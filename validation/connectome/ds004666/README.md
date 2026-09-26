@@ -23,9 +23,15 @@ MRtrix 在 10,000 次播种中生成 3,021 条流线，其中 2,915 条获得 at
 
 把 MRtrix 的 `-seed_gmwmi` 单独换成 PyTorch 同款二值边界 mask 的 `-seed_image` 后，MRtrix 获得 3,348 条 atlas 分配；与 PyTorch 种子 0 的 count r=0.669、Dice=0.586，FBC r=0.735。此受控臂用于定位播种差异，不是原脚本条件。
 
+只把 PyTorch 四处 SH 阶次从 lmax=4 提至 lmax=8 的[敏感性诊断](lmax8_diagnostic.public.json)，count/FBC Pearson 升至 0.765/0.817，但 count 归一化 MAE 升至 0.685、连接支持 Dice 降至 0.492，FBC 归一化 MAE 升至 2.315。提高 SH 阶次未解决输出差距；该诊断不替代正式 lmax=4 三种子结果。
+
 ![相同 DWI 与 atlas 的四类结构连接矩阵及差值](../../../docs/connectome/figures/connectome_comparison.png)
 
 ![矩阵相关性、支持和归一化误差](../../../docs/connectome/figures/connectome_metrics.png)
+
+## 默认自动 T1 接口检查
+
+同一公开 T1w 与原始 AP-DWI 另以 100 次种子尝试跑通默认自动 SynthSeg 与 TorchFLIRT（不传分割、atlas 或变换）：内部调用 35.11 秒，接受 62 条流线；20×20 四矩阵均有限且对称。自动组织前景与公开 DWI 脑掩膜 Dice 0.940，和上述固定世界仿射的 SynthSeg 前景 Dice 0.958。此[接口检查记录](auto_interface_smoke.public.json)只证明自动链能运行；原始 DWI 仍不符合生产接口的预处理条件，也不参与上述数值对照。
 
 ## 运行时间
 

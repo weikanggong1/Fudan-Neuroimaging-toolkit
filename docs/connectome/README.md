@@ -139,3 +139,5 @@ eddy-rotated bvec 文件。图像来源文件的 SHA-256 和切面参数见
 [示例图记录](../../validation/connectome/ds004666_example_image.json)。
 
 ![ds004666 同次扫描 T1、DWI b0、脑掩膜及脑区覆盖](figures/ds004666_t1_b0_mask_atlas.png)
+
+默认自动 SynthSeg+TorchFLIRT 的 100 次种子接口检查及其分割几何指标见[公开记录](../../validation/connectome/ds004666/auto_interface_smoke.public.json)。它不参与正式同 atlas 的 MRtrix 数值对照。
