@@ -26,6 +26,15 @@ def _command(tmp_path):
     return argv, output
 
 
+def test_connectome_cli_requires_explicit_seed_count(tmp_path):
+    argv, _ = _command(tmp_path)
+    index = argv.index("--n-seeds")
+    del argv[index:index + 2]
+    with pytest.raises(SystemExit) as error:
+        main(argv)
+    assert error.value.code == 2
+
+
 def test_connectome_cli_writes_named_outputs(tmp_path, monkeypatch, capsys):
     from fnit import connectome
 

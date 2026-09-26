@@ -141,7 +141,7 @@ class UKBConnectome:
         atlas_dwi: str | Path | None = None,
         t1_segmentation: str | Path | None = None,
         dwi_to_t1_world: np.ndarray | torch.Tensor | None = None,
-        n_seeds: int = 10_000_000,
+        n_seeds: int,
         seed: int = 0,
     ) -> ConnectomeResult:
         dwi_data, dwi_affine = _image(dwi, self.device)

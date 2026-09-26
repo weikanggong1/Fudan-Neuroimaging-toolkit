@@ -35,7 +35,7 @@ MRtrix 在 10,000 次播种中生成 3,021 条流线，其中 2,915 条获得 at
 
 ## 运行时间
 
-计时均在 gpucw1 上，PyTorch 2.5.1 使用 NVIDIA H100、float32 和 TF32。PyTorch 的三次端到端调用（已有分割和单位变换，包含 NIfTI 读取、FOD、追踪、近似 SIFT2、四张 CSV 与中间 NIfTI 写出）为 **25.41、25.24、27.38 秒**；峰值进程 RSS 分别约 1.06、1.05、1.04 GB，未记录 GPU 峰值显存。MRtrix 各阶段是独立进程的墙钟时间：Dhollander 22.88 秒，MSMT-CSD 182.98 秒，mtnormalise 3.25 秒，FSL 5TT 859.56 秒，iFOD2/ACT 13.55 秒，tcksift2 20.75 秒，四张矩阵赋值合计 0.32 秒。MRtrix 的 FSL 5TT 包含 T1 解剖处理，PyTorch 计时则复用已有 SynthSeg 分割；这些数字**不能直接构成完整流程的加速倍数**。10,000 次播种的实测不能外推到默认 10,000,000 次的耗时或内存。
+计时均在 gpucw1 上，PyTorch 2.5.1 使用 NVIDIA H100、float32 和 TF32。PyTorch 的三次端到端调用（已有分割和单位变换，包含 NIfTI 读取、FOD、追踪、近似 SIFT2、四张 CSV 与中间 NIfTI 写出）为 **25.41、25.24、27.38 秒**；峰值进程 RSS 分别约 1.06、1.05、1.04 GB，未记录 GPU 峰值显存。MRtrix 各阶段是独立进程的墙钟时间：Dhollander 22.88 秒，MSMT-CSD 182.98 秒，mtnormalise 3.25 秒，FSL 5TT 859.56 秒，iFOD2/ACT 13.55 秒，tcksift2 20.75 秒，四张矩阵赋值合计 0.32 秒。MRtrix 的 FSL 5TT 包含 T1 解剖处理，PyTorch 计时则复用已有 SynthSeg 分割；这些数字**不能直接构成完整流程的加速倍数**。10,000 次播种的实测不能外推到原 UKB 脚本 10,000,000 次的耗时或内存；本接口要求显式设置播种次数。
 
 同一组 3,021 条 MRtrix 真实流线、SIFT2 权重、长度、FA 和 atlas 输入下，另做单独的矩阵赋值逐元素比较：2,915 条双端分配在两臂一致，count 的 400/400 元素完全一致；FBC、mean length、mean FA 的最大绝对误差分别为 `8.99e-6`、`5.63e-6 mm`、`2.96e-8`。H100 上 10 次计时的中位数分别为 MRtrix 四个进程 `0.172 s`（含启动与 I/O）和本包已驻留 GPU 计算 `0.0746 s`。该[真实轨迹赋值报告](../ds004666_fsl_act_real_tracks_assignment_report.json)把追踪/FOD 差异从矩阵映射误差中分离，计时不代表完整流程加速。
 
@@ -45,7 +45,7 @@ MRtrix 在 10,000 次播种中生成 3,021 条流线，其中 2,915 条获得 at
 
 ## 复查
 
-[report.public.json](report.public.json) 记录各 CSV 的 SHA-256、每种子结果、归一化定义及各阶段时间。数值运行所用远端快照的 8 个 connectome `.py` 文件与合并到 FNIT 0.12.0 后的本地源码 SHA-256 逐一相同，哈希也在报告中。用仓库脚本可在这些已公开的小矩阵上重新计算指标：
+[report.public.json](report.public.json) 记录各 CSV 的 SHA-256、每种子结果、归一化定义及各阶段时间。数值运行所用远端快照的 8 个 connectome `.py` 文件哈希见报告；当前 7 个模块与该快照逐字节相同，`pipeline.py` 只删除了未验证的 1,000 万次播种默认值，所有数值运行都显式指定了 1 万次，计算逻辑未改。用仓库脚本可在这些已公开的小矩阵上重新计算指标：
 
 ```bash
 python tools/compare_connectome_matrices.py \

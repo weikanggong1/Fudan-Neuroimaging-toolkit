@@ -23,7 +23,7 @@ result = model(
     "derivatives/dwi/sub-01_desc-eddyRotated_dwi.bvec",
     "sub-01/anat/sub-01_T1w.nii.gz",
     atlas_dwi="derivatives/atlas/sub-01_space-dwi_atlas.nii.gz",
-    n_seeds=10_000_000,
+    n_seeds=10_000,
     seed=0,
 )
 count = result.matrices["count"]
@@ -37,7 +37,7 @@ count = result.matrices["count"]
 | `atlas_dwi` | 可选，已对齐到 DWI RAS 世界坐标的 3D 非负整数标签图；可保留原 atlas 网格和 affine，标签 1 对应矩阵第一行 |
 | `t1_segmentation` | 可选，T1 空间 SynthSeg 标签图；省略时运行包内 SynthSeg 2.0 |
 | `dwi_to_t1_world` | 可选，DWI RAS 世界坐标到 T1 RAS 世界坐标的 `4×4` 齐次矩阵；省略时运行包内 TorchFLIRT |
-| `n_seeds`, `seed` | 默认分别为 10,000,000 和 0；固定种子用于重复采样 |
+| `n_seeds`, `seed` | 显式指定播种尝试次数；`seed` 默认 0，固定种子用于重复采样 |
 
 不提供 `atlas_dwi` 时，从 SynthSeg 解剖标签建立紧凑脑区图，并按标签升序
 重编号。它不是原仓库的皮层加 Tian 亚皮层分区；要比较相同 parcellation 的矩阵，
@@ -74,7 +74,7 @@ fnit connectome \
   --t1 sub-01/anat/sub-01_T1w.nii.gz \
   --atlas-dwi derivatives/atlas/sub-01_space-dwi_atlas.nii.gz \
   --output-dir derivatives/fnit_connectome/sub-01 \
-  --device cuda:0 --n-seeds 10000000 --seed 0
+  --device cuda:0 --n-seeds 10000 --seed 0
 ```
 
 已有 SynthSeg 标签可用 `--t1-segmentation` 传入，从而不加载该模型的权重；
@@ -121,7 +121,7 @@ CSV 或空白分隔文本。`--device cpu` 可用于小规模功能检查；完�
 eddy-rotated bvec；所以它是算法同输入比较，不能外推为已校正 UKB 数据上的
 输出一致性。MRtrix 参考臂的 FSL 5TT 暂代原脚本的 FreeSurfer+FIRST 5TT，
 本包使用已有 SynthSeg 分割和单位变换；两者不是原流程严格等价复现。
-默认 `10,000,000` 次种子尚未实测可行性、耗时或显存。不同计时边界也不允许
+原 UKB 脚本的 `10,000,000` 次种子尚未实测可行性、耗时或显存；本接口要求显式设置 `n_seeds`。不同计时边界也不允许
 从这张表计算完整流程加速倍数。
 
 ![真实 ds004666 同输入四张矩阵和差值](figures/connectome_comparison.png)

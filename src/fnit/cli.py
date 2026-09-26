@@ -546,7 +546,7 @@ def main(argv=None):
     connectome.add_argument('--dwi-to-t1-world', help='optional 4x4 RAS-mm transform, CSV or whitespace text')
     connectome.add_argument('--synthseg-weights', help='official SynthSeg 2.0 checkpoint')
     connectome.add_argument('--device', default='cuda:0')
-    connectome.add_argument('--n-seeds', type=int, default=10_000_000)
+    connectome.add_argument('--n-seeds', type=int, required=True)
     connectome.add_argument('--seed', type=int, default=0)
     connectome.add_argument('--overwrite', action='store_true')
     from .topup.cli import add_parser as add_topup_parser

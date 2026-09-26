@@ -45,7 +45,8 @@
     "mrtrix_reference": "Dhollander + MSMT-CSD lmax8 + mtnormalise + FSL 5TT ACT iFOD2 (-seed_gmwmi, -cutoff 0.1, -power 0.5, -samples 3) + tcksift2 + tck2connectome -symmetric -assignment_radial_search 4. FSL 5TT substitutes for original FreeSurfer+FIRST 5TT.",
     "pytorch_candidate": "PyTorch three-tissue response/CSD lmax4, discrete probabilistic tractography with GM/WM boundary seeds, approximate SIFT2, exact endpoint matrix assignment; TF32 enabled, float32 tensors.",
     "controlled_seed_reference": "Same MRtrix FOD and FSL 5TT, but -seed_image uses PyTorch binary WM/GM boundary mask instead of -seed_gmwmi. This alters one MRtrix input and is diagnostic only.",
-    "pytorch_module_sha256": {
+    "source_equivalence": "Seven modules are byte-identical to the numeric run. pipeline.py differs only by removing its default n_seeds=10000000, making n_seeds required; all numeric runs supplied n_seeds=10000 explicitly. Computational code is unchanged.",
+    "executed_snapshot_module_sha256": {
       "__init__.py": "217b938a0ad88ca71977f7140034c4745e0410ed7103c7304161a25031789a44",
       "assignment.py": "de0cb9cf78569d7953218696756f232dc3fb397d26c03b60985c0e0d59af6529",
       "dti.py": "e8ba06386859b40a0422ca1cee4f321766b758b2dac1b959655e41d482ac56b3",
@@ -55,7 +56,16 @@
       "sift2.py": "ac8c1786bbe58535501e22e48735b60f3c6ff03c3625824d17ac05271614debf",
       "tracking.py": "96ff8757e2dbecf26d20c36cbb92155b61103429beb03476a3797fb891feba54"
     },
-    "source_equivalence": "These eight module SHA-256 values were checked byte-for-byte against the remote source snapshot used for the numeric run after rebasing on FNIT 0.12.0."
+    "integrated_module_sha256": {
+      "assignment.py": "de0cb9cf78569d7953218696756f232dc3fb397d26c03b60985c0e0d59af6529",
+      "dti.py": "e8ba06386859b40a0422ca1cee4f321766b758b2dac1b959655e41d482ac56b3",
+      "fod.py": "77e8a490d2d635d13acbf3e703429a63d9441c71b50a85f623d0d22caabd2810",
+      "pipeline.py": "2b5c31eba0056ec56b65b13ab451f111b203e21856d09c47800f13c4ff693dc6",
+      "response.py": "f9b27e55f1ca4eee290f418bce87f6cbebe6c35155042aed4f5d46389fd78d7c",
+      "sift2.py": "ac8c1786bbe58535501e22e48735b60f3c6ff03c3625824d17ac05271614debf",
+      "tracking.py": "96ff8757e2dbecf26d20c36cbb92155b61103429beb03476a3797fb891feba54",
+      "__init__.py": "217b938a0ad88ca71977f7140034c4745e0410ed7103c7304161a25031789a44"
+    }
   },
   "runtime_wall_seconds": {
     "mrtrix_dwi_response_fod": {
