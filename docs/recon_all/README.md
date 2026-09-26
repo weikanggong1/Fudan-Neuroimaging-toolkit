@@ -7,6 +7,31 @@
 实现执行，其他步骤由随本地运行包保存的 FreeSurfer 原生程序执行。单被试支持
 `fnit-recon-all` 命令行和 Python 调用；多被试完整流程只提供 Python 调用。
 
+## 实验性纯 Python 整例入口
+
+`fnit-recon-all-python` 从原始 T1 生成脑体积分割、双侧 white/pial/sphere
+表面、厚度/面积/顶点体积/曲率、aparc/a2009s/DKT 标注及其统计。
+所有阶段都由 Python 包执行；N4 使用 SimpleITK 的 ITK 算子，运行时
+不调用 FreeSurfer 可执行程序。输入目录必须为空。该入口目前是
+**近似重建实验版**：双侧 topology repair、white/pial 放置、inflation 和
+sphere.reg 尚未完成源码等价移植；统计基于这些独立生成的近似表面，
+不能视为官方 FreeSurfer 的等价结果。它只承诺列出的核心输出，
+并不宣称生成固定官方配置的全部 138 个文件。
+
+```bash
+python -m pip install '.[recon-all-python-stages]'
+fnit-setup-weights --model recon-all --dest /path/to/weights
+fnit-setup-recon-all-assets --dest /path/to/assets
+fnit-recon-all-python subject_T1w.nii.gz /scratch/subjects/sub01 \
+  --weights-dir /path/to/weights --assets-dir /path/to/assets --device cuda:0
+```
+
+Python 调用为 `fnit.recon_all.native_free.run_recon_all_python(...)`。
+被试目录中的 `fnit-native-free-run.json` 记录每个阶段的耗时和近似步骤；
+以 `python -m fnit.recon_all.compare_native_free REF CAND --output report.json`
+对照同一 T1 的官方被试。若候选网格与官方顶点顺序不同，比较器报告
+双向最近表面距离与顶点指标的分布差异，明确标记无法逐顶点对齐。
+
 去除原生运行包的 Python/CUDA 移植仍在逐阶段验证。
 [完整替换的验收门槛](../../validation/recon_all/python_gpu_port/RELEASE_GATES.md)
 列出同一 T1 的端到端、逐顶点和分阶段计时条件。

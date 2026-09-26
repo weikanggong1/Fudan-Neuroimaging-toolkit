@@ -1,6 +1,6 @@
 # Fudan Neuroimaging Toolkit (FNIT)
 
-`fudan-neuroimaging-toolkit` 是独立的脑 MRI 推理包，在 CPU 或 CUDA 上运行。单项推理无需安装 FreeSurfer、FSL、TensorFlow、VoxelMorph 或 Neurite。GPU recon-all 需要预先准备的 FreeSurfer 8.2 原生运行包和个人 license，运行时无需安装系统 FreeSurfer。Python 导入名为 `fnit`，单项功能的命令行入口为 `fnit`。
+`fudan-neuroimaging-toolkit` 是独立的脑 MRI 推理包，在 CPU 或 CUDA 上运行。单项推理无需安装 FreeSurfer、FSL、TensorFlow、VoxelMorph 或 Neurite。现有 `fnit-recon-all` 混合流程需要 FreeSurfer 8.2 原生运行包和个人 license；实验性 `fnit-recon-all-python` 使用外置权重与模板，不调用 FreeSurfer 程序。Python 导入名为 `fnit`，单项功能的命令行入口为 `fnit`。
 
 | 功能 | 输出与用途 | 用法、原版对照与验证 |
 |---|---|---|
@@ -14,11 +14,12 @@
 | PyTorch FLIRT | CPU/CUDA 12-DOF correlation-ratio affine；输出 reference-grid image 和 FSL scaled-mm `.mat` | [FLIRT 文档](docs/flirt/README.md) |
 | PyTorch FNIRT | CPU/CUDA GM 配准；输出 intent-2007 coefficients、warped image 和 nonlinear Jacobian | [FNIRT 文档](docs/fnirt/README.md) |
 | GPU applywarp | 应用 FSL dense warp、FNIRT coefficient、premat 和 postmat | [applywarp 文档](docs/applywarp/README.md) |
-| GPU recon-all | T1w 到结构分割、皮层表面、顶点指标和脑区统计 | [GPU recon-all 文档](docs/recon_all/README.md) |
+| GPU recon-all 混合流程 | T1w 到结构分割、皮层表面、顶点指标和脑区统计 | [GPU recon-all 文档](docs/recon_all/README.md) |
+| 实验性纯 Python recon-all | T1w 到核心体积分割、双侧皮层表面、逐顶点指标及脑区统计；近似结果 | [纯 Python 入口](docs/recon_all/README.md#实验性纯-python-整例入口) |
 
-本轮接口清理不覆盖 GPU recon-all；其独立文档和实现保持原状。本轮覆盖的其余功能只提供单被试 Python 和单被试命令行接口；需要处理多个病例时，由调用方在包外组织任务与设备。仓库提供 [T1w 样例](examples/README.md)和 [FLAIR 样例](examples/WMH.md)。
+混合 recon-all 与实验性纯 Python 入口分别提供独立的单被试命令。本轮覆盖的其余功能只提供单被试 Python 和单被试命令行接口；需要处理多个病例时，由调用方在包外组织任务与设备。仓库提供 [T1w 样例](examples/README.md)和 [FLAIR 样例](examples/WMH.md)。
 
-GPU recon-all 的 SynthStrip、33 类 SynthSeg、SynthMorph 及三项辅助神经分割使用 PyTorch/CUDA；影像转换、强度校正、皮层拓扑、表面生成和统计运行于打包的原生 CPU 程序。公开用法只说明 `fnit-recon-all` 单被试命令行和 Python 调用。
+混合 recon-all 的 SynthStrip、33 类 SynthSeg、SynthMorph 及三项辅助神经分割使用 PyTorch/CUDA；其他阶段运行于打包的原生 CPU 程序。实验性 `fnit-recon-all-python` 不调用这些程序，其拓扑修复、表面放置和球面配准仍使用近似算法，不能等同于官方结果。
 
 相关 CUDA 路径允许 NVIDIA TF32 matmul 和 cuDNN 内核；模型与影像张量仍保持 float32，本包不会自动改用 float16 或 bfloat16。各验证报告记录实际开关。
 
@@ -78,9 +79,9 @@ python tools/setup_weights.py --model synthstrip --model synthmorph-joint \
 
 FastVBM 的 SynthMorph 分支从原始 T1w 开始时需要 `synthstrip.1.pt` 和 `synthmorph.deform.3.h5`；`python tools/setup_weights.py --model fast-vbm` 安装这两个后端的权重超集。TorchFNIRT 分支只需 SynthStrip；已有脑 mask 时该分支无需 checkpoint。GM 模板由用户提供，不由配置脚本下载。TorchFAST、TorchFLIRT、TorchFNIRT 和 TorchApplyWarp 不使用权重。
 
-GPU recon-all 还需要与固定 FreeSurfer 8.2 流程匹配的本地原生运行包；上述权重命令不提供它。运行包和个人 license 均不随仓库或 wheel 发布。构建、调用、输出和验收见[GPU recon-all 文档](docs/recon_all/README.md)。
+混合版 GPU recon-all 还需要与固定 FreeSurfer 8.2 流程匹配的本地原生运行包；上述权重命令不提供它。运行包和个人 license 均不随仓库或 wheel 发布。构建、调用、输出和验收见[GPU recon-all 文档](docs/recon_all/README.md)。
 
-GPU recon-all 的 13 个权重和辅助资源文件可单独配置：`python tools/setup_weights.py --model recon-all`。该组复用 SynthStrip 和 SynthMorph 的通用权重，也包含 33 类 SynthSeg、EntoWM、MCA 和静脉窦模型及其查找表；原生运行包仍需单独准备。
+GPU recon-all 的 13 个权重和辅助资源文件可单独配置：`python tools/setup_weights.py --model recon-all`。该组复用 SynthStrip 和 SynthMorph 的通用权重，也包含 33 类 SynthSeg、EntoWM、MCA 和静脉窦模型及其查找表；混合流程的原生运行包仍需单独准备；实验性纯 Python 入口另需 `fnit-setup-recon-all-assets` 安装模板。
 
 独立使用 33 类 SynthSeg 时只需 `python tools/setup_weights.py --model synthseg`，随后运行 `fnit synthseg --i T1.nii.gz --o seg.nii.gz --csv-vols seg.vol.csv`，或使用 Python 的 `SynthSeg` 类；详见[独立接口](docs/synthseg/README.md)。
 
