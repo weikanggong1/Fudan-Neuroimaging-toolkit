@@ -27,6 +27,25 @@ MRtrix 生成 2,891 条流线，2,785 条获得 atlas 双端分配；PyTorch 三
 
 [图像记录](corrected_example_image.public.json)给出源图哈希、重采样、色阶与切面参数。**完整追踪与 SIFT2 输出仍未达到同输入一致性。**
 
+## FreeSurfer 5TT 适配参考
+
+同次 T1w 经 FreeSurfer 8.2 recon-all 完成解剖分割（1.645 小时），再用 MRtrix 构建 5TT/GMWMI；针对**校正 DWI 的均值 b0 重新运行 6-DOF normmi FLIRT**，将 5TT/GMWMI 变换到校正 DWI 网格。后续读取与上节相同的校正 DWI 梯度、MRtrix FOD/FA 和 20 区 atlas，运行 iFOD2/ACT、SIFT2 与四张矩阵。10,000 次尝试生成 2,758 条流线，2,740 条双端分配。原 UKB 脚本使用 FreeSurfer 7.1 与 FIRST，并给 5ttgen freesurfer 传入 -first；本机 MRtrix 3.0.3 不支持该选项，因此这是最接近原脚本的**适配参考**，不是原脚本逐字复跑。[完整三种子比较、命令、每阶段计时、源数据及矩阵哈希](fs5tt_adapted_report.public.json)同时记录原始 AP-DWI 上的适配参考。
+
+校正输入下，PyTorch 种子 0 对重新配准 FreeSurfer 参考的结果如下；归一化 MAE 与边集合的定义同上。
+
+| 矩阵 | Pearson r | 归一化 MAE | 非零边 Dice | 数值比较边数 |
+|---|---:|---:|---:|---:|
+| 流线 count | 0.904 | 0.411 | 0.643 | 190 |
+| SIFT2 FBC | 0.922 | 1.599 | 0.643 | 190 |
+| 加权 mean length | 0.856 | 0.269 | 0.643 | 36 |
+| 加权 mean FA | 0.752 | 0.104 | 0.643 | 36 |
+
+与 FSL 5TT 替代臂相比，count/FBC 的 Pearson 相关提高；非零边 Dice 仍为 0.643，FBC 误差仍大，**完整流程未达到同输入输出一致**。FreeSurfer 处理、FOD、PyTorch 的 T1 分割不在同一计时范围内，不能将上述阶段时间组合成加速倍数。
+
+![校正 DWI 与重新配准 FreeSurfer ACT 的四张矩阵及差值](../../../docs/connectome/figures/corrected_fs5tt_adapted_connectome_comparison.png)
+
+![校正 DWI 与重新配准 FreeSurfer ACT 的矩阵指标](../../../docs/connectome/figures/corrected_fs5tt_adapted_connectome_metrics.png)
+
 ## 原始 DWI 算法诊断：验证范围
 
 MRtrix3 3.0.3-103-g026e850d 参考臂使用 Dhollander 响应、默认 lmax=8 MSMT-CSD、mtnormalise、FSL 6.0.7.4 的 5TT、GMWMI 播种、iFOD2/ACT、tcksift2，以及四次 `tck2connectome -symmetric -assignment_radial_search 4`。追踪参数为 `-seeds 10000 -select 0 -maxlength 250 -cutoff 0.1 -samples 3 -power 0.5`，随机种子 0。原 UKB 脚本使用 FreeSurfer+FIRST 5TT；本次 FSL 5TT 是明确的替代。对照的 PyTorch 版本使用 lmax=4 自拟响应/FOD、离散方向的双向概率追踪、二值 GM/WM 终止、近似 SIFT2，以及同样的矩阵赋值规则，分别用种子 0、1、2 各尝试 10,000 次。均传入已有 T1 分割和单位 RAS 世界变换，自动分割/配准不在这次计时和数值比较内。

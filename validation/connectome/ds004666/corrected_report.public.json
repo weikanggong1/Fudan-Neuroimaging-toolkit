@@ -2,7 +2,7 @@
   "dataset": "OpenNeuro ds004666 sub-01/ses-2mm paired T1w and AP/PA DWI, CC0",
   "input_condition": "FSL TOPUP+EDDY corrected AP DWI with matching EDDY-rotated bvecs, same bvals/T1/SynthSeg-derived 20-node DWI atlas and identity RAS-world transform",
   "preprocessing_provenance": "corrected_input_provenance.public.json",
-  "preprocessing_limit": "The public metadata do not give the actual total readout time; TOPUP and EDDY consistently used an assumed 0.05 s. The absolute corrected anatomy may vary with the true readout time.",
+  "preprocessing_limit": "The public metadata omit measured total readout time. TOPUP and EDDY consistently used 0.05 s, following the FSL FAQ: its field-map scale cancels within TOPUP/EDDY, while a Hz field map used by other software would require the true time. This remains a documented acquisition assumption, not a measured parameter.",
   "input_sha256": {
     "data.nii.gz": "666c28c75b2a378a65af7d39026525bf8c8ddc98ace542d9abbb43476eb8ba18",
     "data.eddy_rotated_bvecs": "27166f5857bc0f2bec33afeae129b641fb938503011d8c330b3c8711fb967911",
