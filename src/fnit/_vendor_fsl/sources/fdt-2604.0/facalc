@@ -1,0 +1,72 @@
+#!/bin/sh
+#   Copyright (C) 2012 University of Oxford
+#
+#   SHCOPYRIGHT
+
+if [ $# -lt 1 ]; then
+echo "Usage: facalc <basename> [-mode]"
+echo "e.g. facalc dti "
+echo "This will use dti_L1 dti_L2 and dti_L3 to compute dti_FA"
+echo "If -mode is set, the mode is calculated as well"
+echo "Usage: facalc basename outbase"
+echo "e.g. facalc dti test"
+echo "will write test_FA instead of dti_FA"
+exit
+fi
+
+bn=$1
+if [ $# -lt 2 ];then 
+ob=$bn
+else
+if [ "$2" != -mode ];then
+ob=$2
+else
+ob=$bn
+fi
+fi
+
+tmp=`${FSLDIR}/bin/tmpnam`
+
+if [ `${FSLDIR}/bin/imtest ${bn}_L1` -eq 0 -o  `${FSLDIR}/bin/imtest ${bn}_L2` -eq 0 -o `${FSLDIR}/bin/imtest ${bn}_L3` -eq 0 ];
+then echo "Not all eigenvalue images exist"
+echo "stopping"
+exit
+fi
+
+
+${FSLDIR}/bin/fslmaths ${bn}_L1 -add ${bn}_L2 -add ${bn}_L3 -div 3 ${tmp}MD
+${FSLDIR}/bin/fslmaths ${bn}_L1 -sqr ${tmp}L1sq
+${FSLDIR}/bin/fslmaths ${bn}_L2 -sqr ${tmp}L2sq
+${FSLDIR}/bin/fslmaths ${bn}_L3 -sqr ${tmp}L3sq
+${FSLDIR}/bin/fslmaths ${bn}_L1 -sub ${tmp}MD -sqr ${tmp}l1subsq
+${FSLDIR}/bin/fslmaths ${bn}_L2 -sub ${tmp}MD -sqr ${tmp}l2subsq
+${FSLDIR}/bin/fslmaths ${bn}_L3 -sub ${tmp}MD -sqr ${tmp}l3subsq
+${FSLDIR}/bin/fslmaths ${tmp}L1sq -add ${tmp}L2sq -add ${tmp}L3sq ${tmp}denom
+${FSLDIR}/bin/fslmaths ${tmp}l1subsq -add ${tmp}l2subsq -add ${tmp}l3subsq -mul 1.5 ${tmp}numer
+${FSLDIR}/bin/fslmaths ${tmp}numer -div ${tmp}denom -sqrt ${ob}_FA
+
+if [ "$2" == -mode -o "$3" == -mode ];then
+    ${FSLDIR}/bin/fslmaths ${bn}_L1 -sub ${tmp}MD ${tmp}E1
+    ${FSLDIR}/bin/fslmaths ${bn}_L2 -sub ${tmp}MD ${tmp}E2
+    ${FSLDIR}/bin/fslmaths ${bn}_L3 -sub ${tmp}MD ${tmp}E3
+    ${FSLDIR}/bin/fslmaths ${tmp}E3 -mul -2 -add ${tmp}E1 -add ${tmp}E2 ${tmp}N1 
+    ${FSLDIR}/bin/fslmaths ${tmp}E1 -mul -2 -add ${tmp}E2 -add ${tmp}E3 ${tmp}N2 
+    ${FSLDIR}/bin/fslmaths ${tmp}E2 -mul -2 -add ${tmp}E1 -add ${tmp}E3 ${tmp}N3 
+    ${FSLDIR}/bin/fslmaths ${tmp}N1 -mul ${tmp}N2 -mul ${tmp}N3 -mul -1 ${tmp}N
+
+    ${FSLDIR}/bin/fslmaths ${tmp}E1 -sub ${tmp}E2 -sub ${tmp}E3 -mul ${tmp}E1 ${tmp}D
+    ${FSLDIR}/bin/fslmaths ${tmp}E2 -sub ${tmp}E3 -mul ${tmp}E2 -add ${tmp}D ${tmp}D
+    ${FSLDIR}/bin/fslmaths ${tmp}E3 -mul ${tmp}E3 -add ${tmp}D ${tmp}D
+    ${FSLDIR}/bin/fslmaths ${tmp}D -thr 0 -sqrt ${tmp}D
+    ${FSLDIR}/bin/fslmaths ${tmp}D -mul ${tmp}D -mul ${tmp}D -mul 2 ${tmp}D
+
+    ${FSLDIR}/bin/fslmaths ${tmp}N -div ${tmp}D -max -1 -min 1 ${ob}_MO
+fi
+
+${FSLDIR}/bin/imrm ${tmp}MD ${tmp}L1sq ${tmp}L2sq ${tmp}L3sq ${tmp}l1subsq ${tmp}l2subsq ${tmp}l3subsq ${tmp}numer ${tmp}denom ${tmp}E1 ${tmp}E2 ${tmp}E3 ${tmp}D ${tmp}N ${tmp}N1 ${tmp}N2 ${tmp}N3
+
+
+
+
+
+

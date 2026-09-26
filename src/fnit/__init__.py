@@ -1,5 +1,5 @@
 """Standalone PyTorch brain MRI inference tools."""
-__version__ = '0.10.0'
+__version__ = '0.11.0'
 
 
 def __getattr__(name):
@@ -40,6 +40,14 @@ def __getattr__(name):
                 'prepare_ukb_topup', 'run_ukb_topup'):
         from importlib import import_module
         module = import_module('.topup', __name__)
+        return getattr(module, name)
+    if name in ('TorchBEDPOSTX', 'BedpostXResult'):
+        from importlib import import_module
+        module = import_module('.bedpostx', __name__)
+        return getattr(module, name)
+    if name in ('TorchProbtrackX', 'ProbTrackXResult'):
+        from importlib import import_module
+        module = import_module('.probtrackx', __name__)
         return getattr(module, name)
     if name in ('FastVBM', 'FastVBMResult',
                 'VBMRegistrationResult'):

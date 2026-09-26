@@ -22,6 +22,8 @@ import pytest
     ("fnirt", ("TorchFNIRT", "TorchFNIRTResult", "GMFNIRTConfig")),
     ("topup", ("TorchTOPUP", "TOPUPResult", "TOPUPConfig",
                "prepare_ukb_topup", "run_ukb_topup")),
+    ("bedpostx", ("TorchBEDPOSTX", "BedpostXResult")),
+    ("probtrackx", ("TorchProbtrackX", "ProbTrackXResult")),
     ("fast_vbm", ("FastVBM", "FastVBMResult", "VBMRegistrationResult")),
 ])
 def test_top_level_exports_are_feature_objects(module, names):

@@ -3,6 +3,8 @@
 import pytest
 import torch
 
+from fnit.bedpostx import TorchBEDPOSTX
+from fnit.probtrackx import TorchProbtrackX
 from fnit.applywarp import TorchApplyWarp
 from fnit.fast import TorchFAST
 from fnit.flirt import TorchFLIRT
@@ -12,7 +14,8 @@ from fnit.topup import TorchTOPUP
 
 @pytest.mark.parametrize(
     "constructor",
-    (TorchApplyWarp, TorchFAST, TorchFLIRT, TorchFNIRT, TorchTOPUP),
+    (TorchApplyWarp, TorchFAST, TorchFLIRT, TorchFNIRT, TorchTOPUP,
+     TorchBEDPOSTX, TorchProbtrackX),
 )
 def test_cuda_registration_components_enable_tf32(monkeypatch, constructor):
     monkeypatch.setattr(torch.cuda, "is_available", lambda: True)

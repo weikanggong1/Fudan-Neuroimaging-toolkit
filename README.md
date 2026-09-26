@@ -15,6 +15,8 @@
 | sMRI（当前 GM 配置） | PyTorch FNIRT | GM 非线性配准；intent-2007 coefficients、warped image 和 Jacobian | [FNIRT 文档](docs/fnirt/README.md) |
 | sMRI、fMRI、dMRI 通用 | GPU applywarp | 应用 FSL dense warp、FNIRT coefficient、premat 和 postmat | [applywarp 文档](docs/applywarp/README.md) |
 | dMRI | PyTorch TOPUP | UKB AP/PA b0 选择、Hz 场估计、畸变校正和 FSL 输出 | [TOPUP 文档](docs/topup/README.md) |
+| dMRI | PyTorch BEDPOSTX | 估计体素内纤维方向及不确定性，供概率追踪使用 | [BEDPOSTX 文档](docs/bedpostx/README.md) |
+| dMRI | PyTorch ProbtrackX | 种子到体素的概率追踪与脑区间连接矩阵 | [ProbtrackX 文档](docs/probtrackx/README.md) |
 | sMRI | GPU recon-all 混合流程 | T1w 到结构分割、皮层表面、顶点指标和脑区统计 | [GPU recon-all 文档](docs/recon_all/README.md) |
 | sMRI | 实验性纯 Python recon-all | T1w 到核心分割、双侧皮层表面、顶点指标和脑区统计；近似结果 | [纯 Python 入口](docs/recon_all/README.md#实验性纯-python-整例入口) |
 | fMRI | MS-HBM 17 网络 | fsLR32k 静息态时序到个体网络划分，纯 CPU | [MS-HBM 文档](src/fnit/mshbm/README.md) |
@@ -30,7 +32,7 @@ Jacobian 和调制步骤；差别只在非线性形变由 SynthMorph 或 TorchFN
 
 FLIRT、FNIRT 和 FastVBM 的 0.9 十例验证状态、数值边界与计时条件见 [FastVBM 验证页](validation/fast_vbm/README.md)；TOPUP 的 FSL 6.0.7.4 实测见 [TOPUP 验证页](docs/topup/README.md)。各算法的输入、输出和原命令对应关系见上表子页。
 
-FLIRT、FNIRT、applywarp 和 TOPUP 的移植代码及随包提供的 FSL 上游源码受 [FSL Software Licence 6.0](licenses/FSL-6.0.txt) 的非商业使用条款约束。运行这些 PyTorch 接口无需安装 FSL。
+FLIRT、FNIRT、applywarp、TOPUP、BEDPOSTX 和 ProbtrackX 的 FSL 派生实现受 [FSL Software Licence 6.0](licenses/FSL-6.0.txt) 的非商业使用条款约束。各功能的移植范围和验证边界见对应子页面。
 
 ## 安装
 
@@ -79,7 +81,7 @@ python tools/setup_weights.py --model synthstrip --model synthmorph-joint \
   --model wmh-synthseg --model synthsr
 ```
 
-FastVBM 的 SynthMorph 分支从原始 T1w 开始时需要 `synthstrip.1.pt` 和 `synthmorph.deform.3.h5`；`python tools/setup_weights.py --model fast-vbm` 安装这两个后端的权重超集。TorchFNIRT 分支只需 SynthStrip；已有脑 mask 时该分支无需 checkpoint。GM 模板由用户提供，不由配置脚本下载。TorchFAST、TorchFLIRT、TorchFNIRT、TorchApplyWarp 和 TorchTOPUP 不使用权重。
+FastVBM 的 SynthMorph 分支从原始 T1w 开始时需要 `synthstrip.1.pt` 和 `synthmorph.deform.3.h5`；`python tools/setup_weights.py --model fast-vbm` 安装这两个后端的权重超集。TorchFNIRT 分支只需 SynthStrip；已有脑 mask 时该分支无需 checkpoint。GM 模板由用户提供，不由配置脚本下载。TorchFAST、TorchFLIRT、TorchFNIRT、TorchApplyWarp、TorchTOPUP、TorchBEDPOSTX 和 TorchProbtrackX 不使用预训练权重。
 
 混合版 GPU recon-all 还需要与固定 FreeSurfer 8.2 流程匹配的本地原生运行包；上述权重命令不提供它。运行包和个人 license 均不随仓库或 wheel 发布。构建、调用、输出和验收见[GPU recon-all 文档](docs/recon_all/README.md)。
 

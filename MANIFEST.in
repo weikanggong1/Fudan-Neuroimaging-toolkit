@@ -2,6 +2,7 @@ include README.md THIRD_PARTY_NOTICES.md environment.yml
 recursive-include licenses *.txt
 recursive-include src/fnit/_vendor_fsl * .*
 recursive-include docs *.md *.json *.png
+include docs/bedpostx/synthetic_example.py
 recursive-include tools *.py *.md
 recursive-include tests *.py *.json
 recursive-include validation/recon_all *.py *.md *.json *.cu
@@ -10,6 +11,9 @@ recursive-include validation/applywarp README.md SHA256SUMS *.json
 recursive-include validation/flirt README.md SHA256SUMS *.public.json
 recursive-include validation/synthseg README.md SHA256SUMS *.public.json
 recursive-include validation/topup *.public.json
+include benchmark/probtrackx_validation.py
+recursive-include validation/bedpostx *.py *.md *.json *.png
+recursive-include validation/probtrackx *.py *.md *.json *.png *.sh
 exclude validation/fast_vbm/release.v0.9.public.json
 
 # Runtime checkpoints, MRI templates, and generated images are external data.

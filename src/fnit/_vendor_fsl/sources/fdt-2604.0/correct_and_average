@@ -1,0 +1,66 @@
+#!/bin/sh
+
+#   Copyright (C) 2004 University of Oxford
+#
+#   SHCOPYRIGHT
+
+usage()
+{
+echo "Usage : $0 <big4D dataset> <avg file>"
+echo ""
+    echo "       This script assumes that there are 3"
+    echo "       separate averages of 0, 29, 0, 31, 0, 0, 0 b-values"
+    echo "       You need to also run Make_bvecs in matlab"
+    echo "       <artefactfile> is optional"
+    exit 1
+}
+
+[ $# -lt 2 ] && usage
+data=`remove_ext ${1}`;
+
+
+if [ `imtest $data` -eq 0 ];then
+    echo "Cannot find image called $1";
+    exit
+fi
+avgfile=$2;
+if [ ! -e $avgfile ];then
+    echo " Cannot find $2"
+    exit
+fi
+
+numlines=`cat $avgfile |grep -v '^ *$'|wc -l`;
+numavgs=`expr $numlines - 1`;
+scans_per_avg=`cat $avgfile |sed 's/, *$/ /g'|sed 's/[^,]/ /g'|sed -n '1p'|wc -w`;
+scans_per_avg=`expr $scans_per_avg + 1`
+b0_numbers=`cat $avgfile |grep -v '^ *$' |sed -n "${numlines}p"`;
+
+
+ab0=`echo $b0_numbers |awk '{print \$1}'`
+eddy_correct ${1} ${$}${1}_b0_correct $ab0
+total_vols=`fslval $1 dim4`;
+vols_per_avg=`echo "10k $total_vols $numavgs / p"|dc`;
+fslroi ${1} data 0 ${vols_per_avg};
+fslmaths data -mul 0 data;
+
+
+avg=1;scan=1;
+while [ ${avg} -le ${numavgs} ]; do
+    scan=1
+#echo ${scan} ${scans_per_avg}
+    while [ ${scan} -le ${scans_per_avg} ]; do
+
+	tmp=`cat $avgfile |sed -n "${avg}p"|awk -F , "{ print \\$$scan }"`;
+
+	echo $avg $scan $tmp $vols_per_avg
+
+	fslroi ${$}${1}_b0_correct ${$}avg_${avg}_scan_${scan} $tmp;
+    	scan=`expr $scan + 1`;
+    done
+    fslmerge -t ${$}avg_${avg}_all `imglob ${$}avg_${avg}_scan_*`
+    fslmaths data  -add ${$}avg_${avg}_all data;
+    avg=`expr $avg + 1`;
+
+done
+fslmaths data -div ${numavgs} data;
+rm ${$}*

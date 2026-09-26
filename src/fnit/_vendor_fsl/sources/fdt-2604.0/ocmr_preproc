@@ -1,0 +1,53 @@
+#!/bin/sh
+
+#   Copyright (C) 2004 University of Oxford
+#
+#   SHCOPYRIGHT
+
+usage()
+{
+    echo "Usage :ocmr_preproc <number of slices per volume>"
+    echo ""
+    exit 1
+}
+
+[ $# -lt 1 ] && usage
+
+nep=`echo *ep2d_* |wc -w`
+nlp=`echo *lp2d_* |wc -w`
+
+if [ $nep -gt 1 ];then
+    a1=`imglob images_?_*ep2d_*`
+    a2=`imglob images_??_*ep2d_*`
+    a3=`imglob images_???_*ep2d_*`
+
+    fslmerge -t big4D $a1 $a2 $a3
+
+elif [ $nlp -gt 1 ];then
+    a1=`imglob images_?_*lp2d_*`
+    a2=`imglob images_??_*lp2d_*`
+    a3=`imglob images_???_*lp2d_*`
+    fslmerge -t big4D $a1 $a2 $a3
+
+fi
+
+#nslices=${1}
+#zsize=`fslval big4D dim3`
+#tsize=`fslval big4D dim4`
+#tpts=`echo "10k $zsize $nslices /p "|dc`
+#afterdot=`echo $tpts | awk -F . '{print \$2}'`
+#foo=`echo $afterdot|grep  [123456798]`
+#if [ ! "$foo" = "" ]; then
+#    echo "wrong number of slices somewhere - exiting"
+#    exit 1
+#fi
+#tpts=`echo "$tpts \* $tsize" |bc"'
+#xsize=`fslval big4D dim1`
+#ysize=`fslval big4D dim2`
+#xvoxsize=`fslval big4D pixdim1`
+#yvoxsize=`fslval big4D pixdim2`
+#zvoxsize=`fslval big4D pixdim3`
+#datatype=`fslval big4D datatype`
+
+
+#fslcreatehd $xsize $ysize $nslices $tpts $xvoxsize $yvoxsize $zvoxsize 0 0 0 0# $datatype big4D

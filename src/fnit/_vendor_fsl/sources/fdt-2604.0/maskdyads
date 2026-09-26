@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# Copyright (C) 2007 University of Oxford
+#
+# SHCOPYRIGHT
+
+Usage() {
+    echo ""
+    echo "Usage: maskdyads dyads fsamples [thr]"
+    echo "default value for thr is 0.05"
+    exit
+}
+
+[ "$1" = "" ] && Usage
+
+d=`$FSLDIR/bin/remove_ext $1`
+f=$2
+t=0.05
+
+if [ "$3" != "" ] ; then
+    t=$3
+fi
+
+${FSLDIR}/bin/fslmaths $f -thr $t -bin -mul $d ${d}_thr$t
+
+

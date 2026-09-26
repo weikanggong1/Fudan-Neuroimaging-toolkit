@@ -484,7 +484,7 @@ class TorchApplyWarp:
         premat_inverse = torch.as_tensor(
             np.linalg.inv(premat_array), dtype=torch.float64, device=self.device
         )
-        source_mm = source_mm.reshape(3, -1)
+        source_mm = source_mm.reshape(3, -1).to(torch.float64)
         input_mm = (
             premat_inverse[:3, :3] @ source_mm + premat_inverse[:3, 3:4]
         )
