@@ -1,0 +1,29 @@
+#!/usr/bin/env fslpython
+#
+# Call an appropriate variant of xfibres_gpu based
+# on what is installed, and whether we have a GPU.
+
+
+import               sys
+import               os
+import os.path    as op
+import subprocess as sp
+
+
+def main():
+    """Call an appropriate variant of xfibres_gpu based on what is
+    installed, and whether a CUDA driver is available.
+    """
+    fsldir    = os.environ['FSLDIR']
+    find_cuda = op.join(fsldir, 'bin', 'find_cuda_exe')
+    xfib      = sp.check_output((find_cuda, 'xfibres_gpu'), text=True).strip()
+
+    if xfib != '':
+       os.execl(xfib, xfib, *sys.argv[1:])
+    else:
+        print(f'Cannot find a suitable xfibres_gpu executable in {fsldir}!')
+        sys.exit(1)
+
+
+if __name__ == '__main__':
+    main()

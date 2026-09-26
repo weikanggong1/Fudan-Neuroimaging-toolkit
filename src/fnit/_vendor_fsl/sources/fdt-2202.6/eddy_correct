@@ -1,0 +1,45 @@
+#!/bin/sh
+
+#   Copyright (C) 2004-8 University of Oxford
+#
+#   SHCOPYRIGHT
+
+Usage() {
+    echo ""
+    echo "Usage: eddy_correct <4dinput> <4doutput> <reference_no> [<interp>]"
+    echo "       Choose interp from {trilinear,spline} def - trilinear "
+    echo ""
+    exit
+}
+
+[ "$3" = "" ] && Usage
+
+interpm="trilinear"
+if [ $# -eq 4 ]; then
+    interpm=${4}
+fi
+
+input=`${FSLDIR}/bin/remove_ext ${1}`
+output=`${FSLDIR}/bin/remove_ext ${2}`
+ref=${3}
+
+if [ `${FSLDIR}/bin/imtest $input` -eq 0 ];then
+    echo "Input does not exist or is not in a supported format"
+    exit
+fi
+
+fslroi $input ${output}_ref $ref 1
+
+fslsplit $input ${output}_tmp
+full_list=`${FSLDIR}/bin/imglob ${output}_tmp????.*`
+
+for i in $full_list ; do
+    echo processing $i
+    echo processing $i >> ${output}.ecclog
+    ${FSLDIR}/bin/flirt -in $i -ref ${output}_ref -nosearch -interp ${interpm} -o $i -paddingsize 1 >> ${output}.ecclog
+done
+
+fslmerge -t $output $full_list
+
+/bin/rm ${output}_tmp????.* ${output}_ref*
+

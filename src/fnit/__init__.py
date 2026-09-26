@@ -1,5 +1,5 @@
 """Standalone PyTorch brain MRI inference tools."""
-__version__ = '0.11.0'
+__version__ = '0.12.0'
 
 
 def __getattr__(name):
@@ -40,6 +40,19 @@ def __getattr__(name):
                 'prepare_ukb_topup', 'run_ukb_topup'):
         from importlib import import_module
         module = import_module('.topup', __name__)
+        return getattr(module, name)
+    if name in ('TorchEDDY', 'EDDYResult', 'EDDYConfig',
+                'prepare_ukb_eddy', 'run_ukb_eddy'):
+        from importlib import import_module
+        module = import_module('.eddy', __name__)
+        return getattr(module, name)
+    if name in ('TorchDTIFIT', 'DTIFITResult', 'select_shell'):
+        from importlib import import_module
+        module = import_module('.dtifit', __name__)
+        return getattr(module, name)
+    if name in ('TorchAMICONODDI', 'AMICONODDIResult', 'AMICONODDIConfig'):
+        from importlib import import_module
+        module = import_module('.amico_noddi', __name__)
         return getattr(module, name)
     if name in ('TorchBEDPOSTX', 'BedpostXResult'):
         from importlib import import_module

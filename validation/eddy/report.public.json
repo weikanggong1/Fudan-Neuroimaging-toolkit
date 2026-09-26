@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-27",
+  "feature": "TorchEDDY",
+  "fnit_version": "0.12.0",
+  "reference": {
+    "software": "FSL 6.0.7.4 EDDY",
+    "component_cpu": "fsl-eddy 2111.0",
+    "component_gpu": "fsl-eddy-cuda-10.2 2111.0",
+    "repository": "https://git.fmrib.ox.ac.uk/fsl/eddy.git",
+    "tag": "2111.0",
+    "commit": "ecfef26151c2613d0f4e1b45dcbbe100b58db50c",
+    "arguments": "UK Biobank v1.5 EDDY sequence with quadratic EC, Jacobian resampling, linear slice model, 8 levels, outlier replacement, RMS, and the same TOPUP field"
+  },
+  "input": {
+    "subjects": 1,
+    "format": "real UKB-format dMRI",
+    "shape": [
+      104,
+      104,
+      72,
+      105
+    ],
+    "volumes": {
+      "b0": 5,
+      "b_approximately_1000": 50,
+      "b_approximately_2000": 50
+    },
+    "mask_voxels": 242261,
+    "same_inputs_for_all_implementations": true,
+    "same_mask_topup_acqp_index_gradients_and_reference_scan": true
+  },
+  "hardware": {
+    "host": "gpucw1",
+    "cpu": "Intel Xeon Gold 6430",
+    "candidate_gpu": "NVIDIA H100 PCIe 80 GB",
+    "reference_gpu": "NVIDIA H100 PCIe 80 GB",
+    "shared_host": true,
+    "candidate_dtype": "float32",
+    "tf32_allowed": true
+  },
+  "metrics": {
+    "fnit_gpu_vs_fsl_gpu": {
+      "all": {
+        "pearson_r": 0.9832390905494119,
+        "mae": 238.97676652039573,
+        "rmse": 372.623945405933
+      },
+      "mean_image": {
+        "pearson_r": 0.9678854109015307,
+        "mae": 137.66535936831403,
+        "rmse": 220.03877255819924
+      },
+      "b0": {
+        "pearson_r": 0.9895973555,
+        "mae": 424.5575,
+        "rmse": 775.6082
+      },
+      "b_approximately_1000": {
+        "pearson_r": 0.9414761458,
+        "mae": 262.0117,
+        "rmse": 388.9814
+      },
+      "b_approximately_2000": {
+        "pearson_r": 0.920846477,
+        "mae": 197.3837,
+        "rmse": 283.0523
+      },
+      "rotated_bvec_mean_unsigned_angle_degrees": 0.6457728,
+      "rotated_bvec_max_unsigned_angle_degrees": 0.9959647,
+      "translation_parameter_mae_mm": 0.709921,
+      "rotation_parameter_mae_rad": 0.00766761
+    },
+    "fnit_gpu_vs_fsl_cpu": {
+      "all": {
+        "pearson_r": 0.9826690375922932,
+        "mae": 241.63383683413215,
+        "rmse": 378.21763415606375
+      },
+      "mean_image": {
+        "pearson_r": 0.9664392642245592,
+        "mae": 139.5666627360483,
+        "rmse": 224.50838526082035
+      }
+    },
+    "fsl_cpu_vs_fsl_gpu": {
+      "all": {
+        "pearson_r": 0.9990439145883838,
+        "mae": 42.083916900986644,
+        "rmse": 88.54964728319115
+      },
+      "mean_image": {
+        "pearson_r": 0.999349006125457,
+        "mae": 17.557525809658355,
+        "rmse": 31.380750828587217
+      },
+      "rotated_bvec_mean_unsigned_angle_degrees": 0.06972179818387768,
+      "rotated_bvec_max_unsigned_angle_degrees": 0.16253398013476425,
+      "translation_parameter_mae_mm": 0.058652169200895235,
+      "rotation_parameter_mae_rad": 0.0007498916398939524
+    }
+  },
+  "timing": {
+    "scope": "fresh process including startup, NIfTI I/O, optimization, and write",
+    "reference_cpu_seconds": 1844.16,
+    "reference_cpu_runs": 1,
+    "reference_cpu_max_rss_kb": 16650968,
+    "reference_gpu_seconds": 646.52,
+    "reference_gpu_runs": 1,
+    "reference_gpu_max_rss_kb": 1208024,
+    "candidate_gpu_seconds": [
+      55.5,
+      47.71,
+      46.71,
+      57.82
+    ],
+    "candidate_gpu_median_seconds": 51.605,
+    "candidate_final_deterministic_seconds": 57.82,
+    "candidate_final_internal_seconds": 27.1725,
+    "candidate_final_max_rss_kb": 2247300,
+    "candidate_final_peak_cuda_memory_bytes": 3480320512,
+    "reference_gpu_over_candidate_final_speedup": 11.181598062953995,
+    "reference_gpu_over_candidate_median_speedup": 12.528243387268676,
+    "reference_cpu_over_candidate_final_speedup": 31.89484607402283
+  },
+  "contract": {
+    "fsl_core_output_contract": true,
+    "fsl_optional_output_contract_complete": false,
+    "fsl_numerically_equivalent": false,
+    "deterministic_seed": 0,
+    "reason": "the PyTorch optimizer and q-space predictor do not reproduce FSL Gaussian-process estimation, native optimization, shell alignment, or all optional outputs"
+  },
+  "figure": "docs/eddy/figures/eddy_fsl_comparison.png",
+  "raw_subject_data_in_repository": false,
+  "figure_sha256": "45556fd0782552026b3e4c5f56ae6901fd990e10efa87b58f99aa54752e43cd1"
+}

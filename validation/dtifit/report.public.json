@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-27",
+  "feature": "TorchDTIFIT",
+  "fnit_version": "0.12.0",
+  "reference": {
+    "software": "FSL 6.0.7.4 DTIFIT",
+    "component": "fsl-fdt 2202.6",
+    "repository": "https://git.fmrib.ox.ac.uk/fsl/fdt.git",
+    "tag": "2202.6",
+    "commit": "f0287f09f09dc34e24b95c471127239be69b4022"
+  },
+  "input": {
+    "subjects": 1,
+    "format": "real UKB-format dMRI after official FSL EDDY",
+    "shape": [
+      104,
+      104,
+      72,
+      55
+    ],
+    "volumes": {
+      "b0": 5,
+      "b_approximately_1000": 50
+    },
+    "mask_voxels": 242261,
+    "same_inputs_for_reference_and_candidate": true
+  },
+  "hardware": {
+    "host": "gpucw1",
+    "cpu": "Intel Xeon Gold 6430",
+    "candidate_gpu": "NVIDIA H100 PCIe 80 GB",
+    "shared_host": true,
+    "candidate_dtype": "float64 fit / float32 output",
+    "tf32_allowed": true
+  },
+  "metrics": {
+    "FA": {
+      "pearson_r": 0.9999999999999974,
+      "mae": 4.247576118248256e-09,
+      "max_abs": 1.1920928955078125e-07
+    },
+    "S0": {
+      "pearson_r": 0.9999999999999997,
+      "mae": 4.2577804129637045e-08,
+      "max_abs": 0.0009765625
+    },
+    "L1": {
+      "pearson_r": 1.0,
+      "mae": 1.0920199056128096e-13,
+      "max_abs": 4.656612873077393e-10
+    },
+    "L2": {
+      "pearson_r": 1.0,
+      "mae": 4.5365677962519794e-14,
+      "max_abs": 4.656612873077393e-10
+    },
+    "L3": {
+      "pearson_r": 0.9999999999999993,
+      "mae": 2.6906695442421173e-14,
+      "max_abs": 4.656612873077393e-10
+    },
+    "MD": {
+      "pearson_r": 1.0,
+      "mae": 3.436588849288375e-14,
+      "max_abs": 4.656612873077393e-10
+    },
+    "MO": {
+      "pearson_r": 0.9999991848480502,
+      "mae": 2.203591151143264e-06,
+      "max_abs": 0.25908786058425903
+    },
+    "V1": {
+      "mean_unsigned_angle_degrees": 0.0068869490153611185,
+      "max_unsigned_angle_degrees": 74.05110760075758
+    },
+    "V2": {
+      "mean_unsigned_angle_degrees": 0.006872392722585426,
+      "max_unsigned_angle_degrees": 72.86589374426391
+    },
+    "V3": {
+      "mean_unsigned_angle_degrees": 0.006516930379651235,
+      "max_unsigned_angle_degrees": 29.046341692254554
+    }
+  },
+  "timing": {
+    "scope": "fresh process including read, initialization, compute, and write",
+    "reference_cpu_seconds": [
+      6.58,
+      6.47,
+      6.25
+    ],
+    "reference_cpu_median_seconds": 6.47,
+    "candidate_gpu_seconds": [
+      8.92,
+      8.52,
+      8.13
+    ],
+    "candidate_gpu_median_seconds": 8.52,
+    "reference_max_rss_kb": [
+      243560,
+      243560,
+      243564
+    ],
+    "candidate_max_rss_kb": [
+      960060,
+      960116,
+      960168
+    ],
+    "candidate_over_reference_time_ratio": 1.3168469860896446
+  },
+  "contract": {
+    "fsl_default_files": true,
+    "tensor_opt_in_matches_save_tensor": true,
+    "default_ols_algorithm_equivalent": true,
+    "fully_numerically_equivalent": false,
+    "reason": "near-degenerate eigenspaces and tensor mode contain differences larger than output rounding"
+  },
+  "figure": "docs/dtifit/figures/dtifit_fsl_comparison.png",
+  "raw_subject_data_in_repository": false,
+  "figure_sha256": "01f0ceb1a54cdf395d74bff3e93a07978703d0e26ae315f02a76c067efb23bf7"
+}

@@ -1,0 +1,32 @@
+#!/bin/sh
+
+#   ZEROPAD - Pad numbers with zeros
+#
+#   Tem Behrens, FMRIB Image Analysis Group
+#
+#   Copyright (C) 2004 University of Oxford
+#
+#   SHCOPYRIGHT
+
+Usage() {
+echo ""
+echo "Usage: zeropad <input> <length of output>"
+echo "e.g. zeropad 1 4    gives 0001"
+echo ""
+exit 1
+}
+
+[ "$1" = "" ] && Usage
+[ "$2" = "" ] && Usage
+
+
+i=`echo $1 | wc -c`;
+j=0;
+k=` expr $2 - $i`;
+k=` expr $k + 1`;
+num=$1;
+while [ "$j" -lt "$k" ];do
+num=0$num;
+j=` expr $j + 1`
+done
+echo $num

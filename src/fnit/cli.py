@@ -250,7 +250,7 @@ def _run_fast_vbm(args):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(prog='fnit')
-    parser.add_argument('--version', action='version', version='Fudan Neuroimaging Toolkit (FNIT) 0.11.0')
+    parser.add_argument('--version', action='version', version='Fudan Neuroimaging Toolkit (FNIT) 0.12.0')
     commands = parser.add_subparsers(dest='command', required=True)
     strip = commands.add_parser('synthstrip', help='brain extraction')
     strip.add_argument('-i', '--image', required=True)
@@ -450,7 +450,13 @@ def main(argv=None):
                           help='disable TorchFAST bias-field correction')
     fast_vbm.add_argument('--overwrite', action='store_true')
     from .topup.cli import add_parser as add_topup_parser
+    from .eddy.cli import add_parser as add_eddy_parser
+    from .dtifit.cli import add_parser as add_dtifit_parser
+    from .amico_noddi.cli import add_parser as add_amico_noddi_parser
     add_topup_parser(commands)
+    add_eddy_parser(commands)
+    add_dtifit_parser(commands)
+    add_amico_noddi_parser(commands)
     from .bedpostx.cli import add_parser as add_bedpostx_parser
     add_bedpostx_parser(commands)
     from .probtrackx.cli import add_parser as add_probtrackx_parser

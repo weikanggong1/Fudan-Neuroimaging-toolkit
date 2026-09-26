@@ -19,6 +19,9 @@ FastVBM 的配准链位于 `flirt/`、`fnirt/`、`applywarp/`、`fast_vbm/regist
 | TorchApplyWarp | [FSL warp application](applywarp/README.md) |
 | FastVBM | [原始 T1w 到 modulated GM](fast_vbm/README.md) |
 | TorchTOPUP | [UKB AP/PA b0 畸变校正](topup/README.md) |
+| TorchEDDY | [UKB dMRI 运动、EC 和离群切片校正](eddy/README.md) |
+| TorchDTIFIT | [FSL 默认 OLS tensor fit](dtifit/README.md) |
+| TorchAMICONODDI | [AMICO 风格 NODDI dictionary fit](amico_noddi/README.md) |
 | TorchBEDPOSTX | [体素内纤维方向估计](bedpostx/README.md) |
 | TorchProbtrackX | [概率纤维束追踪与连接矩阵](probtrackx/README.md) |
 | GPU recon-all | [单 T1 皮层重建](recon_all/README.md) |
@@ -33,6 +36,10 @@ from fnit import (
     TorchApplyWarp, ApplyWarpResult,
     TorchTOPUP, TOPUPResult, TOPUPConfig,
     prepare_ukb_topup, run_ukb_topup,
+    TorchEDDY, EDDYResult, EDDYConfig,
+    TorchDTIFIT, DTIFITResult,
+    TorchAMICONODDI, AMICONODDIResult, AMICONODDIConfig,
+    prepare_ukb_eddy, run_ukb_eddy,
     TorchBEDPOSTX, BedpostXResult,
     TorchProbtrackX, ProbTrackXResult,
     flirt_to_world_affine, flirt_to_world_pull,
@@ -41,6 +48,6 @@ from fnit import (
 )
 ```
 
-学习模型在构造时加载权重并选择 `device="cpu"` 或 `device="cuda:0"`；TorchFAST、TorchFLIRT、TorchFNIRT、TorchApplyWarp、TorchTOPUP、TorchBEDPOSTX 和 TorchProbtrackX 不加载预训练权重。单次调用返回带几何信息的结果对象，由调用者选择保存字段。FastVBM 组合 SynthStrip、TorchFAST、TorchFLIRT 和一个可选非线性后端。`registration_backend="synthmorph"` 延迟加载官方 deform checkpoint；`registration_backend="fnirt"` 构造无 checkpoint 的 TorchFNIRT。
+学习模型在构造时加载权重并选择 `device="cpu"` 或 `device="cuda:0"`；TorchFAST、TorchFLIRT、TorchFNIRT、TorchApplyWarp、TorchTOPUP、TorchEDDY、TorchDTIFIT、TorchAMICONODDI、TorchBEDPOSTX 和 TorchProbtrackX 不加载预训练权重。单次调用返回带几何信息的结果对象，由调用者选择保存字段。FastVBM 组合 SynthStrip、TorchFAST、TorchFLIRT 和一个可选非线性后端。`registration_backend="synthmorph"` 延迟加载官方 deform checkpoint；`registration_backend="fnirt"` 构造无 checkpoint 的 TorchFNIRT。
 
 权重查找顺序为显式路径、`FNIT_WEIGHTS`、配置脚本保存的目录、用户缓存目录、已设置的 `FREESURFER_HOME/models/`；见[权重说明](WEIGHTS.md)。各功能的单被试 Python 返回值、保存方式和命令行参数见上表链接。

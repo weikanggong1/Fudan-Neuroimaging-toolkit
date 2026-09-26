@@ -107,13 +107,16 @@
     "vendored_fast4_reference_source_included": true,
     "vendored_fsl_registration_reference_sources_included": true,
     "vendored_fsl_topup_reference_source_included": true,
-    "vendored_fsl_tractography_reference_sources_included": true
+    "vendored_fsl_tractography_reference_sources_included": true,
+    "vendored_fsl_eddy_fdt_reference_source_included": true,
+    "amico_source_included": false,
+    "amico_license_included": true
   },
   "fsl_registration_source_snapshots": {
-    "purpose": "complete unmodified upstream sources consulted for the modified PyTorch FLIRT, FNIRT, applywarp and TOPUP ports",
+    "purpose": "complete unmodified upstream sources consulted for the modified PyTorch FLIRT, FNIRT, applywarp, TOPUP, EDDY, and DTIFIT implementations",
     "validation_baseline": "FSL 6.0.7.4",
     "manifest": "src/fnit/_vendor_fsl/manifest.json",
-    "manifest_sha256": "87f178a4fc67e639b4a973992ae137533a9c5e7ce70a3dfdd02d69df4f95947d",
+    "manifest_sha256": "41fb0d3179c96202ccc97c1d05e43650c5d44f5a61899a246195d6fbe4e027b9",
     "license_file": "licenses/FSL-6.0.txt",
     "license_sha256": "137735ac0d0f075d58e85642972692b92073711752b273e7de7ed38c6147a8eb",
     "licence_scope": "non-commercial redistribution under the FSL Software Licence, Release 6.0; licence conditions and original and amended source code accompany the product",
@@ -197,6 +200,26 @@
         "directory": "src/fnit/_vendor_fsl/sources/fugue-2201.3",
         "role": "validation_target",
         "fsl_6_0_7_4_package": "fsl-fugue 2201.3"
+      },
+      {
+        "repository": "https://git.fmrib.ox.ac.uk/fsl/eddy.git",
+        "tag": "2111.0",
+        "commit": "ecfef26151c2613d0f4e1b45dcbbe100b58db50c",
+        "git_tree": "b59ce403b5efc4d0672e0b737349d80eaaae5813",
+        "git_archive_sha256": "5534b0667a2d2c3452775fe89a02d64eb3c7174e75424b1113ba75dcefe61ea5",
+        "directory": "src/fnit/_vendor_fsl/sources/eddy-2111.0",
+        "role": "validation_target",
+        "fsl_6_0_7_4_package": "fsl-eddy 2111.0 / fsl-eddy-cuda-10.2 2111.0"
+      },
+      {
+        "repository": "https://git.fmrib.ox.ac.uk/fsl/fdt.git",
+        "tag": "2202.6",
+        "commit": "f0287f09f09dc34e24b95c471127239be69b4022",
+        "git_tree": "455a6439a4c12d7cc5ca58c3aa2100ea643bb488",
+        "git_archive_sha256": "be60469a841c520394e345b8049f1b979044745599be85d3c86a82644100ac0a",
+        "directory": "src/fnit/_vendor_fsl/sources/fdt-2202.6",
+        "role": "validation_target",
+        "fsl_6_0_7_4_package": "fsl-fdt 2202.6"
       }
     ],
     "runtime_dependency": false
@@ -213,7 +236,7 @@
   "fsl_tractography_source_snapshots": {
     "purpose": "unmodified upstream source reference for PyTorch BEDPOSTX and ProbtrackX implementations",
     "manifest": "src/fnit/_vendor_fsl/manifest.json",
-    "manifest_sha256": "87f178a4fc67e639b4a973992ae137533a9c5e7ce70a3dfdd02d69df4f95947d",
+    "manifest_sha256": "41fb0d3179c96202ccc97c1d05e43650c5d44f5a61899a246195d6fbe4e027b9",
     "license_file": "licenses/FSL-6.0.txt",
     "components": [
       {
@@ -243,5 +266,67 @@
     ],
     "runtime_dependency": false,
     "numerical_equivalence_established": false
+  },
+  "dmri_reference": {
+    "ukb_pipeline": {
+      "repository": "https://git.fmrib.ox.ac.uk/falmagro/uk_biobank_pipeline_v_1.5",
+      "commit": "0e39a7f7eb76b55437942bfa3073512506b6c8fa",
+      "role": "EDDY argument sequence, b0+b1000 DTIFIT selection, and NODDI output naming"
+    },
+    "eddy": {
+      "repository": "https://git.fmrib.ox.ac.uk/fsl/eddy.git",
+      "tag": "2111.0",
+      "commit": "ecfef26151c2613d0f4e1b45dcbbe100b58db50c",
+      "git_tree": "b59ce403b5efc4d0672e0b737349d80eaaae5813",
+      "installed_reference": "FSL 6.0.7.4 fsl-eddy 2111.0 and fsl-eddy-cuda-10.2 2111.0",
+      "implementation": "src/fnit/eddy",
+      "source_snapshot": "src/fnit/_vendor_fsl/sources/eddy-2111.0",
+      "numerically_equivalent": false
+    },
+    "dtifit": {
+      "repository": "https://git.fmrib.ox.ac.uk/fsl/fdt.git",
+      "tag": "2202.6",
+      "commit": "f0287f09f09dc34e24b95c471127239be69b4022",
+      "git_tree": "455a6439a4c12d7cc5ca58c3aa2100ea643bb488",
+      "installed_reference": "FSL 6.0.7.4 fsl-fdt 2202.6",
+      "implementation": "src/fnit/dtifit",
+      "source_snapshot": "src/fnit/_vendor_fsl/sources/fdt-2202.6",
+      "default_ols_algorithm_equivalent": true,
+      "fully_numerically_equivalent": false
+    },
+    "amico_noddi": {
+      "repository": "https://github.com/daducci/AMICO",
+      "tag": "v2.0.3",
+      "commit": "df540093b60240c38a6ff2ea4ceb1181c4f3e936",
+      "implementation": "src/fnit/amico_noddi",
+      "source_snapshot_included": false,
+      "license_file": "licenses/AMICO-2.0.txt",
+      "numerically_equivalent": false
+    }
+  },
+  "eddy_validation": {
+    "scope": "one real UKB-format 105-volume AP dMRI; same mask, TOPUP field, acquisition parameters, gradients, and reference scan",
+    "report": "validation/eddy/report.public.json",
+    "figure": "docs/eddy/figures/eddy_fsl_comparison.png",
+    "reference_release": "FSL 6.0.7.4",
+    "shared_core_output_contract": true,
+    "complete_optional_output_contract": false,
+    "numerically_equivalent": false
+  },
+  "dtifit_validation": {
+    "scope": "one real UKB-format subject after official EDDY; b0 plus b approximately 1000",
+    "report": "validation/dtifit/report.public.json",
+    "figure": "docs/dtifit/figures/dtifit_fsl_comparison.png",
+    "reference_release": "FSL 6.0.7.4",
+    "default_ols_algorithm_equivalent": true,
+    "fully_numerically_equivalent": false
+  },
+  "amico_noddi_validation": {
+    "scope": "one real UKB-format 105-volume subject after official EDDY",
+    "report": "validation/amico_noddi/report.public.json",
+    "figure": "docs/amico_noddi/figures/amico_noddi_comparison.png",
+    "reference_release": "AMICO 2.0.3",
+    "output_definitions_compatible": true,
+    "numerically_equivalent": false
   }
 }

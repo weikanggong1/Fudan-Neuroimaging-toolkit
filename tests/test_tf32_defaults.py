@@ -10,11 +10,15 @@ from fnit.fast import TorchFAST
 from fnit.flirt import TorchFLIRT
 from fnit.fnirt import TorchFNIRT
 from fnit.topup import TorchTOPUP
+from fnit.eddy import TorchEDDY
+from fnit.dtifit import TorchDTIFIT
+from fnit.amico_noddi import TorchAMICONODDI
 
 
 @pytest.mark.parametrize(
     "constructor",
     (TorchApplyWarp, TorchFAST, TorchFLIRT, TorchFNIRT, TorchTOPUP,
+     TorchEDDY, TorchDTIFIT, TorchAMICONODDI,
      TorchBEDPOSTX, TorchProbtrackX),
 )
 def test_cuda_registration_components_enable_tf32(monkeypatch, constructor):

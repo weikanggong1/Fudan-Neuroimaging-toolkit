@@ -11,6 +11,9 @@
 - FLIRT：[`flirt/report.public.json`](flirt/report.public.json)。
 - FNIRT 与 FastVBM：[`fast_vbm/README.md`](fast_vbm/README.md) 及 0.9 正式文件。
 - TOPUP：[`topup/report.public.json`](topup/report.public.json) 与[功能页](../docs/topup/README.md)。
+- EDDY：[`eddy/report.public.json`](eddy/report.public.json) 与[功能页](../docs/eddy/README.md)。
+- DTIFIT：[`dtifit/report.public.json`](dtifit/report.public.json) 与[功能页](../docs/dtifit/README.md)。
+- AMICO-NODDI：[`amico_noddi/report.public.json`](amico_noddi/report.public.json) 与[功能页](../docs/amico_noddi/README.md)。
 - BEDPOSTX 与 ProbtrackX：[`bedpostx/README.md`](bedpostx/README.md)、[`probtrackx/README.md`](probtrackx/README.md) 及各自功能页。
 
 ## 功能子页面审计
@@ -31,6 +34,9 @@
 | [FNIRT](../docs/fnirt/README.md) | FSL 6.0.7.4，10 例 matched input | 有：coefficient、field、iout、jout、modulated GM | 有：FSL CPU / 本包 H100 | 有：十例平均 warped GM 和 Jacobian |
 | [applywarp](../docs/applywarp/README.md) | FSL 6.0.7.4，11 项 | 有：dense/coefficient、linear/nearest、header/dtype | 有：FSL CPU / 本包 CPU 与 H100 | 有：相同 warp 的输出与差值 |
 | [TOPUP](../docs/topup/README.md) | FSL 6.0.7.4，1 例真实 UKB 格式 dMRI | 有：field、corrected images、Jacobian、coefficient/movement/header | 有：FSL CPU / 本包 H100，各 3 次 | 有：原始 AP/PA、校正均值、field 与差值 |
+| [EDDY](../docs/eddy/README.md) | FSL 6.0.7.4 EDDY CPU/GPU，1 例真实 UKB 格式 dMRI | 有：校正 DWI、rotated bvec、运动/EC、RMS、outlier；可选辅助文件边界已列出 | 有：FSL CPU/GPU 与本包 H100 | 有：原始 AP mean、两种校正结果与差值 |
+| [DTIFIT](../docs/dtifit/README.md) | FSL 6.0.7.4 FDT 2202.6，1 例真实 UKB 格式 dMRI | 有：FA、S0、L1–L3、V1–V3、MD、MO 和 tensor 开关 | 有：FSL CPU / 本包 H100，各 3 次 | 有：FA 与绝对差 |
+| [AMICO-NODDI](../docs/amico_noddi/README.md) | AMICO 2.0.3，1 例真实 UKB 格式 dMRI | 有：UKB/AMICO 命名、NDI、ODI、FWF、方向和 RMSE | 有：AMICO CPU / 本包 H100 | 有：三项 parameter map 与绝对差 |
 | [BEDPOSTX](../docs/bedpostx/README.md) | FSL 6.0.7.22，真实 dMRI 小 ROI 与合成 DWI | 有：fraction、dyad、diffusivity、FSL 追踪读取 | 有：FSL CPU / 本包 CPU 与 H100 | 有：合成 crossing-fibre fraction 与差值 |
 | [ProbtrackX](../docs/probtrackx/README.md) | FSL 6.0.7.22，真实 UKBB dMRI 后验 | 有：密度图、waytotal、连接矩阵 | 有：FSL CPU / 本包 CPU | 合成后验纤维场图 |
 
