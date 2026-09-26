@@ -45,7 +45,7 @@ MRtrix 在 10,000 次播种中生成 3,021 条流线，其中 2,915 条获得 at
 
 ## 复查
 
-[report.public.json](report.public.json) 记录各 CSV 的 SHA-256、每种子结果、归一化定义及各阶段时间。用仓库脚本可在这些已公开的小矩阵上重新计算指标：
+[report.public.json](report.public.json) 记录各 CSV 的 SHA-256、每种子结果、归一化定义及各阶段时间。数值运行所用远端快照的 8 个 connectome `.py` 文件与合并到 FNIT 0.12.0 后的本地源码 SHA-256 逐一相同，哈希也在报告中。用仓库脚本可在这些已公开的小矩阵上重新计算指标：
 
 ```bash
 python tools/compare_connectome_matrices.py \
