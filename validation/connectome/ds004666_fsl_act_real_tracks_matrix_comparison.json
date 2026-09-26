@@ -1,0 +1,208 @@
+{
+  "metric_policy": {
+    "files": [
+      "connectome_count.csv",
+      "connectome_sift2_fbc.csv",
+      "connectome_mean_length.csv",
+      "connectome_mean_fa.csv"
+    ],
+    "edge_subset": "strict upper triangle; diagonal reported separately",
+    "length_fa_values": "only edges with nonzero counts in both matrices",
+    "support": "nonzero values of each metric; empty/empty Dice is 1",
+    "normalized_error": "raw error / mean absolute nonzero reference value on evaluated edges",
+    "stability": "all unordered candidate-directory pairs with the same comparison policy"
+  },
+  "reference": {
+    "directory": "validation/connectome/ds004666_fsl_act_real_tracks_matrices/reference",
+    "sha256": {
+      "count": "51402b9c312649eb036b02e0e82fcbb9af671bc44a55346419f3f29b277d5978",
+      "sift2_fbc": "cba0cb17ef85f1ecf6ec017451a691a73907d1fdd5ef074e29ce5dd2e62ce3c9",
+      "mean_length": "b7f8ef54acafbac4fd7d4c379b4bc92f3b68bf34e301b129e0ac8509425aff76",
+      "mean_fa": "8f8ed982643cc355aede96c722950d2a6a3616860e5b9976f6481c7cf73b2732"
+    }
+  },
+  "candidates": [
+    {
+      "directory": "validation/connectome/ds004666_fsl_act_real_tracks_matrices/candidate",
+      "sha256": {
+        "count": "51402b9c312649eb036b02e0e82fcbb9af671bc44a55346419f3f29b277d5978",
+        "sift2_fbc": "eeeb3d3168feeeb5ec014e49a7b88c005fd7b92e9a8d7efd57cadc9a4b7a5a6f",
+        "mean_length": "f3293ec306cbaa44def227cf40424551cdd864351c42b92ad34dfad7daa008ad",
+        "mean_fa": "c5ddce45dceb33a07cbf71747c256e2f22bcf7459b914836ee6a0c9f16d00c56"
+      },
+      "metrics": {
+        "count": {
+          "shape": [
+            20,
+            20
+          ],
+          "upper_triangle_excludes_diagonal": true,
+          "nonzero_support": {
+            "reference_edges": 46,
+            "candidate_edges": 46,
+            "shared_edges": 46,
+            "dice": 1.0,
+            "empty_empty_dice_convention": 1.0
+          },
+          "values": {
+            "policy": "all off-diagonal edges",
+            "evaluated_edges": 190,
+            "pearson": 1.0,
+            "spearman": 1.0,
+            "mae": 0.0,
+            "rmse": 0.0,
+            "normalized_mae": 0.0,
+            "normalized_rmse": 0.0,
+            "normalization_scale": 8.956521739130435
+          },
+          "diagonal": {
+            "reference_nonzero_nodes": 16,
+            "candidate_nonzero_nodes": 16,
+            "mae": 0.0,
+            "rmse": 0.0
+          }
+        },
+        "sift2_fbc": {
+          "shape": [
+            20,
+            20
+          ],
+          "upper_triangle_excludes_diagonal": true,
+          "nonzero_support": {
+            "reference_edges": 46,
+            "candidate_edges": 46,
+            "shared_edges": 46,
+            "dice": 1.0,
+            "empty_empty_dice_convention": 1.0
+          },
+          "values": {
+            "policy": "all off-diagonal edges",
+            "evaluated_edges": 190,
+            "pearson": 0.9999999999999998,
+            "spearman": 1.0,
+            "mae": 1.521486994595177e-08,
+            "rmse": 1.0031889032064147e-07,
+            "normalized_mae": 5.372654122049883e-09,
+            "normalized_rmse": 3.542446971385851e-08,
+            "normalization_scale": 2.831909443697203
+          },
+          "diagonal": {
+            "reference_nonzero_nodes": 16,
+            "candidate_nonzero_nodes": 16,
+            "mae": 9.521841988546776e-07,
+            "rmse": 2.6815973784338595e-06
+          }
+        },
+        "mean_length": {
+          "shape": [
+            20,
+            20
+          ],
+          "upper_triangle_excludes_diagonal": true,
+          "nonzero_support": {
+            "reference_edges": 46,
+            "candidate_edges": 46,
+            "shared_edges": 46,
+            "dice": 1.0,
+            "empty_empty_dice_convention": 1.0
+          },
+          "values": {
+            "policy": "common nonzero count edges",
+            "evaluated_edges": 46,
+            "pearson": 0.9999999999999998,
+            "spearman": 1.0,
+            "mae": 8.13006437650404e-07,
+            "rmse": 1.3862136925514405e-06,
+            "normalized_mae": 1.3397976859580092e-08,
+            "normalized_rmse": 2.284417209402652e-08,
+            "normalization_scale": 60.68128391109078
+          },
+          "diagonal": {
+            "reference_nonzero_nodes": 16,
+            "candidate_nonzero_nodes": 16,
+            "mae": 1.6829363080894666e-07,
+            "rmse": 2.43409843137447e-07
+          }
+        },
+        "mean_fa": {
+          "shape": [
+            20,
+            20
+          ],
+          "upper_triangle_excludes_diagonal": true,
+          "nonzero_support": {
+            "reference_edges": 46,
+            "candidate_edges": 46,
+            "shared_edges": 46,
+            "dice": 1.0,
+            "empty_empty_dice_convention": 1.0
+          },
+          "values": {
+            "policy": "common nonzero count edges",
+            "evaluated_edges": 46,
+            "pearson": 0.999999999999995,
+            "spearman": 1.0,
+            "mae": 7.498436572145087e-09,
+            "rmse": 1.0984389189820412e-08,
+            "normalized_mae": 1.6171816317955087e-08,
+            "normalized_rmse": 2.3689941580967488e-08,
+            "normalization_scale": 0.46367312271657424
+          },
+          "diagonal": {
+            "reference_nonzero_nodes": 16,
+            "candidate_nonzero_nodes": 16,
+            "mae": 4.247686945235696e-09,
+            "rmse": 6.212243037816305e-09
+          }
+        }
+      }
+    }
+  ],
+  "stability": {
+    "pair_count": 0,
+    "pairwise": [],
+    "summary": {
+      "count": {
+        "mean_support_dice": null,
+        "minimum_support_dice": null,
+        "mean_pairwise_pearson": null,
+        "mean_pairwise_spearman": null,
+        "mean_pairwise_mae": null,
+        "mean_pairwise_rmse": null,
+        "mean_pairwise_normalized_mae": null,
+        "mean_pairwise_normalized_rmse": null
+      },
+      "sift2_fbc": {
+        "mean_support_dice": null,
+        "minimum_support_dice": null,
+        "mean_pairwise_pearson": null,
+        "mean_pairwise_spearman": null,
+        "mean_pairwise_mae": null,
+        "mean_pairwise_rmse": null,
+        "mean_pairwise_normalized_mae": null,
+        "mean_pairwise_normalized_rmse": null
+      },
+      "mean_length": {
+        "mean_support_dice": null,
+        "minimum_support_dice": null,
+        "mean_pairwise_pearson": null,
+        "mean_pairwise_spearman": null,
+        "mean_pairwise_mae": null,
+        "mean_pairwise_rmse": null,
+        "mean_pairwise_normalized_mae": null,
+        "mean_pairwise_normalized_rmse": null
+      },
+      "mean_fa": {
+        "mean_support_dice": null,
+        "minimum_support_dice": null,
+        "mean_pairwise_pearson": null,
+        "mean_pairwise_spearman": null,
+        "mean_pairwise_mae": null,
+        "mean_pairwise_rmse": null,
+        "mean_pairwise_normalized_mae": null,
+        "mean_pairwise_normalized_rmse": null
+      }
+    }
+  },
+  "path_base": "repository_root"
+}

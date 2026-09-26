@@ -66,4 +66,7 @@ def __getattr__(name):
                 'VBMRegistrationResult'):
         from . import fast_vbm
         return getattr(fast_vbm, name)
+    if name in ('UKBConnectome', 'ConnectomeResult'):
+        from . import connectome
+        return getattr(connectome, name)
     raise AttributeError(name)

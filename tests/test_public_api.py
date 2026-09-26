@@ -30,6 +30,7 @@ import pytest
     ("bedpostx", ("TorchBEDPOSTX", "BedpostXResult")),
     ("probtrackx", ("TorchProbtrackX", "ProbTrackXResult")),
     ("fast_vbm", ("FastVBM", "FastVBMResult", "VBMRegistrationResult")),
+    ("connectome", ("UKBConnectome", "ConnectomeResult")),
 ])
 def test_top_level_exports_are_feature_objects(module, names):
     package = importlib.import_module("fnit")

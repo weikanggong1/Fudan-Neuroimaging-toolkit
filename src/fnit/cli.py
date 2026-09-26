@@ -248,6 +248,90 @@ def _run_fast_vbm(args):
     print(report_path)
 
 
+def _run_connectome(args):
+    import nibabel as nib
+    import numpy as np
+
+    from .connectome import UKBConnectome
+
+    if args.n_seeds < 1:
+        raise ValueError("--n-seeds must be positive")
+    inputs = [args.dwi, args.bvals, args.bvecs, args.t1,
+              args.atlas_dwi, args.t1_segmentation, args.dwi_to_t1_world]
+    inputs = [Path(value) for value in inputs if value is not None]
+    for path in inputs:
+        if not path.is_file():
+            raise FileNotFoundError(path)
+
+    output_dir = Path(args.output_dir)
+    files = {
+        **{name: output_dir / f"connectome_{name}.csv" for name in
+           ("count", "sift2_fbc", "mean_length", "mean_fa")},
+        "atlas": output_dir / "atlas_dwi.nii.gz",
+        "tissues": output_dir / "tissues_dwi.nii.gz",
+        "fa": output_dir / "fa_dwi.nii.gz",
+        "region_labels": output_dir / "region_labels.csv",
+        "transform": output_dir / "dwi_to_t1_world.csv",
+    }
+    source_paths = {path.resolve() for path in inputs}
+    for path in files.values():
+        if path.resolve() in source_paths:
+            raise ValueError(f"output would overwrite an input: {path}")
+        if path.exists() and not args.overwrite:
+            raise FileExistsError(f"output exists: {path}; use --overwrite")
+
+    transform = None
+    if args.dwi_to_t1_world:
+        transform = np.loadtxt(args.dwi_to_t1_world, delimiter="," if
+                               Path(args.dwi_to_t1_world).suffix == ".csv" else None)
+        if transform.shape != (4, 4):
+            raise ValueError("--dwi-to-t1-world must contain a 4x4 matrix")
+    result = UKBConnectome(device=args.device, synthseg_weights=args.synthseg_weights)(
+        args.dwi, args.bvals, args.bvecs, args.t1,
+        atlas_dwi=args.atlas_dwi,
+        t1_segmentation=args.t1_segmentation,
+        dwi_to_t1_world=transform,
+        n_seeds=args.n_seeds,
+        seed=args.seed,
+    )
+    print(f"seed_attempts={result.tractogram.seeds_attempted} "
+          f"accepted_streamlines={len(result.tractogram.paths)}")
+    matrix_names = ("count", "sift2_fbc", "mean_length", "mean_fa")
+    if set(result.matrices) != set(matrix_names):
+        raise ValueError("connectome result must contain four named matrices")
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    def write_csv(path, array, fmt):
+        temporary = path.with_name(f".{path.name}.tmp-{uuid.uuid4().hex}")
+        try:
+            np.savetxt(temporary, array, delimiter=",", fmt=fmt)
+            os.replace(temporary, path)
+        finally:
+            temporary.unlink(missing_ok=True)
+
+    for name in matrix_names:
+        write_csv(files[name], result.matrices[name].detach().cpu().numpy(),
+                  "%d" if name == "count" else "%.9g")
+        print(files[name])
+    affine = result.dwi_affine.detach().cpu().numpy()
+    for name, dtype in (("atlas", np.int32), ("tissues", np.int16),
+                        ("fa", np.float32)):
+        path = files[name]
+        temporary = path.with_name(f".{path.name}.tmp-{uuid.uuid4().hex}.nii.gz")
+        try:
+            data = getattr(result, name).detach().cpu().numpy().astype(dtype)
+            image_affine = (result.atlas_affine if name == "atlas" else result.dwi_affine)
+            nib.save(nib.Nifti1Image(data, image_affine.detach().cpu().numpy()), temporary)
+            os.replace(temporary, path)
+        finally:
+            temporary.unlink(missing_ok=True)
+        print(path)
+    write_csv(files["region_labels"], np.asarray(result.region_labels, dtype=np.int64), "%d")
+    write_csv(files["transform"], result.dwi_to_t1_world.detach().cpu().numpy(), "%.9g")
+    print(files["region_labels"])
+    print(files["transform"])
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(prog='fnit')
     parser.add_argument('--version', action='version', version='Fudan Neuroimaging Toolkit (FNIT) 0.12.0')
@@ -449,6 +533,22 @@ def main(argv=None):
     fast_vbm.add_argument('--no-bias', action='store_true',
                           help='disable TorchFAST bias-field correction')
     fast_vbm.add_argument('--overwrite', action='store_true')
+    connectome = commands.add_parser(
+        'connectome', help='one corrected DWI and T1 to four region matrices',
+        allow_abbrev=False)
+    connectome.add_argument('--dwi', required=True, help='corrected 4D DWI NIfTI')
+    connectome.add_argument('--bvals', required=True)
+    connectome.add_argument('--bvecs', required=True, help='eddy-rotated FSL bvecs')
+    connectome.add_argument('--t1', required=True, help='paired T1w NIfTI')
+    connectome.add_argument('--output-dir', required=True)
+    connectome.add_argument('--atlas-dwi', help='integer atlas on the DWI grid')
+    connectome.add_argument('--t1-segmentation', help='existing SynthSeg labels on the T1 grid')
+    connectome.add_argument('--dwi-to-t1-world', help='optional 4x4 RAS-mm transform, CSV or whitespace text')
+    connectome.add_argument('--synthseg-weights', help='official SynthSeg 2.0 checkpoint')
+    connectome.add_argument('--device', default='cuda:0')
+    connectome.add_argument('--n-seeds', type=int, default=10_000_000)
+    connectome.add_argument('--seed', type=int, default=0)
+    connectome.add_argument('--overwrite', action='store_true')
     from .topup.cli import add_parser as add_topup_parser
     from .eddy.cli import add_parser as add_eddy_parser
     from .dtifit.cli import add_parser as add_dtifit_parser
@@ -464,6 +564,9 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if hasattr(args, '_fnit_handler'):
         args._fnit_handler(args)
+        return
+    if args.command == 'connectome':
+        _run_connectome(args)
         return
     if args.command == 'wmh-synthseg':
         _run_wmh(args)

@@ -1,0 +1,1875 @@
+{
+  "dataset": {
+    "name": "OpenNeuro ds004666, sub-01/ses-2mm, AP 105-volume raw DWI and paired T1w",
+    "doi": "10.18112/openneuro.ds004666.v1.0.8",
+    "license": "CC0",
+    "source_manifest": "download_manifest.tsv",
+    "derivative_manifest": "derivative_manifest.tsv",
+    "input_sha256": {
+      "sub-01_ses-2mm_dir-AP_run-01_part-mag_dwi.nii.gz": "33c4188ffdcd2316a8383c88ff2a719cabbdc414961fc7fd61801d5c392c3bbc",
+      "sub-01_ses-2mm_dir-AP_dwi.bval": "86e91a4f22a8687765d29db41a9a19e2cbcd713a6e60e01392adc25c278b8ff3",
+      "sub-01_ses-2mm_dir-AP_dwi.bvec": "2240efda069768968bc04e48f1a7ad3181536ab7b66dfe5ec6c978727562d8bd",
+      "sub-01_ses-2mm_T1w.nii.gz": "80ace482fbc8a5f18423e202118e58d8c9e9ac9bbd1fea9f243de3fff2572017",
+      "sub-01_ses-2mm_synthseg.nii.gz": "c077d476e2e044934651b53f10f599407fcbe9cc9b1cab06b3ef8885e5740edb",
+      "synthseg_gm_atlas_dwi.nii.gz": "eae3b729cfc0ad0fe5cfa0649381a5b656e2d3c1a66ce678afb2800407f706b0",
+      "identity_world.csv": "1071e33f72efb352764e0ea040792695cd75360b1f1b292bf9c36059cd47f18f",
+      "fod.py": "77e8a490d2d635d13acbf3e703429a63d9441c71b50a85f623d0d22caabd2810",
+      "tracking.py": "96ff8757e2dbecf26d20c36cbb92155b61103429beb03476a3797fb891feba54"
+    },
+    "gradient_scheme": {
+      "volumes": 105,
+      "b0": 5,
+      "b1000": 50,
+      "b2000": 50
+    },
+    "benchmark_input_condition": "Same raw AP-DWI and original BIDS gradients; raw data were used because the provided processed DWI lacks paired eddy-rotated bvecs. This is an algorithmic same-input benchmark, not UKB-corrected-DWI performance."
+  },
+  "run": {
+    "host": "gpucw1",
+    "gpu": "NVIDIA H100",
+    "torch": "2.5.1",
+    "mrtrix": "3.0.3-103-g026e850d",
+    "fsl": "6.0.7.4",
+    "freesurfer_status": "Separate FreeSurfer reference not included in this report",
+    "atlas": "SynthSeg-derived, 20 regions, exact same atlas NIfTI and affine for both arms",
+    "atlas_sha256": "eae3b729cfc0ad0fe5cfa0649381a5b656e2d3c1a66ce678afb2800407f706b0",
+    "t1_segmentation_sha256": "c077d476e2e044934651b53f10f599407fcbe9cc9b1cab06b3ef8885e5740edb",
+    "registration": "Identity DWI-to-T1 RAS-world transform; shared T1/DWI world affine; SynthSeg foreground versus published DWI mask Dice 0.9513.",
+    "seeds_attempted": 10000,
+    "pytorch_seeds": [
+      0,
+      1,
+      2
+    ],
+    "mrtrix_seed": 0,
+    "mrtrix_reference": "Dhollander + MSMT-CSD lmax8 + mtnormalise + FSL 5TT ACT iFOD2 (-seed_gmwmi, -cutoff 0.1, -power 0.5, -samples 3) + tcksift2 + tck2connectome -symmetric -assignment_radial_search 4. FSL 5TT substitutes for original FreeSurfer+FIRST 5TT.",
+    "pytorch_candidate": "PyTorch three-tissue response/CSD lmax4, discrete probabilistic tractography with GM/WM boundary seeds, approximate SIFT2, exact endpoint matrix assignment; TF32 enabled, float32 tensors.",
+    "controlled_seed_reference": "Same MRtrix FOD and FSL 5TT, but -seed_image uses PyTorch binary WM/GM boundary mask instead of -seed_gmwmi. This alters one MRtrix input and is diagnostic only."
+  },
+  "runtime_wall_seconds": {
+    "mrtrix_dwi_response_fod": {
+      "mrconvert": 3.72,
+      "dwi2response_dhollander": 22.88,
+      "dwi2fod_msmt_csd_default_lmax": 182.98
+    },
+    "mrtrix_mtnormalise": 3.25,
+    "mrtrix_fsl5tt_act": {
+      "t1mask": 0.65,
+      "5ttgen_fsl": 859.56,
+      "mrtransform_5tt": 1.13,
+      "5tt2gmwmi": 0.19,
+      "tckgen": 13.55,
+      "tcksift2": 20.75,
+      "tckstats_length": 0.07,
+      "tcksample_fa": 0.05,
+      "tck2connectome_count": 0.21,
+      "tck2connectome_sift2_fbc": 0.03,
+      "tck2connectome_mean_length": 0.04,
+      "tck2connectome_mean_fa": 0.04
+    },
+    "mrtrix_matched_seed_mask_act": {
+      "tckgen": 32.0,
+      "tcksift2": 23.71,
+      "tckstats_length": 0.4,
+      "tcksample_fa": 0.04,
+      "tck2connectome_count": 0.05,
+      "tck2connectome_sift2_fbc": 0.05,
+      "tck2connectome_mean_length": 0.05,
+      "tck2connectome_mean_fa": 0.05
+    },
+    "pytorch": {
+      "seed_0": 25.41,
+      "seed_1": 25.24,
+      "seed_2": 27.38
+    },
+    "timing_scope": "PyTorch times include input NIfTI loading, response/FOD, tracking, approximate SIFT2, matrix calculation and NIfTI/CSV output, using existing segmentation and identity transform. MRtrix stages are separate process wall times and reuse precomputed CSD and FSL 5TT; sum is not a matched full-pipeline speed comparison."
+  },
+  "tractography": {
+    "mrtrix_fsl5tt_act": {
+      "assignment_method": "sum upper triangular including diagonal of symmetric count matrix",
+      "assigned_streamlines": 2915,
+      "fbc_weight_sum_assigned": 1022.3180371224889,
+      "fbc_weighted_mean_length_mm_assigned": 28.810436428184484,
+      "fbc_weighted_mean_fa_assigned": 0.40762139575583456,
+      "nonzero_edges_including_diagonal": 62
+    },
+    "mrtrix_matched_seed_mask_act": {
+      "assignment_method": "sum upper triangular including diagonal of symmetric count matrix",
+      "assigned_streamlines": 3348,
+      "fbc_weight_sum_assigned": 1532.3981823474169,
+      "fbc_weighted_mean_length_mm_assigned": 56.83739896839627,
+      "fbc_weighted_mean_fa_assigned": 0.4772050886086611,
+      "nonzero_edges_including_diagonal": 63
+    },
+    "pytorch": {
+      "seed_0": {
+        "assignment_method": "sum upper triangular including diagonal of symmetric count matrix",
+        "assigned_streamlines": 6319,
+        "fbc_weight_sum_assigned": 5224.786684748,
+        "fbc_weighted_mean_length_mm_assigned": 38.410424080252845,
+        "fbc_weighted_mean_fa_assigned": 0.42387841568974,
+        "nonzero_edges_including_diagonal": 85
+      },
+      "seed_1": {
+        "assignment_method": "sum upper triangular including diagonal of symmetric count matrix",
+        "assigned_streamlines": 6227,
+        "fbc_weight_sum_assigned": 5137.841983042001,
+        "fbc_weighted_mean_length_mm_assigned": 38.2389037829294,
+        "fbc_weighted_mean_fa_assigned": 0.4239467069287491,
+        "nonzero_edges_including_diagonal": 80
+      },
+      "seed_2": {
+        "assignment_method": "sum upper triangular including diagonal of symmetric count matrix",
+        "assigned_streamlines": 6226,
+        "fbc_weight_sum_assigned": 5125.597411319999,
+        "fbc_weighted_mean_length_mm_assigned": 38.49382782255287,
+        "fbc_weighted_mean_fa_assigned": 0.4218692626702337,
+        "nonzero_edges_including_diagonal": 80
+      }
+    }
+  },
+  "comparisons": {
+    "mrtrix_fsl5tt_act": {
+      "metric_policy": {
+        "files": [
+          "connectome_count.csv",
+          "connectome_sift2_fbc.csv",
+          "connectome_mean_length.csv",
+          "connectome_mean_fa.csv"
+        ],
+        "edge_subset": "strict upper triangle; diagonal reported separately",
+        "length_fa_values": "only edges with nonzero counts in both matrices",
+        "support": "nonzero values of each metric; empty/empty Dice is 1",
+        "normalized_error": "raw error / mean absolute nonzero reference value on evaluated edges",
+        "stability": "all unordered candidate-directory pairs with the same comparison policy"
+      },
+      "reference": {
+        "directory": "mrtrix_fsl5tt_act",
+        "sha256": {
+          "count": "51402b9c312649eb036b02e0e82fcbb9af671bc44a55346419f3f29b277d5978",
+          "sift2_fbc": "cba0cb17ef85f1ecf6ec017451a691a73907d1fdd5ef074e29ce5dd2e62ce3c9",
+          "mean_length": "b7f8ef54acafbac4fd7d4c379b4bc92f3b68bf34e301b129e0ac8509425aff76",
+          "mean_fa": "8f8ed982643cc355aede96c722950d2a6a3616860e5b9976f6481c7cf73b2732"
+        }
+      },
+      "candidates": [
+        {
+          "directory": "pytorch_seed_0",
+          "sha256": {
+            "count": "6894d30ff4ef966c5923f37e062840cf801f0de3c0be3269e04103f7b5970be9",
+            "sift2_fbc": "dd5f448c2b8c5ee4dcc4c23591b56034d8bc5f1e47ae5962fbf83c5e5f8d6e72",
+            "mean_length": "eb289288e28fe653ea4576d930274b85beb375cf524e7a463f5ebaccf4a196d7",
+            "mean_fa": "cb1197763d557df36ea22329f10163c66adc51aae8f949628cd9b8f49dc23aa1"
+          },
+          "metrics": {
+            "count": {
+              "shape": [
+                20,
+                20
+              ],
+              "upper_triangle_excludes_diagonal": true,
+              "nonzero_support": {
+                "reference_edges": 46,
+                "candidate_edges": 67,
+                "shared_edges": 31,
+                "dice": 0.5486725663716814,
+                "empty_empty_dice_convention": 1.0
+              },
+              "values": {
+                "policy": "all off-diagonal edges",
+                "evaluated_edges": 190,
+                "pearson": 0.6892400975142338,
+                "spearman": 0.4755728831339915,
+                "mae": 5.331578947368421,
+                "rmse": 21.762715581325878,
+                "normalized_mae": 0.5952733776188043,
+                "normalized_rmse": 2.429817759080074,
+                "normalization_scale": 8.956521739130435
+              },
+              "diagonal": {
+                "reference_nonzero_nodes": 16,
+                "candidate_nonzero_nodes": 18,
+                "mae": 125.25,
+                "rmse": 375.3805402521553
+              }
+            },
+            "sift2_fbc": {
+              "shape": [
+                20,
+                20
+              ],
+              "upper_triangle_excludes_diagonal": true,
+              "nonzero_support": {
+                "reference_edges": 46,
+                "candidate_edges": 67,
+                "shared_edges": 31,
+                "dice": 0.5486725663716814,
+                "empty_empty_dice_convention": 1.0
+              },
+              "values": {
+                "policy": "all off-diagonal edges",
+                "evaluated_edges": 190,
+                "pearson": 0.7389602631830545,
+                "spearman": 0.4693588249384363,
+                "mae": 5.7622522824533595,
+                "rmse": 21.91309310593615,
+                "normalized_mae": 2.0347586661988895,
+                "normalized_rmse": 7.737921547847053,
+                "normalization_scale": 2.831909443697203
+              },
+              "diagonal": {
+                "reference_nonzero_nodes": 16,
+                "candidate_nonzero_nodes": 18,
+                "mae": 156.57551184737605,
+                "rmse": 463.26241385157863
+              }
+            },
+            "mean_length": {
+              "shape": [
+                20,
+                20
+              ],
+              "upper_triangle_excludes_diagonal": true,
+              "nonzero_support": {
+                "reference_edges": 46,
+                "candidate_edges": 67,
+                "shared_edges": 31,
+                "dice": 0.5486725663716814,
+                "empty_empty_dice_convention": 1.0
+              },
+              "values": {
+                "policy": "common nonzero count edges",
+                "evaluated_edges": 31,
+                "pearson": 0.8784090498130933,
+                "spearman": 0.8423387096774193,
+                "mae": 17.21164494895522,
+                "rmse": 22.49446221951533,
+                "normalized_mae": 0.2923790896936042,
+                "normalized_rmse": 0.38211980356289504,
+                "normalization_scale": 58.86756459564874
+              },
+              "diagonal": {
+                "reference_nonzero_nodes": 16,
+                "candidate_nonzero_nodes": 18,
+                "mae": 8.261686915858663,
+                "rmse": 13.458785298692797
+              }
+            },
+            "mean_fa": {
+              "shape": [
+                20,
+                20
+              ],
+              "upper_triangle_excludes_diagonal": true,
+              "nonzero_support": {
+                "reference_edges": 46,
+                "candidate_edges": 67,
+                "shared_edges": 31,
+                "dice": 0.5486725663716814,
+                "empty_empty_dice_convention": 1.0
+              },
+              "values": {
+                "policy": "common nonzero count edges",
+                "evaluated_edges": 31,
+                "pearson": 0.6511064917770578,
+                "spearman": 0.594758064516129,
+                "mae": 0.06013799496536431,
+                "rmse": 0.07522494563682267,
+                "normalized_mae": 0.13103878354953952,
+                "normalized_rmse": 0.16391277052895953,
+                "normalization_scale": 0.458932793302595
+              },
+              "diagonal": {
+                "reference_nonzero_nodes": 16,
+                "candidate_nonzero_nodes": 18,
+                "mae": 0.1178529591366837,
+                "rmse": 0.17857507618557664
+              }
+            }
+          }
+        },
+        {
+          "directory": "pytorch_seed_1",
+          "sha256": {
+            "count": "a830b2a5a0d3365193ad5719a0705caa370c72bc8d3f53bb9eea8f772d0a54c7",
+            "sift2_fbc": "bbc3e2ae641ff9a692b614899cbd4c5c8044649ad9fc696f6f090c974a8dc412",
+            "mean_length": "68fb1f624e4660af63f7b214cc681bf32a1099b60c4a45a1dd4c75b28b46d9c1",
+            "mean_fa": "b81b3cfe57a9896f30c0063b2c6de5db0c6a96e8bc586310e8b10c0ab14f7651"
+          },
+          "metrics": {
+            "count": {
+              "shape": [
+                20,
+                20
+              ],
+              "upper_triangle_excludes_diagonal": true,
+              "nonzero_support": {
+                "reference_edges": 46,
+                "candidate_edges": 63,
+                "shared_edges": 31,
+                "dice": 0.5688073394495413,
+                "empty_empty_dice_convention": 1.0
+              },
+              "values": {
+                "policy": "all off-diagonal edges",
+                "evaluated_edges": 190,
+                "pearson": 0.6823664136689044,
+                "spearman": 0.4998376132396566,
+                "mae": 5.321052631578947,
+                "rmse": 20.656718035544756,
+                "normalized_mae": 0.5940981093510475,
+                "normalized_rmse": 2.306332596201599,
+                "normalization_scale": 8.956521739130435
+              },
+              "diagonal": {
+                "reference_nonzero_nodes": 16,
+                "candidate_nonzero_nodes": 17,
+                "mae": 122.55,
+                "rmse": 363.2159825778596
+              }
+            },
+            "sift2_fbc": {
+              "shape": [
+                20,
+                20
+              ],
+              "upper_triangle_excludes_diagonal": true,
+              "nonzero_support": {
+                "reference_edges": 46,
+                "candidate_edges": 63,
+                "shared_edges": 31,
+                "dice": 0.5688073394495413,
+                "empty_empty_dice_convention": 1.0
+              },
+              "values": {
+                "policy": "all off-diagonal edges",
+                "evaluated_edges": 190,
+                "pearson": 0.7368804496886062,
+                "spearman": 0.4891766438860657,
+                "mae": 5.579108302416119,
+                "rmse": 20.62127273641331,
+                "normalized_mae": 1.9700871137787186,
+                "normalized_rmse": 7.281755701019585,
+                "normalization_scale": 2.831909443697203
+              },
+              "diagonal": {
+                "reference_nonzero_nodes": 16,
+                "candidate_nonzero_nodes": 17,
+                "mae": 154.4414169009322,
+                "rmse": 453.79573937990466
+              }
+            },
+            "mean_length": {
+              "shape": [
+                20,
+                20
+              ],
+              "upper_triangle_excludes_diagonal": true,
+              "nonzero_support": {
+                "reference_edges": 46,
+                "candidate_edges": 63,
+                "shared_edges": 31,
+                "dice": 0.5688073394495413,
+                "empty_empty_dice_convention": 1.0
+              },
+              "values": {
+                "policy": "common nonzero count edges",
+                "evaluated_edges": 31,
+                "pearson": 0.8948898604391654,
+                "spearman": 0.7806451612903226,
+                "mae": 14.674568051942956,
+                "rmse": 18.411727215163268,
+                "normalized_mae": 0.26722977693238176,
+                "normalized_rmse": 0.3352849459849347,
+                "normalization_scale": 54.91367100027974
+              },
+              "diagonal": {
+                "reference_nonzero_nodes": 16,
+                "candidate_nonzero_nodes": 17,
+                "mae": 9.646399998742453,
+                "rmse": 14.623346732929043
+              }
+            },
+            "mean_fa": {
+              "shape": [
+                20,
+                20
+              ],
+              "upper_triangle_excludes_diagonal": true,
+              "nonzero_support": {
+                "reference_edges": 46,
+                "candidate_edges": 63,
+                "shared_edges": 31,
+                "dice": 0.5688073394495413,
+                "empty_empty_dice_convention": 1.0
+              },
+              "values": {
+                "policy": "common nonzero count edges",
+                "evaluated_edges": 31,
+                "pearson": 0.4995471125748619,
+                "spearman": 0.4899193548387097,
+                "mae": 0.07056931512660054,
+                "rmse": 0.0871876015709427,
+                "normalized_mae": 0.1527609593108095,
+                "normalized_rmse": 0.1887344610344023,
+                "normalization_scale": 0.46195909900656795
+              },
+              "diagonal": {
+                "reference_nonzero_nodes": 16,
+                "candidate_nonzero_nodes": 17,
+                "mae": 0.16804760203819788,
+                "rmse": 0.22913937257481373
+              }
+            }
+          }
+        },
+        {
+          "directory": "pytorch_seed_2",
+          "sha256": {
+            "count": "7087b8dcac5de9d6cff5e5c271dc303cd73e63f79c7c4d07f6e922cbdf41e602",
+            "sift2_fbc": "0004a49bbbf646787e2aab07d368a9a0fac74db4c78f94fd7caa660d1ea55cb5",
+            "mean_length": "9568d6aed280f73def5d2ec582780c6c3ec29cfad2ca84046f70c368c9befe12",
+            "mean_fa": "6f3ad35dbd29c793cbb874ece94b568b47d00865c3477818b4a9ff11b13ab69b"
+          },
+          "metrics": {
+            "count": {
+              "shape": [
+                20,
+                20
+              ],
+              "upper_triangle_excludes_diagonal": true,
+              "nonzero_support": {
+                "reference_edges": 46,
+                "candidate_edges": 65,
+                "shared_edges": 32,
+                "dice": 0.5765765765765766,
+                "empty_empty_dice_convention": 1.0
+              },
+              "values": {
+                "policy": "all off-diagonal edges",
+                "evaluated_edges": 190,
+                "pearson": 0.6994017470852298,
+                "spearman": 0.510670795051442,
+                "mae": 5.168421052631579,
+                "rmse": 20.773971568692446,
+                "normalized_mae": 0.5770567194685743,
+                "normalized_rmse": 2.3194240100967294,
+                "normalization_scale": 8.956521739130435
+              },
+              "diagonal": {
+                "reference_nonzero_nodes": 16,
+                "candidate_nonzero_nodes": 15,
+                "mae": 123.55,
+                "rmse": 367.56516429063294
+              }
+            },
+            "sift2_fbc": {
+              "shape": [
+                20,
+                20
+              ],
+              "upper_triangle_excludes_diagonal": true,
+              "nonzero_support": {
+                "reference_edges": 46,
+                "candidate_edges": 65,
+                "shared_edges": 32,
+                "dice": 0.5765765765765766,
+                "empty_empty_dice_convention": 1.0
+              },
+              "values": {
+                "policy": "all off-diagonal edges",
+                "evaluated_edges": 190,
+                "pearson": 0.7394054600813781,
+                "spearman": 0.5010790269665073,
+                "mae": 5.642156972684999,
+                "rmse": 21.30077086223195,
+                "normalized_mae": 1.9923507742249251,
+                "normalized_rmse": 7.521699152365092,
+                "normalization_scale": 2.831909443697203
+              },
+              "diagonal": {
+                "reference_nonzero_nodes": 16,
+                "candidate_nonzero_nodes": 15,
+                "mae": 153.34051127740523,
+                "rmse": 454.4715307612805
+              }
+            },
+            "mean_length": {
+              "shape": [
+                20,
+                20
+              ],
+              "upper_triangle_excludes_diagonal": true,
+              "nonzero_support": {
+                "reference_edges": 46,
+                "candidate_edges": 65,
+                "shared_edges": 32,
+                "dice": 0.5765765765765766,
+                "empty_empty_dice_convention": 1.0
+              },
+              "values": {
+                "policy": "common nonzero count edges",
+                "evaluated_edges": 32,
+                "pearson": 0.884430416696359,
+                "spearman": 0.842008797653959,
+                "mae": 14.727897696003474,
+                "rmse": 19.855368266269164,
+                "normalized_mae": 0.26245482010567783,
+                "normalized_rmse": 0.3538276279492177,
+                "normalization_scale": 56.11593526868077
+              },
+              "diagonal": {
+                "reference_nonzero_nodes": 16,
+                "candidate_nonzero_nodes": 15,
+                "mae": 6.725706501459834,
+                "rmse": 8.196348753448913
+              }
+            },
+            "mean_fa": {
+              "shape": [
+                20,
+                20
+              ],
+              "upper_triangle_excludes_diagonal": true,
+              "nonzero_support": {
+                "reference_edges": 46,
+                "candidate_edges": 65,
+                "shared_edges": 32,
+                "dice": 0.5765765765765766,
+                "empty_empty_dice_convention": 1.0
+              },
+              "values": {
+                "policy": "common nonzero count edges",
+                "evaluated_edges": 32,
+                "pearson": 0.6181414268258627,
+                "spearman": 0.6400293255131965,
+                "mae": 0.057892299255364224,
+                "rmse": 0.07726961139412694,
+                "normalized_mae": 0.12739503448239956,
+                "normalized_rmse": 0.17003582401478562,
+                "normalization_scale": 0.45443136375431037
+              },
+              "diagonal": {
+                "reference_nonzero_nodes": 16,
+                "candidate_nonzero_nodes": 15,
+                "mae": 0.1961934593339846,
+                "rmse": 0.25681729208206716
+              }
+            }
+          }
+        }
+      ],
+      "stability": {
+        "pair_count": 3,
+        "pairwise": [
+          {
+            "candidate_a": "pytorch_seed_0",
+            "candidate_b": "pytorch_seed_1",
+            "metrics": {
+              "count": {
+                "shape": [
+                  20,
+                  20
+                ],
+                "upper_triangle_excludes_diagonal": true,
+                "nonzero_support": {
+                  "reference_edges": 67,
+                  "candidate_edges": 63,
+                  "shared_edges": 56,
+                  "dice": 0.8615384615384616,
+                  "empty_empty_dice_convention": 1.0
+                },
+                "values": {
+                  "policy": "all off-diagonal edges",
+                  "evaluated_edges": 190,
+                  "pearson": 0.9922139183634328,
+                  "spearman": 0.8798567835240241,
+                  "mae": 1.2947368421052632,
+                  "rmse": 3.5481648332920677,
+                  "normalized_mae": 0.06430494323280403,
+                  "normalized_rmse": 0.17622464331398707,
+                  "normalization_scale": 20.134328358208954
+                },
+                "diagonal": {
+                  "reference_nonzero_nodes": 18,
+                  "candidate_nonzero_nodes": 17,
+                  "mae": 6.3,
+                  "rmse": 14.352700094407323
+                }
+              },
+              "sift2_fbc": {
+                "shape": [
+                  20,
+                  20
+                ],
+                "upper_triangle_excludes_diagonal": true,
+                "nonzero_support": {
+                  "reference_edges": 67,
+                  "candidate_edges": 63,
+                  "shared_edges": 56,
+                  "dice": 0.8615384615384616,
+                  "empty_empty_dice_convention": 1.0
+                },
+                "values": {
+                  "policy": "all off-diagonal edges",
+                  "evaluated_edges": 190,
+                  "pearson": 0.9909085927508323,
+                  "spearman": 0.8787612510478671,
+                  "mae": 1.2525549271894736,
+                  "rmse": 3.3542777754727973,
+                  "normalized_mae": 0.06970410871572698,
+                  "normalized_rmse": 0.18666402378770477,
+                  "normalization_scale": 17.96959964437313
+                },
+                "diagonal": {
+                  "reference_nonzero_nodes": 18,
+                  "candidate_nonzero_nodes": 17,
+                  "mae": 5.9613667697000015,
+                  "rmse": 10.731399212950485
+                }
+              },
+              "mean_length": {
+                "shape": [
+                  20,
+                  20
+                ],
+                "upper_triangle_excludes_diagonal": true,
+                "nonzero_support": {
+                  "reference_edges": 67,
+                  "candidate_edges": 63,
+                  "shared_edges": 56,
+                  "dice": 0.8615384615384616,
+                  "empty_empty_dice_convention": 1.0
+                },
+                "values": {
+                  "policy": "common nonzero count edges",
+                  "evaluated_edges": 56,
+                  "pearson": 0.9339689416465462,
+                  "spearman": 0.8935064935064935,
+                  "mae": 9.50217831875,
+                  "rmse": 14.541912031137198,
+                  "normalized_mae": 0.19905571580264428,
+                  "normalized_rmse": 0.30463022387038174,
+                  "normalization_scale": 47.736274642678566
+                },
+                "diagonal": {
+                  "reference_nonzero_nodes": 18,
+                  "candidate_nonzero_nodes": 17,
+                  "mae": 4.567359891999999,
+                  "rmse": 7.085441127144007
+                }
+              },
+              "mean_fa": {
+                "shape": [
+                  20,
+                  20
+                ],
+                "upper_triangle_excludes_diagonal": true,
+                "nonzero_support": {
+                  "reference_edges": 67,
+                  "candidate_edges": 63,
+                  "shared_edges": 56,
+                  "dice": 0.8615384615384616,
+                  "empty_empty_dice_convention": 1.0
+                },
+                "values": {
+                  "policy": "common nonzero count edges",
+                  "evaluated_edges": 56,
+                  "pearson": 0.8330796336127039,
+                  "spearman": 0.8446343130553657,
+                  "mae": 0.03337362007142857,
+                  "rmse": 0.05128467254447098,
+                  "normalized_mae": 0.06775728444514344,
+                  "normalized_rmse": 0.10412146293493216,
+                  "normalization_scale": 0.4925465998928571
+                },
+                "diagonal": {
+                  "reference_nonzero_nodes": 18,
+                  "candidate_nonzero_nodes": 17,
+                  "mae": 0.07436392,
+                  "rmse": 0.13657942823223207
+                }
+              }
+            }
+          },
+          {
+            "candidate_a": "pytorch_seed_0",
+            "candidate_b": "pytorch_seed_2",
+            "metrics": {
+              "count": {
+                "shape": [
+                  20,
+                  20
+                ],
+                "upper_triangle_excludes_diagonal": true,
+                "nonzero_support": {
+                  "reference_edges": 67,
+                  "candidate_edges": 65,
+                  "shared_edges": 57,
+                  "dice": 0.8636363636363636,
+                  "empty_empty_dice_convention": 1.0
+                },
+                "values": {
+                  "policy": "all off-diagonal edges",
+                  "evaluated_edges": 190,
+                  "pearson": 0.9940659369246476,
+                  "spearman": 0.8750968452004343,
+                  "mae": 1.194736842105263,
+                  "rmse": 3.044408161306821,
+                  "normalized_mae": 0.05933830127579884,
+                  "normalized_rmse": 0.1512048530819548,
+                  "normalization_scale": 20.134328358208954
+                },
+                "diagonal": {
+                  "reference_nonzero_nodes": 18,
+                  "candidate_nonzero_nodes": 15,
+                  "mae": 6.3,
+                  "rmse": 10.397114984456024
+                }
+              },
+              "sift2_fbc": {
+                "shape": [
+                  20,
+                  20
+                ],
+                "upper_triangle_excludes_diagonal": true,
+                "nonzero_support": {
+                  "reference_edges": 67,
+                  "candidate_edges": 65,
+                  "shared_edges": 57,
+                  "dice": 0.8636363636363636,
+                  "empty_empty_dice_convention": 1.0
+                },
+                "values": {
+                  "policy": "all off-diagonal edges",
+                  "evaluated_edges": 190,
+                  "pearson": 0.9942290039371663,
+                  "spearman": 0.8766705786417711,
+                  "mae": 1.0761860937263155,
+                  "rmse": 2.5710956413878545,
+                  "normalized_mae": 0.059889263813582214,
+                  "normalized_rmse": 0.14308029629324262,
+                  "normalization_scale": 17.96959964437313
+                },
+                "diagonal": {
+                  "reference_nonzero_nodes": 18,
+                  "candidate_nonzero_nodes": 15,
+                  "mae": 6.639809543699994,
+                  "rmse": 11.471999286983904
+                }
+              },
+              "mean_length": {
+                "shape": [
+                  20,
+                  20
+                ],
+                "upper_triangle_excludes_diagonal": true,
+                "nonzero_support": {
+                  "reference_edges": 67,
+                  "candidate_edges": 65,
+                  "shared_edges": 57,
+                  "dice": 0.8636363636363636,
+                  "empty_empty_dice_convention": 1.0
+                },
+                "values": {
+                  "policy": "common nonzero count edges",
+                  "evaluated_edges": 57,
+                  "pearson": 0.8925004781410244,
+                  "spearman": 0.8497536945812808,
+                  "mae": 10.77604953105263,
+                  "rmse": 18.32052084347219,
+                  "normalized_mae": 0.2244213008809201,
+                  "normalized_rmse": 0.3815419656953282,
+                  "normalization_scale": 48.01705314403509
+                },
+                "diagonal": {
+                  "reference_nonzero_nodes": 18,
+                  "candidate_nonzero_nodes": 15,
+                  "mae": 7.58874416,
+                  "rmse": 12.06354568409397
+                }
+              },
+              "mean_fa": {
+                "shape": [
+                  20,
+                  20
+                ],
+                "upper_triangle_excludes_diagonal": true,
+                "nonzero_support": {
+                  "reference_edges": 67,
+                  "candidate_edges": 65,
+                  "shared_edges": 57,
+                  "dice": 0.8636363636363636,
+                  "empty_empty_dice_convention": 1.0
+                },
+                "values": {
+                  "policy": "common nonzero count edges",
+                  "evaluated_edges": 57,
+                  "pearson": 0.8008850636968138,
+                  "spearman": 0.8336790251490795,
+                  "mae": 0.037060393842105264,
+                  "rmse": 0.059635374253675724,
+                  "normalized_mae": 0.07517818042739391,
+                  "normalized_rmse": 0.12097224181153808,
+                  "normalization_scale": 0.492967422614035
+                },
+                "diagonal": {
+                  "reference_nonzero_nodes": 18,
+                  "candidate_nonzero_nodes": 15,
+                  "mae": 0.1262560099,
+                  "rmse": 0.20322346467933633
+                }
+              }
+            }
+          },
+          {
+            "candidate_a": "pytorch_seed_1",
+            "candidate_b": "pytorch_seed_2",
+            "metrics": {
+              "count": {
+                "shape": [
+                  20,
+                  20
+                ],
+                "upper_triangle_excludes_diagonal": true,
+                "nonzero_support": {
+                  "reference_edges": 63,
+                  "candidate_edges": 65,
+                  "shared_edges": 55,
+                  "dice": 0.859375,
+                  "empty_empty_dice_convention": 1.0
+                },
+                "values": {
+                  "policy": "all off-diagonal edges",
+                  "evaluated_edges": 190,
+                  "pearson": 0.9942355634874873,
+                  "spearman": 0.8820649960382659,
+                  "mae": 1.131578947368421,
+                  "rmse": 2.8200410597981316,
+                  "normalized_mae": 0.053803376365441906,
+                  "normalized_rmse": 0.13408497114511872,
+                  "normalization_scale": 21.03174603174603
+                },
+                "diagonal": {
+                  "reference_nonzero_nodes": 17,
+                  "candidate_nonzero_nodes": 15,
+                  "mae": 5.1,
+                  "rmse": 11.734564329364767
+                }
+              },
+              "sift2_fbc": {
+                "shape": [
+                  20,
+                  20
+                ],
+                "upper_triangle_excludes_diagonal": true,
+                "nonzero_support": {
+                  "reference_edges": 63,
+                  "candidate_edges": 65,
+                  "shared_edges": 55,
+                  "dice": 0.859375,
+                  "empty_empty_dice_convention": 1.0
+                },
+                "values": {
+                  "policy": "all off-diagonal edges",
+                  "evaluated_edges": 190,
+                  "pearson": 0.9942407335142532,
+                  "spearman": 0.8795156996292325,
+                  "mae": 1.0197017739789471,
+                  "rmse": 2.522828428134421,
+                  "normalized_mae": 0.05498509437716759,
+                  "normalized_rmse": 0.13603777374740203,
+                  "normalization_scale": 18.545058174936507
+                },
+                "diagonal": {
+                  "reference_nonzero_nodes": 17,
+                  "candidate_nonzero_nodes": 15,
+                  "mae": 2.9519634114000057,
+                  "rmse": 4.406283536760531
+                }
+              },
+              "mean_length": {
+                "shape": [
+                  20,
+                  20
+                ],
+                "upper_triangle_excludes_diagonal": true,
+                "nonzero_support": {
+                  "reference_edges": 63,
+                  "candidate_edges": 65,
+                  "shared_edges": 55,
+                  "dice": 0.859375,
+                  "empty_empty_dice_convention": 1.0
+                },
+                "values": {
+                  "policy": "common nonzero count edges",
+                  "evaluated_edges": 55,
+                  "pearson": 0.9255956439385477,
+                  "spearman": 0.9003607503607504,
+                  "mae": 9.245848756000001,
+                  "rmse": 14.595769618706376,
+                  "normalized_mae": 0.19178796650208968,
+                  "normalized_rmse": 0.3027621420789631,
+                  "normalization_scale": 48.208701122545456
+                },
+                "diagonal": {
+                  "reference_nonzero_nodes": 17,
+                  "candidate_nonzero_nodes": 15,
+                  "mae": 7.075521438000001,
+                  "rmse": 13.362624613772237
+                }
+              },
+              "mean_fa": {
+                "shape": [
+                  20,
+                  20
+                ],
+                "upper_triangle_excludes_diagonal": true,
+                "nonzero_support": {
+                  "reference_edges": 63,
+                  "candidate_edges": 65,
+                  "shared_edges": 55,
+                  "dice": 0.859375,
+                  "empty_empty_dice_convention": 1.0
+                },
+                "values": {
+                  "policy": "common nonzero count edges",
+                  "evaluated_edges": 55,
+                  "pearson": 0.8139658191082595,
+                  "spearman": 0.8479076479076479,
+                  "mae": 0.03540918123636363,
+                  "rmse": 0.05831625188286886,
+                  "normalized_mae": 0.07149541033871241,
+                  "normalized_rmse": 0.11774755055617302,
+                  "normalization_scale": 0.4952650956
+                },
+                "diagonal": {
+                  "reference_nonzero_nodes": 17,
+                  "candidate_nonzero_nodes": 15,
+                  "mae": 0.07243992380000001,
+                  "rmse": 0.157463228933775
+                }
+              }
+            }
+          }
+        ],
+        "summary": {
+          "count": {
+            "mean_support_dice": 0.8615166083916085,
+            "minimum_support_dice": 0.859375,
+            "mean_pairwise_pearson": 0.9935051395918558,
+            "mean_pairwise_spearman": 0.8790062082542414,
+            "mean_pairwise_mae": 1.207017543859649,
+            "mean_pairwise_rmse": 3.1375380181323407,
+            "mean_pairwise_normalized_mae": 0.059148873624681596,
+            "mean_pairwise_normalized_rmse": 0.1538381558470202
+          },
+          "sift2_fbc": {
+            "mean_support_dice": 0.8615166083916085,
+            "minimum_support_dice": 0.859375,
+            "mean_pairwise_pearson": 0.9931261100674172,
+            "mean_pairwise_spearman": 0.8783158431062902,
+            "mean_pairwise_mae": 1.1161475982982454,
+            "mean_pairwise_rmse": 2.816067281665024,
+            "mean_pairwise_normalized_mae": 0.06152615563549226,
+            "mean_pairwise_normalized_rmse": 0.15526069794278316
+          },
+          "mean_length": {
+            "mean_support_dice": 0.8615166083916085,
+            "minimum_support_dice": 0.859375,
+            "mean_pairwise_pearson": 0.9173550212420394,
+            "mean_pairwise_spearman": 0.8812069794828415,
+            "mean_pairwise_mae": 9.841358868600876,
+            "mean_pairwise_rmse": 15.819400831105254,
+            "mean_pairwise_normalized_mae": 0.20508832772855135,
+            "mean_pairwise_normalized_rmse": 0.32964477721489105
+          },
+          "mean_fa": {
+            "mean_support_dice": 0.8615166083916085,
+            "minimum_support_dice": 0.859375,
+            "mean_pairwise_pearson": 0.8159768388059258,
+            "mean_pairwise_spearman": 0.8420736620373644,
+            "mean_pairwise_mae": 0.03528106504996582,
+            "mean_pairwise_rmse": 0.056412099560338526,
+            "mean_pairwise_normalized_mae": 0.07147695840374992,
+            "mean_pairwise_normalized_rmse": 0.11428041843421442
+          }
+        }
+      }
+    },
+    "mrtrix_matched_seed_mask_act": {
+      "metric_policy": {
+        "files": [
+          "connectome_count.csv",
+          "connectome_sift2_fbc.csv",
+          "connectome_mean_length.csv",
+          "connectome_mean_fa.csv"
+        ],
+        "edge_subset": "strict upper triangle; diagonal reported separately",
+        "length_fa_values": "only edges with nonzero counts in both matrices",
+        "support": "nonzero values of each metric; empty/empty Dice is 1",
+        "normalized_error": "raw error / mean absolute nonzero reference value on evaluated edges",
+        "stability": "all unordered candidate-directory pairs with the same comparison policy"
+      },
+      "reference": {
+        "directory": "mrtrix_matched_seed_mask_act",
+        "sha256": {
+          "count": "556e6a935c782aa0a07435c2e21aeb44fb383c41465941f4640e468a39bd3e77",
+          "sift2_fbc": "e12d1ea685f9381a5a702d21961f35c49393a50b0a7c4e24563239b56f680f21",
+          "mean_length": "2f9ed8eb99be93d9f521fb6b2edb631109f87666e5c35c3d23497a5fa34152d3",
+          "mean_fa": "4829c41bddf6cb9c58cbb4a1d54245b2dc931d68e85fe0d59f405a1de3db4bac"
+        }
+      },
+      "candidates": [
+        {
+          "directory": "pytorch_seed_0",
+          "sha256": {
+            "count": "6894d30ff4ef966c5923f37e062840cf801f0de3c0be3269e04103f7b5970be9",
+            "sift2_fbc": "dd5f448c2b8c5ee4dcc4c23591b56034d8bc5f1e47ae5962fbf83c5e5f8d6e72",
+            "mean_length": "eb289288e28fe653ea4576d930274b85beb375cf524e7a463f5ebaccf4a196d7",
+            "mean_fa": "cb1197763d557df36ea22329f10163c66adc51aae8f949628cd9b8f49dc23aa1"
+          },
+          "metrics": {
+            "count": {
+              "shape": [
+                20,
+                20
+              ],
+              "upper_triangle_excludes_diagonal": true,
+              "nonzero_support": {
+                "reference_edges": 49,
+                "candidate_edges": 67,
+                "shared_edges": 34,
+                "dice": 0.5862068965517241,
+                "empty_empty_dice_convention": 1.0
+              },
+              "values": {
+                "policy": "all off-diagonal edges",
+                "evaluated_edges": 190,
+                "pearson": 0.6685688518489508,
+                "spearman": 0.5187477937163419,
+                "mae": 5.168421052631579,
+                "rmse": 20.83190872322149,
+                "normalized_mae": 0.3602455641236805,
+                "normalized_rmse": 1.452010707592963,
+                "normalization_scale": 14.346938775510203
+              },
+              "diagonal": {
+                "reference_nonzero_nodes": 14,
+                "candidate_nonzero_nodes": 18,
+                "mae": 116.35,
+                "rmse": 335.7501303052614
+              }
+            },
+            "sift2_fbc": {
+              "shape": [
+                20,
+                20
+              ],
+              "upper_triangle_excludes_diagonal": true,
+              "nonzero_support": {
+                "reference_edges": 49,
+                "candidate_edges": 67,
+                "shared_edges": 34,
+                "dice": 0.5862068965517241,
+                "empty_empty_dice_convention": 1.0
+              },
+              "values": {
+                "policy": "all off-diagonal edges",
+                "evaluated_edges": 190,
+                "pearson": 0.7352922102962911,
+                "spearman": 0.5254621216618363,
+                "mae": 4.8673429570306,
+                "rmse": 18.25290749689752,
+                "normalized_mae": 0.7357011718565605,
+                "normalized_rmse": 2.7589355329605305,
+                "normalization_scale": 6.615923887612871
+              },
+              "diagonal": {
+                "reference_nonzero_nodes": 14,
+                "candidate_nonzero_nodes": 18,
+                "mae": 140.73027983603066,
+                "rmse": 406.6784822651036
+              }
+            },
+            "mean_length": {
+              "shape": [
+                20,
+                20
+              ],
+              "upper_triangle_excludes_diagonal": true,
+              "nonzero_support": {
+                "reference_edges": 49,
+                "candidate_edges": 67,
+                "shared_edges": 34,
+                "dice": 0.5862068965517241,
+                "empty_empty_dice_convention": 1.0
+              },
+              "values": {
+                "policy": "common nonzero count edges",
+                "evaluated_edges": 34,
+                "pearson": 0.8266026715792739,
+                "spearman": 0.8734912146676852,
+                "mae": 19.046347235715043,
+                "rmse": 28.056499368640218,
+                "normalized_mae": 0.26915329324370113,
+                "normalized_rmse": 0.39648018113410377,
+                "normalization_scale": 70.76393904075248
+              },
+              "diagonal": {
+                "reference_nonzero_nodes": 14,
+                "candidate_nonzero_nodes": 18,
+                "mae": 12.07079114742688,
+                "rmse": 15.379037015419364
+              }
+            },
+            "mean_fa": {
+              "shape": [
+                20,
+                20
+              ],
+              "upper_triangle_excludes_diagonal": true,
+              "nonzero_support": {
+                "reference_edges": 49,
+                "candidate_edges": 67,
+                "shared_edges": 34,
+                "dice": 0.5862068965517241,
+                "empty_empty_dice_convention": 1.0
+              },
+              "values": {
+                "policy": "common nonzero count edges",
+                "evaluated_edges": 34,
+                "pearson": 0.4101128841684554,
+                "spearman": 0.47318563789152024,
+                "mae": 0.0638926202792511,
+                "rmse": 0.08838828696483306,
+                "normalized_mae": 0.12892515572004845,
+                "normalized_rmse": 0.1783535189348005,
+                "normalization_scale": 0.49557915926034835
+              },
+              "diagonal": {
+                "reference_nonzero_nodes": 14,
+                "candidate_nonzero_nodes": 18,
+                "mae": 0.16912079854362053,
+                "rmse": 0.2525798911517797
+              }
+            }
+          }
+        },
+        {
+          "directory": "pytorch_seed_1",
+          "sha256": {
+            "count": "a830b2a5a0d3365193ad5719a0705caa370c72bc8d3f53bb9eea8f772d0a54c7",
+            "sift2_fbc": "bbc3e2ae641ff9a692b614899cbd4c5c8044649ad9fc696f6f090c974a8dc412",
+            "mean_length": "68fb1f624e4660af63f7b214cc681bf32a1099b60c4a45a1dd4c75b28b46d9c1",
+            "mean_fa": "b81b3cfe57a9896f30c0063b2c6de5db0c6a96e8bc586310e8b10c0ab14f7651"
+          },
+          "metrics": {
+            "count": {
+              "shape": [
+                20,
+                20
+              ],
+              "upper_triangle_excludes_diagonal": true,
+              "nonzero_support": {
+                "reference_edges": 49,
+                "candidate_edges": 63,
+                "shared_edges": 34,
+                "dice": 0.6071428571428571,
+                "empty_empty_dice_convention": 1.0
+              },
+              "values": {
+                "policy": "all off-diagonal edges",
+                "evaluated_edges": 190,
+                "pearson": 0.6636501445845175,
+                "spearman": 0.5390320655017568,
+                "mae": 5.242105263157895,
+                "rmse": 20.212033934997084,
+                "normalized_mae": 0.36538144792992444,
+                "normalized_rmse": 1.408804641272912,
+                "normalization_scale": 14.346938775510203
+              },
+              "diagonal": {
+                "reference_nonzero_nodes": 14,
+                "candidate_nonzero_nodes": 17,
+                "mae": 113.75,
+                "rmse": 323.900061747447
+              }
+            },
+            "sift2_fbc": {
+              "shape": [
+                20,
+                20
+              ],
+              "upper_triangle_excludes_diagonal": true,
+              "nonzero_support": {
+                "reference_edges": 49,
+                "candidate_edges": 63,
+                "shared_edges": 34,
+                "dice": 0.6071428571428571,
+                "empty_empty_dice_convention": 1.0
+              },
+              "values": {
+                "policy": "all off-diagonal edges",
+                "evaluated_edges": 190,
+                "pearson": 0.7385914558899465,
+                "spearman": 0.536773495622908,
+                "mae": 4.757616679658736,
+                "rmse": 17.00154133960062,
+                "normalized_mae": 0.719115993544986,
+                "normalized_rmse": 2.5697909511070636,
+                "normalization_scale": 6.615923887612871
+              },
+              "diagonal": {
+                "reference_nonzero_nodes": 14,
+                "candidate_nonzero_nodes": 17,
+                "mae": 138.49102623716163,
+                "rmse": 397.2446058298583
+              }
+            },
+            "mean_length": {
+              "shape": [
+                20,
+                20
+              ],
+              "upper_triangle_excludes_diagonal": true,
+              "nonzero_support": {
+                "reference_edges": 49,
+                "candidate_edges": 63,
+                "shared_edges": 34,
+                "dice": 0.6071428571428571,
+                "empty_empty_dice_convention": 1.0
+              },
+              "values": {
+                "policy": "common nonzero count edges",
+                "evaluated_edges": 34,
+                "pearson": 0.8547746861434816,
+                "spearman": 0.8441558441558441,
+                "mae": 21.0201183614132,
+                "rmse": 28.27020856032214,
+                "normalized_mae": 0.2934952248394315,
+                "normalized_rmse": 0.3947252377465462,
+                "normalization_scale": 71.61996714908432
+              },
+              "diagonal": {
+                "reference_nonzero_nodes": 14,
+                "candidate_nonzero_nodes": 17,
+                "mae": 13.404652990426879,
+                "rmse": 15.65828481087996
+              }
+            },
+            "mean_fa": {
+              "shape": [
+                20,
+                20
+              ],
+              "upper_triangle_excludes_diagonal": true,
+              "nonzero_support": {
+                "reference_edges": 49,
+                "candidate_edges": 63,
+                "shared_edges": 34,
+                "dice": 0.6071428571428571,
+                "empty_empty_dice_convention": 1.0
+              },
+              "values": {
+                "policy": "common nonzero count edges",
+                "evaluated_edges": 34,
+                "pearson": 0.3581933661715011,
+                "spearman": 0.4768525592055004,
+                "mae": 0.06867284191420611,
+                "rmse": 0.09599923126602097,
+                "normalized_mae": 0.13956044096924172,
+                "normalized_rmse": 0.19509451880456646,
+                "normalization_scale": 0.49206524024484266
+              },
+              "diagonal": {
+                "reference_nonzero_nodes": 14,
+                "candidate_nonzero_nodes": 17,
+                "mae": 0.19037758899950832,
+                "rmse": 0.2696903995444105
+              }
+            }
+          }
+        },
+        {
+          "directory": "pytorch_seed_2",
+          "sha256": {
+            "count": "7087b8dcac5de9d6cff5e5c271dc303cd73e63f79c7c4d07f6e922cbdf41e602",
+            "sift2_fbc": "0004a49bbbf646787e2aab07d368a9a0fac74db4c78f94fd7caa660d1ea55cb5",
+            "mean_length": "9568d6aed280f73def5d2ec582780c6c3ec29cfad2ca84046f70c368c9befe12",
+            "mean_fa": "6f3ad35dbd29c793cbb874ece94b568b47d00865c3477818b4a9ff11b13ab69b"
+          },
+          "metrics": {
+            "count": {
+              "shape": [
+                20,
+                20
+              ],
+              "upper_triangle_excludes_diagonal": true,
+              "nonzero_support": {
+                "reference_edges": 49,
+                "candidate_edges": 65,
+                "shared_edges": 36,
+                "dice": 0.631578947368421,
+                "empty_empty_dice_convention": 1.0
+              },
+              "values": {
+                "policy": "all off-diagonal edges",
+                "evaluated_edges": 190,
+                "pearson": 0.6762418642551062,
+                "spearman": 0.5649112876446069,
+                "mae": 4.9526315789473685,
+                "rmse": 20.065025869853613,
+                "normalized_mae": 0.34520476154825186,
+                "normalized_rmse": 1.3985579909286303,
+                "normalization_scale": 14.346938775510203
+              },
+              "diagonal": {
+                "reference_nonzero_nodes": 14,
+                "candidate_nonzero_nodes": 15,
+                "mae": 114.25,
+                "rmse": 327.9099724009625
+              }
+            },
+            "sift2_fbc": {
+              "shape": [
+                20,
+                20
+              ],
+              "upper_triangle_excludes_diagonal": true,
+              "nonzero_support": {
+                "reference_edges": 49,
+                "candidate_edges": 65,
+                "shared_edges": 36,
+                "dice": 0.631578947368421,
+                "empty_empty_dice_convention": 1.0
+              },
+              "values": {
+                "policy": "all off-diagonal edges",
+                "evaluated_edges": 190,
+                "pearson": 0.7345496818934343,
+                "spearman": 0.5695498119841004,
+                "mae": 4.784753564316859,
+                "rmse": 17.69195275723534,
+                "normalized_mae": 0.7232177463944909,
+                "normalized_rmse": 2.6741469608440243,
+                "normalization_scale": 6.615923887612871
+              },
+              "diagonal": {
+                "reference_nonzero_nodes": 14,
+                "candidate_nonzero_nodes": 15,
+                "mae": 137.36953120265866,
+                "rmse": 397.8705412102292
+              }
+            },
+            "mean_length": {
+              "shape": [
+                20,
+                20
+              ],
+              "upper_triangle_excludes_diagonal": true,
+              "nonzero_support": {
+                "reference_edges": 49,
+                "candidate_edges": 65,
+                "shared_edges": 36,
+                "dice": 0.631578947368421,
+                "empty_empty_dice_convention": 1.0
+              },
+              "values": {
+                "policy": "common nonzero count edges",
+                "evaluated_edges": 36,
+                "pearson": 0.8124428183191496,
+                "spearman": 0.7837837837837838,
+                "mae": 18.957591916166482,
+                "rmse": 30.48531876368325,
+                "normalized_mae": 0.2640884662676885,
+                "normalized_rmse": 0.424675302200022,
+                "normalization_scale": 71.78500516925439
+              },
+              "diagonal": {
+                "reference_nonzero_nodes": 14,
+                "candidate_nonzero_nodes": 15,
+                "mae": 12.80925855441998,
+                "rmse": 14.823287206597636
+              }
+            },
+            "mean_fa": {
+              "shape": [
+                20,
+                20
+              ],
+              "upper_triangle_excludes_diagonal": true,
+              "nonzero_support": {
+                "reference_edges": 49,
+                "candidate_edges": 65,
+                "shared_edges": 36,
+                "dice": 0.631578947368421,
+                "empty_empty_dice_convention": 1.0
+              },
+              "values": {
+                "policy": "common nonzero count edges",
+                "evaluated_edges": 36,
+                "pearson": 0.31503733489388536,
+                "spearman": 0.44324324324324327,
+                "mae": 0.0599484896746111,
+                "rmse": 0.08884398839064124,
+                "normalized_mae": 0.12208905214736773,
+                "normalized_rmse": 0.18093664061396555,
+                "normalization_scale": 0.4910226479787082
+              },
+              "diagonal": {
+                "reference_nonzero_nodes": 14,
+                "candidate_nonzero_nodes": 15,
+                "mae": 0.19071089187899873,
+                "rmse": 0.26854533115671114
+              }
+            }
+          }
+        }
+      ],
+      "stability": {
+        "pair_count": 3,
+        "pairwise": [
+          {
+            "candidate_a": "pytorch_seed_0",
+            "candidate_b": "pytorch_seed_1",
+            "metrics": {
+              "count": {
+                "shape": [
+                  20,
+                  20
+                ],
+                "upper_triangle_excludes_diagonal": true,
+                "nonzero_support": {
+                  "reference_edges": 67,
+                  "candidate_edges": 63,
+                  "shared_edges": 56,
+                  "dice": 0.8615384615384616,
+                  "empty_empty_dice_convention": 1.0
+                },
+                "values": {
+                  "policy": "all off-diagonal edges",
+                  "evaluated_edges": 190,
+                  "pearson": 0.9922139183634328,
+                  "spearman": 0.8798567835240241,
+                  "mae": 1.2947368421052632,
+                  "rmse": 3.5481648332920677,
+                  "normalized_mae": 0.06430494323280403,
+                  "normalized_rmse": 0.17622464331398707,
+                  "normalization_scale": 20.134328358208954
+                },
+                "diagonal": {
+                  "reference_nonzero_nodes": 18,
+                  "candidate_nonzero_nodes": 17,
+                  "mae": 6.3,
+                  "rmse": 14.352700094407323
+                }
+              },
+              "sift2_fbc": {
+                "shape": [
+                  20,
+                  20
+                ],
+                "upper_triangle_excludes_diagonal": true,
+                "nonzero_support": {
+                  "reference_edges": 67,
+                  "candidate_edges": 63,
+                  "shared_edges": 56,
+                  "dice": 0.8615384615384616,
+                  "empty_empty_dice_convention": 1.0
+                },
+                "values": {
+                  "policy": "all off-diagonal edges",
+                  "evaluated_edges": 190,
+                  "pearson": 0.9909085927508323,
+                  "spearman": 0.8787612510478671,
+                  "mae": 1.2525549271894736,
+                  "rmse": 3.3542777754727973,
+                  "normalized_mae": 0.06970410871572698,
+                  "normalized_rmse": 0.18666402378770477,
+                  "normalization_scale": 17.96959964437313
+                },
+                "diagonal": {
+                  "reference_nonzero_nodes": 18,
+                  "candidate_nonzero_nodes": 17,
+                  "mae": 5.9613667697000015,
+                  "rmse": 10.731399212950485
+                }
+              },
+              "mean_length": {
+                "shape": [
+                  20,
+                  20
+                ],
+                "upper_triangle_excludes_diagonal": true,
+                "nonzero_support": {
+                  "reference_edges": 67,
+                  "candidate_edges": 63,
+                  "shared_edges": 56,
+                  "dice": 0.8615384615384616,
+                  "empty_empty_dice_convention": 1.0
+                },
+                "values": {
+                  "policy": "common nonzero count edges",
+                  "evaluated_edges": 56,
+                  "pearson": 0.9339689416465462,
+                  "spearman": 0.8935064935064935,
+                  "mae": 9.50217831875,
+                  "rmse": 14.541912031137198,
+                  "normalized_mae": 0.19905571580264428,
+                  "normalized_rmse": 0.30463022387038174,
+                  "normalization_scale": 47.736274642678566
+                },
+                "diagonal": {
+                  "reference_nonzero_nodes": 18,
+                  "candidate_nonzero_nodes": 17,
+                  "mae": 4.567359891999999,
+                  "rmse": 7.085441127144007
+                }
+              },
+              "mean_fa": {
+                "shape": [
+                  20,
+                  20
+                ],
+                "upper_triangle_excludes_diagonal": true,
+                "nonzero_support": {
+                  "reference_edges": 67,
+                  "candidate_edges": 63,
+                  "shared_edges": 56,
+                  "dice": 0.8615384615384616,
+                  "empty_empty_dice_convention": 1.0
+                },
+                "values": {
+                  "policy": "common nonzero count edges",
+                  "evaluated_edges": 56,
+                  "pearson": 0.8330796336127039,
+                  "spearman": 0.8446343130553657,
+                  "mae": 0.03337362007142857,
+                  "rmse": 0.05128467254447098,
+                  "normalized_mae": 0.06775728444514344,
+                  "normalized_rmse": 0.10412146293493216,
+                  "normalization_scale": 0.4925465998928571
+                },
+                "diagonal": {
+                  "reference_nonzero_nodes": 18,
+                  "candidate_nonzero_nodes": 17,
+                  "mae": 0.07436392,
+                  "rmse": 0.13657942823223207
+                }
+              }
+            }
+          },
+          {
+            "candidate_a": "pytorch_seed_0",
+            "candidate_b": "pytorch_seed_2",
+            "metrics": {
+              "count": {
+                "shape": [
+                  20,
+                  20
+                ],
+                "upper_triangle_excludes_diagonal": true,
+                "nonzero_support": {
+                  "reference_edges": 67,
+                  "candidate_edges": 65,
+                  "shared_edges": 57,
+                  "dice": 0.8636363636363636,
+                  "empty_empty_dice_convention": 1.0
+                },
+                "values": {
+                  "policy": "all off-diagonal edges",
+                  "evaluated_edges": 190,
+                  "pearson": 0.9940659369246476,
+                  "spearman": 0.8750968452004343,
+                  "mae": 1.194736842105263,
+                  "rmse": 3.044408161306821,
+                  "normalized_mae": 0.05933830127579884,
+                  "normalized_rmse": 0.1512048530819548,
+                  "normalization_scale": 20.134328358208954
+                },
+                "diagonal": {
+                  "reference_nonzero_nodes": 18,
+                  "candidate_nonzero_nodes": 15,
+                  "mae": 6.3,
+                  "rmse": 10.397114984456024
+                }
+              },
+              "sift2_fbc": {
+                "shape": [
+                  20,
+                  20
+                ],
+                "upper_triangle_excludes_diagonal": true,
+                "nonzero_support": {
+                  "reference_edges": 67,
+                  "candidate_edges": 65,
+                  "shared_edges": 57,
+                  "dice": 0.8636363636363636,
+                  "empty_empty_dice_convention": 1.0
+                },
+                "values": {
+                  "policy": "all off-diagonal edges",
+                  "evaluated_edges": 190,
+                  "pearson": 0.9942290039371663,
+                  "spearman": 0.8766705786417711,
+                  "mae": 1.0761860937263155,
+                  "rmse": 2.5710956413878545,
+                  "normalized_mae": 0.059889263813582214,
+                  "normalized_rmse": 0.14308029629324262,
+                  "normalization_scale": 17.96959964437313
+                },
+                "diagonal": {
+                  "reference_nonzero_nodes": 18,
+                  "candidate_nonzero_nodes": 15,
+                  "mae": 6.639809543699994,
+                  "rmse": 11.471999286983904
+                }
+              },
+              "mean_length": {
+                "shape": [
+                  20,
+                  20
+                ],
+                "upper_triangle_excludes_diagonal": true,
+                "nonzero_support": {
+                  "reference_edges": 67,
+                  "candidate_edges": 65,
+                  "shared_edges": 57,
+                  "dice": 0.8636363636363636,
+                  "empty_empty_dice_convention": 1.0
+                },
+                "values": {
+                  "policy": "common nonzero count edges",
+                  "evaluated_edges": 57,
+                  "pearson": 0.8925004781410244,
+                  "spearman": 0.8497536945812808,
+                  "mae": 10.77604953105263,
+                  "rmse": 18.32052084347219,
+                  "normalized_mae": 0.2244213008809201,
+                  "normalized_rmse": 0.3815419656953282,
+                  "normalization_scale": 48.01705314403509
+                },
+                "diagonal": {
+                  "reference_nonzero_nodes": 18,
+                  "candidate_nonzero_nodes": 15,
+                  "mae": 7.58874416,
+                  "rmse": 12.06354568409397
+                }
+              },
+              "mean_fa": {
+                "shape": [
+                  20,
+                  20
+                ],
+                "upper_triangle_excludes_diagonal": true,
+                "nonzero_support": {
+                  "reference_edges": 67,
+                  "candidate_edges": 65,
+                  "shared_edges": 57,
+                  "dice": 0.8636363636363636,
+                  "empty_empty_dice_convention": 1.0
+                },
+                "values": {
+                  "policy": "common nonzero count edges",
+                  "evaluated_edges": 57,
+                  "pearson": 0.8008850636968138,
+                  "spearman": 0.8336790251490795,
+                  "mae": 0.037060393842105264,
+                  "rmse": 0.059635374253675724,
+                  "normalized_mae": 0.07517818042739391,
+                  "normalized_rmse": 0.12097224181153808,
+                  "normalization_scale": 0.492967422614035
+                },
+                "diagonal": {
+                  "reference_nonzero_nodes": 18,
+                  "candidate_nonzero_nodes": 15,
+                  "mae": 0.1262560099,
+                  "rmse": 0.20322346467933633
+                }
+              }
+            }
+          },
+          {
+            "candidate_a": "pytorch_seed_1",
+            "candidate_b": "pytorch_seed_2",
+            "metrics": {
+              "count": {
+                "shape": [
+                  20,
+                  20
+                ],
+                "upper_triangle_excludes_diagonal": true,
+                "nonzero_support": {
+                  "reference_edges": 63,
+                  "candidate_edges": 65,
+                  "shared_edges": 55,
+                  "dice": 0.859375,
+                  "empty_empty_dice_convention": 1.0
+                },
+                "values": {
+                  "policy": "all off-diagonal edges",
+                  "evaluated_edges": 190,
+                  "pearson": 0.9942355634874873,
+                  "spearman": 0.8820649960382659,
+                  "mae": 1.131578947368421,
+                  "rmse": 2.8200410597981316,
+                  "normalized_mae": 0.053803376365441906,
+                  "normalized_rmse": 0.13408497114511872,
+                  "normalization_scale": 21.03174603174603
+                },
+                "diagonal": {
+                  "reference_nonzero_nodes": 17,
+                  "candidate_nonzero_nodes": 15,
+                  "mae": 5.1,
+                  "rmse": 11.734564329364767
+                }
+              },
+              "sift2_fbc": {
+                "shape": [
+                  20,
+                  20
+                ],
+                "upper_triangle_excludes_diagonal": true,
+                "nonzero_support": {
+                  "reference_edges": 63,
+                  "candidate_edges": 65,
+                  "shared_edges": 55,
+                  "dice": 0.859375,
+                  "empty_empty_dice_convention": 1.0
+                },
+                "values": {
+                  "policy": "all off-diagonal edges",
+                  "evaluated_edges": 190,
+                  "pearson": 0.9942407335142532,
+                  "spearman": 0.8795156996292325,
+                  "mae": 1.0197017739789471,
+                  "rmse": 2.522828428134421,
+                  "normalized_mae": 0.05498509437716759,
+                  "normalized_rmse": 0.13603777374740203,
+                  "normalization_scale": 18.545058174936507
+                },
+                "diagonal": {
+                  "reference_nonzero_nodes": 17,
+                  "candidate_nonzero_nodes": 15,
+                  "mae": 2.9519634114000057,
+                  "rmse": 4.406283536760531
+                }
+              },
+              "mean_length": {
+                "shape": [
+                  20,
+                  20
+                ],
+                "upper_triangle_excludes_diagonal": true,
+                "nonzero_support": {
+                  "reference_edges": 63,
+                  "candidate_edges": 65,
+                  "shared_edges": 55,
+                  "dice": 0.859375,
+                  "empty_empty_dice_convention": 1.0
+                },
+                "values": {
+                  "policy": "common nonzero count edges",
+                  "evaluated_edges": 55,
+                  "pearson": 0.9255956439385477,
+                  "spearman": 0.9003607503607504,
+                  "mae": 9.245848756000001,
+                  "rmse": 14.595769618706376,
+                  "normalized_mae": 0.19178796650208968,
+                  "normalized_rmse": 0.3027621420789631,
+                  "normalization_scale": 48.208701122545456
+                },
+                "diagonal": {
+                  "reference_nonzero_nodes": 17,
+                  "candidate_nonzero_nodes": 15,
+                  "mae": 7.075521438000001,
+                  "rmse": 13.362624613772237
+                }
+              },
+              "mean_fa": {
+                "shape": [
+                  20,
+                  20
+                ],
+                "upper_triangle_excludes_diagonal": true,
+                "nonzero_support": {
+                  "reference_edges": 63,
+                  "candidate_edges": 65,
+                  "shared_edges": 55,
+                  "dice": 0.859375,
+                  "empty_empty_dice_convention": 1.0
+                },
+                "values": {
+                  "policy": "common nonzero count edges",
+                  "evaluated_edges": 55,
+                  "pearson": 0.8139658191082595,
+                  "spearman": 0.8479076479076479,
+                  "mae": 0.03540918123636363,
+                  "rmse": 0.05831625188286886,
+                  "normalized_mae": 0.07149541033871241,
+                  "normalized_rmse": 0.11774755055617302,
+                  "normalization_scale": 0.4952650956
+                },
+                "diagonal": {
+                  "reference_nonzero_nodes": 17,
+                  "candidate_nonzero_nodes": 15,
+                  "mae": 0.07243992380000001,
+                  "rmse": 0.157463228933775
+                }
+              }
+            }
+          }
+        ],
+        "summary": {
+          "count": {
+            "mean_support_dice": 0.8615166083916085,
+            "minimum_support_dice": 0.859375,
+            "mean_pairwise_pearson": 0.9935051395918558,
+            "mean_pairwise_spearman": 0.8790062082542414,
+            "mean_pairwise_mae": 1.207017543859649,
+            "mean_pairwise_rmse": 3.1375380181323407,
+            "mean_pairwise_normalized_mae": 0.059148873624681596,
+            "mean_pairwise_normalized_rmse": 0.1538381558470202
+          },
+          "sift2_fbc": {
+            "mean_support_dice": 0.8615166083916085,
+            "minimum_support_dice": 0.859375,
+            "mean_pairwise_pearson": 0.9931261100674172,
+            "mean_pairwise_spearman": 0.8783158431062902,
+            "mean_pairwise_mae": 1.1161475982982454,
+            "mean_pairwise_rmse": 2.816067281665024,
+            "mean_pairwise_normalized_mae": 0.06152615563549226,
+            "mean_pairwise_normalized_rmse": 0.15526069794278316
+          },
+          "mean_length": {
+            "mean_support_dice": 0.8615166083916085,
+            "minimum_support_dice": 0.859375,
+            "mean_pairwise_pearson": 0.9173550212420394,
+            "mean_pairwise_spearman": 0.8812069794828415,
+            "mean_pairwise_mae": 9.841358868600876,
+            "mean_pairwise_rmse": 15.819400831105254,
+            "mean_pairwise_normalized_mae": 0.20508832772855135,
+            "mean_pairwise_normalized_rmse": 0.32964477721489105
+          },
+          "mean_fa": {
+            "mean_support_dice": 0.8615166083916085,
+            "minimum_support_dice": 0.859375,
+            "mean_pairwise_pearson": 0.8159768388059258,
+            "mean_pairwise_spearman": 0.8420736620373644,
+            "mean_pairwise_mae": 0.03528106504996582,
+            "mean_pairwise_rmse": 0.056412099560338526,
+            "mean_pairwise_normalized_mae": 0.07147695840374992,
+            "mean_pairwise_normalized_rmse": 0.11428041843421442
+          }
+        }
+      }
+    }
+  },
+  "release_gate": {
+    "same_input_matrix_consistency_confirmed": false,
+    "reason": "Full-stage count support, SIFT2-weighted matrix and streamline acceptance differ materially; the MRtrix reference also uses substitute FSL 5TT and raw, uncorrected DWI.",
+    "main_push_authorized_only_after_consistency": true,
+    "main_push_executed": false
+  }
+}

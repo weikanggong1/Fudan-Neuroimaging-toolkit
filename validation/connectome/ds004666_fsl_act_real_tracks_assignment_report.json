@@ -1,0 +1,158 @@
+{
+  "scope": "real ds004666 MRtrix FSL-5TT ACT tractogram; fixed-input matrix stage only",
+  "source_dataset": "OpenNeuro ds004666",
+  "reference_relative_id": "mrtrix_raw_default/fsl5tt_act_temporary",
+  "atlas_relative_id": "registration_direct_affine/synthseg_gm_atlas_dwi.nii.gz",
+  "track_input": "full tracks_10000.tck, matching all four original tck2connectome commands",
+  "streamlines": 3021,
+  "assigned_reference": 2915,
+  "assigned_torch": 2915,
+  "mrtrix_version": "== tck2connectome 3.0.3-103-g026e850d ==",
+  "torch_version": "2.5.1",
+  "device": "cuda:0",
+  "gpu": "NVIDIA H100 PCIe",
+  "timing_seconds": {
+    "boundary": "MRtrix subprocesses include startup and file I/O; PyTorch is GPU-resident assignment only",
+    "load_tck_atlas_vectors_csv": 0.054002558812499046,
+    "host_to_device": 0.8433945006690919,
+    "torch_assignment_gpu_resident_runs": [
+      0.7872376418672502,
+      0.07547376397997141,
+      0.07455896213650703,
+      0.034200447145849466,
+      0.06083969306200743,
+      0.07455559307709336,
+      0.07450393727049232,
+      0.07463073497638106,
+      0.07478360086679459,
+      0.07515796320512891
+    ],
+    "torch_assignment_gpu_resident_median": 0.07459484855644405,
+    "mrtrix_command_wall_runs": {
+      "count": [
+        0.0625181682407856,
+        0.03370905062183738,
+        0.04252816131338477,
+        0.031233706045895815,
+        0.04589299578219652,
+        0.029738583136349916,
+        0.048118436243385077,
+        0.033440299797803164,
+        0.03993420209735632,
+        0.041970460675656796
+      ],
+      "sift2_fbc": [
+        0.046856661792844534,
+        0.044391707982867956,
+        0.04298665886744857,
+        0.032308763824403286,
+        0.038318853825330734,
+        0.04414601903408766,
+        0.036209385842084885,
+        0.05275694513693452,
+        0.03839075472205877,
+        0.039694797713309526
+      ],
+      "mean_length": [
+        0.053031538147479296,
+        0.051355007104575634,
+        0.03766815084964037,
+        0.03377138590440154,
+        0.039016939233988523,
+        0.04963485291227698,
+        0.03515160782262683,
+        0.05535090295597911,
+        0.04723453614860773,
+        0.05869900016114116
+      ],
+      "mean_fa": [
+        0.04042614484205842,
+        0.041495933663100004,
+        0.03331261919811368,
+        0.049990971107035875,
+        0.05850264988839626,
+        0.04393413010984659,
+        0.032245378009974957,
+        0.037277890369296074,
+        0.047560096718370914,
+        0.03916237223893404
+      ]
+    },
+    "mrtrix_four_commands_wall_median": 0.17203564452938735
+  },
+  "recorded_reference_csv_reproduction_max_absolute_error": {
+    "count": 0.0,
+    "sift2_fbc": 0.0,
+    "mean_length": 0.0,
+    "mean_fa": 9.992007221626409e-16
+  },
+  "metrics": {
+    "count": {
+      "shape": [
+        20,
+        20
+      ],
+      "max_absolute_error_all_elements": 0.0,
+      "mean_absolute_error_all_elements": 0.0,
+      "exact_elements": 400,
+      "total_elements": 400
+    },
+    "sift2_fbc": {
+      "shape": [
+        20,
+        20
+      ],
+      "max_absolute_error_all_elements": 8.992851235234411e-06,
+      "mean_absolute_error_all_elements": 6.206333639138806e-08,
+      "exact_elements": 300,
+      "total_elements": 400
+    },
+    "mean_length": {
+      "shape": [
+        20,
+        20
+      ],
+      "max_absolute_error_all_elements": 5.634777068053154e-06,
+      "mean_absolute_error_all_elements": 1.9540616220004025e-07,
+      "exact_elements": 296,
+      "total_elements": 400
+    },
+    "mean_fa": {
+      "shape": [
+        20,
+        20
+      ],
+      "max_absolute_error_all_elements": 2.9611046725719348e-08,
+      "mean_absolute_error_all_elements": 1.937024758855155e-09,
+      "exact_elements": 292,
+      "total_elements": 400
+    }
+  },
+  "matrix_csv_sha256": {
+    "reference": {
+      "connectome_count.csv": "51402b9c312649eb036b02e0e82fcbb9af671bc44a55346419f3f29b277d5978",
+      "connectome_sift2_fbc.csv": "cba0cb17ef85f1ecf6ec017451a691a73907d1fdd5ef074e29ce5dd2e62ce3c9",
+      "connectome_mean_length.csv": "b7f8ef54acafbac4fd7d4c379b4bc92f3b68bf34e301b129e0ac8509425aff76",
+      "connectome_mean_fa.csv": "8f8ed982643cc355aede96c722950d2a6a3616860e5b9976f6481c7cf73b2732"
+    },
+    "candidate": {
+      "connectome_count.csv": "51402b9c312649eb036b02e0e82fcbb9af671bc44a55346419f3f29b277d5978",
+      "connectome_sift2_fbc.csv": "eeeb3d3168feeeb5ec014e49a7b88c005fd7b92e9a8d7efd57cadc9a4b7a5a6f",
+      "connectome_mean_length.csv": "f3293ec306cbaa44def227cf40424551cdd864351c42b92ad34dfad7daa008ad",
+      "connectome_mean_fa.csv": "c5ddce45dceb33a07cbf71747c256e2f22bcf7459b914836ee6a0c9f16d00c56"
+    }
+  },
+  "assignment_source_sha256": "de0cb9cf78569d7953218696756f232dc3fb397d26c03b60985c0e0d59af6529",
+  "benchmark_script_sha256": "1ac9ea06df1a4789844d8d858f6f3a2d4e060a768f25c9e02a2a1508f7c1292d",
+  "input_sha256": {
+    "tracks_10000.tck": "e97fbfaeacbfdea4a930f0175f44196ed4defb8b7b9f186b0ed4a90e29aa4249",
+    "synthseg_gm_atlas_dwi.nii.gz": "eae3b729cfc0ad0fe5cfa0649381a5b656e2d3c1a66ce678afb2800407f706b0",
+    "sift2_weights.txt": "85d3538eb326c7ff99fd55a86dacdabca92c01a3a1f4bcbef1c6b60240c13d8f",
+    "streamline_length.txt": "326ebdb967a71758f605427b2a84e6dc2e7d640a40c3689f53061e9b8cf21cf0",
+    "streamline_mean_fa.txt": "a1ee42a64397dc6af9bd80808a60fdb6cbc84610b963b970ecdf129457e4bf66",
+    "count.csv": "51402b9c312649eb036b02e0e82fcbb9af671bc44a55346419f3f29b277d5978",
+    "sift2_fbc.csv": "cba0cb17ef85f1ecf6ec017451a691a73907d1fdd5ef074e29ce5dd2e62ce3c9",
+    "mean_length.csv": "b7f8ef54acafbac4fd7d4c379b4bc92f3b68bf34e301b129e0ac8509425aff76",
+    "mean_fa.csv": "8f8ed982643cc355aede96c722950d2a6a3616860e5b9976f6481c7cf73b2732"
+  }
+}
