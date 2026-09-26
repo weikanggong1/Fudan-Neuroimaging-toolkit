@@ -47,8 +47,11 @@ The following Python T1 normalization matched a fresh native command
 on the same Python-generated `nu.mgz` input, while differing from the archived
 full subject at 112 voxels ([report](CONNECTED_T1_NORMALIZE_20260926.md)).
 
-The currently open critical path includes full topology repair, independent
-white placement, and connected native-free orchestration. Both pial optimizers
+A connected experimental native-free core now runs from T1 to bilateral morphometry,
+but passes only 6/138 strict output checks on the same T1
+([full report](NATIVE_FREE_CONNECTED_20260927.md)). The open critical path
+still includes full topology repair, independent white placement, and exact
+connected output parity. Both pial optimizers
 now independently select their full 41-step schedules and match final surfaces
 and vertex metrics when started from frozen official white surfaces. The
 standalone conventional-sphere stage now matches both final native meshes and volume geometry on the frozen subject;
@@ -79,8 +82,8 @@ a 0.02 mm² change at LH `area.pial` vertex 1,234 likewise failed only that map,
 137/138 ([report](complete_subject_area_negative_expanded_20260926.json)).
 Both controls used [linked subject trees](experimental/create_morph_negative_control.py)
 and reported vertex 1,234 as the sole outlier. These checks validate the
-comparator, not a new reconstruction. A fresh, unmodified FreeSurfer run and
-a complete native-free candidate are still required for acceptance.
+comparator, not a new reconstruction. A fresh paired FreeSurfer run and a complete, numerically matching
+native-free candidate are still required for acceptance.
 
 An [existing unmodified FreeSurfer subject comparison](TRUE_OFFICIAL_BASELINE_20260926.md)
 shows that the archived hybrid subject passes 110/138 checks against the true
@@ -88,4 +91,6 @@ official run on the same T1. Ordered mesh coordinates/faces, all 46 surface
 scalar files and annotations agree; SynthSeg soft volumes, SynthMorph warps,
 several derived statistics and label storage types differ. The float32 label
 storage issue has been corrected in the current independent SynthSeg source,
-but no complete native-free candidate has been tested against that reference.
+and the first connected approximate native-free core has now been compared
+against that reference (6/138 strict outputs pass). Exact complete parity
+remains open; see [the connected report](NATIVE_FREE_CONNECTED_20260927.md).

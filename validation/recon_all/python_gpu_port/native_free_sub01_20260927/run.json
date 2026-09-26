@@ -1,0 +1,173 @@
+{
+  "profile": "experimental-native-free-core-v1",
+  "input": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/examples/data/sub-01_T1w.nii.gz",
+  "subject_dir": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_python_gpu_20260925/native_free_core_20260927/sub01_final",
+  "device": "cuda:1",
+  "n4_python": "/cwStorage/home/gongwk/Notebook_code/huashan_multidisease/models/foundation_backbones/neurovfm_runtime/venv/bin/python",
+  "threads": 4,
+  "stages": [
+    {
+      "name": "input_talairach",
+      "seconds": 9.537716032937169
+    },
+    {
+      "name": "n4",
+      "seconds": 234.0522245359607
+    },
+    {
+      "name": "nu",
+      "seconds": 2.399145631119609
+    },
+    {
+      "name": "T1_normalize",
+      "seconds": 81.80191839998588
+    },
+    {
+      "name": "brainmask",
+      "seconds": 1.1284593627788126
+    },
+    {
+      "name": "SynthSeg",
+      "seconds": 7.0620226031169295
+    },
+    {
+      "name": "mri_em_register",
+      "seconds": 905.3744136360474
+    },
+    {
+      "name": "mri_ca_normalize",
+      "seconds": 30.919476612005383
+    },
+    {
+      "name": "surface_lh",
+      "seconds": 31.224803058896214
+    },
+    {
+      "name": "surface_rh",
+      "seconds": 36.87374790292233
+    },
+    {
+      "name": "annot_lh_aparc",
+      "seconds": 63.311327412724495
+    },
+    {
+      "name": "annot_lh_aparc.a2009s",
+      "seconds": 70.35612087557092
+    },
+    {
+      "name": "annot_lh_aparc.DKTatlas",
+      "seconds": 58.033179895952344
+    },
+    {
+      "name": "annot_rh_aparc",
+      "seconds": 60.67707765987143
+    },
+    {
+      "name": "annot_rh_aparc.a2009s",
+      "seconds": 77.2511479947716
+    },
+    {
+      "name": "annot_rh_aparc.DKTatlas",
+      "seconds": 59.95729665923864
+    },
+    {
+      "name": "project_aparc_volumes",
+      "seconds": 5.1917594210244715
+    },
+    {
+      "name": "project_wmparc",
+      "seconds": 1.8899974869564176
+    },
+    {
+      "name": "brain_volume_stats",
+      "seconds": 2.974800718948245
+    },
+    {
+      "name": "aseg_stats",
+      "seconds": 17.09425274701789
+    },
+    {
+      "name": "wmparc_stats",
+      "seconds": 15.330013059079647
+    },
+    {
+      "name": "stats_lh_aparc",
+      "seconds": 0.7003832659684122
+    },
+    {
+      "name": "stats_lh_aparc.a2009s",
+      "seconds": 0.6832006121985614
+    },
+    {
+      "name": "stats_lh_aparc.DKTatlas",
+      "seconds": 0.7418155209161341
+    },
+    {
+      "name": "stats_rh_aparc",
+      "seconds": 0.7090880209580064
+    },
+    {
+      "name": "stats_rh_aparc.a2009s",
+      "seconds": 0.7261933502741158
+    },
+    {
+      "name": "stats_rh_aparc.DKTatlas",
+      "seconds": 0.700632378924638
+    },
+    {
+      "name": "corrected_aparc_ids",
+      "seconds": 5.606104442849755
+    },
+    {
+      "name": "corrected_wmparc_ids",
+      "seconds": 2.254680812358856
+    },
+    {
+      "name": "corrected_wmparc_stats",
+      "seconds": 15.982923499774188
+    }
+  ],
+  "status": "complete",
+  "surfaces": {
+    "lh": {
+      "hemisphere": "lh",
+      "vertices": 117432,
+      "faces": 234916,
+      "raw_components": 1,
+      "cortex_vertices": 104405,
+      "mean_thickness_mm": 4.148111343383789,
+      "approximations": [
+        "filled-from-SynthSeg-WM",
+        "topology-unrepaired",
+        "white-from-smoothed-tessellation",
+        "pial-normal-ray",
+        "inflated-Laplacian",
+        "sphere-radial",
+        "sphere.reg-unregistered"
+      ]
+    },
+    "rh": {
+      "hemisphere": "rh",
+      "vertices": 120276,
+      "faces": 240624,
+      "raw_components": 1,
+      "cortex_vertices": 107540,
+      "mean_thickness_mm": 4.087174415588379,
+      "approximations": [
+        "filled-from-SynthSeg-WM",
+        "topology-unrepaired",
+        "white-from-smoothed-tessellation",
+        "pial-normal-ray",
+        "inflated-Laplacian",
+        "sphere-radial",
+        "sphere.reg-unregistered"
+      ]
+    }
+  },
+  "total_seconds": 1805.7327559408732,
+  "projection_replay": {
+    "original_run_seconds": 1781.8890471858904,
+    "source_sha256_at_launch": "e4f0d549175c90b60fec58fcba5092fe5e1d7acbf0635db176269fe12780cf0d",
+    "corrected_source_sha256": "d46384db54175ab36ee76cd0fd1886b732aec26908dec06c6bbfe826f646694b"
+  }
+}

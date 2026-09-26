@@ -173,17 +173,20 @@ def _project_parcels(subject: Path, aseg: np.ndarray) -> None:
                           ("aparc.a2009s", "aparc.a2009s+aseg.mgz"),
                           ("aparc.DKTatlas", "aparc.DKTatlas+aseg.mgz")):
         projected = aseg.astype(np.int32, copy=True)
-        for hemi, cortical_id, offset in (("lh", 3, 1000), ("rh", 42, 2000)):
+        offsets = (11100, 12100) if atlas == "aparc.a2009s" else (1000, 2000)
+        for (hemi, cortical_id), offset in zip((("lh", 3), ("rh", 42)), offsets):
             vertices, _ = fs.read_geometry(str(surf / f"{hemi}.white"))
             ids, _, _ = fs.read_annot(str(label / f"{hemi}.{atlas}.annot"))
-            tree = cKDTree(vertices)
+            labeled = ids > 0
+            tree = cKDTree(vertices[labeled])
+            parcel_ids = ids[labeled]
             positions = np.argwhere(aseg == cortical_id)
             for block in np.array_split(positions, max(1, (len(positions) + 99999) // 100000)):
                 if not len(block):
                     continue
                 points = block @ transform[:3, :3].T + transform[:3, 3]
                 nearest = tree.query(points, workers=4)[1]
-                projected[block[:, 0], block[:, 1], block[:, 2]] = offset + np.maximum(ids[nearest], 0)
+                projected[block[:, 0], block[:, 1], block[:, 2]] = offset + parcel_ids[nearest]
         _save_like(mri / "aseg.mgz", mri / output, projected)
 
 
@@ -196,14 +199,16 @@ def _project_wmparc(subject: Path, aseg: np.ndarray) -> None:
     for hemi, wm_id, offset in (("lh", 2, 3000), ("rh", 41, 4000)):
         vertices, _ = fs.read_geometry(str(surf / f"{hemi}.white"))
         ids, _, _ = fs.read_annot(str(label / f"{hemi}.aparc.annot"))
-        tree = cKDTree(vertices)
+        labeled = ids > 0
+        tree = cKDTree(vertices[labeled])
+        parcel_ids = ids[labeled]
         positions = np.argwhere(aseg == wm_id)
         for block in np.array_split(positions, max(1, (len(positions) + 99999) // 100000)):
             if not len(block):
                 continue
             points = block @ transform[:3, :3].T + transform[:3, 3]
             nearest = tree.query(points, workers=4)[1]
-            projected[block[:, 0], block[:, 1], block[:, 2]] = offset + np.maximum(ids[nearest], 0)
+            projected[block[:, 0], block[:, 1], block[:, 2]] = offset + parcel_ids[nearest]
     _save_like(mri / "aseg.mgz", mri / "wmparc.mgz", projected)
 
 

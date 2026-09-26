@@ -96,7 +96,8 @@ def _surface(reference: Path, candidate: Path) -> dict:
     return result
 
 
-def _map(reference: Path, candidate: Path, *, vertex_correspondence: bool) -> dict:
+def _map(reference: Path, candidate: Path, *, vertex_correspondence: bool,
+         nearest_reference: np.ndarray | None = None) -> dict:
     a, b = fs.read_morph_data(str(reference)), fs.read_morph_data(str(candidate))
     result = _numbers(a, b)
     if not vertex_correspondence:
@@ -105,12 +106,18 @@ def _map(reference: Path, candidate: Path, *, vertex_correspondence: bool) -> di
         result.pop("p95", None)
         result.pop("max_abs", None)
         result["ordered_comparable"] = False
-        result["reason"] = "mesh vertex order/topology differs; only distributions are comparable"
+        result["reason"] = "mesh vertex order/topology differs; spatial nearest is not true vertex correspondence"
+        if nearest_reference is not None and len(b) == len(nearest_reference):
+            difference = np.abs(a[nearest_reference].astype(np.float64) - b.astype(np.float64))
+            result["spatial_nearest_error"] = {
+                "mae": float(difference.mean()), "p95": float(np.quantile(difference, .95)),
+                "max_abs": float(difference.max(initial=0))}
     return result
 
 
 def _annotation(reference: Path, candidate: Path,
-                *, vertex_correspondence: bool) -> dict:
+                *, vertex_correspondence: bool,
+                nearest_reference: np.ndarray | None = None) -> dict:
     left, _, left_names = fs.read_annot(str(reference))
     right, _, right_names = fs.read_annot(str(candidate))
     names = sorted(set(left_names) | set(right_names))
@@ -124,6 +131,11 @@ def _annotation(reference: Path, candidate: Path,
                "difference_vertices": int(b.sum() - a.sum())}
         if vertex_correspondence and len(a) == len(b) and (a.sum() + b.sum()):
             row["dice"] = float(2 * np.count_nonzero(a & b) / (a.sum() + b.sum()))
+        elif nearest_reference is not None and len(b) == len(nearest_reference):
+            matched = a[nearest_reference]
+            if matched.sum() + b.sum():
+                row["spatial_nearest_dice"] = float(
+                    2 * np.count_nonzero(matched & b) / (matched.sum() + b.sum()))
         rows[name.decode(errors="replace")] = row
     return {"reference_vertices": len(left), "candidate_vertices": len(right),
             "vertex_correspondence": vertex_correspondence and len(left) == len(right),
@@ -220,6 +232,12 @@ def compare(reference: str | Path, candidate: str | Path) -> dict:
                 result["surfaces"][key] = surface
                 ordered[name] = surface["ordered_faces_equal"] and (
                     surface["reference_vertices"] == surface["candidate_vertices"])
+        nearest = None
+        if not ordered.get("white") and (reference / f"surf/{hemi}.white").is_file() and (
+            candidate / f"surf/{hemi}.white").is_file():
+            ref_xyz, _ = fs.read_geometry(str(reference / f"surf/{hemi}.white"))
+            got_xyz, _ = fs.read_geometry(str(candidate / f"surf/{hemi}.white"))
+            nearest = cKDTree(ref_xyz).query(got_xyz, workers=4)[1]
         for name in MAPS:
             key = f"surf/{hemi}.{name}"
             ref, got = reference / key, candidate / key
@@ -227,7 +245,8 @@ def compare(reference: str | Path, candidate: str | Path) -> dict:
                 result["missing_candidate"].append(key)
             elif ref.is_file():
                 result["vertex_maps"][key] = _map(
-                    ref, got, vertex_correspondence=bool(ordered.get("white")))
+                    ref, got, vertex_correspondence=bool(ordered.get("white")),
+                    nearest_reference=nearest)
         for name in ("aparc", "aparc.a2009s", "aparc.DKTatlas",
                      "BA_exvivo", "BA_exvivo.thresh", "mpm.vpnl"):
             key = f"label/{hemi}.{name}.annot"
@@ -236,7 +255,8 @@ def compare(reference: str | Path, candidate: str | Path) -> dict:
                 result["missing_candidate"].append(key)
             elif ref.is_file():
                 result["annotations"][key] = _annotation(
-                    ref, got, vertex_correspondence=bool(ordered.get("white")))
+                    ref, got, vertex_correspondence=bool(ordered.get("white")),
+                    nearest_reference=nearest)
         for name in ("aparc", "aparc.a2009s", "aparc.DKTatlas"):
             key = f"stats/{hemi}.{name}.stats"
             ref, got = reference / key, candidate / key

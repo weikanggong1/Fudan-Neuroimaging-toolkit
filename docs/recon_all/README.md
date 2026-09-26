@@ -30,7 +30,9 @@ Python 调用为 `fnit.recon_all.native_free.run_recon_all_python(...)`。
 被试目录中的 `fnit-native-free-run.json` 记录每个阶段的耗时和近似步骤；
 以 `python -m fnit.recon_all.compare_native_free REF CAND --output report.json`
 对照同一 T1 的官方被试。若候选网格与官方顶点顺序不同，比较器报告
-双向最近表面距离与顶点指标的分布差异，明确标记无法逐顶点对齐。
+双向最近表面距离、顶点指标的分布差异及空间最近点误差；空间最近点不是同源顶点，不能据此声称逐顶点一致。
+[同一 T1 的整例 benchmark、所有指标差异与缺失项](../../validation/recon_all/python_gpu_port/NATIVE_FREE_CONNECTED_20260927.md)
+已公开；实验版目前仅通过严格固定配置的 6/138 项。
 
 去除原生运行包的 Python/CUDA 移植仍在逐阶段验证。
 [完整替换的验收门槛](../../validation/recon_all/python_gpu_port/RELEASE_GATES.md)
