@@ -1,13 +1,13 @@
 # FSL source snapshots used by the PyTorch ports
 
-This directory contains complete, unmodified source snapshots for the FSL
-components consulted while implementing the PyTorch FLIRT, FNIRT, TOPUP, and
-`applywarp` paths. The snapshots are retained for licence compliance and
-reproducible source provenance. They are package data: `fnit` does
-not compile or import them at runtime.
+This directory contains unmodified FSL source-code snapshots consulted while
+implementing the PyTorch FLIRT, FNIRT, TOPUP, `applywarp`, BEDPOSTX, and
+ProbtrackX paths. The snapshots are retained for licence compliance and
+reproducible source provenance. They are package data: `fnit` does not compile
+or import them at runtime.
 
-The validation target is FSL 6.0.7.4. Its Linux package manifest fixes these
-component versions:
+The first eight components match the FSL 6.0.7.4 validation package manifest.
+The fdt and ptx2 rows are separate implementation reference snapshots:
 
 | component | tag | commit |
 | --- | --- | --- |
@@ -19,10 +19,16 @@ component versions:
 | newimage | `2203.11` | `19e3ddd10138d8ea1394fd522fb0770435c61ddd` |
 | warpfns | `2203.0` | `50ea45cb0b9661adba7844444cb38649ae44892b` |
 | fugue | `2201.3` | `9d815181a19c4fe1aebac74e9fa6601cde4e1ded` |
+| fdt (BEDPOSTX) | `2604.0` | `03e2b6bd88423e77386356a4c75b14cca5d90c6c` |
+| ptx2 (ProbtrackX) | `2608.0` | `900e72c451c556d24d2629f9c2ffff12b2ee7bfc` |
 
 [`manifest.json`](manifest.json) records the upstream repository, tag, commit,
 Git tree, deterministic `git archive` SHA-256, and SHA-256 of every distributed
-source file. The original repositories are:
+source file. The FSL 6.0.7.4 baseline applies only to rows marked
+`validation_target`. All fdt and ptx2 source files are byte-identical to
+their commits. Three
+ptx2 NIfTI test-data LFS pointers are omitted; their paths are recorded in
+`manifest.json`. The original repositories are:
 
 - <https://git.fmrib.ox.ac.uk/fsl/flirt.git>
 - <https://git.fmrib.ox.ac.uk/fsl/fnirt.git>
@@ -32,6 +38,8 @@ source file. The original repositories are:
 - <https://git.fmrib.ox.ac.uk/fsl/newimage.git>
 - <https://git.fmrib.ox.ac.uk/fsl/warpfns.git>
 - <https://git.fmrib.ox.ac.uk/fsl/fugue.git>
+- <https://git.fmrib.ox.ac.uk/fsl/fdt.git>
+- <https://git.fmrib.ox.ac.uk/fsl/ptx2.git>
 
 These sources and the modified Python ports are distributed under the
 [FSL Software Licence, Release 6.0](../../../licenses/FSL-6.0.txt). The licence

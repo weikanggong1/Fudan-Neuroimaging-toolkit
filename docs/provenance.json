@@ -106,13 +106,14 @@
     "freesurfer_binaries_included": false,
     "vendored_fast4_reference_source_included": true,
     "vendored_fsl_registration_reference_sources_included": true,
-    "vendored_fsl_topup_reference_source_included": true
+    "vendored_fsl_topup_reference_source_included": true,
+    "vendored_fsl_tractography_reference_sources_included": true
   },
   "fsl_registration_source_snapshots": {
     "purpose": "complete unmodified upstream sources consulted for the modified PyTorch FLIRT, FNIRT, applywarp and TOPUP ports",
     "validation_baseline": "FSL 6.0.7.4",
     "manifest": "src/fnit/_vendor_fsl/manifest.json",
-    "manifest_sha256": "7d10b1e5c2d7a1aa76354b6e59a98c8b05e5b1475f387448ffcc7b3f3e436baf",
+    "manifest_sha256": "87f178a4fc67e639b4a973992ae137533a9c5e7ce70a3dfdd02d69df4f95947d",
     "license_file": "licenses/FSL-6.0.txt",
     "license_sha256": "137735ac0d0f075d58e85642972692b92073711752b273e7de7ed38c6147a8eb",
     "licence_scope": "non-commercial redistribution under the FSL Software Licence, Release 6.0; licence conditions and original and amended source code accompany the product",
@@ -208,5 +209,39 @@
     "output_contract_compatible": true,
     "fsl_applytopup_accepted_fnit_files": true,
     "numerically_equivalent": false
+  },
+  "fsl_tractography_source_snapshots": {
+    "purpose": "unmodified upstream source reference for PyTorch BEDPOSTX and ProbtrackX implementations",
+    "manifest": "src/fnit/_vendor_fsl/manifest.json",
+    "manifest_sha256": "87f178a4fc67e639b4a973992ae137533a9c5e7ce70a3dfdd02d69df4f95947d",
+    "license_file": "licenses/FSL-6.0.txt",
+    "components": [
+      {
+        "repository": "https://git.fmrib.ox.ac.uk/fsl/fdt.git",
+        "tag": "2604.0",
+        "commit": "03e2b6bd88423e77386356a4c75b14cca5d90c6c",
+        "git_tree": "d316197ccd63cb2a8d3d73a7ece8aac90c93588e",
+        "git_archive_sha256": "860344aed84f04931bcf1a0e1bafd93e1630b3564fd100929bb3b021f5014471",
+        "directory": "src/fnit/_vendor_fsl/sources/fdt-2604.0",
+        "role": "reference_source",
+        "excluded_binary_test_data": []
+      },
+      {
+        "repository": "https://git.fmrib.ox.ac.uk/fsl/ptx2.git",
+        "tag": "2608.0",
+        "commit": "900e72c451c556d24d2629f9c2ffff12b2ee7bfc",
+        "git_tree": "6a50cd9a3b940c6b40b3640f7bdfe22666086ba8",
+        "git_archive_sha256": "0c3196968cd10424a4e8f8782d0669af73ade8fbe73182e9f6af592bc07f8133",
+        "directory": "src/fnit/_vendor_fsl/sources/ptx2-2608.0",
+        "role": "reference_source",
+        "excluded_binary_test_data": [
+          "fsl_streamlines/fsl_streamlines/test/testdata/density.nii.gz",
+          "fsl_streamlines/fsl_streamlines/test/testdata/densityNorm.nii.gz",
+          "fsl_streamlines/fsl_streamlines/test/testdata/density_localdir.nii.gz"
+        ]
+      }
+    ],
+    "runtime_dependency": false,
+    "numerical_equivalence_established": false
   }
 }

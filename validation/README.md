@@ -11,6 +11,7 @@
 - FLIRT：[`flirt/report.public.json`](flirt/report.public.json)。
 - FNIRT 与 FastVBM：[`fast_vbm/README.md`](fast_vbm/README.md) 及 0.9 正式文件。
 - TOPUP：[`topup/report.public.json`](topup/report.public.json) 与[功能页](../docs/topup/README.md)。
+- BEDPOSTX 与 ProbtrackX：[`bedpostx/README.md`](bedpostx/README.md)、[`probtrackx/README.md`](probtrackx/README.md) 及各自功能页。
 
 ## 功能子页面审计
 
@@ -30,5 +31,7 @@
 | [FNIRT](../docs/fnirt/README.md) | FSL 6.0.7.4，10 例 matched input | 有：coefficient、field、iout、jout、modulated GM | 有：FSL CPU / 本包 H100 | 有：十例平均 warped GM 和 Jacobian |
 | [applywarp](../docs/applywarp/README.md) | FSL 6.0.7.4，11 项 | 有：dense/coefficient、linear/nearest、header/dtype | 有：FSL CPU / 本包 CPU 与 H100 | 有：相同 warp 的输出与差值 |
 | [TOPUP](../docs/topup/README.md) | FSL 6.0.7.4，1 例真实 UKB 格式 dMRI | 有：field、corrected images、Jacobian、coefficient/movement/header | 有：FSL CPU / 本包 H100，各 3 次 | 有：原始 AP/PA、校正均值、field 与差值 |
+| [BEDPOSTX](../docs/bedpostx/README.md) | FSL 6.0.7.22，真实 dMRI 小 ROI 与合成 DWI | 有：fraction、dyad、diffusivity、FSL 追踪读取 | 有：FSL CPU / 本包 CPU 与 H100 | 有：合成 crossing-fibre fraction 与差值 |
+| [ProbtrackX](../docs/probtrackx/README.md) | FSL 6.0.7.22，真实 UKBB dMRI 后验 | 有：密度图、waytotal、连接矩阵 | 有：FSL CPU / 本包 CPU | 合成后验纤维场图 |
 
 公开记录不含账号、私有绝对路径、源病例 ID、权重或临床原图。公开样例及其来源校验见 [T1w 示例](../examples/README.md)和 [FLAIR 示例](../examples/WMH.md)。没有人工真值的报告只衡量与参考实现的一致性。

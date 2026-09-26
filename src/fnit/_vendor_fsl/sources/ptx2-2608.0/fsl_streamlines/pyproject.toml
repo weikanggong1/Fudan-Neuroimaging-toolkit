@@ -1,0 +1,33 @@
+[build-system]
+requires      = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name            = "fsl_streamlines"
+dynamic         = ["version"]
+description     = "Tool to extract streamlines from xtract and probtrackx output"
+readme          = {file = "README.md", content-type="text/markdown"}
+requires-python = ">=3.8"
+authors         = [{name = "Saad Jbabdi"},
+                   {name = "Martin Craig"},
+                   {name = "Paul McCarthy"}]
+
+dependencies = [
+ "numpy",
+ "scipy",
+ "nibabel",
+ "fslpy",
+ "trx-python"
+]
+
+[project.scripts]
+fsl_streamlines  = "fsl_streamlines.main:main"
+
+[project.urls]
+"Repository" = "https://git.fmrib.ox.ac.uk/fsl/ptx2.git"
+
+[tool.setuptools.packages.find]
+include = ["fsl_streamlines*"]
+
+[tool.setuptools_scm]
+root = ".."
