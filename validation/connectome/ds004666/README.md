@@ -1,6 +1,6 @@
 # ds004666 单被试结构连接组配对验证
 
-这是 `sub-01/ses-2mm` 同次 T1w 与 DWI 的固定输入实验。[OpenNeuro ds004666](https://github.com/OpenNeuroDatasets/ds004666) 的原始 AP-DWI 为 105 个体积（5 个 b0、50 个 b=1000、50 个 b=2000），使用公开原始 bval/bvec。T1 经 SynthSeg 2.0 分割后，生成同一个 20 区 GM atlas；MRtrix 与 PyTorch 读取相同 atlas NIfTI 和相同 RAS 世界坐标。逐体素核对三次 PyTorch 输出与 MRtrix atlas：标签不匹配数均为 0，affine 最大差为 0（[记录](atlas_identity_qc.public.json)）。原始文件的下载地址、字节数、SHA-256 见 [download_manifest.tsv](download_manifest.tsv)，atlas 与 T1 分割哈希见 [report.public.json](report.public.json)。源数据许可和元数据见 [dataset_description.json](dataset_description.json)。
+这是 `sub-01/ses-2mm` 同次 T1w 与 DWI 的固定输入实验。[OpenNeuro ds004666](https://github.com/OpenNeuroDatasets/ds004666) 的原始 AP-DWI 为 105 个体积（5 个 b0、50 个 b=1000、50 个 b=2000），使用公开原始 bval/bvec。T1 经 SynthSeg 2.0 分割后，生成同一个 20 区 GM atlas；MRtrix 与 PyTorch 读取相同 atlas NIfTI 和相同 RAS 世界坐标。逐体素核对三次 PyTorch 输出与 MRtrix atlas：标签不匹配数均为 0，affine 最大差为 0（[记录](atlas_identity_qc.public.json)）。梯度坐标也经过交叉检查：100 个非 b0 方向在 PyTorch 与 MRtrix 导出结果间的有符号点积均大于 0.99999995，b-value 最大绝对差为 0（[梯度帧记录](gradient_frame_qc.public.json)）。原始文件的下载地址、字节数、SHA-256 见 [download_manifest.tsv](download_manifest.tsv)，atlas 与 T1 分割哈希见 [report.public.json](report.public.json)。源数据许可和元数据见 [dataset_description.json](dataset_description.json)。
 
 ## 验证范围
 
