@@ -1,0 +1,111 @@
+{
+  "dataset": "OpenNeuro ds004666 v1.0.8, sub-01/ses-2mm",
+  "dataset_doi": "10.18112/openneuro.ds004666.v1.0.8",
+  "figure_relative_to_repository": "docs/connectome/figures/ds004666_t1_raw_vs_topup_eddy_atlas.png",
+  "figure_sha256": "b2889bf861286ad27169c1967a9d6175d995385807714add7f465789d9d1946e",
+  "corrected_input_provenance_relative_to_repository": "validation/connectome/ds004666/corrected_input_provenance.public.json",
+  "corrected_input_provenance_sha256": "8a310b0dc1ce2de2ead911032f7db12d36c36b18ba6e025a0aabea83b19249fb",
+  "source_file_manifest_relative_to_benchmark_root": {
+    "raw_ap_dwi": {
+      "path_relative_to_ROOT": "data/ds004666/sub-01/ses-2mm/dwi/sub-01_ses-2mm_dir-AP_run-01_part-mag_dwi.nii.gz",
+      "sha256": "33c4188ffdcd2316a8383c88ff2a719cabbdc414961fc7fd61801d5c392c3bbc",
+      "bytes": 118295331
+    },
+    "bvals": {
+      "path_relative_to_ROOT": "data/ds004666/sub-01/ses-2mm/dwi/sub-01_ses-2mm_dir-AP_dwi.bval",
+      "sha256": "86e91a4f22a8687765d29db41a9a19e2cbcd713a6e60e01392adc25c278b8ff3",
+      "bytes": 492
+    },
+    "corrected_dwi": {
+      "path_relative_to_ROOT": "ds004666_fsl_corrected_20260927/eddy/data.nii.gz",
+      "sha256": "666c28c75b2a378a65af7d39026525bf8c8ddc98ace542d9abbb43476eb8ba18",
+      "bytes": 286940194
+    },
+    "corrected_mean_b0": {
+      "path_relative_to_ROOT": "ds004666_fsl_corrected_20260927/eddy/mean_b0.nii.gz",
+      "sha256": "0c1dee4472694a9c43d8355136ae2467d3a90d9f76729371ef95623fc7b1413d",
+      "bytes": 2736693
+    },
+    "t1": {
+      "path_relative_to_ROOT": "data/ds004666/sub-01/ses-2mm/anat/sub-01_ses-2mm_T1w.nii.gz",
+      "sha256": "80ace482fbc8a5f18423e202118e58d8c9e9ac9bbd1fea9f243de3fff2572017",
+      "bytes": 7573516
+    },
+    "atlas": {
+      "path_relative_to_ROOT": "registration_direct_affine/synthseg_gm_atlas_dwi.nii.gz",
+      "sha256": "eae3b729cfc0ad0fe5cfa0649381a5b656e2d3c1a66ce678afb2800407f706b0",
+      "bytes": 76692
+    },
+    "mask": {
+      "path_relative_to_ROOT": "data/ds004666/derivatives/ses-2mm/masks/nodif_brain_mask.nii.gz",
+      "sha256": "4ccac9c11eadc736c71bc7d27457794ecc3a85d00a618198eac3d7603065cfef",
+      "bytes": 14805
+    }
+  },
+  "derived_raw_mean_b0": {
+    "path_relative_to_ROOT": "example_images/corrected_fourpanel/raw_ap_mean_b0.nii.gz",
+    "sha256": "1c27f7393554b92ddebb81d16382682ed21287e39489cb60e7a7cdb0186b36ee",
+    "bytes": 1308963
+  },
+  "render": {
+    "b0_indices_zero_based": [
+      0,
+      21,
+      42,
+      63,
+      84
+    ],
+    "raw_mean_b0": "arithmetic mean of raw AP DWI volumes selected by b<100 s/mm2",
+    "corrected_mean_b0": "arithmetic mean of the same five FSL EDDY corrected volumes",
+    "t1_to_dwi": "nibabel.processing.resample_from_to, NIfTI world coordinates, linear interpolation",
+    "atlas_to_dwi": "atlas already on the identical DWI voxel grid and affine; no further resampling",
+    "axial_slice_zero_based": 29,
+    "slice_selection": "among slices with brain-mask area >=95% of maximum, maximize visible atlas labels; tie-break by brain-mask area",
+    "visible_atlas_labels": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      20
+    ],
+    "crop_in_dwi_voxels": {
+      "x_start_inclusive": 8,
+      "x_stop_exclusive": 96,
+      "y_start_inclusive": 0,
+      "y_stop_exclusive": 104
+    },
+    "orientation": "np.rot90 of identical x-y voxel slices; left-right anatomical labels omitted",
+    "display_clip_percentiles": [
+      1,
+      99
+    ],
+    "t1_display_clip_values": [
+      0.0,
+      2149.561142578125
+    ],
+    "shared_raw_corrected_b0_display_clip_values": [
+      216.6402438354492,
+      11219.678320312483
+    ],
+    "atlas_colormap": "Matplotlib tab20, alpha 0.48, labels 1-20",
+    "scale_bar_mm": 20,
+    "scale_bar_voxel_width_mm": 2.0192308421391147,
+    "readout_time_seconds_assumed": 0.05,
+    "software": {
+      "matplotlib": "3.9.2",
+      "nibabel": "5.2.1",
+      "numpy": "1.26.4"
+    }
+  }
+}

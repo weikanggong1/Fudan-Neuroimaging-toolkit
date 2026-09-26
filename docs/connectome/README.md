@@ -105,6 +105,7 @@ CSV 或空白分隔文本。`--device cpu` 可用于小规模功能检查；完�
 |---|---|---|
 | 固定 120,000 条合成端点、相同权重/长度/FA 的矩阵赋值 | MRtrix3 3.0.5 与本包：count/FBC 的 3×3 全元素一致；mean length 最大绝对误差 `1.2715657e-6` mm；mean FA 最大绝对误差 `4.9670538e-9` | RTX 3060，MRtrix 四条命令合计 `1.463 s`（启动及 I/O）；本包已驻留 GPU 张量计算 `0.858 s` |
 | 固定 ds004666 的 MRtrix ACT 真实 `tracks_10000.tck`、同一 atlas/权重/长度/FA，仅重复矩阵赋值 | 3,021 条轨迹、2,915 条双端分配，两臂 count 的 400/400 元素完全一致；FBC、mean length、mean FA 最大绝对误差分别 `8.99e-6`、`5.63e-6 mm`、`2.96e-8` | H100，10 次中位：MRtrix 四个子进程合计 `0.172 s`（启动与 I/O），本包已驻留 GPU 赋值 `0.0746 s`；边界不同，见[真实轨迹赋值报告](../../validation/connectome/ds004666_fsl_act_real_tracks_assignment_report.json) |
+| 公开 ds004666 的 TOPUP/EDDY 校正 AP-DWI、旋转后 bvec、配对 T1、同一 20 区 atlas；MRtrix FSL-5TT ACT 与本包各 10,000 次播种 | PyTorch 种子 0：count Pearson 0.662、支持 Dice 0.693、归一化 MAE 0.627；SIFT2 FBC Pearson 0.729、归一化 MAE 2.154。三种子、四矩阵、文件哈希与图见[校正数据报告](../../validation/connectome/ds004666/corrected_report.public.json)。**完整流程未达到一致。** | H100：本包三种子 28.12/27.50/29.58 s，复用已有 T1 分割；MRtrix 响应 17.01 s、MSMT-CSD 185.51 s、追踪 12.87 s、SIFT2 21.49 s，另复用 FSL 5TT。TOPUP/EDDY 294.64/681.93 s；计时边界与负载不同 |
 | 公开 ds004666 的原始 AP-DWI、配对 T1、相同 20 区 atlas；MRtrix FSL-5TT ACT 与本包各 10,000 次种子尝试 | PyTorch 种子 0：count Pearson `0.689`、支持 Dice `0.549`、归一化 MAE `0.595`；SIFT2 FBC Pearson `0.739`、归一化 MAE `2.035`。三种子、四张矩阵及误差见[真实数据报告](../../validation/connectome/ds004666/README.md)。**完整流程未达到一致。** | H100：本包种子 0/1/2 为 `25.41/25.24/27.38 s`，复用已有 T1 分割和单位变换；MRtrix Dhollander `22.88 s`、MSMT-CSD `182.98 s`、mtnormalise `3.25 s`、FSL 5TT `859.56 s`、追踪 `13.55 s`、SIFT2 `20.75 s`，计时边界不同 |
 
 [合成矩阵赋值报告](../../validation/connectome/assignment_report.public.json)保留版本、
@@ -117,12 +118,22 @@ CSV 或空白分隔文本。`--device cpu` 可用于小规模功能检查；完�
 
 ![真实轨迹矩阵赋值的逐元素误差](figures/ds004666_real_assignment_metrics.png)
 
-真实样本使用相同原始 AP-DWI 和原始梯度，因为公开的处理后 DWI 未配套
-eddy-rotated bvec；所以它是算法同输入比较，不能外推为已校正 UKB 数据上的
-输出一致性。MRtrix 参考臂的 FSL 5TT 暂代原脚本的 FreeSurfer+FIRST 5TT，
+表中原始 AP-DWI 一行是先前的算法诊断：公开的处理后 DWI 未配套
+eddy-rotated bvec，因而该行不能外推到已校正输入。校正 DWI 一行由
+TOPUP/EDDY 生成匹配的 DWI 与旋转后梯度。MRtrix 参考臂的 FSL 5TT 暂代原脚本的 FreeSurfer+FIRST 5TT，
 本包使用已有 SynthSeg 分割和单位变换；两者不是原流程严格等价复现。
 原 UKB 脚本的 `10,000,000` 次种子尚未实测可行性、耗时或显存；本接口要求显式设置 `n_seeds`。不同计时边界也不允许
 从这张表计算完整流程加速倍数。
+
+校正输入的 FSL TOPUP/EDDY 使用同一份公开 AP/PA DWI；由于元数据缺少实际总读出时间，采用假定 0.05 秒，并在[校正输入记录](../../validation/connectome/ds004666/corrected_input_provenance.public.json)中保留命令、SHA-256 和 QC。MRtrix 导出与本包读取的 100 个非 b0 方向有符号点积最小 0.999999975。以下是校正输入的定量图与示例影像。
+
+![校正输入的四张矩阵及差值](figures/corrected_connectome_comparison.png)
+
+![校正输入的相关、误差与支持](figures/corrected_connectome_metrics.png)
+
+![同次 T1、原始与校正 b0、校正 b0 的 atlas 覆盖](figures/ds004666_t1_raw_vs_topup_eddy_atlas.png)
+
+下两图保留原始 AP-DWI 算法诊断；原始数据不满足本接口的已校正 DWI 输入约定。
 
 ![真实 ds004666 同输入四张矩阵和差值](figures/connectome_comparison.png)
 
@@ -133,9 +144,8 @@ eddy-rotated bvec；所以它是算法同输入比较，不能外推为已校正
 [OpenNeuro ds004666](https://github.com/OpenNeuroDatasets/ds004666) 的
 `sub-01/ses-2mm` 同时提供 T1w、AP/PA DWI 和公开的处理后 DWI。
 下图在同一个 DWI 网格上展示 T1w、处理后 b0 均值，以及脑掩膜和本例的
-20 区 SynthSeg GM atlas。图像只用于检查几何与分区覆盖；定量算法对照
-使用原始 AP-DWI 与其原始梯度，因为公开处理后 DWI 没有配套的
-eddy-rotated bvec 文件。图像来源文件的 SHA-256 和切面参数见
+20 区 SynthSeg GM atlas。这张旧图只用于检查几何与分区覆盖，源图来自公开处理后 DWI；
+校正输入的示例影像和定量图见上文。图像来源文件的 SHA-256 和切面参数见
 [示例图记录](../../validation/connectome/ds004666_example_image.json)。
 
 ![ds004666 同次扫描 T1、DWI b0、脑掩膜及脑区覆盖](figures/ds004666_t1_b0_mask_atlas.png)

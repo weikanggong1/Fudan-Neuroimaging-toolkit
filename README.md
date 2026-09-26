@@ -34,7 +34,7 @@
 FastVBM 的两个分支共用仿射配准、FSL 坐标转换、GPU 重采样、仅非线性
 Jacobian 和调制步骤；差别只在非线性形变由 SynthMorph 或 TorchFNIRT 估计。
 
-FLIRT、FNIRT 和 FastVBM 的 0.9 十例验证状态见 [FastVBM 验证页](validation/fast_vbm/README.md)。TOPUP、EDDY、DTIFIT 和 AMICO-NODDI 的真实 UKB 格式 dMRI 对照见上表各子页；输入、输出、原命令对应关系、计时和数值边界均在各自页面。BEDPOSTX 和 ProbtrackX 的验证边界见其功能页。connectome 的固定端点矩阵赋值与公开 ds004666 真实 DWI 配对 benchmark 均已记录；完整追踪和 SIFT2 结果尚未达到原软件输出一致性，见 [connectome 文档](docs/connectome/README.md)。
+FLIRT、FNIRT 和 FastVBM 的 0.9 十例验证状态见 [FastVBM 验证页](validation/fast_vbm/README.md)。TOPUP、EDDY、DTIFIT 和 AMICO-NODDI 的真实 UKB 格式 dMRI 对照见上表各子页；输入、输出、原命令对应关系、计时和数值边界均在各自页面。BEDPOSTX 和 ProbtrackX 的验证边界见其功能页。connectome 的固定端点矩阵赋值，以及公开 ds004666 的原始和 TOPUP/EDDY 校正 DWI 同输入 benchmark 均已记录；完整追踪和 SIFT2 结果尚未达到原软件输出一致性，见 [connectome 文档](docs/connectome/README.md)。
 
 FLIRT、FNIRT、applywarp、TOPUP、EDDY、DTIFIT、BEDPOSTX 和 ProbtrackX 的 FSL 派生实现及随包提供的上游源码受 [FSL Software Licence 6.0](licenses/FSL-6.0.txt) 的非商业使用条款约束。各功能的移植范围和验证边界见对应子页面。
 

@@ -1,0 +1,213 @@
+{
+  "status": "complete_qc_passed",
+  "dataset": {
+    "name": "OpenNeuro ds004666 EDDEN",
+    "doi": "10.18112/openneuro.ds004666.v1.0.8",
+    "case": "sub-01/ses-2mm, AP run-01 part-mag and PA run-01 part-mag",
+    "url": "https://github.com/OpenNeuroDatasets/ds004666"
+  },
+  "purpose": "Prepare a corrected DWI and the rotated b-vector file emitted by the same FSL EDDY run as a paired input to the connectome benchmark.",
+  "software": {
+    "FSL": "6.0.7.4",
+    "topup_binary": "topup",
+    "eddy_binary": "eddy_cuda10.2",
+    "hardware": "NVIDIA H100 PCIe 80 GB, CUDA_VISIBLE_DEVICES=1",
+    "host": "gpucw1",
+    "cpu_threads_limited_to": 8
+  },
+  "acquisition": {
+    "ap_phase_encoding_vector": [
+      0,
+      -1,
+      0
+    ],
+    "pa_phase_encoding_vector": [
+      0,
+      1,
+      0
+    ],
+    "ap_b0_volume_index": 0,
+    "pa_b0_volume_index": 0,
+    "eddy_index": "105 entries, all 1-based row 1",
+    "total_readout_time_seconds": 0.05,
+    "total_readout_time_is_measured": false,
+    "total_readout_time_note": "The public ds004666 magnitude DWI has no TotalReadoutTime or EffectiveEchoSpacing sidecar. The same assumed 0.05 s was used in TOPUP and EDDY, following the FSL TOPUP and EDDY FAQs. This is not a measured acquisition parameter.",
+    "readout_references": [
+      "https://fsl.fmrib.ox.ac.uk/fsl/docs/diffusion/topup/FAQ/index.html",
+      "https://fsl.fmrib.ox.ac.uk/fsl/docs/diffusion/eddy/FAQ/index.html"
+    ]
+  },
+  "path_aliases": {
+    "ROOT": "root of a local ds004666 benchmark mirror",
+    "DATA": "$ROOT/data/ds004666",
+    "OUT": "$ROOT/ds004666_fsl_corrected_20260927",
+    "FSLDIR": "FSL 6.0.7.4 installation root",
+    "AP": "$DATA/sub-01/ses-2mm/dwi/sub-01_ses-2mm_dir-AP_run-01_part-mag_dwi.nii.gz",
+    "PA": "$DATA/sub-01/ses-2mm/dwi/sub-01_ses-2mm_dir-PA_run-01_part-mag_dwi.nii.gz",
+    "BVAL": "$DATA/sub-01/ses-2mm/dwi/sub-01_ses-2mm_dir-AP_dwi.bval",
+    "BVEC": "$DATA/sub-01/ses-2mm/dwi/sub-01_ses-2mm_dir-AP_dwi.bvec",
+    "MASK": "$DATA/derivatives/ses-2mm/masks/nodif_brain_mask.nii.gz"
+  },
+  "commands": [
+    "export FSLOUTPUTTYPE=NIFTI_GZ OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8",
+    "printf \"0 -1 0 0.05\\n0 1 0 0.05\\n\" > \"$OUT/acqparams.txt\"",
+    "awk \"BEGIN {for (i=1;i<=105;i++) print 1}\" > \"$OUT/eddy_index.txt\"",
+    "\"$FSLDIR/bin/fslroi\" \"$AP\" \"$OUT/topup/AP_b0.nii.gz\" 0 1",
+    "\"$FSLDIR/bin/fslroi\" \"$PA\" \"$OUT/topup/PA_b0.nii.gz\" 0 1",
+    "\"$FSLDIR/bin/fslmerge\" -t \"$OUT/topup/AP_PA_b0.nii.gz\" \"$OUT/topup/AP_b0.nii.gz\" \"$OUT/topup/PA_b0.nii.gz\"",
+    "\"$FSLDIR/bin/topup\" --imain=\"$OUT/topup/AP_PA_b0.nii.gz\" --datain=\"$OUT/acqparams.txt\" --config=\"$FSLDIR/etc/flirtsch/b02b0.cnf\" --out=\"$OUT/topup/fieldmap_out\" --fout=\"$OUT/topup/fieldmap_fout\" --iout=\"$OUT/topup/fieldmap_iout\"",
+    "export CUDA_VISIBLE_DEVICES=1",
+    "timeout 1200 \"$FSLDIR/bin/eddy_cuda10.2\" --imain=\"$AP\" --mask=\"$MASK\" --topup=\"$OUT/topup/fieldmap_out\" --acqp=\"$OUT/acqparams.txt\" --index=\"$OUT/eddy_index.txt\" --bvecs=\"$BVEC\" --bvals=\"$BVAL\" --out=\"$OUT/eddy/data\" --ref_scan_no=0 --flm=quadratic --resamp=jac --slm=linear --niter=8 --fwhm=10,8,4,2,0,0,0,0 --ff=10 --sep_offs_move --nvoxhp=1000 --repol --rms"
+  ],
+  "timing": {
+    "topup_wall_seconds": 294.64,
+    "topup_peak_rss_kb": 285580,
+    "eddy_wall_seconds": 681.93,
+    "eddy_peak_rss_kb": 1208144,
+    "topup_start_utc": "2026-09-26T19:07:40Z",
+    "topup_complete_utc": "2026-09-26T19:12:41Z",
+    "eddy_start_utc": "2026-09-26T19:15:21Z",
+    "complete_utc": "2026-09-26T19:26:49Z"
+  },
+  "qc": {
+    "shape": [
+      104,
+      104,
+      72,
+      105
+    ],
+    "affine_max_abs_difference": 0.0,
+    "rotated_bvec_shape": [
+      3,
+      105
+    ],
+    "non_b0_bvec_norm_min": 0.9999999999352949,
+    "non_b0_bvec_norm_max": 1.0000000000571228,
+    "finite_corrected": true,
+    "acqparams": [
+      "0 -1 0 0.05",
+      "0 1 0 0.05"
+    ],
+    "readout_seconds_status": "assumed per FSL TOPUP FAQ; not provided by ds004666",
+    "b0_selection": {
+      "AP": 0,
+      "PA": 0
+    },
+    "raw_ap_pa_b0_pearson": 0.5968520440051095,
+    "topup_corrected_ap_pa_b0_pearson": 0.9831197342615321,
+    "bvec_rotation_mean_degrees": 0.21950051332838402,
+    "bvec_rotation_max_degrees": 0.46525334093161413,
+    "eddy_device": "cuda",
+    "software": {
+      "FSL": "6.0.7.4",
+      "eddy_binary": "eddy_cuda10.2"
+    }
+  },
+  "file_manifest_relative_to_ROOT": {
+    "data/ds004666/sub-01/ses-2mm/dwi/sub-01_ses-2mm_dir-AP_run-01_part-mag_dwi.nii.gz": {
+      "bytes": 118295331,
+      "sha256": "33c4188ffdcd2316a8383c88ff2a719cabbdc414961fc7fd61801d5c392c3bbc"
+    },
+    "data/ds004666/sub-01/ses-2mm/dwi/sub-01_ses-2mm_dir-PA_run-01_part-mag_dwi.nii.gz": {
+      "bytes": 6026547,
+      "sha256": "dc97e3baff3bcc1a1f11d625bd80590955a412652d2b79386e7cb200dba5c552"
+    },
+    "data/ds004666/sub-01/ses-2mm/dwi/sub-01_ses-2mm_dir-AP_dwi.bval": {
+      "bytes": 492,
+      "sha256": "86e91a4f22a8687765d29db41a9a19e2cbcd713a6e60e01392adc25c278b8ff3"
+    },
+    "data/ds004666/sub-01/ses-2mm/dwi/sub-01_ses-2mm_dir-AP_dwi.bvec": {
+      "bytes": 2990,
+      "sha256": "2240efda069768968bc04e48f1a7ad3181536ab7b66dfe5ec6c978727562d8bd"
+    },
+    "data/ds004666/sub-01/ses-2mm/dwi/sub-01_ses-2mm_dir-PA_dwi.bval": {
+      "bytes": 8,
+      "sha256": "355a9133b7d3b662f28790fe90e5b789fe10626f11ad5c3c99850acebad264e0"
+    },
+    "data/ds004666/sub-01/ses-2mm/dwi/sub-01_ses-2mm_dir-PA_dwi.bvec": {
+      "bytes": 112,
+      "sha256": "5272d76d5c778fac02853381e2e5aba989b4388821af9f5575c0e2244c07bdde"
+    },
+    "data/ds004666/derivatives/ses-2mm/masks/nodif_brain_mask.nii.gz": {
+      "bytes": 14805,
+      "sha256": "4ccac9c11eadc736c71bc7d27457794ecc3a85d00a618198eac3d7603065cfef"
+    },
+    "ds004666_fsl_corrected_20260927/acqparams.txt": {
+      "bytes": 23,
+      "sha256": "12b59b4d40ec69306c89a4be01e777551d713264f0527c14abbece549b46e507"
+    },
+    "ds004666_fsl_corrected_20260927/eddy_index.txt": {
+      "bytes": 210,
+      "sha256": "49965a00b3eeedef4f30455e9cdaa7889675578a24177069f7c11c7c86fb6f3e"
+    },
+    "ds004666_fsl_corrected_20260927/topup/fieldmap_out_fieldcoef.nii.gz": {
+      "bytes": 433240,
+      "sha256": "7208ecd3a7b87b2e965c9b27295676f1ae9bb01e74bad6ddf78e7d5cfa6cc303"
+    },
+    "ds004666_fsl_corrected_20260927/topup/fieldmap_out_movpar.txt": {
+      "bytes": 100,
+      "sha256": "6640186cdda7f778faf158adbc16eaec44e29e5ca59b67dd845731eda9ae97f8"
+    },
+    "ds004666_fsl_corrected_20260927/eddy/data.nii.gz": {
+      "bytes": 286940194,
+      "sha256": "666c28c75b2a378a65af7d39026525bf8c8ddc98ace542d9abbb43476eb8ba18"
+    },
+    "ds004666_fsl_corrected_20260927/eddy/data.eddy_rotated_bvecs": {
+      "bytes": 4575,
+      "sha256": "27166f5857bc0f2bec33afeae129b641fb938503011d8c330b3c8711fb967911"
+    },
+    "ds004666_fsl_corrected_20260927/eddy/data.eddy_parameters": {
+      "bytes": 26539,
+      "sha256": "4355b6cd8d920c3a41a167540b9bacd28afed1920cb0c44af44f841035d35ac9"
+    },
+    "ds004666_fsl_corrected_20260927/topup/fieldmap_fout.nii.gz": {
+      "bytes": 2831984,
+      "sha256": "a219ceaf855bcbc1a8349d551c6baa9b5500ea85f5a873b8cb63a89483d37127"
+    },
+    "ds004666_fsl_corrected_20260927/topup/fieldmap_iout.nii.gz": {
+      "bytes": 5469422,
+      "sha256": "8d77f496f73f12000faf0addd47fab67c224825f7e1ca6dcb9333f5e69d3d532"
+    },
+    "ds004666_fsl_corrected_20260927/run_fsl.sh": {
+      "bytes": 6066,
+      "sha256": "d12e7583cdaea574170f251be436be22e1812875fd43fef6dea6ee69eacbadf0"
+    }
+  },
+  "paired_connectome_assets": {
+    "t1": {
+      "relative_path": "data/ds004666/sub-01/ses-2mm/anat/sub-01_ses-2mm_T1w.nii.gz",
+      "sha256": "80ace482fbc8a5f18423e202118e58d8c9e9ac9bbd1fea9f243de3fff2572017"
+    },
+    "t1_synthseg": {
+      "relative_path": "t1_synthseg/sub-01_ses-2mm_synthseg.nii.gz",
+      "sha256": "c077d476e2e044934651b53f10f599407fcbe9cc9b1cab06b3ef8885e5740edb"
+    },
+    "dwi_atlas": {
+      "relative_path": "registration_direct_affine/synthseg_gm_atlas_dwi.nii.gz",
+      "sha256": "eae3b729cfc0ad0fe5cfa0649381a5b656e2d3c1a66ce678afb2800407f706b0"
+    },
+    "dwi_to_t1_world": {
+      "relative_path": "identity_world.csv",
+      "sha256": "1071e33f72efb352764e0ea040792695cd75360b1f1b292bf9c36059cd47f18f"
+    }
+  },
+  "derived_example_image_input": {
+    "file_relative_to_ROOT": "ds004666_fsl_corrected_20260927/eddy/mean_b0.nii.gz",
+    "source_b0_volume_indices_zero_based": [
+      0,
+      21,
+      42,
+      63,
+      84
+    ],
+    "selection_rule": "AP b-value < 100 s/mm2",
+    "operation": "float32 arithmetic mean of the five final EDDY corrected volumes; DWI affine retained",
+    "shape": [
+      104,
+      104,
+      72
+    ],
+    "bytes": 2736693,
+    "sha256": "0c1dee4472694a9c43d8355136ae2467d3a90d9f76729371ef95623fc7b1413d"
+  }
+}
