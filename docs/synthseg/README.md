@@ -1,6 +1,6 @@
 # 独立 33 类 SynthSeg
 
-[返回首页](../../README.md) · [源码目录](../../src/fnit/synthseg_parc/) · [权重](../WEIGHTS.md) · [验证记录](../../validation/recon_all/)
+[返回首页](../../README.md) · [源码目录](../../src/fnit/synthseg_parc/) · [权重](../WEIGHTS.md) · [验证报告](../../validation/synthseg/report.public.json)
 
 `SynthSeg` 使用 FreeSurfer 8.2 的非 robust、非 parcellated SynthSeg 2.0 模型，从单幅 T1 生成 33 类结构标签和各结构软体积。它与 WMH-SynthSeg 是不同模型；本入口不输出 WMH 标签，也不生成皮层分区。推理使用 PyTorch，不需要安装 FreeSurfer、FSL 或 TensorFlow。
 
@@ -72,6 +72,43 @@ fnit synthseg --i sub-01_T1w.nii.gz --o sub-01_synthseg.nii.gz \
 
 可选参数为 `--weights /path/to/weights`、`--keep-geometry` 和 `--color-lut /path/to/FreeSurferColorLUT.txt`。命令行和 Python 每次均处理一幅图像。独立入口不依赖 recon-all 的原生运行包或个人 license。
 
-## 验证边界
+## 与 FreeSurfer 8.2 的对照验证
 
-公开 CLI 与 Python API 调用同一套 33 类推理与软体积代码，相应接口测试见 [`tests/synthseg_parc/`](../../tests/synthseg_parc/)。在一个 Python 输入链生成的 T1 上，关闭 SynthSeg 卷积 TF32 后，硬分割与原版 16,777,216 个体素全部一致；经单体素临界阈值修正及按官方 `float32` 格式重写已保存 CSV 后，33 列软体积最大差 0.04 mm³，仍有 6 列未达到现有 0.005 mm³ 统计表门槛。格式检查未重跑 GPU 推理；阈值修正仅在这一输入上验证。详见[同输入 GPU 对照](../../validation/recon_all/python_gpu_port/CONNECTED_SYNTHSEG_GPU_20260926.md)。其他被试未验收。
+三例仓库公开、去面容的 T1w 分别运行 FreeSurfer 8.2.0-1 原版
+`mri_synthseg` CPU 命令和本包 H100 GPU 命令。两端读取同一份官方
+`synthseg_2.0.h5`，均使用 4 个 CPU 线程；本包保持默认 TF32。每一臂都在新进程中
+执行，计时包含进程和框架启动、权重与输入加载、推理、后处理、CSV 和 NIfTI 写盘。
+
+| 输出一致性指标 | 三例结果 |
+|---|---:|
+| shape / 数值 affine / dtype | 3/3 一致 |
+| 最低逐体素标签一致率 | 0.99998817 |
+| 全部病例、全部前景标签的最低 Dice | 0.99902629 |
+| 各病例标签 Dice 中位数的中位数 | 0.99998952 |
+| CSV 共同数值列 | 33 |
+| total intracranial volume 最大绝对误差 | 556.75 mm³（0.038%） |
+
+软体积并非逐值相同；最大差异来自 total intracranial volume。硬分割只有少量边界
+体素不同，不能把上表写成逐体素完全复现。完整逐例标签 Dice、输入哈希和软体积误差
+见[公开 JSON](../../validation/synthseg/report.public.json)。
+
+| 实现 | 设备 | 完整单例命令时间，中位数 [最小–最大] |
+|---|---|---:|
+| FreeSurfer 8.2.0-1 `mri_synthseg` | CPU | 156.758 [142.195–187.271] s |
+| FNIT `synthseg` | H100 GPU | 5.867 [5.666–5.976] s |
+
+两组命令按病例顺序串行运行于共享 gpucw1 节点；这是三例观察到的墙钟时间，不是隔离
+节点后的硬件加速试验。
+
+下图使用公开 `sub-02` T1w。两行分别为轴位和冠状位；中间两列在同一 SynthSeg
+输出网格上叠加原版和本包标签，最后一列标出标签不同的体素。完整三维指标来自上表，
+不从二维图片估计。
+
+![公开 T1w、FreeSurfer SynthSeg 与 FNIT SynthSeg 的标签比较](figures/synthseg_comparison.png)
+
+公开 CLI 与 Python API 调用同一套 33 类推理与软体积代码，相应接口测试见
+[`tests/synthseg_parc/`](../../tests/synthseg_parc/)。该对照衡量本包对参考实现的
+复现程度；三例没有人工结构分割真值，不能解释为临床分割准确率。验证范围只覆盖本页
+声明的单幅 T1、SynthSeg 2.0、非 robust、非 parcellated 路径。
+
+另有单例同输入 GPU 精度对照：关闭 SynthSeg 卷积 TF32 后，硬分割与原版 16,777,216 个体素全部一致；经单体素临界阈值修正及按官方 `float32` 格式重写已保存 CSV 后，33 列软体积最大差 0.04 mm³，仍有 6 列未达到现有 0.005 mm³ 统计表门槛。格式检查未重跑 GPU 推理；阈值修正仅在这一输入上验证。详见[同输入 GPU 对照](../../validation/recon_all/python_gpu_port/CONNECTED_SYNTHSEG_GPU_20260926.md)。

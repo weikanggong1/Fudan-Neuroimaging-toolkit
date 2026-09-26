@@ -1,7 +1,7 @@
-# FSL source snapshots used by the registration ports
+# FSL source snapshots used by the PyTorch ports
 
 This directory contains complete, unmodified source snapshots for the FSL
-components consulted while implementing the PyTorch FLIRT, FNIRT, and
+components consulted while implementing the PyTorch FLIRT, FNIRT, TOPUP, and
 `applywarp` paths. The snapshots are retained for licence compliance and
 reproducible source provenance. They are package data: `fnit` does
 not compile or import them at runtime.
@@ -13,6 +13,7 @@ component versions:
 | --- | --- | --- |
 | FLIRT | `2111.2` | `5036b4620ea97db0050f2dc132fbb331dbba060c` |
 | FNIRT | `2203.0` | `27f514a182b5972094e30d8ea79f4fad89cbf03d` |
+| TOPUP | `2203.2` | `3e2cb9104e834ce18c10e4b7edddbd500d0c459c` |
 | basisfield | `2203.1` | `9588bbe8eb8aa0939ddefd00df756aeb80d2305b` |
 | miscmaths | `2203.2` | `7824d74cdfa9fb65de178f642c3c05e57c8c8868` |
 | newimage | `2203.11` | `19e3ddd10138d8ea1394fd522fb0770435c61ddd` |
@@ -25,6 +26,7 @@ source file. The original repositories are:
 
 - <https://git.fmrib.ox.ac.uk/fsl/flirt.git>
 - <https://git.fmrib.ox.ac.uk/fsl/fnirt.git>
+- <https://git.fmrib.ox.ac.uk/fsl/topup.git>
 - <https://git.fmrib.ox.ac.uk/fsl/basisfield.git>
 - <https://git.fmrib.ox.ac.uk/fsl/miscmaths.git>
 - <https://git.fmrib.ox.ac.uk/fsl/newimage.git>

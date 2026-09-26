@@ -18,6 +18,7 @@ FastVBM 的配准链位于 `flirt/`、`fnirt/`、`applywarp/`、`fast_vbm/regist
 | TorchFNIRT | [FSL GM nonlinear registration](fnirt/README.md) |
 | TorchApplyWarp | [FSL warp application](applywarp/README.md) |
 | FastVBM | [原始 T1w 到 modulated GM](fast_vbm/README.md) |
+| TorchTOPUP | [UKB AP/PA b0 畸变校正](topup/README.md) |
 | GPU recon-all | [单 T1 皮层重建](recon_all/README.md) |
 
 ## 公开 Python API
@@ -28,12 +29,14 @@ from fnit import (
     TorchFAST, FastVBM, FastVBMResult, VBMRegistrationResult,
     TorchFLIRT, FLIRTResult, TorchFNIRT, TorchFNIRTResult,
     TorchApplyWarp, ApplyWarpResult,
+    TorchTOPUP, TOPUPResult, TOPUPConfig,
+    prepare_ukb_topup, run_ukb_topup,
     flirt_to_world_affine, flirt_to_world_pull,
     voxel_to_fsl_scaled_mm, world_to_flirt_affine,
     apply_transform,
 )
 ```
 
-学习模型在构造时加载权重并选择 `device="cpu"` 或 `device="cuda:0"`；TorchFAST、TorchFLIRT、TorchFNIRT 和 TorchApplyWarp 不加载权重。单次调用返回带几何信息的结果对象，由调用者选择保存字段。FastVBM 组合 SynthStrip、TorchFAST、TorchFLIRT 和一个可选非线性后端。`registration_backend="synthmorph"` 延迟加载官方 deform checkpoint；`registration_backend="fnirt"` 构造无 checkpoint 的 TorchFNIRT。
+学习模型在构造时加载权重并选择 `device="cpu"` 或 `device="cuda:0"`；TorchFAST、TorchFLIRT、TorchFNIRT、TorchApplyWarp 和 TorchTOPUP 不加载权重。单次调用返回带几何信息的结果对象，由调用者选择保存字段。FastVBM 组合 SynthStrip、TorchFAST、TorchFLIRT 和一个可选非线性后端。`registration_backend="synthmorph"` 延迟加载官方 deform checkpoint；`registration_backend="fnirt"` 构造无 checkpoint 的 TorchFNIRT。
 
 权重查找顺序为显式路径、`FNIT_WEIGHTS`、配置脚本保存的目录、用户缓存目录、已设置的 `FREESURFER_HOME/models/`；见[权重说明](WEIGHTS.md)。各功能的单被试 Python 返回值、保存方式和命令行参数见上表链接。

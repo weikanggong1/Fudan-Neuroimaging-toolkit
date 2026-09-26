@@ -4,9 +4,10 @@
 FSL，可在 CPU 或 CUDA 上读取 FSL dense warp 以及 FNIRT cubic coefficient
 文件，并把 3D/4D 输入重采样到 reference 网格。
 
-CUDA 运行默认允许 TF32 matrix/cuDNN 内核，影像张量和输出仍使用所声明的
-float32/float64 dtype；不自动使用 float16 或 bfloat16。实际开关记录在
-`result.qc["tf32"]`。
+CUDA 运行保持 TF32 matrix/cuDNN 全局开关；FSL 坐标矩阵、坐标网格和 cubic
+coefficient 展开显式使用 float64，避免 TF32 改变重采样坐标。影像插值张量与输出
+使用所声明的 float32/float64 dtype，不自动使用 float16 或 bfloat16。实际全局开关
+记录在 `result.qc["tf32"]`。
 
 ## Python 调用
 
@@ -183,6 +184,40 @@ premat 和 postmat，并用 `fnirtfileutils --out`、`--withaff` 分别检查 re
 91×109×91 的 2 mm synthetic fixture 上记录 FSL CPU、PyTorch CPU 和 PyTorch
 GPU 的端到端 NIfTI 读写时间。当前机器实测结果见
 [`validation/applywarp/report.json`](../../validation/applywarp/report.json)。
+
+CPU 和 H100 路径各自完成 11 项输出检查，均为 11/11 通过。下表中的误差由
+H100 完整三维输出逐体素计算；nearest、显式 short dtype、reference header 均与
+FSL 完全一致。trilinear 的最大误差没有超过预设的 `5e-4`，cubic coefficient
+展开与 `fnirtfileutils` 的最大误差没有超过 `1e-6`。
+
+| FSL 对照范围 | 检查数 | 最大绝对误差范围 | 结果 |
+|---|---:|---:|---:|
+| dense / cubic，trilinear，含或不含矩阵 | 4 | 0.000366–0.000488 | 4/4 通过 |
+| dense / cubic，nearest，含或不含矩阵 | 4 | 0 | 4/4 逐元素一致 |
+| reference header 与显式 short dtype | 1 | 0 | 完全一致 |
+| cubic residual / embedded affine 展开 | 2 | 3.73e-9–1.78e-8 | 2/2 通过 |
+
+计时为同一个 91×109×91、2 mm、dense-relative、trilinear synthetic fixture，
+包含 NIfTI 读取、变换和写盘；先预热，再取三次运行的中位数。FSL 在 CPU 上运行，
+本包分别在 CPU 和 H100 GPU 上运行。
+
+| 实现 | 设备 | 完整调用中位数 |
+|---|---|---:|
+| FSL 6.0.7.4 `applywarp` | CPU | 0.418 s |
+| `TorchApplyWarp` | CPU | 0.384 s |
+| `TorchApplyWarp` | H100 GPU | 0.221 s |
+
+下图显示同一 synthetic 输入经过同一 dense relative warp 后的 FSL 与本包 GPU
+输出。两行分别为轴位和冠状位；FSL 与本包面板使用同一色阶，差值面板单独使用
+误差色阶。图片用于展示误差位置，判断标准仍是上面的完整三维比较。
+
+![FSL applywarp 与 TorchApplyWarp 的 synthetic 输出比较](figures/applywarp_fsl_comparison.png)
+
+GPU 三次计时与 11 项输出记录见
+[`report.json`](../../validation/applywarp/report.json)，独立 CPU 11 项对照见
+[`report.cpu.json`](../../validation/applywarp/report.cpu.json)。该验证覆盖本页列出的
+已支持子集，不能外推到尚未实现的 sinc、输入图像 cubic spline、supersampling
+或逐帧矩阵。
 
 单元测试和可选 FSL 外部测试位于
 [`tests/applywarp`](../../tests/applywarp)。

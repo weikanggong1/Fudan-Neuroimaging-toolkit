@@ -1,0 +1,273 @@
+{
+  "case_count": 10,
+  "claim_boundary": "A tolerance-based functional comparison for the supported default path; not bitwise or complete FSL numerical equivalence.",
+  "contract": {
+    "dtype_match_count": 10,
+    "maximum_affine_abs_difference": 0.0,
+    "shape_match_count": 10
+  },
+  "execution": {
+    "candidate": "fresh FNIT CUDA command on NVIDIA H100 PCIe; default TF32",
+    "fsl": "fresh FSL CPU command",
+    "order": "alternated by case",
+    "runtime_context": "shared gpucw1 node",
+    "timing_scope": "full command wall time including process startup, image read, optimization, resampling, and output writes"
+  },
+  "feature": "FSL FLIRT 6.0.7.4 versus FNIT TorchFLIRT default 12-DOF correlation-ratio path",
+  "inputs": "ten real T1-derived FSL FAST GM maps and one UKB group-GM template",
+  "matrix_gate": {
+    "pass_count": 10,
+    "threshold_mm": 0.05
+  },
+  "matrix_rmsdiff_mm": {
+    "count": 10,
+    "maximum": 0.0289986,
+    "median": 0.008545075,
+    "minimum": 0.00195639,
+    "q1": 0.0062646725,
+    "q3": 0.019429475
+  },
+  "moved_output": {
+    "dice_at_0_2": {
+      "count": 10,
+      "maximum": 0.9986572912617929,
+      "median": 0.9974567903560387,
+      "minimum": 0.9954894306547838,
+      "q1": 0.9965522555670776,
+      "q3": 0.9979052752800619
+    },
+    "mae": {
+      "count": 10,
+      "maximum": 0.005436191438327551,
+      "median": 0.0028825667643591723,
+      "minimum": 0.0016094992295113656,
+      "q1": 0.0023800820899186085,
+      "q3": 0.0038478777203971018
+    },
+    "maximum_absolute_error": {
+      "count": 10,
+      "maximum": 0.04956766963005066,
+      "median": 0.029818356037139893,
+      "minimum": 0.011409103870391846,
+      "q1": 0.020447231829166412,
+      "q3": 0.03196936845779419
+    },
+    "pearson": {
+      "count": 10,
+      "maximum": 0.9999694886395873,
+      "median": 0.9998948560287985,
+      "minimum": 0.9996638311145367,
+      "q1": 0.999826840324848,
+      "q3": 0.9999288164753282
+    },
+    "rmse": {
+      "count": 10,
+      "maximum": 0.008406560450429897,
+      "median": 0.0046966410821416855,
+      "minimum": 0.002500967197262698,
+      "q1": 0.003882339123014575,
+      "q3": 0.00605996733673351
+    }
+  },
+  "records": [
+    {
+      "case": "case01",
+      "matrix_rmsdiff_mm": 0.00435181,
+      "moved_output": {
+        "affine_max_abs": 0.0,
+        "dice_at_0_2": 0.9972381140264351,
+        "dtype_match": true,
+        "mae": 0.0029694451782924453,
+        "maximum_absolute_error": 0.030781149864196777,
+        "pearson": 0.9998754863992284,
+        "rmse": 0.00501350697045029,
+        "shape_match": true
+      },
+      "seconds": {
+        "fnit_h100": 23.808779489714652,
+        "fsl_cpu": 24.01478228904307
+      }
+    },
+    {
+      "case": "case02",
+      "matrix_rmsdiff_mm": 0.00195639,
+      "moved_output": {
+        "affine_max_abs": 0.0,
+        "dice_at_0_2": 0.996534174477505,
+        "dtype_match": true,
+        "mae": 0.0037833186615246384,
+        "maximum_absolute_error": 0.030439317226409912,
+        "pearson": 0.9998395819446168,
+        "rmse": 0.005934978396555823,
+        "shape_match": true
+      },
+      "seconds": {
+        "fnit_h100": 22.011619108263403,
+        "fsl_cpu": 29.344082697760314
+      }
+    },
+    {
+      "case": "case03",
+      "matrix_rmsdiff_mm": 0.0218695,
+      "moved_output": {
+        "affine_max_abs": 0.0,
+        "dice_at_0_2": 0.9966064988357953,
+        "dtype_match": true,
+        "mae": 0.003869397406687923,
+        "maximum_absolute_error": 0.03236544132232666,
+        "pearson": 0.9998225931182585,
+        "rmse": 0.006101630316792739,
+        "shape_match": true
+      },
+      "seconds": {
+        "fnit_h100": 22.525045291986316,
+        "fsl_cpu": 24.514619783032686
+      }
+    },
+    {
+      "case": "case04",
+      "matrix_rmsdiff_mm": 0.00969181,
+      "moved_output": {
+        "affine_max_abs": 0.0,
+        "dice_at_0_2": 0.9954894306547838,
+        "dtype_match": true,
+        "mae": 0.005436191438327551,
+        "maximum_absolute_error": 0.039069563150405884,
+        "pearson": 0.9996638311145367,
+        "rmse": 0.008406560450429897,
+        "shape_match": true
+      },
+      "seconds": {
+        "fnit_h100": 23.21819762000814,
+        "fsl_cpu": 21.96921430202201
+      }
+    },
+    {
+      "case": "case05",
+      "matrix_rmsdiff_mm": 0.0289986,
+      "moved_output": {
+        "affine_max_abs": 0.0,
+        "dice_at_0_2": 0.9958845030769092,
+        "dtype_match": true,
+        "mae": 0.00489768644987132,
+        "maximum_absolute_error": 0.04956766963005066,
+        "pearson": 0.9997117638459826,
+        "rmse": 0.008050894019311245,
+        "shape_match": true
+      },
+      "seconds": {
+        "fnit_h100": 24.884771067183465,
+        "fsl_cpu": 32.29388851812109
+      }
+    },
+    {
+      "case": "case06",
+      "matrix_rmsdiff_mm": 0.00615657,
+      "moved_output": {
+        "affine_max_abs": 0.0,
+        "dice_at_0_2": 0.9984370679020976,
+        "dtype_match": true,
+        "mae": 0.0016140315875088776,
+        "maximum_absolute_error": 0.011409103870391846,
+        "pearson": 0.9999694886395873,
+        "rmse": 0.002500967197262698,
+        "shape_match": true
+      },
+      "seconds": {
+        "fnit_h100": 23.15038904780522,
+        "fsl_cpu": 30.504777818918228
+      }
+    },
+    {
+      "case": "case07",
+      "matrix_rmsdiff_mm": 0.00658898,
+      "moved_output": {
+        "affine_max_abs": 0.0,
+        "dice_at_0_2": 0.9978578548855755,
+        "dtype_match": true,
+        "mae": 0.0023094706953405934,
+        "maximum_absolute_error": 0.019796699285507202,
+        "pearson": 0.9999331438693659,
+        "rmse": 0.003747552172018047,
+        "shape_match": true
+      },
+      "seconds": {
+        "fnit_h100": 23.296844269149005,
+        "fsl_cpu": 25.925558489747345
+      }
+    },
+    {
+      "case": "case08",
+      "matrix_rmsdiff_mm": 0.00739834,
+      "moved_output": {
+        "affine_max_abs": 0.0,
+        "dice_at_0_2": 0.9986572912617929,
+        "dtype_match": true,
+        "mae": 0.0016094992295113656,
+        "maximum_absolute_error": 0.014872968196868896,
+        "pearson": 0.999966752713238,
+        "rmse": 0.002634102077533232,
+        "shape_match": true
+      },
+      "seconds": {
+        "fnit_h100": 22.207889364100993,
+        "fsl_cpu": 27.62895780801773
+      }
+    },
+    {
+      "case": "case09",
+      "matrix_rmsdiff_mm": 0.0262275,
+      "moved_output": {
+        "affine_max_abs": 0.0,
+        "dice_at_0_2": 0.9979210820782239,
+        "dtype_match": true,
+        "mae": 0.002591916273652655,
+        "maximum_absolute_error": 0.029197394847869873,
+        "pearson": 0.9999158342932151,
+        "rmse": 0.004286699976004159,
+        "shape_match": true
+      },
+      "seconds": {
+        "fnit_h100": 22.89164516981691,
+        "fsl_cpu": 30.654492917004973
+      }
+    },
+    {
+      "case": "case10",
+      "matrix_rmsdiff_mm": 0.0121094,
+      "moved_output": {
+        "affine_max_abs": 0.0,
+        "dice_at_0_2": 0.9976754666856424,
+        "dtype_match": true,
+        "mae": 0.0027956883504258994,
+        "maximum_absolute_error": 0.022398829460144043,
+        "pearson": 0.9999142256583685,
+        "rmse": 0.004379775193833081,
+        "shape_match": true
+      },
+      "seconds": {
+        "fnit_h100": 21.99727317644283,
+        "fsl_cpu": 27.780620981939137
+      }
+    }
+  ],
+  "schema": 1,
+  "timing_seconds": {
+    "fnit_h100": {
+      "count": 10,
+      "maximum": 24.884771067183465,
+      "median": 23.021017108811066,
+      "minimum": 21.99727317644283,
+      "q1": 22.287178346072324,
+      "q3": 23.27718260686379
+    },
+    "fsl_cpu": {
+      "count": 10,
+      "maximum": 32.29388851812109,
+      "median": 27.704789394978434,
+      "minimum": 21.96921430202201,
+      "q1": 24.86735445971135,
+      "q3": 30.21460403862875
+    }
+  }
+}

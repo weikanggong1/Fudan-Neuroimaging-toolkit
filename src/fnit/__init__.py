@@ -1,5 +1,5 @@
 """Standalone PyTorch brain MRI inference tools."""
-__version__ = '0.9.0'
+__version__ = '0.10.0'
 
 
 def __getattr__(name):
@@ -35,6 +35,11 @@ def __getattr__(name):
     if name in ('TorchFNIRT', 'TorchFNIRTResult', 'GMFNIRTConfig'):
         from importlib import import_module
         module = import_module('.fnirt', __name__)
+        return getattr(module, name)
+    if name in ('TorchTOPUP', 'TOPUPResult', 'TOPUPConfig',
+                'prepare_ukb_topup', 'run_ukb_topup'):
+        from importlib import import_module
+        module = import_module('.topup', __name__)
         return getattr(module, name)
     if name in ('FastVBM', 'FastVBMResult',
                 'VBMRegistrationResult'):

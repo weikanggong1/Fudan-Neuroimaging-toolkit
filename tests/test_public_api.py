@@ -20,6 +20,8 @@ import pytest
                "flirt_to_world_affine", "flirt_to_world_pull",
                "voxel_to_fsl_scaled_mm", "world_to_flirt_affine")),
     ("fnirt", ("TorchFNIRT", "TorchFNIRTResult", "GMFNIRTConfig")),
+    ("topup", ("TorchTOPUP", "TOPUPResult", "TOPUPConfig",
+               "prepare_ukb_topup", "run_ukb_topup")),
     ("fast_vbm", ("FastVBM", "FastVBMResult", "VBMRegistrationResult")),
 ])
 def test_top_level_exports_are_feature_objects(module, names):

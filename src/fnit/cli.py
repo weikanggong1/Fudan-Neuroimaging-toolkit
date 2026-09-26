@@ -250,7 +250,7 @@ def _run_fast_vbm(args):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(prog='fnit')
-    parser.add_argument('--version', action='version', version='Fudan Neuroimaging Toolkit (FNIT) 0.9.0')
+    parser.add_argument('--version', action='version', version='Fudan Neuroimaging Toolkit (FNIT) 0.10.0')
     commands = parser.add_subparsers(dest='command', required=True)
     strip = commands.add_parser('synthstrip', help='brain extraction')
     strip.add_argument('-i', '--image', required=True)
@@ -449,7 +449,12 @@ def main(argv=None):
     fast_vbm.add_argument('--no-bias', action='store_true',
                           help='disable TorchFAST bias-field correction')
     fast_vbm.add_argument('--overwrite', action='store_true')
+    from .topup.cli import add_parser as add_topup_parser
+    add_topup_parser(commands)
     args = parser.parse_args(argv)
+    if hasattr(args, '_fnit_handler'):
+        args._fnit_handler(args)
+        return
     if args.command == 'wmh-synthseg':
         _run_wmh(args)
         return

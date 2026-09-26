@@ -1,0 +1,182 @@
+{
+  "schema_version": 1,
+  "release": "fudan-neuroimaging-toolkit 0.10.0",
+  "feature": "PyTorch TOPUP b02b0 path",
+  "reference": {
+    "software": "FSL 6.0.7.4",
+    "component": "topup 2203.2",
+    "config": "b02b0.cnf",
+    "commit": "3e2cb9104e834ce18c10e4b7edddbd500d0c459c"
+  },
+  "data": {
+    "subjects": 1,
+    "description": "one real UKB-format dMRI acquisition with AP and PA series",
+    "prepared_pair_shape": [
+      104,
+      104,
+      72,
+      2
+    ],
+    "ap_frames": 105,
+    "pa_frames": 6,
+    "ap_b0_candidates": 5,
+    "pa_b0_candidates": 3,
+    "selected_ap_index_fsl": 0,
+    "selected_ap_index_fnit": 0,
+    "selected_pa_index_fsl": 0,
+    "selected_pa_index_fnit": 0,
+    "total_readout_seconds": 0.069,
+    "signal_mask_definition": "mean raw AP/PA intensity > 100",
+    "public_input_included": false
+  },
+  "implementation": {
+    "device": "cuda:0",
+    "dtype": "float32",
+    "tf32": true,
+    "optimizer": "alternating field and identifiable 5-DOF motion L-BFGS at levels 1-5; field L-BFGS at levels 6-9",
+    "optimizer_steps_per_nominal_iteration": 8,
+    "exact_fsl_optimizer": false,
+    "numerically_equivalent_to_fsl": false,
+    "bitwise_equivalent_to_fsl": false,
+    "spline_prefilter_boundary": "periodic grid-wrap, matched to explicit modulo sampling"
+  },
+  "output_metrics": {
+    "field_hz_full_fov": {
+      "pearson_r": 0.9255340488991494,
+      "mae": 4.977567799667828,
+      "rmse": 7.624565779318073,
+      "max_abs": 104.59049224853516,
+      "units": "Hz"
+    },
+    "field_hz_signal_mask": {
+      "pearson_r": 0.9456406513609522,
+      "mae": 4.40602430900128,
+      "rmse": 7.32000917504625,
+      "max_abs": 104.59049224853516,
+      "units": "Hz"
+    },
+    "corrected_4d_full_fov": {
+      "pearson_r": 0.9943579700705969,
+      "mae": 226.41611346001764,
+      "rmse": 490.23786935558866,
+      "max_abs": 25762.78125
+    },
+    "corrected_mean_full_fov": {
+      "pearson_r": 0.9957783233912412,
+      "mae": 181.48506141942178,
+      "rmse": 422.95600454416495,
+      "max_abs": 23167.1982421875
+    },
+    "jacobians_full_fov": {
+      "pearson_r": 0.808461977858915,
+      "mae": 0.07539592672500267,
+      "rmse": 0.13592297871547732,
+      "max_abs": 2.945159137248993
+    },
+    "corrected_ap_pa_internal_consistency": {
+      "fsl_pearson_r": 0.987586838058554,
+      "fnit_pearson_r": 0.9870902406458679
+    }
+  },
+  "movement_parameters": {
+    "columns": [
+      "x_mm",
+      "y_mm",
+      "z_mm",
+      "x_rad",
+      "y_rad",
+      "z_rad"
+    ],
+    "fsl_second_scan": [
+      0.06063340914,
+      0.0,
+      0.02659042364,
+      -0.0007815675937,
+      0.001686197807,
+      -0.001513976906
+    ],
+    "fnit_second_scan": [
+      0.07857105881,
+      0.0,
+      0.04682692513,
+      -0.00194770447,
+      0.001667802222,
+      -0.004556749482
+    ]
+  },
+  "file_contract": {
+    "field_hz": "shape, float32 dtype, affine, voxel size and intent 2018 match FSL",
+    "corrected_4d": "shape, float32 dtype, affine and voxel size match FSL",
+    "jacobians": "shape, float32 dtype, voxel size and qform/sform-code 0 header contract match FSL",
+    "coefficients": "shape [55,55,39], float32, intent 2016, pixdim [2,2,2], qform-code 1 and sform-code 0 match FSL",
+    "movement": "two rows and six columns; first scan fixed; phase-encoding translation fixed for the opposite-polarity scan",
+    "fsl_applytopup_accepted_fnit_files": true
+  },
+  "fsl_applytopup_interoperability": {
+    "comparison": "FSL applytopup output from FNIT coefficient/movement files versus mean of FNIT corrected pair",
+    "common_nonzero_voxels": 756401,
+    "pearson_r": 0.9999873657984545,
+    "mae": 9.487552755829183,
+    "rmse": 23.33959748685955,
+    "max_abs": 625.4150390625
+  },
+  "timing": {
+    "repetitions": 3,
+    "scope": "fresh process startup, NIfTI read, estimation and all requested output writes",
+    "shared_node_not_exclusive": true,
+    "hardware": {
+      "cpu": "Intel Xeon Gold 6430",
+      "gpu": "NVIDIA H100 PCIe 80 GB",
+      "driver": "535.216.03",
+      "pytorch": "2.5.1 CUDA"
+    },
+    "fsl_cpu": {
+      "wall_seconds": [
+        301.79,
+        298.88,
+        300.17
+      ],
+      "median_seconds": 300.17,
+      "q1_seconds": 299.525,
+      "q3_seconds": 300.98,
+      "max_rss_kb": [
+        285672,
+        285576,
+        285676
+      ]
+    },
+    "fnit_h100": {
+      "wall_seconds": [
+        86.11,
+        87.82,
+        87.8
+      ],
+      "median_seconds": 87.8,
+      "q1_seconds": 86.955,
+      "q3_seconds": 87.81,
+      "cuda_synchronized_compute_seconds": [
+        80.61670151306316,
+        81.8428288185969,
+        81.65229067578912
+      ],
+      "peak_cuda_memory_bytes": [
+        1565862400,
+        1565862400,
+        1565862400
+      ],
+      "max_rss_kb": [
+        1079372,
+        1073068,
+        1073100
+      ]
+    },
+    "median_wall_speed_ratio_fsl_over_fnit": 3.4187927107061507
+  },
+  "example_figure": "docs/topup/figures/topup_fsl_comparison.png",
+  "limitations": [
+    "one real subject; timing repetitions are not independent subjects",
+    "supports exactly one opposite-polarity i/i- or j/j- b0 pair",
+    "implements only the b02b0.cnf path",
+    "PyTorch L-BFGS optimization is not FSL LM/SCG and produces non-rounding numerical differences"
+  ]
+}

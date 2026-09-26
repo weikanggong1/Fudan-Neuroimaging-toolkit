@@ -398,6 +398,14 @@ def run(args):
             else None
         ),
         "device": args.device,
+        "precision": {
+            "cuda_execution": torch.device(args.device).type == "cuda",
+            "tf32_matmul_allowed": bool(torch.backends.cuda.matmul.allow_tf32),
+            "tf32_cudnn_allowed": bool(torch.backends.cudnn.allow_tf32),
+            "coordinate_and_cubic_dtype": "float64",
+            "image_sampling_dtype": "float32",
+            "reduced_precision_tensor_dtype": False,
+        },
         "scope": (
             "dense relative and cubic coefficient fields; coordinate ramp; "
             "trilinear and nearest; with and without one premat and postmat"

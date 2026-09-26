@@ -175,6 +175,45 @@ This is a tolerance-based matrix functional gate for the declared suite.
 `reference_validation_matrix_gate_passed=True` does not mean that a new input
 was compared with FSL.
 
+### FSL and FNIT full-command comparison
+
+The comparison executed fresh FSL 6.0.7.4 CPU and FNIT H100 commands on the same
+10 GM/template pairs. Odd and even cases alternated which implementation ran
+first. All output images had the same shape, numeric affine and dtype. The
+metrics below use the official MNI reference mask; image Dice thresholds both
+outputs at GM PVE 0.2.
+
+| Output metric | median [Q1–Q3] | minimum / maximum |
+|---|---:|---:|
+| matrix RMS difference | 0.008545 [0.006265–0.019429] mm | maximum 0.028999 mm |
+| moved-image Pearson | 0.999895 [0.999827–0.999929] | minimum 0.999664 |
+| moved-image Dice | 0.997457 [0.996552–0.997905] | minimum 0.995489 |
+| moved-image MAE | 0.002883 [0.002380–0.003848] | maximum 0.005436 |
+| moved-image RMSE | 0.004697 [0.003882–0.006060] | maximum 0.008407 |
+
+The matrix gate passed in 10/10 cases at `rmsdiff <= 0.05 mm`. These are close,
+but nonzero, output differences; the result is not bitwise or complete FSL
+numerical equivalence.
+
+| Implementation | Device | Full command median [Q1–Q3] |
+|---|---|---:|
+| FSL 6.0.7.4 `flirt` | CPU | 27.705 [24.867–30.215] s |
+| FNIT `fnit-flirt` | H100 GPU | 23.021 [22.287–23.277] s |
+
+The timing includes process startup, image reads, optimization, resampling,
+matrix/image writes, and ran on a shared node. It records observed wall time;
+it is not an isolated hardware speedup measurement.
+
+The figure shows axial and coronal slices of the 10-case mean FSL output, FNIT
+output, and absolute difference. FSL and FNIT panels use the same intensity
+range; the difference panels use a separate range. Numeric metrics use the
+complete 3D images.
+
+![FSL FLIRT and FNIT TorchFLIRT mean registered GM outputs](figures/flirt_fsl_comparison.png)
+
+The de-identified aggregate and per-case metrics are in
+[`validation/flirt/report.public.json`](../../validation/flirt/report.public.json).
+
 The QC string
 `reference_validation_report="validation/fast_vbm/report.v0.9.public.json"`
 is an artifact identifier relative to the source repository. The root

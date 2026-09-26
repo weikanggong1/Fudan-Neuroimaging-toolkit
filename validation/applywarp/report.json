@@ -4,22 +4,30 @@
   "cuda_version": "11.8",
   "gpu": "NVIDIA H100 PCIe",
   "device": "cuda:0",
+  "precision": {
+    "cuda_execution": true,
+    "tf32_matmul_allowed": true,
+    "tf32_cudnn_allowed": true,
+    "coordinate_and_cubic_dtype": "float64",
+    "image_sampling_dtype": "float32",
+    "reduced_precision_tensor_dtype": false
+  },
   "scope": "dense relative and cubic coefficient fields; coordinate ramp; trilinear and nearest; with and without one premat and postmat",
   "fnirt_coefficients_tested": true,
   "cases": [
     {
       "case": "trilinear-warp-only",
       "maximum_absolute_error": 0.00048828125,
-      "mean_absolute_error": 4.2876309039545996e-05,
-      "different_voxels": 2198,
+      "mean_absolute_error": 4.569245319740445e-05,
+      "different_voxels": 2221,
       "tolerance": 0.0005,
       "passed": true
     },
     {
       "case": "trilinear-matrices",
       "maximum_absolute_error": 0.0003662109375,
-      "mean_absolute_error": 5.346069148942536e-05,
-      "different_voxels": 2362,
+      "mean_absolute_error": 4.3779494715671913e-05,
+      "different_voxels": 2231,
       "tolerance": 0.0005,
       "passed": true
     },
@@ -50,16 +58,16 @@
     },
     {
       "case": "cubic-expansion-vs-fnirtfileutils-out",
-      "maximum_absolute_error": 2.9802322387695312e-08,
-      "mean_absolute_error": 3.652175228907595e-09,
-      "different_voxels": 11239,
+      "maximum_absolute_error": 3.7252902845841263e-09,
+      "mean_absolute_error": 5.716072624176118e-10,
+      "different_voxels": 12232,
       "tolerance": 1e-06,
       "passed": true
     },
     {
       "case": "cubic-embedded-affine-vs-fnirtfileutils-withaff",
-      "maximum_absolute_error": 3.698862321988017e-08,
-      "mean_absolute_error": 6.367410097544473e-09,
+      "maximum_absolute_error": 1.7806879581971913e-08,
+      "mean_absolute_error": 5.327627404693517e-09,
       "different_voxels": 12240,
       "tolerance": 1e-06,
       "passed": true
@@ -67,16 +75,16 @@
     {
       "case": "cubic-trilinear-warp-only",
       "maximum_absolute_error": 0.0003662109375,
-      "mean_absolute_error": 4.52427303089815e-05,
-      "different_voxels": 2259,
+      "mean_absolute_error": 4.471914440977807e-05,
+      "different_voxels": 2190,
       "tolerance": 0.0005,
       "passed": true
     },
     {
       "case": "cubic-trilinear-matrices",
       "maximum_absolute_error": 0.00048828125,
-      "mean_absolute_error": 5.435733234181124e-05,
-      "different_voxels": 2331,
+      "mean_absolute_error": 4.8005113414689605e-05,
+      "different_voxels": 2305,
       "tolerance": 0.0005,
       "passed": true
     },
@@ -117,30 +125,30 @@
     },
     "fsl_applywarp_cpu": {
       "samples_seconds": [
-        0.6608031550422311,
-        0.5550375669263303,
-        0.6291733551770449
+        0.40734890196472406,
+        0.4187085940502584,
+        0.41792713617905974
       ],
-      "median_seconds": 0.6291733551770449,
-      "minimum_seconds": 0.5550375669263303
+      "median_seconds": 0.41792713617905974,
+      "minimum_seconds": 0.40734890196472406
     },
     "torch_cpu": {
       "samples_seconds": [
-        0.4315994419157505,
-        0.44002185855060816,
-        0.45534826861694455
+        0.38014883967116475,
+        0.39931986574083567,
+        0.3838240271434188
       ],
-      "median_seconds": 0.44002185855060816,
-      "minimum_seconds": 0.4315994419157505
+      "median_seconds": 0.3838240271434188,
+      "minimum_seconds": 0.38014883967116475
     },
     "torch_gpu": {
       "samples_seconds": [
-        0.28612199472263455,
-        0.3048492232337594,
-        0.2967147892341018
+        0.21618624730035663,
+        0.24145761597901583,
+        0.22065311390906572
       ],
-      "median_seconds": 0.2967147892341018,
-      "minimum_seconds": 0.28612199472263455
+      "median_seconds": 0.22065311390906572,
+      "minimum_seconds": 0.21618624730035663
     }
   },
   "passed": true

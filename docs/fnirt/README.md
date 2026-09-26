@@ -198,6 +198,14 @@ FLIRT matrix 和官方 reference mask，比较 coefficient-expanded residual、`
 [1054.397–1337.331]；逐例 `FSL/Torch` 时间比中位数为 0.686。该执行未隔离节点
 负载，说明本次实现的实际时间，不能解释为硬件加速倍数。完整分布和计时边界见
 [`fnirt_fsl_10case.v0.9.public.json`](../../validation/fast_vbm/fnirt_fsl_10case.v0.9.public.json)。
+
+下图使用同一批 matched-input 结果。两行分别为十例平均的轴位和冠状位；前三列
+比较 warped GM，后三列比较 nonlinear Jacobian。FSL 与 TorchFNIRT 面板在各自
+输出类型内使用相同色阶，差值面板单独使用误差色阶。图像用于查看误差位置，
+上表的数值由完整三维数据计算。
+
+![FSL FNIRT 与 TorchFNIRT 的十例 matched-input 平均输出](figures/fnirt_fsl_comparison.png)
+
 最终发布源码只移动了 FNIRT 使用的三个坐标函数及其 import；归一化 AST 和其余
 FNIRT Python 源码的逐字节核验见
 [`source_equivalence.v0.9.public.json`](../../validation/fast_vbm/source_equivalence.v0.9.public.json)。该记录是源码继承证明，

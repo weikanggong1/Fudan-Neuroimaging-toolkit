@@ -105,13 +105,14 @@
     "fsl_binaries_included": false,
     "freesurfer_binaries_included": false,
     "vendored_fast4_reference_source_included": true,
-    "vendored_fsl_registration_reference_sources_included": true
+    "vendored_fsl_registration_reference_sources_included": true,
+    "vendored_fsl_topup_reference_source_included": true
   },
   "fsl_registration_source_snapshots": {
-    "purpose": "complete unmodified upstream sources consulted for the modified PyTorch FLIRT, FNIRT and applywarp ports",
+    "purpose": "complete unmodified upstream sources consulted for the modified PyTorch FLIRT, FNIRT, applywarp and TOPUP ports",
     "validation_baseline": "FSL 6.0.7.4",
     "manifest": "src/fnit/_vendor_fsl/manifest.json",
-    "manifest_sha256": "7050329ef6f6c7f695b080086dd6e0221412213563fff7446afc8489a1856e1c",
+    "manifest_sha256": "7d10b1e5c2d7a1aa76354b6e59a98c8b05e5b1475f387448ffcc7b3f3e436baf",
     "license_file": "licenses/FSL-6.0.txt",
     "license_sha256": "137735ac0d0f075d58e85642972692b92073711752b273e7de7ed38c6147a8eb",
     "licence_scope": "non-commercial redistribution under the FSL Software Licence, Release 6.0; licence conditions and original and amended source code accompany the product",
@@ -135,6 +136,16 @@
         "directory": "src/fnit/_vendor_fsl/sources/fnirt-2203.0",
         "role": "validation_target",
         "fsl_6_0_7_4_package": "fsl-fnirt 2203.0"
+      },
+      {
+        "repository": "https://git.fmrib.ox.ac.uk/fsl/topup.git",
+        "tag": "2203.2",
+        "commit": "3e2cb9104e834ce18c10e4b7edddbd500d0c459c",
+        "git_tree": "774a2a6c835ebd4c0489323efac8fa889ff323b7",
+        "git_archive_sha256": "e19a16f9f842202fbac87fd0b48e3301d18397891b8619d80da975cfc6192ab3",
+        "directory": "src/fnit/_vendor_fsl/sources/topup-2203.2",
+        "role": "validation_target",
+        "fsl_6_0_7_4_package": "fsl-topup 2203.2"
       },
       {
         "repository": "https://git.fmrib.ox.ac.uk/fsl/basisfield.git",
@@ -188,5 +199,14 @@
       }
     ],
     "runtime_dependency": false
+  },
+  "topup_validation": {
+    "scope": "one real UKB-format AP/PA dMRI acquisition; same prepared b0 pair and b02b0.cnf schedule",
+    "report": "validation/topup/report.public.json",
+    "figure": "docs/topup/figures/topup_fsl_comparison.png",
+    "fsl_release": "6.0.7.4",
+    "output_contract_compatible": true,
+    "fsl_applytopup_accepted_fnit_files": true,
+    "numerically_equivalent": false
   }
 }

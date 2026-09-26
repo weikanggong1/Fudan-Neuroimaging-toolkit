@@ -2,22 +2,24 @@
 
 `fudan-neuroimaging-toolkit` 是独立的脑 MRI 推理包，在 CPU 或 CUDA 上运行。单项推理无需安装 FreeSurfer、FSL、TensorFlow、VoxelMorph 或 Neurite。现有 `fnit-recon-all` 混合流程需要 FreeSurfer 8.2 原生运行包和个人 license；实验性 `fnit-recon-all-python` 使用外置权重与模板，不调用 FreeSurfer 程序。Python 导入名为 `fnit`，单项功能的命令行入口为 `fnit`。
 
-| 功能 | 输出与用途 | 用法、原版对照与验证 |
-|---|---|---|
-| SynthStrip | 脑图、脑掩膜、有符号距离场 | [SynthStrip 文档](docs/synthstrip/README.md) |
-| SynthMorph | 刚性、仿射、非线性及联合配准；应用已有变换 | [SynthMorph 文档](docs/synthmorph/README.md) |
-| WMH-SynthSeg | 脑结构标签、白质高信号及软体积 | [WMH-SynthSeg 文档](docs/wmh_synthseg/README.md) |
-| 33 类 SynthSeg | T1 结构标签和软体积 | [独立 SynthSeg 文档](docs/synthseg/README.md) |
-| SynthSR | 从单幅 MRI 或 CT 合成 1 mm T1w | [SynthSR 文档](docs/synthsr/README.md) |
-| TorchFAST | T1 三组织分割、PVE 与偏置场校正 | [TorchFAST 文档](docs/fast/README.md) |
-| GPU FAST VBM | 原始 T1w 到 warped GM、Jacobian 和 modulated GM；可选 PyTorch SynthMorph 或 TorchFNIRT | [FastVBM 文档](docs/fast_vbm/README.md) |
-| PyTorch FLIRT | CPU/CUDA 12-DOF correlation-ratio affine；输出 reference-grid image 和 FSL scaled-mm `.mat` | [FLIRT 文档](docs/flirt/README.md) |
-| PyTorch FNIRT | CPU/CUDA GM 配准；输出 intent-2007 coefficients、warped image 和 nonlinear Jacobian | [FNIRT 文档](docs/fnirt/README.md) |
-| GPU applywarp | 应用 FSL dense warp、FNIRT coefficient、premat 和 postmat | [applywarp 文档](docs/applywarp/README.md) |
-| GPU recon-all 混合流程 | T1w 到结构分割、皮层表面、顶点指标和脑区统计 | [GPU recon-all 文档](docs/recon_all/README.md) |
-| 实验性纯 Python recon-all | T1w 到核心体积分割、双侧皮层表面、逐顶点指标及脑区统计；近似结果 | [纯 Python 入口](docs/recon_all/README.md#实验性纯-python-整例入口) |
+| 模态 | 功能 | 输出与用途 | 用法、原版对照与验证 |
+|---|---|---|---|
+| sMRI | SynthStrip | 脑图、脑掩膜、有符号距离场 | [SynthStrip 文档](docs/synthstrip/README.md) |
+| sMRI | SynthMorph | 刚性、仿射、非线性及联合配准；应用已有变换 | [SynthMorph 文档](docs/synthmorph/README.md) |
+| sMRI | WMH-SynthSeg | 脑结构标签、白质高信号及软体积 | [WMH-SynthSeg 文档](docs/wmh_synthseg/README.md) |
+| sMRI | 33 类 SynthSeg | T1 结构标签和软体积 | [独立 SynthSeg 文档](docs/synthseg/README.md) |
+| sMRI | SynthSR | 从单幅 MRI 或 CT 合成 1 mm T1w | [SynthSR 文档](docs/synthsr/README.md) |
+| sMRI | TorchFAST | T1 三组织分割、PVE 与偏置场校正 | [TorchFAST 文档](docs/fast/README.md) |
+| sMRI | GPU FAST VBM | 原始 T1w 到 warped GM、Jacobian 和 modulated GM | [FastVBM 文档](docs/fast_vbm/README.md) |
+| sMRI、fMRI、dMRI 通用 | PyTorch FLIRT | 12-DOF 仿射；reference-grid image 和 FSL scaled-mm `.mat` | [FLIRT 文档](docs/flirt/README.md) |
+| sMRI（当前 GM 配置） | PyTorch FNIRT | GM 非线性配准；intent-2007 coefficients、warped image 和 Jacobian | [FNIRT 文档](docs/fnirt/README.md) |
+| sMRI、fMRI、dMRI 通用 | GPU applywarp | 应用 FSL dense warp、FNIRT coefficient、premat 和 postmat | [applywarp 文档](docs/applywarp/README.md) |
+| dMRI | PyTorch TOPUP | UKB AP/PA b0 选择、Hz 场估计、畸变校正和 FSL 输出 | [TOPUP 文档](docs/topup/README.md) |
+| sMRI | GPU recon-all 混合流程 | T1w 到结构分割、皮层表面、顶点指标和脑区统计 | [GPU recon-all 文档](docs/recon_all/README.md) |
+| sMRI | 实验性纯 Python recon-all | T1w 到核心分割、双侧皮层表面、顶点指标和脑区统计；近似结果 | [纯 Python 入口](docs/recon_all/README.md#实验性纯-python-整例入口) |
+| fMRI | MS-HBM 17 网络 | fsLR32k 静息态时序到个体网络划分，纯 CPU | [MS-HBM 文档](src/fnit/mshbm/README.md) |
 
-混合 recon-all 与实验性纯 Python 入口分别提供独立的单被试命令。本轮覆盖的其余功能只提供单被试 Python 和单被试命令行接口；需要处理多个病例时，由调用方在包外组织任务与设备。仓库提供 [T1w 样例](examples/README.md)和 [FLAIR 样例](examples/WMH.md)。
+混合 recon-all 与实验性纯 Python 入口分别提供独立的单被试命令。其余功能只提供单被试 Python 和单被试命令行接口；需要处理多个病例时，由调用方在包外组织任务与设备。仓库提供 [T1w 样例](examples/README.md)和 [FLAIR 样例](examples/WMH.md)。
 
 混合 recon-all 的 SynthStrip、33 类 SynthSeg、SynthMorph 及三项辅助神经分割使用 PyTorch/CUDA；其他阶段运行于打包的原生 CPU 程序。实验性 `fnit-recon-all-python` 不调用这些程序，其拓扑修复、表面放置和球面配准仍使用近似算法，不能等同于官方结果。
 
@@ -26,9 +28,9 @@
 FastVBM 的两个分支共用仿射配准、FSL 坐标转换、GPU 重采样、仅非线性
 Jacobian 和调制步骤；差别只在非线性形变由 SynthMorph 或 TorchFNIRT 估计。
 
-当前 0.9 的 FLIRT、FNIRT 和 FastVBM 十例验证状态、数值边界与计时条件见 [FastVBM 验证页](validation/fast_vbm/README.md)；各算法的输入、输出和原命令对应关系见上表子页。
+FLIRT、FNIRT 和 FastVBM 的 0.9 十例验证状态、数值边界与计时条件见 [FastVBM 验证页](validation/fast_vbm/README.md)；TOPUP 的 FSL 6.0.7.4 实测见 [TOPUP 验证页](docs/topup/README.md)。各算法的输入、输出和原命令对应关系见上表子页。
 
-FLIRT、FNIRT 和 applywarp 的移植代码及随包提供的 FSL 上游源码受 [FSL Software Licence 6.0](licenses/FSL-6.0.txt) 的非商业使用条款约束。运行这些 PyTorch 接口无需安装 FSL。
+FLIRT、FNIRT、applywarp 和 TOPUP 的移植代码及随包提供的 FSL 上游源码受 [FSL Software Licence 6.0](licenses/FSL-6.0.txt) 的非商业使用条款约束。运行这些 PyTorch 接口无需安装 FSL。
 
 ## 安装
 
@@ -77,7 +79,7 @@ python tools/setup_weights.py --model synthstrip --model synthmorph-joint \
   --model wmh-synthseg --model synthsr
 ```
 
-FastVBM 的 SynthMorph 分支从原始 T1w 开始时需要 `synthstrip.1.pt` 和 `synthmorph.deform.3.h5`；`python tools/setup_weights.py --model fast-vbm` 安装这两个后端的权重超集。TorchFNIRT 分支只需 SynthStrip；已有脑 mask 时该分支无需 checkpoint。GM 模板由用户提供，不由配置脚本下载。TorchFAST、TorchFLIRT、TorchFNIRT 和 TorchApplyWarp 不使用权重。
+FastVBM 的 SynthMorph 分支从原始 T1w 开始时需要 `synthstrip.1.pt` 和 `synthmorph.deform.3.h5`；`python tools/setup_weights.py --model fast-vbm` 安装这两个后端的权重超集。TorchFNIRT 分支只需 SynthStrip；已有脑 mask 时该分支无需 checkpoint。GM 模板由用户提供，不由配置脚本下载。TorchFAST、TorchFLIRT、TorchFNIRT、TorchApplyWarp 和 TorchTOPUP 不使用权重。
 
 混合版 GPU recon-all 还需要与固定 FreeSurfer 8.2 流程匹配的本地原生运行包；上述权重命令不提供它。运行包和个人 license 均不随仓库或 wheel 发布。构建、调用、输出和验收见[GPU recon-all 文档](docs/recon_all/README.md)。
 
@@ -90,5 +92,5 @@ GPU recon-all 的 13 个权重和辅助资源文件可单独配置：`python too
 ## 项目资料
 
 - 各功能的调用、输出、原版对应和数值比较见上表各子页；[代码结构](docs/ARCHITECTURE.md)说明共享接口。
-- [FastVBM 验证](validation/fast_vbm/README.md)、[模型及源码来源](docs/provenance.json)。
+- [功能 benchmark 索引](validation/README.md)、[FastVBM 验证](validation/fast_vbm/README.md)、[TOPUP 验证](docs/topup/README.md)、[模型及源码来源](docs/provenance.json)。
 - [第三方许可与引用](THIRD_PARTY_NOTICES.md)。

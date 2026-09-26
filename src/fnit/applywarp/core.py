@@ -96,12 +96,13 @@ def _fsl_voxel_matrix(image):
 
 
 def _spatial_grid(shape, matrix, device):
+    # FSL coordinate matrices are double precision. Keep geometry out of TF32.
     axes = torch.meshgrid(
-        *(torch.arange(size, dtype=torch.float32, device=device) for size in shape),
+        *(torch.arange(size, dtype=torch.float64, device=device) for size in shape),
         indexing="ij",
     )
     voxels = torch.stack(axes).reshape(3, -1)
-    transform = torch.as_tensor(matrix, dtype=torch.float32, device=device)
+    transform = torch.as_tensor(matrix, dtype=torch.float64, device=device)
     return transform[:3, :3] @ voxels + transform[:3, 3:4]
 
 
@@ -130,7 +131,7 @@ def _sample_linear(data, coordinates):
     shape = tuple(int(size) for size in data.shape[1:])
     sampled = F.grid_sample(
         data[None],
-        _to_grid(coordinates, shape),
+        _to_grid(coordinates, shape).to(dtype=data.dtype),
         mode="bilinear",
         padding_mode="border",
         align_corners=True,
@@ -215,9 +216,10 @@ def _coefficient_metadata(image):
 
 
 def _cubic_basis_matrix(size, coefficient_count, knot_spacing, device):
-    voxels = torch.arange(size, dtype=torch.float32, device=device)[:, None]
+    # FNIRT evaluates coefficient geometry in double precision.
+    voxels = torch.arange(size, dtype=torch.float64, device=device)[:, None]
     coefficients = torch.arange(
-        coefficient_count, dtype=torch.float32, device=device
+        coefficient_count, dtype=torch.float64, device=device
     )[None]
     if knot_spacing == 1:
         centres = coefficients
@@ -237,7 +239,7 @@ def _expand_cubic_coefficients(image, device):
     if not np.isfinite(coefficients).all():
         raise ValueError("FNIRT coefficients must contain only finite values")
     coefficient_tensor = torch.as_tensor(
-        coefficients.copy(), dtype=torch.float32, device=device
+        coefficients.copy(), dtype=torch.float64, device=device
     )
     bases = tuple(
         _cubic_basis_matrix(size, count, spacing, device)
@@ -410,7 +412,7 @@ class TorchApplyWarp:
         reference_shape = tuple(int(size) for size in reference_image.shape[:3])
         output_mm = _spatial_grid(reference_shape, reference_fsl, self.device)
         post_inverse = torch.as_tensor(
-            np.linalg.inv(postmat_array), dtype=torch.float32, device=self.device
+            np.linalg.inv(postmat_array), dtype=torch.float64, device=self.device
         )
         warp_query_mm = (
             post_inverse[:3, :3] @ output_mm + post_inverse[:3, 3:4]
@@ -452,7 +454,7 @@ class TorchApplyWarp:
                 )
                 warp_representation = "FSL dense field"
             warp_world_to_voxel = torch.as_tensor(
-                np.linalg.inv(warp_fsl), dtype=torch.float32, device=self.device
+                np.linalg.inv(warp_fsl), dtype=torch.float64, device=self.device
             )
             flat_query = warp_query_mm.reshape(3, -1)
             warp_voxels = (
@@ -463,7 +465,7 @@ class TorchApplyWarp:
             if embedded_affine is not None:
                 affine_inverse = torch.as_tensor(
                     np.linalg.inv(embedded_affine),
-                    dtype=torch.float32,
+                    dtype=torch.float64,
                     device=self.device,
                 )
                 flat_query = warp_query_mm.reshape(3, -1)
@@ -480,14 +482,14 @@ class TorchApplyWarp:
                 )
 
         premat_inverse = torch.as_tensor(
-            np.linalg.inv(premat_array), dtype=torch.float32, device=self.device
+            np.linalg.inv(premat_array), dtype=torch.float64, device=self.device
         )
         source_mm = source_mm.reshape(3, -1)
         input_mm = (
             premat_inverse[:3, :3] @ source_mm + premat_inverse[:3, 3:4]
         )
         input_world_to_voxel = torch.as_tensor(
-            np.linalg.inv(input_fsl), dtype=torch.float32, device=self.device
+            np.linalg.inv(input_fsl), dtype=torch.float64, device=self.device
         )
         input_voxels = (
             input_world_to_voxel[:3, :3] @ input_mm

@@ -1,0 +1,105 @@
+{
+  "candidate": {
+    "cuda": "11.8",
+    "distribution": "fudan-neuroimaging-toolkit 0.9.0",
+    "execution": "fresh CUDA command process; cuda:0; four CPU threads; default TF32",
+    "gpu": "NVIDIA H100 PCIe",
+    "torch": "2.5.1"
+  },
+  "case_count": 3,
+  "clinical_accuracy_boundary": "This measures reproduction of the reference implementation. The examples have no manual anatomical segmentation ground truth.",
+  "comparison": {
+    "affine_max_abs": 0.0,
+    "all_dtype_match": true,
+    "all_shape_match": true,
+    "csv_common_numeric_column_count": 33,
+    "csv_volume_max_abs_error_mm3": 556.75,
+    "label_dice_median_across_case_medians": 0.9999895202852345,
+    "label_dice_minimum": 0.9990262901655307,
+    "voxel_agreement_minimum": 0.9999881699124035
+  },
+  "feature": "FreeSurfer SynthSeg 2.0 versus FNIT SynthSeg public-example validation",
+  "inputs": "three defaced public T1w examples shipped in the repository",
+  "records": [
+    {
+      "comparison": {
+        "affine_max_abs": 0.0,
+        "csv_common_numeric_column_count": 33,
+        "csv_volume_max_abs_error_mm3": 464.625,
+        "dtype_match": true,
+        "foreground_label_count": 32,
+        "label_dice_median": 1.0,
+        "label_dice_minimum": 0.9990262901655307,
+        "shape_match": true,
+        "voxel_agreement": 0.9999881699124035
+      },
+      "input_sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
+      "public_example": "sub-01",
+      "seconds": {
+        "fnit_gpu": 5.866662323009223,
+        "official_cpu": 187.27110217744485
+      }
+    },
+    {
+      "comparison": {
+        "affine_max_abs": 0.0,
+        "csv_common_numeric_column_count": 33,
+        "csv_volume_max_abs_error_mm3": 556.75,
+        "dtype_match": true,
+        "foreground_label_count": 32,
+        "label_dice_median": 0.9999895202852345,
+        "label_dice_minimum": 0.9992576095025983,
+        "shape_match": true,
+        "voxel_agreement": 0.9999888126049424
+      },
+      "input_sha256": "326d1e0a948b76344150c28bbcf0299b58040092c2f037f09c754103d32f747d",
+      "public_example": "sub-02",
+      "seconds": {
+        "fnit_gpu": 5.97605468891561,
+        "official_cpu": 142.19486894411966
+      }
+    },
+    {
+      "comparison": {
+        "affine_max_abs": 0.0,
+        "csv_common_numeric_column_count": 33,
+        "csv_volume_max_abs_error_mm3": 450.44999999995343,
+        "dtype_match": true,
+        "foreground_label_count": 32,
+        "label_dice_median": 0.9999683970996947,
+        "label_dice_minimum": 0.9992205767731879,
+        "shape_match": true,
+        "voxel_agreement": 0.9999886498662639
+      },
+      "input_sha256": "831866e036766201a5f4c67ca65864d8f4f1042e7b19ce82d5c90632005de5fd",
+      "public_example": "sub-03",
+      "seconds": {
+        "fnit_gpu": 5.666212082840502,
+        "official_cpu": 156.75807120464742
+      }
+    }
+  ],
+  "reference": {
+    "execution": "fresh CPU command process; --threads 4 --cpu --noaddctab",
+    "freesurfer": "8.2.0-1",
+    "script_sha256": "f3c182cd100721e8ae4ae4e0661b6ac3c45e80453f716d668d53ca0fe189279b",
+    "weight_sha256": "f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e"
+  },
+  "runtime_context": "shared gpucw1 node; processes run sequentially",
+  "schema": 1,
+  "timing_scope": "full command wall time including process/framework startup, weights/input loading, inference, postprocessing, CSV and NIfTI writes",
+  "timing_seconds": {
+    "fnit_gpu": {
+      "count": 3,
+      "maximum": 5.97605468891561,
+      "median": 5.866662323009223,
+      "minimum": 5.666212082840502
+    },
+    "official_cpu": {
+      "count": 3,
+      "maximum": 187.27110217744485,
+      "median": 156.75807120464742,
+      "minimum": 142.19486894411966
+    }
+  }
+}

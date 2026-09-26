@@ -413,6 +413,26 @@ GM template 是运行输入，不是模型权重，也不由配置脚本下载�
 release gate 见
 [`validation/fast_vbm`](../../validation/fast_vbm/README.md)。
 
+与 UKB/FSL 端到端输出的 10 例中位数如下。Pearson 和 Dice 都在官方 MNI
+reference mask 内计算；Dice 阈值分别为 warped/modulated GM `0.2`、Jacobian
+`1.0`。
+
+| 非线性分支 | warped GM Pearson / Dice | Jacobian Pearson / Dice | modulated GM Pearson / Dice | 本包 compute + 三幅输出写盘中位数 |
+|---|---:|---:|---:|---:|
+| TorchFNIRT | 0.898466 / 0.914901 | 0.894475 / 0.862602 | 0.886469 / 0.911365 | 180.096 s |
+| SynthMorph | 0.721780 / 0.828445 | 0.310599 / 0.640193 | 0.636723 / 0.824325 | 35.216 s |
+
+UKB/FSL 历史记录的 GM 配准与调制中位数为 897.294 s（10 例）；从 raw T1w
+到 modulated GM 的完整记录中位数为 3637.203 s（9 例）。原记录没有保存硬件和
+线程数，与本包运行也不在同一时间窗，因此这些数字只说明本次观察到的墙钟时间，
+不能作为受控加速倍数。
+
+下图按列显示 UKB/FSL、FNIT+TorchFNIRT 和 FNIT+SynthMorph，按行显示 warped GM、
+nonlinear-only Jacobian 和 modulated GM。每个面板是正式 10 例结果的组平均，
+没有展示单个受试者；同一行使用相同色阶。
+
+![UKB/FSL 与 FNIT 两个非线性分支的十例平均 VBM 输出](figures/fast_vbm_comparison.png)
+
 FLIRT reference-suite matrix gate 为 10/10 通过；其 matrix RMS difference
 中位数为 0.008544 mm，最大值为 0.028984 mm。这排除了“affine
 没有达到预设 matrix gate”这一解释，但该 gate 不是当前输入或完整数值等价证明。
