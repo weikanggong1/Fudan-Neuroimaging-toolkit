@@ -21,6 +21,8 @@ MRtrix3 3.0.3-103-g026e850d 参考臂使用 Dhollander 响应、默认 lmax=8 MS
 
 MRtrix 在 10,000 次播种中生成 3,021 条流线，其中 2,915 条获得 atlas 双端分配；PyTorch 种子 0 生成并分配 6,319 条。三个 PyTorch 种子两两比较的平均 Pearson r 为 count 0.994、FBC 0.993、length 0.917、FA 0.816；平均连接支持 Dice 0.862。这说明本实现自身的矩阵在三次采样中相对稳定，**不表示与 MRtrix 输出一致**。
 
+用完全相同输入和种子 0 独立重复一次时，接受流线均为 6,319 条，count CSV 逐字节一致；FBC、mean length、mean FA 的最大绝对差分别只有 `6.7e-6`、`3.05e-5 mm`、`6.0e-8`，四张矩阵的非零边支持完全一致。三张加权矩阵存在 GPU 浮点累加顺序导致的极小非逐字节差异；[重复性报告与 CSV](fixed_seed_repeat.public.json)保留各自哈希和相对 Frobenius 误差。
+
 把 MRtrix 的 `-seed_gmwmi` 单独换成 PyTorch 同款二值边界 mask 的 `-seed_image` 后，MRtrix 获得 3,348 条 atlas 分配；与 PyTorch 种子 0 的 count r=0.669、Dice=0.586，FBC r=0.735。此受控臂用于定位播种差异，不是原脚本条件。
 
 只把 PyTorch 四处 SH 阶次从 lmax=4 提至 lmax=8 的[敏感性诊断](lmax8_diagnostic.public.json)，count/FBC Pearson 升至 0.765/0.817，但 count 归一化 MAE 升至 0.685、连接支持 Dice 降至 0.492，FBC 归一化 MAE 升至 2.315。提高 SH 阶次未解决输出差距；该诊断不替代正式 lmax=4 三种子结果。
