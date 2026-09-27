@@ -52,7 +52,7 @@ python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
 
 ### Conda GPU 环境
 
-仓库提供独立的 [`environment.yml`](environment.yml)，固定本项目在 gpucw1 验证的 Python 3.11、PyTorch 2.5.1 和 CUDA 11.8 组合。必须从仓库根目录创建环境，因为配置最后以 editable 模式安装当前源码：
+仓库提供独立的 [`environment.yml`](environment.yml)，固定本项目在 gpucw1 验证的 Python 3.11、PyTorch 2.5.1、CUDA 11.8 和 ProbtrackX GPU 所需的 Triton 3.1.0 组合。必须从仓库根目录创建环境，因为配置最后以 editable 模式安装当前源码：
 
 ```bash
 git clone https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit.git

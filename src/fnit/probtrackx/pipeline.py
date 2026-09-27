@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
 import time
@@ -31,7 +32,7 @@ class TorchProbtrackX:
 
     def __init__(self, device="cpu", *, nsamples=5000, nsteps=2000,
                  steplength=0.5, cthr=0.2, fibthresh=0.01,
-                 batch_size=256, seed=12345):
+                 batch_size=2048, seed=12345):
         self.device = torch.device(device)
         if self.device.type == "cuda":
             if not torch.cuda.is_available():
@@ -70,6 +71,7 @@ class TorchProbtrackX:
         self._mask = torch.as_tensor(mask.copy(), dtype=torch.bool,
                                      device=self.device).reshape(-1)
         arrays = {key: [] for key in ("th", "ph", "f")}
+        samples = []
         ntime = None
         for fibre in range(1, 11):
             first = directory / f"merged_th{fibre}samples.nii.gz"
@@ -87,13 +89,20 @@ class TorchProbtrackX:
                     ntime = image.shape[3]
                 elif ntime != image.shape[3]:
                     raise ValueError("posterior sample counts differ")
-                data = np.asarray(image.dataobj, dtype=np.float32)
-                if self._flip_x:
-                    data = np.flip(data, axis=0)
-                arrays[key].append(torch.as_tensor(data.reshape(-1, ntime).copy(),
-                                                   device=self.device))
-        if not arrays["th"] or not ntime:
+                samples.append((key, image))
+        if not samples or not ntime:
             raise ValueError(f"no bedpostX posterior samples found in {directory}")
+
+        def read_sample(sample):
+            key, image = sample
+            data = np.asarray(image.dataobj, dtype=np.float32)
+            if self._flip_x:
+                data = np.flip(data, axis=0)
+            return key, data.reshape(-1, ntime).copy()
+
+        with ThreadPoolExecutor(max_workers=min(4, len(samples))) as pool:
+            for key, data in pool.map(read_sample, samples):
+                arrays[key].append(torch.as_tensor(data, device=self.device))
         self._theta, self._phi, self._fraction = (
             torch.stack(arrays[key]) for key in ("th", "ph", "f")
         )
@@ -113,6 +122,14 @@ class TorchProbtrackX:
         return roi
 
     def _walk(self, starts, generator, reverse_direction=None):
+        if self.device.type == "cuda":
+            try:
+                from ._triton import walk as triton_walk
+            except ModuleNotFoundError as error:
+                if error.name != "triton":
+                    raise
+            else:
+                return triton_walk(self, starts, generator, reverse_direction)
         count = starts.shape[0]
         half = self.nsteps // 2
         shape = self._shape

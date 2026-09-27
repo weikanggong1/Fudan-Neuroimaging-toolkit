@@ -3,6 +3,7 @@
 import nibabel as nib
 import numpy as np
 import pytest
+import torch
 
 from fnit.probtrackx import TorchProbtrackX
 
@@ -76,3 +77,19 @@ def test_neurological_storage_flip_and_roi_geometry_check(tmp_path):
     bad = _roi(tmp_path / "bad.nii.gz", np.eye(4), 2)
     with pytest.raises(ValueError, match="geometry"):
         TorchProbtrackX(nsamples=1, nsteps=2).run(samples, tmp_path / "bad-out", seed=bad)
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required")
+def test_cuda_fused_walk_straight_field_and_network(tmp_path):
+    pytest.importorskip("triton")
+    samples, affine = _field(tmp_path)
+    left = _roi(tmp_path / "left.nii.gz", affine, 2)
+    right = _roi(tmp_path / "right.nii.gz", affine, 6)
+    tracker = TorchProbtrackX(device="cuda:0", nsamples=6, nsteps=40,
+                              steplength=1, batch_size=4, seed=3)
+    result = tracker.run(samples, tmp_path / "cuda-network", regions=[left, right])
+    np.testing.assert_array_equal(np.loadtxt(result.network_matrix, dtype=int),
+                                  [[0, 6], [6, 0]])
+    np.testing.assert_array_equal(np.loadtxt(result.waytotal, dtype=int), [6, 6])
+    density = np.asarray(nib.load(result.paths).dataobj)
+    assert density[4, 2, 2] == 12

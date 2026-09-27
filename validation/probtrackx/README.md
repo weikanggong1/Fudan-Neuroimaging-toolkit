@@ -1,6 +1,29 @@
 # ProbtrackX 真实 DWI 多脑区配对验证
 
-[功能和参数](../../docs/probtrackx/README.md) · [五脑区 CPU/GPU 汇总 JSON](report.multiregion.public.json) · [聚合指标脚本](../../benchmark/probtrackx_multiregion.py) · [seed 选取脚本](prepare_multiregion_seeds.py)
+[功能和参数](../../docs/probtrackx/README.md) · [当前优化汇总 JSON](report.optimization.public.json) · [原始五脑区 CPU/GPU 汇总 JSON](report.multiregion.public.json) · [聚合指标脚本](../../benchmark/probtrackx_multiregion.py) · [seed 选取脚本](prepare_multiregion_seeds.py)
+
+## 当前加速实现与复验
+
+在相同后验和 5 个 seed 上，当前实现并行解压 9 个后验 NIfTI，CPU 默认每批 2048 条轨迹；GPU 用 Triton 3.1.0 融合 float32 步进。缺少 Triton 时 GPU 自动使用原 PyTorch 路径。相同批大小 256 的载入改写在 CPU/GPU 上均与原输出逐体素一致；融合 GPU 使用独立随机流，按 FSL 分布对照。整合后的正式包入口在真实 DWI 上复跑，与隔离内核原型的 seed 图和网络图逐体素一致。显存峰值 2.61 GiB。
+
+| 真实 DWI 运行 | FSL | 旧 FNIT | 当前 FNIT | 当前 FNIT 对 FSL 图相关 |
+| --- | ---: | ---: | ---: | ---: |
+| 五区网络 CPU，2000 条/体素 | 31.50 s | 111.62 s | 50.52 s | 0.9390 |
+| 五区网络 GPU，2000 条/体素 | 11.66 s | 128.75 s | 17.84 s | 0.9575 |
+
+五个 200 条/体素的 CPU seed 配对用时和精度、GPU 胼胝体 seed、矩阵原始计数、源码 SHA-256 均见[当前机器可读报告](report.optimization.public.json)。配对取同一份 FSL BEDPOSTX 后验；旧 GPU 与当前 GPU 均为批大小 2048，旧 CPU 为 256。GPU1 由其他任务共享。所有时间包含启动、载入与写盘。
+
+在可读取这些原始运行目录的授权服务器上重新生成汇总：
+
+```bash
+python benchmark/probtrackx_optimization.py \
+  --baseline-dir /absolute/path/fnit_probtrackx_multiregion_20260927 \
+  --optimized-dir /absolute/path/fnit_probtrackx_opt_20260927 \
+  --source-dir /absolute/path/repository/src/fnit/probtrackx \
+  --output-json /absolute/path/report.optimization.public.json
+```
+
+下面记录的是优化前版本的原始五脑区验证协议，供追溯比较。
 
 ## 输入、选点与配对
 

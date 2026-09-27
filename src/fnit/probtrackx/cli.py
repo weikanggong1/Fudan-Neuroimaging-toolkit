@@ -18,7 +18,7 @@ def _add_arguments(parser):
     parser.add_argument("--steplength", type=float, default=0.5)
     parser.add_argument("--cthr", type=float, default=0.2)
     parser.add_argument("--fibthresh", type=float, default=0.01)
-    parser.add_argument("--batch-size", type=int, default=256)
+    parser.add_argument("--batch-size", type=int, default=2048)
     parser.add_argument("--rseed", type=int, default=12345)
     parser.add_argument("--overwrite", action="store_true")
     parser.set_defaults(_fnit_handler=run_args)
