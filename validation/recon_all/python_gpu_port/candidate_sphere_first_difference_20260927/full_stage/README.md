@@ -34,6 +34,6 @@ report = run_standard_sphere(
 
 修复后 `lh.sphere` 的文件 SHA-256 为 `c3780d38be3a50cd5e33c021949a9f1712d2921c908fb9cdc5f65def2ececcee`，同输入官方为 `150d1b88b00961069227ae84356950a88b7df330c1a9879a0892f69db62e4feb`。有序坐标与面在文件中的**原始几何载荷 SHA-256 也相同**：`7d9b1339fb7abdf909b1bb377e1c6853c0d38cfe34ddce18e118dca3eb961da2`。全文件差别来自创建行和尾部元数据：Python 的 611 字节尾部与官方尾部开头逐字节相同，官方其后还有 1,779 字节程序来源标签。这个差别不影响表面几何读数。
 
-相对 2026-09-24 归档官方 `lh.sphere` 的 2.959344 mm 均值差异在同候选输入官方与归档官方之间也**完全相同**。因此本轮已把该差异定位到 `sphere` 的上游输入；当前候选输入与归档官方的首差需另按有序网格追踪，不能把归档结果的差异归咎于修复后的 Python `sphere`。完整 `sphere.reg`、annotation、最终 white/pial 和皮层统计尚未由本轮验证。
+相对 2026-09-24 归档官方 `lh.sphere` 的 2.959344 mm 均值差异在同候选输入官方与归档官方之间也**完全相同**。因此本轮已把该差异定位到 `sphere` 的上游输入；[上游逐阶段审计](UPSTREAM_FIRST_DIFFERENCE.md)已定位第一张不等的表面为 `white.preaparc`，不能把归档结果的差异归咎于修复后的 Python `sphere`。完整 `sphere.reg`、annotation、最终 white/pial 和皮层统计尚未由本轮验证。
 
 `audit_full_sphere.py` 的必填 CLI 参数为 `--inflated`、`--smoothwm`（候选输入），`--python-sphere`（本轮输出），`--same-input-official`（同候选官方），`--archived-official`（原始归档官方），`--python-report`（API JSON），`--native-time`（官方计时文件），`--report-json`（输出三方比较 JSON）。JSON 含输入/输出 SHA、更新数、三对同索引误差、几何载荷及尾部哈希和时间；不复制影像或表面数据到 Git。
