@@ -106,4 +106,4 @@ CSF/WM 组织掩膜由 TorchFAST 部分体积分数经 BBR 投到 EPI，再在 E
 
 各函数的同输入精度和耗时分别列于 [FEAT 核心](feat.md)、[BBR](bbr.md)、[PICA](pica.md)、[非线性配准](normalization.md)和[AROMA/回归](aroma_confounds.md)。整链的最终实测结果与官方 no-GDC/no-B0 FEAT 对照见 [fMRI 验证页](../../validation/fmri/README.md)。
 
-同一例 490 帧 BOLD 的默认 SynthMorph 分支已从原始 BIDS 成功运行至 MNI152 2 mm：输出 91×109×91×490、float32、TR 0.735 秒，与模板网格完全相同；全部 442,288,210 个值有限，脑掩膜外最大绝对值为 0。PICA 得到 96 个成分，ICA-AROMA 用官方标准掩膜判定 48 个噪声成分。整链墙钟 520.77 秒，PyTorch 峰值已保留显存 17.58 GB。该例关闭额外 WM/CSF/运动回归，因而只验证这些选项的独立子函数测试；FNIRT 分支有独立的真实 T1→MNI 对照，未在这次 490 帧整链中重跑。以上是[可复核标量摘要](../../validation/fmri/e2e_summary.json)，不表示最终清理影像与 UKB FIX 逐体素相同。
+同一例 490 帧 BOLD 的默认 SynthMorph 分支已从原始 BIDS 成功运行至 MNI152 2 mm：输出 91×109×91×490、float32、TR 0.735 秒，与模板网格完全相同；全部 442,288,210 个值有限，脑掩膜外最大绝对值为 0。PICA 得到 96 个成分，ICA-AROMA 用官方标准掩膜判定 48 个噪声成分。整链墙钟 532.22 秒，PyTorch 峰值已保留显存 17.58 GB。该例关闭额外 WM/CSF/运动回归，因而只验证这些选项的独立子函数测试；FNIRT 分支有独立的真实 T1→MNI 对照，未在这次 490 帧整链中重跑。以上是[可复核标量摘要](../../validation/fmri/e2e_summary.json)，不表示最终清理影像与 UKB FIX 逐体素相同。

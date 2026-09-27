@@ -1,6 +1,6 @@
 # T1→MNI152 2 mm 配准与 BOLD 重采样
 
-`register_t1_to_mni` 先用 FNIT `TorchFLIRT` 求 T1→模板的 12 自由度初始矩阵，再从 `SynthMorph` 或 `TorchFNIRT` 中选一个方法估计非线性形变。运行时不启动 FSL。两个后端都把最终变换写成 **MNI 网格上指向 T1 的位移场**，供 `resample_world` 与 EPI→T1 的 BBR 合成。BOLD 最终只插值一次。
+`register_t1_to_mni` 先用 FNIT `TorchFLIRT` 求 T1→模板的 12 自由度初始矩阵，再从 `SynthMorph` 或 `TorchFNIRT` 中选一个方法估计非线性形变。运行时不启动 FSL 或 FreeSurfer 可执行程序；现有 FNIT SynthMorph/FNIRT 后端仍以 Surfa `Volume`、`Affine`、`Warp` 管理几何与变换，SynthMorph 内部还用 Surfa 在 CPU 上重采样 T1；MNI 位移场与最终 BOLD 由 NiBabel 写出。两个后端都把最终变换写成 **MNI 网格上指向 T1 的位移场**，供 `resample_world` 与 EPI→T1 的 BBR 合成。BOLD 最终只插值一次。
 
 ## 输入与输出
 
@@ -96,9 +96,9 @@ SynthMorph 使用学习得到的 deform 网络，在初始 FLIRT 仿射上估计
 
 | 同输入指标 | PyTorch SynthMorph | PyTorch FNIRT | FSL FLIRT+FNIRT |
 |---|---:|---:|---:|
-| 初始仿射 + 非线性配准耗时 | 156.32 s | 386.72 s | 11.25 + 150.53 = 161.78 s |
-| 加上 FNIT 结果图重采样 | 156.71 s | 387.07 s | `fnirt --iout` 已包含输出图 |
-| 峰值内存 | GPU allocated 12.38 GiB，reserved 18.12 GiB | GPU allocated 0.654 GiB，reserved 0.941 GiB | FNIRT CPU RSS 0.798 GiB |
+| 初始仿射 + 非线性配准耗时 | 156.32 s | 240.18 s | 11.25 + 150.53 = 161.78 s |
+| 加上 FNIT 结果图重采样 | 156.71 s | 240.67 s | `fnirt --iout` 已包含输出图 |
+| 峰值内存 | GPU allocated 12.38 GiB，reserved 18.12 GiB | GPU allocated 0.653 GiB，reserved 0.900 GiB | FNIRT CPU RSS 0.798 GiB |
 | MNI 脑内输出强度与 FSL Pearson r | 0.8323 | 0.9135 | 参照 |
 | 输出脑支持区与 FSL Dice | 0.9782 | 0.9902 | 参照 |
 | MNI→T1 pull 坐标差 | 中位 1.75 mm，95 百分位 5.01 mm | 中位 1.02 mm，95 百分位 3.41 mm | 参照 |
@@ -106,4 +106,4 @@ SynthMorph 使用学习得到的 deform 网络，在初始 FLIRT 仿射上估计
 
 Pearson r 在官方 MNI 脑掩膜内计算。脑支持区把每张重采样 T1 的正值第 99 百分位乘以 0.05 作阈值；两张图的二值区求 Dice。坐标差用 FSL `applywarp` 对 T1 的三个 RAS world 坐标图重采样，再与 FNIT 的完整 pull 场比较；只纳入双方均有有效脑信号的体素。相比输出强度，坐标差能直接检验仿射与非线性形变的合成方向。FSL 整头输入单独耗时为 FLIRT 17.41 s、FNIRT 194.34 s，其配准后脑内强度与模板 r=0.7833；整头结果含头皮，故未与去颅骨结果计算脑支持 Dice。
 
-这是一例、一次运行。FNIT 在共享 GPU 上与其他作业同时运行；上表是观察到的耗时，**不能用来作公平的 CPU/GPU 速度排序**。本机 FSL 的 FLIRT/FNIRT 在产出文件后返回 255；已保留该退出码，并核验了新产出 NIfTI 的 gzip CRC、网格、有限值及仿射矩阵可逆性，条件接受为数值参照。两支 FNIT 输出均通过相同的 NIfTI 有限值和 gzip CRC 检查。完整标量、定义及源码 SHA256 见 [`registration_summary.json`](../../validation/fmri/registration_summary.json)；公开文件不含原图、被试标识或逐体素结果。
+这是一例真实数据。PyTorch FNIRT 行为当前源码在同输入上的复测；TorchFLIRT 本次更新仅涉及 6 自由度分支，T1→MNI 使用的 12 自由度分支未改。复测的初始仿射矩阵、完整位移场和重采样 T1 与此前同输入结果逐值相同（最大绝对差均为 0）。SynthMorph 行来自该后端未变更时的同输入运行。FNIT 在共享 GPU 上与其他作业同时运行；上表是观察到的耗时，**不能用来作公平的 CPU/GPU 速度排序**。本机 FSL 的 FLIRT/FNIRT 在产出文件后返回 255；已保留该退出码，并核验了新产出 NIfTI 的 gzip CRC、网格、有限值及仿射矩阵可逆性，条件接受为数值参照。两支 FNIT 输出均通过相同的 NIfTI 有限值和 gzip CRC 检查。完整标量、定义及源码 SHA256 见 [`registration_summary.json`](../../validation/fmri/registration_summary.json)；公开文件不含原图、被试标识或逐体素结果。

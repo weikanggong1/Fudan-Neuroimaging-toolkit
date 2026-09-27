@@ -29,7 +29,7 @@
 
 fMRI 的 BIDS 单 run 入口为 `fnit-fmri run` 或 `run_fmri_pipeline`。本例缺少原始 B0/GDC 输入，因而与跳过这两步的官方流程比较；清理使用 ICA-AROMA，完整 UKB FIX 输出不能逐体素等价。运行需提供 MNI152 T1 2 mm 模板路径，详见功能页。
 
-recon-all 提供单被试命令行与 Python API；多被试并行仅提供 Python API。其余功能只提供单被试 Python 和单被试命令行接口；需要处理多个病例时，由调用方在包外组织任务与设备。仓库提供 [T1w 样例](examples/README.md)和 [FLAIR 样例](examples/WMH.md)。
+recon-all 提供单被试命令行与 Python API；多被试并行仅提供 Python API。其他功能的 Python、命令行与批量入口以各自子页面为准。仓库提供 [T1w 样例](examples/README.md)和 [FLAIR 样例](examples/WMH.md)。
 
 recon-all 的神经网络与部分体素、表面计算使用 PyTorch/CUDA；N4 使用仓库 C++ 与 Conda ITK 在 CPU 上运行，去噪和部分网格、统计使用 Python CPU。当前仍需从固定 FreeSurfer 源码用 Conda 编译三个必需、三个可选表面程序；无需安装 FreeSurfer 运行包。[构建和单被试调用](docs/recon_all/README.md)列出输入、外置数据及输出结构。
 
