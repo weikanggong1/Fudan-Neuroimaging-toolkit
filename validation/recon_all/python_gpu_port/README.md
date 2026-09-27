@@ -21,7 +21,7 @@ python validation/recon_all/python_gpu_port/compare_complete_subject.py \
 | 位置 | 真实数据结果 | 记录 |
 | --- | --- | --- |
 | 旧 v3 整例的 MRI 前缀 | 当时的 13 张 MRI 图逐体素、仿射和头一致；尚未对更新后的代码重跑整例 | [v3 原始报告](native_cpp_conda_20260927/v3_e2e_20260927/BENCHMARK.md) |
-| Talairach 精度修正与有限续跑 | 另一次从同一 T1 开始的定向测试中，eTIV 误差由 822.547 降到 0.895 mm³；后续 GCA、`norm`、`aseg.presurf` 匹配，但没有继续到 WM/皮层 | [Talairach](talairach_tf32_isolation_20260927/README.md) |
+| Talairach 精度修正与有限续跑 | 另一次从同一 T1 开始的定向测试中，eTIV 误差由 822.547 降到 0.895 mm³；后续 GCA、`norm`、`aseg.presurf` 匹配，但没有继续到 WM/皮层 | [Talairach](talairach_tf32_isolation_20260927/README.md)、[LTA 坐标转换](../../../docs/recon_all/TALAIRACH_LTA_NUMPY.md) |
 | WM/filled 保存阶段 | 独立同输入试验核对了白质及填充体积图；这不是修正后从原始 T1 连续运行的结果 | [WM 链](native_cpp_conda_20260927/wm_chain_20260927/REPORT.md) |
 | 候选左侧拓扑与白质前缀 | 自产 MRI 输入的保存阶段复跑得到逐点相同的 `orig.premesh` 和 `orig`；`white.preaparc` 平均顶点偏移 0.000421 mm，50 个顶点超过 0.1 mm；`smoothwm` 为 0.000311 mm，18 个超过 0.1 mm | [候选前缀](white_connected_prefix_20260927/README.md)、[双侧冻结输入拓扑](../../../docs/recon_all/TOPOLOGY_CONDA_GA.md) |
 | 候选左侧标准球面 | 修复前 Python `sphere` 与保存的官方球面平均相差 3.481 mm；同候选输入的 Python/官方平均差 1.653 mm。修正采样角度精度后，8,268,920 项目标距离及前四次各 319,866 个顶点分量逐项一致；完整 sphere 正在复测 | [候选球面](candidate_sphere_annotation_20260927/README.md)、[首差探针](candidate_sphere_first_difference_20260927/README.md) |
