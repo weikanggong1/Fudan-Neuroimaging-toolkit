@@ -1153,6 +1153,264 @@
       "p99_euclidean_mm": 0.006172390404749905,
       "max_euclidean_mm": 0.18816972378978367,
       "vertices_over_0p1_mm": 18
+    },
+    "additional_outer_passes": {
+      "pass1_after_second_optimizer": {
+        "files_sha256": {
+          "candidate_pass1": "1800372ca60e14d6b54aacc04fea4054e2bcebff9f76490f91146efcbae66fab",
+          "official_pass1": "b1f481fd668dc03af6473c19afa431f7638125226be4717e2029fe09775d22d9"
+        },
+        "conda_vs_official": {
+          "exact_elements": 135915,
+          "elements": 319866,
+          "max_absolute": 0.17869901657104492,
+          "p99_absolute": 0.000316619873046875,
+          "vertices_with_any_difference": 93974,
+          "max_euclidean_mm": 0.22223008706015704,
+          "p99_euclidean_mm": 0.0007852661241825476,
+          "vertices_above_0_0001_mm": 2224,
+          "vertices_above_0_1_mm": 2
+        },
+        "gdb_wall_seconds": {
+          "installed": 138.0,
+          "conda": 186.3
+        },
+        "capture_markers": {
+          "installed": [
+            "INSTALLED_OUTER_PASS=1",
+            "INSTALLED_OUTER_PASS=2"
+          ],
+          "conda": [
+            "CONDA_OUTER_PASS=1",
+            "CONDA_OUTER_PASS=2"
+          ]
+        }
+      },
+      "pass3_after_fourth_optimizer": {
+        "files_sha256": {
+          "candidate_pass3": "9f4123935d3cb064ebc36fbd88810ca645d523231a33e0568995541cf9e0fc9d",
+          "official_pass3": "a2c54e81a60608e3bc74e2225d2a44b6fc18722b89a697da1b34a496c46943f1"
+        },
+        "conda_vs_official": {
+          "exact_elements": 99139,
+          "elements": 319866,
+          "max_absolute": 0.5786571502685547,
+          "p99_absolute": 0.00359411239624019,
+          "vertices_with_any_difference": 98057,
+          "max_euclidean_mm": 0.6300040016187256,
+          "p99_euclidean_mm": 0.006998961486221931,
+          "vertices_above_0_0001_mm": 8892,
+          "vertices_above_0_1_mm": 50
+        },
+        "gdb_wall_seconds_concurrent_uncontrolled": {
+          "installed": 212.38,
+          "conda": 312.95
+        },
+        "capture_markers": {
+          "installed": [
+            "INSTALLED_OUTER_PASS=1",
+            "INSTALLED_OUTER_PASS=2",
+            "INSTALLED_OUTER_PASS=3",
+            "INSTALLED_OUTER_PASS=4"
+          ],
+          "conda": [
+            "CONDA_OUTER_PASS=1",
+            "CONDA_OUTER_PASS=2",
+            "CONDA_OUTER_PASS=3",
+            "CONDA_OUTER_PASS=4"
+          ]
+        }
+      },
+      "final_intersection_cleanup": {
+        "conda_before_after": {
+          "exact_elements": 319866,
+          "elements": 319866,
+          "max_absolute": 0.0,
+          "p99_absolute": 0.0,
+          "vertices_with_any_difference": 0,
+          "max_euclidean_mm": 0.0,
+          "p99_euclidean_mm": 0.0,
+          "vertices_above_0_0001_mm": 0,
+          "vertices_above_0_1_mm": 0
+        },
+        "official_before_after": {
+          "exact_elements": 319866,
+          "elements": 319866,
+          "max_absolute": 0.0,
+          "p99_absolute": 0.0,
+          "vertices_with_any_difference": 0,
+          "max_euclidean_mm": 0.0,
+          "p99_euclidean_mm": 0.0,
+          "vertices_above_0_0001_mm": 0,
+          "vertices_above_0_1_mm": 0
+        },
+        "conda_vs_official_after_cleanup": {
+          "exact_elements": 99139,
+          "elements": 319866,
+          "max_absolute": 0.5786571502685547,
+          "p99_absolute": 0.00359411239624019,
+          "vertices_with_any_difference": 98057,
+          "max_euclidean_mm": 0.6300040016187256,
+          "p99_euclidean_mm": 0.006998961486221931,
+          "vertices_above_0_0001_mm": 8892,
+          "vertices_above_0_1_mm": 50
+        }
+      },
+      "outlier_tracking": {
+        "pass0_above_0p0001": 341,
+        "pass1_above_0p0001": 2224,
+        "pass1_above_0p1": [
+          27022,
+          27907
+        ],
+        "final_above_0p1": [
+          9023,
+          10401,
+          11119,
+          25338,
+          27907,
+          37681,
+          38313,
+          38335,
+          38358,
+          38359,
+          38478,
+          38487,
+          38488,
+          39141,
+          39154,
+          39175,
+          39176,
+          39211,
+          39239,
+          40083,
+          40090,
+          40091,
+          40099,
+          51227,
+          51245,
+          51246,
+          52032,
+          52034,
+          52048,
+          52049,
+          52800,
+          52801,
+          52802,
+          52813,
+          52814,
+          53539,
+          53540,
+          67847,
+          67856,
+          82399,
+          82734,
+          82740,
+          82741,
+          82745,
+          83063,
+          98606,
+          98942,
+          100638,
+          104466,
+          106163
+        ],
+        "smooth_above_0p1": [
+          38359,
+          51227,
+          51245,
+          51246,
+          51247,
+          52032,
+          52033,
+          52034,
+          52047,
+          52048,
+          52049,
+          52050,
+          52801,
+          52802,
+          52813,
+          52814,
+          53539,
+          98942
+        ],
+        "final_outliers_already_above_0p0001_at_pass0": 1,
+        "final_outliers_already_above_0p0001_at_pass1": 37,
+        "final_outliers_already_above_0p1_at_pass1": 1,
+        "top_final_vertices": [
+          {
+            "vertex": 38359,
+            "pass0_mm": 1.922192036699903e-06,
+            "pass1_mm": 0.00021103586556890454,
+            "final_mm": 0.6300040016187256,
+            "smooth_mm": 0.1037373282367181
+          },
+          {
+            "vertex": 25338,
+            "pass0_mm": 0.0003952770089531832,
+            "pass1_mm": 0.00016112298646501827,
+            "final_mm": 0.5748138181284329,
+            "smooth_mm": 0.05889817766099876
+          },
+          {
+            "vertex": 98942,
+            "pass0_mm": 7.1366451011160685e-06,
+            "pass1_mm": 0.00016819311283148653,
+            "final_mm": 0.5380869894928939,
+            "smooth_mm": 0.17672382263222822
+          },
+          {
+            "vertex": 51246,
+            "pass0_mm": 2.3326062791128176e-05,
+            "pass1_mm": 0.001669413428469477,
+            "final_mm": 0.5004235056168316,
+            "smooth_mm": 0.15185726459881954
+          },
+          {
+            "vertex": 52049,
+            "pass0_mm": 8.58306884765625e-06,
+            "pass1_mm": 0.00041607232231096543,
+            "final_mm": 0.48510638358678393,
+            "smooth_mm": 0.1596185991875237
+          },
+          {
+            "vertex": 38358,
+            "pass0_mm": 0.0,
+            "pass1_mm": 0.0,
+            "final_mm": 0.4753074801993127,
+            "smooth_mm": 0.09468173494658946
+          },
+          {
+            "vertex": 106163,
+            "pass0_mm": 4.76837158203125e-07,
+            "pass1_mm": 0.0026492688445375772,
+            "final_mm": 0.45805939728105316,
+            "smooth_mm": 0.06040582977742486
+          },
+          {
+            "vertex": 52814,
+            "pass0_mm": 6.55542711490036e-06,
+            "pass1_mm": 0.0002794790544148815,
+            "final_mm": 0.45699859091749734,
+            "smooth_mm": 0.15916385952299006
+          },
+          {
+            "vertex": 67847,
+            "pass0_mm": 9.047348957543505e-06,
+            "pass1_mm": 2.2967518956741897e-05,
+            "final_mm": 0.4430183213126982,
+            "smooth_mm": 0.029675860916997778
+          },
+          {
+            "vertex": 52048,
+            "pass0_mm": 2.7242387499019052e-05,
+            "pass1_mm": 0.004210452342176004,
+            "final_mm": 0.37820983233628885,
+            "smooth_mm": 0.18816972378978367
+          }
+        ]
+      }
     }
   }
 }
