@@ -76,6 +76,7 @@ class GMFNIRTConfig:
     estimate_intensity: tuple[bool, ...] = (True, True, True, False)
     apply_reference_mask: tuple[bool, ...] = (False, False, False, True)
     warp_resolution_mm: tuple[float, float, float] = (10.0, 10.0, 10.0)
+    warp_resolution_schedule_mm: tuple[tuple[float, float, float], ...] | None = None
     jacobian_range: tuple[float, float] = (0.2, 5.0)
     ssd_weighted_lambda: bool = True
 
@@ -97,6 +98,14 @@ class GMFNIRTConfig:
             raise ValueError("maximum iterations must be non-negative")
         if any(value < 0 for value in self.regularization):
             raise ValueError("regularization must be non-negative")
+        if self.warp_resolution_schedule_mm is not None:
+            if len(self.warp_resolution_schedule_mm) != count:
+                raise ValueError("warp resolution schedule must match the level count")
+            if any(
+                len(value) != 3 or any(item <= 0 for item in value)
+                for value in self.warp_resolution_schedule_mm
+            ):
+                raise ValueError("each warp resolution must contain three positive values")
 
 
 @dataclass
@@ -817,12 +826,12 @@ class TorchFNIRT:
         fixed_shape = tuple(int(value) for value in fixed_data.shape)
         fixed_voxel_sizes = tuple(float(value) for value in fixed.geom.voxsize)
         moving_voxel_sizes = tuple(float(value) for value in moving.geom.voxsize)
-        knot_spacing = tuple(
-            max(1, int(math.floor(mm / voxel + 0.5)))
-            for mm, voxel in zip(
-                self.config.warp_resolution_mm, fixed_voxel_sizes
+        resolution_schedule = self.config.warp_resolution_schedule_mm
+        if resolution_schedule is None:
+            resolution_schedule = (self.config.warp_resolution_mm,) * len(
+                self.config.subsampling
             )
-        )
+        knot_spacing = None
         coefficients = None
         previous_stride = None
         previous_level_voxel_sizes = None
@@ -838,6 +847,7 @@ class TorchFNIRT:
             regularization,
             estimate_intensity,
             apply_reference_mask,
+            warp_resolution,
         ) in enumerate(
             zip(
                 self.config.subsampling,
@@ -847,6 +857,7 @@ class TorchFNIRT:
                 self.config.regularization,
                 self.config.estimate_intensity,
                 self.config.apply_reference_mask,
+                resolution_schedule,
             ),
             start=1,
         ):
@@ -861,6 +872,43 @@ class TorchFNIRT:
                 torch.arange(size, device=device, dtype=dtype)
                 for size in level_shape
             )
+            new_knot_spacing = tuple(
+                max(1, int(math.floor(mm / voxel + 0.5)))
+                for mm, voxel in zip(warp_resolution, fixed_voxel_sizes)
+            )
+            if coefficients is None:
+                knot_spacing = new_knot_spacing
+                coefficient_shape = fsl_control_shape(level_shape, knot_spacing)
+                coefficients = torch.zeros(
+                    (3, *coefficient_shape), device=device, dtype=dtype
+                )
+            else:
+                if stride != previous_stride:
+                    coefficients = zoom_coefficients(
+                        coefficients,
+                        level_shape,
+                        knot_spacing,
+                        previous_level_voxel_sizes,
+                        level_voxel_sizes,
+                    )
+                if new_knot_spacing != knot_spacing:
+                    old_bases = spline_bases(
+                        level_shape,
+                        knot_spacing,
+                        level_voxel_sizes,
+                        device=device,
+                        dtype=dtype,
+                        positions=level_positions,
+                    )
+                    dense_field = expand_coefficients(coefficients, old_bases)
+                    coefficients = fit_field_coefficients(
+                        dense_field,
+                        new_knot_spacing,
+                        level_voxel_sizes,
+                        dtype=dtype,
+                    )
+                    knot_spacing = new_knot_spacing
+                coefficient_shape = fsl_control_shape(level_shape, knot_spacing)
             bases = spline_bases(
                 level_shape,
                 knot_spacing,
@@ -869,19 +917,6 @@ class TorchFNIRT:
                 dtype=dtype,
                 positions=level_positions,
             )
-            coefficient_shape = fsl_control_shape(level_shape, knot_spacing)
-            if coefficients is None:
-                coefficients = torch.zeros(
-                    (3, *coefficient_shape), device=device, dtype=dtype
-                )
-            elif stride != previous_stride:
-                coefficients = zoom_coefficients(
-                    coefficients,
-                    level_shape,
-                    knot_spacing,
-                    previous_level_voxel_sizes,
-                    level_voxel_sizes,
-                )
 
             moving_level = _fsl_gaussian_blur(
                 moving_tensor[None, None], input_fwhm, moving_voxel_sizes
@@ -1040,6 +1075,8 @@ class TorchFNIRT:
                     "stride": stride,
                     "matrix_size": list(level_shape),
                     "control_grid_shape": list(coefficient_shape),
+                    "warp_resolution_mm": list(warp_resolution),
+                    "knot_spacing_voxels": list(knot_spacing),
                     "maximum_iterations": maximum_iterations,
                     "accepted_iterations": accepted,
                     "attempts": attempts,

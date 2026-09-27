@@ -40,6 +40,7 @@ fnit-flirt \
   -ref template_GM.nii.gz \
   -out subject_GM_to_template.nii.gz \
   -omat subject_GM_to_template.mat \
+  -inweight subject_GM_weight.nii.gz \
   -dof 12 \
   -cost corratio \
   --device cuda:0
@@ -53,6 +54,7 @@ fnit flirt \
   -ref template_GM.nii.gz \
   -out subject_GM_to_template.nii.gz \
   -omat subject_GM_to_template.mat \
+  -inweight subject_GM_weight.nii.gz \
   -dof 12 \
   -cost corratio \
   --device cuda:0
@@ -67,6 +69,8 @@ Each argument has one role:
 | `-out` | Optional resampled input image on the reference grid. An extensionless name uses `FSLOUTPUTTYPE=NIFTI` or `NIFTI_GZ`. |
 | `-omat` | Optional 4 x 4 input-to-reference matrix in FSL scaled-mm coordinates. |
 | `-init` | Optional initial 4 x 4 input-to-reference matrix in the same FSL scaled-mm convention. |
+| `-inweight` | Optional voxelwise weight on the input grid. It is interpolated with the input at every cost evaluation. |
+| `-refweight` | Optional voxelwise weight on the reference grid. |
 | `-dof 12` or `-dof 6` | Selects the affine or rigid model; 6 requires `-cost normmi`. |
 | `-cost corratio` or `-cost normmi` | Selects the matched cost; normmi requires 6 DOF. |
 | `--device cuda:0` | Runs tensor operations on the selected CUDA device. Use `cpu` for CPU execution. CUDA is selected automatically when this argument is omitted and CUDA is available. |
@@ -85,14 +89,12 @@ flirt \
   -ref template_GM.nii.gz \
   -out subject_GM_to_template.nii.gz \
   -omat subject_GM_to_template.mat \
+  -inweight subject_GM_weight.nii.gz \
   -dof 12 \
   -cost corratio
 ```
 
-The package command implements the default affine path and the 6-DOF/normmi
-rigid path. FSL options for other costs, degrees of freedom, schedules, masks, interpolation modes,
-search ranges, and weighting images are outside the current public contract
-and are rejected rather than approximated.
+The package command implements the default 12-DOF/corratio affine path and the 6-DOF/normmi rigid path. Input/reference weighting is implemented for the 12-DOF/corratio path. Weight images must match their corresponding image grid. Other FSL costs, degrees of freedom, schedules, masks, interpolation modes and search ranges remain outside the public contract.
 
 For diffusion b0 to T1, use `-dof 6 -cost normmi` with brain-extracted
 inputs. On the ds004666 same-input example, the PyTorch and FSL matrices
@@ -114,6 +116,8 @@ result = run_flirt(
     output="subject_GM_to_template.nii.gz",   # FSL -out
     omat="subject_GM_to_template.mat",         # FSL -omat
     init=None,                                  # FSL -init; identity when omitted
+    inweight="subject_GM_weight.nii.gz",           # FSL -inweight
+    refweight=None,                                # FSL -refweight
     dof=12,                                     # FSL -dof 12
     cost="corratio",                            # FSL -cost corratio
     device="cuda:0",
@@ -137,13 +141,44 @@ For in-memory work, call the model directly:
 from fnit.flirt import TorchFLIRT
 
 model = TorchFLIRT(device="cuda:0")
-result = model(moving_volume, reference_volume, init=None)
+result = model(
+    moving_volume,
+    reference_volume,
+    init=None,
+    inweight=input_weight_volume,
+    refweight=None,
+)
 ```
 
-`moving_volume` and `reference_volume` can be NIfTI paths or single-frame
-`surfa.Volume` objects. `init` can be a matrix path or a finite homogeneous
-NumPy 4 x 4 matrix. The direct model call computes results without writing
+`moving_volume`, `reference_volume`, and optional weight images can be NIfTI
+paths or single-frame `surfa.Volume` objects. A weight must match its image
+shape and voxel-to-world matrix. `init` can be a matrix path or a finite
+homogeneous NumPy 4 x 4 matrix. The direct model call computes results without writing
 files.
+
+## UKB weighted-FA validation
+
+The UKB TBSS path first reproduces the FA preprocessing and two `-dilD`
+registration-weight operations. On the real validation subject, both generated
+volumes matched FSL voxelwise: zero differing voxels and maximum absolute
+difference 0.
+
+Using that exact input and weight, FSL 6.0.7.4 and weighted TorchFLIRT produced:
+
+| Metric | Result |
+|---|---:|
+| matrix RMS difference | 0.084262 mm |
+| moved-image Pearson | 0.999399 |
+| moved-image MAE | 0.004005 |
+| moved-image RMSE | 0.005819 |
+| FSL full command | 30.0 s |
+| TorchFLIRT H100 full command | 365.0 s |
+
+This weighted case is functionally close but exceeds the 0.05 mm matrix gate
+defined for the unweighted ten-case suite. Its QC therefore sets
+`validation_parameter_profile_matches_run=false`. The Python weighted path is
+also materially slower than FSL C++ on this case; it is retained because the
+TBSS branch requires the package PyTorch FLIRT implementation.
 
 ## Matrix coordinates
 

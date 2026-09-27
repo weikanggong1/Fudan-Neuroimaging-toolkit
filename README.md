@@ -18,6 +18,8 @@
 | dMRI | PyTorch EDDY | 逐 volume 运动、二次 EC、TOPUP 场、Jacobian 和离群切片校正 | [EDDY 文档](docs/eddy/README.md) |
 | dMRI | PyTorch DTIFIT | FSL 默认 OLS tensor、FA、MD、eigenvalue 和 eigenvector | [DTIFIT 文档](docs/dtifit/README.md) |
 | dMRI | PyTorch AMICO-NODDI | AMICO 2.0.3 数值等价的 NDI、ODI、FWF、方向和拟合误差 | [AMICO-NODDI 文档](docs/amico_noddi/README.md) |
+| dMRI | PyTorch MMORF | T1 scalar 与 DTI tensor 联合估计一个 reference-voxel warp | [MMORF 文档](docs/mmorf/README.md) |
+| dMRI | dMRI 参数图 pipeline | optional TOPUP → EDDY → DTIFIT/NODDI → TBSS 或 MMORF；统一九图输出 | [端到端文档](docs/dmri_pipeline/README.md) |
 | dMRI | PyTorch BEDPOSTX | 估计体素内纤维方向及不确定性，供概率追踪使用 | [BEDPOSTX 文档](docs/bedpostx/README.md) |
 | dMRI | PyTorch ProbtrackX | 种子到体素的概率追踪与脑区间连接矩阵 | [ProbtrackX 文档](docs/probtrackx/README.md) |
 | dMRI | UKBConnectome | 已校正 DWI 和 T1w 到四张结构连接矩阵；追踪和 SIFT2 为近似 | [connectome 文档](docs/connectome/README.md) |
@@ -33,9 +35,9 @@ recon-all 提供单被试命令行与 Python API；多被试并行仅提供 Pyth
 FastVBM 的两个分支共用仿射配准、FSL 坐标转换、GPU 重采样、仅非线性
 Jacobian 和调制步骤；差别只在非线性形变由 SynthMorph 或 TorchFNIRT 估计。
 
-FLIRT、FNIRT 和 FastVBM 的 0.9 十例验证状态见 [FastVBM 验证页](validation/fast_vbm/README.md)。TOPUP、EDDY、DTIFIT 和 AMICO-NODDI 的真实 UKB 格式 dMRI 对照见上表各子页；输入、输出、原命令对应关系、计时和数值边界均在各自页面。BEDPOSTX 和 ProbtrackX 的验证边界见其功能页。connectome 的固定端点矩阵赋值、官方 FreeSurfer 输入的 5TT/GMWMI、配准、atlas 阶段，以及公开 ds004666 的原始和 TOPUP/EDDY 校正 DWI 同输入 benchmark 均已记录；完整追踪和 SIFT2 结果尚未达到原软件输出一致性，见 [connectome 文档](docs/connectome/README.md)。
+FLIRT、FNIRT 和 FastVBM 的 0.9 十例验证状态见 [FastVBM 验证页](validation/fast_vbm/README.md)。TOPUP、EDDY、DTIFIT、AMICO-NODDI、MMORF 和 dMRI 参数图 pipeline 的真实 UKB 格式 dMRI 对照见上表各子页；输入、输出、原命令对应关系、计时和数值边界均在各自页面。BEDPOSTX 和 ProbtrackX 的验证边界见其功能页。connectome 的固定端点矩阵赋值、官方 FreeSurfer 输入的 5TT/GMWMI、配准、atlas 阶段，以及公开 ds004666 的原始和 TOPUP/EDDY 校正 DWI 同输入 benchmark 均已记录；完整追踪和 SIFT2 结果尚未达到原软件输出一致性，见 [connectome 文档](docs/connectome/README.md)。
 
-FLIRT、FNIRT、applywarp、TOPUP、EDDY、DTIFIT、BEDPOSTX 和 ProbtrackX 的 FSL 派生实现及随包提供的上游源码受 [FSL Software Licence 6.0](licenses/FSL-6.0.txt) 的非商业使用条款约束。各功能的移植范围和验证边界见对应子页面。
+FLIRT、FNIRT、applywarp、TOPUP、EDDY、DTIFIT、MMORF、dMRI TBSS 分支、BEDPOSTX 和 ProbtrackX 的 FSL 派生实现及随包提供的上游源码受 [FSL Software Licence 6.0](licenses/FSL-6.0.txt) 的非商业使用条款约束。各功能的移植范围和验证边界见对应子页面。
 
 ## 安装
 
@@ -95,7 +97,7 @@ python tools/setup_weights.py --model synthstrip --model synthmorph-joint \
   --model wmh-synthseg --model synthsr
 ```
 
-FastVBM 的 SynthMorph 分支从原始 T1w 开始时需要 `synthstrip.1.pt` 和 `synthmorph.deform.3.h5`；`python tools/setup_weights.py --model fast-vbm` 安装这两个后端的权重超集。TorchFNIRT 分支只需 SynthStrip；已有脑 mask 时该分支无需 checkpoint。GM 模板由用户提供，不由配置脚本下载。TorchFAST、TorchFLIRT、TorchFNIRT、TorchApplyWarp、TorchTOPUP、TorchEDDY、TorchDTIFIT、TorchAMICONODDI、TorchBEDPOSTX 和 TorchProbtrackX 不使用预训练权重。
+FastVBM 的 SynthMorph 分支从原始 T1w 开始时需要 `synthstrip.1.pt` 和 `synthmorph.deform.3.h5`；`python tools/setup_weights.py --model fast-vbm` 安装这两个后端的权重超集。TorchFNIRT 分支只需 SynthStrip；已有脑 mask 时该分支无需 checkpoint。GM 模板由用户提供，不由配置脚本下载。TorchFAST、TorchFLIRT、TorchFNIRT、TorchApplyWarp、TorchTOPUP、TorchEDDY、TorchDTIFIT、TorchAMICONODDI、TorchMMORF、TorchBEDPOSTX 和 TorchProbtrackX 不使用预训练权重。dMRI pipeline 的 TBSS 分支不使用权重；MMORF 分支仅需 SynthStrip 权重。
 
 recon-all 使用六个外置权重文件和 15 个模板/图谱文件（217,497,770 字节）。分别运行 `fnit-setup-weights --model recon-all --dest /path/to/weights` 和 `fnit-setup-recon-all-assets --dest /path/to/assets`；文件均按 SHA-256 校验。默认 Python 路径不需要 FreeSurfer license；可选 C++ 路径需在环境中设置外部 `FS_LICENSE`，并提供自行编译的程序目录。Git 仓库和 wheel 均不打包这些程序或许可证。调用与验收边界见[recon-all 文档](docs/recon_all/README.md)。
 
@@ -106,5 +108,5 @@ recon-all 使用六个外置权重文件和 15 个模板/图谱文件（217,497,
 ## 项目资料
 
 - 各功能的调用、输出、原版对应和数值比较见上表各子页；[代码结构](docs/ARCHITECTURE.md)说明共享接口。
-- [功能 benchmark 索引](validation/README.md)、[FastVBM 验证](validation/fast_vbm/README.md)、[TOPUP 验证](docs/topup/README.md)、[模型及源码来源](docs/provenance.json)。
+- [功能 benchmark 索引](validation/README.md)、[FastVBM 验证](validation/fast_vbm/README.md)、[dMRI pipeline 验证](validation/dmri_pipeline/README.md)、[MMORF 验证](validation/mmorf/README.md)和[模型及源码来源](docs/provenance.json)。
 - [第三方许可与引用](THIRD_PARTY_NOTICES.md)。

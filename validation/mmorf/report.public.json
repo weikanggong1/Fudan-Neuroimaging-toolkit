@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-27",
+  "scope": "one real T1w plus native DTI tensor and nine diffusion maps",
+  "data_release": "aggregate metrics only; no source image or subject identifier",
+  "pairing_assumption": "the T1w and dMRI files supplied in the validation layout were treated as one subject; identifier linkage was not independently audited",
+  "reference": {
+    "implementation": "FSL MMORF 0.3.2",
+    "commit": "1c1c13b8368f05e1a79a6dafe919d6b61df36bd6",
+    "templates": [
+      "MNI152_T1_1mm_brain",
+      "FSL_HCP1065_tensor_1mm",
+      "FMRIB58_FA_1mm"
+    ]
+  },
+  "fnit": {
+    "version": "0.13.0",
+    "device": "NVIDIA H100 PCIe 80GB",
+    "dtype": "float32",
+    "tf32": true,
+    "peak_cuda_memory_bytes": {
+      "synthstrip": 8315790848,
+      "t1_flirt": 1425188352,
+      "fa_flirt": 749825024,
+      "mmorf": 4544496640,
+      "apply_nine_maps": 986732544,
+      "maximum_stage": 8315790848
+    }
+  },
+  "output_contract": {
+    "warp_shape": [182, 218, 182, 3],
+    "standard_map_shape": [182, 218, 182],
+    "same_reference_affine": true,
+    "dtype": "float32",
+    "warp_units": "reference voxel relative pull displacement",
+    "standard_maps": ["FA", "MD", "L1", "L2", "L3", "MO", "ICVF", "OD", "ISOVF"]
+  },
+  "timing_seconds": {
+    "fnit_registration_chain": {
+      "synthstrip": 10.969125953968614,
+      "t1_flirt": 316.6698482139036,
+      "fa_flirt": 343.99474494019523,
+      "mmorf_including_io": 23.891102259978652,
+      "apply_nine_maps": 13.872252122033387,
+      "sum": 709.3970734900795
+    },
+    "fnit_mmorf_reported_compute": 11.118754470720887,
+    "official_mmorf_full_command": 947.62,
+    "official_mmorf_reported_registration": 925.128,
+    "mmorf_stage_wall_speed_ratio_official_over_fnit": 39.66413896220319,
+    "timing_note": "shared-node observation; the algorithms are not numerically equivalent"
+  },
+  "fnit_vs_official": {
+    "warp_all_components": {
+      "voxels": 5481285,
+      "pearson": 0.5276909564035486,
+      "mae_voxels": 1.4648635799984964,
+      "rmse_voxels": 1.9493491655303574
+    },
+    "warp_component_pearson": [0.6136259962389314, 0.45486761101465, 0.5636317014409681],
+    "jacobian": {
+      "voxels": 1827095,
+      "pearson": 0.4840083992329894,
+      "mae": 0.2148447374653181,
+      "rmse": 0.2848040703339974
+    },
+    "warped_scalar": {
+      "voxels": 1827095,
+      "pearson": 0.7818662660120838,
+      "mae": 135.72134720768952,
+      "rmse": 194.64168012273385
+    },
+    "standard_maps": {
+      "FA": {"pearson": 0.7473002386690627, "mae": 0.07818509627318072, "rmse": 0.11804786293765325},
+      "MD": {"pearson": 0.7748353914249431, "mae": 0.00023846436724041416, "rmse": 0.0004117707458698049},
+      "L1": {"pearson": 0.7682860728655105, "mae": 0.00025700874077191183, "rmse": 0.00043971018167766727},
+      "L2": {"pearson": 0.7751453962005959, "mae": 0.0002496883826048662, "rmse": 0.00041778542780788807},
+      "L3": {"pearson": 0.7730082144310029, "mae": 0.00025190401444342357, "rmse": 0.00041480857723879476},
+      "MO": {"pearson": 0.5004426249018734, "mae": 0.3171230956861322, "rmse": 0.42521531439126137},
+      "ICVF": {"pearson": 0.7095352478252526, "mae": 0.08293498819766305, "rmse": 0.13728797711877658},
+      "OD": {"pearson": 0.7436655745044458, "mae": 0.10775993969565632, "rmse": 0.15957350559282274},
+      "ISOVF": {"pearson": 0.74460236946057, "mae": 0.11784637150007979, "rmse": 0.20068541991343283}
+    },
+    "map_comparison_method": "the official MMORF warp was applied with FNIT apply_mmorf_warp to isolate warp-estimation differences"
+  },
+  "deformation_sanity": {
+    "fnit_warp_magnitude_voxel_quantiles_0_25_50_75_95_99_100": [
+      0.003909349384758156,
+      0.3387039644590229,
+      0.5524488123069948,
+      1.3692553664032925,
+      2.5792838499156643,
+      3.024940398186036,
+      3.6323600197288366
+    ],
+    "fnit_jacobian_quantiles_0_1_5_50_95_99_100": [
+      0.2999724745750427,
+      0.595664187669754,
+      0.744620355963707,
+      1.000295639038086,
+      1.2419912576675411,
+      1.4646081149578085,
+      2.13205885887146
+    ],
+    "fnit_nonpositive_jacobian_voxels": 0
+  },
+  "numerically_equivalent": false,
+  "known_algorithm_differences": [
+    "Adam instead of LM/MM second-order optimisation",
+    "trilinear control expansion instead of cubic B-spline parameterisation",
+    "membrane and bending penalties instead of later-level SPRED",
+    "one-way normalised scalar SSD and tensor L2 instead of the official symmetric objective",
+    "affine tensor rotation only; no nonlinear local finite-strain tensor reorientation"
+  ]
+}

@@ -2,12 +2,13 @@
 
 This directory contains unmodified FSL source-code snapshots consulted while
 implementing the PyTorch FLIRT, FNIRT, TOPUP, EDDY, DTIFIT, `applywarp`,
-BEDPOSTX, and ProbtrackX paths. The snapshots are retained for licence compliance and
+BEDPOSTX, ProbtrackX, and MMORF paths. The snapshots are retained for licence compliance and
 reproducible source provenance. They are package data: `fnit` does not compile
 or import them at runtime.
 
-The first eight components match the FSL 6.0.7.4 validation package manifest.
-The EDDY, DTIFIT, BEDPOSTX, and ProbtrackX rows are separate implementation reference snapshots:
+FLIRT through fugue and MMORF match the FSL 6.0.7.4 validation package
+manifest. The EDDY, DTIFIT, BEDPOSTX, and ProbtrackX rows are separate
+implementation reference snapshots:
 
 | component | tag | commit |
 | --- | --- | --- |
@@ -23,6 +24,7 @@ The EDDY, DTIFIT, BEDPOSTX, and ProbtrackX rows are separate implementation refe
 | fdt (DTIFIT) | `2202.6` | `f0287f09f09dc34e24b95c471127239be69b4022` |
 | fdt (BEDPOSTX) | `2604.0` | `03e2b6bd88423e77386356a4c75b14cca5d90c6c` |
 | ptx2 (ProbtrackX) | `2608.0` | `900e72c451c556d24d2629f9c2ffff12b2ee7bfc` |
+| MMORF | `v0.3.2` | `1c1c13b8368f05e1a79a6dafe919d6b61df36bd6` |
 
 [`manifest.json`](manifest.json) records the upstream repository, tag, commit,
 Git tree, deterministic `git archive` SHA-256, and SHA-256 of every distributed
@@ -43,6 +45,7 @@ ptx2 NIfTI test-data LFS pointers are omitted; their paths are recorded in
 - <https://git.fmrib.ox.ac.uk/fsl/eddy.git>
 - <https://git.fmrib.ox.ac.uk/fsl/fdt.git>
 - <https://git.fmrib.ox.ac.uk/fsl/ptx2.git>
+- <https://git.fmrib.ox.ac.uk/fsl/MMORF.git>
 
 These sources and the modified Python ports are distributed under the
 [FSL Software Licence, Release 6.0](../../../licenses/FSL-6.0.txt). The licence

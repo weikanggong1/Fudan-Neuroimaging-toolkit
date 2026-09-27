@@ -3,7 +3,7 @@ import numpy as np
 import torch
 from scipy.optimize import nnls
 
-from fnit.amico_noddi import TorchAMICONODDI
+from fnit.amico_noddi import AMICONODDIConfig, TorchAMICONODDI
 from fnit.amico_noddi.kernels import amico_scheme, direction_assets
 from fnit.amico_noddi.solver import nonnegative_quadratic
 
@@ -136,3 +136,8 @@ def _dataset_without_b0(tmp_path):
         tmp_path / "no_b0.bvec",
         tmp_path / "no_b0.bval",
     )
+
+
+def test_lut_batch_size_must_be_positive():
+    with np.testing.assert_raises_regex(ValueError, "lut_batch_size"):
+        AMICONODDIConfig(lut_batch_size=0)

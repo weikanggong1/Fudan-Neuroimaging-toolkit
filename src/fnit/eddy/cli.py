@@ -41,12 +41,11 @@ def run(args):
             args.index,
             args.bvecs,
             args.bvals,
-            args.topup,
             args.out,
         )
         if any(v is None for v in required):
             raise ValueError(
-                "direct mode requires --imain --mask --acqp --index --bvecs --bvals --topup --out"
+                "direct mode requires --imain --mask --acqp --index --bvecs --bvals --out"
             )
         result = TorchEDDY(args.device).run(
             args.imain,

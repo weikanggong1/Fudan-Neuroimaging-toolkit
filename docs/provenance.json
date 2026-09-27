@@ -13,7 +13,10 @@
     "python/packages/WMHSynthSeg/inference.py": "519093d8d24c33e2e233ded94fe8c3eb4e6b38160d2c9c2de6505f07da9eb326",
     "python/packages/WMHSynthSeg/utils.py": "a33eb48b466703a954441803e5a1a6aff716ff9755345f548c28ebeee34f6d42",
     "python/packages/WMHSynthSeg/unet3d/model.py": "bff1285de993212dc1382cf2d6e863083c54611e6413863f7c56182b2df3485a",
-    "python/packages/WMHSynthSeg/unet3d/buildingblocks.py": "43246ac1f68884df05cf36c19469981b2374d809ad2629636ed76187b2ac5bc7"
+    "python/packages/WMHSynthSeg/unet3d/buildingblocks.py": "43246ac1f68884df05cf36c19469981b2374d809ad2629636ed76187b2ac5bc7",
+    "mmorf_core.py": "bc19eec223b161a8240c61fe97bcecd19afda2b2aedfaed75267d81b58504a46",
+    "dmri_pipeline.py": "5aac7f4ae62ba57f5e7e7b269ea7f65e4d21be7abc81cc0913fe3aaeb403954d",
+    "dmri_tbss.py": "aa8772ef24b438b1e932481f9ab628d62b9495cc233b78d5ada89138e2360eba"
   },
   "weights_sha256": {
     "synthmorph.affine.2.h5": "1ac5304b683036e5177f5b4ad38fa09fcbbe7883e742d6fa5bdaedd0e619ced6",
@@ -110,13 +113,15 @@
     "vendored_fsl_tractography_reference_sources_included": true,
     "vendored_fsl_eddy_fdt_reference_source_included": true,
     "amico_source_included": false,
-    "amico_license_included": true
+    "amico_license_included": true,
+    "vendored_mmorf_reference_source_included": true,
+    "ukb_tbss_config_files_included": true
   },
   "fsl_registration_source_snapshots": {
-    "purpose": "complete unmodified upstream sources consulted for the modified PyTorch FLIRT, FNIRT, applywarp, TOPUP, EDDY, and DTIFIT implementations",
+    "purpose": "complete unmodified upstream sources consulted for the modified PyTorch FLIRT, FNIRT, applywarp, TOPUP, EDDY, DTIFIT, and MMORF implementations",
     "validation_baseline": "FSL 6.0.7.4",
     "manifest": "src/fnit/_vendor_fsl/manifest.json",
-    "manifest_sha256": "41fb0d3179c96202ccc97c1d05e43650c5d44f5a61899a246195d6fbe4e027b9",
+    "manifest_sha256": "539374d615e10c8bc22de21c44b02cd71b0f2eb60e667c192ac409bd50fb6d33",
     "license_file": "licenses/FSL-6.0.txt",
     "license_sha256": "137735ac0d0f075d58e85642972692b92073711752b273e7de7ed38c6147a8eb",
     "licence_scope": "non-commercial redistribution under the FSL Software Licence, Release 6.0; licence conditions and original and amended source code accompany the product",
@@ -220,6 +225,16 @@
         "directory": "src/fnit/_vendor_fsl/sources/fdt-2202.6",
         "role": "validation_target",
         "fsl_6_0_7_4_package": "fsl-fdt 2202.6"
+      },
+      {
+        "repository": "https://git.fmrib.ox.ac.uk/fsl/MMORF.git",
+        "tag": "v0.3.2",
+        "commit": "1c1c13b8368f05e1a79a6dafe919d6b61df36bd6",
+        "git_tree": "103b935ebc0b1145188dfff79f423c5be5e39617",
+        "git_archive_sha256": "5b1f160e3e3a1d76786fb28dfeb1640011e4c7a358bba3eafaa52b7fef3aa268",
+        "directory": "src/fnit/_vendor_fsl/sources/mmorf-0.3.2",
+        "role": "validation_target",
+        "fsl_6_0_7_4_package": "mmorf 0.3.2"
       }
     ],
     "runtime_dependency": false
@@ -332,5 +347,38 @@
     "maximum_scalar_map_absolute_error": 5.960464477539063e-08,
     "acceptance_threshold": 1e-07,
     "numerically_equivalent": true
+  },
+  "mmorf_reference": {
+    "repository": "https://git.fmrib.ox.ac.uk/fsl/MMORF.git",
+    "tag": "v0.3.2",
+    "commit": "1c1c13b8368f05e1a79a6dafe919d6b61df36bd6",
+    "git_tree": "103b935ebc0b1145188dfff79f423c5be5e39617",
+    "installed_reference": "FSL 6.0.7.4 mmorf 0.3.2",
+    "implementation": "src/fnit/mmorf",
+    "source_snapshot": "src/fnit/_vendor_fsl/sources/mmorf-0.3.2",
+    "warp_contract": "reference-grid relative displacement in reference voxel units",
+    "numerically_equivalent": false
+  },
+  "dmri_pipeline_reference": {
+    "ukb_repository": "https://git.fmrib.ox.ac.uk/falmagro/uk_biobank_pipeline_v_1.5",
+    "ukb_commit": "0e39a7f7eb76b55437942bfa3073512506b6c8fa",
+    "standard_maps": [
+      "FA",
+      "MD",
+      "L1",
+      "L2",
+      "L3",
+      "MO",
+      "ICVF",
+      "OD",
+      "ISOVF"
+    ],
+    "tbss_config_sha256": {
+      "oxford_s1.cnf": "3df6320e97300f9cef8a77b6c7c6306b8256351d5a7022d9966c076f24747227",
+      "oxford_s2.cnf": "b2fe418169f8ce1dde5e277a09e8edcdb6a0dc3f3065972ae69404020ef639ec",
+      "oxford_s3.cnf": "9d304dfd224b8e48f20364dcce77c7618722cf3a9bcd40d764a6d25ee8020eaf"
+    },
+    "fa_preprocessing_voxelwise_equivalent": true,
+    "registration_numerically_equivalent": false
   }
 }

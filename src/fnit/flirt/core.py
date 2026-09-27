@@ -306,6 +306,21 @@ def _blur(data, final_size, voxel_sizes):
     return result
 
 
+def _filter_weight(weight, transform):
+    """Port FLIRT filter_weight for a blur or subsampling transform."""
+    binary = (weight > 0.01).to(torch.float32)
+    support = transform(binary) > 0.9
+    return transform(weight) * support
+
+
+def _filter_image_with_weight(image, weight, transform):
+    """Port FLIRT weighted image filtering with its safe division."""
+    binary = (weight > 0.01).to(torch.float32)
+    denominator = transform(binary)
+    numerator = transform(image * binary)
+    return torch.where(denominator != 0, numerator / denominator, denominator)
+
+
 def _subsample_by_two(data):
     """NEWIMAGE's centred 3-D half-sampling filter."""
     device = data.device
@@ -431,7 +446,7 @@ def _coordinates_from_fsl_coefficients(coefficients, grid):
 
 
 class FSLCorrelationRatio:
-    """FSL 2111.2 unweighted correlation-ratio cost on a PyTorch device."""
+    """FSL 2111.2 correlation-ratio cost on a PyTorch device."""
 
     def __init__(
         self,
@@ -442,6 +457,8 @@ class FSLCorrelationRatio:
         *,
         bins,
         smooth_size=1.0,
+        reference_weight=None,
+        moving_weight=None,
     ):
         self.reference = reference.contiguous().to(dtype=torch.float32)
         self.moving = moving.contiguous().to(dtype=torch.float32)
@@ -450,6 +467,22 @@ class FSLCorrelationRatio:
         self.moving_voxel_sizes = tuple(float(v) for v in moving_voxel_sizes)
         self.bins = int(bins)
         self.smooth_size = float(smooth_size)
+        self.weighted = reference_weight is not None or moving_weight is not None
+        if self.weighted:
+            self.reference_weight = (
+                torch.ones_like(self.reference)
+                if reference_weight is None
+                else reference_weight.contiguous().to(dtype=torch.float32)
+            )
+            self.moving_weight = (
+                torch.ones_like(self.moving)
+                if moving_weight is None
+                else moving_weight.contiguous().to(dtype=torch.float32)
+            )
+            if self.reference_weight.shape != self.reference.shape:
+                raise ValueError("reference weight must match the reference grid")
+            if self.moving_weight.shape != self.moving.shape:
+                raise ValueError("input weight must match the input grid")
         if self.bins < 2:
             raise ValueError("bins must be at least two")
         # NEWIMAGE traverses x fastest, then y, then z.  Keeping that order
@@ -462,6 +495,10 @@ class FSLCorrelationRatio:
         )
         self.grid = torch.stack((x, y, z)).reshape(3, -1)
         self.reference_values = self.reference.permute(2, 1, 0).reshape(-1)
+        if self.weighted:
+            self.reference_weight_values = (
+                self.reference_weight.permute(2, 1, 0).reshape(-1)
+            )
         ref_min = self.reference_values.min()
         ref_max = self.reference_values.max()
         if float(ref_max - ref_min) == 0:
@@ -523,6 +560,13 @@ class FSLCorrelationRatio:
             weights = weight_per_axis.prod(dim=0).clamp_min_(0)
         else:
             weights = torch.ones_like(values)
+        if self.weighted:
+            moving_weights = _manual_trilinear(
+                self.moving_weight, interpolation_coordinates
+            )
+            weights = (
+                weights * moving_weights * self.reference_weight_values
+            ).clamp_min_(0)
         weights = weights * valid
         order = self.bin_sort_order
         lengths = self.bin_lengths
@@ -943,6 +987,8 @@ class _DefaultFLIRTEngine:
         device,
         angular_search=True,
         initial_matrix=None,
+        moving_weight=None,
+        reference_weight=None,
     ):
         self.device = torch.device(device)
         moving = _flip_to_radiological(
@@ -957,6 +1003,28 @@ class _DefaultFLIRTEngine:
         self.reference_original = torch.as_tensor(
             reference.copy(), dtype=torch.float32, device=self.device
         )
+        self.weighted = moving_weight is not None or reference_weight is not None
+        if self.weighted:
+            if moving_weight is None:
+                moving_weight = np.ones_like(moving, dtype=np.float32)
+            else:
+                moving_weight = _flip_to_radiological(
+                    moving_weight, moving_vox2world
+                )
+            if reference_weight is None:
+                reference_weight = np.ones_like(reference, dtype=np.float32)
+            else:
+                reference_weight = _flip_to_radiological(
+                    reference_weight, reference_vox2world
+                )
+            self.moving_weight_original = torch.as_tensor(
+                np.asarray(moving_weight, dtype=np.float32).copy(),
+                device=self.device,
+            )
+            self.reference_weight_original = torch.as_tensor(
+                np.asarray(reference_weight, dtype=np.float32).copy(),
+                device=self.device,
+            )
         self.moving_sizes = tuple(float(v) for v in moving_voxel_sizes)
         self.reference_sizes = tuple(float(v) for v in reference_voxel_sizes)
         self.minimum_sampling = float(
@@ -979,19 +1047,44 @@ class _DefaultFLIRTEngine:
         self.set_scale(8.0, force=True)
 
     def _prepare_reference_pyramid(self):
-        reference = _blur(
-            self.reference_original, self.minimum_sampling, self.reference_sizes
-        )
-        reference, sizes = _isotropic_resample(
-            reference, self.reference_sizes, self.minimum_sampling
-        )
+        def resample(value):
+            blurred = _blur(
+                value, self.minimum_sampling, self.reference_sizes
+            )
+            return _isotropic_resample(
+                blurred, self.reference_sizes, self.minimum_sampling
+            )[0]
+
+        if self.weighted:
+            reference = _filter_image_with_weight(
+                self.reference_original, self.reference_weight_original, resample
+            )
+            reference_weight = _filter_weight(
+                self.reference_weight_original, resample
+            )
+        else:
+            reference = resample(self.reference_original)
+            reference_weight = None
+        sizes = (self.minimum_sampling,) * 3
         self.references = {1: (reference, sizes)}
+        self.reference_weights = {1: reference_weight}
         current, current_sizes = reference, sizes
+        current_weight = reference_weight
         for scale, threshold in ((2, 1.9), (4, 3.9), (8, 7.9)):
             if self.minimum_sampling < threshold:
-                current = _subsample_by_two(current)
+                if self.weighted:
+                    previous_weight = current_weight
+                    current = _filter_image_with_weight(
+                        current, previous_weight, _subsample_by_two
+                    )
+                    current_weight = _filter_weight(
+                        previous_weight, _subsample_by_two
+                    )
+                else:
+                    current = _subsample_by_two(current)
                 current_sizes = tuple(value * 2 for value in current_sizes)
             self.references[scale] = (current, current_sizes)
+            self.reference_weights[scale] = current_weight
 
     def set_scale(self, scale, *, force=False):
         self.requested_scale = float(scale)
@@ -1004,12 +1097,27 @@ class _DefaultFLIRTEngine:
                 # reference pyramid, binning, and centre of rotation.
                 self.level.moving = self.moving_original
                 self.level.cost.moving = self.moving_original
+                if self.weighted:
+                    self.level.cost.moving_weight = self.moving_weight_original
                 self.level.cost.smooth_size = float(scale)
                 self._cache.clear()
             return
         key = int(scale) if int(scale) in self.references else 1
         reference, reference_sizes = self.references[key]
-        moving = _blur(self.moving_original, float(scale), self.moving_sizes)
+        if self.weighted:
+            transform = lambda value: _blur(
+                value, float(scale), self.moving_sizes
+            )
+            moving = _filter_image_with_weight(
+                self.moving_original, self.moving_weight_original, transform
+            )
+            moving_weight = _filter_weight(
+                self.moving_weight_original, transform
+            )
+            reference_weight = self.reference_weights[key]
+        else:
+            moving = _blur(self.moving_original, float(scale), self.moving_sizes)
+            moving_weight = reference_weight = None
         bins = max(2, int(256 / float(scale)))
         cost = FSLCorrelationRatio(
             reference,
@@ -1018,6 +1126,8 @@ class _DefaultFLIRTEngine:
             self.moving_sizes,
             bins=bins,
             smooth_size=float(scale),
+            reference_weight=reference_weight,
+            moving_weight=moving_weight,
         )
         sampling = np.diag([*self.moving_sizes, 1.0])
         centre = _centre_of_gravity(moving, sampling)
@@ -1338,7 +1448,9 @@ class TorchFLIRT:
             torch.backends.cudnn.allow_tf32 = True
         self.angular_search = bool(angular_search)
 
-    def __call__(self, moving, fixed, *, init=None):
+    def __call__(self, moving, fixed, *, init=None, inweight=None, refweight=None):
+        if self.dof == 6 and (inweight is not None or refweight is not None):
+            raise NotImplementedError("weight images are supported only for 12-DOF corratio")
         moving = _load_volume(moving, "moving")
         fixed = _load_volume(fixed, "fixed")
         moving_data = _single_frame(moving, "moving")
@@ -1347,6 +1459,27 @@ class TorchFLIRT:
         fixed_world = np.asarray(fixed.geom.vox2world.matrix, dtype=np.float64)
         moving_sizes = tuple(float(value) for value in moving.geom.voxsize)
         fixed_sizes = tuple(float(value) for value in fixed.geom.voxsize)
+
+        def load_weight(value, image, data, name):
+            if value is None:
+                return None
+            volume = _load_volume(value, name)
+            weight = _single_frame(volume, name)
+            if weight.shape != data.shape or not np.allclose(
+                volume.geom.vox2world.matrix,
+                image.geom.vox2world.matrix,
+                atol=1e-5,
+                rtol=0,
+            ):
+                raise ValueError(f"{name} must match its image grid")
+            if not np.isfinite(weight).all():
+                raise ValueError(f"{name} must contain only finite values")
+            return np.asarray(weight, dtype=np.float32)
+
+        moving_weight = load_weight(inweight, moving, moving_data, "inweight")
+        reference_weight = load_weight(
+            refweight, fixed, fixed_data, "refweight"
+        )
         moving_fsl = voxel_to_fsl_scaled_mm(
             moving_world, moving_data.shape, moving_sizes
         )
@@ -1384,6 +1517,8 @@ class TorchFLIRT:
             device=self.device,
             angular_search=self.angular_search,
             initial_matrix=initial_matrix,
+            moving_weight=moving_weight,
+            reference_weight=reference_weight,
         )
         cost, matrix = engine.run(qsform, dof=self.dof)
         moved_data = _resample_output(
@@ -1415,6 +1550,8 @@ class TorchFLIRT:
             and self.angular_search
             and init is None
             and self.dof == 12
+            and inweight is None
+            and refweight is None
         )
         qc = {
             "backend": "pytorch-fsl-flirt-2111.2-source-derived",
@@ -1440,6 +1577,8 @@ class TorchFLIRT:
             },
             "source_commit": FSL_FLIRT_COMMIT,
             "initial_matrix_used": init is not None,
+            "input_weight_used": inweight is not None,
+            "reference_weight_used": refweight is not None,
             "validation_matrix_gate_mm": 0.05 if self.dof == 12 else None,
             "validation_matrix_metric": (
                 "FSL rmsdiff about the reference intensity-weighted COG" if self.dof == 12
@@ -1492,6 +1631,8 @@ class TorchFLIRT:
         output=None,
         omat=None,
         init=None,
+        inweight=None,
+        refweight=None,
         overwrite=False,
     ):
         """Register paths or volumes and atomically write FSL-style outputs."""
@@ -1504,10 +1645,16 @@ class TorchFLIRT:
         selected = _preflight_outputs(
             _image_output_path(output),
             Path(omat).expanduser() if omat is not None else None,
-            (input, reference, init),
+            (input, reference, init, inweight, refweight),
             overwrite,
         )
-        result = self(input, reference, init=init)
+        result = self(
+            input,
+            reference,
+            init=init,
+            inweight=inweight,
+            refweight=refweight,
+        )
         _write_outputs_atomic(result, selected, overwrite)
         return result
 

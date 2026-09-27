@@ -1,5 +1,5 @@
 """Standalone PyTorch brain MRI inference tools."""
-__version__ = '0.12.1'
+__version__ = '0.13.0'
 
 
 def __getattr__(name):
@@ -53,6 +53,15 @@ def __getattr__(name):
     if name in ('TorchAMICONODDI', 'AMICONODDIResult', 'AMICONODDIConfig'):
         from importlib import import_module
         module = import_module('.amico_noddi', __name__)
+        return getattr(module, name)
+    if name in ('TorchMMORF', 'MMORFResult', 'MMORFConfig', 'apply_mmorf_warp'):
+        from importlib import import_module
+        module = import_module('.mmorf', __name__)
+        return getattr(module, name)
+    if name in ('DMRIPipeline', 'DMRIPipelineResult', 'STANDARD_MAP_NAMES',
+                'TorchTBSS', 'TBSSResult', 'TBSSConfig'):
+        from importlib import import_module
+        module = import_module('.dmri_pipeline', __name__)
         return getattr(module, name)
     if name in ('TorchBEDPOSTX', 'BedpostXResult'):
         from importlib import import_module

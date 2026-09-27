@@ -1,0 +1,659 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-27",
+  "feature": "single-subject dMRI parameter-map pipeline",
+  "scope": "one real UKB-format AP/PA acquisition; aggregate metrics only",
+  "data_release": "no source image, subject identifier, private path, or weight file",
+  "reference": {
+    "ukb_pipeline": "v1.5 commit 0e39a7f7eb76b55437942bfa3073512506b6c8fa",
+    "fsl": "6.0.7.4",
+    "mmorf": "0.3.2 commit 1c1c13b8368f05e1a79a6dafe919d6b61df36bd6"
+  },
+  "hardware": {
+    "candidate": "NVIDIA H100 PCIe 80 GB",
+    "shared_node": true,
+    "dtype": "float32 images; documented float64 solvers",
+    "tf32": true,
+    "float16_or_bfloat16": false
+  },
+  "input": {
+    "dwi_shape": [
+      104,
+      104,
+      72,
+      105
+    ],
+    "b0": 5,
+    "b_approximately_1000": 50,
+    "b_approximately_2000": 50,
+    "ap_and_pa": true,
+    "t1_pairing_assumption": "T1w and dMRI supplied in the validation layout were treated as one subject; identifier linkage was not independently audited"
+  },
+  "common_output_contract": {
+    "maps": [
+      "FA",
+      "MD",
+      "L1",
+      "L2",
+      "L3",
+      "MO",
+      "ICVF",
+      "OD",
+      "ISOVF"
+    ],
+    "shape": [
+      182,
+      218,
+      182
+    ],
+    "dtype": "float32",
+    "same_mni152_fmrib58_1mm_affine": true,
+    "all_finite_and_nonempty": true,
+    "tbss_skeleton_maps": true
+  },
+  "timing_seconds": {
+    "fnit_tbss_end_to_end_wall": 2054.62,
+    "fnit_tbss_internal": {
+      "topup_and_eddy_preparation": 95.81698721041903,
+      "eddy": 47.486898004077375,
+      "dtifit": 16.576533935964108,
+      "noddi": 37.625045157969,
+      "registration_and_map_propagation": 1851.0545869888738
+    },
+    "official_tbss_registration_and_nine_map_propagation_wall": 976.88,
+    "fnit_mmorf_end_to_end_wall": 372.28,
+    "fnit_mmorf_internal": {
+      "topup_and_eddy_preparation": 98.54730344610289,
+      "eddy": 48.88180216308683,
+      "dtifit": 17.24620278691873,
+      "noddi": 36.40068136807531,
+      "registration_and_map_propagation": 165.33290557703003
+    },
+    "amico_lut_batch_400_wall": 49.19,
+    "amico_lut_batch_400_internal": 40.97985565662384,
+    "timing_note": "shared-node observations; official TBSS timing starts from prepared native maps and is compared separately from the raw-to-output candidate wall time"
+  },
+  "peak_cuda_memory_bytes": {
+    "tbss_registration": 4552955392,
+    "mmorf_registration": 4578051072,
+    "amico_full_500_direction_run": 17062867968,
+    "amico_lut_batch_400_final": 13630161408
+  },
+  "fa_preprocessing_and_weight": {
+    "different_voxels_vs_fsl": 0,
+    "maximum_absolute_error": 0.0
+  },
+  "weighted_flirt": {
+    "matrix_rmsdiff_mm": 0.0842615,
+    "moved_pearson": 0.999399,
+    "moved_mae": 0.004005,
+    "moved_rmse": 0.005819,
+    "fsl_cpu_seconds": 30.0,
+    "fnit_h100_seconds": 365.0,
+    "passes_0_05_mm_gate": false
+  },
+  "native_maps_end_to_end_vs_existing_ukb_outputs": {
+    "FA": {
+      "same_shape": true,
+      "same_affine": true,
+      "union_support": {
+        "voxels": 292397,
+        "pearson": 0.5861569970001622,
+        "mae": 0.10181525268208615,
+        "rmse": 0.1755371294324284
+      },
+      "common_support": {
+        "voxels": 237954,
+        "pearson": 0.8761339377945604,
+        "mae": 0.05975620011874971,
+        "rmse": 0.08787048267962802
+      }
+    },
+    "MD": {
+      "same_shape": true,
+      "same_affine": true,
+      "union_support": {
+        "voxels": 292463,
+        "pearson": 0.5475369317494377,
+        "mae": 0.0003927185797632615,
+        "rmse": 0.0006883182420657347
+      },
+      "common_support": {
+        "voxels": 237954,
+        "pearson": 0.898340890146437,
+        "mae": 0.000181144004976835,
+        "rmse": 0.00028918333029282004
+      }
+    },
+    "L1": {
+      "same_shape": true,
+      "same_affine": true,
+      "union_support": {
+        "voxels": 292463,
+        "pearson": 0.4369940296487216,
+        "mae": 0.00046462973780319537,
+        "rmse": 0.0008157539619526152
+      },
+      "common_support": {
+        "voxels": 237954,
+        "pearson": 0.8864738041817164,
+        "mae": 0.00019855760405023464,
+        "rmse": 0.0003036469738044723
+      }
+    },
+    "L2": {
+      "same_shape": true,
+      "same_affine": true,
+      "union_support": {
+        "voxels": 292463,
+        "pearson": 0.5672506851997026,
+        "mae": 0.00039299600755303416,
+        "rmse": 0.0006813882552249284
+      },
+      "common_support": {
+        "voxels": 237954,
+        "pearson": 0.8973192055692065,
+        "mae": 0.00019119124779659925,
+        "rmse": 0.0002994951417968738
+      }
+    },
+    "L3": {
+      "same_shape": true,
+      "same_affine": true,
+      "union_support": {
+        "voxels": 292463,
+        "pearson": 0.6340224732959359,
+        "mae": 0.00035478443624427543,
+        "rmse": 0.0006111370413466305
+      },
+      "common_support": {
+        "voxels": 237954,
+        "pearson": 0.9007340518298944,
+        "mae": 0.0001907619080753782,
+        "rmse": 0.0002972198507906748
+      }
+    },
+    "MO": {
+      "same_shape": true,
+      "same_affine": true,
+      "union_support": {
+        "voxels": 292463,
+        "pearson": 0.4135792649263962,
+        "mae": 0.46317977631381746,
+        "rmse": 0.6091759814597536
+      },
+      "common_support": {
+        "voxels": 237954,
+        "pearson": 0.4660987374441063,
+        "mae": 0.4389640115738983,
+        "rmse": 0.6011292214741787
+      }
+    },
+    "ICVF": {
+      "same_shape": true,
+      "same_affine": true,
+      "union_support": {
+        "voxels": 272910,
+        "pearson": -0.00206971847454545,
+        "mae": 0.1940084018090306,
+        "rmse": 0.3155462717443454
+      },
+      "common_support": {
+        "voxels": 213609,
+        "pearson": 0.6288431177965349,
+        "mae": 0.08966640967209294,
+        "rmse": 0.13399009273337223
+      }
+    },
+    "OD": {
+      "same_shape": true,
+      "same_affine": true,
+      "union_support": {
+        "voxels": 291834,
+        "pearson": 0.5068616246289507,
+        "mae": 0.16964281973985115,
+        "rmse": 0.27060128380298415
+      },
+      "common_support": {
+        "voxels": 237912,
+        "pearson": 0.7576931912318913,
+        "mae": 0.10693828486473549,
+        "rmse": 0.17278972166660755
+      }
+    },
+    "ISOVF": {
+      "same_shape": true,
+      "same_affine": true,
+      "union_support": {
+        "voxels": 231142,
+        "pearson": 0.608481368322222,
+        "mae": 0.19771242672182812,
+        "rmse": 0.2992324306004011
+      },
+      "common_support": {
+        "voxels": 133428,
+        "pearson": 0.8537079967406367,
+        "mae": 0.13238292517392772,
+        "rmse": 0.19049852191264718
+      }
+    }
+  },
+  "tbss_end_to_end_vs_fresh_official": {
+    "standard_maps": {
+      "FA": {
+        "voxels": 1472454,
+        "pearson": 0.7538712218678826,
+        "mae": 0.09091004937876873,
+        "rmse": 0.1291323994693183
+      },
+      "MD": {
+        "voxels": 1897288,
+        "pearson": 0.49361445566768075,
+        "mae": 0.00041002889953948457,
+        "rmse": 0.0006469335679102843
+      },
+      "L1": {
+        "voxels": 1897288,
+        "pearson": 0.457489649395347,
+        "mae": 0.0004548462652194033,
+        "rmse": 0.0007170088910704391
+      },
+      "L2": {
+        "voxels": 1897288,
+        "pearson": 0.5036885534175837,
+        "mae": 0.00041558903328180435,
+        "rmse": 0.0006456058792668034
+      },
+      "L3": {
+        "voxels": 1897288,
+        "pearson": 0.5300326941626566,
+        "mae": 0.0003993278435395611,
+        "rmse": 0.0006131127990246279
+      },
+      "MO": {
+        "voxels": 1897288,
+        "pearson": 0.31315624510512013,
+        "mae": 0.3689996720563617,
+        "rmse": 0.47996939739681266
+      },
+      "ICVF": {
+        "voxels": 1861645,
+        "pearson": 0.4709675722590633,
+        "mae": 0.14439299614364068,
+        "rmse": 0.21968355507726173
+      },
+      "OD": {
+        "voxels": 1897057,
+        "pearson": 0.5345116890360744,
+        "mae": 0.16338213261566706,
+        "rmse": 0.2319546523094835
+      },
+      "ISOVF": {
+        "voxels": 1857975,
+        "pearson": 0.4696080936807454,
+        "mae": 0.19427500666364578,
+        "rmse": 0.29203976711590623
+      }
+    },
+    "skeleton_maps": {
+      "FA": {
+        "voxels": 137570,
+        "pearson": 0.6944630353850065,
+        "mae": 0.12210527186885684,
+        "rmse": 0.16824619336730454
+      },
+      "MD": {
+        "voxels": 137570,
+        "pearson": 0.4063119753810471,
+        "mae": 0.00020578501758425,
+        "rmse": 0.00041829163794358755
+      },
+      "L1": {
+        "voxels": 137570,
+        "pearson": 0.45646926244866837,
+        "mae": 0.00024413420804478717,
+        "rmse": 0.00043772286171519544
+      },
+      "L2": {
+        "voxels": 137570,
+        "pearson": 0.4424685789812376,
+        "mae": 0.00022935815750341784,
+        "rmse": 0.00043037888687489625
+      },
+      "L3": {
+        "voxels": 137570,
+        "pearson": 0.43346613597666495,
+        "mae": 0.00023913657391695284,
+        "rmse": 0.0004424632766066319
+      },
+      "MO": {
+        "voxels": 137570,
+        "pearson": 0.4942999911039951,
+        "mae": 0.35225396153891697,
+        "rmse": 0.47044345712859237
+      },
+      "ICVF": {
+        "voxels": 137515,
+        "pearson": 0.3861005369474241,
+        "mae": 0.1007765399029565,
+        "rmse": 0.16030217741190847
+      },
+      "OD": {
+        "voxels": 137570,
+        "pearson": 0.5630769911342066,
+        "mae": 0.12775030845622254,
+        "rmse": 0.1929379650323531
+      },
+      "ISOVF": {
+        "voxels": 136205,
+        "pearson": 0.3930523612483647,
+        "mae": 0.11822749143066656,
+        "rmse": 0.20888322627417472
+      }
+    },
+    "grid_contract": {
+      "FA": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "skeleton_same_shape": true,
+        "skeleton_same_affine": true,
+        "skeleton_same_dtype": true
+      },
+      "MD": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "skeleton_same_shape": true,
+        "skeleton_same_affine": true,
+        "skeleton_same_dtype": true
+      },
+      "L1": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "skeleton_same_shape": true,
+        "skeleton_same_affine": true,
+        "skeleton_same_dtype": true
+      },
+      "L2": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "skeleton_same_shape": true,
+        "skeleton_same_affine": true,
+        "skeleton_same_dtype": true
+      },
+      "L3": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "skeleton_same_shape": true,
+        "skeleton_same_affine": true,
+        "skeleton_same_dtype": true
+      },
+      "MO": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "skeleton_same_shape": true,
+        "skeleton_same_affine": true,
+        "skeleton_same_dtype": true
+      },
+      "ICVF": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "skeleton_same_shape": true,
+        "skeleton_same_affine": true,
+        "skeleton_same_dtype": true
+      },
+      "OD": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "skeleton_same_shape": true,
+        "skeleton_same_affine": true,
+        "skeleton_same_dtype": true
+      },
+      "ISOVF": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "skeleton_same_shape": true,
+        "skeleton_same_affine": true,
+        "skeleton_same_dtype": true
+      }
+    }
+  },
+  "tbss_matched_native_maps_vs_fresh_official": {
+    "standard_maps": {
+      "FA": {
+        "voxels": 1480196,
+        "pearson": 0.879641997465398,
+        "mae": 0.05237026636158116,
+        "rmse": 0.08284572051768983
+      },
+      "MD": {
+        "voxels": 1796280,
+        "pearson": 0.6551002455516192,
+        "mae": 0.000304769787192102,
+        "rmse": 0.0005394920339712991
+      },
+      "L1": {
+        "voxels": 1796280,
+        "pearson": 0.5916324722509013,
+        "mae": 0.0003482364297028892,
+        "rmse": 0.0006264084523182147
+      },
+      "L2": {
+        "voxels": 1796280,
+        "pearson": 0.6709720413819881,
+        "mae": 0.0003064957973561518,
+        "rmse": 0.0005330910399632194
+      },
+      "L3": {
+        "voxels": 1796280,
+        "pearson": 0.704715279559093,
+        "mae": 0.0002856091595161067,
+        "rmse": 0.0004930384110450111
+      },
+      "MO": {
+        "voxels": 1796280,
+        "pearson": 0.5861393130366768,
+        "mae": 0.2710797445082002,
+        "rmse": 0.3780665404533766
+      },
+      "ICVF": {
+        "voxels": 1762892,
+        "pearson": 0.5201426375667508,
+        "mae": 0.11041860630688946,
+        "rmse": 0.19915605273993306
+      },
+      "OD": {
+        "voxels": 1794246,
+        "pearson": 0.6666499148925428,
+        "mae": 0.11946236626280288,
+        "rmse": 0.1909439797645089
+      },
+      "ISOVF": {
+        "voxels": 1729312,
+        "pearson": 0.7129719410481667,
+        "mae": 0.13002136881780021,
+        "rmse": 0.2215327902209291
+      }
+    },
+    "skeleton_maps": {
+      "FA": {
+        "voxels": 137828,
+        "pearson": 0.8937472232779684,
+        "mae": 0.053004476628961426,
+        "rmse": 0.0845422284315102
+      },
+      "MD": {
+        "voxels": 137828,
+        "pearson": 0.5619069128796529,
+        "mae": 0.00010430233879919896,
+        "rmse": 0.00025743538722195625
+      },
+      "L1": {
+        "voxels": 137828,
+        "pearson": 0.6535724962675451,
+        "mae": 0.00012796144272549185,
+        "rmse": 0.0002884975983452443
+      },
+      "L2": {
+        "voxels": 137828,
+        "pearson": 0.636938103963617,
+        "mae": 0.00011262124192405288,
+        "rmse": 0.0002571853485777235
+      },
+      "L3": {
+        "voxels": 137828,
+        "pearson": 0.6237878565371444,
+        "mae": 0.0001137355041282304,
+        "rmse": 0.0002615142392784382
+      },
+      "MO": {
+        "voxels": 137828,
+        "pearson": 0.746084637222481,
+        "mae": 0.21577158028233523,
+        "rmse": 0.3309534774915694
+      },
+      "ICVF": {
+        "voxels": 137792,
+        "pearson": 0.7556076678963699,
+        "mae": 0.04808629129917507,
+        "rmse": 0.09034353231184769
+      },
+      "OD": {
+        "voxels": 137828,
+        "pearson": 0.7677821565890903,
+        "mae": 0.06056110754999508,
+        "rmse": 0.1123227275059936
+      },
+      "ISOVF": {
+        "voxels": 132855,
+        "pearson": 0.630840355133862,
+        "mae": 0.05451672264599987,
+        "rmse": 0.12124805733592758
+      }
+    },
+    "grid_contract": {
+      "FA": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "skeleton_same_shape": true,
+        "skeleton_same_affine": true,
+        "skeleton_same_dtype": true
+      },
+      "MD": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "skeleton_same_shape": true,
+        "skeleton_same_affine": true,
+        "skeleton_same_dtype": true
+      },
+      "L1": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "skeleton_same_shape": true,
+        "skeleton_same_affine": true,
+        "skeleton_same_dtype": true
+      },
+      "L2": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "skeleton_same_shape": true,
+        "skeleton_same_affine": true,
+        "skeleton_same_dtype": true
+      },
+      "L3": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "skeleton_same_shape": true,
+        "skeleton_same_affine": true,
+        "skeleton_same_dtype": true
+      },
+      "MO": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "skeleton_same_shape": true,
+        "skeleton_same_affine": true,
+        "skeleton_same_dtype": true
+      },
+      "ICVF": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "skeleton_same_shape": true,
+        "skeleton_same_affine": true,
+        "skeleton_same_dtype": true
+      },
+      "OD": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "skeleton_same_shape": true,
+        "skeleton_same_affine": true,
+        "skeleton_same_dtype": true
+      },
+      "ISOVF": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "skeleton_same_shape": true,
+        "skeleton_same_affine": true,
+        "skeleton_same_dtype": true
+      }
+    }
+  },
+  "amico_lut_batch_400_vs_500": {
+    "NDI": {
+      "shape_equal": true,
+      "exact_equal": true,
+      "maximum_absolute_error": 0.0,
+      "nonzero_difference_count": 0
+    },
+    "ODI": {
+      "shape_equal": true,
+      "exact_equal": true,
+      "maximum_absolute_error": 0.0,
+      "nonzero_difference_count": 0
+    },
+    "FWF": {
+      "shape_equal": true,
+      "exact_equal": true,
+      "maximum_absolute_error": 0.0,
+      "nonzero_difference_count": 0
+    },
+    "direction": {
+      "shape_equal": true,
+      "exact_equal": true,
+      "maximum_absolute_error": 0.0,
+      "nonzero_difference_count": 0
+    },
+    "RMSE": {
+      "shape_equal": true,
+      "exact_equal": true,
+      "maximum_absolute_error": 0.0,
+      "nonzero_difference_count": 0
+    },
+    "passed": true
+  },
+  "numerical_boundaries": {
+    "common_nine_map_contract": true,
+    "flirt_complete_numerical_equivalence": false,
+    "fnirt_complete_numerical_equivalence": false,
+    "mmorf_complete_numerical_equivalence": false,
+    "tbss_final_full_pull_jacobian_minimum": -0.01894403249025345,
+    "tbss_topology_gate_passed": false,
+    "note": "same names, shape, affine, dtype, and parameter definitions do not imply equal deformation estimates"
+  }
+}

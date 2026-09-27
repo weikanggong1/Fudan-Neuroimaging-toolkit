@@ -32,6 +32,14 @@ def build_parser(prog="fnit-flirt"):
         "-init", "--init",
         help="initial input-to-reference FSL scaled-mm matrix",
     )
+    parser.add_argument(
+        "-inweight", "--inweight",
+        help="input-space voxelwise registration weight",
+    )
+    parser.add_argument(
+        "-refweight", "--refweight",
+        help="reference-space voxelwise registration weight",
+    )
     parser.add_argument("-dof", type=int, choices=(6, 12), default=12,
                         help="degrees of freedom; choose 6 with -cost normmi")
     parser.add_argument(
@@ -59,6 +67,8 @@ def main(argv=None, *, prog="fnit-flirt"):
             output=args.output,
             omat=args.omat,
             init=args.init,
+            inweight=args.inweight,
+            refweight=args.refweight,
             dof=args.dof,
             cost=args.cost,
             device=args.device,

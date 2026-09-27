@@ -22,6 +22,8 @@ FastVBM 的配准链位于 `flirt/`、`fnirt/`、`applywarp/`、`fast_vbm/regist
 | TorchEDDY | [UKB dMRI 运动、EC 和离群切片校正](eddy/README.md) |
 | TorchDTIFIT | [FSL 默认 OLS tensor fit](dtifit/README.md) |
 | TorchAMICONODDI | [AMICO 2.0.3 数值等价的 NODDI fitting](amico_noddi/README.md) |
+| TorchMMORF | [scalar/tensor shared-warp registration](mmorf/README.md) |
+| dMRI pipeline | [optional TOPUP 到九张标准空间参数图](dmri_pipeline/README.md) |
 | TorchBEDPOSTX | [体素内纤维方向估计](bedpostx/README.md) |
 | TorchProbtrackX | [概率纤维束追踪与连接矩阵](probtrackx/README.md) |
 | UKBConnectome | [已校正 DWI 与 T1w 到四张结构连接矩阵](connectome/README.md) |
@@ -41,6 +43,8 @@ from fnit import (
     TorchEDDY, EDDYResult, EDDYConfig,
     TorchDTIFIT, DTIFITResult,
     TorchAMICONODDI, AMICONODDIResult, AMICONODDIConfig,
+    TorchMMORF, MMORFResult, MMORFConfig, apply_mmorf_warp,
+    DMRIPipeline, DMRIPipelineResult, TorchTBSS, TBSSResult,
     prepare_ukb_eddy, run_ukb_eddy,
     TorchBEDPOSTX, BedpostXResult,
     TorchProbtrackX, ProbTrackXResult,
@@ -50,6 +54,6 @@ from fnit import (
 )
 ```
 
-学习模型在构造时加载权重并选择 `device="cpu"` 或 `device="cuda:0"`；TorchFAST、TorchFLIRT、TorchFNIRT、TorchApplyWarp、TorchTOPUP、TorchEDDY、TorchDTIFIT、TorchAMICONODDI、TorchBEDPOSTX 和 TorchProbtrackX 不加载预训练权重。UKBConnectome 默认使用 CUDA，从已校正 DWI 起步；其 SynthSeg 分割可由调用方提供，或在单次调用时加载官方权重；也可读取官方 FreeSurfer `aparc+aseg.mgz`。单次调用返回带几何信息的结果对象，由调用者选择保存字段。FastVBM 组合 SynthStrip、TorchFAST、TorchFLIRT 和一个可选非线性后端。`registration_backend="synthmorph"` 延迟加载官方 deform checkpoint；`registration_backend="fnirt"` 构造无 checkpoint 的 TorchFNIRT。
+学习模型在构造时加载权重并选择 `device="cpu"` 或 `device="cuda:0"`；TorchFAST、TorchFLIRT、TorchFNIRT、TorchApplyWarp、TorchTOPUP、TorchEDDY、TorchDTIFIT、TorchAMICONODDI、TorchMMORF、TorchBEDPOSTX 和 TorchProbtrackX 不加载预训练权重。dMRI pipeline 的 MMORF 分支调用 SynthStrip，因此该分支需要 SynthStrip 权重。UKBConnectome 默认使用 CUDA，从已校正 DWI 起步；其 SynthSeg 分割可由调用方提供，或在单次调用时加载官方权重；也可读取官方 FreeSurfer `aparc+aseg.mgz`。单次调用返回带几何信息的结果对象，由调用者选择保存字段。FastVBM 组合 SynthStrip、TorchFAST、TorchFLIRT 和一个可选非线性后端。`registration_backend="synthmorph"` 延迟加载官方 deform checkpoint；`registration_backend="fnirt"` 构造无 checkpoint 的 TorchFNIRT。
 
 权重查找顺序为显式路径、`FNIT_WEIGHTS`、配置脚本保存的目录、用户缓存目录、已设置的 `FREESURFER_HOME/models/`；见[权重说明](WEIGHTS.md)。各功能的单被试 Python 返回值、保存方式和命令行参数见上表链接。

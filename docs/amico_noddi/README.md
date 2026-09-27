@@ -2,7 +2,7 @@
 
 `fnit.amico_noddi.TorchAMICONODDI` 复现 [AMICO 2.0.3](https://github.com/daducci/AMICO/tree/v2.0.3) 的 NODDI fitting，并把三个求解阶段放到 PyTorch/CUDA。实现固定对应 commit `df540093b60240c38a6ff2ea4ceb1181c4f3e936`，不在运行时导入或调用 AMICO。
 
-代码使用相同的 b-value 取整、DIPY OLS 主方向、order-12 spherical harmonics、500-direction LUT、145-atom dictionary 和三阶段求解：完整 dictionary NNLS、positive elastic-net support selection、support-constrained NNLS debias。response kernel 与影像为 float32；活动集线性代数为 float64，以保持 SPAMS 求解结果。CUDA float32 运算允许 TF32，没有使用 float16 或 bfloat16。
+代码使用相同的 b-value 取整、DIPY OLS 主方向、order-12 spherical harmonics、500-direction LUT、145-atom dictionary 和三阶段求解：完整 dictionary NNLS、positive elastic-net support selection、support-constrained NNLS debias。response kernel 与影像为 float32；活动集线性代数为 float64，以保持 SPAMS 求解结果。CUDA float32 运算允许 TF32，没有使用 float16 或 bfloat16。500 个 LUT direction 默认按最多 400 个一批求解；各 direction 相互独立，分批只限制显存，不改变模型或精度。可用 `AMICONODDIConfig(lut_batch_size=...)` 调整。
 
 该功能不下载模型权重。包内包含 AMICO 2.0.3 的 500-direction、hash 和 gradient 表；许可见 [`licenses/AMICO-2.0.txt`](../../licenses/AMICO-2.0.txt)。kernel 根据每例 bval/bvec 在运行时生成。
 
@@ -113,6 +113,8 @@ NDI、ODI 和 FWF 的最大差异为 float32 的一个 ULP 量级；RMSE 与方�
 | FNIT 0.12.1 | NVIDIA H100 PCIe 80 GB | 32.87 s（3 次中位数） | 12.77 s | 1.76 GB | 12.43 GB |
 
 计时来自共享节点上的 fresh-process 运行，包含 Python 启动、kernel、方向估计、fitting 和 NIfTI 读写。官方记录为 1 次；最终代码的 FNIT 三次为 `29.44/32.87/34.19 s`，表中报告中位数。GPU wall time 中位数为官方 CPU 的 1.12 倍。活动集优化将精确版初始的总时间从 108.24 s 降至 32.87 s（3.29×），solver 从 92.42 s 降至 12.77 s（7.24×）；主要改动是只构造 active atom 小矩阵、batched Cholesky、病态子集 CG fallback 和 top-k index extraction。代价是峰值显存从 7.78 GB 增至 12.43 GB。
+
+FNIT 0.13.0 将默认 LUT batch 限为 400。用端到端流程产生的同一 DWI、mask 和梯度重新运行，wall time 为 49.19 s，内部计时 40.98 s，PyTorch peak allocation 为 13.63 GB，`nvidia-smi` 观察约 16.5 GiB。与 500-direction 单批版本相比，NDI、ODI、FWF、方向和 RMSE 全部逐元素相同。该复测用于验证最终显存修改；上表仍保留与官方 AMICO 成对运行的 0.12.1 时间。
 
 ![AMICO 2.0.3 与 FNIT 0.12.1 的 NDI、ODI、FWF 和逐体素绝对差](figures/amico_noddi_comparison.png)
 

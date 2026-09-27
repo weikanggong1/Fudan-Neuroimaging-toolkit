@@ -161,6 +161,8 @@ def _run_flirt(args):
         output=args.output,
         omat=args.omat,
         init=args.init,
+        inweight=args.inweight,
+        refweight=args.refweight,
         dof=args.dof,
         cost=args.cost,
         device=args.device,
@@ -335,7 +337,7 @@ def _run_connectome(args):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(prog='fnit')
-    parser.add_argument('--version', action='version', version='Fudan Neuroimaging Toolkit (FNIT) 0.12.1')
+    parser.add_argument('--version', action='version', version='Fudan Neuroimaging Toolkit (FNIT) 0.13.0')
     commands = parser.add_subparsers(dest='command', required=True)
     strip = commands.add_parser('synthstrip', help='brain extraction')
     strip.add_argument('-i', '--image', required=True)
@@ -431,7 +433,7 @@ def main(argv=None):
         'flirt',
         help=(
             'Source-derived PyTorch implementation of the supported FLIRT '
-            '12-DOF correlation-ratio path'
+            '12-DOF correlation-ratio or 6-DOF normmi path'
         ),
         allow_abbrev=False)
     flirt.add_argument('-in', '--in', dest='input', required=True,
@@ -441,8 +443,10 @@ def main(argv=None):
     flirt.add_argument('-out', '--out', dest='output')
     flirt.add_argument('-omat', '--omat')
     flirt.add_argument('-init', '--init')
-    flirt.add_argument('-dof', type=int, choices=(12,), default=12)
-    flirt.add_argument('-cost', choices=('corratio',), default='corratio')
+    flirt.add_argument('-inweight', '--inweight')
+    flirt.add_argument('-refweight', '--refweight')
+    flirt.add_argument('-dof', type=int, choices=(6, 12), default=12)
+    flirt.add_argument('-cost', choices=('corratio', 'normmi'), default='corratio')
     flirt.add_argument('--device')
     flirt.add_argument('--threads', type=int, default=1)
     flirt.add_argument('--overwrite', action='store_true')
@@ -559,6 +563,10 @@ def main(argv=None):
     add_eddy_parser(commands)
     add_dtifit_parser(commands)
     add_amico_noddi_parser(commands)
+    from .mmorf.cli import add_parser as add_mmorf_parser
+    from .dmri_pipeline.cli import add_parser as add_dmri_pipeline_parser
+    add_mmorf_parser(commands)
+    add_dmri_pipeline_parser(commands)
     from .bedpostx.cli import add_parser as add_bedpostx_parser
     add_bedpostx_parser(commands)
     from .probtrackx.cli import add_parser as add_probtrackx_parser

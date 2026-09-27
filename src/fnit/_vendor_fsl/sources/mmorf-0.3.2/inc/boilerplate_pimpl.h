@@ -1,0 +1,45 @@
+//////////////////////////////////////////////////////////////////////////////////////////////
+/// \file
+/// \brief
+/// \details
+/// \author Frederik Lange
+/// \date
+/// \copyright Copyright (C) 2018 University of Oxford
+//////////////////////////////////////////////////////////////////////////////////////////////
+#ifndef GUARD
+#define GUARD
+
+#include <memory>
+
+/// Multi-Modal Registration Framework
+namespace MMORF
+{
+  class CLASS : public PARENT
+  {
+    public:
+////////////////////////////////////////////////////////////////////////////////
+// Rule of 5
+////////////////////////////////////////////////////////////////////////////////
+      /// Default dtor
+      ~CLASS();
+      /// Move ctor
+      CLASS(CLASS&& rhs);
+      /// Move assignment operator
+      CLASS& operator=(CLASS&& rhs);
+      /// Copy ctor
+      CLASS(const CLASS& rhs);
+      /// Copy assignment operator
+      CLASS& operator=(const CLASS& rhs);
+////////////////////////////////////////////////////////////////////////////////
+// Class Specific Functions
+////////////////////////////////////////////////////////////////////////////////
+    /// Default ctor
+      CLASS();
+    private:
+      /// Forward declaration
+      class Impl;
+      /// Pointer to actual implementation object
+      std::unique_ptr<Impl> pimpl_;
+  }; // CLASS
+} // MMORF
+#endif // GUARD
