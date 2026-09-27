@@ -1,0 +1,181 @@
+{
+  "date": "2026-09-28",
+  "input": "sub-02_brain.nii.gz",
+  "input_sha256": "ada1fc44fd439bf42736decadab78dad73aabf3619e417cc88a7634c7c3e8078",
+  "shape": [
+    156,
+    256,
+    256
+  ],
+  "host": "headcw",
+  "device": "cpu",
+  "threads": 4,
+  "torch": "2.5.1",
+  "old_pipeline_sha256": "4eab9eabba7b57a4fc39bd496884eaca219acfd30f7c14f73e347277ec2d4ff7",
+  "new_pipeline_sha256": "54d3555c67a20e4df080cc7ba24d21d009cc877da4986204bff0fb3699409ffd",
+  "old_load_and_infer_seconds": 38.391092830337584,
+  "new_load_and_infer_seconds": 45.99552964605391,
+  "old_save_8_seconds": 1.5683165155351162,
+  "new_save_8_seconds": 2.02277157548815,
+  "old_tissue_means": [
+    188.874267578125,
+    417.4841003417969,
+    665.56494140625
+  ],
+  "new_tissue_means": [
+    188.874267578125,
+    417.4841003417969,
+    665.56494140625
+  ],
+  "old_tissue_variances": [
+    12438.2734375,
+    6724.03369140625,
+    2647.388427734375
+  ],
+  "new_tissue_variances": [
+    12438.2734375,
+    6724.03369140625,
+    2647.388427734375
+  ],
+  "surfa_import_blocked": true,
+  "surfa_loaded": false,
+  "outputs": {
+    "pve_csf": {
+      "dtype": "float32",
+      "shape": [
+        156,
+        256,
+        256
+      ],
+      "different_voxels": 0,
+      "max_abs_diff": 0.0,
+      "affine_max_abs_diff": 0.0,
+      "header_equal": true,
+      "file_bytes_equal": true,
+      "sha256": "ddb961bac991dfabf27bf13488d60f33bf81fd6fb712de1442d2a3b5a20e6ff8"
+    },
+    "pve_gm": {
+      "dtype": "float32",
+      "shape": [
+        156,
+        256,
+        256
+      ],
+      "different_voxels": 0,
+      "max_abs_diff": 0.0,
+      "affine_max_abs_diff": 0.0,
+      "header_equal": true,
+      "file_bytes_equal": true,
+      "sha256": "1c6754b3a2dd0a4dcf1beac324343bbd573b2ac612616f2c5b73f421b0c7eccf"
+    },
+    "pve_wm": {
+      "dtype": "float32",
+      "shape": [
+        156,
+        256,
+        256
+      ],
+      "different_voxels": 0,
+      "max_abs_diff": 0.0,
+      "affine_max_abs_diff": 0.0,
+      "header_equal": true,
+      "file_bytes_equal": true,
+      "sha256": "eb8b00b565ac5188c02cabf00f71a1e67f12912af52c75c60946ea0c55ee7675"
+    },
+    "hard_segmentation": {
+      "dtype": "int32",
+      "shape": [
+        156,
+        256,
+        256
+      ],
+      "different_voxels": 0,
+      "max_abs_diff": 0.0,
+      "affine_max_abs_diff": 0.0,
+      "header_equal": true,
+      "file_bytes_equal": true,
+      "sha256": "e3af4cc58344518f8ff6dab3d5b7d78e37bfa217fc5d8227f4c5b5ce3b335906"
+    },
+    "pve_segmentation": {
+      "dtype": "int32",
+      "shape": [
+        156,
+        256,
+        256
+      ],
+      "different_voxels": 0,
+      "max_abs_diff": 0.0,
+      "affine_max_abs_diff": 0.0,
+      "header_equal": true,
+      "file_bytes_equal": true,
+      "sha256": "79011c0362dc8238726c282f57c5dd18a4fcab2984c7fd0a23bef0bd944c326d"
+    },
+    "mixel_type": {
+      "dtype": "int32",
+      "shape": [
+        156,
+        256,
+        256
+      ],
+      "different_voxels": 0,
+      "max_abs_diff": 0.0,
+      "affine_max_abs_diff": 0.0,
+      "header_equal": true,
+      "file_bytes_equal": true,
+      "sha256": "134504f44038617075452edaeaa5e35e4704a2c63e9ff19ff3d11fd562cbfdd0"
+    },
+    "bias_field": {
+      "dtype": "float32",
+      "shape": [
+        156,
+        256,
+        256
+      ],
+      "different_voxels": 0,
+      "max_abs_diff": 0.0,
+      "affine_max_abs_diff": 0.0,
+      "header_equal": true,
+      "file_bytes_equal": true,
+      "sha256": "50b3b1ada7cf4e630c8f74bf31ec119947a0ccaf2c8fb19db4cf6aed42224f4e"
+    },
+    "restored": {
+      "dtype": "float32",
+      "shape": [
+        156,
+        256,
+        256
+      ],
+      "different_voxels": 0,
+      "max_abs_diff": 0.0,
+      "affine_max_abs_diff": 0.0,
+      "header_equal": true,
+      "file_bytes_equal": true,
+      "sha256": "91c763538ed7dc25177739ebdb3bda9c52b5f98bc807228d5d50ef77aa69f927"
+    }
+  },
+  "gpu_validation": "gpucw1 GPU1 CUDA initialization OOM; no candidate GPU paired run",
+  "regression_tests": {
+    "normal_environment": "8 passed",
+    "surfa_import_blocked": "7 passed, 1 unrelated invalid-command case deselected"
+  },
+  "cli_real_crop_smoke": {
+    "input": "sub-02_brain.nii.gz 64x64x64 crop",
+    "surfa_import_blocked": true,
+    "output_count": 8,
+    "output_shape": [
+      64,
+      64,
+      64
+    ]
+  },
+  "legacy_in_memory_compatibility": {
+    "input_type": "surfa.image.framed.Volume",
+    "output_type": "surfa.image.framed.Volume",
+    "shape": [
+      64,
+      64,
+      64
+    ],
+    "affine_max_abs_diff": 0.0
+  }
+}
