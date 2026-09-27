@@ -92,7 +92,7 @@ SynthMorph 使用学习得到的 deform 网络，在初始 FLIRT 仿射上估计
 
 ## 真实数据 benchmark
 
-本次用同一例 UK Biobank T1：BIDS NIfTI 由该例 FreeSurfer `orig/001.mgz` 转换，**不能核实它与扫描仪原始 T1 文件逐字节相同**。FNIT 和主对照 FSL 共用这张 T1 经 SynthStrip 提取的脑图，以及同一张 MNI152 2 mm 脑模板。FSL 版本为 6.0.7.22。另运行了 FSL 整头 T1→整头模板；该补充对照的 FLIRT 初始矩阵也用两张整头影像估计，不能与同输入 brain-to-brain 结果逐项比较，也不是上面的推荐命令。
+本次用同一例 UK Biobank 已去脑 T1 NIfTI：其网格与同被试 T1 ZIP 中的 `orig/001.mgz` 一致，但强度不同，具体生成步骤未知，**不能视为扫描仪原始 T1 文件**。FNIT 和主对照 FSL 共用这张 T1 经 SynthStrip 提取的脑图，以及同一张 MNI152 2 mm 脑模板。FSL 版本为 6.0.7.22。另运行了 FSL 整头 T1→整头模板；该补充对照的 FLIRT 初始矩阵也用两张整头影像估计，不能与同输入 brain-to-brain 结果逐项比较，也不是上面的推荐命令。
 
 | 同输入指标 | PyTorch SynthMorph | PyTorch FNIRT | FSL FLIRT+FNIRT |
 |---|---:|---:|---:|

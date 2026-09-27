@@ -82,7 +82,12 @@ def __getattr__(name):
                 'register_t1_to_mni', 'resample_world',
                 'ICAResult', 'decompose_spatial_ica', 'AromaResult',
                 'run_aroma_pipeline', 'classify_aroma', 'denoise_aroma',
-                'clean_confounds', 'motion_regressors'):
+                'clean_confounds', 'motion_regressors',
+                'SurfaceHemisphere', 'SurfaceProjectionResult', 'run_surface_projection',
+                'SurfaceQCResult', 'make_ribbon_goodvoxels',
+                'SurfacePipelineInputs', 'SurfacePipelineResult', 'run_surface_from_mni',
+                'MNISurfacePair', 'MNISurfaceResult', 'SurfacePreparationResult',
+                'prepare_mni_surface_geometry', 'prepare_fs_sphere_projection_inputs'):
         from . import fmri
         return getattr(fmri, name)
     if name in ('UKBConnectome', 'ConnectomeResult'):

@@ -1,6 +1,6 @@
 # 体积静息态 fMRI：原始 BIDS 到 MNI152 2 mm
 
-`run_fmri_pipeline` 一次处理一个 BIDS BOLD run。它先用 SynthStrip 提取 SBRef（缺失时取 BOLD 中间帧）与 T1 的脑掩膜，再运行运动校正和 FEAT 核心处理、TorchFAST 白质/脑脊液分割、EPI→T1 BBR、T1→MNI 非线性配准、单被试空间 PICA、ICA-AROMA 和可选 WM/CSF/运动回归。高层入口把 SBRef 掩膜作为 `brain_mask` 传给 FEAT；独立 `run_feat_core` 在未提供 `brain_mask` 时则从运动校正后的 EPI 均值提取掩膜，两条入口的默认掩膜输入不同。最后把清理后的 4D BOLD 通过合成变换一次插值到 MNI152 2 mm 网格。GPU 矩阵运算默认启用 TF32，影像以 float32 保存。
+`run_fmri_pipeline` 一次处理一个 BIDS BOLD run。它先用 SynthStrip 提取 SBRef（缺失时取 BOLD 中间帧）与 T1 的脑掩膜，再运行运动校正和 FEAT 核心处理、TorchFAST 白质/脑脊液分割、EPI→T1 BBR、T1→MNI 非线性配准、单被试空间 PICA、ICA-AROMA 和可选 WM/CSF/运动回归。高层入口把 SBRef 掩膜作为 `brain_mask` 传给 FEAT；独立 `run_feat_core` 在未提供 `brain_mask` 时则从运动校正后的 EPI 均值提取掩膜，两条入口的默认掩膜输入不同。最后把清理后的 4D BOLD 通过合成变换一次插值到 MNI152 2 mm 网格。若提供同被试预先生成的结构表面及 HCP 模板，随后可按[表面投影页](surface.md)生成 fsLR32k 皮层与皮层下 CIFTI。GPU 矩阵运算默认启用 TF32，影像以 float32 保存。
 
 这条流程没有 GDC 和 B0 畸变估计。指定 UKB rfMRI ZIP 没有原始 B0 场图/幅度图，也没有 GDC warp；遇到与 BOLD 关联的 BIDS 场图但缺少已估计 warp 时，FEAT 核心会明确报错。清理使用 ICA-AROMA，不能与 UKB 的 FIX 输出逐体素相同。配准仍须和官方同输入结果对照；特别是当前 PyTorch FNIRT 的 T1 强度模型尚未覆盖官方 T1 配置的非线性强度/偏置项。
 
@@ -45,6 +45,10 @@ result = run_fmri_pipeline(
     t1w_image=None,                               # 多张 BIDS T1w 时指定其中一张的绝对路径
     mni_brain_mask="/absolute/path/MNI152_T1_2mm_brain_mask.nii.gz",  # 与模板同网格的 3D mask；None 时对模板做 SynthStrip
     registration_backend="synthmorph",            # T1→MNI 形变：synthmorph 或 fnirt
+    surface_inputs=None,                          # 已准备的 MNI 网格、ROI 与注册球面；默认不投影表面
+    surface_subject_dir=None,                     # 预生成的同被试结构表面根目录；与 surface_inputs 二选一
+    surface_assets_dir=None,                      # HCP 公开 fsLR 模板根目录；与 surface_subject_dir 同时提供
+    wb_command="wb_command",                      # Connectome Workbench 可执行文件或绝对路径
     synthstrip_weights="/absolute/path/synthstrip.1.pt",  # 脑提取权重；缓存就绪时可为 None
     synthmorph_weights="/absolute/path/synthmorph.deform.3.h5",  # SynthMorph 形变权重；fnirt 分支不用
     ica_n_components=None,                        # PICA 自动定阶；整数表示指定 IC 数
@@ -96,13 +100,14 @@ fnit-fmri run --bids-root /absolute/path/bids --subject 0001 \
 | `aroma/filtered_func_data_aroma.nii.gz` | 原生 EPI 网格的 AROMA 清理后 4D BOLD。启用额外回归时另有 `aroma/filtered_func_data_aroma_confounds.nii.gz`。 |
 | `masks/brain_MNI152_2mm.nii.gz` | MNI 网格上 EPI 掩膜与 MNI 模板脑掩膜的交集；uint8。 |
 | `filtered_func_data_clean_MNI152_2mm.nii.gz` | 最终 MNI152 2 mm float32 BOLD；脑掩膜外为 0，时间轴继承 BOLD 的 TR。 |
-| `pipeline_report.json` | 不含被试编号的影像尺寸、TR、实际 IC 数、回归配置、各阶段耗时以及 PyTorch 峰值已分配/已保留显存；不代表整卡显存。 |
+| `surface/prepared/`、`surface/qc/`、`surface/projection/` | 仅启用表面阶段时生成；分别保存 MNI 网格/ROI、ribbon 与 goodvoxels、fsLR32k CIFTI。逐项结构见[表面投影页](surface.md)。 |
+| `pipeline_report.json` | 不含被试编号的影像尺寸、TR、实际 IC 数、回归配置、各阶段耗时和 PyTorch 峰值显存；启用表面阶段时还记录 CIFTI、覆盖率报告与 goodvoxels 的相对路径。不代表整卡显存。 |
 
 CSF/WM 组织掩膜由 TorchFAST 部分体积分数经 BBR 投到 EPI，再在 EPI 脑掩膜内以 0.8 阈值生成，仅用于可选回归。ICA-AROMA 分类采用[官方 ICA-AROMA](https://github.com/maartenmennes/ICA-AROMA)的三张 MNI152 2 mm CSF、edge、out 掩膜，文件随 `fnit` 安装；阈值 IC 图先从 EPI 空间经 BBR 和 T1→MNI 形变投到相同网格。分类结果仍受本包 PICA 成分和配准差异影响。`regress_wm`、`regress_csf` 和 `regress_motion` 只改变 AROMA 后的结果，不回写 `feat/filtered_func_data.nii.gz`。
 
 ## 实测对照和边界
 
-本例真实 UKB BOLD 为 88×88×64×490、TR 0.735 秒。rfMRI ZIP 中的 BOLD/SBRef 是原始影像；该数据位置没有可核实的 scanner raw T1w。本次整链测试将同被试 FreeSurfer `orig/001.mgz` 用 NiBabel 转为 NIfTI 放入私有 BIDS 测试目录；它是真实 T1 衍生影像，不能作为原始 T1w 的验证证据。模板与权重也仅从服务器已有文件读取。私有影像不随仓库发布，公开结果仅有汇总标量。
+本例真实 UKB BOLD 为 88×88×64×490、TR 0.735 秒。rfMRI ZIP 中的 BOLD/SBRef 是原始影像；该数据位置没有可核实的 scanner raw T1w。本次整链测试的 BIDS T1w 是同被试已有的去脑 T1 NIfTI；其网格与 UKB T1 ZIP 中的 `orig/001.mgz` 一致，但强度并非逐体素相同，具体生成步骤未知，不能作为扫描仪原始 T1w 的验证证据。模板与权重也仅从服务器已有文件读取。私有影像不随仓库发布，公开结果仅有汇总标量。
 
 各函数的同输入精度和耗时分别列于 [FEAT 核心](feat.md)、[BBR](bbr.md)、[PICA](pica.md)、[非线性配准](normalization.md)和[AROMA/回归](aroma_confounds.md)。整链的最终实测结果与官方 no-GDC/no-B0 FEAT 对照见 [fMRI 验证页](../../validation/fmri/README.md)。
 

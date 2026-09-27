@@ -14,7 +14,7 @@
 | sMRI、fMRI、dMRI 通用 | PyTorch FLIRT | 12-DOF 仿射及 6-DOF normmi 刚性；reference-grid image 和 FSL scaled-mm `.mat` | [FLIRT 文档](docs/flirt/README.md) |
 | sMRI、fMRI、dMRI | PyTorch FNIRT | GM/T1 或 TBSS FA 非线性配准；intent-2007 coefficients、warped image 和 Jacobian | [FNIRT 文档](docs/fnirt/README.md) |
 | sMRI、fMRI、dMRI 通用 | GPU applywarp | 应用 FSL dense warp、FNIRT coefficient、premat 和 postmat | [applywarp 文档](docs/applywarp/README.md) |
-| fMRI | BIDS→MNI152 2 mm 体积流程 | SynthStrip、FEAT 核心、FAST/BBR、PICA/AROMA、可选混杂回归；T1→MNI 可选 SynthMorph/FNIRT。跳过 GDC/B0 | [fMRI 入口、输出与真实数据对照](docs/fmri/README.md) |
+| fMRI | BIDS→MNI152 2 mm；可选 fsLR32k 投影 | SynthStrip、FEAT 核心、FAST/BBR、PICA/AROMA；已有结构表面时用 Workbench 生成皮层与皮层下 CIFTI。跳过 GDC/B0 | [体积流程](docs/fmri/README.md)、[表面投影](docs/fmri/surface.md) |
 | dMRI | PyTorch TOPUP | UKB AP/PA b0 选择、Hz 场估计、畸变校正和 FSL 输出 | [TOPUP 文档](docs/topup/README.md) |
 | dMRI | PyTorch EDDY | 逐 volume 运动、二次 EC、TOPUP 场、Jacobian 和离群切片校正 | [EDDY 文档](docs/eddy/README.md) |
 | dMRI | PyTorch DTIFIT | FSL 默认 OLS tensor、FA、MD、eigenvalue 和 eigenvector | [DTIFIT 文档](docs/dtifit/README.md) |
@@ -27,7 +27,7 @@
 | sMRI | recon-all（Python/CUDA + Conda C++） | T1w 到核心分割、双侧皮层表面、顶点指标和脑区统计 | [recon-all 文档](docs/recon_all/README.md) |
 | fMRI | MS-HBM 17 网络 | fsLR32k 静息态时序到个体网络划分，纯 CPU | [MS-HBM 文档](src/fnit/mshbm/README.md) |
 
-fMRI 的 BIDS 单 run 入口为 `fnit-fmri run` 或 `run_fmri_pipeline`。本例缺少原始 B0/GDC 输入，因而与跳过这两步的官方流程比较；清理使用 ICA-AROMA，完整 UKB FIX 输出不能逐体素等价。运行需提供 MNI152 T1 2 mm 模板路径，详见功能页。
+fMRI 的 BIDS 单 run 入口为 `fnit-fmri run` 或 `run_fmri_pipeline`。本例缺少原始 B0/GDC 输入，因而与跳过这两步的官方流程比较；清理使用 ICA-AROMA，完整 UKB FIX 输出不能逐体素等价。运行需提供 MNI152 T1 2 mm 模板路径；可选的 fsLR32k 投影还需同被试预先生成的结构表面，使用 FS sphere 注册，不能视为 UKB MSMAll 输出。详见功能页。
 
 recon-all 提供单被试命令行与 Python API；多被试并行仅提供 Python API。其他功能的 Python、命令行与批量入口以各自子页面为准。仓库提供 [T1w 样例](examples/README.md)和 [FLAIR 样例](examples/WMH.md)。
 
@@ -66,7 +66,7 @@ python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
 
 ### Conda GPU 环境
 
-仓库提供独立的 [`environment.yml`](environment.yml)，固定本项目在 gpucw1 验证的 Python 3.11、PyTorch 2.5.1、CUDA 11.8 和 ProbtrackX GPU 所需的 Triton 3.1.0 组合，并包含 benchmark 绘图使用的 Matplotlib 和 Pillow。必须从仓库根目录创建环境，因为配置最后以 editable 模式安装当前源码：
+仓库提供独立的 [`environment.yml`](environment.yml)，固定本项目在 gpucw1 验证的 Python 3.11、PyTorch 2.5.1、CUDA 11.8 和 ProbtrackX GPU 所需的 Triton 3.1.0 组合，并包含表面投影使用的 Connectome Workbench 2.1.0，以及 benchmark 绘图使用的 Matplotlib 和 Pillow。必须从仓库根目录创建环境，因为配置最后以 editable 模式安装当前源码：
 
 ```bash
 git clone https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit.git
@@ -104,7 +104,7 @@ conda activate fnit-recon-all-cpp
 
 Git 仓库及 wheel 均不包含模型权重。下面从 FreeSurfer 官方地址下载各功能的默认权重，校验 SHA-256，并记录权重目录；推理时不会自动联网。GPU recon-all 的 33 类 SynthSeg 与 WMH-SynthSeg 是不同模型，分别用 `--model synthseg` 和 `--model wmh-synthseg` 安装。
 
-fMRI 的 FEAT 算子、PICA、ICA-AROMA、FAST/BBR 和混杂回归无需模型权重；端到端默认脑提取需 SynthStrip，SynthMorph 形变分支另需 deform 权重。运行 `fnit-setup-weights --model fmri` 部署这两份权重；PyTorch FNIRT 分支只需 SynthStrip。MNI152 2 mm 模板及脑掩膜由用户提供；[fMRI 文档](docs/fmri/README.md)给出官方模板数据包获取方式。
+fMRI 的 FEAT 算子、PICA、ICA-AROMA、FAST/BBR 和混杂回归无需模型权重；端到端默认脑提取需 SynthStrip，SynthMorph 形变分支另需 deform 权重。运行 `fnit-setup-weights --model fmri` 部署这两份权重；PyTorch FNIRT 分支只需 SynthStrip。MNI152 2 mm 模板及脑掩膜由用户提供；[fMRI 文档](docs/fmri/README.md)给出官方模板数据包获取方式。表面投影还需运行 `fnit-setup-fmri-surface-assets --output-dir /absolute/path/hcp_surface_assets` 部署逐文件 SHA-256 校验的 HCP 公开模板；被试白质面、软脑膜面、球面及 `wmparc.mgz` 需另行提供，详见[表面页](docs/fmri/surface.md)。
 
 ```bash
 python tools/setup_weights.py --model synthstrip --model synthmorph-joint \

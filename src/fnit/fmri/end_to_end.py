@@ -15,6 +15,8 @@ from .aroma_pipeline import AromaResult, run_aroma_pipeline
 from .bids import locate_bids_inputs
 from .normalization import T1MNIResult, register_t1_to_mni, resample_world
 from .pipeline import FeatCoreResult, run_feat_core
+from .surface_pipeline import SurfacePipelineInputs, SurfacePipelineResult, run_surface_from_mni
+from .surface_prepare import prepare_fs_sphere_projection_inputs
 
 
 @dataclass(frozen=True)
@@ -29,6 +31,7 @@ class FMRIPipelineResult:
     bbr_matrix: Path
     t1_to_mni: T1MNIResult
     timing_seconds: dict[str, float]
+    surface: SurfacePipelineResult | None = None
 
 
 def _save_mask(data, reference, path):
@@ -79,6 +82,10 @@ def run_fmri_pipeline(
     t1w_image=None,
     mni_brain_mask=None,
     registration_backend="synthmorph",
+    surface_inputs: SurfacePipelineInputs | None = None,
+    surface_subject_dir=None,
+    surface_assets_dir=None,
+    wb_command="wb_command",
     synthstrip_weights=None,
     synthmorph_weights=None,
     ica_n_components=None,
@@ -104,6 +111,10 @@ def run_fmri_pipeline(
     fieldmaps or GDC warp are available in the specified UKB example. Any
     associated BIDS fieldmaps currently cause an explicit error in FEAT core.
     """
+    if surface_inputs is not None and surface_subject_dir is not None:
+        raise ValueError("surface_inputs and surface_subject_dir are mutually exclusive")
+    if (surface_subject_dir is None) != (surface_assets_dir is None):
+        raise ValueError("surface_subject_dir and surface_assets_dir must be provided together")
     output = Path(output_dir).expanduser().resolve()
     clean_mni = output / "filtered_func_data_clean_MNI152_2mm.nii.gz"
     if clean_mni.exists() and not overwrite:
@@ -132,6 +143,14 @@ def run_fmri_pipeline(
         reconstruction=reconstruction, echo=echo,
     )
     t1w = _select_t1(inputs, t1w_image)
+    if surface_subject_dir is not None:
+        scanner_orig = Path(surface_subject_dir).expanduser().resolve() / "mri/orig/001.mgz"
+        structural = nib.load(str(scanner_orig))
+        selected_t1 = nib.load(str(t1w))
+        if structural.shape != selected_t1.shape or not np.allclose(
+            structural.affine, selected_t1.affine, rtol=0, atol=1e-4
+        ):
+            raise ValueError("surface subject scanner T1 and selected BIDS T1 have different grids")
     mask_dir = output / "masks"
     mask_dir.mkdir(exist_ok=True)
     reference = _reference_image(inputs, output / "reference_epi.nii.gz")
@@ -279,6 +298,30 @@ def run_fmri_pipeline(
         output_mask=mask_mni, batch_size=batch_size, device=selected,
     )
     timing["mni_resampling"] = time.perf_counter() - started
+    surface = None
+    if surface_subject_dir is not None:
+        started = time.perf_counter()
+        prepared = prepare_fs_sphere_projection_inputs(
+            subject_dir=surface_subject_dir, pull_ras=t1_to_mni.pull_ras,
+            initial_t1_to_mni_world=t1_to_mni.moving_to_fixed_world,
+            mni_reference=mni_template, hcp_assets_dir=surface_assets_dir,
+            output_dir=output / "surface" / "prepared",
+            wb_command=wb_command, device=selected, overwrite=overwrite,
+        )
+        surface_inputs = SurfacePipelineInputs(
+            left=prepared.left, right=prepared.right,
+            subject_rois=prepared.subject_rois, atlas_rois=prepared.atlas_rois,
+            wb_command=wb_command,
+        )
+        timing["surface_preparation"] = time.perf_counter() - started
+    if surface_inputs is not None:
+        started = time.perf_counter()
+        surface = run_surface_from_mni(
+            clean_mni=clean_mni, mni_reference=mni_template,
+            inputs=surface_inputs, output_dir=output / "surface",
+            overwrite=overwrite,
+        )
+        timing["surface_projection"] = time.perf_counter() - started
     timing["total"] = sum(timing.values())
     report = output / "pipeline_report.json"
     report.write_text(json.dumps({
@@ -310,10 +353,22 @@ def run_fmri_pipeline(
             "feat_filtered": str(feat.filtered_func_data.relative_to(output)),
             "aroma_thresholded_ic_mni": "aroma/ica_thresholded_MNI152_2mm.nii.gz",
             "aroma_clean_native": str(clean_native.relative_to(output)),
+            "surface_dtseries": (
+                str(surface.projection.dtseries.relative_to(output))
+                if surface is not None else None
+            ),
+            "surface_coverage_report": (
+                str(surface.projection.coverage_report.relative_to(output))
+                if surface is not None else None
+            ),
+            "surface_goodvoxels": (
+                str(surface.qc.goodvoxels.relative_to(output))
+                if surface is not None and surface.qc is not None else None
+            ),
         },
     }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return FMRIPipelineResult(
         clean_mni=clean_mni, mask_mni=mask_mni, report=report,
         feat=feat, aroma=aroma, bbr_matrix=bbr_matrix,
-        t1_to_mni=t1_to_mni, timing_seconds=timing,
+        t1_to_mni=t1_to_mni, timing_seconds=timing, surface=surface,
     )

@@ -1,6 +1,6 @@
 # 真实静息态 fMRI 验证
 
-本页记录一例真实 UK Biobank BOLD、SBRef 和 T1 的算法对照。BOLD 为 88×88×64×490，TR 为 0.735 秒。T1 使用现存 FreeSurfer `orig/001.mgz` 转出的影像，其与扫描仪原始 T1 的逐字节关系无法核实。原始 B0 场图和 GDC warp 均不可用，所以 FEAT 对照同时关闭这两步；此结果不能代表原 UKB 全部校正步骤的逐体素复现。FNIT 运行时不调用 FSL。
+本页记录一例真实 UK Biobank BOLD、SBRef 和 T1 的算法对照。BOLD 为 88×88×64×490，TR 为 0.735 秒。T1 使用同被试已有的去脑 NIfTI；它与 T1 ZIP 中的 `orig/001.mgz` 网格一致、强度不同，具体生成步骤未知。原始 B0 场图和 GDC warp 均不可用，所以 FEAT 对照同时关闭这两步；此结果不能代表原 UKB 全部校正步骤的逐体素复现。FNIT 运行时不调用 FSL。
 
 ## FEAT 的原版参照
 
@@ -45,6 +45,7 @@ FSL MCFLIRT 实测 397.54 秒；其余 11 个已单独计时的影像命令合�
 - [MELODIC/PICA](pica_summary.json)：同一真实 4D 输入与掩膜的组件数、重建和耗时检查；原版程序状态保留在摘要中。
 - [T1→MNI152 2 mm 非线性配准](registration_summary.json)：同一 T1、模板和脑掩膜的独立参照；说明 T1 的来源。
 - [ICA-AROMA 与完整 BIDS→MNI152 2 mm 结果](e2e_summary.json)：最终运行的组件数、噪声分类、输出完整性和各阶段耗时。
+- [fsLR32k 表面标量摘要](surface_summary.json) 与 [表面函数、输出和官方命令对照](../../docs/fmri/surface.md)：同一真实 BOLD 的 goodvoxels、Workbench 投影与整链 CIFTI；列出未覆盖的 MSMAll/FIX 步骤。
 
 ## 最终 MNI 输出检查
 

@@ -1,10 +1,14 @@
 """Single-run volumetric fMRI command line interface."""
 
 import argparse
+import json
+from pathlib import Path
 
 from .aroma_pipeline import run_aroma_pipeline
 from .end_to_end import run_fmri_pipeline
 from .pipeline import run_feat_core
+from .surface import SurfaceHemisphere
+from .surface_pipeline import SurfacePipelineInputs
 
 
 def _bids_options(parser):
@@ -52,6 +56,10 @@ def main(argv=None):
     pipeline = commands.add_parser("run", help="raw BIDS to clean MNI152 2-mm BOLD")
     _bids_options(pipeline)
     pipeline.add_argument("--mni-template", required=True)
+    pipeline.add_argument("--surface-config", help="JSON paths for registered MNI surfaces and fsLR32k atlas")
+    pipeline.add_argument("--surface-subject-dir", help="Precomputed structural surfaces and wmparc directory")
+    pipeline.add_argument("--surface-assets-dir", help="Verified HCP fsLR templates directory")
+    pipeline.add_argument("--wb-command", default="wb_command", help="Connectome Workbench executable")
     pipeline.add_argument("--mni-brain-mask")
     pipeline.add_argument("--t1w-image")
     pipeline.add_argument("--registration-backend", choices=("synthmorph", "fnirt"), default="synthmorph")
@@ -103,12 +111,29 @@ def main(argv=None):
         if result.confounds_cleaned_bold is not None:
             print(result.confounds_cleaned_bold)
     else:
+        surface_inputs = None
+        if args.surface_config and args.surface_subject_dir:
+            parser.error("--surface-config and --surface-subject-dir are mutually exclusive")
+        if args.surface_config:
+            config = json.loads(Path(args.surface_config).read_text(encoding="utf-8"))
+            surface_inputs = SurfacePipelineInputs(
+                left=SurfaceHemisphere(**config["left"]),
+                right=SurfaceHemisphere(**config["right"]),
+                subject_rois=config["subject_rois"],
+                atlas_rois=config["atlas_rois"],
+                wb_command=config.get("wb_command", "wb_command"),
+                goodvoxels=config.get("goodvoxels"),
+            )
         result = run_fmri_pipeline(
             **common,
             mni_template=args.mni_template,
             mni_brain_mask=args.mni_brain_mask,
             t1w_image=args.t1w_image,
             registration_backend=args.registration_backend,
+            surface_inputs=surface_inputs,
+            surface_subject_dir=args.surface_subject_dir,
+            surface_assets_dir=args.surface_assets_dir,
+            wb_command=args.wb_command,
             synthstrip_weights=args.synthstrip_weights,
             synthmorph_weights=args.synthmorph_weights,
             ica_n_components=args.ica_n_components,
@@ -124,6 +149,8 @@ def main(argv=None):
             random_state=args.random_state,
         )
         print(result.clean_mni)
+        if result.surface is not None:
+            print(result.surface.projection.dtseries)
     return 0
 
 
