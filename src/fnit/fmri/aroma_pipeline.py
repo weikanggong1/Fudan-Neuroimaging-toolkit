@@ -29,7 +29,7 @@ def run_aroma_pipeline(
     outside_mask,
     output_dir,
     *,
-    n_components,
+    n_components=None,
     tr=None,
     mode="nonaggr",
     device=None,
@@ -37,19 +37,42 @@ def run_aroma_pipeline(
     random_state=0,
     ica_max_iter=500,
     wm_mask=None,
+    regression_csf_mask=None,
     regress_csf=False,
     regress_motion=False,
     motion_model=24,
     bandpass=None,
     global_signal=False,
+    mni_template=None,
+    mni_pull_ras=None,
+    epi_to_t1_world=None,
 ):
     """Decompose, classify, denoise, then optionally regress other confounds.
 
-    Every mask must already match the BOLD voxel grid. The ICA maps use a
-    simple |Z| threshold; they are not MELODIC mixture-model threshold maps.
-    Thus the classifier rule is reproduced but complete official ICA-AROMA
-    component classification equivalence is not claimed.
+    Classification masks must match the thresholded IC maps. Supply all three
+    MNI arguments to classify in MNI space; BOLD and optional regression masks
+    remain on the native EPI grid. With
+    ``n_components=None``, PICA selects the component count by a Laplace PPCA
+    approximation. Thresholded maps use a positive/negative Gamma-Gaussian
+    mixture posterior; component identity still requires real-data comparison.
+    ``regression_csf_mask`` supplies a native EPI tissue mask when MNI-space
+    classification and CSF regression are both requested.
     """
+    transforms = (mni_template, mni_pull_ras, epi_to_t1_world)
+    if any(value is not None for value in transforms) and not all(
+        value is not None for value in transforms
+    ):
+        raise ValueError("mni_template, mni_pull_ras and epi_to_t1_world must be supplied together")
+    if mni_template is not None:
+        if regress_csf and regression_csf_mask is None:
+            raise ValueError("regression_csf_mask on the native EPI grid is required for MNI classification with regress_csf=True")
+        target = nib.load(str(mni_template))
+        for mask in (csf_mask, edge_mask, outside_mask):
+            mask_image = nib.load(str(mask))
+            if mask_image.shape != target.shape or not np.allclose(
+                mask_image.affine, target.affine, atol=1e-4
+            ):
+                raise ValueError("classification masks must match mni_template")
     source = Path(filtered_func_data)
     image = nib.load(str(source))
     if image.ndim != 4:
@@ -67,8 +90,18 @@ def run_aroma_pipeline(
     )
     if not ica.converged:
         raise RuntimeError("spatial ICA did not converge; increase max_iter in decompose_spatial_ica")
+    classification_maps = ica.thresholded_maps
+    if mni_template is not None:
+        from .normalization import resample_world
+
+        classification_maps = resample_world(
+            ica.thresholded_maps, mni_template,
+            np.linalg.inv(np.asarray(epi_to_t1_world, dtype=np.float64)),
+            output / "ica_thresholded_MNI152_2mm.nii.gz",
+            pre_affine_pull_ras=mni_pull_ras, device=device,
+        )
     features = classify_aroma(
-        ica.thresholded_maps, ica.mixing, ica.frequency_power,
+        classification_maps, ica.mixing, ica.frequency_power,
         motion_parameters, csf_mask, edge_mask, outside_mask, seconds,
         n_splits=n_splits, random_state=random_state,
     )
@@ -90,7 +123,8 @@ def run_aroma_pipeline(
     if wm_mask is not None or regress_csf or regress_motion or bandpass is not None or global_signal:
         clean_path = clean_confounds(
             denoised, output / "filtered_func_data_aroma_confounds.nii.gz",
-            wm_mask=wm_mask, csf_mask=csf_mask if regress_csf else None,
+            wm_mask=wm_mask,
+            csf_mask=(regression_csf_mask or csf_mask) if regress_csf else None,
             brain_mask=brain_mask, motion=motion_parameters if regress_motion else None,
             motion_model=motion_model, bandpass=bandpass, tr=seconds,
             global_signal=global_signal, device=device,

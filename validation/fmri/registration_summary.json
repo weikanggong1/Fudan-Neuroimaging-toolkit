@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "benchmark": "one real UK Biobank T1 converted from FreeSurfer orig/001.mgz, registered to FSL MNI152 T1 2-mm template",
+  "source_provenance": "The available orig/001.mgz is a FreeSurfer-derived file; byte identity with scanner raw T1 is unverified.",
+  "input_pairing": "All three brain-to-brain runs use the identical FNIT SynthStrip T1 brain and identical MNI152 2-mm brain template. The separate FSL whole-head run uses the same T1 before brain extraction and the whole-head template, including whole-head FLIRT initialization.",
+  "grid_shape_xyz": [91, 109, 91],
+  "reference_software": "FSL 6.0.7.22 FLIRT and FNIRT",
+  "fnit_code_sha256": {
+    "fmri_normalization_py": "c3cf08a5b25af7f976db511816034bfd70ce4219f8545092aeb3cf44f108fc09",
+    "fnirt_registration_py": "ab7d40d5f3697ae7929902aad1dc62a6c042a02109642a0b72dce1192b922070",
+    "synthmorph_pipeline_py": "91ce123d0e486bb368d8a6b9c0c613ca823a194677cb889c14aac17cb0c24b3e",
+    "flirt_core_py": "28a94420c0f050f00380e1b92e57c7d8102a949810c6214d995f9d35f943d9c8"
+  },
+  "execution": {
+    "fnit_device": "NVIDIA H100 PCIe CUDA with TF32 allowed, FP32 image and displacement field",
+    "fsl_device": "CPU",
+    "fnit_gpu_concurrent_load": true,
+    "timing_caveat": "FNIT ran while unrelated GPU tasks were active. These single-run times are observed durations, not a controlled speed comparison.",
+    "fsl_exit_status": 255,
+    "fsl_validation": "This FSL installation returned 255 even after writing outputs. All reported FLIRT/FNIRT NIfTI outputs and coefficients passed gzip CRC, NiBabel grid and finite-value checks; both affine matrices were finite and invertible. The reference is conditionally accepted with exit status retained."
+  },
+  "metric_definitions": {
+    "image_pearson": "Pearson r of warped T1 intensities within the MNI152 2-mm brain mask; input pairs use the same brain-extracted T1.",
+    "support_dice": "Dice of masks created by thresholding each warped T1 above 5% of its positive 99th percentile; compared with the FSL same-brain output or the MNI brain mask as named.",
+    "median_normalized_mae": "Each warped T1 divided by its positive median within the MNI brain mask, then mean absolute difference within that mask.",
+    "pull_coordinate_difference_mm": "FSL applywarp resampled three T1 RAS-world coordinate images to MNI; Euclidean distance to MNI world plus FNIT dense pull field, within the common valid brain support."
+  },
+  "fsl_same_brain_input": {
+    "flirt_seconds": 11.25,
+    "fnirt_seconds": 150.53,
+    "flirt_and_fnirt_seconds_sum": 161.78,
+    "fnirt_peak_cpu_rss_gib": 0.7976,
+    "pearson_to_mni_template": 0.8025051071719574,
+    "gradient_pearson_to_mni_template": 0.8452320718947126,
+    "support_dice_vs_mni_brain_mask": 0.9436286961657766,
+    "coefficient_finite": true,
+    "coefficient_shape_xyzc": [21, 24, 21, 3]
+  },
+  "fnit_synthmorph_same_brain_input": {
+    "registration_seconds": 156.32104108668864,
+    "registration_and_resample_seconds": 156.7053166567348,
+    "peak_gpu_allocated_gib": 12.381678581237793,
+    "peak_gpu_reserved_gib": 18.1171875,
+    "pearson_vs_fsl_same_brain": 0.8322920551469902,
+    "support_dice_vs_fsl_same_brain": 0.9781782702848485,
+    "median_normalized_mae_vs_fsl_same_brain": 0.10118569433689117,
+    "pull_coordinate_difference_median_mm": 1.7515678405761719,
+    "pull_coordinate_difference_p95_mm": 5.010417270660399,
+    "pull_compared_voxels": 227993,
+    "pearson_to_mni_template": 0.7937739231935136,
+    "gradient_pearson_to_mni_template": 0.8538536038067593,
+    "support_dice_vs_mni_brain_mask": 0.955976319452597,
+    "gzip_crc_and_finite": true
+  },
+  "fnit_pytorch_fnirt_same_brain_input": {
+    "registration_seconds": 386.71610663691536,
+    "registration_and_resample_seconds": 387.07045250386,
+    "peak_gpu_allocated_gib": 0.6540427207946777,
+    "peak_gpu_reserved_gib": 0.94140625,
+    "pearson_vs_fsl_same_brain": 0.9134769883931456,
+    "support_dice_vs_fsl_same_brain": 0.9901964789814767,
+    "median_normalized_mae_vs_fsl_same_brain": 0.06664691865444183,
+    "pull_coordinate_difference_median_mm": 1.0207772254943848,
+    "pull_coordinate_difference_p95_mm": 3.4120439291000366,
+    "pull_compared_voxels": 228451,
+    "pearson_to_mni_template": 0.8157776975615967,
+    "gradient_pearson_to_mni_template": 0.8265029301925191,
+    "support_dice_vs_mni_brain_mask": 0.9387012143885838,
+    "gzip_crc_and_finite": true
+  },
+  "fsl_whole_head_input": {
+    "flirt_seconds": 17.41,
+    "fnirt_seconds": 194.34,
+    "flirt_and_fnirt_seconds_sum": 211.75,
+    "pearson_to_mni_template_within_brain_mask": 0.7833025028986752,
+    "note": "This run uses whole-head T1 and template, unlike FNIT brain-to-brain registration; it is not a paired numerical comparator."
+  }
+}

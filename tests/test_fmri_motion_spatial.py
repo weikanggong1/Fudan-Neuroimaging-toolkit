@@ -76,3 +76,24 @@ def test_resampled_bold_header_uses_reference_spatial_zooms():
     assert result.shape == (8, 9, 7, 2)
     np.testing.assert_allclose(result.header.get_zooms(), (3.0, 3.0, 3.0, 0.735), rtol=1e-6)
     assert result.header.get_xyzt_units()[1] == "sec"
+
+
+def test_cubic_spline_resampling_reduces_error_on_smooth_signal():
+    axes = np.meshgrid(*(np.arange(17) for _ in range(3)), indexing="ij")
+    signal = (np.sin(0.25 * axes[0]) + 0.5 * np.sin(0.35 * axes[1])
+              + 0.3 * np.cos(0.2 * axes[2])).astype(np.float32)
+    affine = np.diag((-1.0, 1.0, 1.0, 1.0))
+    bold = nib.Nifti1Image(signal[..., None], affine)
+    reference = nib.Nifti1Image(np.zeros(signal.shape, dtype=np.float32), affine)
+    matrix = np.eye(4)[None]
+    matrix[0, :3, 3] = (0.35, -0.42, 0.27)
+    shifted = (axes[0] - 0.35, axes[1] + 0.42, axes[2] - 0.27)
+    expected = (np.sin(0.25 * shifted[0]) + 0.5 * np.sin(0.35 * shifted[1])
+                + 0.3 * np.cos(0.2 * shifted[2]))[3:-3, 3:-3, 3:-3]
+    linear = apply_motion_warp(bold, reference, matrix, device="cpu",
+                               interpolation="linear").get_fdata(dtype=np.float32)
+    spline = apply_motion_warp(bold, reference, matrix, device="cpu",
+                               interpolation="spline").get_fdata(dtype=np.float32)
+    linear_error = np.mean(np.abs(linear[3:-3, 3:-3, 3:-3, 0] - expected))
+    spline_error = np.mean(np.abs(spline[3:-3, 3:-3, 3:-3, 0] - expected))
+    assert spline_error < linear_error / 5

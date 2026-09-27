@@ -50,6 +50,8 @@ def run_feat_core(
     reconstruction=None,
     echo=None,
     brain_mask=None,
+    brain_extraction="synthstrip",
+    synthstrip_weights=None,
     spatial_warp=None,
     postmat=None,
     highpass_cutoff_seconds=100.0,
@@ -65,7 +67,8 @@ def run_feat_core(
     warp-reference-to-BOLD FLIRT matrix. If neither is given, this stage
     performs motion-only resampling. It never manufactures a missing B0
     fieldmap or GDC warp. The optional `brain_mask` must already be in the
-    reference grid; otherwise an independent EPI mask is generated.
+    reference grid. Without one, SynthStrip extracts the corrected EPI mean
+    by default; ``brain_extraction='otsu'`` selects the older independent mask.
     """
     inputs = locate_bids_inputs(
         bids_root, subject=subject, session=session, task=task, run=run,
@@ -79,6 +82,8 @@ def run_feat_core(
         )
     if highpass_cutoff_seconds <= 0:
         raise ValueError("highpass_cutoff_seconds must be positive")
+    if brain_extraction not in ("synthstrip", "otsu"):
+        raise ValueError("brain_extraction must be 'synthstrip' or 'otsu'")
     output = Path(output_dir).expanduser().resolve()
     filtered_path = output / "filtered_func_data.nii.gz"
     if filtered_path.exists() and not overwrite:
@@ -108,14 +113,28 @@ def run_feat_core(
     np.savetxt(par_path, matrices_to_mcflirt_parameters(matrices, reference), fmt="%.9g")
     corrected = apply_motion_warp(
         raw, reference, matrices, warp=spatial_warp, postmat=postmat,
-        batch_size=batch_size, device=selected_device,
+        interpolation="spline", batch_size=batch_size, device=selected_device,
+    )
+    corrected.header.set_zooms((*corrected.header.get_zooms()[:3], float(inputs.tr)))
+    corrected.header.set_xyzt_units(
+        xyz=corrected.header.get_xyzt_units()[0], t="sec"
     )
     corrected_data = np.asarray(corrected.dataobj, dtype=np.float32)
     mean = corrected_data.mean(axis=3)
     mean_before_mask = output / "prefiltered_func_data_unwarp_mean.nii.gz"
     _save(mean, reference, mean_before_mask)
     if brain_mask is None:
-        mask_image = epi_brain_mask(nib.load(str(mean_before_mask)))
+        if brain_extraction == "synthstrip":
+            from ..synthstrip import SynthStrip
+
+            stripped = SynthStrip(
+                weights=synthstrip_weights, device=selected_device
+            )(mean_before_mask)
+            mask_image = nib.Nifti1Image(
+                np.asarray(stripped.mask.data, dtype=np.uint8), reference.affine
+            )
+        else:
+            mask_image = epi_brain_mask(nib.load(str(mean_before_mask)))
     else:
         mask_image = nib.load(str(brain_mask))
         if mask_image.shape != reference.shape or not np.allclose(

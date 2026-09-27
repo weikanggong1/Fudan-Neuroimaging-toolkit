@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "benchmark": "one real UK Biobank raw resting-state BOLD, same input and mask for FNIT and FSL MELODIC",
+  "input_shape_xyzt": [
+    88,
+    88,
+    64,
+    490
+  ],
+  "tr_seconds": 0.735,
+  "common_mask_voxels": 113659,
+  "fnit_ica_source_sha256": "e668e57f6ef9066313282d5365208d3c72a6a1afbec11681ade586df2d86e5a3",
+  "fsl_reference_exit_status": 255,
+  "fsl_reference_validation": "Core MELODIC NIfTI and mixing outputs readable; 91.73 s was an output checkpoint, not a completed-process runtime.",
+  "automatic_components": {
+    "fnit": 89,
+    "fsl": 89
+  },
+  "resels": {
+    "fnit": 0.4970940404277743,
+    "fsl": 0.4971
+  },
+  "fnit": {
+    "converged": true,
+    "iterations": 89,
+    "final_decorrelation_change": 0.000956416130065918,
+    "wall_seconds": 90.74022172484547,
+    "peak_cuda_allocated_gb": 0.282948608,
+    "pca_variance_explained": 0.8207710385322571
+  },
+  "matched_abs_pearson_r": {
+    "spatial_median": 0.956558285968409,
+    "spatial_p05": 0.37912523630258665,
+    "temporal_median": 0.9569668883394725,
+    "temporal_p05": 0.44280234092155124
+  },
+  "fnit_posterior": {
+    "range": [
+      0,
+      1
+    ],
+    "threshold": 0.5,
+    "nonzero_brain_component_voxels": 357036,
+    "total_brain_component_voxels": 10115740
+  },
+  "scope": "Single subject; core FSL reference used --no_mm, so no all-component posterior comparison. Lowest matched components differ materially."
+}

@@ -1,5 +1,5 @@
 """Standalone PyTorch brain MRI inference tools."""
-__version__ = '0.15.0'
+__version__ = '0.16.0'
 
 
 def __getattr__(name):
@@ -77,6 +77,9 @@ def __getattr__(name):
         from . import fast_vbm
         return getattr(fast_vbm, name)
     if name in ('FeatCoreResult', 'run_feat_core', 'BIDSInputs', 'locate_bids_inputs',
+                'BBRResult', 'register_bbr',
+                'FMRIPipelineResult', 'run_fmri_pipeline', 'T1MNIResult',
+                'register_t1_to_mni', 'resample_world',
                 'ICAResult', 'decompose_spatial_ica', 'AromaResult',
                 'run_aroma_pipeline', 'classify_aroma', 'denoise_aroma',
                 'clean_confounds', 'motion_regressors'):

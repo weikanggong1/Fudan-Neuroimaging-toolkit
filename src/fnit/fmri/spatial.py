@@ -5,6 +5,7 @@ import nibabel as nib
 import numpy as np
 import torch
 import torch.nn.functional as F
+from scipy.ndimage import map_coordinates
 
 from ..applywarp.core import (
     FSL_CUBIC_SPLINE_COEFFICIENTS,
@@ -25,6 +26,7 @@ def apply_motion_warp(
     warp=None,
     postmat=None,
     warp_convention="auto",
+    interpolation="linear",
     batch_size=16,
     device=None,
 ):
@@ -34,6 +36,7 @@ def apply_motion_warp(
     ``warp`` maps warp source to warp reference; ``postmat`` maps warp reference
     to the final reference. All matrices follow FSL scaled-mm coordinates.
     The returned NIfTI uses the 3D ``reference`` grid and input time axis.
+    ``interpolation="spline"`` uses cubic B-spline image interpolation on CPU.
     """
     image = _load_nifti(input_bold, "input_bold")
     target = _load_nifti(reference, "reference")
@@ -44,6 +47,8 @@ def apply_motion_warp(
         raise ValueError("motion_matrices must contain one finite 4x4 matrix per frame")
     if batch_size < 1:
         raise ValueError("batch_size must be positive")
+    if interpolation not in ("linear", "spline"):
+        raise ValueError("interpolation must be linear or spline")
     if postmat is None:
         post = np.eye(4)
     elif isinstance(postmat, (str, os.PathLike)):
@@ -103,20 +108,34 @@ def apply_motion_warp(
                                   dtype=torch.float64, device=device)
         mm = torch.matmul(inverse[:, :3, :3], source_flat) + inverse[:, :3, 3:4]
         coords = torch.matmul(input_world_to_voxel[:3, :3], mm) + input_world_to_voxel[:3, 3:4]
-        normalized = torch.stack([
-            2 * coords[:, axis] / max(image.shape[axis] - 1, 1) - 1
-            for axis in (2, 1, 0)
-        ], -1).reshape(stop - start, *shape, 3).to(torch.float32)
-        frames = torch.as_tensor(np.moveaxis(data[..., start:stop], -1, 0).copy(),
-                                 dtype=torch.float32, device=device)[:, None]
-        sampled = F.grid_sample(frames, normalized, mode="bilinear", padding_mode="border",
-                                align_corners=True)[:, 0]
         inside = torch.ones((stop - start, coords.shape[-1]), dtype=torch.bool, device=device)
         for axis in range(3):
             inside &= (coords[:, axis] >= -1e-6) & (coords[:, axis] <= image.shape[axis] - 1 + 1e-6)
         valid = inside.reshape(stop - start, *shape) & warp_valid
-        sampled *= valid
-        output[..., start:stop] = np.moveaxis(sampled.cpu().numpy(), 0, -1)
+        if interpolation == "spline":
+            sample_coords = coords.reshape(stop - start, 3, *shape).cpu().numpy()
+            valid_cpu = valid.cpu().numpy()
+            for offset in range(stop - start):
+                sampled = map_coordinates(
+                    data[..., start + offset], sample_coords[offset],
+                    order=3, mode="nearest",
+                )
+                # MCFLIRT extends the edge slices during final interpolation.
+                # For a warp, preserve the existing out-of-field zero policy.
+                if warp is not None:
+                    sampled *= valid_cpu[offset]
+                output[..., start + offset] = sampled
+        else:
+            normalized = torch.stack([
+                2 * coords[:, axis] / max(image.shape[axis] - 1, 1) - 1
+                for axis in (2, 1, 0)
+            ], -1).reshape(stop - start, *shape, 3).to(torch.float32)
+            frames = torch.as_tensor(np.moveaxis(data[..., start:stop], -1, 0).copy(),
+                                     dtype=torch.float32, device=device)[:, None]
+            sampled = F.grid_sample(frames, normalized, mode="bilinear", padding_mode="border",
+                                    align_corners=True)[:, 0]
+            sampled *= valid
+            output[..., start:stop] = np.moveaxis(sampled.cpu().numpy(), 0, -1)
     header = target.header.copy()
     header.set_data_dtype(np.float32)
     result = nib.Nifti1Image(output, target.affine, header)

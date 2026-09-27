@@ -3,36 +3,43 @@
 import argparse
 
 from .aroma_pipeline import run_aroma_pipeline
+from .end_to_end import run_fmri_pipeline
 from .pipeline import run_feat_core
+
+
+def _bids_options(parser):
+    parser.add_argument("--bids-root", required=True)
+    parser.add_argument("--subject", required=True)
+    parser.add_argument("--output-dir", required=True)
+    parser.add_argument("--session")
+    parser.add_argument("--task", default="rest")
+    parser.add_argument("--run")
+    parser.add_argument("--acquisition")
+    parser.add_argument("--direction")
+    parser.add_argument("--reconstruction")
+    parser.add_argument("--echo")
+    parser.add_argument("--device")
+    parser.add_argument("--batch-size", type=int, default=8)
+    parser.add_argument("--motion-iterations", nargs=3, type=int, default=(35, 25, 15))
+    parser.add_argument("--highpass-cutoff-seconds", type=float, default=100)
+    parser.add_argument("--overwrite", action="store_true")
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(prog="fnit-fmri")
     commands = parser.add_subparsers(dest="command", required=True)
     feat = commands.add_parser("feat", help="BIDS BOLD to pre-ICA FEAT core outputs")
-    feat.add_argument("--bids-root", required=True)
-    feat.add_argument("--subject", required=True)
-    feat.add_argument("--output-dir", required=True)
-    feat.add_argument("--session")
-    feat.add_argument("--task", default="rest")
-    feat.add_argument("--run")
-    feat.add_argument("--acquisition")
-    feat.add_argument("--direction")
-    feat.add_argument("--reconstruction")
-    feat.add_argument("--echo")
+    _bids_options(feat)
     feat.add_argument("--brain-mask")
+    feat.add_argument("--brain-extraction", choices=("synthstrip", "otsu"), default="synthstrip")
+    feat.add_argument("--synthstrip-weights")
     feat.add_argument("--spatial-warp")
     feat.add_argument("--postmat")
-    feat.add_argument("--highpass-cutoff-seconds", type=float, default=100)
-    feat.add_argument("--device")
-    feat.add_argument("--batch-size", type=int, default=32)
-    feat.add_argument("--motion-iterations", nargs=3, type=int, default=(35, 25, 15))
-    feat.add_argument("--overwrite", action="store_true")
-    aroma = commands.add_parser("aroma", help="ICA-AROMA and optional confound regression")
+    aroma = commands.add_parser("aroma", help="PICA/ICA-AROMA and optional confound regression")
     for name in ("filtered-func-data", "brain-mask", "motion-parameters", "csf-mask",
                  "edge-mask", "outside-mask", "output-dir"):
         aroma.add_argument("--" + name, required=True)
-    aroma.add_argument("--n-components", type=int, required=True)
+    aroma.add_argument("--n-components", type=int)
     aroma.add_argument("--tr", type=float)
     aroma.add_argument("--mode", choices=("nonaggr", "aggr"), default="nonaggr")
     aroma.add_argument("--device")
@@ -42,21 +49,45 @@ def main(argv=None):
     aroma.add_argument("--motion-model", type=int, choices=(6, 12, 24), default=24)
     aroma.add_argument("--bandpass", nargs=2, type=float)
     aroma.add_argument("--global-signal", action="store_true")
+    pipeline = commands.add_parser("run", help="raw BIDS to clean MNI152 2-mm BOLD")
+    _bids_options(pipeline)
+    pipeline.add_argument("--mni-template", required=True)
+    pipeline.add_argument("--mni-brain-mask")
+    pipeline.add_argument("--t1w-image")
+    pipeline.add_argument("--registration-backend", choices=("synthmorph", "fnirt"), default="synthmorph")
+    pipeline.add_argument("--synthstrip-weights")
+    pipeline.add_argument("--synthmorph-weights")
+    pipeline.add_argument("--ica-n-components", type=int)
+    pipeline.add_argument("--ica-max-iter", type=int, default=500)
+    pipeline.add_argument("--aroma-mode", choices=("nonaggr", "aggr"), default="nonaggr")
+    pipeline.add_argument("--regress-wm", action="store_true")
+    pipeline.add_argument("--regress-csf", action="store_true")
+    pipeline.add_argument("--regress-motion", action="store_true")
+    pipeline.add_argument("--motion-model", type=int, choices=(6, 12, 24), default=24)
+    pipeline.add_argument("--bandpass", nargs=2, type=float)
+    pipeline.add_argument("--global-signal", action="store_true")
+    pipeline.add_argument("--n-splits", type=int, default=1000)
+    pipeline.add_argument("--random-state", type=int, default=0)
     args = parser.parse_args(argv)
-    if args.command == "feat":
-        result = run_feat_core(
+    if args.command in ("feat", "run"):
+        common = dict(
             bids_root=args.bids_root, output_dir=args.output_dir, subject=args.subject,
             session=args.session, task=args.task, run=args.run,
             acquisition=args.acquisition, direction=args.direction,
             reconstruction=args.reconstruction, echo=args.echo,
-            brain_mask=args.brain_mask,
-            spatial_warp=args.spatial_warp, postmat=args.postmat,
             highpass_cutoff_seconds=args.highpass_cutoff_seconds,
             device=args.device, batch_size=args.batch_size,
             motion_iterations=tuple(args.motion_iterations), overwrite=args.overwrite,
         )
+    if args.command == "feat":
+        result = run_feat_core(
+            **common, brain_mask=args.brain_mask,
+            brain_extraction=args.brain_extraction,
+            synthstrip_weights=args.synthstrip_weights,
+            spatial_warp=args.spatial_warp, postmat=args.postmat,
+        )
         print(result.filtered_func_data)
-    else:
+    elif args.command == "aroma":
         result = run_aroma_pipeline(
             filtered_func_data=args.filtered_func_data, brain_mask=args.brain_mask,
             motion_parameters=args.motion_parameters, csf_mask=args.csf_mask,
@@ -71,6 +102,28 @@ def main(argv=None):
         print(result.denoised_bold)
         if result.confounds_cleaned_bold is not None:
             print(result.confounds_cleaned_bold)
+    else:
+        result = run_fmri_pipeline(
+            **common,
+            mni_template=args.mni_template,
+            mni_brain_mask=args.mni_brain_mask,
+            t1w_image=args.t1w_image,
+            registration_backend=args.registration_backend,
+            synthstrip_weights=args.synthstrip_weights,
+            synthmorph_weights=args.synthmorph_weights,
+            ica_n_components=args.ica_n_components,
+            ica_max_iter=args.ica_max_iter,
+            aroma_mode=args.aroma_mode,
+            regress_wm=args.regress_wm,
+            regress_csf=args.regress_csf,
+            regress_motion=args.regress_motion,
+            motion_model=args.motion_model,
+            bandpass=tuple(args.bandpass) if args.bandpass else None,
+            global_signal=args.global_signal,
+            n_splits=args.n_splits,
+            random_state=args.random_state,
+        )
+        print(result.clean_mni)
     return 0
 
 

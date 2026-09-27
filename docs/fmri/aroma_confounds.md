@@ -1,0 +1,121 @@
+# ICA-AROMA 分类、成分回归与可选混杂回归
+
+`run_aroma_pipeline` 读取已经高通的原生 EPI BOLD、脑掩膜和 T×6 运动参数，调用本包单被试 [PICA](pica.md)，再按 ICA-AROMA 的运动相关、边缘比例、高频比例和 CSF 比例选择噪声成分。给定 MNI 模板、T1→MNI pull 和 EPI→T1 BBR 时，它先把阈值 IC 图映射到 MNI152 2 mm，再用官方三张标准掩膜分类；[整链入口](README.md)默认走这一路径。分类后在原生 EPI 空间回归噪声 IC；WM/CSF/motion、带通和全脑信号回归可选。独立调用时不提供配准参数，也可用与 BOLD 同网格的三张掩膜分类。
+
+## 单函数批量时间序列调用
+
+此函数处理一份 4D BOLD（T 个时间点），内部 ICA 与回归联合使用全部 T 帧。`brain_mask` 必须与 BOLD 同网格；分类用的 `csf_mask`、`edge_mask` 和 `outside_mask` 必须与阈值 IC 图的分类网格一致。给定 `mni_template`、`mni_pull_ras`、`epi_to_t1_world` 时，分类网格为 MNI152 2 mm；三者均不提供时为 BOLD 原网格。`regression_csf_mask` 单独指定原生 EPI 网格的完整 CSF 组织掩膜供可选信号回归；在 MNI 分类模式启用 `regress_csf=True` 时必须填写，不能把 MNI 分类掩膜用于原生 EPI 信号回归。
+
+```python
+from fnit import run_aroma_pipeline
+
+aroma = run_aroma_pipeline(
+    filtered_func_data="/absolute/path/feat/filtered_func_data.nii.gz",  # FEAT 核心后 4D BOLD
+    brain_mask="/absolute/path/feat/mask.nii.gz",                        # 与 BOLD 同网格的 3D 脑掩膜
+    motion_parameters="/absolute/path/feat/mc/prefiltered_func_data_mcf.par",  # T×6 运动参数
+    csf_mask="/absolute/path/native_csf_mask.nii.gz",               # 独立原生 EPI 模式：自备同网格 3D CSF 掩膜
+    edge_mask="/absolute/path/native_edge_mask.nii.gz",             # 自备同网格 3D 脑边缘掩膜
+    outside_mask="/absolute/path/native_out_mask.nii.gz",            # 自备同网格 3D 脑外掩膜
+    output_dir="/absolute/path/aroma",                                   # PICA、分类、清理结果目录
+    n_components=None,                                                   # PICA 自动定阶；整数为固定 IC 数
+    tr=0.735,                                                            # TR，秒；None 时读 NIfTI header
+    mode="nonaggr",                                                      # 非积极回归；aggr 为积极回归
+    device="cuda:0",                                                     # PyTorch 设备；None 自动选择
+    n_splits=1000,                                                        # 运动相关特征的 90% 时间点重复抽样次数
+    random_state=0,                                                       # PICA 初始化与抽样随机种子
+    ica_max_iter=500,                                                     # PICA 独立性优化迭代上限
+    wm_mask="/absolute/path/masks/wm_epi.nii.gz",                        # 可选 WM 掩膜；None 不回归 WM 均值
+    regression_csf_mask="/absolute/path/masks/csf_epi.nii.gz",          # 可选 CSF 回归专用完整掩膜；None 时复用分类掩膜
+    regress_csf=True,                                                     # AROMA 后是否另回归 CSF 均值
+    regress_motion=True,                                                  # AROMA 后是否另回归运动参数
+    motion_model=24,                                                      # 运动回归列数：6、12、24
+    bandpass=(0.01, 0.1),                                                 # Hz；None 不做带通
+    global_signal=False,                                                  # 是否加入全脑均值回归
+    mni_template=None,                                                     # MNI 模板；与下面两项一起提供时，把 IC 投到标准空间分类
+    mni_pull_ras=None,                                                     # MNI→T1 的 3 分量 RAS 毫米 pull 位移场；本例 None，使用原生 EPI 掩膜
+    epi_to_t1_world=None,                                                  # EPI→T1 的 4×4 RAS 世界坐标 BBR 矩阵；本例 None
+)
+print(aroma.ica.thresholded_maps)                                        # PICA 概率阈值空间图
+print(aroma.features)                                                    # 每 IC 的四项 AROMA 特征 TSV
+print(aroma.noise_components)                                            # 从 1 开始的噪声 IC 编号
+print(aroma.denoised_bold)                                               # AROMA 清理后原生 EPI 4D BOLD
+print(aroma.confounds_cleaned_bold)                                      # 可选额外回归后的 4D BOLD；未启用时为 None
+```
+
+`ica/` 目录包含 X×Y×Z×K 成分图、阈值图、T×K mixing、频谱功率和定阶/收敛信息，文件名见 [PICA 输出](pica.md)。提供三项 MNI 配准参数时，另输出 `ica_thresholded_MNI152_2mm.nii.gz`，形状为 91×109×91×K，float32；其中每个 MNI 体素从原生 EPI 阈值图取值。`aroma_features.tsv` 有 K 行、5 列：从 1 开始的成分编号与四项特征。`aroma_noise_components.txt` 每行一个从 1 开始的编号。两份清理影像均为 BOLD 原网格、原 TR、float32。混杂回归的输出只在启用 WM、CSF、运动、带通或全脑信号至少一项时写入。
+
+## 独立子函数
+
+若已有 PICA mixing 与阈值图，可独立执行分类与清理；不必再次估计 ICA。官方阈值图和官方三张 MNI 掩膜同输入对照时，应使用 MNI 网格，且 mixing 与运动参数必须来自相同 T 帧。
+
+```python
+from importlib.resources import files
+from fnit import classify_aroma, denoise_aroma, clean_confounds, motion_regressors
+
+mask_dir = files("fnit").joinpath("fmri", "assets")  # wheel 自带的官方 ICA-AROMA 标准掩膜
+features = classify_aroma(
+    thresholded_ic_maps="/absolute/path/aroma/ica_thresholded_MNI152_2mm.nii.gz",  # MNI 网格 X×Y×Z×K 阈值 IC 图
+    mixing="/absolute/path/ica/ica_mixing.tsv",                          # T×K 成分时间序列
+    ftmix="/absolute/path/ica/ica_frequency_power.tsv",                  # ⌊T/2⌋×K 非负频谱功率
+    motion="/absolute/path/feat/mc/prefiltered_func_data_mcf.par",      # T×6 运动参数
+    csf_mask=str(mask_dir.joinpath("mask_csf.nii.gz")),                 # 与阈值图同网格的官方标准 CSF 掩膜
+    edge_mask=str(mask_dir.joinpath("mask_edge.nii.gz")),               # 同网格官方脑边缘掩膜
+    outside_mask=str(mask_dir.joinpath("mask_out.nii.gz")),              # 同网格官方脑外掩膜
+    tr=0.735,                                                             # TR，秒
+    n_splits=1000,                                                         # 运动相关随机抽样次数
+    random_state=0,                                                        # 抽样随机种子
+)
+clean_path = denoise_aroma(
+    input_bold="/absolute/path/feat/filtered_func_data.nii.gz",         # 原始待清理 4D BOLD
+    mixing="/absolute/path/ica/ica_mixing.tsv",                          # 同一次 PICA 的 T×K mixing
+    noise_indices=features["noise_indices"],                              # 从 0 开始的噪声成分索引
+    output_bold="/absolute/path/aroma/filtered_func_data_aroma.nii.gz", # AROMA 输出路径
+    mode="nonaggr",                                                        # nonaggr 部分回归；aggr 全回归
+    device="cuda:0",                                                       # 计算设备
+    chunk_size=4096,                                                       # 每批回归的空间体素数
+)
+motion24 = motion_regressors(
+    motion="/absolute/path/feat/mc/prefiltered_func_data_mcf.par",      # T×6 运动参数
+    model=24,                                                              # 返回 T×6、T×12 或 T×24
+)
+cleaned_path = clean_confounds(
+    input_bold=clean_path,                                                # AROMA 清理后的 4D BOLD
+    output_bold="/absolute/path/aroma/filtered_func_data_aroma_confounds.nii.gz",  # 额外回归输出路径
+    wm_mask="/absolute/path/masks/wm_epi.nii.gz",                        # 同网格 WM 掩膜；None 不回归
+    csf_mask="/absolute/path/masks/csf_epi.nii.gz",                     # 同网格 CSF 掩膜；None 不回归
+    brain_mask="/absolute/path/feat/mask.nii.gz",                        # 全脑掩膜；全脑回归时必需
+    motion="/absolute/path/feat/mc/prefiltered_func_data_mcf.par",      # T×6 运动参数；None 不回归
+    motion_model=24,                                                       # 6、12、24 列运动设计
+    bandpass=(0.01, 0.1),                                                  # Hz；None 不做带通
+    tr=0.735,                                                              # TR，秒；None 时读 NIfTI header
+    global_signal=False,                                                  # 是否回归全脑均值
+    device="cuda:0",                                                       # 计算设备
+    chunk_size=4096,                                                       # 每批投影的空间体素数
+)
+```
+
+`classify_aroma` 返回每成分的最大运动相关、edge fraction、high-frequency content、CSF fraction，以及 **0 起始**的 `noise_indices`。`denoise_aroma` 返回输出路径；`nonaggr` 用全部 IC 拟合、只减去噪声 IC 的部分贡献，`aggr` 仅拟合噪声 IC。`clean_confounds` 返回输出路径：先构造截距、一次/二次趋势及选择的信号列，然后把带通与回归写入同一个投影，避免顺序滤波使已去除频率回流。`motion_regressors` 返回 T×6/12/24 NumPy 数组。
+
+## 原软件运行方式与实测
+
+官方 [ICA-AROMA 脚本](https://github.com/maartenmennes/ICA-AROMA/blob/master/ICA_AROMA.py) 的 generic 模式要求 BOLD、运动参数及输出目录；给定 FEAT 仿射和 T1→MNI warp 后，脚本把阈值 IC 图配准到标准空间作空间分类。下面的官方命令只用于独立基准；`-warp` 必须是 FSL warp，而不是本包 RAS pull NIfTI。
+
+```bash
+python ICA_AROMA.py -in filtered_func_data.nii.gz -out aroma_ref \
+  -mc prefiltered_func_data_mcf.par -m mask.nii.gz \
+  -affmat example_func2highres.mat -warp highres2standard_warp.nii.gz \
+  -dim 0 -den nonaggr
+fsl_regfilt -i filtered_func_data.nii.gz -d melodic_mix \
+  -f 2,5,9 -o filtered_func_data_aroma_ref.nii.gz
+```
+
+`fsl_regfilt -f` 用从 1 开始的 IC 编号。可选 WM/CSF/motion 与带通的参考脚本为用户指定的 [MATLAB 实现](https://github.com/weikanggong/Resting-state-fMRI-preprocessing/blob/master/g_regressWmCsf_and_filter.m)；本包联合投影还可与 AFNI `3dTproject -ort confounds.1D -polort 2 -passband 0.01 0.1` 作独立方法比较，但当前服务器没有 AFNI 实测输出。
+
+| 真实数据同输入项目 | FNIT | 原软件或独立参考 | 差异 |
+|---|---:|---:|---|
+| 490×106 的官方 MELODIC mixing，运动相关 1000 次抽样 | 6.28 秒 | 官方 ICA-AROMA 函数 6.17 秒 | MAE 4.67×10⁻¹⁷；高频比例逐项一致。 |
+| 官方 106 张阈值 IC 图与官方 MNI 2 mm 三张掩膜 | 空间特征 2.33 秒 | 官方 201.02 秒 | edge fraction MAE 3.51×10⁻⁷、CSF fraction MAE 2.32×10⁻⁸；106/106 个噪声判定一致。固定官方 IC 输入，不代表本包自产成分身份相同。 |
+| 真实 BOLD 20³×490 裁剪、官方 106 列 mixing，示例噪声 IC 1–3 | CUDA 含 I/O：nonaggr 2.83 秒、aggr 1.27 秒 | FSL `fsl_regfilt`：2.02 / 1.85 秒 | 两种输出逐体素 float32 相同；噪声索引用于算法测试，非真实分类结果。 |
+| 真实 BOLD 8000 体素×490 帧裁剪，WM/CSF/motion 与带通联合投影 | CUDA 含 I/O 1.83 秒，峰值 0.144 GB | 同输入 NumPy float64 独立投影 0.095 秒，不含 I/O | MAE 1.26×10⁻⁶、最大误差 1.10×10⁻⁴；未与 MATLAB/AFNI 作实测数值对照。 |
+
+上述分类器对照固定了官方 MELODIC IC 和官方掩膜；端到端自产 PICA、配准与清理后影像仍应按 [整链验证](../../validation/fmri/README.md)分别验收。

@@ -31,7 +31,7 @@ def test_two_skewed_components_recover_temporal_modes(tmp_path):
 
     result = decompose_spatial_ica(
         input_path, mask_path, tmp_path / "ica", n_components=2,
-        device="cpu", voxel_batch_size=256, random_state=7, z_threshold=0.5,
+        device="cpu", voxel_batch_size=256, random_state=7, mm_threshold=0.5,
     )
     component_image = nib.load(result.component_maps)
     assert component_image.header.get_zooms()[3] == 1.0
@@ -51,6 +51,10 @@ def test_two_skewed_components_recover_temporal_modes(tmp_path):
     assert result.final_decorrelation_change < 1e-3
     assert result.pca_variance_explained > 0.98
     assert np.count_nonzero(np.asarray(nib.load(result.thresholded_maps).dataobj)) > 0
+    probabilities = np.asarray(nib.load(result.posterior_maps).dataobj)
+    assert probabilities.min() >= 0 and probabilities.max() <= 1
+    assert result.model_order_method == "fixed"
+    assert result.estimated_resels is None
 
 
 def test_component_count_requires_temporal_rank_and_aligned_mask(tmp_path):
@@ -63,3 +67,19 @@ def test_component_count_requires_temporal_rank_and_aligned_mask(tmp_path):
     nib.save(nib.Nifti1Image(np.ones((2, 2, 2), dtype=np.uint8), np.eye(4)), mask)
     with pytest.raises(ValueError, match="smaller than the number of time points"):
         decompose_spatial_ica(bold, mask, tmp_path / "out", n_components=4, device="cpu")
+
+
+def test_pica_mixture_probability_separates_null_and_signal():
+    import torch
+    from fnit.fmri.ica import _mixture_posterior
+
+    rng = np.random.default_rng(1)
+    null = rng.normal(0, 1, 9000)
+    positive = rng.gamma(3, 1, 5000) + 1
+    negative = -rng.gamma(3, 1, 5000) - 1
+    adjusted, posterior = _mixture_posterior(torch.as_tensor(np.r_[null, positive, negative]))
+    probability = posterior.numpy()
+    assert np.isfinite(adjusted.numpy()).all()
+    assert (probability[:9000] >= 0.5).mean() < 0.2
+    assert (probability[9000:14000] >= 0.5).mean() > 0.9
+    assert (probability[14000:] >= 0.5).mean() > 0.9

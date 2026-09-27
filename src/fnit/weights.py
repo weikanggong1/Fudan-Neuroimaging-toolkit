@@ -73,6 +73,7 @@ WEIGHT_FILES = {
 MODEL_FILES = {
     "synthstrip": ("synthstrip.1.pt",),
     "fast-vbm": ("synthstrip.1.pt", "synthmorph.deform.3.h5"),
+    "fmri": ("synthstrip.1.pt", "synthmorph.deform.3.h5"),
     "synthstrip-nocsf": ("synthstrip.nocsf.1.pt",),
     "synthmorph-rigid": ("synthmorph.rigid.1.h5",),
     "synthmorph-affine": ("synthmorph.affine.2.h5",),

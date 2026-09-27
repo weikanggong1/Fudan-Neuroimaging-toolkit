@@ -12,6 +12,7 @@
 - FLIRT：当前移除 Surfa 的同输入核对见[`flirt_no_surfa_20260928/README.md`](flirt_no_surfa_20260928/README.md)；旧版 10 例基准见[`flirt/report.public.json`](flirt/report.public.json)。
 - FNIRT / TBSS：[`dmri_pipeline/tbss_diagnosis.public.json`](dmri_pipeline/tbss_diagnosis.public.json) 与[功能页](../docs/fnirt/README.md)。
 - FastVBM：[`fast_vbm/README.md`](fast_vbm/README.md) 记录当前接口与 fresh benchmark 缺口。
+- 体积 fMRI：[真实 BIDS 整链与 FSL no-GDC/no-B0 FEAT 对照](fmri/README.md)，以及 [MNI152 2 mm 清理结果标量摘要](fmri/e2e_summary.json)。
 - TOPUP：[`topup/report.public.json`](topup/report.public.json) 与[功能页](../docs/topup/README.md)。
 - EDDY：[`eddy/report.public.json`](eddy/report.public.json) 与[功能页](../docs/eddy/README.md)。
 - DTIFIT：[`dtifit/report.public.json`](dtifit/report.public.json) 与[功能页](../docs/dtifit/README.md)。
@@ -35,6 +36,7 @@
 | [SynthSR](../docs/synthsr/README.md) | FreeSurfer TensorFlow，12 例 | 有：shape、affine、dtype、体素差 | 有：原版/本包 CPU 与 GPU | 有：公开 FLAIR 合成 T1w |
 | [TorchFAST](../docs/fast/README.md) | FSL FAST，10 例 | 有：GM PVE、Dice、体积、bias | 有：FSL CPU / 本包 GPU | 有：GM overlay、差值和 bias correction |
 | [FastVBM](../docs/fast_vbm/README.md) | UKB v1 / FSL 接口对应 | 当前源码的 fresh benchmark 尚未完成 | 当前源码无可发布配对计时 | 当前源码无可发布对照图 |
+| [体积 fMRI](../docs/fmri/README.md) | FSL FEAT、MELODIC、FLIRT/BBR、FNIRT、ICA-AROMA；一例真实 UKB rfMRI | 有：同输入 FEAT 4D、掩膜、PICA、BBR、MNI 配准；最终 AROMA 与 FIX 不逐体素比较 | 有：FSL 分步 CPU 与 FNIT GPU；整链墙钟和显存 | 私有 BOLD 图像未公开；发布有限值、网格和数值对照标量 |
 | [FLIRT](../docs/flirt/README.md) | FSL 6.0.7.4；当前 1 例真实 T1，旧版 10 例 GM | 当前新旧包两种配置文件字节相同；与 FSL 的矩阵及图像差异另列 | 当前同输入 FSL / 新旧包 CPU；旧版另有 H100 基准 | 旧版十例平均配准 GM 与差值 |
 | [FNIRT](../docs/fnirt/README.md) | FSL 6.0.7.4，1 例真实 UKB matched-native TBSS | 有：coefficient geometry、九张 standard/skeleton 图及 fixed-affine/fixed-warp 隔离；仍不数值等价 | 有：FSL CPU / 本包 H100，同一 registration 边界 | 有：真实 FA standard-space 对照与绝对差 |
 | [applywarp](../docs/applywarp/README.md) | FSL 6.0.7.4，11 项 | 有：dense/coefficient、linear/nearest、header/dtype | 有：FSL CPU / 本包 CPU 与 H100 | 有：相同 warp 的输出与差值 |

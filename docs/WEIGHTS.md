@@ -5,8 +5,8 @@ WMH-SynthSeg、SynthSR、Python recon-all 和可选辅助分割阶段使用 Free
 配置脚本下载文件、核对大小与 SHA-256，并
 保存权重目录。此后 Python API 和 `fnit` 命令会自动查找它，下载过程无需安装
 FreeSurfer。TorchFAST、TorchFLIRT 和 TorchFNIRT 是数值算法，
-不使用模型权重。FastVBM 的默认 SynthMorph 分支使用 `synthstrip.1.pt` 和官方
-`synthmorph.deform.3.h5`；TorchFNIRT 分支只在 raw T1 脑提取时使用 SynthStrip。
+不使用模型权重。FastVBM 和 fMRI 体积流程的默认 SynthMorph 分支使用
+`synthstrip.1.pt` 与 `synthmorph.deform.3.h5`；fMRI 的 PyTorch FNIRT 分支仍需 SynthStrip 做脑提取。
 
 ## 一次配置，后续自动使用
 
@@ -51,7 +51,7 @@ python tools/setup_weights.py --all --verify-only
 
 `--verify-only` 只检查当前权重目录，不下载或修改配置。已从联网机器复制了权重时，运行 `python tools/setup_weights.py --all --dest /path/to/copied/models`：现有文件校验成功后直接保存目录，无需重新下载。安装 wheel 后也可使用相同选项的 `fnit-setup-weights` 命令。
 
-可选模型名：`synthstrip`、`synthstrip-nocsf`、`synthmorph-rigid`、`synthmorph-affine`、`synthmorph-deform`、`synthmorph-joint`、`synthseg`、`wmh-synthseg`、`recon-all`、`synthsr`、`synthsr-lowfield`、`synthsr-v1` 和 `fast-vbm`。`recon-all` 包含 SynthStrip、SynthMorph affine 和 33 类 SynthSeg 的六个文件，重复选择时只下载一次。`fast-vbm` 是 `synthstrip.1.pt` 与 `synthmorph.deform.3.h5` 的依赖别名，覆盖 FastVBM 两个后端可能使用的权重。只运行 `registration_backend="fnirt"` 可选择 `--model synthstrip`；若调用时还提供显式脑 mask，则该分支不需要任何 checkpoint。`--model` 可重复；不写 `--model` 时等同 `--all`。显式 API/CLI 权重路径优先，其次是 `FNIT_WEIGHTS` 环境变量，再次是脚本保存的目录，然后是默认缓存和现有 FreeSurfer 模型目录。`XDG_CACHE_HOME` 可改变缓存根目录。模型推理不会联网，只有运行配置脚本才会下载。
+可选模型名：`synthstrip`、`synthstrip-nocsf`、`synthmorph-rigid`、`synthmorph-affine`、`synthmorph-deform`、`synthmorph-joint`、`synthseg`、`wmh-synthseg`、`recon-all`、`synthsr`、`synthsr-lowfield`、`synthsr-v1`、`fast-vbm` 和 `fmri`。`recon-all` 包含 SynthStrip、SynthMorph affine 和 33 类 SynthSeg 的六个文件，重复选择时只下载一次。`fast-vbm` 和 `fmri` 都是 `synthstrip.1.pt` 与 `synthmorph.deform.3.h5` 的依赖别名。端到端 fMRI 选择 `registration_backend="fnirt"` 时只需 `--model synthstrip`；仅单独调用 `register_t1_to_mni`、并已备妥去颅骨 T1 与 MNI 模板时不需要 checkpoint。`--model` 可重复；不写 `--model` 时等同 `--all`。显式 API/CLI 权重路径优先，其次是 `FNIT_WEIGHTS` 环境变量，再次是脚本保存的目录，然后是默认缓存和现有 FreeSurfer 模型目录。`XDG_CACHE_HOME` 可改变缓存根目录。模型推理不会联网，只有运行配置脚本才会下载。
 
 原有九个链接、HTTP 状态和文件大小于 **2026-09-23** 核验；新增十个 FreeSurfer 8.2 模型和查找表于 **2026-09-25** 从官方源码/git-annex 完整下载，逐一核对大小和 SHA-256。SynthStrip/SynthMorph 的 SHA-256 来自本包已完成数值验证的权重，并与 FreeSurfer 官方仓库的 git-annex 指针一致；WMH-SynthSeg 和 SynthSR v1 的 SHA-256 来自官方文件的完整下载校验。SynthSR v2 两份文件的大小和 SHA-256 与 FreeSurfer git-annex 对象名一致；配置脚本下载后还会逐字节校验。此处的版本号固定，不会自动跟随上游替换为新模型。
 
@@ -142,7 +142,7 @@ TorchFNIRT、TorchApplyWarp、Jacobian 和 modulation 都不读取 checkpoint。
 
 `python tools/setup_weights.py --model fast-vbm` 配置 SynthStrip 和 deform 两个文件，
 是两个后端的权重超集；只运行 TorchFNIRT 分支可改为 `--model synthstrip`。GM
-template 是独立输入，不是模型权重，也不由本仓库或配置脚本下载。
+template 是独立输入，不是模型权重，也不由本仓库或配置脚本下载。fMRI 同理：`fnit-setup-weights --model fmri` 安装默认链的两份权重；MNI152 T1 2 mm 模板和可选脑掩膜由用户提供绝对路径。
 
 ## 权重许可与归属
 
