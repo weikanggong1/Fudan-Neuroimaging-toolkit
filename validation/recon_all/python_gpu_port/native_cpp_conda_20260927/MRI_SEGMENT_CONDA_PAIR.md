@@ -1,6 +1,6 @@
 # `mri_segment`：同输入 Conda C++ 与 Python 配对
 
-固定输入为官方同一被试的 `antsdn.brain.mgz`（256³ uint8；SHA-256 `378548a3f58f74878450525a734c15ff19ce935dff913133f52aa149bb91d2ce`）。这是**独立子函数验收**；当前 `fnit-recon-all` 尚未生成该输入，也未调用此 C++ 程序，不能将本次耗时算作整例提速。
+这是一份早期**独立子函数验收**记录，固定输入为当时保存的 `antsdn.brain.mgz`（256³ uint8；SHA-256 `378548a3f58f74878450525a734c15ff19ce935dff913133f52aa149bb91d2ce`）。后续 v3 整例已接入去噪与 Conda C++ `mri_segment`；本报告的时间和哈希不能替代[当前完整 YAML 环境的另一份同输入测试](../conda_yaml_install_20260927/README.md)，也不能代表整例提速。
 
 ## 功能与用法
 
@@ -14,7 +14,10 @@ FREESURFER_HOME=/path/to/external/assets FS_LICENSE=/path/to/private/license.txt
 
 ```python
 from fnit.recon_all.mri_segment import segment_white_matter_mgz
-segment_white_matter_mgz("antsdn.brain.mgz", "python.wm.seg.mgz")
+segment_white_matter_mgz(
+    source_path="antsdn.brain.mgz",  # 去噪脑图，256³ uint8 MGZ
+    output_path="python.wm.seg.mgz",  # 初始白质分割输出，原空间 uint8 MGZ
+)
 ```
 
 编译命令为 `cmake --build /path/to/conda-build/build --parallel 4 --target mri_segment`；主页的 `tools/build_recon_all_fs_cpp_conda.sh` 已将其列为第七个目标。单目标增量编译在 headcw 用时 4.05 秒。编译器、ITK 和其余链接依赖来自项目 Conda 环境；二进制需要 `FREESURFER_HOME` 指向外置数据目录以及私有 `FS_LICENSE` 环境变量，不链接已安装的 FreeSurfer 库，最大 glibc 符号版本为 2.14。编译二进制 SHA-256 为 `0842a77762043c4f78f8be46799b32f02f24da1bb05b9e9d8231055e951b9309`。
@@ -33,4 +36,4 @@ MGZ 压缩文件 SHA-256 三者不同；验收以解码后的全部体素、MGH 
 
 随后在目标 gpucw1（CentOS7 CMake 分支）再次完整运行七目标脚本，退出 0、用时 149.45 秒。重编后 `mri_segment` SHA-256 为 `f3c46df3f178e932d42f52c61118696f5893e8f7def7a53eb2cbb5b7d222e5f3`；它在 headcw 的相同冻结输入上仍为 **0 个体素差**、MGH 头部及仿射全同，单次耗时 41.39 秒。[gpucw1 七目标哈希](bin_seven_gpucw1.sha256)、[构建时间](build_seven_gpucw1.time)和[本次运行时间](mri_segment_gpucw1build.time)分别保存。重编使二进制字节哈希改变，数值配对仍须以具体输出为准。
 
-当前整例流程直接从 SynthSeg 标签近似构造 `wm.mgz`，缺少官方的 `brain.mgz → AntsDenoiseImageFs → antsdn.brain.mgz → mri_segment → mri_edit_wm_with_aseg → mri_pretess → mri_fill` 链。将本程序接入实际重建前，须先连通这些输入，并逐阶段核对输出；单独把 `mri_segment` 运行在不同输入上不会获得与官方一致的白质或表面。
+本报告生成时，整例尚未连通 `brain.mgz → AntsDenoiseImageFs → antsdn.brain.mgz → mri_segment → mri_edit_wm_with_aseg → mri_pretess → mri_fill`。后续 v3 已连通并完成[整例比较](v3_e2e_20260927/BENCHMARK.md)，但最终 white/pial 和脑区指标尚未通过；本报告保留当时的独立阶段数据。
