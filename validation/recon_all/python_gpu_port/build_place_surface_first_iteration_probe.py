@@ -107,12 +107,17 @@ def main() -> None:
         if " = " in line:
             key, value = line.split(" = ", 1)
             definitions[key] = shlex.split(value)
+    definitions["CXX_INCLUDES"] = [
+        token.replace("/tmp/fs_full_source_d932", str(args.source))
+        for token in definitions["CXX_INCLUDES"]
+    ]
     compiler = "/home1/gongwk/anaconda3/bin/x86_64-conda-linux-gnu-g++"
     compiled = args.out / "mris_place_surface_first_iteration.o"
     command = [compiler]
     for key in ("CXX_DEFINES", "CXX_INCLUDES", "CXX_FLAGS"):
         command += definitions[key]
-    command += ["-c", str(patched), "-o", str(compiled)]
+    command += ["-I", str(args.source / "include"), "-I", str(args.source / "mris_make_surfaces"),
+                "-c", str(patched), "-o", str(compiled)]
     subprocess.run(command, check=True)
 
     link = shlex.split((target / "link.txt").read_text())

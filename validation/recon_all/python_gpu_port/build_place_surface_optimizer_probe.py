@@ -16,6 +16,7 @@ def main() -> None:
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--capture-iteration", type=int, default=0)
     parser.add_argument("--capture-through", type=int)
+    parser.add_argument("--capture-white-repulsion", action="store_true")
     args = parser.parse_args()
     if args.capture_through is not None and args.capture_through < 1:
         parser.error("--capture-through must be positive")
@@ -130,6 +131,15 @@ def main() -> None:
         if name in ("normal_spring", "tangential_spring"):
             diagnostic = f'dump_first_gradient("pre_{name}");\n    ' + diagnostic
         source = source.replace(needle, diagnostic, 1)
+    if args.capture_white_repulsion:
+        for needle, name in (
+            ("mrisAverageSignedGradients(mris, avgs);", "after_signed_average"),
+            ("mrisComputeRepulsiveTerm(mris, parms->l_repulse, mht_v_current, mht_f_current);",
+             "after_self_repulsion"),
+        ):
+            if source.count(needle) < 1:
+                raise RuntimeError(f"missing source optimizer term: {name}")
+            source = source.replace(needle, needle + f'\n    dump_first_gradient("{name}");', 1)
     patched = args.out / "mrisurf_mri_gradient_probe.cpp"
     patched.write_text(prefix + "// #POS" + source)
 
@@ -139,12 +149,16 @@ def main() -> None:
         if " = " in line:
             key, value = line.split(" = ", 1)
             definitions[key] = shlex.split(value)
+    definitions["CXX_INCLUDES"] = [
+        token.replace("/tmp/fs_full_source_d932", str(args.source))
+        for token in definitions["CXX_INCLUDES"]
+    ]
     compiler = "/home1/gongwk/anaconda3/bin/x86_64-conda-linux-gnu-g++"
     compiled = args.out / "mrisurf_mri_gradient_probe.o"
     command = [compiler]
     for key in ("CXX_DEFINES", "CXX_INCLUDES", "CXX_FLAGS"):
         command += definitions[key]
-    command += ["-I", str(args.source / "utils"), "-c", str(patched), "-o", str(compiled)]
+    command += ["-I", str(args.source / "include"), "-I", str(args.source / "utils"), "-c", str(patched), "-o", str(compiled)]
     subprocess.run(command, check=True)
 
     spring_source = (args.source / "utils/mrisurf_compute_dxyz.cpp").read_text()
@@ -317,7 +331,7 @@ def main() -> None:
     spring_command = [compiler]
     for key in ("CXX_DEFINES", "CXX_INCLUDES", "CXX_FLAGS"):
         spring_command += definitions[key]
-    spring_command += ["-I", str(args.source / "utils"), "-c", str(spring_patched), "-o", str(spring_object)]
+    spring_command += ["-I", str(args.source / "include"), "-I", str(args.source / "utils"), "-c", str(spring_patched), "-o", str(spring_object)]
     subprocess.run(spring_command, check=True)
 
     average_source = (args.source / "utils/mrisurf_metricProperties.cpp").read_text()
@@ -348,7 +362,7 @@ def main() -> None:
     average_command = [compiler]
     for key in ("CXX_DEFINES", "CXX_INCLUDES", "CXX_FLAGS"):
         average_command += definitions[key]
-    average_command += ["-I", str(args.source / "utils"), "-c", str(average_patched), "-o", str(average_object)]
+    average_command += ["-I", str(args.source / "include"), "-I", str(args.source / "utils"), "-c", str(average_patched), "-o", str(average_object)]
     subprocess.run(average_command, check=True)
 
     link = shlex.split((args.build / "mris_make_surfaces/CMakeFiles/mris_place_surface.dir/link.txt").read_text())
