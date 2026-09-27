@@ -1,21 +1,44 @@
-# ProbtrackX 配对验证
+# ProbtrackX 真实 DWI 多脑区配对验证
 
-[功能、参数和结果解读](../../docs/probtrackx/README.md) · [CPU 聚合指标 JSON](report.public.json) · [GPU 聚合指标 JSON](report.gpu.public.json) · [比较脚本](../../benchmark/probtrackx_validation.py)
+[功能和参数](../../docs/probtrackx/README.md) · [五脑区 CPU/GPU 汇总 JSON](report.multiregion.public.json) · [聚合指标脚本](../../benchmark/probtrackx_multiregion.py) · [seed 选取脚本](prepare_multiregion_seeds.py)
 
-## 实验设置
+## 输入、选点与配对
 
-- 2026-09-27 在 `gpucw1` 上运行。原版为 FSL 6.0.7.22 的 `probtrackx2` CPU；FNIT 为 `src/fnit/probtrackx/pipeline.py` SHA-256 `87ae878bc076329712f23bad0980fc14610ecd73f659aa220050397fdafb9afb` 的 CPU 路径。FNIT Python 进程设 `OMP_NUM_THREADS=8`、`MKL_NUM_THREADS=8`。 实现时参考的上游 ptx2 源码是 tag `2608.0`，并非这台服务器所装二进制的逐字节同版本源码。
-- 共同输入是一例 UK Biobank dMRI 已有的 FSL BEDPOSTX 后验：104×104×72 网格，50 帧，三纤维。该后验生成日志不可得。ROI 1 是扩散空间 FA>0.5 掩膜内最靠近掩膜中位点的体素中心所成 7 体素球。
-- ROI 2 先由 FA 与 dyad 方向选择，初始网络只得到一条非零连接。为检查非零连接数值，再以 FSL seed-to-voxel pilot 图在距 ROI 1 至少 4 体素、FA>0.25 的候选中，选出密度和最大的 7 体素球。**因此后一个网络目标是按 FSL 输出选的，不能当成独立的无偏测试集。** 两个 ROI 不重叠，均与 posterior mask 共网格。
-- 两边设置每 seed 体素 200 条轨迹、总步数 400、步长 0.5 mm、曲率阈值 0.2、随机种子 20260927；FNIT `batch_size=256`。`/usr/bin/time` 墙钟计时含载入、追踪、写盘。FSL 进程虽然返回 255，但各预期输出完整且通过 NIfTI 几何、计数与矩阵读取检查；不能据其退出码单独判断测试失败。
+- 2026-09-27 在 `gpucw1` 上运行。使用一例真实 UK Biobank DWI 已有的原版 FSL BEDPOSTX 全脑后验：104×104×72，50 帧，三纤维。FSL 为 6.0.7.22 的 `probtrackx2` CPU / `probtrackx2_gpu`；FNIT `src/fnit/probtrackx/pipeline.py` SHA-256 为 `87ae878bc076329712f23bad0980fc14610ecd73f659aa220050397fdafb9afb`。所有配对运行读取相同的后验和 mask；原始后验生成日志不可得，故仅验证追踪阶段。
+- FSL 自带 JHU-ICBM 白质标签图通过已有 `MNI_to_dti_FA_warp.nii.gz` 最近邻重采样到后验 mask 网格。图谱标签 3、7、8、41、42 分别代表胼胝体膝部、右/左皮质脊髓束、右/左上纵束。每个区域在标签∩mask∩FA≥0.3 中选最大内部距离处的 7 体素十字形 seed；5 个 seed 均通过同网格、非空与 FA 检查。选点不使用 FSL/FNIT 路径图。单被试 seed 坐标与影像留在服务器。
+- Seed-to-voxel：两边均为每 seed 体素 200 条轨迹、400 总步、0.5 mm 步长、0.2 曲率阈值、0.01 次要纤维阈值、随机种子 20260927。FNIT `batch_size=256`、`OMP_NUM_THREADS=8`、`MKL_NUM_THREADS=8`。FNIT 在 H100 GPU1 上使用 float32 并启用 TF32；该 GPU 同时有其他进程。5×5 网络额外使用 2000 条/体素，并用 20260928 重跑 FSL；低抽样 200 条/体素的矩阵也保留在 JSON 中用于说明抽样稀疏性。
+- 墙钟时间均含启动、载入、追踪与写盘。全部 26 个运行目录都有非空 `fdt_paths.nii.gz`、`waytotal`，NIfTI 形状和 affine 经比较脚本检查；12 个 FNIT 进程退出码 0。14 个 FSL 进程退出码 255，但各日志以 `finished` 或 `TOTAL TIME` 结束且输出可读取，因此单凭退出码不判失败。
 
-同一输入还在 H100 GPU1 上运行了 FSL `probtrackx2_gpu`（报告的二进制标识 `2412.6-dirty`）和 FNIT CUDA；GPU 同时有其他任务驻留，运行时间仅是这次环境下的墙钟观测。两边 seed `waytotal` 均为 1400；网络矩阵的两个非零元素 FSL 为 1194/1061、FNIT 为 1190/1067。GPU 的配对图像与时间见 `report.gpu.public.json`。
+## 结果判读
 
-报告中的 Pearson 在两张图的非零体素并集上计算；support Dice 衡量全部非零体素；top-tenth Dice 将 FSL 非零体素数的 10% 作为两图相同的 top-*k*。低计数尾部会降低 support Dice，因此同时报告密度和、相关、top-*k* Dice 和原始矩阵。不同随机数流不要求逐体素相同。
+报告中的 Pearson 在两图非零体素并集上计算；top-10% Dice 用 FSL 非零体素数的 10% 作为两图相同的 top-*k*；support Dice 比较全部非零体素。不同随机数流不要求逐体素完全相同。
 
-## 复现入口与数据边界
+五个 seed 的 FSL/FNIT `waytotal` 全部为 1400。CPU 密度图在非零体素并集的 Pearson *r*=0.9938–0.9970，高密度前十分位 Dice=0.8631–0.9416，密度和最大相对差异 1.18%；GPU *r*=0.9939–0.9972。胼胝体 seed 的 FSL–FSL 换随机种子对照 *r*=0.9939、top Dice=0.9012。CPU 五例墙钟中位数为 FSL 12.42 s、FNIT 23.30 s；GPU 中位数 12.75 s、44.07 s。GPU 为共享环境，速度差仅适用于本次运行。
 
-`benchmark/probtrackx_validation.py` 对一对 FSL/FNIT seed 与网络目录计算汇总指标和三联图。FSL 用 `-s BEDPOSTX/merged -m BEDPOSTX/nodif_brain_mask.nii.gz -x ROI --opd -P 200 -S 400 --rseed=20260927`；网络模式将 `-x` 换成两行 ROI 列表并增加 `--network`。FNIT 对同一后验使用 `--nsamples 200 --nsteps 400 --rseed 20260927` 及相应 `--seed` 或 `--roi-list`。网络矩阵按 ROI 列表顺序输出。真实 UK Biobank 输入、后验、ROI 和单被试图像均只保存在授权服务器上；公开报告仅含汇总数值。 [UK Biobank 的影像公开使用指引](https://community.ukbiobank.ac.uk/hc/en-gb/articles/16594178325277-Submitting-publications-and-use-of-UK-Biobank-images)要求公开展示被试影像前联系其团队。
+5×5 网络每体素 200 条轨迹时，FSL/FNIT 分别只有 6/10 条跨区接受轨迹，图相关 *r*=0.595，不能稳定比较。提高到 2000 条后，右皮质脊髓束→左皮质脊髓束为 FSL 53、FNIT 65，FSL 重跑为 67；反向为 8、8、11。此时 FSL–FNIT 密度图 *r*=0.9477、top Dice=0.7788，FSL–FSL 为 0.9262、0.7611；FSL/FNIT 耗时 31.50/111.62 s。其他边多数仍为零或个位数，不能据此检验低概率边的逐项一致性。所有逐 ROI 指标、矩阵、几何和计时见 [机器可读汇总](report.multiregion.public.json)。
+
+## 复现
+
+在有权限读取同一 DWI/BEDPOSTX 的服务器上，先设置绝对路径 `BED`、`OUT`、`FSLDIR`、`FA`、`WARP`，并使用安装了 NumPy、SciPy、NiBabel、PyTorch 的 `PYTHON`；绘图命令另需 Matplotlib。源代码目录为仓库的 `src`：
+
+```bash
+mkdir -p "$OUT"
+export LD_LIBRARY_PATH="$FSLDIR/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" FSLOUTPUTTYPE=NIFTI_GZ
+"$FSLDIR/bin/applywarp" \
+  --in="$FSLDIR/data/atlases/JHU/JHU-ICBM-labels-2mm.nii.gz" \
+  --ref="$BED/nodif_brain_mask.nii.gz" --warp="$WARP" \
+  --out="$OUT/jhu_labels_dwi.nii.gz" --interp=nn
+"$PYTHON" validation/probtrackx/prepare_multiregion_seeds.py \
+  --labels "$OUT/jhu_labels_dwi.nii.gz" \
+  --mask "$BED/nodif_brain_mask.nii.gz" --fa "$FA" --out "$OUT"
+bash validation/probtrackx/run_real_multiregion.sh "$OUT" "$BED" "$FSLDIR" "$PYTHON" "$PWD/src"
+bash validation/probtrackx/run_real_multiregion_network.sh "$OUT" "$BED" "$FSLDIR" "$PYTHON" "$PWD/src"
+python3 benchmark/probtrackx_multiregion.py --run-dir "$OUT" \
+  --output-json "$OUT/report.multiregion.public.json" \
+  --private-figure "$OUT/example_real.private.png"
+```
+
+脚本的 GPU 编号设为服务器上的 GPU1。FSL `applywarp` 和 `probtrackx2` 在该环境虽返回 255，仍需按输出文件和日志核验。真实 UK Biobank 输入、posterior、seed 与单被试对照图均只保存在授权服务器；仓库只发布汇总数值与合成示例。[UK Biobank 影像公开使用指引](https://community.ukbiobank.ac.uk/hc/en-gb/articles/16594178325277-Submitting-publications-and-use-of-UK-Biobank-images)要求公开展示被试影像前联系其团队。
 
 ## 可公开的合成示例
 

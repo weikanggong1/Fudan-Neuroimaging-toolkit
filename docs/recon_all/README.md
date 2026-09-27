@@ -4,7 +4,7 @@
 
 `fnit-recon-all` 从一幅 T1w 生成脑体积分割、双侧 white/pial/sphere 表面、厚度、面积、顶点体积、曲率、aparc/a2009s/DKT 标注和脑区统计。运行时调用 Python 包及其 CPU/CUDA 算子，不要求安装 FreeSurfer、FSL 或原生 recon-all 运行包。模型权重和模板单独下载并校验。
 
-**当前为近似核心重建。** 拓扑修复、white/pial 放置和球面配准尚未与 FreeSurfer 8.2 对齐；只生成核心输出的子集。一个真实 T1 的整例流程已跑通，严格固定配置的 138 项官方输出中 6 项通过、52 项缺失、80 项存在差异。皮层逐顶点厚度、面积、体积、曲率及脑区统计不能用于需要官方 recon-all 数值一致的分析。详细差异和逐阶段计时见[整例报告](../../validation/recon_all/python_gpu_port/NATIVE_FREE_CONNECTED_20260927.md)。
+**当前为近似核心重建。** 拓扑修复、white/pial 放置和球面配准尚未与 FreeSurfer 8.2 对齐；只生成核心输出的子集。一个真实 T1 的整例流程已跑通，严格固定配置的 138 项官方输出中 6 项通过、52 项缺失、80 项存在差异。皮层逐顶点厚度、面积、体积、曲率及脑区统计不能用于需要官方 recon-all 数值一致的分析。详细差异和逐阶段计时见[整例报告](../../validation/recon_all/python_gpu_port/NATIVE_FREE_CONNECTED_20260927.md)；根因、容差及修复顺序见[差异分析](../../validation/recon_all/python_gpu_port/DISCREPANCY_AND_TOLERANCE_20260927.md)。
 
 ## 安装外置数据
 
