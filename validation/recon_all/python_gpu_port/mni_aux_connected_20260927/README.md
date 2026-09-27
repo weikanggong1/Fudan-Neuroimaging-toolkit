@@ -20,9 +20,9 @@ The Python stages are described in
 [docs/recon_all/MNI_AUX_CHAIN.md](../../../../docs/recon_all/MNI_AUX_CHAIN.md).
 The standalone finalsurfs stage is documented in
 [docs/recon_all/FINAL_SURFS_CHAIN.md](../../../../docs/recon_all/FINAL_SURFS_CHAIN.md).
-The production recon-all scheduler has not yet called the new MNI/aux
-function; this is an isolated, connected stage test rather than a fresh
-T1-to-all-outputs run.
+The production recon-all scheduler now calls the MNI/aux function when
+`--native-white-preaparc` is enabled. This earlier result remains an isolated,
+connected stage test rather than a fresh T1-to-all-outputs run.
 
 ## Input, output, and setup
 
@@ -111,7 +111,7 @@ times come from archived separate runs; load, process boundaries and date
 differ. They are stage context, not a paired acceleration estimate. The
 finalsurfs native timing was a separate same-input five-command replay.
 
-The established result covers this T1 and CPU execution. The complete
-recon-all scheduler still needs to connect these stages, generate surfaces
-from the resulting finalsurfs, and pass the full output and vertex/ROI
-comparison before end-to-end parity can be claimed.
+The established result covers this T1 and CPU execution. The opt-in
+recon-all scheduler now connects these stages to surface generation, but
+its fresh whole-subject output and vertex/ROI comparison still need to pass
+before end-to-end parity can be claimed.

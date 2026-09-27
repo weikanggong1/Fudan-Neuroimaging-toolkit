@@ -99,7 +99,7 @@ python tools/setup_weights.py --model synthstrip --model synthmorph-joint \
 
 FastVBM 的 SynthMorph 分支从原始 T1w 开始时需要 `synthstrip.1.pt` 和 `synthmorph.deform.3.h5`；`python tools/setup_weights.py --model fast-vbm` 安装这两个后端的权重超集。TorchFNIRT 分支只需 SynthStrip；已有脑 mask 时该分支无需 checkpoint。GM 模板由用户提供，不由配置脚本下载。TorchFAST、TorchFLIRT、TorchFNIRT、TorchApplyWarp、TorchTOPUP、TorchEDDY、TorchDTIFIT、TorchAMICONODDI、TorchMMORF、TorchBEDPOSTX 和 TorchProbtrackX 不使用预训练权重。dMRI pipeline 的 TBSS 分支不使用权重；MMORF 分支仅需 SynthStrip 权重。
 
-recon-all 的默认下载组包含 10 个外置权重文件（145,283,019 字节）和 19 个模板/图谱文件（217,851,651 字节）；新增的三个小型先验供待接入的 MCA/dura、静脉窦阶段使用。MNI152 配准四文件仍需按需下载。分别运行 `fnit-setup-weights --model recon-all --dest /path/to/weights` 和 `fnit-setup-recon-all-assets --dest /path/to/assets`；文件均按 SHA-256 校验。当前 recon-all 入口需在环境中设置外部 `FS_LICENSE`，并提供自行编译的程序目录；三个必需程序在 CPU 上运行。Git 仓库和 wheel 均不打包这些程序或许可证。调用与验收边界见[recon-all 文档](docs/recon_all/README.md)。
+recon-all 的默认下载组包含 10 个外置权重文件（145,283,019 字节）和 19 个模板/图谱文件（217,851,651 字节）；其中三个小型先验供可选的 MCA/dura、静脉窦阶段使用。该链另需按需下载 cropped/full 两张 MNI152 图像，目录中的另两份 MNI LTA 不参与该链。分别运行 `fnit-setup-weights --model recon-all --dest /path/to/weights` 和 `fnit-setup-recon-all-assets --dest /path/to/assets`；文件均按 SHA-256 校验。当前 recon-all 入口需在环境中设置外部 `FS_LICENSE`，并提供自行编译的程序目录；三个必需程序在 CPU 上运行。Git 仓库和 wheel 均不打包这些程序或许可证。调用与验收边界见[recon-all 文档](docs/recon_all/README.md)。
 
 独立使用 33 类 SynthSeg 时只需 `python tools/setup_weights.py --model synthseg`，随后运行 `fnit synthseg --i T1.nii.gz --o seg.nii.gz --csv-vols seg.vol.csv`，或使用 Python 的 `SynthSeg` 类；详见[独立接口](docs/synthseg/README.md)。
 
