@@ -1,0 +1,143 @@
+{
+  "dataset": "OpenNeuro ds004666 sub-01 ses-2mm, FSL TOPUP/EDDY corrected AP DWI",
+  "scope": "fixed official Dhollander selected tissue voxels and principal directions; amp2response regression only",
+  "reference_commands": {
+    "wm": "amp2response dwi.mif voxels_sfwm.mif safe_vecs.mif response_wm.txt",
+    "gm": "amp2response dwi.mif voxels_gm.mif safe_vecs.mif response_gm.txt -isotropic",
+    "csf": "amp2response dwi.mif voxels_csf.mif safe_vecs.mif response_csf.txt -isotropic"
+  },
+  "device": "cuda:0",
+  "torch": "2.5.1",
+  "tf32_enabled": true,
+  "dtype_signal": "float32",
+  "dtype_solver": "float64",
+  "load_seconds": 6.171526932157576,
+  "peak_torch_allocated_gib": 0.34936046600341797,
+  "input_sha256": {
+    "dwi": "9ee26b8329696d462754a441d14faa10a0f0fb774fd860feacfaf8443d83d88c",
+    "grad": "48bdb84fcd69d979a447fa578f98cb3be389d7dc6bf17f49499e59e4d6291b0d",
+    "wm_mask": "a93ee84661dd83576499702a3827451386962009920be254f7a0e8e278a5129d",
+    "gm_mask": "a2ed9cdb7c18999dce1a460c7b0ad876efc7282dd5c996b3a26fdedccefbd3ef",
+    "csf_mask": "039afaf68f30d51f3abfb5b90407cfaab758ce07ab30fa2e2ce48e4f6d24a49c",
+    "directions": "8bf409a976d1d9d5f5fc2dc6924a2bf0998837e73d8d14bdabfc7c00637cfab5",
+    "wm_response": "a6b4d6965984a8f4533c37c57eae4ba81add17a6a5d1c5ab85a9ec031f1de6f9",
+    "gm_response": "fcc515c90908ac424a6bd137f16baeb977279cb86bb4def1cf467ee64ed250a9",
+    "csf_response": "cfbd7cfabf92a3e46b4392c3d21872ac1713ed7d3bbe37cfefd54fa6f48aa4f3"
+  },
+  "metrics": {
+    "wm": {
+      "selected_voxels": 442,
+      "seconds": 0.6010509203188121,
+      "mae": 2.0287475403317026e-12,
+      "max_abs": 1.4551915228366852e-11,
+      "reference": [
+        [
+          9165.93679711054,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4945.11662306021,
+          -1945.43298476983,
+          404.525553462989,
+          -58.0449264645557,
+          7.9741760435649,
+          -6.29856975049136
+        ],
+        [
+          3412.43032902694,
+          -1945.04584784278,
+          699.153564027679,
+          -175.669291734439,
+          34.4545683529915,
+          -7.55200048395307
+        ]
+      ],
+      "candidate": [
+        [
+          9165.936797110526,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4945.116623060204,
+          -1945.432984769823,
+          404.52555346298834,
+          -58.04492646455568,
+          7.974176043564935,
+          -6.298569750491329
+        ],
+        [
+          3412.430329026939,
+          -1945.0458478427743,
+          699.1535640276783,
+          -175.66929173443947,
+          34.45456835299153,
+          -7.552000483953092
+        ]
+      ]
+    },
+    "gm": {
+      "selected_voxels": 812,
+      "seconds": 0.022026505786925554,
+      "mae": 9.822542779147625e-11,
+      "max_abs": 1.418811734765768e-10,
+      "reference": [
+        [
+          18097.1394828369
+        ],
+        [
+          8349.67136739101
+        ],
+        [
+          4592.66954516163
+        ]
+      ],
+      "candidate": [
+        [
+          18097.13948283676
+        ],
+        [
+          8349.671367391114
+        ],
+        [
+          4592.669545161679
+        ]
+      ]
+    },
+    "csf": {
+      "selected_voxels": 410,
+      "seconds": 0.0435884608887136,
+      "mae": 6.12014143068033e-12,
+      "max_abs": 7.844391802791506e-12,
+      "reference": [
+        [
+          26239.3835277755
+        ],
+        [
+          979.855228558599
+        ],
+        [
+          389.691065450318
+        ]
+      ],
+      "candidate": [
+        [
+          26239.38352777549
+        ],
+        [
+          979.8552285585912
+        ],
+        [
+          389.69106545031474
+        ]
+      ]
+    }
+  }
+}

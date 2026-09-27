@@ -1,184 +1,199 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "date": "2026-09-27",
-  "feature": "TorchAMICONODDI",
-  "fnit_version": "0.12.1",
+  "feature": "TorchAMICONODDI without a DIPY runtime dependency",
   "reference": {
     "software": "AMICO 2.0.3",
-    "repository": "https://github.com/daducci/AMICO",
     "tag": "v2.0.3",
     "commit": "df540093b60240c38a6ff2ea4ceb1181c4f3e936",
-    "dipy": "1.12.1",
-    "numpy": "1.26.4",
-    "scipy": "1.17.1",
-    "threads": 32
+    "dipy_version_in_reference": "1.12.1",
+    "frozen_official_output_from_prior_environment": true,
+    "reference_complete_process_seconds_from_prior_run": 29.24
   },
-  "input": {
-    "subjects": 1,
-    "format": "real UKB-format dMRI after official FSL EDDY",
+  "inputs": {
+    "full_fit": "one real UKB-format EDDY-corrected DWI; DWI, mask, bvals and rotated bvecs identical for frozen official, pre-change FNIT and current FNIT",
+    "full_shape": [
+      104,
+      104,
+      72,
+      105
+    ],
+    "full_mask_voxels": 242261,
+    "full_b0_volumes": 5,
+    "full_diffusion_volumes": 100,
+    "stage_math": "a separate matched UK Biobank DWI and brain mask; exact same arrays for DIPY-backed and independent math",
+    "stage_shape": [
+      104,
+      104,
+      72,
+      105
+    ],
+    "stage_mask_voxels": 207696,
+    "private_input_paths_hashes_and_images_in_repository": false
+  },
+  "standalone_stage_math_vs_dipy_backed": {
+    "direction_components": {
+      "exact": 623088,
+      "total": 623088
+    },
+    "direction_lut_indices": {
+      "exact": 207696,
+      "total": 207696
+    },
+    "rotation_fit_coefficients": {
+      "exact": 45500,
+      "total": 45500
+    },
+    "rotation_basis_coefficients": {
+      "exact": 45500,
+      "total": 45500
+    },
+    "subject_basis_coefficients": {
+      "exact": 18200,
+      "total": 18200
+    },
+    "white_matter_kernel_values": {
+      "exact": 7560000,
+      "total": 7560000
+    },
+    "isotropic_kernel_values": {
+      "exact": 105,
+      "total": 105
+    },
+    "kernel_norm_values": {
+      "exact": 14400,
+      "total": 14400
+    },
+    "maximum_absolute_difference": 0.0,
+    "cpu_seconds": {
+      "standalone_direction": 0.6417034789919853,
+      "standalone_rotation": 0.0418594628572464,
+      "standalone_subject_basis": 0.0038614794611930847,
+      "standalone_full_kernel": 0.4048459976911545,
+      "dipy_backed_direction": 1.752688281238079,
+      "dipy_backed_rotation": 0.37699905782938004,
+      "dipy_backed_subject_basis": 0.004628874361515045,
+      "dipy_backed_full_kernel": 0.4254356399178505
+    }
+  },
+  "full_fit_current_vs_prechange_fnit": {
+    "same_input_hashes": true,
+    "maps_exact": {
+      "NDI": 242261,
+      "ODI": 242261,
+      "FWF": 242261,
+      "RMSE": 242261,
+      "direction_components": 726783
+    },
+    "all_map_elements_exact": true,
+    "shape_dtype_affine_equal": true,
+    "prechange_source_sha256": "bc44a4aedffa94cf177af9479c4d86fa392c9172c6b6bb003a92d3d0f4ec729d",
+    "standalone_source_sha256": "c213123cb550d673845add593461d15b9f92040be328ccfe3c4c6cceb64759b2"
+  },
+  "full_fit_current_vs_frozen_official": {
+    "metrics": {
+      "NDI": {
+        "exact_elements": 97719,
+        "total_elements": 242261,
+        "mae": 2.248666698586693e-06,
+        "max_abs": 0.04072889685630798,
+        "count_abs_gt_1e_7": 75235
+      },
+      "ODI": {
+        "exact_elements": 62584,
+        "total_elements": 242261,
+        "mae": 7.914600378266036e-06,
+        "max_abs": 0.053755998611450195,
+        "count_abs_gt_1e_7": 76620
+      },
+      "FWF": {
+        "exact_elements": 131327,
+        "total_elements": 242261,
+        "mae": 3.154258010394552e-06,
+        "max_abs": 0.06689253449440002,
+        "count_abs_gt_1e_7": 71702
+      },
+      "direction": {
+        "exact_elements": 678114,
+        "total_elements": 726783,
+        "mae": 0.06735845421488759,
+        "max_abs": 1.999260425567627,
+        "count_abs_gt_1e_7": 48657
+      },
+      "RMSE": {
+        "exact_elements": 149299,
+        "total_elements": 242261,
+        "mae": 7.794731430883955e-09,
+        "max_abs": 0.0003540143370628357,
+        "count_abs_gt_1e_7": 165
+      }
+    },
+    "official_threshold_max_abs": 1e-07,
+    "scalar_maps_all_within_threshold": false,
+    "directions_exact": false,
+    "passed": false,
+    "discrepancy_present_in_prechange_fnit": true,
+    "discrepancy_cause_proven": false
+  },
+  "timing": {
+    "scope": "fresh process /usr/bin/time includes startup, NIfTI I/O, kernel generation and fitting on one H100; original AMICO time was recorded in a prior independent CPU run",
+    "prechange_fnit_full_process_seconds": 26.77,
+    "standalone_fnit_full_process_seconds": 26.59,
+    "prechange_fnit_run_wall_seconds": 22.75230193277821,
+    "standalone_fnit_run_wall_seconds": 22.96476057730615,
+    "prechange_fnit_direction_seconds": 1.3583453577011824,
+    "standalone_fnit_direction_seconds": 1.114825788885355,
+    "prechange_fnit_kernel_seconds": 0.8009383520111442,
+    "standalone_fnit_kernel_seconds": 0.6568197966553271,
+    "prechange_fnit_solver_seconds": 14.32453751610592,
+    "standalone_fnit_solver_seconds": 14.85788066778332,
+    "standalone_fnit_peak_cuda_allocated_bytes": 12431536128,
+    "prechange_fnit_peak_cuda_allocated_bytes": 12431536128,
+    "standalone_fnit_max_rss_kib": 1751768,
+    "prechange_fnit_max_rss_kib": 1774876
+  },
+  "dependency_gate": {
+    "dipy_in_pyproject_dependencies": false,
+    "dipy_in_environment_yml": false,
+    "dipy_imported_by_current_fnit_process": false,
+    "dipy_used_only_for_independent_reference": true
+  },
+  "acceptance": {
+    "removal_of_dipy_runtime_dependency": true,
+    "current_outputs_equal_prechange_frozen_inputs": true,
+    "current_outputs_match_frozen_official_amico_within_threshold": false,
+    "overall_official_numeric_parity_passed": false,
+    "public_example_outputs_equal_prechange": true,
+    "under_20_decimal_gb_on_public_example": false
+  },
+  "figure": "docs/amico_noddi/figures/ds004666_noddi_dipy_replacement.png",
+  "public_example": {
+    "dataset": "OpenNeuro ds004666, one public paired T1/DWI subject, FSL EDDY-corrected AP DWI",
     "shape": [
       104,
       104,
       72,
       105
     ],
-    "volumes": {
-      "b0": 5,
-      "b_approximately_1000": 50,
-      "b_approximately_2000": 50
+    "mask_voxels": 227343,
+    "same_input_hashes_between_old_and_current": true,
+    "current_vs_prechange_fnit": {
+      "NDI_exact_elements": 227343,
+      "ODI_exact_elements": 227343,
+      "FWF_exact_elements": 227343,
+      "RMSE_exact_elements": 227343,
+      "direction_exact_components": 682029,
+      "all_outputs_exact": true,
+      "shape_dtype_affine_equal": true
     },
-    "mask_voxels": 242261,
-    "same_inputs_for_reference_and_candidate": true,
-    "all_mask_voxels_compared": true,
-    "subject_data_in_repository": false
-  },
-  "hardware": {
-    "host": "gpucw1",
-    "cpu": "Intel Xeon Gold 6430",
-    "candidate_gpu": "NVIDIA H100 PCIe 80 GB",
-    "shared_host": true,
-    "kernel_dtype": "float32",
-    "active_set_solver_dtype": "float64",
-    "tf32_allowed_for_float32_matmul": true,
-    "float16_used": false
-  },
-  "model": {
-    "dictionary_atoms": 145,
-    "ic_volume_fractions": 12,
-    "ic_orientation_dispersions": 12,
-    "d_par": 0.0017,
-    "d_iso": 0.003,
-    "lambda1": 0.5,
-    "lambda2": 0.001,
-    "b0_threshold": 100.0,
-    "b_step": 100.0,
-    "spherical_harmonic_order": 12,
-    "lut_directions": 500,
-    "solver_stages": [
-      "full-dictionary NNLS",
-      "positive elastic-net support selection",
-      "support-constrained NNLS debias"
-    ]
-  },
-  "metrics": {
-    "NDI": {
-      "pearson_r": 0.9999999999999994,
-      "mae": 1.3939718573611494e-09,
-      "rmse": 6.625503914229172e-09,
-      "max_abs": 5.960464477539063e-08,
-      "exact_equal_voxels": 231099,
-      "count_abs_gt_1e-7": 0,
-      "count_abs_gt_1e-6": 0,
-      "reference_mean": 0.4162795482238832,
-      "candidate_mean": 0.4162795468301574
-    },
-    "ODI": {
-      "pearson_r": 0.9999999999999993,
-      "mae": 1.2916828753732576e-12,
-      "rmse": 2.4408159817515757e-10,
-      "max_abs": 5.960464477539063e-08,
-      "exact_equal_voxels": 242253,
-      "count_abs_gt_1e-7": 0,
-      "count_abs_gt_1e-6": 0,
-      "reference_mean": 0.43326166973228114,
-      "candidate_mean": 0.43326166973246566
-    },
-    "FWF": {
-      "pearson_r": 1.0,
-      "mae": 7.090174772814153e-13,
-      "rmse": 1.4683509666538827e-10,
-      "max_abs": 5.960464477539063e-08,
-      "exact_equal_voxels": 242230,
-      "count_abs_gt_1e-7": 0,
-      "count_abs_gt_1e-6": 0,
-      "reference_mean": 0.2431523173842922,
-      "candidate_mean": 0.24315231738433016
-    },
-    "normalized_RMSE": {
-      "pearson_r": 1.0,
-      "mae": 0.0,
-      "rmse": 0.0,
-      "max_abs": 0.0,
-      "exact_equal_voxels": 242261,
-      "count_abs_gt_1e-7": 0,
-      "count_abs_gt_1e-6": 0,
-      "reference_mean": 0.04016433054220136,
-      "candidate_mean": 0.04016433054220136
-    },
-    "direction": {
-      "max_abs_component": 0.0,
-      "mae_component": 0.0,
-      "exact_equal_components": 726783,
-      "total_components": 726783
-    }
-  },
-  "acceptance": {
-    "scalar_map_max_abs_threshold": 1e-07,
-    "scalar_map_count_over_threshold": 0,
-    "direction_component_exact": true,
-    "passed": true
-  },
-  "timing": {
-    "scope": "fresh process including Python startup, kernel construction, fitting, NIfTI I/O, and saving; shared node",
-    "reference_runs": 1,
-    "reference_total_seconds": 29.24,
-    "reference_stage_seconds": {
-      "generate": 3.4945272146724164,
-      "load": 0.5324395108036697,
-      "fit": 16.901228642091155,
-      "save": 0.45499349012970924
-    },
-    "reference_max_rss_kb": 3301432,
-    "candidate_runs": 3,
-    "candidate_total_seconds": [
-      34.19,
-      32.87,
-      29.44
-    ],
-    "candidate_total_median_seconds": 32.87,
-    "candidate_internal_median_seconds": 20.303657586220652,
-    "candidate_stage_median_seconds": {
-      "kernel": 1.769119362346828,
-      "direction": 1.7502405070699751,
-      "solver": 12.773147106170654
-    },
-    "candidate_max_rss_median_kb": 1762652,
-    "candidate_peak_cuda_memory_bytes": 12431536128,
-    "candidate_over_reference_wall_time": 1.1241450068399452,
-    "optimization": {
-      "baseline_exact_total_seconds": 108.24,
-      "baseline_exact_solver_seconds": 92.41866513201967,
-      "total_speedup_over_baseline_exact": 3.292972315181016,
-      "solver_speedup_over_baseline_exact": 7.235387204408896,
-      "method": "compact active-set batched Cholesky, CG fallback for ill-conditioned subsets, top-k active-index extraction"
-    }
-  },
-  "contract": {
-    "amico_names": [
-      "fit_NDI.nii.gz",
-      "fit_ODI.nii.gz",
-      "fit_FWF.nii.gz",
-      "fit_dir.nii.gz",
-      "fit_RMSE.nii.gz"
-    ],
-    "ukb_names": [
-      "NODDI_ICVF.nii.gz",
-      "NODDI_OD.nii.gz",
-      "NODDI_ISOVF.nii.gz",
-      "NODDI_dir.nii.gz",
-      "NODDI_RMSE.nii.gz"
-    ],
-    "shape_dtype_affine_qform_sform_pixdim_and_units_equal": true,
-    "direction_intent_equal": true,
-    "same_parameter_definitions": true,
-    "numerically_equivalent_within_float32_rounding": true
-  },
-  "bundled_assets": {
-    "grad_500.npy": "e07dd95378f12556aba7898a3b3396b3b35e1295e4932e361bb7309ebbf73e3e",
-    "htable_ndirs_500.bin": "682f11416844f2a09225c16f412bf7a224a5085a244b59d47f51c51217e4a30b",
-    "ndirs_500.bin": "96e6638e756c53a98b8c16aed760e43fcdf636aa2b1b0bd2bfce21aacfc9f328"
-  },
-  "figure": "docs/amico_noddi/figures/amico_noddi_comparison.png",
-  "figure_sha256": "b636b079c85935190868619a6e8207dabb61d6ec705691e603a847ec700bdc6b",
-  "development_oracle_in_repository": false
+    "old_fnit_process_seconds": 34.32,
+    "current_fnit_process_seconds": 30.01,
+    "old_fnit_run_wall_seconds": 28.613991441670805,
+    "current_fnit_run_wall_seconds": 25.063497227150947,
+    "current_peak_cuda_allocated_bytes": 20915553280,
+    "current_peak_cuda_allocated_decimal_gb": 20.91555328,
+    "current_peak_cuda_allocated_gib": 19.479126930236816,
+    "under_project_20_decimal_gb_target": false,
+    "figure": "docs/amico_noddi/figures/ds004666_noddi_dipy_replacement.png"
+  }
 }

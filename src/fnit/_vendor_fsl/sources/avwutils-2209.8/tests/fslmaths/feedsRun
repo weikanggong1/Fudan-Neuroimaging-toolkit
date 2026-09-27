@@ -1,0 +1,66 @@
+#!/usr/bin/env fslpython
+
+import numpy      as np
+import nibabel    as nib
+import               os
+import subprocess as sp
+import               shlex
+import               sys
+import               traceback
+
+def sprun(cmd):
+    # sp.run(shlex.split(cmd), check=True)
+    # run the command and return the error code
+    # instead of raising an exception
+    return sp.run(shlex.split(cmd)).returncode
+
+
+def test_thr_filename_fail():
+    '''
+    test that fslmaths -thr fails if the input to -thr is a file name
+    '''
+
+    data       = np.random.random((10, 10, 10))
+    image  = nib.Nifti1Image(data, np.eye(4))
+
+    image.to_filename('fslmaths_thr_test.nii.gz')
+    cmd = 'fslmaths fslmaths_thr_test.nii.gz -thr fslmaths_thr_test.nii.gz thr.nii.gz'
+    code = sprun(cmd)
+    # clean up file
+    os.remove('fslmaths_thr_test.nii.gz')
+    assert code != 0
+
+def test_uthr_filename_fail():
+    '''
+    test that fslmaths -uthr fails if the input to -uthr is a file name
+    '''
+
+    data       = np.random.random((10, 10, 10))
+    image  = nib.Nifti1Image(data, np.eye(4))
+
+    image.to_filename('fslmaths_uthr_test.nii.gz')
+    cmd = 'fslmaths fslmaths_uthr_test.nii.gz -uthr fslmaths_uthr_test.nii.gz uthr.nii.gz'
+    code = sprun(cmd)
+    # clean up file
+    os.remove('fslmaths_uthr_test.nii.gz')
+    assert code != 0
+
+
+if __name__ == '__main__':
+    tests = [
+        test_thr_filename_fail,
+        test_uthr_filename_fail,
+    ]
+
+    result = 0
+    for test in tests:
+        try:
+            os.chdir(sys.argv[1])
+            test()
+            print(f'\nTest {test.__name__} PASSED')
+        except Exception as e:
+            print(f'\nTest {test.__name__} FAILED')
+            traceback.print_exc()
+            result = 1
+
+    sys.exit(result)

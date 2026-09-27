@@ -1268,12 +1268,14 @@ class _DefaultFLIRTEngine:
 
 
 class _RigidNMIEngine(_DefaultFLIRTEngine):
-    """Use the shared FLIRT pyramid and search with NMI and final 6DOF."""
+    """按 FSL 默认设置先用相关比搜索，再用 NMI 精化刚性配准。"""
 
     def set_scale(self, scale, *, force=False):
         previous = self.level
         super().set_scale(scale, force=force)
-        if self.level is not previous:
+        # 只指定 -cost normmi 时，默认 searchcost 仍为 CorrRatio；
+        # 8 mm SEARCH 结束后，4 mm 阶段才切换到主代价函数。
+        if self.level is not previous and float(scale) < 8.0:
             self.level.cost = FSLNormalizedMutualInformation(
                 self.level.reference, self.level.moving,
                 self.level.reference_sizes, self.moving_sizes,
@@ -1425,6 +1427,7 @@ class TorchFLIRT:
                 "reduced_precision_tensor_dtype": False,
             },
             "cost": "FSL normalized mutual information" if self.dof == 6 else "FSL correlation ratio",
+            "search_cost": "FSL correlation ratio",
             "optimizer": "MISCMATHS Brent coordinate search",
             "schedule": "FSL default 8/4/2/1 mm",
             "degrees_of_freedom": self.dof,
@@ -1458,12 +1461,12 @@ class TorchFLIRT:
             ),
             "reference_validation_report": (
                 "validation/fast_vbm/report.v0.9.public.json" if self.dof == 12
-                else "validation/connectome/ds004666/anatomy_registration.public.json"
+                else "validation/connectome/original_ukb_flirt.public.json"
             ),
             "reference_validation_domain": (
                 "10 real T1w-derived FSL FAST GM maps registered to one UKB "
                 "group-GM template on an NVIDIA H100 PCIe" if self.dof == 12 else
-                "one ds004666 b0 brain to official FreeSurfer T1 brain on GPU"
+                "one original-protocol UKB b0 brain to T1 brain on NVIDIA H100"
             ),
             "reference_validation_matrix_gate_passed": self.dof == 12,
             "current_input_compared_with_fsl": False,

@@ -1,0 +1,68 @@
+#!/bin/sh
+
+#   reorientation script
+#
+#   Matthew Webster and Mark Jenkinson
+#   FMRIB Image Analysis Group
+#
+#   Copyright (C) 2012 University of Oxford
+#
+#   SHCOPYRIGHT
+
+if [ $# -lt 1 ] ; then
+  echo "Usage: `basename $0` [-m <matrix file>] <input_image> [output_image]"
+  echo " "
+  echo "`basename $0` is a tool for reorienting the image to match the"
+  echo "approximate orientation of the standard template images (MNI152)."
+  echo "It only applies 0, 90, 180 or 270 degree rotations."
+  echo "It is not a registration tool."
+  echo "It requires NIfTI images with valid orientation information"
+  echo "in them (seen by valid labels in FSLView).  This tool"
+  echo "assumes the labels are correct - if not, fix that before using this."
+  echo "If the output name is not specified the equivalent transformation"
+  echo " matrix is written to the standard output"
+  echo "If the option -m is given, with an accompanying filename, then the"
+  echo " transformation matrix is written to this file instead"
+  echo " "
+  exit 1
+fi
+
+if [ $1 = -m ] ; then
+    matfn=$2
+    shift 2
+fi
+img=`$FSLDIR/bin/remove_ext $1`;
+outimg=$2;
+tmpfn=`$FSLDIR/bin/tmpnam`
+
+if [ `$FSLDIR/bin/imtest $img` = 0 ] ; then
+  echo "ERROR: Could not find image $1" 1>&2
+  exit 2
+fi
+
+scode=`$FSLDIR/bin/fslval $img sform_code`;
+qcode=`$FSLDIR/bin/fslval $img qform_code`;
+if [ $scode = 0 -a $qcode = 0 ] ; then
+  echo "ERROR: Orientation information not stored in ${1}!" 1>&2
+  echo "Cannot reslice without orientation information (i.e. need valid labels in FSLView)" 1>&2
+  echo "The NIfTI image must contain a non-zero code for either the sform or the qform" 1>&2
+  echo " - check your reconstruction/conversion software to try and fix this" 1>&2
+  exit 3
+fi
+
+if [ $( ${FSLDIR}/bin/fslorient ${img} ) = "RADIOLOGICAL" ] ; then
+    LeftRight=RL
+else
+    LeftRight=LR
+fi
+if [ X$matfn = X ] ; then
+    $FSLDIR/bin/fslswapdim $img $LeftRight PA IS $outimg
+else
+    $FSLDIR/bin/fslswapdim $img $LeftRight PA IS > $matfn
+    if [ X$outimg != X ] ; then
+	$FSLDIR/bin/fslswapdim $img $LeftRight PA IS $outimg
+    fi
+fi
+
+# clean up
+rm -f ${tmpfn}_nii.mat ${tmpfn}

@@ -1,142 +1,91 @@
-"""Orientation-aware, SIFT2-inspired streamline weighting in PyTorch.
+"""MRtrix3 SIFT2 FMLS, ACT mask, track mapping and optimization on torch.
 
-This is an approximation, not MRtrix ``tcksift2``. MRtrix segments FOD lobes
-into fixels, uses an ACT processing mask, and optimizes exponential
-streamline coefficients with along-track regularization.
-Here, fixed hemisphere direction bins stand in for fixels, and nonnegative
-least squares matches streamline length density to the WM FOD in visited bins.
-
-Streamline points and the affine use world millimetres. WM FOD coefficients are
-even real SH (the convention of :func:`fnit.connectome.fod.real_sh`) in units
-of tissue fraction per steradian. The returned weights are nonnegative,
-dimensionless per-streamline factors. A global proportionality coefficient
-``mu`` (FOD bin fraction per unit normalized streamline length) is estimated
-internally so weights remain around one; it is not an MRtrix-compatible mu.
+The source-derived components follow MRtrix3 3.0.3-103-g026e850d and are
+covered by MPL-2.0; see ``THIRD_PARTY_NOTICES.md``. Tracking and FOD fitting
+are separate stages. Same-track real-data validation is recorded in
+``validation/connectome/ds004666``.
 """
 
 from __future__ import annotations
 
-import math
+from collections.abc import Sequence
 
 import torch
 
-from .fod import real_sh
-
-
-def _hemisphere_directions(count: int, device: torch.device) -> torch.Tensor:
-    index = torch.arange(count, device=device, dtype=torch.float32)
-    z = (index + 0.5) / count
-    angle = index * (math.pi * (3.0 - math.sqrt(5.0)))
-    radial = torch.sqrt(1.0 - z.square())
-    return torch.stack((radial * angle.cos(), radial * angle.sin(), z), dim=-1)
+from .sift2_fixels import _directions, segment_fod_fixels
+from .sift2_mapping import map_streamlines_to_fixels
+from .sift2_optimizer import optimize_sift2_fixels
+from .sift2_proc_mask import processing_mask_from_5tt
 
 
 @torch.inference_mode()
 def estimate_sift2_weights(
-    paths: tuple[torch.Tensor, ...],
+    paths: Sequence[torch.Tensor],
     wm_sh: torch.Tensor,
-    affine: torch.Tensor,
-    lmax: int = 4,
+    fod_affine: torch.Tensor,
+    five_tissue: torch.Tensor,
+    five_tissue_affine: torch.Tensor,
+    *,
+    step_size_mm: float,
+    processing_mask: torch.Tensor | None = None,
 ) -> torch.Tensor:
-    """Estimate approximate SIFT2 weights for world-mm streamlines.
+    """Return MRtrix-style SIFT2 weights for ordered world-mm streamlines.
 
-    ``wm_sh`` has shape ``[X,Y,Z,C]`` and float32 dtype. Every path has shape
-    ``[P,3]`` and uses the same device. Returned weights have shape
-    ``[len(paths)]`` in input order; paths with no in-grid segment receive 0.
-    A segment is subdivided to at most half the smallest voxel edge before
-    midpoint assignment to one voxel and the nearest antipodal direction bin.
+    ``paths`` is a sequence of float32 ``[Pi,3]`` tensors in TCK order and
+    RAS millimetres. ``wm_sh`` is normalized float32 FOD ``[X,Y,Z,45]``;
+    ``fod_affine`` maps voxel centers to RAS mm. ``five_tissue`` is float32
+    ``[A,B,C,5]`` on its own ``five_tissue_affine`` grid in cGM/sGM/WM/CSF/
+    pathology order. All tensors share one CPU/CUDA device. ``step_size_mm``
+    is the tracking step from the TCK header or ``tckgen`` configuration.
+    The optional float32 processing mask ``[X,Y,Z]`` allows same-mask stage
+    comparison; otherwise it is computed from 5TT by ACT supersampling.
+
+    Returns float64 ``[len(paths)]`` per-track factors on the input device,
+    including unassigned tracks. FMLS uses the packaged MRtrix 1281-direction
+    sphere and true FOD lobes, precise Hermite voxel traversal uses 8-bit
+    length quantization, and the default nonlinear optimization estimates
+    proportionality coefficient mu internally. Equivalent command:
+    ``tcksift2 tracks.tck wm_fod_norm.mif weights.txt -act 5tt_dwi.mif``.
+    Fixed official TCK/FOD/5TT outputs should be compared by track index;
+    independent probabilistic tractograms require distributional comparison.
     """
-    if wm_sh.ndim != 4 or wm_sh.dtype != torch.float32 or affine.shape != (4, 4):
-        raise ValueError("expected float32 WM SH [X,Y,Z,C] and affine [4,4]")
-    if lmax < 0 or lmax % 2:
-        raise ValueError("lmax must be a nonnegative even integer")
+    if wm_sh.ndim != 4 or wm_sh.shape[-1] != 45 or wm_sh.dtype != torch.float32:
+        raise ValueError("normalized WM FOD must be float32 [X,Y,Z,45]")
+    if fod_affine.shape != (4, 4) or five_tissue_affine.shape != (4, 4):
+        raise ValueError("FOD and 5TT affines must be 4x4")
+    if five_tissue.ndim != 4 or five_tissue.shape[-1] != 5:
+        raise ValueError("five_tissue must have shape [A,B,C,5]")
+    if step_size_mm <= 0:
+        raise ValueError("step_size_mm must be positive")
     device = wm_sh.device
-    if device.type == "cuda":
-        torch.backends.cuda.matmul.allow_tf32 = True
-    n_tracks = len(paths)
-    weights = torch.zeros(n_tracks, device=device, dtype=torch.float32)
-    if not n_tracks:
-        return weights
-    affine = affine.to(device=device, dtype=torch.float32)
-    inverse = torch.linalg.inv(affine)
-    voxel_width = torch.linalg.vector_norm(affine[:3, :3], dim=0).min()
-    if not bool(torch.isfinite(voxel_width)) or float(voxel_width) <= 0:
-        raise ValueError("affine must have positive finite voxel edge lengths")
-    bin_directions = _hemisphere_directions(32, device)
-    bin_basis = real_sh(bin_directions, lmax)
-    if wm_sh.shape[-1] != bin_basis.shape[-1]:
-        raise ValueError("WM SH coefficient count does not match lmax")
-    shape = wm_sh.shape[:3]
-    n_bins = len(bin_directions)
-    rows, tracks, lengths = [], [], []
-    for track_index, path in enumerate(paths):
-        if path.ndim != 2 or path.shape[-1] != 3 or path.dtype != torch.float32 or path.device != device:
-            raise ValueError("each path must be float32 [P,3] on the WM FOD device")
-        if len(path) < 2:
-            continue
-        start = path[:-1]
-        delta = path[1:] - start
-        segment_length = torch.linalg.vector_norm(delta, dim=1)
-        nonzero = torch.isfinite(segment_length) & (segment_length > 0)
-        start, delta, segment_length = start[nonzero], delta[nonzero], segment_length[nonzero]
-        if not len(segment_length):
-            continue
-        repeats = torch.ceil(segment_length / (0.5 * voxel_width)).long().clamp_min(1)
-        segment = torch.repeat_interleave(torch.arange(len(repeats), device=device), repeats)
-        first = torch.repeat_interleave(torch.cumsum(repeats, 0) - repeats, repeats)
-        fraction = (torch.arange(len(segment), device=device) - first + 0.5) / repeats[segment]
-        midpoint = start[segment] + fraction[:, None] * delta[segment]
-        voxel = (midpoint @ inverse[:3, :3].T + inverse[:3, 3]).round().long()
-        inside = torch.ones(len(segment), device=device, dtype=torch.bool)
-        for axis, size in enumerate(shape):
-            inside &= (voxel[:, axis] >= 0) & (voxel[:, axis] < size)
-        if not bool(inside.any()):
-            continue
-        voxel, segment = voxel[inside], segment[inside]
-        tangent = delta[segment] / segment_length[segment, None]
-        angular_bin = torch.abs(tangent @ bin_directions.T).argmax(dim=1)
-        voxel_index = (voxel[:, 0] * shape[1] + voxel[:, 1]) * shape[2] + voxel[:, 2]
-        rows.append(voxel_index * n_bins + angular_bin)
-        tracks.append(torch.full((len(segment),), track_index, device=device, dtype=torch.long))
-        lengths.append(segment_length[segment] / repeats[segment] / voxel_width)
-    if not rows:
-        return weights
-    row = torch.cat(rows)
-    track = torch.cat(tracks)
-    contribution = torch.cat(lengths)
-    unique_row, local_row = torch.unique(row, sorted=True, return_inverse=True)
-    n_rows = len(unique_row)
-    target = (
-        wm_sh.reshape(-1, wm_sh.shape[-1])[unique_row // n_bins]
-        * bin_basis[unique_row % n_bins]
-    ).sum(dim=1).clamp_min(0) * (4.0 * math.pi / n_bins)
-    row_density = torch.zeros(n_rows, device=device).index_add_(0, local_row, contribution)
-    if not bool(target.sum() > 0):
-        return weights
-    mu = target.sum() / row_density.sum()
-    desired_density = target / mu
-    # FISTA for nonnegative length-density matching with a small prior on
-    # dimensionless factors near one. Scatter operations keep the data sparse.
-    regularizer = 0.01
-    bound = torch.zeros(n_tracks, device=device).index_add_(
-        0, track, contribution * row_density[local_row]
-    ).max() + regularizer
-    step = 1.0 / bound
-    current = torch.ones(n_tracks, device=device)
-    extrapolated = current.clone()
-    acceleration = 1.0
-    for _ in range(300):
-        predicted = torch.zeros(n_rows, device=device).index_add_(
-            0, local_row, contribution * extrapolated[track]
+    if any(t.device != device for t in (fod_affine, five_tissue, five_tissue_affine)):
+        raise ValueError("FOD and 5TT tensors must share a device")
+    if not paths:
+        return torch.empty(0, device=device, dtype=torch.float64)
+    if processing_mask is None:
+        processing_mask = processing_mask_from_5tt(
+            wm_sh, fod_affine, five_tissue, five_tissue_affine,
         )
-        gradient = torch.zeros(n_tracks, device=device).index_add_(
-            0, track, contribution * (predicted - desired_density)[local_row]
-        ) + regularizer * (extrapolated - 1.0)
-        updated = torch.clamp(extrapolated - step * gradient, min=0.0)
-        next_acceleration = (1.0 + math.sqrt(1.0 + 4.0 * acceleration * acceleration)) / 2.0
-        extrapolated = updated + ((acceleration - 1.0) / next_acceleration) * (updated - current)
-        current, acceleration = updated, next_acceleration
-    used = torch.zeros(n_tracks, device=device, dtype=torch.long).index_add_(
-        0, track, torch.ones_like(track)
-    ) > 0
-    return torch.where(used, current, weights)
+    if processing_mask.shape != wm_sh.shape[:3] or processing_mask.device != device:
+        raise ValueError("processing mask must match the FOD grid and device")
+    fixels = segment_fod_fixels(wm_sh, processing_mask)
+    if not len(fixels.voxel_ids):
+        raise ValueError("FOD/ACT mask contains no fixels")
+    directions = _directions(device)[0]
+    mapped = map_streamlines_to_fixels(
+        paths, fod_affine, wm_sh.shape[:3], fixels.voxel_ids,
+        fixels.first_fixel_index, fixels.count, fixels.lookup_table,
+        directions, step_size_mm=step_size_mm,
+        n_fixels=len(fixels.fixel_integrals),
+    )
+    pm = torch.zeros_like(fixels.fixel_integrals)
+    offsets = torch.arange(int(fixels.count.max()), device=device)
+    available = offsets[None, :] < fixels.count.long()[:, None]
+    indices = fixels.first_fixel_index[:, None] + offsets[None, :]
+    voxel_values = processing_mask.reshape(-1)[fixels.voxel_ids.long()].to(pm.dtype)
+    pm[indices[available]] = voxel_values[:, None].expand_as(indices)[available]
+    solution = optimize_sift2_fixels(
+        mapped.track_index, mapped.fixel_index, mapped.length_mm,
+        fixels.fixel_integrals, pm, len(paths),
+    )
+    return solution.weights

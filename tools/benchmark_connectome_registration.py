@@ -18,6 +18,7 @@ def main():
     parser.add_argument("--b0", type=Path, required=True)
     parser.add_argument("--t1", type=Path, required=True)
     parser.add_argument("--fsl-matrix", type=Path, required=True)
+    parser.add_argument("--fsl-moved", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--device", default="cuda:0")
     args = parser.parse_args()
@@ -42,9 +43,32 @@ def main():
     mismatch = (points @ result.moving_to_fixed_world[:3, :3].T + result.moving_to_fixed_world[:3, 3]
                 - points @ reference_world[:3, :3].T - reference_world[:3, 3])
     distances = np.linalg.norm(mismatch, axis=1)
+    image_metrics = None
+    if args.fsl_moved is not None:
+        fsl_moved = np.asarray(sf.load_volume(str(args.fsl_moved)).data, dtype=np.float32)
+        torch_moved = np.asarray(result.moved.data, dtype=np.float32)
+        if fsl_moved.shape != torch_moved.shape:
+            raise ValueError("FSL and PyTorch output image shapes differ")
+        abs_error = np.abs(fsl_moved.astype(np.float64) - torch_moved.astype(np.float64))
+        both = (fsl_moved != 0) & (torch_moved != 0)
+        image_metrics = {
+            "shape": list(fsl_moved.shape),
+            "reference_nonzero": int(np.count_nonzero(fsl_moved)),
+            "candidate_nonzero": int(np.count_nonzero(torch_moved)),
+            "foreground_dice": float(2 * np.count_nonzero(both) /
+                                     (np.count_nonzero(fsl_moved) + np.count_nonzero(torch_moved))),
+            "pearson_both_nonzero": float(np.corrcoef(fsl_moved[both], torch_moved[both])[0, 1]),
+            "mae_both_nonzero": float(abs_error[both].mean()),
+            "mae_all": float(abs_error.mean()),
+            "p95_abs_difference_both_nonzero": float(np.percentile(abs_error[both], 95)),
+            "max_abs_difference": float(abs_error.max()),
+        }
+    private_inputs = (args.b0, args.t1, args.fsl_matrix)
+    if args.fsl_moved is not None:
+        private_inputs += (args.fsl_moved,)
     report = {
         "input_sha256": {p.name: hashlib.sha256(p.read_bytes()).hexdigest()
-                         for p in (args.b0, args.t1, args.fsl_matrix)},
+                         for p in private_inputs},
         "device": args.device,
         "peak_torch_cuda_allocated_gib": (torch.cuda.max_memory_allocated() / 2**30
                                           if args.device.startswith("cuda") else None),
@@ -58,6 +82,7 @@ def main():
         "grid_displacement_mm": {"mean": float(distances.mean()), "p95": float(np.percentile(distances, 95)),
                                  "max": float(distances.max()), "rms": float(np.sqrt(np.mean(distances**2)))},
         "qc": result.qc,
+        "moved_image": image_metrics,
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2) + "\n")

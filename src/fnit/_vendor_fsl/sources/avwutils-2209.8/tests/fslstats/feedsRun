@@ -1,0 +1,215 @@
+#!/usr/bin/env fslpython
+
+# test fslstats with a bunch of different options
+#
+# Usage: fslstats [preoptions] <input> [options]
+#
+# preoption -t will give a separate output line for each 3D volume of a 4D timeseries
+# preoption -K < indexMask > will generate seperate n submasks from indexMask, for indexvalues 1..n where n is the maximum index value in indexMask, and generate statistics for each submask
+# Note - options are applied in order, e.g. -M -l 10 -M will report the non-zero mean, apply a threshold and then report the new nonzero mean
+
+# -l <lthresh> : set lower threshold
+# -u <uthresh> : set upper threshold
+# -r           : output <robust min intensity> <robust max intensity>
+# -R           : output <min intensity> <max intensity>
+# -e           : output mean entropy ; mean(-i*ln(i))
+# -E           : output mean entropy (of nonzero voxels)
+# -v           : output <voxels> <volume>
+# -V           : output <voxels> <volume> (for nonzero voxels)
+# -m           : output mean
+# -M           : output mean (for nonzero voxels)
+# -s           : output standard deviation
+# -S           : output standard deviation (for nonzero voxels)
+# -w           : output smallest ROI <xmin> <xsize> <ymin> <ysize> <zmin> <zsize> <tmin> <tsize> containing nonzero voxels
+# -x           : output co-ordinates of maximum voxel
+# -X           : output co-ordinates of minimum voxel
+# -c           : output centre-of-gravity (cog) in mm coordinates
+# -C           : output centre-of-gravity (cog) in voxel coordinates
+# -p <n>       : output nth percentile (n between 0 and 100)
+# -P <n>       : output nth percentile (for nonzero voxels)
+# -a           : use absolute values of all image intensities
+# -n           : treat NaN or Inf as zero for subsequent stats
+# -k <mask>    : use the specified image (filename) for masking - overrides lower and upper thresholds
+# -d <image>   : take the difference between the base image and the image specified here
+# -h <nbins>   : output a histogram (for the thresholded/masked voxels only) with nbins
+# -H <nbins> <min> <max>   : output a histogram (for the thresholded/masked voxels only) with nbins and histogram limits of min and max
+
+# Note - thresholds are not inclusive ie lthresh<allowed<uthresh
+
+import sys
+import os
+import fsl.utils.run as run
+import numpy as np
+import nibabel as nib
+
+# set the random seed so that the tests are reproducible
+np.random.seed(0)
+
+options = [
+    {"name": "robust", "option": "-r", "expected": "0.018533 0.978824"},
+    {"name": "notRobust", "option": "-R", "expected": "0.000546 0.999809"},
+    {"name": "entropy", "option": "-e", "expected": "0.906103"},
+    {"name": "entropyNonzero", "option": "-E", "expected": "0.906103"},
+    {"name": "volume", "option": "-v", "expected": "1000 1000.000000"},
+    {"name": "volumeNonzero", "option": "-V", "expected": "1000 1000.000000"},
+    {"name": "mean", "option": "-m", "expected": "0.495922"},
+    {"name": "mean", "option": "-m -a", "expected": "0.495922"},
+    {"name": "mean", "option": "-m -a -n", "expected": "0.495922"},
+    {"name": "meanNonzero", "option": "-M", "expected": "0.495922"},
+    {"name": "stdev", "option": "-s", "expected": "0.290744"},
+    {"name": "stdevNonzero", "option": "-S", "expected": "0.290744"},
+    {"name": "roi","option": "-w", "expected": "0 10 0 10 0 10 0 1"},
+    {"name": "maxCoord", "option": "-x", "expected": "9 7 4"},
+    {"name": "minCoord", "option": "-X", "expected": "8 2 1"},
+    {"name": "cogMM", "option": "-c", "expected": "4.498706 4.545873 4.613188"},
+    {"name": "cogVox","option": "-C", "expected": "4.498706 4.545873 4.613188"},
+    {"name": "percentile", "option": "-p 50", "expected": "0.482584"},
+    {"name": "percentileNonzero","option": "-P 50", "expected": "0.482584"},
+    {"name": "meanHistCog", "option": "-m -h 10 -c", "expected": "0.495922 101.000000 \n99.000000 \n108.000000 \n107.000000 \n102.000000 \n93.000000 \n99.000000 \n88.000000 \n95.000000 \n108.000000 \n 4.498706 4.545873 4.613188"},
+    {"name": "meanHist", "option": "-m -h 10", "expected": "0.495922 101.000000 \n99.000000 \n108.000000 \n107.000000 \n102.000000 \n93.000000 \n99.000000 \n88.000000 \n95.000000 \n108.000000"},
+    {"name": "hist", "option": "-h 10", "expected": "101.000000 \n99.000000 \n108.000000 \n107.000000 \n102.000000 \n93.000000 \n99.000000 \n88.000000 \n95.000000 \n108.000000"},
+    {"name": "histLimits", "option": "-H 10 0 1", "expected": "98.000000 \n102.000000 \n107.000000 \n108.000000 \n102.000000 \n93.000000 \n99.000000 \n88.000000 \n95.000000 \n108.000000"},
+    {"name": "threshold", "option": "-l 0.25 -u 0.75 -m", "expected": "0.495150"},
+    {"name": "diff", "option": "-d imageForDiff.nii.gz -m", "expected": "0.000000"},
+]
+
+# create a list of tests and expected results
+tests = []
+for option in options:
+    tests.append(
+        {
+            "preoptions": "",
+            "mask": "",
+            "options": option["option"],
+            "expected": option["expected"],
+            "name": option["name"],
+        }
+    )
+
+tests_with_preoptions = [
+    {
+        "preoptions": "-K",
+        "mask": "mask.nii.gz",
+        "options": "-m",
+        "expected": "0.539022 \n0.514414 \n0.493214 \n0.510435",
+        "name": "preopIndexMaskMean",
+    },
+    {
+        "preoptions": "-t -K",
+        "mask": "mask.nii.gz",
+        "options": "-m",
+        "expected": "0.526682 \n0.515652 \n0.492337 \n0.511661 \n0.551362 \n0.513176 \n0.494091 \n0.509208",
+        "name": "preopIndexMaskMeanTimeSeries",
+    },
+    {
+        "preoptions": "-t",
+        "mask": "",
+        "options": "-m",
+        "expected": "0.503236 \n0.504035",
+        "name": "preopMeanTimeSeries",
+    },
+]
+
+json_tests = []
+for option in options:
+    file_string = f"test_{option['name']}_{option['option'].replace(' ', '_')}.json"
+    file_string = file_string.replace("-", "")
+    json_tests.append(
+        {
+            "preoptions": "",
+            "mask": "",
+            "options": option["option"],
+            "expected": file_string,
+        }
+    )
+
+for option in tests_with_preoptions:
+    file_string = f"test_{option['name']}_{option['preoptions'].replace(' ', '_')}_{option['options'].replace(' ', '_')}.json"
+    file_string = file_string.replace("-", "")
+    json_tests.append(
+        {
+            "preoptions": option["preoptions"],
+            "mask": option["mask"],
+            "options": option["options"],
+            "expected": file_string,
+        }
+    )
+
+def test_fslstats():
+    imgfile = 'test.nii.gz'
+
+    # run the tests witoout preoptions
+    for test in tests:
+        cmd = f"fslstats {test['preoptions']} {test['mask']} {imgfile} {test['options']}"
+        # remove any double spaces from empty test options
+        cmd = " ".join(cmd.split())
+        print(cmd)
+        output = run.runfsl(cmd)
+        # trim any trailing whitespace from the output (fslstats adds a newline at the end)
+        output = output.rstrip()
+        try:
+            assert output == test["expected"]
+        except AssertionError:
+            print('Failed test')
+            print(cmd)
+            print('Output')
+            print(output)
+            print('Expected')
+            print(test["expected"])
+            raise
+
+    # run the tests with preoptions
+    imgfile = 'test_4d.nii.gz'
+    for test in tests_with_preoptions:
+        cmd = f"fslstats {test['preoptions']} {test['mask']} {imgfile} {test['options']}"
+        # remove any double spaces from empty test options
+        cmd = " ".join(cmd.split())
+        print(cmd, flush=True)
+        output = run.runfsl(cmd)
+        # trim any trailing whitespace from the output (fslstats adds a newline at the end)
+        output = output.rstrip()
+        try:
+            assert output == test["expected"]
+        except AssertionError:
+            print('Failed test')
+            print(cmd)
+            print('Output')
+            print(output)
+            print('Expected')
+            print(test["expected"])
+            raise
+
+    # run the json tests
+    for test in json_tests:
+        cmd = f"fslstats -json {test['preoptions']} {test['mask']} {imgfile} {test['options']}"
+        # remove any double spaces from empty test options
+        cmd = " ".join(cmd.split())
+        print(cmd, flush=True)
+        output = run.runfsl(cmd)
+
+        # try to load the expected json file
+        # if it exists, compare the output to the expected
+        try:
+            print(test["expected"])
+            with open(test["expected"], "r") as json_file:
+                # read the file as a string
+                expected = json_file.read()
+                try:
+                    assert output == expected    
+                except AssertionError:
+                    print('Failed test')
+                    print(cmd)
+                    print('Output')
+                    print(output)
+                    print('Expected')
+                    print(expected)
+                    raise
+        except FileNotFoundError:
+            # if the expected json file doesn't exist, create it from the output
+            # usefull for creating new tests or the first time a test is run
+            with open(test["expected"], "w") as json_file:
+                json_file.write(output)
+
+
+if __name__ == "__main__":
+    test_fslstats()

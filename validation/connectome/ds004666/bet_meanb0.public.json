@@ -1,0 +1,86 @@
+{
+  "dataset": "OpenNeuro ds004666, sub-01/ses-2mm corrected AP DWI",
+  "input_provenance": "validation/connectome/ds004666/corrected_input_provenance.public.json",
+  "grid": [
+    104,
+    104,
+    72
+  ],
+  "dwi_volumes": 105,
+  "selected_bzero_volumes": 5,
+  "bzero_rule": "bvalue < 50 s/mm^2",
+  "reference": {
+    "mrtrix_version": "eeab681d3e0cb004cf1d1d31579d3892197ef5b6",
+    "fsl_version": "6.0.7.4",
+    "mrtrix_mean_b0_command": "mrconvert corrected_dwi.nii.gz dwi.mif -fslgrad rotated.bvec dwi.bval -datatype float32 -strides 0,0,0,1; dwiextract dwi.mif -bzero - | mrmath - mean -axis 3 mean_b0.mif; mrconvert mean_b0.mif mean_b0.nii.gz",
+    "fsl_bet_command": "bet mean_b0.nii.gz mean_b0_brain.nii.gz -m -R -f 0.2 -g -0.05",
+    "mrtrix_extract_mean_wall_seconds": 0.65,
+    "mrtrix_extract_mean_peak_rss_kib": 341956,
+    "fsl_bet_wall_seconds": 9.46,
+    "fsl_bet_peak_rss_kib": 36296,
+    "mask_voxels": 224876
+  },
+  "native": {
+    "mean_b0_accumulation": "float32 input; float64 reduce; float32 output",
+    "voxel_size_rule": "MRtrix MIF vox six significant digits, then NIfTI float32",
+    "cpu": {
+      "spatial_shape": [
+        104,
+        104,
+        72
+      ],
+      "dwi_volumes": 105,
+      "bzero_volumes": 5,
+      "bzero_threshold": 50,
+      "mean_reduction": "float64 accumulate, float32 output",
+      "compute_device": "cpu",
+      "bet_voxel_size_source": "MRtrix MIF 6-significant-digit then NIfTI float32",
+      "input_reference_zoom_max_abs_mm": 9.5367431640625e-07,
+      "native_reference_zoom_max_abs_mm": 0.0,
+      "mean_b0_max_abs": 0.0,
+      "mean_b0_mae": 0.0,
+      "mean_b0_exact_voxels": 778752,
+      "reference_mask_voxels": 224876,
+      "candidate_mask_voxels": 224876,
+      "mask_xor_voxels": 0,
+      "mask_dice": 1.0,
+      "mean_bzero_seconds": 0.029553063213825226,
+      "bet_mask_seconds": 3.799645480699837,
+      "torch_mean_plus_bet_seconds": 3.829442670568824,
+      "wall_seconds_including_io_and_comparison": 5.833920897915959,
+      "peak_gpu_allocated_gib": null,
+      "peak_process_rss_kib": 1032056
+    },
+    "h100_gpu": {
+      "spatial_shape": [
+        104,
+        104,
+        72
+      ],
+      "dwi_volumes": 105,
+      "bzero_volumes": 5,
+      "bzero_threshold": 50,
+      "mean_reduction": "float64 accumulate, float32 output",
+      "compute_device": "cuda:0",
+      "bet_voxel_size_source": "MRtrix MIF 6-significant-digit then NIfTI float32",
+      "input_reference_zoom_max_abs_mm": 9.5367431640625e-07,
+      "native_reference_zoom_max_abs_mm": 0.0,
+      "mean_b0_max_abs": 0.0,
+      "mean_b0_mae": 0.0,
+      "mean_b0_exact_voxels": 778752,
+      "reference_mask_voxels": 224876,
+      "candidate_mask_voxels": 224876,
+      "mask_xor_voxels": 0,
+      "mask_dice": 1.0,
+      "mean_bzero_seconds": 0.07564960420131683,
+      "bet_mask_seconds": 7.768859361298382,
+      "torch_mean_plus_bet_seconds": 7.844697288237512,
+      "wall_seconds_including_io_and_comparison": 11.916403616312891,
+      "peak_gpu_allocated_gib": 0.3542933464050293,
+      "peak_process_rss_kib": 992624
+    }
+  },
+  "figure": "docs/connectome/figures/ds004666_bet_mask_comparison.png",
+  "timing_scope": "MRtrix mean time reads dwi.mif and writes mean_b0.mif; FSL BET time reads mean_b0 NIfTI and writes brain/mask; native mean and BET core times exclude DWI loading, include CUDA synchronization; native full wall includes NIfTI loading and reference comparison. Single runs on shared nodes.",
+  "reference_runtime_only": "FNIT code does not invoke FSL or MRtrix3."
+}

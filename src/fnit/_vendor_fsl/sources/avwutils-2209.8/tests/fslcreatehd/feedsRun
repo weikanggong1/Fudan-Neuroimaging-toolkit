@@ -1,0 +1,265 @@
+#!/usr/bin/env fslpython
+
+import os
+import os.path as op
+import sys
+import subprocess as sp
+
+import numpy   as np
+import nibabel as nib
+
+
+THISDIR = op.dirname(op.abspath(__file__))
+
+
+# 2=char, 4=short, 8=int, 16=float, 64=double
+DTYPE_MAPPING = {
+    2  : np.uint8,
+    4  : np.int16,
+    8  : np.int32,
+    16 : np.float32,
+    64 : np.float64
+}
+
+MNI152_2MM_AFFINE = np.array([[-2, 0, 0,   90],
+                              [ 0, 2, 0, -126],
+                              [ 0, 0, 2,  -72],
+                              [ 0, 0, 0,   1]])
+
+
+def validate_result(imgfile, expshape, exppixdim, exporigin, expdtype):
+
+    img       = nib.load(imgfile)
+    hdr       = img.header
+    expshape  = list(expshape)
+    exppixdim = list(exppixdim)
+    exporigin = list(exporigin)
+
+    if (len(expshape) == 3) or \
+       expshape[3] in (0, 1):
+        expndims = 3
+    else:
+        expndims = 4
+
+    expaffine         = np.diag(exppixdim[:3] + [1])
+    expaffine[0,  0] *= -1
+    expaffine[:3, 3]  =  exporigin
+    expaffine[0,  3] *=  exppixdim[0]
+    expaffine[1,  3] *= -exppixdim[1]
+    expaffine[2,  3] *= -exppixdim[2]
+
+    assert len(img.shape)        == expndims
+    assert list(img.shape)       == expshape[ :expndims]
+    assert list(hdr.get_zooms()) == exppixdim[:expndims]
+    assert img.get_data_dtype()  == expdtype
+    assert np.all(np.isclose(img.affine, expaffine))
+
+
+def create_image(shape, pixdim, origin, dtype):
+    pixdim        = list(pixdim)
+    affine        = np.diag(pixdim[:3] + [1])
+    affine[:3, 3] = origin
+    data          = np.random.randint(1, 100, shape).astype(dtype)
+    hdr           = nib.Nifti1Header()
+
+    hdr.set_data_dtype(dtype)
+    hdr.set_data_shape(shape)
+    hdr.set_zooms(pixdim[:len(shape)])
+
+    return nib.Nifti1Image(data, affine, hdr)
+
+
+def test_new_file():
+    tests = [
+
+        # 4th dim of size 0 or 1 should
+        # result in a 3D image (this
+        # is coded in validate_result)
+        ' 5  5  5 0     2    2   2    0      0  0  0    2',
+        ' 5  5  5 0     2    2   2    1      0  0  0    2',
+        ' 5  5  5 1     2    2   2    1      0  0  0    2',
+        ' 5  5  5 1     2    2   2    1      0  0  0    4',
+        ' 5  5  5 1     2    2   2    1      0  0  0    8',
+        ' 5  5  5 1     2    2   2    1      0  0  0    16',
+        ' 5  5  5 1     2    2   2    1      1  2  3    64',
+        ' 5  5  5 1     0.5  1.5 1.25 1      0  0  0    2',
+        ' 5  5  5 1     0.5  1.5 1.25 1.5    0  0  0    2',
+        ' 5  5  5 1     0.5  1.5 1.25 0.5    0  0  0    2',
+        '30 30 30 5     5   10   3    5     10 20 10    2',
+    ]
+
+    for test in tests:
+        args    = list(test.split())
+        imgfile = 'image.nii.gz'
+
+        try:
+            os.remove(imgfile)
+        except:
+            pass
+
+        print(['fslcreatehd'] + args + [imgfile])
+
+        sp.run(['fslcreatehd'] + args + [imgfile])
+
+        args      = [float(a) for a in args]
+        expshape  = args[:4]
+        exppixdim = args[4:8]
+        exporigin = args[8:11]
+        expdtype  = DTYPE_MAPPING[args[11]]
+
+        try:
+            validate_result(
+                imgfile, expshape, exppixdim, exporigin, expdtype)
+        finally:
+            os.remove(imgfile)
+
+
+def test_existing_file():
+
+    # each test is a tuple containing:
+    #  - dtype_of_existing_image
+    #  - shape_of_existing_image
+    #  - exp_shape (set to None if image should not be overwritten)
+    #  - fslcreatehd_args
+    tests = [
+        # 4th dim of 0 or 1 should result in a 3D image
+        (2, (5, 5, 5), None, '5 5 5 0  2 2 2 1  0 0 0 2'),
+        (2, (5, 5, 5), None, '5 5 5 0  2 2 2 1  1 2 3 2'),
+        (2, (5, 5, 5), None, '5 5 5 1  2 2 2 2  0 0 0 2'),
+
+        # dtype arg should be ignored for existing images
+        (2, (5, 5, 5), None, '5 5 5 0  2 2 2 1  0 0 0 4'),
+        (4, (5, 5, 5), None, '5 5 5 0  2 2 2 1  0 0 0 2'),
+
+        # data should be overwritten if any
+        # of the first 3 dims are different,
+        # or if a 4th dim is specified
+        (2, (5, 5, 5), (5, 3, 5),    '5 3 5 0  2 2 2 2  0 0 0 2'),
+        (2, (5, 5, 5), (5, 3, 5),    '5 3 5 0  2 2 2 2  0 0 0 4'),
+        (2, (5, 5, 5), (5, 3, 5),    '5 3 5 1  2 2 2 2  0 0 0 2'),
+        (2, (5, 5, 5), (5, 3, 5),    '5 3 5 1  2 2 2 2  1 2 3 2'),
+        (2, (5, 5, 5), (5, 3, 5, 5), '5 3 5 5  2 2 2 2  0 0 0 2'),
+        (2, (5, 5, 5), (5, 3, 5, 5), '5 3 5 5  2 2 2 2  1 2 3 2'),
+
+        # 4D - same rules apply
+        (2, (5, 5, 5, 5), None, '5 5 5 5  2 2 2 2  0 0 0 2'),
+        (2, (5, 5, 5, 5), None, '5 5 5 5  2 2 2 2  0 0 0 2'),
+        (2, (5, 5, 5, 5), None, '5 5 5 5  2 2 2 2  0 0 0 4'),
+        (4, (5, 5, 5, 5), None, '5 5 5 5  2 2 2 2  0 0 0 2'),
+        (2, (5, 5, 5, 5), None, '5 5 5 5  2 2 2 2  1 2 3 2'),
+
+        # data overwritten if nelements
+        # change
+        (2, (5, 5, 5, 5), (5, 5, 5),    '5 5 5 0  2 2 2 2  0 0 0 2'),
+        (2, (5, 5, 5, 5), (5, 5, 5),    '5 5 5 1  2 2 2 2  0 0 0 2'),
+        (2, (5, 5, 5, 5), (5, 3, 5),    '5 3 5 0  2 2 2 2  0 0 0 2'),
+        (2, (5, 5, 5, 5), (5, 3, 5),    '5 3 5 1  2 2 2 2  0 0 0 2'),
+        (2, (5, 5, 5, 5), (5, 3, 5),    '5 3 5 1  2 2 2 2  1 2 3 2'),
+        (2, (5, 5, 5, 5), (5, 5, 5, 2), '5 5 5 2  2 2 2 2  0 0 0 2'),
+        (2, (5, 5, 5, 5), (5, 3, 5, 5), '5 3 5 5  2 2 2 2  0 0 0 2'),
+        (2, (5, 5, 5, 5), (5, 3, 5, 5), '5 3 5 5  2 2 2 2  1 2 3 2'),
+    ]
+
+    for (dtype, shape, expshape, args) in tests:
+        imgfile = 'image.nii.gz'
+        dtype   = DTYPE_MAPPING[dtype]
+        args    = list(args.split())
+        img     = create_image(shape, (1, 1, 1, 1), (0, 0, 0), dtype)
+
+        img.to_filename(imgfile)
+
+        sp.run(['fslcreatehd'] + args + [imgfile])
+
+        checkdata = expshape is None
+
+        if expshape is None:
+            expshape = shape
+
+        args      = [float(a) for a in args]
+        exppixdim = args[4:8]
+        exporigin = args[8:11]
+
+        try:
+            validate_result(imgfile, expshape, exppixdim, exporigin, dtype)
+
+            if checkdata:
+                data     = np.asanyarray(img.dataobj)
+                datacopy = np.asanyarray(nib.load(imgfile).dataobj)
+                assert np.all(data == datacopy)
+
+        finally:
+            os.remove(imgfile)
+
+
+def test_new_file_xml():
+    xmlfile = op.join(THISDIR, 'mni2mm.xml')
+    sp.run(['fslcreatehd', xmlfile, 'mni.nii.gz'])
+    img = nib.load('mni.nii.gz')
+
+    assert img.shape                   == (91, 109, 91)
+    assert img.header.get_zooms()[:3]  == (2.0, 2.0, 2.0)
+    assert img.header['intent_code']   == 10
+    assert img.header['intent_p1']     == 20
+    assert img.header['intent_p2']     == 30
+    assert img.header['intent_p3']     == 40
+
+
+def test_existing_file_xml_same_shape():
+    xmlfile = op.join(THISDIR, 'mni2mm.xml')
+    img = create_image((91, 109, 91), (3, 3, 3), (5, 5, 5), np.float32)
+    img.to_filename('image.nii.gz')
+
+    sp.run(['fslcreatehd', xmlfile, 'image.nii.gz'])
+
+    result = nib.load('image.nii.gz')
+
+    assert result.shape                  == (91, 109, 91)
+    assert result.header.get_zooms()[:3] == (2.0, 2.0, 2.0)
+
+    # bug in FSL<=6.0.4 caused intent codes to not be set
+    assert result.header['intent_code']  == 10
+    assert result.header['intent_p1']    == 20
+    assert result.header['intent_p2']    == 30
+    assert result.header['intent_p3']    == 40
+    assert np.all(result.affine          == MNI152_2MM_AFFINE)
+
+    # data should be preserved
+    assert np.all(result.get_fdata()     == img.get_fdata())
+
+
+def test_existing_file_xml_different_shape():
+
+    xmlfile = op.join(THISDIR, 'mni2mm.xml')
+    img = create_image((20, 20, 20), (3, 3, 3), (5, 5, 5), np.float32)
+
+    img.to_filename('image.nii.gz')
+
+    sp.run(['fslcreatehd', xmlfile, 'image.nii.gz'])
+
+    result = nib.load('image.nii.gz')
+
+    assert result.shape                  == (91, 109, 91)
+    assert result.header.get_zooms()[:3] == (2.0, 2.0, 2.0)
+    assert result.header['intent_code']  == 10
+    assert result.header['intent_p1']    == 20
+    assert result.header['intent_p2']    == 30
+    assert result.header['intent_p3']    == 40
+    assert np.all(result.affine          == MNI152_2MM_AFFINE)
+
+    # data should be cleared
+    assert np.all(result.get_fdata()     == 0)
+
+
+def main():
+    outdir = sys.argv[1]
+    os.chdir(outdir)
+
+    test_new_file()
+    test_existing_file()
+    test_new_file_xml()
+    test_existing_file_xml_same_shape()
+    test_existing_file_xml_different_shape()
+
+
+if __name__ == '__main__':
+    sys.exit(main())

@@ -81,7 +81,7 @@ def test_reference_validation_is_not_reported_as_current_input_equivalence(
         def __init__(self, *args, **kwargs):
             pass
 
-        def run(self, qsform):
+        def run(self, qsform, dof=12):
             return 0.0, np.eye(4)
 
     monkeypatch.setattr(flirt_core, "_DefaultFLIRTEngine", FakeEngine)

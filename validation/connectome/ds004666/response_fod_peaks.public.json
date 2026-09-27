@@ -1,0 +1,43 @@
+{
+  "dataset": "OpenNeuro ds004666 sub-01 ses-2mm corrected DWI",
+  "scope": "fixed official internal WM/CSF FOD; sh2peaks and peaks2amp metric only",
+  "reference_commands": "sh2peaks abs_ewm2.mif - -num 1 -mask refined_wm.mif | peaks2amp - -; repeat on abs_ewm6.mif with refined_sfwm.mif",
+  "device": "cuda:0",
+  "torch": "2.5.1",
+  "tf32_enabled": false,
+  "input_sha256": {
+    "dwi": "9ee26b8329696d462754a441d14faa10a0f0fb774fd860feacfaf8443d83d88c",
+    "wm2": "1d6669f9c478d7ddc6b7b8223c3dc2ea9d5c920058d0c0b3f171f3c50fa79392",
+    "csf2": "ca7f23b3d937835cde103ae83ccdae2d21dad52064e516939186a1c67abb3703",
+    "metric2": "4647d478d2792c90c95a1dd96dac66777d7a5b9c03c845b2c5aff190dcb24849",
+    "mask2": "34fe1bf8106ff39d122688f3c121db7d91fb81ed952ed6b21faa9599fca03196",
+    "selected2": "b06cbffa4e32df122be59e13c342277c6198623368f3bdda34c6f362157c0cba",
+    "wm6": "a2866845025e59a3f7d0235bd79a2e3a8b984fda98cdd1faa59de8b65f909bda",
+    "csf6": "81f1bdba4cfca09fa8d934bdad4363d4ee9faeb7b5ffb5c18bcc6ffd1f03d8c6",
+    "metric6": "1d4f143448328a778294ce51357d2e8acc5649df61ac221928385932eacf3809",
+    "mask6": "b06cbffa4e32df122be59e13c342277c6198623368f3bdda34c6f362157c0cba",
+    "selected6": "a93ee84661dd83576499702a3827451386962009920be254f7a0e8e278a5129d"
+  },
+  "metrics": {
+    "2": {
+      "mask_voxels": 88491,
+      "selected_voxels": 884,
+      "seconds": 0.18720293324440718,
+      "metric_mae": 3.717246490489882e-08,
+      "metric_max_abs": 2.1621772317015342e-07,
+      "selected_xor": 0,
+      "metric_pearson": 0.9999999999999348,
+      "peak_torch_allocated_gib": 0.3184394836425781
+    },
+    "6": {
+      "mask_voxels": 884,
+      "selected_voxels": 442,
+      "seconds": 0.5122821517288685,
+      "metric_mae": 1.0435199407417618e-07,
+      "metric_max_abs": 4.072933055265793e-07,
+      "selected_xor": 0,
+      "metric_pearson": 0.9999999999993251,
+      "peak_torch_allocated_gib": 0.1367807388305664
+    }
+  }
+}

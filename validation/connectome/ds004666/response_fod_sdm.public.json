@@ -1,0 +1,47 @@
+{
+  "dataset": "OpenNeuro ds004666 sub-01 ses-2mm, corrected DWI",
+  "scope": "Dhollander six-neighbour mask erosion and shell-weighted signal decay metric only",
+  "reference_command": "dwi2response dhollander corrected.mif response_wm.txt response_gm.txt response_csf.txt -mask brain_mask.nii.gz -scratch dhollander_scratch -nocleanup",
+  "device": "cuda:0",
+  "torch": "2.5.1",
+  "tf32_enabled": true,
+  "shape": [
+    104,
+    104,
+    72,
+    105
+  ],
+  "shell_bvals": [
+    5.0,
+    999.0,
+    1997.0
+  ],
+  "seconds": 0.3083238732069731,
+  "peak_torch_allocated_gib": 0.602055549621582,
+  "input_sha256": {
+    "dwi": "9ee26b8329696d462754a441d14faa10a0f0fb774fd860feacfaf8443d83d88c",
+    "grad": "48bdb84fcd69d979a447fa578f98cb3be389d7dc6bf17f49499e59e4d6291b0d",
+    "response": "a6b4d6965984a8f4533c37c57eae4ba81add17a6a5d1c5ab85a9ec031f1de6f9",
+    "mask": "5024bd734f7a7f276575a0998c80c3d6e34b3359a458766c6e57cf86795afeb2",
+    "ref_eroded": "29b2d43ad6aeac7f54bb6e2054b2508d09311e2e57e59f0a5af40b03f4b76d56",
+    "ref_safe": "cca47c7c7583e67de1b92d48451fa54bf1077f2867c03bc5593b71d0ab1791d8",
+    "ref_sdm": "8430f99ffdfd306ac77ab0d6f598b3a00915303fb2219d660dd536970d2643f8"
+  },
+  "eroded": {
+    "candidate_voxels": 162574,
+    "reference_voxels": 162574,
+    "xor_voxels": 0
+  },
+  "safe": {
+    "candidate_voxels": 162569,
+    "reference_voxels": 162569,
+    "xor_voxels": 0
+  },
+  "sdm": {
+    "all_voxels_mae": 1.3941361449161675e-08,
+    "all_voxels_max_abs": 7.152557373046875e-07,
+    "common_safe_voxels": 162569,
+    "common_safe_mae": 6.678310816488724e-08,
+    "common_safe_max_abs": 7.152557373046875e-07
+  }
+}

@@ -9,9 +9,8 @@ from __future__ import annotations
 
 from functools import lru_cache
 from importlib.resources import files
-import warnings
-
 import numpy as np
+from scipy import special
 from scipy.special import erf, erfi, lpmv
 
 _GAMMA = 2.675987e8
@@ -72,18 +71,38 @@ def amico_scheme(bvals, bvecs, b0_threshold=100.0, b_step=100.0):
 
 
 def principal_directions(signal, raw):
-    """Use the same DIPY OLS tensor fit as AMICO 2.0.3."""
-    from dipy.core.gradients import gradient_table
-    from dipy.reconst import dti
+    """Fit OLS diffusion tensors and return [voxels,3] principal directions.
 
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        table = gradient_table(raw[:, 3], bvecs=raw[:, :3])
-        model = dti.TensorModel(table, fit_method="OLS")
-        directions = np.squeeze(
-            model.fit(np.asarray(signal, dtype=np.float64)).directions
-        )
-    return np.asarray(directions, dtype=np.float64).reshape(-1, 3)
+    ``signal`` is an [N,V] nonnegative normalized DWI signal and ``raw`` is
+    the [V,4] AMICO scheme (three b-vector components, then b-value). This
+    follows DIPY 1.12.1's OLS design and eigenvector ordering without a DIPY
+    runtime dependency. The output is float64 in the input gradient frame.
+    """
+    scheme = np.asarray(raw, dtype=np.float64)
+    vectors = np.where(np.isnan(scheme[:, :3]), 0, scheme[:, :3])
+    bvals = scheme[:, 3].copy()
+    unit = np.abs(np.sqrt(np.sum(vectors * vectors, axis=1)) - 1) <= 1e-2
+    if not np.all(unit[bvals > 50]):
+        raise ValueError("diffusion b-vectors must be unit length within 0.01")
+    vectors = np.where(unit[:, None], vectors, 0)
+    bvals *= unit
+    x, y, z = vectors.T
+    design = np.zeros((len(bvals), 7), dtype=np.float64)
+    design[:, 0] = x * x * 1.0 * bvals
+    design[:, 1] = x * y * 2.0 * bvals
+    design[:, 2] = y * y * 1.0 * bvals
+    design[:, 3] = x * z * 2.0 * bvals
+    design[:, 4] = y * z * 2.0 * bvals
+    design[:, 5] = z * z * 1.0 * bvals
+    design[:, 6] = 1
+    design = -design
+    values = np.maximum(np.asarray(signal, dtype=np.float64), 1e-4)
+    coefficients = np.einsum("ij,nj->ni", np.linalg.pinv(design), np.log(values))
+    tensor = coefficients[:, np.array([[0, 1, 3], [1, 2, 4], [3, 4, 5]])]
+    eigenvalues, eigenvectors = np.linalg.eigh(tensor)
+    order = eigenvalues.argsort()[:, ::-1]
+    eigenvectors = np.take_along_axis(eigenvectors, order[:, None, :], axis=-1)
+    return eigenvectors[:, :, 0]
 
 
 def direction_indices(directions):
@@ -375,21 +394,37 @@ def _isotropic_signal(protocol, diffusivity):
     return np.exp(-(delta - small_delta / 3) * q2 * diffusivity * 1e-6)
 
 
+def _real_sh_descoteaux(vectors):
+    """Return the DIPY 1.12.1 legacy real even-order SH basis through l=12."""
+    vectors = np.asarray(vectors, dtype=np.float64).reshape(-1, 3)
+    x, y, z = vectors.T
+    radius = np.sqrt(x * x + y * y + z * z)
+    cosine = np.divide(z, radius, where=radius > 0, out=np.zeros_like(radius))
+    theta = np.where(radius > 0, np.arccos(cosine), 0)
+    phi = np.arctan2(y, x)
+    degrees = np.arange(0, _LMAX + 1, 2)
+    ell = np.repeat(degrees, 2 * degrees + 1)
+    m = np.concatenate([np.arange(-order, order + 1) for order in degrees])
+    if hasattr(special, "sph_harm_y"):
+        complex_basis = special.sph_harm_y(
+            ell[None], np.abs(m)[None], theta[:, None], phi[:, None]
+        )
+    else:
+        complex_basis = special.sph_harm(
+            np.abs(m)[None], ell[None], phi[:, None], theta[:, None]
+        )
+    real_basis = np.where(m[None] > 0, complex_basis.imag, complex_basis.real)
+    real_basis *= np.where(m == 0, 1.0, np.sqrt(2))
+    return real_basis
+
+
 @lru_cache(maxsize=1)
 def _rotation_auxiliary():
-    from dipy.core.geometry import cart2sphere
-    from dipy.reconst.shm import real_sh_descoteaux
-
+    """Return SH rotation matrices for AMICO's fixed 500-direction table."""
     gradients, directions, _ = direction_assets()
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        _, theta, phi = cart2sphere(gradients[:, 0], gradients[:, 1], gradients[:, 2])
-        basis = real_sh_descoteaux(_LMAX, theta, phi)[0]
-        fit = np.dot(np.linalg.pinv(np.dot(basis.T, basis)), basis.T)
-        rotated = np.empty((_NDIRS, _NSH), dtype=np.float64)
-        for index in range(_NDIRS):
-            _, theta, phi = cart2sphere(*directions[index])
-            rotated[index] = real_sh_descoteaux(_LMAX, theta, phi)[0].reshape(-1)
+    basis = _real_sh_descoteaux(gradients)
+    fit = np.dot(np.linalg.pinv(np.dot(basis.T, basis)), basis.T)
+    rotated = _real_sh_descoteaux(directions)
     constants = np.empty(_NSH, dtype=np.float64)
     m0 = np.empty(_NSH, dtype=np.int32)
     index = 0
@@ -404,27 +439,20 @@ def _rotation_auxiliary():
 
 
 def _subject_basis(raw, shells, b0):
-    from dipy.core.geometry import cart2sphere
-    from dipy.reconst.shm import real_sh_descoteaux
-
+    """Return sorted DWI volume indices and [volume,shell*91] SH design."""
     dwi_indices = np.flatnonzero(~b0)
     output_indices = np.empty(len(dwi_indices), dtype=np.int32)
     basis = np.zeros((len(dwi_indices), _NSH * len(shells)), dtype=np.float32)
     offset = 0
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        for shell_index, shell in enumerate(shells):
-            indices = np.flatnonzero(raw[:, 3] == shell)
-            count = len(indices)
-            output_indices[offset : offset + count] = indices
-            _, theta, phi = cart2sphere(
-                raw[indices, 0], raw[indices, 1], raw[indices, 2]
-            )
-            values = real_sh_descoteaux(_LMAX, theta, phi)[0]
-            basis[
-                offset : offset + count, shell_index * _NSH : (shell_index + 1) * _NSH
-            ] = values
-            offset += count
+    for shell_index, shell in enumerate(shells):
+        indices = np.flatnonzero(raw[:, 3] == shell)
+        count = len(indices)
+        output_indices[offset : offset + count] = indices
+        values = _real_sh_descoteaux(raw[indices, :3])
+        basis[
+            offset : offset + count, shell_index * _NSH : (shell_index + 1) * _NSH
+        ] = values
+        offset += count
     return output_indices, basis
 
 

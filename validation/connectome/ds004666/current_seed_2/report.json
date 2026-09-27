@@ -1,0 +1,106 @@
+{
+  "dataset": "OpenNeuro ds004666 sub-01 ses-2mm corrected AP DWI + paired T1",
+  "reference_scope": "same corrected DWI, masks, FreeSurfer aparc+aseg, atlas and fixed RAS transform",
+  "device": "cuda:0",
+  "torch_version": "2.5.1",
+  "tf32_enabled": true,
+  "n_seeds": 10000,
+  "seed": 2,
+  "accepted_streamlines": 2832,
+  "time_seconds_full_call": 332.7372498163022,
+  "peak_torch_allocated_gib": 2.719964027404785,
+  "input_sha256": {
+    "dwi": "9ee26b8329696d462754a441d14faa10a0f0fb774fd860feacfaf8443d83d88c",
+    "bvals": "86e91a4f22a8687765d29db41a9a19e2cbcd713a6e60e01392adc25c278b8ff3",
+    "bvecs": "27166f5857bc0f2bec33afeae129b641fb938503011d8c330b3c8711fb967911",
+    "t1_brain": "6c3f61d916ed177ab944e53c622620b1734d2b41789567dce0e563005bd28453",
+    "aparc_aseg": "02e0dac0bb322e689d6c5910babe1f91b181c767d45d0bd2cdba72f508c476ab",
+    "atlas_dwi": "eae3b729cfc0ad0fe5cfa0649381a5b656e2d3c1a66ce678afb2800407f706b0",
+    "brain_mask": "5024bd734f7a7f276575a0998c80c3d6e34b3359a458766c6e57cf86795afeb2",
+    "transform": "2467ab7114c95899d78f47a027a0d684a7c62e7597ff1963080c9c301f48e5b0",
+    "fod_mask": "5024bd734f7a7f276575a0998c80c3d6e34b3359a458766c6e57cf86795afeb2",
+    "normalise_mask": "ec19c2230fff06d7923961809a63b5860cc9253661651145a0333e03903eafc5"
+  },
+  "reference_sha256": {
+    "count": "9e8d9f11f3686bb3dce674c89e2e03f194a2d4a0387cd552b5f598018ba7d34f",
+    "sift2_fbc": "e13ed9cef4bcee7662937525447e8e5c24f356c85fb2f2138a38ffcecc77b728",
+    "mean_length": "e43eaffc4a99608a7958a2f3ad63513a6ef1041113c2c7cb178e1d3c3ad2c92e",
+    "mean_fa": "26aa13ba8cfd26dd557902160cabe7f86e5c2b30fc7f7f5cc679a09d720af065"
+  },
+  "matrices": {
+    "count": {
+      "upper_triangle_edges": 190,
+      "union_support_edges": 64,
+      "support_dice": 0.7572815533980582,
+      "pearson_upper": 0.9843368650499211,
+      "mae_upper": 0.9789473684210527,
+      "normalized_mae_upper": 0.0848421052631579,
+      "max_abs_upper": 17.0,
+      "candidate_sum_upper": 596.0,
+      "reference_sum_upper": 600.0,
+      "relative_l1_upper": 0.31,
+      "common_support_edges": 39,
+      "pearson_common_support": 0.9826756779357211,
+      "mae_common_support": 3.717948717948718,
+      "normalized_mae_common_support": 0.2495697074010327
+    },
+    "sift2_fbc": {
+      "upper_triangle_edges": 190,
+      "union_support_edges": 64,
+      "support_dice": 0.7572815533980582,
+      "pearson_upper": 0.9890960416527385,
+      "mae_upper": 0.285702560332261,
+      "normalized_mae_upper": 0.08003206989818737,
+      "max_abs_upper": 3.534045249223709,
+      "candidate_sum_upper": 184.86366856098175,
+      "reference_sum_upper": 185.63224912434828,
+      "relative_l1_upper": 0.29242487078183843,
+      "common_support_edges": 39,
+      "pearson_common_support": 0.9892811581595337,
+      "mae_common_support": 1.0144743657647053,
+      "normalized_mae_common_support": 0.22107717544466066
+    },
+    "mean_length": {
+      "upper_triangle_edges": 190,
+      "union_support_edges": 64,
+      "support_dice": 0.7572815533980582,
+      "pearson_upper": 0.5836544044294968,
+      "mae_upper": 13.058781534168034,
+      "normalized_mae_upper": 0.1865252191581021,
+      "max_abs_upper": 220.18325805664062,
+      "candidate_sum_upper": 2911.151339530945,
+      "reference_sum_upper": 3640.5620797108254,
+      "relative_l1_upper": 0.6815344546161424,
+      "common_support_edges": 39,
+      "pearson_common_support": 0.8777078700129903,
+      "mae_common_support": 21.636282745912233,
+      "normalized_mae_common_support": 0.3100288527626093
+    },
+    "mean_fa": {
+      "upper_triangle_edges": 190,
+      "union_support_edges": 64,
+      "support_dice": 0.7572815533980582,
+      "pearson_upper": 0.6577184382058374,
+      "mae_upper": 0.07881884054730057,
+      "normalized_mae_upper": 0.16250979664743365,
+      "max_abs_upper": 0.6524941921234131,
+      "candidate_sum_upper": 25.72929096221924,
+      "reference_sum_upper": 25.220508504798225,
+      "relative_l1_upper": 0.5937857954425458,
+      "common_support_edges": 39,
+      "pearson_common_support": 0.5952143100176371,
+      "mae_common_support": 0.07008028681718384,
+      "normalized_mae_common_support": 0.14597666096915066
+    }
+  },
+  "metric_policy": {
+    "edges": "strict upper triangle; self connections excluded",
+    "normalized_mae_upper": "MAE over all upper edges divided by mean absolute nonzero reference edge",
+    "relative_l1_upper": "sum absolute error over upper edges divided by sum absolute reference upper edges",
+    "normalized_mae_common_support": "MAE on edges nonzero in both matrices divided by mean absolute reference on those edges"
+  },
+  "metric_recalculation": {
+    "source_report_sha256": "1992e6a28d1afa96ed49efac876778a7f881d4dc1ab701c35ad84c0a4528a6ea",
+    "reason": "Clarified normalized MAE versus relative L1; recomputed from saved candidate and SHA-verified official CSVs without rerunning tractography"
+  }
+}

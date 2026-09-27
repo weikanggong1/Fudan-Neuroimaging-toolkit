@@ -3,7 +3,6 @@
 import argparse
 import hashlib
 import json
-import os
 from pathlib import Path
 import subprocess
 import time
@@ -60,13 +59,11 @@ def main():
         nib.save(nib.Nifti1Image(data, source.affine), source_path)
         start = time.perf_counter()
         subprocess.run([
-            "/public/software/apps/MRtrix3/3.0.3/bin/mrtransform",
+            "mrtransform",
             str(source_path), str(reference_path), "-linear", str(args.mrtrix_matrix),
             "-inverse", "-interp", "nearest", "-datatype", "uint32",
             "-template", str(args.dwi_reference), "-force",
-        ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-           env={**os.environ, "LD_LIBRARY_PATH": "/home1/gongwk/anaconda3/lib:" +
-                os.environ.get("LD_LIBRARY_PATH", "")})
+        ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         reference_seconds.append(time.perf_counter() - start)
         source_paths.append(source_path)
         reference_paths.append(reference_path)

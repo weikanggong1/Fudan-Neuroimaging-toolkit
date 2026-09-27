@@ -1,0 +1,31 @@
+{
+  "dataset": "OpenNeuro ds004666 sub-01 ses-2mm; 2758 fixed real MRtrix tracks and corrected FA",
+  "original_command": "tcksample -precise -stat_tck mean tracks_10000.tck fa_corrected.mif streamline_mean_fa.txt -nthreads 8",
+  "comparison": "identical TCK and FA image after lossless MIF-to-NIfTI float32 conversion",
+  "input_sha256": {
+    "tracks_10000.tck": "0761105a4e520de4709e6da9641bfe53e53060cfc21050eb2bab9caa2c7a1f33",
+    "fa_corrected.nii.gz": "0899aa207d22fb700d00a1ae0625d77275df84e3f7a547039bc602b0da8a8692",
+    "streamline_mean_fa.txt": "0f4b75ad907b38c1142d72978b166287701109425cbb66b6886679c03ac6b529"
+  },
+  "n_tracks": 2758,
+  "n_finite_pairs": 2758,
+  "device": "cpu",
+  "dtype": "float32 inputs/output; float64 length sums; TF32 default on CUDA; no float16",
+  "pytorch_seconds": 0.1011752299964428,
+  "peak_cuda_gb": null,
+  "official_tcksample_seconds": 0.03,
+  "timing_note": "Official 0.03 s is command wall time in corrected_mrtrix_fs5tt_act_adapted/stage_times.tsv; PyTorch time starts after TCK/FA loading.",
+  "reference_mean": 0.4312103740152369,
+  "candidate_mean": 0.4312102260301734,
+  "pearson": 0.9999999902265092,
+  "mae": 1.5310699996782266e-06,
+  "rmse": 1.6581065472481643e-05,
+  "max_abs": 0.0005499124526977539,
+  "abs_error_quantiles": {
+    "0.5": 2.9802322387695312e-08,
+    "0.9": 1.1920928955078125e-07,
+    "0.99": 3.076046705245969e-05,
+    "0.999": 0.00018350061774253347
+  },
+  "figure": "tcksample_precise_cpu.png"
+}

@@ -1,0 +1,17 @@
+#!/bin/sh
+
+#   basic image handling scripts
+#
+#   FMRIB Image Analysis Group
+#
+#   Copyright (C) 1999-2005 University of Oxford
+#
+#   SHCOPYRIGHT
+
+if [ $# -lt 1 ] ; then
+  echo "Usage: $0 <filename>" ;
+  exit 1 ;
+fi
+
+${FSLDIR}/bin/fslhd $1 | cat -v | egrep 'data_type|datatype|dim[1-4]|l.*m[ai][xn]|origin[123]|file_type'
+

@@ -22,20 +22,23 @@ def main():
     parser.add_argument("--b0", type=Path, required=True)
     parser.add_argument("--t1", type=Path, required=True)
     parser.add_argument("--fsl-matrix", type=Path, required=True)
+    parser.add_argument("--fsl-moved", type=Path)
     parser.add_argument("--scratch", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--device", default="cuda:0")
     args = parser.parse_args()
     args.scratch.mkdir(parents=True, exist_ok=True)
-    reference_path = args.scratch / "b0_to_t1_fsl.nii.gz"
-    start = time.perf_counter()
-    subprocess.run([
-        "/public/software/apps/FSL/6.0.7.4/bin/flirt", "-in", str(args.b0),
-        "-ref", str(args.t1), "-applyxfm", "-init", str(args.fsl_matrix),
-        "-out", str(reference_path),
-    ], check=True, env={**os.environ, "FSLOUTPUTTYPE": "NIFTI_GZ",
-                    "FSLDIR": "/public/software/apps/FSL/6.0.7.4"})
-    reference_seconds = time.perf_counter() - start
+    reference_path = args.fsl_moved or (args.scratch / "b0_to_t1_fsl.nii.gz")
+    reference_seconds = None
+    if args.fsl_moved is None:
+        start = time.perf_counter()
+        subprocess.run([
+            "/public/software/apps/FSL/6.0.7.4/bin/flirt", "-in", str(args.b0),
+            "-ref", str(args.t1), "-applyxfm", "-init", str(args.fsl_matrix),
+            "-out", str(reference_path),
+        ], check=True, env={**os.environ, "FSLOUTPUTTYPE": "NIFTI_GZ",
+                        "FSLDIR": "/public/software/apps/FSL/6.0.7.4"})
+        reference_seconds = time.perf_counter() - start
     moving, fixed = sf.load_volume(str(args.b0)), sf.load_volume(str(args.t1))
     moving_affine = np.asarray(moving.geom.vox2world.matrix)
     fixed_affine = np.asarray(fixed.geom.vox2world.matrix)
@@ -79,7 +82,8 @@ def main():
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2) + "\n")
-    print(json.dumps(report, indent=2))
+    print(json.dumps({key: value for key, value in report.items()
+                      if key != "input_sha256"}, indent=2))
 
 
 if __name__ == "__main__":

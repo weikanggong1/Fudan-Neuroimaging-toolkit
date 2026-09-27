@@ -6,19 +6,18 @@
 
 | 阶段 | 相同输入与软件参考 | PyTorch 对照结果 | 单次墙钟时间 |
 |---|---|---|---|
-| T1 分割 | 官方 FreeSurfer `recon-all` 产出同一 `aparc+aseg.mgz`，两臂直接读取 | 分割本身使用同一官方文件，未重实现或声称分割等价 | 官方 `recon-all` 约 1.645 h，见[原参考报告](fs5tt_adapted_report.public.json) |
+| T1 分割 | 官方 FreeSurfer `recon-all` 产出同一 `aparc+aseg.mgz`，两臂直接读取 | 分割本身使用同一官方文件，未重实现或声称分割等价 | 官方 `recon-all` 约 1.645 h，见[FreeSurfer 运行记录](freesurfer_recon_all.public.json) |
 | 5TT | `5ttgen freesurfer -nocrop -sgm_amyg_hipp` 的 256³×5 组织图 | [逐值 0 不一致](anatomy_5tt.public.json)；MRtrix 9.56 s，PyTorch GPU 核心计算 0.286 s | 软件计时含进程/I/O，GPU 计时不含输入读取和写出 |
 | GMWMI | `5tt2gmwmi`，相同 T1 5TT | [逐值 0 不一致](anatomy_5tt.public.json)，正值 336,136 个体素，支持 Dice 1；MRtrix 0.84 s，PyTorch GPU 核心计算 0.101 s | 同上 |
-| 刚性配准 | 相同脑内 b0/T1 输入；`flirt -cost normmi -dof 6`，FSL scaled-mm `.mat` | [13³ 网格世界坐标位移差](anatomy_registration_repeat.public.json)：三次最大分别 0.206/0.189/0.162 mm；PyTorch 217.61/227.71/237.84 s，FSL 24.59 s | 同一输入，但不同实现优化所得矩阵不逐值相同 |
 | 用固定 FSL 矩阵重采样 b0 | 相同 b0、T1 网格和 FSL 矩阵，`flirt -applyxfm -init` | [双方非零体素强度 Pearson 0.999999986、MAE 0.201、前景 Dice 0.999989](anatomy_registration_resample.public.json)；FSL 4.738 s，PyTorch 0.569 s | 测的是重采样算子，不含估计矩阵 |
 | 单张标签映射 | 同一 `aparc+aseg.mgz`、FSL 变换和 b0 网格，MRtrix `mrtransform -inverse -interp nearest -template` | [104×104×72 上 0 个标签体素不一致](anatomy_atlas.public.json)，前景 Dice 1 | PyTorch 0.836 s；该单张参考未单独计时 |
 | 两张 atlas 映射与合并 | 从同一 `aparc+aseg` 构造 2 区皮层、2 区皮层下测试图；分别用 MRtrix 最近邻映射，再按原 Python 脚本皮层优先、皮层下标签加 2 合并 | [皮层、皮层下、合并各 0 个体素不一致](anatomy_atlas_merge.public.json)；MRtrix 映射 0.723/0.515 s，PyTorch 0.538/0.023 s；合并核心 PyTorch 0.0158 s、原公式 NumPy 0.0058 s | 测试图用于验证操作规则，**不是**原 UKB 的皮层加 Tian atlas |
 
-**显存。** 用 `torch.cuda.reset_peak_memory_stats()` 后的 `max_memory_allocated()` 测得：5TT+GMWMI 1.00 GiB、单张 atlas 0.218 GiB、双 atlas 0.220 GiB、刚性配准 1.267 GiB、固定矩阵 b0 重采样 1.130 GiB、100 次播种接口调用 1.659 GiB；均低于 20 GiB。报告还保存 PyTorch reserved 值。它们不包含其他进程占用，不能外推到更大输入或千万次追踪。
+**显存。** 用 `torch.cuda.reset_peak_memory_stats()` 后的 `max_memory_allocated()` 测得：5TT+GMWMI 1.00 GiB、单张 atlas 0.218 GiB、双 atlas 0.220 GiB、固定矩阵 b0 重采样 1.130 GiB；均低于 20 GiB。报告还保存 PyTorch reserved 值。它们不包含其他进程占用，不能外推到更大输入或千万次追踪。
 
 ![同一 T1 和校正 DWI 的 FreeSurfer、5TT、GMWMI 和 atlas 示例](../../../docs/connectome/figures/ds004666_anatomy_stage.png)
 
-[示例图记录](anatomy_example_image.public.json)保存图像哈希、切面和标签来源。图中皮层/皮层下图来自冻结的 FreeSurfer 标签，验证坐标变换和合并顺序；色彩仅表示示例测试标签。5TT/GMWMI 图为 MRtrix 参考；逐值比较表明 PyTorch 数组与之相同。[三次独立运行](anatomy_registration_repeat.public.json)使用相同输入；PyTorch 矩阵两两之间在 13³ 网格上最大位移差为 0.093–0.161 mm，不具有逐字节确定性。配准的矩阵及重采样输出达到上述容差，不能据此宣称任何 T1/DWI 都逐值相同。计时范围和软硬件开销不同，表中单项时间不能拼成完整流程的加速倍数。
+[示例图记录](anatomy_example_image.public.json)保存图像哈希、切面和标签来源。图中皮层/皮层下图来自冻结的 FreeSurfer 标签，验证坐标变换和合并顺序；色彩仅表示示例测试标签。5TT/GMWMI 图为 MRtrix 参考；逐值比较表明 PyTorch 数组与之相同。6DOF 配准求解器更新后的真实数据对照见[匹配 UKB 报告](../ORIGINAL_UKB_FLIRT_STAGE_20260927.md)。计时范围和软硬件开销不同，表中单项时间不能拼成完整流程的加速倍数。
 
 ## 可复跑入口
 
@@ -40,9 +39,6 @@ python tools/benchmark_connectome_anatomy.py --aparc-aseg aparc+aseg.mgz \
 python tools/benchmark_connectome_registration.py --b0 b0_brain.nii.gz \
   --t1 t1_brain.nii.gz --fsl-matrix diff2struct_fsl.txt \
   --device cuda:0 --output registration.json
-python tools/compare_connectome_registration_repeats.py --moving b0_brain.nii.gz \
-  --reports registration_1.json registration_2.json registration_3.json \
-  --output registration_repeat.json
 python tools/benchmark_connectome_registration_resample.py --b0 b0_brain.nii.gz \
   --t1 t1_brain.nii.gz --fsl-matrix diff2struct_fsl.txt \
   --scratch scratch --device cuda:0 --output resample.json
@@ -58,6 +54,4 @@ python tools/benchmark_connectome_atlas_merge.py --aparc-aseg aparc+aseg.mgz \
 
 单张标签图的 MRtrix 参考命令为 `mrtransform aparc+aseg.mgz reference_aparc_dwi.nii.gz -linear diff2struct_mrtrix.txt -inverse -interp nearest -datatype uint32 -template b0_brain.nii.gz`。两张 atlas 的参考文件由最后一个脚本用同样参数独立生成；不同 NIfTI 存储轴顺序先依据 affine 重排到 b0 网格，之后才逐体素比较。图像入口为 [`tools/plot_connectome_anatomy.py`](../../../tools/plot_connectome_anatomy.py)。
 
-[公开接口检查](anatomy_official_fs_smoke.public.json)还将同一官方 `aparc+aseg.mgz` 通过 `segmentation_source="freesurfer"` 输入已校正 DWI 的 `UKBConnectome`，固定 FSL 世界变换和已有 20 区 atlas，100 次播种接受 59 条流线，四张矩阵均有限且对称，调用耗时 15.85 s、峰值已分配显存 1.66 GiB。该检查只验证包内接线；其追踪与 SIFT2 仍是近似实现。
-
-这些结果解决此样本的官方分割输入、5TT/GMWMI、6-DOF 配准和 atlas 操作检查。原 UKB 的 FIRST/Tian 输入未获得，因此尚无这两个实际输入的同输出实验；概率纤维追踪、FOD 与 SIFT2 的差异见[完整连接矩阵报告](README.md)。
+这些结果验证此样本的官方分割输入、5TT/GMWMI、固定矩阵重采样和 atlas 操作。现行 6DOF 矩阵求解、原 UKB 的 FIRST 网格和 Tian atlas 分别见[配准](../ORIGINAL_UKB_FLIRT_STAGE_20260927.md)、[FIRST/5TT](../FIRST_MESH_5TT_STAGE_20260927.md)与[原流程 atlas](../../../docs/connectome/ORIGINAL_ATLAS_OPERATORS.md)报告；尚存的数值差异均在各报告中列出。概率纤维追踪、FOD 与 SIFT2 的差异见[连接矩阵报告](README.md)。

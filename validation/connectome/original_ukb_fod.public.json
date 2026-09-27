@@ -1,0 +1,77 @@
+{
+  "stage": "原 UKB dwi2fod msmt_csd，全脑，同输入响应与掩膜",
+  "dataset": "单名真实 UKB 配对受试者，标识与原始影像不公开",
+  "reference_version": "MRtrix eeab681d3e0cb004cf1d1d31579d3892197ef5b6",
+  "input_shape": [
+    104,
+    104,
+    72,
+    105
+  ],
+  "mask_voxels": 212831,
+  "mask_provenance": "原脚本 BET -m -R -f 0.2 -g -0.05 的平均 b0 脑掩膜，maskfilter dilate -npass 2",
+  "input_pairing": "两侧同一校正 DWI、MRtrix 梯度表、Dhollander WM/GM/CSF 响应与膨胀后掩膜",
+  "output_shapes": {
+    "wm": [
+      104,
+      104,
+      72,
+      45
+    ],
+    "gm": [
+      104,
+      104,
+      72
+    ],
+    "csf": [
+      104,
+      104,
+      72
+    ]
+  },
+  "solver": "FNIT float64 ICLS，输出 float32；设计依赖矩阵在本次求解中预计算并跨批复用，CUDA 默认 TF32 开启",
+  "full_brain": {
+    "batch_size": 4096,
+    "metrics": {
+      "wm": {
+        "values": 9577395,
+        "mae": 4.390713008815242e-13,
+        "max_abs": 2.9802322387695312e-08,
+        "fraction_abs_le_1e-5": 1.0,
+        "pearson": 0.9999999999999997
+      },
+      "gm": {
+        "values": 212831,
+        "mae": 4.138508478870621e-17,
+        "max_abs": 2.842170943040401e-14,
+        "fraction_abs_le_1e-5": 1.0,
+        "pearson": 0.9999999999999999
+      },
+      "csf": {
+        "values": 212831,
+        "mae": 4.451786200105179e-15,
+        "max_abs": 9.313225746154785e-10,
+        "fraction_abs_le_1e-5": 1.0,
+        "pearson": 0.9999999999999984
+      }
+    },
+    "torch_compute_seconds": 269.457,
+    "torch_peak_allocated_gib": 1.353854,
+    "mrtrix_command_seconds": 107.04,
+    "mrtrix_peak_rss_kib": 256992,
+    "torch_load_seconds": 0.682134
+  },
+  "selected_10000": {
+    "voxel_count": 10000,
+    "wm_max_abs": 7.450580596923828e-09,
+    "gm_max_abs": 5.5268289944621074e-15,
+    "csf_max_abs": 6.39354021114702e-16,
+    "torch_peak_allocated_gib": 1.24676,
+    "torch_compute_seconds_two_runs": [
+      11.017,
+      11.741
+    ]
+  },
+  "interpretation": "全脑三个组织输出均低于 1e-7 绝对误差，但不是二进制逐值一致；FNIT GPU 求解范围和 MRtrix CPU 完整命令范围不同。",
+  "private_records": "完整输入哈希、路径和原始输出留在授权服务器，不进入仓库"
+}

@@ -1,0 +1,35 @@
+#!/bin/sh
+
+#   basic image handling scripts
+#
+#   FMRIB Image Analysis Group
+#
+#   Copyright (C) 1999-2004 University of Oxford
+#
+#   SHCOPYRIGHT
+
+Usage() {
+    echo "Usage: fslval <input> <keyword>"
+    exit 1
+}
+
+[ "$1" = "" ] && Usage
+[ "$2" = "" ] && Usage
+
+if [ _$FSLDIR = _ ]
+then
+    FSLDIR=$PXHOME/fsl
+    export FSLDIR
+fi
+
+# tail:   skip first line of fslhd output (filename)
+# cat -v: print non-printable characters in e.g. descrip field
+# grep:   match field (first hit)
+# head:   drop remaining hits
+# awk:    print field value
+$FSLDIR/bin/fslhd "$1" | \
+  tail -n +1           | \
+  cat -v               | \
+  grep -e "^$2\s"      | \
+  head -n 1            | \
+  awk '{ for (i = 2; i <= NF; i++) printf "%s ", $i ; printf "\n" }'

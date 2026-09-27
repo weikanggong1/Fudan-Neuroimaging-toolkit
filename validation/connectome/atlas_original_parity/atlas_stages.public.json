@@ -1,0 +1,102 @@
+{
+  "surface_openneuro_ds004666": {
+    "dataset": "OpenNeuro ds004666, one public paired T1/DWI subject; official FreeSurfer 8.2 recon-all",
+    "reference": "upstream UKB-connectomics scripts/python/map_surface_label_to_volume.py",
+    "volume_shape": [
+      256,
+      256,
+      256
+    ],
+    "ribbon_cortex_voxels": {
+      "lh": 261299,
+      "rh": 257021
+    },
+    "positive_labels": 34,
+    "voxel_mismatches": 0,
+    "foreground_dice": 1.0,
+    "minimum_label_dice": 1.0,
+    "affine_equal": true,
+    "reference_seconds_full_process_io": 7.200643330812454,
+    "torch_cpu_seconds_compute_and_host_to_device": 42.57952273637056,
+    "figure": "docs/connectome/figures/ds004666_surface_atlas_original_comparison.png"
+  },
+  "surface_matched_ukb": {
+    "dataset": "one matched UK Biobank T1/DWI pair, deidentified",
+    "reference": "upstream UKB-connectomics scripts/python/map_surface_label_to_volume.py",
+    "volume_shape": [
+      256,
+      256,
+      256
+    ],
+    "ribbon_cortex_voxels": {
+      "lh": 236830,
+      "rh": 231619
+    },
+    "positive_labels": 34,
+    "voxel_mismatches": 0,
+    "foreground_dice": 1.0,
+    "minimum_label_dice": 1.0,
+    "affine_equal": true,
+    "reference_seconds_full_process_io": 6.201464763842523,
+    "torch_gpu_seconds_compute_and_host_to_device": 4.0833817180246115,
+    "torch_gpu_peak_allocated_gib": 1.4210186004638672
+  },
+  "tian_s1_matched_ukb": {
+    "dataset": "same matched UK Biobank T1/DWI pair, deidentified",
+    "reference": "FSL 6.0.7.4, newly generated T1-to-MNI FNIRT coefficient warp, inverse, nearest-neighbor Tian S1 propagation",
+    "reference_warp_is_archived_ukb_output": false,
+    "native_t1_shape": [
+      162,
+      215,
+      180
+    ],
+    "mni_template_shape": [
+      91,
+      109,
+      91
+    ],
+    "positive_labels": 16,
+    "official_reference_foreground_voxels": 44041,
+    "fixed_official_inverse_torch_applywarp": {
+      "label_mismatches": 0,
+      "minimum_label_dice": 1.0,
+      "foreground_dice": 1.0,
+      "torch_gpu_seconds_with_io": 2.057906972710043,
+      "torch_gpu_peak_allocated_gib": 1.3060784339904785,
+      "fsl_applywarp_seconds_full_process_io": 15.4
+    },
+    "torch_inverse": {
+      "global_field_mae_mm": 2.115176812367281e-06,
+      "global_field_p99_absolute_error_mm": 7.62939453125e-06,
+      "global_field_max_absolute_error_mm": 1.1444091796875e-05,
+      "tian_support_field_mae_mm": 1.951845888470416e-06,
+      "tian_support_field_p99_absolute_error_mm": 6.67572021484375e-06,
+      "torch_gpu_seconds_with_io": 27.783579104114324,
+      "torch_gpu_peak_allocated_gib": 0.36711883544921875,
+      "fsl_invwarp_seconds_full_process_io": 41.43,
+      "global_field_voxels_above_0p0001_mm": 0,
+      "tian_support_field_max_absolute_error_mm": 8.58306884765625e-06
+    },
+    "torch_inverse_plus_applywarp": {
+      "label_mismatches": 0,
+      "label_mismatch_fraction": 0.0,
+      "foreground_dice": 1.0,
+      "minimum_label_dice": 1.0,
+      "candidate_foreground_voxels": 44041,
+      "torch_gpu_applywarp_seconds_with_io": 1.240064846817404,
+      "torch_gpu_applywarp_peak_allocated_gib": 1.3060784339904785
+    },
+    "fsl_reference_seconds_full_process_io": {
+      "flirt": 18.98,
+      "fnirt": 251.23,
+      "invwarp": 41.43,
+      "applywarp": 15.4
+    },
+    "fsl_reference_peak_rss_kib": {
+      "flirt": 115692,
+      "fnirt": 810184,
+      "invwarp": 210896,
+      "applywarp": 401356
+    }
+  }
+}

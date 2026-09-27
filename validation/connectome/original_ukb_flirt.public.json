@@ -1,0 +1,48 @@
+{
+  "stage": "b0_to_t1_rigid_registration",
+  "reference_source": "UKB-connectomics probabilistic_tractography_native_space.sh, fixed real UKB DWI/T1 pair",
+  "subject_count": 1,
+  "reference_software": {
+    "mrtrix_commit": "eeab681d3e0cb004cf1d1d31579d3892197ef5b6",
+    "fsl_version": "6.0.7.4",
+    "flirt_source_version": "2111.2"
+  },
+  "input_grid": {
+    "b0_brain": [104, 104, 72],
+    "t1_brain": [162, 215, 180]
+  },
+  "matrix_comparison": {
+    "coordinate_system": "world RAS",
+    "sampling": "13 x 13 x 13 grid across the moving b0 field of view",
+    "displacement_mm": {
+      "mean": 0.18665487655438537,
+      "p95": 0.2854834918434151,
+      "max": 0.36735000461557255,
+      "rms": 0.19533012229396549
+    }
+  },
+  "estimated_matrix_moved_image": {
+    "shape": [162, 215, 180],
+    "foreground_dice": 0.9976549715166204,
+    "pearson_both_nonzero": 0.9995119857559678,
+    "mae_both_nonzero_raw_intensity": 75.96712700737608,
+    "mae_all_raw_intensity": 19.363913245053922,
+    "p95_abs_difference_both_nonzero_raw_intensity": 287.5053955078123
+  },
+  "fixed_fsl_matrix_resampling": {
+    "foreground_dice": 0.9999950011247469,
+    "pearson_both_nonzero": 0.999999995132402,
+    "mae_both_nonzero_raw_intensity": 0.14903690402410463,
+    "mae_all_raw_intensity": 0.0380439558076202
+  },
+  "timing_and_memory": {
+    "fsl_flirt_cpu_wall_seconds_including_command_io": 10.02,
+    "torch_flirt_h100_cuda_seconds_call_including_optimization_and_resampling": 19.155467541888356,
+    "torch_flirt_peak_allocated_gib": 0.745729923248291,
+    "fsl_applyxfm_cpu_wall_seconds_including_command_io": 0.73,
+    "torch_fixed_matrix_resampling_cuda_seconds_excluding_io": 0.5116634778678417,
+    "torch_fixed_matrix_resampling_peak_allocated_gib": 0.6927890777587891
+  },
+  "exact_matrix_or_voxel_equality": false,
+  "note": "Single real paired input; FSL and GPU timings have different IO scope and hardware. Raw images, transforms and subject identifiers remain private."
+}

@@ -1,165 +1,191 @@
-# 单被试 PyTorch dMRI region × region connectome
+# 单被试 dMRI region × region connectome
 
-[返回首页](../../README.md) · [源码](../../src/fnit/connectome/) ·
-[验证报告](../../validation/connectome/ds004666/README.md)
+[返回首页](../../README.md) · [源码](../../src/fnit/connectome/) · [ds004666 验证](../../validation/connectome/ds004666/README.md)
 
-此功能从**已完成畸变、运动和涡流校正的 DWI**、匹配的 b-values、已按 eddy
-旋转的 b-vectors，以及配对 T1w 开始。它在 PyTorch 中估计 FA、三组织响应
-与 FOD、生成双向概率纤维、计算 SIFT2 风格的纤维权重，再把端点映射到脑区，
-生成四张对称矩阵。输入可以按 BIDS 命名，但原始 BIDS DWI 不能直接代替
-已校正 DWI。原 [`UKB-connectomics` 追踪脚本](https://github.com/sina-mansour/UKB-connectomics/blob/main/scripts/bash/probabilistic_tractography_native_space.sh)
-从 UKB 已校正的 `data_ud.nii.gz` 和旋转后梯度起步；本接口不执行 TOPUP、eddy、
-去噪、Gibbs 校正或原流程的其他前处理。
+`UKBConnectome` 从**已完成畸变、运动和涡流校正**的 DWI、配套 bval 和 eddy 旋转后的 bvec 起步，结合配对 T1 的**官方 FreeSurfer recon-all** 分割、DWI 脑掩膜与固定脑区 atlas，返回 count、SIFT2 FBC、加权 mean length 和加权 mean FA 四张矩阵。响应、FOD、强度归一化、5TT/GMWMI、追踪、SIFT2、FA 采样与矩阵赋值由 PyTorch 在指定 CPU/CUDA 设备执行。CUDA 默认允许 TF32；图像主要为 float32，条件数敏感的求解和几何步骤使用 float64，不自动转为 float16/bfloat16。
 
-## Python 调用
+**当前状态：** [阶段性成果与剩余工作](../../validation/connectome/STAGE_RELEASE_20260928.md)已归档。公开 ds004666 已完成多项固定输入阶段对照，并取得 10,000 次播种、显式固定脑掩膜与配准矩阵的整链 seed 0 四矩阵、时间、显存及输入哈希。自动 BET 默认分支单独验收；该旧整链报告不含它。独立追踪的连接支持和 FA 仍有差异；官方及 PyTorch 各三次固定种子的波动基线已核验，共同边 FA 仍有系统差异，因此尚不声明最终矩阵一致。
+
+## 输入准备与安装
+
+原 [UKB-connectomics 追踪脚本](https://github.com/sina-mansour/UKB-connectomics/blob/main/scripts/bash/probabilistic_tractography_native_space.sh) 读取 UKB 已校正的 `data_ud.nii.gz`、`bvecs` 和 `bvals`；它不从原始 BIDS DWI 执行 TOPUP/eddy。本接口也不在单次 connectome 调用内执行 TOPUP、eddy、去噪或 Gibbs 校正；LAS 网格 DWI 的 mean b0 可在调用内用 PyTorch BET 去脑。公开 ds004666 的校正输入由 AP/PA b0 运行 FSL TOPUP，再用 `eddy_cuda10.2` 生成校正 DWI 与旋转后的 bvec；元数据缺少实测总读出时间，实验两步均使用**假定 0.05 s**。[预处理命令、QC 与哈希](../../validation/connectome/ds004666/corrected_input_provenance.public.json)和[校正参考命令](../../validation/connectome/ds004666/corrected_mrtrix_commands.public.txt)保留完整条件。原始 DWI 不满足本接口的输入约定。
+
+T1 解剖输入须先在包外运行**官方 FreeSurfer recon-all**，提供同次 T1 的 skull-stripped brain 图与 `aparc+aseg.mgz`。包内近似 Python recon-all 不参与当前 connectome 验证，也不在本接口自动执行。还需提供非负整数 atlas。DWI 为 LAS 体素顺序时，省略 `brain_mask` 会依照原 UKB 的 `bet mean_b0 -m -R -f 0.2 -g -0.05` 在 PyTorch 中生成脑掩膜；其他方向的 DWI 须提供同网格二值 `brain_mask`。默认不会自动运行 SynthSeg，也不会自动构造或下载 atlas；比较 MRtrix 时应固定同一脑掩膜、atlas、梯度、配准变换和参考响应掩膜。FreeSurfer、FSL 与 MRtrix 是**输入准备和软件对照工具**，不是 PyTorch 核心调用的内部可执行程序。
+
+从仓库根目录安装 GPU 验证环境：
+
+```bash
+conda env create -f environment.yml
+conda activate fnit
+python -c "import torch, fnit; print(torch.__version__, torch.cuda.is_available())"
+fnit connectome --help
+```
+
+CPU 小规模检查可使用 `--device cpu`。官方 FreeSurfer 的运行与许可由使用者在包外管理；本仓库不提供 recon-all 可执行程序、`license.txt`、UKB 原始受控数据或大体积 T1/DWI。
+
+## Python API
 
 ```python
 from fnit import UKBConnectome
 
-model = UKBConnectome(device="cuda:0", synthseg_weights=None)
-result = model(
-    "derivatives/dwi/sub-01_desc-preproc_dwi.nii.gz",
-    "derivatives/dwi/sub-01_desc-preproc_dwi.bval",
-    "derivatives/dwi/sub-01_desc-eddyRotated_dwi.bvec",
-    "sub-01/anat/sub-01_T1w.nii.gz",
-    atlas_dwi="derivatives/atlas/sub-01_space-dwi_atlas.nii.gz",
-    n_seeds=10_000,
-    seed=0,
+result = UKBConnectome(device="cuda:0")(
+    dwi="derivatives/dwi/sub-01_desc-preproc_dwi.nii.gz",  # 输入：校正后的 4D DWI
+    bvals="derivatives/dwi/sub-01_desc-preproc_dwi.bval",  # 输入：每卷 b 值
+    bvecs="derivatives/dwi/sub-01_desc-eddyRotated_dwi.bvec",  # 输入：旋转后的方向
+    t1_brain="freesurfer/sub-01/mri/brain.mgz",  # 输入：同次 T1 去脑图
+    t1_segmentation="freesurfer/sub-01/mri/aparc+aseg.mgz",  # 输入：官方分割
+    atlas_dwi="derivatives/atlas/sub-01_space-dwi_atlas.nii.gz",  # 输入：整数分区
+    brain_mask=None,        # 输入：None 时从 LAS DWI mean b0 运行包内 BET
+    n_seeds=10_000,         # 输入：尝试的流线种子数
+    shell_bvals=None,       # 输入：None 时从 b 值聚类 shell
+    response_mask=None,     # 输入：None 时使用 DWI 默认响应掩膜
+    fod_mask=None,          # 输入：None 时对 BET 掩膜膨胀两次
+    normalise_mask=None,    # 输入：None 时对 BET 掩膜侵蚀两次
+    fa_map=None,            # 输入：None 时从 DWI 拟合 FA
+    dwi_to_t1_world=None,   # 输入：None 时运行 TorchFLIRT 6DOF/normmi
+    seed=0,                # 输入：PyTorch 随机种子
 )
-count = result.matrices["count"]
+count = result.matrices["count"]  # 输出：以 region_labels 为行列的 K×K 计数矩阵
 ```
 
-| 参数 | 约定 |
+| 参数 | 输入约定 |
 |---|---|
-| `dwi` | 4D NIfTI，空间轴为 `[X,Y,Z]`，末轴为方向/体积；需已校正 |
-| `bvals`, `bvecs` | 与 DWI 体积逐一对应；FSL `3×N` 或 `N×3` bvec；非 b0 梯度要有效且已旋转 |
-| `t1` | 同一被试的 T1w NIfTI |
-| `atlas_dwi` | 可选，已对齐到 DWI RAS 世界坐标的 3D 非负整数标签图；可保留原 atlas 网格和 affine，标签 1 对应矩阵第一行 |
-| `t1_segmentation` | 可选，T1 空间 SynthSeg 标签图或官方 FreeSurfer `aparc+aseg.mgz`；后者须设 `segmentation_source="freesurfer"` |
-| `segmentation_source` | `synthseg`（默认）或 `freesurfer`；官方模式读取既有 `recon-all` 输出 |
-| `dwi_to_t1_world` | 可选，DWI RAS 世界坐标到 T1 RAS 世界坐标的 `4×4` 齐次矩阵；省略时运行包内 TorchFLIRT |
-| `n_seeds`, `seed` | 显式指定播种尝试次数；`seed` 默认 0，固定种子用于重复采样 |
+| `dwi`、`bvals`、`bvecs`、`t1_brain` | 已校正 float32 DWI NIfTI `[X,Y,Z,N]`；逐 volume 对应的 bval、eddy-rotated FSL bvec；同次 skull-stripped T1 brain 图 |
+| `t1_segmentation`、`atlas_dwi` | **必选**；官方 FreeSurfer `aparc+aseg.mgz` 和 DWI RAS 世界空间的整数 atlas。atlas 可有独立体素网格及 affine，正标签从 1 起 |
+| `brain_mask` | 可选 DWI 网格二值 BET 掩膜；LAS DWI 省略时，用双精度累加 mean b0、MRtrix 写头体素尺寸规则及 PyTorch BET 自动生成；非 LAS DWI 须提供掩膜 |
+| `n_seeds`、`seed` | 播种尝试数必选；PyTorch 随机数序列与 MRtrix 不同。原脚本 10,000,000 次尝试的耗时和内存未在此验证 |
+| `shell_bvals` | 可选；固定 MRtrix response 文件中的 shell 标签。省略时从 bval 聚类 |
+| `response_mask`、`fod_mask`、`normalise_mask` | 可选；固定参考阶段掩膜；默认响应掩膜由 DWI 的 `dwi2mask_legacy` 计算；FOD/归一化仍分别使用 `brain_mask` 的六邻域两轮膨胀/侵蚀 |
+| `fa_map` | 可选；同网格已计算 FA（如 UKB `dti_FA`）；省略时从 DWI 拟合 MRtrix 风格 tensor FA |
+| `dwi_to_t1_world` | 可选 `4×4` DWI RAS-mm → T1 RAS-mm 矩阵；省略时运行包内 6-DOF/normmi TorchFLIRT。FSL scaled-mm `.mat` 不能直接传入 |
 
-不提供 `atlas_dwi` 时，从 SynthSeg 解剖标签建立紧凑脑区图，并按标签升序
-重编号。它不是原仓库的皮层加 Tian 亚皮层分区；要比较相同 parcellation 的矩阵，
-必须显式传入同一 DWI 网格 atlas。`region_labels` 给出矩阵行列对应的原标签。
-T1 标签通过所给或估计的 RAS-mm 变换以最近邻采样到 DWI 网格。原脚本用
-6-DOF、normmi 的 FSL FLIRT；当前自动变换使用本包的同配置 TorchFLIRT。
-若要固定配准条件，请提供显式 `dwi_to_t1_world`。FSL scaled-mm `.mat` 不能
-直接传给这个参数。
+`ConnectomeResult.matrices` 的四张对称 `K×K` 矩阵以 `region_labels` 映射行列；未分配流线不计入，自连接保留：
 
-`UKBConnectome(...)` 返回 `ConnectomeResult`。`matrices` 包含下表四个键，
-所有矩阵为 `K×K`、对称，未分配的纤维不计入；自连接保留。
-
-| 键 | 含义 |
+| 键 | 结构与单位 |
 |---|---|
-| `count` | 脑区之间被分配的纤维条数，整数 |
-| `sift2_fbc` | 近似 SIFT2 权重之和 |
-| `mean_length` | 纤维长度的权重均值，mm |
-| `mean_fa` | 每条纤维沿程 FA 的权重均值，无量纲 |
+| `count` | int64，双端被分配的流线条数 |
+| `sift2_fbc` | float32，逐流线 SIFT2 权重之和 |
+| `mean_length` | float32，SIFT2 加权的边均值，mm |
+| `mean_fa` | float32，SIFT2 加权的边均值，无量纲 |
 
-其余字段为 `region_labels`、DWI 网格上的 `atlas`、`tissues`、`fa`、`wm_sh`，
-`tractogram`、`sift2_weights`、`dwi_affine`、`atlas_affine` 与 `dwi_to_t1_world`。
-`tractogram.endpoints` 为 RAS 世界坐标，单位 mm；`tissues` 中 0 为背景、
-1 为 GM、2 为 WM、3 为 CSF。DWI 和中间张量为 float32；NVIDIA CUDA 路径
-允许 TF32，不自动使用 float16 或 bfloat16。构造器保存设备和权重位置，
-每次调用处理一个被试；当前 SynthSeg 由每次调用创建。
+其余结果字段包括 `atlas`/`atlas_affine`、`five_tissue`/`five_tissue_affine`、`gmwmi`、`wm_sh`、`fa`、`brain_mask`、`tractogram`、`sift2_weights`、`dwi_affine` 与 `dwi_to_t1_world`。归一化 WM FOD 为 float32 `[X,Y,Z,45]`；5TT 是 cGM/sGM/WM/CSF/path 顺序的 float32 `[A,B,C,5]`，GMWMI 为同一 T1 网格 `[A,B,C]`，其 affine 映射到 DWI RAS 世界毫米。`tractogram.paths` 按流线顺序保存各 `[Pi,3]` 世界毫米坐标，`endpoints` 为 `[T,2,3]`，`lengths_mm` 和精确采样 `mean_fa` 为 `[T]`；`sift2_weights` 是同序 float64 `[T]`。
 
-## 命令行
+## 命令行与输出
 
 ```bash
 fnit connectome \
   --dwi derivatives/dwi/sub-01_desc-preproc_dwi.nii.gz \
   --bvals derivatives/dwi/sub-01_desc-preproc_dwi.bval \
   --bvecs derivatives/dwi/sub-01_desc-eddyRotated_dwi.bvec \
-  --t1 sub-01/anat/sub-01_T1w.nii.gz \
+  --t1 freesurfer/sub-01/mri/brain.mgz \
+  --t1-segmentation freesurfer/sub-01/mri/aparc+aseg.mgz \
   --atlas-dwi derivatives/atlas/sub-01_space-dwi_atlas.nii.gz \
-  --t1-segmentation derivatives/freesurfer/sub-01/mri/aparc+aseg.mgz \
-  --segmentation-source freesurfer \
   --output-dir derivatives/fnit_connectome/sub-01 \
   --device cuda:0 --n-seeds 10000 --seed 0
 ```
 
-已有 SynthSeg 标签可用 `--t1-segmentation` 传入；官方 FreeSurfer `aparc+aseg.mgz` 同时设置 `--segmentation-source freesurfer`。这两种情况均不加载 SynthSeg 权重；
-也可用 `--synthseg-weights` 指定本地官方 SynthSeg 2.0 权重。权重不随包发布，
-下载和校验见[权重说明](../WEIGHTS.md)。`--dwi-to-t1-world` 接收 4×4 的
-CSV 或空白分隔文本。`--device cpu` 可用于小规模功能检查；完整追踪建议 CUDA。
+输出是 `connectome_count.csv`、`connectome_sift2_fbc.csv`、`connectome_mean_length.csv`、`connectome_mean_fa.csv`，以及 `atlas_dwi.nii.gz`、`five_tissue_dwi_world.nii.gz`、`gmwmi_dwi_world.nii.gz`、`fa_dwi.nii.gz`、`brain_mask_dwi.nii.gz`、`region_labels.csv`、`dwi_to_t1_world.csv`。CSV 无表头；第 i 行对应 `region_labels.csv` 的第 i 项。5TT/GMWMI NIfTI 保留 T1 分割网格，affine 表示已映射到 DWI 世界坐标；文件名中的 `dwi_world` 不表示重采样到了 DWI 体素网格。默认拒绝覆盖现有输出，`--overwrite` 可重跑但始终拒绝覆盖输入文件。`--brain-mask`、`--shell-bvals`、`--response-mask`、`--fod-mask`、`--normalise-mask`、`--fa-map` 和 `--dwi-to-t1-world` 可固定对应的参考条件。
 
-输出目录包含 `connectome_count.csv`、`connectome_sift2_fbc.csv`、
-`connectome_mean_length.csv`、`connectome_mean_fa.csv`，以及
-`atlas_dwi.nii.gz`（保留 atlas affine）、`tissues_dwi.nii.gz`、`fa_dwi.nii.gz`、
-`region_labels.csv`、`dwi_to_t1_world.csv`。CSV 不含表头，矩阵第 `i` 行
-对应 `region_labels.csv` 第 `i` 个标签。默认拒绝覆盖任何已有输出；
-`--overwrite` 允许重跑，但始终拒绝覆盖输入文件。单个输出先写临时文件再
-替换，运行中断可能留下之前已写出的部分结果。
+## 阶段函数的张量约定
 
-[解剖算子逐函数输入与调用](ANATOMY_OPERATORS.md)及[官方 FreeSurfer、5TT/GMWMI、配准与 atlas 阶段同输入验证](../../validation/connectome/ds004666/ANATOMY_STAGE_20260927.md)给出原软件命令、逐值/容差、计时和示例图。5TT/GMWMI 工具函数位于 `fnit.connectome`；当前概率追踪仍使用三类离散组织图，未把 MRtrix ACT 算法完整移植。
+所有影像张量使用所选 CPU/CUDA 设备；FOD 和 FA 与 DWI 同网格，5TT/GMWMI 可保留独立 T1 网格。仿射表示 voxel center → RAS 世界毫米，梯度方向遵循 MRtrix 导出的梯度坐标约定。
 
-## 与原流程的对应及边界
+| 函数 | 主要输入 → 输出 |
+|---|---|
+| `mean_bzero` / `mrtrix_roundtrip_voxel_size` / `bet_mask` | 4D DWI 与 b 值 → float32 mean b0；原始体素尺寸 → MRtrix 往返尺寸；mean b0 与尺寸 → bool 脑掩膜。参数、输出与原版命令见 [BET 专页](BET_B0_OPERATORS.md) |
+| `dwi2mask_legacy` | float32 DWI `[X,Y,Z,N]`、对应 b 值 `[N]`、shell 均值 `[S]` → 同设备 bool `[X,Y,Z]`；原版默认响应掩膜，详见[实测报告](../../validation/connectome/default_dwi_mask_stage_20260927.md) |
+| `estimate_mrtrix_dhollander` | 原始幅值 float32 DWI `[X,Y,Z,N]`、MRtrix 梯度 `[N,4]`、shell `[S]`、bool 掩膜 `[X,Y,Z]` → shell 标签、float64 WM `[S,6]`、GM/CSF `[S,1]` 响应及组织掩膜/FA 诊断 |
+| `fit_mrtrix_msmt_csd` | 同一 DWI/梯度/响应与 bool FOD 掩膜 → float32 WM SH `[X,Y,Z,45]`、GM/CSF `[X,Y,Z]`；默认 WM lmax=8 |
+| `normalise_mrtrix_three_tissue` | 三组织原始 FOD、bool 掩膜、DWI affine → `MTNormaliseResult`：归一化三组织、bias field、接受掩膜及组织平衡系数 |
+| `freesurfer_five_tissue` / `gmwmi_from_five_tissue` | 官方 FreeSurfer 整数标签 `[A,B,C]` → float32 5TT `[A,B,C,5]` → GMWMI `[A,B,C]` |
+| `probabilistic_tractography` | 归一化 WM SH/affine、5TT/affine、GMWMI、播种次数 → `Tractogram` 的世界毫米流线、端点、长度和已接受种子 |
+| `estimate_sift2_weights` | 同序流线、WM SH/affine、5TT/affine、`step_size_mm` → float64 逐流线权重 `[T]` |
+| `sample_streamline_mean_precise` | 同序流线、float32 FA `[X,Y,Z]`、DWI affine → float32 沿轨迹均值 `[T]` |
+| `build_connectomes` | 端点 `[T,2,3]`、整数 atlas/affine、逐轨权重/长度/FA → 四张对称 `[K,K]` 矩阵 |
 
-原脚本使用 MRtrix 的 `dwi2response dhollander`、`dwi2fod msmt_csd`、
-`mtnormalise`、`tckgen` 的 iFOD2/ACT、`tcksift2`，以及
-[`tck2connectome -symmetric -assignment_radial_search 4`](https://github.com/sina-mansour/UKB-connectomics/blob/main/scripts/bash/map_structural_connectivity.sh)。
-本包的响应/FOD 估计、GM/WM 边界采样、方向采样与停止规则、SIFT2 风格权重
-是独立的 PyTorch 近似；没有 MRtrix 的 `mtnormalise`、FreeSurfer 5TT/ACT
-等价实现。也没有重建原仓库提供的整套皮层与 Tian atlas。它目前支持原脚本
-四种权重方式：count、SIFT2 FBC、mean length 和 mean FA，不覆盖原仓库
-其他扩展指标。固定输入和随机种子不能消除不同追踪算法导致的纤维差异。
+## 原 UKB 脚本、ds004666 适配参考与当前实现
 
-| 验证范围 | 相同输入的数值结果 | 运行时间 |
+| 阶段 | 原 UKB 脚本 | 公开 ds004666 固定输入 MRtrix 参考 | 当前 PyTorch |
+|---|---|---|---|
+| 输入/掩膜 | UKB `data_ud` + 旋转梯度；BET b0 掩膜；Dhollander 不传 `-mask` 时由 DWI 自建掩膜 | FSL TOPUP/EDDY 校正 AP-DWI；已有阶段对照使用固定 SynthSeg 脑掩膜 | 调用方提供校正 DWI、旋转梯度；LAS DWI 默认运行 PyTorch BET，也可固定外部 BET 掩膜；默认响应掩膜从 DWI 计算，FOD/归一化使用 BET 掩膜的六邻域两轮膨胀/侵蚀 |
+| 响应与 FOD | `dwi2response dhollander` → `dwi2fod msmt_csd` → `mtnormalise` | 同序；默认 WM `lmax=8`；固定参考掩膜 | `estimate_mrtrix_dhollander`、`fit_mrtrix_msmt_csd`、`normalise_mrtrix_three_tissue`；响应/FOD 的 float64 约束求解输出 float32 SH |
+| T1/5TT/配准 | FreeSurfer 7.1 + FIRST；`5ttgen freesurfer -first -nocrop -sgm_amyg_hipp`、`5tt2gmwmi`；6-DOF/normmi FLIRT | 官方 FreeSurfer 8.2 `recon-all` 外置；安装的 MRtrix 3.0.3 无 `-first`，用 `5ttgen freesurfer -nocrop -sgm_amyg_hipp`；校正 b0 重新 FLIRT | 读取官方 `aparc+aseg.mgz` 构建 5TT/GMWMI；可固定变换或运行 TorchFLIRT 6-DOF/normmi；不重做 recon-all/FIRST |
+| 流线/SIFT2 | `tckgen -seed_gmwmi -act -seeds N -select 0 -maxlength 250 -cutoff 0.1 -samples 3 -power 0.5`；`tcksift2 -act` | 同参数，10,000 次播种；固定 FOD/5TT/同 atlas 的阶段验证 | PyTorch GMWMI/双向 iFOD2 风格采样与 ACT 组织终止；MRtrix FMLS/处理掩膜/精确体素映射和 SIFT2 优化实现，随机方向接受律仍有差异 |
+| atlas/矩阵 | 皮层 parcellation + Tian 亚皮层图；`tck2connectome -symmetric -assignment_radial_search 4`；原脚本另采样 MD、MO、S0、NODDI 等 | 固定相同 20 区 SynthSeg 示例 atlas；只比较四张矩阵 | 必选同一 atlas；四张矩阵，长度与精确沿程 FA；不提供原脚本所有扩展指标 |
+
+[原追踪脚本](https://github.com/sina-mansour/UKB-connectomics/blob/main/scripts/bash/probabilistic_tractography_native_space.sh)、[原矩阵脚本](https://github.com/sina-mansour/UKB-connectomics/blob/main/scripts/bash/map_structural_connectivity.sh)、[校正参考命令](../../validation/connectome/ds004666/corrected_mrtrix_commands.public.txt)和[FreeSurfer 适配命令](../../validation/connectome/ds004666/corrected_mrtrix_fs5tt_act_adapted/commands.public.txt)给出实际调用。原 UKB 的 FIRST、Tian 分区及 1,000 万次播种都没有在公开样本上逐项复跑。
+
+以下是对应阶段的参考命令骨架；实际 ds004666 参数、线程数、路径和校正条件以[校正参考命令清单](../../validation/connectome/ds004666/corrected_mrtrix_commands.public.txt)与[FreeSurfer 适配清单](../../validation/connectome/ds004666/corrected_mrtrix_fs5tt_act_adapted/commands.public.txt)为准：
+
+```bash
+mrconvert corrected_dwi.nii.gz corrected.mif -fslgrad eddy_rotated.bvec dwi.bval
+dwi2response dhollander corrected.mif wm.txt gm.txt csf.txt
+maskfilter brain_mask.mif dilate fod_mask.mif -npass 2
+dwi2fod msmt_csd corrected.mif wm.txt wm_fod.mif gm.txt gm.mif csf.txt csf.mif -mask fod_mask.mif
+maskfilter brain_mask.mif erode norm_mask.mif -npass 2
+mtnormalise wm_fod.mif wm_norm.mif gm.mif gm_norm.mif csf.mif csf_norm.mif -mask norm_mask.mif
+5ttgen freesurfer aparc+aseg.mgz 5tt_t1.mif -nocrop -sgm_amyg_hipp
+5tt2gmwmi 5tt_t1.mif gmwmi_t1.mif
+flirt -in b0_brain.nii.gz -ref t1_brain.nii.gz -cost normmi -dof 6 -omat diff2struct_fsl.txt
+tckgen -algorithm iFOD2 -seed_gmwmi gmwmi_dwi.mif -act 5tt_dwi.mif -seeds 10000 -select 0 -maxlength 250 -cutoff 0.1 -samples 3 -power 0.5 wm_norm.mif tracks.tck
+tcksift2 tracks.tck wm_norm.mif weights.txt -act 5tt_dwi.mif
+tcksample -precise -stat_tck mean tracks.tck fa.mif mean_fa.txt
+tck2connectome -symmetric -assignment_radial_search 4 tracks.tck atlas_dwi.nii.gz count.csv
+```
+
+最后三张矩阵分别在 `tck2connectome` 中增加 `-tck_weights_in weights.txt`；mean length/FA 还分别用 `-scale_file lengths.txt` 或 `-scale_file mean_fa.txt` 及 `-stat_edge mean`。`lengths.txt` 来自 `tckstats -dump`。固定真实流线的精确赋值报告检查了这些规则。
+
+## 固定输入阶段证据
+
+各行使用同一 ds004666 图像或同一官方中间输出，但**不是同一次端到端运行**。PyTorch 已载入张量的核心时间与 MRtrix/FSL 独立进程墙钟（含启动和 I/O）边界不同；不能把行间时间相加为整链加速比。
+
+| 固定输入阶段 | 当前配对数值结果 | 时间与报告 |
 |---|---|---|
-| 固定 120,000 条合成端点、相同权重/长度/FA 的矩阵赋值 | MRtrix3 3.0.5 与本包：count/FBC 的 3×3 全元素一致；mean length 最大绝对误差 `1.2715657e-6` mm；mean FA 最大绝对误差 `4.9670538e-9` | RTX 3060，MRtrix 四条命令合计 `1.463 s`（启动及 I/O）；本包已驻留 GPU 张量计算 `0.858 s` |
-| 固定 ds004666 的 MRtrix ACT 真实 `tracks_10000.tck`、同一 atlas/权重/长度/FA，仅重复矩阵赋值 | 3,021 条轨迹、2,915 条双端分配，两臂 count 的 400/400 元素完全一致；FBC、mean length、mean FA 最大绝对误差分别 `8.99e-6`、`5.63e-6 mm`、`2.96e-8` | H100，10 次中位：MRtrix 四个子进程合计 `0.172 s`（启动与 I/O），本包已驻留 GPU 赋值 `0.0746 s`；边界不同，见[真实轨迹赋值报告](../../validation/connectome/ds004666_fsl_act_real_tracks_assignment_report.json) |
-| 公开 ds004666 的 TOPUP/EDDY 校正 AP-DWI、旋转后 bvec、配对 T1、同一 20 区 atlas；MRtrix FSL-5TT ACT 与本包各 10,000 次播种 | PyTorch 种子 0：count Pearson 0.662、支持 Dice 0.693、归一化 MAE 0.627；SIFT2 FBC Pearson 0.729、归一化 MAE 2.154。三种子、四矩阵、文件哈希与图见[校正数据报告](../../validation/connectome/ds004666/corrected_report.public.json)。**完整流程未达到一致。** | H100：本包三种子 28.12/27.50/29.58 s，复用已有 T1 分割；MRtrix 响应 17.01 s、MSMT-CSD 185.51 s、追踪 12.87 s、SIFT2 21.49 s，另复用 FSL 5TT。TOPUP/EDDY 294.64/681.93 s；计时边界与负载不同 |
-| 同一校正 DWI、旋转梯度和 atlas；FreeSurfer 8.2 5TT/GMWMI 适配参考，针对校正 b0 重新做 FLIRT | PyTorch 种子 0：count Pearson 0.904、支持 Dice 0.643、归一化 MAE 0.411；SIFT2 FBC Pearson 0.922、归一化 MAE 1.599。四矩阵、三种子及源文件哈希见[适配参考报告](../../validation/connectome/ds004666/fs5tt_adapted_report.public.json)。**仍未达到完整流程一致。** | FreeSurfer recon-all 1.645 h；复用其 5TT 及校正 DWI 的 CSD 后，重新 FLIRT 24.59 s、追踪 16.90 s、SIFT2 24.64 s；计时范围不同 |
-| 公开 ds004666 的原始 AP-DWI、配对 T1、相同 20 区 atlas；MRtrix FSL-5TT ACT 与本包各 10,000 次种子尝试 | PyTorch 种子 0：count Pearson `0.689`、支持 Dice `0.549`、归一化 MAE `0.595`；SIFT2 FBC Pearson `0.739`、归一化 MAE `2.035`。三种子、四张矩阵及误差见[真实数据报告](../../validation/connectome/ds004666/README.md)。**完整流程未达到一致。** | H100：本包种子 0/1/2 为 `25.41/25.24/27.38 s`，复用已有 T1 分割和单位变换；MRtrix Dhollander `22.88 s`、MSMT-CSD `182.98 s`、mtnormalise `3.25 s`、FSL 5TT `859.56 s`、追踪 `13.55 s`、SIFT2 `20.75 s`，计时边界不同 |
+| mean b0 与 `bet -R` | 公开 ds004666 及匹配 UKB 各 778,752 个 mean b0 值逐值一致，两个最终掩膜均 XOR 0；CPU/GPU 均核验 | 公开原版 MRtrix/FSL 0.65/9.46 s；FNIT H100 mean/BET 0.076/7.769 s、峰值 0.354 GiB；[参数、同输入报告与脑图](BET_B0_OPERATORS.md) |
+| 默认响应掩膜 `dwi2mask legacy` | 相同真实 UKB DWI 掩膜 XOR 0 / 778,752；公开 ds004666 另测 XOR 0 / 778,752 | 原版 13.45 / 17.50 s，FNIT CPU 完整进程 4.73 / 5.33 s；[同输入报告与脑图](../../validation/connectome/default_dwi_mask_stage_20260927.md) |
+| 原 UKB 默认 Dhollander 响应 | 11 个选择掩膜 XOR 0；WM/GM/CSF 响应系数最大误差 6.28e−11 / 2.55e−10 / 8.73e−11 | 原版完整命令 27.04 s；当前版 FNIT CPU 8 线程核心 3.197 s；[同输入报告](../../validation/connectome/original_ukb_dhollander_stage_20260927.md) |
+| 原 UKB 全脑 MSMT-CSD | 212,831 个掩膜体素；WM 9,577,395 个系数最大误差 2.98e−8，GM/CSF 最大误差 2.84e−14 / 9.31e−10；全部小于 1e−7 | H100 求解 269.457 s、峰值已分配 1.354 GiB；MRtrix CPU 完整命令 107.04 s；[同输入报告](../../validation/connectome/original_ukb_fod_stage_20260927.md) |
+| 原 UKB 掩膜形态学与 mtnormalise | 官方 BET 掩膜两次膨胀／侵蚀 XOR 均 0；WM/GM/CSF 归一化全图最大误差 1.19e−7 / 5.96e−8 / 2.98e−8 | H100 核心 0.650 s、0.461 GiB；MRtrix CPU 完整命令 2.11 s；[同输入报告](../../validation/connectome/original_ukb_mtnormalise_stage_20260927.md) |
+| 六邻域掩膜、官方 FreeSurfer 5TT/GMWMI | 两轮膨胀/侵蚀各 XOR 0；256³×5 5TT 和 GMWMI 逐值 0 不一致 | [maskfilter](../../validation/connectome/ds004666/maskfilter_real.public.json)、[解剖/配准](../../validation/connectome/ds004666/ANATOMY_STAGE_20260927.md)；FreeSurfer recon-all 在包外耗时 1.645 h |
+| Dhollander 响应（公开 ds004666） | 11/11 选择掩膜 XOR 0；WM/GM/CSF 最大误差 3.89e−9 / 9.06e−10 / 1.24e−10 | 当前版 CPU 核心 3.748 s；MRtrix 命令 17.01 s；[报告](../../validation/connectome/ds004666/response_fod_stage_20260927.md) |
+| 全脑原始 MSMT-CSD（公开 ds004666） | 208,522 体素、9,383,490 个 WM SH 值，MAE 1.98e−12，最大 1.21e−6；尚未 mtnormalise | 当前版 H100 核心 267.419 s、batch_size=4096、峰值 1.253 GiB；MRtrix CPU 命令 185.51 s；[报告](../../validation/connectome/ds004666/response_fod_full.public.json) |
+| 三组织 mtnormalise | 固定官方原始 FOD，WM SH 7,967,115 元素 MAE 4.79e−10、最大 5.96e−8 | H100 核心 0.568 s；MRtrix 命令 2.41 s；[报告与图](../../validation/connectome/ds004666/mtnormalise_stage_20260927.md) |
+| GMWMI 播种与 iFOD2/ACT 风格追踪 | 种子 8 mm 空间分箱 r=0.4660，官方独立重复 r=0.4664；10,000 次播种，MRtrix/PyTorch 分别接受 2,767/2,950 条，长度 KS=0.0577 | PyTorch 58.45 s，MRtrix 2.96 s；[报告与图](../../validation/connectome/ds004666/tracking_act_stage.md)。随机轨迹不能逐条比对 |
+| SIFT2 固定 FOD/5TT/官方 TCK | 处理掩膜 285/778,752 体素不同，非零支持 Dice=1；fixel 总数两臂均 243,822；全 fixel TDI r=0.9999999371；固定 2,758 条轨迹最终权重 r=0.999999903、MAE 3.44e−5 | [FMLS/处理掩膜图](../../validation/connectome/ds004666/sift2_fmls_stage_20260927.md)、[轨迹映射图](../../validation/connectome/ds004666/sift2_mapping_stage.md)、[优化器报告](../../validation/connectome/ds004666/sift2_optimizer_fmls_exact.public.json) |
+| 固定 2,758 条轨迹精确 FA 均值 | 原 MIF 几何逐轨 r=0.9999999949、MAE 5.58e−7，最大 0.0005499 | CPU 首轮 0.124 s、后续中位 0.102 s；MRtrix 命令 0.03 s；[报告与图](../../validation/connectome/ds004666/tcksample_precise_stage.md) |
+| 固定真实轨迹的四矩阵赋值 | 2,915 条双端分配一致；count 400/400 元素完全一致，FBC/长度/FA 最大误差 8.99e−6 / 5.63e−6 mm / 2.96e−8 | [赋值报告](../../validation/connectome/ds004666_fsl_act_real_tracks_assignment_report.json) |
 
-[合成矩阵赋值报告](../../validation/connectome/assignment_report.public.json)保留版本、
-固定端点、命令和误差。以下图为合成赋值阶段；完整流程的真实矩阵比较图与
-原始 CSV、哈希、计时在[ds004666 报告](../../validation/connectome/ds004666/README.md)。
+![校正输入的响应与 FOD 阶段切片](../../validation/connectome/ds004666/response_fod_example.png)
 
-![固定端点的 MRtrix 与 PyTorch 矩阵赋值比较](figures/assignment_comparison.png)
+![相同 FOD 的 SIFT2 处理掩膜与 fixel 数](../../validation/connectome/ds004666/sift2_fmls_proc_mask_comparison.png)
 
-![固定真实 MRtrix 轨迹的两种矩阵赋值及差值](figures/ds004666_real_assignment_matrices.png)
+![相同 FOD/5TT 的 ACT 追踪密度](../../validation/connectome/ds004666/tracking_act_density.png)
 
-![真实轨迹矩阵赋值的逐元素误差](figures/ds004666_real_assignment_metrics.png)
+![当前整链 seed 0 的四矩阵与差值](../../validation/connectome/ds004666/current_seed_0/connectome_comparison.png)
 
-表中原始 AP-DWI 一行是先前的算法诊断：公开的处理后 DWI 未配套
-eddy-rotated bvec，因而该行不能外推到已校正输入。校正 DWI 一行由
-TOPUP/EDDY 生成匹配的 DWI 与旋转后梯度。MRtrix 参考臂的 FSL 5TT 暂代原脚本的 FreeSurfer+FIRST 5TT，
-本包使用已有 SynthSeg 分割和单位变换；两者不是原流程严格等价复现。
-原 UKB 脚本的 `10,000,000` 次种子尚未实测可行性、耗时或显存；本接口要求显式设置 `n_seeds`。不同计时边界也不允许
-从这张表计算完整流程加速倍数。
+**当前整链 seed 0：** 10,000 次播种接受 2,827 条流线，H100 调用 266.83 s、峰值 Torch 分配 2.720 GiB。相同校正 DWI、官方 T1 分割、atlas、掩膜及变换下，count/FBC 上三角 Pearson r=0.98864/0.98527，支持 Dice=0.73585；mean length/FA 全边 r=0.57720/0.62107。完整指标、CSV 和差异诊断见[当前验证](../../validation/connectome/ds004666/README.md)。三次官方与三次 FNIT 的固定随机种子比较已完成：count/FBC 误差与官方波动部分重叠，但共同边的 FA 跨软件 9/9 对均超出官方重复的 3/3 最大误差。
 
-校正输入的 FSL TOPUP/EDDY 使用同一份公开 AP/PA DWI；由于元数据缺少实际总读出时间，采用假定 0.05 秒，并在[校正输入记录](../../validation/connectome/ds004666/corrected_input_provenance.public.json)中保留命令、SHA-256 和 QC。MRtrix 导出与本包读取的 100 个非 b0 方向有符号点积最小 0.999999975。以下是校正输入的定量图与示例影像。
+## 复跑阶段与整链比较
 
-![校正输入的四张矩阵及差值](figures/corrected_connectome_comparison.png)
+[公开 ds004666 清单](../../validation/connectome/ds004666/download_manifest.tsv)记录 OpenNeuro T1、AP/PA DWI 地址、大小和 SHA-256。完整中间数据体积较大，NIfTI、TCK、官方 FreeSurfer 输出及原始 SIFT2 调试文件留在验证机器；Git 保留脚本、矩阵 CSV、报告和图像。按各阶段报告准备配对图像后运行对应脚本的 `--help`：
 
-![校正输入的相关、误差与支持](figures/corrected_connectome_metrics.png)
+| 阶段 | 脚本入口 |
+|---|---|
+| 响应、FOD、掩膜 | [`benchmark_connectome_response_fod_dhollander.py`](../../tools/benchmark_connectome_response_fod_dhollander.py)、[`benchmark_connectome_response_fod.py`](../../tools/benchmark_connectome_response_fod.py)、[`benchmark_connectome_maskfilter.py`](../../tools/benchmark_connectome_maskfilter.py) |
+| mtnormalise、解剖、追踪 | [`benchmark_connectome_mtnormalise.py`](../../tools/benchmark_connectome_mtnormalise.py)、[`benchmark_connectome_anatomy.py`](../../tools/benchmark_connectome_anatomy.py)、[`benchmark_connectome_tracking_act.py`](../../tools/benchmark_connectome_tracking_act.py) |
+| SIFT2、FA、矩阵 | [`benchmark_sift2_processing_mask.py`](../../tools/benchmark_sift2_processing_mask.py)、[`benchmark_sift2_fixels.py`](../../tools/benchmark_sift2_fixels.py)、[`benchmark_connectome_sift2_mapping.py`](../../tools/benchmark_connectome_sift2_mapping.py)、[`benchmark_connectome_sift2_optimizer.py`](../../tools/benchmark_connectome_sift2_optimizer.py)、[`benchmark_connectome_tcksample_precise.py`](../../tools/benchmark_connectome_tcksample_precise.py)、[`compare_connectome_matrices.py`](../../tools/compare_connectome_matrices.py) |
 
-![同次 T1、原始与校正 b0、校正 b0 的 atlas 覆盖](figures/ds004666_t1_raw_vs_topup_eddy_atlas.png)
+当前整链脚本 [`benchmark_connectome_end_to_end.py`](../../tools/benchmark_connectome_end_to_end.py)要求固定同一校正 DWI、旋转梯度、官方 aparc+aseg、T1 brain、atlas、脑掩膜、DWI→T1 RAS-mm 变换与参考矩阵目录；可再传响应/FOD/归一化掩膜、FA 和 shell 标签。参考目录接受原始 MRtrix 的 `count.csv` 等文件名，也接受公开归档的 `connectome_count.csv` 等文件名。脚本写出 `candidate_*.csv`、轨迹 TCK、逐轨权重/长度/FA 和带输入 SHA-256、边指标、时间、Torch 峰值显存的 `report.json`。三个 FNIT 种子和三个官方固定 RNG 种子的四矩阵、输入哈希与官方自身随机波动已核验；见[3×3 同口径报告](../../validation/connectome/ds004666/official_mrtrix_rng_variability/official_fnit_3x3.public.json)。
 
-相同校正 DWI 上的 FreeSurfer 5TT 适配参考重新将 T1 对准校正 b0。安装的 MRtrix 缺少原脚本 5ttgen 的 -first 选项，故仍有方法差异；其完整数字和命令见[适配参考报告](../../validation/connectome/ds004666/fs5tt_adapted_report.public.json)。
+```bash
+python tools/benchmark_connectome_end_to_end.py --help
+python tools/benchmark_connectome_end_to_end.py \
+  --dwi corrected_dwi.nii.gz --bvals corrected_dwi.bval \
+  --bvecs eddy_rotated.bvec --t1-brain t1_brain.nii.gz \
+  --aparc-aseg aparc+aseg.mgz --atlas-dwi atlas_20_dwi.nii.gz \
+  --brain-mask brain_mask_dwi.nii.gz --transform dwi_to_t1_world.txt \
+  --reference-dir reference_matrices --output-dir candidate_seed0 \
+  --n-seeds 10000 --seed 0 --device cuda:0
+```
 
-![校正 DWI 的 FreeSurfer ACT 适配参考与 PyTorch 四矩阵](figures/corrected_fs5tt_adapted_connectome_comparison.png)
-
-![校正 DWI 的 FreeSurfer ACT 适配参考指标](figures/corrected_fs5tt_adapted_connectome_metrics.png)
-
-下两图保留原始 AP-DWI 算法诊断；原始数据不满足本接口的已校正 DWI 输入约定。
-
-![真实 ds004666 同输入四张矩阵和差值](figures/connectome_comparison.png)
-
-![真实 ds004666 矩阵相关与误差](figures/connectome_metrics.png)
-
-## 公开 BIDS 示例影像
-
-[OpenNeuro ds004666](https://github.com/OpenNeuroDatasets/ds004666) 的
-`sub-01/ses-2mm` 同时提供 T1w、AP/PA DWI 和公开的处理后 DWI。
-下图在同一个 DWI 网格上展示 T1w、处理后 b0 均值，以及脑掩膜和本例的
-20 区 SynthSeg GM atlas。这张旧图只用于检查几何与分区覆盖，源图来自公开处理后 DWI；
-校正输入的示例影像和定量图见上文。图像来源文件的 SHA-256 和切面参数见
-[示例图记录](../../validation/connectome/ds004666_example_image.json)。
-
-![ds004666 同次扫描 T1、DWI b0、脑掩膜及脑区覆盖](figures/ds004666_t1_b0_mask_atlas.png)
-
-默认自动 SynthSeg+TorchFLIRT 的 100 次种子接口检查及其分割几何指标见[公开记录](../../validation/connectome/ds004666/auto_interface_smoke.public.json)。它不参与正式同 atlas 的 MRtrix 数值对照。
+四张矩阵的比较固定脑区顺序，按严格上三角同时报告全边与共同非零边指标；长度/FA 的共同边指标用于区分数值偏差与连接支持差异。固定真实轨迹的赋值一致性不能代替独立追踪后的矩阵一致性。

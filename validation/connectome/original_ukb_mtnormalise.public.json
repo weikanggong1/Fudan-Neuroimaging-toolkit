@@ -1,0 +1,83 @@
+{
+  "stage": "原 UKB BET 脑掩膜两次形态学与三组织 mtnormalise 同输入对照",
+  "dataset": "一名真实 UKB 配对受试者，标识与原始影像不公开",
+  "reference_version": "MRtrix eeab681d3e0cb004cf1d1d31579d3892197ef5b6",
+  "grid": [
+    104,
+    104,
+    72
+  ],
+  "maskfilter": {
+    "input_positive_voxels": 182616,
+    "dilate_2": {
+      "reference_positive": 212831,
+      "candidate_positive": 212831,
+      "xor": 0,
+      "dice": 1.0,
+      "mrtrix_command_seconds": 0.05,
+      "fnit_cpu_core_seconds": 0.03950362652540207
+    },
+    "erode_2": {
+      "reference_positive": 154441,
+      "candidate_positive": 154441,
+      "xor": 0,
+      "dice": 1.0,
+      "mrtrix_command_seconds": 0.06,
+      "fnit_cpu_core_seconds": 0.09263967722654343
+    }
+  },
+  "mtnormalise": {
+    "fixed_inputs": "同一原始 WM/GM/CSF FOD、两次侵蚀 BET 掩膜和 DWI affine",
+    "fitting_mask_voxels": 154441,
+    "full_volume_metrics": {
+      "wm": {
+        "values": 35043840,
+        "mae": 8.629818634535698e-11,
+        "max_abs": 1.1920928955078125e-07,
+        "pearson": 0.9999999999999959
+      },
+      "gm": {
+        "values": 778752,
+        "mae": 2.791669854159694e-10,
+        "max_abs": 5.960464477539063e-08,
+        "pearson": 0.9999999999999979
+      },
+      "csf": {
+        "values": 778752,
+        "mae": 1.1774608365865445e-10,
+        "max_abs": 2.9802322387695312e-08,
+        "pearson": 0.9999999999999636
+      }
+    },
+    "within_mask_metrics": {
+      "wm": {
+        "values": 6949845,
+        "mae": 4.098138623384993e-10,
+        "max_abs": 1.1920928955078125e-07
+      },
+      "gm": {
+        "values": 154441,
+        "mae": 1.3539253260583797e-09,
+        "max_abs": 5.960464477539063e-08
+      },
+      "csf": {
+        "values": 154441,
+        "mae": 5.252212070104281e-10,
+        "max_abs": 2.9802322387695312e-08
+      }
+    },
+    "mrtrix_cpu_command_seconds": 2.11,
+    "mrtrix_peak_rss_kib": 336364,
+    "fnit_gpu_loaded_seconds": 0.6498648109845817,
+    "fnit_gpu_full_process_seconds": 11.09,
+    "fnit_gpu_peak_allocated_gib": 0.46056032180786133,
+    "fnit_gpu_process_max_rss_kib": 2832476,
+    "fnit_cpu_loaded_seconds": 2.4969553723931313,
+    "diagnostics_not_independently_validated": [
+      "bias field",
+      "accepted outlier mask",
+      "tissue balance factors"
+    ]
+  },
+  "private_records": "输入文件哈希、私有路径和原始脑图仅保留在授权服务器"
+}

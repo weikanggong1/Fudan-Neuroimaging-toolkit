@@ -12,7 +12,7 @@ from fnit.cli import main
 
 def _command(tmp_path):
     inputs = {}
-    for name in ("dwi", "bvals", "bvecs", "t1"):
+    for name in ("dwi", "bvals", "bvecs", "t1", "t1_segmentation", "atlas_dwi", "brain_mask"):
         path = tmp_path / name
         path.write_bytes(b"input")
         inputs[name] = path
@@ -20,7 +20,12 @@ def _command(tmp_path):
     argv = [
         "connectome", "--dwi", str(inputs["dwi"]),
         "--bvals", str(inputs["bvals"]), "--bvecs", str(inputs["bvecs"]),
-        "--t1", str(inputs["t1"]), "--output-dir", str(output),
+        "--t1", str(inputs["t1"]),
+        "--t1-segmentation", str(inputs["t1_segmentation"]),
+        "--atlas-dwi", str(inputs["atlas_dwi"]),
+        "--brain-mask", str(inputs["brain_mask"]),
+        "--shell-bvals", "5", "999", "1997",
+        "--output-dir", str(output),
         "--device", "cpu", "--n-seeds", "12", "--seed", "7",
     ]
     return argv, output
@@ -35,7 +40,8 @@ def test_connectome_cli_requires_explicit_seed_count(tmp_path):
     assert error.value.code == 2
 
 
-def test_connectome_cli_writes_named_outputs(tmp_path, monkeypatch, capsys):
+@pytest.mark.parametrize("include_mask", [True, False])
+def test_connectome_cli_writes_named_outputs(tmp_path, monkeypatch, capsys, include_mask):
     from fnit import connectome
 
     calls = []
@@ -53,8 +59,11 @@ def test_connectome_cli_writes_named_outputs(tmp_path, monkeypatch, capsys):
                     "mean_fa": torch.ones(2, 2) * 0.5,
                 },
                 atlas=torch.ones(2, 2, 2, dtype=torch.int32),
-                tissues=torch.ones(2, 2, 2, dtype=torch.int16),
+                five_tissue=torch.ones(2, 2, 2, 5),
+                gmwmi=torch.ones(2, 2, 2),
+                five_tissue_affine=torch.eye(4),
                 fa=torch.ones(2, 2, 2),
+                brain_mask=torch.ones(2, 2, 2, dtype=torch.bool),
                 region_labels=(10, 20),
                 dwi_affine=torch.eye(4),
                 atlas_affine=torch.tensor([[1., 0., 0., -1.],
@@ -66,18 +75,26 @@ def test_connectome_cli_writes_named_outputs(tmp_path, monkeypatch, capsys):
             )
     monkeypatch.setattr(connectome, "UKBConnectome", FakeConnectome)
     argv, output = _command(tmp_path)
+    if not include_mask:
+        position = argv.index("--brain-mask")
+        del argv[position:position + 2]
     main(argv)
+    assert calls[1][1]["brain_mask"] == (tmp_path / "brain_mask" if include_mask else None)
     assert "seed_attempts=12 accepted_streamlines=2" in capsys.readouterr().out
-    assert calls[0] == {"device": "cpu", "synthseg_weights": None}
+    assert calls[0] == {"device": "cpu"}
     assert calls[1][1]["n_seeds"] == 12
     assert calls[1][1]["seed"] == 7
     assert np.array_equal(np.loadtxt(output / "connectome_count.csv", delimiter=","),
                           [[2, 1], [1, 3]])
     for name in ("sift2_fbc", "mean_length", "mean_fa"):
         assert np.loadtxt(output / f"connectome_{name}.csv", delimiter=",").shape == (2, 2)
-    for name in ("atlas", "tissues", "fa"):
-        image = nib.load(output / f"{name}_dwi.nii.gz")
-        assert image.shape == (2, 2, 2)
+    for name, file in (("atlas", "atlas_dwi.nii.gz"),
+                       ("five_tissue", "five_tissue_dwi_world.nii.gz"),
+                       ("gmwmi", "gmwmi_dwi_world.nii.gz"),
+                       ("fa", "fa_dwi.nii.gz"),
+                       ("brain_mask", "brain_mask_dwi.nii.gz")):
+        image = nib.load(output / file)
+        assert image.shape == ((2, 2, 2, 5) if name == "five_tissue" else (2, 2, 2))
         expected_affine = np.eye(4)
         if name == "atlas":
             expected_affine[0, 3] = -1

@@ -17,10 +17,10 @@
 | dMRI | PyTorch TOPUP | UKB AP/PA b0 选择、Hz 场估计、畸变校正和 FSL 输出 | [TOPUP 文档](docs/topup/README.md) |
 | dMRI | PyTorch EDDY | 逐 volume 运动、二次 EC、TOPUP 场、Jacobian 和离群切片校正 | [EDDY 文档](docs/eddy/README.md) |
 | dMRI | PyTorch DTIFIT | FSL 默认 OLS tensor、FA、MD、eigenvalue 和 eigenvector | [DTIFIT 文档](docs/dtifit/README.md) |
-| dMRI | PyTorch AMICO-NODDI | AMICO 2.0.3 数值等价的 NDI、ODI、FWF、方向和拟合误差 | [AMICO-NODDI 文档](docs/amico_noddi/README.md) |
+| dMRI | PyTorch AMICO-NODDI | 无 DIPY 依赖；与替换前五图逐值一致，冻结官方 AMICO 阈值未通过 | [AMICO-NODDI 文档](docs/amico_noddi/README.md) |
 | dMRI | PyTorch BEDPOSTX | 估计体素内纤维方向及不确定性，供概率追踪使用 | [BEDPOSTX 文档](docs/bedpostx/README.md) |
 | dMRI | PyTorch ProbtrackX | 种子到体素的概率追踪与脑区间连接矩阵 | [ProbtrackX 文档](docs/probtrackx/README.md) |
-| dMRI | UKBConnectome | 已校正 DWI 和 T1w 到四张结构连接矩阵；追踪和 SIFT2 为近似 | [connectome 文档](docs/connectome/README.md) |
+| dMRI | UKBConnectome | 已校正 DWI、官方 FreeSurfer 分割、可自动生成的 BET 掩膜和固定 atlas 到四张结构连接矩阵；各阶段验证与整链边界见文档 | [connectome 文档](docs/connectome/README.md) |
 | sMRI | Python recon-all（近似版） | T1w 到核心分割、双侧皮层表面、顶点指标和脑区统计 | [recon-all 文档](docs/recon_all/README.md) |
 | fMRI | MS-HBM 17 网络 | fsLR32k 静息态时序到个体网络划分，纯 CPU | [MS-HBM 文档](src/fnit/mshbm/README.md) |
 
@@ -33,7 +33,7 @@ Python recon-all 的神经网络与部分体素、表面计算使用 PyTorch/CUD
 FastVBM 的两个分支共用仿射配准、FSL 坐标转换、GPU 重采样、仅非线性
 Jacobian 和调制步骤；差别只在非线性形变由 SynthMorph 或 TorchFNIRT 估计。
 
-FLIRT、FNIRT 和 FastVBM 的 0.9 十例验证状态见 [FastVBM 验证页](validation/fast_vbm/README.md)。TOPUP、EDDY、DTIFIT 和 AMICO-NODDI 的真实 UKB 格式 dMRI 对照见上表各子页；输入、输出、原命令对应关系、计时和数值边界均在各自页面。BEDPOSTX 和 ProbtrackX 的验证边界见其功能页。connectome 的固定端点矩阵赋值、官方 FreeSurfer 输入的 5TT/GMWMI、配准、atlas 阶段，以及公开 ds004666 的原始和 TOPUP/EDDY 校正 DWI 同输入 benchmark 均已记录；完整追踪和 SIFT2 结果尚未达到原软件输出一致性，见 [connectome 文档](docs/connectome/README.md)。
+FLIRT、FNIRT 和 FastVBM 的 0.9 十例验证状态见 [FastVBM 验证页](validation/fast_vbm/README.md)。TOPUP、EDDY、DTIFIT 和 AMICO-NODDI 的真实 UKB 格式 dMRI 对照见上表各子页；输入、输出、原命令对应关系、计时和数值边界均在各自页面。BEDPOSTX 和 ProbtrackX 的验证边界见其功能页。connectome 的 Dhollander、MSMT-CSD、mtnormalise、5TT/GMWMI、ACT 追踪、SIFT2 子阶段、FA 采样和矩阵赋值已有公开 ds004666 配对验证；这些阶段指标不等于当前整链连接矩阵一致性，见 [connectome 文档](docs/connectome/README.md)。
 
 FLIRT、FNIRT、applywarp、TOPUP、EDDY、DTIFIT、BEDPOSTX 和 ProbtrackX 的 FSL 派生实现及随包提供的上游源码受 [FSL Software Licence 6.0](licenses/FSL-6.0.txt) 的非商业使用条款约束。各功能的移植范围和验证边界见对应子页面。
 

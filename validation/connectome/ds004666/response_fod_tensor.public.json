@@ -1,0 +1,41 @@
+{
+  "dataset": "OpenNeuro ds004666 sub-01 ses-2mm, corrected DWI",
+  "scope": "default dwi2tensor -iter 2 and tensor2metric FA/principal direction within official Dhollander safe mask",
+  "reference_command": "dwi2tensor dwi.mif - -mask safe_mask.mif |\n  tensor2metric - -fa safe_fa.mif -vector safe_vecs.mif\n  -modulate none -mask safe_mask.mif",
+  "device": "cpu",
+  "torch": "2.5.1",
+  "tf32_enabled": false,
+  "shape": [
+    104,
+    104,
+    72,
+    105
+  ],
+  "masked_voxels": 162569,
+  "seconds": 5.3150414801202714,
+  "peak_torch_allocated_gib": null,
+  "input_sha256": {
+    "dwi": "9ee26b8329696d462754a441d14faa10a0f0fb774fd860feacfaf8443d83d88c",
+    "grad": "48bdb84fcd69d979a447fa578f98cb3be389d7dc6bf17f49499e59e4d6291b0d",
+    "safe_mask": "cca47c7c7583e67de1b92d48451fa54bf1077f2867c03bc5593b71d0ab1791d8",
+    "ref_fa": "3c0972ab130e501f107decc05bc30ff3778d21f4cc29af5fff4b78a4e537fe29",
+    "ref_vec": "8bf409a976d1d9d5f5fc2dc6924a2bf0998837e73d8d14bdabfc7c00637cfab5",
+    "ref_crude_wm": "5660a61e3879c955017308baf15a5e56c62b01a8c3ef34d6bc08ce52728d1103"
+  },
+  "fa": {
+    "mae": 1.9420575435331904e-11,
+    "max_abs": 5.960464477539063e-08,
+    "fraction_abs_le_1e-5": 1.0,
+    "pearson": 0.9999999999999998
+  },
+  "principal_direction": {
+    "mean_abs_cosine": 1.0,
+    "min_abs_cosine": 0.9999999999995328,
+    "fraction_abs_cosine_ge_0_999": 1.0
+  },
+  "crude_wm_fa_gt_0_2": {
+    "candidate_voxels": 96302,
+    "reference_voxels": 96302,
+    "xor_voxels": 0
+  }
+}

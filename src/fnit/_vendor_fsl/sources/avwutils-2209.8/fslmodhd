@@ -1,0 +1,66 @@
+#!/bin/sh
+
+#   basic image handling scripts
+#
+#   Mark Jenkinson
+#   FMRIB Image Analysis Group
+#
+#   Copyright (C) 1999-2012 University of Oxford
+#
+#   SHCOPYRIGHT
+
+
+Usage() {
+    echo ""
+    echo "Usage: `basename $0` <image> <keyword> <value>"
+    echo ""
+    exit 1
+}
+
+if [ $# -lt 3 ] ; then 
+    Usage
+    exit 0;
+fi
+
+if [ _$FSLDIR = _ ] ; then
+    FSLDIR=/usr/local/fsl
+    export FSLDIR
+fi
+
+imfile=$1
+keyword=$2
+value=$3
+
+if [ $keyword = dim1 ] ; then keyword=nx; fi
+if [ $keyword = dim2 ] ; then keyword=ny; fi
+if [ $keyword = dim3 ] ; then keyword=nz; fi
+if [ $keyword = dim4 ] ; then keyword=nt; fi
+if [ $keyword = pixdim1 ] ; then keyword=dx; fi
+if [ $keyword = pixdim2 ] ; then keyword=dy; fi
+if [ $keyword = pixdim3 ] ; then keyword=dz; fi
+if [ $keyword = pixdim4 ] ; then keyword=dt; fi
+
+tmpbase=`${FSLDIR}/bin/tmpnam`;
+
+# generate the xml-style header with fslhd
+${FSLDIR}/bin/fslhd -x $imfile > ${tmpbase}
+# exit if the above didn't generate a decent file
+if [ `cat ${tmpbase} | wc -l` -le 1 ] ; then
+  exit 0;
+fi
+
+# modify header, reprocess and pass onto fslcreatehd
+if [ `cat ${tmpbase} | grep "^[ 	]*$keyword[ 	]*=[ 	]*" | wc -l` = 0 ] ; then
+    # this keyword is not in the fslhd output so add it
+    cat ${tmpbase} | grep -v '/>' > ${tmpbase}2
+    echo "  $keyword = \'$value\'" >> ${tmpbase}2
+    echo "/>" >> ${tmpbase}2
+else
+    # the keyword is present so change its value
+    cat ${tmpbase} | sed "s/^[ 	]*$keyword[ 	]*=.*/  $keyword = \'$value\'/" > ${tmpbase}2
+fi
+
+${FSLDIR}/bin/fslcreatehd ${tmpbase}2 $imfile
+
+/bin/rm ${tmpbase} ${tmpbase}2
+

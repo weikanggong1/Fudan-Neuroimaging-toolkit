@@ -1,0 +1,19 @@
+{
+  "dataset": "OpenNeuro ds004666 sub-01 ses-2mm",
+  "scope": "Fixed 2758 original MRtrix TCK + same 20-label DWI atlas, count matrix assignment only",
+  "coordinates": "nibabel TCK RAS world mm endpoints; atlas NIfTI RAS affine; direct identity world transform",
+  "original_command": "tck2connectome tracks_10000.tck synthseg_gm_atlas_dwi.nii.gz count.csv -symmetric -assignment_radial_search 4",
+  "pytorch_function": "fnit.connectome.assignment.build_connectomes(endpoints, atlas, atlas_affine)['count']",
+  "streamlines": 2758,
+  "assigned_mrtrix": 2740,
+  "assigned_pytorch": 2740,
+  "unassigned_each": 18,
+  "count_matrix_shape": [20, 20],
+  "count_exact_elements": 400,
+  "count_max_abs_error": 0.0,
+  "input_sha256": {
+    "tracks_10000.tck": "0761105a4e520de4709e6da9641bfe53e53060cfc21050eb2bab9caa2c7a1f33",
+    "synthseg_gm_atlas_dwi.nii.gz": "eae3b729cfc0ad0fe5cfa0649381a5b656e2d3c1a66ce678afb2800407f706b0"
+  },
+  "assignment_source_sha256": "de0cb9cf78569d7953218696756f232dc3fb397d26c03b60985c0e0d59af6529"
+}

@@ -1,0 +1,243 @@
+{
+  "dataset": "OpenNeuro ds004666 sub-01 ses-2mm corrected DWI",
+  "scope": "whole default Dhollander response estimation; identical DWI, gradient, brain mask, shell centres",
+  "reference_command": "dwi2response dhollander corrected.mif wm.txt gm.txt csf.txt\n-mask synthseg_brain_mask_dwi.nii.gz -voxels voxels.mif -nocleanup.",
+  "shape": [
+    104,
+    104,
+    72,
+    105
+  ],
+  "shell_bvals": [
+    5.0,
+    999.0,
+    1997.0
+  ],
+  "device": "cpu",
+  "torch": "2.5.1",
+  "tf32_enabled": false,
+  "seconds": 3.7484109327197075,
+  "peak_torch_allocated_gib": null,
+  "responses": {
+    "wm": {
+      "values": 18,
+      "mae": 9.893594092128903e-10,
+      "max_abs": 3.891777566877863e-09,
+      "pearson": 1.0,
+      "candidate": [
+        [
+          9165.936797110473,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4945.116623060173,
+          -1945.4329847698905,
+          404.5255534602416,
+          -58.04492646090258,
+          7.974176044863523,
+          -6.298569751898618
+        ],
+        [
+          3412.4303290267817,
+          -1945.0458478434991,
+          699.1535640289414,
+          -175.6692917331607,
+          34.45456834909972,
+          -7.552000485180025
+        ]
+      ],
+      "reference": [
+        [
+          9165.93679711054,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          4945.11662306021,
+          -1945.43298476983,
+          404.525553462989,
+          -58.0449264645557,
+          7.9741760435649,
+          -6.29856975049136
+        ],
+        [
+          3412.43032902694,
+          -1945.04584784278,
+          699.153564027679,
+          -175.669291734439,
+          34.4545683529915,
+          -7.55200048395307
+        ]
+      ]
+    },
+    "gm": {
+      "values": 3,
+      "mae": 5.156834959052503e-10,
+      "max_abs": 9.058567229658365e-10,
+      "pearson": 1.0,
+      "candidate": [
+        [
+          18097.139482836763
+        ],
+        [
+          8349.671367390105
+        ],
+        [
+          4592.669545161127
+        ]
+      ],
+      "reference": [
+        [
+          18097.1394828369
+        ],
+        [
+          8349.67136739101
+        ],
+        [
+          4592.66954516163
+        ]
+      ]
+    },
+    "csf": {
+      "values": 3,
+      "mae": 4.8790601188860215e-11,
+      "max_abs": 1.2369127944111824e-10,
+      "pearson": 1.0,
+      "candidate": [
+        [
+          26239.383527775375
+        ],
+        [
+          979.855228558615
+        ],
+        [
+          389.69106545032474
+        ]
+      ],
+      "reference": [
+        [
+          26239.3835277755
+        ],
+        [
+          979.855228558599
+        ],
+        [
+          389.691065450318
+        ]
+      ]
+    }
+  },
+  "masks": {
+    "safe_mask": {
+      "candidate_voxels": 162569,
+      "reference_voxels": 162569,
+      "xor_voxels": 0
+    },
+    "crude_wm": {
+      "candidate_voxels": 96302,
+      "reference_voxels": 96302,
+      "xor_voxels": 0
+    },
+    "crude_gm": {
+      "candidate_voxels": 57397,
+      "reference_voxels": 57397,
+      "xor_voxels": 0
+    },
+    "crude_csf": {
+      "candidate_voxels": 8870,
+      "reference_voxels": 8870,
+      "xor_voxels": 0
+    },
+    "refined_wm": {
+      "candidate_voxels": 88491,
+      "reference_voxels": 88491,
+      "xor_voxels": 0
+    },
+    "refined_gm": {
+      "candidate_voxels": 40585,
+      "reference_voxels": 40585,
+      "xor_voxels": 0
+    },
+    "refined_csf": {
+      "candidate_voxels": 4097,
+      "reference_voxels": 4097,
+      "xor_voxels": 0
+    },
+    "voxels_gm": {
+      "candidate_voxels": 812,
+      "reference_voxels": 812,
+      "xor_voxels": 0
+    },
+    "voxels_csf": {
+      "candidate_voxels": 410,
+      "reference_voxels": 410,
+      "xor_voxels": 0
+    },
+    "refined_sfwm": {
+      "candidate_voxels": 884,
+      "reference_voxels": 884,
+      "xor_voxels": 0
+    },
+    "voxels_sfwm": {
+      "candidate_voxels": 442,
+      "reference_voxels": 442,
+      "xor_voxels": 0
+    }
+  },
+  "maps": {
+    "safe_sdm": {
+      "values": 162569,
+      "mae": 5.6691214733091984e-08,
+      "max_abs": 7.152557373046875e-07,
+      "pearson": 0.999999999999979
+    },
+    "fa": {
+      "values": 162569,
+      "mae": 1.9420575435331904e-11,
+      "max_abs": 5.960464477539063e-08,
+      "pearson": 0.9999999999999998
+    },
+    "metric_sfwm2": {
+      "values": 88491,
+      "mae": 4.264657741048773e-08,
+      "max_abs": 2.384185791015625e-07,
+      "pearson": 0.9999999999999254
+    },
+    "metric_sfwm6": {
+      "values": 884,
+      "mae": 1.1354549977574413e-07,
+      "max_abs": 4.76837158203125e-07,
+      "pearson": 0.9999999999992587
+    }
+  },
+  "input_sha256": {
+    "dwi": "9ee26b8329696d462754a441d14faa10a0f0fb774fd860feacfaf8443d83d88c",
+    "grad": "48bdb84fcd69d979a447fa578f98cb3be389d7dc6bf17f49499e59e4d6291b0d",
+    "mask": "5024bd734f7a7f276575a0998c80c3d6e34b3359a458766c6e57cf86795afeb2",
+    "wm_response": "a6b4d6965984a8f4533c37c57eae4ba81add17a6a5d1c5ab85a9ec031f1de6f9",
+    "gm_response": "fcc515c90908ac424a6bd137f16baeb977279cb86bb4def1cf467ee64ed250a9",
+    "csf_response": "cfbd7cfabf92a3e46b4392c3d21872ac1713ed7d3bbe37cfefd54fa6f48aa4f3",
+    "ref_safe_mask": "cca47c7c7583e67de1b92d48451fa54bf1077f2867c03bc5593b71d0ab1791d8",
+    "ref_crude_wm": "5660a61e3879c955017308baf15a5e56c62b01a8c3ef34d6bc08ce52728d1103",
+    "ref_crude_gm": "0451d35995955190443d190c31c13ea3ccd35e40752d951ad406a449b0a8e239",
+    "ref_crude_csf": "8c6f6ede612a90a23eb514ef8f89db2e006d47348875bd80b39bdcdd6a3f9207",
+    "ref_refined_wm": "34fe1bf8106ff39d122688f3c121db7d91fb81ed952ed6b21faa9599fca03196",
+    "ref_refined_gm": "6cc77d913e360d3a2c70c408ef949a0492ac039912d21b3e80f75c17e56740b2",
+    "ref_refined_csf": "93aa74fda48fa25c9ffea6d5c06f5663d5afa74149ace42f8c949d282e45e5d2",
+    "ref_voxels_gm": "a2ed9cdb7c18999dce1a460c7b0ad876efc7282dd5c996b3a26fdedccefbd3ef",
+    "ref_voxels_csf": "039afaf68f30d51f3abfb5b90407cfaab758ce07ab30fa2e2ce48e4f6d24a49c",
+    "ref_refined_sfwm": "b06cbffa4e32df122be59e13c342277c6198623368f3bdda34c6f362157c0cba",
+    "ref_voxels_sfwm": "a93ee84661dd83576499702a3827451386962009920be254f7a0e8e278a5129d",
+    "ref_safe_sdm": "8430f99ffdfd306ac77ab0d6f598b3a00915303fb2219d660dd536970d2643f8",
+    "ref_fa": "3c0972ab130e501f107decc05bc30ff3778d21f4cc29af5fff4b78a4e537fe29",
+    "ref_metric_sfwm2": "4647d478d2792c90c95a1dd96dac66777d7a5b9c03c845b2c5aff190dcb24849",
+    "ref_metric_sfwm6": "1d4f143448328a778294ce51357d2e8acc5649df61ac221928385932eacf3809"
+  }
+}

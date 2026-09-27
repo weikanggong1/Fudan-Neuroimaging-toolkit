@@ -1,106 +1,79 @@
-# ds004666 单被试结构连接组配对验证
+# ds004666 配对 T1/DWI：当前 connectome 验证
 
-**T1 官方 FreeSurfer 分割、PyTorch 5TT/GMWMI、6-DOF 配准及 atlas 同输入检查：**[独立阶段报告](ANATOMY_STAGE_20260927.md)。
+[OpenNeuro ds004666](https://openneuro.org/datasets/ds004666) `sub-01/ses-2mm` 提供同次真实 T1w、AP/PA DWI。源文件、字节数及 SHA-256 见 [download_manifest.tsv](download_manifest.tsv)。本例先以 FSL TOPUP/EDDY 校正 DWI 并旋转 bvec；元数据缺少实测总读出时间，因此 TOPUP/EDDY 都采用假定 `0.05 s`，命令与 QC 见[输入来源](corrected_input_provenance.public.json)。T1 使用官方 FreeSurfer 8.2 `recon-all`；PyTorch 不替代它。两臂固定同一校正 DWI、bval/bvec、`aparc+aseg.mgz`、20 区 SynthSeg atlas、脑掩膜和 DWI→T1 世界变换。此处整链旧报告显式提供脑掩膜，没有测试新默认 BET 分支；其单独基准见 connectome 主文档。
 
-这是 `sub-01/ses-2mm` 同次 T1w 与 DWI 的固定输入实验。下文先报告符合本包输入约定的校正 DWI，再保留原始 DWI 算法诊断。[OpenNeuro ds004666](https://github.com/OpenNeuroDatasets/ds004666) 的原始 AP-DWI 为 105 个体积（5 个 b0、50 个 b=1000、50 个 b=2000），使用公开原始 bval/bvec。T1 经 SynthSeg 2.0 分割后，生成同一个 20 区 GM atlas；MRtrix 与 PyTorch 读取相同 atlas NIfTI 和相同 RAS 世界坐标。逐体素核对三次 PyTorch 输出与 MRtrix atlas：标签不匹配数均为 0，affine 最大差为 0（[记录](atlas_identity_qc.public.json)）。梯度坐标也经过交叉检查：100 个非 b0 方向在 PyTorch 与 MRtrix 导出结果间的有符号点积均大于 0.99999995，b-value 最大绝对差为 0（[梯度帧记录](gradient_frame_qc.public.json)）。原始文件的下载地址、字节数、SHA-256 见 [download_manifest.tsv](download_manifest.tsv)，atlas 与 T1 分割哈希见 [report.public.json](report.public.json)。源数据许可和元数据见 [dataset_description.json](dataset_description.json)。
+![配对 T1、校正前后 b0 与固定 20 区 atlas 的真实切面](../../../docs/connectome/figures/ds004666_t1_raw_vs_topup_eddy_atlas.png)
 
-## 已校正 DWI 与旋转后梯度：同输入对照
+## 参考边界
 
-原始 AP/PA 数据经 FSL TOPUP 和 EDDY 处理。公开元数据没有给出实际总读出时间，两步一致采用假定的 0.05 秒；[校正输入记录](corrected_input_provenance.public.json)保存完整命令、输入输出 SHA-256、几何、梯度旋转及 AP/PA b0 的质控。校正 DWI 为 104×104×72×105，与原始 AP 的网格和 affine 一致。MRtrix 导出梯度与本包读取梯度的 100 个非 b0 方向有符号点积最小为 0.999999975，b-value 最大差为 0。两臂读取同一份校正 DWI、旋转后 bvec、bval、T1 与 20 区 atlas。
+原 [UKB-connectomics](https://github.com/sina-mansour/UKB-connectomics) 使用 UKB `data_ud`、BET 掩膜、FreeSurfer 7.1 + FIRST、Tian 亚皮层 atlas 和 1,000 万次播种。本公开样本适配 MRtrix 3.0.3 `5ttgen freesurfer -nocrop -sgm_amyg_hipp`，因安装版无 `-first`，使用 20 区 SynthSeg atlas 和每次 10,000 次播种。适配参考不等于逐字执行原 UKB 脚本。[MRtrix/FSL 实际命令](corrected_mrtrix_fs5tt_act_adapted/commands.public.txt)与[参考四矩阵](corrected_mrtrix_fs5tt_act_adapted/)可检查。
 
-MRtrix 参考臂使用 Dhollander、默认 lmax=8 的 MSMT-CSD、mtnormalise、iFOD2/ACT、tcksift2 和四张矩阵；5TT 仍采用 FSL 版本，代替原 UKB 脚本的 FreeSurfer+FIRST。PyTorch 使用当前集成代码的 lmax=4 独立响应/FOD、GM/WM 边界追踪和近似 SIFT2。两臂各尝试 10,000 次播种，PyTorch 以种子 0、1、2 检查稳定性。已有 T1 SynthSeg 和单位 RAS 世界变换在本次计算中复用。MRtrix [命令清单](corrected_mrtrix_commands.public.txt)与[机器可读报告](corrected_report.public.json)包含参数、四组原始 20×20 CSV 的 SHA-256 和完整指标。
+## 固定中间输入的逐步对照
 
-下表为 PyTorch 种子 0 对 MRtrix；严格上三角排除对角线。count/FBC 在全部 190 条边计算相关和误差；mean length/FA 只在双方 count 均非零的 35 条边计算数值指标。归一化 MAE 除以被比较边上参考的非零值绝对均值。
+| 阶段 | 同输入结果 | 时间、图像和重跑入口 |
+|---|---|---|
+| FreeSurfer 5TT/GMWMI、6-DOF 配准、atlas | 固定官方 `aparc+aseg.mgz` 的 5TT/GMWMI 逐值一致；真实配准与 atlas 单独报告 | [解剖阶段](ANATOMY_STAGE_20260927.md) |
+| 六邻域掩膜两轮侵蚀／膨胀 | 真实 DWI 掩膜各 XOR 0、Dice 1 | [掩膜报告与切面](maskfilter_stage_20260927.md) |
+| Dhollander 响应、全脑 MSMT-CSD、张量 FA | 11 个响应掩膜全部逐体素一致；WM/GM/CSF 响应最大误差 3.89e−9 / 9.06e−10 / 1.24e−10；全脑 WM 9,383,490 个 SH 值全部误差 ≤1e−5；FA 只有一个病态近零信号体素 >1e−6 | [响应/FOD 报告与图](response_fod_stage_20260927.md) |
+| 三组织 `mtnormalise` | 固定官方原始 FOD，WM SH MAE 4.79e−10、最大 5.96e−8 | [归一化报告与图](mtnormalise_stage_20260927.md) |
+| iFOD2 风格 GMWMI/ACT 追踪 | 10,000 次播种时官方与 PyTorch 接受 2,767 / 2,950 条；长度 KS 0.0577；8 mm 种子密度 r 0.466，接近官方自身重复 r 0.466 | [追踪报告与密度图](tracking_act_stage.md)；随机轨迹不能逐条比对 |
+| SIFT2 的 fixel、处理掩膜、映射与优化 | 固定官方 FOD/5TT/2,758 条 TCK，fixel 数 243,822 一致；TDI r 0.999999937；最终逐轨权重 r 0.999999903、MAE 3.44e−5 | [FMLS 与掩膜图](sift2_fmls_stage_20260927.md)、[映射图](sift2_mapping_stage.md)、[优化器数值](sift2_optimizer_fmls_exact.public.json) |
+| 精确沿程 FA | 固定官方 TCK 与原 MIF 几何，逐轨 r 0.9999999949、MAE 5.58e−7；最大差 0.000550 | [FA 报告与图](tcksample_precise_stage.md) |
+| atlas 双端赋值 | 固定**本次官方 2,758 条 TCK**，两臂均赋值 2,740 条，20×20 count 400/400 元素完全一致 | [固定轨迹检查](integrated_seed0_fixed_tck_assignment.public.json) |
 
-| 矩阵 | Pearson r | 归一化 MAE | 非零边 Dice | 数值比较边数 |
-|---|---:|---:|---:|---:|
-| 流线 count | 0.662 | 0.627 | 0.693 | 190 |
-| SIFT2 FBC | 0.729 | 2.154 | 0.693 | 190 |
-| 加权 mean length | 0.742 | 0.344 | 0.693 | 35 |
-| 加权 mean FA | 0.538 | 0.133 | 0.693 | 35 |
+这些数字来自分别固定上游中间图像/流线的配对实验。各脚本参数、输入/输出结构、等价命令、真实图像、核心时间、参考时间及显存见链接报告与[完整函数文档](../../../docs/connectome/README.md)。固定轨迹的赋值一致不代替独立追踪后最终矩阵的验证。
 
-MRtrix 生成 2,891 条流线，2,785 条获得 atlas 双端分配；PyTorch 三种子分别分配 6,595、6,629、6,694 条。PyTorch 种子之间 count/FBC 的平均 Pearson r 为 0.989/0.992，非零边平均 Dice 为 0.876；自身稳定不能替代与 MRtrix 的一致性。PyTorch 三次调用耗时 28.12、27.50、29.58 秒，包含校正 DWI 读取、估计、追踪和矩阵写出，复用已有 T1 分割。MRtrix 的响应、MSMT-CSD、追踪、SIFT2 各为 17.01、185.51、12.87、21.49 秒，另复用已生成的 FSL 5TT。TOPUP/EDDY 各为 294.64/681.93 秒；两臂计时范围和并发负载不同，不能计算完整流程加速倍数。
+## 当前整链 seed 0
 
-![校正 DWI 输入下四张结构连接矩阵及差值](../../../docs/connectome/figures/corrected_connectome_comparison.png)
+[PyTorch 四矩阵 CSV、输入/参考 SHA-256、时间与显存](current_seed_0/report.json)对应以上相同的校正 DWI、官方 T1 分割、脑掩膜、atlas 和固定世界变换。实际输出存放在 [current_seed_0](current_seed_0/)；四个参考 CSV 在 [corrected_mrtrix_fs5tt_act_adapted](corrected_mrtrix_fs5tt_act_adapted/)。参考 CSV 的 SHA-256 与整链报告逐一相同。严格上三角 190 条边：
 
-![校正 DWI 输入下矩阵相关、支持与误差](../../../docs/connectome/figures/corrected_connectome_metrics.png)
+| 矩阵 | r：全部 190 边 | nMAE：全部边 | r：共同 39 边 | nMAE：共同边 | 支持 Dice |
+|---|---:|---:|---:|---:|---:|
+| count | 0.98864 | 0.06888 | 0.98760 | 0.18998 | 0.73585 |
+| SIFT2 FBC | 0.98527 | 0.08491 | 0.98697 | 0.20711 | 0.73585 |
+| mean length | 0.57720 | 0.17925 | 0.91292 | 0.26123 | 0.73585 |
+| mean FA | 0.62107 | 0.17774 | 0.69061 | 0.12714 | 0.73585 |
 
-![配对 T1、原始和校正 b0、校正 b0 与 20 区 atlas](../../../docs/connectome/figures/ds004666_t1_raw_vs_topup_eddy_atlas.png)
+nMAE = 被评估边的 MAE ÷ 该边集合内**非零参考值**的平均绝对值；共同边集合要求两臂 count 均非零。另在机器报告中保留 `relative_l1_upper` = 全部边绝对误差之和 ÷ 全部参考边绝对值之和；它与 nMAE 使用不同分母，不能直接与官方重复的 nMAE 比较。三次播种的统计采用同一口径。
 
-[图像记录](corrected_example_image.public.json)给出源图哈希、重采样、色阶与切面参数。**完整追踪与 SIFT2 输出仍未达到同输入一致性。**
+![相同真实输入的四张 MRtrix 与 FNIT 连接矩阵及逐元素差值](current_seed_0/connectome_comparison.png)
 
-## FreeSurfer 5TT 适配参考
+[图像输入哈希](current_seed_0/connectome_comparison.json)与[可重跑绘图脚本](../../../tools/plot_connectome_end_to_end.py)确保图像对应上表的同一组 CSV。
 
-同次 T1w 经 FreeSurfer 8.2 recon-all 完成解剖分割（1.645 小时），再用 MRtrix 构建 5TT/GMWMI；针对**校正 DWI 的均值 b0 重新运行 6-DOF normmi FLIRT**，将 5TT/GMWMI 变换到校正 DWI 网格。后续读取与上节相同的校正 DWI 梯度、MRtrix FOD/FA 和 20 区 atlas，运行 iFOD2/ACT、SIFT2 与四张矩阵。10,000 次尝试生成 2,758 条流线，2,740 条双端分配。原 UKB 脚本使用 FreeSurfer 7.1 与 FIRST，并给 5ttgen freesurfer 传入 -first；本机 MRtrix 3.0.3 不支持该选项，因此这是最接近原脚本的**适配参考**，不是原脚本逐字复跑。[完整三种子比较、命令、每阶段计时、源数据及矩阵哈希](fs5tt_adapted_report.public.json)同时记录原始 AP-DWI 上的适配参考。
+PyTorch 10,000 次播种接受 2,827 条流线；`UKBConnectome` 调用耗时 **266.83 s**、Torch 峰值分配显存 **2.720 GiB**（H100、TF32 开启）。MRtrix 各独立命令的墙钟列在[参考 stage_times.tsv](corrected_mrtrix_fs5tt_act_adapted/stage_times.tsv)，其进程启动与文件 I/O 边界不同；FreeSurfer `recon-all` 另耗时 1.645 h。20 区上三角 count 只有 52–54 条非零边，故对长度/FA 的全边相关须与共同非零边误差一起看。[seed 0 差异诊断](integrated_seed0_diagnosis.public.json)保留边级和分布检查。
 
-校正输入下，PyTorch 种子 0 对重新配准 FreeSurfer 参考的结果如下；归一化 MAE 与边集合的定义同上。
+## 三种子随机波动与当前缺口
 
-| 矩阵 | Pearson r | 归一化 MAE | 非零边 Dice | 数值比较边数 |
-|---|---:|---:|---:|---:|
-| 流线 count | 0.904 | 0.411 | 0.643 | 190 |
-| SIFT2 FBC | 0.922 | 1.599 | 0.643 | 190 |
-| 加权 mean length | 0.856 | 0.269 | 0.643 | 36 |
-| 加权 mean FA | 0.752 | 0.104 | 0.643 | 36 |
+[官方随机基线阶段报告](official_stochastic_baseline_stage_20260927.md)及[官方 0/1/2 与 FNIT 0/1/2 的全部 9 个交叉比较](official_mrtrix_rng_variability/official_fnit_3x3.public.json)使用同一真实 DWI/FOD/5TT、atlas 与 FA。官方 `MRTRIX_RNG_SEED` 配合 `-nthreads 0` 固定随机序列；同种子再次生成的 TCK 流线 payload 哈希相同。FNIT 三次[矩阵与报告](current_seed_1/)（seed 1）和[矩阵与报告](current_seed_2/)（seed 2）均已归档。它们分别接受 2,827、2,828、2,832 条流线；调用时间 266.83、291.19、332.74 秒，Torch 峰值分配显存均约 2.72 GiB。时间受共享服务器负载影响。
 
-与 FSL 5TT 替代臂相比，count/FBC 的 Pearson 相关提高；非零边 Dice 仍为 0.643，FBC 误差仍大，**完整流程未达到同输入输出一致**。FreeSurfer 处理、FOD、PyTorch 的 T1 分割不在同一计时范围内，不能将上述阶段时间组合成加速倍数。
+| 指标（同一口径） | 官方三组两两范围 | FNIT×官方九组范围 |
+|---|---:|---:|
+| count：全边 nMAE | 0.0629–0.0707 | 0.0648–0.0909 |
+| FBC：全边 nMAE | 0.0652–0.0895 | 0.0774–0.1149 |
+| 非零边支持 Dice | 0.752–0.790 | 0.707–0.757 |
+| mean FA：共同边 nMAE | **0.0777–0.1014** | **0.1264–0.1785** |
+| mean FA：共同边 Pearson r | 0.697–0.845 | 0.433–0.691 |
 
-![校正 DWI 与重新配准 FreeSurfer ACT 的四张矩阵及差值](../../../docs/connectome/figures/corrected_fs5tt_adapted_connectome_comparison.png)
+![官方自身、FNIT 自身与跨软件的三种子四矩阵相对 L1 误差](official_mrtrix_rng_variability/official_fnit_rng_envelope.png)
 
-![校正 DWI 与重新配准 FreeSurfer ACT 的矩阵指标](../../../docs/connectome/figures/corrected_fs5tt_adapted_connectome_metrics.png)
+此图使用**全边相对 L1**，不是上表的共同边 nMAE；完整配对边集合与两个公式均在机器报告中。
 
-## 原始 DWI 算法诊断：验证范围
+count/FBC 误差与官方随机波动部分重叠，但共同边 FA 的九次跨软件比较均劣于三次官方内部比较；当前不能称四张矩阵已与官方一致。固定同一批官方 TCK 的 FA 采样和 atlas 赋值已接近或达到逐值一致，剩余差异集中在独立 iFOD2/ACT 轨迹。正在按 MRtrix 源码改进皮层下 GM 的 ACT 终止规则，再以相同输入做单改动复测。原 UKB 1,000 万次播种的显存和时间未在此例测量。
 
-MRtrix3 3.0.3-103-g026e850d 参考臂使用 Dhollander 响应、默认 lmax=8 MSMT-CSD、mtnormalise、FSL 6.0.7.4 的 5TT、GMWMI 播种、iFOD2/ACT、tcksift2，以及四次 `tck2connectome -symmetric -assignment_radial_search 4`。追踪参数为 `-seeds 10000 -select 0 -maxlength 250 -cutoff 0.1 -samples 3 -power 0.5`，随机种子 0。原 UKB 脚本使用 FreeSurfer+FIRST 5TT；本次 FSL 5TT 是明确的替代。对照的 PyTorch 版本使用 lmax=4 自拟响应/FOD、离散方向的双向概率追踪、二值 GM/WM 终止、近似 SIFT2，以及同样的矩阵赋值规则，分别用种子 0、1、2 各尝试 10,000 次。均传入已有 T1 分割和单位 RAS 世界变换，自动分割/配准不在这次计时和数值比较内。
+## 复跑
 
-公开处理后 DWI 没有与之对应的 eddy-rotated bvec 文件，因此此次数值比较使用**同一原始 AP-DWI 及其原始梯度**。它检验算法在同输入下的结果，不能代表代码接口要求的已校正 UKB DWI 结果，也不能验证 TOPUP/eddy。示例图使用处理后 b0 检查 T1/DWI 几何；这不改变数值比较的输入。对照也没有复现原仓库的皮层加 Tian atlas。两臂的 FA 估计与沿纤维采样方法不同。
-
-## 输出一致性
-
-下表为 PyTorch 种子 0 对固定 MRtrix FSL-5TT ACT 参考；20×20 矩阵的严格上三角排除对角线。count/FBC 在全部 190 条边计算相关与误差；长度/FA 只在两臂 count 都非零的边计算数值指标。归一化 MAE 除以被比较边上参考的非零值绝对均值。Dice 比较各矩阵非零边集合。[机器可读报告](report.public.json)记录全部 3 个种子、Spearman、RMSE、自连接与文件哈希；旁边的五组 CSV 保留原始 20×20 输出。
-
-| 矩阵 | Pearson r | 归一化 MAE | 非零边 Dice | 数值比较边数 |
-|---|---:|---:|---:|---:|
-| 流线 count | 0.689 | 0.595 | 0.549 | 190 |
-| SIFT2 FBC | 0.739 | 2.035 | 0.549 | 190 |
-| 加权 mean length | 0.878 | 0.292 | 0.549 | 31 |
-| 加权 mean FA | 0.651 | 0.131 | 0.549 | 31 |
-
-MRtrix 在 10,000 次播种中生成 3,021 条流线，其中 2,915 条获得 atlas 双端分配；PyTorch 种子 0 生成并分配 6,319 条。三个 PyTorch 种子两两比较的平均 Pearson r 为 count 0.994、FBC 0.993、length 0.917、FA 0.816；平均连接支持 Dice 0.862。这说明本实现自身的矩阵在三次采样中相对稳定，**不表示与 MRtrix 输出一致**。
-
-用完全相同输入和种子 0 独立重复一次时，接受流线均为 6,319 条，count CSV 逐字节一致；FBC、mean length、mean FA 的最大绝对差分别只有 `6.7e-6`、`3.05e-5 mm`、`6.0e-8`，四张矩阵的非零边支持完全一致。三张加权矩阵存在 GPU 浮点累加顺序导致的极小非逐字节差异；[重复性报告与 CSV](fixed_seed_repeat.public.json)保留各自哈希和相对 Frobenius 误差。
-
-把 MRtrix 的 `-seed_gmwmi` 单独换成 PyTorch 同款二值边界 mask 的 `-seed_image` 后，MRtrix 获得 3,348 条 atlas 分配；与 PyTorch 种子 0 的 count r=0.669、Dice=0.586，FBC r=0.735。此受控臂用于定位播种差异，不是原脚本条件。FSL 5TT 的 GMWMI 正值支持与本包二值 WM/GM 边界在 DWI 网格的 Dice 为 0.454，见[种子掩膜检查](seed_mask_qc.public.json)。
-
-只把 PyTorch 四处 SH 阶次从 lmax=4 提至 lmax=8 的[敏感性诊断](lmax8_diagnostic.public.json)，count/FBC Pearson 升至 0.765/0.817，但 count 归一化 MAE 升至 0.685、连接支持 Dice 降至 0.492，FBC 归一化 MAE 升至 2.315。提高 SH 阶次未解决输出差距；该诊断不替代正式 lmax=4 三种子结果。
-
-![相同 DWI 与 atlas 的四类结构连接矩阵及差值](../../../docs/connectome/figures/connectome_comparison.png)
-
-![矩阵相关性、支持和归一化误差](../../../docs/connectome/figures/connectome_metrics.png)
-
-## 默认自动 T1 接口检查
-
-同一公开 T1w 与原始 AP-DWI 另以 100 次种子尝试跑通默认自动 SynthSeg 与 TorchFLIRT（不传分割、atlas 或变换）：内部调用 35.11 秒，接受 62 条流线；20×20 四矩阵均有限且对称。自动组织前景与公开 DWI 脑掩膜 Dice 0.940，和上述固定世界仿射的 SynthSeg 前景 Dice 0.958。此[接口检查记录](auto_interface_smoke.public.json)只证明自动链能运行；原始 DWI 仍不符合生产接口的预处理条件，也不参与上述数值对照。
-
-## 运行时间
-
-计时均在 gpucw1 上，PyTorch 2.5.1 使用 NVIDIA H100、float32 和 TF32。PyTorch 的三次端到端调用（已有分割和单位变换，包含 NIfTI 读取、FOD、追踪、近似 SIFT2、四张 CSV 与中间 NIfTI 写出）为 **25.41、25.24、27.38 秒**；峰值进程 RSS 分别约 1.06、1.05、1.04 GB，未记录 GPU 峰值显存。MRtrix 各阶段是独立进程的墙钟时间：Dhollander 22.88 秒，MSMT-CSD 182.98 秒，mtnormalise 3.25 秒，FSL 5TT 859.56 秒，iFOD2/ACT 13.55 秒，tcksift2 20.75 秒，四张矩阵赋值合计 0.32 秒。MRtrix 的 FSL 5TT 包含 T1 解剖处理，PyTorch 计时则复用已有 SynthSeg 分割；这些数字**不能直接构成完整流程的加速倍数**。10,000 次播种的实测不能外推到原 UKB 脚本 10,000,000 次的耗时或内存；本接口要求显式设置播种次数。
-
-同一组 3,021 条 MRtrix 真实流线、SIFT2 权重、长度、FA 和 atlas 输入下，另做单独的矩阵赋值逐元素比较：2,915 条双端分配在两臂一致，count 的 400/400 元素完全一致；FBC、mean length、mean FA 的最大绝对误差分别为 `8.99e-6`、`5.63e-6 mm`、`2.96e-8`。H100 上 10 次计时的中位数分别为 MRtrix 四个进程 `0.172 s`（含启动与 I/O）和本包已驻留 GPU 计算 `0.0746 s`。该[真实轨迹赋值报告](../ds004666_fsl_act_real_tracks_assignment_report.json)把追踪/FOD 差异从矩阵映射误差中分离，计时不代表完整流程加速。
-
-![固定真实流线的矩阵赋值对照](../../../docs/connectome/figures/ds004666_real_assignment_matrices.png)
-
-![真实流线矩阵赋值逐元素误差](../../../docs/connectome/figures/ds004666_real_assignment_metrics.png)
-
-## 复查
-
-[report.public.json](report.public.json) 记录各 CSV 的 SHA-256、每种子结果、归一化定义及各阶段时间。数值运行所用远端快照的 8 个 connectome `.py` 文件哈希见报告；当前 7 个模块与该快照逐字节相同，`pipeline.py` 只删除了未验证的 1,000 万次播种默认值，所有数值运行都显式指定了 1 万次，计算逻辑未改。用仓库脚本可在这些已公开的小矩阵上重新计算指标：
+安装与函数输入/输出详见[主文档](../../../docs/connectome/README.md)。固定本例文件后执行 [整链脚本](../../../tools/benchmark_connectome_end_to_end.py)；它写出四张候选 CSV、TCK、逐轨属性和带输入哈希的报告。
 
 ```bash
-python tools/compare_connectome_matrices.py \
-  --reference-dir validation/connectome/ds004666/mrtrix_fsl5tt_act \
-  --candidate-dir validation/connectome/ds004666/pytorch_seed_0 \
-  --candidate-dir validation/connectome/ds004666/pytorch_seed_1 \
-  --candidate-dir validation/connectome/ds004666/pytorch_seed_2
+python tools/benchmark_connectome_end_to_end.py \
+  --dwi corrected_dwi.nii.gz --bvals corrected_dwi.bval \
+  --bvecs eddy_rotated.bvec --t1-brain t1_brain.nii.gz \
+  --aparc-aseg aparc+aseg.mgz --atlas-dwi atlas_20_dwi.nii.gz \
+  --brain-mask brain_mask_dwi.nii.gz --fod-mask brain_mask_dwi.nii.gz \
+  --normalise-mask brain_mask_eroded_2.nii.gz \
+  --transform diff2struct_mrtrix.txt --shell-bvals 5 999 1997 \
+  --reference-dir corrected_mrtrix_fs5tt_act_adapted \
+  --output-dir current_seed_0 --n-seeds 10000 --seed 0 --device cuda:0
 ```
 
-**结论：** 相同输入下的完整追踪与 SIFT2 矩阵差异仍大，未达到“同输入输出一致”的推送条件。矩阵赋值阶段的一致不能代替完整流程一致。
+本阶段新增的自动 mean b0/BET 对照见 [BET 同输入报告](bet_meanb0.public.json)和[中文算子说明与脑图](../../../docs/connectome/BET_B0_OPERATORS.md)；[阶段性成果及剩余门槛](../STAGE_RELEASE_20260928.md)单独归档。

@@ -1,0 +1,74 @@
+#!/bin/sh
+
+#   basic image handling scripts
+#
+#   Christian Beckmann and Mark Jenkinson
+#   FMRIB Image Analysis Group
+#
+#   Copyright (C) 1999-2004 University of Oxford
+#
+#   SHCOPYRIGHT
+
+Usage() {
+    echo ""
+    echo "Usage: fsledithd <input> [editor]"
+    echo ""
+    exit 1
+}
+
+[ "$1" = "" ] && Usage
+
+if [ _$FSLDIR = _ ] ; then
+    FSLDIR=/usr/local/fsl
+    export FSLDIR
+fi
+
+if [ X$FSLEDITOR = X ] ; then
+    FSLEDITOR=nano
+fi
+if [ $# -ge 2 ] ; then
+    FSLEDITOR=$2
+fi
+
+tmpbase=`${FSLDIR}/bin/tmpnam`;
+tmpbase2=`${FSLDIR}/bin/tmpnam`;
+
+# put in helpful comments at the start
+echo "# FSLEDITHD" > ${tmpbase}
+echo "# This text file contains the header information for an Analyze or Nifti file" >> ${tmpbase}
+echo "# Simply edit this file then save it and the header will be regenerated" >> ${tmpbase}
+echo "# All lines starting with the hash (#) character, like this line, will be ignored" >> ${tmpbase}
+echo "# Ensure that all lines intended to set values take the form: name = 'value' " >> ${tmpbase}
+echo "# Note that if the file is Analyze then many settings will be ignored" >> ${tmpbase}
+echo "# Further note that the filetype cannot be changed by this program" >> ${tmpbase}
+echo "#   i.e. changing the nifti_type has no effect" >> ${tmpbase}
+echo " " >> ${tmpbase}
+
+# generate the xml-style header with fslhd
+${FSLDIR}/bin/fslhd -x $1 | grep -v '/>' | grep -v '_filename' | grep -v '[^t]_name' | grep -v 'nvox' | grep -v 'to_ijk' | grep -v 'form_.*orientation' | grep -v 'qto_' > ${tmpbase2}
+# exit if the above didn't generate a decent file
+if [ `cat ${tmpbase} | wc -l` -le 1 ] ; then
+  exit 0;
+fi
+# tack onto initial comments
+cat ${tmpbase2} >> ${tmpbase}
+# add stuff before end
+echo "# Many fields require codes to be set (e.g. sform_code, qform_code, intent_code)" >> ${tmpbase}
+echo "# Valid values are:" >> ${tmpbase}
+echo "#   sform_code (or qform) :- 0=UNKNOWN, 1=SCANNER_ANAT, 2=ALIGNED_ANAT, 3=TALAIRACH, 4=MNI_152" >> ${tmpbase}
+echo "#   xyz_units :- 1=METER, 2=MM, 3=MICRON " >> ${tmpbase}
+echo "#   t_units :- 8=SEC, 16=MSEC, 24=USEC, 32=HZ, 40=PPM, 48=RADS" >> ${tmpbase}
+echo "#   intent_code :- 0=NONE, 2=CORRELATION, 3=TTEST, 4=FTEST, 5=ZSCORE, 6=CHISQ, ..." >> ${tmpbase}
+echo "#                  22=PVAL, 23=LOGPVAL, 24=LOG10PVAL, 1001=ESTIMATE, 1002=LABEL (incl masks)" >> ${tmpbase}
+echo "#                  Other codes can be found in the $FSLDIR/src/niftiio/nifti1.h file" >> ${tmpbase}
+echo " " >> ${tmpbase}
+# close the xml-style part
+echo "/>" >> ${tmpbase}
+
+# edit header, reprocess and pass onto fslcreatehd
+${FSLEDITOR} ${tmpbase}
+cat ${tmpbase} | grep -v '^[ 	]*#' | grep -v '^[ 	]*$' > ${tmpbase2}
+${FSLDIR}/bin/fslcreatehd ${tmpbase2} $1
+
+/bin/rm ${tmpbase} ${tmpbase2}
+

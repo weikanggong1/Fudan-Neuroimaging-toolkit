@@ -1,0 +1,65 @@
+{
+  "dataset": "OpenNeuro ds004666 sub-01 ses-2mm; fixed original MRtrix TCK and FA",
+  "original_command": "tcksample -precise -stat_tck mean tracks_10000.tck fa_corrected.mif streamline_mean_fa.txt -nthreads 8",
+  "conversion_command": "mrconvert fa_corrected.mif fa_corrected_positive_strides.nii.gz -strides +1,+2,+3 -force",
+  "affine": "original MIF header transform and voxel spacing, float64, native voxel index order",
+  "affine_4x4": [
+    [
+      2.0190149469825567,
+      -0.000352462304040404,
+      0.0291865148178632,
+      -103.162224339226
+    ],
+    [
+      0.006562469118491508,
+      1.9737630547111575,
+      -0.421978051808744,
+      -75.7967994694246
+    ],
+    [
+      -0.028729266612440945,
+      0.42608575724566017,
+      1.954758980320716,
+      -66.2713530541304
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "input_sha256": {
+    "tracks_10000.tck": "0761105a4e520de4709e6da9641bfe53e53060cfc21050eb2bab9caa2c7a1f33",
+    "fa_corrected.mif": "5628984aecab46cbaf89f03a6c2cbf6c0cd9fbe829b3dc6c18ffff78f17fa2d8",
+    "fa_corrected_positive_strides.nii.gz": "89b2e1b45c22bedd9b7742dea95e367fe859779b2d6f1f21699e84e8e4a09101",
+    "streamline_mean_fa.txt": "0f4b75ad907b38c1142d72978b166287701109425cbb66b6886679c03ac6b529"
+  },
+  "n_tracks": 2758,
+  "reference_mean": 0.4312103740156635,
+  "candidate_mean": 0.4312102819068264,
+  "pearson": 0.9999999948874124,
+  "mae": 5.583328239363832e-07,
+  "rmse": 1.1992704434080576e-05,
+  "max_abs": 0.0005499124253052212,
+  "abs_error_quantiles": {
+    "0.5": 2.980346375247578e-08,
+    "0.9": 1.1918711822489492e-07,
+    "0.99": 3.5714654096892377e-06,
+    "0.999": 0.00011000158791879471
+  },
+  "seconds_first_call": 0.12386333476752043,
+  "seconds_warm_median": 0.1015598513185978,
+  "seconds_all": [
+    0.12386333476752043,
+    0.1015598513185978,
+    0.10001671686768532,
+    0.10252417298033834,
+    0.1037592813372612,
+    0.0899393018335104
+  ],
+  "timing_note": "CPU 8 threads, TCK and FA loaded before timing; compared to official 0.03 s command wall from stage_times.tsv, boundaries differ",
+  "peak_cuda_gb": null,
+  "figure": "tcksample_precise_mif_affine_cpu.png",
+  "official_tcksample_seconds": 0.03
+}

@@ -1,0 +1,57 @@
+{
+  "input_sha256": {
+    "five_tissue": "32a27dabd9fa7e6094beafda8c90515642f733f1c245530b183846bf40cc5153",
+    "gmwmi": "20a132b4a6854d5c329e80e3a61344ae28a0d7ca0a0d6cebd8254dd777d5349a",
+    "reference_seeds": "03da25ebc058780cc9d68b814661fd04f38bb8c044a5a343a8ac4f05de4e0add",
+    "reference_repeat_seeds": "b83a69cde54dbdc6815499d44254e84dc68ce8be53565244ea1bd52cfbb123ec"
+  },
+  "software": "MRtrix 3.0.3-103-g026e850d Seedtest vs PyTorch GPU float32/TF32 (float64 geometry)",
+  "reference_command": "tckgen -algorithm Seedtest -seed_gmwmi GMWMI -act 5TT -seeds 10000 -select 0 -nthreads 8 -output_seeds seeds.txt FOD seedtest.tck",
+  "candidate_function": "sample_gmwmi_seeds(gmwmi, five_tissue, five_tissue_affine, n_seeds, generator)",
+  "seed_count": 9999,
+  "reference_repeat_seed_count": 9998,
+  "reference_abs_gm_minus_wm_quantiles_0_50_90_99_100": [
+    0.0,
+    0.0002765357494354248,
+    0.003998095169663429,
+    0.009057614952325821,
+    0.010002076625823975
+  ],
+  "candidate_abs_gm_minus_wm_quantiles_0_50_90_99_100": [
+    0.0,
+    0.00037661194801330566,
+    0.004160255193710327,
+    0.008764926344156265,
+    0.009992480278015137
+  ],
+  "reference_centroid_ras_mm": [
+    -0.16331984102725983,
+    1.7271928787231445,
+    23.211563110351562
+  ],
+  "candidate_centroid_ras_mm": [
+    0.9766201972961426,
+    1.164419174194336,
+    22.727561950683594
+  ],
+  "eight_mm_bin_pearson_on_union": 0.4660320069159725,
+  "reference_to_reference_repeat_eight_mm_bin_pearson_on_union": 0.46643924574083395,
+  "reference_to_reference_repeat_nn_mm_quantiles_50_90_99": [
+    2.0896317421058215,
+    3.5693551706850672,
+    4.9446366656639835
+  ],
+  "candidate_to_reference_nn_mm_quantiles_50_90_99": [
+    2.070696903613513,
+    3.557668018588174,
+    4.874688710296535
+  ],
+  "reference_to_candidate_nn_mm_quantiles_50_90_99": [
+    2.074062141830872,
+    3.54320879117776,
+    4.846900118638829
+  ],
+  "candidate_wall_seconds": 0.7504825764335692,
+  "candidate_cuda_peak_allocated_gib": 0.42459535598754883,
+  "comparison_limit": "different random number generators; no row-wise paired seed identity"
+}

@@ -1,0 +1,71 @@
+{
+  "dataset": "OpenNeuro ds004666 sub-01 ses-2mm, corrected DWI",
+  "scope": "fixed official empirical WM/CSF responses and official masks; Dhollander lmax2 and lmax6 two-tissue raw CSD only",
+  "reference_commands": "dwi2fod msmt_csd dwi.mif ewmrf.txt abs_ewm2.mif response_csf.txt\n    abs_csf2.mif -mask refined_wm.mif -lmax 2,0\ndwi2fod msmt_csd dwi.mif ewmrf.txt abs_ewm6.mif response_csf.txt\n    abs_csf6.mif -mask refined_sfwm.mif -lmax 6,0",
+  "device": "cpu",
+  "torch": "2.5.1",
+  "tf32_enabled": false,
+  "shape": [
+    104,
+    104,
+    72,
+    105
+  ],
+  "shell_bvals": [
+    5.0,
+    999.0,
+    1997.0
+  ],
+  "input_sha256": {
+    "dwi": "9ee26b8329696d462754a441d14faa10a0f0fb774fd860feacfaf8443d83d88c",
+    "grad": "48bdb84fcd69d979a447fa578f98cb3be389d7dc6bf17f49499e59e4d6291b0d",
+    "wm_response": "a011734b6a9f87b8745942bc34578861afdc343801d9fc3d189c0d3d0a18facc",
+    "csf_response": "cfbd7cfabf92a3e46b4392c3d21872ac1713ed7d3bbe37cfefd54fa6f48aa4f3",
+    "mask2": "34fe1bf8106ff39d122688f3c121db7d91fb81ed952ed6b21faa9599fca03196",
+    "mask6": "b06cbffa4e32df122be59e13c342277c6198623368f3bdda34c6f362157c0cba",
+    "ref_wm2": "1d6669f9c478d7ddc6b7b8223c3dc2ea9d5c920058d0c0b3f171f3c50fa79392",
+    "ref_csf2": "ca7f23b3d937835cde103ae83ccdae2d21dad52064e516939186a1c67abb3703",
+    "ref_wm6": "a2866845025e59a3f7d0235bd79a2e3a8b984fda98cdd1faa59de8b65f909bda",
+    "ref_csf6": "81f1bdba4cfca09fa8d934bdad4363d4ee9faeb7b5ffb5c18bcc6ffd1f03d8c6"
+  },
+  "metrics": {
+    "2": {
+      "mask_voxels": 88491,
+      "seconds": 1.3518220335245132,
+      "peak_torch_allocated_gib": null,
+      "wm": {
+        "n_values": 530946,
+        "mae": 0.0,
+        "max_abs": 0.0,
+        "fraction_abs_le_1e-5": 1.0,
+        "pearson": 1.0
+      },
+      "csf": {
+        "n_values": 88491,
+        "mae": 0.0,
+        "max_abs": 0.0,
+        "fraction_abs_le_1e-5": 1.0,
+        "pearson": 1.0
+      }
+    },
+    "6": {
+      "mask_voxels": 884,
+      "seconds": 0.24908611178398132,
+      "peak_torch_allocated_gib": null,
+      "wm": {
+        "n_values": 24752,
+        "mae": 0.0,
+        "max_abs": 0.0,
+        "fraction_abs_le_1e-5": 1.0,
+        "pearson": 1.0
+      },
+      "csf": {
+        "n_values": 884,
+        "mae": 0.0,
+        "max_abs": 0.0,
+        "fraction_abs_le_1e-5": 1.0,
+        "pearson": 1.0
+      }
+    }
+  }
+}

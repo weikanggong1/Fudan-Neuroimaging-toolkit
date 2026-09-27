@@ -1,0 +1,63 @@
+{
+  "dataset": "OpenNeuro ds004666 sub-01 ses-2mm corrected AP DWI",
+  "shape": [
+    104,
+    104,
+    72
+  ],
+  "source_voxels": 208522,
+  "reference_commands": [
+    "maskfilter brain_mask.nii.gz erode eroded_2.nii.gz -npass 2",
+    "maskfilter brain_mask.nii.gz dilate dilated_2.nii.gz -npass 2"
+  ],
+  "input_sha256": {
+    "synthseg_brain_mask_dwi.nii.gz": "5024bd734f7a7f276575a0998c80c3d6e34b3359a458766c6e57cf86795afeb2",
+    "brain_mask_eroded_2.nii.gz": "ec19c2230fff06d7923961809a63b5860cc9253661651145a0333e03903eafc5",
+    "brain_mask_dilated_2.nii.gz": "77b02b529d7b796928a836731a1869871475847181bc387dc9130fc97b32d74a"
+  },
+  "devices": {
+    "cpu": {
+      "results": {
+        "erode": {
+          "reference_voxels": 177047,
+          "candidate_voxels": 177047,
+          "xor_voxels": 0,
+          "dice": 1.0,
+          "seconds_core": 0.17466217000037432
+        },
+        "dilate": {
+          "reference_voxels": 242212,
+          "candidate_voxels": 242212,
+          "xor_voxels": 0,
+          "dice": 1.0,
+          "seconds_core": 0.058209517039358616
+        }
+      },
+      "peak_torch_allocated_gib": null
+    },
+    "cuda:0": {
+      "results": {
+        "erode": {
+          "reference_voxels": 177047,
+          "candidate_voxels": 177047,
+          "xor_voxels": 0,
+          "dice": 1.0,
+          "seconds_core": 0.019489225931465626
+        },
+        "dilate": {
+          "reference_voxels": 242212,
+          "candidate_voxels": 242212,
+          "xor_voxels": 0,
+          "dice": 1.0,
+          "seconds_core": 0.0007649501785635948
+        }
+      },
+      "peak_torch_allocated_gib": 0.004351615905761719
+    }
+  },
+  "reference_wall_seconds_with_io": {
+    "erode": 0.28,
+    "dilate": 0.06
+  },
+  "reference_timing_method": "/usr/bin/time -f %e on gpucw1, MRtrix3 3.0.3 maskfilter, NIfTI input/output under /tmp, -npass 2"
+}

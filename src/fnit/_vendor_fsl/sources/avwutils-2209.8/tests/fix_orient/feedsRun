@@ -1,0 +1,166 @@
+#!/usr/bin/env fslpython
+"""Test the standard recipe for fixing a broken orientation, from "The labels
+in FSLView are wrong or missing and no conversion to NIfTI can fix this", on
+this page:
+
+https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Orientation%20Explained
+
+    If this really cannot be fixed at the conversion stage, then it is
+    possible to fix by the follow (only to be attempted after reading the
+    following section on background information on NIfTI orientation):
+    fslorient -deleteorient imagename ; fslswapdim imagename a b c imagename ;
+    fslorient -setqformcode 1 imagename ; where a b c need to be chosen,
+    usually by trial and error, so that the image after this is in the same
+    orientation (as viewed in FSLView) as the MNI152 images. However, unless
+    you have some way of telling left from right in the image (e.g. by a
+    vitamin capsule or clearly known structural asymmetry) this method can
+    easily result in an incorrect left-right labelling and so should not be
+    attempted.
+
+The recipe involves:
+
+ 1. resetting the image affines
+
+ 2. transposing the data array until it is in a
+    RAS orientation
+
+ 3. Enabling the qform affine which, after step
+    1, should be a diagonal matrix with pixdims
+    as scaling parameters.
+
+Specifically, the recipe is as follows:
+
+    # 1. clear the sform/qform affines
+    fslorient -deleteorient image
+
+    # 2. rotate the data into RAS orientation (exact
+    # command depends on original data orientation)
+    fslswapdim image x z y image
+
+    # 3. reset the qform code. The qform should be
+    # a diagonal matrix, and the image data array
+    # should be in RAS orientation, so after this
+    # step the image should be labelled correctly.
+    fslorient -setqformcode 1 image
+
+
+This recipe makes some key assumptions:
+
+  - fslorient -deleteorient (step 1) deleting/
+    clearing the affines - the qform must be
+    reset to be a scaling matrix.
+
+  - fslswapdim (step 2) not touching the affines
+    when the s/qform codes are 0
+
+These are required so that, in step 3, the qform is a diagonal matrix with
+correct scaling paramaters.
+
+Some bugs were introduced in FSL 6.0.0 (fixed in FSL 6.0.6) which broke the
+above assumptions:
+
+  - fslorient -deleteorient was not clearing the original
+    affines
+  - fslswapdim was applying the rotations/flips to both the
+    data, and to the s/qforms, even if the s/qform codes were
+    set to 0.
+"""
+
+import numpy      as np
+import nibabel    as nib
+import               os
+import subprocess as sp
+import               shlex
+import               sys
+import               traceback
+
+def sprun(cmd):
+    sp.run(shlex.split(cmd), check=True)
+
+
+# Test the original recipe for fixing the
+# orientation of an image, as described above
+def test_fix_orient():
+
+    data       = np.random.random((10, 10, 10))
+    orig_qform = np.array([[2, 0, 0,  10],
+                           [0, 2, 0, -20],
+                           [0, 0, 2,  50],
+                           [0, 0, 0,   1]])
+    image  = nib.Nifti1Image(data, np.eye(4))
+    image.set_sform(np.eye(4), 0)
+    image.set_qform(orig_qform, 1)
+
+    image.to_filename('orig.nii.gz')
+    sprun('imcp orig cleared')
+    sprun('fslorient -deleteorient cleared')
+    sprun('fslswapdim cleared x z y swapped')
+    sprun('imcp swapped fixed')
+    sprun('fslorient -setqformcode 1 fixed')
+
+    fixed = nib.load('fixed.nii.gz')
+
+    new_data         = fixed.get_fdata()
+    new_qform, qcode = fixed.get_qform(coded=True)
+    _,         scode = fixed.get_sform(coded=True)
+
+    # new qform should be a scaling matrix (not
+    # necessarily equivalent to the original
+    assert qcode == 1
+    assert scode == 0
+    assert np.all(np.isclose(new_qform, np.diag([2, 2, 2, 1])))
+    assert np.all(np.isclose(new_data,  data.transpose((0, 2, 1))))
+
+
+# An alternate strategy which involves
+# explicitly clobbering the qform
+def test_fix_orient_alternate():
+    # original qform
+    data       = np.random.random((10, 10, 10))
+    orig_qform = np.array([[2, 0, 0,  10],
+                           [0, 2, 0, -20],
+                           [0, 0, 2,  50],
+                           [0, 0, 0,   1]])
+    image  = nib.Nifti1Image(data, np.eye(4))
+    image.set_sform(np.eye(4), 0)
+    image.set_qform(orig_qform, 1)
+
+    image.to_filename('orig.nii.gz')
+    sprun('imcp orig cleared')
+    sprun('fslorient -deleteorient cleared')
+    sprun('fslswapdim cleared x z y swapped')
+    sprun('imcp swapped fixed1')
+    sprun('fslorient -setqform 1 0 0 0 0 1 0 0  0 0 1 0 0 0 0 1 fixed1')
+    sprun('imcp fixed1 fixed')
+    sprun('fslorient -setqformcode 1 fixed')
+
+    fixed = nib.load('fixed.nii.gz')
+
+    new_data         = fixed.get_fdata()
+    new_qform, qcode = fixed.get_qform(coded=True)
+    _,         scode = fixed.get_sform(coded=True)
+
+    # new qform should be a scaling matrix (not
+    # necessarily equivalent to the original
+    assert qcode == 1
+    assert scode == 0
+    assert np.all(np.isclose(new_qform, np.diag([2, 2, 2, 1])))
+    assert np.all(np.isclose(new_data,  data.transpose((0, 2, 1))))
+
+
+if __name__ == '__main__':
+    tests = [test_fix_orient,
+             test_fix_orient_alternate]
+
+    result = 0
+    for test in tests:
+        try:
+            os.chdir(sys.argv[1])
+            test()
+            print(f'\nTest {test.__name__} PASSED')
+        except Exception as e:
+            print(f'\nTest {test.__name__} FAILED')
+            traceback.print_exc()
+            result = 1
+
+    sys.exit(result)

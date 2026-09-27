@@ -1,0 +1,29 @@
+#!/bin/sh
+
+#   basic image handling scripts
+#
+#   FMRIB Image Analysis Group
+#
+#   Copyright (C) 1999-2004 University of Oxford
+#
+#   SHCOPYRIGHT
+
+if [ $# -lt 1 ] ; then
+  echo "Usage: `basename $0` <filename> [-s]" ;
+  echo "  -s  output using short format (one line)"
+  exit 1 ;
+fi
+
+short=no;
+if [ X$2 = X-s ] ; then
+  short=yes;
+fi
+
+if [ $short = no ] ; then
+  $FSLDIR/bin/fslhd $1 | cat -v | grep dim[1-4]
+else
+  sz=`$FSLDIR/bin/fslhd $1 | cat -v | grep dim[1-4] | sed 's/pixdim4.*//' | sed 's/pixdim1/ : Dims = /' | sed 's/^dim1/Size = /' | sed 's/[pix]*dim.[         ]*/ x /'`;
+  echo $sz
+fi
+
+

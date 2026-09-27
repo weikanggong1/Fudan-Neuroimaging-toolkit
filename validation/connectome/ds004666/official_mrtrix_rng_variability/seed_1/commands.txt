@@ -1,0 +1,8 @@
+tckgen -algorithm iFOD2 -seed_gmwmi gmwmi_seed_dwi.mif -act 5tt_dwi.mif -seeds 10000 -select 0 -maxlength 250 -cutoff 0.1 -samples 3 -power 0.5 -nthreads 0 wm_fod_norm.mif tracks_10000.tck -force 
+tcksift2 tracks_10000.tck wm_fod_norm.mif sift2_weights.txt -act 5tt_dwi.mif -nthreads 8 -csv sift2_stats.csv -force 
+tckstats -dump streamline_length.txt tracks_10000.tck -nthreads 8 
+tcksample -precise -stat_tck mean tracks_10000.tck fa_corrected.mif streamline_mean_fa.txt -nthreads 8 
+tck2connectome -symmetric -assignment_radial_search 4 tracks_10000.tck synthseg_gm_atlas_dwi.nii.gz count.csv -nthreads 8 -force 
+tck2connectome -symmetric -assignment_radial_search 4 -tck_weights_in sift2_weights.txt tracks_10000.tck synthseg_gm_atlas_dwi.nii.gz sift2_fbc.csv -nthreads 8 -force 
+tck2connectome -symmetric -assignment_radial_search 4 -tck_weights_in sift2_weights.txt -scale_file streamline_length.txt -stat_edge mean tracks_10000.tck synthseg_gm_atlas_dwi.nii.gz mean_length.csv -nthreads 8 -force 
+tck2connectome -symmetric -assignment_radial_search 4 -tck_weights_in sift2_weights.txt -scale_file streamline_mean_fa.txt -stat_edge mean tracks_10000.tck synthseg_gm_atlas_dwi.nii.gz mean_fa.csv -nthreads 8 -force 

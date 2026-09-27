@@ -257,7 +257,9 @@ def _run_connectome(args):
     if args.n_seeds < 1:
         raise ValueError("--n-seeds must be positive")
     inputs = [args.dwi, args.bvals, args.bvecs, args.t1,
-              args.atlas_dwi, args.t1_segmentation, args.dwi_to_t1_world]
+              args.atlas_dwi, args.t1_segmentation, args.brain_mask,
+              args.response_mask, args.fod_mask, args.normalise_mask,
+              args.fa_map, args.dwi_to_t1_world]
     inputs = [Path(value) for value in inputs if value is not None]
     for path in inputs:
         if not path.is_file():
@@ -268,8 +270,10 @@ def _run_connectome(args):
         **{name: output_dir / f"connectome_{name}.csv" for name in
            ("count", "sift2_fbc", "mean_length", "mean_fa")},
         "atlas": output_dir / "atlas_dwi.nii.gz",
-        "tissues": output_dir / "tissues_dwi.nii.gz",
+        "five_tissue": output_dir / "five_tissue_dwi_world.nii.gz",
+        "gmwmi": output_dir / "gmwmi_dwi_world.nii.gz",
         "fa": output_dir / "fa_dwi.nii.gz",
+        "brain_mask": output_dir / "brain_mask_dwi.nii.gz",
         "region_labels": output_dir / "region_labels.csv",
         "transform": output_dir / "dwi_to_t1_world.csv",
     }
@@ -286,11 +290,16 @@ def _run_connectome(args):
                                Path(args.dwi_to_t1_world).suffix == ".csv" else None)
         if transform.shape != (4, 4):
             raise ValueError("--dwi-to-t1-world must contain a 4x4 matrix")
-    result = UKBConnectome(device=args.device, synthseg_weights=args.synthseg_weights)(
+    result = UKBConnectome(device=args.device)(
         args.dwi, args.bvals, args.bvecs, args.t1,
         atlas_dwi=args.atlas_dwi,
         t1_segmentation=args.t1_segmentation,
-        segmentation_source=args.segmentation_source,
+        brain_mask=args.brain_mask,
+        shell_bvals=args.shell_bvals,
+        response_mask=args.response_mask,
+        fod_mask=args.fod_mask,
+        normalise_mask=args.normalise_mask,
+        fa_map=args.fa_map,
         dwi_to_t1_world=transform,
         n_seeds=args.n_seeds,
         seed=args.seed,
@@ -314,15 +323,18 @@ def _run_connectome(args):
         write_csv(files[name], result.matrices[name].detach().cpu().numpy(),
                   "%d" if name == "count" else "%.9g")
         print(files[name])
-    affine = result.dwi_affine.detach().cpu().numpy()
-    for name, dtype in (("atlas", np.int32), ("tissues", np.int16),
-                        ("fa", np.float32)):
+    for name, dtype, affine in (
+        ("atlas", np.int32, result.atlas_affine),
+        ("five_tissue", np.float32, result.five_tissue_affine),
+        ("gmwmi", np.float32, result.five_tissue_affine),
+        ("fa", np.float32, result.dwi_affine),
+        ("brain_mask", np.uint8, result.dwi_affine),
+    ):
         path = files[name]
         temporary = path.with_name(f".{path.name}.tmp-{uuid.uuid4().hex}.nii.gz")
         try:
             data = getattr(result, name).detach().cpu().numpy().astype(dtype)
-            image_affine = (result.atlas_affine if name == "atlas" else result.dwi_affine)
-            nib.save(nib.Nifti1Image(data, image_affine.detach().cpu().numpy()), temporary)
+            nib.save(nib.Nifti1Image(data, affine.detach().cpu().numpy()), temporary)
             os.replace(temporary, path)
         finally:
             temporary.unlink(missing_ok=True)
@@ -331,7 +343,6 @@ def _run_connectome(args):
     write_csv(files["transform"], result.dwi_to_t1_world.detach().cpu().numpy(), "%.9g")
     print(files["region_labels"])
     print(files["transform"])
-
 
 def main(argv=None):
     parser = argparse.ArgumentParser(prog='fnit')
@@ -535,18 +546,26 @@ def main(argv=None):
                           help='disable TorchFAST bias-field correction')
     fast_vbm.add_argument('--overwrite', action='store_true')
     connectome = commands.add_parser(
-        'connectome', help='one corrected DWI and T1 to four region matrices',
+        'connectome', help='corrected DWI and official FreeSurfer T1 to four region matrices',
         allow_abbrev=False)
     connectome.add_argument('--dwi', required=True, help='corrected 4D DWI NIfTI')
     connectome.add_argument('--bvals', required=True)
     connectome.add_argument('--bvecs', required=True, help='eddy-rotated FSL bvecs')
-    connectome.add_argument('--t1', required=True, help='paired T1w NIfTI')
+    connectome.add_argument('--t1', required=True, help='paired skull-stripped T1 registration image')
+    connectome.add_argument('--t1-segmentation', required=True,
+                            help='official FreeSurfer recon-all aparc+aseg.mgz')
+    connectome.add_argument('--atlas-dwi', required=True,
+                            help='integer atlas in DWI RAS world coordinates')
+    connectome.add_argument('--brain-mask',
+                            help='optional binary DWI BET mask; default native BET on LAS mean b0')
+    connectome.add_argument('--shell-bvals', type=float, nargs='+',
+                            help='optional MRtrix response-header shell centers, e.g. 5 999 1997')
+    connectome.add_argument('--response-mask', help='fixed response-selection mask on DWI grid')
+    connectome.add_argument('--fod-mask', help='fixed CSD mask; default two-pass dilation')
+    connectome.add_argument('--normalise-mask', help='fixed mtnormalise mask; default two-pass erosion')
+    connectome.add_argument('--fa-map', help='precomputed UKB dti_FA map; default DWI tensor FA')
+    connectome.add_argument('--dwi-to-t1-world', help='optional 4x4 RAS-mm transform')
     connectome.add_argument('--output-dir', required=True)
-    connectome.add_argument('--atlas-dwi', help='integer atlas on the DWI grid')
-    connectome.add_argument('--t1-segmentation', help='existing SynthSeg labels or official FreeSurfer aparc+aseg')
-    connectome.add_argument('--segmentation-source', choices=('synthseg', 'freesurfer'), default='synthseg')
-    connectome.add_argument('--dwi-to-t1-world', help='optional 4x4 RAS-mm transform, CSV or whitespace text')
-    connectome.add_argument('--synthseg-weights', help='official SynthSeg 2.0 checkpoint')
     connectome.add_argument('--device', default='cuda:0')
     connectome.add_argument('--n-seeds', type=int, required=True)
     connectome.add_argument('--seed', type=int, default=0)

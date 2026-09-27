@@ -1,0 +1,47 @@
+{
+  "dataset": "OpenNeuro ds004666 sub-01 ses-2mm corrected DWI",
+  "scope": "all original SynthSeg brain-mask voxels, all 105 DWI volumes",
+  "reference_commands": "dwi2tensor corrected.mif tensor.mif -mask synthseg_brain_mask_dwi.nii.gz\ntensor2metric tensor.mif -fa fa_corrected.mif",
+  "device": "cuda:0",
+  "torch": "2.5.1",
+  "tf32_enabled": true,
+  "shape": [
+    104,
+    104,
+    72,
+    105
+  ],
+  "masked_voxels": 208522,
+  "seconds": 0.7018143930472434,
+  "peak_torch_allocated_gib": 0.7240219116210938,
+  "input_sha256": {
+    "dwi": "9ee26b8329696d462754a441d14faa10a0f0fb774fd860feacfaf8443d83d88c",
+    "grad": "48bdb84fcd69d979a447fa578f98cb3be389d7dc6bf17f49499e59e4d6291b0d",
+    "brain_mask": "5024bd734f7a7f276575a0998c80c3d6e34b3359a458766c6e57cf86795afeb2",
+    "ref_fa": "89b2e1b45c22bedd9b7742dea95e367fe859779b2d6f1f21699e84e8e4a09101"
+  },
+  "fa": {
+    "brain_finite_voxels": 208437,
+    "brain_matching_nan_voxels": 85,
+    "brain_nonfinite_mismatch_voxels": 0,
+    "brain_mae": 1.2791501070002053e-06,
+    "brain_max_abs": 0.26661789417266846,
+    "brain_pearson": 0.9999959841130123,
+    "brain_count_abs_gt_1e-6": 1,
+    "whole_grid_finite_mae": 3.424085146189601e-07,
+    "whole_grid_finite_max_abs": 0.26661789417266846,
+    "mismatch_voxels": [
+      {
+        "ijk": [
+          25,
+          36,
+          18
+        ],
+        "candidate": 0.9769041538238525,
+        "reference": 0.7102862596511841,
+        "signal_min": -72.27116394042969,
+        "signal_max": 0.01701408438384533
+      }
+    ]
+  }
+}

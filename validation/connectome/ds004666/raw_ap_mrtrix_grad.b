@@ -1,4 +1,4 @@
-# command_history: mrinfo /cwStorage/home/gongwk/Notebook_code/brainmri_connectome_benchmark/mrtrix_raw_default/raw_ap.mif -export_grad_mrtrix /cwStorage/home/gongwk/Notebook_code/brainmri_connectome_benchmark/gradient_frame_check/raw_ap_mrtrix_grad.b  (version=3.0.3-103-g026e850d)
+# command_history: mrinfo raw_ap.mif -export_grad_mrtrix raw_ap_mrtrix_grad.b  (version=3.0.3-103-g026e850d)
 -0.5773503869 0.5773503929 -0.5773500278 5
 -0.9999949902 -0.001000981556 0.003002921931 1000
 -0.08790782343 -0.1702601171 0.9814701764 2005
