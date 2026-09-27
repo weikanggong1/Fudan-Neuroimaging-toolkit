@@ -309,16 +309,30 @@ def _extract_archive_members(archive, directory, members, prefix):
         raise ValueError(f"Atlas archive is missing expected members: {sorted(members - seen)}")
 
 
+# Data read by native_free.run_recon_all_python. Other verified assets remain
+# available through --all for isolated stage validation.
+CORE_ASSETS = (
+    "ASegStatsLUT.txt", "FreeSurferColorLUT.txt", "WMParcStatsLUT.txt",
+    "average/RB_all_2020-01-02.gca", "average/mni305.cor.stripped.mgz",
+    *(f"average/{hemi}.{atlas}.atlas.acfb40.noaparc.i12.2016-08-02.gcs"
+      for hemi in ("lh", "rh") for atlas in ("DKaparc", "CDaparc", "DKTaparc")),
+    "lib/bem/ic4.tri", "lib/bem/ic7.tri",
+)
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--asset", action="append", choices=ASSET_FILES,
-                        help="Asset to install; repeat to select multiple (default: all verified assets)")
+                        help="Asset to install; repeat to select multiple (default: Python recon-all assets)")
+    parser.add_argument("--all", action="store_true", help="Install all verified stage-validation assets")
     parser.add_argument("--dest", type=Path, help="Asset directory; saved for later runs")
     parser.add_argument("--verify-only", action="store_true", help="Check local files without downloading")
     args = parser.parse_args(argv)
+    if args.asset and args.all:
+        parser.error("--asset and --all are mutually exclusive")
     directory = Path(args.dest or os.environ.get("FNIT_ASSETS")
                      or configured_dir() or cache_dir() / "recon_all_assets").expanduser().resolve()
-    for name in args.asset or ASSET_FILES:
+    for name in (args.asset or (ASSET_FILES if args.all else CORE_ASSETS)):
         print(f"Verified {download_asset(name, directory, verify_only=args.verify_only)}")
     if not args.verify_only:
         save_config(directory)

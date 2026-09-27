@@ -9,7 +9,7 @@ import torch
 
 from fnit.bedpostx import TorchBEDPOSTX
 from fnit.probtrackx import TorchProbtrackX
-from fnit.bedpostx.core import BedpostXConfig, _sample_chunk, _signal_model
+from fnit.bedpostx.core import BedpostXConfig, _energy, _sample_chunk, _signal_model
 
 
 def test_multishell_forward_signal():
@@ -26,6 +26,18 @@ def test_multishell_forward_signal():
     expected = np.array([100.0, 100 * ball,
                          100 * (0.4 * ball + 0.6)], dtype=np.float32)
     np.testing.assert_allclose(signal.numpy(), expected, atol=1e-4)
+
+
+def test_near_zero_priors_follow_fsl_log_density():
+    state = {"s0": torch.tensor([100.0]), "d": torch.tensor([0.001]),
+             "d_std": torch.tensor([1e-9]), "f": torch.tensor([[0.5, 1e-9]]),
+             "th": torch.tensor([[1.0, 1.0]]), "ph": torch.tensor([[0.0, 0.0]])}
+    smaller = {**state, "d_std": torch.tensor([1e-10]),
+               "f": torch.tensor([[0.5, 1e-10]])}
+    args = (torch.tensor([[101.0]]), torch.tensor([0.0]),
+            torch.zeros((1, 3)), BedpostXConfig(nfibres=2, model=2))
+    difference = (_energy(smaller, *args) - _energy(state, *args)).item()
+    assert difference == pytest.approx(-2 * np.log(10), abs=1e-5)
 
 
 def test_posterior_files_and_geometry(tmp_path):

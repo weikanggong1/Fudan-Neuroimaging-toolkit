@@ -1,7 +1,7 @@
 # 预训练权重：下载、校验与公开发布
 
 Git 仓库和 wheel 均不包含权重。SynthStrip、SynthMorph、33 类 SynthSeg、
-WMH-SynthSeg、SynthSR 和 GPU recon-all 辅助分割使用 FreeSurfer 官方发布的文件；
+WMH-SynthSeg、SynthSR、Python recon-all 和可选辅助分割阶段使用 FreeSurfer 官方发布的文件；
 配置脚本下载文件、核对大小与 SHA-256，并
 保存权重目录。此后 Python API 和 `fnit` 命令会自动查找它，下载过程无需安装
 FreeSurfer。TorchFAST、TorchFLIRT 和 TorchFNIRT 是数值算法，
@@ -28,7 +28,7 @@ python tools/setup_weights.py --model synthstrip --model synthmorph-joint
 python tools/setup_weights.py --model wmh-synthseg
 ```
 
-GPU recon-all 使用另一份 **33 类 SynthSeg** 模型，不能用 WMH-SynthSeg 的 39 类 checkpoint 替代。只安装该模型及三个配套 `.npy`，或安装完整 GPU recon-all 的 13 个模型/查找表资源：
+Python recon-all 使用另一份 **33 类 SynthSeg** 模型，不能用 WMH-SynthSeg 的 39 类 checkpoint 替代。整例入口下载 6 个实际使用的权重/标签文件；独立 SynthSeg 只需其中四个：
 
 ```bash
 python tools/setup_weights.py --model synthseg
@@ -51,9 +51,9 @@ python tools/setup_weights.py --all --verify-only
 
 `--verify-only` 只检查当前权重目录，不下载或修改配置。已从联网机器复制了权重时，运行 `python tools/setup_weights.py --all --dest /path/to/copied/models`：现有文件校验成功后直接保存目录，无需重新下载。安装 wheel 后也可使用相同选项的 `fnit-setup-weights` 命令。
 
-可选模型名：`synthstrip`、`synthstrip-nocsf`、`synthmorph-rigid`、`synthmorph-affine`、`synthmorph-deform`、`synthmorph-joint`、`synthseg`、`wmh-synthseg`、`recon-all`、`synthsr`、`synthsr-lowfield`、`synthsr-v1` 和 `fast-vbm`。`recon-all` 包含已有的 SynthStrip/SynthMorph 权重及十个专用资源，重复选择时只下载一次。`fast-vbm` 是 `synthstrip.1.pt` 与 `synthmorph.deform.3.h5` 的依赖别名，覆盖 FastVBM 两个后端可能使用的权重。只运行 `registration_backend="fnirt"` 可选择 `--model synthstrip`；若调用时还提供显式脑 mask，则该分支不需要任何 checkpoint。`--model` 可重复；不写 `--model` 时等同 `--all`。显式 API/CLI 权重路径优先，其次是 `FNIT_WEIGHTS` 环境变量，再次是脚本保存的目录，然后是默认缓存和现有 FreeSurfer 模型目录。`XDG_CACHE_HOME` 可改变缓存根目录。模型推理不会联网，只有运行配置脚本才会下载。
+可选模型名：`synthstrip`、`synthstrip-nocsf`、`synthmorph-rigid`、`synthmorph-affine`、`synthmorph-deform`、`synthmorph-joint`、`synthseg`、`wmh-synthseg`、`recon-all`、`synthsr`、`synthsr-lowfield`、`synthsr-v1` 和 `fast-vbm`。`recon-all` 包含 SynthStrip、SynthMorph affine 和 33 类 SynthSeg 的六个文件，重复选择时只下载一次。`fast-vbm` 是 `synthstrip.1.pt` 与 `synthmorph.deform.3.h5` 的依赖别名，覆盖 FastVBM 两个后端可能使用的权重。只运行 `registration_backend="fnirt"` 可选择 `--model synthstrip`；若调用时还提供显式脑 mask，则该分支不需要任何 checkpoint。`--model` 可重复；不写 `--model` 时等同 `--all`。显式 API/CLI 权重路径优先，其次是 `FNIT_WEIGHTS` 环境变量，再次是脚本保存的目录，然后是默认缓存和现有 FreeSurfer 模型目录。`XDG_CACHE_HOME` 可改变缓存根目录。模型推理不会联网，只有运行配置脚本才会下载。
 
-原有九个链接、HTTP 状态和文件大小于 **2026-09-23** 核验；新增十个 GPU recon-all 专用文件于 **2026-09-25** 从 FreeSurfer `v8.2.0` 官方源码/git-annex 完整下载，逐一核对大小和 SHA-256，且与已验证的运行包清单完全一致。SynthStrip/SynthMorph 的 SHA-256 来自本包已完成数值验证的权重，并与 FreeSurfer 官方仓库的 git-annex 指针一致；WMH-SynthSeg 和 SynthSR v1 的 SHA-256 来自官方文件的完整下载校验。SynthSR v2 两份文件的大小和 SHA-256 与 FreeSurfer git-annex 对象名一致；配置脚本下载后还会逐字节校验。此处的版本号固定，不会自动跟随上游替换为新模型。
+原有九个链接、HTTP 状态和文件大小于 **2026-09-23** 核验；新增十个 FreeSurfer 8.2 模型和查找表于 **2026-09-25** 从官方源码/git-annex 完整下载，逐一核对大小和 SHA-256。SynthStrip/SynthMorph 的 SHA-256 来自本包已完成数值验证的权重，并与 FreeSurfer 官方仓库的 git-annex 指针一致；WMH-SynthSeg 和 SynthSR v1 的 SHA-256 来自官方文件的完整下载校验。SynthSR v2 两份文件的大小和 SHA-256 与 FreeSurfer git-annex 对象名一致；配置脚本下载后还会逐字节校验。此处的版本号固定，不会自动跟随上游替换为新模型。
 
 ## 官方文件
 
@@ -72,14 +72,14 @@ python tools/setup_weights.py --all --verify-only
 | 33 类 SynthSeg | [synthseg_segmentation_labels_2.0.npy](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_segmentation_labels_2.0.npy) | 348 | 标签编号 |
 | 33 类 SynthSeg | [synthseg_segmentation_names_2.0.npy](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_segmentation_names_2.0.npy) | 7,168 | 标签名称 |
 | 33 类 SynthSeg | [synthseg_topological_classes_2.0.npy](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_topological_classes_2.0.npy) | 348 | 拓扑类别 |
-| recon-all 辅助分割 | [entowm.fsm31.t1.nstd00-30.nstd21-108.h5](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_sclimbic_seg/entowm.fsm31.t1.nstd00-30.nstd21-108.h5) | 3,296,904 | EntoWM 模型 |
-| recon-all 辅助分割 | [entowm.ctab](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_sclimbic_seg/entowm.ctab) | 318 | EntoWM 查找表 |
-| recon-all 辅助分割 | [mca-dura.both-lh.nstd21.fhs.h5](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_sclimbic_seg/mca-dura.both-lh.nstd21.fhs.h5) | 3,294,856 | MCA/dura 模型 |
-| recon-all 辅助分割 | [mca-dura.ctab](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_sclimbic_seg/mca-dura.ctab) | 116 | MCA/dura 查找表 |
-| recon-all 辅助分割 | [vsinus.no-sp.m.all.nstd10-070.h5](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_sclimbic_seg/vsinus.no-sp.m.all.nstd10-070.h5) | 3,296,904 | 静脉窦模型 |
-| recon-all 辅助分割 | [sclimbic.volstats.csv](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_sclimbic_seg/sclimbic.volstats.csv) | 500 | 上游体积统计字段表 |
+| 可选辅助分割阶段 | [entowm.fsm31.t1.nstd00-30.nstd21-108.h5](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_sclimbic_seg/entowm.fsm31.t1.nstd00-30.nstd21-108.h5) | 3,296,904 | EntoWM 模型 |
+| 可选辅助分割阶段 | [entowm.ctab](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_sclimbic_seg/entowm.ctab) | 318 | EntoWM 查找表 |
+| 可选辅助分割阶段 | [mca-dura.both-lh.nstd21.fhs.h5](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_sclimbic_seg/mca-dura.both-lh.nstd21.fhs.h5) | 3,294,856 | MCA/dura 模型 |
+| 可选辅助分割阶段 | [mca-dura.ctab](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_sclimbic_seg/mca-dura.ctab) | 116 | MCA/dura 查找表 |
+| 可选辅助分割阶段 | [vsinus.no-sp.m.all.nstd10-070.h5](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_sclimbic_seg/vsinus.no-sp.m.all.nstd10-070.h5) | 3,296,904 | 静脉窦模型 |
+| 可选辅助分割阶段 | [sclimbic.volstats.csv](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_sclimbic_seg/sclimbic.volstats.csv) | 500 | 上游体积统计字段表 |
 
-合计 **4,792,356,791 字节**，约 4.79 GB（4.46 GiB）。其中 `synthseg` 单独安装需四个文件、53,087,016 字节；`recon-all` 组需 13 个文件、3,653,914,059 字节，包含已有的 SynthStrip/SynthMorph 权重。只使用默认 SynthStrip 时需要第一个文件；默认 joint 配准需要 affine 和 deform 两个文件；WMH-SynthSeg 只需其单独的 `.pth`；默认 SynthSR 只需通用 v2 的 `.h5`。[33 类 SynthSeg 官方目录](https://github.com/freesurfer/freesurfer/tree/v8.2.0/mri_synthseg) · [辅助分割官方目录](https://github.com/freesurfer/freesurfer/tree/v8.2.0/mri_sclimbic_seg) · [WMH 官方目录](https://github.com/freesurfer/freesurfer/tree/dev/mri_WMHsynthseg) · [SynthSR 官方目录](https://github.com/freesurfer/freesurfer/tree/dev/mri_synthsr)
+合计 **4,792,356,791 字节**，约 4.79 GB（4.46 GiB）。其中 `synthseg` 单独安装需四个文件、53,087,016 字节；`recon-all` 组需 6 个文件、135,394,037 字节，不下载未接入整例流程的 deform 与辅助分割模型。只使用默认 SynthStrip 时需要第一个文件；默认 joint 配准需要 affine 和 deform 两个文件；WMH-SynthSeg 只需其单独的 `.pth`；默认 SynthSR 只需通用 v2 的 `.h5`。[33 类 SynthSeg 官方目录](https://github.com/freesurfer/freesurfer/tree/v8.2.0/mri_synthseg) · [辅助分割官方目录](https://github.com/freesurfer/freesurfer/tree/v8.2.0/mri_sclimbic_seg) · [WMH 官方目录](https://github.com/freesurfer/freesurfer/tree/dev/mri_WMHsynthseg) · [SynthSR 官方目录](https://github.com/freesurfer/freesurfer/tree/dev/mri_synthsr)
 
 SHA-256：
 
@@ -105,7 +105,7 @@ da6a7b994e3e804cc3dc0e98e965c28a802ddcd38fd9b5c680d75cef285657b0  mca-dura.both-
 691b8e1a1d74668b65a0571e2854a4a83c484438107693d71eef5a081d17380b  sclimbic.volstats.csv
 ```
 
-也可在 [provenance.json](provenance.json) 查看 SynthStrip/SynthMorph 权重与参考实现的来源记录。SynthMorph、SynthSR v2 和 33 类 SynthSeg 的 `.h5` 由 FreeSurfer 的 git-annex 管理；直接下载 GitHub 同名 `raw` 路径可能只得到链接文本。本表链接指向实际 annex 对象；新增的十个 recon-all 专用文件均已完整下载校验。[官方 SynthMorph 目录](https://github.com/freesurfer/freesurfer/tree/dev/mri_synthmorph) · [FreeSurfer git-annex 构建说明](https://surfer.nmr.mgh.harvard.edu/fswiki/BuildGuide)
+也可在 [provenance.json](provenance.json) 查看 SynthStrip/SynthMorph 权重与参考实现的来源记录。SynthMorph、SynthSR v2 和 33 类 SynthSeg 的 `.h5` 由 FreeSurfer 的 git-annex 管理；直接下载 GitHub 同名 `raw` 路径可能只得到链接文本。本表链接指向实际 annex 对象；新增的十个 FreeSurfer 模型及查找表均已完整下载校验。[官方 SynthMorph 目录](https://github.com/freesurfer/freesurfer/tree/dev/mri_synthmorph) · [FreeSurfer git-annex 构建说明](https://surfer.nmr.mgh.harvard.edu/fswiki/BuildGuide)
 
 ## 手动下载示例
 
