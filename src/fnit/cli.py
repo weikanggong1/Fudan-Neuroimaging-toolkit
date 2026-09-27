@@ -564,6 +564,9 @@ def main(argv=None):
     if selected and selected[0] == "flirt":
         _run_flirt(parser.parse_args(selected))
         return
+    if selected and selected[0] == "connectome":
+        _run_connectome(parser.parse_args(selected))
+        return
     if selected and selected[0] == "synthsr":
         _run_synthsr(parser.parse_args(selected))
         return
@@ -606,9 +609,6 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if hasattr(args, '_fnit_handler'):
         args._fnit_handler(args)
-        return
-    if args.command == 'connectome':
-        _run_connectome(args)
         return
     if args.command == 'synthseg':
         _run_synthseg(args)

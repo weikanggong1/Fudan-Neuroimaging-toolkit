@@ -68,12 +68,11 @@ def _tissue_labels(segmentation: torch.Tensor):
 def _registration(b0: torch.Tensor, dwi_affine: torch.Tensor, t1_path: str | Path,
                   device: torch.device):
     # Match the UKB script's rigid-body normalized-mutual-information profile.
-    import surfa as sf
     from ..flirt import TorchFLIRT
+    from ..synthstrip.geometry import Volume
     b0_cpu = b0.detach().cpu().numpy()
-    geometry = sf.ImageGeometry(shape=b0_cpu.shape, vox2world=dwi_affine.cpu().numpy())
-    moving = sf.Volume(b0_cpu, geometry=geometry)
-    result = TorchFLIRT(device=str(device), dof=6, cost="normmi")(moving, sf.load_volume(str(t1_path)))
+    moving = Volume(b0_cpu, dwi_affine.cpu().numpy())
+    result = TorchFLIRT(device=str(device), dof=6, cost="normmi")(moving, t1_path)
     return torch.as_tensor(result.moving_to_fixed_world, device=device, dtype=torch.float32)
 
 

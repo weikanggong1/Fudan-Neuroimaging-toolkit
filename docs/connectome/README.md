@@ -16,17 +16,23 @@
 ```python
 from fnit import UKBConnectome
 
-model = UKBConnectome(device="cuda:0", synthseg_weights=None)
-result = model(
-    "derivatives/dwi/sub-01_desc-preproc_dwi.nii.gz",
-    "derivatives/dwi/sub-01_desc-preproc_dwi.bval",
-    "derivatives/dwi/sub-01_desc-eddyRotated_dwi.bvec",
-    "sub-01/anat/sub-01_T1w.nii.gz",
-    atlas_dwi="derivatives/atlas/sub-01_space-dwi_atlas.nii.gz",
-    n_seeds=10_000,
-    seed=0,
+model = UKBConnectome(
+    device="cuda:0",                         # PyTorch 计算设备
+    synthseg_weights=None,                   # 默认权重目录；也可传入权重路径
 )
-count = result.matrices["count"]
+result = model(
+    dwi="derivatives/dwi/sub-01_desc-preproc_dwi.nii.gz",  # 已校正的四维 DWI
+    bvals="derivatives/dwi/sub-01_desc-preproc_dwi.bval",  # 与每个体积配对的 b 值
+    bvecs="derivatives/dwi/sub-01_desc-eddyRotated_dwi.bvec",  # 已旋转方向
+    t1="sub-01/anat/sub-01_T1w.nii.gz",       # 同一被试 T1w
+    atlas_dwi="derivatives/atlas/sub-01_space-dwi_atlas.nii.gz",  # DWI 空间标签
+    t1_segmentation=None,                    # 无现成标签时运行 SynthSeg
+    segmentation_source="synthseg",          # 标签来源
+    dwi_to_t1_world=None,                    # None 时自动运行 6 DOF TorchFLIRT
+    n_seeds=10_000,                          # 纤维播种尝试次数
+    seed=0,                                  # 随机种子
+)
+count = result.matrices["count"]           # 脑区间纤维计数矩阵
 ```
 
 | 参数 | 约定 |
@@ -46,7 +52,9 @@ count = result.matrices["count"]
 T1 标签通过所给或估计的 RAS-mm 变换以最近邻采样到 DWI 网格。原脚本用
 6-DOF、normmi 的 FSL FLIRT；当前自动变换使用本包的同配置 TorchFLIRT。
 若要固定配准条件，请提供显式 `dwi_to_t1_world`。FSL scaled-mm `.mat` 不能
-直接传给这个参数。
+直接传给这个参数。自动配准的内部函数 `_registration` 接收三维 b0 张量、DWI 体素到 RAS 世界的 4×4 仿射、T1 路径和 PyTorch 设备；返回 `torch.float32` 的 4×4 DWI 世界坐标到 T1 世界坐标矩阵。路径读取使用 NiBabel，内存图像使用仓库 `Volume`，此步骤不导入 Surfa。对应官方命令为 `flirt -in mean_b0.nii.gz -ref T1w.nii.gz -cost normmi -dof 6 -omat b0_to_t1.mat`；官方 `.mat` 需要按 FSL 坐标规则转换后才能传给 `dwi_to_t1_world`。
+
+[当前真实校正 b0/T1 的 Surfa 迁移验证](../../validation/connectome_registration_no_surfa_20260928/README.md)显示新旧 `_registration` 世界矩阵逐元素相同。该隔离验证没有重跑 FOD、追踪、SIFT2 或四张矩阵，完整 connectome 的历史对照仍以下文所列原始报告为准。
 
 `UKBConnectome(...)` 返回 `ConnectomeResult`。`matrices` 包含下表四个键，
 所有矩阵为 `K×K`、对称，未分配的纤维不计入；自连接保留。
@@ -68,6 +76,11 @@ T1 标签通过所给或估计的 RAS-mm 变换以最近邻采样到 DWI 网格�
 ## 命令行
 
 ```bash
+# --dwi：已校正的四维 DWI；--bvals：逐体积 b 值。
+# --bvecs：eddy 旋转后的梯度方向；--t1：同一被试 T1w。
+# --atlas-dwi：DWI 世界坐标中的标签图；--t1-segmentation：既有 T1 标签。
+# --segmentation-source：标签来源；--output-dir：结果目录。
+# --device：PyTorch 设备；--n-seeds：播种次数；--seed：随机种子。
 fnit connectome \
   --dwi derivatives/dwi/sub-01_desc-preproc_dwi.nii.gz \
   --bvals derivatives/dwi/sub-01_desc-preproc_dwi.bval \

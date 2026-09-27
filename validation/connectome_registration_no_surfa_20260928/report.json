@@ -1,0 +1,92 @@
+{
+  "date": "2026-09-28",
+  "scope": "Replace the Surfa objects in connectome _registration only; FLIRT optimization, tracking, FOD, SIFT2 and matrix assignment unchanged",
+  "input": {
+    "source": "OpenNeuro ds004666 real T1w paired with FSL TOPUP/EDDY-corrected AP DWI mean b0",
+    "b0_selection": "arithmetic mean of corrected DWI volume indices 0, 21, 42, 63, 84; retained DWI affine",
+    "b0_shape": [
+      104,
+      104,
+      72
+    ],
+    "b0_sha256": "0c1dee4472694a9c43d8355136ae2467d3a90d9f76729371ef95623fc7b1413d",
+    "t1_shape": [
+      208,
+      274,
+      245
+    ],
+    "t1_sha256": "80ace482fbc8a5f18423e202118e58d8c9e9ac9bbd1fea9f243de3fff2572017",
+    "old_new_volume_data_differing_voxels": 0,
+    "old_new_volume_affine_max_absolute_difference": 0.0,
+    "old_new_volume_voxsize_max_absolute_difference": 0.0
+  },
+  "environment": {
+    "host": "headcw",
+    "device": "CPU",
+    "torch_threads": 8,
+    "torch": "2.5.1",
+    "nibabel": "5.4.2",
+    "numpy": "1.26.4",
+    "surfa_reference_only": "0.6.3",
+    "fsl_reference_only": "6.0.7.4",
+    "timing_boundary": "Only _registration or the corresponding FSL flirt command; each arm run once on a shared host"
+  },
+  "old_new": {
+    "profile": "TorchFLIRT dof=6 cost=normmi, PyTorch inference_mode",
+    "old_wall_seconds": 15.75421879068017,
+    "new_wall_seconds": 14.20677996519953,
+    "output": "DWI world-RAS to T1 world-RAS 4x4 torch.float32 matrix",
+    "matrix_differing_elements": 0,
+    "matrix_max_absolute_difference": 0.0,
+    "matrix_npy_sha256_old_new": "32a318fc7813b281838bd964cb0d3965012c72cbbdbe48db4e2f4d3d3a7f5221",
+    "new_surfa_import_blocked": true,
+    "old_surfa_module_loaded": true,
+    "new_surfa_module_loaded": false,
+    "world_ras_matrix": [
+      [
+        0.9999459385871887,
+        0.00982153695076704,
+        0.0019499626941978931,
+        0.09063348174095154
+      ],
+      [
+        -0.009819403290748596,
+        0.9999511241912842,
+        -0.0011337853502482176,
+        -0.9168451428413391
+      ],
+      [
+        -0.001960898982360959,
+        0.001114558894187212,
+        0.9999974370002747,
+        -1.8967170715332031
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "official_fsl_vs_new": {
+    "command": "flirt -in mean_b0.nii.gz -ref T1w.nii.gz -cost normmi -dof 6 -omat official_flirt.mat",
+    "fsl_wall_seconds": 13.43,
+    "fsl_matrix_sha256": "ced00cdc712febbf5346d1a844cc7caf6d1ed6098a3bdbabf76e56e353a66428",
+    "comparison": "Convert FSL scaled-mm matrix to DWI-to-T1 world-RAS, sample 13x13x13 points across DWI voxel grid, calculate Euclidean displacement from FNIT matrix",
+    "world_displacement_rms_mm": 1.260973012930673,
+    "world_displacement_max_mm": 2.224321060503884,
+    "note": "This full-head b0/T1 comparison differs from the prior brain-extracted b0/T1 benchmark; old and new FNIT matrices are identical, so the FSL difference predates this migration"
+  },
+  "public_interface_checks": {
+    "fnit_connectome_help_with_surfa_import_blocked": true,
+    "targeted_cpu_tests_with_surfa_import_blocked": "2 passed, 1 deselected in 2.37 s",
+    "targeted_tests_use_explicit_transform": true,
+    "targeted_cli_tests_with_surfa_import_blocked": "4 passed in 1.32 s"
+  },
+  "not_tested": [
+    "Full real-data connectome, FOD, tractography, SIFT2 and four region matrices were not rerun",
+    "No new GPU paired registration timing",
+    "Only one real corrected b0/T1 pair and one execution per arm; no speedup conclusion"
+  ]
+}

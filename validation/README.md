@@ -19,7 +19,7 @@
 - MMORF：[`mmorf/report.public.json`](mmorf/report.public.json) 与[功能页](../docs/mmorf/README.md)。
 - dMRI 参数图 pipeline：当前 matched-native TBSS 结果见 [`dmri_pipeline/tbss_diagnosis.public.json`](dmri_pipeline/tbss_diagnosis.public.json)，MMORF 注册结果见 [`mmorf/report.public.json`](mmorf/report.public.json)；raw-to-standard fresh benchmark 尚未完成。
 - BEDPOSTX 与 ProbtrackX：[`bedpostx/README.md`](bedpostx/README.md)、[`probtrackx/README.md`](probtrackx/README.md) 及各自功能页。
-- Connectome：[固定端点矩阵赋值报告](connectome/assignment_report.public.json)、[ds004666 真实 DWI 配对报告](connectome/ds004666/README.md)、[官方 FreeSurfer 解剖阶段对照](connectome/ds004666/ANATOMY_STAGE_20260927.md)与[功能页](../docs/connectome/README.md)；完整流程未达到原软件输出一致。
+- Connectome：[自动配准无 Surfa 核对](connectome_registration_no_surfa_20260928/README.md)、[固定端点矩阵赋值报告](connectome/assignment_report.public.json)、[ds004666 真实 DWI 配对报告](connectome/ds004666/README.md)、[官方 FreeSurfer 解剖阶段对照](connectome/ds004666/ANATOMY_STAGE_20260927.md)与[功能页](../docs/connectome/README.md)；完整流程未达到原软件输出一致。
 
 ## 功能子页面审计
 
