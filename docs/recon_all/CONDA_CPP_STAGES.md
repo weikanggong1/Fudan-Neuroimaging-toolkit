@@ -8,13 +8,19 @@
 from fnit.recon_all.native_free import run_recon_all_python
 
 report = run_recon_all_python(
-    "subject_T1w.nii.gz", "/scratch/subjects/sub01",
-    "/path/to/weights", "/path/to/assets",
-    device="cuda:0", threads=4,
-    native_bin_dir="/path/to/recon-cpp-build/bin",
-    native_topology=True, native_sphere=True,
-    native_surface_metrics=True, native_registration=True,
+    t1="subject_T1w.nii.gz",  # 单幅 T1w NIfTI
+    subject_dir="/scratch/subjects/sub01",  # 空被试输出目录
+    weights_dir="/path/to/weights",  # 外置模型目录
+    assets_dir="/path/to/assets",  # 外置模板和图谱目录
+    device="cuda:0",  # PyTorch 推理设备
+    threads=4,  # CPU 线程数
+    native_bin_dir="/path/to/recon-cpp-build/bin",  # Conda 编译程序目录
+    native_topology=True,  # 拓扑修复及 Python remesh
+    native_sphere=True,  # 膨胀与 Python 球面
+    native_surface_metrics=True,  # Conda 顶点指标程序
+    native_registration=True,  # Python 球面配准
 )
+# report 是含阶段耗时、输出路径及实现来源的运行记录字典。
 ```
 
 ```bash
@@ -25,6 +31,8 @@ fnit-recon-all subject_T1w.nii.gz /scratch/subjects/sub01 \
   --native-bin-dir /path/to/recon-cpp-build/bin \
   --native-topology --native-sphere --native-surface-metrics --native-registration
 ```
+
+CLI 前两个位置参数依次是 T1w 输入和空输出目录；`--weights-dir`、`--assets-dir`、`--native-bin-dir` 分别指外置模型、模板和 Conda 编译程序目录；`--device` 选 PyTorch 设备，`--threads` 指 CPU 线程数。`FS_LICENSE` 是外部许可证路径。输出目录中的 `mri/`、`surf/`、`label/`、`stats/` 与运行报告结构见[主文档](README.md#输入与输出结构)。
 
 `native_bin_dir` 提供三个必需程序；`native_topology` 启用 Python 居中球、Conda `mris_fix_topology_fnit` 及 Python remesh，`native_sphere` 启用 `mris_inflate` 加 Python 双球面，`native_surface_metrics` 启用 `mris_place_surface` 的五张指标图，`native_registration` 启用 Python 球面配准。后两个球面开关仍沿用原 CLI/Python 名称以保持调用兼容，内部数值实现已换成 Python。`native_sphere` 和 `native_registration` 均要求 `native_topology`。多被试仅提供 `fnit.recon_all.batch.run_recon_all_python_batch` Python API，返回按输入顺序排列的单被试报告；输入/输出目录及报告结构见[主文档](README.md#输入与输出结构)。
 
