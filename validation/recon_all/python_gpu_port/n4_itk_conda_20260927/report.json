@@ -75,5 +75,23 @@
       45
     ]
   },
-  "scope": "isolated real T1 N4 plus Python nu postprocessing; no whole-subject rerun"
+  "scope": "isolated real T1 N4, Python nu postprocessing, and Python T1 normalization propagation; no whole-subject rerun",
+  "downstream_t1_isolated_probe": {
+    "function": "fnit.recon_all.normalization.pipeline.normalize_t1",
+    "transform": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_reference_gpucw1/fs_sub01/mri/transforms/talairach.xfm",
+    "reference_input": "saved official nu.mgz",
+    "candidate_input": "current Conda N4 plus Python make_nu nu.mgz",
+    "equal_between_python_outputs": 16777199,
+    "different_between_python_outputs": 17,
+    "maximum_absolute_difference_between_python_outputs": 2,
+    "equal_reference_python_t1_vs_official_t1": 16777104,
+    "equal_candidate_python_t1_vs_official_t1": 16777089,
+    "reference_python_t1_vs_official_t1_mae": 7.867813110351562e-06,
+    "candidate_python_t1_vs_official_t1_mae": 9.000301361083984e-06,
+    "reference_python_t1_sha256": "2662733dd59c20f66845d639a7b63cff2e2a4edb2ca15b77f164ceb0c4910281",
+    "candidate_python_t1_sha256": "400cd641c1ff27fe93492589318ad5a01624e0e0e5f16a6b39f0c2631aa8169c",
+    "official_t1_sha256": "5b319b3cb0dea02b59a7e8190417e75bd9a494e1a96c9318d8d90d4edbaf3427",
+    "reference_python_seconds": 70.31,
+    "candidate_python_seconds": 64.61
+  }
 }
