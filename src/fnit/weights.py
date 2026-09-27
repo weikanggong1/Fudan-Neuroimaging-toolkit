@@ -85,7 +85,8 @@ MODEL_FILES = {
     "recon-all": (
         "synthstrip.1.pt", "synthmorph.affine.2.h5",
         "synthseg_2.0.h5", "synthseg_segmentation_labels_2.0.npy",
-        "synthseg_segmentation_names_2.0.npy", "synthseg_topological_classes_2.0.npy"),
+        "synthseg_segmentation_names_2.0.npy", "synthseg_topological_classes_2.0.npy",
+        "entowm.fsm31.t1.nstd00-30.nstd21-108.h5", "entowm.ctab"),
     "synthsr": ("synthsr_v20_230130.h5",),
     "synthsr-lowfield": ("synthsr_lowfield_v20_230130.h5",),
     "synthsr-v1": ("synthsr_v10_210712.h5",),

@@ -312,7 +312,8 @@ def _extract_archive_members(archive, directory, members, prefix):
 # Data read by native_free.run_recon_all_python. Other verified assets remain
 # available through --all for isolated stage validation.
 CORE_ASSETS = (
-    "ASegStatsLUT.txt", "FreeSurferColorLUT.txt", "WMParcStatsLUT.txt",
+    "ASegStatsLUT.txt", "FreeSurferColorLUT.txt",
+    "SubCorticalMassLUT.txt", "WMParcStatsLUT.txt",
     "average/RB_all_2020-01-02.gca", "average/mni305.cor.stripped.mgz",
     *(f"average/{hemi}.{atlas}.atlas.acfb40.noaparc.i12.2016-08-02.gcs"
       for hemi in ("lh", "rh") for atlas in ("DKaparc", "CDaparc", "DKTaparc")),

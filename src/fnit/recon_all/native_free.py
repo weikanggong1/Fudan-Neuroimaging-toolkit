@@ -20,7 +20,6 @@ import time
 import nibabel as nib
 import nibabel.freesurfer.io as fs
 import numpy as np
-from scipy import ndimage as ndi
 from scipy.spatial import cKDTree
 import torch
 
@@ -58,6 +57,22 @@ def _native_inflate_binary(native_bin_dir: str | Path) -> tuple[Path, str]:
 
 def _native_sphere_binary(native_bin_dir: str | Path) -> tuple[Path, str]:
     return _native_binary(native_bin_dir, "mris_sphere")
+
+
+def _run_native_wm_segment(binary: Path, mri: Path, assets: Path) -> None:
+    env = dict(os.environ, FREESURFER_HOME=str(assets))
+    subprocess.run([str(binary), "-wsizemm", "13", "-mprage",
+                    "antsdn.brain.mgz", "wm.seg.mgz"],
+                   cwd=mri, env=env, check=True)
+
+
+def _run_native_wm_edit(binary: Path, mri: Path, assets: Path) -> None:
+    env = dict(os.environ, FREESURFER_HOME=str(assets))
+    subprocess.run([str(binary), "-keep-in", "-fix-ento-wm", "entowm.mgz",
+                    "3", "255", "255", "-fix-acj", "aseg.presurf.mgz",
+                    "255", "255", "-fill-seg-wm", "-fix-scm-ha", "1",
+                    "wm.seg.mgz", "brain.mgz", "aseg.presurf.mgz",
+                    "wm.asegedit.mgz"], cwd=mri, env=env, check=True)
 
 
 def _folding_atlas(assets: Path, hemi: str) -> Path:
@@ -226,15 +241,6 @@ def _replace_vertices(source: Path, output: Path, vertices: np.ndarray) -> None:
                        + raw[start + 12 * count:])
 
 
-def _largest_filled(mask: np.ndarray) -> np.ndarray:
-    components, count = ndi.label(mask)
-    if count == 0:
-        raise ValueError("hemisphere has no white matter")
-    sizes = np.bincount(components.ravel())
-    sizes[0] = 0
-    return ndi.binary_fill_holes(components == np.argmax(sizes))
-
-
 def _pial_from_cortex(white: np.ndarray, faces: np.ndarray,
                       image: nib.MGHImage, segmentation: np.ndarray,
                       hemi: str) -> tuple[np.ndarray, np.ndarray]:
@@ -273,6 +279,7 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
                   native_surface_metrics_binary: Path | None = None,
                   native_sphere_binaries: tuple[Path, Path] | None = None,
                   native_registration: bool = False,
+                  native_wm_chain: bool = False,
                   assets: Path | None = None) -> dict:
     from .extract_main_component_python import extract_main_component
     from .pretess_python import pretess_mgh
@@ -369,9 +376,11 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
                                  ("K1", k1), ("K2", k2)):
                 fs.write_morph_data(str(surf / f"{hemi}.smoothwm.{name}.crv"),
                                     np.asarray(values, np.float32))
-    approximations = (["filled-from-SynthSeg-WM", "topology-native-on-approximate-upstream"]
-                      if native_topology_binary is not None else
-                      ["filled-from-SynthSeg-WM", "topology-unrepaired"])
+    approximations = ([] if native_wm_chain else ["filled-from-SynthSeg-WM"])
+    if native_topology_binary is None:
+        approximations.append("topology-unrepaired")
+    elif not native_wm_chain:
+        approximations.append("topology-native-on-approximate-upstream")
     if native_surface_metrics_binary is not None:
         approximations.append("native-metrics-on-approximate-white-pial")
     registration_approximation = (
@@ -462,8 +471,9 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          native_topology: bool = False,
                          native_surface_metrics: bool = False,
                          native_registration: bool = False,
-                         native_sphere: bool = False) -> dict:
-    """Run the approximate fixed profile with optional external C++ stages."""
+                         native_sphere: bool = False,
+                         experimental_approximate_wm: bool = False) -> dict:
+    """Run the Conda WM chain; retain the old SynthSeg WM baseline by explicit opt-in."""
     from fnit.synthseg_parc import SynthSeg
     from .brain_volume_stats_python import compute_brain_volume_stats
     from .ca_normalize_python import run_ca_normalize
@@ -477,13 +487,14 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     from .segstats_wmparc_python import write_wmparc_stats
     from .anatomical_stats_file import write_anatomical_stats
 
+    native_wm_chain = not experimental_approximate_wm
     t1, subject = Path(t1).resolve(), Path(subject_dir).resolve()
     weights, assets = Path(weights_dir).resolve(), Path(assets_dir).resolve()
     if not t1.is_file() or not weights.is_dir() or not assets.is_dir():
         raise FileNotFoundError("T1, weights, and assets must exist")
     if subject.exists() and any(subject.iterdir()):
         raise ValueError("subject_dir must be empty")
-    if (native_topology or native_surface_metrics or native_registration or native_sphere) and native_bin_dir is None:
+    if (native_topology or native_surface_metrics or native_registration or native_sphere or native_wm_chain) and native_bin_dir is None:
         raise ValueError("native stages require native_bin_dir")
     if native_registration and not native_topology:
         raise ValueError("native_registration requires native_topology")
@@ -503,6 +514,10 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                      if native_sphere else None)
     sphere_binaries = ((inflate_binary[0], sphere_binary[0])
                        if native_sphere else None)
+    wm_segment_binary = (_native_binary(native_bin_dir, "mri_segment")
+                         if native_wm_chain else None)
+    wm_edit_binary = (_native_binary(native_bin_dir, "mri_edit_wm_with_aseg")
+                      if native_wm_chain else None)
     registration_atlases = ({hemi: _folding_atlas(assets, hemi)
                             for hemi in ("lh", "rh")} if native_registration else {})
     torch.set_num_threads(threads)
@@ -516,6 +531,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         profile = profile.replace("-core-v2", "-sphere-core-v2")
     if registration_binary:
         profile = profile.replace("-core-v2", "-registration-core-v2")
+    if native_wm_chain:
+        profile = profile.replace("-core-v2", "-wmchain-core-v3")
     report: dict = {"profile": profile, "input": str(t1),
                     "subject_dir": str(subject), "device": device,
                     "n4_python": str(n4_python or sys.executable), "threads": threads,
@@ -526,8 +543,14 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     report["topology_repair"] = (
         {"implementation": "native-c++", "binary": str(topology_binary[0]),
          "sha256": topology_binary[1],
-         "upstream": "SynthSeg-derived filled; brainmask.mgz copied as brain.mgz"}
+         "upstream": ("intensity-derived WM and aseg-guided fill" if native_wm_chain
+                      else "SynthSeg-derived filled; brainmask.mgz copied as brain.mgz")}
         if topology_binary else {"implementation": "unrepaired approximation"})
+    report["white_matter_chain"] = (
+        {"implementation": "Python + Conda C++",
+         "mri_segment_sha256": wm_segment_binary[1],
+         "mri_edit_wm_with_aseg_sha256": wm_edit_binary[1]}
+        if native_wm_chain else {"implementation": "SynthSeg label approximation"})
     report["surface_metrics"] = (
         {"implementation": "native-c++", "binary": str(metrics_binary[0]),
          "sha256": metrics_binary[1],
@@ -563,7 +586,7 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     initial = stage("input_talairach", run_input_talairach_chain,
                     t1, subject, weights, assets, device=device, threads=threads)
     mri, surf, labels, stats = (subject / name for name in ("mri", "surf", "label", "stats"))
-    for folder in (surf, labels, stats, mri / "tmp"):
+    for folder in (surf, labels, stats, mri / "tmp", subject / "scripts"):
         folder.mkdir(parents=True, exist_ok=True)
     nu0 = mri / "tmp/nu0.mgz"
     if n4_python is None:
@@ -612,12 +635,41 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     report["corpus_callosum"] = stage("mri_cc", _segment_callosum, mri)
     aseg = np.asarray(nib.load(str(mri / "aseg.auto.mgz")).dataobj).astype(np.int16)
 
-    wm = np.where(np.isin(aseg, (2, 41, 77, 78, 79)), 255, 0).astype(np.uint8)
-    _save_like(mri / "T1.mgz", mri / "wm.mgz", wm)
-    filled = np.zeros(aseg.shape, np.uint8)
-    for code, label_id in ((255, 2), (127, 41)):
-        filled[_largest_filled(aseg == label_id)] = code
-    _save_like(mri / "T1.mgz", mri / "filled.mgz", filled)
+    if native_wm_chain:
+        from .ants_denoise_python import denoise_volume
+        from .fill_cutting_plane_python import fill_mgz
+        from .normalization.aseg_pipeline import normalize_t1_aseg
+        from .pretess_python import pretess_mgh
+        from .sclimbic import mri_entowm_seg
+        from .wm_edits_python import fix_ento_wm
+
+        stage("brain_second_normalize", normalize_t1_aseg,
+              mri / "norm.mgz", mri / "aseg.presurf.mgz",
+              mri / "brainmask.mgz", mri / "brain.mgz", device="cpu")
+        stage("entowm", mri_entowm_seg, mri / "nu.mgz", mri / "entowm.mgz",
+              weights, device="cpu")
+        stage("ants_denoise", denoise_volume, mri / "brain.mgz",
+              mri / "antsdn.brain.mgz")
+        stage("mri_segment", _run_native_wm_segment,
+              wm_segment_binary[0], mri, assets)
+        stage("mri_edit_wm_with_aseg", _run_native_wm_edit,
+              wm_edit_binary[0], mri, assets)
+        stage("wm_pretess", pretess_mgh, mri / "wm.asegedit.mgz", "wm",
+              mri / "norm.mgz", mri / "wm.mgz")
+        stage("wm_fix_ento", fix_ento_wm, mri / "wm.mgz",
+              mri / "entowm.mgz", mri / "wm.mgz", level=3,
+              left_value=255, right_value=255)
+        stage("wm_fix_acj", fix_ento_wm, mri / "wm.mgz",
+              mri / "aseg.presurf.mgz", mri / "wm.mgz", level=3,
+              left_value=255, right_value=255, acj=True)
+        stage("mri_fill", fill_mgz, mri / "wm.mgz",
+              mri / "aseg.presurf.mgz", lta,
+              assets / "SubCorticalMassLUT.txt", mri / "filled.mgz",
+              subject / "scripts/ponscc.cut.log")
+    else:
+        from .experimental_wm import synthseg_wm_fill
+        stage("experimental_synthseg_wm_fill", synthseg_wm_fill,
+              mri / "T1.mgz", aseg, mri / "wm.mgz", mri / "filled.mgz")
     for hemi in ("lh", "rh"):
         result = stage(f"surface_{hemi}", _surface_pair, subject, hemi,
                        mri / "filled.mgz", mri / "norm.mgz", aseg,
@@ -626,6 +678,7 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                        native_surface_metrics_binary=metrics_binary[0] if metrics_binary else None,
                        native_sphere_binaries=sphere_binaries,
                        native_registration=native_registration,
+                       native_wm_chain=native_wm_chain,
                        assets=assets if topology_binary or metrics_binary else None)
         report.setdefault("surfaces", {})[hemi] = result
 
@@ -683,6 +736,7 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--native-surface-metrics", action="store_true")
     parser.add_argument("--native-registration", action="store_true")
     parser.add_argument("--native-sphere", action="store_true")
+    parser.add_argument("--experimental-approximate-wm", action="store_true")
     args = parser.parse_args(argv)
     report = run_recon_all_python(args.t1, args.subject_dir, args.weights_dir,
                                   args.assets_dir, device=args.device,
@@ -691,7 +745,8 @@ def main(argv: list[str] | None = None) -> None:
                                   native_topology=args.native_topology,
                                   native_surface_metrics=args.native_surface_metrics,
                                   native_registration=args.native_registration,
-                                  native_sphere=args.native_sphere)
+                                  native_sphere=args.native_sphere,
+                                  experimental_approximate_wm=args.experimental_approximate_wm)
     print(json.dumps(report, indent=2))
 
 

@@ -1,0 +1,156 @@
+{
+  "protocol": "same-T1 controlled exact-upstream handoff; not a new end-to-end recon-all run",
+  "source_commit": "d932c45b7941662ea380a05efef580568b98d41a",
+  "voxel_count": 16777216,
+  "inputs": {
+    "nu.mgz": {
+      "mismatch": 0,
+      "affine_exact": true,
+      "dtype": "uint8",
+      "official_dtype": "uint8"
+    },
+    "norm.mgz": {
+      "mismatch": 0,
+      "affine_exact": true,
+      "dtype": "uint8",
+      "official_dtype": "uint8"
+    },
+    "brainmask.mgz": {
+      "mismatch": 0,
+      "affine_exact": true,
+      "dtype": "uint8",
+      "official_dtype": "uint8"
+    },
+    "aseg.presurf.mgz": {
+      "mismatch": 0,
+      "affine_exact": true,
+      "dtype": ">f4",
+      "official_dtype": ">f4"
+    },
+    "entowm.mgz": {
+      "mismatch": 0,
+      "affine_exact": true,
+      "dtype": ">i4",
+      "official_dtype": ">i4"
+    }
+  },
+  "outputs": {
+    "brain.mgz": {
+      "mismatch": 0,
+      "dtype": "uint8",
+      "official_dtype": "uint8",
+      "affine_exact": true,
+      "mgh_header_exact": true
+    },
+    "antsdn.brain.mgz": {
+      "mismatch": 0,
+      "dtype": "uint8",
+      "official_dtype": "uint8",
+      "affine_exact": true,
+      "mgh_header_exact": true
+    },
+    "wm.seg.mgz": {
+      "mismatch": 0,
+      "dtype": "uint8",
+      "official_dtype": "uint8",
+      "affine_exact": true,
+      "mgh_header_exact": true
+    },
+    "wm.asegedit.mgz": {
+      "mismatch": 0,
+      "dtype": "uint8",
+      "official_dtype": "uint8",
+      "affine_exact": true,
+      "mgh_header_exact": true
+    },
+    "wm.mgz": {
+      "mismatch": 0,
+      "dtype": "uint8",
+      "official_dtype": "uint8",
+      "affine_exact": true,
+      "mgh_header_exact": true
+    },
+    "filled.mgz": {
+      "mismatch": 0,
+      "dtype": "uint8",
+      "official_dtype": "uint8",
+      "affine_exact": true,
+      "mgh_header_exact": true
+    }
+  },
+  "cut_log_byte_exact": true,
+  "seconds_observed": {
+    "brain_second_normalize": 134.16,
+    "entowm": 10.7,
+    "ants_denoise": 52.33,
+    "mri_segment_conda_cpp": 81.63,
+    "mri_edit_wm_with_aseg_conda_cpp": 52.88,
+    "wm_pretess": 7.424976302310824,
+    "wm_fix_ento": 2.24102380592376,
+    "wm_fix_acj": 4.284325025044382,
+    "mri_fill": 81.53,
+    "eight_target_conda_build": 185.01,
+    "native_edit_frozen_input": 45.99
+  },
+  "prior_v2_upstream_mismatch": {
+    "norm.mgz": {
+      "mismatch": 126298,
+      "dtype": "uint8",
+      "official_dtype": "uint8",
+      "source_nonzero": 1269878,
+      "official_nonzero": 1269875
+    },
+    "brainmask.mgz": {
+      "mismatch": 35,
+      "dtype": "uint8",
+      "official_dtype": "uint8",
+      "source_nonzero": 1269269,
+      "official_nonzero": 1269264
+    },
+    "aseg.presurf.mgz": {
+      "mismatch": 0,
+      "dtype": ">f4",
+      "official_dtype": ">f4",
+      "source_nonzero": 1285092,
+      "official_nonzero": 1285092
+    },
+    "brain.mgz": {
+      "mismatch": 332394,
+      "dtype": "uint8",
+      "official_dtype": "uint8",
+      "source_nonzero": 1268622,
+      "official_nonzero": 1268617
+    }
+  },
+  "prior_v2_denoise_segment_mismatch": {
+    "antsdn.brain.mgz": {
+      "mismatch": 334658,
+      "source_nonzero": 1293146,
+      "official_nonzero": 1293178,
+      "dtype": "uint8",
+      "affine_exact": true
+    },
+    "wm.seg.mgz": {
+      "mismatch": 108393,
+      "source_nonzero": 383279,
+      "official_nonzero": 382817,
+      "dtype": "uint8",
+      "affine_exact": true
+    }
+  },
+  "experimental_baseline_old_v2_replay_mismatch": {
+    "wm.mgz": 0,
+    "filled.mgz": 0
+  },
+  "official_commands": {
+    "brain_second_normalize": "mri_normalize -seed 1234 -mprage -aseg aseg.presurf.mgz -mask brainmask.mgz norm.mgz brain.mgz",
+    "entowm": "mri_entowm_seg --s SUBJECT",
+    "ants_denoise": "AntsDenoiseImageFs -i brain.mgz -o antsdn.brain.mgz",
+    "mri_segment_conda_cpp": "mri_segment -wsizemm 13 -mprage antsdn.brain.mgz wm.seg.mgz",
+    "mri_edit_wm_with_aseg_conda_cpp": "mri_edit_wm_with_aseg -keep-in -fix-ento-wm entowm.mgz 3 255 255 -fix-acj aseg.presurf.mgz 255 255 -fill-seg-wm -fix-scm-ha 1 wm.seg.mgz brain.mgz aseg.presurf.mgz wm.asegedit.mgz",
+    "wm_pretess": "mri_pretess wm.asegedit.mgz wm norm.mgz wm.mgz",
+    "wm_fix_ento": "mri_edit_wm_with_aseg -sa-fix-ento-wm entowm.mgz 3 255 255 wm.mgz wm.mgz",
+    "wm_fix_acj": "mri_edit_wm_with_aseg -sa-fix-acj aseg.presurf.mgz 255 255 wm.mgz wm.mgz",
+    "mri_fill": "mri_fill -a ../scripts/ponscc.cut.log -xform transforms/talairach.lta -segmentation aseg.presurf.mgz -ctab SubCorticalMassLUT.txt wm.mgz filled.mgz"
+  }
+}

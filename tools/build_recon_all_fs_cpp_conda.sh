@@ -53,7 +53,7 @@ if [[ "$source_commit" != "$expected_commit" ]]; then
   echo "FreeSurfer source commit must be $expected_commit; found $source_commit" >&2
   exit 2
 fi
-for file in LICENSE.txt CMakeLists.txt utils/CMakeLists.txt mri_em_register/CMakeLists.txt mris_fix_topology/CMakeLists.txt mris_make_surfaces/CMakeLists.txt mris_register/CMakeLists.txt mris_inflate/CMakeLists.txt mris_sphere/CMakeLists.txt mri_segment/CMakeLists.txt resurf/Code/mris_multimodal_refinement.h; do
+for file in LICENSE.txt CMakeLists.txt utils/CMakeLists.txt mri_em_register/CMakeLists.txt mris_fix_topology/CMakeLists.txt mris_make_surfaces/CMakeLists.txt mris_register/CMakeLists.txt mris_inflate/CMakeLists.txt mris_sphere/CMakeLists.txt mri_segment/CMakeLists.txt mri_edit_wm_with_aseg/CMakeLists.txt resurf/Code/mris_multimodal_refinement.h; do
   test -s "$source_dir/$file" || { echo "missing source: $file" >&2; exit 2; }
 done
 itk_config=$(find "$CONDA_PREFIX/lib/cmake" -maxdepth 3 -name ITKConfig.cmake -print -quit)
@@ -103,7 +103,7 @@ cmake -S "$build_source" -B "$build_dir" -G Ninja \
   -DDISABLE_LINEPROF=ON -DINFANT_MODULE=OFF -DQATOOLS_MODULE=OFF \
   -DDISTRIBUTE_FSPYTHON=OFF -DINSTALL_PYTHON_DEPENDENCIES=OFF \
   2>&1 | tee "$output_dir/configure.log"
-targets=(mri_em_register mris_fix_topology mris_place_surface mris_register mris_inflate mris_sphere mri_segment)
+targets=(mri_em_register mris_fix_topology mris_place_surface mris_register mris_inflate mris_sphere mri_segment mri_edit_wm_with_aseg)
 cmake --build "$build_dir" --parallel 4 --target "${targets[@]}" 2>&1 | tee "$output_dir/build.log"
 for target in "${targets[@]}"; do
   binary=$(find "$build_dir" -type f -name "$target" -perm /111 -print -quit)

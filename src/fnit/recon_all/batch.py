@@ -19,6 +19,7 @@ def run_recon_all_python_batch(
     native_surface_metrics: bool = False,
     native_registration: bool = False,
     native_sphere: bool = False,
+    experimental_approximate_wm: bool = False,
 ) -> list[dict]:
     """Run one subject per device; each reconstruction uses a separate Python process.
 
@@ -30,7 +31,7 @@ def run_recon_all_python_batch(
         raise ValueError("devices must be distinct CPU/CUDA device names")
     if threads < 1:
         raise ValueError("threads must be positive")
-    if (native_topology or native_surface_metrics or native_registration or native_sphere) and native_bin_dir is None:
+    if (native_topology or native_surface_metrics or native_registration or native_sphere or not experimental_approximate_wm) and native_bin_dir is None:
         raise ValueError("native stages require native_bin_dir")
     if native_registration and not native_topology:
         raise ValueError("native_registration requires native_topology")
@@ -72,6 +73,8 @@ def run_recon_all_python_batch(
                 command.append("--native-registration")
             if native_sphere:
                 command.append("--native-sphere")
+            if experimental_approximate_wm:
+                command.append("--experimental-approximate-wm")
             completed = subprocess.run(command, capture_output=True, text=True)
             if completed.returncode:
                 results.append((index, None, completed.stderr.strip()))
