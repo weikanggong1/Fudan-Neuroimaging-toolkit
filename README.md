@@ -1,6 +1,6 @@
 # Fudan Neuroimaging Toolkit (FNIT)
 
-`fudan-neuroimaging-toolkit` 是独立的脑 MRI 推理包，在 CPU 或 CUDA 上运行。单项推理无需安装 FreeSurfer、FSL、TensorFlow、VoxelMorph 或 Neurite。`fnit-recon-all` 使用 Python 流程和外置权重、模板，不调用 FreeSurfer 程序；当前整例重建是近似版，尚未达到官方数值一致。Python 导入名为 `fnit`，单项功能的命令行入口为 `fnit`。
+`fudan-neuroimaging-toolkit` 是独立的脑 MRI 推理包，在 CPU 或 CUDA 上运行。单项推理无需安装 FreeSurfer、FSL、TensorFlow、VoxelMorph 或 Neurite。`fnit-recon-all` 默认使用 Python 流程和外置权重、模板；另可调用用户在 Conda 中从 FreeSurfer 源码编译的六个 C++ 程序，无需安装官方 FreeSurfer。两条路径的整例重建均尚未证实与官方数值一致。Python 导入名为 `fnit`，单项功能的命令行入口为 `fnit`。
 
 | 模态 | 功能 | 输出与用途 | 用法、原版对照与验证 |
 |---|---|---|---|
@@ -21,12 +21,12 @@
 | dMRI | PyTorch BEDPOSTX | 估计体素内纤维方向及不确定性，供概率追踪使用 | [BEDPOSTX 文档](docs/bedpostx/README.md) |
 | dMRI | PyTorch ProbtrackX | 种子到体素的概率追踪与脑区间连接矩阵 | [ProbtrackX 文档](docs/probtrackx/README.md) |
 | dMRI | UKBConnectome | 已校正 DWI 和 T1w 到四张结构连接矩阵；追踪和 SIFT2 为近似 | [connectome 文档](docs/connectome/README.md) |
-| sMRI | Python recon-all（近似版） | T1w 到核心分割、双侧皮层表面、顶点指标和脑区统计 | [recon-all 文档](docs/recon_all/README.md) |
+| sMRI | recon-all（Python 默认、可选外部 C++ 阶段） | T1w 到核心分割、双侧皮层表面、顶点指标和脑区统计 | [recon-all 文档](docs/recon_all/README.md) |
 | fMRI | MS-HBM 17 网络 | fsLR32k 静息态时序到个体网络划分，纯 CPU | [MS-HBM 文档](src/fnit/mshbm/README.md) |
 
 recon-all 提供单被试命令行与 Python API；多被试并行仅提供 Python API。其余功能只提供单被试 Python 和单被试命令行接口；需要处理多个病例时，由调用方在包外组织任务与设备。仓库提供 [T1w 样例](examples/README.md)和 [FLAIR 样例](examples/WMH.md)。
 
-Python recon-all 的神经网络与部分体素、表面计算使用 PyTorch/CUDA；N4、GCA 配准和部分网格/统计计算使用 Python 包中的 CPU 算子。拓扑修复、表面放置和球面配准仍是近似实现。[同一 T1 整例比较](validation/recon_all/python_gpu_port/NATIVE_FREE_CONNECTED_20260927.md)显示严格 138 项输出仅 6 项一致。
+默认 recon-all 的神经网络与部分体素、表面计算使用 PyTorch/CUDA；N4、GCA 配准和部分网格/统计计算使用 Python 包中的 CPU 算子。可选 `--native-bin-dir` 与四个原生阶段开关调用外部 C++ 程序处理 GCA 配准、拓扑、球面与顶点指标，但上游表面仍有近似。[同一 T1 整例比较](validation/recon_all/python_gpu_port/NATIVE_FREE_CONNECTED_20260927.md)的严格 138 项仅 6 项一致，属于旧的纯 Python 配置，不代表可选 C++ 路径的测试结果。
 
 相关 CUDA 路径允许 NVIDIA TF32 matmul 和 cuDNN 内核；模型与影像张量仍保持 float32，本包不会自动改用 float16 或 bfloat16。各验证报告记录实际开关。
 
@@ -86,7 +86,7 @@ python tools/setup_weights.py --model synthstrip --model synthmorph-joint \
 
 FastVBM 的 SynthMorph 分支从原始 T1w 开始时需要 `synthstrip.1.pt` 和 `synthmorph.deform.3.h5`；`python tools/setup_weights.py --model fast-vbm` 安装这两个后端的权重超集。TorchFNIRT 分支只需 SynthStrip；已有脑 mask 时该分支无需 checkpoint。GM 模板由用户提供，不由配置脚本下载。TorchFAST、TorchFLIRT、TorchFNIRT、TorchApplyWarp、TorchTOPUP、TorchEDDY、TorchDTIFIT、TorchAMICONODDI、TorchBEDPOSTX 和 TorchProbtrackX 不使用预训练权重。
 
-Python recon-all 使用六个外置权重文件和 13 个模板/图谱文件。分别运行 `fnit-setup-weights --model recon-all --dest /path/to/weights` 和 `fnit-setup-recon-all-assets --dest /path/to/assets`；文件均按 SHA-256 校验，不需要原生运行包或 FreeSurfer license。调用与验收边界见[recon-all 文档](docs/recon_all/README.md)。
+recon-all 使用六个外置权重文件和 15 个模板/图谱文件（217,497,770 字节）。分别运行 `fnit-setup-weights --model recon-all --dest /path/to/weights` 和 `fnit-setup-recon-all-assets --dest /path/to/assets`；文件均按 SHA-256 校验。默认 Python 路径不需要 FreeSurfer license；可选 C++ 路径需在环境中设置外部 `FS_LICENSE`，并提供自行编译的程序目录。Git 仓库和 wheel 均不打包这些程序或许可证。调用与验收边界见[recon-all 文档](docs/recon_all/README.md)。
 
 独立使用 33 类 SynthSeg 时只需 `python tools/setup_weights.py --model synthseg`，随后运行 `fnit synthseg --i T1.nii.gz --o seg.nii.gz --csv-vols seg.vol.csv`，或使用 Python 的 `SynthSeg` 类；详见[独立接口](docs/synthseg/README.md)。
 

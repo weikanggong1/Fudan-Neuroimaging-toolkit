@@ -1,4 +1,4 @@
-"""Python-only multi-subject scheduler for the approximate recon-all pipeline."""
+"""Multi-subject scheduler for the approximate recon-all pipeline."""
 
 from __future__ import annotations
 
@@ -14,6 +14,11 @@ def run_recon_all_python_batch(
     jobs: list[dict], weights_dir: str | Path, assets_dir: str | Path,
     *, devices: tuple[str, ...] = ("cuda:0",), threads: int = 4,
     n4_python: str | Path | None = None,
+    native_bin_dir: str | Path | None = None,
+    native_topology: bool = False,
+    native_surface_metrics: bool = False,
+    native_registration: bool = False,
+    native_sphere: bool = False,
 ) -> list[dict]:
     """Run one subject per device; each reconstruction uses a separate Python process.
 
@@ -25,6 +30,12 @@ def run_recon_all_python_batch(
         raise ValueError("devices must be distinct CPU/CUDA device names")
     if threads < 1:
         raise ValueError("threads must be positive")
+    if (native_topology or native_surface_metrics or native_registration or native_sphere) and native_bin_dir is None:
+        raise ValueError("native stages require native_bin_dir")
+    if native_registration and not native_topology:
+        raise ValueError("native_registration requires native_topology")
+    if native_sphere and not native_topology:
+        raise ValueError("native_sphere requires native_topology")
     weights, assets = Path(weights_dir).resolve(), Path(assets_dir).resolve()
     if not weights.is_dir() or not assets.is_dir():
         raise FileNotFoundError("weights_dir and assets_dir must exist")
@@ -51,6 +62,16 @@ def run_recon_all_python_batch(
                        "--threads", str(threads)]
             if n4_python is not None:
                 command += ["--n4-python", str(n4_python)]
+            if native_bin_dir is not None:
+                command += ["--native-bin-dir", str(Path(native_bin_dir).resolve())]
+            if native_topology:
+                command.append("--native-topology")
+            if native_surface_metrics:
+                command.append("--native-surface-metrics")
+            if native_registration:
+                command.append("--native-registration")
+            if native_sphere:
+                command.append("--native-sphere")
             completed = subprocess.run(command, capture_output=True, text=True)
             if completed.returncode:
                 results.append((index, None, completed.stderr.strip()))

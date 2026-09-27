@@ -316,6 +316,8 @@ CORE_ASSETS = (
     "average/RB_all_2020-01-02.gca", "average/mni305.cor.stripped.mgz",
     *(f"average/{hemi}.{atlas}.atlas.acfb40.noaparc.i12.2016-08-02.gcs"
       for hemi in ("lh", "rh") for atlas in ("DKaparc", "CDaparc", "DKTaparc")),
+    *(f"average/{hemi}.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif"
+      for hemi in ("lh", "rh")),
     "lib/bem/ic4.tri", "lib/bem/ic7.tri",
 )
 
