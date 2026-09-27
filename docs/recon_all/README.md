@@ -16,7 +16,7 @@ fnit-setup-weights --model recon-all --dest /path/to/weights
 fnit-setup-recon-all-assets --dest /path/to/assets
 ```
 
-默认下载 **8 个权重文件**（SynthStrip、SynthMorph affine、SynthSeg、EntoWM 及相关标签表；合计 138,691,259 字节）和 **16 个模板/图谱文件**（217,498,051 字节，约 207 MiB）。16 个文件包含双侧 folding atlas 和填充所需的 `SubCorticalMassLUT.txt`。安装器检查每个文件的大小和 SHA-256。`fnit-setup-recon-all-assets --all` 才下载全部 102 个阶段研究资源。已有文件可加 `--verify-only` 核验；两个目录均在仓库与 wheel 外。权重的来源和许可见[权重说明](../WEIGHTS.md)，模板清单见[资产验证](../../validation/recon_all/python_gpu_port/ASSETS_VALIDATION.md)。
+默认下载 **10 个权重文件**（SynthStrip、SynthMorph affine、SynthSeg、EntoWM、MCA/dura、静脉窦及相关标签表；合计 145,283,019 字节）和 **23 个模板/图谱文件**（243,578,058 字节，约 232 MiB）。23 个文件包含双侧 folding atlas、填充所需的 `SubCorticalMassLUT.txt`，以及尚待接入整例的 MCA/dura、静脉窦和 MNI152 配准模板。MNI152 四个文件目前从约 515 MB 的上游归档提取。安装器检查每个文件的大小和 SHA-256。`fnit-setup-recon-all-assets --all` 才下载全部 102 个阶段研究资源。已有文件可加 `--verify-only` 核验；两个目录均在仓库与 wheel 外。权重的来源和许可见[权重说明](../WEIGHTS.md)，模板清单见[资产验证](../../validation/recon_all/python_gpu_port/ASSETS_VALIDATION.md)。
 
 仓库 [`environment.yml`](../../environment.yml) 也会安装 Python 阶段依赖；完整 recon-all 及 Conda 编译工具使用 [`environment-recon-all-cpp.yml`](../../environment-recon-all-cpp.yml)。SimpleITK/ITK、Numba 和部分 NumPy/Surfa 操作运行在 CPU；PyTorch 网络及部分体素、表面算子可在 CUDA 上运行。模型张量为 float32，默认允许 TF32；SynthStrip 和 SynthSeg 阶段为已验证的体素一致性局部关闭 cuDNN TF32。没有自动启用 float16 或 bfloat16。
 

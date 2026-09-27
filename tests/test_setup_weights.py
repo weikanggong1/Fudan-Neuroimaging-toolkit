@@ -198,11 +198,11 @@ def test_recon_synthseg_has_independent_install_entry(tmp_path, monkeypatch):
 
 def test_recon_all_selection_lists_complete_model_inventory_once():
     names = weights.MODEL_FILES["recon-all"]
-    assert len(names) == len(set(names)) == 13
+    assert len(names) == len(set(names)) == 10
     assert set(weights.MODEL_FILES["synthseg"]) <= set(names)
     assert {"synthstrip.1.pt", "synthmorph.affine.2.h5",
-            "synthmorph.deform.3.h5", "entowm.ctab", "mca-dura.ctab",
-            "sclimbic.volstats.csv"} <= set(names)
+            "entowm.ctab", "mca-dura.both-lh.nstd21.fhs.h5",
+            "vsinus.no-sp.m.all.nstd10-070.h5"} <= set(names)
     assert set(names) <= weights.WEIGHT_FILES.keys()
 
 
