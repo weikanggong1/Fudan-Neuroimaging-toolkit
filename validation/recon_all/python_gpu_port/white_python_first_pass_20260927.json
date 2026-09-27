@@ -1033,5 +1033,126 @@
     "installed_original_log_first_pass_minutes": 1.3
   },
   "timing_scope": "Python includes input preparation, 17 steps and diagnostic NPZ/surface output. Pinned-source probe stops after step 17 but writes per-step RAM states. Installed GDB capture performs input preparation and first pass, skips later passes, then writes RAM surface. The original official log reports positioning of first pass only. Different scopes; timing ratios are descriptive, not end-to-end equivalent speedups.",
-  "pinned_source_probe_binary_sha256": "3e4575808ae5efb2438b6a08334a2768dca4e4339d12c116d6d5d14a039bf75b"
+  "pinned_source_probe_binary_sha256": "3e4575808ae5efb2438b6a08334a2768dca4e4339d12c116d6d5d14a039bf75b",
+  "current_conda_candidate": {
+    "candidate_subject": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_finalsurfs_stage_20260927/white_candidate_no_official_topology_fslicense",
+    "input_audit": {
+      "surf/lh.orig": {
+        "candidate_sha256": "3ad936c40a67cf64829701747cbe3834bcd0f2c233cb3a1fe6f67d50201f8b76",
+        "official_sha256": "ef1bbc58ad65e2e50a71bd7727112ff4614eb840009cd1060384c598a5cd1126",
+        "vertices_exact": true,
+        "faces_exact": true,
+        "metadata_exact": {
+          "head": true,
+          "valid": true,
+          "filename": false,
+          "volume": true,
+          "voxelsize": true,
+          "xras": true,
+          "yras": true,
+          "zras": true,
+          "cras": true
+        }
+      },
+      "surf/autodet.gw.stats.lh.dat": {
+        "candidate_sha256": "10b313e9f29a9d6572f0aef4546d307f6514eaae44896fc19b4212891719c7d9",
+        "official_sha256": "10b313e9f29a9d6572f0aef4546d307f6514eaae44896fc19b4212891719c7d9",
+        "text_equal": true
+      },
+      "mri/brain.finalsurfs.mgz": {
+        "candidate_sha256": "ee8ef944f074ce05325d923cb75e2f047304be705813e7436f19ff2280ab1809",
+        "official_sha256": "c239ba0c807bd381662d388e198715da44103f0c724b3877a7c9623d4ccff9e7",
+        "voxels_exact": true,
+        "affine_exact": true
+      },
+      "mri/wm.mgz": {
+        "candidate_sha256": "562fe5210f2730d120eee176280ad5eea974b88f9e1d67337d86fa901b679901",
+        "official_sha256": "d6069783c3720b6ec6b7679ee4543a3ba32891b50b9c109a5a6e6f50e1050b46",
+        "voxels_exact": true,
+        "affine_exact": true
+      },
+      "mri/aseg.presurf.mgz": {
+        "candidate_sha256": "59650a0ead68f4e75d9086bf304ba5a0621b5e23e00458b9ebf31a44da702d75",
+        "official_sha256": "be7f851405b92d82ec23041621c2da06bceaa700f4ea39c6aae42008c1dc525c",
+        "voxels_exact": true,
+        "affine_exact": true
+      }
+    },
+    "binary_sha256": "9a42f5d7b70a066daf12e67fb6a0924048b4778186ea772e8976722b226b35d5",
+    "first_pass_surface_sha256": "a1dae70fd995e5dcc81c20973e5788bb180e9d1141a8cbf76139cb036008ef72",
+    "first_pass_capture": {
+      "method": "GDB on exact production Conda binary, break at main+0xf33 to save MRIS pointer; at main+0xf39 after first MRISpositionSurface return call MRISwrite and quit",
+      "breakpoint_marker": "CONDA_AFTER_FIRST_OUTER",
+      "gdb_return_value": 0,
+      "wall_seconds": 103.47
+    },
+    "first_pass_comparison": {
+      "candidate_pass0_vs_official": {
+        "exact_elements": 185991,
+        "elements": 319866,
+        "max_absolute": 0.03580474853515625,
+        "p99_absolute": 7.62939453125e-06,
+        "vertices_with_any_difference": 80043,
+        "max_euclidean_mm": 0.036134434604122995,
+        "p99_euclidean_mm": 9.344061823971473e-06,
+        "vertices_above_0_0001_mm": 341,
+        "vertices_above_0_1_mm": 0
+      },
+      "candidate_pass0_vs_pinned_probe": {
+        "exact_elements": 319866,
+        "elements": 319866,
+        "max_absolute": 0.0,
+        "p99_absolute": 0.0,
+        "vertices_with_any_difference": 0,
+        "max_euclidean_mm": 0.0,
+        "p99_euclidean_mm": 0.0,
+        "vertices_above_0_0001_mm": 0,
+        "vertices_above_0_1_mm": 0
+      },
+      "candidate_pass0_vs_python": {
+        "exact_elements": 186017,
+        "elements": 319866,
+        "max_absolute": 0.03580474853515625,
+        "p99_absolute": 7.62939453125e-06,
+        "vertices_with_any_difference": 80034,
+        "max_euclidean_mm": 0.036134434604122995,
+        "p99_euclidean_mm": 9.344061823971473e-06,
+        "vertices_above_0_0001_mm": 341,
+        "vertices_above_0_1_mm": 0
+      },
+      "official_vs_python": {
+        "exact_elements": 316573,
+        "elements": 319866,
+        "max_absolute": 1.33514404296875e-05,
+        "p99_absolute": 2.9802322387695312e-08,
+        "vertices_with_any_difference": 2133,
+        "max_euclidean_mm": 1.6407633337102178e-05,
+        "p99_euclidean_mm": 5.960464477539062e-07,
+        "vertices_above_0_0001_mm": 0,
+        "vertices_above_0_1_mm": 0
+      }
+    },
+    "completed_white_preaparc_vs_official": {
+      "vertices": 106622,
+      "faces": 213240,
+      "ordered_faces_equal": true,
+      "exact_coordinate_components": 99139,
+      "coordinate_components": 319866,
+      "mean_euclidean_mm": 0.0004205742386864518,
+      "p99_euclidean_mm": 0.006998961486221931,
+      "max_euclidean_mm": 0.6300040016187256,
+      "vertices_over_0p1_mm": 50
+    },
+    "completed_smoothwm_vs_official": {
+      "vertices": 106622,
+      "faces": 213240,
+      "ordered_faces_equal": true,
+      "exact_coordinate_components": 150225,
+      "coordinate_components": 319866,
+      "mean_euclidean_mm": 0.0003112079214864229,
+      "p99_euclidean_mm": 0.006172390404749905,
+      "max_euclidean_mm": 0.18816972378978367,
+      "vertices_over_0p1_mm": 18
+    }
+  }
 }
