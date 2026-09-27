@@ -1,8 +1,10 @@
-"""PyTorch port of the FSL FLIRT 2111.2 default affine path.
+"""PyTorch ports of FSL FLIRT 2111.2 affine and rigid registration profiles.
 
 The implementation in this module follows the code path used by ``fsl_reg``
 for UK Biobank VBM: 12 degrees of freedom, correlation-ratio cost, the default
 8/4/2/1 mm schedule, and the MISCMATHS Brent-style coordinate optimiser.
+The connectome rigid path uses the same schedule with 6 degrees of freedom and
+normalized mutual information.
 
 FSL stores affine matrices in scaled-mm coordinates.  All matrices used by the
 optimizer below are in that coordinate system and map input to reference.
@@ -557,6 +559,82 @@ class FSLCorrelationRatio:
             return 1.0
         cost = (within * n).sum() / total_n / total_variance
         return float(cost)
+
+
+
+class FSLNormalizedMutualInformation(FSLCorrelationRatio):
+    """PyTorch port of NEWIMAGE's smoothed NMI histogram cost."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.test_min = self.moving.min()
+        test_range = self.moving.max() - self.test_min
+        if float(test_range) == 0:
+            test_range = test_range + 1
+        self.test_factor = self.bins / test_range
+
+    def __call__(self, moving_to_reference):
+        coefficients = _fsl_pull_coefficients(
+            moving_to_reference, self.moving_voxel_sizes,
+            self.reference_voxel_sizes, device=self.device,
+        )
+        coordinates = _coordinates_from_fsl_coefficients(coefficients, self.grid)
+        upper = torch.tensor(
+            [size - 1.0001 for size in self.moving.shape],
+            dtype=torch.float32, device=self.device,
+        )[:, None]
+        valid = ((coordinates >= 0) & (coordinates <= upper)).all(dim=0)
+        if not bool(valid.any()):
+            return -1.0
+        values = _manual_trilinear(
+            self.moving, torch.minimum(coordinates.clamp_min(0), upper)
+        )
+        smooth = torch.tensor(
+            [self.smooth_size / value for value in self.moving_voxel_sizes],
+            dtype=torch.float32, device=self.device,
+        )[:, None]
+        edge_weight = torch.where(
+            coordinates < smooth, coordinates / smooth,
+            torch.where(upper - coordinates < smooth,
+                        (upper - coordinates) / smooth, 1.0),
+        ).prod(dim=0).clamp_min_(0)
+        weight = edge_weight * valid
+        bin_float = (values - self.test_min) * self.test_factor
+        truncated = torch.trunc(bin_float)
+        centre = truncated.long().clamp(0, self.bins - 1)
+        minus = (centre - 1).clamp_min(0)
+        plus = (centre + 1).clamp_max(self.bins - 1)
+        fractional = (bin_float - truncated).abs()
+        centre_weight = torch.where(
+            fractional < 0.5, 0.5 + fractional,
+            torch.where(fractional > 0.5, 1.5 - fractional, 1.0),
+        ).clamp(0, 1)
+        minus_weight = torch.where(fractional < 0.5, 1 - centre_weight, 0)
+        plus_weight = torch.where(fractional > 0.5, 1 - centre_weight, 0)
+        stride = self.bins + 1
+        joint = torch.zeros(stride * stride, dtype=torch.float32, device=self.device)
+        for bin_id, bin_weight in (
+            (centre, centre_weight), (minus, minus_weight), (plus, plus_weight)
+        ):
+            joint.scatter_add_(0, self.bin_index * stride + bin_id,
+                               weight * bin_weight)
+        joint = joint.reshape(stride, stride)
+        first = joint.sum(1)
+        second = joint.sum(0)
+        total = second.sum()
+        if float(total) <= 0:
+            return -1.0
+
+        def entropy(histogram):
+            probabilities = histogram / total
+            selected = probabilities > 0
+            return -(probabilities[selected] * probabilities[selected].log()).sum()
+
+        joint_entropy = entropy(joint)
+        if float(joint_entropy) <= 0:
+            return -1.0
+        return float(-(entropy(first) + entropy(second)) / joint_entropy)
+
 
 
 def _quadratic_minimum(x1, middle, x2, y1, y_middle, y2):
@@ -1138,7 +1216,7 @@ class _DefaultFLIRTEngine:
             output.append((value, matrix))
         return output
 
-    def run(self, qsform_matrix):
+    def run(self, qsform_matrix, dof=12):
         qsform_matrix = np.asarray(qsform_matrix) @ np.linalg.inv(
             self.initial_matrix
         )
@@ -1152,9 +1230,9 @@ class _DefaultFLIRTEngine:
         search_costs = [item[0] for item in paired]
         presearch_costs = [item[1] for item in paired]
         candidates = []
-        candidates += self._optimize(search_costs[:3], 7, 4)
-        candidates += self._optimize(presearch_costs[:3], 7, 4)
-        candidates += self._optimize([(0.0, np.eye(4))], 7, 4)
+        candidates += self._optimize(search_costs[:3], min(dof, 7), 4)
+        candidates += self._optimize(presearch_costs[:3], min(dof, 7), 4)
+        candidates += self._optimize([(0.0, np.eye(4))], min(dof, 7), 4)
         best = self._sort(candidates)
         candidates = best[:4]
         fine_step = math.pi / 10
@@ -1169,22 +1247,39 @@ class _DefaultFLIRTEngine:
             value[6] = scale
             perturbations.append(value)
         for perturbation in perturbations:
-            candidates += self._optimize(best[:4], 7, 4, perturbation)
+            candidates += self._optimize(best[:4], min(dof, 7), 4, perturbation)
         best = self._sort(candidates)
 
         self.set_scale(2)
         measured = self._sort(self._measure(best))
-        dof7 = self._optimize(measured[:1], 7, 4)
+        best = self._optimize(measured[:1], min(dof, 7), 4)
         self.bound_guess = (1.0,)
-        dof9 = self._optimize(dof7[:1], 9, 1)
-        dof12 = self._optimize(dof9[:1], 12, 2)
-        best = self._sort(dof12)
+        if dof > 7:
+            best = self._optimize(best[:1], 9, 1)
+        if dof > 9:
+            best = self._optimize(best[:1], 12, 2)
+        best = self._sort(best)
 
         self.set_scale(1)
-        final = self._optimize((best + [(0.0, qsform_matrix)])[:2], 12, 1)
+        final = self._optimize((best + [(0.0, qsform_matrix)])[:2], dof, 1)
         final.append((self.cost(qsform_matrix), qsform_matrix.copy()))
         cost, residual = self._sort(final)[0]
         return cost, residual @ self.initial_matrix
+
+
+class _RigidNMIEngine(_DefaultFLIRTEngine):
+    """Use the shared FLIRT pyramid and search with NMI and final 6DOF."""
+
+    def set_scale(self, scale, *, force=False):
+        previous = self.level
+        super().set_scale(scale, force=force)
+        if self.level is not previous:
+            self.level.cost = FSLNormalizedMutualInformation(
+                self.level.reference, self.level.moving,
+                self.level.reference_sizes, self.moving_sizes,
+                bins=max(2, int(256 / float(scale))), smooth_size=float(scale),
+            )
+        self._cache.clear()
 
 
 def _resample_output(
@@ -1222,12 +1317,17 @@ def _resample_output(
 class TorchFLIRT:
     """Source-derived PyTorch implementation of the supported FLIRT path.
 
-    This class ports the FLIRT default correlation-ratio and coordinate-search
-    path. External validation is reported as reference-suite evidence and is
+    This class ports the supported correlation-ratio and normalized-mutual-
+    information coordinate-search paths. External validation is reported as
+    reference-suite evidence and is
     never treated as a per-input comparison with FSL.
     """
 
-    def __init__(self, device=None, *, angular_search=True):
+    def __init__(self, device=None, *, angular_search=True, dof=12, cost="corratio"):
+        if (dof, cost) not in ((12, "corratio"), (6, "normmi")):
+            raise ValueError("supported FLIRT profiles are 12/corratio and 6/normmi")
+        self.dof = dof
+        self.cost_name = cost
         if device is None:
             device = "cuda" if torch.cuda.is_available() else "cpu"
         self.device = torch.device(device)
@@ -1273,7 +1373,8 @@ class TorchFLIRT:
             @ moving_world
             @ np.linalg.inv(moving_fsl)
         )
-        engine = _DefaultFLIRTEngine(
+        engine_class = _RigidNMIEngine if self.dof == 6 else _DefaultFLIRTEngine
+        engine = engine_class(
             moving_data,
             fixed_data,
             moving_world,
@@ -1284,7 +1385,7 @@ class TorchFLIRT:
             angular_search=self.angular_search,
             initial_matrix=initial_matrix,
         )
-        cost, matrix = engine.run(qsform)
+        cost, matrix = engine.run(qsform, dof=self.dof)
         moved_data = _resample_output(
             moving_data,
             fixed_data.shape,
@@ -1313,6 +1414,7 @@ class TorchFLIRT:
             and bool(torch.backends.cudnn.allow_tf32)
             and self.angular_search
             and init is None
+            and self.dof == 12
         )
         qc = {
             "backend": "pytorch-fsl-flirt-2111.2-source-derived",
@@ -1322,10 +1424,10 @@ class TorchFLIRT:
                 "cudnn": bool(torch.backends.cudnn.allow_tf32),
                 "reduced_precision_tensor_dtype": False,
             },
-            "cost": "FSL correlation ratio",
+            "cost": "FSL normalized mutual information" if self.dof == 6 else "FSL correlation ratio",
             "optimizer": "MISCMATHS Brent coordinate search",
             "schedule": "FSL default 8/4/2/1 mm",
-            "degrees_of_freedom": 12,
+            "degrees_of_freedom": self.dof,
             "angular_search": self.angular_search,
             "cost_value": float(cost),
             "cost_evaluations": engine.cost_evaluations,
@@ -1338,15 +1440,16 @@ class TorchFLIRT:
             },
             "source_commit": FSL_FLIRT_COMMIT,
             "initial_matrix_used": init is not None,
-            "validation_matrix_gate_mm": 0.05,
+            "validation_matrix_gate_mm": 0.05 if self.dof == 12 else None,
             "validation_matrix_metric": (
-                "FSL rmsdiff about the reference intensity-weighted COG"
+                "FSL rmsdiff about the reference intensity-weighted COG" if self.dof == 12
+                else "grid displacement from FSL 6-DOF normmi matrix"
             ),
-            "validation_rmsdiff_radius_mm": 80.0,
-            "validation_case_count": 10,
-            "validation_matrix_pass_count": 10,
-            "validation_matrix_median_mm": 0.00854449,
-            "validation_matrix_maximum_mm": 0.0289838,
+            "validation_rmsdiff_radius_mm": 80.0 if self.dof == 12 else None,
+            "validation_case_count": 10 if self.dof == 12 else None,
+            "validation_matrix_pass_count": 10 if self.dof == 12 else None,
+            "validation_matrix_median_mm": 0.00854449 if self.dof == 12 else None,
+            "validation_matrix_maximum_mm": 0.0289838 if self.dof == 12 else None,
             "reference_validation_profile": (
                 "CUDA TF32 default; angular search; no init"
             ),
@@ -1354,18 +1457,21 @@ class TorchFLIRT:
                 validation_parameter_profile_matches_run
             ),
             "reference_validation_report": (
-                "validation/fast_vbm/report.v0.9.public.json"
+                "validation/fast_vbm/report.v0.9.public.json" if self.dof == 12
+                else "validation/connectome/ds004666/anatomy_registration.public.json"
             ),
             "reference_validation_domain": (
                 "10 real T1w-derived FSL FAST GM maps registered to one UKB "
-                "group-GM template on an NVIDIA H100 PCIe"
+                "group-GM template on an NVIDIA H100 PCIe" if self.dof == 12 else
+                "one ds004666 b0 brain to official FreeSurfer T1 brain on GPU"
             ),
-            "reference_validation_matrix_gate_passed": True,
+            "reference_validation_matrix_gate_passed": self.dof == 12,
             "current_input_compared_with_fsl": False,
             "validated_fsl_equivalent": False,
             "validation_scope": (
                 "reference-suite tolerance-based matrix functional agreement; "
-                "not a per-input FSL comparison"
+                "not a per-input FSL comparison" if self.dof == 12 else
+                "one same-input 6-DOF normmi matrix comparison with FSL"
             ),
             "bitwise_identity_claimed": False,
             "complete_numerical_equivalence_claimed": False,

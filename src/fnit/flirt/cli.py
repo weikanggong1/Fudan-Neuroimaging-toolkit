@@ -11,8 +11,8 @@ def build_parser(prog="fnit-flirt"):
         prog=prog,
         description=(
             "Run the source-derived PyTorch implementation of FLIRT's supported "
-            "default 12-DOF correlation-ratio registration path. Other FLIRT "
-            "optimizers, costs, and degrees of freedom are rejected."
+            "12-DOF correlation-ratio or 6-DOF normalized-mutual-information "
+            "registration path. Other profiles are rejected."
         ),
         allow_abbrev=False,
     )
@@ -32,11 +32,11 @@ def build_parser(prog="fnit-flirt"):
         "-init", "--init",
         help="initial input-to-reference FSL scaled-mm matrix",
     )
-    parser.add_argument("-dof", type=int, choices=(12,), default=12,
-                        help="affine degrees of freedom; only 12 is implemented")
+    parser.add_argument("-dof", type=int, choices=(6, 12), default=12,
+                        help="degrees of freedom; choose 6 with -cost normmi")
     parser.add_argument(
-        "-cost", choices=("corratio",), default="corratio",
-        help="cost function; only corratio is implemented",
+        "-cost", choices=("corratio", "normmi"), default="corratio",
+        help="cost function; choose normmi with -dof 6",
     )
     parser.add_argument(
         "--device", default=None,

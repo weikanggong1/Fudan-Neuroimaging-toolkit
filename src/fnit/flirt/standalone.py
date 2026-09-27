@@ -143,13 +143,11 @@ def run_flirt(
 
     ``input`` is the moving image and ``reference`` defines the output grid.
     ``init``, ``omat`` and ``result.matrix`` use FSL scaled-mm coordinates and
-    map input to reference. Only the validated default 12-DOF,
-    correlation-ratio path is implemented.
+    map input to reference. Supported profiles are 12-DOF/corratio and
+    6-DOF/normmi.
     """
-    if dof != 12:
-        raise NotImplementedError("only FLIRT -dof 12 is implemented")
-    if cost != "corratio":
-        raise NotImplementedError("only FLIRT -cost corratio is implemented")
+    if (dof, cost) not in ((12, "corratio"), (6, "normmi")):
+        raise NotImplementedError("supported profiles are -dof 12 -cost corratio and -dof 6 -cost normmi")
     selected_outputs = _preflight_outputs(
         _image_output_path(output),
         Path(omat).expanduser() if omat is not None else None,
@@ -157,7 +155,7 @@ def run_flirt(
         overwrite,
     )
     result = TorchFLIRT(
-        device=_default_device() if device is None else device
+        device=_default_device() if device is None else device, dof=dof, cost=cost
     )(input, reference, init=init)
     _write_outputs_atomic(result, selected_outputs, overwrite)
     return result

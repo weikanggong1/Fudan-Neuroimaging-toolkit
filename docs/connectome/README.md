@@ -35,7 +35,8 @@ count = result.matrices["count"]
 | `bvals`, `bvecs` | 与 DWI 体积逐一对应；FSL `3×N` 或 `N×3` bvec；非 b0 梯度要有效且已旋转 |
 | `t1` | 同一被试的 T1w NIfTI |
 | `atlas_dwi` | 可选，已对齐到 DWI RAS 世界坐标的 3D 非负整数标签图；可保留原 atlas 网格和 affine，标签 1 对应矩阵第一行 |
-| `t1_segmentation` | 可选，T1 空间 SynthSeg 标签图；省略时运行包内 SynthSeg 2.0 |
+| `t1_segmentation` | 可选，T1 空间 SynthSeg 标签图或官方 FreeSurfer `aparc+aseg.mgz`；后者须设 `segmentation_source="freesurfer"` |
+| `segmentation_source` | `synthseg`（默认）或 `freesurfer`；官方模式读取既有 `recon-all` 输出 |
 | `dwi_to_t1_world` | 可选，DWI RAS 世界坐标到 T1 RAS 世界坐标的 `4×4` 齐次矩阵；省略时运行包内 TorchFLIRT |
 | `n_seeds`, `seed` | 显式指定播种尝试次数；`seed` 默认 0，固定种子用于重复采样 |
 
@@ -43,7 +44,7 @@ count = result.matrices["count"]
 重编号。它不是原仓库的皮层加 Tian 亚皮层分区；要比较相同 parcellation 的矩阵，
 必须显式传入同一 DWI 网格 atlas。`region_labels` 给出矩阵行列对应的原标签。
 T1 标签通过所给或估计的 RAS-mm 变换以最近邻采样到 DWI 网格。原脚本用
-6-DOF、normmi 的 FSL FLIRT；当前自动变换使用本包的 12-DOF TorchFLIRT，
+6-DOF、normmi 的 FSL FLIRT；当前自动变换使用本包的同配置 TorchFLIRT。
 若要固定配准条件，请提供显式 `dwi_to_t1_world`。FSL scaled-mm `.mat` 不能
 直接传给这个参数。
 
@@ -73,11 +74,13 @@ fnit connectome \
   --bvecs derivatives/dwi/sub-01_desc-eddyRotated_dwi.bvec \
   --t1 sub-01/anat/sub-01_T1w.nii.gz \
   --atlas-dwi derivatives/atlas/sub-01_space-dwi_atlas.nii.gz \
+  --t1-segmentation derivatives/freesurfer/sub-01/mri/aparc+aseg.mgz \
+  --segmentation-source freesurfer \
   --output-dir derivatives/fnit_connectome/sub-01 \
   --device cuda:0 --n-seeds 10000 --seed 0
 ```
 
-已有 SynthSeg 标签可用 `--t1-segmentation` 传入，从而不加载该模型的权重；
+已有 SynthSeg 标签可用 `--t1-segmentation` 传入；官方 FreeSurfer `aparc+aseg.mgz` 同时设置 `--segmentation-source freesurfer`。这两种情况均不加载 SynthSeg 权重；
 也可用 `--synthseg-weights` 指定本地官方 SynthSeg 2.0 权重。权重不随包发布，
 下载和校验见[权重说明](../WEIGHTS.md)。`--dwi-to-t1-world` 接收 4×4 的
 CSV 或空白分隔文本。`--device cpu` 可用于小规模功能检查；完整追踪建议 CUDA。
@@ -89,6 +92,8 @@ CSV 或空白分隔文本。`--device cpu` 可用于小规模功能检查；完�
 对应 `region_labels.csv` 第 `i` 个标签。默认拒绝覆盖任何已有输出；
 `--overwrite` 允许重跑，但始终拒绝覆盖输入文件。单个输出先写临时文件再
 替换，运行中断可能留下之前已写出的部分结果。
+
+[解剖算子逐函数输入与调用](ANATOMY_OPERATORS.md)及[官方 FreeSurfer、5TT/GMWMI、配准与 atlas 阶段同输入验证](../../validation/connectome/ds004666/ANATOMY_STAGE_20260927.md)给出原软件命令、逐值/容差、计时和示例图。5TT/GMWMI 工具函数位于 `fnit.connectome`；当前概率追踪仍使用三类离散组织图，未把 MRtrix ACT 算法完整移植。
 
 ## 与原流程的对应及边界
 

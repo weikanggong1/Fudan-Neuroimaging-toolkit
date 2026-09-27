@@ -4,14 +4,18 @@
 registration implementation. It follows the default FSL FLIRT 2111.2 path
 used by `fsl_reg`: 12 degrees of freedom, correlation-ratio cost, the
 8/4/2/1 mm search schedule, and the MISCMATHS Brent coordinate optimizer.
-The implementation runs on a PyTorch CPU or CUDA device and does not call the
-FSL executable at runtime.
+A second profile implements the `-dof 6 -cost normmi` rigid registration
+used by the UKB connectome anatomy stage. Both run on a PyTorch CPU or CUDA
+device and do not call the FSL executable at runtime.
 
 CUDA execution enables TF32 matrix kernels by default while retaining the
 declared float32/float64 tensor dtypes. It does not use float16 or bfloat16;
 the active flags are written to `result.qc["tf32"]`.
 
-This source-derived PyTorch port implements the supported default FSL path; it
+The ten-case gate below applies to the 12-DOF/corratio profile. The 6-DOF/normmi
+profile has a separate one-case b0-to-T1 comparison in the
+[connectome anatomy report](../../validation/connectome/ds004666/ANATOMY_STAGE_20260927.md).
+This source-derived PyTorch port implements these two supported FSL profiles; it
 does not claim bitwise or complete numerical equivalence. The declared
 reference-suite matrix gate passed 10/10 cases at `rmsdiff <= 0.05 mm`, with a median
 of 0.008544 mm and maximum of 0.028984 mm.
@@ -63,8 +67,8 @@ Each argument has one role:
 | `-out` | Optional resampled input image on the reference grid. An extensionless name uses `FSLOUTPUTTYPE=NIFTI` or `NIFTI_GZ`. |
 | `-omat` | Optional 4 x 4 input-to-reference matrix in FSL scaled-mm coordinates. |
 | `-init` | Optional initial 4 x 4 input-to-reference matrix in the same FSL scaled-mm convention. |
-| `-dof 12` | Selects the only implemented affine model. Other values are rejected. |
-| `-cost corratio` | Selects the only implemented cost. Other FLIRT costs are rejected. |
+| `-dof 12` or `-dof 6` | Selects the affine or rigid model; 6 requires `-cost normmi`. |
+| `-cost corratio` or `-cost normmi` | Selects the matched cost; normmi requires 6 DOF. |
 | `--device cuda:0` | Runs tensor operations on the selected CUDA device. Use `cpu` for CPU execution. CUDA is selected automatically when this argument is omitted and CUDA is available. |
 | `--overwrite` | Replaces existing output files. Without it, existing outputs stop the run before registration. |
 
@@ -85,10 +89,17 @@ flirt \
   -cost corratio
 ```
 
-The package command implements this default registration path. FSL options
-for other costs, degrees of freedom, schedules, masks, interpolation modes,
+The package command implements the default affine path and the 6-DOF/normmi
+rigid path. FSL options for other costs, degrees of freedom, schedules, masks, interpolation modes,
 search ranges, and weighting images are outside the current public contract
 and are rejected rather than approximated.
+
+For diffusion b0 to T1, use `-dof 6 -cost normmi` with brain-extracted
+inputs. On the ds004666 same-input example, the PyTorch and FSL matrices
+differed by at most 0.162, 0.189, and 0.206 mm in world-space grid
+displacement across three runs; PyTorch registration took 217.61, 227.71,
+and 237.84 s versus FSL 24.59 s. These figures do not extend
+the ten-case 12-DOF validation gate.
 
 ## Python
 

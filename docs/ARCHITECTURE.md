@@ -14,7 +14,7 @@ FastVBM 的配准链位于 `flirt/`、`fnirt/`、`applywarp/`、`fast_vbm/regist
 | 33 类 SynthSeg | [T1 结构分割](synthseg/README.md) |
 | SynthSR | [合成 T1w](synthsr/README.md) |
 | TorchFAST | [三组织分割及偏置校正](fast/README.md) |
-| TorchFLIRT | [FSL 12-DOF affine](flirt/README.md) |
+| TorchFLIRT | [FSL 12-DOF affine / 6-DOF normmi rigid](flirt/README.md) |
 | TorchFNIRT | [FSL GM nonlinear registration](fnirt/README.md) |
 | TorchApplyWarp | [FSL warp application](applywarp/README.md) |
 | FastVBM | [原始 T1w 到 modulated GM](fast_vbm/README.md) |
@@ -50,6 +50,6 @@ from fnit import (
 )
 ```
 
-学习模型在构造时加载权重并选择 `device="cpu"` 或 `device="cuda:0"`；TorchFAST、TorchFLIRT、TorchFNIRT、TorchApplyWarp、TorchTOPUP、TorchEDDY、TorchDTIFIT、TorchAMICONODDI、TorchBEDPOSTX 和 TorchProbtrackX 不加载预训练权重。UKBConnectome 默认使用 CUDA，从已校正 DWI 起步；其 SynthSeg 分割可由调用方提供，或在单次调用时加载官方权重。单次调用返回带几何信息的结果对象，由调用者选择保存字段。FastVBM 组合 SynthStrip、TorchFAST、TorchFLIRT 和一个可选非线性后端。`registration_backend="synthmorph"` 延迟加载官方 deform checkpoint；`registration_backend="fnirt"` 构造无 checkpoint 的 TorchFNIRT。
+学习模型在构造时加载权重并选择 `device="cpu"` 或 `device="cuda:0"`；TorchFAST、TorchFLIRT、TorchFNIRT、TorchApplyWarp、TorchTOPUP、TorchEDDY、TorchDTIFIT、TorchAMICONODDI、TorchBEDPOSTX 和 TorchProbtrackX 不加载预训练权重。UKBConnectome 默认使用 CUDA，从已校正 DWI 起步；其 SynthSeg 分割可由调用方提供，或在单次调用时加载官方权重；也可读取官方 FreeSurfer `aparc+aseg.mgz`。单次调用返回带几何信息的结果对象，由调用者选择保存字段。FastVBM 组合 SynthStrip、TorchFAST、TorchFLIRT 和一个可选非线性后端。`registration_backend="synthmorph"` 延迟加载官方 deform checkpoint；`registration_backend="fnirt"` 构造无 checkpoint 的 TorchFNIRT。
 
 权重查找顺序为显式路径、`FNIT_WEIGHTS`、配置脚本保存的目录、用户缓存目录、已设置的 `FREESURFER_HOME/models/`；见[权重说明](WEIGHTS.md)。各功能的单被试 Python 返回值、保存方式和命令行参数见上表链接。

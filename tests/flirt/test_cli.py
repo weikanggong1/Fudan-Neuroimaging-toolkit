@@ -18,8 +18,9 @@ class _Moved:
 
 def _fake_model(captured):
     class Model:
-        def __init__(self, *, device):
+        def __init__(self, *, device, dof, cost):
             captured["device"] = device
+            captured["profile"] = (dof, cost)
 
         def __call__(self, moving, fixed, *, init):
             captured["call"] = (moving, fixed, init)
@@ -49,6 +50,7 @@ def test_run_flirt_writes_both_outputs_atomically(tmp_path, monkeypatch):
 
     assert captured == {
         "device": "cuda:1",
+        "profile": (12, "corratio"),
         "call": ("moving.nii.gz", "fixed.nii.gz", "initial.mat"),
     }
     assert output.read_text() == "moved"
@@ -63,10 +65,21 @@ def test_run_flirt_writes_both_outputs_atomically(tmp_path, monkeypatch):
     assert captured["call"] == ("moving.nii.gz", "fixed.nii.gz", "initial.mat")
 
 
+def test_run_flirt_accepts_rigid_normmi_profile(tmp_path, monkeypatch):
+    captured = {}
+    monkeypatch.setattr(standalone, "TorchFLIRT", _fake_model(captured))
+    standalone.run_flirt(
+        "b0.nii.gz", "t1.nii.gz", omat=tmp_path / "rigid.mat",
+        dof=6, cost="normmi", device="cuda:0",
+    )
+    assert captured["profile"] == (6, "normmi")
+    assert (tmp_path / "rigid.mat").is_file()
+
+
 def test_run_flirt_rejects_unsupported_and_dangerous_contracts(tmp_path):
-    with pytest.raises(NotImplementedError, match="dof 12"):
+    with pytest.raises(NotImplementedError, match="supported profiles"):
         standalone.run_flirt("in.nii.gz", "ref.nii.gz", omat=tmp_path / "x", dof=6)
-    with pytest.raises(NotImplementedError, match="cost corratio"):
+    with pytest.raises(NotImplementedError, match="supported profiles"):
         standalone.run_flirt(
             "in.nii.gz", "ref.nii.gz", omat=tmp_path / "x", cost="normcorr"
         )

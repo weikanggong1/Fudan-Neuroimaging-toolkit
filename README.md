@@ -11,7 +11,7 @@
 | sMRI | SynthSR | 从单幅 MRI 或 CT 合成 1 mm T1w | [SynthSR 文档](docs/synthsr/README.md) |
 | sMRI | TorchFAST | T1 三组织分割、PVE 与偏置场校正 | [TorchFAST 文档](docs/fast/README.md) |
 | sMRI | GPU FAST VBM | 原始 T1w 到 warped GM、Jacobian 和 modulated GM | [FastVBM 文档](docs/fast_vbm/README.md) |
-| sMRI、fMRI、dMRI 通用 | PyTorch FLIRT | 12-DOF 仿射；reference-grid image 和 FSL scaled-mm `.mat` | [FLIRT 文档](docs/flirt/README.md) |
+| sMRI、fMRI、dMRI 通用 | PyTorch FLIRT | 12-DOF 仿射及 6-DOF normmi 刚性；reference-grid image 和 FSL scaled-mm `.mat` | [FLIRT 文档](docs/flirt/README.md) |
 | sMRI（当前 GM 配置） | PyTorch FNIRT | GM 非线性配准；intent-2007 coefficients、warped image 和 Jacobian | [FNIRT 文档](docs/fnirt/README.md) |
 | sMRI、fMRI、dMRI 通用 | GPU applywarp | 应用 FSL dense warp、FNIRT coefficient、premat 和 postmat | [applywarp 文档](docs/applywarp/README.md) |
 | dMRI | PyTorch TOPUP | UKB AP/PA b0 选择、Hz 场估计、畸变校正和 FSL 输出 | [TOPUP 文档](docs/topup/README.md) |
@@ -33,7 +33,7 @@ Python recon-all 的神经网络与部分体素、表面计算使用 PyTorch/CUD
 FastVBM 的两个分支共用仿射配准、FSL 坐标转换、GPU 重采样、仅非线性
 Jacobian 和调制步骤；差别只在非线性形变由 SynthMorph 或 TorchFNIRT 估计。
 
-FLIRT、FNIRT 和 FastVBM 的 0.9 十例验证状态见 [FastVBM 验证页](validation/fast_vbm/README.md)。TOPUP、EDDY、DTIFIT 和 AMICO-NODDI 的真实 UKB 格式 dMRI 对照见上表各子页；输入、输出、原命令对应关系、计时和数值边界均在各自页面。BEDPOSTX 和 ProbtrackX 的验证边界见其功能页。connectome 的固定端点矩阵赋值，以及公开 ds004666 的原始和 TOPUP/EDDY 校正 DWI 同输入 benchmark 均已记录；完整追踪和 SIFT2 结果尚未达到原软件输出一致性，见 [connectome 文档](docs/connectome/README.md)。
+FLIRT、FNIRT 和 FastVBM 的 0.9 十例验证状态见 [FastVBM 验证页](validation/fast_vbm/README.md)。TOPUP、EDDY、DTIFIT 和 AMICO-NODDI 的真实 UKB 格式 dMRI 对照见上表各子页；输入、输出、原命令对应关系、计时和数值边界均在各自页面。BEDPOSTX 和 ProbtrackX 的验证边界见其功能页。connectome 的固定端点矩阵赋值、官方 FreeSurfer 输入的 5TT/GMWMI、配准、atlas 阶段，以及公开 ds004666 的原始和 TOPUP/EDDY 校正 DWI 同输入 benchmark 均已记录；完整追踪和 SIFT2 结果尚未达到原软件输出一致性，见 [connectome 文档](docs/connectome/README.md)。
 
 FLIRT、FNIRT、applywarp、TOPUP、EDDY、DTIFIT、BEDPOSTX 和 ProbtrackX 的 FSL 派生实现及随包提供的上游源码受 [FSL Software Licence 6.0](licenses/FSL-6.0.txt) 的非商业使用条款约束。各功能的移植范围和验证边界见对应子页面。
 

@@ -10,6 +10,7 @@ import numpy as np
 import torch
 
 from .assignment import build_connectomes
+from .anatomy import freesurfer_five_tissue, resample_labels_nearest
 from .dti import fit_tensor_fa
 from .fod import fit_three_tissue_csd
 from .response import estimate_three_tissue_response
@@ -53,26 +54,6 @@ def _gradients(bvals_path: str | Path, bvecs_path: str | Path,
     return bvals, bvecs
 
 
-def _resample_labels(data: torch.Tensor, source_affine: torch.Tensor,
-                     target_shape: tuple[int, int, int], target_affine: torch.Tensor,
-                     target_to_source_world: torch.Tensor):
-    """Nearest-neighbour label sampling on a target grid; all coordinates are RAS mm."""
-    device = data.device
-    ranges = [torch.arange(size, device=device) for size in target_shape]
-    voxel = torch.stack(torch.meshgrid(*ranges, indexing="ij"), -1).reshape(-1, 3).to(torch.float32)
-    target_world = voxel @ target_affine[:3, :3].T + target_affine[:3, 3]
-    source_world = target_world @ target_to_source_world[:3, :3].T + target_to_source_world[:3, 3]
-    inverse = torch.linalg.inv(source_affine)
-    source_voxel = (source_world @ inverse[:3, :3].T + inverse[:3, 3]).round().long()
-    inside = torch.ones(len(source_voxel), dtype=torch.bool, device=device)
-    for axis, size in enumerate(data.shape):
-        inside &= (source_voxel[:, axis] >= 0) & (source_voxel[:, axis] < size)
-    safe = torch.stack([source_voxel[:, axis].clamp(0, size - 1)
-                        for axis, size in enumerate(data.shape)], -1)
-    sampled = data[safe[:, 0], safe[:, 1], safe[:, 2]]
-    return torch.where(inside, sampled, torch.zeros_like(sampled)).reshape(target_shape)
-
-
 def _tissue_labels(segmentation: torch.Tensor):
     labels = torch.zeros_like(segmentation, dtype=torch.int16)
     foreground = segmentation > 0
@@ -86,14 +67,13 @@ def _tissue_labels(segmentation: torch.Tensor):
 
 def _registration(b0: torch.Tensor, dwi_affine: torch.Tensor, t1_path: str | Path,
                   device: torch.device):
-    # Reuse the package's GPU registration implementation. Its current
-    # 12-DOF correlation-ratio path differs from the UKB script's 6-DOF NMI.
+    # Match the UKB script's rigid-body normalized-mutual-information profile.
     import surfa as sf
     from ..flirt import TorchFLIRT
     b0_cpu = b0.detach().cpu().numpy()
     geometry = sf.ImageGeometry(shape=b0_cpu.shape, vox2world=dwi_affine.cpu().numpy())
     moving = sf.Volume(b0_cpu, geometry=geometry)
-    result = TorchFLIRT(device=str(device))(moving, sf.load_volume(str(t1_path)))
+    result = TorchFLIRT(device=str(device), dof=6, cost="normmi")(moving, sf.load_volume(str(t1_path)))
     return torch.as_tensor(result.moving_to_fixed_world, device=device, dtype=torch.float32)
 
 
@@ -140,10 +120,15 @@ class UKBConnectome:
         *,
         atlas_dwi: str | Path | None = None,
         t1_segmentation: str | Path | None = None,
+        segmentation_source: str = "synthseg",
         dwi_to_t1_world: np.ndarray | torch.Tensor | None = None,
         n_seeds: int,
         seed: int = 0,
     ) -> ConnectomeResult:
+        if segmentation_source not in ("synthseg", "freesurfer"):
+            raise ValueError("segmentation_source must be synthseg or freesurfer")
+        if segmentation_source == "freesurfer" and t1_segmentation is None:
+            raise ValueError("freesurfer segmentation_source requires t1_segmentation")
         dwi_data, dwi_affine = _image(dwi, self.device)
         if dwi_data.ndim != 4:
             raise ValueError("DWI must have shape [X,Y,Z,N]")
@@ -172,10 +157,17 @@ class UKBConnectome:
                                          dtype=torch.float32)
             if transform.shape != (4, 4):
                 raise ValueError("dwi_to_t1_world must be 4x4")
-        native_seg = _resample_labels(
+        native_seg = resample_labels_nearest(
             seg_data, seg_affine, tuple(dwi_data.shape[:3]), dwi_affine, transform
         )
-        tissues = _tissue_labels(native_seg)
+        if segmentation_source == "freesurfer":
+            five = freesurfer_five_tissue(native_seg)
+            tissues = torch.zeros_like(native_seg, dtype=torch.int16)
+            tissues[(five[..., 0] + five[..., 1]) > 0] = 1
+            tissues[five[..., 2] > 0] = 2
+            tissues[five[..., 3] > 0] = 3
+        else:
+            tissues = _tissue_labels(native_seg)
         if atlas_dwi is None:
             # The default is a compact SynthSeg structure atlas. Explicit
             # UKB cortical+Tian atlases can be supplied in the DWI grid.

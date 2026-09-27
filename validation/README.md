@@ -15,7 +15,7 @@
 - DTIFIT：[`dtifit/report.public.json`](dtifit/report.public.json) 与[功能页](../docs/dtifit/README.md)。
 - AMICO-NODDI：[`amico_noddi/report.public.json`](amico_noddi/report.public.json) 与[功能页](../docs/amico_noddi/README.md)。
 - BEDPOSTX 与 ProbtrackX：[`bedpostx/README.md`](bedpostx/README.md)、[`probtrackx/README.md`](probtrackx/README.md) 及各自功能页。
-- Connectome：[固定端点矩阵赋值报告](connectome/assignment_report.public.json)、[ds004666 真实 DWI 配对报告](connectome/ds004666/README.md)与[功能页](../docs/connectome/README.md)；完整流程未达到原软件输出一致。
+- Connectome：[固定端点矩阵赋值报告](connectome/assignment_report.public.json)、[ds004666 真实 DWI 配对报告](connectome/ds004666/README.md)、[官方 FreeSurfer 解剖阶段对照](connectome/ds004666/ANATOMY_STAGE_20260927.md)与[功能页](../docs/connectome/README.md)；完整流程未达到原软件输出一致。
 
 ## 功能子页面审计
 
@@ -40,6 +40,6 @@
 | [AMICO-NODDI](../docs/amico_noddi/README.md) | AMICO 2.0.3，1 例真实 UKB 格式 dMRI | 有：UKB/AMICO 命名、NDI、ODI、FWF、方向和 RMSE | 有：AMICO CPU / 本包 H100 | 有：三项 parameter map 与绝对差 |
 | [BEDPOSTX](../docs/bedpostx/README.md) | FSL 6.0.7.22，真实 dMRI 小 ROI 与合成 DWI | 有：fraction、dyad、diffusivity、FSL 追踪读取 | 有：FSL CPU / 本包 CPU 与 H100 | 有：合成 crossing-fibre fraction 与差值 |
 | [ProbtrackX](../docs/probtrackx/README.md) | FSL 6.0.7.22，真实 UKBB dMRI 后验 | 有：密度图、waytotal、连接矩阵 | 有：FSL CPU / 本包 CPU | 合成后验纤维场图 |
-| [Connectome](../docs/connectome/README.md) | MRtrix3 3.0.5 合成矩阵赋值；MRtrix3 3.0.3-103 与公开 ds004666 原始 DWI/FSL 5TT ACT | 有：真实四矩阵相关、归一化误差、连接支持和三种子稳定性；完整流程未一致 | 有：合成矩阵阶段 RTX 3060；真实 DWI 的 PyTorch H100 与 MRtrix 分阶段计时，边界已注明 | 有：真实 T1/b0/atlas、四矩阵及差值 |
+| [Connectome](../docs/connectome/README.md) | MRtrix3 3.0.5 合成矩阵赋值；MRtrix3 3.0.3-103、FSL 6.0.7.4、官方 FreeSurfer 8.2 与公开 ds004666 T1/校正 DWI | 有：5TT/GMWMI 与 atlas 逐值比较、6-DOF 配准矩阵容差、真实四矩阵相关、归一化误差、连接支持和三种子稳定性；完整流程未一致 | 有：合成矩阵阶段 RTX 3060；真实 DWI 的 PyTorch H100 与 MRtrix 分阶段计时，边界已注明 | 有：真实 T1/b0/5TT/GMWMI/atlas、四矩阵及差值 |
 
 公开记录不含账号、私有绝对路径、源病例 ID、权重或临床原图。公开样例及其来源校验见 [T1w 示例](../examples/README.md)和 [FLAIR 示例](../examples/WMH.md)。没有人工真值的报告只衡量与参考实现的一致性。

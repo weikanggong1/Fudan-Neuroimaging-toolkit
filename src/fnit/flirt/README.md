@@ -2,7 +2,7 @@
 
 This directory contains the public FLIRT implementation:
 
-- `core.py`: source-derived 12-DOF correlation-ratio registration;
+- `core.py`: source-derived 12-DOF correlation-ratio and 6-DOF normmi registration;
 - `coordinates.py`: FSL scaled-mm and world-RAS conversion;
 - `types.py`: shared result and image-input validation;
 - `standalone.py`: FSL-style Python file API with atomic outputs;

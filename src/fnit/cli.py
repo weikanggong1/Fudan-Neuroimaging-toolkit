@@ -290,6 +290,7 @@ def _run_connectome(args):
         args.dwi, args.bvals, args.bvecs, args.t1,
         atlas_dwi=args.atlas_dwi,
         t1_segmentation=args.t1_segmentation,
+        segmentation_source=args.segmentation_source,
         dwi_to_t1_world=transform,
         n_seeds=args.n_seeds,
         seed=args.seed,
@@ -542,7 +543,8 @@ def main(argv=None):
     connectome.add_argument('--t1', required=True, help='paired T1w NIfTI')
     connectome.add_argument('--output-dir', required=True)
     connectome.add_argument('--atlas-dwi', help='integer atlas on the DWI grid')
-    connectome.add_argument('--t1-segmentation', help='existing SynthSeg labels on the T1 grid')
+    connectome.add_argument('--t1-segmentation', help='existing SynthSeg labels or official FreeSurfer aparc+aseg')
+    connectome.add_argument('--segmentation-source', choices=('synthseg', 'freesurfer'), default='synthseg')
     connectome.add_argument('--dwi-to-t1-world', help='optional 4x4 RAS-mm transform, CSV or whitespace text')
     connectome.add_argument('--synthseg-weights', help='official SynthSeg 2.0 checkpoint')
     connectome.add_argument('--device', default='cuda:0')
