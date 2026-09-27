@@ -1,12 +1,13 @@
 # ProbtrackX 当前实现验证
 
-[功能、输入输出及官方对应命令](../../docs/probtrackx/README.md)
+[功能、输入输出及官方对应命令](../../docs/probtrackx/README.md) · [默认计数](report.default.latest.public.json) · [长度加权](report.current.latest.public.json)
+[matrix1](report.matrix1.cpu.latest.public.json) · [matrix2 与网络](report.matrix2.cpu.latest.public.json) · [matrix3](report.matrix3.cpu.latest.public.json) · [seed→ROI](report.targets.cpu.latest.public.json)
 
 ## 数据与配对设计
 
 在 gpucw1 使用 FSL 6.0.7.22 `probtrackx2` / `probtrackx2_gpu`，对同一例真实 UK Biobank DWI 的原版 FSL BEDPOSTX 三纤维后验比较 FNIT。五个预先定义的 ROI 由 JHU 标签图和被试 FA、追踪 mask 生成，选点不依赖两套追踪结果。
 
-双方统一总步数 400、步长 0.5 mm、`cthr=0.2`、`fibthresh=0.01`、`rseed=20260927`。单 seed 每体素 200 条，五区网络每体素 2000 条；FNIT 批大小 2048，CPU 8 线程。分别配对默认计数 `--opd` 和长度加权 `--opd --pd --ompl`，每种模式运行 FSL CPU/FNIT CPU、FSL GPU/FNIT GPU 的单 seed 与五区网络。墙钟时间包含进程启动、后验载入、追踪与写盘。源码 SHA-256 保存在服务器报告中。GPU 显存单独在真实五区网络长度加权模式测量。真实影像、后验、seed、逐体素结果和汇总指标保留在授权服务器，汇总报告待数据发布授权。
+双方统一总步数 400、步长 0.5 mm、`cthr=0.2`、`fibthresh=0.01`、`rseed=20260927`。单 seed 每体素 200 条，五区网络每体素 2000 条；FNIT 批大小 2048，CPU 8 线程。分别配对默认计数 `--opd` 和长度加权 `--opd --pd --ompl`，每种模式运行 FSL CPU/FNIT CPU、FSL GPU/FNIT GPU 的单 seed 与五区网络。墙钟时间包含进程启动、后验载入、追踪与写盘。四个 ProbTrackX 源码文件的 SHA-256 保存在六份公开摘要中。GPU 显存单独在真实五区网络长度加权模式测量。真实影像、后验、seed 和逐体素结果留在授权服务器；仓库只保存经授权的六份标量摘要。
 
 ## 真实 DWI 复现
 
@@ -56,7 +57,7 @@ CUDA_VISIBLE_DEVICES=0 bash validation/probtrackx/run_real_current.sh \
 
 ## 三类连接矩阵的真实 DWI 复现
 
-同一份五区 ROI 列表以 [prepare_connectome_masks.py](prepare_connectome_masks.py) 制作并集 seed、整数标签图和 ROI 元数据。稀疏矩阵使用同一并集 seed、每体素 500 条、400 总步、0.5 mm、rseed=20260927；区域矩阵使用原 ROI 列表。这样 matrix1/2/3 不混入 --network 的跨 ROI 轨迹筛选。原版与 FNIT 各模式分别启动，墙钟时间包括读取、追踪和写盘。真实 DWI、每条边的原始明细、逐边连接图和汇总指标保留在 gpucw1，汇总报告待数据发布授权。
+同一份五区 ROI 列表以 [prepare_connectome_masks.py](prepare_connectome_masks.py) 制作并集 seed、整数标签图和 ROI 元数据。稀疏矩阵使用同一并集 seed、每体素 500 条、400 总步、0.5 mm、rseed=20260927；区域矩阵使用原 ROI 列表。这样 matrix1/2/3 不混入 --network 的跨 ROI 轨迹筛选。原版与 FNIT 各模式分别启动，墙钟时间包括读取、追踪和写盘。真实 DWI、每条边的原始明细和逐边连接图保留在 gpucw1；仓库的摘要不含原始体素或边矩阵。
 
 ~~~bash
 export BED=/absolute/path/subject.bedpostX
@@ -108,7 +109,17 @@ bash validation/probtrackx/run_real_matrices_fnit.sh \
   --run-dir "$OUT" --device cpu --output "$OUT/real_voxel_matrices.png"
 ~~~
 
-复现 matrix1/3 时，把上述 `benchmark/probtrackx_matrix_current.py` 命令中的两处 matrix2 目录和报告文件名替换为对应编号。比较程序解析 .dot 的 1 起始索引和末尾维度行，并按配套体素坐标表对齐。指标包括非零边支持 Dice、非零并集上的 Pearson r 与 MAE、边权总和及单次运行墙钟时间。--detail-dir 写出每条实际连接的原版和 FNIT 权重，仅用于服务器私有复核。五区网络另比较原始计数、Cij/(Ni×P) 有向矩阵和双向均值；FNIT 保存的归一化文件须与公式逐元素一致。
+复现 matrix1/3 时，把上述 `benchmark/probtrackx_matrix_current.py` 命令中的两处 matrix2 目录和报告文件名替换为对应编号。以下命令从四份私有矩阵/目标报告去除逐边、逐体素数组，得到可发布的标量摘要；仓库内的 `latest` 文件是本次最终源码配对的版本。
+
+~~~bash
+for NAME in matrix1.cpu matrix2.cpu matrix3.cpu targets.cpu; do
+  "$PYTHON" validation/probtrackx/summarize_public.py \
+    --input "$OUT/report.$NAME.json" \
+    --output "$OUT/report.$NAME.public.json"
+done
+~~~
+
+比较程序解析 .dot 的 1 起始索引和末尾维度行，并按配套体素坐标表对齐。指标包括非零边支持 Dice、非零并集上的 Pearson r 与 MAE、边权总和及单次运行墙钟时间。--detail-dir 写出每条实际连接的原版和 FNIT 权重，仅用于服务器私有复核。五区网络另比较原始计数、Cij/(Ni×P) 有向矩阵和双向均值；FNIT 保存的归一化文件须与公式逐元素一致。
 
 ## 真实 DWI 单 waypoint 对照
 
@@ -132,6 +143,6 @@ export PRIVATE_WAYPOINT_OUT=/absolute/path/new-private-waypoint-run
 
 ## 指标解释与规则回归
 
-密度图相关在双方非零体素并集计算；前 10% Dice 用相同的 FSL 非零体素数十分之一作为双方 top-*k*。平均路径长度图的相关和 MAE 在双方都非零的体素上计算，并另报支持 Dice 与并集（含单侧缺失体素）误差。完整 ROI×ROI 原始矩阵只保存在授权服务器；拟公开的报告仅含汇总误差。网络连接稀疏，个位数命中不宜单独解释。
+密度图相关在双方非零体素并集计算；前 10% Dice 用相同的 FSL 非零体素数十分之一作为双方 top-*k*。平均路径长度图的相关和 MAE 在双方都非零的体素上计算，并另报支持 Dice 与并集（含单侧缺失体素）误差。完整 ROI×ROI 原始矩阵只保存在授权服务器；公开报告仅含汇总误差。网络连接稀疏，个位数命中不宜单独解释。
 
 9×5×5 合成直线场用于计数规则回归，不列为正式 benchmark：`--pd --ompl` 的单 seed 和双 ROI 网络输出，以及单独 `--ompl` 的网络输出，均与 FSL 逐元素相同；matrix1/2/3 的 2×2 稀疏矩阵、坐标表、matrix2 lookup 和路径密度也与 FSL 逐项相同。新增 waypoint/`wtstop` 的 9 组合成场配对与 FSL 6.0.7.22 的 `waytotal` 和 `fdt_paths` 逐项相同，AND 条件下的 matrix2 `.dot` 亦逐项相同。`tests/probtrackx/` 的 40 项 CPU/CUDA 回归测试在 gpucw1 全部通过。合成数据仅用于验证计数规则，不用于正式精度或耗时结论；单 waypoint 的真实 DWI 配对已完成但指标仍为私有；`wtstop` 的真实 DWI 对照尚未完成。

@@ -1,0 +1,150 @@
+{
+  "reference": "FSL 6.0.7.22 probtrackx2 / probtrackx2_gpu",
+  "data": "one real UK Biobank DWI; same FSL BEDPOSTX three-fibre posterior",
+  "settings": {
+    "seed_voxels": 7,
+    "seed_nsamples": 200,
+    "network_rois": 5,
+    "network_nsamples": 2000,
+    "nsteps": 400,
+    "steplength_mm": 0.5,
+    "cthr": 0.2,
+    "fibthresh": 0.01,
+    "rseed": 20260927,
+    "fnit_batch_size": 2048,
+    "cpu_threads": 8
+  },
+  "source_sha256": {
+    "pipeline.py": "a7286cff6efd48469fec121d6db7e48cf39929b2ab45acfe8ac6f2badb92c0ec",
+    "_triton.py": "e22ae4599323a675a19ac02d2e9a53c124491a3be4563acd9616991d3d1e1776",
+    "cli.py": "85f362bf06ebf1932a74394a8f8b339673a737cc6b573cbcc3385033ec187c07",
+    "matrix_io.py": "115a2748068339094bfa2d01c1f2ea0159ad4389ab6b413129a3f146de8e6ed7"
+  },
+  "cases": {
+    "seed_cpu": {
+      "fsl_vs_fnit_density": {
+        "affine_max_abs_difference": 0.0,
+        "fsl_nonzero_voxels": 14578,
+        "fnit_nonzero_voxels": 14684,
+        "fsl_density_sum": 6021851.5,
+        "fnit_density_sum": 6072489.5,
+        "fsl_density_max": 15849.5,
+        "fnit_density_max": 17601.5,
+        "pearson_on_union_nonzero": 0.9749748046223382,
+        "support_dice": 0.695646230606247,
+        "top_tenth_dice": 0.8544955387783116,
+        "mean_abs_error_on_union": 125.32655627750995
+      },
+      "wall_seconds_including_load_and_write": {
+        "fsl": 13.42,
+        "fnit": 15.68
+      },
+      "fsl_vs_fnit_mean_length": {
+        "common_voxels": 10178,
+        "support_dice": 0.695646230606247,
+        "pearson_on_common_nonzero": 0.8679620307600335,
+        "mean_abs_error_mm_on_common": 5.688874104278194,
+        "fsl_mean_mm_on_common": 62.36977858845811,
+        "fnit_mean_mm_on_common": 62.28442594514108,
+        "mean_abs_error_mm_on_union_including_missing": 37.904753026983705
+      }
+    },
+    "seed_gpu": {
+      "fsl_vs_fnit_density": {
+        "affine_max_abs_difference": 0.0,
+        "fsl_nonzero_voxels": 13902,
+        "fnit_nonzero_voxels": 14500,
+        "fsl_density_sum": 5877282.0,
+        "fnit_density_sum": 5941989.5,
+        "fsl_density_max": 16532.5,
+        "fnit_density_max": 17835.5,
+        "pearson_on_union_nonzero": 0.9758074009499235,
+        "support_dice": 0.6958664882754736,
+        "top_tenth_dice": 0.8453237410071942,
+        "mean_abs_error_on_union": 124.20018898488121
+      },
+      "wall_seconds_including_load_and_write": {
+        "fsl": 14.18,
+        "fnit": 13.14
+      },
+      "fsl_vs_fnit_mean_length": {
+        "common_voxels": 9882,
+        "support_dice": 0.6958664882754736,
+        "pearson_on_common_nonzero": 0.8638431624090319,
+        "mean_abs_error_mm_on_common": 5.727868493797928,
+        "fsl_mean_mm_on_common": 61.981123852445705,
+        "fnit_mean_mm_on_common": 62.01389140685641,
+        "mean_abs_error_mm_on_union_including_missing": 38.13651912106004
+      }
+    },
+    "network_cpu": {
+      "fsl_vs_fnit_density": {
+        "affine_max_abs_difference": 0.0,
+        "fsl_nonzero_voxels": 1136,
+        "fnit_nonzero_voxels": 1477,
+        "fsl_density_sum": 168524.5,
+        "fnit_density_sum": 210771.5,
+        "fsl_density_max": 1744.0,
+        "fnit_density_max": 1260.0,
+        "pearson_on_union_nonzero": 0.8297828436231202,
+        "support_dice": 0.5610409491006506,
+        "top_tenth_dice": 0.7699115044247787,
+        "mean_abs_error_on_union": 82.51755319148936
+      },
+      "wall_seconds_including_load_and_write": {
+        "fsl": 32.94,
+        "fnit": 54.58
+      },
+      "fsl_vs_fnit_mean_length": {
+        "common_voxels": 733,
+        "support_dice": 0.5610409491006506,
+        "pearson_on_common_nonzero": 0.8439833119129099,
+        "mean_abs_error_mm_on_common": 6.808689689083281,
+        "fsl_mean_mm_on_common": 52.34748208360165,
+        "fnit_mean_mm_on_common": 52.326217210959605,
+        "mean_abs_error_mm_on_union_including_missing": 44.77773644588095
+      },
+      "matrix": {
+        "mean_abs_error": 31.08
+      },
+      "mean_length_matrix": {
+        "mean_abs_error": 4.939862189199999
+      }
+    },
+    "network_gpu": {
+      "fsl_vs_fnit_density": {
+        "affine_max_abs_difference": 0.0,
+        "fsl_nonzero_voxels": 1561,
+        "fnit_nonzero_voxels": 1176,
+        "fsl_density_sum": 230612.5,
+        "fnit_density_sum": 173602.0,
+        "fsl_density_max": 1749.0,
+        "fnit_density_max": 1484.5,
+        "pearson_on_union_nonzero": 0.8330423622472197,
+        "support_dice": 0.5166240409207161,
+        "top_tenth_dice": 0.7051282051282052,
+        "mean_abs_error_on_union": 83.9628078817734
+      },
+      "wall_seconds_including_load_and_write": {
+        "fsl": 13.29,
+        "fnit": 18.38
+      },
+      "fsl_vs_fnit_mean_length": {
+        "common_voxels": 707,
+        "support_dice": 0.5166240409207161,
+        "pearson_on_common_nonzero": 0.8676301660379145,
+        "mean_abs_error_mm_on_common": 6.350707912377623,
+        "fsl_mean_mm_on_common": 54.57178557812746,
+        "fnit_mean_mm_on_common": 54.585178673688894,
+        "mean_abs_error_mm_on_union_including_missing": 47.79572378863842
+      },
+      "matrix": {
+        "mean_abs_error": 25.02
+      },
+      "mean_length_matrix": {
+        "mean_abs_error": 6.64822
+      }
+    }
+  },
+  "release": "aggregate metrics only; private voxel and edge arrays omitted"
+}

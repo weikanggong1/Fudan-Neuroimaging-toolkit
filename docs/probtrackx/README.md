@@ -147,6 +147,46 @@ fnit probtrackx --samples-dir /absolute/path/subject.bedpostX \
 
 ## 与 FSL 的真实 DWI benchmark
 
-已在 gpucw1 使用同一真实 DWI 的 BEDPOSTX 后验，将 FSL 6.0.7.22 与本次 FNIT 源码配对运行。覆盖默认 seed→voxel、长度加权密度、稀疏 matrix1/2/3、seed→目标 ROI 和 region→region；逐体素与逐边结果及汇总指标保存在授权服务器。当前公开页不据此宣称数值等价或加速，指标和比较图待数据发布授权后补充。[复现方法](../../validation/probtrackx/README.md)列出输入、官方命令、运行参数及比较脚本。
+在 gpucw1 使用同一例真实 UK Biobank DWI 的 FSL BEDPOSTX 三纤维后验，分别以 FSL 6.0.7.22 和本次 FNIT 源码运行。默认密度与长度加权模式采用 400 总步、0.5 mm 步长、`cthr=0.2`、`fibthresh=0.01`、相同随机种子；单 seed 每体素 200 条，五区网络每体素 2000 条。FNIT 批大小 2048；CPU 为 8 线程。时间为进程启动、后验载入、追踪及写盘的总墙钟。双方随机数流不同，因此比较汇总图和矩阵，不要求逐轨迹相同。
 
-同网格合成直线场用于计数规则回归：matrix1/2/3 的稀疏输出、坐标表、matrix2 lookup 和密度图与 FSL 逐项相同；9 组 waypoint/`wtstop` 配对的 `waytotal` 和密度图逐项相同。这些合成结果不作为真实数据精度或耗时结论。`tests/probtrackx/` 的 40 项 CPU/CUDA 测试已在 gpucw1 通过。
+### Seed→voxel 与 region→region
+
+默认计数 `--opd`。Pearson r 在双方非零并集计算；支持 Dice 比较非零体素集合，top 10% Dice 比较强连接体素。网络矩阵 MAE 是原始 `fdt_network_matrix` 的平均绝对计数差。
+
+| 任务 | FSL / FNIT (s) | 密度 r | 支持 Dice | top 10% Dice | ROI 矩阵 MAE |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 单 seed CPU | 12.06 / 13.76 | 0.9937 | 0.6957 | 0.8929 | — |
+| 单 seed GPU | 12.41 / 12.94 | 0.9937 | 0.6959 | 0.8856 | — |
+| 五区网络 CPU | 37.93 / 53.80 | 0.9388 | 0.5620 | 0.8142 | 0.76 |
+| 五区网络 GPU | 13.81 / 16.75 | 0.9537 | 0.5181 | 0.7949 | 0.60 |
+
+长度加权 `--opd --pd --ompl`。平均路径长度的 r 和 MAE 仅在双方均为非零的体素上计算，MAE 单位为 mm。该模式的 ROI 矩阵为长度加权和，不能与计数矩阵直接相减。
+
+| 任务 | FSL / FNIT (s) | 加权密度 r | 支持 Dice | 平均长度 r | 长度 MAE (mm) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 单 seed CPU | 13.42 / 15.68 | 0.9750 | 0.6956 | 0.8680 | 5.69 |
+| 单 seed GPU | 14.18 / 13.14 | 0.9758 | 0.6959 | 0.8638 | 5.73 |
+| 五区网络 CPU | 32.94 / 54.58 | 0.8298 | 0.5610 | 0.8440 | 6.81 |
+| 五区网络 GPU | 13.29 / 18.38 | 0.8330 | 0.5166 | 0.8676 | 6.35 |
+
+以上四类模式的配对数值与源码 SHA-256 分别见[默认计数报告](../../validation/probtrackx/report.default.latest.public.json)和[长度加权报告](../../validation/probtrackx/report.current.latest.public.json)。在这些配置下，FNIT CPU 网络慢于 FSL CPU；GPU 也未显示稳定的整体加速。
+
+### Voxel→voxel 稀疏矩阵
+
+同一组 ROI 的并集用于种子和目标，分别运行 matrix1（seed×seed）、matrix2（seed×target2）、matrix3（目标体素共访）；每体素 500 条。按官方坐标表对齐 `.dot` 边后，支持 Dice 比较非零边集合；r 和 MAE 在非零并集计算。以下均为 FSL CPU 与 FNIT CPU 的配对。
+
+| 输出 | FSL / FNIT (s) | 非零边 FSL / FNIT | 支持 Dice | 边权 r | 边权 MAE |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| matrix1 | 17.21 / 31.25 | 155 / 144 | 0.7425 | 0.99983 | 1.86 |
+| matrix2 | 18.55 / 30.03 | 190 / 179 | 0.7913 | 0.99990 | 1.57 |
+| matrix3 | 18.51 / 30.89 | 134 / 122 | 0.7734 | 0.99991 | 2.94 |
+
+高权重边使 r 接近 1，但支持 Dice 为 0.74–0.79，表示低计数边仍不一致；本次 FNIT CPU 三种稀疏矩阵均慢于 FSL CPU。逐模式数值和源码哈希见[matrix1](../../validation/probtrackx/report.matrix1.cpu.latest.public.json)、[matrix2](../../validation/probtrackx/report.matrix2.cpu.latest.public.json)、[matrix3](../../validation/probtrackx/report.matrix3.cpu.latest.public.json)。
+
+### Voxel→ROI 与归一化 ROI 矩阵
+
+单个真实 ROI seed 到 5 个目标的 `--targetmasks --os2t` 配对：FSL / FNIT 为 12.35 / 15.97 秒；每个 seed 体素×目标的平均绝对计数误差为 0.1714，最大误差为 2。报告见[seed→ROI](../../validation/probtrackx/report.targets.cpu.latest.public.json)。
+
+另一组每体素 500 条的五区网络计数配对：FSL / FNIT 为 20.13 / 30.15 秒；原始有向矩阵 MAE 为 0.32。FNIT 的额外归一化有向矩阵和对称矩阵按上文公式生成，和 FSL 原始矩阵含义不同；该组与 FSL 原始矩阵比较后的 MAE 分别为 0.000091 与 0.000023（比较时先对 FSL 原始矩阵施加相同公式）。
+
+逐体素影像、逐边矩阵及连接图保留在授权服务器；仓库的六份 JSON 仅包含汇总标量及源码 SHA-256。[复现命令和指标定义](../../validation/probtrackx/README.md)列出比较方法。合成直线场的 FSL 逐项相同测试只验证计数规则，不替代这组真实数据误差。`tests/probtrackx/` 的 40 项 CPU/CUDA 测试已在 gpucw1 通过。

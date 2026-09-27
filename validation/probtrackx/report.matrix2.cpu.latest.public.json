@@ -1,0 +1,47 @@
+{
+  "reference": "FSL probtrackx2 sparse .dot files; 1-based row/column/value plus size row",
+  "data": "matched real DWI posterior; source images and per-edge details remain private",
+  "source_sha256": {
+    "pipeline.py": "a7286cff6efd48469fec121d6db7e48cf39929b2ab45acfe8ac6f2badb92c0ec",
+    "_triton.py": "e22ae4599323a675a19ac02d2e9a53c124491a3be4563acd9616991d3d1e1776",
+    "cli.py": "85f362bf06ebf1932a74394a8f8b339673a737cc6b573cbcc3385033ec187c07",
+    "matrix_io.py": "115a2748068339094bfa2d01c1f2ea0159ad4389ab6b413129a3f146de8e6ed7"
+  },
+  "wall_seconds_including_load_and_write": {
+    "fsl": 18.55,
+    "fnit": 30.03
+  },
+  "matrices": {
+    "matrix2": {
+      "fsl_and_fnit_coordinate_order_identical": true,
+      "fsl_nonzero_edges": 190,
+      "fnit_nonzero_edges": 179,
+      "common_nonzero_edges": 146,
+      "nonzero_support_dice": 0.7913279132791328,
+      "pearson_on_nonzero_union": 0.9999043682488817,
+      "mean_abs_error_on_nonzero_union": 1.5695067264573992,
+      "max_abs_error": 25.0,
+      "fsl_edge_value_sum": 34569.0,
+      "fnit_edge_value_sum": 34541.0
+    }
+  },
+  "network_counts": {
+    "nsamples_per_seed_voxel": 500,
+    "formula": "directed[i,j] = raw[i,j] / (ROI_seed_voxels[i] * nsamples); symmetric[i,j] = (directed[i,j] + directed[j,i]) / 2; diagonal = 0",
+    "requires_unweighted_count_matrices": true,
+    "raw": {
+      "mean_abs_error": 0.32
+    },
+    "directed_per_launched_particle": {
+      "mean_abs_error": 9.142857142857143e-05
+    },
+    "symmetric_mean": {
+      "mean_abs_error": 2.2857142857142865e-05
+    },
+    "wall_seconds_including_load_and_write": {
+      "fsl": 20.13,
+      "fnit": 30.15
+    }
+  },
+  "release": "aggregate metrics only; private voxel and edge arrays omitted"
+}
