@@ -120,7 +120,7 @@ def register_mni152_affine(subject_dir: str | Path, weights_dir: str | Path,
     crop = _crop_nonzero(native, transform_dir / "invol.crop.nii.gz")
     torch.set_num_threads(threads)
     model = SynthMorph(weights=weights_dir, device=device, model="affine", extent=256)
-    world_affine = model(crop, cropped_target).transform
+    world_affine = model.affine_transform(crop, cropped_target)
     world_affine.save(str(transform_dir / "aff.lta"))
     native_image = nib.load(str(native))
     full_image = nib.load(str(full_target))

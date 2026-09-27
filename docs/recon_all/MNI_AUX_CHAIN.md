@@ -52,7 +52,7 @@ write_mni_voxel_lta(
 # 返回 None；矩阵与几何写入 output_file。
 ```
 
-该写入函数用 nibabel/NumPy 读取固定模板和 MGH 几何，不再直接调用 Surfa。上游 SynthMorph 目前仍通过 Surfa 处理输入图像和返回变换；因此完整 MNI 辅助链尚未去除 Surfa 依赖。
+该写入函数用 NiBabel/NumPy 读取固定模板和 MGH 几何；可选 MNI152 affine 注册也已用 `affine_transform` 移除 Surfa 运行时依赖。通用 SynthMorph 的 `joint`、`deform`、`rigid`、`__call__` 与 `apply_transform` 仍使用 Surfa。辅助分割模块可在禁用 Surfa 导入时加载，但本次没有重跑两张标签图。
 
 命令行：
 
@@ -82,4 +82,4 @@ mri_vsinus_seg --s sub01 --rca-synthseg --threads 4 \
   --synthmorphdir transforms/synthmorph.1.0mm.1.0mm
 ```
 
-[LTA 写入替换的真实 T1 验证](../../validation/recon_all/python_gpu_port/mni_lta_nibabel_20260927/README.md)给出相同矩阵下与原 Surfa 写入的逐字节比较、完整函数的同输入比较和五次写入耗时。[真实 T1 对照](../../validation/recon_all/python_gpu_port/mni_aux_connected_20260927/README.md)逐项比较候选 LTA、两张标签图及后续 `brain.finalsurfs.mgz` 与保存的官方重建。保存试验的 `stats/vsinus.stats` 五个静脉窦区域数值行匹配，但其 eTIV 来自当时的 Talairach LTA；Talairach 精度修改后尚未重测这份统计文件。可选 `--native-white-preaparc` 整例调度会在 CPU 上调用本模块，默认流程不会调用。它还需要新的整例验收。
+[MNI152 affine 注册去 Surfa 的同输入验收](../../validation/recon_all/python_gpu_port/mni152_affine_no_surfa_20260927/README.md)给出两份 LTA 逐字节相同及稳态时间。[LTA 写入替换的真实 T1 验证](../../validation/recon_all/python_gpu_port/mni_lta_nibabel_20260927/README.md)给出相同矩阵下与原 Surfa 写入的逐字节比较、完整函数的同输入比较和五次写入耗时。[真实 T1 对照](../../validation/recon_all/python_gpu_port/mni_aux_connected_20260927/README.md)逐项比较候选 LTA、两张标签图及后续 `brain.finalsurfs.mgz` 与保存的官方重建。保存试验的 `stats/vsinus.stats` 五个静脉窦区域数值行匹配，但其 eTIV 来自当时的 Talairach LTA；Talairach 精度修改后尚未重测这份统计文件。可选 `--native-white-preaparc` 整例调度会在 CPU 上调用本模块，默认流程不会调用。它还需要新的整例验收。

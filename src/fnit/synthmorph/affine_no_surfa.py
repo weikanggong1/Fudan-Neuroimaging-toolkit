@@ -50,6 +50,7 @@ def _geometry(image: nib.spatialimages.SpatialImage) -> AffineGeometry:
         signs = np.eye(3)
         signs[indices] = r[indices] / voxsize
         rotation = q @ signs
+        voxsize = np.asarray(image.header.get_zooms()[:3], dtype=np.float64)
     return AffineGeometry(shape, matrix, voxsize, rotation, center)
 
 
