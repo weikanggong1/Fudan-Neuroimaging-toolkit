@@ -1587,8 +1587,8 @@ class TorchFLIRT:
             "validation_rmsdiff_radius_mm": 80.0 if self.dof == 12 else None,
             "validation_case_count": 10 if self.dof == 12 else None,
             "validation_matrix_pass_count": 10 if self.dof == 12 else None,
-            "validation_matrix_median_mm": 0.00854449 if self.dof == 12 else None,
-            "validation_matrix_maximum_mm": 0.0289838 if self.dof == 12 else None,
+            "validation_matrix_median_mm": 0.008545075 if self.dof == 12 else None,
+            "validation_matrix_maximum_mm": 0.0289986 if self.dof == 12 else None,
             "reference_validation_profile": (
                 "CUDA TF32 default; angular search; no init"
             ),
@@ -1596,7 +1596,7 @@ class TorchFLIRT:
                 validation_parameter_profile_matches_run
             ),
             "reference_validation_report": (
-                "validation/fast_vbm/report.v0.9.public.json" if self.dof == 12
+                "validation/flirt/report.public.json" if self.dof == 12
                 else "validation/connectome/ds004666/anatomy_registration.public.json"
             ),
             "reference_validation_domain": (

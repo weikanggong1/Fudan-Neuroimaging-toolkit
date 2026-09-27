@@ -15,7 +15,7 @@ flowchart LR
   E --> G[TorchAMICO-NODDI all shells]
   F --> H{registration backend}
   G --> H
-  H -->|tbss| I[weighted TorchFLIRT + combined six-level TorchFNIRT]
+  H -->|tbss| I[weighted TorchFLIRT + three-stage TorchFNIRT]
   H -->|mmorf| J[SynthStrip T1 + two TorchFLIRT + run_mmorf]
   I --> K[9 maps on FMRIB58/MNI152 1 mm grid]
   J --> K
@@ -149,114 +149,78 @@ subject/
 | 九图传播 | applywarp --rel -r FMRIB58_FA_1mm -w dti_FA_to_MNI_warp |
 | skeleton mask | FMRIB58_FA-skeleton_1mm ≥ 2000，再乘以有效 FA mask |
 
-包内三份 oxford 配置与 UKB ancillary archive 的 SHA-256 完全一致。`TBSSConfig` 选取相同六层 subsampling、FWHM、lambda、intensity-estimation 和 10→2 mm control-resolution 数值，但把官方三个进程合并为一次连续调用。当前实现还没有复现 implicit zero masks、mask-normalized smoothing、`inwarp/intin` 的阶段交接和 stage 2/3 SCG。因此 FNIRT 结果不是逐值等价；具体隔离证据见下方诊断。单被试 UKB 脚本使用官方 skeleton mask 相乘，并不执行经典多被试 TBSS 的跨被试最大投影；本包复现的是这一行为。
+包内三份 Oxford 配置与 UKB ancillary archive 的 SHA-256 完全一致。`TBSSConfig` 使用相同的六层 subsampling、FWHM、lambda、iteration 和 intensity schedule，并明确保留三个 process stage：stage 1 为四层 LM，stage 2/3 分别为 50/25 次 SCG。当前实现也包括 implicit input/reference zero mask、input mask-normalized smoothing，以及 `inwarp/intin` 的 float32 coefficient/header 和 10 位 intensity 交接。交接在一个 Python 进程内完成，不启动三个 FSL executable。
+
+control grid 按 FSL `FullResKsp` 计算：stage 1 的 10 mm `warpres` 在最终 `subsamp=2` 后对应 full-grid 5 mm spacing，输出 `[39,46,39,3]`；stage 2/3 使用 2 mm spacing，输出 `[94,112,94,3]`。shape、spacing 和 sform 已与官方文件匹配。当前真实病例已通过逐 LM oracle；由于后续数值归约仍有小差异、topology 分支未触发且病例数为一，`ukb_numerically_equivalent=false` 仍保留。单被试 UKB 脚本使用官方 skeleton mask 相乘，并不执行经典多被试 TBSS 的跨被试最大投影；本包复现的是该单被试行为。
 
 ## MMORF 分支对应关系
 
-MMORF 分支和 TBSS 分支共用 TOPUP、EDDY、DTIFIT、NODDI、九图命名及标准 grid。它用两次 TorchFLIRT 保持相同的 input→reference FSL affine contract，只把 FNIRT 非线性注册换成 [PyTorch MMORF](../mmorf/README.md) 的 T1 scalar + DTI tensor 联合目标。warp 是 MMORF reference-voxel displacement，因此由 apply_mmorf_warp 应用，不能交给 FNIRT 的 TorchApplyWarp。
+MMORF 分支和 TBSS 分支共用 TOPUP、EDDY、DTIFIT、NODDI、九图命名及标准 grid。它用两次 TorchFLIRT 保持相同的 input→reference FSL affine contract，只把 FNIRT 非线性注册换成 [PyTorch MMORF](../mmorf/README.md) 的 T1 scalar + DTI tensor 联合目标。warp 位于 reference grid，三通道保存沿 reference image axes 的毫米位移，因此由 `apply_mmorf_warp` 应用，不能交给 FNIRT 的 `TorchApplyWarp`。
 
-## 验证
+## 验证边界
 
-真实 UKB 格式单被试的 FA 前处理图和 FLIRT input-weight 图与 UKB/FSL 命令逐体素完全相同：差异体素 0，最大绝对误差 0。完整 MMORF 分支写出的九张标准图均为 `(182, 218, 182)`、float32、有限且非空，并与 FMRIB58/MNI152 1 mm affine 一致。
+当前发布只列出由现行源码生成的证据：
 
-从原始 AP/PA 到 MMORF 九图的 H100 wall time 为 372.28 s，内部阶段计时如下：
+- TOPUP、EDDY、DTIFIT 和 AMICO-NODDI 的真实数据结果分别位于各自的[验证目录](../../validation/README.md)。
+- TBSS 注册从同一组九张 native 参数图开始，比较官方 weighted FLIRT、三阶段 FNIRT、九图传播和 skeleton multiplication；结果见 [`tbss_diagnosis.public.json`](../../validation/dmri_pipeline/tbss_diagnosis.public.json)。
+- MMORF 的独立真实数据对照固定 T1、DTI tensor、模板和 FLIRT 初始化，结果见 [`validation/mmorf`](../../validation/mmorf/README.md)。
 
-| stage | seconds |
-|---|---:|
-| TOPUP + EDDY preparation | 98.55 |
-| EDDY | 48.88 |
-| DTIFIT | 17.25 |
-| AMICO-NODDI | 36.40 |
-| SynthStrip + two FLIRT + MMORF + nine-map propagation | 165.33 |
-| total internal / full command | 366.41 / 372.28 |
+当前版本尚无从原始 AP/PA 到九张 standard 图的 fresh 端到端配对 benchmark。
+以下 TBSS 表只衡量 registration 及其后续传播；MMORF 表与图只衡量独立注册函数。
 
-上述完整运行发生在最终显存分块修改之前，AMICO-NODDI 的 PyTorch peak allocation 为 17.06 GB。最终代码把 500 个 LUT direction 按最多 400 个分块；相同输入复测的 peak allocation 为 13.63 GB，`nvidia-smi` 进程占用约 16.5 GiB，wall time 49.19 s。五类输出与未分块结果逐元素完全相同，最大绝对误差 0。计时均来自共享 H100 节点。
+### 当前 TBSS 真实数据 benchmark
 
-端到端 native map 与现有 UKB/FSL 输出使用相同 shape 和 affine。下表同时给出包含任一实现非零体素的 union support，以及双方均非零的 common support；二者差距反映 EDDY 和脑 mask 的支持域差异。
+对照使用一例去标识、真实 UKB 格式 dMRI，并从同一组九张 native 参数图开始。A 是
+用户实际调用的 TorchFLIRT + TorchFNIRT 路径；B 固定官方 FLIRT matrix，用于隔离
+nonlinear registration。
 
-| map | union-support r | common-support r |
-|---|---:|---:|
-| FA | 0.586157 | 0.876134 |
-| MD | 0.547537 | 0.898341 |
-| L1 | 0.436994 | 0.886474 |
-| L2 | 0.567251 | 0.897319 |
-| L3 | 0.634022 | 0.900734 |
-| MO | 0.413579 | 0.466099 |
-| ICVF | -0.002070 | 0.628843 |
-| OD | 0.506862 | 0.757693 |
-| ISOVF | 0.608481 | 0.853708 |
+| 实现 | affine | 观测时间 | peak CUDA allocation |
+|---|---|---:|---:|
+| FSL 6.0.7.4 / UKB CPU | FSL FLIRT | 976.88 s external wall | 不适用 |
+| FNIT A / H100 | 本次重新运行 TorchFLIRT | 106.186 s Python pipeline；121.48 s external wall | 3.607 GB |
+| FNIT B / H100 | 固定官方 FLIRT matrix | 18.884 s Python pipeline | 3.608 GB |
 
-### TBSS 时间边界与瓶颈
+B 排除了 affine 优化；共享节点负载没有隔离，因此不报告“等价加速比”。A/B 的九张
+standard 和 skeleton 图均通过 shape、affine、dtype 合同：
 
-原始 AP/PA 到全部标准图和 skeleton 图的 FNIT wall time 为 2054.62 s。内部计时 2048.56 s 的分解如下：
-
-| stage | seconds | internal time |
-|---|---:|---:|
-| TOPUP + EDDY preparation | 95.82 | 4.68% |
-| EDDY | 47.49 | 2.32% |
-| DTIFIT | 16.58 | 0.81% |
-| AMICO-NODDI | 37.63 | 1.84% |
-| TBSS registration + nine-map propagation | 1851.05 | 90.36% |
-
-官方 976.88 s 从已经准备好的九张 native maps 开始，不能与 2054.62 s 构成端到端加速比。把两种实现固定到同一组官方 native maps 后，计时边界才一致：
-
-| 实现 | 相同输入和输出范围 | wall time |
-|---|---|---:|
-| FSL/UKB | weighted FLIRT + three FNIRT stages + nine maps + skeleton | 976.88 s |
-| FNIT | weighted TorchFLIRT + TorchFNIRT + nine maps + skeleton | 982.77 s |
-
-同输入时 FNIT 只慢 5.89 s，即 0.60%；因此没有证据支持“PyTorch TBSS 一般慢约两倍”。原始端到端运行变慢，是该次 FNIT native FA 使非线性优化产生更多超出 Jacobian 范围的形变，继而反复进入拓扑修复。
-
-| 运行 | `constrain_topology` 已计时内循环 | ForceJacobianRange calls / inner iterations | 占 TorchTBSS |
-|---|---:|---:|---:|
-| FNIT raw 端到端输入 | 1187.59 s | 24 / 122 | 64.45% |
-| 相同官方 native maps | 169.98 s | 1 / 5 | 17.52% |
-
-raw 运行的第 3–6 层 topology 时间依次为 155.97、221.28、384.44 和 425.90 s；第 3、4 层各重试十次后仍未达到要求的 Jacobian 范围。当前 Triton limiter 为保持 FSL 的原位 `z/y/x/corner` 更新顺序，只启动一个 program 和一个 warp 串行遍历全部 cube。这个实现让 H100 的大部分计算单元空闲。1187.59 s 还没有包含每轮的 B-spline 重拟合和 Jacobian 重算，因此是 topology 开销的下界。
-
-九张真实参数图逐张调用 `TorchApplyWarp` 仅用 2.895 s；堆为一次 4D 调用用 0.990 s，九图逐元素相同，最大绝对误差 0。匹配输入运行的 PCG 迭代反而更多，25,328 次对 raw 运行的 20,343 次，却更快。这两项隔离共同排除了九图传播和 PCG 数量作为约两倍时间差的主因。从迭代结构推断，PCG 是 topology 之外优先 profile 的计算热点：94% 左右的迭代发生在全分辨率层，系数和 B-spline 运算使用 float64，所以 TF32 不会加速这条主路径。当前没有单独的 PCG wall-time profile，因此不把它定量排序为第二大耗时。
-
-### TBSS 不完全一致的原因
-
-以下隔离实验都使用同一真实病例。它们把输出差异定位到 nonlinear warp 的估计，而不是输出格式或 warp 应用：
-
-| 隔离项 | 真实数据结果 | 判断 |
-|---|---|---|
-| FA preprocessing 与 FLIRT weight | 对 FSL 差异体素 0，最大误差 0 | 已排除 |
-| 固定官方 nonlinear residual，只换 TorchFLIRT affine | 九图 common-support r = 0.999671–0.999910 | affine 的直接重采样效应很小；对 nonlinear 优化轨迹的间接影响尚未单独消融 |
-| 固定官方 FNIRT warp，TorchApplyWarp 对 FSL applywarp | 九图 r 均大于 0.99999999997；全图最大误差 3.53e-5 | warp 方向、坐标和插值已对齐 |
-| 固定官方 warp，再执行 skeleton | mask 差异体素 0；九图 r 均大于 0.999999999985 | skeleton threshold 与相乘已排除 |
-
-固定官方 warp 后，applywarp 与 skeleton 都达到数值容差，因此主要剩余差异位于 TorchFNIRT 的 warp 估计。以下是依据配置、源码和运行 QC 确定的优先核查项；尚未逐项实现后做 one-change ablation，顺序不是各项误差贡献的定量排名：
-
-1. Oxford 三份配置都启用 implicit input/reference zero mask。FSL 在 masked smoothing 和代价函数中使用这些隐式 mask；当前实现没有相同的 zero-mask 与 mask-normalized smoothing。stage 2/3 配置中的 `applyrefmask/applyinmask=1` 只有在命令传入显式 mask 时才生效，本次官方命令没有传入，不能把这两个 dormant flags 当作实测差异来源。真实 moving FA 只有 253,960/778,752 个非零体素，reference 只有 1,489,274/7,221,032 个非零体素，而当前 full-resolution cost mask 达到约 4.00–4.41 million voxels，因此缺少隐式 mask 会改变 SSD、梯度、有效正则权重和优化轨迹。
-2. 官方 stage 2/3 使用 `--minmet=scg`；当前六层全部使用 Gauss–Newton/LM + matrix-free PCG。官方三个独立 `fnirt` 进程还通过 float32 `--inwarp` 和文本 `--intin` 交接，当前实现则在一次调用中保持连续 float64 状态，并用 dense expand/refit 完成 10→2 mm 换基。
-3. 即使在 stage 1 的 LM 部分，FNIT 的 matrix-free FP64 Hessian/PCG、求和顺序和 LM 接受规则也不同于 FSL 的 assembled sparse Hessian。此前逐更新对照最早在第三次 coefficient update 分叉。
-4. topology projection 尚未通过 FSL oracle。raw 运行最终 full-pull Jacobian minimum 为 -0.018944，低于要求的 0.01；投影失败既改变最终 warp，也造成上述额外时间。
-5. raw 端到端输入还叠加 TOPUP、EDDY、脑 mask、DTIFIT 和 NODDI 的 native-map 差异。固定九张 native maps 后，standard r 从 0.313–0.754 提高到 0.520–0.880，但仍未达到数值等价，进一步说明主要剩余误差位于 nonlinear registration。
-
-后续修复应先补齐 implicit masks、masked smoothing、三个 stage 的状态交接和 stage 2/3 SCG，再用 FSL `ForceJacobianRange` oracle 逐轮校验 topology。这样同时处理数值轨迹和反复 topology 的速度代价。之后才适合缓存不变的 bending diagonal、减少 PCG 的 CUDA scalar 同步，并评估保持原位顺序的 C++ topology loop。九图 4D 合并只能节省约 1.9 s，不会改变主要瓶颈。
-
-完整去标识 profile、计时边界和隔离指标见 [`tbss_diagnosis.public.json`](../../validation/dmri_pipeline/tbss_diagnosis.public.json)。
-
-| map | 端到端 standard r | 端到端 skeleton r | 同 native standard r | 同 native skeleton r |
+| map | A standard r | A skeleton r | B standard r | B skeleton r |
 |---|---:|---:|---:|---:|
-| FA | 0.753871 | 0.694463 | 0.879642 | 0.893747 |
-| MD | 0.493614 | 0.406312 | 0.655100 | 0.561907 |
-| L1 | 0.457490 | 0.456469 | 0.591632 | 0.653572 |
-| L2 | 0.503689 | 0.442469 | 0.670972 | 0.636938 |
-| L3 | 0.530033 | 0.433466 | 0.704715 | 0.623788 |
-| MO | 0.313156 | 0.494300 | 0.586139 | 0.746085 |
-| ICVF | 0.470968 | 0.386101 | 0.520143 | 0.755608 |
-| OD | 0.534512 | 0.563077 | 0.666650 | 0.767782 |
-| ISOVF | 0.469608 | 0.393052 | 0.712972 | 0.630840 |
+| FA | 0.998886 | 0.999463 | 0.999523 | 0.999679 |
+| MD | 0.997129 | 0.997087 | 0.998712 | 0.994744 |
+| L1 | 0.996619 | 0.997320 | 0.998438 | 0.994806 |
+| L2 | 0.997222 | 0.997592 | 0.998738 | 0.995896 |
+| L3 | 0.997640 | 0.997887 | 0.998937 | 0.996788 |
+| MO | 0.996725 | 0.998206 | 0.998262 | 0.998889 |
+| ICVF | 0.995086 | 0.996789 | 0.997483 | 0.994425 |
+| OD | 0.997079 | 0.998257 | 0.998542 | 0.997927 |
+| ISOVF | 0.997986 | 0.997748 | 0.999087 | 0.997208 |
 
-“同 native”列让两种实现使用完全相同的九张 native maps，因此主要反映 weighted FLIRT、FNIRT 和 applywarp 的差异。FA 的同输入相关为 0.879642/0.893747，其余图仍有明显差异。最终 full-pull Jacobian minimum 为 -0.01894，没有通过预设 0.01 下界；当前 TorchFNIRT 不应被描述为与 FSL 只差浮点舍入。
+A 的 standard/skeleton FA MAE 为 `0.003129/0.003111`；B 为
+`0.002418/0.002422`。完整 MAE、RMSE、grid contract、Jacobian 和 source hash 见
+[`tbss_diagnosis.public.json`](../../validation/dmri_pipeline/tbss_diagnosis.public.json)。
 
-DTIFIT 和 AMICO-NODDI 在各自相同输入的独立功能 benchmark 中更接近参考实现；本表从原始数据开始，因此也包含 TOPUP、EDDY 和 mask 差异。TBSS、MMORF 配准对照、九图完整误差和运行记录见[公开报告](../../validation/dmri_pipeline/report.public.json)及[MMORF 报告](../../validation/mmorf/report.public.json)。
+### FNIRT 差异诊断
 
-下图使用合成 diffusion maps 展示两条分支共享的九文件标准空间命名和显示范围；真实数据指标来自完整 3D NIfTI，不由该图计算。
+真实 level-1 LM oracle 的 initial cost/mask 为 Torch `639.821722/2598`、FSL
+`639.822/2598`。十次候选的接受序列均为
+`A,A,A,R,R,R,R,A,R,A`，最终为 Torch `478.784565/2508`、FSL
+`478.784/2508`。完整 stage 1 coefficient `r=0.999832`，warped FA
+`r=0.999004`；GPU 对应值为 `0.999879/0.999148`。
 
-![Nine-map standard-space output example](example.png)
+关键修复来自 FSL 的 input-mask 数据类型：`general_transform` 把三线性插值结果写入
+`volume<char>`，因此边界小数在 `Mask()>0.5` 之前已截断。当前实现还匹配
+newimage `1e-8` valid-FOV tolerance、zero-padded boundary neighbor、implicit-zero
+`1e-16` 和 input-mask-after-normalization 顺序。详细逐 attempt 表见
+[TorchFNIRT 页面](../fnirt/README.md#stage-1-lm-oracle-与修复原因)。
 
-公开仓库不包含该真实病例的原图或 subject 标识。示意图使用无身份信息的合成输入；真实验证只发布汇总统计。
+后续层的 sparse BFMatrix 与 matrix-free FP64 reduction 仍有小数值分叉。topology
+projection 未在本例触发，且当前只有一个真实病例，所以不声明全局逐体素等价。定向
+测试为 `63 passed`。
+
+下图显示同一次 current A 运行的官方 FA、FNIT FA 和绝对差值。数值指标来自完整 3D
+NIfTI，不由切片估计。
+
+![FSL/UKB 与 FNIT TorchTBSS 的真实 FA 对照](../fnirt/figures/fnirt_fsl_comparison.png)
+
+公开仓库不包含该病例的原始 dMRI、native 参数图或 subject 标识。重现脚本和去标识
+汇总报告位于 [`validation/dmri_pipeline`](../../validation/dmri_pipeline/README.md)。

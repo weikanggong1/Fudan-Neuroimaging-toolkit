@@ -25,7 +25,7 @@ UKB_PIPELINE_COMMIT = "0e39a7f7eb76b55437942bfa3073512506b6c8fa"
 
 @dataclass(frozen=True)
 class TBSSConfig:
-    """UKB ``oxford_s1/s2/s3.cnf`` combined into one continuous schedule."""
+    """UKB ``oxford_s1/s2/s3.cnf`` with three in-memory process stages."""
 
     skeleton_threshold: float = 2000.0
     fnirt: GMFNIRTConfig = GMFNIRTConfig(
@@ -36,6 +36,10 @@ class TBSSConfig:
         regularization=(300.0, 75.0, 50.0, 40.0, 100.0, 30.0),
         estimate_intensity=(True, True, True, False, False, False),
         apply_reference_mask=(False, False, False, False, False, False),
+        minimization_methods=("lm", "lm", "lm", "lm", "scg", "scg"),
+        process_stages=(1, 1, 1, 1, 2, 3),
+        implicit_reference_mask=True,
+        implicit_input_mask=True,
         warp_resolution_mm=(10.0, 10.0, 10.0),
         warp_resolution_schedule_mm=(
             (10.0, 10.0, 10.0),
@@ -221,7 +225,7 @@ class TorchTBSS:
             weight,
             {
                 "device": str(self.device),
-                "dtype": "float32 images / float64 FNIRT coefficients",
+                "dtype": "float32 images and outputs / float64 FNIRT solver",
                 "tf32": bool(str(self.device).startswith("cuda")),
                 "peak_cuda_memory_bytes": (
                     int(torch.cuda.max_memory_allocated(self.device))
@@ -237,8 +241,9 @@ class TorchTBSS:
                 "ukb_output_contract": True,
                 "oxford_subsampling_fwhm_lambda_iteration_values_combined": True,
                 "official_oxford_three_process_execution": False,
-                "official_implicit_zero_masks_and_masked_smoothing": False,
-                "official_stage_2_3_scg": False,
+                "official_oxford_three_process_handoff": True,
+                "official_implicit_zero_masks_and_masked_smoothing": True,
+                "official_stage_2_3_scg": True,
                 "topology_projection_matches_fsl": False,
                 "official_flirt_input_weight_used": True,
                 "official_config_sha256": {
@@ -248,9 +253,8 @@ class TorchTBSS:
                 },
                 "ukb_numerically_equivalent": False,
                 "known_differences": [
-                    "FSL implicit zero masks and mask-normalized smoothing are not implemented",
-                    "official s1/s2/s3 are separate processes; this schedule runs continuously",
-                    "official stage-2/3 SCG is replaced by Gauss-Newton/LM with PCG",
+                    "s1/s2/s3 handoff is reproduced in memory rather than by launching three processes",
+                    "matrix-free LM arithmetic can diverge from FSL sparse Hessian reductions",
                     "topology projection has not matched the FSL oracle",
                 ],
                 "flirt": linear.qc,

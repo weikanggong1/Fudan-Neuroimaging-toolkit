@@ -1,3 +1,4 @@
+import pytest
 import torch
 
 from fnit.fnirt.optimizer import preconditioned_conjugate_gradient
@@ -134,6 +135,66 @@ def test_zoom_coefficients_keeps_refinement_error_below_fsl_numerical_scale():
         - expand_coefficients(coefficients, old_on_new)
     )
     assert float(difference.abs().max()) < 6e-4
+
+
+
+def test_zoom_coefficients_changes_only_knot_spacing_for_inwarp_handoff():
+    shape = (25, 25, 25)
+    old_spacing = (5, 5, 5)
+    new_spacing = (1, 1, 1)
+    generator = torch.Generator().manual_seed(29)
+    coefficients = torch.randn(
+        (1, *fsl_control_shape(shape, old_spacing)),
+        generator=generator,
+        dtype=torch.float64,
+    )
+
+    actual = zoom_coefficients(
+        coefficients,
+        shape,
+        new_spacing,
+        (1.0, 1.0, 1.0),
+        (1.0, 1.0, 1.0),
+        old_knot_spacing=old_spacing,
+    )
+    old_bases = spline_bases(
+        shape,
+        old_spacing,
+        (1.0, 1.0, 1.0),
+        device="cpu",
+        dtype=torch.float64,
+    )
+    new_bases = spline_bases(
+        shape,
+        new_spacing,
+        (1.0, 1.0, 1.0),
+        device="cpu",
+        dtype=torch.float64,
+    )
+
+    assert actual.shape == (1, *fsl_control_shape(shape, new_spacing))
+    torch.testing.assert_close(
+        expand_coefficients(actual, new_bases),
+        expand_coefficients(coefficients, old_bases),
+        atol=2e-10,
+        rtol=2e-10,
+    )
+
+
+def test_zoom_coefficients_rejects_simultaneous_voxel_and_knot_change():
+    coefficients = torch.zeros(
+        (1, *fsl_control_shape((13, 13, 13), (5, 5, 5))),
+        dtype=torch.float64,
+    )
+    with pytest.raises(ValueError, match="voxel size and knot spacing"):
+        zoom_coefficients(
+            coefficients,
+            (25, 25, 25),
+            (2, 2, 2),
+            (2.0, 2.0, 2.0),
+            (1.0, 1.0, 1.0),
+            old_knot_spacing=(5, 5, 5),
+        )
 
 
 def test_pcg_solves_spd_system():

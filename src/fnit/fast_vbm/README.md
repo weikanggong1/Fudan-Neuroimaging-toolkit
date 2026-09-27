@@ -1,39 +1,21 @@
 # FastVBM 模块
 
-`FastVBM` 将 raw T1w 处理为模板空间 modulated GM：
+[完整说明](../../../docs/fast_vbm/README.md) · [验证状态](../../../validation/fast_vbm/README.md)
+
+`fnit.fast_vbm.FastVBM` 是单被试 raw T1w 到 modulated GM 的 Python API：
 
 ```text
 raw T1w
-  → SynthStrip
-  → TorchFAST 三组织 PVE + bias-field correction
-  → source-derived TorchFLIRT（FSL default path）
-  → PyTorch SynthMorph deform 或 source-derived TorchFNIRT GM config
-  → common FSL warp conversion + GPU TorchApplyWarp
-  → common nonlinear-only Jacobian
-  → warped GM × Jacobian
+  -> SynthStrip 或显式 input-grid brain mask
+  -> TorchFAST 三组织 PVE + bias correction
+  -> TorchFLIRT 12-DOF correlation ratio
+  -> PyTorch SynthMorph deform 或 PyTorch TorchFNIRT GM config
+  -> FSL relative pull conversion + GPU TorchApplyWarp
+  -> nonlinear-only Jacobian
+  -> warped GM * Jacobian
 ```
 
-线性阶段固定使用 FSL default correlation-ratio/Brent FLIRT 实现。
-
-非线性阶段由 `registration_backend` 选择：
-
-- `"synthmorph"` 调用本包 `SynthMorph(model="deform")`，读取官方 `synthmorph.deform.3.h5`；
-- `"fnirt"` 使用 `fnit.fnirt.TorchFNIRT` 的 GM config，不读取非线性 checkpoint。
-
-两分支共用同一 FAST GM、source-derived `TorchFLIRT`、FSL 坐标契约和 template
-grid。两分支的 full RAS pull 都转为
-`u=source_fsl-inv(FLIRT)@target_fsl`，然后由同一 GPU `TorchApplyWarp`、
-`det(I + ∂u/∂q)` 和 modulation 代码处理。FNIRT 与 FSL 配对比较时必须向
-`FastVBM.run(..., reference_mask=...)` 传入官方 FNIRT 使用的同一
-reference mask；默认 `template > 0` 会在 QC 中标为非 FSL-exact。
-该 mask 记录在两个分支的共同上下文中，但 SynthMorph 网络没有 mask 输入；
-mask 使用属于两个 nonlinear estimator 之间的算法差异。因而，两个公开后端
-唯一影响输出的分支是 nonlinear estimator 本身，包括各自的目标函数、正则化和
-mask 使用；其余配准、重采样、Jacobian 和 modulation 步骤相同。
-FNIRT 的 spline analytic Jacobian 只作为 estimator QC 与 common dense Jacobian
-对照，不参与 warped GM、Jacobian 或 modulated GM 的生成。
-
-## 单被试 Python
+## Python
 
 ```python
 from fnit import FastVBM
@@ -41,20 +23,30 @@ from fnit import FastVBM
 pipeline = FastVBM(
     device="cuda:0",
     threads=4,
-    registration_backend="fnirt",  # 或 synthmorph
+    registration_backend="fnirt",  # 或 "synthmorph"
 )
+
 result = pipeline.run(
     "subject_T1w.nii.gz",
     "template_GM.nii.gz",
     "results/sub-01",
+    brain_mask=None,
     reference_mask="MNI152_T1_2mm_brain_mask_dil.nii.gz",
     overwrite=False,
 )
 ```
 
-构造一次后可继续调用并复用已加载组件。只需内存结果时使用 `result = pipeline(image, template)`；已有同网格 mask 时增加 `brain_mask="mask.nii.gz"`，可跳过 SynthStrip。
+`image` 和 `template` 可传路径或 `surfa.Volume`。`brain_mask` 必须与 T1w 同网格，提供时跳过 SynthStrip；`reference_mask` 必须与 template 同网格。`run()` 保存结果并返回 `FastVBMResult`。只需内存结果时调用：
 
-## 单被试命令行
+```python
+result = pipeline(
+    "subject_T1w.nii.gz",
+    "template_GM.nii.gz",
+    reference_mask="MNI152_T1_2mm_brain_mask_dil.nii.gz",
+)
+```
+
+## 命令行
 
 ```bash
 fnit fast-vbm \
@@ -67,88 +59,51 @@ fnit fast-vbm \
   --threads 4
 ```
 
-`-i` 是 raw T1w，`--template` 是 fixed GM template，`-o` 是完整输出目录。
-`--registration-backend` 选择 `synthmorph` 或 `fnirt`；`--reference-mask` 进入
-共同配准上下文，但只有 `TorchFNIRT` 使用。
+`-i` 是单帧 raw T1w；`--template` 决定模板空间输出网格；`-o` 是单个受试者的输出目录；`--registration-backend` 选择 `fnirt` 或 `synthmorph`。完整参数见 `fnit fast-vbm --help`。
 
-## 独立 PyTorch FLIRT
+## 后端与 mask
 
-```python
-from fnit import TorchFLIRT
+两后端共用 TorchFAST GM、TorchFLIRT、坐标转换、TorchApplyWarp、Jacobian 和 modulation。SynthMorph 运行官方 deform 网络，不消费 reference mask。TorchFNIRT 使用 cubic B-spline GM schedule：
 
-result = TorchFLIRT(device="cuda:0").run(
-    input="moving.nii.gz",
-    reference="fixed.nii.gz",
-    output="moved.nii.gz",
-    omat="moving_to_fixed.mat",
-)
-```
+- fixed 非零体素构成 implicit reference mask，每一级都使用；
+- moving 非零体素构成 implicit input mask，用于 mask-normalized smoothing 和 warped-input 有效性筛选；
+- 显式 `reference_mask` 在默认 GM schedule 的最后一级与 implicit reference mask 取交集。
 
-```bash
-fnit flirt -in moving.nii.gz -ref fixed.nii.gz \
-  -out moved.nii.gz -omat moving_to_fixed.mat \
-  -dof 12 -cost corratio --device cuda:0
-```
-
-`moved` 与 reference 的 shape/geometry 一致；`.mat` 是 input → reference 的
-FSL scaled-mm matrix。当前 `TorchFLIRT` 来自 FSL 2111.2 默认
-correlation-ratio/Brent 路径源码。0.9 reference suite 的
-matrix gate 为 10/10 通过（`rmsdiff ≤ 0.05 mm`；中位数 0.008544 mm，
-最大值 0.028984 mm）。运行时仍报告
-`validated_fsl_equivalent=false`；`reference_validation_matrix_gate_passed=true`
-只描述固定套件，不表示当前输入已与 FSL 比较。
-
-QC 中的 `validation/fast_vbm/report.v0.9.public.json` 是源码仓库 artifact id，wheel
-不包含根 `validation/` 目录。安装 wheel 后请使用
-[GitHub report](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/blob/main/validation/fast_vbm/report.v0.9.public.json)；完整边界见
-[`docs/flirt/README.md`](../../../docs/flirt/README.md)。
+省略 `reference_mask` 时，FastVBM 使用 `template > 0` 的派生 mask。复现 FSL/UKB 时应传入原运行实际使用的 mask。当前 TorchFNIRT 优化轨迹仍与 FSL 不同，不声明数值等价。
 
 ## 输出
 
-两个后端使用同一组 13 个结果键与文件名：
+`FastVBMResult` 包含 `brain`、`brain_mask`、`fast`、`registration`、`pve_gm`、`warped_gm`、`jacobian`、`modulated_gm`、`settings` 和 `timing_sec`。`run()` 写出：
 
-| 结果键 | 文件名 |
-|---|---|
-| `brain` | `T1_brain.nii.gz` |
-| `brain_mask` | `brain_mask.nii.gz` |
-| `pve_csf` | `T1_brain_pve_0.nii.gz` |
-| `pve_gm` | `T1_brain_pve_1.nii.gz` |
-| `pve_wm` | `T1_brain_pve_2.nii.gz` |
-| `hard_segmentation` | `T1_brain_seg.nii.gz` |
-| `pve_segmentation` | `T1_brain_pveseg.nii.gz` |
-| `mixel_type` | `T1_brain_mixeltype.nii.gz` |
-| `bias_field` | `T1_brain_bias.nii.gz` |
-| `restored` | `T1_brain_restore.nii.gz` |
-| `warped_gm` | `T1_GM_to_template_GM.nii.gz` |
-| `jacobian` | `T1_GM_JAC_nl.nii.gz` |
-| `modulated_gm` | `T1_GM_to_template_GM_mod.nii.gz` |
+| 键 | 文件名 | 网格 |
+|---|---|---|
+| `brain` | `T1_brain.nii.gz` | 输入 T1 |
+| `brain_mask` | `brain_mask.nii.gz` | 输入 T1 |
+| `pve_csf` | `T1_brain_pve_0.nii.gz` | 输入 T1 |
+| `pve_gm` | `T1_brain_pve_1.nii.gz` | 输入 T1 |
+| `pve_wm` | `T1_brain_pve_2.nii.gz` | 输入 T1 |
+| `hard_segmentation` | `T1_brain_seg.nii.gz` | 输入 T1 |
+| `pve_segmentation` | `T1_brain_pveseg.nii.gz` | 输入 T1 |
+| `mixel_type` | `T1_brain_mixeltype.nii.gz` | 输入 T1 |
+| `bias_field` | `T1_brain_bias.nii.gz` | 输入 T1 |
+| `restored` | `T1_brain_restore.nii.gz` | 输入 T1 |
+| `warped_gm` | `T1_GM_to_template_GM.nii.gz` | GM template |
+| `jacobian` | `T1_GM_JAC_nl.nii.gz` | GM template |
+| `modulated_gm` | `T1_GM_to_template_GM_mod.nii.gz` | GM template |
 
-后三项在 GM template 网格。文件名、网格角色和 `modulated_gm = warped_gm × jacobian` 对应 UKB/FSL VBM；算法和体素值不保证相同。
+另写 `fast_vbm_report.json`。`jacobian` 排除 FLIRT affine determinant，`modulated_gm = warped_gm * jacobian`。
 
-## 权重
+## UKB/FSL 对应命令
 
 ```bash
-python tools/setup_weights.py --model fast-vbm
+fsl_reg T1_brain_pve_1.nii.gz template_GM.nii.gz \
+  T1_GM_to_template_GM -fnirt \
+  "--config=GM_2_MNI152GM_2mm.cnf --jout=T1_GM_JAC_nl"
+
+fslmaths T1_GM_to_template_GM -mul T1_GM_JAC_nl \
+  T1_GM_to_template_GM_mod -odt float
 ```
 
-该别名配置 SynthStrip 与 SynthMorph deform，是两个后端的权重超集。只运行
-`TorchFNIRT` 分支可改用 `--model synthstrip`；若还提供显式脑 mask，则该分支
-不需要 checkpoint。TorchFAST、`TorchFLIRT`、`TorchFNIRT`、`TorchApplyWarp`、
-Jacobian 和 modulation 都没有模型权重。
+UKB 命令从已有 FSL FAST GM 开始；FastVBM 从 raw T1w 开始。文件角色、template grid 和 modulation 公式对应，脑提取、GM estimation 和配准优化器不是同一数值实现。
 
-当前 0.9 共享链路的正式 10 例双后端 FastVBM 结果已经完成；报告只包含
-`end_to_end`，未在该报告中重新运行 matched-GM 或 matched-affine。FLIRT matrix
-functional gate 为
-10/10 通过；独立 direct FNIRT matched-input 报告的 warped GM、Jacobian 和
-modulated GM 中位 Pearson 为 0.998695、0.999267 和
-0.998507，但仍保持 `fsl_fnirt_numerically_equivalent=false`。
-
-详细精度、计时、gate 和归因边界见
-[`validation/fast_vbm/README.md`](../../../validation/fast_vbm/README.md)。Wheel 不包含
-根 `validation/` 目录；安装包用户可直接查看
-[GitHub 上的 0.9 report](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/blob/main/validation/fast_vbm/report.v0.9.public.json)。公开 artifact 还包括
-[`backend_comparison.v0.9.public.csv`](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/blob/main/validation/fast_vbm/backend_comparison.v0.9.public.csv)、
-[`test_summary.v0.9.public.json`](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/blob/main/validation/fast_vbm/test_summary.v0.9.public.json) 和
-[`release.v0.9.public.json`](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/blob/main/validation/fast_vbm/release.v0.9.public.json)。
-
-完整参数、坐标与 Jacobian 约定、FSL/UKB 对应和验证入口见 [`docs/fast_vbm/README.md`](../../../docs/fast_vbm/README.md)。公开统计只以 [`validation/fast_vbm`](../../../validation/fast_vbm/README.md) 为准。
+当前源码尚未完成 fresh 真实数据 benchmark，因此不发布精度、时间、显存或等价性结论。完整输入输出、参数、坐标约定和证据边界见[主文档](../../../docs/fast_vbm/README.md)。

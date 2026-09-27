@@ -292,9 +292,8 @@ The de-identified aggregate and per-case metrics are in
 [`validation/flirt/report.public.json`](../../validation/flirt/report.public.json).
 
 The QC string
-`reference_validation_report="validation/fast_vbm/report.v0.9.public.json"`
-is an artifact identifier relative to the source repository. The root
-`validation/` directory is not included in the installed wheel. Wheel users
-can open the [public report on GitHub](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/blob/main/validation/fast_vbm/report.v0.9.public.json); a source checkout can
-use the relative link
-[`report.v0.9.public.json`](../../validation/fast_vbm/report.v0.9.public.json).
+`reference_validation_report="validation/flirt/report.public.json"`
+identifies the current source-repository artifact. The root `validation/`
+directory is not included in the installed wheel. Wheel users can open the
+[public report on GitHub](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/blob/main/validation/flirt/report.public.json); a source checkout can use the relative link
+[`report.public.json`](../../validation/flirt/report.public.json).

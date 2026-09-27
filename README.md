@@ -12,13 +12,13 @@
 | sMRI | TorchFAST | T1 三组织分割、PVE 与偏置场校正 | [TorchFAST 文档](docs/fast/README.md) |
 | sMRI | GPU FAST VBM | 原始 T1w 到 warped GM、Jacobian 和 modulated GM | [FastVBM 文档](docs/fast_vbm/README.md) |
 | sMRI、fMRI、dMRI 通用 | PyTorch FLIRT | 12-DOF 仿射及 6-DOF normmi 刚性；reference-grid image 和 FSL scaled-mm `.mat` | [FLIRT 文档](docs/flirt/README.md) |
-| sMRI（当前 GM 配置） | PyTorch FNIRT | GM 非线性配准；intent-2007 coefficients、warped image 和 Jacobian | [FNIRT 文档](docs/fnirt/README.md) |
+| sMRI、dMRI | PyTorch FNIRT | GM 或 TBSS FA 非线性配准；intent-2007 coefficients、warped image 和 Jacobian | [FNIRT 文档](docs/fnirt/README.md) |
 | sMRI、fMRI、dMRI 通用 | GPU applywarp | 应用 FSL dense warp、FNIRT coefficient、premat 和 postmat | [applywarp 文档](docs/applywarp/README.md) |
 | dMRI | PyTorch TOPUP | UKB AP/PA b0 选择、Hz 场估计、畸变校正和 FSL 输出 | [TOPUP 文档](docs/topup/README.md) |
 | dMRI | PyTorch EDDY | 逐 volume 运动、二次 EC、TOPUP 场、Jacobian 和离群切片校正 | [EDDY 文档](docs/eddy/README.md) |
 | dMRI | PyTorch DTIFIT | FSL 默认 OLS tensor、FA、MD、eigenvalue 和 eigenvector | [DTIFIT 文档](docs/dtifit/README.md) |
 | dMRI | PyTorch AMICO-NODDI | AMICO 2.0.3 数值等价的 NDI、ODI、FWF、方向和拟合误差 | [AMICO-NODDI 文档](docs/amico_noddi/README.md) |
-| dMRI | PyTorch MMORF (`run_mmorf`) | T1 scalar 与 DTI tensor 联合估计一个 reference-voxel warp | [MMORF 文档](docs/mmorf/README.md) |
+| dMRI | PyTorch MMORF (`run_mmorf`) | T1 scalar 与 DTI tensor 联合估计 reference-grid、reference-axis mm pull warp | [MMORF 文档](docs/mmorf/README.md) |
 | dMRI | dMRI 参数图 pipeline | optional TOPUP → EDDY → DTIFIT/NODDI → TBSS 或 MMORF；统一九图输出 | [端到端文档](docs/dmri_pipeline/README.md) |
 | dMRI | PyTorch BEDPOSTX | 估计体素内纤维方向及不确定性，供概率追踪使用 | [BEDPOSTX 文档](docs/bedpostx/README.md) |
 | dMRI | PyTorch ProbtrackX | seed→voxel 密度、稀疏 voxel×voxel 矩阵、有向 ROI×ROI 连接矩阵 | [ProbtrackX 文档](docs/probtrackx/README.md) |
@@ -35,7 +35,7 @@ recon-all 的神经网络与部分体素、表面计算使用 PyTorch/CUDA；N4�
 FastVBM 的两个分支共用仿射配准、FSL 坐标转换、GPU 重采样、仅非线性
 Jacobian 和调制步骤；差别只在非线性形变由 SynthMorph 或 TorchFNIRT 估计。
 
-FLIRT、FNIRT 和 FastVBM 的 0.9 十例验证状态见 [FastVBM 验证页](validation/fast_vbm/README.md)。TOPUP、EDDY、DTIFIT、AMICO-NODDI、MMORF 和 dMRI 参数图 pipeline 的真实 UKB 格式 dMRI 对照见上表各子页；输入、输出、原命令对应关系、计时和数值边界均在各自页面。BEDPOSTX 和 ProbtrackX 的验证边界见其功能页。connectome 的固定端点矩阵赋值、官方 FreeSurfer 输入的 5TT/GMWMI、配准、atlas 阶段，以及公开 ds004666 的原始和 TOPUP/EDDY 校正 DWI 同输入 benchmark 均已记录；完整追踪和 SIFT2 结果尚未达到原软件输出一致性，见 [connectome 文档](docs/connectome/README.md)。
+FLIRT 的十例验证见 [FLIRT 报告](validation/flirt/report.public.json)；当前 TorchFNIRT/TBSS 的真实数据诊断见 [dMRI 验证页](validation/dmri_pipeline/README.md)。FastVBM 因注册核心已更新，旧端到端结果已移除；重新验证前以 [FastVBM 验证状态](validation/fast_vbm/README.md)为准。TOPUP、EDDY、DTIFIT、AMICO-NODDI、MMORF 和 dMRI 参数图 pipeline 的真实数据对照见上表各子页。BEDPOSTX、ProbtrackX 和 connectome 的验证边界也分别记录在功能页。
 
 FLIRT、FNIRT、applywarp、TOPUP、EDDY、DTIFIT、MMORF、dMRI TBSS 分支、BEDPOSTX 和 ProbtrackX 的 FSL 派生实现及随包提供的上游源码受 [FSL Software Licence 6.0](licenses/FSL-6.0.txt) 的非商业使用条款约束。各功能的移植范围和验证边界见对应子页面。
 
@@ -54,7 +54,7 @@ python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
 
 ### Conda GPU 环境
 
-仓库提供独立的 [`environment.yml`](environment.yml)，固定本项目在 gpucw1 验证的 Python 3.11、PyTorch 2.5.1、CUDA 11.8 和 ProbtrackX GPU 所需的 Triton 3.1.0 组合，并包含合成 benchmark 绘图用的 Matplotlib。必须从仓库根目录创建环境，因为配置最后以 editable 模式安装当前源码：
+仓库提供独立的 [`environment.yml`](environment.yml)，固定本项目在 gpucw1 验证的 Python 3.11、PyTorch 2.5.1、CUDA 11.8 和 ProbtrackX GPU 所需的 Triton 3.1.0 组合，并包含 benchmark 绘图使用的 Matplotlib 和 Pillow。必须从仓库根目录创建环境，因为配置最后以 editable 模式安装当前源码：
 
 ```bash
 git clone https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit.git

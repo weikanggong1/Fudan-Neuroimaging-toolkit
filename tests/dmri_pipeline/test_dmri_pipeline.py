@@ -253,7 +253,7 @@ def test_tbss_passes_volumes_to_fnirt(monkeypatch, tmp_path):
 
     class FakeFNIRT:
         def __init__(self, device=None, config=None):
-            pass
+            captured["fnirt_config"] = config
 
         def __call__(self, moving, fixed, initial):
             captured["moving"] = moving
@@ -289,8 +289,11 @@ def test_tbss_passes_volumes_to_fnirt(monkeypatch, tmp_path):
     assert result.skeleton_maps["ICVF"].shape == shape
     assert result.qc["oxford_subsampling_fwhm_lambda_iteration_values_combined"]
     assert result.qc["official_oxford_three_process_execution"] is False
-    assert result.qc["official_implicit_zero_masks_and_masked_smoothing"] is False
-    assert result.qc["official_stage_2_3_scg"] is False
+    assert result.qc["official_oxford_three_process_handoff"] is True
+    assert result.qc["official_implicit_zero_masks_and_masked_smoothing"] is True
+    assert result.qc["official_stage_2_3_scg"] is True
+    assert captured["fnirt_config"].minimization_methods[-2:] == ("scg", "scg")
+    assert captured["fnirt_config"].process_stages == (1, 1, 1, 1, 2, 3)
     assert result.qc["topology_projection_matches_fsl"] is False
     assert "official_oxford_three_stage_config" not in result.qc
-    assert len(result.qc["known_differences"]) == 4
+    assert len(result.qc["known_differences"]) == 3

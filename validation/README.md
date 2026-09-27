@@ -9,13 +9,14 @@
 - TorchFAST：[`fast/README.md`](fast/README.md) 与 [`fast/report.public.json`](fast/report.public.json)。
 - TorchApplyWarp：[`applywarp/report.json`](applywarp/report.json)。
 - FLIRT：[`flirt/report.public.json`](flirt/report.public.json)。
-- FNIRT 与 FastVBM：[`fast_vbm/README.md`](fast_vbm/README.md) 及 0.9 正式文件。
+- FNIRT / TBSS：[`dmri_pipeline/tbss_diagnosis.public.json`](dmri_pipeline/tbss_diagnosis.public.json) 与[功能页](../docs/fnirt/README.md)。
+- FastVBM：[`fast_vbm/README.md`](fast_vbm/README.md) 记录当前接口与 fresh benchmark 缺口。
 - TOPUP：[`topup/report.public.json`](topup/report.public.json) 与[功能页](../docs/topup/README.md)。
 - EDDY：[`eddy/report.public.json`](eddy/report.public.json) 与[功能页](../docs/eddy/README.md)。
 - DTIFIT：[`dtifit/report.public.json`](dtifit/report.public.json) 与[功能页](../docs/dtifit/README.md)。
 - AMICO-NODDI：[`amico_noddi/report.public.json`](amico_noddi/report.public.json) 与[功能页](../docs/amico_noddi/README.md)。
 - MMORF：[`mmorf/report.public.json`](mmorf/report.public.json) 与[功能页](../docs/mmorf/README.md)。
-- dMRI 参数图 pipeline：[`dmri_pipeline/report.public.json`](dmri_pipeline/report.public.json) 与[功能页](../docs/dmri_pipeline/README.md)。
+- dMRI 参数图 pipeline：当前 matched-native TBSS 结果见 [`dmri_pipeline/tbss_diagnosis.public.json`](dmri_pipeline/tbss_diagnosis.public.json)，MMORF 注册结果见 [`mmorf/report.public.json`](mmorf/report.public.json)；raw-to-standard fresh benchmark 尚未完成。
 - BEDPOSTX 与 ProbtrackX：[`bedpostx/README.md`](bedpostx/README.md)、[`probtrackx/README.md`](probtrackx/README.md) 及各自功能页。
 - Connectome：[固定端点矩阵赋值报告](connectome/assignment_report.public.json)、[ds004666 真实 DWI 配对报告](connectome/ds004666/README.md)、[官方 FreeSurfer 解剖阶段对照](connectome/ds004666/ANATOMY_STAGE_20260927.md)与[功能页](../docs/connectome/README.md)；完整流程未达到原软件输出一致。
 
@@ -32,16 +33,16 @@
 | [SynthSeg](../docs/synthseg/README.md) | FreeSurfer 8.2，3 例公开 T1w | 有：标签、几何、dtype、软体积 | 有：原版 CPU / 本包 H100 | 有：公开 T1w 标签与 mismatch |
 | [SynthSR](../docs/synthsr/README.md) | FreeSurfer TensorFlow，12 例 | 有：shape、affine、dtype、体素差 | 有：原版/本包 CPU 与 GPU | 有：公开 FLAIR 合成 T1w |
 | [TorchFAST](../docs/fast/README.md) | FSL FAST，10 例 | 有：GM PVE、Dice、体积、bias | 有：FSL CPU / 本包 GPU | 有：GM overlay、差值和 bias correction |
-| [FastVBM](../docs/fast_vbm/README.md) | UKB v1 / FSL，10 例 | 有：warped GM、Jacobian、modulated GM | 有：两种后端与历史 FSL 记录，边界已标注 | 有：三类输出的十例平均 |
+| [FastVBM](../docs/fast_vbm/README.md) | UKB v1 / FSL 接口对应 | 当前源码的 fresh benchmark 尚未完成 | 当前源码无可发布配对计时 | 当前源码无可发布对照图 |
 | [FLIRT](../docs/flirt/README.md) | FSL 6.0.7.4，10 例 | 有：`.mat` 与 reference-grid 图像 | 有：FSL CPU / 本包 H100 | 有：十例平均配准 GM 与差值 |
-| [FNIRT](../docs/fnirt/README.md) | FSL 6.0.7.4，10 例 matched input | 有：coefficient、field、iout、jout、modulated GM | 有：FSL CPU / 本包 H100 | 有：十例平均 warped GM 和 Jacobian |
+| [FNIRT](../docs/fnirt/README.md) | FSL 6.0.7.4，1 例真实 UKB matched-native TBSS | 有：coefficient geometry、九张 standard/skeleton 图及 fixed-affine/fixed-warp 隔离；仍不数值等价 | 有：FSL CPU / 本包 H100，同一 registration 边界 | 有：真实 FA standard-space 对照与绝对差 |
 | [applywarp](../docs/applywarp/README.md) | FSL 6.0.7.4，11 项 | 有：dense/coefficient、linear/nearest、header/dtype | 有：FSL CPU / 本包 CPU 与 H100 | 有：相同 warp 的输出与差值 |
 | [TOPUP](../docs/topup/README.md) | FSL 6.0.7.4，1 例真实 UKB 格式 dMRI | 有：field、corrected images、Jacobian、coefficient/movement/header | 有：FSL CPU / 本包 H100，各 3 次 | 有：原始 AP/PA、校正均值、field 与差值 |
 | [EDDY](../docs/eddy/README.md) | FSL 6.0.7.4 EDDY CPU/GPU，1 例真实 UKB 格式 dMRI | 有：校正 DWI、rotated bvec、运动/EC、RMS、outlier；可选辅助文件边界已列出 | 有：FSL CPU/GPU 与本包 H100 | 有：原始 AP mean、两种校正结果与差值 |
 | [DTIFIT](../docs/dtifit/README.md) | FSL 6.0.7.4 FDT 2202.6，1 例真实 UKB 格式 dMRI | 有：FA、S0、L1–L3、V1–V3、MD、MO 和 tensor 开关 | 有：FSL CPU / 本包 H100，各 3 次 | 有：FA 与绝对差 |
 | [AMICO-NODDI](../docs/amico_noddi/README.md) | AMICO 2.0.3，1 例真实 UKB 格式 dMRI | 有：242,261 个体素；三项 map 最大误差 5.96e-8，方向与 RMSE 逐值相同；header 合同一致 | 有：AMICO CPU 29.24 s / 本包 H100 三次中位数 32.87 s | 有：三项 parameter map 与绝对差 |
-| [MMORF](../docs/mmorf/README.md) | FSL MMORF 0.3.2，1 例真实 T1w + DTI tensor | 有：warp、Jacobian、warped scalar/tensor 和九图；算法差异明确列出 | 有：官方 MMORF / 本包 H100 及完整注册链分项 | 有：合成 scalar/tensor 同形变示例 |
-| [dMRI 参数图 pipeline](../docs/dmri_pipeline/README.md) | UKB v1.5 / FSL 6.0.7.4，1 例真实 UKB 格式 AP/PA dMRI | 有：共同九图 MNI grid、TBSS skeleton、原始到 native map 与两条注册分支 | 有：官方 TBSS、本包 TBSS、本包 MMORF 端到端分项 | 有：合成九图标准空间示例 |
+| [MMORF](../docs/mmorf/README.md) | FSL MMORF 0.3.2，1 例真实 T1w + DTI tensor | 有：warp、Jacobian、warped scalar 与同一 sampler 下的九图；warped tensor 无官方 oracle，仍不数值等价 | 有：官方 MMORF / 本包 H100，注册与九图应用分别计时 | 有：真实 warped T1、FA 与绝对差 |
+| [dMRI 参数图 pipeline](../docs/dmri_pipeline/README.md) | UKB v1.5 / FSL 6.0.7.4；当前为 1 例 matched-native TBSS 与独立 MMORF 对照 | 有：共同九图输出合同；TBSS 与 MMORF 分别有当前组件报告 | 有：matched-native TBSS 与独立 MMORF；raw-to-standard fresh 计时待补 | 有：真实 TBSS FA 与独立 MMORF T1/FA 对照 |
 | [BEDPOSTX](../docs/bedpostx/README.md) | FSL 6.0.7.22，真实 dMRI 小 ROI 与合成 DWI | 有：fraction、dyad、diffusivity、FSL 追踪读取 | 有：FSL CPU / 本包 CPU 与 H100 | 有：合成 crossing-fibre fraction 与差值 |
 | [ProbtrackX](../docs/probtrackx/README.md) | FSL 6.0.7.22，真实 UKBB dMRI 后验 | 有：密度图、waytotal、连接矩阵 | 有：FSL CPU / 本包 CPU | 合成后验纤维场图 |
 | [Connectome](../docs/connectome/README.md) | MRtrix3 3.0.5 合成矩阵赋值；MRtrix3 3.0.3-103、FSL 6.0.7.4、官方 FreeSurfer 8.2 与公开 ds004666 T1/校正 DWI | 有：5TT/GMWMI 与 atlas 逐值比较、6-DOF 配准矩阵容差、真实四矩阵相关、归一化误差、连接支持和三种子稳定性；完整流程未一致 | 有：合成矩阵阶段 RTX 3060；真实 DWI 的 PyTorch H100 与 MRtrix 分阶段计时，边界已注明 | 有：真实 T1/b0/5TT/GMWMI/atlas、四矩阵及差值 |

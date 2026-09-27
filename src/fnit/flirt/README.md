@@ -41,10 +41,10 @@ maximum 0.028984 mm). Runtime QC still reports
 does not compare the current input or claim bitwise/complete numerical
 equivalence.
 
-The QC value `reference_validation_report="validation/fast_vbm/report.v0.9.public.json"`
+The QC value `reference_validation_report="validation/flirt/report.public.json"`
 is a source-repository artifact identifier. The wheel does not contain the
 root `validation/` directory; use the
-[public GitHub report](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/blob/main/validation/fast_vbm/report.v0.9.public.json) for an installed package.
+[public GitHub report](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/blob/main/validation/flirt/report.public.json) for an installed package.
 
 See `docs/flirt/README.md` in the source
 repository for the full input/output contract, argument-by-argument examples,

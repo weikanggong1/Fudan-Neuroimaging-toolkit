@@ -227,15 +227,18 @@ def zoom_coefficients(
     new_knot_spacing: Sequence[int],
     old_voxel_sizes: Sequence[float],
     new_voxel_sizes: Sequence[float],
+    *,
+    old_knot_spacing: Sequence[int] | None = None,
 ):
     """Apply FSL ``splinefield::ZoomField`` to 3-D coefficients.
 
     Changing voxel size is represented upstream by a ``fake_old_ksp`` equal
     to ``round(old_voxel_size / new_voxel_size * new_ksp)``.  One
     least-squares coefficient transform is then applied along each axis.
-    FSL rejects simultaneous voxel-size and knot-spacing changes; callers of
-    this helper supply the new knot spacing explicitly so that this condition
-    can be checked here.
+    ``old_knot_spacing`` is needed for an ``--inwarp`` handoff that changes
+    knot spacing without changing voxel size. FSL rejects a simultaneous
+    voxel-size and knot-spacing change, so callers must perform those two
+    transitions separately.
     """
     if coefficients.ndim != 4:
         raise ValueError("coefficients must have shape [channels, Cx, Cy, Cz]")
@@ -249,21 +252,43 @@ def zoom_coefficients(
         raise ValueError("all spline geometries must contain three values")
     new_shape = tuple(int(value) for value in new_shape)
     new_knot_spacing = tuple(int(value) for value in new_knot_spacing)
+    if old_knot_spacing is None:
+        old_knot_spacing = new_knot_spacing
+    else:
+        old_knot_spacing = tuple(int(value) for value in old_knot_spacing)
     old_voxel_sizes = tuple(float(value) for value in old_voxel_sizes)
     new_voxel_sizes = tuple(float(value) for value in new_voxel_sizes)
-    if any(value < 1 for value in new_shape + new_knot_spacing):
+    if len(old_knot_spacing) != 3:
+        raise ValueError("old_knot_spacing must contain three values")
+    if any(
+        value < 1
+        for value in new_shape + new_knot_spacing + old_knot_spacing
+    ):
         raise ValueError("matrix size and knot spacing must be positive")
     if any(value <= 0 for value in old_voxel_sizes + new_voxel_sizes):
         raise ValueError("voxel sizes must be positive")
 
-    # ZoomField is called here only for a voxel-size change.  Its old and new
-    # spline objects retain the same integer knot spacing; the old grid is
-    # represented on the new voxel lattice through fake_old_ksp.
+    voxel_size_changed = old_voxel_sizes != new_voxel_sizes
+    if voxel_size_changed and old_knot_spacing != new_knot_spacing:
+        raise ValueError(
+            "FSL ZoomField cannot change voxel size and knot spacing together"
+        )
+
+    # For a voxel-size change FSL represents the old grid on the new voxel
+    # lattice through fake_old_ksp. For a pure knot-spacing change it uses the
+    # actual old knot spacing directly.
     fake_old_spacing = []
-    for old_voxel, new_voxel, spacing in zip(
-        old_voxel_sizes, new_voxel_sizes, new_knot_spacing
+    for old_voxel, new_voxel, new_spacing, old_spacing in zip(
+        old_voxel_sizes,
+        new_voxel_sizes,
+        new_knot_spacing,
+        old_knot_spacing,
     ):
-        exact = old_voxel / new_voxel * spacing
+        exact = (
+            old_voxel / new_voxel * new_spacing
+            if voxel_size_changed
+            else old_spacing
+        )
         rounded = int(math.floor(exact + 0.5))
         if abs(exact - rounded) > 1e-6:
             raise ValueError(

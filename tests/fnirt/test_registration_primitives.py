@@ -7,14 +7,21 @@ import fnit.fnirt.registration as registration_module
 from fnit.fnirt.registration import (
     GMFNIRTConfig,
     TorchFNIRT,
+    _LevelSystem,
     _fsl_affine_grid,
     _fsl_displacement_coordinates,
+    _fsl_masked_gaussian_blur,
+    _process_knot_spacing_schedule,
     _spline_jacobian,
     _subsampled_size,
     _trilinear_sample,
     spm_like_mean,
 )
-from fnit.fnirt.spline import fsl_control_shape
+from fnit.fnirt.spline import (
+    BendingOperator,
+    fsl_control_shape,
+    spline_bases,
+)
 
 
 def _volume(shape=(8, 8, 8)):
@@ -65,6 +72,66 @@ def test_fsl_recursive_subsampling_keeps_endpoint_coverage():
     assert _subsampled_size(90, 2) == 46
 
 
+def test_full_resolution_knot_spacing_uses_each_process_final_subsampling():
+    schedule = _process_knot_spacing_schedule(
+        (
+            (10.0, 10.0, 10.0),
+            (10.0, 10.0, 10.0),
+            (10.0, 10.0, 10.0),
+            (10.0, 10.0, 10.0),
+            (2.0, 2.0, 2.0),
+            (2.0, 2.0, 2.0),
+        ),
+        (1, 1, 1, 1, 2, 3),
+        (8, 4, 2, 2, 1, 1),
+        (1.0, 1.0, 1.0),
+    )
+
+    assert schedule == (
+        (5, 5, 5),
+        (5, 5, 5),
+        (5, 5, 5),
+        (5, 5, 5),
+        (2, 2, 2),
+        (2, 2, 2),
+    )
+    assert fsl_control_shape((182, 218, 182), schedule[3]) == (39, 46, 39)
+
+
+def test_process_ending_above_full_resolution_upsamples_before_cout():
+    shape = (20, 20, 20)
+    moving = _volume(shape)
+    fixed = moving.copy()
+    initial = sf.Affine(
+        np.eye(4), source=moving, target=fixed, space="world"
+    )
+    config = GMFNIRTConfig(
+        subsampling=(2,),
+        maximum_iterations=(0,),
+        input_fwhm_mm=(0.0,),
+        reference_fwhm_mm=(0.0,),
+        regularization=(0.0,),
+        estimate_intensity=(False,),
+        apply_reference_mask=(False,),
+        process_stages=(1,),
+        warp_resolution_mm=(10.0, 10.0, 10.0),
+    )
+
+    result = TorchFNIRT(device="cpu", config=config)(moving, fixed, initial)
+
+    assert result.qc["final_output_upsampled_to_reference_grid"] is True
+    assert result.qc["process_full_resolution_knot_spacing_voxels"] == [
+        [5, 5, 5]
+    ]
+    assert result.coefficient_image.shape == (7, 7, 7, 3)
+    np.testing.assert_allclose(
+        result.coefficient_image.header.get_zooms()[:3],
+        (5.0, 5.0, 5.0),
+        rtol=0,
+        atol=0,
+    )
+
+
 def test_trilinear_sampler_returns_piecewise_analytic_gradient():
     axes = torch.meshgrid(
         torch.arange(5.0), torch.arange(6.0), torch.arange(7.0), indexing="ij"
@@ -77,6 +144,20 @@ def test_trilinear_sampler_returns_piecewise_analytic_gradient():
     torch.testing.assert_close(
         gradient.squeeze(), torch.tensor([2.0, -3.0, 0.5])
     )
+
+
+def test_trilinear_valid_mask_uses_newimage_boundary_tolerance():
+    volume = torch.ones((2, 2, 2), dtype=torch.float32)
+    coordinates = torch.tensor(
+        [[-5e-9, -2e-8], [0.0, 0.0], [0.0, 0.0]], dtype=torch.float32
+    )
+
+    sampled, valid, gradient = _trilinear_sample(volume, coordinates)
+
+    assert valid.tolist() == [True, False]
+    assert sampled[0] > 0.9999999
+    assert sampled[1] == 0
+    assert gradient[0, 0] == 1
 
 
 def test_warpfns_coordinate_arithmetic_uses_scalar_float_order():
@@ -145,6 +226,153 @@ def test_warpfns_coordinate_arithmetic_uses_scalar_float_order():
         ).numpy(),
         expected_voxels,
     )
+
+
+
+def test_masked_smoothing_renormalizes_inside_implicit_mask():
+    mask = torch.zeros((9, 9, 9), dtype=torch.bool)
+    mask[2:7, 2:7, 2:7] = True
+    volume = torch.full((1, 1, 9, 9, 9), 99.0, dtype=torch.float32)
+    volume[0, 0][mask] = 7.0
+
+    actual = _fsl_masked_gaussian_blur(
+        volume, 4.0, (1.0, 1.0, 1.0), mask
+    )[0, 0]
+
+    torch.testing.assert_close(
+        actual[mask], torch.full_like(actual[mask], 7.0), atol=3e-6, rtol=0
+    )
+    assert torch.count_nonzero(actual[~mask]) == 0
+
+
+def test_implicit_zero_masks_are_active_without_explicit_mask():
+    shape = (8, 8, 8)
+    data = np.zeros(shape, dtype=np.float32)
+    data[0, 0, 0] = np.float32(1e-20)
+    data[2:6, 2:6, 2:6] = 1.0
+    geometry = sf.ImageGeometry(shape, vox2world=np.eye(4))
+    moving = sf.Volume(data, geometry=geometry)
+    fixed = moving.copy()
+    initial = sf.Affine(
+        np.eye(4), source=moving, target=fixed, space="world"
+    )
+
+    result = TorchFNIRT(device="cpu", config=_single_level_config())(
+        moving, fixed, initial
+    )
+
+    level = result.qc["levels"][0]
+    assert level["implicit_input_mask"] is True
+    assert level["implicit_reference_mask"] is True
+    assert level["mask_voxels"] == 4**3
+
+
+def test_input_implicit_mask_is_built_after_mean_scaling():
+    shape = (8, 8, 8)
+    moving_data = np.zeros(shape, dtype=np.float32)
+    moving_data[2:6, 2:6, 2:6] = 1.0
+    moving_data[0, 0, 0] = np.float32(2e-18)
+    fixed_data = moving_data.copy()
+    fixed_data[0, 0, 0] = 1.0
+    geometry = sf.ImageGeometry(shape, vox2world=np.eye(4))
+    moving = sf.Volume(moving_data, geometry=geometry)
+    fixed = sf.Volume(fixed_data, geometry=geometry)
+    initial = sf.Affine(
+        np.eye(4), source=moving, target=fixed, space="world"
+    )
+
+    result = TorchFNIRT(device="cpu", config=_single_level_config())(
+        moving, fixed, initial
+    )
+
+    assert result.qc["levels"][0]["mask_voxels"] == 4**3 + 1
+
+
+def test_warped_input_mask_is_truncated_to_char_before_thresholding():
+    shape = (4, 4, 4)
+    spacing = (2, 2, 2)
+    dtype = torch.float64
+    bases = spline_bases(
+        shape,
+        spacing,
+        (1.0, 1.0, 1.0),
+        device="cpu",
+        dtype=dtype,
+    )
+    bending = BendingOperator(
+        shape,
+        spacing,
+        (1.0, 1.0, 1.0),
+        device="cpu",
+        dtype=dtype,
+    )
+    moving_mask = torch.zeros(shape, dtype=torch.float32)
+    moving_mask[1:3] = 1
+    coordinate_affine = torch.eye(4, dtype=dtype)
+    coordinate_affine[0, 3] = 0.25
+    system = _LevelSystem(
+        torch.ones(shape, dtype=torch.float32),
+        torch.ones(shape, dtype=torch.float32),
+        None,
+        moving_mask,
+        torch.eye(4, dtype=torch.float32),
+        torch.zeros((3, *shape), dtype=torch.float32),
+        torch.eye(4, dtype=torch.float32),
+        bases,
+        bending,
+        0.0,
+        False,
+        False,
+        coordinate_affine,
+    )
+    coefficients = torch.zeros(
+        (3, *fsl_control_shape(shape, spacing)), dtype=dtype
+    )
+
+    state = system.evaluate(coefficients, torch.ones((), dtype=dtype))
+
+    # At output x=2 the trilinear mask is 0.75. FSL writes it to a char
+    # volume first, making it zero; a direct float >0.5 test would retain it.
+    assert state["count"] == 4 * 4
+    assert torch.count_nonzero(state["mask"][2]) == 0
+
+
+
+def test_process_boundary_uses_scg_and_inwarp_knot_refinement():
+    shape = (8, 8, 8)
+    data = np.zeros(shape, dtype=np.float32)
+    data[1:7, 1:7, 1:7] = 1.0
+    geometry = sf.ImageGeometry(shape, vox2world=np.eye(4))
+    moving = sf.Volume(data, geometry=geometry)
+    fixed = moving.copy()
+    initial = sf.Affine(
+        np.eye(4), source=moving, target=fixed, space="world"
+    )
+    config = GMFNIRTConfig(
+        subsampling=(1, 1),
+        maximum_iterations=(0, 0),
+        input_fwhm_mm=(0.0, 0.0),
+        reference_fwhm_mm=(0.0, 0.0),
+        regularization=(0.0, 0.0),
+        estimate_intensity=(False, False),
+        apply_reference_mask=(False, False),
+        minimization_methods=("lm", "scg"),
+        process_stages=(1, 2),
+        warp_resolution_mm=(4.0, 4.0, 4.0),
+        warp_resolution_schedule_mm=(
+            (4.0, 4.0, 4.0),
+            (2.0, 2.0, 2.0),
+        ),
+    )
+
+    result = TorchFNIRT(device="cpu", config=config)(moving, fixed, initial)
+
+    first, second = result.qc["levels"]
+    assert first["process_boundary_handoff"] is False
+    assert second["process_boundary_handoff"] is True
+    assert second["minimization_method"] == "scg"
+    assert second["knot_spacing_voxels"] == [2, 2, 2]
+    assert result.qc["process_handoff_float32_coefficients"] is True
 
 
 def test_gm_config_rejects_mismatched_schedules():

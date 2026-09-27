@@ -14,9 +14,9 @@
     "python/packages/WMHSynthSeg/utils.py": "a33eb48b466703a954441803e5a1a6aff716ff9755345f548c28ebeee34f6d42",
     "python/packages/WMHSynthSeg/unet3d/model.py": "bff1285de993212dc1382cf2d6e863083c54611e6413863f7c56182b2df3485a",
     "python/packages/WMHSynthSeg/unet3d/buildingblocks.py": "43246ac1f68884df05cf36c19469981b2374d809ad2629636ed76187b2ac5bc7",
-    "mmorf_core.py": "bc19eec223b161a8240c61fe97bcecd19afda2b2aedfaed75267d81b58504a46",
-    "dmri_pipeline.py": "5aac7f4ae62ba57f5e7e7b269ea7f65e4d21be7abc81cc0913fe3aaeb403954d",
-    "dmri_tbss.py": "aa8772ef24b438b1e932481f9ab628d62b9495cc233b78d5ada89138e2360eba"
+    "mmorf_core.py": "a89092d2ef561b53049400361a646b9cc8f94300bcb7b3eb14b37ed1e4a18466",
+    "dmri_pipeline.py": "7ed08495a70065f46e8cd6a8402053ec9e5d6a764e5ce8ec37dc961fc369a347",
+    "dmri_tbss.py": "a9d73b62e897c58a50b009d6046567841a72fd8dc9658c4b3e088e09e9459ee2"
   },
   "weights_sha256": {
     "synthmorph.affine.2.h5": "1ac5304b683036e5177f5b4ad38fa09fcbbe7883e742d6fa5bdaedd0e619ced6",
@@ -61,18 +61,9 @@
       "applywarp": "src/fnit/applywarp/core.py",
       "fnirt_method": "PyTorch port of the FSL FNIRT 2203.0 UKB GM path with basisfield 2203.1, miscmaths 2203.2, newimage 2203.11 and warpfns 2203.0 source references",
       "source_provenance_manifest": "src/fnit/_vendor_fsl/manifest.json",
-      "fsl_flirt_equivalence_status": "the default-TF32 ten-case reference suite passed the tolerance-based matrix functional gate 10/10 (median 0.008544 mm, IQR 0.006265-0.019436 mm, maximum 0.028984 mm; threshold 0.05 mm); runtime validated_fsl_equivalent remains false because this is not a per-input, bitwise, or complete numerical-equivalence claim",
-      "fsl_fnirt_equivalence_status": "the independent ten-case matched-input report measured median warped GM r=0.998695, nonlinear Jacobian r=0.999267, and modulated GM r=0.998507 with 10/10 output-contract agreement; errors exceed rounding and fsl_fnirt_numerically_equivalent remains false",
-      "fast_vbm_v0_9_validation": {
-        "scope": "ten real T1w cases; end_to_end only; fnirt and synthmorph backends",
-        "report": "validation/fast_vbm/report.v0.9.public.json",
-        "table": "validation/fast_vbm/backend_comparison.v0.9.public.csv",
-        "test_summary": "validation/fast_vbm/test_summary.v0.9.public.json",
-        "release_manifest": "validation/fast_vbm/release.v0.9.public.json",
-        "direct_fnirt": "validation/fast_vbm/fnirt_fsl_10case.v0.9.public.json",
-        "direct_fnirt_is_independent_matched_input_run": true,
-        "fsl_fnirt_numerically_equivalent": false
-      }
+      "fsl_flirt_equivalence_status": "默认 TF32 的 10 例真实数据功能门限全部通过：FSL rmsdiff 中位数 0.008545075 mm，四分位距 0.006264673–0.019429475 mm，最大值 0.0289986 mm，门限 0.05 mm；该结果不代表逐输入或逐位数值等价，validated_fsl_equivalent 仍为 false。",
+      "fsl_fnirt_equivalence_status": "当前 1 例 matched-native TBSS 对照中，TorchFLIRT + TorchFNIRT 的九张 standard 图 r=0.995086–0.998886，固定官方 affine 后 r=0.997483–0.999523；level-1 LM mask、cost 和接受序列与 FSL 对齐。后续数值归约仍有差异，fsl_fnirt_numerically_equivalent 仍为 false。详见 validation/dmri_pipeline/tbss_diagnosis.public.json。",
+      "fast_vbm_validation_status": "当前 FNIRT 更新后尚未完成新的 raw-T1w-to-VBM 配对 benchmark；被替代的报告和图已删除。"
     },
     "upstream_license": "Apache-2.0",
     "upstream_copyright": "Copyright 2021 University of Oxford, Oxford, UK",
@@ -356,7 +347,10 @@
     "installed_reference": "FSL 6.0.7.4 mmorf 0.3.2",
     "implementation": "src/fnit/mmorf",
     "source_snapshot": "src/fnit/_vendor_fsl/sources/mmorf-0.3.2",
-    "warp_contract": "reference-grid relative displacement in reference voxel units",
+    "warp_contract": "reference-grid relative pull displacement in millimetres along the reference image axes",
+    "validation_report": "validation/mmorf/report.public.json",
+    "validation_figure": "docs/mmorf/figures/mmorf_fsl_comparison.png",
+    "validation_status": "1 例真实 T1w + DTI tensor：warp r=0.969381，Jacobian r=0.947671；固定 sampler、affine 与 native input 后九图 r=0.919880–0.976514。官方与 FNIT 优化器仍不同。",
     "numerically_equivalent": false
   },
   "dmri_pipeline_reference": {
@@ -379,6 +373,9 @@
       "oxford_s3.cnf": "9d304dfd224b8e48f20364dcce77c7618722cf3a9bcd40d764a6d25ee8020eaf"
     },
     "fa_preprocessing_voxelwise_equivalent": true,
+    "current_tbss_validation": "validation/dmri_pipeline/tbss_diagnosis.public.json",
+    "current_mmorf_validation": "validation/mmorf/report.public.json",
+    "raw_to_standard_fresh_benchmark_available": false,
     "registration_numerically_equivalent": false
   }
 }

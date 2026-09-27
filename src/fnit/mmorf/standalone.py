@@ -29,7 +29,8 @@ def run_mmorf(
     FSL scaled-mm matrix from that input image to ``reference_scalar``.
 
     ``output_dir`` receives ``mmorf_warp.nii.gz`` (three-frame relative pull
-    displacement in reference-voxel units), ``mmorf_jacobian.nii.gz``,
+    displacement in millimetres along the reference image axes),
+    ``mmorf_jacobian.nii.gz``,
     ``mmorf_warped_scalar.nii.gz``, ``mmorf_warped_tensor.nii.gz`` and
     ``mmorf_report.json``. The returned :class:`MMORFResult` contains the same
     four NIfTI images in memory plus the report dictionary.
