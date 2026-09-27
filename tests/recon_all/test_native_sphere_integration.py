@@ -24,6 +24,9 @@ class NativeSphereIntegrationTest(unittest.TestCase):
             bin_dir, subject, assets = root / "bin", root / "subjects/sub01", root / "assets"
             bin_dir.mkdir()
             (subject / "surf").mkdir(parents=True)
+            (subject / "mri").mkdir()
+            for name in ("brain", "wm"):
+                (subject / "mri" / f"{name}.mgz").write_bytes(b"mri")
             assets.mkdir()
             surf = subject / "surf"
             (surf / "lh.orig.nofix").write_bytes(b"nofix")
@@ -36,12 +39,13 @@ class NativeSphereIntegrationTest(unittest.TestCase):
                 " (out.parent/'lh.sulc').write_bytes(b'sulc')\n"
             )
             inflate.chmod(0o755)
-            topology = bin_dir / "mris_fix_topology"
+            topology = bin_dir / "mris_fix_topology_fnit"
             topology.write_text(
                 "#!/usr/bin/env python3\n"
                 "import os,pathlib,sys\n"
                 "subject=pathlib.Path(os.environ['SUBJECTS_DIR'])/sys.argv[-2]\n"
                 "(subject/'surf'/(sys.argv[-1]+'.orig.premesh')).write_bytes(b'repaired')\n"
+                "print('FNIT_CENTERED_SUBSTITUTION_USED')\n"
             )
             topology.chmod(0o755)
             resolved, digest = _native_inflate_binary(bin_dir)
@@ -70,6 +74,8 @@ class NativeSphereIntegrationTest(unittest.TestCase):
                            side_effect=fake_quick), patch(
                            "fnit.recon_all.mris_remesh_python.remesh_surface",
                            side_effect=fake_smooth), patch(
+                           "fnit.recon_all.topology_conda_ga.write_centered_topology_sphere",
+                           side_effect=lambda source, output: Path(output).write_bytes(b"centered")), patch(
                            "fnit.recon_all.mris_remove_intersection_python.remove_intersection_surface",
                            return_value=(0, 0)), patch(
                            "fnit.recon_all.sphere_standard_run.run_standard_sphere",

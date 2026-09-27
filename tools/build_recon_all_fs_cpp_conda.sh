@@ -120,6 +120,19 @@ for target in "${targets[@]}"; do
     exit 1
   fi
 done
+# Build the topology variant that consumes the Python exact-centered sphere and
+# pins the older FreeSurfer double-tanh behavior. Keep the unmodified binary
+# above for diagnostic comparisons only.
+"$CONDA_PREFIX/bin/python" "$(dirname "$0")/build_recon_all_topology_fnit.py" \
+  --build "$build_dir" --source "$build_source" \
+  --output-dir "$output_dir/topology-fnit-build"
+install -m 755 "$output_dir/topology-fnit-build/mris_fix_topology_fnit" \
+  "$output_dir/bin/mris_fix_topology_fnit"
+ldd "$output_dir/bin/mris_fix_topology_fnit" > "$output_dir/mris_fix_topology_fnit.ldd"
+if grep -E '/public/software/apps/Freesurfer|/tmp/fs_itk_build' "$output_dir/mris_fix_topology_fnit.ldd"; then
+  echo "patched topology binary links an external FreeSurfer/ITK installation" >&2
+  exit 1
+fi
 sha256sum "$output_dir"/bin/* > "$output_dir/bin.sha256"
 conda list --explicit > "$output_dir/conda-explicit.txt"
 printf 'SOURCE_COMMIT=%s\nSOURCE_VALIDATION=%s\nCONDA_PREFIX=%s\n' "$source_commit" "$source_validation" "$CONDA_PREFIX" > "$output_dir/build-provenance.txt"

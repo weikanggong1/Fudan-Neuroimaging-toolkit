@@ -39,7 +39,7 @@ def _native_em_register_binary(native_bin_dir: str | Path) -> tuple[Path, str]:
 
 
 def _native_topology_binary(native_bin_dir: str | Path) -> tuple[Path, str]:
-    return _native_binary(native_bin_dir, "mris_fix_topology")
+    return _native_binary(native_bin_dir, "mris_fix_topology_fnit")
 
 
 def _native_surface_metrics_binary(native_bin_dir: str | Path) -> tuple[Path, str]:
@@ -86,18 +86,12 @@ def _run_native_em_register(binary: Path, mri: Path, atlas: Path,
 
 def _run_native_topology(binary: Path, subject: Path, hemi: str,
                          assets: Path) -> None:
-    scripts = subject / "scripts"
-    scripts.mkdir(exist_ok=True)
-    env = dict(os.environ, SUBJECTS_DIR=str(subject.parent),
-               FREESURFER_HOME=str(assets))
-    subprocess.run([str(binary), "-ga", "-seed", "1234", "-threads", "1",
-                    "-mgz", "-sphere", "qsphere.nofix", "-inflated",
-                    "inflated.nofix", "-orig",
-                    "orig.nofix", "-out", "orig.premesh", subject.name, hemi],
-                   cwd=scripts, env=env, check=True)
-    output = subject / "surf" / f"{hemi}.orig.premesh"
+    from .topology_conda_ga import run_topology_ga_conda
+
+    result = run_topology_ga_conda(subject, hemi, binary, assets)
+    output = Path(result["output"])
     if not output.is_file():
-        raise FileNotFoundError(f"mris_fix_topology produced no surface: {output}")
+        raise FileNotFoundError(f"topology GA produced no surface: {output}")
 
 
 def _run_native_sphere_step(binary: Path, subject: Path, assets: Path,
