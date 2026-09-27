@@ -36,7 +36,7 @@
 | [TOPUP](../docs/topup/README.md) | FSL 6.0.7.4，1 例真实 UKB 格式 dMRI | 有：field、corrected images、Jacobian、coefficient/movement/header | 有：FSL CPU / 本包 H100，各 3 次 | 有：原始 AP/PA、校正均值、field 与差值 |
 | [EDDY](../docs/eddy/README.md) | FSL 6.0.7.4 EDDY CPU/GPU，1 例真实 UKB 格式 dMRI | 有：校正 DWI、rotated bvec、运动/EC、RMS、outlier；可选辅助文件边界已列出 | 有：FSL CPU/GPU 与本包 H100 | 有：原始 AP mean、两种校正结果与差值 |
 | [DTIFIT](../docs/dtifit/README.md) | FSL 6.0.7.4 FDT 2202.6，1 例真实 UKB 格式 dMRI | 有：FA、S0、L1–L3、V1–V3、MD、MO 和 tensor 开关 | 有：FSL CPU / 本包 H100，各 3 次 | 有：FA 与绝对差 |
-| [AMICO-NODDI](../docs/amico_noddi/README.md) | AMICO 2.0.3，1 例真实 UKB 格式 dMRI | 有：UKB/AMICO 命名、NDI、ODI、FWF、方向和 RMSE | 有：AMICO CPU / 本包 H100 | 有：三项 parameter map 与绝对差 |
+| [AMICO-NODDI](../docs/amico_noddi/README.md) | AMICO 2.0.3，1 例真实 UKB 格式 dMRI | 有：242,261 个体素；三项 map 最大误差 5.96e-8，方向与 RMSE 逐值相同；header 合同一致 | 有：AMICO CPU 29.24 s / 本包 H100 三次中位数 32.87 s | 有：三项 parameter map 与绝对差 |
 | [BEDPOSTX](../docs/bedpostx/README.md) | FSL 6.0.7.22，真实 dMRI 小 ROI 与合成 DWI | 有：fraction、dyad、diffusivity、FSL 追踪读取 | 有：FSL CPU / 本包 CPU 与 H100 | 有：合成 crossing-fibre fraction 与差值 |
 | [ProbtrackX](../docs/probtrackx/README.md) | FSL 6.0.7.22，真实 UKBB dMRI 后验 | 有：密度图、waytotal、连接矩阵 | 有：FSL CPU / 本包 CPU | 合成后验纤维场图 |
 

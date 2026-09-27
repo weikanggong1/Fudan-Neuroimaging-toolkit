@@ -6,7 +6,7 @@ from .core import TorchAMICONODDI
 
 def add_parser(commands):
     parser = commands.add_parser(
-        "amico-noddi", help="AMICO-style NODDI dictionary fitting"
+        "amico-noddi", help="AMICO 2.0.3-compatible NODDI fitting"
     )
     for flag, dest in (
         ("-k", "data"),

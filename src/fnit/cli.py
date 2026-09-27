@@ -250,7 +250,7 @@ def _run_fast_vbm(args):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(prog='fnit')
-    parser.add_argument('--version', action='version', version='Fudan Neuroimaging Toolkit (FNIT) 0.12.0')
+    parser.add_argument('--version', action='version', version='Fudan Neuroimaging Toolkit (FNIT) 0.12.1')
     commands = parser.add_subparsers(dest='command', required=True)
     strip = commands.add_parser('synthstrip', help='brain extraction')
     strip.add_argument('-i', '--image', required=True)

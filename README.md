@@ -17,7 +17,7 @@
 | dMRI | PyTorch TOPUP | UKB AP/PA b0 选择、Hz 场估计、畸变校正和 FSL 输出 | [TOPUP 文档](docs/topup/README.md) |
 | dMRI | PyTorch EDDY | 逐 volume 运动、二次 EC、TOPUP 场、Jacobian 和离群切片校正 | [EDDY 文档](docs/eddy/README.md) |
 | dMRI | PyTorch DTIFIT | FSL 默认 OLS tensor、FA、MD、eigenvalue 和 eigenvector | [DTIFIT 文档](docs/dtifit/README.md) |
-| dMRI | PyTorch AMICO-NODDI | NDI、ODI、FWF、方向和拟合误差 | [AMICO-NODDI 文档](docs/amico_noddi/README.md) |
+| dMRI | PyTorch AMICO-NODDI | AMICO 2.0.3 数值等价的 NDI、ODI、FWF、方向和拟合误差 | [AMICO-NODDI 文档](docs/amico_noddi/README.md) |
 | dMRI | PyTorch BEDPOSTX | 估计体素内纤维方向及不确定性，供概率追踪使用 | [BEDPOSTX 文档](docs/bedpostx/README.md) |
 | dMRI | PyTorch ProbtrackX | 种子到体素的概率追踪与脑区间连接矩阵 | [ProbtrackX 文档](docs/probtrackx/README.md) |
 | sMRI | Python recon-all（近似版） | T1w 到核心分割、双侧皮层表面、顶点指标和脑区统计 | [recon-all 文档](docs/recon_all/README.md) |

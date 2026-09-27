@@ -1,13 +1,16 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "date": "2026-09-27",
   "feature": "TorchAMICONODDI",
-  "fnit_version": "0.12.0",
+  "fnit_version": "0.12.1",
   "reference": {
     "software": "AMICO 2.0.3",
     "repository": "https://github.com/daducci/AMICO",
     "tag": "v2.0.3",
     "commit": "df540093b60240c38a6ff2ea4ceb1181c4f3e936",
+    "dipy": "1.12.1",
+    "numpy": "1.26.4",
+    "scipy": "1.17.1",
     "threads": 32
   },
   "input": {
@@ -25,15 +28,19 @@
       "b_approximately_2000": 50
     },
     "mask_voxels": 242261,
-    "same_inputs_for_reference_and_candidate": true
+    "same_inputs_for_reference_and_candidate": true,
+    "all_mask_voxels_compared": true,
+    "subject_data_in_repository": false
   },
   "hardware": {
     "host": "gpucw1",
     "cpu": "Intel Xeon Gold 6430",
     "candidate_gpu": "NVIDIA H100 PCIe 80 GB",
     "shared_host": true,
-    "candidate_dtype": "float32",
-    "tf32_allowed": true
+    "kernel_dtype": "float32",
+    "active_set_solver_dtype": "float64",
+    "tf32_allowed_for_float32_matmul": true,
+    "float16_used": false
   },
   "model": {
     "dictionary_atoms": 145,
@@ -43,44 +50,77 @@
     "d_iso": 0.003,
     "lambda1": 0.5,
     "lambda2": 0.001,
-    "iterations": [
-      100,
-      200,
-      100
+    "b0_threshold": 100.0,
+    "b_step": 100.0,
+    "spherical_harmonic_order": 12,
+    "lut_directions": 500,
+    "solver_stages": [
+      "full-dictionary NNLS",
+      "positive elastic-net support selection",
+      "support-constrained NNLS debias"
     ]
   },
   "metrics": {
     "NDI": {
-      "pearson_r": 0.8307260788946844,
-      "mae": 0.06286176747656655,
-      "rmse": 0.11943706552791916,
+      "pearson_r": 0.9999999999999994,
+      "mae": 1.3939718573611494e-09,
+      "rmse": 6.625503914229172e-09,
+      "max_abs": 5.960464477539063e-08,
+      "exact_equal_voxels": 231099,
+      "count_abs_gt_1e-7": 0,
+      "count_abs_gt_1e-6": 0,
       "reference_mean": 0.4162795482238832,
-      "candidate_mean": 0.38357357214961374
+      "candidate_mean": 0.4162795468301574
     },
     "ODI": {
-      "pearson_r": 0.9238266469304914,
-      "mae": 0.048621323627592236,
-      "rmse": 0.10588651836979325,
+      "pearson_r": 0.9999999999999993,
+      "mae": 1.2916828753732576e-12,
+      "rmse": 2.4408159817515757e-10,
+      "max_abs": 5.960464477539063e-08,
+      "exact_equal_voxels": 242253,
+      "count_abs_gt_1e-7": 0,
+      "count_abs_gt_1e-6": 0,
       "reference_mean": 0.43326166973228114,
-      "candidate_mean": 0.39902821884606904
+      "candidate_mean": 0.43326166973246566
     },
     "FWF": {
-      "pearson_r": 0.9466169820242207,
-      "mae": 0.0735596582075292,
-      "rmse": 0.13216205984626148,
+      "pearson_r": 1.0,
+      "mae": 7.090174772814153e-13,
+      "rmse": 1.4683509666538827e-10,
+      "max_abs": 5.960464477539063e-08,
+      "exact_equal_voxels": 242230,
+      "count_abs_gt_1e-7": 0,
+      "count_abs_gt_1e-6": 0,
       "reference_mean": 0.2431523173842922,
-      "candidate_mean": 0.17479254504321637
+      "candidate_mean": 0.24315231738433016
     },
     "normalized_RMSE": {
-      "pearson_r": 0.36556032797992644,
-      "mae": 0.0024457804320740907,
-      "rmse": 0.08529267755417158,
+      "pearson_r": 1.0,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "max_abs": 0.0,
+      "exact_equal_voxels": 242261,
+      "count_abs_gt_1e-7": 0,
+      "count_abs_gt_1e-6": 0,
       "reference_mean": 0.04016433054220136,
-      "candidate_mean": 0.04130527228991797
+      "candidate_mean": 0.04016433054220136
+    },
+    "direction": {
+      "max_abs_component": 0.0,
+      "mae_component": 0.0,
+      "exact_equal_components": 726783,
+      "total_components": 726783
     }
   },
+  "acceptance": {
+    "scalar_map_max_abs_threshold": 1e-07,
+    "scalar_map_count_over_threshold": 0,
+    "direction_component_exact": true,
+    "passed": true
+  },
   "timing": {
-    "scope": "fresh process including startup and I/O",
+    "scope": "fresh process including Python startup, kernel construction, fitting, NIfTI I/O, and saving; shared node",
+    "reference_runs": 1,
     "reference_total_seconds": 29.24,
     "reference_stage_seconds": {
       "generate": 3.4945272146724164,
@@ -89,20 +129,56 @@
       "save": 0.45499349012970924
     },
     "reference_max_rss_kb": 3301432,
-    "candidate_total_seconds": 22.98,
-    "candidate_internal_seconds": 14.812637295108289,
-    "candidate_max_rss_kb": 1261684,
-    "candidate_peak_cuda_memory_bytes": 926478848,
-    "total_speedup": 1.2724107919930374
+    "candidate_runs": 3,
+    "candidate_total_seconds": [
+      34.19,
+      32.87,
+      29.44
+    ],
+    "candidate_total_median_seconds": 32.87,
+    "candidate_internal_median_seconds": 20.303657586220652,
+    "candidate_stage_median_seconds": {
+      "kernel": 1.769119362346828,
+      "direction": 1.7502405070699751,
+      "solver": 12.773147106170654
+    },
+    "candidate_max_rss_median_kb": 1762652,
+    "candidate_peak_cuda_memory_bytes": 12431536128,
+    "candidate_over_reference_wall_time": 1.1241450068399452,
+    "optimization": {
+      "baseline_exact_total_seconds": 108.24,
+      "baseline_exact_solver_seconds": 92.41866513201967,
+      "total_speedup_over_baseline_exact": 3.292972315181016,
+      "solver_speedup_over_baseline_exact": 7.235387204408896,
+      "method": "compact active-set batched Cholesky, CG fallback for ill-conditioned subsets, top-k active-index extraction"
+    }
   },
   "contract": {
-    "amico_map_names_available": true,
-    "ukb_map_names_default": true,
+    "amico_names": [
+      "fit_NDI.nii.gz",
+      "fit_ODI.nii.gz",
+      "fit_FWF.nii.gz",
+      "fit_dir.nii.gz",
+      "fit_RMSE.nii.gz"
+    ],
+    "ukb_names": [
+      "NODDI_ICVF.nii.gz",
+      "NODDI_OD.nii.gz",
+      "NODDI_ISOVF.nii.gz",
+      "NODDI_dir.nii.gz",
+      "NODDI_RMSE.nii.gz"
+    ],
+    "shape_dtype_affine_qform_sform_pixdim_and_units_equal": true,
+    "direction_intent_equal": true,
     "same_parameter_definitions": true,
-    "fully_numerically_equivalent": false,
-    "reason": "continuous Watson integration and batched FISTA replace the official SH direction LUT and compiled active-set solvers"
+    "numerically_equivalent_within_float32_rounding": true
+  },
+  "bundled_assets": {
+    "grad_500.npy": "e07dd95378f12556aba7898a3b3396b3b35e1295e4932e361bb7309ebbf73e3e",
+    "htable_ndirs_500.bin": "682f11416844f2a09225c16f412bf7a224a5085a244b59d47f51c51217e4a30b",
+    "ndirs_500.bin": "96e6638e756c53a98b8c16aed760e43fcdf636aa2b1b0bd2bfce21aacfc9f328"
   },
   "figure": "docs/amico_noddi/figures/amico_noddi_comparison.png",
-  "raw_subject_data_in_repository": false,
-  "figure_sha256": "02855b8f111d14ca7ad4d59cee660e3006ac0133ba32c559a2669feb544f071c"
+  "figure_sha256": "b636b079c85935190868619a6e8207dabb61d6ec705691e603a847ec700bdc6b",
+  "development_oracle_in_repository": false
 }
