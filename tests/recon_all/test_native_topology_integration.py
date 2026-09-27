@@ -79,8 +79,9 @@ class NativeTopologyIntegrationTest(unittest.TestCase):
             ])
             command = json.loads((subject / "command.json").read_text())
             self.assertEqual(command["argv"], [
-                str(resolved), "-threads", "1", "-mgz", "-sphere", "qsphere.nofix",
-                "-inflated", "inflated.nofix", "-orig", "orig.nofix", "-out",
+                str(resolved), "-ga", "-seed", "1234", "-threads", "1", "-mgz",
+                "-sphere", "qsphere.nofix", "-inflated", "inflated.nofix",
+                "-orig", "orig.nofix", "-out",
                 "orig", "sub01", "lh",
             ])
             self.assertEqual(command["cwd"], str(subject / "scripts"))

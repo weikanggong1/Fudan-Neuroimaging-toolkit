@@ -74,15 +74,24 @@ class NativeSphereIntegrationTest(unittest.TestCase):
             def copy_stage(input_path, output_path, **kwargs):
                 shutil.copyfile(input_path, output_path)
 
+            quick_calls = []
+            def fake_quick(input_path, output_path):
+                quick_calls.append((input_path, output_path))
+                Path(output_path).write_bytes(b"qsphere")
+
             with patch("fnit.recon_all.smooth_surface_python.smooth_surface",
-                       side_effect=copy_stage), patch.dict(
+                       side_effect=copy_stage), patch(
+                           "fnit.recon_all.sphere_quick_python.write_quick_sphere",
+                           side_effect=fake_quick), patch.dict(
                            os.environ, {"FS_LICENSE": "/private/license.txt"}):
                 python_seconds, topology_seconds, nofix_seconds = _prepare_native_topology(
                     topology, subject, "lh", assets, "cpu",
                     (inflate_binary, sphere_binary))
                 self.assertGreaterEqual(python_seconds, 0)
                 self.assertGreaterEqual(topology_seconds, 0)
-                self.assertEqual(set(nofix_seconds), {"inflate_nofix", "qsphere_nofix"})
+                self.assertEqual(set(nofix_seconds), {"inflate_nofix", "qsphere_nofix_python"})
+                self.assertEqual(quick_calls, [(surf / "lh.inflated.nofix",
+                                                surf / "lh.qsphere.nofix")])
                 self.assertFalse((surf / "lh.sulc").exists())
                 post_seconds = _run_native_sphere_pair(
                     inflate_binary, sphere_binary, subject, "lh", assets, 4)
@@ -96,8 +105,6 @@ class NativeSphereIntegrationTest(unittest.TestCase):
             self.assertEqual([row["argv"] for row in calls], [
                 [str(inflate_binary), "-no-save-sulc", str(surf / "lh.smoothwm.nofix"),
                  str(surf / "lh.inflated.nofix")],
-                [str(sphere_binary), "-q", "-p", "6", "-a", "128", "-seed",
-                 "1234", str(surf / "lh.inflated.nofix"), str(surf / "lh.qsphere.nofix")],
                 [str(inflate_binary), str(surf / "lh.smoothwm"),
                  str(surf / "lh.inflated")],
                 [str(sphere_binary), "-threads", "4", "-seed", "1234",

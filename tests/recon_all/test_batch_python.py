@@ -13,6 +13,8 @@ from fnit.recon_all.batch import run_recon_all_python_batch
 class BatchPythonTest(unittest.TestCase):
     def test_native_topology_requires_binary_directory(self):
         with self.assertRaisesRegex(ValueError, "native_bin_dir"):
+            run_recon_all_python_batch([], ".", ".")
+        with self.assertRaisesRegex(ValueError, "native_bin_dir"):
             run_recon_all_python_batch([], ".", ".", native_topology=True)
         with self.assertRaisesRegex(ValueError, "native_bin_dir"):
             run_recon_all_python_batch([], ".", ".", native_surface_metrics=True)
@@ -79,7 +81,8 @@ class BatchPythonTest(unittest.TestCase):
                     {"t1": t1, "subject_dir": root / "subjects/sub02"}]
             with patch("fnit.recon_all.batch.subprocess.run") as runner:
                 with self.assertRaises(ValueError):
-                    run_recon_all_python_batch(jobs, root / "weights", root / "assets")
+                    run_recon_all_python_batch(jobs, root / "weights", root / "assets",
+                                               native_bin_dir=root / "native-bin")
                 runner.assert_not_called()
 
 

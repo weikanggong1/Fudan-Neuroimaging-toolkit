@@ -20,7 +20,7 @@
 
 [完整输出 JSON](exact_prefix/exact_chain_comparison.json)核对 `brain`、`antsdn.brain`、`wm.seg`、`wm.asegedit`、`wm`、`filled`：**六个文件各 0 个体素差**，uint8 类型、仿射和 284 字节 MGH 头部逐一相同；`ponscc.cut.log` 字节相同。压缩 MGZ 哈希因命令历史/压缩元数据可能不同。上述步骤在独立中间目录连续执行，尚不是更新后 runner 从空被试目录完成的新整例，不能推断 white/pial、球面配准或脑区统计已一致。
 
-旧 v2 默认从 SynthSeg 标签直接生成 `wm/filled`，与官方分别有 435,674/92,188 个体素值差；其中 `wm` 包含强度编码差异。新默认 Conda 路径使用上述真实 WM 链。旧近似保留为显式 `experimental_approximate_wm=True` 的历史对照；重放旧 v2 输入所得 `wm/filled` 均与旧输出 0 体素差，见[对照 JSON](baseline_compatibility.json)。
+旧 v2 从 SynthSeg 标签直接生成 `wm/filled`，与官方分别有 435,674/92,188 个体素值差；其中 `wm` 包含强度编码差异。当前 Conda 路径使用上述真实 WM 链，旧近似代码和调用选项已删除。旧 v2 的已归档整例输出仍可用于历史比较。
 
 ## 构建、依赖与时间边界
 
