@@ -1,6 +1,6 @@
 # 候选 LH `sphere` 完整单阶段验收
 
-2026-09-27 在 gpucw1 的同一真实 T1 候选前缀上，分别对保存的 FreeSurfer 8.2 原生输出和修复后的 Python 输出按顶点索引比较。没有重跑完整 `recon-all`。输入 `lh.inflated`、`lh.smoothwm` 是同面序的 FreeSurfer 三角表面（均 106,622 顶点、213,240 面），SHA-256 分别为 `f3a2128de469dc3c8d06e2649f85f420b26c84f95aea3c7912f677b4e57afd30` 和 `6d1a5d30639f3678c2e825d69b816f9bc35d5411546145f6c0bcab29a5fd0b91`。[官方输入副本审计](official_input_provenance.json)确认两份复制输入逐字节相同。修复后的度量源 SHA-256 为 `dde4f42db3f8f526c2ccb1c1379db4edc5369b0f41cbb72ed8b84dc14030ca92`；本轮实际载入的 12 个球面模块哈希见[源码清单](implementation.sha256)。
+2026-09-27 在 gpucw1 的同一真实 T1 候选前缀上，分别对保存的 FreeSurfer 8.2 原生输出和修复后的 Python 输出按顶点索引比较。没有重跑完整 `recon-all`。输入 `lh.inflated`、`lh.smoothwm` 是同面序的 FreeSurfer 三角表面（均 106,622 顶点、213,240 面），SHA-256 分别为 `f3a2128de469dc3c8d06e2649f85f420b26c84f95aea3c7912f677b4e57afd30` 和 `6d1a5d30639f3678c2e825d69b816f9bc35d5411546145f6c0bcab29a5fd0b91`。[官方输入副本审计](official_input_provenance.json)确认两份复制输入逐字节相同。修复后的度量源 SHA-256 为 `dde4f42db3f8f526c2ccb1c1379db4edc5369b0f41cbb72ed8b84dc14030ca92`；本轮实际载入的 12 个球面模块哈希见[源码清单](implementation.sha256)。 集成到当前分支后，[源码转移核对](integration_source_scope.json)显示 10/12 个模块字节完全相同；另两个差别分别限于函数文档字符串，以及模块文档字符串和独立 CLI 参数。两者参与球面计算的函数体 AST 相同。本完整阶段结果继承的是相同计算路径，不是集成分支重新运行一次。
 
 ## 用法与输出
 
