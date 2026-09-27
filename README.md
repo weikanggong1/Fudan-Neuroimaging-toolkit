@@ -1,6 +1,6 @@
 # Fudan Neuroimaging Toolkit (FNIT)
 
-`fudan-neuroimaging-toolkit` 是独立的脑 MRI 推理包，在 CPU 或 CUDA 上运行。单项推理无需安装 FreeSurfer、FSL、TensorFlow、VoxelMorph 或 Neurite。`fnit-recon-all` 使用 Python/CUDA 阶段、外置权重与模板，并要求从固定 FreeSurfer 源码在 Conda 中编译三个白质/GCA 程序；另外五个表面程序按开关启用，无需安装官方 FreeSurfer。当前整例尚未证实与官方数值一致。Python 导入名为 `fnit`，单项功能的命令行入口为 `fnit`。
+`fudan-neuroimaging-toolkit` 是独立的脑 MRI 推理包，在 CPU 或 CUDA 上运行。单项推理无需安装 FreeSurfer、FSL、TensorFlow、VoxelMorph 或 Neurite。`fnit-recon-all` 使用 Python/CUDA 阶段、外置权重与模板，并要求从固定 FreeSurfer 源码在 Conda 中编译三个白质/GCA 程序；另外三个表面程序按开关启用，正式球面和球面配准调用已验证的 Python API，无需安装官方 FreeSurfer。当前整例尚未证实与官方数值一致。Python 导入名为 `fnit`，单项功能的命令行入口为 `fnit`。
 
 | 模态 | 功能 | 输出与用途 | 用法、原版对照与验证 |
 |---|---|---|---|
@@ -28,7 +28,7 @@
 
 recon-all 提供单被试命令行与 Python API；多被试并行仅提供 Python API。其余功能只提供单被试 Python 和单被试命令行接口；需要处理多个病例时，由调用方在包外组织任务与设备。仓库提供 [T1w 样例](examples/README.md)和 [FLAIR 样例](examples/WMH.md)。
 
-recon-all 的神经网络与部分体素、表面计算使用 PyTorch/CUDA；N4、强度校正、去噪和部分网格/统计计算使用 Python CPU 算子，GCA、白质初分割与白质编辑三步使用 Conda 编译的 CPU 程序。必填 `--native-bin-dir` 指向 Conda 编译的 GCA 与白质程序；四个表面阶段开关可调用额外五个 C++ 程序，当前 white/pial 几何和球面仍有近似。[Conda C++ 同一 T1 整例实测](validation/recon_all/python_gpu_port/native_cpp_conda_20260927/post_cc/BENCHMARK.md)已完成 30 个阶段，用时 2649.0 秒；接入 Python `mri_cc` 后，严格 138 项中有 8 项一致、51 项缺失，不能把与官方 6789.6 秒的时间差视为等价重建的加速。后续[同输入上游修复](validation/recon_all/python_gpu_port/SYNTHSTRIP_TF32_UPSTREAM_FIX_20260927.md)已使 SynthStrip、brainmask、GCA 变换和 CA 标准化数值一致；新的[WM/filled 链](validation/recon_all/python_gpu_port/native_cpp_conda_20260927/wm_chain_20260927/REPORT.md)在正确上游输入上六张体积图逐体素一致。新的空目录 v3 整例已使 13 张上游体积图（含 `filled`）与官方同一 T1 逐体素、数据类型、MGH 头部和仿射一致，见[整例前缀比较](validation/recon_all/python_gpu_port/native_cpp_conda_20260927/v3_e2e_20260927/prefix_13.json)；完整 138 项尚未验收。该 v3 运行中 Conda quick sphere 是首个皮层分叉；当前代码已换成[真实 T1 同输入双侧逐点一致的 Python quick sphere](validation/recon_all/python_gpu_port/native_cpp_conda_20260927/v3_e2e_20260927/quick_sphere_lh.json)，更新后的连续整例仍待验收。
+recon-all 的神经网络与部分体素、表面计算使用 PyTorch/CUDA；N4、强度校正、去噪及部分网格/统计计算使用 Python CPU，三个必需和三个可选的 FreeSurfer 源码程序由 Conda 编译后在 CPU 运行。最新完成的真实 T1 v3 整例历时 2903.79 秒，严格 138 项中 19 项一致，47 项缺失，72 项存在差异；[逐阶段、逐体素及逐脑区报告](validation/recon_all/python_gpu_port/native_cpp_conda_20260927/v3_e2e_20260927/BENCHMARK.md)列出证据。其 13 张上游体积图逐体素一致，但首个表面差异在 quick sphere。当前代码已接入同输入逐点一致的 Python quick/standard sphere 及注册，更新后的连续整例仍待严格验收；皮层拓扑和 white/pial 链仍有偏差，不能把较短墙钟解释为等价重建的加速。
 
 相关 CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核；为保持已验证的体素一致性，SynthStrip 和 SynthSeg 局部关闭 cuDNN TF32。模型与影像张量仍保持 float32，本包不会自动改用 float16 或 bfloat16。各验证报告记录实际开关。
 
@@ -79,14 +79,14 @@ conda activate "$FNIT_ENV_PREFIX"
 
 ### recon-all 的 Conda 环境与 C++ 阶段
 
-从仓库根目录用 [`environment-recon-all-cpp.yml`](environment-recon-all-cpp.yml) 一次安装上述 Python 功能及八个 FreeSurfer C++ 构建目标所需的 Conda 编译器、ITK 开发库、CUDA 工具和 glibc 2.17 sysroot；默认的 `environment.yml` 保持轻量。该命令创建环境，不编译或下载 FreeSurfer 程序：
+从仓库根目录用 [`environment-recon-all-cpp.yml`](environment-recon-all-cpp.yml) 一次安装上述 Python 功能及六个 FreeSurfer C++ 构建目标所需的 Conda 编译器、ITK 开发库、CUDA 工具和 glibc 2.17 sysroot；默认的 `environment.yml` 保持轻量。该命令创建环境，不编译或下载 FreeSurfer 程序：
 
 ```bash
 CONDA_OVERRIDE_GLIBC=2.17 conda env create -f environment-recon-all-cpp.yml
 conda activate fnit-recon-all-cpp
 ```
 
-该 YAML 在目标 glibc 2.17 条件下通过 Conda 求解 dry-run；实际用于编译和整例的环境以文档中的等价分步命令安装，未额外重复一次 YAML 完整创建。随后按 [C++ 编译与调用说明](docs/recon_all/CONDA_CPP_BUILD.md)固定 FreeSurfer 源码提交并构建八个程序：GCA、白质初分割、白质编辑三个为当前必需，五个表面/球面程序按开关启用。每个阶段的功能、等价官方命令和精度/耗时验证见 [C++ 阶段说明](docs/recon_all/CONDA_CPP_STAGES.md)。模型和模板仍通过下述独立命令下载。
+该 YAML 在目标 glibc 2.17 条件下通过 Conda 求解 dry-run；实际用于编译和整例的环境以文档中的等价分步命令安装，未额外重复一次 YAML 完整创建。随后按 [C++ 编译与调用说明](docs/recon_all/CONDA_CPP_BUILD.md)固定 FreeSurfer 源码提交并构建六个程序：GCA、白质初分割、白质编辑三个为当前必需，拓扑、膨胀和顶点图三个按开关启用；标准球面与配准已改用 Python。每个阶段的功能、等价官方命令和精度/耗时验证见 [C++ 阶段说明](docs/recon_all/CONDA_CPP_STAGES.md)。模型和模板仍通过下述独立命令下载。
 
 ## 下载和部署权重
 

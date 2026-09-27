@@ -1,10 +1,10 @@
 # Python recon-all：原始 T1 到皮层指标
 
-[返回首页](../../README.md) · [实现](../../src/fnit/recon_all/) · [最新整例验证](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/post_cc/REPORT.md)
+[返回首页](../../README.md) · [实现](../../src/fnit/recon_all/) · [最新整例验证](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/v3_e2e_20260927/BENCHMARK.md)
 
-`fnit-recon-all` 从一幅 T1w 生成脑体积分割、双侧 white/pial/sphere 表面、厚度、面积、顶点体积、曲率、aparc/a2009s/DKT 标注和脑区统计。调用 Python 包的 CPU/CUDA 算子和在 Conda 中从固定 FreeSurfer 源码编译的三个必需 C++ 程序；另有五个可选表面/球面程序。无需安装官方 FreeSurfer、FSL 或原生 recon-all 运行包。模型权重和模板单独下载并校验。
+`fnit-recon-all` 从一幅 T1w 生成脑体积分割、双侧 white/pial/sphere 表面、厚度、面积、顶点体积、曲率、aparc/a2009s/DKT 标注和脑区统计。调用 Python 包的 CPU/CUDA 算子和在 Conda 中从固定 FreeSurfer 源码编译的三个必需 C++ 程序；另有三个可选表面程序；快速/标准球面和球面配准调用 Python API。无需安装官方 FreeSurfer、FSL 或原生 recon-all 运行包。模型权重和模板单独下载并校验。
 
-**当前仍是近似核心重建。** 上一次完成的 v2 整例运行了 30 个阶段、2649.0 秒，固定 138 项输出中 8 项通过、51 项缺失、79 项存在差异；[归档整例报告](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/post_cc/BENCHMARK.md)给出全部比较。当前代码已修复 [SynthStrip→CA 标准化](../../validation/recon_all/python_gpu_port/SYNTHSTRIP_TF32_UPSTREAM_FIX_20260927.md)首差，并把经过[同输入逐体素验收](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/wm_chain_20260927/REPORT.md)的 brain、去噪、WM 和 filled 链作为默认流程。新的空被试整例已在[13 张上游体积图](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/v3_e2e_20260927/prefix_13.json)上达到逐体素、数据类型、MGH 头部和仿射一致；该 v3 运行的首个皮层差异来自 Conda quick sphere；当前调度已改用[同输入双侧逐点一致的 Python quick sphere](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/v3_e2e_20260927/quick_sphere_lh.json)，更新后的连续整例待验收，white/pial、拓扑、正式球面和脑区指标也未通过连续验收。
+**当前仍是近似核心重建。** 最新完成的 v3 真实 T1 整例运行 39 个阶段、进程墙钟 2903.79 秒；固定 138 项中 19 项通过、47 项缺失、72 项存在差异。[整例精度和时间](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/v3_e2e_20260927/BENCHMARK.md)及[13 张上游体积图](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/v3_e2e_20260927/prefix_13.json)给出详细结果。v3 首个皮层差异在 Conda quick sphere；当前调度已换为[同输入双侧逐点一致的 Python quick sphere](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/v3_e2e_20260927/quick_sphere_lh.json)，并改用已通过独立验收的 Python 标准球面和配准；更新后的整例仍待严格验证。拓扑、white/pial、后处理和最终脑区指标仍未通过连续验收。
 
 ## 安装外置数据
 
@@ -57,7 +57,7 @@ report = run_recon_all_python(
 
 ## Conda 编译程序与可选表面阶段
 
-按[独立 Conda 编译与验证说明](CONDA_CPP_BUILD.md)准备构建环境；三个必需程序和五个可选表面程序的功能、官方命令和精度/时间证据见[逐阶段说明](CONDA_CPP_STAGES.md)。将 FreeSurfer 源码固定在提交 `d932c45b7941662ea380a05efef580568b98d41a`，运行仓库的 [`build_recon_all_fs_cpp_conda.sh`](../../tools/build_recon_all_fs_cpp_conda.sh)：
+按[独立 Conda 编译与验证说明](CONDA_CPP_BUILD.md)准备构建环境；三个必需程序和三个可选表面程序的功能、官方命令和精度/时间证据见[逐阶段说明](CONDA_CPP_STAGES.md)。将 FreeSurfer 源码固定在提交 `d932c45b7941662ea380a05efef580568b98d41a`，运行仓库的 [`build_recon_all_fs_cpp_conda.sh`](../../tools/build_recon_all_fs_cpp_conda.sh)：
 
 ```bash
 conda activate /path/to/conda-build-env
@@ -69,7 +69,9 @@ fnit-recon-all subject_T1w.nii.gz /scratch/subjects/sub01 \
   --native-topology --native-sphere --native-surface-metrics --native-registration
 ```
 
-`--native-bin-dir` 为必填项，提供 `mri_em_register`、`mri_segment` 和 `mri_edit_wm_with_aseg`；四个开关分别调用 `mris_fix_topology`、`mris_inflate` 与 `mris_sphere`、`mris_place_surface` 生成五张顶点图，以及 `mris_register`。`--native-sphere` 和 `--native-registration` 都要求 `--native-topology`。Python API 使用同名参数 `native_bin_dir=...`、`native_topology=True`、`native_sphere=True`、`native_surface_metrics=True`、`native_registration=True`；下述批量 Python API 也支持这些参数。入口检查二进制可执行并记录 SHA-256，不证明任意指定目录中的程序均由上述脚本编译。许可证从外部 `FS_LICENSE` 环境变量继承；Git 仓库和 wheel 均不包含二进制、许可证或外置权重/模板。原生阶段会用到 CPU，整例并非全 GPU；其输出仍需与官方同输入逐文件验收。
+`--native-bin-dir` 为必填项，提供 `mri_em_register`、`mri_segment` 和 `mri_edit_wm_with_aseg`；`--native-topology` 调用 `mris_fix_topology` 并用 Python remesh 生成 `orig`，`--native-sphere` 调用 `mris_inflate` 并使用 Python quick/standard sphere，`--native-surface-metrics` 调用 `mris_place_surface` 生成五张顶点图，`--native-registration` 调用 Python `run_register_sphere`。后两个球面开关保留原名称以兼容已有 CLI/Python 调用；`--native-sphere` 和 `--native-registration` 都要求 `--native-topology`。Python API 使用同名参数 `native_bin_dir=...`、`native_topology=True`、`native_sphere=True`、`native_surface_metrics=True`、`native_registration=True`；下述批量 Python API 也支持这些参数。入口检查二进制可执行并记录 SHA-256，不证明任意指定目录中的程序均由上述脚本编译。许可证从外部 `FS_LICENSE` 环境变量继承；Git 仓库和 wheel 均不包含二进制、许可证或外置权重/模板。原生阶段会用到 CPU，整例并非全 GPU；其输出仍需与官方同输入逐文件验收。
+
+独立[双侧 Python pial.T1 函数](PYTHON_PIAL_PLACEMENT.md)在官方正确上游输入上输出的有序网格完全一致；其输入文件、输出结构、原生命令和实际耗时详见该文档。当前整例的 white 和标签链尚未达到该函数的输入门槛，因此仍使用近似 pial 并在报告中明确标记。
 
 ## 多被试 Python API
 
@@ -97,4 +99,4 @@ python -m fnit.recon_all.compare_native_free \
   --output /scratch/comparison.json
 ```
 
-[比较器](../../src/fnit/recon_all/compare_native_free.py)输出体素、表面、逐顶点图和逐脑区统计差异。上一次完整验收的 v2 候选表面顶点数与官方不同，空间最近点误差只能用于定位差异，不能证明同源顶点一致。逐文件严格门槛和待完成步骤见[发布验收](../../validation/recon_all/python_gpu_port/RELEASE_GATES.md)；独立阶段的配对结果见[移植记录](../../validation/recon_all/python_gpu_port/README.md)。
+[比较器](../../src/fnit/recon_all/compare_native_free.py)输出体素、表面、逐顶点图和逐脑区统计差异。最新完成的 v3 候选表面顶点数与官方不同，空间最近点误差只能用于定位差异，不能证明同源顶点一致。逐文件严格门槛和待完成步骤见[发布验收](../../validation/recon_all/python_gpu_port/RELEASE_GATES.md)；独立阶段的配对结果见[移植记录](../../validation/recon_all/python_gpu_port/README.md)。

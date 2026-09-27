@@ -1,6 +1,6 @@
 # Conda 编译 recon-all 的 FreeSurfer C++ 阶段
 
-当前整例从 FreeSurfer 8.2 固定源码提交 `d932c45b7941662ea380a05efef580568b98d41a` 编译八个程序。`mri_em_register`、`mri_segment`、`mri_edit_wm_with_aseg` 是必需程序；五个表面程序由选项启用。无需安装 FreeSurfer 运行包；模型、模板和个人许可证单独提供。
+当前整例从 FreeSurfer 8.2 固定源码提交 `d932c45b7941662ea380a05efef580568b98d41a` 编译六个程序。`mri_em_register`、`mri_segment`、`mri_edit_wm_with_aseg` 是必需程序；`mris_fix_topology`、`mris_inflate`、`mris_place_surface` 由表面开关启用。标准球面和球面配准由 Python 实现。无需安装 FreeSurfer 运行包；模型、模板和个人许可证单独提供。
 
 ## 安装与构建
 
@@ -24,7 +24,7 @@ fnit-setup-weights --model recon-all --dest /path/to/weights --verify-only
 fnit-setup-recon-all-assets --dest /path/to/assets --verify-only
 ```
 
-脚本检查源码提交和洁净性、Conda 工具位置及 sysroot，在独立工作副本中只修改上游 CMake 的 Python 路径选择并记录差异。图像和表面算法源码不修改。输出保留构建日志、八个程序的 `ldd` 和 SHA-256、Conda 包列表及 FreeSurfer 软件许可证；个人 `license.txt` 不复制进去。[gpucw1 八目标构建记录](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/wm_chain_20260927/REPORT.md)退出 0，用时 185.01 秒。上游 `utils/version.cpp` 包含编译时间，所以重编会改变二进制哈希；目标节点运行前应记录实际哈希。
+脚本检查源码提交和洁净性、Conda 工具位置及 sysroot，在独立工作副本中只修改上游 CMake 的 Python 路径选择并记录差异。图像和表面算法源码不修改。输出保留构建日志、六个程序的 `ldd` 和 SHA-256、Conda 包列表及 FreeSurfer 软件许可证；个人 `license.txt` 不复制进去。当前[六目标 gpucw1 构建](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/six_target_build_20260927/REPORT.md)退出 0、用时 188.62 秒；六个程序均完成动态库检查和启动检查。此前八目标构建保留为历史对照，不属于当前安装流程。上游 `utils/version.cpp` 包含编译时间，所以重编会改变二进制哈希；目标节点运行前应记录实际哈希。
 
 默认外置数据为 8 个权重文件（138,691,259 字节）和 16 个模板/图谱文件（217,498,051 字节），逐文件校验大小与 SHA-256。模板包含双侧 folding atlas 和填充所需的 `SubCorticalMassLUT.txt`。上述数据目录不含可执行程序。
 
@@ -39,6 +39,6 @@ fnit-recon-all subject_T1w.nii.gz /scratch/subjects/sub01 \
   --native-topology --native-sphere --native-surface-metrics --native-registration
 ```
 
-`--native-bin-dir` 必填并启用三个必需 C++ 程序；四个开关启用其余五个程序。`native_sphere` 和 `native_registration` 均要求 `native_topology`。单被试及多被试 Python API 接受同名参数。C++ 阶段在 CPU 上运行，神经网络和部分体素、表面算子在 CUDA 上运行。个人 `FS_LICENSE` 只经环境变量传入，不应写入 Git 或输出包。
+`--native-bin-dir` 必填并启用三个必需 C++ 程序；四个开关启用三个可选 C++ 程序和 Python 球面/配准。`native_sphere` 和 `native_registration` 均要求 `native_topology`。单被试及多被试 Python API 接受同名参数。C++ 阶段在 CPU 上运行，神经网络和部分体素、表面算子在 CUDA 上运行。个人 `FS_LICENSE` 只经环境变量传入，不应写入 Git 或输出包。
 
 [WM/filled 连续同输入验收](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/wm_chain_20260927/REPORT.md)中六张体积图逐体素一致。官方 `-ga` 拓扑模式、white/pial 几何、球面配准和后处理仍未通过连续整例验收；不应把已通过的局部阶段解释为最终指标一致。每个程序的功能、原生命令、准确度及耗时见[阶段报告](CONDA_CPP_STAGES.md)，完整门槛见[发布验收](../../validation/recon_all/python_gpu_port/RELEASE_GATES.md)。

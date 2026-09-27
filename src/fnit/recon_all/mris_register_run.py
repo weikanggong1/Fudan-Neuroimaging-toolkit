@@ -16,7 +16,12 @@ from .mris_register_smoothwm_run import run_register_smoothwm
 def run_register_sphere(sphere: str | Path, smoothwm: str | Path,
                         sulc: str | Path, atlas: str | Path,
                         output: str | Path, *, overlap_device: str = "cpu") -> dict:
-    """Generate `sphere.reg` from the ordered sphere and its sulc/metric maps."""
+    """Read ordered sphere/smoothwm meshes, per-vertex sulc and atlas TIFF.
+
+    Write the registered sphere to output. Return input/output paths and
+    hashes, temporary sulc-seed hash, device, nested sulc/smoothwm pass
+    trajectories and timings, and total seconds; remove the temporary seed.
+    """
     started = time.perf_counter()
     output = Path(output)
     input_hashes = {name: hashlib.sha256(Path(value).read_bytes()).hexdigest()

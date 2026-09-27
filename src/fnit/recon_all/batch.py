@@ -22,7 +22,9 @@ def run_recon_all_python_batch(
 ) -> list[dict]:
     """Run one subject per device; each reconstruction uses a separate Python process.
 
-    Jobs contain ``t1`` and ``subject_dir``. Results preserve input order.
+    Each job maps ``t1`` to an image path and ``subject_dir`` to an empty
+    output folder. Return one single-subject run-report dict per input job,
+    preserving job order; failures raise RuntimeError.
     """
     if not devices or len(set(devices)) != len(devices) or any(
         device != "cpu" and re.fullmatch(r"cuda:\d+", device) is None for device in devices

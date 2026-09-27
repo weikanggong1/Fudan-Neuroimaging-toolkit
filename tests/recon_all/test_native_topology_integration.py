@@ -42,7 +42,7 @@ class NativeTopologyIntegrationTest(unittest.TestCase):
                 "    'subjects_dir': os.environ['SUBJECTS_DIR'],\n"
                 "    'freesurfer_home': os.environ['FREESURFER_HOME'],\n"
                 "    'fs_license': os.environ.get('FS_LICENSE')}))\n"
-                "(surf / f'{hemi}.orig').write_bytes(b'repaired')\n"
+                "(surf / f'{hemi}.orig.premesh').write_bytes(b'repaired')\n"
             )
             binary.chmod(0o755)
             resolved, digest = _native_topology_binary(bin_dir)
@@ -60,6 +60,7 @@ class NativeTopologyIntegrationTest(unittest.TestCase):
                 ("smooth_surface_python", "smooth_surface"),
                 ("inflate_python", "inflate_surface"),
                 ("sphere_quick_python", "write_quick_sphere"),
+                ("mris_remesh_python", "remesh_surface"),
             ):
                 full_name = f"fnit.recon_all.{module_name}"
                 module = ModuleType(full_name)
@@ -67,22 +68,24 @@ class NativeTopologyIntegrationTest(unittest.TestCase):
                 modules[full_name] = module
             with patch.dict(sys.modules, modules), patch.dict(
                     os.environ, {"FS_LICENSE": "/private/license.txt"}):
-                python_seconds, native_seconds, sphere_seconds = _prepare_native_topology(
+                python_seconds, native_seconds, sphere_seconds, remesh_seconds = _prepare_native_topology(
                     resolved, subject, "lh", assets, "cpu")
             self.assertGreaterEqual(python_seconds, 0)
             self.assertGreaterEqual(native_seconds, 0)
+            self.assertGreaterEqual(remesh_seconds, 0)
             self.assertEqual(sphere_seconds, {})
             self.assertEqual(calls, [
                 ("lh.orig.nofix", "lh.smoothwm.nofix", {"device": "cpu"}),
                 ("lh.smoothwm.nofix", "lh.inflated.nofix", {}),
                 ("lh.inflated.nofix", "lh.qsphere.nofix", {}),
+                ("lh.orig.premesh", "lh.orig", {"iterations": 3}),
             ])
             command = json.loads((subject / "command.json").read_text())
             self.assertEqual(command["argv"], [
                 str(resolved), "-ga", "-seed", "1234", "-threads", "1", "-mgz",
                 "-sphere", "qsphere.nofix", "-inflated", "inflated.nofix",
                 "-orig", "orig.nofix", "-out",
-                "orig", "sub01", "lh",
+                "orig.premesh", "sub01", "lh",
             ])
             self.assertEqual(command["cwd"], str(subject / "scripts"))
             self.assertEqual(command["subjects_dir"], str(subject.parent))

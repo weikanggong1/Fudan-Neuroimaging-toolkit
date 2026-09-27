@@ -46,16 +46,8 @@ def _native_surface_metrics_binary(native_bin_dir: str | Path) -> tuple[Path, st
     return _native_binary(native_bin_dir, "mris_place_surface")
 
 
-def _native_registration_binary(native_bin_dir: str | Path) -> tuple[Path, str]:
-    return _native_binary(native_bin_dir, "mris_register")
-
-
 def _native_inflate_binary(native_bin_dir: str | Path) -> tuple[Path, str]:
     return _native_binary(native_bin_dir, "mris_inflate")
-
-
-def _native_sphere_binary(native_bin_dir: str | Path) -> tuple[Path, str]:
-    return _native_binary(native_bin_dir, "mris_sphere")
 
 
 def _run_native_wm_segment(binary: Path, mri: Path, assets: Path) -> None:
@@ -101,9 +93,9 @@ def _run_native_topology(binary: Path, subject: Path, hemi: str,
     subprocess.run([str(binary), "-ga", "-seed", "1234", "-threads", "1",
                     "-mgz", "-sphere", "qsphere.nofix", "-inflated",
                     "inflated.nofix", "-orig",
-                    "orig.nofix", "-out", "orig", subject.name, hemi],
+                    "orig.nofix", "-out", "orig.premesh", subject.name, hemi],
                    cwd=scripts, env=env, check=True)
-    output = subject / "surf" / f"{hemi}.orig"
+    output = subject / "surf" / f"{hemi}.orig.premesh"
     if not output.is_file():
         raise FileNotFoundError(f"mris_fix_topology produced no surface: {output}")
 
@@ -124,8 +116,9 @@ def _run_native_sphere_step(binary: Path, subject: Path, assets: Path,
 
 def _prepare_native_topology(binary: Path, subject: Path, hemi: str,
                              assets: Path, device: str,
-                             native_sphere_binaries: tuple[Path, Path] | None = None
-                             ) -> tuple[float, float, dict[str, float]]:
+                             native_inflate_binary: Path | None = None
+                             ) -> tuple[float, float, dict[str, float], float]:
+    from .mris_remesh_python import remesh_surface
     from .smooth_surface_python import smooth_surface
     from .sphere_quick_python import write_quick_sphere
 
@@ -137,10 +130,9 @@ def _prepare_native_topology(binary: Path, subject: Path, hemi: str,
     smooth_surface(surf / f"{hemi}.orig.nofix", smooth_nofix, device=device)
     python_seconds = time.perf_counter() - tick
     sphere_seconds = {}
-    if native_sphere_binaries:
-        inflate_binary, _ = native_sphere_binaries
+    if native_inflate_binary is not None:
         sphere_seconds["inflate_nofix"] = _run_native_sphere_step(
-            inflate_binary, subject, assets,
+            native_inflate_binary, subject, assets,
             ["-no-save-sulc", str(smooth_nofix), str(inflated_nofix)],
             (inflated_nofix,))
     else:
@@ -151,28 +143,33 @@ def _prepare_native_topology(binary: Path, subject: Path, hemi: str,
     tick = time.perf_counter()
     write_quick_sphere(inflated_nofix, qsphere_nofix)
     quick_seconds = time.perf_counter() - tick
-    if native_sphere_binaries:
+    if native_inflate_binary is not None:
         sphere_seconds["qsphere_nofix_python"] = quick_seconds
     else:
         python_seconds += quick_seconds
     native_started = time.perf_counter()
     _run_native_topology(binary, subject, hemi, assets)
-    return python_seconds, time.perf_counter() - native_started, sphere_seconds
+    native_seconds = time.perf_counter() - native_started
+    tick = time.perf_counter()
+    remesh_surface(surf / f"{hemi}.orig.premesh", surf / f"{hemi}.orig", iterations=3)
+    remesh_seconds = time.perf_counter() - tick
+    return python_seconds + remesh_seconds, native_seconds, sphere_seconds, remesh_seconds
 
 
-def _run_native_sphere_pair(inflate_binary: Path, sphere_binary: Path,
-                            subject: Path, hemi: str, assets: Path,
-                            threads: int) -> dict[str, float]:
+def _run_accurate_sphere_pair(inflate_binary: Path, subject: Path,
+                              hemi: str, assets: Path) -> tuple[dict, dict]:
+    from .sphere_standard_run import run_standard_sphere
+
     surf = subject / "surf"
     inflated, sulc = surf / f"{hemi}.inflated", surf / f"{hemi}.sulc"
     inflate_seconds = _run_native_sphere_step(
         inflate_binary, subject, assets,
         [str(surf / f"{hemi}.smoothwm"), str(inflated)], (inflated, sulc))
-    sphere_seconds = _run_native_sphere_step(
-        sphere_binary, subject, assets,
-        ["-threads", str(threads), "-seed", "1234", str(inflated),
-         str(surf / f"{hemi}.sphere")], (surf / f"{hemi}.sphere",))
-    return {"inflate": inflate_seconds, "sphere": sphere_seconds}
+    sphere_report = run_standard_sphere(
+        inflated, surf / f"{hemi}.smoothwm", surf / f"{hemi}.sphere",
+        finish_device="cpu")
+    return ({"inflate": inflate_seconds,
+             "sphere": sphere_report["total_seconds_including_io"]}, sphere_report)
 
 
 def _run_native_surface_metrics(binary: Path, subject: Path, hemi: str,
@@ -202,23 +199,6 @@ def _run_native_surface_metrics(binary: Path, subject: Path, hemi: str,
             raise FileNotFoundError(f"mris_place_surface produced no morph: {output}")
         timings[name] = time.perf_counter() - tick
     return timings
-
-
-def _run_native_registration(binary: Path, subject: Path, hemi: str,
-                             atlas: Path, assets: Path, threads: int) -> float:
-    surf = subject / "surf"
-    output = surf / f"{hemi}.sphere.reg"
-    scripts = subject / "scripts"
-    scripts.mkdir(exist_ok=True)
-    env = dict(os.environ, SUBJECTS_DIR=str(subject.parent),
-               FREESURFER_HOME=str(assets))
-    tick = time.perf_counter()
-    subprocess.run([str(binary), "-curv", "-threads", str(threads),
-                    str(surf / f"{hemi}.sphere"), str(atlas), str(output)],
-                   cwd=scripts, env=env, check=True)
-    if not output.is_file():
-        raise FileNotFoundError(f"mris_register produced no sphere.reg: {output}")
-    return time.perf_counter() - tick
 
 
 def _save_like(source: Path, output: Path, values: np.ndarray) -> None:
@@ -279,7 +259,7 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
                   aseg: np.ndarray, *, device: str, threads: int = 4,
                   native_topology_binary: Path | None = None,
                   native_surface_metrics_binary: Path | None = None,
-                  native_sphere_binaries: tuple[Path, Path] | None = None,
+                  native_inflate_binary: Path | None = None,
                   native_registration: bool = False,
                   assets: Path | None = None) -> dict:
     from .extract_main_component_python import extract_main_component
@@ -291,7 +271,7 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
     from .surface_curvature_gpu import curvature_map
     from .surface_roi_gpu import vertex_volume_map
 
-    if native_sphere_binaries and native_topology_binary is None:
+    if native_inflate_binary is not None and native_topology_binary is None:
         raise ValueError("native_sphere requires native_topology")
     surf, mri, labels = (subject / name for name in ("surf", "mri", "label"))
     code = 255 if hemi == "lh" else 127
@@ -304,15 +284,15 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
     orig = surf / f"{hemi}.orig.nofix"
     components = extract_main_component(raw, orig)
     smoothwm = surf / f"{hemi}.smoothwm"
-    topology_python_seconds = topology_native_seconds = None
+    topology_python_seconds = topology_native_seconds = topology_remesh_seconds = None
     native_sphere_seconds = None
     if native_topology_binary is not None:
         if assets is None:
             raise ValueError("assets are required for native topology repair")
-        topology_python_seconds, topology_native_seconds, pre_sphere_seconds = (
+        topology_python_seconds, topology_native_seconds, pre_sphere_seconds, topology_remesh_seconds = (
             _prepare_native_topology(native_topology_binary, subject, hemi,
-                                     assets, device, native_sphere_binaries))
-        if native_sphere_binaries:
+                                     assets, device, native_inflate_binary))
+        if native_inflate_binary is not None:
             native_sphere_seconds = pre_sphere_seconds
     else:
         shutil.copyfile(orig, surf / f"{hemi}.orig")
@@ -328,11 +308,13 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
     _replace_vertices(smoothwm, surf / f"{hemi}.pial", pial)
     shutil.copyfile(surf / f"{hemi}.pial", surf / f"{hemi}.pial.T1")
 
-    if native_sphere_binaries:
+    standard_sphere_report = None
+    if native_inflate_binary is not None:
         if assets is None:
             raise ValueError("assets are required for native sphere generation")
-        native_sphere_seconds.update(_run_native_sphere_pair(
-            *native_sphere_binaries, subject, hemi, assets, threads))
+        timings, standard_sphere_report = _run_accurate_sphere_pair(
+            native_inflate_binary, subject, hemi, assets)
+        native_sphere_seconds.update(timings)
     else:
         inflated = surf / f"{hemi}.inflated"
         smooth_surface(smoothwm, inflated, iterations=35, device=device)
@@ -384,9 +366,9 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
         approximations.append("native-metrics-on-approximate-white-pial")
     registration_approximation = (
         "sphere.reg-unregistered" if not native_registration
-        else "sphere.reg-native-on-approximate-upstream" if native_sphere_binaries
-        else "sphere.reg-native-on-approximate-sphere-sulc")
-    sphere_approximations = ([] if native_sphere_binaries else
+        else "sphere.reg-python-on-approximate-upstream" if native_inflate_binary is not None
+        else "sphere.reg-python-on-approximate-sphere-sulc")
+    sphere_approximations = ([] if native_inflate_binary is not None else
                              ["inflated-Laplacian", "sphere-radial"])
     return {"hemisphere": hemi, "vertices": len(white), "faces": len(faces),
             "raw_components": components, "cortex_vertices": len(cortex_vertices),
@@ -394,8 +376,10 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
                 str(surf / f"{hemi}.thickness")))),
             "topology_python_seconds": topology_python_seconds,
             "topology_native_seconds": topology_native_seconds,
+            "topology_remesh_seconds": topology_remesh_seconds,
             "native_metric_seconds": native_metric_seconds,
             "native_sphere_seconds": native_sphere_seconds,
+            "standard_sphere_report": standard_sphere_report,
             "approximations": approximations + [
                 "white-from-smoothed-tessellation", "pial-normal-ray",
                 *sphere_approximations, registration_approximation]}
@@ -471,7 +455,12 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          native_surface_metrics: bool = False,
                          native_registration: bool = False,
                          native_sphere: bool = False) -> dict:
-    """Run the fixed profile with the Conda WM chain."""
+    """Reconstruct one T1 into FreeSurfer-style mri/surf/label/stats folders.
+
+    Return the same run-report dict written to fnit-native-free-run.json:
+    stage timings, per-hemisphere surfaces, implementation provenance and
+    success/failure status. The subject directory must be empty on entry.
+    """
     from fnit.synthseg_parc import SynthSeg
     from .brain_volume_stats_python import compute_brain_volume_stats
     from .ca_normalize_python import run_ca_normalize
@@ -501,21 +490,15 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                        if native_topology else None)
     metrics_binary = (_native_surface_metrics_binary(native_bin_dir)
                       if native_surface_metrics else None)
-    registration_binary = (_native_registration_binary(native_bin_dir)
-                           if native_registration else None)
     inflate_binary = (_native_inflate_binary(native_bin_dir)
                       if native_sphere else None)
-    sphere_binary = (_native_sphere_binary(native_bin_dir)
-                     if native_sphere else None)
-    sphere_binaries = ((inflate_binary[0], sphere_binary[0])
-                       if native_sphere else None)
     wm_segment_binary = _native_binary(native_bin_dir, "mri_segment")
     wm_edit_binary = _native_binary(native_bin_dir, "mri_edit_wm_with_aseg")
     registration_atlases = ({hemi: _folding_atlas(assets, hemi)
                             for hemi in ("lh", "rh")} if native_registration else {})
     torch.set_num_threads(threads)
     started = time.perf_counter()
-    profile = "conda-wmchain-core-v3"
+    profile = "conda-wmchain-core-v4"
     report: dict = {"profile": profile, "input": str(t1),
                     "subject_dir": str(subject), "device": device,
                     "n4_python": str(n4_python or sys.executable), "threads": threads,
@@ -537,19 +520,17 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
          "upstream": "current approximate white/pial surfaces"}
         if metrics_binary else {"implementation": "python"})
     report["sphere_generation"] = (
-        {"implementation": "native-c++",
+        {"implementation": "Conda mris_inflate + Python quick/standard sphere",
          "mris_inflate": {"binary": str(inflate_binary[0]), "sha256": inflate_binary[1]},
-         "mris_sphere": {"binary": str(sphere_binary[0]), "sha256": sphere_binary[1]},
-         "quick_sphere": "python",
+         "finish_device": "cpu",
          "upstream": "native topology repair on WM-chain filled"}
         if native_sphere else {"implementation": "python radial approximation"})
     report["sphere_registration"] = (
-        {"implementation": "native-c++", "binary": str(registration_binary[0]),
-         "sha256": registration_binary[1],
-         "upstream": ("native sphere/sulc on approximate earlier geometry" if native_sphere
+        {"implementation": "Python/Numba", "overlap_device": "cpu",
+         "upstream": ("accurate sphere/sulc on approximate earlier geometry" if native_sphere
                       else "radial approximate sphere and non-native sulc/smoothwm"),
-         "hemisphere_seconds": {}}
-        if registration_binary else {"implementation": "unregistered copy"})
+         "hemisphere_seconds": {}, "reports": {}}
+        if native_registration else {"implementation": "unregistered copy"})
 
     def stage(name, function, *args, **kwargs):
         tick = time.perf_counter()
@@ -645,17 +626,22 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                        device=device, threads=threads,
                        native_topology_binary=topology_binary[0] if topology_binary else None,
                        native_surface_metrics_binary=metrics_binary[0] if metrics_binary else None,
-                       native_sphere_binaries=sphere_binaries,
+                       native_inflate_binary=inflate_binary[0] if inflate_binary else None,
                        native_registration=native_registration,
                        assets=assets if topology_binary or metrics_binary else None)
         report.setdefault("surfaces", {})[hemi] = result
 
-    if registration_binary:
+    if native_registration:
+        from .mris_register_run import run_register_sphere
         for hemi in ("lh", "rh"):
-            seconds = stage(f"register_{hemi}", _run_native_registration,
-                            registration_binary[0], subject, hemi,
-                            registration_atlases[hemi], assets, threads)
-            report["sphere_registration"]["hemisphere_seconds"][hemi] = seconds
+            surf = subject / "surf"
+            result = stage(f"register_{hemi}", run_register_sphere,
+                           surf / f"{hemi}.sphere", surf / f"{hemi}.smoothwm",
+                           surf / f"{hemi}.sulc", registration_atlases[hemi],
+                           surf / f"{hemi}.sphere.reg", overlap_device="cpu")
+            report["sphere_registration"]["hemisphere_seconds"][hemi] = result[
+                "total_seconds_including_io"]
+            report["sphere_registration"]["reports"][hemi] = result
 
     for hemi in ("lh", "rh"):
         for atlas, prefix in (("aparc", "DKaparc"),

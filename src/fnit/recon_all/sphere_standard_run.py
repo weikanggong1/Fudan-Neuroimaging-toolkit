@@ -27,10 +27,11 @@ from .sphere_standard_unfold import _face_geometry, first_epoch_gradient
 
 def run_standard_sphere(inflated: str | Path, smoothwm: str | Path,
                         output: str | Path, *, finish_device: str = "cpu") -> dict:
-    """Generate a conventional sphere from ordered inflated/smoothwm surfaces.
+    """Read same-face-order inflated/smoothwm meshes and write an ordered sphere.
 
-    The optimization uses CPU/Numba source-order arithmetic; final overlap
-    cleanup can run on CUDA. Validation currently covers one bilateral T1.
+    Return paths, device, negative-area fraction, setup/finish/total seconds,
+    ordered update dicts (index, stage, weight, averages, dt, seconds), and
+    final overlap-repair negative-face counts. Only cleanup uses finish_device.
     """
     started = time.perf_counter()
     inflated, smoothwm, output = Path(inflated), Path(smoothwm), Path(output)

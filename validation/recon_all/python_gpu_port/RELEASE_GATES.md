@@ -1,101 +1,20 @@
-# Native-free recon-all acceptance gates
+# recon-all numerical release gates
 
-The published `fnit-recon-all` entry runs the connected Python reconstruction. It is a core-output prototype, not an equivalent FreeSurfer 8.2 replacement. The gates below define what remains before claiming numerical compatibility on the same T1. The current post-CC Conda profile completed 30 stages in 2649.0 s and passed 8/138 strict same-T1 outputs; see [its benchmark](native_cpp_conda_20260927/post_cc/BENCHMARK.md).
+`fnit-recon-all` currently combines Python/PyTorch stages with three required and three optional FreeSurfer 8.2 C++ programs built inside Conda from pinned source. It does not install or link the cluster FreeSurfer runtime. The six-program build and its hashes are [recorded here](native_cpp_conda_20260927/six_target_build_20260927/REPORT.md). A private FreeSurfer license and separately downloaded models/templates are still required.
 
-The optional Conda C++ profile intentionally calls six external programs built from
-FreeSurfer source. A seventh program, `mri_segment`, is built and validated on
-frozen inputs but not yet scheduled by the end-to-end runner. For that profile, gate 1 requires binary hashes, Conda build
-provenance, and evidence that no installed FreeSurfer runtime is linked; the
-no-FreeSurfer-executable process-tree condition applies only to the default Python
-profile. The numerical gates 2–6 apply to both profiles.
+The latest completed same-T1 connected profile, v3, exited successfully after 39 stages and passed **19/138** strict output comparisons with the unmodified FreeSurfer 8.2 subject: 19 MRI volumes pass, 47 expected files are absent, and 72 present files differ. Its 13-volume upstream/WM/filled prefix matches every voxel, dtype, affine and first 284 MGH header bytes. The first connected surface difference is `qsphere.nofix` because v3 called the inaccurate Conda quick-sphere binary. The current code now uses the [bilaterally exact Python quick sphere](native_cpp_conda_20260927/v3_e2e_20260927/quick_sphere_lh.json), writes `orig.premesh` from the official `-ga` topology mode, and runs the [bilaterally exact Python remesh](REMESH_VALIDATION.md) to `orig`; that revised connected chain has not yet completed a strict subject comparison. The v3 [benchmark and ROI/vertex summary](native_cpp_conda_20260927/v3_e2e_20260927/benchmark_summary.json) are diagnostic evidence, not a parity claim.
 
-1. **Connected run:** start with the original T1 and an empty subject folder;
-   generate all fixed-profile outputs using installed `fnit`, external weights,
-   and verified templates. Capture the exact command, versions, input/asset
-   hashes, stage timings, and process tree. The process tree must show no
-   FreeSurfer executable or script call.
-2. **Volumes:** compare every reconstructed volume to a fresh paired FreeSurfer 8.2
-   run, including voxel values, affine, and MGH header. Report the mismatch
-   count per volume; explain byte-level metadata differences separately.
-3. **Surfaces:** compare ordered vertices, ordered faces, volume geometry,
-   topology, and hemisphere labels for `orig`, `white`, `pial`, `inflated`,
-   `sphere`, and `sphere.reg`. Report every vertex error and the first
-   difference. A copied-source diagnostic is supporting evidence, not a
-   substitute for the installed reference output.
-4. **Vertex metrics:** compare all vertices of thickness, white/pial/mid
-   area, vertex volume, mean/Gaussian curvature and other emitted maps with
-   the existing per-map numerical rules. Record maximum error, error
-   distribution, and outlier count for each hemisphere. Zero outliers is
-   required; a summary mean cannot replace the vertex comparison.
-5. **Annotations and statistics:** compare ordered annotation IDs and every
-   ROI row and global measure for aparc, a2009s, DKTatlas, BA/exvivo,
-   aseg, and wmparc. Apply the existing printed-precision and numerical
-   rules to each column, and record any formatting differences.
-6. **Timing:** after the connected run passes, time each candidate and native
-   stage on the same host and same input, including file I/O. Record warm and
-   cold starts separately, GPU initialization, thread counts, device, and
-   shared-host load. Do not combine isolated CPU measurements with H100
-   measurements into a full-flow speed ratio.
+## Gates before claiming official-equivalent output
 
-A connected Python T1-to-N4 run matched a fresh same-host FreeSurfer N4
-voxel for voxel, but differed from the archived unmodified official full run
-at 34/16,777,216 voxels; see [the report](CONNECTED_N4_20260926.md).
-That archival discrepancy remains open for the strict volume gate.
-The connected SynthSeg H100 comparison matched all 16,777,216 hard labels
-only with SynthSeg cuDNN TF32 disabled. Its 33 soft-volume columns still differ
-by up to 0.04 mm³ after a same-input threshold correction and source-style
-float32 CSV rendering; six columns exceed the existing 0.005 mm³ stats
-tolerance. The rendering result is a deterministic replay of saved values,
-not another GPU inference; see
-[the report](CONNECTED_SYNTHSEG_GPU_20260926.md). The CSV gate remains open.
-The following Python T1 normalization matched a fresh native command
-on the same Python-generated `nu.mgz` input, while differing from the archived
-full subject at 112 voxels ([report](CONNECTED_T1_NORMALIZE_20260926.md)).
+1. **Connected run:** begin with the same real T1 and an empty subject directory. Record the exact source archive/commit, input, weights, template and binary hashes, build provenance, command, host, device, process exit, and per-stage wall time. The process tree may contain only the six declared Conda-built C++ programs, Python and their libraries, with no installed FreeSurfer/FSL runtime dependency.
+2. **Volumes:** compare every output MRI volume with the official result, including all voxels, dtype, affine and MGH header. Report mismatch counts and first coordinates. `aseg.mgz`, `aparc+aseg.mgz`, `wmparc.mgz` and the other downstream maps remain open even though the upstream WM prefix passes.
+3. **Surfaces:** compare ordered vertices, ordered faces, volume geometry, topology and labels for `orig`, `white`, `pial`, `inflated`, `sphere` and `sphere.reg` in both hemispheres. A nearest-neighbor distance is diagnostic only if vertex counts/topology differ; it is not a pointwise pass.
+4. **Vertex metrics:** compare all corresponding vertices of thickness, white/pial/mid area, vertex volume, curvature and other emitted maps. Report maximum, distribution and outlier count for each hemisphere and each map. Zero tolerance outliers are required. Pointwise comparison is blocked when ordered topology differs.
+5. **Annotations/statistics:** compare ordered annotation IDs and every ROI row and global measure in aparc, a2009s, DKTatlas, aseg and wmparc outputs. Record missing files, numeric and formatting discrepancies separately.
+6. **Performance:** only after the same-T1 connected numerical gates pass, pair candidate and official stages on the same host, input and thread budget. Record cold/warm runs, I/O, device, GPU initialization and shared-host load. A shorter non-equivalent reconstruction is not an acceleration result.
 
-A connected experimental native-free core now runs from T1 to bilateral morphometry,
-but passes only 6/138 strict output checks on the same T1
-([full report](NATIVE_FREE_CONNECTED_20260927.md)). The open critical path
-still includes full topology repair, independent white placement, and exact
-connected output parity. Both pial optimizers
-now independently select their full 41-step schedules and match final surfaces
-and vertex metrics when started from frozen official white surfaces. The
-standalone conventional-sphere stage now matches both final native meshes and volume geometry on the frozen subject;
-its optimization still runs on CPU/Numba and is not yet wired into a connected
-T1-to-metrics pipeline ([stage report](SPHERE_STANDARD_STATUS.md)). The
-continuous source-scheduled smoothwm stage now matches all LH/RH updates and
-generates both final registered spheres from exact sulc seeds. The sulc stage
-now independently generates those exact bilateral seeds from `sphere`. A fresh
-one-call bilateral CPU/Numba registration from `sphere` matches new unmodified
-FreeSurfer 8.2 final registered surfaces at every ordered vertex, face and
-volume geometry field; its input/seed hashes and all selected steps also agree.
-Exact ordered-topology caching reduced the observed one-call times to
-372.85/347.36 s LH/RH, still slower than fresh native controls on the shared
-host. The final LH overlap repair matches on both CPU and H100 CUDA. See
-[the stage report](MRIS_REGISTER_STATUS.md). The stage inventory in
-[README.md](README.md) states which individual boundaries already pass.
+The [strict comparator](compare_complete_subject.py) checks 138 expected files: 39 MRI outputs, 18 ordered surface geometries, 46 vertex maps, 12 annotations and 23 statistics files. Its archived subject passed 138/138 against itself; isolated 0.02 mm thickness and 0.02 mm² area changes each failed only the edited map. These negative controls establish comparator sensitivity, not reconstruction parity.
 
-The [subject comparator](compare_complete_subject.py) checks 138 outputs in
-the fixed profile: all 39 archived MRI image files, two surface MGH maps,
-18 ordered meshes, 44 per-vertex morph maps including additional curvature
-maps, 12 annotations and 23 statistics files. It compares every voxel and
-vertex, affine and image header, ordered faces, surface volume geometry,
-annotation IDs and numerical statistics fields. The archived subject passed
-138/138 self comparisons ([report](complete_subject_self_check_expanded_20260926.json)).
-A 0.02 mm change at LH thickness vertex 1,234 failed only that map, 137/138
-([report](complete_subject_thickness_negative_expanded_20260926.json));
-a 0.02 mm² change at LH `area.pial` vertex 1,234 likewise failed only that map,
-137/138 ([report](complete_subject_area_negative_expanded_20260926.json)).
-Both controls used [linked subject trees](experimental/create_morph_negative_control.py)
-and reported vertex 1,234 as the sole outlier. These checks validate the
-comparator, not a new reconstruction. A fresh paired FreeSurfer run and a complete, numerically matching
-native-free candidate are still required for acceptance.
+## Current numerical boundary
 
-An [existing unmodified FreeSurfer subject comparison](TRUE_OFFICIAL_BASELINE_20260926.md)
-shows that the archived hybrid subject passes 110/138 checks against the true
-official run on the same T1. Ordered mesh coordinates/faces, all 46 surface
-scalar files and annotations agree; SynthSeg soft volumes, SynthMorph warps,
-several derived statistics and label storage types differ. The float32 label
-storage issue has been corrected in the current independent SynthSeg source,
-and the first connected approximate native-free core has now been compared
-against that reference (6/138 strict outputs pass). Exact complete parity
-remains open; see [the connected report](NATIVE_FREE_CONNECTED_20260927.md).
+Frozen correct upstream inputs validate several individual stages: the GCA LTA, WM/filled prefix and bilateral Python quick, standard and registered spheres; ten Conda vertex maps match all 1,188,540 values when white/pial inputs are official. The standalone Python pial.T1 optimizer also matches both official geometries and its derived thickness/area/volume maps within the stated tolerances. These results do not carry through to the current subject because Conda `mris_fix_topology -ga` still chooses different defect repairs even on identical inputs; the `white.preaparc` optimizer first develops small floating-point force differences that amplify at final white; the current runner still approximates white/pial placement and some postprocessing. The [white first-difference diagnosis](native_cpp_conda_20260927/WHITE_PREAPARC_FIRST_DIVERGENCE_20260927.md) and [stage inventory](README.md) give details. No current result establishes end-to-end FreeSurfer-equivalent cortical thickness, area, volume, curvature or regional statistics.
