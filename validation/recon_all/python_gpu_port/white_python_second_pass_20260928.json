@@ -1,0 +1,1621 @@
+{
+  "scope": "真实 T1 左半球：安装版 FreeSurfer 第二轮入口、全部 9 个接受步（18–26）和第三轮入口；独立诊断，非完整 white.preaparc 生产替换",
+  "source_commit": "d932c45b7941662ea380a05efef580568b98d41a",
+  "source_modules_sha256_local_equals_gpucw1": {
+    "place_surface_border.py": "07eb6e586dec01add03d6762841a7ef44a65bfa8cca97a2854359d910f93a560",
+    "place_surface_rip.py": "d3f7726a5ca09bae60a998303d55f1c130e775775f4a837f2c135dcf34b302b2",
+    "place_surface_objective.py": "84a233d7dc32b8d3b130221192212fbddb6cd6c9819ebc4eefc7b6a26b6a630a",
+    "place_surface_self_repulsion.py": "5891a457071c7fdca419fe20677b4c1b8147390451eba9f198a16d34fcf3da94",
+    "place_surface_curvature.py": "641f3607187aeffd96eb4b84e4413ae7351d0937ec23bfc340ea4501846bdb33",
+    "place_surface_collision.py": "ccf8f330ae48c0e5e371ad7e87d9bb6bc8397ab642b7016ed317edaa56e3852f",
+    "place_white_preaparc_python.py": "72e96265d09f4043e1d492f58ee28b58940bf4d7d2f5e1d8464af989a9944ced"
+  },
+  "remote_scratch": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/white_python_firststep_codex_20260927",
+  "official_boundary_capture": {
+    "reference": "installed FreeSurfer 8.2; diagnostic RAM before outer pass two",
+    "binary_sha256": "67139c3590f961f879a4214cd01f173b42986c7b178d1851dfa3f08e8acf12aa",
+    "input_sha256": {
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/brain.finalsurfs.mgz": "c239ba0c807bd381662d388e198715da44103f0c724b3877a7c9623d4ccff9e7",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/wm.mgz": "d6069783c3720b6ec6b7679ee4543a3ba32891b50b9c109a5a6e6f50e1050b46",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/aseg.presurf.mgz": "be7f851405b92d82ec23041621c2da06bceaa700f4ea39c6aae42008c1dc525c",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/surf/lh.orig": "ef1bbc58ad65e2e50a71bd7727112ff4614eb840009cd1060384c598a5cd1126",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/surf/autodet.gw.stats.lh.dat": "10b313e9f29a9d6572f0aef4546d307f6514eaae44896fc19b4212891719c7d9"
+    },
+    "command": [
+      "/public/software/apps/Freesurfer/8.2.0-1/bin/mris_place_surface",
+      "--adgws-in",
+      "../surf/autodet.gw.stats.lh.dat",
+      "--wm",
+      "wm.mgz",
+      "--threads",
+      "4",
+      "--invol",
+      "brain.finalsurfs.mgz",
+      "--lh",
+      "--i",
+      "../surf/lh.orig",
+      "--o",
+      "../surf/lh.white.unused",
+      "--white",
+      "--seg",
+      "aseg.presurf.mgz",
+      "--restore-255",
+      "--nsmooth",
+      "5",
+      "--rip-bg-no-annot",
+      "--rip-bg",
+      "--rip-bg-lof",
+      "--restore-255",
+      "--outvol",
+      "mrisps.wpa.mgz"
+    ],
+    "gdb_status": 0,
+    "boundary_seen": true,
+    "raw_sha256": "b83a6f616de625bf20166ae3fdcea5ea984d616188f67ba2a6978ccc10e43ec6",
+    "raw_size": 49472608,
+    "seconds": 92.8669670689851
+  },
+  "official_after_step18_capture": {
+    "reference": "installed FreeSurfer 8.2; diagnostic RAM after pass two first step",
+    "binary_sha256": "67139c3590f961f879a4214cd01f173b42986c7b178d1851dfa3f08e8acf12aa",
+    "input_sha256": {
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/brain.finalsurfs.mgz": "c239ba0c807bd381662d388e198715da44103f0c724b3877a7c9623d4ccff9e7",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/wm.mgz": "d6069783c3720b6ec6b7679ee4543a3ba32891b50b9c109a5a6e6f50e1050b46",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/aseg.presurf.mgz": "be7f851405b92d82ec23041621c2da06bceaa700f4ea39c6aae42008c1dc525c",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/surf/lh.orig": "ef1bbc58ad65e2e50a71bd7727112ff4614eb840009cd1060384c598a5cd1126",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/surf/autodet.gw.stats.lh.dat": "10b313e9f29a9d6572f0aef4546d307f6514eaae44896fc19b4212891719c7d9"
+    },
+    "command": [
+      "/public/software/apps/Freesurfer/8.2.0-1/bin/mris_place_surface",
+      "--adgws-in",
+      "../surf/autodet.gw.stats.lh.dat",
+      "--wm",
+      "wm.mgz",
+      "--threads",
+      "4",
+      "--invol",
+      "brain.finalsurfs.mgz",
+      "--lh",
+      "--i",
+      "../surf/lh.orig",
+      "--o",
+      "../surf/lh.white.unused",
+      "--white",
+      "--seg",
+      "aseg.presurf.mgz",
+      "--restore-255",
+      "--nsmooth",
+      "5",
+      "--rip-bg-no-annot",
+      "--rip-bg",
+      "--rip-bg-lof",
+      "--restore-255",
+      "--outvol",
+      "mrisps.wpa.mgz"
+    ],
+    "gdb_status": 0,
+    "capture_kind": "after_first_step",
+    "boundary_seen": true,
+    "one_step_patch_seen": true,
+    "raw_sha256": "9ca7a85fe6df7f77377e474a06c4fd22b67e2089f78d972d80354a41aa09f04b",
+    "raw_size": 49472608,
+    "seconds": 81.01230350276455
+  },
+  "official_logged_sse_capture": {
+    "reference": "installed FreeSurfer 8.2; diagnostic RAM after pass two first step",
+    "binary_sha256": "67139c3590f961f879a4214cd01f173b42986c7b178d1851dfa3f08e8acf12aa",
+    "input_sha256": {
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/brain.finalsurfs.mgz": "c239ba0c807bd381662d388e198715da44103f0c724b3877a7c9623d4ccff9e7",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/wm.mgz": "d6069783c3720b6ec6b7679ee4543a3ba32891b50b9c109a5a6e6f50e1050b46",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/aseg.presurf.mgz": "be7f851405b92d82ec23041621c2da06bceaa700f4ea39c6aae42008c1dc525c",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/surf/lh.orig": "ef1bbc58ad65e2e50a71bd7727112ff4614eb840009cd1060384c598a5cd1126",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/surf/autodet.gw.stats.lh.dat": "10b313e9f29a9d6572f0aef4546d307f6514eaae44896fc19b4212891719c7d9"
+    },
+    "command": [
+      "/public/software/apps/Freesurfer/8.2.0-1/bin/mris_place_surface",
+      "--adgws-in",
+      "../surf/autodet.gw.stats.lh.dat",
+      "--wm",
+      "wm.mgz",
+      "--threads",
+      "4",
+      "--invol",
+      "brain.finalsurfs.mgz",
+      "--lh",
+      "--i",
+      "../surf/lh.orig",
+      "--o",
+      "../surf/lh.white.unused",
+      "--white",
+      "--seg",
+      "aseg.presurf.mgz",
+      "--restore-255",
+      "--nsmooth",
+      "5",
+      "--rip-bg-no-annot",
+      "--rip-bg",
+      "--rip-bg-lof",
+      "--restore-255",
+      "--outvol",
+      "mrisps.wpa.mgz"
+    ],
+    "gdb_status": 0,
+    "capture_kind": "after_first_step",
+    "boundary_seen": true,
+    "one_step_patch_seen": true,
+    "raw_sha256": "68fde40c191ac3fc2bc7a0b70d9a7a98e92c532828d4017b921abd0bdef9502a",
+    "raw_size": 49472608,
+    "seconds": 111.33964646421373
+  },
+  "official_logged_sse_terms": {
+    "initial": {
+      "repulsion_weighted": 7451.625867,
+      "spring_weighted": 170148.83063,
+      "intensity_weighted": 492103.046023,
+      "sse": 669703.502519
+    },
+    "step18": {
+      "repulsion_weighted": 22244.064908,
+      "spring_weighted": 168888.456445,
+      "intensity_weighted": 291493.03944,
+      "sse": 482625.560794
+    }
+  },
+  "official_logged_sse_log_sha256": "74041382de8b3e667bc4b4f9484d40c092629cc6e934a1194a4291215f212125",
+  "logged_vs_plain_after_step18": {
+    "xyz": {
+      "exact_components": 319866,
+      "total_components": 319866,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "count_gt_1e4": 0
+    },
+    "orig": {
+      "exact_components": 319866,
+      "total_components": 319866,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "count_gt_1e4": 0
+    },
+    "normal": {
+      "exact_components": 319866,
+      "total_components": 319866,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "count_gt_1e4": 0
+    },
+    "val": {
+      "exact_components": 106622,
+      "total_components": 106622,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "count_gt_1e4": 0
+    },
+    "target": {
+      "exact_components": 319866,
+      "total_components": 319866,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "count_gt_1e4": 0
+    },
+    "val2": {
+      "exact_components": 106622,
+      "total_components": 106622,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "count_gt_1e4": 0
+    },
+    "d": {
+      "exact_components": 106622,
+      "total_components": 106622,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "count_gt_1e4": 0
+    },
+    "mean": {
+      "exact_components": 106622,
+      "total_components": 106622,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "count_gt_1e4": 0
+    }
+  },
+  "official_first_to_second_boundary": {
+    "first_raw_sha256": "a3b204ac0a597585d21b2bf3b53a071ff59e7818ffe6bc6d0eeb84b7f5f926d4",
+    "second_raw_sha256": "b83a6f616de625bf20166ae3fdcea5ea984d616188f67ba2a6978ccc10e43ec6",
+    "python_npz_sha256": "a5d7981edbbe9ec74cbd7d2eb7c72586d9c4488cf79c976549e1d6d5d4d45592",
+    "first_ripped": 5611,
+    "second_ripped": 5728,
+    "newly_ripped": [
+      39124,
+      39140,
+      39988,
+      39989,
+      40051,
+      40068,
+      40077,
+      40870,
+      40871,
+      40872,
+      40951,
+      40964,
+      40971,
+      40982,
+      40983,
+      40994,
+      40995,
+      41000,
+      41775,
+      41776,
+      41794,
+      41840,
+      41841,
+      41849,
+      41850,
+      41856,
+      42519,
+      42524,
+      42529,
+      42704,
+      42705,
+      42713,
+      42714,
+      43394,
+      43397,
+      43549,
+      43556,
+      43557,
+      43565,
+      43566,
+      44379,
+      44387,
+      44914,
+      44915,
+      45662,
+      45663,
+      48678,
+      48681,
+      49445,
+      49446,
+      49457,
+      49470,
+      49471,
+      49481,
+      49618,
+      49629,
+      49630,
+      50358,
+      50373,
+      51121,
+      51138,
+      51144,
+      51943,
+      51953,
+      52716,
+      53450,
+      53451,
+      53452,
+      59628,
+      59642,
+      60406,
+      60412,
+      60424,
+      60429,
+      60437,
+      61172,
+      61173,
+      61186,
+      61187,
+      61871,
+      61882,
+      61888,
+      61891,
+      61961,
+      62570,
+      65324,
+      65325,
+      65340,
+      66032,
+      66035,
+      66036,
+      66051,
+      66052,
+      66833,
+      74844,
+      75307,
+      87824,
+      88388,
+      91153,
+      92575,
+      92697,
+      93269,
+      93988,
+      94150,
+      94230,
+      94311,
+      94332,
+      94721,
+      95286,
+      95666,
+      96902,
+      97129,
+      99245,
+      100758,
+      101099,
+      105385,
+      105841
+    ],
+    "first_to_second": {
+      "xyz": {
+        "exact_components": 319866,
+        "total_components": 319866,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "count_gt_1e4": 0
+      },
+      "orig": {
+        "exact_components": 319866,
+        "total_components": 319866,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "count_gt_1e4": 0
+      },
+      "normal": {
+        "exact_components": 319866,
+        "total_components": 319866,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "count_gt_1e4": 0
+      },
+      "val": {
+        "exact_components": 5715,
+        "total_components": 106622,
+        "max_abs": 88.56172943115234,
+        "p99_abs": 13.991433486938465,
+        "count_gt_1e4": 100905
+      },
+      "target": {
+        "exact_components": 16834,
+        "total_components": 319866,
+        "max_abs": 12.452507019042969,
+        "p99_abs": 3.306590270996079,
+        "count_gt_1e4": 302891
+      },
+      "val2": {
+        "exact_components": 5782,
+        "total_components": 106622,
+        "max_abs": 15.0,
+        "p99_abs": 1.0,
+        "count_gt_1e4": 100840
+      },
+      "d": {
+        "exact_components": 5824,
+        "total_components": 106622,
+        "max_abs": 8.75,
+        "p99_abs": 4.15000057220459,
+        "count_gt_1e4": 100798
+      },
+      "mean": {
+        "exact_components": 5899,
+        "total_components": 106622,
+        "max_abs": 12.195412933826447,
+        "p99_abs": 6.007575883865353,
+        "count_gt_1e4": 100722
+      }
+    },
+    "python_to_official_first_xyz": {
+      "exact_components": 316573,
+      "total_components": 319866,
+      "max_abs": 1.33514404296875e-05,
+      "p99_abs": 2.9802322387695312e-08,
+      "count_gt_1e4": 0
+    },
+    "python_to_official_first_val": {
+      "exact_components": 106622,
+      "total_components": 106622,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "count_gt_1e4": 0
+    },
+    "python_to_official_first_rip_mismatch": 0,
+    "second_marked": 100878,
+    "second_nonripped_values": {
+      "minimum": -1.0,
+      "maximum": 95.41427612304688
+    }
+  },
+  "python_second_boundary": {
+    "subject": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official",
+    "candidate_arrays": "installed_second_boundary/python_boundary_comparison.npz",
+    "candidate_arrays_sha256": "a2dc9ceb86b1c253c4f6400a4eaa64a145c0126afdd81cb7fcd48fd105776329",
+    "input_sha256": {
+      "installed_normals/vertices.raw": "a3b204ac0a597585d21b2bf3b53a071ff59e7818ffe6bc6d0eeb84b7f5f926d4",
+      "installed_second_boundary/vertices.raw": "b83a6f616de625bf20166ae3fdcea5ea984d616188f67ba2a6978ccc10e43ec6",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/surf/lh.orig": "ef1bbc58ad65e2e50a71bd7727112ff4614eb840009cd1060384c598a5cd1126",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/surf/autodet.gw.stats.lh.dat": "10b313e9f29a9d6572f0aef4546d307f6514eaae44896fc19b4212891719c7d9",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/brain.finalsurfs.mgz": "c239ba0c807bd381662d388e198715da44103f0c724b3877a7c9623d4ccff9e7",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/wm.mgz": "d6069783c3720b6ec6b7679ee4543a3ba32891b50b9c109a5a6e6f50e1050b46",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/aseg.presurf.mgz": "be7f851405b92d82ec23041621c2da06bceaa700f4ea39c6aae42008c1dc525c"
+    },
+    "ripped_count": 5728,
+    "reference_ripped_count": 5728,
+    "ripped_mismatch": 0,
+    "ripped_mismatch_vertices": [],
+    "marked_mismatch": 0,
+    "fields": {
+      "value_after_average": {
+        "exact_components": 106622,
+        "components": 106622,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "count_gt_1e4": 0
+      },
+      "distance": {
+        "exact_components": 106622,
+        "components": 106622,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "count_gt_1e4": 0
+      },
+      "gradient_magnitude": {
+        "exact_components": 106380,
+        "components": 106622,
+        "max_abs": 9.381901741027832,
+        "p99_abs": 0.0,
+        "count_gt_1e4": 242
+      },
+      "target": {
+        "exact_components": 319866,
+        "components": 319866,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "count_gt_1e4": 0
+      },
+      "sigma": {
+        "exact_components": 106505,
+        "components": 106622,
+        "max_abs": 2.0,
+        "p99_abs": 0.0,
+        "count_gt_1e4": 117
+      }
+    },
+    "active_fields": {
+      "gradient_magnitude": {
+        "exact_components": 100765,
+        "components": 100894,
+        "max_abs": 7.931080341339111,
+        "p99_abs": 0.0,
+        "count_gt_1e4": 129
+      },
+      "sigma": {
+        "exact_components": 100894,
+        "components": 100894,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "count_gt_1e4": 0
+      }
+    },
+    "seconds": {
+      "prepare": 4.180097475182265,
+      "rip": 8.184734610840678,
+      "border": 7.571011981926858,
+      "average": 5.385728272143751,
+      "total": 25.321572340093553
+    }
+  },
+  "python_step18": {
+    "subject": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official",
+    "input_sha256": {
+      "installed_second_boundary/vertices.raw": "b83a6f616de625bf20166ae3fdcea5ea984d616188f67ba2a6978ccc10e43ec6",
+      "installed_second_first_step/vertices.raw": "9ca7a85fe6df7f77377e474a06c4fd22b67e2089f78d972d80354a41aa09f04b",
+      "installed_second_boundary/python_boundary_comparison.npz": "a2dc9ceb86b1c253c4f6400a4eaa64a145c0126afdd81cb7fcd48fd105776329"
+    },
+    "normal_difference": {
+      "exact_components": 302682,
+      "components": 302682,
+      "mean_mm": 0.0,
+      "p99_mm": 0.0,
+      "max_mm": 0.0,
+      "count_gt_1e4_mm": 0,
+      "count_gt_01_mm": 0,
+      "largest": [
+        {
+          "vertex": 0,
+          "distance_mm": 0.0
+        },
+        {
+          "vertex": 100893,
+          "distance_mm": 0.0
+        },
+        {
+          "vertex": 100892,
+          "distance_mm": 0.0
+        },
+        {
+          "vertex": 100891,
+          "distance_mm": 0.0
+        },
+        {
+          "vertex": 100890,
+          "distance_mm": 0.0
+        },
+        {
+          "vertex": 100889,
+          "distance_mm": 0.0
+        },
+        {
+          "vertex": 100888,
+          "distance_mm": 0.0
+        },
+        {
+          "vertex": 100887,
+          "distance_mm": 0.0
+        },
+        {
+          "vertex": 100886,
+          "distance_mm": 0.0
+        },
+        {
+          "vertex": 100885,
+          "distance_mm": 0.0
+        }
+      ]
+    },
+    "initial_sse": 669703.5025194291,
+    "initial_rms": 4.9387244267733825,
+    "step_sse": 482625.56078689743,
+    "step_rms": 3.8010261864661112,
+    "objective_parts": {
+      "initial": {
+        "intensity_unweighted": 2460515.193450856,
+        "intensity_weighted": 492103.0460230779,
+        "spring_unweighted": 567162.7462282965,
+        "spring_weighted": 170148.83062959576,
+        "repulsion_weighted": 7451.625866755417,
+        "original_area": 79254.53125,
+        "current_area": 79254.53125,
+        "area_scale": 1.0
+      },
+      "step18": {
+        "intensity_unweighted": 1457465.1754817476,
+        "intensity_weighted": 291493.03943993425,
+        "spring_unweighted": 563566.3417521942,
+        "spring_weighted": 168888.45644589287,
+        "repulsion_weighted": 22244.064901070346,
+        "original_area": 79254.53125,
+        "current_area": 79339.6796875,
+        "area_scale": 0.9989267587661743
+      }
+    },
+    "official_initial_lines": [],
+    "official_step18_lines": [
+      [
+        "0.5000",
+        "482625.6",
+        "3.801"
+      ]
+    ],
+    "coordinates": {
+      "exact_components": 319865,
+      "components": 319866,
+      "mean_mm": 8.944442201480463e-12,
+      "p99_mm": 0.0,
+      "max_mm": 9.5367431640625e-07,
+      "count_gt_1e4_mm": 0,
+      "count_gt_01_mm": 0,
+      "largest": [
+        {
+          "vertex": 62122,
+          "distance_mm": 9.5367431640625e-07
+        },
+        {
+          "vertex": 35534,
+          "distance_mm": 0.0
+        },
+        {
+          "vertex": 35535,
+          "distance_mm": 0.0
+        },
+        {
+          "vertex": 35536,
+          "distance_mm": 0.0
+        },
+        {
+          "vertex": 35537,
+          "distance_mm": 0.0
+        },
+        {
+          "vertex": 35538,
+          "distance_mm": 0.0
+        },
+        {
+          "vertex": 35539,
+          "distance_mm": 0.0
+        },
+        {
+          "vertex": 35540,
+          "distance_mm": 0.0
+        },
+        {
+          "vertex": 35541,
+          "distance_mm": 0.0
+        },
+        {
+          "vertex": 35542,
+          "distance_mm": 0.0
+        }
+      ]
+    },
+    "seconds": {
+      "prepare": 21.09469028795138,
+      "initial_objective": 2.9048914229497313,
+      "gradient": 1.1889229277148843,
+      "collision": 29.83091951208189,
+      "step_objective": 3.1712651662528515,
+      "total": 58.19068931695074
+    },
+    "candidate_arrays": "installed_second_first_step/python_step18_comparison.npz",
+    "candidate_arrays_sha256": "c4b6ca8accf1810d627cdf3dda51f3752e5827e6a209520fdc8ba2707f1bc7b1"
+  },
+  "python_vs_official_sse_absolute_error": {
+    "initial": {
+      "repulsion_weighted_absolute_error": 2.445831341901794e-07,
+      "spring_weighted_absolute_error": 4.0425220504403114e-07,
+      "intensity_weighted_absolute_error": 7.794005796313286e-08,
+      "sse_absolute_error": 4.291068762540817e-07
+    },
+    "step18": {
+      "repulsion_weighted_absolute_error": 6.929654773557559e-06,
+      "spring_weighted_absolute_error": 8.928764145821333e-07,
+      "intensity_weighted_absolute_error": 6.577465683221817e-08,
+      "sse_absolute_error": 7.1025569923222065e-06
+    }
+  },
+  "timing_scope": "Python 第二轮从官方第二轮入口 RAM 单独重放 340.82 s；官方 GDB 从 orig 重放首轮并逐步保存 9 份 RAM 至第二轮末 122.89 s。Python 第三轮入口准备 23.79 s；官方 GDB 从 orig 重放前两轮至第三轮入口 135.11 s。边界、JIT 和诊断 IO 不同，不计算加速比。",
+  "limitations": [
+    "第二轮只有官方标准输出的一位小数 SSE，除 step18 外无法进行逐项高精度 SSE 验收；全部 9 步几何误差 <0.0001 mm。",
+    "第三轮只验证目标准备入口；其后优化步、第四轮、清理、右半球和最终 white.preaparc 均未验证。",
+    "公开 Python API 仍只运行首轮，不属于生产 white 替换；参考 FreeSurfer 仅用于隔离对照，不进入 FNIT 运行链。"
+  ],
+  "diagnostic_scripts_sha256_local_equals_gpucw1": {
+    "capture_white_installed_second_pass_boundary.py": "7411163dbdd53029a662e1799f16d42578473cc4f487736bf87e70e9155eaf48",
+    "compare_white_second_pass_boundary.py": "be26a93bc6121f0a59d0d7668049ccdb618d680e94c59e184e947f8d83b62d45",
+    "validate_white_second_pass_boundary.py": "fa790540228173273d45451a0e060f4d0b5cbf2cb4eb80005da1acdced130eed",
+    "validate_white_second_step.py": "068d044b0beb83bba940ad8a3374ef02f91ca098bea9500cc8290fba573419de",
+    "capture_white_installed_second_pass_steps.py": "3f98c2c0c21de509c9617974db79fb51892eb19e778744c3176044efa88b9703",
+    "validate_white_second_pass_steps.py": "570b5a16dba285521a0ebb18b0855e2d9ff26707f20b5a2b2c0b54b0dd35db6d",
+    "capture_white_installed_third_pass_boundary.py": "d84acc4d6c5bba0160fec3429340a5dc18e858ba5752572f4ac05ec659d95071",
+    "validate_white_third_pass_boundary.py": "beaa60ed3dcb84ee2e397501e52e39f63df31974d61d5b264eaf82c7cd5003c5"
+  },
+  "reproduction": {
+    "working_directory": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/white_python_firststep_codex_20260927",
+    "python_binary": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_cpp_conda_20260927/conda_env/bin/python",
+    "boundary_command": "PYTHONPATH=code/src /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_cpp_conda_20260927/conda_env/bin/python validate_white_second_pass_boundary.py --subject /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official --first-raw installed_normals/vertices.raw --second-raw installed_second_boundary/vertices.raw --out installed_second_boundary/python_boundary_comparison.json",
+    "step18_command": "PYTHONPATH=code/src /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_cpp_conda_20260927/conda_env/bin/python validate_white_second_step.py --subject /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official --before-raw installed_second_boundary/vertices.raw --after-raw installed_second_first_step/vertices.raw --boundary-npz installed_second_boundary/python_boundary_comparison.npz --official-log installed_second_step_sseterms/capture.log --out installed_second_first_step/python_step18_comparison.json",
+    "official_capture_note": "仅隔离参考：capture_white_installed_second_pass_boundary.py 的 --subject、--binary、--license、--out 指向官方输入/二进制/私有许可证/隔离目录；--after-first-step 在第二轮截取首步。脚本从输入重放首轮。",
+    "second_all_steps_command": "PYTHONPATH=code/src /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_cpp_conda_20260927/conda_env/bin/python validate_white_second_pass_steps.py --subject /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official --boundary-raw installed_second_boundary/vertices.raw --boundary-npz installed_second_boundary/python_boundary_comparison.npz --official-steps installed_second_all_steps --out installed_second_all_steps/python_second_pass_comparison.json",
+    "third_boundary_command": "PYTHONPATH=code/src /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_cpp_conda_20260927/conda_env/bin/python validate_white_third_pass_boundary.py --subject /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official --second-final-raw installed_second_all_steps/step026.raw --third-boundary-raw installed_third_boundary/vertices.raw --python-second-npz installed_second_all_steps/python_second_pass_comparison.npz --out installed_third_boundary/python_comparison.json",
+    "new_official_capture_note": "隔离参考脚本 capture_white_installed_second_pass_steps.py 和 capture_white_installed_third_pass_boundary.py 的 --subject、--binary、--license、--out 分别指向冻结被试、安装版对照二进制、私有许可证文件和独立输出目录；后者只截取第三轮入口，不向版本库保存 RAM 原件或许可证内容。"
+  },
+  "official_all_steps_capture": {
+    "reference": "installed FreeSurfer 8.2, second-pass accepted-step RAM only",
+    "binary_sha256": "67139c3590f961f879a4214cd01f173b42986c7b178d1851dfa3f08e8acf12aa",
+    "subject": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official",
+    "input_sha256": {
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/brain.finalsurfs.mgz": "c239ba0c807bd381662d388e198715da44103f0c724b3877a7c9623d4ccff9e7",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/wm.mgz": "d6069783c3720b6ec6b7679ee4543a3ba32891b50b9c109a5a6e6f50e1050b46",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/aseg.presurf.mgz": "be7f851405b92d82ec23041621c2da06bceaa700f4ea39c6aae42008c1dc525c",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/surf/lh.orig": "ef1bbc58ad65e2e50a71bd7727112ff4614eb840009cd1060384c598a5cd1126",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/surf/autodet.gw.stats.lh.dat": "10b313e9f29a9d6572f0aef4546d307f6514eaae44896fc19b4212891719c7d9"
+    },
+    "command": [
+      "/public/software/apps/Freesurfer/8.2.0-1/bin/mris_place_surface",
+      "--adgws-in",
+      "../surf/autodet.gw.stats.lh.dat",
+      "--wm",
+      "wm.mgz",
+      "--threads",
+      "4",
+      "--invol",
+      "brain.finalsurfs.mgz",
+      "--lh",
+      "--i",
+      "../surf/lh.orig",
+      "--o",
+      "../surf/lh.white.unused",
+      "--white",
+      "--seg",
+      "aseg.presurf.mgz",
+      "--restore-255",
+      "--nsmooth",
+      "5",
+      "--rip-bg-no-annot",
+      "--rip-bg",
+      "--rip-bg-lof",
+      "--restore-255",
+      "--outvol",
+      "mrisps.wpa.mgz"
+    ],
+    "gdb_status": 0,
+    "second_pass_started": true,
+    "second_pass_complete": true,
+    "saved_step_messages": [
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26
+    ],
+    "files": {
+      "step018.raw": {
+        "bytes": 49472608,
+        "sha256": "0234715105a65c4a5680e0dac119cfa9e47eae54fd1d5f83f0d65805a5942a20"
+      },
+      "step019.raw": {
+        "bytes": 49472608,
+        "sha256": "52f1b823a0c6dbce0e44ff0d5d1e16cd6d2c3aba7a41440ca93cf694da722493"
+      },
+      "step020.raw": {
+        "bytes": 49472608,
+        "sha256": "951830de9ce5be1fc672cbbed3842304ac1938698ae035673a1f45958e35e423"
+      },
+      "step021.raw": {
+        "bytes": 49472608,
+        "sha256": "414b54f7a7a455b7ccfbad4b92888f77a4e11351e6ae3aced44884133299e3f3"
+      },
+      "step022.raw": {
+        "bytes": 49472608,
+        "sha256": "9c695bd41aa4952917280f10bdda9182b210686963516e0638e292f9eed19298"
+      },
+      "step023.raw": {
+        "bytes": 49472608,
+        "sha256": "e473c85ed03197a8f1c0800fc68c7278c416d5c68e8801826109fdef91ede46d"
+      },
+      "step024.raw": {
+        "bytes": 49472608,
+        "sha256": "85611f1d0472f7317b57433f2bf66da6450aa205585eec4bb36c1cbabde71e47"
+      },
+      "step025.raw": {
+        "bytes": 49472608,
+        "sha256": "cfe6612b32142c13180925e090d7e9bb85f712d21d196636a630220e45c8091e"
+      },
+      "step026.raw": {
+        "bytes": 49472608,
+        "sha256": "c15b8c4b7b1983f8e7585df7ffafcc979e0ef11e02ad6b9cdbf66c2e6d0593e7"
+      }
+    },
+    "official_step_lines": [
+      "018: dt: 0.5000, sse=482625.6, rms=3.801 (23.036%)",
+      "019: dt: 0.2500, sse=338996.1, rms=2.762 (27.346%)",
+      "020: dt: 0.2500, sse=305732.2, rms=2.177 (21.164%)",
+      "021: dt: 0.2500, sse=252125.7, rms=1.878 (13.721%)",
+      "022: dt: 0.2500, sse=244985.9, rms=1.724 (8.222%)",
+      "023: dt: 0.2500, sse=258980.8, rms=1.674 (2.888%)",
+      "024: dt: 0.1250, sse=225960.5, rms=1.491 (10.934%)",
+      "025: dt: 0.1250, sse=220529.9, rms=1.433 (3.880%)",
+      "026: dt: 0.1250, sse=220338.9, rms=1.415 (1.292%)"
+    ],
+    "seconds": 122.89166838303208
+  },
+  "python_all_steps": {
+    "subject": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official",
+    "input_sha256": {
+      "installed_second_boundary/vertices.raw": "b83a6f616de625bf20166ae3fdcea5ea984d616188f67ba2a6978ccc10e43ec6",
+      "installed_second_boundary/python_boundary_comparison.npz": "a2dc9ceb86b1c253c4f6400a4eaa64a145c0126afdd81cb7fcd48fd105776329"
+    },
+    "official_capture_report_sha256": "e99c57b045bb37a0443026fe93f9c7efe050c4265881bc39fcf23f05dfbec539",
+    "first_step": 18,
+    "last_step": 26,
+    "initial_sse": 669703.5025194291,
+    "records": [
+      {
+        "step": 18,
+        "trials": 1,
+        "rejected_trials": [],
+        "sse": 482625.56078689743,
+        "rms": 3.8010261864661112,
+        "next_dt": 0.5,
+        "reductions": 0,
+        "official_printed_sse_rms": [
+          482625.6,
+          3.801
+        ],
+        "sse_error_from_one_decimal_print": 0.03921310254372656,
+        "coordinates": {
+          "exact_components": 319865,
+          "components": 319866,
+          "mean_mm": 8.944442201480463e-12,
+          "p99_mm": 0.0,
+          "max_mm": 9.5367431640625e-07,
+          "count_gt_1e4_mm": 0,
+          "count_gt_01_mm": 0,
+          "largest": [
+            {
+              "vertex": 62122,
+              "distance_mm": 9.5367431640625e-07
+            },
+            {
+              "vertex": 35534,
+              "distance_mm": 0.0
+            },
+            {
+              "vertex": 35535,
+              "distance_mm": 0.0
+            },
+            {
+              "vertex": 35536,
+              "distance_mm": 0.0
+            },
+            {
+              "vertex": 35537,
+              "distance_mm": 0.0
+            },
+            {
+              "vertex": 35538,
+              "distance_mm": 0.0
+            },
+            {
+              "vertex": 35539,
+              "distance_mm": 0.0
+            },
+            {
+              "vertex": 35540,
+              "distance_mm": 0.0
+            },
+            {
+              "vertex": 35541,
+              "distance_mm": 0.0
+            },
+            {
+              "vertex": 35542,
+              "distance_mm": 0.0
+            }
+          ]
+        }
+      },
+      {
+        "step": 19,
+        "trials": 2,
+        "rejected_trials": [
+          {
+            "dt": 0.5,
+            "sse": 530669.5886923394,
+            "rms": 4.1315807032195915
+          }
+        ],
+        "sse": 338996.0502105013,
+        "rms": 2.7615891332931755,
+        "next_dt": 0.25,
+        "reductions": 1,
+        "official_printed_sse_rms": [
+          338996.1,
+          2.762
+        ],
+        "sse_error_from_one_decimal_print": 0.04978949867654592,
+        "coordinates": {
+          "exact_components": 319865,
+          "components": 319866,
+          "mean_mm": 8.944442201480463e-12,
+          "p99_mm": 0.0,
+          "max_mm": 9.5367431640625e-07,
+          "count_gt_1e4_mm": 0,
+          "count_gt_01_mm": 0,
+          "largest": [
+            {
+              "vertex": 62122,
+              "distance_mm": 9.5367431640625e-07
+            },
+            {
+              "vertex": 35534,
+              "distance_mm": 0.0
+            },
+            {
+              "vertex": 35535,
+              "distance_mm": 0.0
+            },
+            {
+              "vertex": 35536,
+              "distance_mm": 0.0
+            },
+            {
+              "vertex": 35537,
+              "distance_mm": 0.0
+            },
+            {
+              "vertex": 35538,
+              "distance_mm": 0.0
+            },
+            {
+              "vertex": 35539,
+              "distance_mm": 0.0
+            },
+            {
+              "vertex": 35540,
+              "distance_mm": 0.0
+            },
+            {
+              "vertex": 35541,
+              "distance_mm": 0.0
+            },
+            {
+              "vertex": 35542,
+              "distance_mm": 0.0
+            }
+          ]
+        }
+      },
+      {
+        "step": 20,
+        "trials": 1,
+        "rejected_trials": [],
+        "sse": 305732.2182447101,
+        "rms": 2.1771207932531182,
+        "next_dt": 0.25,
+        "reductions": 1,
+        "official_printed_sse_rms": [
+          305732.2,
+          2.177
+        ],
+        "sse_error_from_one_decimal_print": 0.018244710110593587,
+        "coordinates": {
+          "exact_components": 319865,
+          "components": 319866,
+          "mean_mm": 8.944442201480463e-12,
+          "p99_mm": 0.0,
+          "max_mm": 9.5367431640625e-07,
+          "count_gt_1e4_mm": 0,
+          "count_gt_01_mm": 0,
+          "largest": [
+            {
+              "vertex": 62122,
+              "distance_mm": 9.5367431640625e-07
+            },
+            {
+              "vertex": 35534,
+              "distance_mm": 0.0
+            },
+            {
+              "vertex": 35535,
+              "distance_mm": 0.0
+            },
+            {
+              "vertex": 35536,
+              "distance_mm": 0.0
+            },
+            {
+              "vertex": 35537,
+              "distance_mm": 0.0
+            },
+            {
+              "vertex": 35538,
+              "distance_mm": 0.0
+            },
+            {
+              "vertex": 35539,
+              "distance_mm": 0.0
+            },
+            {
+              "vertex": 35540,
+              "distance_mm": 0.0
+            },
+            {
+              "vertex": 35541,
+              "distance_mm": 0.0
+            },
+            {
+              "vertex": 35542,
+              "distance_mm": 0.0
+            }
+          ]
+        }
+      },
+      {
+        "step": 21,
+        "trials": 1,
+        "rejected_trials": [],
+        "sse": 252125.72781770726,
+        "rms": 1.8783988541713863,
+        "next_dt": 0.25,
+        "reductions": 1,
+        "official_printed_sse_rms": [
+          252125.7,
+          1.878
+        ],
+        "sse_error_from_one_decimal_print": 0.02781770724686794,
+        "coordinates": {
+          "exact_components": 319862,
+          "components": 319866,
+          "mean_mm": 1.621180149018334e-11,
+          "p99_mm": 0.0,
+          "max_mm": 9.5367431640625e-07,
+          "count_gt_1e4_mm": 0,
+          "count_gt_01_mm": 0,
+          "largest": [
+            {
+              "vertex": 62122,
+              "distance_mm": 9.5367431640625e-07
+            },
+            {
+              "vertex": 92155,
+              "distance_mm": 4.76837158203125e-07
+            },
+            {
+              "vertex": 54869,
+              "distance_mm": 2.384185791015625e-07
+            },
+            {
+              "vertex": 3271,
+              "distance_mm": 5.960464477539063e-08
+            },
+            {
+              "vertex": 35533,
+              "distance_mm": 0.0
+            },
+            {
+              "vertex": 35534,
+              "distance_mm": 0.0
+            },
+            {
+              "vertex": 35535,
+              "distance_mm": 0.0
+            },
+            {
+              "vertex": 35536,
+              "distance_mm": 0.0
+            },
+            {
+              "vertex": 35537,
+              "distance_mm": 0.0
+            },
+            {
+              "vertex": 35538,
+              "distance_mm": 0.0
+            }
+          ]
+        }
+      },
+      {
+        "step": 22,
+        "trials": 1,
+        "rejected_trials": [],
+        "sse": 244985.93861516868,
+        "rms": 1.7239575666170246,
+        "next_dt": 0.25,
+        "reductions": 1,
+        "official_printed_sse_rms": [
+          244985.9,
+          1.724
+        ],
+        "sse_error_from_one_decimal_print": 0.03861516868346371,
+        "coordinates": {
+          "exact_components": 319850,
+          "components": 319866,
+          "mean_mm": 4.529864054597143e-11,
+          "p99_mm": 0.0,
+          "max_mm": 9.5367431640625e-07,
+          "count_gt_1e4_mm": 0,
+          "count_gt_01_mm": 0,
+          "largest": [
+            {
+              "vertex": 62123,
+              "distance_mm": 9.5367431640625e-07
+            },
+            {
+              "vertex": 62137,
+              "distance_mm": 4.76837158203125e-07
+            },
+            {
+              "vertex": 92155,
+              "distance_mm": 4.76837158203125e-07
+            },
+            {
+              "vertex": 60651,
+              "distance_mm": 4.76837158203125e-07
+            },
+            {
+              "vertex": 62122,
+              "distance_mm": 4.76837158203125e-07
+            },
+            {
+              "vertex": 3272,
+              "distance_mm": 2.4027400458748785e-07
+            },
+            {
+              "vertex": 55581,
+              "distance_mm": 2.384185791015625e-07
+            },
+            {
+              "vertex": 2898,
+              "distance_mm": 2.384185791015625e-07
+            },
+            {
+              "vertex": 54890,
+              "distance_mm": 2.384185791015625e-07
+            },
+            {
+              "vertex": 92553,
+              "distance_mm": 2.384185791015625e-07
+            }
+          ]
+        }
+      },
+      {
+        "step": 23,
+        "trials": 1,
+        "rejected_trials": [],
+        "sse": 258980.78578807905,
+        "rms": 1.674163414508464,
+        "next_dt": 0.125,
+        "reductions": 2,
+        "official_printed_sse_rms": [
+          258980.8,
+          1.674
+        ],
+        "sse_error_from_one_decimal_print": 0.014211920934030786,
+        "coordinates": {
+          "exact_components": 319828,
+          "components": 319866,
+          "mean_mm": 1.3832151675940817e-10,
+          "p99_mm": 0.0,
+          "max_mm": 4.672030911985737e-06,
+          "count_gt_1e4_mm": 0,
+          "count_gt_01_mm": 0,
+          "largest": [
+            {
+              "vertex": 61391,
+              "distance_mm": 4.672030911985737e-06
+            },
+            {
+              "vertex": 103474,
+              "distance_mm": 1.9073486328125e-06
+            },
+            {
+              "vertex": 91091,
+              "distance_mm": 9.5367431640625e-07
+            },
+            {
+              "vertex": 92155,
+              "distance_mm": 9.5367431640625e-07
+            },
+            {
+              "vertex": 62123,
+              "distance_mm": 9.5367431640625e-07
+            },
+            {
+              "vertex": 62103,
+              "distance_mm": 4.76837158203125e-07
+            },
+            {
+              "vertex": 62137,
+              "distance_mm": 4.76837158203125e-07
+            },
+            {
+              "vertex": 60651,
+              "distance_mm": 4.76837158203125e-07
+            },
+            {
+              "vertex": 61392,
+              "distance_mm": 4.76837158203125e-07
+            },
+            {
+              "vertex": 3273,
+              "distance_mm": 2.6656007498500226e-07
+            }
+          ]
+        }
+      },
+      {
+        "step": 24,
+        "trials": 1,
+        "rejected_trials": [],
+        "sse": 225960.51682324725,
+        "rms": 1.4911141724527524,
+        "next_dt": 0.125,
+        "reductions": 2,
+        "official_printed_sse_rms": [
+          225960.5,
+          1.491
+        ],
+        "sse_error_from_one_decimal_print": 0.016823247249703854,
+        "coordinates": {
+          "exact_components": 319792,
+          "components": 319866,
+          "mean_mm": 3.30091903014177e-10,
+          "p99_mm": 0.0,
+          "max_mm": 7.62940908315135e-06,
+          "count_gt_1e4_mm": 0,
+          "count_gt_01_mm": 0,
+          "largest": [
+            {
+              "vertex": 3263,
+              "distance_mm": 7.62940908315135e-06
+            },
+            {
+              "vertex": 61391,
+              "distance_mm": 7.3408147422507535e-06
+            },
+            {
+              "vertex": 92155,
+              "distance_mm": 2.431401974483864e-06
+            },
+            {
+              "vertex": 103474,
+              "distance_mm": 2.132480599880018e-06
+            },
+            {
+              "vertex": 62103,
+              "distance_mm": 1.066240299940009e-06
+            },
+            {
+              "vertex": 91091,
+              "distance_mm": 1.066240299940009e-06
+            },
+            {
+              "vertex": 62123,
+              "distance_mm": 1.066240299940009e-06
+            },
+            {
+              "vertex": 61408,
+              "distance_mm": 9.5367431640625e-07
+            },
+            {
+              "vertex": 62789,
+              "distance_mm": 9.5367431640625e-07
+            },
+            {
+              "vertex": 98043,
+              "distance_mm": 9.5367431640625e-07
+            }
+          ]
+        }
+      },
+      {
+        "step": 25,
+        "trials": 1,
+        "rejected_trials": [],
+        "sse": 220529.9330455077,
+        "rms": 1.4332657643774793,
+        "next_dt": 0.125,
+        "reductions": 2,
+        "official_printed_sse_rms": [
+          220529.9,
+          1.433
+        ],
+        "sse_error_from_one_decimal_print": 0.0330455077055376,
+        "coordinates": {
+          "exact_components": 319751,
+          "components": 319866,
+          "mean_mm": 4.587891860284149e-10,
+          "p99_mm": 0.0,
+          "max_mm": 7.649801765401074e-06,
+          "count_gt_1e4_mm": 0,
+          "count_gt_01_mm": 0,
+          "largest": [
+            {
+              "vertex": 3272,
+              "distance_mm": 7.649801765401074e-06
+            },
+            {
+              "vertex": 3263,
+              "distance_mm": 7.630805936475198e-06
+            },
+            {
+              "vertex": 61391,
+              "distance_mm": 4.5984510235752844e-06
+            },
+            {
+              "vertex": 92155,
+              "distance_mm": 2.7392209274950164e-06
+            },
+            {
+              "vertex": 103474,
+              "distance_mm": 2.132480599880018e-06
+            },
+            {
+              "vertex": 60651,
+              "distance_mm": 2.0230487285229133e-06
+            },
+            {
+              "vertex": 61392,
+              "distance_mm": 2.0230487285229133e-06
+            },
+            {
+              "vertex": 62103,
+              "distance_mm": 1.3486991523486091e-06
+            },
+            {
+              "vertex": 91091,
+              "distance_mm": 1.066240299940009e-06
+            },
+            {
+              "vertex": 62123,
+              "distance_mm": 1.066240299940009e-06
+            }
+          ]
+        }
+      },
+      {
+        "step": 26,
+        "trials": 1,
+        "rejected_trials": [],
+        "sse": 220338.8972382525,
+        "rms": 1.414747294641997,
+        "next_dt": 0.0625,
+        "reductions": 3,
+        "official_printed_sse_rms": [
+          220338.9,
+          1.415
+        ],
+        "sse_error_from_one_decimal_print": 0.0027617474843282253,
+        "coordinates": {
+          "exact_components": 319706,
+          "components": 319866,
+          "mean_mm": 7.716369117308438e-10,
+          "p99_mm": 0.0,
+          "max_mm": 7.844297350102474e-06,
+          "count_gt_1e4_mm": 0,
+          "count_gt_01_mm": 0,
+          "largest": [
+            {
+              "vertex": 2883,
+              "distance_mm": 7.844297350102474e-06
+            },
+            {
+              "vertex": 3272,
+              "distance_mm": 7.747890968039847e-06
+            },
+            {
+              "vertex": 3263,
+              "distance_mm": 7.637146763542811e-06
+            },
+            {
+              "vertex": 3264,
+              "distance_mm": 7.636143634725097e-06
+            },
+            {
+              "vertex": 61391,
+              "distance_mm": 4.184229081817685e-06
+            },
+            {
+              "vertex": 20963,
+              "distance_mm": 3.814697265625e-06
+            },
+            {
+              "vertex": 92155,
+              "distance_mm": 2.86102294921875e-06
+            },
+            {
+              "vertex": 61440,
+              "distance_mm": 2.3360154559928683e-06
+            },
+            {
+              "vertex": 61392,
+              "distance_mm": 2.0230487285229133e-06
+            },
+            {
+              "vertex": 61422,
+              "distance_mm": 1.966049969490843e-06
+            }
+          ]
+        }
+      }
+    ],
+    "diagnostic_npz": "installed_second_all_steps/python_second_pass_comparison.npz",
+    "diagnostic_npz_sha256": "4bf974d38a788b697f06b47dfd4def823755a378c6eb10fef682060f342e41c3",
+    "seconds": {
+      "prepare": 12.396230795886368,
+      "initial_objective": 1.7814816758036613,
+      "gradient": 26.04708896903321,
+      "collision": 275.84829740645364,
+      "step_objective": 24.214474115055054,
+      "total": 340.8193019507453
+    }
+  },
+  "official_third_boundary_capture": {
+    "reference": "installed FreeSurfer 8.2; diagnostic RAM before outer pass three",
+    "binary_sha256": "67139c3590f961f879a4214cd01f173b42986c7b178d1851dfa3f08e8acf12aa",
+    "input_sha256": {
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/brain.finalsurfs.mgz": "c239ba0c807bd381662d388e198715da44103f0c724b3877a7c9623d4ccff9e7",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/wm.mgz": "d6069783c3720b6ec6b7679ee4543a3ba32891b50b9c109a5a6e6f50e1050b46",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/aseg.presurf.mgz": "be7f851405b92d82ec23041621c2da06bceaa700f4ea39c6aae42008c1dc525c",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/surf/lh.orig": "ef1bbc58ad65e2e50a71bd7727112ff4614eb840009cd1060384c598a5cd1126",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/surf/autodet.gw.stats.lh.dat": "10b313e9f29a9d6572f0aef4546d307f6514eaae44896fc19b4212891719c7d9"
+    },
+    "command": [
+      "/public/software/apps/Freesurfer/8.2.0-1/bin/mris_place_surface",
+      "--adgws-in",
+      "../surf/autodet.gw.stats.lh.dat",
+      "--wm",
+      "wm.mgz",
+      "--threads",
+      "4",
+      "--invol",
+      "brain.finalsurfs.mgz",
+      "--lh",
+      "--i",
+      "../surf/lh.orig",
+      "--o",
+      "../surf/lh.white.unused",
+      "--white",
+      "--seg",
+      "aseg.presurf.mgz",
+      "--restore-255",
+      "--nsmooth",
+      "5",
+      "--rip-bg-no-annot",
+      "--rip-bg",
+      "--rip-bg-lof",
+      "--restore-255",
+      "--outvol",
+      "mrisps.wpa.mgz"
+    ],
+    "gdb_status": 0,
+    "boundary_seen": true,
+    "raw_sha256": "eb0c2790b94327124345b0dfa03bdaa6f3c4741b3a9a9bde616ac3bb026ad58a",
+    "raw_size": 49472608,
+    "seconds": 135.10724601801485
+  },
+  "python_third_boundary": {
+    "subject": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official",
+    "inputs": {
+      "installed_second_all_steps/step026.raw": "c15b8c4b7b1983f8e7585df7ffafcc979e0ef11e02ad6b9cdbf66c2e6d0593e7",
+      "installed_third_boundary/vertices.raw": "eb0c2790b94327124345b0dfa03bdaa6f3c4741b3a9a9bde616ac3bb026ad58a",
+      "installed_second_all_steps/python_second_pass_comparison.npz": "4bf974d38a788b697f06b47dfd4def823755a378c6eb10fef682060f342e41c3",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/surf/lh.orig": "ef1bbc58ad65e2e50a71bd7727112ff4614eb840009cd1060384c598a5cd1126",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/surf/autodet.gw.stats.lh.dat": "10b313e9f29a9d6572f0aef4546d307f6514eaae44896fc19b4212891719c7d9",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/brain.finalsurfs.mgz": "c239ba0c807bd381662d388e198715da44103f0c724b3877a7c9623d4ccff9e7",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/wm.mgz": "d6069783c3720b6ec6b7679ee4543a3ba32891b50b9c109a5a6e6f50e1050b46",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/aseg.presurf.mgz": "be7f851405b92d82ec23041621c2da06bceaa700f4ea39c6aae42008c1dc525c"
+    },
+    "python_arrays": "installed_third_boundary/python_comparison.npz",
+    "python_arrays_sha256": "24274ff52f4d65e5ca9f588c094827e397110984e7a427fe91055874264f789e",
+    "python_second_final_xyz": {
+      "exact_components": 319706,
+      "components": 319866,
+      "max_abs": 7.62939453125e-06,
+      "count_gt_1e4": 0,
+      "first_mismatch_components": [
+        6369,
+        6423,
+        7374,
+        7464,
+        7512,
+        7517,
+        8624,
+        8625,
+        8627,
+        8628
+      ]
+    },
+    "official_second_final_to_third_entry": {
+      "xyz": {
+        "exact_components": 319866,
+        "components": 319866,
+        "max_abs": 0.0,
+        "count_gt_1e4": 0,
+        "first_mismatch_components": []
+      },
+      "orig": {
+        "exact_components": 319866,
+        "components": 319866,
+        "max_abs": 0.0,
+        "count_gt_1e4": 0,
+        "first_mismatch_components": []
+      },
+      "normal": {
+        "exact_components": 319866,
+        "components": 319866,
+        "max_abs": 0.0,
+        "count_gt_1e4": 0,
+        "first_mismatch_components": []
+      }
+    },
+    "ripped_count": 5744,
+    "reference_ripped_count": 5744,
+    "ripped_mismatch": 0,
+    "ripped_mismatch_vertices": [],
+    "marked_mismatch": 0,
+    "fields": {
+      "value_after_average": {
+        "exact_components": 106622,
+        "components": 106622,
+        "max_abs": 0.0,
+        "count_gt_1e4": 0,
+        "first_mismatch_components": []
+      },
+      "distance": {
+        "exact_components": 106622,
+        "components": 106622,
+        "max_abs": 0.0,
+        "count_gt_1e4": 0,
+        "first_mismatch_components": []
+      },
+      "gradient_magnitude": {
+        "exact_components": 106277,
+        "components": 106622,
+        "max_abs": 14.11612606048584,
+        "count_gt_1e4": 345,
+        "first_mismatch_components": [
+          1773,
+          2108,
+          2109,
+          2123,
+          2124,
+          2485,
+          2489,
+          2490,
+          2504,
+          2505
+        ]
+      },
+      "target": {
+        "exact_components": 319866,
+        "components": 319866,
+        "max_abs": 0.0,
+        "count_gt_1e4": 0,
+        "first_mismatch_components": []
+      },
+      "sigma": {
+        "exact_components": 106489,
+        "components": 106622,
+        "max_abs": 2.0,
+        "count_gt_1e4": 133,
+        "first_mismatch_components": [
+          39124,
+          39140,
+          39988,
+          39989,
+          40051,
+          40068,
+          40077,
+          40870,
+          40871,
+          40872
+        ]
+      }
+    },
+    "active_fields": {
+      "gradient_magnitude": {
+        "exact_components": 100662,
+        "components": 100878,
+        "max_abs": 14.11612606048584,
+        "count_gt_1e4": 216,
+        "first_mismatch_components": [
+          1773,
+          2108,
+          2109,
+          2123,
+          2124,
+          2485,
+          2489,
+          2490,
+          2504,
+          2505
+        ]
+      },
+      "sigma": {
+        "exact_components": 100878,
+        "components": 100878,
+        "max_abs": 0.0,
+        "count_gt_1e4": 0,
+        "first_mismatch_components": []
+      }
+    },
+    "seconds": {
+      "prepare": 4.146274527069181,
+      "rip": 8.071440077852458,
+      "border": 5.084112900309265,
+      "average": 6.487096556928009,
+      "total": 23.788924062158912
+    }
+  },
+  "first_numeric_divergence": {
+    "coordinate": "第二轮 step18 顶点 62122 的一个 float32 坐标分量差 9.5367431640625e-7 mm；后续 step19–26 最大顶点欧氏差不超过 7.844297350102474e-6 mm，逐步均无 >0.0001 mm 顶点",
+    "sse": "step18 安装版逐项日志总 SSE 482625.560794；Python 482625.560786897，差 7.103e-6。step19–26 官方只打印一位小数，Python 各步均在对应打印值 ±0.05 内，无法据此声称后八步微小 SSE 逐位相同。",
+    "third_boundary": "第三轮入口活跃 mean 辅助字段 216 个顶点不同，最大 14.116126；ripped 顶点遗留 sigma 133 处不同。目标值、距离、目标坐标、冻结/标记及活跃 sigma 逐位相同。"
+  }
+}
