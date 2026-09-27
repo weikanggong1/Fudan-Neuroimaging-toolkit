@@ -2,11 +2,12 @@
 
 import numpy as np
 import pytest
-import surfa as sf
 import torch
 
 import fnit
 from fnit.flirt import FLIRTResult, TorchFLIRT
+from fnit.flirt.core import FSLCorrelationRatio
+from fnit.synthstrip.geometry import Volume
 from fnit.flirt import core as flirt_core
 from fnit.flirt.coordinates import (
     flirt_to_world_affine,
@@ -24,7 +25,7 @@ def _volume(shape=(7, 8, 9), vox2world=None):
     data = np.exp(
         -sum((axis - center[index]) ** 2 for index, axis in enumerate(axes)) / 6
     ).astype(np.float32)
-    return sf.Volume(data, geometry=sf.ImageGeometry(shape, vox2world=vox2world))
+    return Volume(data, vox2world)
 
 
 def test_world_and_flirt_matrix_conversions_are_exact_inverses():
@@ -98,3 +99,37 @@ def test_reference_validation_is_not_reported_as_current_input_equivalence(
     assert result.qc["current_input_compared_with_fsl"] is False
     assert result.qc["validated_fsl_equivalent"] is False
     assert result.qc["complete_numerical_equivalence_claimed"] is False
+
+
+def test_weighted_correlation_ratio_matches_unweighted_for_unit_weights():
+    reference = torch.arange(7 * 8 * 9, dtype=torch.float32).reshape(7, 8, 9)
+    moving = torch.flip(reference, dims=(0,)) + 1
+    kwargs = {
+        "reference_voxel_sizes": (1.0, 1.0, 1.0),
+        "moving_voxel_sizes": (1.0, 1.0, 1.0),
+        "bins": 16,
+        "smooth_size": 1.0,
+    }
+    unweighted = FSLCorrelationRatio(reference, moving, **kwargs)
+    weighted = FSLCorrelationRatio(
+        reference,
+        moving,
+        reference_weight=torch.ones_like(reference),
+        moving_weight=torch.ones_like(moving),
+        **kwargs,
+    )
+    assert weighted(np.eye(4)) == pytest.approx(
+        unweighted(np.eye(4)), abs=1e-7
+    )
+
+
+def test_flirt_rejects_weight_on_a_different_grid():
+    image = _volume()
+    shifted_geometry = np.eye(4)
+    shifted_geometry[0, 3] = 2
+    weight = _volume(vox2world=shifted_geometry)
+
+    with pytest.raises(ValueError, match="inweight must match"):
+        TorchFLIRT(device="cpu", angular_search=False)(
+            image, image, inweight=weight
+        )

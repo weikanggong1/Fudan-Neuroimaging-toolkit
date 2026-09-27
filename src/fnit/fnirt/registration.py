@@ -18,12 +18,19 @@ import numpy as np
 import surfa as sf
 import torch
 
-from ..flirt.coordinates import voxel_to_fsl_scaled_mm, world_to_flirt_affine
+from ..flirt.coordinates import (
+    flirt_to_world_affine,
+    voxel_to_fsl_scaled_mm,
+    world_to_flirt_affine,
+)
 from ..fast_vbm.synthmorph_backend import (
     _world_affine,
     pull_jacobian_determinants,
 )
-from .optimizer import preconditioned_conjugate_gradient
+from .optimizer import (
+    preconditioned_conjugate_gradient,
+    scaled_conjugate_gradient,
+)
 from .io import make_fsl_coefficient_image
 from .spline import (
     BendingOperator,
@@ -75,7 +82,12 @@ class GMFNIRTConfig:
     regularization: tuple[float, ...] = (150.0, 75.0, 50.0, 30.0)
     estimate_intensity: tuple[bool, ...] = (True, True, True, False)
     apply_reference_mask: tuple[bool, ...] = (False, False, False, True)
+    minimization_methods: tuple[str, ...] | None = None
+    process_stages: tuple[int, ...] | None = None
+    implicit_reference_mask: bool = True
+    implicit_input_mask: bool = True
     warp_resolution_mm: tuple[float, float, float] = (10.0, 10.0, 10.0)
+    warp_resolution_schedule_mm: tuple[tuple[float, float, float], ...] | None = None
     jacobian_range: tuple[float, float] = (0.2, 5.0)
     ssd_weighted_lambda: bool = True
 
@@ -89,7 +101,16 @@ class GMFNIRTConfig:
             self.estimate_intensity,
             self.apply_reference_mask,
         )
+        optional_schedules = (
+            self.minimization_methods,
+            self.process_stages,
+        )
         if count == 0 or any(len(schedule) != count for schedule in schedules):
+            raise ValueError("all FNIRT schedules must have the same non-zero length")
+        if any(
+            schedule is not None and len(schedule) != count
+            for schedule in optional_schedules
+        ):
             raise ValueError("all FNIRT schedules must have the same non-zero length")
         if any(value not in (1, 2, 4, 8, 16) for value in self.subsampling):
             raise ValueError("FNIRT subsampling factors must be powers of two")
@@ -97,6 +118,28 @@ class GMFNIRTConfig:
             raise ValueError("maximum iterations must be non-negative")
         if any(value < 0 for value in self.regularization):
             raise ValueError("regularization must be non-negative")
+        if self.minimization_methods is not None and any(
+            value not in ("lm", "scg") for value in self.minimization_methods
+        ):
+            raise ValueError("minimization methods must be lm or scg")
+        if self.process_stages is not None:
+            if any(value < 1 for value in self.process_stages):
+                raise ValueError("process stage identifiers must be positive")
+            if any(
+                current < previous
+                for previous, current in zip(
+                    self.process_stages, self.process_stages[1:]
+                )
+            ):
+                raise ValueError("process stage identifiers must be non-decreasing")
+        if self.warp_resolution_schedule_mm is not None:
+            if len(self.warp_resolution_schedule_mm) != count:
+                raise ValueError("warp resolution schedule must match the level count")
+            if any(
+                len(value) != 3 or any(item <= 0 for item in value)
+                for value in self.warp_resolution_schedule_mm
+            ):
+                raise ValueError("each warp resolution must contain three positive values")
 
 
 @dataclass
@@ -176,6 +219,24 @@ def _fsl_gaussian_blur(volume, fwhm_mm, voxel_sizes):
     return result
 
 
+def _fsl_masked_gaussian_blur(volume, fwhm_mm, voxel_sizes, mask):
+    """FSL ``fnirt_CF::masked_smoothing`` for an input image."""
+    if fwhm_mm <= 0 or mask is None:
+        return _fsl_gaussian_blur(volume, fwhm_mm, voxel_sizes)
+    if volume.ndim != 5 or mask.ndim != 3 or volume.shape[2:] != mask.shape:
+        raise ValueError("masked smoothing expects [N,C,X,Y,Z] and [X,Y,Z]")
+    mask_image = mask.to(dtype=volume.dtype)[None, None]
+    numerator = _fsl_gaussian_blur(
+        volume * mask_image, fwhm_mm, voxel_sizes
+    )
+    denominator = _fsl_gaussian_blur(mask_image, fwhm_mm, voxel_sizes)
+    return torch.where(
+        mask_image > 0,
+        numerator / denominator.clamp_min(torch.finfo(volume.dtype).tiny),
+        torch.zeros_like(numerator),
+    )
+
+
 def _subsampled_size(size, factor):
     result = int(size)
     remaining = int(factor)
@@ -183,6 +244,48 @@ def _subsampled_size(size, factor):
         result = result // 2 + 1
         remaining //= 2
     return result
+
+
+def _process_knot_spacing_schedule(
+    resolution_schedule, process_stages, subsampling, voxel_sizes
+):
+    """Convert FNIRT warpres values to each process' full-grid spacing.
+
+    FSL constructs a process at warpres / reference_voxel_size knots and then
+    divides that spacing by the process' final subsampling factor in
+    fnirt_clp::FullResKsp. The same full-grid spacing is retained while that
+    process moves between resolution levels.
+    """
+    result = [None] * len(process_stages)
+    start = 0
+    while start < len(process_stages):
+        stage = process_stages[start]
+        stop = start + 1
+        while stop < len(process_stages) and process_stages[stop] == stage:
+            stop += 1
+        requested = tuple(float(value) for value in resolution_schedule[start])
+        if any(
+            tuple(float(value) for value in resolution_schedule[index]) != requested
+            for index in range(start + 1, stop)
+        ):
+            raise ValueError("warp resolution must be constant within a FNIRT process")
+        final_subsampling = int(subsampling[stop - 1])
+        spacing = []
+        for resolution, voxel_size in zip(requested, voxel_sizes):
+            native_spacing = max(
+                1, int(math.floor(resolution / float(voxel_size) + 0.5))
+            )
+            full_spacing = native_spacing // final_subsampling
+            if full_spacing < 1:
+                raise ValueError(
+                    "warp resolution is incompatible with the process' final "
+                    "subsampling factor"
+                )
+            spacing.append(full_spacing)
+        for index in range(start, stop):
+            result[index] = tuple(spacing)
+        start = stop
+    return tuple(result)
 
 
 def _level_positions(shape, stride, *, device, dtype):
@@ -219,12 +322,15 @@ def _trilinear_sample(volume, coordinates):
     upper = []
     fraction = []
     for coordinate, size in zip(flat, volume.shape):
-        valid &= (coordinate >= 0) & (coordinate <= size - 1)
-        lo = torch.floor(coordinate).to(torch.long).clamp(0, size - 1)
+        # newimage::volume::valid(float, float, float) uses a 1e-8 tolerance.
+        # Keep extrapolated samples within that tolerance in the data mask;
+        # interpolation itself remains zero padded, as in newimage.
+        valid &= (coordinate + 1e-8 >= 0) & (coordinate <= size - 1 + 1e-8)
+        lo = torch.floor(coordinate).to(torch.long)
         hi = lo + 1
         lower.append(lo)
         upper.append(hi)
-        fraction.append((coordinate - lo.to(coordinate.dtype)).clamp(0, 1))
+        fraction.append(coordinate - lo.to(coordinate.dtype))
 
     sx, sy, sz = volume.shape
     linear = volume.reshape(-1)
@@ -514,6 +620,7 @@ class _LevelSystem:
         moving,
         fixed,
         reference_mask,
+        moving_mask,
         moving_fsl2vox,
         target_fsl,
         affine_pull,
@@ -527,6 +634,7 @@ class _LevelSystem:
         self.moving = moving
         self.fixed = fixed
         self.reference_mask = reference_mask
+        self.moving_mask = moving_mask
         self.moving_fsl2vox = moving_fsl2vox
         self.target_fsl = target_fsl
         self.affine_pull = affine_pull
@@ -565,6 +673,15 @@ class _LevelSystem:
             self.moving, source_voxels
         )
         mask = valid
+        if self.moving_mask is not None:
+            warped_mask, _, _ = _trilinear_sample(
+                self.moving_mask, source_voxels
+            )
+            # ``robjmask`` is a ``volume<char>`` upstream. warpfns casts the
+            # trilinear value to char while resampling, before ``Mask()``
+            # applies its >0.5 test. For a binary mask this admits only
+            # samples whose interpolated float value survives truncation to 1.
+            mask = mask & (warped_mask.to(torch.int8) > 0)
         if self.reference_mask is not None:
             mask = mask & self.reference_mask
         count = int(mask.sum())
@@ -598,6 +715,36 @@ class _LevelSystem:
                 self.moving_fsl2vox[:3, :3],
             )
         return state
+
+    def gradient(self, coefficients, scale, *, effective_lambda=None):
+        """Return the FSL SSD gradient and its evaluated state.
+
+        The override reproduces stateful latest_ssd behavior in SCG because a
+        finite-difference gradient does not itself update that value.
+        """
+        state = self.evaluate(coefficients, scale, derivatives=True)
+        mask = state["mask"].to(state["residual"].dtype)
+        count = state["count"]
+        weighted = state["residual"] * mask / count
+        coefficient_gradient = adjoint_field(
+            (state["gradient_fsl"] * weighted[None]).to(coefficients.dtype),
+            self.bases,
+        )
+        scale_gradient = None
+        if self.estimate_scale:
+            scale_gradient = -(
+                self.fixed * weighted
+            ).sum(dtype=coefficients.dtype)
+        if effective_lambda is None:
+            effective_lambda = state["effective_lambda"]
+        bend_factor = effective_lambda / count
+        coefficient_gradient = coefficient_gradient + (
+            bend_factor * self.bending.normal(coefficients)
+        )
+        # FSL applies a factor of two to both the mean-SSD and bending-energy
+        # gradients. It cancels from the LM normal equations but is required by
+        # the finite-difference curvature and lambda updates in SCG.
+        return state, 2.0 * _pack(coefficient_gradient, scale_gradient)
 
     def linearize(self, coefficients, scale):
         state = self.evaluate(coefficients, scale, derivatives=True)
@@ -782,8 +929,24 @@ class TorchFNIRT:
         )
         moving_tensor = moving_raw * moving_scale
         fixed_tensor = torch.from_numpy(fixed_data.copy()).to(device) * fixed_scale
-        mask_tensor = (
-            None if mask_data is None else torch.from_numpy(mask_data.copy()).to(device)
+        explicit_reference_mask = (
+            None
+            if mask_data is None
+            else torch.from_numpy(mask_data.copy()).to(device)
+        )
+        implicit_reference_mask = (
+            torch.from_numpy(
+                (np.abs(fixed_data.astype(np.float64)) >= 1e-16).copy()
+            ).to(device)
+            if self.config.implicit_reference_mask
+            else None
+        )
+        # FNIRT builds the input implicit mask after in-place mean scaling,
+        # while it builds the reference implicit mask before scaling.
+        implicit_input_mask = (
+            moving_tensor.abs() >= 1e-16
+            if self.config.implicit_input_mask
+            else None
         )
 
         moving_fsl_array = voxel_to_fsl_scaled_mm(
@@ -813,20 +976,34 @@ class TorchFNIRT:
             torch.as_tensor(forward_array, device=device, dtype=dtype)
         )
         affine_pull = affine_pull_exact.to(image_dtype)
+        stage_forward_array = np.asarray(forward_array, dtype=np.float64)
 
         fixed_shape = tuple(int(value) for value in fixed_data.shape)
         fixed_voxel_sizes = tuple(float(value) for value in fixed.geom.voxsize)
         moving_voxel_sizes = tuple(float(value) for value in moving.geom.voxsize)
-        knot_spacing = tuple(
-            max(1, int(math.floor(mm / voxel + 0.5)))
-            for mm, voxel in zip(
-                self.config.warp_resolution_mm, fixed_voxel_sizes
+        resolution_schedule = self.config.warp_resolution_schedule_mm
+        if resolution_schedule is None:
+            resolution_schedule = (self.config.warp_resolution_mm,) * len(
+                self.config.subsampling
             )
+        minimization_methods = self.config.minimization_methods
+        if minimization_methods is None:
+            minimization_methods = ("lm",) * len(self.config.subsampling)
+        process_stages = self.config.process_stages
+        if process_stages is None:
+            process_stages = (1,) * len(self.config.subsampling)
+        knot_spacing_schedule = _process_knot_spacing_schedule(
+            resolution_schedule,
+            process_stages,
+            self.config.subsampling,
+            fixed_voxel_sizes,
         )
+        knot_spacing = None
         coefficients = None
         previous_stride = None
         previous_level_voxel_sizes = None
         previous_bases = None
+        previous_stage = None
         scale = torch.ones((), device=device, dtype=dtype)
         levels = []
 
@@ -838,6 +1015,10 @@ class TorchFNIRT:
             regularization,
             estimate_intensity,
             apply_reference_mask,
+            minimization_method,
+            process_stage,
+            warp_resolution,
+            full_knot_spacing,
         ) in enumerate(
             zip(
                 self.config.subsampling,
@@ -847,6 +1028,10 @@ class TorchFNIRT:
                 self.config.regularization,
                 self.config.estimate_intensity,
                 self.config.apply_reference_mask,
+                minimization_methods,
+                process_stages,
+                resolution_schedule,
+                knot_spacing_schedule,
             ),
             start=1,
         ):
@@ -861,6 +1046,55 @@ class TorchFNIRT:
                 torch.arange(size, device=device, dtype=dtype)
                 for size in level_shape
             )
+            new_knot_spacing = tuple(full_knot_spacing)
+            stage_boundary = (
+                coefficients is not None and process_stage != previous_stage
+            )
+            if coefficients is None:
+                knot_spacing = new_knot_spacing
+                coefficient_shape = fsl_control_shape(level_shape, knot_spacing)
+                coefficients = torch.zeros(
+                    (3, *coefficient_shape), device=device, dtype=dtype
+                )
+            else:
+                if stride != previous_stride:
+                    coefficients = zoom_coefficients(
+                        coefficients,
+                        level_shape,
+                        knot_spacing,
+                        previous_level_voxel_sizes,
+                        level_voxel_sizes,
+                        old_knot_spacing=knot_spacing,
+                    )
+                if stage_boundary:
+                    # ``--cout`` stores float coefficients and ``--intout``
+                    # writes global parameters with MISCMATHS precision 10.
+                    coefficients = coefficients.to(image_dtype).to(dtype)
+                    stage_forward_array = np.asarray(
+                        stage_forward_array, dtype=np.float32
+                    ).astype(np.float64)
+                    affine_pull_exact = torch.linalg.inv(
+                        torch.as_tensor(
+                            stage_forward_array, device=device, dtype=dtype
+                        )
+                    )
+                    affine_pull = affine_pull_exact.to(image_dtype)
+                    scale = torch.tensor(
+                        float(format(float(scale), ".10g")),
+                        device=device,
+                        dtype=dtype,
+                    )
+                if new_knot_spacing != knot_spacing:
+                    coefficients = zoom_coefficients(
+                        coefficients,
+                        level_shape,
+                        new_knot_spacing,
+                        level_voxel_sizes,
+                        level_voxel_sizes,
+                        old_knot_spacing=knot_spacing,
+                    )
+                    knot_spacing = new_knot_spacing
+                coefficient_shape = fsl_control_shape(level_shape, knot_spacing)
             bases = spline_bases(
                 level_shape,
                 knot_spacing,
@@ -869,31 +1103,28 @@ class TorchFNIRT:
                 dtype=dtype,
                 positions=level_positions,
             )
-            coefficient_shape = fsl_control_shape(level_shape, knot_spacing)
-            if coefficients is None:
-                coefficients = torch.zeros(
-                    (3, *coefficient_shape), device=device, dtype=dtype
-                )
-            elif stride != previous_stride:
-                coefficients = zoom_coefficients(
-                    coefficients,
-                    level_shape,
-                    knot_spacing,
-                    previous_level_voxel_sizes,
-                    level_voxel_sizes,
-                )
 
-            moving_level = _fsl_gaussian_blur(
-                moving_tensor[None, None], input_fwhm, moving_voxel_sizes
+            moving_level = _fsl_masked_gaussian_blur(
+                moving_tensor[None, None],
+                input_fwhm,
+                moving_voxel_sizes,
+                implicit_input_mask,
             )[0, 0]
             fixed_smoothed = _fsl_gaussian_blur(
                 fixed_tensor[None, None], reference_fwhm, fixed_voxel_sizes
             )[0, 0]
             fixed_level = _take_integer_grid(fixed_smoothed, full_positions)
+            combined_reference_mask = implicit_reference_mask
+            if apply_reference_mask and explicit_reference_mask is not None:
+                combined_reference_mask = (
+                    explicit_reference_mask
+                    if combined_reference_mask is None
+                    else combined_reference_mask & explicit_reference_mask
+                )
             reference_mask_level = None
-            if apply_reference_mask and mask_tensor is not None:
+            if combined_reference_mask is not None:
                 reference_mask_level = _take_integer_grid(
-                    mask_tensor.to(dtype), full_positions
+                    combined_reference_mask.to(dtype), full_positions
                 ) > 0.99
             target_fsl = _coordinate_grid(fixed_fsl, full_positions)
             level_to_full = torch.diag(
@@ -917,6 +1148,11 @@ class TorchFNIRT:
                 moving_level,
                 fixed_level,
                 reference_mask_level,
+                (
+                    None
+                    if implicit_input_mask is None
+                    else implicit_input_mask.to(image_dtype)
+                ),
                 moving_fsl2vox,
                 target_fsl,
                 affine_pull,
@@ -933,66 +1169,129 @@ class TorchFNIRT:
             attempts = 0
             converged = False
             pcg_reports = []
+            scg_history = []
             state = system.evaluate(coefficients, scale)
-            while accepted < maximum_iterations and attempts < 10 * max(
-                1, maximum_iterations
-            ):
-                attempts += 1
-                state, gradient, matvec, diagonal = system.linearize(
-                    coefficients, scale
+            if minimization_method == "scg":
+                initial_vector = _pack(
+                    coefficients, scale if estimate_intensity else None
                 )
-                damping_diagonal = diagonal.clamp_min(
-                    torch.finfo(dtype).eps * diagonal.abs().mean().clamp_min(1)
-                )
+                fixed_scale = scale
+                latest_ssd = None
 
-                def damped(value):
-                    return matvec(value) + lm_lambda * damping_diagonal * value
-
-                step, pcg = preconditioned_conjugate_gradient(
-                    damped,
-                    -gradient,
-                    diagonal=(1 + lm_lambda) * damping_diagonal,
-                    tolerance=self.pcg_tolerance,
-                    max_iterations=self.pcg_max_iterations,
-                )
-                pcg_reports.append(
-                    {
-                        "iterations": pcg.iterations,
-                        "converged": pcg.converged,
-                        "relative_residual": pcg.relative_residual,
-                    }
-                )
-                delta_coefficients, delta_scale = _unpack(
-                    step, coefficient_shape, estimate_intensity
-                )
-                candidate_coefficients = coefficients + delta_coefficients
-                candidate_scale = (
-                    scale + delta_scale if delta_scale is not None else scale
-                )
-                candidate = system.evaluate(
-                    candidate_coefficients, candidate_scale
-                )
-                if bool(torch.isfinite(candidate["cost"])) and float(
-                    candidate["cost"]
-                ) < float(state["cost"]):
-                    old_cost = float(state["cost"])
-                    new_cost = float(candidate["cost"])
-                    coefficients = candidate_coefficients
-                    scale = candidate_scale
-                    state = candidate
-                    accepted += 1
-                    lm_lambda /= 10.0
-                    converged = (
-                        2 * abs(old_cost - new_cost)
-                        <= self.cost_tolerance
-                        * (abs(old_cost) + abs(new_cost) + torch.finfo(dtype).eps)
+                def unpack_parameters(vector):
+                    current_coefficients, current_scale = _unpack(
+                        vector, coefficient_shape, estimate_intensity
                     )
-                    if converged:
-                        break
-                else:
-                    lm_lambda *= 10.0
-                    if lm_lambda > 1e20:
-                        break
+                    if current_scale is None:
+                        current_scale = fixed_scale
+                    return current_coefficients, current_scale
+
+                def scg_cost(vector):
+                    nonlocal latest_ssd
+                    current_coefficients, current_scale = unpack_parameters(vector)
+                    current_state = system.evaluate(
+                        current_coefficients, current_scale
+                    )
+                    latest_ssd = float(current_state["ssd"])
+                    return current_state["cost"]
+
+                def scg_gradient(vector):
+                    current_coefficients, current_scale = unpack_parameters(vector)
+                    effective_lambda = regularization
+                    if self.config.ssd_weighted_lambda:
+                        if latest_ssd is None:
+                            raise RuntimeError("SCG cost must be evaluated first")
+                        effective_lambda *= latest_ssd
+                    _, value = system.gradient(
+                        current_coefficients,
+                        current_scale,
+                        effective_lambda=effective_lambda,
+                    )
+                    return value
+
+                result_vector, scg = scaled_conjugate_gradient(
+                    scg_cost,
+                    scg_gradient,
+                    initial_vector,
+                    max_iterations=maximum_iterations,
+                    initial_lambda=self.initial_lm_lambda,
+                )
+                coefficients, updated_scale = unpack_parameters(result_vector)
+                scale = updated_scale
+                state = system.evaluate(coefficients, scale)
+                attempts = scg.iterations
+                accepted = scg.accepted_iterations
+                converged = scg.converged
+                lm_lambda = scg.lambda_final
+                scg_history = list(scg.history)
+            else:
+                while accepted < maximum_iterations and attempts < 10 * max(
+                    1, maximum_iterations
+                ):
+                    attempts += 1
+                    state, gradient, matvec, diagonal = system.linearize(
+                        coefficients, scale
+                    )
+                    damping_diagonal = diagonal.clamp_min(
+                        torch.finfo(dtype).eps
+                        * diagonal.abs().mean().clamp_min(1)
+                    )
+
+                    def damped(value):
+                        return (
+                            matvec(value)
+                            + lm_lambda * damping_diagonal * value
+                        )
+
+                    step, pcg = preconditioned_conjugate_gradient(
+                        damped,
+                        -gradient,
+                        diagonal=(1 + lm_lambda) * damping_diagonal,
+                        tolerance=self.pcg_tolerance,
+                        max_iterations=self.pcg_max_iterations,
+                    )
+                    pcg_reports.append(
+                        {
+                            "iterations": pcg.iterations,
+                            "converged": pcg.converged,
+                            "relative_residual": pcg.relative_residual,
+                        }
+                    )
+                    delta_coefficients, delta_scale = _unpack(
+                        step, coefficient_shape, estimate_intensity
+                    )
+                    candidate_coefficients = coefficients + delta_coefficients
+                    candidate_scale = (
+                        scale + delta_scale if delta_scale is not None else scale
+                    )
+                    candidate = system.evaluate(
+                        candidate_coefficients, candidate_scale
+                    )
+                    if bool(torch.isfinite(candidate["cost"])) and float(
+                        candidate["cost"]
+                    ) < float(state["cost"]):
+                        old_cost = float(state["cost"])
+                        new_cost = float(candidate["cost"])
+                        coefficients = candidate_coefficients
+                        scale = candidate_scale
+                        state = candidate
+                        accepted += 1
+                        lm_lambda /= 10.0
+                        converged = (
+                            2 * abs(old_cost - new_cost)
+                            <= self.cost_tolerance
+                            * (
+                                abs(old_cost)
+                                + abs(new_cost)
+                                + torch.finfo(dtype).eps
+                            )
+                        )
+                        if converged:
+                            break
+                    else:
+                        lm_lambda *= 10.0
+                        if lm_lambda > 1e20:
+                            break
 
             full_jacobian = _spline_jacobian(
                 coefficients,
@@ -1040,6 +1339,8 @@ class TorchFNIRT:
                     "stride": stride,
                     "matrix_size": list(level_shape),
                     "control_grid_shape": list(coefficient_shape),
+                    "warp_resolution_mm": list(warp_resolution),
+                    "knot_spacing_voxels": list(knot_spacing),
                     "maximum_iterations": maximum_iterations,
                     "accepted_iterations": accepted,
                     "attempts": attempts,
@@ -1054,10 +1355,20 @@ class TorchFNIRT:
                     "intensity_scale": float(scale),
                     "estimate_intensity": estimate_intensity,
                     "apply_reference_mask": apply_reference_mask,
-                    "reference_mask_available": mask_tensor is not None,
+                    "explicit_reference_mask_available": (
+                        explicit_reference_mask is not None
+                    ),
+                    "implicit_reference_mask": (
+                        implicit_reference_mask is not None
+                    ),
+                    "implicit_input_mask": implicit_input_mask is not None,
                     "mask_voxels": state["count"],
-                    "lm_lambda_final": lm_lambda,
+                    "minimization_method": minimization_method,
+                    "process_stage": process_stage,
+                    "process_boundary_handoff": stage_boundary,
+                    "lm_or_scg_lambda_final": lm_lambda,
                     "pcg": pcg_reports,
+                    "scg": scg_history,
                     "full_jacobian_min_before_projection": jacobian_min,
                     "full_jacobian_max_before_projection": jacobian_max,
                     "topology_projection_required": topology_projection_required,
@@ -1067,9 +1378,27 @@ class TorchFNIRT:
             previous_stride = stride
             previous_level_voxel_sizes = level_voxel_sizes
             previous_bases = bases
+            previous_stage = process_stage
 
-        if previous_stride != 1:
-            raise ValueError("the final FNIRT level must use full resolution")
+        final_output_upsampled = previous_stride != 1
+        if final_output_upsampled:
+            coefficients = zoom_coefficients(
+                coefficients,
+                fixed_shape,
+                knot_spacing,
+                previous_level_voxel_sizes,
+                fixed_voxel_sizes,
+                old_knot_spacing=knot_spacing,
+            )
+            previous_bases = spline_bases(
+                fixed_shape,
+                knot_spacing,
+                fixed_voxel_sizes,
+                device=device,
+                dtype=dtype,
+            )
+            previous_stride = 1
+            previous_level_voxel_sizes = fixed_voxel_sizes
         with torch.no_grad():
             field = expand_coefficients(coefficients, previous_bases).to(
                 image_dtype
@@ -1129,7 +1458,15 @@ class TorchFNIRT:
         full_world, _, affine_pull_determinant = pull_jacobian_determinants(
             displacement_array,
             fixed.geom.vox2world.matrix,
-            initial.matrix,
+            flirt_to_world_affine(
+                stage_forward_array,
+                moving.geom.vox2world.matrix,
+                fixed.geom.vox2world.matrix,
+                moving_data.shape,
+                fixed_data.shape,
+                moving.geom.voxsize,
+                fixed.geom.voxsize,
+            ),
             device=device,
         )
         moved_array = moved.cpu().numpy().astype(np.float32)
@@ -1146,10 +1483,10 @@ class TorchFNIRT:
             fixed_shape,
             fixed_voxel_sizes,
             knot_spacing,
-            forward_array,
+            stage_forward_array,
         )
         qc = {
-            "backend": "pytorch-fnirt-matrix-free-lm",
+            "backend": "pytorch-fnirt",
             "device": str(self.device),
             "tf32": {
                 "matmul": bool(torch.backends.cuda.matmul.allow_tf32),
@@ -1159,11 +1496,25 @@ class TorchFNIRT:
             "fsl_fnirt_numerically_equivalent": False,
             "equivalence_status": "external FSL 6.0.7.4 numerical gate not passed",
             "fsl_source_versions": FSL_SOURCE_VERSIONS,
-            "optimizer": "Gauss-Newton/Levenberg-Marquardt with PCG",
+            "optimizer": list(minimization_methods),
             "hessian": "analytic matrix-free B-spline JtJ plus bending Hessian",
             "global_intensity_model": "multiplicative scale of reference",
             "ssd_weighted_lambda": self.config.ssd_weighted_lambda,
-            "mask_schedule_matches_gm_config": mask_tensor is not None,
+            "mask_schedule_matches_gm_config": (
+                explicit_reference_mask is not None
+                or not any(self.config.apply_reference_mask)
+            ),
+            "implicit_reference_mask": self.config.implicit_reference_mask,
+            "implicit_input_mask": self.config.implicit_input_mask,
+            "masked_input_smoothing": self.config.implicit_input_mask,
+            "process_stages": list(process_stages),
+            "process_full_resolution_knot_spacing_voxels": [
+                list(value) for value in knot_spacing_schedule
+            ],
+            "process_handoff_float32_coefficients": True,
+            "process_handoff_float32_affine_header": True,
+            "process_handoff_intensity_precision": 10,
+            "final_output_upsampled_to_reference_grid": final_output_upsampled,
             "intensity_schedule_matches_gm_config": True,
             "topology_projection_matches_fsl": False,
             "topology_projection": (
@@ -1175,7 +1526,10 @@ class TorchFNIRT:
             ),
             "accepts_fsl_coefficient_file": False,
             "exports_fsl_coefficient_file": True,
-            "reference_mask_available": mask_tensor is not None,
+            "reference_mask_available": (
+                explicit_reference_mask is not None
+                or implicit_reference_mask is not None
+            ),
             "knot_spacing_voxels": list(knot_spacing),
             "control_grid_shape": list(coefficients.shape[1:]),
             "levels": levels,

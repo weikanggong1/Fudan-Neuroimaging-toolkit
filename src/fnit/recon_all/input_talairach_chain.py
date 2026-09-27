@@ -7,12 +7,57 @@ import json
 from pathlib import Path
 import time
 
-import surfa as sf
+import numpy as np
+import torch
 
 from fnit.synthstrip import SynthStrip
 
 from .input_chain import run_input_chain
 from .talairach_synthmorph import register_talairach
+
+
+def write_voxel_lta_from_ras(source_lta: str | Path, output_lta: str | Path) -> None:
+    """Convert the fixed SynthMorph RAS LTA to voxel coordinates.
+
+    Read a type-1 LTA with source/destination volume geometry and write a
+    type-0 LTA. Matrix values are float64 to match the previous Surfa
+    conversion; the source and destination geometry text is retained.
+    """
+    lines = Path(source_lta).read_text().splitlines()
+    if not lines[0].startswith("type      = 1") or "nxforms   = 1" not in lines:
+        raise ValueError("expected a single RAS-to-RAS SynthMorph LTA")
+    matrix_row = lines.index("1 4 4") + 1
+    matrix = np.asarray([[float(value) for value in row.split()]
+                         for row in lines[matrix_row:matrix_row + 4]], dtype=np.float64)
+    if matrix.shape != (4, 4):
+        raise ValueError("expected a 4x4 LTA transform")
+
+    def volume_affine(section: str) -> np.ndarray:
+        start = lines.index(section) + 1
+        geometry = dict(row.split("=", 1) for row in lines[start:start + 8]
+                        if "=" in row)
+        geometry = {key.strip(): value.split("#", 1)[0].strip()
+                    for key, value in geometry.items()}
+        dims = np.fromstring(geometry["volume"], sep=" ", dtype=np.float64)
+        sizes = np.fromstring(geometry["voxelsize"], sep=" ", dtype=np.float64)
+        axes = np.asarray([np.fromstring(geometry[key], sep=" ", dtype=np.float64)
+                           for key in ("xras", "yras", "zras")])
+        center = np.fromstring(geometry["cras"], sep=" ", dtype=np.float64)
+        affine = np.eye(4, dtype=np.float64)
+        affine[:3, :3] = axes.T * sizes
+        affine[:3, 3] = center - affine[:3, :3] @ (dims / 2)
+        return affine
+
+    source = volume_affine("src volume info")
+    target = volume_affine("dst volume info")
+    voxel = np.linalg.inv(target) @ matrix @ source
+    lines[0] = "type      = 0 # LINEAR_VOX_TO_VOX"
+    lines[matrix_row:matrix_row + 4] = [
+        " ".join(f"{float(value):.15e}" for value in row) for row in voxel
+    ]
+    output = Path(output_lta)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text("\n".join(lines) + "\n")
 
 
 def run_input_talairach_chain(t1: str | Path, subject_dir: str | Path,
@@ -29,8 +74,14 @@ def run_input_talairach_chain(t1: str | Path, subject_dir: str | Path,
     result = run_input_chain(t1, root, device=device)
     strip_file = root / "mri/synthstrip.mgz"
     started = time.perf_counter()
-    SynthStrip(weights=weights, device=device, threads=threads)(
-        result["conformed"]).image.save(str(strip_file))
+    previous_cudnn_tf32 = torch.backends.cudnn.allow_tf32
+    try:
+        strip = SynthStrip(weights=weights, device=device, threads=threads)
+        # The SynthStrip constructor enables TF32; exact uint8 masks need FP32 cuDNN.
+        torch.backends.cudnn.allow_tf32 = False
+        strip(result["conformed"]).image.save(str(strip_file))
+    finally:
+        torch.backends.cudnn.allow_tf32 = previous_cudnn_tf32
     strip_seconds = time.perf_counter() - started
     xfm = root / "mri/transforms/talairach.xfm"
     lta = root / "mri/transforms/synthmorph.mni305/aff.lta"
@@ -38,7 +89,7 @@ def run_input_talairach_chain(t1: str | Path, subject_dir: str | Path,
     register_talairach(strip_file, template, weights, xfm, lta,
                        device=device, threads=threads)
     voxel_lta = root / "mri/transforms/talairach.xfm.lta"
-    sf.load_affine(str(lta)).convert(space="voxel").save(str(voxel_lta))
+    write_voxel_lta_from_ras(source_lta=lta, output_lta=voxel_lta)
     talairach_seconds = time.perf_counter() - started
     return {**result, "synthstrip": str(strip_file), "talairach_xfm": str(xfm),
             "talairach_affine_lta": str(lta),

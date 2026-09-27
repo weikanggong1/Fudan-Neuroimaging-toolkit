@@ -144,6 +144,9 @@ def _poly_basis(shape, voxel_sizes, device, pe_axis):
 
 
 def _load_topup_field(prefix, shape, device, pe_axis):
+    if prefix is None:
+        zero = torch.zeros(tuple(shape), dtype=torch.float32, device=device)
+        return zero, zero.clone(), None
     prefix = Path(prefix)
     coefficient_path = prefix.with_name(prefix.name + "_fieldcoef.nii.gz")
     if not coefficient_path.exists():
@@ -298,7 +301,7 @@ class TorchEDDY:
         self.device = configure_device(device)
         self.config = EDDYConfig() if config is None else config
 
-    def __call__(self, imain, mask, acqp, index, bvecs, bvals, *, topup, ref_scan_no=0):
+    def __call__(self, imain, mask, acqp, index, bvecs, bvals, *, topup=None, ref_scan_no=0):
         reference = nib.load(os.fspath(imain))
         values = np.asarray(reference.dataobj, dtype=np.float32)
         mask_np = np.asarray(nib.load(os.fspath(mask)).dataobj) > 0
@@ -565,6 +568,7 @@ class TorchEDDY:
                     else None
                 ),
                 "reference_scan": int(ref_scan_no),
+                "topup_applied": topup is not None,
                 "seed": int(cfg.seed),
                 "outlier_slices": int(outliers.sum()),
                 "levels": level_reports,
@@ -580,8 +584,8 @@ class TorchEDDY:
         bvecs,
         bvals,
         *,
-        topup,
         out,
+        topup=None,
         ref_scan_no=0,
         overwrite=False,
     ):

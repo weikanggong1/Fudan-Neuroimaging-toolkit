@@ -145,15 +145,15 @@ def test_cli_uses_configured_asset_environment(tmp_path, monkeypatch, capsys):
     assert str(target) in capsys.readouterr().out
 
 
-def test_default_python_profile_selects_only_connected_assets(monkeypatch, tmp_path):
+def test_default_python_profile_selects_required_assets(monkeypatch, tmp_path):
     downloaded = []
     monkeypatch.setattr(assets, "download_asset",
                         lambda name, directory, verify_only=False: downloaded.append(name) or tmp_path / name)
     monkeypatch.setattr(assets, "save_config", lambda directory: None)
     assets.main(["--dest", str(tmp_path)])
     assert downloaded == list(assets.CORE_ASSETS)
-    assert len(downloaded) == 13
-    assert sum(assets.ASSET_FILES[name][0] for name in downloaded) == 211781658
+    assert len(downloaded) == 19
+    assert sum(assets.ASSET_FILES[name][0] for name in downloaded) == 217851651
     downloaded.clear()
     assets.main(["--all", "--verify-only", "--dest", str(tmp_path)])
     assert len(downloaded) == len(assets.ASSET_FILES) == 102

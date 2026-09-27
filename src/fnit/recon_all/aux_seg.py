@@ -139,13 +139,16 @@ def _save_labels(path: str | Path, labels: np.ndarray,
                  native: nib.spatialimages.SpatialImage) -> Path:
     output = Path(path)
     output.parent.mkdir(parents=True, exist_ok=True)
-    nib.save(nib.MGHImage(np.ascontiguousarray(labels), native.affine), str(output))
+    header = native.header.copy()
+    header.set_data_dtype(np.float32)
+    nib.save(nib.MGHImage(np.ascontiguousarray(labels, dtype=np.float32),
+                          None, header=header), str(output))
     return output
 
 
 def mri_mcadura_seg(input_path: str | Path, output_path: str | Path,
                     synthmorphdir: str | Path, assets: str | Path, *,
-                    device: str = "cpu") -> Path:
+                    device: str = "cpu", weights_dir: str | Path | None = None) -> Path:
     """Segment bilateral MCA-associated dura on an existing 1 mm recon-all MRI."""
     root = _assets_root(assets)
     native = nib.load(str(input_path))
@@ -159,7 +162,8 @@ def mri_mcadura_seg(input_path: str | Path, output_path: str | Path,
         crop = _extract(image, start, 80)
         if hemi == "rh":
             crop = crop[::-1].copy()
-        seg = _infer_crop(crop, native, start, _models_root(root) / MCA_MODEL,
+        models = Path(weights_dir) if weights_dir is not None else _models_root(root)
+        seg = _infer_crop(crop, native, start, models / MCA_MODEL,
                           ((0, "Unknown"), (6101, "Left-Dura-MCA")), 72, device)
         if hemi == "rh":
             seg = seg[::-1].copy()
@@ -197,7 +201,8 @@ def mri_vsinus_seg(input_path: str | Path, output_path: str | Path,
                    ctxseg_path: str | Path | None = None,
                    stats_path: str | Path | None = None,
                    talairach_lta: str | Path | None = None,
-                   device: str = "cpu") -> Path:
+                   device: str = "cpu",
+                   weights_dir: str | Path | None = None) -> Path:
     """Segment venous sinuses and optionally suppress cortical overlap."""
     root = _assets_root(assets)
     native = nib.load(str(input_path))
@@ -206,7 +211,8 @@ def mri_vsinus_seg(input_path: str | Path, output_path: str | Path,
     prior = nib.load(str(root / "average" / "vsinus.no-sp.prior.mni152.1.0mm.mgz"))
     start = _crop_start(_resample_prior(prior, native, lta, device), 144, "vsinus")
     crop = _extract(image, start, 144)
-    seg = _infer_crop(crop, native, start, _models_root(root) / VSINUS_MODEL,
+    models = Path(weights_dir) if weights_dir is not None else _models_root(root)
+    seg = _infer_crop(crop, native, start, models / VSINUS_MODEL,
                       VSINUS_ROWS, 144, device)
     output = np.zeros(native.shape[:3], dtype=np.int32)
     _paste(output, seg, start)
@@ -230,6 +236,7 @@ def _parser(command: str) -> argparse.ArgumentParser:
     parser.add_argument("--sd", default=os.environ.get("SUBJECTS_DIR"))
     parser.add_argument("--synthmorphdir")
     parser.add_argument("--assets", default=os.environ.get("FNIT_ASSETS"))
+    parser.add_argument("--weights", default=os.environ.get("FS_TORCH_MODEL_DIR"))
     parser.add_argument("--threads", type=int, default=1)
     parser.add_argument("--device", default="auto")
     if command == "vsinus":
@@ -268,7 +275,7 @@ def _args(command: str, argv: list[str] | None):
 def main_mcadura(argv: list[str] | None = None) -> int:
     args, _ = _args("mcadura", argv)
     mri_mcadura_seg(args.i, args.o, args.synthmorphdir, args.assets,
-                    device=args.device)
+                    device=args.device, weights_dir=args.weights)
     return 0
 
 
@@ -284,7 +291,7 @@ def main_vsinus(argv: list[str] | None = None) -> int:
                    stats_path=subject / "stats" / "vsinus.stats" if subject else None,
                    talairach_lta=subject / "mri" / "transforms" /
                    "talairach.xfm.lta" if subject else None,
-                   device=args.device)
+                   device=args.device, weights_dir=args.weights)
     return 0
 
 

@@ -1,6 +1,8 @@
-# TorchFAST validation
+# TorchFAST 历史算法基准（旧 Surfa 影像包装层）
 
 [返回首页](../../README.md) · [功能说明](../../docs/fast/README.md) · [聚合 JSON](report.public.json)
+
+此页记录更换影像包装层前的 FSL FAST 对照和 GPU 时间。当前 TorchFAST 的无 Surfa 包装层已有[真实 T1 配对验证](no_surfa_20260928/README.md)；以下 GPU 时间和 FSL 数值没有在新版包装层重新测量。
 
 验证在 gpucw1 上完成。参考程序是 FSL 6.0.7.4 中的 FAST4 2111.3；实现使用
 Python 3.11.7、PyTorch 2.5.1+cu118 和 NVIDIA H100 PCIe。临床数据只发布 10 例

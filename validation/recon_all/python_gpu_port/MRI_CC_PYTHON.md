@@ -40,10 +40,28 @@ or the final output.
 The implementation lives in `mri_cc_plane_python.py`,
 `mri_cc_masks_python.py`, and `mri_cc_python.py`. Its file API is
 `run_mri_cc(aseg_file, norm_file, output_file, lta_file)`; its in-memory API
-is `segment_callosum(aseg, norm)`. The stage is not wired to the recon-all
-dispatcher yet. The paired numerical evidence covers one subject and the
+is `segment_callosum(aseg, norm)`. The stage is now wired after `mri_ca_normalize` in the recon-all dispatcher;
+it writes `aseg.auto_noCCseg.mgz`, `aseg.auto.mgz`, and `cc_up.lta`, then copies
+the edited segmentation to the current `aseg.presurf.mgz` and `aseg.mgz`
+approximation. The paired numerical evidence covers one subject and the
 fixed 256³ recon-all invocation; broader input validation is still needed.
 The stage currently runs on CPU through NumPy and SciPy.
 
 The executable comparison is `validate_mri_cc_python.py`; its completed
 machine-readable record is `mri_cc_python_pair_report.json`.
+
+## Current Conda E2E candidate inputs (2026-09-27)
+
+After the corpus-callosum stage was connected to the runner, a new isolated
+subject test used the current candidate `synthseg.rca.mgz` and `norm.mgz` as
+inputs. Official `mri_cc` and the Python port each changed 2,263 voxels; their
+`aseg.auto.mgz` outputs were identical at all 16,777,216 voxels, with matching
+MGH header and payload bytes. They also matched the archived official
+`aseg.auto.mgz` voxelwise. On headcw, the official command took 99.16 s; the
+Python function took 17.34 s (whole validator process 18.96 s). The connected
+runner helper reduced the prior candidate `aseg.auto` difference from 2,263 to
+0 voxels, while the later official final `aseg` still differs by 104,986 voxels.
+The focused integration test passed 1/1 on gpucw1. The full recon-all subject
+has not yet been rerun after this connection. See the
+[current-input report](native_cpp_conda_20260927/MRI_CC_FEASIBILITY.md) and its
+machine-readable paired and integrated-stage results.

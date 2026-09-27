@@ -32,6 +32,11 @@ class AMICONODDIConfig:
     kkt_tolerance: float = 1e-11
     cg_tolerance: float = 1e-13
     maximum_active_steps: int = 40
+    lut_batch_size: int = 400
+
+    def __post_init__(self):
+        if self.lut_batch_size < 1:
+            raise ValueError("lut_batch_size must be positive")
 
 
 @dataclass(frozen=True)
@@ -140,6 +145,7 @@ class TorchAMICONODDI:
             kkt_tolerance=cfg.kkt_tolerance,
             cg_tolerance=cfg.cg_tolerance,
             maximum_active_steps=cfg.maximum_active_steps,
+            lut_batch_size=cfg.lut_batch_size,
         )
         if self.device.type == "cuda":
             torch.cuda.synchronize(self.device)
@@ -172,8 +178,6 @@ class TorchAMICONODDI:
                 "linear_solver": "batched compact float64 Cholesky with CG fallback",
                 "amico_output_contract": True,
                 "amico_numerically_equivalent": False,
-                "amico_reference_validation": "failed_at_1e-7_on_fixed_real_data",
-                "amico_reference_compared_for_this_input": False,
                 "kernel_seconds": kernel_seconds,
                 "direction_seconds": direction_seconds,
                 "solver_seconds": solver_seconds,
@@ -186,6 +190,7 @@ class TorchAMICONODDI:
                 "voxels": int(flat.size),
                 "volumes": int(values.shape[3]),
                 "lut_directions_used": int(np.unique(lut_indices).size),
+                "lut_batch_size": int(cfg.lut_batch_size),
                 "support_size_min": int(support_sizes.min()),
                 "support_size_median": float(np.median(support_sizes)),
                 "support_size_max": int(support_sizes.max()),

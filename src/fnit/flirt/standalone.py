@@ -134,6 +134,8 @@ def run_flirt(
     output=None,
     omat=None,
     init=None,
+    inweight=None,
+    refweight=None,
     dof=12,
     cost="corratio",
     device=None,
@@ -151,12 +153,18 @@ def run_flirt(
     selected_outputs = _preflight_outputs(
         _image_output_path(output),
         Path(omat).expanduser() if omat is not None else None,
-        (input, reference, init),
+        (input, reference, init, inweight, refweight),
         overwrite,
     )
     result = TorchFLIRT(
         device=_default_device() if device is None else device, dof=dof, cost=cost
-    )(input, reference, init=init)
+    )(
+        input,
+        reference,
+        init=init,
+        inweight=inweight,
+        refweight=refweight,
+    )
     _write_outputs_atomic(result, selected_outputs, overwrite)
     return result
 

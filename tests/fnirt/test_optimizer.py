@@ -1,7 +1,9 @@
+import pytest
 import torch
 
 from fnit.fnirt.optimizer import (
     preconditioned_conjugate_gradient,
+    scaled_conjugate_gradient,
 )
 
 
@@ -44,3 +46,35 @@ def test_pcg_matches_imlpp_iteration_and_step_oracle():
     assert report.converged
     assert abs(report.relative_residual - 0.0003584912872494894) < 1e-15
     torch.testing.assert_close(actual, expected, atol=2e-15, rtol=2e-15)
+
+
+def test_scg_matches_fsl_first_iteration_on_quadratic():
+    matrix = torch.diag(torch.tensor([2.0, 5.0], dtype=torch.float64))
+    rhs = torch.tensor([2.0, -10.0], dtype=torch.float64)
+
+    def cost(value):
+        return 0.5 * torch.dot(value, matrix @ value) - torch.dot(rhs, value)
+
+    def gradient(value):
+        return matrix @ value - rhs
+
+    actual, report = scaled_conjugate_gradient(
+        cost,
+        gradient,
+        torch.zeros(2, dtype=torch.float64),
+        max_iterations=1,
+    )
+
+    torch.testing.assert_close(
+        actual,
+        torch.tensor(
+            [0.4012345679012346, -2.006172839506173],
+            dtype=torch.float64,
+        ),
+        atol=1e-14,
+        rtol=1e-14,
+    )
+    assert report.iterations == 1
+    assert report.accepted_iterations == 1
+    assert report.cost == pytest.approx(-10.641384697454654)
+    assert report.lambda_final == pytest.approx(0.05)

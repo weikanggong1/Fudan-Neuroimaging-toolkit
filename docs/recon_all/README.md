@@ -1,10 +1,16 @@
 # Python recon-all：原始 T1 到皮层指标
 
-[返回首页](../../README.md) · [实现](../../src/fnit/recon_all/) · [整例验证](../../validation/recon_all/python_gpu_port/NATIVE_FREE_CONNECTED_20260927.md)
+[返回首页](../../README.md) · [实现](../../src/fnit/recon_all/) · [最新整例验证](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/v3_e2e_20260927/BENCHMARK.md)
 
-`fnit-recon-all` 从一幅 T1w 生成脑体积分割、双侧 white/pial/sphere 表面、厚度、面积、顶点体积、曲率、aparc/a2009s/DKT 标注和脑区统计。运行时调用 Python 包及其 CPU/CUDA 算子，不要求安装 FreeSurfer、FSL 或原生 recon-all 运行包。模型权重和模板单独下载并校验。
+`fnit-recon-all` 从一幅 T1w 生成脑体积分割、双侧 white/pial/sphere 表面、厚度、面积、顶点体积、曲率、aparc/a2009s/DKT 标注和脑区统计。调用 Python 包的 CPU/CUDA 算子、仓库内编译的 N4 C++ 程序，以及从固定 FreeSurfer 源码编译的三个必需 C++ 程序；另有三个可选表面程序；快速/标准球面和球面配准调用 Python API。无需安装官方 FreeSurfer、FSL 或原生 recon-all 运行包。模型权重和模板单独下载并校验。
 
-**当前为近似核心重建。** 拓扑修复、white/pial 放置和球面配准尚未与 FreeSurfer 8.2 对齐；只生成核心输出的子集。一个真实 T1 的整例流程已跑通，严格固定配置的 138 项官方输出中 6 项通过、52 项缺失、80 项存在差异。皮层逐顶点厚度、面积、体积、曲率及脑区统计不能用于需要官方 recon-all 数值一致的分析。详细差异和逐阶段计时见[整例报告](../../validation/recon_all/python_gpu_port/NATIVE_FREE_CONNECTED_20260927.md)；根因、容差及修复顺序见[差异分析](../../validation/recon_all/python_gpu_port/DISCREPANCY_AND_TOLERANCE_20260927.md)。
+[阶段成果与剩余工作](STAGE_STATUS_20260928.md)记录截至停止任务时的接线、真实数据验收及未完成边界。
+
+**当前仍是近似核心重建。** 最新从原始 T1 完成的 v3 整例运行 39 个阶段、进程墙钟 2903.79 秒；固定 138 项中 19 项通过、47 项缺失、72 项存在差异。[整例精度和时间](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/v3_e2e_20260927/BENCHMARK.md)及[13 张上游体积图](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/v3_e2e_20260927/prefix_13.json)给出详细结果。随后[双侧拓扑同输入验证](TOPOLOGY_CONDA_GA.md)已得到逐点一致的 `orig`；但[精确 `orig` 的逐顶点试验](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/exact_orig_vertex_probe_20260927/README.md)仍有 1.080/1.103 mm 厚度 MAE，原因集中在 [最终 smoothwm 输入及 white/pial 放置](SMOOTHWM_FINAL_PARITY.md)。另一次[真实 T1 的 CPU 下游重放](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/prefix_surface_replay_20260927/README.md)完成 21 阶段，但沿用旧拓扑二进制，19 个通过项全来自复制的 MRI 前缀，不能视为当前代码的整例验收。后续[全候选输入的左侧保存阶段复验](../../validation/recon_all/python_gpu_port/white_connected_prefix_20260927/README.md)得到逐点一致的 `orig`。[采样角度修正后的完整标准球面](../../validation/recon_all/python_gpu_port/candidate_sphere_first_difference_20260927/full_stage/README.md)在同一候选输入上与官方有序顶点和面完全一致，但耗时 884.56 秒，官方为 328.61 秒；对归档官方的平均 2.959 mm 差异来自[上游首差 `white.preaparc`](../../validation/recon_all/python_gpu_port/candidate_sphere_first_difference_20260927/full_stage/UPSTREAM_FIRST_DIFFERENCE.md)。右侧连通拓扑、white/pial、后处理和最终脑区指标仍待连续整例验收。
+
+当前调度器已接入 Python hypointensity 重标、ribbon 与最终 `aseg.mgz` 修正；冻结官方前序输入的五张体积图各 16,777,216 个体素均与官方相同（[同输入报告](../../validation/recon_all/python_gpu_port/ASEG_RIBBON_RUNNER_20260928.md)）。当前调度器的三张皮层脑区体积图和 `wmparc.mgz` 已改为仓库 Python 表面到体素算法；冻结官方前序输入的四张图各 16,777,216 个体素均与官方相同（[同输入报告](../../validation/recon_all/python_gpu_port/ATLAS_VOLUME_RUNNER_20260928.md)）。FNIT 自产上游尚未完成相同核验。
+
+上述 v3 的 13 张上游体积图逐体素一致属于旧 N4 实现。[当前 Conda C++ N4](N4_ITK_CONDA.md)在同一真实 T1 上产生 9 个 `nu0.mgz` 差异体素和 8 个最终 `nu.mgz` 差异体素；本版没有重跑完整 138 项，v3 的上游通过数及墙钟不适用于当前代码。
 
 ## 安装外置数据
 
@@ -16,15 +22,17 @@ fnit-setup-weights --model recon-all --dest /path/to/weights
 fnit-setup-recon-all-assets --dest /path/to/assets
 ```
 
-默认下载 **6 个权重文件**（SynthStrip、SynthMorph affine、SynthSeg 及三个标签表；合计 135,394,037 字节）和 **13 个模板/图谱文件**（211,781,658 字节，约 202 MiB）。安装器检查每个文件的大小和 SHA-256。`fnit-setup-recon-all-assets --all` 才下载全部 102 个阶段研究资源。已有文件可加 `--verify-only` 核验；两个目录均在仓库与 wheel 外。权重的来源和许可见[权重说明](../WEIGHTS.md)，模板清单见[资产验证](../../validation/recon_all/python_gpu_port/ASSETS_VALIDATION.md)。
+默认下载 **10 个权重文件**（SynthStrip、SynthMorph affine、SynthSeg、EntoWM、MCA/dura、静脉窦及相关标签表；合计 145,283,019 字节）和 **19 个模板/图谱文件**（217,851,651 字节，约 208 MiB）。19 个文件包含双侧 folding atlas、填充所需的 `SubCorticalMassLUT.txt`，以及可选预白质链所需的三个 MCA/dura、静脉窦先验。该链还需 cropped/full 两张 MNI152 图像，可用 `--asset` 单独选择；下载器目前从约 515 MB 的上游归档提取，故未加入默认下载组。另两张目录中的 MNI LTA 不参与该链。安装器检查每个文件的大小和 SHA-256。`fnit-setup-recon-all-assets --all` 才下载全部 102 个阶段研究资源。已有文件可加 `--verify-only` 核验；两个目录均在仓库与 wheel 外。权重的来源和许可见[权重说明](../WEIGHTS.md)，模板清单见[资产验证](../../validation/recon_all/python_gpu_port/ASSETS_VALIDATION.md)。
 
-仓库 [`environment.yml`](../../environment.yml) 也会安装 Python 阶段依赖。SimpleITK/ITK、Numba 和部分 NumPy/Surfa 操作运行在 CPU；PyTorch 网络及部分体素、表面算子可在 CUDA 上运行。模型张量为 float32，默认允许 TF32；SynthSeg 阶段为已验证的硬标签一致性关闭 cuDNN TF32。没有自动启用 float16 或 bfloat16。
+[自适应非局部均值去噪](DENOISE_NUMBA.md)已改用仓库内 NumPy/Numba CPU 核心，运行时不需要 ANTsPy。完整 recon-all 及 Conda 编译工具使用 [环境文件](../../environment-recon-all-cpp.yml)。仓库内 Conda ITK N4、Numba 和部分 NumPy 操作运行在 CPU；PyTorch 网络及部分体素、表面算子可在 CUDA 上运行。Talairach 的[仿射注册](TALAIRACH_AFFINE_NIBABEL.md)和[RAS→voxel LTA 转换](TALAIRACH_LTA_NUMPY.md)已移除 Surfa 运行时调用；可选的[MNI152 仿射注册](MNI_AUX_CHAIN.md)也已移除 Surfa 运行时调用；通用 SynthMorph 和仓库其他模块仍有 Surfa 调用。辅助分割没有在本次替换后重跑。模型张量为 float32，默认允许 TF32；SynthStrip 和 SynthSeg 阶段为已验证的体素一致性局部关闭 cuDNN TF32，Talairach SynthMorph affine 前向为已验证的 LTA/eTIV 精度局部关闭 matmul 和 cuDNN TF32，调用后恢复原标志。没有自动启用 float16 或 bfloat16。
 
 ## 单被试
 
 ```bash
+export FS_LICENSE=/path/to/private/license.txt
 fnit-recon-all subject_T1w.nii.gz /scratch/subjects/sub01 \
   --weights-dir /path/to/weights --assets-dir /path/to/assets \
+  --native-bin-dir /path/to/recon-cpp-build/bin \
   --device cuda:0 --threads 4
 ```
 
@@ -34,13 +42,80 @@ fnit-recon-all subject_T1w.nii.gz /scratch/subjects/sub01 \
 from fnit.recon_all.native_free import run_recon_all_python
 
 report = run_recon_all_python(
-    "subject_T1w.nii.gz", "/scratch/subjects/sub01",
-    "/path/to/weights", "/path/to/assets",
-    device="cuda:0", threads=4,
+    t1="subject_T1w.nii.gz",  # 单幅 T1w NIfTI 输入
+    subject_dir="/scratch/subjects/sub01",  # 不存在或为空的被试输出目录
+    weights_dir="/path/to/weights",  # 已校验的外置模型权重目录
+    assets_dir="/path/to/assets",  # 已校验的模板和图谱目录
+    device="cuda:0",  # 推理设备；无 GPU 时填 "cpu"
+    threads=4,  # CPU 阶段使用的线程数
+    native_bin_dir="/path/to/recon-cpp-build/bin",  # Conda 编译程序目录
 )
+# report 是运行记录字典；成功时 report["total_seconds"] 为整例墙钟秒数。
 ```
 
-返回报告包含阶段耗时；被试目录内的 `fnit-native-free-run.json` 记录状态、设备及近似步骤。`--n4-python /path/to/python` 可指定另一已安装 SimpleITK 的 Python 解释器执行 N4；该选项仍只启动 Python 算子。
+### 输入与输出结构
+
+`run_recon_all_python(...) -> dict` 的 Python 参数与对应命令行选项如下；`FS_LICENSE` 是指向私有许可证文件的环境变量，不传给函数。
+
+| Python 参数 / CLI 选项 | 输入含义 |
+| --- | --- |
+| `t1` / 第一个位置参数 | 单幅 T1w NIfTI 路径。 |
+| `subject_dir` / 第二个位置参数 | 输出被试目录；调用前必须不存在或为空。 |
+| `weights_dir` / `--weights-dir` | 经 SHA-256 校验的外置模型目录。 |
+| `assets_dir` / `--assets-dir` | 经 SHA-256 校验的模板、图谱目录。 |
+| `device` / `--device` | `cpu` 或 `cuda:N`，指定 PyTorch 设备。 |
+| `threads` / `--threads` | CPU 程序使用的正整数线程数。 |
+| `native_bin_dir` / `--native-bin-dir` | Conda 编译程序目录，至少含 `fnit_n4_itk`、`mri_em_register`、`mri_segment`、`mri_edit_wm_with_aseg`。 |
+| `native_topology` / `--native-topology` | 启用 Conda 拓扑修复和 Python remesh。 |
+| `native_surface_metrics` / `--native-surface-metrics` | 用 Conda `mris_place_surface` 计算五张顶点图。 |
+| `native_registration` / `--native-registration` | 在拓扑路径上调用 Python 球面配准。 |
+| `native_sphere` / `--native-sphere` | 在拓扑路径上调用 Conda inflate 和 Python 球面。 |
+| `native_white_preaparc` / `--native-white-preaparc` | 在拓扑路径上运行 MNI/辅助分割、white.preaparc、皮层标签，并在球面注释后试运行最终 white、Python pial 和顶点图；整例尚未验收。 |
+
+函数写入 FreeSurfer 风格目录：`mri/*.mgz` 和 `mri/transforms/*.lta` 存放体积分割及变换；`surf/lh.*`、`surf/rh.*` 存放有序三角网格及每顶点的厚度、面积、体积、曲率图；`label/*.annot` 为每顶点脑区标签；`stats/*.stats` 为逐脑区表；`scripts/` 为阶段日志；根目录的 `fnit-native-free-run.json` 是运行报告。当前并非每个官方文件都生成，文件级范围以[138 项比较器](../../validation/recon_all/python_gpu_port/compare_complete_subject.py)为准。
+
+返回的 `dict` 与 JSON 内容相同：`status` 为 `complete` 或 `failed`，`input`、`subject_dir`、`device`、`threads` 和 `profile` 记录调用；`stages` 为按执行顺序排列的 `{name, seconds}` 列表；`surfaces` 以 `lh/rh` 为键，记录网格顶点/面数、分步耗时及近似步骤；`gca_registration`、`white_matter_chain`、`white_preaparc`、`topology_repair`、`sphere_generation`、`surface_metrics`、`sphere_registration` 记录所选实现及二进制哈希；成功时有 `total_seconds`，失败时另有 `failed_stage` 与 `error`。
+
+`run_recon_all_python_batch(jobs, weights_dir, assets_dir, devices=(...), ...) -> list[dict]` 接受 `jobs=[{"t1": 路径, "subject_dir": 空目录}, ...]`；其他参数与单被试一致。每个设备一次处理一例，同设备顺序执行；返回列表按输入顺序包含各例上述报告，任一例失败则抛出 `RuntimeError`。批量入口没有 CLI。
+
+[N4 Conda C++ 阶段](N4_ITK_CONDA.md)从仓库源码编译为 `fnit_n4_itk`，完整重建从 `native_bin_dir` 找到它；此阶段在 CPU 上运行。
+
+## Conda 编译程序与可选表面阶段
+
+按[独立 Conda 编译与验证说明](CONDA_CPP_BUILD.md)准备构建环境；三个 FreeSurfer 必需程序和三个可选表面程序的功能、官方命令和精度/时间证据见[逐阶段说明](CONDA_CPP_STAGES.md)；仓库 N4 程序另见[N4 说明](N4_ITK_CONDA.md)。将 FreeSurfer 源码固定在提交 `d932c45b7941662ea380a05efef580568b98d41a`，运行仓库的 [`build_recon_all_fs_cpp_conda.sh`](../../tools/build_recon_all_fs_cpp_conda.sh)：
+
+```bash
+conda activate /path/to/conda-build-env
+bash tools/build_recon_all_fs_cpp_conda.sh /path/to/freesurfer-source /path/to/native-build
+export FS_LICENSE=/path/to/private/license.txt
+fnit-recon-all subject_T1w.nii.gz /scratch/subjects/sub01 \
+  --weights-dir /path/to/weights --assets-dir /path/to/assets \
+  --device cuda:0 --threads 4 --native-bin-dir /path/to/native-build/bin \
+  --native-topology --native-sphere --native-surface-metrics --native-registration
+```
+
+`--native-bin-dir` 为必填项，提供 `fnit_n4_itk`、`mri_em_register`、`mri_segment` 和 `mri_edit_wm_with_aseg`；`--native-topology` 调用 [Python 居中球和 Conda 拓扑变体](TOPOLOGY_CONDA_GA.md)，再用 Python remesh 生成 `orig`，`--native-sphere` 调用 `mris_inflate` 并使用 Python quick/standard sphere，`--native-surface-metrics` 调用 `mris_place_surface` 生成五张顶点图，`--native-registration` 调用 Python `run_register_sphere`。后两个球面开关保留原名称以兼容已有 CLI/Python 调用；`--native-sphere`、`--native-registration` 和 `--native-white-preaparc` 都要求 `--native-topology`。Python API 使用同名参数 `native_bin_dir=...`、`native_topology=True`、`native_sphere=True`、`native_surface_metrics=True`、`native_registration=True`、`native_white_preaparc=True`；下述批量 Python API 也支持这些参数。入口检查二进制可执行并记录 SHA-256，不证明任意指定目录中的程序均由上述脚本编译。许可证从外部 `FS_LICENSE` 环境变量继承；Git 仓库和 wheel 均不包含二进制、许可证或外置权重/模板。原生阶段会用到 CPU，整例并非全 GPU；其输出仍需与官方同输入逐文件验收。
+
+### 可选的预白质表面链
+
+下列两张 MNI152 图像是 `--native-white-preaparc` 的额外资源；三个模型权重和 MCA/dura、静脉窦先验已在默认下载组。两张图像目前都从约 515 MB 的归档提取，按需安装：
+
+```bash
+fnit-setup-recon-all-assets --dest /path/to/assets \
+  --asset average/mni_icbm152_nlin_asym_09c/reg-targets/mni152.1.0mm.cropped.nii.gz \
+  --asset average/mni_icbm152_nlin_asym_09c/reg-targets/mni152.1.0mm.nii.gz
+```
+
+```bash
+fnit-recon-all subject_T1w.nii.gz /scratch/subjects/sub01 \
+  --weights-dir /path/to/weights --assets-dir /path/to/assets \
+  --native-bin-dir /path/to/native-build/bin --device cuda:0 --threads 4 \
+  --native-topology --native-white-preaparc
+```
+
+该开关在 `filled.mgz` 之后用 CPU 生成被试 MNI152 LTA、MCA/dura 与静脉窦标签及 `brain.finalsurfs.mgz`；每侧 `orig` 产生后用 Python 计算 gray/white 阈值，调用 Conda `mris_place_surface --white` 生成 `white.preaparc`，再用 Python CPU 三轮平滑生成 `smoothwm`。随后生成 `cortex.label` 和 `cortex+hipamyg.label`，等双侧球面注册、aparc 注释完成后，用 Conda C++ 放置最终 `white`、Python 放置 `pial.T1` 并复制为 `pial`，最后计算顶点图。启动时检查三份权重、两张 MNI 图像、三个先验、`mris_fix_topology_fnit` 和 `mris_place_surface`。开关关闭时仍走平滑与法线射线近似路径。当前只核对了这些函数的冻结同输入阶段，未完成该开关的整例运行。
+
+[MNI152/辅助分割](MNI_AUX_CHAIN.md)、[Python finalsurfs](FINAL_SURFS_CHAIN.md)、[双侧预白质放置](WHITE_PREAPARC_CONDA_CHAIN.md)、[LH 候选前缀连通验证](../../validation/recon_all/python_gpu_port/white_connected_prefix_20260927/README.md)和[最终 smoothwm 同输入验收](SMOOTHWM_FINAL_PARITY.md)列出函数输入输出、官方命令与真实 T1 精度/时间。开关关闭时，最终 `white` 仍由 `smoothwm` 近似复制，`pial` 仍由法线射线近似；LH 全候选前缀中近似 `white` 与官方的逐顶点平均位移为 0.288 mm。开关开启时已接入独立验证过的[Conda 最终 white 放置](FINAL_WHITE_CONDA.md)和[双侧 Python pial.T1 函数](PYTHON_PIAL_PLACEMENT.md)，但新串联尚未跑完单侧冻结输入验证，更没有从原始 T1 连续验收。2026-09-28 的单侧隔离重放完成了 Conda 最终 white，平均/最大位移仍为 0.000359/0.752 mm；Python pial 运行约 17 分钟后按用户停止要求终止，未产生最终报告。皮层标签和脑区统计也未通过自产输入整例验收。[Python white 放置诊断](WHITE_PYTHON_FIRST_PASS.md)已推进至左半球第三轮第 34 步；完整第四轮、最终 white 写出与右半球仍待完成。
 
 ## 多被试 Python API
 
@@ -50,13 +125,17 @@ report = run_recon_all_python(
 from fnit.recon_all import run_recon_all_python_batch
 
 reports = run_recon_all_python_batch(
-    [
+    jobs=[  # 每项含一幅 T1w 路径及其独立的空输出目录
         {"t1": "/data/sub01_T1w.nii.gz", "subject_dir": "/scratch/subjects/sub01"},
         {"t1": "/data/sub02_T1w.nii.gz", "subject_dir": "/scratch/subjects/sub02"},
     ],
-    "/path/to/weights", "/path/to/assets",
-    devices=("cuda:0", "cuda:1"), threads=4,
+    weights_dir="/path/to/weights",  # 所有被试共用的外置模型目录
+    assets_dir="/path/to/assets",  # 所有被试共用的模板和图谱目录
+    devices=("cuda:0", "cuda:1"),  # 每个设备同时处理一例
+    threads=4,  # 每个被试 CPU 阶段的线程数
+    native_bin_dir="/path/to/recon-cpp-build/bin",  # Conda 编译程序目录
 )
+# reports 按 jobs 原顺序返回每例的运行记录字典。
 ```
 
 ## 与官方结果比较
@@ -67,4 +146,4 @@ python -m fnit.recon_all.compare_native_free \
   --output /scratch/comparison.json
 ```
 
-[比较器](../../src/fnit/recon_all/compare_native_free.py)输出体素、表面、逐顶点图和逐脑区统计差异。当前候选表面的顶点数与官方不同，空间最近点误差只能用于定位差异，不能证明同源顶点一致。逐文件严格门槛和待完成步骤见[发布验收](../../validation/recon_all/python_gpu_port/RELEASE_GATES.md)；独立阶段的配对结果见[移植记录](../../validation/recon_all/python_gpu_port/README.md)。
+[比较器](../../src/fnit/recon_all/compare_native_free.py)输出体素、表面、逐顶点图和逐脑区统计差异。最新完成的 v3 候选表面顶点数与官方不同，空间最近点误差只能用于定位差异，不能证明同源顶点一致。逐文件严格门槛和待完成步骤见[发布验收](../../validation/recon_all/python_gpu_port/RELEASE_GATES.md)；独立阶段的配对结果见[移植记录](../../validation/recon_all/python_gpu_port/README.md)。

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 from importlib.resources import files
+
 import numpy as np
 from scipy import special
 from scipy.special import erf, erfi, lpmv
@@ -71,23 +72,16 @@ def amico_scheme(bvals, bvecs, b0_threshold=100.0, b_step=100.0):
 
 
 def principal_directions(signal, raw):
-    """Fit OLS diffusion tensors and return [voxels,3] principal directions.
-
-    ``signal`` is an [N,V] nonnegative normalized DWI signal and ``raw`` is
-    the [V,4] AMICO scheme (three b-vector components, then b-value). This
-    follows DIPY 1.12.1's OLS design and eigenvector ordering without a DIPY
-    runtime dependency. The output is float64 in the input gradient frame.
-    """
-    scheme = np.asarray(raw, dtype=np.float64)
-    vectors = np.where(np.isnan(scheme[:, :3]), 0, scheme[:, :3])
-    bvals = scheme[:, 3].copy()
-    unit = np.abs(np.sqrt(np.sum(vectors * vectors, axis=1)) - 1) <= 1e-2
-    if not np.all(unit[bvals > 50]):
-        raise ValueError("diffusion b-vectors must be unit length within 0.01")
-    vectors = np.where(unit[:, None], vectors, 0)
-    bvals *= unit
-    x, y, z = vectors.T
-    design = np.zeros((len(bvals), 7), dtype=np.float64)
+    """Fit the AMICO/DIPY 1.12.1 OLS tensor and return its leading eigenvector."""
+    bvals = np.asarray(raw[:, 3], dtype=np.float64).copy()
+    bvecs = np.asarray(raw[:, :3], dtype=np.float64).copy()
+    valid = np.abs(np.linalg.norm(bvecs, axis=1) - 1) <= 1e-2
+    if not np.all(valid[bvals > 50]):
+        raise ValueError("diffusion-weighted b-vectors must be unit vectors")
+    bvecs[~valid] = 0
+    bvals *= valid
+    x, y, z = bvecs.T
+    design = np.empty((len(bvals), 7), dtype=np.float64)
     design[:, 0] = x * x * 1.0 * bvals
     design[:, 1] = x * y * 2.0 * bvals
     design[:, 2] = y * y * 1.0 * bvals
@@ -96,13 +90,57 @@ def principal_directions(signal, raw):
     design[:, 5] = z * z * 1.0 * bvals
     design[:, 6] = 1
     design = -design
-    values = np.maximum(np.asarray(signal, dtype=np.float64), 1e-4)
-    coefficients = np.einsum("ij,nj->ni", np.linalg.pinv(design), np.log(values))
-    tensor = coefficients[:, np.array([[0, 1, 3], [1, 2, 4], [3, 4, 5]])]
-    eigenvalues, eigenvectors = np.linalg.eigh(tensor)
-    order = eigenvalues.argsort()[:, ::-1]
-    eigenvectors = np.take_along_axis(eigenvectors, order[:, None, :], axis=-1)
-    return eigenvectors[:, :, 0]
+    pseudo_inverse = np.linalg.pinv(design)
+    signal = np.asarray(signal, dtype=np.float64).reshape(-1, len(bvals))
+    directions = np.empty((len(signal), 3), dtype=np.float64)
+    for start in range(0, len(signal), 10000):
+        stop = min(start + 10000, len(signal))
+        coefficients = np.einsum(
+            "...ij,...j", pseudo_inverse, np.log(np.maximum(signal[start:stop], 1e-4))
+        )
+        tensor = np.empty((stop - start, 3, 3), dtype=np.float64)
+        tensor[:, 0, 0] = coefficients[:, 0]
+        tensor[:, 0, 1] = tensor[:, 1, 0] = coefficients[:, 1]
+        tensor[:, 1, 1] = coefficients[:, 2]
+        tensor[:, 0, 2] = tensor[:, 2, 0] = coefficients[:, 3]
+        tensor[:, 1, 2] = tensor[:, 2, 1] = coefficients[:, 4]
+        tensor[:, 2, 2] = coefficients[:, 5]
+        eigenvalues, eigenvectors = np.linalg.eigh(tensor)
+        order = eigenvalues.argsort(axis=1)[:, ::-1]
+        directions[start:stop] = np.take_along_axis(
+            eigenvectors, order[:, None, :], axis=2
+        )[:, :, 0]
+    return directions
+
+
+def _cart2sphere(x, y, z):
+    radius = np.sqrt(x * x + y * y + z * z)
+    cosine = np.divide(z, radius, where=radius > 0, out=None)
+    theta = np.arccos(cosine, where=(cosine >= -1) & (cosine <= 1), out=None)
+    theta = np.where(radius > 0, theta, 0.0)
+    phi = np.arctan2(y, x)
+    return np.broadcast_arrays(radius, theta, phi)
+
+
+@lru_cache(maxsize=1)
+def _sh_indices():
+    orders = np.arange(0, _LMAX + 1, 2, dtype=int)
+    degrees = np.repeat(orders, 2 * orders + 1)
+    phases = np.concatenate([np.arange(-order, order + 1) for order in orders])
+    return phases, degrees
+
+
+def _real_sh_descoteaux(theta, phi):
+    phases, degrees = _sh_indices()
+    theta = np.reshape(theta, [-1, 1])
+    phi = np.reshape(phi, [-1, 1])
+    if hasattr(special, "sph_harm_y"):
+        harmonics = special.sph_harm_y(degrees, np.abs(phases), theta, phi).astype(complex)
+    else:
+        harmonics = special.sph_harm(np.abs(phases), degrees, phi, theta).astype(complex)
+    real = np.where(phases > 0, harmonics.imag, harmonics.real)
+    real *= np.where(phases == 0, 1.0, np.sqrt(2))
+    return real
 
 
 def direction_indices(directions):
@@ -394,37 +432,16 @@ def _isotropic_signal(protocol, diffusivity):
     return np.exp(-(delta - small_delta / 3) * q2 * diffusivity * 1e-6)
 
 
-def _real_sh_descoteaux(vectors):
-    """Return the DIPY 1.12.1 legacy real even-order SH basis through l=12."""
-    vectors = np.asarray(vectors, dtype=np.float64).reshape(-1, 3)
-    x, y, z = vectors.T
-    radius = np.sqrt(x * x + y * y + z * z)
-    cosine = np.divide(z, radius, where=radius > 0, out=np.zeros_like(radius))
-    theta = np.where(radius > 0, np.arccos(cosine), 0)
-    phi = np.arctan2(y, x)
-    degrees = np.arange(0, _LMAX + 1, 2)
-    ell = np.repeat(degrees, 2 * degrees + 1)
-    m = np.concatenate([np.arange(-order, order + 1) for order in degrees])
-    if hasattr(special, "sph_harm_y"):
-        complex_basis = special.sph_harm_y(
-            ell[None], np.abs(m)[None], theta[:, None], phi[:, None]
-        )
-    else:
-        complex_basis = special.sph_harm(
-            np.abs(m)[None], ell[None], phi[:, None], theta[:, None]
-        )
-    real_basis = np.where(m[None] > 0, complex_basis.imag, complex_basis.real)
-    real_basis *= np.where(m == 0, 1.0, np.sqrt(2))
-    return real_basis
-
-
 @lru_cache(maxsize=1)
 def _rotation_auxiliary():
-    """Return SH rotation matrices for AMICO's fixed 500-direction table."""
     gradients, directions, _ = direction_assets()
-    basis = _real_sh_descoteaux(gradients)
+    _, theta, phi = _cart2sphere(gradients[:, 0], gradients[:, 1], gradients[:, 2])
+    basis = _real_sh_descoteaux(theta, phi)
     fit = np.dot(np.linalg.pinv(np.dot(basis.T, basis)), basis.T)
-    rotated = _real_sh_descoteaux(directions)
+    rotated = np.empty((_NDIRS, _NSH), dtype=np.float64)
+    for index in range(_NDIRS):
+        _, theta, phi = _cart2sphere(*directions[index])
+        rotated[index] = _real_sh_descoteaux(theta, phi).reshape(-1)
     constants = np.empty(_NSH, dtype=np.float64)
     m0 = np.empty(_NSH, dtype=np.int32)
     index = 0
@@ -439,7 +456,6 @@ def _rotation_auxiliary():
 
 
 def _subject_basis(raw, shells, b0):
-    """Return sorted DWI volume indices and [volume,shell*91] SH design."""
     dwi_indices = np.flatnonzero(~b0)
     output_indices = np.empty(len(dwi_indices), dtype=np.int32)
     basis = np.zeros((len(dwi_indices), _NSH * len(shells)), dtype=np.float32)
@@ -448,7 +464,8 @@ def _subject_basis(raw, shells, b0):
         indices = np.flatnonzero(raw[:, 3] == shell)
         count = len(indices)
         output_indices[offset : offset + count] = indices
-        values = _real_sh_descoteaux(raw[indices, :3])
+        _, theta, phi = _cart2sphere(raw[indices, 0], raw[indices, 1], raw[indices, 2])
+        values = _real_sh_descoteaux(theta, phi)
         basis[
             offset : offset + count, shell_index * _NSH : (shell_index + 1) * _NSH
         ] = values

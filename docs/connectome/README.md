@@ -61,6 +61,7 @@ count = result.matrices["count"]  # 输出：以 region_labels 为行列的 K×K
 
 `ConnectomeResult.matrices` 的四张对称 `K×K` 矩阵以 `region_labels` 映射行列；未分配流线不计入，自连接保留：
 
+
 | 键 | 结构与单位 |
 |---|---|
 | `count` | int64，双端被分配的流线条数 |
@@ -68,11 +69,18 @@ count = result.matrices["count"]  # 输出：以 region_labels 为行列的 K×K
 | `mean_length` | float32，SIFT2 加权的边均值，mm |
 | `mean_fa` | float32，SIFT2 加权的边均值，无量纲 |
 
+自动 DWI→T1 配准已使用 NiBabel 读取 T1 与仓库内存 `Volume`，不导入 Surfa。既有[真实 b0/T1 隔离验证](../../validation/connectome_registration_no_surfa_20260928/README.md)显示迁移前后的世界矩阵逐元素一致；完整 connectome 未因这次迁移重新运行。
+
 其余结果字段包括 `atlas`/`atlas_affine`、`five_tissue`/`five_tissue_affine`、`gmwmi`、`wm_sh`、`fa`、`brain_mask`、`tractogram`、`sift2_weights`、`dwi_affine` 与 `dwi_to_t1_world`。归一化 WM FOD 为 float32 `[X,Y,Z,45]`；5TT 是 cGM/sGM/WM/CSF/path 顺序的 float32 `[A,B,C,5]`，GMWMI 为同一 T1 网格 `[A,B,C]`，其 affine 映射到 DWI RAS 世界毫米。`tractogram.paths` 按流线顺序保存各 `[Pi,3]` 世界毫米坐标，`endpoints` 为 `[T,2,3]`，`lengths_mm` 和精确采样 `mean_fa` 为 `[T]`；`sift2_weights` 是同序 float64 `[T]`。
 
 ## 命令行与输出
 
 ```bash
+# --dwi：已校正的四维 DWI；--bvals：逐体积 b 值。
+# --bvecs：eddy 旋转后的梯度方向；--t1：同一被试 T1w。
+# --atlas-dwi：DWI 世界坐标中的标签图；--t1-segmentation：既有 T1 标签。
+# --output-dir：结果目录。
+# --device：PyTorch 设备；--n-seeds：播种次数；--seed：随机种子。
 fnit connectome \
   --dwi derivatives/dwi/sub-01_desc-preproc_dwi.nii.gz \
   --bvals derivatives/dwi/sub-01_desc-preproc_dwi.bval \

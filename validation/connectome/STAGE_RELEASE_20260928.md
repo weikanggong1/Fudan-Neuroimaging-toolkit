@@ -13,9 +13,9 @@
 | 固定官方流线的 SIFT2、FA、矩阵赋值 | SIFT2 权重 r=0.999999903、MAE 3.44e−5；FA 逐轨 r=0.9999999949、MAE 5.58e−7；count 矩阵 400/400 元素一致 | [SIFT2](ds004666/sift2_fmls_stage_20260927.md)、[FA](ds004666/tcksample_precise_stage.md)、[四矩阵](ds004666_fsl_act_real_tracks_assignment_report.json) |
 | 公开 ds004666 的 10,000 次播种整链（固定旧版掩膜/变换） | seed 0 count/FBC 相关 0.98864/0.98527，连接支持 Dice 0.73585；mean length/FA 全边相关 0.57720/0.62107 | H100 266.83 s/2.720 GiB；[CSV、图和三种子重复范围](ds004666/README.md)；未包含本次新增的自动 BET 分支 |
 
-本次冻结源码构建的 `0.12.1` wheel 已在现有 Conda 环境中以 `pip --no-deps --target` 隔离安装；BET、FOD、FIRST/5TT、Tian 在真实输入的 CPU 最小调用均成功，详见[安装记录](ds004666/anatomy_conda_install.public.json)。本次 GPU 初始化发生显存不足，未重试；该安装检查不代替全链数值验证。
+合并远端更新前的 `0.12.1` 阶段快照 wheel 已在现有 Conda 环境中以 `pip --no-deps --target` 隔离安装；BET、FOD、FIRST/5TT、Tian 在真实输入的 CPU 最小调用均成功，详见[安装记录](ds004666/anatomy_conda_install.public.json)。本次 GPU 初始化发生显存不足，未重试；该安装检查不代替合并后源码的重新安装或全链数值验证。
 
-表中的核心计算时间与独立命令墙钟的计时边界不同，不能直接当作整链加速比。私人 UKB 路径、受试者编号、影像和逐文件哈希留在授权服务器；本仓库只发布脱敏指标与公开 ds004666 示例。
+表中的核心计算时间与独立命令墙钟的计时边界不同，不能直接当作整链加速比。本次 connectome 的私人 UKB 路径、受试者编号、影像和逐文件哈希留在授权服务器；connectome 报告只发布脱敏指标与公开 ds004666 示例。
 
 ## 未完成的官方一致性门槛
 

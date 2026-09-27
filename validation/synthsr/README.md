@@ -2,6 +2,8 @@
 
 [返回主页](../../README.md) · [SynthSR 输入输出与调用](../../docs/synthsr/README.md) · [匿名汇总数据](../../benchmark/synthsr_validation_2026-09-23.json)
 
+本页记录旧版导入 Surfa 时的 12 例 T1w 基准。当前无 Surfa 路径的同一真实 FLAIR 核对见[迁移报告](../synthsr_no_surfa_20260928/README.md)；本页数字不代表新版 12 例重测。
+
 本次在相同输入、相同官方权重和默认处理选项下，比较 FreeSurfer `mri_synthsr` 与本包 `fnit synthsr`。四组分别是原版 CPU、原版源码 CUDA、本包 CPU、本包 CUDA。比较的是**对原版输出的复现程度**和完整命令耗时；这些病例没有用于评价合成图像质量的人工真值。
 
 ## 病例、权重和环境

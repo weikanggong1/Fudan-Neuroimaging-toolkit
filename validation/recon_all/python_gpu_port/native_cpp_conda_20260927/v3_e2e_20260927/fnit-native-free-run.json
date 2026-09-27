@@ -1,0 +1,279 @@
+{
+  "profile": "experimental-native-gca-topology-metrics-sphere-registration-wmchain-core-v3",
+  "input": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/examples/data/sub-01_T1w.nii.gz",
+  "subject_dir": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_e2e/subjects/sub01",
+  "device": "cuda:0",
+  "n4_python": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_cpp_conda_20260927/conda_env/bin/python",
+  "threads": 4,
+  "stages": [
+    {
+      "name": "input_talairach",
+      "seconds": 10.90358200808987
+    },
+    {
+      "name": "n4",
+      "seconds": 170.63943774299696
+    },
+    {
+      "name": "nu",
+      "seconds": 1.4834104301407933
+    },
+    {
+      "name": "T1_normalize",
+      "seconds": 58.493840623646975
+    },
+    {
+      "name": "brainmask",
+      "seconds": 0.7708974899724126
+    },
+    {
+      "name": "SynthSeg",
+      "seconds": 4.568716902285814
+    },
+    {
+      "name": "mri_em_register",
+      "seconds": 251.2494129720144
+    },
+    {
+      "name": "mri_ca_normalize",
+      "seconds": 27.04759138682857
+    },
+    {
+      "name": "mri_cc",
+      "seconds": 24.43765381583944
+    },
+    {
+      "name": "brain_second_normalize",
+      "seconds": 128.5808892766945
+    },
+    {
+      "name": "entowm",
+      "seconds": 11.557320175226778
+    },
+    {
+      "name": "ants_denoise",
+      "seconds": 46.47239747690037
+    },
+    {
+      "name": "mri_segment",
+      "seconds": 77.37171741994098
+    },
+    {
+      "name": "mri_edit_wm_with_aseg",
+      "seconds": 40.42031741980463
+    },
+    {
+      "name": "wm_pretess",
+      "seconds": 7.490165506955236
+    },
+    {
+      "name": "wm_fix_ento",
+      "seconds": 1.9777960400097072
+    },
+    {
+      "name": "wm_fix_acj",
+      "seconds": 3.1727979741990566
+    },
+    {
+      "name": "mri_fill",
+      "seconds": 74.54755566082895
+    },
+    {
+      "name": "surface_lh",
+      "seconds": 494.7588647371158
+    },
+    {
+      "name": "surface_rh",
+      "seconds": 814.6743817143142
+    },
+    {
+      "name": "register_lh",
+      "seconds": 194.4453528560698
+    },
+    {
+      "name": "register_rh",
+      "seconds": 187.93189403088763
+    },
+    {
+      "name": "annot_lh_aparc",
+      "seconds": 37.537213830277324
+    },
+    {
+      "name": "annot_lh_aparc.a2009s",
+      "seconds": 50.81144245201722
+    },
+    {
+      "name": "annot_lh_aparc.DKTatlas",
+      "seconds": 34.8062281133607
+    },
+    {
+      "name": "annot_rh_aparc",
+      "seconds": 31.53291641594842
+    },
+    {
+      "name": "annot_rh_aparc.a2009s",
+      "seconds": 39.09667288092896
+    },
+    {
+      "name": "annot_rh_aparc.DKTatlas",
+      "seconds": 32.92447459092364
+    },
+    {
+      "name": "project_aparc_volumes",
+      "seconds": 4.903826480265707
+    },
+    {
+      "name": "project_wmparc",
+      "seconds": 1.6006126492284238
+    },
+    {
+      "name": "brain_volume_stats",
+      "seconds": 2.4973563090898097
+    },
+    {
+      "name": "aseg_stats",
+      "seconds": 13.291750953067094
+    },
+    {
+      "name": "wmparc_stats",
+      "seconds": 12.20617639273405
+    },
+    {
+      "name": "stats_lh_aparc",
+      "seconds": 0.5273994538001716
+    },
+    {
+      "name": "stats_lh_aparc.a2009s",
+      "seconds": 0.5676613608375192
+    },
+    {
+      "name": "stats_lh_aparc.DKTatlas",
+      "seconds": 0.6048943907953799
+    },
+    {
+      "name": "stats_rh_aparc",
+      "seconds": 0.5566264912486076
+    },
+    {
+      "name": "stats_rh_aparc.a2009s",
+      "seconds": 0.5109558301046491
+    },
+    {
+      "name": "stats_rh_aparc.DKTatlas",
+      "seconds": 0.5032190377824008
+    }
+  ],
+  "status": "complete",
+  "gca_registration": {
+    "implementation": "native-c++",
+    "binary": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/fs_cpp_eight/bin/mri_em_register",
+    "sha256": "055c622278a77c8112f1fd640ac5d35b1ea584b466e21f3c1ad3dacf5942b29b"
+  },
+  "topology_repair": {
+    "implementation": "native-c++",
+    "binary": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/fs_cpp_eight/bin/mris_fix_topology",
+    "sha256": "51c07b5c69d2f329c11ce9f440f5478a538217a3f0b0c300e21a72111c6c52ed",
+    "upstream": "intensity-derived WM and aseg-guided fill"
+  },
+  "white_matter_chain": {
+    "implementation": "Python + Conda C++",
+    "mri_segment_sha256": "80a9aa2e8b485c5fd885b108e69d73b50322693d159bbf68a61c5c331d480c4e",
+    "mri_edit_wm_with_aseg_sha256": "d31020e2b6b6446ce01c63c48e1bb6a117892792b568e1fdca19ddec2515e81c"
+  },
+  "surface_metrics": {
+    "implementation": "native-c++",
+    "binary": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/fs_cpp_eight/bin/mris_place_surface",
+    "sha256": "959028b7b93908841d47910bcab777070cb7366390cc6c16e2da2d08623c6c81",
+    "upstream": "current approximate white/pial surfaces"
+  },
+  "sphere_generation": {
+    "implementation": "native-c++",
+    "mris_inflate": {
+      "binary": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/fs_cpp_eight/bin/mris_inflate",
+      "sha256": "64b79dc545f9b15b557c0925feaeef26a7dcee37b2accfc0c19cd4a3592e630f"
+    },
+    "mris_sphere": {
+      "binary": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/fs_cpp_eight/bin/mris_sphere",
+      "sha256": "42e06c5efe4e249520992071c8327dc2a84b81b9661ac31932bf95c5f9d80fb8"
+    },
+    "upstream": "native topology repair on approximate SynthSeg-derived filled"
+  },
+  "sphere_registration": {
+    "implementation": "native-c++",
+    "binary": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/fs_cpp_eight/bin/mris_register",
+    "sha256": "18d37b3077fe3e36009efbae25b48f0bec3b0120a7c2f4e69be16f6bef429f44",
+    "upstream": "native sphere/sulc on approximate earlier geometry",
+    "hemisphere_seconds": {
+      "lh": 194.4448880329728,
+      "rh": 187.93124555889517
+    }
+  },
+  "corpus_callosum": {
+    "best_slice": 128,
+    "plane_score": 165125,
+    "plane_y_degrees": -7.663761684675143,
+    "plane_z_degrees": -4.139458131363273,
+    "changed_voxels": 2263
+  },
+  "surfaces": {
+    "lh": {
+      "hemisphere": "lh",
+      "vertices": 102153,
+      "faces": 204302,
+      "raw_components": 1,
+      "cortex_vertices": 94890,
+      "mean_thickness_mm": 2.9397788047790527,
+      "topology_python_seconds": 8.103313065133989,
+      "topology_native_seconds": 9.699496543966234,
+      "native_metric_seconds": {
+        "thickness": 24.83063552621752,
+        "area": 0.47673188894987106,
+        "area.pial": 0.4558985629118979,
+        "curv": 1.484260378871113,
+        "curv.pial": 1.7026861538179219
+      },
+      "native_sphere_seconds": {
+        "inflate_nofix": 9.650285177864134,
+        "qsphere_nofix": 75.19342647911981,
+        "inflate": 10.97510196082294,
+        "sphere": 333.2441478869878
+      },
+      "approximations": [
+        "native-metrics-on-approximate-white-pial",
+        "white-from-smoothed-tessellation",
+        "pial-normal-ray",
+        "sphere.reg-native-on-approximate-upstream"
+      ]
+    },
+    "rh": {
+      "hemisphere": "rh",
+      "vertices": 101079,
+      "faces": 202154,
+      "raw_components": 1,
+      "cortex_vertices": 93821,
+      "mean_thickness_mm": 2.9559948444366455,
+      "topology_python_seconds": 7.73432185407728,
+      "topology_native_seconds": 15.101789802312851,
+      "native_metric_seconds": {
+        "thickness": 27.086037350818515,
+        "area": 0.49241936998441815,
+        "area.pial": 0.4237604457885027,
+        "curv": 1.3647606438025832,
+        "curv.pial": 1.487554251216352
+      },
+      "native_sphere_seconds": {
+        "inflate_nofix": 8.904550798237324,
+        "qsphere_nofix": 154.48955180123448,
+        "inflate": 17.896529731806368,
+        "sphere": 560.8724308190867
+      },
+      "approximations": [
+        "native-metrics-on-approximate-white-pial",
+        "white-from-smoothed-tessellation",
+        "pial-normal-ray",
+        "sphere.reg-native-on-approximate-upstream"
+      ]
+    }
+  },
+  "total_seconds": 2898.51876770705
+}

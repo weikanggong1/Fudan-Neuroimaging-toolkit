@@ -13,7 +13,10 @@
     "python/packages/WMHSynthSeg/inference.py": "519093d8d24c33e2e233ded94fe8c3eb4e6b38160d2c9c2de6505f07da9eb326",
     "python/packages/WMHSynthSeg/utils.py": "a33eb48b466703a954441803e5a1a6aff716ff9755345f548c28ebeee34f6d42",
     "python/packages/WMHSynthSeg/unet3d/model.py": "bff1285de993212dc1382cf2d6e863083c54611e6413863f7c56182b2df3485a",
-    "python/packages/WMHSynthSeg/unet3d/buildingblocks.py": "43246ac1f68884df05cf36c19469981b2374d809ad2629636ed76187b2ac5bc7"
+    "python/packages/WMHSynthSeg/unet3d/buildingblocks.py": "43246ac1f68884df05cf36c19469981b2374d809ad2629636ed76187b2ac5bc7",
+    "mmorf_core.py": "a89092d2ef561b53049400361a646b9cc8f94300bcb7b3eb14b37ed1e4a18466",
+    "dmri_pipeline.py": "7ed08495a70065f46e8cd6a8402053ec9e5d6a764e5ce8ec37dc961fc369a347",
+    "dmri_tbss.py": "a9d73b62e897c58a50b009d6046567841a72fd8dc9658c4b3e088e09e9459ee2"
   },
   "weights_sha256": {
     "synthmorph.affine.2.h5": "1ac5304b683036e5177f5b4ad38fa09fcbbe7883e742d6fa5bdaedd0e619ced6",
@@ -58,18 +61,9 @@
       "applywarp": "src/fnit/applywarp/core.py",
       "fnirt_method": "PyTorch port of the FSL FNIRT 2203.0 UKB GM path with basisfield 2203.1, miscmaths 2203.2, newimage 2203.11 and warpfns 2203.0 source references",
       "source_provenance_manifest": "src/fnit/_vendor_fsl/manifest.json",
-      "fsl_flirt_equivalence_status": "the default-TF32 ten-case reference suite passed the tolerance-based matrix functional gate 10/10 (median 0.008544 mm, IQR 0.006265-0.019436 mm, maximum 0.028984 mm; threshold 0.05 mm); runtime validated_fsl_equivalent remains false because this is not a per-input, bitwise, or complete numerical-equivalence claim",
-      "fsl_fnirt_equivalence_status": "the independent ten-case matched-input report measured median warped GM r=0.998695, nonlinear Jacobian r=0.999267, and modulated GM r=0.998507 with 10/10 output-contract agreement; errors exceed rounding and fsl_fnirt_numerically_equivalent remains false",
-      "fast_vbm_v0_9_validation": {
-        "scope": "ten real T1w cases; end_to_end only; fnirt and synthmorph backends",
-        "report": "validation/fast_vbm/report.v0.9.public.json",
-        "table": "validation/fast_vbm/backend_comparison.v0.9.public.csv",
-        "test_summary": "validation/fast_vbm/test_summary.v0.9.public.json",
-        "release_manifest": "validation/fast_vbm/release.v0.9.public.json",
-        "direct_fnirt": "validation/fast_vbm/fnirt_fsl_10case.v0.9.public.json",
-        "direct_fnirt_is_independent_matched_input_run": true,
-        "fsl_fnirt_numerically_equivalent": false
-      }
+      "fsl_flirt_equivalence_status": "默认 TF32 的 10 例真实数据功能门限全部通过：FSL rmsdiff 中位数 0.008545075 mm，四分位距 0.006264673–0.019429475 mm，最大值 0.0289986 mm，门限 0.05 mm；该结果不代表逐输入或逐位数值等价，validated_fsl_equivalent 仍为 false。",
+      "fsl_fnirt_equivalence_status": "当前 1 例 matched-native TBSS 对照中，TorchFLIRT + TorchFNIRT 的九张 standard 图 r=0.995086–0.998886，固定官方 affine 后 r=0.997483–0.999523；level-1 LM mask、cost 和接受序列与 FSL 对齐。后续数值归约仍有差异，fsl_fnirt_numerically_equivalent 仍为 false。详见 validation/dmri_pipeline/tbss_diagnosis.public.json。",
+      "fast_vbm_validation_status": "当前 FNIRT 更新后尚未完成新的 raw-T1w-to-VBM 配对 benchmark；被替代的报告和图已删除。"
     },
     "upstream_license": "Apache-2.0",
     "upstream_copyright": "Copyright 2021 University of Oxford, Oxford, UK",
@@ -110,13 +104,16 @@
     "vendored_fsl_tractography_reference_sources_included": true,
     "vendored_fsl_eddy_fdt_reference_source_included": true,
     "amico_source_included": false,
-    "amico_license_included": true
+    "amico_license_included": true,
+    "vendored_mmorf_reference_source_included": true,
+    "ukb_tbss_config_files_included": true,
+    "vendored_fsl_bet_reference_sources_included": true
   },
   "fsl_registration_source_snapshots": {
-    "purpose": "complete unmodified upstream sources consulted for the modified PyTorch FLIRT, FNIRT, applywarp, TOPUP, EDDY, and DTIFIT implementations",
+    "purpose": "complete unmodified upstream sources consulted for the modified PyTorch FLIRT, FNIRT, applywarp, TOPUP, EDDY, DTIFIT, MMORF, and BET implementations",
     "validation_baseline": "FSL 6.0.7.4",
     "manifest": "src/fnit/_vendor_fsl/manifest.json",
-    "manifest_sha256": "41fb0d3179c96202ccc97c1d05e43650c5d44f5a61899a246195d6fbe4e027b9",
+    "manifest_sha256": "430cd0235da73109f4ebb67c5a9319c5cc330b43748f4ff5d63ca1f7399e929d",
     "license_file": "licenses/FSL-6.0.txt",
     "license_sha256": "137735ac0d0f075d58e85642972692b92073711752b273e7de7ed38c6147a8eb",
     "licence_scope": "non-commercial redistribution under the FSL Software Licence, Release 6.0; licence conditions and original and amended source code accompany the product",
@@ -220,6 +217,43 @@
         "directory": "src/fnit/_vendor_fsl/sources/fdt-2202.6",
         "role": "validation_target",
         "fsl_6_0_7_4_package": "fsl-fdt 2202.6"
+      },
+      {
+        "repository": "https://git.fmrib.ox.ac.uk/fsl/MMORF.git",
+        "tag": "v0.3.2",
+        "commit": "1c1c13b8368f05e1a79a6dafe919d6b61df36bd6",
+        "git_tree": "103b935ebc0b1145188dfff79f423c5be5e39617",
+        "git_archive_sha256": "5b1f160e3e3a1d76786fb28dfeb1640011e4c7a358bba3eafaa52b7fef3aa268",
+        "directory": "src/fnit/_vendor_fsl/sources/mmorf-0.3.2",
+        "role": "validation_target",
+        "fsl_6_0_7_4_package": "mmorf 0.3.2"
+      },
+      {
+        "repository": "https://git.fmrib.ox.ac.uk/fsl/bet2.git",
+        "tag": "2111.9",
+        "commit": "d6b02000500516ce7d1c0c9fa23259ca7a83f7e3",
+        "git_tree": "33540ff4d5a90fa1030284750e200a13f9b59846",
+        "git_archive_sha256": "59e81a86134268ac565f8f931d98f54a9e0882bf25d7cf344d7c479e49975cd6",
+        "directory": "src/fnit/_vendor_fsl/sources/bet2-2111.9",
+        "role": "reference_source"
+      },
+      {
+        "repository": "https://git.fmrib.ox.ac.uk/fsl/meshclass.git",
+        "tag": "2111.0",
+        "commit": "228ca8e73b86b4466e4323be10da36bd5bfdfb07",
+        "git_tree": "2cded50cfdead0474b868b26b8de09eb0c70d72c",
+        "git_archive_sha256": "6294bfc7f845236f13531e8352d528a048aedcde208d7b3deba5bbe56a10450e",
+        "directory": "src/fnit/_vendor_fsl/sources/meshclass-2111.0",
+        "role": "reference_source"
+      },
+      {
+        "repository": "https://git.fmrib.ox.ac.uk/fsl/avwutils.git",
+        "tag": "2209.8",
+        "commit": "fcc335218284a2b04d5d7eb17dd4cfba264d0295",
+        "git_tree": "287591517825eabf26d55d48f05b2c7dc4525f1a",
+        "git_archive_sha256": "20f7ceae7b67aaee3409eafd91eb6090f3dff24b535fbb1633ce2426907373cc",
+        "directory": "src/fnit/_vendor_fsl/sources/avwutils-2209.8",
+        "role": "reference_source"
       }
     ],
     "runtime_dependency": false
@@ -236,7 +270,7 @@
   "fsl_tractography_source_snapshots": {
     "purpose": "unmodified upstream source reference for PyTorch BEDPOSTX and ProbtrackX implementations",
     "manifest": "src/fnit/_vendor_fsl/manifest.json",
-    "manifest_sha256": "41fb0d3179c96202ccc97c1d05e43650c5d44f5a61899a246195d6fbe4e027b9",
+    "manifest_sha256": "430cd0235da73109f4ebb67c5a9319c5cc330b43748f4ff5d63ca1f7399e929d",
     "license_file": "licenses/FSL-6.0.txt",
     "components": [
       {
@@ -302,8 +336,6 @@
       "source_snapshot_included": false,
       "license_file": "licenses/AMICO-2.0.txt",
       "bundled_direction_assets": true,
-      "dipy_runtime_dependency": false,
-      "current_vs_prechange_five_outputs_exact": true,
       "numerically_equivalent": false
     }
   },
@@ -327,13 +359,53 @@
   "amico_noddi_validation": {
     "scope": "one real UKB-format 105-volume subject after official EDDY",
     "report": "validation/amico_noddi/report.public.json",
-    "figure": "docs/amico_noddi/figures/ds004666_noddi_dipy_replacement.png",
+    "figure": "docs/amico_noddi/figures/amico_noddi_comparison.png",
     "reference_release": "AMICO 2.0.3",
     "output_definitions_compatible": true,
     "all_mask_voxels_compared": true,
-    "current_vs_prechange_five_outputs_exact": true,
     "maximum_scalar_map_absolute_error": 0.06689253449440002,
     "acceptance_threshold": 1e-07,
+    "numerically_equivalent": false,
+    "reference_numpy_wheel_isolation_passed": true,
+    "default_conda_numpy_passed": false
+  },
+  "mmorf_reference": {
+    "repository": "https://git.fmrib.ox.ac.uk/fsl/MMORF.git",
+    "tag": "v0.3.2",
+    "commit": "1c1c13b8368f05e1a79a6dafe919d6b61df36bd6",
+    "git_tree": "103b935ebc0b1145188dfff79f423c5be5e39617",
+    "installed_reference": "FSL 6.0.7.4 mmorf 0.3.2",
+    "implementation": "src/fnit/mmorf",
+    "source_snapshot": "src/fnit/_vendor_fsl/sources/mmorf-0.3.2",
+    "warp_contract": "reference-grid relative pull displacement in millimetres along the reference image axes",
+    "validation_report": "validation/mmorf/report.public.json",
+    "validation_figure": "docs/mmorf/figures/mmorf_fsl_comparison.png",
+    "validation_status": "1 例真实 T1w + DTI tensor：warp r=0.969381，Jacobian r=0.947671；固定 sampler、affine 与 native input 后九图 r=0.919880–0.976514。官方与 FNIT 优化器仍不同。",
     "numerically_equivalent": false
+  },
+  "dmri_pipeline_reference": {
+    "ukb_repository": "https://git.fmrib.ox.ac.uk/falmagro/uk_biobank_pipeline_v_1.5",
+    "ukb_commit": "0e39a7f7eb76b55437942bfa3073512506b6c8fa",
+    "standard_maps": [
+      "FA",
+      "MD",
+      "L1",
+      "L2",
+      "L3",
+      "MO",
+      "ICVF",
+      "OD",
+      "ISOVF"
+    ],
+    "tbss_config_sha256": {
+      "oxford_s1.cnf": "3df6320e97300f9cef8a77b6c7c6306b8256351d5a7022d9966c076f24747227",
+      "oxford_s2.cnf": "b2fe418169f8ce1dde5e277a09e8edcdb6a0dc3f3065972ae69404020ef639ec",
+      "oxford_s3.cnf": "9d304dfd224b8e48f20364dcce77c7618722cf3a9bcd40d764a6d25ee8020eaf"
+    },
+    "fa_preprocessing_voxelwise_equivalent": true,
+    "current_tbss_validation": "validation/dmri_pipeline/tbss_diagnosis.public.json",
+    "current_mmorf_validation": "validation/mmorf/report.public.json",
+    "raw_to_standard_fresh_benchmark_available": false,
+    "registration_numerically_equivalent": false
   }
 }

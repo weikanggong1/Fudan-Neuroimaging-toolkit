@@ -1,199 +1,233 @@
 {
   "schema_version": 3,
   "date": "2026-09-27",
-  "feature": "TorchAMICONODDI without a DIPY runtime dependency",
-  "reference": {
-    "software": "AMICO 2.0.3",
-    "tag": "v2.0.3",
-    "commit": "df540093b60240c38a6ff2ea4ceb1181c4f3e936",
-    "dipy_version_in_reference": "1.12.1",
-    "frozen_official_output_from_prior_environment": true,
-    "reference_complete_process_seconds_from_prior_run": 29.24
-  },
-  "inputs": {
-    "full_fit": "one real UKB-format EDDY-corrected DWI; DWI, mask, bvals and rotated bvecs identical for frozen official, pre-change FNIT and current FNIT",
-    "full_shape": [
-      104,
-      104,
-      72,
-      105
-    ],
-    "full_mask_voxels": 242261,
-    "full_b0_volumes": 5,
-    "full_diffusion_volumes": 100,
-    "stage_math": "a separate matched UK Biobank DWI and brain mask; exact same arrays for DIPY-backed and independent math",
-    "stage_shape": [
-      104,
-      104,
-      72,
-      105
-    ],
-    "stage_mask_voxels": 207696,
-    "private_input_paths_hashes_and_images_in_repository": false
-  },
-  "standalone_stage_math_vs_dipy_backed": {
-    "direction_components": {
-      "exact": 623088,
-      "total": 623088
-    },
-    "direction_lut_indices": {
-      "exact": 207696,
-      "total": 207696
-    },
-    "rotation_fit_coefficients": {
-      "exact": 45500,
-      "total": 45500
-    },
-    "rotation_basis_coefficients": {
-      "exact": 45500,
-      "total": 45500
-    },
-    "subject_basis_coefficients": {
-      "exact": 18200,
-      "total": 18200
-    },
-    "white_matter_kernel_values": {
-      "exact": 7560000,
-      "total": 7560000
-    },
-    "isotropic_kernel_values": {
-      "exact": 105,
-      "total": 105
-    },
-    "kernel_norm_values": {
-      "exact": 14400,
-      "total": 14400
-    },
-    "maximum_absolute_difference": 0.0,
-    "cpu_seconds": {
-      "standalone_direction": 0.6417034789919853,
-      "standalone_rotation": 0.0418594628572464,
-      "standalone_subject_basis": 0.0038614794611930847,
-      "standalone_full_kernel": 0.4048459976911545,
-      "dipy_backed_direction": 1.752688281238079,
-      "dipy_backed_rotation": 0.37699905782938004,
-      "dipy_backed_subject_basis": 0.004628874361515045,
-      "dipy_backed_full_kernel": 0.4254356399178505
-    }
-  },
-  "full_fit_current_vs_prechange_fnit": {
-    "same_input_hashes": true,
-    "maps_exact": {
-      "NDI": 242261,
-      "ODI": 242261,
-      "FWF": 242261,
-      "RMSE": 242261,
-      "direction_components": 726783
-    },
-    "all_map_elements_exact": true,
-    "shape_dtype_affine_equal": true,
-    "prechange_source_sha256": "bc44a4aedffa94cf177af9479c4d86fa392c9172c6b6bb003a92d3d0f4ec729d",
-    "standalone_source_sha256": "c213123cb550d673845add593461d15b9f92040be328ccfe3c4c6cceb64759b2"
-  },
-  "full_fit_current_vs_frozen_official": {
-    "metrics": {
-      "NDI": {
-        "exact_elements": 97719,
-        "total_elements": 242261,
-        "mae": 2.248666698586693e-06,
-        "max_abs": 0.04072889685630798,
-        "count_abs_gt_1e_7": 75235
-      },
-      "ODI": {
-        "exact_elements": 62584,
-        "total_elements": 242261,
-        "mae": 7.914600378266036e-06,
-        "max_abs": 0.053755998611450195,
-        "count_abs_gt_1e_7": 76620
-      },
-      "FWF": {
-        "exact_elements": 131327,
-        "total_elements": 242261,
-        "mae": 3.154258010394552e-06,
-        "max_abs": 0.06689253449440002,
-        "count_abs_gt_1e_7": 71702
-      },
-      "direction": {
-        "exact_elements": 678114,
-        "total_elements": 726783,
-        "mae": 0.06735845421488759,
-        "max_abs": 1.999260425567627,
-        "count_abs_gt_1e_7": 48657
-      },
-      "RMSE": {
-        "exact_elements": 149299,
-        "total_elements": 242261,
-        "mae": 7.794731430883955e-09,
-        "max_abs": 0.0003540143370628357,
-        "count_abs_gt_1e_7": 165
-      }
-    },
-    "official_threshold_max_abs": 1e-07,
-    "scalar_maps_all_within_threshold": false,
-    "directions_exact": false,
-    "passed": false,
-    "discrepancy_present_in_prechange_fnit": true,
-    "discrepancy_cause_proven": false
-  },
-  "timing": {
-    "scope": "fresh process /usr/bin/time includes startup, NIfTI I/O, kernel generation and fitting on one H100; original AMICO time was recorded in a prior independent CPU run",
-    "prechange_fnit_full_process_seconds": 26.77,
-    "standalone_fnit_full_process_seconds": 26.59,
-    "prechange_fnit_run_wall_seconds": 22.75230193277821,
-    "standalone_fnit_run_wall_seconds": 22.96476057730615,
-    "prechange_fnit_direction_seconds": 1.3583453577011824,
-    "standalone_fnit_direction_seconds": 1.114825788885355,
-    "prechange_fnit_kernel_seconds": 0.8009383520111442,
-    "standalone_fnit_kernel_seconds": 0.6568197966553271,
-    "prechange_fnit_solver_seconds": 14.32453751610592,
-    "standalone_fnit_solver_seconds": 14.85788066778332,
-    "standalone_fnit_peak_cuda_allocated_bytes": 12431536128,
-    "prechange_fnit_peak_cuda_allocated_bytes": 12431536128,
-    "standalone_fnit_max_rss_kib": 1751768,
-    "prechange_fnit_max_rss_kib": 1774876
-  },
-  "dependency_gate": {
-    "dipy_in_pyproject_dependencies": false,
-    "dipy_in_environment_yml": false,
-    "dipy_imported_by_current_fnit_process": false,
-    "dipy_used_only_for_independent_reference": true
-  },
-  "acceptance": {
-    "removal_of_dipy_runtime_dependency": true,
-    "current_outputs_equal_prechange_frozen_inputs": true,
-    "current_outputs_match_frozen_official_amico_within_threshold": false,
-    "overall_official_numeric_parity_passed": false,
-    "public_example_outputs_equal_prechange": true,
-    "under_20_decimal_gb_on_public_example": false
-  },
-  "figure": "docs/amico_noddi/figures/ds004666_noddi_dipy_replacement.png",
-  "public_example": {
-    "dataset": "OpenNeuro ds004666, one public paired T1/DWI subject, FSL EDDY-corrected AP DWI",
+  "feature": "TorchAMICONODDI",
+  "fnit_version": "0.14.0",
+  "status": "默认 Conda 环境下未通过 AMICO 2.0.3 数值一致阈值；移除 DIPY 不改变当前 FNIT 输出",
+  "input": {
+    "description": "一例真实 UKB 格式、官方 EDDY 校正后的 105 卷 DWI",
     "shape": [
       104,
       104,
       72,
       105
     ],
-    "mask_voxels": 227343,
-    "same_input_hashes_between_old_and_current": true,
-    "current_vs_prechange_fnit": {
-      "NDI_exact_elements": 227343,
-      "ODI_exact_elements": 227343,
-      "FWF_exact_elements": 227343,
-      "RMSE_exact_elements": 227343,
-      "direction_exact_components": 682029,
-      "all_outputs_exact": true,
-      "shape_dtype_affine_equal": true
+    "volumes": {
+      "b0": 5,
+      "b_approximately_1000": 50,
+      "b_approximately_2000": 50
     },
-    "old_fnit_process_seconds": 34.32,
-    "current_fnit_process_seconds": 30.01,
-    "old_fnit_run_wall_seconds": 28.613991441670805,
-    "current_fnit_run_wall_seconds": 25.063497227150947,
-    "current_peak_cuda_allocated_bytes": 20915553280,
-    "current_peak_cuda_allocated_decimal_gb": 20.91555328,
-    "current_peak_cuda_allocated_gib": 19.479126930236816,
-    "under_project_20_decimal_gb_target": false,
-    "figure": "docs/amico_noddi/figures/ds004666_noddi_dipy_replacement.png"
-  }
+    "mask_voxels": 242261,
+    "sha256": {
+      "DWI.nii.gz": "67e4564323d8d4dfacaa04a451e2ffa0c89de32cb6d98eb5deb46ea8971deeaa",
+      "mask.nii.gz": "3d1c29ec2f1a6870be93e0b436c884dc805d87244f186312c93086301ae08df4",
+      "bvals": "4bba64690ad224848ea4d0891b98a859b79e11f0de77ad9d2539f4397fda2224",
+      "bvecs": "d17c075f60d433feeb8450bedb83ec3a6771878e150542b05627d2feeec158a1"
+    },
+    "files_in_repository": false
+  },
+  "reference": {
+    "software": "AMICO 2.0.3",
+    "commit": "df540093b60240c38a6ff2ea4ceb1181c4f3e936",
+    "dipy_oracle_version": "1.12.1",
+    "host": "gpucw1",
+    "fresh_official_outputs_exactly_equal_to_archived": true,
+    "fresh_reference_comparison_script_note": "官方五图成功保存；脚本随后因比较路径少写 NODDI 子目录以状态 1 退出，独立比较脚本已改正并核验五图。"
+  },
+  "stage_checks": {
+    "ols_direction_vs_dipy_float64": {
+      "exact_components": 726783,
+      "total_components": 726783,
+      "max_abs": 0.0
+    },
+    "rotation_auxiliary": [
+      {
+        "shape": [
+          91,
+          500
+        ],
+        "equal_elements": 45500,
+        "size": 45500,
+        "max_abs": 0.0
+      },
+      {
+        "shape": [
+          500,
+          91
+        ],
+        "equal_elements": 45500,
+        "size": 45500,
+        "max_abs": 0.0
+      },
+      {
+        "shape": [
+          91
+        ],
+        "equal_elements": 91,
+        "size": 91,
+        "max_abs": 0.0
+      },
+      {
+        "shape": [
+          91
+        ],
+        "equal_elements": 91,
+        "size": 91,
+        "max_abs": 0.0
+      }
+    ],
+    "subject_basis": {
+      "shape": [
+        100,
+        182
+      ],
+      "equal_elements": 18200,
+      "size": 18200,
+      "max_abs": 0.0
+    },
+    "subject_indices_exact": true
+  },
+  "same_runtime_new_vs_old_fnit": {
+    "same_input_and_gpu": true,
+    "all_five_maps_exact": true,
+    "maximum_absolute_difference": 0.0,
+    "dipy_imported_by_new_run": false,
+    "old_fnit_dipy_imported": true
+  },
+  "default_conda_numpy": {
+    "numpy_version": "1.26.4",
+    "distribution": "conda-forge",
+    "scipy_version": "1.17.1",
+    "vs_fresh_official": {
+      "NDI": {
+        "shape": [
+          242261
+        ],
+        "max_abs": 0.04072889685630798,
+        "mae": 2.248666698586693e-06,
+        "exact_elements": 97719,
+        "total_elements": 242261,
+        "count_abs_gt_1e-7": 75235
+      },
+      "ODI": {
+        "shape": [
+          242261
+        ],
+        "max_abs": 0.053755998611450195,
+        "mae": 7.914600378266036e-06,
+        "exact_elements": 62584,
+        "total_elements": 242261,
+        "count_abs_gt_1e-7": 76620
+      },
+      "FWF": {
+        "shape": [
+          242261
+        ],
+        "max_abs": 0.06689253449440002,
+        "mae": 3.154258010394552e-06,
+        "exact_elements": 131327,
+        "total_elements": 242261,
+        "count_abs_gt_1e-7": 71702
+      },
+      "RMSE": {
+        "shape": [
+          242261
+        ],
+        "max_abs": 0.0003540143370628357,
+        "mae": 7.794731430883955e-09,
+        "exact_elements": 149299,
+        "total_elements": 242261,
+        "count_abs_gt_1e-7": 165
+      },
+      "dir": {
+        "shape": [
+          242261,
+          3
+        ],
+        "max_abs": 1.999260425567627,
+        "mae": 0.06735845421488759,
+        "exact_elements": 678114,
+        "total_elements": 726783,
+        "count_abs_gt_1e-7": 48657
+      }
+    },
+    "acceptance_max_abs_1e_minus_7_and_direction_exact": false
+  },
+  "reference_numpy_wheel_isolation": {
+    "numpy_version": "1.26.4",
+    "wheel_tag": "cp311-cp311-manylinux_2_17_x86_64",
+    "scope": "仅验证进程以离线参考目录中的 PyPI NumPy wheel 置于 PYTHONPATH 前；FNIT 运行时未导入 DIPY、AMICO。默认 Conda 安装不保证此结果。",
+    "vs_fresh_official": {
+      "NDI": {
+        "shape": [
+          242261
+        ],
+        "max_abs": 5.960464477539063e-08,
+        "mae": 1.3939718573611494e-09,
+        "exact_elements": 231099,
+        "total_elements": 242261,
+        "count_abs_gt_1e-7": 0
+      },
+      "ODI": {
+        "shape": [
+          242261
+        ],
+        "max_abs": 5.960464477539063e-08,
+        "mae": 1.2916828753732576e-12,
+        "exact_elements": 242253,
+        "total_elements": 242261,
+        "count_abs_gt_1e-7": 0
+      },
+      "FWF": {
+        "shape": [
+          242261
+        ],
+        "max_abs": 5.960464477539063e-08,
+        "mae": 7.090174772814153e-13,
+        "exact_elements": 242230,
+        "total_elements": 242261,
+        "count_abs_gt_1e-7": 0
+      },
+      "RMSE": {
+        "shape": [
+          242261
+        ],
+        "max_abs": 0.0,
+        "mae": 0.0,
+        "exact_elements": 242261,
+        "total_elements": 242261,
+        "count_abs_gt_1e-7": 0
+      },
+      "dir": {
+        "shape": [
+          242261,
+          3
+        ],
+        "max_abs": 0.0,
+        "mae": 0.0,
+        "exact_elements": 726783,
+        "total_elements": 726783,
+        "count_abs_gt_1e-7": 0
+      }
+    },
+    "all_five_maps_exact_to_previous_validated_fnit_output": true,
+    "acceptance_max_abs_1e_minus_7_and_direction_exact": true,
+    "dipy_imported_by_candidate": false
+  },
+  "timing": {
+    "scope": "gpucw1 同一真实 DWI；单次进程计时含启动、读写及拟合；节点负载未固定，不计算加速比。",
+    "new_conda_wall_seconds": 34.82,
+    "old_dipy_fnit_conda_wall_seconds": 36.21,
+    "new_reference_numpy_wheel_wall_seconds": 25.17,
+    "fresh_official_saved_outputs_wall_seconds_with_followup_path_error": 28.65,
+    "historical_clean_official_wall_seconds": 29.24,
+    "new_conda_kernel_seconds": 0.7974791252054274,
+    "new_conda_direction_seconds": 0.9705375437624753,
+    "new_conda_solver_seconds": 18.35177623294294,
+    "old_conda_direction_seconds": 1.8245358541607857,
+    "peak_cuda_memory_bytes": 9952554496
+  },
+  "interpretation": "无 DIPY 替换对同环境旧 FNIT 输出逐元素无影响。默认 Conda NumPy 与参考 PyPI NumPy 的二进制线性代数结果不同；后者可复现严格官方阈值，但不得作为默认安装保证。",
+  "figure": "docs/amico_noddi/figures/amico_noddi_comparison.png",
+  "figure_sha256": "f741653d0816591fa7824524a2f8cdbbd704493ac9a073ff32976a7a4cab0d9e"
 }

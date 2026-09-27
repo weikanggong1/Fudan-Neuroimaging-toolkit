@@ -6,7 +6,7 @@ The recon-all WM parcellation command is `mri_surf2volseg --label-wm --i aparc+a
 
 The source only relabels cerebral WM (2/41) and WM hypointensity IDs. `--label-wm` restricts nearest white-surface vertices to `?h.cortex.label`, applies the inward normal check, assigns the annotation index plus 3000/4000 within 5 mm, and otherwise uses 5001/5002. The fixed `aparc+aseg.mgz` contains 180,858 left WM and 179,377 right WM voxels, and no hypo voxels. Every cortex-mask vertex has a positive aparc annotation on this subject. The Python stage therefore reuses the already validated `_nearest_with_dot` white-surface query from `surf2volseg_cortex_python.py`; it need not load pial surfaces for this branch.
 
-`src/fnit/recon_all/surf2volseg_wm_python.py` provides `label_wm_voxels`, `label_wm_volume`, and a standalone step CLI. It uses Python, NumPy, SciPy, PyTorch, and nibabel, without calling a FreeSurfer binary or reading its runtime package. The source MGZ header/footer writer is the existing `mgh_compat.save_same_dtype_mgh`. This module has not been added to the main recon-all entry point.
+`src/fnit/recon_all/surf2volseg_wm_python.py` provides `label_wm_voxels`, `label_wm_volume`, and a standalone step CLI. It uses Python, NumPy, SciPy, PyTorch, and nibabel, without calling a FreeSurfer binary or reading its runtime package. The source MGZ header/footer writer is the existing `mgh_compat.save_same_dtype_mgh`. This was an earlier standalone-stage status. The current runner now calls this module after generating aparc+aseg; see [the current real-input runner check](../ATLAS_VOLUME_RUNNER_20260928.md).
 
 ## Frozen inputs
 

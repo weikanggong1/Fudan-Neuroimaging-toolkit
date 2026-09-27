@@ -1,15 +1,17 @@
 # TorchFNIRT
 
-`TorchFNIRT` 是 FSL 6.0.7.4 中 FNIRT 灰质配准路径的 PyTorch 实现。本页面的
-独立接口只实现 `GM_2_MNI152GM_2mm.cnf`：输入灰质概率图、灰质模板、可选 FLIRT
-仿射矩阵和 binary reference mask，输出 cubic B-spline 系数、配准后的输入图以及
-非线性 Jacobian。运行时不调用 FSL。
+[返回首页](../../README.md) · [dMRI/TBSS pipeline](../dmri_pipeline/README.md)
 
-CUDA 运行默认允许 TF32 matmul 和 cuDNN 内核，同时保留实现声明的
-float32/float64 张量；不使用 float16 或 bfloat16。实际开关写入
+`TorchFNIRT` 是 FNIT 对 FSL FNIRT 非线性配准核心的 PyTorch 实现。独立命令对应
+FSL 6.0.7.4 的 `GM_2_MNI152GM_2mm.cnf` 灰质路径；dMRI pipeline 使用同一核心执行
+UK Biobank 的 `oxford_s1.cnf` → `oxford_s2.cnf` → `oxford_s3.cnf` 三阶段 FA
+配准。运行时不启动 FSL executable。
+
+CUDA 默认允许 TF32 matmul 和 cuDNN，但图像和写出的 coefficient NIfTI 为 float32，优化器内部 coefficient state 和
+主计算为 float64；不使用 float16 或 bfloat16。实际设置写入
 `result.qc["tf32"]`。
 
-## 命令行调用
+## 独立命令行：灰质 FNIRT
 
 ```bash
 python -m fnit.fnirt \
@@ -24,30 +26,24 @@ python -m fnit.fnirt \
   --device cuda:0
 ```
 
-每一行的作用如下：
+| 参数 | 输入或输出 | 作用 |
+|---|---|---|
+| `--in` | 输入 | 单张 3D moving 灰质概率图。 |
+| `--ref` | 输入 | 单张 3D fixed 灰质模板；决定 `iout`/`jout` 的网格。 |
+| `--aff` | 输入，可省略 | 4×4 FSL scaled-mm 矩阵，方向为 input → reference；省略时使用 FSL scaled-mm identity。 |
+| `--refmask` | 输入 | reference 网格上的二值 mask；省略时从 `$FSLDIR/data/standard` 读取官方 mask。 |
+| `--config` | 输入 | 只接受未经修改的 `GM_2_MNI152GM_2mm.cnf` 或该名称。 |
+| `--cout` | 输出 | FSL intent-2007 cubic B-spline coefficient NIfTI；它不是 dense warp。 |
+| `--iout` | 输出，可省略 | 原始 input 经 affine 和 nonlinear warp 后的 reference-grid 图像。 |
+| `--jout` | 输出，可省略 | nonlinear-only Jacobian determinant，不含 FLIRT affine determinant。 |
+| `--device` | 运行选项 | `cpu`、`cuda` 或 `cuda:N`；省略时优先 CUDA。 |
+| `--overwrite` | 运行选项 | 允许替换已有输出；默认保护已有文件。 |
 
-| 参数 | 作用 |
-|---|---|
-| `python -m fnit.fnirt` | 启动本包的单被试 PyTorch FNIRT，不调用外部 `fnirt` executable。 |
-| `--in` | moving/input 灰质概率图；配准要把它变换到 `--ref`。 |
-| `--ref` | fixed/reference 灰质模板；决定 `--iout` 和 `--jout` 的 shape、voxel size 和空间网格。 |
-| `--aff` | 可选 FLIRT `.mat`；方向是 input → reference，坐标是 FSL scaled-mm。代码先转换成带 source/target geometry 的 world-RAS affine，再传给 `TorchFNIRT`。省略时使用 FSL scaled-mm identity。 |
-| `--cout` | cubic B-spline residual coefficient 文件。它是 FSL intent `2007`，不是 dense warp。省略时与 FSL 一样，从 input 文件名生成 `<input>_warpcoef`。 |
-| `--iout` | 原始 `--in` 经仿射和非线性变换后，在 reference 网格上的图像。优化阶段的平滑图不会写到这里。 |
-| `--jout` | 非线性位移的 Jacobian determinant；定义及是否包含 affine 与 FSL `fnirt::SaveJacobian` 对应，不包含 FLIRT affine determinant。体素值差异见验证结果。 |
-| `--refmask` | reference 网格上的 binary `0/1` mask。GM 配置只在最后一级按 `applyrefmask=0,0,0,1` 使用它。省略时仅在 `FSLDIR/data/standard/` 可找到官方 mask 的情况下自动使用。 |
-| `--config` | 只接受官方、未修改的 `GM_2_MNI152GM_2mm.cnf` 或该名称。其他配置会直接报错。 |
-| `--device` | `cpu`、`cuda` 或 `cuda:N`；CLI 和 Python API 均默认优先使用可用 CUDA。 |
-| `--overwrite` | 允许替换已有输出。未给出时，任何一个输出已存在都会在模型运行前报错。 |
+`cout` 总会写出。省略 `--cout` 时，输入 `subject_GM.nii.gz` 生成
+`subject_GM_warpcoef.nii.gz`。不带扩展名的输出遵循 `FSLOUTPUTTYPE=NIFTI` 或
+`NIFTI_GZ`。三个输出路径必须不同，也不能覆盖 input、reference、affine 或 mask。
 
-`cout` 始终生成；省略 `--cout` 时，`subject_GM.nii.gz` 对应默认文件
-`subject_GM_warpcoef.nii.gz`。输出 root 可以不带扩展名：`FSLOUTPUTTYPE=NIFTI`
-补 `.nii`，`NIFTI_GZ` 或未设置时补 `.nii.gz`；其他 `FSLOUTPUTTYPE` 会明确报错。
-三个输出必须使用不同路径，也不能覆盖 input、reference、affine 或 mask。输出先
-写入同目录临时文件。未指定 `--overwrite` 时以原子 hard-link 创建最终文件，若
-并行任务发生路径冲突，本次已创建的输出会回滚，已有文件不会被覆盖。
-
-对应的 FSL 命令是：
+等价的原软件调用形式是：
 
 ```bash
 fnirt \
@@ -61,159 +57,175 @@ fnirt \
   --config=GM_2_MNI152GM_2mm.cnf
 ```
 
-两条命令的参数角色相同。额外的 `--device` 和 `--overwrite` 是本包选项。
+两条命令的参数角色和输出文件类型一致；`--device`、`--overwrite` 是 FNIT 选项。
+当前验证尚未达到逐体素数值等价，因此这里的“等价调用”只表示接口与文件契约对应。
 
-## Python 调用
+## Python：灰质 FNIRT
 
 ```python
 from fnit.fnirt.standalone import run_fnirt
 
 result = run_fnirt(
-    "subject_GM.nii.gz",                 # input/moving GM
-    "template_GM.nii.gz",                # reference/fixed GM
-    "subject_GM_to_template_GM.mat",     # FSL scaled-mm input -> reference
-    cout="subject_GM_to_template_GM_warp.nii.gz",
-    iout="subject_GM_to_template_GM.nii.gz",
-    jout="subject_GM_JAC_nl.nii.gz",
-    refmask="MNI152_T1_2mm_brain_mask_dil.nii.gz",
-    config="GM_2_MNI152GM_2mm.cnf",
-    device="cuda:0",
-    overwrite=False,
+    input="subject_GM.nii.gz",  # 输入：待配准的 3D 个体 GM 概率图
+    reference="template_GM.nii.gz",  # 输入：fixed GM 模板及输出网格
+    affine="subject_GM_to_template_GM.mat",  # 输入：input -> reference 的 FSL scaled-mm 4x4 矩阵
+    cout="subject_GM_to_template_GM_warp.nii.gz",  # 输出：intent-2007 B-spline coefficient NIfTI
+    iout="subject_GM_to_template_GM.nii.gz",  # 输出：reference-grid warped GM
+    jout="subject_GM_JAC_nl.nii.gz",  # 输出：仅 nonlinear warp 的 Jacobian determinant
+    refmask="MNI152_T1_2mm_brain_mask_dil.nii.gz",  # 输入：reference-grid 二值 mask
+    config="GM_2_MNI152GM_2mm.cnf",  # 配置：只支持该官方 GM 配置
+    device="cuda:0",  # 运行设备：第一张 CUDA GPU
+    overwrite=False,  # 写盘策略：不覆盖已有文件
 )
 ```
 
-`affine` 可以传 `None`，含义与 FSL 省略 `--aff` 相同，即使用 scaled-mm identity。
-`device=None` 时与 CLI 一样自动选择 CUDA，否则使用 CPU。若 `input` 是文件路径，
-省略 `cout` 会自动生成同目录的 `<input>_warpcoef`；若 `input` 是内存中的
-`surfa.Volume`，必须显式给出 `cout`，因为没有文件名可用于派生输出路径。
+`result` 是 `TorchFNIRTResult`：
 
-返回值是 `TorchFNIRTResult`。主要内存结果为：
+| 属性 | shape/类型 | 含义 |
+|---|---|---|
+| `coefficient_image` | intent-2007 NIfTI | 与 `cout` 相同，可交给 FNIT `TorchApplyWarp`。 |
+| `coefficients` | `[Cx,Cy,Cz,3]` NumPy array | cubic residual coefficient，不是 reference-grid dense displacement。 |
+| `moved` | reference-grid `surfa.Volume` | 与 `iout` 相同。 |
+| `nonlinear_jacobian` | reference-grid `surfa.Volume` | 与 `jout` 相同，排除 affine determinant。 |
+| `full_pull_jacobian` | reference-grid `surfa.Volume` | 包含 affine 的完整 pull Jacobian；FSL `fnirt --jout` 不写这一项。 |
+| `pull_transform` | `surfa.Warp` | reference → input 的 world-RAS pull transform。 |
+| `qc` | `dict` | schedule、mask、优化、拓扑、设备、TF32 和数值验证状态。 |
 
-| 属性 | 含义 |
-|---|---|
-| `result.coefficient_image` | 与 `--cout` 相同的 intent-2007 NIfTI image。 |
-| `result.coefficients` | `[Cx, Cy, Cz, 3]` coefficient array。 |
-| `result.moved` | 与 `--iout` 相同的 reference-grid `surfa.Volume`。 |
-| `result.nonlinear_jacobian` | 与 `--jout` 相同的非线性 Jacobian。 |
-| `result.full_pull_jacobian` | 包含 affine 的完整 pull Jacobian；FSL `fnirt --jout` 不写这一项。 |
-| `result.pull_transform` | reference → input 的 fixed-grid world-RAS pull warp。它不能作为 FSL scaled-mm warp array 直接使用。 |
-| `result.qc` | 优化层级、拓扑约束和当前数值验证状态。 |
-
-## 坐标和 coefficient 文件
+## coefficient 和坐标定义
 
 FLIRT `.mat` 不是 NIfTI world affine。设 `Vin`、`Vref` 是 input/reference voxel
-到 FSL scaled-mm 的矩阵，`Win`、`Wref` 是对应 voxel-to-world affine，`A` 是
-`--aff`，则传给 `TorchFNIRT` 的 input → reference world-RAS affine 为：
+到 FSL scaled-mm 的矩阵，`Win`、`Wref` 是 voxel-to-world affine，`A` 是
+`--aff`，则 FNIT 传给配准器的 input → reference world-RAS affine 为：
 
 ```text
 Wref · inverse(Vref) · A · Vin · inverse(Win)
 ```
 
-`--cout` 使用 FSL cubic coefficient intent `2007`。它的 sform 保存 input →
-reference FLIRT affine；qform offset 保存 dense reference field size；pixdim 保存
-knot spacing；intent parameters 保存 dense field voxel size。设 `A` 为 sform 中的
-forward FLIRT affine，`x_ref`、`x_in` 为 FSL scaled-mm 坐标，展开系数得到的 residual
-field 为 `d`，则 coefficient 文件定义的 pull 关系是：
+`cout` 的 sform 保存 forward FLIRT affine；qform offset 保存 dense reference field
+size；pixdim 保存 knot spacing；intent parameters 保存 dense field voxel size。展开系数
+得到 residual `d` 后，FSL scaled-mm pull 关系为：
 
 ```text
-x_in = inverse(A) · x_ref + d(x_ref)
+x_input = inverse(A) · x_reference + d(x_reference)
 ```
 
-因此 residual 的定义域是 reference grid，分量位于 input scaled-mm；不能把
-coefficient array 当作 `[X,Y,Z,3]` dense displacement。
-本包的 `TorchApplyWarp` 可以直接读取该文件。
+因此 coefficient array 不能当作 `[X,Y,Z,3]` dense warp 使用。`jout` 定义为
+`det(I + ∂d_nonlinear/∂x_reference)`。
 
-`--jout` 是
-`det(I + ∂d_nonlinear / ∂x_reference)`。它排除 affine determinant，对应 FSL
-FNIRT `SaveJacobian` 和 UKB VBM 非线性 modulation 使用的 nonlinear-only 量。
+## 当前实现与 FSL 对应关系
 
-## 固定配置
-
-内置参数对应 FSL 6.0.7.4 的官方配置：
-
-| 项目 | 值 |
+| FSL 行为 | 当前实现 |
 |---|---|
-| subsampling | `4,2,1,1` |
-| maximum iterations | `5,5,10,5` |
-| input/reference FWHM, mm | `6,4,2,2` / `4,2,0,0` |
-| bending regularization | `150,75,50,30`，按当前 SSD 加权 |
-| intensity model | `global_linear`，前三层估计，最后一层固定 |
-| warp resolution | `10,10,10 mm` |
-| reference mask schedule | `0,0,0,1` |
-| implicit input/reference masking | 关闭 |
-| prescribed Jacobian range | `0.2,5` |
+| SPM-like mean normalization、float32 image scaling | 相同顺序实现 |
+| implicit input/reference zero mask | 使用 `1e-16` 判零；reference mask 在归一化前建立，input mask 在 float32 归一化后建立 |
+| warped input mask | 按 FSL `volume<char>` 语义，三线性插值后先截断为 char，再执行 `>0.5` |
+| 有效 FOV 边界 | 使用 newimage 的 `1e-8` tolerance、原始 floor index 和 zero-padded neighbor |
+| input masked smoothing 与 reference zero-padded Gaussian smoothing | 已实现 |
+| cubic B-spline field、bending regularization、SSD-weighted lambda | 已实现 |
+| LM stages | matrix-free analytic `JᵀJ` + FP64 PCG |
+| `minmet=scg` stages | 按 MISCMATHS `sccngr` 更新顺序实现 |
+| `inwarp`/`intin` process handoff | 在内存中执行 float32 coefficient/header、10 位 intensity 交接 |
+| `FullResKsp` 与 `ZoomField` | 按每个进程最后 subsampling 计算 full-grid spacing |
+| coefficient NIfTI | 输出 FSL intent 2007，shape、spacing、sform 契约已验证 |
+| `ForceJacobianRange` | 已移植；外部逐步 topology oracle 仍未通过 |
 
-若 `--config` 指向一个实际文件，文件名和 SHA-256 都必须与官方
-`GM_2_MNI152GM_2mm.cnf` 一致。这样不会把修改过的配置静默当成已实现配置。
+独立 GM schedule 为 `subsampling=4,2,1,1`、`maxiter=5,5,10,5`、input FWHM
+`6,4,2,2 mm`、reference FWHM `4,2,0,0 mm`、bending lambda
+`150,75,50,30`、10 mm warp resolution，四层使用 LM。dMRI/TBSS schedule 见
+[dMRI 页面](../dmri_pipeline/README.md#ukb-tbss-对应关系)。
 
-FSL 的 `ForceJacobianRange` 不保证最终范围严格落在 `0.2–5`。达到最大尝试次数后
-若仍有少量体素越界，原生 FNIRT 会打印 warning 并继续写出结果。本包默认采用同一
-语义，并在 `result.qc["levels"][...]["topology_projection"]` 保存实际范围与
-`succeeded` 状态。直接构造 `TorchFNIRT(strict_topology=True)` 可把该 warning
-提升为 `RuntimeError`，用于诊断；独立 CLI 和 `run_fnirt()` 使用 FSL 默认语义。
+## 当前真实数据 benchmark：TBSS 中的 TorchFNIRT
 
-## 实现边界
+验证使用一例去标识、真实 UKB 格式 dMRI。FSL 和 FNIT 从同一组九张 native
+DTI/NODDI 参数图开始。官方路径执行 weighted FLIRT、三个 FNIRT 进程、九次
+`applywarp` 和 skeleton multiplication。A 是发布的默认路径
+TorchFLIRT + TorchFNIRT；B 固定官方 FLIRT matrix，只隔离 TorchFNIRT 和后续传播。
 
-当前接口只接收单个 3D input/reference、一个可选 4×4 FLIRT affine 和一个
-binary reference mask。不支持 `T1_2_MNI152_2mm.cnf`、FA 配置、自定义 schedule、
-`--inwarp`、`--intin`、`--inmask`、`--fout`、`--refout`、局部 intensity model、
-DCT basis 或 quadratic spline。CLI 遇到这些参数会报告未识别参数；Python API
-遇到其他 config 会抛出 `NotImplementedError`，不会退化为近似实现。
+| 运行 | affine | 观测时间 | peak CUDA allocation |
+|---|---|---:|---:|
+| FSL 6.0.7.4 / UKB CPU | FSL FLIRT | 976.88 s external wall | 不适用 |
+| FNIT A / H100 | 本次重新运行 TorchFLIRT | 106.186 s Python pipeline；121.48 s external wall | 3.607 GB |
+| FNIT B / H100 | 固定官方 FLIRT matrix | 18.884 s Python pipeline | 3.608 GB |
 
-## 许可和验证门
+B 不包含 affine 优化，不能与 A 或官方端到端时间直接相除。A 的 TorchFLIRT 完成
+8038 次 cost evaluation；三次运行都在共享节点上完成，负载未隔离。单独 stage 1
+四层优化的 FSL CPU、Torch CPU 和 Torch GPU 时间分别为 57.62、56.54 和 7.503 s；
+GPU peak allocation 为 3.229 GB。CUDA 使用默认 TF32，FNIRT solver 保持 FP64。
 
-本实现根据 FSL FNIRT 2203.0、basisfield 2203.1、miscmaths 2203.2、newimage
-2203.11 和 warpfns 2203.0 修改，受
-[`FSL Software Licence, Release 6.0`](../../licenses/FSL-6.0.txt) 约束，仅限
-该许可允许的非商业用途。本项目不是官方 FSL 发布。未修改的上游源码和版本、
-commit、文件哈希保存在
-[`_vendor_fsl`](../../src/fnit/_vendor_fsl/README.md)。
+九张 standard 和 skeleton 图的 shape、affine、dtype 都与官方输出一致。Pearson `r`：
 
-intent-2007 header、ZoomField 和 bending energy 使用 FSL 生成的 oracle fixture；
-B-spline expansion 与 Jacobian 有解析/组件测试。topology 路径目前覆盖 identity 和
-无需投影的 affine 回归，仓库中的 C++ topology oracle 尚未纳入自动门，因此不据此声称
-逐元素复现。0.9 的真实 GM 外部门使用相同 input、reference、
-FLIRT matrix 和官方 reference mask，比较 coefficient-expanded residual、`iout`、
-`jout` 和 modulated GM。文件合同 10/10 一致，数值结果高度相关，但误差不只来自
-末位舍入。因此 `TorchFNIRT.qc["fsl_fnirt_numerically_equivalent"]` 保持 `False`。
-
-### 当前 FSL 6.0.7.4 十例 matched-input 对照
-
-10 例真实 T1w-derived FSL FAST GM 均使用官方
-`GM_2_MNI152GM_2mm.cnf`、同一 UKB GM template、同一 FSL FLIRT matrix 和同一
-`MNI152_T1_2mm_brain_mask_dil`。下表是完整 coefficient grid 或 reference grid
-上的十例中位数；最大误差一列也是逐例 maximum absolute error 的中位数。
-
-| 输出 | Pearson r | MAE | RMSE | 最大绝对误差 |
+| map | A standard | A skeleton | B standard | B skeleton |
 |---|---:|---:|---:|---:|
-| cubic coefficients | 0.999089 | 0.033959 | 0.074783 | 2.106445 |
-| expanded nonlinear residual | 0.999508 | 0.028455 | 0.051817 | 0.980345 |
-| warped GM (`iout`) | 0.998695 | 0.003101 | 0.013682 | 0.642930 |
-| nonlinear Jacobian (`jout`) | 0.999267 | 0.003395 | 0.007417 | 0.240333 |
-| modulated GM | 0.998507 | 0.003759 | 0.017655 | 1.186854 |
+| FA | 0.998886 | 0.999463 | 0.999523 | 0.999679 |
+| MD | 0.997129 | 0.997087 | 0.998712 | 0.994744 |
+| L1 | 0.996619 | 0.997320 | 0.998438 | 0.994806 |
+| L2 | 0.997222 | 0.997592 | 0.998738 | 0.995896 |
+| L3 | 0.997640 | 0.997887 | 0.998937 | 0.996788 |
+| MO | 0.996725 | 0.998206 | 0.998262 | 0.998889 |
+| ICVF | 0.995086 | 0.996789 | 0.997483 | 0.994425 |
+| OD | 0.997079 | 0.998257 | 0.998542 | 0.997927 |
+| ISOVF | 0.997986 | 0.997748 | 0.999087 | 0.997208 |
 
-五类输出的 shape、affine、voxel size、dtype、qform、sform 和 NIfTI intent 均为
-10/10 一致。共享节点上的 FSL CPU `fnirt` 中位数为 855.583 秒
-[IQR 822.899–910.276]，TorchFNIRT H100 同步墙钟中位数为 1244.896 秒
-[1054.397–1337.331]；逐例 `FSL/Torch` 时间比中位数为 0.686。该执行未隔离节点
-负载，说明本次实现的实际时间，不能解释为硬件加速倍数。完整分布和计时边界见
-[`fnirt_fsl_10case.v0.9.public.json`](../../validation/fast_vbm/fnirt_fsl_10case.v0.9.public.json)。
+A 的 standard FA MAE/RMSE 为 `0.003129/0.007914`，skeleton FA 为
+`0.003111/0.005992`。B 的对应值为 `0.002418/0.005184` 和
+`0.002422/0.004642`。A/B full-pull Jacobian 范围分别为
+`0.239943–4.894929` 和 `0.237161–4.875982`；本例均未进入 topology projection。
+完整逐图指标见
+[`tbss_diagnosis.public.json`](../../validation/dmri_pipeline/tbss_diagnosis.public.json)。
 
-下图使用同一批 matched-input 结果。两行分别为十例平均的轴位和冠状位；前三列
-比较 warped GM，后三列比较 nonlinear Jacobian。FSL 与 TorchFNIRT 面板在各自
-输出类型内使用相同色阶，差值面板单独使用误差色阶。图像用于查看误差位置，
-上表的数值由完整三维数据计算。
+![FSL/UKB 与当前 FNIT A 的真实 FA 输出；右列为绝对差值](figures/fnirt_fsl_comparison.png)
 
-![FSL FNIRT 与 TorchFNIRT 的十例 matched-input 平均输出](figures/fnirt_fsl_comparison.png)
+图像和数值来自同一次 current A 运行。图的上行为轴位，下行为冠状位；灰度范围为
+`0–1`，差值按完整非零 support 的 99.5 百分位显示。指标由完整 3D 图计算。
 
-最终发布源码只移动了 FNIRT 使用的三个坐标函数及其 import；归一化 AST 和其余
-FNIRT Python 源码的逐字节核验见
-[`source_equivalence.v0.9.public.json`](../../validation/fast_vbm/source_equivalence.v0.9.public.json)。该记录是源码继承证明，
-不是新的数值运行，也不改变 `fsl_fnirt_numerically_equivalent=false`。
+## Stage 1 LM oracle 与修复原因
 
-最早可定位的分叉出现在第三次 coefficient update 的截断 PCG：FSL 组装稀疏
-Hessian 并按固定顺序累加，TorchFNIRT 使用 matrix-free FP64 `einsum`。两者都在
-相对残差 `1e-3` 处停止，因此不同的归约顺序会使后续 Krylov 和 LM 轨迹分开。
-归一化、LM 阻尼、边界计算、topology projection 和后续更新顺序还会继续传播该
-差异；现有实验不能把最终误差分解到某一个步骤。GPU topology projection 为保留
-FSL 的更新顺序采用串行 kernel，也是当前 Torch 路径没有快于 FSL CPU 的原因之一。
+固定官方 affine 后，FSL verbose trace 和 Torch 的 level-1 LM 使用相同 mask voxel
+数和相同接受序列。FSL cost 只打印六位有效数字：
+
+| point | Torch cost | FSL printed cost | mask voxels | decision |
+|---:|---:|---:|---:|---|
+| initial | 639.821722 | 639.822 | 2598 | initial |
+| 1 | 525.149285 | 525.149 | 2540 | accept |
+| 2 | 492.883311 | 492.883 | 2519 | accept |
+| 3 | 481.481318 | 481.483 | 2499 | accept |
+| 4 | 485.874090 | 485.885 | 2513 | reject |
+| 5 | 485.869969 | 485.881 | 2513 | reject |
+| 6 | 485.831044 | 485.842 | 2513 | reject |
+| 7 | 485.663228 | 485.671 | 2513 | reject |
+| 8 | 479.312016 | 479.320 | 2508 | accept |
+| 9 | 479.583059 | 479.589 | 2503 | reject |
+| 10 | 478.784565 | 478.784 | 2508 | accept |
+
+FSL 在 `update_robjmask()` 中把二值 input mask 重采样到 `volume<char>`。边界的三线性
+小数先被截断，再由 `Mask()` 执行 `>0.5`。当前实现先转换为 `char`，再执行
+`>0.5`，从而排除相同的边界体素；同时匹配 newimage 的
+`1e-8` valid-FOV tolerance、zero-padded boundary neighbor 和 implicit-zero
+`1e-16` 比较顺序。
+
+完整四层 stage 1 的 CPU coefficient `r=0.999832`、MAE `0.019687`；warped FA
+`r=0.999004`、MAE `0.003580`。GPU 对应值为 `r=0.999879` 和 `r=0.999148`。
+coefficient shape 均为 `[39,46,39,3]`。这组逐步结果支持 SSD、global-linear
+intensity mapping、SSD-weighted lambda、LM damping/acceptance 和 spline basis
+在该病例上的语义一致性。
+
+后续 level 的 sparse BFMatrix/NEWMAT 与 matrix-free FP64 reduction 仍会产生小的
+数值路径差异；三进程 handoff 在一个 Python 进程内模拟。topology projection 在本例
+没有触发，当前验证也只有一例，因此仍保留
+`fsl_fnirt_numerically_equivalent=false` 和 `ukb_tbss_numerically_equivalent=false`。
+定向测试命令为
+`pytest -q tests/fnirt tests/dmri_pipeline/test_dmri_pipeline.py`，结果为
+`63 passed`。
+
+## 支持范围与许可
+
+独立 CLI 只支持一个 3D input/reference、可选 4×4 FLIRT affine、binary reference
+mask 和官方 `GM_2_MNI152GM_2mm.cnf`。它不接受任意 FNIRT config、DCT basis、
+quadratic spline、局部 intensity model 或通用 `--inwarp`。TBSS 的 Oxford schedule
+只由 `TorchTBSS` 内部调用。
+
+实现依据 FSL FNIRT 2203.0、basisfield 2203.1、miscmaths 2203.2、newimage
+2203.11 和 warpfns 2203.0，受
+[`FSL Software Licence, Release 6.0`](../../licenses/FSL-6.0.txt) 约束，仅用于该许可
+允许的非商业用途。本项目不是官方 FSL 发布。上游版本、commit 和文件哈希见
+[`_vendor_fsl`](../../src/fnit/_vendor_fsl/README.md)。

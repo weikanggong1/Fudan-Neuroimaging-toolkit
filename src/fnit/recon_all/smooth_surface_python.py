@@ -1,4 +1,4 @@
-"""Fixed ten-pass vertex averaging for recon-all's ``mris_smooth -nw``."""
+"""Ordered vertex averaging for recon-all's ``mris_smooth -nw``."""
 
 from __future__ import annotations
 
@@ -83,8 +83,10 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("input", type=Path)
     parser.add_argument("output", type=Path)
     parser.add_argument("--device", default="cpu")
+    parser.add_argument("--iterations", type=int, default=10)
     args = parser.parse_args(argv)
-    smooth_surface(args.input, args.output, device=args.device)
+    smooth_surface(args.input, args.output, iterations=args.iterations,
+                   device=args.device)
 
 
 if __name__ == "__main__":

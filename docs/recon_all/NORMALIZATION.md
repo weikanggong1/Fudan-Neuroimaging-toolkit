@@ -1,10 +1,10 @@
-# Python/PyTorch T1 intensity normalization
+# T1 强度归一化的 Python/PyTorch 实现
 
-This single stage replaces the FreeSurfer 8.2 command `mri_normalize -g 1 -seed 1234 -mprage nu.mgz T1.mgz` for a conformed T1 `nu.mgz` and its `talairach.xfm`. It runs the 1D spline, gentle correction, and two 3D control-point/bias iterations. It does not call a FreeSurfer executable and needs no FreeSurfer license, native bundle, model weights, or extra template. The current `fnit-recon-all` entry calls this Python stage, while its full morphometry outputs remain approximate.
+第一轮函数对应 FreeSurfer 8.2 的 `mri_normalize -g 1 -seed 1234 -mprage nu.mgz T1.mgz`：读取 conform 后的 `nu.mgz` 和配套 `talairach.xfm`，依次执行一维样条、温和校正及两轮三维控制点/偏置场计算，输出 `T1.mgz`。当前 `fnit-recon-all` 已调用这个 Python 阶段；后续完整皮层指标仍未通过整例验收。函数不启动 FreeSurfer 程序，也不需要模型权重或额外模板。
 
-Install the repository package with `pip install -e .`. The stage uses PyTorch, NumPy, SciPy, Numba, and NiBabel; Numba is included in the package dependencies for the exact CPU Gaussian path. `SimpleITK` is used by the separate [N4 SITK stage](N4_SITK_VALIDATION.md), not by this normalizer.
+从仓库根目录运行 `python -m pip install -e '.[recon-all-python-stages]'` 安装本阶段及 Numba 等依赖。此阶段使用 PyTorch、NumPy、SciPy、Numba 和 NiBabel；精确 CPU 高斯路径依赖 Numba。独立的 [N4 阶段](N4_ITK_CONDA.md)使用仓库内 Conda C++/ITK，本归一化函数不调用它。
 
-## Command line
+## 命令行与 Python 调用
 
 ```bash
 fnit-normalize \
@@ -14,41 +14,42 @@ fnit-normalize \
   --device cuda:0
 ```
 
-On a host without CUDA, use `--device cpu`; omitting `--device` selects CUDA when available and CPU otherwise. The command prints a JSON record with elapsed seconds for each step. `--three-d-iterations 0` and `1` reproduce the intermediate FreeSurfer `-n 0` and `-n 1` checkpoints; the default is `2`. `--diagnostic-dir /path` writes the float32 input, control mask, and float32 bias of each 3D iteration as MGH files.
+`--input` 指 conform 后的 `nu.mgz`，`--xfm` 指其 Talairach 变换，`--output` 指要写入的 uint8 `T1.mgz`，`--device` 指计算设备。函数返回的字典还含 `device`、`three_d_iterations`、`peaks`、`controls`、`propagation`、`smoothing` 和 `three_d_passes`，用于复核各轮输入选择与耗时。
 
-## Python API
+无 CUDA 时设 `--device cpu`；省略该项则可用 CUDA 时选 CUDA，否则选 CPU。命令打印含各步耗时的 JSON。`--three-d-iterations 0` 和 `1` 对应 FreeSurfer 中间检查点 `-n 0`、`-n 1`，默认为 `2`。`--diagnostic-dir /path` 将各三维迭代的 float32 输入、控制点掩膜和 float32 偏置场写成 MGH 文件。
 
 ```python
 from fnit.recon_all.normalization import normalize_t1
 
 report = normalize_t1(
-    "/subjects/sub01/mri/nu.mgz",
-    "/subjects/sub01/mri/transforms/talairach.xfm",
-    "/subjects/sub01/mri/T1.mgz",
-    device="cuda:0",
+    input_file="/subjects/sub01/mri/nu.mgz",  # conform 后的强度图
+    xfm_file="/subjects/sub01/mri/transforms/talairach.xfm",  # 配套 Talairach 变换
+    output_file="/subjects/sub01/mri/T1.mgz",  # uint8 输出图路径
+    device="cuda:0",  # PyTorch 运算设备
 )
+# report["total_seconds"] 是函数墙钟秒数，report["steps"] 是各步耗时字典。
 print(report["total_seconds"], report["steps"])
 ```
 
-The output is a uint8 `T1.mgz`; internal float32 images are retained between passes. `nu.mgz` must be the conformed FreeSurfer T1 stage input, with a Talairach transform in matching geometry. The source translation follows FreeSurfer commit `d932c45b7941662ea380a05efef580568b98d41a`. In the `fs_sub01` CPU diagnostic pair, every intermediate float32 image, control mask, bias image, and final 256³ uint8 volume matched the native output voxel for voxel; the H100 pair also matched at the final T1 volume. See the [checkpoint and timing report](../../validation/recon_all/python_gpu_port/experimental/NORMALIZE_FIRST_PASS.md). This is a one-subject match, and the production full recon-all entry has not yet been switched to this stage.
+输出是 uint8 `T1.mgz`；各轮之间保留 float32 图像。输入 `nu.mgz` 必须是 FreeSurfer conform 网格，Talairach 变换需与其几何信息配套。实现参照 FreeSurfer 提交 `d932c45b7941662ea380a05efef580568b98d41a`。在 `fs_sub01` 的 CPU 对照中，中间 float32 图、控制点掩膜、偏置场及最终 256³ uint8 图逐体素一致；H100 对照的最终 `T1.mgz` 也一致。[检查点和计时报告](../../validation/recon_all/python_gpu_port/experimental/NORMALIZE_FIRST_PASS.md)记录了逐步结果。现有验证只覆盖一例。
 
-## CPU and GPU work
+## CPU 与 GPU 分工
 
-| Step with `--device cuda:0` | Where it runs |
-|---|---|
-| Read/write MGH/MGZ, Talairach transform parsing, 1D histograms and spline coefficients | CPU, NiBabel/NumPy/SciPy |
-| 1D voxel scaling and the bias application after each pass | H100, PyTorch float32 |
-| Gentle and both 3D control-point selections, tissue histograms, neighborhood tests | CPU, NumPy/SciPy |
-| Voronoi chessboard distance and index sorting | CPU, SciPy/NumPy |
-| Voronoi wavefront averages and three sigma-8 Gaussian convolutions | H100, PyTorch float32 |
+| 设置 `--device cuda:0` 时的步骤 | 执行位置 |
+| --- | --- |
+| MGH/MGZ 读写、Talairach 解析、一维直方图和样条系数 | CPU，NiBabel/NumPy/SciPy |
+| 一维体素缩放及各轮偏置场应用 | H100，PyTorch float32 |
+| 温和校正、两轮三维控制点选择、组织直方图和邻域判断 | CPU，NumPy/SciPy |
+| Voronoi chessboard 距离和索引排序 | CPU，SciPy/NumPy |
+| Voronoi 波前平均与三次 sigma-8 高斯卷积 | H100，PyTorch float32 |
 
-The CPU implementation uses Numba for the ordered Gaussian accumulation required for exact voxel parity. The production normalizer contains no subprocess call or native FreeSurfer binary lookup. The separate native benchmark invokes FreeSurfer only to establish the reference output and time.
+精确 CPU 路径以 Numba 按源码顺序累加高斯值。生产函数没有 subprocess 调用或 FreeSurfer 程序查找；官方程序只用于单独生成对照输出和计时。
 
-For the same `fs_sub01` T1, same-host no-diagnostic CLI pairs were **76.94 s native vs 60.55 s Python on headcw CPU** and **116.31 s native vs 75.60 s Python on gpucw1 H100 GPU1**. Both Python outputs had 0/16,777,216 voxels different from their native partner. On H100, the two CPU control-point searches took 20.24 and 32.60 s of the 68.87 s resident Python run; these remain the main speed limit. The full staged command, per-step times, hashes, and remaining cross-subject validation gate are in the [validation report](../../validation/recon_all/python_gpu_port/experimental/NORMALIZE_FIRST_PASS.md).
+相同 `fs_sub01` T1、同主机且不写诊断文件的 CLI 配对观察：headcw CPU 官方 **76.94 秒**、Python **60.55 秒**；gpucw1 H100 GPU1 官方 **116.31 秒**、Python **75.60 秒**。两次 Python 输出各有 **0/16,777,216** 个差异体素。H100 一次 68.87 秒的常驻 Python 运行中，两轮 CPU 控制点搜索耗时 20.24 和 32.60 秒，是目前主要时间开销。分步命令、哈希和跨被试待验收项见[验证报告](../../validation/recon_all/python_gpu_port/experimental/NORMALIZE_FIRST_PASS.md)。
 
-## Second normalization with aseg and brain mask
+## 带 aseg 与 brainmask 的第二轮归一化
 
-The separate `mri_normalize -seed 1234 -mprage -aseg aseg.presurf.mgz -mask brainmask.mgz norm.mgz brain.mgz` translation is available as a Python API and command. It accepts three conformed MGH/MGZ inputs on the same voxel grid and calls no FreeSurfer executable. Its Fast Marching medial WM ridge, outlier removal, initial bias, gentle correction, and two 3D passes run with NumPy/Numba/PyTorch. The exact CPU path was validated; the CUDA path of this second command has not yet been paired with the native result.
+第二个函数对应 `mri_normalize -seed 1234 -mprage -aseg aseg.presurf.mgz -mask brainmask.mgz norm.mgz brain.mgz`。输入为同一 conform 网格的 `norm.mgz`、`aseg.presurf.mgz`、`brainmask.mgz`，输出 `brain.mgz`；也返回步骤和耗时报告。Fast Marching 内侧白质 ridge、离群点过滤、初始偏置场、温和校正和两轮三维迭代由 NumPy/Numba/PyTorch 完成，不调用 FreeSurfer。CPU 精确路径已对照，第二轮 CUDA 路径尚未与官方配对。
 
 ```bash
 fnit-normalize-aseg \
@@ -59,16 +60,19 @@ fnit-normalize-aseg \
   --device cpu
 ```
 
+`--norm`、`--aseg`、`--brainmask` 依次指定三张同网格输入图；`--output` 指输出 `brain.mgz`，`--device` 选 CPU/CUDA。返回字典除 `total_seconds` 外，还记录 ridge 和初始偏置场耗时、控制点数量、白质峰值及后续迭代信息。
+
 ```python
 from fnit.recon_all.normalization import normalize_t1_aseg
 
 report = normalize_t1_aseg(
-    "/subjects/sub01/mri/norm.mgz",
-    "/subjects/sub01/mri/aseg.presurf.mgz",
-    "/subjects/sub01/mri/brainmask.mgz",
-    "/subjects/sub01/mri/brain.mgz",
-    device="cpu",
+    norm_file="/subjects/sub01/mri/norm.mgz",  # GCA 归一化强度图
+    aseg_file="/subjects/sub01/mri/aseg.presurf.mgz",  # 皮层下结构标签
+    brainmask_file="/subjects/sub01/mri/brainmask.mgz",  # 脑掩膜
+    output_file="/subjects/sub01/mri/brain.mgz",  # 归一化脑图输出路径
+    device="cpu",  # 已验证的精确 CPU 路径
 )
+# report["total_seconds"] 是墙钟秒数，report["completion"] 记录后续归一化步骤。
 ```
 
-On the frozen `fs_sub01` inputs, the independent Python ridge, filtered control mask, outlier map, and initial float32 bias output matched the official diagnostic volumes exactly. The complete default two-pass output matched the official `brain.mgz` in all 16,777,216 voxels, including the 284-byte MGH header and voxel payload. The fresh native run appended 996 bytes of trailing metadata, and the earlier completed subject output appended 451 bytes; compressed and complete decompressed file hashes therefore differ. This is an isolated single-subject stage validation; full-pipeline numerical equivalence has not been established. See the [second-pass validation report](../../validation/recon_all/python_gpu_port/NORMALIZE_SECOND_PASS.md).
+在冻结的 `fs_sub01` 输入上，独立 Python ridge、过滤后的控制点掩膜、离群图和初始 float32 偏置场均与官方诊断图一致。默认两轮的完整 `brain.mgz` 为 **0/16,777,216** 个差异体素，MGH 头前 284 字节和体素负载一致。新运行的官方文件在末尾多 996 字节元数据，旧存档输出多 451 字节，因此完整文件哈希不同。这只是单例阶段验证，整例数值一致性仍需检验。[第二轮报告](../../validation/recon_all/python_gpu_port/NORMALIZE_SECOND_PASS.md)列出原始证据。

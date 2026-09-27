@@ -2,7 +2,7 @@
 
 [完整 API、CLI 和验证](../../../docs/connectome/README.md) · [ds004666 阶段报告](../../../validation/connectome/ds004666/README.md)
 
-`UKBConnectome` 从**已校正** DWI、bval、eddy 旋转后的 bvec、配对 skull-stripped T1、官方 FreeSurfer `recon-all` 的 `aparc+aseg.mgz`、可选 DWI BET 掩膜和固定整数 atlas，计算四张 region × region 矩阵。FreeSurfer 分割和 DWI 的 TOPUP/eddy 等前处理在此调用之外完成；LAS DWI 可在调用内运行 PyTorch BET；不会自动运行 SynthSeg 或生成 atlas。
+`UKBConnectome` 从**已校正** DWI、bval、eddy 旋转后的 bvec、配对 skull-stripped T1、官方 FreeSurfer `recon-all` 的 `aparc+aseg.mgz`、可选 DWI BET 掩膜和固定整数 atlas，计算四张 region × region 矩阵。FreeSurfer 分割和 DWI 的 TOPUP/eddy 等前处理在此调用之外完成；LAS DWI 可在调用内运行 PyTorch BET；不会自动运行 SynthSeg 或生成 atlas。自动 DWI→T1 配准使用包内 TorchFLIRT、NiBabel 与内存 `Volume`，不导入 Surfa。
 
 ```python
 from fnit.connectome import UKBConnectome
@@ -24,9 +24,11 @@ result = UKBConnectome(device="cuda:0")(
     dwi_to_t1_world=None,            # 输入：自动 TorchFLIRT
     seed=0,                          # 输入：PyTorch 随机种子
 )
-count = result.matrices["count"]
+count = result.matrices["count"]           # 脑区间纤维计数，K×K
 ```
 
 必选 `n_seeds` 是尝试次数。可选 `dwi_to_t1_world` 为 DWI→T1 RAS-mm `4×4` 矩阵；省略时运行 TorchFLIRT 6-DOF/normmi。可用 `shell_bvals`、`response_mask`、`fod_mask`、`normalise_mask`、`fa_map` 固定参考条件。`ConnectomeResult.matrices` 包含 `count`、`sift2_fbc`、`mean_length`（mm）和 `mean_fa`；结果还保存 5TT/GMWMI、归一化 WM FOD、FA、世界毫米流线、BET 二值脑掩膜、逐流线 SIFT2 权重和几何变换。
 
 响应、原始 FOD、mtnormalise、官方 FreeSurfer 输入的 5TT/GMWMI、固定轨迹 SIFT2 子阶段、精确 FA 与矩阵赋值已有各自配对验证。独立 iFOD2 风格追踪与 MRtrix 仍有分布差异；当前整链固定输入 seed 0 的数值、时间、显存和矩阵 CSV 见[当前验证](../../../validation/connectome/ds004666/README.md)。
+
+[真实 b0/T1 无 Surfa 自动配准核对](../../../validation/connectome_registration_no_surfa_20260928/README.md)只覆盖配准矩阵；完整连接组未因该迁移重新验收。

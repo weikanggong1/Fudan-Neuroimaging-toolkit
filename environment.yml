@@ -11,10 +11,16 @@ dependencies:
   - cuda-version=11.8
   - numpy<2
   - scipy>=1.9
+  - statsmodels=0.14.5
+  - pandas=2.2.3
+  - scikit-learn=1.5.2
+  - trx-python>=0.4.0
   - h5py>=3.8
   - nibabel>=5
-  - matplotlib>=3.7
+  - matplotlib>=3.7  # ProbtrackX real connectivity comparison figure
+  - pillow>=9  # FNIRT/TBSS and MMORF real-data comparison figures
   - pyyaml>=6
   - pip:
       - surfa==0.6.3
+      - triton==3.1.0  # Fused ProbtrackX CUDA kernel; matches PyTorch 2.5.1
       - -e .[recon-all-python-stages]

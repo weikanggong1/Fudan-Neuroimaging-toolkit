@@ -3,7 +3,7 @@ import numpy as np
 import torch
 from scipy.optimize import nnls
 
-from fnit.amico_noddi import TorchAMICONODDI
+from fnit.amico_noddi import AMICONODDIConfig, TorchAMICONODDI
 from fnit.amico_noddi.kernels import amico_scheme, direction_assets
 from fnit.amico_noddi.solver import nonnegative_quadratic
 
@@ -40,8 +40,6 @@ def test_noddi_outputs_are_bounded_and_use_ukb_names(tmp_path):
     for name in ("NODDI_ICVF.nii.gz", "NODDI_OD.nii.gz", "NODDI_ISOVF.nii.gz"):
         assert (tmp_path / "out" / name).is_file()
     assert result.qc["amico_numerically_equivalent"] is False
-    assert result.qc["amico_reference_validation"] == "failed_at_1e-7_on_fixed_real_data"
-    assert result.qc["amico_reference_compared_for_this_input"] is False
     assert result.qc["solver_dtype"] == "float64"
     assert int(result.directions.header["intent_code"]) == 0
 
@@ -138,3 +136,8 @@ def _dataset_without_b0(tmp_path):
         tmp_path / "no_b0.bvec",
         tmp_path / "no_b0.bval",
     )
+
+
+def test_lut_batch_size_must_be_positive():
+    with np.testing.assert_raises_regex(ValueError, "lut_batch_size"):
+        AMICONODDIConfig(lut_batch_size=0)

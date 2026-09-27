@@ -2,6 +2,7 @@
 import argparse
 import csv
 import os
+import sys
 from pathlib import Path
 import uuid
 
@@ -161,6 +162,8 @@ def _run_flirt(args):
         output=args.output,
         omat=args.omat,
         init=args.init,
+        inweight=args.inweight,
+        refweight=args.refweight,
         dof=args.dof,
         cost=args.cost,
         device=args.device,
@@ -346,7 +349,7 @@ def _run_connectome(args):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(prog='fnit')
-    parser.add_argument('--version', action='version', version='Fudan Neuroimaging Toolkit (FNIT) 0.12.1')
+    parser.add_argument('--version', action='version', version='Fudan Neuroimaging Toolkit (FNIT) 0.14.0')
     commands = parser.add_subparsers(dest='command', required=True)
     strip = commands.add_parser('synthstrip', help='brain extraction')
     strip.add_argument('-i', '--image', required=True)
@@ -442,7 +445,7 @@ def main(argv=None):
         'flirt',
         help=(
             'Source-derived PyTorch implementation of the supported FLIRT '
-            '12-DOF correlation-ratio path'
+            '12-DOF correlation-ratio or 6-DOF normmi path'
         ),
         allow_abbrev=False)
     flirt.add_argument('-in', '--in', dest='input', required=True,
@@ -452,8 +455,10 @@ def main(argv=None):
     flirt.add_argument('-out', '--out', dest='output')
     flirt.add_argument('-omat', '--omat')
     flirt.add_argument('-init', '--init')
-    flirt.add_argument('-dof', type=int, choices=(12,), default=12)
-    flirt.add_argument('-cost', choices=('corratio',), default='corratio')
+    flirt.add_argument('-inweight', '--inweight')
+    flirt.add_argument('-refweight', '--refweight')
+    flirt.add_argument('-dof', type=int, choices=(6, 12), default=12)
+    flirt.add_argument('-cost', choices=('corratio', 'normmi'), default='corratio')
     flirt.add_argument('--device')
     flirt.add_argument('--threads', type=int, default=1)
     flirt.add_argument('--overwrite', action='store_true')
@@ -570,6 +575,40 @@ def main(argv=None):
     connectome.add_argument('--n-seeds', type=int, required=True)
     connectome.add_argument('--seed', type=int, default=0)
     connectome.add_argument('--overwrite', action='store_true')
+    # Standalone SynthSeg must not import unrelated pipelines or their dependencies.
+    selected = sys.argv[1:] if argv is None else argv
+    if selected and selected[0] == "synthseg":
+        _run_synthseg(parser.parse_args(selected))
+        return
+    if selected and selected[0] == "flirt":
+        _run_flirt(parser.parse_args(selected))
+        return
+    if selected and selected[0] == "connectome":
+        _run_connectome(parser.parse_args(selected))
+        return
+    if selected and selected[0] == "synthsr":
+        _run_synthsr(parser.parse_args(selected))
+        return
+    if selected and selected[0] == "wmh-synthseg":
+        _run_wmh(parser.parse_args(selected))
+        return
+    if selected and selected[0] == "fast":
+        _run_fast(parser.parse_args(selected))
+        return
+    if selected and selected[0] == "synthstrip":
+        args = parser.parse_args(selected)
+        if not any((args.out, args.mask, args.sdt)):
+            parser.error('provide at least one -o, -m or -d output')
+        from .synthstrip import SynthStrip
+        result = SynthStrip(args.weights, args.device, args.no_csf, args.threads)(
+            args.image, args.border, args.fill)
+        for volume, path in ((result.image, args.out), (result.mask, args.mask),
+                             (result.distance, args.sdt)):
+            if path:
+                Path(path).parent.mkdir(parents=True, exist_ok=True)
+                volume.save(path)
+                print(path)
+        return
     from .topup.cli import add_parser as add_topup_parser
     from .eddy.cli import add_parser as add_eddy_parser
     from .dtifit.cli import add_parser as add_dtifit_parser
@@ -578,6 +617,10 @@ def main(argv=None):
     add_eddy_parser(commands)
     add_dtifit_parser(commands)
     add_amico_noddi_parser(commands)
+    from .mmorf.cli import add_parser as add_mmorf_parser
+    from .dmri_pipeline.cli import add_parser as add_dmri_pipeline_parser
+    add_mmorf_parser(commands)
+    add_dmri_pipeline_parser(commands)
     from .bedpostx.cli import add_parser as add_bedpostx_parser
     add_bedpostx_parser(commands)
     from .probtrackx.cli import add_parser as add_probtrackx_parser
@@ -586,23 +629,8 @@ def main(argv=None):
     if hasattr(args, '_fnit_handler'):
         args._fnit_handler(args)
         return
-    if args.command == 'connectome':
-        _run_connectome(args)
-        return
-    if args.command == 'wmh-synthseg':
-        _run_wmh(args)
-        return
     if args.command == 'synthseg':
         _run_synthseg(args)
-        return
-    if args.command == 'synthsr':
-        _run_synthsr(args)
-        return
-    if args.command == 'fast':
-        _run_fast(args)
-        return
-    if args.command == 'flirt':
-        _run_flirt(args)
         return
     if args.command == 'fnirt':
         _run_fnirt(args)

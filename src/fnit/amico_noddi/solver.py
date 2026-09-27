@@ -164,8 +164,8 @@ def nonnegative_quadratic(
     """Solve batched non-negative quadratic problems with an active set.
 
     ``design`` may be a shared ``(M, C)`` matrix or one matrix per direction,
-    ``(G, M, C)``.  In the latter case ``signal`` is ``(G, V, M)`` and all
-    500 AMICO LUT directions are solved in one GPU launch sequence.
+    ``(G, M, C)``. In the latter case ``signal`` is ``(G, V, M)`` and all
+    directions in the current memory-bounded LUT batch share one launch sequence.
     """
     gram = design.transpose(-2, -1) @ design
     linear = torch.matmul(signal, design) - float(l1)
@@ -345,13 +345,19 @@ def fit_noddi(
     kkt_tolerance=1e-11,
     cg_tolerance=1e-13,
     maximum_active_steps=40,
+    lut_batch_size=400,
 ):
-    """Run AMICO's three fitting stages in one batched LUT solve."""
+    """Run AMICO's three fitting stages in memory-bounded LUT batches."""
     signal = np.asarray(signal, dtype=np.float64)
     lut_indices = direction_indices(directions)
     lut_values = np.unique(lut_indices)
     grouped_rows = [np.flatnonzero(lut_indices == index) for index in lut_values]
-    buckets = (np.arange(len(grouped_rows)),)
+    if int(lut_batch_size) < 1:
+        raise ValueError("lut_batch_size must be positive")
+    buckets = (
+        np.arange(start, min(start + int(lut_batch_size), len(grouped_rows)))
+        for start in range(0, len(grouped_rows), int(lut_batch_size))
+    )
     estimates = np.zeros((len(signal), 3), dtype=np.float64)
     rmse = np.zeros(len(signal), dtype=np.float64)
     support_sizes = np.zeros(len(signal), dtype=np.int16)

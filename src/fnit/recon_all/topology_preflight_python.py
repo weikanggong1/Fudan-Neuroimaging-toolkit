@@ -12,6 +12,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 from collections import defaultdict
+import time
 
 import nibabel.freesurfer.io as fsio
 import numpy as np
@@ -212,6 +213,37 @@ def preflight_surface(path: str | Path) -> tuple[TopologyCounts, int]:
     counts = topology_counts(faces, len(vertices))
     _, iterations = center_sphere(project_and_smooth_sphere(vertices, faces))
     return counts, iterations
+
+
+def write_centered_topology_sphere(input_qsphere: str | Path,
+                                   output_centered: str | Path) -> dict:
+    """Write the exact post-centering sphere used by topology defect search.
+
+    Read one qsphere.nofix triangle surface and write a surface with the same
+    ordered faces and complete footer. The report gives input/output paths,
+    mesh counts, centering iterations and elapsed seconds. No defect
+    correction or additional file is produced.
+    """
+    started = time.perf_counter()
+    source, output = Path(input_qsphere), Path(output_centered)
+    if source.resolve() == output.resolve():
+        raise ValueError("centered topology sphere must use a separate output")
+    vertices, faces = fsio.read_geometry(str(source))
+    centered, iterations = center_sphere(project_and_smooth_sphere(vertices, faces))
+    raw = source.read_bytes()
+    if raw[:3] != b"\xff\xff\xfe":
+        raise ValueError("expected FreeSurfer triangular surface")
+    start = raw.index(b"\n\n", 3) + 2
+    nvertices = int.from_bytes(raw[start:start + 4], "big")
+    if nvertices != len(centered):
+        raise ValueError("surface vertex count changed during centering")
+    xyz_start = start + 8
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_bytes(raw[:xyz_start] + centered.astype(">f4").tobytes()
+                       + raw[xyz_start + 12 * nvertices:])
+    return {"input": str(source), "output": str(output),
+            "vertices": len(vertices), "faces": len(faces),
+            "iterations": iterations, "seconds": time.perf_counter() - started}
 
 
 @njit

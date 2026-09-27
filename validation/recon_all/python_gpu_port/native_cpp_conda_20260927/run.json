@@ -1,0 +1,231 @@
+{
+  "profile": "experimental-native-gca-topology-metrics-sphere-registration-core-v1",
+  "input": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/examples/data/sub-01_T1w.nii.gz",
+  "subject_dir": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_conda_cpp_e2e_20260927/subjects/sub01",
+  "device": "cuda:1",
+  "n4_python": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_cpp_conda_20260927/conda_env/bin/python",
+  "threads": 4,
+  "stages": [
+    {
+      "name": "input_talairach",
+      "seconds": 14.312866831198335
+    },
+    {
+      "name": "n4",
+      "seconds": 195.649805391673
+    },
+    {
+      "name": "nu",
+      "seconds": 1.7727745156735182
+    },
+    {
+      "name": "T1_normalize",
+      "seconds": 67.1229072380811
+    },
+    {
+      "name": "brainmask",
+      "seconds": 0.8841411578468978
+    },
+    {
+      "name": "SynthSeg",
+      "seconds": 8.264006613288075
+    },
+    {
+      "name": "mri_em_register",
+      "seconds": 358.18679120671004
+    },
+    {
+      "name": "mri_ca_normalize",
+      "seconds": 32.78435059869662
+    },
+    {
+      "name": "surface_lh",
+      "seconds": 509.75700852414593
+    },
+    {
+      "name": "surface_rh",
+      "seconds": 640.1153520909138
+    },
+    {
+      "name": "register_lh",
+      "seconds": 269.10398319829255
+    },
+    {
+      "name": "register_rh",
+      "seconds": 231.1715019112453
+    },
+    {
+      "name": "annot_lh_aparc",
+      "seconds": 47.22783291479573
+    },
+    {
+      "name": "annot_lh_aparc.a2009s",
+      "seconds": 63.987942680716515
+    },
+    {
+      "name": "annot_lh_aparc.DKTatlas",
+      "seconds": 61.977108413819224
+    },
+    {
+      "name": "annot_rh_aparc",
+      "seconds": 41.218982656951994
+    },
+    {
+      "name": "annot_rh_aparc.a2009s",
+      "seconds": 57.608539964072406
+    },
+    {
+      "name": "annot_rh_aparc.DKTatlas",
+      "seconds": 48.68150190403685
+    },
+    {
+      "name": "project_aparc_volumes",
+      "seconds": 5.5845441478304565
+    },
+    {
+      "name": "project_wmparc",
+      "seconds": 1.9700216031633317
+    },
+    {
+      "name": "brain_volume_stats",
+      "seconds": 2.8820910397917032
+    },
+    {
+      "name": "aseg_stats",
+      "seconds": 16.730813211295754
+    },
+    {
+      "name": "wmparc_stats",
+      "seconds": 13.508119475096464
+    },
+    {
+      "name": "stats_lh_aparc",
+      "seconds": 1.4044708870351315
+    },
+    {
+      "name": "stats_lh_aparc.a2009s",
+      "seconds": 2.263369672000408
+    },
+    {
+      "name": "stats_lh_aparc.DKTatlas",
+      "seconds": 1.53943897690624
+    },
+    {
+      "name": "stats_rh_aparc",
+      "seconds": 1.6943075018934906
+    },
+    {
+      "name": "stats_rh_aparc.a2009s",
+      "seconds": 2.5016426779329777
+    },
+    {
+      "name": "stats_rh_aparc.DKTatlas",
+      "seconds": 1.3394825612194836
+    }
+  ],
+  "status": "complete",
+  "gca_registration": {
+    "implementation": "native-c++",
+    "binary": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_cpp_conda_20260927/fs_cpp/bin/mri_em_register",
+    "sha256": "e88735766b84d2f2d5176db56aa1f85477f81f355bad4101f24e7df678966713"
+  },
+  "topology_repair": {
+    "implementation": "native-c++",
+    "binary": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_cpp_conda_20260927/fs_cpp/bin/mris_fix_topology",
+    "sha256": "efeeb36fa125daee72f2df893a2bf9f426607a9218f7320cd5c56872a0eb44a4",
+    "upstream": "SynthSeg-derived filled; brainmask.mgz copied as brain.mgz"
+  },
+  "surface_metrics": {
+    "implementation": "native-c++",
+    "binary": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_cpp_conda_20260927/fs_cpp/bin/mris_place_surface",
+    "sha256": "feaa72b02121c5d29eac94836417525a8674869d0513659506e0254a09c0a670",
+    "upstream": "current approximate white/pial surfaces"
+  },
+  "sphere_generation": {
+    "implementation": "native-c++",
+    "mris_inflate": {
+      "binary": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_cpp_conda_20260927/fs_cpp/bin/mris_inflate",
+      "sha256": "5625ac51327851860859265729be55246b1b31ddba8b001f8f68739b1066f2a2"
+    },
+    "mris_sphere": {
+      "binary": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_cpp_conda_20260927/fs_cpp/bin/mris_sphere",
+      "sha256": "ba319a1fe45b4a5aea7c3438d9c2fe0bb062b6f731caf71709baf998b9b78a99"
+    },
+    "upstream": "native topology repair on approximate SynthSeg-derived filled"
+  },
+  "sphere_registration": {
+    "implementation": "native-c++",
+    "binary": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_cpp_conda_20260927/fs_cpp/bin/mris_register",
+    "sha256": "412c9653e0c70ef3e99d06bf5fd909a94426763cee90434310942c6bee0852e5",
+    "upstream": "native sphere/sulc on approximate earlier geometry",
+    "hemisphere_seconds": {
+      "lh": 269.1034725927748,
+      "rh": 231.1710321069695
+    }
+  },
+  "surfaces": {
+    "lh": {
+      "hemisphere": "lh",
+      "vertices": 117076,
+      "faces": 234148,
+      "raw_components": 1,
+      "cortex_vertices": 104698,
+      "mean_thickness_mm": 2.905961751937866,
+      "topology_python_seconds": 9.30106114409864,
+      "topology_native_seconds": 51.98925088811666,
+      "native_metric_seconds": {
+        "thickness": 32.55037182709202,
+        "area": 0.7136675310321152,
+        "area.pial": 0.7418942879885435,
+        "curv": 1.8328847540542483,
+        "curv.pial": 1.9676690120249987
+      },
+      "native_sphere_seconds": {
+        "inflate_nofix": 10.212157626170665,
+        "qsphere_nofix": 69.07820238964632,
+        "inflate": 12.188284648116678,
+        "sphere": 296.2020934941247
+      },
+      "approximations": [
+        "filled-from-SynthSeg-WM",
+        "topology-native-on-approximate-upstream",
+        "native-metrics-on-approximate-white-pial",
+        "white-from-smoothed-tessellation",
+        "pial-normal-ray",
+        "sphere.reg-native-on-approximate-upstream"
+      ]
+    },
+    "rh": {
+      "hemisphere": "rh",
+      "vertices": 120273,
+      "faces": 240542,
+      "raw_components": 1,
+      "cortex_vertices": 106923,
+      "mean_thickness_mm": 2.9056386947631836,
+      "topology_python_seconds": 8.816122608724982,
+      "topology_native_seconds": 51.70914061088115,
+      "native_metric_seconds": {
+        "thickness": 35.6181330033578,
+        "area": 0.7627631081268191,
+        "area.pial": 0.7331634131260216,
+        "curv": 1.7967237662523985,
+        "curv.pial": 1.9940440231002867
+      },
+      "native_sphere_seconds": {
+        "inflate_nofix": 11.907129023224115,
+        "qsphere_nofix": 80.38841603696346,
+        "inflate": 13.612163207959384,
+        "sphere": 409.2528914446011
+      },
+      "approximations": [
+        "filled-from-SynthSeg-WM",
+        "topology-native-on-approximate-upstream",
+        "native-metrics-on-approximate-white-pial",
+        "white-from-smoothed-tessellation",
+        "pial-normal-ray",
+        "sphere.reg-native-on-approximate-upstream"
+      ]
+    }
+  },
+  "total_seconds": 2706.6402660659514
+}

@@ -12,13 +12,14 @@ from .mri_em_register_python import register_t1
 
 def run_input_ca_normalize_chain(t1: str | Path, subject_dir: str | Path,
                                  weights_dir: str | Path, assets_dir: str | Path,
-                                 *, device: str = "cpu", threads: int = 4) -> dict:
+                                 *, n4_binary: str | Path, device: str = "cpu",
+                                 threads: int = 4) -> dict:
     """Produce nu, initial brainmask, Talairach LTA, norm and control points."""
     atlas = Path(assets_dir) / "average/RB_all_2020-01-02.gca"
     if not atlas.is_file():
         raise FileNotFoundError(atlas)
     result = run_input_brainmask_chain(t1, subject_dir, weights_dir, assets_dir,
-                                       device=device, threads=threads)
+                                       n4_binary=n4_binary, device=device, threads=threads)
     mri = Path(subject_dir) / "mri"
     lta = mri / "transforms/talairach.lta"
     started = time.perf_counter()

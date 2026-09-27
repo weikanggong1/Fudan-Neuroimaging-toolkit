@@ -22,8 +22,12 @@ def _fake_model(captured):
             captured["device"] = device
             captured["profile"] = (dof, cost)
 
-        def __call__(self, moving, fixed, *, init):
-            captured["call"] = (moving, fixed, init)
+        def __call__(
+            self, moving, fixed, *, init, inweight=None, refweight=None
+        ):
+            captured["call"] = (
+                moving, fixed, init, inweight, refweight
+            )
             return SimpleNamespace(moved=_Moved(), matrix=np.eye(4))
 
     return Model
@@ -51,7 +55,9 @@ def test_run_flirt_writes_both_outputs_atomically(tmp_path, monkeypatch):
     assert captured == {
         "device": "cuda:1",
         "profile": (12, "corratio"),
-        "call": ("moving.nii.gz", "fixed.nii.gz", "initial.mat"),
+        "call": (
+            "moving.nii.gz", "fixed.nii.gz", "initial.mat", None, None
+        ),
     }
     assert output.read_text() == "moved"
     np.testing.assert_allclose(np.loadtxt(matrix), np.eye(4))
@@ -62,7 +68,9 @@ def test_run_flirt_writes_both_outputs_atomically(tmp_path, monkeypatch):
         standalone.run_flirt(
             "moving.nii.gz", "fixed.nii.gz", output=output, omat=matrix
         )
-    assert captured["call"] == ("moving.nii.gz", "fixed.nii.gz", "initial.mat")
+    assert captured["call"] == (
+        "moving.nii.gz", "fixed.nii.gz", "initial.mat", None, None
+    )
 
 
 def test_run_flirt_accepts_rigid_normmi_profile(tmp_path, monkeypatch):
@@ -114,10 +122,16 @@ def test_dedicated_cli_uses_fsl_argument_names(tmp_path, monkeypatch):
     assert cli.main([
         "-in", "moving.nii.gz", "-ref", "fixed.nii.gz",
         "-out", str(output), "-omat", str(matrix), "-init", "initial.mat",
+        "-inweight", "input_weight.nii.gz",
+        "-refweight", "reference_weight.nii.gz",
         "-dof", "12", "-cost", "corratio", "--device", "cuda:1",
     ]) == 0
     assert captured["call"] == (
-        "moving.nii.gz", "fixed.nii.gz", "initial.mat"
+        "moving.nii.gz",
+        "fixed.nii.gz",
+        "initial.mat",
+        "input_weight.nii.gz",
+        "reference_weight.nii.gz",
     )
 
 
@@ -127,9 +141,15 @@ def test_root_cli_dispatches_to_same_exact_target_wrapper(tmp_path, monkeypatch)
     matrix = tmp_path / "transform.mat"
     root_cli.main([
         "flirt", "-in", "moving.nii.gz", "-ref", "fixed.nii.gz",
-        "-omat", str(matrix), "-cost", "corratio", "--device", "cpu",
+        "-omat", str(matrix), "-cost", "corratio",
+        "-inweight", "input_weight.nii.gz",
+        "-refweight", "reference_weight.nii.gz",
+        "--device", "cpu",
     ])
     assert captured["device"] == "cpu"
+    assert captured["call"][3:] == (
+        "input_weight.nii.gz", "reference_weight.nii.gz"
+    )
     assert matrix.is_file()
 
 

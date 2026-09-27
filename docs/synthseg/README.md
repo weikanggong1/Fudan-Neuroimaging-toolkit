@@ -19,16 +19,29 @@ python tools/setup_weights.py --model synthseg --dest /path/to/weights
 ```python
 from fnit import SynthSeg
 
-model = SynthSeg(device="cuda:0", threads=4)
-result = model("sub-01_T1w.nii.gz")
-result.segmentation.save("sub-01_synthseg.nii.gz")
-result.write_volumes_csv("sub-01_T1w.nii.gz", "sub-01_synthseg.vol.csv")
+model = SynthSeg(
+    weights="/path/to/weights",  # 输入：含 .h5 和三份 .npy 的权重目录；省略时读取已配置目录
+    device="cuda:0",            # 计算设备；无 GPU 时使用 "cpu"
+    threads=4,                  # PyTorch CPU 线程数
+)
+result = model(
+    image="sub-01_T1w.nii.gz",  # 输入：单幅三维 T1 影像
+    keep_geometry=False,        # False 输出预处理网格；True 回到输入影像网格
+    color_lut=None,             # 可选：FreeSurferColorLUT.txt 路径，写入标签色表
+)
+result.segmentation.save("sub-01_synthseg.nii.gz")  # 输出：33 类硬分割图
+result.write_volumes_csv(
+    source="sub-01_T1w.nii.gz",         # CSV 第一列使用的输入文件名
+    path="sub-01_synthseg.vol.csv",    # 输出：各结构软体积，单位 mm³
+)
 print(result.total_intracranial_mm3, result.volumes_mm3)
 ```
 
 `SynthSeg(weights=None, device="cpu", threads=None)` 在构造时加载一次模型；每次调用接收一幅图像。`weights` 可传包含四个文件的目录，或直接传 `synthseg_2.0.h5` 路径；三个 `.npy` 必须与这份 `.h5` 位于同一目录。省略 `weights` 时先查 `FNIT_WEIGHTS`、配置脚本记录的目录，再查默认缓存。输入是单幅 3D `.nii`、`.nii.gz` 或 `.mgz` T1 路径。
 
-`result.segmentation` 是 `surfa.Volume`，默认位于 SynthSeg 预处理后的 RAS 方向、约 1 mm 网格。标签编号为整数值，按原版文件格式以 `float32` 保存。`model(image, keep_geometry=True)` 会将标签以最近邻法重采样到输入网格。`color_lut="/path/to/FreeSurferColorLUT.txt"` 可选地附加色表；默认不读取 FreeSurfer 文件。
+`result.segmentation` 是仓库内的 `SynthSegVolume`，提供 `.data`、`.affine`、`.shape`、`.geom.vox2world.matrix` 和 `.save(path)`；默认位于 SynthSeg 预处理后的 RAS 方向、约 1 mm 网格。标签编号为整数值，按原版文件格式以 `float32` 保存。`model(image, keep_geometry=True)` 会将标签以最近邻法重采样到输入网格。`color_lut="/path/to/FreeSurferColorLUT.txt"` 可选地附加色表；默认不读取 FreeSurfer 文件。
+
+输出图像支持 `.nii`、`.nii.gz`、`.mgh` 和 `.mgz`；`result.segmentation.data` 是三维 `float32` 标签数组。`result.segmentation.affine` 是体素坐标到 RAS 毫米坐标的 4×4 矩阵。`result.near_tie_voxels` 是近似并列标签规则改变的体素数。指定 `color_lut` 后，色表同时写入 MGZ 和 NIfTI 的 FreeSurfer 标签扩展。
 
 `result.volumes_mm3` 是 `{前景标签编号: 软体积}`，`result.total_intracranial_mm3` 是所有前景软体积之和，后验概率先恢复到输入方向，再按原版 NumPy float32 顺序求和并保留三位小数；`result.label_names` 对应 32 个前景结构名。CSV 列顺序、总量和近似并列标签规则与本仓库 GPU recon-all 的 `mri_synthseg` 入口相同。`result.near_tie_voxels` 记录近似并列规则相对于普通 `argmax` 更改的体素数。
 
@@ -71,6 +84,29 @@ fnit synthseg --i sub-01_T1w.nii.gz --o sub-01_synthseg.nii.gz \
 ```
 
 可选参数为 `--weights /path/to/weights`、`--keep-geometry` 和 `--color-lut /path/to/FreeSurferColorLUT.txt`。命令行和 Python 每次均处理一幅图像。独立入口不依赖 recon-all 的原生运行包或个人 license。
+
+## Surfa 输出替换验证
+
+该入口的模型推理、预处理和软体积计算保持原样；本次把标签结果、`keep_geometry` 最近邻回采样、MGH/NIfTI 写盘及可选色表改为仓库内的 nibabel/NumPy 实现。`fnit synthseg` 在解析该子命令时也不会导入其他流程及其 Surfa 依赖。整个仓库仍有其他 Surfa 使用点，本次验证只覆盖独立 33 类 SynthSeg 和 recon-all 调用的同一入口。
+
+同一份真实 `sub-01` T1、同一份外部权重，在 gpucw1 H100 上分别运行改动前后的完整 PyTorch 推理；关闭该模型的 cuDNN TF32，四个 CPU 线程。MGZ 输入的 SHA-256 为 `d79723f94bfc149ff36c89094a3d734b888a03cecbc32dc57a22992e8a5e817f`，原始 NIfTI 为 `f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a`，模型为 `f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e`。
+
+| 输入与输出 | 旧版与新版标签差异 | 仿射最大差 | CSV | 解压后的完整输出 |
+|---|---:|---:|---|---|
+| `orig.mgz` → 256³ MGZ | 0/16,777,216 | 0 | 逐字节相同 | 逐字节相同，含 MGH 头 |
+| 原始 T1 NIfTI，`keep_geometry=True` → 256×156×256 NIfTI | 0/10,223,616 | 0 | 逐字节相同 | 逐字节相同，含 NIfTI 扩展 |
+
+同一例真实分割图还检查了保存为 MGZ/NIfTI、带或不带 1,811 项 FreeSurfer 色表四种组合，解压后均逐字节相同；回采样到原始 T1 的 10,223,616 个标签全部相同。保留的[逐项验证数据](../../validation/synthseg/no_surfa_20260927/)列出了输出哈希、显存和计时。另在禁止导入 Surfa 的进程中，`fnit synthseg` 用该真实 T1 的子体积完成 CPU 推理和图像、CSV 保存；这验证命令行入口，与上面的全脑 GPU 精度对照分开记录。
+
+| 子步骤，同次顺序运行 | 改动前 Surfa 版 | nibabel/NumPy 版 |
+|---|---:|---:|
+| `orig.mgz`：加载模型 | 0.756 s | 0.314 s |
+| `orig.mgz`：预处理、GPU 推理、后处理 | 5.328 s | 3.973 s |
+| `orig.mgz`：MGZ 保存 | 1.030 s | 1.952 s |
+| 原始 NIfTI `keep_geometry=True`：预处理、GPU 推理、后处理 | 3.513 s | 3.325 s |
+| 原始 NIfTI：NIfTI 保存 | 0.163 s | 0.228 s |
+
+这是一轮顺序运行；模型和文件缓存状态不同，推理时间不能解释为本次 I/O 改写带来的加速。新 MGH 保存较慢约 0.9 秒。两种输入峰值 CUDA 已分配显存分别为 17,010 和 16,745 MiB。与官方 `mri_synthseg` 的同输入参考精度及 CPU 时间见下节；本次没有重复运行官方程序。
 
 ## 与 FreeSurfer 8.2 的对照验证
 

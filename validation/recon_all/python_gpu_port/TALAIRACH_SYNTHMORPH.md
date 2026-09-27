@@ -70,11 +70,40 @@ with an H100 neural call. These are different hosts and devices, so they do
 not establish a stage speed ratio. The focused conversion/API tests passed
 (`2 passed`) in the archived Python environment.
 
-## Remaining boundary
+## CUDA precision and current implementation
 
-GPU execution of the new wrapper and TF32 numerical behavior have not been
-checked because gpucw1 was not available in this validation. The SynthMorph
-constructor enables TF32 for CUDA matmul and cuDNN; this CPU replay does not
-exercise that path. The independent unmodified official TensorFlow
-registration, downstream consumers of the new XFM, and an end-to-end Python
-recon-all call remain unvalidated.
+A later same-input gpucw1 experiment fixed the saved candidate SynthStrip
+image, MNI305 template, affine weight, and preceding cuDNN state. The archived
+report separates TF32 effects in matmul and cuDNN. The candidate's default
+GPU affine inference had a maximum voxel-LTA element error of 0.047333 and
+eTIV error −822.547 mm³ against the reference subject. With both TF32
+switches disabled during inference, those errors were 0.00008392 and
+−0.894662 mm³. The corresponding isolated inference times were 2.200 s
+(default, first call) and 4.025 s (both off); one run per state with different
+warm-up, so they are not a paired speed ratio. The CPU float32 inference
+took 17.836 s and had eTIV error +0.486165 mm³. Full parameters, hashes,
+and the one-feature ablation are in the [precision report](talairach_tf32_isolation_20260927/README.md).
+
+`register_talairach` now saves both incoming PyTorch TF32 flags, constructs
+the affine model, disables matmul and cuDNN TF32 only for the forward call,
+and restores both flags even if construction or inference fails. The global
+SynthMorph defaults remain unchanged. Four focused tests passed. A targeted
+call of the patched production function on the **same saved moving-image
+bytes** reproduced the both-off affine LTA SHA-256; the voxel-LTA maximum
+element error was 0.00008392, eTIV error −0.894662 mm³, and both incoming
+TF32 flags were restored. That call took 4.791 s including model construction,
+inference and output writing, with peak PyTorch GPU allocation 4497 MiB. The
+[production report](talairach_tf32_isolation_20260927/production_register_report.json)
+contains the source/input hashes and exact timings. The old 10.65 s archived
+FreeSurfer hybrid wrapper and these new times were not measured as a paired
+benchmark.
+
+The bounded candidate continuation from raw T1 through brainmask, GCA
+registration, CA normalization and presurface aseg was also checked. Its
+`orig`, `synthstrip`, `nu`, `T1`, `brainmask`, `norm`, `ctrl_pts`, and
+`aseg.presurf` were each voxel-exact to the reference on this one T1; the
+GCA `talairach.lta` was matrix-exact. The SynthMorph LTA/eTIV still differ
+slightly, and `cc_up.lta` has a 0.00000763 maximum element difference.
+Surface metrics and another subject remain untested in this precision run.
+An independent unmodified TensorFlow SynthMorph comparison also remains
+unverified because the archived wrapper used the PyTorch neural hook.

@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.20)
+project(fnit_n4_itk LANGUAGES CXX)
+find_package(ITK 5.4 REQUIRED)
+include(${ITK_USE_FILE})
+add_executable(fnit_n4_itk n4_itk.cpp)
+target_compile_features(fnit_n4_itk PRIVATE cxx_std_17)
+target_link_libraries(fnit_n4_itk PRIVATE ${ITK_LIBRARIES})
+install(TARGETS fnit_n4_itk RUNTIME DESTINATION bin)

@@ -62,10 +62,12 @@ def _angle(xyz: np.ndarray, vertex: int, a: int, b: int) -> np.float32:
     bx = np.float32(xyz[b, 0] - xyz[vertex, 0])
     by = np.float32(xyz[b, 1] - xyz[vertex, 1])
     bz = np.float32(xyz[b, 2] - xyz[vertex, 2])
-    la = math.sqrt(float(ax) * float(ax) + float(ay) * float(ay)
-                   + float(az) * float(az))
-    lb = math.sqrt(float(bx) * float(bx) + float(by) * float(by)
-                   + float(bz) * float(bz))
+    la = math.sqrt(np.float64(ax) * np.float64(ax)
+                   + np.float64(ay) * np.float64(ay)
+                   + np.float64(az) * np.float64(az))
+    lb = math.sqrt(np.float64(bx) * np.float64(bx)
+                   + np.float64(by) * np.float64(by)
+                   + np.float64(bz) * np.float64(bz))
     normalizer = la * lb
     if normalizer < 1e-6:
         return np.float32(0)

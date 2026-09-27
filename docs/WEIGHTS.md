@@ -79,7 +79,7 @@ python tools/setup_weights.py --all --verify-only
 | 可选辅助分割阶段 | [vsinus.no-sp.m.all.nstd10-070.h5](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_sclimbic_seg/vsinus.no-sp.m.all.nstd10-070.h5) | 3,296,904 | 静脉窦模型 |
 | 可选辅助分割阶段 | [sclimbic.volstats.csv](https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_sclimbic_seg/sclimbic.volstats.csv) | 500 | 上游体积统计字段表 |
 
-合计 **4,792,356,791 字节**，约 4.79 GB（4.46 GiB）。其中 `synthseg` 单独安装需四个文件、53,087,016 字节；`recon-all` 组需 6 个文件、135,394,037 字节，不下载未接入整例流程的 deform 与辅助分割模型。只使用默认 SynthStrip 时需要第一个文件；默认 joint 配准需要 affine 和 deform 两个文件；WMH-SynthSeg 只需其单独的 `.pth`；默认 SynthSR 只需通用 v2 的 `.h5`。[33 类 SynthSeg 官方目录](https://github.com/freesurfer/freesurfer/tree/v8.2.0/mri_synthseg) · [辅助分割官方目录](https://github.com/freesurfer/freesurfer/tree/v8.2.0/mri_sclimbic_seg) · [WMH 官方目录](https://github.com/freesurfer/freesurfer/tree/dev/mri_WMHsynthseg) · [SynthSR 官方目录](https://github.com/freesurfer/freesurfer/tree/dev/mri_synthsr)
+合计 **4,792,356,791 字节**，约 4.79 GB（4.46 GiB）。其中 `synthseg` 单独安装需四个文件、53,087,016 字节；`recon-all` 组需 10 个文件、145,283,019 字节，包含尚待接入整例的 MCA/dura 和静脉窦模型；不下载 deform、额外查找表和统计字段表。只使用默认 SynthStrip 时需要第一个文件；默认 joint 配准需要 affine 和 deform 两个文件；WMH-SynthSeg 只需其单独的 `.pth`；默认 SynthSR 只需通用 v2 的 `.h5`。[33 类 SynthSeg 官方目录](https://github.com/freesurfer/freesurfer/tree/v8.2.0/mri_synthseg) · [辅助分割官方目录](https://github.com/freesurfer/freesurfer/tree/v8.2.0/mri_sclimbic_seg) · [WMH 官方目录](https://github.com/freesurfer/freesurfer/tree/dev/mri_WMHsynthseg) · [SynthSR 官方目录](https://github.com/freesurfer/freesurfer/tree/dev/mri_synthsr)
 
 SHA-256：
 

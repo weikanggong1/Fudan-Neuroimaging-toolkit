@@ -46,9 +46,17 @@ contains the four image hashes and all per-file gates. The
 [run report](connected_input_talairach_cpu_20260926.json) records 0.499 s
 import, 0.035 s copy, 2.117 s conform/tag, 6.039 s SynthStrip, and 16.051 s
 Talairach. These are one CPU run's stage timings, not paired native timing or
-an end-to-end speed ratio. The new transform has not yet been propagated
-through N4 or surface generation. SynthMorph's shared model enables TF32
-for CUDA matmul and cuDNN; this CPU run cannot verify its GPU/TF32 behavior.
+an end-to-end speed ratio. The table above records the earlier CPU replay.
+The current CUDA caller disables cuDNN TF32 during SynthStrip inference and
+both matmul and cuDNN TF32 during SynthMorph affine inference, restoring the
+entering flags after each call. On the same T1, `orig.mgz`,
+`synthstrip.mgz`, `nu.mgz`, `T1.mgz`, `brainmask.mgz`, `norm.mgz`,
+`ctrl_pts.mgz`, and `aseg.presurf.mgz` match every official voxel. The GCA
+LTA is matrix-exact; the separate SynthMorph voxel LTA retains a maximum
+element difference of 0.00008392 and an eTIV error of −0.894662 mm³. See
+[the SynthStrip check](SYNTHSTRIP_TF32_UPSTREAM_FIX_20260927.md) and
+[the later Talairach precision and downstream continuation](talairach_tf32_isolation_20260927/README.md).
+Cortical outputs remain outside this targeted validation.
 
 The current API also converts its saved affine LTA to
 `transforms/talairach.xfm.lta` using Surfa, without a native executable. We
@@ -59,5 +67,4 @@ was 0.00012255, and the maximum displacement across eight input-grid corners
 was 0.0004203 mm. Its determinant gives eTIV 1,310,267.038702 mm³ versus
 1,310,266.552537 mm³ officially (absolute difference 0.486165 mm³). See
 [the transform report](connected_talairach_voxel_lta_20260926.json) and
-[replay comparator](experimental/compare_talairach_voxel_lta.py). The updated
-one-call API has not been rerun from a new empty subject folder.
+[replay comparator](experimental/compare_talairach_voxel_lta.py). The updated one-call API has been rerun from a new empty subject folder on gpucw1; its SynthStrip inference took 9.80 s and reproduced the official voxel data. The earlier CPU voxel-LTA comparison above remains a separate historical replay.

@@ -2,7 +2,7 @@
 
 [返回首页](../../README.md) · [官方说明](https://surfer.nmr.mgh.harvard.edu/fswiki/WMH-SynthSeg) · [官方源码](https://github.com/freesurfer/freesurfer/tree/dev/mri_WMHsynthseg/WMHSynthSeg)
 
-WMH-SynthSeg 同时分割脑结构和白质高信号（WMH，FreeSurfer 标签 **77**），支持 T1w、FLAIR 等对比度。**FreeSurfer 原版已使用 PyTorch**。本包基于已验证的源码与官方 `WMH-SynthSeg_v10_231110.pth`，提供独立安装、单被试 Python 和单被试命令行调用；推理不调用 FreeSurfer 程序。
+WMH-SynthSeg 同时分割脑结构和白质高信号（WMH，FreeSurfer 标签 **77**），支持 T1w、FLAIR 等对比度。**FreeSurfer 原版已使用 PyTorch**。本包基于已验证的源码与官方 `WMH-SynthSeg_v10_231110.pth`，提供独立安装、单被试 Python 和单被试命令行调用；推理不调用 FreeSurfer 程序，也不需要导入 Surfa。
 
 ## 原版源码流程与输出几何
 
@@ -28,27 +28,29 @@ mri_WMHsynthseg --i case_FLAIR.nii.gz --o case_seg.nii.gz \
 python tools/setup_weights.py --model wmh-synthseg
 ```
 
-Python 模型构造一次即可复用；输入可为 3D `.nii`、`.nii.gz`、`.mgz` 路径或 `surfa.Volume`，返回 `WMHResult`。`crop` 和 `save_lesion_probabilities` 默认均为 `False`，下面显式开启二者以适应 GPU 并保存概率图。
+Python 模型构造一次即可复用；输入可为 3D `.nii`、`.nii.gz`、`.mgz` 路径。已有 `surfa.Volume` 内存对象仍可传入；WMH-SynthSeg 推理本身不会导入 Surfa，仓库其他模块的依赖将在各自迁移后处理。返回 `WMHResult`。`crop` 和 `save_lesion_probabilities` 默认均为 `False`，下面显式开启二者以适应 GPU 并保存概率图。
 
 ```python
 from fnit import WMHSynthSeg
 
-model = WMHSynthSeg(device="cuda:0")
-result = model("case_FLAIR.nii.gz", crop=True, save_lesion_probabilities=True)
-result.segmentation.save("case_seg.nii.gz")
-result.lesion_probability.save("case_seg.lesion_probs.nii.gz")
-print(result.volumes_mm3)
+weights_path = None                  # 权重位置；None 从已配置权重目录查找
+image_path = "case_FLAIR.nii.gz"      # 输入：单幅 3D FLAIR
+model = WMHSynthSeg(weights=weights_path, device="cuda:0", threads=4)
+result = model(image=image_path, crop=True, save_lesion_probabilities=True)
+result.segmentation.save(path="case_seg.nii.gz")  # 输出：33 类标签图
+result.lesion_probability.save(path="case_seg.lesion_probs.nii.gz")  # 输出：WMH 概率图
+print(result.volumes_mm3)             # 输出：标签编号到软体积 mm³ 的字典
 ```
 
 | 参数或字段 | 类型、含义 | 原版对应 |
 |---|---|---|
 | `WMHSynthSeg(weights=None, device="cpu", threads=None)` | 模型构造时加载一次官方 `.pth`；`weights` 可为文件或目录；`device` 选 CPU/GPU | `--device`、`--threads`；原版从 `$FREESURFER_HOME/models` 加载固定文件 |
 | `model(image, crop=False, save_lesion_probabilities=False)` | 单幅 3D 影像；`crop=True` 两遍定位并限制推理区域 | `--i`、`--crop`、`--save_lesion_probabilities` |
-| `result.segmentation` | `surfa.Volume`，33 类整数标签；WMH 为 77 | `--o` 指定的图像 |
-| `result.lesion_probability` | 请求时为 `surfa.Volume`，否则为 `None`；体素值为 WMH 后验概率 | `--save_lesion_probabilities` 额外写出的 `.lesion_probs` 图 |
+| `result.segmentation` | 仓库内 `Volume`，33 类整数值标签；WMH 为 77 | `--o` 指定的图像 |
+| `result.lesion_probability` | 请求时为仓库内 `Volume`，否则为 `None`；体素值为 WMH 后验概率 | `--save_lesion_probabilities` 额外写出的 `.lesion_probs` 图 |
 | `result.volumes_mm3` | `{标签编号: 软体积}` 字典，单位 mm³，包括背景 0 | `--csv_vols` 的各标签体积列；CSV 不输出背景列 |
 
-两幅图像结果都使用原版同样的处理后网格，原图的坐标变换保留在输出仿射矩阵中；不保证与输入数组同形状。调用者通过 `.save(path)` 写出影像；Python 字典若需 CSV，可用下面的 CLI 直接生成与原版列名相同的表。原版 `Intracranial-volume` 列是非背景软体积之和，`Input-file` 列实际记录**输出分割路径**。
+两幅图像结果都使用原版同样的处理后网格，原图的坐标变换保留在输出仿射矩阵中；不保证与输入数组同形状。仓库内 `Volume` 提供 `.data`、`.affine`、`.shape`、`.geom.vox2world.matrix`、`.geom.voxsize` 和 `.save(path)`。调用者通过 `.save(path)` 写出影像；Python 字典若需 CSV，可用下面的 CLI 直接生成与原版列名相同的表。原版 `Intracranial-volume` 列是非背景软体积之和，`Input-file` 列实际记录**输出分割路径**。
 
 对应的新命令为：
 
@@ -62,20 +64,14 @@ fnit wmh-synthseg --i case_FLAIR.nii.gz --o case_seg.nii.gz \
 
 ## 验证边界
 
-数值对照固定同一官方权重、相同输入、设备、`--crop` 和线程，检查输出网格、所有标签、WMH 标签 77、病灶概率图及软体积；分别记录原版 CPU、官方源码 CUDA、本包 CPU、本包 CUDA 的完整命令运行时间。原版随 FreeSurfer 安装的 `fspython` 在 gpucw1 上为 CPU 版 PyTorch，因此 GPU 参考以未改动的官方 `inference.py` 在 CUDA PyTorch 环境中运行，并单独标记。公开病例没有人工 WMH 标注时，原版/本包的一致性不能解释为病灶检测准确率。完整 12 例结果、运行环境与复现命令见[WMH 验证记录](../../validation/wmh/README.md)。
+本次验收固定一份真实 FLAIR、同一官方权重、CPU 和 `--crop`，比较标签、病灶概率、输出几何、软体积和存盘字节；并用已保存的 FreeSurfer CPU 输出核对新版 CLI。原版在 gpucw1 的 FreeSurfer Python 环境运行，新旧仓库 API 在 headcw 的同一 Conda 环境配对运行，时间不作为同硬件官方加速比。公开病例没有人工 WMH 标注，本报告不评价病灶检测准确率。
 
-在 12 例公开 FLAIR 上，CPU 原版/本包和 CUDA 原版/本包两组的**逐例**标签、病灶概率、数值仿射和 CSV 软体积完全一致（WMH Dice=1，概率最大绝对差=0）。完整单例命令的耗时中位数（秒）如下；原版 GPU 指未改动的官方源码在 CUDA Python 环境运行。
-
-| 原版 CPU | 本包 CPU | 原版 GPU | 本包 GPU |
-|---:|---:|---:|---:|
-| 97.38 | 70.69 | 8.25 | 8.41 |
-
-前两臂分别使用 FreeSurfer 的 Torch 2.1.2+cpu 与本包的 Torch 2.5.1，后两臂均用 Torch 2.5.1/CUDA 11.8；这不是控制 PyTorch 版本后的纯网络加速试验。原版写盘与 Surfa 写盘的 NIfTI qform/sform *code* 可能不同，体素值和数值仿射在本实验中相同。[逐例范围与复现条件](../../validation/wmh/README.md#数值与耗时)。
+移除 Surfa 后，使用同一份真实 `sub-04` FLAIR 复核了路径输入、Python API 和 CLI：新旧版本的标签、概率、仿射、软体积相同，NIfTI/MGZ 输出逐字节一致；新 CLI 的标签、概率、已保存仿射和 CSV 数值列也与已保存的官方 CPU 输出一致。实测时间、输入哈希、命令和未测模式见[无 Surfa 迁移记录](../../validation/wmh_no_surfa_20260928/README.md)。此前 12 例基准针对旧版 Surfa 输出路径，保留为[历史验证](../../validation/wmh/README.md)，不代替本次改写的多例验收。
 
 ### 原版与本包示意图
 
 下图使用仓库公开的 `sub-04` FLAIR。左列为输入，中、右列分别叠加 FreeSurfer
-原版和本包输出的标签 77（红色）；两次运行均使用官方权重、CUDA 和 `--crop`。
+原版和旧版仓库输出的标签 77（红色）；两次运行均使用官方权重、CUDA 和 `--crop`。当前无 Surfa 版本的数值结论以上述新验证为准。
 
 ![公开 FLAIR、FreeSurfer WMH-SynthSeg 与本包 WMH-SynthSeg](../figures/wmh_synthseg_comparison.png)
 

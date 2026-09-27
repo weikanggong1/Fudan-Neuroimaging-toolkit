@@ -6,7 +6,7 @@ include docs/bedpostx/synthetic_example.py
 recursive-include tools *.py *.md
 recursive-include tests *.py *.json
 recursive-include validation/recon_all *.py *.md *.json *.cu
-recursive-include validation/fast_vbm README.md SHA256SUMS *.public.json *.public.csv *.py
+recursive-include validation/fast_vbm README.md
 recursive-include validation/applywarp SHA256SUMS *.json
 recursive-include validation/flirt SHA256SUMS *.public.json
 recursive-include validation/synthseg SHA256SUMS *.public.json
@@ -14,8 +14,6 @@ recursive-include validation/topup *.public.json
 include benchmark/probtrackx_validation.py
 recursive-include validation/bedpostx *.py *.md *.json *.png
 recursive-include validation/probtrackx *.py *.md *.json *.png *.sh
-exclude validation/fast_vbm/release.v0.9.public.json
-
 # Runtime checkpoints, MRI templates, and generated images are external data.
 global-exclude *.pt *.pth *.h5 *.hdf5 *.ckpt
 global-exclude *.pyc *.pyo
@@ -25,3 +23,5 @@ prune work
 recursive-include validation/eddy *.json SHA256SUMS
 recursive-include validation/dtifit *.json SHA256SUMS
 recursive-include validation/amico_noddi *.json SHA256SUMS
+recursive-include validation/mmorf *.json *.md *.py SHA256SUMS
+recursive-include validation/dmri_pipeline *.json *.md *.py *.sh SHA256SUMS

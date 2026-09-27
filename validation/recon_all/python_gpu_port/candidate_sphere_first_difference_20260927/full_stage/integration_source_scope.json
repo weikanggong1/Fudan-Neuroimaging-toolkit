@@ -1,0 +1,86 @@
+{
+  "scope": "integration source transfer from isolated exact real-T1 sphere run; no repeat reconstruction",
+  "tested_package": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_finalsurfs_stage_20260927/candidate_sphere_gdb_first_sse_20260927/angle64_package",
+  "modules": [
+    {
+      "module": "sphere_standard_run.py",
+      "tested_sha256": "2dc4f0a8eeff8aebba371ed3360b431f3fba262fbacb2ff0c036fd652d58fcce",
+      "integrated_sha256": "7544ccb77153a7ac242b88d1c9752bdd08ce5765ba483cd644a4075e94e90405",
+      "exact_source": false
+    },
+    {
+      "module": "sphere_standard_metric.py",
+      "tested_sha256": "dde4f42db3f8f526c2ccb1c1379db4edc5369b0f41cbb72ed8b84dc14030ca92",
+      "integrated_sha256": "dde4f42db3f8f526c2ccb1c1379db4edc5369b0f41cbb72ed8b84dc14030ca92",
+      "exact_source": true
+    },
+    {
+      "module": "sphere_standard_unfold.py",
+      "tested_sha256": "7bcc38e10fd08475d7894fba38ca8e71a67c8590103ca77daf82e9ec53462c4f",
+      "integrated_sha256": "7bcc38e10fd08475d7894fba38ca8e71a67c8590103ca77daf82e9ec53462c4f",
+      "exact_source": true
+    },
+    {
+      "module": "sphere_standard_average.py",
+      "tested_sha256": "f79dc72a574d3bef756f06b97ab2546d35662c1d6acbd769e034fa542d84bd78",
+      "integrated_sha256": "f79dc72a574d3bef756f06b97ab2546d35662c1d6acbd769e034fa542d84bd78",
+      "exact_source": true
+    },
+    {
+      "module": "sphere_standard_finish.py",
+      "tested_sha256": "9ba0ce2e7dd6ab0a731a45266f3e7fd8e67b48a39ed7117c65d68cc2a74f9825",
+      "integrated_sha256": "9ba0ce2e7dd6ab0a731a45266f3e7fd8e67b48a39ed7117c65d68cc2a74f9825",
+      "exact_source": true
+    },
+    {
+      "module": "sphere_standard_line_search.py",
+      "tested_sha256": "8777cb96ca93ad0584d34e3f2d2f13827b1302dbaf600fc9454fdd39cd323296",
+      "integrated_sha256": "8777cb96ca93ad0584d34e3f2d2f13827b1302dbaf600fc9454fdd39cd323296",
+      "exact_source": true
+    },
+    {
+      "module": "sphere_standard_nonlinear.py",
+      "tested_sha256": "1b24d46d211f165dc137011eca2f4894eb9c66670d336451986e64dbcf65d0b8",
+      "integrated_sha256": "1b24d46d211f165dc137011eca2f4894eb9c66670d336451986e64dbcf65d0b8",
+      "exact_source": true
+    },
+    {
+      "module": "sphere_standard_python.py",
+      "tested_sha256": "017172cae935775f3e55ec7cdee72c54d6db904021c78896a77d99690a23cc97",
+      "integrated_sha256": "017172cae935775f3e55ec7cdee72c54d6db904021c78896a77d99690a23cc97",
+      "exact_source": true
+    },
+    {
+      "module": "sphere_standard_schedule.py",
+      "tested_sha256": "ed0dec3a640506de649c812c29626a88c6eee0eebf6a6101d47a8b6d5c022494",
+      "integrated_sha256": "ed0dec3a640506de649c812c29626a88c6eee0eebf6a6101d47a8b6d5c022494",
+      "exact_source": true
+    },
+    {
+      "module": "sphere_python.py",
+      "tested_sha256": "21172e853cc062b5015cd5bcdf5dcb02bcd2833abe1d1f5afa3a7af3d64e60a6",
+      "integrated_sha256": "21172e853cc062b5015cd5bcdf5dcb02bcd2833abe1d1f5afa3a7af3d64e60a6",
+      "exact_source": true
+    },
+    {
+      "module": "mris_register_overlap.py",
+      "tested_sha256": "a3a205070387fb9544b686a92e5e08205bb823b5b9f9bc24050d9c57e65e887b",
+      "integrated_sha256": "a3a205070387fb9544b686a92e5e08205bb823b5b9f9bc24050d9c57e65e887b",
+      "exact_source": true
+    },
+    {
+      "module": "smooth_surface_python.py",
+      "tested_sha256": "e6cb55e9bad65ab7023c64c7ba6f8fb1bba53586005cfb9deb3da95bdc4facd1",
+      "integrated_sha256": "7ae11634300dfb8957dc80357642fc6bfe31be7b04f7694bdc5bb51383f447b9",
+      "exact_source": false
+    }
+  ],
+  "exact_source_count": 10,
+  "runner_function_body_ast_equal_ignoring_docstring": true,
+  "smooth_surface_function_ast_equal": true,
+  "source_differences": {
+    "sphere_standard_run.py": "run_standard_sphere docstring only",
+    "smooth_surface_python.py": "module docstring and standalone CLI --iterations argument only; smooth_surface function unchanged"
+  },
+  "conclusion": "Numerical core executed by run_standard_sphere is unchanged; integration inherits the frozen-input sphere geometry result, not an independent rerun."
+}

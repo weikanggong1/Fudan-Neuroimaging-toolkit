@@ -40,7 +40,7 @@ tar -xzf DATA_public.tar.gz -C assets --strip-components=1   templates/template_
 
 ## 当前证据边界
 
-当前正式报告使用 10 例真实 T1w，比较两条 FastVBM 分支与 UKB/FSL reference 的 warped GM、Jacobian 和 modulated GM。报告不是 UK Biobank 原始生产环境的复跑，也不包含 gradient distortion correction、群体平滑、统计模型或结构 IDP。准确度、计时和 FNIRT 数值等价边界只以 [当前 0.9 验证](../../validation/fast_vbm/README.md)为准。
+TorchFNIRT 的 mask、stage handoff 和优化路径已经更新，旧 FastVBM 端到端报告不再对应当前源码，已从仓库移除。当前页面只说明 UKB 步骤和资源对应关系；新的真实 T1w benchmark 完成前，不给出 FastVBM 精度或时间结论。当前验证状态见 [FastVBM 验证页](../../validation/fast_vbm/README.md)，组件级 TorchFNIRT/TBSS 诊断见 [dMRI 验证页](../../validation/dmri_pipeline/README.md)。
 
 ## 来源
 

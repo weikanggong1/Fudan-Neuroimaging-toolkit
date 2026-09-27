@@ -121,6 +121,8 @@ class SynthSegSegmenter:
             original = _blur(original)
             if not flip:
                 return original[0]
+            if x.is_cuda:
+                torch.cuda.empty_cache()
             flipped = _blur(self.model(torch.flip(x, (2,))))
             flipped = torch.flip(flipped, (2,))[:, self.flip_indices]
             return (0.5 * (original + flipped))[0]

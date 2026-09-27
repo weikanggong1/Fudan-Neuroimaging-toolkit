@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fudan-neuroimaging-toolkit"
-version = "0.12.1"
+version = "0.15.0"
 description = "Standalone PyTorch brain MRI inference with single-subject Python and CLI APIs"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -12,10 +12,12 @@ dependencies = [
   "torch>=2.1",
   "numpy>=1.23,<2",
   "scipy>=1.9",
+  "trx-python>=0.4.0",
   "surfa==0.6.3",
   "nibabel>=5",
   "h5py>=3.8",
   "PyYAML>=6",
+  "Pillow>=9",
 ]
 
 [project.urls]
@@ -23,7 +25,7 @@ Repository = "https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit"
 Documentation = "https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit#readme"
 
 [project.optional-dependencies]
-recon-all-python-stages = ["numba>=0.59", "tifffile>=2023.7", "SimpleITK==2.5.6", "antspyx==0.6.3"]
+recon-all-python-stages = ["numba>=0.59", "tifffile>=2023.7"]
 
 [project.scripts]
 fnit = "fnit.cli:main"
@@ -42,6 +44,9 @@ fnit-dtifit = "fnit.dtifit.cli:main"
 fnit-amico-noddi = "fnit.amico_noddi.cli:main"
 fnit-bedpostx = "fnit.bedpostx.cli:main"
 fnit-probtrackx = "fnit.probtrackx.cli:main"
+fnit-mmorf = "fnit.mmorf.cli:main"
+fnit-dmri-pipeline = "fnit.dmri_pipeline.cli:main"
+fnit-fmri = "fnit.fmri.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -81,4 +86,7 @@ fnit = [
   "connectome/*.tsv",
   "connectome/data/*.md",
   "connectome/data/*.npz",
+  "mmorf/*.md",
+  "dmri_pipeline/*.md",
+  "dmri_pipeline/assets/*.cnf",
 ]

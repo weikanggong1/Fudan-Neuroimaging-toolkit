@@ -309,14 +309,21 @@ def _extract_archive_members(archive, directory, members, prefix):
         raise ValueError(f"Atlas archive is missing expected members: {sorted(members - seen)}")
 
 
-# Data read by native_free.run_recon_all_python. Other verified assets remain
-# available through --all for isolated stage validation.
+# Data for native_free.run_recon_all_python and the validated MCA/dura,
+# venous-sinus segmentation stages. Other verified assets remain available
+# through --all for isolated stage validation.
 CORE_ASSETS = (
-    "ASegStatsLUT.txt", "FreeSurferColorLUT.txt", "WMParcStatsLUT.txt",
+    "ASegStatsLUT.txt", "FreeSurferColorLUT.txt",
+    "SubCorticalMassLUT.txt", "WMParcStatsLUT.txt",
     "average/RB_all_2020-01-02.gca", "average/mni305.cor.stripped.mgz",
     *(f"average/{hemi}.{atlas}.atlas.acfb40.noaparc.i12.2016-08-02.gcs"
       for hemi in ("lh", "rh") for atlas in ("DKaparc", "CDaparc", "DKTaparc")),
+    *(f"average/{hemi}.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif"
+      for hemi in ("lh", "rh")),
     "lib/bem/ic4.tri", "lib/bem/ic7.tri",
+    "average/mca-dura.prior.warp.mni152.1.0mm.lh.nii.gz",
+    "average/mca-dura.prior.warp.mni152.1.0mm.rh.nii.gz",
+    "average/vsinus.no-sp.prior.mni152.1.0mm.mgz",
 )
 
 

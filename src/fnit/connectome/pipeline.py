@@ -104,14 +104,12 @@ def _gradients(bvals_path: str | Path, bvecs_path: str | Path,
 
 def _registration(b0_brain: torch.Tensor, dwi_affine: torch.Tensor,
                   t1_brain: str | Path, device: torch.device) -> torch.Tensor:
-    """Run FNIT TorchFLIRT 6-DOF/normmi; return DWI→T1 RAS-mm [4,4]."""
-    import surfa as sf
+    """Run Surfa-free TorchFLIRT 6-DOF/normmi; return DWI→T1 RAS-mm [4,4]."""
     from ..flirt import TorchFLIRT
-    image = b0_brain.detach().cpu().numpy()
-    geometry = sf.ImageGeometry(shape=image.shape, vox2world=dwi_affine.cpu().numpy())
-    moving = sf.Volume(image, geometry=geometry)
+    from ..synthstrip.geometry import Volume
+    moving = Volume(b0_brain.detach().cpu().numpy(), dwi_affine.cpu().numpy())
     result = TorchFLIRT(device=str(device), dof=6, cost="normmi")(
-        moving, sf.load_volume(str(t1_brain)),
+        moving, t1_brain,
     )
     return torch.as_tensor(result.moving_to_fixed_world, device=device,
                            dtype=torch.float64)

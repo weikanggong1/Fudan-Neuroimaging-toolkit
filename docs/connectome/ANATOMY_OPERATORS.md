@@ -131,6 +131,6 @@ nib.save(nib.Nifti1Image(combined.cpu().numpy(), target.affine),
 
 ## 安装和资源边界
 
-主页 [`environment.yml`](../../environment.yml) 提供 PyTorch 2.5.1/CUDA 11.8、nibabel、surfa 和仓库包；5TT 数值表、MPL-2.0 与 FSL 6.0 许可证及 BET 参考源码包含在本次 wheel。该 wheel 已在现有 FNIT Conda Python 3.11 环境中以 `pip --no-deps --target` 隔离安装；BET、MSMT-CSD、FIRST 5TT 和 Tian 反向形变的真实输入 CPU 最小调用成功。本次 wheel 的 GPU 初始化遇到显存不足，未重新运行 CUDA 5TT/FLIRT 或 10,000 次播种整链；先前源码级 GPU 数值比较见各阶段报告，不能视为本次 wheel 的 GPU 安装核验。[安装核验记录](../../validation/connectome/ds004666/anatomy_conda_install.public.json)保存本次 wheel 哈希、环境和调用范围；没有重建全新 Conda 环境。FreeSurfer、FSL、MRtrix 可执行文件未被打包，仅用于独立软件对照；官方 `recon-all` 仍由用户在包外运行。
+主页 [`environment.yml`](../../environment.yml) 提供 PyTorch 2.5.1/CUDA 11.8、nibabel、surfa 和仓库包；5TT 数值表、MPL-2.0 与 FSL 6.0 许可证及 BET 参考源码包含在本次 wheel。合并远端更新前的 `0.12.1` 阶段快照 wheel 已在现有 FNIT Conda Python 3.11 环境中以 `pip --no-deps --target` 隔离安装；BET、MSMT-CSD、FIRST 5TT 和 Tian 反向形变的真实输入 CPU 最小调用成功。该阶段 wheel 的 GPU 初始化遇到显存不足，未重新运行 CUDA 5TT/FLIRT 或 10,000 次播种整链；合并后源码尚未再次打包核验。先前源码级 GPU 数值比较见各阶段报告，不能视为本次 wheel 的 GPU 安装核验。[安装核验记录](../../validation/connectome/ds004666/anatomy_conda_install.public.json)保存本次 wheel 哈希、环境和调用范围；没有重建全新 Conda 环境。FreeSurfer、FSL、MRtrix 可执行文件未被打包，仅用于独立软件对照；官方 `recon-all` 仍由用户在包外运行。
 
 本例 5TT/GMWMI 与 atlas 的 PyTorch 峰值已分配显存为 1.00 和 0.22 GiB。峰值是 `torch.cuda.max_memory_allocated()`，不包含其他进程占用；具体每阶段数据在 JSON 报告中。当前 10,000 次播种整链的 Torch 峰值分配显存为 2.720 GiB；其他尺寸、atlas 与原脚本千万次追踪仍需单独测量。

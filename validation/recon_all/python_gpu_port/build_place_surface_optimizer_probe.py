@@ -16,9 +16,16 @@ def main() -> None:
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--capture-iteration", type=int, default=0)
     parser.add_argument("--capture-through", type=int)
+    parser.add_argument("--capture-white-repulsion", action="store_true")
+    parser.add_argument("--capture-light-after", type=int)
+    parser.add_argument("--stop-after-capture", action="store_true")
     args = parser.parse_args()
     if args.capture_through is not None and args.capture_through < 1:
         parser.error("--capture-through must be positive")
+    if args.stop_after_capture and args.capture_through is None:
+        parser.error("--stop-after-capture requires --capture-through")
+    if args.capture_light_after is not None and args.capture_through is None:
+        parser.error("--capture-light-after requires --capture-through")
     args.out.mkdir(parents=True, exist_ok=True)
     source = (args.source / "utils/mrisurf_mri.cpp").read_text()
     prefix, source = source.split("// #POS", 1)
@@ -29,6 +36,7 @@ def main() -> None:
     auto dump_first_gradient = [&](const char *stage) {
       const char *prefix = getenv("PLACE_GRAD_PREFIX");
       if (!prefix || CAPTURE_GUARD) return;
+      CAPTURE_LIGHT
       char path[STRLEN];
       CAPTURE_PATH
       FILE *output = fopen(path, "wb");
@@ -86,6 +94,14 @@ def main() -> None:
       }
     };
     dump_first_gradient("clear");'''
+    if args.capture_light_after is None:
+        dump = dump.replace("CAPTURE_LIGHT", "")
+    else:
+        dump = dump.replace(
+            "CAPTURE_LIGHT",
+            f'if (n >= {args.capture_light_after} && strcmp(stage, "tangential_spring") '
+            '&& strcmp(stage, "after_collision")) return;',
+        )
     if args.capture_through is None:
         dump = dump.replace("CAPTURE_GUARD", f"n != {args.capture_iteration}")
         dump = dump.replace("CAPTURE_PATH", 'snprintf(path, STRLEN, "%s.%s", prefix, stage);')
@@ -115,6 +131,8 @@ def main() -> None:
             raise RuntimeError("missing first placement objective markers")
         source = source.replace(initial, '  fprintf(stderr, "PY_OBJ_REF initial rms=%.17g sse=%.17g orig_area=%.17g total_area=%.17g\\n", rms, sse, mris->orig_area, mris->total_area);\n' + initial)
         source = source.replace(step, f'    if (n < {args.capture_through}) fprintf(stderr, "PY_OBJ_REF step%d rms=%.17g sse=%.17g orig_area=%.17g total_area=%.17g\\n", n + 1, rms, sse, mris->orig_area, mris->total_area);\n' + step, 1)
+        if args.stop_after_capture:
+            source = source.replace(step, step + f"\n    if (n + 1 >= {args.capture_through}) exit(0);", 1)
     source = source.replace(marker, marker + dump, 1)
     stages = (
         ("mrisComputeIntensityTerm(mris, l_intensity, mri_brain, mri_smooth, parms->sigma, parms);", "intensity"),
@@ -130,6 +148,15 @@ def main() -> None:
         if name in ("normal_spring", "tangential_spring"):
             diagnostic = f'dump_first_gradient("pre_{name}");\n    ' + diagnostic
         source = source.replace(needle, diagnostic, 1)
+    if args.capture_white_repulsion:
+        for needle, name in (
+            ("mrisAverageSignedGradients(mris, avgs);", "after_signed_average"),
+            ("mrisComputeRepulsiveTerm(mris, parms->l_repulse, mht_v_current, mht_f_current);",
+             "after_self_repulsion"),
+        ):
+            if source.count(needle) < 1:
+                raise RuntimeError(f"missing source optimizer term: {name}")
+            source = source.replace(needle, needle + f'\n    dump_first_gradient("{name}");', 1)
     patched = args.out / "mrisurf_mri_gradient_probe.cpp"
     patched.write_text(prefix + "// #POS" + source)
 
@@ -139,12 +166,16 @@ def main() -> None:
         if " = " in line:
             key, value = line.split(" = ", 1)
             definitions[key] = shlex.split(value)
+    definitions["CXX_INCLUDES"] = [
+        token.replace("/tmp/fs_full_source_d932", str(args.source))
+        for token in definitions["CXX_INCLUDES"]
+    ]
     compiler = "/home1/gongwk/anaconda3/bin/x86_64-conda-linux-gnu-g++"
     compiled = args.out / "mrisurf_mri_gradient_probe.o"
     command = [compiler]
     for key in ("CXX_DEFINES", "CXX_INCLUDES", "CXX_FLAGS"):
         command += definitions[key]
-    command += ["-I", str(args.source / "utils"), "-c", str(patched), "-o", str(compiled)]
+    command += ["-I", str(args.source / "include"), "-I", str(args.source / "utils"), "-c", str(patched), "-o", str(compiled)]
     subprocess.run(command, check=True)
 
     spring_source = (args.source / "utils/mrisurf_compute_dxyz.cpp").read_text()
@@ -317,7 +348,7 @@ def main() -> None:
     spring_command = [compiler]
     for key in ("CXX_DEFINES", "CXX_INCLUDES", "CXX_FLAGS"):
         spring_command += definitions[key]
-    spring_command += ["-I", str(args.source / "utils"), "-c", str(spring_patched), "-o", str(spring_object)]
+    spring_command += ["-I", str(args.source / "include"), "-I", str(args.source / "utils"), "-c", str(spring_patched), "-o", str(spring_object)]
     subprocess.run(spring_command, check=True)
 
     average_source = (args.source / "utils/mrisurf_metricProperties.cpp").read_text()
@@ -348,7 +379,7 @@ def main() -> None:
     average_command = [compiler]
     for key in ("CXX_DEFINES", "CXX_INCLUDES", "CXX_FLAGS"):
         average_command += definitions[key]
-    average_command += ["-I", str(args.source / "utils"), "-c", str(average_patched), "-o", str(average_object)]
+    average_command += ["-I", str(args.source / "include"), "-I", str(args.source / "utils"), "-c", str(average_patched), "-o", str(average_object)]
     subprocess.run(average_command, check=True)
 
     link = shlex.split((args.build / "mris_make_surfaces/CMakeFiles/mris_place_surface.dir/link.txt").read_text())
