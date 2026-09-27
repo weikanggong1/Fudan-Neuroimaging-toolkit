@@ -1,6 +1,6 @@
-"""First optimizer step of FreeSurfer 8.2 white.preaparc from matched inputs.
+"""First-pass prefix of FreeSurfer 8.2 white.preaparc from matched inputs.
 
-This diagnostic stage does not create a complete white surface. It reuses the
+This 1–5 step diagnostic does not create a complete white surface. It reuses the
 independently validated MRI, ripping, border, and collision operators and adds
 the white-specific current-surface self-repulsion force.
 """
@@ -19,6 +19,7 @@ from .place_pial_python import _write_vertices_like
 from .place_surface_border import compute_border_values_first_pass
 from .place_surface_collision import asynchronous_first_step
 from .place_surface_curvature import quadratic_curvature, tangent_basis, two_ring_neighbors
+from .place_surface_decision import pial_step_decision
 from .place_surface_geometry import surface_ras_to_voxel
 from .place_surface_gradient_average import average_signed_gradients
 from .place_surface_intensity import intensity_gradient
@@ -34,19 +35,23 @@ from .place_surface_step import unconstrained_step_with_offsets
 from .place_surface_volume import prepare_placement_volume
 
 
-def first_white_preaparc_step(
+def place_white_preaparc_prefix(
     subject_dir: str | Path, hemi: str, output: str | Path,
-    *, diagnostics: str | Path | None = None,
+    *, steps: int = 1, diagnostics: str | Path | None = None,
 ) -> dict:
-    """Write the first placed mesh and return its stage timing and geometry.
+    """Run one to five first-pass steps and write the current diagnostic mesh.
 
     ``subject_dir`` contains ``surf/H.orig``, the gray/white threshold file,
     and ``mri/{brain.finalsurfs,wm,aseg.presurf}.mgz``. ``output`` is a
     diagnostic FreeSurfer surface, not ``H.white.preaparc``. Optional
     ``diagnostics`` writes a NumPy ``.npz`` of intermediate force and mesh
-    arrays to compare against a pinned-source probe.
+    arrays to compare against a pinned-source probe. ``steps`` is 1–5
+    iterations of the first pass; the output contains coordinates after the
+    last requested step and the return dict includes each step's SSE/RMS.
     """
     started = time.perf_counter()
+    if not 1 <= steps <= 5:
+        raise ValueError("steps must be from 1 to 5")
     if hemi not in ("lh", "rh"):
         raise ValueError("hemi must be lh or rh")
     subject = Path(subject_dir)
@@ -108,75 +113,133 @@ def first_white_preaparc_step(
     prepared_at = time.perf_counter()
     initial_sse, initial_rms = objective(xyz)
     initial_objective_at = time.perf_counter()
-    intensity = intensity_gradient(
-        volume, xyz, normals, ripped, values, border[5], affine,
-        brain.header.get_zooms()[:3], weight=0.2, sigma_global=2.0,
-    )
-    averaged = average_signed_gradients(
-        intensity, faces, ripped, 4, ordered_neighbors=ordered)
-    bucket_offsets, bucket_members = vertex_buckets_current(xyz, ripped)
-    self_repulsion = self_repulsion_gradient(
-        xyz, ripped, bucket_offsets, bucket_members,
-        two_offsets, two_neighbors, weight=5.0,
-    )
-    with_repulsion = np.float32(averaged + self_repulsion)
-    normal = spring_gradient(
-        xyz, normals, faces, ripped, weight=0.3, direction="normal",
-        ordered_neighbors=ordered,
-    )
-    with_normal = np.float32(with_repulsion + normal)
-    curvature = quadratic_curvature(
-        xyz, normals, tangent_basis(normals), ripped, two_offsets, two_neighbors)
-    with_curvature = np.float32(with_normal + np.float32(curvature[:, None] * normals))
-    tangent = spring_gradient(
-        xyz, normals, faces, ripped, weight=0.3, direction="tangent",
-        ordered_neighbors=ordered,
-    )
-    gradient = np.float32(with_curvature + tangent)
-    gradient_at = time.perf_counter()
-    gradient_before_collision = gradient.copy() if diagnostics is not None else None
-    proposed, offsets = unconstrained_step_with_offsets(xyz, gradient, ripped, dt=0.5)
-    placed, _ = asynchronous_first_step(
-        xyz, faces, proposed, ripped, fast=True, offsets=offsets,
-        accepted_offsets=gradient, ordered_neighbors=ordered,
-    )
-    collision_at = time.perf_counter()
-    step_sse, step_rms = objective(placed)
-    step_objective_at = time.perf_counter()
+    current = xyz.copy()
+    last_sse, last_rms = initial_sse, initial_rms
+    cropped = np.zeros(len(xyz), dtype=np.int32)
+    dt, reductions = 0.5, 0
+    gradient_seconds = collision_seconds = objective_seconds = 0.0
+    records: list[dict] = []
+    snapshots: dict[str, np.ndarray | float] = {
+        "initial": xyz, "ripped": ripped, "target_values": values,
+        "initial_sse": initial_sse, "initial_rms": initial_rms,
+    } if diagnostics is not None else {}
+    for step in range(1, steps + 1):
+        stage_start = time.perf_counter()
+        normals = initial_vertex_normals(current, faces)
+        intensity = intensity_gradient(
+            volume, current, normals, ripped, values, border[5], affine,
+            brain.header.get_zooms()[:3], weight=0.2, sigma_global=2.0,
+        )
+        averaged = average_signed_gradients(
+            intensity, faces, ripped, 4, ordered_neighbors=ordered)
+        bucket_offsets, bucket_members = vertex_buckets_current(current, ripped)
+        self_repulsion = self_repulsion_gradient(
+            current, ripped, bucket_offsets, bucket_members,
+            two_offsets, two_neighbors, weight=5.0,
+        )
+        with_repulsion = np.float32(averaged + self_repulsion)
+        normal = spring_gradient(
+            current, normals, faces, ripped, weight=0.3, direction="normal",
+            ordered_neighbors=ordered,
+        )
+        with_normal = np.float32(with_repulsion + normal)
+        curvature = quadratic_curvature(
+            current, normals, tangent_basis(normals), ripped, two_offsets, two_neighbors)
+        with_curvature = np.float32(with_normal + np.float32(curvature[:, None] * normals))
+        tangent = spring_gradient(
+            current, normals, faces, ripped, weight=0.3, direction="tangent",
+            ordered_neighbors=ordered,
+        )
+        gradient = np.float32(with_curvature + tangent)
+        gradient_seconds += time.perf_counter() - stage_start
+        before_collision = gradient.copy() if diagnostics is not None else None
+        if diagnostics is not None:
+            snapshots[f"step{step}_initial"] = current.copy()
+            snapshots[f"step{step}_tangential_spring"] = before_collision
+        stale_trial = None
+        for trial in range(3):
+            trial_start = time.perf_counter()
+            proposed, offsets = unconstrained_step_with_offsets(current, gradient, ripped, dt=dt)
+            placed, _ = asynchronous_first_step(
+                current, faces, proposed, ripped, fast=True, offsets=offsets,
+                accepted_offsets=gradient, stale_mht_trial=stale_trial,
+                ordered_neighbors=ordered,
+            )
+            collision_seconds += time.perf_counter() - trial_start
+            blocked = np.any(proposed != current, axis=1) & np.all(placed == current, axis=1)
+            cropped = np.where(ripped, cropped, np.where(blocked, cropped + 1, 0)).astype(np.int32)
+            objective_start = time.perf_counter()
+            step_sse, step_rms = objective(placed)
+            objective_seconds += time.perf_counter() - objective_start
+            next_dt, reductions, reduced, rejected, stop = pial_step_decision(
+                last_sse, last_rms, step_sse, step_rms, dt, reductions)
+            dt = next_dt
+            if rejected:
+                stale_trial = placed
+                if stop:
+                    raise RuntimeError(f"white prefix rejected step {step} after {trial + 1} trials")
+                continue
+            break
+        else:
+            raise RuntimeError(f"white prefix rejected all trials at step {step}")
+        current = placed
+        last_sse, last_rms = step_sse, step_rms
+        records.append({
+            "step": step, "trials": trial + 1, "sse": step_sse, "rms": step_rms,
+            "next_dt": dt, "reductions": reductions,
+            "held_vertices": int(np.count_nonzero(blocked)),
+        })
+        if diagnostics is not None:
+            snapshots[f"step{step}_after_collision"] = current.copy()
+            snapshots[f"step{step}_sse"] = step_sse
+            snapshots[f"step{step}_rms"] = step_rms
+            if step == 1:
+                snapshots.update(
+                    intensity=intensity, averaged=averaged, self_repulsion=self_repulsion,
+                    pre_normal_spring=with_repulsion, normal_spring=with_normal,
+                    curvature=with_curvature, tangential_spring=before_collision,
+                    proposed=proposed, after_collision=current.copy(),
+                    step_sse=step_sse, step_rms=step_rms,
+                )
+        if stop:
+            break
     output.parent.mkdir(parents=True, exist_ok=True)
-    _write_vertices_like(orig, output, placed)
+    _write_vertices_like(orig, output, current)
     if diagnostics is not None:
         diagnostic_path = Path(diagnostics)
         diagnostic_path.parent.mkdir(parents=True, exist_ok=True)
-        np.savez_compressed(
-            diagnostic_path, initial=xyz, ripped=ripped, target_values=values,
-            intensity=intensity, averaged=averaged, self_repulsion=self_repulsion,
-            pre_normal_spring=with_repulsion, normal_spring=with_normal,
-            curvature=with_curvature, tangential_spring=gradient_before_collision,
-            proposed=proposed, after_collision=placed,
-            initial_sse=initial_sse, initial_rms=initial_rms,
-            step_sse=step_sse, step_rms=step_rms,
-        )
+        np.savez_compressed(diagnostic_path, **snapshots)
     finished_at = time.perf_counter()
     return {
-        "output": str(output), "hemisphere": hemi, "steps": 1,
+        "output": str(output), "hemisphere": hemi, "steps": len(records),
         "vertices": int(len(xyz)), "faces": int(len(faces)),
         "ripped_vertices": int(np.count_nonzero(ripped)),
-        "held_vertices": int(np.count_nonzero(np.any(proposed != xyz, axis=1) &
-                                              np.all(placed == xyz, axis=1))),
+        "held_vertices": records[-1]["held_vertices"],
         "initial_sse": initial_sse, "initial_rms": initial_rms,
-        "step_sse": step_sse, "step_rms": step_rms,
+        "step_sse": last_sse, "step_rms": last_rms,
+        "per_step": records,
         "seconds": finished_at - started,
         "stage_seconds": {
             "prepare": prepared_at - started,
             "initial_objective": initial_objective_at - prepared_at,
-            "gradient": gradient_at - initial_objective_at,
-            "collision": collision_at - gradient_at,
-            "step_objective": step_objective_at - collision_at,
-            "write": finished_at - step_objective_at,
+            "gradient": gradient_seconds,
+            "collision": collision_seconds,
+            "step_objective": objective_seconds,
+            "write": finished_at - initial_objective_at - gradient_seconds
+                     - collision_seconds - objective_seconds,
         },
     }
 
+
+def first_white_preaparc_step(
+    subject_dir: str | Path, hemi: str, output: str | Path,
+    *, diagnostics: str | Path | None = None,
+) -> dict:
+    """Run one diagnostic white optimizer step without final surface cleanup."""
+    return place_white_preaparc_prefix(
+        subject_dir=subject_dir, hemi=hemi, output=output,
+        steps=1, diagnostics=diagnostics,
+    )
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -184,9 +247,11 @@ def main() -> None:
     parser.add_argument("hemi", choices=("lh", "rh"))
     parser.add_argument("output", type=Path)
     parser.add_argument("--diagnostics", type=Path)
+    parser.add_argument("--steps", type=int, choices=range(1, 6), default=1)
     args = parser.parse_args()
-    print(json.dumps(first_white_preaparc_step(
-        args.subject_dir, args.hemi, args.output, diagnostics=args.diagnostics,
+    print(json.dumps(place_white_preaparc_prefix(
+        subject_dir=args.subject_dir, hemi=args.hemi, output=args.output,
+        steps=args.steps, diagnostics=args.diagnostics,
     ), indent=2))
 
 
