@@ -1,3 +1,3 @@
 # ProbtrackX module
 
-`TorchProbtrackX` traces volume seeds through bedpostX orientation posterior samples and writes a seed-to-voxel density image or a directed ROI-by-ROI count matrix. All inputs must already share the diffusion grid. See [the full guide](../../../docs/probtrackx/README.md).
+`TorchProbtrackX` traces volume seeds through BEDPOSTX orientation posterior samples. On a shared diffusion grid it writes seed-to-voxel density, sparse voxel-to-voxel matrices, voxel-to-target ROI maps, and directed ROI-by-ROI matrices. See [the full guide](../../../docs/probtrackx/README.md) for inputs, output files, official command equivalents, and real DWI benchmarks.

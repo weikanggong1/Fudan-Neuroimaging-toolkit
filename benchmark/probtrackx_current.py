@@ -83,7 +83,7 @@ def main():
                      "rseed": 20260927, "fnit_batch_size": 2048,
                      "cpu_threads": 8},
         "source_sha256": {name: hashlib.sha256((args.source_dir / name).read_bytes()).hexdigest()
-                          for name in ("pipeline.py", "_triton.py", "cli.py")},
+                          for name in ("pipeline.py", "_triton.py", "cli.py", "matrix_io.py")},
         "cases": {},
     }
     for name, (fsl_name, fnit_name) in names.items():

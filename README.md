@@ -21,7 +21,7 @@
 | dMRI | PyTorch MMORF (`run_mmorf`) | T1 scalar 与 DTI tensor 联合估计一个 reference-voxel warp | [MMORF 文档](docs/mmorf/README.md) |
 | dMRI | dMRI 参数图 pipeline | optional TOPUP → EDDY → DTIFIT/NODDI → TBSS 或 MMORF；统一九图输出 | [端到端文档](docs/dmri_pipeline/README.md) |
 | dMRI | PyTorch BEDPOSTX | 估计体素内纤维方向及不确定性，供概率追踪使用 | [BEDPOSTX 文档](docs/bedpostx/README.md) |
-| dMRI | PyTorch ProbtrackX | 种子到体素的概率追踪与脑区间连接矩阵 | [ProbtrackX 文档](docs/probtrackx/README.md) |
+| dMRI | PyTorch ProbtrackX | seed→voxel 密度、稀疏 voxel×voxel 矩阵、有向 ROI×ROI 连接矩阵 | [ProbtrackX 文档](docs/probtrackx/README.md) |
 | dMRI | UKBConnectome | 已校正 DWI 和 T1w 到四张结构连接矩阵；追踪和 SIFT2 为近似 | [connectome 文档](docs/connectome/README.md) |
 | sMRI | recon-all（Python/CUDA + Conda C++） | T1w 到核心分割、双侧皮层表面、顶点指标和脑区统计 | [recon-all 文档](docs/recon_all/README.md) |
 | fMRI | MS-HBM 17 网络 | fsLR32k 静息态时序到个体网络划分，纯 CPU | [MS-HBM 文档](src/fnit/mshbm/README.md) |

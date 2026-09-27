@@ -24,7 +24,8 @@ export FSLOUTPUTTYPE=NIFTI_GZ PYTHONPATH="$source_dir${PYTHONPATH:+:$PYTHONPATH}
 export OMP_NUM_THREADS=8 MKL_NUM_THREADS=8
 source_files=("$source_dir/fnit/probtrackx/pipeline.py"
               "$source_dir/fnit/probtrackx/_triton.py"
-              "$source_dir/fnit/probtrackx/cli.py")
+              "$source_dir/fnit/probtrackx/cli.py"
+              "$source_dir/fnit/probtrackx/matrix_io.py")
 sha256sum "${source_files[@]}" > "$out/source.sha256.before"
 for name in genu_cc cst_right cst_left slf_right slf_left; do
   printf '%s\n' "$seeds/seed_$name.nii.gz"
