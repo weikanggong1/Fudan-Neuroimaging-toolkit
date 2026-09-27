@@ -255,12 +255,37 @@ def _pial_from_cortex(white: np.ndarray, faces: np.ndarray,
     return (white + normal * distance[:, None]).astype(np.float32), distance
 
 
+def _run_white_mri_chain(subject: Path, weights: Path, assets: Path,
+                         threads: int, stage) -> None:
+    from .finalsurfs_python import run_finalsurfs
+    from .mni_aux_chain import run_mni_aux_chain
+
+    stage("mni_aux", run_mni_aux_chain, subject, weights, assets,
+          device="cpu", threads=threads)
+    stage("brain_finalsurfs", run_finalsurfs, subject, device="cpu")
+
+
+def _place_preaparc_and_smooth(subject: Path, hemi: str, binary: Path,
+                               assets: Path, threads: int) -> dict:
+    from .smooth_surface_python import smooth_surface
+    from .white_preaparc_conda import run_white_preaparc
+
+    report = run_white_preaparc(subject, hemi, binary, assets, threads=threads)
+    tick = time.perf_counter()
+    surf = subject / "surf"
+    smooth_surface(surf / f"{hemi}.white.preaparc", surf / f"{hemi}.smoothwm",
+                   iterations=3, device="cpu")
+    report["smoothwm_seconds"] = time.perf_counter() - tick
+    return report
+
+
 def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
                   aseg: np.ndarray, *, device: str, threads: int = 4,
                   native_topology_binary: Path | None = None,
                   native_surface_metrics_binary: Path | None = None,
                   native_inflate_binary: Path | None = None,
                   native_registration: bool = False,
+                  native_white_preaparc_binary: Path | None = None,
                   assets: Path | None = None) -> dict:
     from .extract_main_component_python import extract_main_component
     from .pretess_python import pretess_mgh
@@ -296,8 +321,15 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
             native_sphere_seconds = pre_sphere_seconds
     else:
         shutil.copyfile(orig, surf / f"{hemi}.orig")
-    smooth_surface(surf / f"{hemi}.orig", smoothwm, device=device)
-    shutil.copyfile(smoothwm, surf / f"{hemi}.white.preaparc")
+    white_preaparc_report = None
+    if native_white_preaparc_binary is not None:
+        if assets is None:
+            raise ValueError("assets are required for native white pre-aparc")
+        white_preaparc_report = _place_preaparc_and_smooth(
+            subject, hemi, native_white_preaparc_binary, assets, threads)
+    else:
+        smooth_surface(surf / f"{hemi}.orig", smoothwm, device=device)
+        shutil.copyfile(smoothwm, surf / f"{hemi}.white.preaparc")
     shutil.copyfile(smoothwm, surf / f"{hemi}.white")
     if native_topology_binary is None:
         shutil.copyfile(smoothwm, surf / f"{hemi}.smoothwm.nofix")
@@ -346,7 +378,9 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
         curvature_map(surf / f"{hemi}.white", surf / f"{hemi}.curv", device=device)
         curvature_map(surf / f"{hemi}.pial", surf / f"{hemi}.curv.pial", device=device)
     from .surface_roi_curvature_gpu import principal_curvatures
-    for surface, prefix in (("white", "white.preaparc"),
+    preaparc_curvature_source = (
+        "white.preaparc" if native_white_preaparc_binary is not None else "white")
+    for surface, prefix in ((preaparc_curvature_source, "white.preaparc"),
                             ("inflated", "inflated")):
         xyz, mesh = fs.read_geometry(str(surf / f"{hemi}.{surface}"))
         k1, k2 = principal_curvatures(xyz, mesh, device=device)
@@ -381,8 +415,10 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
             "native_metric_seconds": native_metric_seconds,
             "native_sphere_seconds": native_sphere_seconds,
             "standard_sphere_report": standard_sphere_report,
+            "white_preaparc_report": white_preaparc_report,
             "approximations": approximations + [
-                "white-from-smoothed-tessellation", "pial-normal-ray",
+                ("white-from-preaparc-smooth-only" if white_preaparc_report
+                 else "white-from-smoothed-tessellation"), "pial-normal-ray",
                 *sphere_approximations, registration_approximation]}
 
 
@@ -455,7 +491,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          native_topology: bool = False,
                          native_surface_metrics: bool = False,
                          native_registration: bool = False,
-                         native_sphere: bool = False) -> dict:
+                         native_sphere: bool = False,
+                         native_white_preaparc: bool = False) -> dict:
     """Reconstruct one T1 into FreeSurfer-style mri/surf/label/stats folders.
 
     Return the same run-report dict written to fnit-native-free-run.json:
@@ -486,11 +523,19 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         raise ValueError("native_registration requires native_topology")
     if native_sphere and not native_topology:
         raise ValueError("native_sphere requires native_topology")
+    if native_white_preaparc and not native_topology:
+        raise ValueError("native_white_preaparc requires native_topology")
+    if native_white_preaparc:
+        from .mni_aux_chain import validate_mni_aux_assets
+
+        validate_mni_aux_assets(weights, assets)
     native_em = _native_em_register_binary(native_bin_dir)
     topology_binary = (_native_topology_binary(native_bin_dir)
                        if native_topology else None)
     metrics_binary = (_native_surface_metrics_binary(native_bin_dir)
                       if native_surface_metrics else None)
+    white_binary = ((metrics_binary or _native_surface_metrics_binary(native_bin_dir))
+                    if native_white_preaparc else None)
     inflate_binary = (_native_inflate_binary(native_bin_dir)
                       if native_sphere else None)
     wm_segment_binary = _native_binary(native_bin_dir, "mri_segment")
@@ -515,6 +560,12 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         "implementation": "Python + Conda C++",
         "mri_segment_sha256": wm_segment_binary[1],
         "mri_edit_wm_with_aseg_sha256": wm_edit_binary[1]}
+    report["white_preaparc"] = (
+        {"implementation": "Python MNI/aux/finalsurfs + Conda C++ placement",
+         "binary": str(white_binary[0]), "sha256": white_binary[1],
+         "final_smoothwm": "Python 3 passes on CPU",
+         "final_white_pial": "approximate"}
+        if white_binary else {"implementation": "smoothed orig copy"})
     report["surface_metrics"] = (
         {"implementation": "native-c++", "binary": str(metrics_binary[0]),
          "sha256": metrics_binary[1],
@@ -621,6 +672,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
           mri / "aseg.presurf.mgz", lta,
           assets / "SubCorticalMassLUT.txt", mri / "filled.mgz",
           subject / "scripts/ponscc.cut.log")
+    if native_white_preaparc:
+        _run_white_mri_chain(subject, weights, assets, threads, stage)
     for hemi in ("lh", "rh"):
         result = stage(f"surface_{hemi}", _surface_pair, subject, hemi,
                        mri / "filled.mgz", mri / "norm.mgz", aseg,
@@ -629,7 +682,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                        native_surface_metrics_binary=metrics_binary[0] if metrics_binary else None,
                        native_inflate_binary=inflate_binary[0] if inflate_binary else None,
                        native_registration=native_registration,
-                       assets=assets if topology_binary or metrics_binary else None)
+                       native_white_preaparc_binary=white_binary[0] if white_binary else None,
+                       assets=assets if topology_binary or metrics_binary or white_binary else None)
         report.setdefault("surfaces", {})[hemi] = result
 
     if native_registration:
@@ -691,6 +745,7 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--native-surface-metrics", action="store_true")
     parser.add_argument("--native-registration", action="store_true")
     parser.add_argument("--native-sphere", action="store_true")
+    parser.add_argument("--native-white-preaparc", action="store_true")
     args = parser.parse_args(argv)
     report = run_recon_all_python(args.t1, args.subject_dir, args.weights_dir,
                                   args.assets_dir, device=args.device,
@@ -699,7 +754,8 @@ def main(argv: list[str] | None = None) -> None:
                                   native_topology=args.native_topology,
                                   native_surface_metrics=args.native_surface_metrics,
                                   native_registration=args.native_registration,
-                                  native_sphere=args.native_sphere)
+                                  native_sphere=args.native_sphere,
+                                  native_white_preaparc=args.native_white_preaparc)
     print(json.dumps(report, indent=2))
 
 

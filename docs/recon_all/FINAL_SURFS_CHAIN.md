@@ -60,9 +60,8 @@ is one byte shorter in a trailing provenance tag: the native replay and the
 saved official output have an extra null byte after `UNKNOWN`. This footer
 does not enter voxel or surface computations.
 
-The production recon-all runner has not yet been rewired to use this stage.
-It must generate the subject-specific MNI152 affine LTA and both auxiliary
-segmentations first; their Python modules exist, but that connected chain
-has not passed end-to-end comparison. Surface placement then requires the
-actual finalsurfs output and ordered `orig.premesh`/`orig` before running
-autodetected thresholds and `white.preaparc` placement.
+The opt-in `--native-white-preaparc` runner now invokes this function after
+generating the subject-specific MNI152 LTA and both auxiliary segmentations.
+Its default path does not. The connected prefix and later cortical measures
+still need separate end-to-end validation; the paired frozen-input result
+above does not establish whole-subject morphometry parity.

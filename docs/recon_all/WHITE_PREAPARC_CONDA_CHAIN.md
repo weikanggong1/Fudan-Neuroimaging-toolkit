@@ -127,8 +127,8 @@ placement optimizer. The [source-level diagnosis](../../validation/recon_all/pyt
 tracks the first visible force difference before accepted step 6 and
 explains why current compiler flag trials do not fix it.
 
-This wrapper is not yet wired into the T1 runner. Its production use
-requires the separate candidate MNI152 affine, MCA/venous-sinus and
-finalsurfs chain to be integrated with the exact topology stages. Final
-`white` also requires cortical labels and annotations after this
-pre-aparc stage.
+The opt-in `--native-white-preaparc` runner now invokes this wrapper after
+the CPU MNI/auxiliary/finalsurfs stages and exact topology repair, then
+smooths its output for three CPU passes. The default runner path does not.
+The final `white` remains a copy of that smoothwm surface until cortical
+labels, annotations and the final white optimizer are integrated.

@@ -62,6 +62,6 @@ are not part of the Python package.
 
 The [real-T1 comparison](../../validation/recon_all/python_gpu_port/mni_aux_connected_20260927/README.md)
 reports the candidate LTA, both label maps, and the downstream
-brain.finalsurfs.mgz against the saved FreeSurfer reconstruction. This
-module is a callable stage; the whole-subject recon-all scheduler still
-requires integration and a fresh end-to-end parity run.
+brain.finalsurfs.mgz against the saved FreeSurfer reconstruction. The opt-in `--native-white-preaparc` whole-subject scheduler now calls this
+module on CPU; the default path does not. A fresh whole-subject parity run
+remains necessary.

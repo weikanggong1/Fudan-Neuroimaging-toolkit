@@ -19,6 +19,7 @@ def run_recon_all_python_batch(
     native_surface_metrics: bool = False,
     native_registration: bool = False,
     native_sphere: bool = False,
+    native_white_preaparc: bool = False,
 ) -> list[dict]:
     """Run one subject per device; each reconstruction uses a separate Python process.
 
@@ -38,6 +39,8 @@ def run_recon_all_python_batch(
         raise ValueError("native_registration requires native_topology")
     if native_sphere and not native_topology:
         raise ValueError("native_sphere requires native_topology")
+    if native_white_preaparc and not native_topology:
+        raise ValueError("native_white_preaparc requires native_topology")
     weights, assets = Path(weights_dir).resolve(), Path(assets_dir).resolve()
     if not weights.is_dir() or not assets.is_dir():
         raise FileNotFoundError("weights_dir and assets_dir must exist")
@@ -74,6 +77,8 @@ def run_recon_all_python_batch(
                 command.append("--native-registration")
             if native_sphere:
                 command.append("--native-sphere")
+            if native_white_preaparc:
+                command.append("--native-white-preaparc")
             completed = subprocess.run(command, capture_output=True, text=True)
             if completed.returncode:
                 results.append((index, None, completed.stderr.strip()))

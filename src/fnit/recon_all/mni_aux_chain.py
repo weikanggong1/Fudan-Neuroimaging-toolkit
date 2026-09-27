@@ -18,6 +18,25 @@ from .aux_seg import MCA_MODEL, VSINUS_MODEL, mri_mcadura_seg, mri_vsinus_seg
 TEMPLATE_DIR = Path("average/mni_icbm152_nlin_asym_09c/reg-targets")
 
 
+def validate_mni_aux_assets(weights_dir: str | Path,
+                            assets_dir: str | Path) -> None:
+    """Require the three model weights, two MNI images and three priors."""
+    weights, assets = Path(weights_dir), Path(assets_dir)
+    required = (
+        weights / "synthmorph.affine.2.h5", weights / MCA_MODEL,
+        weights / VSINUS_MODEL,
+        *(assets / TEMPLATE_DIR / f"mni152.1.0mm{suffix}.nii.gz"
+          for suffix in (".cropped", "")),
+        *(assets / "average" /
+          f"mca-dura.prior.warp.mni152.1.0mm.{hemi}.nii.gz"
+          for hemi in ("lh", "rh")),
+        assets / "average/vsinus.no-sp.prior.mni152.1.0mm.mgz",
+    )
+    for file in required:
+        if not file.is_file():
+            raise FileNotFoundError(file)
+
+
 def _crop_nonzero(image: Path, output: Path) -> Path:
     """Match the conformed-T1 bounding crop from mri_mask -bb 3."""
     source = nib.load(str(image))
@@ -92,12 +111,8 @@ def run_mni_aux_chain(subject_dir: str | Path, weights_dir: str | Path,
     mri = subject / "mri"
     weights = Path(weights_dir)
     assets = Path(assets_dir)
-    required = (mri / "nu.mgz", mri / "synthseg.rca.mgz",
-                weights / MCA_MODEL, weights / VSINUS_MODEL,
-                assets / "average/mca-dura.prior.warp.mni152.1.0mm.lh.nii.gz",
-                assets / "average/mca-dura.prior.warp.mni152.1.0mm.rh.nii.gz",
-                assets / "average/vsinus.no-sp.prior.mni152.1.0mm.mgz")
-    for file in required:
+    validate_mni_aux_assets(weights, assets)
+    for file in (mri / "nu.mgz", mri / "synthseg.rca.mgz"):
         if not file.is_file():
             raise FileNotFoundError(file)
     lta = register_mni152_affine(subject, weights, assets,
