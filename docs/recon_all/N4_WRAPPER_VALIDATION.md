@@ -1,54 +1,44 @@
-# Python N4 后处理与完整阶段对照
+# N4 后处理：`nu0.mgz` 到 `nu.mgz`
 
-FreeSurfer 8.2 使用 `mri_nu_correct.mni --ants-n4` 生成 `nu.mgz`。Python 实现先运行 [`n4_sitk.py`](../../src/fnit/recon_all/n4_sitk.py)，再由 [`n4_wrapper.py`](../../src/fnit/recon_all/n4_wrapper.py) 完成全局均值比值的五位小数处理、`mris_calc` 的 float32 缩放、以 Talairach 为中心的 50 mm 强度直方图，以及 `mri_make_uchar` 的 1%/90% 映射。它还保留 `mri_add_xform_to_header` 后的 MGH 头和 XFORM 元数据。此阶段在 CPU 上使用 Python 和编译版 SimpleITK，已接入当前 `run_recon_all_python`。最新 v3 同 T1 连通运行的 `nu.mgz` 与归档官方结果在全部 16,777,216 个体素、数据类型、仿射和前 284 字节 MGH 头上相同，见 [v3 汇总](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/v3_e2e_20260927/benchmark_summary.json)。
-
-移植依据为固定的 FreeSurfer [wrapper 脚本](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/scripts/mri_nu_correct.mni)和 [`mri_make_uchar` 源码](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/mri_convert/mri_make_uchar.cpp)。
+FreeSurfer 8.2 的 `mri_nu_correct.mni --ants-n4` 在 N4 后恢复全局均值，再按 Talairach 中心 50 mm 球内的强度直方图映射到 uchar。FNIT 先用[仓库内 Conda C++ N4](N4_ITK_CONDA.md)生成 `nu0.mgz`，再由 [`n4_wrapper.py`](../../src/fnit/recon_all/n4_wrapper.py) 执行这一步。固定官方依据为 [`mri_nu_correct.mni`](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/scripts/mri_nu_correct.mni) 和 [`mri_make_uchar.cpp`](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/mri_convert/mri_make_uchar.cpp)。
 
 ## 输入、输出与调用
 
-`make_nu(original_file, n4_file, tal_xfm_file, output_file)` 只执行 N4 之后的步骤；四个参数依次为原始 `orig.mgz`、已校正的 `nu0.mgz`、Talairach `transforms/talairach.xfm` 和输出 `nu.mgz`。它从原始影像保留几何及 XFORM 尾部，输出 uchar MGH/MGZ。
+`make_nu(original_file, n4_file, tal_xfm_file, output_file) -> tuple[float, tuple[int, int]]` 的输入与输出：
+
+| 参数或返回值 | 含义 |
+| --- | --- |
+| `original_file` | 原始三维 `orig.mgz`；提供体素均值、几何和 MGH 尾部。 |
+| `n4_file` | 已完成 N4 的三维 uchar `nu0.mgz`。 |
+| `tal_xfm_file` | `transforms/talairach.xfm`；用于定位 50 mm 强度直方图球。 |
+| `output_file` | 写入三维 uchar `nu.mgz` 的路径；几何和 MGH 尾部来自 `original_file`。 |
+| 返回 `scale, bins` | `scale` 是输入/校正图全局均值比；`bins` 为直方图首个及白质分箱编号。 |
 
 ```python
 from fnit.recon_all.n4_wrapper import make_nu
 
 scale, bins = make_nu(
-    original_file="orig.mgz",  # 原始输入影像及几何来源
-    n4_file="nu0.mgz",  # N4 已校正的中间图
-    tal_xfm_file="transforms/talairach.xfm",  # Talairach 变换
-    output_file="nu.mgz",  # 最终 uchar 强度图路径
+    original_file="/data/sub01/mri/orig.mgz",  # 原始 T1
+    n4_file="/data/sub01/mri/tmp/nu0.mgz",  # N4 子步输出
+    tal_xfm_file="/data/sub01/mri/transforms/talairach.xfm",  # Talairach 变换
+    output_file="/data/sub01/mri/nu.mgz",  # 最终 uchar 图
 )
 ```
 
-函数返回 `scale`（全局均值缩放系数）与 `bins`（直方图首个/白质分箱的二元组）；最终影像写入 `output_file`。若从已有 `nu0.mgz` 用命令行重放后处理：
+同一步的命令行：
 
 ```bash
 python -m fnit.recon_all.n4_wrapper \
-  --orig orig.mgz --nu0 nu0.mgz --tal transforms/talairach.xfm --out nu.mgz
+  --orig /data/sub01/mri/orig.mgz \
+  --nu0 /data/sub01/mri/tmp/nu0.mgz \
+  --tal /data/sub01/mri/transforms/talairach.xfm \
+  --out /data/sub01/mri/nu.mgz
 ```
 
-`--orig`、`--nu0`、`--tal`、`--out` 分别对应上述四个 Python 参数，均为必填；命令打印 `scale` 和 `histogram_bins`。官方完整阶段使用 `mri_nu_correct.mni --ants-n4`，并按 recon-all 顺序运行 `mri_add_xform_to_header -c`。
+官方完整阶段命令为 `mri_nu_correct.mni --ants-n4`，按 recon-all 顺序还运行 `mri_add_xform_to_header -c`。FNIT 完整入口自动调用 `make_nu`，并在 `fnit-native-free-run.json` 中记录 `nu` 阶段墙钟。
 
-## 冻结真实 T1 的逐字节验证
+## 真实 T1 比较
 
-固定输入为主验证中已完成被试 sub01 的 `orig.mgz`。其压缩文件 SHA-256 为 `7dde820d02968c9fe18056a9cc5cc776c1a6395c48dc4d3a47eb6ba9c399f518`；256³ 解码 uchar 体素 SHA-256 为 `84da8a990ef60c6ba30a4ddfbaba597a90e32bca720f96c6d741fcb08c504825`。原生程序组标识为 FreeSurfer 8.2.0-1、构建 `d932c45`。headcw 的两次新运行使用同一输入、Talairach 变换及 wrapper 参数 `--uchar ... --n 2 --ants-n4`。原生命令之后按 recon-all 顺序运行 `mri_add_xform_to_header -c`。
+固定 sub01 的 256³ `orig.mgz` 输入 SHA-256 为 `d79723f94bfc149ff36c89094a3d734b888a03cecbc32dc57a22992e8a5e817f`。当前 Conda C++ N4 输出的 `nu0.mgz` 有 9 个体素比官方低 1；送入本函数后，最终 `nu.mgz` 有 **8 / 16,777,216** 个体素与官方不同，最大差 2；`scale=1.1375598934654052`，`bins=(4, 45)` 与官方一致，仿射和 MGH 前 284 字节一致。详情及哈希见[当前 N4 报告](../../validation/recon_all/python_gpu_port/n4_itk_conda_20260927/README.md)。它尚未通过完整重建的下游皮层指标验收。
 
-| 新生成的输出 | Python 与官方对照 |
-| --- | --- |
-| 最终 `nu.mgz` 形状/类型 | 双方均为 256³ / uchar |
-| 差异体素 | 0 / 16,777,216 |
-| 仿射及前 284 字节 MGH 头 | 相同 |
-| 包含 XFORM 尾部的完整解压 MGH 字节 | **完全一致** |
-| 完整解压 MGH SHA-256 | `6370e1ab0c888ec4d574a244ed745c640442c6ff6a2b54093d6353e89af07dc7` |
-| 均值缩放与直方图分箱 | 两者均为 `1.13755989346540527642`、`(4, 45)` |
-
-在参照版 `orig.mgz` 上，[`normalize_n4_footer`](../../src/fnit/recon_all/n4_wrapper.py) 还独立核对了 `nu0.mgz` 的元数据：规范化后，完整解压 `nu0.mgz` 与官方 N4 输出逐字节一致。这份参照输入的体素 SHA 和前 284 字节 MGH 头与主输入相同，但 XFORM 尾部路径不同（1,346 与 1,398 字节）；不能跨两条输入路径做文件字节比较。规范化修正一处已知 FreeSurfer XFORM `UNKNOWN` 标签编码：源长度含末尾零字节为 8，原生 N4 输出长度为 7。
-
-较早 gpucw1 整例存档的 `nu.mgz` 相对 headcw 的**两次新运行**均差 34 个体素（最大绝对差 2）；其中 9 个体素高 1、25 个高 2。存档日志的缩放和直方图映射与新官方运行相同。将新 N4 uchar 图在这 34 处各增加 1，可重现全部存档最终值。原 wrapper 已删除存档 `nu0.mgz`，现有文件不足以确定上游首因。因此，Python 输出的逐字节验证参照是同输入的新官方运行，而非旧存档 `nu.mgz`。
-
-## 耗时与范围
-
-headcw 上一次完整阶段运行：原生 `mri_nu_correct.mni` 157.84 s，加上 `mri_add_xform_to_header` 0.26 s；Python N4、尾部规范化和最终 `nu.mgz` 生成合计 125.56 s。两者各测一次墙钟，均未用 GPU。原生脚本涵盖 N4 和全部后处理；Python 时间包含 SimpleITK 导入与文件 I/O。[N4_SITK_VALIDATION.md](N4_SITK_VALIDATION.md) 的单独 N4 计时来自其他运行，不能与这里相加。
-
-只计后处理时，headcw 上以同一张冻结 `nu0.mgz` 交替配对运行三次。原生中位数为 **14.71 s**，包含 `mri_binarize`、两次 `mri_segstats`、`mris_calc`、`mri_convert`、`mri_make_uchar`、`mri_add_xform_to_header`；常驻 Python 函数中位数为 **0.99 s**。三对输出的完整解压 MGH 均逐字节一致。原生各子步中位数依次为 1.34、2.32、3.10、2.02、2.19、3.34、0.26 s。Python 计时不含模块导入，原生计时包含每次子进程启动。原始[配对报告](../../validation/recon_all/python_gpu_port/n4_wrapper_headcw_report.json)保存每次耗时与输出哈希。
-
-仅后处理的配对 benchmark 可用 [`benchmark_n4_wrapper.py`](../../validation/recon_all/python_gpu_port/benchmark_n4_wrapper.py) 复现；脚本不重新运行 N4。远端阶段日志和字节对照文件保存在 headcw 的 `/tmp/reconall_n4_sub01_20260925/`。[`test_n4_wrapper.py`](../../tests/recon_all/test_n4_wrapper.py) 的两项针对性测试已通过。
+为单独验证后处理函数，既有真实 T1 试验把**同一张**已校正 `nu0.mgz` 分别送入官方后处理及 Python 函数，配对三次；输出的完整解压 MGH 逐字节相同。官方多命令流程墙钟中位数 14.71 秒，常驻 Python 函数中位数 0.99 秒，见[配对原始记录](../../validation/recon_all/python_gpu_port/n4_wrapper_headcw_report.json)。这项对照不包含 N4 计算，不应与上述完整 N4 时间相加或作为当前整例提速依据。

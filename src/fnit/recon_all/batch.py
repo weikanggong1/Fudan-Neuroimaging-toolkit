@@ -13,7 +13,6 @@ import sys
 def run_recon_all_python_batch(
     jobs: list[dict], weights_dir: str | Path, assets_dir: str | Path,
     *, devices: tuple[str, ...] = ("cuda:0",), threads: int = 4,
-    n4_python: str | Path | None = None,
     native_bin_dir: str | Path | None = None,
     native_topology: bool = False,
     native_surface_metrics: bool = False,
@@ -65,8 +64,6 @@ def run_recon_all_python_batch(
                        str(t1), str(subject), "--weights-dir", str(weights),
                        "--assets-dir", str(assets), "--device", device,
                        "--threads", str(threads)]
-            if n4_python is not None:
-                command += ["--n4-python", str(n4_python)]
             if native_bin_dir is not None:
                 command += ["--native-bin-dir", str(Path(native_bin_dir).resolve())]
             if native_topology:

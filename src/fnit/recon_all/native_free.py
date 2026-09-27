@@ -13,7 +13,6 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
-import sys
 import time
 
 import nibabel as nib
@@ -498,7 +497,6 @@ def _segment_callosum(mri: Path) -> dict[str, float | int]:
 def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          weights_dir: str | Path, assets_dir: str | Path,
                          *, device: str = "cuda:0", threads: int = 4,
-                         n4_python: str | Path | None = None,
                          native_bin_dir: str | Path | None = None,
                          native_topology: bool = False,
                          native_surface_metrics: bool = False,
@@ -542,6 +540,7 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
 
         validate_mni_aux_assets(weights, assets)
     native_em = _native_em_register_binary(native_bin_dir)
+    n4_binary = _native_binary(native_bin_dir, "fnit_n4_itk")
     topology_binary = (_native_topology_binary(native_bin_dir)
                        if native_topology else None)
     metrics_binary = (_native_surface_metrics_binary(native_bin_dir)
@@ -556,10 +555,11 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                             for hemi in ("lh", "rh")} if native_registration else {})
     torch.set_num_threads(threads)
     started = time.perf_counter()
-    profile = "conda-wmchain-core-v4"
+    profile = "conda-wmchain-core-v5"
     report: dict = {"profile": profile, "input": str(t1),
                     "subject_dir": str(subject), "device": device,
-                    "n4_python": str(n4_python or sys.executable), "threads": threads,
+                    "n4_binary": {"binary": str(n4_binary[0]),
+                                  "sha256": n4_binary[1]}, "threads": threads,
                     "stages": [], "status": "running"}
     report["gca_registration"] = {"implementation": "native-c++",
                                   "binary": str(native_em[0]), "sha256": native_em[1]}
@@ -615,15 +615,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     for folder in (surf, labels, stats, mri / "tmp", subject / "scripts"):
         folder.mkdir(parents=True, exist_ok=True)
     nu0 = mri / "tmp/nu0.mgz"
-    if n4_python is None:
-        from .n4_sitk import correct_volume
-        stage("n4", correct_volume, mri / "orig.mgz", nu0)
-    else:
-        env = dict(os.environ, PYTHONPATH=str(Path(__file__).resolve().parents[2]))
-        stage("n4", subprocess.run,
-              [str(n4_python), "-m", "fnit.recon_all.n4_sitk", "--i",
-               str(mri / "orig.mgz"), "--o", str(nu0)],
-              env=env, check=True)
+    from .n4_itk import correct_volume
+    stage("n4", correct_volume, mri / "orig.mgz", nu0, binary=n4_binary[0])
     stage("nu", make_nu, mri / "orig.mgz", nu0,
           initial["talairach_xfm"], mri / "nu.mgz")
     stage("T1_normalize", normalize_t1, mri / "nu.mgz",
@@ -751,7 +744,6 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--assets-dir", type=Path, required=True)
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--threads", type=int, default=4)
-    parser.add_argument("--n4-python", type=Path)
     parser.add_argument("--native-bin-dir", type=Path)
     parser.add_argument("--native-topology", action="store_true")
     parser.add_argument("--native-surface-metrics", action="store_true")
@@ -761,7 +753,7 @@ def main(argv: list[str] | None = None) -> None:
     args = parser.parse_args(argv)
     report = run_recon_all_python(args.t1, args.subject_dir, args.weights_dir,
                                   args.assets_dir, device=args.device,
-                                  threads=args.threads, n4_python=args.n4_python,
+                                  threads=args.threads,
                                   native_bin_dir=args.native_bin_dir,
                                   native_topology=args.native_topology,
                                   native_surface_metrics=args.native_surface_metrics,

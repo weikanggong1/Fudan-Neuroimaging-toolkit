@@ -12,10 +12,11 @@ from .normalization import normalize_t1
 
 def run_input_brainmask_chain(t1: str | Path, subject_dir: str | Path,
                               weights_dir: str | Path, assets_dir: str | Path,
-                              *, device: str = "cpu", threads: int = 4) -> dict:
+                              *, n4_binary: str | Path, device: str = "cpu",
+                              threads: int = 4) -> dict:
     """Produce orig, synthstrip, Talairach, nu, T1 and initial brainmask."""
     result = run_input_n4_chain(t1, subject_dir, weights_dir, assets_dir,
-                                device=device, threads=threads)
+                                n4_binary=n4_binary, device=device, threads=threads)
     mri = Path(subject_dir) / "mri"
     t1_out = mri / "T1.mgz"
     started = time.perf_counter()

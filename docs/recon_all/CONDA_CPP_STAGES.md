@@ -34,7 +34,7 @@ fnit-recon-all subject_T1w.nii.gz /scratch/subjects/sub01 \
 
 CLI 前两个位置参数依次是 T1w 输入和空输出目录；`--weights-dir`、`--assets-dir`、`--native-bin-dir` 分别指外置模型、模板和 Conda 编译程序目录；`--device` 选 PyTorch 设备，`--threads` 指 CPU 线程数。`FS_LICENSE` 是外部许可证路径。输出目录中的 `mri/`、`surf/`、`label/`、`stats/` 与运行报告结构见[主文档](README.md#输入与输出结构)。
 
-`native_bin_dir` 提供三个必需程序；`native_topology` 启用 Python 居中球、Conda `mris_fix_topology_fnit` 及 Python remesh，`native_sphere` 启用 `mris_inflate` 加 Python 双球面，`native_surface_metrics` 启用 `mris_place_surface` 的五张指标图，`native_registration` 启用 Python 球面配准。后两个球面开关仍沿用原 CLI/Python 名称以保持调用兼容，内部数值实现已换成 Python。`native_sphere` 和 `native_registration` 均要求 `native_topology`。多被试仅提供 `fnit.recon_all.batch.run_recon_all_python_batch` Python API，返回按输入顺序排列的单被试报告；输入/输出目录及报告结构见[主文档](README.md#输入与输出结构)。
+`native_bin_dir` 提供仓库 N4 程序及三个必需 FreeSurfer 程序；`native_topology` 启用 Python 居中球、Conda `mris_fix_topology_fnit` 及 Python remesh，`native_sphere` 启用 `mris_inflate` 加 Python 双球面，`native_surface_metrics` 启用 `mris_place_surface` 的五张指标图，`native_registration` 启用 Python 球面配准。后两个球面开关仍沿用原 CLI/Python 名称以保持调用兼容，内部数值实现已换成 Python。`native_sphere` 和 `native_registration` 均要求 `native_topology`。多被试仅提供 `fnit.recon_all.batch.run_recon_all_python_batch` Python API，返回按输入顺序排列的单被试报告；输入/输出目录及报告结构见[主文档](README.md#输入与输出结构)。
 
 ## Conda 程序的输入与输出
 

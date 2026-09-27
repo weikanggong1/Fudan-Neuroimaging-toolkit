@@ -133,6 +133,7 @@ if grep -E '/public/software/apps/Freesurfer|/tmp/fs_itk_build' "$output_dir/mri
   echo "patched topology binary links an external FreeSurfer/ITK installation" >&2
   exit 1
 fi
+bash "$(dirname "$0")/build_n4_itk_conda.sh" "$output_dir"
 sha256sum "$output_dir"/bin/* > "$output_dir/bin.sha256"
 conda list --explicit > "$output_dir/conda-explicit.txt"
 printf 'SOURCE_COMMIT=%s\nSOURCE_VALIDATION=%s\nCONDA_PREFIX=%s\n' "$source_commit" "$source_validation" "$CONDA_PREFIX" > "$output_dir/build-provenance.txt"
