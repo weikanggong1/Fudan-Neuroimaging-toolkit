@@ -1,42 +1,22 @@
-# `AntsDenoiseImageFs`: whole-stage Python parity
+# `AntsDenoiseImageFs` 去噪阶段：仓库内 Numba 实现
 
-The fixed FreeSurfer 8.2 `recon-all` call is
-`AntsDenoiseImageFs -i brain.mgz -o antsdn.brain.mgz`. The pinned source
-`AntsDenoiseImageFs/AntsDenoiseImageFs.cpp` converts each MGH frame to an ITK
-float image, fixes ITK to one thread and applies adaptive non-local means with
-Gaussian noise, patch radius 1, search radius 2, local mean/variance radius 1,
-epsilon 1e-5, mean threshold 0.95, variance threshold 0.5, smoothing factor 1,
-and smoothing variance 2. The reconstruction call does **not** pass `--rician`.
+当前 `fnit-recon-all` 的 `ants_denoise` 阶段调用 [`denoise_volume`](../../../src/fnit/recon_all/ants_denoise_python.py)。运算核心位于 [`ants_denoise_core.py`](../../../src/fnit/recon_all/ants_denoise_core.py)，使用 NumPy 和 Numba 在 CPU 上执行；运行时不导入 ANTsPy，也不调用外部 `AntsDenoiseImageFs`。输入限定为三维 `uint8` MGH/MGZ，与当前 `recon-all` 的 `brain.mgz` 相同。
 
-[`ants_denoise_python.py`](../../../src/fnit/recon_all/ants_denoise_python.py)
-uses `antspyx==0.6.3` with `noise_model="Gaussian"`, `p=1`, `r=2`, no mask and
-no shrink. It passes FreeSurfer voxel spacing, then uses the source-defined
-`MRIsetVoxVal` conversion: clip to `[0, 255]` and round positive half values
-up. It writes the new voxel bytes while preserving the input MGH header and
-trailing tags. This is a **CPU Python API backed by ANTs/ITK compiled code**;
-it requires `pip install antspyx==0.6.3` and no FreeSurfer installation at
-runtime.
+## 实际 T1 配对结果
 
-On `headcw`, the fresh native command ran on the frozen `fs_sub01/mri/brain.mgz`
-in **27.58 seconds** and reproduced the saved official output at all
-**16,777,216/16,777,216** voxels. The Python wrapper ran end to end in
-**28.25 seconds**, and [fresh native versus Python](ants_denoise_stage_headcw.json)
-also matched **16,777,216/16,777,216** uint8 voxels, with zero maximum voxel
-difference, identical affine and identical first 284 MGH header bytes. The
-standalone ANTsPy filter call took **25.98 seconds** in the same isolated
-environment; these are single observed wall times, not repeated-run speed
-claims. The Python wrapper is about 0.67 seconds slower than fresh native in
-these observations.
+2026-09-27 在 `headcw` 使用同一幅真实 T1 派生的 `brain.mgz`（256³，`uint8`，SHA-256 `1b7360d069b76c8a5a63f93f3c296dddeb4db725c4e2625e11ebfc156279f401`）。官方输出 `antsdn.brain.mgz` 的 SHA-256 为 `378548a3f58f74878450525a734c15ff19ce935dff913133f52aa149bb91d2ce`。Python CLI 完整读入、去噪并写盘后的对照见[机器可读结果](ants_denoise_numba_20260927.json)。
 
-The [rounding experiment](ants_denoise_rounding_headcw.json) explains the
-remaining apparent mismatch before conversion was corrected: truncation
-matched 16,135,004 voxels and NumPy's ties-to-even rounding matched
-16,777,213; FreeSurfer's half-up `nint` matched all 16,777,216. The focused
-half-up regression test passed **1/1** on headcw.
+| 检查项 | 结果 |
+| --- | ---: |
+| 输出体素逐点相同 | 16,777,216 / 16,777,216 |
+| 输出数组 SHA-256 | 两侧均为 `56c914332ae338a17ada33bc1ff10c78d8a8f36348ea80fabd954cfd2fc0e951` |
+| 输入到输出发生变化的体素 | 两侧均为 1,039,074 |
+| 仿射、MGH 前 284 字节 | 完全相同 |
+| Python 输出与输入尾部标签 | 完全相同 |
+| Python 输出与官方尾部标签 | 不同；官方解压后多 1 字节 |
 
-Compressed `.mgz` file hashes differ. Native `MRIwrite` added a 2,421-byte
-trailer whereas the input and Python output have 2,420-byte trailers. The
-trailer is not image data; the voxel array, geometry and fixed MGH header
-matched exactly. This is whole-stage **numerical image parity** on the frozen
-T1, not compressed-file byte parity. The wrapper is ready for use as the
-denoising stage once the runner declares the ANTsPy dependency.
+压缩文件 SHA-256 不相同：Python 保留输入尾部标签，官方 `MRIwrite` 改写了尾部。体素、几何和 MGH 固定头部已通过，不能据此称 `.mgz` 文件字节相同。
+
+同机一次观测：当前 Python CLI 从启动到写盘 **19.72 秒**，函数内部计时 **19.14 秒**，峰值 RSS **558,476 KiB**；此前相同输入的官方原生命令为 **27.58 秒**，旧 ANTsPy 包装为 **28.25 秒**。不同调用虽固定同一数据和 `headcw`，但不是重复测量；只说明这次单阶段观测，不代表整例 recon-all 的加速。CPU 是该实现的执行设备。
+
+[函数说明、参数、输出与官方命令](../../../docs/recon_all/DENOISE_NUMBA.md)列出可复现的调用方式。其余 recon-all 步骤仍需各自通过同输入验收。
