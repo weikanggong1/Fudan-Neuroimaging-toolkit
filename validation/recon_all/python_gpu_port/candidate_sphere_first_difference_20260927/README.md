@@ -44,7 +44,7 @@ GDB 在原生第一次 `logSSE` 后、优化更新前抓取目标距离、当前
 | Python 自身距离 SSE | 26.863064785355633 | **26.86393232857408** |
 | 全矩阵比较墙钟时间，含 JIT | 26.92 s | 27.50 s |
 
-[修复后全矩阵 JSON](comparison_angle64.json)的 `source_sha256.metric` 为 `dde4f42db3f8f526c2ccb1c1379db4edc5369b0f41cbb72ed8b84dc14030ca92`，与提交的生产源完全相同。使用同一输入及原生 `sphere0000`–`sphere0004` 快照再跑保存的前四步，[逐步结果](angle64_first4_report.json)显示四次更新后各 **319,866/319,866** 个有序坐标分量与原生逐位相同；初始 SSE 与线搜索所选步长也恢复一致。四步 Python 诊断总耗时 **61.25 s**（含拓扑、目标矩阵、Numba JIT、梯度和比较），原生 `-w 1` 快照探针在写出 `sphere0004` 后 SIGTERM，墙钟 **30.03 s**。两种探针的初始化、诊断 I/O 和停止方式不同，不能据此计算完整球面的加速比。修复后的候选输入**尚未重跑完整** `lh.sphere`、`sphere.reg` 或 `aparc.annot`，全流程几何及统计仍待验收。
+[修复后全矩阵 JSON](comparison_angle64.json)的 `source_sha256.metric` 为 `dde4f42db3f8f526c2ccb1c1379db4edc5369b0f41cbb72ed8b84dc14030ca92`，与提交的生产源完全相同。使用同一输入及原生 `sphere0000`–`sphere0004` 快照再跑保存的前四步，[逐步结果](angle64_first4_report.json)显示四次更新后各 **319,866/319,866** 个有序坐标分量与原生逐位相同；初始 SSE 与线搜索所选步长也恢复一致。四步 Python 诊断总耗时 **61.25 s**（含拓扑、目标矩阵、Numba JIT、梯度和比较），原生 `-w 1` 快照探针在写出 `sphere0004` 后 SIGTERM，墙钟 **30.03 s**。两种探针的初始化、诊断 I/O 和停止方式不同，不能据此计算完整球面的加速比。修复后的候选输入已完成[完整 LH `sphere` 单阶段验收](full_stage/README.md)：106,622 个有序顶点及 213,240 个有序面与同候选输入官方完全一致。`sphere.reg`、`aparc.annot` 和后续皮层统计尚未通过这条候选链验收。
 
 聚焦回归测试 `tests/recon_all/test_sphere_standard_metric.py` 使用上述三个真实顶点的坐标核对阈值位模式；在 gpucw1 环境与现有对称化测试一起为 **2 passed**。原生全矩阵与前四步仅用于离线对照，没有成为 FNIT 的运行依赖。
 
