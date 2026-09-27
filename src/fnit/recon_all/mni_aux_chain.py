@@ -1,0 +1,131 @@
+"""Subject-specific MNI152 affine and MCA/dura plus venous-sinus labels."""
+
+from __future__ import annotations
+
+import argparse
+from pathlib import Path
+
+import nibabel as nib
+import numpy as np
+import surfa as sf
+import torch
+
+from fnit.synthmorph import SynthMorph
+
+from .aux_seg import MCA_MODEL, VSINUS_MODEL, mri_mcadura_seg, mri_vsinus_seg
+
+
+TEMPLATE_DIR = Path("average/mni_icbm152_nlin_asym_09c/reg-targets")
+
+
+def _crop_nonzero(image: Path, output: Path) -> Path:
+    """Match the conformed-T1 bounding crop from mri_mask -bb 3."""
+    source = nib.load(str(image))
+    values = np.asarray(source.dataobj)
+    bounds = []
+    for axis in range(3):
+        nonzero = np.flatnonzero(np.any(
+            values != 0, axis=tuple(i for i in range(3) if i != axis)))
+        if not len(nonzero):
+            raise ValueError("orig.mgz has no nonzero voxels")
+        bounds.append((max(0, int(nonzero[0]) - 3),
+                       min(values.shape[axis], int(nonzero[-1]) + 3)))
+    crop = np.ascontiguousarray(values[tuple(slice(lo, hi) for lo, hi in bounds)])
+    translation = np.eye(4)
+    translation[:3, 3] = [lo for lo, _ in bounds]
+    affine = source.affine @ translation
+    result = nib.Nifti1Image(crop, affine)
+    result.set_sform(affine, code=1)
+    result.set_qform(affine, code=1)
+    result.header.set_xyzt_units("mm")
+    output.parent.mkdir(parents=True, exist_ok=True)
+    nib.save(result, str(output))
+    return output
+
+
+def register_mni152_affine(subject_dir: str | Path, weights_dir: str | Path,
+                           assets_dir: str | Path, *, device: str = "cpu",
+                           threads: int = 4) -> Path:
+    """Write the full-MNI152-to-native voxel LTA used by auxiliary priors.
+
+    Input: subject/mri/orig.mgz, external affine weight and cropped/full MNI152
+    templates. Output: invol.crop.nii.gz, aff.lta and reg.targ_to_invol.lta in
+    subject/mri/transforms/synthmorph.1.0mm.1.0mm. Returns the final LTA path.
+    """
+    subject = Path(subject_dir)
+    native = subject / "mri/orig.mgz"
+    target_dir = Path(assets_dir) / TEMPLATE_DIR
+    cropped_target = target_dir / "mni152.1.0mm.cropped.nii.gz"
+    full_target = target_dir / "mni152.1.0mm.nii.gz"
+    weight = Path(weights_dir) / "synthmorph.affine.2.h5"
+    for file in (native, cropped_target, full_target, weight):
+        if not file.is_file():
+            raise FileNotFoundError(file)
+    transform_dir = subject / "mri/transforms/synthmorph.1.0mm.1.0mm"
+    crop = _crop_nonzero(native, transform_dir / "invol.crop.nii.gz")
+    torch.set_num_threads(threads)
+    model = SynthMorph(weights=weights_dir, device=device, model="affine", extent=256)
+    world_affine = model(crop, cropped_target).transform
+    world_affine.save(str(transform_dir / "aff.lta"))
+    native_image = nib.load(str(native))
+    full_image = nib.load(str(full_target))
+    world = world_affine.convert(space="world").matrix
+    target_to_native = np.linalg.inv(native_image.affine) @ np.linalg.inv(world) @ full_image.affine
+    target_to_native[3] = (0, 0, 0, 1)
+    output = transform_dir / "reg.targ_to_invol.lta"
+    sf.Affine(target_to_native, source=sf.load_volume(str(full_target)),
+              target=sf.load_volume(str(native)), space="voxel").save(str(output))
+    return output
+
+
+def run_mni_aux_chain(subject_dir: str | Path, weights_dir: str | Path,
+                      assets_dir: str | Path, *, device: str = "cpu",
+                      threads: int = 4) -> dict[str, Path]:
+    """Generate the affine LTA and both conformed auxiliary label volumes.
+
+    Requires subject/mri/orig.mgz, nu.mgz, synthseg.rca.mgz; external affine,
+    MCA/dura, venous-sinus weights; cropped/full MNI152 targets and three
+    priors. Returns paths keyed lta, mca_dura, vsinus. Also writes
+    subject/stats/vsinus.stats when segmentation completes.
+    """
+    subject = Path(subject_dir)
+    mri = subject / "mri"
+    weights = Path(weights_dir)
+    assets = Path(assets_dir)
+    required = (mri / "nu.mgz", mri / "synthseg.rca.mgz",
+                weights / MCA_MODEL, weights / VSINUS_MODEL,
+                assets / "average/mca-dura.prior.warp.mni152.1.0mm.lh.nii.gz",
+                assets / "average/mca-dura.prior.warp.mni152.1.0mm.rh.nii.gz",
+                assets / "average/vsinus.no-sp.prior.mni152.1.0mm.mgz")
+    for file in required:
+        if not file.is_file():
+            raise FileNotFoundError(file)
+    lta = register_mni152_affine(subject, weights, assets,
+                                 device=device, threads=threads)
+    torch.set_num_threads(threads)
+    directory = lta.parent
+    mca_dura = mri_mcadura_seg(mri / "nu.mgz", mri / "mca-dura.mgz",
+                               directory, assets, device=device, weights_dir=weights)
+    talairach = mri / "transforms/talairach.xfm.lta"
+    vsinus = mri_vsinus_seg(mri / "nu.mgz", mri / "vsinus.mgz",
+                            directory, assets, ctxseg_path=mri / "synthseg.rca.mgz",
+                            stats_path=subject / "stats/vsinus.stats",
+                            talairach_lta=talairach if talairach.is_file() else None,
+                            device=device, weights_dir=weights)
+    return {"lta": lta, "mca_dura": mca_dura, "vsinus": vsinus}
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("subject_dir", type=Path)
+    parser.add_argument("--weights", required=True, type=Path)
+    parser.add_argument("--assets", required=True, type=Path)
+    parser.add_argument("--device", default="cpu")
+    parser.add_argument("--threads", type=int, default=4)
+    args = parser.parse_args()
+    print(run_mni_aux_chain(args.subject_dir, args.weights, args.assets,
+                            device=args.device, threads=args.threads))
+
+
+if __name__ == "__main__":
+    main()
