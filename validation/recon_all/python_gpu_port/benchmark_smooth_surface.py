@@ -33,6 +33,7 @@ def main() -> None:
     parser.add_argument("--native-binary", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--device", default="cpu")
+    parser.add_argument("--iterations", type=int, default=10)
     parser.add_argument("--repeats", type=int, default=3)
     args = parser.parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
@@ -48,11 +49,13 @@ def main() -> None:
                          else ("python", "native")):
                 start = time.perf_counter()
                 if side == "native":
-                    subprocess.run([str(args.native_binary), "-nw", "-seed", "1234",
+                    subprocess.run([str(args.native_binary), "-n", str(args.iterations),
+                                    "-nw", "-seed", "1234",
                                     str(surface), str(outputs[side])],
                                    capture_output=True, check=True)
                 else:
-                    smooth_surface(surface, outputs[side], device=args.device)
+                    smooth_surface(surface, outputs[side], iterations=args.iterations,
+                                   device=args.device)
                 timings[side].append(time.perf_counter() - start)
             comparison = compare(outputs["native"], outputs["python"])
             if not comparison["geometry_bytes_identical"]:
@@ -62,6 +65,7 @@ def main() -> None:
                      "median_seconds": {side: statistics.median(values)
                                         for side, values in timings.items()}})
     report = {"host": platform.node(), "device": args.device,
+              "iterations": args.iterations,
               "native_binary": str(args.native_binary),
               "input_sha256": {hemi: hashlib.sha256(path.read_bytes()).hexdigest()
                                for hemi, path in inputs.items()},
