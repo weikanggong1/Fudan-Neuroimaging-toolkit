@@ -12,7 +12,7 @@
 | `binary` | Conda 内编译的 FreeSurfer 8.2 `mris_place_surface` |
 | `assets_dir` | 外置 FreeSurfer 数据目录 |
 
-输出为 `surf/autodet.gw.stats.H.dat`、`surf/H.white.preaparc` 和 `mri/mrisps.wpa.mgz`；返回字典包含这些路径及阈值计算、表面放置各自的耗时。两侧共用 `mri/mrisps.wpa.mgz`，第二次调用会覆盖第一次的诊断图，与 recon-all 相同。该函数不调用 FreeSurfer Python 脚本，也不要求安装 FreeSurfer 运行环境，但必须在 Conda 内编译安装原生可执行程序。测试所用程序的 SHA-256 为 `9a42f5d7b70a066daf12e67fb6a0924048b4778186ea772e8976722b226b35d5`，对应 FreeSurfer 源码提交 `d932c45b7941662ea380a05efef580568b98d41a`。如程序要求许可证，需在环境中设置 `FS_LICENSE`。阈值计算使用 Python/Numba，表面放置使用 CPU C++。
+输出为 `surf/autodet.gw.stats.H.dat`、`surf/H.white.preaparc` 和 `mri/mrisps.wpa.mgz`。两侧共用 `mri/mrisps.wpa.mgz`，第二次调用会覆盖第一次的诊断图，与 recon-all 相同。该函数不调用 FreeSurfer Python 脚本，也不要求安装 FreeSurfer 运行环境，但必须在 Conda 内编译安装原生可执行程序。测试所用程序的 SHA-256 为 `9a42f5d7b70a066daf12e67fb6a0924048b4778186ea772e8976722b226b35d5`，对应 FreeSurfer 源码提交 `d932c45b7941662ea380a05efef580568b98d41a`。如程序要求许可证，需在环境中设置 `FS_LICENSE`。阈值计算使用 Python/Numba，表面放置使用 CPU C++。
 
 Python 调用：
 
@@ -20,11 +20,15 @@ Python 调用：
 from fnit.recon_all.white_preaparc_conda import run_white_preaparc
 
 result = run_white_preaparc(
-    "/path/to/subjects/sub01", "lh",
-    "/path/to/conda-native/bin/mris_place_surface",
-    "/path/to/fnit-assets", threads=4,
+    subject_dir="/path/to/subjects/sub01",  # 含 mri/surf 的被试目录
+    hemi="lh",  # 左半球；右半球用 rh
+    binary="/path/to/conda-native/bin/mris_place_surface",  # Conda 编译的程序
+    assets_dir="/path/to/fnit-assets",  # 外置 FreeSurfer 数据目录
+    threads=4,  # CPU 线程数
 )
 ```
+
+`result` 含 `stats`（`surf/autodet.gw.stats.H.dat` 路径）、`output`（`surf/H.white.preaparc` 路径）、`outvol`（`mri/mrisps.wpa.mgz` 路径）、`stats_seconds`（阈值计算墙钟秒数）和 `place_seconds`（放置墙钟秒数）。
 
 命令行调用：
 
@@ -34,6 +38,8 @@ python -m fnit.recon_all.white_preaparc_conda \
   --binary /path/to/conda-native/bin/mris_place_surface \
   --assets-dir /path/to/fnit-assets --threads 4
 ```
+
+命令行前两个位置参数为 `subject_dir`（被试目录）和 `hemi`（`lh`/`rh`）；`--binary` 指定 Conda 程序，`--assets-dir` 指定外置数据目录，`--threads` 指定 CPU 线程数（默认 4）。命令会打印上述返回字典。
 
 从被试的 `mri` 目录运行时，对应的 FreeSurfer 8.2 命令为：
 

@@ -4,7 +4,7 @@
 
 ## 输入、输出与用法
 
-`write_centered_topology_sphere(input_qsphere, output_centered)` 读取有序 FreeSurfer 三角表面 `qsphere.nofix`，写出面和尾部不变的新表面。返回字典含 `input`、`output`、`vertices`、`faces`、`iterations` 和 `seconds`。它使用 nibabel、NumPy、Numba；本函数本身不修复拓扑，也不读取官方中间数据。
+`write_centered_topology_sphere(input_qsphere, output_centered)` 读取有序 FreeSurfer 三角表面 `qsphere.nofix`，写出面和尾部不变的新表面。它使用 nibabel、NumPy、Numba；本函数本身不修复拓扑，也不读取官方中间数据。
 
 `run_topology_ga_conda(subject, hemisphere, binary, assets)` 要求 FreeSurfer 格式的被试目录下有：
 
@@ -17,7 +17,33 @@
 | `binary` | 本仓库 Conda 构建的修补版 `mris_fix_topology_fnit` |
 | `assets` | 仅含数据的 FreeSurfer 8.2 查找资产 |
 
-函数写入 `surf/{hemi}.topology-centered.sphere`、`surf/{hemi}.orig.premesh` 和 `scripts/{hemi}.topology-ga-fnit.log`；返回字典含 `hemisphere`、`preflight`（前处理报告）、`output`、`log`、`command` 和 `native_seconds`。Conda 程序**必须**设置 `FNIT_CENTERED_COORDS`；若未设置则中止，避免退回至另一种居中结果。Python 函数会自动设置，并核查程序的替换标记和输出。
+函数写入 `surf/{hemi}.topology-centered.sphere`、`surf/{hemi}.orig.premesh` 和 `scripts/{hemi}.topology-ga-fnit.log`。Conda 程序**必须**设置 `FNIT_CENTERED_COORDS`；若未设置则中止，避免退回至另一种居中结果。Python 函数会自动设置，并核查程序的替换标记和输出。
+
+两个函数可分别调用；`run_topology_ga_conda` 会自行执行前处理，不需先手动运行第一个示例：
+
+```python
+from fnit.recon_all.topology_preflight_python import write_centered_topology_sphere
+
+preflight = write_centered_topology_sphere(
+    input_qsphere="/path/to/subjects/sub01/surf/lh.qsphere.nofix",  # 输入快速球面
+    output_centered="/path/to/subjects/sub01/surf/lh.topology-centered.sphere",  # 输出居中球面
+)
+```
+
+`preflight` 含 `input`、`output`（两张表面的路径）、`vertices`、`faces`（网格数量）、`iterations`（居中迭代次数）和 `seconds`（墙钟秒数）。
+
+```python
+from fnit.recon_all.topology_conda_ga import run_topology_ga_conda
+
+report = run_topology_ga_conda(
+    subject="/path/to/subjects/sub01",  # 含 surf/mri 的被试目录
+    hemisphere="lh",  # 左半球；右半球用 rh
+    binary="/path/to/conda-build/bin/mris_fix_topology_fnit",  # 修补版 Conda 程序
+    assets="/path/to/assets",  # 外置 FreeSurfer 8.2 数据目录
+)
+```
+
+`report` 含 `hemisphere`（半球）、`preflight`（上述前处理报告）、`output`（`orig.premesh` 路径）、`log`（拓扑日志路径）、`command`（实际执行命令列表）和 `native_seconds`（原生程序墙钟秒数）。本函数不生成最终 `orig`；runner 随后另行 remesh。
 
 激活 Conda 构建环境后，在仓库根目录运行：
 
@@ -27,6 +53,8 @@ python -m fnit.recon_all.topology_conda_ga /path/to/subjects/sub01 lh \
   /path/to/conda-build/bin/mris_fix_topology_fnit /path/to/assets \
   --report /path/to/lh-topology.json
 ```
+
+构建脚本的两个位置参数是洁净的 FreeSurfer 8.2 源码目录和 Conda 构建目录。模块命令的四个位置参数依次对应 `subject`、`hemisphere`、`binary`、`assets`；可选 `--report` 将返回字典写为 JSON，命令同时将 JSON 打印到标准输出。
 
 `rh` 同理。可选的 `native_topology=True` recon-all runner 选择该修补版程序，调用同一个阶段 API，再以 `remesh_surface(..., iterations=3)` 生成 `surf/{hemi}.orig`。默认 runner 的其他表面和分割步骤仍有近似处理；启用本阶段并不等于端到端重建已验收。
 

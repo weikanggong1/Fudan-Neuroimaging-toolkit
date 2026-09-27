@@ -13,12 +13,29 @@
 
 `fnit.recon_all.smooth_surface_python.smooth_surface(input_path, output_path, iterations=10, device="cpu") -> None` 读取 FreeSurfer 三角表面，输出有序面及体积几何不变的三角表面。生成最终 `smoothwm` 时，`input_path` 为 `surf/H.white.preaparc`，`output_path` 为 `surf/H.smoothwm`，`iterations=3`。`device` 接受 `cpu` 或 CUDA 设备字符串；下述实测使用 CPU float32。函数按有序一环邻居平均顶点，不额外写曲率文件，对应官方命令的 `-nw`。创建者注释导致文件字节不同；数值验收比较有序坐标、面和体积几何。
 
+Python API：
+
+```python
+from fnit.recon_all.smooth_surface_python import smooth_surface
+
+smooth_surface(
+    input_path="surf/lh.white.preaparc",  # 已放置的输入表面
+    output_path="surf/lh.smoothwm",  # 平滑后的输出表面
+    iterations=3,  # 最终 smoothwm 平滑三轮
+    device="cpu",  # 计算设备；也可传 CUDA 设备字符串
+)
+```
+
+函数返回 `None`；输出写入 `output_path`，保留输入的有序面和体积几何。
+
 独立 Python 命令：
 
 ```bash
 python -m fnit.recon_all.smooth_surface_python \
   surf/lh.white.preaparc surf/lh.smoothwm --iterations 3 --device cpu
 ```
+
+命令行两个位置参数依次对应 `input_path`、`output_path`；`--iterations` 指定平滑轮数（默认 10），`--device` 指定 `cpu` 或 CUDA 设备（默认 `cpu`）。
 
 对应的官方命令：
 
@@ -49,3 +66,5 @@ python validation/recon_all/python_gpu_port/benchmark_smooth_surface.py \
   --native-binary /path/to/mris_smooth \
   --output-dir /path/to/output --iterations 3 --device cpu --repeats 3
 ```
+
+benchmark 脚本的 `--left-surface`、`--right-surface` 是两侧同输入表面，`--native-binary` 是官方 `mris_smooth`，`--output-dir` 保存配对结果，`--iterations` 和 `--device` 与函数参数相同，`--repeats` 指定配对次数。
