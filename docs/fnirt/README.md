@@ -66,16 +66,16 @@ fnirt \
 from fnit.fnirt.standalone import run_fnirt
 
 result = run_fnirt(
-    "subject_GM.nii.gz",                 # moving GM
-    "template_GM.nii.gz",                # fixed GM template
-    "subject_GM_to_template_GM.mat",     # FSL scaled-mm, input -> reference
-    cout="subject_GM_to_template_GM_warp.nii.gz",
-    iout="subject_GM_to_template_GM.nii.gz",
-    jout="subject_GM_JAC_nl.nii.gz",
-    refmask="MNI152_T1_2mm_brain_mask_dil.nii.gz",
-    config="GM_2_MNI152GM_2mm.cnf",
-    device="cuda:0",
-    overwrite=False,
+    input="subject_GM.nii.gz",  # 输入：待配准的 3D 个体 GM 概率图
+    reference="template_GM.nii.gz",  # 输入：fixed GM 模板及输出网格
+    affine="subject_GM_to_template_GM.mat",  # 输入：input -> reference 的 FSL scaled-mm 4x4 矩阵
+    cout="subject_GM_to_template_GM_warp.nii.gz",  # 输出：intent-2007 B-spline coefficient NIfTI
+    iout="subject_GM_to_template_GM.nii.gz",  # 输出：reference-grid warped GM
+    jout="subject_GM_JAC_nl.nii.gz",  # 输出：仅 nonlinear warp 的 Jacobian determinant
+    refmask="MNI152_T1_2mm_brain_mask_dil.nii.gz",  # 输入：reference-grid 二值 mask
+    config="GM_2_MNI152GM_2mm.cnf",  # 配置：只支持该官方 GM 配置
+    device="cuda:0",  # 运行设备：第一张 CUDA GPU
+    overwrite=False,  # 写盘策略：不覆盖已有文件
 )
 ```
 

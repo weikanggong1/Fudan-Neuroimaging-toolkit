@@ -26,14 +26,16 @@ python -m fnit.fnirt \
 from fnit.fnirt.standalone import run_fnirt
 
 result = run_fnirt(
-    "subject_GM.nii.gz",
-    "template_GM.nii.gz",
-    "subject_GM_to_template_GM.mat",
-    cout="subject_GM_to_template_GM_warp.nii.gz",
-    iout="subject_GM_to_template_GM.nii.gz",
-    jout="subject_GM_JAC_nl.nii.gz",
-    refmask="MNI152_T1_2mm_brain_mask_dil.nii.gz",
-    device="cuda:0",
+    input="subject_GM.nii.gz",  # 输入：个体 3D GM 概率图
+    reference="template_GM.nii.gz",  # 输入：GM 模板及输出网格
+    affine="subject_GM_to_template_GM.mat",  # 输入：input -> reference 的 FSL scaled-mm 矩阵
+    cout="subject_GM_to_template_GM_warp.nii.gz",  # 输出：intent-2007 coefficient NIfTI
+    iout="subject_GM_to_template_GM.nii.gz",  # 输出：warped GM
+    jout="subject_GM_JAC_nl.nii.gz",  # 输出：nonlinear Jacobian determinant
+    refmask="MNI152_T1_2mm_brain_mask_dil.nii.gz",  # 输入：reference-grid 二值 mask
+    config="GM_2_MNI152GM_2mm.cnf",  # 配置：官方 GM schedule
+    device="cuda:0",  # 运行设备
+    overwrite=False,  # 不覆盖已有文件
 )
 ```
 

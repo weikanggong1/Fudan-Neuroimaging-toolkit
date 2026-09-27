@@ -30,15 +30,17 @@ CUDA 路径使用 float32 并默认允许 TF32，不使用 float16 或 bfloat16�
 from fnit import run_mmorf
 
 result = run_mmorf(
-    "t1_brain.nii.gz",                    # moving scalar
-    "MNI152_T1_1mm_brain.nii.gz",         # scalar reference and output grid
-    "dti_tensor.nii.gz",                  # moving tensor, six FSL channels
-    "FSL_HCP1065_tensor_1mm.nii.gz",       # reference tensor
-    moving_scalar_affine="t1_to_MNI.mat", # input -> reference, FSL scaled-mm
-    moving_tensor_affine="FA_to_MNI.mat", # input -> reference, FSL scaled-mm
-    output_dir="mmorf",
-    device="cuda:0",
-    overwrite=False,
+    moving_scalar="t1_brain.nii.gz",  # 输入：个体脑提取 3D T1w
+    reference_scalar="MNI152_T1_1mm_brain.nii.gz",  # 输入：T1 模板及输出网格
+    moving_tensor="dti_tensor.nii.gz",  # 输入：个体 [X,Y,Z,6] FSL tensor
+    reference_tensor="FSL_HCP1065_tensor_1mm.nii.gz",  # 输入：公共空间六通道 tensor
+    output_dir="mmorf",  # 输出：本受试者的五文件结果目录
+    moving_scalar_affine="t1_to_MNI.mat",  # 输入：moving T1 -> reference 的 FSL scaled-mm 矩阵
+    moving_tensor_affine="FA_to_MNI.mat",  # 输入：moving tensor -> reference 的 FSL scaled-mm 矩阵
+    reference_tensor_affine=None,  # 输入：reference tensor 已与 T1 模板同网格，无需额外矩阵
+    device="cuda:0",  # 运行设备：第一张 CUDA GPU
+    config=None,  # 配置：使用 MMORFConfig 默认五层计划
+    overwrite=False,  # 写盘策略：不覆盖已有文件
 )
 ```
 
@@ -57,13 +59,18 @@ result = run_mmorf(
 ```python
 from fnit import TorchMMORF
 
-result = TorchMMORF(device="cuda:0")(
-    "t1_brain.nii.gz",
-    "MNI152_T1_1mm_brain.nii.gz",
-    "dti_tensor.nii.gz",
-    "FSL_HCP1065_tensor_1mm.nii.gz",
-    moving_scalar_affine="t1_to_MNI.mat",
-    moving_tensor_affine="FA_to_MNI.mat",
+model = TorchMMORF(
+    device="cuda:0",  # 运行设备
+    config=None,  # 使用默认 MMORFConfig
+)
+result = model(
+    moving_scalar="t1_brain.nii.gz",  # 输入：个体脑提取 T1w
+    reference_scalar="MNI152_T1_1mm_brain.nii.gz",  # 输入：T1 模板及输出网格
+    moving_tensor="dti_tensor.nii.gz",  # 输入：个体六通道 tensor
+    reference_tensor="FSL_HCP1065_tensor_1mm.nii.gz",  # 输入：公共空间六通道 tensor
+    moving_scalar_affine="t1_to_MNI.mat",  # 输入：moving T1 -> reference 矩阵
+    moving_tensor_affine="FA_to_MNI.mat",  # 输入：moving tensor -> reference 矩阵
+    reference_tensor_affine=None,  # 输入：reference tensor 已与 T1 模板同网格
 )
 ```
 
@@ -73,12 +80,12 @@ result = TorchMMORF(device="cuda:0")(
 from fnit import apply_mmorf_warp
 
 warped_fa = apply_mmorf_warp(
-    "dti_FA.nii.gz",
-    "MNI152_T1_1mm_brain.nii.gz",
-    result.warp,
-    affine="FA_to_MNI.mat",
-    device="cuda:0",
-    interpolation="linear",
+    image="dti_FA.nii.gz",  # 输入：待重采样的 native FA
+    reference="MNI152_T1_1mm_brain.nii.gz",  # 输入：输出网格
+    warp=result.warp,  # 输入：reference-grid、reference-axis mm pull warp
+    affine="FA_to_MNI.mat",  # 输入：FA -> reference 的 FSL scaled-mm 矩阵
+    device="cuda:0",  # 运行设备
+    interpolation="linear",  # 插值：连续参数图使用线性插值
 )
 ```
 

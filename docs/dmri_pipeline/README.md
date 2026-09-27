@@ -48,13 +48,20 @@ TBSS 分支需要 FMRIB58_FA_1mm 和 FMRIB58_FA-skeleton_1mm。MMORF 分支还�
 from fnit import DMRIPipeline
 
 result = DMRIPipeline(
-    device="cuda:0",                 # CUDA float32，允许 TF32
-    registration_backend="tbss",     # UKB FA registration branch
+    device="cuda:0",  # 运行设备：CUDA float32，允许 TF32
+    registration_backend="tbss",  # 配准分支：UKB weighted FLIRT + TorchFNIRT
+    synthstrip_weights=None,  # TBSS 分支不使用 SynthStrip 权重
+    dti_shell=1000,  # DTIFIT 使用的目标 b-value，单位 s/mm²
+    dti_tolerance=100,  # 纳入 DTI shell 的 b-value 容差
 ).run(
-    "raw",                            # AP.* and optional PA.*
-    "subject_tbss",                   # one-subject output root
-    fa_template="FMRIB58_FA_1mm.nii.gz",
-    fa_skeleton="FMRIB58_FA-skeleton_1mm.nii.gz",
+    raw_dir="raw",  # 输入：AP.* 及可选 PA.* 的单被试目录
+    output_dir="subject_tbss",  # 输出：该受试者的唯一结果根目录
+    fa_template="FMRIB58_FA_1mm.nii.gz",  # 输入：标准 FA 模板及输出网格
+    fa_skeleton="FMRIB58_FA-skeleton_1mm.nii.gz",  # 输入：UKB skeleton mask 模板
+    t1=None,  # TBSS 分支不使用 T1w
+    t1_template=None,  # TBSS 分支不使用 T1 模板
+    tensor_template=None,  # TBSS 分支不使用 tensor 模板
+    overwrite=False,  # 写盘策略：不覆盖已有结果
 )
 ~~~
 
@@ -66,16 +73,20 @@ result = DMRIPipeline(
 from fnit import DMRIPipeline
 
 result = DMRIPipeline(
-    device="cuda:0",
-    registration_backend="mmorf",
-    synthstrip_weights="/weights/synthstrip.1.pt",
+    device="cuda:0",  # 运行设备：CUDA float32，允许 TF32
+    registration_backend="mmorf",  # 配准分支：T1 + tensor 联合 TorchMMORF
+    synthstrip_weights="/weights/synthstrip.1.pt",  # 输入：官方 SynthStrip 权重
+    dti_shell=1000,  # DTIFIT 使用的目标 b-value，单位 s/mm²
+    dti_tolerance=100,  # 纳入 DTI shell 的 b-value 容差
 ).run(
-    "raw",
-    "subject_mmorf",
-    fa_template="FMRIB58_FA_1mm.nii.gz",
-    t1="T1w.nii.gz",
-    t1_template="MNI152_T1_1mm_brain.nii.gz",
-    tensor_template="FSL_HCP1065_tensor_1mm.nii.gz",
+    raw_dir="raw",  # 输入：AP.* 及可选 PA.* 的单被试目录
+    output_dir="subject_mmorf",  # 输出：该受试者的唯一结果根目录
+    fa_template="FMRIB58_FA_1mm.nii.gz",  # 输入：FA 仿射初始化模板
+    fa_skeleton=None,  # MMORF 分支不生成 TBSS skeleton 图
+    t1="T1w.nii.gz",  # 输入：个体原始 T1w
+    t1_template="MNI152_T1_1mm_brain.nii.gz",  # 输入：T1 模板及输出网格
+    tensor_template="FSL_HCP1065_tensor_1mm.nii.gz",  # 输入：公共空间六通道 tensor
+    overwrite=False,  # 写盘策略：不覆盖已有结果
 )
 ~~~
 

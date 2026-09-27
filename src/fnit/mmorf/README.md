@@ -8,14 +8,17 @@
 from fnit import run_mmorf
 
 result = run_mmorf(
-    "t1_brain.nii.gz",
-    "MNI152_T1_1mm_brain.nii.gz",
-    "dti_tensor.nii.gz",
-    "FSL_HCP1065_tensor_1mm.nii.gz",
-    moving_scalar_affine="t1_to_MNI.mat",
-    moving_tensor_affine="FA_to_MNI.mat",
-    output_dir="mmorf",
-    device="cuda:0",
+    moving_scalar="t1_brain.nii.gz",  # 输入：个体脑提取 T1w
+    reference_scalar="MNI152_T1_1mm_brain.nii.gz",  # 输入：T1 模板及输出网格
+    moving_tensor="dti_tensor.nii.gz",  # 输入：个体六通道 tensor
+    reference_tensor="FSL_HCP1065_tensor_1mm.nii.gz",  # 输入：公共空间六通道 tensor
+    output_dir="mmorf",  # 输出：五文件结果目录
+    moving_scalar_affine="t1_to_MNI.mat",  # 输入：moving T1 -> reference 矩阵
+    moving_tensor_affine="FA_to_MNI.mat",  # 输入：moving tensor -> reference 矩阵
+    reference_tensor_affine=None,  # 输入：reference tensor 已与 T1 模板同网格
+    device="cuda:0",  # 运行设备
+    config=None,  # 使用默认五层计划
+    overwrite=False,  # 不覆盖已有文件
 )
 ```
 
