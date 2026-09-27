@@ -749,6 +749,17 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                            device=device, threads=threads,
                            metrics_binary=metrics_binary[0] if metrics_binary else None)
             report["surfaces"][hemi].update(result)
+    from .relabel_hypointensities_python import relabel_volume
+    from .surf2volseg_fix_python import fix_presurf_volume
+    from .volmask_python import write_ribbon
+
+    stage("ribbon", write_ribbon, mri / "aseg.presurf.mgz", surf,
+          mri, assets / "FreeSurferColorLUT.txt")
+    stage("relabel_hypointensities", relabel_volume,
+          mri / "aseg.presurf.mgz", surf, mri / "aseg.presurf.hypos.mgz")
+    stage("aseg_ribbon_fix", fix_presurf_volume,
+          mri / "aseg.presurf.hypos.mgz", mri / "ribbon.mgz",
+          surf, labels, mri / "aseg.mgz")
     stage("project_aparc_volumes", _project_parcels, subject)
     stage("project_wmparc", _project_wmparc, subject)
 

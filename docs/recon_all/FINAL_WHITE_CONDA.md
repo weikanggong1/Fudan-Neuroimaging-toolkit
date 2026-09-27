@@ -1,6 +1,6 @@
 # Conda 最终 white 表面放置
 
-`fnit.recon_all.final_white_conda.run_final_white(subject_dir, hemi, binary, assets_dir, threads=4)` 调用 Conda 从 FreeSurfer 8.2 源码编译的 `mris_place_surface`，生成单侧最终 white 表面。这是独立阶段；当前 `fnit-recon-all` 调度器尚未调用，因为此前还须生成对应的皮层标签和脑区注释。
+`fnit.recon_all.final_white_conda.run_final_white(subject_dir, hemi, binary, assets_dir, threads=4)` 调用 Conda 从 FreeSurfer 8.2 源码编译的 `mris_place_surface`，生成单侧最终 white 表面。该函数已接入 `fnit-recon-all --native-white-preaparc` 的球面注释之后；当前串联尚未完成从原始 T1 到最终表面的整例验收。
 
 ## 输入与输出
 
