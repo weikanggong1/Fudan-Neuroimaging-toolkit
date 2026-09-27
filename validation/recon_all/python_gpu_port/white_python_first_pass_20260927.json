@@ -1412,5 +1412,145 @@
         ]
       }
     }
+  },
+  "first_pass_state_handoff": {
+    "scope": "isolated single-variable white command replay, not production API; only active vertex XYZ+normal state changed after first MRISpositionSurface return",
+    "method": "Conda C++ helper loaded by GDB LD_PRELOAD; break at exact production binary main+0xf33/f39, assign current MRIS pointer, call fnit_replace_white_state at outer pass 1; continue original passes 2-4 and cleanup",
+    "helper_source": "validation/recon_all/python_gpu_port/white_state_handoff_probe.cpp",
+    "helper_source_sha256": "a6f8c90dad28c37da222eceeb9a5fd34680f55da5022e9332e703dc03b5e9796",
+    "helper_binary_sha256": "9497fe3084b4d8fbc5661b2073abef712a45aba918d0fb0dcc8edd447ea9e859",
+    "official_vertex_ram_sha256": "a3b204ac0a597585d21b2bf3b53a071ff59e7818ffe6bc6d0eeb84b7f5f926d4",
+    "state_file_sha256": {
+      "conda_control": "1e02feda50e902db598c047f5769d80ded40002dc0d3ce7c3286a69e55b13b43",
+      "python": "a0c12e2ae6b182aad5eff9ccc257f4e0d0da0cc637e6f9e2127688c5b8b00d3e",
+      "installed_official": "c27937028e9ff6e677a13d4a26beb70c0946d2ce3fd996bd749e4530549864d4"
+    },
+    "normal_comparison": {
+      "raw_xyz_exact_to_installed_surface": true,
+      "raw_xyz_exact_to_prior_capture": true,
+      "conda_vs_official_normals_all": {
+        "n": 106622,
+        "max": 0.019277178345798722,
+        "p99": 1.2359621469941467e-05,
+        "over_1e-4": 486,
+        "over_0p1": 0
+      },
+      "conda_vs_official_normals_unripped": {
+        "n": 101011,
+        "max": 0.019277178345798722,
+        "p99": 1.3850766787234654e-05,
+        "over_1e-4": 486,
+        "over_0p1": 0
+      },
+      "python_recomputed_vs_official_normals_unripped": {
+        "n": 101011,
+        "max": 7.358396935274448e-05,
+        "p99": 8.937370150714029e-07,
+        "over_1e-4": 0,
+        "over_0p1": 0
+      }
+    },
+    "control_vs_saved_conda": {
+      "exact_components": 319866,
+      "components": 319866,
+      "mean_mm": 0.0,
+      "p99_mm": 0.0,
+      "max_mm": 0.0,
+      "above_0p0001": 0,
+      "above_0p1": 0
+    },
+    "saved_conda_vs_official": {
+      "exact_components": 99139,
+      "components": 319866,
+      "mean_mm": 0.0004205742386864518,
+      "p99_mm": 0.006998961486221931,
+      "max_mm": 0.6300040016187256,
+      "above_0p0001": 8892,
+      "above_0p1": 50
+    },
+    "python_state_injected_vs_official": {
+      "exact_components": 225850,
+      "components": 319866,
+      "mean_mm": 2.7105547612534846e-05,
+      "p99_mm": 5.4070300797481455e-05,
+      "max_mm": 0.16503418451571158,
+      "above_0p0001": 904,
+      "above_0p1": 2
+    },
+    "python_state_injected_vs_saved_conda": {
+      "exact_components": 98721,
+      "components": 319866,
+      "mean_mm": 0.00043556903760548146,
+      "p99_mm": 0.007374805473654702,
+      "max_mm": 0.6300657731497872,
+      "above_0p0001": 9420,
+      "above_0p1": 52
+    },
+    "original_50_outliers_remaining_after_python_state": 0,
+    "original_50_outliers_improved_after_python_state": 50,
+    "python_state_new_outlier_ids": [
+      58217,
+      58940
+    ],
+    "official_state_injected_vs_official": {
+      "exact_components": 231087,
+      "components": 319866,
+      "mean_mm": 0.000140201233922649,
+      "p99_mm": 1.993300626783099e-05,
+      "max_mm": 0.5321481387249991,
+      "above_0p0001": 767,
+      "above_0p1": 43,
+      "outlier_ids_over_0p1": [
+        58217,
+        58940,
+        60651,
+        61390,
+        61391,
+        61393,
+        61408,
+        61409,
+        61410,
+        62070,
+        62071,
+        62087,
+        62101,
+        62103,
+        62740,
+        62747,
+        62748,
+        62749,
+        62758,
+        62759,
+        62771,
+        62772,
+        62788,
+        63420,
+        63421,
+        63422,
+        63437,
+        63455,
+        63473,
+        64120,
+        64137,
+        64169,
+        64184,
+        64810,
+        64819,
+        64822,
+        64835,
+        65460,
+        65492,
+        66213,
+        92709,
+        93752,
+        103474
+      ]
+    },
+    "timing_seconds_gdb_full_white_command": {
+      "no_change_control": 263.17,
+      "python_state": 265.65,
+      "official_state": 291.0
+    },
+    "interpretation_limit": "Control replay is vertex-exact. Python first-pass XYZ+normal replacement greatly reduces final tail but still has two >0.1 mm vertices. Exact official XYZ+normal replacement yields 43 outliers; six columns do not capture the full optimizer handoff and later nonlinear paths may differ, so this arm cannot by itself attribute remaining error to later C++ operators or hidden state."
   }
 }
