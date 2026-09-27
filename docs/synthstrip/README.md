@@ -12,14 +12,23 @@ SynthStrip 从脑影像预测有符号距离场，生成脑掩膜和去除背景
 from pathlib import Path
 from fnit import SynthStrip
 
-out = Path("results")
-out.mkdir(exist_ok=True)
-extract = SynthStrip(weights="/path/to/weights", device="cuda:0", threads=4)
-result = extract("subject_T1w.nii.gz", border=1, fill=0)
-result.image.save(out / "subject_brain.nii.gz")
-result.mask.save(out / "subject_mask.nii.gz")
-result.distance.save(out / "subject_sdt.nii.gz")
-# 可继续 extract("another_T1w.nii.gz")，复用模型。
+output_dir = Path("results")
+output_dir.mkdir(exist_ok=True)
+extract = SynthStrip(
+    weights="/path/to/weights",  # 输入：synthstrip.1.pt 文件或其目录
+    device="cuda:0",           # 输入：运行设备，也可写 "cpu"
+    no_csf=False,              # 输入：是否改用排除脑脊液的权重
+    threads=4,                 # 输入：PyTorch CPU 线程数
+)
+result = extract(
+    image="subject_T1w.nii.gz",  # 输入：3D/4D T1 影像路径或内存影像
+    border=1,                   # 输入：距离阈值，单位 mm
+    fill=0,                     # 输入：掩膜外的强度
+)
+result.image.save(output_dir / "subject_brain.nii.gz")     # 输出：去颅骨影像
+result.mask.save(output_dir / "subject_mask.nii.gz")       # 输出：二值脑掩膜
+result.distance.save(output_dir / "subject_sdt.nii.gz")    # 输出：有符号距离图，mm
+# 可继续以 image="another_T1w.nii.gz" 调用 extract，复用已加载模型。
 ```
 
 `from fnit.synthstrip import SynthStrip, StripResult` 是等价的功能模块入口。
@@ -43,14 +52,14 @@ result.distance.save(out / "subject_sdt.nii.gz")
 
 | 参数或字段 | 含义 |
 |---|---|
-| `image` 输入 | 文件路径或 `surfa.Volume`；支持 3D 和逐帧处理的 4D |
+| `image` 输入 | `.nii`、`.nii.gz`、`.mgh`、`.mgz` 路径，或 `nibabel` 影像对象；支持 3D 和逐帧处理的 4D。已有 `surfa.Volume` 内存对象也可传入，供旧调用方过渡 |
 | `border` | SDT 阈值，单位 mm，默认 1 |
 | `fill` | 掩膜外的强度；省略时为 `min(image.min(), 0)` |
 | `result.image` | 掩膜外已填充的影像，保留原网格和几何 |
 | `result.mask` | 二值脑掩膜 |
 | `result.distance` | 有符号距离场，单位 mm |
 
-三个返回字段均为 `surfa.Volume`，可用 `.save(path)` 保存为 NIfTI、MGH、MGZ 等支持的格式。调用不会修改输入对象。直接使用 Python 保存时，由调用者准备输出父目录。
+从路径或 `nibabel` 对象调用时，三个字段均为仓库内的 `Volume`，具有 `.data`、`.affine`、`.shape` 和 `.save(path)`，可保存 NIfTI、MGH、MGZ。传入已有 `surfa.Volume` 时，三个字段仍返回同类对象以兼容旧调用。调用不会修改输入对象；直接使用 Python 保存时，由调用者准备输出父目录。
 
 ## 命令行
 
@@ -94,7 +103,7 @@ mri_synthstrip -i subject_T1w.nii.gz \
 
 通过 `checkpoint["model_state_dict"]` 严格加载，无权重转换或精度压缩。下载、许可和 SHA-256 见 [WEIGHTS.md](../WEIGHTS.md)。推理使用本地权重，不调用 FreeSurfer 命令。
 
-U-Net 在所选设备执行。影像读写、Surfa conform/crop、归一化、SDT 扩展、连通域和最终重采样在 CPU 执行。单例的 4D 输入逐帧处理，每次网络推理一个 frame。GPU 可加快网络部分，完整进程耗时还取决于预后处理和 I/O。
+U-Net 在所选设备执行。影像读写使用 `nibabel`，LIA 几何、裁剪和网格形状由仓库内代码计算；最近邻与线性采样、距离扩展及连通域在 CPU 上调用 NumPy/SciPy。完整推理无需导入 Surfa。单例 4D 输入逐帧处理，每次网络推理一个 frame。GPU 可加快网络部分，完整进程耗时还取决于预后处理和 I/O。
 
 ## 源码组织
 
@@ -136,25 +145,17 @@ U-Net 在所选设备执行。影像读写、Surfa conform/crop、归一化、SD
 
 ## 功能差异与验证
 
-官方脚本集成了参数解析和执行流程，本包允许导入并缓存模型；文件格式和几何处理仍使用独立的 Surfa 库。日志、版本和帮助格式由本包维护，未要求与 FreeSurfer 逐字一致。当前统一 CLI 名称为 `fnit synthstrip`，不会替换系统 `mri_synthstrip`。
+官方脚本集成了参数解析和执行流程；本包允许导入并缓存模型，且文件几何由仓库内代码与 `nibabel` 处理。日志、版本和帮助格式由本包维护。统一 CLI 名称为 `fnit synthstrip`，不会替换系统 `mri_synthstrip`。
 
-仓库当前保留的 12 例单被试 benchmark 使用同一官方权重，分别运行 FreeSurfer 与本包的 CPU/CUDA 路径。同设备比较中，脑图、掩膜和距离场逐元素一致；跨 CPU/GPU 时仅一个病例出现 1 个掩膜体素差异，最低 Dice 为 `0.999999858562`。
+当前无 Surfa 实现在同一份真实 T1、同一台 headcw 上与 FreeSurfer 8.2 官方 CLI 比较：`orig.mgz` 的脑图、掩膜、距离图各 **16,777,216 / 16,777,216** 个体素一致；实际参数 `border=1`、`fill=0`、CPU 4 线程。单次完整 CLI 墙钟时间和进程峰值内存、`border=8`、`no_csf=True`、斜切输入与 4D 功能检查见[迁移验证](../../validation/synthstrip_no_surfa_20260927/README.md)。这些耗时只代表该次执行条件，不能据此宣称普遍加速。
 
-计时包含进程与框架启动、权重和输入加载、推理及写盘；CPU 固定 8 线程，GPU 为同一张 H100。该 benchmark 关闭 TF32，因此下表用于复现实测条件，不代表当前默认 TF32 的最快时间。完整四分位数和逐例指标见[当前汇总](../../benchmark/public_report/summary.md)。
-
-| 原版 CPU | 本包 CPU | 原版 GPU | 本包 GPU |
-|---:|---:|---:|---:|
-| 16.92 | 16.96 | 16.92 | 18.27 |
-
-以下使用同一份去面容的公开 `sub-02` T1w 输入和官方权重，展示原版与本包的脑图。两行分别为轴位和冠状位；三个面板使用同一切面及灰度范围。图片的制作步骤与完整影像比较见[图示记录](../figures/README.md)。
+以下保留此前使用同一份去面容的公开 `sub-02` T1w 输入和官方权重生成的脑图；当前无 Surfa 版本的数值结论以上述新验证为准。两行分别为轴位和冠状位；三个面板使用同一切面及灰度范围。图片的制作步骤与完整影像比较见[图示记录](../figures/README.md)。
 
 ![公开 T1w 输入、FreeSurfer 脑图与本包脑图](../figures/synthstrip_comparison.png)
 
 | 检查 | 记录 |
 |---|---|
-| 同设备官方类与本包类、默认/8 mm/no-CSF/4D 分支 | [模板验证](../../validation/synthstrip_fp32/synthstrip_validation.json) |
-| 原版 CPU 与本包 CPU | [CPU 验证](../../validation/synthstrip_cpu/synthstrip_validation.json) |
-| 12 例真实 T1w、四组 CPU/GPU 计时与数值比较 | [当前汇总](../../benchmark/public_report/summary.md) |
+| 无 Surfa 实现、同一真实 T1、官方 CLI 与新 CLI/API | [迁移验证](../../validation/synthstrip_no_surfa_20260927/README.md) |
 
 测试源码在 [tests/synthstrip/](../../tests/synthstrip/)；原版对照工具在 [tools/validate_synthstrip.py](../../tools/validate_synthstrip.py)：
 

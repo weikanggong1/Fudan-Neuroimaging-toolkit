@@ -36,7 +36,7 @@ def comparison(reference, actual):
         "rmse": float(np.sqrt(np.mean(error * error))),
         "unequal_voxels": int(np.count_nonzero(first != second)),
         "affine_max_abs_error": float(np.max(np.abs(
-            reference.geom.vox2world.matrix - actual.geom.vox2world.matrix
+            reference.geom.vox2world.matrix - actual.affine
         ))),
     }
 

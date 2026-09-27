@@ -2,7 +2,8 @@
 
 每个功能只保留当前使用的说明与最新公开 benchmark：
 
-- SynthStrip / SynthMorph：[`benchmark/public_report/summary.md`](../benchmark/public_report/summary.md) 与机器可读 CSV。
+- SynthStrip：[当前无 Surfa 同输入验证](synthstrip_no_surfa_20260927/README.md)。
+- SynthMorph：[`benchmark/public_report/summary.md`](../benchmark/public_report/summary.md) 与机器可读 CSV。
 - WMH-SynthSeg：[`wmh/README.md`](wmh/README.md) 与 [`wmh/report.public.json`](wmh/report.public.json)。
 - SynthSeg：[`synthseg/report.public.json`](synthseg/report.public.json)。
 - SynthSR：[`synthsr/README.md`](synthsr/README.md)。
@@ -27,7 +28,7 @@
 
 | 功能子页面 | 原软件对照 | 输出一致性 | 运行时间 | example image |
 |---|---|---|---|---|
-| [SynthStrip](../docs/synthstrip/README.md) | FreeSurfer 8.2，12 例 | 有：脑图、mask、distance | 有：原版/本包 CPU 与 GPU | 有：公开 T1w 脑提取 |
+| [SynthStrip](../docs/synthstrip/README.md) | FreeSurfer 8.2，同一真实 T1 | 有：脑图、mask、distance | 有：同机官方/本包 CPU 两次；GPU 新几何路径待测 | 有：此前公开 T1w 脑提取图 |
 | [SynthMorph](../docs/synthmorph/README.md) | FreeSurfer 8.2，四种模式 | 有：变换、正反向图像与边界差异 | 有：原版/本包 CPU 与 GPU | 有：公开 T1w joint 配准 |
 | [WMH-SynthSeg](../docs/wmh_synthseg/README.md) | FreeSurfer 官方源码，12 例 | 有：标签、WMH 概率、软体积 | 有：原版/本包 CPU 与 GPU | 有：公开 FLAIR WMH overlay |
 | [SynthSeg](../docs/synthseg/README.md) | FreeSurfer 8.2，3 例公开 T1w | 有：标签、几何、dtype、软体积 | 有：原版 CPU / 本包 H100 | 有：公开 T1w 标签与 mismatch |

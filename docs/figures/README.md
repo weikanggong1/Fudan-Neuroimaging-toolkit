@@ -14,4 +14,4 @@ SynthMorph 图以 `sub-02` 为 moving、`sub-01` 为 fixed，使用默认 `joint
 
 WMH-SynthSeg 图使用公开 `sub-04` FLAIR。中、右列分别叠加 FreeSurfer 与本包输出的标签 77；两次单被试推理使用同一官方 checkpoint、CUDA 和 `--crop`。完整三维输出的标签不一致体素为 0，WMH Dice 为 1，概率图最大绝对差为 0，数值仿射相同。机器可读指标见 [WMH 图示数据](wmh_metrics.json)。
 
-最新数值 benchmark 分别见 [SynthStrip/SynthMorph 12 例汇总](../../benchmark/public_report/summary.md)和 [WMH 12 例报告](../../validation/wmh/README.md)。FastVBM 的当前数值验证见 [0.9 正式报告](../../validation/fast_vbm/README.md)。
+当前 SynthStrip 数值核对见[无 Surfa 迁移验证](../../validation/synthstrip_no_surfa_20260927/README.md)；本页 SynthStrip 图为此前公开样例的同权重输出。SynthMorph 既有 12 例汇总见[历史汇总](../../benchmark/public_report/summary.md)，WMH 的 12 例报告见[WMH 报告](../../validation/wmh/README.md)。FastVBM 的当前数值验证见 [0.9 正式报告](../../validation/fast_vbm/README.md)。
