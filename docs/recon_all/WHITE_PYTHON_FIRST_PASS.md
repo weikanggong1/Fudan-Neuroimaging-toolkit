@@ -1,6 +1,6 @@
-# 白质面放置：Python 首轮、第二轮与第三轮入口
+# 白质面放置：Python 前三轮逐步诊断
 
-`place_white_preaparc_prefix` 运行 `mris_place_surface --white` 第一轮的前 1–17 步。它是逐顶点核对用的独立实现，公开函数只覆盖真实 T1 左半球首轮；隔离验证脚本还核对了第二轮全部九个接受步和第三轮入口。输出是诊断曲面，不能当成完整 `white.preaparc` 接入生产重建。实现只用 nibabel、NumPy 和 Numba，运行在 CPU。已安装 FreeSurfer 仅用于隔离的对照试验，发布代码不会调用它。
+`place_white_preaparc_prefix` 运行 `mris_place_surface --white` 第一轮的前 1–17 步。它是逐顶点核对用的独立实现，公开函数只覆盖真实 T1 左半球首轮；隔离验证脚本还核对了第二、第三轮全部接受步及第三轮入口。输出是诊断曲面，不能当成完整 `white.preaparc` 接入生产重建。实现只用 nibabel、NumPy 和 Numba，运行在 CPU。已安装 FreeSurfer 仅用于隔离的对照试验，发布代码不会调用它。
 
 ## 输入、输出与调用
 
@@ -162,7 +162,7 @@ force = self_repulsion_gradient(
 
 ## 第二轮入口与完整优化步
 
-这一诊断从安装版 FreeSurfer 8.2 第一轮末的 RAM 曲面出发，冻结同一组真实 T1 输入。它不调用完整重建，也不把官方程序接入 FNIT 生产代码。官方二进制、五个输入文件的 SHA256 和断点命令见[第二轮机器报告](../../validation/recon_all/python_gpu_port/white_python_second_pass_20260928.json)。原始 `VERTEX` 内存各 49,472,608 字节，保存在 gpucw1 诊断目录；报告记录哈希，不提交含进程指针的 RAM 原件。
+这一诊断从安装版 FreeSurfer 8.2 第一轮末的 RAM 曲面出发，冻结同一组真实 T1 输入。它不调用完整重建，也不把官方程序接入 FNIT 生产代码。官方二进制、五个输入文件的 SHA256 和断点命令见[第二轮机器报告](../../validation/recon_all/python_gpu_port/white_python_passes_2_3_20260928.json)。原始 `VERTEX` 内存各 49,472,608 字节，保存在 gpucw1 诊断目录；报告记录哈希，不提交含进程指针的 RAM 原件。
 
 官方第二轮开始时，先从 5,611 个增加到 5,728 个冻结顶点，再以 `sigma=1` 搜索边界并平均目标强度五次。Python 用第一轮末官方 RAM 中的坐标、法线、上一轮目标值和冻结标记作为输入。新的冻结标记逐点相同；106,622 个目标强度和目标距离、319,866 个目标坐标分量均逐位相同。100,894 个未冻结顶点的 `sigma` 逐位相同。辅助字段 `mean` 在其中 129 个顶点不同；本次第 18 步的坐标和 SSE 核对未受到可测影响，后续轮次尚未验证。
 
@@ -215,7 +215,32 @@ force = self_repulsion_gradient(
 | 活跃顶点的 `mean` | 100,662/100,878 逐位相同，216 个不等，最大差 14.116126 |
 | 已冻结顶点中残留的 sigma | 133 处不等；不计入上面的活跃 sigma 验收 |
 
-Python 第三轮入口目标准备用时 `23.79 s`（体积准备 `4.15`、冻结 `8.07`、边界搜索 `5.08`、平均 `6.49 s`）。官方 GDB 从原始输入重放前两轮再截取入口，用时 `135.11 s`；起点不同。第三轮优化步及第四轮尚未核对，`mean` 字段差异也未通过验收。
+Python 第三轮入口目标准备用时 `23.79 s`（体积准备 `4.15`、冻结 `8.07`、边界搜索 `5.08`、平均 `6.49 s`）。官方 GDB 从原始输入重放前两轮再截取入口，用时 `135.11 s`；起点不同。`mean` 字段未逐位匹配，以下八步检验它是否进入当前优化轨迹。
+
+### 第三轮第 27–34 步
+
+Python 从上述官方第三轮入口 RAM 坐标出发，使用自己计算的目标强度与活跃 sigma。这两项已逐点匹配；`mean` 没有输入 Python 梯度或目标函数。官方每个接受步另存 RAM，并用 `FREESURFER_logSSE=1` 独立重放，取得六位小数的自排斥、弹簧和强度 SSE。第 28 步先拒绝 `dt=0.5` 再接受 `dt=0.25`；第 31、34 步后缩步。Python 的八个接受步、缩步和结束位置均与官方相同。
+
+| 步 | 官方 SSE | Python SSE | 逐位相同坐标分量 / 319,866 | 最大顶点差（mm） |
+| ---: | ---: | ---: | ---: | ---: |
+| 27 | 417800.562461 | 417800.562461 | 319,865 | 0.000000954 |
+| 28 | 285414.094242 | 285414.094243 | 319,863 | 0.000000954 |
+| 29 | 247318.912133 | 247318.912039 | 319,860 | 0.000000954 |
+| 30 | 227257.904359 | 227257.904306 | 319,851 | 0.000001349 |
+| 31 | 224447.697160 | 224447.701073 | 319,830 | 0.000007632 |
+| 32 | 210614.310101 | 210614.314082 | 319,783 | 0.000007720 |
+| 33 | 210453.108581 | 210453.149022 | 319,746 | 0.000007807 |
+| 34 | 212909.045554 | 212909.110241 | 319,690 | 0.000007910 |
+
+八步都没有顶点超过 `0.0001 mm`。SSE 从第 27 步就有 `3.52e-7` 的数值差；到第 34 步差 `0.064687`，首次跨过官方一位小数的打印边界。单独把**官方第 34 步坐标**输入同一 Python 目标函数，得到 `212909.045554475`，与原生六位小数值只差 `4.75e-7`。换成 Python 自己的坐标得到 `212909.110241`；两套坐标间的 SSE 差 `0.064686` 中，自排斥项占 `0.063706`，强度项占 `0.000987`，弹簧项约 `-0.000007`。第 33 步在官方坐标上重算的 SSE 也与原生值一致至六位小数。因此第 34 步打印差来自微小坐标差在自排斥项的累积，而非同坐标目标函数的可测偏差。
+
+固定 FreeSurfer 源码提交 `d932c45b7941662ea380a05efef580568b98d41a` 中，本命令的 `l_grad` 默认为零；强度梯度实现的 `v->mean` 读数被注释，`mean` 对应的 SSE 项只在 `l_grad` 非零时启用。安装版实测也只记录自排斥、弹簧和强度三项。这解释了入口 216 个活跃 `mean` 差异没有造成当前第三轮的同坐标 SSE 差；不代表其它参数路径可忽略该字段。
+
+Python 第三轮独立重放 `362.54 s`：准备 `16.11`、初始 SSE `3.06`、梯度 `25.93`、碰撞 `291.18`、逐步 SSE `25.78 s`。官方 GDB 从 `lh.orig` 重放前三轮并存八份 RAM 为 `172.51 s`，另一次重放前三轮记录精细 SSE 为 `184.70 s`。计时起点与诊断 IO 不同，不计算正式加速比；Python 的碰撞核明显较慢。
+
+### 离完整 white.preaparc 还差什么
+
+本轮在第三轮入口重新使用**官方**第二轮末坐标。接入生产前，要将 Python 首轮、第二轮、第三轮连续传递，检验微小坐标差会不会在后续轮次放大。官方还有第四轮（`sigma=0.25`、`n_averages=0`）；需核对该轮重新冻结/目标搜索、每个接受及拒绝步、SSE 和坐标。第四轮后还要核对 `MRISremoveIntersections`、写出的 `white.preaparc` 顶点/面/元数据，以及右半球。当前公开函数仍只覆盖首轮，未形成可接入生产的完整白质面替换。
 
 ### 复核脚本的输入和输出
 
@@ -223,6 +248,10 @@ Python 第三轮入口目标准备用时 `23.79 s`（体积准备 `4.15`、冻�
 
 `validate_white_second_pass_steps.py` 使用 `--subject`（输入被试）、`--boundary-raw`（官方第二轮入口 RAM）、`--boundary-npz`（Python 第二轮目标值与 sigma）、`--official-steps`（九个官方逐步 RAM 文件的目录）、`--out`（JSON 路径）。它在 `--out` 同位置写 `.npz`：`initial`、`step18` 至 `step26` 是 `(V,3)` float32 坐标，`ripped` 是 `(V,)` bool，`target_values` 是 `(V,)` float32。JSON 逐步列出接受/拒绝、SSE/RMS、坐标误差和分段耗时。
 
-`validate_white_third_pass_boundary.py` 使用 `--subject`、`--second-final-raw`（官方第 26 步 RAM）、`--third-boundary-raw`（官方第三轮入口 RAM）、`--python-second-npz`（Python 第二轮逐步快照）和 `--out`（JSON 路径）。同位置的 `.npz` 含 `ripped`、`values`、`distances`、`mean`、`marked`、`sigma`（均为 `(V,)`）及 `target`（`(V,3)`）；JSON 给出逐字段相同数、最大差、首次差异位置和分段耗时。实际路径、脚本 SHA256、五个输入的 SHA256 和完整命令均在[机器报告](../../validation/recon_all/python_gpu_port/white_python_second_pass_20260928.json)。
+`validate_white_third_pass_boundary.py` 使用 `--subject`、`--second-final-raw`（官方第 26 步 RAM）、`--third-boundary-raw`（官方第三轮入口 RAM）、`--python-second-npz`（Python 第二轮逐步快照）和 `--out`（JSON 路径）。同位置的 `.npz` 含 `ripped`、`values`、`distances`、`mean`、`marked`、`sigma`（均为 `(V,)`）及 `target`（`(V,3)`）；JSON 给出逐字段相同数、最大差、首次差异位置和分段耗时。实际路径、脚本 SHA256、五个输入的 SHA256 和完整命令均在[机器报告](../../validation/recon_all/python_gpu_port/white_python_passes_2_3_20260928.json)。
+
+`capture_white_installed_third_pass_steps.py` 和 `capture_white_installed_third_pass_sse.py` 的 `--subject`、`--binary`、`--license`、`--out` 与前述官方截取脚本相同。前者写 `step027.raw` 至 `step034.raw`、日志和清单；后者启用高精度 SSE 日志，写 `capture.log` 和含每步三项 SSE 的 `capture_report.json`，不写 RAM。两者都在第三轮结束后退出，不运行第四轮。
+
+`validate_white_third_pass_steps.py` 的 `--subject` 是冻结被试；`--boundary-raw` 是官方第三轮入口 RAM，`--boundary-npz` 是 Python 第三轮目标，`--official-steps` 指向官方八个逐步 RAM，`--out` 指定 JSON。相邻 `.npz` 中 `initial`、`step27` 至 `step34` 为 `(V,3)` float32 坐标，`ripped`、`target_values` 为 `(V,)`。JSON 按步列出试探次数、接受 dt、SSE/RMS、坐标误差及分段时间。`analyze_white_third_sse_terms.py` 另接收 `--python-steps-npz`（上述逐步数组），以及相同的 `--subject`、`--boundary-raw`、`--boundary-npz`、`--official-steps` 和 `--out`（JSON）；输出第 33、34 步分别在官方与 Python 坐标上的三项 SSE。脚本和数据 SHA256、完整命令在[机器报告](../../validation/recon_all/python_gpu_port/white_python_passes_2_3_20260928.json)。
 
 当前公开的 `place_white_preaparc_prefix` 仍只运行首轮，不输出完整 `white.preaparc`。这些隔离探针只提供同输入的阶段证据，未用于 FNIT 生产调用链。
