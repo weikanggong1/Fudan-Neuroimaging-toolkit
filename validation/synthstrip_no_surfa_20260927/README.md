@@ -33,7 +33,7 @@ Surfa 重载 MGZ 后的仿射数值差为约 `5.68e-14` mm。候选脑图与既�
 
 同一真实 T1 的三个 API 参数分支在原始 `orig.mgz` 网格上，`border=1`、`border=8`、`no_csf=True` 各自的影像、掩膜和距离均逐体素一致。斜切原始扫描 `orig/001.mgz`（256×156×256）上，影像和掩膜仍逐体素一致；距离图存在 float32 运算顺序差异，最大 `9.54e-7` mm，**没有**体素超过 `1e-4` mm。4D 入口用该真实 T1 的两帧派生 NIfTI 检查功能，影像和掩膜逐体素一致，距离图最大 `9.54e-7` mm；这两帧不能当作两个独立被试的准确度证据。NIfTI 写盘后的体素一致，数值仿射与 Surfa 写盘最大相差 `7.33e-6` mm。
 
-独立进程在导入钩子中明确阻止 `surfa` 及其子模块后，`from fnit import SynthStrip`、nibabel 内存影像输入、推理和 MGZ 保存均完成；`sys.modules` 无 Surfa 条目。输入内存影像保持不变。旧调用方传入已经创建的 `surfa.Volume` 时，返回值仍为同类对象，已单独确认。
+独立进程在导入钩子中明确阻止 `surfa` 及其子模块后，`from fnit import SynthStrip`、nibabel 内存影像输入、推理和 MGZ 保存均完成；统一 `fnit synthstrip` 入口的掩膜写盘也在相同导入禁用条件下完成，`sys.modules` 无 Surfa 条目。输入内存影像保持不变。旧调用方传入已经创建的 `surfa.Volume` 时，返回值仍为同类对象，已单独确认。
 
 最初使用 float64 坐标重采样时，斜切影像边界上有 29,694 个距离体素误差超过 0.1 mm。原因是 Surfa 0.6.3 的[插值实现](https://github.com/freesurfer/surfa/blob/v0.6.3/surfa/image/interp.pyx)在插值前把体素变换与坐标转为 float32，边界坐标会被舍入到视野内或视野外。按该精度重算后，大误差消失，最大残差降至 `9.54e-7` mm。默认脑掩膜在修正前后均无差异，但距离图属于公开输出，因此保留此修正。
 

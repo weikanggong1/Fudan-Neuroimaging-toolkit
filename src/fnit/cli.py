@@ -561,6 +561,20 @@ def main(argv=None):
     if selected and selected[0] == "synthseg":
         _run_synthseg(parser.parse_args(selected))
         return
+    if selected and selected[0] == "synthstrip":
+        args = parser.parse_args(selected)
+        if not any((args.out, args.mask, args.sdt)):
+            parser.error('provide at least one -o, -m or -d output')
+        from .synthstrip import SynthStrip
+        result = SynthStrip(args.weights, args.device, args.no_csf, args.threads)(
+            args.image, args.border, args.fill)
+        for volume, path in ((result.image, args.out), (result.mask, args.mask),
+                             (result.distance, args.sdt)):
+            if path:
+                Path(path).parent.mkdir(parents=True, exist_ok=True)
+                volume.save(path)
+                print(path)
+        return
     from .topup.cli import add_parser as add_topup_parser
     from .eddy.cli import add_parser as add_eddy_parser
     from .dtifit.cli import add_parser as add_dtifit_parser
