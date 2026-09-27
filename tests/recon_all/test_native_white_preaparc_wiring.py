@@ -5,6 +5,8 @@ from __future__ import annotations
 import contextlib
 import io
 import json
+
+import numpy as np
 from pathlib import Path
 import tempfile
 import unittest
@@ -12,7 +14,8 @@ from unittest.mock import patch
 
 from fnit.recon_all.batch import run_recon_all_python_batch
 from fnit.recon_all.native_free import (
-    _place_preaparc_and_smooth, _run_white_mri_chain, main,
+    _place_preaparc_and_smooth, _run_white_mri_chain,
+    _write_principal_curvature_maps, main,
     run_recon_all_python,
 )
 
@@ -120,6 +123,38 @@ class WhitePreaparcWiringTest(unittest.TestCase):
             self.assertEqual(calls[1][2],
                              {"iterations": 3, "device": "cpu"})
             self.assertIn("smoothwm_seconds", result)
+
+    def test_placed_curvatures_use_preaparc_and_smoothwm_meshes(self):
+        source_value = {"white.preaparc": 2, "inflated": 3, "smoothwm": 4}
+        output = {}
+        reads = []
+
+        def read(path):
+            surface = Path(path).name.split(".", 1)[1]
+            reads.append(surface)
+            return np.full((3, 3), source_value[surface], np.float32), np.zeros((1, 3), np.int32)
+
+        def curv(vertices, _faces, *, device):
+            self.assertEqual(device, "cpu")
+            value = vertices[0, 0]
+            return np.full(3, value, np.float32), np.full(3, value * 10, np.float32)
+
+        with patch("fnit.recon_all.native_free.fs.read_geometry", side_effect=read), patch(
+                "fnit.recon_all.native_free.fs.write_morph_data",
+                side_effect=lambda path, values: output.__setitem__(Path(path).name, values)), patch(
+                "fnit.recon_all.surface_roi_curvature_gpu.principal_curvatures",
+                side_effect=curv):
+            for hemi in ("lh", "rh"):
+                _write_principal_curvature_maps(Path("surf"), hemi, "cpu", True)
+        self.assertEqual(reads, ["white.preaparc", "inflated", "smoothwm"] * 2)
+        self.assertEqual(len(output), 16)
+        for hemi in ("lh", "rh"):
+            for name in ("H", "K", "K1", "K2"):
+                self.assertIn(f"{hemi}.smoothwm.{name}.crv", output)
+            np.testing.assert_array_equal(output[f"{hemi}.white.preaparc.H"],
+                                          np.full(3, 11, np.float32))
+            np.testing.assert_array_equal(output[f"{hemi}.smoothwm.K1.crv"],
+                                          np.full(3, 4, np.float32))
 
     def test_single_cli_and_batch_forward_flag(self):
         with patch("fnit.recon_all.native_free.run_recon_all_python",

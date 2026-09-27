@@ -279,6 +279,32 @@ def _place_preaparc_and_smooth(subject: Path, hemi: str, binary: Path,
     return report
 
 
+def _write_principal_curvature_maps(surf: Path, hemi: str,
+                                    device: str, placed_preaparc: bool) -> None:
+    from .surface_roi_curvature_gpu import principal_curvatures
+
+    preaparc_source = "white.preaparc" if placed_preaparc else "white"
+    smoothwm_curv = None
+    for surface, prefix in ((preaparc_source, "white.preaparc"),
+                            ("inflated", "inflated")):
+        xyz, mesh = fs.read_geometry(str(surf / f"{hemi}.{surface}"))
+        k1, k2 = principal_curvatures(xyz, mesh, device=device)
+        fs.write_morph_data(str(surf / f"{hemi}.{prefix}.H"),
+                            ((k1 + k2) / 2).astype(np.float32))
+        fs.write_morph_data(str(surf / f"{hemi}.{prefix}.K"),
+                            (k1 * k2).astype(np.float32))
+        if surface == "white":
+            smoothwm_curv = (k1, k2)
+    if smoothwm_curv is None:
+        xyz, mesh = fs.read_geometry(str(surf / f"{hemi}.smoothwm"))
+        smoothwm_curv = principal_curvatures(xyz, mesh, device=device)
+    k1, k2 = smoothwm_curv
+    for name, values in (("H", (k1 + k2) / 2), ("K", k1 * k2),
+                         ("K1", k1), ("K2", k2)):
+        fs.write_morph_data(str(surf / f"{hemi}.smoothwm.{name}.crv"),
+                            np.asarray(values, np.float32))
+
+
 def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
                   aseg: np.ndarray, *, device: str, threads: int = 4,
                   native_topology_binary: Path | None = None,
@@ -377,22 +403,8 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
     if native_surface_metrics_binary is None:
         curvature_map(surf / f"{hemi}.white", surf / f"{hemi}.curv", device=device)
         curvature_map(surf / f"{hemi}.pial", surf / f"{hemi}.curv.pial", device=device)
-    from .surface_roi_curvature_gpu import principal_curvatures
-    preaparc_curvature_source = (
-        "white.preaparc" if native_white_preaparc_binary is not None else "white")
-    for surface, prefix in ((preaparc_curvature_source, "white.preaparc"),
-                            ("inflated", "inflated")):
-        xyz, mesh = fs.read_geometry(str(surf / f"{hemi}.{surface}"))
-        k1, k2 = principal_curvatures(xyz, mesh, device=device)
-        fs.write_morph_data(str(surf / f"{hemi}.{prefix}.H"),
-                            ((k1 + k2) / 2).astype(np.float32))
-        fs.write_morph_data(str(surf / f"{hemi}.{prefix}.K"),
-                            (k1 * k2).astype(np.float32))
-        if surface == "white":
-            for name, values in (("H", (k1 + k2) / 2), ("K", k1 * k2),
-                                 ("K1", k1), ("K2", k2)):
-                fs.write_morph_data(str(surf / f"{hemi}.smoothwm.{name}.crv"),
-                                    np.asarray(values, np.float32))
+    _write_principal_curvature_maps(
+        surf, hemi, device, placed_preaparc=white_preaparc_report is not None)
     approximations = []
     if native_topology_binary is None:
         approximations.append("topology-unrepaired")
