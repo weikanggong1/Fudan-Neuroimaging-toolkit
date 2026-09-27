@@ -1,4 +1,4 @@
-"""The public 33-class SynthSeg API and both CLI frontends share one path."""
+"""The public 33-class SynthSeg Python and CLI interfaces share one path."""
 
 from pathlib import Path
 from types import SimpleNamespace
@@ -8,7 +8,6 @@ import torch
 
 from fnit import SynthSeg
 from fnit import cli
-from fnit.recon_all import gpu_tools
 from fnit import synthseg_parc
 from fnit.synthseg_parc import synthseg
 
@@ -70,11 +69,9 @@ def test_independent_api_uses_one_weight_directory_and_recon_soft_volumes(tmp_pa
     assert csv_path.read_text().splitlines()[1].startswith("case,1280294.2,")
 
 
-def test_public_cli_and_recon_wrapper_call_same_api(tmp_path, monkeypatch):
+def test_public_cli_calls_shared_synthseg_api(tmp_path, monkeypatch):
     image = tmp_path / "t1.nii.gz"
     image.write_bytes(b"input")
-    lut = tmp_path / "FreeSurferColorLUT.txt"
-    lut.write_text("0 Unknown 0 0 0 0\n")
     saved = []
     calls = []
 
@@ -107,14 +104,3 @@ def test_public_cli_and_recon_wrapper_call_same_api(tmp_path, monkeypatch):
         ("csv", image, tmp_path / "public.csv"),
     ]
     assert saved == [tmp_path / "public.nii.gz"]
-
-    calls.clear()
-    monkeypatch.setenv("FREESURFER_HOME", str(tmp_path))
-    monkeypatch.setenv("FS_TORCH_MODEL_DIR", str(tmp_path))
-    monkeypatch.setenv("FS_TORCH_DEVICE", "cpu")
-    gpu_tools._segment(["--i", str(image), "--o", str(tmp_path / "recon.mgz"),
-                        "--vol", str(tmp_path / "recon.csv")])
-    assert calls[0] == ("init", {"weights": tmp_path, "device": "cpu", "threads": 4})
-    assert calls[1] == ("run", image, {"keep_geometry": False, "color_lut": lut})
-    assert calls[2] == ("csv", image, tmp_path / "recon.csv")
-    assert saved[-1] == tmp_path / "recon.mgz"

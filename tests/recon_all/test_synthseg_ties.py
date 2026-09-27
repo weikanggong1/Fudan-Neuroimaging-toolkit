@@ -1,8 +1,8 @@
-"""Numerical tie handling for the pinned GPU SynthSeg recon-all command."""
+"""Numerical tie handling for the shared PyTorch SynthSeg implementation."""
 
 import torch
 
-from fnit.recon_all.gpu_tools import (
+from fnit.synthseg_parc.synthseg import (
     SYNTHSEG_TIE_EPSILON, _synthseg_index_with_numerical_ties,
 )
 

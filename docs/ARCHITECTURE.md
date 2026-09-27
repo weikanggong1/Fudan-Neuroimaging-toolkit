@@ -2,7 +2,7 @@
 
 [返回首页](../README.md) · [新增功能](ADDING_FUNCTIONS.md)
 
-每个功能位于 `src/fnit/` 的独立目录，完整用法、原版对应关系和最新验证位于 `docs/` 的同名子页面。共享的 `cli.py` 提供单被试命令行入口，`weights.py` 定位并校验官方权重。除本轮未调整的 `recon_all` 子包外，公开接口只接受单被试输入：Python 每次调用一个对象，命令行每次处理一个病例。
+每个功能位于 `src/fnit/` 的独立目录，完整用法、原版对应关系和最新验证位于 `docs/` 的同名子页面。共享的 `cli.py` 提供单被试命令行入口，`weights.py` 定位并校验官方权重。公开命令行每次处理一个病例；`recon_all` 另提供仅限 Python 的多被试并行调用。
 
 FastVBM 的配准链位于 `flirt/`、`fnirt/`、`applywarp/`、`fast_vbm/registration.py` 和 `fast_vbm/synthmorph_backend.py`。`registration.py` 先执行共同 TorchFLIRT，只在非线性形变估计处分到 SynthMorph 或 TorchFNIRT，随后回到共同 FSL warp conversion、TorchApplyWarp、Jacobian 和 modulation。
 
@@ -24,7 +24,7 @@ FastVBM 的配准链位于 `flirt/`、`fnirt/`、`applywarp/`、`fast_vbm/regist
 | TorchAMICONODDI | [AMICO 风格 NODDI dictionary fit](amico_noddi/README.md) |
 | TorchBEDPOSTX | [体素内纤维方向估计](bedpostx/README.md) |
 | TorchProbtrackX | [概率纤维束追踪与连接矩阵](probtrackx/README.md) |
-| GPU recon-all | [单 T1 皮层重建](recon_all/README.md) |
+| Python recon-all（近似版） | [单 T1 皮层重建](recon_all/README.md) |
 
 ## 公开 Python API
 

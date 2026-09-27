@@ -1,8 +1,6 @@
 # Native-free recon-all acceptance gates
 
-This branch contains independently validated translations. The published
-`fnit-recon-all` entry point still launches a scoped FreeSurfer runtime. It
-must remain described as a hybrid until the gates below pass on the same T1.
+The published `fnit-recon-all` entry runs the connected Python reconstruction. It is a core-output prototype, not an equivalent FreeSurfer 8.2 replacement. The gates below define what remains before claiming numerical compatibility on the same T1.
 
 1. **Connected run:** start with the original T1 and an empty subject folder;
    generate all fixed-profile outputs using installed `fnit`, external weights,
