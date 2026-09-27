@@ -4,14 +4,14 @@
 
 ## 安装与构建
 
-从仓库根目录创建 Conda 环境。该 YAML 已通过求解测试，尚未整份文件重新创建实测：
+从仓库根目录创建 Conda 环境。已按这份 YAML 在 headcw 完整创建新环境，并在 gpucw1 验证 CUDA 与二进制启动；命令和结果见[安装实测](../../validation/recon_all/python_gpu_port/conda_yaml_install_20260927/README.md)：
 
 ```bash
 CONDA_OVERRIDE_GLIBC=2.17 conda env create -f environment-recon-all-cpp.yml
 conda activate fnit-recon-all-cpp
 ```
 
-该 YAML 已在目标 glibc 2.17 条件下通过 Conda dry-run 求解；实际构建和整例使用等价的分步安装环境，尚未重复执行 YAML 完整创建。C/C++/Fortran 编译器、ITK 开发库和 CUDA 工具均来自 Conda；Python 附加包也安装在同一环境。gpucw1 的宿主 glibc 为 2.17，必须使用该 sysroot；用 2.28 构建的程序无法在该节点启动。
+这次完整 YAML 环境已成功重新编译七个目标，但尚未用它重跑整例。C/C++/Fortran 编译器、ITK 开发库和 CUDA 工具均来自 Conda；Python 附加包也安装在同一环境。gpucw1 的宿主 glibc 为 2.17，必须使用该 sysroot；用 2.28 构建的程序无法在该节点启动。
 
 ```bash
 git clone https://github.com/freesurfer/freesurfer.git /path/to/freesurfer-source

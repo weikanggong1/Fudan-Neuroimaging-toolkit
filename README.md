@@ -79,14 +79,14 @@ conda activate "$FNIT_ENV_PREFIX"
 
 ### recon-all 的 Conda 环境与 C++ 阶段
 
-[`environment-recon-all-cpp.yml`](environment-recon-all-cpp.yml) 包含上述 Python 功能及六个 FreeSurfer C++ 构建目标所需的 Conda 编译器、ITK 开发库、CUDA 工具和 glibc 2.17 sysroot；默认的 `environment.yml` 保持轻量。该 YAML 已通过求解测试，整份文件尚未在目标节点重新创建实测。以下命令创建环境，不编译或下载 FreeSurfer 程序：
+[`environment-recon-all-cpp.yml`](environment-recon-all-cpp.yml) 包含上述 Python 功能及七个 FreeSurfer C++ 构建目标所需的 Conda 编译器、ITK 开发库、CUDA 工具和 glibc 2.17 sysroot；默认的 `environment.yml` 保持轻量。已在 headcw 从这份 YAML 创建完整环境，并在 gpucw1 验证 CUDA 和编译程序的 glibc 2.17 启动；[实测记录](validation/recon_all/python_gpu_port/conda_yaml_install_20260927/README.md)列出命令、哈希和真实 T1 阶段结果。以下命令创建环境，不编译或下载 FreeSurfer 程序：
 
 ```bash
 CONDA_OVERRIDE_GLIBC=2.17 conda env create -f environment-recon-all-cpp.yml
 conda activate fnit-recon-all-cpp
 ```
 
-该 YAML 在目标 glibc 2.17 条件下通过 Conda 求解 dry-run；实际用于编译和整例的环境以文档中的等价分步命令安装，未额外重复一次 YAML 完整创建。随后按 [C++ 编译与调用说明](docs/recon_all/CONDA_CPP_BUILD.md)固定 FreeSurfer 源码提交并构建六个程序：GCA、白质初分割、白质编辑三个为当前必需，拓扑、膨胀和顶点图三个按开关启用；标准球面与配准已改用 Python。每个阶段的功能、等价官方命令和精度/耗时验证见 [C++ 阶段说明](docs/recon_all/CONDA_CPP_STAGES.md)。模型和模板仍通过下述独立命令下载。
+随后按 [C++ 编译与调用说明](docs/recon_all/CONDA_CPP_BUILD.md)固定 FreeSurfer 源码提交并构建六个程序：GCA、白质初分割、白质编辑三个为当前必需，拓扑、膨胀和顶点图三个按开关启用；另编译标准拓扑程序供诊断。标准球面与配准已改用 Python。每个阶段的功能、等价官方命令和精度/耗时验证见 [C++ 阶段说明](docs/recon_all/CONDA_CPP_STAGES.md)。模型和模板仍通过下述独立命令下载。
 
 ## 下载和部署权重
 

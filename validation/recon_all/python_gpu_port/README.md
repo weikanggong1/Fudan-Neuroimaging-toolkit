@@ -39,3 +39,5 @@ python validation/recon_all/python_gpu_port/compare_complete_subject.py \
 - **脑区、投影和统计：** [表面注释](MRIS_CA_LABEL_STATUS.md)、[label2annot](LABEL2ANNOT.md)、[表面标签转换](LABEL2LABEL_SURFACE_STATUS.md)、[surf2volseg](SURF2VOLSEG_CORTEX.md)、[ROI 曲率](ROI_CURVATURE.md)、[脑区统计行](ANATOMICAL_STATS_ROWS.md)、[全局统计](ANATOMICAL_STATS_GLOBAL.md)、[eTIV](ESTIMATED_TIV.md)。
 
 `fnit-recon-all` 当前仍需三个必需、三个可选的 Conda 源码编译 C++ 程序，不需要系统安装的 FreeSurfer 运行包。[构建与调用说明](../../../docs/recon_all/CONDA_CPP_BUILD.md)列出固定源码、外置许可证和资产要求。阶段通过率只对报告中的同输入范围有效；当前完整发布状态以[发布门槛](RELEASE_GATES.md)为准。
+
+[完整 Conda YAML 安装实测](conda_yaml_install_20260927/README.md)在独立新环境中编译了上述程序，并使 `mri_segment` 在真实 T1 冻结输入上获得 0/16,777,216 体素差。它验证安装与单阶段运行，不更新上文 v3 整例的 138 项结果。
