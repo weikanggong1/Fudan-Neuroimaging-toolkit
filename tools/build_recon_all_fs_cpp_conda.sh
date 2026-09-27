@@ -121,7 +121,7 @@ for target in "${targets[@]}"; do
   fi
 done
 # Build the topology variant that consumes the Python exact-centered sphere and
-# pins the older FreeSurfer double-tanh behavior. Keep the unmodified binary
+# pins the older FreeSurfer double-tanh and double-sqrt behavior. Keep the unmodified binary
 # above for diagnostic comparisons only.
 "$CONDA_PREFIX/bin/python" "$(dirname "$0")/build_recon_all_topology_fnit.py" \
   --build "$build_dir" --source "$build_source" \

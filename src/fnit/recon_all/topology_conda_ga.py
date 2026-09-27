@@ -1,7 +1,7 @@
 """Conda C++ topology GA with an exact Python sphere-centering preflight.
 
-The pinned FreeSurfer 8.2 source build requires build_topology_fnit.py's two
-numeric fixes. This stage stops at orig.premesh; the caller runs remeshing next.
+The pinned FreeSurfer 8.2 source build requires build_recon_all_topology_fnit.py's three
+source fixes. This stage stops at orig.premesh; the caller runs remeshing next.
 """
 
 from __future__ import annotations

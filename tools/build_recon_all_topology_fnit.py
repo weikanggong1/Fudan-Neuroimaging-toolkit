@@ -1,4 +1,4 @@
-"""Build an isolated FreeSurfer 8.2 topology binary with two numeric fixes.
+"""Build an isolated FreeSurfer 8.2 topology binary with three numeric fixes.
 
 This edits neither the pinned source tree nor its existing Conda build.  It
 requires a completed Ninja build of ``mris_fix_topology`` and the same Conda
@@ -64,7 +64,16 @@ def main() -> None:
         if content.count(needle) != 1:
             raise ValueError(f"expected one patch site in {original}")
         patched = output / filename
-        patched.write_text(content.replace(needle, replacement))
+        content = content.replace(needle, replacement)
+        if filename == "mrisurf_defect.cpp":
+            # Promoting the type-2 smoother argument to double restores
+            # official RH topology under the pinned same-input test.
+            term = "sd += sqrt(dx * dx + dy * dy + dz * dz);"
+            if content.count(term) != 2:
+                raise ValueError("expected two defectSmooth sqrt call sites")
+            content = content.replace(
+                term, "sd += sqrt((double)(dx * dx + dy * dy + dz * dz));", 1)
+        patched.write_text(content)
         line = next(line for line in commands if " -c " in line
                     and line.rstrip().endswith(str(original)))
         cmd = shlex.split(line)

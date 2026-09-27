@@ -3,7 +3,7 @@
 The native-topology option now selects the pinned Conda-built
 `mris_fix_topology_fnit`. Its Python preflight reproduces the sphere used by
 FreeSurfer 8.2 at the start of defect search. The source build changes the
-centering handoff and one float-versus-double `tanh` call. The original
+centering handoff plus float-versus-double `tanh` and `sqrt` calls in defect smoothing. The original
 Conda-built `mris_fix_topology` is retained for diagnostic comparison only.
 This stage runs on CPU. No FreeSurfer executable is required at runtime.
 
@@ -77,31 +77,49 @@ not a current whole-subject E2E result. No patient image is committed.
 | Official FreeSurfer 8.2 | 101,689 / 203,374 | 100,555 / 201,106 | Reference |
 | Unmodified Conda C++ | 101,737 / 203,470 | 100,655 / 201,306 | Both differ |
 | Python exact sphere + original Conda C++ | 101,689 / 203,374 | 100,575 / 201,146 | LH vertices/faces all ordered and float32 exact; RH differs |
-| Python exact sphere + double-`tanh` Conda C++ | 101,689 / 203,374 | 100,548 / 201,092 | LH again exact; RH still differs |
+| Python exact sphere + double-`tanh` Conda C++ | 101,689 / 203,374 | 100,548 / 201,092 | LH exact; RH still differs |
+| Python exact sphere + double-`tanh`/`sqrt` Conda C++ | 101,689 / 203,374 | 100,555 / 201,106 | Both hemispheres have exact ordered vertices, faces, and float32 coordinates |
 
 Python preflight sphere coordinates and ordered faces are **exact** against
 official diagnostic centered spheres for LH 102,764/205,560 and RH
-101,454/202,936. The LH patched result has all 101,689 vertices,
-305,067 coordinate components and 203,374 ordered faces exact. The RH patched
-mesh has seven fewer vertices and 14 fewer faces than official, so
-vertexwise downstream measures cannot be compared by index.
+101,454/202,936. With both C++ math fixes, LH `orig.premesh` has all
+101,689 vertices, 305,067 float32 coordinate components and 203,374 ordered
+faces exact; RH has all 100,555 vertices, 301,665 coordinate components and
+201,106 ordered faces exact. File SHA-256 differs because the surface comment
+records creation provenance. The controlled baseline with only double
+`tanh` had its first RH difference after smoothing defect 0's first
+crossover: three vertices differed by at most 1.19e-7 mm, then MRI matching
+amplified the error and changed GA decisions. Promoting the type-2 smoother's
+`sqrt` argument to double restored this crossover and the complete RH mesh.
 
-One observed paired API run spent 6.84/5.80 s in Python preflight and
-71.57/76.29 s in Conda C++ (LH/RH). The earlier official same-input runs took
-60.98/82.10 s. Shared node load varied; these times do not support an
-equivalent-reconstruction speed claim.
+The observed final Conda C++ stage took 56.92/95.48 s (LH/RH); Python
+preflight took 6.34/3.55 s in a separate call. Earlier official same-input
+runs took 60.98/82.10 s. Shared node load varied, so these observations are
+not a controlled speed comparison. The frozen paired inputs include official
+MRI/WM and independent FNIT nofix surfaces; current connected E2E white/pial
+and atlas metrics are not thereby accepted.
 
-The first remaining RH difference is in defect 0's **first crossover and
-mutation**: initial candidate patch fitness values are all ten exact after
-the double-`tanh` fix, but crossover fitness prints -108.03 for official
-and -107.96 for Conda. Its raw saved mesh is exact; its smoothed mesh differs
-at three vertices by at most 1.19e-7 mm, then the MRI-matched mesh differs
-at 52 vertices (maximum 0.2013 mm). This amplification changes the GA path.
-The next source numeric difference remains unresolved. This is a strict
-parity failure and later surface/ROI metrics are not yet accepted.
+The connected Python remesher was also run on both newly generated
+`orig.premesh` surfaces, with no official surface supplied to the call.
+Against the archived official `orig`, LH had 106,622/106,622 vertices,
+319,866/319,866 float32 coordinates and 213,240/213,240 ordered faces exact;
+RH had 105,541/105,541 vertices, 316,623/316,623 coordinates and
+211,078/211,078 faces exact. It took 100.05/119.32 s on the shared
+headcw node. The [earlier independent remesher benchmark](../../validation/recon_all/python_gpu_port/REMESH_VALIDATION.md)
+compared Python and official commands on a different frozen premesh; its
+timings are not paired with this generated premesh.
+
+The volume geometry metadata fields match numerically for both hemispheres.
+Its `filename` field correctly names each subject's own `mri/wm.mgz`;
+that path naturally differs between the official and scratch subjects. The
+candidate `orig` lacks 425 bytes of official FreeSurfer build/run provenance
+tags, so full footer bytes and file SHA-256 differ. The [bilateral orig
+geometry](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/place_geometry_pair/accurate_filled_initial/curvature_trial/lh_fnit_sqrt_orig_vs_official.json)
+and [footer/metadata report](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/place_geometry_pair/accurate_filled_initial/curvature_trial/orig_metadata_report.json)
+record the distinction; the RH geometry JSON is beside the LH file.
 
 The [bilateral JSON evidence](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/place_geometry_pair/accurate_filled_initial/curvature_trial/)
-include each exact-coordinate/face comparison, API timing, and checkpoint
-boundary. The Conda build pins source file hashes before patching; its
+records exact-coordinate/face comparisons, timings, and the diagnostic
+checkpoint boundary before the final sqrt fix. The Conda build pins source file hashes before patching; its
 `ldd` and SHA-256 outputs are recorded in the build directory. No GPU
 allocation occurs in this stage.

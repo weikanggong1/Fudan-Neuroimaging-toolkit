@@ -68,7 +68,7 @@ CPU 用于两个末端重叠修复，是已通过冻结输入验收的模式；�
 | `mri_em_register` | 4×4 LTA 16 个 float64 元素逐位相同 | 369.43 / 299.21 s |
 | `mri_segment` | `wm.seg` 0/16,777,216 体素差，MGH 头部及仿射一致 | 51.85 / 40.45 s（连续 WM 链当前 81.63 s） |
 | `mri_edit_wm_with_aseg` | `wm.asegedit` 0/16,777,216 体素差 | 旧官方日志 28.42 / 当前 45.99 s（连续 WM 链 52.88 s） |
-| `mris_fix_topology_fnit` 官方 `-ga -seed 1234` | 准确同输入下 LH `orig.premesh` 101,689/203,374，顶点坐标与面全 exact；RH 100,548/201,092，对官方 100,555/201,106 仍不一致，**未通过双侧验收**。[详细证据](TOPOLOGY_CONDA_GA.md) | 官方 LH/RH 60.98/82.10 s；Python 居中球 6.84/5.80 s + Conda C++ 71.57/76.29 s，非同期负载 |
+| `mris_fix_topology_fnit` 官方 `-ga -seed 1234` | 准确同输入下双侧 `orig.premesh` 及 Python remesh 后 `orig` 的有序顶点、坐标、面全 exact；LH/RH 最终 `orig` 106,622/213,240 和 105,541/211,078。[详细证据](TOPOLOGY_CONDA_GA.md) | 官方拓扑 LH/RH 60.98/82.10 s；Python 居中球 6.34/3.55 s + Conda C++ 56.92/95.48 s + Python remesh 100.05/119.32 s，非同期负载 |
 | `mris_inflate` | LH 同输入 117,777 顶点、235,550 面及 117,777 个 sulc 值全部一致 | 12.21 / 12.19 s |
 | Python quick sphere | v3 双侧输入：LH 102,764 顶点/205,560 面、RH 101,454/202,936，全部有序坐标和面一致；更新后的连续左侧输出也逐点 exact | 官方归档 LH/RH 83.88/96.84 s（日志 `FSRUNTIME@`）；Python 139.24/139.03 s；非同期共享负载 |
 | Python standard sphere | 冻结官方双侧输入最终有序顶点、面及 volume geometry 全部逐位一致；LH 243 步、RH 134 步 | 官方 LH/RH 240.64/109.72 s；Python 372.82/220.17 s |
