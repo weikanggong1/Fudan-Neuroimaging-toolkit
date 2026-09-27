@@ -27,7 +27,7 @@ result = model(
     image="T1_brain.nii.gz",    # 必需：已去脑、单帧 T1w 的 NIfTI/MGZ 路径或内存影像
     mask="brain_mask.nii.gz",   # 可选：与 T1 相同尺寸和仿射的二值脑掩模
 )
-result.pve_gm.save("T1_brain_pve_1.nii.gz")  # 保存 GM 分数体积
+result.pve_gm.save(path="T1_brain_pve_1.nii.gz")  # 保存 GM 分数体积
 ```
 
 `image` 的轴顺序与文件中的体素轴一致。`mask` 未提供时，使用 `image > 0`；提供时，使用 `(image > 0) & (mask > 0)`。掩模不重采样；尺寸或 voxel-to-world 仿射不同会报错。文件路径、仓库 `Volume`、NiBabel 影像和旧代码已持有的 Surfa 内存体都可作为输入；**加载路径和调用 TorchFAST 本身不导入 Surfa**。旧 Surfa 内存体输入仍返回同类内存体，便于已有调用迁移。路径、NiBabel 及仓库 `Volume` 输入返回仓库 `Volume`；其 `.data`、`.affine`、`.shape` 和 `.save(path)` 可直接使用。

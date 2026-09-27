@@ -33,7 +33,7 @@ recon-all 提供单被试命令行与 Python API；多被试并行仅提供 Pyth
 
 recon-all 的神经网络与部分体素、表面计算使用 PyTorch/CUDA；N4 使用仓库 C++ 与 Conda ITK 在 CPU 上运行，去噪和部分网格、统计使用 Python CPU。当前仍需从固定 FreeSurfer 源码用 Conda 编译三个必需、三个可选表面程序；无需安装 FreeSurfer 运行包。[构建和单被试调用](docs/recon_all/README.md)列出输入、外置数据及输出结构。
 
-依赖迁移状态（2026-09-28）：当前 recon-all 的 N4、SynthStrip、33 类 SynthSeg、Talairach affine 与可选 MNI152 affine 注册已移除 Surfa、SimpleITK、ANTsPy、DIPY 的运行时调用；在目标 Conda 环境禁用这些模块后，单被试和批量入口可导入（[导入检查](validation/recon_all/python_gpu_port/runtime_imports_20260928.json)）。独立 WMH-SynthSeg 和 SynthSR 也已移除 Surfa 运行时导入。通用 SynthMorph、FLIRT、FNIRT、FAST/VBM、TBSS、connectome 等功能仍有 Surfa 路径，故当前 pyproject 和 Conda 配置仍安装 Surfa，整个仓库尚未满足新的无 Surfa 安装要求。当前版未重跑完整 recon-all，不能由导入检查推断端到端等价。
+依赖迁移状态（2026-09-28）：当前 recon-all 的 N4、SynthStrip、33 类 SynthSeg、Talairach affine 与可选 MNI152 affine 注册已移除 Surfa、SimpleITK、ANTsPy、DIPY 的运行时调用；在目标 Conda 环境禁用这些模块后，单被试和批量入口可导入（[导入检查](validation/recon_all/python_gpu_port/runtime_imports_20260928.json)）。独立 WMH-SynthSeg 和 SynthSR 也已移除 Surfa 运行时导入。通用 SynthMorph、FLIRT、FNIRT、FastVBM、TBSS、connectome 等功能仍有 Surfa 路径，故当前 pyproject 和 Conda 配置仍安装 Surfa，整个仓库尚未满足新的无 Surfa 安装要求。当前版未重跑完整 recon-all，不能由导入检查推断端到端等价。
 
 最近一次从原始 T1 完成的 **v3 历史整例**耗时 2903.79 秒，严格比较 138 项中通过 19 项、缺失 47 项、不同 72 项。[整例原始报告](validation/recon_all/python_gpu_port/native_cpp_conda_20260927/v3_e2e_20260927/BENCHMARK.md)所列的 13 张上游体积图逐体素一致，仅适用于当时的 N4 实现。当前[Conda C++ N4 单阶段对照](docs/recon_all/N4_ITK_CONDA.md)在同一真实 T1 上使 `nu0.mgz` 有 9 / 16,777,216 个体素差 1，最终 `nu.mgz` 有 8 个体素差 1–2；本版尚未重新运行完整 138 项验收，不能沿用 v3 通过率或耗时作为当前结果。
 
