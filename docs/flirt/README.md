@@ -167,18 +167,49 @@ Using that exact input and weight, FSL 6.0.7.4 and weighted TorchFLIRT produced:
 
 | Metric | Result |
 |---|---:|
-| matrix RMS difference | 0.084262 mm |
+| matrix RMS difference | 0.075297 mm |
 | moved-image Pearson | 0.999399 |
 | moved-image MAE | 0.004005 |
 | moved-image RMSE | 0.005819 |
-| FSL full command | 30.0 s |
-| TorchFLIRT H100 full command | 365.0 s |
+| FSL C++ CPU full command | 31.60 s |
+| TorchFLIRT H100 full command | 37.24 s |
+| TorchFLIRT / FSL wall-time ratio | 1.18 |
+| TorchFLIRT CPU | >556 s; stopped before completion |
 
 This weighted case is functionally close but exceeds the 0.05 mm matrix gate
 defined for the unweighted ten-case suite. Its QC therefore sets
-`validation_parameter_profile_matches_run=false`. The Python weighted path is
-also materially slower than FSL C++ on this case; it is retained because the
-TBSS branch requires the package PyTorch FLIRT implementation.
+`validation_parameter_profile_matches_run=false`. These are single-run,
+shared-node observations on the real `(104, 104, 72)` FA image and the
+`(182, 218, 182)` FMRIB58 reference. They replace an unreproduced 365 s record
+from an earlier run of this weighted case.
+
+### Runtime profile
+
+The current-source CUDA run evaluated the correlation-ratio cost 8,070 times.
+Python cProfile measured 28.623 s in the registration engine, with overlapping
+cumulative times of 23.620 s in the serial Brent coordinate optimizer, 21.459 s
+in cost evaluation, 15.682 s in the initial angular search, 8.446 s in the two
+trilinear interpolations performed by each weighted cost evaluation, 6.252 s
+in affine-parameter matrix construction, and 2.622 s in segmented histogram
+reductions. These values overlap and must not be added.
+
+The optimizer selects each next point from the previous result, so most of the
+8,070 evaluations are launched one at a time. Each evaluation also converts
+small matrices on the CPU, starts many elementwise/indexing CUDA kernels, and
+converts several CUDA scalars to Python `bool` or `float`, which synchronizes
+the host and device. During the active search, sampled H100 SM utilization was
+usually 21–30%, with a 53% observed peak. TF32 does not materially accelerate
+the dominant interpolation, indexing and reduction operations. The implementation
+is therefore limited mainly by serial search and kernel-launch/synchronization
+latency rather than H100 arithmetic throughput.
+
+The PyTorch CPU run used roughly 53 CPU cores but had not completed after
+9 min 16 s and was stopped. FSL's compiled CPU implementation remains much
+more efficient for this workload. The current CUDA path stays as the default;
+a faster source-compatible implementation would need batched angular-candidate
+evaluation and a fused compiled cost kernel while preserving the FSL matrix
+and interpolation contract. The machine-readable profile is in
+[`runtime_profile.public.json`](../../validation/flirt/runtime_profile.public.json).
 
 ## Matrix coordinates
 
