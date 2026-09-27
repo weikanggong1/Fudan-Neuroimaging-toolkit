@@ -152,8 +152,8 @@ def test_default_python_profile_selects_required_assets(monkeypatch, tmp_path):
     monkeypatch.setattr(assets, "save_config", lambda directory: None)
     assets.main(["--dest", str(tmp_path)])
     assert downloaded == list(assets.CORE_ASSETS)
-    assert len(downloaded) == 23
-    assert sum(assets.ASSET_FILES[name][0] for name in downloaded) == 243578058
+    assert len(downloaded) == 19
+    assert sum(assets.ASSET_FILES[name][0] for name in downloaded) == 217851651
     downloaded.clear()
     assets.main(["--all", "--verify-only", "--dest", str(tmp_path)])
     assert len(downloaded) == len(assets.ASSET_FILES) == 102

@@ -26,7 +26,7 @@ fnit-setup-recon-all-assets --dest /path/to/assets --verify-only
 
 脚本检查源码提交和洁净性、Conda 工具位置及 sysroot，在独立工作副本中修改上游 CMake 的 Python 路径选择，并从两份经 SHA-256 固定的 C++ 源文件构建 [FNIT 拓扑变体](TOPOLOGY_CONDA_GA.md)；原始源码和标准二进制保留。输出保留构建日志、六个标准程序及拓扑变体的 `ldd` 和 SHA-256、Conda 包列表及 FreeSurfer 软件许可证；个人 `license.txt` 不复制进去。以下[六目标 gpucw1 构建](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/six_target_build_20260927/REPORT.md)退出 0、用时 188.62 秒；六个标准程序均完成动态库检查和启动检查；拓扑变体为其后新增，计时不能沿用该旧构建记录。此前八目标构建保留为历史对照，不属于当前安装流程。上游 `utils/version.cpp` 包含编译时间，所以重编会改变二进制哈希；目标节点运行前应记录实际哈希。
 
-默认外置数据为 10 个权重文件（145,283,019 字节）和 23 个模板/图谱文件（243,578,058 字节），逐文件校验大小与 SHA-256。模板包含双侧 folding atlas 和填充所需的 `SubCorticalMassLUT.txt`。上述数据目录不含可执行程序。
+默认外置数据为 10 个权重文件（145,283,019 字节）和 19 个模板/图谱文件（217,851,651 字节），逐文件校验大小与 SHA-256。模板包含双侧 folding atlas 和填充所需的 `SubCorticalMassLUT.txt`。上述数据目录不含可执行程序。
 
 ## 整例调用
 

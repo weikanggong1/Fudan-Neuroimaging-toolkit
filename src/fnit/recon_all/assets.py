@@ -324,10 +324,6 @@ CORE_ASSETS = (
     "average/mca-dura.prior.warp.mni152.1.0mm.lh.nii.gz",
     "average/mca-dura.prior.warp.mni152.1.0mm.rh.nii.gz",
     "average/vsinus.no-sp.prior.mni152.1.0mm.mgz",
-    "average/mni_icbm152_nlin_asym_09c/reg-targets/mni152.1.0mm.cropped.nii.gz",
-    "average/mni_icbm152_nlin_asym_09c/reg-targets/mni152.1.0mm.nii.gz",
-    "average/mni_icbm152_nlin_asym_09c/reg-targets/reg.1.0mm.to.1.0mm.cropped.lta",
-    "average/mni_icbm152_nlin_asym_09c/reg-targets/reg.1.0mm.cropped.to.1.0mm.lta",
 )
 
 
