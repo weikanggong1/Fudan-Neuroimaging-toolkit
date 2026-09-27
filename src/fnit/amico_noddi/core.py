@@ -177,7 +177,7 @@ class TorchAMICONODDI:
                 "solver": "AMICO three-stage NNLS, positive elastic-net, NNLS debias",
                 "linear_solver": "batched compact float64 Cholesky with CG fallback",
                 "amico_output_contract": True,
-                "amico_numerically_equivalent": True,
+                "amico_numerically_equivalent": False,
                 "kernel_seconds": kernel_seconds,
                 "direction_seconds": direction_seconds,
                 "solver_seconds": solver_seconds,

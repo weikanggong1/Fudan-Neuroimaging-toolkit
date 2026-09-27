@@ -17,7 +17,7 @@
 | dMRI | PyTorch TOPUP | UKB AP/PA b0 选择、Hz 场估计、畸变校正和 FSL 输出 | [TOPUP 文档](docs/topup/README.md) |
 | dMRI | PyTorch EDDY | 逐 volume 运动、二次 EC、TOPUP 场、Jacobian 和离群切片校正 | [EDDY 文档](docs/eddy/README.md) |
 | dMRI | PyTorch DTIFIT | FSL 默认 OLS tensor、FA、MD、eigenvalue 和 eigenvector | [DTIFIT 文档](docs/dtifit/README.md) |
-| dMRI | PyTorch AMICO-NODDI | AMICO 2.0.3 数值等价的 NDI、ODI、FWF、方向和拟合误差 | [AMICO-NODDI 文档](docs/amico_noddi/README.md) |
+| dMRI | PyTorch AMICO-NODDI | AMICO 风格 NDI、ODI、FWF、方向和拟合误差；当前默认 Conda 精度见验证报告 | [AMICO-NODDI 文档](docs/amico_noddi/README.md) |
 | dMRI | PyTorch MMORF (`run_mmorf`) | T1 scalar 与 DTI tensor 联合估计 reference-grid、reference-axis mm pull warp | [MMORF 文档](docs/mmorf/README.md) |
 | dMRI | dMRI 参数图 pipeline | optional TOPUP → EDDY → DTIFIT/NODDI → TBSS 或 MMORF；统一九图输出 | [端到端文档](docs/dmri_pipeline/README.md) |
 | dMRI | PyTorch BEDPOSTX | 估计体素内纤维方向及不确定性，供概率追踪使用 | [BEDPOSTX 文档](docs/bedpostx/README.md) |

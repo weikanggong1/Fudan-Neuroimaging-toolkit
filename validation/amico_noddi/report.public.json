@@ -1,21 +1,11 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "date": "2026-09-27",
   "feature": "TorchAMICONODDI",
-  "fnit_version": "0.12.1",
-  "reference": {
-    "software": "AMICO 2.0.3",
-    "repository": "https://github.com/daducci/AMICO",
-    "tag": "v2.0.3",
-    "commit": "df540093b60240c38a6ff2ea4ceb1181c4f3e936",
-    "dipy": "1.12.1",
-    "numpy": "1.26.4",
-    "scipy": "1.17.1",
-    "threads": 32
-  },
+  "fnit_version": "0.14.0",
+  "status": "默认 Conda 环境下未通过 AMICO 2.0.3 数值一致阈值；移除 DIPY 不改变当前 FNIT 输出",
   "input": {
-    "subjects": 1,
-    "format": "real UKB-format dMRI after official FSL EDDY",
+    "description": "一例真实 UKB 格式、官方 EDDY 校正后的 105 卷 DWI",
     "shape": [
       104,
       104,
@@ -28,167 +18,216 @@
       "b_approximately_2000": 50
     },
     "mask_voxels": 242261,
-    "same_inputs_for_reference_and_candidate": true,
-    "all_mask_voxels_compared": true,
-    "subject_data_in_repository": false
+    "sha256": {
+      "DWI.nii.gz": "67e4564323d8d4dfacaa04a451e2ffa0c89de32cb6d98eb5deb46ea8971deeaa",
+      "mask.nii.gz": "3d1c29ec2f1a6870be93e0b436c884dc805d87244f186312c93086301ae08df4",
+      "bvals": "4bba64690ad224848ea4d0891b98a859b79e11f0de77ad9d2539f4397fda2224",
+      "bvecs": "d17c075f60d433feeb8450bedb83ec3a6771878e150542b05627d2feeec158a1"
+    },
+    "files_in_repository": false
   },
-  "hardware": {
+  "reference": {
+    "software": "AMICO 2.0.3",
+    "commit": "df540093b60240c38a6ff2ea4ceb1181c4f3e936",
+    "dipy_oracle_version": "1.12.1",
     "host": "gpucw1",
-    "cpu": "Intel Xeon Gold 6430",
-    "candidate_gpu": "NVIDIA H100 PCIe 80 GB",
-    "shared_host": true,
-    "kernel_dtype": "float32",
-    "active_set_solver_dtype": "float64",
-    "tf32_allowed_for_float32_matmul": true,
-    "float16_used": false
+    "fresh_official_outputs_exactly_equal_to_archived": true,
+    "fresh_reference_comparison_script_note": "官方五图成功保存；脚本随后因比较路径少写 NODDI 子目录以状态 1 退出，独立比较脚本已改正并核验五图。"
   },
-  "model": {
-    "dictionary_atoms": 145,
-    "ic_volume_fractions": 12,
-    "ic_orientation_dispersions": 12,
-    "d_par": 0.0017,
-    "d_iso": 0.003,
-    "lambda1": 0.5,
-    "lambda2": 0.001,
-    "b0_threshold": 100.0,
-    "b_step": 100.0,
-    "spherical_harmonic_order": 12,
-    "lut_directions": 500,
-    "solver_stages": [
-      "full-dictionary NNLS",
-      "positive elastic-net support selection",
-      "support-constrained NNLS debias"
-    ]
+  "stage_checks": {
+    "ols_direction_vs_dipy_float64": {
+      "exact_components": 726783,
+      "total_components": 726783,
+      "max_abs": 0.0
+    },
+    "rotation_auxiliary": [
+      {
+        "shape": [
+          91,
+          500
+        ],
+        "equal_elements": 45500,
+        "size": 45500,
+        "max_abs": 0.0
+      },
+      {
+        "shape": [
+          500,
+          91
+        ],
+        "equal_elements": 45500,
+        "size": 45500,
+        "max_abs": 0.0
+      },
+      {
+        "shape": [
+          91
+        ],
+        "equal_elements": 91,
+        "size": 91,
+        "max_abs": 0.0
+      },
+      {
+        "shape": [
+          91
+        ],
+        "equal_elements": 91,
+        "size": 91,
+        "max_abs": 0.0
+      }
+    ],
+    "subject_basis": {
+      "shape": [
+        100,
+        182
+      ],
+      "equal_elements": 18200,
+      "size": 18200,
+      "max_abs": 0.0
+    },
+    "subject_indices_exact": true
   },
-  "metrics": {
-    "NDI": {
-      "pearson_r": 0.9999999999999994,
-      "mae": 1.3939718573611494e-09,
-      "rmse": 6.625503914229172e-09,
-      "max_abs": 5.960464477539063e-08,
-      "exact_equal_voxels": 231099,
-      "count_abs_gt_1e-7": 0,
-      "count_abs_gt_1e-6": 0,
-      "reference_mean": 0.4162795482238832,
-      "candidate_mean": 0.4162795468301574
-    },
-    "ODI": {
-      "pearson_r": 0.9999999999999993,
-      "mae": 1.2916828753732576e-12,
-      "rmse": 2.4408159817515757e-10,
-      "max_abs": 5.960464477539063e-08,
-      "exact_equal_voxels": 242253,
-      "count_abs_gt_1e-7": 0,
-      "count_abs_gt_1e-6": 0,
-      "reference_mean": 0.43326166973228114,
-      "candidate_mean": 0.43326166973246566
-    },
-    "FWF": {
-      "pearson_r": 1.0,
-      "mae": 7.090174772814153e-13,
-      "rmse": 1.4683509666538827e-10,
-      "max_abs": 5.960464477539063e-08,
-      "exact_equal_voxels": 242230,
-      "count_abs_gt_1e-7": 0,
-      "count_abs_gt_1e-6": 0,
-      "reference_mean": 0.2431523173842922,
-      "candidate_mean": 0.24315231738433016
-    },
-    "normalized_RMSE": {
-      "pearson_r": 1.0,
-      "mae": 0.0,
-      "rmse": 0.0,
-      "max_abs": 0.0,
-      "exact_equal_voxels": 242261,
-      "count_abs_gt_1e-7": 0,
-      "count_abs_gt_1e-6": 0,
-      "reference_mean": 0.04016433054220136,
-      "candidate_mean": 0.04016433054220136
-    },
-    "direction": {
-      "max_abs_component": 0.0,
-      "mae_component": 0.0,
-      "exact_equal_components": 726783,
-      "total_components": 726783
-    }
+  "same_runtime_new_vs_old_fnit": {
+    "same_input_and_gpu": true,
+    "all_five_maps_exact": true,
+    "maximum_absolute_difference": 0.0,
+    "dipy_imported_by_new_run": false,
+    "old_fnit_dipy_imported": true
   },
-  "acceptance": {
-    "scalar_map_max_abs_threshold": 1e-07,
-    "scalar_map_count_over_threshold": 0,
-    "direction_component_exact": true,
-    "passed": true
+  "default_conda_numpy": {
+    "numpy_version": "1.26.4",
+    "distribution": "conda-forge",
+    "scipy_version": "1.17.1",
+    "vs_fresh_official": {
+      "NDI": {
+        "shape": [
+          242261
+        ],
+        "max_abs": 0.04072889685630798,
+        "mae": 2.248666698586693e-06,
+        "exact_elements": 97719,
+        "total_elements": 242261,
+        "count_abs_gt_1e-7": 75235
+      },
+      "ODI": {
+        "shape": [
+          242261
+        ],
+        "max_abs": 0.053755998611450195,
+        "mae": 7.914600378266036e-06,
+        "exact_elements": 62584,
+        "total_elements": 242261,
+        "count_abs_gt_1e-7": 76620
+      },
+      "FWF": {
+        "shape": [
+          242261
+        ],
+        "max_abs": 0.06689253449440002,
+        "mae": 3.154258010394552e-06,
+        "exact_elements": 131327,
+        "total_elements": 242261,
+        "count_abs_gt_1e-7": 71702
+      },
+      "RMSE": {
+        "shape": [
+          242261
+        ],
+        "max_abs": 0.0003540143370628357,
+        "mae": 7.794731430883955e-09,
+        "exact_elements": 149299,
+        "total_elements": 242261,
+        "count_abs_gt_1e-7": 165
+      },
+      "dir": {
+        "shape": [
+          242261,
+          3
+        ],
+        "max_abs": 1.999260425567627,
+        "mae": 0.06735845421488759,
+        "exact_elements": 678114,
+        "total_elements": 726783,
+        "count_abs_gt_1e-7": 48657
+      }
+    },
+    "acceptance_max_abs_1e_minus_7_and_direction_exact": false
+  },
+  "reference_numpy_wheel_isolation": {
+    "numpy_version": "1.26.4",
+    "wheel_tag": "cp311-cp311-manylinux_2_17_x86_64",
+    "scope": "仅验证进程以离线参考目录中的 PyPI NumPy wheel 置于 PYTHONPATH 前；FNIT 运行时未导入 DIPY、AMICO。默认 Conda 安装不保证此结果。",
+    "vs_fresh_official": {
+      "NDI": {
+        "shape": [
+          242261
+        ],
+        "max_abs": 5.960464477539063e-08,
+        "mae": 1.3939718573611494e-09,
+        "exact_elements": 231099,
+        "total_elements": 242261,
+        "count_abs_gt_1e-7": 0
+      },
+      "ODI": {
+        "shape": [
+          242261
+        ],
+        "max_abs": 5.960464477539063e-08,
+        "mae": 1.2916828753732576e-12,
+        "exact_elements": 242253,
+        "total_elements": 242261,
+        "count_abs_gt_1e-7": 0
+      },
+      "FWF": {
+        "shape": [
+          242261
+        ],
+        "max_abs": 5.960464477539063e-08,
+        "mae": 7.090174772814153e-13,
+        "exact_elements": 242230,
+        "total_elements": 242261,
+        "count_abs_gt_1e-7": 0
+      },
+      "RMSE": {
+        "shape": [
+          242261
+        ],
+        "max_abs": 0.0,
+        "mae": 0.0,
+        "exact_elements": 242261,
+        "total_elements": 242261,
+        "count_abs_gt_1e-7": 0
+      },
+      "dir": {
+        "shape": [
+          242261,
+          3
+        ],
+        "max_abs": 0.0,
+        "mae": 0.0,
+        "exact_elements": 726783,
+        "total_elements": 726783,
+        "count_abs_gt_1e-7": 0
+      }
+    },
+    "all_five_maps_exact_to_previous_validated_fnit_output": true,
+    "acceptance_max_abs_1e_minus_7_and_direction_exact": true,
+    "dipy_imported_by_candidate": false
   },
   "timing": {
-    "scope": "fresh process including Python startup, kernel construction, fitting, NIfTI I/O, and saving; shared node",
-    "reference_runs": 1,
-    "reference_total_seconds": 29.24,
-    "reference_stage_seconds": {
-      "generate": 3.4945272146724164,
-      "load": 0.5324395108036697,
-      "fit": 16.901228642091155,
-      "save": 0.45499349012970924
-    },
-    "reference_max_rss_kb": 3301432,
-    "candidate_runs": 3,
-    "candidate_total_seconds": [
-      34.19,
-      32.87,
-      29.44
-    ],
-    "candidate_total_median_seconds": 32.87,
-    "candidate_internal_median_seconds": 20.303657586220652,
-    "candidate_stage_median_seconds": {
-      "kernel": 1.769119362346828,
-      "direction": 1.7502405070699751,
-      "solver": 12.773147106170654
-    },
-    "candidate_max_rss_median_kb": 1762652,
-    "candidate_peak_cuda_memory_bytes": 12431536128,
-    "candidate_over_reference_wall_time": 1.1241450068399452,
-    "optimization": {
-      "baseline_exact_total_seconds": 108.24,
-      "baseline_exact_solver_seconds": 92.41866513201967,
-      "total_speedup_over_baseline_exact": 3.292972315181016,
-      "solver_speedup_over_baseline_exact": 7.235387204408896,
-      "method": "compact active-set batched Cholesky, CG fallback for ill-conditioned subsets, top-k active-index extraction"
-    }
+    "scope": "gpucw1 同一真实 DWI；单次进程计时含启动、读写及拟合；节点负载未固定，不计算加速比。",
+    "new_conda_wall_seconds": 34.82,
+    "old_dipy_fnit_conda_wall_seconds": 36.21,
+    "new_reference_numpy_wheel_wall_seconds": 25.17,
+    "fresh_official_saved_outputs_wall_seconds_with_followup_path_error": 28.65,
+    "historical_clean_official_wall_seconds": 29.24,
+    "new_conda_kernel_seconds": 0.7974791252054274,
+    "new_conda_direction_seconds": 0.9705375437624753,
+    "new_conda_solver_seconds": 18.35177623294294,
+    "old_conda_direction_seconds": 1.8245358541607857,
+    "peak_cuda_memory_bytes": 9952554496
   },
-  "contract": {
-    "amico_names": [
-      "fit_NDI.nii.gz",
-      "fit_ODI.nii.gz",
-      "fit_FWF.nii.gz",
-      "fit_dir.nii.gz",
-      "fit_RMSE.nii.gz"
-    ],
-    "ukb_names": [
-      "NODDI_ICVF.nii.gz",
-      "NODDI_OD.nii.gz",
-      "NODDI_ISOVF.nii.gz",
-      "NODDI_dir.nii.gz",
-      "NODDI_RMSE.nii.gz"
-    ],
-    "shape_dtype_affine_qform_sform_pixdim_and_units_equal": true,
-    "direction_intent_equal": true,
-    "same_parameter_definitions": true,
-    "numerically_equivalent_within_float32_rounding": true
-  },
-  "bundled_assets": {
-    "grad_500.npy": "e07dd95378f12556aba7898a3b3396b3b35e1295e4932e361bb7309ebbf73e3e",
-    "htable_ndirs_500.bin": "682f11416844f2a09225c16f412bf7a224a5085a244b59d47f51c51217e4a30b",
-    "ndirs_500.bin": "96e6638e756c53a98b8c16aed760e43fcdf636aa2b1b0bd2bfce21aacfc9f328"
-  },
+  "interpretation": "无 DIPY 替换对同环境旧 FNIT 输出逐元素无影响。默认 Conda NumPy 与参考 PyPI NumPy 的二进制线性代数结果不同；后者可复现严格官方阈值，但不得作为默认安装保证。",
   "figure": "docs/amico_noddi/figures/amico_noddi_comparison.png",
-  "figure_sha256": "b636b079c85935190868619a6e8207dabb61d6ec705691e603a847ec700bdc6b",
-  "development_oracle_in_repository": false,
-  "memory_bounded_v0_13_validation": {
-    "lut_batch_size": 400,
-    "same_real_input_as_unbatched_run": true,
-    "wall_seconds": 49.19,
-    "internal_seconds": 40.97985565662384,
-    "peak_cuda_memory_bytes": 13630161408,
-    "nvidia_smi_observed_mib": 16518,
-    "outputs_exactly_equal_to_500_direction_batch": true,
-    "maximum_absolute_error": 0.0
-  }
+  "figure_sha256": "f741653d0816591fa7824524a2f8cdbbd704493ac9a073ff32976a7a4cab0d9e"
 }
