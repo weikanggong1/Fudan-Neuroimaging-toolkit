@@ -4,7 +4,8 @@ This is a targeted comparison, not an end-to-end recon-all acceptance. The
 official reference is FreeSurfer 8.2 on the same T1. Input, weight, template,
 source, and candidate output SHA-256 values are in
 [`precision_report.json`](precision_report.json) and
-[`connected_report.json`](connected_report.json). The reference operation is
+[`connected_report.json`](connected_report.json); the bounded downstream
+continuation is in [`gca_gate_report.json`](gca_gate_report.json). The reference operation is
 `mri_synthmorph -m affine -t aff.lta synthstrip.mgz mni305.cor.stripped.mgz -j 4`.
 The candidate calls `fnit.synthmorph.SynthMorph(..., model="affine", extent=256)`.
 No official volume or transform was used as a candidate input.
@@ -66,6 +67,33 @@ directory, saved candidate `nu0.mgz`, and read-only official subject directory.
 Both scripts support `--device cuda:0 --threads 4`. Their reference paths are
 read for comparison only.
 
-The remaining gate is to carry the new LTA, `nu`, and `brainmask` through GCA
-registration, `norm`, and `aseg.presurf` on the candidate path and compare
-each output. Surface and regional metrics remain outside this trial.
+## Bounded GCA and presurface continuation
+
+`probe_gca_gate.py` continues the saved candidate subject above. It runs the
+same pinned Conda `mri_em_register` binary as the earlier v3 whole-subject
+candidate (binary hash in the JSON), candidate Python `run_ca_normalize`,
+and candidate Python callosum segmentation. It reuses saved **candidate**
+`synthseg.rca.mgz` from the same T1 to avoid rerunning the network; that
+input was independently compared with the official output before use.
+No official image, label, transform, or surface is a reconstruction input.
+The official equivalent registration command is
+`mri_em_register -uns 3 -mask brainmask.mgz nu.mgz RB_all_2020-01-02.gca transforms/talairach.lta`.
+
+| Output | Paired result |
+|---|---|
+| GCA `talairach.lta` | All 16 matrix elements exact |
+| `norm.mgz`, `ctrl_pts.mgz` | Each 0 / 16,777,216 differing voxels; affine and MGH header exact |
+| Saved candidate `synthseg.rca.mgz` | 0 / 16,777,216 differing voxels; affine and MGH header exact |
+| `aseg.auto_noCCseg.mgz`, `aseg.auto.mgz`, `aseg.presurf.mgz` | Each 0 / 16,777,216 differing voxels; affine and MGH header exact |
+| `cc_up.lta` | Maximum matrix element error 0.00000763; not exact |
+
+The registration, CA normalization, and callosum/copy stages took 329.526,
+37.143, and 25.454 s on this shared node. The old v3 timings for the same
+operations were 251.249, 27.048, and 24.438 s, respectively, under a
+different load; these are observations, not controlled speed ratios. The
+new SynthMorph LTA/eTIV improvement is independent of GCA registration,
+which reads `nu` and `brainmask` and creates a separate `talairach.lta`.
+GCA through `aseg.presurf` numerically agrees on this T1, but `cc_up.lta`
+still has a small transform difference. WM, surfaces, regional statistics,
+and additional subjects remain outside this trial; the repository default
+TF32 policy has not been changed.
