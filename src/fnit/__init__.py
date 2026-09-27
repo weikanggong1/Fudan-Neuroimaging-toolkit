@@ -1,5 +1,5 @@
-"""Standalone PyTorch brain MRI inference tools."""
-__version__ = '0.16.0'
+"""Fudan Neuroimaging Toolkit."""
+__version__ = "0.16.0"
 
 
 def __getattr__(name):
@@ -36,13 +36,11 @@ def __getattr__(name):
         from importlib import import_module
         module = import_module('.fnirt', __name__)
         return getattr(module, name)
-    if name in ('TorchTOPUP', 'TOPUPResult', 'TOPUPConfig',
-                'prepare_ukb_topup', 'run_ukb_topup'):
+    if name in ('TorchTOPUP', 'TOPUPResult', 'TOPUPConfig', 'run_ukb_topup'):
         from importlib import import_module
         module = import_module('.topup', __name__)
         return getattr(module, name)
-    if name in ('TorchEDDY', 'EDDYResult', 'EDDYConfig',
-                'prepare_ukb_eddy', 'run_ukb_eddy'):
+    if name in ('TorchEDDY', 'EDDYResult', 'EDDYConfig', 'run_ukb_eddy'):
         from importlib import import_module
         module = import_module('.eddy', __name__)
         return getattr(module, name)
@@ -59,8 +57,7 @@ def __getattr__(name):
         from importlib import import_module
         module = import_module('.mmorf', __name__)
         return getattr(module, name)
-    if name in ('DMRIPipeline', 'DMRIPipelineResult', 'STANDARD_MAP_NAMES',
-                'TorchTBSS', 'TBSSResult', 'TBSSConfig'):
+    if name in ('DMRIPipeline', 'DMRIPipelineResult', 'STANDARD_MAP_NAMES'):
         from importlib import import_module
         module = import_module('.dmri_pipeline', __name__)
         return getattr(module, name)

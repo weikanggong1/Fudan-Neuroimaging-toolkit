@@ -11,8 +11,8 @@ from fnit.topup import (
     TorchTOPUP,
     make_topup_coefficient_image,
     make_topup_jacobian_image,
-    prepare_ukb_topup,
 )
+from fnit.topup.ukb import prepare_ukb_topup
 from fnit.fnirt.spline import fsl_control_shape
 from fnit.topup.core import (
     _cubic_spline_coefficients,

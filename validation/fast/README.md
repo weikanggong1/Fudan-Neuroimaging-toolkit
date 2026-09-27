@@ -1,96 +1,63 @@
-# TorchFAST 历史算法基准（旧 Surfa 影像包装层）
+# TorchFAST 当前源码验证
 
-[返回首页](../../README.md) · [功能说明](../../docs/fast/README.md) · [聚合 JSON](report.public.json)
+[返回主页](../../README.md) · [功能说明](../../docs/fast/README.md) · [机器可读报告](report.public.json)
 
-此页记录更换影像包装层前的 FSL FAST 对照和 GPU 时间。当前 TorchFAST 的无 Surfa 包装层已有[真实 T1 配对验证](no_surfa_20260928/README.md)；以下 GPU 时间和 FSL 数值没有在新版包装层重新测量。
+本页记录 2026-09-27 对当前 Nibabel 输入输出链的真实数据回归。候选只运行 FNIT/PyTorch，不调用 FSL；同一幅 brain-only T1w 的 FSL 6.0.7.4 FAST4 2111.3 输出作为固定参考。
 
-验证在 gpucw1 上完成。参考程序是 FSL 6.0.7.4 中的 FAST4 2111.3；实现使用
-Python 3.11.7、PyTorch 2.5.1+cu118 和 NVIDIA H100 PCIe。临床数据只发布 10 例
-聚合统计，不发布原始路径、逐例记录或影像。
+## 数据与源码绑定
 
-## 相同 brain-only 输入
+主回归使用一幅真实 brain-only T1w；私有路径和病例标识不写入仓库，报告保存输入 SHA-256 `f1b6f58edb3ac9996282d3fcbadcb94626785347481f27cf5a3b9419bf640c12`。示意图另用仓库公开 `sub-02` 的参考 SynthStrip 脑图。
 
-FSL 与 TorchFAST 都读取每例同一份 `T1_brain.nii.gz`。参考命令为：
+候选基于提交 `9146b0004468ffc2a30cacad0ab4fa7b6fdb3b48` 的工作树。FAST 功能源码树 SHA-256 为 `433723da856c798faca9a66ea95784bdbb5ad5b13f66f451ce32e7030559943b`；算法文件 `algorithm.py` 为 `9ffed0035a618ec4d6dc1eea8deeadaddd071ced9b04b66593cb6bd4d1102638`。
+
+## 实际命令
 
 ```bash
-fast -b -o T1_fast/T1_brain T1_brain.nii.gz
-
-fnit fast -i T1_brain.nii.gz -o torch/T1_brain \
-  --device cuda:0 --threads 1 -b
+CUDA_VISIBLE_DEVICES=1 PYTHONPATH=src python -m fnit.cli fast \
+  --image T1_brain.nii.gz --output-prefix work/current/T1_brain \
+  --device cuda:0 --threads 8 -b -B --overwrite
 ```
 
-比较范围是输入中严格大于零的体素。PVE 的 Pearson、MAE、0.5 阈值 Dice 和
-体积比均在三维输出上计算；bias 先取对数再比较。10/10 例通过有限值、PVE 范围、
-脑内 PVE 和为 1、脑外 PVE 为 0、bias 正值、脑外 bias 为 1、校正图恒等式和标签
-范围检查。
+CPU 单例把 `--device` 改为 `cpu`。对应原版参考命令为：
 
-| 输出 | Pearson 中位数 | MAE 中位数 | Dice 0.5 中位数 | Torch/FSL 体积比中位数 |
+```bash
+fast -n 3 -t 1 -b -B -o T1_brain T1_brain.nii.gz
+```
+
+本次固定参考实际保存的是 `fast -b` 的七个共同输出；`restore` 只检查 FNIT 内部恒等式，不参与与 FSL 文件比较。显存和阶段时间使用：
+
+```bash
+CUDA_VISIBLE_DEVICES=1 PYTHONPATH=src python validation/model_io_current/measure_peak.py \
+  --feature fast --input T1_brain.nii.gz --device cuda:0 --threads 8 \
+  --output-dir work/peak/fast --report work/peak/fast.json
+```
+
+## 输出与数值一致性
+
+八幅 FNIT 输出均保留输入的 `208×253×226` shape 和数值 affine。三张 PVE、bias 和 restore 为 `float32`；hard segmentation、PVE segmentation 和 mixel type 为 `int32`。与 FSL 对应文件的 shape、dtype、affine 及 qform/sform code 全部一致。
+
+| 输出 | Pearson | MAE | Dice 0.5 | FNIT/FSL 体积比 |
 |---|---:|---:|---:|---:|
-| CSF PVE | 0.98777 | 0.00820 | 0.98687 | 1.01439 |
-| GM PVE | 0.98488 | 0.01499 | 0.99232 | 0.99059 |
-| WM PVE | 0.99345 | 0.00718 | 0.99713 | 1.00459 |
+| CSF PVE | 0.988556 | 0.008464 | 0.987640 | 1.013900 |
+| GM PVE | 0.984627 | 0.015411 | 0.992328 | 0.989954 |
+| WM PVE | 0.993731 | 0.007022 | 0.997031 | 1.004929 |
 
-log-bias 的 Pearson 中位数为 **0.99999999945**，MAE 为 **1.90×10⁻⁶**。校正图
-的 Pearson 中位数为 **0.99999999998**，相对 MAE 为 **1.92×10⁻⁶**。这些结果说明
-默认 bias 方程、符号和物理平滑尺度与参考一致。HMRF 和 mixel 更新仍采用适合 GPU
-的同步更新，而 FAST 使用逐体素原地更新，因此 PVE 不是逐体素相同。
+log-bias Pearson 为 0.99999999936，MAE 为 2.85×10⁻⁶。hard segmentation、PVE segmentation 和 mixel type 的逐体素一致率分别为 0.999899、0.990349 和 0.939031。FSL 使用逐体素原地 HMRF 更新，本实现使用 GPU 同步更新，因此不声明逐体素等价。
 
-## bias correction 消融
+| 运行 | 病例数 | 完整进程墙钟时间 |
+|---|---:|---:|
+| FSL FAST CPU，同病例参考运行 | 1 | 305.46 s |
+| FNIT 当前源码 H100 GPU 测量进程 | 1 | 12.55 s |
+| FNIT 当前源码 CPU CLI | 1 | 36.24 s |
 
-关闭 bias 更新时仍保留 FAST `-N` 的四次 HMRF 外循环。10 例 GM 对 FSL 的
-Pearson 中位数由 **0.98488** 降到 **0.93647**，Dice 由 **0.99232** 降到
-**0.93703**，MAE 由 **0.01499** 升到 **0.07205**。因此 VBM 路径默认启用偏置场
-校正，并保存 `T1_brain_bias.nii.gz` 和 `T1_brain_restore.nii.gz`。
+时间记录不在同一时段，不能解释为隔离负载下的稳定加速倍数。GPU Python API 中构造 0.517 s、推理 2.448 s、保存八幅压缩 NIfTI 4.365 s，总计 7.329 s；Torch 峰值 allocated 2,352 MiB、reserved 3,444 MiB。
 
-## 运行时间和 CPU/CUDA 一致性
+本页单例验证覆盖当前 I/O、数值、时间与显存；完整机器记录见 [`report.public.json`](report.public.json)。
 
-完整命令时间包含新 Python 进程、输入读取、GPU 计算、CPU 回传和压缩 NIfTI
-输出。TorchFAST `-b` 与 FSL `fast -b` 都保存 7 个对应文件。10 例中位数分别为
-**12.43 s** 和 **305.80 s**；逐例 FSL/Torch 比值的中位数为 **22.97**。两组任务
-在共享节点的不同时段运行，这些数值是观察到的墙钟时间，不是隔离负载下的硬件
-加速上限。
+## 当前公开示意图
 
-一例额外使用 16 个 CPU 线程和 H100 运行同一 PyTorch 实现。输入读取加推理时间
-分别为 **80.65 s** 和 **1.62 s**。CPU/CUDA GM Pearson 为
-**0.9999999949**，MAE 为 **8.41×10⁻⁸**；最大差为一个 PVE 网格步长
-**0.01000005**。bias MAE 为 **3.38×10⁻⁸**。该单例检查说明两个设备路径数值一致，
-不作为稳定的 CPU/GPU 吞吐估计。
+公开 `sub-02` 的当前重跑得到 GM Pearson 0.978172、MAE 0.017553、Dice 0.987420。下图展示相同 brain-only 输入上的 GM PVE 和 bias-corrected 图。
 
-## 原始 T1 到 VBM
+![FSL FAST 与当前 TorchFAST 的公开真实 T1w 对照](figures/fast_comparison.png)
 
-10 例均完成：
-
-```text
-raw T1 -> SynthStrip -> TorchFAST bias correction and GM PVE
-       -> PyTorch registration -> Jacobian -> modulated GM
-```
-
-持久模型批处理中，`SynthStrip + TorchFAST + 11 个输入网格输出`的逐例 warm
-中位数为 **23.05 s**；注册、Jacobian 和调制为 **10.99 s**；两阶段逐例 warm
-时间之和的中位数为 **36.47 s**。这些 GPU 数值不含该批次一次性的模型加载。
-10/10 个最终 Jacobian 在模板 mask 内均为正。FSL UKB 方法链可用的 9 例完整阶段
-计时中位数为 **3637.20 s**；一例缺少完整逐阶段计时，未以 0 填补。两种方法在
-共享节点的不同时段运行，因此这里不据此计算受控加速比。
-
-原始 T1 路径同时更换了脑提取与配准算法，不能把最终差异归因于 FAST。TorchFAST
-原始路径 GM 与 FSL GM 的 0.5 Dice 中位数为 **0.9541**；使用同一 PyTorch 配准器
-时，warped GM 与 FSL-GM 输入臂的 Pearson 中位数为 **0.7923**。直接和 FSL/FNIRT
-最终结果比较时，warped GM Pearson 为 **0.5892**、modulated GM Pearson 为
-**0.5088**。这部分只证明 pipeline 可运行并给出差异边界，不证明 FNIRT 等价。
-
-## 公开图示
-
-下图使用仓库中的公开 `sub-02` T1w 及已经发布的参考 SynthStrip 脑图。FSL 与
-TorchFAST 接收同一 brain-only 输入；中间两列叠加 GM PVE，右侧比较偏置校正图。
-本例 GM Pearson 为 **0.97817**、0.5 Dice 为 **0.98742**、体积比为
-**0.99350**。
-
-![相同公开 T1w 输入的 FSL FAST 与 TorchFAST GM 和偏置校正对照](figures/fast_comparison.png)
-
-图由 [`tools/plot_fast_comparison.py`](../../tools/plot_fast_comparison.py) 生成，数值见
-[`figures/metrics.json`](figures/metrics.json)。聚合结果及计时口径见
-[`report.public.json`](report.public.json)。
-
-## 当前公开记录
-
-单被试聚合结果、计时口径和公开示意图分别见 [`report.public.json`](report.public.json) 与 [`figures/metrics.json`](figures/metrics.json)。原始病例、私有路径和运行输出不进入仓库。
+图的数值记录见 [`figures/metrics.json`](figures/metrics.json)，绘图命令使用 [`tools/plot_fast_comparison.py`](../../tools/plot_fast_comparison.py)。

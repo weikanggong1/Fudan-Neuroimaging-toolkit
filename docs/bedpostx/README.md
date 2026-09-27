@@ -1,129 +1,136 @@
-# TorchBEDPOSTX
+# TorchBEDPOSTX：扩散方向后验估计
 
-`TorchBEDPOSTX` samples voxelwise orientations and fractions for up to three crossing fibres from diffusion MRI. It implements the ball-and-stick signal model with Gaussian residuals, a sparse prior on subsidiary fibre fractions, and Metropolis sampling. The default `model=2` uses a Gamma distribution of diffusivities for multi-shell data. The code runs in float32 on CPU or CUDA; CUDA matmul uses TF32 where supported. It does not require an installed FSL runtime.
+[返回首页](../../README.md) · [源码目录](../../src/fnit/bedpostx/) · [验证记录](../../validation/bedpostx/README.md)
 
-## Input and Python use
+`TorchBEDPOSTX` 从单被试扩散 MRI 中估计最多三条交叉纤维的方向、体积分数和不确定性。模型采用 ball-and-stick 信号、Gaussian 残差、次要纤维稀疏先验和 Metropolis 采样；默认 `model=2` 用 Gamma 分布描述多壳层扩散率。CPU 和 CUDA 均使用 float32，CUDA 默认允许 TF32，不使用 float16 或 bfloat16。运行时不调用 FSL。
 
-Provide one subject directory with `data.nii.gz` (4D diffusion signal), `nodif_brain_mask.nii.gz` (3D diffusion-space mask with matching affine), `bvals`, and `bvecs`. `bvecs` may be 3 × N or N × 3; the package normalizes nonzero vectors. The diffusion signal should already have undergone the desired motion, eddy-current, and susceptibility corrections, with matching rotated `bvecs`.
+## 输入
+
+`subject_dir` 必须包含以下文件：
+
+```text
+subject/
+├── data.nii.gz                 # 4D、已完成运动/涡流/磁敏感校正的 DWI
+├── nodif_brain_mask.nii.gz     # 与 DWI 前三维和 affine 一致的 3D 脑掩膜
+├── bvals                       # N 个 b-value
+└── bvecs                       # 3×N 或 N×3；通常使用 EDDY 旋转后的方向
+```
+
+| Python 参数 | 类型与默认值 | 含义 |
+|---|---|---|
+| `subject_dir` | 路径，必需 | 上述单被试输入目录。 |
+| `output_dir` | 路径或 `None` | 输出目录；省略时为 `<subject_dir>.bedpostX`。 |
+| `device` | `"cpu"`、`"cuda"` 或 `"cuda:N"` | PyTorch 设备。 |
+| `threads` | 正整数或 `None` | CPU 线程数。 |
+| `nfibres` | `3` | 每个体素拟合的最大纤维数。 |
+| `model` | `2` | `1` 为单扩散率，`2` 为 Gamma 扩散率。 |
+| `burnin` | `1000` | burn-in 跳数。 |
+| `njumps` | `1250` | burn-in 后的采样跳数。 |
+| `sample_every` | `25` | 每隔多少跳保存一次；默认产生 50 个样本。 |
+| `ard_weight` | `1.0` | 次要纤维的 ARD 权重。 |
+| `chunk_size` | 实现默认值 | 一次并行处理的 mask 体素数，用于控制显存。 |
+| `seed` | 实现默认值 | 随机种子。 |
+| `overwrite` | `False` | 是否覆盖非空输出目录。 |
+
+## Python 单被试调用
 
 ```python
 from fnit.bedpostx import TorchBEDPOSTX
 
-result = TorchBEDPOSTX(device="cuda:0")('/absolute/path/to/subject')
-print(result.output_dir, result.nvoxels, result.nsamples)
+model = TorchBEDPOSTX(
+    device="cuda:0",  # 运行设备：第一张可见 CUDA GPU
+    threads=1,  # CPU 线程：输入输出和辅助计算使用 1 线程
+    nfibres=3,  # 模型：每个体素最多拟合三条纤维
+    model=2,  # 模型：使用多壳层 Gamma 扩散率
+    burnin=1000,  # MCMC：burn-in 跳数
+    njumps=1250,  # MCMC：burn-in 后的采样跳数
+    sample_every=25,  # MCMC：每 25 跳保存一次
+    ard_weight=1.0,  # 先验：次要纤维 ARD 权重
+    chunk_size=4096,  # 资源：每批并行处理的 mask 体素数
+    seed=8665904,  # 随机性：固定种子便于复现
+)
+result = model(
+    subject_dir="/absolute/path/subject",  # 输入：含 DWI、mask、bval、bvec 的目录
+    output_dir="/absolute/path/subject.bedpostX",  # 输出：后验样本目录
+    overwrite=False,  # 写盘策略：不覆盖已有结果
+)
 ```
 
-The default output is `/absolute/path/to/subject.bedpostX`; pass `output_dir=` to change it. Existing nonempty output directories require `overwrite=True` (or CLI `--overwrite`). Default parameters mirror the FSL `bedpostx` wrapper: 3 fibres, model 2, 1000 burn-in iterations, 1250 subsequent iterations, and one saved draw every 25 iterations (50 draws per voxel). The class also accepts `nfibres`, `model` (1 or 2), `burnin`, `njumps`, `sample_every`, `ard_weight`, `chunk_size`, `seed`, and `threads`. For example, `TorchBEDPOSTX(device="cpu", threads=8, nfibres=2)`.
+`result.output_dir` 是输出目录，`result.nvoxels` 是参与拟合的 mask 体素数，`result.nsamples` 是每个体素保存的后验样本数。`result.elapsed_seconds` 记录完整调用墙钟时间。
 
-## Command line
+## 命令行与原软件对应
+
+FNIT 单被试命令：
 
 ```bash
-fnit bedpostx --subject-dir /absolute/path/to/subject --device cuda:0
-# The standalone `fnit-bedpostx` command accepts the same options.
+fnit bedpostx \
+  --subject-dir /absolute/path/subject \
+  --output-dir /absolute/path/subject.bedpostX \
+  --device cuda:0 \
+  --nfibres 3 --model 2 \
+  --burnin 1000 --njumps 1250 --sample-every 25 \
+  --ard-weight 1 --chunk-size 4096 --seed 8665904 --threads 1
 ```
 
-Use `--output-dir` to choose another destination. `--nfibres`, `--model`, `--burnin`, `--njumps`, `--sample-every`, `--ard-weight`, `--chunk-size`, `--seed`, and `--threads` correspond to the Python options.
-
-## Output and interpretation
-
-`merged_th<i>samples.nii.gz`, `merged_ph<i>samples.nii.gz`, and `merged_f<i>samples.nii.gz` are 4D MCMC draws for fibre *i*. Fibres are sorted by posterior mean fraction at each voxel. `mean_f<i>samples.nii.gz`, `dyads<i>.nii.gz`, mean diffusivity/baseline images, and `nodif_brain_mask.nii.gz` support quality checks. The orientation sample and mask filenames match the files read by FSL `probtrackx2`. `run.json` records the parameters, voxel count, draw count, and wall time for reproducible comparisons.
-
-This is an independent implementation of the published model and algorithm, not a copy of FSL's `xfibres` C++. Its tensor initialization, random number generator, floating-point order, and resulting proposal histories differ from FSL. Thus posterior volumes are not expected to be byte-identical. Compare posterior fraction maps, orientation axes with sign-invariant angular error, and downstream streamline density and connectivity to an original FSL run at matching settings. Do not infer anatomical connectivity probability directly from raw streamline counts; seed voxel count and number of samples affect them.
-
-## Matched FSL benchmark
-
-The [current public report](../../validation/bedpostx/report.public.json) records the exact metrics, runtimes, source hashes, and diagnostic controls. On gpucw1, both implementations processed the same 14 masked voxels from a 7 × 13 × 7 × 105 UK Biobank DWI crop with model 2, three fibres, ARD weight 1, 1000 burn-in jumps, 1250 sampling jumps, one saved draw every 25 jumps, and seed 8665904. Original FSL 6.0.7.22 used CPU `xfibres --cnonlinear`; the current TorchBEDPOSTX code used CPU with one thread or one H100 GPU in float32/TF32. Only aggregate values are public; DWI and subject maps remain on the research server.
-
-| Output, current GPU versus FSL CPU | MAE | Pearson *r* | Interpretation |
-| --- | ---: | ---: | --- |
-| Mean first-fibre fraction | 0.01088 | 0.99918 | Median sign-invariant principal-axis difference 0.66° |
-| Mean second-fibre fraction | 0.01282 | 0.52640 | FSL ROI mean 0.02361; no jointly supported axis |
-| Mean third-fibre fraction | 0.004538 | 0.58033 | FSL ROI mean 0.005968; no jointly supported axis |
-| Mean diffusivity | 0.0001170 mm²/s | 0.96080 | |
-| Mean diffusivity standard deviation | 0.0002166 mm²/s | 0.52974 | Short-chain estimate is unstable |
-
-No second- or third-fibre voxel reached mean fraction ≥ 0.1 in both runs, so their orientation errors and map correlations have limited meaning. The current one-thread CPU run had first-fibre fraction MAE 0.01393, *r* = 0.99767, and median axis difference 0.53°. Its mean-diffusivity MAE was 0.0001187 mm²/s; its diffusivity-standard-deviation MAE was 0.0002387 mm²/s.
-
-| Same-host wall time for 14 voxels | Seconds |
-| --- | ---: |
-| Original FSL CPU | 10.99 |
-| Current Torch CPU, one thread | 22.54 |
-| Current Torch H100 GPU 1 | 39.91 |
-
-The timing includes process startup and file I/O and does not predict whole-brain throughput. FSL `xfibres` returned status 255 after writing valid 50-draw volumes for all 14 voxels; the Torch runs returned status 0. As an interoperability check on the **current GPU output**, original FSL `probtrackx2` loaded three fibres with 50 draws per voxel and completed 20/20 requested streamlines. Its 7 × 13 × 7 density image summed to 57 and `waytotal` was 20; its log ended with `finished` despite status 255.
-
-## Chain stability and weak fibres
-
-The same ROI was rerun with FSL tensor initialization (`--nospat`) and with longer chains. The extended runs used 5000 burn-in and 5000 sampling jumps, saving every 100th jump; all runs therefore retained 50 draws per voxel. These controls use the **current** Torch code.
-
-| Run | Initialization | Burn-in / jumps | Mean f2 | Mean f3 | Mean `d_std` (mm²/s) |
-| --- | --- | ---: | ---: | ---: | ---: |
-| FSL CPU, standard | nonlinear | 1000 / 1250 | 0.02361 | 0.005968 | 0.0002243 |
-| FSL CPU, tensor control | tensor | 1000 / 1250 | 0.01902 | 0.000199 | 0.0002782 |
-| FSL CPU, extended | nonlinear | 5000 / 5000 | 0.01586 | 0.001475 | 1.01×10⁻⁸ |
-| Torch CPU, standard | tensor | 1000 / 1250 | 0.02049 | 0.004256 | 0.0001446 |
-| Torch H100, standard | tensor | 1000 / 1250 | 0.02303 | 0.002811 | 8.18×10⁻⁶ |
-| Torch CPU, extended | tensor | 5000 / 5000 | 0.01305 | 0.001572 | 3.54×10⁻¹⁰ |
-
-[FSL's model-2 source](../../src/fnit/_vendor_fsl/sources/fdt-2604.0/fibre.h) adds `log(d_std)` and, for subsidiary fibres under ARD, `log(f)` to the energy. These terms drive values toward zero; without a positive lower bound, the corresponding continuous density is non-integrable there. FSL's own `d_std` ROI mean fell by more than four orders of magnitude with the longer chain, while its tensor-versus-nonlinear short runs differed by MAE 0.000198 mm²/s. The current Torch long run differed from FSL's long run by `d_std` MAE 1.05×10⁻⁸ mm²/s and mean-f2 MAE 0.00400. Correlations among near-zero `d_std` values are not informative. Interpret the standard run as a finite-chain FSL-compatible estimate, with stronger evidence for the first-fibre fraction and axis in this ROI.
-
-## Why second- and third-fibre correlations are lower
-
-The 14-voxel benchmark ROI contains no voxel where **both** methods assign mean fraction ≥ 0.1 to f2 or f3. In original FSL, 80.3% of saved f2 draws and 97.0% of f3 draws are below 0.05. [FSL uses ARD to determine how many fibres a voxel supports](https://fsl.fmrib.ox.ac.uk/fsl/docs/diffusion/bedpostx.html); near-zero secondary fractions are therefore expected in a region with little crossing-fibre evidence.
-
-| Same 14 voxels, compared with FSL seed 8665904 | f2 Pearson *r* | f3 Pearson *r* |
-| --- | ---: | ---: |
-| FSL seed 8665905 | 0.201 | 0.756 |
-| FSL seed 8665906 | 0.764 | 0.400 |
-| FSL seed 8665907 | 0.535 | 0.591 |
-| Current Torch H100 | 0.526 | 0.580 |
-
-The cross-implementation correlations fall inside FSL's own three-seed range. Adding f2 and f3 did not consistently restore correlation, so simply exchanging the two fibre labels does not explain the weak-ROI result.
-
-To check supported fibres, a separate 64-voxel patch was selected from an **existing** whole-brain FSL map: 48 voxels had f2 and f3 ≥ 0.1, and 16 had f2 ≥ 0.1 with f3 < 0.05. All methods then refit the same cropped DWI. This is an FSL-enriched diagnostic sample, not an unbiased whole-brain accuracy estimate. The fresh FSL reference supported f2 in 63/64 voxels and f3 in 39/64.
-
-| Compared with fresh FSL reference | f2 *r*, all | f3 *r*, all | f2 *r*, jointly ≥ 0.1 | f3 *r*, jointly ≥ 0.1 | Median f2 / f3 axis difference, jointly supported |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| FSL, another seed | 0.782 | 0.699 | 0.832 (60 voxels) | 0.864 (31 voxels) | 6.49° / 9.37° |
-| Current Torch CPU | 0.802 | 0.634 | 0.840 (61 voxels) | 0.810 (29 voxels) | 4.45° / 8.79° |
-| Current Torch H100 | 0.741 | 0.572 | 0.726 (61 voxels) | 0.801 (25 voxels) | 5.44° / 8.30° |
-
-In voxels supporting both secondary fibres, swapping the two direction matches improved the total angular error by over 10° in 5/25 Torch-versus-FSL comparisons; the same happened in 7/31 FSL-versus-FSL comparisons. Sorting by mean fraction cannot eliminate this direction ambiguity when the two components are similar, but it is not the sole source of the weak-ROI fraction mismatch.
-
-As a prior ablation on the weak ROI, disabling ARD raised FSL mean f2/f3 from 0.0236/0.0060 to 0.1066/0.0513 and Torch GPU means from 0.0230/0.0028 to 0.0841/0.0458. The cross-method f2 MAE increased from 0.0128 to 0.0439, so disabling ARD changes the model rather than fixing the comparison. These controls support weak signal, ARD shrinkage, finite-chain variability, and some fibre pairing ambiguity as the main causes in the tested ROIs. They do not establish whole-brain equivalence.
-
-## Shareable synthetic example
-
-The [generator](synthetic_example.py) creates an 8 × 8 × 1 multi-shell DWI with two known crossing-fibre fraction maps and no human imaging data. Run original FSL and the current Torch code with the settings above and `--nf=2`, then render the [current comparison image](synthetic_example.png):
+独立入口 `fnit-bedpostx` 接受同一组参数。对应的 FSL wrapper 调用为：
 
 ```bash
-python docs/bedpostx/synthetic_example.py /tmp/bedpostx-synthetic
-export FSLOUTPUTTYPE=NIFTI_GZ
-xfibres --data=/tmp/bedpostx-synthetic/subject/data.nii.gz \
-  --mask=/tmp/bedpostx-synthetic/subject/nodif_brain_mask.nii.gz \
-  --bvals=/tmp/bedpostx-synthetic/subject/bvals \
-  --bvecs=/tmp/bedpostx-synthetic/subject/bvecs \
-  --nf=2 --model=2 --fudge=1 --bi=1000 --nj=1250 --se=25 \
-  --cnonlinear --seed=8665904 --forcedir \
-  --logdir=/tmp/bedpostx-synthetic/fsl_cpu
-fnit bedpostx --subject-dir /tmp/bedpostx-synthetic/subject \
-  --output-dir /tmp/bedpostx-synthetic/fnit_gpu --device cuda:0 --nfibres 2
-python docs/bedpostx/synthetic_example.py /tmp/bedpostx-synthetic --plot
+bedpostx /absolute/path/subject \
+  --nf=3 --model=2 --fudge=1 \
+  --bi=1000 --nj=1250 --se=25
 ```
 
-![Current synthetic crossing-fibre fraction comparison](synthetic_example.png)
+两条命令读取同一目录结构。`--nf/--model/--fudge/--bi/--nj/--se` 分别对应 `nfibres/model/ard_weight/burnin/njumps/sample_every`。FNIT 另有 `device`、`chunk_size`、`seed`、`threads` 和显式输出目录；随机数生成器、初始化和并行归约顺序与 FSL 不同。
 
-| Synthetic run, 64 voxels | Wall time | f1 MAE to truth | f2 MAE to truth | f1 / f2 MAE to FSL |
-| --- | ---: | ---: | ---: | ---: |
-| Original FSL CPU | 28.55 s | 0.004145 | 0.004321 | Reference |
-| Current Torch CPU, one thread | 21.62 s | 0.004377 | 0.004400 | 0.000902 / 0.001218 |
-| Current Torch H100 GPU 1 | 30.81 s | 0.004268 | 0.004290 | 0.000955 / 0.001042 |
+## 输出与结构
 
-The current GPU-to-FSL fraction-map correlations were 0.99991 (f1) and 0.99951 (f2). Its `d_std` MAE to FSL was 0.0001087 mm²/s. Each absolute-difference panel uses its own color bar capped at its 99th percentile, shown in the panel title. These data were generated from the fitted signal model, so this figure does not establish accuracy on real anatomy.
+```text
+subject.bedpostX/
+├── merged_th1samples.nii.gz    # 第1条纤维的 theta 后验，[X,Y,Z,Nsample]
+├── merged_ph1samples.nii.gz    # 第1条纤维的 phi 后验，[X,Y,Z,Nsample]
+├── merged_f1samples.nii.gz     # 第1条纤维的分数后验，[X,Y,Z,Nsample]
+├── ...                         # 按 nfibres 重复 th/ph/f 文件
+├── mean_f1samples.nii.gz       # 后验平均纤维分数，[X,Y,Z]
+├── dyads1.nii.gz               # 后验平均方向轴，[X,Y,Z,3]
+├── mean_dsamples.nii.gz        # 平均扩散率，[X,Y,Z]
+├── mean_d_stdsamples.nii.gz    # model=2 的扩散率标准差，[X,Y,Z]
+├── mean_S0samples.nii.gz       # 平均基线信号，[X,Y,Z]
+├── nodif_brain_mask.nii.gz     # 追踪互操作所需的脑掩膜
+└── run.json                    # 参数、体素数、样本数和时间
+```
 
-## References
+各纤维按体素内后验平均分数降序排列。方向是轴而非有向向量，比较时应使用符号不变夹角。文件名与 FSL `probtrackx2` 读取的 BEDPOSTX 后验一致；轨迹计数受 seed 体素数和每体素样本数影响，不能直接解释成解剖连接概率。
 
-- [FSL BEDPOSTX documentation](https://fsl.fmrib.ox.ac.uk/fsl/docs/diffusion/bedpostx.html)
-- [Behrens et al., NeuroImage 2007](https://users.fmrib.ox.ac.uk/~behrens/behrens_xfibres.pdf)
-- [Jbabdi et al., Magnetic Resonance in Medicine 2012](https://pubmed.ncbi.nlm.nih.gov/22334356/)
-- [FSL software license](https://fsl.fmrib.ox.ac.uk/fsl/docs/license.html)
+## 与 FSL 的真实数据对照
+
+当前报告使用一例真实 UK Biobank dMRI 的两个诊断裁剪：14 个弱纤维体素，以及从 FSL 后验图中富集得到的 64 个交叉纤维体素。标准设置为 model 2、三纤维、ARD=1、1000/1250 跳、每 25 跳保存一次和 seed 8665904。FSL 6.0.7.22 在 CPU 运行 `xfibres --cnonlinear`；当前 Torch 代码分别在单线程 CPU 和一张 H100 上运行。源码 hash 与报告一致。
+
+| 当前 GPU 对 FSL CPU | MAE | Pearson r | 其他结果 |
+|---|---:|---:|---|
+| 第一纤维平均分数 | 0.01088 | 0.99918 | 主轴夹角中位数 0.66° |
+| 第二纤维平均分数 | 0.01282 | 0.52640 | 双方均无分数 ≥0.1 的共同支持体素 |
+| 第三纤维平均分数 | 0.004538 | 0.58033 | 双方均无分数 ≥0.1 的共同支持体素 |
+| 平均扩散率 | 0.0001170 mm²/s | 0.96080 | — |
+| 扩散率标准差 | 0.0002166 mm²/s | 0.52974 | 短链估计不稳定 |
+
+| 同机 14 体素完整调用 | 时间 |
+|---|---:|
+| FSL CPU | 10.99 s |
+| Torch CPU，1 线程 | 22.54 s |
+| Torch H100 GPU | 39.91 s |
+
+在 64 体素富集裁剪中，Torch GPU 对 fresh FSL 的 f2/f3 全体素相关为 0.741/0.572；双方共同满足分数 ≥0.1 时为 0.726（61 体素）/0.801（25 体素），主轴夹角中位数为 5.44°/8.30°。长链控制表明接近零的次要分数和 `d_std` 对初始化、随机种子和链长敏感；这些裁剪不是无偏全脑精度估计。
+
+![真实 UK Biobank dMRI 诊断 ROI 中 FSL 与 FNIT 的第二、第三纤维方向轴](figures/bedpostx_real_ukb_direction_axes.png)
+
+图中每行分别为 f2 和 f3。左列是 FSL `xfibres`，中列是当前 FNIT H100 输出，颜色表示后验平均纤维分数；右列按体素显示符号不变的锐角差。方向轴没有正负之分，因此绘图前将 FNIT 轴翻转到与 FSL 同一半球。图中只显示双方分数均 ≥0.1 的体素，f2 为 61 个、f3 为 25 个；对应夹角中位数 5.44° 和 8.30°，与机器报告逐项一致。
+
+仓库已公开这份 64 体素裁剪的去标识方向轴图，原始 DWI 和完整后验仍保留在授权服务器。该裁剪按 FSL 后验估计富集，只用于检查受支持的次要纤维；它不能代表全脑无偏精度。机器可读指标和这一适用范围见 [`report.public.json`](../../validation/bedpostx/report.public.json)。
+
+## 合成回归示例
+
+[`synthetic_example.py`](synthetic_example.py) 生成 8×8×1 的已知双交叉纤维信号；[`synthetic_example.png`](synthetic_example.png) 只用于检查模型和画图流程。64 个模拟体素中，Torch GPU 对真值的 f1/f2 MAE 为 0.004268/0.004290，对 FSL 的 MAE 为 0.000955/0.001042，运行 30.81 s。该结果不能替代真实数据验收。
+
+## 来源与限制
+
+该实现复现已发表模型和采样算法，并非 FSL `xfibres` C++ 的逐句翻译。tensor 初始化、随机数流、浮点归约和 proposal history 均不同，因此不声明后验体积逐元素等价。方法与许可见 [FSL BEDPOSTX 文档](https://fsl.fmrib.ox.ac.uk/fsl/docs/diffusion/bedpostx.html)、Behrens et al. (NeuroImage, 2007)、Jbabdi et al. (MRM, 2012) 以及 [FSL 软件许可](https://fsl.fmrib.ox.ac.uk/fsl/docs/license.html)。

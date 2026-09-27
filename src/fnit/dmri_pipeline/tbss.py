@@ -12,7 +12,6 @@ import nibabel as nib
 import numpy as np
 import torch
 from scipy.ndimage import binary_dilation, binary_erosion
-import surfa as sf
 
 from .._dmri import configure_device
 from ..applywarp import TorchApplyWarp
@@ -155,27 +154,19 @@ class TorchTBSS:
             reference.affine, skeleton.affine, atol=1e-5, rtol=0
         ):
             raise ValueError("FA reference and skeleton must use the same grid")
-        moving_volume = sf.Volume(
-            np.asarray(preprocessed.dataobj, dtype=np.float32),
-            geometry=sf.ImageGeometry(preprocessed.shape[:3], vox2world=preprocessed.affine),
+        moving_volume = _image_like(
+            np.asarray(preprocessed.dataobj, dtype=np.float32), preprocessed
         )
-        reference_volume = sf.Volume(
-            np.asarray(reference.dataobj, dtype=np.float32),
-            geometry=sf.ImageGeometry(reference.shape[:3], vox2world=reference.affine),
+        reference_volume = _image_like(
+            np.asarray(reference.dataobj, dtype=np.float32), reference
         )
-        weight_volume = sf.Volume(
-            np.asarray(weight.dataobj, dtype=np.float32),
-            geometry=sf.ImageGeometry(weight.shape[:3], vox2world=weight.affine),
+        weight_volume = _image_like(
+            np.asarray(weight.dataobj, dtype=np.float32), weight
         )
         linear = TorchFLIRT(device=self.device)(
             moving_volume, reference_volume, inweight=weight_volume
         )
-        initial = sf.Affine(
-            linear.moving_to_fixed_world,
-            source=moving_volume,
-            target=reference_volume,
-            space="world",
-        )
+        initial = np.asarray(linear.moving_to_fixed_world, dtype=np.float64)
         nonlinear = TorchFNIRT(device=self.device or "cpu", config=self.config.fnirt)(
             moving_volume, reference_volume, initial
         )
@@ -220,7 +211,7 @@ class TorchTBSS:
             skeletonised,
             linear.matrix,
             nonlinear.coefficient_image,
-            _image_like(np.asarray(nonlinear.nonlinear_jacobian.data), reference),
+            _image_like(np.asarray(nonlinear.nonlinear_jacobian.dataobj), reference),
             preprocessed,
             weight,
             {

@@ -1,24 +1,20 @@
 """Shared FLIRT file inputs and result type."""
 
 from dataclasses import dataclass
-import os
 from pathlib import Path
 
+import nibabel as nib
 import numpy as np
 
-from ..synthstrip.geometry import load_volume
+from .._nib import FNITNifti1Image, load_image
 
 
 def _load_volume(value, name):
-    if isinstance(value, (str, os.PathLike)):
-        return load_volume(value)
-    if all(hasattr(value, field) for field in ("data", "geom", "new")):
-        return value
-    raise TypeError(f"{name} must be a path or volume with data and geometry")
+    return load_image(value, name)
 
 
 def _single_frame(volume, name):
-    data = np.asarray(volume.data)
+    data = np.asanyarray(volume.dataobj)
     if data.ndim == 4 and data.shape[-1] == 1:
         data = data[..., 0]
     if data.ndim != 3:
@@ -34,7 +30,7 @@ def _single_frame(volume, name):
 class FLIRTResult:
     """Reference-grid image and transforms returned by a FLIRT model."""
 
-    moved: object
+    moved: FNITNifti1Image
     matrix: np.ndarray
     moving_to_fixed_world: np.ndarray
     fixed_to_moving_world: np.ndarray
@@ -54,7 +50,7 @@ class FLIRTResult:
         ):
             raise ValueError("output and omat must use different paths")
         if output is not None:
-            self.moved.save(str(output))
+            nib.save(self.moved, str(output))
         if omat is not None:
             np.savetxt(str(omat), self.matrix, fmt="%.12g")
         return self

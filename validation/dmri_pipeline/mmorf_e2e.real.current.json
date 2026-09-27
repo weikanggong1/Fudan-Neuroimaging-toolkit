@@ -1,0 +1,482 @@
+{
+  "schema_version": 1,
+  "data": {
+    "subjects": 1,
+    "kind": "one deidentified real UKB-format AP/PA diffusion MRI plus paired T1w",
+    "subject_identifier_published": false,
+    "raw_file_sha256": {
+      "AP.bval": "4bba64690ad224848ea4d0891b98a859b79e11f0de77ad9d2539f4397fda2224",
+      "AP.bvec": "e9dbf67c3a948f726b06f33c97f173c55ecbe186240541682af9d8cd8fb5835e",
+      "AP.json": "9598b13741a746ab6d57feef1386f6e8b089e07e73ce2a02da6b515d695decb5",
+      "AP.nii.gz": "c37773b5749bc169b96c1bc8642a572637a61325c6eb2ac33e765253011533f1",
+      "PA.bval": "f4397dcf05f5035193915072cc663b4a6b8ed4f80dd7c9e0edf995b2c19bf59e",
+      "PA.bvec": "915af04d3692da2fbf604d9259409997f375632995387630e0f57b8d60aee7f8",
+      "PA.json": "cc60927494c121eaab47198688236830cbf4bf9e2d18bcfe1b1c17dd104db990",
+      "PA.nii.gz": "520437c7f1ced17b325b4ad78860c485840b17686ace838334af1d23a51d603b"
+    },
+    "t1w_sha256": "cfb76d24c9235977049e62882ca570511086f2ec8c96f08b6cee1c93310e66a8",
+    "template_and_weight_sha256": {
+      "FMRIB58_FA_1mm": "1268fd84b658451c9a85799a636688bc1f6947fdf8de2d9cf7f62320de1b3837",
+      "MNI152_T1_1mm_brain": "32d5be33460f995a5d305507053c8862c823d9ca6bfb543381308df14590f212",
+      "FSL_HCP1065_tensor_1mm": "22eca3330011944bddafdbaf404d791beb54b49b27a0c8fc0ea0ef24a5d69b69",
+      "synthstrip_weights": "37417f802196186441aae3e7f385d94f8a98c64a88acaeaa2723af995c653e33"
+    }
+  },
+  "boundary": {
+    "candidate": "raw AP/PA through TOPUP, EDDY, DTIFIT, AMICO-NODDI, SynthStrip, FLIRT, MMORF, and nine map propagations",
+    "reference_native": "existing official UKB DTI/NODDI maps",
+    "reference_standard": "official native maps propagated with the official FSL MMORF warp in the prior matched validation",
+    "reference_affine_limit": "the published reference propagation used the fixed FNIT affine from that prior validation, so this is not an all-official raw-to-standard rerun"
+  },
+  "candidate": {
+    "implementation": "FNIT DMRIPipeline registration_backend=mmorf",
+    "source_snapshot_tar_sha256": "f7547d0a39ddd9fb6ba70deb720f229ecedc6385fa72d457efb2ded78b6c173d",
+    "source_sha256": {
+      "src/fnit/__init__.py": "cc9aa48bd2cd5966801460d83f46eff5839e91fcd6962640a89be538a23ead32",
+      "src/fnit/_dmri.py": "b6bf837f8b5a0a8f0d910706631e882a9e3f8dfc1f1ef77e1cfac7efe36fafbf",
+      "src/fnit/_nib.py": "bffd56aeaca423b2448432ba318212e83549e9e31aa27af6bf20a60888218586",
+      "src/fnit/_transforms.py": "be01fa24cd0c17bb1aa8ac7792cdf0b62c657037808c643427a1b11cc4c05340",
+      "src/fnit/amico_noddi/__init__.py": "a3d133bdb2dcb70b9fe20b638f5e347ac97999e0e79868270335af16f9bdc2a7",
+      "src/fnit/amico_noddi/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+      "src/fnit/amico_noddi/cli.py": "2e684a9fc558b24eabe5ed3d8211e69b87853424a703bf7056c30d29f3a8dfe0",
+      "src/fnit/amico_noddi/core.py": "9adff87a2f9296259944e22936da2a1d9a0ed40bfd31b9df22fa16d52742793b",
+      "src/fnit/amico_noddi/kernels.py": "46f1044aa5f1c2dbffd12dd33707c0e192ef1de01dc23157ae03a0977b3d0b59",
+      "src/fnit/amico_noddi/solver.py": "b86c56d9e3aef90efad74748309c627f4cb013071f3670f74c615f9e27001bf3",
+      "src/fnit/applywarp/__init__.py": "0d193f4216238e40e4f14d86d175806ef016db34ad3b2a6362c4be8e3cde7cfa",
+      "src/fnit/applywarp/__main__.py": "c2ee4ddb093c9af060cafaf68219907f8a6b7b301ed3f8bea75db7555adec987",
+      "src/fnit/applywarp/cli.py": "024de40d9121d2352071cf37f2c47558d97f0630faa1bfc47abcfb4e6e38270e",
+      "src/fnit/applywarp/core.py": "cf6de438f3ac1551804d38682ce3fbb11b8fb042ad881562ebc93aada80f2df5",
+      "src/fnit/cli.py": "2d5e3d37f52fffb7834a438339566cd7ead980606a2127ade268662569922178",
+      "src/fnit/dmri_pipeline/__init__.py": "b332f76a687bb0379daa3384273f72a8fc02b657e4c3ce1600b3f4ae8286f7cf",
+      "src/fnit/dmri_pipeline/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+      "src/fnit/dmri_pipeline/cli.py": "ed901ef2f215694a327c7537d3746188f849a163a21d5bf72cacc3fdaf4bb6df",
+      "src/fnit/dmri_pipeline/pipeline.py": "7ed08495a70065f46e8cd6a8402053ec9e5d6a764e5ce8ec37dc961fc369a347",
+      "src/fnit/dmri_pipeline/tbss.py": "93abf99c86dcc688959b34eb1a8e8b0bd8bec6a561b7332a4782f2338f937bfc",
+      "src/fnit/dtifit/__init__.py": "a38d642b2b5209e1bb10f155d42be85d9798a39db878e8a6f7cfce2d63e22d79",
+      "src/fnit/dtifit/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+      "src/fnit/dtifit/cli.py": "82f8600caaa4aebba89014c1f4327c320a84791f3d687f0db404ee7143d7cae7",
+      "src/fnit/dtifit/core.py": "23e0fb554be1e0b309af154f34f5b6f7139db6e06ca8f10b1bd08be09789dc39",
+      "src/fnit/eddy/__init__.py": "6ecf6fead43f46c425a98348714426e8e89a8ec2f12d4414d1e967dab0a191f2",
+      "src/fnit/eddy/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+      "src/fnit/eddy/cli.py": "6d6bb36183ca15bb2692d1658cc3f1cccbade332465f3b933ff04710266c93fb",
+      "src/fnit/eddy/core.py": "218733afd990fd4dec77ad7ac7dc2718571fc7058972793ebc01c4d525b657d2",
+      "src/fnit/eddy/ukb.py": "5d64adb9cc350678c10c8ad8c2a357787f7ddcb0df1debe64e20d621d1183186",
+      "src/fnit/flirt/__init__.py": "58b1ae43c50bd2942398f272c013f5bc743ce6a78abdaab7c93eeae1949447af",
+      "src/fnit/flirt/__main__.py": "03eb6210ee12d659108106a6126a870a9d5bc89ba95c116cd519e2764b0e092f",
+      "src/fnit/flirt/cli.py": "f45f0774d861a42f73c147d37ca6f5d9a7f8ab6bbde6e33bd3f56919229d30a4",
+      "src/fnit/flirt/coordinates.py": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e",
+      "src/fnit/flirt/core.py": "5528560292d3ba72778fda619abd907ab4cd666b80a8f18b95538ee4b8ca89b2",
+      "src/fnit/flirt/standalone.py": "bf6a86f16b72e49e1f4aaa2b3dd463860568822808c8cb0dd2622175a1597e8b",
+      "src/fnit/flirt/types.py": "55a3abf2d7ce7889c297df95289890a589d1721b9fe3b157aa90e87819ed8e21",
+      "src/fnit/mmorf/__init__.py": "be0bc4e09746ed7decc532fd553a8964823ce5733b327a107c00b63cb67dd774",
+      "src/fnit/mmorf/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+      "src/fnit/mmorf/cli.py": "4a5a54745055a2590f9a2e707e109927841d6cfa065afd998ac21d819509fa96",
+      "src/fnit/mmorf/core.py": "a89092d2ef561b53049400361a646b9cc8f94300bcb7b3eb14b37ed1e4a18466",
+      "src/fnit/mmorf/standalone.py": "fc2050d991663796429fcdcddeab8e86df91ab2f88b539ce8b5a8314694e31f2",
+      "src/fnit/synthstrip/__init__.py": "3eac7a2f37a3dd0009e38a7cf74c64aba481fb5638fff8766ce2a0b6322f5d1d",
+      "src/fnit/synthstrip/model.py": "6afcff10848a8a2a57b9c00d4b637eda90e4c0e21f301d8a8031107d783a5f44",
+      "src/fnit/synthstrip/pipeline.py": "3cc23ab81eebb6ad11ac9814691f9d3b5c13c93fc2569ee1f4dddea70ec37de7",
+      "src/fnit/topup/__init__.py": "950df41a668a1caca619b67866d98e36a8a531954a56b3c16eb6c5acbb81eb5f",
+      "src/fnit/topup/__main__.py": "c2ee4ddb093c9af060cafaf68219907f8a6b7b301ed3f8bea75db7555adec987",
+      "src/fnit/topup/cli.py": "fc5220c7c9de36577f5e116262bb5789733397beff00796059fe07313fba3388",
+      "src/fnit/topup/core.py": "4746d50f28b8137abf9bf6d8a211c12489bddc6a931bd06e695db1965f14b976",
+      "src/fnit/topup/io.py": "c87edab5c5369204d1a7ccfd2cb079dfd1a64e68279d8899f51755609038176a",
+      "src/fnit/topup/ukb.py": "63eb5cc0d9e2f4a4547585af4f041f543dd256a653101ca54ceab235addd0d08"
+    },
+    "pipeline_report_sha256": "fe861561ec6f75aac9a6bda61b64730b31d6f6ab84193a1efb99d7600bb40392",
+    "validator_sha256": "48505345b2c93965e98710e40f139b57efce263d7eab8f5d0f2b1433e2a99d6a",
+    "device": "cuda",
+    "dtype": "float32 images; solver-specific float64 where documented",
+    "tf32": true,
+    "output_contract": {
+      "nine_native_maps": [
+        "FA",
+        "MD",
+        "L1",
+        "L2",
+        "L3",
+        "MO",
+        "ICVF",
+        "OD",
+        "ISOVF"
+      ],
+      "nine_standard_maps": [
+        "FA",
+        "MD",
+        "L1",
+        "L2",
+        "L3",
+        "MO",
+        "ICVF",
+        "OD",
+        "ISOVF"
+      ],
+      "common_standard_output_contract": true
+    }
+  },
+  "reference": {
+    "implementation": "UKB native maps plus FSL MMORF 0.3.2 warp",
+    "sha256": {
+      "standard_FA": "e0961a2a4c8d6397c38435f6f97e8d796318fba6887ba005a5d9a43e9d86da5f",
+      "standard_MD": "59fbd97fffaad36af1d8ffd74050a261a2e715418b1d405956c37baa8d8dc3f0",
+      "standard_L1": "5b6700c6d0776ccf11f0dfb9b58d064d918c88fc77ab833fb84c1d6fce8110fc",
+      "standard_L2": "c24f9c9839acd44c6c7588af8c71e03096a386bfcc33dd3945cae6909d3c52c0",
+      "standard_L3": "ff1a89ce6ab9cef0d327b7a41084f62d589104817f0a6ac6810c4ab918b07f96",
+      "standard_MO": "66b11a719e5538ab61ce32986fc1dfcf646b32e975dcbc613a02d72a11b6f45d",
+      "standard_ICVF": "075d6c7b0cfa38dd78faca2e21923db8bc103c001496bbe19a695d921c5b8d57",
+      "standard_OD": "720610f24caf4dbc5f2e6a8aaf4a5e5661d05f3abd27e97cefd85f0e8e98c7b4",
+      "standard_ISOVF": "779d94d71f5f663b021b3040c93816f9bb504ece98ace7b77fd7608a03190bca",
+      "official_mmorf_warp": "a32b3961823111d0dbb025b4fdc32dcd9504890a4fa83687175c29bc6008c58c",
+      "official_mmorf_jacobian": "3a5b7c8685046e79e247b04aec09f579ac519463c5db4df7ad42a50b980bb263"
+    }
+  },
+  "execution": {
+    "run_date": "2026-09-28",
+    "host": "gpucw1",
+    "gpu": "NVIDIA H100 PCIe",
+    "software": {
+      "pytorch": "2.5.1",
+      "pytorch_cuda": "11.8",
+      "nibabel": "5.4.2",
+      "numpy": "1.26.4"
+    },
+    "run_script_sha256": "feb20cb14800cd954c539751d28650d512d9ebc78b81f3dbfe3f005c1d7dd11d",
+    "candidate_command": "python -m fnit.cli dmri-pipeline --raw-dir <RAW_DIR> --output-dir <OUTPUT_DIR> --registration-backend mmorf --fa-template <FMRIB58_FA_1mm.nii.gz> --t1 <T1w.nii.gz> --t1-template <MNI152_T1_1mm_brain.nii.gz> --tensor-template <FSL_HCP1065_tensor_1mm.nii.gz> --synthstrip-weights <synthstrip.1.pt> --device cuda",
+    "environment": {
+      "PYTHONPATH": "<SOURCE_SNAPSHOT>/src",
+      "CUDA_VISIBLE_DEVICES": "1",
+      "PYTORCH_CUDA_ALLOC_CONF": "unset",
+      "CUDA_MODULE_LOADING": "LAZY"
+    },
+    "gpu_baseline_before_candidate": {
+      "memory_used_mib": 22246.8125,
+      "utilization_percent": 100.0,
+      "exclusive_timing": false,
+      "note": "a separate long-running GPU training process was active"
+    },
+    "reference_command": "FSL MMORF 0.3.2 registration followed by apply_mmorf_warp with the fixed prior FNIT affine; see validation/mmorf/report.public.json"
+  },
+  "accuracy": {
+    "native_maps": {
+      "FA": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 292397,
+          "pearson": 0.5861569970001622,
+          "mae": 0.10181525268208615,
+          "rmse": 0.1755371294324284,
+          "maximum_absolute_error": 1.2247449159622192
+        }
+      },
+      "MD": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 292463,
+          "pearson": 0.5475369317494377,
+          "mae": 0.0003927185797632615,
+          "rmse": 0.0006883182420657347,
+          "maximum_absolute_error": 0.00948549120221287
+        }
+      },
+      "L1": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 292463,
+          "pearson": 0.4369940296487216,
+          "mae": 0.00046462973780319537,
+          "rmse": 0.0008157539619526152,
+          "maximum_absolute_error": 0.009162380709312856
+        }
+      },
+      "L2": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 292463,
+          "pearson": 0.5672506851997026,
+          "mae": 0.00039299600755303416,
+          "rmse": 0.0006813882552249284,
+          "maximum_absolute_error": 0.00951859587803483
+        }
+      },
+      "L3": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 292463,
+          "pearson": 0.6340224732959359,
+          "mae": 0.00035478443624427543,
+          "rmse": 0.0006111370413466305,
+          "maximum_absolute_error": 0.011983550386503339
+        }
+      },
+      "MO": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 292463,
+          "pearson": 0.4135792649263962,
+          "mae": 0.46317977631381746,
+          "rmse": 0.6091759814597536,
+          "maximum_absolute_error": 1.9884552359580994
+        }
+      },
+      "ICVF": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 272910,
+          "pearson": -0.00206971847454545,
+          "mae": 0.1940084018090306,
+          "rmse": 0.3155462717443454,
+          "maximum_absolute_error": 0.9900000691413879
+        }
+      },
+      "OD": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 291834,
+          "pearson": 0.5068616246289507,
+          "mae": 0.16964281973985115,
+          "rmse": 0.27060128380298415,
+          "maximum_absolute_error": 1.0
+        }
+      },
+      "ISOVF": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 231142,
+          "pearson": 0.608481368322222,
+          "mae": 0.19771242672182812,
+          "rmse": 0.2992324306004011,
+          "maximum_absolute_error": 1.124258041381836
+        }
+      }
+    },
+    "standard_maps": {
+      "FA": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 1768397,
+          "pearson": 0.559845035498358,
+          "mae": 0.09986934654865716,
+          "rmse": 0.15158757717960636,
+          "maximum_absolute_error": 1.208866834640503
+        }
+      },
+      "MD": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 1768600,
+          "pearson": 0.5631591545352781,
+          "mae": 0.00036765882187185143,
+          "rmse": 0.000587430438251123,
+          "maximum_absolute_error": 0.006277743610553443
+        }
+      },
+      "L1": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 1768600,
+          "pearson": 0.5357309316340839,
+          "mae": 0.0004041723508998771,
+          "rmse": 0.0006454389344599686,
+          "maximum_absolute_error": 0.004567330819554627
+        }
+      },
+      "L2": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 1768600,
+          "pearson": 0.5631841519593394,
+          "mae": 0.00037694390477760296,
+          "rmse": 0.0005930465750692517,
+          "maximum_absolute_error": 0.006238527130335569
+        }
+      },
+      "L3": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 1768600,
+          "pearson": 0.5859975172949237,
+          "mae": 0.00036224508187035357,
+          "rmse": 0.000563055686074852,
+          "maximum_absolute_error": 0.009145814809016883
+        }
+      },
+      "MO": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 1768600,
+          "pearson": 0.32982874369651566,
+          "mae": 0.3707174205152351,
+          "rmse": 0.4811647951372336,
+          "maximum_absolute_error": 1.93370920419693
+        }
+      },
+      "ICVF": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 1742452,
+          "pearson": 0.3725483953955828,
+          "mae": 0.1467451104754276,
+          "rmse": 0.2238347396824544,
+          "maximum_absolute_error": 0.9900001883506775
+        }
+      },
+      "OD": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 1767458,
+          "pearson": 0.5402359934105335,
+          "mae": 0.15425508279429265,
+          "rmse": 0.22078079855635027,
+          "maximum_absolute_error": 1.0000001192092896
+        }
+      },
+      "ISOVF": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 1734192,
+          "pearson": 0.5280754212303947,
+          "mae": 0.17756105614320064,
+          "rmse": 0.26923538176876105,
+          "maximum_absolute_error": 1.1054535149596632
+        }
+      }
+    }
+  },
+  "timing": {
+    "candidate_external": {
+      "wall_seconds": 563.06,
+      "maximum_rss_kib": 2776112,
+      "exit_status": 0
+    },
+    "candidate_internal_total_seconds": 558.0996986641549,
+    "candidate_stages_seconds": {
+      "topup_and_eddy_preparation": 136.62472028099,
+      "eddy": 49.67526204511523,
+      "dtifit": 17.50185166299343,
+      "noddi": 45.752816857304424,
+      "registration_and_map_propagation": 308.4955472382717
+    },
+    "official_mmorf_external_wall_seconds": 947.62,
+    "official_mmorf_maximum_rss_kib": 9419864,
+    "comparison_scope_matched": false,
+    "candidate_timing_isolated": false,
+    "reason_no_speedup": "candidate timing is full raw-to-standard; official timing is MMORF registration only"
+  },
+  "memory": {
+    "eddy_peak_cuda_bytes": 3480231936,
+    "dtifit_peak_cuda_bytes": 1313357312,
+    "noddi_peak_cuda_bytes": 13669212672,
+    "mmorf_peak_cuda_bytes": 12319755264,
+    "maximum_reported_component_cuda_bytes": 13669212672
+  },
+  "status": {
+    "run_completed": true,
+    "output_grid_contract_passed": true,
+    "output_dtype_contract_passed": true,
+    "numerical_equivalence_passed": false,
+    "reason": "one-case standard-map correlations are not near voxelwise equality and the official reference boundary is not fully matched"
+  },
+  "artifacts": {
+    "figure": "dmri_mmorf_fa_real.png"
+  },
+  "limits": [
+    "one real subject",
+    "the official reference used existing UKB native maps and an existing official MMORF warp",
+    "candidate and official timing scopes differ",
+    "candidate wall timing includes contention from a separate GPU training process"
+  ],
+  "source_equivalence_attestation": {
+    "path": "../runtime_dependencies/flirt_qc_source_equivalence.public.json",
+    "sha256": "b69a6aab75018e75739d864d14fa990470f39a334605a1c2fda18c2871bb1556",
+    "scope": "src/fnit/flirt/core.py only",
+    "measured_source_sha256": "5528560292d3ba72778fda619abd907ab4cd666b80a8f18b95538ee4b8ca89b2",
+    "current_source_sha256": "f5315f5823df98334f170d43df71bb45f83653d484087d0055ab572c63a3c6e4",
+    "normalized_numerical_ast_equal": true,
+    "fresh_current_hash_numerical_run": false
+  },
+  "current_source_chain": {
+    "measurement_source_sha256": "5528560292d3ba72778fda619abd907ab4cd666b80a8f18b95538ee4b8ca89b2",
+    "intermediate_source_sha256": "f5315f5823df98334f170d43df71bb45f83653d484087d0055ab572c63a3c6e4",
+    "current_source_sha256": "ce375d5a144aa80e0b0607b05319be107a651a1d3611cd37e8d5869587001112",
+    "covered_profile": {
+      "degrees_of_freedom": 12,
+      "cost": "corratio"
+    },
+    "attestations": [
+      {
+        "path": "../runtime_dependencies/flirt_qc_source_equivalence.public.json",
+        "sha256": "b69a6aab75018e75739d864d14fa990470f39a334605a1c2fda18c2871bb1556",
+        "scope": "measurement source to intermediate source; runtime QC only"
+      },
+      {
+        "path": "../runtime_dependencies/flirt_profile_source_equivalence.public.json",
+        "sha256": "d942ff3a690cc3889cd54aaae4860592deae2c6f91adc8097d3e5d31743309c7",
+        "scope": "intermediate source to current source; 12-DOF corratio only"
+      }
+    ],
+    "source_equivalent_for_covered_profile": true,
+    "fresh_current_hash_full_real_data_rerun": false,
+    "excluded_profile": "6-DOF normmi; its 8 mm search-cost path changed"
+  },
+  "synthmorph_source_status": {
+    "recorded_in_source_snapshot": false,
+    "executed_by_pipeline": false,
+    "reason": "This registration backend does not call SynthMorph.",
+    "attestation_applicable_to_numerical_output": false,
+    "numerical_inheritance_claimed": false,
+    "registration_backend": "mmorf"
+  },
+  "package_entry_source_chain": {
+    "measurement_source_sha256": {
+      "src/fnit/__init__.py": "cc9aa48bd2cd5966801460d83f46eff5839e91fcd6962640a89be538a23ead32",
+      "src/fnit/cli.py": "2d5e3d37f52fffb7834a438339566cd7ead980606a2127ade268662569922178"
+    },
+    "current_source_sha256": {
+      "src/fnit/__init__.py": "be1cabfa23b20d759d3506d13fa8d7bc18df0452851618ffc8fe699910413b3f",
+      "src/fnit/cli.py": "c92a3fbaa2a8f10e96c73a7bd18bd1a0924844c028db532d2f573d47e4dc2c07"
+    },
+    "covered_entry": "python -m fnit.cli dmri-pipeline; registration_backend=mmorf",
+    "attestation": {
+      "path": "../runtime_dependencies/package_entry_source_equivalence.public.json",
+      "sha256": "981a52903724651fb9ef2e8fbe6a69e2baddafc22871333bd86b51b8931bdc7d"
+    },
+    "source_equivalent_for_covered_route": true,
+    "fresh_current_hash_full_real_data_rerun": false
+  }
+}

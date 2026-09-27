@@ -13,7 +13,7 @@ fsl_reg T1_brain_pve_1.nii.gz template_GM.nii.gz   T1_GM_to_template_GM -fnirt  
 fslmaths T1_GM_to_template_GM -mul T1_GM_JAC_nl   T1_GM_to_template_GM_mod -odt float
 ```
 
-FastVBM 以相同的输出角色结束：GM、warped GM、nonlinear-only Jacobian 和 modulated GM。当前两条分支共用 SynthStrip/TorchFAST、TorchFLIRT、FSL 坐标转换、TorchApplyWarp、Jacobian 与 modulation，只在非线性估计器上选择 PyTorch SynthMorph 或 TorchFNIRT。逐阶段对应和输入输出见 [FastVBM 文档](../fast_vbm/README.md#与-ukb-v1fsl-vbm-的对应关系)。
+FastVBM 以相同的输出角色结束：GM、warped GM、nonlinear-only Jacobian 和 modulated GM。当前两条分支共用 SynthStrip/TorchFAST、TorchFLIRT、FSL 坐标转换、TorchApplyWarp、Jacobian 与 modulation，只在非线性估计器上选择 PyTorch SynthMorph 或 TorchFNIRT。逐阶段对应和输入输出见 [FastVBM 文档](../fast_vbm/README.md)。
 
 源码核对基于 UKB v1.5 commit `0e39a7f7eb76b55437942bfa3073512506b6c8fa`；`bb_structural_pipeline/bb_vbm` 的 SHA-256 为 `efdca88961dad9eeec52e15e2d26ad5f807b2c0bd3b41c547990ba78ebb7753f`。当前 FSL 参考环境为 6.0.7.4，因此验证范围是 v1.5 方法与参数复现，不包含逐字节等价声明。
 
@@ -40,7 +40,7 @@ tar -xzf DATA_public.tar.gz -C assets --strip-components=1   templates/template_
 
 ## 当前证据边界
 
-TorchFNIRT 的 mask、stage handoff 和优化路径已经更新，旧 FastVBM 端到端报告不再对应当前源码，已从仓库移除。当前页面只说明 UKB 步骤和资源对应关系；新的真实 T1w benchmark 完成前，不给出 FastVBM 精度或时间结论。当前验证状态见 [FastVBM 验证页](../../validation/fast_vbm/README.md)，组件级 TorchFNIRT/TBSS 诊断见 [dMRI 验证页](../../validation/dmri_pipeline/README.md)。
+旧 FastVBM 端到端报告不再对应当前源码，已从仓库移除。当前 TorchFNIRT 与 SynthMorph 两个后端已用同一例真实 T1w 完成 raw-to-modulated-GM 复跑；两条路径的 shape、affine 和 dtype 合同通过，但连续值数值等价均未通过，因此不能把计时写成等价实现的加速比。精度、阶段时间、显存、源码哈希和两张当前图见 [FastVBM 验证页](../../validation/fast_vbm/README.md)；组件级 TorchFNIRT/TBSS 诊断见 [dMRI 验证页](../../validation/dmri_pipeline/README.md)。
 
 ## 来源
 

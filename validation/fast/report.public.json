@@ -1,303 +1,870 @@
 {
-  "schema": "torch_fast_release_validation/v1",
-  "release_status": "functional_reproduction_not_bitwise_fast",
-  "contains_case_level_records": false,
-  "contains_subject_paths": false,
-  "contains_subject_images": false,
-  "run_date": "2026-09-24",
-  "cohort": {
-    "n": 10,
-    "description": "Ten real T1-weighted scans from one non-UKB clinical cohort; aggregate metrics only."
+  "schema": "fnit_current_source_real_validation/v2",
+  "feature": "torchfast",
+  "run_date": "2026-09-27",
+  "candidate_source": {
+    "base_git_commit": "9146b0004468ffc2a30cacad0ab4fa7b6fdb3b48",
+    "working_tree_state": "uncommitted current source",
+    "files": {
+      "fnit/_dmri.py": "b6bf837f8b5a0a8f0d910706631e882a9e3f8dfc1f1ef77e1cfac7efe36fafbf",
+      "fnit/_nib.py": "bffd56aeaca423b2448432ba318212e83549e9e31aa27af6bf20a60888218586",
+      "fnit/weights.py": "9d275a1bd4064ff9bd1eb8aaef589ce7804258e7f6c39cd127deae2623d6eb9a",
+      "fnit/fast/__init__.py": "c0f675872a1523425465d764bf3810358d62fc0ad900ff273089b0a5fe516771",
+      "fnit/fast/algorithm.py": "9ffed0035a618ec4d6dc1eea8deeadaddd071ced9b04b66593cb6bd4d1102638",
+      "fnit/fast/pipeline.py": "4f003e47cd33de27fd9c829b05fcef1c83bea1dc3eb522411039331685bf2129"
+    },
+    "tree_sha256": "433723da856c798faca9a66ea95784bdbb5ad5b13f66f451ce32e7030559943b"
   },
   "environment": {
-    "host": "gpucw1",
-    "cpu": "Intel Xeon Gold 6430",
+    "gpu_host": "gpucw1",
     "gpu": "NVIDIA H100 PCIe 80 GB",
-    "python": "3.11.7",
+    "cpu_host": "headcw",
+    "cpu": "Intel Xeon Gold 6418H",
+    "python": "3.11",
     "pytorch": "2.5.1+cu118",
     "cuda_runtime": "11.8",
-    "fsl": "6.0.7.4",
-    "fsl_fast4": "2111.3 h2bc3f7f_1",
-    "numpy": "1.26.4",
-    "nibabel": "5.4.0",
-    "surfa": "0.6.3"
+    "nibabel": "5.4.2",
+    "numpy": "1.26.4"
   },
-  "same_brain_input": {
-    "method": "TorchFAST and FSL fast -b received the identical T1_brain image. Metrics use positive input voxels.",
-    "summary": {
-      "timing": {
-        "torch_fast_sec": {
-          "count": 10,
-          "median": 1.6422463374910876,
-          "min": 1.2614785928744823,
-          "max": 2.9400921198539436
-        },
-        "fsl_fast_cpu_sec": {
-          "count": 10,
-          "median": 305.80027609155513,
-          "min": 254.22468487196602,
-          "max": 347.2025516908616
-        },
-        "fsl_over_torch_ratio": {
-          "count": 10,
-          "median": 185.17965390176514,
-          "min": 118.09240579445168,
-          "max": 235.7713663020528
-        }
+  "inputs": {
+    "current_private_regression_n": 1,
+    "kind": "real brain-only T1w",
+    "case_ids_anonymized": true,
+    "public_figure_n": 1,
+    "public_figure_input": "repository sub-02 after published reference SynthStrip"
+  },
+  "reference": {
+    "software": "FSL 6.0.7.4 FAST4 2111.3",
+    "status": "stored seven-file FSL -b output for the identical brain-only T1w",
+    "candidate_runtime_called_reference": false,
+    "timing_use": "Same-case FSL command that produced the numerical reference; reference and current candidate ran in different time windows, so no stable speed ratio is claimed.",
+    "output_manifest": [
+      {
+        "file": "T1_brain_pve_0.nii.gz",
+        "shape": [
+          208,
+          253,
+          226
+        ],
+        "dtype": "float32",
+        "affine": [
+          [
+            0.7998199462890625,
+            -0.0013855691067874432,
+            -0.0167226679623127,
+            -80.9625244140625
+          ],
+          [
+            0.0013852593256160617,
+            0.7999988198280334,
+            -2.8963180739083327e-05,
+            -136.61834716796875
+          ],
+          [
+            0.016722608357667923,
+            1.216608064291691e-10,
+            0.7998251914978027,
+            -61.795101165771484
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "qform_code": 1,
+        "sform_code": 1,
+        "sha256": "b8888a3736773c311302a3f7dc74fe24b6e4682bc5c6a6362210deaec6d1e22e"
       },
-      "pve_median": {
+      {
+        "file": "T1_brain_pve_1.nii.gz",
+        "shape": [
+          208,
+          253,
+          226
+        ],
+        "dtype": "float32",
+        "affine": [
+          [
+            0.7998199462890625,
+            -0.0013855691067874432,
+            -0.0167226679623127,
+            -80.9625244140625
+          ],
+          [
+            0.0013852593256160617,
+            0.7999988198280334,
+            -2.8963180739083327e-05,
+            -136.61834716796875
+          ],
+          [
+            0.016722608357667923,
+            1.216608064291691e-10,
+            0.7998251914978027,
+            -61.795101165771484
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "qform_code": 1,
+        "sform_code": 1,
+        "sha256": "c148d724f75cc5f66b4084c772f29bcb23f2dae6b30d259e278376f3e68c4715"
+      },
+      {
+        "file": "T1_brain_pve_2.nii.gz",
+        "shape": [
+          208,
+          253,
+          226
+        ],
+        "dtype": "float32",
+        "affine": [
+          [
+            0.7998199462890625,
+            -0.0013855691067874432,
+            -0.0167226679623127,
+            -80.9625244140625
+          ],
+          [
+            0.0013852593256160617,
+            0.7999988198280334,
+            -2.8963180739083327e-05,
+            -136.61834716796875
+          ],
+          [
+            0.016722608357667923,
+            1.216608064291691e-10,
+            0.7998251914978027,
+            -61.795101165771484
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "qform_code": 1,
+        "sform_code": 1,
+        "sha256": "cef81c4e553cdd73af9636f21bb73e6eb1b0e23259928d02276373dcb5265bd7"
+      },
+      {
+        "file": "T1_brain_seg.nii.gz",
+        "shape": [
+          208,
+          253,
+          226
+        ],
+        "dtype": "int32",
+        "affine": [
+          [
+            0.7998199462890625,
+            -0.0013855691067874432,
+            -0.0167226679623127,
+            -80.9625244140625
+          ],
+          [
+            0.0013852593256160617,
+            0.7999988198280334,
+            -2.8963180739083327e-05,
+            -136.61834716796875
+          ],
+          [
+            0.016722608357667923,
+            1.216608064291691e-10,
+            0.7998251914978027,
+            -61.795101165771484
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "qform_code": 1,
+        "sform_code": 1,
+        "sha256": "88b349da4ade755321959f4094ec49b84d6466147b696200c355765381d54e9b"
+      },
+      {
+        "file": "T1_brain_pveseg.nii.gz",
+        "shape": [
+          208,
+          253,
+          226
+        ],
+        "dtype": "int32",
+        "affine": [
+          [
+            0.7998199462890625,
+            -0.0013855691067874432,
+            -0.0167226679623127,
+            -80.9625244140625
+          ],
+          [
+            0.0013852593256160617,
+            0.7999988198280334,
+            -2.8963180739083327e-05,
+            -136.61834716796875
+          ],
+          [
+            0.016722608357667923,
+            1.216608064291691e-10,
+            0.7998251914978027,
+            -61.795101165771484
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "qform_code": 1,
+        "sform_code": 1,
+        "sha256": "b82814ac6d4c9120546cf381f5c538c48024d3130b1966d117f137df067f697c"
+      },
+      {
+        "file": "T1_brain_mixeltype.nii.gz",
+        "shape": [
+          208,
+          253,
+          226
+        ],
+        "dtype": "int32",
+        "affine": [
+          [
+            0.7998199462890625,
+            -0.0013855691067874432,
+            -0.0167226679623127,
+            -80.9625244140625
+          ],
+          [
+            0.0013852593256160617,
+            0.7999988198280334,
+            -2.8963180739083327e-05,
+            -136.61834716796875
+          ],
+          [
+            0.016722608357667923,
+            1.216608064291691e-10,
+            0.7998251914978027,
+            -61.795101165771484
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "qform_code": 1,
+        "sform_code": 1,
+        "sha256": "6754e9ea24ead1449468c94bc382c05613c539ad048998b2e9dd88cdcfbeceb9"
+      },
+      {
+        "file": "T1_brain_bias.nii.gz",
+        "shape": [
+          208,
+          253,
+          226
+        ],
+        "dtype": "float32",
+        "affine": [
+          [
+            0.7998199462890625,
+            -0.0013855691067874432,
+            -0.0167226679623127,
+            -80.9625244140625
+          ],
+          [
+            0.0013852593256160617,
+            0.7999988198280334,
+            -2.8963180739083327e-05,
+            -136.61834716796875
+          ],
+          [
+            0.016722608357667923,
+            1.216608064291691e-10,
+            0.7998251914978027,
+            -61.795101165771484
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "qform_code": 1,
+        "sform_code": 1,
+        "sha256": "24d18dea6885d208c098b81c88737e126776377e37a59f77dd08ab2da8684a4f"
+      }
+    ],
+    "same_case_reference_complete_seconds": 305.4594074941706
+  },
+  "candidate_gpu": {
+    "device": "H100 GPU; default TF32 enabled",
+    "comparison_to_fsl": {
+      "input_sha256": "f1b6f58edb3ac9996282d3fcbadcb94626785347481f27cf5a3b9419bf640c12",
+      "reference": "stored FSL FAST 6.0.7.4 outputs, same brain-only input",
+      "pve": {
         "csf": {
-          "pearson": 0.9877686096133522,
-          "mae": 0.00820052014761083,
-          "rmse": 0.053691915936816645,
-          "dice_at_0_5": 0.9868701046992753,
-          "volume_ratio": 1.0143906463167909
+          "shape": [
+            208,
+            253,
+            226
+          ],
+          "shape_match": true,
+          "reference_dtype": "float32",
+          "candidate_dtype": "float32",
+          "affine_max_abs": 0.0,
+          "reference_qform_code": 1,
+          "candidate_qform_code": 1,
+          "reference_sform_code": 1,
+          "candidate_sform_code": 1,
+          "pearson": 0.9885555879634779,
+          "mae": 0.008463598912820806,
+          "rmse": 0.05361706615163506,
+          "max_abs": 1.0,
+          "dice_at_0_5": 0.9876399315218567,
+          "volume_ratio": 1.0139001607894897
         },
         "gm": {
-          "pearson": 0.984879656750453,
-          "mae": 0.014991886263239856,
-          "rmse": 0.07347476078394821,
-          "dice_at_0_5": 0.9923174370618132,
-          "volume_ratio": 0.9905883436825683
+          "shape": [
+            208,
+            253,
+            226
+          ],
+          "shape_match": true,
+          "reference_dtype": "float32",
+          "candidate_dtype": "float32",
+          "affine_max_abs": 0.0,
+          "reference_qform_code": 1,
+          "candidate_qform_code": 1,
+          "reference_sform_code": 1,
+          "candidate_sform_code": 1,
+          "pearson": 0.9846274787653718,
+          "mae": 0.015410705408567867,
+          "rmse": 0.07390405747152083,
+          "max_abs": 1.0,
+          "dice_at_0_5": 0.9923275828910614,
+          "volume_ratio": 0.9899535775184631
         },
         "wm": {
-          "pearson": 0.993445254648063,
-          "mae": 0.007179296323593441,
-          "rmse": 0.050059344829217735,
-          "dice_at_0_5": 0.9971309248709839,
-          "volume_ratio": 1.004588444600817
+          "shape": [
+            208,
+            253,
+            226
+          ],
+          "shape_match": true,
+          "reference_dtype": "float32",
+          "candidate_dtype": "float32",
+          "affine_max_abs": 0.0,
+          "reference_qform_code": 1,
+          "candidate_qform_code": 1,
+          "reference_sform_code": 1,
+          "candidate_sform_code": 1,
+          "pearson": 0.9937313660894089,
+          "mae": 0.007022312184941949,
+          "rmse": 0.049226973899859784,
+          "max_abs": 1.0,
+          "dice_at_0_5": 0.9970314399988279,
+          "volume_ratio": 1.0049289464950562
         }
       },
-      "bias_log_domain_median": {
-        "pearson": 0.9999999994490927,
-        "mae": 1.8985731499307861e-06,
-        "rmse": 2.6742656977805624e-06
+      "labels": {
+        "hard_segmentation": {
+          "shape": [
+            208,
+            253,
+            226
+          ],
+          "shape_match": true,
+          "reference_dtype": "int32",
+          "candidate_dtype": "int32",
+          "affine_max_abs": 0.0,
+          "reference_qform_code": 1,
+          "candidate_qform_code": 1,
+          "reference_sform_code": 1,
+          "candidate_sform_code": 1,
+          "voxel_agreement": 0.9998987030671382,
+          "disagreeing_voxels": 305
+        },
+        "pve_segmentation": {
+          "shape": [
+            208,
+            253,
+            226
+          ],
+          "shape_match": true,
+          "reference_dtype": "int32",
+          "candidate_dtype": "int32",
+          "affine_max_abs": 0.0,
+          "reference_qform_code": 1,
+          "candidate_qform_code": 1,
+          "reference_sform_code": 1,
+          "candidate_sform_code": 1,
+          "voxel_agreement": 0.9903492253275544,
+          "disagreeing_voxels": 29058
+        },
+        "mixel_type": {
+          "shape": [
+            208,
+            253,
+            226
+          ],
+          "shape_match": true,
+          "reference_dtype": "int32",
+          "candidate_dtype": "int32",
+          "affine_max_abs": 0.0,
+          "reference_qform_code": 1,
+          "candidate_qform_code": 1,
+          "reference_sform_code": 1,
+          "candidate_sform_code": 1,
+          "voxel_agreement": 0.9390312027765323,
+          "disagreeing_voxels": 183574
+        }
       },
-      "restore_median": {
-        "pearson": 0.9999999999752803,
-        "mae": 0.00016335035632868063,
-        "rmse": 0.0002381305571856806,
-        "relative_mae": 1.917131391324404e-06
-      },
-      "numeric_constraints_passed": 10,
-      "numeric_constraints_total": 10
-    }
-  },
-  "bias_ablation": {
-    "method": "TorchFAST on the same ten brain-only inputs with FAST -N semantics: four HMRF loops retained and bias updates disabled.",
-    "without_bias_median": {
-      "sec": 1.388400920899585,
-      "pearson": 0.9364728422712867,
-      "mae": 0.07204559535420083,
-      "dice": 0.9370253049842582,
-      "volume_ratio": 1.0036729854673956,
-      "all_bias_fields_one": true
-    },
-    "with_bias_median": {
-      "pearson": 0.984879656750453,
-      "mae": 0.014991886263239856,
-      "dice_at_0_5": 0.9923174370618132,
-      "volume_ratio": 0.9905883436825683
-    }
-  },
-  "complete_command_timing": {
-    "scope": "Complete fresh Python CLI process, input loading, GPU computation, CPU transfer, and seven compressed NIfTI outputs; FSL timing is the existing complete fast -b subprocess with its outputs.",
-    "summary": {
-      "n": 10,
-      "torch_fast_cli_sec_median": 12.429774081450887,
-      "fsl_fast_cpu_sec_median": 305.80027609155513,
-      "fsl_over_torch_ratio_median": 22.970524605710185
-    },
-    "caveat": "FSL and TorchFAST ran in different windows on a shared node; this is observed wall time, not an isolated hardware speed claim."
-  },
-  "cpu_gpu_check": {
-    "case_count": 1,
-    "cpu_threads": 16,
-    "cpu_sec_input_and_inference": 80.65468302811496,
-    "gpu_sec_input_and_inference": 1.6182432980276644,
-    "observed_cpu_over_gpu_ratio": 49.84088803359663,
-    "gm_pearson": 0.9999999948561953,
-    "gm_mae": 8.40829059711723e-08,
-    "gm_max_abs": 0.010000050067901611,
-    "bias_mae": 3.377251545089166e-08,
-    "bias_max_abs": 6.556510925292969e-07,
-    "caveat": "One real case; shared-node CPU and GPU windows were not simultaneous."
-  },
-  "public_example": {
-    "source": "Repository example sub-02, brain image produced by the published reference SynthStrip run.",
-    "fsl_fast_cpu_complete_sec": 235.12,
-    "torch_fast_gpu_complete_sec": 13.74,
-    "mask_voxels": 1144672,
-    "gm_pearson": 0.9781719107994316,
-    "gm_mae": 0.01755292036884293,
-    "gm_dice_at_0_5": 0.9874186084793504,
-    "gm_volume_ratio_torch_over_fsl": 0.9935013213079218
-  },
-  "raw_t1_vbm": {
-    "n": 10,
-    "all_jacobians_positive": true,
-    "raw_gm_vs_fsl": {
-      "pearson": {
-        "count": 10,
-        "median": 0.7906339929087344,
-        "min": 0.6557772263815543,
-        "max": 0.8434986741519434
-      },
-      "mae": {
-        "count": 10,
-        "median": 0.07804162910230823,
-        "min": 0.06371655783320107,
-        "max": 0.13843960323142931
-      },
-      "dice_0_5": {
-        "count": 10,
-        "median": 0.9540738985911953,
-        "min": 0.9065428245126115,
-        "max": 0.9619594016731516
-      },
-      "volume_ratio": {
-        "count": 10,
-        "median": 1.0462886400821196,
-        "min": 1.0068627121571834,
-        "max": 1.1448811575529445
+      "bias_log": {
+        "shape": [
+          208,
+          253,
+          226
+        ],
+        "shape_match": true,
+        "reference_dtype": "float32",
+        "candidate_dtype": "float32",
+        "affine_max_abs": 0.0,
+        "reference_qform_code": 1,
+        "candidate_qform_code": 1,
+        "reference_sform_code": 1,
+        "candidate_sform_code": 1,
+        "pearson": 0.9999999993609636,
+        "mae": 2.8539477994839694e-06,
+        "rmse": 3.8103380596606894e-06,
+        "max_abs": 1.7731291800493487e-05
       }
     },
-    "fsl_warped": {
-      "pearson": {
-        "count": 10,
-        "median": 0.5892486781792228,
-        "min": 0.41210554919675446,
-        "max": 0.6789638509069531
+    "full_profile_process_seconds": 12.55
+  },
+  "candidate_cpu_single_case": {
+    "n": 1,
+    "complete_cli_seconds": 36.24,
+    "max_rss_kib": 2850528,
+    "comparison_to_fsl": {
+      "pve": {
+        "csf": {
+          "pearson": 0.988555606760191,
+          "mae": 0.008463539131113544,
+          "dice_at_0_5": 0.9876381356741203
+        },
+        "gm": {
+          "pearson": 0.9846271796398598,
+          "mae": 0.015410751905983585,
+          "dice_at_0_5": 0.992326137000299
+        },
+        "wm": {
+          "pearson": 0.993731077794622,
+          "mae": 0.007022418463748193,
+          "dice_at_0_5": 0.9970309835296273
+        }
       },
-      "mae": {
-        "count": 10,
-        "median": 0.2389031232897061,
-        "min": 0.20290748778924453,
-        "max": 0.3009969371315968
-      },
-      "dice_0_5": {
-        "count": 10,
-        "median": 0.7320884003819585,
-        "min": 0.6602849786719783,
-        "max": 0.760809599855822
-      },
-      "volume_ratio": {
-        "count": 10,
-        "median": 1.0442715955774429,
-        "min": 0.9880851787305773,
-        "max": 1.1034973393145402
-      }
-    },
-    "fsl_modulated": {
-      "pearson": {
-        "count": 10,
-        "median": 0.5087656345355369,
-        "min": 0.33735188434926155,
-        "max": 0.6020718917576598
-      },
-      "mae": {
-        "count": 10,
-        "median": 0.2909140698457693,
-        "min": 0.2447088781342255,
-        "max": 0.35331013361431035
-      },
-      "dice_0_5": {
-        "count": 10,
-        "median": 0.7095236643445157,
-        "min": 0.6138839612079322,
-        "max": 0.7389648080085364
-      },
-      "volume_ratio": {
-        "count": 10,
-        "median": 0.9869803120463565,
-        "min": 0.8936577684180582,
-        "max": 1.0092181952957044
-      }
-    },
-    "same_registration_warped": {
-      "pearson": {
-        "count": 10,
-        "median": 0.7923139095848704,
-        "min": 0.5659941682685636,
-        "max": 0.9020265953762434
-      },
-      "mae": {
-        "count": 10,
-        "median": 0.15187363483710747,
-        "min": 0.09872095094224563,
-        "max": 0.24313327358973563
-      },
-      "dice_0_5": {
-        "count": 10,
-        "median": 0.8428489603395236,
-        "min": 0.7322469181920059,
-        "max": 0.8922683879208985
-      },
-      "volume_ratio": {
-        "count": 10,
-        "median": 0.9896777755939379,
-        "min": 0.9493132553274135,
-        "max": 1.026932456129318
-      }
-    },
-    "same_registration_modulated": {
-      "pearson": {
-        "count": 10,
-        "median": 0.7682045902038397,
-        "min": 0.5419798850527456,
-        "max": 0.8800046690387118
-      },
-      "mae": {
-        "count": 10,
-        "median": 0.1706078487630346,
-        "min": 0.11520953047440864,
-        "max": 0.25129383374549463
-      },
-      "dice_0_5": {
-        "count": 10,
-        "median": 0.82654902116871,
-        "min": 0.7020729099269518,
-        "max": 0.8772115236020479
-      },
-      "volume_ratio": {
-        "count": 10,
-        "median": 0.9989883916593487,
-        "min": 0.9356291180540206,
-        "max": 1.0322670120430233
-      }
-    },
-    "timing_sec": {
-      "synthstrip_fast_outputs": {
-        "count": 10,
-        "median": 23.045011381502263,
-        "min": 18.68760459078476,
-        "max": 30.1511358669959
-      },
-      "gpu_registration_modulation": {
-        "count": 10,
-        "median": 10.993846511468291,
-        "min": 9.2094582519494,
-        "max": 19.110928999027237
-      },
-      "gpu_raw_to_vbm": {
-        "count": 10,
-        "median": 36.47381450096145,
-        "min": 30.489082659129053,
-        "max": 39.80056573799811
-      },
-      "fsl_raw_to_vbm": {
-        "count": 9,
-        "median": 3637.203101981897,
-        "min": 3084.7863368084654,
-        "max": 4052.619174204534
+      "raw_bias": {
+        "pearson": 0.9999999995018728,
+        "mae": 2.6171941343387406e-06
       }
     }
   },
-  "raw_t1_vbm_methods": {
-    "gpu": "raw T1 -> SynthStrip -> TorchFAST with bias correction -> PyTorch registration, Jacobian and modulation",
-    "fsl_reference": "existing UKB v1.5-method FSL FAST and FNIRT arm",
-    "registered_mask": "official UKB GM template > 0.01",
-    "native_mask": "union of FSL and resampled TorchFAST GM > 0.01 on the FSL FAST grid",
-    "timing": "GPU values are persistent-model warm per-case saved-stage wall times and exclude the one-time model load; FSL values sum all available raw-to-VBM stages. Methods ran in different windows on a shared node."
+  "single_case_gpu_profile": {
+    "schema": "fnit_model_io_single_case/v1",
+    "feature": "fast",
+    "case_id": "case01",
+    "input_sha256": "f1b6f58edb3ac9996282d3fcbadcb94626785347481f27cf5a3b9419bf640c12",
+    "source": {
+      "files": {
+        "fnit/_dmri.py": "b6bf837f8b5a0a8f0d910706631e882a9e3f8dfc1f1ef77e1cfac7efe36fafbf",
+        "fnit/_nib.py": "bffd56aeaca423b2448432ba318212e83549e9e31aa27af6bf20a60888218586",
+        "fnit/weights.py": "9d275a1bd4064ff9bd1eb8aaef589ce7804258e7f6c39cd127deae2623d6eb9a",
+        "fnit/fast/__init__.py": "c0f675872a1523425465d764bf3810358d62fc0ad900ff273089b0a5fe516771",
+        "fnit/fast/algorithm.py": "9ffed0035a618ec4d6dc1eea8deeadaddd071ced9b04b66593cb6bd4d1102638",
+        "fnit/fast/pipeline.py": "4f003e47cd33de27fd9c829b05fcef1c83bea1dc3eb522411039331685bf2129"
+      },
+      "tree_sha256": "433723da856c798faca9a66ea95784bdbb5ad5b13f66f451ce32e7030559943b"
+    },
+    "runtime": {
+      "device": "cuda:0",
+      "threads": 8,
+      "torch": "2.5.1",
+      "cuda": "11.8",
+      "gpu": "NVIDIA H100 PCIe",
+      "tf32_matmul": true,
+      "tf32_cudnn": true
+    },
+    "seconds": {
+      "model_load": 0.5167326661758125,
+      "inference": 2.4475849587470293,
+      "save": 4.364569521974772,
+      "python_api_total": 7.328887146897614
+    },
+    "cuda_peak_mib": {
+      "allocated": 2351.6884765625,
+      "reserved": 3444.0
+    },
+    "outputs": [
+      {
+        "file": "pve_csf.nii.gz",
+        "shape": [
+          208,
+          253,
+          226
+        ],
+        "dtype": "float32",
+        "affine": [
+          [
+            0.7998199462890625,
+            -0.0013855691067874432,
+            -0.0167226679623127,
+            -80.9625244140625
+          ],
+          [
+            0.0013852593256160617,
+            0.7999988198280334,
+            -2.8963180739083327e-05,
+            -136.61834716796875
+          ],
+          [
+            0.016722608357667923,
+            1.216608064291691e-10,
+            0.7998251914978027,
+            -61.795101165771484
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "finite": true,
+        "sha256": "ae44edf4a44a4cc5f8f4e413d0d6404da443596de5085362511d2b949fea8d0d"
+      },
+      {
+        "file": "pve_gm.nii.gz",
+        "shape": [
+          208,
+          253,
+          226
+        ],
+        "dtype": "float32",
+        "affine": [
+          [
+            0.7998199462890625,
+            -0.0013855691067874432,
+            -0.0167226679623127,
+            -80.9625244140625
+          ],
+          [
+            0.0013852593256160617,
+            0.7999988198280334,
+            -2.8963180739083327e-05,
+            -136.61834716796875
+          ],
+          [
+            0.016722608357667923,
+            1.216608064291691e-10,
+            0.7998251914978027,
+            -61.795101165771484
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "finite": true,
+        "sha256": "1365c833560308d23a461d639c8d83bff5b85ef023042f80a660dff452f62144"
+      },
+      {
+        "file": "pve_wm.nii.gz",
+        "shape": [
+          208,
+          253,
+          226
+        ],
+        "dtype": "float32",
+        "affine": [
+          [
+            0.7998199462890625,
+            -0.0013855691067874432,
+            -0.0167226679623127,
+            -80.9625244140625
+          ],
+          [
+            0.0013852593256160617,
+            0.7999988198280334,
+            -2.8963180739083327e-05,
+            -136.61834716796875
+          ],
+          [
+            0.016722608357667923,
+            1.216608064291691e-10,
+            0.7998251914978027,
+            -61.795101165771484
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "finite": true,
+        "sha256": "b42d1793dbd64c7d81f911c6880e8efd2014dd832832b466adf964d6e1d95e4a"
+      },
+      {
+        "file": "hard_segmentation.nii.gz",
+        "shape": [
+          208,
+          253,
+          226
+        ],
+        "dtype": "int32",
+        "affine": [
+          [
+            0.7998199462890625,
+            -0.0013855691067874432,
+            -0.0167226679623127,
+            -80.9625244140625
+          ],
+          [
+            0.0013852593256160617,
+            0.7999988198280334,
+            -2.8963180739083327e-05,
+            -136.61834716796875
+          ],
+          [
+            0.016722608357667923,
+            1.216608064291691e-10,
+            0.7998251914978027,
+            -61.795101165771484
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "finite": true,
+        "sha256": "3e5124e86500f52c6c43810bed16017e488e2561002e14ae2833c09235db9dc1"
+      },
+      {
+        "file": "pve_segmentation.nii.gz",
+        "shape": [
+          208,
+          253,
+          226
+        ],
+        "dtype": "int32",
+        "affine": [
+          [
+            0.7998199462890625,
+            -0.0013855691067874432,
+            -0.0167226679623127,
+            -80.9625244140625
+          ],
+          [
+            0.0013852593256160617,
+            0.7999988198280334,
+            -2.8963180739083327e-05,
+            -136.61834716796875
+          ],
+          [
+            0.016722608357667923,
+            1.216608064291691e-10,
+            0.7998251914978027,
+            -61.795101165771484
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "finite": true,
+        "sha256": "6d31d4396a002db84c31f4678c7d71e68170ac3bc68758e3cf9444f4f87fca81"
+      },
+      {
+        "file": "mixel_type.nii.gz",
+        "shape": [
+          208,
+          253,
+          226
+        ],
+        "dtype": "int32",
+        "affine": [
+          [
+            0.7998199462890625,
+            -0.0013855691067874432,
+            -0.0167226679623127,
+            -80.9625244140625
+          ],
+          [
+            0.0013852593256160617,
+            0.7999988198280334,
+            -2.8963180739083327e-05,
+            -136.61834716796875
+          ],
+          [
+            0.016722608357667923,
+            1.216608064291691e-10,
+            0.7998251914978027,
+            -61.795101165771484
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "finite": true,
+        "sha256": "3d32d2ed2aa8d5d3ec0821826be3825e54960573ae9520dd21b52d5f13c3d504"
+      },
+      {
+        "file": "bias_field.nii.gz",
+        "shape": [
+          208,
+          253,
+          226
+        ],
+        "dtype": "float32",
+        "affine": [
+          [
+            0.7998199462890625,
+            -0.0013855691067874432,
+            -0.0167226679623127,
+            -80.9625244140625
+          ],
+          [
+            0.0013852593256160617,
+            0.7999988198280334,
+            -2.8963180739083327e-05,
+            -136.61834716796875
+          ],
+          [
+            0.016722608357667923,
+            1.216608064291691e-10,
+            0.7998251914978027,
+            -61.795101165771484
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "finite": true,
+        "sha256": "940e08149b75954dcce1fddcdb70f73c782b5b9c7465a72957c3a89561910c6c"
+      },
+      {
+        "file": "restored.nii.gz",
+        "shape": [
+          208,
+          253,
+          226
+        ],
+        "dtype": "float32",
+        "affine": [
+          [
+            0.7998199462890625,
+            -0.0013855691067874432,
+            -0.0167226679623127,
+            -80.9625244140625
+          ],
+          [
+            0.0013852593256160617,
+            0.7999988198280334,
+            -2.8963180739083327e-05,
+            -136.61834716796875
+          ],
+          [
+            0.016722608357667923,
+            1.216608064291691e-10,
+            0.7998251914978027,
+            -61.795101165771484
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "finite": true,
+        "sha256": "70a06571061d5a4938d46e57f93e3c2623d5d188a402ccacdd6e04d84ecebd50"
+      }
+    ],
+    "external_process_wall_seconds": 12.55
+  },
+  "output_contract": {
+    "pve_0_1_2": {
+      "dtype": "float32",
+      "order": [
+        "CSF",
+        "GM",
+        "WM"
+      ],
+      "shape_and_affine": "identical to input"
+    },
+    "seg_pveseg_mixeltype": {
+      "dtype": "int32",
+      "shape_and_affine": "identical to input"
+    },
+    "bias_and_restore": {
+      "dtype": "float32",
+      "shape_and_affine": "identical to input"
+    }
+  },
+  "figure": {
+    "path": "validation/fast/figures/fast_comparison.png",
+    "sha256": "1a96adab5fe284b74aaf76af9d3f4a5a1ecb06a30ecb42e999eb871f9ad5fba0",
+    "metrics_path": "validation/fast/figures/metrics.json",
+    "metrics_sha256": "d330db69c23811dcf57aa24e6fed25c1ce6ab0943262c5418b393a5312852134",
+    "metrics": {
+      "input": "examples/data/sub-02_T1w.nii.gz after the published reference SynthStrip output",
+      "mask_voxels": 1144672,
+      "gm_pearson": 0.9781718143530315,
+      "gm_mae": 0.01755298152162175,
+      "gm_dice_at_0_5": 0.987419737237692,
+      "gm_volume_ratio_torch_over_fsl": 0.99350111498656,
+      "figure_slices_canonical_voxel": {
+        "axial": 143,
+        "coronal": 125
+      }
+    },
+    "candidate": "current source, default TF32"
+  },
+  "candidate_runtime_dependency_boundary": "FNIT candidate runs imported only FNIT, PyTorch, Nibabel, NumPy and SciPy; FreeSurfer/FSL executables were not called by the candidate.",
+  "timing_scope": "Full CLI wall time includes a fresh Python process, input and weight loading where applicable, inference, postprocessing, and compressed NIfTI/CSV writes.",
+  "release_status": "current_source_validated_functional_reproduction",
+  "limitations": [
+    "One private real brain-only T1w is the current full-I/O numerical regression; the public figure is a second qualitative case.",
+    "FSL and candidate use different HMRF update orders and are not voxel-identical.",
+    "The stored FSL timing and current candidate timing were recorded in different windows."
+  ],
+  "measurement": {
+    "script": "validation/model_io_current/measure_peak.py",
+    "script_sha256": "e4f0aa1209d0376c7df7d73c033db8277074b6ab8a4b0f311b421604a7fe56f9",
+    "single_case_schema": "fnit_model_io_single_case/v1"
   }
 }

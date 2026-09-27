@@ -8,9 +8,9 @@ import tempfile
 import time
 
 import numpy as np
-import surfa as sf
 import torch
 
+from .._nib import FNITNifti1Image, load_image, new_image
 from ..fast import FASTResult, TorchFAST
 from .registration import VBMRegistrationResult, _register_gm
 from .synthmorph_backend import SynthMorphDeformRegistration
@@ -34,14 +34,11 @@ OUTPUT_FILENAMES = {
 
 
 def _load_volume(value, name):
-    if isinstance(value, (str, os.PathLike)):
-        value = sf.load_volume(str(value))
-    if not isinstance(value, sf.Volume):
-        raise TypeError(f"{name} must be a path or surfa.Volume")
-    data = np.asarray(value.data)
+    value = load_image(value, name)
+    data = np.asanyarray(value.dataobj)
     if data.ndim == 4 and data.shape[-1] == 1:
         data = data[..., 0]
-        value = value.new(data)
+        value = new_image(data, value)
     if data.ndim != 3:
         raise ValueError(f"{name} must contain one 3D frame")
     if not np.isfinite(data).all():
@@ -51,15 +48,15 @@ def _load_volume(value, name):
 
 def _same_grid(image, mask):
     return image.shape[:3] == mask.shape[:3] and np.allclose(
-        image.geom.vox2world.matrix,
-        mask.geom.vox2world.matrix,
+        image.affine,
+        mask.affine,
         atol=1e-5,
         rtol=0,
     )
 
 
 def _validate_geometry(volume, name):
-    affine = np.asarray(volume.geom.vox2world.matrix, dtype=np.float64)
+    affine = np.asarray(volume.affine, dtype=np.float64)
     if affine.shape != (4, 4) or not np.isfinite(affine).all():
         raise ValueError(f"{name} affine must be a finite 4x4 matrix")
     linear = affine[:3, :3]
@@ -72,8 +69,8 @@ def _validate_geometry(volume, name):
 class FastVBMResult:
     """Brain extraction, FAST tissue maps, and template-space VBM outputs."""
 
-    brain: sf.Volume
-    brain_mask: sf.Volume
+    brain: FNITNifti1Image
+    brain_mask: FNITNifti1Image
     fast: FASTResult
     registration: VBMRegistrationResult
     settings: dict
@@ -115,8 +112,8 @@ class FastVBMResult:
 
     def report(self):
         """Return JSON-serializable settings, timing, and registration QC."""
-        mask = np.asarray(self.brain_mask.data) > 0
-        bias = np.asarray(self.fast.bias_field.data)
+        mask = np.asanyarray(self.brain_mask.dataobj) > 0
+        bias = np.asanyarray(self.fast.bias_field.dataobj)
         nonlinear_backend = self.settings["registration_backend"]
         nonlinear_label = (
             "PyTorch SynthMorph deform"
@@ -363,11 +360,12 @@ class FastVBM:
             binary = np.asarray(mask_data > 0, dtype=np.uint8)
             if not np.any(binary):
                 raise ValueError("brain_mask is empty")
-            mask = image.new(binary)
-            brain = image.copy()
-            brain[binary == 0] = min(float(image_data.min()), 0.0)
+            mask = new_image(binary, image)
+            brain_data = image_data.copy()
+            brain_data[binary == 0] = min(float(image_data.min()), 0.0)
+            brain = new_image(brain_data, image)
             mask_source = "explicit"
-        mask_data = np.asarray(mask.data)
+        mask_data = np.asanyarray(mask.dataobj)
         if not np.isfinite(mask_data).all() or not np.any(mask_data > 0):
             raise ValueError("brain mask must be finite and nonempty")
         if not _same_grid(image, mask):

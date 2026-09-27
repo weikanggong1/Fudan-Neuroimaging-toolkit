@@ -1,87 +1,71 @@
-# WMH-SynthSeg：12 例 FLAIR 的原版复现与耗时
+# WMH-SynthSeg 当前源码验证
 
-[返回主页](../../README.md) · [功能说明](../../docs/wmh_synthseg/README.md) · [官方源码](https://github.com/freesurfer/freesurfer/tree/dev/mri_WMHsynthseg/WMHSynthSeg)
+[返回主页](../../README.md) · [功能说明](../../docs/wmh_synthseg/README.md) · [机器可读报告](report.public.json)
 
-本页记录旧版 Surfa 输出路径的 12 例验证。当前无 Surfa 实现的同例新旧逐体素、字节与耗时核对见[迁移报告](../wmh_no_surfa_20260928/README.md)；本页数字不代表新版 12 例重测。
+本页记录 2026-09-27 对当前 Surfa→Nibabel 版本的真实数据回归。候选程序只导入 FNIT、PyTorch、Nibabel、NumPy 和 SciPy；推理时没有调用 FreeSurfer。FreeSurfer 8.2.0-1 的 `mri_WMHsynthseg` 输出只作为固定参考。
 
-本实验比较独立包与 FreeSurfer 8.2.0-1 WMH-SynthSeg 的输入、输出和运算结果。原版已使用 PyTorch；独立包保留官方 checkpoint、33 类标签、WMH 概率图及软体积计算，同时提供无需 FreeSurfer 安装的单被试 Python 接口。公开病例没有人工 WMH 标注，因此一致性结果不能衡量临床准确率。
+## 数据、实现与输出
 
-## 病例与来源
+输入为仓库 `examples/wmh_data/` 中三幅公开 FLAIR 衍生图，来源是 OpenNeuro ds003592 的 `sub-02`、`sub-03` 和 `sub-04`。这三幅图只把脑外置零，来源与 SHA-256 见[示例说明](../../examples/WMH.md)。它们没有人工 WMH 真值；本实验衡量 FNIT 对原版程序的复现程度，不衡量病灶检出准确率。
 
-固定选择 [OpenNeuro ds003592](https://openneuro.org/datasets/ds003592) 中 `sub-02` 至 `sub-13` 的 `ses-1` FLAIR，共 12 例，均为公开 CC0 源文件；本仓库只发布其 [SHA-256 清单](SHA256SUMS) 和三例脑外清零的[测试衍生文件](../../examples/WMH.md)，不在 Git 仓库存放这 12 例原图。固定文件名及下载指令如下，从仓库根目录运行：
+候选运行绑定到基础提交 `9146b0004468ffc2a30cacad0ab4fa7b6fdb3b48` 上的工作树。WMH 功能源码树 SHA-256 为 `39cd9b4c380a93370c1244e72eea4c3eaa9f277dd8d70ef44a4ec2293e6a5860`；逐文件哈希保存在报告的 `candidate_source.files`。
 
-```bash
-mkdir -p work/wmh_reproduce/raw
-for n in $(seq -w 2 13); do
-  curl --fail --location --retry 3 \
-    "https://s3.amazonaws.com/openneuro.org/ds003592/sub-${n}/ses-1/anat/sub-${n}_ses-1_FLAIR.nii.gz" \
-    --output "work/wmh_reproduce/raw/sub-${n}_FLAIR.nii.gz"
-done
-cd work/wmh_reproduce/raw
-sha256sum --check ../../../validation/wmh/SHA256SUMS
-cd ../../..
-```
+每例输出一幅 `float32` 标签图、一幅同网格 `float32` WMH 概率图和软体积 CSV。三例输出 shape 分别为 `192×216×126`、`192×216×120`、`192×216×126`；候选与参考的数值 affine 均完全相同。
 
-来源 DOI：`10.18112/openneuro.ds003592.v1.0.13`。三个随仓库发布的 FLAIR 是单独的**脑外清零衍生样例**；下述 12 例基准使用从上述 URL 下载、通过 SHA-256 核验的原始 FLAIR。原始病例的标签 77 没有人工审阅真值。
+## 实际命令
 
-## 固定实现与运行条件
-
-测试主机 gpucw1 配有 2 × NVIDIA H100 PCIe（每卡 81,559 MiB，驱动 535.216.03）及 Intel Xeon Gold 6430。原版源码 CUDA 臂和本包使用 Python 3.11.7、PyTorch 2.5.1/CUDA 11.8、Nibabel 5.4.0、NumPy 1.26.4、Surfa 0.6.3；原生 `mri_WMHsynthseg` 使用 FreeSurfer 自带的 Python 3.8.13 和 PyTorch 2.1.2+cpu。FreeSurfer build 为 `freesurfer-linux-centos7_x86_64-8.2.0-20260314-d932c45`。原版源码和 checkpoint 的 SHA-256 见[来源清单](../../docs/provenance.json)。本包使用同一个 `WMH-SynthSeg_v10_231110.pth`，没有重训练或修改参数。
-
-每例、每臂使用**全新进程**，8 个固定 CPU 核心，CUDA 臂使用物理 GPU 0；设 `NVIDIA_TF32_OVERRIDE=0`，避免 TF32 设置造成无关差异。四臂统一运行 `--crop`、病灶概率输出和软体积 CSV。时间是完整命令的墙钟秒数，包含 Python 启动、加载权重、读图、两遍定位/预测、保存图像与 CSV，不含下载权重和 FLAIR。原生 CPU 臂通过真实 `mri_WMHsynthseg` 启动器；该 gpucw1 安装的 `fspython` 无 CUDA，故 **“原版 CUDA”** 臂以相同 FreeSurfer 安装中**未经修改**的 `inference.py` 在上述 CUDA Python 环境运行。每例输出文件存在且退出码为 0 才算成功；原版内部会捕获单图异常，不能只凭进程返回码判断。
-
-CPU 和 CUDA 分别进行同设备比较：原版 CPU 对本包 CPU，原版源码 CUDA 对本包 CUDA。指标包括输出尺寸、分割与概率图仿射矩阵、全标签体素一致率、WMH 标签 77 的硬 Dice、病灶概率 NRMSE，以及 CSV 每类软体积的绝对误差。原版分割 NIfTI 默认使用 float32；本包也以 float32 保存整数值标签。Nibabel 与 Surfa 写盘时的 qform/sform *code* 可能不同，因此比较数值仿射和体素值。另用一例检查 `.mgz`：原版 Nibabel 与本包 Surfa 的所有标签体素一致，仿射矩阵最大绝对差 **2.29 × 10⁻⁵ mm**，来自 MGZ 几何序列化的浮点差异。12 例主基准使用 `.nii.gz`。
-
-## 复现命令
-
-先安装本包、下载/配置权重，并令 `FREESURFER_HOME` 指向 FreeSurfer 8.2.0-1 的安装目录。下列脚本自动在原版两臂建立仅包含 `bin`、`python` 和官方权重链接的临时 FreeSurfer home，不修改原版源码或模型。每条命令对 12 例逐个启动新进程，输出放在被 Git 忽略的 `work/`：
+三例均用全新进程、8 个 CPU 线程和 H100 GPU1 顺序运行，保留默认 TF32：
 
 ```bash
-python -m pip install .
-python tools/setup_weights.py --model wmh-synthseg
-export WMH_WEIGHTS="$HOME/.cache/fnit"
-export FREESURFER_HOME=/path/to/freesurfer-8.2.0-1
-
-for arm in official-cpu official-cuda torch-cpu torch-cuda; do
-  python tools/benchmark_wmh.py \
-    --input-dir work/wmh_reproduce/raw \
-    --output-dir "work/wmh_reproduce/${arm}" \
-    --weights "$WMH_WEIGHTS" --arm "$arm" \
-    --freesurfer-home "$FREESURFER_HOME" --threads 8
-done
-
-cases=($(printf 'sub-%02d ' {2..13}))
-for device in cpu cuda; do
-  python tools/compare_wmh_outputs.py \
-    --reference-dir "work/wmh_reproduce/official-${device}" \
-    --candidate-dir "work/wmh_reproduce/torch-${device}" \
-    --cases "${cases[@]}" \
-    --output "work/wmh_reproduce/comparison-${device}.json"
-done
-
-python tools/summarize_wmh_validation.py \
-  --official-cpu work/wmh_reproduce/official-cpu/execution.json \
-  --official-cuda work/wmh_reproduce/official-cuda/execution.json \
-  --torch-cpu work/wmh_reproduce/torch-cpu/execution.json \
-  --torch-cuda work/wmh_reproduce/torch-cuda/execution.json \
-  --comparison-cpu work/wmh_reproduce/comparison-cpu.json \
-  --comparison-cuda work/wmh_reproduce/comparison-cuda.json \
-  --output work/wmh_reproduce/report.public.json
+CUDA_VISIBLE_DEVICES=1 PYTHONPATH=src python -m fnit.cli wmh-synthseg \
+  --i examples/wmh_data/sub-02_FLAIR.nii.gz \
+  --o work/current/sub-02_seg.nii.gz \
+  --csv_vols work/current/sub-02_volumes.csv \
+  --device cuda:0 --threads 8 --crop --save_lesion_probabilities \
+  --weights /path/to/official/weights
 ```
 
-`tools/benchmark_wmh.py` 保存逐例 `execution.json`、日志、分割、概率图与 CSV；`tools/compare_wmh_outputs.py` 生成逐例误差；汇总脚本只在四臂和两种同设备比较均完整时写匿名报告。若想只执行其中一臂，可单独运行相应命令；已有部分输出时需使用该脚本的 `--resume` 选项或改用新目录。
+CPU 检查把 `--device` 改为 `cpu`，其余参数和 `sub-02` 输入不变。显存记录使用：
 
-## 数值与耗时
+```bash
+CUDA_VISIBLE_DEVICES=1 PYTHONPATH=src python validation/model_io_current/measure_peak.py \
+  --feature wmh-synthseg --input examples/wmh_data/sub-02_FLAIR.nii.gz \
+  --weights /path/to/official/weights --device cuda:0 --threads 8 \
+  --output-dir work/peak/wmh --report work/peak/wmh.json
+```
 
-四臂均完成 12/12 例。CPU 与 CUDA 的同设备原版/本包比较，在每一例均得到：全标签体素一致率 **1.000000**、WMH 标签 77 的 Dice **1.000000**、病灶概率 MAE/NRMSE/最大绝对差 **0**、分割与概率图仿射矩阵最大差 **0**，以及所有 CSV 软体积最大绝对差 **0 mm³**。输出位于同一处理后网格。压缩文件或 NIfTI 元数据不保证逐字节相同；例如 qform/sform code 会受写盘库影响。
+对应原版参考命令为：
 
-| 完整单例命令 | 中位数（秒） | 平均数（秒） | 逐例范围（秒） |
-|---|---:|---:|---:|
-| FreeSurfer 原生 CPU | 97.38 | 98.33 | 67.39–124.30 |
-| FreeSurfer 未改动源码 CUDA | 8.25 | 8.41 | 7.92–9.66 |
-| 本包 CPU | 70.69 | 71.05 | 69.92–74.67 |
-| 本包 CUDA | 8.41 | 8.97 | 8.06–13.39 |
+```bash
+mri_WMHsynthseg --i sub-02_FLAIR.nii.gz --o sub-02_seg.nii.gz \
+  --device cpu --threads 8 --crop --save_lesion_probabilities \
+  --csv_vols sub-02_volumes.csv
+```
 
-以中位数比较，本包 CPU 命令少 **26.70 秒**（约 27%），12 例中 11 例短于原生 CPU；CUDA 中位数比官方源码多 **0.16 秒**，属于同量级。CUDA 本包第一例为 13.39 秒，其余例为 8.06–9.65 秒。计时反映**整条命令及各自 Python/PyTorch 运行环境**：原生 CPU 用 FreeSurfer 的 Torch 2.1.2，而本包 CPU 用 Torch 2.5.1，因此不能把 CPU 差异全归因于改写代码或网络本身。不同设备之间的运行时间与数值不要混作同设备移植误差。
+## 数值与时间
 
-[report.public.json](report.public.json) 给出 12 例匿名逐例秒数、比较指标和汇总分布；只包含匿名病例序号，没有服务器路径或账号。单例运行示例见[公开 FLAIR](../../examples/WMH.md)，影像对照见[并排图](../../docs/figures/README.md)。
+| 指标 | 当前结果 |
+|---|---:|
+| shape / 数值 affine 一致 | 3/3 |
+| 最低全标签逐体素一致率 | 0.99997810 |
+| 最低 WMH 标签 77 Dice | 0.99981002 |
+| 病灶概率 NRMSE，中位数 [最大值] | 0.00091963 [0.00115553] |
+| 病灶概率最大绝对差，三例最大值 | 0.009606 |
+| CSV 软体积最大绝对差，三例最大值 | 62.62 mm³ |
+| CPU 单例：标签、概率、CSV | 全部数值相同 |
+
+| 运行 | 病例数 | 完整命令墙钟时间 |
+|---|---:|---:|
+| FreeSurfer 8.2 原版 CPU 参考 | 3 | 中位数 109.99 s，范围 105.75–171.00 s |
+| FNIT 当前源码 H100 GPU | 3 | 中位数 11.34 s，范围 10.17–11.67 s |
+| FNIT 当前源码 CPU | 1 | 64.44 s |
+
+原版三例任务所在时段有重叠，只用于生成数值参考；上表不据此计算稳定加速倍数。独占单例 Python API 的阶段时间为权重加载 2.277 s、推理 1.937 s、保存 1.369 s，总计 5.584 s；完整测量进程为 9.85 s。Torch 峰值显存为 allocated 29,730 MiB、reserved 35,828 MiB，超过项目期望的 20 GB 上限，当前不能声称低于 20 GB。
+
+三例 GPU、单例 CPU 的逐例指标、输出合同和当前源码哈希见 [`report.public.json`](report.public.json)。
+
+## 当前示意图
+
+下图使用公开 `sub-04` FLAIR；中、右列分别叠加原版和当前源码的 WMH 标签 77。当前三维比较有 97 个标签不同体素，WMH Dice 为 0.99981002。
+
+![公开 FLAIR 的 FreeSurfer 与当前 FNIT WMH-SynthSeg 输出](../../docs/figures/wmh_synthseg_comparison.png)

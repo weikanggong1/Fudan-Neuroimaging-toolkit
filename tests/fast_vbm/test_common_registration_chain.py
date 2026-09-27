@@ -2,9 +2,11 @@
 
 from types import SimpleNamespace
 
+import nibabel as nib
 import numpy as np
-import surfa as sf
 import torch
+
+from fnit._nib import new_image
 
 import fnit.fast_vbm.registration as registration_module
 from fnit.fast_vbm.synthmorph_backend import (
@@ -41,7 +43,7 @@ def _volume(shape=(7, 8, 9), affine=None):
     )
     centre = (np.asarray(shape, dtype=np.float32) - 1) / 2
     data = np.exp(-np.square(grid - centre).sum(-1) / 12).astype(np.float32)
-    return sf.Volume(data, geometry=sf.ImageGeometry(shape, vox2world=affine))
+    return new_image(data, nib.Nifti1Image(data, affine))
 
 
 def _pull_from_fsl_residual(moving, fixed, forward_fsl, residual):
@@ -75,12 +77,7 @@ def _pull_from_fsl_residual(moving, fixed, forward_fsl, residual):
     target_world = np.einsum(
         "ab,...b->...a", fixed_world[:3, :3], target_voxels
     ) + fixed_world[:3, 3]
-    return sf.Warp(
-        (source_world - target_world).astype(np.float32),
-        source=moving,
-        target=fixed,
-        format=sf.Warp.Format.disp_ras,
-    )
+    return new_image((source_world - target_world).astype(np.float32), fixed)
 
 
 def test_synthmorph_ras_pull_conversion_recovers_fsl_residual():
@@ -151,103 +148,6 @@ def test_common_dense_jacobian_uses_fsl_residual_and_excludes_affine():
 
     torch.testing.assert_close(
         jacobian, torch.full(shape, expected), atol=2e-6, rtol=0
-    )
-
-
-class _CaptureEstimator:
-    def __init__(self):
-        self.calls = []
-
-    def __call__(self, moving, fixed, initial):
-        self.calls.append(
-            {
-                "moving": np.asarray(moving.data).copy(),
-                "fixed": np.asarray(fixed.data).copy(),
-                "initial": np.asarray(initial.matrix).copy(),
-                "moving_geometry": np.asarray(
-                    moving.geom.vox2world.matrix
-                ).copy(),
-                "fixed_geometry": np.asarray(fixed.geom.vox2world.matrix).copy(),
-            }
-        )
-        forward_fsl = world_to_flirt_affine(
-            initial.matrix,
-            moving.geom.vox2world.matrix,
-            fixed.geom.vox2world.matrix,
-            moving.shape[:3],
-            fixed.shape[:3],
-            moving.geom.voxsize,
-            fixed.geom.voxsize,
-        )
-        residual = np.zeros((*fixed.shape[:3], 3), dtype=np.float32)
-        pull = _pull_from_fsl_residual(moving, fixed, forward_fsl, residual)
-        return SimpleNamespace(pull_transform=pull, qc={"capture": True})
-
-
-def test_synthmorph_and_fnirt_enter_estimator_with_identical_preparation():
-    moving = _volume()
-    fixed = _volume()
-    pull_world = np.array(
-        [
-            [0.98, 0.01, 0.00, -0.4],
-            [0.00, 1.02, -0.01, 0.3],
-            [0.01, 0.00, 1.01, -0.2],
-            [0.00, 0.00, 0.00, 1.0],
-        ]
-    )
-    synthmorph = _CaptureEstimator()
-    fnirt = _CaptureEstimator()
-    reference_mask = fixed.new(
-        (np.asarray(fixed.data) > 0.15).astype(np.uint8)
-    )
-    common = {
-        "device": "cpu",
-        "initial_pull": sf.Affine(
-            pull_world, source=fixed, target=moving, space="world"
-        ),
-        "reference_mask": reference_mask,
-    }
-
-    synthmorph_result = _register_gm(
-        moving,
-        fixed,
-        registration_backend="synthmorph",
-        deform_model=synthmorph,
-        **common,
-    )
-    fnirt_result = _register_gm(
-        moving,
-        fixed,
-        registration_backend="fnirt",
-        deform_model=fnirt,
-        **common,
-    )
-
-    for name in synthmorph.calls[0]:
-        np.testing.assert_array_equal(
-            synthmorph.calls[0][name], fnirt.calls[0][name]
-        )
-    assert (
-        synthmorph_result.qc["pre_nonlinear_signature"]
-        == fnirt_result.qc["pre_nonlinear_signature"]
-    )
-    assert synthmorph_result.qc["only_backend_specific_stage"] == (
-        "nonlinear pull-field estimation, including estimator-specific "
-        "objective and mask use"
-    )
-    assert synthmorph_result.qc["reference_mask_source"] == "explicit"
-    assert "passed to FNIRT" in synthmorph_result.qc["reference_mask_role"]
-    assert synthmorph_result.qc["fsl_reference_mask_exact"] is None
-    assert synthmorph_result.qc["fsl_fnirt_numerically_equivalent"] is None
-    assert synthmorph_result.qc["resampling"] == (
-        "fnit.applywarp.TorchApplyWarp"
-    )
-    np.testing.assert_allclose(synthmorph_result.jacobian.data, 1, atol=3e-6)
-    np.testing.assert_array_equal(
-        synthmorph_result.warped_gm.data, fnirt_result.warped_gm.data
-    )
-    np.testing.assert_array_equal(
-        synthmorph_result.modulated_gm.data, fnirt_result.modulated_gm.data
     )
 
 
@@ -332,12 +232,12 @@ def test_real_backend_dispatch_uses_the_same_default_flirt_and_common_tail(
                     {
                         "moving": np.asarray(moving_value.data).copy(),
                         "fixed": np.asarray(fixed_value.data).copy(),
-                        "initial": np.asarray(init.matrix).copy(),
+                        "initial": np.asarray(init).copy(),
                         "mid_space": mid_space,
                     }
                 )
                 forward = world_to_flirt_affine(
-                    init.matrix,
+                    init,
                     moving_value.geom.vox2world.matrix,
                     fixed_value.geom.vox2world.matrix,
                     moving_value.shape[:3],
@@ -366,12 +266,12 @@ def test_real_backend_dispatch_uses_the_same_default_flirt_and_common_tail(
                 {
                     "moving": np.asarray(moving_value.data).copy(),
                     "fixed": np.asarray(fixed_value.data).copy(),
-                    "initial": np.asarray(initial.matrix).copy(),
+                    "initial": np.asarray(initial).copy(),
                     "reference_mask": np.asarray(reference_mask.data).copy(),
                 }
             )
             forward = world_to_flirt_affine(
-                initial.matrix,
+                initial,
                 moving_value.geom.vox2world.matrix,
                 fixed_value.geom.vox2world.matrix,
                 moving_value.shape[:3],

@@ -1,6 +1,6 @@
 # 独立 33 类 SynthSeg
 
-[返回首页](../../README.md) · [源码目录](../../src/fnit/synthseg_parc/) · [权重](../WEIGHTS.md) · [验证报告](../../validation/synthseg/report.public.json)
+[返回首页](../../README.md) · [源码目录](../../src/fnit/synthseg_parc/) · [权重](../WEIGHTS.md) · [当前验证报告](../../validation/synthseg/report.public.json)
 
 `SynthSeg` 使用 FreeSurfer 8.2 的非 robust、非 parcellated SynthSeg 2.0 模型，从单幅 T1 生成 33 类结构标签和各结构软体积。它与 WMH-SynthSeg 是不同模型；本入口不输出 WMH 标签，也不生成皮层分区。推理使用 PyTorch，不需要安装 FreeSurfer、FSL 或 TensorFlow。
 
@@ -20,28 +20,26 @@ python tools/setup_weights.py --model synthseg --dest /path/to/weights
 from fnit import SynthSeg
 
 model = SynthSeg(
-    weights="/path/to/weights",  # 输入：含 .h5 和三份 .npy 的权重目录；省略时读取已配置目录
-    device="cuda:0",            # 计算设备；无 GPU 时使用 "cpu"
-    threads=4,                  # PyTorch CPU 线程数
+    weights=None,  # 权重：按 FNIT 配置顺序查找四个官方模型文件
+    device="cuda:0",  # 设备：第一张可见 CUDA GPU
+    threads=4,  # CPU 线程：用于预处理和后处理
 )
 result = model(
-    image="sub-01_T1w.nii.gz",  # 输入：单幅三维 T1 影像
-    keep_geometry=False,        # False 输出预处理网格；True 回到输入影像网格
-    color_lut=None,             # 可选：FreeSurferColorLUT.txt 路径，写入标签色表
+    image="sub-01_T1w.nii.gz",  # 输入：单幅 3D T1w
+    keep_geometry=False,  # 输出网格：保留预处理后的 RAS、约 1 mm 网格
+    color_lut=None,  # 色表：不附加外部 FreeSurfer LUT
 )
-result.segmentation.save("sub-01_synthseg.nii.gz")  # 输出：33 类硬分割图
+result.segmentation.save(path="sub-01_synthseg.nii.gz")  # 输出路径：33 类硬分割图
 result.write_volumes_csv(
-    source="sub-01_T1w.nii.gz",         # CSV 第一列使用的输入文件名
-    path="sub-01_synthseg.vol.csv",    # 输出：各结构软体积，单位 mm³
+    source="sub-01_T1w.nii.gz",  # CSV 标识：原始输入文件名
+    path="sub-01_synthseg.vol.csv",  # 输出：软体积 CSV 路径
 )
 print(result.total_intracranial_mm3, result.volumes_mm3)
 ```
 
-`SynthSeg(weights=None, device="cpu", threads=None)` 在构造时加载一次模型；每次调用接收一幅图像。`weights` 可传包含四个文件的目录，或直接传 `synthseg_2.0.h5` 路径；三个 `.npy` 必须与这份 `.h5` 位于同一目录。省略 `weights` 时先查 `FNIT_WEIGHTS`、配置脚本记录的目录，再查默认缓存。输入是单幅 3D `.nii`、`.nii.gz` 或 `.mgz` T1 路径。
+`SynthSeg(weights=None, device="cpu", threads=None)` 在构造时加载一次模型；每次调用接收一幅图像。`weights` 可传包含四个文件的目录，或直接传 `synthseg_2.0.h5` 路径；三个 `.npy` 必须与这份 `.h5` 位于同一目录。省略 `weights` 时先查 `FNIT_WEIGHTS`、配置脚本记录的目录，再查默认缓存。输入是单幅 3D `.nii`、`.nii.gz`、`.mgz` T1 路径或 `nibabel.spatialimages.SpatialImage`。
 
-`result.segmentation` 是仓库内的 `SynthSegVolume`，提供 `.data`、`.affine`、`.shape`、`.geom.vox2world.matrix` 和 `.save(path)`；默认位于 SynthSeg 预处理后的 RAS 方向、约 1 mm 网格。标签编号为整数值，按原版文件格式以 `float32` 保存。`model(image, keep_geometry=True)` 会将标签以最近邻法重采样到输入网格。`color_lut="/path/to/FreeSurferColorLUT.txt"` 可选地附加色表；默认不读取 FreeSurfer 文件。
-
-输出图像支持 `.nii`、`.nii.gz`、`.mgh` 和 `.mgz`；`result.segmentation.data` 是三维 `float32` 标签数组。`result.segmentation.affine` 是体素坐标到 RAS 毫米坐标的 4×4 矩阵。`result.near_tie_voxels` 是近似并列标签规则改变的体素数。指定 `color_lut` 后，色表同时写入 MGZ 和 NIfTI 的 FreeSurfer 标签扩展。
+`result.segmentation` 是 `FNITNifti1Image`（`nibabel.Nifti1Image` 子类），默认位于 SynthSeg 预处理后的 RAS 方向、约 1 mm 网格。标签编号和存储类型均为 `int32`；NIfTI qform code 为 0，sform code 为 2。`model(image, keep_geometry=True)` 会将标签以最近邻法重采样到输入网格，并保持相同 dtype 与 form-code 契约。`color_lut="/path/to/FreeSurferColorLUT.txt"` 可选地在返回图像的 `extra["color_lut"]` 中记录色表路径；默认不读取 FreeSurfer 文件。
 
 `result.volumes_mm3` 是 `{前景标签编号: 软体积}`，`result.total_intracranial_mm3` 是所有前景软体积之和，后验概率先恢复到输入方向，再按原版 NumPy float32 顺序求和并保留三位小数；`result.label_names` 对应 32 个前景结构名。CSV 列顺序、总量和近似并列标签规则与本仓库 GPU recon-all 的 `mri_synthseg` 入口相同。`result.near_tie_voxels` 记录近似并列规则相对于普通 `argmax` 更改的体素数。
 
@@ -85,66 +83,24 @@ fnit synthseg --i sub-01_T1w.nii.gz --o sub-01_synthseg.nii.gz \
 
 可选参数为 `--weights /path/to/weights`、`--keep-geometry` 和 `--color-lut /path/to/FreeSurferColorLUT.txt`。命令行和 Python 每次均处理一幅图像。独立入口不依赖 recon-all 的原生运行包或个人 license。
 
-## Surfa 输出替换验证
+## 与 FreeSurfer 8.2 的当前对照
 
-该入口的模型推理、预处理和软体积计算保持原样；本次把标签结果、`keep_geometry` 最近邻回采样、MGH/NIfTI 写盘及可选色表改为仓库内的 nibabel/NumPy 实现。`fnit synthseg` 在解析该子命令时也不会导入其他流程及其 Surfa 依赖。整个仓库仍有其他 Surfa 使用点，本次验证只覆盖独立 33 类 SynthSeg 和 recon-all 调用的同一入口。
+2026-09-27 在三幅仓库公开、去面容 T1w 上重跑当前源码和 FreeSurfer 8.2.0-1 `mri_synthseg --noaddctab`。候选推理没有调用 FreeSurfer。当前 SynthSeg 源码树 SHA-256 为 `39fa204aea7674ad7c6e09652d0f8750dd2872b1b78799812ab0d71b5b6c8972`。
 
-同一份真实 `sub-01` T1、同一份外部权重，在 gpucw1 H100 上分别运行改动前后的完整 PyTorch 推理；关闭该模型的 cuDNN TF32，四个 CPU 线程。MGZ 输入的 SHA-256 为 `d79723f94bfc149ff36c89094a3d734b888a03cecbc32dc57a22992e8a5e817f`，原始 NIfTI 为 `f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a`，模型为 `f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e`。
+本轮同时核对文件头：默认输出和 `keep_geometry=True` 均写 `int32`，qform code 为 0，sform code 为 2，与原版相同。一幅真实 T1w 的 `keep_geometry=True` 输出与输入 shape、affine 完全一致。 针对性测试为 `2 passed`；WMH-SynthSeg、SynthSR 和 TorchFAST 的最小跨模块回归为 `28 passed, 4 skipped`。
 
-| 输入与输出 | 旧版与新版标签差异 | 仿射最大差 | CSV | 解压后的完整输出 |
-|---|---:|---:|---|---|
-| `orig.mgz` → 256³ MGZ | 0/16,777,216 | 0 | 逐字节相同 | 逐字节相同，含 MGH 头 |
-| 原始 T1 NIfTI，`keep_geometry=True` → 256×156×256 NIfTI | 0/10,223,616 | 0 | 逐字节相同 | 逐字节相同，含 NIfTI 扩展 |
-
-同一例真实分割图还检查了保存为 MGZ/NIfTI、带或不带 1,811 项 FreeSurfer 色表四种组合，解压后均逐字节相同；回采样到原始 T1 的 10,223,616 个标签全部相同。保留的[逐项验证数据](../../validation/synthseg/no_surfa_20260927/)列出了输出哈希、显存和计时。另在禁止导入 Surfa 的进程中，`fnit synthseg` 用该真实 T1 的子体积完成 CPU 推理和图像、CSV 保存；这验证命令行入口，与上面的全脑 GPU 精度对照分开记录。
-
-| 子步骤，同次顺序运行 | 改动前 Surfa 版 | nibabel/NumPy 版 |
-|---|---:|---:|
-| `orig.mgz`：加载模型 | 0.756 s | 0.314 s |
-| `orig.mgz`：预处理、GPU 推理、后处理 | 5.328 s | 3.973 s |
-| `orig.mgz`：MGZ 保存 | 1.030 s | 1.952 s |
-| 原始 NIfTI `keep_geometry=True`：预处理、GPU 推理、后处理 | 3.513 s | 3.325 s |
-| 原始 NIfTI：NIfTI 保存 | 0.163 s | 0.228 s |
-
-这是一轮顺序运行；模型和文件缓存状态不同，推理时间不能解释为本次 I/O 改写带来的加速。新 MGH 保存较慢约 0.9 秒。两种输入峰值 CUDA 已分配显存分别为 17,010 和 16,745 MiB。与官方 `mri_synthseg` 的同输入参考精度及 CPU 时间见下节；本次没有重复运行官方程序。
-
-## 与 FreeSurfer 8.2 的对照验证
-
-三例仓库公开、去面容的 T1w 分别运行 FreeSurfer 8.2.0-1 原版
-`mri_synthseg` CPU 命令和本包 H100 GPU 命令。两端读取同一份官方
-`synthseg_2.0.h5`，均使用 4 个 CPU 线程；本包保持默认 TF32。每一臂都在新进程中
-执行，计时包含进程和框架启动、权重与输入加载、推理、后处理、CSV 和 NIfTI 写盘。
-
-| 输出一致性指标 | 三例结果 |
+| 指标 | 三例结果 |
 |---|---:|
-| shape / 数值 affine / dtype | 3/3 一致 |
+| shape / 数值 affine / dtype / qform / sform | 3/3 一致 |
 | 最低逐体素标签一致率 | 0.99998817 |
-| 全部病例、全部前景标签的最低 Dice | 0.99902629 |
-| 各病例标签 Dice 中位数的中位数 | 0.99998952 |
-| CSV 共同数值列 | 33 |
-| total intracranial volume 最大绝对误差 | 556.75 mm³（0.038%） |
+| 全部前景标签最低 Dice | 0.99902629 |
+| CSV 最大绝对误差 | 104.06 mm³ |
+| FNIT H100 完整命令 | 中位数 9.48 s [8.84–10.13] |
 
-软体积并非逐值相同；最大差异来自 total intracranial volume。硬分割只有少量边界
-体素不同，不能把上表写成逐体素完全复现。完整逐例标签 Dice、输入哈希和软体积误差
-见[公开 JSON](../../validation/synthseg/report.public.json)。
+FNIT CPU 单例为 55.57 s；与原版相比只有 1 个标签体素不同，CSV 最大差 0.24 mm³。原版三例 CPU 参考任务所在时段有重叠，中位数 304.23 s，因此不计算稳定加速倍数。GPU 单例 Torch 峰值 allocated 19,769 MiB、reserved 22,820 MiB。
 
-| 实现 | 设备 | 完整单例命令时间，中位数 [最小–最大] |
-|---|---|---:|
-| FreeSurfer 8.2.0-1 `mri_synthseg` | CPU | 156.758 [142.195–187.271] s |
-| FNIT `synthseg` | H100 GPU | 5.867 [5.666–5.976] s |
+完整逐例标签 Dice、CSV、shape/affine/dtype、输出哈希、实际命令和边界见[验证页](../../validation/synthseg/README.md)与[机器报告](../../validation/synthseg/report.public.json)。三例没有人工结构分割真值，这些数值只衡量对参考实现的复现程度。
 
-两组命令按病例顺序串行运行于共享 gpucw1 节点；这是三例观察到的墙钟时间，不是隔离
-节点后的硬件加速试验。
+下图使用本轮公开 `sub-02` 重跑。中间两列显示同网格标签，最后一列标出不同体素；该例逐体素一致率为 0.99998881。
 
-下图使用公开 `sub-02` T1w。两行分别为轴位和冠状位；中间两列在同一 SynthSeg
-输出网格上叠加原版和本包标签，最后一列标出标签不同的体素。完整三维指标来自上表，
-不从二维图片估计。
-
-![公开 T1w、FreeSurfer SynthSeg 与 FNIT SynthSeg 的标签比较](figures/synthseg_comparison.png)
-
-公开 CLI 与 Python API 调用同一套 33 类推理与软体积代码，相应接口测试见
-[`tests/synthseg_parc/`](../../tests/synthseg_parc/)。该对照衡量本包对参考实现的
-复现程度；三例没有人工结构分割真值，不能解释为临床分割准确率。验证范围只覆盖本页
-声明的单幅 T1、SynthSeg 2.0、非 robust、非 parcellated 路径。
-
-另有单例同输入 GPU 精度对照：关闭 SynthSeg 卷积 TF32 后，硬分割与原版 16,777,216 个体素全部一致；经单体素临界阈值修正及按官方 `float32` 格式重写已保存 CSV 后，33 列软体积最大差 0.04 mm³，仍有 6 列未达到现有 0.005 mm³ 统计表门槛。格式检查未重跑 GPU 推理；阈值修正仅在这一输入上验证。详见[同输入 GPU 对照](../../validation/recon_all/python_gpu_port/CONNECTED_SYNTHSEG_GPU_20260926.md)。
+![公开 T1w、FreeSurfer SynthSeg 与当前 FNIT SynthSeg](figures/synthseg_comparison.png)

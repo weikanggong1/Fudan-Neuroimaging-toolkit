@@ -10,33 +10,76 @@
 from fnit import TorchProbtrackX
 
 tracker = TorchProbtrackX(
-    device="cuda:0", nsamples=5000, nsteps=2000, batch_size=2048,
-    steplength=0.5, cthr=0.2, fibthresh=0.01, seed=12345,
+    device="cuda:0",  # 计算设备；GPU 步进使用 Triton，可改为 "cpu"
+    nsamples=5000,  # 每个种子体素发出的轨迹数
+    nsteps=2000,  # 每条双向轨迹的总步数；必须是大于等于 2 的偶数
+    steplength=0.5,  # 每一步的物理长度，单位 mm
+    cthr=0.2,  # 相邻方向最小点积阈值，控制曲率
+    fibthresh=0.01,  # 可选纤维方向的最小 volume fraction
+    batch_size=2048,  # 同批并行推进的轨迹数
+    seed=12345,  # 随机数种子，对应 FSL --rseed
+    distthresh=0.0,  # 每个半轨迹的最短距离阈值，单位 mm
+    sampvox=0.0,  # 种子体素内随机抖动半径，单位 mm
+    fibst=None,  # 起始纤维编号；None 使用默认选择规则
+    usef=False,  # 是否按局部 fiber fraction 选择方向
+    randfib=0,  # 起始纤维随机选择模式，支持 0、1、2、3
+    pathdist=False,  # 是否把密度值改为路径长度加权和
+    mean_path_length=False,  # 是否另写平均首次抵达长度图
 )
-# seed→voxel、seed voxel→target voxel、target voxel pair，均为计数模式
-voxel = tracker.run(
-    "/absolute/path/subject.bedpostX", "/absolute/path/voxel_result",
-    seed="/absolute/path/seed.nii.gz", matrix1=True,
-    target2="/absolute/path/target_union.nii.gz",
-    target3="/absolute/path/target_union.nii.gz",
-    targetmasks=["/absolute/path/roi_01.nii.gz", "/absolute/path/roi_02.nii.gz"],
-)
-# region→region：ROI 列表顺序即矩阵顺序
-network = tracker.run(
-    "/absolute/path/subject.bedpostX", "/absolute/path/network_result",
-    regions=["/absolute/path/roi_01.nii.gz", "/absolute/path/roi_02.nii.gz"],
-)
-print(voxel.paths, voxel.matrix2, voxel.matrix3)
-print(network.network_matrix, network.network_probability, network.network_symmetric)
 
-# 同网格体积 waypoint 与退出后停止约束
-constrained = tracker.run(
-    "/absolute/path/subject.bedpostX", "/absolute/path/constrained_result",
-    seed="/absolute/path/seed.nii.gz",
-    waypoints="/absolute/path/waypoint_list.txt", waycond="AND",
-    wayorder=True, onewaycondition=True,
-    wtstop="/absolute/path/wtstop.nii.gz",
+voxel = tracker.run(
+    samples_dir="/absolute/path/subject.bedpostX",  # 输入：BEDPOSTX 后验目录
+    output_dir="/absolute/path/voxel_result",  # 输出：本次 seed 模式结果目录
+    seed="/absolute/path/seed.nii.gz",  # 输入：非空 3D seed mask
+    regions=None,  # ROI network 模式输入；单 seed 模式必须为 None
+    mask=None,  # 可选追踪 mask；None 使用 nodif_brain_mask.nii.gz
+    avoid=None,  # 可选排除 mask
+    stop=None,  # 可选进入后停止的 mask
+    forcefirststep=False,  # 首步是否跳过 avoid/stop 条件
+    waypoints=None,  # 可选 waypoint mask、路径列表或文本列表
+    waycond="AND",  # waypoint 组合条件：AND 或 OR
+    wayorder=False,  # 是否要求按列表顺序通过 waypoint
+    onewaycondition=False,  # 是否要求每个半轨迹单独满足 waypoint
+    wtstop=None,  # 可选进入后首次离开即停止的 mask
+    matrix1=True,  # 输出 seed voxel×seed voxel 稀疏矩阵
+    target2="/absolute/path/target_union.nii.gz",  # matrix2 的目标体素 mask
+    target3="/absolute/path/target_union.nii.gz",  # matrix3 的行目标 mask
+    lrtarget3=None,  # 可选 matrix3 列目标 mask；None 使用 target3
+    distthresh1=0.0,  # matrix1 有效路径总长度下限，单位 mm
+    distthresh3=0.0,  # matrix3 有效路径总长度下限，单位 mm
+    targetmasks=[  # 每个种子体素要统计命中的目标 ROI，列表顺序定义输出列
+        "/absolute/path/roi_01.nii.gz",
+        "/absolute/path/roi_02.nii.gz",
+    ],
+    overwrite=False,  # False 时已有输出会停止运行
 )
+
+network = tracker.run(
+    samples_dir="/absolute/path/subject.bedpostX",  # 输入：同一 BEDPOSTX 后验目录
+    output_dir="/absolute/path/network_result",  # 输出：ROI network 结果目录
+    seed=None,  # network 模式不使用单 seed mask
+    regions=[  # 输入：至少两个非空、不重叠 ROI；列表顺序定义矩阵行列
+        "/absolute/path/roi_01.nii.gz",
+        "/absolute/path/roi_02.nii.gz",
+    ],
+    overwrite=False,  # 是否覆盖已有结果
+)
+
+constrained = tracker.run(
+    samples_dir="/absolute/path/subject.bedpostX",  # 输入：BEDPOSTX 后验目录
+    output_dir="/absolute/path/constrained_result",  # 输出：带约束的 seed 结果目录
+    seed="/absolute/path/seed.nii.gz",  # 输入：非空 3D seed mask
+    regions=None,  # 单 seed 模式必须为 None
+    waypoints="/absolute/path/waypoint_list.txt",  # 输入：waypoint 路径列表
+    waycond="AND",  # 必须通过全部 waypoint
+    wayorder=True,  # 必须按列表顺序通过 waypoint
+    onewaycondition=True,  # 每个半轨迹单独检查 waypoint
+    wtstop="/absolute/path/wtstop.nii.gz",  # 进入后首次离开即停止的 mask
+    overwrite=False,  # 是否覆盖已有结果
+)
+
+print(voxel.paths, voxel.matrix2, voxel.matrix3)
+print(network.network_matrix, network.network_probability)
 print(constrained.paths)
 ```
 
@@ -55,7 +98,7 @@ print(constrained.paths)
 | `pathdist`, `mean_path_length` | 路径长度加权与平均路径长度，仅已有密度及 ROI 网络模式支持；和新稀疏矩阵或 `targetmasks` 同时使用会报错 | `--pd`, `--ompl` |
 | `device`, `batch_size` | `cpu` 或 `cuda:0`，每批并行轨迹数 | FNIT 选项 |
 
-`distthresh1/3` 仅过滤对应稀疏矩阵的更新，不改变 `fdt_paths` 与 `waytotal`。`matrix1`、`matrix2`、`matrix3` 可以同次运行。每条有效轨迹对 matrix1/2 的同一列及 seed→target 的同一 ROI 最多计一次；matrix3 对该轨迹经过的每对目标体素各计一次。`targetmasks` 可为 Python 路径列表，或文本列表路径；文本列表中的相对路径按列表所在目录解析。`waypoints`、`wtstop` 也接受单个同网格 3D NIfTI、Python 路径列表或文本列表；默认 `waycond="AND"` 要求经过全部 waypoint，`"OR"` 要求经过至少一个。默认两个半轨迹可合并满足条件；`onewaycondition=True` 改为逐半轨迹判定。`wayorder=True` 仅与 `AND` 合用，并按 waypoint 列表顺序检查。`stop` 在进入 mask 时终止，`wtstop` 则允许进入并在离开后终止。在 9 组 9×5×5 合成直线场的 waypoint/`wtstop` 配对中，FNIT 与 FSL 6.0.7.22 的 `waytotal` 和 `fdt_paths` 逐项相同，AND 条件下的 matrix2 `.dot` 也逐项相同。本次默认及矩阵真实 DWI 配对未使用这些约束。另在 gpucw1 完成了单 waypoint 的 FSL CPU/FNIT CPU 真实 DWI 配对，已检查 FSL 完成日志和双方输出；精度、耗时指标仍仅保留在授权服务器，待授权后发布。其他 waypoint/`wtstop` 组合尚无真实 DWI 配对结果。
+`distthresh1/3` 仅过滤对应稀疏矩阵的更新，不改变 `fdt_paths` 与 `waytotal`。`matrix1`、`matrix2`、`matrix3` 可以同次运行。每条有效轨迹对 matrix1/2 的同一列及 seed→target 的同一 ROI 最多计一次；matrix3 对该轨迹经过的每对目标体素各计一次。`targetmasks` 可为 Python 路径列表，或文本列表路径；文本列表中的相对路径按列表所在目录解析。`waypoints`、`wtstop` 也接受单个同网格 3D NIfTI、Python 路径列表或文本列表；默认 `waycond="AND"` 要求经过全部 waypoint，`"OR"` 要求经过至少一个。默认两个半轨迹可合并满足条件；`onewaycondition=True` 改为逐半轨迹判定。`wayorder=True` 仅与 `AND` 合用，并按 waypoint 列表顺序检查。`stop` 在进入 mask 时终止，`wtstop` 则允许进入并在离开后终止。在 9 组 9×5×5 合成直线场的 waypoint/`wtstop` 配对中，FNIT 与 FSL 6.0.7.22 的 `waytotal` 和 `fdt_paths` 逐项相同，AND 条件下的 matrix2 `.dot` 也逐项相同。本次默认及矩阵真实 DWI 配对未使用这些约束。当前公开真实 DWI benchmark 覆盖默认追踪、三类矩阵、target mask 与五区 network；waypoint/`wtstop` 的真实 DWI 数值和时间未列入当前发布证据。
 
 ## 输出及结构
 
@@ -191,4 +234,8 @@ fnit probtrackx --samples-dir /absolute/path/subject.bedpostX \
 
 另一组每体素 500 条的五区网络计数配对：FSL / FNIT 为 20.13 / 30.15 秒；原始有向矩阵 MAE 为 0.32。FNIT 的额外归一化有向矩阵和对称矩阵按上文公式生成，和 FSL 原始矩阵含义不同；该组与 FSL 原始矩阵比较后的 MAE 分别为 0.000091 与 0.000023（比较时先对 FSL 原始矩阵施加相同公式）。
 
-逐体素影像、逐边矩阵及连接图保留在授权服务器；仓库的六份 JSON 仅包含汇总标量及源码 SHA-256。[复现命令和指标定义](../../validation/probtrackx/README.md)列出比较方法。合成直线场的 FSL 逐项相同测试只验证计数规则，不替代这组真实数据误差。`tests/probtrackx/` 的 40 项 CPU/CUDA 测试已在 gpucw1 通过。
+![真实 UK Biobank dMRI 的五区长度加权连接矩阵](figures/probtrackx_real_ukb_network_pd_ompl.png)
+
+上图来自同一例真实 DWI 的 CPU 五区网络 `--opd --pd --ompl` 配对。上排为累计长度加权连接矩阵，下排为命中轨迹的平均长度；从左到右依次为 FSL、当前 FNIT 和 FNIT−FSL。区域标签只保留通用的 JHU 解剖名称，不含病例编号或服务器路径。图中矩阵来自当前源码哈希绑定的同一组输出，与[长度加权报告](../../validation/probtrackx/report.current.latest.public.json)中的矩阵 MAE、密度图和时间统计对应。
+
+原始 DWI、BEDPOSTX 后验、seed、逐体素密度图和完整文本矩阵仍保留在授权服务器；仓库公开六份汇总 JSON 和这一张去标识连接矩阵图。双方随机数流不同，这张图比较的是网络汇总结果，不能证明逐轨迹一致。当前证据只有一例数据、五个 ROI，且网络较稀疏；它不能替代多病例或全脑分区验证。[复现命令和指标定义](../../validation/probtrackx/README.md)列出比较方法。合成直线场的 FSL 逐项相同测试只验证计数规则，不替代这组真实数据误差。`tests/probtrackx/` 的 40 项 CPU/CUDA 测试已在 gpucw1 通过。

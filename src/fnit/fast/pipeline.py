@@ -1,13 +1,10 @@
 """Image-facing API for PyTorch T1 tissue segmentation."""
 
 from dataclasses import dataclass
-import os
-
-import nibabel as nib
 import numpy as np
 import torch
 
-from ..synthstrip.geometry import Volume, load_volume
+from .._nib import FNITNifti1Image, load_image, new_image
 from .algorithm import FASTConfig, segment_t1
 
 
@@ -15,53 +12,24 @@ from .algorithm import FASTConfig, segment_t1
 class FASTResult:
     """Three-tissue partial volumes and bias-correction products."""
 
-    pve_csf: Volume
-    pve_gm: Volume
-    pve_wm: Volume
-    hard_segmentation: Volume
-    pve_segmentation: Volume
-    mixel_type: Volume
-    bias_field: Volume
-    restored: Volume
+    pve_csf: FNITNifti1Image
+    pve_gm: FNITNifti1Image
+    pve_wm: FNITNifti1Image
+    hard_segmentation: FNITNifti1Image
+    pve_segmentation: FNITNifti1Image
+    mixel_type: FNITNifti1Image
+    bias_field: FNITNifti1Image
+    restored: FNITNifti1Image
     tissue_means: tuple[float, float, float]
     tissue_variances: tuple[float, float, float]
 
 
-class _NiftiFASTVolume(Volume):
-    """Keep NIfTI spatial/unit metadata when writing FAST products."""
-
-    def __init__(self, data, affine, header):
-        super().__init__(data, affine)
-        self._header = header.copy()
-
-    def save(self, path):
-        if str(path).lower().endswith((".nii", ".nii.gz")):
-            header = self._header.copy()
-            header.set_data_dtype(self.data.dtype)
-            nib.save(nib.Nifti1Image(self.data, self.affine, header=header), str(path))
-        else:
-            super().save(path)
-
-
 def _load_volume(value, name):
-    if isinstance(value, (str, os.PathLike)):
-        value = nib.load(str(value))
-    if isinstance(value, nib.spatialimages.SpatialImage):
-        volume = load_volume(value)
-        if isinstance(value, nib.Nifti1Image):
-            volume._nifti_header = value.header.copy()
-        return volume
-    if isinstance(value, Volume):
-        return value
-    # Existing in-memory Surfa callers remain usable without importing Surfa.
-    if (hasattr(value, "data") and hasattr(value, "new") and
-            hasattr(getattr(value, "geom", None), "vox2world")):
-        return value
-    raise TypeError(f"{name} must be a path or image volume")
+    return load_image(value, name)
 
 
 def _single_frame(volume, name):
-    data = np.asarray(volume.data)
+    data = np.asanyarray(volume.dataobj)
     if data.ndim == 4 and data.shape[-1] == 1:
         data = data[..., 0]
     if data.ndim != 3:
@@ -110,14 +78,14 @@ class TorchFAST:
     def __call__(self, image, mask=None):
         image = _load_volume(image, "image")
         data = _single_frame(image, "image")
-        affine = np.asarray(image.geom.vox2world.matrix, dtype=float)
+        affine = np.asarray(image.affine, dtype=float)
         voxel_size = tuple(np.linalg.norm(affine[:3, :3], axis=0))
 
         mask_data = None
         if mask is not None:
             mask = _load_volume(mask, "mask")
             mask_data = _single_frame(mask, "mask")
-            mask_affine = np.asarray(mask.geom.vox2world.matrix, dtype=float)
+            mask_affine = np.asarray(mask.affine, dtype=float)
             if mask_data.shape != data.shape or not np.allclose(mask_affine, affine,
                                                                  atol=1e-5, rtol=0):
                 raise ValueError("mask must use the same shape and geometry as image")
@@ -130,10 +98,7 @@ class TorchFAST:
 
         def volume(value, dtype):
             array = value.detach().cpu().numpy().astype(dtype, copy=False)
-            header = getattr(image, "_nifti_header", None)
-            if header is not None:
-                return _NiftiFASTVolume(array, affine, header)
-            return image.new(array)
+            return new_image(array, image)
 
         means = tuple(float(value) for value in result.tissue_means.cpu())
         variances = tuple(float(value) for value in result.tissue_variances.cpu())

@@ -145,6 +145,17 @@ def test_env_and_explicit_paths_override_saved_config(tmp_path, monkeypatch, tin
     assert weights.resolve_weights(name, explicit=explicit) == explicit / name
 
 
+def test_freesurfer_home_is_not_a_weight_source(tmp_path, monkeypatch, tiny_weight):
+    name, _ = tiny_weight
+    freesurfer_models = tmp_path / "freesurfer" / "models"
+    freesurfer_models.mkdir(parents=True)
+    (freesurfer_models / name).write_bytes(b"installed FreeSurfer checkpoint")
+    monkeypatch.setenv("FREESURFER_HOME", str(freesurfer_models.parent))
+
+    with pytest.raises(FileNotFoundError, match=name):
+        weights.resolve_weights(name)
+
+
 def test_wmh_selection_downloads_only_its_official_checkpoint(tmp_path, monkeypatch):
     name = "WMH-SynthSeg_v10_231110.pth"
     assert weights.MODEL_FILES["wmh-synthseg"] == (name,)

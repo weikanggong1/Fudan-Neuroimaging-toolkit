@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-28",
+  "scope": "FLIRT 12-DOF correlation-ratio reports only",
+  "measurement_source": {
+    "path": "src/fnit/flirt/core.py",
+    "sha256": "f5315f5823df98334f170d43df71bb45f83653d484087d0055ab572c63a3c6e4",
+    "reports": [
+      "validation/flirt/report.cpu.current.json",
+      "validation/flirt/report.gpu.current.json",
+      "validation/flirt/report.public.json",
+      "validation/flirt/public_example.current.json"
+    ]
+  },
+  "current_source": {
+    "path": "src/fnit/flirt/core.py",
+    "sha256": "ce375d5a144aa80e0b0607b05319be107a651a1d3611cd37e8d5869587001112"
+  },
+  "covered_profile": {
+    "degrees_of_freedom": 12,
+    "cost": "corratio",
+    "engine": "_DefaultFLIRTEngine"
+  },
+  "diff": {
+    "changed_runtime_branch": "_RigidNMIEngine.set_scale for 6-DOF normmi",
+    "changed_metadata": "TorchFLIRT QC adds search_cost",
+    "covered_profile_selects_changed_engine": false,
+    "covered_profile_numerical_assignment_or_control_flow_changed": false
+  },
+  "ast_check": {
+    "normalization": "replace _RigidNMIEngine body with pass and replace the TorchFLIRT QC dictionary right-hand side with an empty dictionary",
+    "old_normalized_ast_sha256": "6713d365727b5d8d2ac577011c8cdc4364c5a6c52c43fba937681bd45f50eec3",
+    "current_normalized_ast_sha256": "6713d365727b5d8d2ac577011c8cdc4364c5a6c52c43fba937681bd45f50eec3",
+    "default_engine_ast_sha256": "89470e8874b83a28f4c285a03e690ae95e316a527ab208ced72acb1b9dec6b3e",
+    "torchflirt_call_prefix_before_qc_ast_sha256": "ea2d096bac89d7212455a3d27c4c6575b111cfb2d9c8b5864b3be47b09ce1e95",
+    "equal_for_covered_profile": true
+  },
+  "older_measurement_chain": {
+    "attestation_path": "validation/runtime_dependencies/flirt_qc_source_equivalence.public.json",
+    "attestation_sha256": "b69a6aab75018e75739d864d14fa990470f39a334605a1c2fda18c2871bb1556",
+    "measured_source_sha256": "5528560292d3ba72778fda619abd907ab4cd666b80a8f18b95538ee4b8ca89b2",
+    "intermediate_source_sha256": "f5315f5823df98334f170d43df71bb45f83653d484087d0055ab572c63a3c6e4",
+    "applies_to": [
+      "validation/fast_vbm/report.fnirt.real.current.json",
+      "validation/fast_vbm/report.synthmorph.real.current.json",
+      "validation/fast_vbm/report.real.current.json",
+      "validation/dmri_pipeline/tbss_e2e.real.current.json",
+      "validation/dmri_pipeline/mmorf_e2e.real.current.json"
+    ]
+  },
+  "status": {
+    "covered_profile_source_equivalent": true,
+    "fresh_current_hash_full_real_data_rerun": false,
+    "six_dof_normmi_source_equivalent": false,
+    "interpretation": "The preserved measurements retain their original source hashes. The current source is equivalent only for the 12-DOF correlation-ratio profile; this attestation is not a fresh real-data rerun."
+  },
+  "limits": [
+    "The 6-DOF normmi path changed its 8 mm search cost and is outside this attestation.",
+    "Returned QC metadata differs because the current source includes search_cost.",
+    "The claim is restricted to the exact source hashes and reports listed above."
+  ]
+}

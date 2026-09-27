@@ -2,21 +2,16 @@
 
 from dataclasses import dataclass
 import hashlib
-import os
 
 import nibabel as nib
 import numpy as np
-import surfa as sf
 import torch
 
+from .._nib import FNITNifti1Image, load_image, new_image
+from .._transforms import same_geometry
 from ..applywarp import TorchApplyWarp
 from ..flirt import TorchFLIRT
-from ..flirt.coordinates import (
-    WORLD_FORWARD_CONVENTION,
-    WORLD_PULL_CONVENTION,
-    voxel_to_fsl_scaled_mm,
-    world_to_flirt_affine,
-)
+from ..flirt.coordinates import voxel_to_fsl_scaled_mm
 from .synthmorph_backend import SynthMorphDeformRegistration
 
 
@@ -24,9 +19,9 @@ from .synthmorph_backend import SynthMorphDeformRegistration
 class VBMRegistrationResult:
     """Gray-matter maps on the template grid and registration diagnostics."""
 
-    warped_gm: sf.Volume
-    jacobian: sf.Volume
-    modulated_gm: sf.Volume
+    warped_gm: FNITNifti1Image
+    jacobian: FNITNifti1Image
+    modulated_gm: FNITNifti1Image
     pull_world_affine: np.ndarray
     fit_score: float
     maximum_displacement_mm: float
@@ -44,17 +39,17 @@ class _PreparedRegistration:
     flirt_matrix: np.ndarray
     moving_to_fixed_world: np.ndarray
     fixed_to_moving_world: np.ndarray
-    initial: sf.Affine
-    reference_mask: sf.Volume
+    initial: np.ndarray
+    reference_mask: FNITNifti1Image
     reference_mask_source: str
     linear_qc: dict
     signature: dict
 
 
 def _array(volume, name):
-    if not isinstance(volume, sf.Volume):
-        raise TypeError(f"{name} must be a surfa.Volume")
-    data = np.asarray(volume.data)
+    if not isinstance(volume, nib.spatialimages.SpatialImage):
+        raise TypeError(f"{name} must be a nibabel spatial image")
+    data = np.asanyarray(volume.dataobj)
     if data.ndim == 4 and data.shape[-1] == 1:
         data = data[..., 0]
     if data.ndim != 3:
@@ -67,39 +62,12 @@ def _array(volume, name):
 
 
 def _affine(volume, name):
-    affine = np.asarray(volume.geom.vox2world.matrix, dtype=np.float64)
+    affine = np.asarray(volume.affine, dtype=np.float64)
     if affine.shape != (4, 4) or not np.isfinite(affine).all():
         raise ValueError(f"{name} affine must be a finite 4x4 matrix")
     if abs(np.linalg.det(affine[:3, :3])) < 1e-8:
         raise ValueError(f"{name} affine must be invertible")
     return affine
-
-
-def _initial_pull_world(initial_pull, moving, fixed):
-    """Validate a geometry-tagged fixed-to-moving world-RAS affine."""
-    if not isinstance(initial_pull, sf.Affine):
-        raise TypeError("internal initial_pull must be a geometry-tagged surfa.Affine")
-    if not sf.transform.image_geometry_equal(
-        fixed.geom, initial_pull.source, tol=1e-3
-    ):
-        raise ValueError("initial_pull source geometry must match fixed")
-    if not sf.transform.image_geometry_equal(
-        moving.geom, initial_pull.target, tol=1e-3
-    ):
-        raise ValueError("initial_pull target geometry must match moving")
-    try:
-        matrix = np.asarray(
-            initial_pull.convert(space="world").matrix, dtype=np.float64
-        )
-    except RuntimeError as error:
-        raise ValueError("initial_pull must define its coordinate space") from error
-    if matrix.shape != (4, 4) or not np.isfinite(matrix).all():
-        raise ValueError("initial_pull must be a finite 4x4 matrix")
-    if not np.allclose(matrix[3], (0, 0, 0, 1), atol=1e-8, rtol=0):
-        raise ValueError("initial_pull must be a homogeneous affine matrix")
-    if abs(np.linalg.det(matrix[:3, :3])) < 1e-8:
-        raise ValueError("initial_pull must be invertible")
-    return matrix
 
 
 def _normalized_correlation(first, second):
@@ -115,11 +83,11 @@ def _normalized_correlation(first, second):
 
 
 def _displacement_qc(pull, fixed, pull_affine):
-    displacement = np.asarray(pull.data)
+    displacement = np.asarray(pull.dataobj)
     shape = tuple(fixed.shape[:3])
     if displacement.shape != (*shape, 3):
         raise ValueError("pull displacement must match the fixed grid")
-    fixed_affine = np.asarray(fixed.geom.vox2world.matrix, dtype=np.float64)
+    fixed_affine = np.asarray(fixed.affine, dtype=np.float64)
     pull_affine = np.asarray(pull_affine, dtype=np.float64)
     pull_linear_delta = pull_affine[:3, :3] - np.eye(3)
     voxel_coefficients = pull_linear_delta @ fixed_affine[:3, :3]
@@ -200,19 +168,16 @@ def _pre_nonlinear_signature(
 def _reference_mask(value, fixed, fixed_data):
     if value is None:
         data = np.asarray(fixed_data > 0, dtype=np.uint8)
-        return fixed.new(data), data, "derived-fixed-positive-non-fsl-exact"
-    if isinstance(value, (str, bytes, os.PathLike)):
-        value = sf.load_volume(value)
-    if not isinstance(value, sf.Volume):
-        raise TypeError("reference_mask must be a path or surfa.Volume")
-    data = np.asarray(value.data)
+        return new_image(data, fixed), data, "derived-fixed-positive-non-fsl-exact"
+    value = load_image(value, "reference_mask")
+    data = np.asanyarray(value.dataobj)
     if data.ndim == 4 and data.shape[-1] == 1:
         data = data[..., 0]
     if data.ndim != 3 or not np.isfinite(data).all():
         raise ValueError("reference_mask must contain one finite 3D frame")
     if tuple(data.shape) != tuple(fixed.shape[:3]) or not np.allclose(
-        value.geom.vox2world.matrix,
-        fixed.geom.vox2world.matrix,
+        value.affine,
+        fixed.affine,
         atol=1e-5,
         rtol=0,
     ):
@@ -220,7 +185,7 @@ def _reference_mask(value, fixed, fixed_data):
     data = np.asarray(data > 0, dtype=np.uint8)
     if not np.any(data):
         raise ValueError("reference_mask is empty")
-    return fixed.new(data), data, "explicit"
+    return new_image(data, fixed), data, "explicit"
 
 
 def _prepare_registration(
@@ -232,47 +197,17 @@ def _prepare_registration(
     fixed_affine,
     *,
     device,
-    initial_pull,
     reference_mask,
 ):
     """Run the one shared FSL-coordinate affine preparation stage."""
-    if initial_pull is None:
-        linear = TorchFLIRT(device=device)(moving, fixed)
-        moving_to_fixed = np.asarray(
-            linear.moving_to_fixed_world, dtype=np.float64
-        )
-        pull_affine = np.asarray(linear.fixed_to_moving_world, dtype=np.float64)
-        flirt_matrix = np.asarray(linear.matrix, dtype=np.float64)
-        linear_qc = dict(linear.qc)
-    else:
-        pull_affine = _initial_pull_world(initial_pull, moving, fixed)
-        moving_to_fixed = np.linalg.inv(pull_affine)
-        moving_to_fixed[3] = (0, 0, 0, 1)
-        flirt_matrix = world_to_flirt_affine(
-            moving_to_fixed,
-            moving_affine,
-            fixed_affine,
-            moving_data.shape,
-            fixed_data.shape,
-            moving.geom.voxsize,
-            fixed.geom.voxsize,
-        )
-        linear_qc = {
-            "backend": "supplied-fixed-to-moving-world-affine",
-            "validated_fsl_equivalent": None,
-            "forward_transform_convention": WORLD_FORWARD_CONVENTION,
-            "pull_transform_convention": WORLD_PULL_CONVENTION,
-            "matrix_coordinate_system": "FSL scaled-mm",
-            "matrix_direction": "moving/input-to-fixed/reference",
-            "accepts_fsl_flirt_matrix_directly": False,
-            "degrees_of_freedom": None,
-        }
-    initial = sf.Affine(
-        moving_to_fixed,
-        source=moving,
-        target=fixed,
-        space="world",
+    linear = TorchFLIRT(device=device)(moving, fixed)
+    moving_to_fixed = np.asarray(
+        linear.moving_to_fixed_world, dtype=np.float64
     )
+    pull_affine = np.asarray(linear.fixed_to_moving_world, dtype=np.float64)
+    flirt_matrix = np.asarray(linear.matrix, dtype=np.float64)
+    linear_qc = dict(linear.qc)
+    initial = moving_to_fixed.copy()
     reference_mask, reference_mask_data, reference_mask_source = _reference_mask(
         reference_mask, fixed, fixed_data
     )
@@ -301,14 +236,21 @@ def _prepare_registration(
 
 
 def _validate_pull_warp(pull, moving, fixed):
-    if not isinstance(pull, sf.Warp):
-        raise TypeError("nonlinear estimator must return a surfa.Warp")
-    pull = pull.convert(format=sf.Warp.Format.disp_ras, copy=False)
-    if not sf.transform.image_geometry_equal(pull.source, moving.geom, tol=1e-3):
+    if not isinstance(pull, nib.spatialimages.SpatialImage):
+        raise TypeError("nonlinear estimator must return a nibabel spatial image")
+    source_geometry = getattr(pull, "source", None)
+    target_geometry = getattr(pull, "target", None)
+    if source_geometry is not None and not same_geometry(
+        source_geometry, moving, tolerance=1e-3
+    ):
         raise ValueError("nonlinear pull source geometry does not match moving")
-    if not sf.transform.image_geometry_equal(pull.target, fixed.geom, tol=1e-3):
+    if target_geometry is not None and not same_geometry(
+        target_geometry, fixed, tolerance=1e-3
+    ):
         raise ValueError("nonlinear pull target geometry does not match fixed")
-    displacement = np.asarray(pull.data, dtype=np.float32)
+    if not np.allclose(pull.affine, fixed.affine, atol=1e-3, rtol=0):
+        raise ValueError("nonlinear pull target geometry does not match fixed")
+    displacement = np.asarray(pull.dataobj, dtype=np.float32)
     expected = (*tuple(fixed.shape[:3]), 3)
     if displacement.shape != expected:
         raise ValueError(f"nonlinear pull must have shape {expected}")
@@ -365,7 +307,7 @@ def _estimate_nonlinear(
         )
         pull, _ = _validate_pull_warp(result.pull_transform, moving, fixed)
         native_jacobian = np.asarray(
-            result.nonlinear_jacobian.data, dtype=np.float32
+            result.nonlinear_jacobian.dataobj, dtype=np.float32
         )
         return pull, dict(result.qc), native_jacobian
 
@@ -374,15 +316,15 @@ def _estimate_nonlinear(
         raise TypeError("custom nonlinear result must contain pull_transform")
     pull, _ = _validate_pull_warp(result.pull_transform, moving, fixed)
     native_jacobian = getattr(result, "nonlinear_jacobian", None)
-    if isinstance(native_jacobian, sf.Volume):
-        native_jacobian = np.asarray(native_jacobian.data, dtype=np.float32)
+    if isinstance(native_jacobian, nib.spatialimages.SpatialImage):
+        native_jacobian = np.asarray(native_jacobian.dataobj, dtype=np.float32)
     else:
         native_jacobian = None
     return pull, dict(getattr(result, "qc", {})), native_jacobian
 
 
 def _pull_ras_to_fsl_fields(pull, moving, fixed, flirt_matrix, *, device):
-    """Convert a Surfa RAS pull to FNIRT residual and dense FSL fields.
+    """Convert a fixed-grid RAS pull to FNIRT residual and dense FSL fields.
 
     SynthMorph stores ``source_world(target) - target_world`` on the fixed
     grid.  FSL uses scaled-mm axes.  With FLIRT matrix ``A`` (input to
@@ -399,10 +341,14 @@ def _pull_ras_to_fsl_fields(pull, moving, fixed, flirt_matrix, *, device):
     moving_world = _affine(moving, "moving")
     fixed_world = _affine(fixed, "fixed")
     moving_fsl = voxel_to_fsl_scaled_mm(
-        moving_world, tuple(moving.shape[:3]), moving.geom.voxsize
+        moving_world,
+        tuple(moving.shape[:3]),
+        np.linalg.norm(moving_world[:3, :3], axis=0),
     )
     fixed_fsl = voxel_to_fsl_scaled_mm(
-        fixed_world, shape, fixed.geom.voxsize
+        fixed_world,
+        shape,
+        np.linalg.norm(fixed_world[:3, :3], axis=0),
     )
 
     axes = torch.meshgrid(
@@ -537,7 +483,6 @@ def _register_gm(
     fixed,
     *,
     device="cpu",
-    initial_pull=None,
     reference_mask=None,
     synthmorph_weights=None,
     synthmorph_extent=256,
@@ -560,9 +505,8 @@ def _register_gm(
     branch-specific operation is estimation of the nonlinear pull field:
     SynthMorph deform or :class:`~fnit.fnirt.TorchFNIRT`.
 
-    ``initial_pull`` is private support for matched-input validation. It must be
-    a geometry-tagged fixed-to-moving world-RAS :class:`surfa.Affine`. Public
-    FastVBM calls always leave it unset and run TorchFLIRT.
+    The affine preparation stage always runs the package TorchFLIRT
+    implementation.
     """
     device = torch.device(device)
     if device.type == "cuda" and not torch.cuda.is_available():
@@ -582,7 +526,6 @@ def _register_gm(
         moving_affine,
         fixed_affine,
         device=device,
-        initial_pull=initial_pull,
         reference_mask=reference_mask,
     )
     if deform_model is None:
@@ -683,9 +626,9 @@ def _register_gm(
                 jacobian, native_jacobian
             ),
         }
-    warped_gm = fixed.new(moved_data)
-    jacobian_volume = fixed.new(jacobian)
-    modulated_gm = fixed.new(moved_data * jacobian)
+    warped_gm = new_image(moved_data, fixed)
+    jacobian_volume = new_image(jacobian, fixed)
+    modulated_gm = new_image(moved_data * jacobian, fixed)
     displacement_qc = _displacement_qc(
         pull, fixed, prepared.fixed_to_moving_world
     )

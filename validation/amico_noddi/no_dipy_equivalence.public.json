@@ -1,0 +1,30 @@
+{
+  "schema_version": 2,
+  "feature": "AMICO-NODDI internal DIPY removal",
+  "fnit_version": "0.14.0",
+  "reference": {
+    "software": "DIPY 1.12.1",
+    "role": "validation oracle only"
+  },
+  "candidate": {
+    "implementation": "FNIT internal NumPy/SciPy OLS-DTI and legacy Descoteaux-2007 basis",
+    "source_file": "src/fnit/amico_noddi/kernels.py",
+    "source_sha256": "46f1044aa5f1c2dbffd12dd33707c0e192ef1de01dc23157ae03a0977b3d0b59",
+    "numpy": "1.26.4",
+    "scipy": "1.17.1",
+    "runtime_imports_dipy": false
+  },
+  "scope": {
+    "spherical_harmonics": "73 deterministic unit directions, even orders 0 through 12",
+    "principal_direction": "two deterministic diffusion tensors, 65-volume two-shell scheme",
+    "rotation_basis": "bundled AMICO 500-direction tables"
+  },
+  "metrics": {
+    "spherical_harmonics_max_abs": 0.0,
+    "spherical_harmonics_mean_abs": 0.0,
+    "principal_direction_max_sign_invariant_l2": 0.0,
+    "principal_direction_mean_sign_invariant_l2": 0.0,
+    "rotation_basis_max_abs": 0.0,
+    "rotation_fit_max_abs": 0.0
+  }
+}

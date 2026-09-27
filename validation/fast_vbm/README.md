@@ -1,40 +1,34 @@
-# FastVBM 验证状态
+# FastVBM 验证
 
 [返回 FastVBM 文档](../../docs/fast_vbm/README.md) · [TorchFNIRT 验证](../dmri_pipeline/README.md) · [FLIRT 验证](../../docs/flirt/README.md)
 
-当前目录不发布 FastVBM 数值 benchmark。TorchFNIRT 的 implicit mask、masked smoothing、process handoff 和优化过程已经修改；旧 FastVBM 报告、表格、图、构建摘要、source-equivalence 声明和校验清单不再对应当前源码，已从目录删除。
+## 数值运行冻结快照：真实单例
 
-## 当前可声明的范围
+2026 年 9 月 27 日用 1 例去标识化真实临床 T1w，在 gpucw1 NVIDIA H100 PCIe 上运行数值冻结快照。两条路径从同一 raw T1w 开始，共用 SynthStrip、TorchFAST、TorchFLIRT、TorchApplyWarp、Jacobian 和 modulation，只替换 nonlinear estimator。
 
-- FastVBM 的单被试 Python 和 CLI 接口、13 幅 NIfTI 文件名、输入/模板网格角色由当前源码定义。
-- 两个后端共用 SynthStrip/TorchFAST、TorchFLIRT、FSL 坐标转换、TorchApplyWarp、dense nonlinear-only Jacobian 和 modulation；只在 nonlinear estimator 上分支。
-- SynthMorph 网络没有 reference-mask 输入。
-- TorchFNIRT 每一级使用 fixed 非零 implicit reference mask，并用 moving 非零 implicit input mask 做 masked smoothing 和 warped-input 筛选；显式 reference mask 按默认 GM schedule 在最后一级与 implicit mask 取交集。
-- TorchFNIRT 当前优化数值轨迹仍与 FSL 不同。FastVBM、TorchFNIRT 与 UKB/FSL 均不能声明逐体素或完整数值等价。
+冻结快照的 `fast_vbm/registration.py` 为 `02da3e…`，当前文件为 `447892…`。这次只删除私有 `initial_pull` affine bypass；公开 `FastVBM.__call__` 和 `FastVBM.run` 此前没有接收或传递该参数，实测路径始终取 `initial_pull=None` 并运行 TorchFLIRT。把旧文件规范到这条生产路径后，location-free AST 与当前文件相同（两边 SHA-256 均为 `47254a…`）；gpucw1 上相关 17 个受控测试全部通过。三份报告保留实测源码 hash，并明确 `fresh_current_hash_full_real_data_rerun=false`。
 
-这些是源码行为说明，不是新的外部 benchmark 结果。组件级 FNIRT/TBSS 真实数据诊断见 [`validation/dmri_pipeline`](../dmri_pipeline/README.md)，但该结果不能替代 raw-T1w-to-VBM 端到端验证。
+冻结快照的 `flirt/core.py` 为 `552856…`，当前文件为 `ce375d…`。源码继承分两段：[`552856… → f5315f…`](../runtime_dependencies/flirt_qc_source_equivalence.public.json) 只清理 runtime QC；[`f5315f… → ce375d…`](../runtime_dependencies/flirt_profile_source_equivalence.public.json) 只在本流程使用的 12-DOF/corratio 配置下等价。报告保留原实测 hash，并标记没有 fresh current-hash 完整重跑；已改变的 6-DOF/normmi 路径不在证明范围内。
 
-## Fresh benchmark 尚未完成
+两份分支报告共用一份源码快照清单，因此 FNIRT 报告也列出了旧 `synthmorph/pipeline.py` `e680d3…`，但 FNIRT 分支没有执行该文件，报告中的结构化状态明确不主张数值继承。SynthMorph 分支实际执行 `SynthMorph.__call__` 的 deform registration 和 linear 重采样；它通过 [SynthMorph linear 源码等价证明](../runtime_dependencies/synthmorph_linear_source_equivalence.public.json)继承到当前 `pipeline.py` `70e97c…`、`spatial.py` `dab615…`，同样没有 fresh current-hash 完整重跑。该分支清单当时漏记 `spatial.py`，这一出处限制已写入报告；nearest 不使用本次结果作证。
 
-当前源码尚未重新完成 FastVBM 的真实 T1w 配对 benchmark。因此暂不提供以下内容：
+FSL reference 采用该病例固定的 FAST/FNIRT 工件。验证发现归档的 `T1_GM_2mm_to_template_GM` 已在 VBM 脚本中被 Jacobian 原位调制；因此先用官方 coefficient 重新生成未调制 warped GM。重新相乘后的结果与归档文件逐体素完全一致。这个角色核验避免把 modulated GM 错当作 warped GM。
 
-- warped GM、nonlinear-only Jacobian 和 modulated GM 的 Pearson、MAE、RMSE 或 Dice；
-- SynthMorph 与 TorchFNIRT 两分支的运行时间或显存；
-- UKB/FSL 与 FNIT 输出示意图；
-- 当前源码的 pass/fail gate 或 source-equivalence 证明。
+| 后端 | warped GM r | Jacobian r | modulated GM r | 外部 wall | 峰值 CUDA allocation |
+|---|---:|---:|---:|---:|---:|
+| TorchFNIRT | 0.559420 | 0.237607 | 0.487910 | 62.23 s | 12.970 GB |
+| SynthMorph | 0.636498 | 0.328663 | 0.575795 | 75.36 s | 15.487 GB |
 
-完成 fresh benchmark 时，应固定并公开以下条件：
+两分支的 shape、affine 和 dtype 契约全部通过。连续值相似度明显低于数值等价要求，所以 `numerical_equivalence_passed=false`。FNIT 的 raw T1w 和 FSL FAST GM 已位于不同 native 网格；结果同时反映上游 bias correction、裁剪、脑提取、组织分割、affine 和 nonlinear registration 的差异，不能只用来评价某一个配准器。
 
-| 项目 | 必须记录的内容 |
-|---|---|
-| 数据 | 真实 T1w 病例数、去标识 ID 清单和纳入规则 |
-| 输入 | 每例 raw T1w、同一 GM template 和同一 reference mask |
-| FSL reference | FSL/UKB 版本、命令、config、线程和输出网格 |
-| FNIT | commit、package version、源码哈希、checkpoint 哈希和后端参数 |
-| 硬件 | CPU/GPU 型号、CUDA/PyTorch、TF32 设置和峰值显存定义 |
-| 精度 | 三幅模板空间输出的 Pearson、MAE、RMSE、阈值 Dice 及逐例汇总 |
-| 时间 | 首次加载与 warm run 分开；compute、写盘和端到端边界分开 |
-| 图 | 同一切面、同一色阶、reference/FNIT/绝对差，并注明病例或组平均 |
-| 结论 | 明确区分接口对应、功能相似和数值等价 |
+FSL 6.0.7.4 固定官方 coefficient 的 `applywarp` 为 2.28 s，随后 `fslmaths` modulation 为 0.56 s。两项都包含各自读写，但不包含上游计算；本目录不据此计算加速比。
 
-新的报告只有在结果由当前源码生成、工件哈希可复核且图与报告来自同一批输出后，才能作为当前 FastVBM benchmark。完成前，[FastVBM 主文档](../../docs/fast_vbm/README.md)只说明接口、算法和证据边界。
+## 文件
+
+- [`report.real.current.json`](report.real.current.json)：两分支汇总、源码哈希、官方文件角色核验和验收状态。
+- [`report.fnirt.real.current.json`](report.fnirt.real.current.json)：TorchFNIRT 分支的完整三维指标、阶段时间和输出哈希。
+- [`report.synthmorph.real.current.json`](report.synthmorph.real.current.json)：SynthMorph 分支的完整三维指标、阶段时间和输出哈希。
+- [`validate_real.py`](validate_real.py)：单分支复现脚本。
+- [TorchFNIRT 图](../../docs/fast_vbm/figures/fast_vbm_fnirt_real.png)和 [SynthMorph 图](../../docs/fast_vbm/figures/fast_vbm_synthmorph_real.png)：同切面 FSL reference、FNIT 和绝对差。
+
+报告不含原始图像路径和受试者标识。当前精度范围为一例真实 T1w；官方计时从固定中间结果开始，与 FNIT raw-to-VBM 不同边界，因此不计算端到端加速比。

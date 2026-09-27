@@ -61,9 +61,11 @@
       "applywarp": "src/fnit/applywarp/core.py",
       "fnirt_method": "PyTorch port of the FSL FNIRT 2203.0 UKB GM path with basisfield 2203.1, miscmaths 2203.2, newimage 2203.11 and warpfns 2203.0 source references",
       "source_provenance_manifest": "src/fnit/_vendor_fsl/manifest.json",
-      "fsl_flirt_equivalence_status": "默认 TF32 的 10 例真实数据功能门限全部通过：FSL rmsdiff 中位数 0.008545075 mm，四分位距 0.006264673–0.019429475 mm，最大值 0.0289986 mm，门限 0.05 mm；该结果不代表逐输入或逐位数值等价，validated_fsl_equivalent 仍为 false。",
-      "fsl_fnirt_equivalence_status": "当前 1 例 matched-native TBSS 对照中，TorchFLIRT + TorchFNIRT 的九张 standard 图 r=0.995086–0.998886，固定官方 affine 后 r=0.997483–0.999523；level-1 LM mask、cost 和接受序列与 FSL 对齐。后续数值归约仍有差异，fsl_fnirt_numerically_equivalent 仍为 false。详见 validation/dmri_pipeline/tbss_diagnosis.public.json。",
-      "fast_vbm_validation_status": "当前 FNIRT 更新后尚未完成新的 raw-T1w-to-VBM 配对 benchmark；被替代的报告和图已删除。"
+      "fsl_flirt_equivalence_status": "\u5f53\u524d\u53d1\u5e03\u6e90\u7801\u7684 10 \u4f8b\u771f\u5b9e GM matched-input \u5bf9\u7167\u4e2d\uff0cCPU \u4e0e\u9ed8\u8ba4 TF32 GPU \u5206\u522b\u6709 9/10 \u4f8b\u6ee1\u8db3 FSL rmsdiff <= 0.05 mm\u3002CPU \u4e2d\u4f4d\u6570/\u6700\u5927\u503c\u4e3a 0.018468/0.078530 mm\uff0cGPU \u4e3a 0.007994/0.063188 mm\uff1bmoved Pearson \u4e2d\u4f4d\u6570\u5206\u522b\u4e3a 0.999985 \u548c 0.999823\u3002\u7ed3\u679c\u662f\u529f\u80fd\u5bb9\u5dee\u8bc1\u636e\uff0c\u4e0d\u4ee3\u8868\u9010\u5143\u7d20\u6216\u5b8c\u6574\u6570\u503c\u7b49\u4ef7\u3002",
+      "fsl_fnirt_equivalence_status": "\u5f53\u524d 1 \u4f8b\u771f\u5b9e FA matched-input \u5bf9\u7167\u56fa\u5b9a\u76f8\u540c input\u3001FMRIB58_FA_1mm\u3001FSL affine \u4e0e Oxford \u4e09\u9636\u6bb5\u914d\u7f6e\u3002coefficient\u3001warped FA\u3001nonlinear Jacobian\u3001\u542b affine Jacobian \u7684 r \u5206\u522b\u4e3a 0.999893\u30010.999203\u30010.999064\u30010.994737\uff1bshape\u3001affine\u3001dtype \u4e0e intent \u5408\u540c\u901a\u8fc7\uff0c\u4f46\u5dee\u5f02\u8d85\u8fc7\u6d6e\u70b9\u8bef\u5dee\uff0cfsl_fnirt_numerically_equivalent \u4ecd\u4e3a false\u3002\u8be6\u89c1 validation/fnirt/report.real.current.json\u3002",
+      "fast_vbm_validation_status": "\u5f53\u524d 1 \u4f8b\u771f\u5b9e T1w \u5df2\u5b8c\u6210 FNIRT \u4e0e SynthMorph \u4e24\u5206\u652f\u7684 raw-T1w-to-VBM \u56de\u5f52\uff1b\u8f93\u51fa\u7f51\u683c\u4e0e dtype \u5408\u540c\u901a\u8fc7\u3002FNIRT \u7684 warped GM/Jacobian/modulated GM r=0.559420/0.237607/0.487910\uff0cSynthMorph \u4e3a 0.636498/0.328663/0.575795\uff1b\u4e24\u5206\u652f\u5747\u672a\u8fbe\u5230\u6570\u503c\u7b49\u4ef7\u3002\u8be6\u89c1 validation/fast_vbm/report.real.current.json\u3002",
+      "current_fnirt_matched_validation": "validation/fnirt/report.real.current.json",
+      "current_flirt_validation": "validation/flirt/report.public.json"
     },
     "upstream_license": "Apache-2.0",
     "upstream_copyright": "Copyright 2021 University of Oxford, Oxford, UK",
@@ -110,10 +112,10 @@
     "vendored_fsl_bet_reference_sources_included": true
   },
   "fsl_registration_source_snapshots": {
-    "purpose": "complete unmodified upstream sources consulted for the modified PyTorch FLIRT, FNIRT, applywarp, TOPUP, EDDY, DTIFIT, MMORF, and BET implementations",
+    "purpose": "distributed upstream source snapshots consulted for the modified PyTorch FLIRT, FNIRT, applywarp, TOPUP, EDDY, DTIFIT, MMORF, and BET implementations",
     "validation_baseline": "FSL 6.0.7.4",
     "manifest": "src/fnit/_vendor_fsl/manifest.json",
-    "manifest_sha256": "430cd0235da73109f4ebb67c5a9319c5cc330b43748f4ff5d63ca1f7399e929d",
+    "manifest_sha256": "f99ef21d6f34209b57311072b813ff9ba014855db136182dc6a595982f81b06b",
     "license_file": "licenses/FSL-6.0.txt",
     "license_sha256": "137735ac0d0f075d58e85642972692b92073711752b273e7de7ed38c6147a8eb",
     "licence_scope": "non-commercial redistribution under the FSL Software Licence, Release 6.0; licence conditions and original and amended source code accompany the product",
@@ -253,7 +255,13 @@
         "git_tree": "287591517825eabf26d55d48f05b2c7dc4525f1a",
         "git_archive_sha256": "20f7ceae7b67aaee3409eafd91eb6090f3dff24b535fbb1633ce2426907373cc",
         "directory": "src/fnit/_vendor_fsl/sources/avwutils-2209.8",
-        "role": "reference_source"
+        "role": "reference_source",
+        "excluded_binary_test_data": [
+          "tests/fslstats/imageForDiff.nii.gz",
+          "tests/fslstats/mask.nii.gz",
+          "tests/fslstats/test.nii.gz",
+          "tests/fslstats/test_4d.nii.gz"
+        ]
       }
     ],
     "runtime_dependency": false
@@ -270,7 +278,7 @@
   "fsl_tractography_source_snapshots": {
     "purpose": "unmodified upstream source reference for PyTorch BEDPOSTX and ProbtrackX implementations",
     "manifest": "src/fnit/_vendor_fsl/manifest.json",
-    "manifest_sha256": "430cd0235da73109f4ebb67c5a9319c5cc330b43748f4ff5d63ca1f7399e929d",
+    "manifest_sha256": "f99ef21d6f34209b57311072b813ff9ba014855db136182dc6a595982f81b06b",
     "license_file": "licenses/FSL-6.0.txt",
     "components": [
       {
@@ -380,7 +388,7 @@
     "warp_contract": "reference-grid relative pull displacement in millimetres along the reference image axes",
     "validation_report": "validation/mmorf/report.public.json",
     "validation_figure": "docs/mmorf/figures/mmorf_fsl_comparison.png",
-    "validation_status": "1 例真实 T1w + DTI tensor：warp r=0.969381，Jacobian r=0.947671；固定 sampler、affine 与 native input 后九图 r=0.919880–0.976514。官方与 FNIT 优化器仍不同。",
+    "validation_status": "1 \u4f8b\u771f\u5b9e T1w + DTI tensor\uff1awarp r=0.969381\uff0cJacobian r=0.947671\uff1b\u56fa\u5b9a sampler\u3001affine \u4e0e native input \u540e\u4e5d\u56fe r=0.919880\u20130.976514\u3002\u5b98\u65b9\u4e0e FNIT \u4f18\u5316\u5668\u4ecd\u4e0d\u540c\u3002",
     "numerically_equivalent": false
   },
   "dmri_pipeline_reference": {
@@ -403,9 +411,9 @@
       "oxford_s3.cnf": "9d304dfd224b8e48f20364dcce77c7618722cf3a9bcd40d764a6d25ee8020eaf"
     },
     "fa_preprocessing_voxelwise_equivalent": true,
-    "current_tbss_validation": "validation/dmri_pipeline/tbss_diagnosis.public.json",
-    "current_mmorf_validation": "validation/mmorf/report.public.json",
-    "raw_to_standard_fresh_benchmark_available": false,
+    "current_tbss_validation": "validation/dmri_pipeline/tbss_e2e.real.current.json",
+    "current_mmorf_validation": "validation/dmri_pipeline/mmorf_e2e.real.current.json",
+    "raw_to_standard_fresh_benchmark_available": true,
     "registration_numerically_equivalent": false
   }
 }

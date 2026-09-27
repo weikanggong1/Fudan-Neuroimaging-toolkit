@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-28",
+  "scope": "FLIRT core change after final FastVBM, TBSS, and MMORF numerical runs",
+  "benchmark_source": {
+    "path": "src/fnit/flirt/core.py",
+    "sha256": "5528560292d3ba72778fda619abd907ab4cd666b80a8f18b95538ee4b8ca89b2",
+    "source_snapshot_tar_sha256": "f7547d0a39ddd9fb6ba70deb720f229ecedc6385fa72d457efb2ded78b6c173d"
+  },
+  "current_source": {
+    "path": "src/fnit/flirt/core.py",
+    "sha256": "f5315f5823df98334f170d43df71bb45f83653d484087d0055ab572c63a3c6e4"
+  },
+  "diff": {
+    "added_lines": 3,
+    "deleted_lines": 39,
+    "hunks": 1,
+    "location": "TorchFLIRT result QC construction after forward/pull matrices and all image outputs have been computed",
+    "changes": [
+      "removed a validation_parameter_profile_matches_run boolean used only by the QC dictionary",
+      "removed historical tolerance, case-count, and domain values from the QC dictionary",
+      "replaced the reference-validation path and scope strings with current external-report wording"
+    ],
+    "numerical_assignment_or_control_flow_changed": false
+  },
+  "ast_check": {
+    "normalization": "remove the one QC-only validation_parameter_profile_matches_run assignment and replace the qc dictionary right-hand side with an empty dictionary",
+    "old_normalized_ast_sha256": "72083a17196f7162a8a78645c970ae963da9bfa11c011342613e8529fca0cc3a",
+    "current_normalized_ast_sha256": "72083a17196f7162a8a78645c970ae963da9bfa11c011342613e8529fca0cc3a",
+    "equal": true
+  },
+  "tests": {
+    "environment": "gpucw1; current full-package overlay; CUDA hidden for deterministic CPU collection",
+    "selection": "tests/flirt, tests/fast_vbm, tests/dmri_pipeline",
+    "result": "79 passed, 1 skipped in 3.82 s",
+    "skipped": "CUDA repeatability test because CUDA_VISIBLE_DEVICES was empty",
+    "test_file_sha256": {
+      "tests/flirt/test_cli.py": "ddc5e20407456301988b3b153bd16e741e5c4d92831a42e7b6ac5fc6fee21dc5",
+      "tests/fast_vbm/test_common_registration_chain.py": "c78552de3d69e062f7a1322ff741910da194ca482282c2f2a496a80a58ddfb9a",
+      "tests/fast_vbm/test_fast_vbm_cli.py": "ee603f854b5e7387203f79745582c61e5b0977a796e1d160b28da68d346b4236",
+      "tests/fast_vbm/test_fast_vbm_pipeline.py": "ffe433566aba9eb4c02a8399484402cf497f7040c8adebcec0c19b5d794e7d42",
+      "tests/fast_vbm/test_fast_vbm_registration.py": "7e8b3fcb248ccc1e2d6286ccc2acefcbe3704c28b68bda0c3f3ad45769c8e96f",
+      "tests/fast_vbm/test_flirt_api.py": "bfac28b2e50e644d7c6d991469f947352db99d5f45df42bbeff0ad9e53f29e3b",
+      "tests/fast_vbm/test_flirt_coordinates.py": "f7f795e3034037d830666c2bbec6924aa64c9c3475dedac84df436879e9010a6",
+      "tests/fast_vbm/test_fsl_flirt_exact_target.py": "a3b2c26ec42f4fd2b8e88b982d84c480ce4f33dabff185eb4cae1dbe3f75b3c4",
+      "tests/fast_vbm/test_synthmorph_backend.py": "2a4a0dd01e26a91af1db5a915ab02c1bd94f0c3076c1af2f6584c80b0cf7f017",
+      "tests/dmri_pipeline/test_dmri_pipeline.py": "c9c23c244cba8ca5aeac04830ac7a6e9504bef3049a9593d7928c6dfa6ece527"
+    }
+  },
+  "status": {
+    "numerical_path_source_equivalent": true,
+    "runtime_qc_dictionary_identical": false,
+    "fresh_numerical_rerun": false,
+    "interpretation": "Existing numerical arrays and timings were produced by the benchmark source hash. The current source has the same normalized numerical AST; only returned QC metadata changed. This attestation does not re-label the reports as fresh current-source runs."
+  },
+  "applies_to": [
+    "validation/fast_vbm/report.fnirt.real.current.json",
+    "validation/fast_vbm/report.synthmorph.real.current.json",
+    "validation/dmri_pipeline/tbss_e2e.real.current.json",
+    "validation/dmri_pipeline/mmorf_e2e.real.current.json"
+  ],
+  "limits": [
+    "The source-equivalence claim is restricted to this exact old/new FLIRT core pair.",
+    "The validation tests do not replace a fresh real-data benchmark."
+  ]
+}

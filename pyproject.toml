@@ -1,19 +1,18 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "fudan-neuroimaging-toolkit"
 version = "0.16.0"
-description = "Standalone PyTorch brain MRI inference with single-subject Python and CLI APIs"
+description = "Standalone neuroimaging tools with single-subject Python and CLI APIs"
 readme = "README.md"
+license-files = ["licenses/*.txt", "THIRD_PARTY_NOTICES.md"]
 requires-python = ">=3.10"
 dependencies = [
   "torch>=2.1",
   "numpy>=1.23,<2",
   "scipy>=1.9",
-  "trx-python>=0.4.0",
-  "surfa==0.6.3",
   "nibabel>=5",
   "h5py>=3.8",
   "PyYAML>=6",
@@ -26,6 +25,7 @@ Documentation = "https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit#read
 
 [project.optional-dependencies]
 recon-all-python-stages = ["numba>=0.59", "tifffile>=2023.7"]
+connectome-legacy = ["surfa==0.6.3"]
 
 [project.scripts]
 fnit = "fnit.cli:main"
@@ -51,9 +51,6 @@ fnit-setup-fmri-surface-assets = "fnit.fmri.assets_setup:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-
-[tool.setuptools]
-license-files = ["licenses/*.txt", "THIRD_PARTY_NOTICES.md"]
 
 [tool.setuptools.package-data]
 fnit = [

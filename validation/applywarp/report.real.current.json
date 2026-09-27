@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "data": {
+    "kind": "one deidentified real UKB-format dMRI subject",
+    "map": "FA",
+    "subject_identifier_published": false
+  },
+  "candidate": {
+    "implementation": "FNIT TorchApplyWarp",
+    "device": "cuda:0",
+    "source_file": "src/fnit/applywarp/core.py",
+    "source_sha256": "cf6de438f3ac1551804d38682ce3fbb11b8fb042ad881562ebc93aada80f2df5",
+    "tf32": {
+      "matmul": true,
+      "cudnn": true,
+      "reduced_precision_tensor_dtype": false
+    },
+    "warp_representation": "FNIRT cubic spline coefficients",
+    "warp_intent_code": 2007,
+    "interpolation": "trilinear",
+    "valid_fraction": 0.5653595328330994,
+    "timing_scope": "NIfTI load plus transform plus output transfer to CPU; save excluded",
+    "warmup_seconds": 0.6599284810945392,
+    "measured_seconds": [
+      0.33650756208226085,
+      0.2586525920778513,
+      0.36444787308573723
+    ],
+    "median_seconds": 0.33650756208226085,
+    "peak_cuda_memory_bytes": 1957834752
+  },
+  "reference": {
+    "implementation": "FSL 6.0.7.4 applywarp",
+    "timing_scope": "external command including NIfTI load, transform, and save",
+    "wall_seconds": [
+      6.19,
+      5.11,
+      5.67
+    ],
+    "median_seconds": 5.67
+  },
+  "contract": {
+    "same_shape": true,
+    "same_affine": true,
+    "same_dtype": true
+  },
+  "accuracy_union_support": {
+    "voxels": 1548144,
+    "pearson": 0.9999999999938606,
+    "mae": 3.5474458079842115e-07,
+    "rmse": 5.872405449399262e-07,
+    "maximum_absolute_error": 1.1831521987915039e-05
+  },
+  "artifacts": {
+    "candidate_output": "fnit_FA.nii.gz",
+    "figure": "applywarp_real_fa_comparison.png"
+  },
+  "input_sha256": {
+    "input": "bf774599e7f6ff5b567c15e79c539dadeb03dc7110a589e29070a8e065e42cf0",
+    "reference": "1268fd84b658451c9a85799a636688bc1f6947fdf8de2d9cf7f62320de1b3837",
+    "warp": "3e7084b2e239df0164fb37243a8a48714053dc176c97d9614546072e11c3bf4b",
+    "official_output": "95f14648c1bdbec304becf1b5b131b35825cac00ac4139f2225f2ffb6d4ecb23"
+  },
+  "limits": [
+    "one real subject and one continuous FA map",
+    "official FNIRT cubic coefficient warp was fixed; nonlinear registration was not rerun",
+    "FSL and FNIT timing scopes differ because FNIT save time is excluded"
+  ]
+}

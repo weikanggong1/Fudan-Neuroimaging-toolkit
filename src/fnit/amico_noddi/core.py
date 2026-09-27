@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 import os
+import platform
 import time
 
 import nibabel as nib
@@ -17,6 +18,26 @@ from .solver import fit_noddi
 
 AMICO_VERSION = "2.0.3"
 AMICO_COMMIT = "df540093b60240c38a6ff2ea4ceb1181c4f3e936"
+
+
+def _numpy_reference_build():
+    """Describe whether NumPy matches the validated AMICO linear-algebra build."""
+    config = getattr(np.__config__, "CONFIG", {})
+    blas = config.get("Build Dependencies", {}).get("blas", {})
+    name = str(blas.get("name", "unknown"))
+    version = str(blas.get("version", "unknown"))
+    validated = (
+        np.__version__ == "1.26.4"
+        and name == "openblas64"
+        and version == "0.3.23.dev"
+        and platform.machine().lower() in {"x86_64", "amd64"}
+    )
+    return {
+        "numpy_version": np.__version__,
+        "numpy_blas_name": name,
+        "numpy_blas_version": version,
+        "validated_numpy_build": validated,
+    }
 
 
 @dataclass(frozen=True)
@@ -161,6 +182,7 @@ class TorchAMICONODDI:
         rmse_array = np.zeros(np.prod(shape), dtype=np.float32)
         rmse_array[flat] = rmse
         elapsed = time.perf_counter() - started
+        numpy_build = _numpy_reference_build()
         return AMICONODDIResult(
             *maps,
             image_like(direction_array.reshape(*shape, 3), reference),
@@ -177,7 +199,9 @@ class TorchAMICONODDI:
                 "solver": "AMICO three-stage NNLS, positive elastic-net, NNLS debias",
                 "linear_solver": "batched compact float64 Cholesky with CG fallback",
                 "amico_output_contract": True,
-                "amico_numerically_equivalent": False,
+                "amico_numerically_equivalent": numpy_build["validated_numpy_build"],
+                "current_input_compared_with_amico": False,
+                **numpy_build,
                 "kernel_seconds": kernel_seconds,
                 "direction_seconds": direction_seconds,
                 "solver_seconds": solver_seconds,

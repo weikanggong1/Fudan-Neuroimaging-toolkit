@@ -5,7 +5,6 @@ import nibabel as nib
 import numpy as np
 import pytest
 import torch
-import surfa as sf
 
 import fnit.dmri_pipeline.pipeline as pipeline_module
 import fnit.dmri_pipeline.tbss as tbss_module
@@ -258,13 +257,12 @@ def test_tbss_passes_volumes_to_fnirt(monkeypatch, tmp_path):
         def __call__(self, moving, fixed, initial):
             captured["moving"] = moving
             captured["fixed"] = fixed
-            geometry = sf.ImageGeometry(shape, vox2world=np.eye(4))
             return SimpleNamespace(
                 coefficient_image=nib.Nifti1Image(
                     np.zeros((*shape, 3), dtype=np.float64), np.eye(4)
                 ),
-                nonlinear_jacobian=sf.Volume(
-                    np.ones(shape, dtype=np.float32), geometry=geometry
+                nonlinear_jacobian=nib.Nifti1Image(
+                    np.ones(shape, dtype=np.float32), np.eye(4)
                 ),
                 qc={},
             )
@@ -282,8 +280,9 @@ def test_tbss_passes_volumes_to_fnirt(monkeypatch, tmp_path):
     monkeypatch.setattr(tbss_module, "TorchApplyWarp", FakeApplyWarp)
     result = tbss_module.TorchTBSS(device="cpu")(maps, reference_path, skeleton_path)
 
-    assert isinstance(captured["moving"], sf.Volume)
-    assert isinstance(captured["fixed"], sf.Volume)
+    assert isinstance(captured["moving"], nib.Nifti1Image)
+    assert isinstance(captured["fixed"], nib.Nifti1Image)
+    np.testing.assert_array_equal(captured["moving"].affine, np.eye(4))
     assert set(result.standard_maps) == set(STANDARD_MAP_NAMES)
     assert result.standard_maps["ICVF"].shape == shape
     assert result.skeleton_maps["ICVF"].shape == shape

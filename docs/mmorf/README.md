@@ -1,4 +1,4 @@
-# PyTorch MMORF
+# TorchMMORF：T1 与扩散张量联合非线性配准
 
 [返回首页](../../README.md) · [dMRI 参数图 pipeline](../dmri_pipeline/README.md) · [验证工件](../../validation/mmorf/README.md)
 

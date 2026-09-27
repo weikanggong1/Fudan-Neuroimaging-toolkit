@@ -104,11 +104,11 @@ def _load_image(image):
         else:
             source = nib.load(str(path))
             data, affine, header = source.get_fdata(), source.affine, source.header
-    elif hasattr(image, 'data') and hasattr(image, 'geom'):
-        data, affine = image.data, image.geom.vox2world.matrix
-        header = nib.Nifti1Header()
+    elif isinstance(image, nib.spatialimages.SpatialImage):
+        data, affine = np.asanyarray(image.dataobj), image.affine
+        header = nib.Nifti1Header.from_header(image.header)
     else:
-        raise TypeError("image must be a file path or volume with data and geometry")
+        raise TypeError("image must be a file path or nibabel spatial image")
     data = np.squeeze(data)
     if data.ndim == 4 and data.shape[-1] <= 10:
         data = data[..., 0]

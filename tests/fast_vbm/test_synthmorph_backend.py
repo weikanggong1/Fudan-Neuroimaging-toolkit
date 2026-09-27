@@ -2,9 +2,12 @@
 
 from types import SimpleNamespace
 
+import nibabel as nib
 import numpy as np
 import pytest
-import surfa as sf
+
+from fnit._nib import new_image
+from fnit._transforms import AffineTransform
 
 from fnit.fast_vbm.synthmorph_backend import (
     SynthMorphDeformRegistration,
@@ -14,8 +17,8 @@ from fnit.fast_vbm.synthmorph_backend import (
 def _volume(shape=(5, 6, 7), vox2world=None, value=1.0):
     if vox2world is None:
         vox2world = np.eye(4)
-    geometry = sf.ImageGeometry(shape, vox2world=vox2world)
-    return sf.Volume(np.full(shape, value, dtype=np.float32), geometry=geometry)
+    data = np.full(shape, value, dtype=np.float32)
+    return new_image(data, nib.Nifti1Image(data, vox2world))
 
 
 def _linear_pull_warp(moving, fixed, pull_linear):
@@ -28,12 +31,7 @@ def _linear_pull_warp(moving, fixed, pull_linear):
     world += fixed_matrix[:3, 3]
     source_world = np.einsum("ab,...b->...a", pull_linear, world)
     displacement = (source_world - world).astype(np.float32)
-    return sf.Warp(
-        displacement,
-        source=moving,
-        target=fixed,
-        format=sf.Warp.Format.disp_ras,
-    )
+    return new_image(displacement, fixed)
 
 
 class _FakeSynthMorph:
@@ -57,12 +55,7 @@ def _run(pull_linear, moving_to_fixed=None, fixed_affine=None, moved_value=2.0):
     fixed = _volume(vox2world=fixed_affine)
     if moving_to_fixed is None:
         moving_to_fixed = np.eye(4)
-    initial = sf.Affine(
-        moving_to_fixed,
-        source=moving,
-        target=fixed,
-        space="world",
-    )
+    initial = np.asarray(moving_to_fixed, dtype=np.float64)
     fake = _FakeSynthMorph(pull_linear, moved_value=moved_value)
     result = SynthMorphDeformRegistration(
         device="cpu", synthmorph=fake
@@ -77,8 +70,7 @@ def test_identity_affine_and_identity_deformation():
     np.testing.assert_allclose(result.nonlinear_jacobian.data, 1, atol=1e-6)
     np.testing.assert_allclose(result.modulated_gm.data, 2, atol=1e-6)
     assert result.affine_pull_determinant == pytest.approx(1)
-    assert fake.calls[0][2]["init"].space == initial.space
-    np.testing.assert_allclose(fake.calls[0][2]["init"].matrix, initial.matrix)
+    np.testing.assert_allclose(fake.calls[0][2]["init"], initial)
     assert fake.calls[0][2]["mid_space"] is False
     assert result.qc["full_pull_jacobian_convention"].startswith("det(")
     assert result.qc["output_jacobian_convention"].startswith("full pull")
@@ -171,11 +163,23 @@ def test_negative_folding_is_reported_without_absolute_value_or_clipping():
     assert result.qc["nonpositive_nonlinear_jacobian_voxels"] == voxel_count
 
 
-def test_initial_affine_geometry_is_checked_before_model_call():
+def test_initial_affine_is_checked_before_model_call():
+    moving = _volume()
+    fixed = _volume()
+    invalid = np.eye(4)
+    invalid[3, 0] = 1
+    fake = _FakeSynthMorph(np.eye(3))
+
+    with pytest.raises(ValueError, match="homogeneous"):
+        SynthMorphDeformRegistration(synthmorph=fake)(moving, fixed, invalid)
+    assert fake.calls == []
+
+
+def test_geometry_tagged_initial_affine_checks_source_before_model_call():
     moving = _volume()
     fixed = _volume()
     wrong = _volume(shape=(6, 6, 7))
-    initial = sf.Affine(
+    initial = AffineTransform(
         np.eye(4), source=wrong, target=fixed, space="world"
     )
     fake = _FakeSynthMorph(np.eye(3))

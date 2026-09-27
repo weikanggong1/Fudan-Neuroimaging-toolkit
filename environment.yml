@@ -14,7 +14,6 @@ dependencies:
   - statsmodels=0.14.5
   - pandas=2.2.3
   - scikit-learn=1.5.2
-  - trx-python>=0.4.0
   - h5py>=3.8
   - nibabel>=5
   - connectome-workbench-cli=2.1.0  # fsLR surface projection
@@ -22,6 +21,7 @@ dependencies:
   - pillow>=9  # FNIRT/TBSS and MMORF real-data comparison figures
   - pyyaml>=6
   - pip:
-      - surfa==0.6.3
+      # AMICO 逐体素等价验证使用该 PyPI manylinux wheel 的 OpenBLAS64 构建。
+      - "numpy @ https://files.pythonhosted.org/packages/3a/d0/edc009c27b406c4f9cbc79274d6e46d634d139075492ad055e3d68445925/numpy-1.26.4-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=666dbfb6ec68962c033a450943ded891bed2d54e6755e35e5835d63f4f6931d5"
       - triton==3.1.0  # Fused ProbtrackX CUDA kernel; matches PyTorch 2.5.1
-      - -e .[recon-all-python-stages]
+      - -e .

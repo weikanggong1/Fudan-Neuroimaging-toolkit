@@ -5,9 +5,9 @@ import pytest
 import torch
 
 import fnit
+from fnit._nib import FNITNifti1Image
 from fnit.flirt import FLIRTResult, TorchFLIRT
 from fnit.flirt.core import FSLCorrelationRatio
-from fnit.synthstrip.geometry import Volume
 from fnit.flirt import core as flirt_core
 from fnit.flirt.coordinates import (
     flirt_to_world_affine,
@@ -25,7 +25,7 @@ def _volume(shape=(7, 8, 9), vox2world=None):
     data = np.exp(
         -sum((axis - center[index]) ** 2 for index, axis in enumerate(axes)) / 6
     ).astype(np.float32)
-    return Volume(data, vox2world)
+    return FNITNifti1Image(data, vox2world)
 
 
 def test_world_and_flirt_matrix_conversions_are_exact_inverses():
@@ -94,8 +94,9 @@ def test_reference_validation_is_not_reported_as_current_input_equivalence(
 
     result = TorchFLIRT(device="cpu", angular_search=False)(_volume(), _volume())
 
-    assert result.qc["reference_validation_matrix_gate_passed"] is True
-    assert result.qc["validation_parameter_profile_matches_run"] is False
+    assert result.qc["reference_validation_report"] == (
+        "validation/flirt/report.public.json"
+    )
     assert result.qc["current_input_compared_with_fsl"] is False
     assert result.qc["validated_fsl_equivalent"] is False
     assert result.qc["complete_numerical_equivalence_claimed"] is False

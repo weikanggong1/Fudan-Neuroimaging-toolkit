@@ -36,10 +36,8 @@ def build_parser():
     parser.add_argument("--jout", help="output nonlinear-only Jacobian determinant")
     parser.add_argument(
         "--refmask",
-        help=(
-            "reference-grid mask; when omitted, use the standard dilated 2-mm "
-            "mask below FSLDIR"
-        ),
+        required=True,
+        help="explicit reference-grid binary mask",
     )
     parser.add_argument(
         "--config",

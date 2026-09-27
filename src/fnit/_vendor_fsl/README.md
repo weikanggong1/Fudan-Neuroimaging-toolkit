@@ -33,9 +33,10 @@ implementation reference snapshots:
 Git tree, deterministic `git archive` SHA-256, and SHA-256 of every distributed
 source file. The FSL 6.0.7.4 baseline applies only to rows marked
 `validation_target`. All fdt and ptx2 source files are byte-identical to
-their commits. Three
-ptx2 NIfTI test-data LFS pointers are omitted; their paths are recorded in
-`manifest.json`. The original repositories are:
+their commits. Three ptx2 NIfTI test-data LFS pointers and four avwutils
+NIfTI test fixtures are omitted because binary MRI files are not distributed
+inside the Python package; their paths are recorded in `manifest.json`. The
+original repositories are:
 
 - <https://git.fmrib.ox.ac.uk/fsl/flirt.git>
 - <https://git.fmrib.ox.ac.uk/fsl/fnirt.git>

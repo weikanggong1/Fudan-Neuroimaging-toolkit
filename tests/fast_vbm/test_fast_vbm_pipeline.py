@@ -3,9 +3,11 @@
 import inspect
 import json
 
+import nibabel as nib
 import numpy as np
 import pytest
-import surfa as sf
+
+from fnit._nib import FNITNifti1Image, new_image
 
 from fnit.fast import FASTConfig, FASTResult
 from fnit.fast_vbm import FastVBM, FastVBMResult, OUTPUT_FILENAMES
@@ -27,8 +29,7 @@ def _volume(shape=(8, 9, 10), affine=None):
     data = np.exp(
         -sum((axis - center[index]) ** 2 for index, axis in enumerate(axes)) / 8
     ).astype(np.float32)
-    geometry = sf.ImageGeometry(shape, vox2world=affine)
-    return sf.Volume(data, geometry=geometry)
+    return new_image(data, nib.Nifti1Image(data, affine))
 
 
 class _FakeFAST:
@@ -197,8 +198,8 @@ def test_template_affine_must_be_invertible(monkeypatch):
     mask = image.new(np.ones(image.shape[:3], dtype=np.uint8))
     affine = np.eye(4)
     affine[2, 2] = 0
-    with pytest.warns(RuntimeWarning):
-        template = _volume(shape=image.shape[:3], affine=affine)
+    template = _volume(shape=image.shape[:3])
+    template._affine = affine
     with pytest.raises(ValueError, match="invertible"):
         _pipeline(monkeypatch)(image, template, brain_mask=mask)
 
@@ -269,7 +270,7 @@ def test_failed_overwrite_removes_completion_marker(tmp_path, monkeypatch):
     marker = output / "fast_vbm_report.json"
     assert marker.is_file()
 
-    real_save = sf.Volume.save
+    real_save = FNITNifti1Image.save
     calls = 0
 
     def fail_during_stage(self, path, *args, **kwargs):
@@ -279,7 +280,7 @@ def test_failed_overwrite_removes_completion_marker(tmp_path, monkeypatch):
             raise RuntimeError("injected write failure")
         return real_save(self, path, *args, **kwargs)
 
-    monkeypatch.setattr(sf.Volume, "save", fail_during_stage)
+    monkeypatch.setattr(FNITNifti1Image, "save", fail_during_stage)
     with pytest.raises(RuntimeError, match="injected"):
         result.save(output, overwrite=True)
     assert not marker.exists()

@@ -1,4 +1,4 @@
-# TorchFNIRT
+# TorchFNIRT：非线性配准
 
 [返回首页](../../README.md) · [dMRI/TBSS pipeline](../dmri_pipeline/README.md)
 
@@ -31,7 +31,7 @@ python -m fnit.fnirt \
 | `--in` | 输入 | 单张 3D moving 灰质概率图。 |
 | `--ref` | 输入 | 单张 3D fixed 灰质模板；决定 `iout`/`jout` 的网格。 |
 | `--aff` | 输入，可省略 | 4×4 FSL scaled-mm 矩阵，方向为 input → reference；省略时使用 FSL scaled-mm identity。 |
-| `--refmask` | 输入 | reference 网格上的二值 mask；省略时从 `$FSLDIR/data/standard` 读取官方 mask。 |
+| `--refmask` | 输入，必需 | reference 网格上的非空二值 mask；必须显式提供，运行时不会读取 `$FSLDIR`。 |
 | `--config` | 输入 | 只接受未经修改的 `GM_2_MNI152GM_2mm.cnf` 或该名称。 |
 | `--cout` | 输出 | FSL intent-2007 cubic B-spline coefficient NIfTI；它不是 dense warp。 |
 | `--iout` | 输出，可省略 | 原始 input 经 affine 和 nonlinear warp 后的 reference-grid 图像。 |
@@ -85,10 +85,10 @@ result = run_fnirt(
 |---|---|---|
 | `coefficient_image` | intent-2007 NIfTI | 与 `cout` 相同，可交给 FNIT `TorchApplyWarp`。 |
 | `coefficients` | `[Cx,Cy,Cz,3]` NumPy array | cubic residual coefficient，不是 reference-grid dense displacement。 |
-| `moved` | reference-grid `surfa.Volume` | 与 `iout` 相同。 |
-| `nonlinear_jacobian` | reference-grid `surfa.Volume` | 与 `jout` 相同，排除 affine determinant。 |
-| `full_pull_jacobian` | reference-grid `surfa.Volume` | 包含 affine 的完整 pull Jacobian；FSL `fnirt --jout` 不写这一项。 |
-| `pull_transform` | `surfa.Warp` | reference → input 的 world-RAS pull transform。 |
+| `moved` | reference-grid `FNITNifti1Image` | 与 `iout` 相同。 |
+| `nonlinear_jacobian` | reference-grid `FNITNifti1Image` | 与 `jout` 相同，排除 affine determinant。 |
+| `full_pull_jacobian` | reference-grid `FNITNifti1Image` | 包含 affine 的完整 pull Jacobian；FSL `fnirt --jout` 不写这一项。 |
+| `pull_transform` | `DenseWarp`（`nibabel.Nifti1Image` 子类） | reference → input 的 world-RAS 毫米位移场，保存 source/target geometry。 |
 | `qc` | `dict` | schedule、mask、优化、拓扑、设备、TF32 和数值验证状态。 |
 
 ## coefficient 和坐标定义
@@ -134,88 +134,68 @@ x_input = inverse(A) · x_reference + d(x_reference)
 `150,75,50,30`、10 mm warp resolution，四层使用 LM。dMRI/TBSS schedule 见
 [dMRI 页面](../dmri_pipeline/README.md#ukb-tbss-对应关系)。
 
-## 当前真实数据 benchmark：TBSS 中的 TorchFNIRT
+## 当前真实数据验证
 
-验证使用一例去标识、真实 UKB 格式 dMRI。FSL 和 FNIT 从同一组九张 native
-DTI/NODDI 参数图开始。官方路径执行 weighted FLIRT、三个 FNIRT 进程、九次
-`applywarp` 和 skeleton multiplication。A 是发布的默认路径
-TorchFLIRT + TorchFNIRT；B 固定官方 FLIRT matrix，只隔离 TorchFNIRT 和后续传播。
+2026 年 9 月 28 日在 gpucw1 上完成 1 例去标识化真实 UKB 格式 FA 的 matched-input
+验证。FSL 6.0.7.4 和当前 TorchFNIRT 使用完全相同的 preprocessed FA、
+`FMRIB58_FA_1mm`、FSL scaled-mm affine、implicit zero mask 和
+`oxford_s1/s2/s3.cnf` 参数。`dti_FA_mask` 只用于前一步 FLIRT 加权，两个 FNIRT
+实现都不接收它。候选源码快照 tar SHA-256 为
+`f7547d0a39ddd9fb6ba70deb720f229ecedc6385fa72d457efb2ded78b6c173d`，
+`registration.py` 为
+`a63ed0b09e43a5af4bf63b2f583e710b1d0fc73aac548a326c552334a741cd83`。
+报告记录的包入口 `__init__.py` 为 `cc9aa4…`，当前 0.16.0 为 `be1cab…`；差异包括
+版本号、独立的 fMRI 懒加载分支（含 13 个 surface API），以及主动撤下五个内部实现名称。归一化前两项并从新旧源码
+中过滤这五个名称后，保留 API 的新旧 AST SHA-256 均为 `fd295c…`；被撤下名称不主张
+API 兼容，也不影响 `fnit.fnirt` 的直接调用路径。完整 hash、AST 指纹和 `fresh=false`
+边界见[包入口源码等价证明](../../validation/runtime_dependencies/package_entry_source_equivalence.public.json)。
+FSL 参考在本轮重新执行三个进程；新旧官方 coefficient 和 warped FA 逐体素完全相同。
 
-| 运行 | affine | 观测时间 | peak CUDA allocation |
-|---|---|---:|---:|
-| FSL 6.0.7.4 / UKB CPU | FSL FLIRT | 976.88 s external wall | 不适用 |
-| FNIT A / H100 | 本次重新运行 TorchFLIRT | 106.186 s Python pipeline；121.48 s external wall | 3.607 GB |
-| FNIT B / H100 | 固定官方 FLIRT matrix | 18.884 s Python pipeline | 3.608 GB |
+TorchFNIRT 在一个 Python 进程内执行相同的六层 schedule 和三次 process handoff。
+比较范围为 coefficient 全数组、warped FA 两图非零并集，以及模板非零区内的两类
+Jacobian：
 
-B 不包含 affine 优化，不能与 A 或官方端到端时间直接相除。A 的 TorchFLIRT 完成
-8038 次 cost evaluation；三次运行都在共享节点上完成，负载未隔离。单独 stage 1
-四层优化的 FSL CPU、Torch CPU 和 Torch GPU 时间分别为 57.62、56.54 和 7.503 s；
-GPU peak allocation 为 3.229 GB。CUDA 使用默认 TF32，FNIRT solver 保持 FP64。
+| 输出 | 合同 | Pearson r | MAE | RMSE | 最大绝对误差 |
+|---|---|---:|---:|---:|---:|
+| cubic coefficient | shape/affine/float32/intent-2007 通过 | 0.999893 | 0.018804 | 0.038019 | 1.342859 |
+| warped FA (`iout`) | shape/affine/float32 通过 | 0.999203 | 0.003795 | 0.006697 | 0.217295 |
+| nonlinear Jacobian (`jout`) | shape/affine/float32 通过 | 0.999064 | 0.010260 | 0.016942 | 0.422846 |
+| 含 affine 的完整 Jacobian | shape/affine/float32 通过 | 0.994737 | 0.037611 | 0.050840 | 0.613320 |
 
-九张 standard 和 skeleton 图的 shape、affine、dtype 都与官方输出一致。Pearson `r`：
+四类输出的文件合同均通过，但误差明显大于单纯浮点舍入；报告据此保留
+`numerical_equivalence_passed=false`。这表示当前实现不能宣称与 FSL 逐体素数值等价，
+同时也说明此前 raw-to-standard 结果不能只用上游输入分叉解释。普通 API 返回的
+`qc["equivalence_status"]` 仍写“external numerical gate not passed”：该字段表示一次普通
+调用不会自行启动外部 FSL oracle；本次独立报告已经执行外部 gate，结论仍为未达到数值等价。
 
-| map | A standard | A skeleton | B standard | B skeleton |
-|---|---:|---:|---:|---:|
-| FA | 0.998886 | 0.999463 | 0.999523 | 0.999679 |
-| MD | 0.997129 | 0.997087 | 0.998712 | 0.994744 |
-| L1 | 0.996619 | 0.997320 | 0.998438 | 0.994806 |
-| L2 | 0.997222 | 0.997592 | 0.998738 | 0.995896 |
-| L3 | 0.997640 | 0.997887 | 0.998937 | 0.996788 |
-| MO | 0.996725 | 0.998206 | 0.998262 | 0.998889 |
-| ICVF | 0.995086 | 0.996789 | 0.997483 | 0.994425 |
-| OD | 0.997079 | 0.998257 | 0.998542 | 0.997927 |
-| ISOVF | 0.997986 | 0.997748 | 0.999087 | 0.997208 |
+| 运行 | 实测时间 | 内存 |
+|---|---:|---:|
+| TorchFNIRT / H100，同步优化核心 | 16.933 s | peak CUDA allocation 3.598 GB |
+| TorchFNIRT / H100，进程外部 wall | 25.16 s | max CPU RSS 1,091,028 KiB |
+| FSL stage 1 / CPU | 95.20 s | max RSS 794,696 KiB |
+| FSL stage 2 / CPU | 795.08 s | max RSS 1,161,748 KiB |
+| FSL stage 3 / CPU | 374.86 s | max RSS 1,180,244 KiB |
+| FSL 三阶段合计 | 1265.14 s | 上表最大值 |
+| FSL 三阶段加 full-affine Jacobian utility | 1273.20 s | max RSS 1,180,244 KiB |
 
-A 的 standard FA MAE/RMSE 为 `0.003129/0.007914`，skeleton FA 为
-`0.003111/0.005992`。B 的对应值为 `0.002418/0.005184` 和
-`0.002422/0.004642`。A/B full-pull Jacobian 范围分别为
-`0.239943–4.894929` 和 `0.237161–4.875982`；本例均未进入 topology projection。
-完整逐图指标见
-[`tbss_diagnosis.public.json`](../../validation/dmri_pipeline/tbss_diagnosis.public.json)。
+Torch 启动时物理 GPU 0 利用率为 0%，但同卡常驻进程已占 48,310 MiB，余
+32,697 MiB。FSL 启动时主机 load average 为 94.86/89.93/88.62。两个计时都不是隔离
+benchmark，而且候选为单进程、FSL 为三进程，因此不发布加速比；机器报告保留观测 wall
+比值供复核。
 
-![FSL/UKB 与当前 FNIT A 的真实 FA 输出；右列为绝对差值](figures/fnirt_fsl_comparison.png)
+![同一真实 FA、模板和 affine 的 FSL 与 TorchFNIRT 对照](figures/fnirt_real_current.png)
 
-图像和数值来自同一次 current A 运行。图的上行为轴位，下行为冠状位；灰度范围为
-`0–1`，差值按完整非零 support 的 99.5 百分位显示。指标由完整 3D 图计算。
+完整 3D 指标、输入和配置 SHA-256、12 个源码 SHA-256、命令、环境、计时和显存见
+[`report.real.current.json`](../../validation/fnirt/report.real.current.json)。候选执行脚本为
+[`run_current_matched.py`](../../validation/fnirt/run_current_matched.py)，官方参考脚本为
+[`run_official_matched.sh`](../../validation/fnirt/run_official_matched.sh)，报告生成脚本为
+[`validate_real_current.py`](../../validation/fnirt/validate_real_current.py)。仓库不保存原始 FA
+或受试者标识。
 
-## Stage 1 LM oracle 与修复原因
-
-固定官方 affine 后，FSL verbose trace 和 Torch 的 level-1 LM 使用相同 mask voxel
-数和相同接受序列。FSL cost 只打印六位有效数字：
-
-| point | Torch cost | FSL printed cost | mask voxels | decision |
-|---:|---:|---:|---:|---|
-| initial | 639.821722 | 639.822 | 2598 | initial |
-| 1 | 525.149285 | 525.149 | 2540 | accept |
-| 2 | 492.883311 | 492.883 | 2519 | accept |
-| 3 | 481.481318 | 481.483 | 2499 | accept |
-| 4 | 485.874090 | 485.885 | 2513 | reject |
-| 5 | 485.869969 | 485.881 | 2513 | reject |
-| 6 | 485.831044 | 485.842 | 2513 | reject |
-| 7 | 485.663228 | 485.671 | 2513 | reject |
-| 8 | 479.312016 | 479.320 | 2508 | accept |
-| 9 | 479.583059 | 479.589 | 2503 | reject |
-| 10 | 478.784565 | 478.784 | 2508 | accept |
-
-FSL 在 `update_robjmask()` 中把二值 input mask 重采样到 `volume<char>`。边界的三线性
-小数先被截断，再由 `Mask()` 执行 `>0.5`。当前实现先转换为 `char`，再执行
-`>0.5`，从而排除相同的边界体素；同时匹配 newimage 的
-`1e-8` valid-FOV tolerance、zero-padded boundary neighbor 和 implicit-zero
-`1e-16` 比较顺序。
-
-完整四层 stage 1 的 CPU coefficient `r=0.999832`、MAE `0.019687`；warped FA
-`r=0.999004`、MAE `0.003580`。GPU 对应值为 `r=0.999879` 和 `r=0.999148`。
-coefficient shape 均为 `[39,46,39,3]`。这组逐步结果支持 SSD、global-linear
-intensity mapping、SSD-weighted lambda、LM damping/acceptance 和 spline basis
-在该病例上的语义一致性。
-
-后续 level 的 sparse BFMatrix/NEWMAT 与 matrix-free FP64 reduction 仍会产生小的
-数值路径差异；三进程 handoff 在一个 Python 进程内模拟。topology projection 在本例
-没有触发，当前验证也只有一例，因此仍保留
-`fsl_fnirt_numerically_equivalent=false` 和 `ukb_tbss_numerically_equivalent=false`。
-定向测试命令为
-`pytest -q tests/fnirt tests/dmri_pipeline/test_dmri_pipeline.py`，结果为
-`63 passed`。
+同一最终源码还完成了从 raw AP/PA 开始的
+[TBSS 端到端单例](../../validation/dmri_pipeline/tbss_e2e.real.current.json)。九张 standard
+与九张 skeleton 图的网格和 dtype 合同通过，但上游 native 参数图已经分叉，整条流程数值
+等价失败；该 444.93 s wall time 受同卡 100% 训练任务影响，也不用于加速比。
 
 ## 支持范围与许可
 

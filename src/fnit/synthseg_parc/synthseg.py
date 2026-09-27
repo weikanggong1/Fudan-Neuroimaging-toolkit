@@ -7,14 +7,17 @@ import csv
 import os
 from pathlib import Path
 
+import nibabel as nib
 import numpy as np
 import torch
+from nibabel.processing import resample_from_to
 
+from .._dmri import configure_device
+from .._nib import FNITNifti1Image, new_image
 from ..weights import resolve_weights
 from .postprocess import postprocess_segmentation
 from .preprocess import _ras_axes, preprocess_t1
 from .segment import SynthSegSegmenter
-from .synthseg_io import SynthSegVolume, read_color_lut
 
 
 # Cross-framework FP32 convolutions can reverse an almost exact SynthSeg tie.
@@ -60,9 +63,17 @@ def _official_soft_volumes(posterior: torch.Tensor, reference_affine: np.ndarray
     return np.around(np.concatenate(([np.sum(soft)], soft)) * voxel_volume_mm3, 3)
 
 
+def _segmentation_image(data: np.ndarray, reference, affine: np.ndarray):
+    """Create the int32 NIfTI header written by FreeSurfer mri_synthseg."""
+    image = new_image(np.asarray(data, dtype=np.int32), reference, affine=affine)
+    image.set_qform(image.affine, code=0)
+    image.set_sform(image.affine, code=2)
+    return image
+
+
 @dataclass
 class SynthSegResult:
-    segmentation: SynthSegVolume
+    segmentation: FNITNifti1Image
     volumes_mm3: dict[int, float]
     total_intracranial_mm3: float
     label_names: dict[int, str]
@@ -86,7 +97,7 @@ class SynthSeg:
 
     def __init__(self, weights: str | Path | None = None, device: str = "cpu",
                  threads: int | None = None):
-        self.device = torch.device(device)
+        self.device = configure_device(device)
         if threads is not None:
             torch.set_num_threads(os.cpu_count() if threads < 0 else threads)
         model = resolve_weights("synthseg_2.0.h5", explicit=weights)
@@ -105,7 +116,8 @@ class SynthSeg:
         self.segmenter = SynthSegSegmenter(model, labels_path, device=self.device)
 
     @torch.inference_mode()
-    def __call__(self, image: str | Path, *, keep_geometry: bool = False,
+    def __call__(self, image: str | Path | nib.spatialimages.SpatialImage, *,
+                 keep_geometry: bool = False,
                  color_lut: str | Path | None = None) -> SynthSegResult:
         prepared = preprocess_t1(image, device=self.device)
         posterior = self.segmenter.posterior(prepared.image)
@@ -118,12 +130,19 @@ class SynthSeg:
         aligned_affine[:3, 3] += aligned_affine[:3, :3] @ np.asarray(
             [part.start for part in prepared.content_slices])
 
-        data = labels.to(torch.float32).cpu().numpy()
-        segmentation = SynthSegVolume(data, aligned_affine)
+        data = labels.to(torch.int32).cpu().numpy()
+        reference = (nib.load(str(image)) if isinstance(image, (str, Path)) else image)
+        segmentation = _segmentation_image(data, reference, aligned_affine)
         if keep_geometry:
-            segmentation = segmentation.resample_like(image)
+            resampled = resample_from_to(
+                segmentation, (prepared.original_shape, prepared.input_affine), order=0)
+            segmentation = _segmentation_image(
+                np.asanyarray(resampled.dataobj), reference, prepared.input_affine)
         if color_lut is not None:
-            segmentation.labels = read_color_lut(color_lut)
+            color_lut = Path(color_lut)
+            if not color_lut.is_file():
+                raise FileNotFoundError(color_lut)
+            segmentation.extra["color_lut"] = str(color_lut)
 
         values = _official_soft_volumes(posterior, prepared.volume_affine,
                                         prepared.voxel_volume_mm3)

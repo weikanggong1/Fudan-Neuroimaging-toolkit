@@ -1,46 +1,85 @@
-"""SynthMorph registration with PyTorch inference and native image geometry."""
+"""SynthMorph registration with PyTorch inference and nibabel image I/O."""
+
 from __future__ import annotations
+
 from dataclasses import dataclass
 from pathlib import Path
+
+import nibabel as nib
 import numpy as np
 import scipy.linalg
 import torch
-from .spatial import compose, transform
-from .affine_no_surfa import AffineTransform, load_affine_image, network_space_affine
+
+from .._nib import FNITNifti1Image, load_image, new_image
+from .._transforms import (
+    AffineTransform,
+    DenseWarp,
+    image_geometry,
+    load_dense_warp,
+    load_lta,
+    ras_displacement_to_voxel,
+    same_geometry,
+    voxel_displacement_to_ras,
+)
 from ..weights import resolve_weights
+from .spatial import compose, surfa_nearest, transform
 
 
 @dataclass
 class RegistrationResult:
-    moved: object
-    fixed_moved: object
-    transform: object
-    inverse: object
+    moved: FNITNifti1Image
+    fixed_moved: FNITNifti1Image
+    transform: AffineTransform | DenseWarp
+    inverse: AffineTransform | DenseWarp
 
 
 def network_space(image, shape, center=None):
-    import surfa as sf
-    new = sf.ImageGeometry(shape=shape, voxsize=1, rotation='LIA',
-                           center=image.geom.center if center is None else center.geom.center,
-                           shear=None)
-    return ((image.geom.world2vox @ new.vox2world).matrix,
-            (new.world2vox @ image.geom.vox2world).matrix)
+    """Return network-to-image and image-to-network voxel transforms.
+
+    The network grid is 1 mm LIA and uses FreeSurfer's ``shape / 2`` centre
+    convention. ``center`` can select another image's world-space centre.
+    """
+    image = image_geometry(image)
+    shape = tuple(int(value) for value in shape)
+    if len(shape) != 3 or any(value < 1 for value in shape):
+        raise ValueError("network shape must have three positive dimensions")
+    world_center = image.center if center is None else image_geometry(center).center
+    rotation = np.array(
+        [[-1.0, 0.0, 0.0], [0.0, 0.0, 1.0], [0.0, -1.0, 0.0]],
+        dtype=np.float64,
+    )
+    network_affine = np.eye(4, dtype=np.float64)
+    network_affine[:3, :3] = rotation
+    network_affine[:3, 3] = world_center - rotation @ (
+        np.asarray(shape, dtype=np.float64) / 2.0
+    )
+    network_to_image = np.linalg.inv(image.affine) @ network_affine
+    image_to_network = np.linalg.inv(network_affine) @ image.affine
+    return network_to_image, image_to_network
 
 
 def _load(image, single_frame=True):
-    import surfa as sf
-    out = sf.load_volume(str(image)) if isinstance(image, (str, Path)) else image
-    if not isinstance(out, sf.Volume) or len(out.shape) not in (3, 4):
-        raise ValueError('input must be a 3D volume with optional frames')
+    out = load_image(image, "input")
+    if len(out.shape) not in (3, 4):
+        raise ValueError("input must be a 3D volume with optional frames")
     if single_frame and len(out.shape) != 3:
-        raise ValueError('registration inputs must be single-frame 3D volumes')
-    if not np.isfinite(out.data).all():
-        raise ValueError('input contains NaN or infinity')
+        raise ValueError("registration inputs must be single-frame 3D volumes")
+    if not np.isfinite(np.asanyarray(out.dataobj)).all():
+        raise ValueError("input contains NaN or infinity")
     return out
 
 
 def _tensor(image, device):
-    return torch.as_tensor(np.array(image.data, dtype=np.float32, copy=True), device=device)[None, None]
+    data = np.array(image.dataobj, dtype=np.float32, copy=True)
+    return torch.as_tensor(data, device=device)[None, None]
+
+
+def _tensor_frames(image, device):
+    data = np.array(image.dataobj, dtype=np.float32, copy=True)
+    if data.ndim == 3:
+        return torch.as_tensor(data, device=device)[None, None]
+    data = np.moveaxis(data, -1, 0)
+    return torch.as_tensor(data, device=device)[None]
 
 
 def _numpy(tensor):
@@ -49,143 +88,288 @@ def _numpy(tensor):
     return tensor[0].permute(1, 2, 3, 0).detach().cpu().numpy()
 
 
-class SynthMorph:
-    """Reusable registration model; weights is a directory or named path mapping.
+def _tensor_data(tensor):
+    data = tensor[0].detach().cpu().numpy()
+    if data.shape[0] == 1:
+        return data[0]
+    return np.moveaxis(data, 0, -1)
 
-    model: joint (affine + deformable), deform, affine, or rigid.
-    hyper: warp regularity in (0,1), fixed for this model instance.
-    extent: 192 or 256 isotropic 1-mm network voxels per axis.
-    Networks and coordinate composition run on device. Final image resampling
-    uses Surfa on CPU to preserve the original command's boundary conventions.
-    """
-    def __init__(self, weights=None, device='cpu', model='joint', extent=256,
-                 hyper=0.5, steps=7):
+
+def _affine_input(value, moving, fixed):
+    if isinstance(value, (str, Path)):
+        value = load_lta(value)
+    if isinstance(value, AffineTransform):
+        if not same_geometry(moving, value.source) or not same_geometry(
+            fixed, value.target
+        ):
+            raise ValueError("initial transform geometry does not match input images")
+        return value.convert(space="voxel", source=moving, target=fixed)
+    try:
+        matrix = np.asarray(value, dtype=np.float64)
+    except (TypeError, ValueError) as error:
+        raise TypeError("init must be an LTA path or finite 4x4 affine") from error
+    return AffineTransform(
+        matrix, source=moving, target=fixed, space="world"
+    ).convert(space="voxel")
+
+
+def _header_transform(image, transformation):
+    world = transformation.convert(space="world", source=image).matrix
+    return new_image(
+        np.array(image.dataobj, copy=True), image, affine=world @ image.affine
+    )
+
+
+def _resampled_image(
+    image,
+    pull,
+    target,
+    device,
+    *,
+    method="linear",
+    fill=0,
+    surfa_nearest_rule=False,
+):
+    tensor = _tensor_frames(image, device)
+    if method == "nearest" and surfa_nearest_rule:
+        moved = surfa_nearest(
+            tensor,
+            pull,
+            shape=image_geometry(target).shape,
+            fill_value=fill,
+        )
+    else:
+        moved = transform(
+            tensor,
+            pull,
+            shape=image_geometry(target).shape,
+            method=method,
+            fill_value=fill,
+        )
+    return new_image(_tensor_data(moved), image, affine=image_geometry(target).affine)
+
+
+class SynthMorph:
+    """Reusable rigid, affine, deformable or joint registration model."""
+
+    def __init__(
+        self,
+        weights=None,
+        device="cpu",
+        model="joint",
+        extent=256,
+        hyper=0.5,
+        steps=7,
+    ):
         from .models import SynthMorphNetwork
-        if model not in ('joint', 'deform', 'affine', 'rigid'):
-            raise ValueError('unknown registration model')
+
+        if model not in ("joint", "deform", "affine", "rigid"):
+            raise ValueError("unknown registration model")
         if extent not in (192, 256):
-            raise ValueError('extent must be 192 or 256')
+            raise ValueError("extent must be 192 or 256")
         if not 0 < hyper < 1 or steps < 5:
-            raise ValueError('hyper must be in (0,1) and steps must be >=5')
-        names = {'affine': 'synthmorph.affine.2.h5', 'deform': 'synthmorph.deform.3.h5',
-                 'rigid': 'synthmorph.rigid.1.h5'}
-        needed = ('affine', 'deform') if model == 'joint' else (model,)
-        paths = {key: resolve_weights(names[key], weights.get(key) if isinstance(weights, dict) else weights)
-                 for key in needed}
-        self.device, self.model, self.extent = torch.device(device), model, extent
-        # Keep FP32 tensors while allowing TF32 kernels on Ampere/Hopper.
+            raise ValueError("hyper must be in (0,1) and steps must be >=5")
+        names = {
+            "affine": "synthmorph.affine.2.h5",
+            "deform": "synthmorph.deform.3.h5",
+            "rigid": "synthmorph.rigid.1.h5",
+        }
+        needed = ("affine", "deform") if model == "joint" else (model,)
+        paths = {
+            key: resolve_weights(
+                names[key], weights.get(key) if isinstance(weights, dict) else weights
+            )
+            for key in needed
+        }
+        self.device = torch.device(device)
+        self.model = model
+        self.extent = extent
         torch.backends.cuda.matmul.allow_tf32 = True
         torch.backends.cudnn.allow_tf32 = True
-        self.network = SynthMorphNetwork(weights=paths, model=model, hyper=hyper,
-                                        int_steps=steps, device=device)
+        self.network = SynthMorphNetwork(
+            weights=paths,
+            model=model,
+            hyper=hyper,
+            int_steps=steps,
+            device=device,
+        )
 
     @torch.inference_mode()
-    def affine_transform(self, moving: str | Path, fixed: str | Path) -> AffineTransform:
-        """Return the affine-only world transform without Surfa image resampling."""
-        if self.model != "affine":
-            raise ValueError("affine_transform requires model='affine'")
-        moving_data, moving_geometry = load_affine_image(moving)
-        fixed_data, fixed_geometry = load_affine_image(fixed)
-        shape = (self.extent,) * 3
-        net_to_moving, moving_to_net = network_space_affine(moving_geometry, shape)
-        net_to_fixed, fixed_to_net = network_space_affine(fixed_geometry, shape)
-        inputs = []
-        for data, matrix in ((moving_data, net_to_moving), (fixed_data, net_to_fixed)):
-            native = torch.as_tensor(np.array(data, dtype=np.float32, copy=True),
-                                     device=self.device)[None, None]
-            image = transform(native, matrix, shape=shape)
-            image -= image.min()
-            maximum = image.max()
-            if maximum <= 0:
-                raise ValueError("input has no intensity variation in network space")
-            inputs.append(image / maximum)
-        _, backward = self.network(*inputs)
-        voxel = _numpy(compose((net_to_fixed, backward, moving_to_net),
-                               shape=moving_geometry.shape))
-        world = fixed_geometry.matrix @ np.asarray(voxel, np.float64) @ np.linalg.inv(moving_geometry.matrix)
-        return AffineTransform(world, moving_geometry, fixed_geometry)
-
-    @torch.inference_mode()
-    def __call__(self, moving, fixed, init=None, mid_space=False, header_only=False,
-                 output_dir=None):
-        import surfa as sf
+    def __call__(
+        self,
+        moving,
+        fixed,
+        init=None,
+        mid_space=False,
+        header_only=False,
+        output_dir=None,
+    ):
         mov, fix = _load(moving), _load(fixed)
-        is_matrix = self.model in ('affine', 'rigid')
+        is_matrix = self.model in ("affine", "rigid")
         if header_only and not is_matrix:
-            raise ValueError('header_only requires affine or rigid model')
+            raise ValueError("header_only requires affine or rigid model")
         if mid_space and init is None:
-            raise ValueError('mid_space initialization requires init')
+            raise ValueError("mid_space initialization requires init")
+
         shape = (self.extent,) * 3
-        net_to_mov, mov_to_net = network_space(mov, shape, fix if self.model == 'deform' else None)
+        shared_center = fix if self.model == "deform" else None
+        net_to_mov, mov_to_net = network_space(mov, shape, shared_center)
         net_to_fix, fix_to_net = network_space(fix, shape)
         if init is not None:
-            initial = sf.load_affine(str(init)) if isinstance(init, (str, Path)) else init
-            initial = initial.convert(space='voxel')
-            if not sf.transform.image_geometry_equal(mov.geom, initial.source, tol=1e-3) or not sf.transform.image_geometry_equal(fix.geom, initial.target, tol=1e-3):
-                raise ValueError('initial transform geometry does not match input images')
-            initial = fix_to_net @ initial.matrix @ net_to_mov
+            initial = _affine_input(init, mov, fix)
+            initial_network = fix_to_net @ initial.matrix @ net_to_mov
             if mid_space:
-                initial = scipy.linalg.sqrtm(initial)
-                if np.iscomplexobj(initial) and np.max(np.abs(initial.imag)) > 1e-5:
-                    raise ValueError('initial affine has no usable real square root')
-                initial = np.real(initial)
-                net_to_fix = net_to_fix @ initial
+                initial_network = scipy.linalg.sqrtm(initial_network)
+                if np.iscomplexobj(initial_network) and np.max(
+                    np.abs(initial_network.imag)
+                ) > 1e-5:
+                    raise ValueError("initial affine has no usable real square root")
+                initial_network = np.real(initial_network)
+                net_to_fix = net_to_fix @ initial_network
                 fix_to_net = np.linalg.inv(net_to_fix)
-            net_to_mov = net_to_mov @ np.linalg.inv(initial)
+            net_to_mov = net_to_mov @ np.linalg.inv(initial_network)
             mov_to_net = np.linalg.inv(net_to_mov)
-        native = [_tensor(im, self.device) for im in (mov, fix)]
+
+        native = [_tensor(image, self.device) for image in (mov, fix)]
         inputs = []
         for image, matrix in zip(native, (net_to_mov, net_to_fix)):
-            out = transform(image, matrix, shape=shape)
-            out -= out.min()
-            maximum = out.max()
+            normalized = transform(image, matrix, shape=shape)
+            normalized -= normalized.min()
+            maximum = normalized.max()
             if maximum <= 0:
-                raise ValueError('input has no intensity variation in network space')
-            inputs.append(out / maximum)
-        fw_net, bw_net = self.network(*inputs)
-        fw = compose((net_to_mov, fw_net, fix_to_net), shape=fix.shape)
-        bw = compose((net_to_fix, bw_net, mov_to_net), shape=mov.shape)
+                raise ValueError("input has no intensity variation in network space")
+            inputs.append(normalized / maximum)
+
+        forward_network, backward_network = self.network(*inputs)
+        forward_pull = compose(
+            (net_to_mov, forward_network, fix_to_net), shape=fix.shape
+        )
+        inverse_pull = compose(
+            (net_to_fix, backward_network, mov_to_net), shape=mov.shape
+        )
+
         if is_matrix:
-            forward = sf.Affine(_numpy(bw), source=mov, target=fix, space='voxel')
-            inverse = sf.Affine(_numpy(fw), source=fix, target=mov, space='voxel')
-            output_format = dict(space='world')
+            forward_voxel = _numpy(inverse_pull)
+            inverse_voxel = _numpy(forward_pull)
+            forward = AffineTransform(
+                forward_voxel, source=mov, target=fix, space="voxel"
+            ).convert(space="world")
+            inverse = AffineTransform(
+                inverse_voxel, source=fix, target=mov, space="voxel"
+            ).convert(space="world")
+            if header_only:
+                moved = _header_transform(mov, forward)
+                fixed_moved = _header_transform(fix, inverse)
+            else:
+                moved = _resampled_image(
+                    mov, forward_pull, fix, self.device, fill=0
+                )
+                fixed_moved = _resampled_image(
+                    fix, inverse_pull, mov, self.device, fill=0
+                )
         else:
-            forward = sf.Warp(_numpy(fw), source=mov, target=fix, format=sf.Warp.Format.disp_crs)
-            inverse = sf.Warp(_numpy(bw), source=fix, target=mov, format=sf.Warp.Format.disp_crs)
-            output_format = dict(format=sf.Warp.Format.disp_ras)
-        # Surfa has a different valid interpolation domain from the network's
-        # TensorFlow sampler. Preserve native CRS transforms until after resampling.
-        moved = mov.transform(forward, resample=not header_only)
-        fixed_moved = fix.transform(inverse, resample=not header_only)
-        forward = forward.convert(**output_format)
-        inverse = inverse.convert(**output_format)
+            forward = DenseWarp(
+                voxel_displacement_to_ras(_numpy(forward_pull), mov, fix),
+                source=mov,
+                target=fix,
+            )
+            inverse = DenseWarp(
+                voxel_displacement_to_ras(_numpy(inverse_pull), fix, mov),
+                source=fix,
+                target=mov,
+            )
+            moved = _resampled_image(mov, forward_pull, fix, self.device, fill=0)
+            fixed_moved = _resampled_image(
+                fix, inverse_pull, mov, self.device, fill=0
+            )
+
         if output_dir:
             root = Path(output_dir)
             root.mkdir(parents=True, exist_ok=True)
-            net_mov = sf.Volume(_numpy(inputs[0])[..., 0], geometry=sf.ImageGeometry(shape, vox2world=mov.geom.vox2world.matrix @ net_to_mov))
-            net_fix = sf.Volume(_numpy(inputs[1])[..., 0], geometry=sf.ImageGeometry(shape, vox2world=fix.geom.vox2world.matrix @ net_to_fix))
-            net_mov.save(root / 'inp_1.nii.gz')
-            net_fix.save(root / 'inp_2.nii.gz')
-            np.savez_compressed(root / 'network_transforms.npz', forward=_numpy(fw_net), inverse=_numpy(bw_net))
+            net_mov = new_image(
+                _numpy(inputs[0])[..., 0], mov, affine=mov.affine @ net_to_mov
+            )
+            net_fix = new_image(
+                _numpy(inputs[1])[..., 0], fix, affine=fix.affine @ net_to_fix
+            )
+            nib.save(net_mov, str(root / "inp_1.nii.gz"))
+            nib.save(net_fix, str(root / "inp_2.nii.gz"))
+            np.savez_compressed(
+                root / "network_transforms.npz",
+                forward=_numpy(forward_network),
+                inverse=_numpy(backward_network),
+            )
         return RegistrationResult(moved, fixed_moved, forward, inverse)
 
 
-
 @torch.inference_mode()
-def apply_transform(image, transformation, method='linear', fill=0,
-                    dtype='float32', header_only=False):
-    """Apply an LTA or RAS warp with the original Surfa CPU resampling rules.
-    """
-    import surfa as sf
+def apply_transform(
+    image,
+    transformation,
+    method="linear",
+    fill=0,
+    dtype="float32",
+    header_only=False,
+):
+    """Apply an FNIT LTA affine or target-grid RAS displacement field."""
     image = _load(image, single_frame=False)
     if isinstance(transformation, (str, Path)):
-        path = str(transformation)
-        transformation = sf.load_affine(path) if path.endswith('.lta') else sf.load_warp(path)
-    if header_only and not isinstance(transformation, sf.Affine):
-        raise ValueError('header_only requires an affine')
-    if isinstance(transformation, sf.Warp):
-        # Warp source geometry determines CRS coordinates; disallow silent mismatch.
-        if not sf.transform.image_geometry_equal(image.geom, transformation.source, tol=1e-3):
-            raise ValueError('warp source geometry does not match image')
-    return image.transform(transformation, method=method, fill=fill,
-                           resample=not header_only).astype(dtype)
+        path = Path(transformation)
+        transformation = (
+            load_lta(path)
+            if path.suffix.lower() == ".lta"
+            else load_dense_warp(path, source=image)
+        )
+    elif isinstance(transformation, nib.spatialimages.SpatialImage) and not isinstance(
+        transformation, DenseWarp
+    ):
+        transformation = DenseWarp(
+            np.asanyarray(transformation.dataobj),
+            source=image,
+            target=transformation,
+        )
+
+    if header_only:
+        if not isinstance(transformation, AffineTransform):
+            raise ValueError("header_only requires an affine")
+        result = _header_transform(image, transformation)
+    elif isinstance(transformation, AffineTransform):
+        world = transformation.convert(space="world").matrix
+        target = transformation.target
+        pull = (
+            np.linalg.inv(image.affine)
+            @ np.linalg.inv(world)
+            @ target.affine
+        )
+        result = _resampled_image(
+            image,
+            pull,
+            target,
+            "cpu",
+            method=method,
+            fill=fill,
+            surfa_nearest_rule=True,
+        )
+    elif isinstance(transformation, DenseWarp):
+        if not same_geometry(image, transformation.source):
+            raise ValueError("warp source geometry does not match image")
+        pull = ras_displacement_to_voxel(
+            np.asanyarray(transformation.dataobj), image, transformation.target
+        )
+        pull = torch.as_tensor(pull).permute(3, 0, 1, 2)[None]
+        result = _resampled_image(
+            image,
+            pull,
+            transformation.target,
+            "cpu",
+            method=method,
+            fill=fill,
+            surfa_nearest_rule=True,
+        )
+    else:
+        raise TypeError("transformation must be an LTA affine or dense warp")
+
+    output_dtype = np.dtype(dtype)
+    return new_image(
+        np.asarray(result.dataobj).astype(output_dtype, copy=False), result
+    )

@@ -1,8 +1,8 @@
 """Image geometry and public result checks for TorchFAST."""
 
+import nibabel as nib
 import numpy as np
 import pytest
-from fnit.synthstrip.geometry import Volume, load_volume
 
 from fnit.fast import FASTResult, TorchFAST
 
@@ -17,7 +17,8 @@ def _volume(shape=(12, 11, 10), affine=None):
     base = np.where(x < -0.2, 30, np.where(x < 0.3, 70, 110))
     data = np.broadcast_to(base * np.exp(0.2 * x), shape).astype(np.float32).copy()
     data[~mask] = 0
-    return Volume(data, affine), Volume(mask.astype(np.uint8), affine)
+    return (nib.Nifti1Image(data, affine),
+            nib.Nifti1Image(mask.astype(np.uint8), affine))
 
 
 def _model():
@@ -39,22 +40,22 @@ def test_pipeline_preserves_geometry_and_returns_named_outputs(tmp_path):
     )
     for output in fields:
         assert output.shape[:3] == image.shape[:3]
-        np.testing.assert_allclose(output.geom.vox2world.matrix,
-                                   image.geom.vox2world.matrix, atol=1e-6)
-    assert result.pve_gm.data.dtype == np.float32
-    assert result.hard_segmentation.data.dtype == np.int32
+        assert isinstance(output, nib.Nifti1Image)
+        np.testing.assert_allclose(output.affine, image.affine, atol=1e-6)
+    assert result.pve_gm.get_data_dtype() == np.dtype(np.float32)
+    assert result.hard_segmentation.get_data_dtype() == np.dtype(np.int32)
 
     path = tmp_path / "gm.nii.gz"
     result.pve_gm.save(path)
-    loaded = load_volume(path)
-    np.testing.assert_allclose(loaded.geom.vox2world.matrix,
-                               image.geom.vox2world.matrix, atol=1e-5)
-    np.testing.assert_allclose(loaded.data, result.pve_gm.data, atol=1e-6)
+    loaded = nib.load(path)
+    np.testing.assert_allclose(loaded.affine, image.affine, atol=1e-5)
+    np.testing.assert_allclose(np.asanyarray(loaded.dataobj),
+                               np.asanyarray(result.pve_gm.dataobj), atol=1e-6)
 
 
 def test_pipeline_rejects_mask_on_another_grid():
     image, _ = _volume()
-    changed_affine = np.asarray(image.geom.vox2world.matrix).copy()
+    changed_affine = np.asarray(image.affine).copy()
     changed_affine[0, 3] += 1
     _, mask = _volume(affine=changed_affine)
     with pytest.raises(ValueError, match="same shape and geometry"):
@@ -64,27 +65,3 @@ def test_pipeline_rejects_mask_on_another_grid():
 def test_pipeline_rejects_bad_threads():
     with pytest.raises(ValueError, match="positive"):
         TorchFAST(threads=0)
-
-
-def test_path_input_and_legacy_in_memory_volume(tmp_path):
-    image, mask = _volume()
-    image_path, mask_path = tmp_path / "image.nii.gz", tmp_path / "mask.nii.gz"
-    image.save(image_path)
-    mask.save(mask_path)
-    path_result = _model()(image_path, mask_path)
-    assert isinstance(path_result.pve_gm, Volume)
-
-    class LegacyVolume:
-        def __init__(self, volume):
-            self.data = volume.data
-            self.geom = volume.geom
-            self._volume = volume
-
-        def new(self, data):
-            return LegacyVolume(self._volume.new(data))
-
-    native_result = _model()(image, mask)
-    legacy_result = _model()(LegacyVolume(image), LegacyVolume(mask))
-    assert isinstance(legacy_result.pve_gm, LegacyVolume)
-    np.testing.assert_array_equal(legacy_result.pve_gm.data,
-                                  native_result.pve_gm.data)

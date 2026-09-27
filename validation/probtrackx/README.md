@@ -7,7 +7,15 @@
 
 在 gpucw1 使用 FSL 6.0.7.22 `probtrackx2` / `probtrackx2_gpu`，对同一例真实 UK Biobank DWI 的原版 FSL BEDPOSTX 三纤维后验比较 FNIT。五个预先定义的 ROI 由 JHU 标签图和被试 FA、追踪 mask 生成，选点不依赖两套追踪结果。
 
-双方统一总步数 400、步长 0.5 mm、`cthr=0.2`、`fibthresh=0.01`、`rseed=20260927`。单 seed 每体素 200 条，五区网络每体素 2000 条；FNIT 批大小 2048，CPU 8 线程。分别配对默认计数 `--opd` 和长度加权 `--opd --pd --ompl`，每种模式运行 FSL CPU/FNIT CPU、FSL GPU/FNIT GPU 的单 seed 与五区网络。墙钟时间包含进程启动、后验载入、追踪与写盘。四个 ProbTrackX 源码文件的 SHA-256 保存在六份公开摘要中。GPU 显存单独在真实五区网络长度加权模式测量。真实影像、后验、seed 和逐体素结果留在授权服务器；仓库只保存经授权的六份标量摘要。
+双方统一总步数 400、步长 0.5 mm、`cthr=0.2`、`fibthresh=0.01`、`rseed=20260927`。单 seed 每体素 200 条，五区网络每体素 2000 条；FNIT 批大小 2048，CPU 8 线程。分别配对默认计数 `--opd` 和长度加权 `--opd --pd --ompl`，每种模式运行 FSL CPU/FNIT CPU、FSL GPU/FNIT GPU 的单 seed 与五区网络。墙钟时间包含进程启动、后验载入、追踪与写盘。四个 ProbTrackX 源码文件的 SHA-256 保存在六份公开摘要中。GPU 显存单独在真实五区网络长度加权模式测量。真实影像、后验、seed、逐体素结果和完整文本矩阵留在授权服务器；仓库保存六份汇总 JSON 和一张去标识连接矩阵图。
+
+## 公开真实数据示意图
+
+![真实 UK Biobank dMRI 的五区长度加权连接矩阵](../../docs/probtrackx/figures/probtrackx_real_ukb_network_pd_ompl.png)
+
+该图只读取当前 `--opd --pd --ompl` CPU 五区网络输出，没有重新运行追踪。绘图时生成的私有报告与 [`report.current.latest.public.json`](report.current.latest.public.json) 的四个源码 SHA-256 相同；除公开摘要有意去除的 shape、`waytotal` 和原始矩阵外，公共字段逐项一致。上排显示累计长度加权连接矩阵，下排显示平均路径长度，右列为 FNIT−FSL。图中只有通用 JHU ROI 名称，没有病例编号、私有路径或原始脑影像；清除 PNG 元数据后的 SHA-256 为 `39cc1fb18614a12cab52044a582d48093e822452d617914360535a516b999464`。
+
+该图对应一例、五区、每 seed 体素 2000 条轨迹的稀疏网络。FSL 与 FNIT 使用相同随机种子但随机数流不同，因此只能比较密度图和连接矩阵的汇总一致性，不能据此声称逐轨迹等价。
 
 ## 真实 DWI 复现
 
@@ -123,7 +131,7 @@ done
 
 ## 真实 DWI 单 waypoint 对照
 
-[复现脚本](run_real_waypoint.py)从已有 FSL ROI×ROI 网络矩阵选取最大的正非对角计数，按同一 ROI 列表确定 seed 与必经 ROI；选择发生在本次 FNIT 运行之前。随后在同一 BEDPOSTX 后验上分别运行 FSL CPU 与 FNIT CPU 的 `--waypoints` 计数模式，检查完成日志、输出文件和 `waytotal`，并在服务器内比较密度图支持、相关及耗时。`--selection-matrix` 必须与 `--roi-list` 使用同一 ROI 顺序；输出目录需事先不存在。
+[复现脚本](run_real_waypoint.py)从固定 FSL ROI×ROI 网络矩阵选取最大的正非对角计数，按同一 ROI 列表确定 seed 与必经 ROI；选择发生在本次 FNIT 运行之前。随后在同一 BEDPOSTX 后验上分别运行 FSL CPU 与 FNIT CPU 的 `--waypoints` 计数模式，检查完成日志、输出文件和 `waytotal`，并在服务器内比较密度图支持、相关及耗时。`--selection-matrix` 必须与 `--roi-list` 使用同一 ROI 顺序；输出目录需事先不存在。
 
 ~~~bash
 export BED=/absolute/path/subject.bedpostX
@@ -145,4 +153,4 @@ export PRIVATE_WAYPOINT_OUT=/absolute/path/new-private-waypoint-run
 
 密度图相关在双方非零体素并集计算；前 10% Dice 用相同的 FSL 非零体素数十分之一作为双方 top-*k*。平均路径长度图的相关和 MAE 在双方都非零的体素上计算，并另报支持 Dice 与并集（含单侧缺失体素）误差。完整 ROI×ROI 原始矩阵只保存在授权服务器；公开报告仅含汇总误差。网络连接稀疏，个位数命中不宜单独解释。
 
-9×5×5 合成直线场用于计数规则回归，不列为正式 benchmark：`--pd --ompl` 的单 seed 和双 ROI 网络输出，以及单独 `--ompl` 的网络输出，均与 FSL 逐元素相同；matrix1/2/3 的 2×2 稀疏矩阵、坐标表、matrix2 lookup 和路径密度也与 FSL 逐项相同。新增 waypoint/`wtstop` 的 9 组合成场配对与 FSL 6.0.7.22 的 `waytotal` 和 `fdt_paths` 逐项相同，AND 条件下的 matrix2 `.dot` 亦逐项相同。`tests/probtrackx/` 的 40 项 CPU/CUDA 回归测试在 gpucw1 全部通过。合成数据仅用于验证计数规则，不用于正式精度或耗时结论；单 waypoint 的真实 DWI 配对已完成但指标仍为私有；`wtstop` 的真实 DWI 对照尚未完成。
+9×5×5 合成直线场用于计数规则回归，不列为正式 benchmark：`--pd --ompl` 的单 seed 和双 ROI 网络输出，以及单独 `--ompl` 的网络输出，均与 FSL 逐元素相同；matrix1/2/3 的 2×2 稀疏矩阵、坐标表、matrix2 lookup 和路径密度也与 FSL 逐项相同。新增 waypoint/`wtstop` 的 9 组合成场配对与 FSL 6.0.7.22 的 `waytotal` 和 `fdt_paths` 逐项相同，AND 条件下的 matrix2 `.dot` 亦逐项相同。`tests/probtrackx/` 的 40 项 CPU/CUDA 回归测试在 gpucw1 全部通过。合成数据只验证计数规则，不用于正式精度或耗时结论。公开真实 DWI benchmark 覆盖默认追踪、matrix1/2/3、seed-to-target 和五区 network；单 waypoint 的逐体素数组只保留在授权服务器，`wtstop` 的当前证据限于合成规则配对。

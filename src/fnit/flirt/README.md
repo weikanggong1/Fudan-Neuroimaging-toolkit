@@ -1,30 +1,64 @@
-# PyTorch FLIRT 模块
+# TorchFLIRT 源码目录
 
-本目录实现 12 DOF / corratio 和 6 DOF / normmi 线性配准。`core.py` 负责 PyTorch 配准，`coordinates.py` 处理 FSL scaled-mm 与 world-RAS 坐标，`types.py` 管理图像输入和结果，`standalone.py` 提供文件接口，`cli.py` 提供命令行。路径输入经 NiBabel 读取；包内不导入 Surfa，也不调用 FSL。
+本目录实现 FNIT 的单被试线性配准：
+
+- `core.py`：12-DOF/correlation-ratio 仿射配准和 6-DOF/NMI 刚体配准；
+- `coordinates.py`：FSL scaled-mm 与 world-RAS 的矩阵转换；
+- `types.py`：nibabel 输入检查和 `FLIRTResult`；
+- `standalone.py`：FSL 风格路径接口与原子写盘；
+- `cli.py`、`__main__.py`：`fnit-flirt` 命令行入口。
+
+候选运行时只使用 PyTorch、NumPy 和 nibabel，不调用 FSL。CUDA 使用 float32 并默认允许 TF32。
+
+## Python 单被试示例
 
 ```python
 from fnit.flirt import run_flirt
 
 result = run_flirt(
-    input="input_T1.nii.gz",             # 待移动的单帧三维图像
-    reference="reference_T1.nii.gz",   # 固定图像及输出网格
-    output="registered_T1.nii.gz",     # 输出重采样图像
-    omat="input_to_reference.mat",     # 输出 FSL scaled-mm 坐标矩阵
-    init=None,                          # 初始 FSL 矩阵；None 为单位矩阵
-    inweight=None,                      # 输入图像权重
-    refweight=None,                     # 参考图像权重
-    dof=12,                             # 12 自由度仿射配准
-    cost="corratio",                    # 相关比代价函数
-    device="cuda:0",                    # 运行设备；可改为 cpu
-    overwrite=False,                    # 不覆盖已有文件
+    input="subject_GM.nii.gz",  # moving 3D 图像
+    reference="template_GM.nii.gz",  # fixed 图像；决定输出网格
+    output="subject_GM_to_template.nii.gz",  # reference 网格上的 float32 图像
+    omat="subject_GM_to_template.mat",  # input→reference 的 FSL scaled-mm 4×4 矩阵
+    init=None,  # 可选 FSL scaled-mm 初始矩阵
+    inweight=None,  # 可选 input 网格连续权重图
+    refweight=None,  # 可选 reference 网格连续权重图
+    dof=12,  # 当前仿射配置使用 12
+    cost="corratio",  # 当前 12-DOF 配置使用 correlation ratio
+    device="cuda:0",  # 计算设备；可改为 "cpu"
+    overwrite=False,  # 是否覆盖已有输出
 )
-# result.moved：参考网格图像；result.matrix：输入到参考的 FSL 4×4 矩阵；result.qc：运行记录。
 ```
 
-对应命令 `fnit-flirt -in input_T1.nii.gz -ref reference_T1.nii.gz -out registered_T1.nii.gz -omat input_to_reference.mat -dof 12 -cost corratio --device cuda:0`；官方对照命令是 `flirt -in input_T1.nii.gz -ref reference_T1.nii.gz -out registered_T1.nii.gz -omat input_to_reference.mat -dof 12 -cost corratio`。这两条命令的输入、参考、图像输出和矩阵输出含义相同。
+返回值 `result` 包含 `moved`、`matrix`、`moving_to_fixed_world`、`fixed_to_moving_world` 和 `qc`。`moved` 是 `nibabel.Nifti1Image` 子类；`matrix` 是 input→reference 的 FSL scaled-mm 矩阵。
 
-函数参数、内存图像接口、结果字段、坐标说明、真实数据的精度与时间对照见[完整中文文档](../../../docs/flirt/README.md)。2026-09-28 移除 Surfa 的两种配置同输入验证与限制见[迁移报告](../../../validation/flirt_no_surfa_20260928/README.md)。旧 10 例 FSL 对照属于迁移前历史记录，尚未用新路径逐例重测。
+## 命令行
 
-6 DOF / normmi 模式的 8 mm 搜索使用默认 corratio，4/2/1 mm 精化使用 normmi。原 UKB 配对 b0→T1 的迁移前同输入对照：平均矩阵位移 `0.186655 mm`，H100 求解及重采样 `19.155 s` / `0.746 GiB`，FSL CPU 完整命令 `10.02 s`；阶段诊断与迁移后待复测事项见[原 UKB 报告](../../../validation/connectome/ORIGINAL_UKB_FLIRT_STAGE_20260927.md)。
+```bash
+fnit-flirt \
+  -in subject_GM.nii.gz \
+  -ref template_GM.nii.gz \
+  -out subject_GM_to_template.nii.gz \
+  -omat subject_GM_to_template.mat \
+  -dof 12 \
+  -cost corratio \
+  --device cuda:0
+```
 
-本移植及随附上游源码适用 FSL Software Licence Release 6.0（非商业用途）。
+对应的原软件命令为：
+
+```bash
+flirt \
+  -in subject_GM.nii.gz \
+  -ref template_GM.nii.gz \
+  -out subject_GM_to_template.nii.gz \
+  -omat subject_GM_to_template.mat \
+  -dof 12 \
+  -cost corratio
+```
+
+`-in` 是 moving 图像，`-ref` 是 fixed 图像和输出网格，`-out` 保存重采样结果，`-omat` 保存 input→reference 的 FSL scaled-mm 矩阵。当前还支持 `-dof 6 -cost normmi`；其他 FSL 配置会被拒绝。
+
+10 例真实 GM 对照由 `flirt/core.py` `f5315f…` 生成；当前 `ce375d…` 对 **12-DOF/corratio** 的数值路径保持源码等价，没有 fresh current-hash 完整重跑。CPU 和默认 TF32 GPU 均有 9/10 例满足矩阵 `rmsdiff <= 0.05 mm`，moved Pearson 中位数分别为 0.999985 和 0.999823。完整命令中位时间为 FSL CPU 27.705 s、FNIT CPU 82.159 s、FNIT H100 30.165 s。该结果不构成逐元素或完整数值等价，也不覆盖已改变的 6-DOF/normmi 路径。源码链见[配置限定的证明](../../../validation/runtime_dependencies/flirt_profile_source_equivalence.public.json)。
+
+输入、输出结构、参数说明、坐标公式、当前源码报告和公开示意图见[功能说明](../../../docs/flirt/README.md)。

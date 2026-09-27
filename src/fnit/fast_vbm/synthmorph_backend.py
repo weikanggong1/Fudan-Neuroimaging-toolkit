@@ -2,20 +2,23 @@
 
 from dataclasses import dataclass
 
+import nibabel as nib
 import numpy as np
-import surfa as sf
 import torch
+
+from .._nib import FNITNifti1Image, new_image
+from .._transforms import same_geometry
 
 
 @dataclass
 class SynthMorphVBMResult:
     """Template-space images and the target-to-source SynthMorph pull warp."""
 
-    moved: sf.Volume
-    pull_transform: sf.Warp
-    full_pull_jacobian: sf.Volume
-    nonlinear_jacobian: sf.Volume
-    modulated_gm: sf.Volume
+    moved: FNITNifti1Image
+    pull_transform: nib.Nifti1Image
+    full_pull_jacobian: FNITNifti1Image
+    nonlinear_jacobian: FNITNifti1Image
+    modulated_gm: FNITNifti1Image
     affine_pull_determinant: float
     qc: dict
 
@@ -95,22 +98,24 @@ def pull_jacobian_determinants(
 
 
 def _world_affine(initial, moving, fixed):
-    if not isinstance(initial, sf.Affine):
-        raise TypeError("moving_to_fixed must be a surfa.Affine")
-    if not sf.transform.image_geometry_equal(moving.geom, initial.source, tol=1e-3):
+    source_geometry = getattr(initial, "source", None)
+    target_geometry = getattr(initial, "target", None)
+    if source_geometry is not None and not same_geometry(
+        source_geometry, moving, tolerance=1e-3
+    ):
         raise ValueError("moving_to_fixed source geometry does not match moving")
-    if not sf.transform.image_geometry_equal(fixed.geom, initial.target, tol=1e-3):
+    if target_geometry is not None and not same_geometry(
+        target_geometry, fixed, tolerance=1e-3
+    ):
         raise ValueError("moving_to_fixed target geometry does not match fixed")
-    try:
-        initial = initial.convert(space="world")
-    except RuntimeError as error:
-        raise ValueError("moving_to_fixed must define its coordinate space") from error
-    matrix = np.asarray(initial.matrix)
+    matrix = np.asarray(initial, dtype=np.float64)
     if matrix.shape != (4, 4) or not np.isfinite(matrix).all():
         raise ValueError("moving_to_fixed must contain a finite 4x4 matrix")
+    if not np.allclose(matrix[3], (0, 0, 0, 1), atol=1e-8, rtol=0):
+        raise ValueError("moving_to_fixed must be a homogeneous affine matrix")
     if abs(float(np.linalg.det(matrix[:3, :3]))) < 1e-8:
         raise ValueError("moving_to_fixed must be invertible")
-    return initial
+    return matrix
 
 
 class SynthMorphDeformRegistration:
@@ -142,8 +147,10 @@ class SynthMorphDeformRegistration:
 
     def __call__(self, moving, fixed, moving_to_fixed):
         """Register GM after a moving-to-fixed affine initialization."""
-        if not isinstance(moving, sf.Volume) or not isinstance(fixed, sf.Volume):
-            raise TypeError("moving and fixed must be surfa.Volume objects")
+        if not isinstance(moving, nib.spatialimages.SpatialImage) or not isinstance(
+            fixed, nib.spatialimages.SpatialImage
+        ):
+            raise TypeError("moving and fixed must be nibabel spatial images")
         initial = _world_affine(moving_to_fixed, moving, fixed)
         result = self.synthmorph(
             moving,
@@ -151,27 +158,33 @@ class SynthMorphDeformRegistration:
             init=initial,
             mid_space=False,
         )
-        if not isinstance(result.moved, sf.Volume):
-            raise TypeError("SynthMorph moved output must be a surfa.Volume")
-        if not isinstance(result.transform, sf.Warp):
-            raise TypeError("SynthMorph deform output must be a surfa.Warp")
-        pull = result.transform.convert(format=sf.Warp.Format.disp_ras, copy=False)
-        if not sf.transform.image_geometry_equal(pull.source, moving.geom, tol=1e-3):
-            raise ValueError("SynthMorph pull source geometry does not match moving")
-        if not sf.transform.image_geometry_equal(pull.target, fixed.geom, tol=1e-3):
-            raise ValueError("SynthMorph pull target geometry does not match fixed")
-        if not sf.transform.image_geometry_equal(
-            result.moved.geom, fixed.geom, tol=1e-3
+        if not isinstance(result.moved, nib.spatialimages.SpatialImage):
+            raise TypeError("SynthMorph moved output must be a nibabel spatial image")
+        if not isinstance(result.transform, nib.spatialimages.SpatialImage):
+            raise TypeError("SynthMorph deform output must be a nibabel spatial image")
+        pull = result.transform
+        source_geometry = getattr(pull, "source", None)
+        target_geometry = getattr(pull, "target", None)
+        if source_geometry is not None and not same_geometry(
+            source_geometry, moving, tolerance=1e-3
         ):
+            raise ValueError("SynthMorph pull source geometry does not match moving")
+        if target_geometry is not None and not same_geometry(
+            target_geometry, fixed, tolerance=1e-3
+        ):
+            raise ValueError("SynthMorph pull target geometry does not match fixed")
+        if not np.allclose(pull.affine, fixed.affine, atol=1e-3, rtol=0):
+            raise ValueError("SynthMorph pull target geometry does not match fixed")
+        if not np.allclose(result.moved.affine, fixed.affine, atol=1e-3, rtol=0):
             raise ValueError("SynthMorph moved output does not use the fixed grid")
 
         full, nonlinear, affine_pull = pull_jacobian_determinants(
-            pull.data,
-            fixed.geom.vox2world.matrix,
-            initial.matrix,
+            np.asanyarray(pull.dataobj),
+            fixed.affine,
+            initial,
             device=self.device,
         )
-        moved = np.asarray(result.moved.data, dtype=np.float32)
+        moved = np.asarray(result.moved.dataobj, dtype=np.float32)
         if moved.ndim == 4 and moved.shape[-1] == 1:
             moved = moved[..., 0]
         if moved.shape != tuple(fixed.shape[:3]):
@@ -185,10 +198,10 @@ class SynthMorphDeformRegistration:
         nonlinear_array = nonlinear.detach().cpu().numpy().astype(
             np.float32, copy=False
         )
-        moved_volume = fixed.new(moved)
-        full_volume = fixed.new(full_array)
-        nonlinear_volume = fixed.new(nonlinear_array)
-        modulated = fixed.new(moved * nonlinear_array)
+        moved_volume = new_image(moved, fixed)
+        full_volume = new_image(full_array, fixed)
+        nonlinear_volume = new_image(nonlinear_array, fixed)
+        modulated = new_image(moved * nonlinear_array, fixed)
         qc = {
             "warp_convention": (
                 "fixed-grid target-to-source disp-ras: "

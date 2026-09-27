@@ -3,9 +3,9 @@ from types import SimpleNamespace
 import nibabel as nib
 import numpy as np
 import pytest
-import surfa as sf
 
 from fnit import cli as root_cli
+from fnit._nib import new_image
 from fnit.flirt.coordinates import flirt_to_world_affine
 from fnit.fnirt import cli, standalone
 from fnit.fnirt.io import make_fsl_coefficient_image
@@ -51,18 +51,18 @@ def _fake_result(fixed, affine_forward=None):
     coefficient_image = make_fsl_coefficient_image(
         np.zeros((*coefficient_shape, 3), dtype=np.float32),
         fixed.shape[:3],
-        fixed.geom.voxsize,
+        nib.affines.voxel_sizes(fixed.affine),
         knot_spacing,
         affine_forward,
     )
-    moved = fixed.new(np.full(fixed.shape[:3], 0.25, dtype=np.float32))
-    jacobian = fixed.new(np.full(fixed.shape[:3], 1.1, dtype=np.float32))
+    moved = new_image(np.full(fixed.shape[:3], 0.25, dtype=np.float32), fixed)
+    jacobian = new_image(np.full(fixed.shape[:3], 1.1, dtype=np.float32), fixed)
     return SimpleNamespace(
         coefficient_image=coefficient_image,
         moved=moved,
         nonlinear_jacobian=jacobian,
-        full_pull_jacobian=fixed.new(
-            np.full(fixed.shape[:3], 9.9, dtype=np.float32)
+        full_pull_jacobian=new_image(
+            np.full(fixed.shape[:3], 9.9, dtype=np.float32), fixed
         ),
     )
 
@@ -103,12 +103,12 @@ def test_run_fnirt_converts_affine_and_writes_atomic_outputs(tmp_path, monkeypat
     fixed = captured["fixed"]
     expected = flirt_to_world_affine(
         fsl_matrix,
-        moving.geom.vox2world.matrix,
-        fixed.geom.vox2world.matrix,
+        moving.affine,
+        fixed.affine,
         moving.shape[:3],
         fixed.shape[:3],
-        moving.geom.voxsize,
-        fixed.geom.voxsize,
+        nib.affines.voxel_sizes(moving.affine),
+        nib.affines.voxel_sizes(fixed.affine),
     )
     assert np.allclose(captured["world_affine"], expected)
     assert captured["world_affine"].shape == (4, 4)
@@ -137,7 +137,7 @@ def test_run_fnirt_converts_affine_and_writes_atomic_outputs(tmp_path, monkeypat
             coefficient.header["intent_p2"],
             coefficient.header["intent_p3"],
         ],
-        fixed.geom.voxsize,
+        nib.affines.voxel_sizes(fixed.affine),
     )
     assert moved_image.shape == fixed_image.shape
     assert jacobian_image.shape == fixed_image.shape
@@ -221,16 +221,16 @@ def test_run_fnirt_uses_fsl_identity_default_cout_and_auto_device(
     monkeypatch.setenv("FSLOUTPUTTYPE", "NIFTI_GZ")
     standalone.run_fnirt(moving_path, fixed_path, refmask=mask_path)
 
-    moving = sf.load_volume(moving_path)
-    fixed = sf.load_volume(fixed_path)
+    moving = nib.load(moving_path)
+    fixed = nib.load(fixed_path)
     expected = flirt_to_world_affine(
         np.eye(4),
-        moving.geom.vox2world.matrix,
-        fixed.geom.vox2world.matrix,
+        moving.affine,
+        fixed.affine,
         moving.shape[:3],
         fixed.shape[:3],
-        moving.geom.voxsize,
-        fixed.geom.voxsize,
+        nib.affines.voxel_sizes(moving.affine),
+        nib.affines.voxel_sizes(fixed.affine),
     )
     np.testing.assert_allclose(captured["world_affine"], expected)
     assert captured["device"] == "cuda"
@@ -281,33 +281,27 @@ def test_run_fnirt_rejects_unsupported_fsloutputtype(tmp_path, monkeypatch):
         )
 
 
-def test_run_fnirt_protects_automatically_resolved_reference_mask(
-    tmp_path, monkeypatch
-):
+def test_run_fnirt_does_not_resolve_reference_mask_from_fsldir(tmp_path, monkeypatch):
     moving_path, fixed_path, _, matrix_path, _ = _fixture(tmp_path)
     fixed_image = nib.load(fixed_path)
-    fsldir = tmp_path / "fsl"
     standard_mask = (
-        fsldir / "data" / "standard" / standalone.DEFAULT_REFERENCE_MASK
+        tmp_path / "fsl" / "data" / "standard" / standalone.DEFAULT_REFERENCE_MASK
     )
     _save(standard_mask, np.ones(fixed_image.shape), fixed_image.affine)
-    original = standard_mask.read_bytes()
-    monkeypatch.setenv("FSLDIR", str(fsldir))
+    monkeypatch.setenv("FSLDIR", str(tmp_path / "fsl"))
 
     class MustNotRun:
         def __init__(self, **kwargs):
-            raise AssertionError("model ran before output protection")
+            raise AssertionError("model ran without an explicit reference mask")
 
     monkeypatch.setattr(standalone, "TorchFNIRT", MustNotRun)
-    with pytest.raises(ValueError, match="must not replace"):
+    with pytest.raises(ValueError, match="must be provided explicitly"):
         standalone.run_fnirt(
             moving_path,
             fixed_path,
             matrix_path,
-            cout=standard_mask,
-            overwrite=True,
+            cout=tmp_path / "warp.nii.gz",
         )
-    assert standard_mask.read_bytes() == original
 
 
 def test_run_fnirt_requires_a_binary_reference_mask(tmp_path, monkeypatch):
@@ -371,8 +365,8 @@ def test_in_memory_input_requires_explicit_cout(tmp_path):
     moving_path, fixed_path, mask_path, _, _ = _fixture(tmp_path)
     with pytest.raises(ValueError, match="cout is required"):
         standalone.run_fnirt(
-            sf.load_volume(moving_path),
-            sf.load_volume(fixed_path),
+            nib.load(moving_path),
+            nib.load(fixed_path),
             refmask=mask_path,
         )
 

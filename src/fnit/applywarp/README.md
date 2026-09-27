@@ -1,4 +1,4 @@
-# TorchApplyWarp
+# TorchApplyWarp 源码目录
 
 `TorchApplyWarp` 是 FSL `applywarp` 已验证子集的 PyTorch 实现。运行时不调用
 FSL，可在 CPU 或 CUDA 上读取 FSL dense warp 以及 FNIRT cubic coefficient
@@ -9,17 +9,20 @@ FSL，可在 CPU 或 CUDA 上读取 FSL dense warp 以及 FNIRT cubic coefficien
 ```python
 from fnit.applywarp import TorchApplyWarp
 
-result = TorchApplyWarp("cuda:0")(
-    input="subject_GM.nii.gz",
-    reference="GM_template.nii.gz",
-    warp="subject_to_template_coef.nii.gz",
-    premat=None,
-    postmat=None,
-    interpolation="trilinear",
-    warp_convention="auto",
-    output_dtype="float",
+warper = TorchApplyWarp(
+    device="cuda:0",  # 运行设备：第一张可见 CUDA GPU
 )
-result.save("subject_GM_to_template.nii.gz")
+result = warper(
+    input="subject_GM.nii.gz",  # 输入：待重采样的 3D 图像或 4D 序列
+    reference="GM_template.nii.gz",  # 输入：定义输出 shape 与空间几何的参考图
+    warp="subject_to_template_coef.nii.gz",  # 输入：dense warp 或 intent-2007 系数
+    premat=None,  # 输入：warp 之前的 FLIRT scaled-mm 矩阵
+    postmat=None,  # 输入：warp 之后的 FLIRT scaled-mm 矩阵
+    interpolation="trilinear",  # 插值：连续图像使用三线性
+    warp_convention="auto",  # warp 约定：按 FSL 规则自动判定 relative/absolute
+    output_dtype="float",  # 输出：写盘时使用 float32
+)
+result.save(path="subject_GM_to_template.nii.gz")  # 输出路径：reference 网格重采样图像
 ```
 
 `result.image` 是 reference 网格上的 NIfTI image，`result.valid_mask` 标记 warp
@@ -27,12 +30,14 @@ result.save("subject_GM_to_template.nii.gz")
 插值和 dtype。需要一步写盘时使用：
 
 ```python
-TorchApplyWarp("cuda:0").run(
-    "subject_GM.nii.gz",
-    "GM_template.nii.gz",
-    "subject_GM_to_template.nii.gz",
-    warp="subject_to_template_coef.nii.gz",
-    interpolation="trilinear",
+TorchApplyWarp(
+    device="cuda:0",  # 运行设备：第一张可见 CUDA GPU
+).run(
+    input="subject_GM.nii.gz",  # 输入：待重采样图像
+    reference="GM_template.nii.gz",  # 输入：输出参考网格
+    output="subject_GM_to_template.nii.gz",  # 输出：写盘路径
+    warp="subject_to_template_coef.nii.gz",  # 输入：intent-2007 系数文件
+    interpolation="trilinear",  # 插值：连续图像使用三线性
 )
 ```
 
@@ -42,10 +47,10 @@ TorchApplyWarp("cuda:0").run(
 from fnit.applywarp import applywarp
 
 result = applywarp(
-    "subject_GM.nii.gz",
-    "GM_template.nii.gz",
-    warp="subject_to_template_warp.nii.gz",
-    device="cuda:0",
+    input="subject_GM.nii.gz",  # 输入：待重采样图像
+    reference="GM_template.nii.gz",  # 输入：输出参考网格
+    warp="subject_to_template_warp.nii.gz",  # 输入：dense warp
+    device="cuda:0",  # 运行设备：第一张可见 CUDA GPU
 )
 ```
 
@@ -160,25 +165,39 @@ float/double 输入保持 dtype；整数输入在输出动态范围小于 100 �
 supersampling、`--paddingsize`、`--mask`、`--usesqform` 和逐帧矩阵。CLI 会拒绝
 这些选项，代码不会把它们降级成已支持模式。
 
-## 与 FSL 6.0.7.4 的验证
+## 当前真实数据验证
 
-解析验证脚本为
-[`tools/validate_applywarp_fsl.py`](../../../tools/validate_applywarp_fsl.py)：
+2026 年 9 月 27 日用 1 例去标识化的真实 UKB 格式 dMRI 完成了独立验证。输入是
+TBSS 预处理后的 native FA，reference 是 `FMRIB58_FA_1mm`，warp 是 FSL FNIRT
+生成的 intent-2007 cubic coefficient；FSL 直接 `applywarp` 输出作为 reference。
+验证运行的 `src/fnit/applywarp/core.py` SHA-256 为
+`cf6de438f3ac1551804d38682ce3fbb11b8fb042ad881562ebc93aada80f2df5`，与本页源码一致。
 
-```bash
-module load fsl/6.0.7.4
-PYTHONPATH=src python tools/validate_applywarp_fsl.py \
-  --work-dir /tmp/applywarp-parity \
-  --device cuda:0 \
-  --json-out validation/applywarp/report.json
-```
+| 检查 | 结果 |
+|---|---:|
+| 输出 shape / affine / dtype | 全部一致 |
+| union-support voxel | 1,548,144 |
+| Pearson r | 0.999999999994 |
+| MAE | 3.55e-7 |
+| RMSE | 5.87e-7 |
+| 最大绝对误差 | 1.18e-5 |
+| 有效采样体素比例 | 0.565360 |
+| H100 peak CUDA allocation | 1.958 GB |
 
-脚本用坐标 ramp 检查 dense 与 cubic coefficient、trilinear 与 nearest、含/不含
-premat 和 postmat，并用 `fnirtfileutils --out`、`--withaff` 分别检查 residual
-展开和 embedded affine。它还检查 reference header、显式 short dtype，并在
-91×109×91 的 2 mm synthetic fixture 上记录 FSL CPU、PyTorch CPU 和 PyTorch
-GPU 的端到端 NIfTI 读写时间。当前机器实测结果见
-[`validation/applywarp/report.json`](../../../validation/applywarp/report.json)。
+FNIT 先预热一次，再测三次；每次包含 NIfTI 读取、coefficient 展开、GPU
+重采样和输出回传 CPU，不含最后写盘，耗时为 `0.337/0.259/0.364 s`，中位数
+`0.337 s`。FSL 6.0.7.4 的三次外部命令包含读取、计算和写盘，耗时为
+`6.19/5.11/5.67 s`，中位数 `5.67 s`。两者计时边界不同，因此不据此计算加速比。
 
-单元测试和可选 FSL 外部测试位于
-[`tests/applywarp`](../../../tests/applywarp)。
+![真实 FA 的 FSL applywarp 与 FNIT TorchApplyWarp 对照](../../../docs/applywarp/figures/applywarp_real_fa_comparison.png)
+
+机器可读结果见
+[`report.real.current.json`](../../../validation/applywarp/report.real.current.json)，复现脚本见
+[`validate_real.py`](../../../validation/applywarp/validate_real.py)。报告只发布数据类型和文件
+SHA-256，不发布受试者标识。这个结果验证了单例连续 FA、trilinear 和 intent-2007
+coefficient；不能外推到其他病例、nearest、dense warp 或未实现选项。
+
+## 测试
+
+单元测试位于 [`tests/applywarp`](../../../tests/applywarp)。当前真实数据复现入口为
+[`validation/applywarp/validate_real.py`](../../../validation/applywarp/validate_real.py)；它要求调用方显式提供输入、FSL reference、coefficient warp 与输出目录。测试和验证期间可以安装 FSL 生成参照，`TorchApplyWarp` 的正常运行不调用 FSL。

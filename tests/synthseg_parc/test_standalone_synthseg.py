@@ -3,6 +3,7 @@
 from pathlib import Path
 from types import SimpleNamespace
 
+import nibabel as nib
 import numpy as np
 import torch
 
@@ -44,17 +45,24 @@ def test_independent_api_uses_one_weight_directory_and_recon_soft_volumes(tmp_pa
 
     prepared = SimpleNamespace(
         image=torch.zeros((2, 2, 2)), aligned_affine=np.diag([2., 1., 1., 1.]),
-        content_slices=(slice(0, 2),) * 3,
+        content_slices=(slice(0, 2),) * 3, input_affine=np.eye(4),
+        original_shape=(2, 2, 2),
         volume_affine=np.diag([2., 1., 1., 1.]), voxel_volume_mm3=2.0,
     )
     monkeypatch.setattr(synthseg, "SynthSegSegmenter", FakeSegmenter)
     monkeypatch.setattr(synthseg, "preprocess_t1", lambda image, device: prepared)
     monkeypatch.delenv("FREESURFER_HOME", raising=False)
 
-    result = SynthSeg(weights=model, device="cpu")("t1.nii.gz")
+    source = nib.Nifti1Image(np.zeros((2, 2, 2), dtype=np.float32), np.eye(4))
+    model_instance = SynthSeg(weights=model, device="cpu")
+    result = model_instance(source)
     assert observed == [(model, tmp_path / "synthseg_segmentation_labels_2.0.npy", "cpu")]
-    assert int(result.segmentation.data[0, 0, 0]) == 1
-    assert result.segmentation.data.dtype == np.float32
+    assert isinstance(result.segmentation, nib.Nifti1Image)
+    segmentation = np.asanyarray(result.segmentation.dataobj)
+    assert int(segmentation[0, 0, 0]) == 1
+    assert segmentation.dtype == np.int32
+    assert int(result.segmentation.header["qform_code"]) == 0
+    assert int(result.segmentation.header["sform_code"]) == 2
     assert result.near_tie_voxels == 1
     assert result.volumes_mm3[1] == 15.0
     assert result.volumes_mm3[2] == 1.0
@@ -67,6 +75,20 @@ def test_independent_api_uses_one_weight_directory_and_recon_soft_volumes(tmp_pa
     result.total_intracranial_mm3 = 1280294.25
     result.write_volumes_csv("case.nii.gz", csv_path)
     assert csv_path.read_text().splitlines()[1].startswith("case,1280294.2,")
+
+    saved = tmp_path / "segmentation.nii.gz"
+    result.segmentation.save(saved)
+    reloaded = nib.load(saved)
+    assert reloaded.get_data_dtype() == np.dtype(np.int32)
+    assert int(reloaded.header["qform_code"]) == 0
+    assert int(reloaded.header["sform_code"]) == 2
+
+    kept = model_instance(source, keep_geometry=True).segmentation
+    assert kept.shape == source.shape
+    assert np.array_equal(kept.affine, source.affine)
+    assert kept.get_data_dtype() == np.dtype(np.int32)
+    assert int(kept.header["qform_code"]) == 0
+    assert int(kept.header["sform_code"]) == 2
 
 
 def test_public_cli_calls_shared_synthseg_api(tmp_path, monkeypatch):

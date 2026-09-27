@@ -1,8 +1,8 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "date": "2026-09-27",
   "feature": "TorchEDDY",
-  "fnit_version": "0.12.0",
+  "fnit_version": "0.14.0",
   "reference": {
     "software": "FSL 6.0.7.4 EDDY",
     "component_cpu": "fsl-eddy 2111.0",
@@ -108,20 +108,14 @@
     "reference_gpu_seconds": 646.52,
     "reference_gpu_runs": 1,
     "reference_gpu_max_rss_kb": 1208024,
-    "candidate_gpu_seconds": [
-      55.5,
-      47.71,
-      46.71,
-      57.82
-    ],
-    "candidate_gpu_median_seconds": 51.605,
-    "candidate_final_deterministic_seconds": 57.82,
-    "candidate_final_internal_seconds": 27.1725,
-    "candidate_final_max_rss_kb": 2247300,
-    "candidate_final_peak_cuda_memory_bytes": 3480320512,
-    "reference_gpu_over_candidate_final_speedup": 11.181598062953995,
-    "reference_gpu_over_candidate_median_speedup": 12.528243387268676,
-    "reference_cpu_over_candidate_final_speedup": 31.89484607402283
+    "candidate_current_seconds": 55.8,
+    "candidate_current_runs": 1,
+    "candidate_current_internal_seconds": 28.992895232047886,
+    "candidate_current_max_rss_kb": 2238232,
+    "candidate_current_peak_cuda_memory_bytes": 3480320512,
+    "reference_gpu_over_candidate_current_speedup": 11.586379928315413,
+    "reference_cpu_over_candidate_current_speedup": 33.0494623655914,
+    "shared_host": true
   },
   "contract": {
     "fsl_core_output_contract": true,
@@ -132,5 +126,31 @@
   },
   "figure": "docs/eddy/figures/eddy_fsl_comparison.png",
   "raw_subject_data_in_repository": false,
-  "figure_sha256": "45556fd0782552026b3e4c5f56ae6901fd990e10efa87b58f99aa54752e43cd1"
+  "figure_sha256": "45556fd0782552026b3e4c5f56ae6901fd990e10efa87b58f99aa54752e43cd1",
+  "candidate": {
+    "implementation": "FNIT TorchEDDY current source",
+    "source_sha256": {
+      "src/fnit/eddy/core.py": "218733afd990fd4dec77ad7ac7dc2718571fc7058972793ebc01c4d525b657d2",
+      "src/fnit/eddy/cli.py": "6d6bb36183ca15bb2692d1658cc3f1cccbade332465f3b933ff04710266c93fb",
+      "src/fnit/_dmri.py": "b6bf837f8b5a0a8f0d910706631e882a9e3f8dfc1f1ef77e1cfac7efe36fafbf",
+      "src/fnit/fnirt/spline.py": "7bb3bf5cd84da8b1c35a3e9ff2ef2d815307770c25b1228adf4e96f1dc4d6659"
+    },
+    "current_run": {
+      "fresh_process": true,
+      "same_real_input_and_FSL_reference_as_metrics": true,
+      "core_outputs_byte_identical_to_metric_producing_candidate": true,
+      "core_output_sha256": {
+        "data.nii.gz": "897b455e2e687f2b85e8bfce7415c998b2ab3fac636a6df58f565e387a9dfd2b",
+        "data.eddy_rotated_bvecs": "c353bb7a84e40e919c546033ba1e8b22d7a7a1527242560a57540cfe31e5d168",
+        "data.eddy_parameters": "814429e35a5038f10b03869c18733be7701a7d3e2e4dca94c33fb66978519f73",
+        "data.eddy_movement_rms": "021a273fa2f7787daf6b311ba67aa0acf3fb3edff2f7fb0c2576374f168aecdd",
+        "data.eddy_restricted_movement_rms": "021a273fa2f7787daf6b311ba67aa0acf3fb3edff2f7fb0c2576374f168aecdd",
+        "data.eddy_outlier_map": "7d220604d97466b22951ad62cf71d5cbd191265a5356aac0f45d8221c9cd0094",
+        "data.eddy_outlier_n_stdev_map": "6334b127da61503b371d778d61b4e1569611f135f87afaca4b4cab4e7a136d20",
+        "data.eddy_outlier_report": "65580fde15c8398b565d8d4627e2c02bee9eab26f4ca041e1ff1cb78d5cb8a58"
+      },
+      "qc_addition_since_metric_run": "topup_applied=true only; numerical path unchanged"
+    }
+  },
+  "metric_provenance": "The current fresh run produced all eight shared core outputs byte-for-byte identical to the candidate used for the stored FSL CPU/GPU comparisons; therefore the stored accuracy metrics and figure apply exactly to current source."
 }

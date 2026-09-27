@@ -151,24 +151,28 @@ def test_mmorf_cli_delegates_to_public_function(monkeypatch, tmp_path):
     assert captured["kwargs"]["device"] == "cpu"
 
 
-def test_vendored_mmorf_snapshot_matches_manifest():
+def test_vendored_fsl_snapshots_match_manifest():
     package = Path(__file__).parents[2] / "src" / "fnit" / "_vendor_fsl"
     manifest = json.loads((package / "manifest.json").read_text())
-    entry = next(
-        item for item in manifest["components"]
-        if item["directory"] == "sources/mmorf-0.3.2"
-    )
-    root = package / entry["directory"]
-    distributed = {
-        str(path.relative_to(root)): path
-        for path in root.rglob("*") if path.is_file()
-    }
-    assert set(distributed) == set(entry["files"])
-    assert sum(path.stat().st_size for path in distributed.values()) == entry["content_bytes"]
-    for name, metadata in entry["files"].items():
-        data = distributed[name].read_bytes()
-        assert len(data) == metadata["bytes"]
-        assert hashlib.sha256(data).hexdigest() == metadata["sha256"]
+    for entry in manifest["components"]:
+        root = package / entry["directory"]
+        distributed = {
+            str(path.relative_to(root)): path
+            for path in root.rglob("*")
+            if path.is_file()
+            and "__pycache__" not in path.parts
+            and path.suffix != ".pyc"
+        }
+        assert set(distributed) == set(entry["files"]), entry["directory"]
+        assert len(distributed) == entry["file_count"]
+        assert (
+            sum(path.stat().st_size for path in distributed.values())
+            == entry["content_bytes"]
+        )
+        for name, metadata in entry["files"].items():
+            data = distributed[name].read_bytes()
+            assert len(data) == metadata["bytes"]
+            assert hashlib.sha256(data).hexdigest() == metadata["sha256"]
 
 
 

@@ -1,4 +1,4 @@
-# SynthStrip
+# SynthStrip 源码目录
 
 这里实现脑提取。`model.py` 定义官方 U-Net，`pipeline.py` 实现影像处理及 `SynthStrip`、`StripResult`，`__init__.py` 导出接口。单被试命令使用统一的 `fnit synthstrip` 入口。
 
@@ -6,21 +6,26 @@
 from fnit.synthstrip import SynthStrip
 
 model = SynthStrip(
-    weights="/path/to/weights",  # 输入：模型权重文件或目录
-    device="cuda:0",           # 输入：推理设备
-    no_csf=False,              # 输入：是否使用排除脑脊液的权重
-    threads=4,                 # 输入：PyTorch CPU 线程数
+    weights="/path/to/weights",  # 权重输入：官方 PT 文件或权重目录
+    device="cuda:0",  # 计算设备；可改为 "cpu"
+    no_csf=False,  # 使用保留 CSF 的默认模型
+    threads=4,  # 预处理和后处理使用的 CPU 线程数
 )
 result = model(
-    image="subject_T1w.nii.gz",  # 输入：T1 影像路径
-    border=1,                   # 输入：脑掩膜距离阈值，mm
-    fill=0,                     # 输入：掩膜外的强度
+    image="subject_T1w.nii.gz",  # 输入：3D T1w 或逐 frame 处理的 4D 图像
+    border=1,  # 距离场小于 1 mm 的体素归入脑 mask
+    fill=0,  # 脑外输出填充值
 )
-result.mask.save("subject_mask.nii.gz")  # 输出：二值脑掩膜
+result.mask.save(path="subject_mask.nii.gz")  # 输出路径：二值脑掩膜
 ```
 
-调用返回去颅骨图像 `image`、脑掩膜 `mask` 和符号距离图 `distance`。路径或 nibabel 输入返回仓库内 `Volume`，包含 `.data`、`.affine`、`.geom.vox2world.matrix`、`.geom.voxsize`、`.save(path)`；已有 Surfa 内存对象仍返回同类对象。输入可为 3D 图像或逐帧处理的 4D 图像。
+调用返回三个 `FNITNifti1Image`（`nibabel.Nifti1Image` 子类）：去颅骨图像 `image`、脑掩膜 `mask` 和符号距离图 `distance`。三者保留输入几何；输入可为 3D 图像或逐帧处理的 4D 图像。
 
-同输入、官方命令和本包命令的实际体素、几何与耗时记录见[无 Surfa 迁移验证](../../../validation/synthstrip_no_surfa_20260927/README.md)。
+当前 12 例真实 T1w、H100 单进程 CLI 对照中，FreeSurfer 8.2 / FNIT
+墙钟中位数为 `16.916 / 16.395 s`；最低 mask Dice 为 `0.993925`，最低 brain
+image Pearson r 为 `0.994261`。FNIT 单例 PyTorch peak allocation 为
+`8.316 GB`。候选使用默认 TF32，官方参考关闭 TF32，因此不声明逐体素完全相同。
+当前报告绑定 `pipeline.py`、`model.py`、`_nib.py` 和 `weights.py` 的源码
+SHA-256；逐例指标和图见[功能说明](../../../docs/synthstrip/README.md)。
 
 [完整参数、CLI、源码分析与验证](../../../docs/synthstrip/README.md) · [权重](../../../docs/WEIGHTS.md)

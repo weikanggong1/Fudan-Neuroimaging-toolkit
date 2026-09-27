@@ -1,577 +1,774 @@
 {
-  "n": 12,
-  "case_order": [
-    "case01",
-    "case02",
-    "case03",
-    "case04",
-    "case05",
-    "case06",
-    "case07",
-    "case08",
-    "case09",
-    "case10",
-    "case11",
-    "case12"
-  ],
-  "case_ids_anonymized": true,
-  "arm_seconds": {
-    "official-cpu": {
-      "median": 97.38422088208608,
-      "mean": 98.33241952067085,
-      "range": [
-        67.38646902097389,
-        124.30483487783931
-      ]
+  "schema": "fnit_current_source_real_validation/v2",
+  "feature": "wmh-synthseg",
+  "run_date": "2026-09-27",
+  "candidate_source": {
+    "base_git_commit": "9146b0004468ffc2a30cacad0ab4fa7b6fdb3b48",
+    "working_tree_state": "uncommitted current source",
+    "files": {
+      "fnit/_dmri.py": "b6bf837f8b5a0a8f0d910706631e882a9e3f8dfc1f1ef77e1cfac7efe36fafbf",
+      "fnit/_nib.py": "bffd56aeaca423b2448432ba318212e83549e9e31aa27af6bf20a60888218586",
+      "fnit/weights.py": "9d275a1bd4064ff9bd1eb8aaef589ce7804258e7f6c39cd127deae2623d6eb9a",
+      "fnit/wmh_synthseg/__init__.py": "025cb2db3b2a4f006fcc1a687c61a46591c87b08ba56c8c586a72ae6ae17c7a7",
+      "fnit/wmh_synthseg/model.py": "dd95cd0816c308ba5a14de4b5bd8ddbeaf640656515d0713bbeb5df11533bf6c",
+      "fnit/wmh_synthseg/pipeline.py": "465c3a9565e05892ef71e95b938600ee286bcef971237e7dc6077175738ca1e5",
+      "fnit/wmh_synthseg/spatial.py": "d81416104064110511ee0f073998b3e19959748c74ad88675d90488a261db8a6"
     },
-    "official-cuda": {
-      "median": 8.252821628469974,
-      "mean": 8.408246534585487,
-      "range": [
-        7.921222314005718,
-        9.66022250498645
-      ]
+    "tree_sha256": "39cd9b4c380a93370c1244e72eea4c3eaa9f277dd8d70ef44a4ec2293e6a5860"
+  },
+  "environment": {
+    "gpu_host": "gpucw1",
+    "gpu": "NVIDIA H100 PCIe 80 GB",
+    "cpu_host": "headcw",
+    "cpu": "Intel Xeon Gold 6418H",
+    "python": "3.11",
+    "pytorch": "2.5.1+cu118",
+    "cuda_runtime": "11.8",
+    "nibabel": "5.4.2",
+    "numpy": "1.26.4"
+  },
+  "inputs": {
+    "n": 3,
+    "kind": "real public brain-exterior-zeroed FLAIR derivatives",
+    "source": "OpenNeuro ds003592; repository examples sub-02, sub-03, sub-04",
+    "manual_ground_truth": false
+  },
+  "reference": {
+    "software": "FreeSurfer 8.2.0-1 mri_WMHsynthseg",
+    "device": "CPU",
+    "status": "fresh reference outputs generated for the same three public inputs",
+    "candidate_runtime_called_reference": false,
+    "observed_concurrent_wall_seconds": [
+      171.0032261274755,
+      109.9918223740533,
+      105.74753336980939
+    ],
+    "timing_use": "accuracy reference only; jobs overlapped, so these seconds are not used for a speed ratio",
+    "output_manifest": [
+      {
+        "case": "sub-02",
+        "segmentation": {
+          "file": "sub-02_seg.nii.gz",
+          "shape": [
+            192,
+            216,
+            126
+          ],
+          "dtype": "float32",
+          "affine": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -94.7549057006836
+            ],
+            [
+              0.0,
+              0.9959005117416382,
+              -0.09045466035604477,
+              -89.07371520996094
+            ],
+            [
+              -0.0,
+              0.0904550701379776,
+              0.995900571346283,
+              -81.90336608886719
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "qform_code": 0,
+          "sform_code": 2,
+          "sha256": "d619a4f6bc7ade20977d574e4d86b0114ebbd2412a40310c6aa9454b13152eb8"
+        },
+        "lesion_probability": {
+          "file": "sub-02_seg.lesion_probs.nii.gz",
+          "shape": [
+            192,
+            216,
+            126
+          ],
+          "dtype": "float32",
+          "affine": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -94.7549057006836
+            ],
+            [
+              0.0,
+              0.9959005117416382,
+              -0.09045466035604477,
+              -89.07371520996094
+            ],
+            [
+              -0.0,
+              0.0904550701379776,
+              0.995900571346283,
+              -81.90336608886719
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "qform_code": 0,
+          "sform_code": 2,
+          "sha256": "39ac860b26d8fad724f13c0f8ae3fbfd7580f601b10ff8f547a23031db4c982c"
+        },
+        "csv_sha256": "1e4cb92553e964619af722ad973f9696102be0491972c93a47b0cd2c195edfc3"
+      },
+      {
+        "case": "sub-03",
+        "segmentation": {
+          "file": "sub-03_seg.nii.gz",
+          "shape": [
+            192,
+            216,
+            120
+          ],
+          "dtype": "float32",
+          "affine": [
+            [
+              1.0,
+              0.0,
+              -0.0,
+              -96.25790405273438
+            ],
+            [
+              0.0,
+              0.9930344820022583,
+              0.11782397329807281,
+              -90.7796859741211
+            ],
+            [
+              -0.0,
+              -0.11782406270503998,
+              0.9930344820022583,
+              -39.58333206176758
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "qform_code": 0,
+          "sform_code": 2,
+          "sha256": "ec69109c64025d8b9698a177b04314295f70aae853780258dcbec05041f51f6c"
+        },
+        "lesion_probability": {
+          "file": "sub-03_seg.lesion_probs.nii.gz",
+          "shape": [
+            192,
+            216,
+            120
+          ],
+          "dtype": "float32",
+          "affine": [
+            [
+              1.0,
+              0.0,
+              -0.0,
+              -96.25790405273438
+            ],
+            [
+              0.0,
+              0.9930344820022583,
+              0.11782397329807281,
+              -90.7796859741211
+            ],
+            [
+              -0.0,
+              -0.11782406270503998,
+              0.9930344820022583,
+              -39.58333206176758
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "qform_code": 0,
+          "sform_code": 2,
+          "sha256": "c1a3ec756fcd75e4d8e9c9650ac65a0f3ee016133250ab0bb2f7bb28f4688647"
+        },
+        "csv_sha256": "32c0cb4c40c5a8313808195238f7535835caea4efc3dd6a7a962efa51f3c4efa"
+      },
+      {
+        "case": "sub-04",
+        "segmentation": {
+          "file": "sub-04_seg.nii.gz",
+          "shape": [
+            192,
+            216,
+            126
+          ],
+          "dtype": "float32",
+          "affine": [
+            [
+              1.0,
+              0.0,
+              -0.0,
+              -94.91390228271484
+            ],
+            [
+              0.0,
+              0.9974645376205444,
+              0.07116534560918808,
+              -87.61981201171875
+            ],
+            [
+              -0.0,
+              -0.07116493582725525,
+              0.9974645376205444,
+              -58.79562759399414
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "qform_code": 0,
+          "sform_code": 2,
+          "sha256": "04bb6e8651adab1d8ba4e6e5b7b5b9bb70911e199b7b5a47c24e6b4d2ab86659"
+        },
+        "lesion_probability": {
+          "file": "sub-04_seg.lesion_probs.nii.gz",
+          "shape": [
+            192,
+            216,
+            126
+          ],
+          "dtype": "float32",
+          "affine": [
+            [
+              1.0,
+              0.0,
+              -0.0,
+              -94.91390228271484
+            ],
+            [
+              0.0,
+              0.9974645376205444,
+              0.07116534560918808,
+              -87.61981201171875
+            ],
+            [
+              -0.0,
+              -0.07116493582725525,
+              0.9974645376205444,
+              -58.79562759399414
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "qform_code": 0,
+          "sform_code": 2,
+          "sha256": "10c822e0b8e553fdb60b158672646e8d7a67591ec730b96834b6a6a2b48a493f"
+        },
+        "csv_sha256": "a1e998f870c7ee1cd0c7f7edda9f70f338b4db0f9b1c549de5a7e165d735f33f"
+      }
+    ]
+  },
+  "candidate_gpu": {
+    "device": "H100 GPU; default TF32 enabled",
+    "complete_cli_seconds": {
+      "count": 3,
+      "median": 11.34,
+      "mean": 11.06,
+      "minimum": 10.17,
+      "maximum": 11.67
     },
-    "torch-cpu": {
-      "median": 70.68619873840362,
-      "mean": 71.05111255399727,
-      "range": [
-        69.91620977385901,
-        74.6698445121292
-      ]
-    },
-    "torch-cuda": {
-      "median": 8.4148108944064,
-      "mean": 8.973380430407511,
-      "range": [
-        8.055973400129005,
-        13.393944500945508
-      ]
+    "records": [
+      {
+        "case": "sub-02",
+        "shape": [
+          192,
+          216,
+          126
+        ],
+        "segmentation_voxel_agreement": 0.9999844990079365,
+        "segmentation_disagreeing_voxels": 81,
+        "wmh_hard_dice": 0.9998580956435362,
+        "wmh_voxels_reference": 3524,
+        "wmh_voxels_candidate": 3523,
+        "lesion_probability_mae": 4.982339084099364e-07,
+        "lesion_probability_nrmse": 0.001155533511929163,
+        "lesion_probability_max_abs": 0.006676822900772095,
+        "segmentation_affine_max_abs": 0.0,
+        "probability_affine_max_abs": 0.0,
+        "wmh_soft_volume_mm3_reference": 3925.4248,
+        "wmh_soft_volume_mm3_candidate": 3927.7344,
+        "max_csv_volume_abs_error_mm3": 52.10000000000582
+      },
+      {
+        "case": "sub-03",
+        "shape": [
+          192,
+          216,
+          120
+        ],
+        "segmentation_voxel_agreement": 0.9999780976723252,
+        "segmentation_disagreeing_voxels": 109,
+        "wmh_hard_dice": 0.9998868650299808,
+        "wmh_voxels_reference": 13257,
+        "wmh_voxels_candidate": 13260,
+        "lesion_probability_mae": 9.533647660994053e-07,
+        "lesion_probability_nrmse": 0.0007386048020439689,
+        "lesion_probability_max_abs": 0.008556187152862549,
+        "segmentation_affine_max_abs": 0.0,
+        "probability_affine_max_abs": 0.0,
+        "wmh_soft_volume_mm3_reference": 13833.705,
+        "wmh_soft_volume_mm3_candidate": 13837.671,
+        "max_csv_volume_abs_error_mm3": 62.62000000005355
+      },
+      {
+        "case": "sub-04",
+        "shape": [
+          192,
+          216,
+          126
+        ],
+        "segmentation_voxel_agreement": 0.9999814370835783,
+        "segmentation_disagreeing_voxels": 97,
+        "wmh_hard_dice": 0.9998100183648914,
+        "wmh_voxels_reference": 23682,
+        "wmh_voxels_candidate": 23691,
+        "lesion_probability_mae": 1.8451490730664003e-06,
+        "lesion_probability_nrmse": 0.0009196264919433274,
+        "lesion_probability_max_abs": 0.009605973958969116,
+        "segmentation_affine_max_abs": 0.0,
+        "probability_affine_max_abs": 0.0,
+        "wmh_soft_volume_mm3_reference": 24159.684,
+        "wmh_soft_volume_mm3_candidate": 24168.105,
+        "max_csv_volume_abs_error_mm3": 57.45000000001164
+      }
+    ],
+    "output_manifest": [
+      {
+        "case": "sub-02",
+        "input_sha256": "5d89375e39443cea96b42176b0fc07491a9a2d2c545ea397a8d460c25c0e929e",
+        "segmentation": {
+          "shape": [
+            192,
+            216,
+            126
+          ],
+          "dtype": "float32",
+          "affine": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -94.7549057006836
+            ],
+            [
+              0.0,
+              0.9959005117416382,
+              -0.09045466035604477,
+              -89.07371520996094
+            ],
+            [
+              -0.0,
+              0.0904550701379776,
+              0.995900571346283,
+              -81.90336608886719
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "qform_code": 1,
+          "sform_code": 1,
+          "sha256": "7722394e3f0f474cf3384ae55888968079fcdfe77bf86c74cab9accb2e804a86"
+        },
+        "lesion_probability": {
+          "shape": [
+            192,
+            216,
+            126
+          ],
+          "dtype": "float32",
+          "affine": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              -94.7549057006836
+            ],
+            [
+              0.0,
+              0.9959005117416382,
+              -0.09045466035604477,
+              -89.07371520996094
+            ],
+            [
+              -0.0,
+              0.0904550701379776,
+              0.995900571346283,
+              -81.90336608886719
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "qform_code": 1,
+          "sform_code": 1,
+          "sha256": "8620a68f642de24ed8869d6c56dc729e2716a993b40d00e323d869f46023696f"
+        },
+        "csv_sha256": "e7a35a4924a67b0ce8698935ea6e0f9e337b08559fb31d9c7f396083bb8aed5b"
+      },
+      {
+        "case": "sub-03",
+        "input_sha256": "be462c4f889487db7ade74a1c501fb9937f53830c16d1b8a75d8a183afb84f47",
+        "segmentation": {
+          "shape": [
+            192,
+            216,
+            120
+          ],
+          "dtype": "float32",
+          "affine": [
+            [
+              1.0,
+              0.0,
+              -0.0,
+              -96.25790405273438
+            ],
+            [
+              0.0,
+              0.9930344820022583,
+              0.11782397329807281,
+              -90.7796859741211
+            ],
+            [
+              -0.0,
+              -0.11782406270503998,
+              0.9930344820022583,
+              -39.58333206176758
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "qform_code": 1,
+          "sform_code": 1,
+          "sha256": "63e031f00c877b887eaf94696b29ea624030958092114c811e76aea1f3ef5e10"
+        },
+        "lesion_probability": {
+          "shape": [
+            192,
+            216,
+            120
+          ],
+          "dtype": "float32",
+          "affine": [
+            [
+              1.0,
+              0.0,
+              -0.0,
+              -96.25790405273438
+            ],
+            [
+              0.0,
+              0.9930344820022583,
+              0.11782397329807281,
+              -90.7796859741211
+            ],
+            [
+              -0.0,
+              -0.11782406270503998,
+              0.9930344820022583,
+              -39.58333206176758
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "qform_code": 1,
+          "sform_code": 1,
+          "sha256": "d131b6ab156ce21feb2f5db91671582bdec33708f959a01be2e441fdb2228c1d"
+        },
+        "csv_sha256": "fc67cf86dd4d49c57bfb88a3623e8b235cb18bbf462ddcc28786ac1cef2c6339"
+      },
+      {
+        "case": "sub-04",
+        "input_sha256": "fb3e36b57a408718534952f09a84e9c7b9729ed1687123c6aafd8c8790962699",
+        "segmentation": {
+          "shape": [
+            192,
+            216,
+            126
+          ],
+          "dtype": "float32",
+          "affine": [
+            [
+              1.0,
+              0.0,
+              -0.0,
+              -94.91390228271484
+            ],
+            [
+              0.0,
+              0.9974645376205444,
+              0.07116534560918808,
+              -87.61981201171875
+            ],
+            [
+              -0.0,
+              -0.07116493582725525,
+              0.9974645376205444,
+              -58.79562759399414
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "qform_code": 1,
+          "sform_code": 1,
+          "sha256": "605e003c8a4fad0cafcbee29836d15228d7a1a60a823e62a7f1ded58578b4548"
+        },
+        "lesion_probability": {
+          "shape": [
+            192,
+            216,
+            126
+          ],
+          "dtype": "float32",
+          "affine": [
+            [
+              1.0,
+              0.0,
+              -0.0,
+              -94.91390228271484
+            ],
+            [
+              0.0,
+              0.9974645376205444,
+              0.07116534560918808,
+              -87.61981201171875
+            ],
+            [
+              -0.0,
+              -0.07116493582725525,
+              0.9974645376205444,
+              -58.79562759399414
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "qform_code": 1,
+          "sform_code": 1,
+          "sha256": "a9b7778bf09d7af6d83aa3d66699a9df23e7a82b0af2ea87b9c1b7ef0b9dba54"
+        },
+        "csv_sha256": "35e4b340ef388ff1889fbb17b9b028457e1b82a3487636e00677e133582a7869"
+      }
+    ]
+  },
+  "candidate_cpu_single_case": {
+    "n": 1,
+    "complete_cli_seconds": 64.44,
+    "max_rss_kib": 28926576,
+    "comparison_to_official_cpu": {
+      "shape": [
+        192,
+        216,
+        126
+      ],
+      "segmentation_dtype_reference": "float32",
+      "segmentation_dtype_candidate": "float32",
+      "probability_dtype_reference": "float32",
+      "probability_dtype_candidate": "float32",
+      "segmentation_affine_max_abs": 0.0,
+      "probability_affine_max_abs": 0.0,
+      "segmentation_voxel_agreement": 1.0,
+      "wmh_hard_dice": 1.0,
+      "lesion_probability_mae": 0.0,
+      "lesion_probability_max_abs": 0.0,
+      "csv_common_numeric_columns": 33,
+      "csv_max_abs_error_mm3": 0.0
     }
   },
-  "comparison": {
-    "cpu": {
-      "segmentation_voxel_agreement": {
-        "median": 1.0,
-        "mean": 1.0,
-        "range": [
-          1.0,
-          1.0
-        ]
+  "single_case_gpu_profile": {
+    "schema": "fnit_model_io_single_case/v1",
+    "feature": "wmh-synthseg",
+    "case_id": "case01",
+    "input_sha256": "5d89375e39443cea96b42176b0fc07491a9a2d2c545ea397a8d460c25c0e929e",
+    "source": {
+      "files": {
+        "fnit/_dmri.py": "b6bf837f8b5a0a8f0d910706631e882a9e3f8dfc1f1ef77e1cfac7efe36fafbf",
+        "fnit/_nib.py": "bffd56aeaca423b2448432ba318212e83549e9e31aa27af6bf20a60888218586",
+        "fnit/weights.py": "9d275a1bd4064ff9bd1eb8aaef589ce7804258e7f6c39cd127deae2623d6eb9a",
+        "fnit/wmh_synthseg/__init__.py": "025cb2db3b2a4f006fcc1a687c61a46591c87b08ba56c8c586a72ae6ae17c7a7",
+        "fnit/wmh_synthseg/model.py": "dd95cd0816c308ba5a14de4b5bd8ddbeaf640656515d0713bbeb5df11533bf6c",
+        "fnit/wmh_synthseg/pipeline.py": "465c3a9565e05892ef71e95b938600ee286bcef971237e7dc6077175738ca1e5",
+        "fnit/wmh_synthseg/spatial.py": "d81416104064110511ee0f073998b3e19959748c74ad88675d90488a261db8a6"
       },
-      "wmh_hard_dice": {
-        "median": 1.0,
-        "mean": 1.0,
-        "range": [
-          1.0,
-          1.0
-        ]
-      },
-      "lesion_probability_mae": {
-        "median": 0.0,
-        "mean": 0.0,
-        "range": [
-          0.0,
-          0.0
-        ]
-      },
-      "lesion_probability_nrmse": {
-        "median": 0.0,
-        "mean": 0.0,
-        "range": [
-          0.0,
-          0.0
-        ]
-      },
-      "lesion_probability_max_abs": {
-        "median": 0.0,
-        "mean": 0.0,
-        "range": [
-          0.0,
-          0.0
-        ]
-      },
-      "segmentation_affine_max_abs": {
-        "median": 0.0,
-        "mean": 0.0,
-        "range": [
-          0.0,
-          0.0
-        ]
-      },
-      "probability_affine_max_abs": {
-        "median": 0.0,
-        "mean": 0.0,
-        "range": [
-          0.0,
-          0.0
-        ]
-      },
-      "max_csv_volume_abs_error_mm3": {
-        "median": 0.0,
-        "mean": 0.0,
-        "range": [
-          0.0,
-          0.0
-        ]
-      },
-      "output_affine_max_abs": {
-        "median": 0.0,
-        "mean": 0.0,
-        "range": [
-          0.0,
-          0.0
-        ]
-      }
+      "tree_sha256": "39cd9b4c380a93370c1244e72eea4c3eaa9f277dd8d70ef44a4ec2293e6a5860"
     },
-    "cuda": {
-      "segmentation_voxel_agreement": {
-        "median": 1.0,
-        "mean": 1.0,
-        "range": [
-          1.0,
-          1.0
-        ]
+    "runtime": {
+      "device": "cuda:0",
+      "threads": 8,
+      "torch": "2.5.1",
+      "cuda": "11.8",
+      "gpu": "NVIDIA H100 PCIe",
+      "tf32_matmul": true,
+      "tf32_cudnn": true
+    },
+    "seconds": {
+      "model_load": 2.2769002681598067,
+      "inference": 1.9374095438979566,
+      "save": 1.36943113617599,
+      "python_api_total": 5.583740948233753
+    },
+    "cuda_peak_mib": {
+      "allocated": 29730.3232421875,
+      "reserved": 35828.0
+    },
+    "outputs": [
+      {
+        "file": "segmentation.nii.gz",
+        "shape": [
+          192,
+          216,
+          126
+        ],
+        "dtype": "float32",
+        "affine": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            -94.7549057006836
+          ],
+          [
+            0.0,
+            0.9959005117416382,
+            -0.09045466035604477,
+            -89.07371520996094
+          ],
+          [
+            -0.0,
+            0.0904550701379776,
+            0.995900571346283,
+            -81.90336608886719
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "finite": true,
+        "sha256": "7722394e3f0f474cf3384ae55888968079fcdfe77bf86c74cab9accb2e804a86"
       },
-      "wmh_hard_dice": {
-        "median": 1.0,
-        "mean": 1.0,
-        "range": [
-          1.0,
-          1.0
-        ]
-      },
-      "lesion_probability_mae": {
-        "median": 0.0,
-        "mean": 0.0,
-        "range": [
-          0.0,
-          0.0
-        ]
-      },
-      "lesion_probability_nrmse": {
-        "median": 0.0,
-        "mean": 0.0,
-        "range": [
-          0.0,
-          0.0
-        ]
-      },
-      "lesion_probability_max_abs": {
-        "median": 0.0,
-        "mean": 0.0,
-        "range": [
-          0.0,
-          0.0
-        ]
-      },
-      "segmentation_affine_max_abs": {
-        "median": 0.0,
-        "mean": 0.0,
-        "range": [
-          0.0,
-          0.0
-        ]
-      },
-      "probability_affine_max_abs": {
-        "median": 0.0,
-        "mean": 0.0,
-        "range": [
-          0.0,
-          0.0
-        ]
-      },
-      "max_csv_volume_abs_error_mm3": {
-        "median": 0.0,
-        "mean": 0.0,
-        "range": [
-          0.0,
-          0.0
-        ]
-      },
-      "output_affine_max_abs": {
-        "median": 0.0,
-        "mean": 0.0,
-        "range": [
-          0.0,
-          0.0
-        ]
+      {
+        "file": "lesion_probability.nii.gz",
+        "shape": [
+          192,
+          216,
+          126
+        ],
+        "dtype": "float32",
+        "affine": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            -94.7549057006836
+          ],
+          [
+            0.0,
+            0.9959005117416382,
+            -0.09045466035604477,
+            -89.07371520996094
+          ],
+          [
+            -0.0,
+            0.0904550701379776,
+            0.995900571346283,
+            -81.90336608886719
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "finite": true,
+        "sha256": "8620a68f642de24ed8869d6c56dc729e2716a993b40d00e323d869f46023696f"
       }
-    }
+    ],
+    "external_process_wall_seconds": 9.85
   },
-  "case_records": [
-    {
-      "case": "case01",
-      "seconds": {
-        "official-cpu": 88.11398129398003,
-        "official-cuda": 8.772765857866034,
-        "torch-cpu": 74.6698445121292,
-        "torch-cuda": 13.393944500945508
-      },
-      "comparison": {
-        "cpu": {
-          "segmentation_voxel_agreement": 1.0,
-          "wmh_hard_dice": 1.0,
-          "lesion_probability_mae": 0.0,
-          "lesion_probability_nrmse": 0.0,
-          "lesion_probability_max_abs": 0.0,
-          "segmentation_affine_max_abs": 0.0,
-          "probability_affine_max_abs": 0.0,
-          "max_csv_volume_abs_error_mm3": 0.0
-        },
-        "cuda": {
-          "segmentation_voxel_agreement": 1.0,
-          "wmh_hard_dice": 1.0,
-          "lesion_probability_mae": 0.0,
-          "lesion_probability_nrmse": 0.0,
-          "lesion_probability_max_abs": 0.0,
-          "segmentation_affine_max_abs": 0.0,
-          "probability_affine_max_abs": 0.0,
-          "max_csv_volume_abs_error_mm3": 0.0
-        }
-      }
+  "output_contract": {
+    "segmentation": {
+      "dtype": "float32 containing integer FreeSurfer labels including WMH label 77",
+      "shape": "processed RAS/1 mm grid; case-dependent",
+      "affine": "processed grid voxel-to-RAS matrix"
     },
-    {
-      "case": "case02",
-      "seconds": {
-        "official-cpu": 96.26775300200097,
-        "official-cuda": 8.25902719493024,
-        "torch-cpu": 70.82157128211111,
-        "torch-cuda": 8.389062933856621
-      },
-      "comparison": {
-        "cpu": {
-          "segmentation_voxel_agreement": 1.0,
-          "wmh_hard_dice": 1.0,
-          "lesion_probability_mae": 0.0,
-          "lesion_probability_nrmse": 0.0,
-          "lesion_probability_max_abs": 0.0,
-          "segmentation_affine_max_abs": 0.0,
-          "probability_affine_max_abs": 0.0,
-          "max_csv_volume_abs_error_mm3": 0.0
-        },
-        "cuda": {
-          "segmentation_voxel_agreement": 1.0,
-          "wmh_hard_dice": 1.0,
-          "lesion_probability_mae": 0.0,
-          "lesion_probability_nrmse": 0.0,
-          "lesion_probability_max_abs": 0.0,
-          "segmentation_affine_max_abs": 0.0,
-          "probability_affine_max_abs": 0.0,
-          "max_csv_volume_abs_error_mm3": 0.0
-        }
-      }
+    "lesion_probability": {
+      "dtype": "float32",
+      "shape_and_affine": "same as segmentation",
+      "range": "posterior probability of label 77"
     },
-    {
-      "case": "case03",
-      "seconds": {
-        "official-cpu": 90.5438877120614,
-        "official-cuda": 8.246616062009707,
-        "torch-cpu": 70.44550208095461,
-        "torch-cuda": 8.370594392996281
-      },
-      "comparison": {
-        "cpu": {
-          "segmentation_voxel_agreement": 1.0,
-          "wmh_hard_dice": 1.0,
-          "lesion_probability_mae": 0.0,
-          "lesion_probability_nrmse": 0.0,
-          "lesion_probability_max_abs": 0.0,
-          "segmentation_affine_max_abs": 0.0,
-          "probability_affine_max_abs": 0.0,
-          "max_csv_volume_abs_error_mm3": 0.0
-        },
-        "cuda": {
-          "segmentation_voxel_agreement": 1.0,
-          "wmh_hard_dice": 1.0,
-          "lesion_probability_mae": 0.0,
-          "lesion_probability_nrmse": 0.0,
-          "lesion_probability_max_abs": 0.0,
-          "segmentation_affine_max_abs": 0.0,
-          "probability_affine_max_abs": 0.0,
-          "max_csv_volume_abs_error_mm3": 0.0
-        }
-      }
-    },
-    {
-      "case": "case04",
-      "seconds": {
-        "official-cpu": 67.38646902097389,
-        "official-cuda": 8.173965889029205,
-        "torch-cpu": 70.32909932499751,
-        "torch-cuda": 8.444344405084848
-      },
-      "comparison": {
-        "cpu": {
-          "segmentation_voxel_agreement": 1.0,
-          "wmh_hard_dice": 1.0,
-          "lesion_probability_mae": 0.0,
-          "lesion_probability_nrmse": 0.0,
-          "lesion_probability_max_abs": 0.0,
-          "segmentation_affine_max_abs": 0.0,
-          "probability_affine_max_abs": 0.0,
-          "max_csv_volume_abs_error_mm3": 0.0
-        },
-        "cuda": {
-          "segmentation_voxel_agreement": 1.0,
-          "wmh_hard_dice": 1.0,
-          "lesion_probability_mae": 0.0,
-          "lesion_probability_nrmse": 0.0,
-          "lesion_probability_max_abs": 0.0,
-          "segmentation_affine_max_abs": 0.0,
-          "probability_affine_max_abs": 0.0,
-          "max_csv_volume_abs_error_mm3": 0.0
-        }
-      }
-    },
-    {
-      "case": "case05",
-      "seconds": {
-        "official-cpu": 89.4518903370481,
-        "official-cuda": 9.66022250498645,
-        "torch-cpu": 70.61378982989118,
-        "torch-cuda": 8.967982050031424
-      },
-      "comparison": {
-        "cpu": {
-          "segmentation_voxel_agreement": 1.0,
-          "wmh_hard_dice": 1.0,
-          "lesion_probability_mae": 0.0,
-          "lesion_probability_nrmse": 0.0,
-          "lesion_probability_max_abs": 0.0,
-          "segmentation_affine_max_abs": 0.0,
-          "probability_affine_max_abs": 0.0,
-          "max_csv_volume_abs_error_mm3": 0.0
-        },
-        "cuda": {
-          "segmentation_voxel_agreement": 1.0,
-          "wmh_hard_dice": 1.0,
-          "lesion_probability_mae": 0.0,
-          "lesion_probability_nrmse": 0.0,
-          "lesion_probability_max_abs": 0.0,
-          "segmentation_affine_max_abs": 0.0,
-          "probability_affine_max_abs": 0.0,
-          "max_csv_volume_abs_error_mm3": 0.0
-        }
-      }
-    },
-    {
-      "case": "case06",
-      "seconds": {
-        "official-cpu": 103.25467903306708,
-        "official-cuda": 8.207641394110397,
-        "torch-cpu": 71.93843752006069,
-        "torch-cuda": 8.44055885495618
-      },
-      "comparison": {
-        "cpu": {
-          "segmentation_voxel_agreement": 1.0,
-          "wmh_hard_dice": 1.0,
-          "lesion_probability_mae": 0.0,
-          "lesion_probability_nrmse": 0.0,
-          "lesion_probability_max_abs": 0.0,
-          "segmentation_affine_max_abs": 0.0,
-          "probability_affine_max_abs": 0.0,
-          "max_csv_volume_abs_error_mm3": 0.0
-        },
-        "cuda": {
-          "segmentation_voxel_agreement": 1.0,
-          "wmh_hard_dice": 1.0,
-          "lesion_probability_mae": 0.0,
-          "lesion_probability_nrmse": 0.0,
-          "lesion_probability_max_abs": 0.0,
-          "segmentation_affine_max_abs": 0.0,
-          "probability_affine_max_abs": 0.0,
-          "max_csv_volume_abs_error_mm3": 0.0
-        }
-      }
-    },
-    {
-      "case": "case07",
-      "seconds": {
-        "official-cpu": 113.74544539209455,
-        "official-cuda": 8.338753096060827,
-        "torch-cpu": 70.11882251803763,
-        "torch-cuda": 9.654580161906779
-      },
-      "comparison": {
-        "cpu": {
-          "segmentation_voxel_agreement": 1.0,
-          "wmh_hard_dice": 1.0,
-          "lesion_probability_mae": 0.0,
-          "lesion_probability_nrmse": 0.0,
-          "lesion_probability_max_abs": 0.0,
-          "segmentation_affine_max_abs": 0.0,
-          "probability_affine_max_abs": 0.0,
-          "max_csv_volume_abs_error_mm3": 0.0
-        },
-        "cuda": {
-          "segmentation_voxel_agreement": 1.0,
-          "wmh_hard_dice": 1.0,
-          "lesion_probability_mae": 0.0,
-          "lesion_probability_nrmse": 0.0,
-          "lesion_probability_max_abs": 0.0,
-          "segmentation_affine_max_abs": 0.0,
-          "probability_affine_max_abs": 0.0,
-          "max_csv_volume_abs_error_mm3": 0.0
-        }
-      }
-    },
-    {
-      "case": "case08",
-      "seconds": {
-        "official-cpu": 124.30483487783931,
-        "official-cuda": 8.92163077602163,
-        "torch-cpu": 71.00402120989747,
-        "torch-cuda": 9.534454170847312
-      },
-      "comparison": {
-        "cpu": {
-          "segmentation_voxel_agreement": 1.0,
-          "wmh_hard_dice": 1.0,
-          "lesion_probability_mae": 0.0,
-          "lesion_probability_nrmse": 0.0,
-          "lesion_probability_max_abs": 0.0,
-          "segmentation_affine_max_abs": 0.0,
-          "probability_affine_max_abs": 0.0,
-          "max_csv_volume_abs_error_mm3": 0.0
-        },
-        "cuda": {
-          "segmentation_voxel_agreement": 1.0,
-          "wmh_hard_dice": 1.0,
-          "lesion_probability_mae": 0.0,
-          "lesion_probability_nrmse": 0.0,
-          "lesion_probability_max_abs": 0.0,
-          "segmentation_affine_max_abs": 0.0,
-          "probability_affine_max_abs": 0.0,
-          "max_csv_volume_abs_error_mm3": 0.0
-        }
-      }
-    },
-    {
-      "case": "case09",
-      "seconds": {
-        "official-cpu": 110.30711915995926,
-        "official-cuda": 8.295017479918897,
-        "torch-cpu": 69.91620977385901,
-        "torch-cuda": 8.13321488420479
-      },
-      "comparison": {
-        "cpu": {
-          "segmentation_voxel_agreement": 1.0,
-          "wmh_hard_dice": 1.0,
-          "lesion_probability_mae": 0.0,
-          "lesion_probability_nrmse": 0.0,
-          "lesion_probability_max_abs": 0.0,
-          "segmentation_affine_max_abs": 0.0,
-          "probability_affine_max_abs": 0.0,
-          "max_csv_volume_abs_error_mm3": 0.0
-        },
-        "cuda": {
-          "segmentation_voxel_agreement": 1.0,
-          "wmh_hard_dice": 1.0,
-          "lesion_probability_mae": 0.0,
-          "lesion_probability_nrmse": 0.0,
-          "lesion_probability_max_abs": 0.0,
-          "segmentation_affine_max_abs": 0.0,
-          "probability_affine_max_abs": 0.0,
-          "max_csv_volume_abs_error_mm3": 0.0
-        }
-      }
-    },
-    {
-      "case": "case10",
-      "seconds": {
-        "official-cpu": 95.76606068294495,
-        "official-cuda": 8.114621636923403,
-        "torch-cpu": 70.75860764691606,
-        "torch-cuda": 8.055973400129005
-      },
-      "comparison": {
-        "cpu": {
-          "segmentation_voxel_agreement": 1.0,
-          "wmh_hard_dice": 1.0,
-          "lesion_probability_mae": 0.0,
-          "lesion_probability_nrmse": 0.0,
-          "lesion_probability_max_abs": 0.0,
-          "segmentation_affine_max_abs": 0.0,
-          "probability_affine_max_abs": 0.0,
-          "max_csv_volume_abs_error_mm3": 0.0
-        },
-        "cuda": {
-          "segmentation_voxel_agreement": 1.0,
-          "wmh_hard_dice": 1.0,
-          "lesion_probability_mae": 0.0,
-          "lesion_probability_nrmse": 0.0,
-          "lesion_probability_max_abs": 0.0,
-          "segmentation_affine_max_abs": 0.0,
-          "probability_affine_max_abs": 0.0,
-          "max_csv_volume_abs_error_mm3": 0.0
-        }
-      }
-    },
-    {
-      "case": "case11",
-      "seconds": {
-        "official-cpu": 102.34622497390956,
-        "official-cuda": 7.987474209163338,
-        "torch-cpu": 72.07304130704142,
-        "torch-cuda": 8.15360848302953
-      },
-      "comparison": {
-        "cpu": {
-          "segmentation_voxel_agreement": 1.0,
-          "wmh_hard_dice": 1.0,
-          "lesion_probability_mae": 0.0,
-          "lesion_probability_nrmse": 0.0,
-          "lesion_probability_max_abs": 0.0,
-          "segmentation_affine_max_abs": 0.0,
-          "probability_affine_max_abs": 0.0,
-          "max_csv_volume_abs_error_mm3": 0.0
-        },
-        "cuda": {
-          "segmentation_voxel_agreement": 1.0,
-          "wmh_hard_dice": 1.0,
-          "lesion_probability_mae": 0.0,
-          "lesion_probability_nrmse": 0.0,
-          "lesion_probability_max_abs": 0.0,
-          "segmentation_affine_max_abs": 0.0,
-          "probability_affine_max_abs": 0.0,
-          "max_csv_volume_abs_error_mm3": 0.0
-        }
-      }
-    },
-    {
-      "case": "case12",
-      "seconds": {
-        "official-cpu": 98.5006887621712,
-        "official-cuda": 7.921222314005718,
-        "torch-cpu": 69.92440364207141,
-        "torch-cuda": 8.142246926901862
-      },
-      "comparison": {
-        "cpu": {
-          "segmentation_voxel_agreement": 1.0,
-          "wmh_hard_dice": 1.0,
-          "lesion_probability_mae": 0.0,
-          "lesion_probability_nrmse": 0.0,
-          "lesion_probability_max_abs": 0.0,
-          "segmentation_affine_max_abs": 0.0,
-          "probability_affine_max_abs": 0.0,
-          "max_csv_volume_abs_error_mm3": 0.0
-        },
-        "cuda": {
-          "segmentation_voxel_agreement": 1.0,
-          "wmh_hard_dice": 1.0,
-          "lesion_probability_mae": 0.0,
-          "lesion_probability_nrmse": 0.0,
-          "lesion_probability_max_abs": 0.0,
-          "segmentation_affine_max_abs": 0.0,
-          "probability_affine_max_abs": 0.0,
-          "max_csv_volume_abs_error_mm3": 0.0
-        }
-      }
-    }
+    "volumes_csv": "33 non-background soft volumes plus intracranial volume, in mm3"
+  },
+  "figure": {
+    "path": "docs/figures/wmh_synthseg_comparison.png",
+    "sha256": "a434fdccc6340fc34a7ecb7186f1a7b5cdfbd0e3322df4f830eee46e1d055618",
+    "case": "public sub-04",
+    "candidate": "current source, default TF32"
+  },
+  "candidate_runtime_dependency_boundary": "FNIT candidate runs imported only FNIT, PyTorch, Nibabel, NumPy and SciPy; FreeSurfer/FSL executables were not called by the candidate.",
+  "timing_scope": "Full CLI wall time includes a fresh Python process, input and weight loading where applicable, inference, postprocessing, and compressed NIfTI/CSV writes.",
+  "release_status": "current_source_validated_memory_target_not_met",
+  "limitations": [
+    "Three public derived FLAIR inputs; no manual WMH ground truth.",
+    "Official CPU accuracy jobs overlapped, so timing is not used for a stable speedup ratio.",
+    "Torch peak allocated/reserved memory was 29730/35828 MiB and exceeds the 20 GB project target."
   ],
-  "all_success": true
+  "measurement": {
+    "script": "validation/model_io_current/measure_peak.py",
+    "script_sha256": "e4f0aa1209d0376c7df7d73c033db8277074b6ab8a4b0f311b421604a7fe56f9",
+    "single_case_schema": "fnit_model_io_single_case/v1"
+  }
 }

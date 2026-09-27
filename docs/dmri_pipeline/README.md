@@ -1,4 +1,4 @@
-# 单被试 dMRI 参数图 pipeline
+# 单被试 dMRI 参数图流程
 
 [返回首页](../../README.md) · [PyTorch MMORF](../mmorf/README.md)
 
@@ -162,76 +162,104 @@ subject/
 
 包内三份 Oxford 配置与 UKB ancillary archive 的 SHA-256 完全一致。`TBSSConfig` 使用相同的六层 subsampling、FWHM、lambda、iteration 和 intensity schedule，并明确保留三个 process stage：stage 1 为四层 LM，stage 2/3 分别为 50/25 次 SCG。当前实现也包括 implicit input/reference zero mask、input mask-normalized smoothing，以及 `inwarp/intin` 的 float32 coefficient/header 和 10 位 intensity 交接。交接在一个 Python 进程内完成，不启动三个 FSL executable。
 
-control grid 按 FSL `FullResKsp` 计算：stage 1 的 10 mm `warpres` 在最终 `subsamp=2` 后对应 full-grid 5 mm spacing，输出 `[39,46,39,3]`；stage 2/3 使用 2 mm spacing，输出 `[94,112,94,3]`。shape、spacing 和 sform 已与官方文件匹配。当前真实病例已通过逐 LM oracle；由于后续数值归约仍有小差异、topology 分支未触发且病例数为一，`ukb_numerically_equivalent=false` 仍保留。单被试 UKB 脚本使用官方 skeleton mask 相乘，并不执行经典多被试 TBSS 的跨被试最大投影；本包复现的是该单被试行为。
+control grid 按 FSL `FullResKsp` 计算：stage 1 的 10 mm `warpres` 在最终 `subsamp=2` 后对应 full-grid 5 mm spacing；stage 2/3 使用 2 mm spacing，最终 coefficient grid 为 `[94,112,94,3]`。当前真实单例已经覆盖迁移后的 FLIRT、FNIRT、applywarp 与 `tbss.py`，源码哈希和结果见下文。该例的输出网格合同通过，但逐体素数值等价未通过，因此报告仍记录 `ukb_numerically_equivalent=false`。单被试 UKB 脚本使用官方 skeleton mask 相乘，并不执行经典多被试 TBSS 的跨被试最大投影；本包复现的是该单被试行为。
 
 ## MMORF 分支对应关系
 
 MMORF 分支和 TBSS 分支共用 TOPUP、EDDY、DTIFIT、NODDI、九图命名及标准 grid。它用两次 TorchFLIRT 保持相同的 input→reference FSL affine contract，只把 FNIRT 非线性注册换成 [PyTorch MMORF](../mmorf/README.md) 的 T1 scalar + DTI tensor 联合目标。warp 位于 reference grid，三通道保存沿 reference image axes 的毫米位移，因此由 `apply_mmorf_warp` 应用，不能交给 FNIRT 的 `TorchApplyWarp`。
 
-## 验证边界
+## 当前真实数据验证
 
-当前发布只列出由现行源码生成的证据：
+以下数值运行使用源码快照 tar `f7547d0a39ddd9fb6ba70deb720f229ecedc6385fa72d457efb2ded78b6c173d`，其中 `flirt/core.py` 为 `552856…`；当前文件为 `ce375d…`。继承链分两段：[第一段](../../validation/runtime_dependencies/flirt_qc_source_equivalence.public.json)只清理 runtime QC，[第二段](../../validation/runtime_dependencies/flirt_profile_source_equivalence.public.json)证明本流程使用的 12-DOF/corratio 数值路径未变。报告保留原测量 hash，并在新增 chain 对象中明确 `fresh=false`。这不是 current-hash 完整真实数据重跑，也不覆盖已改变的 6-DOF/normmi 路径。
+两份报告记录的 `__init__.py`/`cli.py` 为 `cc9aa4…`/`2d5e3d…`，当前 0.16.0 为
+`be1cab…`/`c92a3f…`。归一化版本号、移除独立的 fMRI 懒加载分支（含 13 个 surface API），并从新旧源码中
+过滤五个主动撤下的内部实现名称后，保留 API 的新旧 AST SHA-256 均为 `fd295c…`。
+这五个名称不主张 API 兼容；`dmri-pipeline` 的动态 parser、最终 `parse_args` 和 handler
+分发 AST 未变。完整入口证明见
+[包入口源码等价证明](../../validation/runtime_dependencies/package_entry_source_equivalence.public.json)。
 
-- TOPUP、EDDY、DTIFIT 和 AMICO-NODDI 的真实数据结果分别位于各自的[验证目录](../../validation/README.md)。
-- TBSS 注册从同一组九张 native 参数图开始，比较官方 weighted FLIRT、三阶段 FNIRT、九图传播和 skeleton multiplication；结果见 [`tbss_diagnosis.public.json`](../../validation/dmri_pipeline/tbss_diagnosis.public.json)。
-- MMORF 的独立真实数据对照固定 T1、DTI tensor、模板和 FLIRT 初始化，结果见 [`validation/mmorf`](../../validation/mmorf/README.md)。
+两份 dMRI source manifest 均未记录 SynthMorph，TBSS 和 MMORF 路径也都不执行 SynthMorph。机器报告以结构化字段记录 `executed=false` 和 `attestation_applicable=false`，因此这里不引用 SynthMorph linear 证明作数值继承。
 
-当前版本尚无从原始 AP/PA 到九张 standard 图的 fresh 端到端配对 benchmark。
-以下 TBSS 表只衡量 registration 及其后续传播；MMORF 表与图只衡量独立注册函数。
+### MMORF：raw AP/PA 到九张标准图
 
-### 当前 TBSS 真实数据 benchmark
+2026 年 9 月 28 日在 gpucw1 的 NVIDIA H100 PCIe 上，用上述数值运行冻结快照跑完 1 例去标识化真实 UKB 格式 AP/PA dMRI 和配对 T1w。输入从 `raw/AP.*`、`raw/PA.*` 开始，实际执行 TOPUP、EDDY、DTIFIT、AMICO-NODDI、SynthStrip、两次 TorchFLIRT、TorchMMORF 和九张图的 warp propagation。源码快照 tar SHA-256 为 `f7547d0a39ddd9fb6ba70deb720f229ecedc6385fa72d457efb2ded78b6c173d`；`dmri_pipeline/pipeline.py` 的 SHA-256 为 `7ed08495a70065f46e8cd6a8402053ec9e5d6a764e5ce8ec37dc961fc369a347`，`mmorf/core.py` 为 `a89092d2ef561b53049400361a646b9cc8f94300bcb7b3eb14b37ed1e4a18466`；机器报告逐项记录 50 个调用链源码哈希。
 
-对照使用一例去标识、真实 UKB 格式 dMRI，并从同一组九张 native 参数图开始。A 是
-用户实际调用的 TorchFLIRT + TorchFNIRT 路径；B 固定官方 FLIRT matrix，用于隔离
-nonlinear registration。
+参考图由既有 UKB native DTI/NODDI 参数图和 FSL MMORF 0.3.2 warp 生成。该参考传播沿用了先前匹配验证中固定的 FNIT affine，因此不是“全部阶段均由官方软件重跑”的 raw-to-standard reference。下面的数值用于检查当前端到端输出和暴露差异，不能作为完全匹配的官方验收。
 
-| 实现 | affine | 观测时间 | peak CUDA allocation |
-|---|---|---:|---:|
-| FSL 6.0.7.4 / UKB CPU | FSL FLIRT | 976.88 s external wall | 不适用 |
-| FNIT A / H100 | 本次重新运行 TorchFLIRT | 106.186 s Python pipeline；121.48 s external wall | 3.607 GB |
-| FNIT B / H100 | 固定官方 FLIRT matrix | 18.884 s Python pipeline | 3.608 GB |
-
-B 排除了 affine 优化；共享节点负载没有隔离，因此不报告“等价加速比”。A/B 的九张
-standard 和 skeleton 图均通过 shape、affine、dtype 合同：
-
-| map | A standard r | A skeleton r | B standard r | B skeleton r |
+| 参数图 | native r | standard r | standard MAE | standard RMSE |
 |---|---:|---:|---:|---:|
-| FA | 0.998886 | 0.999463 | 0.999523 | 0.999679 |
-| MD | 0.997129 | 0.997087 | 0.998712 | 0.994744 |
-| L1 | 0.996619 | 0.997320 | 0.998438 | 0.994806 |
-| L2 | 0.997222 | 0.997592 | 0.998738 | 0.995896 |
-| L3 | 0.997640 | 0.997887 | 0.998937 | 0.996788 |
-| MO | 0.996725 | 0.998206 | 0.998262 | 0.998889 |
-| ICVF | 0.995086 | 0.996789 | 0.997483 | 0.994425 |
-| OD | 0.997079 | 0.998257 | 0.998542 | 0.997927 |
-| ISOVF | 0.997986 | 0.997748 | 0.999087 | 0.997208 |
+| FA | 0.586157 | 0.559845 | 0.099869 | 0.151588 |
+| MD | 0.547537 | 0.563159 | 3.677e-4 | 5.874e-4 |
+| L1 | 0.436994 | 0.535731 | 4.042e-4 | 6.454e-4 |
+| L2 | 0.567251 | 0.563184 | 3.769e-4 | 5.930e-4 |
+| L3 | 0.634022 | 0.585998 | 3.622e-4 | 5.631e-4 |
+| MO | 0.413579 | 0.329829 | 0.370717 | 0.481165 |
+| ICVF | -0.002070 | 0.372548 | 0.146745 | 0.223835 |
+| OD | 0.506862 | 0.540236 | 0.154255 | 0.220781 |
+| ISOVF | 0.608481 | 0.528075 | 0.177561 | 0.269235 |
 
-A 的 standard/skeleton FA MAE 为 `0.003129/0.003111`；B 为
-`0.002418/0.002422`。完整 MAE、RMSE、grid contract、Jacobian 和 source hash 见
-[`tbss_diagnosis.public.json`](../../validation/dmri_pipeline/tbss_diagnosis.public.json)。
+九张 standard 图的 shape、affine 和 float32 dtype 均与 reference 一致；文件集合和网格合同通过。所有连续值指标都未达到逐体素数值等价，`numerical_equivalence_passed=false`。native 图在配准前已经存在明显差异，尤其 ICVF，因此标准空间差异不能只归因于 MMORF。当前 end-to-end 结果也不能继承组件报告中的 AMICO 数值等价结论。
 
-### FNIRT 差异诊断
+| 阶段 | 当前 H100 时间 |
+|---|---:|
+| TOPUP 和 EDDY 准备 | 136.625 s |
+| EDDY | 49.675 s |
+| DTIFIT | 17.502 s |
+| AMICO-NODDI | 45.753 s |
+| SynthStrip、两次 FLIRT、MMORF 和九图传播 | 308.496 s |
+| Python pipeline 内部总计 | 558.100 s |
+| 外部进程 wall | 563.06 s |
 
-真实 level-1 LM oracle 的 initial cost/mask 为 Torch `639.821722/2598`、FSL
-`639.822/2598`。十次候选的接受序列均为
-`A,A,A,R,R,R,R,A,R,A`，最终为 Torch `478.784565/2508`、FSL
-`478.784/2508`。完整 stage 1 coefficient `r=0.999832`，warped FA
-`r=0.999004`；GPU 对应值为 `0.999879/0.999148`。
+最大组件级 CUDA allocation 为 13.669 GB，来自 AMICO-NODDI；MMORF 为 12.320 GB，EDDY 为 3.480 GB，DTIFIT 为 1.313 GB。外部进程最大 CPU RSS 为 2,776,112 KiB。启动时同卡已有其他训练，占用 22,246.8 MiB 且利用率为 100%，所以 563.06 s 只证明完整运行，不作为隔离性能值。FSL MMORF 的既有外部记录为 947.62 s，但只含 MMORF registration；两者范围和负载均不同，不计算加速比。
 
-关键修复来自 FSL 的 input-mask 数据类型：`general_transform` 把三线性插值结果写入
-`volume<char>`，因此边界小数在 `Mask()>0.5` 之前已截断。当前实现还匹配
-newimage `1e-8` valid-FOV tolerance、zero-padded boundary neighbor、implicit-zero
-`1e-16` 和 input-mask-after-normalization 顺序。详细逐 attempt 表见
-[TorchFNIRT 页面](../fnirt/README.md#stage-1-lm-oracle-与修复原因)。
+![当前 raw-to-standard MMORF 的真实 FA 对照](figures/dmri_mmorf_fa_real.png)
 
-后续层的 sparse BFMatrix 与 matrix-free FP64 reduction 仍有小数值分叉。topology
-projection 未在本例触发，且当前只有一个真实病例，所以不声明全局逐体素等价。定向
-测试为 `63 passed`。
+机器报告见 [`mmorf_e2e.real.current.json`](../../validation/dmri_pipeline/mmorf_e2e.real.current.json)，复现和比较脚本见 [`validate_mmorf_e2e.py`](../../validation/dmri_pipeline/validate_mmorf_e2e.py)。仓库不保存原始 dMRI、T1w 或受试者标识，只发布输入文件 SHA-256。
 
-下图显示同一次 current A 运行的官方 FA、FNIT FA 和绝对差值。数值指标来自完整 3D
-NIfTI，不由切片估计。
+### TBSS：raw AP/PA 到九张标准图和 skeleton 图
 
-![FSL/UKB 与 FNIT TorchTBSS 的真实 FA 对照](../fnirt/figures/fnirt_fsl_comparison.png)
+2026 年 9 月 28 日在 gpucw1 的 NVIDIA H100 PCIe 上，用上述数值运行冻结快照跑完同一例去标识化真实 UKB 格式 AP/PA dMRI。执行命令为：
 
-公开仓库不包含该病例的原始 dMRI、native 参数图或 subject 标识。重现脚本和去标识
-汇总报告位于 [`validation/dmri_pipeline`](../../validation/dmri_pipeline/README.md)。
+~~~bash
+python -m fnit.cli dmri-pipeline \
+  --raw-dir <RAW_DIR> \
+  --output-dir <OUTPUT_DIR> \
+  --registration-backend tbss \
+  --fa-template <FMRIB58_FA_1mm.nii.gz> \
+  --fa-skeleton <FMRIB58_FA-skeleton_1mm.nii.gz> \
+  --device cuda
+~~~
+
+`--raw-dir` 指向一名被试的 AP/PA 原始采集；`--output-dir` 是该被试的独立输出目录；`--registration-backend tbss` 选择 weighted FLIRT、三阶段 TorchFNIRT、九图传播和 skeleton multiplication；`--fa-template` 同时定义配准目标与 1 mm 输出网格；`--fa-skeleton` 提供 UKB 单被试 skeleton mask；`--device cuda` 在 H100 上执行 PyTorch 阶段。实测源码快照 tar SHA-256 为 `f7547d0a39ddd9fb6ba70deb720f229ecedc6385fa72d457efb2ded78b6c173d`；`pipeline.py`、`tbss.py`、`flirt/core.py` 和 `fnirt/registration.py` 分别为 `7ed08495a70065f46e8cd6a8402053ec9e5d6a764e5ce8ec37dc961fc369a347`、`93abf99c86dcc688959b34eb1a8e8b0bd8bec6a561b7332a4782f2338f937bfc`、`5528560292d3ba72778fda619abd907ab4cd666b80a8f18b95538ee4b8ca89b2` 和 `a63ed0b09e43a5af4bf63b2f583e710b1d0fc73aac548a326c552334a741cd83`。机器报告逐项记录 52 个调用链源码哈希。
+
+native reference 是既有官方 UKB DTI/NODDI 参数图。standard 和 skeleton reference 从这套 prepared official maps 开始，实际运行 FSL 6.0.7.4 weighted FLIRT、三次 FNIRT、applywarp 和 skeleton multiplication。候选则从 raw AP/PA 开始，因此这是当前完整链的真实回归，也是上游差异和配准差异的合并结果。
+
+| 参数图 | native r | standard r | standard MAE | skeleton r | skeleton MAE |
+|---|---:|---:|---:|---:|---:|
+| FA | 0.586157 | 0.694611 | 0.087692 | 0.561165 | 0.123220 |
+| MD | 0.547537 | 0.600453 | 3.624e-4 | 0.447009 | 2.192e-4 |
+| L1 | 0.436994 | 0.535743 | 4.229e-4 | 0.413255 | 2.896e-4 |
+| L2 | 0.567251 | 0.613368 | 3.619e-4 | 0.504887 | 2.166e-4 |
+| L3 | 0.634022 | 0.658698 | 3.274e-4 | 0.540063 | 1.942e-4 |
+| MO | 0.413579 | 0.464303 | 0.320516 | 0.622653 | 0.285623 |
+| ICVF | -0.002070 | 0.313822 | 0.165453 | 0.107073 | 0.142074 |
+| OD | 0.506862 | 0.592098 | 0.148483 | 0.605502 | 0.098723 |
+| ISOVF | 0.608481 | 0.624363 | 0.154927 | 0.525343 | 0.090987 |
+
+九张 standard 图和九张 skeleton 图的 shape、affine、float32 dtype 均与 reference 一致；文件集合和网格合同通过。连续值没有达到逐体素数值等价，`numerical_equivalence_passed=false`。native 图在配准前的 Pearson r 已为 -0.002070–0.634022，其中 ICVF 几乎不相关，所以不能把 standard 或 skeleton 的全部差异归因于 FLIRT/FNIRT。
+
+| 阶段 | 当前 H100 时间 |
+|---|---:|
+| TOPUP 和 EDDY 准备 | 102.208 s |
+| EDDY | 54.489 s |
+| DTIFIT | 19.137 s |
+| AMICO-NODDI | 50.678 s |
+| weighted FLIRT、三阶段 FNIRT、九图传播和 skeleton | 213.520 s |
+| Python pipeline 内部总计 | 440.092 s |
+| 外部进程 wall | 444.93 s |
+
+最大组件级 CUDA allocation 为 13.664 GB，来自 AMICO-NODDI；TBSS 配准为 3.632 GB，EDDY 为 3.475 GB，DTIFIT 为 1.313 GB。外部进程最大 CPU RSS 为 2,510,476 KiB。启动时同卡已有其他训练，占用 20,869 MiB 且利用率为 100%，所以 444.93 s 只证明完整运行，不作为隔离性能值。FSL 参考的外部 wall 为 976.88 s，但它从 prepared FA 和九张参数图开始；计时边界和负载不同，不计算加速比。候选保存 float32 影像；DTIFIT、NODDI 和 FNIRT 在文档所列求解步骤中使用 float64，CUDA matmul 和 cuDNN 允许 TF32，没有使用 float16 或 bfloat16。
+
+![当前 raw-to-standard TBSS 的真实 FA 对照](figures/dmri_tbss_fa_real.png)
+
+机器报告见 [`tbss_e2e.real.current.json`](../../validation/dmri_pipeline/tbss_e2e.real.current.json)，比较和作图脚本见 [`validate_tbss_e2e.py`](../../validation/dmri_pipeline/validate_tbss_e2e.py)。报告保存九张 native、standard 和 skeleton 图的逐图指标、输入与 reference SHA-256、完整调用链源码 SHA-256、阶段时间和显存。仓库不保存原始 dMRI 或受试者标识。

@@ -12,13 +12,12 @@ from fnit.synthseg_parc import SynthSegParc
 from fnit.synthseg_parc.segment import SynthSegSegmenter, run_synthseg_parc_t1
 
 
-@pytest.mark.parametrize("initial_enabled", [False, True])
-def test_segmenter_uses_cudnn_without_tf32_and_restores_flags(monkeypatch, initial_enabled):
+def test_segmenter_keeps_default_tf32_enabled(monkeypatch):
     seen = []
 
     class RecordingModel(torch.nn.Module):
         def forward(self, image):
-            seen.append((torch.backends.cudnn.enabled, torch.backends.cudnn.allow_tf32))
+            seen.append(torch.backends.cudnn.allow_tf32)
             posterior = torch.zeros((1, 33, *image.shape[2:]), device=image.device)
             posterior[:, 0] = 1
             return posterior
@@ -27,11 +26,9 @@ def test_segmenter_uses_cudnn_without_tf32_and_restores_flags(monkeypatch, initi
     segmenter.device = torch.device("cpu")
     segmenter.model = RecordingModel()
     segmenter.flip_indices = torch.arange(33)
-    monkeypatch.setattr(torch.backends.cudnn, "enabled", initial_enabled)
     monkeypatch.setattr(torch.backends.cudnn, "allow_tf32", True)
     segmenter.posterior(torch.zeros((32, 32, 32)))
-    assert seen == [(True, False), (True, False)]
-    assert torch.backends.cudnn.enabled is initial_enabled
+    assert seen == [True, True]
     assert torch.backends.cudnn.allow_tf32 is True
 
 

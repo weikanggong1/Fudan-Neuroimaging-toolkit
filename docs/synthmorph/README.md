@@ -12,24 +12,39 @@
 from pathlib import Path
 from fnit import SynthMorph, apply_transform
 
-out = Path("results")
-out.mkdir(exist_ok=True)
-register = SynthMorph(
-    weights="/path/to/weights", device="cuda:0", model="joint",
-    extent=256, hyper=0.5, steps=7,
-)
-result = register("moving_T1w.nii.gz", "fixed_T1w.nii.gz")
-result.moved.save(out / "moving_in_fixed.nii.gz")
-result.fixed_moved.save(out / "fixed_in_moving.nii.gz")
-result.transform.save(out / "moving_to_fixed.mgz")
-result.inverse.save(out / "fixed_to_moving.mgz")
+output_dir = Path("results")  # 输出目录：保存本例配准图像和变换
+output_dir.mkdir(parents=True, exist_ok=True)
 
-# 离散标签与原 moving 图像应具有相同几何，使用最近邻。
-labels = apply_transform(
-    "moving_labels.nii.gz", result.transform,
-    method="nearest", dtype="int16",
+register = SynthMorph(
+    weights="/path/to/weights",  # 权重输入：包含官方 SynthMorph HDF5 权重的目录
+    device="cuda:0",  # 计算设备；可改为 "cpu"
+    model="joint",  # 配准模型：joint 同时估计仿射和非线性变换
+    extent=256,  # 网络空间每轴体素数；支持 192 或 256
+    hyper=0.5,  # 非线性正则化参数，范围 0–1
+    steps=7,  # stationary velocity scaling-and-squaring 次数
 )
-labels.save(out / "labels_in_fixed.nii.gz")
+result = register(
+    moving="moving_T1w.nii.gz",  # 输入：待变换的单帧 3D 图像
+    fixed="fixed_T1w.nii.gz",  # 输入：目标图像；决定 moved 输出网格
+    init=None,  # 可选输入：带几何信息的初始 LTA 仿射
+    mid_space=False,  # 是否以初始仿射的中间空间初始化；True 时必须提供 init
+    header_only=False,  # affine/rigid 时可只改头信息；joint 应为 False
+    output_dir=None,  # 可选调试目录；此处不写网络空间中间文件
+)
+result.moved.save(path=output_dir / "moving_in_fixed.nii.gz")  # 输出路径：moving 在 fixed 网格的图像
+result.fixed_moved.save(path=output_dir / "fixed_in_moving.nii.gz")  # 输出路径：fixed 在 moving 网格的图像
+result.transform.save(path=output_dir / "moving_to_fixed.mgz")  # 输出路径：moving→fixed 变换
+result.inverse.save(path=output_dir / "fixed_to_moving.mgz")  # 输出路径：fixed→moving 变换
+
+labels = apply_transform(
+    image="moving_labels.nii.gz",  # 输入：与 moving 几何一致的离散标签图
+    transformation=result.transform,  # 输入：moving→fixed 的带几何变换
+    method="nearest",  # 标签使用最近邻，避免产生新标签值
+    fill=0,  # 视野外填充值
+    dtype="int16",  # 输出体素类型
+    header_only=False,  # False 表示真正重采样数据
+)
+labels.save(path=output_dir / "labels_in_fixed.nii.gz")  # 输出路径：重采样后的标签图
 ```
 
 `from fnit.synthmorph import SynthMorph, RegistrationResult, apply_transform` 是等价的功能模块入口。模型实例可重复用于后续影像对。
@@ -57,8 +72,8 @@ labels.save(out / "labels_in_fixed.nii.gz")
 
 | 参数 | 含义 |
 |---|---|
-| `moving`, `fixed` | 文件路径或 `surfa.Volume`，必须为单帧 3D 图像；网格和方向可不同 |
-| `init` | 可选初始仿射：`.lta` 路径或带源/目标几何的 Surfa Affine，几何须匹配输入 |
+| `moving`, `fixed` | 文件路径或 `nibabel.spatialimages.SpatialImage`，必须为单帧 3D 图像；网格和方向可不同 |
+| `init` | 可选初始仿射：`.lta` 路径、带源/目标几何的 `AffineTransform`，或 4×4 world-RAS 矩阵 |
 | `mid_space` | 使用初始仿射的中间空间；为 `True` 时必须提供 `init` |
 | `header_only` | 仅改变影像头信息，限 affine / rigid |
 | `output_dir` | 调试输出目录：`inp_1.nii.gz`、`inp_2.nii.gz` 和 `network_transforms.npz` |
@@ -67,12 +82,12 @@ labels.save(out / "labels_in_fixed.nii.gz")
 
 | 字段 | 含义 |
 |---|---|
-| `moved` | moving 在 fixed 空间的 `surfa.Volume` |
-| `fixed_moved` | fixed 在 moving 空间的 `surfa.Volume` |
+| `moved` | moving 在 fixed 空间的 `FNITNifti1Image` |
+| `fixed_moved` | fixed 在 moving 空间的 `FNITNifti1Image` |
 | `transform` | moving → fixed 的带几何变换 |
 | `inverse` | fixed → moving 的带几何变换 |
 
-重采样时图像采用目标网格；`header_only=True` 保留数据并更新其几何。每次调用都会计算双向结果。对于 affine / rigid，变换为 world-space `surfa.Affine`，建议保存为 `.lta`；joint / deform 返回 RAS 位移 `surfa.Warp`，建议保存为 `.mgz`。普通三通道数组不携带足够的源/目标几何，不能直接替代这些变换文件。直接在 Python 中保存时，由调用者准备输出父目录。
+重采样时图像采用目标网格；`header_only=True` 保留数据并更新 affine。每次调用都会计算双向结果。affine / rigid 返回 world-space `AffineTransform`，保存为 `.lta`；joint / deform 返回 target-grid、target→source 的 world-RAS 毫米位移 `DenseWarp`，可保存为 `.mgz`、`.mgh` 或 NIfTI。普通三通道数组不携带足够的源/目标几何，不能直接替代内存中的变换对象。直接在 Python 中保存时，由调用者准备输出父目录。
 
 ### 应用已有变换
 
@@ -80,14 +95,14 @@ labels.save(out / "labels_in_fixed.nii.gz")
 
 | 参数 | 含义 |
 |---|---|
-| `image` | 路径或 `surfa.Volume`；接受 3D 和带 frame 维的 4D |
-| `transformation` | `.lta` 路径、warp 文件路径或 Surfa Affine/Warp |
+| `image` | 路径或 `nibabel.spatialimages.SpatialImage`；接受 3D 和末维为 frame 的 4D |
+| `transformation` | `.lta` 路径、warp 文件路径、`AffineTransform` 或 `DenseWarp` |
 | `method` | `linear` 或 `nearest`，标签使用 `nearest` |
 | `fill` | 视野外强度，默认 0 |
 | `dtype` | 输出类型，默认 `float32` |
 | `header_only` | 只更新头信息，限 affine |
 
-返回 `surfa.Volume`。warp 的源几何必须与输入图像一致；配准输入仍仅支持 3D，这一限制不适用于应用已有变换。
+返回 `FNITNifti1Image`。warp 的 source geometry 必须与输入图像一致；配准输入仍仅支持 3D，这一限制不适用于应用已有变换。
 
 ## 命令行
 
@@ -129,7 +144,7 @@ mri_synthmorph apply -m nearest -t int16 \
 | `-j`, `--threads` | Torch 线程数，CLI 默认 4 |
 | `-d`, `--output-dir` | 调试目录 |
 
-配准至少请求一个影像、变换或调试输出。统一 CLI 会创建输出父目录。`fnit apply` 的位置参数依次是变换、影像、输出；支持 `--method`、`--fill`、`--dtype`、`--header-only`。CLI dtype 选择为 `uint8`、`uint16`、`int16`、`int32`、`float32`，默认 `float32`。apply 使用 Surfa CPU 重采样，不接受设备参数。当前 apply CLI 与 Python 每次均处理一对 image/output。
+配准至少请求一个影像、变换或调试输出。统一 CLI 会创建输出父目录。`fnit apply` 的位置参数依次是变换、影像、输出；支持 `--method`、`--fill`、`--dtype`、`--header-only`。CLI dtype 选择为 `uint8`、`uint16`、`int16`、`int32`、`float32`，默认 `float32`。apply 使用包内 PyTorch sampler 在 CPU 重采样，不接受设备参数。当前 apply CLI 与 Python 每次均处理一对 image/output。
 
 ## 权重和执行位置
 
@@ -141,7 +156,7 @@ mri_synthmorph apply -m nearest -t int16 \
 
 官方地址、文件大小、SHA-256 和许可证见 [WEIGHTS.md](../WEIGHTS.md)。独立推理只需本地权重；HDF5 加载器只支持这里记录的架构，不是任意 Keras 网络转换器。
 
-网络空间采样、网络、速度场积分和原始坐标组合在所选设备执行。HDF5 读取和超网络权重特化、初始仿射的矩阵平方根、影像 I/O、最终 Surfa 重采样在 CPU 执行。对于固定 `hyper`，构造时把大型超网络特化为普通卷积权重，随后可复用。这一初始化与重复调用的时间分配不同于原实现，比较性能时需区分完整 CLI 进程和已加载 API。
+网络空间采样、网络、速度场积分、坐标组合和配准结果重采样在所选 PyTorch 设备执行。HDF5 读取、超网络权重特化、初始仿射的矩阵平方根及 nibabel 影像 I/O 在 CPU 执行；独立 `apply_transform` 固定在 CPU。对于固定 `hyper`，构造时把大型超网络特化为普通卷积权重，随后可复用。这一初始化与重复调用的时间分配不同于原实现，比较性能时需区分完整 CLI 进程和已加载 API。
 
 ## 源码组织
 
@@ -150,108 +165,110 @@ mri_synthmorph apply -m nearest -t int16 \
 | [models.py](../../src/fnit/synthmorph/models.py) | affine/rigid 特征网络、HyperVxmJoint、HDF5 读取与权重特化 |
 | [pipeline.py](../../src/fnit/synthmorph/pipeline.py) | 图像几何、预后处理、双向结果与 apply |
 | [spatial.py](../../src/fnit/synthmorph/spatial.py) | pull 采样、仿射/位移组合和积分 |
+| [_transforms.py](../../src/fnit/_transforms.py) | 带 source/target geometry 的 `AffineTransform`、`DenseWarp` 及 LTA 读写 |
 | [__init__.py](../../src/fnit/synthmorph/__init__.py) | 功能公开导出 |
 
-## Source map
+## 原版源码对应关系
 
-Source paths below are relative to the reference `$FREESURFER_HOME`; Python dependency paths refer to `python/lib/python3.8/site-packages/`. Line numbers refer to the recorded 8.2.0 build.
+下列路径相对于已记录的 FreeSurfer 8.2.0 `$FREESURFER_HOME`；Python 依赖路径位于 `python/lib/python3.8/site-packages/`。行号以 provenance 中固定的构建为准。
 
-| Source | Lines | Role |
+| 原版源码 | 行号 | 对应功能 |
 |---|---:|---|
-| `python/scripts/mri_synthmorph` | CLI parser near end | `register`/`apply`; model choices and parameter validation; explicitly selects TensorFlow backends |
-| `python/packages/synthmorph/registration.py` | 10–15 | Official model weights: affine.2, rigid.1, deform.3 |
-| same | 18–54 | Build image-specific 1 mm isotropic LIA network geometry |
-| same | 57–100 | Resample into network coordinates, zero outside volume, min–max normalize |
-| same | 103–156 | Flexible nested Keras H5 loading |
-| same | 159–242 | Input geometry validation, affine initialization, network selection |
-| same | 244–310 | Native-coordinate composition, Surfa transforms, outputs and debug network-space exports |
+| `python/scripts/mri_synthmorph` | 文件末尾的 CLI parser | `register`/`apply` 参数、模型选择与检查；显式选择 TensorFlow 后端 |
+| `python/packages/synthmorph/registration.py` | 10–15 | affine.2、rigid.1、deform.3 官方权重名 |
+| 同上 | 18–54 | 依据影像几何建立 1 mm 等体素 LIA 网络网格 |
+| 同上 | 57–100 | 网络空间重采样、视野外填零、全局 min–max 归一化 |
+| 同上 | 103–156 | 嵌套 Keras H5 权重读取 |
+| 同上 | 159–242 | 几何检查、初始仿射和网络选择 |
+| 同上 | 244–310 | 原生坐标组合、Surfa 变换、双向输出和调试文件 |
 | `voxelmorph/tf/networks.py` | 1238–1459 | `VxmAffineFeatureDetector` |
-| same | 1462–1685 | `HyperVxmJoint` |
-| `neurite/tf/layers.py` | 2668–2803 | `HyperConvFromDense`: predict complete convolution kernel/bias from a dense hypernetwork |
-| `neurite/tf/utils/utils.py` | 73 onward | Multilinear interpolation with whole-sample fill or border clamping |
-| same | 512–578 | Centered normalized feature barycenters, divide-no-nan |
-| `voxelmorph/tf/utils/utils.py` | 253–348 | Mixed affine/dense pull-transform composition |
-| same | 350 onward | Scaling-and-squaring integration |
-| same | 794–982 | Affine parameters and intrinsic XYZ Euler rotations |
-| same | 983–1046 | Cholesky decomposition stripping scale/shear |
-| same | 1049–1098 | Weighted least-squares affine fit |
+| 同上 | 1462–1685 | `HyperVxmJoint` |
+| `neurite/tf/layers.py` | 2668–2803 | `HyperConvFromDense`，由超网络生成完整卷积核和偏置 |
+| `neurite/tf/utils/utils.py` | 73 起 | 多线性插值、视野外填充与边界扩展 |
+| 同上 | 512–578 | 归一化特征重心和 divide-no-nan |
+| `voxelmorph/tf/utils/utils.py` | 253–348 | 仿射与 dense pull 变换组合 |
+| 同上 | 350 起 | scaling-and-squaring 积分 |
+| 同上 | 794–982 | 仿射参数和 XYZ 内禀 Euler 旋转 |
+| 同上 | 983–1046 | Cholesky 分解除去 scale/shear |
+| 同上 | 1049–1098 | 加权最小二乘仿射拟合 |
 
-The bundled `voxelmorph/torch/networks.py` contains ordinary `VxmDense`; it does **not** implement the affine feature detector or HyperVxmJoint. Changing `VXM_BACKEND` alone is insufficient. The command additionally forces the TensorFlow backend.
+FreeSurfer 附带的 `voxelmorph/torch/networks.py` 只有普通 `VxmDense`，没有 affine feature detector 或 `HyperVxmJoint`；只更改 `VXM_BACKEND` 不能得到同一算法。原命令还会强制选择 TensorFlow 后端。
 
-## Model and weight conversion
+## 模型和权重转换
 
-**Affine/rigid.** One shared single-image detector has four 3×3×3 convolutions with 256 output channels, each followed by LeakyReLU(0.2) and factor-two max pooling; four additional 256-channel convolutions at the coarsest scale; and a 64-channel ReLU output. Standalone registration downsamples the normalized network images by selecting index coordinates `(2i,2j,2k)`. Its feature maps yield 64 centered barycenters. Coordinates are divided by feature-map extent and multiplied by the detector input extent, rather than taking a generic resized coordinate grid.
+### Affine 与 rigid
 
-The product of the two images' normalized feature masses weights a normal-equation affine fit in both directions. The first result is averaged with the inverse of the second, and the reverse result is the inverse of that average. Rigid mode uses a separately trained checkpoint and strips scale and shear by Cholesky/Euler decomposition; an SVD nearest-rotation approximation would change the algorithm. The return matrices operate on zero-based voxel indices, so the centered estimate is conjugated by translations `(shape−1)/2`.
+单幅影像 detector 共享权重：前四层为 3×3×3、256 通道卷积，每层接 LeakyReLU(0.2) 和 2 倍 max pooling；最粗尺度再接四层 256 通道卷积，最后输出 64 通道 ReLU 特征。独立配准以 `(2i,2j,2k)` 索引下采样归一化网络影像，再计算 64 个加权特征重心。坐标按特征图范围归一化后乘 detector 输入范围，不能用普通 resize 网格替代。
 
-**Deformable.** A scalar user-selected regularization input passes through four Dense(32, ReLU) layers. Each of the 13 convolutions has its entire kernel and bias predicted by separate linear maps from this 32-vector. The main network has four 256-channel encoder convolutions/pools; four 256-channel decoder convolutions followed by nearest-neighbor ×2 upsampling and skip concatenation; four 256-channel extra convolutions; and a three-channel linear SVF output. Decoder convolutions 5–8 (zero-based indexes) consume 512 channels. Features are always ordered as moving then fixed.
+两幅图归一化特征质量的乘积用于双向加权最小二乘拟合。正向结果与反向结果的逆取平均，反向变换再取该平均矩阵的逆。rigid 使用独立权重，并按原版 Cholesky/Euler 分解除去 scale 和 shear；SVD 最近旋转不是同一算法。矩阵作用于从 0 开始的 voxel index，因此估计结果还需用 `(shape-1)/2` 的平移共轭到图像中心。
 
-Keras Conv3D kernels are `(Ki,Kj,Kk,Cin,Cout)`. PyTorch Conv3D kernels are `(Cout,Cin,Ki,Kj,Kk)`: transpose `(4,3,0,1,2)` with **no spatial reversal**. Dense kernels are `(input,output)`; evaluating `h @ W + b` preserves that layout. Hyperkernel flat outputs must first be reshaped to the Keras five-dimensional kernel shape and only then transposed. The source predicts kernel and bias linearly; neither has an extra activation.
+### Deformable
 
-The published deformable H5 stores several GB of hypernetwork coefficients. The port streams one hyperkernel matrix at a time and evaluates its 32-dimensional projection with torch, retaining only the resulting ordinary convolution weights. This is an algebraic specialization for a fixed regularization value, not a reduced architecture. Calling `DeformNetwork.set_hyper(r)` recomputes these weights for any `0 < r < 1`; repeated calls at the same value are cached. Inference does not import TensorFlow. Alternative weights must follow this exact 8.2 architecture; arbitrary future Keras model graphs are not automatically translated.
+用户给出的正则化标量先经过四层 Dense(32, ReLU)。主网络 13 个卷积层的完整卷积核和偏置，分别由这个 32 维向量经线性映射生成。主干包含四层 256 通道 encoder 卷积与 pooling、四层 256 通道 decoder 卷积、最近邻 2 倍上采样和 skip concatenation，再接四层 256 通道卷积和三通道线性 SVF 输出。decoder 的第 5–8 层输入为 512 通道；输入通道顺序固定为 moving、fixed。
 
-The installed H5 dataset shapes imply 12,837,696 affine parameters (51,350,784 FP32 bytes) and 877,133,827 deformable hypernetwork parameters (3,508,535,308 FP32 bytes). Specialization retains 26,579,715 deformable convolution parameters (106,318,860 FP32 bytes). These figures count parameter storage only, not activation tensors, convolution workspaces, HDF5 metadata or process memory.
+Keras Conv3D 权重布局为 `(Ki,Kj,Kk,Cin,Cout)`，PyTorch 为 `(Cout,Cin,Ki,Kj,Kk)`，因此使用 `(4,3,0,1,2)` 转置，不反转空间轴。Dense 权重保留 `(input,output)`，按 `h @ W + b` 计算。超网络的扁平输出必须先还原为 Keras 五维卷积核，再转置到 PyTorch 布局。
 
-## Symmetry and coordinate transforms
+官方 deform H5 保存数 GB 的超网络系数。本实现逐个读取 hyperkernel 矩阵，与 32 维状态相乘后只保留普通卷积权重。这是在固定 `hyper` 下的代数特化，不是缩小网络。`DeformNetwork.set_hyper(r)` 可为任意 `0 < r < 1` 重新生成权重，相同值会复用缓存。加载过程不导入 TensorFlow；其他权重必须符合这里固定的 8.2 架构。
 
-For both directions, the same deformable network runs on swapped inputs and the SVF is antisymmetrized: `v = (D(m,f) − D(f,m))/2`; the reverse SVF is `−v`. Two scaling-and-squaring integrations compute `exp(v)` and `exp(−v)`, at half resolution. With seven steps, initialize `u=v/128` and repeat `u ← u + u(Id+u)` seven times. Sampling the vector field uses border extension, not zero fill.
+已记录 H5 shape 对应 12,837,696 个 affine 参数（FP32 51,350,784 字节）和 877,133,827 个 deform 超网络参数（FP32 3,508,535,308 字节）。特化后保留 26,579,715 个 deform 卷积参数（FP32 106,318,860 字节）。这些数字只统计参数，不含 activation、卷积 workspace、HDF5 metadata 和进程内存。
 
-Joint registration estimates a symmetric affine transform in the half-resolution image space and computes separate principal square roots for the forward and reverse matrices. It resamples both full-resolution images directly into this affine mid-space. The nonlinear step therefore differs from running standalone affine followed by ordinary deformable registration, unless the latter uses the documented mid-space initialization. The port computes the 4×4 real principal roots with double-precision Denman–Beavers iterations, then converts back to FP32. This differs numerically from TensorFlow's Schur-based matrix root, so the final transform error must be measured.
+## 对称约束和坐标变换
 
-At half resolution the composed pull map is `A_half_to_full ∘ exp(v) ∘ S_0.5 ∘ A_half_to_full`. Deform-only omits the final two factors and uses `A_half_to_full=S_2`. To produce a full-resolution displacement field, the source composes with a *dense* `S_0.5` pull map defined on the full grid. Generic `F.interpolate(..., align_corners=...)` is not an equivalent replacement at the last boundary.
+非线性网络以交换顺序运行两次，得到反对称 SVF：`v = (D(m,f) - D(f,m))/2`，反向为 `-v`。两者在半分辨率上分别计算 `exp(v)` 和 `exp(-v)`。七步积分先令 `u=v/128`，再重复七次 `u <- u + u(Id+u)`；向量场采样使用边界扩展，而不是填零。
 
-All network transforms are **pull** maps: the first maps fixed coordinates to moving coordinates for sampling the moving image. The registration wrapper conjugates by network/native coordinate maps (`net_to_mov ∘ fw ∘ fix_to_net`). Matrix transforms are exchanged before constructing Surfa Affines because LTA follows the opposite convention; nonlinear fields are constructed as `disp_crs`, then exported as `disp_ras`. A plain three-channel NIfTI array without correct source/target geometry and RAS conversion would not reproduce the command.
+joint 模式在半分辨率影像空间估计对称仿射，并分别计算正向、反向矩阵的 principal square root，然后把两幅全分辨率图直接采样到仿射中间空间。因此，joint 不等同于普通 affine 后直接运行 deform，除非 deform 使用文档约定的 mid-space 初始化。本实现用 float64 Denman–Beavers 迭代求 4×4 实主平方根，再转回 FP32；原 TensorFlow 路径使用 Schur 方法，最终误差必须通过实测判断。
 
-## Pre/postprocessing and option compatibility
+网络变换都是 pull map：正向 field 把 fixed 坐标映射到 moving 坐标，以便采样 moving。wrapper 再用网络网格与原生网格变换进行共轭组合。内存中的 `AffineTransform` 明确保存 source→target 方向；采样时再求 target→source pull。非线性结果从 voxel displacement 转为 target-grid 的 world-RAS 毫米位移 `DenseWarp`。缺少 source/target geometry 的普通三通道数组不能直接替代这些内存对象。
 
-The wrapper preserves single-frame NIfTI/MGZ image geometry. Joint/affine/rigid network grids are centered on each input's field of view. Deform-only centers the moving network grid on the fixed image, reflecting assumed prior affine alignment. Images are resampled to LIA 1 mm with extent 192 or 256 and globally min–max normalized after resampling, including the zero-filled exterior. It is not percentile normalization or per-slice normalization.
+## 预处理、后处理和选项边界
 
-The original CLI also supports bidirectional image and transform output, affine initialization, mid-space initialization, header-only affine application, interpolation/dtype/fill control for apply, alternative checkpoint paths, and debug network-space outputs. These functions belong to the wrapper and must be compared separately from neural forward equivalence.
+wrapper 保留单帧 NIfTI/MGZ 的 shape、方向和空间信息。joint/affine/rigid 的网络网格分别以两幅输入的视野中心建立；deform-only 把 moving 网络网格放在 fixed 中心，前提是输入已有合适的仿射对齐。两幅图重采样到 192³ 或 256³、1 mm LIA 网格后做全局 min–max 归一化，归一化范围包含视野外的零填充；这不是 percentile 或逐切片归一化。
 
-Neural inference, network-space resampling, SVF integration and native-coordinate composition use PyTorch on the selected device. Final moved-image resampling and applying a saved transform use the standalone Surfa library on CPU, exactly as the original CLI does. These operations do not invoke FreeSurfer executables or TensorFlow.
+网络推理、网络空间采样、SVF 积分、坐标组合和 registration 输出重采样都在所选 PyTorch 设备运行；保存的影像为 nibabel 对象。`apply_transform` 使用同一包内 sampler，但固定在 CPU。运行时不调用 FreeSurfer、TensorFlow 或 Surfa。
 
-Two interpolation conventions must remain separate. Neurite's network sampler accepts coordinates in `[0,n−1]`, filling a sample outside that closed interval. Surfa 0.6.3's final linear sampler checks the floored coordinate, accepting `[0,n)` and extending the final voxel over `[n−1,n)`. Surfa nearest-neighbor sampling also accepts `[0,n)` and rounds positive half-integers upward, whereas TensorFlow/PyTorch round ties to even. Reusing the network sampler for final outputs therefore changes edge voxels even when the estimated transforms agree. The port resamples using the original native voxel/CRS transforms before converting the returned transforms to world/RAS format, preserving the original operation order and avoiding unnecessary coordinate round trips.
+registration 的 linear sampler 接受闭区间 `[0,n-1]` 内坐标，越界使用 `fill`。`apply_transform(method="nearest")` 另按 Surfa 0.6.3 使用 `floor(x + 0.5)` 和 `[0,n)` 有效域。下节 12 例结果由报告中记录的测量源码生成；当前 registration linear 路径通过源码等价证明继承，nearest 路径不借用这组真实数据指标。
 
-The installed original command has an initialization-path dtype failure: with `-i` (also `-i -M`), `net_to_mov` and sometimes `net_to_fix` become floating TensorFlow tensors at double precision. VoxelMorph composition preserves floating tensor dtypes but casts NumPy inputs to single precision, leading to a mixed double/float matrix multiplication with the FP32 network result. The option validator preserves the unmodified command's failed exit code and logs. For a separate functional comparison it copies the official `synthmorph` Python package into the task's `work/reference_dtype_fix/` and inserts only `net_to_mov = np.asarray(net_to_mov)` and `net_to_fix = np.asarray(net_to_fix)` immediately before native-space composition. It runs the official CLI through `fspython` with `FS_LOCAL_PYTHONPATH` selecting that copy, verifies the imported source path, and records original/copied hashes. The installed FreeSurfer files remain untouched. These initialized-registration comparisons are explicitly labeled **patched reference**, and must not be described as successful runs of the unmodified original command.
+原版 `mri_synthmorph` 的 `-i` 和 `-i -M` 路径存在 float64/float32 混合错误，未修改的命令会失败。验证记录同时保留原失败结果，以及仅在原包副本的 native-space composition 前增加两次 `np.asarray` 转换后的比较；FreeSurfer 安装文件未被修改。后者明确标为 **patched reference**，不能写成原命令成功运行。
 
-Saved-transform application accepts multi-frame (4D) input images; neural registration still requires single-frame (3D) images. The option validator exercises four distinct frames with both affine and nonlinear saved transforms, linear and nearest-neighbor interpolation, and checks image data bitwise against the original `apply` command. It separately checks output dtype, nonzero fill, and header-only affine application.
+保存后的 affine 或 nonlinear 变换可应用于多帧 4D 图像；神经网络配准仍只接受单帧 3D 图像。选项验证使用四个不同 frame 检查 affine/nonlinear、linear/nearest、dtype、fill 和 header-only。
 
 ## 验证、差异与限制
 
-仓库当前保留的单被试数值检查覆盖网络层、空间运算层、完整影像流程和常用选项：
+[`GPU 报告`](../../validation/synthmorph/report.real.current.gpu.json)和 [`CPU 报告`](../../validation/synthmorph/report.real.current.cpu.json)使用测量源码 `pipeline.py` `e680d3…`、`spatial.py` `9c629a…` 的完整 Nibabel/PyTorch 调用链，将同一组 12 例真实临床 T1w 配准到同一 MNI152 T1 2 mm 模板，并逐例比较 FreeSurfer 8.2.0 `mri_synthmorph register -m joint`。当前文件 hash 为 `70e97c…`、`dab615…`；变更限于独立 `apply_transform` 的 nearest 语义，registration 的 `SynthMorph.__call__` 与 linear 重采样路径不变。完整 hash 与 AST 指纹见[源码等价证明](../../validation/runtime_dependencies/synthmorph_linear_source_equivalence.public.json)。报告保留原测量 hash，当前版本没有重新跑 12 例完整 registration。病例按固定排序选取，未按输出质量筛选；公开报告只保存去标识别名和输入 SHA-256。两边原始计时均为每例 fresh CLI，包含 Python 启动、HDF5 加载与超网络特化、读图、推理、重采样和两份 NIfTI 写出。GPU 候选默认启用 TF32，影像和模型张量为 float32，没有使用 float16 或 bfloat16；CPU 两边均固定 8 线程。
 
-- 130 项空间与插值检查覆盖边界、半整数取整、积分和变换组合。
-- 192³ 模板对覆盖 affine、rigid、deform、joint 四种模式和双向输出。
-- 默认 joint、256³ 的 12 例真实 T1w 中，同设备最大形变向量差为 `0.000790 mm`，最大正向 moved NRMSE 为 `4.05e-5`。
-- 15 项选项检查覆盖保存变换、插值、dtype、fill、4D 和 header-only；原版初始化路径的已知 dtype 错误按页面前述边界单列。
+| 项目 | 12 例结果 |
+|---|---:|
+| moved shape / affine / dtype | 12/12 一致 |
+| moved Pearson 最低值 | `0.994337` |
+| moved NRMSE 最大值 | `0.081249` |
+| 位移向量平均误差（12 例均值） | `0.079139 mm` |
+| 位移向量最大误差 | `1.104136 mm` |
+| FNIT GPU 完整命令中位数 | `15.780 s` |
+| FreeSurfer GPU 完整命令中位数 | `116.594 s` |
+| FNIT / FreeSurfer GPU 中位时间比 | `0.1353` |
+| FNIT 峰值 CUDA allocation | `13.426 GB` |
+| FNIT CPU 完整命令中位数 | `140.185 s` |
+| FreeSurfer CPU 完整命令中位数 | `164.549 s` |
+| FNIT / FreeSurfer CPU 中位时间比 | `0.8519` |
+| CPU moved Pearson 最低值 | `0.994810` |
+| CPU 位移向量平均误差（12 例均值） | `0.0000677 mm` |
 
-完整单被试 benchmark 分别运行 FreeSurfer 与本包的 CPU/GPU 路径，计时含进程启动、模型与输入加载、推理和写盘。该 benchmark 关闭 TF32，所以下表是固定实验条件的观测值，不代表当前默认 TF32 的最快时间。逐例准确度和四分位数见[当前汇总](../../benchmark/public_report/summary.md)。
+形变文件的语义一致：两者均表示 target 网格上 target→source 的 world-RAS 毫米位移。FreeSurfer 文件 shape 为 `[X,Y,Z,1,3]`，FNIT 使用标准 NIfTI vector shape `[X,Y,Z,3]`；比较时只压缩原版的单例 frame 轴。坐标和 moved 输出非常接近，但仍有非零误差，因此本页结论是功能与数值近似，不是逐元素等价。
 
-| 原版 CPU | 本包 CPU | 原版 GPU | 本包 GPU |
-|---:|---:|---:|---:|
-| 164.55 | 122.33 | 116.59 | 17.62 |
+下图使用仓库内公开的 OpenNeuro ds000114 去面部 T1w：`sub-02` 为 moving，`sub-01` 为 fixed。图中原版和 FNIT 均为 joint 模式的当前输出；两者 shape、affine 和 float32 dtype 一致，非零并集内 Pearson 为 `0.998347`。输入、输出和图片哈希见 [`public_example.current.json`](../../validation/synthmorph/public_example.current.json)。
 
-下图使用公开 T1w 样例，展示 moving、fixed 以及原版和本包的 joint 配准图像。两列配准结果均在 fixed 网格；图中为展示使用相同的 fixed 脑掩膜。原版在 CPU、本包在 GPU 上推理，因此这张图用于查看结果，不用于比较运行速度。图像制作与完整体数据比较见[图示记录](../figures/README.md)。
+![公开 OpenNeuro T1w 的 FreeSurfer 与 FNIT SynthMorph 当前结果](figures/synthmorph_public_current.png)
 
-![公开 T1w 输入及 FreeSurfer 与本包的 joint 配准结果](../figures/synthmorph_comparison.png)
+当前限制：神经网络配准只接受单帧 3D 图像；`apply_transform` 可处理末维为 frame 的 4D 图像。报告记录的根 CLI `2d5e3d…` 与当前
+`c92a3f…` 的 SynthMorph 参数定义和分发 AST 完全一致，限定结论见
+[包入口源码等价证明](../../validation/runtime_dependencies/package_entry_source_equivalence.public.json)。`apply_transform` 固定使用 CPU sampler。nearest 的 Surfa 半整数和边界规则已通过 headcw CPU 16 项及 gpucw1 H100 26 项定向测试，但尚无独立真实标签数据 benchmark；12 例 registration 报告只覆盖 linear 路径。原版 `-i` 与 `-i -M` 的已知 dtype 错误不属于默认 joint 路径，不能把 patched reference 写作未修改原命令。真实病例没有配准地标真值，本报告验证对原实现的复现程度，不评价独立解剖学准确率。
 
-模板反向图像存在少量采样有效域边界跳变：deform 为 1 个、joint 为 2 个体素，其强度误差超过输入最大强度的 0.1%。微小坐标误差使域外填零变为域内采样，因此接近的位移并不保证全部输出逐元素一致。完整误差、几何和定位见[异常体素报告](../../validation/full192/reverse_output_diagnosis/report.json)。本包保留原边界规则，没有通过放宽规则掩盖这些差异。
-
-参考版本的 `-i` / `-i -M` 原命令因 float64/float32 混合而失败。记录同时保留原失败和两行类型转换副本的比较结果；调试输出布局、日志及线程默认值也与原 CLI 不同。
-
-测试入口：
+复核入口：
 
 ```bash
 python -m pytest tests/synthmorph tests/test_public_api.py
-# 原版差分比较才需要 FreeSurfer。
-module load freesurfer
-python tools/validate_spatial.py --out-dir validation/spatial --device cuda
-python tools/compare_synthmorph_networks.py --help
-python tools/validate_synthmorph.py --help
-python tools/validate_registration_options.py --help
+python validation/synthmorph/current_regression.py --help
 ```
-
-[validate_synthmorph.py](../../tools/validate_synthmorph.py) 执行完整流程；[compare_synthmorph_networks.py](../../tools/compare_synthmorph_networks.py) 分开运行 TensorFlow 和 PyTorch，比较特征、矩阵、SVF 和位移。完整逐例准确度与计时见[当前汇总](../../benchmark/public_report/summary.md)。真实病例没有配准地标真值，这些数值对照验证参考实现的复现，不是独立解剖学准确率评估。
 
 ## 官方来源与引用
 

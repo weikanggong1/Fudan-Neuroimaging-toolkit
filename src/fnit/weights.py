@@ -130,8 +130,6 @@ def resolve_weights(filename, explicit=None):
     if environment and (Path(environment) / filename).is_file():
         return Path(environment) / filename
     roots = [configured_dir(), cache_dir()]
-    if os.environ.get("FREESURFER_HOME"):
-        roots.append(Path(os.environ["FREESURFER_HOME"]) / "models")
     for root in roots:
         if root and (Path(root) / filename).is_file():
             return Path(root) / filename

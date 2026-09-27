@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-28",
+  "scope": "SynthMorph registration and moved-image resampling through the linear interpolation path",
+  "measurement_source": {
+    "src/fnit/synthmorph/pipeline.py": "e680d3a85f7e240cdab235047766973035d9188e705d9642e3edca1402d5d202",
+    "src/fnit/synthmorph/spatial.py": "9c629a94827a987fcc4880cbf18f36aa79f347270585b8c4b92b3fc1660104ee",
+    "reports": [
+      "validation/synthmorph/report.real.current.cpu.json",
+      "validation/synthmorph/report.real.current.gpu.json",
+      "validation/synthmorph/public_example.current.json"
+    ]
+  },
+  "current_source": {
+    "src/fnit/synthmorph/pipeline.py": "70e97c1164b672e19d70ebb9ee39dd0273a71b993bf78b8b22031522dfbd8991",
+    "src/fnit/synthmorph/spatial.py": "dab615dcc8a5f332ef2efede1d5e45d04f21c440243650e960d763e35595d861"
+  },
+  "covered_path": {
+    "entry_point": "SynthMorph.__call__",
+    "interpolation": "linear",
+    "outputs": [
+      "RegistrationResult.moved",
+      "RegistrationResult.fixed_moved",
+      "RegistrationResult.transform",
+      "RegistrationResult.inverse"
+    ]
+  },
+  "diff": {
+    "pipeline": [
+      "imported surfa_nearest",
+      "added an opt-in surfa_nearest_rule branch to _resampled_image",
+      "enabled that branch only inside apply_transform; SynthMorph.__call__ leaves it disabled"
+    ],
+    "spatial": [
+      "added nearest-neighbour helpers",
+      "kept the affine dense calculation and linear interpolation branch unchanged",
+      "moved method validation before coordinate construction without changing valid linear calls"
+    ],
+    "covered_path_numerical_assignment_or_control_flow_changed": false
+  },
+  "ast_check": {
+    "synthmorph_registration_call_ast_sha256": "d0d357bdb238d0774a49459463a6c3b03134cfd2ca143de5ad0f6c1d07d68660",
+    "resampled_image_linear_branch_ast_sha256": "3d2577489f3c9bd66b94b09f5eca5740a8b009e2dc8f9c0e196b76e6dacc68f1",
+    "dense_ast_sha256": "8b86802fd22c83e2faa5b0eba2d7402899cebd73f7134147947be52221cb7016",
+    "linear_transform_normalized_ast_sha256": "ebc72a1e7ba83dc77bdb83faf1e5d07686aa1740043c105ec10cf79ef4d04391",
+    "normalization": "specialize _resampled_image and spatial.transform to method=linear, remove invalid-method and nearest-output branches, and normalize the affine coordinate assignment to the unchanged dense call",
+    "old_and_current_equal": true
+  },
+  "nearest_semantics": {
+    "covered_by_real_registration_reports": false,
+    "implementation": "apply_transform(method='nearest') uses Surfa 0.6.3 rules: floor(x + 0.5) and the valid coordinate domain [0, size)",
+    "evidence": {
+      "cpu": "headcw; 16 passed in 1.63 s",
+      "gpu": "gpucw1 H100; 26 passed in 4.00 s",
+      "selection": "tests/synthmorph/test_spatial.py tests/synthmorph/test_pipeline_geometry.py",
+      "test_sha256": {
+        "tests/synthmorph/test_spatial.py": "732daa5e4f8a92d04fc0c29d20d5ccaf2710949a43cd2b03d269bc0f947e0cfb",
+        "tests/synthmorph/test_pipeline_geometry.py": "904f02b1b8e4fbc3992443fc5cadf86b53862a2834a0b13d81e75a2df257c1cb"
+      }
+    }
+  },
+  "status": {
+    "linear_registration_path_source_equivalent": true,
+    "fresh_current_hash_full_real_data_rerun": false,
+    "nearest_real_data_numerical_claim": false,
+    "interpretation": "The real registration metrics and timings retain their measured source hashes and inherit only through the unchanged linear registration path. The nearest-neighbour branch has separate targeted tests and is not validated by the 12-case registration reports."
+  },
+  "limits": [
+    "This attestation does not turn the preserved reports into fresh current-source runs.",
+    "It does not claim that apply_transform(method='nearest') was compared on the 12 real registration cases.",
+    "It is restricted to the exact old and current source hashes listed above."
+  ]
+}

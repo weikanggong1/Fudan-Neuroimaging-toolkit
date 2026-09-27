@@ -26,18 +26,77 @@ def dense(matrix, shape, warp_right=None):
     return torch.einsum('ij,bjxyz->bixyz', matrix[:3, :3], loc) + matrix[:3, 3][None, :, None, None, None] - coords
 
 
+def _dense_affine_nearest(matrix, shape):
+    """Build an affine shift without TF32 changing half-voxel ties."""
+    coords = grid(shape, matrix.device, matrix.dtype)
+    mapped = torch.stack([
+        matrix[row, 0] * coords[:, 0]
+        + matrix[row, 1] * coords[:, 1]
+        + matrix[row, 2] * coords[:, 2]
+        for row in range(3)
+    ], dim=1)
+    mapped = mapped + matrix[:3, 3][None, :, None, None, None]
+    return mapped - coords
+
+
+def surfa_nearest(volume, trans, shape=None, fill_value=0):
+    """Resample with the nearest-neighbour rules used by Surfa 0.6.3."""
+    trans = torch.as_tensor(trans, dtype=torch.float32, device=volume.device)
+    if trans.ndim == 2:
+        shape = volume.shape[2:] if shape is None else tuple(shape)
+        coords = grid(shape, volume.device, torch.float32)
+        loc = torch.stack([
+            trans[row, 0] * coords[:, 0]
+            + trans[row, 1] * coords[:, 1]
+            + trans[row, 2] * coords[:, 2]
+            + trans[row, 3]
+            for row in range(3)
+        ], dim=1)
+    else:
+        loc = grid(trans.shape[2:], volume.device, torch.float32) + trans
+
+    valid = torch.ones_like(loc[:, :1], dtype=torch.bool)
+    indices = []
+    for dimension, size in enumerate(volume.shape[2:]):
+        valid &= (loc[:, dimension:dimension + 1] >= 0)
+        valid &= (loc[:, dimension:dimension + 1] < size)
+        index = torch.floor(loc[:, dimension] + 0.5).long()
+        indices.append(index.clamp(0, size - 1))
+
+    flat = (
+        indices[0] * volume.shape[3] + indices[1]
+    ) * volume.shape[4] + indices[2]
+    out = torch.gather(
+        volume.flatten(2),
+        2,
+        flat.flatten(1)[:, None].expand(
+            volume.shape[0], volume.shape[1], -1
+        ),
+    )
+    out = out.reshape(volume.shape[0], volume.shape[1], *loc.shape[2:])
+    if fill_value is not None:
+        fill = torch.as_tensor(fill_value, dtype=out.dtype, device=out.device)
+        out = torch.where(valid, out, fill)
+    return out
+
+
 def transform(volume, trans, shape=None, fill_value=0, method='linear'):
     """Resample N,C,I,J,K data with a matrix or N,3,I,J,K displacement."""
     trans = torch.as_tensor(trans, dtype=volume.dtype, device=volume.device)
-    if trans.ndim == 2:
-        shape = volume.shape[2:] if shape is None else tuple(shape)
-        # Match the source's affine -> displacement -> coordinates path, also
-        # at half-voxel ties used by nearest-neighbour label interpolation.
-        loc = grid(shape, volume.device, volume.dtype) + dense(trans, shape)
-    else:
-        loc = grid(trans.shape[2:], volume.device, volume.dtype) + trans
     if method not in ('linear', 'nearest'):
         raise ValueError('method must be linear or nearest')
+    if trans.ndim == 2:
+        shape = volume.shape[2:] if shape is None else tuple(shape)
+        # Match Neurite's affine -> displacement -> coordinates path. The
+        # nearest branch avoids TF32 GEMM so exact half-voxel ties remain ties.
+        shift = (
+            _dense_affine_nearest(trans, shape)
+            if method == 'nearest'
+            else dense(trans, shape)
+        )
+        loc = grid(shape, volume.device, volume.dtype) + shift
+    else:
+        loc = grid(trans.shape[2:], volume.device, volume.dtype) + trans
     if method == 'nearest':
         idx = [loc[:, d].round().long().clamp(0, n - 1) for d, n in enumerate(volume.shape[2:])]
         flat = (idx[0] * volume.shape[3] + idx[1]) * volume.shape[4] + idx[2]

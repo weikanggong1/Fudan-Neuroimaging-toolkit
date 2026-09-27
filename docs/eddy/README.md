@@ -1,8 +1,8 @@
-# PyTorch EDDY：UKB dMRI 运动、涡流和离群切片校正
+# TorchEDDY：UKB dMRI 运动、涡流和离群切片校正
 
 `fnit.eddy.TorchEDDY` 在 PyTorch/CUDA 中实现单被试 EDDY 路径。它读取 FSL EDDY 的核心输入，联合估计逐体积 6-DOF 运动和 10 参数二次涡流场，使用已有 TOPUP 场校正 susceptibility 畸变，更新 b-vector，并替换离群切片。运行时不调用 FSL，也不需要模型权重。
 
-实现参照 [FSL EDDY `2111.0`](https://git.fmrib.ox.ac.uk/fsl/eddy)、FSL 6.0.7.4 的命令合同，以及 [UK Biobank pipeline v1.5](https://git.fmrib.ox.ac.uk/falmagro/uk_biobank_pipeline_v_1.5) 的参数组合。优化器和 q-space predictor 是适合 PyTorch 自动微分的独立实现，因此输出并非 FSL EDDY 的逐体素数值复制。真实数据中，校正后全部脑内 DWI 与 FSL GPU EDDY 的相关系数为 0.9832；差异明显超过浮点舍入，不能互换用于要求严格 FSL 数值复现的分析。
+实现参照 [FSL EDDY `2111.0`](https://git.fmrib.ox.ac.uk/fsl/eddy)、FSL 6.0.7.4 的命令合同，以及 [UK Biobank pipeline v1.5](https://git.fmrib.ox.ac.uk/falmagro/uk_biobank_pipeline_v_1.5) 的参数组合。优化器和 q-space predictor 是适合 PyTorch 自动微分的独立实现，因此输出并非 FSL EDDY 的逐体素数值复制。FNIT 0.14.0 的真实数据基准中，校正后全部脑内 DWI 与 FSL GPU EDDY 的相关系数为 0.9832；报告所列数值源码 SHA-256 与当前 0.16.0 一致；差异明显超过浮点舍入，不能互换用于要求严格 FSL 数值复现的分析。
 
 CUDA 路径使用 float32 并允许 TF32；不自动启用 float16 或 bfloat16。默认 `seed=0`，相同输入、代码和设备上的优化顺序可复现。
 
@@ -51,17 +51,20 @@ fnit eddy \
 ```python
 from fnit import TorchEDDY
 
-eddy = TorchEDDY(device="cuda:0")
+eddy = TorchEDDY(
+    device="cuda:0",  # 运行设备：第一张可见 CUDA GPU
+)
 result = eddy.run(
-    imain="AP.nii.gz",                 # 单被试 4D DWI
-    mask="nodif_brain_mask.nii.gz",    # DWI 空间脑 mask
-    topup="fieldmap_out",              # TOPUP basename
-    acqp="acqparams.txt",              # PE 方向和读出时间
-    index="eddy_index.txt",             # 每个 volume 对应的 acqp 行
-    bvecs="AP.bvec",
-    bvals="AP.bval",
-    out="eddy/data",                   # 输出 basename
-    ref_scan_no=0,
+    imain="AP.nii.gz",  # 输入：单被试 4D AP DWI
+    mask="nodif_brain_mask.nii.gz",  # 输入：DWI 网格上的 3D 脑掩膜
+    topup="fieldmap_out",  # 输入：TOPUP coefficient 与运动文件的根名
+    acqp="acqparams.txt",  # 输入：相位编码方向和总读出时间
+    index="eddy_index.txt",  # 输入：每个 volume 对应的 acqp 行号
+    bvecs="AP.bvec",  # 输入：FSL 3×N 梯度方向
+    bvals="AP.bval",  # 输入：与 DWI volume 顺序一致的 b-value
+    out="eddy/data",  # 输出：FSL 风格结果 basename
+    ref_scan_no=0,  # 固定参考：使用第 0 个 volume
+    overwrite=False,  # 写盘策略：不覆盖已有文件
 )
 ```
 
@@ -73,10 +76,11 @@ UKB 目录已经由 TOPUP 准备好时，可用单被试便捷接口：
 from fnit.eddy import run_ukb_eddy
 
 result, inputs = run_ukb_eddy(
-    raw_dir="subject/raw",              # AP.nii.gz、AP.bval、AP.bvec
-    topup_dir="subject/topup",          # acqparams.txt、fieldmap_out_fieldcoef.nii.gz
-    output_dir="subject/eddy",
-    device="cuda:0",
+    raw_dir="subject/raw",  # 输入：AP.nii.gz、AP.bval、AP.bvec 的目录
+    topup_dir="subject/topup",  # 输入：TOPUP acquisition 参数与 coefficient 目录
+    output_dir="subject/eddy",  # 输出：该受试者的 EDDY 结果目录
+    device="cuda:0",  # 运行设备：第一张可见 CUDA GPU
+    overwrite=False,  # 写盘策略：不覆盖已有文件
 )
 ```
 
@@ -102,7 +106,7 @@ fnit eddy \
 | `<out>.eddy_movement_rms` | N×2 | 相同文本合同 |
 | `<out>.eddy_restricted_movement_rms` | N×2 | 相同文本合同 |
 | `<out>.eddy_outlier_map` | N×Z | 相同布局 |
-| `<out>.eddy_outlier_n_stdev_map` | N×Z | robust slice residual z-score |
+| `<out>.eddy_outlier_n_stdev_map` | N×Z | 稳健切片残差 z 分数 |
 | `<out>.eddy_outlier_n_sqr_stdev_map` | N×Z | 上一项的平方 |
 | `<out>.eddy_outlier_report` | 文本 | 相同用途 |
 | `<out>.eddy_qc.json` | 运行与资源记录 | FNIT 额外输出 |
@@ -118,6 +122,10 @@ FSL 可选的 `eddy_outlier_free_data`、post-eddy shell alignment 和命令快�
 5. 在每个 shell 内计算 slice residual 的 median/MAD z-score，替换超过阈值的切片。
 6. 用最终刚体旋转更新 b-vector，并写 FSL 核心输出。
 
+## 当前发布验收状态
+
+当前源码已在同一例真实 UKB 格式 dMRI 上运行。校正 DWI、旋转 b-vector、参数、两种 RMS、outlier map、outlier z-score 和 outlier report 共八项核心输出的逐文件 SHA-256 与报告绑定值相同。因此下述精度和示意图覆盖当前数值路径；机器可读报告同时记录当前调用链源码 hash。
+
 ## 真实数据对照
 
 验证输入为一例真实 UKB 格式 dMRI：`104×104×72×105`，5 个 b0、50 个 b≈1000 和 50 个 b≈2000 volume；反向 PA 数据用于先行 TOPUP。FSL 和 FNIT 使用同一 AP、mask、TOPUP field、acqparams、index、bval、bvec 和参考帧。硬件为 gpucw1 的 NVIDIA H100 PCIe 80 GB；节点为共享状态。
@@ -132,16 +140,15 @@ FSL 可选的 `eddy_outlier_free_data`、post-eddy shell alignment 和命令快�
 
 旋转后 b-vector 与 FSL 的平均夹角为 `0.646°`，最大 `0.996°`；平移参数 MAE 为 `0.710 mm`，旋转参数 MAE 为 `0.00767 rad`。这些是参考实现一致性指标，不是畸变校正的人工真值精度。
 
-计时范围包含进程启动、NIfTI I/O、优化和写出。FSL CPU 与 GPU 各完成一次有效参考运行；FNIT 共运行四次。节点为共享状态，因此单次参考耗时用于同机量级比较，不作为稳定吞吐量估计。
+计时范围包含进程启动、NIfTI I/O、优化和写出。FSL CPU、FSL GPU 与当前 FNIT 各完成一次有效运行。节点为共享状态，因此单次耗时用于同机量级比较，不作为稳定吞吐量估计。
 
 | 实现 | 设备 | 总耗时 | 峰值内存 | 相对 FNIT 最终运行 |
 |---|---|---:|---:|---:|
-| FSL `eddy_cpu` | Xeon Gold 6430 | 1844.16 s | 16.65 GB RSS | 31.89× |
-| FSL `eddy_cuda10.2` | H100 PCIe 80 GB | 646.52 s | 1.21 GB RSS | 11.18× |
-| FNIT TorchEDDY，最终确定性运行 | H100 PCIe 80 GB | 57.82 s | 2.25 GB RSS；3.48 GB peak CUDA | 1.00× |
-| FNIT TorchEDDY，四次中位数 | H100 PCIe 80 GB | 51.61 s | — | — |
+| FSL `eddy_cpu` | Xeon Gold 6430 | 1844.16 s | 16.65 GB RSS | 33.05× |
+| FSL `eddy_cuda10.2` | H100 PCIe 80 GB | 646.52 s | 1.21 GB RSS | 11.59× |
+| FNIT TorchEDDY 0.14.0 | H100 PCIe 80 GB | 55.80 s | 2.24 GB RSS；3.48 GB peak CUDA | 1.00× |
 
-FNIT 另外三次总耗时为 `55.50/47.71/46.71 s`，最终运行的内部同步计算为 `27.17 s`。FSL CPU 与 GPU 输出本身并非逐值相同：全部脑内 voxel×volume 的 `r=0.99904`、MAE `42.08`，旋转后 b-vector 平均夹角 `0.070°`。FNIT 对 FSL CPU 的对应 `r=0.98267`、MAE `241.63`，与对 FSL GPU 的结论一致。
+当前 FNIT 运行的内部同步计算为 `28.99 s`。FSL CPU 与 GPU 输出本身并非逐值相同：全部脑内 voxel×volume 的 `r=0.99904`、MAE `42.08`，旋转后 b-vector 平均夹角 `0.070°`。FNIT 对 FSL CPU 的对应 `r=0.98267`、MAE `241.63`，与对 FSL GPU 的结论一致。
 
 ![原始 AP、FSL EDDY、FNIT TorchEDDY 及差值](figures/eddy_fsl_comparison.png)
 

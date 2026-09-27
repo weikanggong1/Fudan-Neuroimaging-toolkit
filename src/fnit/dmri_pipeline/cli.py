@@ -2,8 +2,6 @@
 
 import argparse
 
-from .pipeline import DMRIPipeline
-
 
 def _arguments(parser):
     parser.add_argument("--raw-dir", required=True, help="directory containing AP.* and optional PA.*")
@@ -24,6 +22,8 @@ def _arguments(parser):
 
 
 def run(args):
+    from .pipeline import DMRIPipeline
+
     result = DMRIPipeline(
         device=args.device,
         registration_backend=args.registration_backend,

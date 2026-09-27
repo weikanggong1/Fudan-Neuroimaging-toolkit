@@ -1,0 +1,685 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-27",
+  "feature": "SynthMorph measured nibabel/PyTorch joint registration versus FreeSurfer 8.2.0; current linear path inherited by attestation",
+  "data": {
+    "subjects": 12,
+    "kind": "real clinical T1w to MNI152 T1 2 mm",
+    "selection": "first sorted files with valid finite 3D data and nonsingular finite geometry; no output-based selection",
+    "identifiers_public": false,
+    "input_sha256": {
+      "case01": "cd7d98a03f9aea34b83f69b184af2ced799351b93eb8da09957aae7038a6e36f",
+      "case02": "4f7bac4f4f9557c62a078af610ef94f871975e54e39d07b4d618583130fdc8fa",
+      "case03": "6f10925db6cec345ed8ad1d915e9840fd0c69ece2cd46d9ac4a83e23101c8f2e",
+      "case04": "916cc95237a89e7824ab742c8921268c3517617556ea341ff2e750fe5af36a1d",
+      "case05": "59c4daaa3669af1c49c05db8a825ed52ef8654a1497adfdddedc3ed96933e7af",
+      "case06": "63330a1a47c1ed9d50a3c9a336864794ada01f596344d53849dd8f17459e1a0f",
+      "case07": "3f53604a41ab20feb9efc371a621805568c57350f7da4447caa67039b56089a8",
+      "case08": "cacdccc0cd44f161853433144e03d78034ce3126aba86b81111925a7e29e6c91",
+      "case09": "05e2d1ae47f35ac8a0ff025e29c6926c6f45102be94bd9a957c5865572ad9bc8",
+      "case10": "78808a40a9194be9daae767bfba03bacaa40c78b85359ba940b7925a3b390896",
+      "case11": "62b964ed3720fa372d934068cea3f05c6e4418fb6d9bdcec3a1f1f21a67378ce",
+      "case12": "5d4565903ceca205bdaac20ac9353646ef71293e0dedb1b134119a0af49d1779"
+    },
+    "fixed_sha256": "0585cd056bf5ccfb8bf97a5f6a66082d4e7caad525718fc11e40d80a827fcb92"
+  },
+  "reference": {
+    "software": "FreeSurfer 8.2.0 mri_synthmorph official source",
+    "device_class": "GPU",
+    "script_sha256": "4fa7fb879243cbf55addef6cf253e4206fda90a9c82728f72a6050eaa80bf5c6",
+    "tf32_override": 0
+  },
+  "candidate": {
+    "device": "cuda:0",
+    "tf32_default": true,
+    "float16_used": false,
+    "threads": 8,
+    "peak_cuda_memory_bytes_case01": 13425769984,
+    "source_sha256": {
+      "src/fnit/synthmorph/models.py": "a1cab2e98f6972ae053a7df2b30416c0ca069c1a30df562e6005d42d85d34a1b",
+      "src/fnit/synthmorph/pipeline.py": "e680d3a85f7e240cdab235047766973035d9188e705d9642e3edca1402d5d202",
+      "src/fnit/synthmorph/spatial.py": "9c629a94827a987fcc4880cbf18f36aa79f347270585b8c4b92b3fc1660104ee",
+      "src/fnit/_nib.py": "bffd56aeaca423b2448432ba318212e83549e9e31aa27af6bf20a60888218586",
+      "src/fnit/_transforms.py": "be01fa24cd0c17bb1aa8ac7792cdf0b62c657037808c643427a1b11cc4c05340",
+      "src/fnit/weights.py": "9d275a1bd4064ff9bd1eb8aaef589ce7804258e7f6c39cd127deae2623d6eb9a",
+      "src/fnit/cli.py": "2d5e3d37f52fffb7834a438339566cd7ead980606a2127ade268662569922178"
+    }
+  },
+  "summary": {
+    "maximum_moved_nrmse_reference_rms": 0.08124930880001453,
+    "minimum_moved_pearson_r": 0.9943374658577174,
+    "mean_warp_vector_error_mm": 0.07913942156720886,
+    "maximum_warp_vector_error_mm": 1.1041356235502349,
+    "candidate_wall_seconds_median": 15.780000000000001,
+    "reference_wall_seconds_median": 116.59388475946616,
+    "candidate_over_reference_median": 0.1353415750110242
+  },
+  "transform_contract": "Both files encode target-grid target-to-source world-RAS displacement in millimetres. FreeSurfer writes [X,Y,Z,1,3], FNIT writes the NIfTI vector shape [X,Y,Z,3]; comparisons squeeze only the singleton frame axis.",
+  "timing_boundary": "Each CLI run includes Python startup, HDF5 loading and fixed-hypernetwork specialization, image loading, inference, resampling, and two NIfTI writes.",
+  "records": [
+    {
+      "case_id": "case01",
+      "input_sha256": "cd7d98a03f9aea34b83f69b184af2ced799351b93eb8da09957aae7038a6e36f",
+      "metrics": {
+        "moved": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 1.4246981234934473,
+          "rmse": 9.659694464650219,
+          "nrmse_reference_rms": 0.08124930880001453,
+          "max_abs": 620.5695190429688,
+          "pearson_r": 0.9944741389747148
+        },
+        "transform": {
+          "semantic_shape_equal_after_squeeze": true,
+          "candidate_file_shape": [
+            91,
+            109,
+            91,
+            3
+          ],
+          "reference_file_shape": [
+            91,
+            109,
+            91,
+            1,
+            3
+          ],
+          "affine_max_abs": 0.0,
+          "component_mae_mm": 0.04395370211033465,
+          "vector_error_mean_mm": 0.08621099582953066,
+          "vector_error_p95_mm": 0.1277572025951064,
+          "vector_error_max_mm": 0.321616466595291
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 23.95,
+        "maximum_rss_kbytes": 1368424,
+        "exit_status": 0,
+        "driver_wall_seconds": 23.9652813449502,
+        "reused_for_report": false
+      },
+      "reference_timing": {
+        "wall_seconds": 230.82630300917663,
+        "maximum_rss_kbytes": 6018336
+      }
+    },
+    {
+      "case_id": "case02",
+      "input_sha256": "4f7bac4f4f9557c62a078af610ef94f871975e54e39d07b4d618583130fdc8fa",
+      "metrics": {
+        "moved": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.8491076937336302,
+          "rmse": 4.133334227458408,
+          "nrmse_reference_rms": 0.048373275071308244,
+          "max_abs": 450.2659912109375,
+          "pearson_r": 0.9980587312249365
+        },
+        "transform": {
+          "semantic_shape_equal_after_squeeze": true,
+          "candidate_file_shape": [
+            91,
+            109,
+            91,
+            3
+          ],
+          "reference_file_shape": [
+            91,
+            109,
+            91,
+            1,
+            3
+          ],
+          "affine_max_abs": 0.0,
+          "component_mae_mm": 0.03898555015295006,
+          "vector_error_mean_mm": 0.07545666668348888,
+          "vector_error_p95_mm": 0.12556152308749338,
+          "vector_error_max_mm": 0.24594735067845855
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 14.32,
+        "maximum_rss_kbytes": 1360420,
+        "exit_status": 0,
+        "driver_wall_seconds": 14.328415101859719,
+        "reused_for_report": false
+      },
+      "reference_timing": {
+        "wall_seconds": 238.34493347886018,
+        "maximum_rss_kbytes": 6013180
+      }
+    },
+    {
+      "case_id": "case03",
+      "input_sha256": "6f10925db6cec345ed8ad1d915e9840fd0c69ece2cd46d9ac4a83e23101c8f2e",
+      "metrics": {
+        "moved": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 1.0758640366424523,
+          "rmse": 8.040776614033419,
+          "nrmse_reference_rms": 0.07965951755530154,
+          "max_abs": 427.9347839355469,
+          "pearson_r": 0.9943374658577174
+        },
+        "transform": {
+          "semantic_shape_equal_after_squeeze": true,
+          "candidate_file_shape": [
+            91,
+            109,
+            91,
+            3
+          ],
+          "reference_file_shape": [
+            91,
+            109,
+            91,
+            1,
+            3
+          ],
+          "affine_max_abs": 0.0,
+          "component_mae_mm": 0.03813968171189513,
+          "vector_error_mean_mm": 0.07845709360914588,
+          "vector_error_p95_mm": 0.13026215974978203,
+          "vector_error_max_mm": 0.5160426586874616
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 14.17,
+        "maximum_rss_kbytes": 1368400,
+        "exit_status": 0,
+        "driver_wall_seconds": 14.178705357015133,
+        "reused_for_report": false
+      },
+      "reference_timing": {
+        "wall_seconds": 116.42313670390286,
+        "maximum_rss_kbytes": 6010044
+      }
+    },
+    {
+      "case_id": "case04",
+      "input_sha256": "916cc95237a89e7824ab742c8921268c3517617556ea341ff2e750fe5af36a1d",
+      "metrics": {
+        "moved": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.7796204259584029,
+          "rmse": 2.6023468930766795,
+          "nrmse_reference_rms": 0.03324594699667111,
+          "max_abs": 181.475830078125,
+          "pearson_r": 0.999106366256509
+        },
+        "transform": {
+          "semantic_shape_equal_after_squeeze": true,
+          "candidate_file_shape": [
+            91,
+            109,
+            91,
+            3
+          ],
+          "reference_file_shape": [
+            91,
+            109,
+            91,
+            1,
+            3
+          ],
+          "affine_max_abs": 0.0,
+          "component_mae_mm": 0.03825473272092296,
+          "vector_error_mean_mm": 0.07571940705745454,
+          "vector_error_p95_mm": 0.1195323274464913,
+          "vector_error_max_mm": 0.35561971797867153
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 14.46,
+        "maximum_rss_kbytes": 1368416,
+        "exit_status": 0,
+        "driver_wall_seconds": 14.471733110956848,
+        "reused_for_report": false
+      },
+      "reference_timing": {
+        "wall_seconds": 116.76463281502947,
+        "maximum_rss_kbytes": 6010744
+      }
+    },
+    {
+      "case_id": "case05",
+      "input_sha256": "59c4daaa3669af1c49c05db8a825ed52ef8654a1497adfdddedc3ed96933e7af",
+      "metrics": {
+        "moved": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.9578832570806374,
+          "rmse": 4.163539296605088,
+          "nrmse_reference_rms": 0.049037753610597375,
+          "max_abs": 344.8615417480469,
+          "pearson_r": 0.9978594948575548
+        },
+        "transform": {
+          "semantic_shape_equal_after_squeeze": true,
+          "candidate_file_shape": [
+            91,
+            109,
+            91,
+            3
+          ],
+          "reference_file_shape": [
+            91,
+            109,
+            91,
+            1,
+            3
+          ],
+          "affine_max_abs": 0.0,
+          "component_mae_mm": 0.043017776961573106,
+          "vector_error_mean_mm": 0.08279062798198543,
+          "vector_error_p95_mm": 0.12631586195934813,
+          "vector_error_max_mm": 0.23955125585606987
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 15.67,
+        "maximum_rss_kbytes": 1368432,
+        "exit_status": 0,
+        "driver_wall_seconds": 15.676255363039672,
+        "reused_for_report": false
+      },
+      "reference_timing": {
+        "wall_seconds": 231.9721169990953,
+        "maximum_rss_kbytes": 6008884
+      }
+    },
+    {
+      "case_id": "case06",
+      "input_sha256": "63330a1a47c1ed9d50a3c9a336864794ada01f596344d53849dd8f17459e1a0f",
+      "metrics": {
+        "moved": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.82980975559231,
+          "rmse": 1.7912085338313684,
+          "nrmse_reference_rms": 0.025691764857901943,
+          "max_abs": 31.216516494750977,
+          "pearson_r": 0.9994284733312387
+        },
+        "transform": {
+          "semantic_shape_equal_after_squeeze": true,
+          "candidate_file_shape": [
+            91,
+            109,
+            91,
+            3
+          ],
+          "reference_file_shape": [
+            91,
+            109,
+            91,
+            1,
+            3
+          ],
+          "affine_max_abs": 0.0,
+          "component_mae_mm": 0.04533581360376309,
+          "vector_error_mean_mm": 0.08992135604323308,
+          "vector_error_p95_mm": 0.1369882715115791,
+          "vector_error_max_mm": 0.24864720610876767
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 17.63,
+        "maximum_rss_kbytes": 1406716,
+        "exit_status": 0,
+        "driver_wall_seconds": 17.64508115919307,
+        "reused_for_report": false
+      },
+      "reference_timing": {
+        "wall_seconds": 203.59053529798985,
+        "maximum_rss_kbytes": 6014300
+      }
+    },
+    {
+      "case_id": "case07",
+      "input_sha256": "3f53604a41ab20feb9efc371a621805568c57350f7da4447caa67039b56089a8",
+      "metrics": {
+        "moved": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.741036490939182,
+          "rmse": 1.5734785885479579,
+          "nrmse_reference_rms": 0.017539459218160143,
+          "max_abs": 26.773361206054688,
+          "pearson_r": 0.9997340830662815
+        },
+        "transform": {
+          "semantic_shape_equal_after_squeeze": true,
+          "candidate_file_shape": [
+            91,
+            109,
+            91,
+            3
+          ],
+          "reference_file_shape": [
+            91,
+            109,
+            91,
+            1,
+            3
+          ],
+          "affine_max_abs": 0.0,
+          "component_mae_mm": 0.035501757774923946,
+          "vector_error_mean_mm": 0.06914114304480007,
+          "vector_error_p95_mm": 0.10897637928738296,
+          "vector_error_max_mm": 0.2071360823675483
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 15.89,
+        "maximum_rss_kbytes": 1404272,
+        "exit_status": 0,
+        "driver_wall_seconds": 15.90104938391596,
+        "reused_for_report": false
+      },
+      "reference_timing": {
+        "wall_seconds": 115.99016979406588,
+        "maximum_rss_kbytes": 6013404
+      }
+    },
+    {
+      "case_id": "case08",
+      "input_sha256": "cacdccc0cd44f161853433144e03d78034ce3126aba86b81111925a7e29e6c91",
+      "metrics": {
+        "moved": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 1.0778563772275707,
+          "rmse": 2.4441528994713777,
+          "nrmse_reference_rms": 0.028315500650315805,
+          "max_abs": 52.625,
+          "pearson_r": 0.9993136969849971
+        },
+        "transform": {
+          "semantic_shape_equal_after_squeeze": true,
+          "candidate_file_shape": [
+            91,
+            109,
+            91,
+            3
+          ],
+          "reference_file_shape": [
+            91,
+            109,
+            91,
+            1,
+            3
+          ],
+          "affine_max_abs": 0.0,
+          "component_mae_mm": 0.04905191565220264,
+          "vector_error_mean_mm": 0.1039624166138099,
+          "vector_error_p95_mm": 0.1683416442619728,
+          "vector_error_max_mm": 0.33093638551635707
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 24.6,
+        "maximum_rss_kbytes": 1399020,
+        "exit_status": 0,
+        "driver_wall_seconds": 24.607385363895446,
+        "reused_for_report": false
+      },
+      "reference_timing": {
+        "wall_seconds": 113.69592138496228,
+        "maximum_rss_kbytes": 6016488
+      }
+    },
+    {
+      "case_id": "case09",
+      "input_sha256": "05e2d1ae47f35ac8a0ff025e29c6926c6f45102be94bd9a957c5865572ad9bc8",
+      "metrics": {
+        "moved": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.6175181840018,
+          "rmse": 1.362876914117873,
+          "nrmse_reference_rms": 0.015985264802182656,
+          "max_abs": 30.039451599121094,
+          "pearson_r": 0.999788886345096
+        },
+        "transform": {
+          "semantic_shape_equal_after_squeeze": true,
+          "candidate_file_shape": [
+            91,
+            109,
+            91,
+            3
+          ],
+          "reference_file_shape": [
+            91,
+            109,
+            91,
+            1,
+            3
+          ],
+          "affine_max_abs": 0.0,
+          "component_mae_mm": 0.03424613690394921,
+          "vector_error_mean_mm": 0.06932678724781957,
+          "vector_error_p95_mm": 0.13116218804165947,
+          "vector_error_max_mm": 1.1041356235502349
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 23.38,
+        "maximum_rss_kbytes": 1406052,
+        "exit_status": 0,
+        "driver_wall_seconds": 23.39183872938156,
+        "reused_for_report": false
+      },
+      "reference_timing": {
+        "wall_seconds": 114.81234251800925,
+        "maximum_rss_kbytes": 6014352
+      }
+    },
+    {
+      "case_id": "case10",
+      "input_sha256": "78808a40a9194be9daae767bfba03bacaa40c78b85359ba940b7925a3b390896",
+      "metrics": {
+        "moved": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.9249959676924685,
+          "rmse": 2.0039474588523287,
+          "nrmse_reference_rms": 0.02402378628102741,
+          "max_abs": 46.218658447265625,
+          "pearson_r": 0.9995041888931461
+        },
+        "transform": {
+          "semantic_shape_equal_after_squeeze": true,
+          "candidate_file_shape": [
+            91,
+            109,
+            91,
+            3
+          ],
+          "reference_file_shape": [
+            91,
+            109,
+            91,
+            1,
+            3
+          ],
+          "affine_max_abs": 0.0,
+          "component_mae_mm": 0.044955363959673166,
+          "vector_error_mean_mm": 0.08977518903129858,
+          "vector_error_p95_mm": 0.14012507617078604,
+          "vector_error_max_mm": 0.25765169465595805
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 14.59,
+        "maximum_rss_kbytes": 1406596,
+        "exit_status": 0,
+        "driver_wall_seconds": 14.59791075764224,
+        "reused_for_report": false
+      },
+      "reference_timing": {
+        "wall_seconds": 239.6997597659938,
+        "maximum_rss_kbytes": 6013280
+      }
+    },
+    {
+      "case_id": "case11",
+      "input_sha256": "62b964ed3720fa372d934068cea3f05c6e4418fb6d9bdcec3a1f1f21a67378ce",
+      "metrics": {
+        "moved": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.5944964619921685,
+          "rmse": 1.3891809357206806,
+          "nrmse_reference_rms": 0.015376095017760355,
+          "max_abs": 85.83460998535156,
+          "pearson_r": 0.9997993244705895
+        },
+        "transform": {
+          "semantic_shape_equal_after_squeeze": true,
+          "candidate_file_shape": [
+            91,
+            109,
+            91,
+            3
+          ],
+          "reference_file_shape": [
+            91,
+            109,
+            91,
+            1,
+            3
+          ],
+          "affine_max_abs": 0.0,
+          "component_mae_mm": 0.027335649043849896,
+          "vector_error_mean_mm": 0.05541765988370417,
+          "vector_error_p95_mm": 0.10370169068994592,
+          "vector_error_max_mm": 0.25150964130164166
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 16.52,
+        "maximum_rss_kbytes": 1398548,
+        "exit_status": 0,
+        "driver_wall_seconds": 16.527457657735795,
+        "reused_for_report": false
+      },
+      "reference_timing": {
+        "wall_seconds": 113.82029776391573,
+        "maximum_rss_kbytes": 6011596
+      }
+    },
+    {
+      "case_id": "case12",
+      "input_sha256": "5d4565903ceca205bdaac20ac9353646ef71293e0dedb1b134119a0af49d1779",
+      "metrics": {
+        "moved": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.6884713878903874,
+          "rmse": 1.5578643822061182,
+          "nrmse_reference_rms": 0.020371327285500656,
+          "max_abs": 29.6241455078125,
+          "pearson_r": 0.9996570838433174
+        },
+        "transform": {
+          "semantic_shape_equal_after_squeeze": true,
+          "candidate_file_shape": [
+            91,
+            109,
+            91,
+            3
+          ],
+          "reference_file_shape": [
+            91,
+            109,
+            91,
+            1,
+            3
+          ],
+          "affine_max_abs": 0.0,
+          "component_mae_mm": 0.036822945898102845,
+          "vector_error_mean_mm": 0.07349371578023556,
+          "vector_error_p95_mm": 0.12891124531421666,
+          "vector_error_max_mm": 0.22425388161055212
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 13.6,
+        "maximum_rss_kbytes": 1406712,
+        "exit_status": 0,
+        "driver_wall_seconds": 13.603716837242246,
+        "reused_for_report": false
+      },
+      "reference_timing": {
+        "wall_seconds": 113.06736428802833,
+        "maximum_rss_kbytes": 6018216
+      }
+    }
+  ],
+  "current_source_chain": {
+    "measurement_source_sha256": {
+      "src/fnit/synthmorph/pipeline.py": "e680d3a85f7e240cdab235047766973035d9188e705d9642e3edca1402d5d202",
+      "src/fnit/synthmorph/spatial.py": "9c629a94827a987fcc4880cbf18f36aa79f347270585b8c4b92b3fc1660104ee"
+    },
+    "current_source_sha256": {
+      "src/fnit/synthmorph/pipeline.py": "70e97c1164b672e19d70ebb9ee39dd0273a71b993bf78b8b22031522dfbd8991",
+      "src/fnit/synthmorph/spatial.py": "dab615dcc8a5f332ef2efede1d5e45d04f21c440243650e960d763e35595d861"
+    },
+    "covered_path": "SynthMorph registration with linear interpolation",
+    "attestation": {
+      "path": "../runtime_dependencies/synthmorph_linear_source_equivalence.public.json",
+      "sha256": "549ca3ae350596d020841baa35232b8b838da6cbede3b1a739ecb10fa4a1da4f"
+    },
+    "source_equivalent_for_covered_path": true,
+    "fresh_current_hash_full_real_data_rerun": false,
+    "nearest_semantics": {
+      "covered_by_this_real_data_report": false,
+      "evidence": "separate CPU/H100 unit tests recorded by the attestation"
+    }
+  },
+  "package_entry_source_chain": {
+    "measurement_source_sha256": {
+      "src/fnit/cli.py": "2d5e3d37f52fffb7834a438339566cd7ead980606a2127ade268662569922178"
+    },
+    "current_source_sha256": {
+      "src/fnit/cli.py": "c92a3fbaa2a8f10e96c73a7bd18bd1a0924844c028db532d2f573d47e4dc2c07"
+    },
+    "covered_entry": "root synthmorph command; registration linear path",
+    "attestation": {
+      "path": "../runtime_dependencies/package_entry_source_equivalence.public.json",
+      "sha256": "981a52903724651fb9ef2e8fbe6a69e2baddafc22871333bd86b51b8931bdc7d"
+    },
+    "source_equivalent_for_covered_route": true,
+    "fresh_current_hash_full_real_data_rerun": false
+  }
+}

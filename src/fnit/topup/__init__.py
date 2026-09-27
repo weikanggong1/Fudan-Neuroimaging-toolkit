@@ -13,7 +13,7 @@ from .io import (
     make_topup_coefficient_image,
     make_topup_jacobian_image,
 )
-from .ukb import prepare_ukb_topup, run_ukb_topup
+from .ukb import run_ukb_topup
 
 __all__ = [
     "FSL_TOPUP_COMMIT",
@@ -25,6 +25,5 @@ __all__ = [
     "TorchTOPUP",
     "make_topup_coefficient_image",
     "make_topup_jacobian_image",
-    "prepare_ukb_topup",
     "run_ukb_topup",
 ]

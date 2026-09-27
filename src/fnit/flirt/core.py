@@ -15,10 +15,12 @@ import math
 import os
 from pathlib import Path
 
+import nibabel as nib
 import numpy as np
 import torch
 import torch.nn.functional as F
 
+from .._nib import new_image
 from .coordinates import flirt_to_world_affine, voxel_to_fsl_scaled_mm
 from .types import FLIRTResult, _load_volume, _single_frame
 
@@ -1377,13 +1379,13 @@ class _DefaultFLIRTEngine:
 
 
 class _RigidNMIEngine(_DefaultFLIRTEngine):
-    """按 FSL 默认设置先用相关比搜索，再用 NMI 精化刚性配准。"""
+    """Use CorrRatio for angular search, then NMI for final 6-DOF stages."""
 
     def set_scale(self, scale, *, force=False):
         previous = self.level
         super().set_scale(scale, force=force)
-        # 只指定 -cost normmi 时，默认 searchcost 仍为 CorrRatio；
-        # 8 mm SEARCH 结束后，4 mm 阶段才切换到主代价函数。
+        # FSL keeps the default searchcost (CorrRatio) at 8 mm when only
+        # -cost normmi is supplied, then switches to the main cost below 8 mm.
         if self.level is not previous and float(scale) < 8.0:
             self.level.cost = FSLNormalizedMutualInformation(
                 self.level.reference, self.level.moving,
@@ -1456,10 +1458,10 @@ class TorchFLIRT:
         fixed = _load_volume(fixed, "fixed")
         moving_data = _single_frame(moving, "moving")
         fixed_data = _single_frame(fixed, "fixed")
-        moving_world = np.asarray(moving.geom.vox2world.matrix, dtype=np.float64)
-        fixed_world = np.asarray(fixed.geom.vox2world.matrix, dtype=np.float64)
-        moving_sizes = tuple(float(value) for value in moving.geom.voxsize)
-        fixed_sizes = tuple(float(value) for value in fixed.geom.voxsize)
+        moving_world = np.asarray(moving.affine, dtype=np.float64)
+        fixed_world = np.asarray(fixed.affine, dtype=np.float64)
+        moving_sizes = tuple(float(value) for value in nib.affines.voxel_sizes(moving.affine))
+        fixed_sizes = tuple(float(value) for value in nib.affines.voxel_sizes(fixed.affine))
 
         def load_weight(value, image, data, name):
             if value is None:
@@ -1467,8 +1469,8 @@ class TorchFLIRT:
             volume = _load_volume(value, name)
             weight = _single_frame(volume, name)
             if weight.shape != data.shape or not np.allclose(
-                volume.geom.vox2world.matrix,
-                image.geom.vox2world.matrix,
+                volume.affine,
+                image.affine,
                 atol=1e-5,
                 rtol=0,
             ):
@@ -1532,7 +1534,7 @@ class TorchFLIRT:
             fixed_sizes,
             self.device,
         ).cpu().numpy()
-        moved = fixed.new(moved_data.astype(np.float32, copy=False))
+        moved = new_image(moved_data.astype(np.float32, copy=False), fixed)
         forward_world = flirt_to_world_affine(
             matrix,
             moving_world,
@@ -1544,16 +1546,6 @@ class TorchFLIRT:
         )
         pull_world = np.linalg.inv(forward_world)
         pull_world[3] = (0, 0, 0, 1)
-        validation_parameter_profile_matches_run = (
-            self.device.type == "cuda"
-            and bool(torch.backends.cuda.matmul.allow_tf32)
-            and bool(torch.backends.cudnn.allow_tf32)
-            and self.angular_search
-            and init is None
-            and self.dof == 12
-            and inweight is None
-            and refweight is None
-        )
         qc = {
             "backend": "pytorch-fsl-flirt-2111.2-source-derived",
             "device": str(self.device),
@@ -1581,38 +1573,12 @@ class TorchFLIRT:
             "initial_matrix_used": init is not None,
             "input_weight_used": inweight is not None,
             "reference_weight_used": refweight is not None,
-            "validation_matrix_gate_mm": 0.05 if self.dof == 12 else None,
-            "validation_matrix_metric": (
-                "FSL rmsdiff about the reference intensity-weighted COG" if self.dof == 12
-                else "grid displacement from FSL 6-DOF normmi matrix"
-            ),
-            "validation_rmsdiff_radius_mm": 80.0 if self.dof == 12 else None,
-            "validation_case_count": 10 if self.dof == 12 else None,
-            "validation_matrix_pass_count": 10 if self.dof == 12 else None,
-            "validation_matrix_median_mm": 0.008545075 if self.dof == 12 else None,
-            "validation_matrix_maximum_mm": 0.0289986 if self.dof == 12 else None,
-            "reference_validation_profile": (
-                "CUDA TF32 default; angular search; no init"
-            ),
-            "validation_parameter_profile_matches_run": (
-                validation_parameter_profile_matches_run
-            ),
-            "reference_validation_report": (
-                "validation/flirt/report.public.json" if self.dof == 12
-                else "validation/connectome/original_ukb_flirt.public.json"
-            ),
-            "reference_validation_domain": (
-                "10 real T1w-derived FSL FAST GM maps registered to one UKB "
-                "group-GM template on an NVIDIA H100 PCIe" if self.dof == 12 else
-                "one original-protocol UKB b0 brain to T1 brain on NVIDIA H100"
-            ),
-            "reference_validation_matrix_gate_passed": self.dof == 12,
+            "reference_validation_report": "validation/flirt/report.public.json",
             "current_input_compared_with_fsl": False,
             "validated_fsl_equivalent": False,
             "validation_scope": (
-                "reference-suite tolerance-based matrix functional agreement; "
-                "not a per-input FSL comparison" if self.dof == 12 else
-                "one same-input 6-DOF normmi matrix comparison with FSL"
+                "release benchmark evidence is external to runtime QC and does not "
+                "establish equivalence for the current input"
             ),
             "bitwise_identity_claimed": False,
             "complete_numerical_equivalence_claimed": False,

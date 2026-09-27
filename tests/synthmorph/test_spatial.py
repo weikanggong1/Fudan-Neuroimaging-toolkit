@@ -17,7 +17,13 @@ def test_affine_nearest_half_voxel_regression(device, shape, point):
     labels = labels.expand(1, 1, *shape)
     matrix = torch.tensor([[1.02, .08, 0, .2], [-.03, .95, .04, -.7],
                            [.01, 0, 1.04, .8]], device=device)
-    actual = transform(labels, matrix, method="nearest", fill_value=-99)
+    previous_tf32 = torch.backends.cuda.matmul.allow_tf32
+    if device == "cuda":
+        torch.backends.cuda.matmul.allow_tf32 = True
+    try:
+        actual = transform(labels, matrix, method="nearest", fill_value=-99)
+    finally:
+        torch.backends.cuda.matmul.allow_tf32 = previous_tf32
     assert actual[(0, 0, *point)].item() == 0
 
 

@@ -12,23 +12,23 @@ SynthStrip 从脑影像预测有符号距离场，生成脑掩膜和去除背景
 from pathlib import Path
 from fnit import SynthStrip
 
-output_dir = Path("results")
-output_dir.mkdir(exist_ok=True)
+out = Path("results")
+out.mkdir(exist_ok=True)
 extract = SynthStrip(
-    weights="/path/to/weights",  # 输入：synthstrip.1.pt 文件或其目录
-    device="cuda:0",           # 输入：运行设备，也可写 "cpu"
-    no_csf=False,              # 输入：是否改用排除脑脊液的权重
-    threads=4,                 # 输入：PyTorch CPU 线程数
+    weights="/path/to/weights",  # 权重：官方 PT 文件或权重目录
+    device="cuda:0",  # 设备：第一张可见 CUDA GPU
+    no_csf=False,  # 模型：保留 CSF 的默认模型
+    threads=4,  # CPU 线程：预处理与后处理使用 4 线程
 )
 result = extract(
-    image="subject_T1w.nii.gz",  # 输入：3D/4D T1 影像路径或内存影像
-    border=1,                   # 输入：距离阈值，单位 mm
-    fill=0,                     # 输入：掩膜外的强度
+    image="subject_T1w.nii.gz",  # 输入：单幅 3D T1w，也可传 nibabel 空间影像
+    border=1,  # 掩膜阈值：距离场小于 1 mm 视为脑内
+    fill=0,  # 输出背景：脑掩膜外填 0
 )
-result.image.save(output_dir / "subject_brain.nii.gz")     # 输出：去颅骨影像
-result.mask.save(output_dir / "subject_mask.nii.gz")       # 输出：二值脑掩膜
-result.distance.save(output_dir / "subject_sdt.nii.gz")    # 输出：有符号距离图，mm
-# 可继续以 image="another_T1w.nii.gz" 调用 extract，复用已加载模型。
+result.image.save(path=out / "subject_brain.nii.gz")  # 输出路径：脑提取后的 T1w
+result.mask.save(path=out / "subject_mask.nii.gz")  # 输出路径：二值脑掩膜
+result.distance.save(path=out / "subject_sdt.nii.gz")  # 输出路径：有符号距离场
+# 可继续 extract(image="another_T1w.nii.gz")，复用已加载模型。
 ```
 
 `from fnit.synthstrip import SynthStrip, StripResult` 是等价的功能模块入口。
@@ -39,7 +39,7 @@ result.distance.save(output_dir / "subject_sdt.nii.gz")    # 输出：有符号�
 
 | 参数 | 含义 |
 |---|---|
-| `weights` | 官方 PT 文件或所在目录；省略时使用[统一查找顺序](../ARCHITECTURE.md#公开-api-与兼容性) |
+| `weights` | 官方 PT 文件或所在目录；省略时使用[统一查找顺序](../ARCHITECTURE.md#公开-python-api) |
 | `device` | `"cpu"` 或 `"cuda:N"`；CUDA 编号遵循 `CUDA_VISIBLE_DEVICES` |
 | `no_csf` | 为 `True` 时使用排除 CSF 的官方权重 |
 | `threads` | 当前进程的 Torch 线程数；`None` 保留当前值 |
@@ -52,14 +52,14 @@ result.distance.save(output_dir / "subject_sdt.nii.gz")    # 输出：有符号�
 
 | 参数或字段 | 含义 |
 |---|---|
-| `image` 输入 | `.nii`、`.nii.gz`、`.mgh`、`.mgz` 路径，或 `nibabel` 影像对象；支持 3D 和逐帧处理的 4D。已有 `surfa.Volume` 内存对象也可传入，供旧调用方过渡 |
+| `image` 输入 | 文件路径或 `nibabel.spatialimages.SpatialImage`；支持 3D 和逐帧处理的 4D |
 | `border` | SDT 阈值，单位 mm，默认 1 |
 | `fill` | 掩膜外的强度；省略时为 `min(image.min(), 0)` |
 | `result.image` | 掩膜外已填充的影像，保留原网格和几何 |
 | `result.mask` | 二值脑掩膜 |
 | `result.distance` | 有符号距离场，单位 mm |
 
-从路径或 `nibabel` 对象调用时，三个字段均为仓库内的 `Volume`，具有 `.data`、`.affine`、`.shape`、`.dtype` 和 `.save(path)`；旧接口常用的 `.geom.vox2world.matrix` 与 `.geom.voxsize` 也分别指向仿射矩阵和体素尺寸，可保存 NIfTI、MGH、MGZ。传入已有 `surfa.Volume` 时，三个字段仍返回同类对象以兼容旧调用。调用不会修改输入对象；直接使用 Python 保存时，由调用者准备输出父目录。
+三个返回字段均为 `FNITNifti1Image`（`nibabel.Nifti1Image` 子类），可用 `.save(path)` 保存；也可直接传给 `nibabel.save`。调用不会修改输入对象。直接使用 Python 保存时，由调用者准备输出父目录。
 
 ## 命令行
 
@@ -103,7 +103,7 @@ mri_synthstrip -i subject_T1w.nii.gz \
 
 通过 `checkpoint["model_state_dict"]` 严格加载，无权重转换或精度压缩。下载、许可和 SHA-256 见 [WEIGHTS.md](../WEIGHTS.md)。推理使用本地权重，不调用 FreeSurfer 命令。
 
-U-Net 在所选设备执行。影像读写使用 `nibabel`，LIA 几何、裁剪和网格形状由仓库内代码计算；最近邻与线性采样、距离扩展及连通域在 CPU 上调用 NumPy/SciPy。完整推理无需导入 Surfa。单例 4D 输入逐帧处理，每次网络推理一个 frame。GPU 可加快网络部分，完整进程耗时还取决于预后处理和 I/O。
+U-Net 在所选设备执行。nibabel 影像读写、SciPy conform/crop、归一化、SDT 扩展、连通域和最终重采样在 CPU 执行。单例的 4D 输入逐帧处理，每次网络推理一个 frame。GPU 可加快网络部分，完整进程耗时还取决于预后处理和 I/O。
 
 ## 源码组织
 
@@ -145,30 +145,66 @@ U-Net 在所选设备执行。影像读写使用 `nibabel`，LIA 几何、裁剪
 
 ## 功能差异与验证
 
-官方脚本集成了参数解析和执行流程；本包允许导入并缓存模型，且文件几何由仓库内代码与 `nibabel` 处理。日志、版本和帮助格式由本包维护。统一 CLI 名称为 `fnit synthstrip`，不会替换系统 `mri_synthstrip`。
+官方脚本集成了参数解析和执行流程，本包允许导入并缓存模型。当前影像几何处理使用 nibabel 和 SciPy；日志、版本和帮助格式由本包维护，未要求与 FreeSurfer 逐字一致。统一 CLI 名称为 `fnit synthstrip`，不会替换系统 `mri_synthstrip`。
 
-当前无 Surfa 实现在同一份真实 T1、同一台 headcw 上与 FreeSurfer 8.2 官方 CLI 比较：`orig.mgz` 的脑图、掩膜、距离图各 **16,777,216 / 16,777,216** 个体素一致；实际参数 `border=1`、`fill=0`、CPU 4 线程。单次完整 CLI 墙钟时间和进程峰值内存、`border=8`、`no_csf=True`、斜切输入与 4D 功能检查见[迁移验证](../../validation/synthstrip_no_surfa_20260927/README.md)。这些耗时只代表该次执行条件，不能据此宣称普遍加速。
+当前 12 例真实临床 T1w 回归使用固定输入清单、同一官方权重和独立 CLI
+进程，对照 FreeSurfer 8.2.0 未修改的 `mri_synthstrip` 源码 CUDA 路径。
+公开报告不含病例标识或私有路径。当前候选源码 hash 为
+`pipeline.py=3cc23ab81eebb6ad11ac9814691f9d3b5c13c93fc2569ee1f4dddea70ec37de7`、
+`model.py=6afcff10848a8a2a57b9c00d4b637eda90e4c0e21f301d8a8031107d783a5f44`
+和 `_nib.py=bffd56aeaca423b2448432ba318212e83549e9e31aa27af6bf20a60888218586`，
+与本页源码一致。
 
-以下保留此前使用同一份去面容的公开 `sub-02` T1w 输入和官方权重生成的脑图；当前无 Surfa 版本的数值结论以上述新验证为准。两行分别为轴位和冠状位；三个面板使用同一切面及灰度范围。图片的制作步骤与完整影像比较见[图示记录](../figures/README.md)。
+两边的三项输出 shape、affine 和 dtype 全部一致。候选采用本包要求的默认
+TF32，官方参考运行设置了 `NVIDIA_TF32_OVERRIDE=0`；影像几何实现也分别为
+nibabel/SciPy 与官方 Surfa。因此该组结果衡量功能和数值接近程度，不声明逐体素
+完全相同。
 
-![公开 T1w 输入、FreeSurfer 脑图与本包脑图](../figures/synthstrip_comparison.png)
+| 当前 12 例 GPU 对照 | 结果 |
+|---|---:|
+| mask Dice，最小值 | 0.993925 |
+| 单例 mask 不同体素数，最大值 | 38,094 |
+| distance MAE，12 例平均 / 单例最大（mm） | 0.338627 / 0.610645 |
+| brain image Pearson r，最小值 | 0.994261 |
+| brain image MAE，单例最大值 | 0.116816 |
 
-| 检查 | 记录 |
-|---|---|
-| 无 Surfa 实现、同一真实 T1、官方 CLI 与新 CLI/API | [迁移验证](../../validation/synthstrip_no_surfa_20260927/README.md) |
+墙钟时间包含 Python 启动、权重和影像加载、推理、后处理以及 brain、mask、
+distance 三次 NIfTI 写盘。gpucw1 的 H100 共享节点上，FreeSurfer / FNIT 的
+12 例中位数为 `16.916 / 16.395 s`；FNIT 与参考的中位数比为 `0.969`。
+FNIT 单例 PyTorch peak allocation 为 `8.316 GB`，低于 20 GB；FNIT / 参考
+进程最大 RSS 中位数为 `1,216,022 / 1,035,954 KiB`。共享节点计时不解释为
+独占硬件加速比。
 
-测试源码在 [tests/synthstrip/](../../tests/synthstrip/)；原版对照工具在 [tools/validate_synthstrip.py](../../tools/validate_synthstrip.py)：
+下图取固定清单的 case01，以同一切面和灰度范围展示输入、FreeSurfer 脑图与
+当前 FNIT 脑图。真实病例没有人工脑掩膜真值，因此这些指标验证对官方实现的
+复现程度，不代表独立临床准确率。
+
+![当前 SynthStrip 在真实 T1w 上与 FreeSurfer 8.2 的脑提取对照](figures/synthstrip_current_real_case01.png)
+
+机器可读逐例指标、输入 SHA-256、源码 SHA-256、计时、RSS 和显存见
+[`report.real.current.json`](../../validation/synthstrip/report.real.current.json)；
+复现脚本为
+[`current_regression.py`](../../validation/synthstrip/current_regression.py)。
+脚本只在验证阶段读取已单独运行的 FreeSurfer 输出作为参照，FNIT 运行时不调用
+FreeSurfer。
+
+## 测试与复现
+
+单元测试和当前真实数据回归分别使用：
 
 ```bash
 python -m pytest tests/synthstrip tests/test_public_api.py
-# 只有与原版比较时才需要 FreeSurfer。
-module load freesurfer
-python tools/validate_synthstrip.py --image /path/to/test_T1w.nii.gz \
-  --out-dir validation/synthstrip --device cuda --reference-device cpu
+python validation/synthstrip/current_regression.py \
+  --manifest /path/to/deidentified_manifest.json \
+  --reference-root /path/to/freesurfer_reference \
+  --output-root /path/to/fnit_outputs \
+  --weights /path/to/synthstrip.1.pt \
+  --source-root . \
+  --python /path/to/fnit/python \
+  --device cuda:0 \
+  --threads 8
 ```
 
-该工具从指定原脚本 AST 提取网络类，用相同权重比较参数名、参数量和随机 `64³` 输入的预测，再执行完整影像流程；正式流程仍使用官方最小 `192³` 网格。参考安装自带的 Torch 是 CPU build，因此 GPU 原版参考使用未修改官方脚本与 CUDA Python 环境，报告明确标为 `official_source_cuda`。
-
-这些检查衡量与原版的数值一致性。真实病例没有人工脑掩膜真值，无法从中得出临床提取准确率。大视野裁切和常数输入的处理见上文。
+`--manifest` 只列输入路径、匿名病例号和 SHA-256；`--reference-root` 保存事先由官方 `mri_synthstrip` 生成的三项输出；`--output-root` 保存当前 FNIT 输出与报告；`--source-root` 固定待验证源码；`--python` 固定实际运行环境。该脚本不会在 FNIT 推理过程中调用 FreeSurfer。
 
 原方法：Hoopes et al., *SynthStrip: Skull-Stripping for Any Brain Image*, NeuroImage (2022), [doi:10.1016/j.neuroimage.2022.119474](https://doi.org/10.1016/j.neuroimage.2022.119474)。

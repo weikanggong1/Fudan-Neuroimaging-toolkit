@@ -9,9 +9,10 @@ import uuid
 
 import nibabel as nib
 import numpy as np
-import surfa as sf
 import torch
 
+from .._nib import load_image, new_image
+from .._transforms import AffineTransform
 from ..flirt.coordinates import flirt_to_world_affine
 from .io import FSL_CUBIC_SPLINE_COEFFICIENTS
 from .registration import GMFNIRTConfig, TorchFNIRT
@@ -52,16 +53,11 @@ def _validate_config(value):
 
 
 def _load_volume(value, name):
-    if isinstance(value, (str, os.PathLike)):
-        volume = sf.load_volume(str(value))
-    elif isinstance(value, sf.Volume):
-        volume = value
-    else:
-        raise TypeError(f"{name} must be a NIfTI path or surfa.Volume")
-    data = np.asarray(volume.data)
+    volume = load_image(value, name)
+    data = np.asanyarray(volume.dataobj)
     if data.ndim == 4 and data.shape[-1] == 1:
         data = data[..., 0]
-        volume = volume.new(data)
+        volume = new_image(data, volume)
     if data.ndim != 3 or any(size < 2 for size in data.shape):
         raise ValueError(f"{name} must contain one 3D image")
     if not np.isfinite(data).all():
@@ -86,29 +82,24 @@ def _load_affine(value):
 
 
 def _resolve_reference_mask(value):
-    if value is not None:
-        return value
-    fsldir = os.environ.get("FSLDIR")
-    if fsldir:
-        path = Path(fsldir) / "data" / "standard" / DEFAULT_REFERENCE_MASK
-        if path.is_file():
-            return path
-    raise ValueError(
-        "refmask is required for the GM configuration when FSLDIR does not "
-        f"contain data/standard/{DEFAULT_REFERENCE_MASK}"
-    )
+    if value is None:
+        raise ValueError(
+            "refmask is required for the GM configuration and must be provided "
+            "explicitly"
+        )
+    return value
 
 
 def _validate_reference_mask(mask, reference):
     mask = _load_volume(mask, "refmask")
     if tuple(mask.shape[:3]) != tuple(reference.shape[:3]) or not np.allclose(
-        mask.geom.vox2world.matrix,
-        reference.geom.vox2world.matrix,
+        mask.affine,
+        reference.affine,
         atol=1e-5,
         rtol=0,
     ):
         raise ValueError("refmask must use the reference image grid")
-    values = np.asarray(mask.data)
+    values = np.asanyarray(mask.dataobj)
     if not np.all((values == 0) | (values == 1)):
         raise ValueError("refmask must be binary with values 0 and 1")
     if not np.any(values == 1):
@@ -143,7 +134,7 @@ def _nifti_output_path(value, name):
 def _default_coefficient_root(input):
     if not isinstance(input, (str, os.PathLike)):
         raise ValueError(
-            "cout is required when input is an in-memory surfa.Volume"
+            "cout is required when input is an in-memory nibabel image"
         )
     path = Path(input).expanduser()
     name = path.name
@@ -220,9 +211,9 @@ def _write_outputs_atomic(result, outputs, overwrite):
                     )
                 nib.save(coefficient_image, str(temporary))
             elif name == "iout":
-                result.moved.save(str(temporary))
+                nib.save(result.moved, str(temporary))
             else:
-                result.nonlinear_jacobian.save(str(temporary))
+                nib.save(result.nonlinear_jacobian, str(temporary))
         for temporary, destination in staged:
             if overwrite:
                 os.replace(temporary, destination)
@@ -286,18 +277,15 @@ def run_fnirt(
     fsl_affine = _load_affine(affine)
     forward_world = flirt_to_world_affine(
         fsl_affine,
-        moving.geom.vox2world.matrix,
-        fixed.geom.vox2world.matrix,
+        moving.affine,
+        fixed.affine,
         moving.shape[:3],
         fixed.shape[:3],
-        moving.geom.voxsize,
-        fixed.geom.voxsize,
+        nib.affines.voxel_sizes(moving.affine),
+        nib.affines.voxel_sizes(fixed.affine),
     )
-    moving_to_fixed = sf.Affine(
-        forward_world,
-        source=moving,
-        target=fixed,
-        space="world",
+    moving_to_fixed = AffineTransform(
+        forward_world, source=moving, target=fixed, space="world"
     )
     result = TorchFNIRT(
         device=_default_device() if device is None else device,

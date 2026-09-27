@@ -14,18 +14,16 @@ from dataclasses import dataclass
 import math
 import warnings
 
+import nibabel as nib
 import numpy as np
-import surfa as sf
 import torch
 
+from .._nib import FNITNifti1Image, load_image, new_image
+from .._transforms import AffineTransform, DenseWarp, same_geometry
 from ..flirt.coordinates import (
     flirt_to_world_affine,
     voxel_to_fsl_scaled_mm,
     world_to_flirt_affine,
-)
-from ..fast_vbm.synthmorph_backend import (
-    _world_affine,
-    pull_jacobian_determinants,
 )
 from .optimizer import (
     preconditioned_conjugate_gradient,
@@ -52,6 +50,70 @@ FSL_SOURCE_VERSIONS = {
     "newimage": "2203.11 (19e3ddd10138d8ea1394fd522fb0770435c61ddd)",
     "warpfns": "2203.0 (50ea45cb0b9661adba7844444cb38649ae44892b)",
 }
+
+
+def _field_determinant(matrix):
+    return (
+        matrix[0, 0]
+        * (matrix[1, 1] * matrix[2, 2] - matrix[1, 2] * matrix[2, 1])
+        - matrix[0, 1]
+        * (matrix[1, 0] * matrix[2, 2] - matrix[1, 2] * matrix[2, 0])
+        + matrix[0, 2]
+        * (matrix[1, 0] * matrix[2, 1] - matrix[1, 1] * matrix[2, 0])
+    )
+
+
+def _pull_jacobian_determinants(
+    displacement_ras, target_vox2world, moving_to_fixed_world, *, device
+):
+    field = torch.as_tensor(
+        np.array(displacement_ras, dtype=np.float32, copy=True), device=device
+    )
+    if field.ndim != 4 or field.shape[-1] != 3:
+        raise ValueError("displacement_ras must have shape (X, Y, Z, 3)")
+    target = torch.as_tensor(
+        target_vox2world, dtype=torch.float32, device=device
+    )[:3, :3]
+    affine = torch.as_tensor(
+        moving_to_fixed_world, dtype=torch.float32, device=device
+    )[:3, :3]
+    target_determinant = torch.linalg.det(target)
+    affine_determinant = torch.linalg.det(affine)
+    if abs(float(target_determinant)) < 1e-8:
+        raise ValueError("target_vox2world must be invertible")
+    if abs(float(affine_determinant)) < 1e-8:
+        raise ValueError("moving_to_fixed_world must be invertible")
+    field = field.movedim(-1, 0)
+    voxel_gradient = torch.stack(
+        torch.gradient(field, dim=(1, 2, 3), edge_order=1), dim=1
+    )
+    world_gradient = torch.einsum(
+        "abxyz,bc->acxyz", voxel_gradient, torch.linalg.inv(target)
+    )
+    pull_gradient = world_gradient + torch.eye(
+        3, dtype=field.dtype, device=device
+    )[:, :, None, None, None]
+    full = _field_determinant(pull_gradient)
+    affine_pull_determinant = affine_determinant.reciprocal()
+    return full, full / affine_pull_determinant, affine_pull_determinant
+
+
+def _world_affine(value, moving, fixed):
+    if isinstance(value, AffineTransform):
+        if not same_geometry(value.source, moving) or not same_geometry(
+            value.target, fixed
+        ):
+            raise ValueError("moving_to_fixed geometry does not match the images")
+        matrix = value.convert(space="world").matrix
+    else:
+        matrix = np.asarray(value, dtype=np.float64)
+    if matrix.shape != (4, 4) or not np.isfinite(matrix).all():
+        raise ValueError("moving_to_fixed must contain a finite 4x4 matrix")
+    if not np.allclose(matrix[3], (0, 0, 0, 1), atol=1e-8, rtol=0):
+        raise ValueError("moving_to_fixed must be a homogeneous affine matrix")
+    if abs(float(np.linalg.det(matrix[:3, :3]))) < 1e-8:
+        raise ValueError("moving_to_fixed must be invertible")
+    return np.array(matrix, dtype=np.float64, copy=True)
 
 
 _GOOD_FFT_SIZES = (
@@ -144,11 +206,11 @@ class GMFNIRTConfig:
 
 @dataclass
 class TorchFNIRTResult:
-    moved: sf.Volume
-    pull_transform: sf.Warp
-    full_pull_jacobian: sf.Volume
-    nonlinear_jacobian: sf.Volume
-    modulated_gm: sf.Volume
+    moved: FNITNifti1Image
+    pull_transform: DenseWarp
+    full_pull_jacobian: FNITNifti1Image
+    nonlinear_jacobian: FNITNifti1Image
+    modulated_gm: FNITNifti1Image
     affine_pull_determinant: float
     coefficients: np.ndarray
     coefficient_image: object
@@ -891,11 +953,11 @@ class TorchFNIRT:
             raise ValueError("invalid LM options")
 
     def __call__(self, moving, fixed, moving_to_fixed, *, reference_mask=None):
-        if not isinstance(moving, sf.Volume) or not isinstance(fixed, sf.Volume):
-            raise TypeError("moving and fixed must be surfa.Volume objects")
+        moving = load_image(moving, "moving")
+        fixed = load_image(fixed, "fixed")
         initial = _world_affine(moving_to_fixed, moving, fixed)
-        moving_data = np.asarray(moving.data, dtype=np.float32).squeeze()
-        fixed_data = np.asarray(fixed.data, dtype=np.float32).squeeze()
+        moving_data = np.asarray(moving.dataobj, dtype=np.float32).squeeze()
+        fixed_data = np.asarray(fixed.dataobj, dtype=np.float32).squeeze()
         if moving_data.ndim != 3 or fixed_data.ndim != 3:
             raise ValueError("moving and fixed must each contain one 3D frame")
         if not np.isfinite(moving_data).all() or not np.isfinite(fixed_data).all():
@@ -904,16 +966,15 @@ class TorchFNIRT:
         selected_mask = self.reference_mask if reference_mask is None else reference_mask
         mask_data = None
         if selected_mask is not None:
-            if not isinstance(selected_mask, sf.Volume):
-                selected_mask = sf.load_volume(selected_mask)
+            selected_mask = load_image(selected_mask, "reference_mask")
             if selected_mask.shape[:3] != fixed.shape[:3] or not np.allclose(
-                selected_mask.geom.vox2world.matrix,
-                fixed.geom.vox2world.matrix,
+                selected_mask.affine,
+                fixed.affine,
                 atol=1e-5,
                 rtol=0,
             ):
                 raise ValueError("reference mask must be on the fixed image grid")
-            mask_data = np.asarray(selected_mask.data).squeeze() > 0.5
+            mask_data = np.asanyarray(selected_mask.dataobj).squeeze() > 0.5
 
         device = self.device
         image_dtype = torch.float32
@@ -950,19 +1011,19 @@ class TorchFNIRT:
         )
 
         moving_fsl_array = voxel_to_fsl_scaled_mm(
-            moving.geom.vox2world.matrix, moving_data.shape, moving.geom.voxsize
+            moving.affine, moving_data.shape, nib.affines.voxel_sizes(moving.affine)
         )
         fixed_fsl_array = voxel_to_fsl_scaled_mm(
-            fixed.geom.vox2world.matrix, fixed_data.shape, fixed.geom.voxsize
+            fixed.affine, fixed_data.shape, nib.affines.voxel_sizes(fixed.affine)
         )
         forward_array = world_to_flirt_affine(
-            initial.matrix,
-            moving.geom.vox2world.matrix,
-            fixed.geom.vox2world.matrix,
+            initial,
+            moving.affine,
+            fixed.affine,
             moving_data.shape,
             fixed_data.shape,
-            moving.geom.voxsize,
-            fixed.geom.voxsize,
+            nib.affines.voxel_sizes(moving.affine),
+            nib.affines.voxel_sizes(fixed.affine),
         )
         moving_fsl_exact = torch.as_tensor(
             moving_fsl_array, device=device, dtype=dtype
@@ -979,8 +1040,8 @@ class TorchFNIRT:
         stage_forward_array = np.asarray(forward_array, dtype=np.float64)
 
         fixed_shape = tuple(int(value) for value in fixed_data.shape)
-        fixed_voxel_sizes = tuple(float(value) for value in fixed.geom.voxsize)
-        moving_voxel_sizes = tuple(float(value) for value in moving.geom.voxsize)
+        fixed_voxel_sizes = tuple(float(value) for value in nib.affines.voxel_sizes(fixed.affine))
+        moving_voxel_sizes = tuple(float(value) for value in nib.affines.voxel_sizes(moving.affine))
         resolution_schedule = self.config.warp_resolution_schedule_mm
         if resolution_schedule is None:
             resolution_schedule = (self.config.warp_resolution_mm,) * len(
@@ -1432,11 +1493,11 @@ class TorchFNIRT:
             )
 
             fixed_world = torch.as_tensor(
-                np.array(fixed.geom.vox2world.matrix, dtype=np.float32, copy=True),
+                np.array(fixed.affine, dtype=np.float32, copy=True),
                 device=device,
             )
             moving_world = torch.as_tensor(
-                np.array(moving.geom.vox2world.matrix, dtype=np.float32, copy=True),
+                np.array(moving.affine, dtype=np.float32, copy=True),
                 device=device,
             )
             target_world = _coordinate_grid(fixed_world, full_positions)
@@ -1449,23 +1510,20 @@ class TorchFNIRT:
             displacement = (source_world - target_world).movedim(0, -1)
 
         displacement_array = displacement.cpu().numpy().astype(np.float32)
-        pull_transform = sf.Warp(
-            displacement_array,
-            source=moving,
-            target=fixed,
-            format=sf.Warp.Format.disp_ras,
+        pull_transform = DenseWarp(
+            displacement_array, source=moving, target=fixed
         )
-        full_world, _, affine_pull_determinant = pull_jacobian_determinants(
+        full_world, _, affine_pull_determinant = _pull_jacobian_determinants(
             displacement_array,
-            fixed.geom.vox2world.matrix,
+            fixed.affine,
             flirt_to_world_affine(
                 stage_forward_array,
-                moving.geom.vox2world.matrix,
-                fixed.geom.vox2world.matrix,
+                moving.affine,
+                fixed.affine,
                 moving_data.shape,
                 fixed_data.shape,
-                moving.geom.voxsize,
-                fixed.geom.voxsize,
+                nib.affines.voxel_sizes(moving.affine),
+                nib.affines.voxel_sizes(fixed.affine),
             ),
             device=device,
         )
@@ -1540,11 +1598,11 @@ class TorchFNIRT:
             "full_pull_jacobian_max": float(full_world.max()),
         }
         return TorchFNIRTResult(
-            moved=fixed.new(moved_array),
+            moved=new_image(moved_array, fixed),
             pull_transform=pull_transform,
-            full_pull_jacobian=fixed.new(full_array),
-            nonlinear_jacobian=fixed.new(nonlinear_array),
-            modulated_gm=fixed.new(moved_array * nonlinear_array),
+            full_pull_jacobian=new_image(full_array, fixed),
+            nonlinear_jacobian=new_image(nonlinear_array, fixed),
+            modulated_gm=new_image(moved_array * nonlinear_array, fixed),
             affine_pull_determinant=float(affine_pull_determinant),
             coefficients=coefficient_array,
             coefficient_image=coefficient_image,

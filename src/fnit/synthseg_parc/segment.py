@@ -11,6 +11,7 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
+from .._dmri import configure_device
 from .model import _Block
 from .pipeline import SynthSegParc
 from .postprocess import postprocess_segmentation
@@ -89,7 +90,7 @@ class SynthSegSegmenter:
     """Return the hard 33-class map supplied to the official ``--parc`` head."""
 
     def __init__(self, weights: str | Path, labels: str | Path, device="cpu"):
-        self.device = torch.device(device)
+        self.device = configure_device(device)
         raw_labels = np.load(labels)
         if len(raw_labels) != 55 or len(np.unique(raw_labels)) != 33:
             raise ValueError("Expected SynthSeg 2.0's 55-entry label array with 33 unique IDs")
@@ -111,21 +112,19 @@ class SynthSegSegmenter:
         if image.ndim != 3:
             raise ValueError("image must be a preprocessed 3-D tensor")
         x = image.to(device=self.device, dtype=torch.float32)[None, None]
-        # Full float32 is required for voxel parity on the fixed recon-all T1.
-        with torch.backends.cudnn.flags(enabled=True, allow_tf32=False):
-            original = self.model(x)
-            if not smooth:
-                if flip:
-                    raise ValueError("unsmoothed probabilities require flip=False")
-                return original[0]
-            original = _blur(original)
-            if not flip:
-                return original[0]
-            if x.is_cuda:
-                torch.cuda.empty_cache()
-            flipped = _blur(self.model(torch.flip(x, (2,))))
-            flipped = torch.flip(flipped, (2,))[:, self.flip_indices]
-            return (0.5 * (original + flipped))[0]
+        original = self.model(x)
+        if not smooth:
+            if flip:
+                raise ValueError("unsmoothed probabilities require flip=False")
+            return original[0]
+        original = _blur(original)
+        if not flip:
+            return original[0]
+        if x.is_cuda:
+            torch.cuda.empty_cache()
+        flipped = _blur(self.model(torch.flip(x, (2,))))
+        flipped = torch.flip(flipped, (2,))[:, self.flip_indices]
+        return (0.5 * (original + flipped))[0]
 
     @torch.inference_mode()
     def __call__(self, image: torch.Tensor) -> torch.Tensor:

@@ -1,0 +1,685 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-27",
+  "feature": "SynthMorph measured nibabel/PyTorch joint registration versus FreeSurfer 8.2.0; current linear path inherited by attestation",
+  "data": {
+    "subjects": 12,
+    "kind": "real clinical T1w to MNI152 T1 2 mm",
+    "selection": "first sorted files with valid finite 3D data and nonsingular finite geometry; no output-based selection",
+    "identifiers_public": false,
+    "input_sha256": {
+      "case01": "cd7d98a03f9aea34b83f69b184af2ced799351b93eb8da09957aae7038a6e36f",
+      "case02": "4f7bac4f4f9557c62a078af610ef94f871975e54e39d07b4d618583130fdc8fa",
+      "case03": "6f10925db6cec345ed8ad1d915e9840fd0c69ece2cd46d9ac4a83e23101c8f2e",
+      "case04": "916cc95237a89e7824ab742c8921268c3517617556ea341ff2e750fe5af36a1d",
+      "case05": "59c4daaa3669af1c49c05db8a825ed52ef8654a1497adfdddedc3ed96933e7af",
+      "case06": "63330a1a47c1ed9d50a3c9a336864794ada01f596344d53849dd8f17459e1a0f",
+      "case07": "3f53604a41ab20feb9efc371a621805568c57350f7da4447caa67039b56089a8",
+      "case08": "cacdccc0cd44f161853433144e03d78034ce3126aba86b81111925a7e29e6c91",
+      "case09": "05e2d1ae47f35ac8a0ff025e29c6926c6f45102be94bd9a957c5865572ad9bc8",
+      "case10": "78808a40a9194be9daae767bfba03bacaa40c78b85359ba940b7925a3b390896",
+      "case11": "62b964ed3720fa372d934068cea3f05c6e4418fb6d9bdcec3a1f1f21a67378ce",
+      "case12": "5d4565903ceca205bdaac20ac9353646ef71293e0dedb1b134119a0af49d1779"
+    },
+    "fixed_sha256": "0585cd056bf5ccfb8bf97a5f6a66082d4e7caad525718fc11e40d80a827fcb92"
+  },
+  "reference": {
+    "software": "FreeSurfer 8.2.0 mri_synthmorph official source",
+    "device_class": "CPU",
+    "script_sha256": "4fa7fb879243cbf55addef6cf253e4206fda90a9c82728f72a6050eaa80bf5c6",
+    "tf32_override": 0
+  },
+  "candidate": {
+    "device": "cpu",
+    "tf32_default": false,
+    "float16_used": false,
+    "threads": 8,
+    "peak_cuda_memory_bytes_case01": null,
+    "source_sha256": {
+      "src/fnit/synthmorph/models.py": "a1cab2e98f6972ae053a7df2b30416c0ca069c1a30df562e6005d42d85d34a1b",
+      "src/fnit/synthmorph/pipeline.py": "e680d3a85f7e240cdab235047766973035d9188e705d9642e3edca1402d5d202",
+      "src/fnit/synthmorph/spatial.py": "9c629a94827a987fcc4880cbf18f36aa79f347270585b8c4b92b3fc1660104ee",
+      "src/fnit/_nib.py": "bffd56aeaca423b2448432ba318212e83549e9e31aa27af6bf20a60888218586",
+      "src/fnit/_transforms.py": "be01fa24cd0c17bb1aa8ac7792cdf0b62c657037808c643427a1b11cc4c05340",
+      "src/fnit/weights.py": "9d275a1bd4064ff9bd1eb8aaef589ce7804258e7f6c39cd127deae2623d6eb9a",
+      "src/fnit/cli.py": "2d5e3d37f52fffb7834a438339566cd7ead980606a2127ade268662569922178"
+    }
+  },
+  "summary": {
+    "maximum_moved_nrmse_reference_rms": 0.07852492312693278,
+    "minimum_moved_pearson_r": 0.9948097189068951,
+    "mean_warp_vector_error_mm": 6.76863561722614e-05,
+    "maximum_warp_vector_error_mm": 0.0005014549781846613,
+    "candidate_wall_seconds_median": 140.185,
+    "reference_wall_seconds_median": 164.5490667889826,
+    "candidate_over_reference_median": 0.8519343362777801
+  },
+  "transform_contract": "Both files encode target-grid target-to-source world-RAS displacement in millimetres. FreeSurfer writes [X,Y,Z,1,3], FNIT writes the NIfTI vector shape [X,Y,Z,3]; comparisons squeeze only the singleton frame axis.",
+  "timing_boundary": "Each CLI run includes Python startup, HDF5 loading and fixed-hypernetwork specialization, image loading, inference, resampling, and two NIfTI writes.",
+  "records": [
+    {
+      "case_id": "case01",
+      "input_sha256": "cd7d98a03f9aea34b83f69b184af2ced799351b93eb8da09957aae7038a6e36f",
+      "metrics": {
+        "moved": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.312492524793958,
+          "rmse": 9.335798531155355,
+          "nrmse_reference_rms": 0.07852492312693278,
+          "max_abs": 484.2878112792969,
+          "pearson_r": 0.9948396728676526
+        },
+        "transform": {
+          "semantic_shape_equal_after_squeeze": true,
+          "candidate_file_shape": [
+            91,
+            109,
+            91,
+            3
+          ],
+          "reference_file_shape": [
+            91,
+            109,
+            91,
+            1,
+            3
+          ],
+          "affine_max_abs": 0.0,
+          "component_mae_mm": 3.81633266697508e-05,
+          "vector_error_mean_mm": 7.738671209324306e-05,
+          "vector_error_p95_mm": 0.00014754546818400357,
+          "vector_error_max_mm": 0.0005014549781846613
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 145.05,
+        "maximum_rss_kbytes": 11455872,
+        "exit_status": 0,
+        "driver_wall_seconds": 145.05729051679373,
+        "reused_for_report": false
+      },
+      "reference_timing": {
+        "wall_seconds": 197.0687804359477,
+        "maximum_rss_kbytes": 18012204
+      }
+    },
+    {
+      "case_id": "case02",
+      "input_sha256": "4f7bac4f4f9557c62a078af610ef94f871975e54e39d07b4d618583130fdc8fa",
+      "metrics": {
+        "moved": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.07386528735633947,
+          "rmse": 3.626084317276527,
+          "nrmse_reference_rms": 0.04243684298356457,
+          "max_abs": 450.2657165527344,
+          "pearson_r": 0.9985062866566086
+        },
+        "transform": {
+          "semantic_shape_equal_after_squeeze": true,
+          "candidate_file_shape": [
+            91,
+            109,
+            91,
+            3
+          ],
+          "reference_file_shape": [
+            91,
+            109,
+            91,
+            1,
+            3
+          ],
+          "affine_max_abs": 0.0,
+          "component_mae_mm": 4.161556749281849e-05,
+          "vector_error_mean_mm": 8.15480994793995e-05,
+          "vector_error_p95_mm": 0.00016853883388042086,
+          "vector_error_max_mm": 0.0004888173974499923
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 146.52,
+        "maximum_rss_kbytes": 11455452,
+        "exit_status": 0,
+        "driver_wall_seconds": 146.5307556167245,
+        "reused_for_report": false
+      },
+      "reference_timing": {
+        "wall_seconds": 246.82736493903212,
+        "maximum_rss_kbytes": 18013200
+      }
+    },
+    {
+      "case_id": "case03",
+      "input_sha256": "6f10925db6cec345ed8ad1d915e9840fd0c69ece2cd46d9ac4a83e23101c8f2e",
+      "metrics": {
+        "moved": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.2339884514141772,
+          "rmse": 7.698477528391754,
+          "nrmse_reference_rms": 0.07626840333839248,
+          "max_abs": 427.93560791015625,
+          "pearson_r": 0.9948097189068951
+        },
+        "transform": {
+          "semantic_shape_equal_after_squeeze": true,
+          "candidate_file_shape": [
+            91,
+            109,
+            91,
+            3
+          ],
+          "reference_file_shape": [
+            91,
+            109,
+            91,
+            1,
+            3
+          ],
+          "affine_max_abs": 0.0,
+          "component_mae_mm": 3.206986688239155e-05,
+          "vector_error_mean_mm": 6.540698699898912e-05,
+          "vector_error_p95_mm": 0.00012325664078829582,
+          "vector_error_max_mm": 0.00032637404840404416
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 128.87,
+        "maximum_rss_kbytes": 11456236,
+        "exit_status": 0,
+        "driver_wall_seconds": 128.88043956458569,
+        "reused_for_report": false
+      },
+      "reference_timing": {
+        "wall_seconds": 225.9258898468688,
+        "maximum_rss_kbytes": 18016624
+      }
+    },
+    {
+      "case_id": "case04",
+      "input_sha256": "916cc95237a89e7824ab742c8921268c3517617556ea341ff2e750fe5af36a1d",
+      "metrics": {
+        "moved": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.0474968839672121,
+          "rmse": 2.0024740857597667,
+          "nrmse_reference_rms": 0.02558233499739244,
+          "max_abs": 181.47622680664062,
+          "pearson_r": 0.9994710430969479
+        },
+        "transform": {
+          "semantic_shape_equal_after_squeeze": true,
+          "candidate_file_shape": [
+            91,
+            109,
+            91,
+            3
+          ],
+          "reference_file_shape": [
+            91,
+            109,
+            91,
+            1,
+            3
+          ],
+          "affine_max_abs": 0.0,
+          "component_mae_mm": 3.911472200387253e-05,
+          "vector_error_mean_mm": 7.99104754345619e-05,
+          "vector_error_p95_mm": 0.0001406790841261732,
+          "vector_error_max_mm": 0.0002394463321910891
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 136.92000000000002,
+        "maximum_rss_kbytes": 11456432,
+        "exit_status": 0,
+        "driver_wall_seconds": 136.93252167850733,
+        "reused_for_report": false
+      },
+      "reference_timing": {
+        "wall_seconds": 124.91683617094532,
+        "maximum_rss_kbytes": 18023356
+      }
+    },
+    {
+      "case_id": "case05",
+      "input_sha256": "59c4daaa3669af1c49c05db8a825ed52ef8654a1497adfdddedc3ed96933e7af",
+      "metrics": {
+        "moved": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.10289819854133427,
+          "rmse": 3.8157498821808757,
+          "nrmse_reference_rms": 0.044941463691895694,
+          "max_abs": 344.8614501953125,
+          "pearson_r": 0.9982027705464103
+        },
+        "transform": {
+          "semantic_shape_equal_after_squeeze": true,
+          "candidate_file_shape": [
+            91,
+            109,
+            91,
+            3
+          ],
+          "reference_file_shape": [
+            91,
+            109,
+            91,
+            1,
+            3
+          ],
+          "affine_max_abs": 0.0,
+          "component_mae_mm": 4.069665901418318e-05,
+          "vector_error_mean_mm": 8.664010147933711e-05,
+          "vector_error_p95_mm": 0.00017464482333770138,
+          "vector_error_max_mm": 0.00030085364003189626
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 141.25,
+        "maximum_rss_kbytes": 11455780,
+        "exit_status": 0,
+        "driver_wall_seconds": 141.26087567210197,
+        "reused_for_report": false
+      },
+      "reference_timing": {
+        "wall_seconds": 125.83973333192989,
+        "maximum_rss_kbytes": 18029576
+      }
+    },
+    {
+      "case_id": "case06",
+      "input_sha256": "63330a1a47c1ed9d50a3c9a336864794ada01f596344d53849dd8f17459e1a0f",
+      "metrics": {
+        "moved": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.0035134330922208554,
+          "rmse": 0.08335967937474031,
+          "nrmse_reference_rms": 0.001195649979083376,
+          "max_abs": 8.21387767791748,
+          "pearson_r": 0.9999987651574355
+        },
+        "transform": {
+          "semantic_shape_equal_after_squeeze": true,
+          "candidate_file_shape": [
+            91,
+            109,
+            91,
+            3
+          ],
+          "reference_file_shape": [
+            91,
+            109,
+            91,
+            1,
+            3
+          ],
+          "affine_max_abs": 0.0,
+          "component_mae_mm": 1.6988663050480817e-05,
+          "vector_error_mean_mm": 3.457901511331754e-05,
+          "vector_error_p95_mm": 6.24492856740757e-05,
+          "vector_error_max_mm": 0.00016256161310319913
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 144.57999999999998,
+        "maximum_rss_kbytes": 11462200,
+        "exit_status": 0,
+        "driver_wall_seconds": 144.59199541062117,
+        "reused_for_report": false
+      },
+      "reference_timing": {
+        "wall_seconds": 215.19036897295155,
+        "maximum_rss_kbytes": 18026908
+      }
+    },
+    {
+      "case_id": "case07",
+      "input_sha256": "3f53604a41ab20feb9efc371a621805568c57350f7da4447caa67039b56089a8",
+      "metrics": {
+        "moved": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.001161150626439345,
+          "rmse": 0.022895715550262156,
+          "nrmse_reference_rms": 0.0002552171521113829,
+          "max_abs": 5.941473960876465,
+          "pearson_r": 0.9999999437305305
+        },
+        "transform": {
+          "semantic_shape_equal_after_squeeze": true,
+          "candidate_file_shape": [
+            91,
+            109,
+            91,
+            3
+          ],
+          "reference_file_shape": [
+            91,
+            109,
+            91,
+            1,
+            3
+          ],
+          "affine_max_abs": 0.0,
+          "component_mae_mm": 3.821520054684099e-05,
+          "vector_error_mean_mm": 7.645599579389772e-05,
+          "vector_error_p95_mm": 0.0001410922394478373,
+          "vector_error_max_mm": 0.0003446764220604406
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 137.0,
+        "maximum_rss_kbytes": 11461780,
+        "exit_status": 0,
+        "driver_wall_seconds": 137.0068864747882,
+        "reused_for_report": false
+      },
+      "reference_timing": {
+        "wall_seconds": 204.02014030492865,
+        "maximum_rss_kbytes": 18013580
+      }
+    },
+    {
+      "case_id": "case08",
+      "input_sha256": "cacdccc0cd44f161853433144e03d78034ce3126aba86b81111925a7e29e6c91",
+      "metrics": {
+        "moved": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.003866602567477273,
+          "rmse": 0.16472005483522154,
+          "nrmse_reference_rms": 0.001908281093828663,
+          "max_abs": 21.238624572753906,
+          "pearson_r": 0.9999968852965758
+        },
+        "transform": {
+          "semantic_shape_equal_after_squeeze": true,
+          "candidate_file_shape": [
+            91,
+            109,
+            91,
+            3
+          ],
+          "reference_file_shape": [
+            91,
+            109,
+            91,
+            1,
+            3
+          ],
+          "affine_max_abs": 0.0,
+          "component_mae_mm": 1.751994379590223e-05,
+          "vector_error_mean_mm": 3.60959041768797e-05,
+          "vector_error_p95_mm": 6.4849853515625e-05,
+          "vector_error_max_mm": 0.00017827333748699834
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 119.56,
+        "maximum_rss_kbytes": 11462404,
+        "exit_status": 0,
+        "driver_wall_seconds": 119.57115954905748,
+        "reused_for_report": false
+      },
+      "reference_timing": {
+        "wall_seconds": 125.56963177910075,
+        "maximum_rss_kbytes": 18054952
+      }
+    },
+    {
+      "case_id": "case09",
+      "input_sha256": "05e2d1ae47f35ac8a0ff025e29c6926c6f45102be94bd9a957c5865572ad9bc8",
+      "metrics": {
+        "moved": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.002506597188958821,
+          "rmse": 0.04430603879298757,
+          "nrmse_reference_rms": 0.0005196675157631136,
+          "max_abs": 3.9817311763763428,
+          "pearson_r": 0.9999997772830788
+        },
+        "transform": {
+          "semantic_shape_equal_after_squeeze": true,
+          "candidate_file_shape": [
+            91,
+            109,
+            91,
+            3
+          ],
+          "reference_file_shape": [
+            91,
+            109,
+            91,
+            1,
+            3
+          ],
+          "affine_max_abs": 0.0,
+          "component_mae_mm": 4.7350212419574056e-05,
+          "vector_error_mean_mm": 9.487491706947715e-05,
+          "vector_error_p95_mm": 0.00017127948242678565,
+          "vector_error_max_mm": 0.0003173314566510837
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 141.44,
+        "maximum_rss_kbytes": 11461956,
+        "exit_status": 0,
+        "driver_wall_seconds": 141.44494502991438,
+        "reused_for_report": false
+      },
+      "reference_timing": {
+        "wall_seconds": 122.30207440420054,
+        "maximum_rss_kbytes": 18019404
+      }
+    },
+    {
+      "case_id": "case10",
+      "input_sha256": "78808a40a9194be9daae767bfba03bacaa40c78b85359ba940b7925a3b390896",
+      "metrics": {
+        "moved": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.000996544476272631,
+          "rmse": 0.017809858577958106,
+          "nrmse_reference_rms": 0.0002135089100914955,
+          "max_abs": 6.727485179901123,
+          "pearson_r": 0.9999999608421076
+        },
+        "transform": {
+          "semantic_shape_equal_after_squeeze": true,
+          "candidate_file_shape": [
+            91,
+            109,
+            91,
+            3
+          ],
+          "reference_file_shape": [
+            91,
+            109,
+            91,
+            1,
+            3
+          ],
+          "affine_max_abs": 0.0,
+          "component_mae_mm": 4.0527713560043254e-05,
+          "vector_error_mean_mm": 7.927729694896595e-05,
+          "vector_error_p95_mm": 0.00015028164370416418,
+          "vector_error_max_mm": 0.000425129141716157
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 139.12,
+        "maximum_rss_kbytes": 11462556,
+        "exit_status": 0,
+        "driver_wall_seconds": 139.13222306966782,
+        "reused_for_report": false
+      },
+      "reference_timing": {
+        "wall_seconds": 132.0293531420175,
+        "maximum_rss_kbytes": 18021568
+      }
+    },
+    {
+      "case_id": "case11",
+      "input_sha256": "62b964ed3720fa372d934068cea3f05c6e4418fb6d9bdcec3a1f1f21a67378ce",
+      "metrics": {
+        "moved": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.005439753575510474,
+          "rmse": 0.3520676102944187,
+          "nrmse_reference_rms": 0.0038968467623035005,
+          "max_abs": 85.83524322509766,
+          "pearson_r": 0.9999871121343732
+        },
+        "transform": {
+          "semantic_shape_equal_after_squeeze": true,
+          "candidate_file_shape": [
+            91,
+            109,
+            91,
+            3
+          ],
+          "reference_file_shape": [
+            91,
+            109,
+            91,
+            1,
+            3
+          ],
+          "affine_max_abs": 0.0,
+          "component_mae_mm": 2.1461711845039948e-05,
+          "vector_error_mean_mm": 4.8144001021290046e-05,
+          "vector_error_p95_mm": 9.954825096664344e-05,
+          "vector_error_max_mm": 0.00023169379637237876
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 142.96,
+        "maximum_rss_kbytes": 11462348,
+        "exit_status": 0,
+        "driver_wall_seconds": 142.96470844745636,
+        "reused_for_report": false
+      },
+      "reference_timing": {
+        "wall_seconds": 204.3897569179535,
+        "maximum_rss_kbytes": 18033600
+      }
+    },
+    {
+      "case_id": "case12",
+      "input_sha256": "5d4565903ceca205bdaac20ac9353646ef71293e0dedb1b134119a0af49d1779",
+      "metrics": {
+        "moved": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.0012995987691217811,
+          "rmse": 0.03795126129976576,
+          "nrmse_reference_rms": 0.0004962671334681942,
+          "max_abs": 5.46600341796875,
+          "pearson_r": 0.9999997965272783
+        },
+        "transform": {
+          "semantic_shape_equal_after_squeeze": true,
+          "candidate_file_shape": [
+            91,
+            109,
+            91,
+            3
+          ],
+          "reference_file_shape": [
+            91,
+            109,
+            91,
+            1,
+            3
+          ],
+          "affine_max_abs": 0.0,
+          "component_mae_mm": 2.5010858192675347e-05,
+          "vector_error_mean_mm": 5.1916768457778174e-05,
+          "vector_error_p95_mm": 9.05940405810388e-05,
+          "vector_error_max_mm": 0.00020026252362681103
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 129.88,
+        "maximum_rss_kbytes": 11462704,
+        "exit_status": 0,
+        "driver_wall_seconds": 129.88802718371153,
+        "reused_for_report": false
+      },
+      "reference_timing": {
+        "wall_seconds": 122.13891044794582,
+        "maximum_rss_kbytes": 18022288
+      }
+    }
+  ],
+  "current_source_chain": {
+    "measurement_source_sha256": {
+      "src/fnit/synthmorph/pipeline.py": "e680d3a85f7e240cdab235047766973035d9188e705d9642e3edca1402d5d202",
+      "src/fnit/synthmorph/spatial.py": "9c629a94827a987fcc4880cbf18f36aa79f347270585b8c4b92b3fc1660104ee"
+    },
+    "current_source_sha256": {
+      "src/fnit/synthmorph/pipeline.py": "70e97c1164b672e19d70ebb9ee39dd0273a71b993bf78b8b22031522dfbd8991",
+      "src/fnit/synthmorph/spatial.py": "dab615dcc8a5f332ef2efede1d5e45d04f21c440243650e960d763e35595d861"
+    },
+    "covered_path": "SynthMorph registration with linear interpolation",
+    "attestation": {
+      "path": "../runtime_dependencies/synthmorph_linear_source_equivalence.public.json",
+      "sha256": "549ca3ae350596d020841baa35232b8b838da6cbede3b1a739ecb10fa4a1da4f"
+    },
+    "source_equivalent_for_covered_path": true,
+    "fresh_current_hash_full_real_data_rerun": false,
+    "nearest_semantics": {
+      "covered_by_this_real_data_report": false,
+      "evidence": "separate CPU/H100 unit tests recorded by the attestation"
+    }
+  },
+  "package_entry_source_chain": {
+    "measurement_source_sha256": {
+      "src/fnit/cli.py": "2d5e3d37f52fffb7834a438339566cd7ead980606a2127ade268662569922178"
+    },
+    "current_source_sha256": {
+      "src/fnit/cli.py": "c92a3fbaa2a8f10e96c73a7bd18bd1a0924844c028db532d2f573d47e4dc2c07"
+    },
+    "covered_entry": "root synthmorph command; registration linear path",
+    "attestation": {
+      "path": "../runtime_dependencies/package_entry_source_equivalence.public.json",
+      "sha256": "981a52903724651fb9ef2e8fbe6a69e2baddafc22871333bd86b51b8931bdc7d"
+    },
+    "source_equivalent_for_covered_route": true,
+    "fresh_current_hash_full_real_data_rerun": false
+  }
+}

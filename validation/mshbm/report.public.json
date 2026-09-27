@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-27",
+  "feature": "FNIT MS-HBM versus CBIG Kong2019 MS-HBM",
+  "data": {
+    "subjects": 1,
+    "case": "MSC02",
+    "kind": "real 5-minute resting-state fMRI, fsLR32k cortex",
+    "frames": 100,
+    "timeseries_shape": [
+      100,
+      59412
+    ],
+    "input_sha256": "64b532b988b347056fc4215137412a454114614411cde7a0feed82b165d3dd95",
+    "input_in_repository": false
+  },
+  "reference": {
+    "software": "CBIG Kong2019 MS-HBM under MATLAB R2018b",
+    "commit": "b69b822a15e2a94f1e439606552fc44b6858cf3c",
+    "mesh": "fs_LR_32k",
+    "sessions": 2,
+    "networks": 17,
+    "w": 200,
+    "c": 50
+  },
+  "output_contract": {
+    "labels_shape": [
+      64984
+    ],
+    "left_vertices": 32492,
+    "right_vertices": 32492,
+    "cortical_vertices": 59412,
+    "medial_wall_label": 0,
+    "network_labels": "1..17 in CBIG HCP_40 order"
+  },
+  "profiles": [
+    {
+      "session": 1,
+      "frames": 50,
+      "values": 88107996,
+      "different_values": 0,
+      "agreement": 1.0
+    },
+    {
+      "session": 2,
+      "frames": 50,
+      "values": 88107996,
+      "different_values": 0,
+      "agreement": 1.0
+    }
+  ],
+  "labels": {
+    "all_vertex_agreement": 1.0,
+    "cortex_agreement": 1.0,
+    "different_all_vertices": 0,
+    "different_cortical_vertices": 0,
+    "per_network_dice": {
+      "1": 1.0,
+      "2": 1.0,
+      "3": 1.0,
+      "4": 1.0,
+      "5": 1.0,
+      "6": 1.0,
+      "7": 1.0,
+      "8": 1.0,
+      "9": 1.0,
+      "10": 1.0,
+      "11": 1.0,
+      "12": 1.0,
+      "13": 1.0,
+      "14": 1.0,
+      "15": 1.0,
+      "16": 1.0,
+      "17": 1.0
+    },
+    "minimum_network_dice": 1.0
+  },
+  "timing": {
+    "hardware": "headcw, Intel Xeon Gold 6418H, 8 BLAS/MATLAB threads",
+    "fnit_raw_timeseries_to_labels": {
+      "wall_seconds": 186.29,
+      "maximum_rss_kbytes": 2288764
+    },
+    "fnit_saved_profiles_to_labels": {
+      "wall_seconds": 141.29,
+      "maximum_rss_kbytes": 2257836
+    },
+    "cbig_saved_profiles_to_labels": {
+      "wall_seconds": 145.71,
+      "maximum_rss_kbytes": 2680168
+    },
+    "comparison_note": "The matched timing starts from the same two saved binary profiles and ends after labels; each process includes interpreter startup and file I/O."
+  },
+  "precision": {
+    "fnit": "NumPy/SciPy CPU; float32 profiles and float64 inference state",
+    "gpu_used": false,
+    "float16_used": false
+  },
+  "source_sha256": {
+    "src/fnit/mshbm/core.py": "8cd2f6fb706a13c60be5070c575cdb77898e2d309cf3f958c4fdbfee355a27ea",
+    "src/fnit/mshbm/cli.py": "fd36e8dc399a7ea4ff5fae19462e33bcd6aceec7d7c94a9406ca60585632c2d5",
+    "src/fnit/mshbm/assets/hcp40_fslr32k_17.npz": "aece34ff3651a10e44c8905d5eac32a1e322acd5d3b028d54c0fbe05ad3f7c17",
+    "validation/mshbm/run_fnit_from_cbig_profiles.py": "ff3f6e1ddbe5db228fbb42a06501784eba57a6249b815d8fb109f46c117d806e",
+    "validation/mshbm/compare_real.py": "da25f07953314b9c90fa2a72c42702679d9b6a98983007a16063838d80a81d54"
+  },
+  "figure": "docs/mshbm/figures/mshbm_cbig_comparison.png",
+  "scope": "One real subject and one five-minute acquisition; exact agreement here is not a multi-cohort accuracy claim.",
+  "figure_sha256": "cc5914306ec8d49a103f36f11ebdecf1855b8560fa017e8621e2cae5ea3ca59b"
+}

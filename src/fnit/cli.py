@@ -6,6 +6,8 @@ import sys
 from pathlib import Path
 import uuid
 
+from . import __version__
+
 
 def _atomic_save(volume, path):
     path = Path(path)
@@ -349,7 +351,7 @@ def _run_connectome(args):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(prog='fnit')
-    parser.add_argument('--version', action='version', version='Fudan Neuroimaging Toolkit (FNIT) 0.14.0')
+    parser.add_argument('--version', action='version', version=f'Fudan Neuroimaging Toolkit (FNIT) {__version__}')
     commands = parser.add_subparsers(dest='command', required=True)
     strip = commands.add_parser('synthstrip', help='brain extraction')
     strip.add_argument('-i', '--image', required=True)
@@ -474,8 +476,8 @@ def main(argv=None):
     fnirt.add_argument('--cout', help='intent-2007 cubic coefficient output')
     fnirt.add_argument('--iout', help='warped input on the reference grid')
     fnirt.add_argument('--jout', help='nonlinear-only Jacobian determinant')
-    fnirt.add_argument('--refmask', dest='reference_mask',
-                       help='binary mask on the reference grid')
+    fnirt.add_argument('--refmask', dest='reference_mask', required=True,
+                       help='explicit binary mask on the reference grid')
     fnirt.add_argument('--config', default='GM_2_MNI152GM_2mm.cnf')
     fnirt.add_argument('--device')
     fnirt.add_argument('--overwrite', action='store_true')

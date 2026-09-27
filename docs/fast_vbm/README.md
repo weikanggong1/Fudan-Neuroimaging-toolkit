@@ -1,4 +1,4 @@
-# FastVBM：单被试 T1w 到 modulated GM
+# FastVBM：单被试 T1w 到调制灰质图
 
 [返回首页](../../README.md) · [源码目录](../../src/fnit/fast_vbm/) · [TorchFAST](../fast/README.md) · [TorchFNIRT](../fnirt/README.md) · [权重](../WEIGHTS.md) · [验证状态](../../validation/fast_vbm/README.md)
 
@@ -28,10 +28,10 @@ flowchart LR
 
 | 输入 | 类型 | 约束 | 用途 |
 |---|---|---|---|
-| `image` | 路径或 `surfa.Volume` | 单帧、有限值、3D T1w | 脑提取和组织分割 |
-| `template` | 路径或 `surfa.Volume` | 单帧、有限值、3D，至少包含一个正值 | fixed GM template；决定模板空间输出的 shape 和 affine |
-| `brain_mask` | 路径或 `surfa.Volume`，可省略 | 与 T1w shape 和 affine 一致，非空 | 提供时跳过 SynthStrip |
-| `reference_mask` | 路径或 `surfa.Volume`，可省略 | 与 GM template shape 和 affine 一致，非空 | FNIRT 显式 reference mask；SynthMorph 只记录其摘要 |
+| `image` | 路径或 `nibabel.spatialimages.SpatialImage` | 单帧、有限值、3D T1w | 脑提取和组织分割 |
+| `template` | 路径或 `nibabel.spatialimages.SpatialImage` | 单帧、有限值、3D，至少包含一个正值 | fixed GM template；决定模板空间输出的 shape 和 affine |
+| `brain_mask` | 路径或 `nibabel.spatialimages.SpatialImage`，可省略 | 与 T1w shape 和 affine 一致，非空 | 提供时跳过 SynthStrip |
+| `reference_mask` | 路径或 `nibabel.spatialimages.SpatialImage`，可省略 | 与 GM template shape 和 affine 一致，非空 | FNIRT 显式 reference mask；SynthMorph 只记录其摘要 |
 | `output_dir` | 路径 | 单个受试者的独立目录 | 保存 13 幅 NIfTI 和一份 JSON 报告 |
 
 省略 `reference_mask` 时，FastVBM 从 `template > 0` 构造显式 mask，并在 QC 中标记为派生 mask。复现某次 FSL/UKB 运行时，应传入该运行实际使用的 reference mask；任意 mask 或派生 mask 都不能作为与 FSL 数值等价的证据。
@@ -50,17 +50,18 @@ SynthMorph 后端：
 from fnit import FastVBM
 
 pipeline = FastVBM(
-    device="cuda:0",
-    threads=4,
-    registration_backend="synthmorph",
+    device="cuda:0",  # 运行设备：第一张可见 CUDA GPU
+    threads=4,  # CPU 线程：读写及部分预后处理使用 4 线程
+    registration_backend="synthmorph",  # 非线性后端：PyTorch SynthMorph deform
 )
 
 result = pipeline.run(
-    "subject_T1w.nii.gz",
-    "template_GM.nii.gz",
-    "results/sub-01",
-    reference_mask="MNI152_T1_2mm_brain_mask_dil.nii.gz",
-    overwrite=False,
+    image="subject_T1w.nii.gz",  # 输入：单幅原始 3D T1w
+    template="template_GM.nii.gz",  # 输入：fixed GM 模板及输出网格
+    output_dir="results/sub-01",  # 输出：该受试者的结果目录
+    brain_mask=None,  # 输入：不提供，使用 SynthStrip 生成脑掩膜
+    reference_mask="MNI152_T1_2mm_brain_mask_dil.nii.gz",  # 输入：模板网格二值掩膜
+    overwrite=False,  # 写盘策略：不覆盖已有文件
 )
 ```
 
@@ -79,17 +80,19 @@ FNIRT 后端：
 from fnit import FastVBM
 
 pipeline = FastVBM(
-    device="cuda:0",
-    threads=4,
-    registration_backend="fnirt",
-    synthstrip_weights="/models/synthstrip.1.pt",
+    device="cuda:0",  # 运行设备：第一张可见 CUDA GPU
+    threads=4,  # CPU 线程：读写及部分预后处理使用 4 线程
+    registration_backend="fnirt",  # 非线性后端：TorchFNIRT GM 配置
+    synthstrip_weights="/models/synthstrip.1.pt",  # 权重：SynthStrip checkpoint
 )
 
 result = pipeline.run(
-    "subject_T1w.nii.gz",
-    "template_GM.nii.gz",
-    "results/sub-01-fnirt",
-    reference_mask="MNI152_T1_2mm_brain_mask_dil.nii.gz",
+    image="subject_T1w.nii.gz",  # 输入：单幅原始 3D T1w
+    template="template_GM.nii.gz",  # 输入：fixed GM 模板及输出网格
+    output_dir="results/sub-01-fnirt",  # 输出：该受试者的结果目录
+    brain_mask=None,  # 输入：不提供，使用 SynthStrip 生成脑掩膜
+    reference_mask="MNI152_T1_2mm_brain_mask_dil.nii.gz",  # 输入：FNIRT reference mask
+    overwrite=False,  # 写盘策略：不覆盖已有文件
 )
 ```
 
@@ -103,11 +106,12 @@ python tools/setup_weights.py --model synthstrip
 
 ```python
 result = pipeline.run(
-    "subject_T1w.nii.gz",
-    "template_GM.nii.gz",
-    "results/sub-01-fnirt",
-    brain_mask="subject_brain_mask.nii.gz",
-    reference_mask="MNI152_T1_2mm_brain_mask_dil.nii.gz",
+    image="subject_T1w.nii.gz",  # 输入：单幅原始 3D T1w
+    template="template_GM.nii.gz",  # 输入：fixed GM 模板
+    output_dir="results/sub-01-fnirt",  # 输出：该受试者的结果目录
+    brain_mask="subject_brain_mask.nii.gz",  # 输入：与 T1w 同网格的已有脑掩膜
+    reference_mask="MNI152_T1_2mm_brain_mask_dil.nii.gz",  # 输入：模板网格二值掩膜
+    overwrite=False,  # 写盘策略：不覆盖已有文件
 )
 ```
 
@@ -115,14 +119,15 @@ result = pipeline.run(
 
 ```python
 result = pipeline(
-    "subject_T1w.nii.gz",
-    "template_GM.nii.gz",
-    reference_mask="MNI152_T1_2mm_brain_mask_dil.nii.gz",
+    image="subject_T1w.nii.gz",  # 输入：单幅原始 3D T1w
+    template="template_GM.nii.gz",  # 输入：fixed GM 模板
+    brain_mask=None,  # 输入：不提供，使用 SynthStrip 生成脑掩膜
+    reference_mask="MNI152_T1_2mm_brain_mask_dil.nii.gz",  # 输入：模板网格二值掩膜
 )
 
-result.warped_gm.save("warped_gm.nii.gz")
-result.jacobian.save("jacobian_nonlinear.nii.gz")
-result.modulated_gm.save("modulated_gm.nii.gz")
+result.warped_gm.save(path="warped_gm.nii.gz")  # 输出路径：模板空间 GM
+result.jacobian.save(path="jacobian_nonlinear.nii.gz")  # 输出路径：非线性 Jacobian
+result.modulated_gm.save(path="modulated_gm.nii.gz")  # 输出路径：调制 GM
 ```
 
 ### 构造参数
@@ -276,7 +281,7 @@ FNIRT 当前实现还包括四级 GM schedule、10 mm B-spline control spacing�
 | `bias_field` | `T1_brain_bias.nii.gz` | 输入 T1 | 乘性 bias field，脑外为 1 |
 | `restored` | `T1_brain_restore.nii.gz` | 输入 T1 | bias-corrected T1，脑外为 0 |
 | `warped_gm` | `T1_GM_to_template_GM.nii.gz` | GM template | affine + nonlinear warped GM |
-| `jacobian` | `T1_GM_JAC_nl.nii.gz` | GM template | nonlinear-only pull determinant |
+| `jacobian` | `T1_GM_JAC_nl.nii.gz` | GM template | 仅非线性 pull 变换的行列式 |
 | `modulated_gm` | `T1_GM_to_template_GM_mod.nii.gz` | GM template | warped GM × Jacobian |
 
 另写 `fast_vbm_report.json`，记录参数、分阶段时间、FAST 摘要、配准 QC 和输出文件名。报告不保存原始输入路径。
@@ -345,8 +350,40 @@ python tools/setup_weights.py --model fast-vbm
 
 该命令安装两后端的权重超集。GM template 和 reference mask 是运行输入，不是模型权重，也不由该脚本下载。下载公开 UKB 模板的方法见 [UKB/FSL 专页](../ukb_vbm/README.md)。
 
-## 当前验证状态
+## 当前真实数据验证
 
-当前 TorchFNIRT 使用新的 mask、平滑、process handoff 和优化语义。FastVBM 尚未完成与当前源码配对的 fresh 十例精度、时间、显存和 source-equivalence 验证。
+2026 年 9 月 27 日在 gpucw1 的 NVIDIA H100 PCIe 上，用数值运行冻结快照完成 1 例去标识化真实临床 T1w 的双后端回归。两条 FNIT 路径使用同一幅 raw T1w、同一 HCP GM template、同一 FSL dilated MNI mask 和同一 SynthStrip checkpoint。`fast_vbm/pipeline.py` 的 SHA-256 为 `aa37774419f0fed952a2a5a3304601d07436fc827522ed32c9088f964e9254b9`；其余依赖源码哈希写在机器可读报告中。
 
-当前源码的 fresh FastVBM 真实数据 benchmark 尚未完成。因此本页不提供当前端到端精度、运行时间、显存、示例图，也不声明 FastVBM 或 TorchFNIRT 与 UKB/FSL 数值等价。待新的双后端配对运行完成后，应在相同 raw T1w、template、reference mask、输出网格和计时边界下重新生成报告与示意图。当前状态和验收字段见 [`validation/fast_vbm/README.md`](../../validation/fast_vbm/README.md)。
+本次数值运行记录的 `flirt/core.py` SHA-256 为 `552856…`；当前文件为 `ce375d…`。[`552856… → f5315f…`](../../validation/runtime_dependencies/flirt_qc_source_equivalence.public.json) 只清理运行时 QC，[`f5315f… → ce375d…`](../../validation/runtime_dependencies/flirt_profile_source_equivalence.public.json) 则只在 FastVBM 使用的 12-DOF/corratio 配置下保持数值路径不变。报告保留原实测 hash，并明确 `fresh_current_hash_full_real_data_rerun=false`；这条链不能用于 6-DOF/normmi。
+
+分支报告的 `candidate.source_sha256` 是共同源码快照清单，不等于每个文件都被执行。FNIRT 分支虽列出旧 `synthmorph/pipeline.py` `e680d3…`，实际没有调用 SynthMorph，因此不对该文件声明数值继承。SynthMorph 分支实际执行 deform registration 的 `SynthMorph.__call__` 和 linear 重采样；[linear 路径证明](../../validation/runtime_dependencies/synthmorph_linear_source_equivalence.public.json)把测量时的 `pipeline.py` `e680d3…`、`spatial.py` `9c629a…` 限定继承到当前 `70e97c…`、`dab615…`。分支清单没有单列旧 `spatial.py`，报告保留这一出处限制；没有 fresh current-hash 完整重跑，也不把 nearest 的定向测试当作本次真实 VBM 数值证据。
+
+FSL 对照来自同一病例的 FAST/FNIRT VBM 工件。原流程把 `warped GM × Jacobian` 原位写回 `T1_GM_2mm_to_template_GM`，所以该文件已是 modulated GM。验证先用官方 intent-2007 coefficient 和 FSL 6.0.7.4 `applywarp` 重建未调制 warped GM，再乘官方 Jacobian；所得图与归档文件逐体素完全一致。下面的指标在 template-grid 显式 mask 内计算，共 292,019 个体素。
+
+| 后端 | 输出 | Pearson r | MAE | RMSE | Dice，阈值 0.2 |
+|---|---|---:|---:|---:|---:|
+| TorchFNIRT | warped GM | 0.559420 | 0.220316 | 0.354288 | 0.734844 |
+| TorchFNIRT | Jacobian | 0.237607 | 0.224483 | 0.331839 | 1.000000 |
+| TorchFNIRT | modulated GM | 0.487910 | 0.257733 | 0.438617 | 0.731948 |
+| SynthMorph | warped GM | 0.636498 | 0.198546 | 0.326702 | 0.777472 |
+| SynthMorph | Jacobian | 0.328663 | 0.223898 | 0.311995 | 1.000000 |
+| SynthMorph | modulated GM | 0.575795 | 0.234447 | 0.388955 | 0.770208 |
+
+两条路径的三幅 template-space 图均与 FSL reference 具有相同 shape、affine 和 float32 dtype。数值指标没有达到逐体素等价，FastVBM 当前验收结果为 **输出契约通过，数值等价未通过**。Jacobian 的阈值 Dice 为 1 只表示两幅 Jacobian 在该 mask 内都大于 0.2，不能替代连续值误差。
+
+| 实现 | 计时内容 | compute | 13 图写盘 | 外部进程 wall | 峰值 CUDA allocation |
+|---|---|---:|---:|---:|---:|
+| FNIT + TorchFNIRT | raw T1w 到 13 幅输出；冷启动 | 49.010 s | 7.416 s | 62.23 s | 12.970 GB |
+| FNIT + SynthMorph | raw T1w 到 13 幅输出；冷启动 | 57.852 s | 7.042 s | 75.36 s | 15.487 GB |
+| FSL 6.0.7.4 | 固定官方 warp 的 `applywarp` | — | 已包含 | 2.28 s | 未记录 |
+| FSL 6.0.7.4 | `fslmaths warped -mul Jacobian` | — | 已包含 | 0.56 s | 未记录 |
+
+FNIT 的 `compute` 包含输入读取、首次 checkpoint 加载和 GPU 结果回传，不含 NIfTI 写盘；外部 wall 还包含 Python 启动、完整三维比较和作图。FSL 两行只测固定 warp 应用和 multiplication，未测 UKB/FSL 的脑提取、FAST、FLIRT 或 FNIRT estimation。因此这些时间不能计算端到端加速比。本次没有取得同边界的 FSL raw-T1w-to-VBM 时间。
+
+![真实 T1w 的 TorchFNIRT FastVBM 与 FSL 对照](figures/fast_vbm_fnirt_real.png)
+
+![真实 T1w 的 SynthMorph FastVBM 与 FSL 对照](figures/fast_vbm_synthmorph_real.png)
+
+该病例的 FNIT raw T1w 网格为 208×320×320，归档的 FSL FAST GM 网格为 208×320×213；官方流程在 FAST 前还执行了不同的 bias correction、裁剪和脑提取。因而这次低相关同时包含上游 GM 估计、affine 和 nonlinear registration 的差异，不能只归因于 FLIRT、FNIRT 或 SynthMorph。若要定位单一阶段，应从同一 native GM 和同一 affine 开始做配准隔离实验。
+
+汇总报告见 [`report.real.current.json`](../../validation/fast_vbm/report.real.current.json)，两个原始分支报告和复现脚本位于 [`validation/fast_vbm`](../../validation/fast_vbm/)。报告只发布文件哈希，不发布受试者标识。当前样本量为 1，不能代替十例或群体稳定性验证。

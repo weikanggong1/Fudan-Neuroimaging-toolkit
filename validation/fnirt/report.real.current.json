@@ -1,0 +1,350 @@
+{
+  "schema_version": 1,
+  "data": {
+    "subjects": 1,
+    "kind": "one deidentified real UKB-format diffusion FA image",
+    "subject_identifier_published": false,
+    "input_sha256": "bf774599e7f6ff5b567c15e79c539dadeb03dc7110a589e29070a8e065e42cf0",
+    "reference_sha256": "1268fd84b658451c9a85799a636688bc1f6947fdf8de2d9cf7f62320de1b3837",
+    "affine_sha256": "b0e6607aeeac9af2bdf561c1d9b9f029c11ef6581d612115c2b85ea9531b33d9",
+    "registration_weight_sha256": "b396ce7cefcd6daa28900c2935473819f6eb08f5aad6eb244d1f32c7e10d8eb8",
+    "registration_weight_role": "FLIRT input weight only; neither FNIRT implementation receives it",
+    "config_sha256": {
+      "oxford_s1.cnf": "3df6320e97300f9cef8a77b6c7c6306b8256351d5a7022d9966c076f24747227",
+      "oxford_s2.cnf": "b2fe418169f8ce1dde5e277a09e8edcdb6a0dc3f3065972ae69404020ef639ec",
+      "oxford_s3.cnf": "9d304dfd224b8e48f20364dcce77c7618722cf3a9bcd40d764a6d25ee8020eaf"
+    }
+  },
+  "boundary": {
+    "matched": true,
+    "shared": "identical preprocessed FA, FMRIB58_FA_1mm reference, FSL scaled-mm affine, implicit masks, and Oxford s1/s2/s3 schedule",
+    "candidate": "all six schedule levels and three process stages run in one TorchFNIRT process",
+    "official": "FSL 6.0.7.4 runs three FNIRT processes with coefficient and intensity handoff"
+  },
+  "candidate": {
+    "implementation": "current TorchFNIRT with TBSSConfig().fnirt",
+    "source_snapshot_tar_sha256": "f7547d0a39ddd9fb6ba70deb720f229ecedc6385fa72d457efb2ded78b6c173d",
+    "source_sha256": {
+      "src/fnit/__init__.py": "cc9aa48bd2cd5966801460d83f46eff5839e91fcd6962640a89be538a23ead32",
+      "src/fnit/_nib.py": "bffd56aeaca423b2448432ba318212e83549e9e31aa27af6bf20a60888218586",
+      "src/fnit/_transforms.py": "be01fa24cd0c17bb1aa8ac7792cdf0b62c657037808c643427a1b11cc4c05340",
+      "src/fnit/flirt/coordinates.py": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e",
+      "src/fnit/fnirt/__init__.py": "1b4f8c793ebd91c362f592a3d481ca9305789a05e62a16d532d633706633e4c4",
+      "src/fnit/fnirt/io.py": "ee79183709258f2e71dcd110f3c922b1cc7d20a979161ae1c86c2c627becf366",
+      "src/fnit/fnirt/optimizer.py": "e5d5df0358acbb7c3b23ca5ff6c2e797479e5c7efee8e7fa22fe559e7b3faf6b",
+      "src/fnit/fnirt/registration.py": "a63ed0b09e43a5af4bf63b2f583e710b1d0fc73aac548a326c552334a741cd83",
+      "src/fnit/fnirt/spline.py": "7bb3bf5cd84da8b1c35a3e9ff2ef2d815307770c25b1228adf4e96f1dc4d6659",
+      "src/fnit/fnirt/topology.py": "150f65a73baf796f98e6304d0c209288816ee75485be5d93032db46edeb52900",
+      "src/fnit/fnirt/_topology_triton.py": "3f61e452228a9c3dff85caff58ed1103e7b89783c86838bf1e70e322ae3f65f1",
+      "src/fnit/dmri_pipeline/tbss.py": "93abf99c86dcc688959b34eb1a8e8b0bd8bec6a561b7332a4782f2338f937bfc"
+    },
+    "run_script_sha256": "1d7d27242f30a4d826502ac0cd31ff978de2ad382562dcd9fd26fa187bc688e1",
+    "validator_sha256": "70bf7a93c85424f60a1e4a83774dda236698c723093b3119e4ef2036778cc7a6",
+    "command": "PYTHONPATH=<SOURCE_SNAPSHOT>/src CUDA_VISIBLE_DEVICES=0 CUDA_MODULE_LOADING=LAZY PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True python validation/fnirt/run_current_matched.py --input <FA> --reference <FMRIB58_FA_1mm> --affine <FSL_AFFINE> --output-dir <OUTPUT> --device cuda",
+    "device": "NVIDIA H100 PCIe GPU 0",
+    "dtype": "float32 images and outputs / float64 FNIRT solver",
+    "tf32": true,
+    "qc": {
+      "topology_projection_required": false,
+      "process_stages": [
+        1,
+        1,
+        1,
+        1,
+        2,
+        3
+      ],
+      "control_grid_shape": [
+        94,
+        112,
+        94
+      ]
+    }
+  },
+  "reference": {
+    "implementation": "FSL FNIRT 6.0.7.4",
+    "run_script_sha256": "6e00594fe984e8df2d3dd9e33c36ea74837aa6bbb79c06f4db835126d5776be4",
+    "command": "FSLDIR=<FSL_6.0.7.4> validation/fnirt/run_official_matched.sh <OUTPUT> <FA> <FMRIB58_FA_1mm> <FSL_AFFINE> <OXFORD_CONFIG_PREFIX>",
+    "fresh_rerun_matches_prior_official": {
+      "coefficient": {
+        "contract": {
+          "same_shape": true,
+          "same_affine": true,
+          "same_dtype": true,
+          "candidate_shape": [
+            94,
+            112,
+            94,
+            3
+          ],
+          "official_shape": [
+            94,
+            112,
+            94,
+            3
+          ],
+          "candidate_dtype": "float32",
+          "official_dtype": "float32",
+          "candidate_intent_code": 2007,
+          "official_intent_code": 2007
+        },
+        "metrics": {
+          "voxels": 2968896,
+          "pearson": 1.0,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "maximum_absolute_error": 0.0
+        },
+        "candidate_sha256": "3e7084b2e239df0164fb37243a8a48714053dc176c97d9614546072e11c3bf4b",
+        "official_sha256": "3e7084b2e239df0164fb37243a8a48714053dc176c97d9614546072e11c3bf4b"
+      },
+      "iout": {
+        "contract": {
+          "same_shape": true,
+          "same_affine": true,
+          "same_dtype": true,
+          "candidate_shape": [
+            182,
+            218,
+            182
+          ],
+          "official_shape": [
+            182,
+            218,
+            182
+          ],
+          "candidate_dtype": "float32",
+          "official_dtype": "float32",
+          "candidate_intent_code": 0,
+          "official_intent_code": 0
+        },
+        "metrics": {
+          "voxels": 1548122,
+          "pearson": 1.0,
+          "mae": 0.0,
+          "rmse": 0.0,
+          "maximum_absolute_error": 0.0
+        },
+        "candidate_sha256": "95f14648c1bdbec304becf1b5b131b35825cac00ac4139f2225f2ffb6d4ecb23",
+        "official_sha256": "95f14648c1bdbec304becf1b5b131b35825cac00ac4139f2225f2ffb6d4ecb23"
+      }
+    }
+  },
+  "execution": {
+    "run_date": "2026-09-28",
+    "host": "gpucw1",
+    "candidate_software": {
+      "pytorch": "2.5.1",
+      "pytorch_cuda": "11.8",
+      "nibabel": "5.4.2",
+      "numpy": "1.26.4"
+    },
+    "candidate_gpu_baseline": {
+      "physical_index": 0,
+      "model": "NVIDIA H100 PCIe",
+      "memory_used_mib": 48310,
+      "memory_free_mib": 32697,
+      "utilization_percent": 0,
+      "shared_resident_process_count": 2,
+      "shared_resident_memory_mib": 48296
+    },
+    "candidate_timing_isolated": false,
+    "candidate_timing_note": "GPU 0 was idle at launch but another process retained 47.5 GiB; 32.7 GiB remained free",
+    "official_cpu_baseline": "01:32:03 up 27 days,  5:14,  4 users,  load average: 94.86, 89.93, 88.62"
+  },
+  "accuracy": {
+    "coefficient": {
+      "contract": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "candidate_shape": [
+          94,
+          112,
+          94,
+          3
+        ],
+        "official_shape": [
+          94,
+          112,
+          94,
+          3
+        ],
+        "candidate_dtype": "float32",
+        "official_dtype": "float32",
+        "candidate_intent_code": 2007,
+        "official_intent_code": 2007
+      },
+      "metrics": {
+        "voxels": 2968896,
+        "pearson": 0.9998930912271585,
+        "mae": 0.01880370809209925,
+        "rmse": 0.0380187972300689,
+        "maximum_absolute_error": 1.342859148979187
+      },
+      "candidate_sha256": "31abac2cfe51d076165f8286cc2285d2ee60b928575f4263a8592cff163998fe",
+      "official_sha256": "3e7084b2e239df0164fb37243a8a48714053dc176c97d9614546072e11c3bf4b"
+    },
+    "iout": {
+      "contract": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "candidate_shape": [
+          182,
+          218,
+          182
+        ],
+        "official_shape": [
+          182,
+          218,
+          182
+        ],
+        "candidate_dtype": "float32",
+        "official_dtype": "float32",
+        "candidate_intent_code": 0,
+        "official_intent_code": 0
+      },
+      "metrics": {
+        "voxels": 1549904,
+        "pearson": 0.9992029500195538,
+        "mae": 0.003794975431582708,
+        "rmse": 0.006697387376598663,
+        "maximum_absolute_error": 0.21729493141174316
+      },
+      "candidate_sha256": "aa176c7e5dc4af1aec18505b7568529a9b16a326f2559f39a88113518738b5e2",
+      "official_sha256": "95f14648c1bdbec304becf1b5b131b35825cac00ac4139f2225f2ffb6d4ecb23"
+    },
+    "jacobian_nonlinear": {
+      "contract": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "candidate_shape": [
+          182,
+          218,
+          182
+        ],
+        "official_shape": [
+          182,
+          218,
+          182
+        ],
+        "candidate_dtype": "float32",
+        "official_dtype": "float32",
+        "candidate_intent_code": 0,
+        "official_intent_code": 0
+      },
+      "metrics": {
+        "voxels": 1489274,
+        "pearson": 0.9990638183510887,
+        "mae": 0.01025978563364578,
+        "rmse": 0.016942431300664713,
+        "maximum_absolute_error": 0.42284631729125977
+      },
+      "candidate_sha256": "2a79429c6ae5b9a1ccff0ca252c797ab3b03f83ed5dee750cfc744e23e496241",
+      "official_sha256": "0090f47f6aa934dd466998bbcf0909cf803d692cae0fabc9a5000501934b8d33"
+    },
+    "jacobian_with_affine": {
+      "contract": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "candidate_shape": [
+          182,
+          218,
+          182
+        ],
+        "official_shape": [
+          182,
+          218,
+          182
+        ],
+        "candidate_dtype": "float32",
+        "official_dtype": "float32",
+        "candidate_intent_code": 0,
+        "official_intent_code": 0
+      },
+      "metrics": {
+        "voxels": 1489274,
+        "pearson": 0.9947365768709971,
+        "mae": 0.037611132297699836,
+        "rmse": 0.050839636264738725,
+        "maximum_absolute_error": 0.6133203506469727
+      },
+      "candidate_sha256": "3a7553358ac77b9bde57b4fbc34f19a8d6a37917e286359b8c36a7c4560f8a88",
+      "official_sha256": "796e0d4cbb22dc0d8544acc63b4812933096305dd4aacb1d63b7d34d98900225"
+    }
+  },
+  "timing": {
+    "candidate_external": {
+      "wall_seconds": 25.16,
+      "maximum_rss_kib": 1091028,
+      "exit_status": 0
+    },
+    "candidate_synchronized_core_seconds": 16.9331811000593,
+    "official_stage_external": {
+      "stage1": {
+        "wall_seconds": 95.2,
+        "maximum_rss_kib": 794696,
+        "exit_status": 0
+      },
+      "stage2": {
+        "wall_seconds": 795.08,
+        "maximum_rss_kib": 1161748,
+        "exit_status": 0
+      },
+      "stage3": {
+        "wall_seconds": 374.86,
+        "maximum_rss_kib": 1180244,
+        "exit_status": 0
+      }
+    },
+    "official_three_stage_fnirt_wall_seconds": 1265.14,
+    "official_total_including_full_jacobian_utility": {
+      "wall_seconds": 1273.2,
+      "maximum_rss_kib": 1180244,
+      "exit_status": 0
+    },
+    "observed_nonisolated_wall_ratio_official_stages_over_candidate": 50.28378378378379,
+    "speedup_reported": false,
+    "comparison_note": "candidate external time includes Python startup and four output writes; official stage sum includes three process startups and writes coefficient, iout, and nonlinear Jacobian. The GPU shared resident memory and the CPU baseline load average was high, so the observed ratio is not an isolated speedup estimate; full-affine Jacobian utility is excluded from it"
+  },
+  "memory": {
+    "candidate_peak_cuda_bytes": 3598192128,
+    "candidate_external_maximum_rss_kib": 1091028,
+    "official_maximum_stage_rss_kib": 1180244
+  },
+  "status": {
+    "run_completed": true,
+    "same_input_config_and_affine": true,
+    "output_contract_passed": true,
+    "numerical_equivalence_passed": false,
+    "reason": "all output contracts match, but coefficient, warped image, and Jacobian differences exceed floating-point-only error"
+  },
+  "artifacts": {
+    "figure": "docs/fnirt/figures/fnirt_real_current.png",
+    "figure_sha256": "84fbbab5e0243019e94ba29715bd715f1990af72d790a696de60bcd1ac043a8e"
+  },
+  "limits": [
+    "one real subject",
+    "GPU timing was not process-isolated because an idle process retained memory on the same GPU",
+    "the FSL CPU and Torch GPU implementations use different process boundaries",
+    "the official run started at a high CPU load average and is not an isolated CPU timing"
+  ],
+  "package_entry_source_chain": {
+    "measurement_source_sha256": {
+      "src/fnit/__init__.py": "cc9aa48bd2cd5966801460d83f46eff5839e91fcd6962640a89be538a23ead32"
+    },
+    "current_source_sha256": {
+      "src/fnit/__init__.py": "be1cabfa23b20d759d3506d13fa8d7bc18df0452851618ffc8fe699910413b3f"
+    },
+    "covered_entry": "direct validation/fnirt/run_current_matched.py execution",
+    "attestation": {
+      "path": "../runtime_dependencies/package_entry_source_equivalence.public.json",
+      "sha256": "981a52903724651fb9ef2e8fbe6a69e2baddafc22871333bd86b51b8931bdc7d"
+    },
+    "source_equivalent_for_covered_route": true,
+    "fresh_current_hash_full_real_data_rerun": false
+  }
+}

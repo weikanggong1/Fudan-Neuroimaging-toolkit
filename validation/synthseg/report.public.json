@@ -1,105 +1,573 @@
 {
-  "candidate": {
-    "cuda": "11.8",
-    "distribution": "fudan-neuroimaging-toolkit 0.9.0",
-    "execution": "fresh CUDA command process; cuda:0; four CPU threads; default TF32",
-    "gpu": "NVIDIA H100 PCIe",
-    "torch": "2.5.1"
-  },
-  "case_count": 3,
-  "clinical_accuracy_boundary": "This measures reproduction of the reference implementation. The examples have no manual anatomical segmentation ground truth.",
-  "comparison": {
-    "affine_max_abs": 0.0,
-    "all_dtype_match": true,
-    "all_shape_match": true,
-    "csv_common_numeric_column_count": 33,
-    "csv_volume_max_abs_error_mm3": 556.75,
-    "label_dice_median_across_case_medians": 0.9999895202852345,
-    "label_dice_minimum": 0.9990262901655307,
-    "voxel_agreement_minimum": 0.9999881699124035
-  },
-  "feature": "FreeSurfer SynthSeg 2.0 versus FNIT SynthSeg public-example validation",
-  "inputs": "three defaced public T1w examples shipped in the repository",
-  "records": [
-    {
-      "comparison": {
-        "affine_max_abs": 0.0,
-        "csv_common_numeric_column_count": 33,
-        "csv_volume_max_abs_error_mm3": 464.625,
-        "dtype_match": true,
-        "foreground_label_count": 32,
-        "label_dice_median": 1.0,
-        "label_dice_minimum": 0.9990262901655307,
-        "shape_match": true,
-        "voxel_agreement": 0.9999881699124035
-      },
-      "input_sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
-      "public_example": "sub-01",
-      "seconds": {
-        "fnit_gpu": 5.866662323009223,
-        "official_cpu": 187.27110217744485
-      }
+  "schema": "fnit_current_source_real_validation/v2",
+  "feature": "synthseg-33-class",
+  "run_date": "2026-09-27",
+  "candidate_source": {
+    "base_git_commit": "9146b0004468ffc2a30cacad0ab4fa7b6fdb3b48",
+    "working_tree_state": "uncommitted current source",
+    "files": {
+      "fnit/_dmri.py": "b6bf837f8b5a0a8f0d910706631e882a9e3f8dfc1f1ef77e1cfac7efe36fafbf",
+      "fnit/_nib.py": "bffd56aeaca423b2448432ba318212e83549e9e31aa27af6bf20a60888218586",
+      "fnit/weights.py": "9d275a1bd4064ff9bd1eb8aaef589ce7804258e7f6c39cd127deae2623d6eb9a",
+      "fnit/synthseg_parc/__init__.py": "bc5b61c66e2635be1f459407800f97850cc1c2db3f4ad29fd77c80a8abb4d0ef",
+      "fnit/synthseg_parc/model.py": "0571f1d1a680f5ecf12a60730b5af224028c5d10a45647c57f779d84b16e2a08",
+      "fnit/synthseg_parc/pipeline.py": "a1a859157fd40adf88198309390181e791524d0572d638c1d380b31472981f19",
+      "fnit/synthseg_parc/postprocess.py": "730cecec349015ea15d5ff6e203e4383b3060103797d1d805846d2bd97870b5e",
+      "fnit/synthseg_parc/preprocess.py": "67159d8d1c646df82d7023c4dd5f4e57222fc94386673987b1c25e110c946d49",
+      "fnit/synthseg_parc/segment.py": "a28f9d6a0c2de46dbdb047e63c0f2b3494e5181b43d5611d248f9b4203981f92",
+      "fnit/synthseg_parc/synthseg.py": "db1dfcb3e79abe29d39ee535fbc87ec559b4e54c86ca7c07e7b5c154e6c7605d"
     },
-    {
-      "comparison": {
-        "affine_max_abs": 0.0,
-        "csv_common_numeric_column_count": 33,
-        "csv_volume_max_abs_error_mm3": 556.75,
-        "dtype_match": true,
-        "foreground_label_count": 32,
-        "label_dice_median": 0.9999895202852345,
-        "label_dice_minimum": 0.9992576095025983,
-        "shape_match": true,
-        "voxel_agreement": 0.9999888126049424
-      },
-      "input_sha256": "326d1e0a948b76344150c28bbcf0299b58040092c2f037f09c754103d32f747d",
-      "public_example": "sub-02",
-      "seconds": {
-        "fnit_gpu": 5.97605468891561,
-        "official_cpu": 142.19486894411966
-      }
-    },
-    {
-      "comparison": {
-        "affine_max_abs": 0.0,
-        "csv_common_numeric_column_count": 33,
-        "csv_volume_max_abs_error_mm3": 450.44999999995343,
-        "dtype_match": true,
-        "foreground_label_count": 32,
-        "label_dice_median": 0.9999683970996947,
-        "label_dice_minimum": 0.9992205767731879,
-        "shape_match": true,
-        "voxel_agreement": 0.9999886498662639
-      },
-      "input_sha256": "831866e036766201a5f4c67ca65864d8f4f1042e7b19ce82d5c90632005de5fd",
-      "public_example": "sub-03",
-      "seconds": {
-        "fnit_gpu": 5.666212082840502,
-        "official_cpu": 156.75807120464742
-      }
-    }
-  ],
+    "tree_sha256": "39fa204aea7674ad7c6e09652d0f8750dd2872b1b78799812ab0d71b5b6c8972",
+    "contract_test_sha256": "bb7431e1fbac177d1f2642977765d4346901c64dce2164e3347fe82584de087d"
+  },
+  "environment": {
+    "gpu_host": "gpucw1",
+    "gpu": "NVIDIA H100 PCIe 80 GB",
+    "cpu_host": "headcw",
+    "cpu": "Intel Xeon Gold 6418H",
+    "python": "3.11",
+    "pytorch": "2.5.1+cu118",
+    "cuda_runtime": "11.8",
+    "nibabel": "5.4.2",
+    "numpy": "1.26.4"
+  },
+  "inputs": {
+    "n": 3,
+    "kind": "real public defaced T1w examples shipped in the repository",
+    "manual_ground_truth": false
+  },
   "reference": {
-    "execution": "fresh CPU command process; --threads 4 --cpu --noaddctab",
-    "freesurfer": "8.2.0-1",
-    "script_sha256": "f3c182cd100721e8ae4ae4e0661b6ac3c45e80453f716d668d53ca0fe189279b",
-    "weight_sha256": "f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e"
+    "software": "FreeSurfer 8.2.0-1 mri_synthseg --noaddctab",
+    "device": "CPU",
+    "status": "fresh reference outputs generated for the same three public inputs",
+    "candidate_runtime_called_reference": false,
+    "observed_concurrent_wall_seconds": [
+      389.24,
+      217.55,
+      304.23
+    ],
+    "timing_use": "accuracy reference only; jobs overlapped, so these seconds are not used for a speed ratio",
+    "output_manifest": [
+      {
+        "case": "sub-01",
+        "segmentation": {
+          "file": "sub-01_seg.nii.gz",
+          "shape": [
+            256,
+            203,
+            257
+          ],
+          "dtype": "int32",
+          "affine": [
+            [
+              0.9991319179534912,
+              -0.03973383083939552,
+              0.01251270156353712,
+              -125.2579116821289
+            ],
+            [
+              0.040772195905447006,
+              0.9943392276763916,
+              -0.09811791777610779,
+              -73.28185272216797
+            ],
+            [
+              -0.00854506902396679,
+              0.09854292124509811,
+              0.9950961470603943,
+              -177.5690460205078
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "qform_code": 0,
+          "sform_code": 2,
+          "sha256": "fa3259f5cd2574ae731d0a4598f0ebc231f933833ec47a5930058e0d46998670"
+        },
+        "csv_sha256": "53c24ee7dbf25bd75b5d38b3edbd2029e5c7fb3e0642a2a0efd65911082d6cd7"
+      },
+      {
+        "case": "sub-02",
+        "segmentation": {
+          "file": "sub-02_seg.nii.gz",
+          "shape": [
+            203,
+            257,
+            257
+          ],
+          "dtype": "int32",
+          "affine": [
+            [
+              0.9997749328613281,
+              -0.009888110682368279,
+              -0.018768996000289917,
+              -99.75605010986328
+            ],
+            [
+              0.009889805689454079,
+              0.9999511241912842,
+              0.0,
+              -106.93299865722656
+            ],
+            [
+              0.018768079578876495,
+              -0.00018310801533516496,
+              0.9998238682746887,
+              -138.22817993164062
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "qform_code": 0,
+          "sform_code": 2,
+          "sha256": "78f6d41d33135646a79c9dc82c06136c90682751eb3f5472a26eaf571be9ee17"
+        },
+        "csv_sha256": "63d505335eba66f23957e2a0add8e8f2b6cd877f36b7946dde3f74710ec2ba2d"
+      },
+      {
+        "case": "sub-03",
+        "segmentation": {
+          "file": "sub-03_seg.nii.gz",
+          "shape": [
+            256,
+            203,
+            256
+          ],
+          "dtype": "int32",
+          "affine": [
+            [
+              0.9986832737922668,
+              -0.009050726890563965,
+              0.05047789588570595,
+              -134.40057373046875
+            ],
+            [
+              0.00393687142059207,
+              0.9949324727058411,
+              0.1004679948091507,
+              -86.7865982055664
+            ],
+            [
+              -0.05114881321787834,
+              -0.10013697296380997,
+              0.9936589598655701,
+              -150.90489196777344
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "qform_code": 0,
+          "sform_code": 2,
+          "sha256": "706de260cc2d4b981acf0f4ac0675e7a0b4801178d03d846a755d9203074d706"
+        },
+        "csv_sha256": "829160c5c38086909abaf17eb3f28cc60d57618b40a93bce8d8ee4e6fc328344"
+      }
+    ]
   },
-  "runtime_context": "shared gpucw1 node; processes run sequentially",
-  "schema": 1,
-  "timing_scope": "full command wall time including process/framework startup, weights/input loading, inference, postprocessing, CSV and NIfTI writes",
-  "timing_seconds": {
-    "fnit_gpu": {
-      "count": 3,
-      "maximum": 5.97605468891561,
-      "median": 5.866662323009223,
-      "minimum": 5.666212082840502
+  "candidate_gpu": {
+    "device": "H100 GPU; default TF32 enabled",
+    "comparison_to_official_cpu": {
+      "records": [
+        {
+          "case": "sub-01",
+          "shape": [
+            256,
+            203,
+            257
+          ],
+          "shape_match": true,
+          "reference_dtype": "int32",
+          "candidate_dtype": "int32",
+          "dtype_match": true,
+          "reference_qform_code": 0,
+          "candidate_qform_code": 0,
+          "reference_sform_code": 2,
+          "candidate_sform_code": 2,
+          "affine_max_abs": 0.0,
+          "voxel_agreement": 0.9999881699124035,
+          "disagreeing_voxels": 158,
+          "foreground_label_count": 32,
+          "label_dice_min": 0.9990262901655307,
+          "label_dice_median": 1.0,
+          "csv_common_numeric_columns": 33,
+          "csv_max_abs_mm3": 100.35999999998603,
+          "seconds": 10.13
+        },
+        {
+          "case": "sub-02",
+          "shape": [
+            203,
+            257,
+            257
+          ],
+          "shape_match": true,
+          "reference_dtype": "int32",
+          "candidate_dtype": "int32",
+          "dtype_match": true,
+          "reference_qform_code": 0,
+          "candidate_qform_code": 0,
+          "reference_sform_code": 2,
+          "candidate_sform_code": 2,
+          "affine_max_abs": 0.0,
+          "voxel_agreement": 0.9999888126049424,
+          "disagreeing_voxels": 150,
+          "foreground_label_count": 32,
+          "label_dice_min": 0.9992576095025983,
+          "label_dice_median": 0.9999895202852345,
+          "csv_common_numeric_columns": 33,
+          "csv_max_abs_mm3": 92.05999999999767,
+          "seconds": 9.48
+        },
+        {
+          "case": "sub-03",
+          "shape": [
+            256,
+            203,
+            256
+          ],
+          "shape_match": true,
+          "reference_dtype": "int32",
+          "candidate_dtype": "int32",
+          "dtype_match": true,
+          "reference_qform_code": 0,
+          "candidate_qform_code": 0,
+          "reference_sform_code": 2,
+          "candidate_sform_code": 2,
+          "affine_max_abs": 0.0,
+          "voxel_agreement": 0.9999886498662639,
+          "disagreeing_voxels": 151,
+          "foreground_label_count": 32,
+          "label_dice_min": 0.9992205767731879,
+          "label_dice_median": 0.9999683970996947,
+          "csv_common_numeric_columns": 33,
+          "csv_max_abs_mm3": 104.05999999999767,
+          "seconds": 8.84
+        }
+      ],
+      "summary": {
+        "n": 3,
+        "all_shape_match": true,
+        "all_dtype_match": true,
+        "all_qform_sform_match": true,
+        "affine_max_abs": 0.0,
+        "voxel_agreement_min": 0.9999881699124035,
+        "label_dice_min": 0.9990262901655307,
+        "label_dice_case_median_median": 0.9999895202852345,
+        "csv_max_abs_mm3": 104.05999999999767,
+        "seconds_median": 9.48,
+        "seconds_min": 8.84,
+        "seconds_max": 10.13
+      }
     },
-    "official_cpu": {
-      "count": 3,
-      "maximum": 187.27110217744485,
-      "median": 156.75807120464742,
-      "minimum": 142.19486894411966
+    "output_manifest": [
+      {
+        "case": "sub-01",
+        "input_sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
+        "segmentation": {
+          "shape": [
+            256,
+            203,
+            257
+          ],
+          "dtype": "int32",
+          "affine": [
+            [
+              0.9991319179534912,
+              -0.03973383083939552,
+              0.01251270156353712,
+              -125.2579116821289
+            ],
+            [
+              0.040772195905447006,
+              0.9943392276763916,
+              -0.09811791777610779,
+              -73.28185272216797
+            ],
+            [
+              -0.00854506902396679,
+              0.09854292124509811,
+              0.9950961470603943,
+              -177.5690460205078
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "qform_code": 0,
+          "sform_code": 2,
+          "sha256": "8244cba172cdfac92a75e05ed7c4842825a879dd5553a8c6e5fd946e328ea4bc"
+        },
+        "csv_sha256": "4b5903c8112fbfc32c277276767bf82603fe09264fc8dd9fccf975d8a6017550"
+      },
+      {
+        "case": "sub-02",
+        "input_sha256": "326d1e0a948b76344150c28bbcf0299b58040092c2f037f09c754103d32f747d",
+        "segmentation": {
+          "shape": [
+            203,
+            257,
+            257
+          ],
+          "dtype": "int32",
+          "affine": [
+            [
+              0.9997749328613281,
+              -0.009888110682368279,
+              -0.018768996000289917,
+              -99.75605010986328
+            ],
+            [
+              0.009889805689454079,
+              0.9999511241912842,
+              0.0,
+              -106.93299865722656
+            ],
+            [
+              0.018768079578876495,
+              -0.00018310801533516496,
+              0.9998238682746887,
+              -138.22817993164062
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "qform_code": 0,
+          "sform_code": 2,
+          "sha256": "d68c2d63a87163e5cc6f36c7cc8f44464da4b2bbc423da53b627211be5e194e7"
+        },
+        "csv_sha256": "f81beb65516479d29f0b17db973be5643e6aca8f8a74d377e20a836277bede38"
+      },
+      {
+        "case": "sub-03",
+        "input_sha256": "831866e036766201a5f4c67ca65864d8f4f1042e7b19ce82d5c90632005de5fd",
+        "segmentation": {
+          "shape": [
+            256,
+            203,
+            256
+          ],
+          "dtype": "int32",
+          "affine": [
+            [
+              0.9986832737922668,
+              -0.009050726890563965,
+              0.05047789588570595,
+              -134.40057373046875
+            ],
+            [
+              0.00393687142059207,
+              0.9949324727058411,
+              0.1004679948091507,
+              -86.7865982055664
+            ],
+            [
+              -0.05114881321787834,
+              -0.10013697296380997,
+              0.9936589598655701,
+              -150.90489196777344
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "qform_code": 0,
+          "sform_code": 2,
+          "sha256": "efc349a80f2c373a8c52ea69bf83342cd6e83f453989e262afb9a016c7170cbc"
+        },
+        "csv_sha256": "789bee2e16fb28579af36d41bb2f5f8b884d8f0a6d1904c802d52d02d3a0bb93"
+      }
+    ]
+  },
+  "candidate_cpu_single_case": {
+    "n": 1,
+    "complete_cli_seconds": 55.57,
+    "max_rss_kib": 20174812,
+    "comparison_to_official_cpu": {
+      "shape": [
+        256,
+        203,
+        257
+      ],
+      "shape_match": true,
+      "reference_dtype": "int32",
+      "candidate_dtype": "int32",
+      "dtype_match": true,
+      "reference_qform_code": 0,
+      "candidate_qform_code": 0,
+      "reference_sform_code": 2,
+      "candidate_sform_code": 2,
+      "affine_max_abs": 0.0,
+      "voxel_agreement": 0.9999999251260279,
+      "disagreeing_voxels": 1,
+      "label_dice_min": 0.9999971631769015,
+      "label_dice_median": 1.0,
+      "csv_common_numeric_columns": 33,
+      "csv_max_abs_mm3": 0.24000000004889444,
+      "seconds": 55.57
     }
+  },
+  "single_case_gpu_profile": {
+    "schema": "fnit_model_io_single_case/v1",
+    "feature": "synthseg",
+    "case_id": "case01",
+    "input_sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
+    "source": {
+      "files": {
+        "fnit/_dmri.py": "b6bf837f8b5a0a8f0d910706631e882a9e3f8dfc1f1ef77e1cfac7efe36fafbf",
+        "fnit/_nib.py": "bffd56aeaca423b2448432ba318212e83549e9e31aa27af6bf20a60888218586",
+        "fnit/weights.py": "9d275a1bd4064ff9bd1eb8aaef589ce7804258e7f6c39cd127deae2623d6eb9a",
+        "fnit/synthseg_parc/__init__.py": "bc5b61c66e2635be1f459407800f97850cc1c2db3f4ad29fd77c80a8abb4d0ef",
+        "fnit/synthseg_parc/model.py": "0571f1d1a680f5ecf12a60730b5af224028c5d10a45647c57f779d84b16e2a08",
+        "fnit/synthseg_parc/pipeline.py": "a1a859157fd40adf88198309390181e791524d0572d638c1d380b31472981f19",
+        "fnit/synthseg_parc/postprocess.py": "730cecec349015ea15d5ff6e203e4383b3060103797d1d805846d2bd97870b5e",
+        "fnit/synthseg_parc/preprocess.py": "67159d8d1c646df82d7023c4dd5f4e57222fc94386673987b1c25e110c946d49",
+        "fnit/synthseg_parc/segment.py": "a28f9d6a0c2de46dbdb047e63c0f2b3494e5181b43d5611d248f9b4203981f92",
+        "fnit/synthseg_parc/synthseg.py": "db1dfcb3e79abe29d39ee535fbc87ec559b4e54c86ca7c07e7b5c154e6c7605d"
+      },
+      "tree_sha256": "39fa204aea7674ad7c6e09652d0f8750dd2872b1b78799812ab0d71b5b6c8972"
+    },
+    "runtime": {
+      "device": "cuda:0",
+      "threads": 8,
+      "torch": "2.5.1",
+      "cuda": "11.8",
+      "gpu": "NVIDIA H100 PCIe",
+      "tf32_matmul": true,
+      "tf32_cudnn": true
+    },
+    "seconds": {
+      "model_load": 1.0798848480917513,
+      "inference": 3.490919064730406,
+      "save": 0.4188099540770054,
+      "python_api_total": 4.9896138668991625
+    },
+    "cuda_peak_mib": {
+      "allocated": 19769.23583984375,
+      "reserved": 22820.0
+    },
+    "outputs": [
+      {
+        "file": "segmentation.nii.gz",
+        "shape": [
+          256,
+          203,
+          257
+        ],
+        "dtype": "int32",
+        "affine": [
+          [
+            0.9991319179534912,
+            -0.03973383083939552,
+            0.01251270156353712,
+            -125.2579116821289
+          ],
+          [
+            0.040772195905447006,
+            0.9943392276763916,
+            -0.09811791777610779,
+            -73.28185272216797
+          ],
+          [
+            -0.00854506902396679,
+            0.09854292124509811,
+            0.9950961470603943,
+            -177.5690460205078
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "finite": true,
+        "sha256": "8244cba172cdfac92a75e05ed7c4842825a879dd5553a8c6e5fd946e328ea4bc"
+      }
+    ],
+    "external_process_wall_seconds": 8.83
+  },
+  "output_contract": {
+    "segmentation": {
+      "dtype": "int32",
+      "qform_code": 0,
+      "sform_code": 2,
+      "default_grid": "processed RAS, approximately 1 mm grid",
+      "keep_geometry_grid": "input shape and affine with nearest-neighbour labels"
+    },
+    "volumes_csv": "33 numeric columns: total intracranial volume and 32 foreground soft volumes, in mm3"
+  },
+  "tests": {
+    "command": "PYTHONPATH=src python -m pytest -q tests/synthseg_parc/test_standalone_synthseg.py",
+    "result": "2 passed",
+    "covers": [
+      "default output save/reload dtype and qform/sform",
+      "keep_geometry shape, affine, dtype and qform/sform",
+      "CLI dispatch"
+    ]
+  },
+  "figure": {
+    "path": "docs/synthseg/figures/synthseg_comparison.png",
+    "sha256": "fcb294c098896514303136e9daea223c5f78a4324981b492fa56ad9d68377971",
+    "case": "public sub-02",
+    "candidate": "current source, default TF32"
+  },
+  "candidate_runtime_dependency_boundary": "FNIT candidate runs imported only FNIT, PyTorch, Nibabel, NumPy and SciPy; FreeSurfer/FSL executables were not called by the candidate.",
+  "timing_scope": "Full CLI wall time includes a fresh Python process, input and weight loading where applicable, inference, postprocessing, and compressed NIfTI/CSV writes.",
+  "keep_geometry_real_case": {
+    "device": "CPU",
+    "n": 1,
+    "input_shape": [
+      256,
+      156,
+      256
+    ],
+    "output_shape": [
+      256,
+      156,
+      256
+    ],
+    "affine_max_abs": 0.0,
+    "dtype": "int32",
+    "qform_code": 0,
+    "sform_code": 2,
+    "output_sha256": "27ba97b8696d5e4fb707e8a931f4d07772ebb27fa707f4c66cede13f828c4836"
+  },
+  "cross_module_regression": {
+    "command": "PYTHONPATH=src python -m pytest -q tests/wmh_synthseg tests/synthsr tests/fast",
+    "result": "28 passed, 4 skipped",
+    "interpretation": "the SynthSeg-only output contract change did not introduce a tested WMH-SynthSeg, SynthSR or TorchFAST regression"
+  },
+  "release_status": "current_source_validated",
+  "limitations": [
+    "Three public defaced T1w inputs; no manual anatomical ground truth.",
+    "Official CPU accuracy jobs overlapped, so timing is not used for a stable speedup ratio.",
+    "Torch allocated peak was below 20 GiB, but allocator reserved peak was 22820 MiB."
+  ],
+  "measurement": {
+    "script": "validation/model_io_current/measure_peak.py",
+    "script_sha256": "e4f0aa1209d0376c7df7d73c033db8277074b6ab8a4b0f311b421604a7fe56f9",
+    "single_case_schema": "fnit_model_io_single_case/v1"
   }
 }

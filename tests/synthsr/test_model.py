@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 
 import h5py
+import nibabel as nib
 import numpy as np
 import pytest
 import torch
@@ -32,6 +33,15 @@ def test_npz_input_keeps_source_dtype(tmp_path):
     data, affine, _ = _load_image(path)
     assert data.dtype == np.uint16
     np.testing.assert_array_equal(affine, np.eye(4))
+
+
+def test_nibabel_memory_input_preserves_affine_and_header():
+    affine = np.diag([1.2, 1.3, 1.4, 1.0])
+    source = nib.Nifti1Image(np.ones((4, 5, 6), dtype=np.float32), affine)
+    data, loaded_affine, header = _load_image(source)
+    np.testing.assert_array_equal(data, np.ones((4, 5, 6)))
+    np.testing.assert_array_equal(loaded_affine, affine)
+    assert isinstance(header, nib.Nifti1Header)
 
 
 def test_npz_output_uses_unquantized_data(tmp_path):

@@ -1,9 +1,10 @@
 import numpy as np
 import pytest
-import surfa as sf
 import torch
 
 import fnit.fnirt.registration as registration_module
+from fnit._nib import FNITNifti1Image
+from fnit._transforms import AffineTransform
 from fnit.fnirt.registration import (
     GMFNIRTConfig,
     TorchFNIRT,
@@ -24,6 +25,12 @@ from fnit.fnirt.spline import (
 )
 
 
+def _image(data, affine=None):
+    if affine is None:
+        affine = np.eye(4)
+    return FNITNifti1Image(np.asarray(data), affine)
+
+
 def _volume(shape=(8, 8, 8)):
     coordinates = np.indices(shape, dtype=np.float32)
     center = (np.asarray(shape, dtype=np.float32) - 1) / 2
@@ -31,7 +38,7 @@ def _volume(shape=(8, 8, 8)):
         -sum((axis - center[index]) ** 2 for index, axis in enumerate(coordinates))
         / 8
     ).astype(np.float32)
-    return sf.Volume(data, geometry=sf.ImageGeometry(shape, vox2world=np.eye(4)))
+    return _image(data)
 
 
 def _single_level_config():
@@ -102,7 +109,7 @@ def test_process_ending_above_full_resolution_upsamples_before_cout():
     shape = (20, 20, 20)
     moving = _volume(shape)
     fixed = moving.copy()
-    initial = sf.Affine(
+    initial = AffineTransform(
         np.eye(4), source=moving, target=fixed, space="world"
     )
     config = GMFNIRTConfig(
@@ -250,10 +257,9 @@ def test_implicit_zero_masks_are_active_without_explicit_mask():
     data = np.zeros(shape, dtype=np.float32)
     data[0, 0, 0] = np.float32(1e-20)
     data[2:6, 2:6, 2:6] = 1.0
-    geometry = sf.ImageGeometry(shape, vox2world=np.eye(4))
-    moving = sf.Volume(data, geometry=geometry)
+    moving = _image(data)
     fixed = moving.copy()
-    initial = sf.Affine(
+    initial = AffineTransform(
         np.eye(4), source=moving, target=fixed, space="world"
     )
 
@@ -274,10 +280,9 @@ def test_input_implicit_mask_is_built_after_mean_scaling():
     moving_data[0, 0, 0] = np.float32(2e-18)
     fixed_data = moving_data.copy()
     fixed_data[0, 0, 0] = 1.0
-    geometry = sf.ImageGeometry(shape, vox2world=np.eye(4))
-    moving = sf.Volume(moving_data, geometry=geometry)
-    fixed = sf.Volume(fixed_data, geometry=geometry)
-    initial = sf.Affine(
+    moving = _image(moving_data)
+    fixed = _image(fixed_data)
+    initial = AffineTransform(
         np.eye(4), source=moving, target=fixed, space="world"
     )
 
@@ -342,10 +347,9 @@ def test_process_boundary_uses_scg_and_inwarp_knot_refinement():
     shape = (8, 8, 8)
     data = np.zeros(shape, dtype=np.float32)
     data[1:7, 1:7, 1:7] = 1.0
-    geometry = sf.ImageGeometry(shape, vox2world=np.eye(4))
-    moving = sf.Volume(data, geometry=geometry)
+    moving = _image(data)
     fixed = moving.copy()
-    initial = sf.Affine(
+    initial = AffineTransform(
         np.eye(4), source=moving, target=fixed, space="world"
     )
     config = GMFNIRTConfig(
@@ -392,7 +396,7 @@ def test_failed_topology_projection_warns_and_continues_by_default(monkeypatch):
     )
     moving = _volume()
     fixed = moving.copy()
-    initial = sf.Affine(
+    initial = AffineTransform(
         np.eye(4), source=moving, target=fixed, space="world"
     )
 
@@ -418,7 +422,7 @@ def test_failed_topology_projection_raises_in_explicit_strict_mode(monkeypatch):
     )
     moving = _volume()
     fixed = moving.copy()
-    initial = sf.Affine(
+    initial = AffineTransform(
         np.eye(4), source=moving, target=fixed, space="world"
     )
 

@@ -1,0 +1,605 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-27",
+  "feature": "SynthStrip current nibabel/SciPy pipeline versus FreeSurfer 8.2.0",
+  "data": {
+    "subjects": 12,
+    "kind": "real clinical T1w",
+    "selection": "first sorted files with valid finite 3D data and nonsingular finite geometry; no output-based selection",
+    "identifiers_public": false,
+    "input_sha256": {
+      "case01": "cd7d98a03f9aea34b83f69b184af2ced799351b93eb8da09957aae7038a6e36f",
+      "case02": "4f7bac4f4f9557c62a078af610ef94f871975e54e39d07b4d618583130fdc8fa",
+      "case03": "6f10925db6cec345ed8ad1d915e9840fd0c69ece2cd46d9ac4a83e23101c8f2e",
+      "case04": "916cc95237a89e7824ab742c8921268c3517617556ea341ff2e750fe5af36a1d",
+      "case05": "59c4daaa3669af1c49c05db8a825ed52ef8654a1497adfdddedc3ed96933e7af",
+      "case06": "63330a1a47c1ed9d50a3c9a336864794ada01f596344d53849dd8f17459e1a0f",
+      "case07": "3f53604a41ab20feb9efc371a621805568c57350f7da4447caa67039b56089a8",
+      "case08": "cacdccc0cd44f161853433144e03d78034ce3126aba86b81111925a7e29e6c91",
+      "case09": "05e2d1ae47f35ac8a0ff025e29c6926c6f45102be94bd9a957c5865572ad9bc8",
+      "case10": "78808a40a9194be9daae767bfba03bacaa40c78b85359ba940b7925a3b390896",
+      "case11": "62b964ed3720fa372d934068cea3f05c6e4418fb6d9bdcec3a1f1f21a67378ce",
+      "case12": "5d4565903ceca205bdaac20ac9353646ef71293e0dedb1b134119a0af49d1779"
+    }
+  },
+  "reference": {
+    "software": "FreeSurfer 8.2.0 mri_synthstrip official source CUDA",
+    "script_sha256": "bbc2ff8f8779862039401b05d5cd6039fb4f3583e0032a793ac9adb3f4521590",
+    "tf32_override": 0
+  },
+  "candidate": {
+    "device": "cuda:0",
+    "tf32_default": true,
+    "float16_used": false,
+    "threads": 8,
+    "peak_cuda_memory_bytes_case01": 8315790848,
+    "source_sha256": {
+      "src/fnit/synthstrip/model.py": "6afcff10848a8a2a57b9c00d4b637eda90e4c0e21f301d8a8031107d783a5f44",
+      "src/fnit/synthstrip/pipeline.py": "3cc23ab81eebb6ad11ac9814691f9d3b5c13c93fc2569ee1f4dddea70ec37de7",
+      "src/fnit/_nib.py": "bffd56aeaca423b2448432ba318212e83549e9e31aa27af6bf20a60888218586",
+      "src/fnit/weights.py": "9d275a1bd4064ff9bd1eb8aaef589ce7804258e7f6c39cd127deae2623d6eb9a"
+    }
+  },
+  "summary": {
+    "minimum_mask_dice": 0.9939254753705405,
+    "maximum_mask_different_voxels": 38094,
+    "mean_distance_mae_mm": 0.33862695477265564,
+    "maximum_distance_mae_mm": 0.6106451161442362,
+    "candidate_wall_seconds_median": 16.395,
+    "reference_wall_seconds_median": 16.916188871953636,
+    "candidate_over_reference_median": 0.9691899353986436,
+    "minimum_stripped_image_pearson_r": 0.9942611010537407,
+    "maximum_stripped_image_mae": 0.11681598369891827,
+    "candidate_maximum_rss_kbytes_median": 1216022,
+    "reference_maximum_rss_kbytes_median": 1035954
+  },
+  "timing_boundary": "Each CLI run includes Python startup, weight and image loading, inference, post-processing, and three NIfTI writes.",
+  "records": [
+    {
+      "case_id": "case01",
+      "input_sha256": "cd7d98a03f9aea34b83f69b184af2ced799351b93eb8da09957aae7038a6e36f",
+      "metrics": {
+        "image": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "int16",
+          "reference_dtype": "int16",
+          "mae": 0.11681598369891827,
+          "max_abs": 368.0,
+          "pearson_r": 0.9942611010537407
+        },
+        "mask": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "uint8",
+          "reference_dtype": "uint8",
+          "different_voxels": 29987,
+          "dice": 0.995754231645055,
+          "candidate_voxels": 3527674,
+          "reference_voxels": 3535123
+        },
+        "distance": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.018632768285536505,
+          "max_abs": 2.2050103545188904,
+          "pearson_r": 0.9999689885309004
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 18.14,
+        "maximum_rss_kbytes": 1162788,
+        "exit_status": 0,
+        "driver_wall_seconds": 18.14,
+        "reused_for_report": true
+      },
+      "reference_timing": {
+        "wall_seconds": 18.41568445204757,
+        "maximum_rss_kbytes": 1004988
+      }
+    },
+    {
+      "case_id": "case02",
+      "input_sha256": "4f7bac4f4f9557c62a078af610ef94f871975e54e39d07b4d618583130fdc8fa",
+      "metrics": {
+        "image": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "int16",
+          "reference_dtype": "int16",
+          "mae": 0.056430194561298073,
+          "max_abs": 307.0,
+          "pearson_r": 0.9979894170807742
+        },
+        "mask": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "uint8",
+          "reference_dtype": "uint8",
+          "different_voxels": 29078,
+          "dice": 0.9956080756550428,
+          "candidate_voxels": 3313465,
+          "reference_voxels": 3307323
+        },
+        "distance": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.31441539182596967,
+          "max_abs": 95.05043888092041,
+          "pearson_r": 0.8449238549888672
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 14.8,
+        "maximum_rss_kbytes": 1162888,
+        "exit_status": 0,
+        "driver_wall_seconds": 14.8,
+        "reused_for_report": true
+      },
+      "reference_timing": {
+        "wall_seconds": 16.38447905704379,
+        "maximum_rss_kbytes": 1005132
+      }
+    },
+    {
+      "case_id": "case03",
+      "input_sha256": "6f10925db6cec345ed8ad1d915e9840fd0c69ece2cd46d9ac4a83e23101c8f2e",
+      "metrics": {
+        "image": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "int16",
+          "reference_dtype": "int16",
+          "mae": 0.08270000751201922,
+          "max_abs": 300.0,
+          "pearson_r": 0.9954173909678856
+        },
+        "mask": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "uint8",
+          "reference_dtype": "uint8",
+          "different_voxels": 29364,
+          "dice": 0.9947778617189734,
+          "candidate_voxels": 2816041,
+          "reference_voxels": 2806943
+        },
+        "distance": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.3143215913057522,
+          "max_abs": 95.08538579940796,
+          "pearson_r": 0.8414285167328769
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 21.46,
+        "maximum_rss_kbytes": 1162856,
+        "exit_status": 0,
+        "driver_wall_seconds": 21.46,
+        "reused_for_report": true
+      },
+      "reference_timing": {
+        "wall_seconds": 16.336983800167218,
+        "maximum_rss_kbytes": 1004836
+      }
+    },
+    {
+      "case_id": "case04",
+      "input_sha256": "916cc95237a89e7824ab742c8921268c3517617556ea341ff2e750fe5af36a1d",
+      "metrics": {
+        "image": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "int16",
+          "reference_dtype": "int16",
+          "mae": 0.09601046048677885,
+          "max_abs": 393.0,
+          "pearson_r": 0.9952553837293884
+        },
+        "mask": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "uint8",
+          "reference_dtype": "uint8",
+          "different_voxels": 32865,
+          "dice": 0.9946716312720202,
+          "candidate_voxels": 3092535,
+          "reference_voxels": 3075394
+        },
+        "distance": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.020028465199283377,
+          "max_abs": 2.1605809032917023,
+          "pearson_r": 0.999957960176848
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 19.53,
+        "maximum_rss_kbytes": 1162808,
+        "exit_status": 0,
+        "driver_wall_seconds": 19.53,
+        "reused_for_report": true
+      },
+      "reference_timing": {
+        "wall_seconds": 16.622191370930523,
+        "maximum_rss_kbytes": 1004944
+      }
+    },
+    {
+      "case_id": "case05",
+      "input_sha256": "59c4daaa3669af1c49c05db8a825ed52ef8654a1497adfdddedc3ed96933e7af",
+      "metrics": {
+        "image": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "int16",
+          "reference_dtype": "int16",
+          "mae": 0.07034869854266827,
+          "max_abs": 263.0,
+          "pearson_r": 0.9975808478119996
+        },
+        "mask": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "uint8",
+          "reference_dtype": "uint8",
+          "different_voxels": 30761,
+          "dice": 0.9952454458772045,
+          "candidate_voxels": 3238668,
+          "reference_voxels": 3231129
+        },
+        "distance": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.6106451161442362,
+          "max_abs": 95.25448751449585,
+          "pearson_r": 0.7463696465453136
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 16.54,
+        "maximum_rss_kbytes": 1162708,
+        "exit_status": 0,
+        "driver_wall_seconds": 16.54,
+        "reused_for_report": true
+      },
+      "reference_timing": {
+        "wall_seconds": 16.89521061605774,
+        "maximum_rss_kbytes": 1005060
+      }
+    },
+    {
+      "case_id": "case06",
+      "input_sha256": "63330a1a47c1ed9d50a3c9a336864794ada01f596344d53849dd8f17459e1a0f",
+      "metrics": {
+        "image": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "int16",
+          "reference_dtype": "int16",
+          "mae": 0.05432612827845982,
+          "max_abs": 286.0,
+          "pearson_r": 0.9973646232722204
+        },
+        "mask": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "uint8",
+          "reference_dtype": "uint8",
+          "different_voxels": 27045,
+          "dice": 0.9957499115645307,
+          "candidate_voxels": 3180598,
+          "reference_voxels": 3182799
+        },
+        "distance": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.3128921693143827,
+          "max_abs": 95.13000679016113,
+          "pearson_r": 0.8425753331403388
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 14.78,
+        "maximum_rss_kbytes": 1217036,
+        "exit_status": 0,
+        "driver_wall_seconds": 14.78,
+        "reused_for_report": true
+      },
+      "reference_timing": {
+        "wall_seconds": 17.6243429959286,
+        "maximum_rss_kbytes": 1037088
+      }
+    },
+    {
+      "case_id": "case07",
+      "input_sha256": "3f53604a41ab20feb9efc371a621805568c57350f7da4447caa67039b56089a8",
+      "metrics": {
+        "image": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "int16",
+          "reference_dtype": "int16",
+          "mae": 0.06971202354260089,
+          "max_abs": 346.0,
+          "pearson_r": 0.9966362970981327
+        },
+        "mask": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "uint8",
+          "reference_dtype": "uint8",
+          "different_voxels": 27207,
+          "dice": 0.9956574515000682,
+          "candidate_voxels": 3130248,
+          "reference_voxels": 3134967
+        },
+        "distance": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.6069168140005423,
+          "max_abs": 95.29974126815796,
+          "pearson_r": 0.7432941622073244
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 15.65,
+        "maximum_rss_kbytes": 1215064,
+        "exit_status": 0,
+        "driver_wall_seconds": 15.65,
+        "reused_for_report": true
+      },
+      "reference_timing": {
+        "wall_seconds": 16.931978782871738,
+        "maximum_rss_kbytes": 1035020
+      }
+    },
+    {
+      "case_id": "case08",
+      "input_sha256": "cacdccc0cd44f161853433144e03d78034ce3126aba86b81111925a7e29e6c91",
+      "metrics": {
+        "image": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "int16",
+          "reference_dtype": "int16",
+          "mae": 0.07498016357421874,
+          "max_abs": 423.0,
+          "pearson_r": 0.9966071693750638
+        },
+        "mask": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "uint8",
+          "reference_dtype": "uint8",
+          "different_voxels": 31375,
+          "dice": 0.9949980542231648,
+          "candidate_voxels": 3144168,
+          "reference_voxels": 3128391
+        },
+        "distance": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.31426148597925363,
+          "max_abs": 95.12538576126099,
+          "pearson_r": 0.8422876609889832
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 15.45,
+        "maximum_rss_kbytes": 1217180,
+        "exit_status": 0,
+        "driver_wall_seconds": 15.45,
+        "reused_for_report": true
+      },
+      "reference_timing": {
+        "wall_seconds": 17.018359378213063,
+        "maximum_rss_kbytes": 1037004
+      }
+    },
+    {
+      "case_id": "case09",
+      "input_sha256": "05e2d1ae47f35ac8a0ff025e29c6926c6f45102be94bd9a957c5865572ad9bc8",
+      "metrics": {
+        "image": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "int16",
+          "reference_dtype": "int16",
+          "mae": 0.051713605608258925,
+          "max_abs": 307.0,
+          "pearson_r": 0.9980638210646553
+        },
+        "mask": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "uint8",
+          "reference_dtype": "uint8",
+          "different_voxels": 28248,
+          "dice": 0.9957284951171352,
+          "candidate_voxels": 3312596,
+          "reference_voxels": 3300530
+        },
+        "distance": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.016872789611175158,
+          "max_abs": 1.8580278158187866,
+          "pearson_r": 0.9999706783500151
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 15.51,
+        "maximum_rss_kbytes": 1217160,
+        "exit_status": 0,
+        "driver_wall_seconds": 15.51,
+        "reused_for_report": true
+      },
+      "reference_timing": {
+        "wall_seconds": 17.917567792115733,
+        "maximum_rss_kbytes": 1036888
+      }
+    },
+    {
+      "case_id": "case10",
+      "input_sha256": "78808a40a9194be9daae767bfba03bacaa40c78b85359ba940b7925a3b390896",
+      "metrics": {
+        "image": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "int16",
+          "reference_dtype": "int16",
+          "mae": 0.0905403791155134,
+          "max_abs": 334.0,
+          "pearson_r": 0.9959644078697565
+        },
+        "mask": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "uint8",
+          "reference_dtype": "uint8",
+          "different_voxels": 38094,
+          "dice": 0.9939254753705405,
+          "candidate_voxels": 3148350,
+          "reference_voxels": 3122758
+        },
+        "distance": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.31682186554843095,
+          "max_abs": 95.35425615310669,
+          "pearson_r": 0.8422360381243198
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 17.62,
+        "maximum_rss_kbytes": 1216980,
+        "exit_status": 0,
+        "driver_wall_seconds": 17.62,
+        "reused_for_report": true
+      },
+      "reference_timing": {
+        "wall_seconds": 16.900398961035535,
+        "maximum_rss_kbytes": 1037224
+      }
+    },
+    {
+      "case_id": "case11",
+      "input_sha256": "62b964ed3720fa372d934068cea3f05c6e4418fb6d9bdcec3a1f1f21a67378ce",
+      "metrics": {
+        "image": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "int16",
+          "reference_dtype": "int16",
+          "mae": 0.06981951032366071,
+          "max_abs": 309.0,
+          "pearson_r": 0.9973894838268466
+        },
+        "mask": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "uint8",
+          "reference_dtype": "uint8",
+          "different_voxels": 32269,
+          "dice": 0.994911689773441,
+          "candidate_voxels": 3163691,
+          "reference_voxels": 3178100
+        },
+        "distance": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.6092095626565905,
+          "max_abs": 95.26247978210449,
+          "pearson_r": 0.7436310136151243
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 18.71,
+        "maximum_rss_kbytes": 1217204,
+        "exit_status": 0,
+        "driver_wall_seconds": 18.71,
+        "reused_for_report": true
+      },
+      "reference_timing": {
+        "wall_seconds": 17.17223512311466,
+        "maximum_rss_kbytes": 1037048
+      }
+    },
+    {
+      "case_id": "case12",
+      "input_sha256": "5d4565903ceca205bdaac20ac9353646ef71293e0dedb1b134119a0af49d1779",
+      "metrics": {
+        "image": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "int16",
+          "reference_dtype": "int16",
+          "mae": 0.061047145298549106,
+          "max_abs": 331.0,
+          "pearson_r": 0.9975696013703423
+        },
+        "mask": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "uint8",
+          "reference_dtype": "uint8",
+          "different_voxels": 31077,
+          "dice": 0.9949681145528306,
+          "candidate_voxels": 3094354,
+          "reference_voxels": 3081661
+        },
+        "distance": {
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32",
+          "mae": 0.6085054374007139,
+          "max_abs": 95.12524032592773,
+          "pearson_r": 0.7427100169834258
+        }
+      },
+      "candidate_timing": {
+        "wall_seconds": 16.25,
+        "maximum_rss_kbytes": 1217008,
+        "exit_status": 0,
+        "driver_wall_seconds": 16.25,
+        "reused_for_report": true
+      },
+      "reference_timing": {
+        "wall_seconds": 16.781937398947775,
+        "maximum_rss_kbytes": 1037112
+      }
+    }
+  ],
+  "environment": {
+    "host": "gpucw1",
+    "gpu": "NVIDIA H100 PCIe",
+    "shared_node_timing": true
+  },
+  "limitations": "The 12 cases have no manual brain-mask ground truth. Metrics quantify agreement with FreeSurfer 8.2.0. The reference disabled TF32 while FNIT used its required TF32 default, and timing came from a shared node."
+}

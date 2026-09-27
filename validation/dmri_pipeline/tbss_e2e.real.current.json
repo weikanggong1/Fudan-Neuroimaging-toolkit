@@ -1,0 +1,605 @@
+{
+  "schema_version": 1,
+  "data": {
+    "subjects": 1,
+    "kind": "one deidentified real UKB-format AP/PA diffusion MRI",
+    "subject_identifier_published": false,
+    "raw_file_sha256": {
+      "AP.bval": "4bba64690ad224848ea4d0891b98a859b79e11f0de77ad9d2539f4397fda2224",
+      "AP.bvec": "e9dbf67c3a948f726b06f33c97f173c55ecbe186240541682af9d8cd8fb5835e",
+      "AP.json": "9598b13741a746ab6d57feef1386f6e8b089e07e73ce2a02da6b515d695decb5",
+      "AP.nii.gz": "c37773b5749bc169b96c1bc8642a572637a61325c6eb2ac33e765253011533f1",
+      "PA.bval": "f4397dcf05f5035193915072cc663b4a6b8ed4f80dd7c9e0edf995b2c19bf59e",
+      "PA.bvec": "915af04d3692da2fbf604d9259409997f375632995387630e0f57b8d60aee7f8",
+      "PA.json": "cc60927494c121eaab47198688236830cbf4bf9e2d18bcfe1b1c17dd104db990",
+      "PA.nii.gz": "520437c7f1ced17b325b4ad78860c485840b17686ace838334af1d23a51d603b"
+    },
+    "template_sha256": {
+      "FMRIB58_FA_1mm": "1268fd84b658451c9a85799a636688bc1f6947fdf8de2d9cf7f62320de1b3837",
+      "FMRIB58_FA_skeleton_1mm": "db7a69531396504ecf1555061831dd909c524b6d5575d5c1b280a340eea9c8de"
+    }
+  },
+  "boundary": {
+    "candidate": "raw AP/PA through TOPUP, EDDY, DTIFIT, AMICO-NODDI, weighted FLIRT, three-stage FNIRT, nine map propagations, and skeleton multiplication",
+    "reference_native": "existing official UKB DTI/NODDI maps",
+    "reference_standard": "official FSL 6.0.7.4 weighted FLIRT, three FNIRT stages, applywarp, and skeleton multiplication from prepared official maps",
+    "timing_match": "candidate timing is full raw-to-standard; official timing starts from prepared FA and parameter maps"
+  },
+  "candidate": {
+    "implementation": "FNIT DMRIPipeline registration_backend=tbss",
+    "source_snapshot_tar_sha256": "f7547d0a39ddd9fb6ba70deb720f229ecedc6385fa72d457efb2ded78b6c173d",
+    "source_sha256": {
+      "src/fnit/__init__.py": "cc9aa48bd2cd5966801460d83f46eff5839e91fcd6962640a89be538a23ead32",
+      "src/fnit/_dmri.py": "b6bf837f8b5a0a8f0d910706631e882a9e3f8dfc1f1ef77e1cfac7efe36fafbf",
+      "src/fnit/_nib.py": "bffd56aeaca423b2448432ba318212e83549e9e31aa27af6bf20a60888218586",
+      "src/fnit/_transforms.py": "be01fa24cd0c17bb1aa8ac7792cdf0b62c657037808c643427a1b11cc4c05340",
+      "src/fnit/amico_noddi/__init__.py": "a3d133bdb2dcb70b9fe20b638f5e347ac97999e0e79868270335af16f9bdc2a7",
+      "src/fnit/amico_noddi/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+      "src/fnit/amico_noddi/cli.py": "2e684a9fc558b24eabe5ed3d8211e69b87853424a703bf7056c30d29f3a8dfe0",
+      "src/fnit/amico_noddi/core.py": "9adff87a2f9296259944e22936da2a1d9a0ed40bfd31b9df22fa16d52742793b",
+      "src/fnit/amico_noddi/kernels.py": "46f1044aa5f1c2dbffd12dd33707c0e192ef1de01dc23157ae03a0977b3d0b59",
+      "src/fnit/amico_noddi/solver.py": "b86c56d9e3aef90efad74748309c627f4cb013071f3670f74c615f9e27001bf3",
+      "src/fnit/applywarp/__init__.py": "0d193f4216238e40e4f14d86d175806ef016db34ad3b2a6362c4be8e3cde7cfa",
+      "src/fnit/applywarp/__main__.py": "c2ee4ddb093c9af060cafaf68219907f8a6b7b301ed3f8bea75db7555adec987",
+      "src/fnit/applywarp/cli.py": "024de40d9121d2352071cf37f2c47558d97f0630faa1bfc47abcfb4e6e38270e",
+      "src/fnit/applywarp/core.py": "cf6de438f3ac1551804d38682ce3fbb11b8fb042ad881562ebc93aada80f2df5",
+      "src/fnit/cli.py": "2d5e3d37f52fffb7834a438339566cd7ead980606a2127ade268662569922178",
+      "src/fnit/dmri_pipeline/__init__.py": "b332f76a687bb0379daa3384273f72a8fc02b657e4c3ce1600b3f4ae8286f7cf",
+      "src/fnit/dmri_pipeline/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+      "src/fnit/dmri_pipeline/cli.py": "ed901ef2f215694a327c7537d3746188f849a163a21d5bf72cacc3fdaf4bb6df",
+      "src/fnit/dmri_pipeline/pipeline.py": "7ed08495a70065f46e8cd6a8402053ec9e5d6a764e5ce8ec37dc961fc369a347",
+      "src/fnit/dmri_pipeline/tbss.py": "93abf99c86dcc688959b34eb1a8e8b0bd8bec6a561b7332a4782f2338f937bfc",
+      "src/fnit/dtifit/__init__.py": "a38d642b2b5209e1bb10f155d42be85d9798a39db878e8a6f7cfce2d63e22d79",
+      "src/fnit/dtifit/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+      "src/fnit/dtifit/cli.py": "82f8600caaa4aebba89014c1f4327c320a84791f3d687f0db404ee7143d7cae7",
+      "src/fnit/dtifit/core.py": "23e0fb554be1e0b309af154f34f5b6f7139db6e06ca8f10b1bd08be09789dc39",
+      "src/fnit/eddy/__init__.py": "6ecf6fead43f46c425a98348714426e8e89a8ec2f12d4414d1e967dab0a191f2",
+      "src/fnit/eddy/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+      "src/fnit/eddy/cli.py": "6d6bb36183ca15bb2692d1658cc3f1cccbade332465f3b933ff04710266c93fb",
+      "src/fnit/eddy/core.py": "218733afd990fd4dec77ad7ac7dc2718571fc7058972793ebc01c4d525b657d2",
+      "src/fnit/eddy/ukb.py": "5d64adb9cc350678c10c8ad8c2a357787f7ddcb0df1debe64e20d621d1183186",
+      "src/fnit/flirt/__init__.py": "58b1ae43c50bd2942398f272c013f5bc743ce6a78abdaab7c93eeae1949447af",
+      "src/fnit/flirt/__main__.py": "03eb6210ee12d659108106a6126a870a9d5bc89ba95c116cd519e2764b0e092f",
+      "src/fnit/flirt/cli.py": "f45f0774d861a42f73c147d37ca6f5d9a7f8ab6bbde6e33bd3f56919229d30a4",
+      "src/fnit/flirt/coordinates.py": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e",
+      "src/fnit/flirt/core.py": "5528560292d3ba72778fda619abd907ab4cd666b80a8f18b95538ee4b8ca89b2",
+      "src/fnit/flirt/standalone.py": "bf6a86f16b72e49e1f4aaa2b3dd463860568822808c8cb0dd2622175a1597e8b",
+      "src/fnit/flirt/types.py": "55a3abf2d7ce7889c297df95289890a589d1721b9fe3b157aa90e87819ed8e21",
+      "src/fnit/fnirt/__init__.py": "1b4f8c793ebd91c362f592a3d481ca9305789a05e62a16d532d633706633e4c4",
+      "src/fnit/fnirt/__main__.py": "3d2438ae92f4746e9ffaa1f837b1fe803f6281091d1f31f8c95643716f257d9a",
+      "src/fnit/fnirt/_topology_triton.py": "3f61e452228a9c3dff85caff58ed1103e7b89783c86838bf1e70e322ae3f65f1",
+      "src/fnit/fnirt/cli.py": "ee48881c817d9c26cb46cc1215e003fb86f6c85e778353f67dbf7f095a2025f7",
+      "src/fnit/fnirt/io.py": "ee79183709258f2e71dcd110f3c922b1cc7d20a979161ae1c86c2c627becf366",
+      "src/fnit/fnirt/optimizer.py": "e5d5df0358acbb7c3b23ca5ff6c2e797479e5c7efee8e7fa22fe559e7b3faf6b",
+      "src/fnit/fnirt/registration.py": "a63ed0b09e43a5af4bf63b2f583e710b1d0fc73aac548a326c552334a741cd83",
+      "src/fnit/fnirt/spline.py": "7bb3bf5cd84da8b1c35a3e9ff2ef2d815307770c25b1228adf4e96f1dc4d6659",
+      "src/fnit/fnirt/standalone.py": "06ce1513901eced3ba63ef8e85ddbe344ee746db02a31827c222872156b6a7f7",
+      "src/fnit/fnirt/topology.py": "150f65a73baf796f98e6304d0c209288816ee75485be5d93032db46edeb52900",
+      "src/fnit/topup/__init__.py": "950df41a668a1caca619b67866d98e36a8a531954a56b3c16eb6c5acbb81eb5f",
+      "src/fnit/topup/__main__.py": "c2ee4ddb093c9af060cafaf68219907f8a6b7b301ed3f8bea75db7555adec987",
+      "src/fnit/topup/cli.py": "fc5220c7c9de36577f5e116262bb5789733397beff00796059fe07313fba3388",
+      "src/fnit/topup/core.py": "4746d50f28b8137abf9bf6d8a211c12489bddc6a931bd06e695db1965f14b976",
+      "src/fnit/topup/io.py": "c87edab5c5369204d1a7ccfd2cb079dfd1a64e68279d8899f51755609038176a",
+      "src/fnit/topup/ukb.py": "63eb5cc0d9e2f4a4547585af4f041f543dd256a653101ca54ceab235addd0d08"
+    },
+    "pipeline_report_sha256": "293212bef308b6b4d589c0cd187e480b0903cf443af7598dd732d6042070272f",
+    "validator_sha256": "b252c846bcc7145461065ebd90961c1ae12977053b001092c17639ee773e5103",
+    "device": "cuda",
+    "dtype": "float32 images; solver-specific float64 where documented",
+    "tf32": true,
+    "output_contract": {
+      "nine_native_maps": [
+        "FA",
+        "MD",
+        "L1",
+        "L2",
+        "L3",
+        "MO",
+        "ICVF",
+        "OD",
+        "ISOVF"
+      ],
+      "nine_standard_maps": [
+        "FA",
+        "MD",
+        "L1",
+        "L2",
+        "L3",
+        "MO",
+        "ICVF",
+        "OD",
+        "ISOVF"
+      ],
+      "common_standard_output_contract": true
+    }
+  },
+  "reference": {
+    "implementation": "FSL 6.0.7.4 / UKB TBSS registration",
+    "sha256": {
+      "standard_FA": "ce420c76f043c77f1d85ea95149eb20fcfe375b80e52e608c8435885d92cbb11",
+      "skeleton_FA": "ad2d2487e69e34961cff1e323b8666e4b4dffbab265e6183e210d9af6fbf37ab",
+      "standard_MD": "22a4709ecb7895074502b6689a8d394bea497d4630696147ec4de72185ab1d29",
+      "skeleton_MD": "b8120e33e7efc8782648092148eb915d1a810d639eca0409a3b1e546ef1a7d1c",
+      "standard_L1": "017a5543c88637890fa4f5039246f9d1871c12eb6ba8c9b8ab079648179e4ec5",
+      "skeleton_L1": "ebfc64953a894c535a0af3ee8abf79ea6699822a934b949bf45cd0f5e1e7e059",
+      "standard_L2": "2b27f51ec31d655bcb7144aadd31d4b0a37e43846ea2ba9c391ddcddbf60bfbe",
+      "skeleton_L2": "b5f34d183dcf17f20941c1f916ff3720b52d1dc362f838b2518cde4b5f78fd5d",
+      "standard_L3": "605bb932e10146cdbe31274ecf74c578db68b1c552b31108d00e6eafc382d541",
+      "skeleton_L3": "759e9df17fadb23cfc71f72afac70d6c98c9e06086d42e01c9ce9ec95579cdb8",
+      "standard_MO": "9b2fb315f0d298189606d1d0f6bc15e6970d79e5ae12ce54eb71cbdf06034c57",
+      "skeleton_MO": "ca216811ecec28fdb3fa4e94fb31246f90a2546258058bf1b5e3e5cd1840f447",
+      "standard_ICVF": "7c298e3badf5c6d1453047b57c9b8f64be75fde28ddf1919391af96f4e81f379",
+      "skeleton_ICVF": "3e1c3e99a5ae7d7ffdf892c4312aefbdb620bc05c38b94be84b3c22b330cb102",
+      "standard_OD": "c12119e50b6e3a74a51a2833181bf876ef0cb54c483aaf10babfca631fef068d",
+      "skeleton_OD": "3ef47bf7b40f85bbc83a7545171ce985b82cb900d18691112d4c60e5def61676",
+      "standard_ISOVF": "22589587d833d25adfae4ab9c29db4e11c4692fc4e53f044f06c0a86afe0dc9d",
+      "skeleton_ISOVF": "25686a4644186c0413955755aeb73db39f734164d68f9a61238277173f86de2b"
+    }
+  },
+  "execution": {
+    "run_date": "2026-09-28",
+    "host": "gpucw1",
+    "gpu": "NVIDIA H100 PCIe",
+    "software": {
+      "pytorch": "2.5.1",
+      "pytorch_cuda": "11.8",
+      "nibabel": "5.4.2",
+      "numpy": "1.26.4"
+    },
+    "run_script_sha256": "0256cc56d14750a8ab102718756b684132fd2d95e73bbedf1a110d42d4b7a029",
+    "candidate_command": "python -m fnit.cli dmri-pipeline --raw-dir <RAW_DIR> --output-dir <OUTPUT_DIR> --registration-backend tbss --fa-template <FMRIB58_FA_1mm.nii.gz> --fa-skeleton <FMRIB58_FA-skeleton_1mm.nii.gz> --device cuda",
+    "environment": {
+      "PYTHONPATH": "<SOURCE_SNAPSHOT>/src",
+      "CUDA_VISIBLE_DEVICES": "1",
+      "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True",
+      "CUDA_MODULE_LOADING": "LAZY"
+    },
+    "gpu_baseline_before_candidate": {
+      "memory_used_mib": 20869.0,
+      "utilization_percent": 100.0,
+      "exclusive_timing": false,
+      "note": "a separate long-running GPU training process was active"
+    },
+    "reference_command": "validation/dmri_pipeline/run_official_tbss.sh <OUTPUT_DIR> <PREPROCESSED_FA> <INPUT_WEIGHT> <MAP_DIR> <FMRIB58_FA_1mm.nii.gz> <FMRIB58_FA-skeleton_1mm.nii.gz> <OXFORD_CONFIG_PREFIX>"
+  },
+  "accuracy": {
+    "native_maps": {
+      "FA": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 292397,
+          "pearson": 0.5861569970001622,
+          "mae": 0.10181525268208615,
+          "rmse": 0.1755371294324284,
+          "maximum_absolute_error": 1.2247449159622192
+        }
+      },
+      "MD": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 292463,
+          "pearson": 0.5475369317494377,
+          "mae": 0.0003927185797632615,
+          "rmse": 0.0006883182420657347,
+          "maximum_absolute_error": 0.00948549120221287
+        }
+      },
+      "L1": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 292463,
+          "pearson": 0.4369940296487216,
+          "mae": 0.00046462973780319537,
+          "rmse": 0.0008157539619526152,
+          "maximum_absolute_error": 0.009162380709312856
+        }
+      },
+      "L2": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 292463,
+          "pearson": 0.5672506851997026,
+          "mae": 0.00039299600755303416,
+          "rmse": 0.0006813882552249284,
+          "maximum_absolute_error": 0.00951859587803483
+        }
+      },
+      "L3": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 292463,
+          "pearson": 0.6340224732959359,
+          "mae": 0.00035478443624427543,
+          "rmse": 0.0006111370413466305,
+          "maximum_absolute_error": 0.011983550386503339
+        }
+      },
+      "MO": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 292463,
+          "pearson": 0.4135792649263962,
+          "mae": 0.46317977631381746,
+          "rmse": 0.6091759814597536,
+          "maximum_absolute_error": 1.9884552359580994
+        }
+      },
+      "ICVF": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 272910,
+          "pearson": -0.00206971847454545,
+          "mae": 0.1940084018090306,
+          "rmse": 0.3155462717443454,
+          "maximum_absolute_error": 0.9900000691413879
+        }
+      },
+      "OD": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 291834,
+          "pearson": 0.5068616246289507,
+          "mae": 0.16964281973985115,
+          "rmse": 0.27060128380298415,
+          "maximum_absolute_error": 1.0
+        }
+      },
+      "ISOVF": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 231142,
+          "pearson": 0.608481368322222,
+          "mae": 0.19771242672182812,
+          "rmse": 0.2992324306004011,
+          "maximum_absolute_error": 1.124258041381836
+        }
+      }
+    },
+    "standard_maps": {
+      "FA": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 1441190,
+          "pearson": 0.6946111912146797,
+          "mae": 0.08769197957427054,
+          "rmse": 0.14330896479365612,
+          "maximum_absolute_error": 0.9048065543174744
+        }
+      },
+      "MD": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 1786992,
+          "pearson": 0.6004534477655668,
+          "mae": 0.00036243118977704225,
+          "rmse": 0.0005922490922933624,
+          "maximum_absolute_error": 0.007343314704485238
+        }
+      },
+      "L1": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 1786992,
+          "pearson": 0.535743012954045,
+          "mae": 0.0004228557821374677,
+          "rmse": 0.0006993037622438198,
+          "maximum_absolute_error": 0.006982607650570571
+        }
+      },
+      "L2": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 1786992,
+          "pearson": 0.6133683642173854,
+          "mae": 0.00036185646820874627,
+          "rmse": 0.0005850732479670244,
+          "maximum_absolute_error": 0.007692692102864385
+        }
+      },
+      "L3": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 1786992,
+          "pearson": 0.6586981292481119,
+          "mae": 0.000327430692053913,
+          "rmse": 0.0005246555333040698,
+          "maximum_absolute_error": 0.010201229364611208
+        }
+      },
+      "MO": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 1786992,
+          "pearson": 0.46430297461096987,
+          "mae": 0.32051606085526957,
+          "rmse": 0.42516435883001014,
+          "maximum_absolute_error": 1.8687638640403748
+        }
+      },
+      "ICVF": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 1754286,
+          "pearson": 0.31382238252600314,
+          "mae": 0.16545314455110358,
+          "rmse": 0.26175204418444525,
+          "maximum_absolute_error": 0.9900001287460327
+        }
+      },
+      "OD": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 1785271,
+          "pearson": 0.5920979882328822,
+          "mae": 0.14848340860046128,
+          "rmse": 0.2215760476245385,
+          "maximum_absolute_error": 1.0000001192092896
+        }
+      },
+      "ISOVF": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 1740910,
+          "pearson": 0.6243629238088897,
+          "mae": 0.15492743941279244,
+          "rmse": 0.24255986086155248,
+          "maximum_absolute_error": 1.1007056860253215
+        }
+      }
+    },
+    "skeleton_maps": {
+      "FA": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 136728,
+          "pearson": 0.5611653289029429,
+          "mae": 0.12322014749133274,
+          "rmse": 0.2047795846362805,
+          "maximum_absolute_error": 0.9048065543174744
+        }
+      },
+      "MD": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 136728,
+          "pearson": 0.44700921860483694,
+          "mae": 0.00021920753622129902,
+          "rmse": 0.00041952342048594726,
+          "maximum_absolute_error": 0.00408408185467124
+        }
+      },
+      "L1": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 136728,
+          "pearson": 0.4132545835054246,
+          "mae": 0.00028964275536750574,
+          "rmse": 0.0005498291817497555,
+          "maximum_absolute_error": 0.004401461686939001
+        }
+      },
+      "L2": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 136728,
+          "pearson": 0.504887040953649,
+          "mae": 0.0002165962767281712,
+          "rmse": 0.0004008438884303358,
+          "maximum_absolute_error": 0.004017850384116173
+        }
+      },
+      "L3": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 136728,
+          "pearson": 0.5400625921318396,
+          "mae": 0.0001942045285616954,
+          "rmse": 0.00035922120244884437,
+          "maximum_absolute_error": 0.003910078201442957
+        }
+      },
+      "MO": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 136728,
+          "pearson": 0.6226534553367106,
+          "mae": 0.28562264710573326,
+          "rmse": 0.4045757977469042,
+          "maximum_absolute_error": 1.831689476966858
+        }
+      },
+      "ICVF": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 136628,
+          "pearson": 0.10707331620136487,
+          "mae": 0.1420741980156966,
+          "rmse": 0.25081979142272864,
+          "maximum_absolute_error": 0.989372193813324
+        }
+      },
+      "OD": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 136728,
+          "pearson": 0.6055017279212509,
+          "mae": 0.09872333784877306,
+          "rmse": 0.16457476863521003,
+          "maximum_absolute_error": 1.0
+        }
+      },
+      "ISOVF": {
+        "same_shape": true,
+        "same_affine": true,
+        "same_dtype": true,
+        "metrics": {
+          "voxels": 133926,
+          "pearson": 0.5253426636116809,
+          "mae": 0.09098698631034847,
+          "rmse": 0.15461945330228546,
+          "maximum_absolute_error": 1.0824604034423828
+        }
+      }
+    }
+  },
+  "timing": {
+    "candidate_external": {
+      "wall_seconds": 444.93,
+      "maximum_rss_kib": 2510476,
+      "exit_status": 0
+    },
+    "candidate_internal_total_seconds": 440.09232696006075,
+    "candidate_stages_seconds": {
+      "topup_and_eddy_preparation": 102.20757141010836,
+      "eddy": 54.488590811844915,
+      "dtifit": 19.13675489416346,
+      "noddi": 50.67764484323561,
+      "registration_and_map_propagation": 213.5197577145882
+    },
+    "official_registration_external": {
+      "wall_seconds": 976.88,
+      "maximum_rss_kib": 1254544,
+      "exit_status": 0
+    },
+    "comparison_scope_matched": false,
+    "candidate_timing_isolated": false,
+    "reason_no_speedup": "candidate timing includes raw preprocessing; official timing starts from prepared native maps"
+  },
+  "memory": {
+    "component_peak_cuda_bytes": {
+      "eddy": 3475116032,
+      "dtifit": 1313357312,
+      "noddi": 13663715840,
+      "tbss": 3631746560
+    },
+    "maximum_reported_component_cuda_bytes": 13663715840
+  },
+  "status": {
+    "run_completed": true,
+    "standard_grid_contract_passed": true,
+    "standard_dtype_contract_passed": true,
+    "skeleton_grid_contract_passed": true,
+    "skeleton_dtype_contract_passed": true,
+    "numerical_equivalence_passed": false,
+    "reason": "one-case raw-to-standard outputs are not near voxelwise equality"
+  },
+  "artifacts": {
+    "figure": "dmri_tbss_fa_real.png"
+  },
+  "limits": [
+    "one real subject",
+    "candidate and official timing scopes differ",
+    "candidate wall timing includes contention from a separate GPU training process",
+    "native-map differences are part of the raw-to-standard comparison"
+  ],
+  "source_equivalence_attestation": {
+    "path": "../runtime_dependencies/flirt_qc_source_equivalence.public.json",
+    "sha256": "b69a6aab75018e75739d864d14fa990470f39a334605a1c2fda18c2871bb1556",
+    "scope": "src/fnit/flirt/core.py only",
+    "measured_source_sha256": "5528560292d3ba72778fda619abd907ab4cd666b80a8f18b95538ee4b8ca89b2",
+    "current_source_sha256": "f5315f5823df98334f170d43df71bb45f83653d484087d0055ab572c63a3c6e4",
+    "normalized_numerical_ast_equal": true,
+    "fresh_current_hash_numerical_run": false
+  },
+  "current_source_chain": {
+    "measurement_source_sha256": "5528560292d3ba72778fda619abd907ab4cd666b80a8f18b95538ee4b8ca89b2",
+    "intermediate_source_sha256": "f5315f5823df98334f170d43df71bb45f83653d484087d0055ab572c63a3c6e4",
+    "current_source_sha256": "ce375d5a144aa80e0b0607b05319be107a651a1d3611cd37e8d5869587001112",
+    "covered_profile": {
+      "degrees_of_freedom": 12,
+      "cost": "corratio"
+    },
+    "attestations": [
+      {
+        "path": "../runtime_dependencies/flirt_qc_source_equivalence.public.json",
+        "sha256": "b69a6aab75018e75739d864d14fa990470f39a334605a1c2fda18c2871bb1556",
+        "scope": "measurement source to intermediate source; runtime QC only"
+      },
+      {
+        "path": "../runtime_dependencies/flirt_profile_source_equivalence.public.json",
+        "sha256": "d942ff3a690cc3889cd54aaae4860592deae2c6f91adc8097d3e5d31743309c7",
+        "scope": "intermediate source to current source; 12-DOF corratio only"
+      }
+    ],
+    "source_equivalent_for_covered_profile": true,
+    "fresh_current_hash_full_real_data_rerun": false,
+    "excluded_profile": "6-DOF normmi; its 8 mm search-cost path changed"
+  },
+  "synthmorph_source_status": {
+    "recorded_in_source_snapshot": false,
+    "executed_by_pipeline": false,
+    "reason": "This registration backend does not call SynthMorph.",
+    "attestation_applicable_to_numerical_output": false,
+    "numerical_inheritance_claimed": false,
+    "registration_backend": "tbss"
+  },
+  "package_entry_source_chain": {
+    "measurement_source_sha256": {
+      "src/fnit/__init__.py": "cc9aa48bd2cd5966801460d83f46eff5839e91fcd6962640a89be538a23ead32",
+      "src/fnit/cli.py": "2d5e3d37f52fffb7834a438339566cd7ead980606a2127ade268662569922178"
+    },
+    "current_source_sha256": {
+      "src/fnit/__init__.py": "be1cabfa23b20d759d3506d13fa8d7bc18df0452851618ffc8fe699910413b3f",
+      "src/fnit/cli.py": "c92a3fbaa2a8f10e96c73a7bd18bd1a0924844c028db532d2f573d47e4dc2c07"
+    },
+    "covered_entry": "python -m fnit.cli dmri-pipeline; registration_backend=tbss",
+    "attestation": {
+      "path": "../runtime_dependencies/package_entry_source_equivalence.public.json",
+      "sha256": "981a52903724651fb9ef2e8fbe6a69e2baddafc22871333bd86b51b8931bdc7d"
+    },
+    "source_equivalent_for_covered_route": true,
+    "fresh_current_hash_full_real_data_rerun": false
+  }
+}

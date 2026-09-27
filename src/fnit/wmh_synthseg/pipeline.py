@@ -9,11 +9,11 @@ import csv
 import os
 from pathlib import Path
 
-import nibabel as nib
 import numpy as np
 import torch
 
-from ..synthstrip.geometry import Volume
+from .._dmri import configure_device
+from .._nib import FNITNifti1Image, load_image, new_image
 from ..weights import resolve_weights
 from .model import UNet3D
 from .spatial import align_volume_to_ref, myzoom_torch
@@ -37,8 +37,8 @@ LABEL_NAMES = ('background', '3rd-ventricle', '4th-ventricle', 'brainstem',
 
 @dataclass
 class WMHResult:
-    segmentation: Volume
-    lesion_probability: Volume | None
+    segmentation: FNITNifti1Image
+    lesion_probability: FNITNifti1Image | None
     volumes_mm3: dict[int, float]
 
 
@@ -55,7 +55,7 @@ def _write_volumes_csv(volumes_mm3, segmentation_path, csv_path):
 
 class WMHSynthSeg:
     def __init__(self, weights=None, device='cpu', threads=None):
-        self.device = torch.device(device)
+        self.device = configure_device(device)
         if threads is not None:
             torch.set_num_threads(os.cpu_count() if threads < 0 else threads)
         checkpoint_path = resolve_weights('WMH-SynthSeg_v10_231110.pth', explicit=weights)
@@ -68,13 +68,8 @@ class WMHSynthSeg:
 
     @torch.no_grad()
     def __call__(self, image, crop=False, save_lesion_probabilities=False):
-        if isinstance(image, (str, Path)):
-            volume = nib.load(str(image))
-            data, affine = volume.get_fdata(), volume.affine
-        elif hasattr(image, 'data') and hasattr(image, 'geom'):
-            data, affine = image.data, image.geom.vox2world.matrix
-        else:
-            raise TypeError('image must be a path or volume with data and geometry')
+        volume = load_image(image)
+        data, affine = volume.get_fdata(), volume.affine
         data = np.squeeze(data)
         if data.ndim != 3:
             raise ValueError('WMH-SynthSeg accepts a single 3D volume')
@@ -104,11 +99,12 @@ class WMHSynthSeg:
         segmentation = self.labels[torch.argmax(probabilities, dim=0)].cpu().numpy()
         volumes = probabilities.sum(dim=(1, 2, 3)).cpu().numpy()
         # FreeSurfer MRIwrite uses a default NIfTI header, yielding float32 labels.
-        seg_volume = Volume(segmentation.astype(np.float32), aff_upscaled)
+        seg_volume = new_image(segmentation.astype(np.float32), volume,
+                               affine=aff_upscaled)
         lesion_volume = None
         if save_lesion_probabilities:
             lesion = probabilities[LABEL_IDS.index(77)].cpu().numpy()
-            lesion_volume = Volume(lesion, aff_upscaled)
+            lesion_volume = new_image(lesion, volume, affine=aff_upscaled)
         return WMHResult(seg_volume, lesion_volume,
                          {label: float(value) for label, value in zip(LABEL_IDS, volumes)})
 

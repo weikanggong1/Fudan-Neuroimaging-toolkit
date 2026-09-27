@@ -4,7 +4,12 @@ import torch
 from scipy.optimize import nnls
 
 from fnit.amico_noddi import AMICONODDIConfig, TorchAMICONODDI
-from fnit.amico_noddi.kernels import amico_scheme, direction_assets
+from fnit.amico_noddi.kernels import (
+    _real_sh_descoteaux,
+    amico_scheme,
+    direction_assets,
+    principal_directions,
+)
 from fnit.amico_noddi.solver import nonnegative_quadratic
 
 
@@ -39,7 +44,10 @@ def test_noddi_outputs_are_bounded_and_use_ukb_names(tmp_path):
         assert values.min() >= 0 and values.max() <= 1
     for name in ("NODDI_ICVF.nii.gz", "NODDI_OD.nii.gz", "NODDI_ISOVF.nii.gz"):
         assert (tmp_path / "out" / name).is_file()
-    assert result.qc["amico_numerically_equivalent"] is False
+    assert result.qc["amico_numerically_equivalent"] is result.qc[
+        "validated_numpy_build"
+    ]
+    assert result.qc["current_input_compared_with_amico"] is False
     assert result.qc["solver_dtype"] == "float64"
     assert int(result.directions.header["intent_code"]) == 0
 
@@ -60,6 +68,53 @@ def test_direction_assets_have_amico_500_shapes():
     assert directions.shape == (500, 3)
     assert table.shape == (181 * 181,)
     assert table.dtype == np.int16
+
+
+def test_internal_ols_tensor_recovers_principal_direction():
+    rng = np.random.default_rng(118)
+    gradients = rng.normal(size=(36, 3))
+    gradients /= np.linalg.norm(gradients, axis=1, keepdims=True)
+    gradients[:3] = 0
+    bvals = np.r_[np.zeros(3), np.full(33, 1000.0)]
+    principal = np.array([0.8, -0.3, 0.5196152422706632])
+    principal /= np.linalg.norm(principal)
+    helper = np.array([principal[1], -principal[0], 0.0])
+    helper /= np.linalg.norm(helper)
+    third = np.cross(principal, helper)
+    rotation = np.column_stack((principal, helper, third))
+    tensor = rotation @ np.diag([1.7e-3, 0.45e-3, 0.3e-3]) @ rotation.T
+    signal = 1000.0 * np.exp(-bvals * np.einsum("ni,ij,nj->n", gradients, tensor, gradients))
+    raw = np.column_stack((gradients, bvals))
+    actual = principal_directions(signal[None], raw)[0]
+    assert abs(float(np.dot(actual, principal))) > 1 - 1e-10
+
+
+def test_internal_ols_tensor_ignores_nonunit_b0_vectors():
+    rng = np.random.default_rng(441)
+    gradients = rng.normal(size=(36, 3))
+    gradients /= np.linalg.norm(gradients, axis=1, keepdims=True)
+    bvals = np.r_[np.zeros(3), np.full(33, 1000.0)]
+    signal = rng.uniform(0.1, 1.0, size=(7, 36))
+    raw_zero = np.column_stack((gradients, bvals))
+    raw_zero[:3, :3] = 0
+    raw_nonunit = raw_zero.copy()
+    raw_nonunit[:3, :3] = np.array(
+        [[0.2, 0.1, 0.0], [0.0, -0.3, 0.2], [0.4, 0.0, 0.1]]
+    )
+    np.testing.assert_array_equal(
+        principal_directions(signal, raw_zero),
+        principal_directions(signal, raw_nonunit),
+    )
+
+
+def test_internal_descoteaux_basis_has_expected_north_pole_values():
+    basis = _real_sh_descoteaux(np.array([0.0]), np.array([0.0]))[0]
+    degrees = np.arange(0, 13, 2)
+    l_values = np.repeat(degrees, 2 * degrees + 1)
+    m_values = np.concatenate([np.arange(-degree, degree + 1) for degree in degrees])
+    expected = np.zeros_like(basis)
+    expected[m_values == 0] = np.sqrt((2 * l_values[m_values == 0] + 1) / (4 * np.pi))
+    np.testing.assert_allclose(basis, expected, atol=1e-14, rtol=1e-14)
 
 
 def test_torch_active_set_matches_nnls():

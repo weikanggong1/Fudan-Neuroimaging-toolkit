@@ -8,13 +8,19 @@ from .io import (
     save_fsl_coefficients,
 )
 
-from .registration import (
-    FSL_SOURCE_VERSIONS,
-    GMFNIRTConfig,
-    TorchFNIRT,
-    TorchFNIRTResult,
-    spm_like_mean,
-)
+
+def __getattr__(name):
+    if name in {
+        "FSL_SOURCE_VERSIONS",
+        "GMFNIRTConfig",
+        "TorchFNIRT",
+        "TorchFNIRTResult",
+        "spm_like_mean",
+    }:
+        from importlib import import_module
+        module = import_module(".registration", __name__)
+        return getattr(module, name)
+    raise AttributeError(name)
 
 __all__ = [
     "FSL_SOURCE_VERSIONS",

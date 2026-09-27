@@ -1,0 +1,225 @@
+{
+  "schema_version": 1,
+  "data": {
+    "kind": "one deidentified real clinical T1w",
+    "subjects": 1,
+    "subject_identifier_published": false
+  },
+  "candidate": {
+    "implementation": "FNIT FastVBM",
+    "backend": "fnirt",
+    "device": "cuda:0",
+    "source_sha256": {
+      "src/fnit/fast_vbm/pipeline.py": "aa37774419f0fed952a2a5a3304601d07436fc827522ed32c9088f964e9254b9",
+      "src/fnit/fast_vbm/registration.py": "02da3eb746ee7fb6ff75a70bb0f65be1fc9c717390cf1f0a06141503714baa0c",
+      "src/fnit/fast_vbm/synthmorph_backend.py": "547de082dc4bb65d630f254d2d4d34c5da81233fb6c91019a337f9f40424b211",
+      "src/fnit/fast/pipeline.py": "4f003e47cd33de27fd9c829b05fcef1c83bea1dc3eb522411039331685bf2129",
+      "src/fnit/synthstrip/pipeline.py": "3cc23ab81eebb6ad11ac9814691f9d3b5c13c93fc2569ee1f4dddea70ec37de7",
+      "src/fnit/synthmorph/pipeline.py": "e680d3a85f7e240cdab235047766973035d9188e705d9642e3edca1402d5d202",
+      "src/fnit/flirt/core.py": "5528560292d3ba72778fda619abd907ab4cd666b80a8f18b95538ee4b8ca89b2",
+      "src/fnit/fnirt/registration.py": "a63ed0b09e43a5af4bf63b2f583e710b1d0fc73aac548a326c552334a741cd83",
+      "src/fnit/applywarp/core.py": "cf6de438f3ac1551804d38682ce3fbb11b8fb042ad881562ebc93aada80f2df5",
+      "src/fnit/_nib.py": "bffd56aeaca423b2448432ba318212e83549e9e31aa27af6bf20a60888218586",
+      "src/fnit/_transforms.py": "be01fa24cd0c17bb1aa8ac7792cdf0b62c657037808c643427a1b11cc4c05340"
+    },
+    "tf32": {
+      "matmul": true,
+      "cudnn": true,
+      "reduced_precision_tensor_dtype": false
+    }
+  },
+  "reference": {
+    "implementation": "existing FSL/UKB VBM outputs",
+    "warped_gm": "fsl_reg/FNIRT output",
+    "jacobian": "FNIRT nonlinear-only Jacobian",
+    "modulated_gm": "warped GM multiplied by Jacobian in float32"
+  },
+  "accuracy_mask": {
+    "definition": "explicit template-grid reference mask > 0",
+    "voxels": 292019
+  },
+  "contracts": {
+    "warped_gm": {
+      "same_shape": true,
+      "same_affine": true,
+      "candidate_dtype": "float32",
+      "reference_dtype": "float32"
+    },
+    "jacobian": {
+      "same_shape": true,
+      "same_affine": true,
+      "candidate_dtype": "float32",
+      "reference_dtype": "float32"
+    },
+    "modulated_gm": {
+      "same_shape": true,
+      "same_affine": true,
+      "candidate_dtype": "float32",
+      "reference_dtype": "float32"
+    }
+  },
+  "accuracy": {
+    "warped_gm": {
+      "voxels": 292019,
+      "pearson": 0.5594200640266467,
+      "mae": 0.22031572235195226,
+      "rmse": 0.3542880709198234,
+      "maximum_absolute_error": 1.0000001192092896,
+      "dice_at_0.2": 0.7348437236537547
+    },
+    "jacobian": {
+      "voxels": 292019,
+      "pearson": 0.23760690716574143,
+      "mae": 0.22448287391445912,
+      "rmse": 0.33183939929542866,
+      "maximum_absolute_error": 4.296265006065369,
+      "dice_at_0.2": 1.0
+    },
+    "modulated_gm": {
+      "voxels": 292019,
+      "pearson": 0.4879102695069597,
+      "mae": 0.257732918032739,
+      "rmse": 0.4386173211596699,
+      "maximum_absolute_error": 5.431355953216553,
+      "dice_at_0.2": 0.7319484816624404
+    }
+  },
+  "upstream_diagnosis": {
+    "native_gm_contract": {
+      "same_shape": false,
+      "same_affine": false,
+      "candidate_dtype": "float32",
+      "reference_dtype": "float32"
+    },
+    "brain_mask_contract": {
+      "same_shape": false,
+      "same_affine": false,
+      "candidate_dtype": "uint8",
+      "reference_dtype": "float32"
+    }
+  },
+  "timing_seconds": {
+    "compute_including_input_load_and_lazy_weights": 49.00982207339257,
+    "nifti_save_13_outputs_and_report": 7.416449559852481,
+    "in_process_total": 57.67530213901773,
+    "pipeline_stage_report": {
+      "brain_extraction": 9.841895184013993,
+      "fast": 6.312913519795984,
+      "registration_jacobian_modulation": 32.38753388077021,
+      "total": 49.00501855928451
+    }
+  },
+  "memory": {
+    "peak_cuda_allocated_bytes": 12969777152,
+    "process_max_rss_kib": 2357364
+  },
+  "environment": {
+    "host": "gpucw1",
+    "python": "3.11.16",
+    "torch": "2.5.1",
+    "cuda_runtime": "11.8",
+    "gpu": "NVIDIA H100 PCIe",
+    "cpu_threads": 4
+  },
+  "input_sha256": {
+    "raw_t1w": "cd7d98a03f9aea34b83f69b184af2ced799351b93eb8da09957aae7038a6e36f",
+    "gm_template": "2f20eeb19a8f9c3514d1bd1f4d46bca13065ca66bae723721e413688bde9110c",
+    "reference_mask": "342d41e1c445d87a812ca288786a116306e96a5595a198e46ba7e7515d4f221c",
+    "official_warped_gm": "e4981b19f63a3ab18ace79a6b57ae41c3a14c528477137f8f9532fae1a2b3052",
+    "official_jacobian": "6f11e62f6aa4390ff10787831924b339479126a813767d115341884062e34642",
+    "synthstrip_weights": "37417f802196186441aae3e7f385d94f8a98c64a88acaeaa2723af995c653e33"
+  },
+  "output_sha256": {
+    "warped_gm": "8c540a11c1eff853f9a99f52370835c62cdf01a9fdc92ec417972344af6e31d4",
+    "jacobian": "defddc8d85dad9e6127d8439002fe6c412640303c1e4a4c182ddd38b3c29d9d9",
+    "modulated_gm": "d811ba8b3ff448324b14f53258b0e37e70277423005607c85c29bce3fc1a0c1d"
+  },
+  "artifacts": {
+    "figure": "fast_vbm_fnirt_real.png",
+    "pipeline_report": "fast_vbm_report.json"
+  },
+  "limits": [
+    "one real subject",
+    "the official maps were existing FSL/UKB outputs and were not regenerated inside this script",
+    "FastVBM and FSL/UKB use different brain extraction, tissue segmentation, affine, and nonlinear optimizers",
+    "the timings are one cold in-process run and are not a repeated benchmark"
+  ],
+  "fast_vbm_registration_source_status": {
+    "scope": "src/fnit/fast_vbm/registration.py public FastVBM production path",
+    "measurement_source_sha256": "02da3eb746ee7fb6ff75a70bb0f65be1fc9c717390cf1f0a06141503714baa0c",
+    "current_source_sha256": "44789289ef69e03e1619245e6618158ebba7765dfa97cfdc7b07784e4ce51441",
+    "change": "removed the private initial_pull affine-bypass hook and its validation; the retained path always runs TorchFLIRT",
+    "measurement_profile": {
+      "entry_points": [
+        "FastVBM.__call__",
+        "FastVBM.run"
+      ],
+      "initial_pull": null,
+      "public_api_forwarded_initial_pull": false,
+      "affine_stage": "TorchFLIRT"
+    },
+    "normalized_public_path_ast": {
+      "normalization": "remove the retired _initial_pull_world helper and its imports, select the old initial_pull is None branch, remove the retired keyword and all docstrings, then compare location-free Python AST dumps",
+      "measurement_ast_sha256": "47254ae814328b469d5628853adf7c1910c9bb1946011fb6acd800573d50adc3",
+      "current_ast_sha256": "47254ae814328b469d5628853adf7c1910c9bb1946011fb6acd800573d50adc3",
+      "equal": true
+    },
+    "controlled_behavior_test": {
+      "host": "gpucw1",
+      "tests": [
+        "tests/fast_vbm/test_common_registration_chain.py",
+        "tests/fast_vbm/test_fast_vbm_registration.py",
+        "tests/fast_vbm/test_fast_vbm_pipeline.py"
+      ],
+      "result": "17 passed",
+      "duration_seconds": 3.11,
+      "coverage": "default TorchFLIRT dispatch for both nonlinear backends, common post-affine chain, input checks, and absence of the retired public option"
+    },
+    "source_equivalent_for_public_production_path": true,
+    "fresh_current_hash_full_real_data_rerun": false,
+    "excluded_path": "retired private initial_pull branch"
+  },
+  "source_equivalence_attestation": {
+    "path": "../runtime_dependencies/flirt_qc_source_equivalence.public.json",
+    "sha256": "b69a6aab75018e75739d864d14fa990470f39a334605a1c2fda18c2871bb1556",
+    "scope": "src/fnit/flirt/core.py only",
+    "measured_source_sha256": "5528560292d3ba72778fda619abd907ab4cd666b80a8f18b95538ee4b8ca89b2",
+    "current_source_sha256": "f5315f5823df98334f170d43df71bb45f83653d484087d0055ab572c63a3c6e4",
+    "normalized_numerical_ast_equal": true,
+    "fresh_current_hash_numerical_run": false
+  },
+  "current_source_chain": {
+    "measurement_source_sha256": "5528560292d3ba72778fda619abd907ab4cd666b80a8f18b95538ee4b8ca89b2",
+    "intermediate_source_sha256": "f5315f5823df98334f170d43df71bb45f83653d484087d0055ab572c63a3c6e4",
+    "current_source_sha256": "ce375d5a144aa80e0b0607b05319be107a651a1d3611cd37e8d5869587001112",
+    "covered_profile": {
+      "degrees_of_freedom": 12,
+      "cost": "corratio"
+    },
+    "attestations": [
+      {
+        "path": "../runtime_dependencies/flirt_qc_source_equivalence.public.json",
+        "sha256": "b69a6aab75018e75739d864d14fa990470f39a334605a1c2fda18c2871bb1556",
+        "scope": "measurement source to intermediate source; runtime QC only"
+      },
+      {
+        "path": "../runtime_dependencies/flirt_profile_source_equivalence.public.json",
+        "sha256": "d942ff3a690cc3889cd54aaae4860592deae2c6f91adc8097d3e5d31743309c7",
+        "scope": "intermediate source to current source; 12-DOF corratio only"
+      }
+    ],
+    "source_equivalent_for_covered_profile": true,
+    "fresh_current_hash_full_real_data_rerun": false,
+    "excluded_profile": "6-DOF normmi; its 8 mm search-cost path changed"
+  },
+  "synthmorph_source_status": {
+    "recorded_in_source_snapshot": true,
+    "executed_by_branch": false,
+    "recorded_measurement_source_sha256": {
+      "src/fnit/synthmorph/pipeline.py": "e680d3a85f7e240cdab235047766973035d9188e705d9642e3edca1402d5d202"
+    },
+    "record_role": "shared source snapshot inventory only",
+    "attestation_applicable_to_branch_numerical_output": false,
+    "numerical_inheritance_claimed": false
+  }
+}

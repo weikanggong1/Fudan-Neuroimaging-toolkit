@@ -8,6 +8,7 @@ import numpy as np
 import torch
 from torch.nn import functional as F
 
+from .._dmri import configure_device
 from .model import ParcUNet
 
 
@@ -21,7 +22,7 @@ class SynthSegParc:
     """
 
     def __init__(self, weights: str | Path, labels: str | Path, device="cpu"):
-        self.device = torch.device(device)
+        self.device = configure_device(device)
         label_ids = np.unique(np.load(labels))
         if len(label_ids) != 69 or label_ids[0] != 0:
             raise ValueError("Expected 69 SynthSeg parcellation labels including background")

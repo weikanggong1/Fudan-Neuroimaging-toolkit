@@ -95,23 +95,23 @@ def _align_ras(image: torch.Tensor, affine: np.ndarray):
     return image, aligned_affine
 
 
-def preprocess_t1(path: str | Path, device="cpu", min_pad: int = 128) -> PreprocessedT1:
+def preprocess_t1(path: str | Path | nib.spatialimages.SpatialImage,
+                  device="cpu", min_pad: int = 128) -> PreprocessedT1:
     """Load, resample, orient, normalize, and center-pad a T1 for SynthSeg.
 
     ``min_pad=128`` matches official ``mri_synthseg`` without ``--crop``.
     Smaller values are useful for local crop tests; output dimensions remain
     multiples of 32. The returned image is a 3-D float32 tensor on ``device``.
     """
-    source = nib.load(str(path))
+    source = (nib.load(str(path)) if isinstance(path, (str, Path)) else path)
+    if not isinstance(source, nib.spatialimages.SpatialImage):
+        raise TypeError("path must be a path or nibabel spatial image")
     data = np.squeeze(source.get_fdata(dtype=np.float64))
     if data.ndim != 3:
         raise ValueError("SynthSeg requires a single 3-D image")
     affine = source.affine.copy()
     original_shape = tuple(data.shape)
-    if isinstance(source, nib.MGHImage):
-        voxsize = np.asarray(source.header["delta"], dtype=float)
-    else:
-        voxsize = np.asarray(source.header["pixdim"][1:4], dtype=float)
+    voxsize = np.asarray(source.header.get_zooms()[:3], dtype=float)
     image = torch.as_tensor(data, device=device)
     if np.any((voxsize > 1.05) | (voxsize < 0.95)):
         image, affine = _resample_1mm(image, affine)

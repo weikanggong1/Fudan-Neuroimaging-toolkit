@@ -2,26 +2,39 @@ include README.md THIRD_PARTY_NOTICES.md environment.yml
 recursive-include licenses *.txt
 recursive-include src/fnit/_vendor_fsl * .*
 recursive-include docs *.md *.json *.png
+recursive-include examples *.md *.json *.py
 include docs/bedpostx/synthetic_example.py
-recursive-include tools *.py *.md
+recursive-include tools *.py
 recursive-include tests *.py *.json
-recursive-include validation/recon_all *.py *.md *.json *.cu
-recursive-include validation/fast_vbm README.md
-recursive-include validation/applywarp SHA256SUMS *.json
-recursive-include validation/flirt SHA256SUMS *.public.json
-recursive-include validation/synthseg SHA256SUMS *.public.json
-recursive-include validation/topup *.public.json
-include benchmark/probtrackx_validation.py
-recursive-include validation/bedpostx *.py *.md *.json *.png
-recursive-include validation/probtrackx *.py *.md *.json *.png *.sh
+recursive-include validation/applywarp *.json *.py SHA256SUMS
+recursive-include validation/flirt *.json *.md *.py SHA256SUMS
+recursive-include validation/fnirt *.json *.py *.sh SHA256SUMS
+recursive-include validation/topup *.public.json SHA256SUMS
+recursive-include benchmark *.py
+recursive-include validation/bedpostx *.md *.json
+recursive-include validation/probtrackx *.py *.md *.json *.sh
 # Runtime checkpoints, MRI templates, and generated images are external data.
 global-exclude *.pt *.pth *.h5 *.hdf5 *.ckpt
 global-exclude *.pyc *.pyo
 global-exclude *.nii *.nii.gz *.mgz *.mgh
+# ICA-AROMA uses these three small, licensed standard-space masks at runtime.
+recursive-include src/fnit/fmri/assets *.nii.gz
 prune weights
 prune work
 recursive-include validation/eddy *.json SHA256SUMS
 recursive-include validation/dtifit *.json SHA256SUMS
-recursive-include validation/amico_noddi *.json SHA256SUMS
+recursive-include validation/amico_noddi *.json *.py SHA256SUMS
 recursive-include validation/mmorf *.json *.md *.py SHA256SUMS
 recursive-include validation/dmri_pipeline *.json *.md *.py *.sh SHA256SUMS
+include validation/README.md
+recursive-include validation/fast_vbm *.json *.md *.py SHA256SUMS
+recursive-include validation/fast *.json *.md *.png SHA256SUMS
+recursive-include validation/wmh *.json *.md SHA256SUMS
+recursive-include validation/synthseg *.json *.md *.py SHA256SUMS
+recursive-include validation/synthsr *.json *.md SHA256SUMS
+recursive-include validation/synthstrip *.json *.py
+recursive-include validation/synthmorph *.json *.md *.py SHA256SUMS
+recursive-include validation/mshbm *.json *.md *.py
+recursive-include validation/fmri *.json *.md *.py *.png SHA256SUMS
+recursive-include validation/model_io_current *.md *.py
+recursive-include validation/runtime_dependencies *.json SHA256SUMS

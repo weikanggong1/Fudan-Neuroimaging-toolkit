@@ -1,0 +1,258 @@
+{
+  "schema_version": 4,
+  "generated_at": "2026-09-28",
+  "scope": "Package initialization and root CLI routes recorded by the FNIRT, SynthMorph, and dMRI pipeline real-data reports; this revision also records the deliberate 0.16.0 contraction of the root public API. The expanded fMRI lazy-export branch, including its surface exports, and removed internal-only exports are not covered numerical routes.",
+  "measurement_source": {
+    "src/fnit/__init__.py": "cc9aa48bd2cd5966801460d83f46eff5839e91fcd6962640a89be538a23ead32",
+    "src/fnit/cli.py": "2d5e3d37f52fffb7834a438339566cd7ead980606a2127ade268662569922178"
+  },
+  "current_source": {
+    "src/fnit/__init__.py": "be1cabfa23b20d759d3506d13fa8d7bc18df0452851618ffc8fe699910413b3f",
+    "src/fnit/cli.py": "c92a3fbaa2a8f10e96c73a7bd18bd1a0924844c028db532d2f573d47e4dc2c07"
+  },
+  "covered_routes": [
+    {
+      "report": "validation/fnirt/report.real.current.json",
+      "entry": "direct execution of validation/fnirt/run_current_matched.py",
+      "files": [
+        "src/fnit/__init__.py"
+      ]
+    },
+    {
+      "report": "validation/synthmorph/report.real.current.cpu.json",
+      "entry": "root synthmorph command and linear registration path",
+      "files": [
+        "src/fnit/cli.py"
+      ]
+    },
+    {
+      "report": "validation/synthmorph/report.real.current.gpu.json",
+      "entry": "root synthmorph command and linear registration path",
+      "files": [
+        "src/fnit/cli.py"
+      ]
+    },
+    {
+      "report": "validation/dmri_pipeline/tbss_e2e.real.current.json",
+      "entry": "python -m fnit.cli dmri-pipeline --registration-backend tbss",
+      "files": [
+        "src/fnit/__init__.py",
+        "src/fnit/cli.py"
+      ]
+    },
+    {
+      "report": "validation/dmri_pipeline/mmorf_e2e.real.current.json",
+      "entry": "python -m fnit.cli dmri-pipeline --registration-backend mmorf",
+      "files": [
+        "src/fnit/__init__.py",
+        "src/fnit/cli.py"
+      ]
+    }
+  ],
+  "diff": {
+    "src/fnit/__init__.py": [
+      "changed package version from 0.14.0 to 0.16.0",
+      "added the disjoint fMRI lazy-export branch in 0.15.0 and expanded it in 0.16.0",
+      "the current branch exports FeatCore, BIDS lookup, BBR, full fMRI pipeline, T1-to-MNI, resampling, ICA, AROMA, confound helpers, and the fMRI surface projection, QC, orchestration, and MNI-surface preparation APIs",
+      "removed prepare_ukb_topup, prepare_ukb_eddy, TorchTBSS, TBSSResult, and TBSSConfig from the root lazy-export name tuples so that preparation and TBSS implementation details remain internal",
+      "kept the module targets and branch bodies for every retained lazy export unchanged and did not execute a numerical operation at package import"
+    ],
+    "src/fnit/cli.py": [
+      "made --version read fnit.__version__ instead of a literal",
+      "changed the excluded connectome command",
+      "added early dispatch for synthseg, flirt, connectome, synthsr, wmh-synthseg, fast, and synthstrip",
+      "did not add an early branch for synthmorph, fnirt, or dmri-pipeline",
+      "kept the synthmorph parser and dispatch, final parse_args call, dynamic _fnit_handler dispatch, and dmri-pipeline parser registration unchanged"
+    ]
+  },
+  "ast_check": {
+    "src/fnit/__init__.py": {
+      "normalization": "parse with Python ast; replace the __version__ value with '__FNIT_VERSION__'; remove the disjoint __getattr__ if-branch whose body imports '.fmri'; remove only prepare_ukb_topup, prepare_ukb_eddy, TorchTBSS, TBSSResult, and TBSSConfig from root lazy-export membership tuples in both sources; serialize with ast.dump(annotate_fields=True, include_attributes=False); hash the UTF-8 bytes",
+      "measurement_source_commit": "df18a33f43e9854aeb22a5de13e9889d8d4aa751",
+      "fmri_branches_removed_from_measurement_source": 0,
+      "fmri_branches_removed_from_current_source": 1,
+      "internal_only_names_filtered_from_measurement_source": 5,
+      "internal_only_names_filtered_from_current_source": 0,
+      "intentionally_removed_root_exports": [
+        {
+          "name": "prepare_ukb_topup",
+          "previous_module": ".topup",
+          "status": "removed from the root public API; preparation remains an internal pipeline operation"
+        },
+        {
+          "name": "prepare_ukb_eddy",
+          "previous_module": ".eddy",
+          "status": "removed from the root public API; preparation remains an internal pipeline operation"
+        },
+        {
+          "name": "TorchTBSS",
+          "previous_module": ".dmri_pipeline",
+          "status": "removed from the root public API; TBSS remains an internal dMRI pipeline implementation"
+        },
+        {
+          "name": "TBSSResult",
+          "previous_module": ".dmri_pipeline",
+          "status": "removed from the root public API; TBSS remains an internal dMRI pipeline implementation"
+        },
+        {
+          "name": "TBSSConfig",
+          "previous_module": ".dmri_pipeline",
+          "status": "removed from the root public API; TBSS remains an internal dMRI pipeline implementation"
+        }
+      ],
+      "retained_export_branch_checks": {
+        "topup": {
+          "retained_names": [
+            "TorchTOPUP",
+            "TOPUPResult",
+            "TOPUPConfig",
+            "run_ukb_topup"
+          ],
+          "old_filtered_ast_sha256": "934c8ce473e9e367f2603d83f6f1ce639d134f6d00e26cbb46212bca6d9f84a2",
+          "current_ast_sha256": "934c8ce473e9e367f2603d83f6f1ce639d134f6d00e26cbb46212bca6d9f84a2",
+          "equal": true
+        },
+        "eddy": {
+          "retained_names": [
+            "TorchEDDY",
+            "EDDYResult",
+            "EDDYConfig",
+            "run_ukb_eddy"
+          ],
+          "old_filtered_ast_sha256": "5d6a1589ba0d253dddd9bfec4ba6c1f24f258aeb2002903e427379ded438298e",
+          "current_ast_sha256": "5d6a1589ba0d253dddd9bfec4ba6c1f24f258aeb2002903e427379ded438298e",
+          "equal": true
+        },
+        "dmri_pipeline": {
+          "retained_names": [
+            "DMRIPipeline",
+            "DMRIPipelineResult",
+            "STANDARD_MAP_NAMES"
+          ],
+          "old_filtered_ast_sha256": "374bddabb5e2c26f9156abce2320af618c89d5046ef09009817aa63ac306b036",
+          "current_ast_sha256": "374bddabb5e2c26f9156abce2320af618c89d5046ef09009817aa63ac306b036",
+          "equal": true
+        },
+        "fnirt": {
+          "retained_names": [
+            "TorchFNIRT",
+            "TorchFNIRTResult",
+            "GMFNIRTConfig"
+          ],
+          "old_ast_sha256": "26e9b982eeddd3dc1a676f59c01d765d82ffd6df3bede4e3936e3f0d59b2a711",
+          "current_ast_sha256": "26e9b982eeddd3dc1a676f59c01d765d82ffd6df3bede4e3936e3f0d59b2a711",
+          "equal": true
+        }
+      },
+      "current_fmri_export_names": [
+        "FeatCoreResult",
+        "run_feat_core",
+        "BIDSInputs",
+        "locate_bids_inputs",
+        "BBRResult",
+        "register_bbr",
+        "FMRIPipelineResult",
+        "run_fmri_pipeline",
+        "T1MNIResult",
+        "register_t1_to_mni",
+        "resample_world",
+        "ICAResult",
+        "decompose_spatial_ica",
+        "AromaResult",
+        "run_aroma_pipeline",
+        "classify_aroma",
+        "denoise_aroma",
+        "clean_confounds",
+        "motion_regressors",
+        "SurfaceHemisphere",
+        "SurfaceProjectionResult",
+        "run_surface_projection",
+        "SurfaceQCResult",
+        "make_ribbon_goodvoxels",
+        "SurfacePipelineInputs",
+        "SurfacePipelineResult",
+        "run_surface_from_mni",
+        "MNISurfacePair",
+        "MNISurfaceResult",
+        "SurfacePreparationResult",
+        "prepare_mni_surface_geometry",
+        "prepare_fs_sphere_projection_inputs"
+      ],
+      "current_surface_export_names": [
+        "SurfaceHemisphere",
+        "SurfaceProjectionResult",
+        "run_surface_projection",
+        "SurfaceQCResult",
+        "make_ribbon_goodvoxels",
+        "SurfacePipelineInputs",
+        "SurfacePipelineResult",
+        "run_surface_from_mni",
+        "MNISurfacePair",
+        "MNISurfaceResult",
+        "SurfacePreparationResult",
+        "prepare_mni_surface_geometry",
+        "prepare_fs_sphere_projection_inputs"
+      ],
+      "normalized_ast_utf8_bytes": 10690,
+      "old_normalized_ast_sha256": "fd295c2c0725d5c84de08715785c249afcba83b2c1ef4a6d7168237bf05e4a9b",
+      "current_normalized_ast_sha256": "fd295c2c0725d5c84de08715785c249afcba83b2c1ef4a6d7168237bf05e4a9b",
+      "equal": true,
+      "python_version": "3.10.12",
+      "current_fmri_branch_ast_utf8_bytes": 1494,
+      "current_fmri_branch_ast_sha256": "c0b268f42c3a258d3ccbe15554e437ca3cb4be8357be39d058e214c93c9097cf",
+      "fmri_surface_branch_independence": {
+        "dispatch_form": "one __getattr__ if-branch guarded only by membership in the listed fMRI export tuple; the body imports '.fmri' and returns getattr(fmri, name)",
+        "covered_route_name_intersection": [],
+        "covered_cli_routes_access_root_fmri_exports": false,
+        "normalization_action": "remove this complete branch before comparing the measurement and current package-entry ASTs",
+        "result": "the normalized package-entry AST remains byte-identical after adding the surface names, so the covered FNIRT, SynthMorph, and dMRI routes do not execute or depend on the surface branch"
+      }
+    },
+    "src/fnit/cli.py": {
+      "normalization": "compare the exact AST subtrees exercised by the covered routes; unrelated parser and command branches are excluded",
+      "run_fnirt": {
+        "old_ast_sha256": "efd426665aa495d0cf184e4de371101346676eb5f1b8efb329cf5eec1b4975aa",
+        "current_ast_sha256": "efd426665aa495d0cf184e4de371101346676eb5f1b8efb329cf5eec1b4975aa",
+        "equal": true
+      },
+      "synthmorph_parser": {
+        "old_ast_sha256": "0502ce65ec699677d54a6980657cba0a10c0bb11129484b0051ea911bd7730ae",
+        "current_ast_sha256": "0502ce65ec699677d54a6980657cba0a10c0bb11129484b0051ea911bd7730ae",
+        "equal": true
+      },
+      "synthmorph_dispatch": {
+        "old_ast_sha256": "ade02e4e5b98db598a49d688109a47ee24063e8533af53b70251acb7269ba4f1",
+        "current_ast_sha256": "ade02e4e5b98db598a49d688109a47ee24063e8533af53b70251acb7269ba4f1",
+        "equal": true
+      },
+      "dmri_pipeline_parser_registration": {
+        "old_ast_sha256": "3543b4693a36a1098850b8bc928887694ed59a6deb7d3dfd0339de01f55a77b6",
+        "current_ast_sha256": "3543b4693a36a1098850b8bc928887694ed59a6deb7d3dfd0339de01f55a77b6",
+        "equal": true
+      },
+      "final_parse_args": {
+        "old_ast_sha256": "5cb31753e27f8f2b36719e49f742852cb91fb04d139c2c933b7bd876e5aec6ba",
+        "current_ast_sha256": "5cb31753e27f8f2b36719e49f742852cb91fb04d139c2c933b7bd876e5aec6ba",
+        "equal": true
+      },
+      "dynamic_handler_dispatch": {
+        "old_ast_sha256": "ed915469370b70f20f93443804ace24bd9a30ee4678007b0960b21aa2aec2e02",
+        "current_ast_sha256": "ed915469370b70f20f93443804ace24bd9a30ee4678007b0960b21aa2aec2e02",
+        "equal": true
+      }
+    }
+  },
+  "status": {
+    "covered_routes_source_equivalent": true,
+    "fresh_current_hash_full_real_data_rerun": false,
+    "interpretation": "The reports retain their measured source hashes. For the listed FNIRT, SynthMorph, and dMRI routes, retained root exports and covered CLI subtrees have identical normalized ASTs, so the package-entry changes do not alter argument values, numerical calls, image outputs, or timings. Five implementation-level names were deliberately removed from the root public API and are not claimed as retained exports. The expanded fMRI lazy-export branch, including all listed surface exports, is disjoint from these routes. This is a source-equivalence record, not a new real-data run."
+  },
+  "limits": [
+    "This claim is restricted to the exact old and current hashes and covered routes listed above.",
+    "It does not attest the fMRI lazy-export route, its surface exports, or any numerical implementation under fnit.fmri; that complete branch is removed only to prove it is disjoint from the listed pre-existing routes.",
+    "It does not claim API compatibility for prepare_ukb_topup, prepare_ukb_eddy, TorchTBSS, TBSSResult, or TBSSConfig; those names were intentionally removed from the root public API.",
+    "It does not attest the changed connectome command or any early-dispatch command.",
+    "It does not replace the separate numerical-source attestations for FLIRT or SynthMorph resampling."
+  ],
+  "current_release": "0.16.0"
+}

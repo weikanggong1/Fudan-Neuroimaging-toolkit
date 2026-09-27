@@ -1,4 +1,4 @@
-# PyTorch DTIFIT：FSL 默认 OLS diffusion tensor fit
+# TorchDTIFIT：OLS 扩散张量拟合
 
 `fnit.dtifit.TorchDTIFIT` 在 CPU 或 CUDA 上实现 FSL DTIFIT 默认的七参数 log-linear ordinary least-squares 路径。它输出 FA、S0、三个 eigenvalue、三个 eigenvector、MD 和 MO；`--save_tensor` 额外写六分量 tensor。运行时不调用 FSL，也不使用模型权重。
 
@@ -43,14 +43,17 @@ FSL 的 `--wls` 不在当前实现中；传入 `weighted=True` 会明确报错�
 ```python
 from fnit import TorchDTIFIT
 
-model = TorchDTIFIT(device="cuda:0")
+model = TorchDTIFIT(
+    device="cuda:0",  # 运行设备：第一张可见 CUDA GPU
+)
 result = model.run(
-    data="data_b1000.nii.gz",
-    mask="nodif_brain_mask.nii.gz",
-    bvecs="data_b1000.bvec",
-    bvals="data_b1000.bval",
-    output_prefix="dti",
-    save_tensor=False,
+    data="data_b1000.nii.gz",  # 输入：b0 与目标 shell 组成的 4D DWI
+    mask="nodif_brain_mask.nii.gz",  # 输入：同一扩散网格的 3D 脑掩膜
+    bvecs="data_b1000.bvec",  # 输入：FSL 3×N 梯度方向
+    bvals="data_b1000.bval",  # 输入：与 DWI volume 顺序一致的 b-value
+    output_prefix="dti",  # 输出：所有 DTIFIT 文件的 basename
+    save_tensor=False,  # 输出：不额外写六通道 tensor 文件
+    overwrite=False,  # 写盘策略：不覆盖已有文件
 )
 
 fa_image = result.maps["FA"]
@@ -65,12 +68,14 @@ print(result.qc)
 from fnit.dtifit import select_shell
 
 select_shell(
-    data="eddy/data.nii.gz",
-    bvals="AP.bval",
-    bvecs="eddy/data.eddy_rotated_bvecs",
-    output="data_b1000.nii.gz",
-    shell=1000,
-    tolerance=100,
+    data="eddy/data.nii.gz",  # 输入：EDDY 校正后的多 shell 4D DWI
+    bvals="AP.bval",  # 输入：全部 b-value
+    bvecs="eddy/data.eddy_rotated_bvecs",  # 输入：EDDY 旋转后的 b-vector
+    output="data_b1000.nii.gz",  # 输出：b0+b1000 的 4D DWI
+    shell=1000,  # 目标 shell：1000 s/mm²
+    tolerance=100,  # 容差：目标 b-value 前后 100 s/mm²
+    include_b0=True,  # volume：同时保留 b0
+    overwrite=False,  # 写盘策略：不覆盖已有文件
 )
 ```
 
@@ -97,6 +102,10 @@ select_shell(
 3. 将 signal 下限设为 `0.01×S0`，执行第二次 OLS。
 4. 对 3×3 对称 tensor 做特征分解，并按 eigenvalue 降序输出 L1–L3 和 V1–V3。
 5. 按 FSL 公式计算 FA、MD 和 MO。
+
+## 当前发布验收状态
+
+[`report.public.json`](../../validation/dtifit/report.public.json) 由 FNIT 0.14.0 生成，并记录 `core.py`、`cli.py` 与共享 dMRI I/O 的 SHA-256。报告中的候选实现与当前 0.16.0 数值文件逐字节相同，因此真实数据精度、时间和图示仍覆盖当前数值路径。报告记录进程 RSS，没有记录 CUDA peak allocation；病例数为一。
 
 ## 真实数据对照
 

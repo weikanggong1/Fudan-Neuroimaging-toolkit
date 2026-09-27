@@ -1,4 +1,4 @@
-# PyTorch TOPUP：UK Biobank AP/PA b0 畸变校正
+# TorchTOPUP：UK Biobank AP/PA b0 畸变校正
 
 `fnit.topup.TorchTOPUP` 是 FSL TOPUP `b02b0.cnf` 路径的 PyTorch/CUDA 实现，用一对相反相位编码的 b0 图像估计 Hz 场图并生成 Jacobian 调制后的校正图。运行时不调用 FSL。当前公开接口一次处理一个被试；多被试调度由调用方完成。
 
@@ -86,10 +86,10 @@ topup \
 from fnit import run_ukb_topup
 
 result, prepared = run_ukb_topup(
-    "/path/to/subject/raw",          # AP/PA NIfTI、bval 和 JSON
-    "topup_subject",                 # 单被试输出目录
-    device="cuda:0",                 # GPU 选择；也可为 "cpu"
-    overwrite=False,                 # True 才允许替换已有文件
+    raw_dir="/path/to/subject/raw",  # 输入：AP/PA NIfTI、bval 和 JSON 的目录
+    output_dir="topup_subject",  # 输出：该受试者的 TOPUP 结果目录
+    device="cuda:0",  # 运行设备：第一张可见 CUDA GPU，也可为 "cpu"
+    overwrite=False,  # 写盘策略：不覆盖已有文件
 )
 ```
 
@@ -100,19 +100,28 @@ result, prepared = run_ukb_topup(
 ```python
 from fnit import TorchTOPUP
 
-model = TorchTOPUP(device="cuda:0")
+model = TorchTOPUP(
+    device="cuda:0",  # 运行设备：第一张可见 CUDA GPU
+)
 result = model.run(
-    "B0_AP_PA.nii.gz",       # FSL --imain
-    "acqparams.txt",         # FSL --datain
-    out="fieldmap_out",      # FSL --out
-    fout="fieldmap_fout",    # FSL --fout
-    iout="fieldmap_iout",    # FSL --iout
-    jacout="fieldmap_jacout",  # FSL --jacout
-    overwrite=False,
+    imain="B0_AP_PA.nii.gz",  # 输入：FSL --imain，两帧相反相位编码 b0
+    datain="acqparams.txt",  # 输入：FSL --datain，采集方向与总读出时间
+    out="fieldmap_out",  # 输出：FSL --out，系数和运动文件根名
+    fout="fieldmap_fout",  # 输出：FSL --fout，Hz 场图
+    iout="fieldmap_iout",  # 输出：FSL --iout，两帧校正图
+    jacout="fieldmap_jacout",  # 输出：FSL --jacout，两个 Jacobian
+    overwrite=False,  # 写盘策略：不覆盖已有文件
 )
 ```
 
-不写文件时使用 `result = model("B0_AP_PA.nii.gz", "acqparams.txt")`。
+不写文件时使用：
+
+```python
+result = model(
+    imain="B0_AP_PA.nii.gz",  # 输入：两帧相反相位编码 b0
+    datain="acqparams.txt",  # 输入：两行 acquisition parameters
+)
+```
 
 | Python 字段 | 内容 |
 |---|---|
@@ -143,6 +152,10 @@ result = model.run(
 当前路径固定为 UKB 使用的 `b02b0.cnf`：九级 20→4 mm cubic B-spline 场、2/1 倍 subsampling、8→0 mm smoothing、SSD 加弯曲能正则、cubic 图像插值、周期性相位编码外推和 Jacobian 强度调制。第一帧固定；反向帧按照 `TopupScanManager` 仅估计五个可辨识的刚体参数。前五级交替更新场与运动，后四级固定运动并细化场。
 
 FSL 使用 LM/SCG、显式导数和稀疏线性求解；FNIT 使用 PyTorch 自动微分和分层 L-BFGS。该优化差异是主要数值边界。当前接口要求正好两个 3D b0、单一且相反的 `i` 或 `j` 相位编码方向；不支持 `k/k-`、多于两帧、自定义配置、其他正则模型或原生 TOPUP 的全部选项。程序遇到这些输入会明确报错。
+
+## 当前发布验收状态
+
+[`report.public.json`](../../validation/topup/report.public.json) 由 FNIT 0.14.0 生成，并记录 `core.py`、`io.py`、`ukb.py`、`cli.py` 与共享 dMRI I/O 的 SHA-256。报告中的候选实现与当前 0.16.0 数值文件逐字节相同，因此真实数据精度、时间和图示仍覆盖当前数值路径。病例数为一，范围限制见下文。
 
 ## 与 FSL 6.0.7.4 的真实数据对照
 
