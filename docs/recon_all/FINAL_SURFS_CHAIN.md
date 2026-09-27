@@ -1,29 +1,21 @@
-# `brain.finalsurfs.mgz`: connected Python mask and edit chain
+# `brain.finalsurfs.mgz` 的 Python 掩膜和编辑链
 
-`fnit.recon_all.finalsurfs_python.run_finalsurfs(subject_dir, device="cpu")`
-reads six conformed MGZ files from `subject_dir/mri`: `brain.mgz`,
-`brainmask.mgz`, `mca-dura.mgz`, `vsinus.mgz`, `entowm.mgz`, and
-`aseg.presurf.mgz`. It writes `brain.finalsurfs.mgz` and its identical
-pre-manual-edit checkpoint `brain.finalsurfs.manedit.mgz` in the same directory.
-The Python return value is the final MGZ path. All inputs must have the same
-voxel grid. The masks run through PyTorch on the selected CPU or CUDA device;
-the two final edits use NumPy/SciPy on CPU. This function requires no
-FreeSurfer executable.
+`fnit.recon_all.finalsurfs_python.run_finalsurfs(subject_dir, device="cpu")` 从 `subject_dir/mri` 读取六张 conform 后的 MGZ：`brain.mgz`、`brainmask.mgz`、`mca-dura.mgz`、`vsinus.mgz`、`entowm.mgz`、`aseg.presurf.mgz`。它在同一目录写出 `brain.finalsurfs.mgz` 和人工编辑前的相同检查点 `brain.finalsurfs.manedit.mgz`，返回前者路径。输入必须处在同一体素网格。掩膜操作用指定 CPU/CUDA 设备上的 PyTorch，最后两步编辑用 CPU NumPy/SciPy；不调用 FreeSurfer 程序。
 
-Python API:
+Python 调用：
 
 ```python
 from fnit.recon_all.finalsurfs_python import run_finalsurfs
 final_mgz = run_finalsurfs("/path/to/subjects/sub01", device="cpu")
 ```
 
-Command line:
+命令行：
 
 ```bash
 python -m fnit.recon_all.finalsurfs_python /path/to/subjects/sub01 --device cpu
 ```
 
-The FreeSurfer 8.2 equivalent, run from `subject_dir/mri`, is:
+从 `subject_dir/mri` 执行的 FreeSurfer 8.2 等价命令：
 
 ```bash
 mri_mask -T 5 brain.mgz brainmask.mgz brain.finalsurfs.mgz
@@ -34,34 +26,12 @@ mri_edit_wm_with_aseg -sa-fix-acj aseg.presurf.mgz 255 255 brain.finalsurfs.mgz 
 cp brain.finalsurfs.mgz brain.finalsurfs.manedit.mgz
 ```
 
-## Real T1 comparison
+## 真实 T1 对照
 
-The [saved report](../../validation/recon_all/python_gpu_port/finalsurfs_chain_20260927/report.json)
-uses the deidentified `sub-01_T1w.nii.gz` scan, SHA-256
-`f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a`,
-and its completed FreeSurfer 8.2 reconstruction on `gpucw1`. Both full
-five-step replays read the **same six saved official input volumes**, with
-their input hashes recorded in the report. Python produced **0 differing
-voxels out of 16,777,216** for the final volume and checkpoint. It took
-8.83 seconds including Python function I/O; the five official commands took
-8.21 seconds including process startup and I/O in one unpaired run on the
-same host. This does not establish a speed difference.
+[保存的对照报告](../../validation/recon_all/python_gpu_port/finalsurfs_chain_20260927/report.json)使用去标识 `sub-01_T1w.nii.gz`（SHA-256 `f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a`）及其在 gpucw1 完成的 FreeSurfer 8.2 重建。两组完整的五步复跑读取**相同的六张官方保存输入图**，各输入哈希均记录在报告中。Python 生成的最终图与检查点均为 **0/16,777,216 个差异体素**，包含函数 I/O 用时 8.83 秒；五条官方命令包含进程启动和 I/O 用时 8.21 秒。这是在同一主机的一次非配对运行，不能由此判断稳定速度差。
 
-The current FNIT v5 T1-prefix output already matches the official `brain`,
-`brainmask`, `entowm`, `aseg.presurf` and `nu` volumes voxelwise on this scan.
-It has no `mca-dura` or `vsinus` volumes. A second replay used those **four
-FNIT-generated inputs**, borrowed only the **two official auxiliary label
-volumes**, and again produced 0/16,777,216 differing final voxels in 9.13
-seconds. This is a conditional upstream test, not an end-to-end FNIT result.
+FNIT v5 当时的 T1 前缀在此影像上已使 `brain`、`brainmask`、`entowm`、`aseg.presurf`、`nu` 的体素与官方相同，但尚未生成 `mca-dura`、`vsinus`。第二次复跑取其中**四张 FNIT 生成的输入**，只借用**两张官方辅助标签图**，9.13 秒得到 0/16,777,216 个最终图差异体素。这是有条件的上游测试，不是 FNIT 整例结果。
 
-The [byte analysis](../../validation/recon_all/python_gpu_port/finalsurfs_chain_20260927/byte_analysis.json)
-found identical decompressed MGH headers and voxel payloads. The Python file
-is one byte shorter in a trailing provenance tag: the native replay and the
-saved official output have an extra null byte after `UNKNOWN`. This footer
-does not enter voxel or surface computations.
+[字节分析](../../validation/recon_all/python_gpu_port/finalsurfs_chain_20260927/byte_analysis.json)显示，解压后的 MGH 头和体素负载相同。Python 文件只在尾部来源标记少一个字节：原生命令复跑及保存的官方输出在 `UNKNOWN` 后还有一个空字节；此尾部不参与体素或表面计算。
 
-The opt-in `--native-white-preaparc` runner now invokes this function after
-generating the subject-specific MNI152 LTA and both auxiliary segmentations.
-Its default path does not. The connected prefix and later cortical measures
-still need separate end-to-end validation; the paired frozen-input result
-above does not establish whole-subject morphometry parity.
+可选 `--native-white-preaparc` 调度现在会先生成被试 MNI152 LTA 和两张辅助分割，再调用本函数；默认路径不调用。前缀连通性与后续皮层指标还需从原始 T1 验收，冻结同输入结果不能证明整例形态指标一致。
