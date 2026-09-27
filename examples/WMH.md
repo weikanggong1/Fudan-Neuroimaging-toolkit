@@ -34,11 +34,11 @@ from pathlib import Path
 from fnit import WMHSynthSeg
 
 Path("examples/results/wmh_single").mkdir(parents=True, exist_ok=True)
-model = WMHSynthSeg(device="cuda:0", threads=4)
-result = model("examples/wmh_data/sub-04_FLAIR.nii.gz",
-               crop=True, save_lesion_probabilities=True)
-result.segmentation.save("examples/results/wmh_single/sub-04_python_seg.nii.gz")
-result.lesion_probability.save("examples/results/wmh_single/sub-04_python_lesion_probs.nii.gz")
+model = WMHSynthSeg(weights=None, device="cuda:0", threads=4)  # None：使用已配置权重目录
+result = model(image="examples/wmh_data/sub-04_FLAIR.nii.gz",  # 输入：单幅 3D FLAIR
+               crop=True, save_lesion_probabilities=True)     # 裁剪并返回概率图
+result.segmentation.save(path="examples/results/wmh_single/sub-04_python_seg.nii.gz")  # 标签
+result.lesion_probability.save(path="examples/results/wmh_single/sub-04_python_lesion_probs.nii.gz")  # WMH 概率
 print(result.volumes_mm3[77])  # WMH 软体积；不是硬标签 77 的体素数。
 ```
 

@@ -2,6 +2,8 @@
 
 [返回主页](../../README.md) · [功能说明](../../docs/wmh_synthseg/README.md) · [官方源码](https://github.com/freesurfer/freesurfer/tree/dev/mri_WMHsynthseg/WMHSynthSeg)
 
+本页记录旧版 Surfa 输出路径的 12 例验证。当前无 Surfa 实现的同例新旧逐体素、字节与耗时核对见[迁移报告](../wmh_no_surfa_20260928/README.md)；本页数字不代表新版 12 例重测。
+
 本实验比较独立包与 FreeSurfer 8.2.0-1 WMH-SynthSeg 的输入、输出和运算结果。原版已使用 PyTorch；独立包保留官方 checkpoint、33 类标签、WMH 概率图及软体积计算，同时提供无需 FreeSurfer 安装的单被试 Python 接口。公开病例没有人工 WMH 标注，因此一致性结果不能衡量临床准确率。
 
 ## 病例与来源

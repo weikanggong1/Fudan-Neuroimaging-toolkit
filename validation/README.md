@@ -4,7 +4,7 @@
 
 - SynthStrip：[当前无 Surfa 同输入验证](synthstrip_no_surfa_20260927/README.md)。
 - SynthMorph：[`benchmark/public_report/summary.md`](../benchmark/public_report/summary.md) 与机器可读 CSV。
-- WMH-SynthSeg：[`wmh/README.md`](wmh/README.md) 与 [`wmh/report.public.json`](wmh/report.public.json)。
+- WMH-SynthSeg：当前无 Surfa 迁移核对见[`wmh_no_surfa_20260928/README.md`](wmh_no_surfa_20260928/README.md)；旧版 12 例基准见[`wmh/README.md`](wmh/README.md)。
 - SynthSeg：[`synthseg/report.public.json`](synthseg/report.public.json)。
 - SynthSR：[`synthsr/README.md`](synthsr/README.md)。
 - TorchFAST：[`fast/README.md`](fast/README.md) 与 [`fast/report.public.json`](fast/report.public.json)。

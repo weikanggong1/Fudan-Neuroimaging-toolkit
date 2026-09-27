@@ -11,9 +11,9 @@ from pathlib import Path
 
 import nibabel as nib
 import numpy as np
-import surfa as sf
 import torch
 
+from ..synthstrip.geometry import Volume
 from ..weights import resolve_weights
 from .model import UNet3D
 from .spatial import align_volume_to_ref, myzoom_torch
@@ -37,8 +37,8 @@ LABEL_NAMES = ('background', '3rd-ventricle', '4th-ventricle', 'brainstem',
 
 @dataclass
 class WMHResult:
-    segmentation: sf.Volume
-    lesion_probability: sf.Volume | None
+    segmentation: Volume
+    lesion_probability: Volume | None
     volumes_mm3: dict[int, float]
 
 
@@ -71,10 +71,10 @@ class WMHSynthSeg:
         if isinstance(image, (str, Path)):
             volume = nib.load(str(image))
             data, affine = volume.get_fdata(), volume.affine
-        elif isinstance(image, sf.Volume):
+        elif hasattr(image, 'data') and hasattr(image, 'geom'):
             data, affine = image.data, image.geom.vox2world.matrix
         else:
-            raise TypeError('image must be a path or surfa.Volume')
+            raise TypeError('image must be a path or volume with data and geometry')
         data = np.squeeze(data)
         if data.ndim != 3:
             raise ValueError('WMH-SynthSeg accepts a single 3D volume')
@@ -103,13 +103,12 @@ class WMHSynthSeg:
         probabilities += 0.5 * torch.softmax(pred2[flip_channels], dim=0)
         segmentation = self.labels[torch.argmax(probabilities, dim=0)].cpu().numpy()
         volumes = probabilities.sum(dim=(1, 2, 3)).cpu().numpy()
-        geometry = sf.ImageGeometry(segmentation.shape, vox2world=aff_upscaled)
         # FreeSurfer MRIwrite uses a default NIfTI header, yielding float32 labels.
-        seg_volume = sf.Volume(segmentation.astype(np.float32), geometry=geometry)
+        seg_volume = Volume(segmentation.astype(np.float32), aff_upscaled)
         lesion_volume = None
         if save_lesion_probabilities:
             lesion = probabilities[LABEL_IDS.index(77)].cpu().numpy()
-            lesion_volume = sf.Volume(lesion, geometry=geometry)
+            lesion_volume = Volume(lesion, aff_upscaled)
         return WMHResult(seg_volume, lesion_volume,
                          {label: float(value) for label, value in zip(LABEL_IDS, volumes)})
 

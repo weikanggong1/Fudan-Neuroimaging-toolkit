@@ -561,6 +561,9 @@ def main(argv=None):
     if selected and selected[0] == "synthseg":
         _run_synthseg(parser.parse_args(selected))
         return
+    if selected and selected[0] == "wmh-synthseg":
+        _run_wmh(parser.parse_args(selected))
+        return
     if selected and selected[0] == "synthstrip":
         args = parser.parse_args(selected)
         if not any((args.out, args.mask, args.sdt)):
@@ -597,9 +600,6 @@ def main(argv=None):
         return
     if args.command == 'connectome':
         _run_connectome(args)
-        return
-    if args.command == 'wmh-synthseg':
-        _run_wmh(args)
         return
     if args.command == 'synthseg':
         _run_synthseg(args)
