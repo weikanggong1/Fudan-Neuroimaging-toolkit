@@ -33,6 +33,8 @@ recon-all 提供单被试命令行与 Python API；多被试并行仅提供 Pyth
 
 recon-all 的神经网络与部分体素、表面计算使用 PyTorch/CUDA；N4 使用仓库 C++ 与 Conda ITK 在 CPU 上运行，去噪和部分网格、统计使用 Python CPU。当前仍需从固定 FreeSurfer 源码用 Conda 编译三个必需、三个可选表面程序；无需安装 FreeSurfer 运行包。[构建和单被试调用](docs/recon_all/README.md)列出输入、外置数据及输出结构。
 
+依赖迁移状态（2026-09-28）：当前 recon-all 的 N4、SynthStrip、33 类 SynthSeg、Talairach affine 与可选 MNI152 affine 注册已移除 Surfa、SimpleITK、ANTsPy、DIPY 的运行时调用；在目标 Conda 环境禁用这些模块后，单被试和批量入口可导入（[导入检查](validation/recon_all/python_gpu_port/runtime_imports_20260928.json)）。通用 SynthMorph、FLIRT、FNIRT、FAST/VBM、SynthSR、TBSS、connectome 等功能仍有 Surfa 路径，故当前 pyproject 和 Conda 配置仍安装 Surfa，整个仓库尚未满足新的无 Surfa 安装要求。当前版未重跑完整 recon-all，不能由导入检查推断端到端等价。
+
 最近一次从原始 T1 完成的 **v3 历史整例**耗时 2903.79 秒，严格比较 138 项中通过 19 项、缺失 47 项、不同 72 项。[整例原始报告](validation/recon_all/python_gpu_port/native_cpp_conda_20260927/v3_e2e_20260927/BENCHMARK.md)所列的 13 张上游体积图逐体素一致，仅适用于当时的 N4 实现。当前[Conda C++ N4 单阶段对照](docs/recon_all/N4_ITK_CONDA.md)在同一真实 T1 上使 `nu0.mgz` 有 9 / 16,777,216 个体素差 1，最终 `nu.mgz` 有 8 个体素差 1–2；本版尚未重新运行完整 138 项验收，不能沿用 v3 通过率或耗时作为当前结果。
 
 后续[双侧拓扑冻结输入验证](docs/recon_all/TOPOLOGY_CONDA_GA.md)已得到逐点一致的 `orig`。[自产输入左侧标准球面](validation/recon_all/python_gpu_port/candidate_sphere_first_difference_20260927/full_stage/README.md)在相同候选输入下与官方有序顶点和面一致，Python 用时 884.56 秒，官方 328.61 秒；与归档官方球面的均差 2.959 mm 来自上游 `white.preaparc`。左侧[白质面首轮状态试验](docs/recon_all/WHITE_PYTHON_FIRST_PASS.md)在隔离条件下将最终超过 0.1 mm 的顶点由 50 个降到 2 个，尚未接入生产。最终 white/pial、右侧连通表面、配准球面及脑区指标仍需同一 T1 连续验收；当前不能声称等价重建加速。
