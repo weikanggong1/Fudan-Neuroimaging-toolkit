@@ -6,7 +6,7 @@
 - SynthMorph：[`benchmark/public_report/summary.md`](../benchmark/public_report/summary.md) 与机器可读 CSV。
 - WMH-SynthSeg：当前无 Surfa 迁移核对见[`wmh_no_surfa_20260928/README.md`](wmh_no_surfa_20260928/README.md)；旧版 12 例基准见[`wmh/README.md`](wmh/README.md)。
 - SynthSeg：[`synthseg/report.public.json`](synthseg/report.public.json)。
-- SynthSR：[`synthsr/README.md`](synthsr/README.md)。
+- SynthSR：当前无 Surfa 迁移核对见[`synthsr_no_surfa_20260928/README.md`](synthsr_no_surfa_20260928/README.md)；旧版 12 例基准见[`synthsr/README.md`](synthsr/README.md)。
 - TorchFAST：[`fast/README.md`](fast/README.md) 与 [`fast/report.public.json`](fast/report.public.json)。
 - TorchApplyWarp：[`applywarp/report.json`](applywarp/report.json)。
 - FLIRT：[`flirt/report.public.json`](flirt/report.public.json)。

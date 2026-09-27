@@ -561,6 +561,9 @@ def main(argv=None):
     if selected and selected[0] == "synthseg":
         _run_synthseg(parser.parse_args(selected))
         return
+    if selected and selected[0] == "synthsr":
+        _run_synthsr(parser.parse_args(selected))
+        return
     if selected and selected[0] == "wmh-synthseg":
         _run_wmh(parser.parse_args(selected))
         return
@@ -603,9 +606,6 @@ def main(argv=None):
         return
     if args.command == 'synthseg':
         _run_synthseg(args)
-        return
-    if args.command == 'synthsr':
-        _run_synthsr(args)
         return
     if args.command == 'fast':
         _run_fast(args)

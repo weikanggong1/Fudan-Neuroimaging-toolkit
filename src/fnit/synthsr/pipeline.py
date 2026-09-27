@@ -7,7 +7,6 @@ from pathlib import Path
 import nibabel as nib
 import numpy as np
 from scipy.ndimage import gaussian_filter
-import surfa as sf
 import torch
 
 from ..weights import resolve_weights
@@ -105,11 +104,11 @@ def _load_image(image):
         else:
             source = nib.load(str(path))
             data, affine, header = source.get_fdata(), source.affine, source.header
-    elif isinstance(image, sf.Volume):
+    elif hasattr(image, 'data') and hasattr(image, 'geom'):
         data, affine = image.data, image.geom.vox2world.matrix
         header = nib.Nifti1Header()
     else:
-        raise TypeError("image must be a file path or surfa.Volume")
+        raise TypeError("image must be a file path or volume with data and geometry")
     data = np.squeeze(data)
     if data.ndim == 4 and data.shape[-1] <= 10:
         data = data[..., 0]

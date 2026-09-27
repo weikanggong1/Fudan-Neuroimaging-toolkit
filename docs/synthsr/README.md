@@ -2,7 +2,7 @@
 
 [返回首页](../../README.md) · [FreeSurfer 使用说明](https://surfer.nmr.mgh.harvard.edu/fswiki/SynthSR) · [原版源码](https://github.com/freesurfer/freesurfer/blob/dev/mri_synthsr/mri_synthsr) · [权重配置](../WEIGHTS.md)
 
-SynthSR 接受一幅 3D MRI 或 CT，输出标准对比度的 1 mm 等方 MP-RAGE 图像。它结合超分辨率与图像合成，并在合成时填补白质病灶。输入可以是 T1w、T2w、FLAIR 等对比度；原版不要求事先去颅骨、校正偏场或归一化强度。本包将原版的 TensorFlow 网络和推理流程改写为 PyTorch，推理时不调用 FreeSurfer。
+SynthSR 接受一幅 3D MRI 或 CT，输出标准对比度的 1 mm 等方 MP-RAGE 图像。它结合超分辨率与图像合成，并在合成时填补白质病灶。输入可以是 T1w、T2w、FLAIR 等对比度；原版不要求事先去颅骨、校正偏场或归一化强度。本包将原版的 TensorFlow 网络和推理流程改写为 PyTorch，推理时不调用 FreeSurfer，也不导入 Surfa。
 
 ## 原版指令与模型
 
@@ -27,10 +27,22 @@ mri_synthsr --i case_FLAIR.nii.gz --o case_synthsr.nii.gz --threads 4
 ```python
 from fnit import SynthSR
 
-sr = SynthSR(device="cuda:0")
-result = sr("case_FLAIR.nii.gz")
-result.image.save("case_synthsr.nii.gz")
-print(result.image.data.shape, result.image.affine)
+image_path = "case_FLAIR.nii.gz"  # 输入：单幅 3D FLAIR
+sr = SynthSR(
+    weights=None,       # 权重文件或目录；None 从已配置目录查找通用 v2
+    device="cuda:0",    # 运行设备；无 GPU 时改为 "cpu"
+    lowfield=False,     # False 使用通用模型；True 使用低场模型
+    v1=False,           # True 使用 2021 年模型，优先于 lowfield
+    threads=4,          # PyTorch CPU 线程数
+)
+result = sr(
+    image=image_path,          # 输入图像路径
+    ct=False,                  # CT 输入设 True，以 0–80 HU 截断
+    disable_flipping=False,    # False 使用左右翻转的第二次预测
+    disable_sharpening=False,  # False 保留输出锐化
+)
+result.image.save(path="case_synthsr.nii.gz")  # 输出：1 mm 合成 T1w
+print(result.image.data.shape, result.image.affine)  # 输出大小和 RAS 仿射
 ```
 
 构造 `SynthSR` 时加载一次权重；每次调用接收一幅影像。`device="cpu"` 是 Python 默认值；要用 GPU，显式指定 `"cuda:0"` 等设备。`weights` 可以是 `.h5` 文件或包含所选官方文件的目录；省略时按[权重配置](../WEIGHTS.md)自动查找。`threads` 控制 PyTorch CPU 线程，省略时保留当前设置。
@@ -38,9 +50,11 @@ print(result.image.data.shape, result.image.affine)
 | 本包接口 | 输入或返回值 | 原版对应 |
 |---|---|---|
 | `SynthSR(weights=None, device="cpu", lowfield=False, v1=False, threads=None)` | 选择设备、权重和单输入模型；`v1=True` 优先于 `lowfield=True` | `--model`、`--cpu`、`--lowfield`、`--v1`、`--threads` |
-| `sr(image, ct=False, disable_flipping=False, disable_sharpening=False)` | `image` 是单幅 `.nii`、`.nii.gz`、`.mgz`、`.npz` 路径或 `surfa.Volume` | `--i`、`--ct`、`--disable_flipping`、`--disable_sharpening` |
+| `sr(image, ct=False, disable_flipping=False, disable_sharpening=False)` | `image` 是单幅 `.nii`、`.nii.gz`、`.mgz`、`.npz` 路径；已有带 `.data`/`.geom` 的内存体对象也可传入 | `--i`、`--ct`、`--disable_flipping`、`--disable_sharpening` |
 | `result.image.data` | 3D `numpy.ndarray`，`uint8`，是 NIfTI/MGZ 写盘前的量化数值 | `--o` 输出的体素数组 |
 | `result.image.affine` | 4×4 RAS 仿射矩阵，描述 1 mm 输出网格 | `--o` 输出的几何信息 |
+| `result.image.header` | 从路径输入保留的 NiBabel 影像头；内存体或 NPZ 输入使用新 NIfTI 头 | 输出文件的头信息 |
+| `result.image.float_data` | 锐化后、乘 2 量化前的 3D `float32` 数组；写 `.npz` 时使用 | 原版 `.npz` 的 `vol_data` |
 | `result.image.save(path)` | 写 `.nii`、`.nii.gz`、`.mgz` 或 `.npz` | `--o` 指定输出路径 |
 
 原版先按输入 affine 重采样到 1 mm，再将体素轴对齐 RAS，居中补到 32 的倍数。网络是单通道、五层 3D U-Net。默认对左右翻转后的图像再推理一次并平均；预测截到 0–128，裁掉填充，再做锐化：原图加上原图与高斯模糊图之差，高斯标准差为 1.5 体素。最后转回输入的**轴方向**。因此输出与输入共享物理空间，但尺寸通常不同：它是 1 mm 网格，并未重采样回原始体素尺寸。写盘前乘以 2、截到 0–255、转换为 `uint8`。
@@ -58,16 +72,10 @@ fnit synthsr --i case_FLAIR.nii.gz --o case_synthsr.nii.gz \
 
 ## 对照验证
 
-在 gpucw1 上，12 例真实 T1w 使用同一份官方 v2 权重，以完整单例命令分别运行原版 TensorFlow CPU/GPU 与本包 PyTorch CPU/GPU。四组均成功；PyTorch GPU 对原版 CPU 的输出形状、仿射矩阵和 `uint8` 类型在 12 例中全部一致，逐例至少 **99.992%** 体素完全相同，最大差值 **1** 灰度级。完整命令耗时中位数（秒）如下。
+本次移除 Surfa 导入后，在同一份真实原始 `sub-04` FLAIR 上，旧版与新版 PyTorch 的量化图、浮点图、仿射及 NIfTI/MGZ/NPZ 文件逐字节一致；新版 CLI 在禁止 Surfa 导入时完成。与当场运行的官方 FreeSurfer CPU 输出相比，5,960,556 个体素中有 287 个相差 1 灰度级，其余相同，输出仿射一致。完整命令耗时：官方 CPU `240.03` 秒、新版 CPU `30.26` 秒；各运行一次，框架不同，不能作为稳定加速倍数。[输入哈希、命令、API 分段耗时和未测模式](../../validation/synthsr_no_surfa_20260928/README.md)另有记录。此前 12 例 T1w 基准针对旧版导入路径，保留为[历史验证](../../validation/synthsr/README.md)，不代替本次多例验收。
 
-| 原版 CPU | 本包 CPU | 原版 GPU | 本包 GPU |
-|---:|---:|---:|---:|
-| 103.60 | 42.32 | 53.27 | 13.80 |
-
-这些时间包含模型加载、预处理、两次网络推理、后处理和写盘；原版 GPU 在此环境需另外指定 CUDA/cuDNN 动态库，TensorFlow GPU 可见性预检不计入逐例时间。共享节点负载和框架启动开销会影响时间，具体条件与匿名统计见[验证记录](../../validation/synthsr/README.md)。
-
-下面是仓库中公开的 `sub-04` FLAIR 样例：三行分别为轴位、冠状位和矢状位；每行以相同 RAS 坐标显示原始输入、FreeSurfer 原版 CPU 输出和本包 PyTorch GPU 输出。两幅合成图使用同一显示灰度范围；数值比较使用完整三维 NIfTI，不从图片估计。
+下面是仓库中公开的 `sub-04` FLAIR 样例：三行分别为轴位、冠状位和矢状位；每行以相同 RAS 坐标显示原始输入、FreeSurfer 原版 CPU 输出和旧版仓库 PyTorch GPU 输出。两幅合成图使用同一显示灰度范围；数值比较使用完整三维 NIfTI，不从图片估计。
 
 ![公开 FLAIR 输入与原版、PyTorch SynthSR 的合成 T1w 对照](figures/synthsr_flair_comparison.png)
 
-图由 [`tools/plot_synthsr_comparison.py`](../../tools/plot_synthsr_comparison.py) 从三份 NIfTI 按物理坐标生成。该样例原版与 PyTorch 输出的形状、仿射和类型相同，**99.990%** 体素完全一致，最大差值 1 灰度级。原始数据的公开来源及校验方式见[示例数据](../../examples/WMH.md)。
+图由 [`tools/plot_synthsr_comparison.py`](../../tools/plot_synthsr_comparison.py) 从三份 NIfTI 按物理坐标生成。该历史图示中原版与旧版 PyTorch 输出的形状、仿射和类型相同，**99.990%** 体素完全一致，最大差值 1 灰度级。原始数据的公开来源及校验方式见[示例数据](../../examples/WMH.md)。
