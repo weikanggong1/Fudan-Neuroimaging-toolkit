@@ -6,6 +6,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
+import pytest
 import surfa as sf
 
 
@@ -66,3 +67,48 @@ def test_register_talairach_writes_readable_xfm_without_native_program(tmp_path,
     assert called == {"weights": "weights", "device": "cpu", "model": "affine",
                       "extent": 256,
                       "input": ("synthstrip.mgz", "mni305.cor.stripped.mgz")}
+
+
+def test_register_talairach_disables_tf32_only_for_affine_inference(tmp_path, monkeypatch):
+    affine = _affine()
+    flags = talairach.torch.backends
+    monkeypatch.setattr(flags.cuda.matmul, "allow_tf32", False)
+    monkeypatch.setattr(flags.cudnn, "allow_tf32", True)
+    observed = []
+
+    class FakeModel:
+        def __init__(self, **kwargs):
+            # The real SynthMorph constructor enables both flags.
+            flags.cuda.matmul.allow_tf32 = True
+            flags.cudnn.allow_tf32 = True
+
+        def __call__(self, moving, template):
+            observed.append((flags.cuda.matmul.allow_tf32, flags.cudnn.allow_tf32))
+            return SimpleNamespace(transform=affine)
+
+    monkeypatch.setattr(talairach, "SynthMorph", FakeModel)
+    talairach.register_talairach("moving", "template", "weights",
+                                 tmp_path / "talairach.xfm", threads=1)
+    assert observed == [(False, False)]
+    assert (flags.cuda.matmul.allow_tf32, flags.cudnn.allow_tf32) == (False, True)
+
+
+def test_register_talairach_restores_tf32_when_inference_fails(tmp_path, monkeypatch):
+    flags = talairach.torch.backends
+    monkeypatch.setattr(flags.cuda.matmul, "allow_tf32", True)
+    monkeypatch.setattr(flags.cudnn, "allow_tf32", False)
+
+    class FailingModel:
+        def __init__(self, **kwargs):
+            flags.cuda.matmul.allow_tf32 = True
+            flags.cudnn.allow_tf32 = True
+
+        def __call__(self, moving, template):
+            assert (flags.cuda.matmul.allow_tf32, flags.cudnn.allow_tf32) == (False, False)
+            raise RuntimeError("inference failed")
+
+    monkeypatch.setattr(talairach, "SynthMorph", FailingModel)
+    with pytest.raises(RuntimeError, match="inference failed"):
+        talairach.register_talairach("moving", "template", "weights",
+                                     tmp_path / "talairach.xfm", threads=1)
+    assert (flags.cuda.matmul.allow_tf32, flags.cudnn.allow_tf32) == (True, False)

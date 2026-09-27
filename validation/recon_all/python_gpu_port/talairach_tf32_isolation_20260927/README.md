@@ -97,3 +97,25 @@ GCA through `aseg.presurf` numerically agrees on this T1, but `cc_up.lta`
 still has a small transform difference. WM, surfaces, regional statistics,
 and additional subjects remain outside this trial; the repository default
 TF32 policy has not been changed.
+
+## Production entry-point check
+
+After the bounded downstream gate, `register_talairach` was changed to
+disable matmul and cuDNN TF32 only during its affine forward call and restore
+both entering flags in `finally`, including error exits. The package-wide
+SynthMorph defaults remain unchanged. Four focused tests passed, including
+inference-success and exception restoration. The batch runner executes each
+subject in a separate process, so these process-level flags do not cross
+subject workers.
+
+The patched production function was then called once on the **same saved
+`synthstrip.mgz` bytes** used in the fixed-input comparison, with the same
+weight and template. Its affine LTA SHA-256 matched the isolated GPU
+both-off result. It measured maximum official world/voxel LTA element errors
+of 0.00001281 / 0.00008392, and eTIV error −0.89466 mm³. Both TF32 flags
+were true before and after the call. The one-run wall time was 4.791 s for
+construction, inference, affine-LTA and XFM writing; peak PyTorch GPU
+allocation was 4497 MiB. See
+[`production_register_report.json`](production_register_report.json) for
+input and module hashes. This run did not repeat downstream stages or
+measure a paired native runtime.

@@ -53,10 +53,18 @@ def register_talairach(moving: str | Path, template: str | Path,
                        weights: str | Path, output_xfm: str | Path,
                        output_lta: str | Path | None = None,
                        device: str = "cpu", threads: int = 4) -> np.ndarray:
-    """Run the archived affine-only stage without FreeSurfer executables."""
+    """Run affine registration with local FP32 inference and restore TF32 flags."""
     torch.set_num_threads(threads)
-    model = SynthMorph(weights=weights, device=device, model="affine", extent=256)
-    result = model(moving, template)
+    previous_matmul_tf32 = torch.backends.cuda.matmul.allow_tf32
+    previous_cudnn_tf32 = torch.backends.cudnn.allow_tf32
+    try:
+        model = SynthMorph(weights=weights, device=device, model="affine", extent=256)
+        torch.backends.cuda.matmul.allow_tf32 = False
+        torch.backends.cudnn.allow_tf32 = False
+        result = model(moving, template)
+    finally:
+        torch.backends.cuda.matmul.allow_tf32 = previous_matmul_tf32
+        torch.backends.cudnn.allow_tf32 = previous_cudnn_tf32
     if output_lta is not None:
         path = Path(output_lta)
         path.parent.mkdir(parents=True, exist_ok=True)

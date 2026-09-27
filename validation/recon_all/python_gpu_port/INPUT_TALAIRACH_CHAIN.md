@@ -46,7 +46,17 @@ contains the four image hashes and all per-file gates. The
 [run report](connected_input_talairach_cpu_20260926.json) records 0.499 s
 import, 0.035 s copy, 2.117 s conform/tag, 6.039 s SynthStrip, and 16.051 s
 Talairach. These are one CPU run's stage timings, not paired native timing or
-an end-to-end speed ratio. The table above records the earlier CPU replay. The current CUDA caller now disables cuDNN TF32 only for SynthStrip inference: on the same T1 its `orig.mgz` and `synthstrip.mgz` match all official voxels, and the resulting `brainmask.mgz`, GCA LTA, `norm.mgz` and `ctrl_pts.mgz` match numerically. See [the updated CUDA precision and downstream comparison](SYNTHSTRIP_TF32_UPSTREAM_FIX_20260927.md). The SynthMorph XFM and later cortical outputs still require separate validation.
+an end-to-end speed ratio. The table above records the earlier CPU replay.
+The current CUDA caller disables cuDNN TF32 during SynthStrip inference and
+both matmul and cuDNN TF32 during SynthMorph affine inference, restoring the
+entering flags after each call. On the same T1, `orig.mgz`,
+`synthstrip.mgz`, `nu.mgz`, `T1.mgz`, `brainmask.mgz`, `norm.mgz`,
+`ctrl_pts.mgz`, and `aseg.presurf.mgz` match every official voxel. The GCA
+LTA is matrix-exact; the separate SynthMorph voxel LTA retains a maximum
+element difference of 0.00008392 and an eTIV error of −0.894662 mm³. See
+[the SynthStrip check](SYNTHSTRIP_TF32_UPSTREAM_FIX_20260927.md) and
+[the later Talairach precision and downstream continuation](talairach_tf32_isolation_20260927/README.md).
+Cortical outputs remain outside this targeted validation.
 
 The current API also converts its saved affine LTA to
 `transforms/talairach.xfm.lta` using Surfa, without a native executable. We
