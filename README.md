@@ -1,6 +1,6 @@
 # Fudan Neuroimaging Toolkit (FNIT)
 
-`fudan-neuroimaging-toolkit` 是独立的脑 MRI 推理包，在 CPU 或 CUDA 上运行。单项推理无需安装 FreeSurfer、FSL、TensorFlow、VoxelMorph 或 Neurite。`fnit-recon-all` 使用 Python/CUDA 阶段、外置权重与模板，并要求从固定 FreeSurfer 源码在 Conda 中编译三个白质/GCA 程序；另外三个表面程序按开关启用，正式球面和球面配准调用已验证的 Python API，无需安装官方 FreeSurfer。当前整例尚未证实与官方数值一致。Python 导入名为 `fnit`，单项功能的命令行入口为 `fnit`。
+`fudan-neuroimaging-toolkit` 是独立的脑 MRI 推理包，在 CPU 或 CUDA 上运行。单项推理无需安装 FreeSurfer、FSL、TensorFlow、VoxelMorph 或 Neurite。`fnit-recon-all` 使用 Python/CUDA 阶段、外置权重与模板，并要求从固定 FreeSurfer 源码在 Conda 中编译三个白质/GCA 程序；另外三个表面程序按开关启用，正式球面和球面配准调用在冻结官方输入上验证的 Python API；自产输入的球面尚未通过同输入验收。无需安装官方 FreeSurfer。当前整例尚未证实与官方数值一致。Python 导入名为 `fnit`，单项功能的命令行入口为 `fnit`。
 
 | 模态 | 功能 | 输出与用途 | 用法、原版对照与验证 |
 |---|---|---|---|
@@ -79,7 +79,7 @@ conda activate "$FNIT_ENV_PREFIX"
 
 ### recon-all 的 Conda 环境与 C++ 阶段
 
-从仓库根目录用 [`environment-recon-all-cpp.yml`](environment-recon-all-cpp.yml) 一次安装上述 Python 功能及六个 FreeSurfer C++ 构建目标所需的 Conda 编译器、ITK 开发库、CUDA 工具和 glibc 2.17 sysroot；默认的 `environment.yml` 保持轻量。该命令创建环境，不编译或下载 FreeSurfer 程序：
+[`environment-recon-all-cpp.yml`](environment-recon-all-cpp.yml) 包含上述 Python 功能及六个 FreeSurfer C++ 构建目标所需的 Conda 编译器、ITK 开发库、CUDA 工具和 glibc 2.17 sysroot；默认的 `environment.yml` 保持轻量。该 YAML 已通过求解测试，整份文件尚未在目标节点重新创建实测。以下命令创建环境，不编译或下载 FreeSurfer 程序：
 
 ```bash
 CONDA_OVERRIDE_GLIBC=2.17 conda env create -f environment-recon-all-cpp.yml

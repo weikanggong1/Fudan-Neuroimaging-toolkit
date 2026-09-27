@@ -4,7 +4,7 @@
 
 ## 安装与构建
 
-从仓库根目录安装完整 Conda 环境：
+从仓库根目录创建 Conda 环境。该 YAML 已通过求解测试，尚未整份文件重新创建实测：
 
 ```bash
 CONDA_OVERRIDE_GLIBC=2.17 conda env create -f environment-recon-all-cpp.yml
