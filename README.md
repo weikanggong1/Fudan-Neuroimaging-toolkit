@@ -14,6 +14,7 @@
 | sMRI、fMRI、dMRI 通用 | PyTorch FLIRT | 12-DOF 仿射及 6-DOF normmi 刚性；reference-grid image 和 FSL scaled-mm `.mat` | [FLIRT 文档](docs/flirt/README.md) |
 | sMRI、dMRI | PyTorch FNIRT | GM 或 TBSS FA 非线性配准；intent-2007 coefficients、warped image 和 Jacobian | [FNIRT 文档](docs/fnirt/README.md) |
 | sMRI、fMRI、dMRI 通用 | GPU applywarp | 应用 FSL dense warp、FNIRT coefficient、premat 和 postmat | [applywarp 文档](docs/applywarp/README.md) |
+| fMRI | BIDS FEAT 核心、ICA-AROMA 与可选 WM/CSF/motion 回归 | 4D BOLD、运动矩阵、脑掩膜、ICA 降噪；B0/BBR/GDC 尚未完整复现 | [fMRI 用法与真实数据对照](docs/fmri/README.md) |
 | dMRI | PyTorch TOPUP | UKB AP/PA b0 选择、Hz 场估计、畸变校正和 FSL 输出 | [TOPUP 文档](docs/topup/README.md) |
 | dMRI | PyTorch EDDY | 逐 volume 运动、二次 EC、TOPUP 场、Jacobian 和离群切片校正 | [EDDY 文档](docs/eddy/README.md) |
 | dMRI | PyTorch DTIFIT | FSL 默认 OLS tensor、FA、MD、eigenvalue 和 eigenvector | [DTIFIT 文档](docs/dtifit/README.md) |
@@ -25,6 +26,8 @@
 | dMRI | UKBConnectome | 已校正 DWI 和 T1w 到四张结构连接矩阵；追踪和 SIFT2 为近似 | [connectome 文档](docs/connectome/README.md) |
 | sMRI | recon-all（Python/CUDA + Conda C++） | T1w 到核心分割、双侧皮层表面、顶点指标和脑区统计 | [recon-all 文档](docs/recon_all/README.md) |
 | fMRI | MS-HBM 17 网络 | fsLR32k 静息态时序到个体网络划分，纯 CPU | [MS-HBM 文档](src/fnit/mshbm/README.md) |
+
+fMRI 的 BIDS 单 run 入口为 `fnit-fmri` 或 Python API；真实 UKB FEAT 子步骤已单独对照，完整 FIX 前数值结果尚未达到等价，见功能页。
 
 recon-all 提供单被试命令行与 Python API；多被试并行仅提供 Python API。其余功能只提供单被试 Python 和单被试命令行接口；需要处理多个病例时，由调用方在包外组织任务与设备。仓库提供 [T1w 样例](examples/README.md)和 [FLAIR 样例](examples/WMH.md)。
 
@@ -41,7 +44,7 @@ Jacobian 和调制步骤；差别只在非线性形变由 SynthMorph 或 TorchFN
 
 FLIRT 的十例验证见 [FLIRT 报告](validation/flirt/report.public.json)；当前 TorchFNIRT/TBSS 的真实数据诊断见 [dMRI 验证页](validation/dmri_pipeline/README.md)。FastVBM 因注册核心已更新，旧端到端结果已移除；重新验证前以 [FastVBM 验证状态](validation/fast_vbm/README.md)为准。TOPUP、EDDY、DTIFIT、AMICO-NODDI、MMORF 和 dMRI 参数图 pipeline 的真实数据对照见上表各子页。BEDPOSTX、ProbtrackX 和 connectome 的验证边界也分别记录在功能页。
 
-FLIRT、FNIRT、applywarp、TOPUP、EDDY、DTIFIT、MMORF、dMRI TBSS 分支、BEDPOSTX 和 ProbtrackX 的 FSL 派生实现及随包提供的上游源码受 [FSL Software Licence 6.0](licenses/FSL-6.0.txt) 的非商业使用条款约束。各功能的移植范围和验证边界见对应子页面。
+FLIRT、FNIRT、applywarp、TOPUP、EDDY、DTIFIT、MMORF、dMRI TBSS 分支、BEDPOSTX、ProbtrackX，以及 fMRI 的 FEAT/MELODIC 风格实现所依据的 FSL 算法受 [FSL Software Licence 6.0](licenses/FSL-6.0.txt) 的非商业使用条款约束。各功能的移植范围和验证边界见对应子页面。
 
 ## 安装
 
@@ -95,6 +98,8 @@ conda activate fnit-recon-all-cpp
 ## 下载和部署权重
 
 Git 仓库及 wheel 均不包含模型权重。下面从 FreeSurfer 官方地址下载各功能的默认权重，校验 SHA-256，并记录权重目录；推理时不会自动联网。GPU recon-all 的 33 类 SynthSeg 与 WMH-SynthSeg 是不同模型，分别用 `--model synthseg` 和 `--model wmh-synthseg` 安装。
+
+fMRI 的 FEAT 核心、ICA、ICA-AROMA 与混杂回归均无模型权重。
 
 ```bash
 python tools/setup_weights.py --model synthstrip --model synthmorph-joint \
