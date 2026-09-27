@@ -8,6 +8,7 @@ from pathlib import Path
 import time
 
 import surfa as sf
+import torch
 
 from fnit.synthstrip import SynthStrip
 
@@ -29,8 +30,14 @@ def run_input_talairach_chain(t1: str | Path, subject_dir: str | Path,
     result = run_input_chain(t1, root, device=device)
     strip_file = root / "mri/synthstrip.mgz"
     started = time.perf_counter()
-    SynthStrip(weights=weights, device=device, threads=threads)(
-        result["conformed"]).image.save(str(strip_file))
+    previous_cudnn_tf32 = torch.backends.cudnn.allow_tf32
+    try:
+        strip = SynthStrip(weights=weights, device=device, threads=threads)
+        # The SynthStrip constructor enables TF32; exact uint8 masks need FP32 cuDNN.
+        torch.backends.cudnn.allow_tf32 = False
+        strip(result["conformed"]).image.save(str(strip_file))
+    finally:
+        torch.backends.cudnn.allow_tf32 = previous_cudnn_tf32
     strip_seconds = time.perf_counter() - started
     xfm = root / "mri/transforms/talairach.xfm"
     lta = root / "mri/transforms/synthmorph.mni305/aff.lta"

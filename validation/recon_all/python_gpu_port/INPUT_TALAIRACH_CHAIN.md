@@ -46,9 +46,7 @@ contains the four image hashes and all per-file gates. The
 [run report](connected_input_talairach_cpu_20260926.json) records 0.499 s
 import, 0.035 s copy, 2.117 s conform/tag, 6.039 s SynthStrip, and 16.051 s
 Talairach. These are one CPU run's stage timings, not paired native timing or
-an end-to-end speed ratio. The new transform has not yet been propagated
-through N4 or surface generation. SynthMorph's shared model enables TF32
-for CUDA matmul and cuDNN; this CPU run cannot verify its GPU/TF32 behavior.
+an end-to-end speed ratio. The table above records the earlier CPU replay. The current CUDA caller now disables cuDNN TF32 only for SynthStrip inference: on the same T1 its `orig.mgz` and `synthstrip.mgz` match all official voxels, and the resulting `brainmask.mgz`, GCA LTA, `norm.mgz` and `ctrl_pts.mgz` match numerically. See [the updated CUDA precision and downstream comparison](SYNTHSTRIP_TF32_UPSTREAM_FIX_20260927.md). The SynthMorph XFM and later cortical outputs still require separate validation.
 
 The current API also converts its saved affine LTA to
 `transforms/talairach.xfm.lta` using Surfa, without a native executable. We
@@ -59,5 +57,4 @@ was 0.00012255, and the maximum displacement across eight input-grid corners
 was 0.0004203 mm. Its determinant gives eTIV 1,310,267.038702 mm³ versus
 1,310,266.552537 mm³ officially (absolute difference 0.486165 mm³). See
 [the transform report](connected_talairach_voxel_lta_20260926.json) and
-[replay comparator](experimental/compare_talairach_voxel_lta.py). The updated
-one-call API has not been rerun from a new empty subject folder.
+[replay comparator](experimental/compare_talairach_voxel_lta.py). The updated one-call API has been rerun from a new empty subject folder on gpucw1; its SynthStrip inference took 9.80 s and reproduced the official voxel data. The earlier CPU voxel-LTA comparison above remains a separate historical replay.

@@ -72,9 +72,4 @@ not establish a stage speed ratio. The focused conversion/API tests passed
 
 ## Remaining boundary
 
-GPU execution of the new wrapper and TF32 numerical behavior have not been
-checked because gpucw1 was not available in this validation. The SynthMorph
-constructor enables TF32 for CUDA matmul and cuDNN; this CPU replay does not
-exercise that path. The independent unmodified official TensorFlow
-registration, downstream consumers of the new XFM, and an end-to-end Python
-recon-all call remain unvalidated.
+The CPU replay above does not determine CUDA behavior. Subsequent CUDA same-input replays on gpucw1 showed that the SynthMorph XFM depends on process/cuDNN state and still differs from the archived official XFM after the SynthStrip image is corrected. The [current upstream report](SYNTHSTRIP_TF32_UPSTREAM_FIX_20260927.md) distinguishes that remaining transform gap from the now exact SynthStrip, brainmask, GCA LTA and CA-normalization outputs. Independent unmodified TensorFlow registration parity remains unverified.
