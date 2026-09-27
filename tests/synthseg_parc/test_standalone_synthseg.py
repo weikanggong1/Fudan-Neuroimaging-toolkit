@@ -104,3 +104,20 @@ def test_public_cli_calls_shared_synthseg_api(tmp_path, monkeypatch):
         ("csv", image, tmp_path / "public.csv"),
     ]
     assert saved == [tmp_path / "public.nii.gz"]
+
+
+def test_synthseg_cli_does_not_import_unrelated_pipelines(monkeypatch):
+    import builtins
+
+    original_import = builtins.__import__
+    observed = []
+
+    def guarded_import(name, *args, **kwargs):
+        if name == "topup.cli":
+            raise AssertionError("SynthSeg must parse before importing TOPUP")
+        return original_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", guarded_import)
+    monkeypatch.setattr(cli, "_run_synthseg", lambda args: observed.append((args.i, args.o)))
+    cli.main(["synthseg", "--i", "input.nii.gz", "--o", "output.mgz"])
+    assert observed == [("input.nii.gz", "output.mgz")]

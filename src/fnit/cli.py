@@ -2,6 +2,7 @@
 import argparse
 import csv
 import os
+import sys
 from pathlib import Path
 import uuid
 
@@ -555,6 +556,11 @@ def main(argv=None):
     connectome.add_argument('--n-seeds', type=int, required=True)
     connectome.add_argument('--seed', type=int, default=0)
     connectome.add_argument('--overwrite', action='store_true')
+    # Standalone SynthSeg must not import unrelated pipelines or their dependencies.
+    selected = sys.argv[1:] if argv is None else argv
+    if selected and selected[0] == "synthseg":
+        _run_synthseg(parser.parse_args(selected))
+        return
     from .topup.cli import add_parser as add_topup_parser
     from .eddy.cli import add_parser as add_eddy_parser
     from .dtifit.cli import add_parser as add_dtifit_parser

@@ -8,13 +8,13 @@ import os
 from pathlib import Path
 
 import numpy as np
-import surfa as sf
 import torch
 
 from ..weights import resolve_weights
 from .postprocess import postprocess_segmentation
 from .preprocess import _ras_axes, preprocess_t1
 from .segment import SynthSegSegmenter
+from .synthseg_io import SynthSegVolume, read_color_lut
 
 
 # Cross-framework FP32 convolutions can reverse an almost exact SynthSeg tie.
@@ -62,7 +62,7 @@ def _official_soft_volumes(posterior: torch.Tensor, reference_affine: np.ndarray
 
 @dataclass
 class SynthSegResult:
-    segmentation: sf.Volume
+    segmentation: SynthSegVolume
     volumes_mm3: dict[int, float]
     total_intracranial_mm3: float
     label_names: dict[int, str]
@@ -119,12 +119,11 @@ class SynthSeg:
             [part.start for part in prepared.content_slices])
 
         data = labels.to(torch.float32).cpu().numpy()
-        segmentation = sf.Volume(
-            data, geometry=sf.ImageGeometry(shape=data.shape, vox2world=aligned_affine))
+        segmentation = SynthSegVolume(data, aligned_affine)
         if keep_geometry:
-            segmentation = segmentation.resample_like(sf.load_volume(image), method="nearest")
+            segmentation = segmentation.resample_like(image)
         if color_lut is not None:
-            segmentation.labels = sf.load_label_lookup(str(color_lut))
+            segmentation.labels = read_color_lut(color_lut)
 
         values = _official_soft_volumes(posterior, prepared.volume_affine,
                                         prepared.voxel_volume_mm3)
