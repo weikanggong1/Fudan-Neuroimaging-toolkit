@@ -139,7 +139,10 @@ def _save_labels(path: str | Path, labels: np.ndarray,
                  native: nib.spatialimages.SpatialImage) -> Path:
     output = Path(path)
     output.parent.mkdir(parents=True, exist_ok=True)
-    nib.save(nib.MGHImage(np.ascontiguousarray(labels), native.affine), str(output))
+    header = native.header.copy()
+    header.set_data_dtype(np.float32)
+    nib.save(nib.MGHImage(np.ascontiguousarray(labels, dtype=np.float32),
+                          None, header=header), str(output))
     return output
 
 
