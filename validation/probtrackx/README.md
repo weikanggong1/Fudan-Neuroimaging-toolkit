@@ -47,10 +47,10 @@ CUDA_VISIBLE_DEVICES=0 bash validation/probtrackx/run_real_current.sh \
   --output-json "$OUT/memory.current.private.json"
 "$PYTHON" validation/probtrackx/summarize_public.py \
   --input "$OUT/report.default.private.json" \
-  --output "$OUT/report.default.public.json"
+  --output "$OUT/report.default.latest.public.json"
 "$PYTHON" validation/probtrackx/summarize_public.py \
   --input "$OUT/report.current.private.json" \
-  --output "$OUT/report.current.public.json"
+  --output "$OUT/report.current.latest.public.json"
 ```
 
 绘图需要 `matplotlib`，主页 Conda 环境包含该依赖。FSL 在本服务器上有时返回状态 255，但日志结束于 `finished` 且结果可读取；运行脚本记录状态码并逐项检查需要的输出。FNIT CPU/GPU 均正常返回 0。
@@ -115,7 +115,7 @@ bash validation/probtrackx/run_real_matrices_fnit.sh \
 for NAME in matrix1.cpu matrix2.cpu matrix3.cpu targets.cpu; do
   "$PYTHON" validation/probtrackx/summarize_public.py \
     --input "$OUT/report.$NAME.json" \
-    --output "$OUT/report.$NAME.public.json"
+    --output "$OUT/report.$NAME.latest.public.json"
 done
 ~~~
 

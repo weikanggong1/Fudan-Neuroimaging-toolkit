@@ -86,6 +86,8 @@ output_dir/
 
 `run()` 返回 `ProbTrackXResult`。`output_dir`、`paths`、`waytotal` 为路径；启用相应输出时，`lengths`、`network_matrix`、`network_lengths`、`network_probability`、`network_symmetric`、`matrix1`、`matrix1_coords`、`matrix2`、`matrix2_coords`、`matrix2_target_coords`、`matrix2_lookup`、`matrix3`、`matrix3_coords`、`matrix3_target_coords`、`seed_to_targets_matrix` 为对应文件路径，否则为 `None`。`seed_to_targets` 是目标图路径元组；`seed_points`、`accepted_streamlines` 和 `elapsed_seconds` 分别是种子体素数、有效采样轨迹数与运行秒数。`regions` 与 `targetmasks` 同用时，种子行按 ROI 列表顺序拼接，目标图使用从 0 开始的 `<roi>` 编号。
 
+`regions` 与稀疏矩阵或 `targetmasks` 同用时，追踪先应用网络模式的“命中其他 ROI”筛选，因此这些输出是条件连接结果；若需要不经网络筛选的 voxel×voxel 矩阵，应把 ROI 并集作为单个 `seed` 输入。
+
 ROI 矩阵的 `C[i,j]` 是从 ROI *i* 发出的样本抵达 ROI *j* 的次数，行列顺序由 `regions` 决定。FNIT 派生有向矩阵定义为 `P[i,j] = C[i,j] / (Ni × nsamples)`，其中 `Ni` 是第 *i* 个 seed ROI 的体素数；对称矩阵是 `(P[i,j] + P[j,i]) / 2`。只把原始 `fdt_network_matrix` 与 FSL 同名文件直接对照。`waytotal` 是有效轨迹数，不能替代发出的 `Ni × nsamples`；regions 模式的密度图只计命中其他 ROI 的有效轨迹。`pathdist=True` 时 `fdt_paths`/原始网络矩阵改为长度和；`mean_path_length=True` 另写 `fdt_paths_lengths.nii.gz` 与网络的 `fdt_network_matrix_lengths`。
 
 ## CLI 与原版 FSL 命令
