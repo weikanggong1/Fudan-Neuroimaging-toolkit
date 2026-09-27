@@ -28,3 +28,11 @@
 原生前四次 `dt` 为 1027.938、18451.210、399.497、34325.025；独立 Python 候选完整运行记录为 1027.937441、18450.785169、399.364756、34319.906153。两者 index 0–2 的阶段均为 `initial_repair`、梯度平均数 1024，index 3 的平均数为 256。第 0 次更新后坐标已不同，后续 `dt` 不能作为同状态精度比较。本次未修改生产代码。
 
 两个失败尝试不计入数值结果：`-v` 未附取值，只打印帮助；合用 `DIAG` 和 `-w 1` 时，程序写出 `sphere0000` 后因 `MRISwriteIntoVolume` 诊断错误退出，未完成更新。因此 SSE 和网格分别采集。
+
+## 首行距离与源码核对
+
+[逐项审计](initial_row0_metric_audit.json)对原生首次 `logSSE:1` 打印的第 0 顶点数据进行比较。Python 在相同候选 `smoothwm` 上调用 `sample_standard_metric_matrix` 和 `average_standard_metric`，得到 8,268,920 个目标距离；构建耗时 25.81 s（含 JIT）。随后在精确相同的原生 `sphere0000` 上调用 `_spherical_distance`。第 0 顶点的 79 个目标距离、79 个当前距离均与原生日志**在打印的六位小数上逐项一致**。这不能证明全矩阵逐位相同，也不能解释 0.000867 的加权距离 SSE 差额。
+
+[FreeSurfer 8.2 对应源码](https://github.com/freesurfer/freesurfer/blob/d932c45/utils/mrisurf_sseTerms.cpp#L1442-L1622)把目标距离和当前距离存为 float，距离比例、每顶点 SSE 和总 SSE 使用 double；逐顶点循环会跳过被标记的顶点及无效距离，并可能应用 `vsmoothness`。Python 当前的 `_distance_sse` 则按行顺序对全部距离求和。原生日志只打印第 0 顶点的距离，没有逐顶点 SSE；现有文件无法判断其余样本/顺序、当前距离或筛选条件何处首次不同。候选 `smoothwm` 相对官方输入有小幅坐标扰动，角度采样的阈值分支可能改变后续全局随机序列；这仍是待检假说，不能据此修改采样或 SSE 算法。之前在冻结官方输入上验证的 8,268,920/8,268,920 目标距离精确一致，不代表本次候选输入也精确一致。
+
+最小后续核查是复用已有的 [GDB 内存采集脚本](../experimental/capture_standard_sphere_trial_memory.py)，以相同程序和候选输入、`SPHERE_LOGSSE_HIT=1` 停在第一次 SSE 后，只在 scratch 保存原生 `native_offsets.bin`、`native_target.bin`、`native_current.bin` 和 `native_xyz.bin`。先逐位比较全部目标距离及行长度；若相同，再比较当前距离，并用原生数组在 Python 重算 SSE。若目标距离不同，定位第一行差异后再检查邻居 ID 与采样阈值。该探针尚未执行，不需要重跑完整 sphere，也不应在分叉位置查明前调参或修改生产实现。
