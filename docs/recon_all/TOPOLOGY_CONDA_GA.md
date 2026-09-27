@@ -1,43 +1,25 @@
-# Conda topology GA with Python sphere preflight
+# Conda 拓扑 GA 与 Python sphere 前处理
 
-The native-topology option now selects the pinned Conda-built
-`mris_fix_topology_fnit`. Its Python preflight reproduces the sphere used by
-FreeSurfer 8.2 at the start of defect search. The source build changes the
-centering handoff plus float-versus-double `tanh` and `sqrt` calls in defect smoothing. The original
-Conda-built `mris_fix_topology` is retained for diagnostic comparison only.
-This stage runs on CPU. No FreeSurfer executable is required at runtime.
+启用 `native_topology` 后，流程调用在 Conda 内编译并固定版本的 `mris_fix_topology_fnit`。它的 Python 前处理复现 FreeSurfer 8.2 缺陷搜索开始时使用的 sphere。源码编译补丁调整了居中坐标的交接，以及缺陷平滑中 `tanh`、`sqrt` 的 float/double 调用。未修改的 Conda `mris_fix_topology` 仅保留用于诊断对照。该阶段在 CPU 上运行，运行时不要求系统安装 FreeSurfer。
 
-## Inputs, outputs, and use
+## 输入、输出与用法
 
-`write_centered_topology_sphere(input_qsphere, output_centered)` reads one
-ordered FreeSurfer triangle `qsphere.nofix` and writes a new triangle surface
-with the same faces and footer. It returns a dictionary with `input`,
-`output`, `vertices`, `faces`, `iterations`, and `seconds`. It uses
-nibabel, NumPy and Numba. It does not repair topology or read official
-intermediate data.
+`write_centered_topology_sphere(input_qsphere, output_centered)` 读取有序 FreeSurfer 三角表面 `qsphere.nofix`，写出面和尾部不变的新表面。返回字典含 `input`、`output`、`vertices`、`faces`、`iterations` 和 `seconds`。它使用 nibabel、NumPy、Numba；本函数本身不修复拓扑，也不读取官方中间数据。
 
-`run_topology_ga_conda(subject, hemisphere, binary, assets)` requires the
-following files beneath a FreeSurfer-style subject directory:
+`run_topology_ga_conda(subject, hemisphere, binary, assets)` 要求 FreeSurfer 格式的被试目录下有：
 
-| Input | Role |
+| 输入 | 用途 |
 | --- | --- |
-| `surf/{hemi}.orig.nofix` | Original-space ordered mesh |
-| `surf/{hemi}.inflated.nofix` | Inflated coordinates |
-| `surf/{hemi}.qsphere.nofix` | Quick spherical mesh |
-| `mri/brain.mgz`, `mri/wm.mgz` | Matched intensity image and WM mask |
-| `binary` | Patched `mris_fix_topology_fnit` from this repository's Conda build |
-| `assets` | Data-only FreeSurfer 8.2 lookup assets |
+| `surf/{hemi}.orig.nofix` | 原始空间的有序网格 |
+| `surf/{hemi}.inflated.nofix` | 膨胀表面坐标 |
+| `surf/{hemi}.qsphere.nofix` | 快速球面网格 |
+| `mri/brain.mgz`, `mri/wm.mgz` | 配对的强度图和白质掩膜 |
+| `binary` | 本仓库 Conda 构建的修补版 `mris_fix_topology_fnit` |
+| `assets` | 仅含数据的 FreeSurfer 8.2 查找资产 |
 
-The function writes `surf/{hemi}.topology-centered.sphere`,
-`surf/{hemi}.orig.premesh` and
-`scripts/{hemi}.topology-ga-fnit.log`. It returns a dictionary containing
-`hemisphere`, `preflight` (the first function's report), `output`, `log`,
-`command`, and `native_seconds`. The Conda binary **requires**
-`FNIT_CENTERED_COORDS`; an unset path aborts rather than silently reverting
-to its different centering result. The Python function sets it automatically.
-It verifies the binary's substitution marker and output.
+函数写入 `surf/{hemi}.topology-centered.sphere`、`surf/{hemi}.orig.premesh` 和 `scripts/{hemi}.topology-ga-fnit.log`；返回字典含 `hemisphere`、`preflight`（前处理报告）、`output`、`log`、`command` 和 `native_seconds`。Conda 程序**必须**设置 `FNIT_CENTERED_COORDS`；若未设置则中止，避免退回至另一种居中结果。Python 函数会自动设置，并核查程序的替换标记和输出。
 
-From the repository root after activating the Conda build environment:
+激活 Conda 构建环境后，在仓库根目录运行：
 
 ```bash
 bash tools/build_recon_all_fs_cpp_conda.sh /path/to/clean/freesurfer-8.2-source /path/to/conda-build
@@ -46,13 +28,9 @@ python -m fnit.recon_all.topology_conda_ga /path/to/subjects/sub01 lh \
   --report /path/to/lh-topology.json
 ```
 
-Repeat for `rh`. The optional `native_topology=True` recon-all runner
-selects this patched binary and calls the same stage API, then
-`remesh_surface(..., iterations=3)` to produce `surf/{hemi}.orig`.
-The default runner still has other approximate surface and segmentation steps;
-selecting this stage does not establish equivalent end-to-end reconstruction.
+`rh` 同理。可选的 `native_topology=True` recon-all runner 选择该修补版程序，调用同一个阶段 API，再以 `remesh_surface(..., iterations=3)` 生成 `surf/{hemi}.orig`。默认 runner 的其他表面和分割步骤仍有近似处理；启用本阶段并不等于端到端重建已验收。
 
-The official FreeSurfer 8.2 command from `subject/scripts` is:
+从 `subject/scripts` 目录运行时，对应的 FreeSurfer 8.2 命令为：
 
 ```bash
 mris_fix_topology -threads 1 -mgz -sphere qsphere.nofix \
@@ -61,65 +39,24 @@ mris_fix_topology -threads 1 -mgz -sphere qsphere.nofix \
 mris_remesh --remesh --iters 3 ../surf/lh.orig.premesh ../surf/lh.orig
 ```
 
-## Real-T1 same-input result
+## 真实 T1 的冻结同输入结果
 
-The frozen input is a real T1, with original MRI SHA-256
-`c99c246200cc35479b6b8cd691457985b66f2062d4a37a0c3592ff1b678b985c`.
-FNIT's corrected `filled` and `norm` generated all eight LH/RH
-`orig/inflated/smoothwm/qsphere.nofix` surfaces exactly against the
-completed FreeSurfer 8.2 subject. The narrow topology comparison then read
-those independent surfaces plus the frozen official `brain.mgz` and
-`wm.mgz` through the scratch subject. Thus it isolates this stage; it is
-not a current whole-subject E2E result. No patient image is committed.
+原始真实 T1 MRI 的 SHA-256 为 `c99c246200cc35479b6b8cd691457985b66f2062d4a37a0c3592ff1b678b985c`。FNIT 修正后的 `filled`、`norm` 生成了 LH/RH 共八张 `orig/inflated/smoothwm/qsphere.nofix` 表面；相对已完成的 FreeSurfer 8.2 被试，这八张表面逐点一致。以下拓扑阶段对照读取这些独立生成的表面，同时通过临时被试目录读取**冻结的官方 `brain.mgz` 和 `wm.mgz`**。因此，结果只隔离了拓扑阶段，不能作为当前候选输入整例重建的证据。Git 中没有存放患者影像。
 
-| Accurate same inputs | LH `orig.premesh` vertices/faces | RH vertices/faces | Relation to official |
+| 相同准确输入 | LH `orig.premesh` 顶点/面 | RH 顶点/面 | 相对官方结果 |
 | --- | ---: | ---: | --- |
-| Official FreeSurfer 8.2 | 101,689 / 203,374 | 100,555 / 201,106 | Reference |
-| Unmodified Conda C++ | 101,737 / 203,470 | 100,655 / 201,306 | Both differ |
-| Python exact sphere + original Conda C++ | 101,689 / 203,374 | 100,575 / 201,146 | LH vertices/faces all ordered and float32 exact; RH differs |
-| Python exact sphere + double-`tanh` Conda C++ | 101,689 / 203,374 | 100,548 / 201,092 | LH exact; RH still differs |
-| Python exact sphere + double-`tanh`/`sqrt` Conda C++ | 101,689 / 203,374 | 100,555 / 201,106 | Both hemispheres have exact ordered vertices, faces, and float32 coordinates |
+| 官方 FreeSurfer 8.2 | 101,689 / 203,374 | 100,555 / 201,106 | 参照 |
+| 未修补的 Conda C++ | 101,737 / 203,470 | 100,655 / 201,306 | 两侧均不同 |
+| Python 精确 sphere + 原版 Conda C++ | 101,689 / 203,374 | 100,575 / 201,146 | LH 顶点、面顺序及 float32 坐标完全一致；RH 不同 |
+| Python 精确 sphere + double-`tanh` Conda C++ | 101,689 / 203,374 | 100,548 / 201,092 | LH 一致；RH 仍不同 |
+| Python 精确 sphere + double-`tanh`/`sqrt` Conda C++ | 101,689 / 203,374 | 100,555 / 201,106 | 双侧有序顶点、面和 float32 坐标完全一致 |
 
-Python preflight sphere coordinates and ordered faces are **exact** against
-official diagnostic centered spheres for LH 102,764/205,560 and RH
-101,454/202,936. With both C++ math fixes, LH `orig.premesh` has all
-101,689 vertices, 305,067 float32 coordinate components and 203,374 ordered
-faces exact; RH has all 100,555 vertices, 301,665 coordinate components and
-201,106 ordered faces exact. File SHA-256 differs because the surface comment
-records creation provenance. The controlled baseline with only double
-`tanh` had its first RH difference after smoothing defect 0's first
-crossover: three vertices differed by at most 1.19e-7 mm, then MRI matching
-amplified the error and changed GA decisions. Promoting the type-2 smoother's
-`sqrt` argument to double restored this crossover and the complete RH mesh.
+Python 前处理所得 sphere 的坐标和有序面与官方诊断用居中 sphere **完全一致**：LH 为 102,764/205,560，RH 为 101,454/202,936。应用两项 C++ 数学修正后，LH `orig.premesh` 的 101,689 个顶点、305,067 个 float32 坐标分量和 203,374 个有序面完全一致；RH 相应为 100,555、301,665 和 201,106。文件 SHA-256 因表面注释记录生成来源而不同。仅将 `tanh` 改为 double 的受控基线，RH 的首差发生在平滑第 0 个缺陷后的首次 crossover：三个顶点最多相差 1.19e-7 mm；随后 MRI 匹配放大误差并改变 GA 决策。将 type-2 平滑器的 `sqrt` 参数提升为 double 后，该 crossover 和最终 RH 网格恢复一致。
 
-The observed final Conda C++ stage took 56.92/95.48 s (LH/RH); Python
-preflight took 6.34/3.55 s in a separate call. Earlier official same-input
-runs took 60.98/82.10 s. Shared node load varied, so these observations are
-not a controlled speed comparison. The frozen paired inputs include official
-MRI/WM and independent FNIT nofix surfaces; current connected E2E white/pial
-and atlas metrics are not thereby accepted.
+最终 Conda C++ 阶段的观测耗时为 LH/RH 56.92/95.48 s；另一次调用的 Python 前处理耗时为 6.34/3.55 s。较早官方同输入运行耗时 60.98/82.10 s。共享节点负载有变化，这些数据不是受控速度比较。冻结配对输入包含官方 MRI/WM 和 FNIT 独立生成的 nofix 表面；由此尚不能验收当前连通流程的 white/pial 和 atlas 指标。
 
-The connected Python remesher was also run on both newly generated
-`orig.premesh` surfaces, with no official surface supplied to the call.
-Against the archived official `orig`, LH had 106,622/106,622 vertices,
-319,866/319,866 float32 coordinates and 213,240/213,240 ordered faces exact;
-RH had 105,541/105,541 vertices, 316,623/316,623 coordinates and
-211,078/211,078 faces exact. It took 100.05/119.32 s on the shared
-headcw node. The [earlier independent remesher benchmark](../../validation/recon_all/python_gpu_port/REMESH_VALIDATION.md)
-compared Python and official commands on a different frozen premesh; its
-timings are not paired with this generated premesh.
+连通的 Python remesh 还处理了新生成的双侧 `orig.premesh`，调用时没有提供官方表面。相对归档官方 `orig`，LH 顶点 106,622/106,622、float32 坐标 319,866/319,866、有序面 213,240/213,240 完全一致；RH 分别为 105,541/105,541、316,623/316,623、211,078/211,078。在共享的 headcw 节点耗时 100.05/119.32 s。[较早的独立 remesh benchmark](../../validation/recon_all/python_gpu_port/REMESH_VALIDATION.md)使用另一张冻结 premesh 比较 Python 与官方命令，其耗时不能与本次生成的 premesh 配对。
 
-The volume geometry metadata fields match numerically for both hemispheres.
-Its `filename` field correctly names each subject's own `mri/wm.mgz`;
-that path naturally differs between the official and scratch subjects. The
-candidate `orig` lacks 425 bytes of official FreeSurfer build/run provenance
-tags, so full footer bytes and file SHA-256 differ. The [bilateral orig
-geometry](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/place_geometry_pair/accurate_filled_initial/curvature_trial/lh_fnit_sqrt_orig_vs_official.json)
-and [footer/metadata report](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/place_geometry_pair/accurate_filled_initial/curvature_trial/orig_metadata_report.json)
-record the distinction; the RH geometry JSON is beside the LH file.
+两侧体积几何元数据字段在数值上相同；其中 `filename` 正确指向各自被试的 `mri/wm.mgz`，所以官方与临时被试的路径不同。候选 `orig` 缺少 425 字节的官方 FreeSurfer 构建/运行来源标签，完整尾部字节及文件 SHA-256 因而不同。[双侧 orig 几何记录](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/place_geometry_pair/accurate_filled_initial/curvature_trial/lh_fnit_sqrt_orig_vs_official.json)和[尾部及元数据报告](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/place_geometry_pair/accurate_filled_initial/curvature_trial/orig_metadata_report.json)区分了这两类差异；RH 几何 JSON 位于 LH 文件旁。
 
-The [bilateral JSON evidence](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/place_geometry_pair/accurate_filled_initial/curvature_trial/)
-records exact-coordinate/face comparisons, timings, and the diagnostic
-checkpoint boundary before the final sqrt fix. The Conda build pins source file hashes before patching; its
-`ldd` and SHA-256 outputs are recorded in the build directory. No GPU
-allocation occurs in this stage.
+[双侧 JSON 证据](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/place_geometry_pair/accurate_filled_initial/curvature_trial/)记录了坐标和面逐项对照、耗时及最后一次 `sqrt` 修正前的诊断检查点。Conda 构建在打补丁前固定源码哈希；`ldd` 与 SHA-256 输出存于构建目录。本阶段没有分配 GPU 显存。
