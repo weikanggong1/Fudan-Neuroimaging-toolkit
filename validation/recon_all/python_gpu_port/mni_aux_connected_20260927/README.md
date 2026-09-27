@@ -55,7 +55,12 @@ header checks, LTA distances, label counts and times. The linked
 [probe.py](probe.py) calls the same production component functions that the
 new wrapper uses. [compare_inputs.py](compare_inputs.py) generated the
 upstream comparison. The one process used four CPU threads and finished
-with exit code 0.
+with exit code 0. A separate direct call of the module CLI on a fresh
+subject directory also finished with exit code 0 in 35.68 s wall time and
+4,922,680 KiB peak RSS. Its two label files and both LTA files were
+byte-identical to the component probe outputs; see
+[wrapper_comparison.json](wrapper_comparison.json) and
+[wrapper.log](wrapper.log).
 
 ## Numerical result
 
