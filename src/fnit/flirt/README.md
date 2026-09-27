@@ -1,54 +1,28 @@
-# PyTorch FLIRT
+# PyTorch FLIRT 模块
 
-This directory contains the public FLIRT implementation:
-
-- `core.py`: source-derived 12-DOF correlation-ratio and 6-DOF normmi registration;
-- `coordinates.py`: FSL scaled-mm and world-RAS conversion;
-- `types.py`: shared result and image-input validation;
-- `standalone.py`: FSL-style Python file API with atomic outputs;
-- `cli.py` and `__main__.py`: `fnit-flirt` and module commands.
+本目录实现 12 DOF / corratio 和 6 DOF / normmi 线性配准。`core.py` 负责 PyTorch 配准，`coordinates.py` 处理 FSL scaled-mm 与 world-RAS 坐标，`types.py` 管理图像输入和结果，`standalone.py` 提供文件接口，`cli.py` 提供命令行。路径输入经 NiBabel 读取；包内不导入 Surfa，也不调用 FSL。
 
 ```python
 from fnit.flirt import run_flirt
 
 result = run_flirt(
-    "subject_GM.nii.gz",
-    "template_GM.nii.gz",
-    output="subject_GM_to_template.nii.gz",
-    omat="subject_GM_to_template.mat",
-    device="cuda:0",
+    input="input_T1.nii.gz",             # 待移动的单帧三维图像
+    reference="reference_T1.nii.gz",   # 固定图像及输出网格
+    output="registered_T1.nii.gz",     # 输出重采样图像
+    omat="input_to_reference.mat",     # 输出 FSL scaled-mm 坐标矩阵
+    init=None,                          # 初始 FSL 矩阵；None 为单位矩阵
+    inweight=None,                      # 输入图像权重
+    refweight=None,                     # 参考图像权重
+    dof=12,                             # 12 自由度仿射配准
+    cost="corratio",                    # 相关比代价函数
+    device="cuda:0",                    # 运行设备；可改为 cpu
+    overwrite=False,                    # 不覆盖已有文件
 )
+# result.moved：参考网格图像；result.matrix：输入到参考的 FSL 4×4 矩阵；result.qc：运行记录。
 ```
 
-```bash
-fnit-flirt \
-  -in subject_GM.nii.gz \
-  -ref template_GM.nii.gz \
-  -out subject_GM_to_template.nii.gz \
-  -omat subject_GM_to_template.mat \
-  -dof 12 -cost corratio --device cuda:0
-```
+对应命令 `fnit-flirt -in input_T1.nii.gz -ref reference_T1.nii.gz -out registered_T1.nii.gz -omat input_to_reference.mat -dof 12 -cost corratio --device cuda:0`；官方对照命令是 `flirt -in input_T1.nii.gz -ref reference_T1.nii.gz -out registered_T1.nii.gz -omat input_to_reference.mat -dof 12 -cost corratio`。这两条命令的输入、参考、图像输出和矩阵输出含义相同。
 
-The input is the moving image. The reference defines the output grid. The
-matrix maps input to reference in FSL scaled-mm coordinates; it is not a
-world-RAS affine.
+函数参数、内存图像接口、结果字段、坐标说明、真实数据的精度与时间对照见[完整中文文档](../../../docs/flirt/README.md)。2026-09-28 移除 Surfa 的两种配置同输入验证与限制见[迁移报告](../../../validation/flirt_no_surfa_20260928/README.md)。旧 10 例 FSL 对照属于迁移前历史记录，尚未用新路径逐例重测。
 
-The implementation reports a passed FLIRT matrix functional gate for the 0.9
-reference suite: 10/10 cases (`rmsdiff <= 0.05 mm`; median 0.008544 mm,
-maximum 0.028984 mm). Runtime QC still reports
-`validated_fsl_equivalent=false` and `current_input_compared_with_fsl=false`.
-`reference_validation_matrix_gate_passed=true` describes that fixed suite; it
-does not compare the current input or claim bitwise/complete numerical
-equivalence.
-
-The QC value `reference_validation_report="validation/flirt/report.public.json"`
-is a source-repository artifact identifier. The wheel does not contain the
-root `validation/` directory; use the
-[public GitHub report](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/blob/main/validation/flirt/report.public.json) for an installed package.
-
-See `docs/flirt/README.md` in the source
-repository for the full input/output contract, argument-by-argument examples,
-coordinate conversion, validation table, and timing context.
-
-The modified port and its vendored upstream sources are covered by the
-non-commercial FSL Software Licence, Release 6.0.
+本移植及随附上游源码适用 FSL Software Licence Release 6.0（非商业用途）。

@@ -16,7 +16,6 @@ import os
 from pathlib import Path
 
 import numpy as np
-import surfa as sf
 import torch
 import torch.nn.functional as F
 

@@ -9,7 +9,7 @@
 - SynthSR：当前无 Surfa 迁移核对见[`synthsr_no_surfa_20260928/README.md`](synthsr_no_surfa_20260928/README.md)；旧版 12 例基准见[`synthsr/README.md`](synthsr/README.md)。
 - TorchFAST：[`fast/README.md`](fast/README.md) 与 [`fast/report.public.json`](fast/report.public.json)。
 - TorchApplyWarp：[`applywarp/report.json`](applywarp/report.json)。
-- FLIRT：[`flirt/report.public.json`](flirt/report.public.json)。
+- FLIRT：当前移除 Surfa 的同输入核对见[`flirt_no_surfa_20260928/README.md`](flirt_no_surfa_20260928/README.md)；旧版 10 例基准见[`flirt/report.public.json`](flirt/report.public.json)。
 - FNIRT / TBSS：[`dmri_pipeline/tbss_diagnosis.public.json`](dmri_pipeline/tbss_diagnosis.public.json) 与[功能页](../docs/fnirt/README.md)。
 - FastVBM：[`fast_vbm/README.md`](fast_vbm/README.md) 记录当前接口与 fresh benchmark 缺口。
 - TOPUP：[`topup/report.public.json`](topup/report.public.json) 与[功能页](../docs/topup/README.md)。
@@ -35,7 +35,7 @@
 | [SynthSR](../docs/synthsr/README.md) | FreeSurfer TensorFlow，12 例 | 有：shape、affine、dtype、体素差 | 有：原版/本包 CPU 与 GPU | 有：公开 FLAIR 合成 T1w |
 | [TorchFAST](../docs/fast/README.md) | FSL FAST，10 例 | 有：GM PVE、Dice、体积、bias | 有：FSL CPU / 本包 GPU | 有：GM overlay、差值和 bias correction |
 | [FastVBM](../docs/fast_vbm/README.md) | UKB v1 / FSL 接口对应 | 当前源码的 fresh benchmark 尚未完成 | 当前源码无可发布配对计时 | 当前源码无可发布对照图 |
-| [FLIRT](../docs/flirt/README.md) | FSL 6.0.7.4，10 例 | 有：`.mat` 与 reference-grid 图像 | 有：FSL CPU / 本包 H100 | 有：十例平均配准 GM 与差值 |
+| [FLIRT](../docs/flirt/README.md) | FSL 6.0.7.4；当前 1 例真实 T1，旧版 10 例 GM | 当前新旧包两种配置文件字节相同；与 FSL 的矩阵及图像差异另列 | 当前同输入 FSL / 新旧包 CPU；旧版另有 H100 基准 | 旧版十例平均配准 GM 与差值 |
 | [FNIRT](../docs/fnirt/README.md) | FSL 6.0.7.4，1 例真实 UKB matched-native TBSS | 有：coefficient geometry、九张 standard/skeleton 图及 fixed-affine/fixed-warp 隔离；仍不数值等价 | 有：FSL CPU / 本包 H100，同一 registration 边界 | 有：真实 FA standard-space 对照与绝对差 |
 | [applywarp](../docs/applywarp/README.md) | FSL 6.0.7.4，11 项 | 有：dense/coefficient、linear/nearest、header/dtype | 有：FSL CPU / 本包 CPU 与 H100 | 有：相同 warp 的输出与差值 |
 | [TOPUP](../docs/topup/README.md) | FSL 6.0.7.4，1 例真实 UKB 格式 dMRI | 有：field、corrected images、Jacobian、coefficient/movement/header | 有：FSL CPU / 本包 H100，各 3 次 | 有：原始 AP/PA、校正均值、field 与差值 |

@@ -561,6 +561,9 @@ def main(argv=None):
     if selected and selected[0] == "synthseg":
         _run_synthseg(parser.parse_args(selected))
         return
+    if selected and selected[0] == "flirt":
+        _run_flirt(parser.parse_args(selected))
+        return
     if selected and selected[0] == "synthsr":
         _run_synthsr(parser.parse_args(selected))
         return
@@ -609,9 +612,6 @@ def main(argv=None):
         return
     if args.command == 'synthseg':
         _run_synthseg(args)
-        return
-    if args.command == 'flirt':
-        _run_flirt(args)
         return
     if args.command == 'fnirt':
         _run_fnirt(args)

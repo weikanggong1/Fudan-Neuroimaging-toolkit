@@ -5,15 +5,16 @@ import os
 from pathlib import Path
 
 import numpy as np
-import surfa as sf
+
+from ..synthstrip.geometry import load_volume
 
 
 def _load_volume(value, name):
     if isinstance(value, (str, os.PathLike)):
-        return sf.load_volume(str(value))
-    if isinstance(value, sf.Volume):
+        return load_volume(value)
+    if all(hasattr(value, field) for field in ("data", "geom", "new")):
         return value
-    raise TypeError(f"{name} must be a path or surfa.Volume")
+    raise TypeError(f"{name} must be a path or volume with data and geometry")
 
 
 def _single_frame(volume, name):
@@ -33,7 +34,7 @@ def _single_frame(volume, name):
 class FLIRTResult:
     """Reference-grid image and transforms returned by a FLIRT model."""
 
-    moved: sf.Volume
+    moved: object
     matrix: np.ndarray
     moving_to_fixed_world: np.ndarray
     fixed_to_moving_world: np.ndarray

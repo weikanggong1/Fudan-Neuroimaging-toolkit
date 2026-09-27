@@ -2,12 +2,12 @@
 
 import numpy as np
 import pytest
-import surfa as sf
 import torch
 
 import fnit
 from fnit.flirt import FLIRTResult, TorchFLIRT
 from fnit.flirt.core import FSLCorrelationRatio
+from fnit.synthstrip.geometry import Volume
 from fnit.flirt import core as flirt_core
 from fnit.flirt.coordinates import (
     flirt_to_world_affine,
@@ -25,7 +25,7 @@ def _volume(shape=(7, 8, 9), vox2world=None):
     data = np.exp(
         -sum((axis - center[index]) ** 2 for index, axis in enumerate(axes)) / 6
     ).astype(np.float32)
-    return sf.Volume(data, geometry=sf.ImageGeometry(shape, vox2world=vox2world))
+    return Volume(data, vox2world)
 
 
 def test_world_and_flirt_matrix_conversions_are_exact_inverses():
