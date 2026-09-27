@@ -18,7 +18,6 @@ import time
 import nibabel as nib
 import nibabel.freesurfer.io as fs
 import numpy as np
-from scipy.spatial import cKDTree
 import torch
 
 
@@ -198,14 +197,6 @@ def _run_native_surface_metrics(binary: Path, subject: Path, hemi: str,
             raise FileNotFoundError(f"mris_place_surface produced no morph: {output}")
         timings[name] = time.perf_counter() - tick
     return timings
-
-
-def _save_like(source: Path, output: Path, values: np.ndarray) -> None:
-    image = nib.load(str(source))
-    array = np.ascontiguousarray(values)
-    header = image.header.copy()
-    header.set_data_dtype(array.dtype)
-    nib.save(nib.MGHImage(array, image.affine, header), str(output))
 
 
 def _replace_vertices(source: Path, output: Path, vertices: np.ndarray) -> None:
@@ -498,52 +489,24 @@ def _finish_cortical_surface(subject: Path, hemi: str, binary: Path,
                                "sphere-and-upstream-parity-unverified"]}
 
 
-def _project_parcels(subject: Path, aseg: np.ndarray) -> None:
-    """Assign cortical voxels to the closest same-hemisphere white vertex."""
-    mri, surf, label = (subject / name for name in ("mri", "surf", "label"))
-    image = nib.load(str(mri / "aseg.mgz"))
-    transform = image.header.get_vox2ras_tkr()
+def _project_parcels(subject: Path) -> None:
+    """Run the validated bilateral cortex-volume mapping for three atlases."""
+    from .surf2volseg_cortex_python import label_cortex_volume
+
+    mri, surf, labels = (subject / name for name in ("mri", "surf", "label"))
     for atlas, output in (("aparc", "aparc+aseg.mgz"),
                           ("aparc.a2009s", "aparc.a2009s+aseg.mgz"),
                           ("aparc.DKTatlas", "aparc.DKTatlas+aseg.mgz")):
-        projected = aseg.astype(np.int32, copy=True)
-        offsets = (11100, 12100) if atlas == "aparc.a2009s" else (1000, 2000)
-        for (hemi, cortical_id), offset in zip((("lh", 3), ("rh", 42)), offsets):
-            vertices, _ = fs.read_geometry(str(surf / f"{hemi}.white"))
-            ids, _, _ = fs.read_annot(str(label / f"{hemi}.{atlas}.annot"))
-            labeled = ids > 0
-            tree = cKDTree(vertices[labeled])
-            parcel_ids = ids[labeled]
-            positions = np.argwhere(aseg == cortical_id)
-            for block in np.array_split(positions, max(1, (len(positions) + 99999) // 100000)):
-                if not len(block):
-                    continue
-                points = block @ transform[:3, :3].T + transform[:3, 3]
-                nearest = tree.query(points, workers=4)[1]
-                projected[block[:, 0], block[:, 1], block[:, 2]] = offset + parcel_ids[nearest]
-        _save_like(mri / "aseg.mgz", mri / output, projected)
+        label_cortex_volume(mri / "aseg.mgz", surf, labels, mri / output,
+                            atlas=atlas)
 
 
-def _project_wmparc(subject: Path, aseg: np.ndarray) -> None:
-    """Assign white matter voxels to nearby aparc regions."""
-    mri, surf, label = (subject / name for name in ("mri", "surf", "label"))
-    image = nib.load(str(mri / "aseg.mgz"))
-    transform = image.header.get_vox2ras_tkr()
-    projected = aseg.astype(np.int32, copy=True)
-    for hemi, wm_id, offset in (("lh", 2, 3000), ("rh", 41, 4000)):
-        vertices, _ = fs.read_geometry(str(surf / f"{hemi}.white"))
-        ids, _, _ = fs.read_annot(str(label / f"{hemi}.aparc.annot"))
-        labeled = ids > 0
-        tree = cKDTree(vertices[labeled])
-        parcel_ids = ids[labeled]
-        positions = np.argwhere(aseg == wm_id)
-        for block in np.array_split(positions, max(1, (len(positions) + 99999) // 100000)):
-            if not len(block):
-                continue
-            points = block @ transform[:3, :3].T + transform[:3, 3]
-            nearest = tree.query(points, workers=4)[1]
-            projected[block[:, 0], block[:, 1], block[:, 2]] = offset + parcel_ids[nearest]
-    _save_like(mri / "aseg.mgz", mri / "wmparc.mgz", projected)
+def _project_wmparc(subject: Path) -> None:
+    """Run the validated white-matter volume mapping from aparc+aseg."""
+    from .surf2volseg_wm_python import label_wm_volume
+
+    mri, surf, labels = (subject / name for name in ("mri", "surf", "label"))
+    label_wm_volume(mri / "aparc+aseg.mgz", surf, labels, mri / "wmparc.mgz")
 
 
 def _segment_callosum(mri: Path) -> dict[str, float | int]:
@@ -786,8 +749,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                            device=device, threads=threads,
                            metrics_binary=metrics_binary[0] if metrics_binary else None)
             report["surfaces"][hemi].update(result)
-    stage("project_aparc_volumes", _project_parcels, subject, aseg)
-    stage("project_wmparc", _project_wmparc, subject, aseg)
+    stage("project_aparc_volumes", _project_parcels, subject)
+    stage("project_wmparc", _project_wmparc, subject)
 
     volumes = stage("brain_volume_stats", compute_brain_volume_stats,
                     subject, assets / "ASegStatsLUT.txt")

@@ -6,7 +6,7 @@ bilateral white/pial surfaces, and bilateral `cortex.label` masks; it writes
 `mri_aparc2aseg/mri_surf2volseg.cpp`, including a nearest-vertex cortex-mask
 check for cerebral white matter outside the ribbon and unknown voxels inside
 it. `surf2volseg_fix_python.py` is the fixed `--fix-presurf-with-ribbon` branch
-only; `--label-cortex` and `--label-wm` are separate pending branches.
+only in this historical check; `--label-cortex` and `--label-wm` were later connected and checked on real frozen inputs in [the current runner report](ATLAS_VOLUME_RUNNER_20260928.md).
 
 On frozen `fs_sub01` inputs, **16,777,216/16,777,216 output voxels** matched
 both the archived and freshly run official `aseg.mgz`. The first categorical

@@ -37,7 +37,7 @@ recon-all 的神经网络与部分体素、表面计算使用 PyTorch/CUDA；N4 
 
 最近一次从原始 T1 完成的 **v3 历史整例**耗时 2903.79 秒，严格比较 138 项中通过 19 项、缺失 47 项、不同 72 项。[整例原始报告](validation/recon_all/python_gpu_port/native_cpp_conda_20260927/v3_e2e_20260927/BENCHMARK.md)所列的 13 张上游体积图逐体素一致，仅适用于当时的 N4 实现。当前[Conda C++ N4 单阶段对照](docs/recon_all/N4_ITK_CONDA.md)在同一真实 T1 上使 `nu0.mgz` 有 9 / 16,777,216 个体素差 1，最终 `nu.mgz` 有 8 个体素差 1–2；本版尚未重新运行完整 138 项验收，不能沿用 v3 通过率或耗时作为当前结果。
 
-后续[双侧拓扑冻结输入验证](docs/recon_all/TOPOLOGY_CONDA_GA.md)已得到逐点一致的 `orig`。[自产输入左侧标准球面](validation/recon_all/python_gpu_port/candidate_sphere_first_difference_20260927/full_stage/README.md)在相同候选输入下与官方有序顶点和面一致，Python 用时 884.56 秒，官方 328.61 秒；与归档官方球面的均差 2.959 mm 来自上游 `white.preaparc`。左侧[白质面首轮状态试验](docs/recon_all/WHITE_PYTHON_FIRST_PASS.md)在隔离条件下将最终超过 0.1 mm 的顶点由 50 个降到 2 个，尚未接入生产。最终 white/pial、右侧连通表面、配准球面及脑区指标仍需同一 T1 连续验收；当前不能声称等价重建加速。
+后续[双侧拓扑冻结输入验证](docs/recon_all/TOPOLOGY_CONDA_GA.md)已得到逐点一致的 `orig`。[自产输入左侧标准球面](validation/recon_all/python_gpu_port/candidate_sphere_first_difference_20260927/full_stage/README.md)在相同候选输入下与官方有序顶点和面一致，Python 用时 884.56 秒，官方 328.61 秒；与归档官方球面的均差 2.959 mm 来自上游 `white.preaparc`。[脑区体积图的 Python 同输入核对](validation/recon_all/python_gpu_port/ATLAS_VOLUME_RUNNER_20260928.md)已在冻结官方表面、标签和 aseg 上使 aparc/a2009s/DKT 与 wmparc 四张图全部逐体素一致。左侧[白质面首轮状态试验](docs/recon_all/WHITE_PYTHON_FIRST_PASS.md)在隔离条件下将最终超过 0.1 mm 的顶点由 50 个降到 2 个，尚未接入生产。最终 white/pial、右侧连通表面、配准球面及脑区指标仍需同一 T1 连续验收；当前不能声称等价重建加速。
 
 相关 CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核；为保持已验证的体素一致性，SynthStrip 和 SynthSeg 局部关闭 cuDNN TF32；recon-all 的 Talairach SynthMorph affine 前向局部关闭 matmul 和 cuDNN TF32 以缩小 LTA/eTIV 误差，随后恢复原设置。模型与影像张量仍保持 float32，本包不会自动改用 float16 或 bfloat16。各验证报告记录实际开关。
 
