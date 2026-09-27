@@ -11,7 +11,7 @@ The FreeSurfer 8.2 `recon-all.log` for the real `sub-01_T1w.nii.gz` case has two
 
 ## Python stage
 
-`fnit.recon_all.smooth_surface_python.smooth_surface(input_path, output_path, iterations=3, device="cpu")` reads a FreeSurfer triangular surface and writes a triangular surface with the same ordered faces and volume geometry. It returns `None`. For the final `smoothwm`, set `input_path=surf/H.white.preaparc`, `output_path=surf/H.smoothwm`, and `iterations=3`. `device` accepts `cpu` or a CUDA device string; the benchmark below uses CPU float32. The function performs ordered one-ring vertex averaging without `mris_smooth`'s write of additional curvature files (`-nw`). Output bytes differ in the creator comment; ordered coordinates, faces and volume geometry are the numeric contract.
+`fnit.recon_all.smooth_surface_python.smooth_surface(input_path, output_path, iterations=10, device="cpu")` reads a FreeSurfer triangular surface and writes a triangular surface with the same ordered faces and volume geometry. It returns `None`. For the final `smoothwm`, set `input_path=surf/H.white.preaparc`, `output_path=surf/H.smoothwm`, and `iterations=3`. `device` accepts `cpu` or a CUDA device string; the benchmark below uses CPU float32. The function performs ordered one-ring vertex averaging without `mris_smooth`'s write of additional curvature files (`-nw`). Output bytes differ in the creator comment; ordered coordinates, faces and volume geometry are the numeric contract.
 
 Standalone Python command:
 

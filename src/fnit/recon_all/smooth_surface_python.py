@@ -1,4 +1,4 @@
-"""Fixed ten-pass vertex averaging for recon-all's ``mris_smooth -nw``."""
+"""Ordered vertex averaging for recon-all's ``mris_smooth -nw``."""
 
 from __future__ import annotations
 
