@@ -1,9 +1,15 @@
 # White/pial geometry placement: integration dependency audit
 
-This is a read-only audit of the fixed `sub-01_T1w.nii.gz` case. The current
-runner calls the Conda-built `mris_place_surface` for bilateral thickness,
+Historical snapshot of the `sphere_registration_preflight` subject. The current opt-in
+MNI/auxiliary, topology, `white.preaparc`, and `smoothwm` status is in
+[`docs/recon_all/README.md`](../../../../docs/recon_all/README.md) and the
+[connected LH replay](../white_connected_prefix_20260927/README.md); the
+missing-input table below describes this older subject, not the current runner.
+
+This is a read-only audit of the fixed `sub-01_T1w.nii.gz` case. The then-current
+runner called the Conda-built `mris_place_surface` for bilateral thickness,
 area, pial area, white curvature and pial curvature **on its approximate
-surfaces**. It does not call the C++ white/pial geometry optimizer. The ten
+surfaces**. It did not call the C++ white/pial geometry optimizer. The ten
 metric calls passed same-input comparisons against the installed FreeSurfer
 binary at every vertex and by complete file SHA-256; this certifies those
 metric commands on frozen surfaces, not the reconstructed surfaces themselves.
