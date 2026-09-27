@@ -306,6 +306,196 @@
     "fsl_fibre_source_sha256": "0e6c1c69ee2a9d2488ad1c4dae099d1089678117314a54acd8a22a4ce9c0d539",
     "synthetic_generator_sha256": "ba8f1bfc0967aeff3458354e5fe90bdb7ee369c80b5a3bd701cf285a8f7be476",
     "synthetic_figure_sha256": "294e8ea8299b8a6f3a0d164caf0eb2ccd0f5dedc0b3958d93326fd8d583391b7",
-    "verification": "Current code hash matches the isolated gpucw1 package used for the real and synthetic CPU/GPU runs. The figure was rendered from the current synthetic outputs."
+    "verification": "Current core hash matches the isolated gpucw1 package used for all reported FNIT runs, including fibre-support and no-ARD controls. The figure was rendered from the current synthetic outputs."
+  },
+  "secondary_fibre_diagnosis": {
+    "weak_14_voxel_roi": {
+      "fsl_reference_seed": 8665904,
+      "fsl_reference_fraction_means": {
+        "f2": 0.023613886907696724,
+        "f3": 0.0059680878184735775
+      },
+      "fsl_reference_draw_fraction_below_0_05": {
+        "f2": 0.8028571428571428,
+        "f3": 0.97
+      },
+      "fsl_other_seeds_vs_reference": {
+        "8665905": {
+          "f2": {
+            "mae": 0.029324406757950783,
+            "pearson_r": 0.20102738175066254
+          },
+          "f3": {
+            "mae": 0.0030937616247683764,
+            "pearson_r": 0.7562827469853272
+          }
+        },
+        "8665906": {
+          "f2": {
+            "mae": 0.014602705836296082,
+            "pearson_r": 0.7644836214784337
+          },
+          "f3": {
+            "mae": 0.004796244204044342,
+            "pearson_r": 0.4002354198784878
+          }
+        },
+        "8665907": {
+          "f2": {
+            "mae": 0.015335987322032452,
+            "pearson_r": 0.5346222105709459
+          },
+          "f3": {
+            "mae": 0.004471861757338047,
+            "pearson_r": 0.5914812076865247
+          }
+        }
+      },
+      "current_fnit_gpu_vs_reference": {
+        "f2": {
+          "mae": 0.012820960953831673,
+          "pearson_r": 0.5263991140544944
+        },
+        "f3": {
+          "mae": 0.00453755771741271,
+          "pearson_r": 0.5803262481619965
+        }
+      },
+      "f2_plus_f3_pearson_r": {
+        "fsl_8665905": 0.21686705115639862,
+        "fsl_8665906": 0.7052941370315883,
+        "fsl_8665907": 0.5977126235912308,
+        "fnit_gpu": 0.574485533630153
+      },
+      "note": "No jointly supported f2/f3 voxel at mean fraction >=0.1. Adding f2 and f3 did not consistently restore map correlation."
+    },
+    "supported_64_voxel_roi": {
+      "crop_shape": [
+        9,
+        9,
+        9,
+        105
+      ],
+      "selection": "Within one compact patch, select 48 voxels with f2>=0.1 and f3>=0.1 and 16 with f2>=0.1 and f3<0.05 according to a pre-existing whole-brain FSL map; refit FSL and FNIT from DWI.",
+      "selection_caveat": "This diagnostic ROI is enriched using FSL estimates and is not an unbiased whole-brain accuracy sample.",
+      "masked_voxels": 64,
+      "fsl_reference_seed": 8665904,
+      "fsl_reference_fraction_ge_0_1_voxels": {
+        "f2": 63,
+        "f3": 39
+      },
+      "seconds": {
+        "fsl_reference": 39.41,
+        "fsl_repeat": 39.65,
+        "fnit_cpu_one_thread": 29.03,
+        "fnit_h100_gpu_1": 37.5
+      },
+      "comparisons_to_fsl_reference": {
+        "fsl_repeat": {
+          "f2": {
+            "mae": 0.021618518978357315,
+            "pearson_r_all": 0.7818515376938968,
+            "joint_fraction_ge_0_1_voxels": 60,
+            "pearson_r_joint_supported": 0.83219359132437,
+            "median_axis_degrees_joint_supported": 6.490551948547363
+          },
+          "f3": {
+            "mae": 0.032210707664489746,
+            "pearson_r_all": 0.6989417474905323,
+            "joint_fraction_ge_0_1_voxels": 31,
+            "pearson_r_joint_supported": 0.8639888601766462,
+            "median_axis_degrees_joint_supported": 9.36925983428955
+          }
+        },
+        "fnit_cpu": {
+          "f2": {
+            "mae": 0.023868892341852188,
+            "pearson_r_all": 0.8022716760222369,
+            "joint_fraction_ge_0_1_voxels": 61,
+            "pearson_r_joint_supported": 0.8400307125084222,
+            "median_axis_degrees_joint_supported": 4.447700500488281
+          },
+          "f3": {
+            "mae": 0.037384651601314545,
+            "pearson_r_all": 0.6343308689552111,
+            "joint_fraction_ge_0_1_voxels": 29,
+            "pearson_r_joint_supported": 0.8099575411366067,
+            "median_axis_degrees_joint_supported": 8.794238090515137
+          }
+        },
+        "fnit_gpu": {
+          "f2": {
+            "mae": 0.024049758911132812,
+            "pearson_r_all": 0.7412393688232061,
+            "joint_fraction_ge_0_1_voxels": 61,
+            "pearson_r_joint_supported": 0.7255180576784173,
+            "median_axis_degrees_joint_supported": 5.44409704208374
+          },
+          "f3": {
+            "mae": 0.04351165145635605,
+            "pearson_r_all": 0.5715482938780035,
+            "joint_fraction_ge_0_1_voxels": 25,
+            "pearson_r_joint_supported": 0.8005464137767361,
+            "median_axis_degrees_joint_supported": 8.299759864807129
+          }
+        }
+      },
+      "direction_pairing": {
+        "fsl_repeat": {
+          "joint_supported_secondary_voxels": 31,
+          "count_swapped_better_by_10_degrees": 7,
+          "median_direct_sum_degrees": 15.079087257385254,
+          "median_best_sum_degrees": 10.945830345153809
+        },
+        "fnit_gpu": {
+          "joint_supported_secondary_voxels": 25,
+          "count_swapped_better_by_10_degrees": 5,
+          "median_direct_sum_degrees": 14.13465690612793,
+          "median_best_sum_degrees": 11.535619735717773
+        }
+      },
+      "exit_status": {
+        "fsl_reference": 255,
+        "fsl_repeat": 255,
+        "fnit_cpu": 0,
+        "fnit_gpu": 0
+      },
+      "artifacts_valid": true
+    },
+    "no_ard_ablation_on_weak_roi": {
+      "setting": "FSL --noard and Torch ard_weight=0; all other standard-run settings and input unchanged.",
+      "means_with_ard": {
+        "fsl_ard": {
+          "f2": 0.023613886907696724,
+          "f3": 0.0059680878184735775
+        },
+        "fnit_ard": {
+          "f2": 0.02303224615752697,
+          "f3": 0.0028105422388762236
+        }
+      },
+      "means_without_ard": {
+        "fsl_noard": {
+          "f2": 0.1066189855337143,
+          "f3": 0.05134863778948784
+        },
+        "fnit_noard": {
+          "f2": 0.08411236852407455,
+          "f3": 0.04582331329584122
+        }
+      },
+      "cross_method_without_ard": {
+        "f2": {
+          "mae": 0.04394712299108505,
+          "pearson_r": 0.6315701545448933
+        },
+        "f3": {
+          "mae": 0.012936560437083244,
+          "pearson_r": 0.7670094579605031
+        }
+      },
+      "interpretation": "ARD suppresses weak secondary fractions in both implementations. Removing ARD changes the fitted model and increases cross-method absolute fraction differences; it is not a parity fix."
+    },
+    "data_policy": "Only aggregate diagnostic metrics are public; selected voxel locations and subject imaging remain on the research server."
   }
 }

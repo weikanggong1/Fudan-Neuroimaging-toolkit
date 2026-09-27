@@ -67,6 +67,31 @@ The same ROI was rerun with FSL tensor initialization (`--nospat`) and with long
 
 [FSL's model-2 source](../../src/fnit/_vendor_fsl/sources/fdt-2604.0/fibre.h) adds `log(d_std)` and, for subsidiary fibres under ARD, `log(f)` to the energy. These terms drive values toward zero; without a positive lower bound, the corresponding continuous density is non-integrable there. FSL's own `d_std` ROI mean fell by more than four orders of magnitude with the longer chain, while its tensor-versus-nonlinear short runs differed by MAE 0.000198 mm²/s. The current Torch long run differed from FSL's long run by `d_std` MAE 1.05×10⁻⁸ mm²/s and mean-f2 MAE 0.00400. Correlations among near-zero `d_std` values are not informative. Interpret the standard run as a finite-chain FSL-compatible estimate, with stronger evidence for the first-fibre fraction and axis in this ROI.
 
+## Why second- and third-fibre correlations are lower
+
+The 14-voxel benchmark ROI contains no voxel where **both** methods assign mean fraction ≥ 0.1 to f2 or f3. In original FSL, 80.3% of saved f2 draws and 97.0% of f3 draws are below 0.05. [FSL uses ARD to determine how many fibres a voxel supports](https://fsl.fmrib.ox.ac.uk/fsl/docs/diffusion/bedpostx.html); near-zero secondary fractions are therefore expected in a region with little crossing-fibre evidence.
+
+| Same 14 voxels, compared with FSL seed 8665904 | f2 Pearson *r* | f3 Pearson *r* |
+| --- | ---: | ---: |
+| FSL seed 8665905 | 0.201 | 0.756 |
+| FSL seed 8665906 | 0.764 | 0.400 |
+| FSL seed 8665907 | 0.535 | 0.591 |
+| Current Torch H100 | 0.526 | 0.580 |
+
+The cross-implementation correlations fall inside FSL's own three-seed range. Adding f2 and f3 did not consistently restore correlation, so simply exchanging the two fibre labels does not explain the weak-ROI result.
+
+To check supported fibres, a separate 64-voxel patch was selected from an **existing** whole-brain FSL map: 48 voxels had f2 and f3 ≥ 0.1, and 16 had f2 ≥ 0.1 with f3 < 0.05. All methods then refit the same cropped DWI. This is an FSL-enriched diagnostic sample, not an unbiased whole-brain accuracy estimate. The fresh FSL reference supported f2 in 63/64 voxels and f3 in 39/64.
+
+| Compared with fresh FSL reference | f2 *r*, all | f3 *r*, all | f2 *r*, jointly ≥ 0.1 | f3 *r*, jointly ≥ 0.1 | Median f2 / f3 axis difference, jointly supported |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| FSL, another seed | 0.782 | 0.699 | 0.832 (60 voxels) | 0.864 (31 voxels) | 6.49° / 9.37° |
+| Current Torch CPU | 0.802 | 0.634 | 0.840 (61 voxels) | 0.810 (29 voxels) | 4.45° / 8.79° |
+| Current Torch H100 | 0.741 | 0.572 | 0.726 (61 voxels) | 0.801 (25 voxels) | 5.44° / 8.30° |
+
+In voxels supporting both secondary fibres, swapping the two direction matches improved the total angular error by over 10° in 5/25 Torch-versus-FSL comparisons; the same happened in 7/31 FSL-versus-FSL comparisons. Sorting by mean fraction cannot eliminate this direction ambiguity when the two components are similar, but it is not the sole source of the weak-ROI fraction mismatch.
+
+As a prior ablation on the weak ROI, disabling ARD raised FSL mean f2/f3 from 0.0236/0.0060 to 0.1066/0.0513 and Torch GPU means from 0.0230/0.0028 to 0.0841/0.0458. The cross-method f2 MAE increased from 0.0128 to 0.0439, so disabling ARD changes the model rather than fixing the comparison. These controls support weak signal, ARD shrinkage, finite-chain variability, and some fibre pairing ambiguity as the main causes in the tested ROIs. They do not establish whole-brain equivalence.
+
 ## Shareable synthetic example
 
 The [generator](synthetic_example.py) creates an 8 × 8 × 1 multi-shell DWI with two known crossing-fibre fraction maps and no human imaging data. Run original FSL and the current Torch code with the settings above and `--nf=2`, then render the [current comparison image](synthetic_example.png):
