@@ -1,6 +1,6 @@
 # Talairach LTA 坐标转换
 
-`run_input_talairach_chain` 在 SynthMorph 仿射注册后，需要将 `aff.lta` 的 RAS 到 RAS 矩阵写成体素到体素的 `talairach.xfm.lta`。这一步现由 `write_voxel_lta_from_ras` 在仓库内用 NumPy 完成，不导入 Surfa。SynthStrip、SynthMorph 网络及其他阶段的 Surfa 依赖尚未全部替换。
+`run_input_talairach_chain` 在 SynthMorph 仿射注册后，需要将 `aff.lta` 的 RAS 到 RAS 矩阵写成体素到体素的 `talairach.xfm.lta`。这一步现由 `write_voxel_lta_from_ras` 在仓库内用 NumPy 完成，不导入 Surfa。Talairach affine 注册也已采用[NiBabel/PyTorch 实现](TALAIRACH_AFFINE_NIBABEL.md)；其他通用 SynthMorph 路径与部分重建阶段的 Surfa 依赖尚未全部替换。
 
 ## 输入、输出与调用
 

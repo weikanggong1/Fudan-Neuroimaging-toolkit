@@ -3,11 +3,10 @@
 import importlib.util
 import os
 from pathlib import Path
-from types import SimpleNamespace
 
 import numpy as np
 import pytest
-import surfa as sf
+from fnit.synthmorph.affine_no_surfa import AffineGeometry, AffineTransform
 
 
 MODULE = Path(os.environ.get(
@@ -24,15 +23,16 @@ def _affine():
     source[:3, 3] = [4, -6, 2]
     target = np.eye(4)
     target[:3, :3] = [[-1, 0, 0], [0, 0, -1], [0, 1, 0]]
-    moving = sf.Volume(np.zeros((16, 18, 20), np.float32),
-                       geometry=sf.ImageGeometry((16, 18, 20), vox2world=source))
-    fixed = sf.Volume(np.zeros((16, 18, 20), np.float32),
-                      geometry=sf.ImageGeometry((16, 18, 20), vox2world=target))
+    shape = (16, 18, 20)
+    moving = AffineGeometry(shape, source, np.ones(3), source[:3, :3],
+                            (source @ np.array([8, 9, 10, 1]))[:3])
+    fixed = AffineGeometry(shape, target, np.ones(3), target[:3, :3],
+                           (target @ np.array([8, 9, 10, 1]))[:3])
     matrix = np.array([[1.1, 0.03, 0.01, 3.5],
                        [-0.02, 0.95, 0.04, -5.25],
                        [0.01, -0.01, 1.2, 2.75],
                        [0, 0, 0, 1]], np.float32)
-    return sf.Affine(matrix, source=moving, target=fixed, space="world")
+    return AffineTransform(matrix, source=moving, target=fixed)
 
 
 def test_talairach_conversion_preserves_world_coordinate_mapping():
@@ -49,9 +49,9 @@ def test_register_talairach_writes_readable_xfm_without_native_program(tmp_path,
         def __init__(self, **kwargs):
             called.update(kwargs)
 
-        def __call__(self, moving, template):
+        def affine_transform(self, moving, template):
             called["input"] = (moving, template)
-            return SimpleNamespace(transform=affine)
+            return affine
 
     monkeypatch.setattr(talairach, "SynthMorph", FakeModel)
     path = tmp_path / "transforms/talairach.xfm"
@@ -82,9 +82,9 @@ def test_register_talairach_disables_tf32_only_for_affine_inference(tmp_path, mo
             flags.cuda.matmul.allow_tf32 = True
             flags.cudnn.allow_tf32 = True
 
-        def __call__(self, moving, template):
+        def affine_transform(self, moving, template):
             observed.append((flags.cuda.matmul.allow_tf32, flags.cudnn.allow_tf32))
-            return SimpleNamespace(transform=affine)
+            return affine
 
     monkeypatch.setattr(talairach, "SynthMorph", FakeModel)
     talairach.register_talairach("moving", "template", "weights",
@@ -103,7 +103,7 @@ def test_register_talairach_restores_tf32_when_inference_fails(tmp_path, monkeyp
             flags.cuda.matmul.allow_tf32 = True
             flags.cudnn.allow_tf32 = True
 
-        def __call__(self, moving, template):
+        def affine_transform(self, moving, template):
             assert (flags.cuda.matmul.allow_tf32, flags.cudnn.allow_tf32) == (False, False)
             raise RuntimeError("inference failed")
 

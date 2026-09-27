@@ -4,7 +4,6 @@ from pathlib import Path
 import argparse
 
 import numpy as np
-import surfa as sf
 import torch
 
 from fnit.synthmorph import SynthMorph
@@ -23,7 +22,7 @@ def _matmul_float32(left: np.ndarray, right: np.ndarray) -> np.ndarray:
     return output
 
 
-def talairach_matrix(affine: sf.Affine) -> np.ndarray:
+def talairach_matrix(affine: object) -> np.ndarray:
     """Replay the RAS→voxel→RAS conversion used by ``rca-talairach``."""
     world = affine.convert(space="world")
     source = np.asarray(world.source.vox2world.matrix, np.float32)
@@ -61,15 +60,15 @@ def register_talairach(moving: str | Path, template: str | Path,
         model = SynthMorph(weights=weights, device=device, model="affine", extent=256)
         torch.backends.cuda.matmul.allow_tf32 = False
         torch.backends.cudnn.allow_tf32 = False
-        result = model(moving, template)
+        affine = model.affine_transform(moving, template)
     finally:
         torch.backends.cuda.matmul.allow_tf32 = previous_matmul_tf32
         torch.backends.cudnn.allow_tf32 = previous_cudnn_tf32
     if output_lta is not None:
         path = Path(output_lta)
         path.parent.mkdir(parents=True, exist_ok=True)
-        result.transform.save(str(path))
-    matrix = talairach_matrix(result.transform)
+        affine.save(str(path))
+    matrix = talairach_matrix(affine)
     write_talairach_xfm(matrix, output_xfm)
     return matrix
 

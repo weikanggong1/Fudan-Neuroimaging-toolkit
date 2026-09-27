@@ -1,23 +1,25 @@
 """SynthMorph registration with PyTorch inference and native image geometry."""
+from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 import numpy as np
 import scipy.linalg
-import surfa as sf
 import torch
 from .spatial import compose, transform
+from .affine_no_surfa import AffineTransform, load_affine_image, network_space_affine
 from ..weights import resolve_weights
 
 
 @dataclass
 class RegistrationResult:
-    moved: sf.Volume
-    fixed_moved: sf.Volume
+    moved: object
+    fixed_moved: object
     transform: object
     inverse: object
 
 
 def network_space(image, shape, center=None):
+    import surfa as sf
     new = sf.ImageGeometry(shape=shape, voxsize=1, rotation='LIA',
                            center=image.geom.center if center is None else center.geom.center,
                            shear=None)
@@ -26,6 +28,7 @@ def network_space(image, shape, center=None):
 
 
 def _load(image, single_frame=True):
+    import surfa as sf
     out = sf.load_volume(str(image)) if isinstance(image, (str, Path)) else image
     if not isinstance(out, sf.Volume) or len(out.shape) not in (3, 4):
         raise ValueError('input must be a 3D volume with optional frames')
@@ -77,8 +80,35 @@ class SynthMorph:
                                         int_steps=steps, device=device)
 
     @torch.inference_mode()
+    def affine_transform(self, moving: str | Path, fixed: str | Path) -> AffineTransform:
+        """Return the affine-only world transform without Surfa image resampling."""
+        if self.model != "affine":
+            raise ValueError("affine_transform requires model='affine'")
+        moving_data, moving_geometry = load_affine_image(moving)
+        fixed_data, fixed_geometry = load_affine_image(fixed)
+        shape = (self.extent,) * 3
+        net_to_moving, moving_to_net = network_space_affine(moving_geometry, shape)
+        net_to_fixed, fixed_to_net = network_space_affine(fixed_geometry, shape)
+        inputs = []
+        for data, matrix in ((moving_data, net_to_moving), (fixed_data, net_to_fixed)):
+            native = torch.as_tensor(np.array(data, dtype=np.float32, copy=True),
+                                     device=self.device)[None, None]
+            image = transform(native, matrix, shape=shape)
+            image -= image.min()
+            maximum = image.max()
+            if maximum <= 0:
+                raise ValueError("input has no intensity variation in network space")
+            inputs.append(image / maximum)
+        _, backward = self.network(*inputs)
+        voxel = _numpy(compose((net_to_fixed, backward, moving_to_net),
+                               shape=moving_geometry.shape))
+        world = fixed_geometry.matrix @ np.asarray(voxel, np.float64) @ np.linalg.inv(moving_geometry.matrix)
+        return AffineTransform(world, moving_geometry, fixed_geometry)
+
+    @torch.inference_mode()
     def __call__(self, moving, fixed, init=None, mid_space=False, header_only=False,
                  output_dir=None):
+        import surfa as sf
         mov, fix = _load(moving), _load(fixed)
         is_matrix = self.model in ('affine', 'rigid')
         if header_only and not is_matrix:
@@ -146,6 +176,7 @@ def apply_transform(image, transformation, method='linear', fill=0,
                     dtype='float32', header_only=False):
     """Apply an LTA or RAS warp with the original Surfa CPU resampling rules.
     """
+    import surfa as sf
     image = _load(image, single_frame=False)
     if isinstance(transformation, (str, Path)):
         path = str(transformation)
