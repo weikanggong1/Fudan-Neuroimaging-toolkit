@@ -53,7 +53,8 @@ class NativeTopologyIntegrationTest(unittest.TestCase):
 
             def copy_stage(input_path, output_path, **kwargs):
                 calls.append((Path(input_path).name, Path(output_path).name, kwargs))
-                shutil.copyfile(input_path, output_path)
+                if Path(input_path).resolve() != Path(output_path).resolve():
+                    shutil.copyfile(input_path, output_path)
 
             modules = {}
             for module_name, function_name in (
@@ -61,6 +62,7 @@ class NativeTopologyIntegrationTest(unittest.TestCase):
                 ("inflate_python", "inflate_surface"),
                 ("sphere_quick_python", "write_quick_sphere"),
                 ("mris_remesh_python", "remesh_surface"),
+                ("mris_remove_intersection_python", "remove_intersection_surface"),
             ):
                 full_name = f"fnit.recon_all.{module_name}"
                 module = ModuleType(full_name)
@@ -68,17 +70,19 @@ class NativeTopologyIntegrationTest(unittest.TestCase):
                 modules[full_name] = module
             with patch.dict(sys.modules, modules), patch.dict(
                     os.environ, {"FS_LICENSE": "/private/license.txt"}):
-                python_seconds, native_seconds, sphere_seconds, remesh_seconds = _prepare_native_topology(
+                python_seconds, native_seconds, sphere_seconds, remesh_seconds, intersection_seconds = _prepare_native_topology(
                     resolved, subject, "lh", assets, "cpu")
             self.assertGreaterEqual(python_seconds, 0)
             self.assertGreaterEqual(native_seconds, 0)
             self.assertGreaterEqual(remesh_seconds, 0)
+            self.assertGreaterEqual(intersection_seconds, 0)
             self.assertEqual(sphere_seconds, {})
             self.assertEqual(calls, [
                 ("lh.orig.nofix", "lh.smoothwm.nofix", {"device": "cpu"}),
                 ("lh.smoothwm.nofix", "lh.inflated.nofix", {}),
                 ("lh.inflated.nofix", "lh.qsphere.nofix", {}),
                 ("lh.orig.premesh", "lh.orig", {"iterations": 3}),
+                ("lh.orig", "lh.orig", {}),
             ])
             command = json.loads((subject / "command.json").read_text())
             self.assertEqual(command["argv"], [

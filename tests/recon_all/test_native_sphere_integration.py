@@ -70,15 +70,18 @@ class NativeSphereIntegrationTest(unittest.TestCase):
                            side_effect=fake_quick), patch(
                            "fnit.recon_all.mris_remesh_python.remesh_surface",
                            side_effect=fake_smooth), patch(
+                           "fnit.recon_all.mris_remove_intersection_python.remove_intersection_surface",
+                           return_value=(0, 0)), patch(
                            "fnit.recon_all.sphere_standard_run.run_standard_sphere",
                            side_effect=fake_standard), patch.dict(
                            os.environ, {"FS_LICENSE": "/private/license.txt"}):
-                _, topology_seconds, nofix, remesh_seconds = _prepare_native_topology(
+                _, topology_seconds, nofix, remesh_seconds, intersection_seconds = _prepare_native_topology(
                     topology, subject, "lh", assets, "cpu", resolved)
                 times, report = _run_accurate_sphere_pair(
                     resolved, subject, "lh", assets)
             self.assertGreaterEqual(topology_seconds, 0)
             self.assertGreaterEqual(remesh_seconds, 0)
+            self.assertGreaterEqual(intersection_seconds, 0)
             self.assertEqual(set(nofix), {"inflate_nofix", "qsphere_nofix_python"})
             self.assertEqual(quick_calls, [(surf / "lh.inflated.nofix",
                                             surf / "lh.qsphere.nofix")])

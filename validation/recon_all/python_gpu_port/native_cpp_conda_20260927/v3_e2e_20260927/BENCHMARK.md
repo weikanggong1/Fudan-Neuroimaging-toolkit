@@ -56,8 +56,10 @@ The per-vertex files can only be compared as **distributions** until topology an
 | --- | ---: | ---: |
 | `thickness`, mm | 2.079 → 2.940 | 2.024 → 2.956 |
 | `area`, mm² | 0.706 → 0.525 | 0.711 → 0.530 |
+| `area.pial`, mm² | 0.872 → 1.408 | 0.876 → 1.374 |
 | `volume`, mm³ | 1.682 → 2.730 | 1.658 → 2.735 |
 | `curv`, 1/mm | −0.0252 → −0.0518 | −0.0229 → −0.0475 |
+| `curv.pial`, 1/mm | 0.0538 → −0.0641 | 0.0541 → −0.0042 |
 
 These values are distribution means, not vertexwise MAEs. The paired final vertex error is **not measurable without correspondence**. Any apparent vertexwise error by raw array index would be invalid.
 

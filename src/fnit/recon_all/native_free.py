@@ -117,8 +117,9 @@ def _run_native_sphere_step(binary: Path, subject: Path, assets: Path,
 def _prepare_native_topology(binary: Path, subject: Path, hemi: str,
                              assets: Path, device: str,
                              native_inflate_binary: Path | None = None
-                             ) -> tuple[float, float, dict[str, float], float]:
+                             ) -> tuple[float, float, dict[str, float], float, float]:
     from .mris_remesh_python import remesh_surface
+    from .mris_remove_intersection_python import remove_intersection_surface
     from .smooth_surface_python import smooth_surface
     from .sphere_quick_python import write_quick_sphere
 
@@ -153,7 +154,12 @@ def _prepare_native_topology(binary: Path, subject: Path, hemi: str,
     tick = time.perf_counter()
     remesh_surface(surf / f"{hemi}.orig.premesh", surf / f"{hemi}.orig", iterations=3)
     remesh_seconds = time.perf_counter() - tick
-    return python_seconds + remesh_seconds, native_seconds, sphere_seconds, remesh_seconds
+    tick = time.perf_counter()
+    orig = surf / f"{hemi}.orig"
+    remove_intersection_surface(orig, orig)
+    intersection_seconds = time.perf_counter() - tick
+    return (python_seconds + remesh_seconds + intersection_seconds, native_seconds,
+            sphere_seconds, remesh_seconds, intersection_seconds)
 
 
 def _run_accurate_sphere_pair(inflate_binary: Path, subject: Path,
@@ -284,12 +290,12 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
     orig = surf / f"{hemi}.orig.nofix"
     components = extract_main_component(raw, orig)
     smoothwm = surf / f"{hemi}.smoothwm"
-    topology_python_seconds = topology_native_seconds = topology_remesh_seconds = None
+    topology_python_seconds = topology_native_seconds = topology_remesh_seconds = topology_intersection_seconds = None
     native_sphere_seconds = None
     if native_topology_binary is not None:
         if assets is None:
             raise ValueError("assets are required for native topology repair")
-        topology_python_seconds, topology_native_seconds, pre_sphere_seconds, topology_remesh_seconds = (
+        topology_python_seconds, topology_native_seconds, pre_sphere_seconds, topology_remesh_seconds, topology_intersection_seconds = (
             _prepare_native_topology(native_topology_binary, subject, hemi,
                                      assets, device, native_inflate_binary))
         if native_inflate_binary is not None:
@@ -377,6 +383,7 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
             "topology_python_seconds": topology_python_seconds,
             "topology_native_seconds": topology_native_seconds,
             "topology_remesh_seconds": topology_remesh_seconds,
+            "topology_intersection_seconds": topology_intersection_seconds,
             "native_metric_seconds": native_metric_seconds,
             "native_sphere_seconds": native_sphere_seconds,
             "standard_sphere_report": standard_sphere_report,
