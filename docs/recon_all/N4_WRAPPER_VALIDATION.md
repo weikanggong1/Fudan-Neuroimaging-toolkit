@@ -1,37 +1,54 @@
-# Python N4 wrapper replay
+# Python N4 后处理与完整阶段对照
 
-FreeSurfer 8.2 calls `mri_nu_correct.mni --ants-n4` to make `nu.mgz`. The Python implementation combines [`n4_sitk.py`](../../src/fnit/recon_all/n4_sitk.py) with [`n4_wrapper.py`](../../src/fnit/recon_all/n4_wrapper.py). The latter reproduces the five-decimal global mean ratio, `mris_calc` float32 scaling, the Talairach-centered 50 mm intensity histogram, and `mri_make_uchar`'s 1%/90% mapping. It also preserves the final MGH header and XFORM metadata state after `mri_add_xform_to_header`. This stage uses Python and compiled SimpleITK on CPU and is called by the current `run_recon_all_python` entry point. The latest v3 same-T1 connected run matched the archived official `nu.mgz` at all 16,777,216 voxels, dtype, affine and 284-byte MGH header; see the [v3 summary](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/v3_e2e_20260927/benchmark_summary.json).
+FreeSurfer 8.2 使用 `mri_nu_correct.mni --ants-n4` 生成 `nu.mgz`。Python 实现先运行 [`n4_sitk.py`](../../src/fnit/recon_all/n4_sitk.py)，再由 [`n4_wrapper.py`](../../src/fnit/recon_all/n4_wrapper.py) 完成全局均值比值的五位小数处理、`mris_calc` 的 float32 缩放、以 Talairach 为中心的 50 mm 强度直方图，以及 `mri_make_uchar` 的 1%/90% 映射。它还保留 `mri_add_xform_to_header` 后的 MGH 头和 XFORM 元数据。此阶段在 CPU 上使用 Python 和编译版 SimpleITK，已接入当前 `run_recon_all_python`。最新 v3 同 T1 连通运行的 `nu.mgz` 与归档官方结果在全部 16,777,216 个体素、数据类型、仿射和前 284 字节 MGH 头上相同，见 [v3 汇总](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/v3_e2e_20260927/benchmark_summary.json)。
 
-The port was checked against the pinned FreeSurfer [wrapper script](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/scripts/mri_nu_correct.mni) and [`mri_make_uchar` source](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/mri_convert/mri_make_uchar.cpp).
+移植依据为固定的 FreeSurfer [wrapper 脚本](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/scripts/mri_nu_correct.mni)和 [`mri_make_uchar` 源码](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/mri_convert/mri_make_uchar.cpp)。
 
-## Exactness on the frozen T1
+## 输入、输出与调用
 
-The fixed input was the completed sub01 `orig.mgz` from the main validation run. Its compressed SHA-256 is `7dde820d02968c9fe18056a9cc5cc776c1a6395c48dc4d3a47eb6ba9c399f518`; its 256³ decoded uchar voxel SHA-256 is `84da8a990ef60c6ba30a4ddfbaba597a90e32bca720f96c6d741fcb08c504825`. The native executable bundle identifies itself as FreeSurfer 8.2.0-1, build `d932c45`. Both fresh replays ran on headcw with the same input, Talairach transform, and wrapper options `--uchar ... --n 2 --ants-n4`. The native script was followed by `mri_add_xform_to_header -c`, as in recon-all.
+`make_nu(original_file, n4_file, tal_xfm_file, output_file)` 只执行 N4 之后的步骤；四个参数依次为原始 `orig.mgz`、已校正的 `nu0.mgz`、Talairach `transforms/talairach.xfm` 和输出 `nu.mgz`。它从原始影像保留几何及 XFORM 尾部，输出 uchar MGH/MGZ。
 
-| Fresh output | Python vs native result |
-| --- | --- |
-| Final `nu.mgz` shape/dtype | 256³ / uchar in both |
-| Voxel mismatches | 0 of 16,777,216 |
-| Affine and 284-byte MGH header | Identical |
-| Full decompressed MGH bytes, including XFORM footer | **Identical** |
-| Full decompressed MGH SHA-256 | `6370e1ab0c888ec4d574a244ed745c640442c6ff6a2b54093d6353e89af07dc7` |
-| Mean scale and histogram bins | `1.13755989346540527642`; `(4, 45)` in both |
+```python
+from fnit.recon_all.n4_wrapper import make_nu
 
-The `nu0.mgz` metadata gate was independently checked on the reference copy of `orig.mgz`: after [`normalize_n4_footer`](../../src/fnit/recon_all/n4_wrapper.py), the entire decompressed `nu0.mgz` matched the official N4 output byte for byte. That reference input has the same voxel SHA and 284-byte MGH header as the main input, but a different XFORM footer path (1,346 versus 1,398 footer bytes); files from the two input paths should not be compared bytewise. The normalization corrects a single known FreeSurfer XFORM `UNKNOWN` tag encoding: a source length of eight including the trailing zero becomes the native N4 output's length of seven.
+scale, bins = make_nu(
+    original_file="orig.mgz",  # 原始输入影像及几何来源
+    n4_file="nu0.mgz",  # N4 已校正的中间图
+    tal_xfm_file="transforms/talairach.xfm",  # Talairach 变换
+    output_file="nu.mgz",  # 最终 uchar 强度图路径
+)
+```
 
-The earlier gpucw1 full-reconstruction archive has 34 differing `nu.mgz` voxels relative to **both** fresh headcw replays (maximum absolute difference 2); the archived values are higher by one at 9 voxels and by two at 25. Its log records the same scale and histogram mapping as the fresh native replay. Raising the fresh N4 uchar value by one at those 34 locations reproduces all archived final values. The archived intermediate `nu0.mgz` was removed by the original wrapper, so the exact upstream cause cannot be established from retained artifacts. The fresh Python output is therefore verified against a fresh official run on the same input, not against the archived `nu.mgz`.
-
-## Timing and use
-
-One same-host full-stage run measured 157.84 s for native `mri_nu_correct.mni` plus 0.26 s for native `mri_add_xform_to_header`, versus 125.56 s for Python N4 correction, footer normalization, and final `nu.mgz` generation. These are wall times for one run each on headcw; no GPU was used. The native script includes N4 and all postprocessing; the Python measurement includes SimpleITK import and file IO. The earlier isolated N4 timings in [N4_SITK_VALIDATION.md](N4_SITK_VALIDATION.md) are separate runs and should not be added to these totals.
-
-For the postprocessing alone, three alternating paired trials on headcw used the same fixed `nu0.mgz`. The native median was **14.71 s** across `mri_binarize`, two `mri_segstats` calls, `mris_calc`, `mri_convert`, `mri_make_uchar`, and `mri_add_xform_to_header`; the resident Python function median was **0.99 s**. All three native/Python output pairs were identical across the full decompressed MGH. Native median substep times were 1.34, 2.32, 3.10, 2.02, 2.19, 3.34, and 0.26 s respectively. The Python timing excludes module import, whereas the native timing includes each subprocess launch. The raw [paired report](../../validation/recon_all/python_gpu_port/n4_wrapper_headcw_report.json) includes all trial times and output hashes.
-
-To replay only the post-N4 wrapper from an existing `nu0.mgz`:
+函数返回 `scale`（全局均值缩放系数）与 `bins`（直方图首个/白质分箱的二元组）；最终影像写入 `output_file`。若从已有 `nu0.mgz` 用命令行重放后处理：
 
 ```bash
 python -m fnit.recon_all.n4_wrapper \
   --orig orig.mgz --nu0 nu0.mgz --tal transforms/talairach.xfm --out nu.mgz
 ```
 
-The postprocessing paired benchmark is reproducible with [`benchmark_n4_wrapper.py`](../../validation/recon_all/python_gpu_port/benchmark_n4_wrapper.py); it does not rerun N4. The remote stage logs and byte-comparison artifacts are retained under `/tmp/reconall_n4_sub01_20260925/` on headcw. Two focused tests in [`test_n4_wrapper.py`](../../tests/recon_all/test_n4_wrapper.py) passed.
+`--orig`、`--nu0`、`--tal`、`--out` 分别对应上述四个 Python 参数，均为必填；命令打印 `scale` 和 `histogram_bins`。官方完整阶段使用 `mri_nu_correct.mni --ants-n4`，并按 recon-all 顺序运行 `mri_add_xform_to_header -c`。
+
+## 冻结真实 T1 的逐字节验证
+
+固定输入为主验证中已完成被试 sub01 的 `orig.mgz`。其压缩文件 SHA-256 为 `7dde820d02968c9fe18056a9cc5cc776c1a6395c48dc4d3a47eb6ba9c399f518`；256³ 解码 uchar 体素 SHA-256 为 `84da8a990ef60c6ba30a4ddfbaba597a90e32bca720f96c6d741fcb08c504825`。原生程序组标识为 FreeSurfer 8.2.0-1、构建 `d932c45`。headcw 的两次新运行使用同一输入、Talairach 变换及 wrapper 参数 `--uchar ... --n 2 --ants-n4`。原生命令之后按 recon-all 顺序运行 `mri_add_xform_to_header -c`。
+
+| 新生成的输出 | Python 与官方对照 |
+| --- | --- |
+| 最终 `nu.mgz` 形状/类型 | 双方均为 256³ / uchar |
+| 差异体素 | 0 / 16,777,216 |
+| 仿射及前 284 字节 MGH 头 | 相同 |
+| 包含 XFORM 尾部的完整解压 MGH 字节 | **完全一致** |
+| 完整解压 MGH SHA-256 | `6370e1ab0c888ec4d574a244ed745c640442c6ff6a2b54093d6353e89af07dc7` |
+| 均值缩放与直方图分箱 | 两者均为 `1.13755989346540527642`、`(4, 45)` |
+
+在参照版 `orig.mgz` 上，[`normalize_n4_footer`](../../src/fnit/recon_all/n4_wrapper.py) 还独立核对了 `nu0.mgz` 的元数据：规范化后，完整解压 `nu0.mgz` 与官方 N4 输出逐字节一致。这份参照输入的体素 SHA 和前 284 字节 MGH 头与主输入相同，但 XFORM 尾部路径不同（1,346 与 1,398 字节）；不能跨两条输入路径做文件字节比较。规范化修正一处已知 FreeSurfer XFORM `UNKNOWN` 标签编码：源长度含末尾零字节为 8，原生 N4 输出长度为 7。
+
+较早 gpucw1 整例存档的 `nu.mgz` 相对 headcw 的**两次新运行**均差 34 个体素（最大绝对差 2）；其中 9 个体素高 1、25 个高 2。存档日志的缩放和直方图映射与新官方运行相同。将新 N4 uchar 图在这 34 处各增加 1，可重现全部存档最终值。原 wrapper 已删除存档 `nu0.mgz`，现有文件不足以确定上游首因。因此，Python 输出的逐字节验证参照是同输入的新官方运行，而非旧存档 `nu.mgz`。
+
+## 耗时与范围
+
+headcw 上一次完整阶段运行：原生 `mri_nu_correct.mni` 157.84 s，加上 `mri_add_xform_to_header` 0.26 s；Python N4、尾部规范化和最终 `nu.mgz` 生成合计 125.56 s。两者各测一次墙钟，均未用 GPU。原生脚本涵盖 N4 和全部后处理；Python 时间包含 SimpleITK 导入与文件 I/O。[N4_SITK_VALIDATION.md](N4_SITK_VALIDATION.md) 的单独 N4 计时来自其他运行，不能与这里相加。
+
+只计后处理时，headcw 上以同一张冻结 `nu0.mgz` 交替配对运行三次。原生中位数为 **14.71 s**，包含 `mri_binarize`、两次 `mri_segstats`、`mris_calc`、`mri_convert`、`mri_make_uchar`、`mri_add_xform_to_header`；常驻 Python 函数中位数为 **0.99 s**。三对输出的完整解压 MGH 均逐字节一致。原生各子步中位数依次为 1.34、2.32、3.10、2.02、2.19、3.34、0.26 s。Python 计时不含模块导入，原生计时包含每次子进程启动。原始[配对报告](../../validation/recon_all/python_gpu_port/n4_wrapper_headcw_report.json)保存每次耗时与输出哈希。
+
+仅后处理的配对 benchmark 可用 [`benchmark_n4_wrapper.py`](../../validation/recon_all/python_gpu_port/benchmark_n4_wrapper.py) 复现；脚本不重新运行 N4。远端阶段日志和字节对照文件保存在 headcw 的 `/tmp/reconall_n4_sub01_20260925/`。[`test_n4_wrapper.py`](../../tests/recon_all/test_n4_wrapper.py) 的两项针对性测试已通过。
