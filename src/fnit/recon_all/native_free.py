@@ -355,15 +355,29 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
     else:
         smooth_surface(surf / f"{hemi}.orig", smoothwm, device=device)
         shutil.copyfile(smoothwm, surf / f"{hemi}.white.preaparc")
-    shutil.copyfile(smoothwm, surf / f"{hemi}.white")
+    if native_white_preaparc_binary is not None:
+        from .label_cortex_fix_ga_python import label_cortex_fix_ga
+        from .label_cortex_python import label_cortex
+
+        base, ga = label_cortex_fix_ga(
+            surf / f"{hemi}.white.preaparc", mri / "aseg.presurf.mgz",
+            mri / "entowm.mgz", hemi, labels / f"{hemi}.cortex.label")
+        label_cortex(surf / f"{hemi}.white.preaparc",
+                     mri / "aseg.presurf.mgz",
+                     labels / f"{hemi}.cortex+hipamyg.label",
+                     keep_hip_amyg=True)
+        cortex_count = len(base) + len(ga)
+    else:
+        shutil.copyfile(smoothwm, surf / f"{hemi}.white")
     if native_topology_binary is None:
         shutil.copyfile(smoothwm, surf / f"{hemi}.smoothwm.nofix")
 
     white, faces = fs.read_geometry(str(smoothwm))
-    image = nib.load(str(mri / "aseg.mgz"))
-    pial, thickness = _pial_from_cortex(white, faces, image, aseg, hemi)
-    _replace_vertices(smoothwm, surf / f"{hemi}.pial", pial)
-    shutil.copyfile(surf / f"{hemi}.pial", surf / f"{hemi}.pial.T1")
+    if native_white_preaparc_binary is None:
+        image = nib.load(str(mri / "aseg.mgz"))
+        pial, thickness = _pial_from_cortex(white, faces, image, aseg, hemi)
+        _replace_vertices(smoothwm, surf / f"{hemi}.pial", pial)
+        shutil.copyfile(surf / f"{hemi}.pial", surf / f"{hemi}.pial.T1")
 
     standard_sphere_report = None
     if native_inflate_binary is not None:
@@ -382,6 +396,18 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
                             np.linalg.norm(inflated_xyz - white, axis=1).astype(np.float32))
     if not native_registration:
         shutil.copyfile(surf / f"{hemi}.sphere", surf / f"{hemi}.sphere.reg")
+    if native_white_preaparc_binary is not None:
+        _write_principal_curvature_maps(surf, hemi, device, placed_preaparc=True)
+        return {"hemisphere": hemi, "vertices": len(white), "faces": len(faces),
+                "raw_components": components, "cortex_vertices": cortex_count,
+                "topology_python_seconds": topology_python_seconds,
+                "topology_native_seconds": topology_native_seconds,
+                "topology_remesh_seconds": topology_remesh_seconds,
+                "topology_intersection_seconds": topology_intersection_seconds,
+                "native_sphere_seconds": native_sphere_seconds,
+                "standard_sphere_report": standard_sphere_report,
+                "white_preaparc_report": white_preaparc_report,
+                "placement_pending": True}
     native_metric_seconds = None
     if native_surface_metrics_binary is not None:
         if assets is None:
@@ -431,6 +457,45 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
                 ("white-from-preaparc-smooth-only" if white_preaparc_report
                  else "white-from-smoothed-tessellation"), "pial-normal-ray",
                 *sphere_approximations, registration_approximation]}
+
+
+def _finish_cortical_surface(subject: Path, hemi: str, binary: Path,
+                             assets: Path, *, device: str, threads: int,
+                             metrics_binary: Path | None = None) -> dict:
+    """Place final white/pial after sphere registration and annotation."""
+    from .final_white_conda import run_final_white
+    from .place_pial_python import place_pial_t1
+    from .surface_area_gpu import area_map, mid_area_map
+    from .surface_curvature_gpu import curvature_map
+    from .surface_roi_gpu import vertex_volume_map
+    from .surface_thickness_gpu import thickness_map
+
+    surf, labels = subject / "surf", subject / "label"
+    white_report = run_final_white(subject, hemi, binary, assets, threads=threads)
+    pial_report = place_pial_t1(subject, hemi)
+    shutil.copyfile(surf / f"{hemi}.pial.T1", surf / f"{hemi}.pial")
+    metric_seconds = None
+    if metrics_binary is not None:
+        metric_seconds = _run_native_surface_metrics(metrics_binary, subject, hemi, assets)
+    else:
+        thickness_map(surf / f"{hemi}.white", surf / f"{hemi}.pial",
+                      surf / f"{hemi}.thickness", device=device)
+        area_map(surf / f"{hemi}.white", surf / f"{hemi}.area", device=device)
+        area_map(surf / f"{hemi}.pial", surf / f"{hemi}.area.pial", device=device)
+        curvature_map(surf / f"{hemi}.white", surf / f"{hemi}.curv", device=device)
+        curvature_map(surf / f"{hemi}.pial", surf / f"{hemi}.curv.pial", device=device)
+    mid_area_map(surf / f"{hemi}.area", surf / f"{hemi}.area.pial",
+                 surf / f"{hemi}.area.mid", device=device)
+    vertex_volume_map(surf / f"{hemi}.white", surf / f"{hemi}.pial",
+                      labels / f"{hemi}.cortex.label",
+                      surf / f"{hemi}.volume", device=device)
+    return {"final_white_report": white_report, "pial_report": pial_report,
+            "native_metric_seconds": metric_seconds,
+            "mean_thickness_mm": float(np.mean(fs.read_morph_data(
+                str(surf / f"{hemi}.thickness")))),
+            "placement_pending": False,
+            "approximations": ["final-white-conda-cpp", "pial-python",
+                               "sphere-and-upstream-parity-unverified"]}
 
 
 def _project_parcels(subject: Path, aseg: np.ndarray) -> None:
@@ -576,12 +641,13 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         {"implementation": "Python MNI/aux/finalsurfs + Conda C++ placement",
          "binary": str(white_binary[0]), "sha256": white_binary[1],
          "final_smoothwm": "Python 3 passes on CPU",
-         "final_white_pial": "approximate"}
+         "final_white_pial": "Conda C++ final white + Python pial after annotation"}
         if white_binary else {"implementation": "smoothed orig copy"})
     report["surface_metrics"] = (
         {"implementation": "native-c++", "binary": str(metrics_binary[0]),
          "sha256": metrics_binary[1],
-         "upstream": "current approximate white/pial surfaces"}
+         "upstream": ("placed final white/pial" if native_white_preaparc
+                      else "current approximate white/pial surfaces")}
         if metrics_binary else {"implementation": "python"})
     report["sphere_generation"] = (
         {"implementation": "Conda mris_inflate + Python quick/standard sphere",
@@ -713,6 +779,13 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                   atlas_file, assets / "lib/bem/ic4.tri",
                   assets / "lib/bem/ic7.tri",
                   labels / f"{hemi}.{atlas}.annot", device=device)
+    if native_white_preaparc:
+        for hemi in ("lh", "rh"):
+            result = stage(f"finish_surface_{hemi}", _finish_cortical_surface,
+                           subject, hemi, white_binary[0], assets,
+                           device=device, threads=threads,
+                           metrics_binary=metrics_binary[0] if metrics_binary else None)
+            report["surfaces"][hemi].update(result)
     stage("project_aparc_volumes", _project_parcels, subject, aseg)
     stage("project_wmparc", _project_wmparc, subject, aseg)
 
