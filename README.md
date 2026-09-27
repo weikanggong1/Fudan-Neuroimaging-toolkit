@@ -28,9 +28,9 @@
 
 recon-all 提供单被试命令行与 Python API；多被试并行仅提供 Python API。其余功能只提供单被试 Python 和单被试命令行接口；需要处理多个病例时，由调用方在包外组织任务与设备。仓库提供 [T1w 样例](examples/README.md)和 [FLAIR 样例](examples/WMH.md)。
 
-默认 recon-all 的神经网络与部分体素、表面计算使用 PyTorch/CUDA；N4、GCA 配准和部分网格/统计计算使用 Python 包中的 CPU 算子。可选 `--native-bin-dir` 与四个原生阶段开关调用外部 C++ 程序处理 GCA 配准、拓扑、球面与顶点指标，但上游表面仍有近似。[Conda C++ 同一 T1 整例实测](validation/recon_all/python_gpu_port/native_cpp_conda_20260927/post_cc/BENCHMARK.md)已完成 30 个阶段，用时 2649.0 秒；接入 Python `mri_cc` 后，严格 138 项中有 8 项一致、51 项缺失，不能把与官方 6789.6 秒的时间差视为等价重建的加速。旧的纯 Python 配置见[独立报告](validation/recon_all/python_gpu_port/NATIVE_FREE_CONNECTED_20260927.md)。
+默认 recon-all 的神经网络与部分体素、表面计算使用 PyTorch/CUDA；N4、GCA 配准和部分网格/统计计算使用 Python 包中的 CPU 算子。可选 `--native-bin-dir` 与四个原生阶段开关调用外部 C++ 程序处理 GCA 配准、拓扑、球面与顶点指标，但上游表面仍有近似。[Conda C++ 同一 T1 整例实测](validation/recon_all/python_gpu_port/native_cpp_conda_20260927/post_cc/BENCHMARK.md)已完成 30 个阶段，用时 2649.0 秒；接入 Python `mri_cc` 后，严格 138 项中有 8 项一致、51 项缺失，不能把与官方 6789.6 秒的时间差视为等价重建的加速。后续[同输入上游修复](validation/recon_all/python_gpu_port/SYNTHSTRIP_TF32_UPSTREAM_FIX_20260927.md)已使 SynthStrip、brainmask、GCA 变换和 CA 标准化数值一致，尚未形成新的整例 138 项结果。
 
-相关 CUDA 路径允许 NVIDIA TF32 matmul 和 cuDNN 内核；模型与影像张量仍保持 float32，本包不会自动改用 float16 或 bfloat16。各验证报告记录实际开关。
+相关 CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核；为保持已验证的体素一致性，SynthStrip 和 SynthSeg 局部关闭 cuDNN TF32。模型与影像张量仍保持 float32，本包不会自动改用 float16 或 bfloat16。各验证报告记录实际开关。
 
 FastVBM 的两个分支共用仿射配准、FSL 坐标转换、GPU 重采样、仅非线性
 Jacobian 和调制步骤；差别只在非线性形变由 SynthMorph 或 TorchFNIRT 估计。
