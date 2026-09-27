@@ -71,7 +71,7 @@ fnit-recon-all subject_T1w.nii.gz /scratch/subjects/sub01 \
 
 `--native-bin-dir` 为必填项，提供 `mri_em_register`、`mri_segment` 和 `mri_edit_wm_with_aseg`；`--native-topology` 调用 [Python 居中球和 Conda 拓扑变体](TOPOLOGY_CONDA_GA.md)，再用 Python remesh 生成 `orig`，`--native-sphere` 调用 `mris_inflate` 并使用 Python quick/standard sphere，`--native-surface-metrics` 调用 `mris_place_surface` 生成五张顶点图，`--native-registration` 调用 Python `run_register_sphere`。后两个球面开关保留原名称以兼容已有 CLI/Python 调用；`--native-sphere` 和 `--native-registration` 都要求 `--native-topology`。Python API 使用同名参数 `native_bin_dir=...`、`native_topology=True`、`native_sphere=True`、`native_surface_metrics=True`、`native_registration=True`；下述批量 Python API 也支持这些参数。入口检查二进制可执行并记录 SHA-256，不证明任意指定目录中的程序均由上述脚本编译。许可证从外部 `FS_LICENSE` 环境变量继承；Git 仓库和 wheel 均不包含二进制、许可证或外置权重/模板。原生阶段会用到 CPU，整例并非全 GPU；其输出仍需与官方同输入逐文件验收。
 
-独立[双侧 Python pial.T1 函数](PYTHON_PIAL_PLACEMENT.md)在官方正确上游输入上输出的有序网格完全一致；[Python brain.finalsurfs 五步链](FINAL_SURFS_CHAIN.md)在相同真实 T1 六项输入上与官方逐体素一致。各文档列出输入、输出、原生命令及实际耗时。当前整例尚未自产 MCA/dura、静脉窦标签，white 和皮层标签链仍未达到这些函数的连续输入门槛，因此整例仍使用近似 white/pial 并在报告中明确标记。
+独立[双侧 Python pial.T1 函数](PYTHON_PIAL_PLACEMENT.md)在官方正确上游输入上输出的有序网格完全一致。[MNI152 仿射与辅助分割 Python 链](MNI_AUX_CHAIN.md)已用真实 T1 的候选自产输入得到与官方逐体素一致的 MCA/dura、静脉窦标签；随后[Python brain.finalsurfs 五步链](FINAL_SURFS_CHAIN.md)也逐体素一致。各文档列出输入、输出、原生命令及实际耗时。这些已验收的独立阶段仍需接入整例调度；white 和皮层标签链未通过连续验收，因此当前整例仍使用近似 white/pial。MNI152 资源需按资产清单额外下载。
 
 ## 多被试 Python API
 
