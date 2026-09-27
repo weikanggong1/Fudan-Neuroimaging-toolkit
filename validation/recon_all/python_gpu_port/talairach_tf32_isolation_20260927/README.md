@@ -31,7 +31,7 @@ The default GPU world affine exactly reproduces the earlier v3 candidate
 world affine. Disabling both TF32 switches only during the affine inference
 reduced the absolute eTIV error from 822.547 to 0.895 mm³, about 919-fold.
 It did not make the LTA or eTIV exactly equal to the official output.
-No production precision default was changed.
+The isolation run did not change production code; the later local production patch is described below.
 
 ## Connected input prefix
 
@@ -96,7 +96,7 @@ which reads `nu` and `brainmask` and creates a separate `talairach.lta`.
 GCA through `aseg.presurf` numerically agrees on this T1, but `cc_up.lta`
 still has a small transform difference. WM, surfaces, regional statistics,
 and additional subjects remain outside this trial; the repository default
-TF32 policy has not been changed.
+TF32 remains the package-wide default; the recon-all affine call now has the local precision patch described below.
 
 ## Production entry-point check
 
