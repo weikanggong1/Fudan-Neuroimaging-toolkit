@@ -14,17 +14,20 @@ fnit-normalize \
   --device cuda:0
 ```
 
+`--input` 指 conform 后的 `nu.mgz`，`--xfm` 指其 Talairach 变换，`--output` 指要写入的 uint8 `T1.mgz`，`--device` 指计算设备。函数返回的字典还含 `device`、`three_d_iterations`、`peaks`、`controls`、`propagation`、`smoothing` 和 `three_d_passes`，用于复核各轮输入选择与耗时。
+
 无 CUDA 时设 `--device cpu`；省略该项则可用 CUDA 时选 CUDA，否则选 CPU。命令打印含各步耗时的 JSON。`--three-d-iterations 0` 和 `1` 对应 FreeSurfer 中间检查点 `-n 0`、`-n 1`，默认为 `2`。`--diagnostic-dir /path` 将各三维迭代的 float32 输入、控制点掩膜和 float32 偏置场写成 MGH 文件。
 
 ```python
 from fnit.recon_all.normalization import normalize_t1
 
 report = normalize_t1(
-    "/subjects/sub01/mri/nu.mgz",
-    "/subjects/sub01/mri/transforms/talairach.xfm",
-    "/subjects/sub01/mri/T1.mgz",
-    device="cuda:0",
+    input_file="/subjects/sub01/mri/nu.mgz",  # conform 后的强度图
+    xfm_file="/subjects/sub01/mri/transforms/talairach.xfm",  # 配套 Talairach 变换
+    output_file="/subjects/sub01/mri/T1.mgz",  # uint8 输出图路径
+    device="cuda:0",  # PyTorch 运算设备
 )
+# report["total_seconds"] 是函数墙钟秒数，report["steps"] 是各步耗时字典。
 print(report["total_seconds"], report["steps"])
 ```
 
@@ -57,16 +60,19 @@ fnit-normalize-aseg \
   --device cpu
 ```
 
+`--norm`、`--aseg`、`--brainmask` 依次指定三张同网格输入图；`--output` 指输出 `brain.mgz`，`--device` 选 CPU/CUDA。返回字典除 `total_seconds` 外，还记录 ridge 和初始偏置场耗时、控制点数量、白质峰值及后续迭代信息。
+
 ```python
 from fnit.recon_all.normalization import normalize_t1_aseg
 
 report = normalize_t1_aseg(
-    "/subjects/sub01/mri/norm.mgz",
-    "/subjects/sub01/mri/aseg.presurf.mgz",
-    "/subjects/sub01/mri/brainmask.mgz",
-    "/subjects/sub01/mri/brain.mgz",
-    device="cpu",
+    norm_file="/subjects/sub01/mri/norm.mgz",  # GCA 归一化强度图
+    aseg_file="/subjects/sub01/mri/aseg.presurf.mgz",  # 皮层下结构标签
+    brainmask_file="/subjects/sub01/mri/brainmask.mgz",  # 脑掩膜
+    output_file="/subjects/sub01/mri/brain.mgz",  # 归一化脑图输出路径
+    device="cpu",  # 已验证的精确 CPU 路径
 )
+# report["total_seconds"] 是墙钟秒数，report["completion"] 记录后续归一化步骤。
 ```
 
 在冻结的 `fs_sub01` 输入上，独立 Python ridge、过滤后的控制点掩膜、离群图和初始 float32 偏置场均与官方诊断图一致。默认两轮的完整 `brain.mgz` 为 **0/16,777,216** 个差异体素，MGH 头前 284 字节和体素负载一致。新运行的官方文件在末尾多 996 字节元数据，旧存档输出多 451 字节，因此完整文件哈希不同。这只是单例阶段验证，整例数值一致性仍需检验。[第二轮报告](../../validation/recon_all/python_gpu_port/NORMALIZE_SECOND_PASS.md)列出原始证据。

@@ -36,16 +36,36 @@ fnit-recon-all subject_T1w.nii.gz /scratch/subjects/sub01 \
 from fnit.recon_all.native_free import run_recon_all_python
 
 report = run_recon_all_python(
-    "subject_T1w.nii.gz", "/scratch/subjects/sub01",
-    "/path/to/weights", "/path/to/assets",
-    device="cuda:0", threads=4,
-    native_bin_dir="/path/to/recon-cpp-build/bin",
+    t1="subject_T1w.nii.gz",  # 单幅 T1w NIfTI 输入
+    subject_dir="/scratch/subjects/sub01",  # 不存在或为空的被试输出目录
+    weights_dir="/path/to/weights",  # 已校验的外置模型权重目录
+    assets_dir="/path/to/assets",  # 已校验的模板和图谱目录
+    device="cuda:0",  # 推理设备；无 GPU 时填 "cpu"
+    threads=4,  # CPU 阶段使用的线程数
+    native_bin_dir="/path/to/recon-cpp-build/bin",  # Conda 编译程序目录
 )
+# report 是运行记录字典；成功时 report["total_seconds"] 为整例墙钟秒数。
 ```
 
 ### 输入与输出结构
 
-`run_recon_all_python(t1, subject_dir, weights_dir, assets_dir, ...) -> dict` 的 `t1` 是单幅 T1w 影像路径；`subject_dir` 是不存在或为空的输出目录；`weights_dir` 和 `assets_dir` 是经 SHA-256 校验的外置权重、模板目录；`native_bin_dir` 包含至少 `mri_em_register`、`mri_segment`、`mri_edit_wm_with_aseg`。`device` 是 `cpu` 或 `cuda:N`，`threads` 为正整数；五个 `native_*` 布尔值控制表面阶段。`FS_LICENSE` 在环境中指向私有许可证。
+`run_recon_all_python(...) -> dict` 的 Python 参数与对应命令行选项如下；`FS_LICENSE` 是指向私有许可证文件的环境变量，不传给函数。
+
+| Python 参数 / CLI 选项 | 输入含义 |
+| --- | --- |
+| `t1` / 第一个位置参数 | 单幅 T1w NIfTI 路径。 |
+| `subject_dir` / 第二个位置参数 | 输出被试目录；调用前必须不存在或为空。 |
+| `weights_dir` / `--weights-dir` | 经 SHA-256 校验的外置模型目录。 |
+| `assets_dir` / `--assets-dir` | 经 SHA-256 校验的模板、图谱目录。 |
+| `device` / `--device` | `cpu` 或 `cuda:N`，指定 PyTorch 设备。 |
+| `threads` / `--threads` | CPU 程序使用的正整数线程数。 |
+| `n4_python` / `--n4-python` | 可选；另一个已装 SimpleITK 的 Python 解释器路径，只用于 N4。 |
+| `native_bin_dir` / `--native-bin-dir` | Conda 编译程序目录，至少含 `mri_em_register`、`mri_segment`、`mri_edit_wm_with_aseg`。 |
+| `native_topology` / `--native-topology` | 启用 Conda 拓扑修复和 Python remesh。 |
+| `native_surface_metrics` / `--native-surface-metrics` | 用 Conda `mris_place_surface` 计算五张顶点图。 |
+| `native_registration` / `--native-registration` | 在拓扑路径上调用 Python 球面配准。 |
+| `native_sphere` / `--native-sphere` | 在拓扑路径上调用 Conda inflate 和 Python 球面。 |
+| `native_white_preaparc` / `--native-white-preaparc` | 在拓扑路径上调用可选 MNI/辅助分割及白质预放置链。 |
 
 函数写入 FreeSurfer 风格目录：`mri/*.mgz` 和 `mri/transforms/*.lta` 存放体积分割及变换；`surf/lh.*`、`surf/rh.*` 存放有序三角网格及每顶点的厚度、面积、体积、曲率图；`label/*.annot` 为每顶点脑区标签；`stats/*.stats` 为逐脑区表；`scripts/` 为阶段日志；根目录的 `fnit-native-free-run.json` 是运行报告。当前并非每个官方文件都生成，文件级范围以[138 项比较器](../../validation/recon_all/python_gpu_port/compare_complete_subject.py)为准。
 
@@ -100,14 +120,17 @@ fnit-recon-all subject_T1w.nii.gz /scratch/subjects/sub01 \
 from fnit.recon_all import run_recon_all_python_batch
 
 reports = run_recon_all_python_batch(
-    [
+    jobs=[  # 每项含一幅 T1w 路径及其独立的空输出目录
         {"t1": "/data/sub01_T1w.nii.gz", "subject_dir": "/scratch/subjects/sub01"},
         {"t1": "/data/sub02_T1w.nii.gz", "subject_dir": "/scratch/subjects/sub02"},
     ],
-    "/path/to/weights", "/path/to/assets",
-    devices=("cuda:0", "cuda:1"), threads=4,
-    native_bin_dir="/path/to/recon-cpp-build/bin",
+    weights_dir="/path/to/weights",  # 所有被试共用的外置模型目录
+    assets_dir="/path/to/assets",  # 所有被试共用的模板和图谱目录
+    devices=("cuda:0", "cuda:1"),  # 每个设备同时处理一例
+    threads=4,  # 每个被试 CPU 阶段的线程数
+    native_bin_dir="/path/to/recon-cpp-build/bin",  # Conda 编译程序目录
 )
+# reports 按 jobs 原顺序返回每例的运行记录字典。
 ```
 
 ## 与官方结果比较

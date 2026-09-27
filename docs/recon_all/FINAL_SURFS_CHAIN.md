@@ -6,7 +6,12 @@ Python 调用：
 
 ```python
 from fnit.recon_all.finalsurfs_python import run_finalsurfs
-final_mgz = run_finalsurfs("/path/to/subjects/sub01", device="cpu")
+
+final_mgz = run_finalsurfs(
+    subject_dir="/path/to/subjects/sub01",  # 六张 MGZ 输入所在的被试目录
+    device="cpu",  # 掩膜步骤运行设备，可选 "cuda:0"
+)
+# final_mgz 是输出 mri/brain.finalsurfs.mgz 的路径。
 ```
 
 命令行：
@@ -14,6 +19,8 @@ final_mgz = run_finalsurfs("/path/to/subjects/sub01", device="cpu")
 ```bash
 python -m fnit.recon_all.finalsurfs_python /path/to/subjects/sub01 --device cpu
 ```
+
+CLI 位置参数是被试目录；`--device` 选择掩膜计算设备。函数同时写出 `brain.finalsurfs.mgz` 和相同的 `brain.finalsurfs.manedit.mgz`，两者均位于该目录的 `mri/` 下。
 
 从 `subject_dir/mri` 执行的 FreeSurfer 8.2 等价命令：
 

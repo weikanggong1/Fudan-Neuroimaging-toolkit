@@ -14,12 +14,25 @@
 Python 调用：
 
 ```python
-from fnit.recon_all.mni_aux_chain import run_mni_aux_chain
+from fnit.recon_all.mni_aux_chain import register_mni152_affine, run_mni_aux_chain
+
+lta_path = register_mni152_affine(
+    subject_dir="/path/to/subjects/sub01",  # 被试目录；其 mri/orig.mgz 为配准输入
+    weights_dir="/path/to/weights",  # 含 SynthMorph affine 权重
+    assets_dir="/path/to/assets",  # 含 cropped/full MNI152 模板
+    device="cuda:0",  # PyTorch 推理设备
+    threads=4,  # CPU 计算线程数
+)
+# lta_path 是 mri/transforms/.../reg.targ_to_invol.lta 的路径。
 
 paths = run_mni_aux_chain(
-    "/path/to/subjects/sub01", "/path/to/weights", "/path/to/assets",
-    device="cuda:0", threads=4,
+    subject_dir="/path/to/subjects/sub01",  # 还需 mri/nu.mgz、synthseg.rca.mgz
+    weights_dir="/path/to/weights",  # 另含 MCA/dura 与静脉窦模型
+    assets_dir="/path/to/assets",  # 另含三个分割先验
+    device="cuda:0",  # 模型推理设备
+    threads=4,  # CPU 线程数
 )
+# paths["lta"]、paths["mca_dura"]、paths["vsinus"] 分别是三个输出路径。
 ```
 
 命令行：
@@ -29,6 +42,8 @@ python -m fnit.recon_all.mni_aux_chain /path/to/subjects/sub01 \
   --weights /path/to/weights --assets /path/to/assets \
   --device cuda:0 --threads 4
 ```
+
+CLI 第一个位置参数是含 `mri/orig.mgz`、`nu.mgz`、`synthseg.rca.mgz` 的被试目录；`--weights` 指模型目录，`--assets` 指 MNI152 模板和先验目录，`--device` 选 PyTorch 设备，`--threads` 指 CPU 线程数。输出文件和返回值见上表。
 
 外置资产目录对 MNI152 模板和先验逐文件校验哈希。两张 MNI152 图像按需下载；当前下载器从约 515 MB 的上游归档提取。权重和模板不随 Python 包分发。
 
