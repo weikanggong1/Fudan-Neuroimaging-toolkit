@@ -6,6 +6,8 @@
 
 **当前仍是近似核心重建。** 最新从原始 T1 完成的 v3 整例运行 39 个阶段、进程墙钟 2903.79 秒；固定 138 项中 19 项通过、47 项缺失、72 项存在差异。[整例精度和时间](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/v3_e2e_20260927/BENCHMARK.md)及[13 张上游体积图](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/v3_e2e_20260927/prefix_13.json)给出详细结果。随后[双侧拓扑同输入验证](TOPOLOGY_CONDA_GA.md)已得到逐点一致的 `orig`；但[精确 `orig` 的逐顶点试验](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/exact_orig_vertex_probe_20260927/README.md)仍有 1.080/1.103 mm 厚度 MAE，原因集中在 [最终 smoothwm 输入及 white/pial 放置](SMOOTHWM_FINAL_PARITY.md)。另一次[真实 T1 的 CPU 下游重放](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/prefix_surface_replay_20260927/README.md)完成 21 阶段，但沿用旧拓扑二进制，19 个通过项全来自复制的 MRI 前缀，不能视为当前代码的整例验收。后续[全候选输入的左侧保存阶段复验](../../validation/recon_all/python_gpu_port/white_connected_prefix_20260927/README.md)得到逐点一致的 `orig`。[采样角度修正后的完整标准球面](../../validation/recon_all/python_gpu_port/candidate_sphere_first_difference_20260927/full_stage/README.md)在同一候选输入上与官方有序顶点和面完全一致，但耗时 884.56 秒，官方为 328.61 秒；对归档官方的平均 2.959 mm 差异来自[上游首差 `white.preaparc`](../../validation/recon_all/python_gpu_port/candidate_sphere_first_difference_20260927/full_stage/UPSTREAM_FIRST_DIFFERENCE.md)。右侧连通拓扑、white/pial、后处理和最终脑区指标仍待连续整例验收。
 
+上述 v3 的 13 张上游体积图逐体素一致属于旧 N4 实现。[当前 Conda C++ N4](N4_ITK_CONDA.md)在同一真实 T1 上产生 9 个 `nu0.mgz` 差异体素和 8 个最终 `nu.mgz` 差异体素；本版没有重跑完整 138 项，v3 的上游通过数及墙钟不适用于当前代码。
+
 ## 安装外置数据
 
 Python ≥3.10；CUDA 运行需与驱动兼容的 PyTorch。仓库根目录安装：

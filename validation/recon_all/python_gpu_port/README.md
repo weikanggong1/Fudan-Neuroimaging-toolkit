@@ -4,7 +4,7 @@
 
 ## 当前整例结果
 
-最近一次从原始 T1 完成的 v3 调度运行了 39 步、用时 2903.79 秒。与 FreeSurfer 8.2 的同一被试逐文件比较，**19/138 项通过、47 项缺失、72 项不同**；13 张上游 MRI 图在体素、类型、仿射和 MGH 头前 284 字节上相同。[整例原始报告](native_cpp_conda_20260927/v3_e2e_20260927/BENCHMARK.md)记录那一版的分步时间和脑区/顶点差异。此后拓扑、Talairach 精度和若干表面步骤已更新，**没有新的完整 138 项运行**，因此 v3 耗时和通过率不能当作当前代码的等价重建结果。
+最近一次从原始 T1 完成的 v3 调度运行了 39 步、用时 2903.79 秒。与 FreeSurfer 8.2 的同一被试逐文件比较，**19/138 项通过、47 项缺失、72 项不同**；13 张上游 MRI 图在体素、类型、仿射和 MGH 头前 284 字节上相同。[整例原始报告](native_cpp_conda_20260927/v3_e2e_20260927/BENCHMARK.md)记录那一版的分步时间和脑区/顶点差异。此后拓扑、Talairach、N4 和若干表面步骤已更新，**没有新的完整 138 项运行**。当前 N4 单阶段的 `nu0.mgz` 有 9 个体素与官方不同，最终 `nu.mgz` 有 8 个体素不同；因此旧 v3 的 13 张上游图逐体素一致、通过率和耗时均不能当作当前代码的结果。
 
 [发布门槛](RELEASE_GATES.md)规定从空被试目录起跑、逐体素与逐顶点对齐、脑区行比较和配对计时的验收方法。[严格比较器](compare_complete_subject.py)覆盖 39 张 MRI、18 个表面、46 张顶点图、12 个注释和 23 个统计文件：
 
@@ -21,6 +21,7 @@ python validation/recon_all/python_gpu_port/compare_complete_subject.py \
 | 位置 | 真实数据结果 | 记录 |
 | --- | --- | --- |
 | 旧 v3 整例的 MRI 前缀 | 当时的 13 张 MRI 图逐体素、仿射和头一致；尚未对更新后的代码重跑整例 | [v3 原始报告](native_cpp_conda_20260927/v3_e2e_20260927/BENCHMARK.md) |
+| 当前 Conda C++ N4 单阶段 | 真实 T1 上 `nu0.mgz` 9/16,777,216 体素不同，后处理 `nu.mgz` 8 个体素不同；仿射和 MGH 头一致，未重跑整例 | [N4 当前报告](n4_itk_conda_20260927/README.md) |
 | Talairach 精度修正与有限续跑 | 另一次从同一 T1 开始的定向测试中，eTIV 误差由 822.547 降到 0.895 mm³；后续 GCA、`norm`、`aseg.presurf` 匹配，但没有继续到 WM/皮层 | [Talairach](talairach_tf32_isolation_20260927/README.md)、[LTA 坐标转换](../../../docs/recon_all/TALAIRACH_LTA_NUMPY.md) |
 | WM/filled 保存阶段 | 独立同输入试验核对了白质及填充体积图；这不是修正后从原始 T1 连续运行的结果 | [WM 链](native_cpp_conda_20260927/wm_chain_20260927/REPORT.md) |
 | 候选左侧拓扑与白质前缀 | 自产 MRI 输入的保存阶段复跑得到逐点相同的 `orig.premesh` 和 `orig`；`white.preaparc` 平均顶点偏移 0.000421 mm，50 个顶点超过 0.1 mm；`smoothwm` 为 0.000311 mm，18 个超过 0.1 mm | [候选前缀](white_connected_prefix_20260927/README.md)、[双侧冻结输入拓扑](../../../docs/recon_all/TOPOLOGY_CONDA_GA.md) |
@@ -33,12 +34,12 @@ python validation/recon_all/python_gpu_port/compare_complete_subject.py \
 
 函数参数、输入和输出结构、等价 FreeSurfer 命令及真实数据的精度/时间，见各功能说明或其原始对照记录：
 
-- **载入、预处理、强度校正：** [NIfTI 导入](NIFTI_IMPORT.md)、[conform](CONFORM.md)、[N4 包装](../../../docs/recon_all/N4_WRAPPER_VALIDATION.md)、[去噪](ANTS_DENOISE_STATUS.md)、[T1/brain 归一化](../../../docs/recon_all/NORMALIZATION.md)、[CA 归一化](CA_NORMALIZE.md)。
+- **载入、预处理、强度校正：** [NIfTI 导入](NIFTI_IMPORT.md)、[conform](CONFORM.md)、[Conda C++ N4](../../../docs/recon_all/N4_ITK_CONDA.md)、[N4 后处理](../../../docs/recon_all/N4_WRAPPER_VALIDATION.md)、[去噪](ANTS_DENOISE_STATUS.md)、[T1/brain 归一化](../../../docs/recon_all/NORMALIZATION.md)、[CA 归一化](CA_NORMALIZE.md)。
 - **体积分割和后处理：** [GCA 注册](MRI_EM_REGISTER_VALIDATION.md)、[初始白质分割](MRI_SEGMENT_VALIDATION.md)、[WM/aseg 编辑](WM_ASEGEDIT_FIXED.md)、[胼胝体](MRI_CC_PYTHON.md)、[体积掩膜](VOLMASK.md)、[MNI152/辅助标签](../../../docs/recon_all/MNI_AUX_CHAIN.md)、[brain.finalsurfs](../../../docs/recon_all/FINAL_SURFS_CHAIN.md)。
 - **初始表面与球面：** [tessellate](TESSELLATE.md)、[pretess](PRETESS.md)、[初始平滑](SMOOTH_SURFACE.md)、[膨胀](INFLATE_STATUS.md)、[quick sphere](SPHERE_QUICK_STATUS.md)、[拓扑/重网格](../../../docs/recon_all/TOPOLOGY_CONDA_GA.md)、[标准球面](SPHERE_STANDARD_STATUS.md)、[球面配准](MRIS_REGISTER_STATUS.md)。标准球面现已通过同候选输入完整阶段核对；球面配准的旧逐点试验仍使用冻结官方输入，候选链整例尚未通过。
 - **white、pial 与每顶点图：** [阈值](AUTODET_GWSTATS_STATUS.md)、[白质预放置](../../../docs/recon_all/WHITE_PREAPARC_CONDA_CHAIN.md)、[Python white 首轮 17 步](../../../docs/recon_all/WHITE_PYTHON_FIRST_PASS.md)、[smoothwm](../../../docs/recon_all/SMOOTHWM_FINAL_PARITY.md)、[Python pial](../../../docs/recon_all/PYTHON_PIAL_PLACEMENT.md)、[面积](area_cuda1_report.json)、[厚度](thickness_stage_report.json)、[顶点体积](vertex_volume_cuda0_report.json)、[曲率](curvature_stage_report.json)。
 - **脑区、投影和统计：** [表面注释](MRIS_CA_LABEL_STATUS.md)、[label2annot](LABEL2ANNOT.md)、[表面标签转换](LABEL2LABEL_SURFACE_STATUS.md)、[surf2volseg](SURF2VOLSEG_CORTEX.md)、[ROI 曲率](ROI_CURVATURE.md)、[脑区统计行](ANATOMICAL_STATS_ROWS.md)、[全局统计](ANATOMICAL_STATS_GLOBAL.md)、[eTIV](ESTIMATED_TIV.md)。
 
-`fnit-recon-all` 当前仍需三个必需、三个可选的 Conda 源码编译 C++ 程序，不需要系统安装的 FreeSurfer 运行包。[构建与调用说明](../../../docs/recon_all/CONDA_CPP_BUILD.md)列出固定源码、外置许可证和资产要求。阶段通过率只对报告中的同输入范围有效；当前完整发布状态以[发布门槛](RELEASE_GATES.md)为准。
+`fnit-recon-all` 当前仍需仓库 N4 程序，以及三个必需、三个可选的 Conda 源码编译 FreeSurfer C++ 程序；不需要系统安装的 FreeSurfer 运行包。[构建与调用说明](../../../docs/recon_all/CONDA_CPP_BUILD.md)列出固定源码、外置许可证和资产要求。阶段通过率只对报告中的同输入范围有效；当前完整发布状态以[发布门槛](RELEASE_GATES.md)为准。
 
 [完整 Conda YAML 安装实测](conda_yaml_install_20260927/README.md)在独立新环境中编译了上述程序，并使 `mri_segment` 在真实 T1 冻结输入上获得 0/16,777,216 体素差。它验证安装与单阶段运行，不更新上文 v3 整例的 138 项结果。
