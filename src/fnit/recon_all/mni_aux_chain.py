@@ -7,7 +7,6 @@ from pathlib import Path
 
 import nibabel as nib
 import numpy as np
-import surfa as sf
 import torch
 
 from fnit.synthmorph import SynthMorph
@@ -16,6 +15,43 @@ from .aux_seg import MCA_MODEL, VSINUS_MODEL, mri_mcadura_seg, mri_vsinus_seg
 
 
 TEMPLATE_DIR = Path("average/mni_icbm152_nlin_asym_09c/reg-targets")
+
+
+def write_mni_voxel_lta(output_file: str | Path, matrix: np.ndarray,
+                        source_file: str | Path, target_file: str | Path) -> None:
+    """Write the full-MNI-to-native voxel transform with nibabel geometry."""
+    transform = np.asarray(matrix, dtype=np.float64)
+    if transform.shape != (4, 4):
+        raise ValueError("expected a 4x4 voxel transform")
+
+    def volume_info(path: str | Path) -> list[str]:
+        image = nib.load(str(path))
+        if len(image.shape) != 3:
+            raise ValueError("LTA volume geometry must be 3D")
+        sizes = np.asarray(image.header.get_zooms()[:3], dtype=np.float64)
+        if isinstance(image, nib.MGHImage):
+            directions = np.asarray(image.header["Mdc"], dtype=np.float64)
+            center = np.asarray(image.header["Pxyz_c"], dtype=np.float64)
+        else:
+            directions = (image.affine[:3, :3] / sizes).T + 0.0
+            center = (image.affine @ np.array([*(d / 2 for d in image.shape), 1.0]))[:3]
+        lines = ["valid = 1", "filename = none",
+                 "volume = " + " ".join(str(d) for d in image.shape),
+                 "voxelsize = " + " ".join(f"{v:.15e}" for v in sizes)]
+        for name, row in zip(("xras", "yras", "zras"), directions):
+            lines.append(name + "   = " + " ".join(f"{v:.15e}" for v in row))
+        lines.append("cras   = " + " ".join(f"{v:.15e}" for v in center))
+        return lines
+
+    lines = ["type      = 0 # LINEAR_VOX_TO_VOX", "nxforms   = 1",
+             "mean      = 0.0000 0.0000 0.0000", "sigma     = 1.0000",
+             "1 4 4"]
+    lines.extend(" ".join(f"{v:.15e}" for v in row) for row in transform)
+    lines.extend(["src volume info", *volume_info(source_file),
+                  "dst volume info", *volume_info(target_file)])
+    output = Path(output_file)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text("\n".join(lines) + "\n")
 
 
 def validate_mni_aux_assets(weights_dir: str | Path,
@@ -88,12 +124,12 @@ def register_mni152_affine(subject_dir: str | Path, weights_dir: str | Path,
     world_affine.save(str(transform_dir / "aff.lta"))
     native_image = nib.load(str(native))
     full_image = nib.load(str(full_target))
-    world = world_affine.convert(space="world").matrix
+    world = world_affine.matrix
     target_to_native = np.linalg.inv(native_image.affine) @ np.linalg.inv(world) @ full_image.affine
     target_to_native[3] = (0, 0, 0, 1)
     output = transform_dir / "reg.targ_to_invol.lta"
-    sf.Affine(target_to_native, source=sf.load_volume(str(full_target)),
-              target=sf.load_volume(str(native)), space="voxel").save(str(output))
+    write_mni_voxel_lta(output_file=output, matrix=target_to_native,
+                        source_file=full_target, target_file=native)
     return output
 
 
