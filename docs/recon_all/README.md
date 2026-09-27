@@ -1,10 +1,10 @@
 # Python recon-all：原始 T1 到皮层指标
 
-[返回首页](../../README.md) · [实现](../../src/fnit/recon_all/) · [整例验证](../../validation/recon_all/python_gpu_port/NATIVE_FREE_CONNECTED_20260927.md)
+[返回首页](../../README.md) · [实现](../../src/fnit/recon_all/) · [最新整例验证](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/post_cc/REPORT.md)
 
-`fnit-recon-all` 从一幅 T1w 生成脑体积分割、双侧 white/pial/sphere 表面、厚度、面积、顶点体积、曲率、aparc/a2009s/DKT 标注和脑区统计。默认调用 Python 包及其 CPU/CUDA 算子；可选调用用户在 Conda 中从 FreeSurfer 源码编译的六个 C++ 程序。两条路径均不要求安装官方 FreeSurfer、FSL 或原生 recon-all 运行包。模型权重和模板单独下载并校验。
+`fnit-recon-all` 从一幅 T1w 生成脑体积分割、双侧 white/pial/sphere 表面、厚度、面积、顶点体积、曲率、aparc/a2009s/DKT 标注和脑区统计。默认调用 Python 包及其 CPU/CUDA 算子；可选调用用户在 Conda 中从 FreeSurfer 源码编译的六个 C++ 程序；第七个 `mri_segment` 已单独编译验收。两条路径均不要求安装官方 FreeSurfer、FSL 或原生 recon-all 运行包。模型权重和模板单独下载并校验。
 
-**当前为近似核心重建。** 默认 Python 路径的拓扑修复、white/pial 放置和球面配准尚未与 FreeSurfer 8.2 对齐；只生成核心输出的子集。旧的纯 Python 配置曾在一个真实 T1 上跑通整例，严格固定配置的 138 项官方输出中 6 项通过、52 项缺失、80 项存在差异。这是该旧配置的结果，不是可选 C++ 路径的验收结果。C++ 路径仍使用近似的上游几何，尚未证实皮层逐顶点厚度、面积、体积、曲率及脑区统计与官方数值一致。旧配置的差异和计时见[整例报告](../../validation/recon_all/python_gpu_port/NATIVE_FREE_CONNECTED_20260927.md)；根因、容差及修复顺序见[差异分析](../../validation/recon_all/python_gpu_port/DISCREPANCY_AND_TOLERANCE_20260927.md)。
+**当前为近似核心重建。** 默认 Python 路径的拓扑修复、white/pial 放置和球面配准尚未与 FreeSurfer 8.2 对齐；只生成核心输出的子集。可选 Conda C++ 路径接入 Python `mri_cc` 后，已从同一真实 T1 在空被试目录完成 30 个阶段，用时 2649.0 秒；固定的 138 项官方输出中只有 8 项通过、51 项缺失、79 项存在差异。其表面顶点数与官方不同，厚度、面积、体积、曲率及脑区统计未达到逐点或数值一致。[本次整例报告](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/post_cc/BENCHMARK.md)列出各阶段时间与逐文件比较；[旧的纯 Python 配置](../../validation/recon_all/python_gpu_port/NATIVE_FREE_CONNECTED_20260927.md)另有独立结果。根因、容差及修复顺序见[差异分析](../../validation/recon_all/python_gpu_port/DISCREPANCY_AND_TOLERANCE_20260927.md)。
 
 ## 安装外置数据
 
@@ -44,7 +44,7 @@ report = run_recon_all_python(
 
 ## 可选 Conda C++ 阶段
 
-按[独立 Conda 编译与验证说明](CONDA_CPP_BUILD.md)准备构建环境，将 FreeSurfer 源码固定在提交 `d932c45b7941662ea380a05efef580568b98d41a`，运行仓库的 [`build_recon_all_fs_cpp_conda.sh`](../../tools/build_recon_all_fs_cpp_conda.sh)：
+按[独立 Conda 编译与验证说明](CONDA_CPP_BUILD.md)准备构建环境；六个整例程序及第七个独立 `mri_segment` 的功能、官方命令和精度/时间证据见[逐阶段说明](CONDA_CPP_STAGES.md)。将 FreeSurfer 源码固定在提交 `d932c45b7941662ea380a05efef580568b98d41a`，运行仓库的 [`build_recon_all_fs_cpp_conda.sh`](../../tools/build_recon_all_fs_cpp_conda.sh)：
 
 ```bash
 conda activate /path/to/conda-build-env

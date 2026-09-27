@@ -441,6 +441,19 @@ def _project_wmparc(subject: Path, aseg: np.ndarray) -> None:
     _save_like(mri / "aseg.mgz", mri / "wmparc.mgz", projected)
 
 
+def _segment_callosum(mri: Path) -> dict[str, float | int]:
+    from .mri_cc_python import run_mri_cc
+
+    source = mri / "aseg.auto_noCCseg.mgz"
+    output = mri / "aseg.auto.mgz"
+    shutil.copyfile(mri / "synthseg.rca.mgz", source)
+    info = run_mri_cc(source, mri / "norm.mgz", output,
+                      mri / "transforms/cc_up.lta")
+    for name in ("aseg.presurf.mgz", "aseg.mgz"):
+        shutil.copyfile(output, mri / name)
+    return info
+
+
 def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          weights_dir: str | Path, assets_dir: str | Path,
                          *, device: str = "cuda:0", threads: int = 4,
@@ -494,15 +507,15 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                             for hemi in ("lh", "rh")} if native_registration else {})
     torch.set_num_threads(threads)
     started = time.perf_counter()
-    profile = ("experimental-native-gca-topology-core-v1" if topology_binary
-               else "experimental-native-gca-core-v1" if native_em
-               else "experimental-native-free-core-v1")
+    profile = ("experimental-native-gca-topology-core-v2" if topology_binary
+               else "experimental-native-gca-core-v2" if native_em
+               else "experimental-native-free-core-v2")
     if metrics_binary:
-        profile = profile.replace("-core-v1", "-metrics-core-v1")
+        profile = profile.replace("-core-v2", "-metrics-core-v2")
     if native_sphere:
-        profile = profile.replace("-core-v1", "-sphere-core-v1")
+        profile = profile.replace("-core-v2", "-sphere-core-v2")
     if registration_binary:
-        profile = profile.replace("-core-v1", "-registration-core-v1")
+        profile = profile.replace("-core-v2", "-registration-core-v2")
     report: dict = {"profile": profile, "input": str(t1),
                     "subject_dir": str(subject), "device": device,
                     "n4_python": str(n4_python or sys.executable), "threads": threads,
@@ -571,6 +584,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     if topology_binary:
         shutil.copyfile(mri / "brainmask.mgz", mri / "brain.mgz")
 
+    if torch.device(device).type == "cuda":
+        torch.cuda.empty_cache()
     previous_cudnn_tf32 = torch.backends.cudnn.allow_tf32
     torch.backends.cudnn.allow_tf32 = False
     try:
@@ -579,14 +594,11 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          keep_geometry=True, color_lut=assets / "FreeSurferColorLUT.txt"))
     finally:
         torch.backends.cudnn.allow_tf32 = previous_cudnn_tf32
+        if torch.device(device).type == "cuda":
+            torch.cuda.empty_cache()
     stiv_mm3 = result.total_intracranial_mm3
     result.segmentation.save(str(mri / "synthseg.rca.mgz"))
     result.write_volumes_csv(mri / "orig.mgz", stats / "synthseg.vol.csv")
-    seg_image = nib.load(str(mri / "synthseg.rca.mgz"))
-    aseg = np.asarray(seg_image.dataobj).astype(np.int16)
-    for name in ("aseg.auto.mgz", "aseg.presurf.mgz", "aseg.mgz"):
-        shutil.copyfile(mri / "synthseg.rca.mgz", mri / name)
-
     lta = mri / "transforms/talairach.lta"
     gca = assets / "average/RB_all_2020-01-02.gca"
     if native_em:
@@ -597,6 +609,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     stage("mri_ca_normalize", run_ca_normalize, mri / "nu.mgz",
           mri / "brainmask.mgz", gca,
           lta, mri / "norm.mgz", mri / "ctrl_pts.mgz")
+    report["corpus_callosum"] = stage("mri_cc", _segment_callosum, mri)
+    aseg = np.asarray(nib.load(str(mri / "aseg.auto.mgz")).dataobj).astype(np.int16)
 
     wm = np.where(np.isin(aseg, (2, 41, 77, 78, 79)), 255, 0).astype(np.uint8)
     _save_like(mri / "T1.mgz", mri / "wm.mgz", wm)

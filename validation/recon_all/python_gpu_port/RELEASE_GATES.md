@@ -1,6 +1,13 @@
 # Native-free recon-all acceptance gates
 
-The published `fnit-recon-all` entry runs the connected Python reconstruction. It is a core-output prototype, not an equivalent FreeSurfer 8.2 replacement. The gates below define what remains before claiming numerical compatibility on the same T1.
+The published `fnit-recon-all` entry runs the connected Python reconstruction. It is a core-output prototype, not an equivalent FreeSurfer 8.2 replacement. The gates below define what remains before claiming numerical compatibility on the same T1. The current post-CC Conda profile completed 30 stages in 2649.0 s and passed 8/138 strict same-T1 outputs; see [its benchmark](native_cpp_conda_20260927/post_cc/BENCHMARK.md).
+
+The optional Conda C++ profile intentionally calls six external programs built from
+FreeSurfer source. A seventh program, `mri_segment`, is built and validated on
+frozen inputs but not yet scheduled by the end-to-end runner. For that profile, gate 1 requires binary hashes, Conda build
+provenance, and evidence that no installed FreeSurfer runtime is linked; the
+no-FreeSurfer-executable process-tree condition applies only to the default Python
+profile. The numerical gates 2–6 apply to both profiles.
 
 1. **Connected run:** start with the original T1 and an empty subject folder;
    generate all fixed-profile outputs using installed `fnit`, external weights,

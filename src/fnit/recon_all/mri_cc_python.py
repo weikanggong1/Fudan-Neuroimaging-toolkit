@@ -1,7 +1,7 @@
 """Native-free numerical port of FreeSurfer 8.2 ``mri_cc -aseg``.
 
-The fixed source is d932c45. This module is intentionally separate from the
-recon-all dispatcher until paired validation establishes its acceptance scope.
+The fixed source is d932c45. The recon-all dispatcher calls this stage after
+`norm.mgz` is generated.
 """
 
 from __future__ import annotations

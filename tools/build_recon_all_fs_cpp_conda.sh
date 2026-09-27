@@ -26,17 +26,34 @@ for compiler in CC CXX FC; do
     *) echo "$compiler resolves outside CONDA_PREFIX" >&2; exit 2 ;;
   esac
 done
-if test -s "$source_dir/.fnit-source-commit"; then
-  source_commit=$(cat "$source_dir/.fnit-source-commit")
-else
-  source_commit=$(git -C "$source_dir" rev-parse HEAD 2>/dev/null || true)
-fi
 expected_commit=d932c45b7941662ea380a05efef580568b98d41a
+if git -C "$source_dir" rev-parse --show-toplevel >/dev/null 2>&1; then
+  source_commit=$(git -C "$source_dir" rev-parse HEAD)
+  source_validation=clean-git
+  if [[ "$(realpath "$(git -C "$source_dir" rev-parse --show-toplevel)")" != "$source_dir" ]] ||
+     [[ -n "$(git -C "$source_dir" status --porcelain --untracked-files=all)" ]]; then
+    echo "FreeSurfer source Git checkout must be clean and rooted at $source_dir" >&2
+    exit 2
+  fi
+elif test -s "$source_dir/.fnit-source-commit"; then
+  source_commit=$(cat "$source_dir/.fnit-source-commit")
+  expected_tree=df2ace4b904dc722090782895c251ceac65b8c52f192c2abcf7ce3daabc83585
+  source_tree=$(cd "$source_dir" && find . -type f ! -name .fnit-source-commit -print0 |
+    LC_ALL=C sort -z | xargs -0 sha256sum | sha256sum | cut -d' ' -f1)
+  if [[ "$source_tree" != "$expected_tree" ]]; then
+    echo "FreeSurfer source archive tree differs from the validated commit" >&2
+    exit 2
+  fi
+  source_validation="archive-tree-sha256:$source_tree"
+else
+  echo "FreeSurfer source must be a clean Git checkout or validated source archive" >&2
+  exit 2
+fi
 if [[ "$source_commit" != "$expected_commit" ]]; then
   echo "FreeSurfer source commit must be $expected_commit; found $source_commit" >&2
   exit 2
 fi
-for file in LICENSE.txt CMakeLists.txt utils/CMakeLists.txt mri_em_register/CMakeLists.txt mris_fix_topology/CMakeLists.txt mris_make_surfaces/CMakeLists.txt mris_register/CMakeLists.txt mris_inflate/CMakeLists.txt mris_sphere/CMakeLists.txt resurf/Code/mris_multimodal_refinement.h; do
+for file in LICENSE.txt CMakeLists.txt utils/CMakeLists.txt mri_em_register/CMakeLists.txt mris_fix_topology/CMakeLists.txt mris_make_surfaces/CMakeLists.txt mris_register/CMakeLists.txt mris_inflate/CMakeLists.txt mris_sphere/CMakeLists.txt mri_segment/CMakeLists.txt resurf/Code/mris_multimodal_refinement.h; do
   test -s "$source_dir/$file" || { echo "missing source: $file" >&2; exit 2; }
 done
 itk_config=$(find "$CONDA_PREFIX/lib/cmake" -maxdepth 3 -name ITKConfig.cmake -print -quit)
@@ -86,7 +103,7 @@ cmake -S "$build_source" -B "$build_dir" -G Ninja \
   -DDISABLE_LINEPROF=ON -DINFANT_MODULE=OFF -DQATOOLS_MODULE=OFF \
   -DDISTRIBUTE_FSPYTHON=OFF -DINSTALL_PYTHON_DEPENDENCIES=OFF \
   2>&1 | tee "$output_dir/configure.log"
-targets=(mri_em_register mris_fix_topology mris_place_surface mris_register mris_inflate mris_sphere)
+targets=(mri_em_register mris_fix_topology mris_place_surface mris_register mris_inflate mris_sphere mri_segment)
 cmake --build "$build_dir" --parallel 4 --target "${targets[@]}" 2>&1 | tee "$output_dir/build.log"
 for target in "${targets[@]}"; do
   binary=$(find "$build_dir" -type f -name "$target" -perm /111 -print -quit)
@@ -105,4 +122,4 @@ for target in "${targets[@]}"; do
 done
 sha256sum "$output_dir"/bin/* > "$output_dir/bin.sha256"
 conda list --explicit > "$output_dir/conda-explicit.txt"
-printf 'SOURCE_COMMIT=%s\nCONDA_PREFIX=%s\n' "$source_commit" "$CONDA_PREFIX" > "$output_dir/build-provenance.txt"
+printf 'SOURCE_COMMIT=%s\nSOURCE_VALIDATION=%s\nCONDA_PREFIX=%s\n' "$source_commit" "$source_validation" "$CONDA_PREFIX" > "$output_dir/build-provenance.txt"

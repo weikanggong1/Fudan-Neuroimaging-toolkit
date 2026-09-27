@@ -1,6 +1,6 @@
 # Fudan Neuroimaging Toolkit (FNIT)
 
-`fudan-neuroimaging-toolkit` 是独立的脑 MRI 推理包，在 CPU 或 CUDA 上运行。单项推理无需安装 FreeSurfer、FSL、TensorFlow、VoxelMorph 或 Neurite。`fnit-recon-all` 默认使用 Python 流程和外置权重、模板；另可调用用户在 Conda 中从 FreeSurfer 源码编译的六个 C++ 程序，无需安装官方 FreeSurfer。两条路径的整例重建均尚未证实与官方数值一致。Python 导入名为 `fnit`，单项功能的命令行入口为 `fnit`。
+`fudan-neuroimaging-toolkit` 是独立的脑 MRI 推理包，在 CPU 或 CUDA 上运行。单项推理无需安装 FreeSurfer、FSL、TensorFlow、VoxelMorph 或 Neurite。`fnit-recon-all` 默认使用 Python 流程和外置权重、模板；另可调用用户在 Conda 中从 FreeSurfer 源码编译的六个 C++ 程序，无需安装官方 FreeSurfer；第七个 `mri_segment` 已编译并独立验收，尚未接入整例。两条路径的整例重建均尚未证实与官方数值一致。Python 导入名为 `fnit`，单项功能的命令行入口为 `fnit`。
 
 | 模态 | 功能 | 输出与用途 | 用法、原版对照与验证 |
 |---|---|---|---|
@@ -26,7 +26,7 @@
 
 recon-all 提供单被试命令行与 Python API；多被试并行仅提供 Python API。其余功能只提供单被试 Python 和单被试命令行接口；需要处理多个病例时，由调用方在包外组织任务与设备。仓库提供 [T1w 样例](examples/README.md)和 [FLAIR 样例](examples/WMH.md)。
 
-默认 recon-all 的神经网络与部分体素、表面计算使用 PyTorch/CUDA；N4、GCA 配准和部分网格/统计计算使用 Python 包中的 CPU 算子。可选 `--native-bin-dir` 与四个原生阶段开关调用外部 C++ 程序处理 GCA 配准、拓扑、球面与顶点指标，但上游表面仍有近似。[同一 T1 整例比较](validation/recon_all/python_gpu_port/NATIVE_FREE_CONNECTED_20260927.md)的严格 138 项仅 6 项一致，属于旧的纯 Python 配置，不代表可选 C++ 路径的测试结果。
+默认 recon-all 的神经网络与部分体素、表面计算使用 PyTorch/CUDA；N4、GCA 配准和部分网格/统计计算使用 Python 包中的 CPU 算子。可选 `--native-bin-dir` 与四个原生阶段开关调用外部 C++ 程序处理 GCA 配准、拓扑、球面与顶点指标，但上游表面仍有近似。[Conda C++ 同一 T1 整例实测](validation/recon_all/python_gpu_port/native_cpp_conda_20260927/post_cc/BENCHMARK.md)已完成 30 个阶段，用时 2649.0 秒；接入 Python `mri_cc` 后，严格 138 项中有 8 项一致、51 项缺失，不能把与官方 6789.6 秒的时间差视为等价重建的加速。旧的纯 Python 配置见[独立报告](validation/recon_all/python_gpu_port/NATIVE_FREE_CONNECTED_20260927.md)。
 
 相关 CUDA 路径允许 NVIDIA TF32 matmul 和 cuDNN 内核；模型与影像张量仍保持 float32，本包不会自动改用 float16 或 bfloat16。各验证报告记录实际开关。
 
@@ -74,6 +74,17 @@ conda activate "$FNIT_ENV_PREFIX"
 ```
 
 然后在 GPU 节点激活同一路径。这样 Conda 会按目标节点 ABI 选择二进制包；环境仍由同一份 `environment.yml` 完整构建。
+
+### recon-all 可选 C++ 阶段的 Conda 环境
+
+从仓库根目录用 [`environment-recon-all-cpp.yml`](environment-recon-all-cpp.yml) 一次安装上述 Python 功能及七个 FreeSurfer C++ 构建目标所需的 Conda 编译器、ITK 开发库、CUDA 工具和 glibc 2.17 sysroot；默认的 `environment.yml` 保持轻量。该命令创建环境，不编译或下载 FreeSurfer 程序：
+
+```bash
+CONDA_OVERRIDE_GLIBC=2.17 conda env create -f environment-recon-all-cpp.yml
+conda activate fnit-recon-all-cpp
+```
+
+该 YAML 在目标 glibc 2.17 条件下通过 Conda 求解 dry-run；实际用于编译和整例的环境以文档中的等价分步命令安装，未额外重复一次 YAML 完整创建。随后按 [C++ 编译与调用说明](docs/recon_all/CONDA_CPP_BUILD.md)固定 FreeSurfer 源码提交并构建七个程序，其中六个接入整例。每个阶段的功能、等价官方命令和精度/耗时验证见 [C++ 阶段说明](docs/recon_all/CONDA_CPP_STAGES.md)。模型和模板仍通过下述独立命令下载。
 
 ## 下载和部署权重
 

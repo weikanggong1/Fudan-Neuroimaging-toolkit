@@ -1,0 +1,13 @@
+--- a/mris_sphere/mris_sphere.cpp
++++ b/mris_sphere/mris_sphere.cpp
+@@ -296,8 +296,8 @@
+   max_dim = MAX(abs(max_dim), abs(mris->zlo)) ;
+   max_dim = MAX(abs(max_dim), abs(mris->zhi)) ;
+ #else
+-  max_dim = MAX(abs(mris->xhi-mris->xlo), abs(mris->yhi-mris->ylo)) ;
+-  max_dim = MAX(max_dim,abs(mris->zhi-mris->zlo)) ;
++  max_dim = MAX(abs((int)(mris->xhi-mris->xlo)), abs((int)(mris->yhi-mris->ylo))) ;
++  max_dim = MAX(max_dim,abs((int)(mris->zhi-mris->zlo))) ;
+ #endif
+   if (max_dim > .75*DEFAULT_RADIUS)
+   {

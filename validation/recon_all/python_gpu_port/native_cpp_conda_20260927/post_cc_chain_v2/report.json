@@ -1,0 +1,183 @@
+{
+  "status": "complete",
+  "candidate": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_conda_cpp_cc_e2e_20260927/subjects/sub01",
+  "official": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official",
+  "color_lut": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_cpp_conda_20260927/assets/FreeSurferColorLUT.txt",
+  "integration_dependencies": {
+    "source_aseg": "mri_cc -> aseg.auto -> aseg.presurf",
+    "ribbon": "both white/pial surfaces + aseg.presurf + FreeSurferColorLUT",
+    "hypos": "aseg.presurf + both white surfaces",
+    "final_aseg": "hypos + ribbon + both white/pial surfaces + both cortex labels",
+    "missing_entowm": true,
+    "cortex_label_limit": "v2 runner uses no-GA label_cortex; official --fix-ga also uses entowm",
+    "runner_handoff": "reload final int32 aseg before project_aparc and later stats"
+  },
+  "input_sha256": {
+    "mri/aseg.presurf.mgz": "59650a0ead68f4e75d9086bf304ba5a0621b5e23e00458b9ebf31a44da702d75",
+    "surf/lh.white": "69bacd97ee9214844c0e042bc47aac78ef5343b253017bca526adaeab97fbfbc",
+    "surf/lh.pial": "59bf4191168b11b769159cb4e6f1e3797e45215e07ebb1568ba3719dd8a41bf8",
+    "surf/rh.white": "705c0bbacdf1ebed30ed6c8fda4541489eef3d5e55f7d987b6b25091df49a797",
+    "surf/rh.pial": "561483abdbb59a19f333f5734f084f902fb125ced573020f0a407be7796457bf",
+    "label/lh.cortex.label": "264834f546e29a8991072a8e54c1bfc373279073d4d2c38c95aebc5266eb51b3",
+    "label/rh.cortex.label": "2f239e9cd0cf0d3f8199c37869df6d850e1a08c063d96639faae59c58aa8109e"
+  },
+  "port_sha256": {
+    "volmask": "7641b18f049ba31841a1ba2496a871adbc595285f8c48ef0bdb0c04f4099afca",
+    "relabel": "b0a575e4643f908b16a10c3df7f13cb38e3f9dfe62efc510252eab342bb6c02a",
+    "surf2volseg_fix": "f19e375a47214c38ffd64b6572fd019d18f28426d7952985c4c11aeeab0c08ab"
+  },
+  "seconds": {
+    "copy_subject": 1.026060650125146,
+    "volmask": 10.04140514228493,
+    "relabel_hypointensities": 5.825394014827907,
+    "surf2volseg_fix": 10.088177436031401,
+    "aseg_int32_header": 0.5989693012088537
+  },
+  "comparisons": {
+    "before_aseg": {
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "dtype": [
+        ">f4",
+        ">i4"
+      ],
+      "unequal_voxels": 104986,
+      "first_unequal_ijk": [
+        65,
+        118,
+        112
+      ],
+      "affine_max_abs": 0.0,
+      "header_exact": false,
+      "decompressed_mgh_exact": false,
+      "sha256": [
+        "59650a0ead68f4e75d9086bf304ba5a0621b5e23e00458b9ebf31a44da702d75",
+        "29fbcff5dff5300599ee863e0c7c425867af725134631741685b41ca44639bc2"
+      ]
+    },
+    "mri/ribbon.mgz": {
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "dtype": [
+        "uint8",
+        "uint8"
+      ],
+      "unequal_voxels": 227112,
+      "first_unequal_ijk": [
+        65,
+        117,
+        114
+      ],
+      "affine_max_abs": 0.0,
+      "header_exact": true,
+      "decompressed_mgh_exact": false,
+      "sha256": [
+        "c8f508342a36ca0ce67eed0468446d0aa6352a2b03bd5a203c0896f3a76b1d00",
+        "4c49b3f248994d876023a86623ae9478d7cff753e2c5a56481dc387988d3e9f8"
+      ]
+    },
+    "mri/lh.ribbon.mgz": {
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "dtype": [
+        "uint8",
+        "uint8"
+      ],
+      "unequal_voxels": 105802,
+      "first_unequal_ijk": [
+        118,
+        117,
+        62
+      ],
+      "affine_max_abs": 0.0,
+      "header_exact": true,
+      "decompressed_mgh_exact": false,
+      "sha256": [
+        "f7d829cee8012a3bcf8d882395f9ab1018e171b069049d63656123808f42bcc9",
+        "6f0b1a177f19ced181f2c0715e13979565bc140e8b4ab4261de904f85f005ab6"
+      ]
+    },
+    "mri/rh.ribbon.mgz": {
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "dtype": [
+        "uint8",
+        "uint8"
+      ],
+      "unequal_voxels": 108521,
+      "first_unequal_ijk": [
+        65,
+        117,
+        114
+      ],
+      "affine_max_abs": 0.0,
+      "header_exact": true,
+      "decompressed_mgh_exact": false,
+      "sha256": [
+        "21bf39f88d35c5176857b3b5d5f640aae45ed4703cbb8443205d5890366d9060",
+        "7c560e7c9a399cd71499ad0162353e34c62fb11c17bddb0a3cd6fe7e1297a44b"
+      ]
+    },
+    "mri/aseg.presurf.hypos.mgz": {
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "dtype": [
+        ">f4",
+        ">f4"
+      ],
+      "unequal_voxels": 879,
+      "first_unequal_ijk": [
+        104,
+        124,
+        54
+      ],
+      "affine_max_abs": 0.0,
+      "header_exact": true,
+      "decompressed_mgh_exact": false,
+      "sha256": [
+        "5567b1162d8549606871b9705bcd5a267b43a59ee837499d28e118e9dcaf3802",
+        "31b489d3e67a1e455330bf9a683fce63631d0244a7ed15a3d56c08f7c5ffccb2"
+      ]
+    },
+    "mri/aseg.mgz": {
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "dtype": [
+        ">i4",
+        ">i4"
+      ],
+      "unequal_voxels": 142536,
+      "first_unequal_ijk": [
+        65,
+        118,
+        112
+      ],
+      "affine_max_abs": 0.0,
+      "header_exact": true,
+      "decompressed_mgh_exact": false,
+      "sha256": [
+        "e3478a8aa2206795466daf9d030624d67b05948266d69aa6d32a0842fef85dc6",
+        "29fbcff5dff5300599ee863e0c7c425867af725134631741685b41ca44639bc2"
+      ]
+    }
+  },
+  "source_input_sha256_unchanged": true
+}

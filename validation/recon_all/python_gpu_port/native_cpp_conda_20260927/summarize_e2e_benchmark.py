@@ -49,7 +49,11 @@ def detail(row: dict) -> str:
                        ("vertex IDs", "vertex_ids")):
         part = row.get(key)
         if isinstance(part, dict):
+            if "reference_shape" in part and "candidate_shape" in part:
+                return f"{label} shape: {part['candidate_shape']} candidate vs {part['reference_shape']} official"
             return f"{label}: {part.get('exact', '?')}/{part.get('elements', '?')} exact; max |Δ| {part.get('max_abs', '?')}"
+    if "reference_shape" in row and "candidate_shape" in row:
+        return f"vertex shape: {row['candidate_shape']} candidate vs {row['reference_shape']} official"
     if "elements" in row:
         return f"vertices: {row['exact']}/{row['elements']} exact; max |Δ| {row['max_abs']}"
     if "outlier_rows" in row:
