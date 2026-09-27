@@ -19,7 +19,7 @@ result = model(
 result.mask.save("subject_mask.nii.gz")  # 输出：二值脑掩膜
 ```
 
-调用返回去颅骨图像 `image`、脑掩膜 `mask` 和符号距离图 `distance`。路径或 nibabel 输入返回仓库内 `Volume`，包含 `.data`、`.affine`、`.save(path)`；已有 Surfa 内存对象仍返回同类对象。输入可为 3D 图像或逐帧处理的 4D 图像。
+调用返回去颅骨图像 `image`、脑掩膜 `mask` 和符号距离图 `distance`。路径或 nibabel 输入返回仓库内 `Volume`，包含 `.data`、`.affine`、`.geom.vox2world.matrix`、`.geom.voxsize`、`.save(path)`；已有 Surfa 内存对象仍返回同类对象。输入可为 3D 图像或逐帧处理的 4D 图像。
 
 同输入、官方命令和本包命令的实际体素、几何与耗时记录见[无 Surfa 迁移验证](../../../validation/synthstrip_no_surfa_20260927/README.md)。
 

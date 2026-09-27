@@ -59,7 +59,7 @@ result.distance.save(output_dir / "subject_sdt.nii.gz")    # 输出：有符号�
 | `result.mask` | 二值脑掩膜 |
 | `result.distance` | 有符号距离场，单位 mm |
 
-从路径或 `nibabel` 对象调用时，三个字段均为仓库内的 `Volume`，具有 `.data`、`.affine`、`.shape` 和 `.save(path)`，可保存 NIfTI、MGH、MGZ。传入已有 `surfa.Volume` 时，三个字段仍返回同类对象以兼容旧调用。调用不会修改输入对象；直接使用 Python 保存时，由调用者准备输出父目录。
+从路径或 `nibabel` 对象调用时，三个字段均为仓库内的 `Volume`，具有 `.data`、`.affine`、`.shape`、`.dtype` 和 `.save(path)`；旧接口常用的 `.geom.vox2world.matrix` 与 `.geom.voxsize` 也分别指向仿射矩阵和体素尺寸，可保存 NIfTI、MGH、MGZ。传入已有 `surfa.Volume` 时，三个字段仍返回同类对象以兼容旧调用。调用不会修改输入对象；直接使用 Python 保存时，由调用者准备输出父目录。
 
 ## 命令行
 

@@ -2,6 +2,7 @@
 
 import os
 from pathlib import Path
+from types import SimpleNamespace
 
 import nibabel as nib
 import numpy as np
@@ -18,10 +19,18 @@ class Volume:
             _, r = np.linalg.qr(self.affine[:3, :3])
             voxsize = np.abs(np.diag(r))
         self.voxsize = np.asarray(voxsize, dtype=np.float64)
+        self.geom = SimpleNamespace(
+            vox2world=SimpleNamespace(matrix=self.affine), voxsize=self.voxsize,
+            shape=np.asarray(self.data.shape[:3]),
+        )
 
     @property
     def shape(self):
         return self.data.shape
+
+    @property
+    def dtype(self):
+        return self.data.dtype
 
     @property
     def nframes(self):
