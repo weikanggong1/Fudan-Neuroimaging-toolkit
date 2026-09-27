@@ -1,6 +1,6 @@
 """First-pass prefix of FreeSurfer 8.2 white.preaparc from matched inputs.
 
-This 1–5 step diagnostic does not create a complete white surface. It reuses the
+This first-pass diagnostic does not create a complete white surface. It reuses the
 independently validated MRI, ripping, border, and collision operators and adds
 the white-specific current-surface self-repulsion force.
 """
@@ -39,19 +39,19 @@ def place_white_preaparc_prefix(
     subject_dir: str | Path, hemi: str, output: str | Path,
     *, steps: int = 1, diagnostics: str | Path | None = None,
 ) -> dict:
-    """Run one to five first-pass steps and write the current diagnostic mesh.
+    """Run a prefix of the first pass and write the current diagnostic mesh.
 
     ``subject_dir`` contains ``surf/H.orig``, the gray/white threshold file,
     and ``mri/{brain.finalsurfs,wm,aseg.presurf}.mgz``. ``output`` is a
     diagnostic FreeSurfer surface, not ``H.white.preaparc``. Optional
     ``diagnostics`` writes a NumPy ``.npz`` of intermediate force and mesh
-    arrays to compare against a pinned-source probe. ``steps`` is 1–5
+    arrays to compare against a pinned-source probe. ``steps`` is 1–17
     iterations of the first pass; the output contains coordinates after the
     last requested step and the return dict includes each step's SSE/RMS.
     """
     started = time.perf_counter()
-    if not 1 <= steps <= 5:
-        raise ValueError("steps must be from 1 to 5")
+    if not 1 <= steps <= 17:
+        raise ValueError("steps must be from 1 to 17")
     if hemi not in ("lh", "rh"):
         raise ValueError("hemi must be lh or rh")
     subject = Path(subject_dir)
@@ -247,7 +247,7 @@ def main() -> None:
     parser.add_argument("hemi", choices=("lh", "rh"))
     parser.add_argument("output", type=Path)
     parser.add_argument("--diagnostics", type=Path)
-    parser.add_argument("--steps", type=int, choices=range(1, 6), default=1)
+    parser.add_argument("--steps", type=int, choices=range(1, 18), default=1)
     args = parser.parse_args()
     print(json.dumps(place_white_preaparc_prefix(
         subject_dir=args.subject_dir, hemi=args.hemi, output=args.output,

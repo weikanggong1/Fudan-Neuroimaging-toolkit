@@ -18,6 +18,7 @@ def main() -> None:
     parser.add_argument("--build", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--iterations", type=int, default=1)
+    parser.add_argument("--no-surface-snapshots", action="store_true")
     parser.add_argument("--stop-after-target-pass", type=int)
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
@@ -27,7 +28,7 @@ def main() -> None:
             'static const unsigned int mris_place_surface_help_xml_len = 0;\n'
         )
     original = (args.source / "mris_make_surfaces/mris_place_surface.cpp").read_text()
-    if args.iterations > 1:
+    if args.iterations > 1 and not args.no_surface_snapshots:
         show = "Gdiag |= DIAG_SHOW ;"
         if original.count(show) != 1:
             raise RuntimeError("missing source diagnostic flags")

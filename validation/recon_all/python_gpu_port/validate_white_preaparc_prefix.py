@@ -1,4 +1,4 @@
-"""Compare the first five white-placement iterations to pinned FreeSurfer RAM."""
+"""Compare one white-placement first-pass prefix to pinned FreeSurfer RAM."""
 
 from __future__ import annotations
 
@@ -18,24 +18,27 @@ def main() -> None:
     parser.add_argument("--probe-prefix", type=Path, required=True)
     parser.add_argument("--native-log", type=Path, required=True)
     parser.add_argument("--report", type=Path, required=True)
+    parser.add_argument("--steps", type=int, default=5)
     args = parser.parse_args()
     candidate = np.load(args.diagnostics)
     native = {}
-    pattern = re.compile(r"PY_OBJ_REF step([1-5]) rms=([^ ]+) sse=([^ ]+)")
+    pattern = re.compile(r"PY_OBJ_REF step(\d+) rms=([^ ]+) sse=([^ ]+)")
     for line in args.native_log.read_text().splitlines():
         match = pattern.search(line)
         if match and int(match.group(1)) not in native:
             native[int(match.group(1))] = (float(match.group(2)), float(match.group(3)))
     records = []
-    for step in range(1, 6):
+    for step in range(1, args.steps + 1):
         prefix = f"{args.probe_prefix}.step{step:02d}"
         stages = {}
         for name, source_stage, columns in (
-            ("initial", "clear", slice(0, 3)),
+            ("initial", "clear" if step <= 5 else "after_collision", slice(0, 3)),
             ("tangential_spring", "tangential_spring", slice(6, 9)),
             ("after_collision", "after_collision", slice(0, 3)),
         ):
-            reference = np.fromfile(f"{prefix}.{source_stage}", dtype=STATE)
+            source_prefix = prefix if name != "initial" or step <= 5 else \
+                f"{args.probe_prefix}.step{step - 1:02d}"
+            reference = np.fromfile(f"{source_prefix}.{source_stage}", dtype=STATE)
             stages[name] = _compare(candidate[f"step{step}_{name}"], reference["floats"][:, columns])
         rms, sse = native[step]
         records.append({
@@ -50,7 +53,7 @@ def main() -> None:
          for name, stage in record["stages"].items()
          if stage["exact_elements"] != stage["elements"]), None,
     )
-    report = {"scope": "first five iterations of first white.preaparc pass on frozen real T1",
+    report = {"scope": f"first {args.steps} iterations of first white.preaparc pass on frozen real T1",
               "reference": "instrumented pinned FreeSurfer 8.2 source",
               "first_difference": first_difference, "steps": records}
     args.report.parent.mkdir(parents=True, exist_ok=True)

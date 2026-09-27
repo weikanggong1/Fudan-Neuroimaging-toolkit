@@ -17,9 +17,15 @@ def main() -> None:
     parser.add_argument("--capture-iteration", type=int, default=0)
     parser.add_argument("--capture-through", type=int)
     parser.add_argument("--capture-white-repulsion", action="store_true")
+    parser.add_argument("--capture-light-after", type=int)
+    parser.add_argument("--stop-after-capture", action="store_true")
     args = parser.parse_args()
     if args.capture_through is not None and args.capture_through < 1:
         parser.error("--capture-through must be positive")
+    if args.stop_after_capture and args.capture_through is None:
+        parser.error("--stop-after-capture requires --capture-through")
+    if args.capture_light_after is not None and args.capture_through is None:
+        parser.error("--capture-light-after requires --capture-through")
     args.out.mkdir(parents=True, exist_ok=True)
     source = (args.source / "utils/mrisurf_mri.cpp").read_text()
     prefix, source = source.split("// #POS", 1)
@@ -30,6 +36,7 @@ def main() -> None:
     auto dump_first_gradient = [&](const char *stage) {
       const char *prefix = getenv("PLACE_GRAD_PREFIX");
       if (!prefix || CAPTURE_GUARD) return;
+      CAPTURE_LIGHT
       char path[STRLEN];
       CAPTURE_PATH
       FILE *output = fopen(path, "wb");
@@ -87,6 +94,14 @@ def main() -> None:
       }
     };
     dump_first_gradient("clear");'''
+    if args.capture_light_after is None:
+        dump = dump.replace("CAPTURE_LIGHT", "")
+    else:
+        dump = dump.replace(
+            "CAPTURE_LIGHT",
+            f'if (n >= {args.capture_light_after} && strcmp(stage, "tangential_spring") '
+            '&& strcmp(stage, "after_collision")) return;',
+        )
     if args.capture_through is None:
         dump = dump.replace("CAPTURE_GUARD", f"n != {args.capture_iteration}")
         dump = dump.replace("CAPTURE_PATH", 'snprintf(path, STRLEN, "%s.%s", prefix, stage);')
@@ -116,6 +131,8 @@ def main() -> None:
             raise RuntimeError("missing first placement objective markers")
         source = source.replace(initial, '  fprintf(stderr, "PY_OBJ_REF initial rms=%.17g sse=%.17g orig_area=%.17g total_area=%.17g\\n", rms, sse, mris->orig_area, mris->total_area);\n' + initial)
         source = source.replace(step, f'    if (n < {args.capture_through}) fprintf(stderr, "PY_OBJ_REF step%d rms=%.17g sse=%.17g orig_area=%.17g total_area=%.17g\\n", n + 1, rms, sse, mris->orig_area, mris->total_area);\n' + step, 1)
+        if args.stop_after_capture:
+            source = source.replace(step, step + f"\n    if (n + 1 >= {args.capture_through}) exit(0);", 1)
     source = source.replace(marker, marker + dump, 1)
     stages = (
         ("mrisComputeIntensityTerm(mris, l_intensity, mri_brain, mri_smooth, parms->sigma, parms);", "intensity"),
