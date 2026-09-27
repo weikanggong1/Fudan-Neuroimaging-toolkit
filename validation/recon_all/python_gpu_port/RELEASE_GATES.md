@@ -17,8 +17,8 @@
 
 ## 当前实测边界
 
-生产入口在保存的 T1 MRI 前缀之后仍采用近似表面流程。v3 的 **19/138** 是旧完整运行结果；当前代码尚无新的整例通过率，不能据此声称皮层指标一致或重建加速。后续[左半球候选 MRI 中间结果复跑](white_connected_prefix_20260927/README.md)中，`orig.premesh` 和 `orig` 的有序几何完全一致；`white.preaparc` 平均位移 0.000421 mm，50 个顶点超过 0.1 mm；三轮 `smoothwm` 平均位移 0.000311 mm，18 个顶点超过 0.1 mm。这表明先前将该输入差异归因于 Conda 拓扑修复的判断需要修正。该测试既不是从 T1 开始的单进程重建，也未覆盖右半球。
+生产入口在保存的 T1 MRI 前缀之后仍采用近似表面流程。v3 的 **19/138** 是旧完整运行结果；当前代码尚无新的整例通过率，不能据此声称皮层指标一致或重建加速。后续[左半球候选 MRI 中间结果复跑](white_connected_prefix_20260927/README.md)中，`orig.premesh` 和 `orig` 的有序几何完全一致；`white.preaparc` 平均位移 0.000421 mm，50 个顶点超过 0.1 mm；三轮 `smoothwm` 平均位移 0.000311 mm，18 个顶点超过 0.1 mm。这表明先前将该输入差异归因于 Conda 拓扑修复的判断需要修正。 [首轮内存对照](../../../docs/recon_all/WHITE_PYTHON_FIRST_PASS.md)还显示当前 Conda 白质放置器从首轮便与已安装官方程序出现尾差；Python 首轮与官方第 17 步最大顶点差为 1.64×10⁻⁵ mm，但剩余三轮尚未实现。该测试既不是从 T1 开始的单进程重建，也未覆盖右半球。
 
-修复前的[候选左半球 sphere](candidate_sphere_annotation_20260927/README.md)与存档官方 sphere 平均相差 3.481 mm；官方程序用同一候选输入运行后，与存档官方 sphere 平均相差 2.959 mm，同候选输入的 Python/官方平均差为 1.653 mm。[采样角度首差](candidate_sphere_first_difference_20260927/README.md)现已定位并修复：8,268,920 项目标距离和邻居编号逐项相同，距离 SSE 均为 26.86393232857408，前四次顶点更新各 319,866 个分量逐项相同。修复后的完整 `sphere` 尚在单阶段复测，不能把前四步结果外推到 `sphere.reg`、注释或最终 white。
+[修复后的候选左半球完整 `sphere`](candidate_sphere_first_difference_20260927/full_stage/README.md)在相同候选输入上与官方的 106,622 个有序顶点和 213,240 个有序面全部一致；Python/官方墙钟为 884.56/328.61 秒。两者与归档官方球面的平均差都为 2.959 mm。[上游审计](candidate_sphere_first_difference_20260927/full_stage/UPSTREAM_FIRST_DIFFERENCE.md)发现第一个已保存的几何差异在 `white.preaparc`。这一阶段验收不能外推到 `sphere.reg`、注释、最终 white 或整例。
 
 独立的 [final white](../../../docs/recon_all/FINAL_WHITE_CONDA.md) 和 [pial.T1](../../../docs/recon_all/PIAL_T1_CONDA.md) Conda 接口只在冻结的官方输入上测试。后者有 5,571 个顶点超过 0.1 mm；相同输入下的独立 Python pial.T1 几何则与官方一致。recon-all 的 SynthMorph Talairach 仿射调用现已[局部关闭 TF32](talairach_tf32_isolation_20260927/README.md)，在此 T1 上将 eTIV 误差从 822.547 降到 0.895 mm³；有限续跑中的 GCA、`norm` 和 `aseg.presurf` 仍匹配。此后尚未重新进行 138 项整例比较。最终 white/pial 几何、双侧 `sphere.reg`、注释、后处理体积图、全部顶点图及逐脑区统计仍需从真实 T1 连续验收。
