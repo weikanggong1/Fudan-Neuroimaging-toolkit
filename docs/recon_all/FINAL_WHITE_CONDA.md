@@ -4,7 +4,7 @@
 
 ## 输入与输出
 
-`subject_dir` 是 FreeSurfer 风格的被试目录，`hemi` 为 `lh` 或 `rh`，`binary` 指向 Conda 编译的可执行文件，`assets_dir` 为外置 FreeSurfer 数据目录，`threads` 为正整数。函数先检查以下七个文件：
+函数先检查被试目录中的以下七个文件：
 
 | `subject_dir` 内的输入 | 用途 |
 | --- | --- |
@@ -13,7 +13,7 @@
 | `surf/autodet.gw.stats.H.dat` | 被试灰质/白质阈值 |
 | `label/H.cortex.label`、`label/H.aparc.annot` | 皮层 rip 掩膜及脑区注释 |
 
-`H` 对应半球。函数写入 `surf/H.white` 与 `mri/mrisps.white.mgz`，返回 `{"output": path, "outvol": path, "seconds": wall_time}`。后一诊断图由双侧调用共用，第二侧会覆盖第一侧，和 recon-all 相同。许可证通过外部 `FS_LICENSE` 传入；wrapper 将 `FREESURFER_HOME` 设为 `assets_dir`、`SUBJECTS_DIR` 设为被试目录的父目录。运行不依赖系统安装的 FreeSurfer，但需要该源码编译程序。
+`H` 对应半球。函数写入 `surf/H.white` 与 `mri/mrisps.white.mgz`。后一诊断图由双侧调用共用，第二侧会覆盖第一侧，和 recon-all 相同。许可证通过外部 `FS_LICENSE` 传入；wrapper 将 `FREESURFER_HOME` 设为 `assets_dir`、`SUBJECTS_DIR` 设为被试目录的父目录。运行不依赖系统安装的 FreeSurfer，但需要该源码编译程序。
 
 Python API：
 
@@ -21,11 +21,15 @@ Python API：
 from fnit.recon_all.final_white_conda import run_final_white
 
 result = run_final_white(
-    "/path/to/subjects/sub01", "lh",
-    "/path/to/recon-cpp-build/bin/mris_place_surface",
-    "/path/to/assets", threads=4,
+    subject_dir="/path/to/subjects/sub01",  # 含 mri/surf/label 的被试目录
+    hemi="lh",  # 左半球；右半球用 rh
+    binary="/path/to/recon-cpp-build/bin/mris_place_surface",  # Conda 编译的程序
+    assets_dir="/path/to/assets",  # 外置 FreeSurfer 数据目录
+    threads=4,  # CPU 线程数
 )
 ```
+
+`result` 的 `output` 是 `surf/H.white` 路径，`outvol` 是 `mri/mrisps.white.mgz` 路径，`seconds` 是放置阶段的墙钟秒数。
 
 独立命令：
 
@@ -34,6 +38,8 @@ python -m fnit.recon_all.final_white_conda /path/to/subjects/sub01 lh \
   --binary /path/to/recon-cpp-build/bin/mris_place_surface \
   --assets-dir /path/to/assets --threads 4
 ```
+
+命令行前两个位置参数分别是 `subject_dir`（被试目录）和 `hemi`（`lh`/`rh`）；`--binary` 指定 Conda 程序，`--assets-dir` 指定外置数据目录，`--threads` 指定 CPU 线程数（默认 4）。命令会打印上述返回字典。
 
 保存的 FreeSurfer 8.2 `recon-all.log` 中对应命令从 `subject_dir/mri` 运行：
 

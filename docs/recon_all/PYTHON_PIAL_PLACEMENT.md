@@ -20,16 +20,17 @@
 from fnit.recon_all.place_pial_python import place_pial_t1
 
 report = place_pial_t1(
-    "/path/to/subjects/sub01", "lh",
-    "/path/to/subjects/sub01/surf/lh.pial.T1",
+    subject="/path/to/subjects/sub01",  # 含七个前置文件的被试目录
+    hemisphere="lh",  # 左半球；右半球用 rh
+    output="/path/to/subjects/sub01/surf/lh.pial.T1",  # 输出表面路径
 )
 ```
 
-`output` 可省略，默认写入 `subject/surf/{hemi}.pial.T1`。函数输出一个 FreeSurfer 三角表面：保留输入 white 的**有序面、完整体积几何标签和辅助尾部**，以放置后的 pial 坐标替换顶点坐标。返回字典含 `output`（路径字符串）、`hemisphere`、`steps`（接受的优化步数）、`pass_ends`（四轮的累计步数）、`cleanup`（相交次数、轨迹和平滑次数）及 `seconds`（墙钟耗时）。`max_steps` 默认 200；未收敛时抛出异常，不写入未完成的表面。
+`output` 可省略，默认写入 `subject/surf/{hemi}.pial.T1`。函数输出一个 FreeSurfer 三角表面：保留输入 white 的**有序面、完整体积几何标签和辅助尾部**，以放置后的 pial 坐标替换顶点坐标。`report` 含 `output`（路径字符串）、`hemisphere`（半球）、`steps`（接受的优化步数）、`pass_ends`（四轮的累计步数）、`cleanup`（相交次数、轨迹和平滑次数）及 `seconds`（墙钟耗时）。`max_steps` 默认 200；未收敛时抛出异常，不写入未完成的表面。
 
 函数不生成厚度、面积、曲率、体积或 atlas 统计；这些指标须由后续阶段计算。它也不生成所需的 white、标签或 MRI 输入。当前 runner 将 `smoothwm` 复制成 `white`，不能据此重现下述冻结同输入的逐点结果。按官方顺序，还需先完成 `white.preaparc` 放置、皮层和海马杏仁核标签、sphere 配准与 aparc 注释、最终 white 放置。本 pial 函数不直接读取 `white.preaparc` 或 `aparc.annot`，但它们属于上述上游流程。
 
-在 `subject/mri` 目录中，使用 FreeSurfer 8.2 和 `FS_LICENSE` 的对应官方命令为：
+本模块没有独立 Python CLI；上面的具名实参调用是使用入口。在 `subject/mri` 目录中，使用 FreeSurfer 8.2 和 `FS_LICENSE` 的对应官方命令为：
 
 ```bash
 mris_place_surface --adgws-in ../surf/autodet.gw.stats.lh.dat \

@@ -4,7 +4,7 @@
 
 ## 输入、输出与调用
 
-`subject_dir` 是 FreeSurfer 风格的被试目录，`hemi` 为 `lh` 或 `rh`，`binary` 指向 Conda 编译的可执行文件，`assets_dir` 为外置 FreeSurfer 数据目录，`threads` 为正整数。函数启动前检查：
+函数启动前检查被试目录中的以下文件：
 
 | `subject_dir` 内的输入 | 用途 |
 | --- | --- |
@@ -14,7 +14,7 @@
 | `label/H.cortex+hipamyg.label`、`label/H.cortex.label` | 皮层 rip 与内侧壁固定掩膜 |
 | `label/H.aparc.annot` | 传给原生命令的脑区注释 |
 
-`H` 对应半球。函数写入 `surf/H.pial.T1`，返回 `{"output": path, "seconds": wall_time}`；它不生成最终 `pial`、厚度、面积、顶点体积、曲率或脑区统计。许可证保持在外部 `FS_LICENSE`；wrapper 向程序传入 `FREESURFER_HOME=assets_dir` 和 `SUBJECTS_DIR=subject_dir.parent`。[Conda C++ 阶段说明](CONDA_CPP_STAGES.md)列出构建方法。
+`H` 对应半球。函数写入 `surf/H.pial.T1`；它不生成最终 `pial`、厚度、面积、顶点体积、曲率或脑区统计。许可证保持在外部 `FS_LICENSE`；wrapper 向程序传入 `FREESURFER_HOME=assets_dir` 和 `SUBJECTS_DIR=subject_dir.parent`。[Conda C++ 阶段说明](CONDA_CPP_STAGES.md)列出构建方法。
 
 Python API：
 
@@ -22,11 +22,15 @@ Python API：
 from fnit.recon_all.pial_t1_conda import run_pial_t1
 
 result = run_pial_t1(
-    "/path/to/subjects/sub01", "lh",
-    "/path/to/recon-cpp-build/bin/mris_place_surface",
-    "/path/to/assets", threads=4,
+    subject_dir="/path/to/subjects/sub01",  # 含 mri/surf/label 的被试目录
+    hemi="lh",  # 左半球；右半球用 rh
+    binary="/path/to/recon-cpp-build/bin/mris_place_surface",  # Conda 编译的程序
+    assets_dir="/path/to/assets",  # 外置 FreeSurfer 数据目录
+    threads=4,  # CPU 线程数
 )
 ```
+
+`result` 的 `output` 是 `surf/H.pial.T1` 路径，`seconds` 是该阶段的墙钟秒数。
 
 独立命令：
 
@@ -35,6 +39,8 @@ python -m fnit.recon_all.pial_t1_conda /path/to/subjects/sub01 lh \
   --binary /path/to/recon-cpp-build/bin/mris_place_surface \
   --assets-dir /path/to/assets --threads 4
 ```
+
+命令行前两个位置参数分别是 `subject_dir`（被试目录）和 `hemi`（`lh`/`rh`）；`--binary` 指定 Conda 程序，`--assets-dir` 指定外置数据目录，`--threads` 指定 CPU 线程数（默认 4）。命令会打印上述返回字典。
 
 保存的 FreeSurfer 8.2 `recon-all.log` 中对应命令从 `subject_dir/mri` 运行：
 
