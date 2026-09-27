@@ -68,6 +68,20 @@ with exit code 0.
 | Venous sinus | 0/16,777,216 differing voxels; all five nonzero label counts and intersections identical; float32 dtype, 284-byte MGH header and affine identical |
 | brain.finalsurfs | 0/16,777,216 differing voxels; uint8 dtype, 284-byte MGH header and affine identical |
 
+The [venous-sinus statistics comparison](vsinus_stats_comparison.json)
+finds that all five rows match official numerically in Index, SegId,
+NVoxels, Volume_mm3, Mean, StdDev, Min, Max and Range at the printed
+precision. The stats files are not byte-identical: FNIT writes an 11-line
+summary where FreeSurfer writes a 60-line metadata-rich report.
+The eTIV measure also differs: FNIT 1,309,444.005577 versus official
+1,310,266.467668 mm³, a difference of -822.462091 mm³ (-0.06277%).
+The dominant source is the existing MNI305 Talairach LTA: applying FNIT's
+eTIV formula to the candidate versus official LTA gives
+1,309,444.005577 versus 1,310,266.552537 mm³. A further 0.084869 mm³
+between the official-LTA formula and official stats has not been isolated.
+Thus the auxiliary segmentation's regional statistics match, but its
+eTIV and text format do not.
+
 The compressed MGZ files have different SHA-256; the comparison establishes
 voxel, grid and header equality, not byte identity. The previous isolated
 GPU affine trial differed from official by 0.0685 voxel in the LTA. This CPU

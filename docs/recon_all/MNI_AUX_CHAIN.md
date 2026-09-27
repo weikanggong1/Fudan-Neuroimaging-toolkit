@@ -35,6 +35,12 @@ Command line:
       --weights /path/to/weights --assets /path/to/assets \
       --device cuda:0 --threads 4
 
+The generated stats/vsinus.stats has exact printed numeric rows for
+the five venous-sinus regions on the tested T1, but its eTIV is derived from
+the existing Talairach LTA and differs by 822.462091 mm³ from the official
+reference. Its text metadata and spacing also differ; see the linked
+comparison below.
+
 The external asset catalog verifies MNI152 template and prior hashes. The
 two MNI152 image files are optional downloads; the current asset installer
 extracts them from a roughly 515 MB upstream archive. Models and templates
