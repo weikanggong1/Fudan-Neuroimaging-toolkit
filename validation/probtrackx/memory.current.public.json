@@ -1,26 +1,13 @@
 {
-  "purpose": "independent GPU peak-memory check; same FNIT source and real DWI settings as paired benchmark",
+  "purpose": "real DWI five-ROI network --pd --ompl peak-memory check",
   "source_sha256": {
-    "pipeline.py": "a5918139b31ce63de86eca395f116928ab45509beaef345aa4cba81d3bfcac1d",
+    "pipeline.py": "f5f3912fcfb204c543f905c1818da60c31076668ece57bb17839c183f5383d85",
     "_triton.py": "e22ae4599323a675a19ac02d2e9a53c124491a3be4563acd9616991d3d1e1776",
-    "cli.py": "211f8e9cb80593e402c8fafddbb5d1c709eb98e81eeddf090a6b9782656aacca"
+    "cli.py": "dabbe344a97418549ed569ec5ef479b47acc5253a9effd68c07627f0446267b4"
   },
-  "settings": {
-    "seed_voxels": 7,
-    "seed_nsamples": 200,
-    "network_rois": 5,
-    "network_nsamples": 2000,
-    "nsteps": 400,
-    "steplength_mm": 0.5,
-    "cthr": 0.2,
-    "fibthresh": 0.01,
-    "rseed": 20260927,
-    "fnit_batch_size": 2048,
-    "cpu_threads": 8
-  },
-  "device": "H100 GPU1, CUDA_VISIBLE_DEVICES=1, FNIT cuda:0",
+  "device": "NVIDIA H100 PCIe",
   "measurement": "torch.cuda.max_memory_allocated() / 1024**3",
   "peak_cuda_allocated_gib": 2.612851619720459,
   "accepted_streamlines": 76,
-  "elapsed_seconds_inside_process": 13.643144650850445
+  "elapsed_seconds_inside_process": 15.014284862671047
 }

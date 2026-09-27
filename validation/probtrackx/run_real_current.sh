@@ -7,6 +7,11 @@ seeds=${3:?directory containing seed_genu_cc/cst/slf masks}
 fsl=${4:?FSL installation}
 py=${5:?Python with FNIT installed}
 source_dir=${6:?repository src directory}
+mode=${7:-pd_ompl}
+case "$mode" in
+  default|pd_ompl) ;;
+  *) echo "mode must be default or pd_ompl" >&2; exit 2 ;;
+esac
 mkdir -p "$out"
 out=$(cd "$out" && pwd)
 export FSLDIR="$fsl" LD_LIBRARY_PATH="$fsl/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
@@ -18,6 +23,7 @@ done > "$out/seed_list.txt"
 run_fsl() {
   local label=$1 binary=$2 input=$3 samples=$4 extra=$5 status=0
   local flags=(--opd)
+  if [[ "$mode" == pd_ompl ]]; then flags+=(--pd --ompl); fi
   if [[ "$extra" == network ]]; then flags+=(--network); fi
   [[ ! -e "$out/$label" ]] || { echo "Output exists: $out/$label" >&2; return 1; }
   /usr/bin/time -f 'wall_s=%e' -o "$out/$label.time" \
@@ -26,12 +32,17 @@ run_fsl() {
     -P "$samples" -S 400 --rseed=20260927 > "$out/$label.log" 2>&1 || status=$?
   printf 'exit_code=%s\n' "$status" > "$out/$label.status"
   [[ -s "$out/$label/fdt_paths.nii.gz" && -s "$out/$label/waytotal" ]]
-  if [[ "$extra" == network ]]; then [[ -s "$out/$label/fdt_network_matrix" ]]; fi
+  if [[ "$mode" == pd_ompl ]]; then [[ -s "$out/$label/fdt_paths_lengths.nii.gz" ]]; fi
+  if [[ "$extra" == network ]]; then
+    [[ -s "$out/$label/fdt_network_matrix" ]]
+    if [[ "$mode" == pd_ompl ]]; then [[ -s "$out/$label/fdt_network_matrix_lengths" ]]; fi
+  fi
 }
 run_fnit() {
   local label=$1 device=$2 input=$3 samples=$4 extra=$5
   local flags=(--seed "$input")
   if [[ "$extra" == network ]]; then flags=(--roi-list "$input"); fi
+  if [[ "$mode" == pd_ompl ]]; then flags+=(--pd --ompl); fi
   [[ ! -e "$out/$label" ]] || { echo "Output exists: $out/$label" >&2; return 1; }
   /usr/bin/time -f 'wall_s=%e' -o "$out/$label.time" \
     "$py" -m fnit.probtrackx.cli --samples-dir "$bed" "${flags[@]}" \

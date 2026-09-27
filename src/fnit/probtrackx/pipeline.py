@@ -21,6 +21,8 @@ class ProbTrackXResult:
     seed_points: int
     accepted_streamlines: int
     elapsed_seconds: float
+    lengths: Path | None = None
+    network_lengths: Path | None = None
 
 
 class TorchProbtrackX:
@@ -33,7 +35,8 @@ class TorchProbtrackX:
     def __init__(self, device="cpu", *, nsamples=5000, nsteps=2000,
                  steplength=0.5, cthr=0.2, fibthresh=0.01,
                  batch_size=2048, seed=12345, distthresh=0.0, sampvox=0.0,
-                 fibst=None, usef=False, randfib=0):
+                 fibst=None, usef=False, randfib=0,
+                 pathdist=False, mean_path_length=False):
         self.device = torch.device(device)
         if self.device.type == "cuda":
             if not torch.cuda.is_available():
@@ -58,6 +61,8 @@ class TorchProbtrackX:
         self.fibst = int(fibst) if fibst is not None else 1
         self.usef = bool(usef)
         self.randfib = int(randfib)
+        self.pathdist = bool(pathdist)
+        self.mean_path_length = bool(mean_path_length)
 
     def _load_samples(self, directory, tracking_mask=None):
         directory = Path(directory)
@@ -261,6 +266,13 @@ class TorchProbtrackX:
             return np.empty(0, dtype=np.int32)
         return path
 
+    @staticmethod
+    def _first_visits(path, steplength, distthresh):
+        if max(0, len(path) - 1) * steplength < distthresh:
+            return np.empty(0, dtype=np.int32), np.empty(0, dtype=np.float32)
+        voxels, steps = np.unique(path, return_index=True)
+        return voxels, steps.astype(np.float32) * steplength
+
     def run(self, samples_dir, output_dir, *, seed=None, regions=None,
             mask=None, avoid=None, stop=None, forcefirststep=False,
             overwrite=False):
@@ -285,16 +297,28 @@ class TorchProbtrackX:
             raise ValueError("network ROIs must not overlap")
         output_dir = Path(output_dir)
         paths_path = output_dir / "fdt_paths.nii.gz"
+        lengths_path = (output_dir / "fdt_paths_lengths.nii.gz"
+                        if self.mean_path_length else None)
         waytotal_path = output_dir / "waytotal"
         matrix_path = output_dir / "fdt_network_matrix" if regions is not None else None
-        outputs = (paths_path, waytotal_path) + ((matrix_path,) if matrix_path else ())
-        for path in outputs:
+        matrix_lengths_path = (output_dir / "fdt_network_matrix_lengths"
+                               if matrix_path and self.mean_path_length else None)
+        for path in (paths_path, lengths_path, waytotal_path, matrix_path,
+                     matrix_lengths_path):
+            if path is None:
+                continue
             if path.exists() and not overwrite:
                 raise FileExistsError(path)
         output_dir.mkdir(parents=True, exist_ok=True)
         generator = torch.Generator(device=self.device).manual_seed(self.seed)
         density = np.zeros(int(np.prod(self._shape)), dtype=np.float32)
-        matrix = np.zeros((len(masks), len(masks)), dtype=np.int64) if matrix_path else None
+        length_sum = np.zeros_like(density) if self.mean_path_length else None
+        visit_count = np.zeros_like(density) if self.mean_path_length else None
+        matrix = (np.zeros((len(masks), len(masks)),
+                           dtype=np.float64 if self.pathdist else np.int64)
+                  if matrix_path else None)
+        matrix_length_sum = np.zeros_like(matrix, dtype=np.float64) if matrix_lengths_path else None
+        matrix_count = np.zeros_like(matrix, dtype=np.int64) if matrix_lengths_path else None
         totals = np.zeros(len(masks), dtype=np.int64)
         targets = np.stack([mask.reshape(-1) for mask in masks]) if matrix_path else None
         nseed = 0
@@ -314,41 +338,71 @@ class TorchProbtrackX:
                                                    forcefirststep)
                         path_b = self._filter_half(path_b, avoid_mask, stop_mask,
                                                    forcefirststep)
-                        forward_voxels = (np.unique(path_a) if
-                                          max(0, len(path_a) - 1) * self.steplength >= self.distthresh
-                                          else np.empty(0, dtype=np.int32))
-                        backward_voxels = (np.unique(path_b) if
-                                           max(0, len(path_b) - 1) * self.steplength >= self.distthresh
-                                           else np.empty(0, dtype=np.int32))
+                        forward_voxels, forward_lengths = self._first_visits(
+                            path_a, self.steplength, self.distthresh)
+                        backward_voxels, backward_lengths = self._first_visits(
+                            path_b, self.steplength, self.distthresh)
                         if matrix is not None:
                             forward_hits = targets[:, forward_voxels].any(axis=1)
                             backward_hits = targets[:, backward_voxels].any(axis=1)
                             forward_hits[row] = backward_hits[row] = False
-                            if not (forward_hits.any() or backward_hits.any()):
+                            hits = forward_hits | backward_hits
+                            if not hits.any():
                                 continue
-                            visited = np.union1d(
-                                forward_voxels if forward_hits.any() else np.empty(0, dtype=int),
-                                backward_voxels if backward_hits.any() else np.empty(0, dtype=int),
-                            )
-                            matrix[row, forward_hits | backward_hits] += 1
-                        else:
-                            visited = np.union1d(forward_voxels, backward_voxels)
+                            for target in np.flatnonzero(hits):
+                                distances = []
+                                if forward_hits[target]:
+                                    distances.append(np.flatnonzero(targets[target, path_a])[0]
+                                                     * self.steplength)
+                                if backward_hits[target]:
+                                    distances.append(np.flatnonzero(targets[target, path_b])[0]
+                                                     * self.steplength)
+                                target_length = float(np.mean(distances))
+                                matrix[row, target] += target_length if self.pathdist else 1
+                                if matrix_lengths_path:
+                                    matrix_length_sum[row, target] += target_length
+                                    matrix_count[row, target] += 1
+                            if not forward_hits.any():
+                                forward_voxels = np.empty(0, dtype=np.int32)
+                            if not backward_hits.any():
+                                backward_voxels = np.empty(0, dtype=np.int32)
+                        visited = np.union1d(forward_voxels, backward_voxels)
                         if not len(visited):
                             continue
                         totals[row] += 1
-                        density[visited] += 1
-        image_data = density.reshape(self._shape)
-        if self._flip_x:
-            image_data = np.flip(image_data, axis=0).copy()
-        header = self._reference.header.copy()
-        header.set_data_dtype(np.float32)
-        image = nib.Nifti1Image(image_data.astype(np.float32),
-                                self._reference.affine, header=header)
-        nib.save(image, str(paths_path))
+                        if self.pathdist or self.mean_path_length:
+                            lengths = np.zeros(len(visited), dtype=np.float32)
+                            if len(backward_voxels):
+                                lengths[np.searchsorted(visited, backward_voxels)] = backward_lengths
+                            if len(forward_voxels):
+                                lengths[np.searchsorted(visited, forward_voxels)] = forward_lengths
+                            if self.mean_path_length:
+                                length_sum[visited] += lengths
+                                visit_count[visited] += 1
+                        density[visited] += lengths if self.pathdist else 1
+        images = [(density, paths_path)]
+        if lengths_path:
+            mean_lengths = np.divide(length_sum, visit_count,
+                                     out=np.zeros_like(length_sum), where=visit_count > 0)
+            images.append((mean_lengths, lengths_path))
+        for values, path in images:
+            image_data = values.reshape(self._shape)
+            if self._flip_x:
+                image_data = np.flip(image_data, axis=0).copy()
+            header = self._reference.header.copy()
+            header.set_data_dtype(np.float32)
+            image = nib.Nifti1Image(image_data.astype(np.float32),
+                                    self._reference.affine, header=header)
+            nib.save(image, str(path))
         np.savetxt(waytotal_path, totals[:, None], fmt="%d")
         if matrix_path:
-            np.savetxt(matrix_path, matrix, fmt="%d")
+            np.savetxt(matrix_path, matrix, fmt="%.8g" if self.pathdist else "%d")
+        if matrix_lengths_path:
+            mean_matrix = np.divide(matrix_length_sum, matrix_count,
+                                    out=np.zeros_like(matrix_length_sum), where=matrix_count > 0)
+            np.savetxt(matrix_lengths_path, mean_matrix, fmt="%.8g")
         if self.device.type == "cuda":
             torch.cuda.synchronize(self.device)
         return ProbTrackXResult(output_dir, paths_path, waytotal_path, matrix_path,
-                                nseed, int(totals.sum()), time.perf_counter() - start_time)
+                                nseed, int(totals.sum()), time.perf_counter() - start_time,
+                                lengths_path, matrix_lengths_path)

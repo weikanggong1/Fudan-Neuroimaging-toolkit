@@ -27,6 +27,8 @@ def _add_arguments(parser):
     parser.add_argument("--fibst", type=int)
     parser.add_argument("--randfib", type=int, choices=(0, 1, 2, 3), default=0)
     parser.add_argument("--usef", action="store_true")
+    parser.add_argument("--pd", action="store_true", help="weight path density by length")
+    parser.add_argument("--ompl", action="store_true", help="save mean path lengths")
     parser.add_argument("--batch-size", type=int, default=2048)
     parser.add_argument("--rseed", type=int, default=12345)
     parser.add_argument("--overwrite", action="store_true")
@@ -51,7 +53,8 @@ def run_args(args):
                             cthr=args.cthr, fibthresh=args.fibthresh,
                             batch_size=args.batch_size, seed=args.rseed,
                             distthresh=args.distthresh, sampvox=args.sampvox,
-                            fibst=args.fibst, usef=args.usef, randfib=args.randfib)
+                            fibst=args.fibst, usef=args.usef, randfib=args.randfib,
+                            pathdist=args.pd, mean_path_length=args.ompl)
     result = model.run(args.samples_dir, args.output_dir, seed=args.seed,
                        regions=regions, mask=args.mask, avoid=args.avoid,
                        stop=args.stop, forcefirststep=args.forcefirststep,
@@ -60,6 +63,10 @@ def run_args(args):
     print(result.waytotal)
     if result.network_matrix:
         print(result.network_matrix)
+    if result.lengths:
+        print(result.lengths)
+    if result.network_lengths:
+        print(result.network_lengths)
     return result
 
 

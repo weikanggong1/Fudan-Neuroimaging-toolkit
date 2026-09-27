@@ -252,3 +252,44 @@ def test_cuda_randfib_population_weights(tmp_path):
         selected_second = (first_direction[:, 1].abs() >
                            first_direction[:, 0].abs()).float().mean().item()
         assert abs(selected_second - expected) < 0.07
+
+@pytest.mark.parametrize("device", ["cpu", "cuda:0"])
+def test_path_distance_and_mean_length_outputs(device, tmp_path):
+    if device.startswith("cuda"):
+        if not torch.cuda.is_available():
+            pytest.skip("CUDA required")
+        pytest.importorskip("triton")
+    samples, affine = _field(tmp_path)
+    seed = _roi(tmp_path / "seed.nii.gz", affine, 4)
+    tracker = TorchProbtrackX(device=device, nsamples=8, nsteps=40,
+                              steplength=1, pathdist=True,
+                              mean_path_length=True, seed=7)
+    result = tracker.run(samples, tmp_path / "pd", seed=seed)
+    assert result.lengths == result.output_dir / "fdt_paths_lengths.nii.gz"
+    assert result.network_lengths is None
+    np.testing.assert_array_equal(
+        np.asarray(nib.load(result.paths).dataobj)[:, 2, 2],
+        [64, 48, 32, 16, 0, 8, 24, 40, 56])
+    np.testing.assert_array_equal(
+        np.asarray(nib.load(result.lengths).dataobj)[:, 2, 2],
+        [8, 6, 4, 2, 0, 1, 3, 5, 7])
+
+
+@pytest.mark.parametrize("device", ["cpu", "cuda:0"])
+def test_path_distance_network_matrix_and_lengths(device, tmp_path):
+    if device.startswith("cuda"):
+        if not torch.cuda.is_available():
+            pytest.skip("CUDA required")
+        pytest.importorskip("triton")
+    samples, affine = _field(tmp_path)
+    left = _roi(tmp_path / "left.nii.gz", affine, 2)
+    right = _roi(tmp_path / "right.nii.gz", affine, 6)
+    tracker = TorchProbtrackX(device=device, nsamples=8, nsteps=40,
+                              steplength=1, pathdist=True,
+                              mean_path_length=True, seed=7)
+    result = tracker.run(samples, tmp_path / "network-pd", regions=[left, right])
+    np.testing.assert_array_equal(np.loadtxt(result.network_matrix),
+                                  [[0, 56], [64, 0]])
+    np.testing.assert_array_equal(np.loadtxt(result.network_lengths),
+                                  [[0, 7], [8, 0]])
+    np.testing.assert_array_equal(np.loadtxt(result.waytotal), [8, 8])
