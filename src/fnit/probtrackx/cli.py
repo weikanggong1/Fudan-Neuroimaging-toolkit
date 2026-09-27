@@ -12,12 +12,21 @@ def _add_arguments(parser):
     mode.add_argument("--seed", help="one diffusion-space NIfTI seed mask")
     mode.add_argument("--roi-list", help="text file listing >=2 diffusion-space NIfTI ROIs")
     parser.add_argument("--output-dir", required=True)
+    parser.add_argument("--mask", help="tracking mask in diffusion space; defaults to bedpostX mask")
+    parser.add_argument("--avoid", help="reject half paths entering this volume mask")
+    parser.add_argument("--stop", help="stop half paths upon entering this volume mask")
+    parser.add_argument("--forcefirststep", action="store_true")
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--nsamples", type=int, default=5000)
     parser.add_argument("--nsteps", type=int, default=2000)
     parser.add_argument("--steplength", type=float, default=0.5)
     parser.add_argument("--cthr", type=float, default=0.2)
     parser.add_argument("--fibthresh", type=float, default=0.01)
+    parser.add_argument("--distthresh", type=float, default=0.0)
+    parser.add_argument("--sampvox", type=float, default=0.0)
+    parser.add_argument("--fibst", type=int)
+    parser.add_argument("--randfib", type=int, choices=(0, 1, 2, 3), default=0)
+    parser.add_argument("--usef", action="store_true")
     parser.add_argument("--batch-size", type=int, default=2048)
     parser.add_argument("--rseed", type=int, default=12345)
     parser.add_argument("--overwrite", action="store_true")
@@ -40,9 +49,13 @@ def run_args(args):
     model = TorchProbtrackX(device=args.device, nsamples=args.nsamples,
                             nsteps=args.nsteps, steplength=args.steplength,
                             cthr=args.cthr, fibthresh=args.fibthresh,
-                            batch_size=args.batch_size, seed=args.rseed)
+                            batch_size=args.batch_size, seed=args.rseed,
+                            distthresh=args.distthresh, sampvox=args.sampvox,
+                            fibst=args.fibst, usef=args.usef, randfib=args.randfib)
     result = model.run(args.samples_dir, args.output_dir, seed=args.seed,
-                       regions=regions, overwrite=args.overwrite)
+                       regions=regions, mask=args.mask, avoid=args.avoid,
+                       stop=args.stop, forcefirststep=args.forcefirststep,
+                       overwrite=args.overwrite)
     print(result.paths)
     print(result.waytotal)
     if result.network_matrix:

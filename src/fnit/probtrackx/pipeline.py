@@ -32,16 +32,18 @@ class TorchProbtrackX:
 
     def __init__(self, device="cpu", *, nsamples=5000, nsteps=2000,
                  steplength=0.5, cthr=0.2, fibthresh=0.01,
-                 batch_size=2048, seed=12345):
+                 batch_size=2048, seed=12345, distthresh=0.0, sampvox=0.0,
+                 fibst=None, usef=False, randfib=0):
         self.device = torch.device(device)
         if self.device.type == "cuda":
             if not torch.cuda.is_available():
                 raise RuntimeError("CUDA is not available")
             torch.backends.cuda.matmul.allow_tf32 = True
             torch.backends.cudnn.allow_tf32 = True
-        if nsamples < 1 or nsteps < 2 or nsteps % 2 or batch_size < 1:
+        if (nsamples < 1 or nsteps < 2 or nsteps % 2 or batch_size < 1
+                or (fibst is not None and fibst < 1) or randfib not in (0, 1, 2, 3)):
             raise ValueError("nsamples and batch_size must be positive; nsteps must be even and >= 2")
-        if steplength <= 0 or not 0 <= cthr < 1 or not 0 <= fibthresh < 1:
+        if steplength <= 0 or distthresh < 0 or sampvox < 0 or not 0 <= cthr < 1 or not 0 <= fibthresh < 1:
             raise ValueError("invalid tracking length, curvature or fibre threshold")
         self.nsamples = int(nsamples)
         self.nsteps = int(nsteps)
@@ -50,10 +52,16 @@ class TorchProbtrackX:
         self.fibthresh = float(fibthresh)
         self.batch_size = int(batch_size)
         self.seed = int(seed)
+        self.distthresh = float(distthresh)
+        self.sampvox = float(sampvox)
+        self.fibst_explicit = fibst is not None
+        self.fibst = int(fibst) if fibst is not None else 1
+        self.usef = bool(usef)
+        self.randfib = int(randfib)
 
-    def _load_samples(self, directory):
+    def _load_samples(self, directory, tracking_mask=None):
         directory = Path(directory)
-        mask_path = directory / "nodif_brain_mask.nii.gz"
+        mask_path = Path(tracking_mask) if tracking_mask is not None else directory / "nodif_brain_mask.nii.gz"
         if not mask_path.is_file():
             raise FileNotFoundError(mask_path)
         reference = nib.load(str(mask_path))
@@ -107,8 +115,10 @@ class TorchProbtrackX:
             torch.stack(arrays[key]) for key in ("th", "ph", "f")
         )
         self._ntime = ntime
+        if self.fibst > self._theta.shape[0]:
+            raise ValueError("fibst exceeds number of posterior fibre populations")
 
-    def _load_roi(self, path):
+    def _load_roi(self, path, *, allow_empty=False):
         image = nib.load(str(path))
         if (len(image.shape) != 3 or image.shape != self._shape
                 or not np.allclose(image.affine, self._reference.affine, atol=1e-4)):
@@ -117,9 +127,36 @@ class TorchProbtrackX:
         if self._flip_x:
             roi = np.flip(roi, axis=0)
         roi = roi.copy()
-        if not roi.any():
+        if not allow_empty and not roi.any():
             raise ValueError(f"ROI is empty: {path}")
         return roi
+
+    def _jitter_seed(self, starts, generator):
+        if not self.sampvox:
+            return starts
+        remaining = torch.ones(len(starts), dtype=torch.bool, device=self.device)
+        offsets = torch.zeros_like(starts)
+        while bool(remaining.any()):
+            draws = torch.rand(starts.shape, device=self.device, generator=generator) * 2 - 1
+            accepted = remaining & ((draws * draws).sum(1) <= 1)
+            offsets[accepted] = draws[accepted]
+            remaining &= ~accepted
+        return starts + offsets * (self.sampvox / self._voxel_size)
+
+    def _starting_fibres(self, fraction, generator):
+        count, nfib = fraction.shape
+        if self.fibst_explicit or self.randfib == 0:
+            return torch.full((count,), self.fibst - 1, dtype=torch.long,
+                              device=self.device)
+        if self.randfib == 3:
+            return torch.randint(nfib, (count,), device=self.device, generator=generator)
+        eligible = fraction > self.fibthresh
+        weight = eligible.to(torch.float32) if self.randfib == 1 else torch.where(
+            eligible, fraction, 0)
+        total = weight.sum(1)
+        draw = torch.rand(count, device=self.device, generator=generator) * total
+        chosen = (weight.cumsum(1) < draw[:, None]).sum(1)
+        return torch.where(total > 0, chosen, 0).to(torch.long)
 
     def _walk(self, starts, generator, reverse_direction=None):
         if self.device.type == "cuda":
@@ -143,7 +180,15 @@ class TorchProbtrackX:
         active = torch.ones(count, dtype=torch.bool, device=self.device)
         history = torch.full((count, half), -1, dtype=torch.int32, device=self.device)
         ids = torch.arange(count, device=self.device)
+        prior_voxel = torch.floor(pos + 0.5).to(torch.long)
         for step in range(half):
+            prior_inside = ((prior_voxel >= 0) & (prior_voxel < self._shape_tensor)).all(1)
+            prior_safe = prior_voxel.clamp(min=0)
+            prior_safe[:, 0].clamp_(max=shape[0] - 1)
+            prior_safe[:, 1].clamp_(max=shape[1] - 1)
+            prior_safe[:, 2].clamp_(max=shape[2] - 1)
+            prior_index = (prior_safe[:, 0] * shape[1] + prior_safe[:, 1]) * shape[2] + prior_safe[:, 2]
+            active &= prior_inside & self._mask[prior_index]
             voxel = torch.floor(pos + 0.5).to(torch.long)
             inside = ((voxel >= 0) & (voxel < self._shape_tensor)).all(1)
             safe = voxel.clamp(min=0)
@@ -151,10 +196,11 @@ class TorchProbtrackX:
             safe[:, 1].clamp_(max=shape[1] - 1)
             safe[:, 2].clamp_(max=shape[2] - 1)
             index = (safe[:, 0] * shape[1] + safe[:, 1]) * shape[2] + safe[:, 2]
-            active &= inside & self._mask[index]
             if not bool(active.any()):
                 break
-            history[active, step] = index[active].to(torch.int32)
+            recorded = active & inside
+            history[recorded, step] = index[recorded].to(torch.int32)
+            prior_voxel = voxel
 
             lower = torch.floor(pos)
             sampled = (lower + (torch.rand((count, 3), device=self.device,
@@ -176,13 +222,19 @@ class TorchProbtrackX:
                                       torch.cos(theta)), dim=-1)
             alignment = (directions * previous[:, None, :]).sum(-1).abs()
             alignment = torch.where(fraction > self.fibthresh, alignment, -1.0)
-            chosen = (torch.zeros(count, dtype=torch.long, device=self.device)
+            chosen = (self._starting_fibres(fraction, generator)
                       if step == 0 else alignment.argmax(1))
             selected = directions[ids, chosen]
             chosen_theta = theta[ids, chosen]
             chosen_phi = phi[ids, chosen]
+            chosen_fraction = fraction[ids, chosen]
+            if step == 0:
+                chosen_fraction = fraction[:, 0]
             cosine = (selected * previous).sum(1)
             active &= valid & (chosen_theta != 0) & (chosen_phi != 0)
+            if self.usef:
+                active &= chosen_fraction > torch.rand(count, device=self.device,
+                                                        generator=generator)
             active &= (~jumped) | (cosine.abs() > self.cthr)
             random_sign = torch.where(torch.rand(count, device=self.device,
                                                   generator=generator) > 0.5, 1.0, -1.0)
@@ -196,7 +248,21 @@ class TorchProbtrackX:
             jumped |= active
         return history.cpu().numpy(), first_direction
 
+    @staticmethod
+    def _filter_half(path, avoid, stop, forcefirststep):
+        path = path[path >= 0]
+        if stop is not None and len(path) > 1:
+            hit = np.flatnonzero(stop[path[1:]]) + 1
+            if forcefirststep:
+                hit = hit[hit > 1]
+            if len(hit):
+                path = path[:hit[0] + 1]
+        if avoid is not None and avoid[path[int(forcefirststep):]].any():
+            return np.empty(0, dtype=np.int32)
+        return path
+
     def run(self, samples_dir, output_dir, *, seed=None, regions=None,
+            mask=None, avoid=None, stop=None, forcefirststep=False,
             overwrite=False):
         """Write seed-to-voxel density or a directed ROI-by-ROI matrix.
 
@@ -206,11 +272,15 @@ class TorchProbtrackX:
         if (seed is None) == (regions is None):
             raise ValueError("specify exactly one of seed or regions")
         start_time = time.perf_counter()
-        self._load_samples(samples_dir)
+        self._load_samples(samples_dir, mask)
         roi_files = [seed] if seed is not None else list(regions)
         if regions is not None and len(roi_files) < 2:
             raise ValueError("network mode requires at least two ROIs")
         masks = [self._load_roi(path) for path in roi_files]
+        avoid_mask = (self._load_roi(avoid, allow_empty=True).reshape(-1)
+                      if avoid is not None else None)
+        stop_mask = (self._load_roi(stop, allow_empty=True).reshape(-1)
+                     if stop is not None else None)
         if regions is not None and np.any(np.sum(np.stack(masks), axis=0) > 1):
             raise ValueError("network ROIs must not overlap")
         output_dir = Path(output_dir)
@@ -236,11 +306,20 @@ class TorchProbtrackX:
                     count = min(self.batch_size, self.nsamples - offset)
                     starts = torch.as_tensor(np.repeat(point[None], count, axis=0),
                                              dtype=torch.float32, device=self.device)
+                    starts = self._jitter_seed(starts, generator)
                     forward, initial = self._walk(starts, generator)
                     backward, _ = self._walk(starts, generator, initial)
                     for path_a, path_b in zip(forward, backward):
-                        forward_voxels = np.unique(path_a[path_a >= 0])
-                        backward_voxels = np.unique(path_b[path_b >= 0])
+                        path_a = self._filter_half(path_a, avoid_mask, stop_mask,
+                                                   forcefirststep)
+                        path_b = self._filter_half(path_b, avoid_mask, stop_mask,
+                                                   forcefirststep)
+                        forward_voxels = (np.unique(path_a) if
+                                          max(0, len(path_a) - 1) * self.steplength >= self.distthresh
+                                          else np.empty(0, dtype=np.int32))
+                        backward_voxels = (np.unique(path_b) if
+                                           max(0, len(path_b) - 1) * self.steplength >= self.distthresh
+                                           else np.empty(0, dtype=np.int32))
                         if matrix is not None:
                             forward_hits = targets[:, forward_voxels].any(axis=1)
                             backward_hits = targets[:, backward_voxels].any(axis=1)
