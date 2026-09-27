@@ -1,121 +1,54 @@
-# Talairach affine precision isolation on one real T1
+# Talairach 仿射精度：同一真实 T1 的局部测试
 
-This is a targeted comparison, not an end-to-end recon-all acceptance. The
-official reference is FreeSurfer 8.2 on the same T1. Input, weight, template,
-source, and candidate output SHA-256 values are in
-[`precision_report.json`](precision_report.json) and
-[`connected_report.json`](connected_report.json); the bounded downstream
-continuation is in [`gca_gate_report.json`](gca_gate_report.json). The reference operation is
-`mri_synthmorph -m affine -t aff.lta synthstrip.mgz mni305.cor.stripped.mgz -j 4`.
-The candidate calls `fnit.synthmorph.SynthMorph(..., model="affine", extent=256)`.
-No official volume or transform was used as a candidate input.
+本报告只检查 Talairach 仿射及有限的下游步骤，不是 recon-all 整例验收。官方参照是同一 T1 的 FreeSurfer 8.2 结果。输入、权重、模板、源码及候选输出的 SHA-256 见 [`precision_report.json`](precision_report.json) 和 [`connected_report.json`](connected_report.json)；后续 GCA 检查见 [`gca_gate_report.json`](gca_gate_report.json)。对应官方命令为 `mri_synthmorph -m affine -t aff.lta synthstrip.mgz mni305.cor.stripped.mgz -j 4`。候选实现调用 `fnit.synthmorph.SynthMorph(..., model="affine", extent=256)`。官方体积图和变换没有作为候选输入。
 
-## Fixed-input affine comparison
+## 固定输入的仿射比较
 
-All rows use the same saved candidate `synthstrip.mgz`, MNI305 template and
-affine weight. The source used in the test has the hashes recorded in the
-report. Both cuDNN benchmark and deterministic flags were true, matching the
-preceding SynthStrip state. Each row has one timed inference; the second
-default row is a warm repeat, so these times are not a paired speed benchmark.
+各次运行使用同一份已保存的候选 `synthstrip.mgz`、MNI305 模板和 affine 权重，源码哈希见 JSON。cuDNN benchmark 和 deterministic 标志均为 true，与前一步 SynthStrip 的状态一致。每行只计时一次；最后一行是默认设置的热启动重复，因此不能将这些数字当成配对速度基准。
 
-| Execution | matmul TF32 | cuDNN TF32 | Inference s | Max voxel-LTA element error | eTIV error mm³ |
-|---|---:|---:|---:|---:|---:|
-| CPU float32 | off | off | 17.836 | 0.00012255 | +0.48617 |
-| GPU default, first | on | on | 2.200 | 0.04733276 | −822.54696 |
-| GPU float32, both off | off | off | 4.025 | 0.00008392 | −0.89466 |
-| GPU, matmul off | off | on | 1.511 | 0.00392628 | −3.52243 |
-| GPU, cuDNN off | on | off | 1.483 | 0.07858276 | −826.74013 |
-| GPU default, repeat | on | on | 1.412 | 0.04733276 | −822.54696 |
+| 运行方式 | matmul TF32 | cuDNN TF32 | 推理秒数 | voxel LTA 最大元素误差 | eTIV 误差 mm³ |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| CPU float32 | 关 | 关 | 17.836 | 0.00012255 | +0.48617 |
+| GPU 默认，首次 | 开 | 开 | 2.200 | 0.04733276 | −822.54696 |
+| GPU float32，两项均关 | 关 | 关 | 4.025 | 0.00008392 | −0.89466 |
+| GPU，仅关 matmul | 关 | 开 | 1.511 | 0.00392628 | −3.52243 |
+| GPU，仅关 cuDNN | 开 | 关 | 1.483 | 0.07858276 | −826.74013 |
+| GPU 默认，重复 | 开 | 开 | 1.412 | 0.04733276 | −822.54696 |
 
-The default GPU world affine exactly reproduces the earlier v3 candidate
-world affine. Disabling both TF32 switches only during the affine inference
-reduced the absolute eTIV error from 822.547 to 0.895 mm³, about 919-fold.
-It did not make the LTA or eTIV exactly equal to the official output.
-The isolation run did not change production code; the later local production patch is described below.
+GPU 默认所得 world affine 与先前 v3 候选完全相同。只在 affine 推理期间关闭两项 TF32 后，eTIV 绝对误差由 822.547 降至 0.895 mm³，约缩小 919 倍；LTA 和 eTIV 仍未与官方逐位相同。上表的隔离试验当时未修改生产代码；生产入口的改动见下文。
 
-## Connected input prefix
+## 从原始 T1 连到 brainmask
 
-The separate connected trial starts from the same raw T1, runs candidate
-SynthStrip and Talairach with both TF32 flags disabled only inside the
-SynthMorph affine call, and then runs candidate `nu`, `T1`, and `brainmask`.
-It reuses a saved **candidate** N4 `nu0.mgz`, since N4 does not read the
-Talairach transform. It does not run GCA registration or any later stage.
+另一次连通试验从同一原始 T1 出发，运行候选 SynthStrip 和 Talairach；仅在 SynthMorph affine 前向期间关闭两项 TF32，再运行候选 `nu`、`T1` 和 `brainmask`。N4 不读取 Talairach 变换，因此复用此前保存的**候选** `nu0.mgz`。该试验没有运行 GCA 注册或后续步骤。
 
-| Candidate volume | Differing voxels versus official | Affine / MGH header |
-|---|---:|---|
-| `orig.mgz` | 0 / 16,777,216 | exact / exact |
-| `synthstrip.mgz` | 0 / 16,777,216 | exact / exact |
-| `nu.mgz` | 0 / 16,777,216 | exact / exact |
-| `T1.mgz` | 0 / 16,777,216 | exact / exact |
-| `brainmask.mgz` | 0 / 16,777,216 | exact / exact |
+| 候选体积图 | 相对官方的差异体素 | 仿射 / MGH 头 |
+| --- | ---: | --- |
+| `orig.mgz` | 0 / 16,777,216 | 相同 / 相同 |
+| `synthstrip.mgz` | 0 / 16,777,216 | 相同 / 相同 |
+| `nu.mgz` | 0 / 16,777,216 | 相同 / 相同 |
+| `T1.mgz` | 0 / 16,777,216 | 相同 / 相同 |
+| `brainmask.mgz` | 0 / 16,777,216 | 相同 / 相同 |
 
-The connected voxel LTA has a maximum element error of 0.00008392 and yields
-eTIV 1,310,265.657875 mm³ versus official 1,310,266.552537 mm³. Timings:
-input plus Talairach 13.435 s (including SynthStrip 6.540 s and affine
-Talairach 3.983 s); `nu` from saved `nu0` 1.818 s; `T1` normalization
-62.867 s; `brainmask` 0.983 s. The full MGZ file hashes need not match when
-history metadata differs; voxel arrays, affine matrices and the first 284
-header bytes were compared separately.
+该连通试验的 voxel LTA 最大元素误差为 0.00008392；eTIV 为 1,310,265.657875 mm³，官方为 1,310,266.552537 mm³。输入至 Talairach 用时 13.435 秒，其中 SynthStrip 6.540 秒、Talairach affine 3.983 秒；从保存的 `nu0` 生成 `nu` 用时 1.818 秒，`T1` 归一化 62.867 秒，`brainmask` 0.983 秒。MGZ 历史元数据可使整文件哈希不同，故分别比较了体素数组、仿射和 MGH 头前 284 字节。
 
-`probe_precision.py` is a reusable CLI with moving image, template, weight
-directory, official and prior affine/voxel LTAs, and output directory as
-positional arguments. The recorded fixed-input run used an equivalent
-scratch script whose SHA-256 is in `precision_report.json`.
-`probe_connected.py` is the exact script used for the connected trial; it
-accepts T1, empty candidate subject directory, weight directory, asset
-directory, saved candidate `nu0.mgz`, and read-only official subject directory.
-Both scripts support `--device cuda:0 --threads 4`. Their reference paths are
-read for comparison only.
+`probe_precision.py` 是可复用 CLI，位置参数依次提供 moving 图像、模板、权重目录、官方及先前的 affine/voxel LTA、输出目录。固定输入结果使用等价的临时脚本，脚本 SHA-256 记在 `precision_report.json`。`probe_connected.py` 是连通试验实际脚本，输入 T1、空候选被试目录、权重目录、模板目录、保存的候选 `nu0.mgz` 和只读官方被试目录。两者均支持 `--device cuda:0 --threads 4`；官方路径只供比较读取。
 
-## Bounded GCA and presurface continuation
+## GCA 至 presurf 的有限续跑
 
-`probe_gca_gate.py` continues the saved candidate subject above. It runs the
-same pinned Conda `mri_em_register` binary as the earlier v3 whole-subject
-candidate (binary hash in the JSON), candidate Python `run_ca_normalize`,
-and candidate Python callosum segmentation. It reuses saved **candidate**
-`synthseg.rca.mgz` from the same T1 to avoid rerunning the network; that
-input was independently compared with the official output before use.
-No official image, label, transform, or surface is a reconstruction input.
-The official equivalent registration command is
-`mri_em_register -uns 3 -mask brainmask.mgz nu.mgz RB_all_2020-01-02.gca transforms/talairach.lta`.
+`probe_gca_gate.py` 接着运行上述候选被试。它调用与 v3 整例相同的固定 Conda `mri_em_register` 程序（哈希见 JSON）、候选 Python `run_ca_normalize` 和候选 Python 胼胝体分割。为避免重复网络推理，复用同一 T1 已保存的**候选** `synthseg.rca.mgz`；使用前已独立核对它与官方的差异。官方影像、标签、变换和表面均未作为重建输入。等价注册命令为 `mri_em_register -uns 3 -mask brainmask.mgz nu.mgz RB_all_2020-01-02.gca transforms/talairach.lta`。
 
-| Output | Paired result |
-|---|---|
-| GCA `talairach.lta` | All 16 matrix elements exact |
-| `norm.mgz`, `ctrl_pts.mgz` | Each 0 / 16,777,216 differing voxels; affine and MGH header exact |
-| Saved candidate `synthseg.rca.mgz` | 0 / 16,777,216 differing voxels; affine and MGH header exact |
-| `aseg.auto_noCCseg.mgz`, `aseg.auto.mgz`, `aseg.presurf.mgz` | Each 0 / 16,777,216 differing voxels; affine and MGH header exact |
-| `cc_up.lta` | Maximum matrix element error 0.00000763; not exact |
+| 输出 | 对照结果 |
+| --- | --- |
+| GCA `talairach.lta` | 16 个矩阵元素全部相同 |
+| `norm.mgz`、`ctrl_pts.mgz` | 各 0 / 16,777,216 差异体素；仿射和 MGH 头相同 |
+| 已保存的候选 `synthseg.rca.mgz` | 0 / 16,777,216 差异体素；仿射和 MGH 头相同 |
+| `aseg.auto_noCCseg.mgz`、`aseg.auto.mgz`、`aseg.presurf.mgz` | 各 0 / 16,777,216 差异体素；仿射和 MGH 头相同 |
+| `cc_up.lta` | 最大矩阵元素误差 0.00000763，未逐位相同 |
 
-The registration, CA normalization, and callosum/copy stages took 329.526,
-37.143, and 25.454 s on this shared node. The old v3 timings for the same
-operations were 251.249, 27.048, and 24.438 s, respectively, under a
-different load; these are observations, not controlled speed ratios. The
-new SynthMorph LTA/eTIV improvement is independent of GCA registration,
-which reads `nu` and `brainmask` and creates a separate `talairach.lta`.
-GCA through `aseg.presurf` numerically agrees on this T1, but `cc_up.lta`
-still has a small transform difference. WM, surfaces, regional statistics,
-and additional subjects remain outside this trial; the repository default
-TF32 remains the package-wide default; the recon-all affine call now has the local precision patch described below.
+本次共享节点上，GCA 注册、CA 归一化、胼胝体及复制步骤分别用时 329.526、37.143、25.454 秒。v3 旧运行对应为 251.249、27.048、24.438 秒；节点负载不同，不能计算受控速度比。SynthMorph LTA/eTIV 的改进不改变 GCA 注册：GCA 读取 `nu`、`brainmask`，另写 `talairach.lta`。此 T1 的 GCA 到 `aseg.presurf` 数值匹配，`cc_up.lta` 仍有小误差；WM、表面、脑区统计和其他被试均未纳入该试验。
 
-## Production entry-point check
+## 生产入口检查
 
-After the bounded downstream gate, `register_talairach` was changed to
-disable matmul and cuDNN TF32 only during its affine forward call and restore
-both entering flags in `finally`, including error exits. The package-wide
-SynthMorph defaults remain unchanged. Four focused tests passed, including
-inference-success and exception restoration. The batch runner executes each
-subject in a separate process, so these process-level flags do not cross
-subject workers.
+随后修改 `register_talairach`：仅在 affine 前向期间关闭 matmul 和 cuDNN TF32，并在 `finally` 中恢复进入函数时的标志，异常退出亦然。包内其他 SynthMorph 调用仍按原默认设置运行。四个针对性测试通过，覆盖成功推理和异常时的标志恢复。批量入口每例使用独立进程，这两个进程级标志不会跨被试工作进程共享。
 
-The patched production function was then called once on the **same saved
-`synthstrip.mgz` bytes** used in the fixed-input comparison, with the same
-weight and template. Its affine LTA SHA-256 matched the isolated GPU
-both-off result. It measured maximum official world/voxel LTA element errors
-of 0.00001281 / 0.00008392, and eTIV error −0.89466 mm³. Both TF32 flags
-were true before and after the call. The one-run wall time was 4.791 s for
-construction, inference, affine-LTA and XFM writing; peak PyTorch GPU
-allocation was 4497 MiB. See
-[`production_register_report.json`](production_register_report.json) for
-input and module hashes. This run did not repeat downstream stages or
-measure a paired native runtime.
+修改后的生产函数对**完全相同的已保存 `synthstrip.mgz` 字节**、权重和模板调用一次，affine LTA 的 SHA-256 与隔离试验的 GPU 双关结果相同。相对官方，world/voxel LTA 的最大元素误差分别为 0.00001281 / 0.00008392，eTIV 误差 −0.89466 mm³；调用前后两项 TF32 标志均为 true。构造模型、推理并写入 affine LTA 和 XFM 的一次墙钟为 4.791 秒，PyTorch GPU 峰值分配 4497 MiB。输入和模块哈希见 [`production_register_report.json`](production_register_report.json)。这次没有重复下游步骤，也没有做配对官方耗时测试。
