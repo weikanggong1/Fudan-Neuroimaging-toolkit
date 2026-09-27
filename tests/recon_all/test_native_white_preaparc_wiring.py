@@ -156,6 +156,33 @@ class WhitePreaparcWiringTest(unittest.TestCase):
             np.testing.assert_array_equal(output[f"{hemi}.smoothwm.K1.crv"],
                                           np.full(3, 4, np.float32))
 
+    def test_default_curvature_path_reuses_white_smoothwm(self):
+        output = {}
+        reads = []
+
+        def read(path):
+            surface = Path(path).name.split(".", 1)[1]
+            reads.append(surface)
+            value = {"white": 1, "inflated": 3}[surface]
+            return np.full((3, 3), value, np.float32), np.zeros((1, 3), np.int32)
+
+        def curv(vertices, _faces, *, device):
+            value = vertices[0, 0]
+            return np.full(3, value, np.float32), np.full(3, value * 10, np.float32)
+
+        with patch("fnit.recon_all.native_free.fs.read_geometry", side_effect=read), patch(
+                "fnit.recon_all.native_free.fs.write_morph_data",
+                side_effect=lambda path, values: output.__setitem__(Path(path).name, values)), patch(
+                "fnit.recon_all.surface_roi_curvature_gpu.principal_curvatures",
+                side_effect=curv):
+            for hemi in ("lh", "rh"):
+                _write_principal_curvature_maps(Path("surf"), hemi, "cpu", False)
+        self.assertEqual(reads, ["white", "inflated"] * 2)
+        self.assertEqual(len(output), 16)
+        for hemi in ("lh", "rh"):
+            np.testing.assert_array_equal(output[f"{hemi}.white.preaparc.H"],
+                                          output[f"{hemi}.smoothwm.H.crv"])
+
     def test_single_cli_and_batch_forward_flag(self):
         with patch("fnit.recon_all.native_free.run_recon_all_python",
                    return_value={"status": "complete"}) as run:

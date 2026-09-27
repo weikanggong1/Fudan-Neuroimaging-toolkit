@@ -7,7 +7,7 @@ The FreeSurfer 8.2 `recon-all.log` for the real `sub-01_T1w.nii.gz` case has two
 | `surf/H.smoothwm.nofix` | `mris_smooth -nw -seed 1234 H.orig.nofix H.smoothwm.nofix` | Unrepaired `orig.nofix`; default 10 passes |
 | `surf/H.smoothwm` | `mris_smooth -n 3 -nw -seed 1234 H.white.preaparc H.smoothwm` | Placed `white.preaparc`; three passes |
 
-`H` is `lh` or `rh`. The final command is recorded at lines 4675 and 4681 of that official subject's `scripts/recon-all.log`. The current runner still calls `smooth_surface(H.orig, H.smoothwm)` with its default 10 passes, then copies `smoothwm` to `white.preaparc`. This stage wiring is the cause of the final `smoothwm` discrepancy even when `orig` has exact geometry. It cannot be corrected by changing the number of passes on `orig`: genuine `white.preaparc` placement must precede final smoothing. The nofix output has a separate, correct ten-pass input.
+`H` is `lh` or `rh`. The final command is recorded at lines 4675 and 4681 of that official subject's `scripts/recon-all.log`. The default runner calls `smooth_surface(H.orig, H.smoothwm)` with its default 10 passes, then copies `smoothwm` to `white.preaparc`. The optional `--native-white-preaparc` route instead runs genuine white pre-aparc placement first and this three-pass Python smoothing second. That route has a separate [saved-stage real-T1 connected check](../../validation/recon_all/python_gpu_port/white_connected_prefix_20260927/README.md); final white/pial placement and complete reconstruction remain unaccepted. The nofix output has a separate, correct ten-pass input.
 
 ## Python stage
 
@@ -27,7 +27,7 @@ mris_smooth -n 3 -nw -seed 1234 \
   surf/lh.white.preaparc surf/lh.smoothwm
 ```
 
-The corresponding `rh` invocation substitutes `rh` for `lh`. This isolated stage does not create `white.preaparc` and does not by itself fix the current end-to-end reconstruction.
+The corresponding `rh` invocation substitutes `rh` for `lh`. This isolated function does not create `white.preaparc`; the optional recon-all route supplies it from the Conda placement wrapper.
 
 ## Same-input real-data benchmark
 
@@ -38,7 +38,7 @@ On `gpucw1`, both implementations read the **same saved official** bilateral `wh
 | LH | 106,622 / 213,240 | 319,866 / 319,866 | 0 mm | 7.889 s | 3.153 s |
 | RH | 105,541 / 211,078 | 316,623 / 316,623 | 0 mm | 6.634 s | 3.609 s |
 
-All ordered faces and volume geometry fields also matched. The three-run timing arrays, input hashes, and native replay comparisons are in [`report.json`](../../validation/recon_all/python_gpu_port/smoothwm_final_same_input_20260927/report.json). The same-input result establishes the Python operator's parity; it does not establish parity for current final `smoothwm` or downstream metrics until `white.preaparc` is generated from the correct surface placement chain.
+All ordered faces and volume geometry fields also matched. The three-run timing arrays, input hashes, and native replay comparisons are in [`report.json`](../../validation/recon_all/python_gpu_port/smoothwm_final_same_input_20260927/report.json). The same-input result establishes the Python operator's parity. The optional connected LH candidate route gives a separate near-match for final `smoothwm`, with 18 vertices above 0.1 mm; downstream metrics remain unaccepted.
 
 Reproduce the paired benchmark from an environment containing the FreeSurfer binary and this Python package:
 
