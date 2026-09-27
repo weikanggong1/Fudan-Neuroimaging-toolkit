@@ -1,4 +1,4 @@
-# Conda white.preaparc from an exact FNIT prefix
+# Conda white.preaparc on saved real-T1 stage inputs
 
 `fnit.recon_all.white_preaparc_conda.run_white_preaparc(subject_dir, hemi, binary, assets_dir, threads=4)`
 connects the existing Python gray/white threshold calculation to the
@@ -137,10 +137,12 @@ smooths its output for three CPU passes. The default runner path does not.
 The final `white` remains a copy of that smoothwm surface until cortical
 labels, annotations and the final white optimizer are integrated.
 
-A separate [LH connected candidate-prefix replay](../../validation/recon_all/python_gpu_port/white_connected_prefix_20260927/README.md)
-uses FNIT-generated MNI152 LTA, MCA/dura, venous-sinus and finalsurfs
-outputs, with no official auxiliary label borrowed. It reuses the same
-mixed-input topology mesh and therefore does not close that earlier MRI
-boundary. Its placed surface
-retains 50 vertices above 0.1 mm, and its three-pass smoothwm has 18.
-The two trials have distinct upstream provenance.
+The [saved-stage LH connected checks](../../validation/recon_all/python_gpu_port/white_connected_prefix_20260927/README.md)
+include both an earlier mixed-MRI replay and a separate fully candidate-input
+replay. The latter uses FNIT-generated MNI152 LTA, MCA/dura, venous-sinus,
+finalsurfs, v5 brain/wm/filled/norm, and independently generated Python
+nofix surfaces. Its placed surface retains 50 vertices above 0.1 mm;
+three-pass smoothwm has 18. Current recon-all copies that smoothwm to final
+white, which still differs from official final white by 0.288 mm mean 3D
+vertex displacement. These are saved-stage connections on one T1, not a
+fresh complete recon-all execution.

@@ -71,12 +71,18 @@ def main() -> None:
     upstream = json.loads(args.upstream_report.read_text())
     topology = json.loads(args.topology_report.read_text())
     place = json.loads(args.placement_time.read_text())
-    topology_subject = Path(topology["hemispheres"]["lh"]["outputs"]["orig"]).parents[1]
+    topology_subject = (candidate / "surf/lh.orig").resolve().parents[1]
     report = {
         "scope": "saved stages from one real T1; LH placement only; see topology MRI provenance",
         "candidate": str(candidate), "official": str(official),
         "upstream_timings_seconds": upstream["timings_seconds"],
         "topology_initial_lh_stages": topology["hemispheres"]["lh"]["stages"],
+        "initial_surface_mri_sources": {
+            name: paired_files(Path(topology[name]), official / "mri" / f"{name}.mgz")
+                  | {"voxel_comparison": volume(Path(topology[name]),
+                                                official / "mri" / f"{name}.mgz")}
+            for name in ("filled", "norm")
+        },
         "placement_timings_seconds": {
             "thresholds": place["stats_seconds"],
             "white_preaparc": place["place_seconds"],
@@ -112,6 +118,8 @@ def main() -> None:
                                official / "mri" / name)
             for name in ("mca-dura.mgz", "vsinus.mgz")
         },
+        "runner_white_copy_vs_official_final_white": surface(
+            candidate / "surf/lh.smoothwm", official / "surf/lh.white"),
         "threshold_stats_text_equal": (
             (candidate / "surf/autodet.gw.stats.lh.dat").read_bytes() ==
             (official / "surf/autodet.gw.stats.lh.dat").read_bytes()),

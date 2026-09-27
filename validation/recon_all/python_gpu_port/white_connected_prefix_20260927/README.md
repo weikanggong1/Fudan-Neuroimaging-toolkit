@@ -1,103 +1,121 @@
-# Connected candidate prefix through LH smoothwm
+# Real-T1 saved-stage prefix through LH smoothwm
 
-This is a **saved-stage connection test**, not a fresh one-process
-T1-to-recon-all run. The real input scan is
+This is a **connected replay from saved candidate stages**, not a fresh
+single-process T1-to-recon-all run. The deidentified input is
 `examples/data/sub-01_T1w.nii.gz` (SHA-256
-`f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a`).
-The reference is the completed FreeSurfer 8.2 `a_official` subject on gpucw1.
-No official auxiliary label or surface is passed to placement. The saved
-patched topology GA output in this test **did use official `brain.mgz` and
-`wm.mgz`**; its scratch subject also symlinked official `filled.mgz` and
-`norm.mgz`. Corresponding v5 candidate MRI volumes were separately measured
-voxel-exact, but this replay has an official-MRI topology input boundary.
+`f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a`);
+the comparison subject is completed FreeSurfer 8.2 `a_official` on gpucw1.
+The new **fully candidate-input LH replay** passes no official image,
+label, or surface into reconstruction operators. The official subject is
+read by the probes only for paired comparison. The older mixed-input
+replay is retained below with its distinct provenance.
 
-## Candidate chain and file boundaries
+## Fully candidate-input LH chain
 
-The saved v5 candidate MRI inputs `orig`, `nu`, `synthseg.rca`, `brain`,
-`brainmask`, `entowm`, and `aseg.presurf` each have zero voxel differences
-against the official subject ([upstream comparison](../mni_aux_connected_20260927/input_comparison.json)).
-The [CPU MNI/auxiliary run](../mni_aux_connected_20260927/README.md) uses
-those images and external weights/priors to generate its own MNI152 LTA,
-`mca-dura.mgz`, `vsinus.mgz`, and `brain.finalsurfs.mgz`. The [initial
-surface chain](../../../../src/fnit/recon_all/initial_surface_chain.py)
-starts from candidate `filled` and `norm` and uses Python pretess,
-tessellation, smoothing, **Python inflate**, and Python quick sphere. The
-[patched Conda topology GA](../../../../docs/recon_all/TOPOLOGY_CONDA_GA.md)
-and Python remesh then generate LH `orig.premesh` and `orig` using the
-scratch topology subject's official `brain` and `wm`. They are
-linked into an isolated subject with the candidate MRI outputs. The new
-Conda `mris_place_surface --white` wrapper produces `lh.white.preaparc`;
-Python `smooth_surface(..., iterations=3, device="cpu")` consumes that
-placed surface to produce `lh.smoothwm`.
+The saved v5 candidate `orig`, `nu`, `synthseg.rca`, `brain`, `brainmask`,
+`entowm`, and `aseg.presurf` MRI outputs were each voxel-exact against
+official ([seven-input comparison](../mni_aux_connected_20260927/input_comparison.json)).
+The [CPU MNI152/auxiliary run](../mni_aux_connected_20260927/README.md)
+used those candidate files plus external weights/priors to generate
+its own LTA, `mca-dura`, `vsinus`, and `brain.finalsurfs`. The initial
+surface files `orig.nofix`, `inflated.nofix`, and `qsphere.nofix` came from
+FNIT's Python [initial surface chain](../../../../src/fnit/recon_all/initial_surface_chain.py)
+on separately saved candidate `filled`/`norm` from this T1; they were all
+ordered-coordinate/face exact against official before topology repair.
 
-The stages were run at different times and their saved candidate outputs
-were linked for this test. The [raw paired report](lh_report.json) records
-the resolved candidate and official paths and full SHA-256 hashes for
-`wm`, `aseg.presurf`, both auxiliary labels, `brain.finalsurfs`, `orig`,
-`orig.premesh`, `white.preaparc`, `smoothwm`, the diagnostic volume, and
-the threshold statistics. The source-to-target link and the four official topology MRI symlinks are
-auditable in the report. This mixed-input check does **not** establish a
-fully candidate-derived topology chain, fresh production CLI completion,
-or RH connected placement. The prior [RH candidate placement test](../../../../docs/recon_all/WHITE_PREAPARC_CONDA_CHAIN.md)
-used borrowed official auxiliary labels and has a different upstream
-boundary. Corrected Python inflate and quick sphere were separately exact
-on this T1's frozen inputs ([inflation](../INFLATE_STATUS.md),
-[quick sphere](../SPHERE_QUICK_STATUS.md)); this is not a guarantee for other
-subjects.
+The new [candidate topology probe](probe_candidate_topology.py) links the
+v5 candidate **`brain`, `wm`, `filled`, and `norm`** into a new scratch
+subject. It refuses any of their resolved paths under the official
+subject. All four have 0/16,777,216 differing voxels and affine difference
+0 against their reference counterparts. The probe runs Python centered
+sphere, patched Conda `mris_fix_topology_fnit`, Python three-iteration
+remesh, and Python intersection check. Its [input and output report](candidate_topology_lh_report.json)
+records realpaths, SHA-256, elapsed times, and ordered vertex/face
+comparisons. `orig.premesh` and `orig` were exact. In this scratch subject,
+`wm`, `aseg.presurf`, `brain.finalsurfs`, `mca-dura`, and `vsinus` are
+candidate outputs as well.
 
-## Same-T1 accuracy
+The [placement probe](probe_candidate_place.py) then runs Python gray/white
+thresholds and Conda `mris_place_surface --white` on that new `orig`,
+followed by Python three-pass CPU smoothing. The [full LH paired report](candidate_full_lh_report.json)
+records each input/output realpath and SHA-256, per-surface ordered
+coordinates/faces, per-volume voxels/affines, threshold text equality,
+and stage times. It also compares the current runner's proposed final
+`white` (a copy of `smoothwm`) with official final `white`. The stages
+were executed in separate processes and linked by saved files. RH has
+separate segmental placement evidence, but this fully candidate-input
+connected replay was LH only.
 
-| Candidate output | Comparison with saved FreeSurfer 8.2 output |
+| Output on the new candidate subject | Difference against saved official |
 | --- | ---: |
 | `mca-dura`, `vsinus`, `brain.finalsurfs` | Each 0 / 16,777,216 differing voxels; affine equal |
-| LH `orig.premesh`, conditional on official topology MRI inputs | 101,689 ordered vertices and 203,374 faces exact |
-| LH `orig`, same conditional input | 106,622 ordered vertices and 213,240 faces exact |
-| LH `white.preaparc` | 106,622 faces ordered exact; mean/P99/max 3D vertex displacement **0.000420574 / 0.006998961 / 0.630004 mm**; **50** vertices >0.1 mm |
-| Placement diagnostic `mrisps.wpa` | 0 / 16,777,216 differing voxels; affine equal |
-| Threshold statistics | Text byte-identical |
-| LH `smoothwm`, 3 CPU passes | 106,622 faces ordered exact; mean/P99/max 3D vertex displacement **0.000311208 / 0.006172390 / 0.188170 mm**; **18** vertices >0.1 mm |
+| LH `orig.premesh` | 101,689 ordered vertices, 203,374 faces, all coordinates exact |
+| LH `orig` | 106,622 ordered vertices, 213,240 faces, all coordinates exact; zero intersecting faces |
+| LH `white.preaparc` | Ordered faces exact; mean / P99 / max **0.000420574 / 0.006998961 / 0.630004 mm**; **50** vertices >0.1 mm |
+| `mrisps.wpa` diagnostic | 0 / 16,777,216 differing voxels; affine equal |
+| Gray/white threshold statistics | Text byte-identical |
+| LH `smoothwm`, three CPU passes | Ordered faces exact; mean / P99 / max **0.000311208 / 0.006172390 / 0.188170 mm**; **18** vertices >0.1 mm |
+| Current runner's `white = smoothwm` versus official final `white` | Mean / P99 / max **0.288067 / 1.263745 / 3.322477 mm**; **89,203** vertices >0.1 mm |
 
-Distances are Euclidean between corresponding vertices, not absolute
-coordinate-component errors. The compressed volume/surface hashes need not
-match when geometry and voxels do: metadata and provenance differ. The
-nonzero vertex tails remain a precision gap for the downstream white/pial
-and vertex-map stages. No downstream regional thickness, area, volume,
-curvature, atlas, or complete 138-output acceptance is inferred here.
+All distances are 3D Euclidean distances at corresponding vertex indices.
+The last row measures the **next unresolved final white placement stage**;
+it does not reflect an additional placement command. The nonzero
+`white.preaparc`/`smoothwm` tails are a smaller precision gap, still
+relevant to vertex-level acceptance. Byte hashes of compressed MGZ and
+surface files can differ despite exact voxel or ordered geometry because
+metadata/provenance differs. Final pial geometry, thickness, area, volume,
+curvature, atlas, ROI statistics, and complete 138-output acceptance remain
+unverified for this connected prefix.
 
-## Observed time and official context
+## Times and official context
 
-| Stage | Candidate CPU wall, s | Archived official stage, s |
+| Stage | Candidate saved-run wall, s | Archived official context |
 | --- | ---: | ---: |
-| MNI152 crop + affine | 15.63 | crop 1.86 + SynthMorph 107.57 |
-| MCA/dura segmentation | 6.49 | 118 |
-| Venous-sinus segmentation | 12.09 | 55 |
-| Five finalsurfs edits | 8.58 | 8.21 |
-| LH initial Python inflate / quick sphere | 27.57 / 56.29 | See [stage reports](../INFLATE_STATUS.md) and [sphere report](../SPHERE_QUICK_STATUS.md) |
-| LH Conda topology GA and Python remesh | See [topology report](../../../../docs/recon_all/TOPOLOGY_CONDA_GA.md) | See same report |
-| LH gray/white thresholds | 4.41 | Archived 3.98 |
-| LH Conda white pre-aparc placement | 261.51 | Archived 242.65 |
-| LH final Python smoothwm | 7.22 | Paired official-input median 3.153 |
+| MNI152 crop + affine, MCA/dura, vsinus, five finalsurfs edits | 15.63, 6.49, 12.09, 8.58 | 1.86 + 107.57, 118, 55, 8.21 s respectively; [MNI/aux report](../mni_aux_connected_20260927/README.md) |
+| LH initial Python pretess, tessellation, main component, smoothing, inflate, quick sphere | 3.64, 0.37, 0.08, 3.90, 27.57, 56.29 | Separate [inflate](../INFLATE_STATUS.md) and [sphere](../SPHERE_QUICK_STATUS.md) benchmarks |
+| LH centered sphere / Conda topology GA / Python remesh / intersection check | 9.94 / 104.77 / 181.66 / 1.45 | Separate [topology benchmark](../../../../docs/recon_all/TOPOLOGY_CONDA_GA.md) |
+| LH thresholds / Conda pre-aparc placement / Python final smoothwm | 8.24 / 237.16 / 5.86 | 3.98 / 242.65 archived for first two; 3.153 s official-input smoothing median in [separate paired benchmark](../../../../docs/recon_all/SMOOTHWM_FINAL_PARITY.md) |
 
-The MNI/aux/finalsurfs sum was **42.79 s**; its full earlier probe,
-including imports and volume comparisons, took 57.25 s. The threshold,
-placement and final smoothing sum in this separate saved-stage run was
-**273.14 s**. Load, inputs, process boundaries and dates differ from the
-archived official timings; these are stage observations, not an equivalent
-end-to-end speed comparison. The [same-input final smoothing benchmark](../../../../docs/recon_all/SMOOTHWM_FINAL_PARITY.md)
-found exact output from an official `white.preaparc` input and is separate
-from the candidate-connected errors above.
+These are one-run observations on a shared node, with separate process
+boundaries and differing load. The official measurements were archived
+on other runs. They do not give an end-to-end time or a controlled speed
+ratio. The MNI/aux/finalsurfs stage sum was 42.79 s in its earlier probe;
+that probe's full wall, including repeated 256³ comparisons, was 57.25 s.
 
-## Reproduce the comparison
+## Earlier mixed-input LH replay
 
-Use the FNIT Conda Python with nibabel and NumPy, the saved candidate
-subjects and official reference, then run:
+The [earlier comparison](lh_report.json) linked the same candidate
+auxiliary labels and finalsurfs to an `orig` generated by the same FNIT
+Python/Conda topology algorithms, **but its topology scratch subject used
+official `brain` and `wm` MRI files**. Its `filled` and `norm` symlinks
+also pointed to the official subject, even though the independent initial
+Python surface chain read candidate `filled`/`norm`. This test therefore
+could not establish a fully candidate-input topology chain. Its placed
+`white.preaparc` and smoothed `smoothwm` had the same geometry errors as
+the subsequent fully candidate replay. The older [bilateral placement
+report](../../../../docs/recon_all/WHITE_PREAPARC_CONDA_CHAIN.md) also
+borrowed official MCA/dura and venous-sinus labels, so its RH result has a
+separate upstream boundary. Both trial types are kept to show precisely
+which inputs were checked.
+
+## Reproduce the checks
+
+Run the [candidate topology probe](probe_candidate_topology.py) with an
+empty scratch subject, v5 MRI directory, candidate auxiliary subject,
+saved FNIT initial surface subject, official comparison subject, patched
+Conda `mris_fix_topology_fnit`, external data assets, and output JSON.
+It writes the candidate MRI manifest and stops before placement if the
+first topology surface differs. Then run [candidate placement](probe_candidate_place.py)
+with that subject, Conda `mris_place_surface`, assets, and timing JSON.
+Finally use the saved-output comparator:
 
 ```bash
-python compare.py CANDIDATE_PLACEMENT_SUBJECT OFFICIAL_SUBJECT \
-  CANDIDATE_AUX_SUBJECT CANDIDATE_AUX_REPORT INITIAL_SURFACE_REPORT \
-  PLACEMENT_TIME_JSON lh_report.json
+python compare.py CANDIDATE_SUBJECT OFFICIAL_SUBJECT CANDIDATE_AUX_SUBJECT \
+  CANDIDATE_AUX_REPORT INITIAL_SURFACE_REPORT PLACEMENT_TIME_JSON \
+  candidate_full_lh_report.json
 ```
 
-The command compares the saved outputs; it does not rerun image inference,
-topology repair or placement. Source input/output paths and hashes needed to
-repeat those stage calls are in the JSON report and the linked stage reports.
+The probe scripts require the FNIT Conda Python, nibabel, NumPy, the
+pinned Conda binaries and data-only assets; `FS_LICENSE` points to a
+private external license when required by those binaries. No license,
+patient image, binary, or model weight is committed.
