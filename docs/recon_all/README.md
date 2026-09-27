@@ -90,7 +90,7 @@ fnit-recon-all subject_T1w.nii.gz /scratch/subjects/sub01 \
 
 该开关在 `filled.mgz` 之后用 CPU 生成被试 MNI152 LTA、MCA/dura 与静脉窦标签及 `brain.finalsurfs.mgz`；每侧精确 `orig` 产生后，用 Python 计算 gray/white 阈值，调用 Conda `mris_place_surface --white` 生成 `white.preaparc`，再用 Python CPU 三轮平滑生成最终 `smoothwm`。启动时检查三份权重、两张 MNI 图像、三个先验、`mris_fix_topology_fnit` 和 `mris_place_surface`。开关关闭时沿用原路径。
 
-[MNI152/辅助分割](MNI_AUX_CHAIN.md)、[Python finalsurfs](FINAL_SURFS_CHAIN.md)、[双侧预白质放置](WHITE_PREAPARC_CONDA_CHAIN.md)、[LH 候选前缀连通验证](../../validation/recon_all/python_gpu_port/white_connected_prefix_20260927/README.md)和[最终 smoothwm 同输入验收](SMOOTHWM_FINAL_PARITY.md)列出函数输入输出、官方命令与真实 T1 精度/时间。最终 `white` 仍由 `smoothwm` 近似复制；LH 全候选前缀中这一步与官方最终 `white` 的逐顶点平均 3D 位移为 0.288 mm。`pial` 仍由法线射线近似，皮层标签/脑区统计仍未通过整例验收。独立[双侧 Python pial.T1 函数](PYTHON_PIAL_PLACEMENT.md)在官方正确上游输入上逐顶点一致，但本开关不调用它。 独立[Conda 最终 white 放置](FINAL_WHITE_CONDA.md)已在冻结官方输入上试跑，尚未接入整例。
+[MNI152/辅助分割](MNI_AUX_CHAIN.md)、[Python finalsurfs](FINAL_SURFS_CHAIN.md)、[双侧预白质放置](WHITE_PREAPARC_CONDA_CHAIN.md)、[LH 候选前缀连通验证](../../validation/recon_all/python_gpu_port/white_connected_prefix_20260927/README.md)和[最终 smoothwm 同输入验收](SMOOTHWM_FINAL_PARITY.md)列出函数输入输出、官方命令与真实 T1 精度/时间。最终 `white` 仍由 `smoothwm` 近似复制；LH 全候选前缀中这一步与官方最终 `white` 的逐顶点平均 3D 位移为 0.288 mm。`pial` 仍由法线射线近似，皮层标签/脑区统计仍未通过整例验收。独立[双侧 Python pial.T1 函数](PYTHON_PIAL_PLACEMENT.md)在官方正确上游输入上逐顶点一致，但本开关不调用它。 独立[Conda 最终 white 放置](FINAL_WHITE_CONDA.md)和[Conda pial.T1 放置](PIAL_T1_CONDA.md)已在冻结官方输入上分别试跑，尚未接入整例。
 
 ## 多被试 Python API
 
