@@ -1,4 +1,6 @@
-# 真实 T1 左半球：自产平滑白质表面到球面
+# 修复前的真实 T1 左半球候选球面
+
+本页保存采样角度修正前的完整球面结果；修正后已有[同输入初始矩阵及前四步验证](../candidate_sphere_first_difference_20260927/README.md)，完整球面仍在单阶段复测。
 
 本次接续[已保存的自产 MRI、拓扑和白质预放置阶段](../white_connected_prefix_20260927/README.md)，输入为去标识的 `sub-01_T1w.nii.gz`（SHA-256：`f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a`）。候选被试位于 gpucw1 的 `/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_finalsurfs_stage_20260927/white_candidate_no_official_topology_fslicense`。官方 FreeSurfer 8.2 被试 `/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official` 只用于输出比较。这是保存阶段的接续试验，尚非从原始 T1 在单一进程完成的整例重建。
 
@@ -6,7 +8,7 @@
 
 ## 输入、输出与命令
 
-Conda 编译的 `mris_inflate` 读取自产 `surf/lh.smoothwm`，写入 `surf/lh.inflated` 和每顶点 `surf/lh.sulc`；对应官方命令为 `mris_inflate LH.SMOOTHWM LH.INFLATED`。随后 Python `run_standard_sphere(inflated, smoothwm, output, finish_device="cpu") -> dict` 读取两个同面序网格，写入 `surf/lh.sphere`，返回投影、度量、逐步优化和总耗时。独立命令与官方对应命令如下：
+Conda 编译的 `mris_inflate` 读取自产 `surf/lh.smoothwm`，写入 `surf/lh.inflated` 和每顶点 `surf/lh.sulc`；对应官方命令为 `mris_inflate LH.SMOOTHWM LH.INFLATED`。随后 Python `run_standard_sphere(inflated=..., smoothwm=..., output=..., finish_device="cpu") -> dict` 读取两个同面序网格，写入 `surf/lh.sphere`，返回投影、度量、逐步优化和总耗时。独立命令与官方对应命令如下：
 
 ```bash
 python -m fnit.recon_all.sphere_standard_run \
@@ -50,4 +52,4 @@ CONTROL=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_fina
 
 初始负面面积比例在候选/冻结输入下分别为 0.022116% / 0.022112%。第 0、1 次线搜索步长分别是 1027.937 / 1027.952、18450.785 / 18396.798；第 2 次变为 **399.365 / 132.050**，第 8 次首次出现优化调度分歧。NumPy 二次拟合曾发出[浮点溢出警告](white_candidate_lh_sphere_warnings.log)，目前不能单凭警告确定误差来源。
 
-这项控制说明：自产上游网格的小误差足以让官方球面也偏离原整例结果；相同自产输入下 Python 与官方程序仍有 1.653 mm 平均差异，移植本身也未通过。依逐点验收规则，本次停在 `sphere`，没有据此生成 `sphere.reg`、`aparc.annot` 或最终 white。下一步需先收敛上游网格误差和同输入球面误差。
+这项修复前控制说明：自产上游网格的小误差足以让官方球面也偏离原整例结果；当时相同自产输入下 Python 与官方程序仍有 1.653 mm 平均差异。该版本依逐点验收规则停在 `sphere`，没有据此生成 `sphere.reg`、`aparc.annot` 或最终 white。采样首差现已修复并通过前四步验收，完整候选输出仍待核对。
