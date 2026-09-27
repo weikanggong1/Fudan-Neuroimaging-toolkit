@@ -20,4 +20,6 @@ separates common-support differences from mask/support differences in the nine
 native maps. [`run_official_tbss.sh`](run_official_tbss.sh)
 contains the exact forward FLIRT, three-stage FNIRT, `applywarp`, and skeleton
 commands used for the timed oracle. The final aggregate is stored in
-[`report.public.json`](report.public.json).
+[`report.public.json`](report.public.json). The matched-native timing,
+topology profile, fixed-affine, fixed-warp, and skeleton attribution are
+summarized in [`tbss_diagnosis.public.json`](tbss_diagnosis.public.json).

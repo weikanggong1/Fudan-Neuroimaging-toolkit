@@ -18,7 +18,7 @@ from ..dtifit import TorchDTIFIT, select_shell
 from ..eddy import TorchEDDY
 from ..eddy.ukb import _brain_mask, prepare_ukb_eddy
 from ..flirt import TorchFLIRT
-from ..mmorf import TorchMMORF, apply_mmorf_warp
+from ..mmorf import apply_mmorf_warp, run_mmorf
 from ..synthstrip import SynthStrip
 from ..topup import run_ukb_topup
 from ..topup.ukb import _metadata
@@ -262,13 +262,14 @@ class DMRIPipeline:
             tensor_matrix_path = registration_dir / "dti_FA_to_MNI_affine.mat"
             np.savetxt(scalar_matrix_path, scalar_affine.matrix, fmt="%.12g")
             np.savetxt(tensor_matrix_path, tensor_affine.matrix, fmt="%.12g")
-            mmorf = TorchMMORF(device=self.device).run(
+            mmorf = run_mmorf(
                 t1_brain_path,
                 t1_template,
                 dti.maps["tensor"],
                 tensor_template,
                 moving_scalar_affine=scalar_affine.matrix,
                 moving_tensor_affine=tensor_affine.matrix,
+                device=self.device,
                 output_dir=registration_dir,
                 overwrite=overwrite,
             )

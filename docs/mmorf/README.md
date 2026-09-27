@@ -2,16 +2,16 @@
 
 [返回首页](../../README.md) · [端到端 dMRI pipeline](../dmri_pipeline/README.md)
 
-本模块用一个共享的非线性形变同时配准一对标量图和一对 FSL 六通道 diffusion tensor 图。当前公开接口固定为单被试调用。输入仿射矩阵沿用 FLIRT 的 input → reference scaled-mm 定义；输出 warp 位于 reference grid，保存 reference voxel units 的三通道相对 pull displacement。这个单位与 FNIRT/applywarp 的 mm displacement 不同，不能混用。
+本模块用一个共享的非线性形变同时配准一对标量图和一对 FSL 六通道 diffusion tensor 图。公开的单被试函数是 `run_mmorf`；`fnit-mmorf` 命令和 dMRI pipeline 的 MMORF 分支均调用这一个函数。输入仿射矩阵沿用 FLIRT 的 input → reference scaled-mm 定义；输出 warp 位于 reference grid，保存 reference voxel units 的三通道相对 pull displacement。这个单位与 FNIRT/applywarp 的 mm displacement 不同，不能混用。
 
 该实现复用了 FNIT 的 FSL 坐标转换和 nibabel I/O，CUDA 路径使用 float32 并默认允许 TF32。默认五层计划来自 MMORF 0.3.2：32、32、16、8、4 mm control resolution，8、8、4、2、1 mm smoothing，每层 5 次更新。
 
 ## Python 单被试调用
 
 ~~~python
-from fnit import TorchMMORF
+from fnit import run_mmorf
 
-result = TorchMMORF(device="cuda:0").run(
+result = run_mmorf(
     "t1_brain.nii.gz",                    # moving scalar
     "MNI152_T1_1mm_brain.nii.gz",         # scalar reference and output grid
     "dti_tensor.nii.gz",                  # moving tensor: Dxx,Dxy,Dxz,Dyy,Dyz,Dzz
@@ -19,10 +19,13 @@ result = TorchMMORF(device="cuda:0").run(
     moving_scalar_affine="t1_to_MNI.mat", # FLIRT scaled-mm input→reference
     moving_tensor_affine="FA_to_MNI.mat", # FLIRT scaled-mm input→reference
     output_dir="mmorf",
+    device="cuda:0",                       # float32 images; TF32 enabled
 )
 ~~~
 
-第一至第四个位置参数分别定义 moving scalar、reference scalar、moving tensor 和 reference tensor。两个 moving affine 先把各自图像放到共同 reference grid；未提供 reference tensor affine 时按同网格 identity 处理。run 会保存结果；直接调用 TorchMMORF(...)(...) 只返回内存中的 MMORFResult。
+第一至第四个位置参数接受 NIfTI 路径或 nibabel image，依次定义 moving 3D scalar、reference 3D scalar、moving 六通道 tensor 和 reference 六通道 tensor。tensor 最后一维必须按 `Dxx,Dxy,Dxz,Dyy,Dyz,Dzz` 排列。两个 moving affine 接受 4×4 数组或 FSL `.mat` 路径，先把各自输入放到 `reference_scalar` 的 grid；未提供 `reference_tensor_affine` 时按 identity 处理。`output_dir` 必填，已有结果默认报错，只有 `overwrite=True` 才替换。`config` 可传 `MMORFConfig`；默认使用文首的五层计划。
+
+`run_mmorf` 写出完整结果并返回 `MMORFResult`。需要只在内存中计算时，可使用低层接口 `TorchMMORF(device=...)(...)`，该调用不会保存文件。
 
 输出：
 
@@ -33,6 +36,8 @@ result = TorchMMORF(device="cuda:0").run(
 | mmorf_warped_scalar.nii.gz | moving scalar 的 reference-grid 图像 |
 | mmorf_warped_tensor.nii.gz | moving tensor 的 reference-grid 图像 |
 | mmorf_report.json | 设备、精度、五层损失、耗时、峰值 CUDA 显存和等价性边界 |
+
+返回对象的 `warp`、`jacobian`、`warped_scalar`、`warped_tensor` 分别对应前四个 NIfTI 文件，`qc` 对应 JSON 内容。warp 和所有 warped image 都使用 `reference_scalar` 的 shape 与 affine。
 
 ## 命令行单被试调用
 

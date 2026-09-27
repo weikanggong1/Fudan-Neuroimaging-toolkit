@@ -1,10 +1,17 @@
 import hashlib
 import json
 from pathlib import Path
+from types import SimpleNamespace
 import nibabel as nib
 import numpy as np
 
-from fnit.mmorf import MMORFConfig, TorchMMORF, apply_mmorf_warp
+import fnit.mmorf.cli as cli_module
+from fnit.mmorf import (
+    MMORFConfig,
+    TorchMMORF,
+    apply_mmorf_warp,
+    run_mmorf,
+)
 
 
 def _image(data):
@@ -51,6 +58,75 @@ def test_joint_registration_returns_official_warp_contract():
     assert result.qc["mmorf_warp_contract"] is True
     assert np.isfinite(result.warp.get_fdata()).all()
     assert np.isfinite(result.jacobian.get_fdata()).all()
+
+
+def test_run_mmorf_writes_complete_single_subject_output(tmp_path):
+    shape = (5, 6, 7)
+    scalar = np.ones(shape, dtype=np.float32)
+    tensor = np.zeros((*shape, 6), dtype=np.float32)
+    tensor[..., (0, 3, 5)] = (1.4e-3, 0.5e-3, 0.4e-3)
+    config = MMORFConfig(
+        warp_resolution_mm=(8.0,),
+        smoothing_mm=(0.0,),
+        regularization=(0.2,),
+        iterations=(1,),
+        sample_stride=(2,),
+    )
+
+    result = run_mmorf(
+        _image(scalar),
+        _image(scalar),
+        _image(tensor),
+        _image(tensor),
+        output_dir=tmp_path,
+        device="cpu",
+        config=config,
+    )
+
+    assert result.warp.shape == (*shape, 3)
+    assert result.warped_scalar.shape == shape
+    assert result.warped_tensor.shape == (*shape, 6)
+    assert {path.name for path in tmp_path.iterdir()} == {
+        "mmorf_warp.nii.gz",
+        "mmorf_jacobian.nii.gz",
+        "mmorf_warped_scalar.nii.gz",
+        "mmorf_warped_tensor.nii.gz",
+        "mmorf_report.json",
+    }
+
+
+def test_mmorf_cli_delegates_to_public_function(monkeypatch, tmp_path):
+    captured = {}
+
+    def fake_run_mmorf(*args, **kwargs):
+        captured["args"] = args
+        captured["kwargs"] = kwargs
+        return SimpleNamespace(qc={"complete": True})
+
+    monkeypatch.setattr(cli_module, "run_mmorf", fake_run_mmorf)
+    cli_module.main(
+        [
+            "--mov-scalar", "moving_scalar.nii.gz",
+            "--ref-scalar", "reference_scalar.nii.gz",
+            "--mov-tensor", "moving_tensor.nii.gz",
+            "--ref-tensor", "reference_tensor.nii.gz",
+            "--aff-mov-scalar", "scalar.mat",
+            "--aff-mov-tensor", "tensor.mat",
+            "-o", str(tmp_path),
+            "--device", "cpu",
+        ]
+    )
+
+    assert captured["args"] == (
+        "moving_scalar.nii.gz",
+        "reference_scalar.nii.gz",
+        "moving_tensor.nii.gz",
+        "reference_tensor.nii.gz",
+    )
+    assert captured["kwargs"]["output_dir"] == str(tmp_path)
+    assert captured["kwargs"]["moving_scalar_affine"] == "scalar.mat"
+    assert captured["kwargs"]["moving_tensor_affine"] == "tensor.mat"
+    assert captured["kwargs"]["device"] == "cpu"
 
 
 def test_vendored_mmorf_snapshot_matches_manifest():

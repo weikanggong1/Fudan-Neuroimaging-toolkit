@@ -15,8 +15,8 @@ flowchart LR
   E --> G[TorchAMICO-NODDI all shells]
   F --> H{registration backend}
   G --> H
-  H -->|tbss| I[weighted TorchFLIRT + three-stage TorchFNIRT]
-  H -->|mmorf| J[SynthStrip T1 + two TorchFLIRT + scalar/tensor TorchMMORF]
+  H -->|tbss| I[weighted TorchFLIRT + combined six-level TorchFNIRT]
+  H -->|mmorf| J[SynthStrip T1 + two TorchFLIRT + run_mmorf]
   I --> K[9 maps on FMRIB58/MNI152 1 mm grid]
   J --> K
 ~~~
@@ -79,7 +79,7 @@ result = DMRIPipeline(
 )
 ~~~
 
-该分支先用 SynthStrip 生成 t1_brain，再分别计算 T1→MNI T1 和 FA→FMRIB58 的 12-DOF FLIRT 矩阵。PyTorch MMORF 用这两份仿射初始化 T1 scalar pair 与 DTI tensor pair，并只估计一个共享 warp；九张 dMRI 参数图全部使用 FA/tensor affine 与同一 warp 重采样。SynthStrip 权重可通过 fnit-setup-weights --model synthstrip 下载。
+该分支先用 SynthStrip 生成 t1_brain，再分别计算 T1→MNI T1 和 FA→FMRIB58 的 12-DOF FLIRT 矩阵。随后它调用公开的 [`run_mmorf`](../mmorf/README.md) 函数，用两份仿射初始化 T1 scalar pair 与 DTI tensor pair，并只估计一个共享 warp；九张 dMRI 参数图全部使用 FA/tensor affine 与同一 warp 重采样。独立函数、命令行和 pipeline 因而共用同一实现和五文件 MMORF 输出。SynthStrip 权重可通过 fnit-setup-weights --model synthstrip 下载。
 
 ## 命令行：单被试
 
@@ -149,7 +149,7 @@ subject/
 | 九图传播 | applywarp --rel -r FMRIB58_FA_1mm -w dti_FA_to_MNI_warp |
 | skeleton mask | FMRIB58_FA-skeleton_1mm ≥ 2000，再乘以有效 FA mask |
 
-包内三份 oxford 配置与 UKB ancillary archive 的 SHA-256 完全一致。TorchFNIRT 连续执行相同六层 subsampling、FWHM、lambda、intensity-estimation 和 10→2 mm control-resolution 计划；stage 2/3 的官方 SCG 被当前 LM/PCG optimizer 取代，所以 FNIRT 结果仍是 tolerance-level comparison，不是逐值等价。单被试 UKB 脚本使用官方 skeleton mask 相乘，并不执行经典多被试 TBSS 的跨被试最大投影；本包复现的是这一行为。
+包内三份 oxford 配置与 UKB ancillary archive 的 SHA-256 完全一致。`TBSSConfig` 选取相同六层 subsampling、FWHM、lambda、intensity-estimation 和 10→2 mm control-resolution 数值，但把官方三个进程合并为一次连续调用。当前实现还没有复现 implicit zero masks、mask-normalized smoothing、`inwarp/intin` 的阶段交接和 stage 2/3 SCG。因此 FNIRT 结果不是逐值等价；具体隔离证据见下方诊断。单被试 UKB 脚本使用官方 skeleton mask 相乘，并不执行经典多被试 TBSS 的跨被试最大投影；本包复现的是这一行为。
 
 ## MMORF 分支对应关系
 
@@ -186,7 +186,58 @@ MMORF 分支和 TBSS 分支共用 TOPUP、EDDY、DTIFIT、NODDI、九图命名�
 | OD | 0.506862 | 0.757693 |
 | ISOVF | 0.608481 | 0.853708 |
 
-TBSS 分支从原始 AP/PA 到全部标准图和 skeleton 图的 wall time 为 2054.62 s，其中注册与九图传播为 1851.05 s；官方 FSL 从已经准备好的 native maps 开始完成 FLIRT、三阶段 FNIRT、九图传播和 skeleton mask 用时 976.88 s。两者计时起点不同，因此不作为端到端加速比。FNIT 注册本身的独立同输入运行用时 982.77 s。
+### TBSS 时间边界与瓶颈
+
+原始 AP/PA 到全部标准图和 skeleton 图的 FNIT wall time 为 2054.62 s。内部计时 2048.56 s 的分解如下：
+
+| stage | seconds | internal time |
+|---|---:|---:|
+| TOPUP + EDDY preparation | 95.82 | 4.68% |
+| EDDY | 47.49 | 2.32% |
+| DTIFIT | 16.58 | 0.81% |
+| AMICO-NODDI | 37.63 | 1.84% |
+| TBSS registration + nine-map propagation | 1851.05 | 90.36% |
+
+官方 976.88 s 从已经准备好的九张 native maps 开始，不能与 2054.62 s 构成端到端加速比。把两种实现固定到同一组官方 native maps 后，计时边界才一致：
+
+| 实现 | 相同输入和输出范围 | wall time |
+|---|---|---:|
+| FSL/UKB | weighted FLIRT + three FNIRT stages + nine maps + skeleton | 976.88 s |
+| FNIT | weighted TorchFLIRT + TorchFNIRT + nine maps + skeleton | 982.77 s |
+
+同输入时 FNIT 只慢 5.89 s，即 0.60%；因此没有证据支持“PyTorch TBSS 一般慢约两倍”。原始端到端运行变慢，是该次 FNIT native FA 使非线性优化产生更多超出 Jacobian 范围的形变，继而反复进入拓扑修复。
+
+| 运行 | `constrain_topology` 已计时内循环 | ForceJacobianRange calls / inner iterations | 占 TorchTBSS |
+|---|---:|---:|---:|
+| FNIT raw 端到端输入 | 1187.59 s | 24 / 122 | 64.45% |
+| 相同官方 native maps | 169.98 s | 1 / 5 | 17.52% |
+
+raw 运行的第 3–6 层 topology 时间依次为 155.97、221.28、384.44 和 425.90 s；第 3、4 层各重试十次后仍未达到要求的 Jacobian 范围。当前 Triton limiter 为保持 FSL 的原位 `z/y/x/corner` 更新顺序，只启动一个 program 和一个 warp 串行遍历全部 cube。这个实现让 H100 的大部分计算单元空闲。1187.59 s 还没有包含每轮的 B-spline 重拟合和 Jacobian 重算，因此是 topology 开销的下界。
+
+九张真实参数图逐张调用 `TorchApplyWarp` 仅用 2.895 s；堆为一次 4D 调用用 0.990 s，九图逐元素相同，最大绝对误差 0。匹配输入运行的 PCG 迭代反而更多，25,328 次对 raw 运行的 20,343 次，却更快。这两项隔离共同排除了九图传播和 PCG 数量作为约两倍时间差的主因。从迭代结构推断，PCG 是 topology 之外优先 profile 的计算热点：94% 左右的迭代发生在全分辨率层，系数和 B-spline 运算使用 float64，所以 TF32 不会加速这条主路径。当前没有单独的 PCG wall-time profile，因此不把它定量排序为第二大耗时。
+
+### TBSS 不完全一致的原因
+
+以下隔离实验都使用同一真实病例。它们把输出差异定位到 nonlinear warp 的估计，而不是输出格式或 warp 应用：
+
+| 隔离项 | 真实数据结果 | 判断 |
+|---|---|---|
+| FA preprocessing 与 FLIRT weight | 对 FSL 差异体素 0，最大误差 0 | 已排除 |
+| 固定官方 nonlinear residual，只换 TorchFLIRT affine | 九图 common-support r = 0.999671–0.999910 | affine 的直接重采样效应很小；对 nonlinear 优化轨迹的间接影响尚未单独消融 |
+| 固定官方 FNIRT warp，TorchApplyWarp 对 FSL applywarp | 九图 r 均大于 0.99999999997；全图最大误差 3.53e-5 | warp 方向、坐标和插值已对齐 |
+| 固定官方 warp，再执行 skeleton | mask 差异体素 0；九图 r 均大于 0.999999999985 | skeleton threshold 与相乘已排除 |
+
+固定官方 warp 后，applywarp 与 skeleton 都达到数值容差，因此主要剩余差异位于 TorchFNIRT 的 warp 估计。以下是依据配置、源码和运行 QC 确定的优先核查项；尚未逐项实现后做 one-change ablation，顺序不是各项误差贡献的定量排名：
+
+1. Oxford 三份配置都启用 implicit input/reference zero mask。FSL 在 masked smoothing 和代价函数中使用这些隐式 mask；当前实现没有相同的 zero-mask 与 mask-normalized smoothing。stage 2/3 配置中的 `applyrefmask/applyinmask=1` 只有在命令传入显式 mask 时才生效，本次官方命令没有传入，不能把这两个 dormant flags 当作实测差异来源。真实 moving FA 只有 253,960/778,752 个非零体素，reference 只有 1,489,274/7,221,032 个非零体素，而当前 full-resolution cost mask 达到约 4.00–4.41 million voxels，因此缺少隐式 mask 会改变 SSD、梯度、有效正则权重和优化轨迹。
+2. 官方 stage 2/3 使用 `--minmet=scg`；当前六层全部使用 Gauss–Newton/LM + matrix-free PCG。官方三个独立 `fnirt` 进程还通过 float32 `--inwarp` 和文本 `--intin` 交接，当前实现则在一次调用中保持连续 float64 状态，并用 dense expand/refit 完成 10→2 mm 换基。
+3. 即使在 stage 1 的 LM 部分，FNIT 的 matrix-free FP64 Hessian/PCG、求和顺序和 LM 接受规则也不同于 FSL 的 assembled sparse Hessian。此前逐更新对照最早在第三次 coefficient update 分叉。
+4. topology projection 尚未通过 FSL oracle。raw 运行最终 full-pull Jacobian minimum 为 -0.018944，低于要求的 0.01；投影失败既改变最终 warp，也造成上述额外时间。
+5. raw 端到端输入还叠加 TOPUP、EDDY、脑 mask、DTIFIT 和 NODDI 的 native-map 差异。固定九张 native maps 后，standard r 从 0.313–0.754 提高到 0.520–0.880，但仍未达到数值等价，进一步说明主要剩余误差位于 nonlinear registration。
+
+后续修复应先补齐 implicit masks、masked smoothing、三个 stage 的状态交接和 stage 2/3 SCG，再用 FSL `ForceJacobianRange` oracle 逐轮校验 topology。这样同时处理数值轨迹和反复 topology 的速度代价。之后才适合缓存不变的 bending diagonal、减少 PCG 的 CUDA scalar 同步，并评估保持原位顺序的 C++ topology loop。九图 4D 合并只能节省约 1.9 s，不会改变主要瓶颈。
+
+完整去标识 profile、计时边界和隔离指标见 [`tbss_diagnosis.public.json`](../../validation/dmri_pipeline/tbss_diagnosis.public.json)。
 
 | map | 端到端 standard r | 端到端 skeleton r | 同 native standard r | 同 native skeleton r |
 |---|---:|---:|---:|---:|

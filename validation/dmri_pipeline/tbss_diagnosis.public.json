@@ -1,0 +1,267 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-27",
+  "feature": "UKB-style single-subject TBSS branch runtime and numerical attribution",
+  "scope": "one real UKB-format AP/PA acquisition; matched-native and fixed-transform isolation; aggregate metrics only",
+  "data_release": "no source image, subject identifier, private path, or weight file",
+  "reference": {
+    "ukb_pipeline": "v1.5 commit 0e39a7f7eb76b55437942bfa3073512506b6c8fa",
+    "fsl": "6.0.7.4"
+  },
+  "hardware": {
+    "candidate": "NVIDIA H100 PCIe 80 GB",
+    "shared_node": true,
+    "tf32": true,
+    "fnirt_coefficient_dtype": "float64",
+    "peak_cuda_memory_bytes": 4552955392
+  },
+  "timing_boundary": {
+    "fnit_raw_end_to_end_starts_at": "raw AP/PA acquisition",
+    "official_tbss_starts_at": "nine prepared native maps",
+    "raw_2054_62_vs_official_976_88_is_direct_speed_ratio": false
+  },
+  "fnit_raw_end_to_end": {
+    "wall_seconds": 2054.62,
+    "internal_seconds": 2048.5643799919635,
+    "stages": {
+      "topup_and_eddy_preparation": {
+        "seconds": 95.81698721041903,
+        "percent_internal": 4.6772748831449915
+      },
+      "eddy": {
+        "seconds": 47.486898004077375,
+        "percent_internal": 2.31805739023265
+      },
+      "dtifit": {
+        "seconds": 16.576533935964108,
+        "percent_internal": 0.8091780808972738
+      },
+      "noddi": {
+        "seconds": 37.625045157969,
+        "percent_internal": 1.8366542699583892
+      },
+      "registration_and_map_propagation": {
+        "seconds": 1851.0545869888738,
+        "percent_internal": 90.35862407195303
+      }
+    },
+    "torch_tbss_seconds": 1842.6557168639265
+  },
+  "matched_native_timing": {
+    "same_nine_official_native_maps": true,
+    "fnit_wall_seconds": 982.77,
+    "fnit_internal_seconds": 970.2062538000755,
+    "official_fsl_wall_seconds": 976.88,
+    "wall_difference_seconds": 5.89,
+    "fnit_slower_percent": 0.6029399721562578
+  },
+  "topology_profile": {
+    "raw_end_to_end": {
+      "constrain_topology_inner_seconds": 1187.5886824619956,
+      "percent_torch_tbss": 64.44984115009775,
+      "percent_pipeline_internal": 57.97175300229786,
+      "force_jacobian_range_calls": 24,
+      "inner_iterations": 122,
+      "levels": [
+        {
+          "level": 3,
+          "matrix_size": [
+            92,
+            110,
+            92
+          ],
+          "calls": 10,
+          "inner_iterations": 43,
+          "seconds": 155.97104072989896,
+          "range_succeeded": false
+        },
+        {
+          "level": 4,
+          "matrix_size": [
+            92,
+            110,
+            92
+          ],
+          "calls": 10,
+          "inner_iterations": 58,
+          "seconds": 221.27910313475877,
+          "range_succeeded": false
+        },
+        {
+          "level": 5,
+          "matrix_size": [
+            182,
+            218,
+            182
+          ],
+          "calls": 1,
+          "inner_iterations": 9,
+          "seconds": 384.43853117804974
+        },
+        {
+          "level": 6,
+          "matrix_size": [
+            182,
+            218,
+            182
+          ],
+          "calls": 3,
+          "inner_iterations": 12,
+          "seconds": 425.90000741928816
+        }
+      ]
+    },
+    "matched_native": {
+      "constrain_topology_inner_seconds": 169.97515350207686,
+      "percent_torch_tbss": 17.51948505445819,
+      "force_jacobian_range_calls": 1,
+      "inner_iterations": 5
+    },
+    "implementation_cause": "one Triton program with one warp serially traverses every cube and corner to preserve FSL in-place update order",
+    "timed_inner_loop_excludes": [
+      "B-spline refit",
+      "Jacobian recomputation"
+    ]
+  },
+  "pcg_profile": {
+    "raw_end_to_end_iterations_by_level": [
+      176,
+      316,
+      275,
+      385,
+      14377,
+      4814
+    ],
+    "raw_end_to_end_total": 20343,
+    "matched_native_iterations_by_level": [
+      457,
+      396,
+      301,
+      411,
+      19290,
+      4473
+    ],
+    "matched_native_total": 25328,
+    "full_resolution_fraction_raw": 0.9433711841911222,
+    "full_resolution_fraction_matched": 0.9382106759317751,
+    "gpu_scalar_synchronizations_per_iteration_at_least": 3,
+    "tf32_accelerates_main_path": false,
+    "reason": "coefficient and B-spline solver path is float64"
+  },
+  "nine_map_applywarp_speed_isolation": {
+    "same_real_native_maps_and_warp": true,
+    "nine_serial_calls_seconds": 2.8952,
+    "one_4d_call_seconds": 0.9898,
+    "array_equal": true,
+    "maximum_absolute_error": 0.0,
+    "conclusion": "map propagation is not the 1851-second bottleneck",
+    "nine_serial_peak_cuda_gb": 1.95,
+    "one_4d_call_peak_cuda_gb": 2.192
+  },
+  "numerical_attribution": {
+    "fa_preprocessing_and_weight": {
+      "different_voxels_vs_fsl": 0,
+      "maximum_absolute_error": 0.0
+    },
+    "weighted_flirt": {
+      "matrix_rms_difference_mm": 0.0752966,
+      "moved_pearson": 0.999399,
+      "passes_0_05_mm_gate": false,
+      "fixed_official_nonlinear_residual_common_support_pearson_range": [
+        0.9996711231218572,
+        0.9999100816735124
+      ],
+      "conclusion": "direct affine substitution with the official nonlinear residual is small; the indirect effect on the TorchFNIRT optimization trajectory was not isolated",
+      "fixed_residual_direct_effect_is_small": true,
+      "effect_on_torch_fnirt_optimization_trajectory_isolated": false
+    },
+    "official_warp_torch_applywarp_vs_fsl": {
+      "union_support_pearson_minimum": 0.9999999999763745,
+      "maximum_absolute_error_all_maps": 3.524869680404663e-05,
+      "fa_maximum_absolute_error": 1.1831521987915039e-05,
+      "dti_maximum_absolute_error": 1.043081283569336e-07,
+      "noddi_maximum_absolute_error": 2.4500302970409393e-05,
+      "boundary_nonzero_voxel_difference_maximum": 2,
+      "conclusion": "warp metadata, pull direction, coordinates, and interpolation are matched at numerical tolerance"
+    },
+    "skeleton_with_official_warp": {
+      "mask_different_voxels": 0,
+      "mask_voxels": 136692,
+      "pearson_minimum": 0.9999999999857919,
+      "maximum_absolute_error_all_maps": 3.524869680404663e-05,
+      "conclusion": "skeleton threshold and multiplication are not a material source of disagreement"
+    },
+    "torch_fnirt": {
+      "complete_numerical_equivalence": false,
+      "moving_fa_nonzero_voxels": 253960,
+      "moving_fa_voxels": 778752,
+      "moving_fa_nonzero_fraction": 0.32611152202498356,
+      "reference_nonzero_voxels": 1489274,
+      "reference_voxels": 7221032,
+      "reference_nonzero_fraction": 0.20624115777357033,
+      "final_full_pull_jacobian_minimum": -0.01894403249025345,
+      "requested_minimum": 0.01,
+      "torch_full_resolution_cost_mask_voxel_range_approximate": [
+        4000000,
+        4410000
+      ],
+      "candidate_causes_for_one_change_ablation": [
+        "Oxford implicit input/reference zero masks and mask-normalized smoothing are absent",
+        "Oxford stage 2 and 3 use SCG, while all six TorchFNIRT levels use Gauss-Newton/LM with matrix-free PCG",
+        "official s1/s2/s3 are separate processes linked by serialized inwarp/intin; TorchFNIRT keeps one continuous float64 state and performs dense 10-to-2-mm basis refitting",
+        "matrix-free FP64 Hessian accumulation and LM acceptance differ from FSL sparse assembled arithmetic",
+        "topology projection has not matched the FSL oracle and sometimes fails the requested Jacobian range"
+      ],
+      "candidate_order_is_quantitative_error_ranking": false
+    },
+    "upstream_native_maps": {
+      "union_support_pearson_range": [
+        -0.00206971847454545,
+        0.6340224732959359
+      ],
+      "common_support_pearson_range": [
+        0.4660987374441063,
+        0.9007340518298944
+      ],
+      "effect": "TOPUP, EDDY, brain-mask, DTIFIT, and NODDI differences add to the raw end-to-end disagreement"
+    }
+  },
+  "final_output_correlations": {
+    "raw_end_to_end_standard_range": [
+      0.31315624510512013,
+      0.7538712218678826
+    ],
+    "raw_end_to_end_skeleton_range": [
+      0.3861005369474241,
+      0.6944630353850065
+    ],
+    "matched_native_standard_range": [
+      0.5201426375667508,
+      0.879641997465398
+    ],
+    "matched_native_skeleton_range": [
+      0.5619069128796529,
+      0.8937472232779684
+    ]
+  },
+  "conclusion": {
+    "speed": "matched-native FNIT and FSL have similar wall time; the raw FNIT trajectory triggers repeated serial topology repair",
+    "parity": "the remaining matched-native disagreement is dominated by nonlinear warp estimation, chiefly masking, SCG/stage semantics, solver arithmetic, and topology projection",
+    "matched_at_numerical_tolerance_with_official_warp": [
+      "FA preprocessing/weight",
+      "applywarp",
+      "skeleton multiplication"
+    ],
+    "flirt_direct_effect_small": true,
+    "flirt_indirect_optimization_effect_isolated": false
+  },
+  "source_sha256": {
+    "src/fnit/dmri_pipeline/tbss.py": "d77740ecc1cbb51fbe614794ab389dc6dd573c2e9d2d78f1c3751e3537a3ec87",
+    "src/fnit/fnirt/registration.py": "22d3bf04ab8d46d57c047f7d613e9365ee7b2159e9fdf20f5241f98ac4643db2",
+    "src/fnit/fnirt/optimizer.py": "d6ced5c63df69eb9f73b7d10608cd7c21b498ef842c326e05aff87e7de68fa73",
+    "src/fnit/fnirt/topology.py": "150f65a73baf796f98e6304d0c209288816ee75485be5d93032db46edeb52900",
+    "src/fnit/fnirt/_topology_triton.py": "3f61e452228a9c3dff85caff58ed1103e7b89783c86838bf1e70e322ae3f65f1",
+    "src/fnit/applywarp/core.py": "cf6de438f3ac1551804d38682ce3fbb11b8fb042ad881562ebc93aada80f2df5",
+    "validation/dmri_pipeline/run_official_tbss.sh": "bd3a3c9015643ef6f269d5e3b6d8367cb587a73775f9eb83031593bcb29ce903"
+  }
+}

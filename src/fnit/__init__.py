@@ -54,7 +54,8 @@ def __getattr__(name):
         from importlib import import_module
         module = import_module('.amico_noddi', __name__)
         return getattr(module, name)
-    if name in ('TorchMMORF', 'MMORFResult', 'MMORFConfig', 'apply_mmorf_warp'):
+    if name in ('TorchMMORF', 'MMORFResult', 'MMORFConfig',
+                'apply_mmorf_warp', 'run_mmorf'):
         from importlib import import_module
         module = import_module('.mmorf', __name__)
         return getattr(module, name)

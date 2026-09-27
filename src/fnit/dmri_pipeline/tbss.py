@@ -235,7 +235,11 @@ class TorchTBSS:
                 "skeleton_threshold": self.config.skeleton_threshold,
                 "ukb_preprocessing_contract": True,
                 "ukb_output_contract": True,
-                "official_oxford_three_stage_config": True,
+                "oxford_subsampling_fwhm_lambda_iteration_values_combined": True,
+                "official_oxford_three_process_execution": False,
+                "official_implicit_zero_masks_and_masked_smoothing": False,
+                "official_stage_2_3_scg": False,
+                "topology_projection_matches_fsl": False,
                 "official_flirt_input_weight_used": True,
                 "official_config_sha256": {
                     "oxford_s1.cnf": "3df6320e97300f9cef8a77b6c7c6306b8256351d5a7022d9966c076f24747227",
@@ -243,10 +247,12 @@ class TorchTBSS:
                     "oxford_s3.cnf": "9d304dfd224b8e48f20364dcce77c7618722cf3a9bcd40d764a6d25ee8020eaf",
                 },
                 "ukb_numerically_equivalent": False,
-                "known_difference": (
-                    "the official schedules are combined continuously; stage-2/3 "
-                    "SCG is executed by the packaged FNIRT LM/PCG optimiser"
-                ),
+                "known_differences": [
+                    "FSL implicit zero masks and mask-normalized smoothing are not implemented",
+                    "official s1/s2/s3 are separate processes; this schedule runs continuously",
+                    "official stage-2/3 SCG is replaced by Gauss-Newton/LM with PCG",
+                    "topology projection has not matched the FSL oracle",
+                ],
                 "flirt": linear.qc,
                 "fnirt": nonlinear.qc,
                 "elapsed_seconds": elapsed,

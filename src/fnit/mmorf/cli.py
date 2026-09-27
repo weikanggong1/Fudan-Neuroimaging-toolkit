@@ -2,7 +2,7 @@
 
 import argparse
 
-from .core import TorchMMORF
+from .standalone import run_mmorf
 
 
 def _arguments(parser):
@@ -19,7 +19,7 @@ def _arguments(parser):
 
 
 def run(args):
-    result = TorchMMORF(device=args.device).run(
+    result = run_mmorf(
         args.mov_scalar,
         args.ref_scalar,
         args.mov_tensor,
@@ -27,6 +27,7 @@ def run(args):
         moving_scalar_affine=args.aff_mov_scalar,
         moving_tensor_affine=args.aff_mov_tensor,
         reference_tensor_affine=args.aff_ref_tensor,
+        device=args.device,
         output_dir=args.output_dir,
         overwrite=args.overwrite,
     )

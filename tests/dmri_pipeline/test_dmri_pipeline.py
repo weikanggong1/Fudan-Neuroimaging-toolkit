@@ -7,6 +7,7 @@ import pytest
 import torch
 import surfa as sf
 
+import fnit.dmri_pipeline.pipeline as pipeline_module
 import fnit.dmri_pipeline.tbss as tbss_module
 
 from fnit.dmri_pipeline import DMRIPipeline, STANDARD_MAP_NAMES
@@ -20,7 +21,7 @@ def test_common_nine_map_contract():
     )
 
 
-def test_tbss_config_is_the_three_official_ukb_schedules():
+def test_tbss_config_combines_selected_official_schedule_values():
     config = TBSSConfig().fnirt
     assert config.subsampling == (8, 4, 2, 2, 1, 1)
     assert config.maximum_iterations == (5, 5, 5, 5, 50, 25)
@@ -99,6 +100,132 @@ def test_partial_pa_acquisition_is_rejected(tmp_path):
         )
 
 
+def test_mmorf_branch_calls_public_mmorf_function(monkeypatch, tmp_path):
+    raw = tmp_path / "raw"
+    raw.mkdir()
+    for name in ("AP.nii.gz", "AP.bval", "AP.bvec", "AP.json"):
+        (raw / name).touch()
+
+    shape = (5, 6, 7)
+    scalar = nib.Nifti1Image(np.ones(shape, dtype=np.float32), np.eye(4))
+    tensor_data = np.zeros((*shape, 6), dtype=np.float32)
+    tensor_data[..., (0, 3, 5)] = (1.4e-3, 0.5e-3, 0.4e-3)
+    tensor = nib.Nifti1Image(tensor_data, np.eye(4))
+    paths = {}
+    for name, image in {
+        "t1": scalar,
+        "fa_template": scalar,
+        "t1_template": scalar,
+        "tensor_template": tensor,
+        "mask": scalar,
+    }.items():
+        paths[name] = tmp_path / f"{name}.nii.gz"
+        nib.save(image, paths[name])
+
+    monkeypatch.setattr(
+        pipeline_module,
+        "_prepare_ap_only",
+        lambda *args, **kwargs: {"mask": paths["mask"]},
+    )
+
+    class FakeEDDY:
+        def __init__(self, device=None):
+            pass
+
+        def run(self, **kwargs):
+            return SimpleNamespace(qc={})
+
+    class FakeDTIFIT:
+        def __init__(self, device=None):
+            pass
+
+        def run(self, *args, **kwargs):
+            maps = {
+                name: scalar
+                for name in ("FA", "MD", "L1", "L2", "L3", "MO")
+            }
+            maps["tensor"] = tensor
+            return SimpleNamespace(maps=maps, qc={})
+
+    class FakeNODDI:
+        def __init__(self, device=None):
+            pass
+
+        def run(self, *args, **kwargs):
+            return SimpleNamespace(ndi=scalar, odi=scalar, fwf=scalar, qc={})
+
+    class Saveable:
+        def __init__(self, image):
+            self.image = image
+
+        def save(self, path):
+            nib.save(self.image, path)
+
+    class FakeSynthStrip:
+        def __init__(self, weights=None, device=None):
+            pass
+
+        def __call__(self, image):
+            return SimpleNamespace(image=Saveable(scalar), mask=Saveable(scalar))
+
+    class FakeFLIRT:
+        def __init__(self, device=None):
+            pass
+
+        def __call__(self, *args, **kwargs):
+            return SimpleNamespace(matrix=np.eye(4), qc={})
+
+    monkeypatch.setattr(pipeline_module, "TorchEDDY", FakeEDDY)
+    monkeypatch.setattr(pipeline_module, "TorchDTIFIT", FakeDTIFIT)
+    monkeypatch.setattr(pipeline_module, "TorchAMICONODDI", FakeNODDI)
+    monkeypatch.setattr(pipeline_module, "SynthStrip", FakeSynthStrip)
+    monkeypatch.setattr(pipeline_module, "TorchFLIRT", FakeFLIRT)
+    monkeypatch.setattr(
+        pipeline_module,
+        "select_shell",
+        lambda *args, **kwargs: ("shell.nii.gz", "shell.bval", "shell.bvec"),
+    )
+
+    captured = {}
+
+    def fake_run_mmorf(*args, **kwargs):
+        captured["args"] = args
+        captured["kwargs"] = kwargs
+        warp = nib.Nifti1Image(
+            np.zeros((*shape, 3), dtype=np.float32), np.eye(4)
+        )
+        return SimpleNamespace(warp=warp, qc={})
+
+    monkeypatch.setattr(pipeline_module, "run_mmorf", fake_run_mmorf)
+    monkeypatch.setattr(
+        pipeline_module,
+        "apply_mmorf_warp",
+        lambda image, *args, **kwargs: image,
+    )
+
+    output_dir = tmp_path / "out"
+    result = DMRIPipeline(
+        device="cpu",
+        registration_backend="mmorf",
+        synthstrip_weights="synthstrip.pt",
+    ).run(
+        raw,
+        output_dir,
+        fa_template=paths["fa_template"],
+        t1=paths["t1"],
+        t1_template=paths["t1_template"],
+        tensor_template=paths["tensor_template"],
+    )
+
+    assert captured["args"][2] is tensor
+    assert captured["kwargs"]["device"].type == "cpu"
+    assert captured["kwargs"]["output_dir"] == output_dir / "registration"
+    np.testing.assert_array_equal(
+        captured["kwargs"]["moving_tensor_affine"], np.eye(4)
+    )
+    assert set(result.standard_maps) == set(STANDARD_MAP_NAMES)
+
+
 def test_tbss_passes_volumes_to_fnirt(monkeypatch, tmp_path):
     shape = (9, 9, 9)
     data = np.zeros(shape, dtype=np.float32)
@@ -160,3 +287,10 @@ def test_tbss_passes_volumes_to_fnirt(monkeypatch, tmp_path):
     assert set(result.standard_maps) == set(STANDARD_MAP_NAMES)
     assert result.standard_maps["ICVF"].shape == shape
     assert result.skeleton_maps["ICVF"].shape == shape
+    assert result.qc["oxford_subsampling_fwhm_lambda_iteration_values_combined"]
+    assert result.qc["official_oxford_three_process_execution"] is False
+    assert result.qc["official_implicit_zero_masks_and_masked_smoothing"] is False
+    assert result.qc["official_stage_2_3_scg"] is False
+    assert result.qc["topology_projection_matches_fsl"] is False
+    assert "official_oxford_three_stage_config" not in result.qc
+    assert len(result.qc["known_differences"]) == 4

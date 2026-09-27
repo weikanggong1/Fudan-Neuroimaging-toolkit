@@ -28,7 +28,7 @@ import pytest
     ("amico_noddi", ("TorchAMICONODDI", "AMICONODDIResult",
                      "AMICONODDIConfig")),
     ("mmorf", ("TorchMMORF", "MMORFResult", "MMORFConfig",
-               "apply_mmorf_warp")),
+               "apply_mmorf_warp", "run_mmorf")),
     ("dmri_pipeline", ("DMRIPipeline", "DMRIPipelineResult",
                        "STANDARD_MAP_NAMES", "TorchTBSS", "TBSSResult",
                        "TBSSConfig")),
