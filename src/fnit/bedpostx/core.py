@@ -82,9 +82,9 @@ def _energy(state, observed, bvals, bvecs, config):
     energy = energy - torch.log(torch.sin(theta).abs().clamp_min(1e-6)).sum(dim=1)
     if config.nfibres > 1:
         energy = energy + config.ard_weight * torch.log(
-            fractions[:, 1:].clamp_min(1e-8)).sum(dim=1)
+            fractions[:, 1:]).sum(dim=1)
     if config.model == 2:
-        energy = energy + torch.log(d_std.clamp_min(1e-8))
+        energy = energy + torch.log(d_std)
     valid = ((s0 > 0) & (d > 0) & (d <= 0.005)
              & (fractions > 0).all(dim=1) & (fractions < 1).all(dim=1)
              & (fractions.sum(dim=1) <= 1))

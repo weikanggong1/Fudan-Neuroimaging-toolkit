@@ -48,6 +48,24 @@ On the same gpucw1 host, original FSL CPU `xfibres` took 10.99 seconds and Torch
 
 As a file-contract check, original FSL `probtrackx2` loaded the TorchBEDPOSTX output as three fibres with 50 draws per voxel and tracked 20/20 streamlines from one same-grid voxel. It wrote a 7 × 13 × 7 `fdt_paths.nii.gz` with nonzero density and a `waytotal` of 20. Its log ended with `finished` despite the same status-255 behavior.
 
+
+## Why the low-fraction and diffusivity-spread maps differ
+
+A controlled rerun on the same 14-voxel ROI showed that the original FSL result itself changes at least as much as the cross-implementation comparison. The FSL tensor-initialized run used `--nospat` instead of `--cnonlinear`; all other short-run settings and the seed matched. The extended runs used 5000 burn-in and 5000 sampling jumps, saving every 100th jump, so every run still saved 50 draws per voxel. Values below are ROI means in mm²/s for `d_std`.
+
+| Run | Initialization | Burn-in / sampling jumps | Mean f2 | Mean f3 | Mean `d_std` |
+| --- | --- | ---: | ---: | ---: | ---: |
+| FSL CPU, reference | nonlinear | 1000 / 1250 | 0.02361 | 0.005968 | 0.0002243 |
+| FSL CPU, tensor control | tensor | 1000 / 1250 | 0.01902 | 0.000199 | 0.0002782 |
+| FSL CPU, extended | nonlinear | 5000 / 5000 | 0.01586 | 0.001475 | 0.0000000101 |
+| Torch CPU, original | tensor | 1000 / 1250 | 0.02049 | 0.004256 | 0.0001446 |
+| Torch CPU, extended original | tensor | 5000 / 5000 | 0.01598 | 0.001580 | 0.000000755 |
+| Torch CPU, extended corrected | tensor | 5000 / 5000 | 0.01305 | 0.001572 | 0.000000000354 |
+
+[FSL's model-2 source](../../src/fnit/_vendor_fsl/sources/fdt-2604.0/fibre.h) adds `log(d_std)` to the energy and, with ARD enabled, `log(f)` for each subsidiary fibre. The fitted signal remains finite as these values approach zero. Consequently, those terms pull finite-chain estimates toward zero; with no positive lower bound, the corresponding continuous density is not normalizable at zero. The original FSL `d_std` mean dropped by more than four orders of magnitude in the extended run, and 100% of its saved extended-run draws were below `1e-5`. The short-run FSL result is therefore not a stable reference for this parameter. The very small second and third fractions have the same issue; neither short run had a voxel with fraction ≥ 0.1 in both methods. The first-fibre fraction and axis are much more stable in this ROI.
+
+The implementations also start in different states: FSL's `--cnonlinear` fits a multi-fibre nonlinear model before sampling, while TorchBEDPOSTX starts from a diffusion tensor. FSL's tensor-control and nonlinear runs had MAEs of 0.0108 for mean f1, 0.0148 for mean f2, and 0.000198 mm²/s for mean `d_std`; these are comparable to the short-run cross-implementation differences. Random draws, proposal adaptation, and floating-point precision can then produce different finite chains. A separate implementation error was found in TorchBEDPOSTX: it previously flattened the two logarithmic prior terms below `1e-8`. That floor has been removed to match FSL's source. The corrected short CPU run changed the ROI mean `d_std` from 0.000144647 to 0.000144597 mm²/s; it does not resolve the finite-chain discrepancy. Against the corresponding FSL extended run, the corrected Torch extended run reduced `d_std` MAE from 7.55×10⁻⁷ to 1.05×10⁻⁸ mm²/s and mean-f2 MAE from 0.00574 to 0.00400. Both extended `d_std` means are near zero and their voxelwise correlations are not informative. The corrected H100 short run completed with finite outputs; its FSL `d_std` MAE was 0.0002166 mm²/s versus 0.0002158 before correction. See the [diagnostic report](../../validation/bedpostx/diagnosis.public.json) for the exact run settings and aggregate results.
+
 ## Shareable synthetic example
 
 The [synthetic example script](synthetic_example.py) creates an 8 × 8 × 1 multi-shell DWI with two known crossing-fibre fraction maps and no human imaging data. Generate the subject, fit both implementations at the settings above with `--nf=2`, then render the [comparison image](synthetic_example.png):
