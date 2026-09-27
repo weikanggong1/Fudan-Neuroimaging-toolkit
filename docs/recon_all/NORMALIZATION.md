@@ -2,7 +2,7 @@
 
 第一轮函数对应 FreeSurfer 8.2 的 `mri_normalize -g 1 -seed 1234 -mprage nu.mgz T1.mgz`：读取 conform 后的 `nu.mgz` 和配套 `talairach.xfm`，依次执行一维样条、温和校正及两轮三维控制点/偏置场计算，输出 `T1.mgz`。当前 `fnit-recon-all` 已调用这个 Python 阶段；后续完整皮层指标仍未通过整例验收。函数不启动 FreeSurfer 程序，也不需要模型权重或额外模板。
 
-仓库包可通过 `pip install -e .` 安装。此阶段使用 PyTorch、NumPy、SciPy、Numba 和 NiBabel；精确 CPU 高斯路径依赖 Numba。独立的 [N4 SITK 阶段](N4_SITK_VALIDATION.md)使用 SimpleITK，本归一化函数不使用。
+从仓库根目录运行 `python -m pip install -e '.[recon-all-python-stages]'` 安装本阶段及 Numba 等依赖。此阶段使用 PyTorch、NumPy、SciPy、Numba 和 NiBabel；精确 CPU 高斯路径依赖 Numba。独立的 [N4 SITK 阶段](N4_SITK_VALIDATION.md)使用 SimpleITK，本归一化函数不使用。
 
 ## 命令行与 Python 调用
 
