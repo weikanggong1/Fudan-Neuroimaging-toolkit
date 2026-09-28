@@ -6,6 +6,8 @@ import pytest
 
 from fnit._nib import new_image
 from fnit._transforms import DenseWarp
+from fnit.fast_vbm import registration as registration_module
+from fnit.fnirt import TorchFNIRT
 
 from fnit.fast_vbm.registration import (
     _displacement_qc,
@@ -30,6 +32,23 @@ def test_internal_registration_rejects_empty_volume():
 
     with pytest.raises(ValueError, match="GM image is empty"):
         _register_gm(empty, positive)
+
+
+def test_internal_gm_fnirt_disables_implicit_zero_masks(monkeypatch):
+    captured = {}
+
+    def capture_init(self, *, device, config):
+        captured["config"] = config
+        raise RuntimeError("config captured")
+
+    monkeypatch.setattr(registration_module, "_prepare_registration", lambda *args, **kwargs: None)
+    monkeypatch.setattr(TorchFNIRT, "__init__", capture_init)
+    volume = _volume()
+    with pytest.raises(RuntimeError, match="config captured"):
+        _register_gm(volume, volume, registration_backend="fnirt")
+    assert captured["config"].implicit_reference_mask is False
+    assert captured["config"].implicit_input_mask is False
+
 
 def test_displacement_qc_separates_affine_and_nonlinear_components():
     shape = (9, 7, 5)

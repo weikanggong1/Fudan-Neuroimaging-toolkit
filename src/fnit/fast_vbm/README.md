@@ -66,11 +66,10 @@ fnit fast-vbm \
 
 两后端共用 TorchFAST GM、TorchFLIRT、坐标转换、TorchApplyWarp、Jacobian 和 modulation。SynthMorph 运行官方 deform 网络，不消费 reference mask。TorchFNIRT 使用 cubic B-spline GM schedule：
 
-- fixed 非零体素构成 implicit reference mask，每一级都使用；
-- moving 非零体素构成 implicit input mask，用于 mask-normalized smoothing 和 warped-input 有效性筛选；
-- 显式 `reference_mask` 在默认 GM schedule 的最后一级与 implicit reference mask 取交集。
+- 与 FSL GM 配置一致，关闭 implicit reference 和 input mask；零值不自动排除；
+- 显式 `reference_mask` 在默认 GM schedule 的最后一级使用。
 
-省略 `reference_mask` 时，FastVBM 使用 `template > 0` 的派生 mask。复现 FSL/UKB 时应传入原运行实际使用的 mask。当前 TorchFNIRT 优化轨迹仍与 FSL 不同，不声明数值等价。
+省略 `reference_mask` 时，FastVBM 使用 `template > 0` 的派生 mask。复现 FSL/UKB 时应传入原运行实际使用的 mask。完整链尚未达到数值等价。
 
 ## 输出
 
@@ -107,19 +106,6 @@ fslmaths T1_GM_to_template_GM -mul T1_GM_JAC_nl \
 
 UKB 命令从已有 FSL FAST GM 开始；FastVBM 从 raw T1w 开始。文件角色、template grid 和 modulation 公式对应，脑提取、GM estimation 和配准优化器不是同一数值实现。
 
-## 当前真实数据验证
+## 当前验证状态
 
-数值运行冻结快照已在 1 例真实 T1w 上完成双后端回归。冻结快照的 FLIRT core 为 `552856…`，当前为 `ce375d…`；继承依次经过 [QC-only 第一段](../../../validation/runtime_dependencies/flirt_qc_source_equivalence.public.json)和[12-DOF/corratio 限定的第二段](../../../validation/runtime_dependencies/flirt_profile_source_equivalence.public.json)，不等同于 fresh current-hash 重跑，也不覆盖 6-DOF/normmi。共同源码清单在 FNIRT 报告中也列出旧 SynthMorph 文件，但该分支没有执行它；只有 SynthMorph 分支通过 [linear 路径证明](../../../validation/runtime_dependencies/synthmorph_linear_source_equivalence.public.json)继承实际执行的 `SynthMorph.__call__`。两后端三幅 template-space 输出的 shape、affine 和 float32 dtype 均与 FSL/UKB reference 一致，但数值等价未通过：
-
-| 后端 | warped GM r | Jacobian r | modulated GM r | compute | 峰值 CUDA allocation |
-|---|---:|---:|---:|---:|---:|
-| `fnirt` | 0.559420 | 0.237607 | 0.487910 | 49.010 s | 12.970 GB |
-| `synthmorph` | 0.636498 | 0.328663 | 0.575795 | 57.852 s | 15.487 GB |
-
-计时为 H100 冷启动单次运行，包含读取、首次权重加载和 GPU 结果回传，不含 13 幅 NIfTI 写盘。FSL 固定官方 warp 的 `applywarp` 和 multiplication 分别为 2.28 s、0.56 s，但该范围不含脑提取、FAST、FLIRT 或 FNIRT estimation，不能与 FNIT 端到端时间计算加速比。
-
-![TorchFNIRT FastVBM 真实数据对照](../../../docs/fast_vbm/figures/fast_vbm_fnirt_real.png)
-
-![SynthMorph FastVBM 真实数据对照](../../../docs/fast_vbm/figures/fast_vbm_synthmorph_real.png)
-
-详细输入、指标、官方文件角色核验和限制见[主文档](../../../docs/fast_vbm/README.md)；机器报告见 [`validation/fast_vbm`](../../../validation/fast_vbm/)。
+单例固定 FSL GM 输入的掩膜诊断及本版原始 T1w 完整链复测见[验证页](../../../validation/fast_vbm/README.md)。旧配置下的 FNIRT 数值报告不适用于本版；当前源码尚未完成多例配对 benchmark。

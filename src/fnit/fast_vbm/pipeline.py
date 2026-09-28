@@ -325,6 +325,8 @@ class FastVBM:
                         index == level_count - 1
                         for index in range(level_count)
                     ),
+                    implicit_reference_mask=False,
+                    implicit_input_mask=False,
                 )
                 self.deform_model = TorchFNIRT(
                     device=self.device,

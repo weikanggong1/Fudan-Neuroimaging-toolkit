@@ -14,7 +14,7 @@
 | [SynthSeg](../docs/synthseg/README.md) | [3 例公开 T1w](synthseg/report.public.json) | shape、affine、int32、qform/sform 合同一致；标签与软体积近似一致 | 报告含 GPU/CPU 时间和峰值显存；功能页展示标签与差异 |
 | [SynthSR](../docs/synthsr/README.md) | [12 例 T1w 与公开 FLAIR 示例](synthsr/report.public.json) | shape、affine、uint8 合同一致；输出与 FreeSurfer CPU 参考近似一致 | 报告含 GPU/CPU 时间和峰值显存；功能页展示合成 T1w |
 | [TorchFAST](../docs/fast/README.md) | [真实 brain-only T1w](fast/report.public.json) | 分割、PVE、bias field 与 bias-corrected 图按图比较；不是逐体素等价实现 | 报告含 FSL/FNIT 时间和峰值显存；功能页展示 GM、差值和偏置校正 |
-| [FastVBM](../docs/fast_vbm/README.md) | [同一真实 T1w 的 FNIRT 与 SynthMorph 分支](fast_vbm/report.real.current.json) | 两个分支的 shape、affine、dtype 合同通过；标准空间连续值未达到逐体素等价 | 报告含分阶段时间、峰值显存和两套真实脑图 |
+| [FastVBM](../docs/fast_vbm/README.md) | [单例真实 GM 掩膜定位](fast_vbm/README.md) | 关闭隐式零值掩膜后，固定 FSL GM 输入的三项相关性约 0.996；完整链仍有上游差异 | 本版单例完整链已复测；FSL 缺少同边界耗时，多例尚待复测 |
 | [TorchFLIRT](../docs/flirt/README.md) | [12-DOF 真实 MRI 对照](flirt/report.public.json) | FSL scaled-mm 矩阵合同和 reference-grid 输出均独立比较；仅 12-DOF/corratio 可通过两段证明继承 | 报告区分 CPU/GPU 与共享节点计时边界；没有 fresh current-hash 全量重跑；功能页展示公开 T1w 配准图 |
 | [TorchFNIRT](../docs/fnirt/README.md) | [当前真实 FA matched-input 对照](fnirt/report.real.current.json) | coefficient、warped FA、两类 Jacobian 和标准网格合同分别核对；连续值差异超过浮点误差 | 报告含三阶段 FSL 与 FNIT 配准时间、显存；功能页展示真实 FA 对照 |
 | [TorchApplyWarp](../docs/applywarp/README.md) | [真实 FA 与 intent-2007 coefficient warp](applywarp/report.real.current.json) | shape、affine、dtype 一致；连续值误差按 union support 报告 | 报告含三次 FSL/FNIT 计时和峰值显存；功能页展示 FA 与差值 |

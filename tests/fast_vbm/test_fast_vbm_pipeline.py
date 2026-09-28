@@ -112,7 +112,10 @@ def test_fnirt_pipeline_uses_fsl_topology_failure_semantics_by_default(
         fnirt_regularization=(0.0,),
     )
 
-    assert pipeline._deform_model().strict_topology is False
+    deform = pipeline._deform_model()
+    assert deform.strict_topology is False
+    assert deform.config.implicit_reference_mask is False
+    assert deform.config.implicit_input_mask is False
 
 
 def test_explicit_mask_pipeline_returns_input_and_template_grid_outputs(

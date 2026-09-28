@@ -233,20 +233,12 @@ fnit fast-vbm \
 | 形变模型 | 官方 SynthMorph deform 网络和 stationary velocity integration | fixed-grid cubic B-spline residual displacement |
 | 目标和优化 | checkpoint 定义的学习型配准 | 强度尺度 + SSD、bending energy、LM 与 matrix-free PCG |
 | 输出 pull | fixed-grid target → source world-RAS displacement | 内部 FSL scaled-mm residual，随后转为相同 world-RAS pull |
-| mask | 网络没有 reference-mask 输入 | 使用 implicit masks，并按 schedule 使用显式 reference mask |
+| mask | 网络没有 reference-mask 输入 | GM 配准关闭 implicit masks，按 schedule 使用显式 reference mask |
 | checkpoint | `synthmorph.deform.3.h5` | 无 |
 
-### FNIRT implicit mask 的实际行为
+### FNIRT GM 掩膜
 
-当前 `TorchFNIRT` 的 GM 配置执行以下 mask 规则：
-
-- `fixed != 0` 生成 implicit reference mask，并在四个优化层都参与有效体素筛选。
-- `moving != 0` 生成 implicit input mask。输入 Gaussian smoothing 使用 mask-normalized smoothing；配准采样后也要求 warped input mask 有效。
-- FastVBM 传入的显式 `reference_mask` 按 GM schedule 在最后一级启用，并与 implicit reference mask 取交集。
-- 省略显式 mask 时，FastVBM 传入派生的 `template > 0` mask。它便于正常运行，但不代表某次 FSL 运行实际使用的 mask。
-- SynthMorph 网络不消费这些 mask；FastVBM 仅把 reference mask 纳入共同输入摘要和 QC。
-
-FNIRT 当前实现还包括四级 GM schedule、10 mm B-spline control spacing、输入 masked smoothing、reference zero-padded smoothing、bending regularization 和 nonlinear Jacobian 范围检查。它与 FSL 的接口角色和输出用途对应，但当前优化数值轨迹仍不同，不能声明逐体素或完整数值等价。
+FastVBM 的 GM 配准按核对过的 FSL `GM_2_MNI152GM_2mm.cnf` 设置 `--imprefm=0 --impinm=0`。输入 GM 和模板中的零值不会因隐式掩膜而自动排除；显式 `reference_mask` 按 GM schedule 在最后一级启用。省略显式 mask 时，FastVBM 使用 `template > 0` 派生 mask。复现 FSL 运行应提供当时实际使用的 mask。通用 `TorchFNIRT` 默认值不变，SynthMorph 网络不消费 reference mask。
 
 ## 返回值和文件输出
 
@@ -350,40 +342,6 @@ python tools/setup_weights.py --model fast-vbm
 
 该命令安装两后端的权重超集。GM template 和 reference mask 是运行输入，不是模型权重，也不由该脚本下载。下载公开 UKB 模板的方法见 [UKB/FSL 专页](../ukb_vbm/README.md)。
 
-## 当前真实数据验证
+## 当前验证状态
 
-2026 年 9 月 27 日在 gpucw1 的 NVIDIA H100 PCIe 上，用数值运行冻结快照完成 1 例去标识化真实临床 T1w 的双后端回归。两条 FNIT 路径使用同一幅 raw T1w、同一 HCP GM template、同一 FSL dilated MNI mask 和同一 SynthStrip checkpoint。`fast_vbm/pipeline.py` 的 SHA-256 为 `aa37774419f0fed952a2a5a3304601d07436fc827522ed32c9088f964e9254b9`；其余依赖源码哈希写在机器可读报告中。
-
-本次数值运行记录的 `flirt/core.py` SHA-256 为 `552856…`；当前文件为 `ce375d…`。[`552856… → f5315f…`](../../validation/runtime_dependencies/flirt_qc_source_equivalence.public.json) 只清理运行时 QC，[`f5315f… → ce375d…`](../../validation/runtime_dependencies/flirt_profile_source_equivalence.public.json) 则只在 FastVBM 使用的 12-DOF/corratio 配置下保持数值路径不变。报告保留原实测 hash，并明确 `fresh_current_hash_full_real_data_rerun=false`；这条链不能用于 6-DOF/normmi。
-
-分支报告的 `candidate.source_sha256` 是共同源码快照清单，不等于每个文件都被执行。FNIRT 分支虽列出旧 `synthmorph/pipeline.py` `e680d3…`，实际没有调用 SynthMorph，因此不对该文件声明数值继承。SynthMorph 分支实际执行 deform registration 的 `SynthMorph.__call__` 和 linear 重采样；[linear 路径证明](../../validation/runtime_dependencies/synthmorph_linear_source_equivalence.public.json)把测量时的 `pipeline.py` `e680d3…`、`spatial.py` `9c629a…` 限定继承到当前 `70e97c…`、`dab615…`。分支清单没有单列旧 `spatial.py`，报告保留这一出处限制；没有 fresh current-hash 完整重跑，也不把 nearest 的定向测试当作本次真实 VBM 数值证据。
-
-FSL 对照来自同一病例的 FAST/FNIRT VBM 工件。原流程把 `warped GM × Jacobian` 原位写回 `T1_GM_2mm_to_template_GM`，所以该文件已是 modulated GM。验证先用官方 intent-2007 coefficient 和 FSL 6.0.7.4 `applywarp` 重建未调制 warped GM，再乘官方 Jacobian；所得图与归档文件逐体素完全一致。下面的指标在 template-grid 显式 mask 内计算，共 292,019 个体素。
-
-| 后端 | 输出 | Pearson r | MAE | RMSE | Dice，阈值 0.2 |
-|---|---|---:|---:|---:|---:|
-| TorchFNIRT | warped GM | 0.559420 | 0.220316 | 0.354288 | 0.734844 |
-| TorchFNIRT | Jacobian | 0.237607 | 0.224483 | 0.331839 | 1.000000 |
-| TorchFNIRT | modulated GM | 0.487910 | 0.257733 | 0.438617 | 0.731948 |
-| SynthMorph | warped GM | 0.636498 | 0.198546 | 0.326702 | 0.777472 |
-| SynthMorph | Jacobian | 0.328663 | 0.223898 | 0.311995 | 1.000000 |
-| SynthMorph | modulated GM | 0.575795 | 0.234447 | 0.388955 | 0.770208 |
-
-两条路径的三幅 template-space 图均与 FSL reference 具有相同 shape、affine 和 float32 dtype。数值指标没有达到逐体素等价，FastVBM 当前验收结果为 **输出契约通过，数值等价未通过**。Jacobian 的阈值 Dice 为 1 只表示两幅 Jacobian 在该 mask 内都大于 0.2，不能替代连续值误差。
-
-| 实现 | 计时内容 | compute | 13 图写盘 | 外部进程 wall | 峰值 CUDA allocation |
-|---|---|---:|---:|---:|---:|
-| FNIT + TorchFNIRT | raw T1w 到 13 幅输出；冷启动 | 49.010 s | 7.416 s | 62.23 s | 12.970 GB |
-| FNIT + SynthMorph | raw T1w 到 13 幅输出；冷启动 | 57.852 s | 7.042 s | 75.36 s | 15.487 GB |
-| FSL 6.0.7.4 | 固定官方 warp 的 `applywarp` | — | 已包含 | 2.28 s | 未记录 |
-| FSL 6.0.7.4 | `fslmaths warped -mul Jacobian` | — | 已包含 | 0.56 s | 未记录 |
-
-FNIT 的 `compute` 包含输入读取、首次 checkpoint 加载和 GPU 结果回传，不含 NIfTI 写盘；外部 wall 还包含 Python 启动、完整三维比较和作图。FSL 两行只测固定 warp 应用和 multiplication，未测 UKB/FSL 的脑提取、FAST、FLIRT 或 FNIRT estimation。因此这些时间不能计算端到端加速比。本次没有取得同边界的 FSL raw-T1w-to-VBM 时间。
-
-![真实 T1w 的 TorchFNIRT FastVBM 与 FSL 对照](figures/fast_vbm_fnirt_real.png)
-
-![真实 T1w 的 SynthMorph FastVBM 与 FSL 对照](figures/fast_vbm_synthmorph_real.png)
-
-该病例的 FNIT raw T1w 网格为 208×320×320，归档的 FSL FAST GM 网格为 208×320×213；官方流程在 FAST 前还执行了不同的 bias correction、裁剪和脑提取。因而这次低相关同时包含上游 GM 估计、affine 和 nonlinear registration 的差异，不能只归因于 FLIRT、FNIRT 或 SynthMorph。若要定位单一阶段，应从同一 native GM 和同一 affine 开始做配准隔离实验。
-
-汇总报告见 [`report.real.current.json`](../../validation/fast_vbm/report.real.current.json)，两个原始分支报告和复现脚本位于 [`validation/fast_vbm`](../../validation/fast_vbm/)。报告只发布文件哈希，不发布受试者标识。当前样本量为 1，不能代替十例或群体稳定性验证。
+单例真实数据的固定 FSL GM 和仿射输入对照将此前 FNIRT 低相关性主要定位到隐式零值掩膜。关闭两个掩膜后，warped GM、Jacobian、modulated GM 与 FSL 的 Pearson r 分别为 0.996、0.997、0.996。本版从原始 T1w 完整链复测的三项相关性分别为 0.783、0.733、0.726；FNIT compute 为 110.72 s、写盘 7.56 s、峰值 CUDA allocated 12.97 GB。FSL 缺少相同边界的完整链计时，不能计算加速比。上游脑提取、裁剪、偏置校正和 GM 分割仍需分阶段核对；单例结果不能声明多例或逐体素等价。指标、对照边界见[验证页](../../validation/fast_vbm/README.md)。

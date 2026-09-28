@@ -566,6 +566,8 @@ def _register_gm(
                     index == level_count - 1 for index in range(level_count)
                 ),
                 warp_resolution_mm=warp_resolution,
+                implicit_reference_mask=False,
+                implicit_input_mask=False,
             )
             deform_model = TorchFNIRT(
                 device=device,
