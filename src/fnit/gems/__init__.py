@@ -11,6 +11,9 @@ def __getattr__(name):
     if name in {"SubregionResult", "segment_subregions"}:
         from . import pipeline
         return getattr(pipeline, name)
+    if name == "prepare_brainstem_atlas":
+        from .setup import prepare_brainstem_atlas
+        return prepare_brainstem_atlas
     raise AttributeError(name)
 
 
@@ -18,4 +21,5 @@ __all__ = [
     "GEMSAtlas", "read_compression_lut", "TorchGEMS", "TorchGEMSResult",
     "ashburner_prior", "estimate_label_centroid_affine", "SubregionResult", "segment_subregions",
     "BlockIndex", "build_block_index", "rasterize_priors",
+    "prepare_brainstem_atlas",
 ]

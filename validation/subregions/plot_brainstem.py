@@ -32,27 +32,36 @@ def main():
     xyz = np.argwhere(mask)
     if not len(xyz):
         raise ValueError("No brainstem subregions to plot")
-    sx = int(np.median(xyz[:, 0]))
+    scp_xyz = np.argwhere((x == 178) | (y == 178))
     lo = np.maximum(xyz[:, 1:].min(0) - 8, 0)
     hi = np.minimum(xyz[:, 1:].max(0) + 9, np.asarray(raw.shape[1:]))
-    sl = (sx, slice(lo[0], hi[0]), slice(lo[1], hi[1]))
-    background = np.rot90(raw[sl])
-    upper = np.percentile(background[np.isfinite(background)], 99)
+    scp_lo = np.maximum(scp_xyz[:, :2].min(0) - 8, 0)
+    scp_hi = np.minimum(scp_xyz[:, :2].max(0) + 9, np.asarray(raw.shape[:2]))
+    sections = [
+        (int(np.median(xyz[:, 0])), slice(lo[0], hi[0]), slice(lo[1], hi[1])),
+        (slice(scp_lo[0], scp_hi[0]), slice(scp_lo[1], scp_hi[1]),
+         int(np.median(scp_xyz[:, 2]))),
+    ]
     labels = (173, 174, 175, 178)
-    figure, axes = plt.subplots(1, 3, figsize=(12, 4), layout="constrained")
-    for axis in axes:
-        axis.imshow(background, cmap="gray", vmin=0, vmax=upper)
-        axis.axis("off")
-    for axis, data, title in zip(axes[:2], (x, y), ("FreeSurfer", "FNIT TorchGEMS")):
-        section = np.rot90(data[sl])
-        for i, label in enumerate(labels):
-            overlay = np.ma.masked_where(section != label, np.ones_like(section))
-            axis.imshow(overlay, cmap=ListedColormap([plt.cm.tab10(i)]), alpha=0.6)
+    figure, axes = plt.subplots(2, 3, figsize=(12, 7), layout="constrained")
+    for row, sl in enumerate(sections):
+        background = np.rot90(raw[sl])
+        upper = np.percentile(background[np.isfinite(background)], 99)
+        for axis in axes[row]:
+            axis.imshow(background, cmap="gray", vmin=0, vmax=upper)
+            axis.axis("off")
+        for axis, data in zip(axes[row, :2], (x, y)):
+            section = np.rot90(data[sl])
+            for i, label in enumerate(labels):
+                overlay = np.ma.masked_where(section != label, np.ones_like(section))
+                axis.imshow(overlay, cmap=ListedColormap([plt.cm.tab10(i)]), alpha=0.6)
+        difference = np.rot90((x[sl] != y[sl]) & (mask[sl]))
+        axes[row, 2].imshow(np.ma.masked_where(~difference, difference),
+                            cmap=ListedColormap(["red"]), alpha=0.75)
+        axes[row, 0].text(0.01, 0.98, "brainstem sagittal" if row == 0 else "SCP axial",
+                          transform=axes[row, 0].transAxes, color="white", va="top")
+    for axis, title in zip(axes[0], ("FreeSurfer", "FNIT TorchGEMS", "Label disagreement")):
         axis.set_title(title)
-    difference = np.rot90((x[sl] != y[sl]) & (mask[sl]))
-    axes[2].imshow(np.ma.masked_where(~difference, difference),
-                   cmap=ListedColormap(["red"]), alpha=0.75)
-    axes[2].set_title("Label disagreement")
     figure.savefig(args.output, dpi=170)
 
 

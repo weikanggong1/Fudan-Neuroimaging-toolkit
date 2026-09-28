@@ -2,6 +2,7 @@
 
 import argparse
 import hashlib
+from importlib.resources import files
 import json
 import os
 import re
@@ -14,8 +15,8 @@ from fnit.weights import cache_dir, verify_file
 
 
 # Relative path: (size, SHA-256, key extension for direct annex-backed files).
-# All URLs have passed full GET, byte-count, and SHA-256 checks against
-# the FreeSurfer 8.2 files.
+# Network assets passed full GET, byte-count, and SHA-256 checks against
+# FreeSurfer 8.2 files; the small BrainstemSS LUT is bundled and hash-checked.
 ASSET_FILES = {
     "ASegStatsLUT.txt": (
         3240, "36eb822e91174a7a4f99f22f17f19e6692225476b815aa0fdaf0622fd32e2511", ".txt"),
@@ -29,6 +30,12 @@ ASSET_FILES = {
         71651552, "2fcd276a39800f01f93a4c8828ae6d0a8cea3d8b8b9fe1599d4ee54e806be93e", ".gca"),
     "average/RB_all_withskull_2020_01_02.gca": (
         76631396, "0cc9b5a76f80555507ff86bfccce31bb7a308b8541dcad8c2a465fb915534870", ".gca"),
+    "average/BrainstemSS/atlas/AtlasMesh.gz": (
+        1726705, "90b0c6a6ade8aa388ef7c682b652ffc6bbd602271fd6b6068f47197514b2df3f", ".gz"),
+    "average/BrainstemSS/atlas/AtlasDump.mgz": (
+        48827, "14523eaf5e7f596be68d251a50f98ef277f5b7ef8904cca786a3efef8e9e3e7f", ".mgz"),
+    "average/BrainstemSS/atlas/compressionLookupTable.txt": (
+        1291, "8c343757d9ee13ed2d02daeb5f5f5fc764a6adb850b19b9d1b0ad352c96ca15b", ".txt"),
     "average/colortable_BA.txt": (
         810, "83aaf7a79ce4fdb98c9f6175b318dfaceed276ebf7422cdfaa195f1f71a2512f", ".txt"),
     "average/colortable_BA_thresh.txt": (
@@ -151,6 +158,7 @@ ASSET_FILES = {
     "subjects/fsaverage/label/rh.perirhinal_exvivo.thresh.label": (13128, "e8eaa170f7d1aa232a4d4879e00354171a901c6c67a5b159b4724df12e694034", ""),
 }
 ANNEX_BASE = "https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects"
+BUNDLED_BRAINSTEM_LUT = "average/BrainstemSS/atlas/compressionLookupTable.txt"
 SOURCE_BASE = ("https://raw.githubusercontent.com/freesurfer/freesurfer/"
                "d932c45b7941662ea380a05efef580568b98d41a/distribution")
 FSAVERAGE_BASE = ("https://www.freesurfer.net/pub/dist/freesurfer/"
@@ -180,7 +188,7 @@ FSAVERAGE_ARCHIVE_SIZE = 320193429
 FSAVERAGE_ARCHIVE_SHA256 = "586cbe3513db2872ad885486a042ebbde1cb5ca66dd3255994e8736901ce147f"
 
 
-# The 102 fixed-profile data files are all covered by verified sources.
+# The fixed recon-all profile and optional BrainstemSS data have verified sources.
 PENDING_FILES = {}
 
 
@@ -191,6 +199,8 @@ def _annex_url(size, sha256, extension):
 
 
 def asset_url(name):
+    if name == BUNDLED_BRAINSTEM_LUT:
+        raise ValueError(f"{name} is included in the FNIT package")
     if name in SOURCE_FILES:
         return f"{SOURCE_BASE}/{name}"
     if name in FSAVERAGE_FILES:
@@ -228,6 +238,13 @@ def download_asset(name, directory, verify_only=False):
         return target
     if verify_only:
         raise ValueError(f"Missing or invalid reconstruction asset: {target}")
+    if name == BUNDLED_BRAINSTEM_LUT:
+        data = files("fnit").joinpath("gems/data/brainstem_compressionLookupTable.txt").read_bytes()
+        if len(data) != size or hashlib.sha256(data).hexdigest() != sha256:
+            raise ValueError("Bundled brainstem lookup table failed SHA-256 verification")
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(data)
+        return target
     if name in ARCHIVE_MEMBERS:
         archive = Path(directory) / ".downloads" / "mni_icbm152_nlin_asym_09c.tar.gz"
         archive_size, archive_sha = ARCHIVE_SIZE, ARCHIVE_SHA256

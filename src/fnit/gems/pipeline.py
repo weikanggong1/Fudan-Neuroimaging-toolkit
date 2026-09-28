@@ -5,15 +5,21 @@ from __future__ import annotations
 from dataclasses import dataclass
 import json
 from pathlib import Path
+from time import monotonic
 
 import nibabel as nib
+from nibabel.processing import resample_from_to
 import numpy as np
+from scipy import ndimage
 import torch
 
+from .._dmri import configure_device
 from .._nib import FNITNifti1Image, new_image
 from .atlas import GEMSAtlas
+from .brainstem import (brainstem_gaussian_hyperparameters,
+                        fit_brainstem_segmentation, make_brainstem_working_image)
 from .core import TorchGEMS, TorchGEMSResult
-from .initialize import estimate_label_centroid_affine
+from .initialize import estimate_label_centroid_affine, estimate_mask_affine
 
 
 @dataclass
@@ -83,6 +89,7 @@ def segment_subregions(
     data = np.asanyarray(image.dataobj, dtype=np.float32)
     if data.ndim != 3:
         raise ValueError("segment_subregions expects one 3-D T1 image")
+    device = configure_device(device)
     root = Path(atlas_root)
     if not root.is_dir():
         raise FileNotFoundError(root)
@@ -117,7 +124,15 @@ def segment_subregions(
     table: dict[int, str] = {0: "Unknown"}
     init_report: dict[str, dict] = {}
 
+    def tick() -> float:
+        if device.type == "cuda":
+            torch.cuda.synchronize(device)
+        return monotonic()
+
     for name in selected:
+        if device.type == "cuda":
+            torch.cuda.reset_peak_memory_stats(device)
+        started = tick()
         atlas, matrix, classes, config = _load_spec(root / name)
         if not config.get("include_label_ids"):
             raise ValueError(
@@ -128,21 +143,76 @@ def segment_subregions(
                 raise FileNotFoundError(root / name / "atlas_to_native_voxel.npy")
             if coarse is None:
                 coarse = _native_coarse_segmentation(t1, synthseg_weights, device)
-            alignment_map = {int(k): int(v) for k, v in config.get("alignment_label_map", {}).items()}
-            matrix, shared = estimate_label_centroid_affine(
-                atlas, coarse, device=device,
-                min_shared_labels=int(config.get("min_shared_labels", 4)),
-                atlas_to_target_labels=alignment_map)
-            init_report[name] = {"mode": "synthseg_label_centroids", "shared_labels": list(shared),
-                                 "atlas_to_native_voxel": matrix.tolist()}
+            mask_ids = config.get("alignment_target_label_ids")
+            if mask_ids is not None:
+                atlas_dump = root / name / "AtlasDump.mgz"
+                if not atlas_dump.is_file():
+                    raise FileNotFoundError(atlas_dump)
+                matrix, score = estimate_mask_affine(
+                    nib.load(str(atlas_dump)), image, coarse, mask_ids, device=device)
+                init_report[name] = {"mode": "target_mask_affine", "target_label_ids": list(mask_ids),
+                                     "soft_dice": score, "atlas_to_native_voxel": matrix.tolist()}
+            else:
+                alignment_map = {int(k): int(v) for k, v in config.get("alignment_label_map", {}).items()}
+                matrix, shared = estimate_label_centroid_affine(
+                    atlas, coarse, device=device,
+                    min_shared_labels=int(config.get("min_shared_labels", 4)),
+                    atlas_to_target_labels=alignment_map)
+                init_report[name] = {"mode": "synthseg_label_centroids", "shared_labels": list(shared),
+                                     "atlas_to_native_voxel": matrix.tolist()}
         else:
             init_report[name] = {"mode": "provided_affine", "atlas_to_native_voxel": matrix.tolist()}
         atlas = atlas.transformed(matrix, transform_reference=True)
+        aligned = tick()
+        mean_hyper = n_hyper = None
+        if config.get("segmentation_fit") == "brainstem":
+            if coarse is None:
+                coarse = _native_coarse_segmentation(t1, synthseg_weights, device)
+            if classes is not None:
+                means, counts = brainstem_gaussian_hyperparameters(
+                    image, coarse, classes, atlas.label_ids)
+                mean_hyper = torch.as_tensor(means, device=device)
+                n_hyper = torch.as_tensor(counts, device=device)
+            atlas, fit_report = fit_brainstem_segmentation(
+                atlas, coarse, device=device,
+                iterations=int(config.get("segmentation_fit_iterations", 40)),
+                fit_alphas=(np.load(root / name / config["segmentation_alpha_file"])
+                            if config.get("segmentation_alpha_file") else None),
+                optimizer_name=str(config.get("segmentation_fit_optimizer", "adam")))
+            init_report[name]["segmentation_fit"] = fit_report
+        segmentation_fitted = tick()
+        working_image, working_data, working_target, working_coarse = image, data, target, coarse
+        resolution = config.get("working_resolution_mm")
+        if resolution is not None:
+            if config.get("segmentation_fit") != "brainstem":
+                raise ValueError("working_resolution_mm currently requires brainstem segmentation_fit")
+            working_image, working_coarse, prep_report = make_brainstem_working_image(
+                image, coarse, resolution_mm=float(resolution))
+            init_report[name]["working_image"] = prep_report
+            atlas = atlas.transformed(np.linalg.inv(working_image.affine) @ image.affine,
+                                      transform_reference=True)
+            working_data = np.asarray(working_image.dataobj, dtype=np.float32)
+            working_target = torch.as_tensor(working_data, device=device)
+        image_prepared = tick()
+        fit_stages = None
+        if "fit_alpha_files" in config:
+            files = config["fit_alpha_files"]
+            steps = config["fit_stage_iterations"]
+            if classes is None or len(files) != len(steps):
+                raise ValueError("fit_alpha_files needs label_classes and matching fit_stage_iterations")
+            grouped = np.zeros((len(atlas.vertices), int(classes.max()) + 1), dtype=np.float32)
+            for channel, group in enumerate(classes):
+                grouped[:, group] += atlas.alphas[:, channel]
+            fit_stages = [(grouped if filename is None else
+                           np.load(root / name / filename), int(count))
+                          for filename, count in zip(files, steps)]
+        total_deform_steps = (sum(n for _, n in fit_stages) if fit_stages is not None else
+                              int(config.get("deform_iterations", deform_iterations)))
         margin = max(2, int(np.ceil(float(config.get("deform_lr", 0.05)) *
-                                     int(config.get("deform_iterations", deform_iterations)) + 2)))
+                                     total_deform_steps + 2)))
         lo = np.maximum(np.floor(atlas.vertices.min(0)).astype(int) - margin, 0)
         hi = np.minimum(np.ceil(atlas.vertices.max(0)).astype(int) + margin + 1,
-                        np.asarray(data.shape))
+                        np.asarray(working_data.shape))
         if np.any(hi <= lo):
             raise ValueError(f"Atlas {name!r} does not intersect the input T1 grid")
         crop = tuple(slice(int(a), int(b)) for a, b in zip(lo, hi))
@@ -151,14 +221,21 @@ def segment_subregions(
         atlas = atlas.transformed(shift, transform_reference=True)
         init_report[name]["crop_start"] = lo.tolist()
         init_report[name]["crop_stop"] = hi.tolist()
-        result = TorchGEMS(atlas, device=device)(
-            target[crop],
+        result = TorchGEMS(atlas, device=device, block_size=int(config.get("block_size", 8)))(
+            working_target[crop],
             label_classes=classes,
             em_iterations=int(config.get("em_iterations", em_iterations)),
             deform_iterations=int(config.get("deform_iterations", deform_iterations)),
             deform_lr=float(config.get("deform_lr", 0.05)),
+            deform_optimizer=str(config.get("deform_optimizer", "adam")),
+            deform_em_interval=int(config.get("deform_em_interval", 1)),
             deformation_weight=float(config.get("deformation_weight", 1.0)),
+            mean_hyper=mean_hyper,
+            n_hyper=n_hyper,
+            mask_to_atlas=bool(config.get("mask_to_atlas", False)),
+            fit_alpha_stages=fit_stages,
         )
+        intensity_fitted = tick()
         confidence, _ = result.posterior.max(0)
         candidate = result.labels
         output_map = {int(k): int(v) for k, v in config.get("output_label_map", {}).items()}
@@ -172,17 +249,41 @@ def segment_subregions(
         foreground = torch.zeros_like(candidate, dtype=torch.bool)
         for old_id in include_ids:
             foreground |= result.labels == old_id
+        if config.get("segmentation_fit") == "brainstem":
+            components, count = ndimage.label(foreground.cpu().numpy())
+            if count:
+                sizes = np.bincount(components.ravel())
+                sizes[0] = 0
+                foreground &= torch.as_tensor(components == sizes.argmax(), device=device)
         support_ids = config.get("support_coarse_label_ids")
         if support_ids is not None:
-            if coarse is None:
-                coarse = _native_coarse_segmentation(t1, synthseg_weights, device)
-            support = torch.as_tensor(coarse[crop], device=device)
+            if working_coarse is None:
+                working_coarse = _native_coarse_segmentation(t1, synthseg_weights, device)
+            support = torch.as_tensor(working_coarse[crop], device=device)
             foreground &= torch.isin(support, torch.as_tensor(support_ids, device=device))
-        take = foreground & (confidence > best_conf[crop])
-        combined_crop = combined[crop]
-        best_conf_crop = best_conf[crop]
-        combined_crop[take] = candidate[take]
-        best_conf_crop[take] = confidence[take]
+        if resolution is None:
+            take = foreground & (confidence > best_conf[crop])
+            combined_crop = combined[crop]
+            best_conf_crop = best_conf[crop]
+            combined_crop[take] = candidate[take]
+            best_conf_crop[take] = confidence[take]
+        else:
+            crop_to_work = np.eye(4)
+            crop_to_work[:3, 3] = lo
+            local_affine = working_image.affine @ crop_to_work
+            native_grid = (image.shape[:3], image.affine)
+
+            def to_native(volume, order):
+                source = nib.Nifti1Image(volume.detach().cpu().numpy(), local_affine)
+                aligned = resample_from_to(source, native_grid, order=order)
+                return torch.as_tensor(np.asarray(aligned.dataobj), device=device)
+
+            native_labels = to_native(candidate.to(torch.int32), 0)
+            native_foreground = to_native(foreground.to(torch.uint8), 0).bool()
+            native_confidence = to_native(confidence, 1)
+            take = native_foreground & (native_confidence > best_conf)
+            combined[take] = native_labels[take].to(combined.dtype)
+            best_conf[take] = native_confidence[take]
         results[name] = result
         prefix = str(config.get("output_name_prefix", ""))
         name_map = {int(k): str(v) for k, v in config.get("output_name_map", {}).items()}
@@ -201,6 +302,17 @@ def segment_subregions(
                     f"in atlas pack {name!r}; use output_label_map in config.json"
                 )
             table[new_id] = out_name
+        finished = tick()
+        init_report[name]["timing_seconds"] = {
+            "alignment": aligned - started,
+            "segmentation_fit": segmentation_fitted - aligned,
+            "image_preparation": image_prepared - segmentation_fitted,
+            "intensity_mesh_fit": intensity_fitted - image_prepared,
+            "postprocess": finished - intensity_fitted,
+            "total": finished - started,
+        }
+        if device.type == "cuda":
+            init_report[name]["peak_gpu_gib"] = torch.cuda.max_memory_allocated(device) / 2**30
 
     out = new_image(combined.cpu().numpy().astype(np.int32), image, affine=image.affine)
     # NIfTI converted from MGH needs an explicit sform; the inherited MGH

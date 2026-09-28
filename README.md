@@ -13,7 +13,7 @@ CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核。模型、影像张
 | sMRI | WMH-SynthSeg | 脑结构标签、WMH 标签与软体积 | [WMH-SynthSeg](docs/wmh_synthseg/README.md) |
 | sMRI | 33 类 SynthSeg | T1w 结构标签与软体积 | [SynthSeg](docs/synthseg/README.md) |
 | sMRI | SynthSeg+ | 33 类结构与 68 区体积皮层分区 | [SynthSeg+](docs/synthseg_plus/README.md) |
-| sMRI | TorchGEMS 实验接口 | 皮下亚区图谱的概率分割；官方核团精度未验收 | [皮下亚区](docs/subregions/README.md) |
+| sMRI | TorchGEMS 脑干亚区 | 脑干四亚区标签；两例真实 T1 均达到逐区 Dice 与体积阈值 | [皮下亚区](docs/subregions/README.md) |
 | sMRI | SynthSR | 1 mm T1w 合成图 | [SynthSR](docs/synthsr/README.md) |
 | sMRI | TorchFAST | 三组织分割、PVE 与偏置场 | [TorchFAST](docs/fast/README.md) |
 | sMRI | FastVBM | 标准空间 GM、Jacobian 与 modulated GM | [FastVBM](docs/fast_vbm/README.md) |
@@ -103,6 +103,15 @@ fsLR32k 表面投影的 HCP 公开模板不属于模型权重，单独下载并�
 ```bash
 fnit-setup-fmri-surface-assets --output-dir /absolute/path/hcp_surface_assets --msmall
 ```
+
+脑干亚区另需约 2.3 MB 图谱包，可独立下载和生成 PyTorch 平滑先验：
+
+```bash
+# --output-root：生成 brainstem/ 图谱目录的根路径；--device：先验计算设备
+fnit-setup-brainstem-atlas --output-root /absolute/path/atlases --device cuda:0
+```
+
+输入、输出及 FreeSurfer 同输入对照见[脑干亚区说明](docs/subregions/README.md)。
 
 `--msmall` 增加公开的 MSMAll 群体模板和配置；被试者的 white、pial、sphere.reg 和 wmparc 由用户提供。个体 MSMAll 配准仍需另行计算；完整输入与许可见 [fMRI 表面投影](docs/fmri/surface.md)。
 

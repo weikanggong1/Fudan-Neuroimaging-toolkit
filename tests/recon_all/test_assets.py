@@ -48,7 +48,7 @@ def test_verified_root_lookup_tables_use_pinned_source(name):
 
 
 def test_fixed_profile_data_inventory_has_verified_sources():
-    assert len(assets.ASSET_FILES) == 102
+    assert len(assets.ASSET_FILES) == 105
     assert assets.PENDING_FILES == {}
     assert set(assets.ASSET_FILES).isdisjoint(assets.PENDING_FILES)
     assert sum(name.startswith("average/mni_icbm152_nlin_asym_09c/reg-targets/")
@@ -98,6 +98,15 @@ def test_verify_only_requires_exact_size_and_sha(tmp_path, monkeypatch):
     target.write_bytes(b"corrupt atlas")
     with pytest.raises(ValueError, match="Missing or invalid"):
         assets.download_asset(name, tmp_path, verify_only=True)
+
+
+def test_brainstem_lookup_table_is_installed_from_verified_package_data(tmp_path):
+    name = assets.BUNDLED_BRAINSTEM_LUT
+    target = assets.download_asset(name, tmp_path)
+    size, digest, _ = assets.ASSET_FILES[name]
+    assert target.stat().st_size == size
+    assert hashlib.sha256(target.read_bytes()).hexdigest() == digest
+    assert assets.download_asset(name, tmp_path, verify_only=True) == target
 
 
 @pytest.mark.parametrize(("prefix", "name"), (
@@ -156,4 +165,4 @@ def test_default_python_profile_selects_required_assets(monkeypatch, tmp_path):
     assert sum(assets.ASSET_FILES[name][0] for name in downloaded) == 217851651
     downloaded.clear()
     assets.main(["--all", "--verify-only", "--dest", str(tmp_path)])
-    assert len(downloaded) == len(assets.ASSET_FILES) == 102
+    assert len(downloaded) == len(assets.ASSET_FILES) == 105

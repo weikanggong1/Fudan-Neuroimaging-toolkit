@@ -73,7 +73,8 @@ def rasterize_priors(
     block_size: int = 8,
     tolerance: float = 2e-5,
     background_channel: int | None = 0,
-) -> tuple[torch.Tensor, torch.Tensor]:
+    return_assignment: bool = False,
+) -> tuple[torch.Tensor, ...]:
     """Rasterize node alphas to a dense ``[K,X,Y,Z]`` prior tensor.
 
     Tetrahedron lookup uses a conservative block index.  Barycentric solves,
@@ -98,6 +99,10 @@ def rasterize_priors(
     # channel-last during indexed writes; permute at return.
     out = torch.zeros((*shape, k), device=vertices.device, dtype=alphas.dtype)
     covered = torch.zeros(shape, device=vertices.device, dtype=torch.bool)
+    assigned_cells = (torch.zeros((*shape, 4), device=vertices.device, dtype=torch.long)
+                      if return_assignment else None)
+    assigned_weights = (torch.zeros((*shape, 4), device=vertices.device, dtype=vertices.dtype)
+                        if return_assignment else None)
 
     for block_id, ids_np in enumerate(block_index.candidates):
         if len(ids_np) == 0:
@@ -108,22 +113,14 @@ def rasterize_priors(
         tet = vertices[cells]  # M,4,3
         v0 = tet[:, 0]
         matrix = torch.stack((tet[:, 1] - v0, tet[:, 2] - v0, tet[:, 3] - v0), dim=-1)
-        det = torch.linalg.det(matrix)
-        nonsingular = det.abs() > 1e-10
-        if not bool(torch.any(nonsingular)):
-            continue
-        cells = cells[nonsingular]
-        v0 = v0[nonsingular]
-        matrix = matrix[nonsingular]
-        inv = torch.linalg.inv(matrix)
+        inv, info = torch.linalg.inv_ex(matrix, check_errors=False)
         rel = points[:, None, :] - v0[None, :, :]
         w123 = torch.einsum("mij,pmj->pmi", inv, rel)
         weights = torch.cat((1.0 - w123.sum(-1, keepdim=True), w123), dim=-1)
-        score = weights.amin(-1)
+        singular = (info != 0) | (torch.linalg.det(matrix).abs() <= 1e-10)
+        score = weights.amin(-1).masked_fill(singular[None], -torch.inf)
         best_score, best = score.max(dim=1)
         valid = best_score >= -float(tolerance)
-        if not bool(torch.any(valid)):
-            continue
         selected_cells = cells[best[valid]]
         selected_weights = weights[valid, best[valid]]
         values = (alphas[selected_cells] * selected_weights[..., None]).sum(dim=1)
@@ -133,6 +130,9 @@ def rasterize_priors(
         x, y, z = points[valid].long().unbind(-1)
         out[x, y, z] = values
         covered[x, y, z] = True
+        if return_assignment:
+            assigned_cells[x, y, z] = selected_cells
+            assigned_weights[x, y, z] = selected_weights
 
     if background_channel is not None:
         bg = int(background_channel)
@@ -140,4 +140,5 @@ def rasterize_priors(
             raise ValueError("background_channel is out of range")
         missing = ~covered
         out[..., bg] = torch.where(missing, torch.ones_like(out[..., bg]), out[..., bg])
-    return out.permute(3, 0, 1, 2).contiguous(), covered
+    result = (out.permute(3, 0, 1, 2).contiguous(), covered)
+    return (*result, assigned_cells, assigned_weights) if return_assignment else result
