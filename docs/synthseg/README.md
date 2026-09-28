@@ -71,8 +71,7 @@ fnit synthseg --i sub-01_T1w.nii.gz --o sub-01_synthseg.nii.gz \
 | `--keep-geometry` | `--keepgeom` | 以最近邻法把硬标签重采样回输入网格 |
 | `--color-lut` | `--addctab` / `--noaddctab` | 本包只在显式提供 FreeSurfer LUT 时附加色表；原版默认附加色表 |
 
-原版的目录输入、robust、皮层分区、QC、posterior、CT、Photo-SynthSeg 和其他
-模型路径；本接口没有实现这些选项，也不会把它们近似为 33 类单幅 T1 路径。
+原版的目录输入、robust、QC、posterior、CT、Photo-SynthSeg 和其他模型路径没有在此 33 类接口中实现。皮层分区请使用同一 CLI 的 `--parc` 或 [SynthSeg+ Python API](../synthseg_plus/README.md)。
 
 ## 命令行
 
@@ -85,7 +84,7 @@ fnit synthseg --i sub-01_T1w.nii.gz --o sub-01_synthseg.nii.gz \
 
 ## 与 FreeSurfer 8.2 的当前对照
 
-2026-09-27 在三幅仓库公开、去面容 T1w 上重跑当前源码和 FreeSurfer 8.2.0-1 `mri_synthseg --noaddctab`。候选推理没有调用 FreeSurfer。当前 SynthSeg 源码树 SHA-256 为 `39fa204aea7674ad7c6e09652d0f8750dd2872b1b78799812ab0d71b5b6c8972`。
+2026-09-27 在三幅仓库公开、去面容 T1w 上重跑当前源码和 FreeSurfer 8.2.0-1 `mri_synthseg --noaddctab`。候选推理没有调用 FreeSurfer。该次 33 类推理所用源码树 SHA-256 为 `39fa204aea7674ad7c6e09652d0f8750dd2872b1b78799812ab0d71b5b6c8972`。
 
 本轮同时核对文件头：默认输出和 `keep_geometry=True` 均写 `int32`，qform code 为 0，sform code 为 2，与原版相同。一幅真实 T1w 的 `keep_geometry=True` 输出与输入 shape、affine 完全一致。 针对性测试为 `2 passed`；WMH-SynthSeg、SynthSR 和 TorchFAST 的最小跨模块回归为 `28 passed, 4 skipped`。
 

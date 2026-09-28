@@ -8,6 +8,8 @@
 
 | 功能 | 当前真实数据报告 | 输出一致性结论 | 时间、显存与示意图 |
 |---|---|---|---|
+| [SynthSeg+](../docs/synthseg_plus/README.md) | [公开 T1w 对照](synthseg_plus/README.md) | 同网格与官方 `--parc` 比较，98 个出现的前景标签最低 Dice 0.99834 | 单例 H100 命令时间和峰值显存；逐标签报告 |
+| [TorchGEMS 皮下亚区实验接口](../docs/subregions/README.md) | [公开 T1w brainstem 对照](subregions/README.md) | 图谱读取与真实 T1 运行通过，四个亚区 Dice 尚未达到官方等价 | 官方/FNIT 命令时间、体积差和切面图 |
 | [SynthStrip](../docs/synthstrip/README.md) | [12 例 T1w GPU 对照](synthstrip/report.real.current.json) | shape、affine、dtype 一致；脑掩膜、脑图和距离场为近似一致 | 报告含逐例 FreeSurfer/FNIT 时间、RSS、峰值显存；功能页展示三视图 |
 | [SynthMorph](../docs/synthmorph/README.md) | [12 例 GPU](synthmorph/report.real.current.gpu.json)、[12 例 CPU](synthmorph/report.real.current.cpu.json)与[公开 T1w 示例](synthmorph/public_example.current.json) | moved image 与 RAS-mm pull warp 接近参考；测量 hash 通过 linear-only 证明继承，nearest 另有定向测试 | 两份报告使用同一计时边界；没有 fresh current-hash 全量重跑；功能页展示公开配准图 |
 | [WMH-SynthSeg](../docs/wmh_synthseg/README.md) | [3 例公开 FLAIR GPU 与 1 例 CPU](wmh/report.public.json) | 标签、WMH、软体积及 NIfTI 合同与 FreeSurfer 参考近似一致 | 报告含 GPU/CPU 时间和峰值显存；功能页展示 WMH overlay |

@@ -21,9 +21,10 @@ class SynthSegParc:
     for left/right cortex. No volumetric segmentation is estimated here.
     """
 
-    def __init__(self, weights: str | Path, labels: str | Path, device="cpu"):
+    def __init__(self, weights: str | Path, labels: str | Path | np.ndarray, device="cpu"):
         self.device = configure_device(device)
-        label_ids = np.unique(np.load(labels))
+        raw_labels = np.load(labels) if isinstance(labels, (str, Path)) else np.asarray(labels)
+        label_ids = np.unique(raw_labels)
         if len(label_ids) != 69 or label_ids[0] != 0:
             raise ValueError("Expected 69 SynthSeg parcellation labels including background")
         self.labels = torch.as_tensor(label_ids.astype(np.int64), device=self.device)

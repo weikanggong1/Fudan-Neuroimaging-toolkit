@@ -69,19 +69,47 @@ def _run_wmh(args):
 
 
 def _run_synthseg(args):
-    from .synthseg_parc import SynthSeg
-
     source, target = Path(args.i), Path(args.o)
     if not source.is_file():
         raise FileNotFoundError(source)
     target.parent.mkdir(parents=True, exist_ok=True)
-    result = SynthSeg(weights=args.weights, device=args.device, threads=args.threads)(
-        source, keep_geometry=args.keep_geometry, color_lut=args.color_lut)
-    result.segmentation.save(target)
+    if args.parc:
+        if args.csv_vols:
+            raise ValueError("--csv-vols with --parc has not been validated")
+        if args.color_lut:
+            raise ValueError("--color-lut with --parc is not implemented")
+        import torch
+        torch.set_num_threads(args.threads)
+        from .synthseg_parc import SynthSegPlus
+        result = SynthSegPlus(weights=args.weights, parc_weights=args.parc_weights,
+                              device=args.device)(source, keep_geometry=args.keep_geometry)
+        result.combined.save(target)
+        if args.parc_out:
+            Path(args.parc_out).parent.mkdir(parents=True, exist_ok=True)
+            result.cortical_parcellation.save(args.parc_out)
+    else:
+        if args.parc_out or args.parc_weights:
+            raise ValueError("--parc-out and --parc-weights require --parc")
+        from .synthseg_parc import SynthSeg
+        result = SynthSeg(weights=args.weights, device=args.device, threads=args.threads)(
+            source, keep_geometry=args.keep_geometry, color_lut=args.color_lut)
+        result.segmentation.save(target)
+        if args.csv_vols:
+            result.write_volumes_csv(source, args.csv_vols)
+            print(args.csv_vols)
     print(target)
-    if args.csv_vols:
-        result.write_volumes_csv(source, args.csv_vols)
-        print(args.csv_vols)
+
+
+def _run_subregions(args):
+    from .gems import segment_subregions
+    result = segment_subregions(
+        args.i, args.atlas_root, structures="all" if not args.structure else args.structure,
+        coarse_segmentation=args.coarse_segmentation, synthseg_weights=args.synthseg_weights,
+        auto_initialize=not args.no_auto_initialize, device=args.device,
+        em_iterations=args.em_iterations, deform_iterations=args.deform_iterations)
+    Path(args.o).parent.mkdir(parents=True, exist_ok=True)
+    result.labels.save(args.o)
+    print(args.o)
 
 
 def _synthsr_suffix(path):
@@ -440,6 +468,20 @@ def main(argv=None):
     synthseg.add_argument('--keep-geometry', action='store_true',
                           help='resample labels back to the input image grid')
     synthseg.add_argument('--color-lut', help='optional FreeSurfer color lookup table')
+    synthseg.add_argument('--parc', action='store_true', help='SynthSeg 2.0 cortical parcellation')
+    synthseg.add_argument('--parc-weights', help='official synthseg_parc_2.0.h5 or directory')
+    synthseg.add_argument('--parc-out', help='optional cortex-only parcel image')
+    subregions = commands.add_parser('subregions', help='experimental PyTorch GEMS subregions')
+    subregions.add_argument('--i', '-i', required=True, help='native 3-D T1 image')
+    subregions.add_argument('--o', '-o', required=True, help='native-grid labels')
+    subregions.add_argument('--atlas-root', required=True, help='directory of GEMS atlas packs')
+    subregions.add_argument('--structure', action='append', help='atlas-pack name; repeat for several')
+    subregions.add_argument('--coarse-segmentation', help='native-grid coarse labels')
+    subregions.add_argument('--synthseg-weights', help='SynthSeg weights for initialization')
+    subregions.add_argument('--no-auto-initialize', action='store_true')
+    subregions.add_argument('--em-iterations', type=int, default=8)
+    subregions.add_argument('--deform-iterations', type=int, default=0)
+    subregions.add_argument('--device', default='cuda:0')
     sr = commands.add_parser('synthsr', help='synthesize a 1 mm T1-weighted image')
     sr.add_argument('--i', '-i', required=True, help='single input image')
     sr.add_argument('--o', '-o', required=True, help='output image or directory for this image')
@@ -615,6 +657,9 @@ def main(argv=None):
     if selected and selected[0] == "synthseg":
         _run_synthseg(parser.parse_args(selected))
         return
+    if selected and selected[0] == "subregions":
+        _run_subregions(parser.parse_args(selected))
+        return
     if selected and selected[0] == "flirt":
         _run_flirt(parser.parse_args(selected))
         return
@@ -666,6 +711,9 @@ def main(argv=None):
         return
     if args.command == 'synthseg':
         _run_synthseg(args)
+        return
+    if args.command == 'subregions':
+        _run_subregions(args)
         return
     if args.command == 'fnirt':
         _run_fnirt(args)

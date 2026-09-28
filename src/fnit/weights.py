@@ -41,6 +41,9 @@ WEIGHT_FILES = {
     "synthseg_2.0.h5": (
         "https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/bee/241/SHA256E-s53079152--f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e.0.h5/SHA256E-s53079152--f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e.0.h5",
         53079152, "f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e"),
+    "synthseg_parc_2.0.h5": (
+        "https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects/p0/0f/SHA256E-s53090840--83bb1de76fb6f173c6dacacd433f81209fc6abb1dbc179a930ec06ecabbeb684.0.h5/SHA256E-s53090840--83bb1de76fb6f173c6dacacd433f81209fc6abb1dbc179a930ec06ecabbeb684.0.h5",
+        53090840, "83bb1de76fb6f173c6dacacd433f81209fc6abb1dbc179a930ec06ecabbeb684"),
     "synthseg_segmentation_labels_2.0.npy": (
         "https://raw.githubusercontent.com/freesurfer/freesurfer/v8.2.0/mri_synthseg/synthseg_segmentation_labels_2.0.npy",
         348, "5ef25ec33fe917ac99f30b8f2185b2d77121136ee411b9c4970c0b59be615ed8"),
@@ -82,6 +85,10 @@ MODEL_FILES = {
     "wmh-synthseg": ("WMH-SynthSeg_v10_231110.pth",),
     "synthseg": (
         "synthseg_2.0.h5", "synthseg_segmentation_labels_2.0.npy",
+        "synthseg_segmentation_names_2.0.npy", "synthseg_topological_classes_2.0.npy"),
+    "synthseg-plus": (
+        "synthseg_2.0.h5", "synthseg_parc_2.0.h5",
+        "synthseg_segmentation_labels_2.0.npy",
         "synthseg_segmentation_names_2.0.npy", "synthseg_topological_classes_2.0.npy"),
     "recon-all": (
         "synthstrip.1.pt", "synthmorph.affine.2.h5",

@@ -12,6 +12,8 @@ CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核。模型、影像张
 | sMRI | SynthMorph | 刚性、仿射、非线性配准结果及变换 | [SynthMorph](docs/synthmorph/README.md) |
 | sMRI | WMH-SynthSeg | 脑结构标签、WMH 标签与软体积 | [WMH-SynthSeg](docs/wmh_synthseg/README.md) |
 | sMRI | 33 类 SynthSeg | T1w 结构标签与软体积 | [SynthSeg](docs/synthseg/README.md) |
+| sMRI | SynthSeg+ | 33 类结构与 68 区体积皮层分区 | [SynthSeg+](docs/synthseg_plus/README.md) |
+| sMRI | TorchGEMS 实验接口 | 皮下亚区图谱的概率分割；官方核团精度未验收 | [皮下亚区](docs/subregions/README.md) |
 | sMRI | SynthSR | 1 mm T1w 合成图 | [SynthSR](docs/synthsr/README.md) |
 | sMRI | TorchFAST | 三组织分割、PVE 与偏置场 | [TorchFAST](docs/fast/README.md) |
 | sMRI | FastVBM | 标准空间 GM、Jacobian 与 modulated GM | [FastVBM](docs/fast_vbm/README.md) |
@@ -83,6 +85,7 @@ python tools/setup_weights.py --all
 python tools/setup_weights.py --model synthstrip --model synthmorph-joint
 python tools/setup_weights.py --model wmh-synthseg
 python tools/setup_weights.py --model synthseg
+python tools/setup_weights.py --model synthseg-plus
 python tools/setup_weights.py --model synthsr
 python tools/setup_weights.py --model fast-vbm
 python tools/setup_weights.py --model fmri

@@ -149,7 +149,7 @@ def run_synthseg_parc_t1(
     segment_weights: str | Path,
     segment_labels: str | Path,
     parc_weights: str | Path,
-    parc_labels: str | Path,
+    parc_labels: str | Path | np.ndarray,
     *,
     device: str | torch.device = "cpu",
     min_pad: int = 128,
