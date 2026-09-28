@@ -105,14 +105,18 @@ class DMRIPipeline:
         synthstrip_weights=None,
         dti_shell=1000,
         dti_tolerance=100,
+        bvec_source="rotated",
     ):
         if registration_backend not in ("tbss", "mmorf"):
             raise ValueError("registration_backend must be 'tbss' or 'mmorf'")
+        if bvec_source not in ("rotated", "raw"):
+            raise ValueError("bvec_source must be 'rotated' or 'raw'")
         self.device = configure_device(device)
         self.registration_backend = registration_backend
         self.synthstrip_weights = synthstrip_weights
         self.dti_shell = float(dti_shell)
         self.dti_tolerance = float(dti_tolerance)
+        self.bvec_source = bvec_source
 
     def run(
         self,
@@ -190,6 +194,9 @@ class DMRIPipeline:
         timings["eddy"] = time.perf_counter() - started
         corrected = eddy_root.with_name(eddy_root.name + ".nii.gz")
         rotated_bvecs = eddy_root.with_name(eddy_root.name + ".eddy_rotated_bvecs")
+        fitting_bvecs = (
+            rotated_bvecs if self.bvec_source == "rotated" else raw_dir / "AP.bvec"
+        )
         mask_path = Path(eddy_inputs["mask"])
 
         native_dir = output_dir / "native"
@@ -198,7 +205,7 @@ class DMRIPipeline:
         shell_image, shell_bval, shell_bvec = select_shell(
             corrected,
             raw_dir / "AP.bval",
-            rotated_bvecs,
+            fitting_bvecs,
             native_dir / "data_1_shell",
             shell=self.dti_shell,
             tolerance=self.dti_tolerance,
@@ -219,7 +226,7 @@ class DMRIPipeline:
         noddi = TorchAMICONODDI(device=self.device).run(
             corrected,
             mask_path,
-            rotated_bvecs,
+            fitting_bvecs,
             raw_dir / "AP.bval",
             output_dir=native_dir,
             naming="ukb",
@@ -303,6 +310,7 @@ class DMRIPipeline:
             "common_standard_output_contract": True,
             "dti_shell": self.dti_shell,
             "dti_tolerance": self.dti_tolerance,
+            "bvec_source": self.bvec_source,
             "timings_seconds": timings,
             "elapsed_seconds": time.perf_counter() - total_started,
             "eddy": eddy.qc,

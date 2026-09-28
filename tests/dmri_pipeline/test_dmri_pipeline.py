@@ -1,3 +1,4 @@
+import argparse
 import hashlib
 from types import SimpleNamespace
 from importlib.resources import files
@@ -10,6 +11,7 @@ import fnit.dmri_pipeline.pipeline as pipeline_module
 import fnit.dmri_pipeline.tbss as tbss_module
 
 from fnit.dmri_pipeline import DMRIPipeline, STANDARD_MAP_NAMES
+from fnit.dmri_pipeline.cli import _arguments
 from fnit.dmri_pipeline.tbss import TBSSConfig, preprocess_fa
 from fnit.eddy.core import _load_topup_field
 
@@ -18,6 +20,18 @@ def test_common_nine_map_contract():
     assert STANDARD_MAP_NAMES == (
         "FA", "MD", "L1", "L2", "L3", "MO", "ICVF", "OD", "ISOVF"
     )
+
+
+def test_bvec_source_cli_and_invalid_value():
+    parser = argparse.ArgumentParser()
+    _arguments(parser)
+    options = parser.parse_args(
+        ["--raw-dir", "raw", "-o", "out", "--fa-template", "fa.nii.gz",
+         "--bvec-source", "raw"]
+    )
+    assert options.bvec_source == "raw"
+    with pytest.raises(ValueError, match="bvec_source"):
+        DMRIPipeline(device="cpu", bvec_source="invalid")
 
 
 def test_tbss_config_combines_selected_official_schedule_values():
@@ -99,7 +113,8 @@ def test_partial_pa_acquisition_is_rejected(tmp_path):
         )
 
 
-def test_mmorf_branch_calls_public_mmorf_function(monkeypatch, tmp_path):
+@pytest.mark.parametrize("bvec_source", ("rotated", "raw"))
+def test_mmorf_branch_calls_public_mmorf_function(monkeypatch, tmp_path, bvec_source):
     raw = tmp_path / "raw"
     raw.mkdir()
     for name in ("AP.nii.gz", "AP.bval", "AP.bvec", "AP.json"):
@@ -151,6 +166,7 @@ def test_mmorf_branch_calls_public_mmorf_function(monkeypatch, tmp_path):
             pass
 
         def run(self, *args, **kwargs):
+            captured["noddi_bvecs"] = args[2]
             return SimpleNamespace(ndi=scalar, odi=scalar, fwf=scalar, qc={})
 
     class Saveable:
@@ -179,11 +195,11 @@ def test_mmorf_branch_calls_public_mmorf_function(monkeypatch, tmp_path):
     monkeypatch.setattr(pipeline_module, "TorchAMICONODDI", FakeNODDI)
     monkeypatch.setattr(pipeline_module, "SynthStrip", FakeSynthStrip)
     monkeypatch.setattr(pipeline_module, "TorchFLIRT", FakeFLIRT)
-    monkeypatch.setattr(
-        pipeline_module,
-        "select_shell",
-        lambda *args, **kwargs: ("shell.nii.gz", "shell.bval", "shell.bvec"),
-    )
+    def fake_select_shell(*args, **kwargs):
+        captured["shell_bvecs"] = args[2]
+        return "shell.nii.gz", "shell.bval", "shell.bvec"
+
+    monkeypatch.setattr(pipeline_module, "select_shell", fake_select_shell)
 
     captured = {}
 
@@ -207,6 +223,7 @@ def test_mmorf_branch_calls_public_mmorf_function(monkeypatch, tmp_path):
         device="cpu",
         registration_backend="mmorf",
         synthstrip_weights="synthstrip.pt",
+        bvec_source=bvec_source,
     ).run(
         raw,
         output_dir,
@@ -223,6 +240,13 @@ def test_mmorf_branch_calls_public_mmorf_function(monkeypatch, tmp_path):
         captured["kwargs"]["moving_tensor_affine"], np.eye(4)
     )
     assert set(result.standard_maps) == set(STANDARD_MAP_NAMES)
+    expected_bvecs = (
+        raw / "AP.bvec" if bvec_source == "raw"
+        else output_dir / "eddy" / "data.eddy_rotated_bvecs"
+    )
+    assert captured["shell_bvecs"] == expected_bvecs
+    assert captured["noddi_bvecs"] == expected_bvecs
+    assert result.qc["bvec_source"] == bvec_source
 
 
 def test_tbss_passes_volumes_to_fnirt(monkeypatch, tmp_path):

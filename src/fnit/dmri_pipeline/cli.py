@@ -17,6 +17,7 @@ def _arguments(parser):
     parser.add_argument("--synthstrip-weights", help="official synthstrip.1.pt; required by MMORF")
     parser.add_argument("--dti-shell", type=float, default=1000)
     parser.add_argument("--dti-tolerance", type=float, default=100)
+    parser.add_argument("--bvec-source", choices=("rotated", "raw"), default="rotated")
     parser.add_argument("--device")
     parser.add_argument("--overwrite", action="store_true")
 
@@ -30,6 +31,7 @@ def run(args):
         synthstrip_weights=args.synthstrip_weights,
         dti_shell=args.dti_shell,
         dti_tolerance=args.dti_tolerance,
+        bvec_source=args.bvec_source,
     ).run(
         args.raw_dir,
         args.output_dir,

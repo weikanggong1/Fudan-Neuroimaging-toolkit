@@ -53,6 +53,7 @@ result = DMRIPipeline(
     synthstrip_weights=None,  # TBSS 分支不使用 SynthStrip 权重
     dti_shell=1000,  # DTIFIT 使用的目标 b-value，单位 s/mm²
     dti_tolerance=100,  # 纳入 DTI shell 的 b-value 容差
+    bvec_source="rotated",  # DTIFIT/NODDI 梯度：EDDY 旋转后；对照试验可选 "raw"
 ).run(
     raw_dir="raw",  # 输入：AP.* 及可选 PA.* 的单被试目录
     output_dir="subject_tbss",  # 输出：该受试者的唯一结果根目录
@@ -78,6 +79,7 @@ result = DMRIPipeline(
     synthstrip_weights="/weights/synthstrip.1.pt",  # 输入：官方 SynthStrip 权重
     dti_shell=1000,  # DTIFIT 使用的目标 b-value，单位 s/mm²
     dti_tolerance=100,  # 纳入 DTI shell 的 b-value 容差
+    bvec_source="rotated",  # DTIFIT/NODDI 梯度：EDDY 旋转后；对照试验可选 "raw"
 ).run(
     raw_dir="raw",  # 输入：AP.* 及可选 PA.* 的单被试目录
     output_dir="subject_mmorf",  # 输出：该受试者的唯一结果根目录
@@ -103,6 +105,7 @@ fnit-dmri-pipeline \
   --registration-backend tbss \
   --fa-template FMRIB58_FA_1mm.nii.gz \
   --fa-skeleton FMRIB58_FA-skeleton_1mm.nii.gz \
+  --bvec-source rotated \
   --device cuda:0
 ~~~
 
@@ -118,10 +121,11 @@ fnit-dmri-pipeline \
   --t1-template MNI152_T1_1mm_brain.nii.gz \
   --tensor-template FSL_HCP1065_tensor_1mm.nii.gz \
   --synthstrip-weights /weights/synthstrip.1.pt \
+  --bvec-source rotated \
   --device cuda:0
 ~~~
 
---raw-dir 选择单个 subject；-o 是该 subject 的唯一输出根；--registration-backend 只改变非线性标准化分支。其余行分别提供该分支需要的模板、T1 和权重。--device 控制所有 PyTorch 步骤使用同一设备；每次调用只处理这一名被试。
+--raw-dir 选择单个 subject；-o 是该 subject 的唯一输出根；--registration-backend 只改变非线性标准化分支。其余行分别提供该分支需要的模板、T1 和权重。--device 控制所有 PyTorch 步骤使用同一设备；每次调用只处理这一名被试。--bvec-source rotated 使 DTIFIT 和 NODDI 使用 EDDY 旋转后的梯度；改为 raw 时，两者都使用原始 AP.bvec。EDDY 的图像校正及其自身保存的旋转梯度文件照常运行，报告中的 bvec_source 记录实际拟合输入。
 
 ## 输出契约
 
@@ -149,6 +153,26 @@ subject/
 
 两条分支的 registration/standard 中九个文件名、MNI grid、float32 dtype 和参数定义相同。report 记录是否使用 TOPUP、各阶段耗时、设备、TF32、每个子函数的 QC 和非等价边界。
 
+## 原始与旋转 bvec 的单例对照
+
+为检查梯度旋转是否导致低相关，固定同一例真实 AP/PA 数据的 FNIT EDDY 校正图、脑 mask、bval 和模板，只将 DTIFIT 与 NODDI 的梯度由旋转后的文件改为原始 `AP.bvec`，再运行 TBSS 配准、九图传播与 skeleton。以下 Pearson r 均在两侧非零体素并集上计算；参考图与上面的端到端报告相同。
+
+| 参数图 | 原生 r：旋转→原始 | 标准 r：旋转→原始 | skeleton r：旋转→原始 |
+|---|---:|---:|---:|
+| FA | 0.586157→0.586172 | 0.694611→0.694454 | 0.561165→0.561281 |
+| MD | 0.547537→0.547549 | 0.600453→0.597792 | 0.447009→0.445168 |
+| L1 | 0.436994→0.437013 | 0.535743→0.531993 | 0.413255→0.412540 |
+| L2 | 0.567251→0.567250 | 0.613368→0.610968 | 0.504887→0.502886 |
+| L3 | 0.634022→0.634043 | 0.658698→0.656747 | 0.540063→0.537756 |
+| MO | 0.413579→0.413582 | 0.464303→0.462845 | 0.622653→0.622600 |
+| ICVF | −0.002070→−0.002032 | 0.313822→0.312697 | 0.107073→0.107476 |
+| OD | 0.506862→0.507194 | 0.592098→0.590575 | 0.605502→0.601955 |
+| ISOVF | 0.608481→0.608437 | 0.624363→0.622468 | 0.525343→0.523098 |
+
+九张标准图使用原始 bvec 后全部下降，平均 Δr 为 −0.001880。默认保留 `bvec_source="rotated"`。需要重复该对照时，在上面的 Python 构造器中将 `bvec_source` 设为 `"raw"`，或在单被试 CLI 中使用 `--bvec-source raw`；其余输入参数保持不变。数据及数值源码 SHA-256、逐图结果见[机器报告](../../validation/dmri_pipeline/bvec_source_ablation.real.json)。这是固定 EDDY 结果的下游配对试验，不是新的整链计时。
+
+回查首次发布 dMRI pipeline 的 `aa46ac4`：当时 raw-to-native 的 FA r 已是 0.586156997，ICVF r 已是 −0.002069718；TBSS 标准 FA r 为 0.753871，未达到 0.99999。旧报告中的 DTIFIT 与 AMICO-NODDI 约 0.99999–1.0，使用的是两套拟合器**相同的官方 EDDY 输入**，不包含 FNIT TOPUP/EDDY 与官方原生图的差异。两种实验不能当作一次整链精度的前后版本比较。
+
 ## UKB TBSS 对应关系
 
 | 本包步骤 | UKB v1.5 / FSL 命令 |
@@ -171,12 +195,7 @@ MMORF 分支和 TBSS 分支共用 TOPUP、EDDY、DTIFIT、NODDI、九图命名�
 ## 当前真实数据验证
 
 以下数值运行使用源码快照 tar `f7547d0a39ddd9fb6ba70deb720f229ecedc6385fa72d457efb2ded78b6c173d`，其中 `flirt/core.py` 为 `552856…`；当前文件为 `ce375d…`。继承链分两段：[第一段](../../validation/runtime_dependencies/flirt_qc_source_equivalence.public.json)只清理 runtime QC，[第二段](../../validation/runtime_dependencies/flirt_profile_source_equivalence.public.json)证明本流程使用的 12-DOF/corratio 数值路径未变。报告保留原测量 hash，并在新增 chain 对象中明确 `fresh=false`。这不是 current-hash 完整真实数据重跑，也不覆盖已改变的 6-DOF/normmi 路径。
-两份报告记录的 `__init__.py`/`cli.py` 为 `cc9aa4…`/`2d5e3d…`，当前 0.16.0 为
-`be1cab…`/`c92a3f…`。归一化版本号、移除独立的 fMRI 懒加载分支（含 13 个 surface API），并从新旧源码中
-过滤五个主动撤下的内部实现名称后，保留 API 的新旧 AST SHA-256 均为 `fd295c…`。
-这五个名称不主张 API 兼容；`dmri-pipeline` 的动态 parser、最终 `parse_args` 和 handler
-分发 AST 未变。完整入口证明见
-[包入口源码等价证明](../../validation/runtime_dependencies/package_entry_source_equivalence.public.json)。
+两份旧报告的包入口源码等价证明仅适用于当时的 `dmri-pipeline` 入口；本次新增 `bvec_source` 参数和 CLI 选项后，不能再把该证明当成当前入口的 AST 等价证明。旧报告仍是原测量快照的结果。本次同一 EDDY 输出上的真实数据配对试验和当前选项测试见[上文](#原始与旋转-bvec-的单例对照)及[机器报告](../../validation/dmri_pipeline/bvec_source_ablation.real.json)。
 
 两份 dMRI source manifest 均未记录 SynthMorph，TBSS 和 MMORF 路径也都不执行 SynthMorph。机器报告以结构化字段记录 `executed=false` 和 `attestation_applicable=false`，因此这里不引用 SynthMorph linear 证明作数值继承。
 

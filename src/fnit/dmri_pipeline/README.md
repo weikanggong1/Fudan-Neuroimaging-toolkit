@@ -17,4 +17,6 @@ TBSS 分支也已用同一例真实 AP/PA 和数值运行冻结快照完成 raw-
 
 ![TBSS raw-to-standard 真实 FA 对照](../../../docs/dmri_pipeline/figures/dmri_tbss_fa_real.png)
 
+DTIFIT 与 NODDI 默认读取 EDDY 旋转后的 bvec。单被试调用可设置 `bvec_source="raw"`（CLI：`--bvec-source raw`）复核原始 `AP.bvec`；真实数据配对试验的九张标准图相关性均未改善，具体数值见 [bvec 来源报告](../../../validation/dmri_pipeline/bvec_source_ablation.real.json)。
+
 两个分支的完整输入边界、逐图精度、阶段时间、显存、源码哈希和限制见[主文档](../../../docs/dmri_pipeline/README.md)与 [`validation/dmri_pipeline`](../../../validation/dmri_pipeline/README.md)。FLIRT core 从测量时的 `552856…` 经 [QC-only 第一段](../../../validation/runtime_dependencies/flirt_qc_source_equivalence.public.json)和[12-DOF/corratio 限定的第二段](../../../validation/runtime_dependencies/flirt_profile_source_equivalence.public.json)继承到当前 `ce375d…`。报告保留原测量 hash，没有 fresh current-hash 完整重跑；该链不覆盖 6-DOF/normmi。TBSS 与 MMORF 都不调用 SynthMorph，报告也没有记录其源码，因此 `synthmorph_source_status` 明确不适用 SynthMorph linear attestation。

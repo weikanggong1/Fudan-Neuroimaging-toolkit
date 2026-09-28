@@ -3,13 +3,17 @@
 [返回 dMRI pipeline 文档](../../docs/dmri_pipeline/README.md) · [MMORF 文档](../../docs/mmorf/README.md) · [FNIRT 文档](../../docs/fnirt/README.md)
 
 两份数值报告使用源码快照 tar `f7547d0a…`，其中 FLIRT core 为 `552856…`；当前文件为 `ce375d…`。继承链包含 [QC-only 的 `552856… → f5315f…`](../runtime_dependencies/flirt_qc_source_equivalence.public.json) 和 [12-DOF/corratio 限定的 `f5315f… → ce375d…`](../runtime_dependencies/flirt_profile_source_equivalence.public.json)。两份报告保留原测量 hash，新增的 chain 对象明确 `fresh=false`。该证明不覆盖 6-DOF/normmi。
-公共包入口也保留测量 hash：`__init__.py`/`cli.py` 为 `cc9aa4…`/`2d5e3d…`，
-当前 0.16.0 为 `be1cab…`/`c92a3f…`。[包入口源码等价证明](../runtime_dependencies/package_entry_source_equivalence.public.json)
-归一化版本号、移除独立的 fMRI 懒加载分支（含 13 个 surface API），并过滤五个主动撤下的内部实现名称后，
-保留 API 的新旧 AST SHA-256 均为 `fd295c…`。这五个名称不主张 API 兼容；证明仅限
-`dmri-pipeline` 动态 parser 和 handler 路径，并明确 `fresh=false`。
+旧报告保留测量时的包入口 hash；[包入口源码等价证明](../runtime_dependencies/package_entry_source_equivalence.public.json)只覆盖本次增加 `bvec_source` 参数之前的入口。当前 CLI 已增加该选项，因此不主张它与旧报告的入口 AST 等价。本次配对试验及对应测试单独列在下文。
 
 TBSS 与 MMORF 两份 source manifest 都没有记录 SynthMorph 文件，两条运行路径也不调用 SynthMorph；报告已加入 `synthmorph_source_status`，明确 `executed=false`、不适用 SynthMorph linear attestation，也不主张相关数值继承。
+
+## bvec 来源配对试验
+
+[单例机器报告](bvec_source_ablation.real.json)固定 EDDY 校正图、mask、bval 和 TBSS 模板，只在 DTIFIT/NODDI 拟合时切换 `AP.bvec` 与 `data.eddy_rotated_bvecs`。1 例真实 AP/PA 数据上，原始 bvec 的九张标准图 Pearson r 全部较旋转 bvec 下降，平均 Δr = −0.001880。默认仍使用旋转梯度；单被试 Python/CLI 可以显式选择 `raw` 复核。报告保存输入和数值源码哈希，不含受试者影像。
+
+复现时先用默认的 `bvec_source="rotated"` 跑一个被试，保留 `eddy/data.nii.gz`、mask 和旋转后的 bvec。然后调用 [原始梯度重拟合脚本](run_bvec_ablation.py)：`--baseline-root` 是默认分支的输出根目录，`--raw-dir` 是同一被试的原始 AP/PA 目录，`--fa-template` 和 `--fa-skeleton` 是同一套 FMRIB58 1 mm 文件，`--output-dir` 是新的空结果目录，`--device` 指定运行设备。脚本复用固定 EDDY 图像，仅重跑 DTIFIT、NODDI 和 TBSS。[配对比较脚本](compare_bvec_source.py)再接收这两个结果根目录、官方原生九图目录、官方 TBSS 根目录和输出 JSON 路径；它以同一非零并集口径计算 27 组比较。公开脚本对本例重算的 54 个 Pearson 值与机器报告逐项一致。
+
+旧版 `aa46ac4` 的 raw-to-native FA r = 0.586156997、ICVF r = −0.002069718，与当前报告相同。旧版接近 1 的 DTIFIT/NODDI 组件指标来自固定相同官方 EDDY 输入，不能作为整个 raw-to-TBSS pipeline 曾达到该精度的证据。
 
 ## 实测冻结快照：MMORF raw-to-standard
 
