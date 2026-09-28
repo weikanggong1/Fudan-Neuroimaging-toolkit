@@ -46,7 +46,7 @@ UKB `T1_20263/raw_data` 存放的是每人一个 ZIP，内部 `FreeSurfer/` 才�
 | `prepare_fs_sphere_projection_inputs` | `subject_dir`、`pull_ras`、`initial_t1_to_mni_world`；`mni_reference`：同网格 3D MNI 2 mm；`hcp_assets_dir`：公开 HCP 资产根；`output_dir`。可选 `wb_command="wb_command"`、`device="cpu"`、`overwrite=False`。 | `SurfacePreparationResult.left/right`：各为八条 GIFTI 路径组成的 `SurfaceHemisphere`；`.subject_rois` 为 `ROIs.2.nii.gz`、`.atlas_rois` 为 HCP 标准标签、`.inverse_residual_mm` 为双侧反解误差。其他中间文件见输出树。 | `-surface-sphere-project-unproject`、`-metric-fill-holes/-metric-remove-islands/-metric-resample`、`-volume-label-import`；对应官方 `bb_hcp_surf_mni` 的 FS sphere 和 ROI 段。 |
 | `run_surface_projection` | `clean_mni`：4D BOLD；`mni_reference`、`goodvoxels`、`subject_rois`、`atlas_rois`：同一 2 mm 网格 NIfTI；`left`、`right`：已准备的 `SurfaceHemisphere`；`output_dir`。可选 `wb_command="wb_command"`、`overwrite=False`。 | `SurfaceProjectionResult.dtseries`、`.left_metric`、`.right_metric`、`.subcortical_volume`、`.coverage_report`：CIFTI、双侧 GIFTI、4D NIfTI、覆盖 JSON；`.timing_seconds` 为每条 Workbench 命令耗时。 | `-volume-to-surface-mapping -ribbon-constrained`、`-metric-resample ADAP_BARY_AREA`、`-metric-smoothing`、`-cifti-resample`、`-cifti-create-dense-timeseries`。 |
 | `run_surface_from_mni` | `clean_mni`、`mni_reference`；`inputs=SurfacePipelineInputs(left, right, subject_rois, atlas_rois, wb_command, goodvoxels)`；`output_dir`。可选 `overwrite=False`。`goodvoxels=None` 表示现场计算。 | `SurfacePipelineResult.projection`：上述投影结果；`.qc`：现场计算时的 `SurfaceQCResult`，传入固定掩膜时为 `None`。在 `output_dir/qc/` 与 `projection/` 写文件。 | 组合上述 goodvoxels 与 Workbench 投影步骤；官方对应 `bb_hcp_surf_mni` 的 ribbon→dense CIFTI 段。 |
-| `run_surface_from_volume` | `volume_dir`：FNIT 已完成 WM/CSF/motion 回归的体积输出目录；`recon_all`：同被试 UKB T1 ZIP 或已解压的 `FreeSurfer/`；`hcp_assets_dir`：公开模板根；`output_dir`。可选 `wb_command="wb_command"`、`device="cpu"`、`overwrite=False`。 | `SurfacePipelineResult`；在 `output_dir/prepared/`、`qc/`、`projection/` 依次写结构准备、goodvoxels 和 fsLR32k CIFTI。ZIP 中的临时结构文件运行结束后删除。 | 读取 volume 已保存的 T1→MNI 矩阵和 pull，组合现有 FS sphere、ribbon、Workbench 投影；对应官方 initial CIFTI 段。 |
+| `run_surface_from_volume` | `volume_dir`：FNIT 已完成 WM/CSF/motion 回归的体积输出目录；`recon_all`：同被试 UKB T1 ZIP 或已解压的 `FreeSurfer/`；`hcp_assets_dir`：公开模板根；`output_dir`。可选 `wb_command="wb_command"`、`device="cpu"`、`overwrite=False`；`registered_spheres=(左,右)`：已经估计的原生拓扑球面；`dedrift_spheres=(左,右)`：配套 164k 群体 DeDrift 球面，必须与前者同时给出。 | `SurfacePipelineResult`；在 `output_dir/prepared/`、`qc/`、`projection/` 写结构准备、goodvoxels 和 fsLR32k CIFTI；传入球面时另在 `registered/` 写新 ROI 与 midthickness，传入 DeDrift 时另在 `dedrift/` 写组合球面。ZIP 中的临时结构文件运行结束后删除。 | 读取 volume 已保存的 T1→MNI 矩阵和 pull，按指定球面重建 ROI 并用 Workbench 投影；未给球面时对应官方 initial FS CIFTI 段。 |
 
 ### T1/FLAIR 联合偏置校正
 
@@ -204,6 +204,31 @@ fnit-fmri surface \
 ```
 
 `--volume-dir`、`--recon-all`、`--surface-assets-dir`、`--output-dir`、`--wb-command`、`--device` 与上面的同名 Python 参数含义相同；加 `--overwrite` 才允许覆盖已有结果。这里得到的是基于 FreeSurfer `sphere.reg` 的 fsLR32k time series，尚未执行 MSMSulc 或 MSMAll，不对应 UKB 最终 MSMAll 文件。
+
+已有**独立估计完成**的双侧 MSMAll 原生球面与 UKB 群体 DeDrift 文件时，Python 入口可重新投影同一份清理后的 volume BOLD；本接口不估计 MSMAll 球面，命令行目前仍使用上面的 FS sphere 默认路径。
+
+```python
+from fnit import run_surface_from_volume
+
+registered_result = run_surface_from_volume(
+    volume_dir="/absolute/path/sub-EXAMPLE_volume",  # 已完成混杂回归的 FNIT 体积输出目录
+    recon_all="/absolute/path/T1_20263/raw_data/SUBJECT_ID_20263_2_0.zip",  # 与 volume T1 同被试的 recon-all ZIP
+    hcp_assets_dir="/absolute/path/hcp_surface_assets",  # fsLR32k/164k 公共模板根目录
+    output_dir="/absolute/path/sub-EXAMPLE_surface_msmall",  # 新 ROI、DeDrift 和 CIFTI 输出父目录
+    wb_command="/absolute/path/bin/wb_command",  # Connectome Workbench 可执行文件
+    device="cuda:0",  # 表面非线性坐标变换和 wmparc 重采样设备
+    overwrite=False,  # 目标表面文件存在时停止
+    registered_spheres=(
+        "/absolute/path/L.sphere.MSMAll.native.surf.gii",  # 左侧原生顶点顺序的 MSMAll 球面
+        "/absolute/path/R.sphere.MSMAll.native.surf.gii",  # 右侧原生顶点顺序的 MSMAll 球面
+    ),
+    dedrift_spheres=(
+        "/absolute/path/DeDriftMSMAllUKB.L.sphere.DeDriftMSMAllUKB.164k_fs_LR.surf.gii",  # UKB 左侧 164k 群体变换
+        "/absolute/path/DeDriftMSMAllUKB.R.sphere.DeDriftMSMAllUKB.164k_fs_LR.surf.gii",  # UKB 右侧 164k 群体变换
+    ),
+)
+print(registered_result.projection.dtseries)  # 490 帧示例对应时间×91,282 灰质单元
+```
 
 ## 从原始 BIDS 一次运行
 
@@ -364,6 +389,7 @@ wb_command -metric-resample native.func.gii registered_sphere.native.surf.gii sp
 | 探索性 PyTorch MSMSulc 与官方 MSM 优化器 | 左侧参考 sulc 相关：初始球面 0.7901、PyTorch 实验 0.8895、官方 MSM 0.8463；PyTorch 对官方球面中位顶点距离 1.995 mm，第 95 百分位 4.670 mm | PyTorch 实验 14.6 秒、峰值 GPU 预留 0.252 GB | 官方 MSM 左侧 46 分 39.45 秒 | PyTorch 实验仍未达到球面一致性，未纳入 FNIT 正式接口；相关较高不代表个体注册等价，也没有据此推断正式流程加速 |
 | DeDrift 球面组合内核 | 双侧 120,035/122,950 顶点；与独立 Workbench 球面组合命令逐点相同，双侧 MAE/最大误差均为 0 | 双侧 5.95 秒 | 独立 Workbench 左 2.77、右 2.94 秒 | 固定真实个体 FS 球面测试组合命令，群体变换采用公开 HCP DeDrift；尚非 UKB MSMAll + UKB DeDrift 结果 |
 | 新注册球面的投影准备 | 用同一 FS 球面重建时，左右原生 ROI 差异均为 0 顶点，左右 32k midthickness 最大坐标差均为 0 mm | 左 2.25、右 2.30 秒 | 显式 Workbench 左 2.20、右 2.19 秒 | 复核换球面后必须重建的 ROI 与 midthickness 编排；两条路线调用同一 Workbench |
+| 外部球面接入整链 | 同一真实 490 帧回归后 BOLD、同一 FS 球面；重建新 ROI 后得到 490×91,282 CIFTI，与既有 FS 投影逐值相同，MAE/最大误差均为 0 | 727.84 秒，含 ZIP 解压、结构准备、QC 与 490 帧投影 | 既有 FNIT 同输入 FS 投影文件，未保存配对整链计时 | 此行检验传入球面的接口，不是 MSMAll 或 UKB DeDrift 的输出一致性 benchmark |
 | MNI `wmparc`/皮层下 ROI | 独立重算的 FSL warp 与 FNIT pull：前景 Dice 0.9083、逐标签一致率 0.8183、19 标签平均 Dice 0.8657；固定 FNIT pull 的独立 SciPy 最近邻重采样与 FNIT 标签差异 0 体素 | 1.429 秒（GPU＋Workbench） | 2.856 秒（FSL warp＋Workbench） | 两条路线使用不同 T1→MNI warp，仅作描述性比较；`applywarp` 返回 255，但产物完整解码并通过 shape、finite、identity 核查 |
 | 同 ribbon 的 goodvoxels | FNIT 178,558、FSL 178,548 个体素；Dice 0.999149、差异 304 体素 | 10.83 / 11.31 秒 | 58.41 / 73.22 秒 | 同一 490 帧 BOLD、同一 87,160 体素 ribbon；两次时间均从固定 ribbon 后的统计步骤计，节点负载有波动 |
 | 同 goodvoxels/球面的左右皮层 `func.gii` | 各 32,492 顶点×8 帧；Pearson r=1、MAE=0、最大绝对误差=0，逐值相同 | 23.72 秒 | 23.87 秒 | 同一 Workbench 2.1.0、同一输入、`OMP_NUM_THREADS=8`；分别累加双侧 14 条皮层命令的耗时 |

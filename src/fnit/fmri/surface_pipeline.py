@@ -14,6 +14,7 @@ from ..flirt.coordinates import flirt_to_world_affine
 from .surface import SurfaceHemisphere, SurfaceProjectionResult, run_surface_projection
 from .surface_prepare import prepare_fs_sphere_projection_inputs
 from .surface_qc import SurfaceQCResult, make_ribbon_goodvoxels
+from .surface_registration import apply_dedrift, prepare_registered_projection
 
 
 @dataclass(frozen=True)
@@ -87,8 +88,19 @@ def run_surface_from_volume(
     wb_command: str | Path = "wb_command",
     device: str = "cpu",
     overwrite: bool = False,
+    registered_spheres: tuple[str | Path, str | Path] | None = None,
+    dedrift_spheres: tuple[str | Path, str | Path] | None = None,
 ) -> SurfacePipelineResult:
-    """Map FNIT's confound-cleaned MNI BOLD using a matching recon-all directory or UKB T1 ZIP."""
+    """Map confound-cleaned MNI BOLD with FS or supplied L/R registration spheres.
+
+    ``registered_spheres`` may contain independently estimated MSMSulc or
+    MSMAll native-topology spheres. ``dedrift_spheres`` must contain the
+    corresponding L/R 164k group transforms and requires registered spheres.
+    """
+    if dedrift_spheres is not None and registered_spheres is None:
+        raise ValueError("dedrift_spheres requires registered_spheres")
+    if registered_spheres is not None and len(registered_spheres) != 2:
+        raise ValueError("registered_spheres must contain left and right paths")
     volume = Path(volume_dir).expanduser().resolve()
     output = Path(output_dir).expanduser().resolve()
     clean = volume / "filtered_func_data_clean_MNI152_2mm.nii.gz"
@@ -153,12 +165,38 @@ def run_surface_from_volume(
             device=device,
             overwrite=overwrite,
         )
+        hemispheres = {"L": prepared.left, "R": prepared.right}
+        if registered_spheres is not None:
+            spheres = dict(zip(("L", "R"), registered_spheres))
+            if dedrift_spheres is not None:
+                spheres = apply_dedrift(
+                    registered_spheres=registered_spheres,
+                    dedrift_spheres=dedrift_spheres,
+                    hcp_assets_dir=hcp_assets_dir,
+                    output_dir=output / "dedrift",
+                    wb_command=wb_command,
+                )
+            mesh = Path(hcp_assets_dir).expanduser().resolve() / (
+                "global/templates/standard_mesh_atlases"
+            )
+            for hemi in ("L", "R"):
+                hemispheres[hemi] = prepare_registered_projection(
+                    hemisphere=hemispheres[hemi],
+                    individual_roi=output / "prepared" / f"{hemi}.roi.individual.native.shape.gii",
+                    registered_sphere=spheres[hemi],
+                    reference_sphere_164k=mesh / (
+                        f"fsaverage.{hemi}_LR.spherical_std.164k_fs_LR.surf.gii"
+                    ),
+                    reference_roi_164k=mesh / f"{hemi}.atlasroi.164k_fs_LR.shape.gii",
+                    output_dir=output / "registered" / hemi,
+                    wb_command=wb_command,
+                )
         return run_surface_from_mni(
             clean_mni=clean,
             mni_reference=reference_path,
             inputs=SurfacePipelineInputs(
-                left=prepared.left,
-                right=prepared.right,
+                left=hemispheres["L"],
+                right=hemispheres["R"],
                 subject_rois=prepared.subject_rois,
                 atlas_rois=prepared.atlas_rois,
                 wb_command=wb_command,
