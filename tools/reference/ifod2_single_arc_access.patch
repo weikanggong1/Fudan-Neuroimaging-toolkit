@@ -1,0 +1,22 @@
+--- a/src/dwi/tractography/algorithms/iFOD2.h
++++ b/src/dwi/tractography/algorithms/iFOD2.h
+@@ -196,0 +197,19 @@
++            bool oracle_arc(const Eigen::Vector3f& point,
++                            const Eigen::Vector3f& start_direction,
++                            const Eigen::Vector3f& end_direction,
++                            vector<Eigen::Vector3f>& path_positions,
++                            vector<Eigen::Vector3f>& path_tangents,
++                            float& start_amplitude, float& start_amplitude_direct, float& probability)
++            {
++              pos = point;
++              dir = start_direction.normalized();
++              if (!get_data(source)) return false;
++              start_amplitude = FOD(dir);
++              start_amplitude_direct = Math::SH::value(values, dir, S.lmax);
++              if (!(start_amplitude > 0.0f)) return false;
++              half_log_prob0 = 0.5f * std::log(start_amplitude);
++              get_path(path_positions, path_tangents, end_direction.normalized());
++              probability = path_prob(path_positions, path_tangents);
++              return true;
++            }
++

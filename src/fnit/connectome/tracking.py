@@ -8,7 +8,7 @@ import math
 import torch
 from torch.nn import functional as F
 
-from .fod import real_sh
+from .fod import tracking_sh_precomputed
 
 
 @dataclass
@@ -271,12 +271,12 @@ def _grow(
                                positions[:, None] + step_mm * prior[:, None], endpoint)
         mid_tangent = torch.where(straight[..., None], prior[:, None], mid_tangent)
 
-        start_amp = (_sample(fod, positions, fod_inverse) * real_sh(prior, lmax)).sum(-1)
+        start_amp = (_sample(fod, positions, fod_inverse) * tracking_sh_precomputed(prior, lmax)).sum(-1)
         mid_fod = _sample(fod, midpoint.reshape(-1, 3), fod_inverse).reshape(batch, -1, fod.shape[-1])
-        mid_basis = real_sh(mid_tangent.reshape(-1, 3).float(), lmax).reshape(batch, -1, fod.shape[-1])
+        mid_basis = tracking_sh_precomputed(mid_tangent.reshape(-1, 3).float(), lmax).reshape(batch, -1, fod.shape[-1])
         mid_amp = (mid_fod * mid_basis).sum(-1)
         end_fod = _sample(fod, endpoint.reshape(-1, 3), fod_inverse).reshape(batch, -1, fod.shape[-1])
-        end_basis = real_sh(directions.reshape(-1, 3).float(), lmax).reshape(batch, -1, fod.shape[-1])
+        end_basis = tracking_sh_precomputed(directions.reshape(-1, 3).float(), lmax).reshape(batch, -1, fod.shape[-1])
         end_amp = (end_fod * end_basis).sum(-1)
         end_tissue = _five_tissue_values(five_tissue, endpoint.reshape(-1, 3),
                                          five_inverse).reshape(batch, -1, 5)
@@ -454,7 +454,7 @@ def probabilistic_tractography(
     if min_length_mm < 0 or min_length_mm > max_length_mm:
         raise ValueError('minimum length must lie between zero and maximum length')
     directions = _sphere(sphere_samples, device)
-    basis = real_sh(directions, lmax)
+    basis = tracking_sh_precomputed(directions, lmax)
     if wm_sh.shape[-1] != basis.shape[-1]:
         raise ValueError('WM SH coefficient count does not match lmax')
     generator = torch.Generator(device=device).manual_seed(seed)

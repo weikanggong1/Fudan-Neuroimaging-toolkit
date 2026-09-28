@@ -7,6 +7,7 @@ coefficients, and MRtrix's 300-direction active-set constraints.
 from __future__ import annotations
 
 import math
+from functools import lru_cache
 
 import torch
 
@@ -60,6 +61,65 @@ def real_sh(directions: torch.Tensor, lmax: int = 4) -> torch.Tensor:
                 value = math.sqrt(2.0) * value * torch.cos(order * phi)
             values.append(value)
     return torch.stack(values, dim=-1)
+
+
+@lru_cache(maxsize=8)
+def _tracking_sh_table(lmax: int, device: torch.device) -> torch.Tensor:
+    """Build MRtrix iFOD2's 512-elevation float32 Legendre lookup table."""
+    count = 512
+    inc = torch.tensor(math.pi / (count - 1), device=device, dtype=torch.float32)
+    z = (torch.arange(count, device=device, dtype=torch.float32) * inc).cos()
+    width = (lmax + 1) * (lmax + 2) // 2
+    table = torch.zeros((count, width), device=device, dtype=torch.float32)
+    for l in range(0, lmax + 1, 2):
+        for m in range(l + 1):
+            norm = math.sqrt((2 * l + 1) / (4 * math.pi) *
+                             math.factorial(l - m) / math.factorial(l + m))
+            index = l * (l - 1) // 2 + l + m
+            table[:, index] = norm * _associated_legendre(l, m, z) * (math.sqrt(2) if m else 1)
+    return table
+
+
+def tracking_sh_precomputed(directions: torch.Tensor, lmax: int = 8) -> torch.Tensor:
+    """Evaluate tracking SH via MRtrix iFOD2's 512-elevation lookup rule.
+
+    Input is nonzero float32 directions ``[...,3]`` on CPU/CUDA; output is
+    float32 real SH ``[...,C]`` in the same coefficient order as ``real_sh``.
+    The table is cached per device and lmax. Equivalent original operation:
+    ``Math::SH::PrecomputedAL<float>::value`` in MRtrix3 iFOD2, enabled by
+    ``tckgen -algorithm iFOD2 ...``. Real-FOD single-arc comparison is in
+    ``validation/connectome/ds004666/ifod2_single_arc_20260929.md``.
+    """
+    if lmax < 0 or lmax % 2 or directions.shape[-1] != 3 or directions.dtype != torch.float32:
+        raise ValueError("expected float32 directions [...,3] and nonnegative even lmax")
+    shape = directions.shape[:-1]
+    flat = directions.reshape(-1, 3)
+    unit = flat / torch.linalg.vector_norm(flat, dim=-1).clamp_min(1e-20)[:, None]
+    table = _tracking_sh_table(lmax, unit.device)
+    inc = unit.new_tensor(math.pi / 511)
+    position = unit[:, 2].clamp(-1, 1).acos() / inc
+    lower = position.long().clamp(0, 511)
+    fraction = (position - lower).clamp(0, 1)
+    upper = (lower + 1).clamp_max(511)
+    basis = (1 - fraction)[:, None] * table[lower] + fraction[:, None] * table[upper]
+    radius = torch.linalg.vector_norm(unit[:, :2], dim=-1)
+    cosine = torch.where(radius > 0, unit[:, 0] / radius.clamp_min(1e-20), 1)
+    sine = torch.where(radius > 0, unit[:, 1] / radius.clamp_min(1e-20), 0)
+    output = torch.zeros_like(basis)
+    for l in range(0, lmax + 1, 2):
+        index = l * (l - 1) // 2 + l
+        output[:, index] = basis[:, index]
+    cos_m = torch.ones_like(cosine)
+    sin_m = torch.zeros_like(sine)
+    for m in range(1, lmax + 1):
+        next_cos = cos_m * cosine - sin_m * sine
+        next_sin = sin_m * cosine + cos_m * sine
+        for l in range(m + (m & 1), lmax + 1, 2):
+            index = l * (l - 1) // 2 + l + m
+            output[:, index] = basis[:, index] * next_cos
+            output[:, index - 2 * m] = basis[:, index] * next_sin
+        cos_m, sin_m = next_cos, next_sin
+    return output.reshape(*shape, -1)
 
 
 # MRtrix3 electrostatic_repulsion_300_data (azimuth, elevation; radians).
