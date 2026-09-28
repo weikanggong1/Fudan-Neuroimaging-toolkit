@@ -122,3 +122,71 @@ def test_connectome_cli_requires_overwrite_for_existing_output(tmp_path):
     with pytest.raises(FileExistsError, match="use --overwrite"):
         main(argv)
     assert existing.read_text() == "prior result"
+
+
+def test_connectome_cli_subject_directory_writes_nodes(tmp_path, monkeypatch):
+    from fnit import connectome
+    from fnit.connectome.freesurfer_subject import ConnectomeNode
+
+    subject = tmp_path / "subject" / "mri"
+    subject.mkdir(parents=True)
+    (subject / "brain.mgz").write_bytes(b"brain")
+    (subject / "aparc+aseg.mgz").write_bytes(b"segmentation")
+    for name in ("dwi", "bvals", "bvecs"):
+        (tmp_path / name).write_bytes(b"input")
+
+    class FakeConnectome:
+        def __init__(self, **kwargs):
+            pass
+
+        def __call__(self, *args, **kwargs):
+            assert kwargs["freesurfer_subject_dir"] == str(subject.parent)
+            assert kwargs["atlas"] == "fs-aparc"
+            assert kwargs["atlas_dwi"] is None
+            return SimpleNamespace(
+                matrices={
+                    "count": torch.ones((1, 1), dtype=torch.int64),
+                    "sift2_fbc": torch.ones((1, 1)),
+                    "mean_length": torch.ones((1, 1)),
+                    "mean_fa": torch.ones((1, 1)),
+                },
+                atlas=torch.ones((2, 2, 2), dtype=torch.int32),
+                five_tissue=torch.ones((2, 2, 2, 5)),
+                gmwmi=torch.ones((2, 2, 2)),
+                fa=torch.ones((2, 2, 2)),
+                brain_mask=torch.ones((2, 2, 2)),
+                region_labels=(1,),
+                nodes=(ConnectomeNode(1, 1001, "L", "ctx-lh-bankssts"),),
+                five_tissue_affine=torch.eye(4),
+                dwi_affine=torch.eye(4),
+                atlas_affine=torch.eye(4),
+                dwi_to_t1_world=torch.eye(4),
+                tractogram=SimpleNamespace(seeds_attempted=1, paths=(None,)),
+            )
+
+    monkeypatch.setattr(connectome, "UKBConnectome", FakeConnectome)
+    output = tmp_path / "result"
+    main([
+        "connectome", "--dwi", str(tmp_path / "dwi"),
+        "--bvals", str(tmp_path / "bvals"), "--bvecs", str(tmp_path / "bvecs"),
+        "--freesurfer-subject-dir", str(subject.parent), "--atlas", "fs-aparc",
+        "--n-seeds", "1", "--device", "cpu", "--output-dir", str(output),
+    ])
+    assert (output / "nodes.tsv").read_text().splitlines() == [
+        "index\toriginal_label\themisphere\tname",
+        "1\t1001\tL\tctx-lh-bankssts",
+    ]
+
+
+def test_connectome_cli_subject_directory_requires_completed_files(tmp_path):
+    subject = tmp_path / "subject"
+    subject.mkdir()
+    for name in ("dwi", "bvals", "bvecs"):
+        (tmp_path / name).write_bytes(b"input")
+    with pytest.raises(FileNotFoundError, match="brain.mgz"):
+        main([
+            "connectome", "--dwi", str(tmp_path / "dwi"),
+            "--bvals", str(tmp_path / "bvals"), "--bvecs", str(tmp_path / "bvecs"),
+            "--freesurfer-subject-dir", str(subject), "--n-seeds", "1",
+            "--device", "cpu", "--output-dir", str(tmp_path / "result"),
+        ])

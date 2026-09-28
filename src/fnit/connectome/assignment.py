@@ -22,6 +22,7 @@ def build_connectomes(
     fa: torch.Tensor | None = None,
     radius: float = 4.0,
     batch_size: int = 1024,
+    node_count: int | None = None,
 ) -> dict[str, torch.Tensor]:
     """Assign endpoints to nearest labelled voxel centres and form matrices.
 
@@ -58,7 +59,10 @@ def build_connectomes(
     if torch.any(atlas < 0):
         raise ValueError("atlas labels must be non-negative")
 
-    count_nodes = int(atlas.max().item())
+    max_label = int(atlas.max().item())
+    count_nodes = max_label if node_count is None else node_count
+    if count_nodes < max_label:
+        raise ValueError("node_count must cover the atlas maximum label")
     if count_nodes == 0:
         raise ValueError("atlas contains no labelled voxels")
     count_tracks = endpoints.shape[0]

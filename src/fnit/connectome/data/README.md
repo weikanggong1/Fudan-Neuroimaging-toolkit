@@ -21,3 +21,7 @@ The MRtrix3 source data and this derived asset are © 2008–2022 the MRtrix3
 contributors and subject to the Mozilla Public License 2.0; see
 [`licenses/MPL-2.0.txt`](../../../../licenses/MPL-2.0.txt). No MRtrix
 executable is bundled.
+
+## FreeSurfer 84 节点映射
+
+`fs_aparc84.tsv` 给出 `aparc+aseg.mgz` 原始标签到连续矩阵编号 1–84 的对应；0 是背景。顺序采用 MRtrix3 3.0.3 的 `labelconvert/fs_default.txt`，原始 ID 与名称按 FreeSurfer 8.2 `FreeSurferColorLUT.txt` 确认。源映射 SHA256 为 `cd5a3f2ce69937fdb12980f1e0a16c8ba435f324ba9192eb557c01ad31263f23`，FreeSurfer LUT 为 `da55c6a47d316ee16d2609afd5c93cb8078e08e7e3afec5bb6283027d7c33e7b`，当前 TSV 为 `ef0633831a8a0b299d29522f2f1bb21ca76aafdf6fd1c75e4b116413cfab3fcf`。许可证见仓库根目录 `licenses/MPL-2.0.txt` 和 `licenses/FreeSurfer.txt`。FNIT 运行时不调用 MRtrix 或 FreeSurfer 可执行程序。

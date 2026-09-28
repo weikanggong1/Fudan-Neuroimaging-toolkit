@@ -13,9 +13,10 @@ from nibabel.orientations import (
 import numpy as np
 import torch
 
-from .anatomy import freesurfer_five_tissue, gmwmi_from_five_tissue
+from .anatomy import freesurfer_five_tissue, gmwmi_from_five_tissue, resample_labels_nearest
 from .bet import bet_mask, mean_bzero, mrtrix_roundtrip_voxel_size
 from .assignment import build_connectomes
+from .freesurfer_subject import ConnectomeNode, FreeSurferSubject, fs_aparc_atlas
 from .fod import fit_mrtrix_msmt_csd
 from .masks import dwi2mask_legacy, maskfilter_six_connected
 from .mtnormalise import normalise_mrtrix_three_tissue
@@ -106,8 +107,7 @@ def _registration(b0_brain: torch.Tensor, dwi_affine: torch.Tensor,
                   t1_brain: str | Path, device: torch.device) -> torch.Tensor:
     """Run Surfa-free TorchFLIRT 6-DOF/normmi; return DWI→T1 RAS-mm [4,4]."""
     from ..flirt import TorchFLIRT
-    from ..synthstrip.geometry import Volume
-    moving = Volume(b0_brain.detach().cpu().numpy(), dwi_affine.cpu().numpy())
+    moving = nib.Nifti1Image(b0_brain.detach().cpu().numpy(), dwi_affine.cpu().numpy())
     result = TorchFLIRT(device=str(device), dof=6, cost="normmi")(
         moving, t1_brain,
     )
@@ -133,6 +133,7 @@ class ConnectomeResult:
     dwi_affine: torch.Tensor
     atlas_affine: torch.Tensor
     dwi_to_t1_world: torch.Tensor
+    nodes: tuple[ConnectomeNode, ...] | None = None
 
 
 class UKBConnectome:
@@ -141,8 +142,10 @@ class UKBConnectome:
     The paired T1 segmentation must be official ``recon-all`` aparc+aseg;
     FreeSurfer itself remains the user's established external stage. PyTorch
     computes response, FOD, mtnormalise, 5TT/GMWMI, ACT tracking, SIFT2,
-    precise per-track FA and the four matrices. The caller supplies a fixed
-    atlas and may provide a fixed BET brain mask; otherwise the LAS DWI
+    precise per-track FA and the four matrices. A completed FreeSurfer subject
+    directory supplies the T1 and 84-node atlas; explicit T1/atlas inputs
+    remain available for fixed-input comparisons. The caller may provide a
+    fixed BET brain mask; otherwise the LAS DWI
     mean b0 is skull stripped with native PyTorch BET. CUDA uses TF32
     by default and no float16/bfloat16 conversion.
     """
@@ -161,10 +164,12 @@ class UKBConnectome:
         dwi: str | Path,
         bvals: str | Path,
         bvecs: str | Path,
-        t1_brain: str | Path,
+        t1_brain: str | Path | None = None,
         *,
-        t1_segmentation: str | Path,
-        atlas_dwi: str | Path,
+        t1_segmentation: str | Path | None = None,
+        atlas_dwi: str | Path | None = None,
+        freesurfer_subject_dir: str | Path | None = None,
+        atlas: str = "fs-aparc",
         brain_mask: str | Path | None = None,
         n_seeds: int,
         shell_bvals: Sequence[float] | None = None,
@@ -178,10 +183,13 @@ class UKBConnectome:
         """Run one subject; all images/gradients must describe the same scan.
 
         ``dwi`` is corrected float32 NIfTI [X,Y,Z,N]; ``bvals``/``bvecs``
-        are FSL N and 3×N or N×3 eddy-rotated files. ``t1_brain`` is the
-        skull-stripped T1 registration target. ``t1_segmentation`` is official
-        FreeSurfer aparc+aseg.mgz, and ``atlas_dwi`` is a nonnegative integer
-        atlas in DWI RAS space (it may retain a separate voxel grid).
+        are FSL N and 3×N or N×3 eddy-rotated files.
+        ``freesurfer_subject_dir`` is a completed recon-all subject directory;
+        ``atlas="fs-aparc"`` builds a contiguous 84-node DWI-grid atlas
+        from its ``mri/aparc+aseg.mgz``. Alternatively, ``t1_brain``,
+        ``t1_segmentation`` and ``atlas_dwi`` must all be supplied. The
+        explicit atlas is a nonnegative integer image in DWI RAS world space
+        and may retain a separate voxel grid.
         ``brain_mask`` fixes a binary DWI BET mask; if omitted, native BET
         generates it from the MRtrix-style double-accumulated mean b0 on an
         LAS grid. MRtrix shell clustering runs from b-values by default; optional ``shell_bvals`` fixes the
@@ -197,7 +205,8 @@ class UKBConnectome:
 
         Output ``ConnectomeResult.matrices`` has count int64 and SIFT2 FBC,
         mean length (mm), mean FA float32 K×K arrays. ``region_labels`` maps
-        rows/columns to 1..K. ``atlas`` retains its own grid and affine.
+        rows/columns to 1..K. ``nodes`` defines each row when the FreeSurfer
+        subject input is used; ``atlas`` is then on the DWI voxel grid.
         ``five_tissue`` [A,B,C,5] and ``gmwmi`` [A,B,C] retain T1 grid but
         their affine maps into DWI RAS space. ``wm_sh`` [X,Y,Z,45] is the
         normalized FOD; ``fa`` [X,Y,Z] is the map sampled along tracks;
@@ -207,6 +216,15 @@ class UKBConnectome:
         """
         if n_seeds < 1:
             raise ValueError("n_seeds must be positive")
+        if freesurfer_subject_dir is not None:
+            if any(value is not None for value in (t1_brain, t1_segmentation, atlas_dwi)):
+                raise ValueError("freesurfer_subject_dir cannot be combined with explicit T1/atlas inputs")
+            if atlas != "fs-aparc":
+                raise ValueError("only fs-aparc is currently supported from a subject directory")
+            subject = FreeSurferSubject(Path(freesurfer_subject_dir))
+            t1_brain, t1_segmentation = subject.brain, subject.aparc_aseg
+        elif any(value is None for value in (t1_brain, t1_segmentation, atlas_dwi)):
+            raise ValueError("provide freesurfer_subject_dir or all of t1_brain, t1_segmentation, atlas_dwi")
         reference = nib.load(str(dwi))
         dwi_data, dwi_affine = _image(dwi, self.device)
         if dwi_data.ndim != 4:
@@ -257,7 +275,17 @@ class UKBConnectome:
             if transform.shape != (4, 4):
                 raise ValueError("dwi_to_t1_world must be 4x4")
         five_affine = torch.linalg.inv(transform) @ seg_affine
-        atlas_data, atlas_affine = _image(atlas_dwi, self.device)
+        nodes = None
+        if freesurfer_subject_dir is not None:
+            atlas_t1, nodes = fs_aparc_atlas(seg)
+            atlas_data = resample_labels_nearest(
+                labels=atlas_t1, source_affine=seg_affine,
+                target_shape=tuple(dwi_data.shape[:3]), target_affine=dwi_affine,
+                target_to_source_world=transform,
+            )
+            atlas_affine = dwi_affine
+        else:
+            atlas_data, atlas_affine = _image(atlas_dwi, self.device)
         if atlas_data.ndim != 3 or not bool(torch.isfinite(atlas_data).all()) or not bool(
             torch.equal(atlas_data, atlas_data.round())
         ) or bool((atlas_data < 0).any()):
@@ -265,7 +293,8 @@ class UKBConnectome:
         atlas = atlas_data.to(torch.int32)
         if not bool((atlas > 0).any()):
             raise ValueError("atlas contains no region labels")
-        region_labels = tuple(range(1, int(atlas.max()) + 1))
+        region_labels = (tuple(node.index for node in nodes) if nodes is not None else
+                         tuple(range(1, int(atlas.max()) + 1)))
         shells, wm_response, gm_response, csf_response, _ = estimate_mrtrix_dhollander(
             dwi_data, gradient, shells, response_selection,
         )
@@ -291,8 +320,9 @@ class UKBConnectome:
         matrices = build_connectomes(
             tracks.endpoints, atlas, atlas_affine, weights=weights,
             lengths=tracks.lengths_mm, fa=tracks.mean_fa,
+            node_count=len(nodes) if nodes is not None else None,
         )
         return ConnectomeResult(
             matrices, region_labels, atlas, five, five_affine, gmwmi,
-            wm_sh, fa, mask, tracks, weights, dwi_affine, atlas_affine, transform,
+            wm_sh, fa, mask, tracks, weights, dwi_affine, atlas_affine, transform, nodes,
         )

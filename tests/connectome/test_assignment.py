@@ -104,3 +104,12 @@ def test_rejects_invalid_shapes():
         build_connectomes(torch.zeros((2, 3)), atlas, torch.eye(4))
     with pytest.raises(ValueError, match="weights"):
         build_connectomes(torch.zeros((2, 2, 3)), atlas, torch.eye(4), weights=torch.ones(3))
+
+
+def test_explicit_node_count_retains_absent_final_node():
+    atlas = torch.ones((2, 2, 2), dtype=torch.int32)
+    endpoints = torch.tensor([[[0., 0., 0.], [1., 1., 1.]]])
+    count = build_connectomes(endpoints, atlas, torch.eye(4), node_count=3)["count"]
+    assert count.shape == (3, 3)
+    assert count[0, 0] == 1
+    assert count[2].sum() == 0

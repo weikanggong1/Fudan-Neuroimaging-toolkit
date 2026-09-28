@@ -261,7 +261,17 @@ def _run_connectome(args):
 
     if args.n_seeds < 1:
         raise ValueError("--n-seeds must be positive")
-    inputs = [args.dwi, args.bvals, args.bvecs, args.t1,
+    if args.freesurfer_subject_dir is not None:
+        if any(value is not None for value in (args.t1, args.t1_segmentation, args.atlas_dwi)):
+            raise ValueError("--freesurfer-subject-dir cannot be combined with --t1/--t1-segmentation/--atlas-dwi")
+        from .connectome import FreeSurferSubject
+        subject = FreeSurferSubject(Path(args.freesurfer_subject_dir))
+        anatomy_inputs = [subject.brain, subject.aparc_aseg]
+    else:
+        if any(value is None for value in (args.t1, args.t1_segmentation, args.atlas_dwi)):
+            raise ValueError("provide --freesurfer-subject-dir or all of --t1, --t1-segmentation, --atlas-dwi")
+        anatomy_inputs = [args.t1, args.t1_segmentation, args.atlas_dwi]
+    inputs = [args.dwi, args.bvals, args.bvecs, *anatomy_inputs,
               args.atlas_dwi, args.t1_segmentation, args.brain_mask,
               args.response_mask, args.fod_mask, args.normalise_mask,
               args.fa_map, args.dwi_to_t1_world]
@@ -280,6 +290,7 @@ def _run_connectome(args):
         "fa": output_dir / "fa_dwi.nii.gz",
         "brain_mask": output_dir / "brain_mask_dwi.nii.gz",
         "region_labels": output_dir / "region_labels.csv",
+        **({"nodes": output_dir / "nodes.tsv"} if args.freesurfer_subject_dir else {}),
         "transform": output_dir / "dwi_to_t1_world.csv",
     }
     source_paths = {path.resolve() for path in inputs}
@@ -299,7 +310,9 @@ def _run_connectome(args):
         args.dwi, args.bvals, args.bvecs, args.t1,
         atlas_dwi=args.atlas_dwi,
         t1_segmentation=args.t1_segmentation,
-        brain_mask=args.brain_mask,
+        freesurfer_subject_dir=args.freesurfer_subject_dir,
+        atlas=args.atlas,
+        brain_mask=Path(args.brain_mask) if args.brain_mask else None,
         shell_bvals=args.shell_bvals,
         response_mask=args.response_mask,
         fod_mask=args.fod_mask,
@@ -345,9 +358,26 @@ def _run_connectome(args):
             temporary.unlink(missing_ok=True)
         print(path)
     write_csv(files["region_labels"], np.asarray(result.region_labels, dtype=np.int64), "%d")
+    if "nodes" in files:
+        import csv
+        temporary = files["nodes"].with_name(f".nodes.tsv.tmp-{uuid.uuid4().hex}")
+        try:
+            with temporary.open("w", newline="") as stream:
+                writer = csv.writer(stream, delimiter="\t")
+                writer.writerow(("index", "original_label", "hemisphere", "name"))
+                writer.writerows((n.index, n.original_label, n.hemisphere, n.name)
+                                 for n in result.nodes)
+            os.replace(temporary, files["nodes"])
+        finally:
+            temporary.unlink(missing_ok=True)
+        print(files["nodes"])
     write_csv(files["transform"], result.dwi_to_t1_world.detach().cpu().numpy(), "%.9g")
     print(files["region_labels"])
     print(files["transform"])
+    if args.device.startswith("cuda"):
+        import torch
+        torch.cuda.synchronize()
+        print(f"torch_peak_allocated_gib={torch.cuda.max_memory_allocated() / 2**30:.3f}")
 
 def main(argv=None):
     parser = argparse.ArgumentParser(prog='fnit')
@@ -558,11 +588,14 @@ def main(argv=None):
     connectome.add_argument('--dwi', required=True, help='corrected 4D DWI NIfTI')
     connectome.add_argument('--bvals', required=True)
     connectome.add_argument('--bvecs', required=True, help='eddy-rotated FSL bvecs')
-    connectome.add_argument('--t1', required=True, help='paired skull-stripped T1 registration image')
-    connectome.add_argument('--t1-segmentation', required=True,
+    connectome.add_argument('--t1', help='paired skull-stripped T1 registration image')
+    connectome.add_argument('--t1-segmentation',
                             help='official FreeSurfer recon-all aparc+aseg.mgz')
-    connectome.add_argument('--atlas-dwi', required=True,
+    connectome.add_argument('--atlas-dwi',
                             help='integer atlas in DWI RAS world coordinates')
+    connectome.add_argument('--freesurfer-subject-dir', help='completed recon-all subject directory')
+    connectome.add_argument('--atlas', default='fs-aparc', choices=('fs-aparc',),
+                            help='atlas to build from the FreeSurfer subject')
     connectome.add_argument('--brain-mask',
                             help='optional binary DWI BET mask; default native BET on LAS mean b0')
     connectome.add_argument('--shell-bvals', type=float, nargs='+',

@@ -29,7 +29,7 @@ CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核。模型、影像张
 | dMRI | TorchBEDPOSTX | 纤维方向、体积分数与不确定性 | [BEDPOSTX](docs/bedpostx/README.md) |
 | dMRI | TorchProbtrackX | 路径密度与 voxel/ROI 连接矩阵 | [ProbtrackX](docs/probtrackx/README.md) |
 | fMRI | MS-HBM 17 网络 | fsLR32k 个体网络标签 | [MS-HBM](docs/mshbm/README.md) |
-| dMRI | UKBConnectome | 四张结构连接矩阵 | [Connectome](docs/connectome/README.md) |
+| dMRI | UKBConnectome | 由校正 DWI 与已完成的 FreeSurfer subject 目录生成 84 区四张结构连接矩阵 | [Connectome](docs/connectome/README.md)；[真实数据对照](validation/connectome/fs_aparc84_subject_dir_20260928.md) |
 | sMRI | recon-all | 核心分割、皮层表面、顶点指标与脑区统计 | [recon-all](docs/recon_all/README.md) |
 
 各功能页均给出带参数名和逐项注释的 Python 单被试示例、等价命令行、输入/输出结构、原软件命令、真实数据精度与计时结果。统一入口中的子命令用 `fnit <子命令> --help` 查看；fMRI 使用 `fnit-fmri --help`，MS-HBM 使用 `fnit-mshbm --help`，recon-all 使用 `fnit-recon-all --help`。全部独立入口见 [pyproject.toml](pyproject.toml)。
