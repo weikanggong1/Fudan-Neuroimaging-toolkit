@@ -87,6 +87,7 @@ def __getattr__(name):
                 'SurfaceHemisphere', 'SurfaceProjectionResult', 'run_surface_projection',
                 'SurfaceQCResult', 'make_ribbon_goodvoxels',
                 'SurfacePipelineInputs', 'SurfacePipelineResult', 'run_surface_from_mni',
+                'run_surface_from_volume',
                 'MNISurfacePair', 'MNISurfaceResult', 'SurfacePreparationResult',
                 'prepare_mni_surface_geometry', 'prepare_fs_sphere_projection_inputs'):
         from . import fmri

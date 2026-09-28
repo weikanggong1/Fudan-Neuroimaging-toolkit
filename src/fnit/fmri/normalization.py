@@ -5,7 +5,6 @@ from pathlib import Path
 
 import nibabel as nib
 import numpy as np
-import surfa as sf
 import torch
 import torch.nn.functional as F
 
@@ -41,15 +40,12 @@ def register_t1_to_mni(
     if backend not in ("synthmorph", "fnirt"):
         raise ValueError("backend must be 'synthmorph' or 'fnirt'")
     selected = device or ("cuda" if torch.cuda.is_available() else "cpu")
-    moving = sf.load_volume(str(t1_brain))
-    fixed = sf.load_volume(str(mni_brain))
+    moving = nib.load(str(t1_brain))
+    fixed = nib.load(str(mni_brain))
     if len(moving.shape) != 3 or len(fixed.shape) != 3:
         raise ValueError("T1 and MNI template must each be 3D")
     linear = TorchFLIRT(device=selected)(moving, fixed)
-    initial = sf.Affine(
-        np.asarray(linear.moving_to_fixed_world, dtype=np.float64),
-        source=moving, target=fixed, space="world",
-    )
+    initial = np.asarray(linear.moving_to_fixed_world, dtype=np.float64)
     if backend == "synthmorph":
         from ..synthmorph import SynthMorph
 
@@ -75,8 +71,7 @@ def register_t1_to_mni(
         pull = TorchFNIRT(device=selected, config=config)(
             moving, fixed, initial, reference_mask=reference_mask
         ).pull_transform
-    pull = pull.convert(format=sf.Warp.Format.disp_ras, copy=False)
-    field = np.asarray(pull.data, dtype=np.float32)
+    field = np.asarray(pull.dataobj, dtype=np.float32)
     if field.shape != (*fixed.shape[:3], 3) or not np.isfinite(field).all():
         raise ValueError("registration produced an invalid MNI-to-T1 pull field")
     output = Path(output_dir).expanduser().resolve()
@@ -84,7 +79,7 @@ def register_t1_to_mni(
     affine_path = output / "T1_to_MNI152_2mm_affine.mat"
     field_path = output / "MNI152_2mm_to_T1_pull_ras.nii.gz"
     np.savetxt(affine_path, np.asarray(linear.matrix), fmt="%.12g")
-    image = nib.Nifti1Image(field, np.asarray(fixed.geom.vox2world.matrix))
+    image = nib.Nifti1Image(field, fixed.affine)
     image.header.set_intent("vector")
     nib.save(image, str(field_path))
     return T1MNIResult(

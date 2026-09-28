@@ -2,8 +2,8 @@
 
 Usage: python -m fnit.fmri.assets_setup --output-dir /absolute/path/hcp_templates
 
-The output keeps HCPpipelines paths under ``global/templates/``. Subject-specific
-surfaces, MSM/UKB registrations, and restricted HCP group ICA maps are not included.
+The output keeps HCPpipelines paths under ``global/templates/`` and ``MSMConfig/``.
+Subject-specific surfaces and registrations are not included.
 """
 
 from __future__ import annotations
@@ -42,6 +42,20 @@ ASSETS = (
     (MESH + "fsaverage.R_LR.spherical_std.164k_fs_LR.surf.gii", "85e718e424a1d87521fb0f3942538db16d8c745fe5b9ee20405baac2aff1dbb1"),
     (MESH + "Avgwmparc.nii.gz", "c8d80a4a0327daf3855168ce36ee3a5f4b9c660fd38d4ebf9865d2b915887a1b"),
     ("global/templates/91282_Greyordinates/Atlas_ROIs.2.nii.gz", "764c5c0139c37f4e0ec288525e8a83f0d5d6821bc82fefcc979c1ac0c35b1cd4"),
+)
+
+MSMALL_ASSETS = (
+    ("MSMConfig/MSMSulcStrainFinalconf", "46b250404cb2570b4f645d8e53c30fabde799663d61761d61cf54ff110318203"),
+    ("MSMConfig/MSMAllStrainFinalconf1to1_1to3_1", "ec9348a2bd2aea5ce2bf1a7387997dabb3443784c15a017faa4871e4ea38cc2e"),
+    ("MSMConfig/MSMAllStrainFinalconf1to1_1to3_2", "646f100e7826d0c285f379f2a9121f0c0c8cd61a3d2d200cc241c416617b8555"),
+    (MESH + "Conte69.MyelinMap_BC.164k_fs_LR.dscalar.nii", "66f5726a4d4e02189e2d28643cf4017f1bcd4b7c0ef07a6282e05180b73de070"),
+    ("global/templates/MSMAll/DeDriftingGroup.L.sphere.DeDriftMSMAll.164k_fs_LR.surf.gii", "e07fe3f9d7e508f60a85a0230c1680610f23521c89d204f79000093abd51149e"),
+    ("global/templates/MSMAll/DeDriftingGroup.R.sphere.DeDriftMSMAll.164k_fs_LR.surf.gii", "27c4ab1d7773fbaf90e917f6ae992fc37c6400f81603b239f8faa357ae276fb3"),
+    ("global/templates/MSMAll/Q1-Q6_RelatedParcellation210.MyelinMap_BC_MSMAll_2_d41_WRN_DeDrift.32k_fs_LR.dscalar.nii", "7dda1cf9ca08a098fc9e7e14918be65936d10fc95dbd0e3f0ee77e3100aa899b"),
+    ("global/templates/MSMAll/Q1-Q6_RelatedParcellation210.atlas_Topographic_ROIs.32k_fs_LR.dscalar.nii", "5b7dc5bbb339aa97a998eb638d915968eddb42179aad2273e7a121c0753ad14f"),
+    ("global/templates/MSMAll/Q1-Q6_RelatedParcellation210.atlas_Topography.32k_fs_LR.dscalar.nii", "35f86f3da38e085e4ec52e158b244ebdb00896d88820273b0eb971fdb0211300"),
+    ("global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d40_ROW_vn/Weights.txt", "3b01bec7f345d61ab62798cfba2630dfb07363379260f61f8b5b27bf5cb69ce5"),
+    ("global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d40_ROW_vn/melodic_oIC.dscalar.nii", "399f299bdde45720a37e650bf1306a771ffe179a8cdb914fdd297d28a16e9805"),
 )
 
 
@@ -85,10 +99,11 @@ def _install_one(output_dir: Path, relative_path: str, expected_sha256: str, ope
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, required=True, help="Absolute destination directory")
+    parser.add_argument("--msmall", action="store_true", help="Install public MSMAll d40 templates and MSM configuration")
     args = parser.parse_args(argv)
     if not args.output_dir.is_absolute():
         parser.error("--output-dir must be an absolute path")
-    for relative_path, digest in ASSETS:
+    for relative_path, digest in ASSETS + (MSMALL_ASSETS if args.msmall else ()):
         path = _install_one(args.output_dir, relative_path, digest)
         print(path)
 

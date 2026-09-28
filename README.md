@@ -101,10 +101,10 @@ fnit-setup-weights --all --dest /path/to/weights --verify-only
 fsLR32k 表面投影的 HCP 公开模板不属于模型权重，单独下载并逐文件校验：
 
 ```bash
-fnit-setup-fmri-surface-assets --output-dir /absolute/path/hcp_surface_assets
+fnit-setup-fmri-surface-assets --output-dir /absolute/path/hcp_surface_assets --msmall
 ```
 
-被试者的 white、pial、sphere.reg 和 wmparc 由用户提供；完整输入与许可见 [fMRI 表面投影](docs/fmri/surface.md)。
+`--msmall` 增加公开的 MSMAll 群体模板和配置；被试者的 white、pial、sphere.reg 和 wmparc 由用户提供。个体 MSMAll 配准仍需另行计算；完整输入与许可见 [fMRI 表面投影](docs/fmri/surface.md)。
 
 API 的显式 `weights=`、CLI 的 `--weights`、`FNIT_WEIGHTS` 环境变量、已保存目录和默认缓存按此顺序解析。TorchFAST、TorchFLIRT、TorchFNIRT、TorchApplyWarp、TorchTOPUP、TorchEDDY、TorchDTIFIT、TorchAMICONODDI、TorchMMORF、TorchBEDPOSTX、TorchProbtrackX 与 dMRI pipeline 的 TBSS 分支没有预训练权重；从原始 T1w 启动的流程可能仍需 SynthStrip。文件清单、官方 URL、SHA-256、许可和离线部署见[权重说明](docs/WEIGHTS.md)。
 

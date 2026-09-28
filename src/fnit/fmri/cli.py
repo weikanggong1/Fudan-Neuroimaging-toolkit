@@ -8,7 +8,7 @@ from .aroma_pipeline import run_aroma_pipeline
 from .end_to_end import run_fmri_pipeline
 from .pipeline import run_feat_core
 from .surface import SurfaceHemisphere
-from .surface_pipeline import SurfacePipelineInputs
+from .surface_pipeline import SurfacePipelineInputs, run_surface_from_volume
 
 
 def _bids_options(parser):
@@ -76,6 +76,14 @@ def main(argv=None):
     pipeline.add_argument("--global-signal", action="store_true")
     pipeline.add_argument("--n-splits", type=int, default=1000)
     pipeline.add_argument("--random-state", type=int, default=0)
+    surface = commands.add_parser("surface", help="clean MNI volume output and recon-all ZIP to fsLR32k")
+    surface.add_argument("--volume-dir", required=True)
+    surface.add_argument("--recon-all", required=True)
+    surface.add_argument("--surface-assets-dir", required=True)
+    surface.add_argument("--output-dir", required=True)
+    surface.add_argument("--wb-command", default="wb_command")
+    surface.add_argument("--device", default="cpu")
+    surface.add_argument("--overwrite", action="store_true")
     args = parser.parse_args(argv)
     if args.command in ("feat", "run"):
         common = dict(
@@ -110,6 +118,17 @@ def main(argv=None):
         print(result.denoised_bold)
         if result.confounds_cleaned_bold is not None:
             print(result.confounds_cleaned_bold)
+    elif args.command == "surface":
+        result = run_surface_from_volume(
+            volume_dir=args.volume_dir,
+            recon_all=args.recon_all,
+            hcp_assets_dir=args.surface_assets_dir,
+            output_dir=args.output_dir,
+            wb_command=args.wb_command,
+            device=args.device,
+            overwrite=args.overwrite,
+        )
+        print(result.projection.dtseries)
     else:
         surface_inputs = None
         if args.surface_config and args.surface_subject_dir:

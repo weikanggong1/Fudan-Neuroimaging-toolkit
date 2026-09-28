@@ -10,10 +10,11 @@
 
 ```bash
 python tools/setup_fmri_surface_assets.py \
-  --output-dir /absolute/path/hcp_surface_assets
+  --output-dir /absolute/path/hcp_surface_assets \
+  --msmall
 ```
 
-`--output-dir` 是保存 HCP 公开球面、atlas ROI、`Atlas_ROIs.2.nii.gz`、`Avgwmparc.nii.gz` 和 FreeSurfer 标签表的**绝对目录**。安装器保留 `global/templates/` 和 `global/config/` 相对路径；再次运行会检查已有文件的 SHA-256。该目录不含被试影像、FreeSurfer 结构结果、HCP group ICA d25/d50 图或 UKB 专用 DeDrift 球面。完整官方 MSMAll 还需要后两类资源；HCP group ICA 数据受 ConnectomeDB 注册与数据使用条款约束，不随 FNIT 安装。
+`--output-dir` 是保存 HCP 公开模板的**绝对目录**。安装器保留 `global/templates/`、`global/config/` 和 `MSMConfig/` 相对路径；再次运行会检查已有文件的 SHA-256。`--msmall` 增加 MSMSulc/MSMAll 配置、40 维群体 RSN 及权重、髓鞘和拓扑参考图，以及 HCP 的 DeDrift 球面。核对来源为上述固定 commit 的 [`global/templates/MSMAll`](https://github.com/Washington-University/HCPpipelines/tree/f8cac6892f88bdf889d644711ff038198eb81533/global/templates/MSMAll) 与 [`MSMConfig`](https://github.com/Washington-University/HCPpipelines/tree/f8cac6892f88bdf889d644711ff038198eb81533/MSMConfig)。这些是群体模板，不含被试 MSMAll 配准结果；安装完成也不会自动把当前 FS sphere 投影变成 MSMAll。省略 `--msmall` 时只安装原有投影模板。
 
 `run_surface_projection` 调用 Workbench 时，若环境中没有 `OMP_NUM_THREADS`，默认给其子进程设置 `min(可见 CPU 数, 8)`；已设置时沿用用户的值。例如 `export OMP_NUM_THREADS=4` 可将本次投影限制为 4 线程。结构准备和 ribbon QC 的 Workbench 命令不由这一投影函数管理。
 
@@ -29,6 +30,8 @@ python tools/setup_fmri_surface_assets.py \
 | `hcp_assets_dir` | 上述安装器保存的模板根目录。 |
 | `wb_command` | Connectome Workbench 可执行文件名或绝对路径；用于球面操作、距离场、ribbon 投影、表面重采样和 CIFTI。 |
 
+UKB `T1_20263/raw_data` 存放的是每人一个 ZIP，内部 `FreeSurfer/` 才是 recon-all 结果。已完成体积处理时，可直接向下面的独立入口传入该 ZIP；无需手工解压。FNIT 只读取所需的 `orig.mgz`、`orig/001.mgz`、`wmparc.mgz` 和双侧 white、pial、sphere.reg、thickness，不调用 FreeSurfer 程序。入口先核对 `orig/001.mgz` 与体积流程 T1 的尺寸和仿射，防止将另一人的表面映射到当前 BOLD。
+
 准备函数将 native `white/pial` 从 FreeSurfer tkRAS 转为 T1 scanner RAS，然后逐顶点求解 MNI 非线性 pull 的反变换，生成 MNI scanner RAS 下的 white、pial、midthickness。球面采用现有 `sphere.reg` 到 fsLR 的 FS sphere 对应关系；原生皮层 ROI 从 `abs(thickness)>0` 生成，Workbench 依次执行 `-metric-fill-holes` 和 `-metric-remove-islands`，然后把 164k fsLR atlas ROI 沿注册球面反投到原生网格（`BARYCENTRIC -largest`），与个人 ROI 做并集。`wmparc.mgz` 按同一 pull 最近邻重采样到 MNI 网格，再用 HCP 标签表提取被试皮层下 ROI。本例结构文件缺少官方使用的 `mri/brain.finalsurfs.mgz`；FNIT 以 `orig.mgz` 的 tkRAS 坐标变换定位表面，尚未与官方的 CRAS 坐标逐顶点核对。`make_ribbon_goodvoxels` 用 Workbench 距离场生成皮层 ribbon，并用 BOLD 时间变异系数和局部平滑趋势计算 goodvoxels；时间标准差采用 N−1 样本方差，空间阈值统计只使用 ribbon 内的非零体素且采用 N−1 样本方差，对应 FSL `-Tstd` 和 `fslstats -S`。可传入固定 goodvoxels 掩膜以做同输入比较。
 
 ## 子函数接口
@@ -43,6 +46,7 @@ python tools/setup_fmri_surface_assets.py \
 | `prepare_fs_sphere_projection_inputs` | `subject_dir`、`pull_ras`、`initial_t1_to_mni_world`；`mni_reference`：同网格 3D MNI 2 mm；`hcp_assets_dir`：公开 HCP 资产根；`output_dir`。可选 `wb_command="wb_command"`、`device="cpu"`、`overwrite=False`。 | `SurfacePreparationResult.left/right`：各为八条 GIFTI 路径组成的 `SurfaceHemisphere`；`.subject_rois` 为 `ROIs.2.nii.gz`、`.atlas_rois` 为 HCP 标准标签、`.inverse_residual_mm` 为双侧反解误差。其他中间文件见输出树。 | `-surface-sphere-project-unproject`、`-metric-fill-holes/-metric-remove-islands/-metric-resample`、`-volume-label-import`；对应官方 `bb_hcp_surf_mni` 的 FS sphere 和 ROI 段。 |
 | `run_surface_projection` | `clean_mni`：4D BOLD；`mni_reference`、`goodvoxels`、`subject_rois`、`atlas_rois`：同一 2 mm 网格 NIfTI；`left`、`right`：已准备的 `SurfaceHemisphere`；`output_dir`。可选 `wb_command="wb_command"`、`overwrite=False`。 | `SurfaceProjectionResult.dtseries`、`.left_metric`、`.right_metric`、`.subcortical_volume`、`.coverage_report`：CIFTI、双侧 GIFTI、4D NIfTI、覆盖 JSON；`.timing_seconds` 为每条 Workbench 命令耗时。 | `-volume-to-surface-mapping -ribbon-constrained`、`-metric-resample ADAP_BARY_AREA`、`-metric-smoothing`、`-cifti-resample`、`-cifti-create-dense-timeseries`。 |
 | `run_surface_from_mni` | `clean_mni`、`mni_reference`；`inputs=SurfacePipelineInputs(left, right, subject_rois, atlas_rois, wb_command, goodvoxels)`；`output_dir`。可选 `overwrite=False`。`goodvoxels=None` 表示现场计算。 | `SurfacePipelineResult.projection`：上述投影结果；`.qc`：现场计算时的 `SurfaceQCResult`，传入固定掩膜时为 `None`。在 `output_dir/qc/` 与 `projection/` 写文件。 | 组合上述 goodvoxels 与 Workbench 投影步骤；官方对应 `bb_hcp_surf_mni` 的 ribbon→dense CIFTI 段。 |
+| `run_surface_from_volume` | `volume_dir`：FNIT 已完成 WM/CSF/motion 回归的体积输出目录；`recon_all`：同被试 UKB T1 ZIP 或已解压的 `FreeSurfer/`；`hcp_assets_dir`：公开模板根；`output_dir`。可选 `wb_command="wb_command"`、`device="cpu"`、`overwrite=False`。 | `SurfacePipelineResult`；在 `output_dir/prepared/`、`qc/`、`projection/` 依次写结构准备、goodvoxels 和 fsLR32k CIFTI。ZIP 中的临时结构文件运行结束后删除。 | 读取 volume 已保存的 T1→MNI 矩阵和 pull，组合现有 FS sphere、ribbon、Workbench 投影；对应官方 initial CIFTI 段。 |
 
 单独生成 goodvoxels 时，四张表面必须已经在 MNI scanner RAS，`reference` 与 `clean_bold` 的前三维尺寸和 affine 一致：
 
@@ -64,6 +68,40 @@ qc = make_ribbon_goodvoxels(
 print(qc.ribbon, qc.goodvoxels, qc.report)  # 3D ribbon、3D goodvoxels、标量报告
 ```
 
+## 从已完成的体积回归输出运行
+
+先用 `run_fmri_pipeline(..., regress_wm=True, regress_csf=True, regress_motion=True)` 生成 `filtered_func_data_clean_MNI152_2mm.nii.gz`。`run_surface_from_volume` 从同一个体积目录读取这幅 4D 图、`T1_brain.nii.gz`、MNI 参考、T1→MNI FLIRT 矩阵和 MNI→T1 pull；它要求 `pipeline_report.json` 确认至少一项 WM、CSF 或 motion 回归已启用。请传与该体积 T1 对应的同被试 T1 ZIP，不要只传 `raw_data` 总目录。
+
+```python
+from fnit import run_surface_from_volume
+
+result = run_surface_from_volume(
+    volume_dir="/absolute/path/sub-EXAMPLE_volume",  # FNIT 体积流程的完整输出目录；内含回归后的 MNI BOLD
+    recon_all="/absolute/path/T1_20263/raw_data/SUBJECT_ID_20263_2_0.zip",  # 同被试的 recon-all ZIP
+    hcp_assets_dir="/absolute/path/hcp_surface_assets",  # setup_fmri_surface_assets.py 下载并校验的模板根目录
+    output_dir="/absolute/path/sub-EXAMPLE_surface",  # prepared/、qc/、projection/ 的父目录
+    wb_command="/absolute/path/bin/wb_command",  # Connectome Workbench 可执行文件
+    device="cuda:0",  # 表面顶点的非线性反变换和 wmparc 重采样所用 PyTorch 设备
+    overwrite=False,  # 目标表面文件已存在时停止，避免混合两次运行
+)
+print(result.projection.dtseries)  # fsLR32k 双侧皮层及 2 mm 皮层下时间序列，形状为时间×灰质单元
+print(result.qc.goodvoxels)  # MNI 2 mm 3D 采样掩膜
+```
+
+同一功能的命令行形式：
+
+```bash
+fnit-fmri surface \
+  --volume-dir /absolute/path/sub-EXAMPLE_volume \
+  --recon-all /absolute/path/T1_20263/raw_data/SUBJECT_ID_20263_2_0.zip \
+  --surface-assets-dir /absolute/path/hcp_surface_assets \
+  --output-dir /absolute/path/sub-EXAMPLE_surface \
+  --wb-command /absolute/path/bin/wb_command \
+  --device cuda:0
+```
+
+`--volume-dir`、`--recon-all`、`--surface-assets-dir`、`--output-dir`、`--wb-command`、`--device` 与上面的同名 Python 参数含义相同；加 `--overwrite` 才允许覆盖已有结果。这里得到的是基于 FreeSurfer `sphere.reg` 的 fsLR32k time series，尚未执行 MSMSulc 或 MSMAll，不对应 UKB 最终 MSMAll 文件。
+
 ## 从原始 BIDS 一次运行
 
 已有外部生成的 FreeSurfer 结构目录时，可让高层体积入口接续表面准备与投影。以下仅列必要路径和本例选择的参数；其余体积处理选项及默认值见[体积流程](README.md)。这里的 `surface_subject_dir` 是必需的外部结构输入，原始 BIDS T1w 本身不会在 FNIT 中自动生成 white、pial 和 sphere.reg。
@@ -84,6 +122,9 @@ result = run_fmri_pipeline(
     wb_command="/absolute/path/bin/wb_command",  # Connectome Workbench 可执行文件
     synthstrip_weights=None,  # 已安装在 FNIT 缓存的 SynthStrip 权重
     synthmorph_weights=None,  # 已安装在 FNIT 缓存的 SynthMorph 权重
+    regress_wm=True,  # 使用体积 BOLD 网格中的白质均值做混杂回归
+    regress_csf=True,  # 使用脑脊液均值做混杂回归
+    regress_motion=True,  # 使用运动参数做混杂回归
     device="cuda:0",  # PyTorch 设备；无 GPU 时可改 cpu
 )
 print(result.clean_mni)  # MNI152 2 mm 清理后 4D BOLD
@@ -204,7 +245,7 @@ wb_command -metric-resample native.func.gii registered_sphere.native.surf.gii sp
   -current-roi roi.native.shape.gii
 ```
 
-官方完整 `bb_surf` 仍要求 T2_FLAIR、场图处理的先验结果、MSMSulc/MSMAll 配准模板、UKB DeDrift 球面及 FIX 相关输出。指定 UKB 原始 rfMRI ZIP 没有原始 B0 场图，体积流程已按现有数据走无 GDC/B0 路径；因此即使上述投影在同输入下吻合，也不能据此宣称整条 UKB 表面流程等价。
+官方完整 `bb_surf` 仍要求 T2_FLAIR 偏置校正、个体 MSMSulc/MSMAll 球面配准及 DeDrift；官方最终清理还使用 FIX。本页的目标输入是 FNIT 已做混杂回归的 volume BOLD，因而不重复 FIX。`--msmall` 已提供公开群体模板和 HCP 配置，但当前尚未生成个体 MSMAll 球面。指定 UKB 原始 rfMRI ZIP 没有原始 B0 场图，体积流程已按现有数据走无 GDC/B0 路径；即使上述投影在同输入下吻合，也不能据此宣称整条 UKB 表面流程等价。
 
 ## 真实数据对照
 
