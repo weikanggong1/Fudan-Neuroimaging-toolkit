@@ -126,6 +126,8 @@ FSL 可选的 `eddy_outlier_free_data`、post-eddy shell alignment 和命令快�
 
 当前源码已在同一例真实 UKB 格式 dMRI 上运行。校正 DWI、旋转 b-vector、参数、两种 RMS、outlier map、outlier z-score 和 outlier report 共八项核心输出的逐文件 SHA-256 与报告绑定值相同。因此下述精度和示意图覆盖当前数值路径；机器可读报告同时记录当前调用链源码 hash。
 
+另有一次以 FSL `eddy_cuda10.2` 为固定基准、逐项核对输入 SHA-256 的[匹配输入验证](../../validation/eddy/README.md)。该实验的 b≈1000、b≈2000 每体素跨梯度方向相关中位数分别为 0.780 和 0.755，离群切片只有 1 个重合。严格数值复刻尚未完成；下方 0.14.0 表格和图片是此前一次运行的记录，不代表这次匹配输入实验。
+
 ## 真实数据对照
 
 验证输入为一例真实 UKB 格式 dMRI：`104×104×72×105`，5 个 b0、50 个 b≈1000 和 50 个 b≈2000 volume；反向 PA 数据用于先行 TOPUP。FSL 和 FNIT 使用同一 AP、mask、TOPUP field、acqparams、index、bval、bvec 和参考帧。硬件为 gpucw1 的 NVIDIA H100 PCIe 80 GB；节点为共享状态。

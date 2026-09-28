@@ -1,5 +1,11 @@
 # dMRI 参数图验证
 
+## EDDY 输入替换诊断
+
+[匹配输入 EDDY 报告](../eddy/README.md)固定同一例 AP、FNIT TOPUP、mask、梯度等输入，分别运行 TorchEDDY 和 FSL `eddy_cuda10.2`；再用相同 FNIT DTIFIT、AMICO-NODDI 和 TBSS 代码处理两份 EDDY 输出。[九图结果](eddy_swap.matched_20260928.json)同时给出非零并集和交集的 Pearson r。与既有 UKB 官方 standard 图比较，在并集上换用 FSL EDDY 后，MD 的 r 从 0.600 升至 0.661，ICVF 从 0.314 升至 0.367；FA 从 0.695 降至 0.677。九图中八图升高、一图降低。
+
+既有 UKB 官方参数图的 TOPUP 与掩膜准备并未同这次配对实验固定，因此这组下游相关不是只改变 EDDY 算法的官方端到端对照。它只能定位：EDDY 输出差异会传递到下游，但不能据此判定哪一版 EDDY 更接近官方完整流程。EDDY 本身的匹配输入对照应以上述独立报告为准。
+
 [返回 dMRI pipeline 文档](../../docs/dmri_pipeline/README.md) · [MMORF 文档](../../docs/mmorf/README.md) · [FNIRT 文档](../../docs/fnirt/README.md)
 
 两份数值报告使用源码快照 tar `f7547d0a…`，其中 FLIRT core 为 `552856…`；当前文件为 `ce375d…`。继承链包含 [QC-only 的 `552856… → f5315f…`](../runtime_dependencies/flirt_qc_source_equivalence.public.json) 和 [12-DOF/corratio 限定的 `f5315f… → ce375d…`](../runtime_dependencies/flirt_profile_source_equivalence.public.json)。两份报告保留原测量 hash，新增的 chain 对象明确 `fresh=false`。该证明不覆盖 6-DOF/normmi。
