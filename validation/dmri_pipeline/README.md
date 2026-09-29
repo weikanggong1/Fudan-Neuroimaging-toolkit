@@ -12,6 +12,8 @@
 
 [两次运行的 native 九图比较](bids_native_branch_compare.real.json)在非零体素并集上的 r 为 0.982398–0.999929。两次 TorchEDDY 的 `gp_seed_override` 都为 null，日志中的首轮 GP seed 分别为 1790694888 和 1790696344。因此独立运行的上游图并非固定种子的配对试验，这些数值差异不能归因于 T1w；T1w 在本流程只进入后面的 MMORF 配准。
 
+带 T1w 的 `--registration-backend mmorf` 也实际启动了完整命令。BIDS 选择、TOPUP、EDDY、九张 native 图、SynthStrip 脑图及两份 FLIRT 仿射均已完成；随后 MMORF 的 tensor 有限应变旋转在共享 GPU 上因显存不足退出，未生成标准空间九图。失败时该 GPU 剩余 228.69 MiB，进程占用约 10.59 GiB；命令运行 36:20.19，退出码 1。详见[失败阶段记录](bids_mmorf.shared_gpu_oom.json)。这次不能作为带 T1w 整链通过的证据；最终源码的真实 BIDS 输入预检和该分支的单元调用测试仍已通过。
+
 2026 年 9 月 29 日在 gpucw1 用一例真实 UKB 格式 AP/PA 数据，从原始图像运行 TBSS 分支。结果图像仍留在计算节点；仓库只保存汇总数值。
 
 随后 TorchEDDY 的样条权重改为无布尔索引计算；固定种子的完整八轮校正图与改动前文件 SHA-256 相同，其他数值输出也逐值相同。本页九图相似性指标来自改动前的整链实测，TBSS 分支尚未用改动后源码重跑；下述整链运行时间也不代表现版耗时。现版 EDDY 单独计时见 [EDDY 验证页](../eddy/README.md)。
@@ -39,7 +41,7 @@ python validation/dmri_pipeline/compare_current_eddy_pipeline.py \
 
 ## MMORF 分支
 
-当前 MMORF 模块的 T1w、FA、tensor 真实数据配对验证见 [MMORF 报告](../mmorf/report.public.json)。旧求解器的 raw-to-standard 整链指标已移除；当前源码的 MMORF 整链尚未重跑。
+当前 MMORF 模块的 T1w、FA、tensor 真实数据配对验证见 [MMORF 报告](../mmorf/report.public.json)。旧求解器的 raw-to-standard 整链指标已移除；这次 BIDS 整链尝试在非线性阶段因共享 GPU 显存耗尽，完整标准空间输出仍待验证。
 
 ## 经典 NODDI 接入
 

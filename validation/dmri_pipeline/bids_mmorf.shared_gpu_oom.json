@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "input": "one real UKB AP/PA DWI reorganized as raw BIDS with the paired T1w; source data remain private",
+  "registration_backend": "mmorf",
+  "noddi_fit_method": "amico",
+  "device": "gpucw1 H100, shared GPU",
+  "command_exit_code": 1,
+  "wall_seconds_until_failure": 2180.19,
+  "completed": {
+    "bids_input_selection": true,
+    "topup": true,
+    "eddy_8_dwi_iterations": true,
+    "native_nine_maps": true,
+    "synthstrip_t1_brain": true,
+    "t1_to_mni_affine": true,
+    "fa_to_mni_affine": true,
+    "mmorf_warp": false,
+    "standard_nine_maps": false
+  },
+  "failure": {
+    "type": "torch.OutOfMemoryError",
+    "stage": "MMORF finite-strain tensor rotation inside LBFGS closure",
+    "attempted_allocation_mib": 260.0,
+    "free_gpu_mib": 228.69,
+    "process_gpu_gib": 10.59,
+    "pytorch_allocated_gib": 8.14
+  },
+  "interpretation": "shared GPU memory pressure stopped the validation run; this does not establish a BIDS input or MMORF algorithm error",
+  "source_note": "launch used the BIDS selection fixes and default AMICO path before the stale-PA overwrite fix and concurrent classic-NODDI option; these changes do not enter this input",
+  "measured_dmri_source_sha256": {
+    "src/fnit/dmri_pipeline/bids.py": "4ddde0d7b007026e557a3f3d3811b67771fbb3f68b32aebe465957cdfa89803b",
+    "src/fnit/dmri_pipeline/pipeline.py": "096f4217e320c032470301908258288fe321b66a1b7f337a223a43c82903fb51",
+    "src/fnit/dmri_pipeline/cli.py": "639fac8ac22b0dc6b08a4c8c7f2539311e5d354640a976c139493886d65b614b"
+  }
+}
