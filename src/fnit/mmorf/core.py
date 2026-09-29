@@ -1108,16 +1108,6 @@ class TorchMMORF:
                     if float(initial_tensor) <= 1.0e-8
                     else 50.0 / initial_tensor
                 )
-            optimiser = torch.optim.LBFGS(
-                [control],
-                lr=cfg.learning_rate,
-                max_iter=steps,
-                max_eval=max(20, 4 * steps),
-                tolerance_grad=1.0e-7,
-                tolerance_change=1.0e-9,
-                history_size=10,
-                line_search_fn="strong_wolfe",
-            )
             closure_evaluations = 0
 
             def closure():
@@ -1133,20 +1123,47 @@ class TorchMMORF:
                 closure_evaluations += 1
                 return loss
 
-            optimiser.step(closure)
-            with torch.no_grad():
-                (
-                    scalar_cost,
-                    tensor_cost,
-                    regulariser,
-                    determinant,
-                    regulariser_name,
-                ) = evaluate_terms()
-                loss = (
-                    cfg.scalar_weight * scalar_cost_scale * scalar_cost
-                    + cfg.tensor_weight * tensor_cost_scale * tensor_cost
-                    + penalty * regulariser
+            starting_control = control.detach().clone()
+            nonfinite_level_rejected = False
+            for retry in range(4):
+                with torch.no_grad():
+                    control.copy_(starting_control)
+                optimiser = torch.optim.LBFGS(
+                    [control],
+                    lr=cfg.learning_rate * (0.25 ** retry),
+                    max_iter=steps,
+                    max_eval=max(20, 4 * steps),
+                    tolerance_grad=1.0e-7,
+                    tolerance_change=1.0e-9,
+                    history_size=10,
+                    line_search_fn="strong_wolfe",
                 )
+                optimiser.step(closure)
+                with torch.no_grad():
+                    (
+                        scalar_cost,
+                        tensor_cost,
+                        regulariser,
+                        determinant,
+                        regulariser_name,
+                    ) = evaluate_terms()
+                    loss = (
+                        cfg.scalar_weight * scalar_cost_scale * scalar_cost
+                        + cfg.tensor_weight * tensor_cost_scale * tensor_cost
+                        + penalty * regulariser
+                    )
+                if torch.isfinite(control).all() and torch.isfinite(loss) and torch.isfinite(determinant).all():
+                    break
+            else:
+                nonfinite_level_rejected = True
+                with torch.no_grad():
+                    control.copy_(starting_control)
+                    scalar_cost, tensor_cost, regulariser, determinant, regulariser_name = evaluate_terms()
+                    loss = (cfg.scalar_weight * scalar_cost_scale * scalar_cost
+                            + cfg.tensor_weight * tensor_cost_scale * tensor_cost
+                            + penalty * regulariser)
+                if not torch.isfinite(loss) or not torch.isfinite(determinant).all():
+                    raise RuntimeError(f"MMORF level {level} has no finite candidate")
             latest = {
                 "total": float(loss.detach()),
                 "scalar": float(scalar_cost.detach()),
@@ -1159,6 +1176,8 @@ class TorchMMORF:
                 "jacobian_max": float(determinant.detach().max()),
                 "optimizer": "lbfgs_strong_wolfe",
                 "closure_evaluations": closure_evaluations,
+                "nonfinite_retries": retry,
+                "nonfinite_level_rejected": nonfinite_level_rejected,
             }
             levels.append(
                 {

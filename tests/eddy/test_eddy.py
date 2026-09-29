@@ -1,58 +1,57 @@
+import nibabel as nib
 import numpy as np
-import torch
-from fnit.eddy.core import EDDYConfig, _grid, _poly_basis, _qspace_weights, _rigid_grid
+import pytest
+
+from fnit.eddy import EDDYConfig, EDDYResult, TorchEDDY
+from fnit.eddy.topup_field import _load_topup_field
 
 
-def test_batched_identity_rigid_grid():
-    grid = _grid((5, 6, 7), "cpu")
-    parameters = torch.zeros((3, 6))
-    pulled = _rigid_grid(grid, parameters, (2, 2, 2))
-    torch.testing.assert_close(pulled, grid[None].expand(3, -1, -1, -1, -1))
+def test_public_eddy_uses_source_aligned_backend():
+    model = TorchEDDY(device="cpu")
+    assert isinstance(model.config, EDDYConfig)
+    assert model.config.niter == 8
+    assert model.config.fwhm_mm == (10, 8, 4, 2, 0, 0, 0, 0)
 
 
-def test_quadratic_field_has_fsl_ten_parameters():
-    basis, derivative = _poly_basis((5, 6, 7), (2, 2, 2), "cpu", 1)
-    assert basis.shape == (10, 5, 6, 7) and derivative.shape == basis.shape
-    torch.testing.assert_close(derivative[1], torch.full((5, 6, 7), 2.0))
+def test_eddy_accepts_absent_topup_field():
+    field, derivative, voxel_sizes = _load_topup_field(None, (4, 5, 6), "cpu", 1)
+    assert field.shape == (4, 5, 6)
+    assert not field.any() and not derivative.any()
+    assert voxel_sizes is None
 
 
-def test_qspace_predictor_excludes_self_and_normalizes():
-    b = np.array([0, 0, 1000, 1000, 1000])
-    g = np.array(
-        [[0, 0, 1, 0, 1 / np.sqrt(2)], [0, 0, 0, 1, 1 / np.sqrt(2)], [0, 0, 0, 0, 0.0]]
-    )
-    weights = _qspace_weights(b, g, k=3)
-    np.testing.assert_allclose(weights.sum(1), 1)
-    np.testing.assert_allclose(np.diag(weights), 0)
+def test_eddy_rejects_mask_on_different_grid(tmp_path):
+    dwi = tmp_path / "dwi.nii.gz"
+    mask = tmp_path / "mask.nii.gz"
+    nib.save(nib.Nifti1Image(np.zeros((4, 4, 4, 2), np.float32), np.eye(4)), dwi)
+    nib.save(nib.Nifti1Image(np.ones((3, 4, 4), np.float32), np.eye(4)), mask)
+    np.savetxt(tmp_path / "acqp.txt", [[0, -1, 0, 0.05]])
+    np.savetxt(tmp_path / "index.txt", [[1, 1]], fmt="%d")
+    np.savetxt(tmp_path / "bvecs", np.zeros((3, 2)))
+    np.savetxt(tmp_path / "bvals", [[0, 1000]])
+    with pytest.raises(ValueError, match="mask and DWI grids"):
+        TorchEDDY(device="cpu")(
+            imain=dwi, mask=mask, acqp=tmp_path / "acqp.txt",
+            index=tmp_path / "index.txt", bvecs=tmp_path / "bvecs",
+            bvals=tmp_path / "bvals", topup=None,
+        )
 
 
-def test_default_seed_is_fixed():
-    assert EDDYConfig().seed == 0
-
-
-def test_outlier_squared_map_is_part_of_core_output(tmp_path):
-    import nibabel as nib
-    from fnit.eddy import EDDYResult
-
-    image = nib.Nifti1Image(np.zeros((2, 2, 2, 1), np.float32), np.eye(4))
+def test_eddy_result_saves_fsl_sidecars(tmp_path):
+    image = nib.Nifti1Image(np.zeros((2, 2, 3, 4), np.float32), np.eye(4))
     result = EDDYResult(
-        image,
-        np.zeros((3, 1)),
-        np.zeros((1, 16)),
-        np.zeros((1, 2)),
-        np.zeros((1, 2)),
-        np.zeros((1, 2)),
-        np.array([[2.0, -3.0]]),
-        {},
+        corrected=image,
+        rotated_bvecs=np.zeros((3, 4)),
+        parameters=np.zeros((4, 16)),
+        movement_rms=np.zeros((4, 2)),
+        restricted_movement_rms=np.zeros((4, 2)),
+        outlier_map=np.zeros((4, 3), dtype=int),
+        outlier_n_stdev_map=np.zeros((4, 3)),
+        outlier_n_sqr_stdev_map=np.zeros((4, 3)),
+        outlier_report_lines=[],
+        qc={},
     )
-    paths = result.save(tmp_path / "eddy")
-    squared = np.loadtxt(tmp_path / "eddy.eddy_outlier_n_sqr_stdev_map")
-    np.testing.assert_allclose(squared, [4, 9])
-    assert tmp_path / "eddy.eddy_outlier_n_sqr_stdev_map" in paths
-
-
-def test_schedule_lengths_must_match():
-    import pytest
-
-    with pytest.raises(ValueError, match="same non-empty schedule"):
-        EDDYConfig(fwhm=(1, 0), subsampling=(1,))
+    paths = result.save(tmp_path / "data")
+    assert (tmp_path / "data.nii.gz") in paths
+    assert np.loadtxt(tmp_path / "data.eddy_parameters").shape == (4, 16)
+    assert np.loadtxt(tmp_path / "data.eddy_outlier_map", skiprows=1).shape == (4, 3)

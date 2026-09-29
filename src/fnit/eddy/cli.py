@@ -1,7 +1,7 @@
 """Command-line interface for TorchEDDY."""
 
 import argparse
-from .core import TorchEDDY
+from . import TorchEDDY
 from .ukb import run_ukb_eddy
 
 
@@ -18,6 +18,7 @@ def _arguments(parser):
     parser.add_argument("--topup")
     parser.add_argument("--out")
     parser.add_argument("--ref-scan-no", type=int, default=0)
+    parser.add_argument("--gp-seed", type=int)
     parser.add_argument("--device")
     parser.add_argument("--overwrite", action="store_true")
 
@@ -57,6 +58,7 @@ def run(args):
             topup=args.topup,
             out=args.out,
             ref_scan_no=args.ref_scan_no,
+            gp_seed=args.gp_seed,
             overwrite=args.overwrite,
         )
     print(result.qc)

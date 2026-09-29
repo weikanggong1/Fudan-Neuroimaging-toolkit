@@ -8,7 +8,7 @@ import torch
 from scipy.ndimage import binary_closing, binary_fill_holes, binary_erosion, label
 from .._dmri import image_like, load_bvals
 from ..topup.ukb import _best_b0, _load_b0_candidates
-from .core import TorchEDDY
+from . import TorchEDDY
 
 
 def _brain_mask(image):

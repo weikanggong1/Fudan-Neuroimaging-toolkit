@@ -13,7 +13,7 @@ import fnit.dmri_pipeline.tbss as tbss_module
 from fnit.dmri_pipeline import DMRIPipeline, STANDARD_MAP_NAMES
 from fnit.dmri_pipeline.cli import _arguments
 from fnit.dmri_pipeline.tbss import TBSSConfig, preprocess_fa
-from fnit.eddy.core import _load_topup_field
+from fnit.eddy.topup_field import _load_topup_field
 
 
 def test_common_nine_map_contract():
