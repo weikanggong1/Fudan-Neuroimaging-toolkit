@@ -2,6 +2,16 @@
 
 [功能和调用方式](../../docs/dmri_pipeline/README.md) · [TBSS 当前机器报告](tbss_e2e.real.current.json) · [经典 NODDI 接入报告](pipeline_classic_real.public.json) · [九图比较脚本](compare_current_eddy_pipeline.py) · [官方 TBSS 参考脚本](run_official_tbss.sh)
 
+## 原始 BIDS 入口：真实 AP/PA 采集
+
+把一例真实 UKB AP/PA DWI 按原始 BIDS 的 `sub-*/dwi/` 结构组织，并分别测试不含 T1w 和加入配对 T1w 的目录。源图像仍留在计算节点，不上传仓库。[最终源码的输入预检](bids_preflight.real.final.json)确认两种目录都选中同一条 105 volume DWI；暂存的 AP/PA 图像、AP bval/bvec 与 PA bval 同原文件逐字节相同，两方向的相位编码向量及读出时间也相同。没有反向图时跳过 TOPUP、多场图 `IntendedFor` 选择、3D `fmap/*_epi` 转换、BIDS 元数据继承和覆盖时清理旧 PA，另由 21 项自动测试覆盖。
+
+[无 T1w 的整链报告](bids_tbss.real.current.json)记录 `fnit-dmri-pipeline --bids-root ... --registration-backend tbss` 的真实运行。TOPUP 确实启用，acqparams 两行分别为 `(0,-1,0,0.069)` 和 `(0,1,0,0.069)`；九张 native 图同为 104×104×72，九张 standard 图与九张 skeleton 图同为 182×218×182，全部 float32、有限值且各组 affine 一致。完整进程 wall 为 1649.82 s；TOPUP 与 EDDY 准备 187.55 s、EDDY 1009.60 s、DTIFIT 15.63 s、NODDI 65.97 s、TBSS 配准和九图传播 366.39 s。这是共享 H100 节点的一次观察值，不能用作相对 FSL 的独占 GPU 加速比。
+
+无 T1w 整链启动后，BIDS 选择器又修正了 subject 层场图、多 T1w 的 TBSS 忽略规则以及覆盖时清理旧 PA。该病例无 session、无 T1、已有唯一反向 DWI，也未覆盖输出，因此这些分支不参与所测计算；整链报告中的 inspected-source hash 不是启动时的精确 BIDS 文件 hash。最终源码另以同一真实输入完成上述预检，并通过自动测试。该验收证明 BIDS 输入正确进入既有计算链、输出结构正确；与原版 FSL 的数值差异应按下文的匹配输入对照判读，不能从输入格式验收推出逐体素等价。
+
+[两次运行的 native 九图比较](bids_native_branch_compare.real.json)在非零体素并集上的 r 为 0.982398–0.999929。两次 TorchEDDY 的 `gp_seed_override` 都为 null，日志中的首轮 GP seed 分别为 1790694888 和 1790696344。因此独立运行的上游图并非固定种子的配对试验，这些数值差异不能归因于 T1w；T1w 在本流程只进入后面的 MMORF 配准。
+
 2026 年 9 月 29 日在 gpucw1 用一例真实 UKB 格式 AP/PA 数据，从原始图像运行 TBSS 分支。结果图像仍留在计算节点；仓库只保存汇总数值。
 
 随后 TorchEDDY 的样条权重改为无布尔索引计算；固定种子的完整八轮校正图与改动前文件 SHA-256 相同，其他数值输出也逐值相同。本页九图相似性指标来自改动前的整链实测，TBSS 分支尚未用改动后源码重跑；下述整链运行时间也不代表现版耗时。现版 EDDY 单独计时见 [EDDY 验证页](../eddy/README.md)。

@@ -23,6 +23,7 @@ from ..mmorf import apply_mmorf_warp, run_mmorf
 from ..synthstrip import SynthStrip
 from ..topup import run_ukb_topup
 from ..topup.ukb import _metadata
+from .bids import locate_bids_dwi, stage_bids_dwi
 from .tbss import TBSSConfig, TorchTBSS
 
 
@@ -96,7 +97,7 @@ def _prepare_ap_only(raw_dir, output_dir, *, overwrite):
 
 
 class DMRIPipeline:
-    """Run one UKB-format AP acquisition through DTI/NODDI and registration."""
+    """Run one UKB-format or raw BIDS DWI through DTI/NODDI and registration."""
 
     def __init__(
         self,
@@ -338,6 +339,43 @@ class DMRIPipeline:
         report_path.write_text(json.dumps(qc, indent=2) + "\n", encoding="utf-8")
         return DMRIPipelineResult(
             native_maps, standard_maps, self.registration_backend, output_dir, qc
+        )
+
+    def run_bids(
+        self,
+        bids_root,
+        output_dir,
+        *,
+        subject,
+        session=None,
+        run=None,
+        acquisition=None,
+        direction=None,
+        fa_template,
+        fa_skeleton=None,
+        t1=None,
+        t1_template=None,
+        tensor_template=None,
+        overwrite=False,
+    ):
+        """Select one raw BIDS DWI run and reuse the existing AP/PA pipeline."""
+        inputs = locate_bids_dwi(
+            bids_root, subject=subject, session=session, run=run,
+            acquisition=acquisition, direction=direction, t1=t1,
+            select_t1=self.registration_backend == "mmorf",
+        )
+        if self.registration_backend == "mmorf" and inputs.t1w is None:
+            raise ValueError("MMORF requires a T1w image in BIDS anat/ or explicit t1")
+        output_dir = Path(output_dir).expanduser()
+        if (output_dir / "dmri_pipeline_report.json").exists() and not overwrite:
+            raise FileExistsError(output_dir / "dmri_pipeline_report.json")
+        raw_dir = stage_bids_dwi(inputs, output_dir / "bids_input", overwrite=overwrite)
+        return self.run(
+            raw_dir, output_dir, fa_template=fa_template,
+            fa_skeleton=fa_skeleton,
+            t1=inputs.t1w if self.registration_backend == "mmorf" else None,
+            t1_template=t1_template, tensor_template=tensor_template,
+            overwrite=overwrite,
         )
 
 

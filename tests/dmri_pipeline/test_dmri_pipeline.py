@@ -1,5 +1,6 @@
 import argparse
 import hashlib
+import json
 from types import SimpleNamespace
 from importlib.resources import files
 import nibabel as nib
@@ -11,6 +12,7 @@ import fnit.dmri_pipeline.pipeline as pipeline_module
 import fnit.dmri_pipeline.tbss as tbss_module
 
 from fnit.dmri_pipeline import DMRIPipeline, STANDARD_MAP_NAMES
+from fnit.dmri_pipeline.bids import locate_bids_dwi, stage_bids_dwi
 from fnit.dmri_pipeline.cli import _arguments
 from fnit.dmri_pipeline.tbss import TBSSConfig, preprocess_fa
 from fnit.fnirt import FNIRTConfig, TBSSFNIRTConfig
@@ -36,6 +38,211 @@ def test_bvec_source_cli_and_invalid_value():
         DMRIPipeline(device="cpu", bvec_source="invalid")
     with pytest.raises(ValueError, match="noddi_fit_method"):
         DMRIPipeline(device="cpu", noddi_fit_method="invalid")
+
+
+def _bids_case(root, *, with_t1):
+    (root / "dataset_description.json").write_text(
+        json.dumps({"Name": "Real-format fixture", "BIDSVersion": "1.11.0"})
+    )
+    base = root / "sub-01" / "ses-1"
+    dwi_dir, fmap_dir = base / "dwi", base / "fmap"
+    dwi_dir.mkdir(parents=True)
+    fmap_dir.mkdir()
+    image = dwi_dir / "sub-01_ses-1_dir-AP_run-01_dwi.nii.gz"
+    reverse = fmap_dir / "sub-01_ses-1_dir-PA_epi.nii.gz"
+    nib.save(nib.Nifti1Image(np.ones((6, 6, 6, 3), np.float32), np.eye(4)), image)
+    nib.save(nib.Nifti1Image(np.ones((6, 6, 6), np.float32), np.eye(4)), reverse)
+    (base / "sub-01_ses-1_dwi.bval").write_text("0 1000 2000\n")
+    (base / "sub-01_ses-1_dwi.bvec").write_text("0 1 0\n0 0 1\n0 0 0\n")
+    (root / "dwi.json").write_text(json.dumps({
+        "PhaseEncodingDirection": "j", "TotalReadoutTime": 0.05,
+        "B0FieldSource": "pepolar1",
+    }))
+    (fmap_dir / "sub-01_ses-1_dir-PA_epi.json").write_text(json.dumps({
+        "PhaseEncodingDirection": "j-", "TotalReadoutTime": 0.05,
+        "B0FieldIdentifier": "pepolar1",
+    }))
+    if with_t1:
+        anat = base / "anat"
+        anat.mkdir()
+        nib.save(nib.Nifti1Image(np.ones((6, 6, 6), np.float32), np.eye(4)),
+                 anat / "sub-01_ses-1_T1w.nii.gz")
+    return image, reverse
+
+
+@pytest.mark.parametrize("with_t1,backend", [(False, "tbss"), (True, "mmorf")])
+def test_bids_entry_stages_realistic_inputs_and_optional_t1(monkeypatch, tmp_path,
+                                                               with_t1, backend):
+    root = tmp_path / "bids"
+    root.mkdir()
+    image, reverse = _bids_case(root, with_t1=with_t1)
+    captured = {}
+
+    def fake_run(self, raw_dir, output_dir, **kwargs):
+        captured.update(raw_dir=raw_dir, output_dir=output_dir, **kwargs)
+        return SimpleNamespace(output_dir=output_dir)
+
+    monkeypatch.setattr(DMRIPipeline, "run", fake_run)
+    pipeline = DMRIPipeline(device="cpu", registration_backend=backend,
+                            synthstrip_weights="weights.pt" if with_t1 else None)
+    output = tmp_path / "output"
+    pipeline.run_bids(root, output, subject="01", session="1", run="01",
+                      direction="AP", fa_template="fa.nii.gz")
+    staged = output / "bids_input"
+    assert captured["raw_dir"] == staged
+    assert (staged / "AP.nii.gz").resolve() == image
+    assert nib.load(str(staged / "PA.nii.gz")).shape == (6, 6, 6, 1)
+    np.testing.assert_array_equal(np.atleast_1d(np.loadtxt(staged / "PA.bval")), [0])
+    assert json.loads((staged / "PA.json").read_text())["PhaseEncodingDirection"] == "j-"
+    assert json.loads((staged / "bids_selection.json").read_text())["reverse_pe"] == reverse.relative_to(root).as_posix()
+    assert (captured["t1"] is not None) == with_t1
+
+
+def test_bids_mmorf_requires_t1_and_ambiguous_dwi_is_rejected(tmp_path):
+    root = tmp_path / "bids"
+    root.mkdir()
+    image, _ = _bids_case(root, with_t1=False)
+    second = image.with_name(image.name.replace("run-01", "run-02"))
+    second.symlink_to(image)
+    with pytest.raises(ValueError, match="expected one BIDS DWI run"):
+        locate_bids_dwi(root, subject="01", session="1")
+    with pytest.raises(ValueError, match="requires a T1w"):
+        DMRIPipeline(device="cpu", registration_backend="mmorf").run_bids(
+            root, tmp_path / "out", subject="01", run="01", direction="AP",
+            fa_template="fa.nii.gz",
+        )
+    assert image.is_file()
+
+
+def test_bids_reverse_dwi_preserves_its_bvalues(tmp_path):
+    root = tmp_path / "bids"
+    root.mkdir()
+    _bids_case(root, with_t1=False)
+    fmap = root / "sub-01" / "ses-1" / "fmap"
+    for path in fmap.iterdir():
+        path.unlink()
+    reverse = root / "sub-01" / "ses-1" / "dwi" / "sub-01_ses-1_dir-PA_dwi.nii.gz"
+    nib.save(nib.Nifti1Image(np.ones((6, 6, 6, 2), np.float32), np.eye(4)), reverse)
+    reverse.with_suffix("").with_suffix(".bval").write_text("0 1000\n")
+    reverse.with_suffix("").with_suffix(".json").write_text(json.dumps({
+        "PhaseEncodingDirection": "j-", "TotalReadoutTime": 0.05,
+        "B0FieldIdentifier": "pepolar1",
+    }))
+    inputs = locate_bids_dwi(root, subject="01", direction="AP")
+    staged = stage_bids_dwi(inputs, tmp_path / "staged")
+    np.testing.assert_array_equal(np.loadtxt(staged / "PA.bval"), [0, 1000])
+
+
+def test_bids_single_sessionless_t1_is_not_counted_twice(tmp_path):
+    root = tmp_path / "bids"
+    dwi = root / "sub-01" / "dwi"
+    anat = root / "sub-01" / "anat"
+    dwi.mkdir(parents=True)
+    anat.mkdir()
+    (root / "dataset_description.json").write_text(
+        '{"Name":"test","BIDSVersion":"1.11.0"}'
+    )
+    nib.save(nib.Nifti1Image(np.ones((4, 4, 4, 2), np.float32), np.eye(4)),
+             dwi / "sub-01_dir-AP_dwi.nii.gz")
+    (dwi / "sub-01_dir-AP_dwi.bval").write_text("0 1000\n")
+    (dwi / "sub-01_dir-AP_dwi.bvec").write_text("0 1\n0 0\n0 0\n")
+    (dwi / "sub-01_dir-AP_dwi.json").write_text(
+        '{"PhaseEncodingDirection":"j-","TotalReadoutTime":0.05}'
+    )
+    t1 = anat / "sub-01_T1w.nii.gz"
+    nib.save(nib.Nifti1Image(np.ones((4, 4, 4), np.float32), np.eye(4)), t1)
+    assert locate_bids_dwi(root, subject="01").t1w == t1
+
+
+def test_bids_without_reverse_phase_encoding_stages_ap_only(tmp_path):
+    root = tmp_path / "bids"
+    root.mkdir()
+    _bids_case(root, with_t1=False)
+    staged = tmp_path / "staged"
+    stage_bids_dwi(locate_bids_dwi(root, subject="01", direction="AP"), staged)
+    assert (staged / "PA.nii.gz").is_file()
+    for path in (root / "sub-01" / "ses-1" / "fmap").iterdir():
+        path.unlink()
+    inputs = locate_bids_dwi(root, subject="01", direction="AP")
+    assert inputs.reverse is None
+    staged = stage_bids_dwi(inputs, staged, overwrite=True)
+    assert (staged / "AP.nii.gz").is_file()
+    assert not (staged / "PA.nii.gz").exists()
+
+
+def test_bids_subject_level_fieldmap_can_target_session_dwi(tmp_path):
+    root = tmp_path / "bids"
+    root.mkdir()
+    _bids_case(root, with_t1=False)
+    participant = root / "sub-01"
+    source = participant / "ses-1" / "fmap"
+    target = participant / "fmap"
+    target.mkdir()
+    for path in source.iterdir():
+        path.rename(target / path.name.replace("_ses-1", ""))
+    inputs = locate_bids_dwi(root, subject="01", session="1", direction="AP")
+    assert inputs.reverse.parent == target
+
+
+def test_bids_intended_for_selects_one_of_two_reverse_fieldmaps(tmp_path):
+    root = tmp_path / "bids"
+    root.mkdir()
+    image, reverse = _bids_case(root, with_t1=False)
+    fmap = reverse.parent
+    other = fmap / "sub-01_ses-1_dir-PA_run-02_epi.nii.gz"
+    other.symlink_to(reverse)
+    other.with_suffix("").with_suffix(".json").write_text(json.dumps({
+        "PhaseEncodingDirection": "j-", "TotalReadoutTime": 0.05,
+        "IntendedFor": "ses-1/dwi/unrelated_dwi.nii.gz",
+    }))
+    reverse.with_suffix("").with_suffix(".json").write_text(json.dumps({
+        "PhaseEncodingDirection": "j-", "TotalReadoutTime": 0.05,
+        "IntendedFor": image.relative_to(root / "sub-01").as_posix(),
+    }))
+    assert locate_bids_dwi(root, subject="01", direction="AP").reverse == reverse
+
+
+def test_bids_uncompressed_dwi_is_staged_as_nii_gz(tmp_path):
+    root = tmp_path / "bids"
+    root.mkdir()
+    image, _ = _bids_case(root, with_t1=False)
+    uncompressed = image.with_suffix("")
+    nib.save(nib.load(str(image)), uncompressed)
+    image.unlink()
+    inputs = locate_bids_dwi(root, subject="01", direction="AP")
+    staged = stage_bids_dwi(inputs, tmp_path / "staged")
+    assert nib.load(str(staged / "AP.nii.gz")).shape == (6, 6, 6, 3)
+
+
+def test_bids_cli_selects_single_subject_run():
+    parser = argparse.ArgumentParser()
+    _arguments(parser)
+    args = parser.parse_args([
+        "--bids-root", "bids", "--subject", "sub-01", "--session", "ses-1",
+        "--direction", "AP", "--run", "01", "-o", "out", "--fa-template", "fa.nii.gz",
+    ])
+    assert (args.bids_root, args.subject, args.direction) == ("bids", "sub-01", "AP")
+
+
+def test_bids_tbss_ignores_multiple_t1w(monkeypatch, tmp_path):
+    root = tmp_path / "bids"
+    root.mkdir()
+    _bids_case(root, with_t1=True)
+    anat = root / "sub-01" / "ses-1" / "anat"
+    source = anat / "sub-01_ses-1_T1w.nii.gz"
+    (anat / "sub-01_ses-1_run-02_T1w.nii.gz").symlink_to(source)
+    captured = {}
+
+    def fake_run(self, raw_dir, output_dir, **kwargs):
+        captured.update(kwargs)
+        return SimpleNamespace(output_dir=output_dir)
+
+    monkeypatch.setattr(DMRIPipeline, "run", fake_run)
+    DMRIPipeline(device="cpu").run_bids(
+        root, tmp_path / "output", subject="01", direction="AP",
+        fa_template="fa.nii.gz",
+    )
+    assert captured["t1"] is None
 
 
 def test_tbss_config_combines_selected_official_schedule_values():

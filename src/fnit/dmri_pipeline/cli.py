@@ -4,7 +4,14 @@ import argparse
 
 
 def _arguments(parser):
-    parser.add_argument("--raw-dir", required=True, help="directory containing AP.* and optional PA.*")
+    source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument("--raw-dir", help="directory containing AP.* and optional PA.*")
+    source.add_argument("--bids-root", help="root of a raw BIDS dataset")
+    parser.add_argument("--subject", help="BIDS subject label; required with --bids-root")
+    parser.add_argument("--session", help="BIDS session label")
+    parser.add_argument("--run", help="BIDS DWI run label")
+    parser.add_argument("--acquisition", help="BIDS DWI acquisition label")
+    parser.add_argument("--direction", help="BIDS DWI dir label, such as AP")
     parser.add_argument("-o", "--output-dir", required=True)
     parser.add_argument(
         "--registration-backend", choices=("tbss", "mmorf"), default="tbss"
@@ -27,7 +34,7 @@ def _arguments(parser):
 def run(args):
     from .pipeline import DMRIPipeline
 
-    result = DMRIPipeline(
+    pipeline = DMRIPipeline(
         device=args.device,
         registration_backend=args.registration_backend,
         fnirt_config=args.fnirt_preset,
@@ -36,16 +43,25 @@ def run(args):
         dti_tolerance=args.dti_tolerance,
         bvec_source=args.bvec_source,
         noddi_fit_method=args.noddi_fit_method,
-    ).run(
-        args.raw_dir,
-        args.output_dir,
-        fa_template=args.fa_template,
-        fa_skeleton=args.fa_skeleton,
-        t1=args.t1,
-        t1_template=args.t1_template,
-        tensor_template=args.tensor_template,
-        overwrite=args.overwrite,
     )
+    options = {
+        "fa_template": args.fa_template,
+        "fa_skeleton": args.fa_skeleton,
+        "t1": args.t1,
+        "t1_template": args.t1_template,
+        "tensor_template": args.tensor_template,
+        "overwrite": args.overwrite,
+    }
+    if args.bids_root:
+        if not args.subject:
+            raise ValueError("--subject is required with --bids-root")
+        result = pipeline.run_bids(
+            args.bids_root, args.output_dir, subject=args.subject,
+            session=args.session, run=args.run, acquisition=args.acquisition,
+            direction=args.direction, **options,
+        )
+    else:
+        result = pipeline.run(args.raw_dir, args.output_dir, **options)
     print(result.output_dir)
     print(result.qc)
 
