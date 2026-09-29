@@ -14,7 +14,7 @@
 | `reference_mask` | 可选的 `mni_brain` 网格二值掩膜，只供 PyTorch FNIRT 使用；SynthMorph 不读取它。 |
 | `device` | 如 `"cuda:0"` 或 `"cpu"`；`None` 时优先 CUDA。GPU 默认允许 TF32，图像与形变使用 float32，不启用 float16。 |
 
-返回 `T1MNIResult`。`affine` 是 **T1→MNI 的 FSL scaled-mm 初始矩阵文件** `T1_to_MNI152_2mm_affine.mat`；`moving_to_fixed_world` 是对应的 RAS world 4×4 NumPy 数组。`pull_ras` 是 `MNI152_2mm_to_T1_pull_ras.nii.gz`，shape 为 MNI `X×Y×Z×3`，三个分量单位是 RAS 毫米。对某个 MNI world 坐标 `p`，对应 T1 world 坐标为 `p + pull_ras(p)`。这个位移场已经包含初始仿射与非线性形变；应用它时**不要再叠加 `affine`**。`backend` 记录选择的方法。
+返回 `T1MNIResult`。`affine` 是 **T1→MNI 的 FSL scaled-mm 初始矩阵文件** `T1_to_MNI152_2mm_affine.mat`；`moving_to_fixed_world` 是对应的 RAS world 4×4 NumPy 数组。`pull_ras` 是 `MNI152_2mm_to_T1_pull_ras.nii.gz`，shape 为 MNI `X×Y×Z×3`，三个分量单位是 RAS 毫米。对某个 MNI world 坐标 `p`，对应 T1 world 坐标为 `p + pull_ras(p)`。这个位移场已经包含初始仿射与非线性形变；应用它时**不要再叠加 `affine`**。`backend` 记录选择的方法；`qc` 在 FNIRT 分支返回逐层优化、强度多项式、偏置场范围和显存精度设置，SynthMorph 分支为 `None`。整链运行还会将它写入 `pipeline_report.json` 的 `t1_to_mni_qc`。
 
 | `resample_world` 参数 | 含义 |
 |---|---|
@@ -47,8 +47,8 @@ registration = register_t1_to_mni(
     t1_brain="/absolute/path/sub-0001_T1w_brain.nii.gz",  # 同被试 3D 去颅骨 T1
     mni_brain="/absolute/path/MNI152_T1_2mm_brain.nii.gz",  # 3D MNI152 2 mm 脑模板
     output_dir="/absolute/path/sub-0001/reg",  # 仿射矩阵、MNI→T1 位移场输出目录
-    backend="synthmorph",  # 可改成 "fnirt"；两者输出结构相同
-    synthmorph_weights="/absolute/path/synthmorph.deform.3.h5",  # deform 模型权重；fnirt 不使用
+    backend="fnirt",  # 使用 T1FNIRTConfig；改成 "synthmorph" 使用 deform 网络
+    synthmorph_weights=None,  # fnirt 不读取该权重；synthmorph 分支填写 deform 权重或使用缓存
     reference_mask="/absolute/path/MNI152_T1_2mm_brain_mask.nii.gz",  # fnirt 使用的模板脑掩膜
     device="cuda:0",  # 计算设备；无 GPU 时填写 "cpu"
 )
@@ -84,11 +84,11 @@ applywarp --in=filtered_func_data_clean_epi.nii.gz \
   --out=filtered_func_data_clean_MNI152_2mm.nii.gz
 ```
 
-固定**与 FNIT 完全相同的两张去颅骨输入**时，可把上面 `fnirt` 的 `--in`、`--ref` 换成 `T1_brain.nii.gz`、`MNI152_T1_2mm_brain.nii.gz`，并显式提供模板掩膜。这是实现差异测试；它与 FSL 推荐的整头 FNIRT 输入并不相同。
+固定**与 FNIT 完全相同的两张去颅骨输入**时，可把上面 `fnirt` 的 `--in`、`--ref` 换成 `T1_brain.nii.gz`、`MNI152_T1_2mm_brain.nii.gz`，并添加 `--refmask=MNI152_T1_2mm_brain_mask.nii.gz`。下面的实测对照使用这一组输入；它与 FSL 推荐的整头 FNIRT 输入不同。
 
 ## 两个后端的对应边界
 
-SynthMorph 使用学习得到的 deform 网络，在初始 FLIRT 仿射上估计形变；它不是 FNIRT 优化器。PyTorch FNIRT 复用 FNIT 的 B 样条和 Gauss–Newton/LM 核心，并按 FSL `T1_2_MNI152_2mm.cnf` 设置多尺度采样、平滑和正则化；现有实现仍使用全局线性强度映射，而 FSL T1 配置使用非线性强度及偏置场模型。因此二者输出文件契约一致，不应声称与官方 FNIRT 逐体素一致。两后端都要求检查配准图像和脑缘重合程度，不能仅凭算法名称认定配准有效。
+SynthMorph 使用学习得到的 deform 网络。PyTorch FNIRT 复用 FNIT 的 B 样条和 Gauss–Newton/LM 核心，`T1FNIRTConfig` 采用官方六级采样、平滑、正则化和五阶强度多项式设置。T1 分支在每级形变优化前，交替拟合参考图像到输入图像的多项式映射和 50 mm 三次 B 样条乘性偏置场；偏置场限制在 0.25–4 倍，最后一级沿用上一级强度参数。FSL 将强度、偏置和形变参数联合优化，本实现的交替拟合并非相同的数值步骤。两后端的输出文件结构相同，均需检查脑缘重合；当前实测误差不支持与官方 FNIRT 逐体素数值等价的结论。
 
 ## 真实数据 benchmark
 
@@ -96,14 +96,14 @@ SynthMorph 使用学习得到的 deform 网络，在初始 FLIRT 仿射上估计
 
 | 同输入指标 | PyTorch SynthMorph | PyTorch FNIRT | FSL FLIRT+FNIRT |
 |---|---:|---:|---:|
-| 初始仿射 + 非线性配准耗时 | 156.32 s | 240.18 s | 11.25 + 150.53 = 161.78 s |
-| 加上 FNIT 结果图重采样 | 156.71 s | 240.67 s | `fnirt --iout` 已包含输出图 |
-| 峰值内存 | GPU allocated 12.38 GiB，reserved 18.12 GiB | GPU allocated 0.653 GiB，reserved 0.900 GiB | FNIRT CPU RSS 0.798 GiB |
-| MNI 脑内输出强度与 FSL Pearson r | 0.8323 | 0.9135 | 参照 |
-| 输出脑支持区与 FSL Dice | 0.9782 | 0.9902 | 参照 |
-| MNI→T1 pull 坐标差 | 中位 1.75 mm，95 百分位 5.01 mm | 中位 1.02 mm，95 百分位 3.41 mm | 参照 |
-| 与 MNI T1 模板强度 Pearson r | 0.7938 | 0.8158 | 0.8025 |
+| 初始仿射 + 非线性配准耗时 | 156.32 s | 318.41 s | 11.25 + 150.53 = 161.78 s |
+| 加上 FNIT 结果图重采样 | 156.71 s | 318.83 s | `fnirt --iout` 已包含输出图 |
+| 峰值内存 | GPU allocated 12.38 GiB，reserved 18.12 GiB | GPU allocated 0.997 GB，reserved 1.462 GB | FNIRT CPU RSS 0.798 GiB |
+| MNI 脑内输出强度与 FSL Pearson r | 0.8323 | 0.9213 | 参照 |
+| 输出脑支持区与 FSL Dice | 0.9782 | 0.9823 | 参照 |
+| MNI→T1 pull 坐标差 | 中位 1.75 mm，95 百分位 5.01 mm | 中位 0.884 mm，95 百分位 3.046 mm | 参照 |
+| 与 MNI T1 模板强度 Pearson r | 0.7938 | 0.8052 | 0.8025 |
 
 Pearson r 在官方 MNI 脑掩膜内计算。脑支持区把每张重采样 T1 的正值第 99 百分位乘以 0.05 作阈值；两张图的二值区求 Dice。坐标差用 FSL `applywarp` 对 T1 的三个 RAS world 坐标图重采样，再与 FNIT 的完整 pull 场比较；只纳入双方均有有效脑信号的体素。相比输出强度，坐标差能直接检验仿射与非线性形变的合成方向。FSL 整头输入单独耗时为 FLIRT 17.41 s、FNIRT 194.34 s，其配准后脑内强度与模板 r=0.7833；整头结果含头皮，故未与去颅骨结果计算脑支持 Dice。
 
-这是一例真实数据。PyTorch FNIRT 行为当前源码在同输入上的复测；TorchFLIRT 本次更新仅涉及 6 自由度分支，T1→MNI 使用的 12 自由度分支未改。复测的初始仿射矩阵、完整位移场和重采样 T1 与此前同输入结果逐值相同（最大绝对差均为 0）。SynthMorph 行来自该后端未变更时的同输入运行。FNIT 在共享 GPU 上与其他作业同时运行；上表是观察到的耗时，**不能用来作公平的 CPU/GPU 速度排序**。本机 FSL 的 FLIRT/FNIRT 在产出文件后返回 255；已保留该退出码，并核验了新产出 NIfTI 的 gzip CRC、网格、有限值及仿射矩阵可逆性，条件接受为数值参照。两支 FNIT 输出均通过相同的 NIfTI 有限值和 gzip CRC 检查。完整标量、定义及源码 SHA256 见 [`registration_summary.json`](../../validation/fmri/registration_summary.json)；公开文件不含原图、被试标识或逐体素结果。
+这是一例真实数据。PyTorch FNIRT 行来自当前 T1 强度模型的重跑；SynthMorph 行保留此前运行的实测值，未因本次改动重跑。FNIT 在共享 GPU 上与其他作业同时运行；上表是观察到的耗时，不能用来作公平的 CPU/GPU 速度排序。本机 FSL 的 FLIRT/FNIRT 在产出文件后返回 255；保留该退出码，并核验了 NIfTI 的 gzip CRC、网格、有限值及仿射矩阵可逆性，条件接受为数值参照。FNIRT 新结果的输入 SHA256、源码 SHA256、强度拟合记录和指标见[当前 T1 报告](../../validation/fmri/t1_fnirt_20260929.public.json)；FSL 与 SynthMorph 的原始标量见[参照摘要](../../validation/fmri/registration_summary.json)。仓库不含原图、被试标识或逐体素结果。

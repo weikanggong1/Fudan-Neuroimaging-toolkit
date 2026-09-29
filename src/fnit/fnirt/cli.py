@@ -10,14 +10,14 @@ def build_parser():
     parser = argparse.ArgumentParser(
         prog="python -m fnit.fnirt",
         description=(
-            "Run the source-derived PyTorch implementation of FSL's supported "
-            "GM_2_MNI152GM_2mm FNIRT path. Other FNIRT configurations and "
+            "Run the PyTorch implementation of FSL's supported "
+            "GM_2_MNI152GM_2mm or T1_2_MNI152_2mm FNIRT paths. Other configurations and "
             "options are rejected."
         ),
         allow_abbrev=False,
     )
-    parser.add_argument("--in", dest="input", required=True, help="input/moving GM NIfTI")
-    parser.add_argument("--ref", required=True, help="reference/fixed GM NIfTI")
+    parser.add_argument("--in", dest="input", required=True, help="input/moving 3D NIfTI")
+    parser.add_argument("--ref", required=True, help="reference/fixed 3D NIfTI")
     parser.add_argument(
         "--aff",
         help=(
@@ -42,7 +42,7 @@ def build_parser():
     parser.add_argument(
         "--config",
         default=SUPPORTED_CONFIG,
-        help=f"only {SUPPORTED_CONFIG} is accepted (default: %(default)s)",
+        help="GM_2_MNI152GM_2mm.cnf or T1_2_MNI152_2mm.cnf (default: %(default)s)",
     )
     parser.add_argument(
         "--device",

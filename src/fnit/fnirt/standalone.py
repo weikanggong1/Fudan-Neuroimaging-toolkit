@@ -1,4 +1,4 @@
-"""FSL-style single-subject wrapper for the PyTorch FNIRT GM path."""
+"""FSL-style single-subject wrapper for the PyTorch FNIRT GM and T1 paths."""
 
 from __future__ import annotations
 
@@ -15,13 +15,15 @@ from .._nib import load_image, new_image
 from .._transforms import AffineTransform
 from ..flirt.coordinates import flirt_to_world_affine
 from .io import FSL_CUBIC_SPLINE_COEFFICIENTS
-from .registration import GMFNIRTConfig, TorchFNIRT
+from .registration import GMFNIRTConfig, T1FNIRTConfig, TorchFNIRT
 
 
 SUPPORTED_CONFIG = "GM_2_MNI152GM_2mm.cnf"
 SUPPORTED_CONFIG_SHA256 = (
     "3bc82d0ff4d8f53d89a741bd853a427607a5cb108e170b44d8835c4b542a4980"
 )
+T1_CONFIG = "T1_2_MNI152_2mm.cnf"
+T1_CONFIG_SHA256 = "49df13ca10b8f95700fedb100d0abacf5ff98f1cbfc10cdbcb4bbb4c8d155acd"
 DEFAULT_REFERENCE_MASK = "MNI152_T1_2mm_brain_mask_dil.nii.gz"
 
 
@@ -38,18 +40,24 @@ def _validate_config(value):
         return SUPPORTED_CONFIG
     text = os.fspath(value)
     path = Path(text)
-    if path.name not in (SUPPORTED_CONFIG, Path(SUPPORTED_CONFIG).stem):
+    selected = next(
+        (name for name in (SUPPORTED_CONFIG, T1_CONFIG)
+         if path.name in (name, Path(name).stem)),
+        None,
+    )
+    if selected is None:
         raise NotImplementedError(
-            f"only {SUPPORTED_CONFIG} is implemented; received {text}"
+            f"only {SUPPORTED_CONFIG} and {T1_CONFIG} are implemented; received {text}"
         )
     has_directory = path.is_absolute() or path.parent != Path(".")
     if has_directory and not path.is_file():
         raise FileNotFoundError(path)
-    if path.is_file() and _sha256(path) != SUPPORTED_CONFIG_SHA256:
+    expected = SUPPORTED_CONFIG_SHA256 if selected == SUPPORTED_CONFIG else T1_CONFIG_SHA256
+    if path.is_file() and _sha256(path) != expected:
         raise NotImplementedError(
-            f"{path} is not the unmodified FSL {SUPPORTED_CONFIG} configuration"
+            f"{path} is not the unmodified FSL {selected} configuration"
         )
-    return SUPPORTED_CONFIG
+    return selected
 
 
 def _load_volume(value, name):
@@ -84,7 +92,7 @@ def _load_affine(value):
 def _resolve_reference_mask(value):
     if value is None:
         raise ValueError(
-            "refmask is required for the GM configuration and must be provided "
+            "refmask is required for FNIRT and must be provided "
             "explicitly"
         )
     return value
@@ -249,7 +257,7 @@ def run_fnirt(
     device=None,
     overwrite=False,
 ):
-    """Run the supported FSL GM FNIRT path and optionally write its outputs.
+    """Run the supported FSL GM or T1 FNIRT path and write requested outputs.
 
     ``affine`` follows an FSL FLIRT ``.mat`` contract: input to reference in
     FSL scaled-mm coordinates.  When omitted, it is the scaled-mm identity,
@@ -258,7 +266,7 @@ def run_fnirt(
     ``jout`` is the nonlinear-only determinant written by FSL FNIRT's
     ``SaveJacobian`` path; it excludes the affine determinant.
     """
-    _validate_config(config)
+    selected_config = _validate_config(config)
     selected_mask = _resolve_reference_mask(refmask)
     if cout is None:
         cout = _default_coefficient_root(input)
@@ -289,7 +297,7 @@ def run_fnirt(
     )
     result = TorchFNIRT(
         device=_default_device() if device is None else device,
-        config=GMFNIRTConfig(),
+        config=(GMFNIRTConfig() if selected_config == SUPPORTED_CONFIG else T1FNIRTConfig()),
     )(
         moving,
         fixed,
@@ -304,5 +312,7 @@ __all__ = [
     "DEFAULT_REFERENCE_MASK",
     "SUPPORTED_CONFIG",
     "SUPPORTED_CONFIG_SHA256",
+    "T1_CONFIG",
+    "T1_CONFIG_SHA256",
     "run_fnirt",
 ]

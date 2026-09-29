@@ -38,7 +38,7 @@
 
 | 功能 | 当前真实数据报告 | 输出一致性结论 | 时间、显存与示意图 |
 |---|---|---|---|
-| [BIDS→MNI152 2 mm fMRI](../docs/fmri/README.md) | [FEAT](fmri/feat_summary.json)、[BBR](fmri/bbr_summary.json)、[PICA](fmri/pica_summary.json)、[配准](fmri/registration_summary.json)与[整链](fmri/e2e_summary.json) | FEAT 子阶段分别比较；最终 AROMA 输出没有可逐体素配对的 UKB FIX 参考 | 报告记录阶段时间、显存和限制；功能页的真实数据图同时展示 FEAT mean BOLD、BBR、T1→MNI 配准和 PICA |
+| [BIDS→MNI152 2 mm fMRI](../docs/fmri/README.md) | [FEAT](fmri/feat_summary.json)、[BBR](fmri/bbr_summary.json)、[PICA](fmri/pica_summary.json)、[T1 FNIRT 配准](fmri/t1_fnirt_20260929.public.json)、[FNIRT volume 整链](fmri/fmri_volume_fnirt_20260929.public.json)与[默认整链](fmri/e2e_summary.json) | FEAT 子阶段分别比较；最终 AROMA 输出没有可逐体素配对的 UKB FIX 参考 | 报告记录阶段时间、显存和限制；功能页的真实数据图同时展示 FEAT mean BOLD、BBR、T1→MNI 配准和 PICA |
 | [MS-HBM 17 网络](../docs/mshbm/README.md) | [真实 fsLR32k 静息态时序](mshbm/report.public.json) | 输入 profile、网络标签和 Dice/ARI 按顶点比较 | 报告含 CBIG/FNIT 的匹配计时与内存；功能页展示网络标签与差异 |
 
 recon-all 与 Connectome 的验证边界由各自功能页维护，不纳入本页审计表。

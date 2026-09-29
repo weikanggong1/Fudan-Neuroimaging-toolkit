@@ -317,6 +317,7 @@ def run_fmri_pipeline(
         "mni_shape": list(template.shape),
         "mni_voxel_mm": [float(value) for value in template.header.get_zooms()[:3]],
         "registration_backend": registration_backend,
+        "t1_to_mni_qc": t1_to_mni.qc,
         "ica_components": aroma.ica.n_components,
         "ica_converged": aroma.ica.converged,
         "ica_iterations": aroma.ica.n_iterations,

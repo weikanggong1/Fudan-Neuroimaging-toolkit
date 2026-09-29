@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-29",
+  "scope": "one real UK Biobank 490-frame BOLD and SBRef; BIDS T1 is skull-stripped with unknown processing provenance; volume-only FNIT BIDS-to-MNI152 2-mm FNIRT branch",
+  "processing": "SynthStrip, spline FEAT, TorchFAST/BBR, T1FNIRTConfig, PyTorch PICA, ICA-AROMA nonaggressive, one-pass MNI BOLD resampling; no GDC, B0 correction, surface projection, or extra WM/CSF/motion regression",
+  "input_sha256": {
+    "bold": "67717caaa823141c6e59d46db52e92deb4419d232ba699c399c69eb8888a0e92",
+    "sbref": "ff4e0e49a504527468234456cba6ad367d63c1f3f529d8ff3519bc78e2076323",
+    "bids_t1w": "7c702c5040fce960c49a09dab2e6c22854f4652031986d639b735f0f4a85399d"
+  },
+  "output_sha256": {
+    "clean_mni_bold": "7aea14ca78b506d30689121abe69dc5c6e6aa97265472d2db665861eddd46394",
+    "mni_mask": "007a41e3547e2e207c8caff09f952b9d9ab2b4b6b2e32e66ef09a63594d8348e",
+    "mni_to_t1_pull": "9c12b051cd30e9e05ef23ee148927b06d1e16a8d6ac8a4992a25be30cd028794"
+  },
+  "validator_sha256": "c38c2d77b19db4e12e5820fead44043f5ba1ad65c865ee3c9038ab35b261422f",
+  "result": {
+    "schema_version": 1,
+    "whole_process_exit_status": 0,
+    "registration_backend": "fnirt",
+    "t1_intensity_model": "global_non_linear_with_bias",
+    "t1_level_count": 6,
+    "t1_fsl_numerically_equivalent": false,
+    "input_bold_shape": [
+      88,
+      88,
+      64,
+      490
+    ],
+    "output_bold_shape": [
+      91,
+      109,
+      91,
+      490
+    ],
+    "output_dtype": "float32",
+    "tr_seconds": 0.7350000143051147,
+    "mni_template_grid_matches": true,
+    "mask_voxels": 221110,
+    "finite_output_values": 442288210,
+    "nonfinite_output_values": 0,
+    "inside_mask_nonzero_fraction": 0.9999592962778707,
+    "outside_mask_max_abs": 0.0,
+    "gzip_crc_passed": true,
+    "ica_components": 95,
+    "ica_converged": true,
+    "aroma_noise_components": 53,
+    "timing_seconds": {
+      "synthstrip": 8.462538920808583,
+      "feat_core": 280.1254231040366,
+      "fast": 1.8747667758725584,
+      "bbr_and_t1_to_mni": 587.8285627909936,
+      "aroma_masks": 0.4488235251046717,
+      "pica_aroma_confounds": 122.8545030890964,
+      "mni_resampling": 51.236068076919764,
+      "total": 1052.8306862828322
+    },
+    "whole_process_wall_seconds": 1059.67,
+    "whole_process_max_cpu_rss_kb": 4572196,
+    "cuda_peak_allocated_gb": 6.23941376,
+    "cuda_peak_reserved_gb": 7.314866176,
+    "source_sha256": {
+      "fnirt_registration.py": "05627c68a33a4baa071f31283a61b62ddb9b1d3b6b6f524d0b0bcdeddf112a4e",
+      "fmri_normalization.py": "9e3832709c7d3a67928cabec6e95893f56b48b94dec810d40d565d67d7528f86",
+      "fmri_end_to_end.py": "71d6b8dbfbb675f3bffc5a09923d34a079521181f42b1835d832545512d7c158"
+    }
+  },
+  "comparison_limit": "The final ICA-AROMA BOLD has no paired FSL/UKB FIX voxelwise oracle. The reported pass covers execution and output contracts, while T1 registration has a separate same-input FSL comparison.",
+  "timing_limit": "Shared H100 GPU with other active processes; wall and CUDA peak memory are observed values, not controlled speed comparisons.",
+  "privacy": "Only scalars and SHA256 hashes are published; BIDS images and voxelwise outputs remain on the remote server."
+}

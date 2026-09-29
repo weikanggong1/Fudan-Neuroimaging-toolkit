@@ -1,0 +1,195 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-29",
+  "scope": "one real skull-stripped T1 and MNI152 2-mm brain template; same-input FSL 6.0.7.22 FLIRT/FNIRT reference; no raw scanner T1 validation",
+  "input_provenance": "T1 grid matches the same-subject UKB orig/001.mgz, but intensities differ and its processing provenance is unknown",
+  "inputs_sha256": {
+    "moving_t1_brain": "12550a5d57f88122e0e314062cd1767b75672552ab4b8906a8fced180ade3b83",
+    "fixed_mni_brain": "91729207be92d54c8a9e3d790070ad26f68f2d049861c6162d6a35db713c5e56",
+    "fixed_mni_brain_mask": "b71a9f2015bd10262c37e51b4d17a655d0eb0a0dec4ba48322fb5af55c86b97c",
+    "fsl_warped_t1": "c2dd6e85ad4e5d934a55ae65cbcf5aeb3b1c99353d69bb5e597afc3977f457e5"
+  },
+  "source_sha256": {
+    "fnirt_registration.py": "05627c68a33a4baa071f31283a61b62ddb9b1d3b6b6f524d0b0bcdeddf112a4e",
+    "fnirt_standalone.py": "ff416a49ad3b76ccc652557ac6dd1e8e83bf9deace567c4a8b3d828da32bcc56",
+    "fnirt_cli.py": "cee4eeaf7e354583b7c2b2570f825abf1c91f1729adafd057b5086880a05a676",
+    "fmri_normalization.py": "9e3832709c7d3a67928cabec6e95893f56b48b94dec810d40d565d67d7528f86",
+    "validate_fnirt_t1w.py": "92ec0d7a19e6cb2e577c337b4b0ad834c0ddc08f41782f611ad4417372697f7a",
+    "fsl_T1_2_MNI152_2mm.cnf": "49df13ca10b8f95700fedb100d0abacf5ff98f1cbfc10cdbcb4bbb4c8d155acd"
+  },
+  "reference": {
+    "fsl_version": "6.0.7.22",
+    "flirt_seconds": 11.25,
+    "fnirt_seconds": 150.53,
+    "flirt_and_fnirt_seconds_sum": 161.78,
+    "fnirt_peak_cpu_rss_gib": 0.7976,
+    "exit_status": 255,
+    "acceptance": "conditional: output gzip CRC, grid, finite values, and affine invertibility checked despite exit 255"
+  },
+  "fnit": {
+    "registration_backend": "fnirt",
+    "intensity_model": "global_non_linear_with_bias",
+    "intensity_fitting": "alternating polynomial and cubic bias fit before each deformation level",
+    "fsl_fnirt_numerically_equivalent": false,
+    "registration_seconds": 318.4074900406413,
+    "registration_and_resample_seconds": 318.83041965262964,
+    "cuda_peak_allocated_gb": 0.996696064,
+    "cuda_peak_reserved_gb": 1.461714944,
+    "output_shape": [
+      91,
+      109,
+      91
+    ],
+    "output_grid_matches_reference": true,
+    "gzip_crc_and_finite": true,
+    "pearson_vs_fsl_same_input": 0.9212741280894937,
+    "support_dice_vs_fsl_same_input": 0.9822575321984834,
+    "pull_difference_median_mm": 0.8835209608078003,
+    "pull_difference_p95_mm": 3.046198606491088,
+    "pull_compared_voxels": 228265,
+    "pearson_to_mni_template": 0.8052303377048667,
+    "level_intensity": [
+      {
+        "level": 1,
+        "polynomial": [
+          0.5242809711938905,
+          -1.5556323726965706,
+          2.9486421489013788,
+          0.6080515371122753,
+          -2.340119566274046,
+          0.8651613324192228
+        ],
+        "bias_range": [
+          0.25,
+          3.1393103166030394
+        ],
+        "bias_pcg": {
+          "iterations": 79,
+          "converged": true,
+          "relative_residual": 0.0009306950141868912
+        }
+      },
+      {
+        "level": 2,
+        "polynomial": [
+          0.5350196263745555,
+          -1.3675321436810743,
+          2.3851376760701752,
+          0.8064376917846218,
+          -1.9423032444788437,
+          0.6302741358013194
+        ],
+        "bias_range": [
+          0.25,
+          2.0318011864888823
+        ],
+        "bias_pcg": {
+          "iterations": 79,
+          "converged": true,
+          "relative_residual": 0.000908414043401978
+        }
+      },
+      {
+        "level": 3,
+        "polynomial": [
+          0.327699360368433,
+          -0.5848868523792624,
+          1.6768593199861894,
+          0.4768248977087067,
+          -1.2469791712988139,
+          0.39580002786114604
+        ],
+        "bias_range": [
+          0.25,
+          2.3622440238928046
+        ],
+        "bias_pcg": {
+          "iterations": 100,
+          "converged": true,
+          "relative_residual": 0.0008156674929047871
+        }
+      },
+      {
+        "level": 4,
+        "polynomial": [
+          0.2758198255183581,
+          -0.4092202826258829,
+          1.504746116618941,
+          0.357162675572336,
+          -0.9811171538147095,
+          0.29373009672744965
+        ],
+        "bias_range": [
+          0.25,
+          2.212331035161931
+        ],
+        "bias_pcg": {
+          "iterations": 79,
+          "converged": true,
+          "relative_residual": 0.0009288729327955892
+        }
+      },
+      {
+        "level": 5,
+        "polynomial": [
+          -0.015537938720619923,
+          0.6168758876389382,
+          0.5689941932798713,
+          -0.0571931893173969,
+          -0.04135264171847466,
+          -0.039979499443157665
+        ],
+        "bias_range": [
+          0.25,
+          1.6460322288876013
+        ],
+        "bias_pcg": {
+          "iterations": 70,
+          "converged": true,
+          "relative_residual": 0.0009181911349278249
+        }
+      },
+      {
+        "level": 6,
+        "polynomial": [
+          -0.015537938720619923,
+          0.6168758876389382,
+          0.5689941932798713,
+          -0.0571931893173969,
+          -0.04135264171847466,
+          -0.039979499443157665
+        ],
+        "bias_range": [
+          0.25,
+          1.6460322288876013
+        ],
+        "bias_pcg": null
+      }
+    ]
+  },
+  "metric_definition": {
+    "image_pearson": "Pearson r of warped T1 within the MNI brain mask",
+    "support_dice": "Dice after thresholding each warped T1 at 5% of its positive 99th percentile",
+    "pull_difference_mm": "Euclidean distance between FNIT MNI-world plus pull displacement and FSL applywarp of three T1 RAS-world coordinate volumes, on common valid brain support"
+  },
+  "timing_caveat": "H100 GPU and FSL CPU runs were not isolated or simultaneous; report observed times without speedup claim",
+  "standalone_cli_same_input": {
+    "exit_status": 0,
+    "wall_seconds": 198.82,
+    "max_cpu_rss_kb": 903772,
+    "coefficient_shape": [21, 24, 21, 3],
+    "coefficient_intent": 2007,
+    "warped_shape": [91, 109, 91],
+    "warped_grid_matches_reference": true,
+    "coefficient_and_warped_finite": true,
+    "gzip_crc": true,
+    "pearson_vs_fmri_registration_entry_same_input": 0.9999264822938757,
+    "mae_vs_fmri_registration_entry_same_input": 1.9985028505325317,
+    "output_sha256": {
+      "coefficients": "ac42b0fdbd54fd528abfab9628223aeaff46dbdcfc2de27866f3ce766db97181",
+      "warped_t1": "598d780ba5b5aeaff6ad3bdc103b6fa03d960f060c0545c5fb2b30d7f3b4fe1e"
+    },
+    "note": "Same T1, MNI brain, reference mask and saved FLIRT affine as the fMRI registration entry; output resampling differs between entries. Shared GPU timing is not a paired speed comparison."
+  },
+  "privacy": "The repository contains scalars and SHA256 only; source images and voxelwise outputs remain on the remote server"
+}

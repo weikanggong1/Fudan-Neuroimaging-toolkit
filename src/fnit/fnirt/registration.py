@@ -152,6 +152,10 @@ class GMFNIRTConfig:
     warp_resolution_schedule_mm: tuple[tuple[float, float, float], ...] | None = None
     jacobian_range: tuple[float, float] = (0.2, 5.0)
     ssd_weighted_lambda: bool = True
+    intensity_model: str = "global_linear"
+    intensity_order: int = 1
+    bias_resolution_mm: tuple[float, float, float] = (50.0, 50.0, 50.0)
+    bias_regularization: float = 10000.0
 
     def __post_init__(self):
         count = len(self.subsampling)
@@ -202,6 +206,27 @@ class GMFNIRTConfig:
                 for value in self.warp_resolution_schedule_mm
             ):
                 raise ValueError("each warp resolution must contain three positive values")
+        if self.intensity_model not in ("global_linear", "global_non_linear_with_bias"):
+            raise ValueError("unsupported FNIRT intensity model")
+        if self.intensity_model == "global_non_linear_with_bias" and not 2 <= self.intensity_order <= 5:
+            raise ValueError("T1 intensity order must be between 2 and 5")
+        if any(value <= 0 for value in self.bias_resolution_mm) or self.bias_regularization < 0:
+            raise ValueError("invalid bias field resolution or regularization")
+
+
+@dataclass(frozen=True)
+class T1FNIRTConfig(GMFNIRTConfig):
+    """FSL ``T1_2_MNI152_2mm.cnf`` geometry and T1 intensity settings."""
+
+    subsampling: tuple[int, ...] = (4, 4, 2, 2, 1, 1)
+    maximum_iterations: tuple[int, ...] = (5, 5, 5, 5, 5, 10)
+    input_fwhm_mm: tuple[float, ...] = (8.0, 6.0, 5.0, 4.5, 3.0, 2.0)
+    reference_fwhm_mm: tuple[float, ...] = (8.0, 6.0, 5.0, 4.0, 2.0, 0.0)
+    regularization: tuple[float, ...] = (300.0, 150.0, 100.0, 50.0, 40.0, 30.0)
+    estimate_intensity: tuple[bool, ...] = (True, True, True, True, True, False)
+    apply_reference_mask: tuple[bool, ...] = (True,) * 6
+    intensity_model: str = "global_non_linear_with_bias"
+    intensity_order: int = 5
 
 
 @dataclass
@@ -913,6 +938,72 @@ class _LevelSystem:
         return state, gradient, matvec, diagonal
 
 
+def _t1_intensity_map(reference, warped, mask, voxel_sizes, config):
+    """Fit a reference-to-moving polynomial and a smooth multiplicative bias."""
+    active = mask & (reference > 5) & (warped > 5)
+    if int(active.sum()) < config.intensity_order + 1:
+        raise RuntimeError("T1 FNIRT has too few valid voxels for intensity mapping")
+    x = (reference[active].double() / 100.0).clamp(0, 4)
+    y = warped[active].double() / 100.0
+    design = torch.stack([x.pow(power) for power in range(config.intensity_order + 1)], dim=1)
+    gram = design.T @ design
+    ridge = torch.eye(gram.shape[0], device=gram.device, dtype=gram.dtype) * (
+        1e-6 * gram.diagonal().mean().clamp_min(1)
+    )
+    polynomial = torch.linalg.solve(gram + ridge, design.T @ y)
+    all_x = (reference.double() / 100.0).clamp(0, 4)
+    mapped = torch.zeros_like(all_x)
+    for coefficient in polynomial.flip(0):
+        mapped = mapped * all_x + coefficient
+    mapped = (100.0 * mapped).clamp_min(0)
+
+    spacing = tuple(
+        max(1, int(round(resolution / size)))
+        for resolution, size in zip(config.bias_resolution_mm, voxel_sizes)
+    )
+    bases = spline_bases(
+        reference.shape, spacing, voxel_sizes,
+        device=reference.device, dtype=torch.float64,
+    )
+    bending = BendingOperator(
+        reference.shape, spacing, voxel_sizes,
+        device=reference.device, dtype=torch.float64,
+    )
+    weights = active.to(torch.float64) * mapped.square()
+    count = int(active.sum())
+    rhs = adjoint_field(
+        ((warped.double() - mapped) * mapped * active / count)[None], bases
+    )[0]
+    regularization = config.bias_regularization / count
+
+    def matvec(vector):
+        field = expand_coefficients(vector.reshape((1, *rhs.shape)), bases)[0]
+        data = adjoint_field((weights * field / count)[None], bases)[0]
+        return (data + regularization * bending.normal(
+            vector.reshape((1, *rhs.shape))
+        )[0]).reshape(-1)
+
+    diagonal = design_diagonal(weights / count, bases) + (
+        regularization * bending.diagonal()
+    )
+    correction, report = preconditioned_conjugate_gradient(
+        matvec, rhs.reshape(-1), diagonal=diagonal.reshape(-1).clamp_min(1e-8),
+        tolerance=1e-3, max_iterations=100,
+    )
+    bias = 1.0 + expand_coefficients(correction.reshape((1, *rhs.shape)), bases)[0]
+    if not bool(torch.isfinite(bias).all()):
+        raise RuntimeError("T1 FNIRT produced an invalid bias field")
+    return polynomial, bias.clamp(0.25, 4.0), report
+
+
+def _apply_t1_intensity(reference, polynomial, bias):
+    x = (reference.double() / 100.0).clamp(0, 4)
+    mapped = torch.zeros_like(x)
+    for coefficient in polynomial.flip(0):
+        mapped = mapped * x + coefficient
+    return (100.0 * mapped).clamp_min(0).mul(bias).to(reference.dtype)
+
+
 class TorchFNIRT:
     """Matrix-free PyTorch FNIRT for the FSL GM registration schedule.
 
@@ -1066,6 +1157,8 @@ class TorchFNIRT:
         previous_bases = None
         previous_stage = None
         scale = torch.ones((), device=device, dtype=dtype)
+        t1_polynomial = None
+        t1_bias = None
         levels = []
 
         for level, (
@@ -1221,9 +1314,32 @@ class TorchFNIRT:
                 bending,
                 regularization,
                 self.config.ssd_weighted_lambda,
-                estimate_intensity,
+                estimate_intensity and self.config.intensity_model == "global_linear",
                 coordinate_affine,
             )
+            intensity_report = None
+            if self.config.intensity_model == "global_non_linear_with_bias":
+                initial_state = system.evaluate(coefficients, scale)
+                if estimate_intensity:
+                    t1_polynomial, t1_bias, intensity_report = _t1_intensity_map(
+                        fixed_level,
+                        initial_state["warped"],
+                        initial_state["mask"],
+                        level_voxel_sizes,
+                        self.config,
+                    )
+                else:
+                    if t1_polynomial is None or t1_bias is None:
+                        raise RuntimeError("T1 intensity mapping has not been estimated")
+                    t1_bias = torch.nn.functional.interpolate(
+                        t1_bias[None, None], size=level_shape,
+                        mode="trilinear", align_corners=True,
+                    )[0, 0]
+                system.fixed = _apply_t1_intensity(
+                    fixed_level, t1_polynomial, t1_bias
+                )
+                scale = torch.ones((), device=device, dtype=dtype)
+            optimize_scale = estimate_intensity and self.config.intensity_model == "global_linear"
 
             lm_lambda = self.initial_lm_lambda
             accepted = 0
@@ -1234,14 +1350,14 @@ class TorchFNIRT:
             state = system.evaluate(coefficients, scale)
             if minimization_method == "scg":
                 initial_vector = _pack(
-                    coefficients, scale if estimate_intensity else None
+                    coefficients, scale if optimize_scale else None
                 )
                 fixed_scale = scale
                 latest_ssd = None
 
                 def unpack_parameters(vector):
                     current_coefficients, current_scale = _unpack(
-                        vector, coefficient_shape, estimate_intensity
+                        vector, coefficient_shape, optimize_scale
                     )
                     if current_scale is None:
                         current_scale = fixed_scale
@@ -1319,7 +1435,7 @@ class TorchFNIRT:
                         }
                     )
                     delta_coefficients, delta_scale = _unpack(
-                        step, coefficient_shape, estimate_intensity
+                        step, coefficient_shape, optimize_scale
                     )
                     candidate_coefficients = coefficients + delta_coefficients
                     candidate_scale = (
@@ -1415,6 +1531,21 @@ class TorchFNIRT:
                     "cost": float(state["cost"]),
                     "intensity_scale": float(scale),
                     "estimate_intensity": estimate_intensity,
+                    "t1_polynomial": (
+                        None if t1_polynomial is None
+                        else [float(value) for value in t1_polynomial]
+                    ),
+                    "t1_bias_range": (
+                        None if t1_bias is None
+                        else [float(t1_bias.min()), float(t1_bias.max())]
+                    ),
+                    "t1_bias_pcg": (
+                        None if intensity_report is None else {
+                            "iterations": intensity_report.iterations,
+                            "converged": intensity_report.converged,
+                            "relative_residual": intensity_report.relative_residual,
+                        }
+                    ),
                     "apply_reference_mask": apply_reference_mask,
                     "explicit_reference_mask_available": (
                         explicit_reference_mask is not None
@@ -1556,7 +1687,12 @@ class TorchFNIRT:
             "fsl_source_versions": FSL_SOURCE_VERSIONS,
             "optimizer": list(minimization_methods),
             "hessian": "analytic matrix-free B-spline JtJ plus bending Hessian",
-            "global_intensity_model": "multiplicative scale of reference",
+            "global_intensity_model": self.config.intensity_model,
+            "t1_intensity_fitting": (
+                "alternating polynomial and cubic bias fit before each deformation level"
+                if self.config.intensity_model == "global_non_linear_with_bias"
+                else None
+            ),
             "ssd_weighted_lambda": self.config.ssd_weighted_lambda,
             "mask_schedule_matches_gm_config": (
                 explicit_reference_mask is not None
@@ -1573,7 +1709,9 @@ class TorchFNIRT:
             "process_handoff_float32_affine_header": True,
             "process_handoff_intensity_precision": 10,
             "final_output_upsampled_to_reference_grid": final_output_upsampled,
-            "intensity_schedule_matches_gm_config": True,
+            "intensity_schedule_matches_gm_config": (
+                self.config.intensity_model == "global_linear"
+            ),
             "topology_projection_matches_fsl": False,
             "topology_projection": (
                 "FSL 2203.0 algorithm ported; external numerical gate pending"
@@ -1613,6 +1751,7 @@ class TorchFNIRT:
 __all__ = [
     "FSL_SOURCE_VERSIONS",
     "GMFNIRTConfig",
+    "T1FNIRTConfig",
     "TorchFNIRT",
     "TorchFNIRTResult",
     "spm_like_mean",

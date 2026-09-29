@@ -2,10 +2,11 @@
 
 [返回首页](../../README.md) · [dMRI/TBSS pipeline](../dmri_pipeline/README.md)
 
-`TorchFNIRT` 是 FNIT 对 FSL FNIRT 非线性配准核心的 PyTorch 实现。独立命令对应
-FSL 6.0.7.4 的 `GM_2_MNI152GM_2mm.cnf` 灰质路径；dMRI pipeline 使用同一核心执行
+`TorchFNIRT` 是 FNIT 对 FSL FNIRT 非线性配准核心的 PyTorch 实现。独立命令默认
+`GM_2_MNI152GM_2mm.cnf` 灰质路径，也接受 `T1_2_MNI152_2mm.cnf`；dMRI pipeline 使用同一核心执行
 UK Biobank 的 `oxford_s1.cnf` → `oxford_s2.cnf` → `oxford_s3.cnf` 三阶段 FA
-配准。运行时不启动 FSL executable。
+配准。T1w Python 分支使用 `T1FNIRTConfig`，供 fMRI volume 的 T1→MNI 配准。
+运行时不启动 FSL executable。
 
 CUDA 默认允许 TF32 matmul 和 cuDNN，但图像和写出的 coefficient NIfTI 为 float32，优化器内部 coefficient state 和
 主计算为 float64；不使用 float16 或 bfloat16。实际设置写入
@@ -28,11 +29,11 @@ python -m fnit.fnirt \
 
 | 参数 | 输入或输出 | 作用 |
 |---|---|---|
-| `--in` | 输入 | 单张 3D moving 灰质概率图。 |
-| `--ref` | 输入 | 单张 3D fixed 灰质模板；决定 `iout`/`jout` 的网格。 |
+| `--in` | 输入 | 单张 3D moving 灰质概率图或 T1 影像，与 `--config` 对应。 |
+| `--ref` | 输入 | 单张 3D fixed 灰质或 T1 模板；决定 `iout`/`jout` 的网格。 |
 | `--aff` | 输入，可省略 | 4×4 FSL scaled-mm 矩阵，方向为 input → reference；省略时使用 FSL scaled-mm identity。 |
 | `--refmask` | 输入，必需 | reference 网格上的非空二值 mask；必须显式提供，运行时不会读取 `$FSLDIR`。 |
-| `--config` | 输入 | 只接受未经修改的 `GM_2_MNI152GM_2mm.cnf` 或该名称。 |
+| `--config` | 输入 | 未修改的 `GM_2_MNI152GM_2mm.cnf` 或 `T1_2_MNI152_2mm.cnf`，也可只写名称；省略时使用 GM。 |
 | `--cout` | 输出 | FSL intent-2007 cubic B-spline coefficient NIfTI；它不是 dense warp。 |
 | `--iout` | 输出，可省略 | 原始 input 经 affine 和 nonlinear warp 后的 reference-grid 图像。 |
 | `--jout` | 输出，可省略 | nonlinear-only Jacobian determinant，不含 FLIRT affine determinant。 |
@@ -91,6 +92,80 @@ result = run_fnirt(
 | `pull_transform` | `DenseWarp`（`nibabel.Nifti1Image` 子类） | reference → input 的 world-RAS 毫米位移场，保存 source/target geometry。 |
 | `qc` | `dict` | schedule、mask、优化、拓扑、设备、TF32 和数值验证状态。 |
 
+## Python：T1w FNIRT
+
+`T1FNIRTConfig` 采用官方 `T1_2_MNI152_2mm.cnf` 的六级采样、平滑、
+形变正则化、五阶全局强度多项式和 50 mm 偏置场设置。以下是直接调用核心的例子；
+fMRI volume 的完整入口见[T1→MNI 用法](../fmri/normalization.md)。
+
+```python
+import nibabel as nib
+from fnit.flirt import TorchFLIRT
+from fnit.fnirt import T1FNIRTConfig, TorchFNIRT
+
+moving = nib.load("/absolute/path/T1_brain.nii.gz")  # 输入：同被试 3D 去脑 T1
+fixed = nib.load("/absolute/path/MNI152_T1_2mm_brain.nii.gz")  # 输入：3D MNI 脑模板，决定输出网格
+mask = nib.load("/absolute/path/MNI152_T1_2mm_brain_mask.nii.gz")  # 输入：模板同网格二值脑掩膜
+linear = TorchFLIRT(device="cuda:0")(moving=moving, fixed=fixed)  # 初始 12 自由度 T1→MNI 配准
+result = TorchFNIRT(device="cuda:0", config=T1FNIRTConfig())(
+    moving=moving,  # 待变形的 T1 NIfTI
+    fixed=fixed,  # 固定的 MNI NIfTI 与输出网格
+    moving_to_fixed=linear.moving_to_fixed_world,  # 输入：T1→MNI 的 4×4 RAS-world 初始矩阵
+    reference_mask=mask,  # 输入：只在模板网格的脑内估计配准
+)
+result.moved.save("/absolute/path/T1_in_MNI.nii.gz")  # 输出：MNI 网格重采样 T1
+nib.save(result.coefficient_image, "/absolute/path/T1_to_MNI_coeff.nii.gz")  # 输出：FSL intent-2007 系数图
+```
+
+`result` 与上表的 `TorchFNIRTResult` 结构相同；`pull_transform` 是 MNI→T1
+的 world-RAS 位移，可与 EPI→T1 BBR 合成，一次插值输出 BOLD。`qc["levels"]`
+记录各级强度多项式、偏置场范围和偏置场 PCG 收敛情况。该分支在每级形变优化前
+交替拟合多项式与三次 B 样条偏置场，并把偏置场限制在 0.25–4 倍。
+FSL 对强度、偏置和形变进行联合优化，因此这不是逐步数值等价的移植。
+T1w 可用上述 Python API、fMRI volume 入口，或独立命令行：
+
+```bash
+# --in：待配准的单张去脑 T1。
+# --ref：MNI 脑模板，同时决定输出图像网格。
+# --aff：T1→MNI 的 FSL scaled-mm 初始矩阵。
+# --refmask：与模板同网格的二值脑掩膜。
+# --config：选择 T1w 六级配准和强度模型。
+# --cout：写出 FSL intent-2007 形变系数。
+# --iout：写出模板网格上的 T1 图像。
+# --device：指定 PyTorch 计算设备。
+python -m fnit.fnirt \
+  --in T1_brain.nii.gz \
+  --ref MNI152_T1_2mm_brain.nii.gz \
+  --aff T1_to_MNI_affine.mat \
+  --refmask MNI152_T1_2mm_brain_mask.nii.gz \
+  --config T1_2_MNI152_2mm.cnf \
+  --cout T1_to_MNI_coeff.nii.gz \
+  --iout T1_in_MNI.nii.gz \
+  --device cuda:0
+```
+
+`--aff` 是 FSL scaled-mm 的 T1→MNI 初始矩阵；`--refmask` 与 `--ref` 同网格；
+`--cout` 写 intent-2007 系数，`--iout` 写模板网格的变形 T1。其余选项见上表。
+
+同输入的原软件命令是：
+
+```bash
+flirt -in T1_brain.nii.gz -ref MNI152_T1_2mm_brain.nii.gz \
+  -dof 12 -omat T1_to_MNI_affine.mat
+fnirt --in=T1_brain.nii.gz --ref=MNI152_T1_2mm_brain.nii.gz \
+  --aff=T1_to_MNI_affine.mat --refmask=MNI152_T1_2mm_brain_mask.nii.gz \
+  --config=T1_2_MNI152_2mm.cnf --cout=T1_to_MNI_coeff.nii.gz \
+  --iout=T1_in_MNI.nii.gz
+```
+
+一例真实去脑 T1 的同输入对照中，FNIT 对 FSL warped T1 的脑内相关为 0.9213、
+脑支持区 Dice 为 0.9823，MNI→T1 坐标差中位数 0.884 mm；FNIT 配准耗时
+318.41 s、GPU 峰值分配 0.997 GB。独立 T1 CLI 同输入实测退出状态为 0，
+系数图 intent 为 2007，变形 T1 与模板同网格，两个输出的 gzip 与有限值检查通过。
+FSL FLIRT+FNIRT 的两段 CPU 时间合计
+161.78 s，运行环境未隔离，不据此排序。输入哈希、指标定义与参照退出状态见
+[T1w 真实数据报告](../../validation/fmri/t1_fnirt_20260929.public.json)。
+
 ## coefficient 和坐标定义
 
 FLIRT `.mat` 不是 NIfTI world affine。设 `Vin`、`Vref` 是 input/reference voxel
@@ -134,10 +209,10 @@ x_input = inverse(A) · x_reference + d(x_reference)
 `150,75,50,30`、10 mm warp resolution，四层使用 LM。dMRI/TBSS schedule 见
 [dMRI 页面](../dmri_pipeline/README.md#ukb-tbss-对应关系)。
 
-## 当前真实数据验证
+## FA 路径的既有真实数据验证
 
 2026 年 9 月 28 日在 gpucw1 上完成 1 例去标识化真实 UKB 格式 FA 的 matched-input
-验证。FSL 6.0.7.4 和当前 TorchFNIRT 使用完全相同的 preprocessed FA、
+验证。FSL 6.0.7.4 和当时的 TorchFNIRT 候选使用完全相同的 preprocessed FA、
 `FMRIB58_FA_1mm`、FSL scaled-mm affine、implicit zero mask 和
 `oxford_s1/s2/s3.cnf` 参数。`dti_FA_mask` 只用于前一步 FLIRT 加权，两个 FNIRT
 实现都不接收它。候选源码快照 tar SHA-256 为
@@ -199,8 +274,8 @@ benchmark，而且候选为单进程、FSL 为三进程，因此不发布加速�
 
 ## 支持范围与许可
 
-独立 CLI 只支持一个 3D input/reference、可选 4×4 FLIRT affine、binary reference
-mask 和官方 `GM_2_MNI152GM_2mm.cnf`。它不接受任意 FNIRT config、DCT basis、
+独立 CLI 支持一个 3D input/reference、可选 4×4 FLIRT affine、binary reference
+mask 和未修改的官方 GM 或 T1 配置。它不接受任意 FNIRT config、DCT basis、
 quadratic spline、局部 intensity model 或通用 `--inwarp`。TBSS 的 Oxford schedule
 只由 `TorchTBSS` 内部调用。
 

@@ -7,7 +7,7 @@ import pytest
 from fnit import cli as root_cli
 from fnit._nib import new_image
 from fnit.flirt.coordinates import flirt_to_world_affine
-from fnit.fnirt import cli, standalone
+from fnit.fnirt import T1FNIRTConfig, cli, standalone
 from fnit.fnirt.io import make_fsl_coefficient_image
 from fnit.fnirt.spline import fsl_control_shape
 
@@ -178,7 +178,7 @@ def test_run_fnirt_rejects_unsupported_contracts(tmp_path):
             matrix_path,
             cout=tmp_path / "warp.nii.gz",
             refmask=mask_path,
-            config="T1_2_MNI152_2mm.cnf",
+            config="unsupported.cnf",
         )
     modified = tmp_path / standalone.SUPPORTED_CONFIG
     modified.write_text("--miter=1,1,1,1\n")
@@ -200,6 +200,42 @@ def test_run_fnirt_rejects_unsupported_contracts(tmp_path):
             refmask=mask_path,
             overwrite=True,
         )
+
+
+def test_run_fnirt_selects_t1_config(tmp_path, monkeypatch):
+    moving, fixed, mask, affine, matrix = _fixture(tmp_path)
+    captured = {}
+
+    class FakeFNIRT:
+        def __init__(self, *, device, config):
+            captured["config"] = config
+
+        def __call__(self, source, target, initial, *, reference_mask):
+            assert reference_mask.shape == target.shape
+            return _fake_result(target, matrix)
+
+    monkeypatch.setattr(standalone, "TorchFNIRT", FakeFNIRT)
+    standalone.run_fnirt(
+        input=moving,
+        reference=fixed,
+        affine=affine,
+        cout=tmp_path / "t1_coeff.nii.gz",
+        refmask=mask,
+        config=standalone.T1_CONFIG,
+        device="cpu",
+    )
+    assert isinstance(captured["config"], T1FNIRTConfig)
+    assert (tmp_path / "t1_coeff.nii.gz").is_file()
+
+
+def test_cli_forwards_t1_config(monkeypatch):
+    captured = {}
+    monkeypatch.setattr(cli, "run_fnirt", lambda *args, **kwargs: captured.update(kwargs))
+    assert cli.main([
+        "--in", "T1.nii.gz", "--ref", "MNI.nii.gz",
+        "--refmask", "MNI_mask.nii.gz", "--config", standalone.T1_CONFIG,
+    ]) == 0
+    assert captured["config"] == standalone.T1_CONFIG
 
 
 def test_run_fnirt_uses_fsl_identity_default_cout_and_auto_device(

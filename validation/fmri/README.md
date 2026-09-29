@@ -43,10 +43,13 @@ FSL MCFLIRT 实测 397.54 秒；其余 11 个已单独计时的影像命令合�
 - [固定官方运动矩阵的插值核对照](motion_spline_summary.json)：8 个真实时间点；区分插值误差与运动矩阵误差。
 - [EPI→T1 BBR](bbr_summary.json)：同一初始矩阵和同一白质分割的受控对照，以及 FNIT 白质分割的独立影响。
 - [MELODIC/PICA](pica_summary.json)：同一真实 4D 输入与掩膜的组件数、重建和耗时检查；原版程序状态保留在摘要中。
-- [T1→MNI152 2 mm 非线性配准](registration_summary.json)：同一 T1、模板和脑掩膜的独立参照；说明 T1 的来源。
+- [当前 T1→MNI152 2 mm FNIRT 对照](t1_fnirt_20260929.public.json)：同一真实 T1、模板和脑掩膜的 FSL 配对精度、时间、显存及输入/源码 SHA256。此前 FSL 与 SynthMorph 标量保留在[参照摘要](registration_summary.json)。
 - [ICA-AROMA 与完整 BIDS→MNI152 2 mm 结果](e2e_summary.json)：最终运行的组件数、噪声分类、输出完整性和各阶段耗时。
+- [当前 fMRI volume FNIRT 整链](fmri_volume_fnirt_20260929.public.json)：同一例真实 490 帧 BOLD 的退出码、全体素有限值、模板网格、掩膜外零值、TR、GPU 显存、时间和输入/输出 SHA256。
 - [fMRIPrep 表面路径标量摘要](fmriprep_surface_summary.json)与[函数、输出和官方命令对照](../../docs/fmri/surface.md)：真实 490 帧 BOLD 的 T1w 皮层投影及 MNI 皮层下组装；固定官方球面时 CIFTI 与 NiWorkflows 官方源码逐值一致，并单独量化 FNIT 与官方 MSM 球面产生的每点时间相关差异。旧 MNI 表面流程的单帧对照已移除。
 
 ## 最终 MNI 输出检查
 
-最终流水线退出状态为 0，得到 91×109×91×490 的 float32 4D 影像，TR 0.735 秒，与 MNI152 2 mm 模板网格的 affine 一致。全部 442,288,210 个值有限，脑掩膜外最大绝对值为 0；该次 ICA 收敛于 96 个成分，AROMA 判为噪声的成分有 48 个，并采用非激进回归。没有启用额外的 WM、CSF 或运动信号回归。程序报告的分步耗时合计 526.65 秒，进程墙钟 532.22 秒；CUDA 峰值 reserved 17.58 GB。具体输出与源码哈希见 [整链摘要](e2e_summary.json)。AROMA 代替 FIX，清理后的 MNI 影像没有可直接逐体素比较的 UKB FIX 输出。
+默认 SynthMorph 流水线此前退出状态为 0，得到 91×109×91×490 的 float32 4D 影像，TR 0.735 秒；442,288,210 个值有限，掩膜外为 0。ICA 收敛于 96 个成分，AROMA 判定 48 个噪声成分。进程墙钟 532.22 秒，CUDA 峰值 reserved 17.58 GB；详见[原有整链摘要](e2e_summary.json)。
+
+本次 FNIRT volume 流水线退出状态也为 0，输出尺寸和 TR 相同，模板网格及 gzip CRC 检查通过；442,288,210 个数值全部有限，掩膜外最大绝对值为 0。ICA 收敛于 95 个成分，AROMA 判定 53 个噪声成分。分步耗时合计 1052.83 秒，进程墙钟 1059.67 秒；CUDA 峰值 reserved 7.31 GB。两次运行均处于共享 GPU 环境，不作速度排序。FNIRT 结果及源文件、输入和输出哈希见[当前整链报告](fmri_volume_fnirt_20260929.public.json)。两个分支均使用 AROMA 代替 FIX，清理后的 MNI 影像没有可直接逐体素比较的 UKB FIX 输出。

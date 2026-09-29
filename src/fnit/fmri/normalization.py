@@ -19,6 +19,7 @@ class T1MNIResult:
     pull_ras: Path
     backend: str
     moving_to_fixed_world: np.ndarray
+    qc: dict | None = None
 
 
 def register_t1_to_mni(
@@ -53,24 +54,16 @@ def register_t1_to_mni(
             weights=synthmorph_weights, device=selected, model="deform"
         )
         pull = model(moving, fixed, init=initial).transform
+        qc = None
     else:
-        from ..fnirt import GMFNIRTConfig, TorchFNIRT
+        from ..fnirt import T1FNIRTConfig, TorchFNIRT
 
-        # Match the T1 config's geometric schedule. TorchFNIRT currently uses
-        # global-linear intensity mapping; FSL T1 FNIRT additionally models
-        # nonlinear intensity and bias fields, so numeric equivalence is open.
-        config = GMFNIRTConfig(
-            subsampling=(4, 4, 2, 2, 1, 1),
-            maximum_iterations=(5, 5, 5, 5, 5, 10),
-            input_fwhm_mm=(8, 6, 5, 4.5, 3, 2),
-            reference_fwhm_mm=(8, 6, 5, 4, 2, 0),
-            regularization=(300, 150, 100, 50, 40, 30),
-            estimate_intensity=(True, True, True, True, True, False),
-            apply_reference_mask=(True,) * 6,
-        )
-        pull = TorchFNIRT(device=selected, config=config)(
+        config = T1FNIRTConfig()
+        nonlinear = TorchFNIRT(device=selected, config=config)(
             moving, fixed, initial, reference_mask=reference_mask
-        ).pull_transform
+        )
+        pull = nonlinear.pull_transform
+        qc = getattr(nonlinear, "qc", None)
     field = np.asarray(pull.dataobj, dtype=np.float32)
     if field.shape != (*fixed.shape[:3], 3) or not np.isfinite(field).all():
         raise ValueError("registration produced an invalid MNI-to-T1 pull field")
@@ -87,6 +80,7 @@ def register_t1_to_mni(
         pull_ras=field_path,
         backend=backend,
         moving_to_fixed_world=np.asarray(linear.moving_to_fixed_world),
+        qc=qc,
     )
 
 

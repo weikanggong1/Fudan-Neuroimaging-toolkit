@@ -13,6 +13,7 @@ def __getattr__(name):
     if name in {
         "FSL_SOURCE_VERSIONS",
         "GMFNIRTConfig",
+        "T1FNIRTConfig",
         "TorchFNIRT",
         "TorchFNIRTResult",
         "spm_like_mean",
@@ -27,6 +28,7 @@ __all__ = [
     "FSL_CUBIC_SPLINE_COEFFICIENTS",
     "FSLFNIRTCoefficients",
     "GMFNIRTConfig",
+    "T1FNIRTConfig",
     "TorchFNIRT",
     "TorchFNIRTResult",
     "load_fsl_coefficients",

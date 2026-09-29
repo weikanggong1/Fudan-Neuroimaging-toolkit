@@ -2,7 +2,8 @@
 
 TorchFNIRT 是 FNIT 的 PyTorch FNIRT 核心。独立接口对应 FSL
 `GM_2_MNI152GM_2mm.cnf`；`TorchTBSS` 使用同一核心执行 UK Biobank Oxford
-三阶段 FA schedule。完整输入输出、坐标定义、原软件命令、真实数据 benchmark 和
+三阶段 FA schedule；`T1FNIRTConfig` 为 fMRI volume 提供六级 T1w 配准及
+多项式/偏置场强度拟合。完整输入输出、坐标定义、原软件命令、真实数据 benchmark 和
 当前数值边界见 [`docs/fnirt/README.md`](../../../docs/fnirt/README.md)。
 
 ## 单被试命令行
@@ -19,6 +20,10 @@ python -m fnit.fnirt \
   --config GM_2_MNI152GM_2mm.cnf \
   --device cuda:0
 ```
+
+T1w 输入改用 `--config T1_2_MNI152_2mm.cnf`，并将 `--in`、`--ref`、
+`--aff` 与 `--refmask` 换成同一 T1 配准问题的对应文件；各参数与输出文件结构见
+[T1w 用法](../../../docs/fnirt/README.md#pythont1w-fnirt)。
 
 ## Python
 
@@ -46,4 +51,4 @@ Jacobian、pull transform 和 QC。
 
 CUDA 默认允许 TF32；图像和写出的 coefficient NIfTI 使用 float32，优化器内部 state 和主计算使用 float64，不使用 float16/bfloat16。当前实现匹配 FSL 的 implicit-mask 阈值、建立顺序、`volume<char>` warped-mask 截断以及 newimage 的有效 FOV 边界。
 
-当前 `registration.py` 已用 1 例真实 FA 完成 matched-input 验证：TorchFNIRT 与 FSL 6.0.7.4 固定相同 FA、FMRIB58_FA_1mm、FSL affine 和 Oxford 三阶段配置。coefficient、warped FA、nonlinear Jacobian、含 affine Jacobian 的 Pearson r 分别为 `0.999893`、`0.999203`、`0.999064`、`0.994737`；shape、affine、float32 与 coefficient intent-2007 合同通过。误差超过浮点舍入，因此数值等价仍判定失败。H100 同步优化核心为 `16.933 s`、进程外部 wall 为 `25.16 s`、peak CUDA allocation 为 `3.598 GB`；FSL 三阶段 CPU wall 合计 `1265.14 s`。两侧运行均未隔离，不发布加速比。完整报告、输入边界、时间限制和图见 [`docs/fnirt/README.md`](../../../docs/fnirt/README.md)。
+2026 年 9 月 28 日的候选源码曾用 1 例真实 FA 完成 matched-input 验证：TorchFNIRT 与 FSL 6.0.7.4 固定相同 FA、FMRIB58_FA_1mm、FSL affine 和 Oxford 三阶段配置。coefficient、warped FA、nonlinear Jacobian、含 affine Jacobian 的 Pearson r 分别为 `0.999893`、`0.999203`、`0.999064`、`0.994737`；shape、affine、float32 与 coefficient intent-2007 合同通过。误差超过浮点舍入，因此数值等价仍判定失败。H100 同步优化核心为 `16.933 s`、进程外部 wall 为 `25.16 s`、peak CUDA allocation 为 `3.598 GB`；FSL 三阶段 CPU wall 合计 `1265.14 s`。两侧运行均未隔离，不发布加速比。本次 T1 更新未重新执行 FA 的同输入数值对照；以上数字仅对应报告中的源码哈希。完整报告见 [`docs/fnirt/README.md`](../../../docs/fnirt/README.md)。
