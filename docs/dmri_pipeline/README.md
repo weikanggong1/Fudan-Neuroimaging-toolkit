@@ -213,4 +213,4 @@ EDDY 的进程内 CUDA allocation 峰值为 4.54 GiB；全流程最大组件峰�
 
 ### MMORF：T1 与 tensor 联合配准
 
-当前 MMORF 模块已用真实 T1w、FA 双标量与 tensor 完成和官方实现的配对对照，见 [MMORF 验证](../mmorf/README.md)。此前完整 dMRI pipeline 的 MMORF 分支使用旧求解器，其机器记录仅保留历史溯源。当前源码的 raw-to-standard MMORF 整链仍需重新验证。
+当前 MMORF 模块已用真实 T1w、FA 双标量与 tensor 完成和官方实现的配对对照，见 [MMORF 验证](../mmorf/README.md)。此前完整 dMRI pipeline 的 MMORF 分支使用旧求解器，旧版整链指标已移除。当前源码的 raw-to-standard MMORF 整链仍需重新验证。

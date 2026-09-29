@@ -29,4 +29,4 @@ python validation/dmri_pipeline/compare_current_eddy_pipeline.py \
 
 ## MMORF 分支
 
-当前 MMORF 模块的 T1w、FA、tensor 真实数据配对验证见 [MMORF 报告](../mmorf/report.public.json)。旧求解器的 raw-to-standard 整链报告仅保留历史溯源；当前源码的 MMORF 整链尚未重跑。
+当前 MMORF 模块的 T1w、FA、tensor 真实数据配对验证见 [MMORF 报告](../mmorf/report.public.json)。旧求解器的 raw-to-standard 整链指标已移除；当前源码的 MMORF 整链尚未重跑。
