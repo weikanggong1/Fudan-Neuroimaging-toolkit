@@ -9,10 +9,17 @@ from .pipeline import TorchProbtrackX
 def _add_arguments(parser):
     parser.add_argument("--samples-dir", required=True, help="FSL-compatible bedpostX directory")
     mode = parser.add_mutually_exclusive_group(required=True)
-    mode.add_argument("--seed", help="one diffusion-space NIfTI seed mask")
-    mode.add_argument("--roi-list", help="text file listing >=2 diffusion-space NIfTI ROIs")
+    mode.add_argument("--seed", help="one diffusion- or MNI-space NIfTI seed mask")
+    mode.add_argument("--roi-list", help="text file listing >=2 diffusion- or MNI-space NIfTI ROIs")
     parser.add_argument("--output-dir", required=True)
-    parser.add_argument("--mask", help="tracking mask in diffusion space; defaults to bedpostX mask")
+    parser.add_argument("--mask", help="tracking mask in diffusion or MNI space; defaults to bedpostX mask")
+    parser.add_argument("--mni-reference", help="MNI warp grid; inferred from the first MNI mask if omitted")
+    parser.add_argument("--diff2struct-mat", help="diffusion-to-T1 FLIRT scaled-mm matrix")
+    parser.add_argument("--struct2mni-warp", help="T1-to-MNI FSL warp or FNIRT coefficient file")
+    parser.add_argument("--diff2mni-warp", help="TBSS-style diffusion-to-MNI FSL warp with embedded affine")
+    parser.add_argument("--dmri-pipeline-dir", help="FNIT dMRI pipeline subject output root")
+    parser.add_argument("--registration-backend", choices=("auto", "tbss", "mmorf"),
+                        default="auto", help="pipeline registration branch; auto inspects saved files")
     parser.add_argument("--avoid", help="reject half paths entering this volume mask")
     parser.add_argument("--stop", help="stop half paths upon entering this volume mask")
     parser.add_argument("--wtstop", help="volume mask or text list; stop after leaving an entered mask")
@@ -89,7 +96,13 @@ def run_args(args):
                        matrix1=args.omatrix1, target2=args.target2,
                        target3=args.target3, lrtarget3=args.lrtarget3,
                        distthresh1=args.distthresh1, distthresh3=args.distthresh3,
-                       targetmasks=targetmasks, overwrite=args.overwrite)
+                       targetmasks=targetmasks, mni_reference=args.mni_reference,
+                       diff2struct_mat=args.diff2struct_mat,
+                       struct2mni_warp=args.struct2mni_warp,
+                       diff2mni_warp=args.diff2mni_warp,
+                       dmri_pipeline_dir=args.dmri_pipeline_dir,
+                       registration_backend=args.registration_backend,
+                       overwrite=args.overwrite)
     print(result.paths)
     print(result.waytotal)
     if result.network_matrix:

@@ -31,6 +31,14 @@ def __getattr__(name):
         from importlib import import_module
         module = import_module('.applywarp', __name__)
         return getattr(module, name)
+    if name in ('TorchConvertWarp', 'WarpFieldResult'):
+        from importlib import import_module
+        module = import_module('.convertwarp', __name__)
+        return getattr(module, name)
+    if name == 'TorchInvWarp':
+        from importlib import import_module
+        module = import_module('.invwarp', __name__)
+        return getattr(module, name)
     if name in ('FLIRTResult', 'TorchFLIRT',
                 'flirt_to_world_affine', 'flirt_to_world_pull',
                 'voxel_to_fsl_scaled_mm', 'world_to_flirt_affine'):

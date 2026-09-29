@@ -20,6 +20,8 @@
 | [TorchFLIRT](../docs/flirt/README.md) | [12-DOF 真实 MRI 对照](flirt/report.public.json) | FSL scaled-mm 矩阵合同和 reference-grid 输出均独立比较；仅 12-DOF/corratio 可通过两段证明继承 | 报告区分 CPU/GPU 与共享节点计时边界；没有 fresh current-hash 全量重跑；功能页展示公开 T1w 配准图 |
 | [TorchFNIRT](../docs/fnirt/README.md) | [当前真实 FA matched-input 对照](fnirt/report.real.current.json) | coefficient、warped FA、两类 Jacobian 和标准网格合同分别核对；连续值差异超过浮点误差 | 报告含三阶段 FSL 与 FNIT 配准时间、显存；功能页展示真实 FA 对照 |
 | [TorchApplyWarp](../docs/applywarp/README.md) | [真实 FA 与 intent-2007 coefficient warp](applywarp/report.real.current.json) | shape、affine、dtype 一致；连续值误差按 union support 报告 | 报告含三次 FSL/FNIT 计时和峰值显存；功能页展示 FA 与差值 |
+| [TorchConvertWarp](../docs/convertwarp/README.md) | [真实 DWI 组合场](convertwarp/README.md)及[TBSS/MMORF pipeline 分支](probtrackx/README.md) | 默认 TBSS 系数场与 FSL 分量 MAE 1.98×10⁻⁶ mm；MMORF 转场后重采样 FA 与原 pipeline r≈1 | FSL TBSS 完整命令 49.73 s，FNIT Python 调用 10.02 s；MMORF FNIT 调用 7.27 s，计时边界不同 |
+| [TorchInvWarp](../docs/invwarp/README.md) | [真实 TBSS/MMORF 同输入 FSL 对照](invwarp/README.md) | 脑内反场向量均差 0.0058/0.0670 mm，MNI 掩膜 Dice 0.9917/0.9912；不是逐体素等价 | FSL 完整命令 110.82/137.49 s，FNIT Python 调用 0.79/0.81 s；功能页展示两条真实掩膜图 |
 
 ## dMRI
 
@@ -32,7 +34,7 @@
 | [TorchMMORF](../docs/mmorf/README.md) | [当前双标量真实数据对照](mmorf/report.public.json) | T1、FA 两组标量与 DTI tensor 共享 warp；记录自动 PyTorchFLIRT、warp、Jacobian、两张 warped scalar 的配对精度 | 分别记录线性、非线性、官方 MMORF 时间及共享 GPU 负载；功能页提供当前对照图 |
 | [dMRI 参数图 pipeline](../docs/dmri_pipeline/README.md) | [TBSS 分支](dmri_pipeline/tbss_e2e.real.current.json) | TBSS 路径从 raw AP/PA 生成九张标准空间图；当前 MMORF 模块的配对验证见上行，MMORF 整链待重跑 | TBSS 报告记录阶段时间、显存和比较边界 |
 | [TorchBEDPOSTX](../docs/bedpostx/README.md) | [真实 dMRI ROI 与 crossing-fibre 检查](bedpostx/report.public.json) | 比较纤维数、fraction、方向轴和角度；采样随机流不同，不要求后验体积逐元素相同 | 报告含 FSL CPU、FNIT CPU/GPU 时间；功能页展示真实方向轴 |
-| [TorchProbtrackX](../docs/probtrackx/README.md) | [默认追踪](probtrackx/report.default.latest.public.json)、[当前 GPU](probtrackx/report.current.latest.public.json)与[matrix/target 汇总](probtrackx/README.md) | 比较密度、路径长度、稀疏 voxel 矩阵和 ROI 连接矩阵；随机流不同，不要求逐轨迹相同 | 报告含 FSL/FNIT CPU/GPU 计时；功能页展示真实五区连接矩阵 |
+| [TorchProbtrackX](../docs/probtrackx/README.md) | [默认追踪](probtrackx/report.default.latest.public.json)、[当前 GPU](probtrackx/report.current.latest.public.json)、[matrix/target 汇总](probtrackx/README.md)与[MNI seed 两分支自动转换](probtrackx/README.md) | 比较密度、路径长度、稀疏矩阵和 ROI 矩阵；真实 MNI seed 自动转换与直接传入转换结果的追踪图完全相同 | 原追踪报告含 FSL/FNIT CPU/GPU 计时；功能页展示连接矩阵和真实掩膜 |
 
 ## fMRI
 

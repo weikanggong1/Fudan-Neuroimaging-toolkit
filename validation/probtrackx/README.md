@@ -3,6 +3,34 @@
 [功能、输入输出及官方对应命令](../../docs/probtrackx/README.md) · [默认计数](report.default.latest.public.json) · [长度加权](report.current.latest.public.json)
 [matrix1](report.matrix1.cpu.latest.public.json) · [matrix2 与网络](report.matrix2.cpu.latest.public.json) · [matrix3](report.matrix3.cpu.latest.public.json) · [seed→ROI](report.targets.cpu.latest.public.json) · [性能分段记录](report.performance.public.json)
 
+## MNI 掩膜自动映射：两条真实 dMRI pipeline 分支
+
+在同一例真实 DWI 的 BEDPOSTX 后验上，分别读取已运行的 FNIT TBSS 与 MMORF pipeline 输出。两条 pipeline 的 `native/dti_FA.nii.gz` 与 BEDPOSTX mask 的 shape、affine 相同。用同一张 JHU 第 9 号 MNI 标签作为 seed，程序自动生成 FSL dense 组合场、diffusion 网格上的反场及二值 seed，然后以每 seed 体素 20 条、200 总步、`rseed=711` 追踪。再次直接输入自动保存的 diffusion seed，密度图与 `waytotal` 均逐项相同。[TBSS 机器报告](report.mni_tbss.public.json)与[MMORF 机器报告](report.mni_mmorf.public.json)保存本次源码哈希、计时及数值。
+
+| 配准分支 | 组合场重采样 FA 与 pipeline 标准 FA 的非零并集 r / MAE | diffusion seed 体素 | 自动 / 直接追踪 `waytotal` | Python 调用时间：转换 / 求逆 / 自动转换加追踪 |
+| --- | ---: | ---: | ---: | ---: |
+| TBSS（FNIRT 系数含 affine） | 0.994361 / 0.001231 | 120 | 2400 / 2400 | 10.02 / 0.79 / 15.43 s |
+| MMORF（独立 affine + MMORF warp） | 0.999999999996 / 2.14×10⁻⁷ | 114 | 2280 / 2280 | 7.27 / 0.81 / 16.01 s |
+
+TBSS pipeline 在重采样后另用非零标准 FA 模板作掩膜；上表比较的是未做该末步掩膜的组合场重采样结果与已掩膜的最终 FA，因此该 r 不是配准场的纯数值误差。MMORF pipeline 直接保存 `apply_mmorf_warp` 的重采样结果，上表接近 1 的 r 验证了 MMORF→FSL 坐标转换。两条分支的组合场是不同算法估计的场，120 与 114 个 seed 体素不能直接视为精度优劣。时间是在共享 GPU 上、模块已导入后的单次 Python 调用；不与本页完整进程墙钟的追踪报告比较。
+
+两分支的自动转换加追踪单进程累计 PyTorch allocation 峰值均为 2.64 GiB；这是 `torch.cuda.max_memory_allocated()`，不包括 CUDA 上下文和其他进程占用的显存。转换阶段累计峰值 TBSS 1.17 GiB、MMORF 1.25 GiB，求逆后均约 1.50 GiB。两次计时在共享 H100 上波动，不外推为固定吞吐。
+
+```bash
+# --pipeline-dir 是同一被试 dMRI pipeline 的输出根；--samples-dir 是匹配的 BEDPOSTX 目录。
+# --mni-mask 为同一 MNI 物理空间中的二值标签；--backend 逐次选 tbss 或 mmorf。
+python validation/probtrackx/benchmark_mni_pipeline.py \
+  --pipeline-dir /data/subject_tbss --samples-dir /data/subject.bedpostX \
+  --mni-mask /data/JHU_label9_MNI.nii.gz --backend tbss --device cuda:0 \
+  --output-dir /data/check_tbss --source-root ./src
+python validation/probtrackx/benchmark_mni_pipeline.py \
+  --pipeline-dir /data/subject_mmorf --samples-dir /data/subject.bedpostX \
+  --mni-mask /data/JHU_label9_MNI.nii.gz --backend mmorf --device cuda:0 \
+  --output-dir /data/check_mmorf --source-root ./src
+```
+
+FSL 6.0.7.4 对官方 FNIRT 系数的 `convertwarp → invwarp → applywarp` 同输入对照见[反场验证](../invwarp/README.md)。FNIT MMORF 原场与 FSL 的位移单位和坐标定义不同，不能未经转换直接输入 FSL `convertwarp`；转换后的 dense 场可交给 FSL `invwarp`，其数值对照另在反场验证中记录。
+
 ## 数据与配对设计
 
 在 gpucw1 使用 FSL 6.0.7.22 `probtrackx2` / `probtrackx2_gpu`，对同一例真实 UK Biobank DWI 的原版 FSL BEDPOSTX 三纤维后验比较 FNIT。五个预先定义的 ROI 由 JHU 标签图和被试 FA、追踪 mask 生成，选点不依赖两套追踪结果。

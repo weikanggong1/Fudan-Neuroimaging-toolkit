@@ -36,6 +36,7 @@ class ProbTrackXResult:
     matrix3_target_coords: Path | None = None
     seed_to_targets: tuple[Path, ...] = ()
     seed_to_targets_matrix: Path | None = None
+    mni_to_diffusion_dir: Path | None = None
 
 
 class TorchProbtrackX:
@@ -331,6 +332,8 @@ class TorchProbtrackX:
             onewaycondition=False, wtstop=None,
             matrix1=False, target2=None, target3=None, lrtarget3=None,
             distthresh1=0.0, distthresh3=0.0, targetmasks=None,
+            mni_reference=None, diff2struct_mat=None, struct2mni_warp=None,
+            diff2mni_warp=None, dmri_pipeline_dir=None, registration_backend="auto",
             overwrite=False):
         """Track volume seeds and write requested density and connectome outputs.
 
@@ -353,6 +356,21 @@ class TorchProbtrackX:
             raise ValueError("new matrix and seed-to-target outputs currently support count mode only")
 
         start_time = time.perf_counter()
+        from .mni_masks import prepare_mni_masks
+        prepared, mni_to_diffusion_dir = prepare_mni_masks(
+            samples_dir, output_dir, mni_reference=mni_reference,
+            diff2struct_mat=diff2struct_mat, struct2mni_warp=struct2mni_warp,
+            diff2mni_warp=diff2mni_warp, dmri_pipeline_dir=dmri_pipeline_dir,
+            registration_backend=registration_backend,
+            device=self.device, overwrite=overwrite, seed=seed, regions=regions,
+            mask=mask, avoid=avoid, stop=stop, waypoints=waypoints,
+            wtstop=wtstop, target2=target2, target3=target3,
+            lrtarget3=lrtarget3, targetmasks=targetmasks)
+        seed, regions, mask, avoid, stop = (
+            prepared[name] for name in ("seed", "regions", "mask", "avoid", "stop"))
+        waypoints, wtstop, target2, target3, lrtarget3, targetmasks = (
+            prepared[name] for name in ("waypoints", "wtstop", "target2",
+                                         "target3", "lrtarget3", "targetmasks"))
         self._load_samples(samples_dir, mask)
         roi_files = [seed] if seed is not None else list(regions)
         if regions is not None and len(roi_files) < 2:
@@ -702,4 +720,5 @@ class TorchProbtrackX:
             int(totals.sum()), time.perf_counter() - start_time,
             lengths_path, network_lengths, network_probability, network_symmetric,
             m1_path, m1_coords, m2_path, m2_coords, m2_target_coords, m2_lookup,
-            m3_path, m3_coords, m3_target_coords, s2t_paths, s2t_matrix_path)
+            m3_path, m3_coords, m3_target_coords, s2t_paths, s2t_matrix_path,
+            mni_to_diffusion_dir)

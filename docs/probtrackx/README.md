@@ -1,10 +1,10 @@
 # ProbtrackX 概率纤维束追踪
 
-`TorchProbtrackX` 从 BEDPOSTX 的方向后验独立追踪。当前可在**同一扩散网格的体积掩膜**上输出 seed→voxel 路径密度、稀疏 voxel→voxel 矩阵，以及有向 region→region 矩阵；还可输出每个种子体素到各目标 ROI 的计数图。CPU 使用 PyTorch，GPU 步进使用 Triton，float32 张量且默认允许 TF32。追踪时不调用 FSL。官方 [ProbtrackX 输出定义](https://fsl.fmrib.ox.ac.uk/fsl/docs/diffusion/probtrackx.html)中的 `matrix3` 是目标体素两两共同经过次数，和 `matrix2` 的种子体素×目标体素含义不同。下方的[覆盖表](#与官方选项的差异)列出尚未等价的模式。
+`TorchProbtrackX` 从 BEDPOSTX 的方向后验独立追踪。MNI 空间体积掩膜可用本包 dMRI pipeline 的 TBSS 或 MMORF 配准结果自动反变换到 diffusion 网格；也可显式提供外部配准文件。追踪本身仍在 diffusion 网格进行。输出包括 seed→voxel 路径密度、稀疏 voxel→voxel 矩阵、有向 region→region 矩阵，以及每个种子体素到各目标 ROI 的计数图。CPU 使用 PyTorch，GPU 步进使用 Triton，float32 张量且默认允许 TF32。追踪时不调用 FSL。官方 [ProbtrackX 输出定义](https://fsl.fmrib.ox.ac.uk/fsl/docs/diffusion/probtrackx.html)中的 `matrix3` 是目标体素两两共同经过次数，和 `matrix2` 的种子体素×目标体素含义不同。下方的[覆盖表](#与官方选项的差异)列出尚未等价的模式。
 
 ## 输入与 Python 用法
 
-`run(samples_dir, output_dir, ...)` 每次处理一个被试。`samples_dir` 需有 `nodif_brain_mask.nii.gz` 和各条纤维的 `merged_th<i>samples.nii.gz`、`merged_ph<i>samples.nii.gz`、`merged_f<i>samples.nii.gz`。`seed=` 是一个非空 3D NIfTI 掩膜；`regions=` 是按矩阵行列顺序排列的至少两个非空、不重叠 3D ROI，二者须择一。所有 mask 均须与 BEDPOSTX mask 具有相同 shape 和 affine；`mask=` 可指定追踪 mask。`output_dir` 是绝对或相对结果目录；文件已存在时报错，除非设置 `overwrite=True`。
+`run(samples_dir, output_dir, ...)` 每次处理一个被试。`samples_dir` 需有 `nodif_brain_mask.nii.gz` 和各条纤维的 `merged_th<i>samples.nii.gz`、`merged_ph<i>samples.nii.gz`、`merged_f<i>samples.nii.gz`。`seed=` 是一个非空 3D NIfTI 掩膜；`regions=` 是按矩阵行列顺序排列的至少两个非空、不重叠 3D ROI，二者须择一。体积 mask 可与 BEDPOSTX mask 同网格，也可位于对应的 MNI 物理空间；后者须提供同一被试的 `dmri_pipeline_dir`，或一张已含 affine 的 `diff2mni_warp`，或成对的 `diff2struct_mat` 与 `struct2mni_warp`。`mask=` 可指定追踪 mask。`output_dir` 是绝对或相对结果目录；文件已存在时报错，除非设置 `overwrite=True`。
 
 ```python
 from fnit import TorchProbtrackX
@@ -51,6 +51,12 @@ voxel = tracker.run(
         "/absolute/path/roi_01.nii.gz",
         "/absolute/path/roi_02.nii.gz",
     ],
+    mni_reference=None,  # 本例为 diffusion 掩膜；输入 MNI 掩膜时指定标准空间参考图
+    dmri_pipeline_dir=None,  # 本例不需要 pipeline；MNI 掩膜可传同被试 pipeline 输出根
+    registration_backend="auto",  # pipeline 中自动识别 TBSS 或 MMORF
+    diff2mni_warp=None,  # 可选的已含 affine 的 diffusion→MNI FSL warp
+    diff2struct_mat=None,  # 此例无 MNI mask；外部 diffusion→T1 FLIRT .mat 模式才填写
+    struct2mni_warp=None,  # 外部 T1→MNI FSL warp 模式才填写
     overwrite=False,  # False 时已有输出会停止运行
 )
 
@@ -83,18 +89,125 @@ print(network.network_matrix, network.network_probability)
 print(constrained.paths)
 ```
 
+### MNI 掩膜自动转换
+
+默认直接传入本包 [dMRI pipeline](../dmri_pipeline/README.md) 的单被试输出根目录。程序读取 `registration/` 中的配准文件，调用本包 [TorchConvertWarp](../convertwarp/README.md)、[TorchInvWarp](../invwarp/README.md) 和 [TorchApplyWarp](../applywarp/README.md)，把 MNI 掩膜最近邻映射到 BEDPOSTX diffusion 网格。`registration_backend="auto"` 在目录中只存在一种 warp 时自动选择；如果两类文件同时存在，须指定 `"tbss"` 或 `"mmorf"`。
+
+| pipeline 分支 | 读取的文件 | 组合方式 |
+| --- | --- | --- |
+| TBSS | `registration/dti_FA_to_MNI_warp.nii.gz`、`registration/standard/FA.nii.gz` | FNIRT 系数已含 FA→MNI affine，不再次应用 `dti_FA_to_MNI_affine.mat` |
+| MMORF | `registration/mmorf_warp.nii.gz`、`registration/dti_FA_to_MNI_affine.mat`、`registration/standard/FA.nii.gz`、`native/dti_FA.nii.gz` | 把 MMORF 的参考图像轴 mm 场与 FA→MNI scaled-mm 矩阵转换成 FSL dense pull 场 |
+
+两种分支都会核对 `native/dti_FA.nii.gz` 与 `samples_dir/nodif_brain_mask.nii.gz` 的 shape、affine。不同则不能假定两者是同一 diffusion 空间，程序会报错。
+
+```python
+from fnit import TorchProbtrackX
+
+tracker = TorchProbtrackX(
+    device="cuda:0",  # GPU 设备
+    nsamples=5000,  # 每个 seed 体素的轨迹数
+    nsteps=2000,  # 双向轨迹总步数
+    steplength=0.5,  # 每步长度，单位 mm
+    cthr=0.2,  # 曲率阈值
+    fibthresh=0.01,  # 纤维体积分数阈值
+    batch_size=16384,  # 并行轨迹数
+    seed=12345,  # 随机种子
+)
+result = tracker.run(
+    samples_dir="/data/subject.bedpostX",  # 该被试 BEDPOSTX 后验与 diffusion mask
+    output_dir="/data/track_MNI_seed",  # 追踪图与自动转换中间文件目录
+    seed="/data/seed_in_MNI.nii.gz",  # MNI 空间 3D 二值 seed 掩膜
+    regions=None,  # 单 seed 模式不使用 ROI 列表
+    dmri_pipeline_dir="/data/subject_tbss",  # 本包同一被试 dMRI pipeline 的输出根
+    registration_backend="auto",  # 自动识别 tbss/mmorf；也可明确指定分支
+    mni_reference=None,  # 使用 pipeline 的 registration/standard/FA.nii.gz
+    overwrite=False,  # False 时不覆盖已有结果
+)
+print(result.paths, result.waytotal, result.mni_to_diffusion_dir)
+```
+
+若 pipeline 目录是 MMORF 结果，只需把 `dmri_pipeline_dir` 改为该被试的 MMORF 输出根。对应单被试 CLI：
+
+```bash
+# --dmri-pipeline-dir 指向含 native/ 和 registration/ 的同一被试结果根。
+fnit probtrackx --samples-dir /data/subject.bedpostX \
+  --seed /data/seed_in_MNI.nii.gz --output-dir /data/track_MNI_seed \
+  --dmri-pipeline-dir /data/subject_tbss --registration-backend auto \
+  --device cuda:0 --nsamples 5000 --nsteps 2000
+```
+
+若已有外部 FSL 配准文件，也可显式传 `diff2mni_warp=`（TBSS 类型，场内已含 affine），或同时传 `diff2struct_mat=` 与 `struct2mni_warp=`（diffusion→T1 再 T1→MNI）。三种输入方式只能选一种。下面展示后一种输入，不能把已含线性部分的 TBSS warp 再与同一个矩阵组合。
+
+```python
+from fnit import TorchProbtrackX
+
+tracker = TorchProbtrackX(
+    device="cuda:0",  # GPU 设备
+    nsamples=5000,  # 每个 seed 体素的轨迹数
+    nsteps=2000,  # 双向轨迹总步数
+    steplength=0.5,  # 每步长度，单位 mm
+    cthr=0.2,  # 曲率方向点积阈值
+    fibthresh=0.01,  # 纤维体积分数阈值
+    batch_size=16384,  # 同时计算的轨迹数
+    seed=12345,  # 随机种子
+)
+result = tracker.run(
+    samples_dir="/data/subject.bedpostX",  # BEDPOSTX 后验与 diffusion mask 目录
+    output_dir="/data/track_MNI_seed",  # 路径密度、计数和中间 warp 的结果目录
+    seed="/data/seed_in_MNI.nii.gz",  # MNI 网格中的非空二值 seed
+    regions=None,  # 单 seed 模式不传 ROI 列表
+    mni_reference="/data/MNI152_T1_2mm.nii.gz",  # MNI 输出网格，须匹配 T1→MNI warp
+    diff2struct_mat="/data/diff_to_T1.mat",  # diffusion→T1 FLIRT 矩阵
+    struct2mni_warp="/data/T1_to_MNI_warp.nii.gz",  # T1→MNI 非线性场
+    overwrite=False,  # 是否覆盖已有结果
+)
+print(result.paths, result.waytotal, result.mni_to_diffusion_dir)
+```
+
+`mni_reference` 在 pipeline 模式下默认取 `registration/standard/FA.nii.gz`，独立配准文件模式下默认取第一张 MNI 掩膜。`seed`、`regions`、`mask`、`avoid`、`stop`、`waypoints`、`wtstop`、`target2`、`target3`、`lrtarget3` 和 `targetmasks` 可以在 MNI 网格，也可与 diffusion 网格掩膜混用；不同 MNI 掩膜可有不同分辨率，但 NIfTI affine 必须描述同一个 MNI 物理空间。输入应为 3D 二值掩膜，映射采用最近邻；所有追踪输出仍在 diffusion 网格。`result.mni_to_diffusion_dir` 指向组合场、逆场和映射后掩膜的目录；没有 MNI 掩膜时为 `None`。原版 `probtrackx2` 可借 `--xfm/--invxfm` 使用某些非 diffusion seed；本接口明确先映射掩膜再追踪，输出空间始终为 diffusion。
+
+对应命令行：
+
+```bash
+# --seed 是 MNI seed；--mni-reference 是标准网格；两条变换依次是 diffusion→T1、T1→MNI。
+fnit probtrackx --samples-dir /data/subject.bedpostX \
+  --seed /data/seed_in_MNI.nii.gz --output-dir /data/track_MNI_seed \
+  --mni-reference /data/MNI152_T1_2mm.nii.gz \
+  --diff2struct-mat /data/diff_to_T1.mat \
+  --struct2mni-warp /data/T1_to_MNI_warp.nii.gz \
+  --device cuda:0 --nsamples 5000 --nsteps 2000
+
+# FSL 对应的显式三步转换；追踪使用转换后的 diffusion seed。
+convertwarp --ref=/data/MNI152_T1_2mm.nii.gz \
+  --warp1=/data/T1_to_MNI_warp.nii.gz --premat=/data/diff_to_T1.mat \
+  --out=/data/diff_to_MNI_warp.nii.gz --relout
+invwarp --ref=/data/subject.bedpostX/nodif_brain_mask.nii.gz \
+  --warp=/data/diff_to_MNI_warp.nii.gz --out=/data/MNI_to_diff_warp.nii.gz --rel
+applywarp --in=/data/seed_in_MNI.nii.gz \
+  --ref=/data/subject.bedpostX/nodif_brain_mask.nii.gz \
+  --warp=/data/MNI_to_diff_warp.nii.gz --out=/data/seed_in_diff.nii.gz --interp=nn
+probtrackx2 -s /data/subject.bedpostX/merged \
+  -m /data/subject.bedpostX/nodif_brain_mask.nii.gz -x /data/seed_in_diff.nii.gz \
+  --dir=/data/fsl_track --forcedir --opd -P 5000 -S 2000 --steplength=0.5
+```
+
+真实 DWI 检查使用 JHU 1 mm atlas 的第 9 号 MNI 标签作为 seed，同一例 BEDPOSTX 三纤维后验。用本包 dMRI pipeline 实际保存的两种配准结果时，同一 MNI seed 在 TBSS/MMORF 分支分别映射为 120/114 个 diffusion 体素；自动转换加追踪与直接传入保存的 diffusion 掩膜所得密度图各自完全相同，`waytotal` 分别为 2400/2280。转换后的 FA 与各自 pipeline 标准 FA 的非零并集相关性分别为 0.994361/0.999999999996；TBSS 标准图额外乘了模板非零掩膜，因此前者包含该末步差异。FSL 反场掩膜分别有 1 个体素不同，图示见[逆场对照](../invwarp/README.md)；完整计时和源码哈希见[两条分支的真实数据记录](../../validation/probtrackx/README.md)。不同 seed 集合的 FSL 与 FNIT 追踪结果不能直接解释为追踪算法本身的精度差。
+
 | 参数 | 输入和含义 | FSL 对应 |
 | --- | --- | --- |
 | `nsamples`, `nsteps`, `steplength` | 每个种子体素的轨迹数、双向总步数（偶数≥2）、物理步长 mm | `-P`, `-S`, `--steplength` |
 | `cthr`, `fibthresh`, `seed` | 方向点积阈值、纤维分数阈值、随机种子 | `--cthr`, `--fibthresh`, `--rseed` |
 | `distthresh`, `sampvox`, `fibst`, `randfib`, `usef` | 单半路径最短距离、seed 抖动半径、起始纤维与纤维选择 | 同名官方选项 |
-| `avoid`, `stop`, `forcefirststep` | 排除 mask、进入后停止的 mask、首步条件；仅同网格体积 | 同名官方选项 |
+| `avoid`, `stop`, `forcefirststep` | 排除 mask、进入后停止的 mask、首步条件；MNI mask 先自动映射 | 同名官方选项 |
 | `waypoints`, `waycond`, `wayorder`, `onewaycondition` | 必经 mask、AND/OR、按列表顺序通过、对每个半轨迹分别判定 | `--waypoints`, `--waycond`, `--wayorder`, `--onewaycondition` |
 | `wtstop` | 进入 mask 后在首次离开时停止该半轨迹 | `--wtstop` |
 | `matrix1=True`, `distthresh1` | 种子体素之间的稀疏矩阵；有效路径总长度下限 | `--omatrix1`, `--distthresh1` |
-| `target2=...` | 种子体素×目标体素；`target2` 必须同网格 | `--omatrix2 --target2=...` |
+| `target2=...` | 种子体素×目标体素；MNI mask 先自动映射 | `--omatrix2 --target2=...` |
 | `target3=...`, `lrtarget3=...`, `distthresh3` | 目标体素共访矩阵；可选不同的列目标；有效路径总长度下限 | `--omatrix3 --target3=... --lrtarget3=... --distthresh3` |
 | `targetmasks=[...]` | 每个种子体素到多个目标 ROI 的命中次数 | `--targetmasks=... --os2t --s2tastext` |
+| `dmri_pipeline_dir`, `registration_backend` | 本包同一被试 dMRI pipeline 输出根；自动或指定 TBSS/MMORF 分支 | TBSS 的 FSL warp，或 FNIT MMORF warp 与 affine → dense FSL 场 → `invwarp` → `applywarp --interp=nn` |
+| `mni_reference`, `diff2mni_warp` | MNI 输出网格与已含 affine 的 diffusion→MNI FSL 场 | `convertwarp --warp1` → `invwarp` → `applywarp --interp=nn` |
+| `diff2struct_mat`, `struct2mni_warp` | 可选外部 diffusion→T1 `.mat` 与 T1→MNI FSL warp；必须成对传入 | `convertwarp --premat --warp1` → `invwarp` → `applywarp --interp=nn` |
 | `pathdist`, `mean_path_length` | 路径长度加权与平均路径长度，仅已有密度及 ROI 网络模式支持；和新稀疏矩阵或 `targetmasks` 同时使用会报错 | `--pd`, `--ompl` |
 | `device`, `batch_size` | `cpu` 或 `cuda:0`，每批并行轨迹数 | FNIT 选项 |
 
@@ -104,6 +217,10 @@ print(constrained.paths)
 
 ```text
 output_dir/
+├── mni_to_diffusion/                       # 仅输入 MNI 掩膜时生成
+│   ├── diff2mni_warp.nii.gz               # MNI 网格上的 diffusion→MNI pull 场
+│   ├── mni2diff_warp.nii.gz               # diffusion 网格上的 MNI→diffusion pull 场
+│   └── masks/000/<input_name>.nii.gz      # 最近邻映射后的二值 diffusion 掩膜
 ├── fdt_paths.nii.gz                         # seed→voxel 轨迹通过次数
 ├── fdt_paths_lengths.nii.gz                 # mean_path_length=True；平均首次抵达长度
 ├── waytotal                                 # 单 seed 一行；regions 每 ROI 一行
@@ -125,9 +242,9 @@ output_dir/
 └── matrix_seeds_to_all_targets              # Nseed × Ntargetmasks文本矩阵
 ```
 
-所有 NIfTI 输出保留输入 mask 的形状和 affine。`.dot` 文件按官方格式写入从 1 开始的 `row column count` 稀疏三元组，末行为 `Nrow Ncol 0` 维度标记；体素次序由配套坐标表定义，不能直接假定是 NIfTI 的线性索引。`matrix1` 排除自连接；`matrix3` 未指定 `lrtarget3` 时只存上三角且不含对角，指定后为行目标×列目标的有向组合。`fdt_paths` 是经过体素的采样轨迹次数，**不是解剖纤维条数**。
+追踪 NIfTI 输出使用 BEDPOSTX diffusion mask 的形状和 affine；`mni_to_diffusion/diff2mni_warp.nii.gz` 使用 MNI 参考网格。`.dot` 文件按官方格式写入从 1 开始的 `row column count` 稀疏三元组，末行为 `Nrow Ncol 0` 维度标记；体素次序由配套坐标表定义，不能直接假定是 NIfTI 的线性索引。`matrix1` 排除自连接；`matrix3` 未指定 `lrtarget3` 时只存上三角且不含对角，指定后为行目标×列目标的有向组合。`fdt_paths` 是经过体素的采样轨迹次数，**不是解剖纤维条数**。
 
-`run()` 返回 `ProbTrackXResult`。`output_dir`、`paths`、`waytotal` 为路径；启用相应输出时，`lengths`、`network_matrix`、`network_lengths`、`network_probability`、`network_symmetric`、`matrix1`、`matrix1_coords`、`matrix2`、`matrix2_coords`、`matrix2_target_coords`、`matrix2_lookup`、`matrix3`、`matrix3_coords`、`matrix3_target_coords`、`seed_to_targets_matrix` 为对应文件路径，否则为 `None`。`seed_to_targets` 是目标图路径元组；`seed_points`、`accepted_streamlines` 和 `elapsed_seconds` 分别是种子体素数、有效采样轨迹数与运行秒数。`regions` 与 `targetmasks` 同用时，种子行按 ROI 列表顺序拼接，目标图使用从 0 开始的 `<roi>` 编号。
+`run()` 返回 `ProbTrackXResult`。`output_dir`、`paths`、`waytotal` 为路径；`mni_to_diffusion_dir` 在自动转换时是中间目录路径，否则为 `None`。启用相应输出时，`lengths`、`network_matrix`、`network_lengths`、`network_probability`、`network_symmetric`、`matrix1`、`matrix1_coords`、`matrix2`、`matrix2_coords`、`matrix2_target_coords`、`matrix2_lookup`、`matrix3`、`matrix3_coords`、`matrix3_target_coords`、`seed_to_targets_matrix` 为对应文件路径，否则为 `None`。`seed_to_targets` 是目标图路径元组；`seed_points`、`accepted_streamlines` 和 `elapsed_seconds` 分别是种子体素数、有效采样轨迹数与运行秒数。`regions` 与 `targetmasks` 同用时，种子行按 ROI 列表顺序拼接，目标图使用从 0 开始的 `<roi>` 编号。
 
 `regions` 与稀疏矩阵或 `targetmasks` 同用时，追踪先应用网络模式的“命中其他 ROI”筛选，因此这些输出是条件连接结果；若需要不经网络筛选的 voxel×voxel 矩阵，应把 ROI 并集作为单个 `seed` 输入。
 
@@ -183,12 +300,12 @@ fnit probtrackx --samples-dir /absolute/path/subject.bedpostX \
 
 | 类别 | 已实现 | 尚有差异 |
 | --- | --- | --- |
-| 输入和空间 | BEDPOSTX 后验、同网格体积 seed/ROI、独立追踪 mask、体积避让和停止 | `--simple` ASCII 点、表面 seed/target、`--seedref`、`--meshspace`、`--xfm`、`--invxfm`，以及非 network 多 ROI 输入；`target2` 低分辨率网格未支持 |
+| 输入和空间 | BEDPOSTX 后验、diffusion 或 MNI 网格体积 mask；MNI mask 先显式反变换到 diffusion，独立追踪 mask、体积避让和停止 | `--simple` ASCII 点、表面 seed/target、`--seedref`、`--meshspace`、`--xfm`、`--invxfm`，以及非 network 多 ROI 输入；`target2` 低分辨率网格未支持 |
 | 步进和过滤 | 双向 Euler、`-P/-S`、`--steplength`、`--cthr`、`--fibthresh`、`--randfib`、`--fibst`、`--usef`、`--sampvox`、`--distthresh`、`--rseed`、体积 `--avoid`、`--stop`、`--forcefirststep`、`--waypoints`/`--waycond`/`--wayorder`/`--onewaycondition`、`--wtstop` | `--modeuler`、`--loopcheck`、局部方向/曲率及表面约束选项；随机数流不逐轨迹一致；waypoint/停止组合已做合成场配对；单 waypoint 真实 DWI 配对已完成但指标未公开，其他约束组合仍待验证 |
 | 输出 | 密度图、`--pd`/`--ompl` 的密度及网络结果、`--network`、同网格体积计数的 `--omatrix1/2/3` 与 `--targetmasks/--os2t` | 新矩阵和 seed→target 的 `--pd/--ompl`、`--omatrix4`、`--fopd`、`--opathdir`、`--otargetpaths`、`--savepaths`、`--closestvertex`；`--s2tastext` 当前自动写，不能独立控制 |
 | 文件和运行控制 | FSL 风格矩阵 `.dot`、坐标表、target2 lookup，FNIT 自有归一化连接矩阵 | 官方 `-o/--out`、`--dir/--forcedir` 目录命名、`--verbose`；FNIT 固定写密度图 |
 
-官方仍有以下当前未接入的具体选项：`--simple`、表面 seed/target、`--seedref`、`--meshspace`、`--xfm`、`--invxfm`、`--closestvertex`；`--modeuler`、`--loopcheck`；`--omatrix4`、`--target4`、`--colmask4`、`--fopd`、`--opathdir`、`--otargetpaths`、`--savepaths`。官方帮助还包含方向与纤维选择相关的 `--prefdir`、`--no_integrity`、`--onewayonly`、`--locfibchoice`、`--loccurvthresh`、`--noprobinterpol`。FNIT 当前固定写 `fdt_paths.nii.gz`，不支持官方 `-o/--out` 与目录自动命名语义。上述选项会影响部分三类 connectome 的数值或输出结构，因此当前结果只应按本页明确支持的同网格体积模式使用。
+官方仍有以下当前未接入的具体选项：`--simple`、表面 seed/target、`--seedref`、`--meshspace`、`--xfm`、`--invxfm`、`--closestvertex`；`--modeuler`、`--loopcheck`；`--omatrix4`、`--target4`、`--colmask4`、`--fopd`、`--opathdir`、`--otargetpaths`、`--savepaths`。官方帮助还包含方向与纤维选择相关的 `--prefdir`、`--no_integrity`、`--onewayonly`、`--locfibchoice`、`--loccurvthresh`、`--noprobinterpol`。FNIT 当前固定写 `fdt_paths.nii.gz`，不支持官方 `-o/--out` 与目录自动命名语义。上述选项会影响部分三类 connectome 的数值或输出结构，因此当前结果只应按本页明确支持的 diffusion 网格体积追踪模式使用。
 
 ## 与 FSL 的真实 DWI benchmark
 

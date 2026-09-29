@@ -20,6 +20,8 @@ CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核。模型、影像张
 | sMRI、fMRI、dMRI | TorchFLIRT | reference-grid 图像与 FSL scaled-mm `.mat` | [FLIRT](docs/flirt/README.md) |
 | sMRI、dMRI | TorchFNIRT | warped image、Jacobian 与 intent-2007 coefficients | [FNIRT](docs/fnirt/README.md) |
 | sMRI、fMRI、dMRI | TorchApplyWarp | 应用 warp、premat 与 postmat 后的 reference-grid 图像 | [applywarp](docs/applywarp/README.md) |
+| sMRI、fMRI、dMRI | `fnit convertwarp` / TorchConvertWarp | 组合 FLIRT 矩阵与 FSL 非线性场；转换 MMORF warp | [convertwarp](docs/convertwarp/README.md) |
+| sMRI、fMRI、dMRI | `fnit invwarp` / TorchInvWarp | 在指定网格上求 FSL 位移场的反场 | [invwarp](docs/invwarp/README.md) |
 | fMRI | BIDS→MNI152 2 mm 体积流程 | 单 run FEAT、FAST/BBR、PICA/AROMA、可选混杂回归与 MNI 影像 | [fMRI](docs/fmri/README.md) |
 | fMRI | 回归后个体 EPI→T1w 皮层、MNI 2 mm 皮层下→fsLR32k | 双侧 GIFTI 与 91k CIFTI 时间序列 | [fMRI 表面投影](docs/fmri/surface.md) |
 | dMRI | TorchTOPUP | Hz 场、校正图与 FSL 兼容输出 | [TOPUP](docs/topup/README.md) |
@@ -29,7 +31,7 @@ CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核。模型、影像张
 | dMRI | TorchMMORF | 多组标量与 DTI 联合配准、内部 PyTorchFLIRT 线性初始化、pull warp 与 Jacobian | [MMORF](docs/mmorf/README.md) |
 | dMRI | 参数图 pipeline | TOPUP/EDDY/DTIFIT/NODDI 后接 TBSS 或 MMORF 的九张标准空间图 | [dMRI pipeline](docs/dmri_pipeline/README.md) |
 | dMRI | TorchBEDPOSTX | 纤维方向、体积分数与不确定性 | [BEDPOSTX](docs/bedpostx/README.md) |
-| dMRI | TorchProbtrackX | 路径密度与 voxel/ROI 连接矩阵 | [ProbtrackX](docs/probtrackx/README.md) |
+| dMRI | TorchProbtrackX | MNI 掩膜自动映射到 diffusion、路径密度与 voxel/ROI 连接矩阵 | [ProbtrackX](docs/probtrackx/README.md) |
 | fMRI | MS-HBM 17 网络 | fsLR32k 个体网络标签 | [MS-HBM](docs/mshbm/README.md) |
 | dMRI | UKBConnectome | 由校正 DWI 与已完成的 FreeSurfer subject 目录生成 84 区四张结构连接矩阵 | [Connectome](docs/connectome/README.md)；[真实数据对照](validation/connectome/fs_aparc84_subject_dir_20260928.md) |
 | sMRI | recon-all | 核心分割、皮层表面、顶点指标与脑区统计 | [recon-all](docs/recon_all/README.md) |
@@ -115,7 +117,7 @@ fnit-setup-brainstem-atlas --output-root /absolute/path/atlases --device cuda:0
 
 输入、输出及 FreeSurfer 同输入对照见[脑干亚区说明](docs/subregions/README.md)。
 
-API 的显式 `weights=`、CLI 的 `--weights`、`FNIT_WEIGHTS` 环境变量、已保存目录和默认缓存按此顺序解析。TorchFAST、TorchFLIRT、TorchFNIRT、TorchApplyWarp、TorchTOPUP、TorchEDDY、TorchDTIFIT、TorchAMICONODDI、TorchMMORF、TorchBEDPOSTX、TorchProbtrackX 与 dMRI pipeline 的 TBSS 分支没有预训练权重；从原始 T1w 启动的流程可能仍需 SynthStrip。文件清单、官方 URL、SHA-256、许可和离线部署见[权重说明](docs/WEIGHTS.md)。
+API 的显式 `weights=`、CLI 的 `--weights`、`FNIT_WEIGHTS` 环境变量、已保存目录和默认缓存按此顺序解析。TorchFAST、TorchFLIRT、TorchFNIRT、TorchApplyWarp、TorchConvertWarp、TorchInvWarp、TorchTOPUP、TorchEDDY、TorchDTIFIT、TorchAMICONODDI、TorchMMORF、TorchBEDPOSTX、TorchProbtrackX 与 dMRI pipeline 的 TBSS 分支没有预训练权重；从原始 T1w 启动的流程可能仍需 SynthStrip。文件清单、官方 URL、SHA-256、许可和离线部署见[权重说明](docs/WEIGHTS.md)。
 
 ## 验证、样例与许可
 

@@ -772,6 +772,10 @@ def main(argv=None):
     add_bedpostx_parser(commands)
     from .probtrackx.cli import add_parser as add_probtrackx_parser
     add_probtrackx_parser(commands)
+    from .convertwarp.cli import add_parser as add_convertwarp_parser
+    from .invwarp.cli import add_parser as add_invwarp_parser
+    add_convertwarp_parser(commands)
+    add_invwarp_parser(commands)
     args = parser.parse_args(argv)
     if hasattr(args, '_fnit_handler'):
         args._fnit_handler(args)

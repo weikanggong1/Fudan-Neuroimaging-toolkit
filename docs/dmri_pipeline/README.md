@@ -150,12 +150,17 @@ subject/
 │   ├── NODDI_OD.nii.gz
 │   └── NODDI_ISOVF.nii.gz
 ├── registration/
+│   ├── dti_FA_to_MNI_warp.nii.gz     # TBSS only；FNIRT 系数已含 affine
+│   ├── dti_FA_to_MNI_affine.mat      # TBSS/MMORF；MMORF 转 FSL 场时使用
+│   ├── mmorf_warp.nii.gz            # MMORF only；参考图像轴 mm 场
 │   ├── standard/{FA,MD,L1,L2,L3,MO,ICVF,OD,ISOVF}.nii.gz
 │   └── skeleton/{...}.nii.gz      # TBSS only
 └── dmri_pipeline_report.json
 ~~~
 
 两条分支的 registration/standard 中九个文件名、MNI grid、float32 dtype 和参数定义相同。report 记录是否使用 TOPUP、各阶段耗时、设备、TF32、每个子函数的 QC 和非等价边界。
+
+概率追踪若传入 MNI 掩膜，可把上述单被试输出根作为 `TorchProbtrackX.run(dmri_pipeline_dir=...)` 的输入。它按 TBSS/MMORF 分支生成 FSL dense 组合场，再在 BEDPOSTX diffusion 网格求逆并最近邻映射掩膜；详见[ProbtrackX 的 MNI 掩膜用法](../probtrackx/README.md)。
 
 ## UKB TBSS 对应关系
 

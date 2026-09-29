@@ -1,6 +1,6 @@
 # ProbtrackX 源码目录
 
-`TorchProbtrackX` 使用 BEDPOSTX 方向后验进行同一扩散网格上的体积概率追踪，可输出 seed→voxel 密度、voxel→voxel 稀疏矩阵、voxel→ROI 计数图和有向 ROI×ROI 矩阵。CPU 路径使用 PyTorch，CUDA 步进使用 Triton；无额外路径约束的 CUDA 结果由 Numba 汇总计数。运行时不调用 FSL。
+`TorchProbtrackX` 使用 BEDPOSTX 方向后验进行 diffusion 网格上的体积概率追踪。MNI 网格掩膜先通过本包 `TorchConvertWarp`、`TorchInvWarp` 和 `TorchApplyWarp` 自动映射到 diffusion 网格，再输出 seed→voxel 密度、voxel→voxel 稀疏矩阵、voxel→ROI 计数图和有向 ROI×ROI 矩阵。CPU 路径使用 PyTorch，CUDA 步进使用 Triton；无额外路径约束的 CUDA 结果由 Numba 汇总计数。运行时不调用 FSL。
 
 ## Python 单被试示例
 
@@ -23,11 +23,16 @@ result = tracker.run(
     seed="/absolute/path/seed.nii.gz",  # 输入：同网格非空 3D seed mask
     regions=None,  # 单 seed 模式必须为 None
     mask=None,  # 可选追踪 mask；None 使用 nodif_brain_mask.nii.gz
+    mni_reference=None,  # MNI 掩膜的参考网格；diffusion seed 可省略
+    diff2struct_mat=None,  # 仅外部 diffusion→T1 + T1→MNI 组合模式需要
+    struct2mni_warp=None,  # 仅外部两段 FSL 配准模式需要
     overwrite=False,  # 是否覆盖已有输出
 )
 ```
 
-`result.paths` 指向 `fdt_paths.nii.gz`，`result.waytotal` 指向有效轨迹计数；启用相应选项后还会返回 matrix1/2/3、seed-to-target 和 network 文件路径。所有 NIfTI 继承 BEDPOSTX mask 的 shape 和 affine。
+`result.mni_to_diffusion_dir` 指向自动生成的组合场、逆场与 diffusion 掩膜目录；没有 MNI 输入时为 `None`。`result.paths` 指向 `fdt_paths.nii.gz`，`result.waytotal` 指向有效轨迹计数；启用相应选项后还会返回 matrix1/2/3、seed-to-target 和 network 文件路径。追踪图和映射后的掩膜使用 BEDPOSTX diffusion 网格；组合前向场使用 MNI 参考网格。
+
+输入 MNI 掩膜时，优先传 `dmri_pipeline_dir="/data/subject_tbss"` 或 `"/data/subject_mmorf"`，即本包 dMRI pipeline 单被试输出根。`registration_backend="auto"` 根据 `registration/` 内的 warp 选择 TBSS 或 MMORF；TBSS 系数已含 affine，MMORF 使用 `mmorf_warp.nii.gz` 加 `dti_FA_to_MNI_affine.mat`。也可传已含 affine 的 `diff2mni_warp`，或成对传 `diff2struct_mat`、`struct2mni_warp`。完整带参数名示例、官方三步命令和真实 DWI 对照见[功能说明](../../../docs/probtrackx/README.md)。
 
 内部 `accumulate_paths` 接收前、后半轨迹的 `[轨迹, 步数]` 一维体素索引数组（`-1` 表示终止）、ROI 查找表、步长和最短距离阈值，并就地更新路径密度、长度、网络矩阵和有效轨迹计数数组；没有单独返回文件。它用于无额外路径约束的 CUDA `--opd`、`--pd --ompl`、`--network` 模式，对应原版 `probtrackx2_gpu` 的同名选项。当前真实数据速度和精度见[性能记录](../../../validation/probtrackx/report.performance.public.json)及[配对报告](../../../validation/probtrackx/report.current.latest.public.json)。
 
