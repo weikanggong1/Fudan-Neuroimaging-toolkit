@@ -1,5 +1,7 @@
 # dMRI connectome 阶段性记录（2026-09-28）
 
+这是 2026-09-28 的历史快照，表内时间和缺口只对应当时源码。当前 BIDS 端到端入口及双 atlas 实测见[2026-09-30 UKB 报告](ukb_bids_e2e_20260930.md)，最新逐阶段状态见[验收表](ORIGINAL_UKB_PARITY_GATES.md)。
+
 本次提交保留已实现的算子、真实数据同输入对照、运行时间和公开示例图，供后续复核。**阶段性发布不表示原 UKB-connectomics 的七套 atlas、1,000 万次播种和 28 张矩阵已与官方结果一致。**原版命令只在独立 benchmark 环境运行；FNIT 接口仍从已校正 DWI、旋转后的梯度及外部官方 FreeSurfer `recon-all` 产物起步。
 
 ## 已确认的结果
