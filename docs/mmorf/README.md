@@ -276,3 +276,8 @@ FNIT 与官方的输出均可读取，warp 和 Jacobian 的 shape、affine、dty
 ## 来源与许可
 
 实现参考[官方 MMORF 源码](https://git.fmrib.ox.ac.uk/fsl/MMORF)的 v0.3.2、commit `1c1c13b8368f05e1a79a6dafe919d6b61df36bd6`。发行包不含官方 MMORF 源码或可执行文件。源代码改写仍遵守 [`FSL Software Licence, Release 6.0`](../../licenses/FSL-6.0.txt)；FNIT 不是官方 FSL 发布。
+
+## Reference
+
+- 参考文献：Lange et al., *MMORF—FSL’s MultiMOdal Registration Framework*, Imaging Neuroscience (2024), [doi:10.1162/imag_a_00100](https://doi.org/10.1162/imag_a_00100)。
+- 原实现代码库：[FSL `MMORF`](https://git.fmrib.ox.ac.uk/fsl/MMORF)。

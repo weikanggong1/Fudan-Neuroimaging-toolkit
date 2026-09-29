@@ -350,3 +350,9 @@ python tools/setup_weights.py --model fast-vbm
 ## 当前验证状态
 
 单例真实数据的固定 FSL GM 和仿射输入对照将此前 FNIRT 低相关性主要定位到隐式零值掩膜。关闭两个掩膜后，warped GM、Jacobian、modulated GM 与 FSL 的 Pearson r 分别为 0.996、0.997、0.996。本版从原始 T1w 完整链复测的三项相关性分别为 0.783、0.733、0.726；FNIT compute 为 110.72 s、写盘 7.56 s、峰值 CUDA allocated 12.97 GB。FSL 缺少相同边界的完整链计时，不能计算加速比。上游脑提取、裁剪、偏置校正和 GM 分割仍需分阶段核对；单例结果不能声明多例或逐体素等价。指标、对照边界见[验证页](../../validation/fast_vbm/README.md)。
+
+## Reference
+
+- 参考文献：Ashburner & Friston, *Voxel-Based Morphometry—The Methods*, NeuroImage (2000), [doi:10.1006/nimg.2000.0582](https://doi.org/10.1006/nimg.2000.0582)。
+- 参考文献：Smith et al., *Advances in functional and structural MR image analysis and implementation as FSL*, NeuroImage (2004), [doi:10.1016/j.neuroimage.2004.07.051](https://doi.org/10.1016/j.neuroimage.2004.07.051)。
+- 原实现代码库：[FSL `fslvbm`](https://git.fmrib.ox.ac.uk/fsl/fslvbm)。

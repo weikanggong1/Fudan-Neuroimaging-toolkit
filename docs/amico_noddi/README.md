@@ -148,3 +148,9 @@ NumPy 的 LAPACK/OpenBLAS 构建会影响退化张量的特征向量符号与伪
 ![AMICO 2.0.3 与当前 FNIT 的 NDI、ODI、FWF 和逐体素绝对差](figures/amico_noddi_comparison.png)
 
 图使用同一真实病例。最终当前输出与图示运行的 NDI/ODI/FWF/RMSE/方向数组分别逐元素相同或仅有上述一个 ULP 差异，因此图示仍对应当前数值结果。原始病例、官方输出和开发期 AMICO/DIPY oracle 不进入仓库。当前源码的 OLS 主方向、Descoteaux-2007 spherical-harmonic basis 与 500-direction rotation basis 对 DIPY 1.12.1 的误差均为 `0`；验证脚本和报告见 [`compare_no_dipy.py`](../../validation/amico_noddi/compare_no_dipy.py) 与 [`no_dipy_equivalence.public.json`](../../validation/amico_noddi/no_dipy_equivalence.public.json)。
+
+## Reference
+
+- 参考文献：Daducci et al., *Accelerated Microstructure Imaging via Convex Optimization (AMICO) from diffusion MRI data*, NeuroImage (2015), [doi:10.1016/j.neuroimage.2014.10.026](https://doi.org/10.1016/j.neuroimage.2014.10.026)。
+- 参考文献：Zhang et al., *NODDI: Practical in vivo neurite orientation dispersion and density imaging of the human brain*, NeuroImage (2012), [原文](https://www.sciencedirect.com/science/article/pii/S1053811912003539)。
+- 原实现代码库：[AMICO 2.0.3](https://github.com/daducci/AMICO/tree/v2.0.3)。

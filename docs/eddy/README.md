@@ -117,3 +117,8 @@ result = eddy.run(
 | 实测 wall time | FSL GPU 10:21.19（启动至写盘）；FNIT GPU 10:38.75（CUDA 初始化后调用至写盘） |
 
 数值由完整 4D 影像计算。两侧在共同脑掩膜内的非零输出掩膜相同，但离群切片图不完全相同。FNIT 的 cubic B-spline 权重改用无布尔索引的分段计算后，完整八轮输出与修改前逐值相同，NIfTI 的 SHA-256 也相同。单轮真实病例在同一 GPU、固定种子下的两次计时为修改前 249.68 s、修改后 147.69 s；共享 GPU 负载未隔离。表中的 FSL 与 FNIT 计时边界不同，不能据此计算稳定加速比。本版 CUDA allocation 峰值为 4.51 GiB。对 FSL 的实测误差仍超过浮点舍入，不能描述为逐体素完全相同。新版的真实切片对照图已在计算节点生成，公开图像尚待授权；旧版图不对应当前代码，已移除。
+
+## Reference
+
+- 参考文献：Andersson & Sotiropoulos, *An integrated approach to correction for off-resonance effects and subject movement in diffusion MR imaging*, NeuroImage (2016), [doi:10.1016/j.neuroimage.2015.10.019](https://doi.org/10.1016/j.neuroimage.2015.10.019)。
+- 原实现代码库：[FSL `eddy`](https://git.fmrib.ox.ac.uk/fsl/eddy)。

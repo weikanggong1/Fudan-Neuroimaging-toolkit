@@ -84,3 +84,8 @@ mri_synthseg --i sub-01_T1w.nii.gz --o sub-01_official_parc.nii.gz \
 完整命令可以按输出范围对照，但共享 GPU 的负载不同，不能把单次结果作为稳定加速倍数。Python 调用不含写盘，与完整命令的计时范围不同。QC 输出尚未实现；本轮验证也未覆盖 `fast=True`。
 
 ![公开 T1w 的原版与 FNIT SynthSeg+ 分区](figures/synthseg_plus_comparison.png)
+
+## Reference
+
+- 参考文献：Billot et al., *Robust machine learning segmentation for large-scale analysis of heterogeneous clinical brain MRI datasets*, PNAS (2023), [doi:10.1073/pnas.2216399120](https://doi.org/10.1073/pnas.2216399120)。
+- 原实现代码库：[FreeSurfer `mri_synthseg --parc`](https://github.com/freesurfer/freesurfer/tree/dev/mri_synthseg)。

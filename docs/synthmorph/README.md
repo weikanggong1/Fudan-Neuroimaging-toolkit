@@ -327,10 +327,9 @@ python validation/synthmorph/current_regression.py --help
 python validation/synthmorph/validate_fsl_warp.py --help
 ```
 
-## 官方来源与引用
+具体移植依据为已记录哈希的 FreeSurfer 8.2.0 安装版本。
 
-- [FreeSurfer SynthMorph 源码](https://github.com/freesurfer/freesurfer/tree/dev/mri_synthmorph)
-- [VoxelMorph TensorFlow 分支](https://github.com/voxelmorph/voxelmorph/tree/dev-tensorflow)
-- [联合 SynthMorph 方法论文](https://doi.org/10.1162/imag_a_00197)
+## Reference
 
-上述链接用于追溯项目来源；具体移植依据为已记录哈希的 FreeSurfer 8.2.0 安装版本。
+- 参考文献：Hoffmann et al., *Anatomy-aware and acquisition-agnostic joint registration with SynthMorph*, Imaging Neuroscience (2024), [doi:10.1162/imag_a_00197](https://doi.org/10.1162/imag_a_00197)。
+- 原实现代码库：[FreeSurfer `mri_synthmorph`](https://github.com/freesurfer/freesurfer/tree/dev/mri_synthmorph)；[VoxelMorph TensorFlow 分支](https://github.com/voxelmorph/voxelmorph/tree/dev-tensorflow)。

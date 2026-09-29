@@ -135,3 +135,8 @@ V1、V2、V3 的平均无符号夹角分别为 `0.00689°`、`0.00687°` 和 `0.
 ![FSL 与 FNIT 的 FA 及绝对差](figures/dtifit_fsl_comparison.png)
 
 机器可读数值见 [`validation/dtifit/report.public.json`](../../validation/dtifit/report.public.json)。图由 [`tools/plot_dmri_comparisons.py`](../../tools/plot_dmri_comparisons.py) 生成。
+
+## Reference
+
+- 参考文献：Basser, Mattiello & LeBihan, *MR diffusion tensor spectroscopy and imaging*, Biophysical Journal (1994), [doi:10.1016/S0006-3495(94)80775-1](https://doi.org/10.1016/S0006-3495(94)80775-1)。
+- 原实现代码库：[FSL `fdt`（含 `dtifit`）](https://git.fmrib.ox.ac.uk/fsl/fdt)。

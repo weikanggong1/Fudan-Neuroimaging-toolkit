@@ -312,8 +312,9 @@ print(cifti)  # 时间×灰质坐标，TR 来自 clean_mni 的 NIfTI 头
 
 同一主机上，FNIT 双侧 GPU 注册墙钟时间为 65.06 秒，峰值显存分别为 0.298、0.315 GB，保存后的球面无折叠三角形；官方 MSM 的左、右 CPU 墙钟时间为 46 分 39 秒、46 分 42 秒。两边使用不同硬件和优化算法，这些时间不能作为等精度加速比。复用已生成的个体 T1w BOLD 和 FNIT 注册球面，490 帧表面投影与 CIFTI 组装耗时 447.04 秒，包含结构准备和 Workbench 投影；EPI→T1w 重采样另计。固定输入的 Workbench ribbon 与 dilation 两侧分步计时之和为 289.56 秒；严格 cortex mask、ADAP_BARY_AREA 和 atlas mask 之和为 119.99 秒。这些分步数字来自独立运行。参数在这同一被试上筛选，尚无独立被试的复核；FNIT 的上游 BBR、MNI 配准与去噪也和 fMRIPrep 不同。**当前默认球面可生成可分析的 fsLR32k/91k 时间序列，尚未达到官方 MSM 的数值等价。**
 
-## 参考文献与原实现
+## Reference
 
-- Robinson EC 等. [Multimodal surface matching with higher-order smoothness constraints](https://doi.org/10.1016/j.neuroimage.2017.10.037). *NeuroImage*, 2018；[newMSM 原实现代码](https://github.com/rbesenczi/newMSM)及[官方使用说明](https://fsl.fmrib.ox.ac.uk/fsl/docs/registration/newmsm/guide.html)。
-- Esteban O 等. [fMRIPrep: a robust preprocessing pipeline for functional MRI](https://doi.org/10.1038/s41592-018-0235-4). *Nature Methods*, 2019；[fMRIPrep 原实现代码](https://github.com/nipreps/fmriprep)与[sMRIPrep 原实现代码](https://github.com/nipreps/smriprep)。
-- Glasser MF 等. [The minimal preprocessing pipelines for the Human Connectome Project](https://doi.org/10.1016/j.neuroimage.2013.04.127). *NeuroImage*, 2013；[HCP Pipelines 原实现代码](https://github.com/Washington-University/HCPpipelines)及[Connectome Workbench 原实现代码](https://github.com/Washington-University/workbench)。
+- 参考文献：Robinson et al., *Multimodal surface matching with higher-order smoothness constraints*, NeuroImage (2018), [doi:10.1016/j.neuroimage.2017.10.037](https://doi.org/10.1016/j.neuroimage.2017.10.037)。
+- 参考文献：Esteban et al., *fMRIPrep: a robust preprocessing pipeline for functional MRI*, Nature Methods (2019), [doi:10.1038/s41592-018-0235-4](https://doi.org/10.1038/s41592-018-0235-4)。
+- 参考文献：Glasser et al., *The Minimal Preprocessing Pipelines for the Human Connectome Project*, NeuroImage (2013), [doi:10.1016/j.neuroimage.2013.04.127](https://doi.org/10.1016/j.neuroimage.2013.04.127)。
+- 原实现代码库：[newMSM](https://github.com/rbesenczi/newMSM)（[官方使用说明](https://fsl.fmrib.ox.ac.uk/fsl/docs/registration/newmsm/guide.html)）；[fMRIPrep fsLR 重采样](https://github.com/nipreps/fmriprep/blob/e56dc9938e742c789510705372f88fdb5a8206c2/fmriprep/workflows/bold/resampling.py)；[sMRIPrep](https://github.com/nipreps/smriprep)；[HCP Pipelines](https://github.com/Washington-University/HCPpipelines)；[Connectome Workbench](https://github.com/Washington-University/workbench)。

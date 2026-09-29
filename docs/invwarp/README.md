@@ -46,3 +46,8 @@ invwarp --ref=/data/nodif_brain_mask.nii.gz \
 ![TBSS：真实 MNI 掩膜反变换](figures/real_tbss_inverse_mask.png)
 
 ![MMORF：真实 MNI 掩膜反变换](figures/real_mmorf_inverse_mask.png)
+
+## Reference
+
+- 参考文献：Andersson, Jenkinson & Smith, *Non-linear registration, aka spatial normalisation*, FMRIB Technical Report TR07JA2 (2007), [原文](https://www.fmrib.ox.ac.uk/datasets/techrep/tr07ja2/tr07ja2.pdf)。 `invwarp` 没有单独的方法论文。
+- 原实现代码库：[FSL `fnirt`（含 `invwarp`）](https://git.fmrib.ox.ac.uk/fsl/fnirt)。

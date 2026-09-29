@@ -219,3 +219,9 @@ EDDY 的进程内 CUDA allocation 峰值为 4.54 GiB；全流程最大组件峰�
 ### MMORF：T1 与 tensor 联合配准
 
 当前 MMORF 模块已用真实 T1w、FA 双标量与 tensor 完成和官方实现的配对对照，见 [MMORF 验证](../mmorf/README.md)。此前完整 dMRI pipeline 的 MMORF 分支使用旧求解器，旧版整链指标已移除。当前源码的 raw-to-standard MMORF 整链仍需重新验证。
+
+## Reference
+
+- 参考文献：Alfaro-Almagro et al., *Image processing and Quality Control for the first 10,000 brain imaging datasets from UK Biobank*, NeuroImage (2018), [论文](https://discovery.ucl.ac.uk/id/eprint/10039942/)。
+- 参考文献：Smith et al., *Tract-based spatial statistics: Voxelwise analysis of multi-subject diffusion data*, NeuroImage (2006), [doi:10.1016/j.neuroimage.2006.02.024](https://doi.org/10.1016/j.neuroimage.2006.02.024)。
+- 原实现代码库：[UK Biobank pipeline v1.5](https://git.fmrib.ox.ac.uk/falmagro/uk_biobank_pipeline_v_1.5)；[FSL `tbss`](https://git.fmrib.ox.ac.uk/fsl/tbss)；[FSL `MMORF`（可选配准分支）](https://git.fmrib.ox.ac.uk/fsl/MMORF)。

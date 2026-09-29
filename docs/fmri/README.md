@@ -122,3 +122,9 @@ CSF/WM 组织掩膜由 TorchFAST 部分体积分数经 BBR 投到 EPI，再在 E
 同一例 490 帧 BOLD 的默认 SynthMorph 分支此前已从原始 BIDS 成功运行至 MNI152 2 mm：输出 91×109×91×490、float32、TR 0.735 秒；ICA 收敛于 96 个成分，AROMA 判定 48 个噪声成分。整链墙钟 532.22 秒，PyTorch 峰值保留显存 17.58 GB。该结果见[原有整链摘要](../../validation/fmri/e2e_summary.json)。
 
 当前代码的 `registration_backend="fnirt"` volume 分支完成了相同 BIDS BOLD/SBRef/T1 的 490 帧整链，退出码 0。输出为 91×109×91×490 的 float32 NIfTI，TR 0.735 秒，MNI 网格匹配；442,288,210 个数值全部有限，脑掩膜外最大绝对值为 0。默认六级 T1 FNIRT 联合优化形变与强度参数；ICA 收敛于 95 个成分，AROMA 判定 63 个噪声成分。进程墙钟 1202.18 秒，PyTorch 峰值分配 6.24 GB、保留 7.31 GB。两次整链在共享 GPU 上分时运行，不能据此作公平速度排序。输入/输出 SHA256、分步耗时及全体素检查见[FNIRT 整链报告](../../validation/fmri/fmri_volume_fnirt_20260929.public.json)；T1 配准的 FSL 同输入对照见[配准报告](../../validation/fmri/t1_fnirt_20260929.public.json)。最终 AROMA 结果没有可逐体素配对的 UKB FIX 参照。
+
+## Reference
+
+- 参考文献：Smith et al., *Advances in functional and structural MR image analysis and implementation as FSL*, NeuroImage (2004), [doi:10.1016/j.neuroimage.2004.07.051](https://doi.org/10.1016/j.neuroimage.2004.07.051)。
+- 参考文献：Pruim et al., *ICA-AROMA: A robust ICA-based strategy for removing motion artifacts from fMRI data*, NeuroImage (2015), [doi:10.1016/j.neuroimage.2015.02.064](https://doi.org/10.1016/j.neuroimage.2015.02.064)。
+- 原实现代码库：[FSL `feat5`](https://git.fmrib.ox.ac.uk/fsl/feat5)；[ICA-AROMA](https://github.com/maartenmennes/ICA-AROMA)。

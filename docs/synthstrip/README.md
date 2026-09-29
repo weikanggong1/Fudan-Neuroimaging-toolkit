@@ -207,4 +207,7 @@ python validation/synthstrip/current_regression.py \
 
 `--manifest` 只列输入路径、匿名病例号和 SHA-256；`--reference-root` 保存事先由官方 `mri_synthstrip` 生成的三项输出；`--output-root` 保存当前 FNIT 输出与报告；`--source-root` 固定待验证源码；`--python` 固定实际运行环境。该脚本不会在 FNIT 推理过程中调用 FreeSurfer。
 
-原方法：Hoopes et al., *SynthStrip: Skull-Stripping for Any Brain Image*, NeuroImage (2022), [doi:10.1016/j.neuroimage.2022.119474](https://doi.org/10.1016/j.neuroimage.2022.119474)。
+## Reference
+
+- 参考文献：Hoopes et al., *SynthStrip: Skull-Stripping for Any Brain Image*, NeuroImage (2022), [doi:10.1016/j.neuroimage.2022.119474](https://doi.org/10.1016/j.neuroimage.2022.119474)。
+- 原实现代码库：[FreeSurfer `mri_synthstrip`](https://github.com/freesurfer/freesurfer/tree/dev/mri_synthstrip)。

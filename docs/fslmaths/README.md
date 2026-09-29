@@ -94,3 +94,8 @@ fnit-fslmaths --device cuda:0 -dt float /data/sub-01/T1w_brain.nii.gz -thr 100 -
 完整图像测试的 FNIT CUDA 峰值分配不超过 0.430 GiB；48 组裁剪块对照包含每个选项组合的耗时、误差和峰值分配。高斯平滑的差异主要来自卷积累加顺序和浮点舍入。空间仿射、体素尺寸、qform/sform 和输出形状在上述完整图像对照中一致。
 
 同一真实 tensor 裁剪块及其 3D 时间中位图还用于三次混合维度检验：4D 加 3D、3D 加 4D、4D 用 3D 图像作掩膜。三组输出均为 48×48×48×6，与 FSL 逐体素一致。
+
+## Reference
+
+- 参考文献：Smith et al., *Advances in functional and structural MR image analysis and implementation as FSL*, NeuroImage (2004), [doi:10.1016/j.neuroimage.2004.07.051](https://doi.org/10.1016/j.neuroimage.2004.07.051)。 `fslmaths` 没有单独的方法论文。
+- 原实现代码库：[FSL `avwutils`（含 `fslmaths`）](https://git.fmrib.ox.ac.uk/fsl/avwutils)。

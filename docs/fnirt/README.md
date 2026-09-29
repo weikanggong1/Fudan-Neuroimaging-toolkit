@@ -378,3 +378,8 @@ intensity model 或通用 `--inwarp`。TBSS 预设在直接配准时可选，dMR
 [`FSL Software Licence, Release 6.0`](../../licenses/FSL-6.0.txt) 约束，仅用于该许可
 允许的非商业用途。本项目不是官方 FSL 发布。上游版本、commit 和文件哈希见
 [`_vendor_fsl`](../../src/fnit/_vendor_fsl/README.md)。
+
+## Reference
+
+- 参考文献：Andersson, Jenkinson & Smith, *Non-linear registration, aka spatial normalisation*, FMRIB Technical Report TR07JA2 (2007), [原文](https://www.fmrib.ox.ac.uk/datasets/techrep/tr07ja2/tr07ja2.pdf)。
+- 原实现代码库：[FSL `fnirt`](https://git.fmrib.ox.ac.uk/fsl/fnirt)。

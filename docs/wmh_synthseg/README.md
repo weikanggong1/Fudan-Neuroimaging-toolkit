@@ -90,3 +90,8 @@ fnit wmh-synthseg --i case_FLAIR.nii.gz --o case_seg.nii.gz \
 下图使用本轮公开 `sub-04` 当前重跑。左列为输入，中、右列分别叠加 FreeSurfer 原版和当前 FNIT 的标签 77；完整三维比较的 WMH Dice 为 0.99981002。
 
 ![公开 FLAIR、FreeSurfer WMH-SynthSeg 与当前 FNIT WMH-SynthSeg](../figures/wmh_synthseg_comparison.png)
+
+## Reference
+
+- 参考文献：Laso et al., *Quantifying white matter hyperintensity and brain volumes in heterogeneous clinical and low-field portable MRI*, ISBI (2024), [doi:10.1109/ISBI56570.2024.10635502](https://doi.org/10.1109/ISBI56570.2024.10635502)。
+- 原实现代码库：[FreeSurfer WMH-SynthSeg](https://github.com/freesurfer/freesurfer/tree/dev/mri_WMHsynthseg/WMHSynthSeg)。

@@ -89,3 +89,8 @@ segment_subregions brainstem --cross fs_sub01 \
 ```
 
 官方命令从该 subject 的 `mri/norm.mgz` 和 `mri/aseg.mgz` 读入。严格阶段对照应把同一对文件交给 FNIT；对比脚本会按仿射将官方 `brainstemSsLabels.FSvoxelSpace.mgz` 最近邻重采样到 FNIT 网格。原始 T1 加 FNIT SynthSeg 的完整独立输入属于另一项对照，不应与官方 `norm/aseg` 阶段结果混为同输入比较。逐区 Dice、硬体积差、阶段计时、峰值显存和限制见[验证记录](../../validation/subregions/README.md)。
+
+## Reference
+
+- 参考文献：Iglesias et al., *Bayesian segmentation of brainstem structures in MRI*, NeuroImage (2015), [doi:10.1016/j.neuroimage.2015.02.065](https://doi.org/10.1016/j.neuroimage.2015.02.065)。
+- 原实现代码库：[FreeSurfer 主代码库](https://github.com/freesurfer/freesurfer)。

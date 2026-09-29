@@ -6,38 +6,65 @@ CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核。模型、影像张
 
 ## 功能
 
-| 模态 | 功能 | 主要输出 | 用法、输入输出、原软件命令与 benchmark |
-|---|---|---|---|
-| sMRI | SynthStrip | 脑图、脑掩膜、有符号距离场 | [SynthStrip](docs/synthstrip/README.md) |
-| sMRI | SynthMorph | 刚性、仿射、非线性配准及 FSL warp 转换 | [SynthMorph](docs/synthmorph/README.md) |
-| sMRI | WMH-SynthSeg | 脑结构标签、WMH 标签与软体积 | [WMH-SynthSeg](docs/wmh_synthseg/README.md) |
-| sMRI | 33 类 SynthSeg | T1w 结构标签与软体积 | [SynthSeg](docs/synthseg/README.md) |
-| sMRI | SynthSeg+ | 33 类结构与 68 区体积皮层分区 | [SynthSeg+](docs/synthseg_plus/README.md) |
-| sMRI | TorchGEMS 脑干亚区 | 脑干四亚区标签；两例真实 T1 均达到逐区 Dice 与体积阈值 | [皮下亚区](docs/subregions/README.md) |
-| sMRI | SynthSR | 1 mm T1w 合成图 | [SynthSR](docs/synthsr/README.md) |
-| sMRI | TorchFAST | 三组织分割、PVE 与偏置场 | [TorchFAST](docs/fast/README.md) |
-| sMRI | FastVBM | 标准空间 GM、Jacobian 与 modulated GM | [FastVBM](docs/fast_vbm/README.md) |
-| sMRI、fMRI、dMRI | TorchFLIRT | reference-grid 图像与 FSL scaled-mm `.mat` | [FLIRT](docs/flirt/README.md) |
-| sMRI、dMRI | TorchFNIRT | warped image、Jacobian 与 intent-2007 coefficients | [FNIRT](docs/fnirt/README.md) |
-| sMRI、fMRI、dMRI | TorchApplyWarp | 应用 warp、premat 与 postmat 后的 reference-grid 图像 | [applywarp](docs/applywarp/README.md) |
-| sMRI、fMRI、dMRI | `fnit convertwarp` / TorchConvertWarp | 组合 FLIRT 矩阵与 FSL 非线性场；转换 MMORF warp | [convertwarp](docs/convertwarp/README.md) |
-| sMRI、fMRI、dMRI | `fnit invwarp` / TorchInvWarp | 在指定网格上求 FSL 位移场的反场 | [invwarp](docs/invwarp/README.md) |
-| sMRI、fMRI、dMRI | PyTorch fslmaths 常用运算 | 3D/4D NIfTI 算术、阈值、滤波、形态学与时间统计 | [fslmaths](docs/fslmaths/README.md) |
-| fMRI | BIDS→MNI152 2 mm 体积流程 | 单 run FEAT、FAST/BBR、PICA/AROMA、可选混杂回归与 MNI 影像 | [fMRI](docs/fmri/README.md) |
-| fMRI | 回归后个体 EPI→T1w 皮层、MNI 2 mm 皮层下→fsLR32k | 双侧 GIFTI 与 91k CIFTI 时间序列 | [fMRI 表面投影](docs/fmri/surface.md) |
-| dMRI | TorchTOPUP | Hz 场、校正图与 FSL 兼容输出 | [TOPUP](docs/topup/README.md) |
-| dMRI | TorchEDDY | 运动/涡流校正 DWI、旋转 bvec 与参数 | [EDDY](docs/eddy/README.md) |
-| dMRI | TorchDTIFIT | FA、MD、L1–L3、V1–V3、S0 与 tensor | [DTIFIT](docs/dtifit/README.md) |
-| dMRI | TorchAMICONODDI | NDI、ODI、FWF、方向与拟合误差 | [AMICO-NODDI](docs/amico_noddi/README.md) |
-| dMRI | TorchMMORF | 多组标量与 DTI 联合配准、内部 PyTorchFLIRT 线性初始化、pull warp 与 Jacobian | [MMORF](docs/mmorf/README.md) |
-| dMRI | 参数图 pipeline | TOPUP/EDDY/DTIFIT/NODDI 后接 TBSS 或 MMORF 的九张标准空间图 | [dMRI pipeline](docs/dmri_pipeline/README.md) |
-| dMRI | TorchBEDPOSTX | 纤维方向、体积分数与不确定性 | [BEDPOSTX](docs/bedpostx/README.md) |
-| dMRI | TorchProbtrackX | MNI 掩膜自动映射到 diffusion、路径密度与 voxel/ROI 连接矩阵 | [ProbtrackX](docs/probtrackx/README.md) |
-| fMRI | MS-HBM 17 网络 | fsLR32k 个体网络标签 | [MS-HBM](docs/mshbm/README.md) |
-| dMRI | UKBConnectome | 由校正 DWI 与已完成的 FreeSurfer subject 目录生成 84 区四张结构连接矩阵 | [Connectome](docs/connectome/README.md)；[真实数据对照](validation/connectome/fs_aparc84_subject_dir_20260928.md) |
-| sMRI | recon-all | 核心分割、皮层表面、顶点指标与脑区统计 | [recon-all](docs/recon_all/README.md) |
+### 一般功能
 
-各功能页均给出带参数名和逐项注释的 Python 单被试示例、等价命令行、输入/输出结构、原软件命令、真实数据精度与计时结果。统一入口中的子命令用 `fnit <子命令> --help` 查看；fMRI 使用 `fnit-fmri --help`，MS-HBM 使用 `fnit-mshbm --help`，recon-all 使用 `fnit-recon-all --help`。全部独立入口见 [pyproject.toml](pyproject.toml)。
+| 函数名 | 原软件函数名 | 功能 |
+|---|---|---|
+| [run_fslmaths](docs/fslmaths/README.md) | FSL `fslmaths` | 3D/4D NIfTI 算术、阈值、滤波、形态学与时间统计。 |
+
+### sMRI
+
+| 函数名 | 原软件函数名 | 功能 |
+|---|---|---|
+| [SynthStrip](docs/synthstrip/README.md) | FreeSurfer `mri_synthstrip` | 脑图、脑掩膜和有符号距离场。 |
+| [SynthMorph](docs/synthmorph/README.md) | FreeSurfer `mri_synthmorph` | 刚性、仿射和非线性配准。 |
+| [WMHSynthSeg](docs/wmh_synthseg/README.md) | FreeSurfer `mri_WMHsynthseg` | 脑结构与白质高信号标签、软体积。 |
+| [SynthSeg](docs/synthseg/README.md) | FreeSurfer `mri_synthseg` | 33 类脑结构标签与软体积。 |
+| [SynthSegPlus](docs/synthseg_plus/README.md) | FreeSurfer `mri_synthseg --parc` | 33 类结构与 68 区皮层分区。 |
+| [segment_subregions](docs/subregions/README.md) | FreeSurfer `segment_subregions brainstem` | 脑干四亚区标签。 |
+| [SynthSR](docs/synthsr/README.md) | FreeSurfer `mri_synthsr` | 合成 1 mm T1w 图像。 |
+| [TorchFAST](docs/fast/README.md) | FSL `fast` | 三组织分割、部分体积分数与偏置场。 |
+
+### fMRI
+
+| 函数名 | 原软件函数名 | 功能 |
+|---|---|---|
+| [run_fmri_pipeline](docs/fmri/README.md) | FSL `feat`、`melodic`；ICA-AROMA | 单 run 预处理、去噪与 MNI152 2 mm 体积输出。 |
+| [run_surface_from_volume](docs/fmri/surface.md) | fMRIPrep fsLR 重采样工作流；Workbench `-volume-to-surface-mapping` | 将回归后的 BOLD 投到 fsLR32k，生成双侧 GIFTI 和 91k CIFTI。 |
+| [parcellate](docs/mshbm/README.md) | CBIG `CBIG_MSHBM_parcellation_single_subject.m` | 生成个体 fsLR32k 17 网络标签。 |
+
+### dMRI
+
+| 函数名 | 原软件函数名 | 功能 |
+|---|---|---|
+| [TorchTOPUP](docs/topup/README.md) | FSL `topup` | AP/PA b0 畸变场估计与校正。 |
+| [TorchEDDY](docs/eddy/README.md) | FSL `eddy` | DWI 运动及涡流校正、bvec 旋转。 |
+| [TorchDTIFIT](docs/dtifit/README.md) | FSL `dtifit` | FA、MD、特征值/向量、S0 与张量拟合。 |
+| [TorchAMICONODDI](docs/amico_noddi/README.md) | AMICO `NODDI` | NDI、ODI、FWF、方向与拟合误差。 |
+| [TorchMMORF](docs/mmorf/README.md) | FSL `MMORF` | 多标量与扩散张量联合配准，自动估计线性初始化。 |
+| [TorchBEDPOSTX](docs/bedpostx/README.md) | FSL `bedpostx` | 纤维方向、体积分数与后验不确定性。 |
+| [TorchProbtrackX](docs/probtrackx/README.md) | FSL `probtrackx2` | 概率纤维追踪、路径密度和连接矩阵。 |
+
+### 多模态
+
+| 函数名 | 原软件函数名 | 功能 |
+|---|---|---|
+| [TorchFLIRT](docs/flirt/README.md) | FSL `flirt` | 线性配准并输出参考网格图像与 `.mat`。 |
+| [TorchFNIRT](docs/fnirt/README.md) | FSL `fnirt` | 非线性配准、Jacobian 与系数场。 |
+| [TorchApplyWarp](docs/applywarp/README.md) | FSL `applywarp` | 应用形变场及前后仿射矩阵。 |
+| [TorchConvertWarp](docs/convertwarp/README.md) | FSL `convertwarp` | 组合线性与非线性变换，转换 MMORF 场。 |
+| [TorchInvWarp](docs/invwarp/README.md) | FSL `invwarp` | 在指定网格上计算位移场的反场。 |
+
+### pipelines
+
+| 函数名 | 原软件函数名 | 功能 |
+|---|---|---|
+| [FastVBM](docs/fast_vbm/README.md) | FSL `fslvbm` | 从 T1w 生成标准空间灰质、Jacobian 与调制灰质图。 |
+| [DMRIPipeline](docs/dmri_pipeline/README.md) | UK Biobank dMRI pipeline（FSL `topup`、`eddy`、`dtifit`、TBSS） | 生成九张标准空间扩散参数图；可选 MMORF 配准。 |
+| [UKBConnectome](docs/connectome/README.md) | UKB-connectomics 结构连接组网脚本 | 从校正 DWI 与结构分割生成结构连接矩阵；[真实数据对照](validation/connectome/fs_aparc84_subject_dir_20260928.md)。 |
+| [run_recon_all_python](docs/recon_all/README.md) | FreeSurfer `recon-all` | 从 T1w 生成脑分割、皮层表面、顶点指标与脑区统计。 |
+
+各功能页给出带参数注释的 Python 单被试示例、输入/输出结构、原软件命令、真实数据精度与计时结果，并在末尾列出参考文献和原实现代码库。统一入口中的子命令用 `fnit <子命令> --help` 查看；fMRI 使用 `fnit-fmri --help`，MS-HBM 使用 `fnit-mshbm --help`，recon-all 使用 `fnit-recon-all --help`。全部独立入口见 [pyproject.toml](pyproject.toml)。
 
 ## 安装
 

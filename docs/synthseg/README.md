@@ -103,3 +103,8 @@ FNIT CPU 单例为 55.57 s；与原版相比只有 1 个标签体素不同，CSV
 下图使用本轮公开 `sub-02` 重跑。中间两列显示同网格标签，最后一列标出不同体素；该例逐体素一致率为 0.99998881。
 
 ![公开 T1w、FreeSurfer SynthSeg 与当前 FNIT SynthSeg](figures/synthseg_comparison.png)
+
+## Reference
+
+- 参考文献：Billot et al., *SynthSeg: Segmentation of brain MRI scans of any contrast and resolution without retraining*, Medical Image Analysis (2023), [doi:10.1016/j.media.2023.102789](https://doi.org/10.1016/j.media.2023.102789)。
+- 原实现代码库：[FreeSurfer `mri_synthseg`](https://github.com/freesurfer/freesurfer/tree/dev/mri_synthseg)。

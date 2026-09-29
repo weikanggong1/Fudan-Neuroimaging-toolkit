@@ -147,3 +147,8 @@ python -m fnit.recon_all.compare_native_free \
 ```
 
 [比较器](../../src/fnit/recon_all/compare_native_free.py)输出体素、表面、逐顶点图和逐脑区统计差异。最新完成的 v3 候选表面顶点数与官方不同，空间最近点误差只能用于定位差异，不能证明同源顶点一致。逐文件严格门槛和待完成步骤见[发布验收](../../validation/recon_all/python_gpu_port/RELEASE_GATES.md)；独立阶段的配对结果见[移植记录](../../validation/recon_all/python_gpu_port/README.md)。
+
+## Reference
+
+- 参考文献：Fischl, *FreeSurfer*, NeuroImage (2012), [doi:10.1016/j.neuroimage.2012.01.021](https://doi.org/10.1016/j.neuroimage.2012.01.021)。
+- 原实现代码库：[FreeSurfer `recon-all`](https://github.com/freesurfer/freesurfer)。

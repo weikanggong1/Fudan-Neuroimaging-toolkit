@@ -257,8 +257,9 @@ python tools/benchmark_connectome_end_to_end.py \
 
 四张矩阵的比较固定脑区顺序，按严格上三角同时报告全边与共同非零边指标；长度/FA 的共同边指标用于区分数值偏差与连接支持差异。固定真实轨迹的赋值一致性不能代替独立追踪后的矩阵一致性。
 
-## 参考文献与原实现
+## Reference
 
-- Tournier JD 等，*MRtrix3: A fast, flexible and open software framework for medical image processing and visualisation*，NeuroImage 202:116137，2019。[论文](https://pubmed.ncbi.nlm.nih.gov/31473352/)
-- Smith RE 等，*Anatomically-constrained tractography: improved diffusion MRI streamlines tractography through effective use of anatomical information*，NeuroImage 62:1924–1938，2012。[论文](https://pubmed.ncbi.nlm.nih.gov/22705374/)
-- [原 UKB-connectomics 代码库](https://github.com/sina-mansour/UKB-connectomics)、[本次对照的 MRtrix3 源码提交](https://github.com/MRtrix3/mrtrix3/tree/eeab681d3e0cb004cf1d1d31579d3892197ef5b6)、[PyTorch 代码库](https://github.com/pytorch/pytorch)。
+- 参考文献：Mansour et al., *Connectomes for 40,000 UK Biobank participants: A multi-modal, multi-scale brain network resource*, [PubMed 37839728](https://pubmed.ncbi.nlm.nih.gov/37839728/)。
+- 参考文献：Tournier et al., *MRtrix3: A fast, flexible and open software framework for medical image processing and visualisation*, NeuroImage (2019), [PubMed 31473352](https://pubmed.ncbi.nlm.nih.gov/31473352/)。
+- 参考文献：Smith et al., *Anatomically-constrained tractography: improved diffusion MRI streamlines tractography through effective use of anatomical information*, NeuroImage (2012), [PubMed 22705374](https://pubmed.ncbi.nlm.nih.gov/22705374/)。
+- 原实现代码库：[UKB-connectomics](https://github.com/sina-mansour/UKB-connectomics)；[本次对照的 MRtrix3 源码提交](https://github.com/MRtrix3/mrtrix3/tree/eeab681d3e0cb004cf1d1d31579d3892197ef5b6)。计算框架：[PyTorch](https://github.com/pytorch/pytorch)。

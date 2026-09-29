@@ -139,3 +139,8 @@ FSL GPU 的 2.20 秒只含拟合核心，不含 `bedpostx_gpu` 的拆分、合�
 ## 来源与限制
 
 该实现复现已发表模型和采样算法，并非 FSL `xfibres` C++ 的逐句翻译。tensor 初始化、随机数流、浮点归约和 proposal history 均不同，因此不声明后验体积逐元素等价。方法与许可见 [FSL BEDPOSTX 文档](https://fsl.fmrib.ox.ac.uk/fsl/docs/diffusion/bedpostx.html)、Behrens et al. (NeuroImage, 2007)、Jbabdi et al. (MRM, 2012) 以及 [FSL 软件许可](https://fsl.fmrib.ox.ac.uk/fsl/docs/license.html)。
+
+## Reference
+
+- 参考文献：Behrens et al., *Probabilistic diffusion tractography with multiple fibre orientations: What can we gain?*, NeuroImage (2007), [doi:10.1016/j.neuroimage.2006.09.018](https://doi.org/10.1016/j.neuroimage.2006.09.018)。
+- 原实现代码库：[FSL `fdt`（含 `xfibres`/BEDPOSTX）](https://git.fmrib.ox.ac.uk/fsl/fdt)。

@@ -69,3 +69,8 @@ convertwarp --ref=/data/MNI152_T1_2mm.nii.gz \
 在 gpucw1 上，用同一例真实 DWI 已保存的 FNIT pipeline 输出核对两条分支。TBSS 系数单独转换的 dense 场与 FSL `convertwarp --relout` 场均为 `182×218×182×3`、float32，affine 相同；位移分量 MAE `1.984×10⁻⁶ mm`，最大差 `9.54×10⁻⁶ mm`。FSL 完整命令耗时 49.73 秒，FNIT GPU 单次 Python 调用 10.02 秒，计时边界不同，不据此计算加速比。TBSS 场重采样 FA 与 pipeline 标准 FA 的非零并集 `r=0.994361`、MAE `0.001231`；标准 FA 在重采样后另乘模板非零掩膜，因此这里还包含掩膜末步差异。
 
 MMORF warp 加同目录 FLIRT 矩阵转换后重采样 FA，与 pipeline 原 `apply_mmorf_warp` 标准 FA 的 `r=0.999999999996`、MAE `2.14×10⁻⁷`。转换 Python 调用耗时 7.27 秒。FSL `convertwarp` 不能直接读取 MMORF 原场，转换后的 dense 场可供 FSL `invwarp` 和 `applywarp` 使用。[验证记录](../../validation/convertwarp/README.md)列出命令与输入边界；反变换结果及脑图见 [TorchInvWarp](../invwarp/README.md)。
+
+## Reference
+
+- 参考文献：Andersson, Jenkinson & Smith, *Non-linear registration, aka spatial normalisation*, FMRIB Technical Report TR07JA2 (2007), [原文](https://www.fmrib.ox.ac.uk/datasets/techrep/tr07ja2/tr07ja2.pdf)。 `convertwarp` 没有单独的方法论文。
+- 原实现代码库：[FSL `fnirt`（含 `convertwarp`）](https://git.fmrib.ox.ac.uk/fsl/fnirt)。

@@ -87,3 +87,8 @@ fnit synthsr --i case_FLAIR.nii.gz --o case_synthsr.nii.gz \
 下图使用仓库公开 `sub-04` FLAIR，并用当前默认 TF32 重新生成 FNIT 一列。临床 12 例统计与这幅公开示意图不是同一数据集。公开图两幅输出的 shape、`uint8` 和 affine 一致，完全相同体素比例为 97.8558%，MAE 为 0.02145 灰度级，最大差为 2。
 
 ![公开 FLAIR、FreeSurfer SynthSR 与当前 FNIT SynthSR](figures/synthsr_flair_comparison.png)
+
+## Reference
+
+- 参考文献：Iglesias et al., *SynthSR: A public AI tool to turn heterogeneous clinical brain scans into high-resolution T1-weighted images for 3D morphometry*, Science Advances (2023), [doi:10.1126/sciadv.add3607](https://doi.org/10.1126/sciadv.add3607)。
+- 原实现代码库：[FreeSurfer `mri_synthsr`](https://github.com/freesurfer/freesurfer/tree/dev/mri_synthsr)。

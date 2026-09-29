@@ -177,3 +177,8 @@ gm = result.pve[1]
 
 `t1_tensor` 和返回张量均为 `(X, Y, Z)` 顺序。该接口适合算法测试；常规影像调用
 应使用 `TorchFAST`，由它检查坐标并构造 `FNITNifti1Image` 输出。
+
+## Reference
+
+- 参考文献：Zhang, Brady & Smith, *Segmentation of brain MR images through a hidden Markov random field model and the expectation-maximization algorithm*, IEEE Transactions on Medical Imaging (2001), [doi:10.1109/42.906424](https://doi.org/10.1109/42.906424)。
+- 原实现代码库：[FSL `fast4`](https://git.fmrib.ox.ac.uk/fsl/fast4)。

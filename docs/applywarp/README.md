@@ -214,3 +214,8 @@ coefficient；不能外推到其他病例、nearest、dense warp 或未实现选
 
 单元测试位于 [`tests/applywarp`](../../tests/applywarp)。当前真实数据复现入口为
 [`validation/applywarp/validate_real.py`](../../validation/applywarp/validate_real.py)；它要求调用方显式提供输入、FSL reference、coefficient warp 与输出目录。测试和验证期间可以安装 FSL 生成参照，`TorchApplyWarp` 的正常运行不调用 FSL。
+
+## Reference
+
+- 参考文献：Andersson, Jenkinson & Smith, *Non-linear registration, aka spatial normalisation*, FMRIB Technical Report TR07JA2 (2007), [原文](https://www.fmrib.ox.ac.uk/datasets/techrep/tr07ja2/tr07ja2.pdf)。 `applywarp` 没有单独的方法论文。
+- 原实现代码库：[FSL `fnirt`（含 `applywarp`）](https://git.fmrib.ox.ac.uk/fsl/fnirt)。
