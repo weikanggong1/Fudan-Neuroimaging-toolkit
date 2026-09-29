@@ -90,7 +90,7 @@ segment_subregions thalamus --cross fs_sub01 --sd /absolute/path/subjects --thre
 segment_subregions hippo-amygdala --cross fs_sub01 --sd /absolute/path/subjects --threads 4
 ```
 
-在 gpucw1 的同一真实 T1 上，官方双侧海马/杏仁核总墙钟 1005.17 秒、丘脑 596.84 秒。FNIT 对应三个独立阶段计时、逐区 Dice 和后验软体积见[验证报告](../../validation/subregions/nuclei.md)。目前前景 Dice 为 0.9923（左）、0.9930（右）和 0.9975（丘脑），但按每区 Dice≥0.95 且硬体积差≤5% 的约定，仅 18/28、14/27、38/44 区达标。后验软体积表除丘脑 52 项中的一项外，均在 5% 内。因此这些结果仅供方法开发和复核，不能声称与官方逐核团等价。
+在 gpucw1 的同一真实 T1 上，官方双侧海马/杏仁核总墙钟 1005.17 秒、丘脑 596.84 秒。FNIT 三项并发运行的各自墙钟、阶段日志、逐区 Dice 和后验软体积见[验证报告](../../validation/subregions/nuclei.md)。目前前景 Dice 为 0.9923（左）、0.9930（右）和 0.9975（丘脑），但按每区 Dice≥0.95 且硬体积差≤5% 的约定，仅 18/28、14/27、38/44 区达标。后验软体积表除丘脑 52 项中的一项外，均在 5% 内。因此这些结果仅供方法开发和复核，不能声称与官方逐核团等价。
 
 ## 参考文献与原实现代码
 
