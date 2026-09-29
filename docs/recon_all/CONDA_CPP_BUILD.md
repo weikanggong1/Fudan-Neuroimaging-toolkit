@@ -14,7 +14,7 @@ fnit-setup-weights --model recon-all --dest /data/fnit-weights --verify-only
 fnit-setup-recon-all-assets --dest /data/fnit-assets --verify-only
 ```
 
-从仓库根目录执行。安装脚本优先检出固定 Git 提交；Git 服务不可达时，改用同一提交的 codeload 压缩包，先核对压缩包 SHA-256，再核对解包源码树哈希。之后编译原生程序、复制到当前 `$CONDA_PREFIX/bin`，并检查运行时动态库。源码仅保存在本机 Conda 安装目录，不提交到 FNIT 仓库。下载和编译需要联网、磁盘空间和 C/C++/Fortran 工具链；这些工具链及 `curl` 已列入主页 `environment.yml`。在 glibc 2.17 节点创建环境时，可按本机需要设置 `CONDA_OVERRIDE_GLIBC=2.17`。首次安装后应核对 `share/fnit/recon_all_native_full/installed-bin.sha256` 和构建记录。新版安装目录使用 `_full` 后缀，保留旧环境中不足以构建非线性程序的裁剪源码目录，不把两者混用。2026-09-29 已用主页文件创建新环境，从已校验的固定源码归档安装原有 11 个必需程序；其后固定 codeload 源码树上的新版构建脚本又成功编译新增的 3 个非线性变换程序，现版需要 14 个。[初始源码及构建记录](../../validation/recon_all/python_gpu_port/source_codeload_build_20260929.json)可复查；当前安装脚本的全新环境执行与隔离整例仍需验收。
+从仓库根目录执行。安装脚本优先检出固定 Git 提交；Git 服务不可达时，改用同一提交的 codeload 压缩包，先核对压缩包 SHA-256，再核对解包源码树哈希。之后编译原生程序、复制到当前 `$CONDA_PREFIX/bin`，并检查运行时动态库。源码仅保存在本机 Conda 安装目录，不提交到 FNIT 仓库。下载和编译需要联网、磁盘空间和 C/C++/Fortran 工具链；这些工具链及 `curl` 已列入主页 `environment.yml`。在 glibc 2.17 节点创建环境时，可按本机需要设置 `CONDA_OVERRIDE_GLIBC=2.17`。首次安装后应核对 `share/fnit/recon_all_native_full/installed-bin.sha256` 和构建记录。新版安装目录使用 `_full` 后缀，保留旧环境中不足以构建非线性程序的裁剪源码目录，不把两者混用。2026-09-29 已在主页 Conda 环境用已校验的完整固定源码树运行新版安装脚本，[14 个必需程序的构建、安装、哈希及动态库检查](../../validation/recon_all/python_gpu_port/build_full_14_20260929.json)通过；新目录从网络重新取得全部资产及无预装软件环境的整例仍需验收。
 
 开发者已有固定源码时，可设置 `FNIT_RECON_ALL_SOURCE=/path/to/clean/source` 再运行同一脚本。源码必须是洁净的上述提交或已校验归档。直接构建入口仍是：
 

@@ -6,7 +6,7 @@
 
 ## 当前单 T1 标准流程
 
-入口已固定执行 MNI152 非线性变换、拓扑修复、真实 `white.preaparc`、标准球面与配准、最终 white、Conda 源码构建的四轮 pial 以及体积/顶点后处理，不再通过多个开关组合近似表面。Python pial 保留为可单独调用的同输入验证函数。[同一自产输入的双引擎比较](native_pial_candidate_20260929.json)给出输出差异与耗时。文件完整性与数值验收是运行报告中的不同字段。最初的 11 个原生程序已在新主页 Conda 环境从固定源码归档构建并安装；随后又在同一固定 codeload 源码树成功构建非线性变换所需的 3 个程序，主页脚本现要求 14 个。早期[第二次构建记录](source_codeload_build_20260929.json)及同输入真实 T1 的 `mri_segment` 逐体素一致；[合并后的旧版 recon-all 测试](rebased_tests_20260929.json)为 222 项通过，新增代码需重测。[资产安装记录](asset_setup_20260929.json)显示：已有目录的 98 项在新环境重新校验通过；全新下载进行到 80 项后，fsaverage 归档服务器拒绝连接，未完成网络安装。无预装软件环境中的整例隔离验证仍待完成。[安装说明](../../../docs/recon_all/CONDA_CPP_BUILD.md)。
+入口已固定执行 MNI152 非线性变换、拓扑修复、真实 `white.preaparc`、标准球面与配准、最终 white、Conda 源码构建的四轮 pial 以及体积/顶点后处理，不再通过多个开关组合近似表面。Python pial 保留为可单独调用的同输入验证函数。[同一自产输入的双引擎比较](native_pial_candidate_20260929.json)给出输出差异与耗时。文件完整性与数值验收是运行报告中的不同字段。主页安装脚本已在新 Conda 环境从[完整固定源码树编译并安装 14 个必需程序](build_full_14_20260929.json)；源代码快照的 [recon-all 与权重清单测试](rebased_tests_20260929.json)为 237 项通过。此前的[固定源码初次构建](source_codeload_build_20260929.json)还记录了同输入真实 T1 的 `mri_segment` 逐体素一致。[资产安装记录](asset_setup_20260929.json)显示：已有目录的 98 项在新环境重新校验通过；全新下载进行到 80 项后，fsaverage 归档服务器拒绝连接，未完成网络安装。无预装软件环境中的整例隔离验证仍待完成。[安装说明](../../../docs/recon_all/CONDA_CPP_BUILD.md)。 当前源码在主页环境的首次整例重跑于共享 GPU 0 的 SynthSeg 阶段因可用显存不足而停下，详见 [v8 OOM 记录](v8_shared_gpu_oom_20260929.json)；已改用空闲显存较多的 GPU 1 重新运行。
 
 旧版 v5 开发链从原始 T1 完成了 59 个阶段，双侧 white/pial 的[独立网格检查](mesh_validation_20260929.json)通过，但因使用早期代码快照缺少固定清单中的 18 项，运行报告为 `incomplete`，耗时 11,651 秒。与归档官方整例严格比较仅 5/138 项通过，通过项均是 MRI；它不能代表现版交付。v6 主页安装链在 Python pial 阶段结束，未形成完整整例。
 
