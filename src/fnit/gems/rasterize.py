@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import math
 
 import numpy as np
@@ -14,6 +14,22 @@ class BlockIndex:
     shape: tuple[int, int, int]
     block_size: int
     candidates: tuple[np.ndarray, ...]
+    _device_cache: dict = field(default_factory=dict, compare=False, repr=False)
+
+    def device_blocks(self, device, dtype):
+        key = (str(device), dtype)
+        if key not in self._device_cache:
+            blocks = []
+            for block_id, ids_np in enumerate(self.candidates):
+                if len(ids_np) == 0:
+                    continue
+                points, _ = _block_points(block_id, self, device, dtype)
+                blocks.append((points,
+                               torch.as_tensor(ids_np, device=device, dtype=torch.long),
+                               torch.arange(len(points), device=device),
+                               points.long().unbind(-1)))
+            self._device_cache[key] = tuple(blocks)
+        return self._device_cache[key]
 
 
 def build_block_index(vertices: np.ndarray, tetrahedra: np.ndarray,
@@ -104,11 +120,7 @@ def rasterize_priors(
     assigned_weights = (torch.zeros((*shape, 4), device=vertices.device, dtype=vertices.dtype)
                         if return_assignment else None)
 
-    for block_id, ids_np in enumerate(block_index.candidates):
-        if len(ids_np) == 0:
-            continue
-        points, axes = _block_points(block_id, block_index, vertices.device, vertices.dtype)
-        ids = torch.as_tensor(ids_np, device=vertices.device, dtype=torch.long)
+    for points, ids, point_ids, (x, y, z) in block_index.device_blocks(vertices.device, vertices.dtype):
         cells = tetrahedra[ids]
         tet = vertices[cells]  # M,4,3
         v0 = tet[:, 0]
@@ -121,18 +133,17 @@ def rasterize_priors(
         score = weights.amin(-1).masked_fill(singular[None], -torch.inf)
         best_score, best = score.max(dim=1)
         valid = best_score >= -float(tolerance)
-        selected_cells = cells[best[valid]]
-        selected_weights = weights[valid, best[valid]]
+        selected_cells = cells[best]
+        selected_weights = weights[point_ids, best]
         values = (alphas[selected_cells] * selected_weights[..., None]).sum(dim=1)
         values = values.clamp_min(0)
         values = values / values.sum(-1, keepdim=True).clamp_min(torch.finfo(values.dtype).eps)
 
-        x, y, z = points[valid].long().unbind(-1)
-        out[x, y, z] = values
-        covered[x, y, z] = True
+        out[x, y, z] = torch.where(valid[:, None], values, 0)
+        covered[x, y, z] = valid
         if return_assignment:
-            assigned_cells[x, y, z] = selected_cells
-            assigned_weights[x, y, z] = selected_weights
+            assigned_cells[x, y, z] = torch.where(valid[:, None], selected_cells, 0)
+            assigned_weights[x, y, z] = torch.where(valid[:, None], selected_weights, 0)
 
     if background_channel is not None:
         bg = int(background_channel)

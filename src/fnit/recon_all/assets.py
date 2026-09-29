@@ -36,6 +36,18 @@ ASSET_FILES = {
         48827, "14523eaf5e7f596be68d251a50f98ef277f5b7ef8904cca786a3efef8e9e3e7f", ".mgz"),
     "average/BrainstemSS/atlas/compressionLookupTable.txt": (
         1291, "8c343757d9ee13ed2d02daeb5f5f5fc764a6adb850b19b9d1b0ad352c96ca15b", ".txt"),
+    "average/ThalamicNuclei/atlas/AtlasMesh.gz": (
+        6844185, "7bb5954c43885ddace887fe5fa8e0c0cdcd3bea41beb6185f48a1784e451bd08", ".gz"),
+    "average/ThalamicNuclei/atlas/AtlasDump.mgz": (
+        839824, "c6bb408e519ebd5fc520dd98da044493f34cb14747f7229fbed224598d129758", ".mgz"),
+    "average/ThalamicNuclei/atlas/compressionLookupTable.txt": (
+        2130, "9f480319b803a2c44606c6595c46a26fbb74726bdc800e88b443011fedb175ff", ".txt"),
+    "average/HippoSF/atlas/AtlasMesh.gz": (
+        19911600, "fafd5b5a005df3a6dcacf544b164ac6692132f1a1c078d66f8d0484d1022225c", ".gz"),
+    "average/HippoSF/atlas/AtlasDump.mgz": (
+        366711, "a46221d8efcd5dc5f6488bc4fe9e8a2435cf42ec21ce1f85bbd1e3947f793e2d", ".mgz"),
+    "average/HippoSF/atlas/compressionLookupTable.txt": (
+        2595, "5962518cb188de252a03796cf04ea8991cd444907b7733b14fc501cd898da362", ".txt"),
     "average/colortable_BA.txt": (
         810, "83aaf7a79ce4fdb98c9f6175b318dfaceed276ebf7422cdfaa195f1f71a2512f", ".txt"),
     "average/colortable_BA_thresh.txt": (
@@ -159,6 +171,11 @@ ASSET_FILES = {
 }
 ANNEX_BASE = "https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git/annex/objects"
 BUNDLED_BRAINSTEM_LUT = "average/BrainstemSS/atlas/compressionLookupTable.txt"
+BUNDLED_SUBREGION_LUTS = {
+    BUNDLED_BRAINSTEM_LUT: "brainstem_compressionLookupTable.txt",
+    "average/ThalamicNuclei/atlas/compressionLookupTable.txt": "thalamus_compressionLookupTable.txt",
+    "average/HippoSF/atlas/compressionLookupTable.txt": "hippo_compressionLookupTable.txt",
+}
 SOURCE_BASE = ("https://raw.githubusercontent.com/freesurfer/freesurfer/"
                "d932c45b7941662ea380a05efef580568b98d41a/distribution")
 FSAVERAGE_BASE = ("https://www.freesurfer.net/pub/dist/freesurfer/"
@@ -199,7 +216,7 @@ def _annex_url(size, sha256, extension):
 
 
 def asset_url(name):
-    if name == BUNDLED_BRAINSTEM_LUT:
+    if name in BUNDLED_SUBREGION_LUTS:
         raise ValueError(f"{name} is included in the FNIT package")
     if name in SOURCE_FILES:
         return f"{SOURCE_BASE}/{name}"
@@ -238,10 +255,10 @@ def download_asset(name, directory, verify_only=False):
         return target
     if verify_only:
         raise ValueError(f"Missing or invalid reconstruction asset: {target}")
-    if name == BUNDLED_BRAINSTEM_LUT:
-        data = files("fnit").joinpath("gems/data/brainstem_compressionLookupTable.txt").read_bytes()
+    if name in BUNDLED_SUBREGION_LUTS:
+        data = files("fnit").joinpath("gems/data/" + BUNDLED_SUBREGION_LUTS[name]).read_bytes()
         if len(data) != size or hashlib.sha256(data).hexdigest() != sha256:
-            raise ValueError("Bundled brainstem lookup table failed SHA-256 verification")
+            raise ValueError(f"Bundled lookup table failed SHA-256 verification: {name}")
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(data)
         return target
