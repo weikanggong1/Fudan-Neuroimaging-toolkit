@@ -1,6 +1,6 @@
 # SynthSeg+ 真实 T1w 对照（2026-09-29）
 
-[功能与用法](../../docs/synthseg_plus/README.md) · [GPU 逐项结果](report.real.json) · [CPU 逐项结果](report.cpu.real.json) · [耗时记录](benchmark.volumes.real.json)
+[功能与用法](../../docs/synthseg_plus/README.md) · [GPU 逐项结果](report.real.json) · [CPU 逐项结果](report.cpu.real.json) · [完整命令计时](timing.real.json) · [Python 调用计时](benchmark.volumes.real.json)
 
 输入为仓库公开的去面容 T1w `examples/data/sub-01_T1w.nii.gz`，SHA-256 为 `f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a`。两端均使用 FreeSurfer 8.2.0-1 的 SynthSeg 2.0 主网络和皮层分区权重；FNIT 推理不调用 FreeSurfer。测试在 gpucw1 的 H100 PCIe 上进行，CPU 线程数为 4。
 
@@ -16,7 +16,8 @@
   --o official_vol.nii.gz --parc --vol official_vol.csv --threads 4
 
 # FNIT：输入、合并图和 CSV 与上一命令逐项对应；--weights 指官方模型目录。
-PYTHONPATH=src python -m fnit.cli synthseg \
+# 本轮在共享节点选物理 GPU 1；CUDA_VISIBLE_DEVICES=1 将其映射为 cuda:0。
+/usr/bin/time -f 'wall_seconds=%e' env CUDA_VISIBLE_DEVICES=1 PYTHONPATH=src python -m fnit.cli synthseg \
   --i examples/data/sub-01_T1w.nii.gz \
   --o fnit_vol.nii.gz --parc --csv-vols fnit_vol.csv \
   --weights /absolute/path/models --parc-weights /absolute/path/models \
@@ -79,9 +80,10 @@ FreeSurfer 默认在合并 NIfTI 中写入颜色表扩展，FNIT 的 NIfTI 未�
 | 实现及调用范围 | 本例时间 |
 |---|---:|
 | FreeSurfer 8.2.0-1 GPU，`mri_synthseg --parc --vol` 完整命令 | `542.08 s` |
+| FNIT H100，`fnit synthseg --parc --csv-vols` 完整命令 | `18.71 s` |
 | FreeSurfer 8.2.0-1 CPU，同一完整命令加 `--cpu` | `241.48 s` |
 | FNIT CPU，`fnit synthseg --parc --csv-vols --device cpu` 完整命令 | `210.19 s` |
 | FNIT H100，`SynthSegPlus(...)(volumes=True)` 首轮 / 同对象第二轮 | `16.68 / 13.10 s` |
 | FNIT H100，`SynthSegPlus(...)(volumes=False)` 首轮 / 同对象第二轮 | `7.30 / 1.97 s` |
 
-CPU 的两条完整命令计时范围相同，本轮 FNIT 用时比原版少 `31.29 s`。GPU 原版完整命令与 FNIT Python 调用的计时范围不同，不能直接相除作为加速倍数。H100 与其他作业共享，原版 GPU 在这次运行中比 CPU 慢也不代表一般情况；FNIT 两次 GPU 调用的少量边界体素会随 CUDA 算法选择而变化。当前只验收了一幅完整 T1w；`fast=True`、QC、robust 路径和其他采集方案未纳入本次对照。
+CPU 与 GPU 各自的两条完整命令均写出合并图和软体积 CSV，计时范围相同。本轮 CPU 上 FNIT 比原版少 `31.29 s`；GPU 上记录到 `542.08 / 18.71 s`。GPU 两次运行不在相同负载下，H100 与其他作业共享，因此这组数字不代表稳定加速倍数，原版 GPU 在这次运行中比 CPU 慢也不代表一般情况。Python 调用计时不含写盘，不与完整命令直接相除。FNIT 两次 GPU 调用的少量边界体素会随 CUDA 算法选择而变化。当前只验收了一幅完整 T1w；`fast=True`、QC、robust 路径和其他采集方案未纳入本次对照。

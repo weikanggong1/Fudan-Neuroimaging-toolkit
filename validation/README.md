@@ -8,7 +8,7 @@
 
 | 功能 | 当前真实数据报告 | 输出一致性结论 | 时间、显存与示意图 |
 |---|---|---|---|
-| [SynthSeg+](../docs/synthseg_plus/README.md) | [公开 T1w 对照](synthseg_plus/README.md) | GPU 合并图逐体素一致率 0.9999758；CPU 仅 6 个体素不同，软体积最大差 0.293 mm³ | 官方与 FNIT 的 CPU 完整命令计时、GPU Python 调用计时、逐标签报告及切面图 |
+| [SynthSeg+](../docs/synthseg_plus/README.md) | [公开 T1w 对照](synthseg_plus/README.md) | GPU 合并图逐体素一致率 0.9999758；CPU 仅 6 个体素不同，软体积最大差 0.293 mm³ | 官方与 FNIT 的 CPU/GPU 完整命令计时、GPU Python 调用计时、逐标签报告及切面图 |
 | [TorchGEMS 脑干亚区](../docs/subregions/README.md) | [两张真实 T1 的 BrainstemSS 对照](subregions/README.md) | 两例四区均达逐区 Dice ≥0.95、体积差 ≤5% | 官方/FNIT 命令时间、逐区体积差、阶段耗时和切面图 |
 | [SynthStrip](../docs/synthstrip/README.md) | [12 例 T1w GPU 对照](synthstrip/report.real.current.json) | shape、affine、dtype 一致；脑掩膜、脑图和距离场为近似一致 | 报告含逐例 FreeSurfer/FNIT 时间、RSS、峰值显存；功能页展示三视图 |
 | [SynthMorph](../docs/synthmorph/README.md) | [12 例 GPU](synthmorph/report.real.current.gpu.json)、[12 例 CPU](synthmorph/report.real.current.cpu.json)与[公开 T1w 示例](synthmorph/public_example.current.json) | moved image 与 RAS-mm pull warp 接近参考；测量 hash 通过 linear-only 证明继承，nearest 另有定向测试 | 两份报告使用同一计时边界；没有 fresh current-hash 全量重跑；功能页展示公开配准图 |
