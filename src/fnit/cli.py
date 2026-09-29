@@ -74,16 +74,18 @@ def _run_synthseg(args):
         raise FileNotFoundError(source)
     target.parent.mkdir(parents=True, exist_ok=True)
     if args.parc:
-        if args.csv_vols:
-            raise ValueError("--csv-vols with --parc has not been validated")
         if args.color_lut:
             raise ValueError("--color-lut with --parc is not implemented")
         import torch
         torch.set_num_threads(args.threads)
         from .synthseg_parc import SynthSegPlus
         result = SynthSegPlus(weights=args.weights, parc_weights=args.parc_weights,
-                              device=args.device)(source, keep_geometry=args.keep_geometry)
+                              device=args.device)(source, keep_geometry=args.keep_geometry,
+                                                  volumes=bool(args.csv_vols))
         result.combined.save(target)
+        if args.csv_vols:
+            result.write_volumes_csv(source, args.csv_vols)
+            print(args.csv_vols)
         if args.parc_out:
             Path(args.parc_out).parent.mkdir(parents=True, exist_ok=True)
             result.cortical_parcellation.save(args.parc_out)

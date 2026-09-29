@@ -53,14 +53,16 @@ def _restore_posterior_orientation(posterior: np.ndarray,
 
 
 def _official_soft_volumes(posterior: torch.Tensor, reference_affine: np.ndarray,
-                           voxel_volume_mm3: float) -> np.ndarray:
+                           voxel_volume_mm3: float, *,
+                           round_decimals: int | None = 3) -> np.ndarray:
     # Keep channels last and C-contiguous, as in the official Keras output.
     spatial = torch.empty((*posterior.shape[1:], posterior.shape[0]),
                           dtype=posterior.dtype, device="cpu")
     spatial.copy_(posterior.permute(1, 2, 3, 0))
     restored = _restore_posterior_orientation(spatial.numpy(), reference_affine)
     soft = np.sum(restored[..., 1:], axis=(0, 1, 2))
-    return np.around(np.concatenate(([np.sum(soft)], soft)) * voxel_volume_mm3, 3)
+    volumes = np.concatenate(([np.sum(soft)], soft)) * voxel_volume_mm3
+    return np.around(volumes, round_decimals) if round_decimals is not None else volumes
 
 
 def _segmentation_image(data: np.ndarray, reference, affine: np.ndarray):

@@ -43,5 +43,11 @@ def test_official_h5_load_and_cortex_only_output():
     assert torch.all(parcels[segmentation == 0] == 0)
     assert torch.all(parcels[segmentation == 3] != 0)
     assert set(torch.unique(parcels).tolist()) <= set(np.load(labels).tolist())
+    parcels_with_volumes, soft_volumes = model(
+        image, segmentation, soft_volumes=True,
+        content_slices=(slice(None), slice(None), slice(None)))
+    assert torch.equal(parcels_with_volumes, parcels)
+    assert soft_volumes.shape == (68,)
+    assert np.all(np.isfinite(soft_volumes)) and np.all(soft_volumes > 0)
     with pytest.raises(ValueError, match="aligned 3-D"):
         model(image, segmentation[1:])

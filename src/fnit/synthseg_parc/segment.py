@@ -141,6 +141,9 @@ class SynthSegParcResult:
     affine: np.ndarray
     source_affine: np.ndarray
     source_shape: tuple[int, int, int]
+    segmentation_posterior: torch.Tensor | None = None
+    parcellation_soft_voxels: np.ndarray | None = None
+    voxel_volume_mm3: float = 1.0
 
 
 @torch.inference_mode()
@@ -155,6 +158,9 @@ def run_synthseg_parc_t1(
     min_pad: int = 128,
     topology_classes: str | Path | None = None,
     fast: bool = False,
+    volumes: bool = False,
+    segmenter: SynthSegSegmenter | None = None,
+    parcellator: SynthSegParc | None = None,
 ) -> SynthSegParcResult:
     """Run official SynthSeg 2.0 non-robust segmentation and ``--parc`` heads.
 
@@ -164,9 +170,12 @@ def run_synthseg_parc_t1(
     3/42 with the 68 parcel IDs. ``topology_classes`` defaults to the official
     2.0 array beside ``segment_labels``. ``fast`` skips the left-right ensemble
     and uses FreeSurfer's shorter posterior filter.
+    ``volumes=True`` retains the postprocessed segmentation probabilities
+    and 68 parcellation probability sums for soft-volume reporting.
     """
     prepared = preprocess_t1(t1, device=device, min_pad=min_pad)
-    segmenter = SynthSegSegmenter(segment_weights, segment_labels, device)
+    if segmenter is None:
+        segmenter = SynthSegSegmenter(segment_weights, segment_labels, device)
     raw_posterior = segmenter.posterior(prepared.image, flip=not fast, smooth=not fast)
     parc_posterior = _blur(raw_posterior[None])[0] if fast else raw_posterior
     raw_segmentation = segmenter.labels[parc_posterior.argmax(0)]
@@ -182,13 +191,21 @@ def run_synthseg_parc_t1(
     selection = prepared.content_slices
     segmentation, processed_posterior = postprocess_segmentation(
         raw_posterior, segmenter.labels, topology, selection, fast=fast)
-    del raw_posterior, processed_posterior, segmenter
+    segmentation_posterior = processed_posterior if volumes else None
+    del raw_posterior, processed_posterior
     segmentation_padded = torch.zeros_like(raw_segmentation)
     segmentation_padded[selection] = segmentation
-    parcellation = SynthSegParc(parc_weights, parc_labels, device)(
-        prepared.image, raw_segmentation, segmentation_padded)[selection]
+    if parcellator is None:
+        parcellator = SynthSegParc(parc_weights, parc_labels, device)
+    parcel_result = parcellator(
+        prepared.image, raw_segmentation, segmentation_padded,
+        soft_volumes=volumes, content_slices=selection if volumes else None)
+    parcellation_padded, soft_parc = parcel_result if volumes else (parcel_result, None)
+    parcellation = parcellation_padded[selection]
     combined = torch.where(parcellation != 0, parcellation, segmentation)
     affine = prepared.aligned_affine.copy()
     affine[:3, 3] += affine[:3, :3] @ np.asarray([s.start for s in selection])
     return SynthSegParcResult(segmentation, parcellation, combined, affine,
-                             prepared.input_affine, prepared.original_shape)
+                             prepared.input_affine, prepared.original_shape,
+                             segmentation_posterior, soft_parc,
+                             prepared.voxel_volume_mm3)

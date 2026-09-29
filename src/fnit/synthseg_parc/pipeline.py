@@ -32,7 +32,9 @@ class SynthSegParc:
 
     @torch.inference_mode()
     def __call__(self, image: torch.Tensor, segmentation: torch.Tensor,
-                 output_segmentation: torch.Tensor | None = None) -> torch.Tensor:
+                 output_segmentation: torch.Tensor | None = None, *,
+                 soft_volumes: bool = False,
+                 content_slices: tuple[slice, slice, slice] | None = None):
         if image.ndim != 3 or segmentation.shape != image.shape:
             raise ValueError("image and segmentation must be aligned 3-D tensors")
         image = image.to(device=self.device, dtype=torch.float32)
@@ -57,4 +59,17 @@ class SynthSegParc:
         output_cortex = cortex if output_segmentation is None else (
             (output_segmentation.to(self.device) == 3) | (output_segmentation.to(self.device) == 42)
         )
-        return torch.where(output_cortex, self.labels[parcel_index], self.labels[0])
+        parcels = torch.where(output_cortex, self.labels[parcel_index], self.labels[0])
+        if not soft_volumes:
+            return parcels
+        if content_slices is None:
+            raise ValueError("content_slices are required for soft volumes")
+        selected = posterior[(slice(None), *content_slices)]
+        spatial = torch.empty((*selected.shape[1:], selected.shape[0]),
+                              dtype=selected.dtype, device="cpu")
+        spatial.copy_(selected.permute(1, 2, 3, 0))
+        probabilities = spatial.numpy()
+        probabilities[..., 0] = (~output_cortex[content_slices]).cpu().numpy()
+        probabilities /= np.sum(probabilities, axis=-1)[..., None]
+        volumes = np.sum(probabilities[..., 1:], axis=(0, 1, 2))
+        return parcels, volumes
