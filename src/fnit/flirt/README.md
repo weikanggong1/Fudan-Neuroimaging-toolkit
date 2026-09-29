@@ -61,6 +61,8 @@ flirt \
 
 MNI152 同一世界空间的 1 mm→2 mm 重采样使用 `fnit-flirt -in MNI152_T1_1mm.nii.gz -ref MNI152_T1_2mm.nii.gz -applyxfm -usesqform -out MNI152_T1_1mm_on_2mm.nii.gz`。已有 FSL `.mat` 时把 `-usesqform` 换成 `-init input_to_reference.mat`。对应原命令是 `flirt -in MNI152_T1_1mm.nii.gz -ref MNI152_T1_2mm.nii.gz -applyxfm -usesqform -out MNI152_T1_1mm_on_2mm.nii.gz`；[完整参数和 Python 示例](../../../docs/flirt/README.md#已知线性变换mni152-分辨率转换)及[真实模板对照](../../../validation/flirt/applyxfm_mni.cpu.json)见链接。
 
+上述原始 FSL 模板实测得到的 [1→2 mm `.mat`](assets/FSL_MNI152_T1_1mm_to_2mm.mat) 随 FNIT 安装包提供；只对功能页列出的两张模板哈希验证过。
+
 真实 UKB b0→T1 的 6-DOF/normmi 配准，经本次候选搜索自由度修订后，相对 FSL 矩阵的世界坐标位移 RMS 从旧版 GPU 的 0.195330 mm 降至 CPU 0.009932 mm、H100 TF32 0.009983 mm；一例结果见[刚性配准报告](../../../validation/connectome/original_ukb_flirt.public.json)。12-DOF/corratio 的 10 例 GM CPU 测量有 9/10 例满足矩阵 `rmsdiff <= 0.05 mm`；H100 完成 4 例，4/4 满足门限。完整命令时间及不能直接比较的负载条件见[功能说明](../../../docs/flirt/README.md)。10 例测量源码与最终源码的 12-DOF 分支核对见[源码范围记录](../../../validation/runtime_dependencies/flirt_profile_source_equivalence.public.json)。这些结果不构成逐矩阵或逐体素等价。
 
 输入、输出结构、参数说明、坐标公式、当前源码报告和公开示意图见[功能说明](../../../docs/flirt/README.md)。

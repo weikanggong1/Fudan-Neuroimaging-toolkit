@@ -9,6 +9,7 @@
 | `report.gpu.current.json` | 前 4 例真实 GM 的 H100 默认 TF32 报告；运行时有其他 GPU 作业。 |
 | `public_example.current.json` | OpenNeuro ds000114 公开 T1w 示例的来源、命令、hash、指标和时间。 |
 | `applyxfm_mni.cpu.json`、`applyxfm_mni.gpu.json` | FSL 原始 MNI152 T1 模板 1 mm↔2 mm 双向重采样的 CPU/H100 精度、耗时和源码哈希；不含影像。 |
+| [`FSL_MNI152_T1_1mm_to_2mm.mat`](../../src/fnit/flirt/assets/FSL_MNI152_T1_1mm_to_2mm.mat) | 官方 FLIRT 在上述原始模板上导出的 input→reference FSL scaled-mm 矩阵；内容与两份报告一致。 |
 | `benchmark_applyxfm.py` | 在装有 FSL 的验证环境重跑上述对照；FNIT 运行时不使用它。 |
 | `validate_real.py` | 运行候选、用 fresh FSL `-applyxfm` 输出计算指标，并合并 CPU/GPU 报告。 |
 | `plot_public_example.py` | 生成公开示例 JSON 和 `docs/flirt/figures/flirt_public_current.png`。 |
