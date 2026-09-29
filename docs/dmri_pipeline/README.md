@@ -230,6 +230,8 @@ fnit-dmri-pipeline --bids-root /data/bids --subject 01 --session 01 \
 
 `--bids-root` 是原始 BIDS 根目录；`--subject` 选择一名被试，`--session`、`--run`、`--acquisition` 和 `--direction` 在有多次采集时限定主 DWI。第二条命令省略 `--t1`，表示从该被试的 `anat/` 读取唯一 T1w；如果有多张，用 `--t1` 明确指定。`--noddi-fit-method amico` 使用默认字典拟合，改为 `classic` 时使用连续 Watson 拟合。`-o` 保存九张 native 和 standard 参数图及报告。BIDS 图像与梯度不会被改写：`bids_input/` 中保留源文件链接、合并后的 JSON 和 `bids_selection.json`；输出九图沿用下面的 FNIT 目录结构，尚未命名为 BIDS Derivatives。
 
+下面带 T1w 的完整实测将第二条命令中的 FA、T1、tensor 三个 1 mm 模板换为同一 MNI 网格的 2 mm 版本；重采样方法和模板哈希见[验收报告](../../validation/dmri_pipeline/bids_mmorf_2mm.real.current.json)。九图的输出 shape 由模板决定。
+
 ### UKB 命名输入
 
 TBSS：
@@ -326,9 +328,10 @@ MMORF 分支和 TBSS 分支共用 TOPUP、EDDY、DTIFIT、NODDI、九图命名�
 | 验证 | 已完成的输出 | 结果与范围 |
 |---|---|---|
 | [原始 BIDS、无 T1w、TBSS](../../validation/dmri_pipeline/bids_tbss.real.current.json) | 九张 native、九张标准空间和九张 skeleton 图 | 真实 AP/PA 105 volume DWI；各组 shape/affine 一致、float32、有限值；共享 H100 完整命令 1649.82 s。 |
+| [原始 BIDS、带 T1w、MMORF 2 mm](../../validation/dmri_pipeline/bids_mmorf_2mm.real.current.json) | 九张 native、九张标准空间图和 MMORF 形变场 | 同一真实 AP/PA+T1w 采集；standard 九图同 91×109×91 网格、float32、有限值；完整命令 1829.25 s。 |
 | [原始 BIDS、带 T1w、MMORF 1 mm](../../validation/dmri_pipeline/bids_mmorf.shared_gpu_oom.json) | 九张 native 图、T1 脑图、两份 FLIRT 矩阵 | 36:20.19 后在 MMORF 非线性阶段因共享 GPU 显存不足退出；标准空间九图未完成。 |
 | [既有 UKB TBSS 与 FSL 对照](../../validation/dmri_pipeline/tbss_e2e.real.current.json) | 九张 native、standard、skeleton 图 | 相对匹配 FSL EDDY 的下游对照：native r=0.978640–0.999882、standard r=0.940917–0.988332、skeleton r=0.949470–0.991235。 |
-| [经典 NODDI 接入](../../validation/dmri_pipeline/pipeline_classic_real.public.json) | 九图接口与真实体素拟合 | 2,048 个真实脑内体素的阶段集成测试；使用 identity 配准，不是 raw-to-MNI 整链。 |
+| [经典 NODDI 接入](../../validation/dmri_pipeline/pipeline_classic_real.public.json) | 九图接口与真实体素拟合 | 24 个真实脑内体素的阶段集成测试；使用 identity 配准，不是 raw-to-MNI 整链。 |
 
 上述 FSL EDDY 对照固定 TOPUP 场、掩膜和后续 FNIT 步骤，只替换 EDDY 的校正图。另一个[原版 FSL TBSS 参考](../../validation/dmri_pipeline/README.md#既有-ukb-tbss-与-fsl-对照)从官方 UKB native 参数图开始，其 standard 九图 r=0.358268–0.699381；它与本包 raw AP/PA 起步的输入不同，不能据此计算整链加速比或把差异单独归给 FNIRT。FSL 对照的九图相关性不是本次 BIDS 运行重新测得的结果。
 

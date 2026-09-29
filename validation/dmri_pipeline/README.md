@@ -5,9 +5,10 @@
 | 验证边界 | 结果 | 证据 |
 |---|---|---|
 | 原始 BIDS、无 T1w、TBSS 完整命令 | 九张 native、standard、skeleton 图均通过输出检查 | [当前整链](bids_tbss.real.current.json) |
+| 原始 BIDS、带 T1w、MMORF 2 mm 完整命令 | 九张 native、standard 图和 MMORF 形变场均通过输出检查 | [当前整链](bids_mmorf_2mm.real.current.json) |
 | 原始 BIDS、带 T1w、MMORF 1 mm 完整命令 | native 图、T1 脑图和两份仿射完成；非线性阶段因共享 GPU 显存不足退出 | [失败阶段](bids_mmorf.shared_gpu_oom.json) |
 | 既有 UKB TBSS 对 FSL 参考 | 九图数值比较；参考输入边界与 raw-to-standard 候选不同 | [对照报告](tbss_e2e.real.current.json) |
-| 经典 NODDI 接入 | 2,048 个真实体素的拟合与九图接口检查，非完整整链 | [阶段报告](pipeline_classic_real.public.json) |
+| 经典 NODDI 接入 | 24 个真实体素的拟合与九图接口检查，非完整整链 | [阶段报告](pipeline_classic_real.public.json) |
 
 ## 原始 BIDS 入口：真实 AP/PA 采集
 
@@ -19,7 +20,9 @@
 
 [两次运行的 native 九图比较](bids_native_branch_compare.real.json)在非零体素并集上的 r 为 0.982398–0.999929。两次 TorchEDDY 的 `gp_seed_override` 都为 null，日志中的首轮 GP seed 分别为 1790694888 和 1790696344。因此独立运行的上游图并非固定种子的配对试验，这些数值差异不能归因于 T1w；T1w 在本流程只进入后面的 MMORF 配准。
 
-带 T1w 的 `--registration-backend mmorf` 也实际启动了完整命令。BIDS 选择、TOPUP、EDDY、九张 native 图、SynthStrip 脑图及两份 FLIRT 仿射均已完成；随后 MMORF 的 tensor 有限应变旋转在共享 GPU 上因显存不足退出，未生成标准空间九图。失败时该 GPU 剩余 228.69 MiB，进程占用约 10.59 GiB；命令运行 36:20.19，退出码 1。详见[失败阶段记录](bids_mmorf.shared_gpu_oom.json)。这次不能作为带 T1w 整链通过的证据；最终源码的真实 BIDS 输入预检和该分支的单元调用测试仍已通过。
+带 T1w 的 MMORF 分支在同一真实 AP/PA+T1w 采集上，以由官方 1 mm FA、T1、tensor 模板重采样的 2 mm 网格完成 `run_bids()` 整链。九张 native 图为 104×104×72，九张 standard 图为 91×109×91；图像均为 float32、有限值且组内 affine 一致。MMORF 形变场为 91×109×91×3，九图与 T1 模板网格一致。暂存的 AP/PA 图像和梯度与原始文件逐字节相同，SynthStrip 权重大小和 SHA-256 与 FNIT 清单一致。完整命令 wall 为 1829.25 s；TOPUP/EDDY 准备、EDDY、DTIFIT、NODDI 和配准传播分别为 168.91、958.84、13.34、50.95 和 633.69 s；组件内 CUDA allocator 峰值最高为 NODDI 的 11.59 GiB。[机器报告](bids_mmorf_2mm.real.current.json)记录了源码、模板及权重哈希。2 mm 模板改变了输出网格，因此不能把这组图直接与 1 mm 原版 FSL 图逐体素比较。
+
+另一次使用官方 1 mm 模板的 MMORF 整链已完成 BIDS 选择、TOPUP、EDDY、九张 native 图、SynthStrip 脑图及两份 FLIRT 仿射，随后在 tensor 有限应变旋转时因共享 GPU 显存不足退出，未生成标准空间九图。失败时该 GPU 剩余 228.69 MiB，进程占用约 10.59 GiB；命令运行 36:20.19，退出码 1。详见[失败阶段记录](bids_mmorf.shared_gpu_oom.json)。
 
 ## 既有 UKB TBSS 与 FSL 对照
 
@@ -62,7 +65,7 @@ python validation/dmri_pipeline/compare_current_eddy_pipeline.py \
 
 ## MMORF 分支
 
-当前 MMORF 模块的 T1w、FA、tensor 真实数据配对验证见 [MMORF 报告](../mmorf/report.public.json)。旧求解器的 raw-to-standard 整链指标已移除；这次 BIDS 整链尝试在非线性阶段因共享 GPU 显存耗尽，完整标准空间输出仍待验证。
+当前 MMORF 模块的 T1w、FA、tensor 真实数据配对验证见 [MMORF 报告](../mmorf/report.public.json)。本页 2 mm BIDS 整链已生成九张标准图；与原版 FSL MMORF 的配对精度仍按独立 MMORF 验证页判读，不能将不同模板网格的图像直接逐体素比较。
 
 ## 经典 NODDI 接入
 
