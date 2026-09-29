@@ -24,14 +24,16 @@ CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核。模型、影像张
 | [segment_subregions](docs/subregions/README.md) | FreeSurfer `segment_subregions brainstem` | 脑干四亚区标签。 |
 | [SynthSR](docs/synthsr/README.md) | FreeSurfer `mri_synthsr` | 合成 1 mm T1w 图像。 |
 | [TorchFAST](docs/fast/README.md) | FSL `fast` | 三组织分割、部分体积分数与偏置场。 |
+| [FastVBM](docs/fast_vbm/README.md) | FSL `fslvbm` | 从 T1w 生成标准空间灰质、Jacobian 与调制灰质图。 |
+| [run_recon_all_python](docs/recon_all/README.md) | FreeSurfer `recon-all` | 从 T1w 生成脑分割、皮层表面、顶点指标与脑区统计。 |
 
 ### fMRI
 
 | 函数名 | 原软件函数名 | 功能 |
 |---|---|---|
+| [parcellate](docs/mshbm/README.md) | CBIG `CBIG_MSHBM_parcellation_single_subject.m` | 生成个体 fsLR32k 17 网络标签。 |
 | [run_fmri_pipeline](docs/fmri/README.md) | FSL `feat`、`melodic`；ICA-AROMA | 单 run 预处理、去噪与 MNI152 2 mm 体积输出。 |
 | [run_surface_from_volume](docs/fmri/surface.md) | fMRIPrep fsLR 重采样工作流；Workbench `-volume-to-surface-mapping` | 将回归后的 BOLD 投到 fsLR32k，生成双侧 GIFTI 和 91k CIFTI。 |
-| [parcellate](docs/mshbm/README.md) | CBIG `CBIG_MSHBM_parcellation_single_subject.m` | 生成个体 fsLR32k 17 网络标签。 |
 
 ### dMRI
 
@@ -44,6 +46,8 @@ CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核。模型、影像张
 | [TorchMMORF](docs/mmorf/README.md) | FSL `MMORF` | 多标量与扩散张量联合配准，自动估计线性初始化。 |
 | [TorchBEDPOSTX](docs/bedpostx/README.md) | FSL `bedpostx` | 纤维方向、体积分数与后验不确定性。 |
 | [TorchProbtrackX](docs/probtrackx/README.md) | FSL `probtrackx2` | 概率纤维追踪、路径密度和连接矩阵。 |
+| [DMRIPipeline](docs/dmri_pipeline/README.md) | UK Biobank dMRI pipeline（FSL `topup`、`eddy`、`dtifit`、TBSS） | 生成九张标准空间扩散参数图；可选 MMORF 配准。 |
+| [UKBConnectome](docs/connectome/README.md) | UKB-connectomics 结构连接组网脚本 | 从校正 DWI 与结构分割生成结构连接矩阵；[真实数据对照](validation/connectome/fs_aparc84_subject_dir_20260928.md)。 |
 
 ### 多模态
 
@@ -54,15 +58,6 @@ CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核。模型、影像张
 | [TorchApplyWarp](docs/applywarp/README.md) | FSL `applywarp` | 应用形变场及前后仿射矩阵。 |
 | [TorchConvertWarp](docs/convertwarp/README.md) | FSL `convertwarp` | 组合线性与非线性变换，转换 MMORF 场。 |
 | [TorchInvWarp](docs/invwarp/README.md) | FSL `invwarp` | 在指定网格上计算位移场的反场。 |
-
-### pipelines
-
-| 函数名 | 原软件函数名 | 功能 |
-|---|---|---|
-| [FastVBM](docs/fast_vbm/README.md) | FSL `fslvbm` | 从 T1w 生成标准空间灰质、Jacobian 与调制灰质图。 |
-| [DMRIPipeline](docs/dmri_pipeline/README.md) | UK Biobank dMRI pipeline（FSL `topup`、`eddy`、`dtifit`、TBSS） | 生成九张标准空间扩散参数图；可选 MMORF 配准。 |
-| [UKBConnectome](docs/connectome/README.md) | UKB-connectomics 结构连接组网脚本 | 从校正 DWI 与结构分割生成结构连接矩阵；[真实数据对照](validation/connectome/fs_aparc84_subject_dir_20260928.md)。 |
-| [run_recon_all_python](docs/recon_all/README.md) | FreeSurfer `recon-all` | 从 T1w 生成脑分割、皮层表面、顶点指标与脑区统计。 |
 
 各功能页给出带参数注释的 Python 单被试示例、输入/输出结构、原软件命令、真实数据精度与计时结果，并在末尾列出参考文献和原实现代码库。统一入口中的子命令用 `fnit <子命令> --help` 查看；fMRI 使用 `fnit-fmri --help`，MS-HBM 使用 `fnit-mshbm --help`，recon-all 使用 `fnit-recon-all --help`。全部独立入口见 [pyproject.toml](pyproject.toml)。
 
