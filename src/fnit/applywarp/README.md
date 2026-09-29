@@ -136,8 +136,10 @@ SynthMorph/Surfa 的 `disp_ras` warp 同样可表示 target/output → source/in
 pull mapping，但其位移分量属于 world-RAS，并携带 source/target geometry。
 FSL warp 的分量属于 FSL scaled-mm，FNIRT coefficient 还把 residual、knot
 spacing 和 affine 分开保存。两者方向角色相近，数组和 header 不能直接互换。
-本模块不读取 FreeSurfer `.m3z`、`.mgz` warp 或 `surfa.Warp`；转换时必须同时
-使用 source 和 target geometry 完成 RAS/FSL 坐标换算。
+本模块不直接读取 FreeSurfer `.m3z`、`.mgz` warp 或 `surfa.Warp`。本包
+`fnit.synthmorph.convert_warp_to_fsl(warp, moving=..., fixed=...)` 使用原
+moving/fixed 几何生成 intent-2006 FSL relative warp，随后可由本模块的
+`warp` 参数读取；完整单被试示例见 [SynthMorph](../synthmorph/README.md)。
 
 ## 支持的 warp 文件
 
@@ -196,6 +198,10 @@ FNIT 先预热一次，再测三次；每次包含 NIfTI 读取、coefficient �
 [`validate_real.py`](../../../validation/applywarp/validate_real.py)。报告只发布数据类型和文件
 SHA-256，不发布受试者标识。这个结果验证了单例连续 FA、trilinear 和 intent-2007
 coefficient；不能外推到其他病例、nearest、dense warp 或未实现选项。
+
+SynthMorph 转换后的 intent-2006 dense warp 另用一对公开真实 T1w 完成了
+TorchApplyWarp/FSL applywarp 对照；精度、时间和图像见
+[SynthMorph 文档](../../../docs/synthmorph/README.md#fsl-warp-转换真实-t1w)。
 
 ## 测试
 

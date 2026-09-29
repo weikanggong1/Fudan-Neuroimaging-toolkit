@@ -6,7 +6,8 @@ def __getattr__(name):
     if name in ('SynthStrip', 'StripResult'):
         from . import synthstrip
         return getattr(synthstrip, name)
-    if name in ('SynthMorph', 'RegistrationResult', 'apply_transform'):
+    if name in ('SynthMorph', 'RegistrationResult', 'apply_transform',
+                'convert_warp_to_fsl'):
         from . import synthmorph
         return getattr(synthmorph, name)
     if name in ('WMHSynthSeg', 'WMHResult'):

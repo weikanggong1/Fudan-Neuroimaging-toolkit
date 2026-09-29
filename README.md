@@ -9,7 +9,7 @@ CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核。模型、影像张
 | 模态 | 功能 | 主要输出 | 用法、输入输出、原软件命令与 benchmark |
 |---|---|---|---|
 | sMRI | SynthStrip | 脑图、脑掩膜、有符号距离场 | [SynthStrip](docs/synthstrip/README.md) |
-| sMRI | SynthMorph | 刚性、仿射、非线性配准结果及变换 | [SynthMorph](docs/synthmorph/README.md) |
+| sMRI | SynthMorph | 刚性、仿射、非线性配准及 FSL warp 转换 | [SynthMorph](docs/synthmorph/README.md) |
 | sMRI | WMH-SynthSeg | 脑结构标签、WMH 标签与软体积 | [WMH-SynthSeg](docs/wmh_synthseg/README.md) |
 | sMRI | 33 类 SynthSeg | T1w 结构标签与软体积 | [SynthSeg](docs/synthseg/README.md) |
 | sMRI | SynthSeg+ | 33 类结构与 68 区体积皮层分区 | [SynthSeg+](docs/synthseg_plus/README.md) |

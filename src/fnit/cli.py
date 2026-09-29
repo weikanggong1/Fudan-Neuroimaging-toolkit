@@ -432,6 +432,7 @@ def main(argv=None):
     reg.add_argument('-O', '--out-fixed')
     reg.add_argument('-t', '--trans')
     reg.add_argument('-T', '--inverse')
+    reg.add_argument('--fsl-warp', help='moving-to-fixed FSL intent-2006 dense warp')
     reg.add_argument('-i', '--init')
     reg.add_argument('-M', '--mid-space', action='store_true')
     reg.add_argument('-H', '--header-only', action='store_true')
@@ -732,14 +733,19 @@ def main(argv=None):
         outputs = ((result.image, args.out), (result.mask, args.mask), (result.distance, args.sdt))
     elif args.command == 'synthmorph':
         import torch
-        from .synthmorph import SynthMorph
-        if not any((args.out_moving, args.out_fixed, args.trans, args.inverse, args.output_dir)):
+        from .synthmorph import SynthMorph, convert_warp_to_fsl
+        if not any((args.out_moving, args.out_fixed, args.trans, args.inverse,
+                    args.fsl_warp, args.output_dir)):
             parser.error('provide at least one registration output')
+        if args.fsl_warp and args.model in ('affine', 'rigid'):
+            parser.error('--fsl-warp requires joint or deform model')
         torch.set_num_threads(args.threads)
         model = SynthMorph(args.weights, args.device, args.model, args.extent, args.hyper, args.steps)
         result = model(args.moving, args.fixed, args.init, args.mid_space, args.header_only, args.output_dir)
         outputs = ((result.moved, args.out_moving), (result.fixed_moved, args.out_fixed),
-                   (result.transform, args.trans), (result.inverse, args.inverse))
+                   (result.transform, args.trans), (result.inverse, args.inverse),
+                   (convert_warp_to_fsl(result.transform, moving=args.moving, fixed=args.fixed)
+                    if args.fsl_warp else None, args.fsl_warp))
     else:
         from .synthmorph import apply_transform
         result = apply_transform(

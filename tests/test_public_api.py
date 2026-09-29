@@ -12,7 +12,8 @@ import pytest
 
 @pytest.mark.parametrize("module,names", [
     ("synthstrip", ("SynthStrip", "StripResult")),
-    ("synthmorph", ("SynthMorph", "RegistrationResult", "apply_transform")),
+    ("synthmorph", ("SynthMorph", "RegistrationResult", "apply_transform",
+                    "convert_warp_to_fsl")),
     ("wmh_synthseg", ("WMHSynthSeg", "WMHResult")),
     ("synthseg_parc", ("SynthSeg", "SynthSegResult")),
     ("synthsr", ("SynthSR", "SynthSRResult", "SynthSRImage")),
