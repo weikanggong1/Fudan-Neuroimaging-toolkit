@@ -10,6 +10,8 @@
 
 进一步的[公开真实输入 100k 比较](../../validation/connectome/ds004666/tracking_100k_matrices_20260929.md)包含三次 MRtrix 与一次 FNIT 的独立追踪、SIFT2、FA、四矩阵和轨迹密度。count 相对 L1 的跨软件比较有 2/3 进入官方自身重复范围；长度 KS、端点分布和 8 mm TDI 仍略超出。FNIT 100k 本次追踪耗时 1,443.91 s、后处理 36.53 s、全链 Torch 峰值 2.473 GiB；共享 H100 的负载与早前纯追踪计时不同。100 万及 1,000 万次播种尚未实测。
 
+可选 `compile_arc=True` / `--compile-arc` 只编译 CUDA iFOD2 圆弧概率核。相同真实输入的[100k 实测](../../validation/connectome/ds004666/tracking_compile_20260929.md)中，首次编译计入后追踪 782.49 s、保留 27,353 条、全链 Torch 峰值 2.468 GiB。未编译的另一次追踪 1,443.91 s、保留 27,401 条；两次共享 GPU 负载不同，不能将墙钟比值视为稳定加速比。长度、端点和 TDI 的独立群体差异仍在官方重复范围外。
+
 [七套原 UKB atlas 的同轨迹与独立轨迹矩阵对照](../../validation/connectome/ds004666/seven_atlas_100k_20260929.md)现已覆盖 84–1054 节点、四种矩阵和真实连接图。同一 27,616 条官方 TCK、权重、长度、FA 和七张 DWI atlas 下，七个 count 矩阵均逐元素一致，FBC/平均长度/平均 FA 最大绝对误差分别不超过 `5.07e−5`、`5.05e−4 mm`、`5.58e−7`。FNIT 自身 100k 轨迹与三次官方随机范围比较仍有未进入的矩阵指标；图谱 Tian 使用 SynthMorph，不能等同原 UKB 的 FNIRT 标签。这七套固定轨迹及独立轨迹 `.npz`、节点表、时间、显存和图已入库；除 Schaefer200+Tian S1 外，各套还没有分别完成正式 CLI 从 DWI 的一键运行。
 
 多 atlas 的函数级验证已覆盖 Schaefer200、500、1000 的 fsaverage→native 表面与 T1 ribbon 体积投影；500/1000 在同一真实 T1 上与原脚本均逐体素一致，Tian S4 合并后 554/1054 个节点在 DWI 网格均有体素，见[扩展图谱报告和脑图](../../validation/connectome/ds004666/atlas_schaefer_multi_20260929.md)。原生 aparc/a2009s 皮层体积也与原版逐体素一致；与 Tian S1 合并后生成 84/164 节点，见[原生图谱实测](../../validation/connectome/ds004666/atlas_native_aparc_20260929.md)。Glasser 皮层体积与原版逐体素一致；与 Tian S1/S4 合并后为 376/414 节点，其中各有两个极小的皮层节点在 DWI 降采样后无体素，见[Glasser 图谱实测与脑图](../../validation/connectome/ds004666/atlas_glasser_20260929.md)。Tian S1/S4 改用 FNIT PyTorch SynthMorph 时，标签与官方 SynthMorph 的前景 Dice 均为 0.981；固定官方形变后，最近邻标签逐体素一致，见[配准实测](../../validation/connectome/ds004666/atlas_synthmorph_20260929.md)。七套原 UKB 图谱均已接入 CLI；仅 Schaefer200+Tian S1 已完成公开真实 DWI 的四矩阵一键产物检查。
@@ -51,6 +53,7 @@ result = UKBConnectome(device="cuda:0")(
     fa_map=None,            # 输入：None 时从 DWI 拟合 FA
     dwi_to_t1_world=None,   # 输入：None 时运行 TorchFLIRT 6DOF/normmi
     seed=0,                # 输入：PyTorch 随机种子
+    compile_arc=False,     # 输入：True 时首次编译 CUDA 圆弧概率核；默认直接执行
 )
 count = result.matrices["count"]  # 输出：nodes 定义行列的 84×84 计数矩阵
 ```
@@ -61,6 +64,7 @@ count = result.matrices["count"]  # 输出：nodes 定义行列的 84×84 计数
 | `freesurfer_subject_dir`、`atlas` | 推荐入口：已完成的同被试 `recon-all` subject 目录，含 `mri/brain.mgz` 与 `mri/aparc+aseg.mgz`；默认 `atlas="fs-aparc"` 映射为 1–84，另有原 UKB 七套皮层+Tian 图谱。输出 atlas 重采样到 DWI 体素网格。也可显式提供 `t1_brain`、`t1_segmentation`、`atlas_dwi` 三项以运行既有参考条件 |
 | `brain_mask` | 可选 DWI 网格二值 BET 掩膜；LAS DWI 省略时，用双精度累加 mean b0、MRtrix 写头体素尺寸规则及 PyTorch BET 自动生成；非 LAS DWI 须提供掩膜 |
 | `n_seeds`、`seed` | 播种尝试数必选；PyTorch 随机数序列与 MRtrix 不同。原脚本 10,000,000 次尝试的耗时和内存未在此验证 |
+| `compile_arc` | 可选 bool，默认 `False`；`True` 时需要 CUDA，首次运行包含 PyTorch Inductor 编译时间；输出仍为同结构的 `Tractogram`。数值舍入会影响随机接受边界，详情见[真实 100k 对照](../../validation/connectome/ds004666/tracking_compile_20260929.md) |
 | `shell_bvals` | 可选；固定 MRtrix response 文件中的 shell 标签。省略时从 bval 聚类 |
 | `response_mask`、`fod_mask`、`normalise_mask` | 可选；固定参考阶段掩膜；默认响应掩膜由 DWI 的 `dwi2mask_legacy` 计算；FOD/归一化仍分别使用 `brain_mask` 的六邻域两轮膨胀/侵蚀 |
 | `fa_map` | 可选；同网格已计算 FA（如 UKB `dti_FA`）；省略时从 DWI 拟合 MRtrix 风格 tensor FA |
@@ -89,6 +93,7 @@ count = result.matrices["count"]  # 输出：nodes 定义行列的 84×84 计数
 # --atlas：由 aparc+aseg 自动生成的 fs-aparc 84 节点 atlas。
 # --output-dir：结果目录。
 # --device：PyTorch 设备；--n-seeds：播种次数；--seed：随机种子。
+# --compile-arc：可选；CUDA 上首次编译 iFOD2 圆弧概率核，省略时默认关闭。
 fnit connectome \
   --dwi derivatives/dwi/sub-01_desc-preproc_dwi.nii.gz \
   --bvals derivatives/dwi/sub-01_desc-preproc_dwi.bval \
@@ -151,7 +156,7 @@ fnit connectome \
 | `schaefer_to_t1` / `native_annotation_to_t1` / `glasser_to_t1` / `synthmorph_tian_to_t1` / `fnirt_tian_to_t1` / `combine_cortical_tian` | fsaverage Schaefer 注释、recon-all 原生 aparc 注释或 Glasser fsLR dlabel 与球面 → 皮层 T1 标签及节点表；T1 脑图、MNI 模板和 Tian 标签 → SynthMorph 原生标签及可复用形变；已给定 FNIRT 前向 coefficient → 原流程原生标签；同网格皮层/Tian 标签与名称 → 连续整数合并 atlas；各参数、原版命令及[配准实测](../../validation/connectome/ds004666/atlas_synthmorph_20260929.md)、[原生图谱实测](../../validation/connectome/ds004666/atlas_native_aparc_20260929.md)、[Glasser 实测](../../validation/connectome/ds004666/atlas_glasser_20260929.md) |
 | `freesurfer_five_tissue` / `gmwmi_from_five_tissue` | 官方 FreeSurfer 整数标签 `[A,B,C]` → float32 5TT `[A,B,C,5]` → GMWMI `[A,B,C]` |
 | `tracking_sh_precomputed` | 非零 float32 方向 `[...,3]`、偶数 `lmax` → 同设备 float32 球谐函数值 `[...,C]`；参数、等价原版运算及真实单弧基准见[专项报告](../../validation/connectome/ds004666/ifod2_single_arc_20260929.md) |
-| `probabilistic_tractography` | 归一化 WM SH/affine、5TT/affine、GMWMI、播种次数，以及可选 5TT 头文件体素尺寸 `five_tissue_spacing_mm=(sx,sy,sz)` → `Tractogram` 的世界毫米流线、端点、长度和已接受种子；每步最多 1,000 次校准拒绝采样、ACT 整数深度状态，详见[同输入 10k 精度](../../validation/connectome/ds004666/ifod2_rejection_20260929.md)、[纯追踪 100k 时间和显存](../../validation/connectome/ds004666/tracking_scale_100k_20260929.md)与[100k 四矩阵和轨迹分布](../../validation/connectome/ds004666/tracking_100k_matrices_20260929.md) |
+| `probabilistic_tractography` | 归一化 WM SH/affine、5TT/affine、GMWMI、播种次数，以及可选 5TT 头文件体素尺寸 `five_tissue_spacing_mm=(sx,sy,sz)` → `Tractogram` 的世界毫米流线、端点、长度和已接受种子；每步最多 1,000 次校准拒绝采样、ACT 整数深度状态；可选 `compile_arc=True` 编译 CUDA 圆弧核，默认关闭。详见[同输入 10k 精度](../../validation/connectome/ds004666/ifod2_rejection_20260929.md)、[100k 四矩阵和轨迹分布](../../validation/connectome/ds004666/tracking_100k_matrices_20260929.md)与[编译核精度、时间和图](../../validation/connectome/ds004666/tracking_compile_20260929.md) |
 | `estimate_sift2_weights` | 同序流线、WM SH/affine、5TT/affine、`step_size_mm` → float64 逐流线权重 `[T]` |
 | `sample_streamline_mean_precise` | 同序流线、float32 FA `[X,Y,Z]`、DWI affine → float32 沿轨迹均值 `[T]` |
 | `build_connectomes` | 端点 `[T,2,3]`、整数 atlas/affine、逐轨权重/长度/FA、可选 `node_count` → 四张对称 `[K,K]` 矩阵；`node_count` 保留没有体素的末尾节点零行列 |

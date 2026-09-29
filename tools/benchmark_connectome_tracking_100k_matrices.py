@@ -26,6 +26,7 @@ def main() -> None:
     parser.add_argument("--batch-size", type=int, default=8192)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--device", default="cuda:0")
+    parser.add_argument("--compile-arc", action="store_true")
     args = parser.parse_args()
     device = torch.device(args.device)
     if device.type == "cuda":
@@ -54,6 +55,7 @@ def main() -> None:
         five_tissue_affine=five_affine, gmwmi=gmwmi,
         five_tissue_spacing_mm=spacing, n_seeds=args.n_seeds,
         batch_size=args.batch_size, seed=args.seed, lmax=8,
+        compile_arc=args.compile_arc,
     )
     _sync(device)
     tracking_seconds = time.perf_counter() - started
@@ -91,6 +93,7 @@ def main() -> None:
         "input_sha256": {name: _sha256(path) for name, path in input_paths},
         "device": str(device), "tf32": bool(torch.backends.cuda.matmul.allow_tf32),
         "n_seeds": args.n_seeds, "batch_size": args.batch_size, "seed": args.seed,
+        "compile_arc": args.compile_arc,
         "accepted_streamlines": len(tracks.paths),
         "load_seconds": load_seconds, "tracking_seconds": tracking_seconds,
         "postprocessing_seconds": post_seconds,

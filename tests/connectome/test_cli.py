@@ -78,12 +78,15 @@ def test_connectome_cli_writes_named_outputs(tmp_path, monkeypatch, capsys, incl
     if not include_mask:
         position = argv.index("--brain-mask")
         del argv[position:position + 2]
+    else:
+        argv.append("--compile-arc")
     main(argv)
     assert calls[1][1]["brain_mask"] == (tmp_path / "brain_mask" if include_mask else None)
     assert "seed_attempts=12 accepted_streamlines=2" in capsys.readouterr().out
     assert calls[0] == {"device": "cpu"}
     assert calls[1][1]["n_seeds"] == 12
     assert calls[1][1]["seed"] == 7
+    assert calls[1][1]["compile_arc"] is include_mask
     assert np.array_equal(np.loadtxt(output / "connectome_count.csv", delimiter=","),
                           [[2, 1], [1, 3]])
     for name in ("sift2_fbc", "mean_length", "mean_fa"):

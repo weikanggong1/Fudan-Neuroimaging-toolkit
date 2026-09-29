@@ -413,6 +413,7 @@ def _run_connectome(args):
         dwi_to_t1_world=transform,
         n_seeds=args.n_seeds,
         seed=args.seed,
+        compile_arc=args.compile_arc,
     )
     print(f"seed_attempts={result.tractogram.seeds_attempted} "
           f"accepted_streamlines={len(result.tractogram.paths)}")
@@ -719,6 +720,8 @@ def main(argv=None):
     connectome.add_argument('--device', default='cuda:0')
     connectome.add_argument('--n-seeds', type=int, required=True)
     connectome.add_argument('--seed', type=int, default=0)
+    connectome.add_argument('--compile-arc', action='store_true',
+                            help='compile the CUDA iFOD2 arc kernel for large seed counts')
     connectome.add_argument('--overwrite', action='store_true')
     # Standalone SynthSeg must not import unrelated pipelines or their dependencies.
     selected = sys.argv[1:] if argv is None else argv

@@ -35,6 +35,17 @@ def test_gmwmi_requires_nonempty_nonnegative_weights():
         sample_gmwmi_seeds(torch.zeros((3, 3, 3)), five, torch.eye(4), 1,
                            torch.Generator().manual_seed(0))
 
+
+def test_compiled_arc_requires_cuda():
+    from fnit.connectome.tracking import probabilistic_tractography
+
+    with pytest.raises(ValueError, match="compile_arc requires CUDA"):
+        probabilistic_tractography(
+            torch.zeros((1, 1, 1, 1)), torch.eye(4),
+            torch.zeros((1, 1, 1, 5)), torch.eye(4), torch.ones((1, 1, 1)),
+            n_seeds=1, lmax=0, compile_arc=True,
+        )
+
 @pytest.mark.parametrize("device", ["cuda"])
 def test_tractography_accepts_separate_fod_and_anatomy_grids(device):
     if device == "cuda" and not torch.cuda.is_available():

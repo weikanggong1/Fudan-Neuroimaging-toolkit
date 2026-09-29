@@ -202,6 +202,7 @@ class UKBConnectome:
         fa_map: str | Path | None = None,
         dwi_to_t1_world: np.ndarray | torch.Tensor | None = None,
         seed: int = 0,
+        compile_arc: bool = False,
     ) -> ConnectomeResult:
         """Run one subject; all images/gradients must describe the same scan.
 
@@ -239,6 +240,8 @@ class UKBConnectome:
         DWI→T1 RAS-mm transform freezes registration; otherwise TorchFLIRT
         runs 6-DOF/normmi. ``n_seeds`` counts tracking attempts and ``seed``
         seeds the PyTorch generator, whose sequence differs from MRtrix.
+        ``compile_arc`` compiles the CUDA iFOD2 probability kernel on first
+        use, with startup cost but lower steady propagation time.
 
         Output ``ConnectomeResult.matrices`` has count int64 and SIFT2 FBC,
         mean length (mm), mean FA float32 K×K arrays. ``region_labels`` maps
@@ -412,6 +415,7 @@ class UKBConnectome:
         tracks = probabilistic_tractography(
             wm_sh, dwi_affine, five, five_affine, gmwmi,
             n_seeds=n_seeds, seed=seed,
+            compile_arc=compile_arc,
             five_tissue_spacing_mm=nib.load(str(t1_segmentation)).header.get_zooms()[:3],
         )
         if not tracks.paths:

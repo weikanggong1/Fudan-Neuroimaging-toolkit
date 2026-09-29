@@ -381,6 +381,7 @@ def _grow(
     calibration_local: torch.Tensor | None = None,
     calibration_ratio: float | None = None,
     seed_to_wm_initial: torch.Tensor | None = None,
+    arc_probability_fn=None,
 ):
     """Propagate iFOD2 arcs with calibrated batched rejection sampling.
 
@@ -401,6 +402,8 @@ def _grow(
                                power, seeds.device) if max_angle_degrees > 0 else
             (seeds.new_tensor([[0., 0., 1.]]), 1.)
         )
+    if arc_probability_fn is None:
+        arc_probability_fn = _ifod2_arc_probability
     batch = seeds.shape[0]
     paths = seeds.new_zeros((batch, max_steps + 1, 3))
     paths[:, 0] = seeds
@@ -431,7 +434,7 @@ def _grow(
             break
         calibrated = _rotate_ifod2_directions(
             prior, calibration_local[None].expand(batch, -1, -1))
-        calibration_probability, _, _, _, _ = _ifod2_arc_probability(
+        calibration_probability, _, _, _, _ = arc_probability_fn(
             positions, prior, calibrated, half_log_start, fod, five_tissue,
             fod_inverse, five_inverse, lmax=lmax, step_mm=step_mm,
             cutoff=cutoff, power=power,
@@ -456,7 +459,7 @@ def _grow(
             local = torch.stack(((1 - cosine.square()).sqrt() * azimuth.cos(),
                                  (1 - cosine.square()).sqrt() * azimuth.sin(), cosine), -1)
             proposals = _rotate_ifod2_directions(prior[indices], local)
-            probability, midpoint, endpoint, mid_amp, end_amp = _ifod2_arc_probability(
+            probability, midpoint, endpoint, mid_amp, end_amp = arc_probability_fn(
                 positions[indices], prior[indices], proposals, half_log_start[indices],
                 fod, five_tissue, fod_inverse, five_inverse, lmax=lmax,
                 step_mm=step_mm, cutoff=cutoff, power=power,
@@ -664,6 +667,7 @@ def probabilistic_tractography(
     max_angle_degrees: float = 45.,
     cutoff: float = 0.1,
     power: float = 0.5,
+    compile_arc: bool = False,
 ) -> Tractogram:
     """Generate FOD streamlines from 5TT GMWMI seeds on a CUDA or CPU device.
 
@@ -686,6 +690,9 @@ def probabilistic_tractography(
     iFOD2 propagation uses calibrated rejection sampling. ACT seed and
     per-point structural states were checked on real inputs; full-track
     truncation and image-exit parity are still under validation.
+    ``compile_arc=True`` compiles only the iFOD2 arc probability kernel with
+    PyTorch Inductor on CUDA. It preserves float32/TF32 and spends additional
+    time compiling on first use; choose it for high seed counts.
     """
     if (wm_sh.ndim != 4 or fod_affine.shape != (4, 4) or
             five_tissue.ndim != 4 or five_tissue.shape[-1] != 5 or
@@ -697,6 +704,8 @@ def probabilistic_tractography(
     if n_seeds < 1 or batch_size < 1 or arc_proposals < 1:
         raise ValueError('n_seeds, batch_size and arc_proposals must be positive')
     device = wm_sh.device
+    if compile_arc and device.type != 'cuda':
+        raise ValueError('compile_arc requires CUDA')
     if device.type == 'cuda':
         torch.backends.cuda.matmul.allow_tf32 = True
     fod_affine = fod_affine.to(device=device, dtype=torch.float64)
@@ -730,6 +739,8 @@ def probabilistic_tractography(
         (wm_sh.new_tensor([[0., 0., 1.]]), 1.)
     )
     generator = torch.Generator(device=device).manual_seed(seed)
+    arc_probability_fn = (torch.compile(_ifod2_arc_probability, fullgraph=True,
+                                        dynamic=True) if compile_arc else None)
     seeds = sample_gmwmi_seeds(gmwmi, five_tissue, five_tissue_affine,
                                n_seeds, generator)
     collected = []
@@ -751,6 +762,7 @@ def probabilistic_tractography(
             batch_seeds, initial, wm_sh, five_tissue, fod_inverse, act_inverse,
             generator, lmax=lmax, proposals_per_step=arc_proposals,
             calibration_local=calibration_local, calibration_ratio=calibration_ratio,
+            arc_probability_fn=arc_probability_fn,
             step_mm=step_mm, max_steps=max_steps,
             max_angle_degrees=max_angle_degrees, cutoff=cutoff, power=power,
         )
@@ -758,6 +770,7 @@ def probabilistic_tractography(
             batch_seeds, -initial, wm_sh, five_tissue, fod_inverse, act_inverse,
             generator, lmax=lmax, proposals_per_step=arc_proposals,
             calibration_local=calibration_local, calibration_ratio=calibration_ratio,
+            arc_probability_fn=arc_probability_fn,
             seed_to_wm_initial=wf,
             step_mm=step_mm, max_steps=max_steps,
             max_angle_degrees=max_angle_degrees, cutoff=cutoff, power=power,
