@@ -6,7 +6,7 @@ import nibabel as nib
 import numpy as np
 import pytest
 
-from fnit.fmri.ica import decompose_spatial_ica
+from fnit.melodic.ica import decompose_spatial_ica
 
 
 def test_two_skewed_components_recover_temporal_modes(tmp_path):
@@ -71,7 +71,7 @@ def test_component_count_requires_temporal_rank_and_aligned_mask(tmp_path):
 
 def test_pica_mixture_probability_separates_null_and_signal():
     import torch
-    from fnit.fmri.ica import _mixture_posterior
+    from fnit.melodic.ica import _mixture_posterior
 
     rng = np.random.default_rng(1)
     null = rng.normal(0, 1, 9000)

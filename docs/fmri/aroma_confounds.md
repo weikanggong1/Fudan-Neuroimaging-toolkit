@@ -1,6 +1,6 @@
 # ICA-AROMA 分类、成分回归与可选混杂回归
 
-`run_aroma_pipeline` 读取已经高通的原生 EPI BOLD、脑掩膜和 T×6 运动参数，调用本包单被试 [PICA](pica.md)，再按 ICA-AROMA 的运动相关、边缘比例、高频比例和 CSF 比例选择噪声成分。给定 MNI 模板、T1→MNI pull 和 EPI→T1 BBR 时，它先把阈值 IC 图映射到 MNI152 2 mm，再用官方三张标准掩膜分类；[整链入口](README.md)默认走这一路径。分类后在原生 EPI 空间回归噪声 IC；WM/CSF/motion、带通和全脑信号回归可选。独立调用时不提供配准参数，也可用与 BOLD 同网格的三张掩膜分类。
+`run_aroma_pipeline` 读取已经高通的原生 EPI BOLD、脑掩膜和 T×6 运动参数，调用本包单被试 [PICA](../melodic/README.md)，再按 ICA-AROMA 的运动相关、边缘比例、高频比例和 CSF 比例选择噪声成分。给定 MNI 模板、T1→MNI pull 和 EPI→T1 BBR 时，它先把阈值 IC 图映射到 MNI152 2 mm，再用官方三张标准掩膜分类；[整链入口](README.md)默认走这一路径。分类后在原生 EPI 空间回归噪声 IC；WM/CSF/motion、带通和全脑信号回归可选。独立调用时不提供配准参数，也可用与 BOLD 同网格的三张掩膜分类。
 
 ## 单函数批量时间序列调用
 
@@ -42,7 +42,7 @@ print(aroma.denoised_bold)                                               # AROMA
 print(aroma.confounds_cleaned_bold)                                      # 可选额外回归后的 4D BOLD；未启用时为 None
 ```
 
-`ica/` 目录包含 X×Y×Z×K 成分图、阈值图、T×K mixing、频谱功率和定阶/收敛信息，文件名见 [PICA 输出](pica.md)。提供三项 MNI 配准参数时，另输出 `ica_thresholded_MNI152_2mm.nii.gz`，形状为 91×109×91×K，float32；其中每个 MNI 体素从原生 EPI 阈值图取值。`aroma_features.tsv` 有 K 行、5 列：从 1 开始的成分编号与四项特征。`aroma_noise_components.txt` 每行一个从 1 开始的编号。两份清理影像均为 BOLD 原网格、原 TR、float32。混杂回归的输出只在启用 WM、CSF、运动、带通或全脑信号至少一项时写入。
+`ica/` 目录包含 X×Y×Z×K 成分图、阈值图、T×K mixing、频谱功率和定阶/收敛信息，文件名见 [PICA 输出](../melodic/README.md)。提供三项 MNI 配准参数时，另输出 `ica_thresholded_MNI152_2mm.nii.gz`，形状为 91×109×91×K，float32；其中每个 MNI 体素从原生 EPI 阈值图取值。`aroma_features.tsv` 有 K 行、5 列：从 1 开始的成分编号与四项特征。`aroma_noise_components.txt` 每行一个从 1 开始的编号。两份清理影像均为 BOLD 原网格、原 TR、float32。混杂回归的输出只在启用 WM、CSF、运动、带通或全脑信号至少一项时写入。
 
 ## 独立子函数
 

@@ -2,7 +2,7 @@
 
 `run_feat_core` 从一个原始 BIDS run 生成 PICA/FIX 前的 `filtered_func_data.nii.gz`。它估计每帧到 SBRef 的刚体运动，使用三次 B 样条在一次插值中重采样 BOLD，求 EPI 均值和脑掩膜，按整段掩膜内第 50 百分位缩放到 10000，再做高斯加权局部直线高通。缺少 SBRef 时以 BOLD 中间帧为参考。没有场图/GDC warp 时只做运动重采样；不会自行制造畸变场。
 
-脑提取默认使用 PyTorch SynthStrip 对重采样后的 EPI 均值求掩膜。若有同网格现成掩膜，传 `brain_mask`；`brain_extraction="otsu"` 保留无需权重的独立 EPI 掩膜算法。默认与官方 FEAT 的 BET/强度阈值掩膜定义不同，因此整链对照须分别记录掩膜差异和后续数值差异。完整 `run_fmri_pipeline` 会先对 SBRef（缺失时 BOLD 中间帧）运行 SynthStrip，再把该掩膜通过 `brain_mask` 显式交给本函数；本页独立调用的 `brain_mask=None` 则对运动校正后的 EPI 均值运行 SynthStrip。
+脑提取默认使用 PyTorch SynthStrip 对重采样后的 EPI 均值求掩膜。若有同网格现成掩膜，传 `brain_mask`；`brain_extraction="otsu"` 保留无需权重的独立 EPI 掩膜算法。默认与官方 FEAT 的 BET/强度阈值掩膜定义不同，因此整链对照须分别记录掩膜差异和后续数值差异。完整 `fMRIVolume_pipeline` 会先对 SBRef（缺失时 BOLD 中间帧）运行 SynthStrip，再把该掩膜通过 `brain_mask` 显式交给本函数；本页独立调用的 `brain_mask=None` 则对运动校正后的 EPI 均值运行 SynthStrip。
 
 ## BIDS 输入与调用
 

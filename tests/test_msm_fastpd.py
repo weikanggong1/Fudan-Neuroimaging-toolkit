@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from fnit.fmri import _fastpd_native
+from fnit.msm import _fastpd_native
 
 
 def test_hocr_fastpd_selects_joint_triangle_move():

@@ -96,22 +96,17 @@ def __getattr__(name):
         return getattr(fast_vbm, name)
     if name in ('FeatCoreResult', 'run_feat_core', 'BIDSInputs', 'locate_bids_inputs',
                 'BBRResult', 'register_bbr',
-                'FMRIPipelineResult', 'run_fmri_pipeline', 'T1MNIResult',
+                'FMRIVolumeResult', 'fMRIVolume_pipeline', 'T1MNIResult',
                 'register_t1_to_mni', 'resample_world',
                 'ICAResult', 'decompose_spatial_ica', 'AromaResult',
                 'run_aroma_pipeline', 'classify_aroma', 'denoise_aroma',
                 'clean_confounds', 'motion_regressors',
-                'SurfaceHemisphere', 'SurfaceProjectionResult', 'run_surface_projection',
+                'SurfaceHemisphere', 'SurfaceProjectionResult',
                 'create_fmriprep_cifti', 'run_fmriprep_surface_projection',
-                'SurfaceQCResult', 'make_ribbon_goodvoxels',
                 'MSMSulcInputs', 'prepare_msmsulc_inputs', 'run_msmsulc',
-                'run_newmsm_msmsulc',
-                'SurfacePipelineInputs', 'SurfacePipelineResult', 'run_surface_from_mni',
-                'run_surface_from_volume',
-                'MNISurfacePair', 'MNISurfaceResult', 'SurfacePreparationResult',
-                'T1SurfacePreparation', 'prepare_fmriprep_surface_inputs',
-                'prepare_mni_surface_geometry', 'prepare_t1w_surface_geometry',
-                'prepare_fs_sphere_projection_inputs'):
+                'FMRISurfaceResult', 'fMRISurface_pipeline',
+                'T1SurfacePair', 'T1SurfaceGeometry', 'T1SurfacePreparation',
+                'prepare_fmriprep_surface_inputs', 'prepare_t1w_surface_geometry'):
         from . import fmri
         return getattr(fmri, name)
     if name in ('UKBConnectome', 'ConnectomeResult'):

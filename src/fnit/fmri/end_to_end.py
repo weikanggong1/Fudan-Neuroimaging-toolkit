@@ -3,6 +3,8 @@
 from dataclasses import dataclass
 from pathlib import Path
 import json
+import shutil
+from tempfile import TemporaryDirectory
 import time
 
 import nibabel as nib
@@ -11,27 +13,24 @@ import torch
 
 from ..fast import TorchFAST
 from ..synthstrip import SynthStrip
-from .aroma_pipeline import AromaResult, run_aroma_pipeline
+from .aroma_pipeline import run_aroma_pipeline
 from .bids import locate_bids_inputs
-from .normalization import T1MNIResult, register_t1_to_mni, resample_world
-from .pipeline import FeatCoreResult, run_feat_core
-from .surface_pipeline import (SurfacePipelineInputs, SurfacePipelineResult,
-                               run_surface_from_mni, run_surface_from_volume)
+from .derivatives import ensure_derivative_dataset, fmri_derivative_paths, sidecar, write_json
+from .normalization import register_t1_to_mni, resample_world
+from .pipeline import run_feat_core
 
 
 @dataclass(frozen=True)
-class FMRIPipelineResult:
-    """Paths for the native FEAT stage, registration, ICA and final MNI BOLD."""
+class FMRIVolumeResult:
+    """Persistent BIDS Derivatives paths for a completed volume run."""
 
+    clean_native: Path
     clean_mni: Path
     mask_mni: Path
-    report: Path
-    feat: FeatCoreResult
-    aroma: AromaResult
+    t1_brain: Path
     bbr_matrix: Path
-    t1_to_mni: T1MNIResult
+    metadata: Path
     timing_seconds: dict[str, float]
-    surface: SurfacePipelineResult | None = None
 
 
 def _save_mask(data, reference, path):
@@ -66,9 +65,9 @@ def _select_t1(inputs, requested):
     return candidates[0]
 
 
-def run_fmri_pipeline(
+def fMRIVolume_pipeline(
     bids_root,
-    output_dir,
+    derivatives_root,
     *,
     subject,
     mni_template,
@@ -83,10 +82,6 @@ def run_fmri_pipeline(
     mni_brain_mask=None,
     registration_backend="synthmorph",
     fnirt_config=None,
-    surface_inputs: SurfacePipelineInputs | None = None,
-    surface_subject_dir=None,
-    surface_assets_dir=None,
-    wb_command="wb_command",
     synthstrip_weights=None,
     synthmorph_weights=None,
     ica_n_components=None,
@@ -112,22 +107,24 @@ def run_fmri_pipeline(
     fieldmaps or GDC warp are available in the specified UKB example. Any
     associated BIDS fieldmaps currently cause an explicit error in FEAT core.
     """
-    if surface_inputs is not None and surface_subject_dir is not None:
-        raise ValueError("surface_inputs and surface_subject_dir are mutually exclusive")
     if registration_backend == "fnirt":
         from ..fnirt import resolve_fnirt_config
         fnirt_config = resolve_fnirt_config(fnirt_config, default="t1")
     elif fnirt_config is not None:
         raise ValueError("fnirt_config requires registration_backend='fnirt'")
-    if (surface_subject_dir is None) != (surface_assets_dir is None):
-        raise ValueError("surface_subject_dir and surface_assets_dir must be provided together")
-    if surface_subject_dir is not None and not (regress_wm or regress_csf or regress_motion):
-        raise ValueError("surface_subject_dir requires WM, CSF, or motion regression")
-    output = Path(output_dir).expanduser().resolve()
+    inputs = locate_bids_inputs(
+        bids_root, subject=subject, session=session, task=task, run=run,
+        acquisition=acquisition, direction=direction,
+        reconstruction=reconstruction, echo=echo,
+    )
+    t1w = _select_t1(inputs, t1w_image)
+    paths = fmri_derivative_paths(inputs, t1w, derivatives_root)
+    if paths.clean_mni.exists() and not overwrite:
+        raise FileExistsError(paths.clean_mni)
+    ensure_derivative_dataset(paths.root, inputs.bids_root)
+    work = TemporaryDirectory(prefix="fnit-volume-")
+    output = Path(work.name)
     clean_mni = output / "filtered_func_data_clean_MNI152_2mm.nii.gz"
-    if clean_mni.exists() and not overwrite:
-        raise FileExistsError(clean_mni)
-    output.mkdir(parents=True, exist_ok=True)
     selected = device or ("cuda" if torch.cuda.is_available() else "cpu")
     if str(selected).startswith("cuda"):
         torch.backends.cuda.matmul.allow_tf32 = True
@@ -145,20 +142,6 @@ def run_fmri_pipeline(
             mask_image.affine, template.affine, atol=1e-4
         ):
             raise ValueError("mni_template must match the ICA-AROMA MNI152 2-mm mask grid")
-    inputs = locate_bids_inputs(
-        bids_root, subject=subject, session=session, task=task, run=run,
-        acquisition=acquisition, direction=direction,
-        reconstruction=reconstruction, echo=echo,
-    )
-    t1w = _select_t1(inputs, t1w_image)
-    if surface_subject_dir is not None:
-        scanner_orig = Path(surface_subject_dir).expanduser().resolve() / "mri/orig/001.mgz"
-        structural = nib.load(str(scanner_orig))
-        selected_t1 = nib.load(str(t1w))
-        if structural.shape != selected_t1.shape or not np.allclose(
-            structural.affine, selected_t1.affine, rtol=0, atol=1e-4
-        ):
-            raise ValueError("surface subject scanner T1 and selected BIDS T1 have different grids")
     mask_dir = output / "masks"
     mask_dir.mkdir(exist_ok=True)
     reference = _reference_image(inputs, output / "reference_epi.nii.gz")
@@ -307,15 +290,6 @@ def run_fmri_pipeline(
         output_mask=mask_mni, batch_size=batch_size, device=selected,
     )
     timing["mni_resampling"] = time.perf_counter() - started
-    surface = None
-    if surface_inputs is not None:
-        started = time.perf_counter()
-        surface = run_surface_from_mni(
-            clean_mni=clean_mni, mni_reference=mni_template,
-            inputs=surface_inputs, output_dir=output / "surface",
-            overwrite=overwrite,
-        )
-        timing["surface_projection"] = time.perf_counter() - started
     timing["total"] = sum(timing.values())
     report = output / "pipeline_report.json"
     report.write_text(json.dumps({
@@ -348,39 +322,59 @@ def run_fmri_pipeline(
             "feat_filtered": str(feat.filtered_func_data.relative_to(output)),
             "aroma_thresholded_ic_mni": "aroma/ica_thresholded_MNI152_2mm.nii.gz",
             "aroma_clean_native": str(clean_native.relative_to(output)),
-            "surface_dtseries": (
-                str(surface.projection.dtseries.relative_to(output))
-                if surface is not None else None
-            ),
-            "surface_coverage_report": (
-                str(surface.projection.coverage_report.relative_to(output))
-                if surface is not None else None
-            ),
-            "surface_goodvoxels": (
-                str(surface.qc.goodvoxels.relative_to(output))
-                if surface is not None and surface.qc is not None else None
-            ),
         },
     }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    if surface_subject_dir is not None:
-        started = time.perf_counter()
-        surface = run_surface_from_volume(
-            volume_dir=output, recon_all=surface_subject_dir,
-            hcp_assets_dir=surface_assets_dir, output_dir=output / "surface",
-            wb_command=wb_command, device=selected, overwrite=overwrite,
-        )
-        timing["surface_projection"] = time.perf_counter() - started
-        timing["total"] = sum(value for key, value in timing.items() if key != "total")
-        details = json.loads(report.read_text(encoding="utf-8"))
-        details["timing_seconds"] = timing
-        details["outputs"]["surface_dtseries"] = str(surface.projection.dtseries.relative_to(output))
-        details["outputs"]["surface_coverage_report"] = str(
-            surface.projection.coverage_report.relative_to(output)
-        )
-        report.write_text(json.dumps(details, ensure_ascii=False, indent=2) + "\n",
-                          encoding="utf-8")
-    return FMRIPipelineResult(
-        clean_mni=clean_mni, mask_mni=mask_mni, report=report,
-        feat=feat, aroma=aroma, bbr_matrix=bbr_matrix,
-        t1_to_mni=t1_to_mni, timing_seconds=timing, surface=surface,
+    for source, destination in (
+        (clean_native, paths.clean_native), (clean_mni, paths.clean_mni),
+        (mask_mni, paths.mask_mni), (t1_brain, paths.t1_brain),
+        (bbr_matrix, paths.bbr_matrix),
+    ):
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source, destination)
+    raw_bold = inputs.bold.relative_to(inputs.bids_root).as_posix()
+    raw_t1w = t1w.relative_to(inputs.bids_root).as_posix()
+    metadata = {
+        **{key: inputs.bold_metadata[key] for key in (
+            "EchoTime", "FlipAngle", "MagneticFieldStrength", "Manufacturer",
+            "PhaseEncodingDirection", "Units",
+        ) if key in inputs.bold_metadata},
+        "TaskName": inputs.task, "RepetitionTime": inputs.tr,
+        "SkullStripped": True,
+        "Sources": [f"bids:raw:{raw_bold}", f"bids:raw:{raw_t1w}"],
+        "FNIT": {
+            "SourceT1w": raw_t1w,
+            "ConfoundRegression": {"wm": regress_wm, "csf": regress_csf,
+                                  "motion": regress_motion},
+            "RegistrationBackend": registration_backend,
+            "TimingSeconds": timing,
+            "Report": json.loads(report.read_text(encoding="utf-8")),
+        },
+    }
+    for destination in (paths.clean_native, paths.clean_mni):
+        details = dict(metadata)
+        if destination == paths.clean_mni:
+            details["Resolution"] = "2 mm isotropic"
+        else:
+            reference = inputs.sbref or inputs.bold
+            details["SpatialReference"] = (
+                f"bids:raw:{reference.relative_to(inputs.bids_root).as_posix()}"
+            )
+        write_json(sidecar(destination), details)
+    write_json(sidecar(paths.mask_mni), {"Sources": [f"bids:raw:{raw_bold}"],
+                                                "Resolution": "2 mm isotropic",
+                                                "Type": "Brain"})
+    write_json(sidecar(paths.t1_brain), {
+        "Sources": [f"bids:raw:{raw_t1w}"],
+        "SkullStripped": True,
+    })
+    write_json(paths.bbr_matrix.with_suffix(".json"), {
+        "Sources": [f"bids:raw:{raw_bold}", f"bids:raw:{raw_t1w}"],
+        "Description": "EPI reference to T1w affine in FSL FLIRT matrix convention",
+    })
+    work.cleanup()
+    return FMRIVolumeResult(
+        clean_native=paths.clean_native, clean_mni=paths.clean_mni,
+        mask_mni=paths.mask_mni, t1_brain=paths.t1_brain,
+        bbr_matrix=paths.bbr_matrix, metadata=sidecar(paths.clean_mni),
+        timing_seconds=timing,
     )

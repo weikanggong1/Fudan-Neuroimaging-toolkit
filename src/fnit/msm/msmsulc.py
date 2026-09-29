@@ -10,8 +10,8 @@ from scipy.spatial import cKDTree
 import torch
 import torch.nn.functional as F
 
-from .surface_msmsulc import _surface, _smoothing_graph, _affine_initialization
-from .surface_registration import MSMSulcInputs
+from ._affine import _surface, _smoothing_graph, _affine_initialization
+from .prepare import MSMSulcInputs
 
 def _ico(level):
     a,b=0.8506508084,0.5257311121
@@ -310,7 +310,7 @@ def _repair_folds(original, deformed, faces, device):
     return corrected.astype(np.float32),len(inverted),float(movement.max())
 
 
-def run_newmsm_msmsulc(
+def run_msmsulc(
     inputs: dict[str, MSMSulcInputs], output_dir: str | Path, *,
     device: str = "cuda:0",
 ) -> dict[str, Path]:

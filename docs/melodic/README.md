@@ -1,18 +1,18 @@
-# 单被试空间 PICA（PyTorch）
+# FNIT MELODIC：单被试空间 PICA
 
-`decompose_spatial_ica` 对一张 4D BOLD 做单被试空间 ICA。输入须先完成所选 FEAT 预处理；函数本身不做运动校正、畸变校正或配准。它先按体素去时间均值，用初始 PCA 的残差估计体素方差，再做时间 PCA 白化和空间对称 FastICA。默认 `n_components=None` 用平滑度修正后的 Laplace PPCA 选阶；空间成分按残差噪声标准化，Gaussian/正负 Gamma 混合模型给每个体素估计“非背景”后验概率，默认保留概率 ≥0.5 的值。该实现仅依赖 PyTorch、NumPy、nibabel，不在实际处理路径调用 FSL。[MELODIC 官方说明](https://fsl.fmrib.ox.ac.uk/fsl/docs/resting_state/melodic.html)；[当前源码：PCA](https://git.fmrib.ox.ac.uk/fsl/melodic/-/blob/master/melpca.cc)、[ICA](https://git.fmrib.ox.ac.uk/fsl/melodic/-/blob/master/melica.cc)、[混合模型](https://git.fmrib.ox.ac.uk/fsl/melodic/-/blob/master/melgmix.cc)。
+`decompose_spatial_ica` 对一张 4D BOLD 做单被试空间 ICA。输入须先完成所选 FEAT 预处理；函数本身不做运动校正、畸变校正或配准。它先按体素去时间均值，用初始 PCA 的残差估计体素方差，再做时间 PCA 白化和空间对称 FastICA。默认 `n_components=None` 用平滑度修正后的 Laplace PPCA 选阶；空间成分按残差噪声标准化，Gaussian/正负 Gamma 混合模型给每个体素估计“非背景”后验概率，默认保留概率 ≥0.5 的值。该实现仅依赖 PyTorch、NumPy、nibabel，不在实际处理路径调用 FSL。
 
 ## 输入和调用
 
 `input_bold` 是 4D NIfTI（X×Y×Z×T，T≥6）；`brain_mask` 是同网格 3D NIfTI，非零值表示参与分解的体素。两者的前三维尺寸和 affine 必须一致。`output_dir` 是输出目录。示例中的路径需要换成实际绝对路径。
 
 ```python
-from fnit import decompose_spatial_ica
+from fnit.melodic import decompose_spatial_ica
 
 ica = decompose_spatial_ica(
-    input_bold="/absolute/path/filtered_func_data.nii.gz",  # 已预处理的 4D BOLD；X×Y×Z×T
-    brain_mask="/absolute/path/mask.nii.gz",                 # 与 BOLD 同网格的 3D 脑掩膜
-    output_dir="/absolute/path/pica",                       # 输出目录；不存在则创建
+    input_bold="/absolute/path/bids/derivatives/fnit/sub-0001/func/sub-0001_task-rest_desc-preproc_bold.nii.gz",  # 已预处理的 4D BOLD；X×Y×Z×T
+    brain_mask="/absolute/path/bids/derivatives/fnit/sub-0001/func/sub-0001_task-rest_desc-brain_mask.nii.gz",                 # 与 BOLD 同网格的 3D 脑掩膜
+    output_dir="/absolute/path/work/melodic",                       # 输出目录；不存在则创建
     n_components=None,                                       # None：Laplace PPCA 自动定阶；整数 K：固定 K
     device="cuda:0",                                        # PyTorch 设备；也可填 "cpu"
     voxel_batch_size=8192,                                  # 每次处理的脑内体素数
@@ -68,3 +68,8 @@ melodic -i /absolute/path/filtered_func_data.nii.gz \
 ## 仍有差异
 
 FSL 的 PPCA、IC 求解及混合模型含重启、Gaussian 混合模型回退和更多推断分支；此处实现单次对称 ICA 与三类 Gaussian/Gamma 推断，尚未逐项复现所有分支。自动定阶一致、IC 中位相关较高不代表每张 IC 一致；5% 分位数反映仍有明显不同的成分。本次标量和源码哈希见[机器可读汇总](../../validation/fmri/pica_summary.json)。具体源码版本、随机初始化、停止阈值、FSL 异常退出和完整阈值图比较都应随基准记录。ICA-AROMA 的分类结果因此不能直接称为与官方逐成分相同。
+
+## 参考文献与原实现
+
+- Beckmann 与 Smith，*Probabilistic Independent Component Analysis for Functional Magnetic Resonance Imaging*，IEEE TMI，2004，[DOI](https://doi.org/10.1109/TMI.2003.822821)。
+- 原实现：[FSL MELODIC 文档](https://fsl.fmrib.ox.ac.uk/fsl/docs/resting_state/melodic.html)、[PCA 源码](https://git.fmrib.ox.ac.uk/fsl/melodic/-/blob/master/melpca.cc)、[ICA 源码](https://git.fmrib.ox.ac.uk/fsl/melodic/-/blob/master/melica.cc)、[混合模型源码](https://git.fmrib.ox.ac.uk/fsl/melodic/-/blob/master/melgmix.cc)。

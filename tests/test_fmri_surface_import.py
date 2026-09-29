@@ -18,15 +18,15 @@ def reject_surfa(name, *args, **kwargs):
 
 builtins.__import__ = reject_surfa
 surface = importlib.import_module("fnit.fmri.surface")
-from fnit import run_surface_projection
+from fnit import fMRISurface_pipeline
 from fnit.fmri import (
-    SurfaceHemisphere, SurfacePipelineInputs, run_surface_from_mni,
-    prepare_fs_sphere_projection_inputs,
+    SurfaceHemisphere, FMRISurfaceResult, fMRISurface_pipeline,
+    prepare_fmriprep_surface_inputs,
 )
-assert run_surface_projection is surface.run_surface_projection
+assert callable(fMRISurface_pipeline)
 assert SurfaceHemisphere is surface.SurfaceHemisphere
-assert callable(run_surface_from_mni)
-assert callable(prepare_fs_sphere_projection_inputs)
+assert callable(fMRISurface_pipeline)
+assert callable(prepare_fmriprep_surface_inputs)
 assert "surfa" not in sys.modules
 """
     result = subprocess.run(
@@ -39,8 +39,8 @@ def test_volumetric_public_api_still_resolves():
     code = """
 import fnit.fmri as fmri
 from fnit.fmri import end_to_end, normalization
-assert fmri.FMRIPipelineResult is end_to_end.FMRIPipelineResult
-assert fmri.run_fmri_pipeline is end_to_end.run_fmri_pipeline
+assert fmri.FMRIVolumeResult is end_to_end.FMRIVolumeResult
+assert fmri.fMRIVolume_pipeline is end_to_end.fMRIVolume_pipeline
 assert fmri.T1MNIResult is normalization.T1MNIResult
 assert fmri.register_t1_to_mni is normalization.register_t1_to_mni
 assert fmri.resample_world is normalization.resample_world

@@ -8,7 +8,7 @@ import numpy as np
 
 from .aroma import classify_aroma, denoise_aroma
 from .confounds import clean_confounds
-from .ica import ICAResult, decompose_spatial_ica
+from ..melodic import ICAResult, decompose_spatial_ica
 
 
 @dataclass(frozen=True)

@@ -1,130 +1,87 @@
-# 体积静息态 fMRI：原始 BIDS 到 MNI152 2 mm
+# fMRI 体积流程
 
-`run_fmri_pipeline` 一次处理一个 BIDS BOLD run。它先用 SynthStrip 提取 SBRef（缺失时取 BOLD 中间帧）与 T1 的脑掩膜，再运行运动校正和 FEAT 核心处理、TorchFAST 白质/脑脊液分割、EPI→T1 BBR、T1→MNI 非线性配准、单被试空间 PICA、ICA-AROMA 和可选 WM/CSF/运动回归。高层入口把 SBRef 掩膜作为 `brain_mask` 传给 FEAT；独立 `run_feat_core` 在未提供 `brain_mask` 时则从运动校正后的 EPI 均值提取掩膜，两条入口的默认掩膜输入不同。最后把清理后的 4D BOLD 通过合成变换一次插值到 MNI152 2 mm 网格。以回归后的 volume 结果和同被试 recon-all 运行 `run_surface_from_volume`，按[表面投影页](surface.md)的 fMRIPrep 顺序分别使用 T1w BOLD 投影皮层、MNI BOLD 提供皮层下信号，生成 fsLR32k/91k CIFTI。GPU 矩阵运算默认启用 TF32，影像以 float32 保存。
+`fMRIVolume_pipeline` 每次处理一个原始 BIDS BOLD run，输出 BIDS Derivatives。步骤依次为 SynthStrip 脑提取、FEAT 核心运动校正与高通、TorchFAST 组织分割、BBR、T1→MNI152NLin6Asym 2 mm 配准、[FNIT MELODIC/PICA](../melodic/README.md)、ICA-AROMA 和可选 WM/CSF/运动回归。最后分别保存个体 EPI 网格与 MNI 网格的清理后 BOLD。运算时不调用 FSL、FreeSurfer 或 fMRIPrep。GPU 默认允许 TF32。
 
-这条流程没有 GDC 和 B0 畸变估计。指定 UKB rfMRI ZIP 没有原始 B0 场图/幅度图，也没有 GDC warp；遇到与 BOLD 关联的 BIDS 场图但缺少已估计 warp 时，FEAT 核心会明确报错。清理使用 ICA-AROMA，不能与 UKB 的 FIX 输出逐体素相同。PyTorch FNIRT 的 T1 分支联合优化形变、5 系数强度多项式和 50 mm 偏置场；与 FSL 仍有数值差异，见[同输入对照](normalization.md)。
+## 输入与安装
 
-## 安装、权重和输入
-
-在仓库根目录执行 `conda env create -f environment.yml`，激活 `fnit` 后执行 `fnit-setup-weights --model fmri`，即可准备 SynthStrip 和 SynthMorph deform 权重。选择 `registration_backend="fnirt"` 时只需 `fnit-setup-weights --model synthstrip`。运行时不调用 FSL、FreeSurfer 或其 Python 工作流包。MNI152 T1 2 mm 模板是单独的影像输入；传入模板绝对路径，推荐同时传入同网格的脑掩膜。两份 NIfTI 可从 [FSL 官方 `fsl-data_standard` 固定版数据包](https://fsl.fmrib.ox.ac.uk/fsldownloads/fslconda/public/noarch/fsl-data_standard-2208.0-0.tar.bz2)的 `data/standard/` 目录取得，文件名分别为 `MNI152_T1_2mm.nii.gz` 和 `MNI152_T1_2mm_brain_mask.nii.gz`；使用前核对[官方模板说明](https://fsl.fmrib.ox.ac.uk/fsl/docs/utilities/dataset_clitools.html)与[许可](https://fsl.fmrib.ox.ac.uk/fsl/docs/license.html)。仅需模板数据，FNIT 运行时不调用 FSL。`mni_template` 必须为 3D、三个体素边长均为 2 mm，且尺寸和仿射与包内 ICA-AROMA 标准掩膜完全一致；不同来源的 2 mm MNI 网格即使体素大小相同，也会在运行前报错。
-
-输入采用原始 BIDS 目录，至少有一份 4D BOLD、对应 JSON 的 `TaskName` 与秒单位 `RepetitionTime`，以及同被试 3D T1w。SBRef 可选；缺失时使用 BOLD 中间帧。多个 run/T1w 候选时明确填写实体或 `t1w_image`。功能不从 UKB ZIP 直接读取。
+在仓库根目录运行 `conda env create -f environment.yml`，激活 `fnit`，再运行 `fnit-setup-weights --model fmri`。选 `registration_backend="fnirt"` 时只需要 SynthStrip 权重。`mni_template` 须为与 FNIT ICA-AROMA 掩膜同网格的 MNI152 T1 2 mm NIfTI；`mni_brain_mask` 可选，但需与模板同网格。原始 BIDS 至少包含 `dataset_description.json`、`sub-<label>/func/*_bold.nii.gz` 及含 `TaskName`、`RepetitionTime` 的 JSON、同被试 `anat/*_T1w.nii.gz`。SBRef 可选。多 run、echo 或 T1w 候选需明确选择。
 
 ```text
-bids_root/
+bids/
 ├── dataset_description.json
 └── sub-0001/
     ├── anat/sub-0001_T1w.nii.gz
     └── func/
         ├── sub-0001_task-rest_bold.nii.gz
-        ├── sub-0001_task-rest_bold.json
-        └── sub-0001_task-rest_sbref.nii.gz  # 可选
+        └── sub-0001_task-rest_bold.json
 ```
-
-`locate_bids_inputs` 检查 BIDS 文件名、影像维度、JSON 和 NIfTI 的 TR，并返回 BOLD、T1w、SBRef、关联场图及元数据的路径。选中同一 run 的规则见 [FEAT 核心](feat.md)。
 
 ## Python 调用
 
-下例每个路径都须替换为本机绝对路径。权重装入 FNIT 缓存或设定 `FNIT_WEIGHTS` 后，两个 `*_weights` 参数也可填 `None`。
-
 ```python
-from fnit import run_fmri_pipeline
+from fnit import fMRIVolume_pipeline
 
-result = run_fmri_pipeline(
-    bids_root="/absolute/path/bids",               # 原始 BIDS 数据集根目录
-    output_dir="/absolute/path/sub-0001_fmri",    # 本次运行的输出目录
-    subject="0001",                               # BIDS sub 标签，不含 sub-
-    mni_template="/absolute/path/MNI152_T1_2mm.nii.gz",  # 3D MNI152 T1 2 mm 参考影像
-    session=None,                                  # ses 标签；无 session 填 None
-    task="rest",                                  # task 标签，与 BOLD 文件名对应
-    run=None,                                     # run 标签；多 run 时填写具体值
-    acquisition=None,                             # acq 标签；多候选时填写
-    direction=None,                               # dir 标签；如 AP/PA
-    reconstruction=None,                          # rec 标签；多候选时填写
-    echo=None,                                    # echo 标签；多 echo 时填写
-    t1w_image=None,                               # 多张 BIDS T1w 时指定其中一张的绝对路径
-    mni_brain_mask="/absolute/path/MNI152_T1_2mm_brain_mask.nii.gz",  # 与模板同网格的 3D mask；None 时对模板做 SynthStrip
-    registration_backend="synthmorph",            # T1→MNI 形变：synthmorph 或 fnirt
-    fnirt_config=None,                             # fnirt 分支默认 T1 预设；可传 T1FNIRTConfig() 或修改后的配置
-    surface_inputs=None,                          # 已准备的 MNI 网格、ROI 与注册球面；默认不投影表面
-    surface_subject_dir=None,                     # 预生成的同被试结构表面根目录；与 surface_inputs 二选一
-    surface_assets_dir=None,                      # HCP 公开 fsLR 模板根目录；与 surface_subject_dir 同时提供
-    wb_command="wb_command",                      # Connectome Workbench 可执行文件或绝对路径
-    synthstrip_weights="/absolute/path/synthstrip.1.pt",  # 脑提取权重；缓存就绪时可为 None
-    synthmorph_weights="/absolute/path/synthmorph.deform.3.h5",  # SynthMorph 形变权重；fnirt 分支不用
-    ica_n_components=None,                        # PICA 自动定阶；整数表示指定 IC 数
-    aroma_mode="nonaggr",                          # ICA-AROMA 非积极回归；也可填 aggr
-    regress_wm=False,                             # AROMA 后是否回归白质均值信号
-    regress_csf=False,                            # AROMA 后是否回归脑脊液均值信号
-    regress_motion=False,                         # AROMA 后是否回归运动参数
-    motion_model=24,                               # 运动回归列数：6、12 或 24
-    bandpass=None,                                # 可选 (低频Hz, 高频Hz)，如 (0.01, 0.1)
-    global_signal=False,                          # 是否同时回归全脑均值
-    highpass_cutoff_seconds=100.0,                 # FEAT 高通截止周期，秒
-    device="cuda:0",                              # PyTorch 计算设备；None 自动选择
-    batch_size=8,                                 # 每批重采样的 BOLD 帧数
-    motion_iterations=(35, 25, 15),               # 运动优化三层迭代次数
-    ica_max_iter=500,                             # PICA 独立成分迭代上限
-    n_splits=1000,                                # AROMA 运动相关特征的随机抽样次数
-    random_state=0,                               # ICA 初始化和 AROMA 抽样随机种子
-    overwrite=False,                              # 已有最终文件时是否覆盖
+result = fMRIVolume_pipeline(
+    bids_root="/absolute/path/bids",                   # 原始 BIDS 数据集根目录
+    derivatives_root="/absolute/path/bids/derivatives/fnit",  # FNIT BIDS Derivatives 根目录
+    subject="0001",                                   # sub 标签，不含 sub-
+    session=None,                                      # ses 标签；没有 session 时为 None
+    task="rest",                                      # task 标签
+    run=None,                                         # run 标签；多 run 时指定
+    acquisition=None,                                 # acq 标签；多候选时指定
+    direction=None,                                   # dir 标签；多候选时指定
+    reconstruction=None,                              # rec 标签；多候选时指定
+    echo=None,                                        # echo 标签；多 echo 时指定
+    t1w_image=None,                                   # 同被试唯一 T1w；多张时传绝对路径
+    mni_template="/absolute/path/MNI152_T1_2mm.nii.gz",  # MNI152 2 mm 参考 NIfTI
+    mni_brain_mask=None,                              # 同网格模板掩膜；None 则用 SynthStrip
+    registration_backend="synthmorph",                # T1→MNI：synthmorph 或 fnirt
+    fnirt_config=None,                                # fnirt 分支配置；默认 T1 预设
+    synthstrip_weights=None,                          # None 从 FNIT 权重缓存读取
+    synthmorph_weights=None,                          # None 从 FNIT 权重缓存读取
+    ica_n_components=None,                            # None 自动定阶；整数固定 IC 数
+    aroma_mode="nonaggr",                              # AROMA 回归模式：nonaggr/aggr
+    regress_wm=True,                                  # 回归白质均值信号
+    regress_csf=True,                                 # 回归脑脊液均值信号
+    regress_motion=True,                              # 回归运动参数
+    motion_model=24,                                  # 运动项数：6、12、24
+    bandpass=None,                                    # 可选频段 (低Hz, 高Hz)
+    global_signal=False,                              # 是否回归全脑均值
+    highpass_cutoff_seconds=100.0,                    # FEAT 高通截止周期，秒
+    device="cuda:0",                                  # PyTorch 设备
+    batch_size=8,                                     # BOLD 重采样每批帧数
+    motion_iterations=(35, 25, 15),                   # 三层运动优化迭代数
+    ica_max_iter=500,                                 # ICA 迭代上限
+    n_splits=1000,                                    # AROMA 随机抽样次数
+    random_state=0,                                   # ICA/AROMA 随机种子
+    overwrite=False,                                  # 是否覆盖同名最终结果
 )
-print(result.clean_mni)                           # X×Y×Z×T，MNI152 2 mm 清理后 BOLD
-print(result.mask_mni)                            # 同网格 3D 二值脑掩膜
-print(result.report)                              # 参数、尺寸、耗时和显存的 JSON
-print(result.timing_seconds)                      # 各阶段墙钟秒数
+print(result.clean_native)  # 个体 EPI 空间清理后 4D BOLD
+print(result.clean_mni)     # MNI152 2 mm 清理后 4D BOLD
 ```
 
-命令行处理同一个 BIDS run；`fnit-fmri run --help` 列出上述可选参数：
-
-```bash
-fnit-fmri run --bids-root /absolute/path/bids --subject 0001 \
-  --mni-template /absolute/path/MNI152_T1_2mm.nii.gz \
-  --mni-brain-mask /absolute/path/MNI152_T1_2mm_brain_mask.nii.gz \
-  --registration-backend synthmorph --device cuda:0 \
-  --output-dir /absolute/path/sub-0001_fmri
-```
-
-运行 T1 FNIRT 时，将 `--registration-backend` 的值改为 `fnirt`；
-`--fnirt-preset` 省略时为 `t1`，也可显式写 `--fnirt-preset t1`。Python 入口的
-`fnirt_config` 可传 `dataclasses.replace(T1FNIRTConfig(), ...)` 调整已实现参数；
-仍需同一
-`--bids-root`、`--subject`、`--mni-template`、`--mni-brain-mask` 和独立的
-`--output-dir`。该分支需要 SynthStrip 权重，不读取 SynthMorph deform 权重。
+命令行：`fnit-fmri volume --bids-root /absolute/path/bids --derivatives-root /absolute/path/bids/derivatives/fnit --subject 0001 --mni-template /absolute/path/MNI152_T1_2mm.nii.gz --regress-wm --regress-csf --regress-motion --device cuda:0`。完整选项见 `fnit-fmri volume --help`。
 
 ## 输出
 
-| 路径 | 结构和含义 |
+以 `sub-0001_task-rest` 为例，`derivatives_root/dataset_description.json` 声明 BIDS Derivatives 数据集；下列文件位于 `sub-0001/`。保留源 BIDS 的 ses、task、acq、dir、run、echo 等实体。NIfTI 为 float32；掩膜为 3D 二值图，BOLD 为 X×Y×Z×T。
+
+| 路径（省略 `sub-0001/`） | 含义 |
 |---|---|
-| `feat/filtered_func_data.nii.gz` | 原生 EPI 网格 X×Y×Z×T float32；运动校正、掩膜、整段强度缩放及高通后的 PICA 输入。FEAT 子文件见 [FEAT 核心](feat.md)。 |
-| `masks/epi_synthstrip.nii.gz` | SBRef 或 BOLD 中间帧网格的 SynthStrip 二值脑掩膜；作为高层 FEAT 的显式脑掩膜。 |
-| `T1_brain.nii.gz`、`masks/T1_synthstrip.nii.gz` | T1 原网格的 SynthStrip 脑影像及二值掩膜。 |
-| `masks/T1_pve_wm.nii.gz`、`masks/T1_pve_csf.nii.gz` | T1 原网格的 TorchFAST 白质、脑脊液部分体积分数；BBR 使用 `masks/T1_wmseg.nii.gz`。 |
-| `masks/csf_epi.nii.gz`、`masks/wm_epi.nii.gz` | EPI 网格的高概率 CSF 和 WM 掩膜，仅供相应的可选信号回归。 |
-| `reg/example_func2highres.mat` | EPI→T1 的 4×4 FLIRT scaled-mm 矩阵。原理与实测见 [BBR](bbr.md)。 |
-| `reg/T1_to_MNI152_2mm_affine.mat`、`reg/MNI152_2mm_to_T1_pull_ras.nii.gz` | T1→MNI 初始仿射与 MNI 网格上指向 T1 的 3 分量 RAS 毫米位移场。见 [非线性配准](normalization.md)。 |
-| `aroma/ica/`、`aroma/ica_thresholded_MNI152_2mm.nii.gz` | 原生 EPI 空间的 PICA 成分、mixing 与频谱；另把阈值成分图经 BBR 和 T1→MNI 形变投到 MNI152 2 mm，供 ICA-AROMA 空间分类。见 [PICA](pica.md)。 |
-| `aroma/aroma_features.tsv`、`aroma/aroma_noise_components.txt` | 四项 ICA-AROMA 特征，以及从 1 开始编号的噪声成分。见 [AROMA/回归](aroma_confounds.md)。 |
-| `aroma/filtered_func_data_aroma.nii.gz` | 原生 EPI 网格的 AROMA 清理后 4D BOLD。启用额外回归时另有 `aroma/filtered_func_data_aroma_confounds.nii.gz`。 |
-| `masks/brain_MNI152_2mm.nii.gz` | MNI 网格上 EPI 掩膜与 MNI 模板脑掩膜的交集；uint8。 |
-| `filtered_func_data_clean_MNI152_2mm.nii.gz` | 最终 MNI152 2 mm float32 BOLD；脑掩膜外为 0，时间轴继承 BOLD 的 TR。 |
-| `surface/clean_T1w.nii.gz`、`surface/projection/` | 设置 `surface_subject_dir` 与 `surface_assets_dir` 后，回归后的个体 EPI 重采样为 T1w BOLD，再按 fMRIPrep 顺序生成双侧 32k GIFTI 与 91k CIFTI；也可独立调用 `run_surface_from_volume` 指定输出目录。显式传入 `surface_inputs` 时仍使用旧的 MNI 表面投影接口。输出结构见[表面投影页](surface.md)。 |
-| `pipeline_report.json` | 不含被试编号的影像尺寸、TR、实际 IC 数、回归配置、各阶段耗时和 PyTorch 峰值显存；FNIRT 分支的 `t1_to_mni_qc` 记录六级配准与强度拟合，SynthMorph 分支为 `null`。启用表面阶段时还记录 CIFTI、覆盖率报告与 goodvoxels 的相对路径。不代表整卡显存。 |
+| `func/sub-0001_task-rest_space-boldref_desc-clean_bold.nii.gz` | 原生 EPI 参考网格的清理后 BOLD，供 surface 皮层投影前重采样到 T1w。 |
+| `func/sub-0001_task-rest_space-MNI152NLin6Asym_res-2_desc-clean_bold.nii.gz` | MNI152 2 mm 清理后 BOLD，供皮层下 CIFTI。相邻 JSON 记录 TR、来源、回归配置和耗时。 |
+| `func/sub-0001_task-rest_space-MNI152NLin6Asym_res-2_desc-brain_mask.nii.gz` | MNI 网格脑掩膜。 |
+| `func/sub-0001_task-rest_from-boldref_to-T1w_mode-image_xfm.txt` | BBR FLIRT 4×4 矩阵；surface 流程用它把 EPI BOLD 采样到 T1w。 |
+| `anat/sub-0001_desc-brain_T1w.nii.gz` | SynthStrip 提取的 T1w 脑影像；与源 T1w 同网格。 |
 
-CSF/WM 组织掩膜由 TorchFAST 部分体积分数经 BBR 投到 EPI，再在 EPI 脑掩膜内以 0.8 阈值生成，仅用于可选回归。ICA-AROMA 分类采用[官方 ICA-AROMA](https://github.com/maartenmennes/ICA-AROMA)的三张 MNI152 2 mm CSF、edge、out 掩膜，文件随 `fnit` 安装；阈值 IC 图先从 EPI 空间经 BBR 和 T1→MNI 形变投到相同网格。分类结果仍受本包 PICA 成分和配准差异影响。`regress_wm`、`regress_csf` 和 `regress_motion` 只改变 AROMA 后的结果，不回写 `feat/filtered_func_data.nii.gz`。
+`FMRIVolumeResult` 返回上述五条绝对路径、MNI BOLD 的 JSON 路径及各阶段耗时。中间的 FEAT、PICA 与 AROMA 文件只在运行时工作目录中存在。表面处理需随后调用 [`fMRISurface_pipeline`](surface.md)。
 
-## 实测对照和边界
+## 真实数据对照
 
-本例真实 UKB BOLD 为 88×88×64×490、TR 0.735 秒。rfMRI ZIP 中的 BOLD/SBRef 是原始影像；该数据位置没有可核实的 scanner raw T1w。本次整链测试的 BIDS T1w 是同被试已有的去脑 T1 NIfTI；其网格与 UKB T1 ZIP 中的 `orig/001.mgz` 一致，但强度并非逐体素相同，具体生成步骤未知，不能作为扫描仪原始 T1w 的验证证据。模板与权重也仅从服务器已有文件读取。私有影像不随仓库发布，公开结果仅有汇总标量。
+一例 UKB 490 帧 BOLD 的 no-GDC/no-B0 FEAT 同输入对照：滤波后 4D Pearson r 0.997429、MAE 426.525；交集掩膜内逐体素时间相关中位 0.973472。FNIT 的整链 490 帧 MNI 输出尺寸 91×109×91×490，TR 0.735 秒。细分时间、T1→MNI 精度及限制见[验证摘要](../../validation/fmri/README.md)。该既有对照检查的是算法阶段；重构后的 BIDS 写出路径还需单独验收。ICA-AROMA 与 UKB FIX 的数值不同。
 
-各函数的同输入精度和耗时分别列于 [FEAT 核心](feat.md)、[BBR](bbr.md)、[PICA](pica.md)、[非线性配准](normalization.md)和[AROMA/回归](aroma_confounds.md)。整链的最终实测结果与官方 no-GDC/no-B0 FEAT 对照见 [fMRI 验证页](../../validation/fmri/README.md)。
+## 参考文献与原实现
 
-同一例 490 帧 BOLD 的默认 SynthMorph 分支此前已从原始 BIDS 成功运行至 MNI152 2 mm：输出 91×109×91×490、float32、TR 0.735 秒；ICA 收敛于 96 个成分，AROMA 判定 48 个噪声成分。整链墙钟 532.22 秒，PyTorch 峰值保留显存 17.58 GB。该结果见[原有整链摘要](../../validation/fmri/e2e_summary.json)。
-
-当前代码的 `registration_backend="fnirt"` volume 分支完成了相同 BIDS BOLD/SBRef/T1 的 490 帧整链，退出码 0。输出为 91×109×91×490 的 float32 NIfTI，TR 0.735 秒，MNI 网格匹配；442,288,210 个数值全部有限，脑掩膜外最大绝对值为 0。默认六级 T1 FNIRT 联合优化形变与强度参数；ICA 收敛于 95 个成分，AROMA 判定 63 个噪声成分。进程墙钟 1202.18 秒，PyTorch 峰值分配 6.24 GB、保留 7.31 GB。两次整链在共享 GPU 上分时运行，不能据此作公平速度排序。输入/输出 SHA256、分步耗时及全体素检查见[FNIRT 整链报告](../../validation/fmri/fmri_volume_fnirt_20260929.public.json)；T1 配准的 FSL 同输入对照见[配准报告](../../validation/fmri/t1_fnirt_20260929.public.json)。最终 AROMA 结果没有可逐体素配对的 UKB FIX 参照。
-
-## Reference
-
-- 参考文献：Smith et al., *Advances in functional and structural MR image analysis and implementation as FSL*, NeuroImage (2004), [doi:10.1016/j.neuroimage.2004.07.051](https://doi.org/10.1016/j.neuroimage.2004.07.051)。
-- 参考文献：Pruim et al., *ICA-AROMA: A robust ICA-based strategy for removing motion artifacts from fMRI data*, NeuroImage (2015), [doi:10.1016/j.neuroimage.2015.02.064](https://doi.org/10.1016/j.neuroimage.2015.02.064)。
-- 原实现代码库：[FSL `feat5`](https://git.fmrib.ox.ac.uk/fsl/feat5)；[ICA-AROMA](https://github.com/maartenmennes/ICA-AROMA)。
+- Smith 等，*Advances in functional and structural MR image analysis and implementation as FSL*，NeuroImage，2004，[DOI](https://doi.org/10.1016/j.neuroimage.2004.07.051)。
+- Pruim 等，*ICA-AROMA*，NeuroImage，2015，[DOI](https://doi.org/10.1016/j.neuroimage.2015.02.064)。
+- 原实现：[FSL FEAT](https://git.fmrib.ox.ac.uk/fsl/feat5)、[ICA-AROMA](https://github.com/maartenmennes/ICA-AROMA)；[BIDS Derivatives 规范](https://bids-specification.readthedocs.io/en/stable/derivatives/introduction.html)。

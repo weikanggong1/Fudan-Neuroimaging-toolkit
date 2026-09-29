@@ -13,7 +13,7 @@ The complete FreeSurfer Software License terms appear in [`licenses/FreeSurfer.t
 
 This package is an independent adaptation; it is not an official FreeSurfer release.
 
-`src/fnit/fmri/_fastpd_src/FastPD.h`, `graph.h`, and `block.h` are the FastPD
+`src/fnit/msm/_fastpd_src/FastPD.h`, `graph.h`, and `block.h` are the FastPD
 implementation distributed with [newMSM commit 2607189](https://github.com/rbesenczi/newMSM/tree/260718953547743c028a45f8c885d163441df87a/libraries/msm-newmeshreg/include/FastPD).
 `FastPD.h` has a local include change so it can use FNIT's small model adapter.
 FastPD is restricted to research and non-commercial use; the upstream notice is
