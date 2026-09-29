@@ -82,6 +82,8 @@ result = run_input_n4_chain(
 
 在 2026-09-29 的自产上游整例中，当前 `nu.mgz` 与归档官方结果仅有 2 个体素不同。另将固定 FreeSurfer 源码中的 `AntsN4BiasFieldCorrectionFs` **在同一 Conda 中编译**并运行于相同 `orig.mgz`，经同一 FNIT `make_nu` 后仍有 42 个体素不同；因此标准流程保留当前 N4 实现。[同输入的程序哈希和体素数](../../validation/recon_all/python_gpu_port/n4_source_probe_20260929.json)可复查。两处差异在连续链中足以影响 EM 注册；对冻结官方 `nu` 和 `brainmask` 重放当前 Conda `mri_em_register` 时，LTA 16/16 个矩阵元素与官方一致，见[输入敏感性记录](../../validation/recon_all/python_gpu_port/em_register_input_sensitivity_20260929.json)。这些结果不能代替整例皮层指标验收。
 
+在 gpucw1 上以相同 `orig` 的体素和 MGH 头独立重跑官方 N4，后处理的 `nu` 与归档官方图逐体素一致，FNIT 同主机输出仍差 2 个体素；同一官方程序在 headcw 上重跑则差 34 个体素。[配对记录](../../validation/recon_all/python_gpu_port/n4_same_host_replay_20260930.json)区分了实现差异与主机差异。官方重跑只作为隔离的参考，不进入 FNIT 标准路径；两处前段差异也不足以单独解释后续所有表面误差。
+
 ## 参考文献与原实现
 
 - Fischl B. FreeSurfer. *NeuroImage*. 2012;62(2):774–781. [doi:10.1016/j.neuroimage.2012.01.021](https://doi.org/10.1016/j.neuroimage.2012.01.021)。

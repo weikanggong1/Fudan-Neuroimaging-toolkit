@@ -6,7 +6,7 @@
 
 ## 当前单 T1 标准流程
 
-入口已固定执行 MNI152 非线性变换、拓扑修复、真实 `white.preaparc`、标准球面与配准、最终 white、Conda 源码构建的四轮 pial 以及体积/顶点后处理，不再通过多个开关组合近似表面。Python pial 保留为可单独调用的同输入验证函数。[同一自产输入的双引擎比较](native_pial_candidate_20260929.json)给出输出差异与耗时。文件完整性与数值验收是运行报告中的不同字段。主页安装脚本已在新 Conda 环境从[完整固定源码树编译并安装 14 个必需程序](build_full_14_20260929.json)；源代码快照的 [recon-all 与权重清单测试](rebased_tests_20260929.json)为 237 项通过。此前的[固定源码初次构建](source_codeload_build_20260929.json)还记录了同输入真实 T1 的 `mri_segment` 逐体素一致。[资产安装记录](asset_setup_20260929.json)显示：已有目录的 98 项在新环境重新校验通过；全新下载进行到 80 项后，fsaverage 归档服务器拒绝连接，未完成网络安装。无预装软件环境中的整例隔离验证仍待完成。[安装说明](../../../docs/recon_all/CONDA_CPP_BUILD.md)。 当前源码在主页环境的首次整例重跑于共享 GPU 0 的 SynthSeg 阶段因可用显存不足而停下，详见 [v8 OOM 记录](v8_shared_gpu_oom_20260929.json)；已改用空闲显存较多的 GPU 1 重新运行。
+入口已固定执行 MNI152 非线性变换、拓扑修复、真实 `white.preaparc`、标准球面与配准、最终 white、Conda 源码构建的四轮 pial 以及体积/顶点后处理，不再通过多个开关组合近似表面。Python pial 保留为可单独调用的同输入验证函数。[同一自产输入的双引擎比较](native_pial_candidate_20260929.json)给出输出差异与耗时。文件完整性与数值验收是运行报告中的不同字段。主页安装脚本已在新 Conda 环境从[完整固定源码树编译并安装 14 个必需程序](build_full_14_20260929.json)；源代码快照的 [recon-all 与权重清单测试](rebased_tests_20260929.json)为 237 项通过。此前的[固定源码初次构建](source_codeload_build_20260929.json)还记录了同输入真实 T1 的 `mri_segment` 逐体素一致。[资产安装记录](asset_setup_20260929.json)显示首次全新下载在 80 项处中断；[续传后的全新安装](asset_fresh_install_20260930.json)和当前源码 `--verify-only` 对 98 项标准资产均通过。无预装软件环境中的整例隔离验证仍待完成。[安装说明](../../../docs/recon_all/CONDA_CPP_BUILD.md)。 当前源码在主页环境的首次整例重跑于共享 GPU 0 的 SynthSeg 阶段因可用显存不足而停下，详见 [v8 OOM 记录](v8_shared_gpu_oom_20260929.json)；已改用空闲显存较多的 GPU 1 重新运行。独立 `sub-02` 的同版重跑也在共享 GPU 0 的 SynthSeg 阶段因其他任务占用显存而中断，见 [v10 OOM 记录](v10_shared_gpu_oom_20260930.json)。
 
 旧版 v5 开发链从原始 T1 完成了 59 个阶段，双侧 white/pial 的[独立网格检查](mesh_validation_20260929.json)通过，但因使用早期代码快照缺少固定清单中的 18 项，运行报告为 `incomplete`，耗时 11,651 秒。与归档官方整例严格比较仅 5/138 项通过，通过项均是 MRI；它不能代表现版交付。v6 主页安装链在 Python pial 阶段结束，未形成完整整例。
 
@@ -31,6 +31,7 @@ python validation/recon_all/python_gpu_port/plot_filled_difference.py \
 | 范围 | 实测与边界 | 记录 |
 | --- | --- | --- |
 | N4 与 EM 输入敏感性 | 自产 `nu` 相对官方仅差 2 个体素；对冻结官方 `nu`、`brainmask` 重跑 Conda `mri_em_register` 时 LTA 16/16 元素一致。两处差异在连续链中放大，不能据此断言 N4 是唯一原因 | [N4 源码构建对照](n4_source_probe_20260929.json)、[EM 配对](em_register_input_sensitivity_20260929.json) |
+| N4 同主机参考重放 | 在 gpucw1 上官方程序的 `nu` 与归档官方逐体素一致，FNIT 仍差 2 个体素；官方程序换到 headcw 后差 34 个体素 | [同主机与跨主机配对](n4_same_host_replay_20260930.json) |
 | 缺陷体积映射 | 真实 T1 冻结输入，16,777,216 个体素全部一致；新 Conda 自编译 `mri_label2vol` | [精度、时间和输入](defects_volume_20260929.json)、[函数说明](../../../docs/recon_all/DEFECTS_VOLUME.md) |
 | Talairach affine 子进程 | 冻结真实 SynthStrip 输入，XFM、LTA 与直接路径逐字节一致；需整例显存复核 | [记录](talairach_child_20260929.json) |
 | SynthSeg 显存 | 同一 T1、同一 GPU 的候选分割与旧路径逐体素一致，体积 CSV 逐字节一致；独立阶段进程采样 18,450 MiB | [记录](synthseg_memory_20260929.json)、[资源说明](../../../docs/recon_all/GPU_MEMORY.md) |

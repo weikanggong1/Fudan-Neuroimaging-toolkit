@@ -1,0 +1,19 @@
+{
+  "date": "2026-09-30",
+  "scope": "same real sub-01 T1, isolated official FreeSurfer 8.2 N4 reference replay versus FNIT N4; official output never used by the candidate workflow",
+  "official_binary": "/public/software/apps/Freesurfer/8.2.0-1/bin/AntsN4BiasFieldCorrectionFs",
+  "official_binary_sha256": "9d77c96f6462e0f0f46a42b3ed59d7ed7364318d2006fb31dff96a953929d239",
+  "fnit_binary_sha256": "60f5f5d7ede7fbce6aecfe47021e6299e3fa55309e0820ffd05eb6057a68523f",
+  "input": "official and FNIT orig.mgz have identical 284-byte MGH headers and all 16777216 voxels; gzip bytes and non-image footer differ",
+  "gpucw1": {
+    "official_replay_nu0_vs_fnit_nu0_different_voxels": 2,
+    "official_replay_nu_vs_archived_official_nu_different_voxels": 0,
+    "official_replay_nu_vs_fnit_nu_different_voxels": 2,
+    "official_replay_nu_vs_fnit_nu_max_absolute_difference": 2
+  },
+  "headcw": {
+    "official_nu0_vs_gpucw1_official_nu0_different_voxels": 37,
+    "official_replay_nu_vs_archived_official_nu_different_voxels": 34
+  },
+  "interpretation": "The same-host official replay reproduces the archived reference; FNIT N4 leaves two real voxel differences. The separate headcw replay also shows host-dependent N4 rounding, so cross-host bitwise comparisons cannot isolate the FNIT algorithm difference. This does not prove the two voxels are the only cause of later surface errors."
+}
