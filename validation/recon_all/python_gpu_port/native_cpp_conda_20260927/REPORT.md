@@ -41,4 +41,4 @@ The Python `mri_ca_normalize` stage was also compared on frozen candidate inputs
 3. The integrated `mris_place_surface` calls compute five vertex maps on the current white/pial meshes. Its white and pial geometry placement modes still lack `brain.finalsurfs`, autodetected gray/white stats, remeshed `orig`, auxiliary segmentations, and the official stage order. See [`WHITE_PIAL_DEPENDENCY_GAP.md`](WHITE_PIAL_DEPENDENCY_GAP.md).
 4. Downstream atlas labels, ribbon-based volume assignment, per-vertex volume/area.mid and several regional statistics are absent or approximate. They must be checked after the upstream segmentation and mesh are fixed.
 
-The GPU memory and FP32 output audit is in [`GPU_MEMORY_PROFILE.md`](GPU_MEMORY_PROFILE.md). No FP16 or BF16 mode was introduced. For production studies requiring FreeSurfer-equivalent cortical metrics, the current result fails the numerical acceptance gate.
+该旧版运行的 GPU 内存记录见[现版显存说明](../../../../docs/recon_all/GPU_MEMORY.md)中的历史数据段；原英文快照已移除。该次未启用 FP16/BF16，皮层指标没有通过数值验收。

@@ -37,10 +37,13 @@ if git -C "$source_dir" rev-parse --show-toplevel >/dev/null 2>&1; then
   fi
 elif test -s "$source_dir/.fnit-source-commit"; then
   source_commit=$(cat "$source_dir/.fnit-source-commit")
-  expected_tree=df2ace4b904dc722090782895c251ceac65b8c52f192c2abcf7ce3daabc83585
+  # Validated local source subset and the complete GitHub codeload archive.
+  expected_trees=(df2ace4b904dc722090782895c251ceac65b8c52f192c2abcf7ce3daabc83585
+                  313afb62ea5b5c7d5aa9d78659403b126c63e7cdd91465391ce6a2138c93693c)
   source_tree=$(cd "$source_dir" && find . -type f ! -name .fnit-source-commit -print0 |
     LC_ALL=C sort -z | xargs -0 sha256sum | sha256sum | cut -d' ' -f1)
-  if [[ "$source_tree" != "$expected_tree" ]]; then
+  if [[ "$source_tree" != "${expected_trees[0]}" &&
+        "$source_tree" != "${expected_trees[1]}" ]]; then
     echo "FreeSurfer source archive tree differs from the validated commit" >&2
     exit 2
   fi
@@ -103,7 +106,7 @@ cmake -S "$build_source" -B "$build_dir" -G Ninja \
   -DDISABLE_LINEPROF=ON -DINFANT_MODULE=OFF -DQATOOLS_MODULE=OFF \
   -DDISTRIBUTE_FSPYTHON=OFF -DINSTALL_PYTHON_DEPENDENCIES=OFF \
   2>&1 | tee "$output_dir/configure.log"
-targets=(mri_em_register mri_segment mri_edit_wm_with_aseg mris_fix_topology mris_inflate mris_place_surface)
+targets=(mri_em_register mri_segment mri_edit_wm_with_aseg mris_fix_topology mris_remove_intersection mris_inflate mris_place_surface mrisp_paint mris_curvature_stats mri_label2vol)
 cmake --build "$build_dir" --parallel 4 --target "${targets[@]}" 2>&1 | tee "$output_dir/build.log"
 for target in "${targets[@]}"; do
   binary=$(find "$build_dir" -type f -name "$target" -perm /111 -print -quit)

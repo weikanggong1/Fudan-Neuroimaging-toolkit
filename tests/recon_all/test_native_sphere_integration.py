@@ -82,7 +82,8 @@ class NativeSphereIntegrationTest(unittest.TestCase):
                            side_effect=fake_standard), patch.dict(
                            os.environ, {"FS_LICENSE": "/private/license.txt"}):
                 _, topology_seconds, nofix, remesh_seconds, intersection_seconds = _prepare_native_topology(
-                    topology, subject, "lh", assets, "cpu", resolved)
+                    topology, subject, "lh", assets, "cpu", resolved,
+                    bin_dir / "mris_remove_intersection")
                 times, report = _run_accurate_sphere_pair(
                     resolved, subject, "lh", assets)
             self.assertGreaterEqual(topology_seconds, 0)
@@ -112,15 +113,13 @@ class NativeSphereIntegrationTest(unittest.TestCase):
             with self.assertRaises(subprocess.CalledProcessError):
                 _run_accurate_sphere_pair(binary, subject, "lh", root)
 
-    def test_cli_forwards_sphere_flag(self):
+    def test_cli_uses_fixed_sphere_stage(self):
         with patch("fnit.recon_all.native_free.run_recon_all_python",
                    return_value={"status": "complete"}) as run:
             with contextlib.redirect_stdout(io.StringIO()):
                 main(["input.nii.gz", "subject", "--weights-dir", "weights",
-                      "--assets-dir", "assets", "--native-bin-dir", "bin",
-                      "--native-topology", "--native-sphere"])
-        self.assertTrue(run.call_args.kwargs["native_sphere"])
-        self.assertTrue(run.call_args.kwargs["native_topology"])
+                      "--assets-dir", "assets", "--native-bin-dir", "bin"])
+        self.assertNotIn("native_sphere", run.call_args.kwargs)
 
 
 if __name__ == "__main__":

@@ -1,24 +1,33 @@
-# recon-all 数值验收门槛
+# recon-all 单 T1 的验收门槛
 
-`fnit-recon-all` 目前结合 Python/PyTorch 与六个由固定 FreeSurfer 8.2 源码在 Conda 内编译的 C++ 程序，其中三个必需、三个可选。运行时不用安装集群的 FreeSurfer。[构建记录](native_cpp_conda_20260927/six_target_build_20260927/REPORT.md)列出程序及哈希。仍需单独提供 FreeSurfer 许可证、模型权重和模板。
+[功能入口](../../../docs/recon_all/README.md) · [验证记录](README.md) · [比较器](compare_complete_subject.py)
 
-最近一次从同一 T1 完整运行的 v3 共执行 39 步，对照未经修改的 FreeSurfer 8.2 被试，严格比较通过 **19/138** 项：19 个 MRI 文件通过，47 个预期文件缺失，72 个已有文件不同。上游 WM/filled 的 13 个 MRI 文件在体素、数据类型、仿射和 MGH 头前 284 字节上相同。v3 的首个表面差异发生在 `qsphere.nofix`。此后代码改用[左右半球均匹配的 Python quick sphere](native_cpp_conda_20260927/v3_e2e_20260927/quick_sphere_lh.json)，以 `-ga` 拓扑模式写出 `orig.premesh`，再由[Python remesh](REMESH_VALIDATION.md)生成 `orig`。这些修改尚未经过新的整例 138 项比较。[v3 耗时及 ROI/顶点结果](native_cpp_conda_20260927/v3_e2e_20260927/benchmark_summary.json)只记录当时版本，不代表当前代码的精度或速度。
+当前标准入口只接受一幅原始 T1w。它应从空被试目录连续生成固定的 138 项输出，不得用复制、径向投影或法线射线搜索代替必要的拓扑、white/pial 和球面步骤。`fnit-native-free-run.json` 的 `status=complete` 只代表阶段运行与文件存在性检查完成；同一报告的 `numeric_validation` 须另行根据独立参考填写。旧 v3 的 19/138 项不是现版结果。
 
-## 发布前要核对的内容
+## 运行与完整性
 
-1. **整例运行。** 从同一真实 T1 和空被试目录开始，记录源码版本、输入、权重、模板与程序哈希，以及构建过程、命令、主机、设备、退出状态和各步耗时。进程树只应包含声明的六个 Conda 编译程序、Python 及其库，不应依赖已安装的 FreeSurfer/FSL 运行环境。
-2. **体积图。** 核对每个 MRI 输出的全部体素、数据类型、仿射和 MGH 头；有差异时给出数量与首个坐标。`aseg.mgz`、`aparc+aseg.mgz`、`wmparc.mgz` 等下游图尚未通过整例验收。
-3. **表面。** 逐半球比较 `orig`、`white`、`pial`、`inflated`、`sphere`、`sphere.reg` 的有序顶点、有序面片、体积几何信息、拓扑和标签。若顶点数或拓扑不同，最近邻距离只能用于诊断，不能算逐点通过。
-4. **顶点指标。** 在相同顶点顺序下比较厚度、white/pial/mid 面积、顶点体积、曲率及其他输出图。每张图、每个半球都记录最大误差、分布和超阈值顶点数；验收要求超阈值数为零。
-5. **脑区和统计。** 比较注释图的有序 ID，并逐行核对 aparc、a2009s、DKTatlas、aseg 和 wmparc 的脑区结果及全局指标。缺失文件、数值差异和格式差异分开记录。
-6. **耗时。** 数值门槛通过后，才在相同主机、输入和线程预算下逐步配对比较候选版与官方版。记录冷/热运行、I/O、设备、GPU 初始化和共享节点负载。未达到等价输出的整例耗时不能作为加速结论。
+1. 从主页 `environment.yml` 创建新环境、安装当前固定源码编译的原生组件，并用标准入口从原始 T1 开始运行。保存源码提交、T1、权重、资产和二进制 SHA-256、主机、设备、精度设置、阶段耗时及退出状态。
+2. 核查两侧拓扑、`white.preaparc`、球面与配准、最终 white、pial、注释和后处理均实际执行。必要阶段失败须抛异常并留运行记录。固定 138 项无缺失；体积网格、surface RAS 与顶点顺序必须自洽。
+3. 在没有系统 FSL/FreeSurfer 等预装软件的环境核查进程树、实际读取的文件和动态库。Conda 中按固定源码编译的程序与 FNIT 资产可以存在；独立生成的官方参考不能被候选运行路径当输入使用。
 
-[严格比较器](compare_complete_subject.py)检查 138 个预期文件：39 个 MRI 输出、18 个表面几何、46 张顶点图、12 个注释和 23 个统计文件。官方存档被试与自身比较通过 138/138；人工改动 0.02 mm 厚度或 0.02 mm² 面积时，比较器分别只报对应图失败。这证明比较器能检出小误差，并不证明候选重建已通过。
+## 数值比较
 
-## 当前实测边界
+使用[严格比较器](compare_complete_subject.py)与同一真实 T1 的独立官方参考对照：
 
-生产入口在保存的 T1 MRI 前缀之后仍采用近似表面流程。v3 的 **19/138** 是旧完整运行结果；当前代码尚无新的整例通过率，不能据此声称皮层指标一致或重建加速。后续[左半球候选 MRI 中间结果复跑](white_connected_prefix_20260927/README.md)中，`orig.premesh` 和 `orig` 的有序几何完全一致；`white.preaparc` 平均位移 0.000421 mm，50 个顶点超过 0.1 mm；三轮 `smoothwm` 平均位移 0.000311 mm，18 个顶点超过 0.1 mm。这表明先前将该输入差异归因于 Conda 拓扑修复的判断需要修正。 [首轮内存对照](../../../docs/recon_all/WHITE_PYTHON_FIRST_PASS.md)还显示当前 Conda 白质放置器从首轮便与已安装官方程序出现尾差；Python 首轮与官方第 17 步最大顶点差为 1.64×10⁻⁵ mm，但剩余三轮尚未实现。该测试既不是从 T1 开始的单进程重建，也未覆盖右半球。
+- MRI 与其他体积图：整数图逐体素一致；浮点图绝对误差 ≤1×10⁻⁶；数据类型、仿射与 MGH 头一致。记录不同体素数与首个坐标。
+- 表面：有序面、体积几何一致；同索引坐标绝对误差 ≤1×10⁻⁵ mm。顶点数或拓扑不同时，最近邻距离只用于诊断，不计通过。
+- 顶点图：面积的限值为 `0.001 + 0.001×|参考值|`，其他图为 `0.005 + 0.001×|参考值|`；逐侧记录 P99、最大差和超阈值顶点数。
+- 注释：逐顶点编码、颜色表与名称一致。统计：数据行及 `# Measure` 行的数值绝对差 ≤0.005；列数、行数和文本字段一致。
 
-[修复后的候选左半球完整 `sphere`](candidate_sphere_first_difference_20260927/full_stage/README.md)在相同候选输入上与官方的 106,622 个有序顶点和 213,240 个有序面全部一致；Python/官方墙钟为 884.56/328.61 秒。两者与归档官方球面的平均差都为 2.959 mm。[上游审计](candidate_sphere_first_difference_20260927/full_stage/UPSTREAM_FIRST_DIFFERENCE.md)发现第一个已保存的几何差异在 `white.preaparc`。这一阶段验收不能外推到 `sphere.reg`、注释、最终 white 或整例。
+上述阈值是当前比较器的固定验收口径；还要另报 MRI、表面、顶点图、注释和统计各组通过数，不能把相关系数或文件总通过数单独解释为整体等价。比较器已通过官方参考自比 138/138 和厚度/面积定点扰动的负对照。FNIT 现版整例完成后才能报告其通过数。
 
-独立的 [final white](../../../docs/recon_all/FINAL_WHITE_CONDA.md) 和 [pial.T1](../../../docs/recon_all/PIAL_T1_CONDA.md) Conda 接口只在冻结的官方输入上测试。后者有 5,571 个顶点超过 0.1 mm；相同输入下的独立 Python pial.T1 几何则与官方一致。recon-all 的 SynthMorph Talairach 仿射调用现已[局部关闭 TF32](talairach_tf32_isolation_20260927/README.md)，在此 T1 上将 eTIV 误差从 822.547 降到 0.895 mm³；有限续跑中的 GCA、`norm` 和 `aseg.presurf` 仍匹配。此后尚未重新进行 138 项整例比较。最终 white/pial 几何、双侧 `sphere.reg`、注释、后处理体积图、全部顶点图及逐脑区统计仍需从真实 T1 连续验收。
+## 资源、速度和跨被试
+
+在相同主机、线程及输入预算下分别计时 FNIT 与参考流程；只有输出范围和精度均清楚时才比较速度。GPU 默认 TF32，SynthStrip、SynthSeg 与 Talairach affine 的 FP32 例外要在报告中注明；FP16/BF16 不自动启用。显存统一存字节并展示 GB/GiB，外部进程采样与 PyTorch 统计分开；关闭 PyTorch 分配缓存时，后者的 0 不可当成峰值。采样峰值须标明采样间隔，并核查父子进程合计是否低于 20 GB。
+
+至少再用另一例独立真实 T1 检查完整链，另找真实非零自相交表面验证修复分支。当前这些跨被试与异常输入证据仍缺，不能以单个被试双侧或模拟网格代替。
+
+## 参考文献与原实现
+
+- Fischl B. FreeSurfer. *NeuroImage*. 2012;62(2):774–781. [doi:10.1016/j.neuroimage.2012.01.021](https://doi.org/10.1016/j.neuroimage.2012.01.021)。
+- [FreeSurfer 原实现代码库](https://github.com/freesurfer/freesurfer/tree/d932c45b7941662ea380a05efef580568b98d41a)。

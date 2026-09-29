@@ -82,8 +82,13 @@ mris_place_surface --adgws-in ../surf/autodet.gw.stats.lh.dat \
 
 另一次较早的最终 `white` 测量中，相对官方最终 `white` 的**单坐标分量绝对误差均值**约为 0.44 mm；它处于后续阶段，统计量也不同，不能与上表的 preaparc 三维位移直接相除。Conda 与官方放置优化器在相同初始平滑之后出现浮点差异，每侧留下上述 50 个离群顶点。[源码级首差分析](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/WHITE_PREAPARC_FIRST_DIVERGENCE_20260927.md) 将第一处可见的受力差异定位在第 6 次接受步之前；现有编译选项试验没有消除该差异。
 
-## 当前可选路径与后续全候选保存阶段试验
+## 标准路径与历史全候选保存阶段试验
 
-启用 `--native-white-preaparc` 后，runner 在 CPU MNI/辅助分割/finalsurfs 和拓扑阶段之后调用本函数，再以 Python 在 CPU 上平滑 3 轮。默认路径不调用它。当前最终 `white` 仍是 `smoothwm` 的复制品；皮层标签、注释和最终 white 优化尚未接入这个放置步骤。
+标准 runner 在 CPU MNI/辅助分割/finalsurfs 和拓扑阶段之后调用本函数，再以 Python 在 CPU 上平滑 3 轮。随后执行皮层标签、球面注释和最终 white 放置；自产上游连续整例仍需验收。
 
-[保存阶段 LH 连通检查](../../validation/recon_all/python_gpu_port/white_connected_prefix_20260927/README.md) 分别记录了较早的混合 MRI 重放，以及后来一次**全候选输入的 LH 重放**。后者使用 FNIT 生成的 MNI152 LTA、MCA/dura、vsinus、finalsurfs、v5 `brain/wm/filled/norm` 和独立生成的 Python nofix 表面。该次 LH 放置结果仍有 50 个顶点位移 >0.1 mm；3 轮平滑后为 18 个。当前 runner 复制该 `smoothwm` 作为最终 `white` 时，相对官方最终 `white` 的同索引三维顶点位移均值为 0.288 mm。这些是同一 T1 上拼接保存阶段的检验，并非新的一次进程从原始 T1 完整运行 recon-all；本节双侧混合输入试验的数字也不能充当 RH 全候选结果。
+[保存阶段 LH 连通检查](../../validation/recon_all/python_gpu_port/white_connected_prefix_20260927/README.md) 分别记录了较早的混合 MRI 重放，以及后来一次**全候选输入的 LH 重放**。后者使用 FNIT 生成的 MNI152 LTA、MCA/dura、vsinus、finalsurfs、v5 `brain/wm/filled/norm` 和独立生成的 Python nofix 表面。该次 LH 放置结果仍有 50 个顶点位移 >0.1 mm；3 轮平滑后为 18 个。历史试验曾复制该 `smoothwm` 作为最终 `white` 时，相对官方最终 `white` 的同索引三维顶点位移均值为 0.288 mm。现版标准流程已改为真实的最终 white 放置。这些是同一 T1 上拼接保存阶段的检验，并非新的一次进程从原始 T1 完整运行 recon-all；本节双侧混合输入试验的数字也不能充当 RH 全候选结果。
+
+## 参考文献与原实现
+
+- Fischl B. FreeSurfer. *NeuroImage*. 2012;62(2):774–781. [doi:10.1016/j.neuroimage.2012.01.021](https://doi.org/10.1016/j.neuroimage.2012.01.021)。
+- [FreeSurfer 固定源码提交](https://github.com/freesurfer/freesurfer/tree/d932c45b7941662ea380a05efef580568b98d41a)。

@@ -121,9 +121,14 @@ class SynthSegSegmenter:
         if not flip:
             return original[0]
         if x.is_cuda:
+            # The first 33-channel posterior is only needed after the second
+            # pass; keep its exact float32 values off the GPU meanwhile.
+            original = original.cpu()
             torch.cuda.empty_cache()
         flipped = _blur(self.model(torch.flip(x, (2,))))
         flipped = torch.flip(flipped, (2,))[:, self.flip_indices]
+        if x.is_cuda:
+            original = original.to(x.device)
         return (0.5 * (original + flipped))[0]
 
     @torch.inference_mode()

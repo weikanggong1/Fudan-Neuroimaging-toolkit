@@ -1,0 +1,34 @@
+{
+  "date": "2026-09-29",
+  "scope": "single real T1 SynthSeg stage; fresh processes on gpucw1 GPU 1; not a full recon-all run",
+  "input_orig_mgz_sha256": "20341ee0863c3a117eb631d65863c41b45931c8986b3bc75c4c9619601a5c8ed",
+  "model_synthseg_2_0_h5_sha256": "f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e",
+  "precision": "float32, cudnn.allow_tf32=False, cudnn.benchmark=True, cudnn.deterministic=True; no FP16/BF16",
+  "baseline": {
+    "gpu_max_allocated_bytes": 21057717760,
+    "gpu_max_reserved_bytes": 24358420480,
+    "tiv_mm3": 1280259.125
+  },
+  "first_posterior_temporarily_on_cpu": {
+    "different_segmentation_voxels_vs_baseline": 0,
+    "volumes_csv_byte_equal_vs_baseline": true,
+    "gpu_max_allocated_bytes": 18843125248,
+    "gpu_max_reserved_bytes": 22814916608,
+    "sampled_process_peak_mib": 22296,
+    "sample_count": 35
+  },
+  "first_posterior_on_cpu_and_no_cuda_allocator_cache": {
+    "different_segmentation_voxels_vs_baseline": 0,
+    "tiv_mm3": 1280259.125,
+    "sampled_process_peak_mib": 18450,
+    "sample_count": 44,
+    "note": "PyTorch allocated/reserved counters are zero when the caching allocator is disabled; nvidia-smi sampled the process PID every 0.25 seconds. Samples are not a guaranteed continuous peak."
+  },
+  "rejected_trial": {
+    "change": "cudnn.benchmark=False",
+    "different_segmentation_voxels_vs_baseline": 70,
+    "tiv_mm3": 1280258.375,
+    "gpu_max_reserved_bytes": 22814916608,
+    "reason": "no memory saving and changed output"
+  }
+}

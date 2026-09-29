@@ -47,3 +47,10 @@ lta_convert --inlta talairach.xfm.lta --outmni talairach.xfm
 FNIT 的同输入实测覆盖三张真实 SynthStrip 脑图。每组新旧 FNIT 的 16 个矩阵元素、LTA 和 XFM 字节以及 eTIV 完全相同；新路径稳态中位数 **0.738–0.832 秒**，旧 Surfa 路径 **1.446–1.734 秒**，PyTorch 峰值显存分配从 4497 MiB 降至 4433 MiB。归档 FreeSurfer 包装脚本输出与新路径仍有 1.2812e-5 的 LTA 最大矩阵元素差和 −0.420220 mm³ 的 eTIV 差；归档脚本使用 PyTorch neural hook，不是独立 TensorFlow 网络对照。[输入哈希、每次耗时与逐项差异](../../validation/recon_all/python_gpu_port/talairach_affine_no_surfa_20260927/README.md)记录了完整范围。
 
 此改动只覆盖 recon-all Talairach affine 调用。通用 SynthMorph 的 `joint`、`deform`、`rigid`、`__call__` 和 `apply_transform` 仍依赖 Surfa，尚未完成同输入替换。
+
+标准 CUDA 输入链现在在独立子进程中执行此 affine 阶段，以释放其 CUDA 常驻内存。子进程沿用 SynthStrip 后的 cuDNN benchmark、deterministic、TF32 标志，affine 推理局部关闭 TF32。对一张真实 T1 的冻结 `synthstrip.mgz`，子进程的 XFM 和 LTA 与同输入直接调用逐字节相同；子进程 PyTorch allocated/reserved 峰值为 4,715,548,672/4,884,267,008 字节。此结果尚不代表整例显存达标；[原始哈希与测量记录](../../validation/recon_all/python_gpu_port/talairach_child_20260929.json)。CPU 路径仍在当前进程调用该函数。
+
+## 参考文献与原实现
+
+- Fischl B. FreeSurfer. *NeuroImage*. 2012;62(2):774–781. [doi:10.1016/j.neuroimage.2012.01.021](https://doi.org/10.1016/j.neuroimage.2012.01.021)。
+- [FreeSurfer 固定源码提交](https://github.com/freesurfer/freesurfer/tree/d932c45b7941662ea380a05efef580568b98d41a)。

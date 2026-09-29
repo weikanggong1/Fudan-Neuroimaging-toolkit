@@ -160,6 +160,19 @@ def contrast_percentage(subject: str | Path, hemi: str, *, device: str = "cpu") 
     return (result.astype(np.float64) * 100).astype(np.float32)
 
 
+def write_contrast_percentage(subject: str | Path, hemi: str,
+                              output: str | Path, *, device: str = "cpu") -> Path:
+    """保存每顶点 white/gray 百分比图，保留固定 MGH 头。"""
+    subject, output = Path(subject), Path(output)
+    values = contrast_percentage(subject, hemi, device=device)
+    header = nib.load(str(subject / "mri/rawavg.mgz")).header.copy()
+    header.set_data_shape((len(values), 1, 1))
+    header["fov"] = float(len(values))
+    output.parent.mkdir(parents=True, exist_ok=True)
+    nib.save(nib.MGHImage(values[:, None, None], None, header=header), str(output))
+    return output
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("subject", type=Path)
@@ -168,15 +181,15 @@ def main() -> None:
     parser.add_argument("output", type=Path)
     parser.add_argument("--device", default="cpu")
     args = parser.parse_args()
-    values = (contrast_percentage(args.subject, args.hemi, device=args.device)
-              if args.projection == "pct" else
-              sample_contrast(args.subject, args.hemi, args.projection,
-                              device=args.device))
+    if args.projection == "pct":
+        write_contrast_percentage(args.subject, args.hemi, args.output,
+                                  device=args.device)
+        return
+    values = sample_contrast(args.subject, args.hemi, args.projection,
+                             device=args.device)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     header = nib.load(str(args.subject / "mri" / "rawavg.mgz")).header.copy()
     header.set_data_shape((len(values), 1, 1))
-    if args.projection == "pct":
-        header["fov"] = float(len(values))
     nib.save(nib.MGHImage(values[:, None, None], None, header=header), str(args.output))
 
 

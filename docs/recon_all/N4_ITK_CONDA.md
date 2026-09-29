@@ -78,4 +78,12 @@ result = run_input_n4_chain(
 
 固定输入为 sub01 的 256³ `orig.mgz`，SHA-256 `d79723f94bfc149ff36c89094a3d734b888a03cecbc32dc57a22992e8a5e817f`。一次 headcw 测试中，`nu0.mgz` 相对官方有 **9 / 16,777,216** 个体素不同，均低 1 个灰度级；最终 `nu.mgz` 有 **8 / 16,777,216** 个体素不同，最大差 2。两步仿射及 MGH 前 284 字节相同。完整数值和哈希见[验证报告](../../validation/recon_all/python_gpu_port/n4_itk_conda_20260927/README.md)。
 
-包装器单次耗时 107.89 秒，之前同输入的官方 N4 单次耗时 168.26 秒；两次处于不同共享负载，不能作为受控加速比。N4 仍运行于 CPU。该单步误差尚未通过整例皮层指标验收；当前整例整体也未达到 FreeSurfer 数值一致。
+包装器单次耗时 107.89 秒，之前同输入的官方 N4 单次耗时 168.26 秒；两次处于不同共享负载，不能作为受控加速比。N4 仍运行于 CPU。
+
+在 2026-09-29 的自产上游整例中，当前 `nu.mgz` 与归档官方结果仅有 2 个体素不同。另将固定 FreeSurfer 源码中的 `AntsN4BiasFieldCorrectionFs` **在同一 Conda 中编译**并运行于相同 `orig.mgz`，经同一 FNIT `make_nu` 后仍有 42 个体素不同；因此标准流程保留当前 N4 实现。[同输入的程序哈希和体素数](../../validation/recon_all/python_gpu_port/n4_source_probe_20260929.json)可复查。两处差异在连续链中足以影响 EM 注册；对冻结官方 `nu` 和 `brainmask` 重放当前 Conda `mri_em_register` 时，LTA 16/16 个矩阵元素与官方一致，见[输入敏感性记录](../../validation/recon_all/python_gpu_port/em_register_input_sensitivity_20260929.json)。这些结果不能代替整例皮层指标验收。
+
+## 参考文献与原实现
+
+- Fischl B. FreeSurfer. *NeuroImage*. 2012;62(2):774–781. [doi:10.1016/j.neuroimage.2012.01.021](https://doi.org/10.1016/j.neuroimage.2012.01.021)。
+- [FreeSurfer 固定源码提交](https://github.com/freesurfer/freesurfer/tree/d932c45b7941662ea380a05efef580568b98d41a)。
+- [ITK N4 原实现代码库](https://github.com/InsightSoftwareConsortium/ITK)。

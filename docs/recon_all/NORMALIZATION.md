@@ -76,3 +76,8 @@ report = normalize_t1_aseg(
 ```
 
 在冻结的 `fs_sub01` 输入上，独立 Python ridge、过滤后的控制点掩膜、离群图和初始 float32 偏置场均与官方诊断图一致。默认两轮的完整 `brain.mgz` 为 **0/16,777,216** 个差异体素，MGH 头前 284 字节和体素负载一致。新运行的官方文件在末尾多 996 字节元数据，旧存档输出多 451 字节，因此完整文件哈希不同。这只是单例阶段验证，整例数值一致性仍需检验。[第二轮报告](../../validation/recon_all/python_gpu_port/NORMALIZE_SECOND_PASS.md)列出原始证据。
+
+## 参考文献与原实现
+
+- Fischl B. FreeSurfer. *NeuroImage*. 2012;62(2):774–781. [doi:10.1016/j.neuroimage.2012.01.021](https://doi.org/10.1016/j.neuroimage.2012.01.021)。
+- [FreeSurfer 固定源码提交](https://github.com/freesurfer/freesurfer/tree/d932c45b7941662ea380a05efef580568b98d41a)。

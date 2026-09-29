@@ -109,6 +109,45 @@ def test_subregion_lookup_table_is_installed_from_verified_package_data(tmp_path
     assert assets.download_asset(name, tmp_path, verify_only=True) == target
 
 
+def test_corrupt_download_is_discarded_and_retried(tmp_path, monkeypatch):
+    class Response(io.BytesIO):
+        status = 200
+        headers = {}
+
+    responses = iter((Response(b"broken"), Response(b"target")))
+    monkeypatch.setattr(assets, "urlopen", lambda request, timeout: next(responses))
+    target = tmp_path / "asset.dat"
+    expected = hashlib.sha256(b"target").hexdigest()
+    assert assets._download_verified("https://example.invalid/asset.dat", target,
+                                     len(b"target"), expected) == target
+    assert target.read_bytes() == b"target"
+    assert not (tmp_path / "asset.dat.part").exists()
+
+
+def test_source_asset_uses_verified_conda_build_source(tmp_path, monkeypatch):
+    name = "average/colortable_BA.txt"
+    content = b"verified source data"
+    monkeypatch.setitem(assets.ASSET_FILES, name,
+                        (len(content), hashlib.sha256(content).hexdigest(), ".txt"))
+    monkeypatch.setattr(assets.sys, "prefix", str(tmp_path / "conda"))
+    source = (tmp_path / "conda/share/fnit/recon_all_native/source/distribution" / name)
+    source.parent.mkdir(parents=True)
+    source.write_bytes(content)
+    monkeypatch.setattr(assets, "urlopen", lambda *args, **kwargs:
+                        pytest.fail("verified Conda source should not use network"))
+    target = assets.download_asset(name, tmp_path / "assets")
+    assert target.read_bytes() == content
+
+
+def test_brainstem_lookup_table_is_installed_from_verified_package_data(tmp_path):
+    name = assets.BUNDLED_BRAINSTEM_LUT
+    target = assets.download_asset(name, tmp_path)
+    size, digest, _ = assets.ASSET_FILES[name]
+    assert target.stat().st_size == size
+    assert hashlib.sha256(target.read_bytes()).hexdigest() == digest
+    assert assets.download_asset(name, tmp_path, verify_only=True) == target
+
+
 @pytest.mark.parametrize(("prefix", "name"), (
     ("average/", "average/mni_icbm152_nlin_asym_09c/reg-targets/test.lta"),
     ("subjects/", "subjects/fsaverage/label/test.label")))
@@ -161,8 +200,8 @@ def test_default_python_profile_selects_required_assets(monkeypatch, tmp_path):
     monkeypatch.setattr(assets, "save_config", lambda directory: None)
     assets.main(["--dest", str(tmp_path)])
     assert downloaded == list(assets.CORE_ASSETS)
-    assert len(downloaded) == 19
-    assert sum(assets.ASSET_FILES[name][0] for name in downloaded) == 217851651
+    assert len(downloaded) == 98
+    assert sum(assets.ASSET_FILES[name][0] for name in downloaded) == 264773919
     downloaded.clear()
     assets.main(["--all", "--verify-only", "--dest", str(tmp_path)])
     assert len(downloaded) == len(assets.ASSET_FILES) == 111

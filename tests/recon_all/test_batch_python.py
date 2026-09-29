@@ -11,24 +11,6 @@ from fnit.recon_all.batch import run_recon_all_python_batch
 
 
 class BatchPythonTest(unittest.TestCase):
-    def test_native_topology_requires_binary_directory(self):
-        with self.assertRaisesRegex(ValueError, "native_bin_dir"):
-            run_recon_all_python_batch([], ".", ".")
-        with self.assertRaisesRegex(ValueError, "native_bin_dir"):
-            run_recon_all_python_batch([], ".", ".", native_topology=True)
-        with self.assertRaisesRegex(ValueError, "native_bin_dir"):
-            run_recon_all_python_batch([], ".", ".", native_surface_metrics=True)
-        with self.assertRaisesRegex(ValueError, "native_bin_dir"):
-            run_recon_all_python_batch([], ".", ".", native_registration=True)
-        with self.assertRaisesRegex(ValueError, "native_topology"):
-            run_recon_all_python_batch([], ".", ".", native_bin_dir=".",
-                                       native_registration=True)
-        with self.assertRaisesRegex(ValueError, "native_bin_dir"):
-            run_recon_all_python_batch([], ".", ".", native_sphere=True)
-        with self.assertRaisesRegex(ValueError, "native_topology"):
-            run_recon_all_python_batch([], ".", ".", native_bin_dir=".",
-                                       native_sphere=True)
-
     def test_two_devices_run_concurrently_and_return_input_order(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -57,14 +39,8 @@ class BatchPythonTest(unittest.TestCase):
             with patch("fnit.recon_all.batch.subprocess.run", side_effect=fake_run):
                 reports = run_recon_all_python_batch(
                     jobs, weights, assets, devices=("cuda:0", "cuda:1"),
-                    native_bin_dir=native_dir, native_topology=True,
-                    native_surface_metrics=True, native_registration=True,
-                    native_sphere=True)
-            self.assertTrue(all(command[-6:] == ["--native-bin-dir", str(native_dir),
-                                                 "--native-topology",
-                                                 "--native-surface-metrics",
-                                                 "--native-registration",
-                                                 "--native-sphere"]
+                    native_bin_dir=native_dir)
+            self.assertTrue(all(command[-2:] == ["--native-bin-dir", str(native_dir)]
                                 for command in calls))
             self.assertEqual([row["subject_dir"] for row in reports],
                              [str(job["subject_dir"]) for job in jobs])

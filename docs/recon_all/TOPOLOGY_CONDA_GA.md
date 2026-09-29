@@ -1,6 +1,6 @@
 # Conda 拓扑 GA 与 Python sphere 前处理
 
-启用 `native_topology` 后，流程调用在 Conda 内编译并固定版本的 `mris_fix_topology_fnit`。它的 Python 前处理复现 FreeSurfer 8.2 缺陷搜索开始时使用的 sphere。源码编译补丁调整了居中坐标的交接，以及缺陷平滑中 `tanh`、`sqrt` 的 float/double 调用。未修改的 Conda `mris_fix_topology` 仅保留用于诊断对照。该阶段在 CPU 上运行，运行时不要求系统安装 FreeSurfer。
+标准单 T1 流程调用在 Conda 内编译并固定版本的 `mris_fix_topology_fnit`。它的 Python 前处理复现 FreeSurfer 8.2 缺陷搜索开始时使用的 sphere。源码编译补丁调整了居中坐标的交接，以及缺陷平滑中 `tanh`、`sqrt` 的 float/double 调用。未修改的 Conda `mris_fix_topology` 仅保留用于诊断对照。该阶段在 CPU 上运行，运行时不要求系统安装 FreeSurfer。
 
 ## 输入、输出与用法
 
@@ -56,7 +56,7 @@ python -m fnit.recon_all.topology_conda_ga /path/to/subjects/sub01 lh \
 
 构建脚本的两个位置参数是洁净的 FreeSurfer 8.2 源码目录和 Conda 构建目录。模块命令的四个位置参数依次对应 `subject`、`hemisphere`、`binary`、`assets`；可选 `--report` 将返回字典写为 JSON，命令同时将 JSON 打印到标准输出。
 
-`rh` 同理。可选的 `native_topology=True` recon-all runner 选择该修补版程序，调用同一个阶段 API，再以 `remesh_surface(..., iterations=3)` 生成 `surf/{hemi}.orig`。默认 runner 的其他表面和分割步骤仍有近似处理；启用本阶段并不等于端到端重建已验收。
+`rh` 同理。标准 runner 选择该修补版程序，调用同一个阶段 API，再以 `remesh_surface(..., iterations=3)` 生成 `surf/{hemi}.orig`。阶段同输入结果不等于端到端重建已验收。
 
 从 `subject/scripts` 目录运行时，对应的 FreeSurfer 8.2 命令为：
 
@@ -88,3 +88,8 @@ Python 前处理所得 sphere 的坐标和有序面与官方诊断用居中 sphe
 两侧体积几何元数据字段在数值上相同；其中 `filename` 正确指向各自被试的 `mri/wm.mgz`，所以官方与临时被试的路径不同。候选 `orig` 缺少 425 字节的官方 FreeSurfer 构建/运行来源标签，完整尾部字节及文件 SHA-256 因而不同。[双侧 orig 几何记录](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/place_geometry_pair/accurate_filled_initial/curvature_trial/lh_fnit_sqrt_orig_vs_official.json)和[尾部及元数据报告](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/place_geometry_pair/accurate_filled_initial/curvature_trial/orig_metadata_report.json)区分了这两类差异；RH 几何 JSON 位于 LH 文件旁。
 
 [双侧 JSON 证据](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/place_geometry_pair/accurate_filled_initial/curvature_trial/)记录了坐标和面逐项对照、耗时及最后一次 `sqrt` 修正前的诊断检查点。Conda 构建在打补丁前固定源码哈希；`ldd` 与 SHA-256 输出存于构建目录。本阶段没有分配 GPU 显存。
+
+## 参考文献与原实现
+
+- Fischl B. FreeSurfer. *NeuroImage*. 2012;62(2):774–781. [doi:10.1016/j.neuroimage.2012.01.021](https://doi.org/10.1016/j.neuroimage.2012.01.021)。
+- [FreeSurfer 固定源码提交](https://github.com/freesurfer/freesurfer/tree/d932c45b7941662ea380a05efef580568b98d41a)。

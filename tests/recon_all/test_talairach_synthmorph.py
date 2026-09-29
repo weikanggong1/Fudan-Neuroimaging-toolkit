@@ -3,6 +3,7 @@
 import importlib.util
 import os
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -49,9 +50,9 @@ def test_register_talairach_writes_readable_xfm_without_native_program(tmp_path,
         def __init__(self, **kwargs):
             called.update(kwargs)
 
-        def affine_transform(self, moving, template):
-            called["input"] = (moving, template)
-            return affine
+        def __call__(self, moving, template, *, header_only):
+            called["input"] = (moving, template, header_only)
+            return SimpleNamespace(transform=affine)
 
     monkeypatch.setattr(talairach, "SynthMorph", FakeModel)
     path = tmp_path / "transforms/talairach.xfm"
@@ -66,7 +67,7 @@ def test_register_talairach_writes_readable_xfm_without_native_program(tmp_path,
     np.testing.assert_allclose(parsed, matrix[:3], atol=5e-9, rtol=0)
     assert called == {"weights": "weights", "device": "cpu", "model": "affine",
                       "extent": 256,
-                      "input": ("synthstrip.mgz", "mni305.cor.stripped.mgz")}
+                      "input": ("synthstrip.mgz", "mni305.cor.stripped.mgz", True)}
 
 
 def test_register_talairach_disables_tf32_only_for_affine_inference(tmp_path, monkeypatch):
@@ -82,9 +83,10 @@ def test_register_talairach_disables_tf32_only_for_affine_inference(tmp_path, mo
             flags.cuda.matmul.allow_tf32 = True
             flags.cudnn.allow_tf32 = True
 
-        def affine_transform(self, moving, template):
+        def __call__(self, moving, template, *, header_only):
+            assert header_only
             observed.append((flags.cuda.matmul.allow_tf32, flags.cudnn.allow_tf32))
-            return affine
+            return SimpleNamespace(transform=affine)
 
     monkeypatch.setattr(talairach, "SynthMorph", FakeModel)
     talairach.register_talairach("moving", "template", "weights",
@@ -103,7 +105,8 @@ def test_register_talairach_restores_tf32_when_inference_fails(tmp_path, monkeyp
             flags.cuda.matmul.allow_tf32 = True
             flags.cudnn.allow_tf32 = True
 
-        def affine_transform(self, moving, template):
+        def __call__(self, moving, template, *, header_only):
+            assert header_only
             assert (flags.cuda.matmul.allow_tf32, flags.cudnn.allow_tf32) == (False, False)
             raise RuntimeError("inference failed")
 

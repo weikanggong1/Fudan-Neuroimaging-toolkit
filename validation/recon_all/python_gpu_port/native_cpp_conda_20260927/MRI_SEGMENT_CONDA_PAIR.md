@@ -36,4 +36,4 @@ MGZ 压缩文件 SHA-256 三者不同；验收以解码后的全部体素、MGH 
 
 随后在目标 gpucw1（CentOS7 CMake 分支）再次完整运行七目标脚本，退出 0、用时 149.45 秒。重编后 `mri_segment` SHA-256 为 `f3c46df3f178e932d42f52c61118696f5893e8f7def7a53eb2cbb5b7d222e5f3`；它在 headcw 的相同冻结输入上仍为 **0 个体素差**、MGH 头部及仿射全同，单次耗时 41.39 秒。[gpucw1 七目标哈希](bin_seven_gpucw1.sha256)、[构建时间](build_seven_gpucw1.time)和[本次运行时间](mri_segment_gpucw1build.time)分别保存。重编使二进制字节哈希改变，数值配对仍须以具体输出为准。
 
-本报告生成时，整例尚未连通 `brain.mgz → AntsDenoiseImageFs → antsdn.brain.mgz → mri_segment → mri_edit_wm_with_aseg → mri_pretess → mri_fill`。后续 v3 已连通并完成[整例比较](v3_e2e_20260927/BENCHMARK.md)，但最终 white/pial 和脑区指标尚未通过；本报告保留当时的独立阶段数据。
+这份记录只用于证明相同输入下的 `mri_segment` 阶段行为。当前整例结果见[现版验证索引](../README.md)；旧版整例及其近似表面记录已从现版目录删除，可从 Git 历史追溯。

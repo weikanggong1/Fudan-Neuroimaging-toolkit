@@ -21,15 +21,13 @@ class NativeRegistrationIntegrationTest(unittest.TestCase):
             atlas.write_bytes(b"atlas")
             self.assertEqual(_folding_atlas(root, "lh"), atlas)
 
-    def test_cli_forwards_registration_flag(self):
+    def test_cli_uses_fixed_registration_stage(self):
         with patch("fnit.recon_all.native_free.run_recon_all_python",
                    return_value={"status": "complete"}) as run:
             with contextlib.redirect_stdout(io.StringIO()):
                 main(["input.nii.gz", "subject", "--weights-dir", "weights",
-                      "--assets-dir", "assets", "--native-bin-dir", "bin",
-                      "--native-topology", "--native-registration"])
-        self.assertTrue(run.call_args.kwargs["native_registration"])
-        self.assertTrue(run.call_args.kwargs["native_topology"])
+                      "--assets-dir", "assets", "--native-bin-dir", "bin"])
+        self.assertNotIn("native_registration", run.call_args.kwargs)
 
 
 if __name__ == "__main__":

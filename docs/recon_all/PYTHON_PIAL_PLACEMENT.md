@@ -1,6 +1,6 @@
 # Python pial.T1 表面放置
 
-`fnit.recon_all.place_pial_python.place_pial_t1` 实现 FreeSurfer 8.2 `mris_place_surface --pial` 的四轮几何优化，以及内侧壁固定和表面相交修复。它在 CPU 上使用 NumPy、Numba 和 nibabel。该函数可单独调用；默认 `fnit-recon-all` 仍生成近似 pial，启用 `--native-white-preaparc` 后会在最终 white 放置后调用此函数。该可选串联尚未完成整例验收。此阶段没有 CUDA 验证，也没有整例重建等价的验收结果。
+`fnit.recon_all.place_pial_python.place_pial_t1` 实现 FreeSurfer 8.2 `mris_place_surface --pial` 的四轮几何优化，以及内侧壁固定和表面相交修复。它在 CPU 上使用 NumPy、Numba 和 nibabel，可单独调用并用于同输入算法核对。标准 `fnit-recon-all` 在最终 white 放置后使用[Conda 源码构建的原生 pial](NATIVE_PIAL_PLACEMENT.md)；原因及同输入差异见该页。此 Python 阶段没有 CUDA 验证，不能用冻结官方上游的单阶段结果代替整例验收。
 
 ## 输入、输出与调用
 
@@ -28,7 +28,7 @@ report = place_pial_t1(
 
 `output` 可省略，默认写入 `subject/surf/{hemi}.pial.T1`。函数输出一个 FreeSurfer 三角表面：保留输入 white 的**有序面、完整体积几何标签和辅助尾部**，以放置后的 pial 坐标替换顶点坐标。`report` 含 `output`（路径字符串）、`hemisphere`（半球）、`steps`（接受的优化步数）、`pass_ends`（四轮的累计步数）、`cleanup`（相交次数、轨迹和平滑次数）及 `seconds`（墙钟耗时）。`max_steps` 默认 200；未收敛时抛出异常，不写入未完成的表面。
 
-函数不生成厚度、面积、曲率、体积或 atlas 统计；这些指标须由后续阶段计算。它也不生成所需的 white、标签或 MRI 输入。默认 runner 将 `smoothwm` 复制成 `white`，不能据此重现下述冻结同输入的逐点结果；可选高精度路径虽已接线，但还没有完成连续输入验收。按官方顺序，还需先完成 `white.preaparc` 放置、皮层和海马杏仁核标签、sphere 配准与 aparc 注释、最终 white 放置。本 pial 函数不直接读取 `white.preaparc` 或 `aparc.annot`，但它们属于上述上游流程。
+函数不生成厚度、面积、曲率、体积或 atlas 统计；这些指标须由后续阶段计算。它也不生成所需的 white、标签或 MRI 输入。标准 runner 已在上游完成最终 white 放置；自产上游连续输入仍需验收，不能据此沿用下述冻结同输入的逐点结果。按官方顺序，还需先完成 `white.preaparc` 放置、皮层和海马杏仁核标签、sphere 配准与 aparc 注释、最终 white 放置。本 pial 函数不直接读取 `white.preaparc` 或 `aparc.annot`，但它们属于上述上游流程。
 
 本模块没有独立 Python CLI；上面的具名实参调用是使用入口。在 `subject/mri` 目录中，使用 FreeSurfer 8.2 和 `FS_LICENSE` 的对应官方命令为：
 
@@ -57,4 +57,9 @@ mris_place_surface --adgws-in ../surf/autodet.gw.stats.lh.dat \
 
 输出文件的 SHA-256 可能因首条表面注释记录生成来源而不同。[双侧几何、尾部与耗时报告](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/place_geometry_pair/python_pial/) 保存了逐项对照。以相同的官方 white 和 cortex 标签，将该阶段输出接入现有 Python 顶点指标函数后，相对归档官方图的 p99 绝对误差：厚度不超过 2.38e-7 mm、pial 面积不超过 2.38e-7 mm²、顶点体积不超过 4.77e-7 mm³；两侧相应最大误差分别不超过 4.77e-7 mm、9.54e-7 mm² 和 1.91e-6 mm³。曲率函数仍有小幅算法误差：LH/RH 的 p99 为 2.71e-5/2.15e-5，最大值为 4.54e-4/2.03e-4。双侧共八张图均没有超过既定容差的顶点（面积：0.001 + 0.001 × |reference|；其他图：0.005 + 0.001 × |reference|）。[指标图比较脚本](../../validation/recon_all/python_gpu_port/compare_pial_metric_maps.py)与 [LH/RH JSON 报告](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/place_geometry_pair/python_pial/)保留逐图计数。这些冻结输入结果尚不能代表当前默认 runner 的指标或吞吐。此项 CPU pial 优化在有限观测中明显较慢；待上游候选链匹配后，碰撞检测和 KDTree 是主要提速对象。
 
-所需 Python 包为 `nibabel`、`NumPy`、`SciPy`、`PyTorch`、`Numba`，由仓库 `environment.yml` 的 `recon-all-python-stages` 扩展安装。`place_pial_t1` 不调用外部 FreeSurfer 可执行程序。
+所需 Python 包为 `nibabel`、`NumPy`、`SciPy`、`PyTorch`、`Numba`，由主页 `environment.yml` 安装。`place_pial_t1` 不调用外部 FreeSurfer 可执行程序；自产上游的 Python 与 Conda C++ 同输入比较见[标准 pial 记录](NATIVE_PIAL_PLACEMENT.md)。
+
+## 参考文献与原实现
+
+- Fischl B. FreeSurfer. *NeuroImage*. 2012;62(2):774–781. [doi:10.1016/j.neuroimage.2012.01.021](https://doi.org/10.1016/j.neuroimage.2012.01.021)。
+- [FreeSurfer 固定源码提交](https://github.com/freesurfer/freesurfer/tree/d932c45b7941662ea380a05efef580568b98d41a)。

@@ -82,4 +82,9 @@ mri_vsinus_seg --s sub01 --rca-synthseg --threads 4 \
   --synthmorphdir transforms/synthmorph.1.0mm.1.0mm
 ```
 
-[MNI152 affine 注册去 Surfa 的同输入验收](../../validation/recon_all/python_gpu_port/mni152_affine_no_surfa_20260927/README.md)给出两份 LTA 逐字节相同及稳态时间。[LTA 写入替换的真实 T1 验证](../../validation/recon_all/python_gpu_port/mni_lta_nibabel_20260927/README.md)给出相同矩阵下与原 Surfa 写入的逐字节比较、完整函数的同输入比较和五次写入耗时。[真实 T1 对照](../../validation/recon_all/python_gpu_port/mni_aux_connected_20260927/README.md)逐项比较候选 LTA、两张标签图及后续 `brain.finalsurfs.mgz` 与保存的官方重建。保存试验的 `stats/vsinus.stats` 五个静脉窦区域数值行匹配，但其 eTIV 来自当时的 Talairach LTA；Talairach 精度修改后尚未重测这份统计文件。可选 `--native-white-preaparc` 整例调度会在 CPU 上调用本模块，默认流程不会调用。它还需要新的整例验收。
+[MNI152 affine 注册去 Surfa 的同输入验收](../../validation/recon_all/python_gpu_port/mni152_affine_no_surfa_20260927/README.md)给出两份 LTA 逐字节相同及稳态时间。[LTA 写入替换的真实 T1 验证](../../validation/recon_all/python_gpu_port/mni_lta_nibabel_20260927/README.md)给出相同矩阵下与原 Surfa 写入的逐字节比较、完整函数的同输入比较和五次写入耗时。[真实 T1 对照](../../validation/recon_all/python_gpu_port/mni_aux_connected_20260927/README.md)逐项比较候选 LTA、两张标签图及后续 `brain.finalsurfs.mgz` 与保存的官方重建。保存试验的 `stats/vsinus.stats` 五个静脉窦区域数值行匹配，但其 eTIV 来自当时的 Talairach LTA；Talairach 精度修改后尚未重测这份统计文件。标准单 T1 流程在 CPU 上调用本模块。它还需要新的整例验收。
+
+## 参考文献与原实现
+
+- Fischl B. FreeSurfer. *NeuroImage*. 2012;62(2):774–781. [doi:10.1016/j.neuroimage.2012.01.021](https://doi.org/10.1016/j.neuroimage.2012.01.021)。
+- [FreeSurfer 固定源码提交](https://github.com/freesurfer/freesurfer/tree/d932c45b7941662ea380a05efef580568b98d41a)。

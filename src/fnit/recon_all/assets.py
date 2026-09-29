@@ -7,6 +7,7 @@ import json
 import os
 import re
 import shutil
+import sys
 import tarfile
 from pathlib import Path
 from urllib.request import Request, urlopen
@@ -262,6 +263,14 @@ def download_asset(name, directory, verify_only=False):
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(data)
         return target
+    if name in SOURCE_FILES:
+        for source_root in (Path(sys.prefix) / "share/fnit/recon_all_fs_source_d932c45",
+                            Path(sys.prefix) / "share/fnit/recon_all_native/source"):
+            source = source_root / "distribution" / name
+            if verify_file(source, size, sha256):
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(source, target)
+                return target
     if name in ARCHIVE_MEMBERS:
         archive = Path(directory) / ".downloads" / "mni_icbm152_nlin_asym_09c.tar.gz"
         archive_size, archive_sha = ARCHIVE_SIZE, ARCHIVE_SHA256
@@ -292,29 +301,30 @@ def _download_verified(url, target, size, sha256):
         part.unlink()
     if part.exists() and part.stat().st_size == size:
         part.unlink()
-    offset = part.stat().st_size if part.exists() else 0
-    headers = {"User-Agent": "Mozilla/5.0"}
-    if offset:
-        headers["Range"] = f"bytes={offset}-"
-    with urlopen(Request(url, headers=headers), timeout=60) as response:
-        if offset and response.status == 206:
-            match = re.fullmatch(r"bytes (\d+)-(\d+)/(\d+)",
-                                 response.headers.get("Content-Range", ""))
-            if not match or int(match[1]) != offset or int(match[3]) != size:
-                raise ValueError(f"Unexpected HTTP Content-Range for {target}")
-            mode = "ab"
-        elif response.status == 200:
-            mode = "wb"
-        else:
-            raise ValueError(f"Unexpected HTTP status {response.status} for {target}")
-        with part.open(mode) as stream:
-            for block in iter(lambda: response.read(8 * 1024 * 1024), b""):
-                stream.write(block)
-    if not verify_file(part, size, sha256):
+    for _ in range(2):
+        offset = part.stat().st_size if part.exists() else 0
+        headers = {"User-Agent": "Mozilla/5.0"}
+        if offset:
+            headers["Range"] = f"bytes={offset}-"
+        with urlopen(Request(url, headers=headers), timeout=60) as response:
+            if offset and response.status == 206:
+                match = re.fullmatch(r"bytes (\d+)-(\d+)/(\d+)",
+                                     response.headers.get("Content-Range", ""))
+                if not match or int(match[1]) != offset or int(match[3]) != size:
+                    raise ValueError(f"Unexpected HTTP Content-Range for {target}")
+                mode = "ab"
+            elif response.status == 200:
+                mode = "wb"
+            else:
+                raise ValueError(f"Unexpected HTTP status {response.status} for {target}")
+            with part.open(mode) as stream:
+                for block in iter(lambda: response.read(8 * 1024 * 1024), b""):
+                    stream.write(block)
+        if verify_file(part, size, sha256):
+            part.replace(target)
+            return target
         part.unlink(missing_ok=True)
-        raise ValueError(f"Downloaded asset failed size or SHA-256 verification: {target}")
-    part.replace(target)
-    return target
+    raise ValueError(f"Downloaded asset failed size or SHA-256 verification: {target}")
 
 
 def _extract_archive_members(archive, directory, members, prefix):
@@ -358,7 +368,22 @@ CORE_ASSETS = (
     "average/mca-dura.prior.warp.mni152.1.0mm.lh.nii.gz",
     "average/mca-dura.prior.warp.mni152.1.0mm.rh.nii.gz",
     "average/vsinus.no-sp.prior.mni152.1.0mm.mgz",
+    "average/mni_icbm152_nlin_asym_09c/reg-targets/mni152.1.0mm.cropped.nii.gz",
+    "average/mni_icbm152_nlin_asym_09c/reg-targets/mni152.1.0mm.nii.gz",
+    "average/colortable_BA.txt", "average/colortable_BA_thresh.txt",
+    "average/colortable_vpnl.txt",
+    *(f"subjects/fsaverage/surf/{hemi}.sphere.reg" for hemi in ("lh", "rh")),
+    *(name for name in ASSET_FILES if name.startswith("subjects/fsaverage/label/")),
 )
+
+
+def validate_core_assets(directory: str | Path) -> None:
+    """在运行前检查固定单 T1 流程的全部外置模板。"""
+    root = Path(directory)
+    for name in CORE_ASSETS:
+        size, sha256, _ = ASSET_FILES[name]
+        if not verify_file(root / name, size, sha256):
+            raise FileNotFoundError(f"missing or changed recon-all asset: {root / name}")
 
 
 def main(argv=None):

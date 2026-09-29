@@ -41,4 +41,9 @@ FNIT v5 当时的 T1 前缀在此影像上已使 `brain`、`brainmask`、`entowm
 
 [字节分析](../../validation/recon_all/python_gpu_port/finalsurfs_chain_20260927/byte_analysis.json)显示，解压后的 MGH 头和体素负载相同。Python 文件只在尾部来源标记少一个字节：原生命令复跑及保存的官方输出在 `UNKNOWN` 后还有一个空字节；此尾部不参与体素或表面计算。
 
-可选 `--native-white-preaparc` 调度现在会先生成被试 MNI152 LTA 和两张辅助分割，再调用本函数；默认路径不调用。前缀连通性与后续皮层指标还需从原始 T1 验收，冻结同输入结果不能证明整例形态指标一致。
+标准单 T1 流程先生成被试 MNI152 LTA 和两张辅助分割，再调用本函数。前缀连通性与后续皮层指标还需从原始 T1 验收，冻结同输入结果不能证明整例形态指标一致。
+
+## 参考文献与原实现
+
+- Fischl B. FreeSurfer. *NeuroImage*. 2012;62(2):774–781. [doi:10.1016/j.neuroimage.2012.01.021](https://doi.org/10.1016/j.neuroimage.2012.01.021)。
+- [FreeSurfer 固定源码提交](https://github.com/freesurfer/freesurfer/tree/d932c45b7941662ea380a05efef580568b98d41a)。

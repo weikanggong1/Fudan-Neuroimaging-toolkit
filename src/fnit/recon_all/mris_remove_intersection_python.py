@@ -1,14 +1,12 @@
-"""Detect surface self intersections and preserve the verified zero-intersection case.
-
-The fixed recon-all call uses the default ``mris_remove_intersection`` mode.
-For surfaces with intersecting faces, FreeSurfer runs an iterative soap-bubble
-repair; that branch is not implemented here and raises before writing output.
-"""
+"""检测表面自相交；非零相交交由 Conda 源码构建的迭代修复程序处理。"""
 
 from __future__ import annotations
 
 import argparse
+import os
 import shutil
+import subprocess
+import sys
 from pathlib import Path
 
 import nibabel.freesurfer as fs
@@ -127,12 +125,32 @@ def mark_intersections(vertices: np.ndarray, faces: np.ndarray) -> tuple[np.ndar
     return marks, int(intersecting_faces.sum())
 
 
-def remove_intersection_surface(input_path: str | Path, output_path: str | Path) -> tuple[int, int]:
-    """Write the fixed recon-all zero-intersection branch without a native binary."""
+def remove_intersection_surface(input_path: str | Path, output_path: str | Path,
+                                *, binary: str | Path | None = None,
+                                assets_dir: str | Path | None = None) -> tuple[int, int]:
+    """写出修复表面；返回输入相交面数和受影响顶点数。"""
     vertices, faces = fs.read_geometry(str(input_path))
     marks, count = mark_intersections(vertices, faces)
     if count:
-        raise NotImplementedError(f"{count} intersecting faces require FreeSurfer soap-bubble repair")
+        executable = Path(binary or Path(sys.prefix) / "bin/mris_remove_intersection")
+        if not executable.is_file():
+            raise FileNotFoundError(f"intersection repair binary not found: {executable}")
+        output = Path(output_path)
+        temporary = output.with_name(output.name + ".fnit-intersection")
+        try:
+            env = dict(os.environ)
+            if assets_dir is not None:
+                env["FREESURFER_HOME"] = str(Path(assets_dir).resolve())
+            subprocess.run([str(executable), str(input_path), str(temporary)],
+                           env=env, check=True)
+            corrected, corrected_faces = fs.read_geometry(str(temporary))
+            _, remaining = mark_intersections(corrected, corrected_faces)
+            if remaining:
+                raise RuntimeError(f"intersection repair left {remaining} intersecting faces")
+            temporary.replace(output)
+        finally:
+            temporary.unlink(missing_ok=True)
+        return count, int(marks.sum())
     if Path(input_path).resolve() != Path(output_path).resolve():
         shutil.copyfile(input_path, output_path)
     return count, int(marks.sum())
@@ -142,8 +160,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("input", type=Path)
     parser.add_argument("output", type=Path)
+    parser.add_argument("--binary", type=Path)
     args = parser.parse_args()
-    faces, vertices = remove_intersection_surface(args.input, args.output)
+    faces, vertices = remove_intersection_surface(args.input, args.output,
+                                                  binary=args.binary)
     print(f"Found {faces} intersecting faces; marked {vertices} vertices")
 
 

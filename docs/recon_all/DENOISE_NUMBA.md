@@ -44,3 +44,9 @@ AntsDenoiseImageFs -i /data/sub01/mri/brain.mgz -o /data/sub01/mri/antsdn.brain.
 ## 同输入验收
 
 [真实 T1 的逐体素和耗时报告](../../validation/recon_all/python_gpu_port/ANTS_DENOISE_STATUS.md)使用官方同名命令输出作参照。当前 Numba CLI 输出与官方 **16,777,216/16,777,216** 个体素相同；单次观测为 Python CLI **19.72 秒**、官方 **27.58 秒**。官方写盘的尾部标签比输入多 1 字节，故压缩文件 SHA-256 不相同。该阶段使用 CPU，整例的表面、配准和脑区指标仍需独立验收。
+
+## 参考文献与原实现
+
+- Fischl B. FreeSurfer. *NeuroImage*. 2012;62(2):774–781. [doi:10.1016/j.neuroimage.2012.01.021](https://doi.org/10.1016/j.neuroimage.2012.01.021)。
+- [FreeSurfer 固定源码提交](https://github.com/freesurfer/freesurfer/tree/d932c45b7941662ea380a05efef580568b98d41a)。
+- [ANTs DenoiseImage 原实现代码库](https://github.com/ANTsX/ANTs)。

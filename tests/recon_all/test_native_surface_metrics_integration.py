@@ -1,4 +1,4 @@
-"""Check the optional native morphometry commands without MRI inputs."""
+"""Check the required native morphometry commands without MRI inputs."""
 
 import contextlib
 import hashlib
@@ -84,14 +84,13 @@ class NativeSurfaceMetricsIntegrationTest(unittest.TestCase):
             with self.assertRaises(subprocess.CalledProcessError):
                 _run_native_surface_metrics(binary, subject, "lh", root)
 
-    def test_cli_forwards_surface_metrics_flag(self):
+    def test_cli_uses_fixed_surface_metrics_stage(self):
         with patch("fnit.recon_all.native_free.run_recon_all_python",
                    return_value={"status": "complete"}) as run:
             with contextlib.redirect_stdout(io.StringIO()):
                 main(["input.nii.gz", "subject", "--weights-dir", "weights",
-                      "--assets-dir", "assets", "--native-bin-dir", "bin",
-                      "--native-surface-metrics"])
-        self.assertTrue(run.call_args.kwargs["native_surface_metrics"])
+                      "--assets-dir", "assets", "--native-bin-dir", "bin"])
+        self.assertNotIn("native_surface_metrics", run.call_args.kwargs)
         self.assertEqual(run.call_args.kwargs["native_bin_dir"], Path("bin"))
 
 

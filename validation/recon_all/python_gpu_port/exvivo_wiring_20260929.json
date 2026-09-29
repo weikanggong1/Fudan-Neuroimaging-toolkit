@@ -1,0 +1,25 @@
+{
+  "date": "2026-09-29",
+  "scope": "FNIT annotation orchestration on frozen official real-T1 sphere.reg, white and orig; not a full FNIT subject",
+  "reference": "2026-09-24 a_official recon-all output",
+  "bug_before_fix": {
+    "lh.BA_exvivo": 5,
+    "lh.BA_exvivo.thresh": 67,
+    "lh.mpm.vpnl": 0,
+    "rh.BA_exvivo": 0,
+    "rh.BA_exvivo.thresh": 199,
+    "rh.mpm.vpnl": 0
+  },
+  "cause": "FNIT grouped source labels in asset-list order; --maxstatwinner resolves equal statistics by the later label in the command",
+  "fix": "Use the original recon-all label argument order for BA, thresholded BA and VPnl",
+  "after_fix_different_vertex_codes": {
+    "lh.BA_exvivo": 0,
+    "lh.BA_exvivo.thresh": 0,
+    "lh.mpm.vpnl": 0,
+    "rh.BA_exvivo": 0,
+    "rh.BA_exvivo.thresh": 0,
+    "rh.mpm.vpnl": 0
+  },
+  "left_vertices": 106622,
+  "right_vertices": 105541
+}

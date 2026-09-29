@@ -1,9 +1,10 @@
-"""Checks for the isolated native-free intersection-removal branch."""
+"""检查零相交保留和非零相交修复结果复检。"""
 
 from __future__ import annotations
 
 import numpy as np
 import pytest
+from unittest.mock import patch
 
 pytest.importorskip("nibabel")
 pytest.importorskip("scipy")
@@ -61,10 +62,22 @@ def test_zero_branch_preserves_surface_file(tmp_path) -> None:
     assert source.read_bytes() == original_bytes
 
 
-def test_positive_branch_fails_before_writing(tmp_path) -> None:
+def test_positive_branch_rechecks_repaired_surface(tmp_path) -> None:
     vertices, faces = tetrahedra(0.3)
     source, output = tmp_path / "input", tmp_path / "output"
     fs.write_geometry(str(source), vertices, faces)
-    with pytest.raises(NotImplementedError, match="intersecting faces"):
-        remove_intersection_surface(source, output)
-    assert not output.exists()
+    binary = tmp_path / "mris_remove_intersection"
+    binary.write_text("binary")
+
+    def repair(command, *, env, check):
+        assert command[:2] == [str(binary), str(source)]
+        assert check
+        assert env["FREESURFER_HOME"] == str(tmp_path)
+        corrected, corrected_faces = tetrahedra(3.0)
+        fs.write_geometry(command[2], corrected, corrected_faces)
+
+    with patch("fnit.recon_all.mris_remove_intersection_python.subprocess.run",
+               side_effect=repair):
+        assert remove_intersection_surface(source, output, binary=binary,
+                                           assets_dir=tmp_path) == (4, 7)
+    assert mark_intersections(*fs.read_geometry(str(output)))[1] == 0

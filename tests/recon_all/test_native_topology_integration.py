@@ -1,4 +1,4 @@
-"""Exercise the optional native topology handoff without a full MRI run."""
+"""Exercise the required native topology handoff without a full MRI run."""
 
 import contextlib
 import hashlib
@@ -50,6 +50,10 @@ class NativeTopologyIntegrationTest(unittest.TestCase):
                 "print('FNIT_CENTERED_SUBSTITUTION_USED')\n"
             )
             binary.chmod(0o755)
+            inflate = bin_dir / "mris_inflate"
+            inflate.write_text("#!/bin/sh\ncp \"$2\" \"$3\"\n")
+            inflate.chmod(0o755)
+            intersection = bin_dir / "mris_remove_intersection"
             resolved, digest = _native_topology_binary(bin_dir)
             self.assertEqual(resolved, binary.resolve())
             self.assertEqual(digest, hashlib.sha256(binary.read_bytes()).hexdigest())
@@ -64,7 +68,6 @@ class NativeTopologyIntegrationTest(unittest.TestCase):
             modules = {}
             for module_name, function_name in (
                 ("smooth_surface_python", "smooth_surface"),
-                ("inflate_python", "inflate_surface"),
                 ("sphere_quick_python", "write_quick_sphere"),
                 ("mris_remesh_python", "remesh_surface"),
                 ("mris_remove_intersection_python", "remove_intersection_surface"),
@@ -78,19 +81,19 @@ class NativeTopologyIntegrationTest(unittest.TestCase):
                     side_effect=copy_stage), patch.dict(
                     os.environ, {"FS_LICENSE": "/private/license.txt"}):
                 python_seconds, native_seconds, sphere_seconds, remesh_seconds, intersection_seconds = _prepare_native_topology(
-                    resolved, subject, "lh", assets, "cpu")
+                    resolved, subject, "lh", assets, "cpu", inflate, intersection)
             self.assertGreaterEqual(python_seconds, 0)
             self.assertGreaterEqual(native_seconds, 0)
             self.assertGreaterEqual(remesh_seconds, 0)
             self.assertGreaterEqual(intersection_seconds, 0)
-            self.assertEqual(sphere_seconds, {})
+            self.assertEqual(set(sphere_seconds), {"inflate_nofix", "qsphere_nofix_python"})
             self.assertEqual(calls, [
                 ("lh.orig.nofix", "lh.smoothwm.nofix", {"device": "cpu"}),
-                ("lh.smoothwm.nofix", "lh.inflated.nofix", {}),
                 ("lh.inflated.nofix", "lh.qsphere.nofix", {}),
                 ("lh.qsphere.nofix", "lh.topology-centered.sphere", {}),
                 ("lh.orig.premesh", "lh.orig", {"iterations": 3}),
-                ("lh.orig", "lh.orig", {}),
+                ("lh.orig", "lh.orig", {"binary": intersection,
+                                         "assets_dir": assets}),
             ])
             command = json.loads((subject / "command.json").read_text())
             self.assertEqual(command["argv"], [
@@ -128,14 +131,13 @@ class NativeTopologyIntegrationTest(unittest.TestCase):
                 with self.assertRaises(subprocess.CalledProcessError):
                     _run_native_topology(binary, subject, "lh", root)
 
-    def test_cli_forwards_native_topology_flag(self):
+    def test_cli_uses_fixed_topology_stage(self):
         with patch("fnit.recon_all.native_free.run_recon_all_python",
                    return_value={"status": "complete"}) as run:
             with contextlib.redirect_stdout(io.StringIO()):
                 main(["input.nii.gz", "subject", "--weights-dir", "weights",
-                      "--assets-dir", "assets", "--native-bin-dir", "bin",
-                      "--native-topology"])
-        self.assertTrue(run.call_args.kwargs["native_topology"])
+                      "--assets-dir", "assets", "--native-bin-dir", "bin"])
+        self.assertNotIn("native_topology", run.call_args.kwargs)
         self.assertEqual(run.call_args.kwargs["native_bin_dir"], Path("bin"))
 
 

@@ -7,7 +7,7 @@
 | `surf/H.smoothwm.nofix` | `mris_smooth -nw -seed 1234 H.orig.nofix H.smoothwm.nofix` | 未修复拓扑的 `orig.nofix`；默认 10 轮 |
 | `surf/H.smoothwm` | `mris_smooth -n 3 -nw -seed 1234 H.white.preaparc H.smoothwm` | 放置后的 `white.preaparc`；3 轮 |
 
-`H` 为 `lh` 或 `rh`。最终平滑命令见该被试官方 `scripts/recon-all.log` 的第 4675、4681 行。默认 runner 以默认 10 轮调用 `smooth_surface(H.orig, H.smoothwm)`，随后把 `smoothwm` 复制为 `white.preaparc`。可选的 `--native-white-preaparc` 路径先运行 Conda white.preaparc 放置，再用 Python 平滑 3 轮。该路径另有[真实 T1 保存阶段 LH 连通检验](../../validation/recon_all/python_gpu_port/white_connected_prefix_20260927/README.md)；最终 white/pial 放置及完整重建尚未验收。`smoothwm.nofix` 使用独立的 `orig.nofix` 输入和 10 轮平滑。
+`H` 为 `lh` 或 `rh`。最终平滑命令见该被试官方 `scripts/recon-all.log` 的第 4675、4681 行。标准 runner 先运行 Conda white.preaparc 放置，再用 Python 平滑 3 轮得到 `smoothwm`。该路径另有[真实 T1 保存阶段 LH 连通检验](../../validation/recon_all/python_gpu_port/white_connected_prefix_20260927/README.md)；最终 white/pial 放置及完整重建尚未验收。`smoothwm.nofix` 使用独立的 `orig.nofix` 输入和 10 轮平滑。
 
 ## 函数与调用
 
@@ -44,7 +44,7 @@ mris_smooth -n 3 -nw -seed 1234 \
   surf/lh.white.preaparc surf/lh.smoothwm
 ```
 
-右侧调用将 `lh` 改为 `rh`。独立函数本身不生成 `white.preaparc`；可选 recon-all 路径由 Conda 放置函数提供这一输入。
+右侧调用将 `lh` 改为 `rh`。独立函数本身不生成 `white.preaparc`；标准 recon-all 路径由 Conda 放置函数提供这一输入。
 
 ## 冻结官方输入的真实数据对照
 
@@ -55,7 +55,7 @@ mris_smooth -n 3 -nw -seed 1234 \
 | LH | 106,622 / 213,240 | 319,866 / 319,866 | 0 mm | 7.889 s | 3.153 s |
 | RH | 105,541 / 211,078 | 316,623 / 316,623 | 0 mm | 6.634 s | 3.609 s |
 
-有序面和体积几何字段也完全一致。3 次耗时、输入哈希和原生命令重放结果见 [`report.json`](../../validation/recon_all/python_gpu_port/smoothwm_final_same_input_20260927/report.json)。这证明平滑函数在**冻结的同输入**条件下数值一致，不等于候选上游及整例输出一致。另一次可选路径的 LH 全候选保存阶段试验中，最终 `smoothwm` 仍有 18 个顶点位移 >0.1 mm；下游指标尚未验收。
+有序面和体积几何字段也完全一致。3 次耗时、输入哈希和原生命令重放结果见 [`report.json`](../../validation/recon_all/python_gpu_port/smoothwm_final_same_input_20260927/report.json)。这证明平滑函数在**冻结的同输入**条件下数值一致，不等于候选上游及整例输出一致。历史 LH 全候选保存阶段试验中，最终 `smoothwm` 仍有 18 个顶点位移 >0.1 mm；下游指标尚未验收。
 
 在包含 FreeSurfer 可执行程序和本 Python 包的环境中，按以下命令重跑配对 benchmark：
 
@@ -68,3 +68,8 @@ python validation/recon_all/python_gpu_port/benchmark_smooth_surface.py \
 ```
 
 benchmark 脚本的 `--left-surface`、`--right-surface` 是两侧同输入表面，`--native-binary` 是官方 `mris_smooth`，`--output-dir` 保存配对结果，`--iterations` 和 `--device` 与函数参数相同，`--repeats` 指定配对次数。
+
+## 参考文献与原实现
+
+- Fischl B. FreeSurfer. *NeuroImage*. 2012;62(2):774–781. [doi:10.1016/j.neuroimage.2012.01.021](https://doi.org/10.1016/j.neuroimage.2012.01.021)。
+- [FreeSurfer 固定源码提交](https://github.com/freesurfer/freesurfer/tree/d932c45b7941662ea380a05efef580568b98d41a)。

@@ -98,7 +98,7 @@ source .venv/bin/activate
 python -m pip install .
 ```
 
-recon-all 的 Python/C++ 阶段和 Connectome 的兼容依赖不属于基础安装；安装方法与实现边界见各自功能页。
+recon-all 的 Python 依赖和原生编译工具链已列入主页 Conda 环境；创建环境后按 [recon-all 安装说明](docs/recon_all/CONDA_CPP_BUILD.md)编译固定源码程序并获取外置权重、图谱。Connectome 的兼容依赖及其安装边界见功能页。
 
 ## 下载和配置权重
 

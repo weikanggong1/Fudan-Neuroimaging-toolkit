@@ -34,7 +34,7 @@ Python `mri_cc` 在独立同输入配对中使 `aseg.auto` 的 16,777,216 个体
 
 隔离后处理探针在完整 v2 被试的副本上调用现有 Python `volmask`、低信号重标记和 ribbon 回填：候选 `ribbon` 与官方相差 227,112 个体素，最终 `aseg` 相差 142,536 个体素，比未回填的 104,986 个多 37,550。该实验反而恶化，因此没有接入默认流程；先修上游 white/pial 几何与 `entowm` 支持的皮层标签。[后处理完整报告](../post_cc_chain_v2/README.md)保存输入哈希、输出差异、类型、仿射与阶段时间。
 
-本次 GPU 进程采样的最大驻留量为 **20,824 MiB**，超过 20 GiB 目标；采样在前置阶段启动后才开始，不能称为完整运行连续峰值。独立 SynthSeg FP32 显存试验见[显存审计](../GPU_MEMORY_PROFILE.md)，前置残留的阶段定位另行记录。未启用 float16/bfloat16；SynthSeg 为保持体素一致单独关闭 cuDNN TF32，其余 PyTorch 路径维持项目默认 TF32 策略。
+本次 GPU 进程采样的最大驻留量为 **20,824 MiB**，超过 20 GiB 目标；采样在前置阶段启动后才开始，不能称为完整运行连续峰值。旧版与现版的分界见[显存说明](../../../../../docs/recon_all/GPU_MEMORY.md)。未启用 float16/bfloat16；SynthSeg 为保持体素一致单独关闭 cuDNN TF32，其余 PyTorch 路径维持项目默认 TF32 策略。
 
 v2 运行 JSON 固定记录了当时实际调用的六个二进制 SHA-256。整例结束后为加入第七目标先在 headcw、后在 gpucw1 重新执行构建脚本，两组二进制哈希均与整例时不同，见[headcw 哈希](../bin_seven.sha256)和[gpucw1 哈希](../bin_seven_gpucw1.sha256)；这些后续构建未用于 v2 计时或 138 项比较，也不自动继承其整例数值证据。第七目标 `mri_segment` 已在两次重编后另做同输入复测。
 

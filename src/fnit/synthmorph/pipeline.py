@@ -251,6 +251,10 @@ class SynthMorph:
         if is_matrix:
             forward_voxel = _numpy(inverse_pull)
             inverse_voxel = _numpy(forward_pull)
+            # float32 affine averaging/composition can perturb the fixed
+            # homogeneous row even though the model estimates only 3x4 terms.
+            forward_voxel[3] = (0, 0, 0, 1)
+            inverse_voxel[3] = (0, 0, 0, 1)
             forward = AffineTransform(
                 forward_voxel, source=mov, target=fix, space="voxel"
             ).convert(space="world")

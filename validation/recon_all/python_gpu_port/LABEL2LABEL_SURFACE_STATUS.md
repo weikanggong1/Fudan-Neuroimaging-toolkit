@@ -1,29 +1,35 @@
-# Fixed fsaverage surface-label transfer
+# fsaverage 表面标签映射
 
-The frozen FreeSurfer 8.2.0 recon-all log contains 72 calls of `mri_label2label --srcsubject fsaverage --trgsubject fs_sub01 --regmethod surface`: 36 labels per hemisphere. These include BA/V1/V2/MT/entorhinal/perirhinal labels, eight FG/hOc `mpm.vpnl` labels, and the 14 thresholded labels per side. The input contract is the source `fsaverage/label/*.label`, source `fsaverage/surf/?h.sphere.reg`, target `fs_sub01/surf/?h.sphere.reg`, and target `fs_sub01/surf/?h.white`. Each output is the same-named label in `fs_sub01/label`.
+`SurfaceLabelMapper` 对应固定单 T1 流程中的 `mri_label2label --srcsubject fsaverage --trgsubject sub01 --regmethod surface`。输入为 fsaverage 的双侧 `sphere.reg` 和 72 张 `.label`，以及被试的双侧 `sphere.reg` 与 `white`；输出为被试 `label/H.*.label`，每行保存目标顶点编号、surface RAS 坐标和统计值。每侧缓存一次源/目标球面最近顶点关系，再处理该侧的 36 张标签。
 
-`SurfaceLabelMapper` implements the fixed surface call: rescale each sphere to radius 100 using FreeSurfer's bounding-box-centered mean radius; map source label points to nearest target sphere vertices in source-label order; then visit as-yet-unmapped target vertices in vertex order and include those whose nearest source sphere vertex lies in the source label. It retains the first occurrence of duplicate target vertices and carries source statistics as float32 into native label text. The mapper caches the two sphere nearest-vertex arrays for all 36 labels of one hemisphere. Native uses a spatial hash; this SciPy nearest-neighbor replacement was checked against its ordered output on the frozen T1.
+对 2026-09-24 的一例真实 T1 冻结官方表面，FNIT 的 72/72 张标签与官方文件逐字节一致，包括顶点顺序、坐标、统计文本和文件头。代表性 `lh.FG1.mpm.vpnl.label` 的 SHA-256 为 `02df9ccb88212f18f9e5be7e9b8ed2e0351804465a661481686c2c422e3b8054`，`rh.BA1_exvivo.label` 为 `0bc04fd8fcdf94d3a9e858421b14fde584664a63541f51414282eb4e442557b3`。输入表面来自官方冻结整例，此结果不能替代 FNIT 自产表面的连续验证。2026-09-29 已将映射器接入标准入口，并核对六张最终注释的全部顶点编码；见[接线记录](exvivo_wiring_20260929.json)。
 
-## Exact output checks
+| 旧版同输入计时 | 官方 | FNIT |
+| --- | ---: | ---: |
+| 左侧 FG1，headcw 单次调用 | 3.17 s | 0.53 s |
+| 右侧 BA1，headcw 单次调用 | 2.94 s | 0.61 s |
+| 72 张标签 | gpucw1 旧日志合计 236.24 s | headcw FNIT 旧观察 7.90 s |
 
-Freshly replayed native `mri_label2label` on headcw and Python both match the frozen official files byte for byte for representative `lh.FG1.mpm.vpnl.label` (SHA-256 `02df9ccb88212f18f9e5be7e9b8ed2e0351804465a661481686c2c422e3b8054`) and `rh.BA1_exvivo.label` (SHA-256 `0bc04fd8fcdf94d3a9e858421b14fde584664a63541f51414282eb4e442557b3`). The [batch validator](benchmark_label2label_surface.py) then reproduced **72/72** frozen official label files byte for byte, including vertex order, coordinates, statistic text, header, and filename. Its ordered-map regression test passed on headcw (`1 passed`).
+最后一行不是同机配对，不能用于速度比。映射器建立双侧缓存分别观察到 0.264 s 和 0.287 s。所用 fsaverage 资产是两个球面和 72 张标签，合计 21,196,583 字节；FNIT 运行时不需要系统 FreeSurfer 程序。
 
-The native log's `Writing label file ... 443` for LH FG1 is a pre-write count. FreeSurfer flags duplicate target vertices during writing; the actual native and official files each contain 343 data rows. The Python output has the same 343 rows in the same order.
+```python
+from pathlib import Path
+from fnit.recon_all.label2label_surface_python import SurfaceLabelMapper
 
-## Time and external assets
-
-| Measurement | Native FreeSurfer | Python |
-|---|---:|---:|
-| LH FG1, same headcw CPU, independent call | 3.17 s | 0.53 s |
-| RH BA1, same headcw CPU, independent call | 2.94 s | 0.61 s |
-| All 72, Python with hemisphere maps reused on headcw | — | 7.90 s wall; 5.711 s of per-label calls, median 0.053 s |
-| All 72 native calls in the original gpucw1 log | 236.24 s summed; median 3.245 s | — |
-
-The original 72-call native sum is from gpucw1, a different host from the Python batch run; only the two independent calls above are paired on headcw. Hemisphere mapper setup took 0.264 s LH and 0.287 s RH. These are CPU timings, and this module is not yet connected to the main recon-all entrypoint.
-
-The external fsaverage inputs used by this fixed stage total **21,196,583 bytes** (74 files: two `sphere.reg` surfaces and 72 source labels). They can be supplied as a small separately downloaded template directory; FreeSurfer binaries or its full fsaverage tree are not needed by this Python stage. Target `sphere.reg` and `white` come from the reconstructed subject.
-
-```bash
-PYTHONPATH=src python validation/recon_all/python_gpu_port/benchmark_label2label_surface.py \
-  /path/to/fsaverage /path/to/fs_sub01 /path/to/scratch/labels
+mapper = SurfaceLabelMapper(
+    source_sphere=Path("/data/fnit-assets/subjects/fsaverage/surf/lh.sphere.reg"),  # fsaverage 左侧配准球面
+    target_sphere=Path("/data/subjects/sub01/surf/lh.sphere.reg"),  # 被试左侧配准球面
+    target_white=Path("/data/subjects/sub01/surf/lh.white"),  # 被试左侧 white，提供目标坐标
+    target_subject="sub01",  # 输出 label 文件头中的被试名
+)
+target_vertex_ids = mapper.map_label(
+    source_label=Path("/data/fnit-assets/subjects/fsaverage/label/lh.BA1_exvivo.label"),  # 源标签
+    output_label=Path("/data/subjects/sub01/label/lh.BA1_exvivo.label"),  # 目标标签
+)
+# target_vertex_ids 为输出文件中的目标顶点编号数组。
 ```
+
+## 参考文献与原实现
+
+- Fischl B. FreeSurfer. *NeuroImage*. 2012;62(2):774–781. [doi:10.1016/j.neuroimage.2012.01.021](https://doi.org/10.1016/j.neuroimage.2012.01.021)。
+- [FreeSurfer 原实现代码库](https://github.com/freesurfer/freesurfer/tree/d932c45b7941662ea380a05efef580568b98d41a)。

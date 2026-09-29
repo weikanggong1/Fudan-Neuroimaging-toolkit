@@ -33,3 +33,8 @@ mri_synthmorph -m affine -t transforms/synthmorph.mni305/aff.lta \
 归档官方 `talairach.xfm.lta` 与上述两份结果的最大矩阵元素差为 `7.63e-6`，来自完整官方变换生成路径；本次替换只证明旧 FNIT 子函数的输出不变，不声称完整 Talairach 输出已逐字节匹配官方。
 
 在 headcw 新 Conda 环境中，同一输入和相同文件写入范围各预热一次后交错运行 20 次：NumPy 实现中位数 **0.363 ms**，旧 Surfa 调用中位数 **1.187 ms**。此阶段远小于网络注册时间，不能把这项差值解释为整例提速。正式整例仍需重新核对 LTA、eTIV 和下游体素。
+
+## 参考文献与原实现
+
+- Fischl B. FreeSurfer. *NeuroImage*. 2012;62(2):774–781. [doi:10.1016/j.neuroimage.2012.01.021](https://doi.org/10.1016/j.neuroimage.2012.01.021)。
+- [FreeSurfer 固定源码提交](https://github.com/freesurfer/freesurfer/tree/d932c45b7941662ea380a05efef580568b98d41a)。

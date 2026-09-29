@@ -49,7 +49,10 @@ def new_image(data, reference: nib.spatialimages.SpatialImage, *, affine=None):
     array = np.asarray(data)
     header = nib.Nifti1Header.from_header(reference.header)
     header.set_data_dtype(array.dtype)
-    image = FNITNifti1Image(array, reference.affine if affine is None else affine, header)
-    image.set_qform(image.affine, int(header["qform_code"]))
-    image.set_sform(image.affine, int(header["sform_code"]))
+    target_affine = reference.affine if affine is None else affine
+    image = FNITNifti1Image(array, target_affine, header)
+    image.set_qform(target_affine, int(header["qform_code"]))
+    # MGH has no NIfTI sform code. Code 0 would discard the supplied affine
+    # and make nibabel fall back to a centered, axis-aligned voxel grid.
+    image.set_sform(target_affine, max(1, int(header["sform_code"])))
     return image

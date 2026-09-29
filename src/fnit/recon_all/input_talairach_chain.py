@@ -4,6 +4,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import subprocess
+import sys
 from pathlib import Path
 import time
 
@@ -86,8 +89,21 @@ def run_input_talairach_chain(t1: str | Path, subject_dir: str | Path,
     xfm = root / "mri/transforms/talairach.xfm"
     lta = root / "mri/transforms/synthmorph.mni305/aff.lta"
     started = time.perf_counter()
-    register_talairach(strip_file, template, weights, xfm, lta,
-                       device=device, threads=threads)
+    child_gpu = None
+    if torch.device(device).type == "cuda":
+        memory_report = root / "scripts/talairach-child-gpu.json"
+        child_env = dict(os.environ)
+        child_env.pop("PYTORCH_NO_CUDA_MEMORY_CACHING", None)
+        subprocess.run([
+            sys.executable, "-m", "fnit.recon_all.talairach_synthmorph",
+            str(strip_file), str(template), "--weights", str(weights),
+            "--xfm", str(xfm), "--lta", str(lta), "--device", device,
+            "--threads", str(threads), "--memory-report", str(memory_report),
+        ], check=True, env=child_env)
+        child_gpu = json.loads(memory_report.read_text())
+    else:
+        register_talairach(strip_file, template, weights, xfm, lta,
+                           device=device, threads=threads)
     voxel_lta = root / "mri/transforms/talairach.xfm.lta"
     write_voxel_lta_from_ras(source_lta=lta, output_lta=voxel_lta)
     talairach_seconds = time.perf_counter() - started
@@ -95,7 +111,8 @@ def run_input_talairach_chain(t1: str | Path, subject_dir: str | Path,
             "talairach_affine_lta": str(lta),
             "talairach_voxel_lta": str(voxel_lta), "threads": threads,
             "synthstrip_seconds": strip_seconds,
-            "talairach_seconds": talairach_seconds}
+            "talairach_seconds": talairach_seconds,
+            "talairach_child_gpu": child_gpu}
 
 
 def main() -> None:

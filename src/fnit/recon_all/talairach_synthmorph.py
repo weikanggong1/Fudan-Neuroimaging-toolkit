@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import argparse
+import json
 
 import numpy as np
 import torch
@@ -60,7 +61,7 @@ def register_talairach(moving: str | Path, template: str | Path,
         model = SynthMorph(weights=weights, device=device, model="affine", extent=256)
         torch.backends.cuda.matmul.allow_tf32 = False
         torch.backends.cudnn.allow_tf32 = False
-        affine = model.affine_transform(moving, template)
+        affine = model(moving, template, header_only=True).transform
     finally:
         torch.backends.cuda.matmul.allow_tf32 = previous_matmul_tf32
         torch.backends.cudnn.allow_tf32 = previous_cudnn_tf32
@@ -82,9 +83,21 @@ def main() -> None:
     parser.add_argument("--lta", type=Path)
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--threads", type=int, default=4)
+    parser.add_argument("--memory-report", type=Path)
     args = parser.parse_args()
+    # 与标准输入链中的 SynthStrip 后端设置一致。
+    torch.backends.cudnn.benchmark = True
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cuda.matmul.allow_tf32 = True
+    torch.backends.cudnn.allow_tf32 = True
     register_talairach(args.moving, args.template, args.weights,
                        args.xfm, args.lta, args.device, args.threads)
+    if args.memory_report is not None:
+        args.memory_report.parent.mkdir(parents=True, exist_ok=True)
+        args.memory_report.write_text(json.dumps({
+            "gpu_peak_allocated_bytes": torch.cuda.max_memory_allocated(),
+            "gpu_peak_reserved_bytes": torch.cuda.max_memory_reserved(),
+        }, indent=2))
 
 
 if __name__ == "__main__":

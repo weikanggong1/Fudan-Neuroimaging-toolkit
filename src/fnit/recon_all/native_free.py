@@ -1,8 +1,4 @@
-"""T1-to-morphometry reconstruction with Conda WM and optional surface stages.
-
-Surface placement and registration are still approximate; the run report
-records each selected implementation.
-"""
+"""单幅 T1 的 FNIT 皮层重建。必要表面阶段使用固定的完整调用链。"""
 
 from __future__ import annotations
 
@@ -13,6 +9,7 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import time
 
 import nibabel as nib
@@ -30,6 +27,15 @@ def _native_binary(native_bin_dir: str | Path, name: str) -> tuple[Path, str]:
         for chunk in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(chunk)
     return binary, digest.hexdigest()
+
+
+def _native_bin_directory(value: str | Path | None) -> Path:
+    """默认从当前 Conda 环境发现 FNIT 自编译原生程序。"""
+    directory = Path(value).resolve() if value is not None else Path(
+        os.environ.get("FNIT_RECON_ALL_BIN_DIR", Path(sys.prefix) / "bin")).resolve()
+    if not directory.is_dir():
+        raise FileNotFoundError(f"FNIT recon-all native bin directory not found: {directory}")
+    return directory
 
 
 def _native_em_register_binary(native_bin_dir: str | Path) -> tuple[Path, str]:
@@ -108,7 +114,8 @@ def _run_native_sphere_step(binary: Path, subject: Path, assets: Path,
 
 def _prepare_native_topology(binary: Path, subject: Path, hemi: str,
                              assets: Path, device: str,
-                             native_inflate_binary: Path | None = None
+                             native_inflate_binary: Path,
+                             intersection_binary: Path,
                              ) -> tuple[float, float, dict[str, float], float, float]:
     from .mris_remesh_python import remesh_surface
     from .mris_remove_intersection_python import remove_intersection_surface
@@ -123,23 +130,14 @@ def _prepare_native_topology(binary: Path, subject: Path, hemi: str,
     smooth_surface(surf / f"{hemi}.orig.nofix", smooth_nofix, device=device)
     python_seconds = time.perf_counter() - tick
     sphere_seconds = {}
-    if native_inflate_binary is not None:
-        sphere_seconds["inflate_nofix"] = _run_native_sphere_step(
-            native_inflate_binary, subject, assets,
-            ["-no-save-sulc", str(smooth_nofix), str(inflated_nofix)],
-            (inflated_nofix,))
-    else:
-        from .inflate_python import inflate_surface
-        tick = time.perf_counter()
-        inflate_surface(smooth_nofix, inflated_nofix)
-        python_seconds += time.perf_counter() - tick
+    sphere_seconds["inflate_nofix"] = _run_native_sphere_step(
+        native_inflate_binary, subject, assets,
+        ["-no-save-sulc", str(smooth_nofix), str(inflated_nofix)],
+        (inflated_nofix,))
     tick = time.perf_counter()
     write_quick_sphere(inflated_nofix, qsphere_nofix)
     quick_seconds = time.perf_counter() - tick
-    if native_inflate_binary is not None:
-        sphere_seconds["qsphere_nofix_python"] = quick_seconds
-    else:
-        python_seconds += quick_seconds
+    sphere_seconds["qsphere_nofix_python"] = quick_seconds
     native_started = time.perf_counter()
     _run_native_topology(binary, subject, hemi, assets)
     native_seconds = time.perf_counter() - native_started
@@ -148,7 +146,8 @@ def _prepare_native_topology(binary: Path, subject: Path, hemi: str,
     remesh_seconds = time.perf_counter() - tick
     tick = time.perf_counter()
     orig = surf / f"{hemi}.orig"
-    remove_intersection_surface(orig, orig)
+    remove_intersection_surface(orig, orig, binary=intersection_binary,
+                                assets_dir=assets)
     intersection_seconds = time.perf_counter() - tick
     return (python_seconds + remesh_seconds + intersection_seconds, native_seconds,
             sphere_seconds, remesh_seconds, intersection_seconds)
@@ -199,50 +198,55 @@ def _run_native_surface_metrics(binary: Path, subject: Path, hemi: str,
     return timings
 
 
-def _replace_vertices(source: Path, output: Path, vertices: np.ndarray) -> None:
-    """Retain the triangle order and volume-geometry tag of a source surface."""
-    raw = source.read_bytes()
-    if raw[:3] != b"\xff\xff\xfe":
-        raise ValueError(f"expected a triangular surface: {source}")
-    first = raw.index(b"\n\n", 3) + 2
-    count = int.from_bytes(raw[first:first + 4], "big")
-    if len(vertices) != count:
-        raise ValueError("surface vertex count changed")
-    start = first + 8
-    output.write_bytes(raw[:start] + np.asarray(vertices, dtype=">f4").tobytes()
-                       + raw[start + 12 * count:])
+def _run_avg_curv(binary: Path, subject: Path, hemi: str,
+                  atlas: Path, assets: Path) -> None:
+    """执行固定的 mrisp_paint 第 6 幅图谱映射。"""
+    output = subject / "surf" / f"{hemi}.avg_curv"
+    env = dict(os.environ, SUBJECTS_DIR=str(subject.parent),
+               FREESURFER_HOME=str(assets))
+    subprocess.run([str(binary), "-a", "5", f"{atlas}#6",
+                    str(subject / "surf" / f"{hemi}.sphere.reg"), str(output)],
+                   cwd=subject / "scripts", env=env, check=True)
+    if not output.is_file():
+        raise FileNotFoundError(output)
 
 
-def _pial_from_cortex(white: np.ndarray, faces: np.ndarray,
-                      image: nib.MGHImage, segmentation: np.ndarray,
-                      hemi: str) -> tuple[np.ndarray, np.ndarray]:
-    from .inflate_python import vertex_normals
+def _run_curvature_stats(binary: Path, subject: Path, hemi: str,
+                         assets: Path) -> None:
+    """生成固定的 curv.stats 及 smoothwm 曲率附图。"""
+    output = subject / "stats" / f"{hemi}.curv.stats"
+    env = dict(os.environ, SUBJECTS_DIR=str(subject.parent),
+               FREESURFER_HOME=str(assets))
+    subprocess.run([str(binary), "-m", "--writeCurvatureFiles", "-G",
+                    "-o", str(output), "-F", "smoothwm", subject.name,
+                    hemi, "curv", "sulc"], cwd=subject / "scripts",
+                   env=env, check=True)
+    for path in (output, *(subject / "surf" / f"{hemi}.smoothwm.{name}.crv"
+                           for name in ("BE", "C", "FI", "S"))):
+        if not path.is_file():
+            raise FileNotFoundError(path)
 
-    normal = vertex_normals(np.asarray(white, np.float32), np.asarray(faces, np.int32))
-    center = white.mean(axis=0)
-    if np.median(np.sum(normal * (white - center), axis=1)) < 0:
-        normal = -normal
-    wm_id, cortex_id = ((2, 3) if hemi == "lh" else (41, 42))
-    allowed = (segmentation == wm_id) | (segmentation == cortex_id)
-    inverse = np.linalg.inv(image.header.get_vox2ras_tkr())
-    distance = np.full(len(white), np.float32(6), dtype=np.float32)
-    active = np.ones(len(white), bool)
-    entered_cortex = np.zeros(len(white), bool)
-    for step in range(1, 13):
-        indices = np.flatnonzero(active)
-        if not len(indices):
-            break
-        points = white[indices] + np.float32(step * .5) * normal[indices]
-        voxels = np.rint(points @ inverse[:3, :3].T + inverse[:3, 3]).astype(np.int32)
-        in_bounds = np.all((voxels >= 0) & (voxels < np.asarray(allowed.shape)), axis=1)
-        voxels = np.clip(voxels, 0, np.asarray(allowed.shape) - 1)
-        labels = segmentation[voxels[:, 0], voxels[:, 1], voxels[:, 2]]
-        entered_cortex[indices] |= in_bounds & (labels == cortex_id)
-        finished = (~in_bounds | ~allowed[voxels[:, 0], voxels[:, 1], voxels[:, 2]]) & entered_cortex[indices]
-        distance[indices[finished]] = np.float32(step * .5)
-        active[indices[finished]] = False
-    distance = np.clip(distance, 1, 6)
-    return (white + normal * distance[:, None]).astype(np.float32), distance
+
+def _run_defects_volume(binary: Path, subject: Path, hemi: str,
+                        assets: Path) -> None:
+    """按固定 recon-all --defects 命令将拓扑缺陷投射到 conform 网格。"""
+    mri, surf, labels = (subject / name for name in ("mri", "surf", "label"))
+    output = mri / "surface.defects.mgz"
+    template = mri / "orig.mgz" if hemi == "lh" else output
+    defect_labels = surf / f"{hemi}.defect_labels"
+    cortex = labels / f"{hemi}.nofix.cortex.label"
+    for required in (template, defect_labels, cortex):
+        if not required.is_file():
+            raise FileNotFoundError(required)
+    env = dict(os.environ, SUBJECTS_DIR=str(subject.parent),
+               FREESURFER_HOME=str(assets))
+    subprocess.run([str(binary), "--defects", str(surf / f"{hemi}.orig.nofix"),
+                    str(defect_labels), str(template),
+                    "1000" if hemi == "lh" else "2000",
+                    "0" if hemi == "lh" else "1", str(output), str(cortex)],
+                   cwd=subject / "scripts", env=env, check=True)
+    if not output.is_file():
+        raise FileNotFoundError(output)
 
 
 def _run_white_mri_chain(subject: Path, weights: Path, assets: Path,
@@ -269,13 +273,48 @@ def _place_preaparc_and_smooth(subject: Path, hemi: str, binary: Path,
     return report
 
 
+def _run_native_pial(binary: Path, subject: Path, hemi: str,
+                     assets: Path, threads: int) -> dict:
+    """用 Conda 源码构建程序完成四轮 pial 放置，并检查输出网格。"""
+    surf, mri, labels = (subject / name for name in ("surf", "mri", "label"))
+    white = surf / f"{hemi}.white"
+    output = surf / f"{hemi}.pial.T1"
+    command = [str(binary), "--adgws-in",
+               str(surf / f"autodet.gw.stats.{hemi}.dat"),
+               "--seg", str(mri / "aseg.presurf.mgz"),
+               "--threads", str(threads), "--wm", str(mri / "wm.mgz"),
+               "--invol", str(mri / "brain.finalsurfs.mgz"),
+               f"--{hemi}", "--i", str(white), "--o", str(output),
+               "--pial", "--nsmooth", "0", "--rip-label",
+               str(labels / f"{hemi}.cortex+hipamyg.label"),
+               "--pin-medial-wall", str(labels / f"{hemi}.cortex.label"),
+               "--aparc", str(labels / f"{hemi}.aparc.annot"),
+               "--repulse-surf", str(white), "--white-surf", str(white),
+               "--restore-255"]
+    env = dict(os.environ, SUBJECTS_DIR=str(subject.parent),
+               FREESURFER_HOME=str(assets))
+    log = subject / "scripts" / f"{hemi}.pial.log"
+    tick = time.perf_counter()
+    with log.open("w") as stream:
+        subprocess.run(command, cwd=subject / "scripts", env=env,
+                       stdout=stream, stderr=subprocess.STDOUT, check=True)
+    if not output.is_file():
+        raise FileNotFoundError(output)
+    vertices, faces = fs.read_geometry(str(output))
+    white_vertices, white_faces = fs.read_geometry(str(white))
+    if not np.isfinite(vertices).all() or len(vertices) != len(white_vertices) \
+            or not np.array_equal(faces, white_faces):
+        raise RuntimeError(f"pial output changed the ordered white mesh: {output}")
+    return {"implementation": "conda-source-cpp", "output": str(output),
+            "log": str(log), "vertices": len(vertices), "faces": len(faces),
+            "seconds": time.perf_counter() - tick}
+
+
 def _write_principal_curvature_maps(surf: Path, hemi: str,
-                                    device: str, placed_preaparc: bool) -> None:
+                                    device: str) -> None:
     from .surface_roi_curvature_gpu import principal_curvatures
 
-    preaparc_source = "white.preaparc" if placed_preaparc else "white"
-    smoothwm_curv = None
-    for surface, prefix in ((preaparc_source, "white.preaparc"),
+    for surface, prefix in (("white.preaparc", "white.preaparc"),
                             ("inflated", "inflated")):
         xyz, mesh = fs.read_geometry(str(surf / f"{hemi}.{surface}"))
         k1, k2 = principal_curvatures(xyz, mesh, device=device)
@@ -283,12 +322,8 @@ def _write_principal_curvature_maps(surf: Path, hemi: str,
                             ((k1 + k2) / 2).astype(np.float32))
         fs.write_morph_data(str(surf / f"{hemi}.{prefix}.K"),
                             (k1 * k2).astype(np.float32))
-        if surface == "white":
-            smoothwm_curv = (k1, k2)
-    if smoothwm_curv is None:
-        xyz, mesh = fs.read_geometry(str(surf / f"{hemi}.smoothwm"))
-        smoothwm_curv = principal_curvatures(xyz, mesh, device=device)
-    k1, k2 = smoothwm_curv
+    xyz, mesh = fs.read_geometry(str(surf / f"{hemi}.smoothwm"))
+    k1, k2 = principal_curvatures(xyz, mesh, device=device)
     for name, values in (("H", (k1 + k2) / 2), ("K", k1 * k2),
                          ("K1", k1), ("K2", k2)):
         fs.write_morph_data(str(surf / f"{hemi}.smoothwm.{name}.crv"),
@@ -296,24 +331,17 @@ def _write_principal_curvature_maps(surf: Path, hemi: str,
 
 
 def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
-                  aseg: np.ndarray, *, device: str, threads: int = 4,
-                  native_topology_binary: Path | None = None,
-                  native_surface_metrics_binary: Path | None = None,
-                  native_inflate_binary: Path | None = None,
-                  native_registration: bool = False,
-                  native_white_preaparc_binary: Path | None = None,
-                  assets: Path | None = None) -> dict:
+                  *, device: str, threads: int, topology_binary: Path,
+                  inflate_binary: Path, intersection_binary: Path,
+                  place_binary: Path, defect_binary: Path,
+                  assets: Path) -> dict:
+    """从 filled 生成已修复 orig、预白质表面及标准球面。"""
     from .extract_main_component_python import extract_main_component
+    from .label_cortex_fix_ga_python import label_cortex_fix_ga
+    from .label_cortex_python import label_cortex
     from .pretess_python import pretess_mgh
-    from .smooth_surface_python import smooth_surface
-    from .sphere_python import project_radially
     from .tessellate_gpu import tessellate_mgh, write_quad_surface
-    from .surface_area_gpu import area_map, mid_area_map
-    from .surface_curvature_gpu import curvature_map
-    from .surface_roi_gpu import vertex_volume_map
 
-    if native_inflate_binary is not None and native_topology_binary is None:
-        raise ValueError("native_sphere requires native_topology")
     surf, mri, labels = (subject / name for name in ("surf", "mri", "label"))
     code = 255 if hemi == "lh" else 127
     pretess = mri / f"filled-pretess{code}.mgz"
@@ -322,159 +350,48 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
     vertices, quads = tessellate_mgh(pretess, code, device=device)
     write_quad_surface(raw, vertices, quads, nib.load(str(pretess)),
                        Path("../mri") / pretess.name)
-    orig = surf / f"{hemi}.orig.nofix"
-    components = extract_main_component(raw, orig)
-    smoothwm = surf / f"{hemi}.smoothwm"
-    topology_python_seconds = topology_native_seconds = topology_remesh_seconds = topology_intersection_seconds = None
-    native_sphere_seconds = None
-    if native_topology_binary is not None:
-        if assets is None:
-            raise ValueError("assets are required for native topology repair")
-        topology_python_seconds, topology_native_seconds, pre_sphere_seconds, topology_remesh_seconds, topology_intersection_seconds = (
-            _prepare_native_topology(native_topology_binary, subject, hemi,
-                                     assets, device, native_inflate_binary))
-        if native_inflate_binary is not None:
-            native_sphere_seconds = pre_sphere_seconds
-    else:
-        shutil.copyfile(orig, surf / f"{hemi}.orig")
-    white_preaparc_report = None
-    if native_white_preaparc_binary is not None:
-        if assets is None:
-            raise ValueError("assets are required for native white pre-aparc")
-        white_preaparc_report = _place_preaparc_and_smooth(
-            subject, hemi, native_white_preaparc_binary, assets, threads)
-    else:
-        smooth_surface(surf / f"{hemi}.orig", smoothwm, device=device)
-        shutil.copyfile(smoothwm, surf / f"{hemi}.white.preaparc")
-    if native_white_preaparc_binary is not None:
-        from .label_cortex_fix_ga_python import label_cortex_fix_ga
-        from .label_cortex_python import label_cortex
-
-        base, ga = label_cortex_fix_ga(
-            surf / f"{hemi}.white.preaparc", mri / "aseg.presurf.mgz",
-            mri / "entowm.mgz", hemi, labels / f"{hemi}.cortex.label")
-        label_cortex(surf / f"{hemi}.white.preaparc",
-                     mri / "aseg.presurf.mgz",
-                     labels / f"{hemi}.cortex+hipamyg.label",
-                     keep_hip_amyg=True)
-        cortex_count = len(base) + len(ga)
-    else:
-        shutil.copyfile(smoothwm, surf / f"{hemi}.white")
-    if native_topology_binary is None:
-        shutil.copyfile(smoothwm, surf / f"{hemi}.smoothwm.nofix")
-
-    white, faces = fs.read_geometry(str(smoothwm))
-    if native_white_preaparc_binary is None:
-        image = nib.load(str(mri / "aseg.mgz"))
-        pial, thickness = _pial_from_cortex(white, faces, image, aseg, hemi)
-        _replace_vertices(smoothwm, surf / f"{hemi}.pial", pial)
-        shutil.copyfile(surf / f"{hemi}.pial", surf / f"{hemi}.pial.T1")
-
-    standard_sphere_report = None
-    if native_inflate_binary is not None:
-        if assets is None:
-            raise ValueError("assets are required for native sphere generation")
-        timings, standard_sphere_report = _run_accurate_sphere_pair(
-            native_inflate_binary, subject, hemi, assets)
-        native_sphere_seconds.update(timings)
-    else:
-        inflated = surf / f"{hemi}.inflated"
-        smooth_surface(smoothwm, inflated, iterations=35, device=device)
-        inflated_xyz, _ = fs.read_geometry(str(inflated))
-        sphere_xyz = project_radially(inflated_xyz)
-        _replace_vertices(inflated, surf / f"{hemi}.sphere", sphere_xyz)
-        fs.write_morph_data(str(surf / f"{hemi}.sulc"),
-                            np.linalg.norm(inflated_xyz - white, axis=1).astype(np.float32))
-    if not native_registration:
-        shutil.copyfile(surf / f"{hemi}.sphere", surf / f"{hemi}.sphere.reg")
-    if native_white_preaparc_binary is not None:
-        _write_principal_curvature_maps(surf, hemi, device, placed_preaparc=True)
-        return {"hemisphere": hemi, "vertices": len(white), "faces": len(faces),
-                "raw_components": components, "cortex_vertices": cortex_count,
-                "topology_python_seconds": topology_python_seconds,
-                "topology_native_seconds": topology_native_seconds,
-                "topology_remesh_seconds": topology_remesh_seconds,
-                "topology_intersection_seconds": topology_intersection_seconds,
-                "native_sphere_seconds": native_sphere_seconds,
-                "standard_sphere_report": standard_sphere_report,
-                "white_preaparc_report": white_preaparc_report,
-                "placement_pending": True}
-    native_metric_seconds = None
-    if native_surface_metrics_binary is not None:
-        if assets is None:
-            raise ValueError("assets are required for native surface metrics")
-        native_metric_seconds = _run_native_surface_metrics(
-            native_surface_metrics_binary, subject, hemi, assets)
-    else:
-        fs.write_morph_data(str(surf / f"{hemi}.thickness"), thickness)
-        area_map(surf / f"{hemi}.white", surf / f"{hemi}.area", device=device)
-        area_map(surf / f"{hemi}.pial", surf / f"{hemi}.area.pial", device=device)
-    mid_area_map(surf / f"{hemi}.area", surf / f"{hemi}.area.pial",
-                 surf / f"{hemi}.area.mid", device=device)
-    from .label_cortex_python import label_cortex
-    cortex = labels / f"{hemi}.cortex.label"
-    cortex_vertices = label_cortex(surf / f"{hemi}.white", mri / "aseg.mgz", cortex)
-    vertex_volume_map(surf / f"{hemi}.white", surf / f"{hemi}.pial",
-                      cortex, surf / f"{hemi}.volume", device=device)
-    if native_surface_metrics_binary is None:
-        curvature_map(surf / f"{hemi}.white", surf / f"{hemi}.curv", device=device)
-        curvature_map(surf / f"{hemi}.pial", surf / f"{hemi}.curv.pial", device=device)
-    _write_principal_curvature_maps(
-        surf, hemi, device, placed_preaparc=white_preaparc_report is not None)
-    approximations = []
-    if native_topology_binary is None:
-        approximations.append("topology-unrepaired")
-    if native_surface_metrics_binary is not None:
-        approximations.append("native-metrics-on-approximate-white-pial")
-    registration_approximation = (
-        "sphere.reg-unregistered" if not native_registration
-        else "sphere.reg-python-on-approximate-upstream" if native_inflate_binary is not None
-        else "sphere.reg-python-on-approximate-sphere-sulc")
-    sphere_approximations = ([] if native_inflate_binary is not None else
-                             ["inflated-Laplacian", "sphere-radial"])
+    components = extract_main_component(raw, surf / f"{hemi}.orig.nofix")
+    label_cortex(surf / f"{hemi}.orig.nofix", mri / "aseg.presurf.mgz",
+                 labels / f"{hemi}.nofix.cortex.label")
+    topology_python_seconds, topology_native_seconds, pre_sphere_seconds, remesh_seconds, intersection_seconds = (
+        _prepare_native_topology(topology_binary, subject, hemi, assets,
+                                 device, inflate_binary, intersection_binary))
+    _run_defects_volume(defect_binary, subject, hemi, assets)
+    preaparc = _place_preaparc_and_smooth(subject, hemi, place_binary,
+                                         assets, threads)
+    base, ga = label_cortex_fix_ga(
+        surf / f"{hemi}.white.preaparc", mri / "aseg.presurf.mgz",
+        mri / "entowm.mgz", hemi, labels / f"{hemi}.cortex.label")
+    label_cortex(surf / f"{hemi}.white.preaparc", mri / "aseg.presurf.mgz",
+                 labels / f"{hemi}.cortex+hipamyg.label", keep_hip_amyg=True)
+    sphere_timings, sphere_report = _run_accurate_sphere_pair(
+        inflate_binary, subject, hemi, assets)
+    _write_principal_curvature_maps(surf, hemi, device)
+    white, faces = fs.read_geometry(str(surf / f"{hemi}.smoothwm"))
     return {"hemisphere": hemi, "vertices": len(white), "faces": len(faces),
-            "raw_components": components, "cortex_vertices": len(cortex_vertices),
-            "mean_thickness_mm": float(np.mean(fs.read_morph_data(
-                str(surf / f"{hemi}.thickness")))),
+            "raw_components": components, "cortex_vertices": len(base) + len(ga),
             "topology_python_seconds": topology_python_seconds,
             "topology_native_seconds": topology_native_seconds,
-            "topology_remesh_seconds": topology_remesh_seconds,
-            "topology_intersection_seconds": topology_intersection_seconds,
-            "native_metric_seconds": native_metric_seconds,
-            "native_sphere_seconds": native_sphere_seconds,
-            "standard_sphere_report": standard_sphere_report,
-            "white_preaparc_report": white_preaparc_report,
-            "approximations": approximations + [
-                ("white-from-preaparc-smooth-only" if white_preaparc_report
-                 else "white-from-smoothed-tessellation"), "pial-normal-ray",
-                *sphere_approximations, registration_approximation]}
+            "topology_remesh_seconds": remesh_seconds,
+            "topology_intersection_seconds": intersection_seconds,
+            "sphere_seconds": {**pre_sphere_seconds, **sphere_timings},
+            "standard_sphere_report": sphere_report,
+            "white_preaparc_report": preaparc,
+            "placement_pending": True}
 
 
 def _finish_cortical_surface(subject: Path, hemi: str, binary: Path,
-                             assets: Path, *, device: str, threads: int,
-                             metrics_binary: Path | None = None) -> dict:
-    """Place final white/pial after sphere registration and annotation."""
+                             assets: Path, *, device: str, threads: int) -> dict:
+    """球面配准和注释完成后，依次放置最终 white、pial 并计算顶点图。"""
     from .final_white_conda import run_final_white
-    from .place_pial_python import place_pial_t1
-    from .surface_area_gpu import area_map, mid_area_map
-    from .surface_curvature_gpu import curvature_map
+    from .surface_area_gpu import mid_area_map
     from .surface_roi_gpu import vertex_volume_map
-    from .surface_thickness_gpu import thickness_map
 
     surf, labels = subject / "surf", subject / "label"
     white_report = run_final_white(subject, hemi, binary, assets, threads=threads)
-    pial_report = place_pial_t1(subject, hemi)
+    pial_report = _run_native_pial(binary, subject, hemi, assets, threads)
     shutil.copyfile(surf / f"{hemi}.pial.T1", surf / f"{hemi}.pial")
-    metric_seconds = None
-    if metrics_binary is not None:
-        metric_seconds = _run_native_surface_metrics(metrics_binary, subject, hemi, assets)
-    else:
-        thickness_map(surf / f"{hemi}.white", surf / f"{hemi}.pial",
-                      surf / f"{hemi}.thickness", device=device)
-        area_map(surf / f"{hemi}.white", surf / f"{hemi}.area", device=device)
-        area_map(surf / f"{hemi}.pial", surf / f"{hemi}.area.pial", device=device)
-        curvature_map(surf / f"{hemi}.white", surf / f"{hemi}.curv", device=device)
-        curvature_map(surf / f"{hemi}.pial", surf / f"{hemi}.curv.pial", device=device)
+    metric_seconds = _run_native_surface_metrics(binary, subject, hemi, assets)
     mid_area_map(surf / f"{hemi}.area", surf / f"{hemi}.area.pial",
                  surf / f"{hemi}.area.mid", device=device)
     vertex_volume_map(surf / f"{hemi}.white", surf / f"{hemi}.pial",
@@ -484,9 +401,7 @@ def _finish_cortical_surface(subject: Path, hemi: str, binary: Path,
             "native_metric_seconds": metric_seconds,
             "mean_thickness_mm": float(np.mean(fs.read_morph_data(
                 str(surf / f"{hemi}.thickness")))),
-            "placement_pending": False,
-            "approximations": ["final-white-conda-cpp", "pial-python",
-                               "sphere-and-upstream-parity-unverified"]}
+            "placement_pending": False}
 
 
 def _project_parcels(subject: Path) -> None:
@@ -499,6 +414,38 @@ def _project_parcels(subject: Path) -> None:
                           ("aparc.DKTatlas", "aparc.DKTatlas+aseg.mgz")):
         label_cortex_volume(mri / "aseg.mgz", surf, labels, mri / output,
                             atlas=atlas)
+
+
+def _project_exvivo_annotations(subject: Path, assets: Path) -> None:
+    """将固定 fsaverage 标签投射到被试，并生成 BA/VPNL 注释。"""
+    from .label2annot_python import write_label_annotation
+    from .label2label_surface_python import SurfaceLabelMapper
+
+    surf, labels = subject / "surf", subject / "label"
+    ba_names = ("BA1", "BA2", "BA3a", "BA3b", "BA4a", "BA4p", "BA6",
+                "BA44", "BA45", "V1", "V2", "MT", "perirhinal", "entorhinal")
+    vpnl_names = ("FG1", "FG2", "FG3", "FG4", "hOc1", "hOc2", "hOc3v", "hOc4v")
+    for hemi in ("lh", "rh"):
+        mapper = SurfaceLabelMapper(
+            assets / f"subjects/fsaverage/surf/{hemi}.sphere.reg",
+            surf / f"{hemi}.sphere.reg", surf / f"{hemi}.white", subject.name)
+        for group, names, color_table in (
+            ("BA_exvivo", [f"{name}_exvivo" for name in ba_names],
+             "colortable_BA.txt"),
+            ("BA_exvivo.thresh", [f"{name}_exvivo.thresh" for name in ba_names],
+             "colortable_BA_thresh.txt"),
+            ("mpm.vpnl", [f"{name}.mpm.vpnl" for name in vpnl_names],
+             "colortable_vpnl.txt"),
+        ):
+            targets = []
+            for name in names:
+                source = assets / f"subjects/fsaverage/label/{hemi}.{name}.label"
+                target = labels / source.name
+                mapper.map_label(source, target)
+                targets.append(target)
+            write_label_annotation(surf / f"{hemi}.orig",
+                                   assets / "average" / color_table,
+                                   targets, labels / f"{hemi}.{group}.annot")
 
 
 def _project_wmparc(subject: Path) -> None:
@@ -522,15 +469,46 @@ def _segment_callosum(mri: Path) -> dict[str, float | int]:
     return info
 
 
+def _validate_meshes(subject: Path) -> dict:
+    """检查双侧网格闭合、球面拓扑和最终 white/pial 自相交。"""
+    from .mris_remove_intersection_python import mark_intersections
+
+    result = {}
+    for hemi in ("lh", "rh"):
+        surf = subject / "surf"
+        meshes = {name: fs.read_geometry(str(surf / f"{hemi}.{name}"))
+                  for name in ("orig", "white", "pial", "sphere.reg")}
+        orig_vertices, orig_faces = meshes["orig"]
+        ordered_faces = all(np.array_equal(orig_faces, faces)
+                            for _, faces in meshes.values())
+        finite = all(np.isfinite(vertices).all()
+                     for vertices, _ in meshes.values())
+        edges = np.sort(np.vstack((orig_faces[:, (0, 1)],
+                                   orig_faces[:, (1, 2)],
+                                   orig_faces[:, (2, 0)])), axis=1)
+        unique_edges, counts = np.unique(edges, axis=0, return_counts=True)
+        euler = len(orig_vertices) - len(unique_edges) + len(orig_faces)
+        unclosed_edges = int(np.count_nonzero(counts != 2))
+        intersections = {name: mark_intersections(*meshes[name])[1]
+                         for name in ("white", "pial")}
+        passed = ordered_faces and finite and euler == 2 and unclosed_edges == 0 \
+            and all(count == 0 for count in intersections.values())
+        result[hemi] = {"vertices": len(orig_vertices),
+                        "faces": len(orig_faces), "euler": int(euler),
+                        "unclosed_edges": unclosed_edges,
+                        "ordered_faces_preserved": ordered_faces,
+                        "finite_coordinates": finite,
+                        "intersecting_faces": intersections,
+                        "status": "passed" if passed else "failed"}
+    result["status"] = ("passed" if all(result[hemi]["status"] == "passed"
+                                       for hemi in ("lh", "rh")) else "failed")
+    return result
+
+
 def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          weights_dir: str | Path, assets_dir: str | Path,
                          *, device: str = "cuda:0", threads: int = 4,
-                         native_bin_dir: str | Path | None = None,
-                         native_topology: bool = False,
-                         native_surface_metrics: bool = False,
-                         native_registration: bool = False,
-                         native_sphere: bool = False,
-                         native_white_preaparc: bool = False) -> dict:
+                         native_bin_dir: str | Path | None = None) -> dict:
     """Reconstruct one T1 into FreeSurfer-style mri/surf/label/stats folders.
 
     Return the same run-report dict written to fnit-native-free-run.json:
@@ -555,86 +533,108 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         raise FileNotFoundError("T1, weights, and assets must exist")
     if subject.exists() and any(subject.iterdir()):
         raise ValueError("subject_dir must be empty")
-    if native_bin_dir is None:
-        raise ValueError("native stages require native_bin_dir")
-    if native_registration and not native_topology:
-        raise ValueError("native_registration requires native_topology")
-    if native_sphere and not native_topology:
-        raise ValueError("native_sphere requires native_topology")
-    if native_white_preaparc and not native_topology:
-        raise ValueError("native_white_preaparc requires native_topology")
-    if native_white_preaparc:
-        from .mni_aux_chain import validate_mni_aux_assets
+    from .mni_aux_chain import validate_mni_aux_assets
+    from .assets import validate_core_assets
 
-        validate_mni_aux_assets(weights, assets)
+    validate_mni_aux_assets(weights, assets)
+    validate_core_assets(assets)
+    native_bin_dir = _native_bin_directory(native_bin_dir)
     native_em = _native_em_register_binary(native_bin_dir)
     n4_binary = _native_binary(native_bin_dir, "fnit_n4_itk")
-    topology_binary = (_native_topology_binary(native_bin_dir)
-                       if native_topology else None)
-    metrics_binary = (_native_surface_metrics_binary(native_bin_dir)
-                      if native_surface_metrics else None)
-    white_binary = ((metrics_binary or _native_surface_metrics_binary(native_bin_dir))
-                    if native_white_preaparc else None)
-    inflate_binary = (_native_inflate_binary(native_bin_dir)
-                      if native_sphere else None)
+    topology_binary = _native_topology_binary(native_bin_dir)
+    metrics_binary = _native_surface_metrics_binary(native_bin_dir)
+    inflate_binary = _native_inflate_binary(native_bin_dir)
+    intersection_binary = _native_binary(native_bin_dir, "mris_remove_intersection")
+    paint_binary = _native_binary(native_bin_dir, "mrisp_paint")
+    curvature_stats_binary = _native_binary(native_bin_dir, "mris_curvature_stats")
+    defect_binary = _native_binary(native_bin_dir, "mri_label2vol")
     wm_segment_binary = _native_binary(native_bin_dir, "mri_segment")
     wm_edit_binary = _native_binary(native_bin_dir, "mri_edit_wm_with_aseg")
-    registration_atlases = ({hemi: _folding_atlas(assets, hemi)
-                            for hemi in ("lh", "rh")} if native_registration else {})
+    registration_atlases = {hemi: _folding_atlas(assets, hemi)
+                            for hemi in ("lh", "rh")}
     torch.set_num_threads(threads)
+    if torch.device(device).type == "cuda" and not torch.cuda.is_initialized():
+        os.environ.setdefault("PYTORCH_NO_CUDA_MEMORY_CACHING", "1")
+    cuda_memory_cache_disabled = os.environ.get("PYTORCH_NO_CUDA_MEMORY_CACHING") == "1"
+    torch.backends.cuda.matmul.allow_tf32 = True
+    torch.backends.cudnn.allow_tf32 = True
     started = time.perf_counter()
-    profile = "conda-wmchain-core-v5"
+    profile = "single-t1-standard"
     report: dict = {"profile": profile, "input": str(t1),
                     "subject_dir": str(subject), "device": device,
                     "n4_binary": {"binary": str(n4_binary[0]),
                                   "sha256": n4_binary[1]}, "threads": threads,
+                    "precision": {"matmul_tf32_default": True,
+                                  "cudnn_tf32_default": True,
+                                  "fp16_or_bf16_enabled": False,
+                                  "fp32_exceptions": ["SynthStrip", "SynthSeg",
+                                                      "Talairach affine"]},
+                    "gpu_memory_mode": ("no_cuda_allocator_cache" if cuda_memory_cache_disabled
+                                        else "torch_cuda_allocator"),
                     "stages": [], "status": "running"}
     report["gca_registration"] = {"implementation": "native-c++",
                                   "binary": str(native_em[0]), "sha256": native_em[1]}
-    report["topology_repair"] = (
-        {"implementation": "native-c++", "binary": str(topology_binary[0]),
-         "sha256": topology_binary[1],
-         "upstream": "intensity-derived WM and aseg-guided fill"}
-        if topology_binary else {"implementation": "unrepaired approximation"})
+    report["topology_repair"] = {
+        "implementation": "native-c++", "binary": str(topology_binary[0]),
+        "sha256": topology_binary[1],
+        "intersection_binary": str(intersection_binary[0]),
+        "intersection_sha256": intersection_binary[1],
+        "upstream": "intensity-derived WM and aseg-guided fill"}
     report["white_matter_chain"] = {
         "implementation": "Python + Conda C++",
         "mri_segment_sha256": wm_segment_binary[1],
         "mri_edit_wm_with_aseg_sha256": wm_edit_binary[1]}
-    report["white_preaparc"] = (
-        {"implementation": "Python MNI/aux/finalsurfs + Conda C++ placement",
-         "binary": str(white_binary[0]), "sha256": white_binary[1],
-         "final_smoothwm": "Python 3 passes on CPU",
-         "final_white_pial": "Conda C++ final white + Python pial after annotation"}
-        if white_binary else {"implementation": "smoothed orig copy"})
-    report["surface_metrics"] = (
-        {"implementation": "native-c++", "binary": str(metrics_binary[0]),
-         "sha256": metrics_binary[1],
-         "upstream": ("placed final white/pial" if native_white_preaparc
-                      else "current approximate white/pial surfaces")}
-        if metrics_binary else {"implementation": "python"})
-    report["sphere_generation"] = (
-        {"implementation": "Conda mris_inflate + Python quick/standard sphere",
-         "mris_inflate": {"binary": str(inflate_binary[0]), "sha256": inflate_binary[1]},
-         "finish_device": "cpu",
-         "upstream": "native topology repair on WM-chain filled"}
-        if native_sphere else {"implementation": "python radial approximation"})
-    report["sphere_registration"] = (
-        {"implementation": "Python/Numba", "overlap_device": "cpu",
-         "upstream": ("accurate sphere/sulc on approximate earlier geometry" if native_sphere
-                      else "radial approximate sphere and non-native sulc/smoothwm"),
-         "hemisphere_seconds": {}, "reports": {}}
-        if native_registration else {"implementation": "unregistered copy"})
+    report["white_preaparc"] = {
+        "implementation": "Python MNI/aux/finalsurfs + Conda C++ placement",
+        "binary": str(metrics_binary[0]), "sha256": metrics_binary[1],
+        "final_smoothwm": "Python 3 passes on CPU",
+        "final_white_pial": "Conda source-built C++ white and pial after annotation"}
+    report["surface_metrics"] = {
+        "implementation": "native-c++", "binary": str(metrics_binary[0]),
+        "sha256": metrics_binary[1], "upstream": "placed final white/pial"}
+    report["sphere_generation"] = {
+        "implementation": "Conda mris_inflate + Python quick/standard sphere",
+        "mris_inflate": {"binary": str(inflate_binary[0]), "sha256": inflate_binary[1]},
+        "finish_device": "cpu", "upstream": "repaired topology"}
+    report["sphere_registration"] = {
+        "implementation": "Python/Numba", "overlap_device": "cpu",
+        "hemisphere_seconds": {}, "reports": {}}
+    report["extra_curvature"] = {
+        "mrisp_paint_sha256": paint_binary[1],
+        "mris_curvature_stats_sha256": curvature_stats_binary[1]}
+    report["defects_volume"] = {"binary": str(defect_binary[0]),
+                                 "sha256": defect_binary[1]}
 
     def stage(name, function, *args, **kwargs):
         tick = time.perf_counter()
+        gpu = torch.device(device).type == "cuda" and torch.cuda.is_available()
+        if gpu and torch.cuda.is_initialized() and not cuda_memory_cache_disabled:
+            torch.cuda.reset_peak_memory_stats()
         try:
             value = function(*args, **kwargs)
         except Exception as error:
+            if gpu and torch.cuda.is_initialized() and not cuda_memory_cache_disabled:
+                report["gpu_peak_allocated_bytes"] = max(
+                    report.get("gpu_peak_allocated_bytes", 0),
+                    torch.cuda.max_memory_allocated())
+                report["gpu_peak_reserved_bytes"] = max(
+                    report.get("gpu_peak_reserved_bytes", 0),
+                    torch.cuda.max_memory_reserved())
             report.update(status="failed", failed_stage=name, error=repr(error),
                           total_seconds=time.perf_counter() - started)
             (subject / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
             raise
-        report["stages"].append({"name": name, "seconds": time.perf_counter() - tick})
+        row = {"name": name, "seconds": time.perf_counter() - tick}
+        if isinstance(value, dict) and value.get("talairach_child_gpu"):
+            row["talairach_child_gpu"] = value["talairach_child_gpu"]
+            for key in ("gpu_peak_allocated_bytes", "gpu_peak_reserved_bytes"):
+                report[key] = max(report.get(key, 0), value["talairach_child_gpu"][key])
+        if gpu and torch.cuda.is_initialized() and not cuda_memory_cache_disabled:
+            row["gpu_peak_allocated_bytes"] = torch.cuda.max_memory_allocated()
+            row["gpu_peak_reserved_bytes"] = torch.cuda.max_memory_reserved()
+            for key in ("gpu_peak_allocated_bytes", "gpu_peak_reserved_bytes"):
+                report[key] = max(report.get(key, 0), row[key])
+        report["stages"].append(row)
         (subject / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
         return value
 
@@ -674,8 +674,6 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
           mri / "brainmask.mgz", gca,
           lta, mri / "norm.mgz", mri / "ctrl_pts.mgz")
     report["corpus_callosum"] = stage("mri_cc", _segment_callosum, mri)
-    aseg = np.asarray(nib.load(str(mri / "aseg.auto.mgz")).dataobj).astype(np.int16)
-
     from .ants_denoise_python import denoise_volume
     from .fill_cutting_plane_python import fill_mgz
     from .normalization.aseg_pipeline import normalize_t1_aseg
@@ -706,31 +704,34 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
           mri / "aseg.presurf.mgz", lta,
           assets / "SubCorticalMassLUT.txt", mri / "filled.mgz",
           subject / "scripts/ponscc.cut.log")
-    if native_white_preaparc:
-        _run_white_mri_chain(subject, weights, assets, threads, stage)
+    # 固定 recon-all 脚本此处执行 cp filled.mgz filled.auto.mgz。
+    stage("filled_auto_checkpoint", shutil.copyfile,
+          mri / "filled.mgz", mri / "filled.auto.mgz")
+    _run_white_mri_chain(subject, weights, assets, threads, stage)
     for hemi in ("lh", "rh"):
         result = stage(f"surface_{hemi}", _surface_pair, subject, hemi,
-                       mri / "filled.mgz", mri / "norm.mgz", aseg,
+                       mri / "filled.mgz", mri / "norm.mgz",
                        device=device, threads=threads,
-                       native_topology_binary=topology_binary[0] if topology_binary else None,
-                       native_surface_metrics_binary=metrics_binary[0] if metrics_binary else None,
-                       native_inflate_binary=inflate_binary[0] if inflate_binary else None,
-                       native_registration=native_registration,
-                       native_white_preaparc_binary=white_binary[0] if white_binary else None,
-                       assets=assets if topology_binary or metrics_binary or white_binary else None)
+                       topology_binary=topology_binary[0],
+                       inflate_binary=inflate_binary[0],
+                       intersection_binary=intersection_binary[0],
+                       place_binary=metrics_binary[0],
+                       defect_binary=defect_binary[0], assets=assets)
         report.setdefault("surfaces", {})[hemi] = result
+        (subject / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
 
-    if native_registration:
-        from .mris_register_run import run_register_sphere
-        for hemi in ("lh", "rh"):
-            surf = subject / "surf"
-            result = stage(f"register_{hemi}", run_register_sphere,
-                           surf / f"{hemi}.sphere", surf / f"{hemi}.smoothwm",
-                           surf / f"{hemi}.sulc", registration_atlases[hemi],
-                           surf / f"{hemi}.sphere.reg", overlap_device="cpu")
-            report["sphere_registration"]["hemisphere_seconds"][hemi] = result[
-                "total_seconds_including_io"]
-            report["sphere_registration"]["reports"][hemi] = result
+    from .mris_register_run import run_register_sphere
+    for hemi in ("lh", "rh"):
+        surf = subject / "surf"
+        result = stage(f"register_{hemi}", run_register_sphere,
+                       surf / f"{hemi}.sphere", surf / f"{hemi}.smoothwm",
+                       surf / f"{hemi}.sulc", registration_atlases[hemi],
+                       surf / f"{hemi}.sphere.reg", overlap_device="cpu")
+        report["sphere_registration"]["hemisphere_seconds"][hemi] = result[
+            "total_seconds_including_io"]
+        report["sphere_registration"]["reports"][hemi] = result
+        stage(f"avg_curv_{hemi}", _run_avg_curv, paint_binary[0], subject,
+              hemi, registration_atlases[hemi], assets)
 
     for hemi in ("lh", "rh"):
         for atlas, prefix in (("aparc", "DKaparc"),
@@ -742,13 +743,22 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                   atlas_file, assets / "lib/bem/ic4.tri",
                   assets / "lib/bem/ic7.tri",
                   labels / f"{hemi}.{atlas}.annot", device=device)
-    if native_white_preaparc:
-        for hemi in ("lh", "rh"):
-            result = stage(f"finish_surface_{hemi}", _finish_cortical_surface,
-                           subject, hemi, white_binary[0], assets,
-                           device=device, threads=threads,
-                           metrics_binary=metrics_binary[0] if metrics_binary else None)
-            report["surfaces"][hemi].update(result)
+    for hemi in ("lh", "rh"):
+        result = stage(f"finish_surface_{hemi}", _finish_cortical_surface,
+                       subject, hemi, metrics_binary[0], assets,
+                       device=device, threads=threads)
+        report["surfaces"][hemi].update(result)
+        (subject / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
+    stage("exvivo_annotations", _project_exvivo_annotations, subject, assets)
+    from .surface_jacobian_gpu import jacobian_map
+    from .vol2surf_contrast_python import write_contrast_percentage
+
+    for hemi in ("lh", "rh"):
+        stage(f"jacobian_{hemi}", jacobian_map,
+              surf / f"{hemi}.white.preaparc", surf / f"{hemi}.sphere.reg",
+              surf / f"{hemi}.jacobian_white", device="cpu")
+        stage(f"contrast_{hemi}", write_contrast_percentage,
+              subject, hemi, surf / f"{hemi}.w-g.pct.mgh", device="cpu")
     from .relabel_hypointensities_python import relabel_volume
     from .surf2volseg_fix_python import fix_presurf_volume
     from .volmask_python import write_ribbon
@@ -778,8 +788,38 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
             stage(f"stats_{hemi}_{atlas}", write_anatomical_stats,
                   subject, hemi, atlas, "white", volumes,
                   stats / f"{hemi}.{atlas}.stats", device=device)
-    report.update(status="complete", total_seconds=time.perf_counter() - started)
+        for atlas, surface in (("aparc", "pial"),
+                               ("BA_exvivo", "white"),
+                               ("BA_exvivo.thresh", "white")):
+            suffix = "aparc.pial" if surface == "pial" else atlas
+            stage(f"stats_{hemi}_{suffix}", write_anatomical_stats,
+                  subject, hemi, atlas, surface, volumes,
+                  stats / f"{hemi}.{suffix}.stats", device=device)
+        from .segstats_surface_snr_python import write_surface_snr_stats
+        stage(f"stats_{hemi}_w-g.pct", write_surface_snr_stats,
+              subject, hemi, stats / f"{hemi}.w-g.pct.stats")
+        stage(f"stats_{hemi}_curv", _run_curvature_stats,
+              curvature_stats_binary[0], subject, hemi, assets)
+    from .expected_outputs import paths as expected_paths
+
+    expected = expected_paths()
+    present = {name: (subject / name).is_file() for name in expected}
+    missing = [name for name, exists in present.items() if not exists]
+    report["output_validation"] = {
+        "profile": "single-t1-138", "expected": len(expected),
+        "present": len(expected) - len(missing), "missing": missing,
+        "status": "passed" if not missing else "failed"}
+    report["mesh_validation"] = stage("mesh_validation", _validate_meshes, subject)
+    report["numeric_validation"] = {"status": "not_run",
+                                    "reason": "reference_subject_not_provided"}
+    report["outputs"] = {name: str(subject / name) for name in expected if present[name]}
+    valid = not missing and report["mesh_validation"]["status"] == "passed"
+    report.update(status="complete" if valid else "incomplete",
+                  total_seconds=time.perf_counter() - started)
     (subject / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
+    if not valid:
+        raise RuntimeError(f"recon-all output or mesh validation failed; "
+                           f"see {subject / 'fnit-native-free-run.json'}")
     return report
 
 
@@ -792,21 +832,11 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--threads", type=int, default=4)
     parser.add_argument("--native-bin-dir", type=Path)
-    parser.add_argument("--native-topology", action="store_true")
-    parser.add_argument("--native-surface-metrics", action="store_true")
-    parser.add_argument("--native-registration", action="store_true")
-    parser.add_argument("--native-sphere", action="store_true")
-    parser.add_argument("--native-white-preaparc", action="store_true")
     args = parser.parse_args(argv)
     report = run_recon_all_python(args.t1, args.subject_dir, args.weights_dir,
                                   args.assets_dir, device=args.device,
                                   threads=args.threads,
-                                  native_bin_dir=args.native_bin_dir,
-                                  native_topology=args.native_topology,
-                                  native_surface_metrics=args.native_surface_metrics,
-                                  native_registration=args.native_registration,
-                                  native_sphere=args.native_sphere,
-                                  native_white_preaparc=args.native_white_preaparc)
+                                  native_bin_dir=args.native_bin_dir)
     print(json.dumps(report, indent=2))
 
 

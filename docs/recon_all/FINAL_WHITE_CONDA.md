@@ -1,6 +1,6 @@
 # Conda 最终 white 表面放置
 
-`fnit.recon_all.final_white_conda.run_final_white(subject_dir, hemi, binary, assets_dir, threads=4)` 调用 Conda 从 FreeSurfer 8.2 源码编译的 `mris_place_surface`，生成单侧最终 white 表面。该函数已接入 `fnit-recon-all --native-white-preaparc` 的球面注释之后；当前串联尚未完成从原始 T1 到最终表面的整例验收。
+`fnit.recon_all.final_white_conda.run_final_white(subject_dir, hemi, binary, assets_dir, threads=4)` 调用 Conda 从 FreeSurfer 8.2 源码编译的 `mris_place_surface`，生成单侧最终 white 表面。该函数已接入标准 `fnit-recon-all` 流程的球面注释之后；当前串联尚未完成从原始 T1 到最终表面的整例验收。
 
 ## 输入与输出
 
@@ -80,3 +80,8 @@ Conda 输出接近官方，但未达到顶点完全一致；其误差与早期�
 冻结输入下，两份日志在第 0 轮、放置子迭代 008 首次出现打印数值差：官方 SSE 为 `231646.9`，Conda 为 `231647.0`。此前打印的 SSE 在显示精度内一致。两者都使用 4 线程，预处理数量和边界摘要相同，四轮外层优化的步长接受/拒绝顺序也相同。更早的 `VMPeak` 与耗时差异仅涉及资源。小的算术偏差可在后续迭代累积，但现有日志不能定位具体运算。
 
 ELF `.comment` 显示官方程序含 GCC 4.8.5 对象，Conda 程序含 GCC 11.4.0 对象。Conda CMake 缓存为 `Release`（`-O3`），编译器默认参数包含 `-O2 -march=nocona -mtune=haswell -ftree-vectorize`；官方二进制已去符号，无法取得完整编译参数。Conda 构建链接其 `libgomp` 和 ITK VNL，官方程序链接系统 `libgomp` 且不链接 ITK VNL；两者的 `libm` 均为 `/lib64/libm.so.6`。官方二进制的源码修订号未从程序本身确认。当前不能将 57 个超阈值顶点归因于单一编译选项、库、线程调度或源码版本，因此未调整构建参数。
+
+## 参考文献与原实现
+
+- Fischl B. FreeSurfer. *NeuroImage*. 2012;62(2):774–781. [doi:10.1016/j.neuroimage.2012.01.021](https://doi.org/10.1016/j.neuroimage.2012.01.021)。
+- [FreeSurfer 固定源码提交](https://github.com/freesurfer/freesurfer/tree/d932c45b7941662ea380a05efef580568b98d41a)。

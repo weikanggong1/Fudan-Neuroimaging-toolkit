@@ -1,5 +1,5 @@
-# Python recon-all 模块
+# recon-all 源码入口
 
-单被试入口：`fnit.recon_all.native_free.run_recon_all_python(...)`，命令为 `fnit-recon-all`。多被试并行入口：`fnit.recon_all.run_recon_all_python_batch(...)`，仅提供 Python API。两者读取外置权重与模板，并调用 Conda 从固定 FreeSurfer 源码编译的少数 C++ 程序，无须安装官方 FreeSurfer 运行包。
+`run_recon_all_python(t1=..., subject_dir=..., weights_dir=..., assets_dir=..., device="cuda:0", threads=4, native_bin_dir=None)` 执行固定单 T1 标准流程；`fnit-recon-all` 是其命令行入口。`run_recon_all_python_batch(jobs=..., weights_dir=..., assets_dir=..., devices=..., threads=..., native_bin_dir=None)` 按输入顺序返回多个被试的报告。
 
-默认重建仍为近似版本。可选 `native_white_preaparc=True` / `--native-white-preaparc` 接入 CPU MNI/辅助分割、`brain.finalsurfs`、Conda 预白质放置及 Python 三轮 `smoothwm`；需 `native_topology=True` 和两张可选 MNI152 图像。最终 `white/pial` 与皮层统计仍未通过整例一致性验收。最新完整 T1 重建 v3 的严格 138 项比较通过 19 项。安装、参数和输出见[完整说明](../../../docs/recon_all/README.md)及[整例报告](../../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/v3_e2e_20260927/BENCHMARK.md)。
+安装、全部参数、坐标空间、输出文件结构和验收边界见[用户说明](../../../docs/recon_all/README.md)。固定文件清单位于 [expected_outputs.py](expected_outputs.py)，并与 138 项比较器共用。
