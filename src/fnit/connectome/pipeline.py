@@ -30,6 +30,12 @@ from .sift2 import estimate_sift2_weights
 from .tcksample_precise import sample_streamline_mean_precise
 from .tracking import Tractogram, probabilistic_tractography
 
+SCHAEFER_TIAN_ATLASES = {
+    "schaefer200+tian-s1": (200, 1),
+    "schaefer500+tian-s4": (500, 4),
+    "schaefer1000+tian-s4": (1000, 4),
+}
+
 
 def _image(path: str | Path, device: torch.device) -> tuple[torch.Tensor, torch.Tensor]:
     image = nib.load(str(path))
@@ -193,12 +199,12 @@ class UKBConnectome:
         are FSL N and 3×N or N×3 eddy-rotated files.
         ``freesurfer_subject_dir`` is a completed recon-all subject directory;
         ``atlas="fs-aparc"`` builds a contiguous 84-node DWI-grid atlas
-        from its ``mri/aparc+aseg.mgz``. ``atlas="schaefer200+tian-s1"``
-        reads the original Schaefer and Tian S1 files from
+        from its ``mri/aparc+aseg.mgz``. A Schaefer+Tian atlas
+        reads the original Schaefer and Tian template files from
         ``atlas_templates_dir``, maps Schaefer through ``fsaverage_dir``
         to the native ribbon, registers ``mni_template`` to T1 with FNIT
         SynthMorph joint using optional ``synthmorph_weights``, then builds
-        a 216-node DWI atlas. For a fixed original UKB atlas, supply
+        a contiguous DWI atlas. For a fixed original UKB atlas, supply
         ``tian_fnirt_coeff`` instead of ``mni_template``; FNIT inverts the
         given FNIRT T1→MNI coefficient and samples Tian without calling FSL.
         Alternatively, ``t1_brain``,
@@ -234,13 +240,13 @@ class UKBConnectome:
         if freesurfer_subject_dir is not None:
             if any(value is not None for value in (t1_brain, t1_segmentation, atlas_dwi)):
                 raise ValueError("freesurfer_subject_dir cannot be combined with explicit T1/atlas inputs")
-            if atlas not in ("fs-aparc", "schaefer200+tian-s1"):
+            if atlas not in ("fs-aparc", *SCHAEFER_TIAN_ATLASES):
                 raise ValueError("unsupported atlas from a subject directory")
-            if atlas == "schaefer200+tian-s1" and (
+            if atlas in SCHAEFER_TIAN_ATLASES and (
                 atlas_templates_dir is None or fsaverage_dir is None or
                 (mni_template is None) == (tian_fnirt_coeff is None)
             ):
-                raise ValueError("Schaefer200+Tian S1 requires atlas_templates_dir, fsaverage_dir and exactly one of mni_template or tian_fnirt_coeff")
+                raise ValueError("Schaefer+Tian requires atlas_templates_dir, fsaverage_dir and exactly one of mni_template or tian_fnirt_coeff")
             if tian_fnirt_coeff is not None and synthmorph_weights is not None:
                 raise ValueError("synthmorph_weights cannot be used with tian_fnirt_coeff")
             subject = FreeSurferSubject(Path(freesurfer_subject_dir))
@@ -305,32 +311,34 @@ class UKBConnectome:
             if atlas == "fs-aparc":
                 atlas_t1, nodes = fs_aparc_atlas(seg)
             else:
+                parcels, tian_scale = SCHAEFER_TIAN_ATLASES[atlas]
                 templates = Path(atlas_templates_dir)
                 cortical, cortical_nodes = schaefer_to_t1(
                     subject_dir=subject.subject_dir,
                     fsaverage_dir=fsaverage_dir,
-                    left_annot=templates / "lh.Schaefer2018_200Parcels_7Networks_order.annot",
-                    right_annot=templates / "rh.Schaefer2018_200Parcels_7Networks_order.annot",
+                    left_annot=templates / f"lh.Schaefer2018_{parcels}Parcels_7Networks_order.annot",
+                    right_annot=templates / f"rh.Schaefer2018_{parcels}Parcels_7Networks_order.annot",
                     device=str(self.device),
                 )
+                tian_name = f"Tian_Subcortex_S{tian_scale}_3T"
                 if tian_fnirt_coeff is None:
                     tian, _ = synthmorph_tian_to_t1(
                         t1_brain=subject.brain,
                         mni_template=mni_template,
-                        tian_mni=templates / "Tian_Subcortex_S1_3T.nii.gz",
+                        tian_mni=templates / f"{tian_name}.nii.gz",
                         device=str(self.device), weights=synthmorph_weights,
                     )
                 else:
                     tian = fnirt_tian_to_t1(
                         t1_brain=subject.brain,
-                        tian_mni=templates / "Tian_Subcortex_S1_3T.nii.gz",
+                        tian_mni=templates / f"{tian_name}.nii.gz",
                         forward_coefficients=tian_fnirt_coeff,
                         device=str(self.device),
                     )
                 combined, nodes = combine_cortical_tian(
                     cortical_t1=cortical, cortical_nodes=cortical_nodes,
                     tian_t1=tian,
-                    tian_names=tuple((templates / "Tian_Subcortex_S1_3T_label.txt")
+                    tian_names=tuple((templates / f"{tian_name}_label.txt")
                                      .read_text().splitlines()),
                 )
                 atlas_t1 = torch.as_tensor(np.asarray(combined.dataobj),

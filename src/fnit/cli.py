@@ -303,22 +303,28 @@ def _run_connectome(args):
             raise ValueError("provide --freesurfer-subject-dir or all of --t1, --t1-segmentation, --atlas-dwi")
         anatomy_inputs = [args.t1, args.t1_segmentation, args.atlas_dwi]
     atlas_inputs = []
-    if args.atlas != "schaefer200+tian-s1" and args.tian_fnirt_coeff:
-        raise ValueError("--tian-fnirt-coeff requires --atlas schaefer200+tian-s1")
-    if args.atlas == "schaefer200+tian-s1":
+    schaefer_tian = {
+        "schaefer200+tian-s1": (200, 1),
+        "schaefer500+tian-s4": (500, 4),
+        "schaefer1000+tian-s4": (1000, 4),
+    }
+    if args.atlas not in schaefer_tian and args.tian_fnirt_coeff:
+        raise ValueError("--tian-fnirt-coeff requires a Schaefer+Tian atlas")
+    if args.atlas in schaefer_tian:
+        parcels, tian_scale = schaefer_tian[args.atlas]
         if (args.freesurfer_subject_dir is None or args.atlas_templates_dir is None or
                 args.fsaverage_dir is None or
                 (args.mni_template is None) == (args.tian_fnirt_coeff is None)):
-            raise ValueError("Schaefer200+Tian S1 needs --freesurfer-subject-dir, --atlas-templates-dir, --fsaverage-dir and exactly one of --mni-template or --tian-fnirt-coeff")
+            raise ValueError("Schaefer+Tian needs --freesurfer-subject-dir, --atlas-templates-dir, --fsaverage-dir and exactly one of --mni-template or --tian-fnirt-coeff")
         if args.tian_fnirt_coeff and args.synthmorph_weights:
             raise ValueError("--synthmorph-weights cannot be used with --tian-fnirt-coeff")
         templates = Path(args.atlas_templates_dir)
         atlas_inputs = [
             Path(args.mni_template or args.tian_fnirt_coeff),
-            *(templates / f"{hemi}.Schaefer2018_200Parcels_7Networks_order.annot"
+            *(templates / f"{hemi}.Schaefer2018_{parcels}Parcels_7Networks_order.annot"
               for hemi in ("lh", "rh")),
-            templates / "Tian_Subcortex_S1_3T.nii.gz",
-            templates / "Tian_Subcortex_S1_3T_label.txt",
+            templates / f"Tian_Subcortex_S{tian_scale}_3T.nii.gz",
+            templates / f"Tian_Subcortex_S{tian_scale}_3T_label.txt",
             *(Path(args.fsaverage_dir) / "surf" / f"{hemi}.sphere.reg"
               for hemi in ("lh", "rh")),
             *(subject.subject_dir / "surf" / f"{hemi}.{kind}"
@@ -660,7 +666,8 @@ def main(argv=None):
                             help='integer atlas in DWI RAS world coordinates')
     connectome.add_argument('--freesurfer-subject-dir', help='completed recon-all subject directory')
     connectome.add_argument('--atlas', default='fs-aparc',
-                            choices=('fs-aparc', 'schaefer200+tian-s1'),
+                            choices=('fs-aparc', 'schaefer200+tian-s1',
+                                     'schaefer500+tian-s4', 'schaefer1000+tian-s4'),
                             help='atlas to build from the FreeSurfer subject')
     connectome.add_argument('--atlas-templates-dir',
                             help='original UKB Schaefer/Tian template directory')

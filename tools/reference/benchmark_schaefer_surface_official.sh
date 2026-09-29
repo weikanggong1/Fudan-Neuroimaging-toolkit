@@ -7,13 +7,15 @@ subjects_dir=$2     # 同时含 fsaverage 与待测 recon-all subject 的目录
 subject_id=$3       # 待测 subject 目录名
 template_dir=$4     # 原 UKB 仓库的 data/templates/atlases
 output_dir=$5       # 写出转换后与原生注释、计时
+parcels=${6:-200}   # 200、500 或 1000 个双半球 Schaefer 节点
+case "$parcels" in 200|500|1000) ;; *) echo "parcels must be 200, 500 or 1000" >&2; exit 2 ;; esac
 
 mkdir -p "$output_dir"
 python3 "$template_dir/../../../scripts/python/convert_schaefer_annot.py" \
-  "$template_dir/lh.Schaefer2018_200Parcels_7Networks_order.annot" \
-  "$template_dir/rh.Schaefer2018_200Parcels_7Networks_order.annot" \
-  "$output_dir/lh.fsaverage.Schaefer200.annot" \
-  "$output_dir/rh.fsaverage.Schaefer200.annot"
+  "$template_dir/lh.Schaefer2018_${parcels}Parcels_7Networks_order.annot" \
+  "$template_dir/rh.Schaefer2018_${parcels}Parcels_7Networks_order.annot" \
+  "$output_dir/lh.fsaverage.Schaefer${parcels}.annot" \
+  "$output_dir/rh.fsaverage.Schaefer${parcels}.annot"
 export FREESURFER_HOME="$freesurfer_home"
 export SUBJECTS_DIR="$subjects_dir"
 set +eu
@@ -22,6 +24,6 @@ set -eu
 for hemi in lh rh; do
   /usr/bin/time -f '%e %M' -o "$output_dir/$hemi.time" \
     mri_surf2surf --srcsubject fsaverage --trgsubject "$subject_id" \
-      --hemi "$hemi" --sval-annot "$output_dir/$hemi.fsaverage.Schaefer200.annot" \
-      --tval "$output_dir/$hemi.native.Schaefer200.annot"
+      --hemi "$hemi" --sval-annot "$output_dir/$hemi.fsaverage.Schaefer${parcels}.annot" \
+      --tval "$output_dir/$hemi.native.Schaefer${parcels}.annot"
 done

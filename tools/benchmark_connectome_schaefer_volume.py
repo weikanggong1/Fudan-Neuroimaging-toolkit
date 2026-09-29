@@ -1,4 +1,4 @@
-"""原 UKB Schaefer200 模板到真实 T1 ribbon 标签体积的同输入验证。"""
+"""原 UKB Schaefer 模板到真实 T1 ribbon 标签体积的同输入验证。"""
 
 import argparse
 import json
@@ -17,6 +17,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("subject-dir", "fsaverage-dir", "left-annot", "right-annot", "official-volume", "output-dir"):
         parser.add_argument("--" + name, type=Path, required=True)
+    parser.add_argument("--parcels", type=int, choices=(200, 500, 1000), default=200)
     parser.add_argument("--device", default="cuda:0")
     args = parser.parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
@@ -50,7 +51,7 @@ def main():
         "nonzero_xor": int(np.count_nonzero((actual > 0) != (expected > 0))),
         "label_min_max": [int(actual.min()), int(actual.max())],
     }
-    nib.save(candidate, str(args.output_dir / "fnit_schaefer200_t1.nii.gz"))
+    nib.save(candidate, str(args.output_dir / f"fnit_schaefer{args.parcels}_t1.nii.gz"))
     (args.output_dir / "report.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(report))
 

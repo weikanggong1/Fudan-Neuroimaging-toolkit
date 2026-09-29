@@ -98,7 +98,7 @@ ACT 单独用 [300 个真实种子生成的固定世界坐标路径](ifod2_rejec
 
 三次 FNIT 独立种子分别接受 `2,713/2,727/2,691` 条流线；H100 追踪核心 `66.25/69.96/72.20 s`、后处理 `34.90/35.76/34.19 s`，Torch 峰值均约 `2.176 GiB`。按[既有 3×3 比较程序](../../../tools/benchmark_connectome_rng_envelope.py)对三次官方、三次 FNIT 的所有配对使用相同指标，得到[完整 JSON](ifod2_rejection_20260929/rejection_act_3x3.json)和[四矩阵误差图](ifod2_rejection_20260929/rejection_act_3x3.png)。count 上三角相对 L1 官方自身 `0.2283–0.2583`、FNIT 自身 `0.2748–0.2951`、跨软件 `0.2300–0.2933`，跨软件 4/9 对在官方范围内。共同边 mean FA nMAE 官方自身 `0.0777–0.1014`、FNIT 自身 `0.0803–0.1035`、跨软件 `0.0643–0.1039`，跨软件 6/9 对在官方范围内；count 支持 Dice 跨软件 4/9 对在官方范围内。mean FA 的系统性偏差较旧采样器明显缩小，但 count、FBC 的重复波动和稀疏边支持仍未全面匹配。
 
-参考流程的独立 `tckgen` 命令一次完整墙钟为 `16.90 s`，见[阶段计时](corrected_mrtrix_fs5tt_act_adapted/stage_times.tsv)。FNIT 上述 `66–72 s` 是已载入张量后的 H100 追踪核心；两侧设备和计时边界不同，但目前没有 GPU 提速证据。FNIT 每批保持低于 20 GiB，100 万至 1,000 万次播种的总内存与用时尚未验证。
+参考流程的独立 `tckgen` 命令一次完整墙钟为 `16.90 s`，见[阶段计时](corrected_mrtrix_fs5tt_act_adapted/stage_times.tsv)。FNIT 上述 `66–72 s` 是已载入张量后的 H100 追踪核心；两侧设备和计时边界不同，但目前没有 GPU 提速证据。[另一次同空间输入的 100k 规模实验](tracking_scale_100k_20260929.md)测得 FNIT 819.68 s、Torch 峰值 0.973 GiB，仍明显慢于 MRtrix；100 万至 1,000 万次播种的总内存与用时尚未验证。
 
 为定位差异，[轨迹群体对照](../../../tools/benchmark_connectome_tracking_population.py)另读三份官方真实 TCK 和 FNIT seed 0 的 TCK；FNIT seed 0 重跑的四张矩阵逐项保持相同。沿各轨迹折线计算的长度分布 KS 统计量：官方自身三对 `0.0190–0.0295`，FNIT 与官方三对 `0.0149–0.0271`。端点在世界毫米 8 mm 立方格的直方图相关性：官方自身 `0.3566–0.3853`，跨软件 `0.3654–0.3686`。DWI 网格 4×4×4 体素块（约 8 mm）的 TDI 相关性：官方自身 `0.8430–0.8651`，跨软件 `0.8597–0.8653`。这些粗尺度分布已与官方重复波动相近；原始单体素 TDI 在官方不同种子之间也几乎不相关，不能据此判断不同实现的系统误差。详见[轨迹分布 JSON](ifod2_rejection_20260929/track_population_seed0.json)和[长度及脑内 TDI 图](ifod2_rejection_20260929/track_population_seed0.png)。稀疏 atlas 边的 10,000 次播种仍需更高播种量和更多重复，才能区分尾部抽样差异与有限样本波动。
 
