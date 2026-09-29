@@ -1005,12 +1005,12 @@ def _apply_t1_intensity(reference, polynomial, bias):
 
 
 class TorchFNIRT:
-    """Matrix-free PyTorch FNIRT for the FSL GM registration schedule.
+    """Matrix-free PyTorch FNIRT for supported GM and T1 schedules.
 
     The optimiser is genuine Gauss-Newton/Levenberg-Marquardt with analytic
-    B-spline forward/adjoint operators and PCG.  The class is deliberately not
-    named ``Exact``: the ported ``constrain_topology`` projection and the full
-    optimisation trajectory still require external FSL 6.0.7.4 numerical gates.
+    B-spline forward/adjoint operators and PCG. T1 additionally fits intensity
+    and bias at configured levels. Its trajectory is not numerically
+    identical to FSL FNIRT.
     """
 
     def __init__(
@@ -1689,7 +1689,7 @@ class TorchFNIRT:
             "hessian": "analytic matrix-free B-spline JtJ plus bending Hessian",
             "global_intensity_model": self.config.intensity_model,
             "t1_intensity_fitting": (
-                "alternating polynomial and cubic bias fit before each deformation level"
+                "alternating polynomial and cubic bias fit at configured intensity levels"
                 if self.config.intensity_model == "global_non_linear_with_bias"
                 else None
             ),

@@ -119,8 +119,8 @@ nib.save(result.coefficient_image, "/absolute/path/T1_to_MNI_coeff.nii.gz")  # �
 
 `result` 与上表的 `TorchFNIRTResult` 结构相同；`pull_transform` 是 MNI→T1
 的 world-RAS 位移，可与 EPI→T1 BBR 合成，一次插值输出 BOLD。`qc["levels"]`
-记录各级强度多项式、偏置场范围和偏置场 PCG 收敛情况。该分支在每级形变优化前
-交替拟合多项式与三次 B 样条偏置场，并把偏置场限制在 0.25–4 倍。
+记录各级强度多项式、偏置场范围和偏置场 PCG 收敛情况。该分支在前五级形变优化前
+拟合多项式与三次 B 样条偏置场，末级沿用上一结果；偏置场限制在 0.25–4 倍。
 FSL 对强度、偏置和形变进行联合优化，因此这不是逐步数值等价的移植。
 T1w 可用上述 Python API、fMRI volume 入口，或独立命令行：
 
