@@ -77,6 +77,13 @@ volume_file = convert_space(
 
 输出体积只有皮层掩膜内赋值。多帧输入保持帧次序：NIfTI 为 `(X,Y,Z,T)`，GIFTI 每帧一个数据数组。标签值超过 float32 精确整数范围（2²⁴）时不适用。MNI 与表面之间的体素分辨率及表面顶点密度是两个独立参数。
 
+fsLR CIFTI 包含皮层下体素时，先按 HCP 方法用 Workbench 提取两侧 GIFTI，再将这两个文件作为 `source`。本函数只转换皮层部分，不把 CIFTI 中的皮层下数据投到皮层：
+
+```bash
+wb_command -cifti-separate input.dscalar.nii COLUMN \
+  -metric CORTEX_LEFT L.func.gii -metric CORTEX_RIGHT R.func.gii
+```
+
 命令行示例：
 
 ```bash
@@ -126,7 +133,7 @@ wb_command -metric-resample L.fsaverage6.func.gii \
 | fsaverage164k → MNI152 1 mm | 4.11 s | CBIG MATLAB 20.73 s | 1,029,656 个皮层体素逐体素相同；最大绝对差 0 |
 | fsaverage6 沟深 → fsLR32k | 0.77 s | Workbench 0.77 s | 双半球逐顶点相同；最大绝对差 0 |
 
-另用同一真实 MNI T1 图的 0.5 mm 重采样版本测试输入，生成 fsaverage3k；用 0.5 mm 与 2 mm 参考网格测试表面回体积，输出分别为 `(363,435,363)` 和 `(91,109,91)`。0.5 mm 图是原始模板的重采样，不是新的独立扫描。GPU 计时及占用记录见 `validation/space_conversion/README.md`。
+另用同一真实 MNI T1 图的 0.5 mm 重采样版本测试输入，生成 fsaverage3k；用 0.5 mm 与 2 mm 参考网格测试表面回体积，输出分别为 `(363,435,363)` 和 `(91,109,91)`。0.5 mm 图是原始模板的重采样，不是新的独立扫描。测试细节见 `validation/space_conversion/README.md`。
 
 ## 参考文献和原实现代码库
 
