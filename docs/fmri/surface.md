@@ -181,6 +181,8 @@ newmsm --inmesh=/absolute/path/work/msmsulc_inputs/L.sphere_rot.surf.gii \
 
 官方七次逐轮球面变形检查点还可单独验证插值：目前平面投影的平均顶点距离约为 0.00126 mm，沿球心射线投影并计算重心权重后约为 0.000005 mm。直接把射线插值用于现有局部求解器，最终球面中位角差为左 0.566°、右 0.467°，而已发布版本为左 0.494°、右 0.495°，因此未将这项全局替换加入安装包。
 
+对官方和 FNIT 的 40,962 点重采样球面按三维坐标匹配顶点后，两套网格的最近点距离中位数为 0.000004 mm，但只有 0.044% 的顶点拥有相同数组下标。因此必须先重排特征，再比较数值。真实 sulc 的重采样结果与官方相关为源侧 0.999994、模板侧约 1.000000；平均绝对差分别为 0.000479、0.000000074。按原始数组下标直接比较得到的近零相关是顶点编号差异，不是特征重采样失败。FNIT 内部几何和特征使用同一编号顺序，无需改写输出球面的顶点顺序；这项核查将剩余主要误差进一步定位到标签提案、联合求解和变形更新。
+
 独立的完整联合求解实验也没有通过最终球面验收：加局部补全并采用射线变形时，左侧角差为 0.624°，有 3 个待修复的折叠面片，耗时 553 秒；仅接受确定标签时，角差为 0.972°，有 2 个待修复面片，耗时 135 秒。两者都比已发布左侧球面更偏离官方，故未接入 pipeline。剩余工作是使高阶二次化后的标签求解和跨轮更新接近官方，并在双侧球面及 490 帧时间序列上重新验收。
 
 原版完整流程的命令格式如下；`--cifti-output 91k` 指定 91,282 个灰质坐标，`--msm` 启用官方 MSMSulc，`--fs-subjects-dir` 使用已有的同被试 FreeSurfer subject。这是原软件等价入口的说明，不是下文固定输入 benchmark 的运行命令；原版从 BIDS 原始数据重算上游流程，不会直接读取 FNIT 已回归的 BOLD。[官方参数说明](https://fmriprep.org/en/latest/usage.html)与[fsLR 输出说明](https://fmriprep.org/en/latest/outputs.html)给出其空间和球面约定。
@@ -309,3 +311,9 @@ print(cifti)  # 时间×灰质坐标，TR 来自 clean_mni 的 NIfTI 头
 固定官方球面后，投影及 CIFTI 逐值一致，皮层下始终一致；当前皮层差异来自球面对应关系。
 
 同一主机上，FNIT 双侧 GPU 注册墙钟时间为 65.06 秒，峰值显存分别为 0.298、0.315 GB，保存后的球面无折叠三角形；官方 MSM 的左、右 CPU 墙钟时间为 46 分 39 秒、46 分 42 秒。两边使用不同硬件和优化算法，这些时间不能作为等精度加速比。复用已生成的个体 T1w BOLD 和 FNIT 注册球面，490 帧表面投影与 CIFTI 组装耗时 447.04 秒，包含结构准备和 Workbench 投影；EPI→T1w 重采样另计。固定输入的 Workbench ribbon 与 dilation 两侧分步计时之和为 289.56 秒；严格 cortex mask、ADAP_BARY_AREA 和 atlas mask 之和为 119.99 秒。这些分步数字来自独立运行。参数在这同一被试上筛选，尚无独立被试的复核；FNIT 的上游 BBR、MNI 配准与去噪也和 fMRIPrep 不同。**当前默认球面可生成可分析的 fsLR32k/91k 时间序列，尚未达到官方 MSM 的数值等价。**
+
+## 参考文献与原实现
+
+- Robinson EC 等. [Multimodal surface matching with higher-order smoothness constraints](https://doi.org/10.1016/j.neuroimage.2017.10.037). *NeuroImage*, 2018；[newMSM 原实现代码](https://github.com/rbesenczi/newMSM)及[官方使用说明](https://fsl.fmrib.ox.ac.uk/fsl/docs/registration/newmsm/guide.html)。
+- Esteban O 等. [fMRIPrep: a robust preprocessing pipeline for functional MRI](https://doi.org/10.1038/s41592-018-0235-4). *Nature Methods*, 2019；[fMRIPrep 原实现代码](https://github.com/nipreps/fmriprep)与[sMRIPrep 原实现代码](https://github.com/nipreps/smriprep)。
+- Glasser MF 等. [The minimal preprocessing pipelines for the Human Connectome Project](https://doi.org/10.1016/j.neuroimage.2013.04.127). *NeuroImage*, 2013；[HCP Pipelines 原实现代码](https://github.com/Washington-University/HCPpipelines)及[Connectome Workbench 原实现代码](https://github.com/Washington-University/workbench)。
