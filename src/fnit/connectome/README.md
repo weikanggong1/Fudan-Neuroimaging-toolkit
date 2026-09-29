@@ -31,6 +31,8 @@ nodes = result.nodes                          # 输出：84 个矩阵行列定�
 
 必选 `n_seeds` 是尝试次数。可选 `dwi_to_t1_world` 为 DWI→T1 RAS-mm `4×4` 矩阵；省略时运行 TorchFLIRT 6-DOF/normmi。可用 `shell_bvals`、`response_mask`、`fod_mask`、`normalise_mask`、`fa_map` 固定参考条件。`ConnectomeResult.nodes` 提供 `index`、`original_label`、`hemisphere`、`name`，矩阵行列严格按 index 排列。`ConnectomeResult.matrices` 包含 `count`、`sift2_fbc`、`mean_length`（mm）和 `mean_fa`；结果还保存 5TT/GMWMI、归一化 WM FOD、FA、世界毫米流线、BET 二值脑掩膜、逐流线 SIFT2 权重和几何变换。
 
-响应、原始 FOD、mtnormalise、官方 FreeSurfer 输入的 5TT/GMWMI、固定轨迹 SIFT2 子阶段、精确 FA 与矩阵赋值已有各自配对验证。追踪球谐函数查表的[固定单弧基准](../../../validation/connectome/ds004666/ifod2_single_arc_20260929.md)、连续初始方向的[真实 FOD 基准](../../../validation/connectome/ds004666/ifod2_initial_direction_20260929.md)和[ACT 种子判定基准](../../../validation/connectome/ds004666/ifod2_act_seed_20260929.md)分别记录数值、时间与图。传播中的圆弧抽样和后续 ACT 状态仍有差异，最终矩阵未进入已测官方重复范围。旧版整链固定输入 seed 0 的矩阵 CSV 见[历史验证](../../../validation/connectome/ds004666/README.md)。
+响应、原始 FOD、mtnormalise、官方 FreeSurfer 输入的 5TT/GMWMI、固定轨迹 SIFT2 子阶段、精确 FA 与矩阵赋值已有各自配对验证。追踪球谐函数查表的[固定单弧基准](../../../validation/connectome/ds004666/ifod2_single_arc_20260929.md)、连续初始方向的[真实 FOD 基准](../../../validation/connectome/ds004666/ifod2_initial_direction_20260929.md)和[ACT 种子判定基准](../../../validation/connectome/ds004666/ifod2_act_seed_20260929.md)分别记录数值、时间与图。传播中的独立流线群体仍有差异，最终矩阵未全面进入已测官方重复范围。旧版整链固定输入 seed 0 的矩阵 CSV 见[历史验证](../../../validation/connectome/ds004666/README.md)。
+
+[新 100k 真实输入验证](../../../validation/connectome/ds004666/tracking_100k_matrices_20260929.md)已比较三次官方与一次 FNIT 的轨迹、SIFT2 和四矩阵：count 相对 L1 有 2/3 组跨软件配对进入官方自身范围，长度、端点和 TDI 的跨软件差异仍略超范围。当前该规模全链 Torch 峰值 2.473 GiB，追踪速度仍明显慢于独立 MRtrix CPU 参考。
 
 [真实 b0/T1 无 Surfa 自动配准核对](../../../validation/connectome_registration_no_surfa_20260928/README.md)只覆盖配准矩阵；完整连接组未因该迁移重新验收。

@@ -13,7 +13,7 @@
 | 5TT、GMWMI、DWI↔T1、atlas | [解剖报告](ANATOMY_STAGE_20260927.md)；固定官方分割的 5TT/GMWMI 逐值一致 |
 | 掩膜、响应、FOD、mtnormalise | [掩膜](maskfilter_stage_20260927.md)、[响应/FOD](response_fod_stage_20260927.md)、[归一化](mtnormalise_stage_20260927.md)；固定输入的主要数值误差与脑图分别列明 |
 | iFOD2/ACT | [当前拒绝采样与 ACT 报告](ifod2_rejection_20260929.md)；固定单弧最大概率误差 1.58×10⁻⁶，12,600 个真实 5TT 采样点 ACT 状态零差异；独立随机轨迹未全面进入官方重复包络 |
-| 100k 播种规模 | [同空间输入、计时及显存](tracking_scale_100k_20260929.md)；FNIT 27,401 条、MRtrix 27,616 条，FNIT 819.68 s、Torch 峰值 0.973 GiB；流线群体和四矩阵的 100k 对照待做 |
+| 100k 播种规模 | [同空间纯追踪](tracking_scale_100k_20260929.md)记录 FNIT 27,401 条、819.68 s、Torch 峰值 0.973 GiB；[三次官方与一次 FNIT 的全链四矩阵、轨迹分布和脑图](tracking_100k_matrices_20260929.md)另测 FNIT 追踪 1,443.91 s、全链 Torch 峰值 2.473 GiB。count 相对 L1 有 2/3 个跨软件比较进入官方自身范围，长度/端点/TDI 仍超出 |
 | SIFT2、FA、双端赋值 | 固定同一官方 TCK，[SIFT2](sift2_mapping_stage.md) 逐轨权重相关 0.999999903、[FA](tcksample_precise_stage.md) 逐轨相关 0.9999999949、[count](integrated_seed0_fixed_tck_assignment.public.json) 400/400 元素一致 |
 | atlas 自动生成 | [Schaefer200+Tian S1/S4](atlas_synthmorph_20260929.md)、[Schaefer500/1000+Tian S4](atlas_schaefer_multi_20260929.md)、[原生 aparc/a2009s+Tian S1](atlas_native_aparc_20260929.md)和[Glasser+Tian S1/S4](atlas_glasser_20260929.md)；七套原 UKB 图谱的皮层体积与原脚本逐体素一致。Glasser 有两个仅 1–2 个 T1 体素的节点在 DWI 网格消失。SynthMorph 与原 FNIRT 路线存在明确差异，给定同一 FNIRT coefficient 可使 Tian S1 逐体素一致 |
 | 配准影响 | [固定流线敏感性实验](registration_sensitivity_20260929.md)；只换 atlas 时 count 相关 0.9986、相对 L1 0.0157；各自重跑追踪会放大矩阵差异 |
@@ -23,6 +23,8 @@
 `fnit connectome --atlas schaefer200+tian-s1` 已直接读取校正 DWI、旋转梯度和官方 `recon-all` 目录，自动生成 216 节点 atlas、追踪、SIFT2 及四张矩阵。真实 1000 次播种的[输出检查与四矩阵图](atlas_synthmorph_20260929.md)显示 216 个节点全部存在、四矩阵有限且对称；这一小样本仅验收接口和文件结构。
 
 固定真实 FOD/5TT、10,000 个 GMWMI 位置以及同一 20 节点 atlas 后，FNIT 三次分别接受 2,713、2,727、2,691 条，MRtrix 三次为 2,758、2,728、2,727 条。官方自身 count 上三角相对 L1 为 0.2283–0.2583，跨软件九组为 0.2300–0.2933，其中 4/9 进入官方范围；共同边 mean FA 归一化 MAE 官方为 0.0777–0.1014，跨软件为 0.0643–0.1039，其中 6/9 进入范围。完整矩阵、输入哈希、时间、显存及脑图见[当前追踪报告](ifod2_rejection_20260929.md)。尚不能称最终 connectome 与官方流程匹配。
+
+100k 的[新对照](tracking_100k_matrices_20260929.md)使用同一 FOD/5TT/GMWMI/FA/20 节点 atlas，三次官方与一次 FNIT 的四矩阵 count 相对 L1 为官方互比 `0.094–0.117`、FNIT 对官方 `0.084–0.107`；跨软件 2/3 进入范围。FNIT 对官方的长度 KS `0.0099–0.0124`，高于官方互比 `0.0054–0.0070`；端点和 8 mm TDI 相关也略低于官方互比。该 100k 验证仍不能替代七套原 UKB 图谱或 1,000 万次播种的验收。
 
 ![当前三种子四矩阵误差比较](ifod2_rejection_20260929/rejection_act_3x3.png)
 
