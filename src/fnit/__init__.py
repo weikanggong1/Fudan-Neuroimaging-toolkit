@@ -87,6 +87,9 @@ def __getattr__(name):
     if name == 'run_fslmaths':
         from .fslmaths import run_fslmaths
         return run_fslmaths
+    if name == 'convert_space':
+        from .space_conversion import convert_space
+        return convert_space
     if name in ('FastVBM', 'FastVBMResult',
                 'VBMRegistrationResult'):
         from . import fast_vbm
