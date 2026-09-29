@@ -1,6 +1,8 @@
 """由 fsaverage 注释和已完成的 recon-all 表面生成原生皮层 atlas。"""
 
 from pathlib import Path
+import subprocess
+import tempfile
 
 import nibabel as nib
 import numpy as np
@@ -76,9 +78,9 @@ def fsaverage_annotation_to_t1(
             native_sphere_reg=torch.as_tensor(native_sphere, device=device),
             fsaverage_labels=torch.as_tensor(labels, device=device),
         ))
-    left_max = int(source_labels[0].max())
+    left_ids = set(left_nonzero.tolist())
     nodes = tuple(ConnectomeNode(
-        index=i, original_label=i, hemisphere="L" if i <= left_max else "R",
+        index=i, original_label=i, hemisphere="L" if i in left_ids else "R",
         name=name,
     ) for i, name in enumerate(names, 1))
     return _native_labels_to_t1(subject, tuple(mapped), device), nodes
@@ -149,6 +151,60 @@ def schaefer_to_t1(
     return fsaverage_annotation_to_t1(
         subject_dir=subject_dir, fsaverage_dir=fsaverage_dir,
         left_labels=left, right_labels=right, names=names, device=device,
+    )
+
+
+def glasser_to_t1(
+    subject_dir: str | Path,
+    fsaverage_dir: str | Path,
+    atlas_templates_dir: str | Path,
+    *,
+    device: str = "cuda:0",
+    workbench_command: str | Path = "wb_command",
+) -> tuple[nib.Nifti1Image, tuple[ConnectomeNode, ...]]:
+    """将原 UKB Glasser CIFTI 映射到 recon-all 受试者 T1 ribbon。
+
+    ``atlas_templates_dir`` 含 Glasser 32k dlabel，邻接 ``surfaces``
+    目录含 32k fsLR 与 164k fsaverage 球面；``fsaverage_dir`` 含
+    双半球 sphere.reg。``workbench_command`` 是允许使用的 Workbench
+    可执行文件。Workbench 做 32k→164k BARYCENTRIC 标签重采样；
+    PyTorch 做 164k→原生顶点和 T1 ribbon 投影。返回 int32 T1 NIfTI
+    和按 Glasser 原编号 1..360 排列的节点表。原版对应双半球
+    ``wb_command -cifti-separate``、``-label-resample``、
+    ``mri_surf2surf --sval-annot`` 和 ``map_surface_label_to_volume.py``。
+    """
+    templates = Path(atlas_templates_dir)
+    surfaces = templates.parent / "surfaces"
+    dlabel = templates / (
+        "Q1-Q6_RelatedParcellation210.CorticalAreas_dil_Final_Final_"
+        "Areas_Group_Colors.32k_fs_LR.dlabel.nii"
+    )
+    labels = []
+    names = None
+    with tempfile.TemporaryDirectory(prefix="fnit-glasser-") as scratch:
+        for hemi, side, cortex in (("lh", "L", "CORTEX_LEFT"),
+                                   ("rh", "R", "CORTEX_RIGHT")):
+            label_32k = Path(scratch) / f"{hemi}.32k.label.gii"
+            label_164k = Path(scratch) / f"{hemi}.164k.label.gii"
+            subprocess.run([str(workbench_command), "-cifti-separate", str(dlabel),
+                            "COLUMN", "-label", cortex, str(label_32k)],
+                           check=True, capture_output=True)
+            subprocess.run([
+                str(workbench_command), "-label-resample", str(label_32k),
+                str(surfaces / f"{side}.sphere.32k_fs_LR.surf.gii"),
+                str(surfaces / f"fs_{side}-to-fs_LR_fsaverage.{side}_LR."
+                     f"spherical_std.164k_fs_{side}.surf.gii"),
+                "BARYCENTRIC", str(label_164k),
+            ], check=True, capture_output=True)
+            image = nib.load(str(label_164k))
+            labels.append(np.asarray(image.darrays[0].data, dtype=np.int32))
+            if names is None:
+                lut = image.labeltable.get_labels_as_dict()
+                names = tuple(lut[i] for i in range(1, len(lut)))
+    return fsaverage_annotation_to_t1(
+        subject_dir=subject_dir, fsaverage_dir=fsaverage_dir,
+        left_labels=labels[0], right_labels=labels[1], names=names,
+        device=device,
     )
 
 

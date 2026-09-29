@@ -12,7 +12,7 @@ import torch
 from connectome_benchmark_common import _sha256
 from fnit.connectome.anatomy import resample_labels_nearest
 from fnit.connectome.atlas_builder import (
-    combine_cortical_tian, native_annotation_to_t1, schaefer_to_t1,
+    combine_cortical_tian, glasser_to_t1, native_annotation_to_t1, schaefer_to_t1,
 )
 
 
@@ -24,8 +24,13 @@ def main() -> None:
     for name in ("fsaverage-dir", "left-annot", "right-annot"):
         parser.add_argument("--" + name, type=Path)
     parser.add_argument("--native-annotation", choices=("aparc", "aparc.a2009s"))
+    parser.add_argument("--glasser-template-dir", type=Path)
+    parser.add_argument("--workbench-command", default="wb_command")
     parser.add_argument("--device", default="cuda:0")
     args = parser.parse_args()
+    if sum((bool(args.native_annotation), args.glasser_template_dir is not None,
+            args.left_annot is not None or args.right_annot is not None)) != 1:
+        raise ValueError("choose exactly one native, Glasser, or two Schaefer annotations")
     t0 = time.perf_counter()
     if args.native_annotation:
         if any(value is not None for value in (args.fsaverage_dir, args.left_annot, args.right_annot)):
@@ -37,6 +42,25 @@ def main() -> None:
             ("left_annot", args.subject_dir / "label" / f"lh.{args.native_annotation}.annot"),
             ("right_annot", args.subject_dir / "label" / f"rh.{args.native_annotation}.annot"),
         )
+    elif args.glasser_template_dir is not None:
+        if args.fsaverage_dir is None:
+            raise ValueError("Glasser atlas needs fsaverage_dir")
+        cortical, cortical_nodes = glasser_to_t1(
+            subject_dir=args.subject_dir,
+            fsaverage_dir=args.fsaverage_dir,
+            atlas_templates_dir=args.glasser_template_dir,
+            workbench_command=args.workbench_command,
+            device=args.device,
+        )
+        cortical_inputs = tuple((name, path) for name, path in (
+            ("glasser_dlabel", args.glasser_template_dir /
+             "Q1-Q6_RelatedParcellation210.CorticalAreas_dil_Final_Final_Areas_Group_Colors.32k_fs_LR.dlabel.nii"),
+            *((f"{side}_32k_sphere", args.glasser_template_dir.parent / "surfaces" /
+               f"{side}.sphere.32k_fs_LR.surf.gii") for side in ("L", "R")),
+            *((f"{side}_164k_sphere", args.glasser_template_dir.parent / "surfaces" /
+               f"fs_{side}-to-fs_LR_fsaverage.{side}_LR.spherical_std.164k_fs_{side}.surf.gii")
+              for side in ("L", "R")),
+        ))
     else:
         if any(value is None for value in (args.fsaverage_dir, args.left_annot, args.right_annot)):
             raise ValueError("Schaefer atlas needs fsaverage_dir and both hemisphere annotations")

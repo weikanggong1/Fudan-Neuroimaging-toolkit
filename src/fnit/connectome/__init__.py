@@ -8,7 +8,7 @@ from .assignment import build_connectomes
 from .atlas_tian import fnirt_tian_to_t1, synthmorph_tian_to_t1
 from .atlas_surface import resample_annotation_to_native, surface_annotation_to_volume
 from .atlas_builder import (
-    combine_cortical_tian, fsaverage_annotation_to_t1, native_annotation_to_t1,
+    combine_cortical_tian, fsaverage_annotation_to_t1, glasser_to_t1, native_annotation_to_t1,
     schaefer_to_t1,
 )
 from .bet import bet_mask, mean_bzero, mrtrix_roundtrip_voxel_size
@@ -44,6 +44,6 @@ __all__ = [
     "sample_streamline_mean_precise", "segment_fod_fixels",
     "synthmorph_tian_to_t1", "fnirt_tian_to_t1", "resample_annotation_to_native",
     "surface_annotation_to_volume", "fsaverage_annotation_to_t1", "native_annotation_to_t1",
-    "schaefer_to_t1",
+    "schaefer_to_t1", "glasser_to_t1",
     "combine_cortical_tian",
 ]

@@ -312,14 +312,16 @@ def _run_connectome(args):
         "aparc+tian-s1": "aparc",
         "aparc.a2009s+tian-s1": "aparc.a2009s",
     }
-    if args.atlas not in (*schaefer_tian, *native_tian) and args.tian_fnirt_coeff:
+    glasser_tian = {"glasser+tian-s1": 1, "glasser+tian-s4": 4}
+    if args.atlas not in (*schaefer_tian, *native_tian, *glasser_tian) and args.tian_fnirt_coeff:
         raise ValueError("--tian-fnirt-coeff requires a cortical+Tian atlas")
-    if args.atlas in (*schaefer_tian, *native_tian):
-        tian_scale = schaefer_tian[args.atlas][1] if args.atlas in schaefer_tian else 1
+    if args.atlas in (*schaefer_tian, *native_tian, *glasser_tian):
+        tian_scale = (schaefer_tian[args.atlas][1] if args.atlas in schaefer_tian
+                      else glasser_tian.get(args.atlas, 1))
         if (args.freesurfer_subject_dir is None or args.atlas_templates_dir is None or
-                (args.atlas in schaefer_tian and args.fsaverage_dir is None) or
+                (args.atlas in (*schaefer_tian, *glasser_tian) and args.fsaverage_dir is None) or
                 (args.mni_template is None) == (args.tian_fnirt_coeff is None)):
-            raise ValueError("cortical+Tian needs --freesurfer-subject-dir, --atlas-templates-dir, Schaefer --fsaverage-dir and exactly one of --mni-template or --tian-fnirt-coeff")
+            raise ValueError("cortical+Tian needs --freesurfer-subject-dir, --atlas-templates-dir, surface-atlas --fsaverage-dir and exactly one of --mni-template or --tian-fnirt-coeff")
         if args.tian_fnirt_coeff and args.synthmorph_weights:
             raise ValueError("--synthmorph-weights cannot be used with --tian-fnirt-coeff")
         templates = Path(args.atlas_templates_dir)
@@ -335,6 +337,17 @@ def _run_connectome(args):
             parcels, _ = schaefer_tian[args.atlas]
             atlas_inputs.extend(templates / f"{hemi}.Schaefer2018_{parcels}Parcels_7Networks_order.annot"
                                 for hemi in ("lh", "rh"))
+            atlas_inputs.extend(Path(args.fsaverage_dir) / "surf" / f"{hemi}.sphere.reg"
+                                for hemi in ("lh", "rh"))
+            atlas_inputs.extend(subject.subject_dir / "surf" / f"{hemi}.sphere.reg"
+                                for hemi in ("lh", "rh"))
+        elif args.atlas in glasser_tian:
+            atlas_inputs.append(templates / "Q1-Q6_RelatedParcellation210.CorticalAreas_dil_Final_Final_Areas_Group_Colors.32k_fs_LR.dlabel.nii")
+            surfaces = templates.parent / "surfaces"
+            atlas_inputs.extend(surfaces / f"{side}.sphere.32k_fs_LR.surf.gii"
+                                for side in ("L", "R"))
+            atlas_inputs.extend(surfaces / f"fs_{side}-to-fs_LR_fsaverage.{side}_LR.spherical_std.164k_fs_{side}.surf.gii"
+                                for side in ("L", "R"))
             atlas_inputs.extend(Path(args.fsaverage_dir) / "surf" / f"{hemi}.sphere.reg"
                                 for hemi in ("lh", "rh"))
             atlas_inputs.extend(subject.subject_dir / "surf" / f"{hemi}.sphere.reg"
@@ -678,11 +691,12 @@ def main(argv=None):
     connectome.add_argument('--freesurfer-subject-dir', help='completed recon-all subject directory')
     connectome.add_argument('--atlas', default='fs-aparc',
                             choices=('fs-aparc', 'aparc+tian-s1', 'aparc.a2009s+tian-s1',
+                                     'glasser+tian-s1', 'glasser+tian-s4',
                                      'schaefer200+tian-s1',
                                      'schaefer500+tian-s4', 'schaefer1000+tian-s4'),
                             help='atlas to build from the FreeSurfer subject')
     connectome.add_argument('--atlas-templates-dir',
-                            help='original UKB Schaefer/Tian template directory')
+                            help='original UKB atlas directory; Glasser also needs sibling surfaces directory')
     connectome.add_argument('--fsaverage-dir',
                             help='fsaverage subject directory with lh/rh sphere.reg')
     connectome.add_argument('--mni-template',

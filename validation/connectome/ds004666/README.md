@@ -15,7 +15,7 @@
 | iFOD2/ACT | [当前拒绝采样与 ACT 报告](ifod2_rejection_20260929.md)；固定单弧最大概率误差 1.58×10⁻⁶，12,600 个真实 5TT 采样点 ACT 状态零差异；独立随机轨迹未全面进入官方重复包络 |
 | 100k 播种规模 | [同空间输入、计时及显存](tracking_scale_100k_20260929.md)；FNIT 27,401 条、MRtrix 27,616 条，FNIT 819.68 s、Torch 峰值 0.973 GiB；流线群体和四矩阵的 100k 对照待做 |
 | SIFT2、FA、双端赋值 | 固定同一官方 TCK，[SIFT2](sift2_mapping_stage.md) 逐轨权重相关 0.999999903、[FA](tcksample_precise_stage.md) 逐轨相关 0.9999999949、[count](integrated_seed0_fixed_tck_assignment.public.json) 400/400 元素一致 |
-| atlas 自动生成 | [Schaefer200+Tian S1/S4](atlas_synthmorph_20260929.md)、[Schaefer500/1000+Tian S4](atlas_schaefer_multi_20260929.md)与[原生 aparc/a2009s+Tian S1](atlas_native_aparc_20260929.md)；五种皮层体积与原脚本逐体素一致。SynthMorph 与原 FNIRT 路线存在明确差异，给定同一 FNIRT coefficient 可使 Tian S1 逐体素一致 |
+| atlas 自动生成 | [Schaefer200+Tian S1/S4](atlas_synthmorph_20260929.md)、[Schaefer500/1000+Tian S4](atlas_schaefer_multi_20260929.md)、[原生 aparc/a2009s+Tian S1](atlas_native_aparc_20260929.md)和[Glasser+Tian S1/S4](atlas_glasser_20260929.md)；七套原 UKB 图谱的皮层体积与原脚本逐体素一致。Glasser 有两个仅 1–2 个 T1 体素的节点在 DWI 网格消失。SynthMorph 与原 FNIRT 路线存在明确差异，给定同一 FNIRT coefficient 可使 Tian S1 逐体素一致 |
 | 配准影响 | [固定流线敏感性实验](registration_sensitivity_20260929.md)；只换 atlas 时 count 相关 0.9986、相对 L1 0.0157；各自重跑追踪会放大矩阵差异 |
 
 ## 当前整链和随机重复

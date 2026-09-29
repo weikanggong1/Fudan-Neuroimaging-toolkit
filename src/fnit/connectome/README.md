@@ -4,6 +4,8 @@
 
 `UKBConnectome` 从已校正 DWI、bval、eddy 旋转后的 bvec 和已完成的 `recon-all` subject 目录开始，自动读取 `brain.mgz`、`aparc+aseg.mgz`，构建 84 节点 `fs-aparc` atlas，并计算四张 region × region 矩阵。TOPUP/eddy 与官方 `recon-all` 由调用方提前完成；包内不运行它们。独立 iFOD2/ACT 追踪仍处于与 MRtrix 的分布对照阶段。
 
+`--atlas` 另支持原 UKB 七套皮层+Tian 组合。Glasser 的 32k fsLR→164k fsaverage 标签重采样使用主页 conda 环境中的 Connectome Workbench；后续原生表面与 T1 ribbon 投影由 PyTorch 完成。[真实 Glasser 逐体素比较、参数和脑图](../../../validation/connectome/ds004666/atlas_glasser_20260929.md)记录原版 360 节点皮层标签与 FNIT 完全一致，Tian 的 SynthMorph 路线则与原 UKB FNIRT 路线分别解释。
+
 ```python
 from fnit.connectome import UKBConnectome
 

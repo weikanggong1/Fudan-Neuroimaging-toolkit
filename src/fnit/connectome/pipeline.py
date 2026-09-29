@@ -16,7 +16,9 @@ import torch
 from .anatomy import freesurfer_five_tissue, gmwmi_from_five_tissue, resample_labels_nearest
 from .bet import bet_mask, mean_bzero, mrtrix_roundtrip_voxel_size
 from .assignment import build_connectomes
-from .atlas_builder import combine_cortical_tian, native_annotation_to_t1, schaefer_to_t1
+from .atlas_builder import (
+    combine_cortical_tian, glasser_to_t1, native_annotation_to_t1, schaefer_to_t1,
+)
 from .atlas_tian import fnirt_tian_to_t1, synthmorph_tian_to_t1
 from .freesurfer_subject import ConnectomeNode, FreeSurferSubject, fs_aparc_atlas
 from .fod import fit_mrtrix_msmt_csd
@@ -38,6 +40,10 @@ SCHAEFER_TIAN_ATLASES = {
 NATIVE_TIAN_ATLASES = {
     "aparc+tian-s1": "aparc",
     "aparc.a2009s+tian-s1": "aparc.a2009s",
+}
+GLASSER_TIAN_ATLASES = {
+    "glasser+tian-s1": 1,
+    "glasser+tian-s4": 4,
 }
 
 
@@ -211,7 +217,10 @@ class UKBConnectome:
         ``atlas_templates_dir``, maps Schaefer through ``fsaverage_dir``
         to the native ribbon, registers ``mni_template`` to T1 with FNIT
         SynthMorph joint using optional ``synthmorph_weights``, then builds
-        a contiguous DWI atlas. For a fixed original UKB atlas, supply
+        a contiguous DWI atlas. Glasser+Tian additionally reads the original
+        32k dlabel and sibling surface templates, uses Workbench for the
+        fsLR-to-fsaverage label resample, then maps to the native ribbon with
+        PyTorch; its labels follow right 1..180, left 181..360. For a fixed original UKB atlas, supply
         ``tian_fnirt_coeff`` instead of ``mni_template``; FNIT inverts the
         given FNIRT T1→MNI coefficient and samples Tian without calling FSL.
         Alternatively, ``t1_brain``,
@@ -247,14 +256,17 @@ class UKBConnectome:
         if freesurfer_subject_dir is not None:
             if any(value is not None for value in (t1_brain, t1_segmentation, atlas_dwi)):
                 raise ValueError("freesurfer_subject_dir cannot be combined with explicit T1/atlas inputs")
-            if atlas not in ("fs-aparc", *SCHAEFER_TIAN_ATLASES, *NATIVE_TIAN_ATLASES):
+            if atlas not in ("fs-aparc", *SCHAEFER_TIAN_ATLASES,
+                             *NATIVE_TIAN_ATLASES, *GLASSER_TIAN_ATLASES):
                 raise ValueError("unsupported atlas from a subject directory")
-            if atlas in (*SCHAEFER_TIAN_ATLASES, *NATIVE_TIAN_ATLASES) and (
+            if atlas in (*SCHAEFER_TIAN_ATLASES, *NATIVE_TIAN_ATLASES,
+                         *GLASSER_TIAN_ATLASES) and (
                 atlas_templates_dir is None or
-                (atlas in SCHAEFER_TIAN_ATLASES and fsaverage_dir is None) or
+                (atlas in (*SCHAEFER_TIAN_ATLASES, *GLASSER_TIAN_ATLASES)
+                 and fsaverage_dir is None) or
                 (mni_template is None) == (tian_fnirt_coeff is None)
             ):
-                raise ValueError("cortical+Tian atlas requires atlas_templates_dir, Schaefer fsaverage_dir and exactly one of mni_template or tian_fnirt_coeff")
+                raise ValueError("cortical+Tian atlas requires atlas_templates_dir, surface-atlas fsaverage_dir and exactly one of mni_template or tian_fnirt_coeff")
             if tian_fnirt_coeff is not None and synthmorph_weights is not None:
                 raise ValueError("synthmorph_weights cannot be used with tian_fnirt_coeff")
             subject = FreeSurferSubject(Path(freesurfer_subject_dir))
@@ -327,13 +339,21 @@ class UKBConnectome:
                         annotation=NATIVE_TIAN_ATLASES[atlas],
                         device=str(self.device),
                     )
-                else:
+                elif atlas in SCHAEFER_TIAN_ATLASES:
                     parcels, tian_scale = SCHAEFER_TIAN_ATLASES[atlas]
                     cortical, cortical_nodes = schaefer_to_t1(
                         subject_dir=subject.subject_dir,
                         fsaverage_dir=fsaverage_dir,
                         left_annot=templates / f"lh.Schaefer2018_{parcels}Parcels_7Networks_order.annot",
                         right_annot=templates / f"rh.Schaefer2018_{parcels}Parcels_7Networks_order.annot",
+                        device=str(self.device),
+                    )
+                else:
+                    tian_scale = GLASSER_TIAN_ATLASES[atlas]
+                    cortical, cortical_nodes = glasser_to_t1(
+                        subject_dir=subject.subject_dir,
+                        fsaverage_dir=fsaverage_dir,
+                        atlas_templates_dir=templates,
                         device=str(self.device),
                     )
                 tian_name = f"Tian_Subcortex_S{tian_scale}_3T"
