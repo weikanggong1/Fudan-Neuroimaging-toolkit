@@ -22,6 +22,7 @@ CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核。模型、影像张
 | sMRI、fMRI、dMRI | TorchApplyWarp | 应用 warp、premat 与 postmat 后的 reference-grid 图像 | [applywarp](docs/applywarp/README.md) |
 | sMRI、fMRI、dMRI | `fnit convertwarp` / TorchConvertWarp | 组合 FLIRT 矩阵与 FSL 非线性场；转换 MMORF warp | [convertwarp](docs/convertwarp/README.md) |
 | sMRI、fMRI、dMRI | `fnit invwarp` / TorchInvWarp | 在指定网格上求 FSL 位移场的反场 | [invwarp](docs/invwarp/README.md) |
+| sMRI、fMRI、dMRI | PyTorch fslmaths 常用运算 | 3D/4D NIfTI 算术、阈值、滤波、形态学与时间统计 | [fslmaths](docs/fslmaths/README.md) |
 | fMRI | BIDS→MNI152 2 mm 体积流程 | 单 run FEAT、FAST/BBR、PICA/AROMA、可选混杂回归与 MNI 影像 | [fMRI](docs/fmri/README.md) |
 | fMRI | 回归后个体 EPI→T1w 皮层、MNI 2 mm 皮层下→fsLR32k | 双侧 GIFTI 与 91k CIFTI 时间序列 | [fMRI 表面投影](docs/fmri/surface.md) |
 | dMRI | TorchTOPUP | Hz 场、校正图与 FSL 兼容输出 | [TOPUP](docs/topup/README.md) |

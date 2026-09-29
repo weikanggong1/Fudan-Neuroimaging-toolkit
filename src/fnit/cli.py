@@ -475,6 +475,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(prog='fnit')
     parser.add_argument('--version', action='version', version=f'Fudan Neuroimaging Toolkit (FNIT) {__version__}')
     commands = parser.add_subparsers(dest='command', required=True)
+    commands.add_parser('fslmaths', help='PyTorch implementation of common fslmaths operations')
     strip = commands.add_parser('synthstrip', help='brain extraction')
     strip.add_argument('-i', '--image', required=True)
     strip.add_argument('-o', '--out')
@@ -721,6 +722,10 @@ def main(argv=None):
     connectome.add_argument('--overwrite', action='store_true')
     # Standalone SynthSeg must not import unrelated pipelines or their dependencies.
     selected = sys.argv[1:] if argv is None else argv
+    if selected and selected[0] == 'fslmaths':
+        from .fslmaths.cli import main as fslmaths_main
+        fslmaths_main(selected[1:])
+        return
     if selected and selected[0] == "synthseg":
         _run_synthseg(parser.parse_args(selected))
         return

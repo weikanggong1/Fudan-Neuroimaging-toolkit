@@ -22,6 +22,7 @@
 | [TorchApplyWarp](../docs/applywarp/README.md) | [真实 FA 与 intent-2007 coefficient warp](applywarp/report.real.current.json) | shape、affine、dtype 一致；连续值误差按 union support 报告 | 报告含三次 FSL/FNIT 计时和峰值显存；功能页展示 FA 与差值 |
 | [TorchConvertWarp](../docs/convertwarp/README.md) | [真实 DWI 组合场](convertwarp/README.md)及[TBSS/MMORF pipeline 分支](probtrackx/README.md) | 默认 TBSS 系数场与 FSL 分量 MAE 1.98×10⁻⁶ mm；MMORF 转场后重采样 FA 与原 pipeline r≈1 | FSL TBSS 完整命令 49.73 s，FNIT Python 调用 10.02 s；MMORF FNIT 调用 7.27 s，计时边界不同 |
 | [TorchInvWarp](../docs/invwarp/README.md) | [真实 TBSS/MMORF 同输入 FSL 对照](invwarp/README.md) | 脑内反场向量均差 0.0058/0.0670 mm，MNI 掩膜 Dice 0.9917/0.9912；不是逐体素等价 | FSL 完整命令 110.82/137.49 s，FNIT Python 调用 0.79/0.81 s；功能页展示两条真实掩膜图 |
+| [PyTorch fslmaths 常用运算](../docs/fslmaths/README.md) | [真实 T1w、tensor 与 BOLD 配对对照](fslmaths/real_data_20260929.json) | 48 组裁剪块、5 组完整影像、2 组 BOLD 滤波和 3 组 3D/4D 混合运算逐体素比较 | 报告记录 FSL CPU、FNIT 拥挤 H100 的耗时，主要运算另记录 CUDA 峰值分配 |
 
 ## dMRI
 

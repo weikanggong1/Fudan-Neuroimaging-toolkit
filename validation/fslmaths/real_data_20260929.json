@@ -1,0 +1,1342 @@
+{
+  "description": "真实 T1 和 DTI tensor 上的 fslmaths 6.0.7.4 与 FNIT PyTorch 配对对照",
+  "date": "2026-09-29",
+  "reference": "FSL 6.0.7.4",
+  "torch": "2.5.1",
+  "nibabel": "5.4.2",
+  "reference_host": "headcw",
+  "gpu_host": "gpucw1",
+  "gpu_device": "H100 GPU 0",
+  "gpu_memory_fraction_limit": 0.2,
+  "gpu_before_full": [
+    "0, 56019 MiB, 81559 MiB, 98 %",
+    "1, 43812 MiB, 81559 MiB, 7 %"
+  ],
+  "gpu_after_full": [
+    "0, 56833 MiB, 81559 MiB, 99 %",
+    "1, 43812 MiB, 81559 MiB, 3 %"
+  ],
+  "gpu_before_sweep": [
+    "0, 56019 MiB, 81559 MiB, 84 %",
+    "1, 43812 MiB, 81559 MiB, 3 %"
+  ],
+  "gpu_after_sweep": [
+    "0, 56551 MiB, 81559 MiB, 100 %",
+    "1, 43812 MiB, 81559 MiB, 4 %"
+  ],
+  "source_images": {
+    "t1_brain": {
+      "shape": [
+        176,
+        256,
+        256
+      ],
+      "sha256": "cd3a39993a22f4de5465960655f37e614e43d0297867327ab9036f01c6e494c5",
+      "kind": "真实 MRI"
+    },
+    "dti_tensor": {
+      "shape": [
+        104,
+        104,
+        72,
+        6
+      ],
+      "sha256": "53f01a091bb625f1d42c99b02ffd09ffe34fbe7ea0e3421ab2a8288dd4c174ed",
+      "kind": "真实 MRI"
+    },
+    "t1_brain_crop": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "sha256": "3925ca6b73a23465b56a7acdb40dc41b9eb3602818ad3d7c8224d9a59cef71fc",
+      "kind": "从同一真实 MRI 中心截取的连续体素块"
+    },
+    "dti_tensor_crop": {
+      "shape": [
+        48,
+        48,
+        48,
+        6
+      ],
+      "sha256": "976ff89c899618b9340218767b4b6046a77e9341762c10e759b6177faf2103b7",
+      "kind": "从同一真实 MRI 中心截取的连续体素块"
+    },
+    "bold_crop": {
+      "shape": [
+        16,
+        16,
+        16,
+        490
+      ],
+      "sha256": "c03507083e09c23648fc706587e174a756a63ca7a8c335d0b97cade4964add6f",
+      "kind": "真实运动校正后 BOLD 的 16x16x16x490 连续空间块"
+    }
+  },
+  "full_images": {
+    "thr_bin": {
+      "shape": [
+        176,
+        256,
+        256
+      ],
+      "mae": 0.0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "exact_fraction": 1.0,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 3.7186302235350013,
+      "torch_gpu_seconds": 1.4500688659027219,
+      "gpu_peak_allocated_gib": 0.1835947036743164
+    },
+    "Tmean": {
+      "shape": [
+        104,
+        104,
+        72
+      ],
+      "mae": 6.935624548925442e-12,
+      "max_abs": 2.3283064365386963e-10,
+      "p99_abs": 1.1641532182693481e-10,
+      "exact_fraction": 0.8603059767422748,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.26720850821584463,
+      "torch_gpu_seconds": 0.23719562264159322,
+      "gpu_peak_allocated_gib": 0.02030801773071289
+    },
+    "s2": {
+      "shape": [
+        176,
+        256,
+        256
+      ],
+      "mae": 2.998198625279568e-05,
+      "max_abs": 0.0008425026474014885,
+      "p99_abs": 0.00040999596976121227,
+      "exact_fraction": 0.8009140708229758,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 5.919944901950657,
+      "torch_gpu_seconds": 6.7297500260174274,
+      "gpu_peak_allocated_gib": 0.4297609329223633
+    },
+    "box_mean": {
+      "shape": [
+        176,
+        256,
+        256
+      ],
+      "mae": 4.8544238676337025e-06,
+      "max_abs": 0.00029238948104648443,
+      "p99_abs": 9.331879800811294e-05,
+      "exact_fraction": 0.8711847825483843,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 3.332973406650126,
+      "torch_gpu_seconds": 1.5033823726698756,
+      "gpu_peak_allocated_gib": 0.4296884536743164
+    },
+    "bptf": {
+      "shape": [
+        104,
+        104,
+        72,
+        6
+      ],
+      "mae": 1.5193938806998922e-12,
+      "max_abs": 2.3283064365386963e-10,
+      "p99_abs": 5.820766091346741e-11,
+      "exact_fraction": 0.958997644093798,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.9839123291894794,
+      "torch_gpu_seconds": 0.7731730611994863,
+      "gpu_peak_allocated_gib": 0.08349323272705078
+    }
+  },
+  "cropped_images": {
+    "arithmetic": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 0.0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "exact_fraction": 1.0,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 4.235047752037644,
+      "torch_gpu_seconds": 0.1916066911071539,
+      "gpu_peak_allocated_gib": 0.0058612823486328125,
+      "operations": [
+        "-add",
+        "2.5",
+        "-sub",
+        "0.5",
+        "-mul",
+        "1.2",
+        "-div",
+        "2",
+        "-max",
+        "0",
+        "-min",
+        "1000"
+      ],
+      "input": "t1"
+    },
+    "image_add": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 0.0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "exact_fraction": 1.0,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.28879176918417215,
+      "torch_gpu_seconds": 0.06930844625458121,
+      "gpu_peak_allocated_gib": 0.005859851837158203,
+      "operations": [
+        "-add",
+        "t1_brain_crop.nii.gz"
+      ],
+      "input": "t1"
+    },
+    "image_mask": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 0.0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "exact_fraction": 1.0,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.1047107819467783,
+      "torch_gpu_seconds": 0.08672491321340203,
+      "gpu_peak_allocated_gib": 0.006103992462158203,
+      "operations": [
+        "-mas",
+        "t1_brain_crop.nii.gz"
+      ],
+      "input": "t1"
+    },
+    "threshold": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 0.0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "exact_fraction": 1.0,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.0790930725634098,
+      "torch_gpu_seconds": 0.05370483733713627,
+      "gpu_peak_allocated_gib": 0.004151344299316406,
+      "operations": [
+        "-thr",
+        "100",
+        "-uthr",
+        "1000"
+      ],
+      "input": "t1"
+    },
+    "abs_sqrt_sqr": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 0.0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "exact_fraction": 1.0,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.13020507153123617,
+      "torch_gpu_seconds": 0.1585716912522912,
+      "gpu_peak_allocated_gib": 0.005860328674316406,
+      "operations": [
+        "-sub",
+        "100",
+        "-abs",
+        "-sqrt",
+        "-sqr"
+      ],
+      "input": "t1"
+    },
+    "recip": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 0.0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "exact_fraction": 1.0,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.06558729521930218,
+      "torch_gpu_seconds": 0.07107227761298418,
+      "gpu_peak_allocated_gib": 0.006103992462158203,
+      "operations": [
+        "-recip"
+      ],
+      "input": "t1"
+    },
+    "exp_log": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 3.213166545849985e-18,
+      "max_abs": 2.220446049250313e-16,
+      "p99_abs": 2.220446049250313e-16,
+      "exact_fraction": 0.9826240539550781,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.1526926215738058,
+      "torch_gpu_seconds": 0.07788082817569375,
+      "gpu_peak_allocated_gib": 0.006104469299316406,
+      "operations": [
+        "-div",
+        "1000",
+        "-exp",
+        "-log"
+      ],
+      "input": "t1"
+    },
+    "bin_binv": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 0.0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "exact_fraction": 1.0,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.0465129604563117,
+      "torch_gpu_seconds": 0.05350867519155145,
+      "gpu_peak_allocated_gib": 0.004150867462158203,
+      "operations": [
+        "-bin",
+        "-binv"
+      ],
+      "input": "t1"
+    },
+    "pow": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 0.0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "exact_fraction": 1.0,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.11145435832440853,
+      "torch_gpu_seconds": 0.062230996787548065,
+      "gpu_peak_allocated_gib": 0.003906726837158203,
+      "operations": [
+        "-pow",
+        "0.5"
+      ],
+      "input": "t1"
+    },
+    "inm": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 0.0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "exact_fraction": 1.0,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.0731820585206151,
+      "torch_gpu_seconds": 0.1135094091296196,
+      "gpu_peak_allocated_gib": 0.00826263427734375,
+      "operations": [
+        "-inm",
+        "100"
+      ],
+      "input": "t1"
+    },
+    "ing": {
+      "shape": [
+        48,
+        48,
+        48,
+        6
+      ],
+      "mae": 1.9437240545105846e-06,
+      "max_abs": 3.0517578125e-05,
+      "p99_abs": 3.0517578125e-05,
+      "exact_fraction": 0.6921552493248457,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.14407471846789122,
+      "torch_gpu_seconds": 0.1920595928095281,
+      "gpu_peak_allocated_gib": 0.017528057098388672,
+      "operations": [
+        "-ing",
+        "100"
+      ],
+      "input": "tensor"
+    },
+    "roi": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 0.0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "exact_fraction": 1.0,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.05931843165308237,
+      "torch_gpu_seconds": 0.049482632894068956,
+      "gpu_peak_allocated_gib": 0.003906726837158203,
+      "operations": [
+        "-roi",
+        "4",
+        "32",
+        "3",
+        "40",
+        "2",
+        "48",
+        "0",
+        "-1"
+      ],
+      "input": "t1"
+    },
+    "Tstd": {
+      "shape": [
+        48,
+        48,
+        48
+      ],
+      "mae": 1.5423284049086726e-11,
+      "max_abs": 2.3283064365386963e-10,
+      "p99_abs": 1.1641532182693481e-10,
+      "exact_fraction": 0.7273763020833334,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.12237534858286381,
+      "torch_gpu_seconds": 0.0683563482016325,
+      "gpu_peak_allocated_gib": 0.002884387969970703,
+      "operations": [
+        "-Tstd"
+      ],
+      "input": "tensor"
+    },
+    "Tmedian": {
+      "shape": [
+        48,
+        48,
+        48
+      ],
+      "mae": 0.0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "exact_fraction": 1.0,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.11200248170644045,
+      "torch_gpu_seconds": 0.11273657530546188,
+      "gpu_peak_allocated_gib": 0.009888648986816406,
+      "operations": [
+        "-Tmedian"
+      ],
+      "input": "tensor"
+    },
+    "Tperc": {
+      "shape": [
+        48,
+        48,
+        48
+      ],
+      "mae": 0.0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "exact_fraction": 1.0,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.1339828623458743,
+      "torch_gpu_seconds": 0.05645590694621205,
+      "gpu_peak_allocated_gib": 0.009888648986816406,
+      "operations": [
+        "-Tperc",
+        "75"
+      ],
+      "input": "tensor"
+    },
+    "Tar1": {
+      "shape": [
+        48,
+        48,
+        48
+      ],
+      "mae": 2.615796854019034e-08,
+      "max_abs": 1.7881393432617188e-07,
+      "p99_abs": 1.1920928955078125e-07,
+      "exact_fraction": 0.4751790364583333,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.11736094951629639,
+      "torch_gpu_seconds": 0.06282933009788394,
+      "gpu_peak_allocated_gib": 0.008240222930908203,
+      "operations": [
+        "-Tar1"
+      ],
+      "input": "tensor"
+    },
+    "Tmaxn": {
+      "shape": [
+        48,
+        48,
+        48
+      ],
+      "mae": 0.0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "exact_fraction": 1.0,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.09277912974357605,
+      "torch_gpu_seconds": 0.0792768420651555,
+      "gpu_peak_allocated_gib": 0.003708362579345703,
+      "operations": [
+        "-Tmaxn"
+      ],
+      "input": "tensor"
+    },
+    "Xmean": {
+      "shape": [
+        1,
+        48,
+        48,
+        6
+      ],
+      "mae": 2.3378144600867114e-11,
+      "max_abs": 3.4924596548080444e-10,
+      "p99_abs": 1.1641532182693481e-10,
+      "exact_fraction": 0.4568142361111111,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.053520048037171364,
+      "torch_gpu_seconds": 0.04049996519461274,
+      "gpu_peak_allocated_gib": 0.0025238990783691406,
+      "operations": [
+        "-Xmean"
+      ],
+      "input": "tensor"
+    },
+    "s2": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 0.00019457714773169374,
+      "max_abs": 0.000769916037143048,
+      "p99_abs": 0.000535888230233468,
+      "exact_fraction": 0.06119537353515625,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.24549767188727856,
+      "torch_gpu_seconds": 0.28608310502022505,
+      "gpu_peak_allocated_gib": 0.009839057922363281,
+      "operations": [
+        "-s",
+        "2"
+      ],
+      "input": "t1"
+    },
+    "box_mean": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 3.70946122993122e-05,
+      "max_abs": 0.0002667815597305889,
+      "p99_abs": 0.00016389069742217544,
+      "exact_fraction": 0.1911163330078125,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.19927348289638758,
+      "torch_gpu_seconds": 0.12380865775048733,
+      "gpu_peak_allocated_gib": 0.009766578674316406,
+      "operations": [
+        "-kernel",
+        "boxv",
+        "3",
+        "-fmean"
+      ],
+      "input": "t1"
+    },
+    "box_unnormalized": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 5.269408451351075e-05,
+      "max_abs": 0.0005085909813260514,
+      "p99_abs": 0.0002494084391378242,
+      "exact_fraction": 0.19095230102539062,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.18029215186834335,
+      "torch_gpu_seconds": 0.09863789938390255,
+      "gpu_peak_allocated_gib": 0.005860805511474609,
+      "operations": [
+        "-kernel",
+        "boxv",
+        "3",
+        "-fmeanu"
+      ],
+      "input": "t1"
+    },
+    "dilate_max": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 0.0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "exact_fraction": 1.0,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.1459156172350049,
+      "torch_gpu_seconds": 0.07296044565737247,
+      "gpu_peak_allocated_gib": 0.008002281188964844,
+      "operations": [
+        "-dilF"
+      ],
+      "input": "t1"
+    },
+    "dilate_mean": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 0.0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "exact_fraction": 1.0,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.14228521194308996,
+      "torch_gpu_seconds": 0.06516210595145822,
+      "gpu_peak_allocated_gib": 0.011963367462158203,
+      "operations": [
+        "-dilM"
+      ],
+      "input": "t1"
+    },
+    "erode_min": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 0.0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "exact_fraction": 1.0,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.18198355566710234,
+      "torch_gpu_seconds": 0.059032564982771873,
+      "gpu_peak_allocated_gib": 0.010144710540771484,
+      "operations": [
+        "-eroF"
+      ],
+      "input": "t1"
+    },
+    "erode_sparse": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 0.0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "exact_fraction": 1.0,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.30106999911367893,
+      "torch_gpu_seconds": 0.057635764591395855,
+      "gpu_peak_allocated_gib": 0.007813453674316406,
+      "operations": [
+        "-ero"
+      ],
+      "input": "t1"
+    },
+    "median_filter": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 0.0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "exact_fraction": 1.0,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.3261752650141716,
+      "torch_gpu_seconds": 0.08269102592021227,
+      "gpu_peak_allocated_gib": 0.16229963302612305,
+      "operations": [
+        "-fmedian"
+      ],
+      "input": "t1"
+    },
+    "bptf_hp": {
+      "shape": [
+        48,
+        48,
+        48,
+        6
+      ],
+      "mae": 4.475698998446928e-12,
+      "max_abs": 2.3283064365386963e-10,
+      "p99_abs": 5.820766091346741e-11,
+      "exact_fraction": 0.8774911385995371,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.506649942137301,
+      "torch_gpu_seconds": 0.345361374784261,
+      "gpu_peak_allocated_gib": 0.038849830627441406,
+      "operations": [
+        "-bptf",
+        "2",
+        "-1"
+      ],
+      "input": "tensor"
+    },
+    "bptf_lp": {
+      "shape": [
+        48,
+        48,
+        48,
+        6
+      ],
+      "mae": 0.0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "exact_fraction": 1.0,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.22542541939765215,
+      "torch_gpu_seconds": 0.1887359581887722,
+      "gpu_peak_allocated_gib": 0.03866767883300781,
+      "operations": [
+        "-bptf",
+        "-1",
+        "1"
+      ],
+      "input": "tensor"
+    },
+    "bptf_both": {
+      "shape": [
+        48,
+        48,
+        48,
+        6
+      ],
+      "mae": 6.0905787741024636e-12,
+      "max_abs": 8.731149137020111e-11,
+      "p99_abs": 2.9103830456733704e-11,
+      "exact_fraction": 0.37027391975308643,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.15184506308287382,
+      "torch_gpu_seconds": 0.1906716632656753,
+      "gpu_peak_allocated_gib": 0.041780948638916016,
+      "operations": [
+        "-bptf",
+        "2",
+        "1"
+      ],
+      "input": "tensor"
+    },
+    "sin": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 3.79259002133113e-19,
+      "max_abs": 5.551115123125783e-17,
+      "p99_abs": 2.7755575615628914e-17,
+      "exact_fraction": 0.9890785217285156,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.063800192438066,
+      "torch_gpu_seconds": 0.06268253922462463,
+      "gpu_peak_allocated_gib": 0.03711128234863281,
+      "operations": [
+        "-div",
+        "5000",
+        "-sin"
+      ],
+      "input": "t1"
+    },
+    "cos": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 1.2434443665693129e-18,
+      "max_abs": 1.1102230246251565e-16,
+      "p99_abs": 1.1102230246251565e-16,
+      "exact_fraction": 0.988800048828125,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.08171745017170906,
+      "torch_gpu_seconds": 0.06515310984104872,
+      "gpu_peak_allocated_gib": 0.03711128234863281,
+      "operations": [
+        "-div",
+        "5000",
+        "-cos"
+      ],
+      "input": "t1"
+    },
+    "tan": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 2.1429933565533799e-19,
+      "max_abs": 5.551115123125783e-17,
+      "p99_abs": 0.0,
+      "exact_fraction": 0.9949569702148438,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.06447102408856153,
+      "torch_gpu_seconds": 0.06618180684745312,
+      "gpu_peak_allocated_gib": 0.03711128234863281,
+      "operations": [
+        "-div",
+        "5000",
+        "-tan"
+      ],
+      "input": "t1"
+    },
+    "asin": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 1.0484706170011738e-17,
+      "max_abs": 5.551115123125783e-17,
+      "p99_abs": 5.551115123125783e-17,
+      "exact_fraction": 0.7020645141601562,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.09563310630619526,
+      "torch_gpu_seconds": 0.06492264429107308,
+      "gpu_peak_allocated_gib": 0.03711128234863281,
+      "operations": [
+        "-div",
+        "5000",
+        "-asin"
+      ],
+      "input": "t1"
+    },
+    "acos": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 1.5493079638228408e-17,
+      "max_abs": 2.220446049250313e-16,
+      "p99_abs": 2.220446049250313e-16,
+      "exact_fraction": 0.9302253723144531,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.06998619344085455,
+      "torch_gpu_seconds": 0.06534799467772245,
+      "gpu_peak_allocated_gib": 0.03711128234863281,
+      "operations": [
+        "-div",
+        "5000",
+        "-acos"
+      ],
+      "input": "t1"
+    },
+    "atan": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 2.9893777942074386e-18,
+      "max_abs": 5.551115123125783e-17,
+      "p99_abs": 5.551115123125783e-17,
+      "exact_fraction": 0.9124031066894531,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.08466076850891113,
+      "torch_gpu_seconds": 0.0641054050065577,
+      "gpu_peak_allocated_gib": 0.03711128234863281,
+      "operations": [
+        "-div",
+        "5000",
+        "-atan"
+      ],
+      "input": "t1"
+    },
+    "nan": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 0.0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "exact_fraction": 1.0,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.09482544660568237,
+      "torch_gpu_seconds": 0.050282424315810204,
+      "gpu_peak_allocated_gib": 0.0358891487121582,
+      "operations": [
+        "-pow",
+        "-1",
+        "-nan"
+      ],
+      "input": "t1"
+    },
+    "nanm": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 0.0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "exact_fraction": 1.0,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.05722591746598482,
+      "torch_gpu_seconds": 0.031758158933371305,
+      "gpu_peak_allocated_gib": 0.0358891487121582,
+      "operations": [
+        "-pow",
+        "-1",
+        "-nanm"
+      ],
+      "input": "t1"
+    },
+    "kernel_2D": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 3.3775956603219246e-05,
+      "max_abs": 0.00029606289331240987,
+      "p99_abs": 0.00015046861426526448,
+      "exact_fraction": 0.20370864868164062,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.16790902242064476,
+      "torch_gpu_seconds": 0.08005802892148495,
+      "gpu_peak_allocated_gib": 0.041016578674316406,
+      "operations": [
+        "-kernel",
+        "2D",
+        "-fmean"
+      ],
+      "input": "t1"
+    },
+    "kernel_3D": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 0.00020078397912114268,
+      "max_abs": 0.0009030841836192849,
+      "p99_abs": 0.0005699355600745552,
+      "exact_fraction": 0.1905975341796875,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.1959027424454689,
+      "torch_gpu_seconds": 0.08449144568294287,
+      "gpu_peak_allocated_gib": 0.041016578674316406,
+      "operations": [
+        "-kernel",
+        "3D",
+        "-fmean"
+      ],
+      "input": "t1"
+    },
+    "kernel_box": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 3.70946122993122e-05,
+      "max_abs": 0.0002667815597305889,
+      "p99_abs": 0.00016389069742217544,
+      "exact_fraction": 0.1911163330078125,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.15037606935948133,
+      "torch_gpu_seconds": 0.07784797810018063,
+      "gpu_peak_allocated_gib": 0.041016578674316406,
+      "operations": [
+        "-kernel",
+        "box",
+        "3",
+        "-fmean"
+      ],
+      "input": "t1"
+    },
+    "kernel_boxv3": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 3.437547492370149e-05,
+      "max_abs": 0.00025215148934876197,
+      "p99_abs": 0.00014724731454407447,
+      "exact_fraction": 0.19271469116210938,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.2105694366618991,
+      "torch_gpu_seconds": 0.07366198487579823,
+      "gpu_peak_allocated_gib": 0.041016578674316406,
+      "operations": [
+        "-kernel",
+        "boxv3",
+        "3",
+        "5",
+        "1",
+        "-fmean"
+      ],
+      "input": "t1"
+    },
+    "kernel_gauss": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 0.00019457714773169374,
+      "max_abs": 0.000769916037143048,
+      "p99_abs": 0.000535888230233468,
+      "exact_fraction": 0.06119537353515625,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.24031091295182705,
+      "torch_gpu_seconds": 0.27029899694025517,
+      "gpu_peak_allocated_gib": 0.04108905792236328,
+      "operations": [
+        "-kernel",
+        "gauss",
+        "2",
+        "-fmean"
+      ],
+      "input": "t1"
+    },
+    "kernel_sphere": {
+      "shape": [
+        64,
+        64,
+        64
+      ],
+      "mae": 0.00042258228336131246,
+      "max_abs": 0.0013612533755349432,
+      "p99_abs": 0.000977904710121038,
+      "exact_fraction": 0.18672561645507812,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.393214994110167,
+      "torch_gpu_seconds": 0.07880692090839148,
+      "gpu_peak_allocated_gib": 0.04101753234863281,
+      "operations": [
+        "-kernel",
+        "sphere",
+        "2",
+        "-fmean"
+      ],
+      "input": "t1"
+    },
+    "Tmin": {
+      "shape": [
+        48,
+        48,
+        48
+      ],
+      "mae": 0.0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "exact_fraction": 1.0,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.08762318082153797,
+      "torch_gpu_seconds": 0.1099177235737443,
+      "gpu_peak_allocated_gib": 0.0341343879699707,
+      "operations": [
+        "-Tmin"
+      ],
+      "input": "tensor"
+    },
+    "Tmax": {
+      "shape": [
+        48,
+        48,
+        48
+      ],
+      "mae": 0.0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "exact_fraction": 1.0,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.07849347777664661,
+      "torch_gpu_seconds": 0.08254211116582155,
+      "gpu_peak_allocated_gib": 0.0341343879699707,
+      "operations": [
+        "-Tmax"
+      ],
+      "input": "tensor"
+    },
+    "Ystd": {
+      "shape": [
+        48,
+        1,
+        48,
+        6
+      ],
+      "mae": 1.192573611879871e-11,
+      "max_abs": 2.3283064365386963e-10,
+      "p99_abs": 1.1641532182693481e-10,
+      "exact_fraction": 0.6150173611111112,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.05244673974812031,
+      "torch_gpu_seconds": 0.09333139378577471,
+      "gpu_peak_allocated_gib": 0.03377389907836914,
+      "operations": [
+        "-Ystd"
+      ],
+      "input": "tensor"
+    },
+    "Zmax": {
+      "shape": [
+        48,
+        48,
+        1,
+        6
+      ],
+      "mae": 0.0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "exact_fraction": 1.0,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.049618867225944996,
+      "torch_gpu_seconds": 0.045291158836334944,
+      "gpu_peak_allocated_gib": 0.03377389907836914,
+      "operations": [
+        "-Zmax"
+      ],
+      "input": "tensor"
+    },
+    "inm4d": {
+      "shape": [
+        48,
+        48,
+        48,
+        6
+      ],
+      "mae": 4.324602987156085e-06,
+      "max_abs": 0.0001220703125,
+      "p99_abs": 3.0517578125e-05,
+      "exact_fraction": 0.5039032359182098,
+      "finite_fraction": 1.0,
+      "affine_max_abs_mm": 0.0,
+      "fsl_seconds": 0.1347209122031927,
+      "torch_gpu_seconds": 0.18081040307879448,
+      "gpu_peak_allocated_gib": 0.0365595817565918,
+      "operations": [
+        "-inm",
+        "100"
+      ],
+      "input": "tensor"
+    }
+  },
+  "integer_output_and_range": {
+    "shape": [
+      64,
+      64,
+      64
+    ],
+    "mae": 0.0,
+    "max_abs": 0.0,
+    "p99_abs": 0.0,
+    "exact_fraction": 1.0,
+    "finite_fraction": 1.0,
+    "affine_max_abs_mm": 0.0,
+    "operations": [
+      "-mul",
+      "0.5",
+      "-range"
+    ],
+    "output_dtype": "short",
+    "fsl_cal_min_max": [
+      0.0,
+      1088.0
+    ],
+    "torch_cal_min_max": [
+      0.0,
+      1088.0
+    ]
+  },
+  "source_sha256": {
+    "src/fnit/fslmaths/core.py": "8fea8d3fe7d6cd0385b3678f927aaef6704781f5bedb6564418e4b638a601472",
+    "src/fnit/fslmaths/cli.py": "3987df199e2530ab3df02353282bdee157fc3cff32694a039251d86a674bf5b0",
+    "src/fnit/feat/temporal.py": "b0a3fc14751a6a7cd9ce7c66ac8fe7b3fc4bea43f4039ef5b03d5af47e3d7b08"
+  },
+  "bold_time_series": {
+    "bptf_bold_hp": {
+      "operations": [
+        "-bptf",
+        "20",
+        "-1"
+      ],
+      "shape": [
+        16,
+        16,
+        16,
+        490
+      ],
+      "fsl_seconds": 1.6800887193530798,
+      "torch_gpu_seconds": 0.9174283239990473,
+      "gpu_peak_allocated_gib": 0.07924318313598633,
+      "mae": 2.7941344441366167e-06,
+      "rmse": 7.562541996520338e-06,
+      "max_abs": 0.000244140625,
+      "p99_abs": 3.0517578125e-05,
+      "affine_max_abs_mm": 0.0
+    },
+    "bptf_bold_band": {
+      "operations": [
+        "-bptf",
+        "20",
+        "2"
+      ],
+      "shape": [
+        16,
+        16,
+        16,
+        490
+      ],
+      "fsl_seconds": 0.7536730812862515,
+      "torch_gpu_seconds": 0.7363369599916041,
+      "gpu_peak_allocated_gib": 0.1052556037902832,
+      "mae": 1.90615682189633e-06,
+      "rmse": 4.464295891252247e-06,
+      "max_abs": 0.0001220703125,
+      "p99_abs": 1.52587890625e-05,
+      "affine_max_abs_mm": 0.0
+    }
+  },
+  "gpu_before_bold": [
+    "0, 58793 MiB, 81559 MiB, 100 %",
+    "1, 8292 MiB, 81559 MiB, 3 %"
+  ],
+  "gpu_after_bold": [
+    "0, 59249 MiB, 81559 MiB, 99 %",
+    "1, 10698 MiB, 81559 MiB, 4 %"
+  ],
+  "mixed_dimensions": {
+    "mixed_4d_plus_3d": {
+      "shape": [
+        48,
+        48,
+        48,
+        6
+      ],
+      "fsl_seconds": 1.537144680507481,
+      "torch_gpu_seconds": 0.21280035888776183,
+      "mae": 0.0,
+      "max_abs": 0.0,
+      "affine_max_abs_mm": 0.0,
+      "operand": "actual tensor crop and its 3D temporal median"
+    },
+    "mixed_3d_plus_4d": {
+      "shape": [
+        48,
+        48,
+        48,
+        6
+      ],
+      "fsl_seconds": 0.16658727638423443,
+      "torch_gpu_seconds": 0.16431400692090392,
+      "mae": 0.0,
+      "max_abs": 0.0,
+      "affine_max_abs_mm": 0.0,
+      "operand": "actual tensor crop and its 3D temporal median"
+    },
+    "mixed_4d_mask_3d": {
+      "shape": [
+        48,
+        48,
+        48,
+        6
+      ],
+      "fsl_seconds": 0.3501473441720009,
+      "torch_gpu_seconds": 0.31928489403799176,
+      "mae": 0.0,
+      "max_abs": 0.0,
+      "affine_max_abs_mm": 0.0,
+      "operand": "actual tensor crop and its 3D temporal median"
+    }
+  }
+}

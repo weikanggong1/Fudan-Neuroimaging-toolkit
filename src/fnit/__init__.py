@@ -84,6 +84,9 @@ def __getattr__(name):
         from importlib import import_module
         module = import_module('.probtrackx', __name__)
         return getattr(module, name)
+    if name == 'run_fslmaths':
+        from .fslmaths import run_fslmaths
+        return run_fslmaths
     if name in ('FastVBM', 'FastVBMResult',
                 'VBMRegistrationResult'):
         from . import fast_vbm
