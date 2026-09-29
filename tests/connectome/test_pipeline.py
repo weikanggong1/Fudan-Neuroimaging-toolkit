@@ -41,3 +41,21 @@ def test_scalar_mask_accepts_axis_flip_and_rejects_shift(tmp_path):
     nib.save(nib.Nifti1Image(mask[::-1], shifted), path)
     with pytest.raises(ValueError, match="does not share DWI voxel centers"):
         _scalar_on_grid(path, reference, torch.device("cpu"), binary=True)
+
+
+def test_automatic_bet_maps_ras_bids_mask_back_to_original_grid(monkeypatch):
+    import fnit.connectome.pipeline as module
+
+    mean_b0 = torch.zeros((3, 4, 2), dtype=torch.float32)
+    mean_b0[0, 2, 1] = 1
+    reference = nib.Nifti1Image(np.zeros(mean_b0.shape, np.float32), np.eye(4))
+    observed = []
+
+    def fake_bet(*, mean_b0, **kwargs):
+        observed.append(torch.nonzero(mean_b0).tolist())
+        return mean_b0 > 0
+
+    monkeypatch.setattr(module, "bet_mask", fake_bet)
+    mask = module._bet_on_dwi_grid(mean_b0, reference, torch.device("cpu"))
+    assert observed == [[[2, 2, 1]]]
+    assert torch.equal(mask, mean_b0 > 0)

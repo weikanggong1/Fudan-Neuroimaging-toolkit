@@ -292,6 +292,40 @@ def _run_connectome(args):
 
     if args.n_seeds < 1:
         raise ValueError("--n-seeds must be positive")
+    atlas_names = tuple(args.atlas)
+    if len(set(atlas_names)) != len(atlas_names):
+        raise ValueError("--atlas names must be distinct")
+    if args.download_atlases:
+        from .connectome.assets import install_connectome_atlases
+        directory = (args.atlas_templates_dir or
+                     Path(args.output_dir) / "atlas_templates")
+        args.atlas_templates_dir = install_connectome_atlases(
+            atlas_names, directory)
+    if args.bids_root:
+        if not args.subject:
+            raise ValueError("--subject is required with --bids-root")
+        if any(value is not None for value in
+               (args.dwi, args.bvals, args.bvecs, args.t1_segmentation, args.atlas_dwi)):
+            raise ValueError("--bids-root cannot be mixed with explicit DWI/T1 segmentation inputs")
+        from .connectome.bids import prepare_bids_connectome
+        selected = prepare_bids_connectome(
+            args.bids_root, args.output_dir, subject=args.subject,
+            session=args.session, run=args.run, acquisition=args.acquisition,
+            direction=args.direction, t1=args.t1,
+            freesurfer_subject_dir=args.freesurfer_subject_dir,
+            corrected_dwi=args.corrected_dwi,
+            rotated_bvecs=args.rotated_bvecs,
+            device=args.device, overwrite=args.overwrite,
+        )
+        args.dwi, args.bvals, args.bvecs = selected.dwi, selected.bvals, selected.bvecs
+        args.t1 = None
+        args.freesurfer_subject_dir = selected.freesurfer_subject_dir
+        print("preprocessing=" + ",".join(f"{name}:{status}" for name, status in selected.stages.items()))
+    else:
+        if args.corrected_dwi or args.rotated_bvecs or args.subject:
+            raise ValueError("BIDS selection and external correction options require --bids-root")
+        if any(value is None for value in (args.dwi, args.bvals, args.bvecs)):
+            raise ValueError("provide --bids-root/--subject or corrected --dwi/--bvals/--bvecs")
     if args.freesurfer_subject_dir is not None:
         if any(value is not None for value in (args.t1, args.t1_segmentation, args.atlas_dwi)):
             raise ValueError("--freesurfer-subject-dir cannot be combined with --t1/--t1-segmentation/--atlas-dwi")
@@ -313,51 +347,53 @@ def _run_connectome(args):
         "aparc.a2009s+tian-s1": "aparc.a2009s",
     }
     glasser_tian = {"glasser+tian-s1": 1, "glasser+tian-s4": 4}
-    if args.atlas not in (*schaefer_tian, *native_tian, *glasser_tian) and args.tian_fnirt_coeff:
+    if not any(name in (*schaefer_tian, *native_tian, *glasser_tian)
+               for name in atlas_names) and args.tian_fnirt_coeff:
         raise ValueError("--tian-fnirt-coeff requires a cortical+Tian atlas")
-    if args.atlas in (*schaefer_tian, *native_tian, *glasser_tian):
-        tian_scale = (schaefer_tian[args.atlas][1] if args.atlas in schaefer_tian
-                      else glasser_tian.get(args.atlas, 1))
-        if (args.freesurfer_subject_dir is None or args.atlas_templates_dir is None or
-                (args.atlas in (*schaefer_tian, *glasser_tian) and args.fsaverage_dir is None) or
-                (args.mni_template is None) == (args.tian_fnirt_coeff is None)):
-            raise ValueError("cortical+Tian needs --freesurfer-subject-dir, --atlas-templates-dir, surface-atlas --fsaverage-dir and exactly one of --mni-template or --tian-fnirt-coeff")
-        if args.tian_fnirt_coeff and args.synthmorph_weights:
-            raise ValueError("--synthmorph-weights cannot be used with --tian-fnirt-coeff")
-        templates = Path(args.atlas_templates_dir)
-        atlas_inputs = [
-            Path(args.mni_template or args.tian_fnirt_coeff),
-            templates / f"Tian_Subcortex_S{tian_scale}_3T.nii.gz",
-            templates / f"Tian_Subcortex_S{tian_scale}_3T_label.txt",
-            *(subject.subject_dir / "surf" / f"{hemi}.{kind}"
-              for hemi in ("lh", "rh") for kind in ("pial", "white")),
-            subject.subject_dir / "mri/ribbon.mgz",
-        ]
-        if args.atlas in schaefer_tian:
-            parcels, _ = schaefer_tian[args.atlas]
-            atlas_inputs.extend(templates / f"{hemi}.Schaefer2018_{parcels}Parcels_7Networks_order.annot"
-                                for hemi in ("lh", "rh"))
-            atlas_inputs.extend(Path(args.fsaverage_dir) / "surf" / f"{hemi}.sphere.reg"
-                                for hemi in ("lh", "rh"))
-            atlas_inputs.extend(subject.subject_dir / "surf" / f"{hemi}.sphere.reg"
-                                for hemi in ("lh", "rh"))
-        elif args.atlas in glasser_tian:
-            atlas_inputs.append(templates / "Q1-Q6_RelatedParcellation210.CorticalAreas_dil_Final_Final_Areas_Group_Colors.32k_fs_LR.dlabel.nii")
-            surfaces = templates.parent / "surfaces"
-            atlas_inputs.extend(surfaces / f"{side}.sphere.32k_fs_LR.surf.gii"
-                                for side in ("L", "R"))
-            atlas_inputs.extend(surfaces / f"fs_{side}-to-fs_LR_fsaverage.{side}_LR.spherical_std.164k_fs_{side}.surf.gii"
-                                for side in ("L", "R"))
-            atlas_inputs.extend(Path(args.fsaverage_dir) / "surf" / f"{hemi}.sphere.reg"
-                                for hemi in ("lh", "rh"))
-            atlas_inputs.extend(subject.subject_dir / "surf" / f"{hemi}.sphere.reg"
-                                for hemi in ("lh", "rh"))
-        else:
-            atlas_inputs.extend(subject.subject_dir / "label" / f"{hemi}.{native_tian[args.atlas]}.annot"
-                                for hemi in ("lh", "rh"))
-        if args.synthmorph_weights:
-            atlas_inputs.extend(Path(args.synthmorph_weights) / name for name in (
-                "synthmorph.affine.2.h5", "synthmorph.deform.3.h5"))
+    for atlas_name in atlas_names:
+        if atlas_name in (*schaefer_tian, *native_tian, *glasser_tian):
+            tian_scale = (schaefer_tian[atlas_name][1] if atlas_name in schaefer_tian
+                          else glasser_tian.get(atlas_name, 1))
+            if (args.freesurfer_subject_dir is None or args.atlas_templates_dir is None or
+                    (atlas_name in (*schaefer_tian, *glasser_tian) and args.fsaverage_dir is None) or
+                    (args.mni_template is None) == (args.tian_fnirt_coeff is None)):
+                raise ValueError("cortical+Tian needs --freesurfer-subject-dir, --atlas-templates-dir, surface-atlas --fsaverage-dir and exactly one of --mni-template or --tian-fnirt-coeff")
+            if args.tian_fnirt_coeff and args.synthmorph_weights:
+                raise ValueError("--synthmorph-weights cannot be used with --tian-fnirt-coeff")
+            templates = Path(args.atlas_templates_dir)
+            atlas_inputs.extend([
+                Path(args.mni_template or args.tian_fnirt_coeff),
+                templates / f"Tian_Subcortex_S{tian_scale}_3T.nii.gz",
+                templates / f"Tian_Subcortex_S{tian_scale}_3T_label.txt",
+                *(subject.subject_dir / "surf" / f"{hemi}.{kind}"
+                  for hemi in ("lh", "rh") for kind in ("pial", "white")),
+                subject.subject_dir / "mri/ribbon.mgz",
+            ])
+            if atlas_name in schaefer_tian:
+                parcels, _ = schaefer_tian[atlas_name]
+                atlas_inputs.extend(templates / f"{hemi}.Schaefer2018_{parcels}Parcels_7Networks_order.annot"
+                                    for hemi in ("lh", "rh"))
+                atlas_inputs.extend(Path(args.fsaverage_dir) / "surf" / f"{hemi}.sphere.reg"
+                                    for hemi in ("lh", "rh"))
+                atlas_inputs.extend(subject.subject_dir / "surf" / f"{hemi}.sphere.reg"
+                                    for hemi in ("lh", "rh"))
+            elif atlas_name in glasser_tian:
+                atlas_inputs.append(templates / "Q1-Q6_RelatedParcellation210.CorticalAreas_dil_Final_Final_Areas_Group_Colors.32k_fs_LR.dlabel.nii")
+                surfaces = templates.parent / "surfaces"
+                atlas_inputs.extend(surfaces / f"{side}.sphere.32k_fs_LR.surf.gii"
+                                    for side in ("L", "R"))
+                atlas_inputs.extend(surfaces / f"fs_{side}-to-fs_LR_fsaverage.{side}_LR.spherical_std.164k_fs_{side}.surf.gii"
+                                    for side in ("L", "R"))
+                atlas_inputs.extend(Path(args.fsaverage_dir) / "surf" / f"{hemi}.sphere.reg"
+                                    for hemi in ("lh", "rh"))
+                atlas_inputs.extend(subject.subject_dir / "surf" / f"{hemi}.sphere.reg"
+                                    for hemi in ("lh", "rh"))
+            else:
+                atlas_inputs.extend(subject.subject_dir / "label" / f"{hemi}.{native_tian[atlas_name]}.annot"
+                                    for hemi in ("lh", "rh"))
+            if args.synthmorph_weights:
+                atlas_inputs.extend(Path(args.synthmorph_weights) / name for name in (
+                    "synthmorph.affine.2.h5", "synthmorph.deform.3.h5"))
     inputs = [args.dwi, args.bvals, args.bvecs, *anatomy_inputs,
               args.atlas_dwi, args.t1_segmentation, args.brain_mask,
               args.response_mask, args.fod_mask, args.normalise_mask,
@@ -368,20 +404,40 @@ def _run_connectome(args):
             raise FileNotFoundError(path)
 
     output_dir = Path(args.output_dir)
+    multi_output = bool(args.bids_root) or len(atlas_names) > 1
+
+    def atlas_files(name):
+        directory = output_dir / "atlases" / name if multi_output else output_dir
+        return {
+            **{key: directory / f"connectome_{key}.csv" for key in
+               ("count", "sift2_fbc", "mean_length", "mean_fa")},
+            "atlas": directory / "atlas_dwi.nii.gz",
+            "region_labels": directory / "region_labels.csv",
+            **({"nodes": directory / "nodes.tsv"} if args.freesurfer_subject_dir else {}),
+        }
+
     files = {
-        **{name: output_dir / f"connectome_{name}.csv" for name in
-           ("count", "sift2_fbc", "mean_length", "mean_fa")},
-        "atlas": output_dir / "atlas_dwi.nii.gz",
         "five_tissue": output_dir / "five_tissue_dwi_world.nii.gz",
         "gmwmi": output_dir / "gmwmi_dwi_world.nii.gz",
         "fa": output_dir / "fa_dwi.nii.gz",
         "brain_mask": output_dir / "brain_mask_dwi.nii.gz",
-        "region_labels": output_dir / "region_labels.csv",
-        **({"nodes": output_dir / "nodes.tsv"} if args.freesurfer_subject_dir else {}),
         "transform": output_dir / "dwi_to_t1_world.csv",
     }
+    output_paths = (*files.values(), *(path for name in atlas_names
+                                        for path in atlas_files(name).values()))
+    run_state = output_dir / "run_state.json"
+    if args.bids_root:
+        from .connectome.bids import _fingerprint, _record, _reusable
+        run_key = _fingerprint(tuple(inputs), {
+            "fnit_version": __version__, "atlas": list(atlas_names),
+            "n_seeds": args.n_seeds, "seed": args.seed, "device": args.device,
+            "shell_bvals": args.shell_bvals, "compile_arc": args.compile_arc,
+        })
+        if not args.overwrite and _reusable(run_state, run_key, output_paths):
+            print("connectome=skipped (matching inputs and complete outputs)")
+            return
     source_paths = {path.resolve() for path in inputs}
-    for path in files.values():
+    for path in output_paths:
         if path.resolve() in source_paths:
             raise ValueError(f"output would overwrite an input: {path}")
         if path.exists() and not args.overwrite:
@@ -398,7 +454,7 @@ def _run_connectome(args):
         atlas_dwi=args.atlas_dwi,
         t1_segmentation=args.t1_segmentation,
         freesurfer_subject_dir=args.freesurfer_subject_dir,
-        atlas=args.atlas,
+        atlas=atlas_names[0] if len(atlas_names) == 1 else atlas_names,
         atlas_templates_dir=args.atlas_templates_dir,
         fsaverage_dir=args.fsaverage_dir,
         mni_template=args.mni_template,
@@ -421,7 +477,6 @@ def _run_connectome(args):
     if set(result.matrices) != set(matrix_names):
         raise ValueError("connectome result must contain four named matrices")
     output_dir.mkdir(parents=True, exist_ok=True)
-
     def write_csv(path, array, fmt):
         temporary = path.with_name(f".{path.name}.tmp-{uuid.uuid4().hex}")
         try:
@@ -430,12 +485,48 @@ def _run_connectome(args):
         finally:
             temporary.unlink(missing_ok=True)
 
-    for name in matrix_names:
-        write_csv(files[name], result.matrices[name].detach().cpu().numpy(),
-                  "%d" if name == "count" else "%.9g")
-        print(files[name])
+    from types import SimpleNamespace
+    atlas_results = getattr(result, "atlas_results", None) or {
+        atlas_names[0]: SimpleNamespace(
+            matrices=result.matrices, atlas=result.atlas,
+            atlas_affine=result.atlas_affine,
+            region_labels=result.region_labels, nodes=getattr(result, "nodes", None),
+        ),
+    }
+    for atlas_name, atlas_result in atlas_results.items():
+        selected_files = atlas_files(atlas_name)
+        selected_files["atlas"].parent.mkdir(parents=True, exist_ok=True)
+        for name in matrix_names:
+            write_csv(selected_files[name], atlas_result.matrices[name].detach().cpu().numpy(),
+                      "%d" if name == "count" else "%.9g")
+            print(selected_files[name])
+        path = selected_files["atlas"]
+        temporary = path.with_name(f".{path.name}.tmp-{uuid.uuid4().hex}.nii.gz")
+        try:
+            nib.save(nib.Nifti1Image(
+                atlas_result.atlas.detach().cpu().numpy().astype(np.int32),
+                atlas_result.atlas_affine.detach().cpu().numpy()), temporary)
+            os.replace(temporary, path)
+        finally:
+            temporary.unlink(missing_ok=True)
+        print(path)
+        write_csv(selected_files["region_labels"],
+                  np.asarray(atlas_result.region_labels, dtype=np.int64), "%d")
+        if "nodes" in selected_files:
+            temporary = selected_files["nodes"].with_name(
+                f".nodes.tsv.tmp-{uuid.uuid4().hex}")
+            try:
+                with temporary.open("w", newline="") as stream:
+                    writer = csv.writer(stream, delimiter="\t", lineterminator="\n")
+                    writer.writerow(("index", "original_label", "hemisphere", "name"))
+                    writer.writerows((n.index, n.original_label, n.hemisphere, n.name)
+                                     for n in atlas_result.nodes)
+                os.replace(temporary, selected_files["nodes"])
+            finally:
+                temporary.unlink(missing_ok=True)
+            print(selected_files["nodes"])
+        print(selected_files["region_labels"])
     for name, dtype, affine in (
-        ("atlas", np.int32, result.atlas_affine),
         ("five_tissue", np.float32, result.five_tissue_affine),
         ("gmwmi", np.float32, result.five_tissue_affine),
         ("fa", np.float32, result.dwi_affine),
@@ -450,23 +541,18 @@ def _run_connectome(args):
         finally:
             temporary.unlink(missing_ok=True)
         print(path)
-    write_csv(files["region_labels"], np.asarray(result.region_labels, dtype=np.int64), "%d")
-    if "nodes" in files:
-        import csv
-        temporary = files["nodes"].with_name(f".nodes.tsv.tmp-{uuid.uuid4().hex}")
-        try:
-            with temporary.open("w", newline="") as stream:
-                writer = csv.writer(stream, delimiter="\t", lineterminator="\n")
-                writer.writerow(("index", "original_label", "hemisphere", "name"))
-                writer.writerows((n.index, n.original_label, n.hemisphere, n.name)
-                                 for n in result.nodes)
-            os.replace(temporary, files["nodes"])
-        finally:
-            temporary.unlink(missing_ok=True)
-        print(files["nodes"])
     write_csv(files["transform"], result.dwi_to_t1_world.detach().cpu().numpy(), "%.9g")
-    print(files["region_labels"])
     print(files["transform"])
+    if args.bids_root:
+        import json
+        description = output_dir / "dataset_description.json"
+        description.write_text(json.dumps({
+            "Name": "FNIT UKBConnectome_pipeline derivatives",
+            "BIDSVersion": "1.9.0", "DatasetType": "derivative",
+            "GeneratedBy": [{"Name": "Fudan Neuroimaging Toolkit", "Version": __version__,
+                             "CodeURL": "https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit"}],
+        }, indent=2) + "\n")
+        _record(run_state, run_key)
     if args.device.startswith("cuda"):
         import torch
         torch.cuda.synchronize()
@@ -681,25 +767,37 @@ def main(argv=None):
     fast_vbm.add_argument('--overwrite', action='store_true')
     connectome = commands.add_parser(
         'UKBConnectome_pipeline', aliases=['connectome'],
-        help='corrected DWI and official FreeSurfer T1 to four region matrices',
+        help='raw BIDS DWI/T1 or corrected DWI to one or more connectomes',
         allow_abbrev=False)
-    connectome.add_argument('--dwi', required=True, help='corrected 4D DWI NIfTI')
-    connectome.add_argument('--bvals', required=True)
-    connectome.add_argument('--bvecs', required=True, help='eddy-rotated FSL bvecs')
+    connectome.add_argument('--bids-root', help='raw BIDS dataset root')
+    connectome.add_argument('--subject', help='BIDS subject label, with or without sub-')
+    connectome.add_argument('--session', help='BIDS session label')
+    connectome.add_argument('--run', help='BIDS DWI run label')
+    connectome.add_argument('--acquisition', help='BIDS DWI acquisition label')
+    connectome.add_argument('--direction', help='BIDS DWI direction label')
+    connectome.add_argument('--corrected-dwi',
+                            help='existing corrected DWI for BIDS mode; requires --rotated-bvecs')
+    connectome.add_argument('--rotated-bvecs',
+                            help='eddy-rotated FSL bvecs for --corrected-dwi')
+    connectome.add_argument('--dwi', help='corrected 4D DWI NIfTI in explicit mode')
+    connectome.add_argument('--bvals')
+    connectome.add_argument('--bvecs', help='eddy-rotated FSL bvecs in explicit mode')
     connectome.add_argument('--t1', help='paired skull-stripped T1 registration image')
     connectome.add_argument('--t1-segmentation',
                             help='official FreeSurfer recon-all aparc+aseg.mgz')
     connectome.add_argument('--atlas-dwi',
                             help='integer atlas in DWI RAS world coordinates')
     connectome.add_argument('--freesurfer-subject-dir', help='completed recon-all subject directory')
-    connectome.add_argument('--atlas', default='fs-aparc',
+    connectome.add_argument('--atlas', nargs='+', default=['fs-aparc'],
                             choices=('fs-aparc', 'aparc+tian-s1', 'aparc.a2009s+tian-s1',
                                      'glasser+tian-s1', 'glasser+tian-s4',
                                      'schaefer200+tian-s1',
                                      'schaefer500+tian-s4', 'schaefer1000+tian-s4'),
-                            help='atlas to build from the FreeSurfer subject')
+                            help='one or more atlas names; tracking and SIFT2 are shared')
     connectome.add_argument('--atlas-templates-dir',
                             help='original UKB atlas directory; Glasser also needs sibling surfaces directory')
+    connectome.add_argument('--download-atlases', action='store_true',
+                            help='download selected licensed Tian/Schaefer atlas files with size and SHA-256 checks')
     connectome.add_argument('--fsaverage-dir',
                             help='fsaverage subject directory with lh/rh sphere.reg')
     connectome.add_argument('--mni-template',

@@ -8,7 +8,7 @@ from typing import Sequence
 
 import nibabel as nib
 from nibabel.orientations import (
-    apply_orientation, inv_ornt_aff, io_orientation, ornt_transform,
+    apply_orientation, axcodes2ornt, inv_ornt_aff, io_orientation, ornt_transform,
 )
 import numpy as np
 import torch
@@ -133,9 +133,32 @@ def _registration(b0_brain: torch.Tensor, dwi_affine: torch.Tensor,
                            dtype=torch.float64)
 
 
+def _bet_on_dwi_grid(mean_b0: torch.Tensor,
+                     reference: nib.spatialimages.SpatialImage,
+                     device: torch.device) -> torch.Tensor:
+    """Apply the established LAS BET implementation on any BIDS DWI orientation."""
+    to_las = ornt_transform(io_orientation(reference.affine),
+                            axcodes2ornt(("L", "A", "S")))
+    las_b0 = torch.as_tensor(np.ascontiguousarray(apply_orientation(
+        mean_b0.detach().cpu().numpy(), to_las)), device=device)
+    las_spacing = tuple(reference.header.get_zooms()[int(axis)]
+                        for axis in to_las[:, 0])
+    las_mask = bet_mask(
+        mean_b0=las_b0,
+        voxel_size=mrtrix_roundtrip_voxel_size(las_spacing),
+        fractional_threshold=0.2,
+        vertical_gradient=-0.05,
+        robust_center=True,
+    )
+    from_las = ornt_transform(axcodes2ornt(("L", "A", "S")),
+                              io_orientation(reference.affine))
+    return torch.as_tensor(np.ascontiguousarray(apply_orientation(
+        las_mask.cpu().numpy(), from_las)), device=device)
+
+
 @dataclass
 class ConnectomeResult:
-    """Four K×K matrices and same-device reconstruction/track intermediates."""
+    """First atlas, all selected atlas results, and shared reconstruction data."""
 
     matrices: dict[str, torch.Tensor]
     region_labels: tuple[int, ...]
@@ -152,6 +175,18 @@ class ConnectomeResult:
     atlas_affine: torch.Tensor
     dwi_to_t1_world: torch.Tensor
     nodes: tuple[ConnectomeNode, ...] | None = None
+    atlas_results: dict[str, "AtlasResult"] | None = None
+
+
+@dataclass
+class AtlasResult:
+    """One selected atlas, its row labels, and four connectivity matrices."""
+
+    matrices: dict[str, torch.Tensor]
+    region_labels: tuple[int, ...]
+    atlas: torch.Tensor
+    atlas_affine: torch.Tensor
+    nodes: tuple[ConnectomeNode, ...] | None
 
 
 class UKBConnectome_pipeline:
@@ -161,7 +196,7 @@ class UKBConnectome_pipeline:
     FreeSurfer itself remains the user's established external stage. PyTorch
     computes response, FOD, mtnormalise, 5TT/GMWMI, ACT tracking, SIFT2,
     precise per-track FA and the four matrices. A completed FreeSurfer subject
-    directory supplies the T1 and 84-node atlas; explicit T1/atlas inputs
+    directory supplies T1 and one or more atlas choices; explicit T1/atlas inputs
     remain available for fixed-input comparisons. The caller may provide a
     fixed BET brain mask; otherwise the LAS DWI
     mean b0 is skull stripped with native PyTorch BET. CUDA uses TF32
@@ -176,6 +211,46 @@ class UKBConnectome_pipeline:
             torch.backends.cuda.matmul.allow_tf32 = True
             torch.backends.cudnn.allow_tf32 = True
 
+    def run_bids(
+        self,
+        bids_root: str | Path,
+        output_dir: str | Path,
+        *,
+        subject: str,
+        n_seeds: int,
+        atlas: str | Sequence[str] = "fs-aparc",
+        session: str | None = None,
+        run: str | None = None,
+        acquisition: str | None = None,
+        direction: str | None = None,
+        t1: str | Path | None = None,
+        freesurfer_subject_dir: str | Path | None = None,
+        corrected_dwi: str | Path | None = None,
+        rotated_bvecs: str | Path | None = None,
+        overwrite: bool = False,
+        **connectome_options,
+    ) -> ConnectomeResult:
+        """Run raw BIDS preparation then compute the selected atlas matrices.
+
+        ``output_dir`` stores resumable DWI and recon-all intermediates;
+        ``connectome_options`` are the optional arguments of ``__call__``.
+        The Python result remains in memory; use the CLI to write matrices.
+        """
+        from .bids import prepare_bids_connectome
+
+        selected = prepare_bids_connectome(
+            bids_root, output_dir, subject=subject, session=session, run=run,
+            acquisition=acquisition, direction=direction, t1=t1,
+            freesurfer_subject_dir=freesurfer_subject_dir,
+            corrected_dwi=corrected_dwi, rotated_bvecs=rotated_bvecs,
+            device=str(self.device), overwrite=overwrite,
+        )
+        return self(
+            selected.dwi, selected.bvals, selected.bvecs,
+            freesurfer_subject_dir=selected.freesurfer_subject_dir,
+            atlas=atlas, n_seeds=n_seeds, **connectome_options,
+        )
+
     @torch.inference_mode()
     def __call__(
         self,
@@ -187,7 +262,7 @@ class UKBConnectome_pipeline:
         t1_segmentation: str | Path | None = None,
         atlas_dwi: str | Path | None = None,
         freesurfer_subject_dir: str | Path | None = None,
-        atlas: str = "fs-aparc",
+        atlas: str | Sequence[str] = "fs-aparc",
         atlas_templates_dir: str | Path | None = None,
         fsaverage_dir: str | Path | None = None,
         mni_template: str | Path | None = None,
@@ -243,7 +318,9 @@ class UKBConnectome_pipeline:
         ``compile_arc`` compiles the CUDA iFOD2 probability kernel on first
         use, with startup cost but lower steady propagation time.
 
-        Output ``ConnectomeResult.matrices`` has count int64 and SIFT2 FBC,
+        Output ``ConnectomeResult.matrices`` describes the first selected atlas;
+        ``atlas_results[name]`` holds each atlas without rerunning tracking.
+        The four matrices contain count int64 and SIFT2 FBC,
         mean length (mm), mean FA float32 K×K arrays. ``region_labels`` maps
         rows/columns to 1..K. ``nodes`` defines each row when the FreeSurfer
         subject input is used; ``atlas`` is then on the DWI voxel grid.
@@ -254,18 +331,22 @@ class UKBConnectome_pipeline:
         ``tractogram`` holds world-mm paths/endpoints/lengths/means and
         ``sift2_weights`` is float64 [T] in track order.
         """
+        atlas_names = (atlas,) if isinstance(atlas, str) else tuple(atlas)
+        if not atlas_names or len(set(atlas_names)) != len(atlas_names):
+            raise ValueError("atlas must contain one or more distinct names")
         if n_seeds < 1:
             raise ValueError("n_seeds must be positive")
         if freesurfer_subject_dir is not None:
             if any(value is not None for value in (t1_brain, t1_segmentation, atlas_dwi)):
                 raise ValueError("freesurfer_subject_dir cannot be combined with explicit T1/atlas inputs")
-            if atlas not in ("fs-aparc", *SCHAEFER_TIAN_ATLASES,
-                             *NATIVE_TIAN_ATLASES, *GLASSER_TIAN_ATLASES):
+            if any(name not in ("fs-aparc", *SCHAEFER_TIAN_ATLASES,
+                                *NATIVE_TIAN_ATLASES, *GLASSER_TIAN_ATLASES)
+                   for name in atlas_names):
                 raise ValueError("unsupported atlas from a subject directory")
-            if atlas in (*SCHAEFER_TIAN_ATLASES, *NATIVE_TIAN_ATLASES,
-                         *GLASSER_TIAN_ATLASES) and (
+            if any(name != "fs-aparc" for name in atlas_names) and (
                 atlas_templates_dir is None or
-                (atlas in (*SCHAEFER_TIAN_ATLASES, *GLASSER_TIAN_ATLASES)
+                (any(name in (*SCHAEFER_TIAN_ATLASES, *GLASSER_TIAN_ATLASES)
+                     for name in atlas_names)
                  and fsaverage_dir is None) or
                 (mni_template is None) == (tian_fnirt_coeff is None)
             ):
@@ -276,7 +357,7 @@ class UKBConnectome_pipeline:
             t1_brain, t1_segmentation = subject.brain, subject.aparc_aseg
         elif any(value is None for value in (t1_brain, t1_segmentation, atlas_dwi)):
             raise ValueError("provide freesurfer_subject_dir or all of t1_brain, t1_segmentation, atlas_dwi")
-        elif atlas != "fs-aparc":
+        elif atlas_names != ("fs-aparc",):
             raise ValueError("a named atlas requires freesurfer_subject_dir")
         reference = nib.load(str(dwi))
         dwi_data, dwi_affine = _image(dwi, self.device)
@@ -293,15 +374,7 @@ class UKBConnectome_pipeline:
             raise ValueError("shell_bvals must be ordered MRtrix shell centers")
         mean_b0 = mean_bzero(dwi=dwi_data, bvalues=bval)
         if brain_mask is None:
-            if nib.aff2axcodes(reference.affine) != ("L", "A", "S"):
-                raise ValueError("automatic BET requires an LAS DWI grid; provide brain_mask")
-            mask = bet_mask(
-                mean_b0=mean_b0,
-                voxel_size=mrtrix_roundtrip_voxel_size(reference.header.get_zooms()[:3]),
-                fractional_threshold=0.2,
-                vertical_gradient=-0.05,
-                robust_center=True,
-            )
+            mask = _bet_on_dwi_grid(mean_b0, reference, self.device)
         else:
             mask = _scalar_on_grid(brain_mask, reference, self.device, binary=True)
         response_selection = (dwi2mask_legacy(dwi_data, gradient[:, 3], shells) if response_mask is None else
@@ -328,80 +401,6 @@ class UKBConnectome_pipeline:
             if transform.shape != (4, 4):
                 raise ValueError("dwi_to_t1_world must be 4x4")
         five_affine = torch.linalg.inv(transform) @ seg_affine
-        nodes = None
-        if freesurfer_subject_dir is not None:
-            atlas_source_affine = seg_affine
-            if atlas == "fs-aparc":
-                atlas_t1, nodes = fs_aparc_atlas(seg)
-            else:
-                templates = Path(atlas_templates_dir)
-                if atlas in NATIVE_TIAN_ATLASES:
-                    tian_scale = 1
-                    cortical, cortical_nodes = native_annotation_to_t1(
-                        subject_dir=subject.subject_dir,
-                        annotation=NATIVE_TIAN_ATLASES[atlas],
-                        device=str(self.device),
-                    )
-                elif atlas in SCHAEFER_TIAN_ATLASES:
-                    parcels, tian_scale = SCHAEFER_TIAN_ATLASES[atlas]
-                    cortical, cortical_nodes = schaefer_to_t1(
-                        subject_dir=subject.subject_dir,
-                        fsaverage_dir=fsaverage_dir,
-                        left_annot=templates / f"lh.Schaefer2018_{parcels}Parcels_7Networks_order.annot",
-                        right_annot=templates / f"rh.Schaefer2018_{parcels}Parcels_7Networks_order.annot",
-                        device=str(self.device),
-                    )
-                else:
-                    tian_scale = GLASSER_TIAN_ATLASES[atlas]
-                    cortical, cortical_nodes = glasser_to_t1(
-                        subject_dir=subject.subject_dir,
-                        fsaverage_dir=fsaverage_dir,
-                        atlas_templates_dir=templates,
-                        device=str(self.device),
-                    )
-                tian_name = f"Tian_Subcortex_S{tian_scale}_3T"
-                if tian_fnirt_coeff is None:
-                    tian, _ = synthmorph_tian_to_t1(
-                        t1_brain=subject.brain,
-                        mni_template=mni_template,
-                        tian_mni=templates / f"{tian_name}.nii.gz",
-                        device=str(self.device), weights=synthmorph_weights,
-                    )
-                else:
-                    tian = fnirt_tian_to_t1(
-                        t1_brain=subject.brain,
-                        tian_mni=templates / f"{tian_name}.nii.gz",
-                        forward_coefficients=tian_fnirt_coeff,
-                        device=str(self.device),
-                    )
-                combined, nodes = combine_cortical_tian(
-                    cortical_t1=cortical, cortical_nodes=cortical_nodes,
-                    tian_t1=tian,
-                    tian_names=tuple((templates / f"{tian_name}_label.txt")
-                                     .read_text().splitlines()),
-                )
-                atlas_t1 = torch.as_tensor(np.asarray(combined.dataobj),
-                                           device=self.device)
-                atlas_source_affine = torch.as_tensor(
-                    combined.affine, device=self.device, dtype=torch.float64,
-                )
-            atlas_data = resample_labels_nearest(
-                labels=atlas_t1, source_affine=atlas_source_affine,
-                target_shape=tuple(dwi_data.shape[:3]), target_affine=dwi_affine,
-                target_to_source_world=transform,
-            )
-            atlas_affine = dwi_affine
-        else:
-            atlas_data, atlas_affine = _image(atlas_dwi, self.device)
-        if atlas_data.ndim != 3 or not bool(torch.isfinite(atlas_data).all()) or not bool(
-            torch.equal(atlas_data, atlas_data.round())
-        ) or bool((atlas_data < 0).any()):
-            raise ValueError("atlas_dwi must contain finite nonnegative integer labels")
-        atlas = atlas_data.to(torch.int32)
-        if not bool((atlas > 0).any()):
-            raise ValueError("atlas contains no region labels")
-        region_labels = (tuple(node.index for node in nodes) if nodes is not None else
-                         tuple(range(1, int(atlas.max()) + 1)))
         shells, wm_response, gm_response, csf_response, _ = estimate_mrtrix_dhollander(
             dwi_data, gradient, shells, response_selection,
         )
@@ -426,14 +425,97 @@ class UKBConnectome_pipeline:
             step_size_mm=step_size_mm,
         )
         tracks.mean_fa = sample_streamline_mean_precise(tracks.paths, fa, dwi_affine)
-        matrices = build_connectomes(
-            tracks.endpoints, atlas, atlas_affine, weights=weights,
-            lengths=tracks.lengths_mm, fa=tracks.mean_fa,
-            node_count=len(nodes) if nodes is not None else None,
-        )
+        atlas_results = {}
+        tian_transform = None
+        for atlas_name in atlas_names:
+            nodes = None
+            if freesurfer_subject_dir is not None:
+                atlas_source_affine = seg_affine
+                if atlas_name == "fs-aparc":
+                    atlas_t1, nodes = fs_aparc_atlas(seg)
+                else:
+                    templates = Path(atlas_templates_dir)
+                    if atlas_name in NATIVE_TIAN_ATLASES:
+                        tian_scale = 1
+                        cortical, cortical_nodes = native_annotation_to_t1(
+                            subject_dir=subject.subject_dir,
+                            annotation=NATIVE_TIAN_ATLASES[atlas_name],
+                            device=str(self.device),
+                        )
+                    elif atlas_name in SCHAEFER_TIAN_ATLASES:
+                        parcels, tian_scale = SCHAEFER_TIAN_ATLASES[atlas_name]
+                        cortical, cortical_nodes = schaefer_to_t1(
+                            subject_dir=subject.subject_dir,
+                            fsaverage_dir=fsaverage_dir,
+                            left_annot=templates / f"lh.Schaefer2018_{parcels}Parcels_7Networks_order.annot",
+                            right_annot=templates / f"rh.Schaefer2018_{parcels}Parcels_7Networks_order.annot",
+                            device=str(self.device),
+                        )
+                    else:
+                        tian_scale = GLASSER_TIAN_ATLASES[atlas_name]
+                        cortical, cortical_nodes = glasser_to_t1(
+                            subject_dir=subject.subject_dir,
+                            fsaverage_dir=fsaverage_dir,
+                            atlas_templates_dir=templates,
+                            device=str(self.device),
+                        )
+                    tian_name = f"Tian_Subcortex_S{tian_scale}_3T"
+                    if tian_fnirt_coeff is None:
+                        tian, tian_transform = synthmorph_tian_to_t1(
+                            t1_brain=subject.brain,
+                            mni_template=mni_template,
+                            tian_mni=templates / f"{tian_name}.nii.gz",
+                            device=str(self.device), weights=synthmorph_weights,
+                            transform=tian_transform,
+                        )
+                    else:
+                        tian = fnirt_tian_to_t1(
+                            t1_brain=subject.brain,
+                            tian_mni=templates / f"{tian_name}.nii.gz",
+                            forward_coefficients=tian_fnirt_coeff,
+                            device=str(self.device),
+                        )
+                    combined, nodes = combine_cortical_tian(
+                        cortical_t1=cortical, cortical_nodes=cortical_nodes,
+                        tian_t1=tian,
+                        tian_names=tuple((templates / f"{tian_name}_label.txt")
+                                         .read_text().splitlines()),
+                    )
+                    atlas_t1 = torch.as_tensor(np.asarray(combined.dataobj),
+                                               device=self.device)
+                    atlas_source_affine = torch.as_tensor(
+                        combined.affine, device=self.device, dtype=torch.float64,
+                    )
+                atlas_data = resample_labels_nearest(
+                    labels=atlas_t1, source_affine=atlas_source_affine,
+                    target_shape=tuple(dwi_data.shape[:3]), target_affine=dwi_affine,
+                    target_to_source_world=transform,
+                )
+                atlas_affine = dwi_affine
+            else:
+                atlas_data, atlas_affine = _image(atlas_dwi, self.device)
+            if atlas_data.ndim != 3 or not bool(torch.isfinite(atlas_data).all()) or not bool(
+                torch.equal(atlas_data, atlas_data.round())
+            ) or bool((atlas_data < 0).any()):
+                raise ValueError("atlas_dwi must contain finite nonnegative integer labels")
+            atlas_data = atlas_data.to(torch.int32)
+            if not bool((atlas_data > 0).any()):
+                raise ValueError("atlas contains no region labels")
+            region_labels = (tuple(node.index for node in nodes) if nodes is not None else
+                             tuple(range(1, int(atlas_data.max()) + 1)))
+            matrices = build_connectomes(
+                tracks.endpoints, atlas_data, atlas_affine, weights=weights,
+                lengths=tracks.lengths_mm, fa=tracks.mean_fa,
+                node_count=len(nodes) if nodes is not None else None,
+            )
+            atlas_results[atlas_name] = AtlasResult(
+                matrices, region_labels, atlas_data, atlas_affine, nodes,
+            )
+        first = atlas_results[atlas_names[0]]
         return ConnectomeResult(
-            matrices, region_labels, atlas, five, five_affine, gmwmi,
-            wm_sh, fa, mask, tracks, weights, dwi_affine, atlas_affine, transform, nodes,
+            first.matrices, first.region_labels, first.atlas, five, five_affine, gmwmi,
+            wm_sh, fa, mask, tracks, weights, dwi_affine, first.atlas_affine,
+            transform, first.nodes, atlas_results,
         )
 
 

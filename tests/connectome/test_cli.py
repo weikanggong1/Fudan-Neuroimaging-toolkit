@@ -230,3 +230,70 @@ def test_connectome_cli_rejects_ambiguous_tian_registration(tmp_path):
             "--tian-fnirt-coeff", str(tmp_path / "warp.nii.gz"),
             "--n-seeds", "1", "--device", "cpu", "--output-dir", str(tmp_path / "result"),
         ])
+
+
+def test_connectome_cli_multiple_atlases_share_one_core_run(tmp_path, monkeypatch):
+    from fnit import connectome
+    from fnit.connectome.freesurfer_subject import ConnectomeNode
+
+    subject = tmp_path / "subject"
+    templates = tmp_path / "templates"
+    for path in (
+        subject / "mri/brain.mgz", subject / "mri/aparc+aseg.mgz",
+        subject / "mri/ribbon.mgz",
+        *(subject / f"surf/{hemi}.{kind}" for hemi in ("lh", "rh")
+          for kind in ("pial", "white")),
+        *(subject / f"label/{hemi}.aparc.annot" for hemi in ("lh", "rh")),
+        templates / "Tian_Subcortex_S1_3T.nii.gz",
+        templates / "Tian_Subcortex_S1_3T_label.txt",
+        tmp_path / "mni.nii.gz", tmp_path / "dwi", tmp_path / "bvals",
+        tmp_path / "bvecs",
+    ):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"input")
+    calls = []
+
+    class FakeConnectome:
+        def __init__(self, *, device):
+            pass
+
+        def __call__(self, *args, **kwargs):
+            calls.append(kwargs["atlas"])
+            results = {}
+            for name, count in (("fs-aparc", 1), ("aparc+tian-s1", 2)):
+                results[name] = SimpleNamespace(
+                    matrices={key: torch.full((count, count), count,
+                                              dtype=torch.int64 if key == "count" else torch.float32)
+                              for key in ("count", "sift2_fbc", "mean_length", "mean_fa")},
+                    atlas=torch.ones((2, 2, 2), dtype=torch.int32),
+                    atlas_affine=torch.eye(4), region_labels=tuple(range(1, count + 1)),
+                    nodes=tuple(ConnectomeNode(i, i, "L", f"node{i}")
+                                for i in range(1, count + 1)),
+                )
+            first = results["fs-aparc"]
+            return SimpleNamespace(
+                atlas_results=results, matrices=first.matrices, atlas=first.atlas,
+                atlas_affine=first.atlas_affine, region_labels=first.region_labels,
+                five_tissue=torch.ones((2, 2, 2, 5)), gmwmi=torch.ones((2, 2, 2)),
+                fa=torch.ones((2, 2, 2)), brain_mask=torch.ones((2, 2, 2)),
+                five_tissue_affine=torch.eye(4), dwi_affine=torch.eye(4),
+                dwi_to_t1_world=torch.eye(4),
+                tractogram=SimpleNamespace(seeds_attempted=10, paths=(None,)),
+            )
+
+    monkeypatch.setattr(connectome, "UKBConnectome_pipeline", FakeConnectome)
+    output = tmp_path / "output"
+    main([
+        "UKBConnectome_pipeline", "--dwi", str(tmp_path / "dwi"),
+        "--bvals", str(tmp_path / "bvals"), "--bvecs", str(tmp_path / "bvecs"),
+        "--freesurfer-subject-dir", str(subject),
+        "--atlas", "fs-aparc", "aparc+tian-s1",
+        "--atlas-templates-dir", str(templates),
+        "--mni-template", str(tmp_path / "mni.nii.gz"),
+        "--n-seeds", "10", "--device", "cpu", "--output-dir", str(output),
+    ])
+    assert calls == [("fs-aparc", "aparc+tian-s1")]
+    assert np.loadtxt(output / "atlases/fs-aparc/connectome_count.csv",
+                      delimiter=",").shape == ()
+    assert np.loadtxt(output / "atlases/aparc+tian-s1/connectome_count.csv",
+                      delimiter=",").shape == (2, 2)

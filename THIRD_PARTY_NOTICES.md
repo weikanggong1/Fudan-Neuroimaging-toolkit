@@ -1,5 +1,14 @@
 # Third-party notices
 
+`assets/connectome/` includes the Schaefer 2018 fsaverage annotations for 200,
+500 and 1000 parcels from Thomas Yeo Lab / CBIG under the MIT license in
+[`licenses/CBIG-MIT.txt`](licenses/CBIG-MIT.txt), and the Tian S1/S4 3T
+subcortical images and labels under the Melbourne Subcortex Atlas license in
+[`licenses/Tian-Atlas.txt`](licenses/Tian-Atlas.txt). The latter requires
+citation of Tian et al. (2020) in any publication using the atlas. The pinned
+sizes, SHA-256 values and original-author repositories are recorded in
+`src/fnit/connectome/atlas_manifest.json`. Glasser/HCP files are not mirrored.
+
 `src/fnit/mshbm/` is a modified CPU Python adaptation of CBIG's Kong2019
 MS-HBM single-subject parcellation and its 17-network HCP_40 fsLR32k prior.
 Original source and templates: Thomas Yeo Lab / CBIG, commit
