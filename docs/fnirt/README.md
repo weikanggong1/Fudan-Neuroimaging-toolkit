@@ -284,6 +284,24 @@ warped T1 脑内 Pearson r 0.9274、支持区 Dice 0.9884、coefficient Pearson 
 253.51 s，但写出可检查文件后退出状态为 255；这里只作条件性输出对照，不据此
 比较速度。报告另记录输出网格、gzip/有限值检查和源码哈希。
 
+同一例的[相关性诊断](../../validation/fnirt/default_correlation_diagnosis_20260929.public.json)
+把形变估计与最终重采样分开检查。在 FSL coefficient 固定时，FSL `applywarp`
+与 FNIT `TorchApplyWarp` 的输出相关为 0.999999999989；改用 FNIT coefficient，
+即使仍由同一个 `applywarp` 重采样，相关也降到 0.9275。两套 coefficient 对应的
+MNI→T1 取样坐标相差中位 0.873 mm、95 百分位 3.134 mm。把脑掩膜向内腐蚀
+3 个体素后相关仍为 0.9292。这些对照把主要差异定位在默认形变估计，
+而非跨程序读取 coefficient 或重采样。
+
+两边都设 `--intmod=global_linear`、保持同一输入和初始矩阵时，输出相关升至
+0.999008，取样坐标差降至中位 0.018 mm、95 百分位 0.157 mm。因此，
+当前默认的非线性强度映射与偏置场分支是本例形变差异的主要来源。FSL 将形变、
+多项式和偏置场参数联合优化；FNIT 在每一级形变优化前拟合一次强度映射并在该级
+固定。源码还存在明确的阶数语义差异：FSL `--intorder=5` 建立 5 个系数
+（0–4 次项），FNIT 当前建立 6 个（0–5 次项）。只把 FNIT 设为 `--intorder 4`，
+与 FSL 默认输出的相关为 0.9275，说明仅改阶数不能解决此例主要偏差。
+即使使用 `global_linear`，相关仍未达到 0.9999；FNIT 自身 `iout` 与按其
+coefficient 重新重采样的相关为 0.999867，这项输出一致性也待修正。
+
 ### T1w 专用预设
 
 真实去脑 T1 的同输入对照中，fMRI 配准入口对 FSL warped T1 的脑内相关为

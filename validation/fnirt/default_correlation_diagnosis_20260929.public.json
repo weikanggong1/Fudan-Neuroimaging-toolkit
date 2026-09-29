@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-29",
+  "scope": "one real skull-stripped T1, the same MNI152 2-mm brain reference and saved initial FLIRT affine for FSL FNIRT and FNIT",
+  "source_commit": "c6ed5f429be6e9b65fe0ccf69388ab39f679595a",
+  "mask": "reference brain intensity > 0; 228483 voxels",
+  "default": {
+    "fsl_command": "fnirt --in=T1_brain.nii.gz --ref=MNI152_2mm_brain.nii.gz --aff=initial.mat --cout=fsl_coeff.nii.gz --iout=fsl_warped.nii.gz",
+    "fnit_command": "python -m fnit.fnirt --in T1_brain.nii.gz --ref MNI152_2mm_brain.nii.gz --aff initial.mat --config default --cout fnit_coeff.nii.gz --iout fnit_warped.nii.gz",
+    "iout_pearson": 0.9273739072963979,
+    "iout_mae": 63.33546492842266,
+    "fsl_iout_vs_fsl_applywarp_fsl_coeff_pearson": 0.9999999999951021,
+    "fsl_iout_vs_fnit_applywarp_fsl_coeff_pearson": 0.99999999998865,
+    "fsl_applywarp_fsl_coeff_vs_fsl_applywarp_fnit_coeff_pearson": 0.9275162940932451,
+    "fnit_iout_vs_fnit_applywarp_fnit_coeff_pearson": 0.9998634003978313,
+    "coefficient_pull_coordinate_distance_mm": {
+      "median": 0.8733193278312683,
+      "p95": 3.133548593521118
+    },
+    "eroded_reference_mask_three_voxels_iout_pearson": 0.9291836707485839,
+    "fsl_exit_status": 255,
+    "fnit_exit_status": 0
+  },
+  "global_linear_ablation": {
+    "change": "set --intmod=global_linear in both FSL and FNIT; all other command inputs and settings unchanged",
+    "fsl_iout_vs_fnit_iout_pearson": 0.9990076355494588,
+    "fsl_iout_vs_fnit_iout_mae": 4.350972189042405,
+    "fsl_coeff_vs_fnit_coeff_pull_coordinate_distance_mm": {
+      "median": 0.018218114972114563,
+      "p95": 0.15650985836982725
+    },
+    "fsl_iout_vs_fnit_rewarp_fsl_coeff_pearson": 0.9999999999888667,
+    "fnit_iout_vs_fnit_rewarp_fnit_coeff_pearson": 0.9998671821656058,
+    "fnit_rewarp_fsl_coeff_vs_fnit_rewarp_fnit_coeff_pearson": 0.9991429486729677,
+    "fsl_wall_seconds": 133.10,
+    "fnit_wall_seconds": 61.38,
+    "fsl_exit_status": 255,
+    "fnit_exit_status": 0,
+    "fsl_warped_sha256": "3f74b8173c78ea113d5e16ebc1d2b4ffcbe9906d843da7f7f5b4396e5d922b46",
+    "fnit_warped_sha256": "aad1183d9830e9d31e445cad5d94d48fcdab6aa94c1f4237be8f6488a2f571d2"
+  },
+  "fnit_polynomial_order_ablation": {
+    "change": "set FNIT --intorder 4; compare with the unchanged FSL default",
+    "fsl_default_iout_vs_fnit_iout_pearson": 0.9275058665482285,
+    "fsl_default_iout_vs_fnit_iout_mae": 63.27195809466334,
+    "fnit_default_iout_vs_fnit_order4_iout_pearson": 0.9994198394055046,
+    "fnit_wall_seconds_cpu": 134.25,
+    "fnit_exit_status": 0,
+    "fnit_warped_sha256": "61094cdf1dd5e76b54e12f8530175e710cc535bddb6c535cd80dde58af9eab09"
+  },
+  "source_findings": [
+    "FSL includes deformation, global polynomial and local bias field in the same optimization parameter vector and gradient; FNIT fits polynomial and bias once before each deformation level and freezes them during that level.",
+    "FSL intorder=5 creates five polynomial coefficients (powers 0 through 4); FNIT intensity_order=5 currently creates six (powers 0 through 5)."
+  ],
+  "interpretation": "The nonlinear intensity-plus-bias branch is the dominant source of default T1 warp divergence in this case. The polynomial coefficient-count discrepancy is real but changing it alone has a small effect. The remaining global-linear difference and FNIT iout/coeff re-warp discrepancy mean numerical equivalence above r=0.9999 has not been demonstrated.",
+  "limits": "Single real T1. FSL wrote gzip-valid, finite images but returned 255, so its output is a conditional numerical reference. CPU and GPU wall times are not a controlled speed comparison. No private image or voxelwise result is included."
+}
