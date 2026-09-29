@@ -1,0 +1,36 @@
+{
+  "date": "2026-09-30",
+  "profile": "single-t1-standard",
+  "candidate_source": "9ae7939; sub-02 additionally contains the CPU SynthSeg backend fix later pushed as b66ff97",
+  "comparison_scope": "two independent real T1 images, each processed continuously from the raw image; official FreeSurfer 8.2 references were generated separately",
+  "subjects": {
+    "sub-01": {
+      "device": "H100 GPU",
+      "input_t1_sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
+      "run_status": "complete",
+      "exit_code": 0,
+      "stages": 66,
+      "total_seconds": 6398.565596858971,
+      "output_validation": {"expected": 138, "present": 138, "missing": 0, "status": "passed"},
+      "mesh_validation": {"status": "passed", "lh_vertices": 105539, "rh_vertices": 104540, "both_euler": 2, "both_unclosed_edges": 0, "white_pial_intersecting_faces": 0},
+      "strict_reference_comparison": {"checked": 138, "passed": 5, "all_pass": false, "group_passed": {"mri": 5, "surf": 0, "label": 0, "stats": 0}, "passed_files": ["mri/entowm.mgz", "mri/mca-dura.mgz", "mri/orig.mgz", "mri/orig/001.mgz", "mri/rawavg.mgz"]},
+      "peak_sampled_process_gpu_mib": 18452,
+      "gpu_sample_count": 3019,
+      "precision": "TF32 default with documented FP32 exceptions; no FP16 or BF16"
+    },
+    "sub-02": {
+      "device": "CPU on nodecw10",
+      "input_t1_sha256": "326d1e0a948b76344150c28bbcf0299b58040092c2f037f09c754103d32f747d",
+      "run_status": "complete",
+      "exit_code": 0,
+      "stages": 66,
+      "total_seconds": 5622.315797276795,
+      "output_validation": {"expected": 138, "present": 138, "missing": 0, "status": "passed"},
+      "mesh_validation": {"status": "passed", "lh_vertices": 119475, "rh_vertices": 118560, "both_euler": 2, "both_unclosed_edges": 0, "white_pial_intersecting_faces": 0},
+      "strict_reference_comparison": {"checked": 138, "passed": 2, "all_pass": false, "group_passed": {"mri": 2, "surf": 0, "label": 0, "stats": 0}, "passed_files": ["mri/orig/001.mgz", "mri/rawavg.mgz"]},
+      "reference_host": "nodecw10",
+      "reference_exit_code": 0
+    }
+  },
+  "limits": "Complete stage execution and mesh/output checks pass. Strict numeric acceptance fails on both subjects. The GPU maximum is from periodic process sampling, not a continuous peak guarantee. The two subject runtimes use different hosts and devices and do not establish a speed ratio. Physical isolation from preinstalled FreeSurfer remains unverified."
+}

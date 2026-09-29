@@ -98,7 +98,7 @@ fnit synthseg --i sub-01_T1w.nii.gz --o sub-01_synthseg.nii.gz \
 
 2026-09-27 的旧 CPU 路径单例为 55.57 s；与原版相比只有 1 个标签体素不同，CSV 最大差 0.24 mm³。原版三例 CPU 参考任务所在时段有重叠，中位数 304.23 s，因此不计算稳定加速倍数。GPU 单例 Torch 峰值 allocated 19,769 MiB、reserved 22,820 MiB。
 
-2026-09-30 在 nodecw10 的 PyTorch 2.5.1 上，CPU oneDNN 路径处理真实 `sub-02` 时发生段错误。现版在 CPU 推理这一段关闭 MKLDNN，并在返回后恢复原设置；同输入的独立阶段和 recon-all 连续运行都通过 SynthSeg，后者耗时 368.14 秒，写出的软体积总量为 1,452,089.5 mm³。独立阶段观测进程 RSS 最大约 97.4 GiB。该设置不影响 CUDA 路径；旧 CPU 耗时不能代表现版。完整 recon-all CPU 续跑尚待结束。[阶段记录](../../validation/recon_all/python_gpu_port/synthseg_cpu_backend_20260930.json)。
+2026-09-30 在 nodecw10 的 PyTorch 2.5.1 上，CPU oneDNN 路径处理真实 `sub-02` 时发生段错误。现版在 CPU 推理这一段关闭 MKLDNN，并在返回后恢复原设置；同输入的独立阶段和 recon-all 连续运行都通过 SynthSeg，后者耗时 368.14 秒，写出的软体积总量为 1,452,089.5 mm³。独立阶段观测进程 RSS 最大约 97.4 GiB。该设置不影响 CUDA 路径；旧 CPU 耗时不能代表现版。完整 recon-all CPU 运行已完成，输出完整性与网格检查通过，严格数值比较通过 2/138 项。[阶段记录](../../validation/recon_all/python_gpu_port/synthseg_cpu_backend_20260930.json)、[整例记录](../../validation/recon_all/python_gpu_port/current_full_runs_20260930.json)。
 
 同一 nodecw10 上另行运行官方 FreeSurfer 8.2 `mri_synthseg --cpu --keepgeom --threads 4` 作参考；现版 FNIT 相比官方的 256³ 标签图有 33 个体素不同，32 个前景标签最低 Dice 为 0.999886，软体积 CSV 最大差 1.9 mm³。官方单次耗时 295.58 秒，FNIT 为 368.14 秒；共享节点单次计时只用于说明本次运行，不推断稳定速度比。官方输出仅在隔离的参考目录中用于比较，不作为 FNIT 输入。[逐项记录](../../validation/recon_all/python_gpu_port/synthseg_cpu_backend_20260930.json)。
 
