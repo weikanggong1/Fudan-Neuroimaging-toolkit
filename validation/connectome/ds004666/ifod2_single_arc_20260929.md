@@ -30,7 +30,7 @@ bin/ifod2_single_arc_oracle wm_fod_norm.nii.gz ifod2_arc_cases.txt > ifod2_arc_o
 
 ## FNIT 函数与输出
 
-`tracking_sh_precomputed(directions, lmax=8)` 位于 `fnit.connectome.fod`。`directions` 是 CPU/CUDA 上的 float32、末维为 3 的非零方向张量，形状为 `[...,3]`；函数内部归一化。`lmax` 是非负偶数，追踪默认 8。返回同设备 float32 实球谐函数张量 `[...,C]`，其中 `C=(lmax+1)(lmax+2)/2`；系数按偶数阶 `l`，再按 `m=-l...l` 排列。内部按 MRtrix iFOD2 的 512 个极角采样点建立可缓存的缔合勒让德表，并沿极角线性插值。公开 `probabilistic_tractography` 的初始方向评价和传播 FOD 评价现调用此函数；它仍用有限 16 个候选方向，并未替换为官方的连续拒绝采样。
+`tracking_sh_precomputed(directions, lmax=8)` 位于 `fnit.connectome.fod`。`directions` 是 CPU/CUDA 上的 float32、末维为 3 的非零方向张量，形状为 `[...,3]`；函数内部归一化。`lmax` 是非负偶数，追踪默认 8。返回同设备 float32 实球谐函数张量 `[...,C]`，其中 `C=(lmax+1)(lmax+2)/2`；系数按偶数阶 `l`，再按 `m=-l...l` 排列。内部按 MRtrix iFOD2 的 512 个极角采样点建立可缓存的缔合勒让德表，并沿极角线性插值。公开 `probabilistic_tractography` 的初始方向评价和传播 FOD 评价调用此函数；当前传播采用连续方向的校准拒绝采样，每轮并行计算 16 个提案、每弧最多尝试 1,000 次。
 
 ```python
 import torch
@@ -71,3 +71,8 @@ python tools/benchmark_connectome_ifod2_single_arc.py \
 ## 当前追踪组合
 
 球谐函数查表已用于当前的连续初始方向、校准拒绝采样及 ACT 实现。单弧的确定性精度不能代替随机轨迹和最终矩阵验收；同一真实 FOD/5TT 的三种子四矩阵结果见[当前追踪报告](ifod2_rejection_20260929.md)。
+
+## 参考文献与原实现
+
+- [MRtrix3 方法论文](https://pubmed.ncbi.nlm.nih.gov/31473352/)；[原版 iFOD2 代码](https://github.com/MRtrix3/mrtrix3/blob/eeab681d3e0cb004cf1d1d31579d3892197ef5b6/src/dwi/tractography/algorithms/iFOD2.h)。
+- [原 UKB-connectomics 代码库](https://github.com/sina-mansour/UKB-connectomics)。

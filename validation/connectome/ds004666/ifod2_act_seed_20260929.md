@@ -76,3 +76,8 @@ python tools/benchmark_connectome_ifod2_act_seed.py \
 ## 当前组合
 
 此页只保留 ACT 种子函数的同输入检查。当前校准拒绝采样、ACT 逐点状态、随机流线和四矩阵三种子对照见[追踪报告](ifod2_rejection_20260929.md)。
+
+## 参考文献与原实现
+
+- [ACT 方法论文](https://pubmed.ncbi.nlm.nih.gov/22705374/)；[原版 ACT 状态及种子检查代码](https://github.com/MRtrix3/mrtrix3/blob/eeab681d3e0cb004cf1d1d31579d3892197ef5b6/src/dwi/tractography/ACT/method.h)。
+- [原 UKB-connectomics 代码库](https://github.com/sina-mansour/UKB-connectomics)。
