@@ -3,11 +3,14 @@
 import argparse
 import csv
 import gzip
+import hashlib
 import json
 from pathlib import Path
 
 import nibabel as nib
 import numpy as np
+
+from fnit.bwas import core
 
 
 def main():
@@ -22,6 +25,10 @@ def main():
     assert report["all_unordered_voxel_pairs"] == 6296047005
     assert report["cases"] == 792 and report["controls"] == 956
     assert report["sites"] == 36 and report["cdt"] == 5.0
+    upstream_hash = "1b78a98efb04ae5c1b764b101ec434ed8c8277f815481ae0ca940ebd910323c2"
+    core_hash = hashlib.sha256(Path(core.__file__).read_bytes()).hexdigest()
+    assert report["upstream_source_sha256"] == upstream_hash
+    assert core_hash == "2e9b2b9132110285a2cffce83bd2d434178386155eabc5c065018c9512107d82"
     assert report["peak_cuda_allocated_bytes"] < 20 * 1024**3
     assert np.isfinite(report["fwhm_voxels"]) and report["fwhm_voxels"] >= 2
     assert (output / "dataset_description.json").is_file()
@@ -54,7 +61,8 @@ def main():
                "suprathreshold_edges": edge_count,
                "clusters": len(clusters), "ma_nonzero_voxels": int(np.count_nonzero(values)),
                "peak_cuda_allocated_bytes": report["peak_cuda_allocated_bytes"],
-               "elapsed_seconds": report["fnit_elapsed_seconds"]}
+               "elapsed_seconds": report["fnit_elapsed_seconds"],
+               "fnit_core_sha256": core_hash, "original_source_sha256": upstream_hash}
     print(json.dumps(checked, indent=2))
 
 
