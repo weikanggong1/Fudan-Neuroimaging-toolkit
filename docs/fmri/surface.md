@@ -71,7 +71,7 @@ output_dir/
 ├── prepared/native/lh.pial.T1w.native.surf.gii
 ├── prepared/native/lh.midthickness.T1w.native.surf.gii
 ├── msmsulc/L.sphere.sulc_registered.native.surf.gii  # 默认内部注册时生成；右侧同理
-├── newmsm_experimental/L.sphere.discrete.native.surf.gii  # 仅选择实验分支时生成；右侧同理
+├── newmsm_experimental/L.sphere.MSMSulc.native.surf.gii  # 仅选择实验分支时生成；右侧同理
 ├── prepared/L.roi.individual.native.shape.gii  # thickness→填孔→去孤岛的原生皮层掩膜；右侧同理
 ├── registered/L/midthickness.32k_fsLR.surf.gii  # 按所选球面重采样的中面；右侧同理
 ├── projection/L.32k.func.gii                # 左侧完整 32k 顶点时间序列
@@ -87,7 +87,7 @@ output_dir/
 | `prepare_t1w_surface_geometry(subject_dir, output_dir, overwrite=False)` | `subject_dir` 为现成 recon-all 目录；返回双侧 white/pial/midthickness 的 T1w scanner RAS GIFTI、原生顶点数。读取 `orig.mgz` 的 tkRAS→scanner RAS 仿射，不调用 FreeSurfer。 | `mris_convert` 加 T1w 空间仿射；本函数用 nibabel 读取。 |
 | `prepare_fmriprep_surface_inputs(subject_dir, hcp_assets_dir, output_dir, wb_command="wb_command", overwrite=False)` | 在 T1w 几何基础上生成双侧 FS→fsLR 初始球面及个体皮层 ROI；返回 `T1SurfacePreparation.geometry/initial_spheres/individual_rois`。ROI 按 sMRIPrep 的 thickness 绝对值二值化、填孔、去孤岛步骤生成。不创建 MNI 表面或重采样 wmparc。 | `wb_command -surface-sphere-project-unproject`、`-metric-fill-holes`、`-metric-remove-islands`。 |
 | `prepare_msmsulc_inputs(...)`、`run_msmsulc(inputs, output_dir, device="cuda:0")` | 前者产生双侧原生 sulc、旋转球面和 fsLR 参考文件；后者返回左右原生顶点顺序的注册球面，并保存含仿射角度、损失、耗时、显存和折叠数的报告。 | `msm --inmesh ... --refmesh ... --indata ... --refdata ... --conf MSMSulcStrainFinalconf --out ...`。FNIT 优化器尚未逐点复现 MSM。 |
-| `run_newmsm_msmsulc(inputs, output_dir, device="cuda:0")` | 读取同一双侧输入，以 162→642→2,562 个控制点的离散局部搜索输出双侧原生顶点顺序球面及 `registration_report.json`。目前需显式选择；输出尚未与官方 newMSM 数值等价。 | `newmsm --inmesh ... --refmesh ... --indata ... --refdata ... --conf MSMSulcStrainFinalconf --out ...`；官方命令仅用于隔离环境中的 benchmark。 |
+| `run_newmsm_msmsulc(inputs, output_dir, device="cuda:0")` | 读取同一双侧输入，以 162→642→2,562 个控制点进行脑沟相关和三角形应变优化；C++ 组件用 HOCR 降阶及 FastPD 联合选择控制点位移。输出双侧原生顶点顺序球面和 `registration_report.json`。目前需显式选择；球面尚未与官方 newMSM 逐值相同。 | `newmsm --inmesh ... --refmesh ... --indata ... --refdata ... --conf MSMSulcStrainFinalconf --out ...`；官方命令仅用于隔离环境中的 benchmark。 |
 | `run_fmriprep_surface_projection(clean_t1w, clean_mni, left, right, left_label, right_label, hcp_dseg, output_dir, goodvoxels=None, wb_command="wb_command", overwrite=False)` | `clean_t1w` 为 T1w 4D BOLD，`clean_mni` 为 MNI152NLin6Asym 2 mm 4D BOLD；`left/right` 各含 white/pial/midthickness、注册球面、原生 ROI、32k 球面/中面/atlas ROI；三项标签输入指定 fsLR 非内侧壁 ROI 与 HCP dseg。返回双侧 32k GIFTI、91k CIFTI、原 MNI BOLD 路径、耗时及覆盖报告。 | `wb_command -volume-to-surface-mapping ... -ribbon-constrained white pial`；`-metric-dilate ... 10 ... -nearest`；`-metric-mask`；`-metric-resample ... ADAP_BARY_AREA ... -area-surfs ... -current-roi`；再次 `-metric-mask`。 |
 | `create_fmriprep_cifti(clean_mni, left_metric, right_metric, left_label, right_label, hcp_dseg, output_file)` | 双侧 GIFTI 与 MNI BOLD 合成时间×灰质坐标的 CIFTI；按双侧非内侧壁顶点及 HCP 标签分别收集皮层下体素。 | NiWorkflows `GenerateCifti`。输入网格必须与 HCP dseg 匹配；输出沿用输入 TR。 |
 
@@ -128,26 +128,28 @@ msm --inmesh=/absolute/path/work/msmsulc_inputs/L.sphere_rot.surf.gii \
   --out=/absolute/path/work/official/L.
 ```
 
-### 逐级离散球面配准实验分支
+### HOCR 与 FastPD 的逐级球面配准
 
-`run_newmsm_msmsulc` 使用 FNIT 自己的 PyTorch 实现：面积校正的 sulc 重采样，依次使用 162、642、2,562 个控制点和 2,562、10,242、40,962 个数据点，以局部脑沟相关和三角形形变能选取离散位移。它不调用 newMSM；当前搜索是逐控制点局部更新，**尚未复现官方的标签提案及高阶联合优化**。默认 `registration="msmsulc"` 不受此实验分支影响。
+`run_newmsm_msmsulc` 读取双侧球面和 sulc，先估计整体旋转，再依次以 162、642、2,562 个控制点对 2,562、10,242、40,962 个数据点配准。每级运行 8 轮；同一轮固定控制网格，生成 19 个球面位移标签。按照本次官方对照配置，第一级使用面片内 sulc 的 SSD，后两级使用 Pearson 相关，并加上三角形应变代价。FNIT 自行把三元二值代价按 HOCR 降为二次项，由附带的 FastPD C++ 内核求解联合位移；层级间的球面形变沿球心射线插值。皮层投影继续使用同一套 Workbench 命令。
 
-`inputs` 是上例 `prepare_msmsulc_inputs` 返回的 `{"L": MSMSulcInputs, "R": MSMSulcInputs}`。每侧读取 `rotated_sphere`（100 mm 原生球面）、`native_sulc`（同一原生顶点顺序）、`reference_sphere` 和 `reference_sulc`（fsLR 164k 模板）；`native_sphere`、`affine` 由准备函数一并记录。`output_dir` 指定输出文件夹；`device` 指定 PyTorch 设备，CUDA 默认启用 TF32。返回字典的 `L`、`R` 是原生顶点顺序的注册球面路径。目录中还保存 `registration_report.json`，逐侧记录仿射角度、三个级别的控制点数、数据点数、迭代轮数、末轮位移更新数、球面折叠面片修复前后数量、最大修复位移和耗时。若局部折叠无法修复，函数报错，不会输出该侧球面。
+Conda 安装中的 `cxx-compiler` 会在构建 FNIT 时编译扩展。该路径运行时不调用 newMSM、FSL 或 FreeSurfer 可执行文件。FastPD 源码来自 newMSM，**只许可科研和非商业使用**；FNIT 的 HOCR 降阶独立实现，不附带 ELC 源码，许可与修改记录见 [第三方声明](../../THIRD_PARTY_NOTICES.md)。
+
+`inputs` 是上例 `prepare_msmsulc_inputs` 返回的 `{"L": MSMSulcInputs, "R": MSMSulcInputs}`。每侧必须有 `rotated_sphere`（100 mm、原生顶点顺序）、`native_sulc`（同顶点顺序）、`reference_sphere` 与 `reference_sulc`（HCP 164k 模板）；其余 `native_sphere`、`affine` 路径由准备函数记录。`output_dir` 是绝对输出目录，`device` 是 PyTorch 设备，CUDA 默认允许 TF32。返回字典中的 `L`、`R` 分别指向 `L/R.sphere.MSMSulc.native.surf.gii`。同目录的 `registration_report.json` 逐侧记录仿射角度、各级控制点及数据点数、每轮位移更新数、耗时、显存、折叠修复前后数量和最大修复位移；若修复失败则报错。
 
 ```python
 from fnit import run_newmsm_msmsulc
 
 spheres = run_newmsm_msmsulc(
-    inputs=inputs,  # prepare_msmsulc_inputs 返回的双侧球面、sulc 和模板路径
-    output_dir="/absolute/path/work/newmsm_experimental",  # 输出双侧 GIFTI 和 JSON 报告
-    device="cuda:0",  # PyTorch 设备；无 GPU 时填写 "cpu"
+    inputs=inputs,  # 上一段 prepare_msmsulc_inputs 返回的双侧输入字典
+    output_dir="/absolute/path/work/newmsm_experimental",  # 两张 GIFTI 球面与 JSON 报告的目录
+    device="cuda:0",  # PyTorch 计算设备；没有 GPU 时写 "cpu"
 )
-print(spheres["L"], spheres["R"])  # 左右原生顶点顺序注册球面路径
+print(spheres["L"], spheres["R"])  # 左、右原生顶点顺序的球面路径
 ```
 
-高层 `run_surface_from_volume` 可设置 `registration="newmsm_experimental"`，自动准备输入并将这两张球面用于同一套 fsLR32k 投影。已有注册球面也可用 `registered_spheres=(spheres["L"], spheres["R"])` 明确传入。两种调用的最终输出仍是 `projection/L.32k.func.gii`、`projection/R.32k.func.gii` 和 `projection/space-fsLR_den-91k_bold.dtseries.nii`；其余参数及含义见本页高层示例。
+高层 `run_surface_from_volume` 设 `registration="newmsm_experimental"` 即自动运行此函数并把球面传给 fsLR32k 投影；也可把返回值作为 `registered_spheres=(spheres["L"], spheres["R"])` 传入。最终写出 `projection/L.32k.func.gii`、`projection/R.32k.func.gii` 和 `projection/space-fsLR_den-91k_bold.dtseries.nii`，三者分别是含全 32k 顶点的左右 GIFTI 时间序列和 91k 灰质坐标 CIFTI；其余输入见本页高层示例。
 
-官方对照在隔离环境中运行，每侧命令如下，右侧把 `L` 换成 `R`。所用 HCP `MSMSulcStrainFinalconf` 的 `--simval` 需从 `3` 改为 `1`，因为本次 newMSM 版本不再接受原 NMI 设定；保留其余层级、正则项和迭代次数。FNIT 安装和正常运行均不使用这个命令。
+官方对照在隔离环境中运行。下例是左侧，右侧把 `L` 换为 `R`；HCP 配置中的 `--simval=3` 改为此版 newMSM 可接受的 `1`，其余层级、正则和迭代设置保持一致。FNIT 安装和运行不执行该命令。
 
 ```bash
 newmsm --inmesh=/absolute/path/work/msmsulc_inputs/L.sphere_rot.surf.gii \
@@ -158,125 +160,25 @@ newmsm --inmesh=/absolute/path/work/msmsulc_inputs/L.sphere_rot.surf.gii \
   --out=/absolute/path/work/newmsm_reference/L.
 ```
 
-一例真实静息态数据在同一初始球面、个体 sulc 和模板 sulc 下对照。按原生顶点对应，先计算两张球面的夹角，再取中位数和第 95 百分位。时间是每侧注册的墙钟时间；FNIT 使用 H100 GPU，官方 newMSM 使用 8 个 CPU 线程，且结果精度不同，不能将耗时比解释为等价加速。
+在同一例真实静息态数据上，FNIT 与官方 newMSM 使用相同的初始球面、源 sulc 和模板 sulc。球面角差按对应原生顶点计算；时间为单侧注册墙钟时间，FNIT 在 H100 上运行，官方用 8 个 CPU 线程，精度仍不相等。
 
-| 实现 | 左侧角差中位数 / 95% | 右侧角差中位数 / 95% | 左 / 右耗时 |
+| 实现 | 左侧角差中位数 / 第 95 百分位 | 右侧角差中位数 / 第 95 百分位 | 左 / 右注册耗时 |
 |---|---:|---:|---:|
-| FNIT 逐级离散实验分支 vs 官方 newMSM | 0.494° / 1.291° | 0.495° / 1.768° | 40.34 / 36.39 秒 |
+| FNIT HOCR + FastPD vs 官方 newMSM | 0.383° / 1.060° | 0.407° / 1.018° | 138.59 / 123.70 秒 |
 | 官方 newMSM | 0° / 0° | 0° / 0° | 312.61 / 241.95 秒 |
 
-固定回归后 BOLD、T1w 表面、ROI、模板和 Workbench 命令，仅替换左右注册球面。对每个灰质坐标先计算 490 帧 Pearson r，再在区域内取均值；常数序列不参与相关均值，MAE 使用全部对应值。
+FNIT 左侧修复前有 1 个折叠面片，右侧为 0；写出后两侧均为 0。左侧最大修复位移 0.104 mm，PyTorch 峰值显存分别为 0.726、0.727 GB。只固定 BOLD、T1w 表面、皮层 ROI、模板和 Workbench 步骤，并替换注册球面，对每个灰质坐标的 490 帧先算 Pearson r，再在区域内求均值；常数序列不计入相关均值，MAE 包含全部对应值。
 
-| 实验分支 vs 官方 newMSM 球面 | 灰质坐标 | 有效相关 | 平均 r | 中位 r | MAE |
+| FNIT 球面 vs 官方 newMSM 球面 | 灰质坐标 | 有效相关 | 平均 r | 中位 r | MAE |
 |---|---:|---:|---:|---:|---:|
-| 左皮层 | 29,696 | 29,695 | 0.9184 | 0.9564 | 21.55 |
-| 右皮层 | 29,716 | 29,684 | 0.8989 | 0.9505 | 26.15 |
+| 左皮层 | 29,696 | 29,695 | 0.9414 | 0.9720 | 18.20 |
+| 右皮层 | 29,716 | 29,689 | 0.9420 | 0.9686 | 19.71 |
 | 皮层下 | 31,870 | — | 1.0000 | 1.0000 | 0 |
 
-该次实验球面的 490 帧投影及 CIFTI 组装耗时 493.05 秒，复用已生成的 T1w BOLD，不含上述球面注册时间。完成这次投影后，检查发现左侧 240,066 个面片中有 3 个折叠，右侧 245,896 个面片没有折叠。现版注册在写出前局部修复：左侧 3→0，最大顶点位移 0.119 mm；右侧 0→0。用修复后的左球面重做 490 帧皮层重采样，平均时间相关相对官方为 0.918351，原输出为 0.918353；两版输出的 MAE 为 0.00054。实验分支的球面角差和双侧平均时间相关仍未达到预设的 0.25°、0.95 目标；因此目前只供显式选择和比较，不作为数值等价的默认分支。下文默认 FNIT 与旧版 MSM 的指标是另一组对照。
+单独的左/右 Workbench 皮层重采样与掩膜分别用 38.60 / 35.67 秒，不含球面注册、T1w BOLD 生成或 CIFTI 组装。同一检查点上，独立 HOCR 的二次项在 100 组随机代价及 100 组相邻面片模型中与上游实现的系数误差不超过 2.2×10⁻¹⁴；接上同一 FastPD 后，真实数据的该轮移动点为 411 个，官方为 396 个，其中 375 个相同。两次相同输入的官方 newMSM 自身球面角差中位数为左 0.394°、右 0.353°，对应皮层逐点时间相关均值为 0.943、0.954。FNIT 目前接近这一重复运行的波动量级，但仍未达到先前设定的角差 0.25°、时间相关 0.95 验收线，故继续保留显式实验选项，不称官方数值等价。剩余差异主要在每片数据项和离散轨迹。
 
-同一输入、配置和 8 个 CPU 线程重跑官方 newMSM，左右球面相对首次官方结果的中位角差分别为 0.394°、0.353°。固定其余投影输入后，两次官方结果的皮层逐点时间相关均值为左 0.943、右 0.954。FNIT 实验分支相对第二次官方结果分别为 0.914、0.893；相对首次结果见上表。重复跑说明单次官方球面本身不是逐顶点稳定的数值真值，但 FNIT 的时间序列差异仍大于两次官方运行之间的差异。影响官方运行间波动的具体环节尚未定位。
+同一回归后 BOLD 从 `run_surface_from_volume(registration="newmsm_experimental")` 运行到底，生成 `490 × 91,282` 的 CIFTI，耗时 719.00 秒；两侧 32k GIFTI 与分别运行注册、投影得到的数组逐值相同，数组中均为有限值。该总时间包含已有 T1w BOLD 的读取、结构文件准备、双侧注册、Workbench 投影和 CIFTI 组装，不包含上游混杂回归。
 
-进一步用同一例真实数据的官方逐轮输出核对数值行为。官方最后一级使用 19 个标签；标签搜索半径由该级**未变形**控制网格的最大边长确定。官方某一轮移动 396 个控制点。以相同轮次的输入计算 FNIT 面片代价，官方更新前后为 1128.19→1116.22；独立图割加局部补全虽降至 1064.14，却移动 1319 个控制点；只接受图割确定标签时降至 1110.53，移动 184 个。代价下降不能代替对官方标签轨迹的验证。[官方 newMSM 指南](https://fsl.fmrib.ox.ac.uk/fsl/docs/registration/newmsm/guide.html)说明了三点面片能量和 HOCR 优化。
-
-官方七次逐轮球面变形检查点还可单独验证插值：目前平面投影的平均顶点距离约为 0.00126 mm，沿球心射线投影并计算重心权重后约为 0.000005 mm。直接把射线插值用于现有局部求解器，最终球面中位角差为左 0.566°、右 0.467°；只用于逐级传递和最终球面写出时为左 0.568°、右 0.461°，后者在修复前分别有 2、1 个折叠面片。已发布版本为左 0.494°、右 0.495°，因此未将这项替换加入安装包。
-
-对官方和 FNIT 的 40,962 点重采样球面按三维坐标匹配顶点后，两套网格的最近点距离中位数为 0.000004 mm，但只有 0.044% 的顶点拥有相同数组下标。因此必须先重排特征，再比较数值。真实 sulc 的重采样结果与官方相关为源侧 0.999994、模板侧约 1.000000；平均绝对差分别为 0.000479、0.000000074。按原始数组下标直接比较得到的近零相关是顶点编号差异，不是特征重采样失败。FNIT 内部几何和特征使用同一编号顺序，无需改写输出球面的顶点顺序；这项核查将剩余主要误差进一步定位到标签提案、联合求解和变形更新。
-
-独立的完整联合求解实验也没有通过最终球面验收：加局部补全并采用射线变形时，左侧角差为 0.624°，有 3 个待修复的折叠面片，耗时 553 秒；仅接受确定标签时，角差为 0.972°，有 2 个待修复面片，耗时 135 秒。两者都比已发布左侧球面更偏离官方，故未接入 pipeline。剩余工作是使高阶二次化后的标签求解和跨轮更新接近官方，并在双侧球面及 490 帧时间序列上重新验收。
-
-原版完整流程的命令格式如下；`--cifti-output 91k` 指定 91,282 个灰质坐标，`--msm` 启用官方 MSMSulc，`--fs-subjects-dir` 使用已有的同被试 FreeSurfer subject。这是原软件等价入口的说明，不是下文固定输入 benchmark 的运行命令；原版从 BIDS 原始数据重算上游流程，不会直接读取 FNIT 已回归的 BOLD。[官方参数说明](https://fmriprep.org/en/latest/usage.html)与[fsLR 输出说明](https://fmriprep.org/en/latest/outputs.html)给出其空间和球面约定。
-
-```bash
-fmriprep /absolute/path/bids /absolute/path/fmriprep_derivatives participant \
-  --participant-label EXAMPLE \
-  --fs-subjects-dir /absolute/path/freesurfer_subjects \
-  --cifti-output 91k \
-  --msm \
-  --output-spaces MNI152NLin6Asym:res-2 fsLR:den-32k
-```
-
-固定输入的皮层步骤对应以下 Workbench 命令。示意左侧；右侧把 `L` 文件替换为 `R`。`T1W_BOLD` 是 T1w 4D BOLD，`WHITE`、`PIAL`、`MID` 是 T1w 原生表面，`CORTEX_MASK` 是 thickness 经填孔、去孤岛后的原生 ROI，`REG_SPHERE` 是 MSMSulc 原生球面，`ATLAS_SPHERE`、`ATLAS_MID` 和 `ATLAS_ROI` 是 fsLR32k 文件。省略可选 `-volume-roi` 对应本页默认设置。
-
-```bash
-wb_command -volume-to-surface-mapping "$T1W_BOLD" "$MID" L.native.func.gii -ribbon-constrained "$WHITE" "$PIAL"
-wb_command -metric-dilate L.native.func.gii "$MID" 10 L.dilated.func.gii -nearest
-wb_command -metric-mask L.dilated.func.gii "$CORTEX_MASK" L.masked.func.gii
-wb_command -metric-resample L.masked.func.gii "$REG_SPHERE" "$ATLAS_SPHERE" ADAP_BARY_AREA L.atlas.func.gii -area-surfs "$MID" "$ATLAS_MID" -current-roi "$CORTEX_MASK"
-wb_command -metric-mask L.atlas.func.gii "$ATLAS_ROI" L.32k.func.gii
-```
-
-单独准备结构输入时，每个参数可按下面填写。原生 ROI 不随注册球面改变。选定注册球面后，使用 `wb_command -surface-resample` 将个体 T1w 中面变换到 fsLR32k；高层入口会自动完成这一步。
-
-```python
-from fnit import prepare_fmriprep_surface_inputs
-
-prepared = prepare_fmriprep_surface_inputs(
-    subject_dir="/absolute/path/FreeSurfer",  # 同被试已完成的 recon-all 目录
-    hcp_assets_dir="/absolute/path/hcp_surface_assets",  # HCP 球面与 ROI 模板根目录
-    output_dir="/absolute/path/surface/prepared",  # T1w 几何、初始球面与皮层 ROI 的保存目录
-    wb_command="/absolute/path/bin/wb_command",  # Connectome Workbench 可执行文件
-    overwrite=False,  # 已有几何文件时停止
-)
-print(prepared.initial_spheres)  # 左、右原生顶点顺序的 FS→fsLR 初始球面
-print(prepared.individual_rois)  # 左、右个体皮层 ROI
-```
-
-已有注册后的左右 `SurfaceHemisphere` 时，可单独执行投影与组装。`left`、`right` 必须各含 T1w 空间 white/pial/midthickness、原生注册球面和 ROI，以及 fsLR32k 球面、中面和 atlas ROI；这些字段不能改成 MNI 空间表面。
-
-```python
-from fnit import SurfaceHemisphere, run_fmriprep_surface_projection, create_fmriprep_cifti
-
-left = SurfaceHemisphere(
-    white="/absolute/path/L.white.T1w.native.surf.gii",  # 左侧 T1w 白质面
-    pial="/absolute/path/L.pial.T1w.native.surf.gii",  # 左侧 T1w 软脑膜面
-    midthickness="/absolute/path/L.midthickness.T1w.native.surf.gii",  # 左侧 T1w 中面
-    registered_sphere="/absolute/path/L.sphere.MSMSulc.native.surf.gii",  # 左侧原生顶点顺序的注册球面
-    native_roi="/absolute/path/L.roi.native.shape.gii",  # 左侧原生皮层掩膜
-    atlas_sphere="/absolute/path/L.sphere.32k_fs_LR.surf.gii",  # 左侧 fsLR32k 球面
-    atlas_midthickness="/absolute/path/L.midthickness.32k_fsLR.surf.gii",  # 左侧 32k 中面
-    atlas_roi="/absolute/path/L.atlasroi.32k_fs_LR.shape.gii",  # 左侧 fsLR32k 皮层 ROI
-)
-right = SurfaceHemisphere(
-    white="/absolute/path/R.white.T1w.native.surf.gii",  # 右侧 T1w 白质面
-    pial="/absolute/path/R.pial.T1w.native.surf.gii",  # 右侧 T1w 软脑膜面
-    midthickness="/absolute/path/R.midthickness.T1w.native.surf.gii",  # 右侧 T1w 中面
-    registered_sphere="/absolute/path/R.sphere.MSMSulc.native.surf.gii",  # 右侧原生顶点顺序的注册球面
-    native_roi="/absolute/path/R.roi.native.shape.gii",  # 右侧原生皮层掩膜
-    atlas_sphere="/absolute/path/R.sphere.32k_fs_LR.surf.gii",  # 右侧 fsLR32k 球面
-    atlas_midthickness="/absolute/path/R.midthickness.32k_fsLR.surf.gii",  # 右侧 32k 中面
-    atlas_roi="/absolute/path/R.atlasroi.32k_fs_LR.shape.gii",  # 右侧 fsLR32k 皮层 ROI
-)
-
-projection = run_fmriprep_surface_projection(
-    clean_t1w="/absolute/path/clean_T1w.nii.gz",  # 已回归、重采样到 T1w 的 4D BOLD
-    clean_mni="/absolute/path/clean_MNI152NLin6Asym_2mm.nii.gz",  # 同一 4D BOLD 的 MNI 2 mm 版本
-    left=left,  # 左侧注册后的 SurfaceHemisphere
-    right=right,  # 右侧注册后的 SurfaceHemisphere
-    left_label="/absolute/path/L.atlasroi.32k_fs_LR.shape.gii",  # 左侧非内侧壁标签
-    right_label="/absolute/path/R.atlasroi.32k_fs_LR.shape.gii",  # 右侧非内侧壁标签
-    hcp_dseg="/absolute/path/fmriprep/tpl-MNI152NLin6Asym_res-02_atlas-HCP_dseg.nii.gz",  # 皮层下分区
-    output_dir="/absolute/path/surface/projection",  # 双侧 32k GIFTI 与 91k CIFTI 输出目录
-    goodvoxels=None,  # 可选的 T1w 3D 体积采样掩膜
-    wb_command="/absolute/path/bin/wb_command",  # Connectome Workbench 可执行文件
-    overwrite=False,  # 目标 CIFTI 已存在时停止
-)
-
-cifti = create_fmriprep_cifti(
-    clean_mni="/absolute/path/clean_MNI152NLin6Asym_2mm.nii.gz",  # 同一时间序列的 MNI 2 mm 4D BOLD
-    left_metric=projection.left_metric,  # 左侧 32k 顶点时间序列 GIFTI
-    right_metric=projection.right_metric,  # 右侧 32k 顶点时间序列 GIFTI
-    left_label="/absolute/path/L.atlasroi.32k_fs_LR.shape.gii",  # 左侧保留的皮层顶点
-    right_label="/absolute/path/R.atlasroi.32k_fs_LR.shape.gii",  # 右侧保留的皮层顶点
-    hcp_dseg="/absolute/path/fmriprep/tpl-MNI152NLin6Asym_res-02_atlas-HCP_dseg.nii.gz",  # 皮层下 HCP 标签
-    output_file="/absolute/path/surface/check.dtseries.nii",  # 独立组装得到的 CIFTI 文件名
-)
-print(cifti)  # 时间×灰质坐标，TR 来自 clean_mni 的 NIfTI 头
-```
-
-已有 `run_surface_from_mni`/`run_surface_projection` 是独立的 MNI 体积投影接口，包含 fsLR 平滑和皮层下重采样，**不是当前高层 fMRIPrep 路径**；调用它们时输入和输出约定见函数 docstring。现有的结构偏置校正与髓鞘图函数也不参与这条路径。
-
-## 真实数据对照
 
 测试使用一例真实 UKB 静息态 BOLD：490 帧，TR 0.735 秒。固定回归后 BOLD、T1w white/pial/midthickness、sMRIPrep 规则生成的 cortex mask、MNI BOLD、TemplateFlow 标签与 HCP dseg。皮层直接用 T1w BOLD；皮层下从 MNI BOLD 取值。公开的[标量摘要](../../validation/fmri/fmriprep_surface_summary.json)不含影像、逐顶点值或被试标识。fMRIPrep 及 NiWorkflows 参照代码均固定提交与 SHA-256；官方命令只在隔离的对照环境执行，FNIT 运行时不导入它们。
 
@@ -315,6 +217,8 @@ print(cifti)  # 时间×灰质坐标，TR 来自 clean_mni 的 NIfTI 头
 ## 参考文献与原实现
 
 - 参考文献：Robinson et al., *Multimodal surface matching with higher-order smoothness constraints*, NeuroImage (2018), [doi:10.1016/j.neuroimage.2017.10.037](https://doi.org/10.1016/j.neuroimage.2017.10.037)。
+- 参考文献：Ishikawa, *Transformation of General Binary MRF Minimization to the First-Order Case*, IEEE TPAMI (2011), [doi:10.1109/TPAMI.2010.91](https://doi.org/10.1109/TPAMI.2010.91)。
+- 参考文献：Komodakis、Tziritas 与 Paragios, *Fast, Approximately Optimal Solutions for Single and Dynamic MRFs*, CVPR (2007), [原论文](https://www.csd.uoc.gr/~tziritas/papers/CVPR07_FastPD.pdf)。
 - 参考文献：Esteban et al., *fMRIPrep: a robust preprocessing pipeline for functional MRI*, Nature Methods (2019), [doi:10.1038/s41592-018-0235-4](https://doi.org/10.1038/s41592-018-0235-4)。
 - 参考文献：Glasser et al., *The Minimal Preprocessing Pipelines for the Human Connectome Project*, NeuroImage (2013), [doi:10.1016/j.neuroimage.2013.04.127](https://doi.org/10.1016/j.neuroimage.2013.04.127)。
-- 原实现代码库：[newMSM](https://github.com/rbesenczi/newMSM)（[官方使用说明](https://fsl.fmrib.ox.ac.uk/fsl/docs/registration/newmsm/guide.html)）；[fMRIPrep fsLR 重采样](https://github.com/nipreps/fmriprep/blob/e56dc9938e742c789510705372f88fdb5a8206c2/fmriprep/workflows/bold/resampling.py)；[sMRIPrep](https://github.com/nipreps/smriprep)；[HCP Pipelines](https://github.com/Washington-University/HCPpipelines)；[Connectome Workbench](https://github.com/Washington-University/workbench)。
+- 原实现代码库：[newMSM](https://github.com/rbesenczi/newMSM)及其 [FastPD 源码](https://github.com/rbesenczi/newMSM/tree/260718953547743c028a45f8c885d163441df87a/libraries/msm-newmeshreg/include/FastPD)（[官方使用说明](https://fsl.fmrib.ox.ac.uk/fsl/docs/registration/newmsm/guide.html)）；[fMRIPrep fsLR 重采样](https://github.com/nipreps/fmriprep/blob/e56dc9938e742c789510705372f88fdb5a8206c2/fmriprep/workflows/bold/resampling.py)；[sMRIPrep](https://github.com/nipreps/smriprep)；[HCP Pipelines](https://github.com/Washington-University/HCPpipelines)；[Connectome Workbench](https://github.com/Washington-University/workbench)。

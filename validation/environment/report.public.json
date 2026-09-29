@@ -1,19 +1,21 @@
 {
   "schema_version": 1,
-  "date": "2026-09-28",
+  "date": "2026-09-29",
   "feature": "FNIT independent Conda environment resolution",
-  "environment_yml_sha256": "a2baf45c2a1c5b50cf0c6e0253b83dc9ec0db109c69ececaef40159bc3205183",
+  "environment_yml_sha256": "74ebdbdb82a6d123de0420a28cd4d869fc5213ffb7c23ae0fc05ae725ce4821f",
   "solver": {
     "host_class": "networked Linux x86_64 login node",
     "target_glibc": "2.17",
     "conda_version": "24.11.3",
     "dry_run_solved": true,
-    "resolved_conda_packages": 221,
+    "resolved_conda_packages": 235,
     "python": "3.11.16",
     "pytorch": "2.5.1 CUDA 11.8 cuDNN 9.1",
     "torchtriton": "3.1.0",
     "trx_python_resolved": false,
-    "connectome_workbench_cli": "2.1.0"
+    "connectome_workbench_cli": "2.1.0",
+    "cxx_compiler": "2.0.0",
+    "sysroot_linux_64": "2.17"
   },
   "pip_pinned_numpy": {
     "version": "1.26.4",
@@ -24,5 +26,5 @@
     "runtime_blas_name": "openblas64",
     "runtime_blas_version": "0.3.23.dev"
   },
-  "scope": "Conda dependency resolution was rerun after adding Connectome Workbench 2.1.0 and removing the unused trx-python dependency from the base single-subject environment. The pinned NumPy wheel was separately downloaded, hash-checked, imported, and used by the current AMICO real-data comparison. Optional recon-all and Connectome extras are documented separately."
+  "scope": "Conda dependency resolution was rerun after adding cxx-compiler for the MSMSulc FastPD extension. A wheel was built and installed in a separate target on gpucw1; the native extension imported and solved a triangle test. This is not a clean creation of the entire Conda environment. The pinned NumPy wheel was previously downloaded, hash-checked, imported, and used by the AMICO real-data comparison."
 }

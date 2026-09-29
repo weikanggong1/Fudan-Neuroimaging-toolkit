@@ -13,6 +13,17 @@ The complete FreeSurfer Software License terms appear in [`licenses/FreeSurfer.t
 
 This package is an independent adaptation; it is not an official FreeSurfer release.
 
+`src/fnit/fmri/_fastpd_src/FastPD.h`, `graph.h`, and `block.h` are the FastPD
+implementation distributed with [newMSM commit 2607189](https://github.com/rbesenczi/newMSM/tree/260718953547743c028a45f8c885d163441df87a/libraries/msm-newmeshreg/include/FastPD).
+`FastPD.h` has a local include change so it can use FNIT's small model adapter.
+FastPD is restricted to research and non-commercial use; the upstream notice is
+preserved in [`licenses/FastPD-research-only.txt`](licenses/FastPD-research-only.txt).
+The containing newMSM repository also publishes an MIT license, preserved in
+[`licenses/newMSM-MIT.txt`](licenses/newMSM-MIT.txt); the FastPD-specific
+restriction remains applicable to this component.
+FNIT's triangle-to-quadratic HOCR reduction in `fastpd_module.cpp` is an
+independent implementation. Upstream ELC source is not included.
+
 - `synthstrip/` adapts FreeSurfer's `mri_synthstrip`, by Andrew Hoopes, Jocelyn S. Mora, Adrian V. Dalca, Bruce Fischl, Malte Hoffmann and collaborators. The original implementation already uses PyTorch. Preserve the accompanying FreeSurfer license (`licenses/FreeSurfer.txt`).
 - `synthmorph/pipeline.py` and the image-space workflow adapt FreeSurfer's SynthMorph registration code by Malte Hoffmann and collaborators. Preserve the accompanying FreeSurfer license.
 - `synthmorph/models.py` and `synthmorph/spatial.py` implement VoxelMorph/Neurite algorithms, originally distributed under Apache License 2.0 (`licenses/Apache-2.0.txt`). Modified for PyTorch, channels-first tensors, direct HDF5 loading, and reusable inference.

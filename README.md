@@ -74,7 +74,7 @@ python -c "import fnit, torch; print(fnit.__version__, torch.__version__, torch.
 fnit --help
 ```
 
-`environment.yml` 固定 Python 3.11、PyTorch 2.5.1、CUDA 11.8、Triton 3.1.0、Connectome Workbench 2.1.0，以及 AMICO 逐体素对照使用的 NumPy 1.26.4 x86_64 wheel。目标 GPU 节点为 glibc 2.17 时，可在共享文件系统上按该 ABI 求解：
+`environment.yml` 固定 Python 3.11、PyTorch 2.5.1、CUDA 11.8、Triton 3.1.0、Connectome Workbench 2.1.0、构建 MSMSulc 扩展所需的 C++ 编译器，以及 AMICO 逐体素对照使用的 NumPy 1.26.4 x86_64 wheel。目标 GPU 节点为 glibc 2.17 时，可在共享文件系统上按该 ABI 求解：
 
 ```bash
 FNIT_ENV_PREFIX=/path/on/shared-storage/fnit-conda
@@ -85,6 +85,8 @@ conda activate "$FNIT_ENV_PREFIX"
 [Conda 环境验证](validation/environment/README.md)和[机器可读报告](validation/environment/report.public.json)记录了依赖 dry-run、目标 ABI、固定 wheel 的下载校验与实际导入结果。dry-run 证明依赖可解析，不代表任意机器已经完成环境创建。
 
 只需基础 Python 安装时也可使用虚拟环境：
+
+该方式需预先安装支持 C++17 的编译器，以构建表面 MSMSulc 的 FastPD 扩展。
 
 ```bash
 python3 -m venv .venv
