@@ -107,10 +107,7 @@ class TorchAMICONODDI:
         if fit_method not in ("amico", "classic"):
             raise ValueError("fit_method must be 'amico' or 'classic'")
         self.device = configure_device(device)
-        self.config = (
-            AMICONODDIConfig(lut_batch_size=100 if fit_method == "classic" else 400)
-            if config is None else config
-        )
+        self.config = AMICONODDIConfig() if config is None else config
         self.fit_method = fit_method
 
     def __call__(self, data, mask, bvecs, bvals):

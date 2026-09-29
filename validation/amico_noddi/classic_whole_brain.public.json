@@ -7,28 +7,18 @@
     105
   ],
   "mask_voxels": 242261,
-  "input_sha256": {
-    "DWI.nii.gz": "67e4564323d8d4dfacaa04a451e2ffa0c89de32cb6d98eb5deb46ea8971deeaa",
-    "mask.nii.gz": "3d1c29ec2f1a6870be93e0b436c884dc805d87244f186312c93086301ae08df4",
-    "bvals": "4bba64690ad224848ea4d0891b98a859b79e11f0de77ad9d2539f4397fda2224",
-    "rotated_bvecs": "d17c075f60d433feeb8450bedb83ec3a6771878e150542b05627d2feeec158a1"
-  },
-  "source_sha256": {
-    "src/fnit/amico_noddi/classic.py": "2d1cd22c73b40edb5aeabe2c3ebf3dd642a3984b5cf037dc058dad778be16ee7",
-    "src/fnit/amico_noddi/core.py": "038eeb7b259a94bd0a395d9073cc182a3138f068d1760b32eb18140cc91b3096"
-  },
   "device": "NVIDIA H100 PCIe",
-  "gpu_memory_fraction_limit": 0.1,
-  "gpu_state_columns": "index, memory_used_MiB, memory_free_MiB, utilization_percent",
+  "gpu_memory_fraction_limit": 0.2,
+  "torch_num_threads": 8,
   "gpu_before": [
-    "0, 70269, 10738, 100",
-    "1, 69927, 11080, 100"
+    "0, 61657, 19350, 99",
+    "1, 70875, 10132, 100"
   ],
   "gpu_after": [
-    "0, 79037, 1970, 100",
-    "1, 70955, 10052, 100"
+    "0, 74915, 6092, 100",
+    "1, 70875, 10132, 100"
   ],
-  "wall_seconds_including_io": 340.86137754423544,
+  "wall_seconds_including_io": 209.54601059807464,
   "qc": {
     "device": "cuda:0",
     "kernel_dtype": "float32",
@@ -49,23 +39,36 @@
     "numpy_blas_name": "blas",
     "numpy_blas_version": "3.9.0",
     "validated_numpy_build": false,
-    "kernel_seconds": 0.663515486754477,
-    "direction_seconds": 0.5228944472037256,
-    "solver_seconds": 334.8202594202012,
-    "amico_initialization_seconds": 211.43188071995974,
-    "elapsed_seconds": 337.49841225286946,
-    "peak_cuda_memory_bytes": 2301324288,
+    "kernel_seconds": 0.7382963821291924,
+    "direction_seconds": 0.5260367058217525,
+    "solver_seconds": 202.72433483600616,
+    "amico_initialization_seconds": 84.63272823393345,
+    "elapsed_seconds": 205.49738988699391,
+    "peak_cuda_memory_bytes": 9952554496,
     "voxels": 242261,
     "volumes": 105,
     "lut_directions_used": 500,
-    "lut_batch_size": 100,
+    "lut_batch_size": 400,
     "support_size_min": 1,
     "support_size_median": 10.0,
     "support_size_max": 27,
-    "accepted_updates": 3710026,
+    "accepted_updates": 3710053,
     "rician_sigma_median": 0.00035961007233709097,
-    "classic_refinement_seconds": 123.38835595734417
+    "classic_refinement_seconds": 118.09158014785498
   },
+  "input_sha256": {
+    "DWI.nii.gz": "67e4564323d8d4dfacaa04a451e2ffa0c89de32cb6d98eb5deb46ea8971deeaa",
+    "mask.nii.gz": "3d1c29ec2f1a6870be93e0b436c884dc805d87244f186312c93086301ae08df4",
+    "bvals": "4bba64690ad224848ea4d0891b98a859b79e11f0de77ad9d2539f4397fda2224",
+    "rotated_bvecs": "d17c075f60d433feeb8450bedb83ec3a6771878e150542b05627d2feeec158a1"
+  },
+  "source_sha256": {
+    "src/fnit/amico_noddi/classic.py": "2d1cd22c73b40edb5aeabe2c3ebf3dd642a3984b5cf037dc058dad778be16ee7",
+    "src/fnit/amico_noddi/core.py": "5e79e796e95f9c53429b8cb408d87d9e2455ed101cb7ac7ec00ad9c3f354ae26",
+    "src/fnit/amico_noddi/solver.py": "b86c56d9e3aef90efad74748309c627f4cb013071f3670f74c615f9e27001bf3",
+    "src/fnit/amico_noddi/kernels.py": "46f1044aa5f1c2dbffd12dd33707c0e192ef1de01dc23157ae03a0977b3d0b59"
+  },
+  "gpu_state_columns": "index, memory_used_MiB, memory_free_MiB, utilization_percent",
   "output_checks": {
     "NDI": {
       "shape": [
@@ -78,7 +81,7 @@
       "outside_mask_all_zero": true,
       "masked_min": 0.0010000000474974513,
       "masked_max": 0.9990000128746033,
-      "sha256": "91812bc20e62de76c611b7e8b225e71f291ac6266e8967740ebbe4c6a03ed59a"
+      "sha256": "a90cf177ac71a9174ad7b349cb0fec21677f3ac1f3cae4ae1d5582dda3d330a6"
     },
     "ODI": {
       "shape": [
@@ -91,7 +94,7 @@
       "outside_mask_all_zero": true,
       "masked_min": 0.004999999888241291,
       "masked_max": 0.9950000047683716,
-      "sha256": "ecadb89d5d342fb55bbe9536eaea679fe430addab883f495659d54b52baf4c1d"
+      "sha256": "15cdb655a43526a2bf8291c2aa8ee3bb8f37d5b4e0955a9ab6d6e5cd9b5612aa"
     },
     "FWF": {
       "shape": [
@@ -104,7 +107,7 @@
       "outside_mask_all_zero": true,
       "masked_min": 0.0,
       "masked_max": 0.9990000128746033,
-      "sha256": "78f6ef03e1c3ebd419886f2f9eb38d91905e47cc173a0e1fce9f7fb99db6ea56"
+      "sha256": "17ca37dcb7f2f52d9fa37618664cf20b26e9aa8ad5169549e4fda427717cc592"
     },
     "dir": {
       "shape": [
@@ -118,7 +121,7 @@
       "outside_mask_all_zero": true,
       "masked_min": -0.9999992847442627,
       "masked_max": 0.9999996423721313,
-      "sha256": "54e15be53e46775db9d64c4c16ba09510fdc19df08eeccbb4836cf4fda0f2121",
+      "sha256": "4ddc303f048ee99a2cb80e513cbfc846962ffb09093c61fe98caf0d2e2cf5ed0",
       "masked_direction_norm_min": 0.9999999403953552,
       "masked_direction_norm_max": 1.0
     },
@@ -139,5 +142,19 @@
       "masked_count_gt_1": 19
     }
   },
-  "timing_note": "One real subject, full 242261-voxel brain mask, GPU shared with other jobs at 100% utilization before and after; observed duration is not a hardware-normalized speedup."
+  "optimization_check": {
+    "previous_lut_batch_size": 100,
+    "previous_wall_seconds_including_io": 340.86137754423544,
+    "previous_peak_cuda_memory_bytes": 2301324288,
+    "current_lut_batch_size": 400,
+    "max_abs_difference_vs_previous_full_brain_output": {
+      "NDI": 5.960464477539063e-08,
+      "ODI": 5.960464477539063e-08,
+      "FWF": 4.0046870708465576e-08,
+      "dir": 5.364418029785156e-07,
+      "RMSE": 0.0
+    },
+    "note": "Runs occurred at different times on a shared occupied H100; timings are observations, not an isolated speedup estimate."
+  },
+  "timing_note": "One real subject, full 242261-voxel brain mask, shared H100 at 99-100% utilization before and after; observed duration is not a hardware-normalized speedup."
 }

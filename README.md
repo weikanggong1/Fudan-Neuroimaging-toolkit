@@ -69,9 +69,10 @@ CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核。模型、影像张
 
 | 功能 | 真实输入 | GPU | 全流程实测耗时 | PyTorch 峰值 allocation |
 |---|---|---|---:|---:|
-| `TorchAMICONODDI(fit_method="classic")` | 一例 EDDY 校正 DWI，`104×104×72×105`，全脑 mask `242,261` 体素 | H100 PCIe，进程显存分配上限 10% | `340.86 s`（含读写） | `2.30 GB` |
+| `TorchAMICONODDI(fit_method="amico")` | 一例 EDDY 校正 DWI，`104×104×72×105`，全脑 mask `242,261` 体素 | H100 PCIe，进程显存分配上限 20% | `81.79 s`（含读写） | `9.95 GB` |
+| `TorchAMICONODDI(fit_method="classic")` | 同一例 DWI 与全脑 mask | H100 PCIe，进程显存分配上限 20% | `209.55 s`（含读写） | `9.95 GB` |
 
-本次运行的 AMICO 初始化耗时 `211.43 s`，连续 Watson 拟合耗时 `123.39 s`。GPU 在测试前后均有其他作业、利用率 100%；上表是这一次完整被试全脑运行的观测时间。五张输出图均为有限值、与输入同网格，mask 外为零；详细配置、显存占用、输出 SHA-256 和质量检查见[全脑机器报告](validation/amico_noddi/classic_whole_brain.public.json)。另用该病例的 24 个真实体素核对了[原版 MATLAB NODDI 的数值一致性](validation/amico_noddi/classic_original_real_24.public.json)，该小样本不用于主页耗时。
+两种模式均使用默认每批 400 个 LUT 方向，各自完整运行同一真实病例。经典模式中，AMICO 初始化耗时 `84.63 s`，连续 Watson 拟合耗时 `118.09 s`。测试前后 GPU 均被其他作业占用，利用率为 99–100%；上表是各一次全脑运行的观测时间，不用于推断稳定加速比。五张输出图均为有限值、与输入同网格，mask 外为零；配置、输入及输出 SHA-256 和逐图精度见 [AMICO 全脑报告](validation/amico_noddi/report.public.json)与[经典 NODDI 全脑报告](validation/amico_noddi/classic_whole_brain.public.json)。另用同一病例的 24 个真实体素核对了[原版 MATLAB NODDI 的数值一致性](validation/amico_noddi/classic_original_real_24.public.json)，该小样本不用于主页耗时。
 
 ## 安装
 

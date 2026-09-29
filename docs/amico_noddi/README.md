@@ -123,40 +123,28 @@ FNIT 的一次 `TorchAMICONODDI.run(..., naming="amico")` 对应上述全部步�
 | `directions` | `fit_dir.nii.gz` | `NODDI_dir.nii.gz` | AMICO 模式为 DTI 主方向；经典模式为非线性拟合主方向；最后一维长度为 3 |
 | `rmse` | `fit_RMSE.nii.gz` | `NODDI_RMSE.nii.gz` | 归一化信号 RMSE |
 
-所有输出为 float32 NIfTI，mask 外为零。真实数据检查中，shape、dtype、affine、qform、sform、pixdim、空间单位和 intent 均与官方文件一致。
+所有输出为 float32 NIfTI，mask 外为零。当前真实数据检查确认五张图的 shape、dtype 和 affine；逐图数值结果见下文。
 
 ## AMICO 路径逐体素验证
 
-[`report.public.json`](../../validation/amico_noddi/report.public.json) 由 FNIT 0.14.0 生成，在 gpucw1 上以一例真实 UKB 格式、官方 FSL EDDY 校正后的 `104×104×72×105` dMRI 与 AMICO 2.0.3 配对。数据包含 5 个 b0、50 个 b≈1000、50 个 b≈2000；同一 mask 内 242,261 个体素全部参加比较。两边使用相同 DWI、mask、bval 和 rotated bvec。该报告是旧源码的整脑验证；本次增加模式分流后 `core.py` 和 `cli.py` 的 SHA-256 已改变，下面另列当前源码的真实数据复测。
+用一例真实 UKB 格式、官方 FSL EDDY 校正后的 `104×104×72×105` DWI 和完整的 `242,261` 体素脑掩膜运行当前默认 AMICO 模式。将五张输出图与同输入的官方 AMICO 2.0.3 逐体素比较。数据包含 5 个 b0、50 个 b≈1000 和 50 个 b≈2000；两边使用相同 DWI、mask、bval 与旋转后的 bvec。
 
-| 输出 | MAE | 最大绝对误差 | 误差 > `1e-7` |
+| 输出 | 全脑 MAE | 最大绝对误差 | Pearson r |
 |---|---:|---:|---:|
-| NDI | `1.394e-9` | `5.960e-8` | `0 / 242,261` |
-| ODI | `1.292e-12` | `5.960e-8` | `0 / 242,261` |
-| FWF | `7.090e-13` | `5.960e-8` | `0 / 242,261` |
-| normalized RMSE | `0` | `0` | `0 / 242,261` |
-| direction | component MAE `0` | component max `0` | `0 / 726,783` |
+| NDI | `2.13e-6` | `0.04073` | `0.9999997` |
+| ODI | `8.08e-6` | `0.05376` | `0.9999989` |
+| FWF | `3.15e-6` | `0.06689` | `0.9999998` |
+| normalized RMSE | `7.78e-9` | `0.000354` | `≈1` |
 
-本页把标量图 `max_abs <= 1e-7` 且方向分量逐元素相同定义为数值等价。NDI、ODI 和 FWF 的最大差异为 float32 一个 ULP；RMSE 和方向图逐元素相同。shape、dtype、affine、qform、sform、pixdim、空间单位、intent 与官方文件一致。
+主方向的轴向等价角差中位数为 `0°`，99 百分位为 `1.21e-6°`。五张图均为有限值、float32、与输入同网格，mask 外为零。H100 PCIe 上设置进程显存分配上限 20%，默认 LUT 批量 400；本次含读写耗时 `81.79 s`，其中 solver `71.20 s`，PyTorch 峰值 allocation `9.95 GB`。测试前后 GPU 有其他作业、利用率为 99–100%。此前同例官方 AMICO CPU 运行耗时 `29.24 s`，与当前 GPU 运行不在同一时间窗，不能计算可靠加速比。逐图误差、输入/输出和源码 SHA-256、GPU 负载及计时见[当前全脑报告](../../validation/amico_noddi/report.public.json)。
 
-| 实现 | 设备 | 完整 wall time | 内部总时间 | solver | 峰值显存 |
-|---|---|---:|---:|---:|---:|
-| AMICO 2.0.3 | Intel Xeon Gold 6430，32 threads | `29.24 s` | — | `16.90 s` | — |
-| FNIT 0.14.0 历史实测 | NVIDIA H100 PCIe 80 GB | `66.35 s` | `28.05 s` | `23.90 s` | `9.95 GB` |
+![AMICO 2.0.3 与当前 FNIT 的真实全脑 NDI、ODI、FWF 和逐体素绝对误差](figures/amico_noddi_comparison.png)
 
-FNIT 的 `66.35 s` 从模型构造开始，包含 NIfTI 读取、kernel、方向估计、fitting 和五张图保存；外部验证进程为 `73.19 s`，还包含 Python 启动和逐图比较。本次 GPU 有其他常驻进程，AMICO 参考与候选也不在同一时间窗，因此不计算稳定加速比。FNIT 默认按 400 个 LUT direction 分块，当前峰值 allocation 低于 20 GB。
-
-NumPy 的 LAPACK/OpenBLAS 构建会影响退化张量的特征向量符号与伪逆末位。旧整脑结果使用 NumPy 1.26.4 官方 CPython 3.11 manylinux wheel（OpenBLAS64 0.3.23.dev）。仓库 [`environment.yml`](../../environment.yml) 以 PyPI 官方 URL和 SHA-256 `666dbf...31d5` 固定该 wheel；`result.qc` 同时返回 `numpy_version`、`numpy_blas_name`、`numpy_blas_version` 和 `validated_numpy_build`。只有该已验证构建且使用 `fit_method="amico"` 时，`amico_numerically_equivalent` 才可能为 `True`；普通 API 不运行 AMICO oracle，因此 `current_input_compared_with_amico` 保持 `False`。其他 NumPy 构建不能继承旧整脑逐值结论。
-
-![AMICO 2.0.3 与当前 FNIT 的 NDI、ODI、FWF 和逐体素绝对差](figures/amico_noddi_comparison.png)
-
-图使用旧整脑运行的同一真实病例，展示当时的 NDI/ODI/FWF 与逐体素误差。原始病例、官方输出和开发期 AMICO/DIPY oracle 不进入仓库。OLS 主方向、Descoteaux-2007 spherical-harmonic basis 与 500-direction rotation basis 的原验证见 [`compare_no_dipy.py`](../../validation/amico_noddi/compare_no_dipy.py) 与 [`no_dipy_equivalence.public.json`](../../validation/amico_noddi/no_dipy_equivalence.public.json)。
-
-当前源码的 `fit_method="amico"` 在同一真实病例固定的 2,048 个脑内体素上重新运行，使用相同官方 AMICO 文件对照。当前测试环境的 NumPy 1.26.4 BLAS 构建与旧整脑验证不同；NDI/ODI/FWF 对官方的 MAE 分别为 `5.09e-6`、`1.21e-5`、`1.32e-5`，Pearson r 均大于 `0.999998`，个别体素最大差异达 `0.0234`。本轮 H100 含读写时间 `22.64 s`，进程峰值 CUDA allocation `99.4 MB`，LUT 每批 100 个方向。输入、源码及官方文件哈希见 [`amico_current_real_2048.public.json`](../../validation/amico_noddi/amico_current_real_2048.public.json)。
+图为该病例第 36 层轴位切片；误差图的显示上限为 `0.001`，全脑最大误差以表中数值为准。原始病例、官方输出和开发期 AMICO/DIPY oracle 不进入仓库。OLS 主方向、Descoteaux-2007 spherical-harmonic basis 与 500-direction rotation basis 的独立验证见 [`compare_no_dipy.py`](../../validation/amico_noddi/compare_no_dipy.py) 和 [`no_dipy_equivalence.public.json`](../../validation/amico_noddi/no_dipy_equivalence.public.json)。
 
 ## 经典连续 Watson 拟合
 
-`fit_method="classic"` 使用与原版 NODDI 对应的细胞内 stick、Watson 方向分布、tortuosity 细胞外室和自由水室，固定 `d_par=1.7e-3`、`d_iso=3e-3` mm²/s。它先用现有 AMICO 求解器为每个体素提供起点，再用 PyTorch float64 对细胞内体积分数、ODI、自由水分数和两个主方向角进行最多 30 次阻尼 Gauss–Newton 更新。经典拟合使用原始 b-value 与归一化的原始 b-vector，b0 幅度固定为该体素 b0 均值。目标函数为 Rician 负对数似然；噪声尺度按原版 `EstimateSigma` 从 b0 的总体标准差和 `0.02 × b0 均值` 取较大者，再除以 100。stick 的 Watson 卷积使用 12 阶偶数 Legendre 展开与 64 点积分。默认 AMICO 初始化 LUT 批量从 400 降至 100，以减少显存。
+`fit_method="classic"` 使用与原版 NODDI 对应的细胞内 stick、Watson 方向分布、tortuosity 细胞外室和自由水室，固定 `d_par=1.7e-3`、`d_iso=3e-3` mm²/s。它先用现有 AMICO 求解器为每个体素提供起点，再用 PyTorch float64 对细胞内体积分数、ODI、自由水分数和两个主方向角进行最多 30 次阻尼 Gauss–Newton 更新。经典拟合使用原始 b-value 与归一化的原始 b-vector，b0 幅度固定为该体素 b0 均值。目标函数为 Rician 负对数似然；噪声尺度按原版 `EstimateSigma` 从 b0 的总体标准差和 `0.02 × b0 均值` 取较大者，再除以 100。stick 的 Watson 卷积使用 12 阶偶数 Legendre 展开与 64 点积分。AMICO 初始化默认每批处理 400 个 LUT 方向；显存不足时可显式设为 100。
 
 输入与上表相同；`run()` 仍写五张 NIfTI，`result.qc["fit_method"]` 记录实际模式。`ndi` 是组织内的细胞内分数，`fwf` 是整体自由水分数，`odi=2 atan(1/kappa)/π`。经典模式的 `directions` 为连续拟合的主方向；默认 AMICO 模式保留 DTI 主方向。`rmse` 是对 b0 归一化观测信号的均方根残差。两种算法使用同一文件名、网格与数据类型，但不会逐体素相同。
 
@@ -165,7 +153,7 @@ from fnit import TorchAMICONODDI
 from fnit.amico_noddi import AMICONODDIConfig
 
 classic_config = AMICONODDIConfig(
-    lut_batch_size=100,  # AMICO 初始化的每批 LUT 方向数；减少共享 GPU 显存
+    lut_batch_size=400,  # AMICO 初始化的每批 LUT 方向数；默认 400，显存不足时可设为 100
 )
 classic_noddi = TorchAMICONODDI(
     device="cuda:0",  # 计算设备；也可设为 "cpu"
@@ -199,7 +187,7 @@ print(classic_result.qc)  # 拟合方式、耗时、显存和样本数
 | `kkt_tolerance` | `1e-11` | AMICO 活动集的 KKT 收敛阈值 |
 | `cg_tolerance` | `1e-13` | AMICO 共轭梯度回退的收敛阈值 |
 | `maximum_active_steps` | `40` | AMICO 活动集最多更新次数 |
-| `lut_batch_size` | AMICO 模式 `400`；经典模式 `100` | 每批处理的 LUT 方向数；仅影响显存和速度 |
+| `lut_batch_size` | `400` | 每批处理的 LUT 方向数；显存不足时可改为 `100` |
 
 原版 NODDI Toolbox 的对应调用是：
 
@@ -213,7 +201,7 @@ SaveParamsAsNIfTI('FittedParams.mat', 'noddi_roi.mat', 'eddy/nodif_brain_mask.ni
 
 FNIT 保留 AMICO 起点；原版 Toolbox 使用网格搜索和 MATLAB `fmincon`，因此两者的优化路径不同。DIPY 的 [Bingham `k2odi`](https://docs.dipy.org/stable/reference/dipy.reconst.html#dipy.reconst.bingham.k2odi) 使用相同的 Watson 浓度参数到 ODI 换算，但不是原版 NODDI 的逐体素拟合器。
 
-在一例真实、经 EDDY 校正的 `104×104×72×105` DWI 中，从 242,261 个脑内体素先按种子 `20260929` 取 2,048 个，再按种子 `20260930` 固定取 24 个，向本机 MATLAB R2023b 的原版 NODDI Toolbox 1.05 传入同一 DWI 信号、原始 bval 和旋转后 bvec。24 个原版拟合均返回错误码 0。FNIT H100 进程限制为总显存的 10%；两种机器的耗时不可用来计算加速比。
+在一例真实、经 EDDY 校正的 `104×104×72×105` DWI 中，从 242,261 个脑内体素先按种子 `20260929` 取 2,048 个，再按种子 `20260930` 固定取 24 个，向本机 MATLAB R2023b 的原版 NODDI Toolbox 1.05 传入同一 DWI 信号、原始 bval 和旋转后 bvec。24 个原版拟合均返回错误码 0。FNIT 使用当前默认 LUT 批量 400，H100 进程限制为总显存的 10%；两种机器的耗时不可用来计算加速比。
 
 | 参数 | 与原版的 MAE | 最大绝对差 | Pearson r |
 |---|---:|---:|---:|
@@ -223,7 +211,7 @@ FNIT 保留 AMICO 起点；原版 Toolbox 使用网格搜索和 MATLAB `fmincon`
 
 轴向等价的主方向角差中位数为 `0.013°`，90 百分位为 `3.28°`。这是 24 个固定真实体素的数值一致性检查；输入与原版 Toolbox 的 SHA-256、运行环境和实测耗时见 [`classic_original_real_24.public.json`](../../validation/amico_noddi/classic_original_real_24.public.json)。
 
-同一病例的全脑 `242,261` 个 mask 体素也完成了当前经典模式的一次运行：H100 PCIe 上设置进程显存分配上限 10%，包含读写耗时 `340.86 s`，其中 AMICO 初始化 `211.43 s`、连续拟合 `123.39 s`；PyTorch 峰值 allocation `2.30 GB`。测试时 GPU 在运行前后均有其他作业，利用率 100%。五张结果图全部为有限值、mask 外为零；归一化 RMSE 的中位数 `0.0362`、99 百分位 `0.1025`，另有 19 个体素超过 1。全脑输入、输出哈希和逐图检查见 [`classic_whole_brain.public.json`](../../validation/amico_noddi/classic_whole_brain.public.json)。
+同一病例的全脑 `242,261` 个 mask 体素也完成了当前默认经典模式的一次运行：H100 PCIe 上设置进程显存分配上限 20%，包含读写耗时 `209.55 s`，其中 AMICO 初始化 `84.63 s`、连续拟合 `118.09 s`；PyTorch 峰值 allocation `9.95 GB`。此前 LUT 批量 100 的单次运行耗时 `340.86 s`、峰值 allocation `2.30 GB`；改为 400 后，五张全脑图与旧图最大逐值差异为 `5.4e-7`。这两次测试均为共享 GPU，计时不能解释为隔离条件下的加速比。五张结果图全部为有限值、mask 外为零；归一化 RMSE 的中位数 `0.0362`、99 百分位 `0.1025`，另有 19 个体素超过 1。全脑输入、输出哈希和逐图检查见 [`classic_whole_brain.public.json`](../../validation/amico_noddi/classic_whole_brain.public.json)。
 
 ## Reference
 
