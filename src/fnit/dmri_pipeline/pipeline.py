@@ -108,6 +108,7 @@ class DMRIPipeline:
         dti_shell=1000,
         dti_tolerance=100,
         bvec_source="rotated",
+        noddi_fit_method="amico",
     ):
         if registration_backend not in ("tbss", "mmorf"):
             raise ValueError("registration_backend must be 'tbss' or 'mmorf'")
@@ -115,6 +116,8 @@ class DMRIPipeline:
             raise ValueError("fnirt_config requires registration_backend='tbss'")
         if bvec_source not in ("rotated", "raw"):
             raise ValueError("bvec_source must be 'rotated' or 'raw'")
+        if noddi_fit_method not in ("amico", "classic"):
+            raise ValueError("noddi_fit_method must be 'amico' or 'classic'")
         self.device = configure_device(device)
         self.registration_backend = registration_backend
         self.fnirt_config = (
@@ -125,6 +128,7 @@ class DMRIPipeline:
         self.dti_shell = float(dti_shell)
         self.dti_tolerance = float(dti_tolerance)
         self.bvec_source = bvec_source
+        self.noddi_fit_method = noddi_fit_method
 
     def run(
         self,
@@ -231,7 +235,9 @@ class DMRIPipeline:
         timings["dtifit"] = time.perf_counter() - started
 
         started = time.perf_counter()
-        noddi = TorchAMICONODDI(device=self.device).run(
+        noddi = TorchAMICONODDI(
+            device=self.device, fit_method=self.noddi_fit_method
+        ).run(
             corrected,
             mask_path,
             fitting_bvecs,
@@ -321,6 +327,7 @@ class DMRIPipeline:
             "dti_shell": self.dti_shell,
             "dti_tolerance": self.dti_tolerance,
             "bvec_source": self.bvec_source,
+            "noddi_fit_method": self.noddi_fit_method,
             "timings_seconds": timings,
             "elapsed_seconds": time.perf_counter() - total_started,
             "eddy": eddy.qc,

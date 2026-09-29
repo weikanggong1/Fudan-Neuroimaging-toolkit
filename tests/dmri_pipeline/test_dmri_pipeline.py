@@ -28,11 +28,14 @@ def test_bvec_source_cli_and_invalid_value():
     _arguments(parser)
     options = parser.parse_args(
         ["--raw-dir", "raw", "-o", "out", "--fa-template", "fa.nii.gz",
-         "--bvec-source", "raw"]
+         "--bvec-source", "raw", "--noddi-fit-method", "classic"]
     )
     assert options.bvec_source == "raw"
+    assert options.noddi_fit_method == "classic"
     with pytest.raises(ValueError, match="bvec_source"):
         DMRIPipeline(device="cpu", bvec_source="invalid")
+    with pytest.raises(ValueError, match="noddi_fit_method"):
+        DMRIPipeline(device="cpu", noddi_fit_method="invalid")
 
 
 def test_tbss_config_combines_selected_official_schedule_values():
@@ -166,8 +169,8 @@ def test_mmorf_branch_calls_public_mmorf_function(monkeypatch, tmp_path, bvec_so
             return SimpleNamespace(maps=maps, qc={})
 
     class FakeNODDI:
-        def __init__(self, device=None):
-            pass
+        def __init__(self, device=None, fit_method="amico"):
+            captured["noddi_fit_method"] = fit_method
 
         def run(self, *args, **kwargs):
             captured["noddi_bvecs"] = args[2]
@@ -228,6 +231,7 @@ def test_mmorf_branch_calls_public_mmorf_function(monkeypatch, tmp_path, bvec_so
         registration_backend="mmorf",
         synthstrip_weights="synthstrip.pt",
         bvec_source=bvec_source,
+        noddi_fit_method="classic" if bvec_source == "raw" else "amico",
     ).run(
         raw,
         output_dir,
@@ -251,6 +255,9 @@ def test_mmorf_branch_calls_public_mmorf_function(monkeypatch, tmp_path, bvec_so
     assert captured["shell_bvecs"] == expected_bvecs
     assert captured["noddi_bvecs"] == expected_bvecs
     assert result.qc["bvec_source"] == bvec_source
+    assert captured["noddi_fit_method"] == (
+        "classic" if bvec_source == "raw" else "amico"
+    )
 
 
 def test_tbss_passes_volumes_to_fnirt(monkeypatch, tmp_path):

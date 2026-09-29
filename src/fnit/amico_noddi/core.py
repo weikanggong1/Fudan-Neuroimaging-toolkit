@@ -13,6 +13,7 @@ import numpy as np
 import torch
 
 from .._dmri import configure_device, image_like, load_bvals
+from .classic import fit_classic_noddi
 from .kernels import build_noddi_kernels, load_raw_bvecs, principal_directions
 from .solver import fit_noddi
 
@@ -100,11 +101,17 @@ class AMICONODDIResult:
 
 
 class TorchAMICONODDI:
-    """Fit NODDI with AMICO 2.0.3 kernels and PyTorch active-set solvers."""
+    """Fit NODDI with AMICO or continuous classical Watson fitting."""
 
-    def __init__(self, device=None, *, config=None):
+    def __init__(self, device=None, *, config=None, fit_method="amico"):
+        if fit_method not in ("amico", "classic"):
+            raise ValueError("fit_method must be 'amico' or 'classic'")
         self.device = configure_device(device)
-        self.config = AMICONODDIConfig() if config is None else config
+        self.config = (
+            AMICONODDIConfig(lut_batch_size=100 if fit_method == "classic" else 400)
+            if config is None else config
+        )
+        self.fit_method = fit_method
 
     def __call__(self, data, mask, bvecs, bvals):
         reference = nib.load(os.fspath(data))
@@ -168,6 +175,26 @@ class TorchAMICONODDI:
             maximum_active_steps=cfg.maximum_active_steps,
             lut_batch_size=cfg.lut_batch_size,
         )
+        amico_initialization_seconds = time.perf_counter() - solver_started
+        classic_qc = {}
+        if self.fit_method == "classic":
+            classic_started = time.perf_counter()
+            classic_bvals = kernels["raw"][:, 3].copy()
+            classic_bvals[kernels["b0"]] = 0
+            estimates, directions, rmse, classic_qc = fit_classic_noddi(
+                signal,
+                classic_bvals,
+                kernels["raw"][:, :3],
+                estimates,
+                directions,
+                rmse,
+                d_par=cfg.d_par,
+                d_iso=cfg.d_iso,
+                device=self.device,
+            )
+            if self.device.type == "cuda":
+                torch.cuda.synchronize(self.device)
+            classic_qc["classic_refinement_seconds"] = time.perf_counter() - classic_started
         if self.device.type == "cuda":
             torch.cuda.synchronize(self.device)
         solver_seconds = time.perf_counter() - solver_started
@@ -192,19 +219,35 @@ class TorchAMICONODDI:
                 "kernel_dtype": "float32",
                 "solver_dtype": "float64",
                 "tf32": bool(self.device.type == "cuda"),
-                "reference_implementation": f"AMICO {AMICO_VERSION} NODDI",
-                "reference_commit": AMICO_COMMIT,
+                "reference_implementation": (
+                    f"AMICO {AMICO_VERSION} NODDI"
+                    if self.fit_method == "amico" else "classical continuous Watson NODDI"
+                ),
+                "reference_commit": AMICO_COMMIT if self.fit_method == "amico" else None,
+                "amico_initialization_commit": AMICO_COMMIT,
                 "dictionary_atoms": int(len(cfg.ic_ods) * len(cfg.ic_vfs) + 1),
                 "lut_directions": 500,
-                "solver": "AMICO three-stage NNLS, positive elastic-net, NNLS debias",
-                "linear_solver": "batched compact float64 Cholesky with CG fallback",
+                "solver": (
+                    "AMICO three-stage NNLS, positive elastic-net, NNLS debias"
+                    if self.fit_method == "amico"
+                    else "AMICO initialization, continuous six-parameter Rician nonlinear fit"
+                ),
+                "fit_method": self.fit_method,
+                "linear_solver": (
+                    "batched compact float64 Cholesky with CG fallback"
+                    if self.fit_method == "amico"
+                    else "AMICO active set followed by batched 6x6 damped Gauss-Newton"
+                ),
                 "amico_output_contract": True,
-                "amico_numerically_equivalent": numpy_build["validated_numpy_build"],
+                "amico_numerically_equivalent": (
+                    self.fit_method == "amico" and numpy_build["validated_numpy_build"]
+                ),
                 "current_input_compared_with_amico": False,
                 **numpy_build,
                 "kernel_seconds": kernel_seconds,
                 "direction_seconds": direction_seconds,
                 "solver_seconds": solver_seconds,
+                "amico_initialization_seconds": amico_initialization_seconds,
                 "elapsed_seconds": elapsed,
                 "peak_cuda_memory_bytes": (
                     int(torch.cuda.max_memory_allocated(self.device))
@@ -218,6 +261,7 @@ class TorchAMICONODDI:
                 "support_size_min": int(support_sizes.min()),
                 "support_size_median": float(np.median(support_sizes)),
                 "support_size_max": int(support_sizes.max()),
+                **classic_qc,
             },
         )
 

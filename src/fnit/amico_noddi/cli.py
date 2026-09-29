@@ -17,6 +17,7 @@ def add_parser(commands):
         parser.add_argument(flag, f"--{dest}", required=True)
     parser.add_argument("-o", "--output-dir", required=True)
     parser.add_argument("--naming", choices=("ukb", "amico"), default="ukb")
+    parser.add_argument("--fit-method", choices=("amico", "classic"), default="amico")
     parser.add_argument("--device")
     parser.add_argument("--overwrite", action="store_true")
     parser.set_defaults(_fnit_handler=run)
@@ -24,7 +25,7 @@ def add_parser(commands):
 
 
 def run(args):
-    result = TorchAMICONODDI(device=args.device).run(
+    result = TorchAMICONODDI(device=args.device, fit_method=args.fit_method).run(
         args.data,
         args.mask,
         args.bvecs,
@@ -45,6 +46,7 @@ def main(argv=None):
     parser.add_argument("-b", "--bvals", required=True)
     parser.add_argument("-o", "--output-dir", required=True)
     parser.add_argument("--naming", choices=("ukb", "amico"), default="ukb")
+    parser.add_argument("--fit-method", choices=("amico", "classic"), default="amico")
     parser.add_argument("--device")
     parser.add_argument("--overwrite", action="store_true")
     run(parser.parse_args(argv))

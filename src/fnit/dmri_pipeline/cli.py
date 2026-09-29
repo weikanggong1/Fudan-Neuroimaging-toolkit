@@ -19,6 +19,7 @@ def _arguments(parser):
     parser.add_argument("--dti-shell", type=float, default=1000)
     parser.add_argument("--dti-tolerance", type=float, default=100)
     parser.add_argument("--bvec-source", choices=("rotated", "raw"), default="rotated")
+    parser.add_argument("--noddi-fit-method", choices=("amico", "classic"), default="amico")
     parser.add_argument("--device")
     parser.add_argument("--overwrite", action="store_true")
 
@@ -34,6 +35,7 @@ def run(args):
         dti_shell=args.dti_shell,
         dti_tolerance=args.dti_tolerance,
         bvec_source=args.bvec_source,
+        noddi_fit_method=args.noddi_fit_method,
     ).run(
         args.raw_dir,
         args.output_dir,

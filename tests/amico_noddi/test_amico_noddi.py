@@ -1,19 +1,23 @@
 import nibabel as nib
 import numpy as np
+import pytest
 import torch
 from scipy.optimize import nnls
 
 from fnit.amico_noddi import AMICONODDIConfig, TorchAMICONODDI
+from fnit.amico_noddi.classic import ClassicNODDIModel, fit_classic_noddi
 from fnit.amico_noddi.kernels import (
     _real_sh_descoteaux,
     amico_scheme,
+    build_noddi_kernels,
     direction_assets,
     principal_directions,
 )
 from fnit.amico_noddi.solver import nonnegative_quadratic
 
 
-def test_noddi_outputs_are_bounded_and_use_ukb_names(tmp_path):
+@pytest.mark.parametrize("fit_method", ("amico", "classic"))
+def test_noddi_outputs_are_bounded_and_use_ukb_names(tmp_path, fit_method):
     rng = np.random.default_rng(5)
     count = 25
     b = np.r_[np.zeros(3), np.repeat(1000, 11), np.repeat(2000, 11)]
@@ -31,7 +35,7 @@ def test_noddi_outputs_are_bounded_and_use_ukb_names(tmp_path):
     )
     np.savetxt(tmp_path / "bvals", b[None])
     np.savetxt(tmp_path / "bvecs", g)
-    result = TorchAMICONODDI("cpu").run(
+    result = TorchAMICONODDI("cpu", fit_method=fit_method).run(
         tmp_path / "dwi.nii.gz",
         tmp_path / "mask.nii.gz",
         tmp_path / "bvecs",
@@ -44,9 +48,9 @@ def test_noddi_outputs_are_bounded_and_use_ukb_names(tmp_path):
         assert values.min() >= 0 and values.max() <= 1
     for name in ("NODDI_ICVF.nii.gz", "NODDI_OD.nii.gz", "NODDI_ISOVF.nii.gz"):
         assert (tmp_path / "out" / name).is_file()
-    assert result.qc["amico_numerically_equivalent"] is result.qc[
-        "validated_numpy_build"
-    ]
+    assert result.qc["amico_numerically_equivalent"] is (
+        fit_method == "amico" and result.qc["validated_numpy_build"]
+    )
     assert result.qc["current_input_compared_with_amico"] is False
     assert result.qc["solver_dtype"] == "float64"
     assert int(result.directions.header["intent_code"]) == 0
@@ -196,3 +200,52 @@ def _dataset_without_b0(tmp_path):
 def test_lut_batch_size_must_be_positive():
     with np.testing.assert_raises_regex(ValueError, "lut_batch_size"):
         AMICONODDIConfig(lut_batch_size=0)
+    with np.testing.assert_raises_regex(ValueError, "fit_method"):
+        TorchAMICONODDI("cpu", fit_method="unknown")
+
+
+def test_classic_continuous_fit_recovers_watson_signal():
+    rng = np.random.default_rng(48)
+    bvals = np.r_[np.zeros(3), np.full(24, 1000), np.full(24, 2000)]
+    bvecs = rng.normal(size=(len(bvals), 3))
+    bvecs /= np.linalg.norm(bvecs, axis=1, keepdims=True)
+    bvecs[:3] = 0
+    model = ClassicNODDIModel(
+        bvals, bvecs, d_par=1.7e-3, d_iso=3e-3, device="cpu"
+    )
+    true_parameters = torch.tensor([[0.55, 0.32, 0.12, 1.0]], dtype=torch.float64)
+    direction = torch.tensor([[0.0, 0.0, 1.0]], dtype=torch.float64)
+    signal = model.evaluate(true_parameters, direction).numpy()
+    estimates, fitted_direction, rmse, _ = fit_classic_noddi(
+        signal, bvals, bvecs, np.array([[0.50, 0.36, 0.16]]),
+        direction.numpy(), np.array([0.02]), d_par=1.7e-3,
+        d_iso=3e-3, device="cpu", maximum_iterations=30,
+    )
+    np.testing.assert_allclose(estimates[0], true_parameters.numpy()[0, :3], atol=0.015)
+    assert abs(float(fitted_direction[0] @ direction.numpy()[0])) > 0.99
+    assert rmse[0] < 0.002
+
+
+def test_classic_forward_signal_matches_amico_atom():
+    rng = np.random.default_rng(7)
+    bvals = np.r_[np.zeros(3), np.full(16, 1000), np.full(16, 2000)]
+    bvecs = rng.normal(size=(3, len(bvals)))
+    bvecs /= np.linalg.norm(bvecs, axis=0)
+    bvecs[:, :3] = 0
+    config = AMICONODDIConfig()
+    kernels = build_noddi_kernels(bvals, bvecs, config.ic_ods, config.ic_vfs)
+    volume_fraction = config.ic_vfs[5]
+    dispersion = config.ic_ods[4]
+    lut_direction = direction_assets()[1][17]
+    model = ClassicNODDIModel(
+        kernels["raw"][:, 3], kernels["raw"][:, :3],
+        d_par=config.d_par, d_iso=config.d_iso, device="cpu",
+    )
+    parameters = torch.tensor(
+        [[volume_fraction, dispersion, 0.0, 1.0]], dtype=torch.float64
+    )
+    actual = model.evaluate(
+        parameters, torch.tensor(lut_direction[None], dtype=torch.float64)
+    ).numpy()[0]
+    reference = kernels["wm"][4 * len(config.ic_vfs) + 5, 17]
+    np.testing.assert_allclose(actual, reference, atol=2e-7, rtol=0)

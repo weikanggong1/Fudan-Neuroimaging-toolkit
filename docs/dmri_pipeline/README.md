@@ -12,7 +12,7 @@ flowchart LR
   C --> E[TorchEDDY]
   D --> E
   E --> F[TorchDTIFIT b≈1000]
-  E --> G[TorchAMICO-NODDI all shells]
+  E --> G[TorchAMICONODDI all shells: AMICO or classic]
   F --> H{registration backend}
   G --> H
   H -->|tbss| I[weighted TorchFLIRT + three-stage TorchFNIRT]
@@ -55,6 +55,7 @@ result = DMRIPipeline(
     dti_shell=1000,  # DTIFIT 使用的目标 b-value，单位 s/mm²
     dti_tolerance=100,  # 纳入 DTI shell 的 b-value 容差
     bvec_source="rotated",  # DTIFIT/NODDI 梯度：EDDY 旋转后；对照试验可选 "raw"
+    noddi_fit_method="classic",  # 连续 Watson 非线性拟合；默认 "amico"
 ).run(
     raw_dir="raw",  # 输入：AP.* 及可选 PA.* 的单被试目录
     output_dir="subject_tbss",  # 输出：该受试者的唯一结果根目录
@@ -83,6 +84,7 @@ result = DMRIPipeline(
     dti_shell=1000,  # DTIFIT 使用的目标 b-value，单位 s/mm²
     dti_tolerance=100,  # 纳入 DTI shell 的 b-value 容差
     bvec_source="rotated",  # DTIFIT/NODDI 梯度：EDDY 旋转后；对照试验可选 "raw"
+    noddi_fit_method="classic",  # 连续 Watson 非线性拟合；默认 "amico"
 ).run(
     raw_dir="raw",  # 输入：AP.* 及可选 PA.* 的单被试目录
     output_dir="subject_mmorf",  # 输出：该受试者的唯一结果根目录
@@ -110,6 +112,7 @@ fnit-dmri-pipeline \
   --fa-template FMRIB58_FA_1mm.nii.gz \
   --fa-skeleton FMRIB58_FA-skeleton_1mm.nii.gz \
   --bvec-source rotated \
+  --noddi-fit-method classic \
   --device cuda:0
 ~~~
 
@@ -126,10 +129,13 @@ fnit-dmri-pipeline \
   --tensor-template FSL_HCP1065_tensor_1mm.nii.gz \
   --synthstrip-weights /weights/synthstrip.1.pt \
   --bvec-source rotated \
+  --noddi-fit-method classic \
   --device cuda:0
 ~~~
 
---raw-dir 选择单个 subject；-o 是该 subject 的唯一输出根；--registration-backend 只改变非线性标准化分支。其余行分别提供该分支需要的模板、T1 和权重。--device 控制所有 PyTorch 步骤使用同一设备；每次调用只处理这一名被试。--bvec-source rotated 使 DTIFIT 和 NODDI 使用 EDDY 旋转后的梯度；改为 raw 时，两者都使用原始 AP.bvec。EDDY 的图像校正及其自身保存的旋转梯度文件照常运行，报告中的 bvec_source 记录实际拟合输入。
+--raw-dir 选择单个 subject；-o 是该 subject 的唯一输出根；--registration-backend 选择非线性标准化分支。其余行分别提供该分支需要的模板、T1 和权重。--device 控制所有 PyTorch 步骤使用同一设备；每次调用只处理这一名被试。--bvec-source rotated 使 DTIFIT 和 NODDI 使用 EDDY 旋转后的梯度；改为 raw 时，两者都使用原始 AP.bvec。`--noddi-fit-method classic` 将 NODDI 阶段切换到[连续 Watson 拟合](../amico_noddi/README.md)；默认 `amico` 保留原数值路径。报告的 `noddi_fit_method` 与 `noddi.fit_method` 记录实际选择。
+
+本页下方既有 raw-to-standard 整链对照使用默认 `amico`；上面的 `classic` 示例是新增的选择方式，单独的集成结果见“经典 NODDI 接入验证”。
 
 ## 输出契约
 
@@ -220,8 +226,13 @@ EDDY 的进程内 CUDA allocation 峰值为 4.54 GiB；全流程最大组件峰�
 
 当前 MMORF 模块已用真实 T1w、FA 双标量与 tensor 完成和官方实现的配对对照，见 [MMORF 验证](../mmorf/README.md)。此前完整 dMRI pipeline 的 MMORF 分支使用旧求解器，旧版整链指标已移除。当前源码的 raw-to-standard MMORF 整链仍需重新验证。
 
+### 经典 NODDI 接入验证
+
+`noddi_fit_method="classic"` 经过真实 EDDY 校正 DWI 的 pipeline 阶段集成测试。测试固定 2,048 个真实脑内体素，实际运行 `select_shell`、`TorchDTIFIT` 和 `TorchAMICONODDI`，检查九张 native/standard 图的接口以及 ICVF、OD、ISOVF 与独立经典 NODDI 运行结果。测试复用已校正的 EDDY 图，配准用同网格 identity stub，因此验证的是拟合与参数图传递，不代表 raw-to-MNI 整链精度或耗时。实测记录见 [`pipeline_classic_real.public.json`](../../validation/dmri_pipeline/pipeline_classic_real.public.json)。
+
 ## Reference
 
 - 参考文献：Alfaro-Almagro et al., *Image processing and Quality Control for the first 10,000 brain imaging datasets from UK Biobank*, NeuroImage (2018), [论文](https://discovery.ucl.ac.uk/id/eprint/10039942/)。
 - 参考文献：Smith et al., *Tract-based spatial statistics: Voxelwise analysis of multi-subject diffusion data*, NeuroImage (2006), [doi:10.1016/j.neuroimage.2006.02.024](https://doi.org/10.1016/j.neuroimage.2006.02.024)。
 - 原实现代码库：[UK Biobank pipeline v1.5](https://git.fmrib.ox.ac.uk/falmagro/uk_biobank_pipeline_v_1.5)；[FSL `tbss`](https://git.fmrib.ox.ac.uk/fsl/tbss)；[FSL `MMORF`（可选配准分支）](https://git.fmrib.ox.ac.uk/fsl/MMORF)。
+- 经典 NODDI 参考：Zhang et al., *NODDI: Practical in vivo neurite orientation dispersion and density imaging of the human brain*, NeuroImage (2012), [doi:10.1016/j.neuroimage.2012.03.072](https://doi.org/10.1016/j.neuroimage.2012.03.072)；[NODDI Matlab Toolbox](https://www.nitrc.org/projects/noddi_toolbox)。

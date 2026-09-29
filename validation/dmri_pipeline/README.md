@@ -1,6 +1,6 @@
 # dMRI 参数图流程验证
 
-[功能和调用方式](../../docs/dmri_pipeline/README.md) · [TBSS 当前机器报告](tbss_e2e.real.current.json) · [九图比较脚本](compare_current_eddy_pipeline.py) · [官方 TBSS 参考脚本](run_official_tbss.sh)
+[功能和调用方式](../../docs/dmri_pipeline/README.md) · [TBSS 当前机器报告](tbss_e2e.real.current.json) · [经典 NODDI 接入报告](pipeline_classic_real.public.json) · [九图比较脚本](compare_current_eddy_pipeline.py) · [官方 TBSS 参考脚本](run_official_tbss.sh)
 
 2026 年 9 月 29 日在 gpucw1 用一例真实 UKB 格式 AP/PA 数据，从原始图像运行 TBSS 分支。结果图像仍留在计算节点；仓库只保存汇总数值。
 
@@ -30,3 +30,7 @@ python validation/dmri_pipeline/compare_current_eddy_pipeline.py \
 ## MMORF 分支
 
 当前 MMORF 模块的 T1w、FA、tensor 真实数据配对验证见 [MMORF 报告](../mmorf/report.public.json)。旧求解器的 raw-to-standard 整链指标已移除；当前源码的 MMORF 整链尚未重跑。
+
+## 经典 NODDI 接入
+
+在同一例真实 EDDY 校正 DWI 的固定 2,048 个脑内体素上，`DMRIPipeline(noddi_fit_method="classic")` 实际调用 `select_shell`、`TorchDTIFIT` 和经典 `TorchAMICONODDI`。九张 native 和 standard 图键完整；ICVF、OD、ISOVF 与相同输入的独立经典 NODDI 输出最大绝对差均为零。EDDY 直接接入预先校正的真实数据，配准使用 identity stub；报告只验证 NODDI 的 pipeline 接入，不代表完整 raw-to-MNI 结果。运行记录、源码和输入 SHA-256 见[机器报告](pipeline_classic_real.public.json)。

@@ -1,0 +1,79 @@
+{
+  "scope": "same real 2048-voxel DWI as classic benchmark",
+  "wall_seconds_including_io": 22.635099274106324,
+  "qc": {
+    "device": "cuda:0",
+    "kernel_dtype": "float32",
+    "solver_dtype": "float64",
+    "tf32": true,
+    "reference_implementation": "AMICO 2.0.3 NODDI",
+    "reference_commit": "df540093b60240c38a6ff2ea4ceb1181c4f3e936",
+    "amico_initialization_commit": "df540093b60240c38a6ff2ea4ceb1181c4f3e936",
+    "dictionary_atoms": 145,
+    "lut_directions": 500,
+    "solver": "AMICO three-stage NNLS, positive elastic-net, NNLS debias",
+    "fit_method": "amico",
+    "linear_solver": "batched compact float64 Cholesky with CG fallback",
+    "amico_output_contract": true,
+    "amico_numerically_equivalent": false,
+    "current_input_compared_with_amico": false,
+    "numpy_version": "1.26.4",
+    "numpy_blas_name": "blas",
+    "numpy_blas_version": "3.9.0",
+    "validated_numpy_build": false,
+    "kernel_seconds": 0.7342866719700396,
+    "direction_seconds": 0.009431186132133007,
+    "solver_seconds": 13.579997357912362,
+    "amico_initialization_seconds": 13.579880148172379,
+    "elapsed_seconds": 15.651572238188237,
+    "peak_cuda_memory_bytes": 99433984,
+    "voxels": 2048,
+    "volumes": 105,
+    "lut_directions_used": 489,
+    "lut_batch_size": 100,
+    "support_size_min": 1,
+    "support_size_median": 10.0,
+    "support_size_max": 23
+  },
+  "comparison": {
+    "NDI": {
+      "mae": 5.0940943765453994e-06,
+      "max_abs": 0.008273065090179443,
+      "pearson_r": 0.9999995790177789
+    },
+    "ODI": {
+      "mae": 1.2145745131419972e-05,
+      "max_abs": 0.010691791772842407,
+      "pearson_r": 0.9999993463855903
+    },
+    "FWF": {
+      "mae": 1.318873269440246e-05,
+      "max_abs": 0.023413335904479027,
+      "pearson_r": 0.9999987940256134
+    },
+    "RMSE": {
+      "mae": 1.0422354534966871e-08,
+      "max_abs": 1.1090189218521118e-05,
+      "pearson_r": 0.9999999999333727
+    }
+  },
+  "source_sha256": {
+    "src/fnit/amico_noddi/classic.py": "d02ddd301f6d720977762b19f8472e51bb7cc27a3b90115b59301f54d7d0314e",
+    "src/fnit/amico_noddi/core.py": "8f52043a5e1d8b224cdb7ae96d24ee5736d2771e62ba5e497f5fa263c20f5280",
+    "src/fnit/amico_noddi/kernels.py": "46f1044aa5f1c2dbffd12dd33707c0e192ef1de01dc23157ae03a0977b3d0b59",
+    "src/fnit/amico_noddi/solver.py": "b86c56d9e3aef90efad74748309c627f4cb013071f3670f74c615f9e27001bf3"
+  },
+  "real_input_sha256": {
+    "DWI.nii.gz": "67e4564323d8d4dfacaa04a451e2ffa0c89de32cb6d98eb5deb46ea8971deeaa",
+    "mask.nii.gz": "3d1c29ec2f1a6870be93e0b436c884dc805d87244f186312c93086301ae08df4",
+    "bvals": "4bba64690ad224848ea4d0891b98a859b79e11f0de77ad9d2539f4397fda2224",
+    "rotated_bvecs": "d17c075f60d433feeb8450bedb83ec3a6771878e150542b05627d2feeec158a1"
+  },
+  "official_amico_output_sha256": {
+    "fit_NDI.nii.gz": "800128db443f29f9d850cce3c9c7a3eae88a8fac3c13272de2d68a557afeb3e4",
+    "fit_ODI.nii.gz": "b5e7356637dd8cb9717912b18be9a8d7fa6e47328cc2c46f6cb2db16ac600dc6",
+    "fit_FWF.nii.gz": "9d5f41ea37dd55f715f87c6687a09f2792148d449ee1e0a4af593266b8548d88"
+  },
+  "mask_selection_seed": 20260929,
+  "gpu_memory_fraction_limit": 0.1
+}

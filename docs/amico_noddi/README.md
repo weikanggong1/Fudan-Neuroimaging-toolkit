@@ -1,6 +1,6 @@
 # TorchAMICONODDI：NODDI 微结构拟合
 
-`fnit.amico_noddi.TorchAMICONODDI` 按 [AMICO 2.0.3](https://github.com/daducci/AMICO/tree/v2.0.3) 的 NODDI fitting 流程实现三个 PyTorch/CUDA 求解阶段。实现固定对应 commit `df540093b60240c38a6ff2ea4ceb1181c4f3e936`，不在运行时导入或调用 AMICO，也不依赖已安装的 DIPY。
+`fnit.amico_noddi.TorchAMICONODDI` 默认按 [AMICO 2.0.3](https://github.com/daducci/AMICO/tree/v2.0.3) 的 NODDI fitting 流程运行；`fit_method="classic"` 增加经典连续 Watson NODDI 模型的逐体素非线性拟合。两条路径都由 PyTorch 执行，不在运行时导入或调用 AMICO、NODDI Toolbox 或 DIPY。
 
 代码在包内复现 AMICO 使用的 DIPY OLS 主方向和 legacy Descoteaux-2007 order-12 spherical-harmonic 基，并使用相同的 b-value 取整、500-direction LUT、145-atom dictionary 和三阶段求解：完整 dictionary NNLS、positive elastic-net support selection、support-constrained NNLS debias。response kernel 与影像为 float32；活动集线性代数为 float64，以保持 SPAMS 求解结果。CUDA float32 运算允许 TF32，没有使用 float16 或 bfloat16。500 个 LUT direction 默认按最多 400 个一批求解；各 direction 相互独立，分批只限制显存，不改变模型或精度。可用 `AMICONODDIConfig(lut_batch_size=...)` 调整。
 
@@ -24,6 +24,7 @@ from fnit import TorchAMICONODDI
 noddi = TorchAMICONODDI(
     device="cuda:0",  # 运行设备：第一张可见 CUDA GPU；无权重文件
     config=None,  # 配置：使用 AMICO 2.0.3 的默认 NODDI 参数
+    fit_method="amico",  # 拟合方式："amico" 离散字典；"classic" 连续 Watson 非线性拟合
 )
 result = noddi.run(
     data="eddy/data.nii.gz",               # 单被试、EDDY 校正后的 4D DWI
@@ -66,6 +67,8 @@ fnit amico-noddi \
   --naming amico \
   --device cuda:0
 ```
+
+需要连续 Watson 非线性拟合时，在同一命令中加入 `--fit-method classic`。
 
 这条命令对一个病例完成 NODDI fitting。`--naming amico` 写官方 `fit_*` 名称；`--naming ukb` 写 UK Biobank pipeline 名称。默认遇到已有文件即停止，确认需要覆盖时加入 `--overwrite`。包只提供单被试接口；多个病例由调用方在包外分配进程与 GPU。
 
@@ -122,9 +125,9 @@ FNIT 的一次 `TorchAMICONODDI.run(..., naming="amico")` 对应上述全部步�
 
 所有输出为 float32 NIfTI，mask 外为零。真实数据检查中，shape、dtype、affine、qform、sform、pixdim、空间单位和 intent 均与官方文件一致。
 
-## 当前源码逐体素验证
+## AMICO 路径逐体素验证
 
-[`report.public.json`](../../validation/amico_noddi/report.public.json) 由 FNIT 0.14.0 生成，在 gpucw1 上以一例真实 UKB 格式、官方 FSL EDDY 校正后的 `104×104×72×105` dMRI 与 AMICO 2.0.3 配对。数据包含 5 个 b0、50 个 b≈1000、50 个 b≈2000；同一 mask 内 242,261 个体素全部参加比较。两边使用相同 DWI、mask、bval 和 rotated bvec。报告记录的 `__init__.py`、`cli.py`、`core.py`、`kernels.py`、`solver.py` 和共享 DWI I/O 与当前 0.16.0 数值文件的 SHA-256 逐个相同，因此这些精度和计时结果仍覆盖当前数值路径。其中 `kernels.py` SHA-256 为 `46f1044aa5f1c2dbffd12dd33707c0e192ef1de01dc23157ae03a0977b3d0b59`。
+[`report.public.json`](../../validation/amico_noddi/report.public.json) 由 FNIT 0.14.0 生成，在 gpucw1 上以一例真实 UKB 格式、官方 FSL EDDY 校正后的 `104×104×72×105` dMRI 与 AMICO 2.0.3 配对。数据包含 5 个 b0、50 个 b≈1000、50 个 b≈2000；同一 mask 内 242,261 个体素全部参加比较。两边使用相同 DWI、mask、bval 和 rotated bvec。该报告是旧源码的整脑验证；本次增加模式分流后 `core.py` 和 `cli.py` 的 SHA-256 已改变，下面另列当前源码的真实数据复测。
 
 | 输出 | MAE | 最大绝对误差 | 误差 > `1e-7` |
 |---|---:|---:|---:|
@@ -139,18 +142,91 @@ FNIT 的一次 `TorchAMICONODDI.run(..., naming="amico")` 对应上述全部步�
 | 实现 | 设备 | 完整 wall time | 内部总时间 | solver | 峰值显存 |
 |---|---|---:|---:|---:|---:|
 | AMICO 2.0.3 | Intel Xeon Gold 6430，32 threads | `29.24 s` | — | `16.90 s` | — |
-| FNIT 0.14.0 实测（数值文件与当前 0.16.0 相同） | NVIDIA H100 PCIe 80 GB | `66.35 s` | `28.05 s` | `23.90 s` | `9.95 GB` |
+| FNIT 0.14.0 历史实测 | NVIDIA H100 PCIe 80 GB | `66.35 s` | `28.05 s` | `23.90 s` | `9.95 GB` |
 
 FNIT 的 `66.35 s` 从模型构造开始，包含 NIfTI 读取、kernel、方向估计、fitting 和五张图保存；外部验证进程为 `73.19 s`，还包含 Python 启动和逐图比较。本次 GPU 有其他常驻进程，AMICO 参考与候选也不在同一时间窗，因此不计算稳定加速比。FNIT 默认按 400 个 LUT direction 分块，当前峰值 allocation 低于 20 GB。
 
-NumPy 的 LAPACK/OpenBLAS 构建会影响退化张量的特征向量符号与伪逆末位。上述逐体素结果使用 NumPy 1.26.4 官方 CPython 3.11 manylinux wheel（OpenBLAS64 0.3.23.dev）。仓库 [`environment.yml`](../../environment.yml) 以 PyPI 官方 URL和 SHA-256 `666dbf...31d5` 固定该 wheel；`result.qc` 同时返回 `numpy_version`、`numpy_blas_name`、`numpy_blas_version` 和 `validated_numpy_build`。只有该已验证构建才把 `amico_numerically_equivalent` 置为 `True`，表示运行环境具备已验证的数值路径；普通 API 不运行 AMICO oracle，因此 `current_input_compared_with_amico` 保持 `False`。本页逐体素结论来自独立验证驱动。其他 NumPy 构建仍可运行，但不能继承本页结论。
+NumPy 的 LAPACK/OpenBLAS 构建会影响退化张量的特征向量符号与伪逆末位。旧整脑结果使用 NumPy 1.26.4 官方 CPython 3.11 manylinux wheel（OpenBLAS64 0.3.23.dev）。仓库 [`environment.yml`](../../environment.yml) 以 PyPI 官方 URL和 SHA-256 `666dbf...31d5` 固定该 wheel；`result.qc` 同时返回 `numpy_version`、`numpy_blas_name`、`numpy_blas_version` 和 `validated_numpy_build`。只有该已验证构建且使用 `fit_method="amico"` 时，`amico_numerically_equivalent` 才可能为 `True`；普通 API 不运行 AMICO oracle，因此 `current_input_compared_with_amico` 保持 `False`。其他 NumPy 构建不能继承旧整脑逐值结论。
 
 ![AMICO 2.0.3 与当前 FNIT 的 NDI、ODI、FWF 和逐体素绝对差](figures/amico_noddi_comparison.png)
 
-图使用同一真实病例。最终当前输出与图示运行的 NDI/ODI/FWF/RMSE/方向数组分别逐元素相同或仅有上述一个 ULP 差异，因此图示仍对应当前数值结果。原始病例、官方输出和开发期 AMICO/DIPY oracle 不进入仓库。当前源码的 OLS 主方向、Descoteaux-2007 spherical-harmonic basis 与 500-direction rotation basis 对 DIPY 1.12.1 的误差均为 `0`；验证脚本和报告见 [`compare_no_dipy.py`](../../validation/amico_noddi/compare_no_dipy.py) 与 [`no_dipy_equivalence.public.json`](../../validation/amico_noddi/no_dipy_equivalence.public.json)。
+图使用旧整脑运行的同一真实病例，展示当时的 NDI/ODI/FWF 与逐体素误差。原始病例、官方输出和开发期 AMICO/DIPY oracle 不进入仓库。OLS 主方向、Descoteaux-2007 spherical-harmonic basis 与 500-direction rotation basis 的原验证见 [`compare_no_dipy.py`](../../validation/amico_noddi/compare_no_dipy.py) 与 [`no_dipy_equivalence.public.json`](../../validation/amico_noddi/no_dipy_equivalence.public.json)。
+
+当前源码的 `fit_method="amico"` 在同一真实病例固定的 2,048 个脑内体素上重新运行，使用相同官方 AMICO 文件对照。当前测试环境的 NumPy 1.26.4 BLAS 构建与旧整脑验证不同；NDI/ODI/FWF 对官方的 MAE 分别为 `5.09e-6`、`1.21e-5`、`1.32e-5`，Pearson r 均大于 `0.999998`，个别体素最大差异达 `0.0234`。本轮 H100 含读写时间 `22.64 s`，进程峰值 CUDA allocation `99.4 MB`，LUT 每批 100 个方向。输入、源码及官方文件哈希见 [`amico_current_real_2048.public.json`](../../validation/amico_noddi/amico_current_real_2048.public.json)。
+
+## 经典连续 Watson 拟合
+
+`fit_method="classic"` 使用与原版 NODDI 对应的细胞内 stick、Watson 方向分布、tortuosity 细胞外室和自由水室，固定 `d_par=1.7e-3`、`d_iso=3e-3` mm²/s。它先用现有 AMICO 求解器为每个体素提供起点，再用 PyTorch float64 对细胞内体积分数、ODI、自由水分数、两个主方向角和 b0 幅度进行最多 30 次阻尼 Gauss–Newton 更新。目标函数为 Rician 负对数似然；噪声尺度由 AMICO 初始残差估计并限制在归一化信号的 `0.01–0.2` 范围。stick 的 Watson 卷积使用 12 阶偶数 Legendre 展开与 64 点积分。默认 AMICO 初始化 LUT 批量从 400 降至 100，以减少显存。
+
+输入与上表相同；`run()` 仍写五张 NIfTI，`result.qc["fit_method"]` 记录实际模式。`ndi` 是组织内的细胞内分数，`fwf` 是整体自由水分数，`odi=2 atan(1/kappa)/π`。经典模式的 `directions` 为连续拟合的主方向；默认 AMICO 模式保留 DTI 主方向。`rmse` 是对 b0 归一化观测信号的均方根残差。两种算法使用同一文件名、网格与数据类型，但不会逐体素相同。
+
+```python
+from fnit import TorchAMICONODDI
+from fnit.amico_noddi import AMICONODDIConfig
+
+classic_config = AMICONODDIConfig(
+    lut_batch_size=100,  # AMICO 初始化的每批 LUT 方向数；减少共享 GPU 显存
+)
+classic_noddi = TorchAMICONODDI(
+    device="cuda:0",  # 计算设备；也可设为 "cpu"
+    config=classic_config,  # 固定扩散系数与 AMICO 初始化配置
+    fit_method="classic",  # 连续 Watson 六参数 Rician 非线性拟合
+)
+classic_result = classic_noddi.run(
+    data="eddy/data.nii.gz",  # 输入：EDDY 校正后的四维多壳 DWI
+    mask="eddy/nodif_brain_mask.nii.gz",  # 输入：同网格三维二值脑掩膜
+    bvecs="eddy/data.eddy_rotated_bvecs",  # 输入：与校正图对应的旋转后 b-vector
+    bvals="AP.bval",  # 输入：与第四维顺序一致的 b-value
+    output_dir="classic_noddi",  # 输出：五张 AMICO 命名的 NIfTI 文件
+    naming="amico",  # 文件名使用 fit_NDI、fit_ODI、fit_FWF 等
+    overwrite=False,  # 已存在输出时停止
+)
+print(classic_result.qc)  # 拟合方式、耗时、显存和样本数
+```
+
+`AMICONODDIConfig` 参数如下；经典模式中的字典与正则参数只用于 AMICO 起点。
+
+| 参数 | 默认值 | 作用 |
+|---|---:|---|
+| `d_par` | `1.7e-3` | 细胞内和细胞外平行扩散率，mm²/s |
+| `d_iso` | `3.0e-3` | 自由水各向同性扩散率，mm²/s |
+| `ic_vfs` | 12 个 `0.1–0.99` 值 | AMICO 起点的细胞内分数字典网格 |
+| `ic_ods` | 12 个 `0.03–0.99` 值 | AMICO 起点的 ODI 字典网格 |
+| `lambda1` | `0.5` | AMICO 起点的稀疏正则第一参数 |
+| `lambda2` | `1e-3` | AMICO 起点的稀疏正则第二参数 |
+| `b0_threshold` | `100` | 视作 b0 的最大 b-value，s/mm² |
+| `b_step` | `100` | AMICO 输入 b-value 的取整步长，s/mm² |
+| `kkt_tolerance` | `1e-11` | AMICO 活动集的 KKT 收敛阈值 |
+| `cg_tolerance` | `1e-13` | AMICO 共轭梯度回退的收敛阈值 |
+| `maximum_active_steps` | `40` | AMICO 活动集最多更新次数 |
+| `lut_batch_size` | AMICO 模式 `400`；经典模式 `100` | 每批处理的 LUT 方向数；仅影响显存和速度 |
+
+原版 NODDI Toolbox 的对应调用是：
+
+```matlab
+CreateROI('eddy/data.nii.gz', 'eddy/nodif_brain_mask.nii.gz', 'noddi_roi.mat'); % 输入四维 DWI 和三维 mask，输出 ROI
+protocol = FSL2Protocol('AP.bval', 'eddy/data.eddy_rotated_bvecs', 100); % 输入梯度；100 为 b0 阈值
+noddi_model = MakeModel('WatsonSHStickTortIsoV_B0'); % 经典 Watson NODDI 模型
+batch_fitting_single('noddi_roi.mat', protocol, noddi_model, 'FittedParams.mat'); % 逐体素非线性拟合
+SaveParamsAsNIfTI('FittedParams.mat', 'noddi_roi.mat', 'eddy/nodif_brain_mask.nii.gz', 'noddi'); % 输出参数图
+```
+
+FNIT 使用 AMICO 起点和固定残差噪声尺度；原版 Toolbox 的网格搜索、噪声估计及拟合细节不同。因此此模式实现经典模型和 Rician 非线性目标，但尚不能声称与原版 MATLAB 输出数值等价；NITRC 官方源码下载需要账户，本次没有原版逐体素 oracle。这里的“与 AMICO 一致”指参数定义、输出文件和空间结构，精度差异以真实数据报告量化。
+
+在一例真实、经 EDDY 校正的 `104×104×72×105` UKB dMRI 中，固定随机种子从原脑 mask 选 2,048 个体素，使用同一 DWI、mask、bval 和旋转后 bvec，与已保存的官方 AMICO 2.0.3 图比较。最终源码运行前 H100 GPU 0 已占用 `66,073 MiB`、利用率 `100%`；测试进程限制为总显存的 `10%`，PyTorch 峰值 allocation `99.4 MB`，包含读写的 wall time `21.83 s`。其中 AMICO 初始化为 `14.09 s`，连续模型 refinement 为 `0.63 s`。这是一轮共享 GPU 观测，不作为稳定加速比。
+
+| 图 | 与官方 AMICO 的 MAE | Pearson r |
+|---|---:|---:|
+| NDI | `0.031585` | `0.915872` |
+| ODI | `0.031226` | `0.958062` |
+| FWF | `0.024134` | `0.986594` |
+| RMSE | `0.001319` | `0.990222` |
+
+完整指标和测量边界见 [`classic_real_2048.public.json`](../../validation/amico_noddi/classic_real_2048.public.json)。
 
 ## Reference
 
 - 参考文献：Daducci et al., *Accelerated Microstructure Imaging via Convex Optimization (AMICO) from diffusion MRI data*, NeuroImage (2015), [doi:10.1016/j.neuroimage.2014.10.026](https://doi.org/10.1016/j.neuroimage.2014.10.026)。
 - 参考文献：Zhang et al., *NODDI: Practical in vivo neurite orientation dispersion and density imaging of the human brain*, NeuroImage (2012), [原文](https://www.sciencedirect.com/science/article/pii/S1053811912003539)。
 - 原实现代码库：[AMICO 2.0.3](https://github.com/daducci/AMICO/tree/v2.0.3)。
+- 原版经典实现：[NODDI Matlab Toolbox 1.05](https://www.nitrc.org/projects/noddi_toolbox)；其模型与拟合方法见上列 Zhang et al. 论文。
