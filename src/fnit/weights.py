@@ -5,6 +5,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 from pathlib import Path
 from urllib.request import Request, urlopen
 
@@ -101,6 +102,18 @@ MODEL_FILES = {
     "synthsr-v1": ("synthsr_v10_210712.h5",),
 }
 
+# This release contains byte-identical upstream files. Keep the upstream URLs
+# above as the fallback and the record of each original source.
+RELEASE_BASE = ("https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/"
+                "releases/download/assets-v1")
+RELEASE_CHECKSUMS = {name: entry[2] for name, entry in WEIGHT_FILES.items()}
+DEFORM_PARTS = (
+    ("synthmorph.deform.3.h5.part00", 1900000000,
+     "1960594f0929801321de64eaa9b2f116a7d4205cd74c778e55225101e6f1d290"),
+    ("synthmorph.deform.3.h5.part01", 1608630424,
+     "dc4c53b5014ad60c5be82d3d8d275d46f2f1d32dd0ab01bcfdec20b65c9f1b48"),
+)
+
 
 def cache_dir():
     base = os.environ.get("XDG_CACHE_HOME")
@@ -155,16 +168,11 @@ def verify_file(path, size, sha256):
     return digest.hexdigest() == sha256
 
 
-def download_file(filename, directory, verify_only=False):
-    """Download into .part, resume by HTTP Range, verify, then atomically publish."""
-    url, size, sha256 = WEIGHT_FILES[filename]
-    final = directory / filename
+def _download_verified(url, size, sha256, final):
+    """Download one URL with HTTP Range and publish only a verified file."""
     if verify_file(final, size, sha256):
         return final
-    if verify_only:
-        raise ValueError(f"Missing or invalid checkpoint: {final}")
-    directory.mkdir(parents=True, exist_ok=True)
-    part = directory / (filename + ".part")
+    part = final.with_name(final.name + ".part")
     if part.exists() and part.stat().st_size > size:
         part.unlink()
 
@@ -179,12 +187,12 @@ def download_file(filename, directory, verify_only=False):
                             match = re.fullmatch(r"bytes (\d+)-(\d+)/(\d+)",
                                                  response.headers.get("Content-Range", ""))
                             if not match or int(match[1]) != offset or int(match[3]) != size:
-                                raise ValueError(f"Unexpected HTTP Content-Range for {filename}")
+                                raise ValueError(f"Unexpected HTTP Content-Range for {final.name}")
                             mode = "ab"
                         elif response.status == 200:
                             mode = "wb"  # A server that ignores Range sends the whole file.
                         else:
-                            raise ValueError(f"Unexpected HTTP status {response.status} for {filename}")
+                            raise ValueError(f"Unexpected HTTP status {response.status} for {final.name}")
                         with part.open(mode) as stream:
                             for block in iter(lambda: response.read(8 * 1024 * 1024), b""):
                                 stream.write(block)
@@ -197,8 +205,38 @@ def download_file(filename, directory, verify_only=False):
             return final
         part.unlink(missing_ok=True)
         if attempt:
-            raise ValueError(f"Downloaded checkpoint failed size or SHA-256 verification: {filename}")
+            raise ValueError(f"Downloaded checkpoint failed size or SHA-256 verification: {final.name}")
     raise AssertionError("unreachable")
+
+
+def download_file(filename, directory, verify_only=False):
+    """Prefer the pinned release; fall back to the official file and verify SHA-256."""
+    upstream, size, sha256 = WEIGHT_FILES[filename]
+    final = directory / filename
+    if verify_file(final, size, sha256):
+        return final
+    if verify_only:
+        raise ValueError(f"Missing or invalid checkpoint: {final}")
+    directory.mkdir(parents=True, exist_ok=True)
+    if RELEASE_CHECKSUMS.get(filename) == sha256:
+        try:
+            if filename == "synthmorph.deform.3.h5":
+                chunks = [_download_verified(f"{RELEASE_BASE}/{name}", part_size,
+                                             part_hash, directory / name)
+                          for name, part_size, part_hash in DEFORM_PARTS]
+                temporary = final.with_name(final.name + ".part")
+                with temporary.open("wb") as output:
+                    for chunk in chunks:
+                        with chunk.open("rb") as source:
+                            shutil.copyfileobj(source, output, length=8 * 1024 * 1024)
+                if not verify_file(temporary, size, sha256):
+                    raise ValueError(f"Release parts failed SHA-256 verification: {filename}")
+                temporary.replace(final)
+                return final
+            return _download_verified(f"{RELEASE_BASE}/{filename}", size, sha256, final)
+        except (OSError, ValueError):
+            pass
+    return _download_verified(upstream, size, sha256, final)
 
 
 def main(argv=None):

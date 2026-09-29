@@ -5,6 +5,7 @@ import importlib.util
 import io
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 
@@ -15,6 +16,23 @@ _SPEC.loader.exec_module(assets)
 
 
 class TestSurfaceAssets(unittest.TestCase):
+    def test_release_is_preferred_for_pinned_hcp_asset(self):
+        relative_path = "global/templates/example.gii"
+        payload = b"verified release template"
+        digest = hashlib.sha256(payload).hexdigest()
+        requested = []
+
+        def opener(url, timeout):
+            requested.append(url)
+            return io.BytesIO(payload)
+
+        with tempfile.TemporaryDirectory() as directory:
+            with patch.dict(assets.RELEASE_CHECKSUMS, {relative_path: digest}):
+                path = assets._install_one(Path(directory), relative_path, digest, opener)
+            self.assertEqual(path.read_bytes(), payload)
+        self.assertEqual(requested,
+                         [assets.RELEASE_BASE + "hcp--global--templates--example.gii"])
+
     def test_download_verifies_checksum_and_reuses_valid_file(self):
         payload = b"public HCP template"
         calls = []

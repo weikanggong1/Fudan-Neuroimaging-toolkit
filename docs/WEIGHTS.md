@@ -10,7 +10,7 @@ FreeSurfer。TorchFAST、TorchFLIRT 和 TorchFNIRT 是数值算法，
 
 ## 一次配置，后续自动使用
 
-在仓库根目录运行。默认下载下表 19 个文件到 `~/.cache/fnit/`；SynthMorph 最大的文件约 3.51 GB，可通过 HTTP Range 续传。脚本先写 `.part`，完整校验后才更名为正式权重文件。
+在仓库根目录运行。默认下载下表 20 个文件到 `~/.cache/fnit/`。优先使用 [FNIT 固定版本 Release](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1)；Release 暂时不可用时回退到表中的官方地址。`synthmorph.deform.3.h5` 在 Release 中分为两卷，安装器合并后核对完整文件的 SHA-256。其他文件也在写入 `.part` 后通过大小和 SHA-256 校验，再更名为正式文件。
 
 ```bash
 python tools/setup_weights.py --all
@@ -54,7 +54,7 @@ python tools/setup_weights.py --all --verify-only
 
 可选模型名：`synthstrip`、`synthstrip-nocsf`、`synthmorph-rigid`、`synthmorph-affine`、`synthmorph-deform`、`synthmorph-joint`、`synthseg`、`synthseg-plus`、`wmh-synthseg`、`recon-all`、`synthsr`、`synthsr-lowfield`、`synthsr-v1`、`fast-vbm` 和 `fmri`。`recon-all` 包含 SynthStrip、SynthMorph affine 和 33 类 SynthSeg 的六个文件，重复选择时只下载一次。`fast-vbm` 和 `fmri` 都是 `synthstrip.1.pt` 与 `synthmorph.deform.3.h5` 的依赖别名。端到端 fMRI 选择 `registration_backend="fnirt"` 时只需 `--model synthstrip`；仅单独调用 `register_t1_to_mni`、并已备妥去颅骨 T1 与 MNI 模板时不需要 checkpoint。`--model` 可重复；不写 `--model` 时等同 `--all`。显式 API/CLI 权重路径优先，其次是 `FNIT_WEIGHTS` 环境变量，再次是脚本保存的目录，然后是默认缓存；若设置了 `FREESURFER_HOME`，最后还会检查其 `models` 目录，独立安装不依赖该环境变量。`XDG_CACHE_HOME` 可改变缓存根目录。模型推理不会联网，只有运行配置脚本才会下载。
 
-原有九个链接、HTTP 状态和文件大小于 **2026-09-23** 核验；当时新增的十个 FreeSurfer 8.2 模型和查找表于 **2026-09-25** 从官方源码/git-annex 完整下载，逐一核对大小和 SHA-256。SynthStrip/SynthMorph 的 SHA-256 来自本包已完成数值验证的权重，并与 FreeSurfer 官方仓库的 git-annex 指针一致；WMH-SynthSeg 和 SynthSR v1 的 SHA-256 来自官方文件的完整下载校验。SynthSR v2 两份文件的大小和 SHA-256 与 FreeSurfer git-annex 对象名一致；配置脚本下载后还会逐字节校验。此处的版本号固定，不会自动跟随上游替换为新模型。
+官方文件于 **2026-09-23 至 2026-09-29** 从 FreeSurfer 官方源码、git-annex 或已安装的官方发行版核对大小和 SHA-256；Release 保留原始字节，不改变权重格式。SynthStrip/SynthMorph 的 SHA-256 来自本包已完成数值验证的权重，并与 FreeSurfer 官方仓库的 git-annex 指针一致；WMH-SynthSeg 和 SynthSR v1 的 SHA-256 来自官方文件的完整下载校验。SynthSR v2 两份文件的大小和 SHA-256 与 FreeSurfer git-annex 对象名一致；配置脚本下载后还会逐字节校验。此处的版本号固定，不会自动跟随上游替换为新模型。
 
 `synthseg-plus` 在 `synthseg` 四个文件之外增加 53,090,840 字节的皮层分区网络；该文件已与 FreeSurfer 8.2.0-1 安装文件核对 SHA-256。`--all` 的总量因此增加 53,090,840 字节。
 
@@ -134,7 +134,7 @@ export FNIT_WEIGHTS="$PWD/weights"
 `TorchFAST` 和 `fnit fast` 直接运行 HMRF-EM、
 bias field 和 PVE 数值计算，不读取 checkpoint，也不需要执行
 `tools/setup_weights.py`。只有从原始、未去颅骨 T1 开始并先调用 SynthStrip 时，
-才需要配置 `synthstrip.1.pt`。`setup_weights.py --all` 的 19 个文件属于上表
+才需要配置 `synthstrip.1.pt`。`setup_weights.py --all` 的 20 个文件属于上表
 学习模型及其查找表，不含 TorchFAST 文件。
 
 `FastVBM` / `fnit fast-vbm` 从原始 T1w 开始，默认调用 SynthStrip，因此需要
@@ -150,28 +150,20 @@ template 是独立输入，不是模型权重，也不由本仓库或配置脚�
 
 ## 权重许可与归属
 
-**19 个文件中，SynthStrip 与 SynthMorph 的五个权重可选择 MIT 或 CC BY 4.0 许可。** 两个功能的官网 “Code and Weights” 均明确提供这一选择。[SynthStrip](https://surfer.nmr.mgh.harvard.edu/docs/synthstrip/)，[SynthMorph](https://synthmorph.io/#code)
+**20 个文件中，SynthStrip 与 SynthMorph 的五个权重可选择 MIT 或 CC BY 4.0 许可。** 两个功能的官网 “Code and Weights” 均明确提供这一选择。[SynthStrip](https://surfer.nmr.mgh.harvard.edu/docs/synthstrip/)，[SynthMorph](https://synthmorph.io/#code)
 
-这五个权重的公开镜像可按所选许可发布，保留原作者、原始模型名称、官方来源和相应许可文本；如果转换或修改文件，注明具体变更。权重归原作者所有，本项目提供独立的 PyTorch 实现及验证，不将这些模型声称为本项目训练所得。模型卡应链接原论文，并记录文件 SHA-256。[MIT 条款](https://choosealicense.com/licenses/mit/)，[CC BY 4.0 条款](https://creativecommons.org/licenses/by/4.0/)
+Release 中这五个权重选用 CC BY 4.0，保留原作者、原始模型名称、官方来源和许可链接；文件未经转换或修改。权重归原作者所有，本项目提供独立的 PyTorch 实现及验证，不将这些模型声称为本项目训练所得。Release 说明链接原论文，清单记录逐文件 SHA-256。[MIT 条款](https://choosealicense.com/licenses/mit/) · [CC BY 4.0 条款](https://creativecommons.org/licenses/by/4.0/)
 
 **33 类 SynthSeg、WMH-SynthSeg、FreeSurfer 辅助模型/查找表和 SynthSR 权重遵循 [FreeSurfer Software License](https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferSoftwareLicense)。** 官方没有为这些文件宣布上述 MIT 或 CC BY 4.0 双许可。该许可对下载、使用和再分发要求保留条款与归属信息；原文说明软件为研究用途设计，临床应用未获审查或批准。[SynthSeg 官方说明](https://surfer.nmr.mgh.harvard.edu/fswiki/SynthSeg) · [WMH-SynthSeg 官方说明](https://surfer.nmr.mgh.harvard.edu/fswiki/WMH-SynthSeg) · [SynthSR 官方说明](https://surfer.nmr.mgh.harvard.edu/fswiki/SynthSR)
 
 上述许可针对权重。改编代码及依赖继续遵守 [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md) 中的 FreeSurfer、Apache 等条款。
 
-## 如果需要自行提供公开镜像
+## 固定版本 Release 与原站下载范围
 
-目前使用上述官方 URL。本项目没有上传权重或建立模型镜像。如需自行托管，下表列出可选平台；33 类 SynthSeg、WMH-SynthSeg、辅助模型与 SynthSR 镜像还须遵守 FreeSurfer 许可。
+[FNIT `assets-v1` Release](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1)保存本页 20 个权重文件。每个附件的原始 URL、字节数、SHA-256 和许可记录在 Release 附带的 `asset-manifest.json`。`synthmorph.deform.3.h5` 拆成两个小于 2 GiB 的附件；安装器在本地合并，并核对上表中的完整 SHA-256。下载器不会调用 FreeSurfer 程序。
 
-| 方式 | 当前官方限制 | 对本项目的适用性 |
-|---|---|---|
-| Hugging Face 模型仓库 | 免费公开存储为 best-effort；单文件硬上限 500 GB | 文件大小允许原样保存；适合持续维护模型与版本。附模型卡、各自许可和 SHA-256 清单。 |
-| Zenodo | 免费服务；默认每条记录总计 50 GB、最多 100 个文件，适用公平使用政策 | 可原样保存全套，适合带 DOI 的固定研究版本。 |
-| GitHub Release | 专属 Release 文档规定每个附件小于 2 GiB；最多 1,000 个附件，无总大小或下载带宽上限 | deform 权重需拆成小于 2 GiB 的分卷；下载后拼接并核对完整 SHA-256。 |
-| GitHub LFS | Free/Pro 单文件 2 GB；Team 4 GB；Enterprise Cloud 5 GB | Free/Pro 无法原样上传 deform 权重；LFS 下载消耗仓库所有者的流量额度。 |
-| 普通 Git 提交 | 超过 100 MiB 的单文件被拒绝 | 不适合存放整套模型，保持代码仓库轻量。 |
+Release 同时保存 [HCPpipelines v4.7.0 固定提交](https://github.com/Washington-University/HCPpipelines/tree/f8cac6892f88bdf889d644711ff038198eb81533)中的 29 个公开 fMRI 表面模板及配置文件，另附原仓库的 `LICENSE.md`。`fnit-setup-fmri-surface-assets` 优先下载这些附件，失败后回退 HCP 原站；`--fmriprep` 指定的 TemplateFlow HCP dseg 继续从 [TemplateFlow 原站](https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/)下载。
 
-限制来源：[Hugging Face 存储](https://huggingface.co/docs/hub/storage-limits)、[Zenodo 文件限制](https://help.zenodo.org/docs/deposit/manage-files/)、[Zenodo 免费与公平使用](https://support.zenodo.org/help/en-gb/1-upload-deposit/80-what-are-the-size-limitations-of-zenodo)、[GitHub Release](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases)、[Git LFS 文件限制](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-git-large-file-storage)、[普通 Git 文件限制](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github)。
+FreeSurfer recon-all 的外置图谱和模板仍由 `fnit-setup-recon-all-assets` 从 FreeSurfer 原站获取。该组中含 MNI 和其他第三方来源的数据，尚未逐一确认其再分发权利，因此不进入 Release。fMRI 体积流程的 FSL MNI152 T1 与脑掩膜仍按[功能说明](fmri/README.md)从 FSL 官方数据包获取；Tian atlas 仍由用户按其来源条款提供。
 
-GitHub 的通用大文件页面与专属 Release 页面对附件上限表述不同：前者关联账号 LFS 计划，后者明确为 2 GiB。因此若使用 Release，采用每个附件小于 2 GiB 的分卷方案。LFS 的免费额度当前为 Free/Pro 每月 10 GiB 下载流量及 10 GiB 存储；Team/Enterprise 为各 250 GiB，超额处理依预算配置。[LFS 计费说明](https://docs.github.com/en/billing/concepts/product-billing/git-lfs)
-
-若后续建立 Hugging Face 镜像，可用官方 `huggingface_hub` 上传文件夹，并以完整 commit ID 固定下载版本；仍核对本页 SHA-256。公开存储的 best-effort 政策不等同于无限免费额度。[上传文档](https://huggingface.co/docs/huggingface_hub/guides/upload)、[下载文档](https://huggingface.co/docs/huggingface_hub/guides/download)
+权重与 HCP 模板均保留原作者归属。SynthStrip 和 SynthMorph 的五个模型在 Release 中选用 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)；其余 FreeSurfer 权重依 [FreeSurfer Software License](https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferSoftwareLicense)再分发，Release 附完整许可文本。HCP 模板依[HCPpipelines 原仓库许可](https://github.com/Washington-University/HCPpipelines/blob/f8cac6892f88bdf889d644711ff038198eb81533/LICENSE.md)再分发，许可文本也作为附件提供。具体模型论文和原实现链接见各功能说明。

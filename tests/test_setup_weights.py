@@ -69,6 +69,61 @@ def test_interrupted_download_resumes_with_http_range(tmp_path, monkeypatch, tin
     assert not (destination / (name + ".part")).exists()
 
 
+def test_release_file_is_preferred_when_checksum_matches(tmp_path, monkeypatch, tiny_weight):
+    name, content = tiny_weight
+    monkeypatch.setitem(weights.RELEASE_CHECKSUMS, name,
+                        weights.WEIGHT_FILES[name][2])
+    requested = []
+
+    def fetch(request, timeout):
+        requested.append(request.full_url)
+        return Response(content)
+
+    monkeypatch.setattr(weights, "urlopen", fetch)
+    assert weights.download_file(name, tmp_path / "models").read_bytes() == content
+    assert requested == [f"{weights.RELEASE_BASE}/{name}"]
+
+
+def test_release_failure_uses_verified_official_url(tmp_path, monkeypatch, tiny_weight):
+    name, content = tiny_weight
+    upstream = weights.WEIGHT_FILES[name][0]
+    monkeypatch.setitem(weights.RELEASE_CHECKSUMS, name,
+                        weights.WEIGHT_FILES[name][2])
+    requested = []
+
+    def fetch(request, timeout):
+        requested.append(request.full_url)
+        if request.full_url.startswith(weights.RELEASE_BASE):
+            raise OSError("release unavailable")
+        return Response(content)
+
+    monkeypatch.setattr(weights, "urlopen", fetch)
+    assert weights.download_file(name, tmp_path / "models").read_bytes() == content
+    assert requested == [f"{weights.RELEASE_BASE}/{name}", upstream]
+
+
+def test_split_release_checkpoint_reassembles_exact_bytes(tmp_path, monkeypatch):
+    name = "synthmorph.deform.3.h5"
+    chunks = (b"part one", b"part two")
+    content = b"".join(chunks)
+    digest = hashlib.sha256(content).hexdigest()
+    monkeypatch.setitem(weights.WEIGHT_FILES, name,
+                        ("https://upstream.test/deform", len(content), digest))
+    monkeypatch.setitem(weights.RELEASE_CHECKSUMS, name, digest)
+    parts = tuple((f"{name}.part{i:02d}", len(chunk), hashlib.sha256(chunk).hexdigest())
+                  for i, chunk in enumerate(chunks))
+    monkeypatch.setattr(weights, "DEFORM_PARTS", parts)
+    requested = []
+
+    def fetch(request, timeout):
+        requested.append(request.full_url)
+        return Response(chunks[len(requested) - 1])
+
+    monkeypatch.setattr(weights, "urlopen", fetch)
+    assert weights.download_file(name, tmp_path / "models").read_bytes() == content
+    assert requested == [f"{weights.RELEASE_BASE}/{part[0]}" for part in parts]
+
+
 def test_network_timeout_resumes_partial_file(tmp_path, monkeypatch, tiny_weight):
     name, content = tiny_weight
     requests = []
