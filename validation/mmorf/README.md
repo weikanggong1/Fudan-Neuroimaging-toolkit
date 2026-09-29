@@ -1,47 +1,53 @@
-# MMORF 验证
+# MMORF 真实数据验证
 
-[返回 MMORF 文档](../../docs/mmorf/README.md)
+[返回功能说明](../../docs/mmorf/README.md)
 
-[`report.public.json`](report.public.json) 记录 TorchMMORF 正常收敛路径与 FSL MMORF 0.3.2 的真实单被试对照。两边使用相同的脑提取 T1w、FSL 六通道 tensor、模板和 FLIRT 初始化矩阵。该数值比较测于加入非有限值恢复逻辑之前，报告保留测量时的源码哈希；当前源码的首次 LBFGS 尝试保持相同参数和损失，尚无 fresh 同输入 FSL 逐体素重测。[当前源码恢复试验](recovery.real.current.json)记录固定失败输入的重试结果和另一轮完整 raw-to-standard 运行。仓库不保存源图像或 subject identifier，只保留汇总指标与此前已公开的去标识切片。
+[`report.public.json`](report.public.json) 记录一例真实 T1w、DTI FA 和 FSL 六通道 tensor 的双标量联合注册。FNIT 和官方 MMORF 0.3.2 使用相同图像、模板、五级计划以及相同的 FSL scaled-mm 矩阵。FNIT 的第二组 FA 矩阵由内部 PyTorchFLIRT 自动估计，再导出给官方配置。两组标量权重均为 0.5。报告分别给出线性、非线性和含写盘时间；共享 GPU 测试前后的负载及 FNIT 进程显存上限单独记录。
 
-当前报告覆盖：
+精度比较包含 warp、Jacobian、warped T1 和 warped FA 的完整 3D Pearson、MAE、RMSE。两张 warped scalar 都使用同一个 FNIT cubic sampler，仅替换 FNIT 或官方估计的 warp，因此采样器和线性矩阵保持不变。报告中的输入路径和病例标识已去除；真实 NIfTI 不随包分发。
 
-- warp、Jacobian 和 warped scalar 的完整 3D Pearson、MAE、RMSE；
-- shape、affine、dtype、warp 方向和单位；
-- 同一 sampler/affine/native map 下，仅替换官方或 FNIT warp 的九图对照；
-- 固定官方 warp 的 sampler 隔离和 control-lattice 投影诊断；
-- GPU compute、含写盘 wall time、九图应用时间和峰值 CUDA allocation；
-- 当前源码哈希、测试结果和仍未实现的官方求解语义。
+## FNIT 运行
 
-`numerically_equivalent=false`。当前主要差异是官方 sparse full/diagonal Gauss–Newton–Levenberg 与 FNIT LBFGS strong-Wolfe 的更新轨迹。
-
-## 复现比较
-
-[`compare_mmorf.py`](compare_mmorf.py) 对已有输出重新计算指标。`--map` 可重复九次；其中 official 参数图必须先用与 FNIT 图相同的 `apply_mmorf_warp`、affine、native input 和 interpolation 生成，才能只比较 warp estimation：
+以下命令中的路径对应一例真实数据。`--mov-scalar` 与 `--ref-scalar` 按出现顺序成对；`AUTO` 表示该组缺失线性矩阵，由 PyTorchFLIRT 估计。`--memory-fraction 0.24` 对一张 H100 PCIe 约为 19.1 GiB 的进程上限，脚本记录运行前后的全卡占用。
 
 ```bash
-python validation/mmorf/compare_mmorf.py \
-  --fnit-warp fnit/mmorf_warp.nii.gz \
-  --official-warp official/warp.nii.gz \
-  --fnit-jacobian fnit/mmorf_jacobian.nii.gz \
-  --official-jacobian official/jacobian.nii.gz \
-  --brain-mask MNI152_T1_1mm_brain.nii.gz \
-  --fnit-scalar fnit/mmorf_warped_scalar.nii.gz \
-  --official-scalar official/mmorf_warped_scalar.nii.gz \
-  --map-mask fnit/standard/FA.nii.gz official_warp_with_fnit_sampler/FA.nii.gz \
-  --map FA fnit/standard/FA.nii.gz official_warp_with_fnit_sampler/FA.nii.gz \
+PYTHONPATH=src python validation/mmorf/measure_real_multiscalar.py \
+  --mov-scalar t1_brain.nii.gz \
+  --ref-scalar MNI152_T1_1mm_brain.nii.gz \
+  --mov-scalar dti_FA.nii.gz \
+  --ref-scalar FSL_HCP1065_FA_1mm.nii.gz \
+  --mov-tensor dti_tensor.nii.gz \
+  --ref-tensor FSL_HCP1065_tensor_1mm.nii.gz \
+  --aff-mov-scalar t1_to_MNI.mat \
+  --aff-mov-scalar AUTO \
+  --aff-mov-tensor FA_to_MNI.mat \
+  --output-dir fnit_multiscalar \
+  --device cuda:0 \
+  --memory-fraction 0.24
+```
+
+`--mov-tensor` 和 `--ref-tensor` 是 `[X,Y,Z,6]` 的 FSL 张量；`--aff-mov-tensor` 映射 moving tensor 到第一张 reference scalar。未给的 reference 模态矩阵在同网格时为 identity。脚本在目录内生成 MMORF 结果、`mmorf_report.json` 以及额外的 `mmorf_benchmark.json`。
+
+## 官方命令与配对比较
+
+将 `mmorf_report.json` 中 `linear_alignment.moving_scalar[1].matrix` 写为 `FA_auto.mat`，按[功能页示例](../../docs/mmorf/README.md)准备官方 `multimodal.ini`，运行：
+
+```bash
+FSLOUTPUTTYPE=NIFTI_GZ mmorf --config multimodal.ini
+```
+
+此命令仅用于验证；FNIT 运行时不调用官方 MMORF。官方产物为 `official_warp.nii.gz` 和 `official_jacobian.nii.gz`。生成逐体素比较与两个官方 warp 的匹配采样输出：
+
+```bash
+PYTHONPATH=src python validation/mmorf/compare_real_multiscalar.py \
+  --fnit-dir fnit_multiscalar \
+  --official-dir official_multiscalar \
+  --mov-t1 t1_brain.nii.gz \
+  --mov-fa dti_FA.nii.gz \
+  --ref-t1 MNI152_T1_1mm_brain.nii.gz \
+  --device cuda:0 \
+  --memory-fraction 0.24 \
   --output comparison.json
 ```
 
-[`plot_mmorf.py`](plot_mmorf.py) 使用 nibabel、NumPy 和 Pillow 生成文档中的真实数据切片：
-
-```bash
-python validation/mmorf/plot_mmorf.py \
-  --official-scalar official_warp_with_fnit_sampler/T1.nii.gz \
-  --fnit-scalar fnit/mmorf_warped_scalar.nii.gz \
-  --official-fa official_warp_with_fnit_sampler/FA.nii.gz \
-  --fnit-fa fnit/standard/FA.nii.gz \
-  --output docs/mmorf/figures/mmorf_fsl_comparison.png
-```
-
-`SHA256SUMS` 覆盖两份公开报告、两个复现脚本和文档图。数值指标由完整 NIfTI 计算，图像不参与指标计算。
+输出 `comparison.json` 给出数值与 shape/affine/dtype 合同；`official_multiscalar/sampled_T1.nii.gz` 和 `sampled_FA.nii.gz` 用于重建对照图。`plot_mmorf.py` 绘制同网格、同显示范围的 T1 与 FA 切片。`SHA256SUMS` 校验当前公开报告、脚本和图。

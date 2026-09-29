@@ -2,11 +2,11 @@
 
 This directory contains unmodified FSL source-code snapshots consulted while
 implementing the PyTorch FLIRT, FNIRT, TOPUP, EDDY, DTIFIT, `applywarp`, BET,
-BEDPOSTX, ProbtrackX, and MMORF paths. The snapshots are retained for licence compliance and
+BEDPOSTX and ProbtrackX paths. The snapshots are retained for licence compliance and
 reproducible source provenance. They are package data: `fnit` does not compile
 or import them at runtime.
 
-FLIRT through fugue and MMORF match the FSL 6.0.7.4 validation package
+FLIRT through fugue match the FSL 6.0.7.4 validation package
 manifest. The EDDY, DTIFIT, BEDPOSTX, ProbtrackX, and BET rows are separate
 implementation reference snapshots:
 
@@ -27,7 +27,6 @@ implementation reference snapshots:
 | bet2 (BET) | `2111.9` | `d6b02000500516ce7d1c0c9fa23259ca7a83f7e3` |
 | meshclass (BET) | `2111.0` | `228ca8e73b86b4466e4323be10da36bd5bfdfb07` |
 | avwutils (BET) | `2209.8` | `fcc335218284a2b04d5d7eb17dd4cfba264d0295` |
-| MMORF | `v0.3.2` | `1c1c13b8368f05e1a79a6dafe919d6b61df36bd6` |
 
 [`manifest.json`](manifest.json) records the upstream repository, tag, commit,
 Git tree, deterministic `git archive` SHA-256, and SHA-256 of every distributed
@@ -52,7 +51,6 @@ original repositories are:
 - <https://git.fmrib.ox.ac.uk/fsl/bet2.git>
 - <https://git.fmrib.ox.ac.uk/fsl/meshclass.git>
 - <https://git.fmrib.ox.ac.uk/fsl/avwutils.git>
-- <https://git.fmrib.ox.ac.uk/fsl/MMORF.git>
 
 These sources and the modified Python ports are distributed under the
 [FSL Software Licence, Release 6.0](../../../licenses/FSL-6.0.txt). The licence

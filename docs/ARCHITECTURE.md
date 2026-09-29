@@ -23,7 +23,7 @@ FastVBM 的配准链位于 `flirt/`、`fnirt/`、`applywarp/`、`fast_vbm/regist
 | TorchEDDY | [UKB dMRI 运动、EC 和离群切片校正](eddy/README.md) |
 | TorchDTIFIT | [FSL 默认 OLS tensor fit](dtifit/README.md) |
 | TorchAMICONODDI | [AMICO 2.0.3 数值等价的 NODDI fitting](amico_noddi/README.md) |
-| run_mmorf / TorchMMORF | [scalar/tensor shared-warp registration](mmorf/README.md) |
+| run_mmorf / TorchMMORF | [多组标量与张量共享 warp 配准](mmorf/README.md) |
 | dMRI pipeline | [optional TOPUP 到九张标准空间参数图](dmri_pipeline/README.md) |
 | TorchBEDPOSTX | [体素内纤维方向估计](bedpostx/README.md) |
 | TorchProbtrackX | [概率纤维束追踪与连接矩阵](probtrackx/README.md) |

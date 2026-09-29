@@ -4,12 +4,14 @@ from pathlib import Path
 from types import SimpleNamespace
 import nibabel as nib
 import numpy as np
+import pytest
 import torch
 
 import fnit.mmorf.cli as cli_module
 from fnit.mmorf.core import (
     _bending_regularisation,
     _control_shape,
+    _compose_affine,
     _cubic_bspline_basis,
     _cubic_spline_coefficients,
     _expand_control,
@@ -23,12 +25,14 @@ from fnit.mmorf.core import (
     _sample_cubic,
     _sampling_frequency,
     _world_extents,
+    _world_forward,
     _world_jacobian_from_voxel_field,
     _spred_regularisation,
     _symmetric_weight,
 )
 from fnit.mmorf import (
     MMORFConfig,
+    MMORFResult,
     TorchMMORF,
     apply_mmorf_warp,
     run_mmorf,
@@ -117,6 +121,122 @@ def test_run_mmorf_writes_complete_single_subject_output(tmp_path):
     }
 
 
+def test_two_scalar_pairs_share_warp_and_save_each_result(tmp_path):
+    shape = (5, 6, 7)
+    base = np.arange(np.prod(shape), dtype=np.float32).reshape(shape) / 100
+    tensor = np.zeros((*shape, 6), dtype=np.float32)
+    tensor[..., (0, 3, 5)] = (1.4e-3, 0.5e-3, 0.4e-3)
+    config = MMORFConfig(
+        warp_resolution_mm=(8.0,), smoothing_mm=(0.0,),
+        regularization=(0.2,), iterations=(1,),
+    )
+    result = run_mmorf(
+        moving_scalar=[_image(base), _image(base * 2)],
+        reference_scalar=[_image(base), _image(base * 2)],
+        moving_tensor=_image(tensor),
+        reference_tensor=_image(tensor),
+        output_dir=tmp_path,
+        device="cpu",
+        config=config,
+    )
+    assert result.qc["scalar_pair_count"] == 2
+    assert result.qc["scalar_pair_weights"] == (0.5, 0.5)
+    assert len(result.warped_scalars) == 2
+    np.testing.assert_allclose(
+        result.warped_scalar.get_fdata(), result.warped_scalars[0].get_fdata()
+    )
+    assert (tmp_path / "mmorf_warped_scalar_2.nii.gz").is_file()
+    assert result.qc["linear_alignment"]["moving_scalar"][1]["method"] == "same_image"
+    single = MMORFResult(
+        result.warp, result.jacobian, result.warped_scalar,
+        result.warped_tensor, result.qc, (result.warped_scalar,),
+    )
+    single.save(tmp_path, overwrite=True)
+    assert not (tmp_path / "mmorf_warped_scalar_2.nii.gz").exists()
+
+
+def test_existing_output_is_rejected_before_registration(tmp_path, monkeypatch):
+    (tmp_path / "mmorf_report.json").write_text("{}")
+
+    def should_not_register(*args, **kwargs):
+        raise AssertionError("registration must not start")
+
+    monkeypatch.setattr(TorchMMORF, "__call__", should_not_register)
+    with pytest.raises(FileExistsError):
+        TorchMMORF(device="cpu").run(output_dir=tmp_path)
+
+
+def test_missing_affines_call_pytorchflirt_for_each_unaligned_pair(monkeypatch):
+    import fnit.mmorf.core as core
+
+    calls = []
+
+    def fake_auto(moving, fixed, *, device, dof, cost):
+        calls.append((dof, cost, moving.shape, fixed.shape))
+        return np.eye(4)
+
+    monkeypatch.setattr(core, "_auto_affine", fake_auto)
+    shape = (5, 6, 7)
+    base = np.arange(np.prod(shape), dtype=np.float32).reshape(shape) / 100
+    shifted = nib.Nifti1Image(base * 2, np.diag((1.1, 1, 1, 1)))
+    tensor = np.zeros((*shape, 6), dtype=np.float32)
+    tensor[..., (0, 3, 5)] = (1.4e-3, 0.5e-3, 0.4e-3)
+    moving_tensor = tensor.copy()
+    moving_tensor[..., 0] *= 1.1
+    config = MMORFConfig(
+        warp_resolution_mm=(8.0,), smoothing_mm=(0.0,),
+        regularization=(0.2,), iterations=(1,),
+    )
+    result = TorchMMORF(device="cpu", config=config)(
+        moving_scalar=[_image(base + 0.1), _image(base * 2 + 0.1)],
+        reference_scalar=[_image(base), shifted],
+        moving_tensor=_image(moving_tensor),
+        reference_tensor=_image(tensor),
+    )
+    assert [(dof, cost) for dof, cost, _, _ in calls] == [
+        (12, "corratio"), (6, "normmi"), (12, "corratio"),
+        (6, "normmi"),
+    ]
+    assert result.qc["linear_alignment"]["moving_tensor"]["method"] == "pytorchflirt_fa_6_normmi"
+
+
+def test_scalar_pairs_use_their_own_sampling_frequency():
+    shape = (5, 6, 7)
+    scalar = np.arange(np.prod(shape), dtype=np.float32).reshape(shape) / 100
+    coarse = nib.Nifti1Image(scalar, np.diag((2, 2, 2, 1)))
+    tensor = np.zeros((*shape, 6), dtype=np.float32)
+    tensor[..., (0, 3, 5)] = (1.4e-3, 0.5e-3, 0.4e-3)
+    config = MMORFConfig(
+        warp_resolution_mm=(4.0,), smoothing_mm=(1.0,),
+        regularization=(0.2,), iterations=(1,),
+    )
+    result = TorchMMORF(device="cpu", config=config)(
+        moving_scalar=[_image(scalar), coarse],
+        reference_scalar=[_image(scalar), coarse],
+        moving_tensor=_image(tensor),
+        reference_tensor=_image(tensor),
+        reference_scalar_affine=[None, np.eye(4)],
+    )
+    assert result.qc["levels"][0]["scalar_sampling_frequency"] == (4, 2)
+
+
+def test_linear_pair_matrix_composes_in_world_before_fsl_conversion():
+    shape = (5, 6, 7)
+    moving = nib.Nifti1Image(np.ones(shape), np.diag((1.2, 1.0, 1.0, 1.0)))
+    intermediate = nib.Nifti1Image(np.ones(shape), np.diag((1.0, 1.4, 1.0, 1.0)))
+    common = _image(np.ones(shape))
+    first = np.eye(4)
+    first[0, 3] = 2.0
+    second = np.eye(4)
+    second[1, 3] = -3.0
+    combined = _compose_affine(moving, intermediate, common, first, second)
+    expected = (_world_forward(second, intermediate, common)
+                @ _world_forward(first, moving, intermediate))
+    np.testing.assert_allclose(
+        _world_forward(combined, moving, common), expected, atol=1e-8
+    )
+
+
 def test_mmorf_cli_delegates_to_public_function(monkeypatch, tmp_path):
     captured = {}
 
@@ -151,9 +271,37 @@ def test_mmorf_cli_delegates_to_public_function(monkeypatch, tmp_path):
     assert captured["kwargs"]["device"] == "cpu"
 
 
+def test_mmorf_cli_pairs_repeated_scalars_and_auto_affines(monkeypatch, tmp_path):
+    captured = {}
+
+    def fake_run_mmorf(*args, **kwargs):
+        captured["args"] = args
+        captured["kwargs"] = kwargs
+        return SimpleNamespace(qc={})
+
+    monkeypatch.setattr(cli_module, "run_mmorf", fake_run_mmorf)
+    cli_module.main([
+        "--mov-scalar", "moving_t1.nii.gz", "--ref-scalar", "ref_t1.nii.gz",
+        "--mov-scalar", "moving_fa.nii.gz", "--ref-scalar", "ref_fa.nii.gz",
+        "--mov-tensor", "moving_dti.nii.gz", "--ref-tensor", "ref_dti.nii.gz",
+        "--aff-mov-scalar", "t1.mat", "--aff-mov-scalar", "AUTO",
+        "--scalar-weight", "0.5", "--scalar-weight", "0.5",
+        "-o", str(tmp_path),
+    ])
+    assert captured["args"][:2] == (
+        ["moving_t1.nii.gz", "moving_fa.nii.gz"],
+        ["ref_t1.nii.gz", "ref_fa.nii.gz"],
+    )
+    assert captured["kwargs"]["moving_scalar_affine"] == ["t1.mat", None]
+    assert captured["kwargs"]["scalar_weights"] == [0.5, 0.5]
+    assert captured["kwargs"]["auto_linear"] is True
+
+
 def test_vendored_fsl_snapshots_match_manifest():
     package = Path(__file__).parents[2] / "src" / "fnit" / "_vendor_fsl"
     manifest = json.loads((package / "manifest.json").read_text())
+    assert not (package / "sources" / "mmorf-0.3.2").exists()
+    assert all(entry["directory"] != "sources/mmorf-0.3.2" for entry in manifest["components"])
     for entry in manifest["components"]:
         root = package / entry["directory"]
         distributed = {

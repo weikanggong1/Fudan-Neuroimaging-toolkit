@@ -29,8 +29,8 @@
 | [TorchEDDY](../docs/eddy/README.md) | [真实 UKB 格式 dMRI](eddy/report.public.json) | 对 `eddy_cuda10.2` 的 4D r=0.999738，14/15 离群切片重合；不是逐体素等价实现 | FSL GPU 10:21.19（进程），FNIT GPU 10:38.75（CUDA 初始化后调用）；切片图尚未公开 |
 | [TorchDTIFIT](../docs/dtifit/README.md) | [真实 UKB 格式 dMRI](dtifit/report.public.json) | tensor、FA、MD、特征值、特征向量和 S0 的合同与数值分别报告 | 报告含三次 FSL/FNIT 墙钟；功能页展示 FA 与差值 |
 | [TorchAMICONODDI](../docs/amico_noddi/README.md) | [真实 EDDY 校正 dMRI](amico_noddi/report.public.json)与[无 DIPY 核心证明](amico_noddi/no_dipy_equivalence.public.json) | NDI、ODI、FWF、方向与 RMSE 对 AMICO 2.0.3 逐体素比较 | 报告含参考/FNIT 分阶段时间和峰值显存；功能页展示参数图与差值 |
-| [TorchMMORF](../docs/mmorf/README.md) | [正常路径 FSL 对照](mmorf/report.public.json)与[当前源码恢复试验](mmorf/recovery.real.current.json) | pull warp、Jacobian、warped scalar 和九张参数图合同通过；正常路径测量早于恢复逻辑，当前源码尚无 fresh 同输入 FSL 重测 | 分别记录 FSL/FNIT 正常路径时间和当前源码真实数据恢复、整链时间；功能页保留原对照图 |
-| [dMRI 参数图 pipeline](../docs/dmri_pipeline/README.md) | [TBSS 分支](dmri_pipeline/tbss_e2e.real.current.json)与[MMORF 分支](dmri_pipeline/mmorf_e2e.real.current.json) | 两条路径从 raw AP/PA 生成九张标准空间图；网格/dtype 合同通过，连续值未达到逐体素等价 | 报告分开记录各阶段时间、显存和比较边界；新版病例图仍保存在计算节点 |
+| [TorchMMORF](../docs/mmorf/README.md) | [当前双标量真实数据对照](mmorf/report.public.json) | T1、FA 两组标量与 DTI tensor 共享 warp；记录自动 PyTorchFLIRT、warp、Jacobian、两张 warped scalar 的配对精度 | 分别记录线性、非线性、官方 MMORF 时间及共享 GPU 负载；功能页提供当前对照图 |
+| [dMRI 参数图 pipeline](../docs/dmri_pipeline/README.md) | [TBSS 分支](dmri_pipeline/tbss_e2e.real.current.json) | TBSS 路径从 raw AP/PA 生成九张标准空间图；当前 MMORF 模块的配对验证见上行，MMORF 整链待重跑 | TBSS 报告记录阶段时间、显存和比较边界 |
 | [TorchBEDPOSTX](../docs/bedpostx/README.md) | [真实 dMRI ROI 与 crossing-fibre 检查](bedpostx/report.public.json) | 比较纤维数、fraction、方向轴和角度；采样随机流不同，不要求后验体积逐元素相同 | 报告含 FSL CPU、FNIT CPU/GPU 时间；功能页展示真实方向轴 |
 | [TorchProbtrackX](../docs/probtrackx/README.md) | [默认追踪](probtrackx/report.default.latest.public.json)、[当前 GPU](probtrackx/report.current.latest.public.json)与[matrix/target 汇总](probtrackx/README.md) | 比较密度、路径长度、稀疏 voxel 矩阵和 ROI 连接矩阵；随机流不同，不要求逐轨迹相同 | 报告含 FSL/FNIT CPU/GPU 计时；功能页展示真实五区连接矩阵 |
 

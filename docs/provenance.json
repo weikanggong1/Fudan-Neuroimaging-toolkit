@@ -14,9 +14,9 @@
     "python/packages/WMHSynthSeg/utils.py": "a33eb48b466703a954441803e5a1a6aff716ff9755345f548c28ebeee34f6d42",
     "python/packages/WMHSynthSeg/unet3d/model.py": "bff1285de993212dc1382cf2d6e863083c54611e6413863f7c56182b2df3485a",
     "python/packages/WMHSynthSeg/unet3d/buildingblocks.py": "43246ac1f68884df05cf36c19469981b2374d809ad2629636ed76187b2ac5bc7",
-    "mmorf_core.py": "a89092d2ef561b53049400361a646b9cc8f94300bcb7b3eb14b37ed1e4a18466",
-    "dmri_pipeline.py": "7ed08495a70065f46e8cd6a8402053ec9e5d6a764e5ce8ec37dc961fc369a347",
-    "dmri_tbss.py": "a9d73b62e897c58a50b009d6046567841a72fd8dc9658c4b3e088e09e9459ee2"
+    "mmorf_core.py": "49260559dddbf67e227d53c16f01a772f2ceb20cff09c0c3f9117e2633fa9b27",
+    "dmri_pipeline.py": "65a3de168c4ef50c7c711bd9a8b5a0939922dbd95628328c8a93e36b7fb97086",
+    "dmri_tbss.py": "187ac4d39fef4f2d63ca37a6057aedf0aa11320cfbcd07a2a911532339c6ec20"
   },
   "weights_sha256": {
     "synthmorph.affine.2.h5": "1ac5304b683036e5177f5b4ad38fa09fcbbe7883e742d6fa5bdaedd0e619ced6",
@@ -107,15 +107,15 @@
     "vendored_fsl_eddy_fdt_reference_source_included": true,
     "amico_source_included": false,
     "amico_license_included": true,
-    "vendored_mmorf_reference_source_included": true,
+    "vendored_mmorf_reference_source_included": false,
     "ukb_tbss_config_files_included": true,
     "vendored_fsl_bet_reference_sources_included": true
   },
   "fsl_registration_source_snapshots": {
-    "purpose": "distributed upstream source snapshots consulted for the modified PyTorch FLIRT, FNIRT, applywarp, TOPUP, EDDY, DTIFIT, MMORF, and BET implementations",
+    "purpose": "distributed upstream source snapshots consulted for the modified PyTorch FLIRT, FNIRT, applywarp, TOPUP, EDDY, DTIFIT, and BET implementations",
     "validation_baseline": "FSL 6.0.7.4",
     "manifest": "src/fnit/_vendor_fsl/manifest.json",
-    "manifest_sha256": "f99ef21d6f34209b57311072b813ff9ba014855db136182dc6a595982f81b06b",
+    "manifest_sha256": "66cf02f6ad038e33e514ff445f5a408b9528a8f4c75aa5e5bffdc8b635566130",
     "license_file": "licenses/FSL-6.0.txt",
     "license_sha256": "137735ac0d0f075d58e85642972692b92073711752b273e7de7ed38c6147a8eb",
     "licence_scope": "non-commercial redistribution under the FSL Software Licence, Release 6.0; licence conditions and original and amended source code accompany the product",
@@ -219,16 +219,6 @@
         "directory": "src/fnit/_vendor_fsl/sources/fdt-2202.6",
         "role": "validation_target",
         "fsl_6_0_7_4_package": "fsl-fdt 2202.6"
-      },
-      {
-        "repository": "https://git.fmrib.ox.ac.uk/fsl/MMORF.git",
-        "tag": "v0.3.2",
-        "commit": "1c1c13b8368f05e1a79a6dafe919d6b61df36bd6",
-        "git_tree": "103b935ebc0b1145188dfff79f423c5be5e39617",
-        "git_archive_sha256": "5b1f160e3e3a1d76786fb28dfeb1640011e4c7a358bba3eafaa52b7fef3aa268",
-        "directory": "src/fnit/_vendor_fsl/sources/mmorf-0.3.2",
-        "role": "validation_target",
-        "fsl_6_0_7_4_package": "mmorf 0.3.2"
       },
       {
         "repository": "https://git.fmrib.ox.ac.uk/fsl/bet2.git",
@@ -384,11 +374,10 @@
     "git_tree": "103b935ebc0b1145188dfff79f423c5be5e39617",
     "installed_reference": "FSL 6.0.7.4 mmorf 0.3.2",
     "implementation": "src/fnit/mmorf",
-    "source_snapshot": "src/fnit/_vendor_fsl/sources/mmorf-0.3.2",
     "warp_contract": "reference-grid relative pull displacement in millimetres along the reference image axes",
     "validation_report": "validation/mmorf/report.public.json",
     "validation_figure": "docs/mmorf/figures/mmorf_fsl_comparison.png",
-    "validation_status": "1 \u4f8b\u771f\u5b9e T1w + DTI tensor\uff1awarp r=0.969381\uff0cJacobian r=0.947671\uff1b\u56fa\u5b9a sampler\u3001affine \u4e0e native input \u540e\u4e5d\u56fe r=0.919880\u20130.976514\u3002\u5b98\u65b9\u4e0e FNIT \u4f18\u5316\u5668\u4ecd\u4e0d\u540c\u3002",
+    "validation_status": "1 \u4f8b\u771f\u5b9e T1w + FA \u53cc\u6807\u91cf\u548c DTI tensor\uff0c\u56fa\u5b9a\u76f8\u540c affine \u4e0e sampler\uff1awarp r=0.978064\u3001Jacobian r=0.970834\u3001warped T1 r=0.958732\u3001warped FA r=0.983303\u3002\u9ed8\u8ba4 TF32 GPU \u5cf0\u503c 14.30 GB\uff1b\u672a\u8fbe\u5230\u9010\u4f53\u7d20\u6570\u503c\u7b49\u4ef7\u3002",
     "numerically_equivalent": false
   },
   "dmri_pipeline_reference": {
@@ -412,7 +401,9 @@
     },
     "fa_preprocessing_voxelwise_equivalent": true,
     "current_tbss_validation": "validation/dmri_pipeline/tbss_e2e.real.current.json",
-    "current_mmorf_validation": "validation/dmri_pipeline/mmorf_e2e.real.current.json",
+    "current_mmorf_module_validation": "validation/mmorf/report.public.json",
+    "current_mmorf_pipeline_validation": null,
+    "historical_mmorf_pipeline_validation": "validation/dmri_pipeline/mmorf_e2e.real.current.json",
     "raw_to_standard_fresh_benchmark_available": true,
     "registration_numerically_equivalent": false
   }

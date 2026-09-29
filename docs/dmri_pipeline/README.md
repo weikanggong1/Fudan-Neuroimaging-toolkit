@@ -213,29 +213,4 @@ EDDY 的进程内 CUDA allocation 峰值为 4.54 GiB；全流程最大组件峰�
 
 ### MMORF：T1 与 tensor 联合配准
 
-本次另用同一 raw AP/PA、配对 T1w 完整运行 MMORF 分支。第一列使用匹配 FSL EDDY 输出，经同一 FNIT DTIFIT/NODDI 得到的 native 图，检查上游 EDDY 输入的影响。第二列使用既有官方 MMORF 0.3.2 warp，对先前准备的 UKB native 图按固定 FNIT affine/sampler 重采样得到标准图；其上游参数图、affine 均未与本次 raw-to-standard 流程固定。因此第二列是结果相似性描述，不是独立的 MMORF 算法误差。
-
-| 图 | 匹配 FSL EDDY：native r | 官方 MMORF 派生 standard r |
-|---|---:|---:|
-| FA | 0.999185 | 0.528859 |
-| MD | 0.999882 | 0.547325 |
-| L1 | 0.999782 | 0.525561 |
-| L2 | 0.999827 | 0.546538 |
-| L3 | 0.999836 | 0.565496 |
-| MO | 0.980262 | 0.323959 |
-| ICVF | 0.987788 | 0.394228 |
-| OD | 0.994724 | 0.532359 |
-| ISOVF | 0.998832 | 0.530648 |
-
-匹配 FSL EDDY 的 native 九图 r 为 0.980262–0.999882；相对官方 MMORF 派生图的 standard r 为 0.323959–0.565496。所有比较的 3D 空间网格与 affine 一致。官方 ICVF、OD、ISOVF 文件为单帧 4D NIfTI，本包为 3D；比较时只压去其末尾长度为 1 的维度，原始文件 shape 并非完全一致。九图的 MAE、RMSE 和原始 shape 标记见[MMORF 当前报告](../../validation/dmri_pipeline/mmorf_e2e.real.current.json)。
-
-| 阶段 | 本次耗时 |
-|---|---:|
-| TOPUP 与 EDDY 输入准备 | 61.31 s |
-| 新版 TorchEDDY | 657.63 s |
-| DTIFIT | 16.57 s |
-| AMICO-NODDI | 22.14 s |
-| SynthStrip、两次 FLIRT、MMORF 与九图传播 | 124.41 s |
-| 完整进程 wall | 14:47.18 |
-
-独立 `run_mmorf` 求解在这条流程中耗时 46.22 s，进程内 CUDA allocation 峰值为 11.45 GiB。此次 MMORF 五层优化都取得有限值，没有触发降步长重试；此前同例不同 EDDY 随机选点的一次运行曾在最后一级失效，固定其输入重新执行已触发一次重试并成功。两次运行的完整结果不可视为同一随机试验。官方 MMORF 的 947.62 s 只覆盖配准，输入和负载均与此处不同，不据此计算加速比。新版真实病例切片图保留在计算节点，公开仓库当前只提供完整 3D/4D 指标。
+当前 MMORF 模块已用真实 T1w、FA 双标量与 tensor 完成和官方实现的配对对照，见 [MMORF 验证](../mmorf/README.md)。此前完整 dMRI pipeline 的 MMORF 分支使用旧求解器，其机器记录仅保留历史溯源。当前源码的 raw-to-standard MMORF 整链仍需重新验证。

@@ -22,7 +22,7 @@ import torch.nn.functional as F
 from scipy.ndimage import spline_filter
 
 from .._dmri import configure_device, image_like
-from ..flirt import flirt_to_world_affine
+from ..flirt import flirt_to_world_affine, world_to_flirt_affine
 from ..fnirt.spline import BendingOperator
 
 
@@ -77,6 +77,7 @@ class MMORFResult:
     warped_scalar: nib.Nifti1Image
     warped_tensor: nib.Nifti1Image
     qc: dict
+    warped_scalars: tuple[nib.Nifti1Image, ...] = ()
 
     def save(self, output_dir, *, overwrite=False):
         output_dir = Path(output_dir).expanduser()
@@ -86,6 +87,10 @@ class MMORFResult:
             output_dir / "mmorf_warped_scalar.nii.gz": self.warped_scalar,
             output_dir / "mmorf_warped_tensor.nii.gz": self.warped_tensor,
         }
+        paths.update({
+            output_dir / f"mmorf_warped_scalar_{index}.nii.gz": image
+            for index, image in enumerate(self.warped_scalars[1:], 2)
+        })
         report = output_dir / "mmorf_report.json"
         existing = [path for path in (*paths, report) if path.exists()]
         if existing and not overwrite:
@@ -93,6 +98,10 @@ class MMORFResult:
         output_dir.mkdir(parents=True, exist_ok=True)
         for path, image in paths.items():
             nib.save(image, str(path))
+        if overwrite:
+            for stale in output_dir.glob("mmorf_warped_scalar_*.nii.gz"):
+                if stale not in paths:
+                    stale.unlink()
         report.write_text(json.dumps(self.qc, indent=2) + "\n", encoding="utf-8")
         return {**{path.name: path for path in paths}, report.name: report}
 
@@ -123,6 +132,59 @@ def _load_matrix(value):
     if abs(float(np.linalg.det(matrix[:3, :3]))) < 1e-10:
         raise ValueError("an MMORF affine must be invertible")
     return matrix
+
+
+def _items(value):
+    return list(value) if isinstance(value, (tuple, list)) else [value]
+
+
+def _pair_affines(value, count, name):
+    if value is None:
+        return [None] * count
+    if count == 1:
+        values = _items(value)
+        return values if len(values) == 1 else [value]
+    values = _items(value)
+    if len(values) != count:
+        raise ValueError(f"{name} must contain one affine per scalar pair")
+    return values
+
+
+def _tensor_fa_image(image, data):
+    """Calculate an FA contrast for linear registration, without tensor fitting."""
+    xx, xy, xz, yy, yz, zz = np.moveaxis(data, -1, 0)
+    trace = xx + yy + zz
+    squared = xx * xx + yy * yy + zz * zz + 2 * (xy * xy + xz * xz + yz * yz)
+    fa = np.sqrt(np.maximum(1.5 * (squared - trace * trace / 3) /
+                            np.maximum(squared, 1e-20), 0)).astype(np.float32)
+    return image_like(fa, image)
+
+
+def _auto_affine(moving, fixed, *, device, dof, cost):
+    from ..flirt import TorchFLIRT
+
+    return TorchFLIRT(device=device, dof=dof, cost=cost)(moving, fixed).matrix
+
+
+def _same_grid(left, right):
+    return left.shape[:3] == right.shape[:3] and np.allclose(
+        left.affine, right.affine, atol=1e-5, rtol=0
+    )
+
+
+def _same_image(left, left_data, right, right_data):
+    return _same_grid(left, right) and np.array_equal(left_data, right_data)
+
+
+def _compose_affine(moving, intermediate, common, first, second):
+    forward = _world_forward(second, intermediate, common) @ _world_forward(
+        first, moving, intermediate
+    )
+    return world_to_flirt_affine(
+        forward, moving.affine, common.affine, moving.shape[:3],
+        common.shape[:3], moving.header.get_zooms()[:3],
+        common.header.get_zooms()[:3],
+    )
 
 
 def _world_forward(matrix, image, common):
@@ -831,7 +893,7 @@ def apply_mmorf_warp(
 
 
 class TorchMMORF:
-    """Register one scalar and one FSL-format tensor pair with a shared warp."""
+    """Register ordered scalar pairs and one FSL tensor pair with a shared warp."""
 
     def __init__(self, device=None, *, config=None):
         self.device = configure_device(device)
@@ -845,29 +907,128 @@ class TorchMMORF:
         reference_tensor,
         *,
         moving_scalar_affine=None,
+        reference_scalar_affine=None,
         moving_tensor_affine=None,
         reference_tensor_affine=None,
+        scalar_weights=None,
+        auto_linear=True,
     ):
-        mov_s, mov_s_data = _load_image(moving_scalar, "moving_scalar")
-        ref_s, ref_s_data = _load_image(reference_scalar, "reference_scalar")
+        moving_inputs = _items(moving_scalar)
+        reference_inputs = _items(reference_scalar)
+        if not moving_inputs or len(moving_inputs) != len(reference_inputs):
+            raise ValueError("moving_scalar and reference_scalar need equally many pairs")
+        scalar_pairs = [
+            (
+                _load_image(moving, f"moving_scalar[{index}]"),
+                _load_image(reference, f"reference_scalar[{index}]"),
+            )
+            for index, (moving, reference) in enumerate(
+                zip(moving_inputs, reference_inputs), 1
+            )
+        ]
+        ref_s = scalar_pairs[0][1][0]
+        pair_count = len(scalar_pairs)
+        moving_affines = _pair_affines(
+            moving_scalar_affine, pair_count, "moving_scalar_affine"
+        )
+        reference_affines = _pair_affines(
+            reference_scalar_affine, pair_count, "reference_scalar_affine"
+        )
+        if reference_affines[0] is not None and not np.allclose(
+            _load_matrix(reference_affines[0]), np.eye(4), atol=1e-8
+        ):
+            raise ValueError("the first reference scalar defines warp space; its affine must be identity")
+        if scalar_weights is None:
+            scalar_weights = [1.0 / pair_count] * pair_count
+        elif len(scalar_weights) != pair_count or any(
+            not np.isfinite(weight) or weight < 0 for weight in scalar_weights
+        ):
+            raise ValueError("scalar_weights needs one non-negative finite weight per pair")
+        scalar_weights = tuple(float(weight) for weight in scalar_weights)
         mov_t, mov_t_data = _load_image(moving_tensor, "moving_tensor", frames=6)
         ref_t, ref_t_data = _load_image(reference_tensor, "reference_tensor", frames=6)
+        if self.device.type == "cuda":
+            torch.cuda.reset_peak_memory_stats(self.device)
+        linear_started = time.perf_counter()
+        linear_methods = []
+        for index, ((mov_s, mov_data), (ref_pair, ref_data)) in enumerate(scalar_pairs):
+            if index == 0:
+                reference_affines[index] = np.eye(4)
+                reference_method = "warp_space"
+            elif reference_affines[index] is not None:
+                reference_method = "provided"
+            elif _same_grid(ref_pair, ref_s):
+                reference_affines[index] = np.eye(4)
+                reference_method = "same_grid"
+            elif auto_linear:
+                reference_affines[index] = _auto_affine(
+                    ref_pair, ref_s, device=self.device, dof=6, cost="normmi"
+                )
+                reference_method = "pytorchflirt_6_normmi"
+            else:
+                reference_method = "identity"
+            if moving_affines[index] is not None:
+                moving_method = "provided"
+            elif _same_image(mov_s, mov_data, ref_pair, ref_data):
+                moving_affines[index] = reference_affines[index]
+                moving_method = "same_image"
+            elif auto_linear:
+                pair_matrix = _auto_affine(
+                    mov_s, ref_pair, device=self.device, dof=12, cost="corratio"
+                )
+                moving_affines[index] = _compose_affine(
+                    mov_s, ref_pair, ref_s, pair_matrix, reference_affines[index]
+                )
+                moving_method = "pytorchflirt_12_corratio"
+            else:
+                moving_method = "identity"
+            linear_methods.append((moving_method, reference_method))
+        tensor_methods = ["provided" if moving_tensor_affine is not None else "identity",
+                          "provided" if reference_tensor_affine is not None else "identity"]
+        if reference_tensor_affine is None and _same_grid(ref_t, ref_s):
+            tensor_methods[1] = "same_grid"
+        elif reference_tensor_affine is None and auto_linear:
+            reference_tensor_affine = _auto_affine(
+                _tensor_fa_image(ref_t, ref_t_data), ref_s,
+                device=self.device, dof=6, cost="normmi"
+            )
+            tensor_methods[1] = "pytorchflirt_fa_6_normmi"
+        if moving_tensor_affine is None and _same_image(mov_t, mov_t_data, ref_t, ref_t_data):
+            moving_tensor_affine = reference_tensor_affine
+            tensor_methods[0] = "same_image"
+        elif moving_tensor_affine is None and auto_linear:
+            moving_tensor_affine = _auto_affine(
+                _tensor_fa_image(mov_t, mov_t_data), ref_s,
+                device=self.device, dof=6, cost="normmi"
+            )
+            tensor_methods[0] = "pytorchflirt_fa_6_normmi"
+        linear_elapsed = time.perf_counter() - linear_started
+        linear_peak_cuda = (
+            int(torch.cuda.max_memory_allocated(self.device))
+            if self.device.type == "cuda" else None
+        )
         forwards = {
-            "reference_scalar": _world_forward(None, ref_s, ref_s),
-            "moving_scalar": _world_forward(moving_scalar_affine, mov_s, ref_s),
             "moving_tensor": _world_forward(moving_tensor_affine, mov_t, ref_s),
             "reference_tensor": _world_forward(reference_tensor_affine, ref_t, ref_s),
         }
+        scalar_forwards = [
+            (
+                _world_forward(moving_affines[index], moving[0], ref_s),
+                _world_forward(reference_affines[index], reference[0], ref_s),
+            )
+            for index, (moving, reference) in enumerate(scalar_pairs)
+        ]
         if self.device.type == "cuda":
             torch.cuda.synchronize(self.device)
             torch.cuda.reset_peak_memory_stats(self.device)
         started = time.perf_counter()
-        ref_scalar = torch.as_tensor(
-            ref_s_data, device=self.device, dtype=torch.float32
-        )[None]
-        mov_scalar = torch.as_tensor(
-            mov_s_data, device=self.device, dtype=torch.float32
-        )[None]
+        scalar_tensors = [
+            (
+                torch.as_tensor(moving[1], device=self.device, dtype=torch.float32)[None],
+                torch.as_tensor(reference[1], device=self.device, dtype=torch.float32)[None],
+            )
+            for moving, reference in scalar_pairs
+        ]
         ref_tensor = torch.as_tensor(
             np.moveaxis(ref_t_data, -1, 0),
             device=self.device,
@@ -898,15 +1059,16 @@ class TorchMMORF:
         levels = []
         cfg = self.config
         extent_min, _ = _world_extents(ref_s.shape[:3], ref_s.affine)
-        scalar_resolution = min(
-            *(abs(float(value)) for value in ref_s.header.get_zooms()[:3]),
-            *(abs(float(value)) for value in mov_s.header.get_zooms()[:3]),
-        )
+        scalar_resolutions = tuple(min(
+            abs(float(value))
+            for (image, _) in (moving, reference)
+            for value in image.header.get_zooms()[:3]
+        ) for moving, reference in scalar_pairs)
         tensor_resolution = min(
             *(abs(float(value)) for value in ref_t.header.get_zooms()[:3]),
             *(abs(float(value)) for value in mov_t.header.get_zooms()[:3]),
         )
-        maximum_resolution = min(scalar_resolution, tensor_resolution)
+        maximum_resolution = min(*scalar_resolutions, tensor_resolution)
         for level, (resolution, smoothing, penalty, steps) in enumerate(
             zip(
                 cfg.warp_resolution_mm,
@@ -929,8 +1091,9 @@ class TorchMMORF:
                     control_shape,
                 )
             control = control.detach().contiguous().requires_grad_(True)
-            scalar_frequency = _sampling_frequency(
-                resolution, smoothing, scalar_resolution
+            scalar_frequencies = tuple(
+                _sampling_frequency(resolution, smoothing, pair_resolution)
+                for pair_resolution in scalar_resolutions
             )
             tensor_frequency = _sampling_frequency(
                 resolution, smoothing, tensor_resolution
@@ -938,14 +1101,15 @@ class TorchMMORF:
             regulariser_frequency = min(
                 max(int(math.floor(resolution / maximum_resolution)), 1), 4
             )
-            scalar_axes = _robust_world_axes(
-                control_shape,
-                extent_min,
-                resolution,
-                scalar_frequency,
-                device=self.device,
-                dtype=control.dtype,
-            )
+            scalar_grids = {}
+            for frequency in set(scalar_frequencies):
+                axes = _robust_world_axes(
+                    control_shape, extent_min, resolution, frequency,
+                    device=self.device, dtype=control.dtype,
+                )
+                scalar_grids[frequency] = (
+                    axes, torch.stack(torch.meshgrid(*axes, indexing="ij"))
+                )
             tensor_axes = _robust_world_axes(
                 control_shape,
                 extent_min,
@@ -962,71 +1126,87 @@ class TorchMMORF:
                 device=self.device,
                 dtype=control.dtype,
             )
-            scalar_world = torch.stack(torch.meshgrid(*scalar_axes, indexing="ij"))
             tensor_world = torch.stack(torch.meshgrid(*tensor_axes, indexing="ij"))
-            ref_s_smooth = _blur(
-                ref_scalar, smoothing, ref_s.header.get_zooms()[:3]
-            )
-            mov_s_smooth = _blur(
-                mov_scalar, smoothing, mov_s.header.get_zooms()[:3]
-            )
+            scalar_levels = []
+            for index, ((moving, reference), (moving_data, reference_data)) in enumerate(
+                zip(scalar_pairs, scalar_tensors)
+            ):
+                mov_image, ref_image = moving[0], reference[0]
+                frequency = scalar_frequencies[index]
+                scalar_world = scalar_grids[frequency][1]
+                mov_coefficients = _cubic_spline_coefficients(
+                    _blur(moving_data, smoothing, mov_image.header.get_zooms()[:3])
+                )
+                ref_coefficients = _cubic_spline_coefficients(
+                    _blur(reference_data, smoothing, ref_image.header.get_zooms()[:3])
+                )
+                moving_forward, reference_forward = scalar_forwards[index]
+                ref_level = _sample_cubic(
+                    ref_coefficients,
+                    _native_pull_coordinates(scalar_world, ref_image, reference_forward),
+                )[0]
+                mov_level = _sample_cubic(
+                    mov_coefficients,
+                    _native_pull_coordinates(scalar_world, mov_image, moving_forward),
+                )[0]
+                scalar_levels.append((
+                    mov_image,
+                    mov_coefficients * _robust_normalise(mov_level, return_scale=True),
+                    ref_level * _robust_normalise(ref_level, return_scale=True),
+                    moving_forward,
+                    scalar_weights[index],
+                    frequency,
+                ))
             ref_t_smooth = _blur(
                 ref_tensor, smoothing, ref_t.header.get_zooms()[:3]
             )
             mov_t_smooth = _blur(
                 mov_tensor, smoothing, mov_t.header.get_zooms()[:3]
             )
-            ref_s_coefficients = _cubic_spline_coefficients(ref_s_smooth)
-            mov_s_coefficients = _cubic_spline_coefficients(mov_s_smooth)
             ref_t_coefficients = _cubic_spline_coefficients(ref_t_smooth)
             mov_t_coefficients = _cubic_spline_coefficients(mov_t_smooth)
-            ref_s_level = _sample_cubic(
-                ref_s_coefficients,
-                _native_pull_coordinates(
-                    scalar_world, ref_s, forwards["reference_scalar"]
-                ),
-            )[0]
-            mov_s_level = _sample_cubic(
-                mov_s_coefficients,
-                _native_pull_coordinates(
-                    scalar_world, mov_s, forwards["moving_scalar"]
-                ),
-            )[0]
             ref_t_level = _sample_cubic(
                 ref_t_coefficients,
                 _native_pull_coordinates(
                     tensor_world, ref_t, forwards["reference_tensor"]
                 ),
             )
-            scalar_ref_scale = _robust_normalise(ref_s_level, return_scale=True)
-            scalar_mov_scale = _robust_normalise(mov_s_level, return_scale=True)
-            ref_s_norm = ref_s_level * scalar_ref_scale
             bending_operator = None
+            scalar_cost_scales = None
+            scalar_raw_costs = []
 
             def evaluate_terms():
                 nonlocal bending_operator
-                scalar_field_world = _expand_control_world(
-                    control, scalar_axes, resolution, extent_min
-                )
-                warped_scalar = _sample_cubic(
-                    mov_s_coefficients * scalar_mov_scale,
-                    _native_pull_coordinates(
-                        scalar_world,
-                        mov_s,
-                        forwards["moving_scalar"],
-                        scalar_field_world,
-                    ),
-                )[0]
-                scalar_step = resolution / scalar_frequency
-                scalar_jacobian = _jacobian(
-                    scalar_field_world, (scalar_step,) * 3
-                )
-                # MMORF uses the symmetric determinant as a fixed quadrature
-                # weight in data derivatives; it does not differentiate it.
-                scalar_weight = _symmetric_weight(scalar_jacobian)
-                scalar_cost = (
-                    scalar_weight * (warped_scalar - ref_s_norm).square()
-                ).mean()
+                scalar_raw_costs.clear()
+                scalar_cost = control.new_zeros(())
+                scalar_fields = {}
+                for mov_image, mov_coefficients, ref_norm, moving_forward, pair_weight, frequency in scalar_levels:
+                    if frequency not in scalar_fields:
+                        axes, scalar_world = scalar_grids[frequency]
+                        scalar_field_world = _expand_control_world(
+                            control, axes, resolution, extent_min
+                        )
+                        scalar_jacobian = _jacobian(
+                            scalar_field_world, (resolution / frequency,) * 3
+                        )
+                        # MMORF treats this quadrature weight as fixed in data derivatives.
+                        scalar_fields[frequency] = (
+                            scalar_world, scalar_field_world,
+                            _symmetric_weight(scalar_jacobian),
+                        )
+                    scalar_world, scalar_field_world, scalar_weight = scalar_fields[frequency]
+                    warped_scalar = _sample_cubic(
+                        mov_coefficients,
+                        _native_pull_coordinates(
+                            scalar_world, mov_image, moving_forward, scalar_field_world
+                        ),
+                    )[0]
+                    raw_cost = (
+                        scalar_weight * (warped_scalar - ref_norm).square()
+                    ).mean()
+                    scalar_raw_costs.append(raw_cost)
+                    scale = 1.0 if scalar_cost_scales is None else scalar_cost_scales[len(scalar_raw_costs) - 1]
+                    scalar_cost = scalar_cost + pair_weight * scale * raw_cost
 
                 tensor_field_world = _expand_control_world(
                     control, tensor_axes, resolution, extent_min
@@ -1097,11 +1277,10 @@ class TorchMMORF:
                 )
 
             with torch.no_grad():
-                initial_scalar, initial_tensor, _, _, _ = evaluate_terms()
-                scalar_cost_scale = (
-                    initial_scalar.new_zeros(())
-                    if float(initial_scalar) <= 1.0e-8
-                    else 50.0 / initial_scalar
+                _, initial_tensor, _, _, _ = evaluate_terms()
+                scalar_cost_scales = tuple(
+                    cost.new_zeros(()) if float(cost) <= 1.0e-8 else 50.0 / cost
+                    for cost in scalar_raw_costs
                 )
                 tensor_cost_scale = (
                     initial_tensor.new_zeros(())
@@ -1115,7 +1294,7 @@ class TorchMMORF:
                 optimiser.zero_grad(set_to_none=True)
                 scalar_cost, tensor_cost, regulariser, _, _ = evaluate_terms()
                 loss = (
-                    cfg.scalar_weight * scalar_cost_scale * scalar_cost
+                    cfg.scalar_weight * scalar_cost
                     + cfg.tensor_weight * tensor_cost_scale * tensor_cost
                     + penalty * regulariser
                 )
@@ -1148,7 +1327,7 @@ class TorchMMORF:
                         regulariser_name,
                     ) = evaluate_terms()
                     loss = (
-                        cfg.scalar_weight * scalar_cost_scale * scalar_cost
+                        cfg.scalar_weight * scalar_cost
                         + cfg.tensor_weight * tensor_cost_scale * tensor_cost
                         + penalty * regulariser
                     )
@@ -1159,7 +1338,7 @@ class TorchMMORF:
                 with torch.no_grad():
                     control.copy_(starting_control)
                     scalar_cost, tensor_cost, regulariser, determinant, regulariser_name = evaluate_terms()
-                    loss = (cfg.scalar_weight * scalar_cost_scale * scalar_cost
+                    loss = (cfg.scalar_weight * scalar_cost
                             + cfg.tensor_weight * tensor_cost_scale * tensor_cost
                             + penalty * regulariser)
                 if not torch.isfinite(loss) or not torch.isfinite(determinant).all():
@@ -1168,7 +1347,10 @@ class TorchMMORF:
                 "total": float(loss.detach()),
                 "scalar": float(scalar_cost.detach()),
                 "tensor": float(tensor_cost.detach()),
-                "scalar_cost_scale": float(scalar_cost_scale),
+                "scalar_cost_scale": (
+                    float(scalar_cost_scales[0]) if pair_count == 1
+                    else [float(scale) for scale in scalar_cost_scales]
+                ),
                 "tensor_cost_scale": float(tensor_cost_scale),
                 "regulariser": float(regulariser.detach()),
                 "regulariser_name": regulariser_name,
@@ -1184,10 +1366,19 @@ class TorchMMORF:
                     "level": level,
                     "warp_resolution_mm": resolution,
                     "smoothing_mm": smoothing,
-                    "scalar_sampling_frequency": scalar_frequency,
+                    "scalar_sampling_frequency": (
+                        scalar_frequencies[0] if pair_count == 1
+                        else scalar_frequencies
+                    ),
                     "tensor_sampling_frequency": tensor_frequency,
                     "regulariser_sampling_frequency": regulariser_frequency,
-                    "scalar_sample_shape": tuple(axis.numel() for axis in scalar_axes),
+                    "scalar_sample_shape": (
+                        tuple(axis.numel() for axis in scalar_grids[scalar_frequencies[0]][0])
+                        if pair_count == 1 else [
+                            tuple(axis.numel() for axis in scalar_grids[frequency][0])
+                            for frequency in scalar_frequencies
+                        ]
+                    ),
                     "tensor_sample_shape": tuple(axis.numel() for axis in tensor_axes),
                     "iterations": steps,
                     "control_shape": control_shape,
@@ -1214,13 +1405,12 @@ class TorchMMORF:
         jacobian_image = image_like(
             jacobian.detach().cpu().numpy().astype(np.float32), ref_s
         )
-        warped_scalar = apply_mmorf_warp(
-            mov_s,
-            ref_s,
-            warp,
-            affine=moving_scalar_affine,
-            device=self.device,
-            interpolation="cubic",
+        warped_scalars = tuple(
+            apply_mmorf_warp(
+                moving[0], ref_s, warp, affine=moving_affines[index],
+                device=self.device, interpolation="cubic",
+            )
+            for index, (moving, _) in enumerate(scalar_pairs)
         )
         warped_tensor = apply_mmorf_warp(
             mov_t,
@@ -1236,7 +1426,7 @@ class TorchMMORF:
         return MMORFResult(
             warp,
             jacobian_image,
-            warped_scalar,
+            warped_scalars[0],
             warped_tensor,
             {
                 "device": str(self.device),
@@ -1246,6 +1436,20 @@ class TorchMMORF:
                 "reference_commit": MMORF_COMMIT,
                 "warp_units": MMORF_WARP_UNITS,
                 "fsl_affine_contract": True,
+                "scalar_pair_count": pair_count,
+                "scalar_pair_weights": scalar_weights,
+                "linear_alignment": {
+                    "moving_scalar": [
+                        {"method": methods[0], "matrix": _load_matrix(moving_affines[index]).tolist()}
+                        for index, methods in enumerate(linear_methods)
+                    ],
+                    "reference_scalar": [
+                        {"method": methods[1], "matrix": _load_matrix(reference_affines[index]).tolist()}
+                        for index, methods in enumerate(linear_methods)
+                    ],
+                    "moving_tensor": {"method": tensor_methods[0], "matrix": _load_matrix(moving_tensor_affine).tolist()},
+                    "reference_tensor": {"method": tensor_methods[1], "matrix": _load_matrix(reference_tensor_affine).tolist()},
+                },
                 "mmorf_warp_contract": True,
                 "mmorf_numerically_equivalent": False,
                 "implemented_mmorf_semantics": {
@@ -1280,7 +1484,7 @@ class TorchMMORF:
                     ),
                     "image_prefilter": (
                         "SciPy mirror-boundary coefficient prefiltering has not "
-                        "yet been shown coefficient-identical to the vendored "
+                        "yet been shown coefficient-identical to the official "
                         "Danny Ruijters CUDA prefilter"
                     ),
                     "smoothing": (
@@ -1293,16 +1497,38 @@ class TorchMMORF:
                     ),
                 },
                 "elapsed_seconds": elapsed,
+                "linear_alignment_seconds": linear_elapsed,
+                "linear_peak_cuda_memory_bytes": linear_peak_cuda,
+                "total_registration_seconds": linear_elapsed + elapsed,
                 "peak_cuda_memory_bytes": (
                     int(torch.cuda.max_memory_allocated(self.device))
                     if self.device.type == "cuda"
                     else None
                 ),
+                "total_peak_cuda_memory_bytes": (
+                    max(linear_peak_cuda, int(torch.cuda.max_memory_allocated(self.device)))
+                    if self.device.type == "cuda" else None
+                ),
                 "levels": levels,
             },
+            warped_scalars,
         )
 
     def run(self, *args, output_dir, overwrite=False, **kwargs):
+        if not overwrite:
+            destination = Path(output_dir).expanduser()
+            existing = next((
+                path for path in (
+                    destination / "mmorf_warp.nii.gz",
+                    destination / "mmorf_jacobian.nii.gz",
+                    destination / "mmorf_warped_scalar.nii.gz",
+                    destination / "mmorf_warped_tensor.nii.gz",
+                    destination / "mmorf_report.json",
+                    *destination.glob("mmorf_warped_scalar_*.nii.gz"),
+                ) if path.exists()
+            ), None)
+            if existing is not None:
+                raise FileExistsError(f"output exists: {existing}; pass overwrite=True")
         result = self(*args, **kwargs)
         result.save(output_dir, overwrite=overwrite)
         return result

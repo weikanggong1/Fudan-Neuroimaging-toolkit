@@ -1,211 +1,218 @@
 {
-  "schema_version": 2,
-  "created_utc": "2026-09-27T12:40:09Z",
-  "feature": "FNIT TorchMMORF versus FSL MMORF 0.3.2",
+  "schema_version": 3,
+  "created_utc": "2026-09-29T06:29:56+00:00",
+  "feature": "FNIT TorchMMORF dual scalar versus FSL MMORF 0.3.2",
   "data": {
-    "scope": "one de-identified real T1w plus native DTI tensor and nine diffusion maps",
+    "scope": "one real brain-extracted T1w, DTI FA, and six-channel diffusion tensor with three 1 mm templates",
+    "subject_linkage": "T1w and dMRI were treated as one subject; independent ID linkage audit was not available",
     "release": "aggregate metrics and de-identified slices only; source images and subject identifier are not distributed",
-    "pairing_note": "the supplied T1w and dMRI layout was treated as one subject; external subject-ID linkage was not independently audited"
+    "input_sha256": {
+      "moving_T1w": "cd3a39993a22f4de5465960655f37e614e43d0297867327ab9036f01c6e494c5",
+      "moving_FA": "052c0648546703d3ec0f8bb9f3a85bdd1963193e6bb4f41d4e3a1b7f148fcd5b",
+      "moving_tensor": "c002a9d0840f9ea0190c3c49ccba5b004dc539ea85a181314299ee066db0c831",
+      "reference_T1w": "32d5be33460f995a5d305507053c8862c823d9ca6bfb543381308df14590f212",
+      "reference_FA": "4344b5bf1039f4932f5c5c0133f2d0a0e3b4615e070f68facb72a121432a2f9d",
+      "reference_tensor": "22eca3330011944bddafdbaf404d791beb54b49b27a0c8fc0ea0ef24a5d69b69"
+    }
   },
   "reference": {
-    "implementation": "FSL MMORF 0.3.2",
+    "implementation": "FSL MMORF 0.3.2 in FSL 6.0.7.4",
     "commit": "1c1c13b8368f05e1a79a6dafe919d6b61df36bd6",
-    "templates": [
-      "MNI152_T1_1mm_brain",
-      "FSL_HCP1065_tensor_1mm",
-      "FMRIB58_FA_1mm"
-    ],
-    "configuration": "five levels: 32,32,16,8,4 mm; smoothing 8,8,4,2,1 mm; five updates per level"
-  },
-  "fnit": {
-    "version": "0.14.0",
-    "device": "NVIDIA H100 PCIe 80GB",
-    "dtype": "float32",
-    "tf32": true,
-    "peak_cuda_memory_bytes": 12317684224
-  },
-  "output_contract": {
-    "warp_shape": [
-      182,
-      218,
-      182,
-      3
-    ],
-    "jacobian_and_scalar_shape": [
-      182,
-      218,
-      182
-    ],
-    "dtype": "float32",
-    "same_reference_affine": true,
-    "warp_units": "millimetres along the reference image axes",
-    "warp_direction": "relative pull displacement on the reference grid",
-    "nifti_intent": "none, matching the official warp header",
-    "warped_tensor_note": "FNIT convenience output; MMORF debug/output command used here exposes warped scalar, warp and Jacobian, not a tensor-volume oracle"
-  },
-  "implemented_source_semantics": {
-    "control_lattice": "world-mm cardinal cubic B-spline with exact integer refinement",
-    "sampling": "official robust world grids and source-derived sampling frequencies",
-    "image_interpolation": "native-image cubic B-spline coefficient sampling for registration and scalar output",
-    "data_cost": "robust scalar normalization, fixed 0.5*(1+detJ) quadrature weights and full nine-element tensor Frobenius cost",
-    "tensor": "affine/header rotation plus local finite-strain reorientation in the registration objective",
-    "regularizer": "Bkk bending energy at level one and MMORF SPRED approximation thereafter",
-    "optimizer": "PyTorch limited-memory BFGS with strong-Wolfe line search"
-  },
-  "timing_seconds": {
-    "fnit_gpu_compute": 33.615768634248525,
-    "fnit_run_mmorf_including_nifti_and_json_writes": 47.79710276564583,
-    "fnit_apply_nine_maps_linear": 5.104213512968272,
-    "fnit_registration_plus_nine_maps": 52.902658740989864,
-    "official_mmorf_full_command": 947.62,
-    "official_mmorf_reported_registration": 925.128,
-    "context": "shared H100 node; load was not isolated",
-    "equivalent_speedup_claimed": false
-  },
-  "current_fnit_vs_official": {
-    "mask": "non-zero MNI152_T1_1mm_brain",
-    "warp_all_components": {
-      "voxels": 5481285,
-      "pearson": 0.9693807936271482,
-      "mae_mm": 0.39381033300713264,
-      "rmse_mm": 0.6146973577296875
-    },
-    "warp_component_pearson": [
-      0.9822696533123829,
-      0.9578241819233881,
-      0.9723091581512097
-    ],
-    "warp_rms_mm": {
-      "fnit": 1.9393027162357932,
-      "official": 2.2880659272095025
-    },
-    "jacobian": {
-      "voxels": 1827095,
-      "pearson": 0.9476705834753884,
-      "mae": 0.05980669696369016,
-      "rmse": 0.09799193509519744
-    },
-    "jacobian_range": {
-      "fnit": [
-        0.10620943456888199,
-        6.034921646118164
+    "exit_status": 0,
+    "readable_outputs": {
+      "warp_shape": [
+        182,
+        218,
+        182,
+        3
       ],
-      "official": [
-        0.2343195080757141,
-        3.8659682273864746
+      "jacobian_shape": [
+        182,
+        218,
+        182
       ]
     },
-    "warped_scalar": {
-      "voxels": 1827095,
-      "pearson": 0.9328280683547127,
-      "mae": 65.48191831106102,
-      "rmse": 107.36070736154232
-    }
-  },
-  "registration_isolation_with_matched_sampler": {
-    "boundary": "same FNIT map sampler, affine matrices and native maps; only candidate versus official estimated warp changes",
-    "mask": "common non-zero support of both official-warp and FNIT-warp FA outputs",
-    "standard_maps": {
-      "FA": {
-        "voxels": 1503720,
-        "pearson": 0.9765135090106173,
-        "mae": 0.01789319380874548,
-        "rmse": 0.03173268848535483,
-        "maximum_absolute_error": 0.9803391359746456
+    "gpu_before": [
+      {
+        "index": 0,
+        "used_mib": 56693,
+        "total_mib": 81559,
+        "utilization_percent": 17
       },
-      "MD": {
-        "voxels": 1503720,
-        "pearson": 0.9600727716088028,
-        "mae": 8.02532732742498e-05,
-        "rmse": 0.00016610849484217268,
-        "maximum_absolute_error": 0.003316250555599254
-      },
-      "L1": {
-        "voxels": 1503720,
-        "pearson": 0.9556438853317782,
-        "mae": 8.504556813618255e-05,
-        "rmse": 0.00017901963571879037,
-        "maximum_absolute_error": 0.003626189130500279
-      },
-      "L2": {
-        "voxels": 1503720,
-        "pearson": 0.9610477133026033,
-        "mae": 8.255872762320464e-05,
-        "rmse": 0.00016696359324756187,
-        "maximum_absolute_error": 0.0033185836509801447
-      },
-      "L3": {
-        "voxels": 1503720,
-        "pearson": 0.9641038163852003,
-        "mae": 8.113482025347475e-05,
-        "rmse": 0.000159547217229474,
-        "maximum_absolute_error": 0.003117522470347467
-      },
-      "MO": {
-        "voxels": 1503720,
-        "pearson": 0.9198796216082915,
-        "mae": 0.10786941693876587,
-        "rmse": 0.17060671033870808,
-        "maximum_absolute_error": 1.723564863204956
-      },
-      "ICVF": {
-        "voxels": 1503720,
-        "pearson": 0.9558809774730138,
-        "mae": 0.029394201828713523,
-        "rmse": 0.05828583732848618,
-        "maximum_absolute_error": 0.9825643012300134
-      },
-      "OD": {
-        "voxels": 1503720,
-        "pearson": 0.9547459373966652,
-        "mae": 0.036145539181010385,
-        "rmse": 0.06666631139953494,
-        "maximum_absolute_error": 0.9995277349080425
-      },
-      "ISOVF": {
-        "voxels": 1503720,
-        "pearson": 0.9594049832165982,
-        "mae": 0.040910134490565526,
-        "rmse": 0.07903864066235394,
-        "maximum_absolute_error": 0.9982846443308517
+      {
+        "index": 1,
+        "used_mib": 70032,
+        "total_mib": 81559,
+        "utilization_percent": 100
       }
+    ],
+    "gpu_after": [
+      {
+        "index": 0,
+        "used_mib": 55566,
+        "total_mib": 81559,
+        "utilization_percent": 99
+      },
+      {
+        "index": 1,
+        "used_mib": 70032,
+        "total_mib": 81559,
+        "utilization_percent": 77
+      }
+    ]
+  },
+  "matched_configuration": {
+    "scalar_pairs": [
+      "T1w",
+      "FA"
+    ],
+    "scalar_weights": [
+      0.5,
+      0.5
+    ],
+    "tensor_weight": 1.0,
+    "reference_grid": "MNI152_T1_1mm_brain",
+    "five_control_point_levels_mm": [
+      32,
+      32,
+      16,
+      8,
+      4
+    ],
+    "five_smoothing_levels_mm": [
+      8,
+      8,
+      4,
+      2,
+      1
+    ],
+    "same_fsl_scaled_mm_affines": true,
+    "FA_affine_origin": "FNIT PyTorchFLIRT 12-DOF CorRatio; exported unchanged to official MMORF",
+    "shared_nonlinear_warp": true
+  },
+  "fnit": {
+    "version": "0.16.0",
+    "device": "NVIDIA H100 PCIe 80GB GPU 0",
+    "dtype": "float32",
+    "tf32": true,
+    "memory_fraction_limit": 0.24,
+    "matched_affine_run": {
+      "wall_seconds_with_write": 79.77593770576641,
+      "linear_alignment_seconds": 0.00044409697875380516,
+      "nonlinear_seconds": 63.22247059736401,
+      "peak_cuda_memory_bytes": 14295471104,
+      "gpu_before": {
+        "used_mib": 56019,
+        "total_mib": 81559,
+        "utilization_percent": 1
+      },
+      "gpu_after": {
+        "used_mib": 74435,
+        "total_mib": 81559,
+        "utilization_percent": 94
+      }
+    },
+    "automatic_FA_affine_run": {
+      "wall_seconds_with_write": 287.1211875360459,
+      "linear_alignment_seconds": 210.26664969325066,
+      "nonlinear_seconds": 62.09724130202085,
+      "linear_peak_cuda_memory_bytes": 822892544,
+      "peak_cuda_memory_bytes": 14298827776,
+      "gpu_before": {
+        "used_mib": 56019,
+        "total_mib": 81559,
+        "utilization_percent": 74
+      },
+      "gpu_after": {
+        "used_mib": 72803,
+        "total_mib": 81559,
+        "utilization_percent": 63
+      },
+      "FA_affine_max_abs_vs_matched": 2.3035795493342448e-11,
+      "warp_max_abs_vs_matched": 0.0
     }
   },
-  "coordinate_and_sampler_isolation": {
-    "official_full_warp_through_fnit_cubic_sampler_vs_official_debug_scalar": {
-      "voxels": 1827095,
-      "pearson": 0.9937950622049266,
-      "mae": 25.129669861906798,
-      "rmse": 34.671743518893514
+  "timing_seconds": {
+    "official_registration": 1161.31,
+    "official_command_wall_with_write": 1183.61,
+    "fnit_matched_nonlinear": 63.22247059736401,
+    "fnit_matched_wall_with_write": 79.77593770576641,
+    "fnit_auto_linear": 210.26664969325066,
+    "fnit_auto_nonlinear": 62.09724130202085,
+    "fnit_auto_wall_with_write": 287.1211875360459,
+    "context": "shared H100 node with other jobs; before and after whole-GPU occupancy is recorded; runs were sequential and not isolated",
+    "equivalent_speedup_claimed": false
+  },
+  "comparison": {
+    "mask": "nonzero reference T1w for warp, Jacobian and T1; additionally both warped FA values nonzero for FA",
+    "sampler": "FNIT cubic sampler for both estimated warps and both moving scalar images",
+    "warp_all_components": {
+      "voxels": 5481285,
+      "pearson": 0.9780636117382713,
+      "mae": 0.2755346662187139,
+      "rmse": 0.43450861629850895,
+      "maximum_absolute_error": 8.529042720794678
     },
-    "official_one_step_warp_projection_to_current_32mm_lattice_pearson": 0.9972485897748667,
-    "interpretation": "warp units, direction, affine order, control-lattice capacity and scalar sampler are not the main remaining error source"
+    "warp_component_pearson": [
+      0.982140143497351,
+      0.9699731047413873,
+      0.9795435355433934
+    ],
+    "jacobian": {
+      "voxels": 1827095,
+      "pearson": 0.9708344003087601,
+      "mae": 0.03651166099214712,
+      "rmse": 0.06156437746821613,
+      "maximum_absolute_error": 3.1970767974853516
+    },
+    "warped_T1": {
+      "voxels": 1827095,
+      "pearson": 0.9587322097825577,
+      "mae": 49.15811423582981,
+      "rmse": 86.69018956416582,
+      "maximum_absolute_error": 1666.067886352539
+    },
+    "warped_FA": {
+      "voxels": 1805066,
+      "pearson": 0.9833029101850403,
+      "mae": 0.015765067301064587,
+      "rmse": 0.029956772261252262,
+      "maximum_absolute_error": 1.0030446946620941
+    },
+    "contracts": {
+      "warp": {
+        "shape_match": true,
+        "affine_maximum_absolute_difference": 0.0,
+        "dtype_match": true
+      },
+      "jacobian": {
+        "shape_match": true,
+        "affine_maximum_absolute_difference": 0.0,
+        "dtype_match": true
+      }
+    },
+    "comparison_seconds_including_sampling": 12.195531120058149,
+    "comparison_peak_cuda_memory_bytes": 1609289728
   },
   "numerically_equivalent": false,
   "remaining_differences": [
-    "official MMORF assembles full or diagonal sparse Gauss-Newton Hessians and uses Levenberg damping and candidate rejection; FNIT uses LBFGS strong-Wolfe",
-    "the official tensor rotation gradient and Hessian are explicit analytic expressions; FNIT differentiates its finite-strain implementation with PyTorch autograd",
-    "SciPy mirror-boundary cubic coefficient prefiltering has not been shown coefficient-identical to the vendored CUDA prefilter",
-    "the saved dense Jacobian uses finite differences rather than analytic cubic-spline derivatives",
-    "no official warped-tensor debug oracle was available for a voxelwise output comparison"
+    "official MMORF uses sparse Gauss-Newton/Levenberg optimization; FNIT uses PyTorch LBFGS with strong-Wolfe search",
+    "official per-modality scalar scaling is updated after lower-cost candidates; FNIT currently fixes it from the initial cost",
+    "official analytic tensor rotation derivatives and Jacobian differ from FNIT autograd and finite-difference saved Jacobian",
+    "cubic prefilter boundary and coefficient identity have not been established",
+    "one real case does not establish population-level accuracy or stable speedup"
   ],
   "test_verification": {
-    "command": "PYTHONPATH=src python -m pytest tests/mmorf/test_mmorf.py -q",
-    "result": "15 passed",
-    "wall_seconds": 6.36
+    "python": "3.11",
+    "mmorf_dmri_pipeline_public_api": "76 passed"
   },
   "source_sha256": {
-    "src/fnit/mmorf/core.py": "a89092d2ef561b53049400361a646b9cc8f94300bcb7b3eb14b37ed1e4a18466",
-    "src/fnit/mmorf/standalone.py": "fc2050d991663796429fcdcddeab8e86df91ab2f88b539ce8b5a8314694e31f2",
-    "validation/mmorf/compare_mmorf.py": "3af5d798c7bf0ef59db16c5ef27a5e7916db08231d01129cb800fe859489e9d5",
+    "src/fnit/mmorf/core.py": "49260559dddbf67e227d53c16f01a772f2ceb20cff09c0c3f9117e2633fa9b27",
+    "src/fnit/mmorf/cli.py": "3e9d2d8c2cbeed1121e986545cc0d6d26f4f248937c9ff7423a4ea81e0b61101",
+    "src/fnit/mmorf/standalone.py": "cfad1efe8703a620af4b196a98cad2b6b490b7a7d57daf2293e1bd7f0b816326",
+    "validation/mmorf/measure_real_multiscalar.py": "dd11761301dc493335ea880704a29e4a80e46dfaca8132969783d958d2ceade2",
+    "validation/mmorf/compare_real_multiscalar.py": "aab2506b82d92383bd4cd347caef48c3416c211bef9aa42902016a0f2e18ca8f",
     "validation/mmorf/plot_mmorf.py": "f4ed6e7ddd724ce8ad2790673da2f9c7c9c85f04186aff6c1cadb5ff757c2591",
-    "docs/mmorf/figures/mmorf_fsl_comparison.png": "0d0369f7e7bec2297e81f348d3578faebbbe6ba89fa7f6d490308e46d2c97a1d"
-  },
-  "current_source_audit": {
-    "current_core_sha256": "110fb0ed68019257b2a6c79cd96d96a55f90f4a9c11b858addcfff41d281c15c",
-    "measured_core_sha256": "a89092d2ef561b53049400361a646b9cc8f94300bcb7b3eb14b37ed1e4a18466",
-    "change_scope": "Non-finite level recovery after an unchanged initial LBFGS attempt. The measured FSL comparison used finite first attempts.",
-    "fresh_current_core_same_input_fsl_comparison": false,
-    "current_real_data_recovery_report": "recovery.real.current.json"
+    "docs/mmorf/figures/mmorf_fsl_comparison.png": "2c49df2c97d69634a8892f70210abff13612db8f93e1da38c01c0b83274ca508"
   }
 }

@@ -26,7 +26,7 @@ CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核。模型、影像张
 | dMRI | TorchEDDY | 运动/涡流校正 DWI、旋转 bvec 与参数 | [EDDY](docs/eddy/README.md) |
 | dMRI | TorchDTIFIT | FA、MD、L1–L3、V1–V3、S0 与 tensor | [DTIFIT](docs/dtifit/README.md) |
 | dMRI | TorchAMICONODDI | NDI、ODI、FWF、方向与拟合误差 | [AMICO-NODDI](docs/amico_noddi/README.md) |
-| dMRI | TorchMMORF | T1/DTI 联合配准的 pull warp、Jacobian 与 warped maps | [MMORF](docs/mmorf/README.md) |
+| dMRI | TorchMMORF | 多组标量与 DTI 联合配准、内部 PyTorchFLIRT 线性初始化、pull warp 与 Jacobian | [MMORF](docs/mmorf/README.md) |
 | dMRI | 参数图 pipeline | TOPUP/EDDY/DTIFIT/NODDI 后接 TBSS 或 MMORF 的九张标准空间图 | [dMRI pipeline](docs/dmri_pipeline/README.md) |
 | dMRI | TorchBEDPOSTX | 纤维方向、体积分数与不确定性 | [BEDPOSTX](docs/bedpostx/README.md) |
 | dMRI | TorchProbtrackX | 路径密度与 voxel/ROI 连接矩阵 | [ProbtrackX](docs/probtrackx/README.md) |
