@@ -6,11 +6,15 @@
 
 ## 当前单 T1 标准流程
 
-入口已固定执行 MNI152 非线性变换、拓扑修复、真实 `white.preaparc`、标准球面与配准、最终 white、Conda 源码构建的四轮 pial 以及体积/顶点后处理，不再通过多个开关组合近似表面。Python pial 保留为可单独调用的同输入验证函数。[同一自产输入的双引擎比较](native_pial_candidate_20260929.json)给出输出差异与耗时。文件完整性与数值验收是运行报告中的不同字段。主页安装脚本已在新 Conda 环境从[完整固定源码树编译并安装 14 个必需程序](build_full_14_20260929.json)；源代码快照的 [recon-all 与权重清单测试](rebased_tests_20260929.json)为 237 项通过。此前的[固定源码初次构建](source_codeload_build_20260929.json)还记录了同输入真实 T1 的 `mri_segment` 逐体素一致。[资产安装记录](asset_setup_20260929.json)显示首次全新下载在 80 项处中断；[续传后的全新安装](asset_fresh_install_20260930.json)和当前源码 `--verify-only` 对 98 项标准资产均通过。无预装软件环境中的整例隔离验证仍待完成。[安装说明](../../../docs/recon_all/CONDA_CPP_BUILD.md)。 当前源码在主页环境的首次整例重跑于共享 GPU 0 的 SynthSeg 阶段因可用显存不足而停下，详见 [v8 OOM 记录](v8_shared_gpu_oom_20260929.json)；已改用空闲显存较多的 GPU 1 重新运行。独立 `sub-02` 的同版重跑也在共享 GPU 0 的 SynthSeg 阶段因其他任务占用显存而中断，见 [v10 OOM 记录](v10_shared_gpu_oom_20260930.json)。
+入口已固定执行 MNI152 非线性变换、拓扑修复、真实 `white.preaparc`、标准球面与配准、最终 white、Conda 源码构建的四轮 pial 以及体积/顶点后处理，不再通过多个开关组合近似表面。Python pial 保留为可单独调用的同输入验证函数。[同一自产输入的双引擎比较](native_pial_candidate_20260929.json)给出输出差异与耗时。文件完整性与数值验收是运行报告中的不同字段。主页安装脚本已在新 Conda 环境从[完整固定源码树编译并安装 14 个必需程序](build_full_14_20260929.json)；源代码快照的 [recon-all 与权重清单测试](rebased_tests_20260929.json)为 237 项通过。此前的[固定源码初次构建](source_codeload_build_20260929.json)还记录了同输入真实 T1 的 `mri_segment` 逐体素一致。[资产安装记录](asset_setup_20260929.json)显示首次全新下载在 80 项处中断；[续传后的全新安装](asset_fresh_install_20260930.json)和当前源码 `--verify-only` 对 98 项标准资产均通过。 当前权重清单的 [11 项模型文件](weights_verify_20260930.json)也已在主页环境逐项核对大小和 SHA-256；这次核对使用已安装权重。无预装软件环境中的整例隔离验证仍待完成。[安装说明](../../../docs/recon_all/CONDA_CPP_BUILD.md)。 当前源码在主页环境的首次整例重跑于共享 GPU 0 的 SynthSeg 阶段因可用显存不足而停下，详见 [v8 OOM 记录](v8_shared_gpu_oom_20260929.json)；已改用空闲显存较多的 GPU 1 重新运行。独立 `sub-02` 的同版重跑也在共享 GPU 0 的 SynthSeg 阶段因其他任务占用显存而中断，见 [v10 OOM 记录](v10_shared_gpu_oom_20260930.json)。
 
 旧版 v5 开发链从原始 T1 完成了 59 个阶段，双侧 white/pial 的[独立网格检查](mesh_validation_20260929.json)通过，但因使用早期代码快照缺少固定清单中的 18 项，运行报告为 `incomplete`，耗时 11,651 秒。与归档官方整例严格比较仅 5/138 项通过，通过项均是 MRI；它不能代表现版交付。v6 主页安装链在 Python pial 阶段结束，未形成完整整例。
 
 固定源码快照的 v7 标准链使用新建 Conda 环境从原始 T1 跑完当时调度的计算阶段，耗时 7,414 秒；两侧[网格质量](v7_mesh_validation_20260929.json)另行检查为闭合、Euler 特征数 2、white/pial 自相交数 0。当时固定清单缺 4 项；在同一自产上游上单独补跑 `entowm.stats` 和[非线性配准](mni_nonlinear_real_20260929.json)后，138 项均存在。补跑不算一次当前 HEAD 的原始 T1 整例。严格[138 项整例比较](v7_138_comparison_20260929.json)仍只有 5 项通过，不能宣称数值验收。候选与官方表面顶点数不同，[双向最近点距离](v7_surface_nearest_20260929.json)仅用于定位形状差异，不能替代同索引比较。[34 个 aparc 脑区的统计](v7_region_comparison_20260929.json)中，平均厚度相关性左侧 0.9924、右侧 0.9978，均未达到 0.9999；[前段体积比较](v7_volume_comparison_20260929.json)中 WM 与 filled 也未达到 0.9957 门槛。整例进程 GPU 占用每 2 秒采样的最大值为 18,452 MiB，约 19.35 GB；采样最大值不等于连续峰值。
+
+当前代码快照在 GPU 上的 `sub-01` 整例重跑尚在后段；其[前段体积对照](v9_volume_prefix_20260930.json)中 `wm` 相关性为 0.96216，`filled` 两侧标签 Dice 为 0.99415 / 0.99345，仍低于 0.9957。此数值只属于本次自产上游前缀，完整 138 项要等整例结束后另报。
+
+`sub-02` 的同主机整例对照已定位到[最早的体积差异](sub02_conform_prefix_20260930.json)：导入图和 `rawavg.mgz` 的体素、仿射完全一致，conform 后的 `orig.mgz` 有 195/16,777,216 个体素相差 1 灰度级。后续差异明显增大；这项观察尚不能把全部下游偏差归因于 conform。
 
 独立真实 `sub-02` 的同一冻结快照完成双侧表面和大部分统计，但 `brain_volume_stats` 遇到 4 个未分侧的标签 77 体素而停下。修正后对该阶段、后续统计和非线性配准分别手动续算，[138/138 项存在、两侧网格质量通过](sub02_fixed_stage_audit_20260929.json)。标签 77 的[同输入官方配对](brain_volume_label77_pair_20260929.json)显示左右白质体积完全相同，16 项统计最大误差 0.000826 mm³。手动续算不算当前 HEAD 的原始 T1 完整整例通过。
 

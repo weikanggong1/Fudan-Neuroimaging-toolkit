@@ -1,0 +1,16 @@
+{
+  "date": "2026-09-30",
+  "scope": "real sub-02 T1, FNIT CPU v12 continuous prefix versus FreeSurfer 8.2 official recon-all on the same nodecw10 host",
+  "fnit_source_snapshot": "9ae7939 plus CPU SynthSeg backend patch later pushed as b66ff97; input/conform implementation unchanged",
+  "input_t1_sha256": "326d1e0a948b76344150c28bbcf0299b58040092c2f037f09c754103d32f747d",
+  "grid_shape_after_conform": [256, 256, 256],
+  "volume_comparison": {
+    "orig/001.mgz": {"different_voxels": 0, "affine_max_absolute_difference_mm": 0.0},
+    "rawavg.mgz": {"different_voxels": 0, "affine_max_absolute_difference_mm": 0.0},
+    "orig.mgz": {"different_voxels": 195, "total_voxels": 16777216, "maximum_absolute_voxel_difference": 1, "affine_max_absolute_difference_mm": 0.0},
+    "nu.mgz": {"different_voxels": 40320, "maximum_absolute_voxel_difference": 2, "affine_max_absolute_difference_mm": 0.0},
+    "T1.mgz": {"different_voxels": 223968, "maximum_absolute_voxel_difference": 15, "affine_max_absolute_difference_mm": 0.0}
+  },
+  "conform_difference_sign": {"fnit_minus_official_negative_one": 101, "fnit_minus_official_positive_one": 94},
+  "interpretation": "The first observed voxel difference is in mri_convert --conform reproduction. This record does not isolate the later registration and normalization error sources."
+}

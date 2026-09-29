@@ -100,6 +100,8 @@ fnit synthseg --i sub-01_T1w.nii.gz --o sub-01_synthseg.nii.gz \
 
 2026-09-30 在 nodecw10 的 PyTorch 2.5.1 上，CPU oneDNN 路径处理真实 `sub-02` 时发生段错误。现版在 CPU 推理这一段关闭 MKLDNN，并在返回后恢复原设置；同输入的独立阶段和 recon-all 连续运行都通过 SynthSeg，后者耗时 368.14 秒，写出的软体积总量为 1,452,089.5 mm³。独立阶段观测进程 RSS 最大约 97.4 GiB。该设置不影响 CUDA 路径；旧 CPU 耗时不能代表现版。完整 recon-all CPU 续跑尚待结束。[阶段记录](../../validation/recon_all/python_gpu_port/synthseg_cpu_backend_20260930.json)。
 
+同一 nodecw10 上另行运行官方 FreeSurfer 8.2 `mri_synthseg --cpu --keepgeom --threads 4` 作参考；现版 FNIT 相比官方的 256³ 标签图有 33 个体素不同，32 个前景标签最低 Dice 为 0.999886，软体积 CSV 最大差 1.9 mm³。官方单次耗时 295.58 秒，FNIT 为 368.14 秒；共享节点单次计时只用于说明本次运行，不推断稳定速度比。官方输出仅在隔离的参考目录中用于比较，不作为 FNIT 输入。[逐项记录](../../validation/recon_all/python_gpu_port/synthseg_cpu_backend_20260930.json)。
+
 完整逐例标签 Dice、CSV、shape/affine/dtype、输出哈希、实际命令和边界见[验证页](../../validation/synthseg/README.md)与[机器报告](../../validation/synthseg/report.public.json)。三例没有人工结构分割真值，这些数值只衡量对参考实现的复现程度。
 
 下图使用本轮公开 `sub-02` 重跑。中间两列显示同网格标签，最后一列标出不同体素；该例逐体素一致率为 0.99998881。

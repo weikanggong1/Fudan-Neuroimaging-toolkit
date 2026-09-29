@@ -25,6 +25,32 @@
     "written_csv_total_intracranial_mm3": 1452089.5,
     "complete_reconstruction_status_at_record_time": "running"
   },
+  "comparison_to_prior_gpu_candidate": {
+    "reference": "subject_02_v7/mri/synthseg.rca.mgz",
+    "candidate": "subject_02_v12_cpu/mri/synthseg.rca.mgz",
+    "different_label_voxels": 132,
+    "total_voxels": 16777216,
+    "foreground_dice": 0.9999849156786437,
+    "note": "Different device and reconstruction snapshots; this is a diagnostic comparison, not an isolated MKLDNN effect."
+  },
+  "same_host_official_synthseg_comparison": {
+    "reference": "FreeSurfer 8.2 mri_synthseg --cpu --keepgeom --threads 4 on nodecw10, separate reference subject",
+    "reference_wall_seconds": 295.58,
+    "candidate_wall_seconds": 368.14299101382494,
+    "shape": [256, 256, 256],
+    "affine_max_absolute_difference_mm": 0.0,
+    "different_label_voxels": 33,
+    "total_voxels": 16777216,
+    "foreground_dice": 0.9999958861477682,
+    "minimum_label_dice": 0.9998855180309101,
+    "minimum_dice_label": 53,
+    "label_count": 32,
+    "csv_names_equal": true,
+    "reference_total_intracranial_mm3": 1452087.6,
+    "candidate_total_intracranial_mm3": 1452089.5,
+    "maximum_csv_absolute_difference_mm3": 1.9,
+    "scope": "single stage on the same real T1 and host; shared-node timings are not a controlled speed ratio"
+  },
   "tests": {
     "command": "PYTHONPATH=src python -m pytest -q tests/synthseg_parc tests/recon_all tests/test_setup_weights.py",
     "passed": 253,
