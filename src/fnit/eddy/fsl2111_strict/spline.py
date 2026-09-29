@@ -60,13 +60,11 @@ def _start_indices(x: torch.Tensor) -> torch.Tensor:
 
 def _cubic_weight(d: torch.Tensor) -> torch.Tensor:
     a = d.abs()
-    out = torch.zeros_like(a)
-    m = a < 1
-    out[m] = (2.0 / 3.0) + 0.5 * a[m] * a[m] * (a[m] - 2.0)
-    m2 = (a >= 1) & (a < 2)
-    q = 2.0 - a[m2]
-    out[m2] = (1.0 / 6.0) * q * q * q
-    return out
+    # Dense branches avoid CUDA synchronization from boolean indexing.
+    near = (2.0 / 3.0) + 0.5 * a * a * (a - 2.0)
+    q = 2.0 - a
+    middle = (1.0 / 6.0) * q * q * q
+    return torch.where(a < 1, near, torch.where(a < 2, middle, 0.0))
 
 
 def _periodic_index(idx: torch.Tensor, n: int) -> torch.Tensor:

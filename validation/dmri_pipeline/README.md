@@ -4,6 +4,8 @@
 
 2026 年 9 月 29 日在 gpucw1 用一例真实 UKB 格式 AP/PA 数据，从原始图像分别运行 TBSS 和 MMORF 分支。两个分支均经过当前公开的 TorchEDDY 实现，且使用同一例被试的原始 dMRI。结果图像仍留在计算节点；仓库只保存汇总数值。
 
+随后 TorchEDDY 的样条权重改为无布尔索引计算；固定种子的完整八轮校正图与改动前文件 SHA-256 相同，其他数值输出也逐值相同。本页九图相似性指标来自改动前的整链实测，两条分支尚未用改动后源码重跑；下述整链运行时间也不代表现版耗时。现版 EDDY 单独计时见 [EDDY 验证页](../eddy/README.md)。
+
 TBSS 的第一个参考固定 TOPUP 系数、掩膜和其余输入，改用 FSL `eddy_cuda10.2` 校正图，再由相同 FNIT DTIFIT、NODDI、TBSS 代码生成九图；该配对比较隔离 EDDY 输入的影响。九张 native 图 r 为 0.978640–0.999882，standard 图 r 为 0.940917–0.988332，skeleton 图 r 为 0.949470–0.991235。shape 和 affine 全部匹配。
 
 第二个参考由先前准备的官方 UKB native 参数图开始，经 FSL 6.0.7.4 weighted FLIRT、三阶段 FNIRT 和 applywarp 生成 standard/skeleton 图。其输入边界与本次 raw-to-standard 流程不同：standard 九图 r 为 0.358268–0.699381，skeleton 九图 r 为 0.098878–0.651267。这些差异不能单独定位到 EDDY 或 FNIRT，也不能将 FSL 的配准计时与完整 FNIT 计时相除。各图 MAE、RMSE 和有效体素数见[机器报告](tbss_e2e.real.current.json)。

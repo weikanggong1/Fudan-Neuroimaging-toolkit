@@ -176,6 +176,8 @@ MMORF 分支和 TBSS 分支共用 TOPUP、EDDY、DTIFIT、NODDI、九图命名�
 
 2026 年 9 月 29 日在 gpucw1 H100 用一例真实 UKB 格式 AP/PA dMRI，从原始图像运行 TOPUP、新版 TorchEDDY、DTIFIT、NODDI 和两条配准分支。TBSS 使用与既有报告哈希一致的 FMRIB58 FA/skeleton 模板；MMORF 另使用同一病例的 T1w、MNI T1/tensor 模板及官方 SynthStrip 权重。两条分支分别实际运行，不混用旧 EDDY 结果。数值比较使用非零体素并集。
 
+此后 TorchEDDY 只将样条权重改为无布尔索引计算；固定种子的完整八轮校正图与改动前文件 SHA-256 相同，参数和其余数值输出也逐值相同。本页九图精度比较来自改动前的整链实测，两条分支尚未用改动后源码重跑。下列整链阶段耗时也只代表那次运行；当前 EDDY 单独运行时间见 [EDDY 验证页](../../validation/eddy/README.md)。
+
 ### TBSS：九张标准图和 skeleton 图
 
 “匹配 FSL EDDY”一列固定同一 TOPUP 场与脑掩膜，使用 `eddy_cuda10.2` 输出，再调用相同的 FNIT DTIFIT、NODDI 和 TBSS 代码。它隔离 EDDY 输入造成的差异。“原版 FSL TBSS”一列使用先前从官方 UKB native 参数图开始，经 FSL weighted FLIRT、三阶段 FNIRT、applywarp 生成的标准图和 skeleton 图；FA 文件哈希分别为 `ce420c…`、`ad2d24…`。后者与本流程从 raw AP/PA 起步的范围不同。

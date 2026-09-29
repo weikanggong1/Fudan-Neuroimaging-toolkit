@@ -26,7 +26,7 @@
 | 功能 | 当前真实数据报告 | 输出一致性结论 | 时间、显存与示意图 |
 |---|---|---|---|
 | [TorchTOPUP](../docs/topup/README.md) | [真实 UKB 格式 AP/PA dMRI](topup/report.public.json) | Hz 场、校正图、运动参数与 FSL 文件合同逐项比较 | 报告含三次 FSL CPU/FNIT GPU 墙钟和显存；功能页展示场图与校正图 |
-| [TorchEDDY](../docs/eddy/README.md) | [真实 UKB 格式 dMRI](eddy/report.public.json) | 对 `eddy_cuda10.2` 的 4D r=0.999738，14/15 离群切片重合；不是逐体素等价实现 | FSL GPU 10:21.19，FNIT GPU 19:25.09；新版切片图尚未公开 |
+| [TorchEDDY](../docs/eddy/README.md) | [真实 UKB 格式 dMRI](eddy/report.public.json) | 对 `eddy_cuda10.2` 的 4D r=0.999738，14/15 离群切片重合；不是逐体素等价实现 | FSL GPU 10:21.19（进程），FNIT GPU 10:38.75（CUDA 初始化后调用）；切片图尚未公开 |
 | [TorchDTIFIT](../docs/dtifit/README.md) | [真实 UKB 格式 dMRI](dtifit/report.public.json) | tensor、FA、MD、特征值、特征向量和 S0 的合同与数值分别报告 | 报告含三次 FSL/FNIT 墙钟；功能页展示 FA 与差值 |
 | [TorchAMICONODDI](../docs/amico_noddi/README.md) | [真实 EDDY 校正 dMRI](amico_noddi/report.public.json)与[无 DIPY 核心证明](amico_noddi/no_dipy_equivalence.public.json) | NDI、ODI、FWF、方向与 RMSE 对 AMICO 2.0.3 逐体素比较 | 报告含参考/FNIT 分阶段时间和峰值显存；功能页展示参数图与差值 |
 | [TorchMMORF](../docs/mmorf/README.md) | [正常路径 FSL 对照](mmorf/report.public.json)与[当前源码恢复试验](mmorf/recovery.real.current.json) | pull warp、Jacobian、warped scalar 和九张参数图合同通过；正常路径测量早于恢复逻辑，当前源码尚无 fresh 同输入 FSL 重测 | 分别记录 FSL/FNIT 正常路径时间和当前源码真实数据恢复、整链时间；功能页保留原对照图 |
