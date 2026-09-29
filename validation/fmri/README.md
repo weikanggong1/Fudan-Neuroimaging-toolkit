@@ -47,7 +47,9 @@ FSL MCFLIRT 实测 397.54 秒；其余 11 个已单独计时的影像命令合�
 - [当前 T1→MNI152 2 mm FNIRT 对照](t1_fnirt_20260929.public.json)：同一真实 T1、模板和脑掩膜的 FSL 配对精度、时间、显存及输入/源码 SHA256。此前 FSL 与 SynthMorph 标量保留在[参照摘要](registration_summary.json)。
 - [ICA-AROMA 与完整 BIDS→MNI152 2 mm 结果](e2e_summary.json)：最终运行的组件数、噪声分类、输出完整性和各阶段耗时。
 - [当前 fMRI volume FNIRT 整链](fmri_volume_fnirt_20260929.public.json)：同一例真实 490 帧 BOLD 的退出码、全体素有限值、模板网格、掩膜外零值、TR、GPU 显存、时间和输入/输出 SHA256。
+- [重构后 volume BIDS 入口](volume_bids_current.json)：同一真实 BOLD 的前 64 帧，在 CPU 上从原始 BIDS 到最终 BIDS Derivatives 的文件结构、有限值和耗时检查。
 - [fMRIPrep 表面路径标量摘要](surface_current.json)与[函数、输出和官方命令对照](../../docs/fmri/surface.md)：真实 490 帧 BOLD 的 T1w 皮层投影及 MNI 皮层下组装；固定官方球面时 CIFTI 与 NiWorkflows 官方源码逐值一致，并单独量化 FNIT HOCR/FastPD 与官方 newMSM 球面产生的每点时间相关差异。旧 MNI 表面流程的单帧对照已移除。
+- [重构后 surface BIDS 入口](surface_bids_current.json)：把此前完成回归的完整 490 帧真实 volume 结果按 BIDS Derivatives 路径接入，验收 MSMSulc、fsLR32k GIFTI、91k CIFTI 及 JSON 写出。
 
 ## 最终 MNI 输出检查
 

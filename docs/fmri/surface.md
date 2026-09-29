@@ -49,7 +49,9 @@ print(result.dtseries)  # 91k CIFTI 时间序列
 
 ## 真实数据对照
 
-固定同一例真实 UKB 490 帧回归后 BOLD、T1w 表面、掩膜和官方注册球面，FNIT 投影与显式 Workbench 命令逐值一致；CIFTI 与从 NiWorkflows 官方源码提取的组装步骤最大绝对差 0，90,553 个非常数灰质坐标的逐点时间相关均值为 1。只换成 FNIT HOCR/FastPD MSMSulc 球面，与官方 newMSM 结果的左/右皮层逐点时间相关均值为 0.9414/0.9420，MAE 为 18.20/19.71；皮层下值一致。该差异来自球面对应关系，不能称为官方逐值等价。球面、耗时和折叠数详见 [MSMSulc 对照](../msm/README.md)及[标量摘要](../../validation/fmri/surface_current.json)。这些数字是重构前同一算法的对照，BIDS 新入口需独立完成端到端复测。
+固定同一例真实 UKB 490 帧回归后 BOLD、T1w 表面、掩膜和官方注册球面，FNIT 投影与显式 Workbench 命令逐值一致；CIFTI 与从 NiWorkflows 官方源码提取的组装步骤最大绝对差 0，90,553 个非常数灰质坐标的逐点时间相关均值为 1。只换成 FNIT HOCR/FastPD MSMSulc 球面，与官方 newMSM 结果的左/右皮层逐点时间相关均值为 0.9414/0.9420，MAE 为 18.20/19.71；皮层下值一致。该差异来自球面对应关系，不能称为官方逐值等价。球面、耗时和折叠数详见 [MSMSulc 对照](../msm/README.md)及[标量摘要](../../validation/fmri/surface_current.json)。
+
+重构后的 BIDS 入口也使用完整 490 帧真实数据完成一次端到端表面运行：双侧均写出 32,492 顶点 GIFTI，CIFTI 为 490×91,282，所有数值有限；三份输出及 JSON 均存在，总墙钟 923.80 秒。此次输入是把此前完成 WM/CSF/运动回归的真实 volume 结果按 BIDS Derivatives 路径接入，核对的是新入口和文件写出，未重新跑本次重构后的完整 490 帧 volume。见[本次入口验收摘要](../../validation/fmri/surface_bids_current.json)。
 
 ## 参考文献与原实现
 
