@@ -90,6 +90,7 @@ def __getattr__(name):
                 'create_fmriprep_cifti', 'run_fmriprep_surface_projection',
                 'SurfaceQCResult', 'make_ribbon_goodvoxels',
                 'MSMSulcInputs', 'prepare_msmsulc_inputs', 'run_msmsulc',
+                'run_newmsm_msmsulc',
                 'SurfacePipelineInputs', 'SurfacePipelineResult', 'run_surface_from_mni',
                 'run_surface_from_volume',
                 'MNISurfacePair', 'MNISurfaceResult', 'SurfacePreparationResult',

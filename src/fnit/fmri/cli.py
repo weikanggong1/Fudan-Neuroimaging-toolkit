@@ -83,7 +83,7 @@ def main(argv=None):
     surface.add_argument("--output-dir", required=True)
     surface.add_argument("--wb-command", default="wb_command")
     surface.add_argument("--device", default="cpu")
-    surface.add_argument("--registration", choices=("msmsulc", "fs"), default="msmsulc")
+    surface.add_argument("--registration", choices=("msmsulc", "newmsm_experimental", "fs"), default="msmsulc")
     surface.add_argument("--overwrite", action="store_true")
     args = parser.parse_args(argv)
     if args.command in ("feat", "run"):

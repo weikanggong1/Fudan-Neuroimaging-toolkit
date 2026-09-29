@@ -17,6 +17,7 @@ from .surface_prepare import prepare_fmriprep_surface_inputs
 from .surface_qc import SurfaceQCResult, make_ribbon_goodvoxels
 from .surface_registration import prepare_msmsulc_inputs
 from .surface_msmsulc import run_msmsulc
+from .surface_newmsm import run_newmsm_msmsulc
 from .surface_fmriprep import run_fmriprep_surface_projection
 from .normalization import resample_world
 
@@ -104,8 +105,8 @@ def run_surface_from_volume(
     ``registered_spheres`` may supply external L/R MSMSulc spheres for an
     exact fixed-sphere comparison; otherwise FNIT estimates them with Torch.
     """
-    if registration not in ("msmsulc", "fs"):
-        raise ValueError("registration must be 'msmsulc' or 'fs'")
+    if registration not in ("msmsulc", "newmsm_experimental", "fs"):
+        raise ValueError("registration must be 'msmsulc', 'newmsm_experimental' or 'fs'")
     if registered_spheres is not None and len(registered_spheres) != 2:
         raise ValueError("registered_spheres must contain left and right paths")
     volume = Path(volume_dir).expanduser().resolve()
@@ -159,7 +160,7 @@ def run_surface_from_volume(
                 f"surf/{hemi}.{name}"
                 for hemi in ("lh", "rh")
                 for name in (("white", "pial", "sphere.reg", "thickness", "sphere", "sulc")
-                             if registration == "msmsulc" and registered_spheres is None
+                             if registration in ("msmsulc", "newmsm_experimental") and registered_spheres is None
                              else ("white", "pial", "sphere.reg", "thickness"))
             )
             with zipfile.ZipFile(source) as archive:
@@ -179,14 +180,18 @@ def run_surface_from_volume(
             output_dir=output / "prepared", wb_command=wb_command,
             overwrite=overwrite,
         )
-        if registration == "msmsulc" and registered_spheres is None:
+        if registration in ("msmsulc", "newmsm_experimental") and registered_spheres is None:
             sulc_inputs = prepare_msmsulc_inputs(
                 subject_dir=subject,
                 initial_spheres=prepared.initial_spheres,
                 hcp_assets_dir=assets, output_dir=output / "msmsulc_inputs",
                 wb_command=wb_command,
             )
-            spheres = run_msmsulc(sulc_inputs, output / "msmsulc", device=device)
+            if registration == "newmsm_experimental":
+                spheres = run_newmsm_msmsulc(
+                    sulc_inputs, output / "newmsm_experimental", device=device)
+            else:
+                spheres = run_msmsulc(sulc_inputs, output / "msmsulc", device=device)
             registered_spheres = (spheres["L"], spheres["R"])
         if registered_spheres is None:
             registered_spheres = prepared.initial_spheres

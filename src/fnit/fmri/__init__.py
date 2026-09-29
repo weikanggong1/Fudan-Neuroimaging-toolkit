@@ -11,6 +11,7 @@ from .surface import SurfaceHemisphere, SurfaceProjectionResult, run_surface_pro
 from .surface_fmriprep import create_fmriprep_cifti, run_fmriprep_surface_projection
 from .surface_qc import SurfaceQCResult, make_ribbon_goodvoxels
 from .surface_msmsulc import run_msmsulc
+from .surface_newmsm import run_newmsm_msmsulc
 from .surface_registration import MSMSulcInputs, prepare_msmsulc_inputs
 from .surface_pipeline import SurfacePipelineInputs, SurfacePipelineResult, run_surface_from_mni, run_surface_from_volume
 from .surface_prepare import (MNISurfacePair, MNISurfaceResult, SurfacePreparationResult,
@@ -38,7 +39,7 @@ __all__ = [
     "SurfaceHemisphere", "SurfaceProjectionResult", "run_surface_projection",
     "create_fmriprep_cifti", "run_fmriprep_surface_projection",
     "SurfaceQCResult", "make_ribbon_goodvoxels",
-    "MSMSulcInputs", "prepare_msmsulc_inputs", "run_msmsulc",
+    "MSMSulcInputs", "prepare_msmsulc_inputs", "run_msmsulc", "run_newmsm_msmsulc",
     "SurfacePipelineInputs", "SurfacePipelineResult", "run_surface_from_mni", "run_surface_from_volume",
     "MNISurfacePair", "MNISurfaceResult", "SurfacePreparationResult",
     "T1SurfacePreparation", "prepare_fmriprep_surface_inputs",
