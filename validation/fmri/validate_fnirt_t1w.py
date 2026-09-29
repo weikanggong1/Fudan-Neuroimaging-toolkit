@@ -117,7 +117,7 @@ def main():
                 "level": level["level"],
                 "polynomial": level["t1_polynomial"],
                 "bias_range": level["t1_bias_range"],
-                "bias_pcg": level["t1_bias_pcg"],
+                "bias_bending_energy": level["t1_bias_bending_energy"],
             }
             for level in registration.qc["levels"]
         ],

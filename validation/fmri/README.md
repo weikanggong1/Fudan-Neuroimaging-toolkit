@@ -52,4 +52,4 @@ FSL MCFLIRT 实测 397.54 秒；其余 11 个已单独计时的影像命令合�
 
 默认 SynthMorph 流水线此前退出状态为 0，得到 91×109×91×490 的 float32 4D 影像，TR 0.735 秒；442,288,210 个值有限，掩膜外为 0。ICA 收敛于 96 个成分，AROMA 判定 48 个噪声成分。进程墙钟 532.22 秒，CUDA 峰值 reserved 17.58 GB；详见[原有整链摘要](e2e_summary.json)。
 
-当前配置的 FNIRT volume 流水线退出状态也为 0，输出尺寸和 TR 相同，模板网格及 gzip CRC 检查通过；442,288,210 个数值全部有限，掩膜外最大绝对值为 0。ICA 收敛于 95 个成分，AROMA 判定 53 个噪声成分。分步耗时合计 837.97 秒，进程墙钟 844.61 秒；CUDA 峰值 reserved 7.31 GB。两次运行均处于共享 GPU 环境，不作速度排序。FNIRT 结果及源文件、输入和输出哈希见[当前整链报告](fmri_volume_fnirt_20260929.public.json)。两个分支均使用 AROMA 代替 FIX，清理后的 MNI 影像没有可直接逐体素比较的 UKB FIX 输出。
+联合优化版本的 FNIRT volume 流水线退出状态为 0，输出尺寸和 TR 相同，模板网格及 gzip CRC 检查通过；442,288,210 个数值全部有限，掩膜外最大绝对值为 0。ICA 收敛于 95 个成分，AROMA 判定 63 个噪声成分。分步耗时合计 1194.98 秒，进程墙钟 1202.18 秒；CUDA 峰值 reserved 7.31 GB。两次运行均处于共享 GPU 环境，不作速度排序。FNIRT 结果及源文件、输入和输出哈希见[当前整链报告](fmri_volume_fnirt_20260929.public.json)。两个分支均使用 AROMA 代替 FIX，清理后的 MNI 影像没有可直接逐体素比较的 UKB FIX 输出。

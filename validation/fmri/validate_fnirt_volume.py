@@ -45,6 +45,8 @@ def main():
         raise ValueError("pipeline did not select FNIRT")
     if report["t1_to_mni_qc"]["global_intensity_model"] != "global_non_linear_with_bias":
         raise ValueError("pipeline did not use the T1 intensity model")
+    if report["t1_to_mni_qc"]["t1_intensity_fitting"] != "joint LM polynomial, cubic bias and deformation estimation":
+        raise ValueError("pipeline did not use joint T1 intensity optimisation")
     if bold.shape[:3] != template.shape or bold.shape[3] < 2:
         raise ValueError("BOLD dimensions do not match the template")
     if mask_image.shape != template.shape or pull_image.shape != (*template.shape, 3):

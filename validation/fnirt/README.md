@@ -7,10 +7,10 @@
 ## FSL 无配置默认值：2026-09-29
 
 同一真实去脑 T1、MNI152 2 mm 模板和 FSL FLIRT 初始矩阵分别输入无 `--config`
-的 FSL FNIRT 与 FNIT `default`。FNIT 的 warped T1 脑内 Pearson r 为 0.9274，
-支持区 Dice 为 0.9884，coefficient 全数组 Pearson r 为 0.8824。两份系数图的
+的 FSL FNIRT 与 FNIT `default`。联合优化版本的 warped T1 脑内 Pearson r 为 0.99584，
+支持区 Dice 为 0.99875，coefficient 全数组 Pearson r 为 0.99480。两份系数图的
 shape、intent-2007、输出网格、gzip CRC 和有限值检查通过。FNIT 配准与写出
-14.91 s，GPU 峰值分配 0.992 GB；FSL CPU 进程 253.51 s，但写出有效文件后
+44.80 s，GPU 峰值分配 1.089 GB；FSL CPU 进程 253.51 s，但写出有效文件后
 返回 255，因此仅作条件性对照，也不发布加速比。输入与源码哈希、指标定义见
 [默认预设报告](default_preset_20260929.public.json)，执行和比较脚本见
 [`validate_default_real.py`](validate_default_real.py)。

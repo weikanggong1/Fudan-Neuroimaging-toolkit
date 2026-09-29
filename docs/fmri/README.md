@@ -2,7 +2,7 @@
 
 `run_fmri_pipeline` 一次处理一个 BIDS BOLD run。它先用 SynthStrip 提取 SBRef（缺失时取 BOLD 中间帧）与 T1 的脑掩膜，再运行运动校正和 FEAT 核心处理、TorchFAST 白质/脑脊液分割、EPI→T1 BBR、T1→MNI 非线性配准、单被试空间 PICA、ICA-AROMA 和可选 WM/CSF/运动回归。高层入口把 SBRef 掩膜作为 `brain_mask` 传给 FEAT；独立 `run_feat_core` 在未提供 `brain_mask` 时则从运动校正后的 EPI 均值提取掩膜，两条入口的默认掩膜输入不同。最后把清理后的 4D BOLD 通过合成变换一次插值到 MNI152 2 mm 网格。以回归后的 volume 结果和同被试 recon-all 运行 `run_surface_from_volume`，按[表面投影页](surface.md)的 fMRIPrep 顺序分别使用 T1w BOLD 投影皮层、MNI BOLD 提供皮层下信号，生成 fsLR32k/91k CIFTI。GPU 矩阵运算默认启用 TF32，影像以 float32 保存。
 
-这条流程没有 GDC 和 B0 畸变估计。指定 UKB rfMRI ZIP 没有原始 B0 场图/幅度图，也没有 GDC warp；遇到与 BOLD 关联的 BIDS 场图但缺少已估计 warp 时，FEAT 核心会明确报错。清理使用 ICA-AROMA，不能与 UKB 的 FIX 输出逐体素相同。PyTorch FNIRT 的 T1 分支已加入五阶强度映射和 50 mm 偏置场，但采用逐级交替拟合；它与 FSL 的联合优化仍有数值差异，见[同输入对照](normalization.md)。
+这条流程没有 GDC 和 B0 畸变估计。指定 UKB rfMRI ZIP 没有原始 B0 场图/幅度图，也没有 GDC warp；遇到与 BOLD 关联的 BIDS 场图但缺少已估计 warp 时，FEAT 核心会明确报错。清理使用 ICA-AROMA，不能与 UKB 的 FIX 输出逐体素相同。PyTorch FNIRT 的 T1 分支联合优化形变、5 系数强度多项式和 50 mm 偏置场；与 FSL 仍有数值差异，见[同输入对照](normalization.md)。
 
 ## 安装、权重和输入
 
@@ -121,4 +121,4 @@ CSF/WM 组织掩膜由 TorchFAST 部分体积分数经 BBR 投到 EPI，再在 E
 
 同一例 490 帧 BOLD 的默认 SynthMorph 分支此前已从原始 BIDS 成功运行至 MNI152 2 mm：输出 91×109×91×490、float32、TR 0.735 秒；ICA 收敛于 96 个成分，AROMA 判定 48 个噪声成分。整链墙钟 532.22 秒，PyTorch 峰值保留显存 17.58 GB。该结果见[原有整链摘要](../../validation/fmri/e2e_summary.json)。
 
-当前代码的 `registration_backend="fnirt"` volume 分支完成了相同 BIDS BOLD/SBRef/T1 的 490 帧整链，退出码 0。输出为 91×109×91×490 的 float32 NIfTI，TR 0.735 秒，MNI 网格匹配；442,288,210 个数值全部有限，脑掩膜外最大绝对值为 0。默认六级 T1 FNIRT 使用多项式与偏置场强度模型；ICA 收敛于 95 个成分，AROMA 判定 53 个噪声成分。进程墙钟 844.61 秒，PyTorch 峰值分配 6.24 GB、保留 7.31 GB。两次整链在共享 GPU 上分时运行，不能据此作公平速度排序。输入/输出 SHA256、分步耗时及全体素检查见[FNIRT 整链报告](../../validation/fmri/fmri_volume_fnirt_20260929.public.json)；T1 配准的 FSL 同输入对照见[配准报告](../../validation/fmri/t1_fnirt_20260929.public.json)。最终 AROMA 结果没有可逐体素配对的 UKB FIX 参照。
+当前代码的 `registration_backend="fnirt"` volume 分支完成了相同 BIDS BOLD/SBRef/T1 的 490 帧整链，退出码 0。输出为 91×109×91×490 的 float32 NIfTI，TR 0.735 秒，MNI 网格匹配；442,288,210 个数值全部有限，脑掩膜外最大绝对值为 0。默认六级 T1 FNIRT 联合优化形变与强度参数；ICA 收敛于 95 个成分，AROMA 判定 63 个噪声成分。进程墙钟 1202.18 秒，PyTorch 峰值分配 6.24 GB、保留 7.31 GB。两次整链在共享 GPU 上分时运行，不能据此作公平速度排序。输入/输出 SHA256、分步耗时及全体素检查见[FNIRT 整链报告](../../validation/fmri/fmri_volume_fnirt_20260929.public.json)；T1 配准的 FSL 同输入对照见[配准报告](../../validation/fmri/t1_fnirt_20260929.public.json)。最终 AROMA 结果没有可逐体素配对的 UKB FIX 参照。

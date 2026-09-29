@@ -9,7 +9,8 @@ import torch
 
 from fnit.fmri import normalization
 from fnit.fnirt import T1FNIRTConfig
-from fnit.fnirt.registration import _apply_t1_intensity, _t1_intensity_map
+from fnit.fnirt.registration import _JointT1System, _LevelSystem, _pack_t1, _unpack_t1
+from fnit.fnirt.spline import BendingOperator, fsl_control_shape, spline_bases
 
 
 def test_t1_config_uses_six_level_t1_schedule():
@@ -22,19 +23,46 @@ def test_t1_config_uses_six_level_t1_schedule():
     assert config.jacobian_range == (0.01, 100)
 
 
-def test_t1_mapping_reduces_masked_intensity_error():
-    axis = torch.linspace(0, 1, 12, dtype=torch.float32)
-    x, y, z = torch.meshgrid(axis, axis, axis, indexing="ij")
-    reference = 30 + 100 * x + 20 * y
-    warped = (12 + 0.85 * reference + 0.0008 * reference.square()) * (0.9 + 0.2 * z)
-    mask = torch.ones_like(reference, dtype=torch.bool)
-    polynomial, bias, report = _t1_intensity_map(
-        reference, warped, mask, (2, 2, 2), T1FNIRTConfig()
+def test_t1_joint_gradient_includes_deformation_polynomial_and_bias():
+    shape = (6, 6, 6)
+    x, y, z = torch.meshgrid(*[torch.arange(size) for size in shape], indexing="ij")
+    reference = (30 + 6 * x + 4 * y + 2 * z).to(torch.float32)
+    moving = (8 + 0.9 * reference + 0.001 * reference.square()).to(torch.float32)
+    deformation_spacing = (3, 3, 3)
+    bias_spacing = (4, 4, 4)
+    dtype = torch.float64
+    coordinates = torch.stack((x, y, z)).to(torch.float32)
+    interior_mask = torch.zeros(shape, dtype=torch.bool)
+    interior_mask[1:-1, 1:-1, 1:-1] = True
+    deformation = _LevelSystem(
+        moving, reference, interior_mask, None, torch.eye(4), coordinates,
+        torch.eye(4),
+        spline_bases(shape, deformation_spacing, (1, 1, 1), device="cpu", dtype=dtype),
+        BendingOperator(shape, deformation_spacing, (1, 1, 1), device="cpu", dtype=dtype),
+        0.0, False, False,
     )
-    mapped = _apply_t1_intensity(reference, polynomial, bias)
-    assert report.converged
-    assert torch.mean((mapped - warped).square()) < torch.mean((reference - warped).square())
-    assert bool(torch.isfinite(mapped).all())
+    system = _JointT1System(
+        deformation,
+        spline_bases(shape, bias_spacing, (1, 1, 1), device="cpu", dtype=dtype),
+        BendingOperator(shape, bias_spacing, (1, 1, 1), device="cpu", dtype=dtype),
+        10.0, 5,
+    )
+    coefficients = torch.zeros((3, *fsl_control_shape(shape, deformation_spacing)), dtype=dtype)
+    bias = torch.ones((1, *fsl_control_shape(shape, bias_spacing)), dtype=dtype)
+    polynomial = torch.tensor([0.0, 1.0, 0.0, 0.0, 0.0], dtype=dtype)
+    _, gradient, _, _ = system.linearize(coefficients, polynomial, bias, fit_intensity=True)
+    initial = _pack_t1(coefficients, bias, polynomial)
+    for index in (0, coefficients.numel(), initial.numel() - 2):
+        perturbation = torch.zeros_like(initial)
+        perturbation[index] = 1.0
+        epsilon = 1e-3
+        positive = _unpack_t1(initial + epsilon * perturbation, coefficients.shape[1:], bias.shape[1:])
+        negative = _unpack_t1(initial - epsilon * perturbation, coefficients.shape[1:], bias.shape[1:])
+        numerical = (
+            system.evaluate(positive[0], positive[2], positive[1])["cost"]
+            - system.evaluate(negative[0], negative[2], negative[1])["cost"]
+        ) / (2 * epsilon)
+        torch.testing.assert_close(2 * gradient[index], numerical, atol=0.15, rtol=0.06)
 
 
 def test_fmri_fnirt_uses_t1_config_and_writes_pull(tmp_path, monkeypatch):

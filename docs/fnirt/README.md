@@ -47,7 +47,7 @@ Python 用 `dataclasses.replace` 更改单项参数，并把配置对象传给 `
 | `--estint`、`--applyrefmask` | `estimate_intensity`、`apply_reference_mask` | 各级逗号分隔的 0/1 |
 | `--warpres`、`--biasres` | `warp_resolution_mm`、`bias_resolution_mm` | `x,y,z`，单位 mm；TBSS 的 `--warpres` 覆盖全部级别 |
 | `--jacrange` | `jacobian_range` | 最小值、最大值 |
-| `--intmod`、`--intorder` | `intensity_model`、`intensity_order` | 当前支持 `global_linear` 或 `global_non_linear_with_bias`；多项式阶数为 2–5 |
+| `--intmod`、`--intorder` | `intensity_model`、`intensity_order` | 当前支持 `global_linear` 或 `global_non_linear_with_bias`；后者的 `intorder` 为系数个数 2–5，最高次数为 `intorder−1` |
 | `--biaslambda`、`--ssqlambda` | `bias_regularization`、`ssd_weighted_lambda` | 正则化数值、0/1 |
 | `--imprefm`、`--impinm`、`--minmet` | `implicit_reference_mask`、`implicit_input_mask`、`minimization_methods` | 0/1、`lm` 或 `scg`；优化器可写各级列表 |
 
@@ -154,7 +154,9 @@ result = run_fnirt(
 ### Python 与命令行：T1w 专用预设
 
 `T1FNIRTConfig` 采用官方 `T1_2_MNI152_2mm.cnf` 的六级采样、平滑、
-形变正则化、五阶全局强度多项式和 50 mm 偏置场设置。以下是直接调用核心的例子；
+形变正则化、`intorder=5` 的全局强度映射和 50 mm 偏置场设置。这里的
+`intorder=5` 按 FSL 语义表示 5 个多项式系数，即常数项至四次项。
+以下是直接调用核心的例子；
 fMRI volume 的完整入口见[T1→MNI 用法](../fmri/normalization.md)。
 
 ```python
@@ -178,9 +180,10 @@ nib.save(result.coefficient_image, "/absolute/path/T1_to_MNI_coeff.nii.gz")  # �
 
 `result` 与上表的 `TorchFNIRTResult` 结构相同；`pull_transform` 是 MNI→T1
 的 world-RAS 位移，可与 EPI→T1 BBR 合成，一次插值输出 BOLD。`qc["levels"]`
-记录各级强度多项式、偏置场范围和偏置场 PCG 收敛情况。该分支在前五级形变优化前
-拟合多项式与三次 B 样条偏置场，末级沿用上一结果；偏置场限制在 0.25–4 倍。
-FSL 对强度、偏置和形变进行联合优化，因此这不是逐步数值等价的移植。
+记录各级强度多项式、偏置场范围和偏置场弯曲能。前五级把形变、强度多项式和
+三次 B 样条偏置场放进同一个 LM/PCG 法方程求解，末级固定强度参数，只优化形变。
+最终 `iout` 使用与系数文件重采样相同的坐标计算路径。当前实现仍与 FSL 的
+优化轨迹存在数值差异，见下文真实数据对照。
 T1w 可用上述 Python API、fMRI volume 入口，或独立命令行：
 
 ```bash
@@ -261,6 +264,7 @@ x_input = inverse(A) · x_reference + d(x_reference)
 | input masked smoothing 与 reference zero-padded Gaussian smoothing | 已实现 |
 | cubic B-spline field、bending regularization、SSD-weighted lambda | 已实现 |
 | LM stages | matrix-free analytic `JᵀJ` + FP64 PCG |
+| T1 强度映射 | 5 系数全局多项式、B 样条乘性偏置场与形变联合进入 LM 法方程；强度关闭的末级固定上一层参数 |
 | `minmet=scg` stages | 按 MISCMATHS `sccngr` 更新顺序实现 |
 | `inwarp`/`intin` process handoff | 在内存中执行 float32 coefficient/header、10 位 intensity 交接 |
 | `FullResKsp` 与 `ZoomField` | 按每个进程最后 subsampling 计算 full-grid spacing |
@@ -279,36 +283,22 @@ x_input = inverse(A) · x_reference + d(x_reference)
 同输入、同初始 FLIRT 矩阵的真实去脑 T1 对照见
 [默认预设报告](../../validation/fnirt/default_preset_20260929.public.json)。该对照分别
 运行不带 `--config` 的 FSL FNIRT 和 `--config default` 的 FNIT；验证报告记录
-warped T1 脑内 Pearson r 0.9274、支持区 Dice 0.9884、coefficient Pearson r
-0.8824，FNIT 配准与写出 14.91 s、GPU 峰值分配 0.992 GB。FSL CPU 进程
+warped T1 脑内 Pearson r 0.99584、支持区 Dice 0.99875、coefficient Pearson r
+0.99480，FNIT 配准与写出 44.80 s、GPU 峰值分配 1.089 GB。FSL CPU 进程
 253.51 s，但写出可检查文件后退出状态为 255；这里只作条件性输出对照，不据此
 比较速度。报告另记录输出网格、gzip/有限值检查和源码哈希。
 
-同一例的[相关性诊断](../../validation/fnirt/default_correlation_diagnosis_20260929.public.json)
-把形变估计与最终重采样分开检查。在 FSL coefficient 固定时，FSL `applywarp`
-与 FNIT `TorchApplyWarp` 的输出相关为 0.999999999989；改用 FNIT coefficient，
-即使仍由同一个 `applywarp` 重采样，相关也降到 0.9275。两套 coefficient 对应的
-MNI→T1 取样坐标相差中位 0.873 mm、95 百分位 3.134 mm。把脑掩膜向内腐蚀
-3 个体素后相关仍为 0.9292。这些对照把主要差异定位在默认形变估计，
-而非跨程序读取 coefficient 或重采样。
-
-两边都设 `--intmod=global_linear`、保持同一输入和初始矩阵时，输出相关升至
-0.999008，取样坐标差降至中位 0.018 mm、95 百分位 0.157 mm。因此，
-当前默认的非线性强度映射与偏置场分支是本例形变差异的主要来源。FSL 将形变、
-多项式和偏置场参数联合优化；FNIT 在每一级形变优化前拟合一次强度映射并在该级
-固定。源码还存在明确的阶数语义差异：FSL `--intorder=5` 建立 5 个系数
-（0–4 次项），FNIT 当前建立 6 个（0–5 次项）。只把 FNIT 设为 `--intorder 4`，
-与 FSL 默认输出的相关为 0.9275，说明仅改阶数不能解决此例主要偏差。
-即使使用 `global_linear`，相关仍未达到 0.9999；FNIT 自身 `iout` 与按其
-coefficient 重新重采样的相关为 0.999867，这项输出一致性也待修正。
+用 FNIT 导出的 coefficient 重新重采样同一 T1，所得图与 FNIT `iout` 的脑内
+相关为 0.999999999988，平均绝对差为 0.000729 原强度单位。剩余的 0.00416
+相关性差距来自两套优化结果，不能归因于 `iout` 与系数图不一致。
 
 ### T1w 专用预设
 
 真实去脑 T1 的同输入对照中，fMRI 配准入口对 FSL warped T1 的脑内相关为
-0.9216，脑支持区 Dice 为 0.9825，MNI→T1 坐标差中位数 0.882 mm；FNIT
-配准与重采样共 125.52 s，GPU 峰值分配 0.997 GB。独立 T1 CLI 使用同一输入、
-模板、掩膜和 FSL 初始矩阵，输出图脑内相关为 0.9214，系数图 intent 为 2007，
-网格、gzip 和有限值检查通过，进程耗时 33.65 s。两次 FNIT 入口的初始仿射
+0.99736，脑支持区 Dice 为 0.99913，MNI→T1 坐标差中位数 0.055 mm；FNIT
+配准与重采样共 142.65 s，GPU 峰值分配 1.091 GB。独立 T1 CLI 使用同一输入、
+模板、掩膜和 FSL 初始矩阵，输出图脑内相关为 0.99784，系数图 intent 为 2007，
+网格、gzip 和有限值检查通过，进程耗时 74.75 s。两次 FNIT 入口的初始仿射
 不同，不能直接比较耗时与形变。FSL FLIRT+FNIRT 的两段 CPU 时间合计 161.78 s，
 参照进程写出文件后返回 255；运行环境未隔离，不据此排序。输入哈希、指标定义与
 参照状态见[T1w 报告](../../validation/fmri/t1_fnirt_20260929.public.json)。fMRI volume

@@ -999,70 +999,141 @@ class _LevelSystem:
         return state, gradient, matvec, diagonal
 
 
-def _t1_intensity_map(reference, warped, mask, voxel_sizes, config):
-    """Fit a reference-to-moving polynomial and a smooth multiplicative bias."""
-    active = mask & (reference > 5) & (warped > 5)
-    if int(active.sum()) < config.intensity_order + 1:
-        raise RuntimeError("T1 FNIRT has too few valid voxels for intensity mapping")
-    x = (reference[active].double() / 100.0).clamp(0, 4)
-    y = warped[active].double() / 100.0
-    design = torch.stack([x.pow(power) for power in range(config.intensity_order + 1)], dim=1)
-    gram = design.T @ design
-    ridge = torch.eye(gram.shape[0], device=gram.device, dtype=gram.dtype) * (
-        1e-6 * gram.diagonal().mean().clamp_min(1)
-    )
-    polynomial = torch.linalg.solve(gram + ridge, design.T @ y)
-    all_x = (reference.double() / 100.0).clamp(0, 4)
-    mapped = torch.zeros_like(all_x)
-    for coefficient in polynomial.flip(0):
-        mapped = mapped * all_x + coefficient
-    mapped = (100.0 * mapped).clamp_min(0)
-
-    spacing = tuple(
-        max(1, int(round(resolution / size)))
-        for resolution, size in zip(config.bias_resolution_mm, voxel_sizes)
-    )
-    bases = spline_bases(
-        reference.shape, spacing, voxel_sizes,
-        device=reference.device, dtype=torch.float64,
-    )
-    bending = BendingOperator(
-        reference.shape, spacing, voxel_sizes,
-        device=reference.device, dtype=torch.float64,
-    )
-    weights = active.to(torch.float64) * mapped.square()
-    count = int(active.sum())
-    rhs = adjoint_field(
-        ((warped.double() - mapped) * mapped * active / count)[None], bases
-    )[0]
-    regularization = config.bias_regularization / count
-
-    def matvec(vector):
-        field = expand_coefficients(vector.reshape((1, *rhs.shape)), bases)[0]
-        data = adjoint_field((weights * field / count)[None], bases)[0]
-        return (data + regularization * bending.normal(
-            vector.reshape((1, *rhs.shape))
-        )[0]).reshape(-1)
-
-    diagonal = design_diagonal(weights / count, bases) + (
-        regularization * bending.diagonal()
-    )
-    correction, report = preconditioned_conjugate_gradient(
-        matvec, rhs.reshape(-1), diagonal=diagonal.reshape(-1).clamp_min(1e-8),
-        tolerance=1e-3, max_iterations=100,
-    )
-    bias = 1.0 + expand_coefficients(correction.reshape((1, *rhs.shape)), bases)[0]
-    if not bool(torch.isfinite(bias).all()):
-        raise RuntimeError("T1 FNIRT produced an invalid bias field")
-    return polynomial, bias.clamp(0.25, 4.0), report
+def _pack_t1(coefficients, bias_coefficients, polynomial):
+    return torch.cat((
+        _pack(coefficients),
+        bias_coefficients.permute(0, 3, 2, 1).reshape(-1),
+        polynomial.reshape(-1),
+    ))
 
 
-def _apply_t1_intensity(reference, polynomial, bias):
-    x = (reference.double() / 100.0).clamp(0, 4)
-    mapped = torch.zeros_like(x)
-    for coefficient in polynomial.flip(0):
-        mapped = mapped * x + coefficient
-    return (100.0 * mapped).clamp_min(0).mul(bias).to(reference.dtype)
+def _unpack_t1(vector, coefficient_shape, bias_shape):
+    def_size = 3 * math.prod(coefficient_shape)
+    bias_size = math.prod(bias_shape)
+    coefficients, _ = _unpack(vector[:def_size], coefficient_shape, False)
+    bias = vector[def_size:def_size + bias_size].reshape(
+        1, bias_shape[2], bias_shape[1], bias_shape[0]
+    ).permute(0, 3, 2, 1)
+    return coefficients, bias, vector[def_size + bias_size:]
+
+
+class _JointT1System:
+    """Joint LM system for deformation, global polynomial and spline bias."""
+
+    def __init__(self, deformation, bias_bases, bias_bending, bias_lambda, polynomial_order):
+        self.deformation = deformation
+        self.bias_bases = bias_bases
+        self.bias_bending = bias_bending
+        self.bias_lambda = float(bias_lambda)
+        reference = deformation.fixed
+        x = reference / 100.0
+        self.powers = torch.stack(
+            [100.0 * x.pow(degree) for degree in range(polynomial_order)],
+            dim=0,
+        )
+
+    def _mapping(self, polynomial, bias_coefficients):
+        bias = expand_coefficients(bias_coefficients, self.bias_bases)[0].to(
+            self.powers.dtype
+        )
+        global_map = torch.einsum(
+            "ixyz,i->xyz", self.powers, polynomial.to(self.powers.dtype)
+        )
+        return global_map * bias, global_map, bias
+
+    def evaluate(self, coefficients, polynomial, bias_coefficients, *, derivatives=False):
+        mapped, global_map, bias = self._mapping(polynomial, bias_coefficients)
+        self.deformation.fixed = mapped
+        state = self.deformation.evaluate(
+            coefficients, coefficients.new_ones(()), derivatives=derivatives
+        )
+        bias_energy = self.bias_bending.energy(bias_coefficients)
+        state["cost"] = state["cost"] + self.bias_lambda * bias_energy / state["count"]
+        state["bias_energy"] = bias_energy
+        state["global_map"] = global_map
+        state["bias"] = bias
+        return state
+
+    def linearize(self, coefficients, polynomial, bias_coefficients, *, fit_intensity):
+        mapped, _, _ = self._mapping(polynomial, bias_coefficients)
+        self.deformation.fixed = mapped
+        state, deformation_gradient, deformation_matvec, deformation_diagonal = (
+            self.deformation.linearize(coefficients, coefficients.new_ones(()))
+        )
+        bias_energy = self.bias_bending.energy(bias_coefficients)
+        state["cost"] = state["cost"] + self.bias_lambda * bias_energy / state["count"]
+        state["bias_energy"] = bias_energy
+        if not fit_intensity:
+            return state, deformation_gradient, deformation_matvec, deformation_diagonal
+
+        mask = state["mask"].to(self.powers.dtype)
+        count = state["count"]
+        gradient_fsl = state["gradient_fsl"]
+        global_map = torch.einsum(
+            "ixyz,i->xyz", self.powers, polynomial.to(self.powers.dtype)
+        )
+        bias = expand_coefficients(bias_coefficients, self.bias_bases)[0].to(
+            self.powers.dtype
+        )
+        polynomial_images = self.powers * bias[None]
+        residual = state["residual"] * mask / count
+        bias_factor = self.bias_lambda / count
+        bias_gradient = -adjoint_field(
+            (global_map * residual)[None].to(coefficients.dtype), self.bias_bases
+        ) + bias_factor * self.bias_bending.normal(bias_coefficients)
+        polynomial_gradient = -torch.einsum(
+            "ixyz,xyz->i", polynomial_images, residual
+        ).to(coefficients.dtype)
+        def_shape = tuple(coefficients.shape[1:])
+        bias_shape = tuple(bias_coefficients.shape[1:])
+        def matvec(vector):
+            def_coefficients, bias_part, polynomial_part = _unpack_t1(
+                vector, def_shape, bias_shape
+            )
+            def_part = _pack(def_coefficients)
+            delta_field = expand_coefficients(
+                def_coefficients, self.deformation.bases
+            ).to(self.powers.dtype)
+            delta_map = (
+                torch.einsum("ixyz,i->xyz", polynomial_images, polynomial_part.to(self.powers.dtype))
+                + global_map * expand_coefficients(bias_part, self.bias_bases)[0].to(self.powers.dtype)
+            )
+            total = (gradient_fsl * delta_field).sum(0) - delta_map
+            weighted = total * mask / count
+            def_result = deformation_matvec(def_part) - _pack(adjoint_field(
+                (gradient_fsl * (delta_map * mask / count)[None]).to(coefficients.dtype),
+                self.deformation.bases,
+            ))
+            bias_result = -adjoint_field(
+                (global_map * weighted)[None].to(coefficients.dtype), self.bias_bases
+            ) + bias_factor * self.bias_bending.normal(bias_part)
+            polynomial_result = -torch.einsum(
+                "ixyz,xyz->i", polynomial_images, weighted
+            ).to(coefficients.dtype)
+            return torch.cat((
+                def_result,
+                bias_result.permute(0, 3, 2, 1).reshape(-1),
+                polynomial_result,
+            ))
+
+        bias_diagonal = design_diagonal(
+            (global_map.square() * mask / count).to(coefficients.dtype),
+            self.bias_bases,
+        )[None] + bias_factor * self.bias_bending.diagonal()[None]
+        polynomial_diagonal = (
+            polynomial_images.square() * mask[None]
+        ).flatten(1).sum(1, dtype=coefficients.dtype) / count
+        gradient = torch.cat((
+            deformation_gradient,
+            bias_gradient.permute(0, 3, 2, 1).reshape(-1),
+            polynomial_gradient,
+        ))
+        diagonal = torch.cat((
+            deformation_diagonal,
+            bias_diagonal.permute(0, 3, 2, 1).reshape(-1),
+            polynomial_diagonal,
+        ))
+        return state, gradient, matvec, diagonal
 
 
 class TorchFNIRT:
@@ -1219,7 +1290,8 @@ class TorchFNIRT:
         previous_stage = None
         scale = torch.ones((), device=device, dtype=dtype)
         t1_polynomial = None
-        t1_bias = None
+        t1_bias_coefficients = None
+        t1_bias_spacing = None
         levels = []
 
         for level, (
@@ -1319,6 +1391,54 @@ class TorchFNIRT:
                 positions=level_positions,
             )
 
+            if self.config.intensity_model == "global_non_linear_with_bias":
+                initial_stride = self.config.subsampling[0]
+                initial_bias_spacing = tuple(
+                    max(1, int(math.floor(resolution / (voxel * initial_stride) + 0.5)))
+                    for resolution, voxel in zip(
+                        self.config.bias_resolution_mm, fixed_voxel_sizes
+                    )
+                )
+                next_bias_spacing = tuple(
+                    (initial_stride // stride) * spacing
+                    for spacing in initial_bias_spacing
+                )
+                if t1_bias_coefficients is None:
+                    t1_polynomial = torch.zeros(
+                        self.config.intensity_order, device=device, dtype=dtype
+                    )
+                    t1_polynomial[1] = 1.0
+                    t1_bias_coefficients = torch.ones(
+                        (1, *fsl_control_shape(level_shape, next_bias_spacing)),
+                        device=device, dtype=dtype,
+                    )
+                elif stride != previous_stride:
+                    t1_bias_coefficients = zoom_coefficients(
+                        t1_bias_coefficients,
+                        level_shape,
+                        t1_bias_spacing,
+                        previous_level_voxel_sizes,
+                        level_voxel_sizes,
+                    )
+                    if next_bias_spacing != t1_bias_spacing:
+                        t1_bias_coefficients = zoom_coefficients(
+                            t1_bias_coefficients,
+                            level_shape,
+                            next_bias_spacing,
+                            level_voxel_sizes,
+                            level_voxel_sizes,
+                            old_knot_spacing=t1_bias_spacing,
+                        )
+                t1_bias_spacing = next_bias_spacing
+                bias_bases = spline_bases(
+                    level_shape, t1_bias_spacing, level_voxel_sizes,
+                    device=device, dtype=dtype, positions=level_positions,
+                )
+                bias_bending = BendingOperator(
+                    level_shape, t1_bias_spacing, level_voxel_sizes,
+                    device=device, dtype=dtype,
+                )
+
             moving_level = _fsl_masked_gaussian_blur(
                 moving_tensor[None, None],
                 input_fwhm,
@@ -1378,26 +1498,12 @@ class TorchFNIRT:
                 estimate_intensity and self.config.intensity_model == "global_linear",
                 coordinate_affine,
             )
-            intensity_report = None
+            joint_system = None
             if self.config.intensity_model == "global_non_linear_with_bias":
-                initial_state = system.evaluate(coefficients, scale)
-                if estimate_intensity:
-                    t1_polynomial, t1_bias, intensity_report = _t1_intensity_map(
-                        fixed_level,
-                        initial_state["warped"],
-                        initial_state["mask"],
-                        level_voxel_sizes,
-                        self.config,
-                    )
-                else:
-                    if t1_polynomial is None or t1_bias is None:
-                        raise RuntimeError("T1 intensity mapping has not been estimated")
-                    t1_bias = torch.nn.functional.interpolate(
-                        t1_bias[None, None], size=level_shape,
-                        mode="trilinear", align_corners=True,
-                    )[0, 0]
-                system.fixed = _apply_t1_intensity(
-                    fixed_level, t1_polynomial, t1_bias
+                joint_system = _JointT1System(
+                    system, bias_bases, bias_bending,
+                    self.config.bias_regularization,
+                    self.config.intensity_order,
                 )
                 scale = torch.ones((), device=device, dtype=dtype)
             optimize_scale = estimate_intensity and self.config.intensity_model == "global_linear"
@@ -1408,8 +1514,13 @@ class TorchFNIRT:
             converged = False
             pcg_reports = []
             scg_history = []
-            state = system.evaluate(coefficients, scale)
+            state = (
+                joint_system.evaluate(coefficients, t1_polynomial, t1_bias_coefficients)
+                if joint_system is not None else system.evaluate(coefficients, scale)
+            )
             if minimization_method == "scg":
+                if joint_system is not None and estimate_intensity:
+                    raise ValueError("FSL does not estimate intensity with SCG")
                 initial_vector = _pack(
                     coefficients, scale if optimize_scale else None
                 )
@@ -1467,9 +1578,15 @@ class TorchFNIRT:
                     1, maximum_iterations
                 ):
                     attempts += 1
-                    state, gradient, matvec, diagonal = system.linearize(
-                        coefficients, scale
-                    )
+                    if joint_system is None:
+                        state, gradient, matvec, diagonal = system.linearize(
+                            coefficients, scale
+                        )
+                    else:
+                        state, gradient, matvec, diagonal = joint_system.linearize(
+                            coefficients, t1_polynomial, t1_bias_coefficients,
+                            fit_intensity=estimate_intensity,
+                        )
                     damping_diagonal = diagonal.clamp_min(
                         torch.finfo(dtype).eps
                         * diagonal.abs().mean().clamp_min(1)
@@ -1495,15 +1612,37 @@ class TorchFNIRT:
                             "relative_residual": pcg.relative_residual,
                         }
                     )
-                    delta_coefficients, delta_scale = _unpack(
-                        step, coefficient_shape, optimize_scale
-                    )
+                    delta_bias = None
+                    delta_polynomial = None
+                    if joint_system is not None and estimate_intensity:
+                        delta_coefficients, delta_bias, delta_polynomial = _unpack_t1(
+                            step, coefficient_shape,
+                            tuple(t1_bias_coefficients.shape[1:]),
+                        )
+                        delta_scale = None
+                    else:
+                        delta_coefficients, delta_scale = _unpack(
+                            step, coefficient_shape, optimize_scale
+                        )
                     candidate_coefficients = coefficients + delta_coefficients
                     candidate_scale = (
                         scale + delta_scale if delta_scale is not None else scale
                     )
-                    candidate = system.evaluate(
-                        candidate_coefficients, candidate_scale
+                    candidate_polynomial = (
+                        t1_polynomial + delta_polynomial
+                        if delta_polynomial is not None else t1_polynomial
+                    )
+                    candidate_bias = (
+                        t1_bias_coefficients + delta_bias
+                        if delta_bias is not None else t1_bias_coefficients
+                    )
+                    candidate = (
+                        joint_system.evaluate(
+                            candidate_coefficients, candidate_polynomial,
+                            candidate_bias,
+                        ) if joint_system is not None else system.evaluate(
+                            candidate_coefficients, candidate_scale
+                        )
                     )
                     if bool(torch.isfinite(candidate["cost"])) and float(
                         candidate["cost"]
@@ -1512,6 +1651,8 @@ class TorchFNIRT:
                         new_cost = float(candidate["cost"])
                         coefficients = candidate_coefficients
                         scale = candidate_scale
+                        t1_polynomial = candidate_polynomial
+                        t1_bias_coefficients = candidate_bias
                         state = candidate
                         accepted += 1
                         lm_lambda /= 10.0
@@ -1555,7 +1696,15 @@ class TorchFNIRT:
                 5 if level == 1 else 10,
             )
             if topology_qc["required"]:
-                state = system.evaluate(coefficients, scale)
+                state = (
+                    joint_system.evaluate(
+                        coefficients, t1_polynomial, t1_bias_coefficients
+                    ) if joint_system is not None else system.evaluate(coefficients, scale)
+                )
+            t1_bias = (
+                expand_coefficients(t1_bias_coefficients, bias_bases)[0]
+                if joint_system is not None else None
+            )
             if not topology_qc["succeeded"]:
                 message = (
                     "FSL ForceJacobianRange did not reach the requested range; "
@@ -1600,12 +1749,9 @@ class TorchFNIRT:
                         None if t1_bias is None
                         else [float(t1_bias.min()), float(t1_bias.max())]
                     ),
-                    "t1_bias_pcg": (
-                        None if intensity_report is None else {
-                            "iterations": intensity_report.iterations,
-                            "converged": intensity_report.converged,
-                            "relative_residual": intensity_report.relative_residual,
-                        }
+                    "t1_bias_bending_energy": (
+                        None if joint_system is None
+                        else float(state["bias_energy"])
                     ),
                     "apply_reference_mask": apply_reference_mask,
                     "explicit_reference_mask_available": (
@@ -1661,19 +1807,9 @@ class TorchFNIRT:
                 torch.arange(size, device=device, dtype=image_dtype)
                 for size in fixed_shape
             )
-            target_fsl = _coordinate_grid(fixed_fsl, full_positions)
-            source_fsl = (
-                torch.einsum(
-                    "ij,jxyz->ixyz", affine_pull[:3, :3], target_fsl
-                )
-                + affine_pull[:3, 3, None, None, None]
-                + field[0]
-            )
-            source_voxels = (
-                torch.einsum(
-                    "ij,jxyz->ixyz", moving_fsl2vox[:3, :3], source_fsl
-                )
-                + moving_fsl2vox[:3, 3, None, None, None]
+            source_voxels = _fsl_displacement_coordinates(
+                field[0], affine_pull_exact @ fixed_fsl_exact,
+                moving_fsl2vox,
             )
             moved, _, _ = _trilinear_sample(moving_raw, source_voxels)
 
@@ -1750,7 +1886,7 @@ class TorchFNIRT:
             "hessian": "analytic matrix-free B-spline JtJ plus bending Hessian",
             "global_intensity_model": self.config.intensity_model,
             "t1_intensity_fitting": (
-                "alternating polynomial and cubic bias fit at configured intensity levels"
+                "joint LM polynomial, cubic bias and deformation estimation"
                 if self.config.intensity_model == "global_non_linear_with_bias"
                 else None
             ),

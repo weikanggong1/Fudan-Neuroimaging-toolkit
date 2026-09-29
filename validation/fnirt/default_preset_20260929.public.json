@@ -13,9 +13,9 @@
   },
   "fnit_result": {
     "fnit_exit_status": 0,
-    "fnit_registration_and_output_seconds": 14.91353941289708,
-    "fnit_gpu_peak_allocated_gb": 0.991950848,
-    "fnit_gpu_peak_reserved_gb": 1.493172224,
+    "fnit_registration_and_output_seconds": 44.80493008391932,
+    "fnit_gpu_peak_allocated_gb": 1.089224192,
+    "fnit_gpu_peak_reserved_gb": 1.4680064,
     "fnit_preset": "default",
     "fnit_intensity_model": "global_non_linear_with_bias",
     "fnit_level_count": 4,
@@ -33,11 +33,14 @@
     "coefficient_intent": 2007,
     "output_grid_matches_reference": true,
     "gzip_crc_and_finite": true,
-    "pearson_vs_fsl_same_input": 0.9273739072963979,
-    "warped_mae_vs_fsl_same_input": 63.3354606628418,
-    "coefficient_pearson_vs_fsl": 0.8824485452832226,
-    "coefficient_mae_vs_fsl": 0.45792001485824585,
-    "support_dice_vs_fsl_same_input": 0.9884486123049375
+    "pearson_vs_fsl_same_input": 0.9958368470996499,
+    "warped_mae_vs_fsl_same_input": 8.860733985900879,
+    "coefficient_pearson_vs_fsl": 0.9947997581645784,
+    "coefficient_mae_vs_fsl": 0.07024329900741577,
+    "support_dice_vs_fsl_same_input": 0.9987474807058939,
+    "intensity_fitting": "joint LM deformation, five-coefficient polynomial and cubic bias",
+    "iout_vs_coefficient_rewarp_pearson": 0.9999999999883664,
+    "iout_vs_coefficient_rewarp_mae": 0.0007287080180360482
   },
   "input_sha256": {
     "moving": "12550a5d57f88122e0e314062cd1767b75672552ab4b8906a8fced180ade3b83",
@@ -47,11 +50,11 @@
     "fsl_coefficients": "78f7aa8de2fc08acf547a4654eac26b5cc81d3f2566195af13374270c73188d6"
   },
   "output_sha256": {
-    "fnit_coefficients": "43e527a639dd50b8bb8295108b0ec905d7fd53c769e2c12ab6f692b152a8c3a4",
-    "fnit_warped": "0302b394fc1c57d50271b8c9611dedc48f4aa1955f659ad09efb6215c216b783"
+    "fnit_coefficients": "794db05e1fb520a9dc03f0583324bff800f3719515a099fb3e4fce884027facb",
+    "fnit_warped": "774373c83c334ca5806d3faa4fb1c5bf9bd3556021e571456ef4a2b96d8ba7b8"
   },
   "source_sha256": {
-    "fnirt_registration.py": "1dfa5eb9681c84cb552f7ed101ee79d05e5dfcfea418c36ca8a79df7f1d3983d",
+    "fnirt_registration.py": "d52b4f112dd0f409da96f992a614182ab6184b3559f5eb55ce2b4d61a2ee008c",
     "fnirt_standalone.py": "3713fcc33a1afe7fe107c8a6b752946273b695a7880d23f6144229b296052429",
     "validate_default_real.py": "a64dd81491dfdaa1dd93941f9e8b1c8d91009234dc4aace1a820c69cd51d05b1"
   },
@@ -60,7 +63,7 @@
     "support_dice": "each warped T1 thresholded at 5% of its positive 99th percentile; Dice on output grid",
     "coefficient_pearson_and_mae": "all cubic B-spline coefficient array elements, matching [21,24,21,3] grids"
   },
-  "comparison_limit": "matching command settings and NIfTI contracts do not establish numerical equivalence; FSL status 255 makes this a conditional output comparison",
+  "comparison_limit": "single real T1; FSL returned 255 after writing verified files; FNIT joint optimisation is closer but r=0.99584 does not establish numerical equivalence",
   "timing_limit": "FSL CPU and FNIT GPU shared resources and were not an isolated paired speed test",
   "privacy": "only scalars and SHA256 hashes are published; source images and voxelwise outputs stay on the remote server"
 }
