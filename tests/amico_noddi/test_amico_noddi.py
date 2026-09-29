@@ -217,8 +217,8 @@ def test_classic_continuous_fit_recovers_watson_signal():
     direction = torch.tensor([[0.0, 0.0, 1.0]], dtype=torch.float64)
     signal = model.evaluate(true_parameters, direction).numpy()
     estimates, fitted_direction, rmse, _ = fit_classic_noddi(
-        signal, bvals, bvecs, np.array([[0.50, 0.36, 0.16]]),
-        direction.numpy(), np.array([0.02]), d_par=1.7e-3,
+        signal, bvals, bvecs, bvals == 0, np.array([[0.50, 0.36, 0.16]]),
+        direction.numpy(), d_par=1.7e-3,
         d_iso=3e-3, device="cpu", maximum_iterations=30,
     )
     np.testing.assert_allclose(estimates[0], true_parameters.numpy()[0, :3], atol=0.015)

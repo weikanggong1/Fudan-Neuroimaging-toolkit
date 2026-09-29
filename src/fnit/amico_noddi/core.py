@@ -179,15 +179,20 @@ class TorchAMICONODDI:
         classic_qc = {}
         if self.fit_method == "classic":
             classic_started = time.perf_counter()
-            classic_bvals = kernels["raw"][:, 3].copy()
-            classic_bvals[kernels["b0"]] = 0
+            classic_bvals = b_np.copy()
+            classic_bvals[b0] = 0
+            classic_bvecs = g_np.T.copy()
+            classic_bvecs[b0] = (1, 0, 0)
+            classic_bvecs[~b0] /= np.linalg.norm(
+                classic_bvecs[~b0], axis=1, keepdims=True
+            )
             estimates, directions, rmse, classic_qc = fit_classic_noddi(
                 signal,
                 classic_bvals,
-                kernels["raw"][:, :3],
+                classic_bvecs,
+                b0,
                 estimates,
                 directions,
-                rmse,
                 d_par=cfg.d_par,
                 d_iso=cfg.d_iso,
                 device=self.device,
@@ -230,13 +235,13 @@ class TorchAMICONODDI:
                 "solver": (
                     "AMICO three-stage NNLS, positive elastic-net, NNLS debias"
                     if self.fit_method == "amico"
-                    else "AMICO initialization, continuous six-parameter Rician nonlinear fit"
+                    else "AMICO initialization, continuous five-parameter Rician nonlinear fit"
                 ),
                 "fit_method": self.fit_method,
                 "linear_solver": (
                     "batched compact float64 Cholesky with CG fallback"
                     if self.fit_method == "amico"
-                    else "AMICO active set followed by batched 6x6 damped Gauss-Newton"
+                    else "AMICO active set followed by batched 5x5 damped Gauss-Newton"
                 ),
                 "amico_output_contract": True,
                 "amico_numerically_equivalent": (

@@ -341,7 +341,7 @@ EDDY 的进程内 CUDA allocation 峰值为 4.54 GiB；全流程最大组件峰�
 
 ### 经典 NODDI 接入验证
 
-`noddi_fit_method="classic"` 经过真实 EDDY 校正 DWI 的 pipeline 阶段集成测试。测试固定 2,048 个真实脑内体素，实际运行 `select_shell`、`TorchDTIFIT` 和 `TorchAMICONODDI`，检查九张 native/standard 图的接口以及 ICVF、OD、ISOVF 与独立经典 NODDI 运行结果。测试复用已校正的 EDDY 图，配准用同网格 identity stub，因此验证的是拟合与参数图传递，不代表 raw-to-MNI 整链精度或耗时。实测记录见 [`pipeline_classic_real.public.json`](../../validation/dmri_pipeline/pipeline_classic_real.public.json)。
+`noddi_fit_method="classic"` 经过真实 EDDY 校正 DWI 的 pipeline 阶段集成测试。测试固定 24 个真实脑内体素，实际运行 `select_shell`、`TorchDTIFIT` 和 `TorchAMICONODDI`，检查九张 native/standard 图的接口以及 ICVF、OD、ISOVF 与独立经典 NODDI 运行结果。测试复用已校正的 EDDY 图，配准用同网格 identity stub，因此验证的是拟合与参数图传递，不代表 raw-to-MNI 整链精度或耗时。实测记录见 [`pipeline_classic_real.public.json`](../../validation/dmri_pipeline/pipeline_classic_real.public.json)。
 
 ## 参考文献与原实现
 

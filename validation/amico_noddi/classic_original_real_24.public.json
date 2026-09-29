@@ -1,0 +1,63 @@
+{
+  "scope": "one real EDDY-corrected 104x104x72x105 DWI; 24 fixed brain voxels compared with original MATLAB NODDI 1.05",
+  "selection": {
+    "whole_brain_mask_voxels": 242261,
+    "initial_pool_voxels": 2048,
+    "initial_seed": 20260929,
+    "comparison_voxels": 24,
+    "comparison_seed": 20260930,
+    "selected_flat_indices_sha256": "b94fee862d6ad0f622652a2b2218586b9ee7ea9b239d20cfd26e03c42ad64490"
+  },
+  "input_sha256": {
+    "DWI.nii.gz": "67e4564323d8d4dfacaa04a451e2ffa0c89de32cb6d98eb5deb46ea8971deeaa",
+    "mask.nii.gz": "3d1c29ec2f1a6870be93e0b436c884dc805d87244f186312c93086301ae08df4",
+    "bvals": "4bba64690ad224848ea4d0891b98a859b79e11f0de77ad9d2539f4397fda2224",
+    "rotated_bvecs": "d17c075f60d433feeb8450bedb83ec3a6771878e150542b05627d2feeec158a1"
+  },
+  "original": {
+    "source": "local NODDI_toolbox_v1.05.zip labeled WUZI r1032",
+    "archive_sha256": "d4f8a1fe5c5e038a29174c40c4f6de0c868728e4d4cdf59c1d7f6dd399ca8143",
+    "matlab_version": "R2023b Update 5",
+    "model": "WatsonSHStickTortIsoV_B0",
+    "command": "FSL2Protocol(bvals,bvecs,100); MakeModel(\"WatsonSHStickTortIsoV_B0\"); batch_fitting_single(roi,protocol,model,FittedParams.mat)",
+    "successful_fits": 24,
+    "nonzero_error_codes": 0,
+    "fitting_seconds": 19.004974,
+    "fitted_params_mat_sha256": "1a33e1ea5c77535b5bbffc0499308726fd3748cdbcbfa4e84445d8ed9b07223e"
+  },
+  "fnit": {
+    "device": "cuda:0",
+    "gpu_memory_fraction_limit": 0.1,
+    "wall_seconds_including_io": 9.229227417614311,
+    "elapsed_seconds_excluding_io": 5.482665443327278,
+    "peak_cuda_memory_bytes": 43537920,
+    "rician_sigma_median": 0.00034315139055252075,
+    "source_sha256": {
+      "src/fnit/amico_noddi/classic.py": "2d1cd22c73b40edb5aeabe2c3ebf3dd642a3984b5cf037dc058dad778be16ee7",
+      "src/fnit/amico_noddi/core.py": "038eeb7b259a94bd0a395d9073cc182a3138f068d1760b32eb18140cc91b3096"
+    }
+  },
+  "comparison": {
+    "NDI": {
+      "mae": 0.002592006710353772,
+      "max_abs": 0.017821485567420636,
+      "r": 0.9997071152832783
+    },
+    "ODI": {
+      "mae": 0.0027653213956004333,
+      "max_abs": 0.02206744211467815,
+      "r": 0.9995441477023052
+    },
+    "FWF": {
+      "mae": 0.0004697919151815646,
+      "max_abs": 0.005220798649327729,
+      "r": 0.9999935582318928
+    },
+    "direction_degrees": {
+      "median": 0.012519870026315407,
+      "p90": 3.2774854365681634,
+      "median_fwf_lt_0_5": 0.012719863851524498
+    }
+  },
+  "timing_note": "Original MATLAB ran on the local CPU; FNIT ran on an occupied H100. The times are observations, not a matched speed ratio."
+}

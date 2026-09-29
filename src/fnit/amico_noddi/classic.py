@@ -130,16 +130,16 @@ class ClassicNODDIModel:
 
 
 def fit_classic_noddi(
-    signal, bvals, bvecs, estimates, directions, initial_rmse, *,
+    signal, bvals, bvecs, b0_indices, estimates, directions, *,
     d_par, d_iso, device, batch_size=1024, maximum_iterations=30,
 ):
-    """Refine AMICO initial values with batched nonlinear Rician fitting."""
+    """Refine AMICO initial values with the Toolbox's b0-based noise scale."""
     model = ClassicNODDIModel(bvals, bvecs, d_par=d_par, d_iso=d_iso, device=device)
     fitted = np.empty_like(estimates, dtype=np.float32)
     fitted_directions = np.empty_like(directions, dtype=np.float32)
     fitted_rmse = np.empty(len(signal), dtype=np.float32)
     improved = 0
-    baseline_values = np.empty(len(signal), dtype=np.float32)
+    noise_scales = np.empty(len(signal), dtype=np.float32)
     for start in range(0, len(signal), batch_size):
         stop = min(start + batch_size, len(signal))
         observed = torch.as_tensor(signal[start:stop], device=device, dtype=torch.float64)
@@ -154,11 +154,15 @@ def fit_classic_noddi(
             torch.as_tensor(directions[start:stop], device=device, dtype=torch.float64),
             dim=1,
         )
-        sigma = torch.as_tensor(
-            initial_rmse[start:stop], device=device, dtype=torch.float64
-        ).clamp(0.01, 0.2)[:, None]
+        b0_signal = observed[:, b0_indices]
+        sigma = (
+            torch.maximum(
+                b0_signal.std(dim=1, unbiased=False),
+                0.02 * b0_signal.mean(dim=1),
+            ) / 100
+        ).clamp_min(1e-8)[:, None]
         damping = torch.full((stop - start,), 0.01, device=device, dtype=torch.float64)
-        identity = torch.eye(6, device=device, dtype=torch.float64)
+        identity = torch.eye(5, device=device, dtype=torch.float64)
 
         def objective(prediction):
             argument = observed * prediction / sigma.square()
@@ -170,6 +174,7 @@ def fit_classic_noddi(
             prediction, jacobian, tangent_one, tangent_two = model.evaluate(
                 parameters, vectors, jacobian=True
             )
+            jacobian = jacobian[:, :, (0, 1, 2, 4, 5)]
             argument = observed * prediction / sigma.square()
             ratio = torch.special.i1e(argument) / torch.special.i0e(argument)
             residual = observed * ratio - prediction
@@ -179,16 +184,15 @@ def fit_classic_noddi(
                 gram + damping[:, None, None] * identity, right
             ).squeeze(-1)
             step[:, :3].clamp_(-0.15, 0.15)
-            step[:, 3].clamp_(-0.2, 0.2)
-            step[:, 4:].clamp_(-0.3, 0.3)
-            candidate = parameters + step[:, :4]
+            step[:, 3:].clamp_(-0.3, 0.3)
+            candidate = parameters.clone()
+            candidate[:, :3] += step[:, :3]
             candidate[:, 0].clamp_(0.001, 0.999)
             candidate[:, 1].clamp_(0.005, 0.995)
             candidate[:, 2].clamp_(0, 0.999)
-            candidate[:, 3].clamp_(0.1, 2.0)
             candidate_vectors = torch.nn.functional.normalize(
-                vectors + step[:, 4:5] * tangent_one
-                + step[:, 5:6] * tangent_two, dim=1
+                vectors + step[:, 3:4] * tangent_one
+                + step[:, 4:5] * tangent_two, dim=1
             )
             candidate_cost = objective(model.evaluate(candidate, candidate_vectors))
             accept = candidate_cost < current
@@ -199,12 +203,12 @@ def fit_classic_noddi(
             damping = torch.where(accept, damping / 2, damping * 4).clamp(1e-7, 1e6)
         prediction = model.evaluate(parameters, vectors)
         fitted[start:stop] = parameters[:, :3].cpu().numpy().astype(np.float32)
-        baseline_values[start:stop] = parameters[:, 3].cpu().numpy().astype(np.float32)
+        noise_scales[start:stop] = sigma[:, 0].cpu().numpy().astype(np.float32)
         fitted_directions[start:stop] = vectors.cpu().numpy().astype(np.float32)
         fitted_rmse[start:stop] = torch.sqrt(
             (prediction - observed).square().mean(1)
         ).cpu().numpy().astype(np.float32)
     return fitted, fitted_directions, fitted_rmse, {
         "accepted_updates": improved,
-        "fitted_b0_scale_median": float(np.median(baseline_values)),
+        "rician_sigma_median": float(np.median(noise_scales)),
     }

@@ -45,4 +45,4 @@ python validation/dmri_pipeline/compare_current_eddy_pipeline.py \
 
 ## 经典 NODDI 接入
 
-在同一例真实 EDDY 校正 DWI 的固定 2,048 个脑内体素上，`DMRIPipeline(noddi_fit_method="classic")` 实际调用 `select_shell`、`TorchDTIFIT` 和经典 `TorchAMICONODDI`。九张 native 和 standard 图键完整；ICVF、OD、ISOVF 与相同输入的独立经典 NODDI 输出最大绝对差均为零。EDDY 直接接入预先校正的真实数据，配准使用 identity stub；报告只验证 NODDI 的 pipeline 接入，不代表完整 raw-to-MNI 结果。运行记录、源码和输入 SHA-256 见[机器报告](pipeline_classic_real.public.json)。
+在同一例真实 EDDY 校正 DWI 的固定 24 个脑内体素上，`DMRIPipeline(noddi_fit_method="classic")` 实际调用 `select_shell`、`TorchDTIFIT` 和经典 `TorchAMICONODDI`。九张 native 和 standard 图键完整；ICVF、OD、ISOVF 与相同输入的独立经典 NODDI 输出最大绝对差均为零。EDDY 直接接入预先校正的真实数据，配准使用 identity stub；报告只验证 NODDI 的 pipeline 接入，不代表完整 raw-to-MNI 结果。运行记录见[机器报告](pipeline_classic_real.public.json)。

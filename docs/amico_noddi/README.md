@@ -13,7 +13,7 @@
 | `data` / `-k` | EDDY 校正后的 4D DWI | 至少一个 b0 和一个 diffusion-weighted volume |
 | `mask` / `-m` | 脑 mask | 与 DWI 前三维及 affine 对齐；值等于 1 的体素参与 fitting |
 | `bvecs` / `-r` | FSL 3×N 或 N×3 b-vector | 应使用 EDDY 输出的 rotated bvec；列数等于 DWI volume 数 |
-| `bvals` / `-b` | FSL b-value | 数量等于 DWI volume 数；默认按 100 s/mm² 取整，`b<=100` 为 b0 |
+| `bvals` / `-b` | FSL b-value | 数量等于 DWI volume 数；AMICO 按 100 s/mm² 取整，经典拟合使用原始值；`b<=100` 为 b0 |
 | `output_dir` / `-o` | 输出目录 | 已存在文件需显式设置 `overwrite=True` 或 `--overwrite` |
 
 ## Python 调用
@@ -39,7 +39,7 @@ result = noddi.run(
 ndi = result.ndi               # nibabel.Nifti1Image，neurite density
 odi = result.odi               # orientation dispersion
 fwf = result.fwf               # isotropic/free-water fraction
-directions = result.directions # 包内数值复现的 AMICO/DIPY OLS tensor 主方向
+directions = result.directions # AMICO 模式为 OLS tensor 主方向；经典模式为非线性拟合主方向
 rmse = result.rmse             # normalized-signal fitting RMSE
 print(result.qc)               # 版本、精度、体素数、耗时和峰值显存
 ```
@@ -120,7 +120,7 @@ FNIT 的一次 `TorchAMICONODDI.run(..., naming="amico")` 对应上述全部步�
 | `ndi` | `fit_NDI.nii.gz` | `NODDI_ICVF.nii.gz` | 细胞内/神经突密度指数 |
 | `odi` | `fit_ODI.nii.gz` | `NODDI_OD.nii.gz` | 方向离散指数 |
 | `fwf` | `fit_FWF.nii.gz` | `NODDI_ISOVF.nii.gz` | 各向同性自由水分数 |
-| `directions` | `fit_dir.nii.gz` | `NODDI_dir.nii.gz` | DTI 主方向，最后一维长度为 3 |
+| `directions` | `fit_dir.nii.gz` | `NODDI_dir.nii.gz` | AMICO 模式为 DTI 主方向；经典模式为非线性拟合主方向；最后一维长度为 3 |
 | `rmse` | `fit_RMSE.nii.gz` | `NODDI_RMSE.nii.gz` | 归一化信号 RMSE |
 
 所有输出为 float32 NIfTI，mask 外为零。真实数据检查中，shape、dtype、affine、qform、sform、pixdim、空间单位和 intent 均与官方文件一致。
@@ -156,7 +156,7 @@ NumPy 的 LAPACK/OpenBLAS 构建会影响退化张量的特征向量符号与伪
 
 ## 经典连续 Watson 拟合
 
-`fit_method="classic"` 使用与原版 NODDI 对应的细胞内 stick、Watson 方向分布、tortuosity 细胞外室和自由水室，固定 `d_par=1.7e-3`、`d_iso=3e-3` mm²/s。它先用现有 AMICO 求解器为每个体素提供起点，再用 PyTorch float64 对细胞内体积分数、ODI、自由水分数、两个主方向角和 b0 幅度进行最多 30 次阻尼 Gauss–Newton 更新。目标函数为 Rician 负对数似然；噪声尺度由 AMICO 初始残差估计并限制在归一化信号的 `0.01–0.2` 范围。stick 的 Watson 卷积使用 12 阶偶数 Legendre 展开与 64 点积分。默认 AMICO 初始化 LUT 批量从 400 降至 100，以减少显存。
+`fit_method="classic"` 使用与原版 NODDI 对应的细胞内 stick、Watson 方向分布、tortuosity 细胞外室和自由水室，固定 `d_par=1.7e-3`、`d_iso=3e-3` mm²/s。它先用现有 AMICO 求解器为每个体素提供起点，再用 PyTorch float64 对细胞内体积分数、ODI、自由水分数和两个主方向角进行最多 30 次阻尼 Gauss–Newton 更新。经典拟合使用原始 b-value 与归一化的原始 b-vector，b0 幅度固定为该体素 b0 均值。目标函数为 Rician 负对数似然；噪声尺度按原版 `EstimateSigma` 从 b0 的总体标准差和 `0.02 × b0 均值` 取较大者，再除以 100。stick 的 Watson 卷积使用 12 阶偶数 Legendre 展开与 64 点积分。默认 AMICO 初始化 LUT 批量从 400 降至 100，以减少显存。
 
 输入与上表相同；`run()` 仍写五张 NIfTI，`result.qc["fit_method"]` 记录实际模式。`ndi` 是组织内的细胞内分数，`fwf` 是整体自由水分数，`odi=2 atan(1/kappa)/π`。经典模式的 `directions` 为连续拟合的主方向；默认 AMICO 模式保留 DTI 主方向。`rmse` 是对 b0 归一化观测信号的均方根残差。两种算法使用同一文件名、网格与数据类型，但不会逐体素相同。
 
@@ -170,7 +170,7 @@ classic_config = AMICONODDIConfig(
 classic_noddi = TorchAMICONODDI(
     device="cuda:0",  # 计算设备；也可设为 "cpu"
     config=classic_config,  # 固定扩散系数与 AMICO 初始化配置
-    fit_method="classic",  # 连续 Watson 六参数 Rician 非线性拟合
+    fit_method="classic",  # 连续 Watson 五参数 Rician 非线性拟合
 )
 classic_result = classic_noddi.run(
     data="eddy/data.nii.gz",  # 输入：EDDY 校正后的四维多壳 DWI
@@ -211,18 +211,19 @@ batch_fitting_single('noddi_roi.mat', protocol, noddi_model, 'FittedParams.mat')
 SaveParamsAsNIfTI('FittedParams.mat', 'noddi_roi.mat', 'eddy/nodif_brain_mask.nii.gz', 'noddi'); % 输出参数图
 ```
 
-FNIT 使用 AMICO 起点和固定残差噪声尺度；原版 Toolbox 的网格搜索、噪声估计及拟合细节不同。因此此模式实现经典模型和 Rician 非线性目标，但尚不能声称与原版 MATLAB 输出数值等价；NITRC 官方源码下载需要账户，本次没有原版逐体素 oracle。这里的“与 AMICO 一致”指参数定义、输出文件和空间结构，精度差异以真实数据报告量化。
+FNIT 保留 AMICO 起点；原版 Toolbox 使用网格搜索和 MATLAB `fmincon`，因此两者的优化路径不同。DIPY 的 [Bingham `k2odi`](https://docs.dipy.org/stable/reference/dipy.reconst.html#dipy.reconst.bingham.k2odi) 使用相同的 Watson 浓度参数到 ODI 换算，但不是原版 NODDI 的逐体素拟合器。
 
-在一例真实、经 EDDY 校正的 `104×104×72×105` UKB dMRI 中，固定随机种子从原脑 mask 选 2,048 个体素，使用同一 DWI、mask、bval 和旋转后 bvec，与已保存的官方 AMICO 2.0.3 图比较。最终源码运行前 H100 GPU 0 已占用 `66,073 MiB`、利用率 `100%`；测试进程限制为总显存的 `10%`，PyTorch 峰值 allocation `99.4 MB`，包含读写的 wall time `21.83 s`。其中 AMICO 初始化为 `14.09 s`，连续模型 refinement 为 `0.63 s`。这是一轮共享 GPU 观测，不作为稳定加速比。
+在一例真实、经 EDDY 校正的 `104×104×72×105` DWI 中，从 242,261 个脑内体素先按种子 `20260929` 取 2,048 个，再按种子 `20260930` 固定取 24 个，向本机 MATLAB R2023b 的原版 NODDI Toolbox 1.05 传入同一 DWI 信号、原始 bval 和旋转后 bvec。24 个原版拟合均返回错误码 0。FNIT H100 进程限制为总显存的 10%；两种机器的耗时不可用来计算加速比。
 
-| 图 | 与官方 AMICO 的 MAE | Pearson r |
-|---|---:|---:|
-| NDI | `0.031585` | `0.915872` |
-| ODI | `0.031226` | `0.958062` |
-| FWF | `0.024134` | `0.986594` |
-| RMSE | `0.001319` | `0.990222` |
+| 参数 | 与原版的 MAE | 最大绝对差 | Pearson r |
+|---|---:|---:|---:|
+| ICVF/NDI | `0.002592` | `0.017821` | `0.999707` |
+| ODI | `0.002765` | `0.022067` | `0.999544` |
+| ISOVF/FWF | `0.000470` | `0.005221` | `0.999994` |
 
-完整指标和测量边界见 [`classic_real_2048.public.json`](../../validation/amico_noddi/classic_real_2048.public.json)。
+轴向等价的主方向角差中位数为 `0.013°`，90 百分位为 `3.28°`。这是 24 个固定真实体素的数值一致性检查；输入与原版 Toolbox 的 SHA-256、运行环境和实测耗时见 [`classic_original_real_24.public.json`](../../validation/amico_noddi/classic_original_real_24.public.json)。
+
+同一病例的全脑 `242,261` 个 mask 体素也完成了当前经典模式的一次运行：H100 PCIe 上设置进程显存分配上限 10%，包含读写耗时 `340.86 s`，其中 AMICO 初始化 `211.43 s`、连续拟合 `123.39 s`；PyTorch 峰值 allocation `2.30 GB`。测试时 GPU 在运行前后均有其他作业，利用率 100%。五张结果图全部为有限值、mask 外为零；归一化 RMSE 的中位数 `0.0362`、99 百分位 `0.1025`，另有 19 个体素超过 1。全脑输入、输出哈希和逐图检查见 [`classic_whole_brain.public.json`](../../validation/amico_noddi/classic_whole_brain.public.json)。
 
 ## Reference
 

@@ -65,6 +65,14 @@ CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核。模型、影像张
 
 各功能页给出带参数注释的 Python 单被试示例、输入/输出结构、原软件命令、真实数据精度与计时结果，并在末尾列出参考文献和原实现代码库。统一入口中的子命令用 `fnit <子命令> --help` 查看；fMRI 使用 `fnit-fmri --help`，MS-HBM 使用 `fnit-mshbm --help`，recon-all 使用 `fnit-recon-all --help`。全部独立入口见 [pyproject.toml](pyproject.toml)。
 
+## dMRI 单被试全脑 benchmark
+
+| 功能 | 真实输入 | GPU | 全流程实测耗时 | PyTorch 峰值 allocation |
+|---|---|---|---:|---:|
+| `TorchAMICONODDI(fit_method="classic")` | 一例 EDDY 校正 DWI，`104×104×72×105`，全脑 mask `242,261` 体素 | H100 PCIe，进程显存分配上限 10% | `340.86 s`（含读写） | `2.30 GB` |
+
+本次运行的 AMICO 初始化耗时 `211.43 s`，连续 Watson 拟合耗时 `123.39 s`。GPU 在测试前后均有其他作业、利用率 100%；上表是这一次完整被试全脑运行的观测时间。五张输出图均为有限值、与输入同网格，mask 外为零；详细配置、显存占用、输出 SHA-256 和质量检查见[全脑机器报告](validation/amico_noddi/classic_whole_brain.public.json)。另用该病例的 24 个真实体素核对了[原版 MATLAB NODDI 的数值一致性](validation/amico_noddi/classic_original_real_24.public.json)，该小样本不用于主页耗时。
+
 ## 安装
 
 推荐从仓库根目录创建独立 Conda 环境：

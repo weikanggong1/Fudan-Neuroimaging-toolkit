@@ -1,6 +1,6 @@
 # TorchAMICONODDI 源码目录
 
-`TorchAMICONODDI` 在 EDDY 校正后的多壳 DWI 上拟合 NODDI，默认使用 AMICO 字典；`fit_method="classic"` 从 AMICO 解开始优化连续 Watson 三室模型的体积分数、离散度、主方向和 b0 幅度。两种方法都输出 ICVF/NDI、ODI、ISOVF/FWF、方向和拟合 RMSE。运行时不调用 AMICO、NODDI Toolbox 或 DIPY。
+`TorchAMICONODDI` 在 EDDY 校正后的多壳 DWI 上拟合 NODDI，默认使用 AMICO 字典；`fit_method="classic"` 从 AMICO 解开始优化连续 Watson 三室模型的体积分数、离散度和主方向，按原版使用 b0 均值及其噪声估计。两种方法都输出 ICVF/NDI、ODI、ISOVF/FWF、方向和拟合 RMSE。运行时不调用 AMICO、NODDI Toolbox 或 DIPY。
 
 ```python
 from fnit import TorchAMICONODDI
