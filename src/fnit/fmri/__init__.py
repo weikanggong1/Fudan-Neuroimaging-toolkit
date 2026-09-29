@@ -9,6 +9,8 @@ from .aroma import classify_aroma, denoise_aroma
 from .confounds import clean_confounds, motion_regressors
 from .surface import SurfaceHemisphere, SurfaceProjectionResult, run_surface_projection
 from .surface_qc import SurfaceQCResult, make_ribbon_goodvoxels
+from .surface_msmsulc import run_msmsulc
+from .surface_registration import MSMSulcInputs, prepare_msmsulc_inputs
 from .surface_pipeline import SurfacePipelineInputs, SurfacePipelineResult, run_surface_from_mni, run_surface_from_volume
 from .surface_prepare import (MNISurfacePair, MNISurfaceResult, SurfacePreparationResult,
                               prepare_mni_surface_geometry, prepare_fs_sphere_projection_inputs)
@@ -32,6 +34,7 @@ __all__ = [
     "classify_aroma", "denoise_aroma", "clean_confounds", "motion_regressors",
     "SurfaceHemisphere", "SurfaceProjectionResult", "run_surface_projection",
     "SurfaceQCResult", "make_ribbon_goodvoxels",
+    "MSMSulcInputs", "prepare_msmsulc_inputs", "run_msmsulc",
     "SurfacePipelineInputs", "SurfacePipelineResult", "run_surface_from_mni", "run_surface_from_volume",
     "MNISurfacePair", "MNISurfaceResult", "SurfacePreparationResult",
     "prepare_mni_surface_geometry", "prepare_fs_sphere_projection_inputs",

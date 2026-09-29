@@ -21,7 +21,7 @@ CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核。模型、影像张
 | sMRI、dMRI | TorchFNIRT | warped image、Jacobian 与 intent-2007 coefficients | [FNIRT](docs/fnirt/README.md) |
 | sMRI、fMRI、dMRI | TorchApplyWarp | 应用 warp、premat 与 postmat 后的 reference-grid 图像 | [applywarp](docs/applywarp/README.md) |
 | fMRI | BIDS→MNI152 2 mm 体积流程 | 单 run FEAT、FAST/BBR、PICA/AROMA、可选混杂回归与 MNI 影像 | [fMRI](docs/fmri/README.md) |
-| fMRI | MNI 2 mm→fsLR32k 表面投影 | 双侧 GIFTI、皮层下 4D 影像与 CIFTI dense timeseries | [fMRI 表面投影](docs/fmri/surface.md) |
+| fMRI | 回归后 MNI 2 mm→MSMSulc→fsLR32k | 双侧 GIFTI、皮层下 4D 影像与 CIFTI dense timeseries | [fMRI 表面投影](docs/fmri/surface.md) |
 | dMRI | TorchTOPUP | Hz 场、校正图与 FSL 兼容输出 | [TOPUP](docs/topup/README.md) |
 | dMRI | TorchEDDY | 运动/涡流校正 DWI、旋转 bvec 与参数 | [EDDY](docs/eddy/README.md) |
 | dMRI | TorchDTIFIT | FA、MD、L1–L3、V1–V3、S0 与 tensor | [DTIFIT](docs/dtifit/README.md) |
@@ -101,8 +101,10 @@ fnit-setup-weights --all --dest /path/to/weights --verify-only
 fsLR32k 表面投影的 HCP 公开模板不属于模型权重，单独下载并逐文件校验：
 
 ```bash
-fnit-setup-fmri-surface-assets --output-dir /absolute/path/hcp_surface_assets --msmall
+fnit-setup-fmri-surface-assets --output-dir /absolute/path/hcp_surface_assets
 ```
+
+该命令包含 fsLR32k 投影和 MSMSulc 配准所需的球面、脑沟参考图、ROI 与标签表。被试需提供已生成的 white、pial、sphere、sphere.reg、sulc、thickness 和 wmparc；不需要 FLAIR 或髓鞘图。完整用法见 [fMRI 表面投影](docs/fmri/surface.md)。
 
 脑干亚区另需约 2.3 MB 图谱包，可独立下载和生成 PyTorch 平滑先验：
 
@@ -112,8 +114,6 @@ fnit-setup-brainstem-atlas --output-root /absolute/path/atlases --device cuda:0
 ```
 
 输入、输出及 FreeSurfer 同输入对照见[脑干亚区说明](docs/subregions/README.md)。
-
-`--msmall` 增加公开的 MSMAll 群体模板和配置；被试者的 white、pial、sphere.reg 和 wmparc 由用户提供。个体 MSMAll 配准仍需另行计算；完整输入与许可见 [fMRI 表面投影](docs/fmri/surface.md)。
 
 API 的显式 `weights=`、CLI 的 `--weights`、`FNIT_WEIGHTS` 环境变量、已保存目录和默认缓存按此顺序解析。TorchFAST、TorchFLIRT、TorchFNIRT、TorchApplyWarp、TorchTOPUP、TorchEDDY、TorchDTIFIT、TorchAMICONODDI、TorchMMORF、TorchBEDPOSTX、TorchProbtrackX 与 dMRI pipeline 的 TBSS 分支没有预训练权重；从原始 T1w 启动的流程可能仍需 SynthStrip。文件清单、官方 URL、SHA-256、许可和离线部署见[权重说明](docs/WEIGHTS.md)。
 

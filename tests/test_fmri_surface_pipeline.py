@@ -62,7 +62,7 @@ def test_surface_from_volume_checks_recon_grid_and_uses_clean_bold(
     monkeypatch.setattr(surface_pipeline, "run_surface_from_mni", project)
     kwargs = dict(
         volume_dir=volume, recon_all=archive_path, hcp_assets_dir=tmp_path,
-        output_dir=tmp_path / "surface",
+        output_dir=tmp_path / "surface", registration="fs",
     )
     if scanner_offset:
         with pytest.raises(ValueError, match="different grids"):

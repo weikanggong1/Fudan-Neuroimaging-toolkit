@@ -15,6 +15,8 @@ from .surface import SurfaceHemisphere, SurfaceProjectionResult, run_surface_pro
 from .surface_prepare import prepare_fs_sphere_projection_inputs
 from .surface_qc import SurfaceQCResult, make_ribbon_goodvoxels
 from .surface_registration import apply_dedrift, prepare_registered_projection
+from .surface_registration import prepare_msmsulc_inputs
+from .surface_msmsulc import run_msmsulc
 
 
 @dataclass(frozen=True)
@@ -88,21 +90,28 @@ def run_surface_from_volume(
     wb_command: str | Path = "wb_command",
     device: str = "cpu",
     overwrite: bool = False,
+    registration: str = "msmsulc",
     registered_spheres: tuple[str | Path, str | Path] | None = None,
     dedrift_spheres: tuple[str | Path, str | Path] | None = None,
 ) -> SurfacePipelineResult:
-    """Map confound-cleaned MNI BOLD with FS or supplied L/R registration spheres.
+    """Map confound-cleaned MNI BOLD to fsLR32k with sulcal registration.
 
-    ``registered_spheres`` may contain independently estimated MSMSulc or
-    MSMAll native-topology spheres. ``dedrift_spheres`` must contain the
-    corresponding L/R 164k group transforms and requires registered spheres.
+    ``registration='msmsulc'`` estimates subject-specific sulcal spheres from
+    FreeSurfer ``sphere``/``sulc`` without running MSM. ``registration='fs'``
+    retains the initial FreeSurfer sphere path for a controlled comparison.
+    Supplied ``registered_spheres`` override either estimate.
     """
+    if registration not in ("msmsulc", "fs"):
+        raise ValueError("registration must be 'msmsulc' or 'fs'")
     if dedrift_spheres is not None and registered_spheres is None:
         raise ValueError("dedrift_spheres requires registered_spheres")
     if registered_spheres is not None and len(registered_spheres) != 2:
         raise ValueError("registered_spheres must contain left and right paths")
     volume = Path(volume_dir).expanduser().resolve()
     output = Path(output_dir).expanduser().resolve()
+    dtseries = output / "projection/clean_MNI_Atlas_registered_sphere_s2.dtseries.nii"
+    if dtseries.exists() and not overwrite:
+        raise FileExistsError(dtseries)
     clean = volume / "filtered_func_data_clean_MNI152_2mm.nii.gz"
     report_path = volume / "pipeline_report.json"
     t1_path = volume / "T1_brain.nii.gz"
@@ -138,7 +147,9 @@ def run_surface_from_volume(
             required = ("mri/orig.mgz", "mri/orig/001.mgz", "mri/wmparc.mgz") + tuple(
                 f"surf/{hemi}.{name}"
                 for hemi in ("lh", "rh")
-                for name in ("white", "pial", "sphere.reg", "thickness")
+                for name in (("white", "pial", "sphere.reg", "thickness", "sphere", "sulc")
+                             if registration == "msmsulc" and registered_spheres is None
+                             else ("white", "pial", "sphere.reg", "thickness"))
             )
             with zipfile.ZipFile(source) as archive:
                 for name in required:
@@ -166,6 +177,19 @@ def run_surface_from_volume(
             overwrite=overwrite,
         )
         hemispheres = {"L": prepared.left, "R": prepared.right}
+        if registration == "msmsulc" and registered_spheres is None:
+            sulc_inputs = prepare_msmsulc_inputs(
+                subject_dir=subject,
+                initial_spheres=(prepared.left.registered_sphere,
+                                 prepared.right.registered_sphere),
+                hcp_assets_dir=hcp_assets_dir,
+                output_dir=output / "msmsulc_inputs",
+                wb_command=wb_command,
+            )
+            sulc_spheres = run_msmsulc(
+                inputs=sulc_inputs, output_dir=output / "msmsulc", device=device,
+            )
+            registered_spheres = (sulc_spheres["L"], sulc_spheres["R"])
         if registered_spheres is not None:
             spheres = dict(zip(("L", "R"), registered_spheres))
             if dedrift_spheres is not None:

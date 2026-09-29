@@ -83,6 +83,7 @@ def main(argv=None):
     surface.add_argument("--output-dir", required=True)
     surface.add_argument("--wb-command", default="wb_command")
     surface.add_argument("--device", default="cpu")
+    surface.add_argument("--registration", choices=("msmsulc", "fs"), default="msmsulc")
     surface.add_argument("--overwrite", action="store_true")
     args = parser.parse_args(argv)
     if args.command in ("feat", "run"):
@@ -126,6 +127,7 @@ def main(argv=None):
             output_dir=args.output_dir,
             wb_command=args.wb_command,
             device=args.device,
+            registration=args.registration,
             overwrite=args.overwrite,
         )
         print(result.projection.dtseries)

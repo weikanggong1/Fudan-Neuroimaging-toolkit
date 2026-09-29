@@ -1,0 +1,43 @@
+{
+  "input": "一例真实 UK Biobank 静息态 fMRI；同一 MNI152 2 mm 网格的白质、脑脊液和运动回归后 BOLD；已生成的 recon-all 表面",
+  "frames": 490,
+  "tr_seconds": 0.7350000143051147,
+  "fnit_surface": {
+    "cifti_shape": [490, 91282],
+    "varying_grayordinates": 91282,
+    "wall_seconds_including_recon_zip_extraction": 757.135352968704,
+    "workbench_projection_command_seconds": 673.3732896922156,
+    "left_registration_seconds": 15.898784258402884,
+    "right_registration_seconds": 14.817505195271224,
+    "peak_gpu_reserved_gb_left_right": [0.281018368, 0.295698432],
+    "folded_triangles_left_right": [0, 0]
+  },
+  "paired_official_msm_sphere": {
+    "same_native_and_reference_spheres_and_sulcal_metrics": true,
+    "left_vertices": 120035,
+    "right_vertices": 122950,
+    "median_vertex_distance_mm_left_right": [1.992853, 2.276585],
+    "p95_vertex_distance_mm_left_right": [4.668614, 5.427391],
+    "reference_sulc_pearson_r_initial_left_right": [0.7751665, 0.7618331],
+    "reference_sulc_pearson_r_fnit_left_right": [0.8841501, 0.8763541],
+    "reference_sulc_pearson_r_official_left_right": [0.8381269, 0.8288835],
+    "official_msm_seconds_left_right": [2799.45, 2802.17]
+  },
+  "paired_cifti_first_8_real_frames": {
+    "fixed_inputs": "相同的清理后 BOLD、MNI 表面、goodvoxels、ROI、Workbench 2.1.0 和投影命令；只更换个体注册球面",
+    "grayordinates": 91282,
+    "pearson_r_all": 0.8681105407025883,
+    "mae_all_intensity_units": 24.427870371858685,
+    "cortex_left": {"grayordinates": 29696, "pearson_r": 0.7962243819419645, "mae_intensity_units": 34.77744700161314},
+    "cortex_right": {"grayordinates": 29716, "pearson_r": 0.7788793371735004, "mae_intensity_units": 40.28381333706086},
+    "all_subcortical_structures_exactly_equal": true,
+    "official_sphere_projection_wall_seconds_including_8_frame_extraction": 41.40364842582494
+  },
+  "source_sha256": {
+    "surface_msmsulc_py": "7ed6c733fc832fcdb1da7f64d9fd7258af338f27836bb2b0bf7af0fcb66217a4",
+    "surface_pipeline_py_during_full_run": "a4a17cc5faa8d7f6055c98ae361e6f53c4f69a6dee47f980101992b0aab43e7e",
+    "surface_pipeline_py_current": "c0e8bb3792eccb04754e8887f245e47482474bcb5201eeaad4b44fc050637389"
+  },
+  "post_run_code_change": "整链运行后，surface_pipeline.py 只增加了已有输出的前置检查；数值计算路径不变，相关测试已重跑。",
+  "interpretation": "独立脑沟优化器生成可分析的 fsLR32k 时间序列，但与官方 MSM 或 UKB 最终 MSMAll/FIX 输出不逐值等价。前 8 帧 CIFTI 对照只量化注册球面带来的差异，不代表整条 UKB 流程等价。"
+}

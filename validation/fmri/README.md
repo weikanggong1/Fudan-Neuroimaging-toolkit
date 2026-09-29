@@ -45,7 +45,8 @@ FSL MCFLIRT 实测 397.54 秒；其余 11 个已单独计时的影像命令合�
 - [MELODIC/PICA](pica_summary.json)：同一真实 4D 输入与掩膜的组件数、重建和耗时检查；原版程序状态保留在摘要中。
 - [T1→MNI152 2 mm 非线性配准](registration_summary.json)：同一 T1、模板和脑掩膜的独立参照；说明 T1 的来源。
 - [ICA-AROMA 与完整 BIDS→MNI152 2 mm 结果](e2e_summary.json)：最终运行的组件数、噪声分类、输出完整性和各阶段耗时。
-- [fsLR32k 表面标量摘要](surface_summary.json) 与 [表面函数、输出和官方命令对照](../../docs/fmri/surface.md)：同一真实 BOLD 的 goodvoxels、Workbench 投影与整链 CIFTI；列出未覆盖的 MSMAll/FIX 步骤。
+- [MSMSulc 路径标量摘要](msmsulc_summary.json) 与 [表面函数、输出和官方命令对照](../../docs/fmri/surface.md)：真实 490 帧回归后 BOLD 生成的 fsLR32k CIFTI，以及与官方 MSM 球面及前 8 帧 CIFTI 的固定输入对照。
+- [既有 FS 球面表面标量摘要](surface_summary.json)：同一真实 BOLD 的 goodvoxels、Workbench 投影与旧 FS 球面整链检查；作为注册方式对照保留。
 
 ## 最终 MNI 输出检查
 

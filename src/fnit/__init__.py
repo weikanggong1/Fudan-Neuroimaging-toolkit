@@ -86,6 +86,7 @@ def __getattr__(name):
                 'clean_confounds', 'motion_regressors',
                 'SurfaceHemisphere', 'SurfaceProjectionResult', 'run_surface_projection',
                 'SurfaceQCResult', 'make_ribbon_goodvoxels',
+                'MSMSulcInputs', 'prepare_msmsulc_inputs', 'run_msmsulc',
                 'SurfacePipelineInputs', 'SurfacePipelineResult', 'run_surface_from_mni',
                 'run_surface_from_volume',
                 'MNISurfacePair', 'MNISurfaceResult', 'SurfacePreparationResult',
