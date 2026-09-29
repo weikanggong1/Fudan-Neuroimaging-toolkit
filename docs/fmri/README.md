@@ -1,6 +1,6 @@
 # 体积静息态 fMRI：原始 BIDS 到 MNI152 2 mm
 
-`run_fmri_pipeline` 一次处理一个 BIDS BOLD run。它先用 SynthStrip 提取 SBRef（缺失时取 BOLD 中间帧）与 T1 的脑掩膜，再运行运动校正和 FEAT 核心处理、TorchFAST 白质/脑脊液分割、EPI→T1 BBR、T1→MNI 非线性配准、单被试空间 PICA、ICA-AROMA 和可选 WM/CSF/运动回归。高层入口把 SBRef 掩膜作为 `brain_mask` 传给 FEAT；独立 `run_feat_core` 在未提供 `brain_mask` 时则从运动校正后的 EPI 均值提取掩膜，两条入口的默认掩膜输入不同。最后把清理后的 4D BOLD 通过合成变换一次插值到 MNI152 2 mm 网格。以回归后的 volume 结果和同被试 recon-all 运行 `run_surface_from_volume`，即可按[表面投影页](surface.md)的 MSMSulc 路径生成 fsLR32k CIFTI。GPU 矩阵运算默认启用 TF32，影像以 float32 保存。
+`run_fmri_pipeline` 一次处理一个 BIDS BOLD run。它先用 SynthStrip 提取 SBRef（缺失时取 BOLD 中间帧）与 T1 的脑掩膜，再运行运动校正和 FEAT 核心处理、TorchFAST 白质/脑脊液分割、EPI→T1 BBR、T1→MNI 非线性配准、单被试空间 PICA、ICA-AROMA 和可选 WM/CSF/运动回归。高层入口把 SBRef 掩膜作为 `brain_mask` 传给 FEAT；独立 `run_feat_core` 在未提供 `brain_mask` 时则从运动校正后的 EPI 均值提取掩膜，两条入口的默认掩膜输入不同。最后把清理后的 4D BOLD 通过合成变换一次插值到 MNI152 2 mm 网格。以回归后的 volume 结果和同被试 recon-all 运行 `run_surface_from_volume`，按[表面投影页](surface.md)的 fMRIPrep 顺序分别使用 T1w BOLD 投影皮层、MNI BOLD 提供皮层下信号，生成 fsLR32k/91k CIFTI。GPU 矩阵运算默认启用 TF32，影像以 float32 保存。
 
 这条流程没有 GDC 和 B0 畸变估计。指定 UKB rfMRI ZIP 没有原始 B0 场图/幅度图，也没有 GDC warp；遇到与 BOLD 关联的 BIDS 场图但缺少已估计 warp 时，FEAT 核心会明确报错。清理使用 ICA-AROMA，不能与 UKB 的 FIX 输出逐体素相同。配准仍须和官方同输入结果对照；特别是当前 PyTorch FNIRT 的 T1 强度模型尚未覆盖官方 T1 配置的非线性强度/偏置项。
 
@@ -100,7 +100,7 @@ fnit-fmri run --bids-root /absolute/path/bids --subject 0001 \
 | `aroma/filtered_func_data_aroma.nii.gz` | 原生 EPI 网格的 AROMA 清理后 4D BOLD。启用额外回归时另有 `aroma/filtered_func_data_aroma_confounds.nii.gz`。 |
 | `masks/brain_MNI152_2mm.nii.gz` | MNI 网格上 EPI 掩膜与 MNI 模板脑掩膜的交集；uint8。 |
 | `filtered_func_data_clean_MNI152_2mm.nii.gz` | 最终 MNI152 2 mm float32 BOLD；脑掩膜外为 0，时间轴继承 BOLD 的 TR。 |
-| `surface/prepared/`、`surface/qc/`、`surface/projection/` | 体积流程内置的表面选项使用已有 FS 注册球面。回归后默认 MSMSulc 路径由独立 `run_surface_from_volume` 生成，输出结构见[表面投影页](surface.md)。 |
+| `surface/clean_T1w.nii.gz`、`surface/projection/` | 设置 `surface_subject_dir` 与 `surface_assets_dir` 后，回归后的个体 EPI 重采样为 T1w BOLD，再按 fMRIPrep 顺序生成双侧 32k GIFTI 与 91k CIFTI；也可独立调用 `run_surface_from_volume` 指定输出目录。显式传入 `surface_inputs` 时仍使用旧的 MNI 表面投影接口。输出结构见[表面投影页](surface.md)。 |
 | `pipeline_report.json` | 不含被试编号的影像尺寸、TR、实际 IC 数、回归配置、各阶段耗时和 PyTorch 峰值显存；启用表面阶段时还记录 CIFTI、覆盖率报告与 goodvoxels 的相对路径。不代表整卡显存。 |
 
 CSF/WM 组织掩膜由 TorchFAST 部分体积分数经 BBR 投到 EPI，再在 EPI 脑掩膜内以 0.8 阈值生成，仅用于可选回归。ICA-AROMA 分类采用[官方 ICA-AROMA](https://github.com/maartenmennes/ICA-AROMA)的三张 MNI152 2 mm CSF、edge、out 掩膜，文件随 `fnit` 安装；阈值 IC 图先从 EPI 空间经 BBR 和 T1→MNI 形变投到相同网格。分类结果仍受本包 PICA 成分和配准差异影响。`regress_wm`、`regress_csf` 和 `regress_motion` 只改变 AROMA 后的结果，不回写 `feat/filtered_func_data.nii.gz`。

@@ -85,12 +85,15 @@ def __getattr__(name):
                 'run_aroma_pipeline', 'classify_aroma', 'denoise_aroma',
                 'clean_confounds', 'motion_regressors',
                 'SurfaceHemisphere', 'SurfaceProjectionResult', 'run_surface_projection',
+                'create_fmriprep_cifti', 'run_fmriprep_surface_projection',
                 'SurfaceQCResult', 'make_ribbon_goodvoxels',
                 'MSMSulcInputs', 'prepare_msmsulc_inputs', 'run_msmsulc',
                 'SurfacePipelineInputs', 'SurfacePipelineResult', 'run_surface_from_mni',
                 'run_surface_from_volume',
                 'MNISurfacePair', 'MNISurfaceResult', 'SurfacePreparationResult',
-                'prepare_mni_surface_geometry', 'prepare_fs_sphere_projection_inputs'):
+                'T1SurfacePreparation', 'prepare_fmriprep_surface_inputs',
+                'prepare_mni_surface_geometry', 'prepare_t1w_surface_geometry',
+                'prepare_fs_sphere_projection_inputs'):
         from . import fmri
         return getattr(fmri, name)
     if name in ('UKBConnectome', 'ConnectomeResult'):

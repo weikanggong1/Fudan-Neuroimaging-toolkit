@@ -58,6 +58,12 @@ MSMALL_ASSETS = (
     ("global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d40_ROW_vn/melodic_oIC.dscalar.nii", "399f299bdde45720a37e650bf1306a771ffe179a8cdb914fdd297d28a16e9805"),
 )
 
+FMRIPREP_ASSETS = (
+    ("fmriprep/tpl-MNI152NLin6Asym_res-02_atlas-HCP_dseg.nii.gz",
+     "9c25e63edec37b3876756b749a3f0127511c6b63bf2855060a44007bb479b987"),
+)
+FMRIPREP_BASE = "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/"
+
 
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
@@ -67,7 +73,8 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def _install_one(output_dir: Path, relative_path: str, expected_sha256: str, opener=urlopen) -> Path:
+def _install_one(output_dir: Path, relative_path: str, expected_sha256: str,
+                 opener=urlopen, base_urls=(BASE_URL, FALLBACK_URL)) -> Path:
     destination = output_dir / relative_path
     if destination.exists():
         if _sha256(destination) != expected_sha256:
@@ -76,10 +83,11 @@ def _install_one(output_dir: Path, relative_path: str, expected_sha256: str, ope
 
     destination.parent.mkdir(parents=True, exist_ok=True)
     last_error = None
-    for base_url in (BASE_URL, FALLBACK_URL):
+    for base_url in base_urls:
         temporary = None
         try:
-            with opener(base_url + relative_path, timeout=60) as source:
+            remote_name = relative_path.split("/")[-1] if base_urls == (FMRIPREP_BASE,) else relative_path
+            with opener(base_url + remote_name, timeout=60) as source:
                 with tempfile.NamedTemporaryFile(dir=destination.parent, delete=False) as target:
                     temporary = Path(target.name)
                     for chunk in iter(lambda: source.read(1024 * 1024), b""):
@@ -100,12 +108,17 @@ def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, required=True, help="Absolute destination directory")
     parser.add_argument("--msmall", action="store_true", help="Install public MSMAll d40 templates and MSM configuration")
+    parser.add_argument("--fmriprep", action="store_true", help="Install the TemplateFlow HCP dseg for 91k CIFTI")
     args = parser.parse_args(argv)
     if not args.output_dir.is_absolute():
         parser.error("--output-dir must be an absolute path")
     for relative_path, digest in ASSETS + (MSMALL_ASSETS if args.msmall else ()):
         path = _install_one(args.output_dir, relative_path, digest)
         print(path)
+    if args.fmriprep:
+        for relative_path, digest in FMRIPREP_ASSETS:
+            print(_install_one(args.output_dir, relative_path, digest,
+                               base_urls=(FMRIPREP_BASE,)))
 
 
 if __name__ == "__main__":

@@ -1,10 +1,11 @@
-"""Connect the MNI volume pipeline to UKB-style fsLR32k projection."""
+"""Connect cleaned volume BOLD to fsLR32k projection."""
 
 from dataclasses import dataclass
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import json
 import shutil
+import subprocess
 import zipfile
 
 import nibabel as nib
@@ -12,11 +13,12 @@ import numpy as np
 
 from ..flirt.coordinates import flirt_to_world_affine
 from .surface import SurfaceHemisphere, SurfaceProjectionResult, run_surface_projection
-from .surface_prepare import prepare_fs_sphere_projection_inputs
+from .surface_prepare import prepare_fmriprep_surface_inputs
 from .surface_qc import SurfaceQCResult, make_ribbon_goodvoxels
-from .surface_registration import apply_dedrift, prepare_registered_projection
 from .surface_registration import prepare_msmsulc_inputs
 from .surface_msmsulc import run_msmsulc
+from .surface_fmriprep import run_fmriprep_surface_projection
+from .normalization import resample_world
 
 
 @dataclass(frozen=True)
@@ -81,6 +83,7 @@ def run_surface_from_mni(
     return SurfacePipelineResult(projection=projection, qc=qc)
 
 
+
 def run_surface_from_volume(
     volume_dir: str | Path,
     recon_all: str | Path,
@@ -92,59 +95,67 @@ def run_surface_from_volume(
     overwrite: bool = False,
     registration: str = "msmsulc",
     registered_spheres: tuple[str | Path, str | Path] | None = None,
-    dedrift_spheres: tuple[str | Path, str | Path] | None = None,
+    goodvoxels: str | Path | None = None,
 ) -> SurfacePipelineResult:
-    """Map confound-cleaned MNI BOLD to fsLR32k with sulcal registration.
+    """Map confound-cleaned BOLD to fsLR32k with fMRIPrep's projection order.
 
-    ``registration='msmsulc'`` estimates subject-specific sulcal spheres from
-    FreeSurfer ``sphere``/``sulc`` without running MSM. ``registration='fs'``
-    retains the initial FreeSurfer sphere path for a controlled comparison.
-    Supplied ``registered_spheres`` override either estimate.
+    Native EPI BOLD is interpolated once to T1w for cortical sampling. The
+    existing 2-mm MNI152NLin6Asym BOLD supplies subcortical CIFTI voxels.
+    ``registered_spheres`` may supply external L/R MSMSulc spheres for an
+    exact fixed-sphere comparison; otherwise FNIT estimates them with Torch.
     """
     if registration not in ("msmsulc", "fs"):
         raise ValueError("registration must be 'msmsulc' or 'fs'")
-    if dedrift_spheres is not None and registered_spheres is None:
-        raise ValueError("dedrift_spheres requires registered_spheres")
     if registered_spheres is not None and len(registered_spheres) != 2:
         raise ValueError("registered_spheres must contain left and right paths")
     volume = Path(volume_dir).expanduser().resolve()
     output = Path(output_dir).expanduser().resolve()
-    dtseries = output / "projection/clean_MNI_Atlas_registered_sphere_s2.dtseries.nii"
-    if dtseries.exists() and not overwrite:
-        raise FileExistsError(dtseries)
-    clean = volume / "filtered_func_data_clean_MNI152_2mm.nii.gz"
-    report_path = volume / "pipeline_report.json"
-    t1_path = volume / "T1_brain.nii.gz"
-    reference_path = volume / "MNI152_2mm_brain.nii.gz"
-    pull_path = volume / "reg/MNI152_2mm_to_T1_pull_ras.nii.gz"
-    affine_path = volume / "reg/T1_to_MNI152_2mm_affine.mat"
-    for path in (clean, report_path, t1_path, reference_path, pull_path, affine_path):
+    assets = Path(hcp_assets_dir).expanduser().resolve()
+    clean_mni = volume / "filtered_func_data_clean_MNI152_2mm.nii.gz"
+    t1 = volume / "T1_brain.nii.gz"
+    report_file = volume / "pipeline_report.json"
+    bbr_file = volume / "reg/example_func2highres.mat"
+    dseg = assets / "fmriprep/tpl-MNI152NLin6Asym_res-02_atlas-HCP_dseg.nii.gz"
+    for path in (clean_mni, t1, report_file, bbr_file, dseg):
         if not path.is_file():
             raise FileNotFoundError(path)
-    report = json.loads(report_path.read_text(encoding="utf-8"))
-    if report.get("outputs", {}).get("clean_mni") != clean.name or not any(
-        report.get("wm_csf_motion_regression", {}).get(name, False)
-        for name in ("wm", "csf", "motion")
-    ):
-        raise ValueError("volume output must contain a completed WM, CSF, or motion regression")
-    t1 = nib.load(str(t1_path))
-    reference = nib.load(str(reference_path))
-    bold = nib.load(str(clean))
-    if bold.ndim != 4 or bold.shape[:3] != reference.shape or not np.allclose(
-        bold.affine, reference.affine, rtol=0, atol=1e-4
-    ):
-        raise ValueError("clean MNI BOLD must match the saved MNI reference grid")
-    forward = flirt_to_world_affine(
-        np.loadtxt(affine_path), t1.affine, reference.affine,
-        t1.shape[:3], reference.shape,
-        t1.header.get_zooms()[:3], reference.header.get_zooms()[:3],
+    report = json.loads(report_file.read_text(encoding="utf-8"))
+    if not any(report.get("wm_csf_motion_regression", {}).get(key, False)
+               for key in ("wm", "csf", "motion")):
+        raise ValueError("volume output lacks completed WM/CSF/motion regression")
+    native = volume / report["outputs"]["aroma_clean_native"]
+    if not native.is_file():
+        raise FileNotFoundError(native)
+    epi_image = nib.load(str(native))
+    t1_image = nib.load(str(t1))
+    mni_image = nib.load(str(clean_mni))
+    label_image = nib.load(str(dseg))
+    canonical_mni = nib.as_closest_canonical(mni_image)
+    canonical_label = nib.as_closest_canonical(label_image)
+    if (epi_image.ndim != 4 or mni_image.ndim != 4 or
+            epi_image.shape[3] != mni_image.shape[3] or
+            canonical_mni.shape[:3] != canonical_label.shape or
+            not np.allclose(canonical_mni.affine, canonical_label.affine,
+                            rtol=0, atol=1e-4)):
+        raise ValueError("volume BOLD and TemplateFlow HCP 2-mm atlas are incompatible")
+    epi_to_t1 = flirt_to_world_affine(
+        np.loadtxt(bbr_file), epi_image.affine, t1_image.affine,
+        epi_image.shape[:3], t1_image.shape,
+        epi_image.header.get_zooms()[:3], t1_image.header.get_zooms()[:3],
     )
+    dtseries = output / "projection/space-fsLR_den-91k_bold.dtseries.nii"
+    if dtseries.exists() and not overwrite:
+        raise FileExistsError(dtseries)
     output.mkdir(parents=True, exist_ok=True)
+    t1_bold = output / "clean_T1w.nii.gz"
+    if not t1_bold.exists() or overwrite:
+        resample_world(native, t1, np.linalg.inv(epi_to_t1), t1_bold,
+                       device=device)
     source = Path(recon_all).expanduser().resolve()
     with TemporaryDirectory(prefix="recon_all_", dir=output) as temporary:
         if source.is_file() and source.suffix.lower() == ".zip":
             subject = Path(temporary) / "FreeSurfer"
-            required = ("mri/orig.mgz", "mri/orig/001.mgz", "mri/wmparc.mgz") + tuple(
+            required = ("mri/orig.mgz", "mri/orig/001.mgz") + tuple(
                 f"surf/{hemi}.{name}"
                 for hemi in ("lh", "rh")
                 for name in (("white", "pial", "sphere.reg", "thickness", "sphere", "sulc")
@@ -153,78 +164,64 @@ def run_surface_from_volume(
             )
             with zipfile.ZipFile(source) as archive:
                 for name in required:
-                    member = f"FreeSurfer/{name}"
                     target = subject / name
                     target.parent.mkdir(parents=True, exist_ok=True)
-                    with archive.open(member) as reader, target.open("wb") as writer:
+                    with archive.open(f"FreeSurfer/{name}") as reader, target.open("wb") as writer:
                         shutil.copyfileobj(reader, writer)
         else:
             subject = source / "FreeSurfer" if (source / "FreeSurfer").is_dir() else source
         scanner = nib.load(str(subject / "mri/orig/001.mgz"))
-        if scanner.shape != t1.shape or not np.allclose(
-            scanner.affine, t1.affine, rtol=0, atol=1e-4
-        ):
+        if scanner.shape != t1_image.shape or not np.allclose(
+                scanner.affine, t1_image.affine, atol=1e-4, rtol=0):
             raise ValueError("recon-all scanner T1 and volume-pipeline T1 have different grids")
-        prepared = prepare_fs_sphere_projection_inputs(
-            subject_dir=subject,
-            pull_ras=pull_path,
-            initial_t1_to_mni_world=forward,
-            mni_reference=reference_path,
-            hcp_assets_dir=hcp_assets_dir,
-            output_dir=output / "prepared",
-            wb_command=wb_command,
-            device=device,
+        prepared = prepare_fmriprep_surface_inputs(
+            subject_dir=subject, hcp_assets_dir=assets,
+            output_dir=output / "prepared", wb_command=wb_command,
             overwrite=overwrite,
         )
-        hemispheres = {"L": prepared.left, "R": prepared.right}
         if registration == "msmsulc" and registered_spheres is None:
             sulc_inputs = prepare_msmsulc_inputs(
                 subject_dir=subject,
-                initial_spheres=(prepared.left.registered_sphere,
-                                 prepared.right.registered_sphere),
-                hcp_assets_dir=hcp_assets_dir,
-                output_dir=output / "msmsulc_inputs",
+                initial_spheres=prepared.initial_spheres,
+                hcp_assets_dir=assets, output_dir=output / "msmsulc_inputs",
                 wb_command=wb_command,
             )
-            sulc_spheres = run_msmsulc(
-                inputs=sulc_inputs, output_dir=output / "msmsulc", device=device,
+            spheres = run_msmsulc(sulc_inputs, output / "msmsulc", device=device)
+            registered_spheres = (spheres["L"], spheres["R"])
+        if registered_spheres is None:
+            registered_spheres = prepared.initial_spheres
+        mesh = assets / "global/templates/standard_mesh_atlases"
+        executable = shutil.which(str(wb_command))
+        if executable is None:
+            raise FileNotFoundError(wb_command)
+        hemispheres = {}
+        for hemi, geometry, individual_roi, sphere in zip(
+            ("L", "R"), (prepared.geometry.left, prepared.geometry.right),
+            prepared.individual_rois, registered_spheres,
+        ):
+            atlas_mid = output / "registered" / hemi / "midthickness.32k_fsLR.surf.gii"
+            atlas_mid.parent.mkdir(parents=True, exist_ok=True)
+            subprocess.run([
+                executable, "-surface-resample", str(geometry.midthickness),
+                str(sphere), str(mesh / f"{hemi}.sphere.32k_fs_LR.surf.gii"),
+                "BARYCENTRIC", str(atlas_mid),
+            ], check=True, capture_output=True, text=True)
+            hemispheres[hemi] = SurfaceHemisphere(
+                white=geometry.white, pial=geometry.pial,
+                midthickness=geometry.midthickness,
+                registered_sphere=sphere,
+                native_roi=individual_roi,
+                atlas_sphere=mesh / f"{hemi}.sphere.32k_fs_LR.surf.gii",
+                atlas_midthickness=atlas_mid,
+                atlas_roi=mesh / f"{hemi}.atlasroi.32k_fs_LR.shape.gii",
             )
-            registered_spheres = (sulc_spheres["L"], sulc_spheres["R"])
-        if registered_spheres is not None:
-            spheres = dict(zip(("L", "R"), registered_spheres))
-            if dedrift_spheres is not None:
-                spheres = apply_dedrift(
-                    registered_spheres=registered_spheres,
-                    dedrift_spheres=dedrift_spheres,
-                    hcp_assets_dir=hcp_assets_dir,
-                    output_dir=output / "dedrift",
-                    wb_command=wb_command,
-                )
-            mesh = Path(hcp_assets_dir).expanduser().resolve() / (
-                "global/templates/standard_mesh_atlases"
-            )
-            for hemi in ("L", "R"):
-                hemispheres[hemi] = prepare_registered_projection(
-                    hemisphere=hemispheres[hemi],
-                    individual_roi=output / "prepared" / f"{hemi}.roi.individual.native.shape.gii",
-                    registered_sphere=spheres[hemi],
-                    reference_sphere_164k=mesh / (
-                        f"fsaverage.{hemi}_LR.spherical_std.164k_fs_LR.surf.gii"
-                    ),
-                    reference_roi_164k=mesh / f"{hemi}.atlasroi.164k_fs_LR.shape.gii",
-                    output_dir=output / "registered" / hemi,
-                    wb_command=wb_command,
-                )
-        return run_surface_from_mni(
-            clean_mni=clean,
-            mni_reference=reference_path,
-            inputs=SurfacePipelineInputs(
-                left=hemispheres["L"],
-                right=hemispheres["R"],
-                subject_rois=prepared.subject_rois,
-                atlas_rois=prepared.atlas_rois,
-                wb_command=wb_command,
-            ),
-            output_dir=output,
+        projection = run_fmriprep_surface_projection(
+            clean_t1w=t1_bold, clean_mni=clean_mni,
+            left=hemispheres["L"], right=hemispheres["R"],
+            left_label=mesh / "L.atlasroi.32k_fs_LR.shape.gii",
+            right_label=mesh / "R.atlasroi.32k_fs_LR.shape.gii",
+            hcp_dseg=dseg, output_dir=output / "projection",
+            goodvoxels=goodvoxels, wb_command=wb_command,
             overwrite=overwrite,
         )
+    return SurfacePipelineResult(projection, None)

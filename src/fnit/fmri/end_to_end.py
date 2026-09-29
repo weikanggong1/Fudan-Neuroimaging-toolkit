@@ -15,8 +15,8 @@ from .aroma_pipeline import AromaResult, run_aroma_pipeline
 from .bids import locate_bids_inputs
 from .normalization import T1MNIResult, register_t1_to_mni, resample_world
 from .pipeline import FeatCoreResult, run_feat_core
-from .surface_pipeline import SurfacePipelineInputs, SurfacePipelineResult, run_surface_from_mni
-from .surface_prepare import prepare_fs_sphere_projection_inputs
+from .surface_pipeline import (SurfacePipelineInputs, SurfacePipelineResult,
+                               run_surface_from_mni, run_surface_from_volume)
 
 
 @dataclass(frozen=True)
@@ -115,6 +115,8 @@ def run_fmri_pipeline(
         raise ValueError("surface_inputs and surface_subject_dir are mutually exclusive")
     if (surface_subject_dir is None) != (surface_assets_dir is None):
         raise ValueError("surface_subject_dir and surface_assets_dir must be provided together")
+    if surface_subject_dir is not None and not (regress_wm or regress_csf or regress_motion):
+        raise ValueError("surface_subject_dir requires WM, CSF, or motion regression")
     output = Path(output_dir).expanduser().resolve()
     clean_mni = output / "filtered_func_data_clean_MNI152_2mm.nii.gz"
     if clean_mni.exists() and not overwrite:
@@ -299,21 +301,6 @@ def run_fmri_pipeline(
     )
     timing["mni_resampling"] = time.perf_counter() - started
     surface = None
-    if surface_subject_dir is not None:
-        started = time.perf_counter()
-        prepared = prepare_fs_sphere_projection_inputs(
-            subject_dir=surface_subject_dir, pull_ras=t1_to_mni.pull_ras,
-            initial_t1_to_mni_world=t1_to_mni.moving_to_fixed_world,
-            mni_reference=mni_template, hcp_assets_dir=surface_assets_dir,
-            output_dir=output / "surface" / "prepared",
-            wb_command=wb_command, device=selected, overwrite=overwrite,
-        )
-        surface_inputs = SurfacePipelineInputs(
-            left=prepared.left, right=prepared.right,
-            subject_rois=prepared.subject_rois, atlas_rois=prepared.atlas_rois,
-            wb_command=wb_command,
-        )
-        timing["surface_preparation"] = time.perf_counter() - started
     if surface_inputs is not None:
         started = time.perf_counter()
         surface = run_surface_from_mni(
@@ -367,6 +354,23 @@ def run_fmri_pipeline(
             ),
         },
     }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    if surface_subject_dir is not None:
+        started = time.perf_counter()
+        surface = run_surface_from_volume(
+            volume_dir=output, recon_all=surface_subject_dir,
+            hcp_assets_dir=surface_assets_dir, output_dir=output / "surface",
+            wb_command=wb_command, device=selected, overwrite=overwrite,
+        )
+        timing["surface_projection"] = time.perf_counter() - started
+        timing["total"] = sum(value for key, value in timing.items() if key != "total")
+        details = json.loads(report.read_text(encoding="utf-8"))
+        details["timing_seconds"] = timing
+        details["outputs"]["surface_dtseries"] = str(surface.projection.dtseries.relative_to(output))
+        details["outputs"]["surface_coverage_report"] = str(
+            surface.projection.coverage_report.relative_to(output)
+        )
+        report.write_text(json.dumps(details, ensure_ascii=False, indent=2) + "\n",
+                          encoding="utf-8")
     return FMRIPipelineResult(
         clean_mni=clean_mni, mask_mni=mask_mni, report=report,
         feat=feat, aroma=aroma, bbr_matrix=bbr_matrix,

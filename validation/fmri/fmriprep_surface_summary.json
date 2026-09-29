@@ -1,0 +1,43 @@
+{
+  "data": "one real UK Biobank resting-state BOLD; aggregate statistics only",
+  "frames": 490,
+  "tr_seconds": 0.735,
+  "cifti_shape": [490, 91282],
+  "inputs": "the same confound-regressed BOLD, T1w surfaces, cortex masks, MNI volume, TemplateFlow labels and HCP dseg; sphere comparison changes only native-to-fsLR registration",
+  "reference_source": {
+    "fmriprep_commit": "e56dc9938e742c789510705372f88fdb5a8206c2",
+    "fmriprep_resampling_py_sha256": "96d73cdf1b2f8eef1f565739028e09e8754eddfb0776652b759f3fcfbd708374",
+    "niworkflows_commit": "0eb323521639665483f651cf088c86047382d656",
+    "niworkflows_cifti_py_sha256": "1c243989bdb1ff9ffdc040b48932dfe408cd23427681a79fb004fc9ccec162b1",
+    "hcp_dseg_sha256": "9c25e63edec37b3876756b749a3f0127511c6b63bf2855060a44007bb479b987"
+  },
+  "fixed_official_sphere": {
+    "native_to_t1w_surface_geometry_and_cortex_mask_exact": true,
+    "eight_frame_highlevel_vs_490_frame_official_command_replay_max_absolute_difference": 0.0,
+    "cifti_vs_niworkflows_official_source": {
+      "brain_model_axis_exact": true,
+      "max_absolute_difference": 0.0,
+      "mean_temporal_r_valid_grayordinates": 1.0,
+      "valid_grayordinates": 90553,
+      "cortex_left_mean_temporal_r": 1.0,
+      "cortex_right_mean_temporal_r": 1.0,
+      "subcortex_mean_temporal_r": 1.0
+    }
+  },
+  "fnit_pytorch_msmsulc_vs_official_msm_sphere": {
+    "only_variable": "registered sphere; other volume, surfaces, masks, templates and Workbench commands fixed",
+    "all": {"grayordinates": 91282, "valid": 90536, "mean_temporal_r": 0.8084734127, "median_temporal_r": 0.9071931703, "mae": 30.2293239223},
+    "cortex_left": {"grayordinates": 29696, "valid": 29694, "mean_temporal_r": 0.7244680355, "median_temporal_r": 0.7832033788, "mae": 43.6355900885},
+    "cortex_right": {"grayordinates": 29716, "valid": 29669, "mean_temporal_r": 0.6913139992, "median_temporal_r": 0.7388664586, "mae": 49.2526135082},
+    "subcortex": {"grayordinates": 31870, "valid": 31173, "mean_temporal_r": 1.0, "median_temporal_r": 1.0, "mae": 0.0}
+  },
+  "timing_seconds_same_host": {
+    "t1w_surface_preparation": 22.6918746028,
+    "eight_frame_highlevel_wall_including_zip_extraction": 73.2153805108,
+    "490_frame_workbench_ribbon_and_dilate_sum": 289.5566173932,
+    "490_frame_workbench_native_mask_resample_and_atlas_mask_sum": 119.9875210323,
+    "490_frame_fnit_cifti_assembly": 19.5686099669,
+    "490_frame_official_niworkflows_cifti_assembly": 19.1427056850
+  },
+  "limits": "Workbench stage times are summed from separate runs, not a full fMRIPrep wall time. Upstream BBR, MNI registration and denoising differ from fMRIPrep. The default FNIT MSMSulc sphere is not numerically equivalent to official MSM."
+}

@@ -8,12 +8,15 @@ from .aroma_pipeline import AromaResult, run_aroma_pipeline
 from .aroma import classify_aroma, denoise_aroma
 from .confounds import clean_confounds, motion_regressors
 from .surface import SurfaceHemisphere, SurfaceProjectionResult, run_surface_projection
+from .surface_fmriprep import create_fmriprep_cifti, run_fmriprep_surface_projection
 from .surface_qc import SurfaceQCResult, make_ribbon_goodvoxels
 from .surface_msmsulc import run_msmsulc
 from .surface_registration import MSMSulcInputs, prepare_msmsulc_inputs
 from .surface_pipeline import SurfacePipelineInputs, SurfacePipelineResult, run_surface_from_mni, run_surface_from_volume
 from .surface_prepare import (MNISurfacePair, MNISurfaceResult, SurfacePreparationResult,
-                              prepare_mni_surface_geometry, prepare_fs_sphere_projection_inputs)
+                              T1SurfacePreparation, prepare_fmriprep_surface_inputs,
+                              prepare_mni_surface_geometry, prepare_t1w_surface_geometry,
+                              prepare_fs_sphere_projection_inputs)
 
 
 def __getattr__(name):
@@ -33,9 +36,12 @@ __all__ = [
     "ICAResult", "decompose_spatial_ica", "AromaResult", "run_aroma_pipeline",
     "classify_aroma", "denoise_aroma", "clean_confounds", "motion_regressors",
     "SurfaceHemisphere", "SurfaceProjectionResult", "run_surface_projection",
+    "create_fmriprep_cifti", "run_fmriprep_surface_projection",
     "SurfaceQCResult", "make_ribbon_goodvoxels",
     "MSMSulcInputs", "prepare_msmsulc_inputs", "run_msmsulc",
     "SurfacePipelineInputs", "SurfacePipelineResult", "run_surface_from_mni", "run_surface_from_volume",
     "MNISurfacePair", "MNISurfaceResult", "SurfacePreparationResult",
-    "prepare_mni_surface_geometry", "prepare_fs_sphere_projection_inputs",
+    "T1SurfacePreparation", "prepare_fmriprep_surface_inputs",
+    "prepare_mni_surface_geometry", "prepare_t1w_surface_geometry",
+    "prepare_fs_sphere_projection_inputs",
 ]

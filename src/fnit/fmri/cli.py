@@ -76,7 +76,7 @@ def main(argv=None):
     pipeline.add_argument("--global-signal", action="store_true")
     pipeline.add_argument("--n-splits", type=int, default=1000)
     pipeline.add_argument("--random-state", type=int, default=0)
-    surface = commands.add_parser("surface", help="clean MNI volume output and recon-all ZIP to fsLR32k")
+    surface = commands.add_parser("surface", help="clean native/T1w cortex and MNI subcortex to fsLR32k CIFTI")
     surface.add_argument("--volume-dir", required=True)
     surface.add_argument("--recon-all", required=True)
     surface.add_argument("--surface-assets-dir", required=True)

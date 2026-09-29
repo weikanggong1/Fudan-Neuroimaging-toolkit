@@ -34,7 +34,7 @@ class SurfaceHemisphere:
 
 @dataclass(frozen=True)
 class SurfaceProjectionResult:
-    """The final dense timeseries, smoothed cortical metrics, and volume."""
+    """The dense timeseries, cortical metrics, volume source and timing."""
 
     dtseries: Path
     left_metric: Path

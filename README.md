@@ -21,7 +21,7 @@ CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核。模型、影像张
 | sMRI、dMRI | TorchFNIRT | warped image、Jacobian 与 intent-2007 coefficients | [FNIRT](docs/fnirt/README.md) |
 | sMRI、fMRI、dMRI | TorchApplyWarp | 应用 warp、premat 与 postmat 后的 reference-grid 图像 | [applywarp](docs/applywarp/README.md) |
 | fMRI | BIDS→MNI152 2 mm 体积流程 | 单 run FEAT、FAST/BBR、PICA/AROMA、可选混杂回归与 MNI 影像 | [fMRI](docs/fmri/README.md) |
-| fMRI | 回归后 MNI 2 mm→MSMSulc→fsLR32k | 双侧 GIFTI、皮层下 4D 影像与 CIFTI dense timeseries | [fMRI 表面投影](docs/fmri/surface.md) |
+| fMRI | 回归后个体 EPI→T1w 皮层、MNI 2 mm 皮层下→fsLR32k | 双侧 GIFTI 与 91k CIFTI 时间序列 | [fMRI 表面投影](docs/fmri/surface.md) |
 | dMRI | TorchTOPUP | Hz 场、校正图与 FSL 兼容输出 | [TOPUP](docs/topup/README.md) |
 | dMRI | TorchEDDY | 运动/涡流校正 DWI、旋转 bvec 与参数 | [EDDY](docs/eddy/README.md) |
 | dMRI | TorchDTIFIT | FA、MD、L1–L3、V1–V3、S0 与 tensor | [DTIFIT](docs/dtifit/README.md) |
@@ -101,10 +101,10 @@ fnit-setup-weights --all --dest /path/to/weights --verify-only
 fsLR32k 表面投影的 HCP 公开模板不属于模型权重，单独下载并逐文件校验：
 
 ```bash
-fnit-setup-fmri-surface-assets --output-dir /absolute/path/hcp_surface_assets
+fnit-setup-fmri-surface-assets --output-dir /absolute/path/hcp_surface_assets --fmriprep
 ```
 
-该命令包含 fsLR32k 投影和 MSMSulc 配准所需的球面、脑沟参考图、ROI 与标签表。被试需提供已生成的 white、pial、sphere、sphere.reg、sulc、thickness 和 wmparc；不需要 FLAIR 或髓鞘图。完整用法见 [fMRI 表面投影](docs/fmri/surface.md)。
+该命令包含 fsLR32k 投影和 MSMSulc 配准所需的球面、脑沟参考图、ROI，以及生成 91k CIFTI 的 HCP 皮层下分区。被试需提供已生成的 white、pial、sphere、sphere.reg、sulc 和 thickness；这条 fMRIPrep 表面路径不使用 FLAIR、髓鞘图或 wmparc。完整用法见 [fMRI 表面投影](docs/fmri/surface.md)。
 
 脑干亚区另需约 2.3 MB 图谱包，可独立下载和生成 PyTorch 平滑先验：
 
