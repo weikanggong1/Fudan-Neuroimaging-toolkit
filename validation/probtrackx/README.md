@@ -1,19 +1,19 @@
 # ProbtrackX 当前实现验证
 
 [功能、输入输出及官方对应命令](../../docs/probtrackx/README.md) · [默认计数](report.default.latest.public.json) · [长度加权](report.current.latest.public.json)
-[matrix1](report.matrix1.cpu.latest.public.json) · [matrix2 与网络](report.matrix2.cpu.latest.public.json) · [matrix3](report.matrix3.cpu.latest.public.json) · [seed→ROI](report.targets.cpu.latest.public.json)
+[matrix1](report.matrix1.cpu.latest.public.json) · [matrix2 与网络](report.matrix2.cpu.latest.public.json) · [matrix3](report.matrix3.cpu.latest.public.json) · [seed→ROI](report.targets.cpu.latest.public.json) · [性能分段记录](report.performance.public.json)
 
 ## 数据与配对设计
 
 在 gpucw1 使用 FSL 6.0.7.22 `probtrackx2` / `probtrackx2_gpu`，对同一例真实 UK Biobank DWI 的原版 FSL BEDPOSTX 三纤维后验比较 FNIT。五个预先定义的 ROI 由 JHU 标签图和被试 FA、追踪 mask 生成，选点不依赖两套追踪结果。
 
-双方统一总步数 400、步长 0.5 mm、`cthr=0.2`、`fibthresh=0.01`、`rseed=20260927`。单 seed 每体素 200 条，五区网络每体素 2000 条；FNIT 批大小 2048，CPU 8 线程。分别配对默认计数 `--opd` 和长度加权 `--opd --pd --ompl`，每种模式运行 FSL CPU/FNIT CPU、FSL GPU/FNIT GPU 的单 seed 与五区网络。墙钟时间包含进程启动、后验载入、追踪与写盘。四个 ProbTrackX 源码文件的 SHA-256 保存在六份公开摘要中。GPU 显存单独在真实五区网络长度加权模式测量。真实影像、后验、seed、逐体素结果和完整文本矩阵留在授权服务器；仓库保存六份汇总 JSON 和一张去标识连接矩阵图。
+双方统一总步数 400、步长 0.5 mm、`cthr=0.2`、`fibthresh=0.01`、`rseed=20260927`。单 seed 每体素 200 条，五区网络每体素 2000 条；FNIT 批大小 16384，CPU 8 线程。分别配对默认计数 `--opd` 和长度加权 `--opd --pd --ompl`，每种模式运行 FSL CPU/FNIT CPU、FSL GPU/FNIT GPU 的单 seed 与五区网络。FNIT 当前源码于 2026-09-29 在已被占用的 H100 GPU 1 上复跑，PyTorch 显存限制为总量 20%，并记录测试前后占用；FSL 同输入同参数输出来自既有运行。墙钟包含进程启动、后验载入、追踪与写盘。五个 ProbTrackX 源码文件的 SHA-256 保存在六份公开摘要中。真实影像、后验、seed、逐体素结果和完整文本矩阵留在授权服务器；仓库保存六份配对汇总 JSON、一份性能分段 JSON 和一张去标识连接矩阵图。
 
 ## 公开真实数据示意图
 
 ![真实 UK Biobank dMRI 的五区长度加权连接矩阵](../../docs/probtrackx/figures/probtrackx_real_ukb_network_pd_ompl.png)
 
-该图只读取当前 `--opd --pd --ompl` CPU 五区网络输出，没有重新运行追踪。绘图时生成的私有报告与 [`report.current.latest.public.json`](report.current.latest.public.json) 的四个源码 SHA-256 相同；除公开摘要有意去除的 shape、`waytotal` 和原始矩阵外，公共字段逐项一致。上排显示累计长度加权连接矩阵，下排显示平均路径长度，右列为 FNIT−FSL。图中只有通用 JHU ROI 名称，没有病例编号、私有路径或原始脑影像；清除 PNG 元数据后的 SHA-256 为 `39cc1fb18614a12cab52044a582d48093e822452d617914360535a516b999464`。
+该图由[绘图脚本](plot_network_report.py)读取当前 `--opd --pd --ompl` GPU 五区网络的私有配对报告生成，没有重新追踪。私有报告与[公开摘要](report.current.latest.public.json)的五个源码 SHA-256 相同；公开摘要去除了原始矩阵。上排显示累计长度加权连接矩阵，下排显示平均路径长度，右列为 FNIT−FSL。图中只有通用 JHU ROI 名称，没有病例编号、私有路径或原始脑影像；图片 SHA-256 为 `13805f5b4478a04a823ab52fbef43514d893a2f6b6b569b84e19abb52db07edd`。
 
 该图对应一例、五区、每 seed 体素 2000 条轨迹的稀疏网络。FSL 与 FNIT 使用相同随机种子但随机数流不同，因此只能比较密度图和连接矩阵的汇总一致性，不能据此声称逐轨迹等价。
 
@@ -37,18 +37,20 @@ export LD_LIBRARY_PATH="$FSLDIR/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 "$PYTHON" validation/probtrackx/prepare_multiregion_seeds.py \
   --labels "$OUT/jhu_labels_dwi.nii.gz" \
   --mask "$BED/nodif_brain_mask.nii.gz" --fa "$FA" --out "$OUT"
-CUDA_VISIBLE_DEVICES=0 bash validation/probtrackx/run_real_current.sh \
+CUDA_VISIBLE_DEVICES=1 FNIT_GPU_MEMORY_FRACTION=0.2 bash validation/probtrackx/run_real_current.sh \
   "$OUT/default" "$BED" "$OUT" "$FSLDIR" "$PYTHON" "$PWD/src" default
-CUDA_VISIBLE_DEVICES=0 bash validation/probtrackx/run_real_current.sh \
+CUDA_VISIBLE_DEVICES=1 FNIT_GPU_MEMORY_FRACTION=0.2 bash validation/probtrackx/run_real_current.sh \
   "$OUT/pd_ompl" "$BED" "$OUT" "$FSLDIR" "$PYTHON" "$PWD/src" pd_ompl
 "$PYTHON" benchmark/probtrackx_current.py --run-dir "$OUT/default" \
   --mode default --source-dir "$PWD/src/fnit/probtrackx" \
   --output-json "$OUT/report.default.private.json"
 "$PYTHON" benchmark/probtrackx_current.py --run-dir "$OUT/pd_ompl" \
   --mode pd_ompl --source-dir "$PWD/src/fnit/probtrackx" \
-  --output-json "$OUT/report.current.private.json" \
-  --output-figure "$OUT/real_network_pd_ompl_comparison.private.png"
-"$PYTHON" validation/probtrackx/measure_gpu_current.py \
+  --output-json "$OUT/report.current.private.json"
+"$PYTHON" validation/probtrackx/plot_network_report.py \
+  --report "$OUT/report.current.private.json" \
+  --output "$OUT/real_network_pd_ompl_comparison.private.png"
+CUDA_VISIBLE_DEVICES=1 "$PYTHON" validation/probtrackx/measure_gpu_current.py \
   --samples-dir "$BED" --roi-list "$OUT/pd_ompl/seed_list.txt" \
   --output-dir "$OUT/gpu_memory_network" \
   --source-dir "$PWD/src/fnit/probtrackx" \
@@ -61,7 +63,7 @@ CUDA_VISIBLE_DEVICES=0 bash validation/probtrackx/run_real_current.sh \
   --output "$OUT/report.current.latest.public.json"
 ```
 
-绘图需要 `matplotlib`，主页 Conda 环境包含该依赖。FSL 在本服务器上有时返回状态 255，但日志结束于 `finished` 且结果可读取；运行脚本记录状态码并逐项检查需要的输出。FNIT CPU/GPU 均正常返回 0。
+五区连接图使用主页 Conda 环境已包含的 Pillow 绘制。FSL 在本服务器上有时返回状态 255，但日志结束于 `finished` 且结果可读取；运行脚本记录状态码并逐项检查需要的输出。FNIT CPU/GPU 均正常返回 0。
 
 ## 三类连接矩阵的真实 DWI 复现
 
@@ -80,19 +82,19 @@ bash validation/probtrackx/run_real_matrices.sh \
 bash validation/probtrackx/run_real_matrices.sh \
   "$OUT" "$BED" "$ROIS" "$FSLDIR" "$PYTHON" \
   "$PWD/validation/probtrackx/prepare_connectome_masks.py" 500 seed_to_targets_cst_right
-CUDA_VISIBLE_DEVICES=0 bash validation/probtrackx/run_real_matrices.sh \
+CUDA_VISIBLE_DEVICES=1 bash validation/probtrackx/run_real_matrices.sh \
   "$OUT" "$BED" "$ROIS" "$FSLDIR" "$PYTHON" \
   "$PWD/validation/probtrackx/prepare_connectome_masks.py" 500 union_matrix1 gpu
-CUDA_VISIBLE_DEVICES=0 bash validation/probtrackx/run_real_matrices.sh \
+CUDA_VISIBLE_DEVICES=1 bash validation/probtrackx/run_real_matrices.sh \
   "$OUT" "$BED" "$ROIS" "$FSLDIR" "$PYTHON" \
   "$PWD/validation/probtrackx/prepare_connectome_masks.py" 500 union_matrix3 gpu
-CUDA_VISIBLE_DEVICES=0 bash validation/probtrackx/run_real_matrices.sh \
+CUDA_VISIBLE_DEVICES=1 bash validation/probtrackx/run_real_matrices.sh \
   "$OUT" "$BED" "$ROIS" "$FSLDIR" "$PYTHON" \
   "$PWD/validation/probtrackx/prepare_connectome_masks.py" 500 network gpu
 bash validation/probtrackx/run_real_matrices_fnit.sh \
   "$OUT/fnit_runs" "$BED" "$ROIS" "$OUT/masks/target_union.nii.gz" \
   "$PYTHON" "$FNIT_SRC" cpu 500
-CUDA_VISIBLE_DEVICES=0 bash validation/probtrackx/run_real_matrices_fnit.sh \
+CUDA_VISIBLE_DEVICES=1 FNIT_GPU_MEMORY_FRACTION=0.2 bash validation/probtrackx/run_real_matrices_fnit.sh \
   "$OUT/fnit_runs" "$BED" "$ROIS" "$OUT/masks/target_union.nii.gz" \
   "$PYTHON" "$FNIT_SRC" cuda:0 500
 "$PYTHON" benchmark/probtrackx_matrix_current.py \
@@ -153,4 +155,4 @@ export PRIVATE_WAYPOINT_OUT=/absolute/path/new-private-waypoint-run
 
 密度图相关在双方非零体素并集计算；前 10% Dice 用相同的 FSL 非零体素数十分之一作为双方 top-*k*。平均路径长度图的相关和 MAE 在双方都非零的体素上计算，并另报支持 Dice 与并集（含单侧缺失体素）误差。完整 ROI×ROI 原始矩阵只保存在授权服务器；公开报告仅含汇总误差。网络连接稀疏，个位数命中不宜单独解释。
 
-9×5×5 合成直线场用于计数规则回归，不列为正式 benchmark：`--pd --ompl` 的单 seed 和双 ROI 网络输出，以及单独 `--ompl` 的网络输出，均与 FSL 逐元素相同；matrix1/2/3 的 2×2 稀疏矩阵、坐标表、matrix2 lookup 和路径密度也与 FSL 逐项相同。新增 waypoint/`wtstop` 的 9 组合成场配对与 FSL 6.0.7.22 的 `waytotal` 和 `fdt_paths` 逐项相同，AND 条件下的 matrix2 `.dot` 亦逐项相同。`tests/probtrackx/` 的 40 项 CPU/CUDA 回归测试在 gpucw1 全部通过。合成数据只验证计数规则，不用于正式精度或耗时结论。公开真实 DWI benchmark 覆盖默认追踪、matrix1/2/3、seed-to-target 和五区 network；单 waypoint 的逐体素数组只保留在授权服务器，`wtstop` 的当前证据限于合成规则配对。
+9×5×5 合成直线场用于计数规则回归，不列为正式 benchmark：`--pd --ompl` 的单 seed 和双 ROI 网络输出，以及单独 `--ompl` 的网络输出，均与 FSL 逐元素相同；matrix1/2/3 的 2×2 稀疏矩阵、坐标表、matrix2 lookup 和路径密度也与 FSL 逐项相同。新增 waypoint/`wtstop` 的 9 组合成场配对与 FSL 6.0.7.22 的 `waytotal` 和 `fdt_paths` 逐项相同，AND 条件下的 matrix2 `.dot` 亦逐项相同。`tests/probtrackx/` 的 42 项 CPU/CUDA 回归测试在 gpucw1 全部通过。合成数据只验证计数规则，不用于正式精度或耗时结论。公开真实 DWI benchmark 覆盖默认追踪、matrix1/2/3、seed-to-target 和五区 network；单 waypoint 的逐体素数组只保留在授权服务器，`wtstop` 的当前证据限于合成规则配对。

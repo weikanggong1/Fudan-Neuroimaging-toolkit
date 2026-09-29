@@ -1,11 +1,11 @@
-# TorchBEDPOSTX 验证
+# TorchBEDPOSTX 当前验证
 
-[`report.public.json`](report.public.json) 保存 gpucw1 上 FSL 与当前 TorchBEDPOSTX 的真实 UK Biobank dMRI 诊断裁剪结果，包括 CPU/GPU 时间、输出一致性、链稳定性、纤维支持控制、源码 hash 和 FSL `probtrackx2` 互操作检查。方法和边界见 [功能说明](../../docs/bedpostx/README.md)。
+[功能、参数、输入输出和官方命令](../../docs/bedpostx/README.md) · [真实数据汇总报告](report.public.json) · [方向轴绘图脚本](plot_real_axes.py)
 
-公开内容包括一例 UK Biobank 数据中 14 个弱纤维体素和 64 个 FSL 富集交叉纤维体素的汇总统计，以及 64 体素裁剪的去标识方向轴图。原始 DWI 和完整后验保留在授权服务器。
+一例真实 UK Biobank DWI 分别取 14 个弱纤维体素和 64 个交叉纤维富集体素，使用三纤维、model 2、ARD=1、burn-in 1000、后续 1250 跳、每 25 跳保存一次、种子 8665904。FSL 6.0.7.22 的 `xfibres` CPU 输出用于精度对照，14 体素另运行 `xfibres_gpu` 核心测速。FNIT 在 gpucw1 的 H100 GPU 1 上运行；该卡已有其他任务，测试顺序执行，并以 `torch.cuda.set_per_process_memory_fraction(0.2)` 限制 PyTorch 分配。[报告](report.public.json)给出源码及图片 SHA-256、两种裁剪的时间、峰值已分配显存和逐项精度。
 
-![真实 UK Biobank dMRI 诊断 ROI 中 FSL 与 FNIT 的第二、第三纤维方向轴](../../docs/bedpostx/figures/bedpostx_real_ukb_direction_axes.png)
+14 体素优化前后 19 个 NIfTI 输出逐元素相同。64 体素的未编译结果与旧版逐元素相同，编译后 MCMC 链发生分叉；报告采用编译后输出重新计算对 FSL 的指标。该裁剪按已有 FSL 后验富集次要纤维，适合检查弱纤维和方向轴，不代表全脑无偏精度。FSL GPU 的时间仅为 `xfibres_gpu` 核心，不包含拆分、合并或调度。
 
-该图直接读取生成 [`report.public.json`](report.public.json) 所用的 FSL seed 8665904 与当前 FNIT H100 输出，没有重新拟合模型。图中 f2 的共同支持体素数与夹角中位数为 61 和 5.444097°，f3 为 25 和 8.299760°，与报告完全一致。报告绑定的当前数值核心 SHA-256 为 `87eedd3c10d1a393b499ca6c397aa22ea375f37afc2982fc8e2aa7f7414c80e0`；去除 PNG 元数据后的图像 SHA-256 为 `e233adab3703fc8eb4581a4cd8967debf735eca962674a1fdfd087b55ea95241`。
+![真实 DWI 诊断 ROI 的次要纤维方向轴](../../docs/bedpostx/figures/bedpostx_real_ukb_direction_axes.png)
 
-这 64 个体素按 FSL 后验图富集选择，用于检验真实交叉纤维区域，不代表无偏全脑精度；14 体素裁剪的 f2/f3 没有共同的分数 ≥0.1 支持。当前真实 benchmark 的结论只适用于报告中的诊断 ROI。[`synthetic_example.py`](../../docs/bedpostx/synthetic_example.py) 与 [`synthetic_example.png`](../../docs/bedpostx/synthetic_example.png) 只检验已知双交叉纤维信号。
+图片来自当前编译版与 FSL 的真实 64 体素输出。只绘制双方平均纤维分数均 ≥0.1 的体素：f2 为 61 个，f3 为 26 个。原始 DWI 和完整后验留在授权服务器；仓库仅保存汇总指标和去标识图。

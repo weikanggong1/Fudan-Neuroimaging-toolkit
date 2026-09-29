@@ -228,7 +228,7 @@ def main():
         "reference": "FSL probtrackx2 sparse .dot files; 1-based row/column/value plus size row",
         "data": "matched real DWI posterior; source images and per-edge details remain private",
         "source_sha256": {name: hashlib.sha256((args.source_dir / name).read_bytes()).hexdigest()
-                          for name in ("pipeline.py", "_triton.py", "cli.py", "matrix_io.py")},
+                          for name in ("pipeline.py", "_triton.py", "cli.py", "matrix_io.py", "_fast_counts.py")},
         "wall_seconds_including_load_and_write": {
             "fsl": _wall(args.fsl_time or Path(str(args.fsl_dir) + ".time")),
             "fnit": _wall(args.fnit_time or Path(str(args.fnit_dir) + ".time")),

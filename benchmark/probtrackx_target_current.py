@@ -73,7 +73,7 @@ def main():
     }
     report["source_sha256"] = {
         name: hashlib.sha256((args.source_dir / name).read_bytes()).hexdigest()
-        for name in ("pipeline.py", "_triton.py", "cli.py", "matrix_io.py")
+        for name in ("pipeline.py", "_triton.py", "cli.py", "matrix_io.py", "_fast_counts.py")
     }
     args.output_json.parent.mkdir(parents=True, exist_ok=True)
     args.output_json.write_text(json.dumps(report, indent=2) + "\n")

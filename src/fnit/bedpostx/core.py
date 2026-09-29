@@ -5,6 +5,7 @@ Jbabdi et al. (2012). The MCMC implementation does not reuse FSL C++ code.
 """
 
 from dataclasses import asdict, dataclass
+from functools import lru_cache
 import json
 import math
 from pathlib import Path
@@ -94,6 +95,12 @@ def _energy(state, observed, bvals, bvecs, config):
                        torch.full_like(energy, float("inf")))
 
 
+@lru_cache(maxsize=1)
+def _cuda_energy():
+    """Fuse the repeated float32 likelihood calculation on CUDA."""
+    return torch.compile(_energy, fullgraph=True)
+
+
 def _initial_state(observed, bvals, bvecs, config):
     """Initialize the chain from a log-linear diffusion-tensor estimate."""
     baseline = observed[:, bvals <= 50]
@@ -125,8 +132,9 @@ def _initial_state(observed, bvals, bvecs, config):
 
 @torch.no_grad()
 def _sample_chunk(observed, bvals, bvecs, config, generator):
+    energy_fn = _cuda_energy() if observed.is_cuda else _energy
     state = _initial_state(observed, bvals, bvecs, config)
-    current_energy = _energy(state, observed, bvals, bvecs, config)
+    current_energy = energy_fn(state, observed, bvals, bvecs, config)
     nvoxels = observed.shape[0]
     nsamples = config.njumps // config.sample_every
     samples = {key: torch.empty((nvoxels, nsamples, config.nfibres),
@@ -157,7 +165,7 @@ def _sample_chunk(observed, bvals, bvecs, config, generator):
                                                 device=old.device) * scales[key][:, column]
             candidate[key] = proposed
             index = column
-        new_energy = _energy(candidate, observed, bvals, bvecs, config)
+        new_energy = energy_fn(candidate, observed, bvals, bvecs, config)
         draw = torch.rand((nvoxels,), generator=generator, device=old.device).clamp_min(1e-8)
         keep = torch.log(draw) < current_energy - new_energy
         state[key] = torch.where(keep[:, None], candidate[key], old) if column is not None \

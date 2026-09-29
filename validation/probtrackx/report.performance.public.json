@@ -1,0 +1,93 @@
+{
+  "comparison_date": "2026-09-29",
+  "data": "同一真实 UK Biobank DWI 的 FSL BEDPOSTX 三纤维后验；5 个 ROI、35 个 seed 体素、每体素 2000 条、400 总步",
+  "mode": "--opd --pd --ompl --network",
+  "host": "gpucw1",
+  "gpu": "NVIDIA H100 PCIe GPU 1；与其他任务共享，依次执行",
+  "limit": {
+    "cuda_visible_devices": "1",
+    "pytorch_memory_fraction": 0.2,
+    "approximate_pytorch_limit_gib": 15.9,
+    "observed_peak_allocated_gib": 2.612851619720459,
+    "gpu1_background_memory_mib_before_baseline": 42608,
+    "gpu1_background_memory_mib_before_optimized": 42576,
+    "gpu1_observed_before_after": {
+      "baseline_stage": {
+        "before": "42608 MiB, 22%",
+        "after": "42608 MiB, 100%"
+      },
+      "optimized_stage": {
+        "before": "42576 MiB, 100%",
+        "after": "42576 MiB, 36%"
+      },
+      "optimized_full_command": {
+        "before": "25326 MiB, 100%",
+        "after": "25326 MiB, 100%"
+      },
+      "fsl_gpu_full_command": {
+        "before": "42608 MiB, 100%",
+        "after": "42608 MiB, 64%"
+      },
+      "grouped_stage": {
+        "before": "42576 MiB, 100%",
+        "after": "42576 MiB, 100%"
+      },
+      "default_full_command": {
+        "before": "42608 MiB, 59%",
+        "after": "42608 MiB, 50%"
+      }
+    }
+  },
+  "source_sha256": {
+    "pipeline.py": "e50f0039a55839826cd6bc5d11e3062a2afeaeaa8f38eb423d022b945348ca2a",
+    "_triton.py": "10ca096263bfe04d32a1e23acf6eff3876cf317f7955772e7e9d4aeaf220e3af",
+    "cli.py": "08ca8552fdb9d886e553e419dd3e860e8a3ff7906565f3ae695962d28d5e8a60",
+    "matrix_io.py": "115a2748068339094bfa2d01c1f2ea0159ad4389ab6b413129a3f146de8e6ed7",
+    "_fast_counts.py": "047b866e5715f03f3adbaa70807391d8f82c5e267fc2a82b3532290b7c6b3660"
+  },
+  "stage_timer_definition": "同一进程内 run()，不计 Python 启动和模块导入；GPU 同步后分段计时",
+  "stage_seconds": {
+    "baseline_batch_2048": {
+      "total": 16.201300809159875,
+      "posterior_load": 8.814555380027741,
+      "walk_and_transfer": 3.070423955563456,
+      "python_aggregation_and_other": 4.2580601195804775,
+      "walk_calls": 70,
+      "accepted_streamlines": 72
+    },
+    "grouped_batch_16384": {
+      "total": 15.404269494116306,
+      "posterior_load": 9.607311827596277,
+      "walk_and_transfer": 1.202570283319801,
+      "python_aggregation_and_other": 4.544108440168202,
+      "walk_calls": 10,
+      "accepted_streamlines": 76
+    },
+    "grouped_and_numba_batch_16384": {
+      "total": 10.984793792013079,
+      "posterior_load": 8.503321743104607,
+      "walk_and_transfer": 1.1749734221957624,
+      "python_aggregation_and_other": 1.2449581469409168,
+      "walk_calls": 10,
+      "accepted_streamlines": 76
+    }
+  },
+  "accuracy_check": {
+    "grouped_vs_grouped_and_numba": "真实数据的 fdt_paths、fdt_paths_lengths、fdt_network_matrix、fdt_network_matrix_lengths、waytotal 数组逐元素相同；batch 改变随机数流，因此不与 baseline 要求逐轨迹相同"
+  },
+  "whole_process_seconds": {
+    "fsl_gpu_new_run": 12.65,
+    "fnit_gpu_current_run": 12.96
+  },
+  "fsl_gpu_exit_status": 255,
+  "fsl_gpu_artifacts_valid": true,
+  "precision_source": "report.current.latest.public.json 中 network_gpu 对 FSL 的配对指标",
+  "interpretation": "GPU 为共享资源：本次 FNIT 长度加权完整命令启动前约 25.3 GiB 已占用，而 FSL 独立复跑前约 42.6 GiB 已占用。单次时间只说明该配置的瓶颈与优化效果，不代表稳定全脑加速。",
+  "baseline_source_sha256": {
+    "pipeline.py": "a7286cff6efd48469fec121d6db7e48cf39929b2ab45acfe8ac6f2badb92c0ec",
+    "_triton.py": "e22ae4599323a675a19ac02d2e9a53c124491a3be4563acd9616991d3d1e1776",
+    "cli.py": "85f362bf06ebf1932a74394a8f8b339673a737cc6b573cbcc3385033ec187c07",
+    "matrix_io.py": "115a2748068339094bfa2d01c1f2ea0159ad4389ab6b413129a3f146de8e6ed7"
+  },
+  "grouped_only_variant": "同一批大小和种子，在远端临时关闭 Numba 汇总分支，比较结束后恢复源码；其输出仅用于与当前快速汇总逐元素对照。"
+}

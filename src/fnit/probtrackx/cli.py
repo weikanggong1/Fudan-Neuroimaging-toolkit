@@ -43,7 +43,7 @@ def _add_arguments(parser):
     parser.add_argument("--usef", action="store_true")
     parser.add_argument("--pd", action="store_true", help="weight path density by length")
     parser.add_argument("--ompl", action="store_true", help="save mean path lengths")
-    parser.add_argument("--batch-size", type=int, default=2048)
+    parser.add_argument("--batch-size", type=int, default=16384)
     parser.add_argument("--rseed", type=int, default=12345)
     parser.add_argument("--overwrite", action="store_true")
     parser.set_defaults(_fnit_handler=run_args)

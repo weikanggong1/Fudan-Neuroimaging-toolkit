@@ -47,7 +47,7 @@ class TorchProbtrackX:
 
     def __init__(self, device="cpu", *, nsamples=5000, nsteps=2000,
                  steplength=0.5, cthr=0.2, fibthresh=0.01,
-                 batch_size=2048, seed=12345, distthresh=0.0, sampvox=0.0,
+                 batch_size=16384, seed=12345, distthresh=0.0, sampvox=0.0,
                  fibst=None, usef=False, randfib=0,
                  pathdist=False, mean_path_length=False):
         self.device = torch.device(device)
@@ -91,6 +91,8 @@ class TorchProbtrackX:
         self._flip_x = np.linalg.det(reference.affine[:3, :3]) > 0
         self._voxel_size = torch.as_tensor(reference.header.get_zooms()[:3],
                                             dtype=torch.float32, device=self.device)
+        self._step_voxel = tuple(float(np.float32(self.steplength) / np.float32(value))
+                                 for value in reference.header.get_zooms()[:3])
         mask = np.asarray(reference.dataobj) > 0
         if self._flip_x:
             mask = np.flip(mask, axis=0)
@@ -505,19 +507,49 @@ class TorchProbtrackX:
         totals = np.zeros(len(masks), dtype=np.int64)
         network_targets = (np.stack([roi.reshape(-1) for roi in masks])
                            if network_path else None)
+        fast_counts = (self.device.type == "cuda" and avoid_mask is None
+                       and stop_mask is None and waypoint_masks is None
+                       and wtstop_masks is None and m1 is None and m2 is None
+                       and m3 is None and s2t is None)
+        if fast_counts:
+            from ._fast_counts import accumulate_paths
+            roi_lookup = np.full(nvox, -1, dtype=np.int16)
+            if network is not None:
+                for index, roi in enumerate(masks):
+                    roi_lookup[roi.reshape(-1)] = index
+            fast_length_sum = length_sum if length_sum is not None else np.empty(0, np.float32)
+            fast_visit_count = visit_count if visit_count is not None else np.empty(0, np.float32)
+            fast_network = network if network is not None else np.empty((0, 0), np.float64)
+            fast_network_lengths = (network_length_sum if network_length_sum is not None
+                                    else np.empty((0, 0), np.float64))
+            fast_network_count = (network_count if network_count is not None
+                                  else np.empty((0, 0), np.int64))
+        points_per_batch = max(1, self.batch_size // self.nsamples)
         for roi_row, roi in enumerate(masks):
             other_targets = (np.delete(network_targets, roi_row, axis=0)
                              if network_targets is not None and waypoint_masks is not None else None)
-            for point in seed_coords[roi_row]:
-                seed_index = seed_lookup[np.ravel_multi_index(point, self._shape)]
-                for offset in range(0, self.nsamples, self.batch_size):
-                    count = min(self.batch_size, self.nsamples - offset)
-                    starts = torch.as_tensor(np.repeat(point[None], count, axis=0),
+            coords = seed_coords[roi_row]
+            for first in range(0, len(coords), points_per_batch):
+                points = coords[first:first + points_per_batch]
+                for offset in range(0, len(points) * self.nsamples, self.batch_size):
+                    ids = np.arange(offset, min(offset + self.batch_size,
+                                                len(points) * self.nsamples)) // self.nsamples
+                    starts = torch.as_tensor(points[ids],
                                              dtype=torch.float32, device=self.device)
                     starts = self._jitter_seed(starts, generator)
                     forward, initial = self._walk(starts, generator)
                     backward, _ = self._walk(starts, generator, initial)
-                    for path_a, path_b in zip(forward, backward):
+                    if fast_counts:
+                        accumulate_paths(forward, backward, roi_row, roi_lookup,
+                                         len(masks) if network is not None else 0,
+                                         self.steplength, self.distthresh, self.pathdist,
+                                         self.mean_path_length, density, fast_length_sum,
+                                         fast_visit_count, fast_network,
+                                         fast_network_lengths, fast_network_count, totals)
+                        continue
+                    for seed_id, path_a, path_b in zip(ids, forward, backward):
+                        point = points[seed_id]
+                        seed_index = seed_lookup[np.ravel_multi_index(point, self._shape)]
                         path_a, way_a = self._filter_half(
                             path_a, avoid_mask, stop_mask, forcefirststep,
                             wtstop_masks, return_events=True)

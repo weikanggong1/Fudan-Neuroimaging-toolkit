@@ -141,7 +141,7 @@ def walk(tracker, starts, generator, reverse_direction=None):
         tracker._mask, tracker._theta, tracker._phi, tracker._fraction,
         history, first, random_seed,
         count, tracker.nsteps // 2, *tracker._shape, tracker._ntime, tracker._theta.shape[0],
-        *(tracker.steplength / tracker._voxel_size).tolist(),
+        *tracker._step_voxel,
         tracker.cthr, tracker.fibthresh, reverse_direction is not None,
         tracker.fibst - 1 + (16 if tracker.usef else 0) +
         (0 if tracker.fibst_explicit else 32 * tracker.randfib), 128,

@@ -1,6 +1,6 @@
 # ProbtrackX 源码目录
 
-`TorchProbtrackX` 使用 BEDPOSTX 方向后验进行同一扩散网格上的体积概率追踪，可输出 seed→voxel 密度、voxel→voxel 稀疏矩阵、voxel→ROI 计数图和有向 ROI×ROI 矩阵。CPU 路径使用 PyTorch，CUDA 步进使用 Triton；运行时不调用 FSL。
+`TorchProbtrackX` 使用 BEDPOSTX 方向后验进行同一扩散网格上的体积概率追踪，可输出 seed→voxel 密度、voxel→voxel 稀疏矩阵、voxel→ROI 计数图和有向 ROI×ROI 矩阵。CPU 路径使用 PyTorch，CUDA 步进使用 Triton；无额外路径约束的 CUDA 结果由 Numba 汇总计数。运行时不调用 FSL。
 
 ## Python 单被试示例
 
@@ -14,7 +14,7 @@ tracker = TorchProbtrackX(
     steplength=0.5,  # 每步长度，单位 mm
     cthr=0.2,  # 方向点积阈值
     fibthresh=0.01,  # 纤维分数阈值
-    batch_size=2048,  # 每批并行轨迹数
+    batch_size=16384,  # 每批并行轨迹数
     seed=12345,  # 随机数种子
 )
 result = tracker.run(
@@ -28,6 +28,8 @@ result = tracker.run(
 ```
 
 `result.paths` 指向 `fdt_paths.nii.gz`，`result.waytotal` 指向有效轨迹计数；启用相应选项后还会返回 matrix1/2/3、seed-to-target 和 network 文件路径。所有 NIfTI 继承 BEDPOSTX mask 的 shape 和 affine。
+
+内部 `accumulate_paths` 接收前、后半轨迹的 `[轨迹, 步数]` 一维体素索引数组（`-1` 表示终止）、ROI 查找表、步长和最短距离阈值，并就地更新路径密度、长度、网络矩阵和有效轨迹计数数组；没有单独返回文件。它用于无额外路径约束的 CUDA `--opd`、`--pd --ompl`、`--network` 模式，对应原版 `probtrackx2_gpu` 的同名选项。当前真实数据速度和精度见[性能记录](../../../validation/probtrackx/report.performance.public.json)及[配对报告](../../../validation/probtrackx/report.current.latest.public.json)。
 
 ## 命令行与原软件对应
 

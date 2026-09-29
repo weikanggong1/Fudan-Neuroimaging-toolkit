@@ -97,7 +97,7 @@ def main():
     args.output_dir.mkdir(parents=True)
     out = args.output_dir.resolve()
     source = args.source_dir.resolve()
-    source_files = ("pipeline.py", "_triton.py", "cli.py", "matrix_io.py")
+    source_files = ("pipeline.py", "_triton.py", "cli.py", "matrix_io.py", "_fast_counts.py")
     source_sha256 = {
         name: hashlib.sha256((source / "fnit/probtrackx" / name).read_bytes()).hexdigest()
         for name in source_files
@@ -121,7 +121,7 @@ def main():
                     "--waypoints", str(waypoint), "--output-dir", str(fnit_out),
                     "--device", "cpu", "--nsamples", str(args.nsamples),
                     "--nsteps", "400", "--steplength", "0.5", "--cthr", "0.2",
-                    "--fibthresh", "0.01", "--batch-size", "2048",
+                    "--fibthresh", "0.01", "--batch-size", "16384",
                     "--rseed", "20260927"]
     fsl_run = _run(fsl_command, out / "fsl_cpu.log", env)
     for name in ("fdt_paths.nii.gz", "waytotal"):
@@ -148,7 +148,7 @@ def main():
         },
         "settings": {"nsamples_per_seed_voxel": args.nsamples, "nsteps": 400,
                      "steplength_mm": 0.5, "cthr": 0.2, "fibthresh": 0.01,
-                     "rseed": 20260927, "fnit_batch_size": 2048,
+                     "rseed": 20260927, "fnit_batch_size": 16384,
                      "cpu_threads": 8, "options": ["opd", "waypoints"]},
         "source_sha256": source_sha256,
         "wall_time": {"fsl": fsl_run, "fnit": fnit_run},

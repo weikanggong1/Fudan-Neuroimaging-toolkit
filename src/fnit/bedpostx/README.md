@@ -1,6 +1,6 @@
 # TorchBEDPOSTX 源码目录
 
-`TorchBEDPOSTX` 是单被试 Python API，读取 FSL 风格的 DWI、脑掩膜、b-value 和 b-vector，写出概率纤维追踪所需的方向与纤维分数后验样本。运行时不调用 FSL。
+`TorchBEDPOSTX` 是单被试 Python API，读取 FSL 风格的 DWI、脑掩膜、b-value 和 b-vector，写出概率纤维追踪所需的方向与纤维分数后验样本。CUDA 路径以 float32 和默认 TF32 运行，并编译重复的似然计算；运行时不调用 FSL。
 
 ```python
 from fnit.bedpostx import TorchBEDPOSTX

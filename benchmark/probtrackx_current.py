@@ -62,7 +62,6 @@ def main():
     parser.add_argument("--mode", choices=("default", "pd_ompl"), default="pd_ompl")
     parser.add_argument("--source-dir", type=Path, required=True)
     parser.add_argument("--output-json", type=Path, required=True)
-    parser.add_argument("--output-figure", type=Path)
     args = parser.parse_args()
     directory = args.run_dir
     names = {
@@ -80,10 +79,10 @@ def main():
                      "network_rois": 5, "network_nsamples": 2000,
                      "nsteps": 400, "steplength_mm": 0.5,
                      "cthr": 0.2, "fibthresh": 0.01,
-                     "rseed": 20260927, "fnit_batch_size": 2048,
+                     "rseed": 20260927, "fnit_batch_size": 16384,
                      "cpu_threads": 8},
         "source_sha256": {name: hashlib.sha256((args.source_dir / name).read_bytes()).hexdigest()
-                          for name in ("pipeline.py", "_triton.py", "cli.py", "matrix_io.py")},
+                          for name in ("pipeline.py", "_triton.py", "cli.py", "matrix_io.py", "_fast_counts.py")},
         "cases": {},
     }
     for name, (fsl_name, fnit_name) in names.items():
@@ -105,36 +104,6 @@ def main():
         report["cases"][name] = result
     args.output_json.parent.mkdir(parents=True, exist_ok=True)
     args.output_json.write_text(json.dumps(report, indent=2) + "\n")
-    if args.output_figure:
-        if args.mode != "pd_ompl":
-            raise ValueError("connectivity figure requires pd_ompl mode")
-        import matplotlib
-        matplotlib.use("Agg")
-        import matplotlib.pyplot as plt
-
-        roi = ["CC genu", "CST R", "CST L", "SLF R", "SLF L"]
-        names = ("matrix", "mean_length_matrix")
-        units = ("weighted paths (mm)", "mean length (mm)")
-        fig, axes = plt.subplots(2, 3, figsize=(11, 7), layout="constrained")
-        network = report["cases"]["network_gpu"]
-        for row, (name, unit) in enumerate(zip(names, units)):
-            a = np.asarray(network[name]["fsl"])
-            b = np.asarray(network[name]["fnit"])
-            maximum = max(float(a.max()), float(b.max()), 1.0)
-            difference = max(float(np.abs(a - b).max()), 1.0)
-            for col, (data, title, cmap, low, high) in enumerate((
-                    (a, "FSL", "viridis", 0, maximum),
-                    (b, "FNIT", "viridis", 0, maximum),
-                    (b - a, "FNIT − FSL", "coolwarm", -difference, difference))):
-                ax = axes[row, col]
-                im = ax.imshow(data, cmap=cmap, vmin=low, vmax=high)
-                ax.set_xticks(range(5), roi, rotation=45, ha="right", fontsize=8)
-                ax.set_yticks(range(5), roi, fontsize=8)
-                ax.set_title(f"{title}: {unit}")
-                fig.colorbar(im, ax=ax, fraction=0.046)
-        args.output_figure.parent.mkdir(parents=True, exist_ok=True)
-        fig.savefig(args.output_figure, dpi=180)
-        plt.close(fig)
 
 
 if __name__ == "__main__":

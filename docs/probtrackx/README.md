@@ -16,7 +16,7 @@ tracker = TorchProbtrackX(
     steplength=0.5,  # 每一步的物理长度，单位 mm
     cthr=0.2,  # 相邻方向最小点积阈值，控制曲率
     fibthresh=0.01,  # 可选纤维方向的最小 volume fraction
-    batch_size=2048,  # 同批并行推进的轨迹数
+    batch_size=16384,  # 同批并行推进的轨迹数；GPU 五区测试使用该值
     seed=12345,  # 随机数种子，对应 FSL --rseed
     distthresh=0.0,  # 每个半轨迹的最短距离阈值，单位 mm
     sampvox=0.0,  # 种子体素内随机抖动半径，单位 mm
@@ -192,7 +192,7 @@ fnit probtrackx --samples-dir /absolute/path/subject.bedpostX \
 
 ## 与 FSL 的真实 DWI benchmark
 
-在 gpucw1 使用同一例真实 UK Biobank DWI 的 FSL BEDPOSTX 三纤维后验，分别以 FSL 6.0.7.22 和本次 FNIT 源码运行。默认密度与长度加权模式采用 400 总步、0.5 mm 步长、`cthr=0.2`、`fibthresh=0.01`、相同随机种子；单 seed 每体素 200 条，五区网络每体素 2000 条。FNIT 批大小 2048；CPU 为 8 线程。时间为进程启动、后验载入、追踪及写盘的总墙钟。双方随机数流不同，因此比较汇总图和矩阵，不要求逐轨迹相同。
+在 gpucw1 使用同一例真实 UK Biobank DWI 的 FSL BEDPOSTX 三纤维后验，分别以 FSL 6.0.7.22 和本次 FNIT 源码运行。默认密度与长度加权模式采用 400 总步、0.5 mm 步长、`cthr=0.2`、`fibthresh=0.01`、相同随机种子；单 seed 每体素 200 条，五区网络每体素 2000 条。FNIT 批大小 16384；CPU 为 8 线程。时间为进程启动、后验载入、追踪及写盘的总墙钟。FSL 结果来自既有同输入同参数运行，FNIT 当前源码于 2026-09-29 复跑；GPU 1 当时非空闲，PyTorch 进程显存限为总量 20%，因此墙钟受其他任务影响。双方随机数流不同，比较汇总图和矩阵，不要求逐轨迹相同。
 
 ### Seed→voxel 与 region→region
 
@@ -200,21 +200,23 @@ fnit probtrackx --samples-dir /absolute/path/subject.bedpostX \
 
 | 任务 | FSL / FNIT (s) | 密度 r | 支持 Dice | top 10% Dice | ROI 矩阵 MAE |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| 单 seed CPU | 12.06 / 13.76 | 0.9937 | 0.6957 | 0.8929 | — |
-| 单 seed GPU | 12.41 / 12.94 | 0.9937 | 0.6959 | 0.8856 | — |
-| 五区网络 CPU | 37.93 / 53.80 | 0.9388 | 0.5620 | 0.8142 | 0.76 |
-| 五区网络 GPU | 13.81 / 16.75 | 0.9537 | 0.5181 | 0.7949 | 0.60 |
+| 单 seed CPU | 12.06 / 13.82 | 0.9935 | 0.6975 | 0.8792 | — |
+| 单 seed GPU | 12.41 / 17.35 | 0.9942 | 0.7003 | 0.8763 | — |
+| 五区网络 CPU | 37.93 / 36.22 | 0.9290 | 0.5516 | 0.7611 | 0.60 |
+| 五区网络 GPU | 13.81 / 17.75 | 0.9436 | 0.5303 | 0.7179 | 0.76 |
 
 长度加权 `--opd --pd --ompl`。平均路径长度的 r 和 MAE 仅在双方均为非零的体素上计算，MAE 单位为 mm。该模式的 ROI 矩阵为长度加权和，不能与计数矩阵直接相减。
 
 | 任务 | FSL / FNIT (s) | 加权密度 r | 支持 Dice | 平均长度 r | 长度 MAE (mm) |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| 单 seed CPU | 13.42 / 15.68 | 0.9750 | 0.6956 | 0.8680 | 5.69 |
-| 单 seed GPU | 14.18 / 13.14 | 0.9758 | 0.6959 | 0.8638 | 5.73 |
-| 五区网络 CPU | 32.94 / 54.58 | 0.8298 | 0.5610 | 0.8440 | 6.81 |
-| 五区网络 GPU | 13.29 / 18.38 | 0.8330 | 0.5166 | 0.8676 | 6.35 |
+| 单 seed CPU | 13.42 / 13.72 | 0.9752 | 0.6975 | 0.8694 | 5.55 |
+| 单 seed GPU | 14.18 / 16.89 | 0.9772 | 0.7003 | 0.8642 | 5.64 |
+| 五区网络 CPU | 32.94 / 33.63 | 0.8082 | 0.5504 | 0.8457 | 7.13 |
+| 五区网络 GPU | 13.29 / 12.96 | 0.8422 | 0.5301 | 0.8821 | 6.24 |
 
-以上四类模式的配对数值与源码 SHA-256 分别见[默认计数报告](../../validation/probtrackx/report.default.latest.public.json)和[长度加权报告](../../validation/probtrackx/report.current.latest.public.json)。在这些配置下，FNIT CPU 网络慢于 FSL CPU；GPU 也未显示稳定的整体加速。
+以上四类模式的配对数值与源码 SHA-256 分别见[默认计数报告](../../validation/probtrackx/report.default.latest.public.json)和[长度加权报告](../../validation/probtrackx/report.current.latest.public.json)。单 seed 当前 CPU 比 GPU 快，五区网络 GPU 则比 CPU 快；长度加权 GPU 网络这次为 12.96 秒，既有 FSL 记录为 13.29 秒，同机独立复跑 FSL 为 12.65 秒。两次独立运行前 GPU 分别已有约 25.3 和 42.6 GiB 占用；这些单次墙钟只能用于定位瓶颈，不能证明稳定加速。
+
+分段计时见[性能记录](../../validation/probtrackx/report.performance.public.json)：旧版 2048 批大小使 35 个 seed 体素触发 70 次双向追踪调用；当前 16384 批大小合并多个 seed 体素，仅需 10 次。缓存步长参数去掉每次调用前的 GPU→CPU 同步，Numba 汇总替代逐轨迹 Python 循环。真实长度加权五区网络的进程内调用由 16.20 秒降至 10.98 秒；其中后验载入仍占 8.50 秒，属于当前主要瓶颈。该分段计时不包含 Python 启动与模块导入，完整命令另见上表。
 
 ### Voxel→voxel 稀疏矩阵
 
@@ -222,20 +224,20 @@ fnit probtrackx --samples-dir /absolute/path/subject.bedpostX \
 
 | 输出 | FSL / FNIT (s) | 非零边 FSL / FNIT | 支持 Dice | 边权 r | 边权 MAE |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| matrix1 | 17.21 / 31.25 | 155 / 144 | 0.7425 | 0.99983 | 1.86 |
-| matrix2 | 18.55 / 30.03 | 190 / 179 | 0.7913 | 0.99990 | 1.57 |
-| matrix3 | 18.51 / 30.89 | 134 / 122 | 0.7734 | 0.99991 | 2.94 |
+| matrix1 | 17.21 / 18.13 | 155 / 140 | 0.7390 | 0.99986 | 1.82 |
+| matrix2 | 18.55 / 33.92 | 190 / 175 | 0.7890 | 0.99992 | 1.53 |
+| matrix3 | 18.51 / 19.45 | 134 / 110 | 0.7705 | 0.99994 | 2.82 |
 
 高权重边使 r 接近 1，但支持 Dice 为 0.74–0.79，表示低计数边仍不一致；本次 FNIT CPU 三种稀疏矩阵均慢于 FSL CPU。逐模式数值和源码哈希见[matrix1](../../validation/probtrackx/report.matrix1.cpu.latest.public.json)、[matrix2](../../validation/probtrackx/report.matrix2.cpu.latest.public.json)、[matrix3](../../validation/probtrackx/report.matrix3.cpu.latest.public.json)。
 
 ### Voxel→ROI 与归一化 ROI 矩阵
 
-单个真实 ROI seed 到 5 个目标的 `--targetmasks --os2t` 配对：FSL / FNIT 为 12.35 / 15.97 秒；每个 seed 体素×目标的平均绝对计数误差为 0.1714，最大误差为 2。报告见[seed→ROI](../../validation/probtrackx/report.targets.cpu.latest.public.json)。
+单个真实 ROI seed 到 5 个目标的 `--targetmasks --os2t` 配对：FSL / FNIT 为 12.35 / 14.03 秒；每个 seed 体素×目标的平均绝对计数误差为 0.0571，最大误差为 1。报告见[seed→ROI](../../validation/probtrackx/report.targets.cpu.latest.public.json)。
 
-另一组每体素 500 条的五区网络计数配对：FSL / FNIT 为 20.13 / 30.15 秒；原始有向矩阵 MAE 为 0.32。FNIT 的额外归一化有向矩阵和对称矩阵按上文公式生成，和 FSL 原始矩阵含义不同；该组与 FSL 原始矩阵比较后的 MAE 分别为 0.000091 与 0.000023（比较时先对 FSL 原始矩阵施加相同公式）。
+另一组每体素 500 条的五区网络计数配对：FSL / FNIT 为 20.13 / 21.39 秒；原始有向矩阵 MAE 为 0.12。FNIT 的额外归一化有向矩阵和对称矩阵按上文公式生成，和 FSL 原始矩阵含义不同；该组与 FSL 原始矩阵比较后的 MAE 均为 0.000034（比较时先对 FSL 原始矩阵施加相同公式）。
 
 ![真实 UK Biobank dMRI 的五区长度加权连接矩阵](figures/probtrackx_real_ukb_network_pd_ompl.png)
 
-上图来自同一例真实 DWI 的 CPU 五区网络 `--opd --pd --ompl` 配对。上排为累计长度加权连接矩阵，下排为命中轨迹的平均长度；从左到右依次为 FSL、当前 FNIT 和 FNIT−FSL。区域标签只保留通用的 JHU 解剖名称，不含病例编号或服务器路径。图中矩阵来自当前源码哈希绑定的同一组输出，与[长度加权报告](../../validation/probtrackx/report.current.latest.public.json)中的矩阵 MAE、密度图和时间统计对应。
+上图来自同一例真实 DWI 的 GPU 五区网络 `--opd --pd --ompl` 配对。上排为累计长度加权连接矩阵，下排为命中轨迹的平均长度；从左到右依次为 FSL、当前 FNIT 和 FNIT−FSL。区域标签只保留通用的 JHU 解剖名称，不含病例编号或服务器路径。图中矩阵来自当前源码哈希绑定的同一组输出，与[长度加权报告](../../validation/probtrackx/report.current.latest.public.json)中的矩阵 MAE、密度图和时间统计对应；绘图脚本见[plot_network_report.py](../../validation/probtrackx/plot_network_report.py)。
 
-原始 DWI、BEDPOSTX 后验、seed、逐体素密度图和完整文本矩阵仍保留在授权服务器；仓库公开六份汇总 JSON 和这一张去标识连接矩阵图。双方随机数流不同，这张图比较的是网络汇总结果，不能证明逐轨迹一致。当前证据只有一例数据、五个 ROI，且网络较稀疏；它不能替代多病例或全脑分区验证。[复现命令和指标定义](../../validation/probtrackx/README.md)列出比较方法。合成直线场的 FSL 逐项相同测试只验证计数规则，不替代这组真实数据误差。`tests/probtrackx/` 的 40 项 CPU/CUDA 测试已在 gpucw1 通过。
+原始 DWI、BEDPOSTX 后验、seed、逐体素密度图和完整文本矩阵仍保留在授权服务器；仓库公开六份配对汇总 JSON、一份性能分段 JSON 和这一张去标识连接矩阵图。双方随机数流不同，这张图比较的是网络汇总结果，不能证明逐轨迹一致。当前证据只有一例数据、五个 ROI，且网络较稀疏；它不能替代多病例或全脑分区验证。[复现命令和指标定义](../../validation/probtrackx/README.md)列出比较方法。合成直线场的 FSL 逐项相同测试只验证计数规则，不替代这组真实数据误差。`tests/probtrackx/` 的 42 项 CPU/CUDA 测试已在 gpucw1 通过。

@@ -21,15 +21,16 @@ def main():
     rois = [Path(line) for line in args.roi_list.read_text().splitlines() if line.strip()]
     if len(rois) != 5:
         raise ValueError("expected five real-data ROIs")
+    torch.cuda.set_per_process_memory_fraction(0.2)
     torch.cuda.reset_peak_memory_stats()
     result = TorchProbtrackX(device="cuda:0", nsamples=2000, nsteps=400,
-                             batch_size=2048, seed=20260927,
+                             batch_size=16384, seed=20260927,
                              pathdist=True, mean_path_length=True).run(
                                  args.samples_dir, args.output_dir, regions=rois)
     report = {
         "purpose": "real DWI five-ROI network --pd --ompl peak-memory check",
         "source_sha256": {name: hashlib.sha256((args.source_dir / name).read_bytes()).hexdigest()
-                          for name in ("pipeline.py", "_triton.py", "cli.py")},
+                          for name in ("pipeline.py", "_triton.py", "cli.py", "_fast_counts.py")},
         "device": torch.cuda.get_device_name(0),
         "measurement": "torch.cuda.max_memory_allocated() / 1024**3",
         "peak_cuda_allocated_gib": torch.cuda.max_memory_allocated() / 1024**3,

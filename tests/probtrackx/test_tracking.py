@@ -66,6 +66,42 @@ def test_network_counts_each_target_once_per_streamline_and_is_directed(tmp_path
                                                      regions=[left, right])
 
 
+def test_multiple_seed_voxels_share_one_tracking_batch(tmp_path, monkeypatch):
+    samples, affine = _field(tmp_path)
+    seed = np.zeros((9, 5, 5), dtype=np.uint8)
+    seed[2, 2, 2] = seed[4, 2, 2] = 1
+    seed_path = tmp_path / "two-seeds.nii.gz"
+    nib.save(nib.Nifti1Image(seed, affine), seed_path)
+    calls = []
+    original = TorchProbtrackX._walk
+
+    def record(self, starts, generator, reverse_direction=None):
+        calls.append(len(starts))
+        return original(self, starts, generator, reverse_direction)
+
+    monkeypatch.setattr(TorchProbtrackX, "_walk", record)
+    result = TorchProbtrackX(nsamples=3, nsteps=40, steplength=1,
+                             batch_size=6, seed=7).run(samples, tmp_path / "batched",
+                                                       seed=seed_path)
+    assert calls == [6, 6]
+    assert result.accepted_streamlines == 6
+    assert int(result.waytotal.read_text().strip()) == 6
+
+
+@pytest.mark.parametrize("device", ("cpu", "cuda"))
+def test_cached_step_keeps_float32_tracking_value(tmp_path, device):
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA unavailable")
+    samples, _ = _field(tmp_path)
+    affine = np.diag([-2.0192308, 2.0192308, 1.9999994, 1.0])
+    for path in samples.glob("*.nii.gz"):
+        image = nib.load(path)
+        nib.save(nib.Nifti1Image(np.asarray(image.dataobj), affine), path)
+    tracker = TorchProbtrackX(device=device, steplength=0.5)
+    tracker._load_samples(samples)
+    assert tracker._step_voxel == tuple((tracker.steplength / tracker._voxel_size).tolist())
+
+
 def test_neurological_storage_flip_and_roi_geometry_check(tmp_path):
     samples, affine = _field(tmp_path, neurological=True)
     seed = _roi(tmp_path / "seed.nii.gz", affine, 2)

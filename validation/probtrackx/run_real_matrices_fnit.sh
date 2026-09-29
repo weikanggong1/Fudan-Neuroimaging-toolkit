@@ -17,6 +17,8 @@ mkdir -p "$out"
 out=$(cd "$out" && pwd)
 export PYTHONPATH="$src${PYTHONPATH:+:$PYTHONPATH}"
 export OMP_NUM_THREADS=8 MKL_NUM_THREADS=8
+gpu=${CUDA_VISIBLE_DEVICES:-0}
+gpu=${gpu%%,*}
 run_one() {
   local name=$1 status=0
   local flags=()
@@ -33,12 +35,22 @@ run_one() {
   esac
   [[ ! -e "$out/fnit_${device}_$name" ]] ||
     { echo "Output exists: $out/fnit_${device}_$name" >&2; return 1; }
+  local entry=(-m fnit.probtrackx.cli)
+  if [[ "$device" == cuda:* && -n "${FNIT_GPU_MEMORY_FRACTION:-}" ]]; then
+    entry=(-c 'import os, torch; torch.cuda.set_per_process_memory_fraction(float(os.environ["FNIT_GPU_MEMORY_FRACTION"])); from fnit.probtrackx.cli import main; main()')
+  fi
+  if [[ "$device" == cuda:* ]]; then
+    nvidia-smi --id="$gpu" --query-gpu=index,memory.used,utilization.gpu --format=csv,noheader > "$out/fnit_${device}_$name.gpu_before.csv"
+  fi
   /usr/bin/time -f 'wall_s=%e' -o "$out/fnit_${device}_$name.time" \
-    "$py" -m fnit.probtrackx.cli --samples-dir "$bed" \
+    "$py" "${entry[@]}" --samples-dir "$bed" \
     --output-dir "$out/fnit_${device}_$name" --device "$device" \
     --nsamples "$nsamples" --nsteps 400 --steplength 0.5 \
     --cthr 0.2 --fibthresh 0.01 --rseed 20260927 \
     "${flags[@]}" > "$out/fnit_${device}_$name.log" 2>&1 || status=$?
+  if [[ "$device" == cuda:* ]]; then
+    nvidia-smi --id="$gpu" --query-gpu=index,memory.used,utilization.gpu --format=csv,noheader > "$out/fnit_${device}_$name.gpu_after.csv"
+  fi
   printf 'exit_code=%s\n' "$status" > "$out/fnit_${device}_$name.status"
   [[ $status -eq 0 && -s "$out/fnit_${device}_$name/waytotal" &&
      -s "$out/fnit_${device}_$name/fdt_paths.nii.gz" ]] ||

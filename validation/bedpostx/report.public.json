@@ -1,501 +1,247 @@
 {
-  "comparison_date": "2026-09-27",
-  "host": "gpucw1",
-  "original_software": "FSL 6.0.7.22 xfibres CPU",
-  "current_implementation": "TorchBEDPOSTX float32; H100 GPU matmul TF32 enabled",
-  "common_parameters": {
+  "comparison_date": "2026-09-29",
+  "data": "同一例真实 UK Biobank DWI 的 14 个弱纤维体素与 64 个富集交叉纤维体素；只公开汇总指标",
+  "settings": {
     "model": 2,
-    "nfibres_real_roi": 3,
-    "nfibres_synthetic": 2,
+    "nfibres": 3,
     "burnin": 1000,
-    "jumps_after_burnin": 1250,
+    "njumps": 1250,
     "sample_every": 25,
-    "draws_per_voxel": 50,
     "ard_weight": 1.0,
-    "seed": 8665904
+    "seed": 8665904,
+    "dtype": "float32",
+    "cuda_tf32": true
   },
-  "real_ukb_roi": {
-    "data_policy": "Only aggregate values are released. The DWI crop and subject-level maps remain on the research server.",
-    "dwi_shape": [
-      7,
-      13,
-      7,
-      105
-    ],
-    "masked_voxels": 14,
-    "seconds": {
-      "fsl_cpu": 10.99,
-      "fnit_cpu_one_thread": 22.54,
-      "fnit_h100_gpu_1": 39.91
-    },
-    "exit_status": {
-      "fsl_cpu": 255,
-      "fnit_cpu": 0,
-      "fnit_gpu": 0
-    },
-    "fsl_artifacts_valid": true,
-    "comparison_to_fsl_cpu": {
-      "fnit_cpu": {
-        "mean_f1": {
-          "mae": 0.013927257619798183,
-          "pearson_r": 0.997671170783821,
-          "fnit_roi_mean": 0.40255194902420044
-        },
-        "mean_f2": {
-          "mae": 0.017556264996528625,
-          "pearson_r": 0.44057857686213897,
-          "fnit_roi_mean": 0.02049337700009346
-        },
-        "mean_f3": {
-          "mae": 0.007236466743052006,
-          "pearson_r": 0.07011729928595625,
-          "fnit_roi_mean": 0.0042562587186694145
-        },
-        "mean_d_mm2_per_s": {
-          "mae": 0.00011870540038216859,
-          "pearson_r": 0.9576041405151234,
-          "fnit_roi_mean": 0.0020122069399803877
-        },
-        "mean_d_std_mm2_per_s": {
-          "mae": 0.00023866406991146505,
-          "pearson_r": 0.3244942441892168,
-          "fnit_roi_mean": 0.0001445974048692733
-        },
-        "principal_axis": {
-          "fibre_1": {
-            "median_degrees_all": 0.5295044183731079,
-            "supported_voxels": 11,
-            "median_degrees_supported": 0.4347626864910126
-          },
-          "fibre_2": {
-            "median_degrees_all": 49.914894104003906,
-            "supported_voxels": 0,
-            "median_degrees_supported": null
-          },
-          "fibre_3": {
-            "median_degrees_all": 53.99457931518555,
-            "supported_voxels": 0,
-            "median_degrees_supported": null
-          }
-        }
+  "gpu_test": {
+    "host": "gpucw1",
+    "device": "NVIDIA H100 PCIe GPU 1",
+    "state": "与其他任务共享，测试前后均非空闲",
+    "pytorch_memory_fraction_limit": 0.2,
+    "cap_gib_approximately": 15.9,
+    "sequential_gpu_runs": true,
+    "wall_time_limit": "共享负载会造成波动；单次诊断裁剪结果不外推全脑",
+    "observed_gpu1_before_after": {
+      "14_voxel_full_compiled": {
+        "before": "42608 MiB, 100%",
+        "after": "42608 MiB, 100%"
       },
-      "fnit_gpu": {
-        "mean_f1": {
-          "mae": 0.010876177810132504,
-          "pearson_r": 0.9991778190243195,
-          "fnit_roi_mean": 0.4033651649951935
-        },
-        "mean_f2": {
-          "mae": 0.012820960953831673,
-          "pearson_r": 0.5263991140544944,
-          "fnit_roi_mean": 0.02303224615752697
-        },
-        "mean_f3": {
-          "mae": 0.00453755771741271,
-          "pearson_r": 0.5803262481619965,
-          "fnit_roi_mean": 0.0028105422388762236
-        },
-        "mean_d_mm2_per_s": {
-          "mae": 0.00011704638745868579,
-          "pearson_r": 0.9607968441635572,
-          "fnit_roi_mean": 0.0019745409954339266
-        },
-        "mean_d_std_mm2_per_s": {
-          "mae": 0.00021663191728293896,
-          "pearson_r": 0.5297406910467355,
-          "fnit_roi_mean": 8.183697900676634e-06
-        },
-        "principal_axis": {
-          "fibre_1": {
-            "median_degrees_all": 0.6600545644760132,
-            "supported_voxels": 12,
-            "median_degrees_supported": 0.5522167682647705
-          },
-          "fibre_2": {
-            "median_degrees_all": 38.945220947265625,
-            "supported_voxels": 0,
-            "median_degrees_supported": null
-          },
-          "fibre_3": {
-            "median_degrees_all": 67.72673797607422,
-            "supported_voxels": 0,
-            "median_degrees_supported": null
-          }
-        }
-      }
-    },
-    "secondary_axis_support": "Neither f2 nor f3 reached mean fraction >= 0.1 in both FSL and current FNIT at any voxel; their axis errors are unsupported.",
-    "fsl_probtrackx2_interoperability": {
-      "loaded_fibres": 3,
-      "loaded_draws_per_voxel": 50,
-      "waytotal": 20,
-      "requested_streamlines": 20,
-      "density_shape": [
-        7,
-        13,
-        7
-      ],
-      "density_sum": 57,
-      "process_exit_status": 255,
-      "finished_log": true
-    }
-  },
-  "same_roi_diagnostic_controls": {
-    "extended_parameters": {
-      "burnin": 5000,
-      "jumps_after_burnin": 5000,
-      "sample_every": 100,
-      "draws_per_voxel": 50
-    },
-    "fsl_nonlinear_short_roi_means": {
-      "f1": 0.39993491768836975,
-      "f2": 0.023613886907696724,
-      "f3": 0.0059680878184735775,
-      "d_mm2_per_s": 0.0020485094282776117,
-      "d_std_mm2_per_s": 0.0002242912451038137
-    },
-    "fsl_tensor_short_roi_means": {
-      "f1": 0.405402272939682,
-      "f2": 0.019022388383746147,
-      "f3": 0.00019874123972840607,
-      "d_mm2_per_s": 0.0020576915703713894,
-      "d_std_mm2_per_s": 0.0002782168157864362
-    },
-    "fsl_nonlinear_long_roi_means": {
-      "f1": 0.40500229597091675,
-      "f2": 0.015861261636018753,
-      "f3": 0.0014748955145478249,
-      "d_mm2_per_s": 0.0019489863188937306,
-      "d_std_mm2_per_s": 1.0144247220011948e-08
-    },
-    "fnit_cpu_short_roi_means": {
-      "f1": 0.40255194902420044,
-      "f2": 0.02049337700009346,
-      "f3": 0.0042562587186694145,
-      "d_mm2_per_s": 0.0020122069399803877,
-      "d_std_mm2_per_s": 0.0001445974048692733
-    },
-    "fnit_cpu_long_roi_means": {
-      "f1": 0.405167818069458,
-      "f2": 0.013046220876276493,
-      "f3": 0.0015717052156105638,
-      "d_mm2_per_s": 0.0019354738760739565,
-      "d_std_mm2_per_s": 3.539680215602914e-10
-    },
-    "within_fsl_tensor_vs_nonlinear_short_mae": {
-      "f1": 0.010815756395459175,
-      "f2": 0.014795514754951,
-      "d_std_mm2_per_s": 0.00019760428403969854
-    },
-    "fnit_cpu_long_vs_fsl_long_mae": {
-      "f1": 0.007468540687114,
-      "f2": 0.003998987842351198,
-      "f3": 9.68096501310356e-05,
-      "d_mm2_per_s": 1.5574225471937098e-05,
-      "d_std_mm2_per_s": 1.0498213853793459e-08
-    },
-    "fsl_short_d_std_draw_fraction_below_1e_5": 0.7771428571428571,
-    "fsl_long_d_std_draw_fraction_below_1e_5": 1.0,
-    "interpretation": "The original FSL finite-chain result depends strongly on initialization and chain length for near-zero d_std and weak fibres. The log priors have no positive lower bound in FSL source, so near-zero correlations are not a stable parity metric."
-  },
-  "synthetic_crossing_fibres": {
-    "generator": "docs/bedpostx/synthetic_example.py",
-    "figure": "docs/bedpostx/synthetic_example.png",
-    "dwi_shape": [
-      8,
-      8,
-      1,
-      105
-    ],
-    "masked_voxels": 64,
-    "seconds": {
-      "fsl_cpu": 28.55,
-      "fnit_cpu_one_thread": 21.62,
-      "fnit_h100_gpu_1": 30.81
-    },
-    "exit_status": {
-      "fsl_cpu": 255,
-      "fnit_cpu": 0,
-      "fnit_gpu": 0
-    },
-    "fsl_artifacts_valid": true,
-    "fraction": {
-      "f1": {
-        "fsl_cpu": {
-          "against_truth": {
-            "mae": 0.004145225297127448,
-            "pearson_r": 0.997107427378179
-          },
-          "against_fsl": null
-        },
-        "fnit_cpu": {
-          "against_truth": {
-            "mae": 0.004376925873969281,
-            "pearson_r": 0.9968094453504556
-          },
-          "against_fsl": {
-            "mae": 0.000902269035577774,
-            "pearson_r": 0.999927468465479
-          }
-        },
-        "fnit_gpu": {
-          "against_truth": {
-            "mae": 0.00426775297549154,
-            "pearson_r": 0.9967211471443499
-          },
-          "against_fsl": {
-            "mae": 0.0009552536066621542,
-            "pearson_r": 0.9999096681170037
-          }
-        }
+      "14_voxel_full_eager": {
+        "before": "42608 MiB, 100%",
+        "after": "42608 MiB, 100%"
       },
-      "f2": {
-        "fsl_cpu": {
-          "against_truth": {
-            "mae": 0.004320832608001576,
-            "pearson_r": 0.9846406583132719
-          },
-          "against_fsl": null
-        },
-        "fnit_cpu": {
-          "against_truth": {
-            "mae": 0.004399872165439387,
-            "pearson_r": 0.9858253883807032
-          },
-          "against_fsl": {
-            "mae": 0.0012176667805761099,
-            "pearson_r": 0.999420836909711
-          }
-        },
-        "fnit_gpu": {
-          "against_truth": {
-            "mae": 0.004289557445528254,
-            "pearson_r": 0.9858108744580242
-          },
-          "against_fsl": {
-            "mae": 0.0010419620666652918,
-            "pearson_r": 0.999506913189895
-          }
-        }
-      }
-    },
-    "mean_d_std_mm2_per_s": {
-      "ground_truth": 0.0004,
-      "fsl_cpu": {
-        "mean": 0.00021325463603716344,
-        "against_fsl": null
-      },
-      "fnit_cpu": {
-        "mean": 0.0001607773738214746,
-        "against_fsl": {
-          "mae": 0.00014421975356526673,
-          "pearson_r": 0.45015811426749924
-        }
-      },
-      "fnit_gpu": {
-        "mean": 0.00015332759357988834,
-        "against_fsl": {
-          "mae": 0.0001087103082682006,
-          "pearson_r": 0.6557895524094064
-        }
+      "64_voxel_compiled": {
+        "before": "42608 MiB, 100%",
+        "after": "42608 MiB, 16%"
       }
     }
   },
-  "source_provenance": {
-    "current_bedpostx_core_sha256": "87eedd3c10d1a393b499ca6c397aa22ea375f37afc2982fc8e2aa7f7414c80e0",
-    "fsl_fibre_source_sha256": "0e6c1c69ee2a9d2488ad1c4dae099d1089678117314a54acd8a22a4ce9c0d539",
-    "synthetic_generator_sha256": "ba8f1bfc0967aeff3458354e5fe90bdb7ee369c80b5a3bd701cf285a8f7be476",
-    "synthetic_figure_sha256": "294e8ea8299b8a6f3a0d164caf0eb2ccd0f5dedc0b3958d93326fd8d583391b7",
-    "verification": "Current core hash matches the isolated gpucw1 package used for all reported FNIT runs, including fibre-support and no-ARD controls. The figure was rendered from the current synthetic outputs."
+  "source_sha256": {
+    "core.py": "a1b2f8fd430168149c00788292ae5226bda01854df8065929feb2fd4ab52cc51",
+    "direction_figure_png": "1e94726ee96c90beed8d912e5a80e7b90243b89a0dd0f97181146b96afbdfd69"
   },
-  "secondary_fibre_diagnosis": {
-    "weak_14_voxel_roi": {
-      "fsl_reference_seed": 8665904,
-      "fsl_reference_fraction_means": {
-        "f2": 0.023613886907696724,
-        "f3": 0.0059680878184735775
+  "real_14_voxels": {
+    "wall_seconds": {
+      "fsl_cpu_complete": 10.99,
+      "fsl_gpu_xfibres_core_only": 2.2,
+      "fnit_cpu_complete": 22.54,
+      "fnit_gpu_eager_complete": 37.208151339087635,
+      "fnit_gpu_compiled_complete": 15.983071438968182,
+      "fnit_gpu_eager_full_process": 39.32,
+      "fnit_gpu_compiled_full_process": 18.89
+    },
+    "fsl_gpu_core_exit_status": 255,
+    "fsl_gpu_core_artifacts_valid": true,
+    "compiled_vs_eager": {
+      "all_19_nifti_arrays_exact": true
+    },
+    "compiled_vs_fsl_cpu": {
+      "mean_f1": {
+        "mae": 0.010876177810132504,
+        "pearson_r": 0.9991778190243195,
+        "fnit_roi_mean": 0.4033651649951935
       },
-      "fsl_reference_draw_fraction_below_0_05": {
-        "f2": 0.8028571428571428,
-        "f3": 0.97
+      "mean_f2": {
+        "mae": 0.012820960953831673,
+        "pearson_r": 0.5263991140544944,
+        "fnit_roi_mean": 0.02303224615752697
       },
-      "fsl_other_seeds_vs_reference": {
-        "8665905": {
-          "f2": {
-            "mae": 0.029324406757950783,
-            "pearson_r": 0.20102738175066254
-          },
-          "f3": {
-            "mae": 0.0030937616247683764,
-            "pearson_r": 0.7562827469853272
-          }
+      "mean_f3": {
+        "mae": 0.00453755771741271,
+        "pearson_r": 0.5803262481619965,
+        "fnit_roi_mean": 0.0028105422388762236
+      },
+      "mean_d_mm2_per_s": {
+        "mae": 0.00011704638745868579,
+        "pearson_r": 0.9607968441635572,
+        "fnit_roi_mean": 0.0019745409954339266
+      },
+      "mean_d_std_mm2_per_s": {
+        "mae": 0.00021663191728293896,
+        "pearson_r": 0.5297406910467355,
+        "fnit_roi_mean": 8.183697900676634e-06
+      },
+      "principal_axis": {
+        "fibre_1": {
+          "median_degrees_all": 0.6600545644760132,
+          "supported_voxels": 12,
+          "median_degrees_supported": 0.5522167682647705
         },
-        "8665906": {
-          "f2": {
-            "mae": 0.014602705836296082,
-            "pearson_r": 0.7644836214784337
-          },
-          "f3": {
-            "mae": 0.004796244204044342,
-            "pearson_r": 0.4002354198784878
-          }
+        "fibre_2": {
+          "median_degrees_all": 38.945220947265625,
+          "supported_voxels": 0,
+          "median_degrees_supported": null
         },
-        "8665907": {
-          "f2": {
-            "mae": 0.015335987322032452,
-            "pearson_r": 0.5346222105709459
-          },
-          "f3": {
-            "mae": 0.004471861757338047,
-            "pearson_r": 0.5914812076865247
-          }
+        "fibre_3": {
+          "median_degrees_all": 67.72673797607422,
+          "supported_voxels": 0,
+          "median_degrees_supported": null
         }
-      },
-      "current_fnit_gpu_vs_reference": {
+      }
+    },
+    "peak_pytorch_allocated_gib": 0.03132772445678711,
+    "time_definition": "FNIT full_process 包括 Python 启动、模块导入、输入、MCMC 和写盘；complete 为进程内 model() 墙钟。FSL GPU 仅为 xfibres_gpu 核心。"
+  },
+  "real_64_voxels": {
+    "selection": "在同一局部区域按既有 FSL 后验富集次要纤维，仅作诊断裁剪",
+    "wall_seconds": {
+      "fsl_cpu_complete": 39.41,
+      "fnit_cpu_complete": 29.03,
+      "fnit_gpu_eager_complete": 35.87596223084256,
+      "fnit_gpu_compiled_complete": 21.64624040480703
+    },
+    "compiled_vs_eager": {
+      "all_nifti_arrays_exact": false,
+      "reason": "融合后的浮点运算使 MCMC 接受判定分叉；使用 FSL 重新比较汇总精度"
+    },
+    "compiled_vs_fsl_cpu": {
+      "fraction": {
+        "f1": {
+          "all": {
+            "mae": 0.022575117647647858,
+            "pearson_r": 0.9565117269729637
+          },
+          "joint_ge_0_1": 64,
+          "joint_supported": {
+            "mae": 0.022575117647647858,
+            "pearson_r": 0.9565117269729637
+          },
+          "replica_count_ge_0_1": 64
+        },
         "f2": {
-          "mae": 0.012820960953831673,
-          "pearson_r": 0.5263991140544944
+          "all": {
+            "mae": 0.023449962958693504,
+            "pearson_r": 0.7423678711843811
+          },
+          "joint_ge_0_1": 61,
+          "joint_supported": {
+            "mae": 0.021717891097068787,
+            "pearson_r": 0.7265233002628233
+          },
+          "replica_count_ge_0_1": 62
         },
         "f3": {
-          "mae": 0.00453755771741271,
-          "pearson_r": 0.5803262481619965
+          "all": {
+            "mae": 0.043084241449832916,
+            "pearson_r": 0.5757686386982941
+          },
+          "joint_ge_0_1": 26,
+          "joint_supported": {
+            "mae": 0.017383607104420662,
+            "pearson_r": 0.713584749429521
+          },
+          "replica_count_ge_0_1": 31
         }
       },
-      "f2_plus_f3_pearson_r": {
-        "fsl_8665905": 0.21686705115639862,
-        "fsl_8665906": 0.7052941370315883,
-        "fsl_8665907": 0.5977126235912308,
-        "fnit_gpu": 0.574485533630153
-      },
-      "note": "No jointly supported f2/f3 voxel at mean fraction >=0.1. Adding f2 and f3 did not consistently restore map correlation."
-    },
-    "supported_64_voxel_roi": {
-      "crop_shape": [
-        9,
-        9,
-        9,
-        105
-      ],
-      "selection": "Within one compact patch, select 48 voxels with f2>=0.1 and f3>=0.1 and 16 with f2>=0.1 and f3<0.05 according to a pre-existing whole-brain FSL map; refit FSL and FNIT from DWI.",
-      "selection_caveat": "This diagnostic ROI is enriched using FSL estimates and is not an unbiased whole-brain accuracy sample.",
-      "masked_voxels": 64,
-      "fsl_reference_seed": 8665904,
-      "fsl_reference_fraction_ge_0_1_voxels": {
-        "f2": 63,
-        "f3": 39
-      },
-      "seconds": {
-        "fsl_reference": 39.41,
-        "fsl_repeat": 39.65,
-        "fnit_cpu_one_thread": 29.03,
-        "fnit_h100_gpu_1": 37.5
-      },
-      "comparisons_to_fsl_reference": {
-        "fsl_repeat": {
-          "f2": {
-            "mae": 0.021618518978357315,
-            "pearson_r_all": 0.7818515376938968,
-            "joint_fraction_ge_0_1_voxels": 60,
-            "pearson_r_joint_supported": 0.83219359132437,
-            "median_axis_degrees_joint_supported": 6.490551948547363
-          },
-          "f3": {
-            "mae": 0.032210707664489746,
-            "pearson_r_all": 0.6989417474905323,
-            "joint_fraction_ge_0_1_voxels": 31,
-            "pearson_r_joint_supported": 0.8639888601766462,
-            "median_axis_degrees_joint_supported": 9.36925983428955
-          }
+      "axis": {
+        "f1": {
+          "median_degrees_all": 3.569459915161133,
+          "median_degrees_joint_supported": 3.569459915161133
         },
-        "fnit_cpu": {
-          "f2": {
-            "mae": 0.023868892341852188,
-            "pearson_r_all": 0.8022716760222369,
-            "joint_fraction_ge_0_1_voxels": 61,
-            "pearson_r_joint_supported": 0.8400307125084222,
-            "median_axis_degrees_joint_supported": 4.447700500488281
-          },
-          "f3": {
-            "mae": 0.037384651601314545,
-            "pearson_r_all": 0.6343308689552111,
-            "joint_fraction_ge_0_1_voxels": 29,
-            "pearson_r_joint_supported": 0.8099575411366067,
-            "median_axis_degrees_joint_supported": 8.794238090515137
-          }
+        "f2": {
+          "median_degrees_all": 5.475663185119629,
+          "median_degrees_joint_supported": 5.391869068145752
         },
-        "fnit_gpu": {
-          "f2": {
-            "mae": 0.024049758911132812,
-            "pearson_r_all": 0.7412393688232061,
-            "joint_fraction_ge_0_1_voxels": 61,
-            "pearson_r_joint_supported": 0.7255180576784173,
-            "median_axis_degrees_joint_supported": 5.44409704208374
-          },
-          "f3": {
-            "mae": 0.04351165145635605,
-            "pearson_r_all": 0.5715482938780035,
-            "joint_fraction_ge_0_1_voxels": 25,
-            "pearson_r_joint_supported": 0.8005464137767361,
-            "median_axis_degrees_joint_supported": 8.299759864807129
-          }
+        "f3": {
+          "median_degrees_all": 43.821495056152344,
+          "median_degrees_joint_supported": 7.969597816467285
         }
       },
+      "f2_plus_f3": {
+        "mae": 0.03485197201371193,
+        "pearson_r": 0.8507583467572685
+      },
+      "both_secondary_joint_supported": 26,
       "direction_pairing": {
-        "fsl_repeat": {
-          "joint_supported_secondary_voxels": 31,
-          "count_swapped_better_by_10_degrees": 7,
-          "median_direct_sum_degrees": 15.079087257385254,
-          "median_best_sum_degrees": 10.945830345153809
-        },
-        "fnit_gpu": {
-          "joint_supported_secondary_voxels": 25,
-          "count_swapped_better_by_10_degrees": 5,
-          "median_direct_sum_degrees": 14.13465690612793,
-          "median_best_sum_degrees": 11.535619735717773
-        }
-      },
-      "exit_status": {
-        "fsl_reference": 255,
-        "fsl_repeat": 255,
-        "fnit_cpu": 0,
-        "fnit_gpu": 0
-      },
-      "artifacts_valid": true
+        "count_swapped_better_by_10_degrees": 5,
+        "median_direct_sum_degrees": 13.363922119140625,
+        "median_best_sum_degrees": 10.368403434753418
+      }
     },
-    "no_ard_ablation_on_weak_roi": {
-      "setting": "FSL --noard and Torch ard_weight=0; all other standard-run settings and input unchanged.",
-      "means_with_ard": {
-        "fsl_ard": {
-          "f2": 0.023613886907696724,
-          "f3": 0.0059680878184735775
+    "fsl_repeat_vs_fsl_cpu": {
+      "fraction": {
+        "f1": {
+          "all": {
+            "mae": 0.02795138768851757,
+            "pearson_r": 0.9252192597907801
+          },
+          "joint_ge_0_1": 64,
+          "joint_supported": {
+            "mae": 0.02795138768851757,
+            "pearson_r": 0.9252192597907801
+          },
+          "replica_count_ge_0_1": 64
         },
-        "fnit_ard": {
-          "f2": 0.02303224615752697,
-          "f3": 0.0028105422388762236
-        }
-      },
-      "means_without_ard": {
-        "fsl_noard": {
-          "f2": 0.1066189855337143,
-          "f3": 0.05134863778948784
-        },
-        "fnit_noard": {
-          "f2": 0.08411236852407455,
-          "f3": 0.04582331329584122
-        }
-      },
-      "cross_method_without_ard": {
         "f2": {
-          "mae": 0.04394712299108505,
-          "pearson_r": 0.6315701545448933
+          "all": {
+            "mae": 0.021618518978357315,
+            "pearson_r": 0.7818515376938968
+          },
+          "joint_ge_0_1": 60,
+          "joint_supported": {
+            "mae": 0.018428320065140724,
+            "pearson_r": 0.83219359132437
+          },
+          "replica_count_ge_0_1": 61
         },
         "f3": {
-          "mae": 0.012936560437083244,
-          "pearson_r": 0.7670094579605031
+          "all": {
+            "mae": 0.032210707664489746,
+            "pearson_r": 0.6989417474905323
+          },
+          "joint_ge_0_1": 31,
+          "joint_supported": {
+            "mae": 0.013261093758046627,
+            "pearson_r": 0.8639888601766462
+          },
+          "replica_count_ge_0_1": 38
         }
       },
-      "interpretation": "ARD suppresses weak secondary fractions in both implementations. Removing ARD changes the fitted model and increases cross-method absolute fraction differences; it is not a parity fix."
+      "axis": {
+        "f1": {
+          "median_degrees_all": 4.930362701416016,
+          "median_degrees_joint_supported": 4.930362701416016
+        },
+        "f2": {
+          "median_degrees_all": 7.065443515777588,
+          "median_degrees_joint_supported": 6.490551948547363
+        },
+        "f3": {
+          "median_degrees_all": 26.120140075683594,
+          "median_degrees_joint_supported": 9.36925983428955
+        }
+      },
+      "f2_plus_f3": {
+        "mae": 0.03628921136260033,
+        "pearson_r": 0.7907695116217224
+      },
+      "both_secondary_joint_supported": 31,
+      "direction_pairing": {
+        "count_swapped_better_by_10_degrees": 7,
+        "median_direct_sum_degrees": 15.079087257385254,
+        "median_best_sum_degrees": 10.945830345153809
+      }
     },
-    "data_policy": "Only aggregate diagnostic metrics are public; selected voxel locations and subject imaging remain on the research server."
-  }
+    "peak_pytorch_allocated_gib": 0.26978588104248047
+  },
+  "scope": "14 与 64 体素均非全脑速度或精度估计；FSL GPU 数字只含 xfibres_gpu 核心，不含拆分与合并。"
 }
