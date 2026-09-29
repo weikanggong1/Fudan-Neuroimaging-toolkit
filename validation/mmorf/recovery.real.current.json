@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-29",
+  "function": "TorchMMORF",
+  "source_sha256": "110fb0ed68019257b2a6c79cd96d96a55f90f4a9c11b858addcfff41d281c15c",
+  "data": "one real UKB-format AP/PA dMRI with paired T1w; DTI tensor from the same subject",
+  "change": "Retry a non-finite LBFGS level from its unchanged initial control with successively quartered learning rates; record retries and reject only that level if all attempts fail.",
+  "fixed_failed_input_replay": {
+    "status": "completed",
+    "last_level_nonfinite_retries": 1,
+    "other_levels_nonfinite_retries": 0,
+    "external_wall_seconds": 75.09,
+    "peak_cuda_memory_bytes": 12313962496
+  },
+  "new_raw_to_standard_pipeline": {
+    "status": "completed",
+    "registration_backend": "mmorf",
+    "nonfinite_retries_by_level": [0, 0, 0, 0, 0],
+    "mmorf_elapsed_seconds": 46.21851488389075,
+    "mmorf_peak_cuda_memory_bytes": 12290960384,
+    "pipeline_external_wall_seconds": 887.18,
+    "nine_standard_maps_written": true,
+    "report": "../dmri_pipeline/mmorf_e2e.real.current.json"
+  },
+  "fsl_comparison_boundary": "report.public.json measures the pre-retry normal path against FSL MMORF 0.3.2. The current first LBFGS attempt uses the same initial control, optimizer settings, closure and loss evaluation; the retry path itself has no FSL numerical-equivalence claim. A fresh same-input voxelwise FSL comparison of current source is not recorded here.",
+  "private_images_published": false
+}

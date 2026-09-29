@@ -202,7 +202,7 @@ mmorf --config multimodal.ini
 
 ## 真实数据 benchmark
 
-一例去标识真实 T1w、native DTI tensor 与九张 DTI/NODDI 参数图分别输入 FSL MMORF 0.3.2 和当前 TorchMMORF。两边使用同一 T1/tensor 模板及同一 FLIRT 初始化矩阵。公开仓库只保留汇总指标和去标识切片。
+一例真实 T1w、native DTI tensor 与九张 DTI/NODDI 参数图分别输入 FSL MMORF 0.3.2 和 TorchMMORF 的正常收敛路径。两边使用同一 T1/tensor 模板及同一 FLIRT 初始化矩阵。下表是在加入非有限值恢复逻辑前测得的；当前源码的首次 LBFGS 尝试仍使用相同起点、学习率、closure 和损失评估，恢复逻辑只在该级出现非有限值时介入。本次没有重新取得当前源码对 FSL 同输入的逐体素比较，不能把下表写作新源码的 fresh benchmark。[当前源码真实数据恢复试验](../../validation/mmorf/recovery.real.current.json)另行记录。仓库只保存汇总指标和此前已公开的去标识切片。
 
 MNI 脑区内的直接输出比较：
 
@@ -235,7 +235,7 @@ warp 三个分量的 `r` 为 `0.982270 / 0.957824 / 0.972309`。warp RMS 为 FNI
 | FSL MMORF 0.3.2 | H100 GPU | 925.13 s | 947.62 s | 未计入 | 未记录 |
 | FNIT TorchMMORF | H100 GPU | 33.62 s | 47.80 s | 5.10 s | 12.318 GB |
 
-计时来自共享节点，负载未隔离；两种优化器仍不数值等价，因此不把时间比写成“等价实现加速倍数”。完整数值、边界和源码哈希见[公开报告](../../validation/mmorf/report.public.json)。
+计时来自共享节点，负载未隔离；两种优化器仍不数值等价，因此不把时间比写成“等价实现加速倍数”。完整数值、边界和测量时的源码哈希见[公开报告](../../validation/mmorf/report.public.json)。当前源码在同一真实病例的另一次 raw-to-standard 运行中完成了九图输出，MMORF 求解耗时 46.22 s、峰值 CUDA allocation 为 11.45 GiB；固定此前失效的输入后，第五级降低步长一次并成功，见[恢复试验](../../validation/mmorf/recovery.real.current.json)。这两个当前源码运行没有与官方 MMORF 固定相同的全部输入，不用于更新上表的 FSL 数值误差。
 
 ![官方 warp 与 TorchMMORF 在同一真实病例上的 warped T1 和 FA](figures/mmorf_fsl_comparison.png)
 

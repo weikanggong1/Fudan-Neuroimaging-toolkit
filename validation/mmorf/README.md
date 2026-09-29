@@ -2,7 +2,7 @@
 
 [返回 MMORF 文档](../../docs/mmorf/README.md)
 
-[`report.public.json`](report.public.json) 是当前 TorchMMORF 与 FSL MMORF 0.3.2 的真实单被试对照。两边使用相同的脑提取 T1w、FSL 六通道 tensor、模板和 FLIRT 初始化矩阵。仓库不保存源图像或 subject identifier，只保留汇总指标与去标识切片。
+[`report.public.json`](report.public.json) 记录 TorchMMORF 正常收敛路径与 FSL MMORF 0.3.2 的真实单被试对照。两边使用相同的脑提取 T1w、FSL 六通道 tensor、模板和 FLIRT 初始化矩阵。该数值比较测于加入非有限值恢复逻辑之前，报告保留测量时的源码哈希；当前源码的首次 LBFGS 尝试保持相同参数和损失，尚无 fresh 同输入 FSL 逐体素重测。[当前源码恢复试验](recovery.real.current.json)记录固定失败输入的重试结果和另一轮完整 raw-to-standard 运行。仓库不保存源图像或 subject identifier，只保留汇总指标与此前已公开的去标识切片。
 
 当前报告覆盖：
 
@@ -44,4 +44,4 @@ python validation/mmorf/plot_mmorf.py \
   --output docs/mmorf/figures/mmorf_fsl_comparison.png
 ```
 
-`SHA256SUMS` 覆盖公开报告、两个复现脚本和文档图。数值指标由完整 NIfTI 计算，图像不参与指标计算。
+`SHA256SUMS` 覆盖两份公开报告、两个复现脚本和文档图。数值指标由完整 NIfTI 计算，图像不参与指标计算。
