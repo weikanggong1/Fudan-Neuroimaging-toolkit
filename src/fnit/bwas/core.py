@@ -197,8 +197,13 @@ def _fisher_block(matrices, start: int, stop: int, i: int, j: int,
         else:
             a[row, :lengths[row]] = series[:, i:i+n_i]
             b[row, :lengths[row]] = series[:, j:j+n_j]
-    left = torch.from_numpy(a).to(device=device, dtype=torch.float64)
-    right = torch.from_numpy(b).to(device=device, dtype=torch.float64)
+    left = torch.from_numpy(a)
+    right = torch.from_numpy(b)
+    if device.type == "cuda":
+        left = left.pin_memory()
+        right = right.pin_memory()
+    left = left.to(device=device, dtype=torch.float64, non_blocking=device.type == "cuda")
+    right = right.to(device=device, dtype=torch.float64, non_blocking=device.type == "cuda")
     r = (torch.bmm(left, right.transpose(1, 2)) if voxel_major else
          torch.bmm(left.transpose(1, 2), right))
     r /= torch.as_tensor(lengths, device=device, dtype=torch.float64)[:, None, None]
