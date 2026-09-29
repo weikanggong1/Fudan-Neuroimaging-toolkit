@@ -1,0 +1,35 @@
+--- a/src/dwi/tractography/algorithms/iFOD2.h
++++ b/src/dwi/tractography/algorithms/iFOD2.h
+@@ -221,5 +221,32 @@
+               return true;
+             }
+ 
++            bool oracle_two_arcs(const Eigen::Vector3f& point,
++                                 const Eigen::Vector3f& start_direction,
++                                 const Eigen::Vector3f& first_end_direction,
++                                 float& first_probability,
++                                 float& second_probability,
++                                 Eigen::Vector3f& first_endpoint,
++                                 Eigen::Vector3f& second_endpoint)
++            {
++              pos = point;
++              dir = start_direction.normalized();
++              if (!get_data(source)) return false;
++              const float start_amplitude = FOD(dir);
++              if (!(start_amplitude > 0.0f)) return false;
++              half_log_prob0 = 0.5f * std::log(start_amplitude);
++              get_path(positions, tangents, first_end_direction.normalized());
++              first_probability = path_prob(positions, tangents);
++              if (!(first_probability > 0.0f)) return false;
++              first_endpoint = positions.back();
++              pos = first_endpoint;
++              dir = tangents.back();
++              half_log_prob0 = last_half_log_probN;
++              get_path(positions, tangents, dir);
++              second_probability = path_prob(positions, tangents);
++              second_endpoint = positions.back();
++              return true;
++            }
++
+ 
+             bool init() override

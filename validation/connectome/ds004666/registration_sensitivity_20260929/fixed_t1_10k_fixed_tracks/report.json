@@ -1,0 +1,87 @@
+{
+  "input_sha256": {
+    "fod": "32461e2e2281f60a15dfd546ad91129d7fe68582844c9d983a7602f23f7c59c6",
+    "five_tissue_t1": "c4e260fd80106a515085fc7d0bcdc371cb650a25697f4e5055afeca988077435",
+    "aparc_aseg": "02e0dac0bb322e689d6c5910babe1f91b181c767d45d0bd2cdba72f508c476ab",
+    "seeds": "41f036eae125b83dd2b6fc7f3c916dd5da8c20915c2990df3f65cce8fb45ffe6",
+    "fa": "0899aa207d22fb700d00a1ae0625d77275df84e3f7a547039bc602b0da8a8692",
+    "registration_report": "8d6d81f570bdc745344a7a048cd48ec4434ba35218249c8d6983f8ba1caad96a"
+  },
+  "device": "cuda:0",
+  "seed": 0,
+  "n_seeds": 10000,
+  "atlas_nodes": 84,
+  "arms": {
+    "fsl": {
+      "act_valid": 9659,
+      "accepted_streamlines": 2706,
+      "seed_world_displacement_from_fsl_mm_mean": 0.0,
+      "tracking_seconds": 66.93154726782814,
+      "postprocessing_seconds": 34.59180868603289,
+      "peak_torch_allocated_gib": 2.3025288581848145
+    },
+    "torch": {
+      "act_valid": 9642,
+      "accepted_streamlines": 2663,
+      "seed_world_displacement_from_fsl_mm_mean": 0.05338122323155403,
+      "tracking_seconds": 59.12568343989551,
+      "postprocessing_seconds": 31.29398685414344,
+      "peak_torch_allocated_gib": 2.3058815002441406
+    }
+  },
+  "seed_rule": "fixed T1 anatomical positions; each arm maps them into its DWI world",
+  "atlas_voxel_xor": 2205,
+  "atlas_voxels": 778752,
+  "matrices_torch_vs_fsl": {
+    "count": {
+      "pearson_upper": 0.8561577712305293,
+      "relative_l1_upper": 0.6842857142857143,
+      "normalized_mae_common_support": 0.43053173241852494,
+      "support_dice": 0.6612740141557129
+    },
+    "sift2_fbc": {
+      "pearson_upper": 0.8349526638276598,
+      "relative_l1_upper": 0.709861159324646,
+      "normalized_mae_common_support": 0.4693343937397003,
+      "support_dice": 0.6612740141557129
+    },
+    "mean_length": {
+      "pearson_upper": 0.3934793681191401,
+      "relative_l1_upper": 1.0510683059692383,
+      "normalized_mae_common_support": 0.23279376327991486,
+      "support_dice": 0.6612740141557129
+    },
+    "mean_fa": {
+      "pearson_upper": 0.556720398839447,
+      "relative_l1_upper": 0.7789206504821777,
+      "normalized_mae_common_support": 0.09113329648971558,
+      "support_dice": 0.6612740141557129
+    }
+  },
+  "fixed_fsl_tracks_torch_atlas_vs_fsl_atlas": {
+    "count": {
+      "pearson_upper": 0.9985552244616206,
+      "relative_l1_upper": 0.015714285714285715,
+      "normalized_mae_common_support": 0.014295925661186563,
+      "support_dice": 0.9979716024340771
+    },
+    "sift2_fbc": {
+      "pearson_upper": 0.997799593501495,
+      "relative_l1_upper": 0.01711694337427616,
+      "normalized_mae_common_support": 0.01425464078783989,
+      "support_dice": 0.9979716024340771
+    },
+    "mean_length": {
+      "pearson_upper": 0.9995078907284486,
+      "relative_l1_upper": 0.003671449376270175,
+      "normalized_mae_common_support": 0.0023675053380429745,
+      "support_dice": 0.9979716024340771
+    },
+    "mean_fa": {
+      "pearson_upper": 0.9984125410868505,
+      "relative_l1_upper": 0.004273616708815098,
+      "normalized_mae_common_support": 0.0013985867844894528,
+      "support_dice": 0.9979716024340771
+    }
+  }
+}

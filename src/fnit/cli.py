@@ -299,10 +299,36 @@ def _run_connectome(args):
         if any(value is None for value in (args.t1, args.t1_segmentation, args.atlas_dwi)):
             raise ValueError("provide --freesurfer-subject-dir or all of --t1, --t1-segmentation, --atlas-dwi")
         anatomy_inputs = [args.t1, args.t1_segmentation, args.atlas_dwi]
+    atlas_inputs = []
+    if args.atlas != "schaefer200+tian-s1" and args.tian_fnirt_coeff:
+        raise ValueError("--tian-fnirt-coeff requires --atlas schaefer200+tian-s1")
+    if args.atlas == "schaefer200+tian-s1":
+        if (args.freesurfer_subject_dir is None or args.atlas_templates_dir is None or
+                args.fsaverage_dir is None or
+                (args.mni_template is None) == (args.tian_fnirt_coeff is None)):
+            raise ValueError("Schaefer200+Tian S1 needs --freesurfer-subject-dir, --atlas-templates-dir, --fsaverage-dir and exactly one of --mni-template or --tian-fnirt-coeff")
+        if args.tian_fnirt_coeff and args.synthmorph_weights:
+            raise ValueError("--synthmorph-weights cannot be used with --tian-fnirt-coeff")
+        templates = Path(args.atlas_templates_dir)
+        atlas_inputs = [
+            Path(args.mni_template or args.tian_fnirt_coeff),
+            *(templates / f"{hemi}.Schaefer2018_200Parcels_7Networks_order.annot"
+              for hemi in ("lh", "rh")),
+            templates / "Tian_Subcortex_S1_3T.nii.gz",
+            templates / "Tian_Subcortex_S1_3T_label.txt",
+            *(Path(args.fsaverage_dir) / "surf" / f"{hemi}.sphere.reg"
+              for hemi in ("lh", "rh")),
+            *(subject.subject_dir / "surf" / f"{hemi}.{kind}"
+              for hemi in ("lh", "rh") for kind in ("sphere.reg", "pial", "white")),
+            subject.subject_dir / "mri/ribbon.mgz",
+        ]
+        if args.synthmorph_weights:
+            atlas_inputs.extend(Path(args.synthmorph_weights) / name for name in (
+                "synthmorph.affine.2.h5", "synthmorph.deform.3.h5"))
     inputs = [args.dwi, args.bvals, args.bvecs, *anatomy_inputs,
               args.atlas_dwi, args.t1_segmentation, args.brain_mask,
               args.response_mask, args.fod_mask, args.normalise_mask,
-              args.fa_map, args.dwi_to_t1_world]
+              args.fa_map, args.dwi_to_t1_world, *atlas_inputs]
     inputs = [Path(value) for value in inputs if value is not None]
     for path in inputs:
         if not path.is_file():
@@ -340,6 +366,11 @@ def _run_connectome(args):
         t1_segmentation=args.t1_segmentation,
         freesurfer_subject_dir=args.freesurfer_subject_dir,
         atlas=args.atlas,
+        atlas_templates_dir=args.atlas_templates_dir,
+        fsaverage_dir=args.fsaverage_dir,
+        mni_template=args.mni_template,
+        synthmorph_weights=args.synthmorph_weights,
+        tian_fnirt_coeff=args.tian_fnirt_coeff,
         brain_mask=Path(args.brain_mask) if args.brain_mask else None,
         shell_bvals=args.shell_bvals,
         response_mask=args.response_mask,
@@ -391,7 +422,7 @@ def _run_connectome(args):
         temporary = files["nodes"].with_name(f".nodes.tsv.tmp-{uuid.uuid4().hex}")
         try:
             with temporary.open("w", newline="") as stream:
-                writer = csv.writer(stream, delimiter="\t")
+                writer = csv.writer(stream, delimiter="\t", lineterminator="\n")
                 writer.writerow(("index", "original_label", "hemisphere", "name"))
                 writer.writerows((n.index, n.original_label, n.hemisphere, n.name)
                                  for n in result.nodes)
@@ -637,8 +668,19 @@ def main(argv=None):
     connectome.add_argument('--atlas-dwi',
                             help='integer atlas in DWI RAS world coordinates')
     connectome.add_argument('--freesurfer-subject-dir', help='completed recon-all subject directory')
-    connectome.add_argument('--atlas', default='fs-aparc', choices=('fs-aparc',),
+    connectome.add_argument('--atlas', default='fs-aparc',
+                            choices=('fs-aparc', 'schaefer200+tian-s1'),
                             help='atlas to build from the FreeSurfer subject')
+    connectome.add_argument('--atlas-templates-dir',
+                            help='original UKB Schaefer/Tian template directory')
+    connectome.add_argument('--fsaverage-dir',
+                            help='fsaverage subject directory with lh/rh sphere.reg')
+    connectome.add_argument('--mni-template',
+                            help='MNI152 T1 2 mm image on the Tian atlas voxel grid')
+    connectome.add_argument('--synthmorph-weights',
+                            help='directory containing affine and deform SynthMorph weights')
+    connectome.add_argument('--tian-fnirt-coeff',
+                            help='existing FNIRT T1-to-MNI coefficient; original-atlas alternative to SynthMorph')
     connectome.add_argument('--brain-mask',
                             help='optional binary DWI BET mask; default native BET on LAS mean b0')
     connectome.add_argument('--shell-bvals', type=float, nargs='+',

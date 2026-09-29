@@ -8,7 +8,7 @@ import math
 import torch
 from torch.nn import functional as F
 
-from .fod import tracking_sh_precomputed
+from .fod import real_sh, tracking_sh_precomputed
 
 
 @dataclass
@@ -224,6 +224,144 @@ def sample_gmwmi_seeds(gmwmi: torch.Tensor, five_tissue: torch.Tensor,
 
 
 
+def _ifod2_calibration(
+    lmax: int, step_mm: float, voxel_mm: float, max_angle_degrees: float,
+    power: float, device: torch.device,
+) -> tuple[torch.Tensor, float]:
+    """Return MRtrix iFOD2 calibration directions ``[K,3]`` and rejection ratio.
+
+    ``step_mm`` and ``voxel_mm`` are positive RAS-mm lengths; the remaining
+    inputs match ``tckgen -algorithm iFOD2 -angle ... -power ...``. The
+    calibration uses an SH delta FOD and the synthetic 1-voxel gradient from
+    ``calibrator.h``; it does not sample the subject's FOD.
+    """
+    if lmax < 0 or lmax % 2 or step_mm <= 0 or voxel_mm <= 0 or not 0 < max_angle_degrees < 180:
+        raise ValueError('invalid iFOD2 calibration geometry')
+    angle_limit = math.radians(max_angle_degrees)
+    elevations = []
+    elevation = 0.0
+    while elevation < angle_limit:
+        elevations.append(elevation)
+        elevation = float(torch.tensor(elevation + .001, dtype=torch.float32))
+    theta = torch.tensor(elevations, dtype=torch.float32)
+    start = torch.tensor([[0., 0., 1.]], dtype=torch.float32)
+    delta = real_sh(start, lmax)[0]
+    start_amplitude = (delta * delta).sum()
+    middle_direction = torch.stack((torch.sin(theta / 2), torch.zeros_like(theta),
+                                    torch.cos(theta / 2)), -1)
+    end_direction = torch.stack((torch.sin(theta), torch.zeros_like(theta),
+                                 torch.cos(theta)), -1)
+    mid_x = torch.where(theta > 0, step_mm / theta.clamp_min(1e-20) *
+                        (1 - torch.cos(theta / 2)), 0.)
+    end_x = torch.where(theta > 0, step_mm / theta.clamp_min(1e-20) *
+                        (1 - torch.cos(theta)), 0.)
+    middle = (real_sh(middle_direction, lmax) * delta).sum(-1) * (1 - mid_x / voxel_mm)
+    end = (real_sh(end_direction, lmax) * delta).sum(-1) * (1 - end_x / voxel_mm)
+    amplitude = torch.where(
+        (middle > 0) & (end > 0),
+        torch.exp(power * (.5 * start_amplitude.log() +
+                           middle.clamp_min(1e-20).log() + .5 * end.clamp_min(1e-20).log())),
+        0.,
+    )
+    stop = next((i for i, value in enumerate(amplitude) if value <= 0), len(theta) - 1)
+
+    def grid(maximum: float, spacing: float) -> list[tuple[float, float, float]]:
+        extent = math.ceil(maximum / spacing)
+        radius_sq = (maximum / spacing) ** 2
+        points = []
+        for i in range(-extent, extent + 1):
+            for j in range(-extent, extent + 1):
+                x, y = i + .5 * j, math.sqrt(3) / 2 * j
+                radial_sq = x * x + y * y
+                if radial_sq > radius_sq:
+                    continue
+                arc = spacing * math.sqrt(radial_sq)
+                scale = spacing * math.sin(arc) / arc if arc else spacing
+                points.append((scale * x, scale * y, math.cos(arc)))
+        return points
+
+    best = (math.inf, None, None)
+    for i in range(1, stop + 1):
+        if amplitude[i] <= 0:
+            continue
+        ratio = float(amplitude[0] / amplitude[i])
+        directions = grid(angle_limit + elevations[i], math.sqrt(3) * elevations[i])
+        expected = angle_limit ** 2 * (1 + ratio) / (2 * elevations[stop] ** 2) + len(directions)
+        if 0 < expected < best[0]:
+            best = (expected, directions, ratio)
+    if best[1] is None:
+        raise RuntimeError('iFOD2 calibration found no positive path probabilities')
+    return torch.tensor(best[1], device=device, dtype=torch.float32), best[2]
+
+
+def _rotate_ifod2_directions(prior: torch.Tensor, local: torch.Tensor) -> torch.Tensor:
+    """Rotate local cone directions ``[B,K,3]`` around ``prior [B,3]``.
+
+    Returns world directions ``[B,K,3]`` by the MRtrix MethodBase rotation.
+    """
+    radius = prior[:, :2].norm(dim=-1)
+    safe = radius.clamp_min(1e-20)
+    basis = torch.stack((prior[:, 0] / safe, prior[:, 1] / safe,
+                         torch.zeros_like(radius)), -1)
+    tilted = torch.stack((prior[:, 2] * basis[:, 0],
+                          prior[:, 2] * basis[:, 1], -radius), -1)
+    alpha = local[..., 2]
+    beta = (local[..., :2] * basis[:, None, :2]).sum(-1)
+    rotated = local + alpha[..., None] * (prior[:, None] - prior.new_tensor([0., 0., 1.])) + \
+        beta[..., None] * (tilted - basis)[:, None]
+    straight = torch.where(prior[:, 2:3, None] < 0, -local, local)
+    return torch.where((radius == 0)[:, None, None], straight, rotated)
+
+
+def _ifod2_arc_probability(
+    position: torch.Tensor, prior: torch.Tensor, directions: torch.Tensor,
+    half_log_start: torch.Tensor, fod: torch.Tensor, five_tissue: torch.Tensor,
+    fod_inverse: torch.Tensor, five_inverse: torch.Tensor, *,
+    lmax: int, step_mm: float, cutoff: float, power: float,
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    """Evaluate candidate arcs ``[B,K,3]`` against FOD and endpoint CSF.
+
+    Returns probability, midpoint, endpoint, midpoint amplitude and endpoint
+    amplitude, all ``[B,K]`` except positions ``[B,K,3]``. ``half_log_start``
+    contains the state carried from the preceding accepted arc. Equivalent
+    MRtrix operations: ``iFOD2::get_path`` and ``iFOD2::path_prob``.
+    """
+    batch, count = directions.shape[:2]
+    cosine = (prior[:, None] * directions).sum(-1).clamp(-1, 1)
+    angle = cosine.acos()
+    curvature = F.normalize(directions - cosine[..., None] * prior[:, None], dim=-1)
+    radius = step_mm / angle.clamp_min(1e-6)
+    half = .5 * angle
+    midpoint = position[:, None] + radius[..., None] * (
+        half.sin()[..., None] * prior[:, None] +
+        (1 - half.cos())[..., None] * curvature)
+    endpoint = position[:, None] + radius[..., None] * (
+        angle.sin()[..., None] * prior[:, None] +
+        (1 - cosine)[..., None] * curvature)
+    mid_tangent = half.cos()[..., None] * prior[:, None] + \
+        half.sin()[..., None] * curvature
+    straight = angle < 1e-4
+    midpoint = torch.where(straight[..., None],
+                           position[:, None] + .5 * step_mm * prior[:, None], midpoint)
+    endpoint = torch.where(straight[..., None],
+                           position[:, None] + step_mm * prior[:, None], endpoint)
+    mid_tangent = torch.where(straight[..., None], prior[:, None], mid_tangent)
+    mid_amplitude = (_sample(fod, midpoint.reshape(-1, 3), fod_inverse).reshape(
+        batch, count, -1) * tracking_sh_precomputed(mid_tangent.reshape(-1, 3), lmax).reshape(
+            batch, count, -1)).sum(-1)
+    end_amplitude = (_sample(fod, endpoint.reshape(-1, 3), fod_inverse).reshape(
+        batch, count, -1) * tracking_sh_precomputed(directions.reshape(-1, 3), lmax).reshape(
+            batch, count, -1)).sum(-1)
+    csf = _five_tissue_mrtrix(five_tissue, endpoint.reshape(-1, 3), five_inverse)[
+        :, 3].reshape(batch, count)
+    valid = ((mid_amplitude >= cutoff) & (end_amplitude >= cutoff) & (csf < .5) &
+             torch.isfinite(mid_amplitude) & torch.isfinite(end_amplitude))
+    log_prob = half_log_start[:, None] + mid_amplitude.clamp_min(1e-20).log() + \
+        .5 * end_amplitude.clamp_min(1e-20).log()
+    probability = torch.where(valid, torch.exp(power * log_prob), 0.)
+    return probability, midpoint, endpoint, mid_amplitude, end_amplitude
+
+
 def _grow(
     seeds: torch.Tensor,
     tangents: torch.Tensor,
@@ -240,32 +378,45 @@ def _grow(
     max_angle_degrees: float,
     cutoff: float,
     power: float,
+    calibration_local: torch.Tensor | None = None,
+    calibration_ratio: float | None = None,
+    seed_to_wm_initial: torch.Tensor | None = None,
 ):
-    """Propagate curved iFOD2 arc candidates with two FOD samples per step.
+    """Propagate iFOD2 arcs with calibrated batched rejection sampling.
 
     Input seeds/tangents are float32 ``[B,3]``, FOD is ``[XF,YF,ZF,C]``, 5TT
     is ``[XA,YA,ZA,5]``, and both inverse affines are float64 ``[4,4]``.
     Output is padded paths ``[B,max_steps+1,3]``, counts ``[B]``, ACT exit
     flags ``[B]``, lengths ``[B]`` in millimetres, and seed-to-WM flags ``[B]``.
 
-    ``-samples 3`` gives a midpoint and endpoint on each arc. Directions are
-    drawn uniformly from the 45-degree cone, as in MRtrix; a finite batch is
-    resampled by the curved-path FOD probability. MRtrix uses calibrated
-    rejection sampling, so the accepted direction law remains approximate.
+    ``-samples 3`` gives a midpoint and endpoint on each arc. For each active
+    track, calibrate the maximum path probability, then accept the first cone
+    proposal whose uniform draw is below path probability / calibrated max.
+    ``proposals_per_step`` controls only the GPU proposal block size; up to
+    1000 proposals per arc are attempted, as in MRtrix iFOD2.
     """
+    if calibration_local is None or calibration_ratio is None:
+        calibration_local, calibration_ratio = (
+            _ifod2_calibration(lmax, step_mm, 2 * step_mm, max_angle_degrees,
+                               power, seeds.device) if max_angle_degrees > 0 else
+            (seeds.new_tensor([[0., 0., 1.]]), 1.)
+        )
     batch = seeds.shape[0]
     paths = seeds.new_zeros((batch, max_steps + 1, 3))
     paths[:, 0] = seeds
     counts = torch.ones(batch, dtype=torch.long, device=seeds.device)
-    active = torch.ones(batch, dtype=torch.bool, device=seeds.device)
+    start_amp = (_sample(fod, seeds, fod_inverse) * tracking_sh_precomputed(tangents, lmax)).sum(-1)
+    active = torch.isfinite(start_amp) & (start_amp > cutoff)
+    half_log_start = .5 * start_amp.clamp_min(1e-20).log()
     ended_in_gm = torch.zeros_like(active)
-    seed_tissue = _five_tissue_values(five_tissue, seeds, five_inverse)
+    seed_tissue = _five_tissue_mrtrix(five_tissue, seeds, five_inverse)
     seed_in_sgm = ((seed_tissue[:, 1] > seed_tissue[:, 0]) &
                    (seed_tissue[:, 1] >= seed_tissue[:, 2]) &
                    (seed_tissue[:, 1] > seed_tissue[:, 3]) &
                    (seed_tissue[:, 1] > seed_tissue[:, 4]))
-    seed_to_wm = torch.zeros_like(active)
-    in_sgm = torch.zeros_like(active)
+    seed_to_wm = (torch.zeros_like(active) if seed_to_wm_initial is None else
+                  seed_to_wm_initial.clone())
+    sgm_depth = torch.zeros(batch, dtype=torch.int32, device=seeds.device)
     best_sgm_metric = seeds.new_full((batch,), float('inf'))
     best_sgm_position = seeds.clone()
     best_sgm_count = counts.clone()
@@ -275,82 +426,74 @@ def _grow(
     prior = tangents.clone()
     cosine_limit = math.cos(math.radians(max_angle_degrees))
     rows = torch.arange(batch, device=seeds.device)
-    z_axis = seeds.new_tensor([0., 0., 1.])
-    y_axis = seeds.new_tensor([0., 1., 0.])
     for step in range(max_steps):
         if not bool(active.any()):
             break
-        cosine = 1 - torch.rand((batch, proposals_per_step), device=seeds.device,
-                                generator=generator) * (1 - cosine_limit)
-        angle = torch.acos(cosine)
-        azimuth = 2 * math.pi * torch.rand((batch, proposals_per_step),
-                                            device=seeds.device, generator=generator)
-        axis_one = torch.linalg.cross(prior, z_axis.expand_as(prior))
-        fallback = axis_one.norm(dim=-1) < 1e-6
-        axis_one[fallback] = torch.linalg.cross(prior[fallback], y_axis.expand_as(prior[fallback]))
-        axis_one = F.normalize(axis_one, dim=-1)
-        axis_two = torch.linalg.cross(prior, axis_one)
-        radial = azimuth.cos()[..., None] * axis_one[:, None] + \
-            azimuth.sin()[..., None] * axis_two[:, None]
-        directions = cosine[..., None] * prior[:, None] + \
-            (1 - cosine.square()).sqrt()[..., None] * radial
-        curvature = directions - cosine[..., None] * prior[:, None]
-        curvature = F.normalize(curvature, dim=-1)
-        radius = step_mm / angle.clamp_min(1e-6)
-        half_angle = .5 * angle
-        midpoint = positions[:, None] + radius[..., None] * (
-            half_angle.sin()[..., None] * prior[:, None] +
-            (1 - half_angle.cos())[..., None] * curvature)
-        endpoint = positions[:, None] + radius[..., None] * (
-            angle.sin()[..., None] * prior[:, None] +
-            (1 - cosine)[..., None] * curvature)
-        mid_tangent = half_angle.cos()[..., None] * prior[:, None] + \
-            half_angle.sin()[..., None] * curvature
-        straight = angle < 1e-4
-        midpoint = torch.where(straight[..., None],
-                               positions[:, None] + .5 * step_mm * prior[:, None], midpoint)
-        endpoint = torch.where(straight[..., None],
-                               positions[:, None] + step_mm * prior[:, None], endpoint)
-        mid_tangent = torch.where(straight[..., None], prior[:, None], mid_tangent)
-
-        start_amp = (_sample(fod, positions, fod_inverse) * tracking_sh_precomputed(prior, lmax)).sum(-1)
-        mid_fod = _sample(fod, midpoint.reshape(-1, 3), fod_inverse).reshape(batch, -1, fod.shape[-1])
-        mid_basis = tracking_sh_precomputed(mid_tangent.reshape(-1, 3).float(), lmax).reshape(batch, -1, fod.shape[-1])
-        mid_amp = (mid_fod * mid_basis).sum(-1)
-        end_fod = _sample(fod, endpoint.reshape(-1, 3), fod_inverse).reshape(batch, -1, fod.shape[-1])
-        end_basis = tracking_sh_precomputed(directions.reshape(-1, 3).float(), lmax).reshape(batch, -1, fod.shape[-1])
-        end_amp = (end_fod * end_basis).sum(-1)
-        end_tissue = _five_tissue_values(five_tissue, endpoint.reshape(-1, 3),
-                                         five_inverse).reshape(batch, -1, 5)
-        permitted = ((cosine >= cosine_limit) & (start_amp[:, None] >= cutoff) &
-                     (mid_amp >= cutoff) & (end_amp >= cutoff) &
-                     (end_tissue[..., 3] < .5))
-        scores = (start_amp.clamp_min(0)[:, None] * end_amp.clamp_min(0)).pow(.5 * power) * \
-            mid_amp.clamp_min(0).pow(power) * permitted
-        moving = active & (scores.sum(-1) > 0)
-        scores = torch.where(moving[:, None], scores, torch.ones_like(scores))
-        cumulative = scores.double().cumsum(-1)
-        draws = torch.rand((batch, 1), device=seeds.device, dtype=torch.float64,
-                           generator=generator) * cumulative[:, -1:]
-        choice = torch.searchsorted(cumulative, draws.contiguous(), right=True).clamp_max(
-            proposals_per_step - 1,
-        ).squeeze(-1)
-        direction = directions[rows, choice]
-        chosen_mid = midpoint[rows, choice]
-        chosen_end = endpoint[rows, choice]
-        mid_tissue = _five_tissue_values(five_tissue, chosen_mid, five_inverse)
-        chosen_end_tissue = end_tissue[rows, choice]
-        ended_in_gm |= active & ~moving & in_sgm
-        previous_seed_to_wm = seed_to_wm
-        live, mid_cgm, mid_exit, in_sgm, seed_to_wm, mid_sgm = _act_sample_state(
-            mid_tissue, moving, in_sgm, seed_in_sgm, seed_to_wm,
+        calibrated = _rotate_ifod2_directions(
+            prior, calibration_local[None].expand(batch, -1, -1))
+        calibration_probability, _, _, _, _ = _ifod2_arc_probability(
+            positions, prior, calibrated, half_log_start, fod, five_tissue,
+            fod_inverse, five_inverse, lmax=lmax, step_mm=step_mm,
+            cutoff=cutoff, power=power,
         )
+        maximum = calibration_probability.amax(-1) * calibration_ratio
+        pending = active & (maximum > 0)
+        direction = prior.clone()
+        chosen_mid = positions.clone()
+        chosen_end = positions.clone()
+        mid_metric = seeds.new_zeros(batch)
+        end_metric = seeds.new_zeros(batch)
+        moving = torch.zeros_like(active)
+        for first_trial in range(0, 1000, proposals_per_step):
+            indices = pending.nonzero(as_tuple=False).flatten()
+            if indices.numel() == 0:
+                break
+            width = min(proposals_per_step, 1000 - first_trial)
+            cosine = 1 - torch.rand((len(indices), width), device=seeds.device,
+                                    generator=generator) * (1 - cosine_limit)
+            azimuth = 2 * math.pi * torch.rand((len(indices), width),
+                                               device=seeds.device, generator=generator)
+            local = torch.stack(((1 - cosine.square()).sqrt() * azimuth.cos(),
+                                 (1 - cosine.square()).sqrt() * azimuth.sin(), cosine), -1)
+            proposals = _rotate_ifod2_directions(prior[indices], local)
+            probability, midpoint, endpoint, mid_amp, end_amp = _ifod2_arc_probability(
+                positions[indices], prior[indices], proposals, half_log_start[indices],
+                fod, five_tissue, fod_inverse, five_inverse, lmax=lmax,
+                step_mm=step_mm, cutoff=cutoff, power=power,
+            )
+            draws = torch.rand((len(indices), width), device=seeds.device,
+                               generator=generator)
+            accepted = draws < probability / maximum[indices, None]
+            chosen = accepted.int().argmax(-1)
+            success = accepted.any(-1)
+            selected = indices[success]
+            choice = chosen[success]
+            direction[selected] = proposals[success, choice]
+            chosen_mid[selected] = midpoint[success, choice]
+            chosen_end[selected] = endpoint[success, choice]
+            mid_metric[selected] = mid_amp[success, choice]
+            end_metric[selected] = end_amp[success, choice]
+            moving[selected] = True
+            pending[selected] = False
+        half_log_start = torch.where(moving, .5 * end_metric.clamp_min(1e-20).log(),
+                                     half_log_start)
+        mid_tissue = _five_tissue_mrtrix(five_tissue, chosen_mid, five_inverse)
+        chosen_end_tissue = _five_tissue_mrtrix(five_tissue, chosen_end, five_inverse)
+        ended_in_gm |= active & ~moving & (sgm_depth > 0)
+        previous_seed_to_wm = seed_to_wm
+        mid_term, new_depth, new_to_wm, mid_sgm = _act_structural_step(
+            mid_tissue, sgm_depth, seed_in_sgm, seed_to_wm)
+        sgm_depth = torch.where(moving, new_depth, sgm_depth)
+        seed_to_wm = torch.where(moving, new_to_wm, seed_to_wm)
+        mid_cgm = moving & (mid_term == 1)
+        mid_exit = moving & (mid_term == 9)
+        mid_image = moving & (mid_term == 3)
+        live = moving & (mid_term == 0)
         best_sgm_metric = torch.where(
             ~previous_seed_to_wm & seed_to_wm,
             torch.full_like(best_sgm_metric, float('inf')), best_sgm_metric,
         )
-        mid_metric = mid_amp[rows, choice]
-        better_mid = mid_sgm & (mid_metric < best_sgm_metric)
+        better_mid = moving & mid_sgm & (mid_metric < best_sgm_metric)
         best_sgm_metric = torch.where(better_mid, mid_metric, best_sgm_metric)
         best_sgm_position = torch.where(better_mid[:, None], chosen_mid, best_sgm_position)
         best_sgm_count = torch.where(better_mid, counts + 1, best_sgm_count)
@@ -358,15 +501,21 @@ def _grow(
             better_mid, lengths + (chosen_mid - positions).norm(dim=-1), best_sgm_length,
         )
         previous_seed_to_wm = seed_to_wm
-        live, end_cgm, end_exit, in_sgm, seed_to_wm, end_sgm = _act_sample_state(
-            chosen_end_tissue, live, in_sgm, seed_in_sgm, seed_to_wm,
-        )
+        end_active = live
+        end_term, new_depth, new_to_wm, end_sgm = _act_structural_step(
+            chosen_end_tissue, sgm_depth, seed_in_sgm, seed_to_wm)
+        sgm_depth = torch.where(live, new_depth, sgm_depth)
+        seed_to_wm = torch.where(live, new_to_wm, seed_to_wm)
+        end_cgm = live & (end_term == 1)
+        end_exit = live & (end_term == 9)
+        end_image = live & (end_term == 3)
+        live = live & (end_term == 0)
         best_sgm_metric = torch.where(
             ~previous_seed_to_wm & seed_to_wm,
             torch.full_like(best_sgm_metric, float('inf')), best_sgm_metric,
         )
-        end_metric = end_amp[rows, choice]
-        better_end = end_sgm & (end_metric < best_sgm_metric)
+        better_end = (end_active & end_sgm & (end_term == 0) &
+                      (end_metric < best_sgm_metric))
         best_sgm_metric = torch.where(better_end, end_metric, best_sgm_metric)
         best_sgm_position = torch.where(better_end[:, None], chosen_end, best_sgm_position)
         best_sgm_count = torch.where(better_end, counts + 1, best_sgm_count)
@@ -383,7 +532,7 @@ def _grow(
         paths[exit_rows, best_sgm_count[sgm_exit] - 1] = best_sgm_position[sgm_exit]
         counts = torch.where(sgm_exit, best_sgm_count, counts)
         lengths = torch.where(sgm_exit, best_sgm_length, lengths)
-        ended_in_gm |= mid_cgm | end_cgm | sgm_exit
+        ended_in_gm |= mid_cgm | end_cgm | sgm_exit | mid_image | end_image
         active = live
         positions = torch.where(append[:, None], proposed, positions)
         prior = torch.where(append[:, None], direction, prior)
@@ -401,36 +550,34 @@ def _valid_act_tissue(tissue: torch.Tensor) -> torch.Tensor:
             (tissue[..., 4] < dominant))
 
 
-def _is_act_gm(tissue: torch.Tensor) -> torch.Tensor:
-    """Return bool ``[...]`` GM dominance for 5TT fractions ``[...,5]``.
+def _act_structural_step(
+    tissue: torch.Tensor, depth: torch.Tensor, seed_in_sgm: torch.Tensor,
+    seed_to_wm: torch.Tensor,
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    """Apply MRtrix ACT check_structural to 5TT ``[B,5]`` and integer depth.
 
-    The output identifies cortical or subcortical GM greater than WM, CSF
-    and pathology at the sampled point.
+    Inputs ``depth`` int32 ``[B]`` and two bool seed flags ``[B]`` carry across
+    sampled points and through direction reversal. Returns termination codes
+    ``[B]`` (0 continue, 1 cGM, 3 image exit, 4 CSF, 9 sGM exit), updated
+    depth, updated seed-to-WM flag, and bool current sGM. The tissue is already
+    sampled with ``_five_tissue_mrtrix``. Official equivalent:
+    ``ACT/method.h::check_structural`` at MRtrix3 eeab681d3e0c.
     """
-    gm = tissue[..., 0] + tissue[..., 1]
-    return (gm >= tissue[..., 2]) & (gm > tissue[..., 3]) & (gm > tissue[..., 4])
-
-
-def _act_sample_state(
-    tissue: torch.Tensor, live: torch.Tensor, in_sgm: torch.Tensor,
-    seed_in_sgm: torch.Tensor, seed_to_wm: torch.Tensor,
-) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
-    """Apply MRtrix ACT to one 5TT ``[B,5]`` sample; return six bool ``[B]`` states.
-
-    Outputs are continuing, cortical termination, sGM exit, current sGM,
-    seed-to-WM reached, and current sample in sGM. MRtrix equivalent:
-    ``ACT/method.h::check_structural``.
-    """
-    good = _valid_act_tissue(tissue)
-    gm = _is_act_gm(tissue)
-    cgm = live & good & gm & (tissue[:, 0] >= tissue[:, 1])
-    sgm = live & good & gm & (tissue[:, 1] > tissue[:, 0])
-    seed_wm_exit = live & in_sgm & ~sgm & ~cgm & good & seed_in_sgm & ~seed_to_wm
-    sgm_exit = live & in_sgm & ~sgm & ~cgm & ~seed_wm_exit
-    continuing = live & good & ~cgm & ~sgm_exit
-    return (continuing, cgm, sgm_exit,
-            (in_sgm | sgm) & ~seed_wm_exit,
-            seed_to_wm | seed_wm_exit, sgm)
+    valid = tissue.sum(-1) >= .5
+    cgm, sgm, wm, csf, path = tissue.unbind(-1)
+    is_csf = (csf >= cgm) & (csf >= sgm) & (csf >= wm) & (csf >= path)
+    is_gm = ((cgm + sgm >= wm) & (cgm + sgm > csf) & (cgm + sgm > path))
+    cortical = valid & ~is_csf & is_gm & (cgm >= sgm)
+    subcortical = valid & ~is_csf & is_gm & (sgm > cgm)
+    exit_sgm = valid & ~is_csf & ~is_gm & (depth > 0)
+    seed_wm_exit = exit_sgm & seed_in_sgm & ~seed_to_wm
+    term = torch.zeros_like(depth, dtype=torch.int32)
+    term = torch.where(~valid, 3, term)
+    term = torch.where(valid & is_csf, torch.where(depth > 0, 9, 4), term)
+    term = torch.where(cortical, 1, term)
+    term = torch.where(exit_sgm & ~seed_wm_exit, 9, term)
+    depth = torch.where(seed_wm_exit, 0, depth + subcortical.int())
+    return term, depth, seed_to_wm | seed_wm_exit, subcortical
 
 
 def _five_tissue_mrtrix(
@@ -536,8 +683,9 @@ def probabilistic_tractography(
     MRtrix continuous sphere rule and 1000 attempts. ``five_tissue_spacing_mm``
     is the 5TT header voxel spacing; if absent, affine column norms are used.
     Cortical GM-side ACT seeds are oriented toward WM and tracked one-way.
-    Finite arc proposal resampling and sampled-point ACT sGM truncation remain
-    approximate.
+    iFOD2 propagation uses calibrated rejection sampling. ACT seed and
+    per-point structural states were checked on real inputs; full-track
+    truncation and image-exit parity are still under validation.
     """
     if (wm_sh.ndim != 4 or fod_affine.shape != (4, 4) or
             five_tissue.ndim != 4 or five_tissue.shape[-1] != 5 or
@@ -554,7 +702,6 @@ def probabilistic_tractography(
     fod_affine = fod_affine.to(device=device, dtype=torch.float64)
     five_tissue_affine = five_tissue_affine.to(device=device, dtype=torch.float64)
     fod_inverse = torch.linalg.inv(fod_affine)
-    five_inverse = torch.linalg.inv(five_tissue_affine)
     five_spacing = (torch.linalg.vector_norm(five_tissue_affine[:3, :3], dim=0)
                     if five_tissue_spacing_mm is None else
                     torch.as_tensor(five_tissue_spacing_mm, device=device, dtype=torch.float64))
@@ -567,15 +714,21 @@ def probabilistic_tractography(
     five_tissue = five_tissue.to(device=device, dtype=torch.float32)
     gmwmi = gmwmi.to(device=device, dtype=torch.float32)
     voxel_mm = torch.linalg.vector_norm(fod_affine[:3, :3], dim=0)
-    step_mm = float(voxel_mm.min()) / 2 if step_mm is None else float(step_mm)
+    voxel_size_mm = float(voxel_mm.prod().pow(1 / 3))
+    step_mm = voxel_size_mm / 2 if step_mm is None else float(step_mm)
     if step_mm <= 0 or max_length_mm <= step_mm:
         raise ValueError('step and maximum length must be positive')
     max_steps = math.ceil(max_length_mm / step_mm)
-    min_length_mm = 2 * float(voxel_mm.min()) if min_length_mm is None else min_length_mm
+    min_length_mm = 2 * voxel_size_mm if min_length_mm is None else min_length_mm
     if min_length_mm < 0 or min_length_mm > max_length_mm:
         raise ValueError('minimum length must lie between zero and maximum length')
     if lmax < 0 or lmax % 2 or wm_sh.shape[-1] != (lmax + 1) * (lmax + 2) // 2:
         raise ValueError('WM SH coefficient count does not match lmax')
+    calibration_local, calibration_ratio = (
+        _ifod2_calibration(lmax, step_mm, voxel_size_mm, max_angle_degrees, power, device)
+        if max_angle_degrees > 0 else
+        (wm_sh.new_tensor([[0., 0., 1.]]), 1.)
+    )
     generator = torch.Generator(device=device).manual_seed(seed)
     seeds = sample_gmwmi_seeds(gmwmi, five_tissue, five_tissue_affine,
                                n_seeds, generator)
@@ -595,14 +748,17 @@ def probabilistic_tractography(
         )
         valid_seed &= valid_act
         forward, nf, gf, lf, wf = _grow(
-            batch_seeds, initial, wm_sh, five_tissue, fod_inverse, five_inverse,
+            batch_seeds, initial, wm_sh, five_tissue, fod_inverse, act_inverse,
             generator, lmax=lmax, proposals_per_step=arc_proposals,
+            calibration_local=calibration_local, calibration_ratio=calibration_ratio,
             step_mm=step_mm, max_steps=max_steps,
             max_angle_degrees=max_angle_degrees, cutoff=cutoff, power=power,
         )
         backward, nb, gb, lb, wb = _grow(
-            batch_seeds, -initial, wm_sh, five_tissue, fod_inverse, five_inverse,
+            batch_seeds, -initial, wm_sh, five_tissue, fod_inverse, act_inverse,
             generator, lmax=lmax, proposals_per_step=arc_proposals,
+            calibration_local=calibration_local, calibration_ratio=calibration_ratio,
+            seed_to_wm_initial=wf,
             step_mm=step_mm, max_steps=max_steps,
             max_angle_degrees=max_angle_degrees, cutoff=cutoff, power=power,
         )

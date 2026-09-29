@@ -1,0 +1,33 @@
+--- a/src/dwi/tractography/algorithms/iFOD2.h
++++ b/src/dwi/tractography/algorithms/iFOD2.h
+@@ -194,5 +194,30 @@
+             const vector<Eigen::Vector3f>& oracle_calibration_directions() const { return calibrate_list; }
+             float oracle_calibration_ratio() const { return calibrate_ratio; }
+ 
++            bool oracle_rejection(const Eigen::Vector3f& point,
++                                  const Eigen::Vector3f& start_direction,
++                                  const Eigen::Vector3f& proposal_direction,
++                                  float& start_amplitude,
++                                  float& calibrated_max,
++                                  float& proposal_probability)
++            {
++              pos = point;
++              dir = start_direction.normalized();
++              if (!get_data(source)) return false;
++              start_amplitude = FOD(dir);
++              if (!(start_amplitude > 0.0f)) return false;
++              half_log_prob0 = 0.5f * std::log(start_amplitude);
++              calibrated_max = 0.0f;
++              for (const auto& local : calibrate_list) {
++                get_path(calib_positions, calib_tangents, rotate_direction(dir, local));
++                const float value = path_prob(calib_positions, calib_tangents);
++                if (value > calibrated_max) calibrated_max = value;
++              }
++              calibrated_max *= calibrate_ratio;
++              get_path(positions, tangents, proposal_direction.normalized());
++              proposal_probability = path_prob(positions, tangents);
++              return true;
++            }
++
+ 
+             bool init() override

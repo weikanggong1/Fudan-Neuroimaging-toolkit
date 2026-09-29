@@ -1,0 +1,145 @@
+"""由 fsaverage 注释和已完成的 recon-all 表面生成原生皮层 atlas。"""
+
+from pathlib import Path
+
+import nibabel as nib
+import numpy as np
+import torch
+
+from .anatomy import combine_cortical_subcortical
+from .atlas_surface import resample_annotation_to_native, surface_annotation_to_volume
+from .freesurfer_subject import ConnectomeNode, FreeSurferSubject
+
+
+def fsaverage_annotation_to_t1(
+    subject_dir: str | Path,
+    fsaverage_dir: str | Path,
+    left_labels: np.ndarray,
+    right_labels: np.ndarray,
+    names: tuple[str, ...],
+    *,
+    device: str = "cuda:0",
+) -> tuple[nib.Nifti1Image, tuple[ConnectomeNode, ...]]:
+    """把 fsaverage 双半球连续整数标签映射到受试者 T1 ribbon。
+
+    ``left_labels``、``right_labels`` 分别对应 fsaverage sphere.reg
+    顶点，均以 0 为背景，非零标签在两半球之间必须互不重叠且形成 1..K。
+    ``names`` 为 K 个节点名；``device`` 是球面最近邻与 ribbon 投影的
+    PyTorch 设备。返回 T1 网格 int32 NIfTI 与 K 行节点表。
+    参考步骤是 FreeSurfer ``mri_surf2surf --sval-annot``，再运行原
+    UKB ``map_surface_label_to_volume.py``；FNIT 只读 recon-all 图像与表面。
+    """
+    subject = FreeSurferSubject(Path(subject_dir))
+    fsaverage = Path(fsaverage_dir)
+    source_labels = (np.asarray(left_labels, dtype=np.int32),
+                     np.asarray(right_labels, dtype=np.int32))
+    present = sorted(set(np.unique(source_labels[0]).tolist()) |
+                     set(np.unique(source_labels[1]).tolist()))
+    left_nonzero = np.unique(source_labels[0])
+    right_nonzero = np.unique(source_labels[1])
+    if present != list(range(len(names) + 1)) or \
+            np.intersect1d(left_nonzero[left_nonzero > 0],
+                           right_nonzero[right_nonzero > 0]).size:
+        raise ValueError("two hemispheres must define disjoint contiguous labels 1..K")
+    mapped = []
+    surfaces = []
+    for hemi, labels in zip(("lh", "rh"), source_labels):
+        source_sphere, _ = nib.freesurfer.read_geometry(str(fsaverage / f"surf/{hemi}.sphere.reg"))
+        native_sphere, _ = nib.freesurfer.read_geometry(str(subject.subject_dir / f"surf/{hemi}.sphere.reg"))
+        if len(labels) != len(source_sphere):
+            raise ValueError(f"{hemi} source annotation/sphere vertex counts differ")
+        mapped.append(resample_annotation_to_native(
+            fsaverage_sphere_reg=torch.as_tensor(source_sphere, device=device),
+            native_sphere_reg=torch.as_tensor(native_sphere, device=device),
+            fsaverage_labels=torch.as_tensor(labels, device=device),
+        ))
+        surfaces.append(tuple(torch.as_tensor(nib.freesurfer.read_geometry(
+            str(subject.subject_dir / f"surf/{hemi}.{kind}"))[0], device=device)
+            for kind in ("pial", "white")))
+    ribbon = nib.load(str(subject.subject_dir / "mri/ribbon.mgz"))
+    cortical = surface_annotation_to_volume(
+        ribbon=torch.as_tensor(ribbon.get_fdata(dtype=np.float32), device=device),
+        vox2ras_tkr=torch.as_tensor(ribbon.header.get_vox2ras_tkr(), device=device),
+        lh_pial=surfaces[0][0], lh_white=surfaces[0][1], lh_labels=mapped[0],
+        rh_pial=surfaces[1][0], rh_white=surfaces[1][1], rh_labels=mapped[1],
+    )
+    left_max = int(source_labels[0].max())
+    nodes = tuple(ConnectomeNode(
+        index=i, original_label=i, hemisphere="L" if i <= left_max else "R",
+        name=name,
+    ) for i, name in enumerate(names, 1))
+    image = nib.Nifti1Image(cortical.cpu().numpy(), ribbon.affine)
+    return image, nodes
+
+
+def schaefer_to_t1(
+    subject_dir: str | Path,
+    fsaverage_dir: str | Path,
+    left_annot: str | Path,
+    right_annot: str | Path,
+    *,
+    device: str = "cuda:0",
+) -> tuple[nib.Nifti1Image, tuple[ConnectomeNode, ...]]:
+    """从原 UKB 双半球 Schaefer 注释生成受试者 T1 ribbon atlas。
+
+    ``subject_dir`` 是已完成的 recon-all 目录，``fsaverage_dir`` 提供
+    双半球 sphere.reg，``left_annot``/``right_annot`` 是 fsaverage 上
+    的 Schaefer 注释，``device`` 指定 GPU/CPU。右半球非零标签在左
+    半球标签后连续编号。返回 int32 T1 NIfTI 和逐行对应 1..K 的
+    ``ConnectomeNode``。原版依次执行 ``convert_schaefer_annot.py``、
+    双半球 ``mri_surf2surf --sval-annot`` 和
+    ``map_surface_label_to_volume.py``。
+    """
+    left, _, left_names = nib.freesurfer.read_annot(str(left_annot))
+    right, _, right_names = nib.freesurfer.read_annot(str(right_annot))
+    n_left = len(left_names) - 1
+    if len(right_names) != len(left_names) or n_left < 1:
+        raise ValueError("Schaefer left/right annotation tables must have equal positive size")
+    right = np.where(right > 0, right + n_left, 0)
+    names = tuple(label.decode("utf-8") for label in (*left_names[1:], *right_names[1:]))
+    return fsaverage_annotation_to_t1(
+        subject_dir=subject_dir, fsaverage_dir=fsaverage_dir,
+        left_labels=left, right_labels=right, names=names, device=device,
+    )
+
+
+def combine_cortical_tian(
+    cortical_t1: nib.spatialimages.SpatialImage,
+    cortical_nodes: tuple[ConnectomeNode, ...],
+    tian_t1: nib.spatialimages.SpatialImage,
+    tian_names: tuple[str, ...],
+) -> tuple[nib.Nifti1Image, tuple[ConnectomeNode, ...]]:
+    """合并同一 T1 网格的连续皮层标签与 Tian 标签。
+
+    ``cortical_t1`` 标签为 0..K，``cortical_nodes`` 定义 1..K；
+    ``tian_t1`` 标签为 0..S，``tian_names`` 按 1..S 排列。
+    皮层非零体素优先；仅在皮层背景处将 Tian 标签偏移 K。
+    返回 int32 NIfTI 和 K+S 行节点表。原版等价步骤为
+    ``python scripts/python/combine_volumetric_atlases.py ...``。
+    """
+    if cortical_t1.shape != tian_t1.shape or not np.allclose(
+        cortical_t1.affine, tian_t1.affine, atol=1e-5
+    ):
+        raise ValueError("cortical and Tian atlases must share one T1 voxel grid")
+    k = len(cortical_nodes)
+    if tuple(node.index for node in cortical_nodes) != tuple(range(1, k + 1)):
+        raise ValueError("cortical_nodes must define consecutive labels 1..K")
+    cortical = np.asarray(cortical_t1.dataobj)
+    tian = np.asarray(tian_t1.dataobj)
+    if (not np.all(np.isfinite(cortical)) or not np.all(np.isfinite(tian)) or
+            not np.all(cortical == np.round(cortical)) or
+            not np.all(tian == np.round(tian)) or
+            cortical.min() < 0 or tian.min() < 0 or
+            cortical.max() > k or tian.max() > len(tian_names)):
+        raise ValueError("atlas labels must be integers inside their node tables")
+    combined = combine_cortical_subcortical(
+        torch.as_tensor(cortical.astype(np.int32)),
+        torch.as_tensor(tian.astype(np.int32)),
+        cortical_max_label=k,
+    ).numpy()
+    nodes = cortical_nodes + tuple(ConnectomeNode(
+        index=k + i, original_label=i,
+        hemisphere="R" if name.endswith("-rh") else "L" if name.endswith("-lh") else "",
+        name=name,
+    ) for i, name in enumerate(tian_names, 1))
+    return nib.Nifti1Image(combined, cortical_t1.affine), nodes

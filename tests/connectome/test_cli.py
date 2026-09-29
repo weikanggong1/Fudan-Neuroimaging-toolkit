@@ -190,3 +190,40 @@ def test_connectome_cli_subject_directory_requires_completed_files(tmp_path):
             "--freesurfer-subject-dir", str(subject), "--n-seeds", "1",
             "--device", "cpu", "--output-dir", str(tmp_path / "result"),
         ])
+
+
+def test_connectome_cli_schaefer_requires_template_inputs(tmp_path):
+    subject = tmp_path / "subject" / "mri"
+    subject.mkdir(parents=True)
+    for name in ("brain.mgz", "aparc+aseg.mgz"):
+        (subject / name).write_bytes(b"input")
+    for name in ("dwi", "bvals", "bvecs"):
+        (tmp_path / name).write_bytes(b"input")
+    with pytest.raises(ValueError, match="--atlas-templates-dir"):
+        main([
+            "connectome", "--dwi", str(tmp_path / "dwi"),
+            "--bvals", str(tmp_path / "bvals"), "--bvecs", str(tmp_path / "bvecs"),
+            "--freesurfer-subject-dir", str(subject.parent),
+            "--atlas", "schaefer200+tian-s1", "--n-seeds", "1",
+            "--device", "cpu", "--output-dir", str(tmp_path / "result"),
+        ])
+
+
+def test_connectome_cli_rejects_ambiguous_tian_registration(tmp_path):
+    subject = tmp_path / "subject" / "mri"
+    subject.mkdir(parents=True)
+    for name in ("brain.mgz", "aparc+aseg.mgz"):
+        (subject / name).write_bytes(b"input")
+    for name in ("dwi", "bvals", "bvecs"):
+        (tmp_path / name).write_bytes(b"input")
+    with pytest.raises(ValueError, match="exactly one"):
+        main([
+            "connectome", "--dwi", str(tmp_path / "dwi"),
+            "--bvals", str(tmp_path / "bvals"), "--bvecs", str(tmp_path / "bvecs"),
+            "--freesurfer-subject-dir", str(subject.parent),
+            "--atlas", "schaefer200+tian-s1",
+            "--atlas-templates-dir", str(tmp_path), "--fsaverage-dir", str(tmp_path),
+            "--mni-template", str(tmp_path / "mni.nii.gz"),
+            "--tian-fnirt-coeff", str(tmp_path / "warp.nii.gz"),
+            "--n-seeds", "1", "--device", "cpu", "--output-dir", str(tmp_path / "result"),
+        ])

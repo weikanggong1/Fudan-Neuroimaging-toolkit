@@ -1,0 +1,11 @@
+--- a/src/dwi/tractography/algorithms/iFOD2.h
++++ b/src/dwi/tractography/algorithms/iFOD2.h
+@@ -191,6 +191,9 @@
+             }
+ 
+ 
++            const vector<Eigen::Vector3f>& oracle_calibration_directions() const { return calibrate_list; }
++            float oracle_calibration_ratio() const { return calibrate_ratio; }
++
+ 
+             bool init() override

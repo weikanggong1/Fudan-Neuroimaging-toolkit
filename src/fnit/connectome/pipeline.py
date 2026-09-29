@@ -16,6 +16,8 @@ import torch
 from .anatomy import freesurfer_five_tissue, gmwmi_from_five_tissue, resample_labels_nearest
 from .bet import bet_mask, mean_bzero, mrtrix_roundtrip_voxel_size
 from .assignment import build_connectomes
+from .atlas_builder import combine_cortical_tian, schaefer_to_t1
+from .atlas_tian import fnirt_tian_to_t1, synthmorph_tian_to_t1
 from .freesurfer_subject import ConnectomeNode, FreeSurferSubject, fs_aparc_atlas
 from .fod import fit_mrtrix_msmt_csd
 from .masks import dwi2mask_legacy, maskfilter_six_connected
@@ -170,6 +172,11 @@ class UKBConnectome:
         atlas_dwi: str | Path | None = None,
         freesurfer_subject_dir: str | Path | None = None,
         atlas: str = "fs-aparc",
+        atlas_templates_dir: str | Path | None = None,
+        fsaverage_dir: str | Path | None = None,
+        mni_template: str | Path | None = None,
+        synthmorph_weights: str | Path | None = None,
+        tian_fnirt_coeff: str | Path | None = None,
         brain_mask: str | Path | None = None,
         n_seeds: int,
         shell_bvals: Sequence[float] | None = None,
@@ -186,7 +193,15 @@ class UKBConnectome:
         are FSL N and 3×N or N×3 eddy-rotated files.
         ``freesurfer_subject_dir`` is a completed recon-all subject directory;
         ``atlas="fs-aparc"`` builds a contiguous 84-node DWI-grid atlas
-        from its ``mri/aparc+aseg.mgz``. Alternatively, ``t1_brain``,
+        from its ``mri/aparc+aseg.mgz``. ``atlas="schaefer200+tian-s1"``
+        reads the original Schaefer and Tian S1 files from
+        ``atlas_templates_dir``, maps Schaefer through ``fsaverage_dir``
+        to the native ribbon, registers ``mni_template`` to T1 with FNIT
+        SynthMorph joint using optional ``synthmorph_weights``, then builds
+        a 216-node DWI atlas. For a fixed original UKB atlas, supply
+        ``tian_fnirt_coeff`` instead of ``mni_template``; FNIT inverts the
+        given FNIRT T1→MNI coefficient and samples Tian without calling FSL.
+        Alternatively, ``t1_brain``,
         ``t1_segmentation`` and ``atlas_dwi`` must all be supplied. The
         explicit atlas is a nonnegative integer image in DWI RAS world space
         and may retain a separate voxel grid.
@@ -219,12 +234,21 @@ class UKBConnectome:
         if freesurfer_subject_dir is not None:
             if any(value is not None for value in (t1_brain, t1_segmentation, atlas_dwi)):
                 raise ValueError("freesurfer_subject_dir cannot be combined with explicit T1/atlas inputs")
-            if atlas != "fs-aparc":
-                raise ValueError("only fs-aparc is currently supported from a subject directory")
+            if atlas not in ("fs-aparc", "schaefer200+tian-s1"):
+                raise ValueError("unsupported atlas from a subject directory")
+            if atlas == "schaefer200+tian-s1" and (
+                atlas_templates_dir is None or fsaverage_dir is None or
+                (mni_template is None) == (tian_fnirt_coeff is None)
+            ):
+                raise ValueError("Schaefer200+Tian S1 requires atlas_templates_dir, fsaverage_dir and exactly one of mni_template or tian_fnirt_coeff")
+            if tian_fnirt_coeff is not None and synthmorph_weights is not None:
+                raise ValueError("synthmorph_weights cannot be used with tian_fnirt_coeff")
             subject = FreeSurferSubject(Path(freesurfer_subject_dir))
             t1_brain, t1_segmentation = subject.brain, subject.aparc_aseg
         elif any(value is None for value in (t1_brain, t1_segmentation, atlas_dwi)):
             raise ValueError("provide freesurfer_subject_dir or all of t1_brain, t1_segmentation, atlas_dwi")
+        elif atlas != "fs-aparc":
+            raise ValueError("a named atlas requires freesurfer_subject_dir")
         reference = nib.load(str(dwi))
         dwi_data, dwi_affine = _image(dwi, self.device)
         if dwi_data.ndim != 4:
@@ -277,9 +301,45 @@ class UKBConnectome:
         five_affine = torch.linalg.inv(transform) @ seg_affine
         nodes = None
         if freesurfer_subject_dir is not None:
-            atlas_t1, nodes = fs_aparc_atlas(seg)
+            atlas_source_affine = seg_affine
+            if atlas == "fs-aparc":
+                atlas_t1, nodes = fs_aparc_atlas(seg)
+            else:
+                templates = Path(atlas_templates_dir)
+                cortical, cortical_nodes = schaefer_to_t1(
+                    subject_dir=subject.subject_dir,
+                    fsaverage_dir=fsaverage_dir,
+                    left_annot=templates / "lh.Schaefer2018_200Parcels_7Networks_order.annot",
+                    right_annot=templates / "rh.Schaefer2018_200Parcels_7Networks_order.annot",
+                    device=str(self.device),
+                )
+                if tian_fnirt_coeff is None:
+                    tian, _ = synthmorph_tian_to_t1(
+                        t1_brain=subject.brain,
+                        mni_template=mni_template,
+                        tian_mni=templates / "Tian_Subcortex_S1_3T.nii.gz",
+                        device=str(self.device), weights=synthmorph_weights,
+                    )
+                else:
+                    tian = fnirt_tian_to_t1(
+                        t1_brain=subject.brain,
+                        tian_mni=templates / "Tian_Subcortex_S1_3T.nii.gz",
+                        forward_coefficients=tian_fnirt_coeff,
+                        device=str(self.device),
+                    )
+                combined, nodes = combine_cortical_tian(
+                    cortical_t1=cortical, cortical_nodes=cortical_nodes,
+                    tian_t1=tian,
+                    tian_names=tuple((templates / "Tian_Subcortex_S1_3T_label.txt")
+                                     .read_text().splitlines()),
+                )
+                atlas_t1 = torch.as_tensor(np.asarray(combined.dataobj),
+                                           device=self.device)
+                atlas_source_affine = torch.as_tensor(
+                    combined.affine, device=self.device, dtype=torch.float64,
+                )
             atlas_data = resample_labels_nearest(
-                labels=atlas_t1, source_affine=seg_affine,
+                labels=atlas_t1, source_affine=atlas_source_affine,
                 target_shape=tuple(dwi_data.shape[:3]), target_affine=dwi_affine,
                 target_to_source_world=transform,
             )
@@ -312,7 +372,7 @@ class UKBConnectome:
         )
         if not tracks.paths:
             raise RuntimeError("ACT tracking accepted no streamlines")
-        step_size_mm = float(torch.linalg.vector_norm(dwi_affine[:3, :3], dim=0).min()) / 2
+        step_size_mm = float(torch.linalg.vector_norm(dwi_affine[:3, :3], dim=0).prod().pow(1 / 3)) / 2
         weights = estimate_sift2_weights(
             tracks.paths, wm_sh, dwi_affine, five, five_affine,
             step_size_mm=step_size_mm,

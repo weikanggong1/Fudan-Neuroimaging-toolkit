@@ -112,36 +112,23 @@ def test_arc_requires_midpoint_fod_above_cutoff(device):
 def test_act_sgm_state_continues_then_exits_or_reaches_cgm(device):
     if device == "cuda" and not torch.cuda.is_available():
         pytest.skip("CUDA is unavailable")
-    from fnit.connectome.tracking import _act_sample_state
+    from fnit.connectome.tracking import _act_structural_step
 
-    tissue = torch.eye(5, device=device)[[1, 2, 0]]
-    live = torch.ones(1, dtype=torch.bool, device=device)
-    off = torch.zeros_like(live)
-    continuing, cortical, exit_sgm, in_sgm, reached_wm, visited = _act_sample_state(
-        tissue[0:1], live, off, off, off,
-    )
-    assert bool(continuing.item()) and bool(visited.item()) and bool(in_sgm.item())
-    assert not bool(cortical.item()) and not bool(exit_sgm.item())
-    continuing, cortical, exit_sgm, _, _, _ = _act_sample_state(
-        tissue[1:2], continuing, in_sgm, off, reached_wm,
-    )
-    assert bool(exit_sgm.item()) and not bool(continuing.item())
-    continuing, cortical, exit_sgm, in_sgm, reached_wm, _ = _act_sample_state(
-        tissue[0:1], live, off, live, off,
-    )
-    continuing, cortical, exit_sgm, in_sgm, reached_wm, _ = _act_sample_state(
-        tissue[1:2], continuing, in_sgm, live, reached_wm,
-    )
-    assert bool(continuing.item()) and bool(reached_wm.item())
-    assert not bool(exit_sgm.item()) and not bool(in_sgm.item())
-    continuing, cortical, exit_sgm, in_sgm, reached_wm, _ = _act_sample_state(
-        tissue[0:1], live, off, off, off,
-    )
-    continuing, cortical, exit_sgm, _, _, _ = _act_sample_state(
-        tissue[2:3], continuing, in_sgm, off, reached_wm,
-    )
-    assert bool(cortical.item()) and not bool(continuing.item())
-    assert not bool(exit_sgm.item())
+    tissue = torch.eye(5, device=device)[[1, 2, 0, 3]]
+    depth = torch.zeros(1, dtype=torch.int32, device=device)
+    off = torch.zeros(1, dtype=torch.bool, device=device)
+    term, depth, to_wm, _ = _act_structural_step(tissue[0:1], depth, off, off)
+    assert int(term.item()) == 0 and int(depth.item()) == 1
+    term, _, _, _ = _act_structural_step(tissue[1:2], depth, off, to_wm)
+    assert int(term.item()) == 9
+    term, _, _, _ = _act_structural_step(tissue[3:4], depth, off, to_wm)
+    assert int(term.item()) == 9
+    term, depth, to_wm, _ = _act_structural_step(tissue[1:2], depth, ~off, off)
+    assert int(term.item()) == 0 and int(depth.item()) == 0 and bool(to_wm.item())
+    term, _, _, _ = _act_structural_step(tissue[2:3], depth, off, to_wm)
+    assert int(term.item()) == 1
+    term, _, _, _ = _act_structural_step(torch.zeros_like(tissue[0:1]), depth, off, to_wm)
+    assert int(term.item()) == 3
 
 
 @pytest.mark.parametrize("device", ["cpu", "cuda"])

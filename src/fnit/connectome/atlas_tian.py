@@ -13,6 +13,75 @@ from fnit.applywarp.core import (
 )
 
 
+def synthmorph_tian_to_t1(
+    t1_brain: str | Path | nib.spatialimages.SpatialImage,
+    mni_template: str | Path | nib.spatialimages.SpatialImage,
+    tian_mni: str | Path | nib.spatialimages.SpatialImage,
+    *,
+    device: str = "cuda:0",
+    weights: str | Path | dict | None = None,
+    transform=None,
+) -> tuple[nib.spatialimages.SpatialImage, object]:
+    """把 2 mm MNI Tian 整数 atlas 映射到 T1 脑图网格。
+
+    三个图像依次为已完成 recon-all 的脑图、与 Tian 同网格的 MNI T1、
+    Tian 整数标签，接受路径或 NiBabel 图像。``device`` 指定推理设备；
+    ``weights`` 指向 FNIT SynthMorph affine/deform 权重目录，省略时使用
+    FNIT 已配置的权重。首次调用以 FNIT PyTorch SynthMorph joint 注册
+    MNI→T1；再次调用可传入返回的 ``transform`` 处理 S4，避免重新
+    注册。返回 T1 网格 int16 标签图及带源/目标几何的 SynthMorph 变换。
+    官方对照为 ``mri_synthmorph register -m joint -t warp.mgz
+    MNI_T1 T1_brain``，随后 ``mri_synthmorph apply -m nearest -t int16
+    warp.mgz Tian atlas_T1.nii.gz``。
+    """
+    from fnit.synthmorph import SynthMorph, apply_transform
+
+    def image(value):
+        return nib.load(str(value)) if isinstance(value, (str, Path)) else value
+
+    t1 = image(t1_brain)
+    mni = image(mni_template)
+    atlas = image(tian_mni)
+    if atlas.shape != mni.shape or not np.allclose(atlas.affine, mni.affine, atol=1e-5):
+        raise ValueError("Tian atlas and MNI T1 must share the same voxel grid")
+    if transform is None:
+        transform = SynthMorph(weights=weights, device=device, model="joint")(
+            moving=mni, fixed=t1,
+        ).transform
+    native = apply_transform(
+        image=atlas, transformation=transform, method="nearest", dtype="int16",
+    )
+    return native, transform
+
+
+def fnirt_tian_to_t1(
+    t1_brain: str | Path | nib.spatialimages.SpatialImage,
+    tian_mni: str | Path | nib.Nifti1Image,
+    forward_coefficients: str | Path | nib.Nifti1Image,
+    *,
+    device: str = "cuda:0",
+) -> nib.Nifti1Image:
+    """用已给定的 FSL FNIRT 前向 coefficient 生成原生 T1 Tian 标签。
+
+    ``t1_brain`` 给出目标 T1 网格，可为 recon-all ``brain.mgz``；
+    ``tian_mni`` 为 MNI 2 mm 整数标签；``forward_coefficients`` 是已
+    生成的 T1→MNI ``fnirt --cout`` 文件，intent 2007；``device`` 是
+    PyTorch 设备。返回 T1 网格 int32 NIfTI。对应原流程的
+    ``invwarp --ref=T1 --warp=coeff --out=inverse``，再执行
+    ``applywarp --ref=T1 --in=Tian --warp=inverse --interp=nn``。
+    这里只读取 coefficient，不调用 FSL 程序。
+    """
+    from fnit.applywarp import TorchApplyWarp
+
+    t1 = nib.load(str(t1_brain)) if isinstance(t1_brain, (str, Path)) else t1_brain
+    reference = nib.Nifti1Image(np.asarray(t1.dataobj), t1.affine)
+    inverse = invert_fnirt_t1_warp(forward_coefficients, reference, device=device)
+    atlas = TorchApplyWarp(device=device)(
+        tian_mni, reference, warp=inverse, interpolation="nearest",
+    ).image
+    return nib.Nifti1Image(np.asarray(atlas.dataobj, dtype=np.int32), atlas.affine)
+
+
 def _vertex_positions(indices: torch.Tensor, field: torch.Tensor,
                       inverse_affine: torch.Tensor,
                       reference_spacing: torch.Tensor) -> torch.Tensor:

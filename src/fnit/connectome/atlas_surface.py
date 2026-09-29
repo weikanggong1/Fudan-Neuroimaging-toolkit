@@ -64,6 +64,39 @@ def _nearest_surface_vertices(
     return result
 
 
+def resample_annotation_to_native(
+    fsaverage_sphere_reg: torch.Tensor,
+    native_sphere_reg: torch.Tensor,
+    fsaverage_labels: torch.Tensor,
+    *,
+    bin_width_mm: float = 3.0,
+    query_batch: int = 8192,
+) -> torch.Tensor:
+    """把 fsaverage 逐顶点标签按配准球面映射到原生表面。
+
+    源/目标球面分别为 `[Vs,3]`/`[Vt,3]` FreeSurfer sphere.reg
+    坐标，源标签为整数 `[Vs]`。返回同设备、同类型 `[Vt]` 标签。
+    ``bin_width_mm`` 是最近邻候选的空间网格宽度；未能证明最近邻的
+    顶点会完整搜索，因此不改变结果。``query_batch`` 是一次处理的
+    目标顶点数，用于控制显存。
+    等价参考：``mri_surf2surf --srcsubject fsaverage
+    --trgsubject SUBJECT --hemi lh --sval-annot atlas.annot --tval native.annot``；
+    ``--sval-annot`` 使用 nearest-neighbour forward 映射。
+    """
+    if (fsaverage_sphere_reg.ndim != 2 or fsaverage_sphere_reg.shape[1] != 3 or
+            native_sphere_reg.ndim != 2 or native_sphere_reg.shape[1] != 3 or
+            fsaverage_labels.ndim != 1 or len(fsaverage_labels) != len(fsaverage_sphere_reg)):
+        raise ValueError("expected source/target sphere [V,3] and source labels [Vs]")
+    if fsaverage_sphere_reg.device != native_sphere_reg.device or \
+            fsaverage_labels.device != native_sphere_reg.device:
+        raise ValueError("spheres and labels must share one device")
+    nearest = _nearest_surface_vertices(
+        native_sphere_reg.to(torch.float64), fsaverage_sphere_reg.to(torch.float64),
+        bin_width_mm=bin_width_mm, query_batch=query_batch,
+    )
+    return fsaverage_labels[nearest]
+
+
 def surface_annotation_to_volume(
     ribbon: torch.Tensor,
     vox2ras_tkr: torch.Tensor,

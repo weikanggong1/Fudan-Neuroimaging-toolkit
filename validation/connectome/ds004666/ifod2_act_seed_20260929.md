@@ -4,7 +4,7 @@
 
 使用公开 ds004666 `sub-01/ses-2mm` 的校正 DWI 所生成的归一化 WM FOD、配对官方 `recon-all` 分割生成的 5TT，以及固定的 10,000 个 GMWMI 世界毫米坐标。FOD、5TT、坐标文件的 SHA-256 分别是 `32461e2e2281f60a15dfd546ad91129d7fe68582844c9d983a7602f23f7c59c6`、`32a27dabd9fa7e6094beafda8c90515642f733f1c245530b183846bf40cc5153`、`41f036eae125b83dd2b6fc7f3c916dd5da8c20915c2990df3f65cce8fb45ffe6`。影像仍在验证服务器；仓库归档种子坐标、逐点结果、矩阵、图和报告。[校正输入的来源与假定读出时间](corrected_input_provenance.public.json)及[原始图像切面](../../../docs/connectome/figures/ds004666_t1_raw_vs_topup_eddy_atlas.png)另有记录。
 
-MRtrix3 固定源码提交 `eeab681d3e0cb004cf1d1d31579d3892197ef5b6` 的 `ACT/method.h::check_seed()`、`seed_is_unidirectional()` 规定：无效组织拒绝播种；皮层灰质侧的灰白质界面只向白质方向传播；亚皮层灰质种子仍可双向传播。方向由种子两侧各 0.001 mm 的 GM−WM 值判定。FNIT 现在实现这两个种子函数，并把单向标志用于流线拼接。后续每步圆弧仍用 16 候选抽样，ACT 回溯和截断尚未逐步对齐。
+MRtrix3 固定源码提交 `eeab681d3e0cb004cf1d1d31579d3892197ef5b6` 的 `ACT/method.h::check_seed()`、`seed_is_unidirectional()` 规定：无效组织拒绝播种；皮层灰质侧的灰白质界面只向白质方向传播；亚皮层灰质种子仍可双向传播。方向由种子两侧各 0.001 mm 的 GM−WM 值判定。FNIT 现在实现这两个种子函数，并把单向标志用于流线拼接。后续圆弧已改为校准拒绝采样；12,600 个真实 5TT 路径采样点的状态见当前报告。
 
 `_five_tissue_mrtrix(five_tissue, points, inverse_affine)` 接收 float32 `[X,Y,Z,5]` 五组织图、RAS 世界毫米 `[B,3]` 坐标和世界→体素 `[4,4]` 变换；返回 float32 `[B,5]`，通道顺序是皮层灰质、亚皮层灰质、白质、脑脊液、病理。超出图像、最近体素为背景时返回零；三线性权重小于 `1e-6` 时置零。MRtrix 根据 NIfTI 头文件体素尺寸规范化 sform 的方向列；仅用 nibabel 读出的浮点 sform 列长度，种子分类会在界面附近产生错误。因此直接调用公开追踪函数时，应传 `five_tissue_spacing_mm=(sx,sy,sz)`，单位 mm；`UKBConnectome` 自动从官方分割头文件传入。省略该参数时采用 affine 列长度。
 
@@ -29,8 +29,8 @@ tracks = probabilistic_tractography(
     batch_size=8192,                          # 输入：每批种子数
     arc_proposals=16,                         # 输入：当前每步候选数，尚非官方拒绝采样
     max_length_mm=250.0,                      # 输入：流线上限，mm
-    min_length_mm=None,                       # 输入：None 时为最小 FOD 体素边长两倍
-    step_mm=None,                             # 输入：None 时为最小 FOD 体素边长一半
+    min_length_mm=None,                       # 输入：None 时为 FOD 体素几何平均边长两倍
+    step_mm=None,                             # 输入：None 时为 FOD 体素几何平均边长一半
     max_angle_degrees=45.0,                   # 输入：每步最大转角
     cutoff=0.1,                               # 输入：FOD 截止值
     power=0.5,                                # 输入：圆弧 FOD 概率幂次
@@ -73,34 +73,6 @@ python tools/benchmark_connectome_ifod2_act_seed.py \
 
 官方独立进程完整墙钟 1.28 s、最大 RSS 622,912 KiB。两侧硬件与计时边界不同；本次不声称 GPU 加速。定向的单点分歧来自接近零的梯度数值符号，没有在报告中掩盖。
 
-## 对连接矩阵的影响与重复性
+## 当前组合
 
-[固定位置 A/B 程序](../../../tools/benchmark_connectome_ifod2_act_ab.py)让两组共享连续初始方向、ACT 种子有效掩膜和后续 PyTorch 随机序列，只切换皮层单向播种与流线拼接。三种 FNIT 种子分别和三份官方 20 节点矩阵比较，共九个配对；FOD、5TT、FA 与 atlas 相同。`--fod`、`--five-tissue`、`--fa`、`--atlas` 是四张真实 NIfTI，`--seeds` 是上述三列坐标，`--five-spacing 1 1 1` 来自 5TT 头文件，重复的 `--official-dir` 各含四张官方矩阵，`--seed` 控制初始方向并令传播 RNG 为 1729+seed，`--output-dir` 写双臂四张 CSV 与指标 JSON。种子 0 的命令如下，种子 1、2 只替换 `--seed` 和输出目录：
-
-```bash
-python tools/benchmark_connectome_ifod2_act_ab.py \
-  --fod wm_fod_norm.nii.gz --five-tissue five_tissue.nii.gz \
-  --seeds frozen_seeds.txt --fa fa_corrected.nii.gz \
-  --atlas synthseg_gm_atlas_dwi.nii.gz --five-spacing 1 1 1 \
-  --official-dir official_seed0_matrices --official-dir official_seed1_matrices \
-  --official-dir official_seed2_matrices --seed 0 --device cuda:0 \
-  --output-dir act_ab_seed0
-```
-
-| 九个配对平均；20 节点严格上三角 | 双向旧规则 | ACT 单向规则 | 单向更好 |
-|---|---:|---:|---:|
-| count 相对 L1 | 0.32421 | 0.32007 | 5 / 9 |
-| count 非零支持 Dice | 0.74758 | 0.75626 | 8 / 9 |
-| SIFT2 FBC 相对 L1 | 0.34535 | 0.33325 | 5 / 9 |
-| mean length 相对 L1 | 0.73512 | 0.72589 | 6 / 9 |
-| mean FA 共同边 nMAE | 0.10634 | 0.10645 | 4 / 9 |
-
-两组接受流线数按 FNIT 种子为 `3001→2902`、`2989→2851`、`2974→2877`；每组固定位置追踪核心约 8.3–9.3 s，后处理约 29–33 s，详见三份 [A/B 原始矩阵与报告](ifod2_act_seed_20260929/)。官方三次自身 count 相对 L1 为 0.2144–0.2426、共同边 FA nMAE 为 0.0787–0.0999；单向规则改善了支持率，但没有让所有最终矩阵进入官方重复范围。三次公开 `probabilistic_tractography()` 入口各尝试 10,000 次并独立采样种子，接受 2,863、2,829、2,830 条；追踪 12.64–16.55 s、含 SIFT2/FA/赋值的已载入输入核心 24.81–27.87 s，Torch 峰值约 2.123 GiB。官方对应整条 `tckgen` 的一次进程墙钟 16.90 s，见[原阶段时间](corrected_mrtrix_fs5tt_act_adapted/stage_times.tsv)；两侧阶段边界与共享负载不同。
-
-FNIT seed 0 跨独立进程重跑，接受流线均为 2,863，四张输出 CSV 的 SHA-256 逐张相同。[四份公开入口报告与 CSV](ifod2_act_seed_20260929/)保留三种子和 seed 0 重跑的输入哈希、误差、时间与显存；图中 count 热图移除了对角线，以便观察 region-region 边。
-
-更新后的完整入口还以同一公开受试者、已校正 DWI、eddy 旋转 bvec 和官方 `recon-all` 目录运行 `fnit connectome --atlas fs-aparc --n-seeds 100 --seed 0 --device cuda:0`，不预制 atlas、脑掩膜或配准矩阵。接受 39 条流线；`nodes.tsv` 有 84 节点，四张 84×84 CSV 均为有限对称矩阵，每张有 17 条非零非对角边。完整进程墙钟 626.62 s、最大 RSS 1,781,320 KiB、Torch 分配峰值 2.782 GiB。[本次输出矩阵、节点表、输入与输出哈希](ifod2_act_seed_20260929/full_smoke_100/)可以逐文件复查；仓库中的节点表仅把换行从 CRLF 转为 LF。100 次播种只检验接口和文件结构，不能用于判断 84 节点矩阵的统计一致性。项目 Conda 环境中 `pip wheel . --no-deps --no-build-isolation` 构建 `0.16.0` wheel 成功，SHA-256 为 `b685936909f102f5d67787f9b5f9402f6442e25d80ba5724aa424750dacd6d2b`；隔离安装后可以导入含 `five_tissue_spacing_mm` 的公开追踪入口。
-
-![真实 5TT 切面、单向种子及 MRtrix/FNIT 连接矩阵](ifod2_act_seed_20260929/act_seed_comparison.png)
-
-绘图程序为 [`plot_connectome_ifod2_act_seed.py`](../../../tools/plot_connectome_ifod2_act_seed.py)。当前剩余的主要方法差异是 iFOD2 每步的校准拒绝采样和完整 ACT `reverse_track`、回溯与亚皮层截断状态；当前函数仍使用 16 候选多项选择。更大样本的 84 节点整链重复性与百万级播种性能尚待验证。阶段验证只证明本次种子判定函数的同输入对齐，不证明整条流线逐条一致。
+此页只保留 ACT 种子函数的同输入检查。当前校准拒绝采样、ACT 逐点状态、随机流线和四矩阵三种子对照见[追踪报告](ifod2_rejection_20260929.md)。

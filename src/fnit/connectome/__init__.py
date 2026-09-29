@@ -5,6 +5,9 @@ from .anatomy import (
     gmwmi_from_five_tissue, resample_labels_nearest,
 )
 from .assignment import build_connectomes
+from .atlas_tian import fnirt_tian_to_t1, synthmorph_tian_to_t1
+from .atlas_surface import resample_annotation_to_native, surface_annotation_to_volume
+from .atlas_builder import combine_cortical_tian, fsaverage_annotation_to_t1, schaefer_to_t1
 from .bet import bet_mask, mean_bzero, mrtrix_roundtrip_voxel_size
 from .freesurfer_subject import ConnectomeNode, FreeSurferSubject, fs_aparc_atlas, fs_aparc_nodes
 from .fod import fit_mrtrix_msmt_csd, real_sh
@@ -36,4 +39,7 @@ __all__ = [
     "optimize_sift2_fixels", "probabilistic_tractography",
     "processing_mask_from_5tt", "real_sh", "resample_labels_nearest",
     "sample_streamline_mean_precise", "segment_fod_fixels",
+    "synthmorph_tian_to_t1", "fnirt_tian_to_t1", "resample_annotation_to_native",
+    "surface_annotation_to_volume", "fsaverage_annotation_to_t1", "schaefer_to_t1",
+    "combine_cortical_tian",
 ]

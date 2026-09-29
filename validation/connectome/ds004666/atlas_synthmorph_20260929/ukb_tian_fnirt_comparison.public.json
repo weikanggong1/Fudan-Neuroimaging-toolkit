@@ -1,0 +1,40 @@
+{
+  "dataset": "matched private UK Biobank T1, subject ID and file paths withheld",
+  "reference": "FSL 6.0.7.4 FLIRT 12 DOF plus FNIRT T1_2_MNI152_2mm.cnf, invwarp, applywarp nearest; forward coefficient newly computed from this T1",
+  "candidate": "FNIT PyTorch SynthMorph joint, MNI moving to native T1 fixed, Tian S1 nearest",
+  "t1_grid": [162, 215, 180],
+  "labels": 16,
+  "full_mni_template": {
+    "voxel_xor": 9553,
+    "voxel_count": 6269400,
+    "foreground_dice": 0.9056595305417171,
+    "per_label_dice_mean": 0.8650559282494799,
+    "registration_and_s1_apply_seconds": 32.15685722976923,
+    "peak_torch_allocated_gib": 12.447082042694092
+  },
+  "brain_mni_template": {
+    "voxel_xor": 9451,
+    "voxel_count": 6269400,
+    "foreground_dice": 0.9046440331554445,
+    "per_label_dice_mean": 0.8697045505678276,
+    "registration_and_s1_apply_seconds": 30.59409053483978,
+    "peak_torch_allocated_gib": 12.447082042694092
+  },
+  "provided_fnirt_coefficient_profile": {
+    "voxel_xor": 0,
+    "voxel_count": 6269400,
+    "per_label_dice_min": 1.0,
+    "fnit_seconds_with_io": 72.79404653422534,
+    "peak_torch_allocated_gib": 1.3060784339904785
+  },
+  "provided_fnirt_coefficient_recon_all_grid": {
+    "voxel_xor": 0,
+    "voxel_count": 16777216,
+    "per_label_dice_min": 1.0,
+    "fnit_seconds_with_io": 85.24027051078156,
+    "peak_torch_allocated_gib": 3.425783157348633,
+    "fsl_invwarp_seconds": 136.97,
+    "fsl_applywarp_seconds": 27.12
+  },
+  "interpretation": "The SynthMorph and FNIRT registration methods yield materially different Tian labels on this matched T1. The exact FNIRT coefficient can be reused as an input for the native FNIT inverse-warp and nearest-label operators; a SynthMorph-only run does not reproduce the original atlas voxelwise."
+}
