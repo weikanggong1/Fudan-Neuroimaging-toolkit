@@ -60,6 +60,8 @@ mris_place_surface --adgws-in surf/autodet.gw.stats.lh.dat \
 
 ## 真实 T1 对照
 
+以下双引擎配对使用 v5 快照生成的同一组自产上游输入；v7 的连续整例另行记录。
+
 在 `sub-01_T1w.nii.gz` 的 FNIT 自产输入上，Conda 源码构建程序的左侧、右侧 pial 分别耗时 291.5 秒和 274.14 秒；独立自相交检测均为零。两个半球与同输入 Python pial 都保持相同的有序面。左侧顶点位移平均 0.0417 mm、P99 0.2797 mm、最大 2.5910 mm；厚度相关性 **0.99845**、平均绝对差 0.0238 mm。右侧顶点位移平均 0.00781 mm、P99 0.1313 mm、最大 1.3418 mm；厚度相关性 **0.99964**、平均绝对差 0.00519 mm。局部最大误差仍需追踪。此处是**两个 FNIT 计算引擎的同输入比较**，不能替代与官方整例的数值验收；输入、二进制、输出哈希和完整数字在[机器可读报告](../../validation/recon_all/python_gpu_port/native_pial_candidate_20260929.json)。测试时共享节点另有任务，不据此发布稳定加速比。
 
 此前在冻结官方上游的真实左侧输入中，另一版 Conda 源码构建 `mris_place_surface` 相对归档官方 pial 的平均位移为 0.0297 mm、P99 0.2294 mm、最大 1.6693 mm，详见[同输入记录](../../validation/recon_all/python_gpu_port/pial_t1_conda_20260927/official_frozen_lh.json)。[Python 双侧同输入记录](PYTHON_PIAL_PLACEMENT.md)则达到有序坐标和面的逐值一致，但观察耗时约为 1,241 和 1,154 秒。不同日期与共享负载下的单次耗时不能直接作为受控速度比。当前源码构建的完整整例结果另以[发布门槛](../../validation/recon_all/python_gpu_port/RELEASE_GATES.md)为准。

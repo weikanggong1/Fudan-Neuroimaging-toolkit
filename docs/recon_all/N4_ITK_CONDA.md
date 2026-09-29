@@ -4,15 +4,15 @@ FreeSurfer 8.2 在 recon-all 中通过 `AntsN4BiasFieldCorrectionFs` 将 `orig.m
 
 ## 安装与编译
 
-从仓库根目录执行：
+标准流程从仓库根目录执行：
 
 ```bash
-CONDA_OVERRIDE_GLIBC=2.17 conda env create -f environment-recon-all-cpp.yml
-conda activate fnit-recon-all-cpp
-bash tools/build_n4_itk_conda.sh /path/to/native-build
+conda env create -f environment.yml
+conda activate fnit
+bash tools/setup_recon_all_native_conda.sh
 ```
 
-`/path/to/native-build/bin/fnit_n4_itk` 是生成的程序。它链接当前 Conda 环境的 ITK 动态库，运行时也须使用该环境。完整 recon-all 的 `build_recon_all_fs_cpp_conda.sh` 会连同其他阶段编译它；单独编译 N4 不需要 FreeSurfer 源码或许可证。输入输出临时 raw 文件位于目标目录，运行结束后自动删除；256³ float32 输入和输出各约 64 MiB。
+`$CONDA_PREFIX/bin/fnit_n4_itk` 是安装后的程序。它链接当前 Conda 环境的 ITK 动态库，运行时也须使用该环境。只排查 N4 时可用 `bash tools/build_n4_itk_conda.sh /path/to/native-build` 单独编译；这一步不需要 FreeSurfer 源码或许可证。输入输出临时 raw 文件位于目标目录，运行结束后自动删除；256³ float32 输入和输出各约 64 MiB。
 
 ## 输入、输出和调用
 

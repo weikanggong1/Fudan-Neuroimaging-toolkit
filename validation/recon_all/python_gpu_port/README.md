@@ -6,14 +6,27 @@
 
 ## 当前单 T1 标准流程
 
-入口已固定执行拓扑修复、真实 `white.preaparc`、标准球面与配准、最终 white、Conda 源码构建的四轮 pial 以及体积/顶点后处理，不再通过多个开关组合近似表面。Python pial 保留为可单独调用的同输入验证函数。[同一自产输入的双引擎比较](native_pial_candidate_20260929.json)给出输出差异与耗时。文件完整性与数值验收是运行报告中的不同字段。必要的 11 个原生程序已在 2026-09-29 的新主页 Conda 环境从固定源码归档构建并安装；全新联网检出与无预装软件环境中的整例隔离验证仍待完成。[安装说明](../../../docs/recon_all/CONDA_CPP_BUILD.md)。
+入口已固定执行拓扑修复、真实 `white.preaparc`、标准球面与配准、最终 white、Conda 源码构建的四轮 pial 以及体积/顶点后处理，不再通过多个开关组合近似表面。Python pial 保留为可单独调用的同输入验证函数。[同一自产输入的双引擎比较](native_pial_candidate_20260929.json)给出输出差异与耗时。文件完整性与数值验收是运行报告中的不同字段。必要的 11 个原生程序已在新主页 Conda 环境从固定源码归档构建并安装；[新下载 codeload 源码的第二次构建](source_codeload_build_20260929.json)也已通过，同输入真实 T1 的 `mri_segment` 逐体素一致。[合并后的 recon-all 测试](rebased_tests_20260929.json)为 222 项通过。[资产安装记录](asset_setup_20260929.json)显示：已有目录的 98 项在新环境重新校验通过；全新下载进行到 80 项后，fsaverage 归档服务器拒绝连接，未完成网络安装。无预装软件环境中的整例隔离验证仍待完成。[安装说明](../../../docs/recon_all/CONDA_CPP_BUILD.md)。
 
-旧版 v5 开发链从原始 T1 完成了 59 个阶段，双侧 white/pial 的[独立网格检查](mesh_validation_20260929.json)通过，但因使用早期代码快照缺少固定清单中的 18 项，运行报告为 `incomplete`，耗时 11,651 秒。与归档官方整例严格比较仅 5/138 项通过，通过项均是 MRI；它不能代表现版交付。新版 v6 主页安装链、固定源码快照的 v7 标准链及另一例真实 T1 仍在运行；完成后记录当前 138 项整例结果。
+旧版 v5 开发链从原始 T1 完成了 59 个阶段，双侧 white/pial 的[独立网格检查](mesh_validation_20260929.json)通过，但因使用早期代码快照缺少固定清单中的 18 项，运行报告为 `incomplete`，耗时 11,651 秒。与归档官方整例严格比较仅 5/138 项通过，通过项均是 MRI；它不能代表现版交付。v6 主页安装链在 Python pial 阶段结束，未形成完整整例；固定源码快照的 v7 标准链及另一例真实 T1 正在运行。v7 的[前段体积比较](v7_volume_comparison_20260929.json)已显示 WM 和 filled 未达到 0.9957 的数值门槛。
+
+![真实 T1 的 filled 分割与差异](../../../docs/recon_all/figures/v7_filled_difference_sub01.png)
+
+图中三列是 conform 网格差异体素最多的 X=128、Y=64、Z=105 切片；前两行分别为官方和 FNIT v7，青色、粉色对应标签 127、255，末行红点标出不一致体素。三张切片分别有 80、103、67 个差异体素，全体积共有 4,885 个；切片图不能替代全体积 Dice。
+[绘图脚本](plot_filled_difference.py)以 `--reference` 接受官方单被试目录、`--candidate` 接受 FNIT 单被试目录、`--output` 指定 PNG 路径；三者均需写明。例如：
+
+```bash
+python validation/recon_all/python_gpu_port/plot_filled_difference.py \
+  --reference /data/reference-sub01 \
+  --candidate /data/subjects/sub01 \
+  --output /data/filled-difference.png
+```
 
 ## 2026-09-29 的现版同输入记录
 
 | 范围 | 实测与边界 | 记录 |
 | --- | --- | --- |
+| N4 与 EM 输入敏感性 | 自产 `nu` 相对官方仅差 2 个体素；对冻结官方 `nu`、`brainmask` 重跑 Conda `mri_em_register` 时 LTA 16/16 元素一致。两处差异在连续链中放大，不能据此断言 N4 是唯一原因 | [N4 源码构建对照](n4_source_probe_20260929.json)、[EM 配对](em_register_input_sensitivity_20260929.json) |
 | 缺陷体积映射 | 真实 T1 冻结输入，16,777,216 个体素全部一致；新 Conda 自编译 `mri_label2vol` | [精度、时间和输入](defects_volume_20260929.json)、[函数说明](../../../docs/recon_all/DEFECTS_VOLUME.md) |
 | Talairach affine 子进程 | 冻结真实 SynthStrip 输入，XFM、LTA 与直接路径逐字节一致；需整例显存复核 | [记录](talairach_child_20260929.json) |
 | SynthSeg 显存 | 同一 T1、同一 GPU 的候选分割与旧路径逐体素一致，体积 CSV 逐字节一致；独立阶段进程采样 18,450 MiB | [记录](synthseg_memory_20260929.json)、[资源说明](../../../docs/recon_all/GPU_MEMORY.md) |

@@ -9,7 +9,7 @@
 | N4 校正 | `mri/orig.mgz` → `mri/tmp/nu0.mgz` | `mri_nu_correct.mni` 所用 N4 校正 | [N4](N4_ITK_CONDA.md) |
 | GCA 注册、WM 分割与编辑 | conform T1、脑掩膜、GCA/aseg → LTA、`wm.seg.mgz`、`wm.asegedit.mgz` | `mri_em_register -uns 3 -mask brainmask.mgz nu.mgz RB_all_2020-01-02.gca transforms/talairach.lta`；`mri_segment`；`mri_edit_wm_with_aseg` | [原生阶段历史同输入结果](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/wm_chain_20260927/REPORT.md) |
 | 拓扑修复 | `surf/H.orig.nofix`、`H.inflated.nofix`、`H.qsphere.nofix`、`mri/brain.mgz`、`wm.mgz` → `H.orig.premesh`，再由 FNIT remesh 写 `H.orig` | `mris_fix_topology -ga -seed 1234 -threads 1 -mgz -sphere qsphere.nofix -inflated inflated.nofix -orig orig.nofix -out orig.premesh subject H` | [拓扑](TOPOLOGY_CONDA_GA.md) |
-| 非零自相交修复 | `surf/H.orig` → 同路径修复表面 | `mris_remove_intersection H.orig H.orig` | [输入输出与当前证据](INTERSECTION_REPAIR.md)；非零真实输入仍需单独配对验收 |
+| 非零自相交修复 | `surf/H.orig` → 同路径修复表面 | `mris_remove_intersection H.orig H.orig` | [输入输出与真实非零相交修复](INTERSECTION_REPAIR.md)；官方同输入配对仍需验收 |
 | 缺陷体积映射 | `H.orig.nofix`、`H.defect_labels`、皮层标签、`orig.mgz` → `mri/surface.defects.mgz` | `mri_label2vol --defects ...` | [输入输出与真实 T1 配对](DEFECTS_VOLUME.md) |
 | 预白质与最终白质表面 | `H.orig`、MRI、皮层标签/注释 → `H.white.preaparc`、`H.smoothwm`、`H.white` | `mris_place_surface --white ...` | [预白质](WHITE_PREAPARC_CONDA_CHAIN.md)、[最终 white](FINAL_WHITE_CONDA.md) |
 | quick/standard sphere、配准 | `H.inflated.nofix`、`H.inflated`、`H.smoothwm`、folding atlas → `H.qsphere.nofix`、`H.sphere`、`H.sphere.reg` | `mris_sphere -q ...`、`mris_sphere ...`、`mris_register ...` | [标准球面](../../validation/recon_all/python_gpu_port/SPHERE_STANDARD_STATUS.md)、[配准](../../validation/recon_all/python_gpu_port/MRIS_REGISTER_STATUS.md) |
@@ -20,7 +20,7 @@
 
 阶段证据分三级：**同输入**把官方冻结上游交给两种实现，验证单个算子；**连续链**使用 FNIT 自产上游，检查误差传播；**整例**从真实原始 T1 开始检查全部 138 个文件、顶点指标、脑区值、耗时及资源。表中的历史同输入结果只证明各自阶段，不能替代现版整例。
 
-每个函数的精确参数、坐标空间、返回字典和具名参数示例以所链接的阶段文档及源码 docstring 为准。`mris_remove_intersection` 的非零相交输入和图谱曲率的 FNIT 自产上游整例尚未验收。
+每个函数的精确参数、坐标空间、返回字典和具名参数示例以所链接的阶段文档及源码 docstring 为准。非零相交输入已修复到零，但未取得官方同输入输出；图谱曲率的 FNIT 自产上游整例尚未验收。
 
 ## 参考文献与原实现
 
