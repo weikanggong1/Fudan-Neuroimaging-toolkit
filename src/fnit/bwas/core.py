@@ -233,7 +233,7 @@ def run_bwas(bids_root: str | Path, participants_tsv: str | Path,
     output_root = Path(output_root).expanduser().resolve()
     if output_root.exists() and any(output_root.iterdir()):
         raise FileExistsError(f"BWAS output directory is not empty: {output_root}")
-    output_root.mkdir(parents=True, exist_ok=True)
+    output_root.mkdir(mode=0o700, parents=True, exist_ok=True)
     cache_parent = Path(cache_root).expanduser().resolve() if cache_root else output_root
     cache_parent.mkdir(parents=True, exist_ok=True)
     if str(device).startswith("cuda"):

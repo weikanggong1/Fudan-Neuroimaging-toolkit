@@ -7,6 +7,7 @@ import argparse
 import csv
 import hashlib
 import json
+import os
 import re
 from pathlib import Path
 from time import perf_counter
@@ -67,7 +68,8 @@ def main():
     if not np.allclose(reference.header.get_zooms()[:3], 2):
         raise ValueError("reference must have 2 mm voxels")
     output = args.output_root
-    output.mkdir(parents=True, exist_ok=True)
+    os.umask(0o077)
+    output.mkdir(mode=0o700, parents=True, exist_ok=True)
     mask_file = output / "group_space-MNI152NLin6Asym_res-2_desc-graymatter_mask.nii.gz"
     if not mask_file.exists():
         nib.save(nib.Nifti1Image(mask.astype(np.uint8), reference.affine), str(mask_file))

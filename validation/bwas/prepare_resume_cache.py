@@ -3,6 +3,7 @@
 import argparse
 import csv
 import json
+import os
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -25,7 +26,8 @@ def main():
         rows = list(csv.DictReader(stream, delimiter="\t"))
     if len(rows) != 1748:
         raise ValueError("expected the fixed 1748-person ABIDE I+II cohort")
-    args.target_cache.mkdir(parents=True, exist_ok=False)
+    os.umask(0o077)
+    args.target_cache.mkdir(mode=0o700, parents=True, exist_ok=False)
 
     def convert(item):
         subject, row = item
