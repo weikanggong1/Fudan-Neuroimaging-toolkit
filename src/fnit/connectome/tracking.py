@@ -97,7 +97,7 @@ def _initial_directions(
 def _five_tissue_values(five_tissue: torch.Tensor, points: torch.Tensor,
                         inverse_affine: torch.Tensor) -> torch.Tensor:
     """Sample 5TT ``[X,Y,Z,5]`` at world-mm ``[N,3]``; return ``[N,5]``."""
-    return _sample(five_tissue, points, inverse_affine).clamp(0, 1)
+    return _five_tissue_mrtrix(five_tissue, points, inverse_affine)
 
 
 def _gmwmi_gradient(five_tissue: torch.Tensor, points: torch.Tensor,
@@ -184,7 +184,7 @@ def sample_gmwmi_seeds(gmwmi: torch.Tensor, five_tissue: torch.Tensor,
     if bool((gmwmi < 0).any()) or not bool((gmwmi > 0).any()):
         raise ValueError('GMWMI weights must be nonnegative and nonempty')
     device = gmwmi.device
-    affine = affine.to(device=device, dtype=torch.float32)
+    affine = affine.to(device=device, dtype=torch.float64)
     inverse = torch.linalg.inv(affine.double())
     min_voxel_mm = float(torch.linalg.vector_norm(affine[:3, :3], dim=0).min())
     nonzero = torch.nonzero(gmwmi.reshape(-1) > 0, as_tuple=False).flatten()
@@ -588,8 +588,9 @@ def _five_tissue_mrtrix(
 ) -> torch.Tensor:
     """Sample float32 5TT at world-mm ``[B,3]`` using MRtrix masked linear rules.
 
-    ``inverse_affine`` uses MRtrix's header spacing, not the rounded NIfTI
-    sform column norms. Return clamped tissue fractions ``[B,5]``; invalid
+    ``inverse_affine`` must match the reference 5TT world transform; a precise
+    NIfTI-2 affine can be passed without spacing correction. Return clamped
+    tissue fractions ``[B,5]``; invalid
     nearest voxels and positions outside the image return zeros.
     """
     voxel = points.double() @ inverse_affine[:3, :3].double().T + inverse_affine[:3, 3].double()

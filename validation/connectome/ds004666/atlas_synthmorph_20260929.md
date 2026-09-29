@@ -34,7 +34,7 @@ mri_synthmorph apply -m nearest -t int16 mni_to_t1.mgz Tian_S4.nii.gz tian_s4_t1
 | MNI→T1 注册及首次 S1 重采样 | 注册 738.21 s，S1 重采样 38.31 s | 33.69 s，峰值 Torch 12.49 GiB | S1 XOR 2,315 / 16,777,216；前景 Dice 0.9810；16 区平均 Dice 0.9752 |
 | 复用形变重采样 S4 | 41.21 s | 1.52 s | S4 XOR 2,744 / 16,777,216；前景 Dice 0.9810；54 区平均 Dice 0.9672 |
 
-官方程序在此次服务器环境中的注册主要使用 CPU；上表是实际命令耗时，不是同设备加速比。两臂使用相同模型权重。独立计算的两份位移场在此受试者上相差均值 0.105 mm、95 分位 0.187 mm、最大 0.417 mm。固定官方形变时，FNIT 最近邻重采样的 S1、S4 标签均 **16,777,216 / 16,777,216 个体素完全一致**。因此此处的 2,315/2,744 个体素差异来自独立计算的 SynthMorph 配准场，而非标签采样。官方形变由独立对照中的 `mri_convert` 转为 NIfTI 位移场；正式 FNIT 路径不运行该命令。
+官方程序在此次服务器环境中的注册主要使用 CPU；上表是实际命令耗时，不是同设备加速比。两臂指定同名的官方 SynthMorph affine/deform 模型；本次归档的报告没有记录两份权重文件的 SHA-256，不能仅凭该报告核验权重字节相同。[复跑脚本](../../../tools/benchmark_connectome_synthmorph_tian.py)现会在注册前按 [FNIT 权重清单](../../../docs/WEIGHTS.md)核查文件大小和 SHA-256，并把哈希写入报告。独立计算的两份位移场在此受试者上相差均值 0.105 mm、95 分位 0.187 mm、最大 0.417 mm。固定官方形变时，FNIT 最近邻重采样的 S1、S4 标签均 **16,777,216 / 16,777,216 个体素完全一致**。因此此处的 2,315/2,744 个体素差异来自独立计算的 SynthMorph 配准场，而非标签采样。官方形变由独立对照中的 `mri_convert` 转为 NIfTI 位移场；正式 FNIT 路径不运行该命令。
 
 **与原 UKB FNIRT 路线的配对比较。** 上表只对比 SynthMorph 的两个实现。另在同一真实 UKB T1 上，分别将原 FSL FLIRT/FNIRT/invwarp/applywarp 路线与 FNIT SynthMorph 的 Tian S1 标签比较。完整 MNI T1 模板得到 9,553 / 6,269,400 体素不同、前景 Dice 0.9057、16 标签平均 Dice 0.8651；去颅骨 MNI 模板分别为 9,451、0.9046、0.8697。两套模板均未复现 FNIRT atlas。因此选择 SynthMorph 时，应把输出标为 FNIT 的替代配准结果；要求原 UKB atlas 逐体素一致时，应提供同一 T1 的 FNIRT 前向 coefficient，并调用 FNIT 的 `fnirt_tian_to_t1`。FSL 参考 coefficient 是此前在同一 UKB T1 上新计算的，不是原 UKB 包自带。脱敏指标见[UKB 配对报告](atlas_synthmorph_20260929/ukb_tian_fnirt_comparison.public.json)，输入路径及哈希只保留在授权服务器。
 
@@ -105,8 +105,14 @@ tian_s1_original_t1 = fnirt_tian_to_t1(
 
 ## 一条命令的真实 DWI 验收
 
-同一受试者的校正 AP DWI、bval、eddy 旋转 bvec 与已完成的 `recon-all` 目录直接输入 `fnit connectome --atlas schaefer200+tian-s1 --n-seeds 1000`。额外参数提供原 UKB 的 Schaefer/Tian 模板目录、fsaverage 目录、MNI 2 mm T1 和已安装的 SynthMorph 权重；完整具名命令及每个参数的含义见[主文档](../../../docs/connectome/README.md)。程序自动生成 T1 atlas、DWI atlas、5TT、GMWMI、FOD、流线、SIFT2 权重和四张矩阵，不要求预先提供 `atlas_dwi`。
+同一受试者的校正 AP DWI、bval、eddy 旋转 bvec 与已完成的 `recon-all` 目录直接输入 `fnit UKBConnectome_pipeline --atlas schaefer200+tian-s1 --n-seeds 1000`。额外参数提供原 UKB 的 Schaefer/Tian 模板目录、fsaverage 目录、MNI 2 mm T1 和已安装的 SynthMorph 权重；完整具名命令及每个参数的含义见[主文档](../../../docs/connectome/README.md)。程序自动生成 T1 atlas、DWI atlas、5TT、GMWMI、FOD、流线、SIFT2 权重和四张矩阵，不要求预先提供 `atlas_dwi`。
 
 [输出检查](atlas_synthmorph_20260929/one_command_schaefer200_tian_s1/output_qc.json)读取实际产物重新验证：`nodes.tsv` 有 216 行；DWI atlas 的 216 个节点全部存在；count、SIFT2 FBC、平均长度、平均 FA 均为有限、对称的 216×216 矩阵。1000 次播种接受 298 条流线，其中 197 条获得双端 atlas 赋值，形成 186 条非零无向边。墙钟 1577.34 s，进程峰值 RSS 2,565,032 KiB，程序报告 PyTorch 峰值分配显存 13.248 GiB。此时 GPU 被其他任务共享，墙钟不可用作单独的算法速度比较。1000 次播种主要检查接口和输出结构；图谱专门的逐体素基准及追踪的 10,000 次多种子对照分别见上文和[追踪报告](ifod2_rejection_20260929.md)。
 
 ![真实校正 DWI 的 Schaefer200+Tian S1 四种连接矩阵](atlas_synthmorph_20260929/one_command_schaefer200_tian_s1/four_matrices.png)
+
+## 参考文献与原实现
+
+- Hoffmann et al., *Anatomy-aware and acquisition-agnostic joint registration with SynthMorph*, Imaging Neuroscience (2024), [doi:10.1162/imag_a_00197](https://doi.org/10.1162/imag_a_00197)。
+- Mansour et al., *Connectomes for 40,000 UK Biobank participants: A multi-modal, multi-scale brain network resource*, Scientific Data (2023), [PubMed 37839728](https://pubmed.ncbi.nlm.nih.gov/37839728/)。
+- 原实现代码库：[FreeSurfer `mri_synthmorph`](https://github.com/freesurfer/freesurfer/tree/dev/mri_synthmorph)、[UKB-connectomics](https://github.com/sina-mansour/UKB-connectomics)。

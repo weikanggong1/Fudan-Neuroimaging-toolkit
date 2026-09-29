@@ -4,7 +4,7 @@
 
 使用公开 OpenNeuro ds004666 `sub-01/ses-2mm` 的校正 DWI、配对 T1 的已完成 `recon-all` 分割，以及同一份归一化 WM FOD、5TT、GMWMI。参考程序是独立编译的 MRtrix3 3.0.3（源码提交 `eeab681d3e0cb004cf1d1d31579d3892197ef5b6`）；它只用于基准，不进入 FNIT 运行时。H100 PCIe 上运行 FNIT，Xeon Gold 6418H 上运行 MRtrix；服务器有其他作业。FNIT 的计时从三个影像载入 GPU 后开始，包含播种、追踪、返回对象整理与输入 SHA-256 统计，不写 TCK；MRtrix 墙钟包含影像读取及 TCK 写出。两者时段和硬件不同，下表只记录本次实测。
 
-首次输入核对发现：原 FNIT T1 5TT/GMWMI 与参考 MRtrix 影像的体素值逐个一致，但参考的 T1→DWI 配准已写入 affine。两者八角点的最大世界坐标差为 `1.483 mm`；不能用那组三张原 NIfTI 做“同输入”结论。本次 FNIT 测量改用 `mrconvert` 从参考三张 MIF 导出的 NIfTI，没有重新采样。FOD 的原 FNIT NIfTI 与参考转换图的体素及 affine 均逐值一致。核查程序为 [benchmark_connectome_scale_inputs.py](../../../tools/benchmark_connectome_scale_inputs.py)，[逐图形状、差异及 SHA-256](tracking_scale_100k_20260929/input_compare.json)留档。
+首次输入核对发现：原 FNIT T1 5TT/GMWMI 与参考 MRtrix 影像的体素值逐个一致，但参考的 T1→DWI 配准已写入 affine。两者八角点的最大世界坐标差为 `1.483 mm`；不能用那组三张原 NIfTI 做“同输入”结论。本次 FNIT 测量改用 `mrconvert` 从参考三张 MIF 导出的 NIfTI，没有重新采样。FOD 的原 FNIT NIfTI 与参考转换的 NIfTI-1 在体素和仿射上逐值一致。核查程序为 [benchmark_connectome_scale_inputs.py](../../../tools/benchmark_connectome_scale_inputs.py)，[逐图形状、差异及 SHA-256](tracking_scale_100k_20260929/input_compare.json)留档。后续[精确仿射检查](act_geometry_accepted_seeds_20260929.md)进一步发现：`mrconvert` 的 NIfTI-1 sform 舍入，使 5TT 和 FOD 世界坐标八角点相对各自 MIF 分别偏最多 `1.43×10⁻⁵ mm` 和 `1.55×10⁻⁵ mm`。本页三张转换图是逐体素一致的输入，不能视为亚体素几何逐值相同。
 
 ## 命令、参数和输出
 

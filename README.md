@@ -50,7 +50,7 @@ CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核。模型、影像张
 | [TorchBEDPOSTX](docs/bedpostx/README.md) | FSL `bedpostx` | 纤维方向、体积分数与后验不确定性。 |
 | [TorchProbtrackX](docs/probtrackx/README.md) | FSL `probtrackx2` | 概率纤维追踪、路径密度和连接矩阵。 |
 | [DMRIPipeline](docs/dmri_pipeline/README.md) | UK Biobank dMRI pipeline（FSL `topup`、`eddy`、`dtifit`、TBSS） | 生成九张标准空间扩散参数图；可选 MMORF 配准。 |
-| [UKBConnectome](docs/connectome/README.md) | UKB-connectomics 结构连接组网脚本 | 从校正 DWI 与结构分割生成结构连接矩阵；[真实数据对照](validation/connectome/fs_aparc84_subject_dir_20260928.md)。 |
+| [UKBConnectome_pipeline](docs/connectome/README.md) | UKB-connectomics 结构连接组网脚本 | 从校正 DWI 与结构分割生成结构连接矩阵；[真实数据对照](validation/connectome/fs_aparc84_subject_dir_20260928.md)。 |
 
 ### 多模态
 

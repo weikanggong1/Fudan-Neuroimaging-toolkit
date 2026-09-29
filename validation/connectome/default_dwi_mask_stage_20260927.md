@@ -1,6 +1,6 @@
 # 默认 DWI 响应掩膜：同输入对照
 
-原 UKB 脚本执行 `dwi2response dhollander` 时不传 `-mask`。所固定的 MRtrix 版本因此在内部调用 `dwi2mask legacy`。FNIT 的 `UKBConnectome` 在 `response_mask=None` 时调用包内 `dwi2mask_legacy`；`brain_mask` 仍用于 FOD 和归一化阶段。若传入 `response_mask`，则直接使用该同网格二值文件，便于复测已有的固定掩膜实验。
+原 UKB 脚本执行 `dwi2response dhollander` 时不传 `-mask`。所固定的 MRtrix 版本因此在内部调用 `dwi2mask legacy`。FNIT 的 `UKBConnectome_pipeline` 在 `response_mask=None` 时调用包内 `dwi2mask_legacy`；`brain_mask` 仍用于 FOD 和归一化阶段。若传入 `response_mask`，则直接使用该同网格二值文件，便于复测已有的固定掩膜实验。
 
 ## 输入、输出和计算顺序
 

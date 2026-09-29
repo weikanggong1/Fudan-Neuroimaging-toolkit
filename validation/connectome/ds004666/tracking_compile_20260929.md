@@ -23,7 +23,7 @@ tracks = probabilistic_tractography(
 # tracks.paths / endpoints / lengths_mm / accepted_seeds 保留在同一 CUDA 设备。
 ```
 
-正式命令 `fnit connectome` 可加 `--compile-arc`；它传给上述函数，其他输入/输出与[主文档](../../../docs/connectome/README.md)相同。等价的独立参考追踪命令为：
+正式命令 `fnit UKBConnectome_pipeline` 可加 `--compile-arc`；它传给上述函数，其他输入/输出与[主文档](../../../docs/connectome/README.md)相同。等价的独立参考追踪命令为：
 
 ```bash
 MRTRIX_RNG_SEED=0 tckgen -algorithm iFOD2 -seed_gmwmi gmwmi.mif \
@@ -70,6 +70,8 @@ python tools/benchmark_connectome_tracking_100k_matrices.py "${compile_args[@]}"
 
 同一 20 节点 atlas 的编译与未编译 FNIT 100k count 相对 L1 为 `0.0685`、非零边支持 Dice 为 `0.9020`、共同边 mean FA 归一化 MAE 为 `0.0412`。独立 MRtrix seed 0/1/2 自身 count 相对 L1 范围 `0.0937–0.1174`；编译版对官方三次为 `0.1064/0.0758/0.1040`，其中两组进入范围，另一组误差更小。编译版 mean FA 共同边误差为 `0.0560/0.0583/0.0498`，官方互比为 `0.0575–0.0613`。这些分布结果没有消除追踪群体偏差：编译版对官方的长度 KS 为 `0.00975–0.01169`，仍高于官方互比 `0.00541–0.00696`；8 mm 端点和 TDI 相关也仍低于官方互比，见[完整矩阵随机范围](tracking_compile_20260929/compiled_100k/envelope.json)和[轨迹群体](tracking_compile_20260929/compiled_100k/population.json)。
 
+该 seed 0 基线后续扩展为 FNIT 三次对官方三次的[100k 对照](tracking_100k_three_seed_20260929.md)；长度、端点和 TDI 的九组跨软件比较均未进入官方自身三次互比范围。
+
 ![编译版 100k count 与 FA 连接矩阵](tracking_compile_20260929/compiled_100k/connectome_comparison.png)
 
 ![编译版 100k 轨迹长度和 TDI 脑图](tracking_compile_20260929/compiled_100k/population.png)
@@ -79,5 +81,6 @@ python tools/benchmark_connectome_tracking_100k_matrices.py "${compile_args[@]}"
 ## 参考文献与原实现
 
 - Tournier JD 等，*MRtrix3: A fast, flexible and open software framework for medical image processing and visualisation*，NeuroImage 202:116137，2019。[论文](https://pubmed.ncbi.nlm.nih.gov/31473352/)
+- Tournier JD、Calamante F、Connelly A，*Improved Probabilistic Streamlines Tractography by 2nd Order Integration Over Fibre Orientation Distributions*，ISMRM 2010，摘要 1670。[原文](https://archive.ismrm.org/2010/1670.html)
 - Smith RE 等，*Anatomically-constrained tractography: improved diffusion MRI streamlines tractography through effective use of anatomical information*，NeuroImage 62:1924–1938，2012。[论文](https://pubmed.ncbi.nlm.nih.gov/22705374/)
 - [原版 iFOD2 代码](https://github.com/MRtrix3/mrtrix3/blob/eeab681d3e0cb004cf1d1d31579d3892197ef5b6/src/dwi/tractography/algorithms/iFOD2.h)；[原 UKB-connectomics 流程](https://github.com/sina-mansour/UKB-connectomics)；[PyTorch `torch.compile` 文档](https://pytorch.org/docs/stable/generated/torch.compile.html)。

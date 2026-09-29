@@ -28,7 +28,7 @@ FastVBM 的配准链位于 `flirt/`、`fnirt/`、`applywarp/`、`fast_vbm/regist
 | TorchBEDPOSTX | [体素内纤维方向估计](bedpostx/README.md) |
 | TorchProbtrackX | [概率纤维束追踪与连接矩阵](probtrackx/README.md) |
 | MS-HBM | [fsLR32k 单被试 17 网络划分](mshbm/README.md) |
-| UKBConnectome | [已校正 DWI 与 T1w 到四张结构连接矩阵](connectome/README.md) |
+| UKBConnectome_pipeline | [已校正 DWI 与 T1w 到四张结构连接矩阵](connectome/README.md) |
 | Python recon-all（近似版） | [单 T1 皮层重建](recon_all/README.md) |
 
 ## 公开 Python API
@@ -41,7 +41,7 @@ from fnit import (
     TorchApplyWarp, ApplyWarpResult,
     run_feat_core, FeatCoreResult, run_aroma_pipeline, AromaResult,
     TorchTOPUP, TOPUPResult, TOPUPConfig,
-    UKBConnectome, ConnectomeResult,
+    UKBConnectome_pipeline, ConnectomeResult,
     run_ukb_topup,
     TorchEDDY, EDDYResult, EDDYConfig,
     TorchDTIFIT, DTIFITResult,
@@ -65,6 +65,6 @@ from fnit.mshbm import load_assets, profiles_from_timeseries, parcellate
 
 该功能的 CLI 是 `fnit-mshbm`；输入、返回值和输出目录见 [MS-HBM 页面](mshbm/README.md)。验证页中的 `MSC02` 是公开 Midnight Scan Club 数据集的受试者别名，不是私有病例标识。
 
-fMRI 的 `run_feat_core` 和 `run_aroma_pipeline` 处理一个 BIDS run，使用独立入口 `fnit-fmri`，不下载模型权重。学习模型在构造时加载权重并选择 `device="cpu"` 或 `device="cuda:0"`；TorchFAST、TorchFLIRT、TorchFNIRT、TorchApplyWarp、TorchTOPUP、TorchEDDY、TorchDTIFIT、TorchAMICONODDI、TorchMMORF、TorchBEDPOSTX 和 TorchProbtrackX 不加载预训练权重。dMRI pipeline 的 MMORF 分支调用 SynthStrip，因此该分支需要 SynthStrip 权重。UKBConnectome 默认使用 CUDA，从已校正 DWI 起步；其 SynthSeg 分割可由调用方提供，或在单次调用时加载官方权重；也可读取官方 FreeSurfer `aparc+aseg.mgz`。单次调用返回带几何信息的结果对象，由调用者选择保存字段。FastVBM 组合 SynthStrip、TorchFAST、TorchFLIRT 和一个可选非线性后端。`registration_backend="synthmorph"` 延迟加载官方 deform checkpoint；`registration_backend="fnirt"` 构造无 checkpoint 的 TorchFNIRT。
+fMRI 的 `run_feat_core` 和 `run_aroma_pipeline` 处理一个 BIDS run，使用独立入口 `fnit-fmri`，不下载模型权重。学习模型在构造时加载权重并选择 `device="cpu"` 或 `device="cuda:0"`；TorchFAST、TorchFLIRT、TorchFNIRT、TorchApplyWarp、TorchTOPUP、TorchEDDY、TorchDTIFIT、TorchAMICONODDI、TorchMMORF、TorchBEDPOSTX 和 TorchProbtrackX 不加载预训练权重。dMRI pipeline 的 MMORF 分支调用 SynthStrip，因此该分支需要 SynthStrip 权重。UKBConnectome_pipeline 默认使用 CUDA，从已校正 DWI 起步；其 SynthSeg 分割可由调用方提供，或在单次调用时加载官方权重；也可读取官方 FreeSurfer `aparc+aseg.mgz`。单次调用返回带几何信息的结果对象，由调用者选择保存字段。FastVBM 组合 SynthStrip、TorchFAST、TorchFLIRT 和一个可选非线性后端。`registration_backend="synthmorph"` 延迟加载官方 deform checkpoint；`registration_backend="fnirt"` 构造无 checkpoint 的 TorchFNIRT。
 
 权重查找顺序为显式路径、`FNIT_WEIGHTS`、配置脚本保存的目录和用户缓存目录；不会从 `FREESURFER_HOME` 自动取权重。见[权重说明](WEIGHTS.md)。各功能的单被试 Python 返回值、保存方式和命令行参数见上表链接。

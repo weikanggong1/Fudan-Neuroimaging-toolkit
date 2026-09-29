@@ -18,7 +18,7 @@ def _command(tmp_path):
         inputs[name] = path
     output = tmp_path / "result"
     argv = [
-        "connectome", "--dwi", str(inputs["dwi"]),
+        "UKBConnectome_pipeline", "--dwi", str(inputs["dwi"]),
         "--bvals", str(inputs["bvals"]), "--bvecs", str(inputs["bvecs"]),
         "--t1", str(inputs["t1"]),
         "--t1-segmentation", str(inputs["t1_segmentation"]),
@@ -73,7 +73,7 @@ def test_connectome_cli_writes_named_outputs(tmp_path, monkeypatch, capsys, incl
                 dwi_to_t1_world=torch.eye(4),
                 tractogram=SimpleNamespace(seeds_attempted=12, paths=(None, None)),
             )
-    monkeypatch.setattr(connectome, "UKBConnectome", FakeConnectome)
+    monkeypatch.setattr(connectome, "UKBConnectome_pipeline", FakeConnectome)
     argv, output = _command(tmp_path)
     if not include_mask:
         position = argv.index("--brain-mask")
@@ -167,10 +167,10 @@ def test_connectome_cli_subject_directory_writes_nodes(tmp_path, monkeypatch):
                 tractogram=SimpleNamespace(seeds_attempted=1, paths=(None,)),
             )
 
-    monkeypatch.setattr(connectome, "UKBConnectome", FakeConnectome)
+    monkeypatch.setattr(connectome, "UKBConnectome_pipeline", FakeConnectome)
     output = tmp_path / "result"
     main([
-        "connectome", "--dwi", str(tmp_path / "dwi"),
+        "UKBConnectome_pipeline", "--dwi", str(tmp_path / "dwi"),
         "--bvals", str(tmp_path / "bvals"), "--bvecs", str(tmp_path / "bvecs"),
         "--freesurfer-subject-dir", str(subject.parent), "--atlas", "fs-aparc",
         "--n-seeds", "1", "--device", "cpu", "--output-dir", str(output),
@@ -188,7 +188,7 @@ def test_connectome_cli_subject_directory_requires_completed_files(tmp_path):
         (tmp_path / name).write_bytes(b"input")
     with pytest.raises(FileNotFoundError, match="brain.mgz"):
         main([
-            "connectome", "--dwi", str(tmp_path / "dwi"),
+            "UKBConnectome_pipeline", "--dwi", str(tmp_path / "dwi"),
             "--bvals", str(tmp_path / "bvals"), "--bvecs", str(tmp_path / "bvecs"),
             "--freesurfer-subject-dir", str(subject), "--n-seeds", "1",
             "--device", "cpu", "--output-dir", str(tmp_path / "result"),
@@ -204,7 +204,7 @@ def test_connectome_cli_schaefer_requires_template_inputs(tmp_path):
         (tmp_path / name).write_bytes(b"input")
     with pytest.raises(ValueError, match="--atlas-templates-dir"):
         main([
-            "connectome", "--dwi", str(tmp_path / "dwi"),
+            "UKBConnectome_pipeline", "--dwi", str(tmp_path / "dwi"),
             "--bvals", str(tmp_path / "bvals"), "--bvecs", str(tmp_path / "bvecs"),
             "--freesurfer-subject-dir", str(subject.parent),
             "--atlas", "schaefer200+tian-s1", "--n-seeds", "1",
@@ -221,7 +221,7 @@ def test_connectome_cli_rejects_ambiguous_tian_registration(tmp_path):
         (tmp_path / name).write_bytes(b"input")
     with pytest.raises(ValueError, match="exactly one"):
         main([
-            "connectome", "--dwi", str(tmp_path / "dwi"),
+            "UKBConnectome_pipeline", "--dwi", str(tmp_path / "dwi"),
             "--bvals", str(tmp_path / "bvals"), "--bvecs", str(tmp_path / "bvecs"),
             "--freesurfer-subject-dir", str(subject.parent),
             "--atlas", "schaefer200+tian-s1",

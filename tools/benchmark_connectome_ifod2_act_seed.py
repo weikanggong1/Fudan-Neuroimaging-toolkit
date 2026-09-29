@@ -29,6 +29,9 @@ def main():
     parser.add_argument("--official", type=Path, required=True, help="官方 ACT 种子检查十一列文本")
     parser.add_argument("--output", type=Path, required=True, help="指标 JSON；同名 CSV 存逐种子结果")
     parser.add_argument("--device", default="cpu", help="cpu 或 cuda:0")
+    parser.add_argument("--affine-mode", choices=("header-spacing", "exact"),
+                        default="header-spacing",
+                        help="NIfTI-1 用头文件间距修正舍入；精确 NIfTI-2 保留原仿射")
     args = parser.parse_args()
     device = torch.device(args.device)
     if device.type == "cuda":
@@ -50,10 +53,11 @@ def main():
     directions[initial[:, 0] == 0] = [1., 0., 0.]
     directions = torch.as_tensor(directions, device=device)
     affine = torch.as_tensor(image.affine, dtype=torch.float64, device=device)
-    columns = affine[:3, :3]
-    affine[:3, :3] = columns / torch.linalg.vector_norm(columns, dim=0) * torch.as_tensor(
-        image.header.get_zooms()[:3], dtype=torch.float64, device=device,
-    )
+    if args.affine_mode == "header-spacing":
+        columns = affine[:3, :3]
+        affine[:3, :3] = columns / torch.linalg.vector_norm(columns, dim=0) * torch.as_tensor(
+            image.header.get_zooms()[:3], dtype=torch.float64, device=device,
+        )
     inverse = torch.linalg.inv(affine)
     if device.type == "cuda":
         torch.cuda.synchronize(device)
@@ -81,7 +85,8 @@ def main():
         "input_sha256": {name: _sha256(path) for name, path in
                          (("five_tissue", args.five_tissue), ("seeds", args.seeds),
                           ("initial", args.initial), ("official", args.official))},
-        "device": str(device), "initial_valid": int(initial_valid.sum()),
+        "device": str(device), "affine_mode": args.affine_mode,
+        "initial_valid": int(initial_valid.sum()),
         "official_seed_valid": int(reference_valid.sum()),
         "fnit_seed_valid": int(valid.sum()),
         "valid_xor": int(np.logical_xor(reference_valid, valid).sum()),

@@ -10,6 +10,7 @@ import nibabel as nib
 import numpy as np
 import torch
 
+import fnit.connectome.tracking as tracking_module
 from connectome_benchmark_common import NAMES, _load, _metrics, _sha256, _sync
 from fnit.connectome.assignment import build_connectomes
 from fnit.connectome.sift2 import estimate_sift2_weights
@@ -27,6 +28,9 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--compile-arc", action="store_true")
+    parser.add_argument("--act-affine-mode", choices=("header-spacing", "exact"),
+                        default="header-spacing",
+                        help="NIfTI-1 间距修正或精确 NIfTI-2 直接仿射")
     args = parser.parse_args()
     device = torch.device(args.device)
     if device.type == "cuda":
@@ -53,13 +57,15 @@ def main() -> None:
     tracks = probabilistic_tractography(
         wm_sh=fod, fod_affine=fod_affine, five_tissue=five,
         five_tissue_affine=five_affine, gmwmi=gmwmi,
-        five_tissue_spacing_mm=spacing, n_seeds=args.n_seeds,
+        five_tissue_spacing_mm=(spacing if args.act_affine_mode == "header-spacing" else None),
+        n_seeds=args.n_seeds,
         batch_size=args.batch_size, seed=args.seed, lmax=8,
         compile_arc=args.compile_arc,
     )
     _sync(device)
     tracking_seconds = time.perf_counter() - started
     args.output_dir.mkdir(parents=True, exist_ok=True)
+    np.save(args.output_dir / "accepted_seeds.npy", tracks.accepted_seeds.cpu().numpy())
     nib.streamlines.save(nib.streamlines.Tractogram(
         [path.cpu().numpy() for path in tracks.paths], affine_to_rasmm=np.eye(4)),
         str(args.output_dir / "tracks.tck"))
@@ -91,9 +97,11 @@ def main() -> None:
     report = {
         "dataset": "OpenNeuro ds004666 corrected DWI; identical FOD, 5TT, GMWMI, FA and atlas",
         "input_sha256": {name: _sha256(path) for name, path in input_paths},
+        "tracking_source_sha256": _sha256(Path(tracking_module.__file__)),
         "device": str(device), "tf32": bool(torch.backends.cuda.matmul.allow_tf32),
         "n_seeds": args.n_seeds, "batch_size": args.batch_size, "seed": args.seed,
         "compile_arc": args.compile_arc,
+        "act_affine_mode": args.act_affine_mode,
         "accepted_streamlines": len(tracks.paths),
         "load_seconds": load_seconds, "tracking_seconds": tracking_seconds,
         "postprocessing_seconds": post_seconds,

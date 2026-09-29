@@ -18,7 +18,7 @@ import numpy as np
 import torch
 
 import fnit.connectome as connectome_module
-from fnit.connectome import UKBConnectome
+from fnit.connectome import UKBConnectome_pipeline
 
 
 NAMES = ("count", "sift2_fbc", "mean_length", "mean_fa")
@@ -104,7 +104,7 @@ def main() -> None:
         torch.cuda.synchronize(device)
         torch.cuda.reset_peak_memory_stats(device)
     start = time.perf_counter()
-    result = UKBConnectome(device=args.device)(
+    result = UKBConnectome_pipeline(device=args.device)(
         args.dwi, args.bvals, args.bvecs, args.t1_brain,
         t1_segmentation=args.aparc_aseg, atlas_dwi=args.atlas_dwi,
         brain_mask=args.brain_mask, shell_bvals=args.shell_bvals,

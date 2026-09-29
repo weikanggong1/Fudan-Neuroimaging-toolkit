@@ -74,5 +74,5 @@ python tools/benchmark_connectome_ifod2_single_arc.py \
 
 ## 参考文献与原实现
 
-- [MRtrix3 方法论文](https://pubmed.ncbi.nlm.nih.gov/31473352/)；[原版 iFOD2 代码](https://github.com/MRtrix3/mrtrix3/blob/eeab681d3e0cb004cf1d1d31579d3892197ef5b6/src/dwi/tractography/algorithms/iFOD2.h)。
+- [iFOD2 原始方法](https://archive.ismrm.org/2010/1670.html)；[MRtrix3 方法论文](https://pubmed.ncbi.nlm.nih.gov/31473352/)；[原版 iFOD2 代码](https://github.com/MRtrix3/mrtrix3/blob/eeab681d3e0cb004cf1d1d31579d3892197ef5b6/src/dwi/tractography/algorithms/iFOD2.h)。
 - [原 UKB-connectomics 代码库](https://github.com/sina-mansour/UKB-connectomics)。

@@ -83,7 +83,7 @@ glasser_cli_args=(
   --device cuda:0                    # H100 等 CUDA 设备；默认 TF32
   --output-dir "$OUTPUT"             # 四张矩阵 CSV、DWI atlas、nodes.tsv 和中间 NIfTI
 )
-fnit connectome "${glasser_cli_args[@]}"
+fnit UKBConnectome_pipeline "${glasser_cli_args[@]}"
 ```
 
 `--mni-template` 与 `--synthmorph-weights` 采用用户允许的 SynthMorph 配准；已有原流程同一 T1 的 FNIRT coefficient 时，可改用单项 `--tian-fnirt-coeff "$FNIRT_COEFF"`，其路径指向 T1→MNI 系数 NIfTI。两条路线只能选一条。正式命令在环境 `PATH` 中寻找 `wb_command`。四张 CSV 分别是 `count`、`sift2_fbc`、`mean_length`（mm）及 `mean_fa`，行列编号严格由 `nodes.tsv` 定义。

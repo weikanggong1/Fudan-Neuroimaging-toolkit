@@ -27,7 +27,7 @@ flirt -in mean_b0.nii.gz -ref T1w.nii.gz \
   -cost normmi -dof 6 -omat official_flirt.mat
 ```
 
-本包公开接口可通过 `UKBConnectome(device="cpu", synthseg_weights=None)(dwi=..., bvals=..., bvecs=..., t1=..., atlas_dwi=..., t1_segmentation=..., segmentation_source="synthseg", dwi_to_t1_world=None, n_seeds=100, seed=0)` 触发自动配准。`dwi_to_t1_world=None` 是关键；其他参数分别提供已校正 DWI、梯度、T1、脑区图、分割、权重和追踪播种。此报告**只隔离运行 `_registration`**，没有再次运行该完整调用。
+本包公开接口可通过 `UKBConnectome_pipeline(device="cpu", synthseg_weights=None)(dwi=..., bvals=..., bvecs=..., t1=..., atlas_dwi=..., t1_segmentation=..., segmentation_source="synthseg", dwi_to_t1_world=None, n_seeds=100, seed=0)` 触发自动配准。`dwi_to_t1_world=None` 是关键；其他参数分别提供已校正 DWI、梯度、T1、脑区图、分割、权重和追踪播种。此报告**只隔离运行 `_registration`**，没有再次运行该完整调用。
 
 ## 真实数据和结果
 
@@ -44,4 +44,4 @@ flirt -in mean_b0.nii.gz -ref T1w.nii.gz \
 
 单次共享节点墙钟时间不能推断稳定提速。官方 FSL 6.0.7.4 在**同一张完整头部 b0 和 T1**上耗时 13.43 s。将 FSL `.mat` 换算为 world-RAS 后，在 b0 的 13×13×13 网格点上与 FNIT 矩阵比较，位移差 RMS **1.261 mm**、最大 **2.224 mm**。此前[脑内 b0/T1 的三次验证](../connectome/ds004666/ANATOMY_STAGE_20260927.md)输入经过脑提取，矩阵位移差范围更小；两项实验输入不同，不能互换结论。新旧 FNIT 矩阵完全相同，当前 FSL 差异不是本次移除 Surfa 造成的。
 
-禁用 Surfa 导入后，`fnit connectome --help` 正常返回；针对性 CPU pipeline 测试为 **2 passed、1 deselected**，另有 CLI 测试 **4 passed**；两组都禁用了 Surfa 导入。小样本 pipeline 测试显式传入配准矩阵，检查其余流程接线，不构成自动配准或真实数据全流程基准。未重新运行真实数据 FOD、纤维追踪、SIFT2 和四张连接矩阵，也未进行 GPU 配对计时。既有完整 connectome 数值对照仍见[ds004666 报告](../connectome/ds004666/README.md)。机器可读数值见[`report.json`](report.json)。
+禁用 Surfa 导入后，`fnit UKBConnectome_pipeline --help` 正常返回；针对性 CPU pipeline 测试为 **2 passed、1 deselected**，另有 CLI 测试 **4 passed**；两组都禁用了 Surfa 导入。小样本 pipeline 测试显式传入配准矩阵，检查其余流程接线，不构成自动配准或真实数据全流程基准。未重新运行真实数据 FOD、纤维追踪、SIFT2 和四张连接矩阵，也未进行 GPU 配对计时。既有完整 connectome 数值对照仍见[ds004666 报告](../connectome/ds004666/README.md)。机器可读数值见[`report.json`](report.json)。

@@ -154,7 +154,7 @@ class ConnectomeResult:
     nodes: tuple[ConnectomeNode, ...] | None = None
 
 
-class UKBConnectome:
+class UKBConnectome_pipeline:
     """Compute UKB-style connectomes from corrected DWI and FreeSurfer T1.
 
     The paired T1 segmentation must be official ``recon-all`` aparc+aseg;
@@ -435,3 +435,6 @@ class UKBConnectome:
             matrices, region_labels, atlas, five, five_affine, gmwmi,
             wm_sh, fa, mask, tracks, weights, dwi_affine, atlas_affine, transform, nodes,
         )
+
+
+UKBConnectome = UKBConnectome_pipeline

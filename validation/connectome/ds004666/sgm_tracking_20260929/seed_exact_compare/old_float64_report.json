@@ -1,0 +1,60 @@
+{
+  "input_sha256": {
+    "five_tissue": "927113d6576d31743306aa069be5087abf330bdac1912a2a9874a2189e9e1608",
+    "gmwmi": "00642e0da77a653cc3995860e4d2cd0ccf594e4053a754f072f034d8baa2653f",
+    "reference_seeds": "2a667acf161b4dcd488afdd44d3ae658278baf49ecbd0be7aa63a20f68a70882",
+    "reference_repeat_seeds": "840e5885011b32d90eb98ac4cd19ccfc7ec7176147ef18be93295bfd3008e4f8"
+  },
+  "software": "independent MRtrix3 Seedtest vs FNIT PyTorch GPU float32/TF32 (float64 geometry)",
+  "act_affine_mode": "exact",
+  "reference_command": "tckgen -algorithm Seedtest -seed_gmwmi GMWMI -act 5TT -seeds N -select 0 -output_seeds seeds.txt FOD seedtest.tck",
+  "reference_attempts": 100000,
+  "candidate_points_sha256": "bcf5e958baf5e4bded4e66a6fcbea79fcf8f9d728befba82369d5647e42846bf",
+  "candidate_function": "sample_gmwmi_seeds(gmwmi, five_tissue, five_tissue_affine, n_seeds, generator)",
+  "seed_count": 99985,
+  "reference_repeat_seed_count": 99987,
+  "reference_abs_gm_minus_wm_quantiles_0_50_90_99_100": [
+    0.0,
+    0.00026163458824157715,
+    0.003932957537472248,
+    0.008937071077525616,
+    0.009999752044677734
+  ],
+  "candidate_abs_gm_minus_wm_quantiles_0_50_90_99_100": [
+    0.0,
+    0.000399857759475708,
+    0.004221318289637566,
+    0.008955845609307289,
+    0.010018616914749146
+  ],
+  "reference_centroid_ras_mm": [
+    0.36964353919029236,
+    1.548020362854004,
+    22.84211540222168
+  ],
+  "candidate_centroid_ras_mm": [
+    0.5117910504341125,
+    1.5664591789245605,
+    22.721403121948242
+  ],
+  "eight_mm_bin_pearson_on_union": 0.9274026091299091,
+  "reference_to_reference_repeat_eight_mm_bin_pearson_on_union": 0.9245835109790804,
+  "reference_to_reference_repeat_nn_mm_quantiles_50_90_99": [
+    0.6859010737540808,
+    1.2435118077274825,
+    1.7543982189421368
+  ],
+  "candidate_to_reference_nn_mm_quantiles_50_90_99": [
+    0.6804956176342404,
+    1.236394337532997,
+    1.7445536153916463
+  ],
+  "reference_to_candidate_nn_mm_quantiles_50_90_99": [
+    0.6820942449018104,
+    1.2453059732019855,
+    1.7558261158763846
+  ],
+  "candidate_wall_seconds": 3.47726657288149,
+  "candidate_cuda_peak_allocated_gib": 0.4605855941772461,
+  "comparison_limit": "different random number generators; no row-wise paired seed identity"
+}

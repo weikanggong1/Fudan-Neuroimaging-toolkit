@@ -49,6 +49,8 @@ def main() -> None:
     parser.add_argument("--reference-attempts", type=int, default=None)
     parser.add_argument("--candidate-points", type=Path)
     parser.add_argument("--device", default="cuda:0")
+    parser.add_argument("--act-affine-mode", choices=("header-spacing", "exact"),
+                        default="header-spacing")
     args = parser.parse_args()
     five_image = nib.load(args.five_tissue)
     gmwmi_image = nib.load(args.gmwmi)
@@ -80,7 +82,9 @@ def main() -> None:
         np.save(args.candidate_points, candidate)
     effective_affine = affine.clone()
     spacing = torch.as_tensor(five_image.header.get_zooms()[:3], dtype=torch.float64, device=device)
-    effective_affine[:3, :3] *= spacing / torch.linalg.vector_norm(effective_affine[:3, :3], dim=0)
+    if args.act_affine_mode == "header-spacing":
+        effective_affine[:3, :3] *= spacing / torch.linalg.vector_norm(
+            effective_affine[:3, :3], dim=0)
     inverse = torch.linalg.inv(effective_affine)
     def fractions(points):
         """计算世界毫米种子处的 GM-WM 差值分位数。"""
@@ -104,6 +108,7 @@ def main() -> None:
                          "reference_seeds": _sha(args.reference_seeds),
                          "reference_repeat_seeds": _sha(args.reference_repeat_seeds)},
         "software": "independent MRtrix3 Seedtest vs FNIT PyTorch GPU float32/TF32 (float64 geometry)",
+        "act_affine_mode": args.act_affine_mode,
         "reference_command": "tckgen -algorithm Seedtest -seed_gmwmi GMWMI -act 5TT -seeds N -select 0 -output_seeds seeds.txt FOD seedtest.tck",
         "reference_attempts": args.reference_attempts,
         "candidate_points_sha256": (_sha(args.candidate_points)

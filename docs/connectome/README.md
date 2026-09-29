@@ -4,13 +4,19 @@
 
 **工作流边界：** `fs-aparc` 是 FNIT 的原生 84 节点输出，不等于原 UKB-connectomics 的七套「皮层 atlas + Tian」组合。现已接入七套图谱的生成入口；默认 5TT 使用 FreeSurfer 分割，不加入 FIRST。原 UKB 的 FIRST、FNIRT 标签与 1,000 万次播种整链仍属于兼容性验收。
 
-`UKBConnectome` 从**已完成畸变、运动和涡流校正**的 DWI、配套 bval 和 eddy 旋转后的 bvec 起步，结合配对 T1 已完成的**官方 FreeSurfer recon-all** subject 目录、DWI 脑掩膜与自动生成的 84 节点 atlas，返回 count、SIFT2 FBC、加权 mean length 和加权 mean FA 四张矩阵。响应、FOD、强度归一化、5TT/GMWMI、追踪、SIFT2、FA 采样与矩阵赋值由 PyTorch 在指定 CPU/CUDA 设备执行。CUDA 默认允许 TF32；图像主要为 float32，条件数敏感的求解和几何步骤使用 float64，不自动转为 float16/bfloat16。
+`UKBConnectome_pipeline` 从**已完成畸变、运动和涡流校正**的 DWI、配套 bval 和 eddy 旋转后的 bvec 起步，结合配对 T1 已完成的**官方 FreeSurfer recon-all** subject 目录、DWI 脑掩膜与自动生成的 84 节点 atlas，返回 count、SIFT2 FBC、加权 mean length 和加权 mean FA 四张矩阵。响应、FOD、强度归一化、5TT/GMWMI、追踪、SIFT2、FA 采样与矩阵赋值由 PyTorch 在指定 CPU/CUDA 设备执行。CUDA 默认允许 TF32；图像主要为 float32，条件数敏感的求解和几何步骤使用 float64，不自动转为 float16/bfloat16。
 
-**当前状态：** `recon-all` 目录可自动生成 84 节点 `fs-aparc` 或原 UKB 七套皮层+Tian 图谱；其中 216 节点 Schaefer200+Tian S1 已通过公开真实 DWI 的[一键四矩阵产物检查](../../validation/connectome/ds004666/atlas_synthmorph_20260929.md)。追踪已改为 iFOD2 校准拒绝采样，固定真实 FOD 的 80 条圆弧和 52 条连续两弧与官方概率最大误差分别为 `1.58×10⁻⁶` 和 `1.49×10⁻⁶`；真实 5TT 的 12,600 个 ACT 状态点与官方无分歧。10,000 固定位置的三次独立追踪与三次官方运行完成 3×3 四矩阵比较；共同边 mean FA 误差有 6/9 对落入官方自身重复范围，count 相对 L1 有 4/9 对落入，仍未达到全指标匹配。[当前追踪报告](../../validation/connectome/ds004666/ifod2_rejection_20260929.md)列出精度、时间、显存和脑图。
+**当前状态：** `recon-all` 目录可自动生成 84 节点 `fs-aparc` 或原 UKB 七套皮层+Tian 图谱；其中 216 节点 Schaefer200+Tian S1 已通过公开真实 DWI 的[一键四矩阵产物检查](../../validation/connectome/ds004666/atlas_synthmorph_20260929.md)。追踪已改为 iFOD2 校准拒绝采样，固定真实 FOD 的 80 条圆弧和 52 条连续两弧与官方概率最大误差分别为 `1.58×10⁻⁶` 和 `1.49×10⁻⁶`；真实 5TT 的 12,600 个 ACT 状态点与官方无分歧。FNIT 固定 10,000 个位置作三次独立追踪，官方从同一 GMWMI 图独立播种三次，完成 3×3 四矩阵比较；共同边 mean FA 误差有 6/9 对落入官方自身重复范围，count 相对 L1 有 4/9 对落入，仍未达到全指标匹配。[当前追踪报告](../../validation/connectome/ds004666/ifod2_rejection_20260929.md)列出精度、时间、显存和脑图。
 
-进一步的[公开真实输入 100k 比较](../../validation/connectome/ds004666/tracking_100k_matrices_20260929.md)包含三次 MRtrix 与一次 FNIT 的独立追踪、SIFT2、FA、四矩阵和轨迹密度。count 相对 L1 的跨软件比较有 2/3 进入官方自身重复范围；长度 KS、端点分布和 8 mm TDI 仍略超出。FNIT 100k 本次追踪耗时 1,443.91 s、后处理 36.53 s、全链 Torch 峰值 2.473 GiB；共享 H100 的负载与早前纯追踪计时不同。100 万及 1,000 万次播种尚未实测。
+进一步的[公开真实输入 100k 三次对三次比较](../../validation/connectome/ds004666/tracking_100k_three_seed_20260929.md)固定同一 FOD、5TT、GMWMI、FA 与 20 节点 atlas 的体素数组，包含独立追踪、SIFT2、FA、四矩阵和轨迹密度。该阶段使用 NIfTI-1 sform；后来查出 5TT 世界仿射相对参考 MIF 仍有最多 `1.43×10⁻⁵ mm` 的角点差。FNIT 三次保留 27,353–27,670 条，官方三次保留 27,616–27,717 条；count 相对 L1 有 6/9 个跨软件配对进入官方自身重复范围，长度 KS、8 mm 端点和 TDI 的 9/9 个跨软件配对均在范围外。编译核追踪 782.49–806.95 s、全链 Torch 峰值 2.468–2.473 GiB；官方 CPU 追踪 67.73–84.42 s。时间受不同设备和共享负载影响，不能推导稳定加速比。100 万及 1,000 万次播种尚未实测。
 
-可选 `compile_arc=True` / `--compile-arc` 只编译 CUDA iFOD2 圆弧概率核。相同真实输入的[100k 实测](../../validation/connectome/ds004666/tracking_compile_20260929.md)中，首次编译计入后追踪 782.49 s、保留 27,353 条、全链 Torch 峰值 2.468 GiB。未编译的另一次追踪 1,443.91 s、保留 27,401 条；两次共享 GPU 负载不同，不能将墙钟比值视为稳定加速比。长度、端点和 TDI 的独立群体差异仍在官方重复范围外。
+[按真实种子组织分层的 10k 长度检查](../../validation/connectome/ds004666/sgm_tracking_20260929.md)发现，最初实现与官方均接受 308 条皮层下起始流线，但 75% 长度分别为 70.71、76.71 mm。后续的精确 5TT/GMWMI 几何与掩膜线性播种修正消除了已接受种子落在白质侧的明确错误，因而已合并；皮层下长度仍未匹配。皮层下 FOD 截断评分的隔离候选未合并。后续需用冻结的圆弧提案逐点核对双向 ACT 终止状态。
+
+[已接受种子的精确仿射检查](../../validation/connectome/ds004666/act_geometry_accepted_seeds_20260929.md)进一步定位到 NIfTI-1 的世界仿射舍入：使用与参考 MIF 同体素、精确仿射的 NIfTI-2 后，2,795 个 FNIT 已接受种子的 ACT 单向判定与官方逐个一致；普通 NIfTI-1 有 93 个分歧。10k 独立追踪的皮层下 75% 长度从 70.71 增至 72.18 mm，FOD 也改用精确仿射后为 73.98 mm，官方为 76.71 mm。100k 精确 5TT/GMWMI 复跑的长度、端点和 TDI 仍在官方三次重复范围外；完整轨迹仍有差异。
+
+同一精确几何下，已合并的掩膜线性 GMWMI 播种在 100k 位置上的 ACT 单向比例为 0.926149，官方两次为 0.925899/0.925910；旧算法为 0.900015。在已接受的 10k 流线中，旧算法有 90 个种子落在白质侧，新算法与官方均为 0。100k 全链复核接受 27,549 条，官方三次为 27,616–27,717 条；count 相对 L1 和支持 Dice 的三次比较均进入官方自身范围，长度 KS 与 8 mm TDI 仍未全面进入。[输入哈希、四矩阵、轨迹密度和脑图](../../validation/connectome/ds004666/act_geometry_accepted_seeds_20260929.md)保留完整对照。
+
+可选 `compile_arc=True` / `--compile-arc` 只编译 CUDA iFOD2 圆弧概率核。相同真实输入的[首次 100k 实测](../../validation/connectome/ds004666/tracking_compile_20260929.md)中，首次编译计入后追踪 782.49 s、保留 27,353 条、全链 Torch 峰值 2.468 GiB。未编译的另一次追踪 1,443.91 s、保留 27,401 条；两次共享 GPU 负载不同，不能将墙钟比值视为稳定加速比。[三次重复](../../validation/connectome/ds004666/tracking_100k_three_seed_20260929.md)确认长度、端点和 TDI 的独立群体差异仍在官方重复范围外。
 
 [七套原 UKB atlas 的同轨迹与独立轨迹矩阵对照](../../validation/connectome/ds004666/seven_atlas_100k_20260929.md)现已覆盖 84–1054 节点、四种矩阵和真实连接图。同一 27,616 条官方 TCK、权重、长度、FA 和七张 DWI atlas 下，七个 count 矩阵均逐元素一致，FBC/平均长度/平均 FA 最大绝对误差分别不超过 `5.07e−5`、`5.05e−4 mm`、`5.58e−7`。FNIT 自身 100k 轨迹与三次官方随机范围比较仍有未进入的矩阵指标；图谱 Tian 使用 SynthMorph，不能等同原 UKB 的 FNIRT 标签。这七套固定轨迹及独立轨迹 `.npz`、节点表、时间、显存和图已入库；除 Schaefer200+Tian S1 外，各套还没有分别完成正式 CLI 从 DWI 的一键运行。
 
@@ -28,7 +34,7 @@ T1 解剖输入须先在包外运行**官方 FreeSurfer recon-all**，提供同�
 conda env create -f environment.yml
 conda activate fnit
 python -c "import torch, fnit; print(torch.__version__, torch.cuda.is_available())"
-fnit connectome --help
+fnit UKBConnectome_pipeline --help
 ```
 
 CPU 小规模检查可使用 `--device cpu`。官方 FreeSurfer 的运行与许可由使用者在包外管理；本仓库不提供 recon-all 可执行程序、`license.txt`、UKB 原始受控数据或大体积 T1/DWI。
@@ -36,9 +42,9 @@ CPU 小规模检查可使用 `--device cpu`。官方 FreeSurfer 的运行与许�
 ## Python API
 
 ```python
-from fnit import UKBConnectome
+from fnit import UKBConnectome_pipeline
 
-result = UKBConnectome(device="cuda:0")(
+result = UKBConnectome_pipeline(device="cuda:0")(
     dwi="derivatives/dwi/sub-01_desc-preproc_dwi.nii.gz",  # 输入：校正后的 4D DWI
     bvals="derivatives/dwi/sub-01_desc-preproc_dwi.bval",  # 输入：每卷 b 值
     bvecs="derivatives/dwi/sub-01_desc-eddyRotated_dwi.bvec",  # 输入：旋转后的方向
@@ -94,7 +100,7 @@ count = result.matrices["count"]  # 输出：nodes 定义行列的 84×84 计数
 # --output-dir：结果目录。
 # --device：PyTorch 设备；--n-seeds：播种次数；--seed：随机种子。
 # --compile-arc：可选；CUDA 上首次编译 iFOD2 圆弧概率核，省略时默认关闭。
-fnit connectome \
+fnit UKBConnectome_pipeline \
   --dwi derivatives/dwi/sub-01_desc-preproc_dwi.nii.gz \
   --bvals derivatives/dwi/sub-01_desc-preproc_dwi.bval \
   --bvecs derivatives/dwi/sub-01_desc-eddyRotated_dwi.bvec \
@@ -117,7 +123,7 @@ MNI_TEMPLATE=data/MNI152_T1_2mm.nii.gz # 与 Tian S1 同体素网格的 MNI T1
 WEIGHTS=data/fnit-weights # fnit-setup-weights --model synthmorph-joint 获取的权重目录
 OUTPUT=derivatives/fnit_connectome/sub-01_schaefer200_tian_s1 # 输出目录
 
-fnit connectome \
+fnit UKBConnectome_pipeline \
   --dwi "$DWI" --bvals "$BVALS" --bvecs "$BVECS" \
   --freesurfer-subject-dir "$SUBJECT" \
   --atlas schaefer200+tian-s1 \
@@ -135,7 +141,7 @@ fnit connectome \
 
 `--atlas aparc+tian-s1` 和 `--atlas aparc.a2009s+tian-s1` 直接读取 recon-all 的原生双半球 `.annot`，无需 `--fsaverage-dir`；仍需 `--atlas-templates-dir` 提供 Tian S1 图像与名称表，以及 `--mni-template` 或 `--tian-fnirt-coeff`。对应节点数分别为 84 和 164。真实 T1 的原版皮层体积 XOR 均为 0，两种 DWI 图谱的所有节点均有体素；完整四矩阵尚未分别一键实测，详见[原生图谱报告](../../validation/connectome/ds004666/atlas_native_aparc_20260929.md)。
 
-`--atlas glasser+tian-s1` 或 `--atlas glasser+tian-s4` 读取 `--atlas-templates-dir` 中的原 UKB Glasser 32k dlabel、相邻 `surfaces` 目录的 fsLR/fsaverage 球面和 Tian S1/S4 图像及名称，再使用 `--fsaverage-dir` 的双半球 `sphere.reg`。环境中的 `wb_command` 完成 32k→164k 标签重采样，余下表面和 T1 投影由 PyTorch 完成。其余参数与上面的 Schaefer 一键命令相同；`--mni-template` 使用 SynthMorph T1→MNI 路线，或以 `--tian-fnirt-coeff` 固定原流程变换。输出应为 376×376 或 414×414 四矩阵及同数目 `nodes.tsv`；公开数据已有真实 T1/DWI 图谱验证，尚未分别完成四矩阵一键实测。函数用法、参考命令、时间、逐体素精度和切片见[Glasser 报告](../../validation/connectome/ds004666/atlas_glasser_20260929.md)。
+`--atlas glasser+tian-s1` 或 `--atlas glasser+tian-s4` 读取 `--atlas-templates-dir` 中的原 UKB Glasser 32k dlabel、相邻 `surfaces` 目录的 fsLR/fsaverage 球面和 Tian S1/S4 图像及名称，再使用 `--fsaverage-dir` 的双半球 `sphere.reg`。环境中的 `wb_command` 完成 32k→164k 标签重采样，余下表面和 T1 投影由 PyTorch 完成。其余参数与上面的 Schaefer 一键命令相同；`--mni-template` 用 SynthMorph 直接求 MNI→T1 配准，把 Tian 标签送到 T1，或以 `--tian-fnirt-coeff` 固定原流程的 T1→MNI 前向变换并求逆。输出应为 376×376 或 414×414 四矩阵及同数目 `nodes.tsv`；公开数据已有真实 T1/DWI 图谱验证，尚未分别完成四矩阵一键实测。函数用法、参考命令、时间、逐体素精度和切片见[Glasser 报告](../../validation/connectome/ds004666/atlas_glasser_20260929.md)。
 
 上面的 SynthMorph 路线与原 UKB 使用的 FNIRT 是两种配准方法。同一 UKB T1 的 Tian S1 对照中，前景 Dice 为 0.906，不能声称与原 FNIRT atlas 一致。已有该 T1 的 FNIRT `--cout` 前向 coefficient 时，可把 `--mni-template "$MNI_TEMPLATE" --synthmorph-weights "$WEIGHTS"` 两项替换为 `--tian-fnirt-coeff "$FNIRT_COEFF"`；`FNIRT_COEFF` 是与 `SUBJECT` 对应的 T1→MNI coefficient NIfTI。FNIT 自己计算逆场和最近邻标签，不在正式路径调用 FSL。两个参数路径只能选其一。函数及配对精度、时间见[图谱实测报告](../../validation/connectome/ds004666/atlas_synthmorph_20260929.md)。
 
@@ -257,9 +263,10 @@ python tools/benchmark_connectome_end_to_end.py \
 
 四张矩阵的比较固定脑区顺序，按严格上三角同时报告全边与共同非零边指标；长度/FA 的共同边指标用于区分数值偏差与连接支持差异。固定真实轨迹的赋值一致性不能代替独立追踪后的矩阵一致性。
 
-## Reference
+## 参考文献与原实现
 
 - 参考文献：Mansour et al., *Connectomes for 40,000 UK Biobank participants: A multi-modal, multi-scale brain network resource*, [PubMed 37839728](https://pubmed.ncbi.nlm.nih.gov/37839728/)。
 - 参考文献：Tournier et al., *MRtrix3: A fast, flexible and open software framework for medical image processing and visualisation*, NeuroImage (2019), [PubMed 31473352](https://pubmed.ncbi.nlm.nih.gov/31473352/)。
+- 参考文献：Tournier、Calamante、Connelly，*Improved Probabilistic Streamlines Tractography by 2nd Order Integration Over Fibre Orientation Distributions*，ISMRM 2010，摘要 1670。[原文](https://archive.ismrm.org/2010/1670.html)。
 - 参考文献：Smith et al., *Anatomically-constrained tractography: improved diffusion MRI streamlines tractography through effective use of anatomical information*, NeuroImage (2012), [PubMed 22705374](https://pubmed.ncbi.nlm.nih.gov/22705374/)。
 - 原实现代码库：[UKB-connectomics](https://github.com/sina-mansour/UKB-connectomics)；[本次对照的 MRtrix3 源码提交](https://github.com/MRtrix3/mrtrix3/tree/eeab681d3e0cb004cf1d1d31579d3892197ef5b6)。计算框架：[PyTorch](https://github.com/pytorch/pytorch)。

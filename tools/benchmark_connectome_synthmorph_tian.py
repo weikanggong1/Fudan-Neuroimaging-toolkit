@@ -11,6 +11,7 @@ import torch
 
 from connectome_benchmark_common import _sha256
 from fnit.connectome.atlas_tian import synthmorph_tian_to_t1
+from fnit.weights import WEIGHT_FILES, resolve_weights, verify_file
 
 
 def compare(candidate, reference):
@@ -47,6 +48,13 @@ def main():
     parser.add_argument("--weights", type=Path)
     parser.add_argument("--device", default="cuda:0")
     args = parser.parse_args()
+    weight_files = {}
+    for name in ("synthmorph.affine.2.h5", "synthmorph.deform.3.h5"):
+        path = resolve_weights(name, explicit=args.weights)
+        _, size, sha256 = WEIGHT_FILES[name]
+        if not verify_file(path, size, sha256):
+            raise ValueError(f"SynthMorph weight failed size/SHA-256 verification: {name}")
+        weight_files[name] = {"bytes": size, "sha256": sha256}
     args.output_dir.mkdir(parents=True, exist_ok=True)
     if args.device.startswith("cuda"):
         torch.empty(1, device=args.device)
@@ -74,6 +82,7 @@ def main():
         "input_sha256": {name: _sha256(path) for name, path in (
             ("t1_brain", args.t1_brain), ("mni_template", args.mni_template),
             ("tian_s1", args.tian_s1), ("tian_s4", args.tian_s4))},
+        "verified_weight_files": weight_files,
         "model": "FNIT PyTorch SynthMorph joint, MNI moving to native T1 fixed",
         "device": args.device,
         "registration_and_s1_apply_seconds": registration_and_s1_seconds,

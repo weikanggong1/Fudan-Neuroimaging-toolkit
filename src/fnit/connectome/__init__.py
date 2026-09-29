@@ -16,7 +16,7 @@ from .freesurfer_subject import ConnectomeNode, FreeSurferSubject, fs_aparc_atla
 from .fod import fit_mrtrix_msmt_csd, real_sh
 from .masks import dwi2mask_legacy, maskfilter_six_connected
 from .mtnormalise import MTNormaliseResult, normalise_mrtrix_three_tissue
-from .pipeline import ConnectomeResult, UKBConnectome
+from .pipeline import ConnectomeResult, UKBConnectome, UKBConnectome_pipeline
 from .response import (
     estimate_mrtrix_dhollander, fit_mrtrix_dhollander_tensor,
     mrtrix_shell_centres,
@@ -31,7 +31,8 @@ from .tracking import Tractogram, probabilistic_tractography
 
 __all__ = [
     "ConnectomeNode", "ConnectomeResult", "FreeSurferSubject", "FixelSegmentation", "MTNormaliseResult",
-    "SIFT2FixelMapping", "SIFT2Optimization", "Tractogram", "UKBConnectome",
+    "SIFT2FixelMapping", "SIFT2Optimization", "Tractogram", "UKBConnectome_pipeline",
+    "UKBConnectome",
     "bet_mask", "build_connectomes", "combine_cortical_subcortical",
     "estimate_mrtrix_dhollander", "estimate_sift2_weights",
     "fit_mrtrix_dhollander_tensor", "fit_mrtrix_msmt_csd",

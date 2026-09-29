@@ -43,4 +43,4 @@ FNIT [同输入脚本](../../../tools/benchmark_connectome_native_aparc.py)的 `
 
 [组合图谱脚本](../../../tools/benchmark_connectome_cortical_tian_profile.py)在同一 T1 上把 FNIT SynthMorph 生成的 Tian S1 放入皮层背景，并以固定 DWI→T1 世界变换采样到实际校正 DWI 网格。调用时设 `--native-annotation aparc` 或 `aparc.a2009s`；`--tian-t1` 是 16 标签 T1 NIfTI，`--tian-names` 是按 1..16 排列的名称，`--dwi-reference` 指定 DWI 形状和 affine，`--dwi-to-t1-world` 提供 4×4 RAS 毫米变换，`--output-dir` 写 `atlas_t1.nii.gz`、`atlas_dwi.nii.gz`、`nodes.tsv` 与 `report.json`。两种组合分别生成 84、164 个节点，在真实 DWI 网格均全部出现；实测 4.88、4.79 s，Torch 峰值均 1.399 GiB，见[84 节点](atlas_native_aparc_20260929/aparc_tian_s1.json)和[164 节点](atlas_native_aparc_20260929/aparc_a2009s_tian_s1.json)。
 
-该 Tian S1 使用 FNIT SynthMorph，属于 T1→MNI 配准替代；其与原 UKB FNIRT 的差别见[配准对照](atlas_synthmorph_20260929.md)。两种新的 CLI 图谱选项尚未分别完成 DWI 到四矩阵的独立一键运行。完整 connectome 与原 UKB 流程一致性仍取决于追踪、FIRST 和原图谱配准条件。
+该 Tian S1 使用 FNIT SynthMorph 直接求 MNI→T1 配准，替代原 UKB 的 T1→MNI FNIRT 求逆路线；两者差别见[配准对照](atlas_synthmorph_20260929.md)。两种新的 CLI 图谱选项尚未分别完成 DWI 到四矩阵的独立一键运行。完整 connectome 与原 UKB 流程一致性仍取决于追踪、FIRST 和原图谱配准条件。

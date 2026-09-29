@@ -4,7 +4,7 @@
 
 `FreeSurferSubject(subject_dir=...)` 读取已完成的官方 `recon-all` 目录，要求 `mri/brain.mgz` 和 `mri/aparc+aseg.mgz`。函数不运行 FreeSurfer。`fs_aparc_atlas(segmentation=...)` 的输入是 T1 网格、非负整数的 `aparc+aseg` 三维张量；输出是同网格 `int32` 标签张量和 84 个 `ConnectomeNode(index, original_label, hemisphere, name)`。背景及未选取的 FreeSurfer ID 为 0。84 行的顺序固定在 [`fs_aparc84.tsv`](../../src/fnit/connectome/data/fs_aparc84.tsv)，来自 MRtrix 3.0.3 `fs_default.txt` 与 FreeSurfer 8.2 ColorLUT 的 ID 对应；不按原始 ID 直接编号。
 
-`UKBConnectome(..., freesurfer_subject_dir=..., atlas="fs-aparc")` 将 atlas 按 DWI→T1 RAS 毫米变换最近邻采样到 DWI 网格；返回的 `result.atlas` / `result.atlas_affine` 是 DWI 网格，`result.nodes` 定义矩阵行列。CLI 另写 `atlas_dwi.nii.gz` 和 `nodes.tsv`。若重采样后某节点没有体素，矩阵仍保留其零行列。
+`UKBConnectome_pipeline(..., freesurfer_subject_dir=..., atlas="fs-aparc")` 将 atlas 按 DWI→T1 RAS 毫米变换最近邻采样到 DWI 网格；返回的 `result.atlas` / `result.atlas_affine` 是 DWI 网格，`result.nodes` 定义矩阵行列。CLI 另写 `atlas_dwi.nii.gz` 和 `nodes.tsv`。若重采样后某节点没有体素，矩阵仍保留其零行列。
 
 ```python
 from pathlib import Path

@@ -47,4 +47,4 @@ python tools/benchmark_connectome_schaefer_volume.py "${atlas_args[@]}"
 
 ![Schaefer1000 与原版同网格切片](atlas_schaefer_multi_20260929/schaefer1000.png)
 
-皮层体积已与原版逐体素一致；Tian S4 的 SynthMorph 是允许的 T1→MNI 配准替代，不能当作原 UKB FNIRT 标签逐体素一致。组合图谱已在真实 DWI 网格确认全部节点有体素。新增的两种 atlas 选项尚未分别完成从 DWI 到四张矩阵的独立一键运行；一键全链的现有实测只覆盖 Schaefer200 + Tian S1。
+皮层体积已与原版逐体素一致；Tian S4 的 SynthMorph 直接求 MNI→T1 配准，替代原 UKB 的 T1→MNI FNIRT 求逆路线，不能当作原 UKB FNIRT 标签逐体素一致。组合图谱已在真实 DWI 网格确认全部节点有体素。新增的两种 atlas 选项尚未分别完成从 DWI 到四张矩阵的独立一键运行；一键全链的现有实测只覆盖 Schaefer200 + Tian S1。

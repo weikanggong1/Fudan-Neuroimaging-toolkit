@@ -288,7 +288,7 @@ def _run_connectome(args):
     import nibabel as nib
     import numpy as np
 
-    from .connectome import UKBConnectome
+    from .connectome import UKBConnectome_pipeline
 
     if args.n_seeds < 1:
         raise ValueError("--n-seeds must be positive")
@@ -393,7 +393,7 @@ def _run_connectome(args):
                                Path(args.dwi_to_t1_world).suffix == ".csv" else None)
         if transform.shape != (4, 4):
             raise ValueError("--dwi-to-t1-world must contain a 4x4 matrix")
-    result = UKBConnectome(device=args.device)(
+    result = UKBConnectome_pipeline(device=args.device)(
         args.dwi, args.bvals, args.bvecs, args.t1,
         atlas_dwi=args.atlas_dwi,
         t1_segmentation=args.t1_segmentation,
@@ -680,7 +680,8 @@ def main(argv=None):
                           help='disable TorchFAST bias-field correction')
     fast_vbm.add_argument('--overwrite', action='store_true')
     connectome = commands.add_parser(
-        'connectome', help='corrected DWI and official FreeSurfer T1 to four region matrices',
+        'UKBConnectome_pipeline', aliases=['connectome'],
+        help='corrected DWI and official FreeSurfer T1 to four region matrices',
         allow_abbrev=False)
     connectome.add_argument('--dwi', required=True, help='corrected 4D DWI NIfTI')
     connectome.add_argument('--bvals', required=True)
@@ -738,7 +739,7 @@ def main(argv=None):
     if selected and selected[0] == "flirt":
         _run_flirt(parser.parse_args(selected))
         return
-    if selected and selected[0] == "connectome":
+    if selected and selected[0] in ("UKBConnectome_pipeline", "connectome"):
         _run_connectome(parser.parse_args(selected))
         return
     if selected and selected[0] == "synthsr":

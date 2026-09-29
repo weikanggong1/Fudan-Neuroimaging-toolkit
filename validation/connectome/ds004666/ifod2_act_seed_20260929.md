@@ -6,7 +6,7 @@
 
 MRtrix3 固定源码提交 `eeab681d3e0cb004cf1d1d31579d3892197ef5b6` 的 `ACT/method.h::check_seed()`、`seed_is_unidirectional()` 规定：无效组织拒绝播种；皮层灰质侧的灰白质界面只向白质方向传播；亚皮层灰质种子仍可双向传播。方向由种子两侧各 0.001 mm 的 GM−WM 值判定。FNIT 现在实现这两个种子函数，并把单向标志用于流线拼接。后续圆弧已改为校准拒绝采样；12,600 个真实 5TT 路径采样点的状态见当前报告。
 
-`_five_tissue_mrtrix(five_tissue, points, inverse_affine)` 接收 float32 `[X,Y,Z,5]` 五组织图、RAS 世界毫米 `[B,3]` 坐标和世界→体素 `[4,4]` 变换；返回 float32 `[B,5]`，通道顺序是皮层灰质、亚皮层灰质、白质、脑脊液、病理。超出图像、最近体素为背景时返回零；三线性权重小于 `1e-6` 时置零。MRtrix 根据 NIfTI 头文件体素尺寸规范化 sform 的方向列；仅用 nibabel 读出的浮点 sform 列长度，种子分类会在界面附近产生错误。因此直接调用公开追踪函数时，应传 `five_tissue_spacing_mm=(sx,sy,sz)`，单位 mm；`UKBConnectome` 自动从官方分割头文件传入。省略该参数时采用 affine 列长度。
+`_five_tissue_mrtrix(five_tissue, points, inverse_affine)` 接收 float32 `[X,Y,Z,5]` 五组织图、RAS 世界毫米 `[B,3]` 坐标和世界→体素 `[4,4]` 变换；返回 float32 `[B,5]`，通道顺序是皮层灰质、亚皮层灰质、白质、脑脊液、病理。超出图像、最近体素为背景时返回零；三线性权重小于 `1e-6` 时置零。本页使用的 NIfTI-1 存在 sform 舍入，仅用 nibabel 读出的列长度会使界面分类出错；因此本页直接调用时传 `five_tissue_spacing_mm=(sx,sy,sz)`，单位 mm；`UKBConnectome_pipeline` 从官方分割头文件传入。省略该参数时采用 affine 原值。[另一份同受试者的精确 NIfTI-2 对照](act_geometry_accepted_seeds_20260929.md)表明，当 NIfTI-2 已保留原 MIF 仿射时，直接采用 affine 更接近官方 ACT 取值。两种数据精度需分别核对。
 
 `_act_seed_direction(five_tissue, seeds, directions, inverse_affine)` 接收同一 5TT、世界毫米种子 `[B,3]`、单位初始方向 `[B,3]` 及上述逆变换；返回 bool `valid[B]`、bool `one_way[B]` 和 float32 `oriented[B,3]`。`valid` 表示可播种，`one_way` 表示只沿 `oriented` 向白质传播。公开 `probabilistic_tractography(...)` 仍返回 `Tractogram`：逐流线 `[Pi,3]` 世界毫米点、`endpoints[T,2,3]`、`lengths_mm[T]`、`accepted_seeds[T,3]` 和尝试数；详细输入、输出及其他参数见[函数文档](../../../docs/connectome/README.md)。GMWMI 加权体素选择和传播候选选择改为 float64 累积分布加显式随机抽样，修复同一 GPU、同一种子跨进程矩阵偶发不同的问题。
 

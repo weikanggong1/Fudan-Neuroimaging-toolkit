@@ -109,7 +109,7 @@ def __getattr__(name):
                 'prepare_fmriprep_surface_inputs', 'prepare_t1w_surface_geometry'):
         from . import fmri
         return getattr(fmri, name)
-    if name in ('UKBConnectome', 'ConnectomeResult'):
+    if name in ('UKBConnectome_pipeline', 'UKBConnectome', 'ConnectomeResult'):
         from . import connectome
         return getattr(connectome, name)
     raise AttributeError(name)
