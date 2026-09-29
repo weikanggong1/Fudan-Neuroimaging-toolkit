@@ -14,6 +14,9 @@ def __getattr__(name):
     if name == "prepare_brainstem_atlas":
         from .setup import prepare_brainstem_atlas
         return prepare_brainstem_atlas
+    if name in {"prepare_nuclei_atlas", "segment_nuclei"}:
+        from . import nuclei
+        return getattr(nuclei, name)
     raise AttributeError(name)
 
 
@@ -22,4 +25,5 @@ __all__ = [
     "ashburner_prior", "estimate_label_centroid_affine", "SubregionResult", "segment_subregions",
     "BlockIndex", "build_block_index", "rasterize_priors",
     "prepare_brainstem_atlas",
+    "prepare_nuclei_atlas", "segment_nuclei",
 ]

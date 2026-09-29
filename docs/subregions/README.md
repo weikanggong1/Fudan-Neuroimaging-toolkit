@@ -2,7 +2,7 @@
 
 [返回首页](../../README.md) · [真实数据对照](../../validation/subregions/README.md)
 
-`segment_subregions` 从三维 T1、同网格的粗结构分割和 GEMS 四面体图谱，输出原 T1 网格上的脑干标签。图谱配准、Gaussian 参数估计、网格变形和后验计算由 Python/PyTorch 执行；读写采用 Nibabel。运行时不调用 FreeSurfer 可执行程序。两例真实 T1 的四区 Dice 均超过 0.95，体积差均不超过 5%；逐区结果和显存见验证记录。丘脑核团、海马和杏仁核图谱目前只能解析，尚无分割精度验收。
+`segment_subregions` 从三维 T1、同网格的粗结构分割和 GEMS 四面体图谱，输出原 T1 网格上的脑干标签。图谱配准、Gaussian 参数估计、网格变形和后验计算由 Python/PyTorch 执行；读写采用 Nibabel。运行时不调用 FreeSurfer 可执行程序。两例真实 T1 的四区 Dice 均超过 0.95，体积差均不超过 5%；逐区结果和显存见验证记录。丘脑核团、海马和杏仁核另用[横断面核团接口](nuclei.md)，该接口已有真实数据对照，但逐区验收尚未全部通过。
 
 ## 安装图谱
 
@@ -90,7 +90,7 @@ segment_subregions brainstem --cross fs_sub01 \
 
 官方命令从该 subject 的 `mri/norm.mgz` 和 `mri/aseg.mgz` 读入。严格阶段对照应把同一对文件交给 FNIT；对比脚本会按仿射将官方 `brainstemSsLabels.FSvoxelSpace.mgz` 最近邻重采样到 FNIT 网格。原始 T1 加 FNIT SynthSeg 的完整独立输入属于另一项对照，不应与官方 `norm/aseg` 阶段结果混为同输入比较。逐区 Dice、硬体积差、阶段计时、峰值显存和限制见[验证记录](../../validation/subregions/README.md)。
 
-## Reference
+## 参考文献与原实现
 
-- 参考文献：Iglesias et al., *Bayesian segmentation of brainstem structures in MRI*, NeuroImage (2015), [doi:10.1016/j.neuroimage.2015.02.065](https://doi.org/10.1016/j.neuroimage.2015.02.065)。
-- 原实现代码库：[FreeSurfer 主代码库](https://github.com/freesurfer/freesurfer)。
+- [Iglesias 等，*NeuroImage*，2015，脑干结构 Bayesian 分割](https://doi.org/10.1016/j.neuroimage.2015.02.065)。
+- [FreeSurfer 原实现代码库](https://github.com/freesurfer/freesurfer)；[官方亚区分割说明](https://surfer.nmr.mgh.harvard.edu/fswiki/SubregionSegmentation)。

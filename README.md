@@ -22,6 +22,7 @@ CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核。模型、影像张
 | [SynthSeg](docs/synthseg/README.md) | FreeSurfer `mri_synthseg` | 33 类脑结构标签与软体积。 |
 | [SynthSegPlus](docs/synthseg_plus/README.md) | FreeSurfer `mri_synthseg --parc` | 33 类结构与 68 区皮层分区。 |
 | [segment_subregions](docs/subregions/README.md) | FreeSurfer `segment_subregions brainstem` | 脑干四亚区标签。 |
+| [segment_nuclei](docs/subregions/nuclei.md) | FreeSurfer `segment_subregions thalamus/hippo-amygdala` | 丘脑核团、海马亚区和杏仁核标签与体积；逐区阈值尚未全部通过。 |
 | [SynthSR](docs/synthsr/README.md) | FreeSurfer `mri_synthsr` | 合成 1 mm T1w 图像。 |
 | [TorchFAST](docs/fast/README.md) | FSL `fast` | 三组织分割、部分体积分数与偏置场。 |
 | [FastVBM](docs/fast_vbm/README.md) | FSL `fslvbm` | 从 T1w 生成标准空间灰质、Jacobian 与调制灰质图。 |
@@ -141,6 +142,16 @@ fnit-setup-brainstem-atlas --output-root /absolute/path/atlases --device cuda:0
 ```
 
 输入、输出及 FreeSurfer 同输入对照见[脑干亚区说明](docs/subregions/README.md)。
+
+丘脑、海马与杏仁核使用独立的 Conda 原生扩展环境，需从仓库根目录编译一次：
+
+```bash
+conda env create -f environment-gems-native.yml
+conda run -n fnit-gems-native python tools/build_gems_native.py
+conda run -n fnit-gems-native fnit-nuclei setup --atlas-root /absolute/path/nuclei_atlases
+```
+
+运行输入为同网格的 `norm.mgz`、`aseg.mgz` 和 `wmparc.mgz`；用法、实际精度和时间见[核团分割说明](docs/subregions/nuclei.md)。
 
 API 的显式 `weights=`、CLI 的 `--weights`、`FNIT_WEIGHTS` 环境变量、已保存目录和默认缓存按此顺序解析。TorchFAST、TorchFLIRT、TorchFNIRT、TorchApplyWarp、TorchConvertWarp、TorchInvWarp、TorchTOPUP、TorchEDDY、TorchDTIFIT、TorchAMICONODDI、TorchMMORF、TorchBEDPOSTX、TorchProbtrackX 与 dMRI pipeline 的 TBSS 分支没有预训练权重；从原始 T1w 启动的流程可能仍需 SynthStrip。文件清单、官方 URL、SHA-256、许可和离线部署见[权重说明](docs/WEIGHTS.md)。
 
