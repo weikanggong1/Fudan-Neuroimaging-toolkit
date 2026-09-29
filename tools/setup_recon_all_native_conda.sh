@@ -3,8 +3,8 @@
 set -euo pipefail
 : "${CONDA_PREFIX:?activate the FNIT Conda environment first}"
 repo_root=$(cd "$(dirname "$0")/.." && pwd)
-source_dir=${FNIT_RECON_ALL_SOURCE:-$CONDA_PREFIX/share/fnit/recon_all_fs_source_d932c45}
-build_dir="$CONDA_PREFIX/share/fnit/recon_all_native"
+source_dir=${FNIT_RECON_ALL_SOURCE:-$CONDA_PREFIX/share/fnit/recon_all_fs_source_d932c45_full}
+build_dir="$CONDA_PREFIX/share/fnit/recon_all_native_full"
 commit=d932c45b7941662ea380a05efef580568b98d41a
 if [[ ! -d "$source_dir/.git" && ! -f "$source_dir/.fnit-source-commit" ]]; then
   if [[ -n "${FNIT_RECON_ALL_SOURCE:-}" ]]; then
@@ -42,6 +42,6 @@ for source in "$build_dir"/bin/*; do
     exit 1
   fi
 done
-sha256sum "$CONDA_PREFIX"/bin/{fnit_n4_itk,mri_em_register,mri_segment,mri_edit_wm_with_aseg,mris_fix_topology_fnit,mris_remove_intersection,mris_inflate,mris_place_surface,mrisp_paint,mris_curvature_stats,mri_label2vol} \
+sha256sum "$CONDA_PREFIX"/bin/{fnit_n4_itk,mri_em_register,mri_segment,mri_edit_wm_with_aseg,mris_fix_topology_fnit,mris_remove_intersection,mris_inflate,mris_place_surface,mrisp_paint,mris_curvature_stats,mri_label2vol,mri_warp_convert,mri_ca_register,mri_convert} \
   > "$build_dir/installed-bin.sha256"
 printf 'Installed FNIT recon-all native stages in %s/bin\n' "$CONDA_PREFIX"

@@ -59,8 +59,18 @@ def compute_brain_volume_stats(subject: str | Path,
                if line.strip() and not line.lstrip().startswith("#")}
     valid = (np.isin(aseg, tuple(lut_ids | {2, 3, 41, 42})) &
              ~np.isin(aseg, (0, 16, 85)))
-    if np.any(aseg == 77):
-        raise ValueError("MNI305 lateralization of label 77 is not yet implemented")
+    hypo_coordinates = np.argwhere(aseg == 77)
+    left_hypo = right_hypo = 0
+    if len(hypo_coordinates):
+        xfm = subject / "mri/transforms/talairach.xfm"
+        lines = xfm.read_text().splitlines()
+        index = lines.index("Linear_Transform =")
+        transform = np.array([[float(value) for value in line.rstrip(" ;").split()]
+                              for line in lines[index + 1:index + 4]])
+        scanner_ras = nib.affines.apply_affine(aseg_image.affine, hypo_coordinates)
+        mni_x = scanner_ras @ transform[0, :3] + transform[0, 3]
+        left_hypo = int(np.count_nonzero(mni_x <= 0))
+        right_hypo = len(hypo_coordinates) - left_hypo
 
     def count(mask: np.ndarray) -> float:
         return float(np.count_nonzero(mask)) * voxel
@@ -76,8 +86,8 @@ def compute_brain_volume_stats(subject: str | Path,
     mask = count(brainmask > 0)
     left_gray = lh_pial - lh_white
     right_gray = rh_pial - rh_white
-    left_white = count(valid & np.isin(aseg, (2, 78))) + callosum / 2
-    right_white = count(valid & np.isin(aseg, (41, 79))) + callosum / 2
+    left_white = count(valid & np.isin(aseg, (2, 78))) + left_hypo * voxel + callosum / 2
+    right_white = count(valid & np.isin(aseg, (41, 79))) + right_hypo * voxel + callosum / 2
     supratentorial = brain_seg - cerebellum
     brain_not_vent = brain_seg - vent - tffc
     supratentorial_not_vent = supratentorial - vent - tffc

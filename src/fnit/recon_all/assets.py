@@ -264,7 +264,9 @@ def download_asset(name, directory, verify_only=False):
         target.write_bytes(data)
         return target
     if name in SOURCE_FILES:
-        for source_root in (Path(sys.prefix) / "share/fnit/recon_all_fs_source_d932c45",
+        for source_root in (Path(sys.prefix) / "share/fnit/recon_all_fs_source_d932c45_full",
+                            Path(sys.prefix) / "share/fnit/recon_all_native_full/source",
+                            Path(sys.prefix) / "share/fnit/recon_all_fs_source_d932c45",
                             Path(sys.prefix) / "share/fnit/recon_all_native/source"):
             source = source_root / "distribution" / name
             if verify_file(source, size, sha256):

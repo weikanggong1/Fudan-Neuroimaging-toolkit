@@ -250,12 +250,17 @@ def _run_defects_volume(binary: Path, subject: Path, hemi: str,
 
 
 def _run_white_mri_chain(subject: Path, weights: Path, assets: Path,
-                         threads: int, stage) -> None:
+                         threads: int, warp_binaries: tuple[Path, Path, Path],
+                         stage) -> None:
     from .finalsurfs_python import run_finalsurfs
     from .mni_aux_chain import run_mni_aux_chain
+    from .mni_nonlinear_chain import run_mni_nonlinear_chain
 
     stage("mni_aux", run_mni_aux_chain, subject, weights, assets,
           device="cpu", threads=threads)
+    stage("mni_nonlinear", run_mni_nonlinear_chain, subject, weights, assets,
+          warp_convert=warp_binaries[0], ca_register=warp_binaries[1],
+          mri_convert=warp_binaries[2], device="cpu", threads=threads)
     stage("brain_finalsurfs", run_finalsurfs, subject, device="cpu")
 
 
@@ -537,6 +542,11 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     from .assets import validate_core_assets
 
     validate_mni_aux_assets(weights, assets)
+    from fnit.weights import WEIGHT_FILES, verify_file
+    deform_weight = weights / "synthmorph.deform.3.h5"
+    _, deform_size, deform_sha256 = WEIGHT_FILES[deform_weight.name]
+    if not verify_file(deform_weight, deform_size, deform_sha256):
+        raise ValueError(f"Missing or invalid nonlinear registration weight: {deform_weight}")
     validate_core_assets(assets)
     native_bin_dir = _native_bin_directory(native_bin_dir)
     native_em = _native_em_register_binary(native_bin_dir)
@@ -548,6 +558,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     paint_binary = _native_binary(native_bin_dir, "mrisp_paint")
     curvature_stats_binary = _native_binary(native_bin_dir, "mris_curvature_stats")
     defect_binary = _native_binary(native_bin_dir, "mri_label2vol")
+    warp_binaries = tuple(_native_binary(native_bin_dir, name) for name in
+                          ("mri_warp_convert", "mri_ca_register", "mri_convert"))
     wm_segment_binary = _native_binary(native_bin_dir, "mri_segment")
     wm_edit_binary = _native_binary(native_bin_dir, "mri_edit_wm_with_aseg")
     registration_atlases = {hemi: _folding_atlas(assets, hemi)
@@ -604,6 +616,10 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         "mris_curvature_stats_sha256": curvature_stats_binary[1]}
     report["defects_volume"] = {"binary": str(defect_binary[0]),
                                  "sha256": defect_binary[1]}
+    report["mni_nonlinear"] = {
+        "implementation": "PyTorch deform + Conda source-built warp conversion",
+        "native_sha256": {name: binary[1] for name, binary in zip(
+            ("mri_warp_convert", "mri_ca_register", "mri_convert"), warp_binaries)}}
 
     def stage(name, function, *args, **kwargs):
         tick = time.perf_counter()
@@ -685,7 +701,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
           mri / "norm.mgz", mri / "aseg.presurf.mgz",
           mri / "brainmask.mgz", mri / "brain.mgz", device="cpu")
     stage("entowm", mri_entowm_seg, mri / "nu.mgz", mri / "entowm.mgz",
-          weights, device="cpu")
+          weights, device="cpu", stats_path=stats / "entowm.stats",
+          talairach_lta=mri / "transforms/talairach.xfm.lta")
     stage("ants_denoise", denoise_volume, mri / "brain.mgz",
           mri / "antsdn.brain.mgz")
     stage("mri_segment", _run_native_wm_segment,
@@ -707,7 +724,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     # 固定 recon-all 脚本此处执行 cp filled.mgz filled.auto.mgz。
     stage("filled_auto_checkpoint", shutil.copyfile,
           mri / "filled.mgz", mri / "filled.auto.mgz")
-    _run_white_mri_chain(subject, weights, assets, threads, stage)
+    _run_white_mri_chain(subject, weights, assets, threads,
+                         tuple(binary[0] for binary in warp_binaries), stage)
     for hemi in ("lh", "rh"):
         result = stage(f"surface_{hemi}", _surface_pair, subject, hemi,
                        mri / "filled.mgz", mri / "norm.mgz",

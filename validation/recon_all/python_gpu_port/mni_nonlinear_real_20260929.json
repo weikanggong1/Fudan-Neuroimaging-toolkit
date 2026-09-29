@@ -1,0 +1,33 @@
+{
+  "scope": "real sub-01 FNIT cropped T1 and affine; Python SynthMorph deform plus Conda source-built warp conversion versus archived FreeSurfer 8.2 output",
+  "input_t1_sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
+  "device": "cpu",
+  "pytorch_registration_seconds": 91.50487297028303,
+  "complete_stage_seconds_on_existing_sub01": 212.46588300075382,
+  "forward_warp": {
+    "shape": [193, 229, 193, 1, 3],
+    "mean_absolute_displacement_difference_mm": 0.000008363656,
+    "p99_absolute_difference_mm": 0.0000457763671875,
+    "maximum_absolute_difference_mm": 0.00021362305,
+    "pearson_r": 0.9999999999999666
+  },
+  "inverse_warp": {
+    "shape": [256, 256, 256, 1, 3],
+    "mean_absolute_displacement_difference_mm": 0.00003088067,
+    "p99_absolute_difference_mm": 0.0001220703125,
+    "maximum_absolute_difference_mm": 0.23314285,
+    "pearson_r": 0.9999999999671554,
+    "maximum_difference_index": [179, 48, 134, 0, 0],
+    "components_above_0_1_mm": 2
+  },
+  "registration_check_image": {
+    "shape": [193, 229, 193],
+    "affine_max_absolute_difference": 0,
+    "nonzero_union_pearson_r": 0.9999972633409986,
+    "nonzero_union_mae": 0.00033124179443341263,
+    "different_voxels": 127,
+    "reference_nonzero_voxels": 3477821,
+    "candidate_nonzero_voxels": 3477821
+  },
+  "boundary": "Same real T1 with FNIT affine upstream; this stage comparison does not establish end-to-end numeric acceptance. The inverse maximum is a local discrepancy requiring spatial review."
+}

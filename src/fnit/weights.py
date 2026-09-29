@@ -92,7 +92,7 @@ MODEL_FILES = {
         "synthseg_segmentation_labels_2.0.npy",
         "synthseg_segmentation_names_2.0.npy", "synthseg_topological_classes_2.0.npy"),
     "recon-all": (
-        "synthstrip.1.pt", "synthmorph.affine.2.h5",
+        "synthstrip.1.pt", "synthmorph.affine.2.h5", "synthmorph.deform.3.h5",
         "synthseg_2.0.h5", "synthseg_segmentation_labels_2.0.npy",
         "synthseg_segmentation_names_2.0.npy", "synthseg_topological_classes_2.0.npy",
         "entowm.fsm31.t1.nstd00-30.nstd21-108.h5", "entowm.ctab",

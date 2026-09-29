@@ -7,6 +7,7 @@
 | 阶段 | FNIT 输入 → 输出 | 对应官方程序或命令 | 详细说明及真实数据证据 |
 | --- | --- | --- | --- |
 | N4 校正 | `mri/orig.mgz` → `mri/tmp/nu0.mgz` | `mri_nu_correct.mni` 所用 N4 校正 | [N4](N4_ITK_CONDA.md) |
+| MNI152 非线性变换 | 裁剪 `orig.mgz`、`aff.lta`、固定模板和 deform 权重 → 前向/逆向 warp、`test.nii.gz` | `mri_synthmorph -m deform`、`mri_warp_convert`、`mri_ca_register -invert-and-save`、`mri_convert -at` | [输入输出、参数及真实 T1 对照](MNI_NONLINEAR_CHAIN.md) |
 | GCA 注册、WM 分割与编辑 | conform T1、脑掩膜、GCA/aseg → LTA、`wm.seg.mgz`、`wm.asegedit.mgz` | `mri_em_register -uns 3 -mask brainmask.mgz nu.mgz RB_all_2020-01-02.gca transforms/talairach.lta`；`mri_segment`；`mri_edit_wm_with_aseg` | [原生阶段历史同输入结果](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/wm_chain_20260927/REPORT.md) |
 | 拓扑修复 | `surf/H.orig.nofix`、`H.inflated.nofix`、`H.qsphere.nofix`、`mri/brain.mgz`、`wm.mgz` → `H.orig.premesh`，再由 FNIT remesh 写 `H.orig` | `mris_fix_topology -ga -seed 1234 -threads 1 -mgz -sphere qsphere.nofix -inflated inflated.nofix -orig orig.nofix -out orig.premesh subject H` | [拓扑](TOPOLOGY_CONDA_GA.md) |
 | 非零自相交修复 | `surf/H.orig` → 同路径修复表面 | `mris_remove_intersection H.orig H.orig` | [输入输出与真实非零相交修复](INTERSECTION_REPAIR.md)；官方同输入配对仍需验收 |
