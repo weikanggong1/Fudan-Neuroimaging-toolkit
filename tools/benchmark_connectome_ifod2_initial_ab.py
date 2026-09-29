@@ -66,7 +66,7 @@ def _metrics(candidate, reference, support):
     }
 
 
-def _track(seeds, initial, valid, fod, fod_affine, five, five_affine, *, rng_seed):
+def _track(seeds, initial, valid, fod, fod_affine, five, five_affine, *, rng_seed, one_way=None):
     device = seeds.device
     generator = torch.Generator(device=device).manual_seed(rng_seed)
     fod_inverse = torch.linalg.inv(fod_affine)
@@ -78,10 +78,14 @@ def _track(seeds, initial, valid, fod, fod_affine, five, five_affine, *, rng_see
                                     generator, **options)
     backward, nb, gb, lb, wb = _grow(seeds, -initial, fod, five, fod_inverse, five_inverse,
                                      generator, **options)
-    total = lf + lb
-    keep = torch.nonzero(valid & gf & gb & (wf | wb) &
+    if one_way is None:
+        one_way = torch.zeros_like(valid)
+    total = torch.where(one_way, lf, lf + lb)
+    keep = torch.nonzero(valid & gf & (one_way | gb) & (wf | wb) &
                          (total >= 4.025599) & (total <= 250.), as_tuple=False).flatten()
-    paths = tuple(torch.cat((backward[i, :nb[i]].flip(0), forward[i, 1:nf[i]])) for i in keep.tolist())
+    paths = tuple(forward[i, :nf[i]] if bool(one_way[i]) else
+                  torch.cat((backward[i, :nb[i]].flip(0), forward[i, 1:nf[i]]))
+                  for i in keep.tolist())
     endpoints = torch.stack([torch.stack((path[0], path[-1])) for path in paths])
     return paths, endpoints, total[keep]
 

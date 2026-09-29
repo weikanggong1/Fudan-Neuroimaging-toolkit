@@ -99,6 +99,7 @@ def main() -> None:
         fod, affine['fod'], five, affine['five-tissue'], gmwmi,
         n_seeds=args.n_seeds, seed=args.seed, lmax=8, batch_size=8192,
         cutoff=.1, power=.5,
+        five_tissue_spacing_mm=images['five-tissue'].header.get_zooms()[:3],
     )
     _sync(device)
     tracking_time = time.perf_counter() - start
@@ -179,6 +180,11 @@ def main() -> None:
         plt.close(fig)
         report['figure']=args.figure.name
     args.output.parent.mkdir(parents=True,exist_ok=True)
+    report['candidate_matrices'] = {}
+    for name, matrix in candidate.items():
+        path = args.output.with_name(f'{args.output.stem}_{name}.csv')
+        np.savetxt(path, matrix, delimiter=',', fmt='%.9g')
+        report['candidate_matrices'][name] = {'file': path.name, 'sha256': _sha(path)}
     args.output.write_text(json.dumps(report,indent=2,allow_nan=False)+'\n')
     print(json.dumps(report,indent=2,allow_nan=False))
 

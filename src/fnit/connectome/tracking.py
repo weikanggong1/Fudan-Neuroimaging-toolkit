@@ -189,11 +189,13 @@ def sample_gmwmi_seeds(gmwmi: torch.Tensor, five_tissue: torch.Tensor,
     min_voxel_mm = float(torch.linalg.vector_norm(affine[:3, :3], dim=0).min())
     nonzero = torch.nonzero(gmwmi.reshape(-1) > 0, as_tuple=False).flatten()
     weights = gmwmi.reshape(-1)[nonzero].float()
+    cumulative = weights.double().cumsum(0)
     selected = []
     remaining = n_seeds
     for _ in range(20):
         count = max(remaining, min(n_seeds, 1024))
-        flat = nonzero[torch.multinomial(weights, count, replacement=True, generator=generator)]
+        draws = torch.rand(count, device=device, dtype=torch.float64, generator=generator) * cumulative[-1]
+        flat = nonzero[torch.searchsorted(cumulative, draws, right=True).clamp_max(len(nonzero) - 1)]
         yz = gmwmi.shape[1] * gmwmi.shape[2]
         voxel = torch.stack((flat // yz, flat // gmwmi.shape[2] % gmwmi.shape[1],
                              flat % gmwmi.shape[2]), dim=-1).float()
@@ -327,7 +329,12 @@ def _grow(
             mid_amp.clamp_min(0).pow(power) * permitted
         moving = active & (scores.sum(-1) > 0)
         scores = torch.where(moving[:, None], scores, torch.ones_like(scores))
-        choice = torch.multinomial(scores, 1, generator=generator).squeeze(-1)
+        cumulative = scores.double().cumsum(-1)
+        draws = torch.rand((batch, 1), device=seeds.device, dtype=torch.float64,
+                           generator=generator) * cumulative[:, -1:]
+        choice = torch.searchsorted(cumulative, draws.contiguous(), right=True).clamp_max(
+            proposals_per_step - 1,
+        ).squeeze(-1)
         direction = directions[rows, choice]
         chosen_mid = midpoint[rows, choice]
         chosen_end = endpoint[rows, choice]
@@ -426,6 +433,69 @@ def _act_sample_state(
             seed_to_wm | seed_wm_exit, sgm)
 
 
+def _five_tissue_mrtrix(
+    five_tissue: torch.Tensor, points: torch.Tensor, inverse_affine: torch.Tensor,
+) -> torch.Tensor:
+    """Sample float32 5TT at world-mm ``[B,3]`` using MRtrix masked linear rules.
+
+    ``inverse_affine`` uses MRtrix's header spacing, not the rounded NIfTI
+    sform column norms. Return clamped tissue fractions ``[B,5]``; invalid
+    nearest voxels and positions outside the image return zeros.
+    """
+    voxel = points.double() @ inverse_affine[:3, :3].double().T + inverse_affine[:3, 3].double()
+    shape = five_tissue.shape[:3]
+    inside = ((voxel > -.5) & (voxel < voxel.new_tensor(shape) - .5)).all(-1)
+    nearest = torch.floor(voxel + .5).long()
+    nearest = torch.stack(tuple(nearest[:, axis].clamp(0, shape[axis] - 1) for axis in range(3)), -1)
+    nonzero = (five_tissue[nearest[:, 0], nearest[:, 1], nearest[:, 2]] != 0).any(-1)
+    lower = torch.floor(voxel).long()
+    fraction = (voxel - lower).float()
+    result = five_tissue.new_zeros((len(points), 5))
+    for dz in (0, 1):
+        iz = (lower[:, 2] + dz).clamp(0, shape[2] - 1)
+        wz = fraction[:, 2] if dz else 1 - fraction[:, 2]
+        for dy in (0, 1):
+            iy = (lower[:, 1] + dy).clamp(0, shape[1] - 1)
+            wy = fraction[:, 1] if dy else 1 - fraction[:, 1]
+            partial = wy * wz
+            for dx in (0, 1):
+                ix = (lower[:, 0] + dx).clamp(0, shape[0] - 1)
+                wx = fraction[:, 0] if dx else 1 - fraction[:, 0]
+                weight = wx * partial
+                result += five_tissue[ix, iy, iz] * torch.where(weight < 1e-6, 0., weight)[:, None]
+    return torch.where((inside & nonzero)[:, None], result.clamp(0, 1), 0.)
+
+
+def _act_seed_direction(
+    five_tissue: torch.Tensor, seeds: torch.Tensor, directions: torch.Tensor,
+    inverse_affine: torch.Tensor,
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    """Apply MRtrix ACT check_seed and seed_is_unidirectional on ``[B,3]`` seeds.
+
+    Input 5TT is float32 ``[X,Y,Z,5]`` and ``inverse_affine`` maps RAS-mm
+    positions to MRtrix voxel centers. Returns bool valid ``[B]``, bool one-way
+    ``[B]``, and oriented float32 directions ``[B,3]``. Cortical GM-side
+    seeds are one-way; the direction is flipped toward WM using a 0.001 mm
+    central sample. Equivalent source: ACT/method.h in MRtrix3 eeab681d3e0c.
+    """
+    tissue = _five_tissue_mrtrix(five_tissue, seeds, inverse_affine)
+    cgm, sgm, wm, csf, path = tissue.unbind(-1)
+    is_sgm = (sgm > cgm) & (sgm >= wm) & (sgm > csf) & (sgm > path)
+    is_csf = (csf >= cgm) & (csf >= sgm) & (csf >= wm) & (csf >= path)
+    valid = _valid_act_tissue(tissue) & (
+        is_sgm | (~is_csf & (wm > 0) & ((cgm + sgm - wm) < .01))
+    )
+    one_way = valid & ~is_sgm & (wm < cgm + sgm) & (sgm < cgm)
+    plus = _five_tissue_mrtrix(five_tissue, seeds + .001 * directions, inverse_affine)
+    minus = _five_tissue_mrtrix(five_tissue, seeds - .001 * directions, inverse_affine)
+    gradient = (plus[:, 0] + plus[:, 1] - plus[:, 2]) - (
+        minus[:, 0] + minus[:, 1] - minus[:, 2]
+    )
+    flip = one_way & (gradient > 0)
+    oriented = torch.where(flip[:, None], -directions, directions)
+    return valid, one_way, oriented
+
+
 @torch.inference_mode()
 def probabilistic_tractography(
     wm_sh: torch.Tensor,
@@ -436,6 +506,7 @@ def probabilistic_tractography(
     *,
     n_seeds: int,
     lmax: int = 8,
+    five_tissue_spacing_mm: tuple[float, float, float] | None = None,
     fa: torch.Tensor | None = None,
     seed: int = 0,
     batch_size: int = 8192,
@@ -462,8 +533,11 @@ def probabilistic_tractography(
     MRtrix equivalent: ``tckgen -algorithm iFOD2 -seed_gmwmi gmwmi.mif
     -act 5tt.mif -seeds N -select 0 -maxlength 250 -cutoff 0.1 -samples 3
     -power 0.5 wm_fod_norm.mif tracks.tck``. Initial directions use the
-    MRtrix continuous sphere rule and 1000 attempts; finite arc proposal
-    resampling and sampled-point ACT sGM truncation remain approximate.
+    MRtrix continuous sphere rule and 1000 attempts. ``five_tissue_spacing_mm``
+    is the 5TT header voxel spacing; if absent, affine column norms are used.
+    Cortical GM-side ACT seeds are oriented toward WM and tracked one-way.
+    Finite arc proposal resampling and sampled-point ACT sGM truncation remain
+    approximate.
     """
     if (wm_sh.ndim != 4 or fod_affine.shape != (4, 4) or
             five_tissue.ndim != 4 or five_tissue.shape[-1] != 5 or
@@ -481,6 +555,14 @@ def probabilistic_tractography(
     five_tissue_affine = five_tissue_affine.to(device=device, dtype=torch.float64)
     fod_inverse = torch.linalg.inv(fod_affine)
     five_inverse = torch.linalg.inv(five_tissue_affine)
+    five_spacing = (torch.linalg.vector_norm(five_tissue_affine[:3, :3], dim=0)
+                    if five_tissue_spacing_mm is None else
+                    torch.as_tensor(five_tissue_spacing_mm, device=device, dtype=torch.float64))
+    if five_spacing.shape != (3,) or not bool(torch.isfinite(five_spacing).all()) or bool((five_spacing <= 0).any()):
+        raise ValueError('five_tissue_spacing_mm must contain three positive finite voxel sizes')
+    act_affine = five_tissue_affine.clone()
+    act_affine[:3, :3] *= five_spacing / torch.linalg.vector_norm(act_affine[:3, :3], dim=0)
+    act_inverse = torch.linalg.inv(act_affine)
     wm_sh = wm_sh.to(torch.float32)
     five_tissue = five_tissue.to(device=device, dtype=torch.float32)
     gmwmi = gmwmi.to(device=device, dtype=torch.float32)
@@ -508,6 +590,10 @@ def probabilistic_tractography(
         initial, valid_seed, _ = _initial_directions(
             _sample(wm_sh, batch_seeds, fod_inverse), generator, lmax=lmax, cutoff=cutoff,
         )
+        valid_act, one_way, initial = _act_seed_direction(
+            five_tissue, batch_seeds, initial, act_inverse,
+        )
+        valid_seed &= valid_act
         forward, nf, gf, lf, wf = _grow(
             batch_seeds, initial, wm_sh, five_tissue, fod_inverse, five_inverse,
             generator, lmax=lmax, proposals_per_step=arc_proposals,
@@ -520,13 +606,14 @@ def probabilistic_tractography(
             step_mm=step_mm, max_steps=max_steps,
             max_angle_degrees=max_angle_degrees, cutoff=cutoff, power=power,
         )
-        total = lf + lb
-        keep = torch.nonzero(valid_seed & gf & gb & (wf | wb) &
+        total = torch.where(one_way, lf, lf + lb)
+        keep = torch.nonzero(valid_seed & gf & (one_way | gb) & (wf | wb) &
                              (total >= min_length_mm) &
                              (total <= max_length_mm), as_tuple=False).flatten()
         for index in keep.tolist():
-            path = torch.cat((backward[index, :nb[index]].flip(0),
-                              forward[index, 1:nf[index]]), dim=0)
+            path = (forward[index, :nf[index]] if bool(one_way[index]) else
+                    torch.cat((backward[index, :nb[index]].flip(0),
+                               forward[index, 1:nf[index]]), dim=0))
             collected.append(path)
             endpoints.append(torch.stack((path[0], path[-1])))
             lengths.append(total[index])

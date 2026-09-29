@@ -308,6 +308,7 @@ class UKBConnectome:
         tracks = probabilistic_tractography(
             wm_sh, dwi_affine, five, five_affine, gmwmi,
             n_seeds=n_seeds, seed=seed,
+            five_tissue_spacing_mm=nib.load(str(t1_segmentation)).header.get_zooms()[:3],
         )
         if not tracks.paths:
             raise RuntimeError("ACT tracking accepted no streamlines")

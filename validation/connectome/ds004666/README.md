@@ -1,6 +1,6 @@
 # ds004666 配对 T1/DWI：历史整链基线与分阶段验证
 
-本页的独立追踪和整链矩阵运行于球谐函数查表、连续初始方向修正之前，保留作历史基线。后续的[固定单弧](ifod2_single_arc_20260929.md)和[连续初始方向、五次矩阵 A/B](ifod2_initial_direction_20260929.md)分别记录实际结果；最终 connectome 尚未达到官方多种子误差范围。
+本页的独立追踪和整链矩阵运行于球谐函数查表、连续初始方向及 ACT 种子规则修正之前，保留作历史基线。后续的[固定单弧](ifod2_single_arc_20260929.md)、[连续初始方向](ifod2_initial_direction_20260929.md)和[ACT 种子同输入对照](ifod2_act_seed_20260929.md)分别记录实际结果；最终 connectome 尚未达到官方多种子误差范围。
 
 [OpenNeuro ds004666](https://openneuro.org/datasets/ds004666) `sub-01/ses-2mm` 提供同次真实 T1w、AP/PA DWI。源文件、字节数及 SHA-256 见 [download_manifest.tsv](download_manifest.tsv)。本例先以 FSL TOPUP/EDDY 校正 DWI 并旋转 bvec；元数据缺少实测总读出时间，因此 TOPUP/EDDY 都采用假定 `0.05 s`，命令与 QC 见[输入来源](corrected_input_provenance.public.json)。T1 使用官方 FreeSurfer 8.2 `recon-all`；PyTorch 不替代它。两臂固定同一校正 DWI、bval/bvec、`aparc+aseg.mgz`、20 区 SynthSeg atlas、脑掩膜和 DWI→T1 世界变换。此处整链旧报告显式提供脑掩膜，没有测试新默认 BET 分支；其单独基准见 connectome 主文档。
 

@@ -22,6 +22,11 @@ def test_weighted_gmwmi_seeds_project_to_planar_interface(device):
     assert seeds.shape == (64, 3)
     assert bool(torch.isfinite(seeds).all())
     torch.testing.assert_close(seeds[:, 0], torch.full((64,), 3.5, device=device), atol=.01, rtol=0)
+    replay = sample_gmwmi_seeds(
+        gmwmi, five, torch.eye(4, device=device), 64,
+        torch.Generator(device=device).manual_seed(7),
+    )
+    assert torch.equal(seeds, replay)
 
 
 def test_gmwmi_requires_nonempty_nonnegative_weights():
@@ -67,6 +72,14 @@ def test_tractography_accepts_separate_fod_and_anatomy_grids(device):
     assert tracks.endpoints.shape == (len(tracks.paths), 2, 3)
     assert tracks.accepted_seeds.shape == (len(tracks.paths), 3)
     assert torch.allclose(tracks.mean_fa, torch.full_like(tracks.mean_fa, .6), atol=1e-5)
+    repeat = probabilistic_tractography(
+        fod, torch.eye(4, device=device), five, anatomy_affine,
+        gmwmi, n_seeds=100, lmax=4, fa=fa, seed=11, cutoff=.01,
+        power=2., max_angle_degrees=20,
+    )
+    assert len(repeat.paths) == len(tracks.paths)
+    assert torch.equal(repeat.accepted_seeds, tracks.accepted_seeds)
+    assert all(torch.equal(left, right) for left, right in zip(tracks.paths, repeat.paths))
 
 @pytest.mark.parametrize("device", ["cpu", "cuda"])
 def test_arc_requires_midpoint_fod_above_cutoff(device):
