@@ -1,4 +1,4 @@
-"""核对真实 T1 上的 Schaefer+Tian atlas 及其 DWI 网格输出。"""
+"""核对真实 T1 上的皮层+Tian atlas 及其 DWI 网格输出。"""
 
 import argparse
 import json
@@ -11,24 +11,43 @@ import torch
 
 from connectome_benchmark_common import _sha256
 from fnit.connectome.anatomy import resample_labels_nearest
-from fnit.connectome.atlas_builder import combine_cortical_tian, schaefer_to_t1
+from fnit.connectome.atlas_builder import (
+    combine_cortical_tian, native_annotation_to_t1, schaefer_to_t1,
+)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    for name in ("subject-dir", "fsaverage-dir", "left-annot", "right-annot",
-                 "tian-t1", "tian-names", "dwi-reference", "dwi-to-t1-world", "output-dir"):
+    for name in ("subject-dir", "tian-t1", "tian-names", "dwi-reference",
+                 "dwi-to-t1-world", "output-dir"):
         parser.add_argument("--" + name, type=Path, required=True)
+    for name in ("fsaverage-dir", "left-annot", "right-annot"):
+        parser.add_argument("--" + name, type=Path)
+    parser.add_argument("--native-annotation", choices=("aparc", "aparc.a2009s"))
     parser.add_argument("--device", default="cuda:0")
     args = parser.parse_args()
     t0 = time.perf_counter()
-    cortical, cortical_nodes = schaefer_to_t1(
-        subject_dir=args.subject_dir,
-        fsaverage_dir=args.fsaverage_dir,
-        left_annot=args.left_annot,
-        right_annot=args.right_annot,
-        device=args.device,
-    )
+    if args.native_annotation:
+        if any(value is not None for value in (args.fsaverage_dir, args.left_annot, args.right_annot)):
+            raise ValueError("native annotation uses the recon-all label directory directly")
+        cortical, cortical_nodes = native_annotation_to_t1(
+            subject_dir=args.subject_dir, annotation=args.native_annotation, device=args.device,
+        )
+        cortical_inputs = (
+            ("left_annot", args.subject_dir / "label" / f"lh.{args.native_annotation}.annot"),
+            ("right_annot", args.subject_dir / "label" / f"rh.{args.native_annotation}.annot"),
+        )
+    else:
+        if any(value is None for value in (args.fsaverage_dir, args.left_annot, args.right_annot)):
+            raise ValueError("Schaefer atlas needs fsaverage_dir and both hemisphere annotations")
+        cortical, cortical_nodes = schaefer_to_t1(
+            subject_dir=args.subject_dir,
+            fsaverage_dir=args.fsaverage_dir,
+            left_annot=args.left_annot,
+            right_annot=args.right_annot,
+            device=args.device,
+        )
+        cortical_inputs = (("left_annot", args.left_annot), ("right_annot", args.right_annot))
     combined, nodes = combine_cortical_tian(
         cortical_t1=cortical,
         cortical_nodes=cortical_nodes,
@@ -50,7 +69,7 @@ def main() -> None:
     present_dwi = np.unique(labels.cpu().numpy())
     report = {
         "input_sha256": {name: _sha256(path) for name, path in (
-            ("left_annot", args.left_annot), ("right_annot", args.right_annot),
+            *cortical_inputs,
             ("tian_t1", args.tian_t1), ("tian_names", args.tian_names),
             ("dwi_reference", args.dwi_reference),
             ("dwi_to_t1_world", args.dwi_to_t1_world),

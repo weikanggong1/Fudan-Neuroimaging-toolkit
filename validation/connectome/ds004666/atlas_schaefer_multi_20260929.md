@@ -32,16 +32,16 @@ atlas_args=(
 python tools/benchmark_connectome_schaefer_volume.py "${atlas_args[@]}"
 ```
 
-[组合图谱脚本](../../../tools/benchmark_connectome_schaefer_tian_profile.py)另接收 `--tian-t1`（FNIT SynthMorph 得到的同 T1 网格 Tian S4 标签）、`--tian-names`（按 1..54 排列的名称）、`--dwi-reference`（校正 DWI，只取网格和 affine）、`--dwi-to-t1-world`（4×4 RAS 毫米变换 CSV）和 `--output-dir`。输出 `atlas_t1.nii.gz`、`atlas_dwi.nii.gz`、`nodes.tsv`、`report.json`；报告保存输入 SHA-256、两空间中的节点覆盖率、时间与 Torch 峰值。Tian S4 的 SynthMorph 与官方 SynthMorph 对照、输入含义及脑图见[既有实测](atlas_synthmorph_20260929.md)。此组组合测试共用一次已固定的 DWI→T1 变换，不重复扩散处理。
+[组合图谱脚本](../../../tools/benchmark_connectome_cortical_tian_profile.py)另接收 `--tian-t1`（FNIT SynthMorph 得到的同 T1 网格 Tian S4 标签）、`--tian-names`（按 1..54 排列的名称）、`--dwi-reference`（校正 DWI，只取网格和 affine）、`--dwi-to-t1-world`（4×4 RAS 毫米变换 CSV）和 `--output-dir`。输出 `atlas_t1.nii.gz`、`atlas_dwi.nii.gz`、`nodes.tsv`、`report.json`；报告保存输入 SHA-256、两空间中的节点覆盖率、时间与 Torch 峰值。Tian S4 的 SynthMorph 与官方 SynthMorph 对照、输入含义及脑图见[既有实测](atlas_synthmorph_20260929.md)。此组组合测试共用一次已固定的 DWI→T1 变换，不重复扩散处理。
 
 ## 实测结果
 
 | 图谱 | 原版双半球表面 | 原版 T1 体积 | FNIT 表面+T1 体积 | 体素差异 | 组合后节点 | DWI 网格出现节点 |
 |---|---:|---:|---:|---:|---:|---:|
-| Schaefer500 + Tian S4 | 4.72 + 4.10 s | 12.03 s | 2.56 s | 0 / 16,777,216 | 554 | 554 |
-| Schaefer1000 + Tian S4 | 3.24 + 2.73 s | 5.15 s | 2.28 s | 0 / 16,777,216 | 1054 | 1054 |
+| Schaefer500 + Tian S4 | 4.72 + 4.10 s | 12.03 s | 2.13 s | 0 / 16,777,216 | 554 | 554 |
+| Schaefer1000 + Tian S4 | 3.24 + 2.73 s | 5.15 s | 2.08 s | 0 / 16,777,216 | 1054 | 1054 |
 
-原版程序在 Xeon Gold 6418H，FNIT 在共享 H100 PCIe 上运行；两者读写和缓存条件不同。FNIT 皮层阶段的 Torch 分配峰值两种图谱均为 `1.399 GiB`；固定 Tian S4 标签后，合并并采样到 DWI 网格分别耗时 `8.10 s`、`9.00 s`（包含重新生成皮层体积），峰值仍为 `1.399 GiB`。每个原版/候选体积的形状、哈希、标签范围、完整体素 XOR 见[Schaefer500 JSON](atlas_schaefer_multi_20260929/schaefer500.json)、[Schaefer1000 JSON](atlas_schaefer_multi_20260929/schaefer1000.json)；组合阶段见[554 节点](atlas_schaefer_multi_20260929/schaefer500_tian_s4.json)与[1054 节点](atlas_schaefer_multi_20260929/schaefer1000_tian_s4.json)。
+原版程序在 Xeon Gold 6418H，FNIT 在共享 H100 PCIe 上运行；两者读写和缓存条件不同。FNIT 皮层阶段的 Torch 分配峰值两种图谱均为 `1.399 GiB`；固定 Tian S4 标签后，合并并采样到 DWI 网格分别耗时 `5.10 s`、`4.87 s`（包含重新生成皮层体积），峰值仍为 `1.399 GiB`。每个原版/候选体积的形状、哈希、标签范围、完整体素 XOR 见[Schaefer500 JSON](atlas_schaefer_multi_20260929/schaefer500.json)、[Schaefer1000 JSON](atlas_schaefer_multi_20260929/schaefer1000.json)；组合阶段见[554 节点](atlas_schaefer_multi_20260929/schaefer500_tian_s4.json)与[1054 节点](atlas_schaefer_multi_20260929/schaefer1000_tian_s4.json)。
 
 ![Schaefer500 与原版同网格切片](atlas_schaefer_multi_20260929/schaefer500.png)
 

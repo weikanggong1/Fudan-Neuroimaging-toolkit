@@ -8,7 +8,7 @@
 
 **当前状态：** `recon-all` 目录可自动生成 84 节点 `fs-aparc` 或 216 节点 Schaefer200+Tian S1；后者已通过公开真实 DWI 的[一键产物检查](../../validation/connectome/ds004666/atlas_synthmorph_20260929.md)。追踪已改为 iFOD2 校准拒绝采样，固定真实 FOD 的 80 条圆弧和 52 条连续两弧与官方概率最大误差分别为 `1.58×10⁻⁶` 和 `1.49×10⁻⁶`；真实 5TT 的 12,600 个 ACT 状态点与官方无分歧。10,000 固定位置的三次独立追踪与三次官方运行完成 3×3 四矩阵比较；共同边 mean FA 误差有 6/9 对落入官方自身重复范围，count 相对 L1 有 4/9 对落入，仍未达到全指标匹配。[当前追踪报告](../../validation/connectome/ds004666/ifod2_rejection_20260929.md)列出精度、时间、显存和脑图。
 
-多 atlas 的函数级验证已覆盖 Schaefer200、500、1000 的 fsaverage→native 表面与 T1 ribbon 体积投影；500/1000 在同一真实 T1 上与原脚本均逐体素一致，Tian S4 合并后 554/1054 个节点在 DWI 网格均有体素，见[扩展图谱报告和脑图](../../validation/connectome/ds004666/atlas_schaefer_multi_20260929.md)。Tian S1/S4 改用 FNIT PyTorch SynthMorph 时，标签与官方 SynthMorph 的前景 Dice 均为 0.981；固定官方形变后，最近邻标签逐体素一致，见[配准实测](../../validation/connectome/ds004666/atlas_synthmorph_20260929.md)。CLI 已接入三种 Schaefer+Tian 组合；七套原 UKB 图谱中的 aparc 两套和 Glasser 两套仍待接入和验证。
+多 atlas 的函数级验证已覆盖 Schaefer200、500、1000 的 fsaverage→native 表面与 T1 ribbon 体积投影；500/1000 在同一真实 T1 上与原脚本均逐体素一致，Tian S4 合并后 554/1054 个节点在 DWI 网格均有体素，见[扩展图谱报告和脑图](../../validation/connectome/ds004666/atlas_schaefer_multi_20260929.md)。原生 aparc/a2009s 皮层体积也与原版逐体素一致；与 Tian S1 合并后生成 84/164 节点，见[原生图谱实测](../../validation/connectome/ds004666/atlas_native_aparc_20260929.md)。Tian S1/S4 改用 FNIT PyTorch SynthMorph 时，标签与官方 SynthMorph 的前景 Dice 均为 0.981；固定官方形变后，最近邻标签逐体素一致，见[配准实测](../../validation/connectome/ds004666/atlas_synthmorph_20260929.md)。CLI 已接入七套原 UKB 图谱中的五套；Glasser+Tian S1/S4 仍待接入和验证。
 
 ## 输入准备与安装
 
@@ -124,6 +124,8 @@ fnit connectome \
 
 同一命令可将 `--atlas` 改为 `schaefer500+tian-s4` 或 `schaefer1000+tian-s4`。两者分别读取原 UKB Schaefer500/1000 双半球注释、Tian S4 NIfTI 与 54 行名称表；`--atlas-templates-dir` 必须包含这些文件。对应 `nodes.tsv` 和四张矩阵分别应有 554 或 1054 行/列。两种扩展图谱已完成真实 T1 体积与 DWI 标签网格检查，尚未分别完成扩散至四矩阵的一键实测。[输入、输出、原版命令、时间与体素精度](../../validation/connectome/ds004666/atlas_schaefer_multi_20260929.md)单列说明。
 
+`--atlas aparc+tian-s1` 和 `--atlas aparc.a2009s+tian-s1` 直接读取 recon-all 的原生双半球 `.annot`，无需 `--fsaverage-dir`；仍需 `--atlas-templates-dir` 提供 Tian S1 图像与名称表，以及 `--mni-template` 或 `--tian-fnirt-coeff`。对应节点数分别为 84 和 164。真实 T1 的原版皮层体积 XOR 均为 0，两种 DWI 图谱的所有节点均有体素；完整四矩阵尚未分别一键实测，详见[原生图谱报告](../../validation/connectome/ds004666/atlas_native_aparc_20260929.md)。
+
 上面的 SynthMorph 路线与原 UKB 使用的 FNIRT 是两种配准方法。同一 UKB T1 的 Tian S1 对照中，前景 Dice 为 0.906，不能声称与原 FNIRT atlas 一致。已有该 T1 的 FNIRT `--cout` 前向 coefficient 时，可把 `--mni-template "$MNI_TEMPLATE" --synthmorph-weights "$WEIGHTS"` 两项替换为 `--tian-fnirt-coeff "$FNIRT_COEFF"`；`FNIRT_COEFF` 是与 `SUBJECT` 对应的 T1→MNI coefficient NIfTI。FNIT 自己计算逆场和最近邻标签，不在正式路径调用 FSL。两个参数路径只能选其一。函数及配对精度、时间见[图谱实测报告](../../validation/connectome/ds004666/atlas_synthmorph_20260929.md)。
 
 输出是 `connectome_count.csv`、`connectome_sift2_fbc.csv`、`connectome_mean_length.csv`、`connectome_mean_fa.csv`，以及 `atlas_dwi.nii.gz`、`five_tissue_dwi_world.nii.gz`、`gmwmi_dwi_world.nii.gz`、`fa_dwi.nii.gz`、`brain_mask_dwi.nii.gz`、`region_labels.csv`、`nodes.tsv`、`dwi_to_t1_world.csv`。矩阵 CSV 无表头；第 i 行对应 `nodes.tsv` 中 index 为 i 的节点。显式自定义 atlas 模式保留 `region_labels.csv`，不产生 `nodes.tsv`。5TT/GMWMI NIfTI 保留 T1 分割网格，affine 表示已映射到 DWI 世界坐标；文件名中的 `dwi_world` 不表示重采样到了 DWI 体素网格。默认拒绝覆盖现有输出，`--overwrite` 可重跑但始终拒绝覆盖输入文件。`--brain-mask`、`--shell-bvals`、`--response-mask`、`--fod-mask`、`--normalise-mask`、`--fa-map` 和 `--dwi-to-t1-world` 可固定对应的参考条件。
@@ -140,7 +142,7 @@ fnit connectome \
 | `fit_mrtrix_msmt_csd` | 同一 DWI/梯度/响应与 bool FOD 掩膜 → float32 WM SH `[X,Y,Z,45]`、GM/CSF `[X,Y,Z]`；默认 WM lmax=8 |
 | `normalise_mrtrix_three_tissue` | 三组织原始 FOD、bool 掩膜、DWI affine → `MTNormaliseResult`：归一化三组织、bias field、接受掩膜及组织平衡系数 |
 | `FreeSurferSubject` / `fs_aparc_atlas` | 完成的 recon-all 目录 → `brain.mgz`、`aparc+aseg.mgz` 路径；整数分割 `[A,B,C]` → 连续节点标签 `[A,B,C]` 与 84 行 `ConnectomeNode`；[同输入实测](../../validation/connectome/fs_aparc84_subject_dir_20260928.md) |
-| `schaefer_to_t1` / `synthmorph_tian_to_t1` / `fnirt_tian_to_t1` / `combine_cortical_tian` | fsaverage 双半球注释与 recon-all 目录 → 皮层 T1 标签及节点表；T1 脑图、MNI 模板和 Tian 标签 → SynthMorph 原生标签及可复用形变；已给定 FNIRT 前向 coefficient → 原流程原生标签；同网格皮层/Tian 标签与名称 → 连续整数合并 atlas；各参数、命令及[真实数据对照](../../validation/connectome/ds004666/atlas_synthmorph_20260929.md) |
+| `schaefer_to_t1` / `native_annotation_to_t1` / `synthmorph_tian_to_t1` / `fnirt_tian_to_t1` / `combine_cortical_tian` | fsaverage Schaefer 或 recon-all 原生 aparc 注释 → 皮层 T1 标签及节点表；T1 脑图、MNI 模板和 Tian 标签 → SynthMorph 原生标签及可复用形变；已给定 FNIRT 前向 coefficient → 原流程原生标签；同网格皮层/Tian 标签与名称 → 连续整数合并 atlas；各参数、原版命令及[配准实测](../../validation/connectome/ds004666/atlas_synthmorph_20260929.md)、[原生图谱实测](../../validation/connectome/ds004666/atlas_native_aparc_20260929.md) |
 | `freesurfer_five_tissue` / `gmwmi_from_five_tissue` | 官方 FreeSurfer 整数标签 `[A,B,C]` → float32 5TT `[A,B,C,5]` → GMWMI `[A,B,C]` |
 | `tracking_sh_precomputed` | 非零 float32 方向 `[...,3]`、偶数 `lmax` → 同设备 float32 球谐函数值 `[...,C]`；参数、等价原版运算及真实单弧基准见[专项报告](../../validation/connectome/ds004666/ifod2_single_arc_20260929.md) |
 | `probabilistic_tractography` | 归一化 WM SH/affine、5TT/affine、GMWMI、播种次数，以及可选 5TT 头文件体素尺寸 `five_tissue_spacing_mm=(sx,sy,sz)` → `Tractogram` 的世界毫米流线、端点、长度和已接受种子；每步最多 1,000 次校准拒绝采样、ACT 整数深度状态，详见[同输入 10k 精度](../../validation/connectome/ds004666/ifod2_rejection_20260929.md)与[真实 100k 时间和显存](../../validation/connectome/ds004666/tracking_scale_100k_20260929.md) |

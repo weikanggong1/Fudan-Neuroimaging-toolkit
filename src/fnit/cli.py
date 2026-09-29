@@ -308,29 +308,40 @@ def _run_connectome(args):
         "schaefer500+tian-s4": (500, 4),
         "schaefer1000+tian-s4": (1000, 4),
     }
-    if args.atlas not in schaefer_tian and args.tian_fnirt_coeff:
-        raise ValueError("--tian-fnirt-coeff requires a Schaefer+Tian atlas")
-    if args.atlas in schaefer_tian:
-        parcels, tian_scale = schaefer_tian[args.atlas]
+    native_tian = {
+        "aparc+tian-s1": "aparc",
+        "aparc.a2009s+tian-s1": "aparc.a2009s",
+    }
+    if args.atlas not in (*schaefer_tian, *native_tian) and args.tian_fnirt_coeff:
+        raise ValueError("--tian-fnirt-coeff requires a cortical+Tian atlas")
+    if args.atlas in (*schaefer_tian, *native_tian):
+        tian_scale = schaefer_tian[args.atlas][1] if args.atlas in schaefer_tian else 1
         if (args.freesurfer_subject_dir is None or args.atlas_templates_dir is None or
-                args.fsaverage_dir is None or
+                (args.atlas in schaefer_tian and args.fsaverage_dir is None) or
                 (args.mni_template is None) == (args.tian_fnirt_coeff is None)):
-            raise ValueError("Schaefer+Tian needs --freesurfer-subject-dir, --atlas-templates-dir, --fsaverage-dir and exactly one of --mni-template or --tian-fnirt-coeff")
+            raise ValueError("cortical+Tian needs --freesurfer-subject-dir, --atlas-templates-dir, Schaefer --fsaverage-dir and exactly one of --mni-template or --tian-fnirt-coeff")
         if args.tian_fnirt_coeff and args.synthmorph_weights:
             raise ValueError("--synthmorph-weights cannot be used with --tian-fnirt-coeff")
         templates = Path(args.atlas_templates_dir)
         atlas_inputs = [
             Path(args.mni_template or args.tian_fnirt_coeff),
-            *(templates / f"{hemi}.Schaefer2018_{parcels}Parcels_7Networks_order.annot"
-              for hemi in ("lh", "rh")),
             templates / f"Tian_Subcortex_S{tian_scale}_3T.nii.gz",
             templates / f"Tian_Subcortex_S{tian_scale}_3T_label.txt",
-            *(Path(args.fsaverage_dir) / "surf" / f"{hemi}.sphere.reg"
-              for hemi in ("lh", "rh")),
             *(subject.subject_dir / "surf" / f"{hemi}.{kind}"
-              for hemi in ("lh", "rh") for kind in ("sphere.reg", "pial", "white")),
+              for hemi in ("lh", "rh") for kind in ("pial", "white")),
             subject.subject_dir / "mri/ribbon.mgz",
         ]
+        if args.atlas in schaefer_tian:
+            parcels, _ = schaefer_tian[args.atlas]
+            atlas_inputs.extend(templates / f"{hemi}.Schaefer2018_{parcels}Parcels_7Networks_order.annot"
+                                for hemi in ("lh", "rh"))
+            atlas_inputs.extend(Path(args.fsaverage_dir) / "surf" / f"{hemi}.sphere.reg"
+                                for hemi in ("lh", "rh"))
+            atlas_inputs.extend(subject.subject_dir / "surf" / f"{hemi}.sphere.reg"
+                                for hemi in ("lh", "rh"))
+        else:
+            atlas_inputs.extend(subject.subject_dir / "label" / f"{hemi}.{native_tian[args.atlas]}.annot"
+                                for hemi in ("lh", "rh"))
         if args.synthmorph_weights:
             atlas_inputs.extend(Path(args.synthmorph_weights) / name for name in (
                 "synthmorph.affine.2.h5", "synthmorph.deform.3.h5"))
@@ -666,7 +677,8 @@ def main(argv=None):
                             help='integer atlas in DWI RAS world coordinates')
     connectome.add_argument('--freesurfer-subject-dir', help='completed recon-all subject directory')
     connectome.add_argument('--atlas', default='fs-aparc',
-                            choices=('fs-aparc', 'schaefer200+tian-s1',
+                            choices=('fs-aparc', 'aparc+tian-s1', 'aparc.a2009s+tian-s1',
+                                     'schaefer200+tian-s1',
                                      'schaefer500+tian-s4', 'schaefer1000+tian-s4'),
                             help='atlas to build from the FreeSurfer subject')
     connectome.add_argument('--atlas-templates-dir',

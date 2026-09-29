@@ -11,6 +11,30 @@ from .atlas_surface import resample_annotation_to_native, surface_annotation_to_
 from .freesurfer_subject import ConnectomeNode, FreeSurferSubject
 
 
+def _native_labels_to_t1(
+    subject: FreeSurferSubject, mapped: tuple[torch.Tensor, torch.Tensor], device: str,
+) -> nib.Nifti1Image:
+    """将双半球原生顶点标签 `[Vh]` 投影为 T1 int32 NIfTI。
+
+    ``subject`` 提供 ribbon、pial/white 表面，``device`` 是 Torch 设备。
+    原版对应 ``map_surface_label_to_volume.py``；真实体素核对见
+    ``validation/connectome/ds004666/atlas_native_aparc_20260929.md``。
+    """
+    surfaces = []
+    for hemi in ("lh", "rh"):
+        surfaces.append(tuple(torch.as_tensor(nib.freesurfer.read_geometry(
+            str(subject.subject_dir / f"surf/{hemi}.{kind}"))[0], device=device)
+            for kind in ("pial", "white")))
+    ribbon = nib.load(str(subject.subject_dir / "mri/ribbon.mgz"))
+    cortical = surface_annotation_to_volume(
+        ribbon=torch.as_tensor(ribbon.get_fdata(dtype=np.float32), device=device),
+        vox2ras_tkr=torch.as_tensor(ribbon.header.get_vox2ras_tkr(), device=device),
+        lh_pial=surfaces[0][0], lh_white=surfaces[0][1], lh_labels=mapped[0],
+        rh_pial=surfaces[1][0], rh_white=surfaces[1][1], rh_labels=mapped[1],
+    )
+    return nib.Nifti1Image(cortical.cpu().numpy(), ribbon.affine)
+
+
 def fsaverage_annotation_to_t1(
     subject_dir: str | Path,
     fsaverage_dir: str | Path,
@@ -42,7 +66,6 @@ def fsaverage_annotation_to_t1(
                            right_nonzero[right_nonzero > 0]).size:
         raise ValueError("two hemispheres must define disjoint contiguous labels 1..K")
     mapped = []
-    surfaces = []
     for hemi, labels in zip(("lh", "rh"), source_labels):
         source_sphere, _ = nib.freesurfer.read_geometry(str(fsaverage / f"surf/{hemi}.sphere.reg"))
         native_sphere, _ = nib.freesurfer.read_geometry(str(subject.subject_dir / f"surf/{hemi}.sphere.reg"))
@@ -53,23 +76,49 @@ def fsaverage_annotation_to_t1(
             native_sphere_reg=torch.as_tensor(native_sphere, device=device),
             fsaverage_labels=torch.as_tensor(labels, device=device),
         ))
-        surfaces.append(tuple(torch.as_tensor(nib.freesurfer.read_geometry(
-            str(subject.subject_dir / f"surf/{hemi}.{kind}"))[0], device=device)
-            for kind in ("pial", "white")))
-    ribbon = nib.load(str(subject.subject_dir / "mri/ribbon.mgz"))
-    cortical = surface_annotation_to_volume(
-        ribbon=torch.as_tensor(ribbon.get_fdata(dtype=np.float32), device=device),
-        vox2ras_tkr=torch.as_tensor(ribbon.header.get_vox2ras_tkr(), device=device),
-        lh_pial=surfaces[0][0], lh_white=surfaces[0][1], lh_labels=mapped[0],
-        rh_pial=surfaces[1][0], rh_white=surfaces[1][1], rh_labels=mapped[1],
-    )
     left_max = int(source_labels[0].max())
     nodes = tuple(ConnectomeNode(
         index=i, original_label=i, hemisphere="L" if i <= left_max else "R",
         name=name,
     ) for i, name in enumerate(names, 1))
-    image = nib.Nifti1Image(cortical.cpu().numpy(), ribbon.affine)
-    return image, nodes
+    return _native_labels_to_t1(subject, tuple(mapped), device), nodes
+
+
+def native_annotation_to_t1(
+    subject_dir: str | Path, annotation: str, *, device: str = "cuda:0",
+) -> tuple[nib.Nifti1Image, tuple[ConnectomeNode, ...]]:
+    """把 recon-all 的原生 aparc 注释按原 UKB 编号投影到 T1 ribbon。
+
+    ``subject_dir`` 是完成的 recon-all 目录；``annotation`` 为
+    ``aparc`` 或 ``aparc.a2009s``，内部读取双半球
+    ``label/{lh,rh}.{annotation}.annot``。返回 T1 网格 int32 NIfTI
+    ``[X,Y,Z]``（背景 0，节点 1..K）和 K 行 ``ConnectomeNode``。
+    原版对应 ``convert_native_annot.py`` 后接
+    ``map_surface_label_to_volume.py``；缺失的编号按原脚本删去。
+    """
+    if annotation not in ("aparc", "aparc.a2009s"):
+        raise ValueError("annotation must be aparc or aparc.a2009s")
+    subject = FreeSurferSubject(Path(subject_dir))
+    labels = [nib.freesurfer.read_annot(str(
+        subject.subject_dir / f"label/{hemi}.{annotation}.annot"))
+        for hemi in ("lh", "rh")]
+    # 原 convert_native_annot.py 用左半球出现的编号过滤两个半球的 LUT。
+    present = set(np.unique(labels[0][0]).tolist())
+    mapped = []
+    nodes = []
+    for hemisphere, (values, _, names) in zip(("L", "R"), labels):
+        output = np.zeros(values.shape, dtype=np.int32)
+        for original in range(1, len(names)):
+            if original not in present:
+                continue
+            index = len(nodes) + 1
+            output[values == original] = index
+            nodes.append(ConnectomeNode(
+                index=index, original_label=original, hemisphere=hemisphere,
+                name=f"{'left' if hemisphere == 'L' else 'right'}_{names[original].decode('utf-8')}",
+            ))
+        mapped.append(torch.as_tensor(output, device=device))
+    return _native_labels_to_t1(subject, tuple(mapped), device), tuple(nodes)
 
 
 def schaefer_to_t1(
