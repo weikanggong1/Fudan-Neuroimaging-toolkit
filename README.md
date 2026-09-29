@@ -1,8 +1,8 @@
 # Fudan Neuroimaging Toolkit (FNIT)
 
-FNIT 提供单被试脑 MRI 处理的 Python 与命令行接口。主要计算由 PyTorch 实现，NIfTI 读写使用 Nibabel；除各功能页明确列出的参考对照外，运行 FNIT 不需要安装 FSL、FreeSurfer、SPM、MRtrix3、AFNI、DIPY 或工作流封装包。Python 包名为 `fnit`，统一命令行入口为 `fnit`。
+FNIT 提供脑 MRI 处理和群体分析的 Python 与命令行接口。主要计算由 PyTorch 实现，NIfTI 读写使用 Nibabel；除各功能页明确列出的参考对照外，运行 FNIT 不需要安装 FSL、FreeSurfer、SPM、MRtrix3、AFNI、DIPY 或工作流封装包。Python 包名为 `fnit`，统一命令行入口为 `fnit`。
 
-CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核。模型、影像张量与 NIfTI 输出保持 float32；不会自动使用 float16 或 bfloat16。除 recon-all 与 Connectome 专页另行维护的范围外，本页审计的功能只提供单被试 Python API 和单被试命令行接口。多个病例由调用方在包外通过任务调度器、进程池或作业系统分配 CPU/GPU；这些功能不提供多被试调度层。
+CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核；BWAS 的连接和回归计算为匹配原版临界 z 值使用 float64。模型、影像张量与 NIfTI 输出保持 float32；不会自动使用 float16 或 bfloat16。除 recon-all、Connectome 和群体 BWAS 专页另行维护的范围外，本页审计的功能只提供单被试 Python API 和单被试命令行接口。多个病例由调用方在包外通过任务调度器、进程池或作业系统分配 CPU/GPU；这些单被试功能不提供多被试调度层。
 
 ## 功能
 
@@ -63,11 +63,12 @@ CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核。模型、影像张
 | [TorchInvWarp](docs/invwarp/README.md) | FSL `invwarp` | 在指定网格上计算位移场的反场。 |
 | [convert_space](docs/space_conversion/README.md) | CBIG RF-ANTs；HCP Workbench `-metric-resample` | MNI152、fsaverage 与 fsLR 皮层标量或标签图互转，支持多种体素网格与表面密度。 |
 
-### Postanalysis
+### Post analysis
 
 | 函数名 | 原软件函数名 | 功能 |
 |---|---|---|
 | [run_bigflica / apply_model](docs/bigflica/README.md) | [BigFLICA](https://github.com/weikanggong/BigFLICA) mMIGP、DicL、FLICA | 从每人一目录的多模态标准空间 NIfTI 提取跨模态成分，输出被试 course、各模态成分 z 图和 top-voxel 脑图；CUDA 路径逐被试建库、分块处理 mMIGP 与 DicL，可选跳过两者直接拟合体素 FLICA，并投影新被试。 |
+| [run_bwas](docs/bwas/README.md) | [weikanggong/BWAS](https://github.com/weikanggong/BWAS) | 对多被试 2 mm BIDS volume BOLD 的逐体素连接做表型 GLM、6D 连接簇校正和 MA 图。 |
 
 各功能页给出带参数注释的 Python 单被试示例、输入/输出结构、原软件命令、真实数据精度与计时结果，并在末尾列出参考文献和原实现代码库。统一入口中的子命令用 `fnit <子命令> --help` 查看；fMRI 使用 `fnit-fmri --help`，MS-HBM 使用 `fnit-mshbm --help`，recon-all 使用 `fnit-recon-all --help`。全部独立入口见 [pyproject.toml](pyproject.toml)。
 

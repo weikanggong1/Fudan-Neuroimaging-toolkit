@@ -90,6 +90,9 @@ def __getattr__(name):
     if name == 'convert_space':
         from .space_conversion import convert_space
         return convert_space
+    if name in ('run_bwas', 'BWASResult'):
+        from . import bwas
+        return getattr(bwas, name)
     if name in ('FastVBM', 'FastVBMResult',
                 'VBMRegistrationResult'):
         from . import fast_vbm
