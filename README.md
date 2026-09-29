@@ -102,7 +102,7 @@ recon-all 的 Python/C++ 阶段和 Connectome 的兼容依赖不属于基础安�
 
 ## 下载和配置权重
 
-Git 仓库与 wheel 不包含模型权重。配置脚本从 FreeSurfer 官方地址下载文件、检查大小和 SHA-256，并保存默认权重目录。推理过程不会自动联网。
+Git 仓库与 wheel 不包含模型权重。配置脚本优先从 [FNIT 固定版本 Release](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1)下载；Release 不可用时回退到原作者地址。每个文件均检查大小和 SHA-256，再保存默认权重目录。推理过程不会自动联网。
 
 下载全部模型：
 
@@ -129,7 +129,7 @@ fnit-setup-weights --all --dest /path/to/weights
 fnit-setup-weights --all --dest /path/to/weights --verify-only
 ```
 
-fsLR32k 表面投影的 HCP 公开模板不属于模型权重，单独下载并逐文件校验：
+fsLR32k 表面投影的 HCP 公开模板不属于模型权重，同样优先从固定版本 Release 下载并逐文件校验；`--fmriprep` 的 TemplateFlow dseg 仍从原站获取：
 
 ```bash
 fnit-setup-fmri-surface-assets --output-dir /absolute/path/hcp_surface_assets --fmriprep

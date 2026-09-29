@@ -2,7 +2,7 @@
 
 `fMRISurface_pipeline` 读取已完成混杂回归的 [FNIT volume BIDS Derivatives](README.md)，使用同被试 T1w 的 recon-all 结果和 HCP fsLR 模板。原生 EPI BOLD 经 BBR 重采样到 T1w 后投到 white/pial ribbon；MNI152 2 mm BOLD 提供皮层下信号。FS 初始球面再经 [FNIT MSMSulc](../msm/README.md) 注册到 fsLR，按 fMRIPrep 顺序运行 Workbench ribbon 投影、dilate、mask、ADAP_BARY_AREA 重采样，并组装 91k CIFTI。直接投向皮层的是 **T1w 网格的 BOLD**。运行时不调用 FreeSurfer、FSL、fMRIPrep 或 Nipype。
 
-先运行 `fMRIVolume_pipeline`，至少启用 WM、CSF 或运动回归中的一项。`recon_all` 必须是同一源 T1w 已完成重建的目录，或含 `FreeSurfer/` 的 ZIP；代码核对 `mri/orig/001.mgz` 与 volume 所用 T1w 的尺寸和仿射。默认只需要 T1w。T2w 或 FLAIR 可用于外部 recon-all 重建，但本流程不读取它们，也不做髓鞘图或 MSMAll。HCP 资源下载：`fnit-setup-fmri-surface-assets --output-dir /absolute/path/hcp_surface_assets --fmriprep`。需另安装允许使用的 Connectome Workbench。
+先运行 `fMRIVolume_pipeline`，至少启用 WM、CSF 或运动回归中的一项。`recon_all` 必须是同一源 T1w 已完成重建的目录，或含 `FreeSurfer/` 的 ZIP；代码核对 `mri/orig/001.mgz` 与 volume 所用 T1w 的尺寸和仿射。默认只需要 T1w。T2w 或 FLAIR 可用于外部 recon-all 重建，但本流程不读取它们，也不做髓鞘图或 MSMAll。HCP 资源下载：`fnit-setup-fmri-surface-assets --output-dir /absolute/path/hcp_surface_assets --fmriprep`。安装器优先从 [FNIT 固定 Release](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1)获取已核对许可的 HCP 文件，失败后回退 HCPpipelines 原站；TemplateFlow dseg 保持原站下载。需另安装允许使用的 Connectome Workbench。
 
 ## Python 调用
 

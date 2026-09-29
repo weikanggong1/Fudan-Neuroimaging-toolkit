@@ -17,6 +17,8 @@ from urllib.request import urlopen
 
 
 HCP_COMMIT = "f8cac6892f88bdf889d644711ff038198eb81533"  # v4.7.0
+RELEASE_BASE = ("https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/"
+                "releases/download/assets-v1/")
 BASE_URL = f"https://raw.githubusercontent.com/Washington-University/HCPpipelines/{HCP_COMMIT}/"
 FALLBACK_URL = f"https://cdn.jsdelivr.net/gh/Washington-University/HCPpipelines@{HCP_COMMIT}/"
 MESH = "global/templates/standard_mesh_atlases/"
@@ -63,6 +65,7 @@ FMRIPREP_ASSETS = (
      "9c25e63edec37b3876756b749a3f0127511c6b63bf2855060a44007bb479b987"),
 )
 FMRIPREP_BASE = "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/"
+RELEASE_CHECKSUMS = dict(ASSETS + MSMALL_ASSETS)
 
 
 def _sha256(path: Path) -> str:
@@ -74,7 +77,7 @@ def _sha256(path: Path) -> str:
 
 
 def _install_one(output_dir: Path, relative_path: str, expected_sha256: str,
-                 opener=urlopen, base_urls=(BASE_URL, FALLBACK_URL)) -> Path:
+                 opener=urlopen, base_urls=(RELEASE_BASE, BASE_URL, FALLBACK_URL)) -> Path:
     destination = output_dir / relative_path
     if destination.exists():
         if _sha256(destination) != expected_sha256:
@@ -84,9 +87,16 @@ def _install_one(output_dir: Path, relative_path: str, expected_sha256: str,
     destination.parent.mkdir(parents=True, exist_ok=True)
     last_error = None
     for base_url in base_urls:
+        if base_url == RELEASE_BASE and RELEASE_CHECKSUMS.get(relative_path) != expected_sha256:
+            continue
         temporary = None
         try:
-            remote_name = relative_path.split("/")[-1] if base_urls == (FMRIPREP_BASE,) else relative_path
+            if base_url == RELEASE_BASE:
+                remote_name = "hcp--" + relative_path.replace("/", "--")
+            elif base_url == FMRIPREP_BASE:
+                remote_name = relative_path.split("/")[-1]
+            else:
+                remote_name = relative_path
             with opener(base_url + remote_name, timeout=60) as source:
                 with tempfile.NamedTemporaryFile(dir=destination.parent, delete=False) as target:
                     temporary = Path(target.name)
