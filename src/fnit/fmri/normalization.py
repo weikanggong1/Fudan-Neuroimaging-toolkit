@@ -30,6 +30,7 @@ def register_t1_to_mni(
     backend="synthmorph",
     synthmorph_weights=None,
     reference_mask=None,
+    fnirt_config=None,
     device=None,
 ):
     """Register one T1 brain to a 2-mm MNI brain with an existing FNIT backend.
@@ -40,6 +41,8 @@ def register_t1_to_mni(
     """
     if backend not in ("synthmorph", "fnirt"):
         raise ValueError("backend must be 'synthmorph' or 'fnirt'")
+    if backend != "fnirt" and fnirt_config is not None:
+        raise ValueError("fnirt_config requires backend='fnirt'")
     selected = device or ("cuda" if torch.cuda.is_available() else "cpu")
     moving = nib.load(str(t1_brain))
     fixed = nib.load(str(mni_brain))
@@ -56,9 +59,9 @@ def register_t1_to_mni(
         pull = model(moving, fixed, init=initial).transform
         qc = None
     else:
-        from ..fnirt import T1FNIRTConfig, TorchFNIRT
+        from ..fnirt import TorchFNIRT, resolve_fnirt_config
 
-        config = T1FNIRTConfig()
+        config = resolve_fnirt_config(fnirt_config, default="t1")
         nonlinear = TorchFNIRT(device=selected, config=config)(
             moving, fixed, initial, reference_mask=reference_mask
         )

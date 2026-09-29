@@ -9,6 +9,7 @@ def _arguments(parser):
     parser.add_argument(
         "--registration-backend", choices=("tbss", "mmorf"), default="tbss"
     )
+    parser.add_argument("--fnirt-preset", choices=("default", "gm", "t1", "tbss"), help="FNIRT preset; default tbss for TBSS registration")
     parser.add_argument("--fa-template", required=True, help="FMRIB58_FA_1mm or grid-equivalent FA")
     parser.add_argument("--fa-skeleton", help="FMRIB58_FA-skeleton_1mm; required by TBSS")
     parser.add_argument("--t1", help="subject T1w; required by MMORF")
@@ -28,6 +29,7 @@ def run(args):
     result = DMRIPipeline(
         device=args.device,
         registration_backend=args.registration_backend,
+        fnirt_config=args.fnirt_preset,
         synthstrip_weights=args.synthstrip_weights,
         dti_shell=args.dti_shell,
         dti_tolerance=args.dti_tolerance,

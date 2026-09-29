@@ -18,11 +18,12 @@ from ..dtifit import TorchDTIFIT, select_shell
 from ..eddy import TorchEDDY
 from ..eddy.ukb import _brain_mask, prepare_ukb_eddy
 from ..flirt import TorchFLIRT
+from ..fnirt import resolve_fnirt_config
 from ..mmorf import apply_mmorf_warp, run_mmorf
 from ..synthstrip import SynthStrip
 from ..topup import run_ukb_topup
 from ..topup.ukb import _metadata
-from .tbss import TorchTBSS
+from .tbss import TBSSConfig, TorchTBSS
 
 
 STANDARD_MAP_NAMES = ("FA", "MD", "L1", "L2", "L3", "MO", "ICVF", "OD", "ISOVF")
@@ -102,6 +103,7 @@ class DMRIPipeline:
         device=None,
         *,
         registration_backend="tbss",
+        fnirt_config=None,
         synthstrip_weights=None,
         dti_shell=1000,
         dti_tolerance=100,
@@ -109,10 +111,16 @@ class DMRIPipeline:
     ):
         if registration_backend not in ("tbss", "mmorf"):
             raise ValueError("registration_backend must be 'tbss' or 'mmorf'")
+        if registration_backend != "tbss" and fnirt_config is not None:
+            raise ValueError("fnirt_config requires registration_backend='tbss'")
         if bvec_source not in ("rotated", "raw"):
             raise ValueError("bvec_source must be 'rotated' or 'raw'")
         self.device = configure_device(device)
         self.registration_backend = registration_backend
+        self.fnirt_config = (
+            resolve_fnirt_config(fnirt_config, default="tbss")
+            if registration_backend == "tbss" else None
+        )
         self.synthstrip_weights = synthstrip_weights
         self.dti_shell = float(dti_shell)
         self.dti_tolerance = float(dti_tolerance)
@@ -243,7 +251,9 @@ class DMRIPipeline:
         started = time.perf_counter()
         registration_dir = output_dir / "registration"
         if self.registration_backend == "tbss":
-            registered = TorchTBSS(device=self.device).run(
+            registered = TorchTBSS(
+                device=self.device, config=TBSSConfig(fnirt=self.fnirt_config)
+            ).run(
                 native_maps,
                 fa_template,
                 fa_skeleton,

@@ -45,6 +45,7 @@ result = run_fmri_pipeline(
     t1w_image=None,                               # 多张 BIDS T1w 时指定其中一张的绝对路径
     mni_brain_mask="/absolute/path/MNI152_T1_2mm_brain_mask.nii.gz",  # 与模板同网格的 3D mask；None 时对模板做 SynthStrip
     registration_backend="synthmorph",            # T1→MNI 形变：synthmorph 或 fnirt
+    fnirt_config=None,                             # fnirt 分支默认 T1 预设；可传 T1FNIRTConfig() 或修改后的配置
     surface_inputs=None,                          # 已准备的 MNI 网格、ROI 与注册球面；默认不投影表面
     surface_subject_dir=None,                     # 预生成的同被试结构表面根目录；与 surface_inputs 二选一
     surface_assets_dir=None,                      # HCP 公开 fsLR 模板根目录；与 surface_subject_dir 同时提供
@@ -84,7 +85,10 @@ fnit-fmri run --bids-root /absolute/path/bids --subject 0001 \
   --output-dir /absolute/path/sub-0001_fmri
 ```
 
-运行 T1 FNIRT 时，将 `--registration-backend` 的值改为 `fnirt`；仍需同一
+运行 T1 FNIRT 时，将 `--registration-backend` 的值改为 `fnirt`；
+`--fnirt-preset` 省略时为 `t1`，也可显式写 `--fnirt-preset t1`。Python 入口的
+`fnirt_config` 可传 `dataclasses.replace(T1FNIRTConfig(), ...)` 调整已实现参数；
+仍需同一
 `--bids-root`、`--subject`、`--mni-template`、`--mni-brain-mask` 和独立的
 `--output-dir`。该分支需要 SynthStrip 权重，不读取 SynthMorph deform 权重。
 
@@ -117,4 +121,4 @@ CSF/WM 组织掩膜由 TorchFAST 部分体积分数经 BBR 投到 EPI，再在 E
 
 同一例 490 帧 BOLD 的默认 SynthMorph 分支此前已从原始 BIDS 成功运行至 MNI152 2 mm：输出 91×109×91×490、float32、TR 0.735 秒；ICA 收敛于 96 个成分，AROMA 判定 48 个噪声成分。整链墙钟 532.22 秒，PyTorch 峰值保留显存 17.58 GB。该结果见[原有整链摘要](../../validation/fmri/e2e_summary.json)。
 
-本次 `registration_backend="fnirt"` 的 volume 分支也完成了相同 BIDS BOLD/SBRef/T1 的 490 帧整链，退出码 0。输出为 91×109×91×490 的 float32 NIfTI，TR 0.735 秒，MNI 网格匹配；442,288,210 个数值全部有限，脑掩膜外最大绝对值为 0。六级 T1 FNIRT 使用多项式与偏置场强度模型；ICA 收敛于 95 个成分，AROMA 判定 53 个噪声成分。进程墙钟 1059.67 秒，PyTorch 峰值分配 6.24 GB、保留 7.31 GB。两次整链在共享 GPU 上分时运行，不能据此作公平速度排序。新分支的输入/输出 SHA256、分步耗时及全体素检查见[FNIRT 整链报告](../../validation/fmri/fmri_volume_fnirt_20260929.public.json)；T1 配准的 FSL 同输入对照见[配准报告](../../validation/fmri/t1_fnirt_20260929.public.json)。最终 AROMA 结果没有可逐体素配对的 UKB FIX 参照。
+当前代码的 `registration_backend="fnirt"` volume 分支完成了相同 BIDS BOLD/SBRef/T1 的 490 帧整链，退出码 0。输出为 91×109×91×490 的 float32 NIfTI，TR 0.735 秒，MNI 网格匹配；442,288,210 个数值全部有限，脑掩膜外最大绝对值为 0。默认六级 T1 FNIRT 使用多项式与偏置场强度模型；ICA 收敛于 95 个成分，AROMA 判定 53 个噪声成分。进程墙钟 844.61 秒，PyTorch 峰值分配 6.24 GB、保留 7.31 GB。两次整链在共享 GPU 上分时运行，不能据此作公平速度排序。输入/输出 SHA256、分步耗时及全体素检查见[FNIRT 整链报告](../../validation/fmri/fmri_volume_fnirt_20260929.public.json)；T1 配准的 FSL 同输入对照见[配准报告](../../validation/fmri/t1_fnirt_20260929.public.json)。最终 AROMA 结果没有可逐体素配对的 UKB FIX 参照。

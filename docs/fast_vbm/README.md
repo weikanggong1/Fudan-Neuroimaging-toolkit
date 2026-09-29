@@ -238,7 +238,12 @@ fnit fast-vbm \
 
 ### FNIRT GM 掩膜
 
-FastVBM 的 GM 配准按核对过的 FSL `GM_2_MNI152GM_2mm.cnf` 设置 `--imprefm=0 --impinm=0`。输入 GM 和模板中的零值不会因隐式掩膜而自动排除；显式 `reference_mask` 按 GM schedule 在最后一级启用。省略显式 mask 时，FastVBM 使用 `template > 0` 派生 mask。复现 FSL 运行应提供当时实际使用的 mask。通用 `TorchFNIRT` 默认值不变，SynthMorph 网络不消费 reference mask。
+FastVBM 的默认 GM 配准参数与 `GMFNIRTConfig()` 一致，按 FSL
+`GM_2_MNI152GM_2mm.cnf` 设置 `--imprefm=0 --impinm=0`。输入 GM 和模板中的零值
+不会因隐式掩膜而自动排除；显式 `reference_mask` 按 GM schedule 在最后一级启用。
+省略显式 mask 时，FastVBM 使用 `template > 0` 派生 mask。复现 FSL 运行应提供
+当时实际使用的 mask。直接 `TorchFNIRT()` 则使用 FSL 无配置文件的默认预设，
+SynthMorph 网络不消费 reference mask。
 
 ## 返回值和文件输出
 

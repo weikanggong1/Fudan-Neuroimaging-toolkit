@@ -1,6 +1,7 @@
 """T1-specific FNIRT configuration and intensity-map regression checks."""
 
 from types import SimpleNamespace
+from dataclasses import replace
 
 import nibabel as nib
 import numpy as np
@@ -18,6 +19,7 @@ def test_t1_config_uses_six_level_t1_schedule():
     assert config.intensity_model == "global_non_linear_with_bias"
     assert config.intensity_order == 5
     assert config.bias_resolution_mm == (50, 50, 50)
+    assert config.jacobian_range == (0.01, 100)
 
 
 def test_t1_mapping_reduces_masked_intensity_error():
@@ -49,10 +51,12 @@ def test_fmri_fnirt_uses_t1_config_and_writes_pull(tmp_path, monkeypatch):
         def __call__(self, source, target):
             return SimpleNamespace(matrix=np.eye(4), moving_to_fixed_world=np.eye(4))
 
+    seen_configs = []
+
     class FakeFNIRT:
         def __init__(self, *, device, config):
             assert device == "cpu"
-            assert isinstance(config, T1FNIRTConfig)
+            seen_configs.append(config)
 
         def __call__(self, source, target, initial, *, reference_mask):
             assert reference_mask == mask
@@ -73,3 +77,15 @@ def test_fmri_fnirt_uses_t1_config_and_writes_pull(tmp_path, monkeypatch):
     )
     assert result.backend == "fnirt"
     assert nib.load(str(result.pull_ras)).shape == (4, 5, 6, 3)
+    assert seen_configs == [T1FNIRTConfig()]
+    custom = replace(T1FNIRTConfig(), regularization=(250, 125, 90, 45, 35, 25))
+    normalization.register_t1_to_mni(
+        t1_brain=moving,
+        mni_brain=fixed,
+        output_dir=tmp_path / "custom",
+        backend="fnirt",
+        reference_mask=mask,
+        fnirt_config=custom,
+        device="cpu",
+    )
+    assert seen_configs[-1] is custom

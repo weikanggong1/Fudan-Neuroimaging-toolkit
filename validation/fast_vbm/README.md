@@ -29,4 +29,4 @@ FNIT 冷启动单次 compute 为 110.72 s，13 幅 NIfTI 及报告写盘为 7.56
 
 ## 后续验收
 
-本次更新使 FastVBM GM 配准关闭 implicit reference 和 input mask；通用 TorchFNIRT 默认值不变。旧配置生成的 FNIRT 报告、汇总、校验清单和图片已移除。`validate_real.py` 保留为当前接口的复现脚本，运行时须使用真实 T1w、匹配的 FSL 输出和相同模板 mask。下一轮需多例配对，核对精度、示例图和同计时边界的速度。
+FastVBM 的 GM 分支已显式关闭 implicit reference 和 input mask；新的 `GMFNIRTConfig()` 默认值也与此一致。直接 `TorchFNIRT()` 的默认值现为 FSL 无配置参数，FastVBM 的有效 GM 配置未随之改变。旧配置生成的 FNIRT 报告、汇总、校验清单和图片已移除。`validate_real.py` 保留为当前接口的复现脚本，运行时须使用真实 T1w、匹配的 FSL 输出和相同模板 mask。多例精度和同计时边界的速度尚未验证。

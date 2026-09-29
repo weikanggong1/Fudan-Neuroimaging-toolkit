@@ -204,17 +204,18 @@ def _run_flirt(args):
 
 
 def _run_fnirt(args):
+    from .fnirt.cli import _effective_config
     from .fnirt.standalone import run_fnirt
 
     return run_fnirt(
         args.input,
-        args.reference,
-        args.affine,
+        args.ref,
+        args.aff,
         cout=args.cout,
         iout=args.iout,
         jout=args.jout,
-        refmask=args.reference_mask,
-        config=args.config,
+        refmask=args.refmask,
+        config=_effective_config(args),
         device=args.device,
         overwrite=args.overwrite,
     )
@@ -570,23 +571,11 @@ def main(argv=None):
     flirt.add_argument('--device')
     flirt.add_argument('--threads', type=int, default=1)
     flirt.add_argument('--overwrite', action='store_true')
+    from .fnirt.cli import add_arguments as add_fnirt_arguments
     fnirt = commands.add_parser(
-        'fnirt', help='PyTorch FNIRT GM_2_MNI152GM_2mm path',
+        'fnirt', help='PyTorch FNIRT default, GM, T1 or TBSS registration',
         allow_abbrev=False)
-    fnirt.add_argument('--in', dest='input', required=True,
-                       help='moving/input GM image')
-    fnirt.add_argument('--ref', dest='reference', required=True,
-                       help='fixed/reference GM template')
-    fnirt.add_argument('--aff', dest='affine',
-                       help='input-to-reference FLIRT scaled-mm matrix')
-    fnirt.add_argument('--cout', help='intent-2007 cubic coefficient output')
-    fnirt.add_argument('--iout', help='warped input on the reference grid')
-    fnirt.add_argument('--jout', help='nonlinear-only Jacobian determinant')
-    fnirt.add_argument('--refmask', dest='reference_mask', required=True,
-                       help='explicit binary mask on the reference grid')
-    fnirt.add_argument('--config', default='GM_2_MNI152GM_2mm.cnf')
-    fnirt.add_argument('--device')
-    fnirt.add_argument('--overwrite', action='store_true')
+    add_fnirt_arguments(fnirt)
     applywarp = commands.add_parser(
         'applywarp', help='apply an FSL warp field with PyTorch')
     applywarp.add_argument('-i', '--in', dest='input', required=True,

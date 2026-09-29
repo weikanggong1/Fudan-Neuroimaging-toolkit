@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-29",
+  "scope": "one real skull-stripped T1 and MNI152 2-mm brain template; identical input, reference, and saved FSL FLIRT affine; FSL FNIRT without --config versus FNIT default preset",
+  "input_provenance": "same subject and inputs as the T1 FNIRT fMRI validation; skull-stripping provenance of T1 is unknown",
+  "fsl_reference": {
+    "build_id": "2412.6-dirty",
+    "config": "no --config",
+    "exit_status": 255,
+    "wall_seconds": 253.51,
+    "peak_cpu_rss_kb": 832556,
+    "acceptance": "conditional: process returned 255 after writing coefficient and warped images; both passed gzip CRC, finite-value, grid and coefficient-format checks"
+  },
+  "fnit_result": {
+    "fnit_exit_status": 0,
+    "fnit_registration_and_output_seconds": 14.91353941289708,
+    "fnit_gpu_peak_allocated_gb": 0.991950848,
+    "fnit_gpu_peak_reserved_gb": 1.493172224,
+    "fnit_preset": "default",
+    "fnit_intensity_model": "global_non_linear_with_bias",
+    "fnit_level_count": 4,
+    "output_shape": [
+      91,
+      109,
+      91
+    ],
+    "coefficient_shape": [
+      21,
+      24,
+      21,
+      3
+    ],
+    "coefficient_intent": 2007,
+    "output_grid_matches_reference": true,
+    "gzip_crc_and_finite": true,
+    "pearson_vs_fsl_same_input": 0.9273739072963979,
+    "warped_mae_vs_fsl_same_input": 63.3354606628418,
+    "coefficient_pearson_vs_fsl": 0.8824485452832226,
+    "coefficient_mae_vs_fsl": 0.45792001485824585,
+    "support_dice_vs_fsl_same_input": 0.9884486123049375
+  },
+  "input_sha256": {
+    "moving": "12550a5d57f88122e0e314062cd1767b75672552ab4b8906a8fced180ade3b83",
+    "reference": "91729207be92d54c8a9e3d790070ad26f68f2d049861c6162d6a35db713c5e56",
+    "fsl_affine": "38bffc22b643ccb80b19a972605c7bc3e2e1d77ec34e57fa7877c5837436b931",
+    "fsl_warped": "1589134d2dc12521dbcc7fa49882ced0d3f007f7d3ef900c50a7f94ae751305f",
+    "fsl_coefficients": "78f7aa8de2fc08acf547a4654eac26b5cc81d3f2566195af13374270c73188d6"
+  },
+  "output_sha256": {
+    "fnit_coefficients": "43e527a639dd50b8bb8295108b0ec905d7fd53c769e2c12ab6f692b152a8c3a4",
+    "fnit_warped": "0302b394fc1c57d50271b8c9611dedc48f4aa1955f659ad09efb6215c216b783"
+  },
+  "source_sha256": {
+    "fnirt_registration.py": "1dfa5eb9681c84cb552f7ed101ee79d05e5dfcfea418c36ca8a79df7f1d3983d",
+    "fnirt_standalone.py": "3713fcc33a1afe7fe107c8a6b752946273b695a7880d23f6144229b296052429",
+    "validate_default_real.py": "a64dd81491dfdaa1dd93941f9e8b1c8d91009234dc4aace1a820c69cd51d05b1"
+  },
+  "metric_definition": {
+    "warped_pearson_and_mae": "warped T1 Pearson r and MAE within voxels where reference brain image > 0",
+    "support_dice": "each warped T1 thresholded at 5% of its positive 99th percentile; Dice on output grid",
+    "coefficient_pearson_and_mae": "all cubic B-spline coefficient array elements, matching [21,24,21,3] grids"
+  },
+  "comparison_limit": "matching command settings and NIfTI contracts do not establish numerical equivalence; FSL status 255 makes this a conditional output comparison",
+  "timing_limit": "FSL CPU and FNIT GPU shared resources and were not an isolated paired speed test",
+  "privacy": "only scalars and SHA256 hashes are published; source images and voxelwise outputs stay on the remote server"
+}

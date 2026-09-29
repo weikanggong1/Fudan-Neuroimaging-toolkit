@@ -82,6 +82,7 @@ def run_fmri_pipeline(
     t1w_image=None,
     mni_brain_mask=None,
     registration_backend="synthmorph",
+    fnirt_config=None,
     surface_inputs: SurfacePipelineInputs | None = None,
     surface_subject_dir=None,
     surface_assets_dir=None,
@@ -113,6 +114,11 @@ def run_fmri_pipeline(
     """
     if surface_inputs is not None and surface_subject_dir is not None:
         raise ValueError("surface_inputs and surface_subject_dir are mutually exclusive")
+    if registration_backend == "fnirt":
+        from ..fnirt import resolve_fnirt_config
+        fnirt_config = resolve_fnirt_config(fnirt_config, default="t1")
+    elif fnirt_config is not None:
+        raise ValueError("fnirt_config requires registration_backend='fnirt'")
     if (surface_subject_dir is None) != (surface_assets_dir is None):
         raise ValueError("surface_subject_dir and surface_assets_dir must be provided together")
     if surface_subject_dir is not None and not (regress_wm or regress_csf or regress_motion):
@@ -230,6 +236,7 @@ def run_fmri_pipeline(
         backend=registration_backend,
         synthmorph_weights=synthmorph_weights,
         reference_mask=template_mask,
+        fnirt_config=fnirt_config,
         device=selected,
     )
     timing["bbr_and_t1_to_mni"] = time.perf_counter() - started

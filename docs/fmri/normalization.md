@@ -12,6 +12,7 @@
 | `backend` | `"synthmorph"` 使用 FNIT SynthMorph deform 权重；`"fnirt"` 使用 FNIT PyTorch FNIRT。默认 `"synthmorph"`。 |
 | `synthmorph_weights` | deform 权重文件的绝对路径；只对 `backend="synthmorph"` 有效。`None` 时按 FNIT 权重配置解析。 |
 | `reference_mask` | 可选的 `mni_brain` 网格二值掩膜，只供 PyTorch FNIRT 使用；SynthMorph 不读取它。 |
+| `fnirt_config` | FNIRT 预设名称或 `FNIRTConfig` 对象；`backend="fnirt"` 时默认 `"t1"`。可用 `dataclasses.replace(T1FNIRTConfig(), ...)` 更改参数；SynthMorph 分支不接收此选项。 |
 | `device` | 如 `"cuda:0"` 或 `"cpu"`；`None` 时优先 CUDA。GPU 默认允许 TF32，图像与形变使用 float32，不启用 float16。 |
 
 返回 `T1MNIResult`。`affine` 是 **T1→MNI 的 FSL scaled-mm 初始矩阵文件** `T1_to_MNI152_2mm_affine.mat`；`moving_to_fixed_world` 是对应的 RAS world 4×4 NumPy 数组。`pull_ras` 是 `MNI152_2mm_to_T1_pull_ras.nii.gz`，shape 为 MNI `X×Y×Z×3`，三个分量单位是 RAS 毫米。对某个 MNI world 坐标 `p`，对应 T1 world 坐标为 `p + pull_ras(p)`。这个位移场已经包含初始仿射与非线性形变；应用它时**不要再叠加 `affine`**。`backend` 记录选择的方法；`qc` 在 FNIRT 分支返回逐层优化、强度多项式、偏置场范围和显存精度设置，SynthMorph 分支为 `None`。整链运行还会将它写入 `pipeline_report.json` 的 `t1_to_mni_qc`。
@@ -50,6 +51,7 @@ registration = register_t1_to_mni(
     backend="fnirt",  # 使用 T1FNIRTConfig；改成 "synthmorph" 使用 deform 网络
     synthmorph_weights=None,  # fnirt 不读取该权重；synthmorph 分支填写 deform 权重或使用缓存
     reference_mask="/absolute/path/MNI152_T1_2mm_brain_mask.nii.gz",  # fnirt 使用的模板脑掩膜
+    fnirt_config="t1",  # FNIRT 预设；省略时仍为 t1，可传修改后的 T1FNIRTConfig 对象
     device="cuda:0",  # 计算设备；无 GPU 时填写 "cpu"
 )
 
@@ -96,13 +98,13 @@ SynthMorph 使用学习得到的 deform 网络。PyTorch FNIRT 复用 FNIT 的 B
 
 | 同输入指标 | PyTorch SynthMorph | PyTorch FNIRT | FSL FLIRT+FNIRT |
 |---|---:|---:|---:|
-| 初始仿射 + 非线性配准耗时 | 156.32 s | 318.41 s | 11.25 + 150.53 = 161.78 s |
-| 加上 FNIT 结果图重采样 | 156.71 s | 318.83 s | `fnirt --iout` 已包含输出图 |
+| 初始仿射 + 非线性配准耗时 | 156.32 s | 125.09 s | 11.25 + 150.53 = 161.78 s |
+| 加上 FNIT 结果图重采样 | 156.71 s | 125.52 s | `fnirt --iout` 已包含输出图 |
 | 峰值内存 | GPU allocated 12.38 GiB，reserved 18.12 GiB | GPU allocated 0.997 GB，reserved 1.462 GB | FNIRT CPU RSS 0.798 GiB |
-| MNI 脑内输出强度与 FSL Pearson r | 0.8323 | 0.9213 | 参照 |
-| 输出脑支持区与 FSL Dice | 0.9782 | 0.9823 | 参照 |
-| MNI→T1 pull 坐标差 | 中位 1.75 mm，95 百分位 5.01 mm | 中位 0.884 mm，95 百分位 3.046 mm | 参照 |
-| 与 MNI T1 模板强度 Pearson r | 0.7938 | 0.8052 | 0.8025 |
+| MNI 脑内输出强度与 FSL Pearson r | 0.8323 | 0.9216 | 参照 |
+| 输出脑支持区与 FSL Dice | 0.9782 | 0.9825 | 参照 |
+| MNI→T1 pull 坐标差 | 中位 1.75 mm，95 百分位 5.01 mm | 中位 0.882 mm，95 百分位 3.057 mm | 参照 |
+| 与 MNI T1 模板强度 Pearson r | 0.7938 | 0.8054 | 0.8025 |
 
 Pearson r 在官方 MNI 脑掩膜内计算。脑支持区把每张重采样 T1 的正值第 99 百分位乘以 0.05 作阈值；两张图的二值区求 Dice。坐标差用 FSL `applywarp` 对 T1 的三个 RAS world 坐标图重采样，再与 FNIT 的完整 pull 场比较；只纳入双方均有有效脑信号的体素。相比输出强度，坐标差能直接检验仿射与非线性形变的合成方向。FSL 整头输入单独耗时为 FLIRT 17.41 s、FNIRT 194.34 s，其配准后脑内强度与模板 r=0.7833；整头结果含头皮，故未与去颅骨结果计算脑支持 Dice。
 

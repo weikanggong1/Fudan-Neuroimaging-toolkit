@@ -50,6 +50,7 @@ from fnit import DMRIPipeline
 result = DMRIPipeline(
     device="cuda:0",  # 运行设备：CUDA float32，允许 TF32
     registration_backend="tbss",  # 配准分支：UKB weighted FLIRT + TorchFNIRT
+    fnirt_config="tbss",  # FNIRT 预设；省略时仍为 UKB Oxford 三阶段 TBSS
     synthstrip_weights=None,  # TBSS 分支不使用 SynthStrip 权重
     dti_shell=1000,  # DTIFIT 使用的目标 b-value，单位 s/mm²
     dti_tolerance=100,  # 纳入 DTI shell 的 b-value 容差
@@ -66,7 +67,9 @@ result = DMRIPipeline(
 )
 ~~~
 
-构造器选择设备和 registration_backend。run 的前两个参数是原始采集目录和输出目录；fa_template 定义 1 mm MNI grid，fa_skeleton 用于 UKB 的 2000 阈值 skeleton mask。返回的 result.native_maps 与 result.standard_maps 都使用同一组九个键。
+构造器选择设备和 registration_backend；`fnirt_config` 可传 `TBSSFNIRTConfig()`
+或 `dataclasses.replace` 后的配置对象。命令行的 `--fnirt-preset` 默认在 TBSS 分支
+选择 `tbss`。run 的前两个参数是原始采集目录和输出目录；fa_template 定义 1 mm MNI grid，fa_skeleton 用于 UKB 的 2000 阈值 skeleton mask。返回的 result.native_maps 与 result.standard_maps 都使用同一组九个键。
 
 ## Python：MMORF 分支
 
@@ -103,6 +106,7 @@ fnit-dmri-pipeline \
   --raw-dir raw \
   -o subject_tbss \
   --registration-backend tbss \
+  --fnirt-preset tbss \
   --fa-template FMRIB58_FA_1mm.nii.gz \
   --fa-skeleton FMRIB58_FA-skeleton_1mm.nii.gz \
   --bvec-source rotated \

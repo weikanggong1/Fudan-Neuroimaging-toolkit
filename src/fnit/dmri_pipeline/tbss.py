@@ -16,7 +16,7 @@ from scipy.ndimage import binary_dilation, binary_erosion
 from .._dmri import configure_device
 from ..applywarp import TorchApplyWarp
 from ..flirt import TorchFLIRT
-from ..fnirt import GMFNIRTConfig, TorchFNIRT
+from ..fnirt import FNIRTConfig, TBSSFNIRTConfig, TorchFNIRT
 
 
 UKB_PIPELINE_COMMIT = "0e39a7f7eb76b55437942bfa3073512506b6c8fa"
@@ -27,30 +27,7 @@ class TBSSConfig:
     """UKB ``oxford_s1/s2/s3.cnf`` with three in-memory process stages."""
 
     skeleton_threshold: float = 2000.0
-    fnirt: GMFNIRTConfig = GMFNIRTConfig(
-        subsampling=(8, 4, 2, 2, 1, 1),
-        maximum_iterations=(5, 5, 5, 5, 50, 25),
-        input_fwhm_mm=(12.0, 8.0, 4.0, 4.0, 1.0, 1.0),
-        reference_fwhm_mm=(12.0, 8.0, 4.0, 4.0, 1.0, 1.0),
-        regularization=(300.0, 75.0, 50.0, 40.0, 100.0, 30.0),
-        estimate_intensity=(True, True, True, False, False, False),
-        apply_reference_mask=(False, False, False, False, False, False),
-        minimization_methods=("lm", "lm", "lm", "lm", "scg", "scg"),
-        process_stages=(1, 1, 1, 1, 2, 3),
-        implicit_reference_mask=True,
-        implicit_input_mask=True,
-        warp_resolution_mm=(10.0, 10.0, 10.0),
-        warp_resolution_schedule_mm=(
-            (10.0, 10.0, 10.0),
-            (10.0, 10.0, 10.0),
-            (10.0, 10.0, 10.0),
-            (10.0, 10.0, 10.0),
-            (2.0, 2.0, 2.0),
-            (2.0, 2.0, 2.0),
-        ),
-        jacobian_range=(0.01, 100.0),
-        ssd_weighted_lambda=True,
-    )
+    fnirt: FNIRTConfig = TBSSFNIRTConfig()
 
 
 @dataclass(frozen=True)

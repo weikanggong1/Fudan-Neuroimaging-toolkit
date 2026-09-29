@@ -50,6 +50,8 @@ def _single_level_config():
         regularization=(0.0,),
         estimate_intensity=(False,),
         apply_reference_mask=(False,),
+        implicit_reference_mask=True,
+        implicit_input_mask=True,
         warp_resolution_mm=(4.0, 4.0, 4.0),
     )
 

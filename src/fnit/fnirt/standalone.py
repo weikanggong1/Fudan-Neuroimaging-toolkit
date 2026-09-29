@@ -15,7 +15,10 @@ from .._nib import load_image, new_image
 from .._transforms import AffineTransform
 from ..flirt.coordinates import flirt_to_world_affine
 from .io import FSL_CUBIC_SPLINE_COEFFICIENTS
-from .registration import GMFNIRTConfig, T1FNIRTConfig, TorchFNIRT
+from .registration import (
+    FNIRTConfig, GMFNIRTConfig, T1FNIRTConfig, TorchFNIRT,
+    resolve_fnirt_config,
+)
 
 
 SUPPORTED_CONFIG = "GM_2_MNI152GM_2mm.cnf"
@@ -36,9 +39,11 @@ def _sha256(path):
 
 
 def _validate_config(value):
-    if value is None:
-        return SUPPORTED_CONFIG
+    if value is None or isinstance(value, FNIRTConfig):
+        return resolve_fnirt_config(value)
     text = os.fspath(value)
+    if text.lower() in ("default", "gm", "t1", "tbss"):
+        return resolve_fnirt_config(text)
     path = Path(text)
     selected = next(
         (name for name in (SUPPORTED_CONFIG, T1_CONFIG)
@@ -57,7 +62,7 @@ def _validate_config(value):
         raise NotImplementedError(
             f"{path} is not the unmodified FSL {selected} configuration"
         )
-    return selected
+    return resolve_fnirt_config("gm" if selected == SUPPORTED_CONFIG else "t1")
 
 
 def _load_volume(value, name):
@@ -87,15 +92,6 @@ def _load_affine(value):
     if abs(float(np.linalg.det(matrix[:3, :3]))) < 1e-10:
         raise ValueError("aff must be invertible")
     return matrix
-
-
-def _resolve_reference_mask(value):
-    if value is None:
-        raise ValueError(
-            "refmask is required for FNIRT and must be provided "
-            "explicitly"
-        )
-    return value
 
 
 def _validate_reference_mask(mask, reference):
@@ -253,11 +249,11 @@ def run_fnirt(
     iout=None,
     jout=None,
     refmask=None,
-    config=SUPPORTED_CONFIG,
+    config=None,
     device=None,
     overwrite=False,
 ):
-    """Run the supported FSL GM or T1 FNIRT path and write requested outputs.
+    """Run a supported FNIRT preset and write requested outputs.
 
     ``affine`` follows an FSL FLIRT ``.mat`` contract: input to reference in
     FSL scaled-mm coordinates.  When omitted, it is the scaled-mm identity,
@@ -267,7 +263,8 @@ def run_fnirt(
     ``SaveJacobian`` path; it excludes the affine determinant.
     """
     selected_config = _validate_config(config)
-    selected_mask = _resolve_reference_mask(refmask)
+    if refmask is None and isinstance(selected_config, (GMFNIRTConfig, T1FNIRTConfig)):
+        raise ValueError("refmask is required for the GM and T1 presets")
     if cout is None:
         cout = _default_coefficient_root(input)
     selected_outputs = _preflight_outputs(
@@ -276,12 +273,12 @@ def run_fnirt(
             "iout": _nifti_output_path(iout, "iout"),
             "jout": _nifti_output_path(jout, "jout"),
         },
-        (input, reference, affine, selected_mask),
+        (input, reference, affine, refmask),
         overwrite,
     )
     moving = _load_volume(input, "input")
     fixed = _load_volume(reference, "reference")
-    selected_mask = _validate_reference_mask(selected_mask, fixed)
+    selected_mask = None if refmask is None else _validate_reference_mask(refmask, fixed)
     fsl_affine = _load_affine(affine)
     forward_world = flirt_to_world_affine(
         fsl_affine,
@@ -297,7 +294,7 @@ def run_fnirt(
     )
     result = TorchFNIRT(
         device=_default_device() if device is None else device,
-        config=(GMFNIRTConfig() if selected_config == SUPPORTED_CONFIG else T1FNIRTConfig()),
+        config=selected_config,
     )(
         moving,
         fixed,

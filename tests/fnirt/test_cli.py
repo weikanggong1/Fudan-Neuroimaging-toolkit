@@ -7,7 +7,7 @@ import pytest
 from fnit import cli as root_cli
 from fnit._nib import new_image
 from fnit.flirt.coordinates import flirt_to_world_affine
-from fnit.fnirt import T1FNIRTConfig, cli, standalone
+from fnit.fnirt import FNIRTConfig, GMFNIRTConfig, T1FNIRTConfig, TBSSFNIRTConfig, cli, standalone
 from fnit.fnirt.io import make_fsl_coefficient_image
 from fnit.fnirt.spline import fsl_control_shape
 
@@ -113,7 +113,7 @@ def test_run_fnirt_converts_affine_and_writes_atomic_outputs(tmp_path, monkeypat
     assert np.allclose(captured["world_affine"], expected)
     assert captured["world_affine"].shape == (4, 4)
     assert captured["device"] == "cuda:1"
-    assert captured["config"] == standalone.GMFNIRTConfig()
+    assert captured["config"] == FNIRTConfig()
     assert captured["mask"].shape[:3] == fixed.shape[:3]
     assert captured["calls"] == 1
     coefficient = nib.load(cout)
@@ -235,7 +235,7 @@ def test_cli_forwards_t1_config(monkeypatch):
         "--in", "T1.nii.gz", "--ref", "MNI.nii.gz",
         "--refmask", "MNI_mask.nii.gz", "--config", standalone.T1_CONFIG,
     ]) == 0
-    assert captured["config"] == standalone.T1_CONFIG
+    assert captured["config"] == T1FNIRTConfig()
 
 
 def test_run_fnirt_uses_fsl_identity_default_cout_and_auto_device(
@@ -331,12 +331,13 @@ def test_run_fnirt_does_not_resolve_reference_mask_from_fsldir(tmp_path, monkeyp
             raise AssertionError("model ran without an explicit reference mask")
 
     monkeypatch.setattr(standalone, "TorchFNIRT", MustNotRun)
-    with pytest.raises(ValueError, match="must be provided explicitly"):
+    with pytest.raises(ValueError, match="refmask is required"):
         standalone.run_fnirt(
             moving_path,
             fixed_path,
             matrix_path,
             cout=tmp_path / "warp.nii.gz",
+            config="gm",
         )
 
 
@@ -438,7 +439,7 @@ def test_cli_forwards_fsl_roles_and_rejects_unknown_options(monkeypatch):
         "iout": "moved.nii.gz",
         "jout": "jacobian.nii.gz",
         "refmask": "mask.nii.gz",
-        "config": standalone.SUPPORTED_CONFIG,
+        "config": GMFNIRTConfig(),
         "device": "cuda:0",
         "overwrite": True,
     }
@@ -468,7 +469,7 @@ def test_cli_allows_fsl_default_affine_cout_and_device(monkeypatch):
         "iout": None,
         "jout": None,
         "refmask": "mask.nii.gz",
-        "config": standalone.SUPPORTED_CONFIG,
+        "config": FNIRTConfig(),
         "device": None,
         "overwrite": False,
     }
@@ -503,7 +504,7 @@ def test_root_cli_dispatches_to_the_same_fnirt_wrapper(monkeypatch):
         "iout": "moved.nii.gz",
         "jout": "jacobian.nii.gz",
         "refmask": "mask.nii.gz",
-        "config": standalone.SUPPORTED_CONFIG,
+        "config": FNIRTConfig(),
         "device": "cuda:1",
         "overwrite": False,
     }

@@ -13,6 +13,7 @@ import fnit.dmri_pipeline.tbss as tbss_module
 from fnit.dmri_pipeline import DMRIPipeline, STANDARD_MAP_NAMES
 from fnit.dmri_pipeline.cli import _arguments
 from fnit.dmri_pipeline.tbss import TBSSConfig, preprocess_fa
+from fnit.fnirt import FNIRTConfig, TBSSFNIRTConfig
 from fnit.eddy.topup_field import _load_topup_field
 
 
@@ -36,6 +37,9 @@ def test_bvec_source_cli_and_invalid_value():
 
 def test_tbss_config_combines_selected_official_schedule_values():
     config = TBSSConfig().fnirt
+    assert config == TBSSFNIRTConfig()
+    assert DMRIPipeline(device="cpu").fnirt_config == config
+    assert DMRIPipeline(device="cpu", fnirt_config="default").fnirt_config == FNIRTConfig()
     assert config.subsampling == (8, 4, 2, 2, 1, 1)
     assert config.maximum_iterations == (5, 5, 5, 5, 50, 25)
     assert config.warp_resolution_schedule_mm[-2:] == (

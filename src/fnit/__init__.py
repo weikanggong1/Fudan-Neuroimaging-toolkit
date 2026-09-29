@@ -37,8 +37,9 @@ def __getattr__(name):
         from importlib import import_module
         module = import_module('.flirt', __name__)
         return getattr(module, name)
-    if name in ('TorchFNIRT', 'TorchFNIRTResult', 'GMFNIRTConfig',
-                'T1FNIRTConfig'):
+    if name in ('TorchFNIRT', 'TorchFNIRTResult', 'FNIRTConfig',
+                'GMFNIRTConfig', 'T1FNIRTConfig', 'TBSSFNIRTConfig',
+                'resolve_fnirt_config'):
         from importlib import import_module
         module = import_module('.fnirt', __name__)
         return getattr(module, name)

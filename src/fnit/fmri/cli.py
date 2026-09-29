@@ -63,6 +63,7 @@ def main(argv=None):
     pipeline.add_argument("--mni-brain-mask")
     pipeline.add_argument("--t1w-image")
     pipeline.add_argument("--registration-backend", choices=("synthmorph", "fnirt"), default="synthmorph")
+    pipeline.add_argument("--fnirt-preset", choices=("default", "gm", "t1", "tbss"), help="FNIRT preset; default t1 when the FNIRT backend is selected")
     pipeline.add_argument("--synthstrip-weights")
     pipeline.add_argument("--synthmorph-weights")
     pipeline.add_argument("--ica-n-components", type=int)
@@ -151,6 +152,7 @@ def main(argv=None):
             mni_brain_mask=args.mni_brain_mask,
             t1w_image=args.t1w_image,
             registration_backend=args.registration_backend,
+            fnirt_config=args.fnirt_preset,
             surface_inputs=surface_inputs,
             surface_subject_dir=args.surface_subject_dir,
             surface_assets_dir=args.surface_assets_dir,

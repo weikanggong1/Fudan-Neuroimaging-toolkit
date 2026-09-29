@@ -7,7 +7,7 @@ import pytest
 from fnit._nib import new_image
 from fnit._transforms import DenseWarp
 from fnit.fast_vbm import registration as registration_module
-from fnit.fnirt import TorchFNIRT
+from fnit.fnirt import GMFNIRTConfig, TorchFNIRT
 
 from fnit.fast_vbm.registration import (
     _displacement_qc,
@@ -48,6 +48,7 @@ def test_internal_gm_fnirt_disables_implicit_zero_masks(monkeypatch):
         _register_gm(volume, volume, registration_backend="fnirt")
     assert captured["config"].implicit_reference_mask is False
     assert captured["config"].implicit_input_mask is False
+    assert captured["config"] == GMFNIRTConfig()
 
 
 def test_displacement_qc_separates_affine_and_nonlinear_components():

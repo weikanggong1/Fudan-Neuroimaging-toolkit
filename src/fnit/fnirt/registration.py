@@ -134,26 +134,26 @@ def _good_fft_size(size):
 
 
 @dataclass(frozen=True)
-class GMFNIRTConfig:
-    """Parameters in FSL ``GM_2_MNI152GM_2mm.cnf``."""
+class FNIRTConfig:
+    """Supported settings from FSL FNIRT without a configuration file."""
 
     subsampling: tuple[int, ...] = (4, 2, 1, 1)
-    maximum_iterations: tuple[int, ...] = (5, 5, 10, 5)
+    maximum_iterations: tuple[int, ...] = (5, 5, 5, 5)
     input_fwhm_mm: tuple[float, ...] = (6.0, 4.0, 2.0, 2.0)
     reference_fwhm_mm: tuple[float, ...] = (4.0, 2.0, 0.0, 0.0)
-    regularization: tuple[float, ...] = (150.0, 75.0, 50.0, 30.0)
+    regularization: tuple[float, ...] = (120.0, 60.0, 30.0, 30.0)
     estimate_intensity: tuple[bool, ...] = (True, True, True, False)
-    apply_reference_mask: tuple[bool, ...] = (False, False, False, True)
+    apply_reference_mask: tuple[bool, ...] = (True,) * 4
     minimization_methods: tuple[str, ...] | None = None
     process_stages: tuple[int, ...] | None = None
     implicit_reference_mask: bool = True
     implicit_input_mask: bool = True
     warp_resolution_mm: tuple[float, float, float] = (10.0, 10.0, 10.0)
     warp_resolution_schedule_mm: tuple[tuple[float, float, float], ...] | None = None
-    jacobian_range: tuple[float, float] = (0.2, 5.0)
+    jacobian_range: tuple[float, float] = (0.01, 100.0)
     ssd_weighted_lambda: bool = True
-    intensity_model: str = "global_linear"
-    intensity_order: int = 1
+    intensity_model: str = "global_non_linear_with_bias"
+    intensity_order: int = 5
     bias_resolution_mm: tuple[float, float, float] = (50.0, 50.0, 50.0)
     bias_regularization: float = 10000.0
 
@@ -184,6 +184,14 @@ class GMFNIRTConfig:
             raise ValueError("maximum iterations must be non-negative")
         if any(value < 0 for value in self.regularization):
             raise ValueError("regularization must be non-negative")
+        if any(value < 0 for value in (*self.input_fwhm_mm, *self.reference_fwhm_mm)):
+            raise ValueError("FWHM values must be non-negative")
+        if len(self.warp_resolution_mm) != 3 or any(
+            value <= 0 for value in self.warp_resolution_mm
+        ):
+            raise ValueError("warp resolution must contain three positive values")
+        if len(self.jacobian_range) != 2 or not 0 < self.jacobian_range[0] < self.jacobian_range[1]:
+            raise ValueError("Jacobian range must contain two increasing positive values")
         if self.minimization_methods is not None and any(
             value not in ("lm", "scg") for value in self.minimization_methods
         ):
@@ -209,13 +217,26 @@ class GMFNIRTConfig:
         if self.intensity_model not in ("global_linear", "global_non_linear_with_bias"):
             raise ValueError("unsupported FNIRT intensity model")
         if self.intensity_model == "global_non_linear_with_bias" and not 2 <= self.intensity_order <= 5:
-            raise ValueError("T1 intensity order must be between 2 and 5")
+            raise ValueError("nonlinear intensity order must be between 2 and 5")
         if any(value <= 0 for value in self.bias_resolution_mm) or self.bias_regularization < 0:
             raise ValueError("invalid bias field resolution or regularization")
 
 
 @dataclass(frozen=True)
-class T1FNIRTConfig(GMFNIRTConfig):
+class GMFNIRTConfig(FNIRTConfig):
+    """FSL ``GM_2_MNI152GM_2mm.cnf`` preset for grey matter maps."""
+
+    maximum_iterations: tuple[int, ...] = (5, 5, 10, 5)
+    regularization: tuple[float, ...] = (150.0, 75.0, 50.0, 30.0)
+    apply_reference_mask: tuple[bool, ...] = (False, False, False, True)
+    implicit_reference_mask: bool = False
+    implicit_input_mask: bool = False
+    jacobian_range: tuple[float, float] = (0.2, 5.0)
+    intensity_model: str = "global_linear"
+
+
+@dataclass(frozen=True)
+class T1FNIRTConfig(FNIRTConfig):
     """FSL ``T1_2_MNI152_2mm.cnf`` geometry and T1 intensity settings."""
 
     subsampling: tuple[int, ...] = (4, 4, 2, 2, 1, 1)
@@ -227,6 +248,46 @@ class T1FNIRTConfig(GMFNIRTConfig):
     apply_reference_mask: tuple[bool, ...] = (True,) * 6
     intensity_model: str = "global_non_linear_with_bias"
     intensity_order: int = 5
+
+
+@dataclass(frozen=True)
+class TBSSFNIRTConfig(FNIRTConfig):
+    """UK Biobank ``oxford_s1/s2/s3.cnf`` FA registration preset."""
+
+    subsampling: tuple[int, ...] = (8, 4, 2, 2, 1, 1)
+    maximum_iterations: tuple[int, ...] = (5, 5, 5, 5, 50, 25)
+    input_fwhm_mm: tuple[float, ...] = (12.0, 8.0, 4.0, 4.0, 1.0, 1.0)
+    reference_fwhm_mm: tuple[float, ...] = (12.0, 8.0, 4.0, 4.0, 1.0, 1.0)
+    regularization: tuple[float, ...] = (300.0, 75.0, 50.0, 40.0, 100.0, 30.0)
+    estimate_intensity: tuple[bool, ...] = (True, True, True, False, False, False)
+    apply_reference_mask: tuple[bool, ...] = (False,) * 6
+    minimization_methods: tuple[str, ...] = ("lm", "lm", "lm", "lm", "scg", "scg")
+    process_stages: tuple[int, ...] = (1, 1, 1, 1, 2, 3)
+    warp_resolution_schedule_mm: tuple[tuple[float, float, float], ...] = (
+        (10.0, 10.0, 10.0),
+        (10.0, 10.0, 10.0),
+        (10.0, 10.0, 10.0),
+        (10.0, 10.0, 10.0),
+        (2.0, 2.0, 2.0),
+        (2.0, 2.0, 2.0),
+    )
+    intensity_model: str = "global_linear"
+
+
+def resolve_fnirt_config(value=None, *, default="default"):
+    """Return a named FNIRT preset or an explicitly supplied configuration."""
+    if isinstance(value, FNIRTConfig):
+        return value
+    name = default if value is None else value
+    presets = {
+        "default": FNIRTConfig,
+        "gm": GMFNIRTConfig,
+        "t1": T1FNIRTConfig,
+        "tbss": TBSSFNIRTConfig,
+    }
+    if not isinstance(name, str) or name.lower() not in presets:
+        raise ValueError("FNIRT config must be default, gm, t1, tbss, or FNIRTConfig")
+    return presets[name.lower()]()
 
 
 @dataclass
@@ -1017,7 +1078,7 @@ class TorchFNIRT:
         self,
         *,
         device="cpu",
-        config: GMFNIRTConfig | None = None,
+        config: FNIRTConfig | None = None,
         reference_mask=None,
         pcg_tolerance=1e-3,
         pcg_max_iterations=500,
@@ -1031,7 +1092,7 @@ class TorchFNIRT:
         if self.device.type == "cuda":
             torch.backends.cuda.matmul.allow_tf32 = True
             torch.backends.cudnn.allow_tf32 = True
-        self.config = GMFNIRTConfig() if config is None else config
+        self.config = resolve_fnirt_config(config)
         self.reference_mask = reference_mask
         self.pcg_tolerance = float(pcg_tolerance)
         self.pcg_max_iterations = int(pcg_max_iterations)
@@ -1750,9 +1811,12 @@ class TorchFNIRT:
 
 __all__ = [
     "FSL_SOURCE_VERSIONS",
+    "FNIRTConfig",
     "GMFNIRTConfig",
     "T1FNIRTConfig",
+    "TBSSFNIRTConfig",
     "TorchFNIRT",
     "TorchFNIRTResult",
+    "resolve_fnirt_config",
     "spm_like_mean",
 ]
