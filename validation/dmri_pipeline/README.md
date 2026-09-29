@@ -1,6 +1,13 @@
 # dMRI 参数图流程验证
 
-[功能和调用方式](../../docs/dmri_pipeline/README.md) · [TBSS 当前机器报告](tbss_e2e.real.current.json) · [经典 NODDI 接入报告](pipeline_classic_real.public.json) · [九图比较脚本](compare_current_eddy_pipeline.py) · [官方 TBSS 参考脚本](run_official_tbss.sh)
+[功能和调用方式](../../docs/dmri_pipeline/README.md) · [既有 UKB TBSS 对照报告](tbss_e2e.real.current.json) · [经典 NODDI 接入报告](pipeline_classic_real.public.json) · [九图比较脚本](compare_current_eddy_pipeline.py) · [官方 TBSS 参考脚本](run_official_tbss.sh)
+
+| 验证边界 | 结果 | 证据 |
+|---|---|---|
+| 原始 BIDS、无 T1w、TBSS 完整命令 | 九张 native、standard、skeleton 图均通过输出检查 | [当前整链](bids_tbss.real.current.json) |
+| 原始 BIDS、带 T1w、MMORF 1 mm 完整命令 | native 图、T1 脑图和两份仿射完成；非线性阶段因共享 GPU 显存不足退出 | [失败阶段](bids_mmorf.shared_gpu_oom.json) |
+| 既有 UKB TBSS 对 FSL 参考 | 九图数值比较；参考输入边界与 raw-to-standard 候选不同 | [对照报告](tbss_e2e.real.current.json) |
+| 经典 NODDI 接入 | 2,048 个真实体素的拟合与九图接口检查，非完整整链 | [阶段报告](pipeline_classic_real.public.json) |
 
 ## 原始 BIDS 入口：真实 AP/PA 采集
 
@@ -14,13 +21,27 @@
 
 带 T1w 的 `--registration-backend mmorf` 也实际启动了完整命令。BIDS 选择、TOPUP、EDDY、九张 native 图、SynthStrip 脑图及两份 FLIRT 仿射均已完成；随后 MMORF 的 tensor 有限应变旋转在共享 GPU 上因显存不足退出，未生成标准空间九图。失败时该 GPU 剩余 228.69 MiB，进程占用约 10.59 GiB；命令运行 36:20.19，退出码 1。详见[失败阶段记录](bids_mmorf.shared_gpu_oom.json)。这次不能作为带 T1w 整链通过的证据；最终源码的真实 BIDS 输入预检和该分支的单元调用测试仍已通过。
 
+## 既有 UKB TBSS 与 FSL 对照
+
 2026 年 9 月 29 日在 gpucw1 用一例真实 UKB 格式 AP/PA 数据，从原始图像运行 TBSS 分支。结果图像仍留在计算节点；仓库只保存汇总数值。
 
-随后 TorchEDDY 的样条权重改为无布尔索引计算；固定种子的完整八轮校正图与改动前文件 SHA-256 相同，其他数值输出也逐值相同。本页九图相似性指标来自改动前的整链实测，TBSS 分支尚未用改动后源码重跑；下述整链运行时间也不代表现版耗时。现版 EDDY 单独计时见 [EDDY 验证页](../eddy/README.md)。
+随后 TorchEDDY 的样条权重改为无布尔索引计算；固定种子的完整八轮校正图与改动前文件 SHA-256 相同，其他数值输出也逐值相同。本节与 FSL 的九图相似性指标来自改动前的整链实测，未按上方 BIDS 运行的输出重新计算；下述 14:06.89 也只代表该次 UKB 运行。新版 EDDY 的单独计时见 [EDDY 验证页](../eddy/README.md)。
 
 TBSS 的第一个参考固定 TOPUP 系数、掩膜和其余输入，改用 FSL `eddy_cuda10.2` 校正图，再由相同 FNIT DTIFIT、NODDI、TBSS 代码生成九图；该配对比较隔离 EDDY 输入的影响。九张 native 图 r 为 0.978640–0.999882，standard 图 r 为 0.940917–0.988332，skeleton 图 r 为 0.949470–0.991235。shape 和 affine 全部匹配。
 
 第二个参考由先前准备的官方 UKB native 参数图开始，经 FSL 6.0.7.4 weighted FLIRT、三阶段 FNIRT 和 applywarp 生成 standard/skeleton 图。其输入边界与本次 raw-to-standard 流程不同：standard 九图 r 为 0.358268–0.699381，skeleton 九图 r 为 0.098878–0.651267。这些差异不能单独定位到 EDDY 或 FNIRT，也不能将 FSL 的配准计时与完整 FNIT 计时相除。各图 MAE、RMSE 和有效体素数见[机器报告](tbss_e2e.real.current.json)。
+
+| 参数图 | 匹配 FSL EDDY：native r | 匹配 FSL EDDY：standard r | 原版 FSL TBSS：standard r | 匹配 FSL EDDY：skeleton r | 原版 FSL TBSS：skeleton r |
+|---|---:|---:|---:|---:|---:|
+| FA | 0.999224 | 0.988332 | 0.667522 | 0.991235 | 0.517921 |
+| MD | 0.999882 | 0.981015 | 0.649976 | 0.954968 | 0.489054 |
+| L1 | 0.999797 | 0.979714 | 0.591519 | 0.952986 | 0.426730 |
+| L2 | 0.999823 | 0.981538 | 0.661351 | 0.961240 | 0.553910 |
+| L3 | 0.999819 | 0.981895 | 0.699381 | 0.966816 | 0.596406 |
+| MO | 0.978640 | 0.940917 | 0.511447 | 0.968428 | 0.640657 |
+| ICVF | 0.986409 | 0.977894 | 0.358268 | 0.949470 | 0.098878 |
+| OD | 0.993978 | 0.976456 | 0.632424 | 0.974554 | 0.651267 |
+| ISOVF | 0.999170 | 0.978553 | 0.690850 | 0.962090 | 0.599029 |
 
 本次 TBSS 完整进程 wall 为 14:06.89；EDDY 阶段 673.42 s，配准、九图传播和 skeleton 阶段 58.02 s。EDDY 进程内 CUDA allocation 峰值为 4.54 GiB；全流程最大组件峰值为 NODDI 的 12.87 GiB。共享 GPU 未隔离。
 
