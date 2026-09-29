@@ -183,19 +183,24 @@ def _fisher_block(matrices, start: int, stop: int, i: int, j: int,
     lengths = np.array([matrices[subject].shape[1] if voxel_major
                         else len(matrices[subject]) for subject in range(start, stop)])
     max_time = int(lengths.max())
-    a = np.zeros((count, max_time, n_i), dtype=np.float32)
-    b = np.zeros((count, max_time, n_j), dtype=np.float32)
+    if voxel_major:
+        a = np.zeros((count, n_i, max_time), dtype=np.float32)
+        b = np.zeros((count, n_j, max_time), dtype=np.float32)
+    else:
+        a = np.zeros((count, max_time, n_i), dtype=np.float32)
+        b = np.zeros((count, max_time, n_j), dtype=np.float32)
     for row, subject in enumerate(range(start, stop)):
         series = matrices[subject]
         if voxel_major:
-            a[row, :lengths[row]] = series[i:i+n_i].T
-            b[row, :lengths[row]] = series[j:j+n_j].T
+            a[row, :, :lengths[row]] = series[i:i+n_i]
+            b[row, :, :lengths[row]] = series[j:j+n_j]
         else:
             a[row, :lengths[row]] = series[:, i:i+n_i]
             b[row, :lengths[row]] = series[:, j:j+n_j]
     left = torch.from_numpy(a).to(device=device, dtype=torch.float64)
     right = torch.from_numpy(b).to(device=device, dtype=torch.float64)
-    r = torch.bmm(left.transpose(1, 2), right)
+    r = (torch.bmm(left, right.transpose(1, 2)) if voxel_major else
+         torch.bmm(left.transpose(1, 2), right))
     r /= torch.as_tensor(lengths, device=device, dtype=torch.float64)[:, None, None]
     r = torch.where(r > 0.9999, 0, r).clamp(-0.999999, 0.999999)
     return torch.atanh(r).reshape(count, -1)
