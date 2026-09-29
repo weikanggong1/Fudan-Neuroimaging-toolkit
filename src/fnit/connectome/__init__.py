@@ -12,7 +12,9 @@ from .atlas_builder import (
     schaefer_to_t1,
 )
 from .bet import bet_mask, mean_bzero, mrtrix_roundtrip_voxel_size
-from .freesurfer_subject import ConnectomeNode, FreeSurferSubject, fs_aparc_atlas, fs_aparc_nodes
+from .freesurfer_subject import (
+    ConnectomeNode, FreeSurferSubject, fs_aparc_a2009s_atlas, fs_aparc_atlas, fs_aparc_nodes,
+)
 from .fod import fit_mrtrix_msmt_csd, real_sh
 from .masks import dwi2mask_legacy, maskfilter_six_connected
 from .mtnormalise import MTNormaliseResult, normalise_mrtrix_three_tissue
@@ -36,7 +38,8 @@ __all__ = [
     "bet_mask", "build_connectomes", "combine_cortical_subcortical",
     "estimate_mrtrix_dhollander", "estimate_sift2_weights",
     "fit_mrtrix_dhollander_tensor", "fit_mrtrix_msmt_csd",
-    "freesurfer_five_tissue", "fs_aparc_atlas", "fs_aparc_nodes", "gmwmi_from_five_tissue",
+    "freesurfer_five_tissue", "fs_aparc_a2009s_atlas", "fs_aparc_atlas",
+    "fs_aparc_nodes", "gmwmi_from_five_tissue",
     "map_streamlines_to_fixels", "dwi2mask_legacy", "maskfilter_six_connected",
     "mean_bzero", "mrtrix_roundtrip_voxel_size",
     "mrtrix_shell_centres", "normalise_mrtrix_three_tissue",

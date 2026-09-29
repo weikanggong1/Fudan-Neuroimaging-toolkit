@@ -346,6 +346,14 @@ def _run_connectome(args):
         "aparc+tian-s1": "aparc",
         "aparc.a2009s+tian-s1": "aparc.a2009s",
     }
+    if "fs-aparc-a2009s" in atlas_names:
+        if args.freesurfer_subject_dir is None:
+            raise ValueError("fs-aparc-a2009s requires --freesurfer-subject-dir")
+        atlas_inputs.extend([
+            subject.aparc_a2009s_aseg,
+            *(subject.subject_dir / "label" / f"{hemi}.aparc.a2009s.annot"
+              for hemi in ("lh", "rh")),
+        ])
     glasser_tian = {"glasser+tian-s1": 1, "glasser+tian-s4": 4}
     if not any(name in (*schaefer_tian, *native_tian, *glasser_tian)
                for name in atlas_names) and args.tian_fnirt_coeff:
@@ -789,7 +797,8 @@ def main(argv=None):
                             help='integer atlas in DWI RAS world coordinates')
     connectome.add_argument('--freesurfer-subject-dir', help='completed recon-all subject directory')
     connectome.add_argument('--atlas', nargs='+', default=['fs-aparc'],
-                            choices=('fs-aparc', 'aparc+tian-s1', 'aparc.a2009s+tian-s1',
+                            choices=('fs-aparc', 'fs-aparc-a2009s',
+                                     'aparc+tian-s1', 'aparc.a2009s+tian-s1',
                                      'glasser+tian-s1', 'glasser+tian-s4',
                                      'schaefer200+tian-s1',
                                      'schaefer500+tian-s4', 'schaefer1000+tian-s4'),

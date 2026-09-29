@@ -13,7 +13,7 @@ from urllib.request import urlopen
 
 
 def _required(atlas: str) -> tuple[str, ...]:
-    if atlas == "fs-aparc":
+    if atlas in ("fs-aparc", "fs-aparc-a2009s"):
         return ()
     scale = 4 if atlas.endswith("tian-s4") else 1
     if atlas in ("aparc+tian-s1", "aparc.a2009s+tian-s1"):

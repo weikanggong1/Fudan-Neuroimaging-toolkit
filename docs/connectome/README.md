@@ -27,6 +27,23 @@ fnit UKBConnectome_pipeline \
 
 ### 多 atlas 示例
 
+只用已完成的 FreeSurfer subject 时，可直接选择两套原生全脑 atlas；`fs-aparc-a2009s` 另外读取 `mri/aparc.a2009s+aseg.mgz` 与双半球 `label/*.aparc.a2009s.annot`，不需要 MNI 模板或配准权重：
+
+```bash
+BIDS_ROOT=/data/study_bids                         # 原始 BIDS 根目录
+OUTPUT_DIR=/data/derivatives/fnit_connectome       # 输出和续跑目录
+FREESURFER_SUBJECT=/data/freesurfer/sub-01          # 含两个 aparc 分割的 recon-all subject
+fnit UKBConnectome_pipeline \
+  --bids-root "$BIDS_ROOT" --subject 01 \
+  --freesurfer-subject-dir "$FREESURFER_SUBJECT" \
+  --atlas fs-aparc fs-aparc-a2009s \
+  --n-seeds 10000 --device cuda:0 --output-dir "$OUTPUT_DIR"
+```
+
+该体积由官方 [`mri_aparc2aseg --s SUBJECT --annot aparc.a2009s --o aparc.a2009s+aseg.mgz`](https://surfer.nmr.mgh.harvard.edu/fswiki/mri_aparc2aseg) 产生；FNIT 根据受试者注释名称和 [FreeSurferColorLUT 的 11100/12100 系列原始编号](https://github.com/freesurfer/freesurfer/blob/dev/distribution/FreeSurferColorLUT.txt)转成 `1..K`，再使用与 `fs-aparc` 相同的 16 个皮层下/小脑节点。参考文献：[Destrieux 等，*NeuroImage* 2010](https://doi.org/10.1016/j.neuroimage.2010.06.010)。
+
+使用 Tian/Schaefer 模板的多 atlas 示例：
+
 ```bash
 BIDS_ROOT=/data/study_bids                         # 同一组 DWI 与 T1w
 OUTPUT_DIR=/data/derivatives/fnit_connectome       # 结果目录
@@ -45,7 +62,7 @@ fnit UKBConnectome_pipeline \
   --output-dir "$OUTPUT_DIR"
 ```
 
-可选名称：`fs-aparc`、`aparc+tian-s1`、`aparc.a2009s+tian-s1`、`glasser+tian-s1`、`glasser+tian-s4`、`schaefer200+tian-s1`、`schaefer500+tian-s4`、`schaefer1000+tian-s4`。`fs-aparc` 从个体 `aparc+aseg.mgz` 生成，无需外部 atlas。Tian 默认用 FNIT PyTorch SynthMorph；已有原 UKB 的 T1→MNI FNIRT coefficient 时可以 `--tian-fnirt-coeff` 替换。Glasser 的 32k→164k 标签重采样目前仍依赖 Connectome Workbench `wb_command`，故该 atlas 还不满足仅官方 recon-all 为外部运行时程序的约束。
+可选名称：`fs-aparc`、`fs-aparc-a2009s`、`aparc+tian-s1`、`aparc.a2009s+tian-s1`、`glasser+tian-s1`、`glasser+tian-s4`、`schaefer200+tian-s1`、`schaefer500+tian-s4`、`schaefer1000+tian-s4`。前两套从个体 FreeSurfer 分割直接生成；`fs-aparc-a2009s` 由本人的 `.annot` 定义名称，按左皮层、右皮层、16 个皮层下与小脑节点连续编号，行列以 `nodes.tsv` 为准。Tian 默认用 FNIT PyTorch SynthMorph；已有原 UKB 的 T1→MNI FNIRT coefficient 时可以 `--tian-fnirt-coeff` 替换。Glasser 的 32k→164k 标签重采样目前仍依赖 Connectome Workbench `wb_command`，故该 atlas 还不满足仅官方 recon-all 为外部运行时程序的约束。
 
 资源许可、模板结构与按需下载见[atlas 资源说明](atlas-assets.md)。固定 FNIT Release `assets-v1` 暂无这组 atlas；有明确许可的 Tian/Schaefer 文件已镜像于仓库，命令可加 `--download-atlases` 自动获取并校验。fsaverage 和 MNI T1 仍由用户提供。
 
@@ -117,6 +134,7 @@ Python 入口 `UKBConnectome_pipeline(device="cuda:0").run_bids(bids_root, outpu
 
 | 真实输入对照 | 已观察结果 | 证据 |
 |---|---|---|
+| 原始 UKB AP/PA BIDS 全链 | 100 次播种的流程检查成功；84 节点四矩阵完整，3,570 s、PyTorch 峰值 4.542 GiB；同输入重跑 4.06 s 且矩阵哈希不变 | [私有输入的公开汇总](../../validation/connectome/ukb_bids_e2e_20260930.md) |
 | AP/PA TOPUP | UKB 一例校正 4D r=0.9944；未逐体素等价 | [TOPUP 报告](../../validation/topup/report.public.json) |
 | EDDY | UKB 一例对 FSL GPU 的脑内 4D r=0.999738，FNIT 10:38.75、参考 10:21.19；计时边界不同 | [EDDY 报告](../../validation/eddy/README.md) |
 | 固定同一 100k TCK/权重/atlas | 七套 count 逐元素相同；FBC 最大绝对误差 ≤5.07e-5 | [七 atlas 矩阵和脑图](../../validation/connectome/ds004666/seven_atlas_100k_20260929.md) |

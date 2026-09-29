@@ -20,7 +20,9 @@ from .atlas_builder import (
     combine_cortical_tian, glasser_to_t1, native_annotation_to_t1, schaefer_to_t1,
 )
 from .atlas_tian import fnirt_tian_to_t1, synthmorph_tian_to_t1
-from .freesurfer_subject import ConnectomeNode, FreeSurferSubject, fs_aparc_atlas
+from .freesurfer_subject import (
+    ConnectomeNode, FreeSurferSubject, fs_aparc_a2009s_atlas, fs_aparc_atlas,
+)
 from .fod import fit_mrtrix_msmt_csd
 from .masks import dwi2mask_legacy, maskfilter_six_connected
 from .mtnormalise import normalise_mrtrix_three_tissue
@@ -339,11 +341,12 @@ class UKBConnectome_pipeline:
         if freesurfer_subject_dir is not None:
             if any(value is not None for value in (t1_brain, t1_segmentation, atlas_dwi)):
                 raise ValueError("freesurfer_subject_dir cannot be combined with explicit T1/atlas inputs")
-            if any(name not in ("fs-aparc", *SCHAEFER_TIAN_ATLASES,
+            if any(name not in ("fs-aparc", "fs-aparc-a2009s", *SCHAEFER_TIAN_ATLASES,
                                 *NATIVE_TIAN_ATLASES, *GLASSER_TIAN_ATLASES)
                    for name in atlas_names):
                 raise ValueError("unsupported atlas from a subject directory")
-            if any(name != "fs-aparc" for name in atlas_names) and (
+            if any(name not in ("fs-aparc", "fs-aparc-a2009s")
+                   for name in atlas_names) and (
                 atlas_templates_dir is None or
                 (any(name in (*SCHAEFER_TIAN_ATLASES, *GLASSER_TIAN_ATLASES)
                      for name in atlas_names)
@@ -433,6 +436,11 @@ class UKBConnectome_pipeline:
                 atlas_source_affine = seg_affine
                 if atlas_name == "fs-aparc":
                     atlas_t1, nodes = fs_aparc_atlas(seg)
+                elif atlas_name == "fs-aparc-a2009s":
+                    atlas_t1, atlas_source_affine = _image(
+                        subject.aparc_a2009s_aseg, self.device)
+                    atlas_t1, nodes = fs_aparc_a2009s_atlas(
+                        atlas_t1, subject.subject_dir)
                 else:
                     templates = Path(atlas_templates_dir)
                     if atlas_name in NATIVE_TIAN_ATLASES:

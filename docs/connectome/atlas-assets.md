@@ -11,7 +11,7 @@ fnit-setup-connectome-atlases \
   --output-dir "$ATLAS_TEMPLATES"
 ```
 
-在 `fnit UKBConnectome_pipeline` 命令加 `--download-atlases` 可在首次使用时执行同一校验；省略 `--atlas-templates-dir` 时下载到本次 `--output-dir/atlas_templates`。`fs-aparc` 不需下载。已存在的同名文件若大小或 SHA-256 不符会报错，不会悄悄覆盖。
+在 `fnit UKBConnectome_pipeline` 命令加 `--download-atlases` 可在首次使用时执行同一校验；省略 `--atlas-templates-dir` 时下载到本次 `--output-dir/atlas_templates`。`fs-aparc` 和 `fs-aparc-a2009s` 直接读取受试者 FreeSurfer 输出，不需下载。已存在的同名文件若大小或 SHA-256 不符会报错，不会悄悄覆盖。
 
 | 选择 | 下载的 atlas 文件 | 来源及条件 |
 |---|---|---|

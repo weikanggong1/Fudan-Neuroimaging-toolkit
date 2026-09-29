@@ -19,7 +19,7 @@ def test_selected_atlas_installation_and_tamper_detection(tmp_path, monkeypatch)
 
     monkeypatch.setattr(assets, "urlopen", open_asset)
     root = assets.install_connectome_atlases(
-        ["fs-aparc", "schaefer200+tian-s1"], tmp_path)
+        ["fs-aparc", "fs-aparc-a2009s", "schaefer200+tian-s1"], tmp_path)
     assert set(downloads) == {
         "Tian_Subcortex_S1_3T.nii.gz", "Tian_Subcortex_S1_3T_label.txt",
         "lh.Schaefer2018_200Parcels_7Networks_order.annot",
