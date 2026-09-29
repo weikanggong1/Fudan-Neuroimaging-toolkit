@@ -95,8 +95,8 @@ applywarp --ref="$T1_IMAGE" --in="$TIAN_MNI" \
   --warp="$INVERSE_FIELD" --interp=nn --out="$TIAN_T1"
 ```
 
-若已经有 FSL `invwarp` 输出，可把它直接作为 `TorchApplyWarp` 的 `warp` 参数；同一实际输入上此单独采样算子与 FSL `applywarp --interp=nn` 的 Tian S1 标签逐体素一致。FNIRT 前向配准 `flirt`/`fnirt` 仍由参考命令生成，现未提供纯 PyTorch 的同结果替代。完整原 UKB 提供的 T1 存档不含预生成的 `T1_to_MNI_warp_coef`，本次参考 warp 是在同一 T1 上新生成并固定的，不能标作 UKB 存档结果。
+若已经有 FSL `invwarp` 输出，可把它直接作为 `TorchApplyWarp` 的 `warp` 参数；同一实际输入上此单独采样算子与 FSL `applywarp --interp=nn` 的 Tian S1 标签逐体素一致。FNIT 现有 `TorchFNIRT` 的 T1→MNI 前向实现，但与 FSL 前向配准尚未达到数值一致，不能把它生成的 coefficient 作为原 UKB 形变的逐值替身；本页同输入验证固定的是 FSL 参考 coefficient。另可用 FNIT PyTorch SynthMorph 自动生成 Tian 标签，其与 FNIRT 的配对差异见[当前真实 T1 报告](../../validation/connectome/ds004666/atlas_synthmorph_20260929.md)。完整原 UKB 提供的 T1 存档不含预生成的 `T1_to_MNI_warp_coef`，本次参考 warp 是在同一 T1 上新生成并固定的，不能标作 UKB 存档结果。
 
 ## 范围与安装
 
-两函数在包内 `fnit.connectome.atlas_surface` 与 `fnit.connectome.atlas_tian`；项目主页 `environment.yml` 提供 PyTorch、nibabel 和绘图依赖，wheel 通过 `pyproject.toml` 声明 PyTorch/nibabel。官方软件只用于单独参考 benchmark。当前完成 `aparc` 皮层映射，以及 Tian S1 逆场和最终标签的同输入对照；Tian S2–S4、FNIRT 前向配准参数等价和最终七套 connectome 输出仍需逐项验证。
+两函数在包内 `fnit.connectome.atlas_surface` 与 `fnit.connectome.atlas_tian`；项目主页 `environment.yml` 提供 PyTorch、nibabel 和绘图依赖，wheel 通过 `pyproject.toml` 声明 PyTorch/nibabel。官方软件只用于单独参考 benchmark。当前完成 `aparc` 皮层映射，以及 Tian S1 逆场和最终标签的同输入对照；Tian S2–S4、TorchFNIRT 与 FSL 前向输出的一致性及最终七套 connectome 仍需逐项验证。

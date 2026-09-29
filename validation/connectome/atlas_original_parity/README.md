@@ -25,7 +25,7 @@
 | **固定同一 FSL `fnirt --cout` 前向 coefficient**，只比较 FNIT `invert_fnirt_t1_warp` 与 FSL `invwarp` | 全域三分量 MAE 2.115×10⁻⁶ mm，绝对误差 P99 7.629×10⁻⁶ mm、最大 1.144×10⁻⁵ mm；全域没有体素的任一分量超过 10⁻⁴ mm；Tian 正标签支持域 MAE 1.952×10⁻⁶ mm、P99 6.676×10⁻⁶ mm | FNIT CUDA 27.784 s（含读写），峰值已分配 0.367 GiB；FSL 41.43 s（完整进程） |
 | FNIT **自有逆形变 + 自有最近邻采样** 对 FSL 最终 S1 | 标签 0 / 6,269,400 不同；前景 Dice 1.0；16 标签最低 Dice 1.0；正标签同为 44,041 体素 | 逆形变计时同上，采样另需 CUDA 1.240 s（含读写），峰值已分配 1.306 GiB |
 
-FSL 参考前向步骤另耗时 FLIRT 18.98 s、FNIRT 251.23 s；两者仍是官方程序。FNIT 采用与 FSL 相同的四面体逐行求逆和六邻域填充。本次 FSL 默认 Jacobian 约束与 `--noconstraint` 的逆场最大差异 7.63×10⁻⁶ mm；FNIT 尚未实现对需要拓扑修正的其他形变所用的约束算子。FNIT 数值场与 FSL 保存的 float32 场仍有至多 1.144×10⁻⁵ mm 的舍入差异，故“标签逐体素一致”不等于“逆场文件逐字节一致”。本次前向 FNIRT coefficient 由 FSL 新生成，并非 UKB 归档文件；T1→MNI 前向配准仍待纯 PyTorch 同输入复现。FNIT 中无运行时 FSL 依赖。
+FSL 参考前向步骤另耗时 FLIRT 18.98 s、FNIRT 251.23 s；两者仍是官方程序。FNIT 采用与 FSL 相同的四面体逐行求逆和六邻域填充。本次 FSL 默认 Jacobian 约束与 `--noconstraint` 的逆场最大差异 7.63×10⁻⁶ mm；FNIT 尚未实现对需要拓扑修正的其他形变所用的约束算子。FNIT 数值场与 FSL 保存的 float32 场仍有至多 1.144×10⁻⁵ mm 的舍入差异，故“标签逐体素一致”不等于“逆场文件逐字节一致”。本次前向 FNIRT coefficient 由 FSL 新生成，并非 UKB 归档文件；FNIT 新增的 `TorchFNIRT` 已有 T1→MNI 功能，但尚未达到 FSL 同结果一致。FNIT 中无运行时 FSL 依赖。
 
 ## 可复现命令与输入说明
 
