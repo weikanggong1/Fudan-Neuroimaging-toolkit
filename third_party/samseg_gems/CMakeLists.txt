@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.18)
 project(fnit_gems_native LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 14)
+if(FNIT_GEMS_CONDA_INCLUDE_DIR)
+  add_compile_options("-I${FNIT_GEMS_CONDA_INCLUDE_DIR}")
+endif()
 
 find_package(ITK REQUIRED)
 find_package(pybind11 CONFIG REQUIRED)

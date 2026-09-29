@@ -13,7 +13,7 @@ def main() -> None:
     if not itk:
         raise RuntimeError("当前 conda 环境缺少 libitk-devel；请使用 environment-gems-native.yml")
     source = root / "third_party" / "samseg_gems"
-    build = root / ".build" / "samseg_gems_conda"
+    build = prefix / "share" / "fnit_gems_build"
     output = root / "src" / "fnit" / "gems" / "native_samseg" / "gems"
     output.mkdir(parents=True, exist_ok=True)
     compiler = prefix / "bin" / "x86_64-conda-linux-gnu-cc"
@@ -27,6 +27,7 @@ def main() -> None:
         f"-DCMAKE_CXX_COMPILER={cxx_compiler}",
         f"-DCMAKE_PREFIX_PATH={prefix}",
         f"-DITK_DIR={itk[-1]}",
+        f"-DFNIT_GEMS_CONDA_INCLUDE_DIR={prefix / 'include'}",
         f"-DPython3_EXECUTABLE={sys.executable}",
         f"-DFNIT_GEMS_OUTPUT_DIR={output}",
     ], check=True)
