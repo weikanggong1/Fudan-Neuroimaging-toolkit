@@ -4,7 +4,6 @@
 #include "kvlAtlasMeshPositionCostAndGradientCalculator.h"
 #include "kvlAtlasMeshToIntensityImageCostAndGradientCalculator.h"
 #include "kvlAtlasMeshToIntensityImageLogDomainCostAndGradientCalculator.h"
-#include "kvlConditionalGaussianEntropyCostAndGradientCalculator.h"
 #include "kvlMutualInformationCostAndGradientCalculator.h"
 #include "kvlAtlasMeshToPointSetCostAndGradientCalculator.h"
 #include "kvlAverageAtlasMeshPositionCostAndGradientCalculator.h"

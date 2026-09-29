@@ -1,0 +1,22 @@
+{
+  "case": "fs_sub01",
+  "environment": "fresh Conda: Python 3.11, NumPy 1.24.3, SciPy 1.10.1, ITK 5.4.7",
+  "intervention": "Replace both FNIT atlas-registration results with the saved official alignedAtlasImage.mgz; retain FNIT mesh fitting and postprocessing",
+  "official_aligned_atlas_sha256": "01fa411d4250fd55a465e9dcc464ea963a3f327f94df4804e32e14e2e958fc2e",
+  "official_target_mask_sha256": "a916ee6319f23d13e17a9d35f90794e01d132257ddbe2570ac76a24856611374",
+  "wall_seconds": 475.4,
+  "against_official": {
+    "labels": 44,
+    "accepted": 31,
+    "foreground_dice": 0.9948692649235323,
+    "different_voxels": 275,
+    "failed_labels": [8111, 8115, 8116, 8118, 8127, 8204, 8211, 8215, 8216, 8218, 8221, 8222, 8227]
+  },
+  "against_independent_fnit_same_conda": {
+    "labels": 44,
+    "accepted": 44,
+    "foreground_dice": 0.9988660454567865,
+    "different_voxels": 53
+  },
+  "conclusion": "Registration-header substitution alone does not meet the per-label criterion in the fresh Conda environment; downstream numerical differences remain."
+}

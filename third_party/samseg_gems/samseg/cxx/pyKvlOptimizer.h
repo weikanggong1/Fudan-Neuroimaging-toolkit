@@ -4,9 +4,6 @@
 #include "kvlAtlasMeshCollection.h"
 #include "pyKvlImage.h"
 
-#include "kvlAtlasMeshDeformationFixedStepGradientDescentOptimizer.h"
-#include "kvlAtlasMeshDeformationGradientDescentOptimizer.h"
-#include "kvlAtlasMeshDeformationConjugateGradientOptimizer.h"
 #include "kvlAtlasMeshDeformationLBFGSOptimizer.h"
 
 #include "pyKvlNumpy.h"
