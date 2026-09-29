@@ -2,12 +2,13 @@
 
 [返回首页](../../README.md) · [源码](../../src/fnit/flirt/) · [10 例 CPU 报告](../../validation/flirt/report.cpu.current.json) · [4 例 H100 配对报告](../../validation/flirt/report.public.json) · [公开示例报告](../../validation/flirt/public_example.current.json)
 
-`TorchFLIRT` 在 FNIT 内实现单被试线性配准。候选程序只依赖 PyTorch、NumPy 和 nibabel，运行时不调用 FSL。FSL 6.0.7.4 只用于本页的对照测试。
+`TorchFLIRT` 在 FNIT 内实现单被试线性配准和已知线性变换的重采样。候选程序只依赖 PyTorch、NumPy 和 nibabel，运行时不调用 FSL。FSL 6.0.7.4 只用于本页的对照测试。
 
 当前公开接口支持两组参数：
 
 - `dof=12, cost="corratio"`：12 自由度仿射配准，对应 FSL `flirt -dof 12 -cost corratio`；
 - `dof=6, cost="normmi"`：6 自由度刚体配准，对应 FSL `flirt -dof 6 -cost normmi`。
+- `applyxfm=True`：直接应用已知 `.mat`，或根据两张图的 qform/sform 对齐同一世界空间；不执行配准优化。
 
 实现包含 FSL scaled-mm 坐标、8/4/2/1 mm 多层搜索、Brent 坐标优化、correlation ratio、normalized mutual information 和默认三线性输出路径。CUDA 使用 float32，默认启用 TF32；没有使用 float16 或 bfloat16。
 
@@ -19,7 +20,9 @@
 | `reference` | `-ref` | NIfTI 路径或单帧 `nibabel` 空间影像 | fixed 图像。它的 shape、affine 和 header 空间信息决定输出网格。 |
 | `output` | `-out` | 可选路径 | 重采样图像的保存位置。`output` 与 `omat` 至少给出一个。 |
 | `omat` | `-omat` | 可选路径 | input→reference 的 4×4 FSL scaled-mm 矩阵。 |
-| `init` | `-init` | 可选 `.mat` 路径或 4×4 数组 | input→reference 的初始 FSL scaled-mm 矩阵；随后仍执行优化。 |
+| `init` | `-init` | 可选 `.mat` 路径或 4×4 数组 | 配准模式下是优化初值；`applyxfm=True` 时是直接应用的 input→reference FSL scaled-mm 矩阵。 |
+| `applyxfm` | `-applyxfm` | 布尔值 | 应用现成变换并在 reference 网格上重采样，不重新估计矩阵；默认 `False`。 |
+| `usesqform` | `-usesqform` | 布尔值 | 仅用于 `applyxfm=True`：按两图 qform/sform 的共同世界坐标对齐；默认 `False`，且不能同时提供 `init`。两图均须有有效 qform 或 sform。 |
 | `inweight` | `-inweight` | 可选 3D NIfTI | input 网格上的连续体素权重；shape 和 affine 必须与 input 相同。 |
 | `refweight` | `-refweight` | 可选 3D NIfTI | reference 网格上的连续体素权重；shape 和 affine 必须与 reference 相同。 |
 | `dof` | `-dof` | `6` 或 `12` | 变换自由度。当前只接受 `12/corratio` 和 `6/normmi` 两种组合。 |
@@ -73,7 +76,7 @@ result = model(
 
 | 字段 | 类型 | 含义 |
 |---|---|---|
-| `moved` | `FNITNifti1Image`，是 `nibabel.Nifti1Image` 的子类 | input 在 reference 网格上的 float32 图像。 |
+| `moved` | `FNITNifti1Image`，是 `nibabel.Nifti1Image` 的子类 | input 在 reference 网格上的图像；配准模式为 float32，`applyxfm` 保留 input 的存盘数据类型。 |
 | `matrix` / `fsl_matrix` | NumPy `(4, 4)` 数组 | input→reference 的 FSL scaled-mm 矩阵。 |
 | `moving_to_fixed_world` | NumPy `(4, 4)` 数组 | input world-RAS→reference world-RAS 的正向矩阵。 |
 | `fixed_to_moving_world` | NumPy `(4, 4)` 数组 | 重采样使用的 reference world-RAS→input world-RAS pull 矩阵。 |
@@ -82,7 +85,7 @@ result = model(
 写盘后的结构为：
 
 ```text
-subject_GM_to_template.nii.gz  # -out；reference 的 shape 和 affine，float32
+subject_GM_to_template.nii.gz  # -out；reference 的 shape 和 affine；配准模式为 float32
 subject_GM_to_template.mat     # -omat；4 行×4 列文本矩阵，input→reference
 ```
 
@@ -142,6 +145,46 @@ fnit-flirt -in b0_brain.nii.gz -ref T1_brain.nii.gz \
 
 这里 `-in` 是去脑 b0，`-ref` 是去脑 T1；`-out` 写 T1 网格上的 b0，`-omat` 写 b0→T1 矩阵。对应的原软件指令是 `flirt -in b0_brain.nii.gz -ref T1_brain.nii.gz -out b0_in_T1.nii.gz -omat b0_to_T1.mat -dof 6 -cost normmi`。真实数据对照见下文。
 
+## 已知线性变换：MNI152 分辨率转换
+
+同一 MNI152 世界空间的 1 mm 与 2 mm 模板转换，使用 `applyxfm=True, usesqform=True`。`reference` 决定输出的体素大小、形状、视野和 affine；这一步不寻找新的配准。输入目前须为有限值的单帧 3D NIfTI，使用 FSL FLIRT 默认的三线性插值及下采样前平滑。标签图所需的最近邻路径尚未实现。
+
+```python
+from fnit.flirt import run_flirt
+
+mni_1mm = "/absolute/path/MNI152_T1_1mm.nii.gz"  # 输入：原始 MNI152 T1 1 mm 强度图
+mni_2mm = "/absolute/path/MNI152_T1_2mm.nii.gz"  # reference：MNI152 2 mm 输出网格
+resampled_t1 = "/absolute/path/MNI152_T1_1mm_on_2mm.nii.gz"  # 输出：2 mm 网格上的输入强度
+world_alignment = "/absolute/path/MNI152_1mm_to_2mm.mat"  # 输出：input→reference 的 FSL scaled-mm 矩阵
+result = run_flirt(
+    input=mni_1mm,  # moving 3D NIfTI
+    reference=mni_2mm,  # 决定输出网格，不从此图复制强度
+    output=resampled_t1,  # 保存三线性重采样图
+    omat=world_alignment,  # 保存实际使用的 4×4 FSL 矩阵
+    applyxfm=True,  # 只应用变换，不执行配准搜索
+    usesqform=True,  # 使两图的 NIfTI 世界坐标重合
+    device="cuda:0",  # PyTorch 设备；CPU 可写 "cpu"
+    overwrite=False,  # 保护已存在的结果
+)
+```
+
+同一计算也可直接取得内存结果：`TorchFLIRT(device="cuda:0").applyxfm(mni_1mm, mni_2mm, usesqform=True)`。如果已有由 FLIRT 产生的 input→reference `.mat`，把上面 `usesqform=True` 改为 `init="/absolute/path/input_to_reference.mat"`，保留 `applyxfm=True`；这时直接应用该矩阵。`init` 和 `usesqform` 必须二选一。`-inweight`、`-refweight`、非默认 `-dof/-cost` 只用于配准，不用于 `applyxfm`。
+
+FNIT 命令行与对应原软件命令：
+
+```bash
+fnit-flirt -in /absolute/path/MNI152_T1_1mm.nii.gz \
+  -ref /absolute/path/MNI152_T1_2mm.nii.gz \
+  -applyxfm -usesqform -out /absolute/path/MNI152_T1_1mm_on_2mm.nii.gz \
+  -omat /absolute/path/MNI152_1mm_to_2mm.mat --device cuda:0
+
+flirt -in /absolute/path/MNI152_T1_1mm.nii.gz \
+  -ref /absolute/path/MNI152_T1_2mm.nii.gz \
+  -applyxfm -usesqform -out /absolute/path/fsl_MNI152_T1_1mm_on_2mm.nii.gz
+```
+
+对于已有 `.mat`，两者均改用 `-applyxfm -init /absolute/path/input_to_reference.mat`。FSL [FLIRT User Guide](https://fsl.fmrib.ox.ac.uk/fsl/docs/registration/flirt/user_guide.html) 与 [FAQ 的分辨率转换示例](https://fsl.fmrib.ox.ac.uk/fsl/docs/registration/flirt/faq.html) 说明了这两种调用。输出 `.mat` 为 FSL scaled-mm 坐标；虽然 `usesqform` 对应世界空间恒等映射，它的 `.mat` 通常不等于单位矩阵。
+
 ## `.mat` 坐标约定
 
 FSL `.mat` 不是 NIfTI world-RAS affine。设 input 和 reference 的 voxel-to-world 矩阵为 `W_in`、`W_ref`，对应的 FSL scaled-mm 基为 `S_in`、`S_ref`，FLIRT 矩阵为 `A`，则 world-RAS 正向变换为：
@@ -153,6 +196,17 @@ W_ref @ inverse(S_ref) @ A @ S_in @ inverse(W_in)
 FSL 在 voxel-to-world 线性部分行列式为正时翻转 scaled-mm 第一轴。FNIT 的 `.mat` 读写和 world-RAS 转换使用同一规则。不能把该矩阵直接当作 FreeSurfer LTA 或 NIfTI affine。
 
 ## 真实数据测量
+
+**MNI152 模板 1 mm↔2 mm 的 `applyxfm -usesqform`。** 以 FSL 发布的原始 MNI152_T1 1 mm、2 mm 图像为双向输入及 reference，FNIT 与官方 FLIRT 各自从新进程读图、重采样并写出 gzip NIfTI。两边输出的 shape 和 affine 均等于 reference。源码哈希、模板 SHA-256、逐方向矩阵和完整指标见 [CPU 实测报告](../../validation/flirt/applyxfm_mni.cpu.json)、[H100 实测报告](../../validation/flirt/applyxfm_mni.gpu.json)；[重测脚本](../../validation/flirt/benchmark_applyxfm.py)不在 FNIT 运行时调用。
+
+| 方向 | 输出尺寸 | 全体素 Pearson r | 全体素 MAE；最大绝对差 | FSL CPU / FNIT CPU 完整命令耗时 |
+|---|---:|---:|---:|---:|
+| 1→2 mm | 91×109×91 | 0.99999999997 | 0.000450；1 | 1.22 / 3.06 秒 |
+| 2→1 mm | 182×218×182 | 1.0 | 0；0 | 1.36 / 3.58 秒 |
+
+官方 FSL 安装在这台服务器上对两次命令都返回状态码 255；脚本每次先删旧文件，只在新输出存在、gzip 可读且尺寸与 affine 合法时才计算指标。FSL `-version` 也返回 255，因此这里把退出状态保留在报告中，而不将其解释为图像计算失败。时间是当次共享节点的观察值，包含进程启动和文件读写。
+
+H100 的两方向精度与上表 CPU 完全相同，FNIT 完整命令分别用时 5.34 和 4.61 秒。测试时两块 H100 的已用显存约 69 GiB、利用率 100%；这些耗时不用于推断 GPU 加速比。
 
 修订依据 FSL FLIRT 2111.2 源码：角度样本与 8 mm 搜索代价插值按原实现的 float32 运算；候选姿态的自由优化使用 `min(dof, 7)`。旧版始终优化 7 个参数，使 `-dof 6` 的候选姿态含额外缩放。修订没有改变 `.mat` 的 scaled-mm 坐标定义或输出网格。
 

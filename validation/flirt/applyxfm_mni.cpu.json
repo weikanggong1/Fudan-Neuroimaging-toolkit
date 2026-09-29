@@ -1,0 +1,101 @@
+{
+  "benchmark": "FSL MNI152_T1 1mm/2mm applyxfm -usesqform",
+  "candidate_device": "cpu",
+  "timing_scope": "fresh CLI process, image loading, resampling, gzip output",
+  "fnit_core_sha256": "721b7a9491c7947eee9f0389c81835ea0d3683aa8fa44f7709dcce5e6951ee7c",
+  "fnit_standalone_sha256": "873fbbce98b7f1fb5c8ec60b01fd5b89a6782ba6adf0b684e0bace029d20bb6d",
+  "cases": [
+    {
+      "direction": "1mm_to_2mm",
+      "moving_sha256": "d1f03e160c2548592a01d98d44d7e0ffa8a8ef58bc9b07d26369e214ba170edb",
+      "reference_sha256": "0585cd056bf5ccfb8bf97a5f6a66082d4e7caad525718fc11e40d80a827fcb92",
+      "reference_shape": [
+        91,
+        109,
+        91
+      ],
+      "output_shape_matches_reference": true,
+      "fsl_affine_matches_reference": true,
+      "fnit_affine_matches_reference": true,
+      "pearson_all_voxels": 0.999999999967827,
+      "mae_all_voxels": 0.0004497971967794001,
+      "mae_nonzero_union": 0.00046469891094602644,
+      "max_absolute_difference": 1.0,
+      "fsl_wall_seconds": 1.220431863795966,
+      "fsl_exit_status": 255,
+      "fnit_wall_seconds": 3.0620429199188948,
+      "fnit_fsl_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "direction": "2mm_to_1mm",
+      "moving_sha256": "0585cd056bf5ccfb8bf97a5f6a66082d4e7caad525718fc11e40d80a827fcb92",
+      "reference_sha256": "d1f03e160c2548592a01d98d44d7e0ffa8a8ef58bc9b07d26369e214ba170edb",
+      "reference_shape": [
+        182,
+        218,
+        182
+      ],
+      "output_shape_matches_reference": true,
+      "fsl_affine_matches_reference": true,
+      "fnit_affine_matches_reference": true,
+      "pearson_all_voxels": 1.0,
+      "mae_all_voxels": 0.0,
+      "mae_nonzero_union": 0.0,
+      "max_absolute_difference": 0.0,
+      "fsl_wall_seconds": 1.3556450088508427,
+      "fsl_exit_status": 255,
+      "fnit_wall_seconds": 3.5764859532937407,
+      "fnit_fsl_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  ]
+}

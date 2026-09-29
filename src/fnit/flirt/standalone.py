@@ -138,6 +138,8 @@ def run_flirt(
     refweight=None,
     dof=12,
     cost="corratio",
+    applyxfm=False,
+    usesqform=False,
     device=None,
     overwrite=False,
 ):
@@ -145,8 +147,8 @@ def run_flirt(
 
     ``input`` is the moving image and ``reference`` defines the output grid.
     ``init``, ``omat`` and ``result.matrix`` use FSL scaled-mm coordinates and
-    map input to reference. Supported profiles are 12-DOF/corratio and
-    6-DOF/normmi.
+    map input to reference. With ``applyxfm=True``, ``init`` is applied without
+    registration, or ``usesqform=True`` aligns the images' world coordinates.
     """
     if (dof, cost) not in ((12, "corratio"), (6, "normmi")):
         raise NotImplementedError("supported profiles are -dof 12 -cost corratio and -dof 6 -cost normmi")
@@ -156,15 +158,19 @@ def run_flirt(
         (input, reference, init, inweight, refweight),
         overwrite,
     )
-    result = TorchFLIRT(
+    if usesqform and not applyxfm:
+        raise ValueError("usesqform requires applyxfm=True")
+    if applyxfm and (inweight is not None or refweight is not None or (dof, cost) != (12, "corratio")):
+        raise ValueError("applyxfm does not accept registration weights, dof, or cost")
+    model = TorchFLIRT(
         device=_default_device() if device is None else device, dof=dof, cost=cost
-    )(
-        input,
-        reference,
-        init=init,
-        inweight=inweight,
-        refweight=refweight,
     )
+    if applyxfm:
+        result = model.applyxfm(input, reference, init=init, usesqform=usesqform)
+    else:
+        result = model(
+            input, reference, init=init, inweight=inweight, refweight=refweight,
+        )
     _write_outputs_atomic(result, selected_outputs, overwrite)
     return result
 

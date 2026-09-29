@@ -12,7 +12,8 @@ def build_parser(prog="fnit-flirt"):
         description=(
             "Run the source-derived PyTorch implementation of FLIRT's supported "
             "12-DOF correlation-ratio or 6-DOF normalized-mutual-information "
-            "registration path. Other profiles are rejected."
+            "registration path, or apply a known transform with -applyxfm. "
+            "Other profiles are rejected."
         ),
         allow_abbrev=False,
     )
@@ -30,7 +31,15 @@ def build_parser(prog="fnit-flirt"):
     )
     parser.add_argument(
         "-init", "--init",
-        help="initial input-to-reference FSL scaled-mm matrix",
+        help="initial registration matrix, or the matrix applied by -applyxfm",
+    )
+    parser.add_argument(
+        "-applyxfm", action="store_true",
+        help="resample without estimating a new registration",
+    )
+    parser.add_argument(
+        "-usesqform", action="store_true",
+        help="with -applyxfm, align input and reference qform/sform world coordinates",
     )
     parser.add_argument(
         "-inweight", "--inweight",
@@ -71,6 +80,8 @@ def main(argv=None, *, prog="fnit-flirt"):
             refweight=args.refweight,
             dof=args.dof,
             cost=args.cost,
+            applyxfm=args.applyxfm,
+            usesqform=args.usesqform,
             device=args.device,
             overwrite=args.overwrite,
         )

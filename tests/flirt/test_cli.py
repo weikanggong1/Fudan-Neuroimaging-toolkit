@@ -4,6 +4,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
+import nibabel as nib
 import pytest
 
 from fnit import cli as root_cli
@@ -161,3 +162,76 @@ def test_cli_rejects_unimplemented_cost(capsys):
         ])
     assert error.value.code == 2
     assert "invalid choice" in capsys.readouterr().err
+
+
+def test_applyxfm_usesqform_and_saved_matrix_match_known_world_grid(tmp_path):
+    x, y, z = np.indices((5, 5, 5))
+    moving = nib.Nifti1Image((x + 2 * y + 3 * z).astype(np.float32), np.diag([2, 2, 2, 1]))
+    fixed = nib.Nifti1Image(np.zeros((9, 9, 9), dtype=np.float32), np.eye(4))
+    output = tmp_path / "upsampled.nii.gz"
+    matrix = tmp_path / "world_alignment.mat"
+    result = standalone.run_flirt(
+        moving, fixed, output=output, omat=matrix,
+        applyxfm=True, usesqform=True, device="cpu",
+    )
+    actual = nib.load(output)
+    assert actual.shape == fixed.shape
+    np.testing.assert_allclose(actual.affine, fixed.affine)
+    fx, fy, fz = np.indices(fixed.shape)
+    np.testing.assert_allclose(actual.get_fdata()[2:7, 2:7, 2:7],
+                               (fx + 2 * fy + 3 * fz)[2:7, 2:7, 2:7] / 2,
+                               atol=1e-5)
+    np.testing.assert_allclose(result.moving_to_fixed_world, np.eye(4), atol=1e-8)
+    np.testing.assert_allclose(np.loadtxt(matrix), result.matrix, atol=1e-8)
+
+    from_matrix = standalone.run_flirt(
+        moving, fixed, output=tmp_path / "from_matrix.nii.gz",
+        applyxfm=True, init=matrix, device="cpu",
+    )
+    np.testing.assert_allclose(from_matrix.moved.get_fdata(), actual.get_fdata(), atol=1e-5)
+
+
+def test_applyxfm_requires_one_transform_and_rejects_registration_options(tmp_path):
+    output = tmp_path / "resampled.nii.gz"
+    with pytest.raises(ValueError, match="exactly one"):
+        standalone.run_flirt("in.nii.gz", "ref.nii.gz", output=output, applyxfm=True)
+    with pytest.raises(ValueError, match="exactly one"):
+        standalone.run_flirt("in.nii.gz", "ref.nii.gz", output=output,
+                             applyxfm=True, usesqform=True, init="a.mat")
+    with pytest.raises(ValueError, match="requires applyxfm"):
+        standalone.run_flirt("in.nii.gz", "ref.nii.gz", output=output,
+                             usesqform=True)
+    with pytest.raises(ValueError, match="does not accept"):
+        standalone.run_flirt("in.nii.gz", "ref.nii.gz", output=output,
+                             applyxfm=True, usesqform=True, inweight="w.nii.gz")
+
+
+def test_cli_applyxfm_usesqform(tmp_path):
+    moving = tmp_path / "in.nii.gz"
+    fixed = tmp_path / "ref.nii.gz"
+    nib.save(nib.Nifti1Image(np.ones((3, 3, 3), dtype=np.float32), np.eye(4)), moving)
+    nib.save(nib.Nifti1Image(np.zeros((3, 3, 3), dtype=np.float32), np.eye(4)), fixed)
+    output = tmp_path / "out.nii.gz"
+    assert cli.main(["-in", str(moving), "-ref", str(fixed), "-out", str(output),
+                     "-applyxfm", "-usesqform", "--device", "cpu"]) == 0
+    assert output.is_file()
+
+
+def test_applyxfm_downsampling_preserves_boundary_and_input_dtype():
+    moving = nib.Nifti1Image(np.full((5, 5, 5), 100, dtype=np.int16), np.eye(4))
+    fixed = nib.Nifti1Image(np.zeros((3, 3, 3), dtype=np.float32), np.diag([2, 2, 2, 1]))
+    result = TorchFLIRT(device="cpu").applyxfm(moving, fixed, usesqform=True)
+    assert result.moved.get_data_dtype() == np.dtype("int16")
+    np.testing.assert_array_equal(np.asarray(result.moved.dataobj), 100)
+
+
+def test_applyxfm_applies_nonidentity_fsl_matrix_in_input_to_reference_direction():
+    x = np.indices((5, 5, 5))[0].astype(np.float32)
+    affine = np.diag([-1, 1, 1, 1])
+    moving = nib.Nifti1Image(x, affine)
+    fixed = nib.Nifti1Image(np.zeros_like(x), affine)
+    matrix = np.eye(4)
+    matrix[0, 3] = 1
+    result = TorchFLIRT(device="cpu").applyxfm(moving, fixed, init=matrix)
+    np.testing.assert_allclose(result.moved.get_fdata()[1:5, 2, 2], [0, 1, 2, 3])
+    np.testing.assert_allclose(result.matrix, matrix)

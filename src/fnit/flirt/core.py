@@ -21,7 +21,7 @@ import torch
 import torch.nn.functional as F
 
 from .._nib import new_image
-from .coordinates import flirt_to_world_affine, voxel_to_fsl_scaled_mm
+from .coordinates import flirt_to_world_affine, voxel_to_fsl_scaled_mm, world_to_flirt_affine
 from .types import FLIRTResult, _load_volume, _single_frame
 
 
@@ -282,27 +282,32 @@ def _blur_kernel(final_size, initial_size, *, device):
     return kernel / kernel.sum()
 
 
-def _convolve_axis(data, kernel, axis):
+def _convolve_axis(data, kernel, axis, *, boundary="zero"):
     if kernel.numel() == 1:
         return data
     radius = int(kernel.numel()) // 2
     pad_shape = list(data.shape)
     pad_shape[axis] = radius
-    zeros = data.new_zeros(pad_shape)
-    padded = torch.cat((zeros, data, zeros), dim=axis)
+    if boundary == "replicate":
+        left = data.narrow(axis, 0, 1).expand(pad_shape)
+        right = data.narrow(axis, data.shape[axis] - 1, 1).expand(pad_shape)
+    else:
+        left = right = data.new_zeros(pad_shape)
+    padded = torch.cat((left, data, right), dim=axis)
     result = torch.zeros_like(data)
     for index, coefficient in enumerate(kernel):
         result.add_(padded.narrow(axis, index, data.shape[axis]) * coefficient)
     return result
 
 
-def _blur(data, final_size, voxel_sizes):
+def _blur(data, final_size, voxel_sizes, *, boundary="zero"):
     result = data
     for axis in range(3):
         result = _convolve_axis(
             result,
             _blur_kernel(final_size, voxel_sizes[axis], device=data.device),
             axis,
+            boundary=boundary,
         )
     return result
 
@@ -1413,6 +1418,8 @@ def _resample_output(
     moving_voxel_sizes,
     fixed_voxel_sizes,
     device,
+    *,
+    blur_boundary="zero",
 ):
     """Apply FLIRT's default trilinear output path on the reference grid."""
     moving = torch.as_tensor(
@@ -1422,7 +1429,8 @@ def _resample_output(
     # low-pass filters the input to the smallest reference sampling distance.
     # This step is deliberately absent from FSL applywarp and is material when
     # a sub-millimetre input is written on a 2 mm template grid.
-    moving = _blur(moving, min(fixed_voxel_sizes), moving_voxel_sizes)
+    moving = _blur(moving, min(fixed_voxel_sizes), moving_voxel_sizes,
+                   boundary=blur_boundary)
     grid = _voxel_grid(fixed_shape, device=device)
     moving_fsl = torch.as_tensor(moving_fsl, dtype=torch.float32, device=device)
     fixed_fsl = torch.as_tensor(fixed_fsl, dtype=torch.float32, device=device)
@@ -1434,6 +1442,20 @@ def _resample_output(
     output = torch.zeros(grid.shape[1], dtype=torch.float32, device=device)
     output[valid] = _manual_trilinear(moving, coordinates[:, valid])
     return output.reshape(fixed_shape)
+
+
+def _load_fsl_matrix(init):
+    if isinstance(init, (str, os.PathLike)):
+        matrix = np.loadtxt(os.fspath(init), dtype=np.float64)
+    else:
+        matrix = np.asarray(init, dtype=np.float64)
+    if matrix.shape != (4, 4) or not np.isfinite(matrix).all():
+        raise ValueError("init must be a finite FSL 4x4 matrix or matrix path")
+    if not np.allclose(matrix[3], (0, 0, 0, 1), atol=1e-8):
+        raise ValueError("init must be a homogeneous affine matrix")
+    if abs(float(np.linalg.det(matrix[:3, :3]))) < 1e-10:
+        raise ValueError("init must be invertible")
+    return matrix
 
 
 class TorchFLIRT:
@@ -1500,18 +1522,8 @@ class TorchFLIRT:
         )
         if init is None:
             initial_matrix = np.eye(4, dtype=np.float64)
-        elif isinstance(init, (str, os.PathLike)):
-            initial_matrix = np.loadtxt(os.fspath(init), dtype=np.float64)
         else:
-            initial_matrix = np.asarray(init, dtype=np.float64)
-        if initial_matrix.shape != (4, 4):
-            raise ValueError("init must be an FSL 4x4 matrix or matrix path")
-        if not np.isfinite(initial_matrix).all():
-            raise ValueError("init must contain only finite values")
-        if not np.allclose(initial_matrix[3], (0, 0, 0, 1), atol=1e-8):
-            raise ValueError("init must be a homogeneous affine matrix")
-        if abs(float(np.linalg.det(initial_matrix[:3, :3]))) < 1e-10:
-            raise ValueError("init must be invertible")
+            initial_matrix = _load_fsl_matrix(init)
         qsform = (
             fixed_fsl
             @ np.linalg.inv(fixed_world)
@@ -1598,6 +1610,58 @@ class TorchFLIRT:
             moving_to_fixed_world=forward_world,
             fixed_to_moving_world=pull_world,
             qc=qc,
+        )
+
+    def applyxfm(self, moving, fixed, *, init=None, usesqform=False):
+        """Apply a known FSL matrix or the images' qform/sform on a 3D grid."""
+        if (init is None and not usesqform) or (init is not None and usesqform):
+            raise ValueError("provide exactly one of init or usesqform=True")
+        moving = _load_volume(moving, "moving")
+        fixed = _load_volume(fixed, "fixed")
+        moving_data = _single_frame(moving, "moving")
+        fixed_data = _single_frame(fixed, "fixed")
+        moving_world = np.asarray(moving.affine, dtype=np.float64)
+        fixed_world = np.asarray(fixed.affine, dtype=np.float64)
+        moving_sizes = tuple(float(value) for value in moving.header.get_zooms()[:3])
+        fixed_sizes = tuple(float(value) for value in fixed.header.get_zooms()[:3])
+        moving_fsl = voxel_to_fsl_scaled_mm(moving_world, moving_data.shape, moving_sizes)
+        fixed_fsl = voxel_to_fsl_scaled_mm(fixed_world, fixed_data.shape, fixed_sizes)
+        if usesqform:
+            if any(int(image.header["qform_code"]) + int(image.header["sform_code"]) == 0
+                   for image in (moving, fixed)):
+                raise ValueError("usesqform requires qform or sform in both images")
+            matrix = world_to_flirt_affine(
+                np.eye(4), moving_world, fixed_world,
+                moving_data.shape, fixed_data.shape, moving_sizes, fixed_sizes,
+            )
+        else:
+            matrix = _load_fsl_matrix(init)
+        moved_data = _resample_output(
+            moving_data, fixed_data.shape, moving_fsl, fixed_fsl, matrix,
+            moving_sizes, fixed_sizes, self.device, blur_boundary="replicate",
+        ).cpu().numpy()
+        moved_data = moved_data.astype(moving.get_data_dtype(), copy=False)
+        forward_world = flirt_to_world_affine(
+            matrix, moving_world, fixed_world,
+            moving_data.shape, fixed_data.shape, moving_sizes, fixed_sizes,
+        )
+        pull_world = np.linalg.inv(forward_world)
+        pull_world[3] = (0, 0, 0, 1)
+        return FLIRTResult(
+            moved=new_image(moved_data, fixed),
+            matrix=matrix,
+            moving_to_fixed_world=forward_world,
+            fixed_to_moving_world=pull_world,
+            qc={
+                "backend": "pytorch-fsl-flirt-2111.2-source-derived",
+                "mode": "applyxfm",
+                "transform_source": "qform/sform" if usesqform else "init",
+                "interpolation": "trilinear with default FLIRT blur",
+                "device": str(self.device),
+                "tf32": bool(torch.backends.cuda.matmul.allow_tf32),
+                "matrix_coordinate_system": "FSL scaled-mm",
+                "current_input_compared_with_fsl": False,
+            },
         )
 
     def run(
