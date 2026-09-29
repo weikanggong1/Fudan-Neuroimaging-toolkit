@@ -19,6 +19,8 @@
 
 压缩路径中，float64 分块 mMIGP 的投影与原 CPU mMIGP 在相同符号下相对误差约 4.5–6.0×10⁻¹⁵。GPU Lasso-LARS 在同一投影输入上，VBM 字典对 sklearn 的相对误差 1.04×10⁻⁵，见[字典对照](dicl64_one.json)；100 个真实小批次的 CPU 张量 LARS 与 sklearn 字典相对差约 2.86×10⁻⁹。GPU FLICA 的同初始化 100 次更新相对误差约 2.45×10⁻⁹。其余差异主要来自 mMIGP 特征向量的任意正负号：只改符号并继续用原 CPU sklearn/FLICA，三项 course 从 0.266–0.741 变为 1.0，见[控制实验](orientation_effect.json)。固定随机种子的字典学习并不自动消除这个符号变化。符号对齐实验读取了 CPU 参考 `U.npy`，用于检验各 GPU 数值步骤，**不是独立 GPU 运行模式的成绩**。
 
+另用**当前默认 batch=32 的 GPU mMIGP 投影**作同输入控制：10 列中 4 列与 CPU 特征向量符号相反；对齐后 `U` 相对误差为 6.19×10⁻¹⁵。两组只在符号上不同，后续均使用相同的 CPU sklearn DicL 和原 FLICA。未对齐时，最优一对一成分匹配的 course 相关为 0.351/0.596/0.892，几乎复现独立 GPU 运行；对齐后为 1/1/1。未对齐的三个 course 子空间主角为 10.4°/33.1°/61.6°；用 GPU course 最优线性拟合中心化 CPU course 后，Frobenius 相对残差为 0.574。因而差异不只是成分置换或整体符号，而是符号改变后 DicL/FLICA 拟合到了不同的子空间。该实验在后续阶段使用 CPU，仅用于定位原因；[不含被试 ID 的汇总](orientation_current_default32.json)。
+
 ## 耗时与资源
 
 以下都是单次观测。CPU 为 headcw Xeon Gold 6418H；GPU 为 gpucw1 H100 PCIe，当时有其他 GPU 作业，占用和计算负载会影响耗时。不同路径输出边界不同时不计算“总加速比”。
