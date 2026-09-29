@@ -662,13 +662,14 @@ class FSLNormalizedMutualInformation(FSLCorrelationRatio):
         minus_weight = torch.where(fractional < 0.5, 1 - centre_weight, 0)
         plus_weight = torch.where(fractional > 0.5, 1 - centre_weight, 0)
         stride = self.bins + 1
-        joint = torch.zeros(stride * stride, dtype=torch.float32, device=self.device)
+        # Accumulate atomics in float64, then keep FSL's float32 entropy path.
+        joint = torch.zeros(stride * stride, dtype=torch.float64, device=self.device)
         for bin_id, bin_weight in (
             (centre, centre_weight), (minus, minus_weight), (plus, plus_weight)
         ):
             joint.scatter_add_(0, self.bin_index * stride + bin_id,
-                               weight * bin_weight)
-        joint = joint.reshape(stride, stride)
+                               (weight * bin_weight).double())
+        joint = joint.reshape(stride, stride).float()
         first = joint.sum(1)
         second = joint.sum(0)
         total = second.sum()

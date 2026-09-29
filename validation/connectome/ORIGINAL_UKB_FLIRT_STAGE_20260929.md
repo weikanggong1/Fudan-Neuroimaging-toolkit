@@ -20,7 +20,7 @@ flirt -in dwi_meanbzero_brain.nii.gz -ref T1_brain.nii.gz -cost normmi -dof 6 -o
 flirt -in dwi_meanbzero_brain.nii.gz -ref T1_brain.nii.gz -applyxfm -init DWI_to_T1_FSL.mat -out b0_in_T1_FSL.nii.gz
 ```
 
-输入是同一真实 UKB 配对 DWI/T1，平均 b0 严格用原脚本的 MRtrix 命令、脑图严格用原脚本的 BET 参数生成。归档中现成的 bedpostX `nodif_brain` 与本脚本的 BET 结果不同，本次没有用它代替配准输入。原始 MRtrix 固定在 `eeab681d3e0cb004cf1d1d31579d3892197ef5b6`，官方参考为 FSL 6.0.7.4。真实原始图像、矩阵及主体标识留在私有工作区；仓库仅提供[聚合数值](original_ukb_flirt.public.json)。
+输入是同一真实 UKB 配对 DWI/T1，平均 b0 严格用原脚本的 MRtrix 命令、脑图严格用原脚本的 BET 参数生成。归档中现成的 bedpostX `nodif_brain` 与本脚本的 BET 结果不同，本次没有用它代替配准输入。原始 MRtrix 固定在 `eeab681d3e0cb004cf1d1d31579d3892197ef5b6`，官方参考为 FSL 6.0.7.4。真实原始图像、矩阵及主体标识留在私有工作区；仓库仅提供[聚合数值](original_ukb_flirt.public.json)。2026-09-30 的复测将 NMI 联合直方图改为 float64 累加，再转回 float32 计算熵；既有 FSL 参考输入和矩阵未更换。
 
 ## FNIT 的输入与输出
 
@@ -62,21 +62,21 @@ python tools/benchmark_connectome_registration.py \
 
 | 指标 | 修订前 FNIT GPU | 修订后 FNIT CPU | 修订后 FNIT H100 TF32 |
 |---|---:|---:|---:|
-| 世界坐标位移 RMS，相对 FSL | 0.195330 mm | 0.009932 mm | 0.009983 mm |
-| 世界坐标位移 95% 位 | 0.285483 mm | 0.015217 mm | 0.015355 mm |
-| 重采样图前景 Pearson | 0.999512 | 0.9999993 | 0.9999724 |
-| 重采样图前景 Dice | 0.997655 | 0.999892 | 0.999557 |
-| 重采样图前景 MAE，原始强度 | 75.967 | 2.903 | 17.411 |
+| 世界坐标位移 RMS，相对 FSL | 0.195330 mm | 0.009469 mm | 0.009553 mm |
+| 世界坐标位移 95% 位 | 0.285483 mm | 0.014270 mm | 0.014491 mm |
+| 重采样图前景 Pearson | 0.999512 | 0.99999935 | 0.99997225 |
+| 重采样图前景 Dice | 0.997655 | 0.999898 | 0.999554 |
+| 重采样图前景 MAE，原始强度 | 75.967 | 2.770 | 17.447 |
 
 修复来自 FSL 2111.2 的 `optimise_strategy3()`：它先允许 12 自由度粗角搜索，然后按 `min(用户请求的自由度, 7)` 自由优化每个候选。旧版 FNIT 在此处固定用 7 自由度，因此 `-dof 6` 候选仍带额外缩放。两例 8 mm 入选候选与 FSL 最近矩阵的 Frobenius 距离从 0.790、3.883 降至 0.00068、0.00139；后续最终位移随之缩小。粗网格平移/缩放及细网格最小点原本已接近 FSL，误差主要从候选自由优化开始。12-DOF 路径仍用 7 自由度候选优化，符合原 schedule。
 
 | 本例时间 | 范围 | 实测 |
 |---|---|---:|
 | FSL CPU | 完整 `flirt` 命令，含读写 | 10.02 秒 |
-| FNIT CPU | 已载入影像后的求解和重采样调用，不含写盘 | 45.26 秒 |
-| FNIT H100 | 与 CPU 相同调用范围；当时 GPU 被其他任务持续占满 | 337.75 秒 |
+| FNIT CPU | 已载入影像后的求解和重采样调用，不含写盘 | 49.57 秒 |
+| FNIT H100 | 与 CPU 相同调用范围；当时 GPU 被其他任务持续占满 | 447.83 秒 |
 
-GPU 本次时间不能用于计算加速比。FSL 与 FNIT 仍未逐矩阵或逐体素一致；本表只验证一例真实跨模态配对。FNIT 的 output 网格、矩阵方向与 FSL 相同。原始 UKB 图像及被试标识不进入公开仓库；公开 T1w 对照图见[FLIRT 功能页](../../docs/flirt/README.md)。
+GPU 本次时间不能用于计算加速比。FSL 与 FNIT 仍未逐矩阵或逐体素一致；本表只验证一例真实跨模态配对。另用同一例 UKB 已校正 DWI 的平均 b0、固定脑掩膜及官方 `brain.mgz` 做两次独立 GPU 配准，最终 4×4 世界矩阵的最大元素差为 0；此前 float32 联合直方图的固定位置 NMI 代价在 20 次计算中会波动 1–2 个 float32 ULP，float64 累加后在相同测试中波动为 0。该重复性不代表随机追踪或最终矩阵已与 MRtrix 对齐。FNIT 的 output 网格、矩阵方向与 FSL 相同。原始 UKB 图像及被试标识不进入公开仓库；公开 T1w 对照图见[FLIRT 功能页](../../docs/flirt/README.md)。
 
 ## 参考文献与原实现
 

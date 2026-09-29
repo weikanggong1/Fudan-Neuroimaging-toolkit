@@ -225,12 +225,12 @@ H100 的两方向精度与上表 CPU 完全相同，FNIT 完整命令分别用�
 
 | 指标 | 修订前 FNIT GPU | 修订后 FNIT CPU | 修订后 FNIT H100 TF32 |
 |---|---:|---:|---:|
-| 相对 FSL 矩阵位移 RMS | 0.195330 mm | 0.009932 mm | 0.009983 mm |
-| moved Pearson | 0.999512 | 0.9999993 | 0.9999724 |
-| moved Dice | 0.997655 | 0.999892 | 0.999557 |
-| moved MAE，原始强度 | 75.967 | 2.903 | 17.411 |
+| 相对 FSL 矩阵位移 RMS | 0.195330 mm | 0.009469 mm | 0.009553 mm |
+| moved Pearson | 0.999512 | 0.99999935 | 0.99997225 |
+| moved Dice | 0.997655 | 0.999898 | 0.999554 |
+| moved MAE，原始强度 | 75.967 | 2.770 | 17.447 |
 
-FSL 完整 CPU 命令用时 10.02 秒；FNIT CPU 已载入图像后的求解与重采样调用为 45.26 秒，不含写盘。修订后的 H100 调用为 337.75 秒，当时 GPU 被其他作业持续占满，不计算加速比。这是一例跨模态病例，不代表所有 b0→T1 图像均达到 0.01 mm。
+FSL 完整 CPU 命令用时 10.02 秒；FNIT CPU 已载入图像后的求解与重采样调用为 49.57 秒，不含写盘。修订后的 H100 调用为 447.83 秒，当时 GPU 被其他作业持续占满，不计算加速比。NMI 联合直方图改为 float64 累加后，用另一组同一例 UKB 已校正 b0、固定脑掩膜和 FreeSurfer `brain.mgz` 做两次独立 GPU 配准，最终 4×4 世界矩阵的最大元素差为 0；这不代表独立追踪重复性。这是一例跨模态病例，不代表所有 b0→T1 图像均达到 0.01 mm。
 
 **12-DOF/corratio，真实 GM→UKB group GM。** 10 例真实 T1w 的 GM PVE 用同一模板，FSL 官方矩阵另经 `flirt -applyxfm` 生成直接重采样参考图；在 `template_GM > 0` 的 258,990 个体素比较。修订后的 [CPU 10 例报告](../../validation/flirt/report.cpu.current.json)和 [H100 4 例报告](../../validation/flirt/report.gpu.current.json)保留各自测量源码 SHA-256。最终源码进一步限制 6-DOF 候选自由度，对 12-DOF 仍使用 7 自由度；同一真实 GM 病例的最终 `.mat` 与 10 例测量源码的 `.mat` 逐元素一致，见[源码范围核对](../../validation/runtime_dependencies/flirt_profile_source_equivalence.public.json)。
 

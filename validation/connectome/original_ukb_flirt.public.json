@@ -1,5 +1,5 @@
 {
-  "date": "2026-09-29",
+  "date": "2026-09-30",
   "profile": "6-DOF normmi；8 mm 默认 searchcost corratio",
   "input": {
     "description": "同一例真实 UK Biobank 平均去脑 b0 到去脑 T1",
@@ -14,30 +14,29 @@
     "cpu_full_command_wall_seconds": 10.02
   },
   "candidate": {
-    "source_sha256": "f2c530cbe75e06e0354a582f12d02b0d3971b8414d70c9c3cdb16e97ab4460f3",
+    "source_file": "src/fnit/flirt/core.py",
+    "source_sha256": "b0ed42eb1032c89e643e17b27c96eb74a1a2df31debfeea3a0ed7499e8b2bd92",
     "cpu": {
       "matrix_world_grid_displacement_mm": {
-        "mean": 0.00918289958234025,
-        "p95": 0.01521724009479447,
-        "maximum": 0.02001116498562255,
-        "rms": 0.009932427354112115
+        "mean": 0.008786043281606096,
+        "p95": 0.014269833985586216,
+        "rms": 0.009468586518922148
       },
-      "moved_foreground_pearson": 0.9999992768227066,
-      "moved_foreground_dice": 0.9998922109777963,
-      "moved_foreground_mae_raw_intensity": 2.9034909347167677,
-      "call_wall_seconds_including_optimization_and_resampling_excluding_file_io": 45.256363759282976
+      "moved_foreground_pearson": 0.9999993460403213,
+      "moved_foreground_dice": 0.9998981469620613,
+      "moved_foreground_mae_raw_intensity": 2.7697982788085938,
+      "call_wall_seconds_including_optimization_and_resampling_excluding_file_io": 49.568311298731714
     },
     "h100_cuda_tf32": {
       "matrix_world_grid_displacement_mm": {
-        "mean": 0.00922314823105298,
-        "p95": 0.015355113970253355,
-        "maximum": 0.02030113473276326,
-        "rms": 0.009983306166922761
+        "mean": 0.008860959487252176,
+        "p95": 0.014491115916335262,
+        "rms": 0.009553068561120478
       },
-      "moved_foreground_pearson": 0.9999723527177774,
-      "moved_foreground_dice": 0.9995572880786147,
-      "moved_foreground_mae_raw_intensity": 17.411342636421526,
-      "call_wall_seconds_under_gpu_contention": 337.75111634191126
+      "moved_foreground_pearson": 0.9999722548082193,
+      "moved_foreground_dice": 0.9995544752430703,
+      "moved_foreground_mae_raw_intensity": 17.446537017822266,
+      "call_wall_seconds_under_gpu_contention": 447.82837215345353
     }
   },
   "search_stage": {
@@ -48,7 +47,14 @@
     "old_gpu_moved_foreground_pearson": 0.9995119857559678
   },
   "sampling": "13×13×13 个输入体素网格点，变换到 world-RAS 后计算两矩阵的位移",
-  "timing_note": "FSL 计时是旧次完整命令；FNIT 当前 CPU/GPU 从已载入图像的调用开始，不含写盘。当前 GPU 同卡有其他任务，利用率持续 100%，337.75 秒不能用于加速比。",
+  "gpu_registration_repeat": {
+    "input": "同一例 UKB 已校正 DWI 的平均 b0、固定脑掩膜和同一官方 FreeSurfer brain.mgz",
+    "repeats": 2,
+    "max_abs_world_transform_element_difference": 0.0,
+    "single_repeat_wall_seconds_under_gpu_contention": 529.7566744177602,
+    "note": "重复性测试与 FSL 同输入配准对照采用不同的 b0/T1 配对；不代表独立 iFOD2 追踪重复。"
+  },
+  "timing_note": "FSL 计时为既有完整命令；FNIT 当前 CPU/GPU 从已载入图像的调用开始，不含写盘。H100 与其他任务共享，447.83 秒不能用于加速比。GPU PyTorch 峰值分配未报告，因为私有对照脚本读取了默认 GPU，而实际运行在 cuda:1。",
   "numerically_equivalent": false,
   "subject_count": 1
 }
