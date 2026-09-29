@@ -298,7 +298,7 @@ print(cifti)  # 时间×灰质坐标，TR 来自 clean_mni 的 NIfTI 头
 
 ### MSMSulc 差异定位
 
-两次注册的初始球面顶点坐标与原生 sulc 数组逐值相同，参考球面和 sulc 也相同。[sMRIPrep 的 MSMSulc 工作流](https://github.com/nipreps/smriprep/blob/6a83b4686953273a0379a5e8aa76bb3d82bf4c3f/src/smriprep/workflows/surfaces.py)使用的 `MSMSulcStrainFinalconf` 与本次 HCP 官方对照的参数逐行相同，仅末尾空行不同。官方先做 NMI 仿射，再以脑沟相关性进行三层离散优化，控制网格依次为 162、642、2,562 个顶点，并使用高阶应变约束。FNIT 当前先优化整体旋转，再以固定 2,562 个 Fibonacci 控制点、四层 sulc 平方误差、连续 Adam 及控制三角形剪切和面积惩罚做局部配准。该惩罚改善形变，但目标函数、插值和求解方法仍与官方不同。[官方 MSM 参数说明](https://fsl.fmrib.ox.ac.uk/fsl/docs/registration/msm.html)解释了相关性、控制网格和正则项的作用。
+两次注册的初始球面顶点坐标与原生 sulc 数组逐值相同，参考球面和 sulc 也相同。[sMRIPrep 的 MSMSulc 工作流](https://github.com/nipreps/smriprep/blob/6a83b4686953273a0379a5e8aa76bb3d82bf4c3f/src/smriprep/workflows/surfaces.py)使用的 `MSMSulcStrainFinalconf` 与本次 HCP 官方对照的参数逐行相同，仅末尾空行不同。官方先做仿射，再以脑沟相关性进行三层离散优化，控制网格依次为 162、642、2,562 个顶点，并使用高阶应变约束。FNIT 当前先优化整体旋转，再以固定 2,562 个 Fibonacci 控制点、四层 sulc 平方误差、连续 Adam 及控制三角形剪切和面积惩罚做局部配准。该惩罚改善形变，但目标函数、插值和求解方法仍与官方不同。[官方 MSM 参数说明](https://fsl.fmrib.ox.ac.uk/fsl/docs/registration/msm.html)解释了相关性、控制网格和正则项的作用。
 
 独立运行官方配置的阶段截断：只做仿射时，左、右球面距官方最终球面的中位角差为 1.591°、2.045°；再完成第一层离散优化后，左侧仍有 0.907°。误差主要在后续离散形变中产生，单独调整旋转不能实现最终球面等价。
 
