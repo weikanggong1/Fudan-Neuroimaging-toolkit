@@ -1,0 +1,44 @@
+{
+  "date": "2026-09-29",
+  "data": "一例真实 UK Biobank BOLD/SBRef，88×88×64×490，TR 0.735 秒",
+  "reference": {
+    "command": "mcflirt -in BOLD.nii.gz -out prefiltered_func_data_mcf -mats -plots -reffile SBREF.nii.gz -rmsrel -rmsabs -spline_final",
+    "software": "FSL MCFLIRT 6.0.7.22",
+    "binary_sha256": "e5fbe9be9dbd4f1ae027a9e8fd38ea41e8507e45fbc1aedb36550c11fb5302cb",
+    "full_command_wall_seconds": 397.54
+  },
+  "candidate": {
+    "function": "fnit.fmri.motion.estimate_motion",
+    "source_sha256": "8b4c46f8a58623d5a838b6c938d8b8a2e940158fa6ab3420df15f78983ed4bee",
+    "input_reference": "与 FSL 命令相同的 BOLD 和 SBRef",
+    "mask": "FNIT 优化使用官方基准的脑掩膜；FSL MCFLIRT 命令没有对应的掩膜参数",
+    "device": "CUDA GPU",
+    "batch_size": 32,
+    "iterations": [35, 25, 15],
+    "resample": false,
+    "fit_only_wall_seconds": 21.63697324739769,
+    "peak_cuda_memory_gb": 1.039172608
+  },
+  "matrix_comparison": {
+    "frames": 490,
+    "direction": "每帧到 SBRef，FSL scaled-mm 坐标",
+    "relative_translation_mm": {
+      "median": 0.32848242997051014,
+      "p95": 0.6195614407532912,
+      "maximum": 0.732708150908595
+    },
+    "relative_rotation_degrees": {
+      "median": 0.2076194977936146,
+      "p95": 0.2871983011367223,
+      "maximum": 0.34406793285512666
+    }
+  },
+  "algorithm_comparison": {
+    "mcflirt": "8 mm 后做两次 4 mm 优化；相邻时间帧传递初值；优化时三线性插值并扩展首尾切片；-spline_final 控制最终输出插值",
+    "fnit": "8 mm、4 mm、原分辨率三级优化；每帧独立从零初值开始；批量 Adam 优化带掩膜的标准化相关",
+    "conclusion": "矩阵方向和输出结构一致，优化轨迹与变换估计尚未达到 FSL 数值一致；本次 FLIRT 改动不改变 motion.py"
+  },
+  "timing_comparison_valid": false,
+  "timing_note": "FNIT 时间仅含参数估计；FSL 时间包含最终样条重采样与写盘。硬件和优化掩膜范围也不同。",
+  "source_record": "原始 490 帧 benchmark_motion_full.py 与 motion_benchmark_private.json；2026-09-29 核对 motion.py 与当前源码 SHA-256 一致"
+}

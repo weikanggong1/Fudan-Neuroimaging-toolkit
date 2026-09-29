@@ -1193,30 +1193,37 @@ class _DefaultFLIRTEngine:
     @staticmethod
     def _angles(lower=-math.pi / 2, upper=math.pi / 2, delta=math.pi / 3):
         count = _fsl_round((upper - lower) / delta) + 1
+        lower, upper = np.float32(lower), np.float32(upper)
         if count == 1:
-            return np.array([(upper + lower) / 2], dtype=np.float64)
-        return np.linspace(lower, upper, count, dtype=np.float64)
+            return np.array([np.float32((upper + lower) / np.float32(2))])
+        span = np.float32(upper - lower)
+        return np.array(
+            [np.float32(lower + np.float32(np.float32(n) * span / np.float32(count - 1)))
+             for n in range(count)],
+            dtype=np.float32,
+        )
 
     @staticmethod
     def _interpolate_coarse(volume, coordinate):
-        x, y, z = coordinate
+        x, y, z = (np.float32(value) for value in coordinate)
         x0, y0, z0 = int(x), int(y), int(z)
         x1 = min(x0 + 1, volume.shape[0] - 1)
         y1 = min(y0 + 1, volume.shape[1] - 1)
         z1 = min(z0 + 1, volume.shape[2] - 1)
-        dx, dy, dz = x - x0, y - y0, z - z0
-        return float(
-            volume[x0, y0, z0] * (1 - dx) * (1 - dy) * (1 - dz)
-            + volume[x0, y0, z1] * (1 - dx) * (1 - dy) * dz
-            + volume[x0, y1, z0] * (1 - dx) * dy * (1 - dz)
-            + volume[x0, y1, z1] * (1 - dx) * dy * dz
-            + volume[x1, y0, z0] * dx * (1 - dy) * (1 - dz)
-            + volume[x1, y0, z1] * dx * (1 - dy) * dz
-            + volume[x1, y1, z0] * dx * dy * (1 - dz)
-            + volume[x1, y1, z1] * dx * dy * dz
-        )
+        dx, dy, dz = np.float32(x - x0), np.float32(y - y0), np.float32(z - z0)
+        v000, v001 = volume[x0, y0, z0], volume[x0, y0, z1]
+        v010, v011 = volume[x0, y1, z0], volume[x0, y1, z1]
+        v100, v101 = volume[x1, y0, z0], volume[x1, y0, z1]
+        v110, v111 = volume[x1, y1, z0], volume[x1, y1, z1]
+        t1 = np.float32(np.float32(v100 - v000) * dx + v000)
+        t2 = np.float32(np.float32(v101 - v001) * dx + v001)
+        t3 = np.float32(np.float32(v110 - v010) * dx + v010)
+        t4 = np.float32(np.float32(v111 - v011) * dx + v011)
+        t5 = np.float32(np.float32(t3 - t1) * dy + t1)
+        t6 = np.float32(np.float32(t4 - t2) * dy + t2)
+        return float(np.float32(np.float32(t6 - t5) * dz + t5))
 
-    def angular_candidates(self):
+    def angular_candidates(self, dof=12):
         if not self.angular_search:
             coarse = fine = np.array([0.0])
         else:
@@ -1252,11 +1259,12 @@ class _DefaultFLIRTEngine:
 
         costs = np.empty((len(fine),) * 3, dtype=np.float32)
         fine_parameters = {}
-        factors = tuple((len(coarse) - 1) / max(1, len(fine) - 1) for _ in range(3))
+        factor = np.float32((len(coarse) - 1) / max(1, len(fine) - 1))
         for ix, rx in enumerate(fine):
             for iy, ry in enumerate(fine):
                 for iz, rz in enumerate(fine):
-                    coordinate = (ix * factors[0], iy * factors[1], iz * factors[2])
+                    coordinate = tuple(np.float32(np.float32(index) * factor)
+                                       for index in (ix, iy, iz))
                     parameters = _IDENTITY_PARAMETERS.copy()
                     parameters[:3] = (rx, ry, rz)
                     parameters[3] = self._interpolate_coarse(tx, coordinate)
@@ -1286,11 +1294,12 @@ class _DefaultFLIRTEngine:
         candidates = [fine_parameters[index] for index in _find_cost_minima(costs)]
 
         pairs = []
+        free_dof = min(dof, 7)
         rms_minimum = min(self.level.reference_sizes)
         for parameters in candidates:
-            matrix = self._parameters_to_matrix(parameters, 7)
+            matrix = self._parameters_to_matrix(parameters, free_dof)
             preoptimized = (self.cost(matrix), matrix.copy())
-            optimized_matrix, value = self.optimize_matrix(matrix, 7)
+            optimized_matrix, value = self.optimize_matrix(matrix, free_dof)
             candidate = ((value, optimized_matrix), preoptimized)
             discard = False
             for index, current in enumerate(pairs):
@@ -1332,7 +1341,7 @@ class _DefaultFLIRTEngine:
             self.initial_matrix
         )
         self.set_scale(8)
-        search, presearch = self.angular_candidates()
+        search, presearch = self.angular_candidates(dof)
 
         self.set_scale(4)
         search_costs = self._measure(search)
@@ -1355,7 +1364,7 @@ class _DefaultFLIRTEngine:
                 perturbations.append(value)
         for scale in (0.1, -0.1, 0.2, -0.2):
             value = np.zeros(12)
-            value[6] = scale
+            value[6] = scale if dof >= 7 else 0.0
             perturbations.append(value)
         for perturbation in perturbations:
             candidates += self._optimize(best[:4], min(dof, 7), 4, perturbation)

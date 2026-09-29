@@ -1,58 +1,60 @@
 {
-  "schema_version": 1,
-  "generated_at": "2026-09-28",
-  "scope": "FLIRT 12-DOF correlation-ratio reports only",
+  "schema_version": 2,
+  "generated_at": "2026-09-29",
+  "scope": "FLIRT 12-DOF/corratio branch only",
   "measurement_source": {
     "path": "src/fnit/flirt/core.py",
-    "sha256": "f5315f5823df98334f170d43df71bb45f83653d484087d0055ab572c63a3c6e4",
+    "sha256": "56a934e77f3014d870ff0c099bad0ef48dbd2783e872e74e39a9a8e239a51fbb",
     "reports": [
       "validation/flirt/report.cpu.current.json",
       "validation/flirt/report.gpu.current.json",
-      "validation/flirt/report.public.json",
-      "validation/flirt/public_example.current.json"
+      "validation/flirt/report.public.json"
     ]
   },
   "current_source": {
     "path": "src/fnit/flirt/core.py",
-    "sha256": "ce375d5a144aa80e0b0607b05319be107a651a1d3611cd37e8d5869587001112"
+    "sha256": "f2c530cbe75e06e0354a582f12d02b0d3971b8414d70c9c3cdb16e97ab4460f3"
   },
-  "covered_profile": {
-    "degrees_of_freedom": 12,
-    "cost": "corratio",
-    "engine": "_DefaultFLIRTEngine"
+  "diff_review": {
+    "changed_lines": [
+      "angular_candidates gains a dof argument",
+      "candidate free optimization changes from 7 to min(dof,7)",
+      "run passes dof to angular_candidates",
+      "scale perturbations are zeroed when dof<7"
+    ],
+    "twelve_dof_values": {
+      "candidate_free_optimization_before": 7,
+      "candidate_free_optimization_after": 7,
+      "scale_perturbations_before": [
+        0.1,
+        -0.1,
+        0.2,
+        -0.2
+      ],
+      "scale_perturbations_after": [
+        0.1,
+        -0.1,
+        0.2,
+        -0.2
+      ]
+    },
+    "all_other_lines_identical": true
   },
-  "diff": {
-    "changed_runtime_branch": "_RigidNMIEngine.set_scale for 6-DOF normmi",
-    "changed_metadata": "TorchFLIRT QC adds search_cost",
-    "covered_profile_selects_changed_engine": false,
-    "covered_profile_numerical_assignment_or_control_flow_changed": false
-  },
-  "ast_check": {
-    "normalization": "replace _RigidNMIEngine body with pass and replace the TorchFLIRT QC dictionary right-hand side with an empty dictionary",
-    "old_normalized_ast_sha256": "6713d365727b5d8d2ac577011c8cdc4364c5a6c52c43fba937681bd45f50eec3",
-    "current_normalized_ast_sha256": "6713d365727b5d8d2ac577011c8cdc4364c5a6c52c43fba937681bd45f50eec3",
-    "default_engine_ast_sha256": "89470e8874b83a28f4c285a03e690ae95e316a527ab208ced72acb1b9dec6b3e",
-    "torchflirt_call_prefix_before_qc_ast_sha256": "ea2d096bac89d7212455a3d27c4c6575b111cfb2d9c8b5864b3be47b09ce1e95",
-    "equal_for_covered_profile": true
-  },
-  "older_measurement_chain": {
-    "attestation_path": "validation/runtime_dependencies/flirt_qc_source_equivalence.public.json",
-    "attestation_sha256": "baa2e1e2c36bfe4e3a92c3a95a86d0c7106bffb21633fefee3f44b0a5e312df1",
-    "measured_source_sha256": "5528560292d3ba72778fda619abd907ab4cd666b80a8f18b95538ee4b8ca89b2",
-    "intermediate_source_sha256": "f5315f5823df98334f170d43df71bb45f83653d484087d0055ab572c63a3c6e4",
-    "applies_to": [
-      "validation/dmri_pipeline/tbss_e2e.real.current.json"
-    ]
+  "real_data_recheck": {
+    "profile": "12-DOF/corratio CPU, real T1w-derived GM case10 to same UKB group GM",
+    "measurement_matrix_sha256": "61bce22871fc0d68eb6236ffa7d7ac95b3bc3bd29c15705d3cbae63aebf29938",
+    "current_matrix_sha256": "61bce22871fc0d68eb6236ffa7d7ac95b3bc3bd29c15705d3cbae63aebf29938",
+    "byte_identical": true
   },
   "status": {
     "covered_profile_source_equivalent": true,
-    "fresh_current_hash_full_real_data_rerun": false,
+    "fresh_current_hash_full_ten_case_rerun": false,
     "six_dof_normmi_source_equivalent": false,
-    "interpretation": "The preserved measurements retain their original source hashes. The current source is equivalent only for the 12-DOF correlation-ratio profile; this attestation is not a fresh real-data rerun."
+    "interpretation": "For dof=12 the changed branches evaluate to their previous values, and one real-case matrix is byte-identical. This is limited to 12-DOF/corratio; the 6-DOF results are separately rerun with the current hash."
   },
   "limits": [
-    "The 6-DOF normmi path changed its 8 mm search cost and is outside this attestation.",
-    "Returned QC metadata differs because the current source includes search_cost.",
-    "The claim is restricted to the exact source hashes and reports listed above."
+    "The 12-DOF CPU 10-case and GPU 4-case reports retain their actual measurement hash.",
+    "A single current-hash real-case matrix check does not replace a ten-case rerun.",
+    "This attestation does not cover 6-DOF/normmi; see validation/connectome/original_ukb_flirt.public.json."
   ]
 }

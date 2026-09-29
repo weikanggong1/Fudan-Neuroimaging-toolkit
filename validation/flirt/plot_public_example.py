@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+import sys
 
 import matplotlib
 matplotlib.use("Agg")
@@ -83,6 +84,8 @@ def main(argv=None):
 
     work = Path(args.work_dir)
     source = Path(args.source_root)
+    sys.path.insert(0, str(source / "src"))
+    from fnit import __version__
     paths = {
         "input": work / "sub-02_T1w.nii.gz",
         "reference": work / "sub-01_T1w.nii.gz",
@@ -153,7 +156,7 @@ def main(argv=None):
     )
     report = {
         "schema_version": 1,
-        "date": "2026-09-28",
+        "date": "2026-09-29",
         "dataset": {
             "name": "OpenNeuro ds000114 v1.0.2",
             "doi": "10.18112/openneuro.ds000114.v1.0.2",
@@ -165,7 +168,7 @@ def main(argv=None):
         },
         "profile": "12-DOF correlation ratio, default angular search",
         "candidate": {
-            "software": "FNIT TorchFLIRT 0.14.0",
+            "software": f"FNIT TorchFLIRT {__version__}",
             "device": "CPU",
             "source_sha256": {name: sha256(source / name) for name in source_names},
             "command": "fnit-flirt -in sub-02_T1w.nii.gz -ref sub-01_T1w.nii.gz -out fnit_moved.nii.gz -omat fnit.mat -dof 12 -cost corratio --device cpu",

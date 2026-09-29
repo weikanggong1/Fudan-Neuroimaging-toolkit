@@ -59,6 +59,6 @@ flirt \
 
 `-in` 是 moving 图像，`-ref` 是 fixed 图像和输出网格，`-out` 保存重采样结果，`-omat` 保存 input→reference 的 FSL scaled-mm 矩阵。当前还支持 `-dof 6 -cost normmi`；其他 FSL 配置会被拒绝。
 
-10 例真实 GM 对照由 `flirt/core.py` `f5315f…` 生成；当前 `ce375d…` 对 **12-DOF/corratio** 的数值路径保持源码等价，没有 fresh current-hash 完整重跑。CPU 和默认 TF32 GPU 均有 9/10 例满足矩阵 `rmsdiff <= 0.05 mm`，moved Pearson 中位数分别为 0.999985 和 0.999823。完整命令中位时间为 FSL CPU 27.705 s、FNIT CPU 82.159 s、FNIT H100 30.165 s。该结果不构成逐元素或完整数值等价，也不覆盖已改变的 6-DOF/normmi 路径。源码链见[配置限定的证明](../../../validation/runtime_dependencies/flirt_profile_source_equivalence.public.json)。
+真实 UKB b0→T1 的 6-DOF/normmi 配准，经本次候选搜索自由度修订后，相对 FSL 矩阵的世界坐标位移 RMS 从旧版 GPU 的 0.195330 mm 降至 CPU 0.009932 mm、H100 TF32 0.009983 mm；一例结果见[刚性配准报告](../../../validation/connectome/original_ukb_flirt.public.json)。12-DOF/corratio 的 10 例 GM CPU 测量有 9/10 例满足矩阵 `rmsdiff <= 0.05 mm`；H100 完成 4 例，4/4 满足门限。完整命令时间及不能直接比较的负载条件见[功能说明](../../../docs/flirt/README.md)。10 例测量源码与最终源码的 12-DOF 分支核对见[源码范围记录](../../../validation/runtime_dependencies/flirt_profile_source_equivalence.public.json)。这些结果不构成逐矩阵或逐体素等价。
 
 输入、输出结构、参数说明、坐标公式、当前源码报告和公开示意图见[功能说明](../../../docs/flirt/README.md)。

@@ -39,6 +39,49 @@ def _synthetic_pair():
     return moving, reference, vox2world
 
 
+def test_search_angles_match_flirt_float_sampling_oracle():
+    coarse = _DefaultFLIRTEngine._angles(delta=np.pi / 3)
+    fine = _DefaultFLIRTEngine._angles(delta=np.pi / 10)
+    np.testing.assert_array_equal(
+        coarse.view(np.uint32),
+        [3217625051, 3204844178, 1057360530, 1070141403],
+    )
+    np.testing.assert_array_equal(
+        fine.view(np.uint32),
+        [3217625051, 3214989692, 3211871802, 3206601084, 3198212476,
+         0, 1050728828, 1059117438, 1064388154, 1067506043, 1070141403],
+    )
+
+
+def test_coarse_interpolation_matches_newimage_float_oracle():
+    volume = (np.arange(8, dtype=np.float64).reshape(2, 2, 2)
+              * 1.23456789).astype(np.float32)
+    result = _DefaultFLIRTEngine._interpolate_coarse(volume, (.3, .6, .9))
+    assert np.asarray(result, dtype=np.float32).view(np.uint32) == 1082285777
+
+
+def test_rigid_search_free_optimization_does_not_fit_scale(monkeypatch):
+    moving, reference, vox2world = _synthetic_pair()
+    engine = _DefaultFLIRTEngine(
+        moving, reference, vox2world, vox2world,
+        (1, 1, 1), (1, 1, 1), device="cpu", angular_search=False,
+    )
+    fitted_dofs = []
+    monkeypatch.setattr(engine, "_optimize_search_subset",
+                        lambda parameters: (parameters.copy(), 0.1))
+    monkeypatch.setattr(engine, "cost", lambda matrix: 0.1)
+    def capture(matrix, dof, maximum_iterations=4):
+        fitted_dofs.append(dof)
+        return matrix, 0.1
+
+    monkeypatch.setattr(engine, "optimize_matrix", capture)
+    engine.angular_candidates(dof=6)
+    assert fitted_dofs == [6]
+    fitted_dofs.clear()
+    engine.angular_candidates(dof=12)
+    assert fitted_dofs == [7]
+
+
 def test_torch_flirt_is_the_exact_target_public_api():
     assert fnit.TorchFLIRT is TorchFLIRT
     assert TorchFLIRT(device="cpu").angular_search is True

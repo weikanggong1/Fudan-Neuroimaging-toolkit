@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "date": "2026-09-28",
+  "date": "2026-09-29",
   "dataset": {
     "name": "OpenNeuro ds000114 v1.0.2",
     "doi": "10.18112/openneuro.ds000114.v1.0.2",
@@ -12,10 +12,10 @@
   },
   "profile": "12-DOF correlation ratio, default angular search",
   "candidate": {
-    "software": "FNIT TorchFLIRT 0.14.0",
+    "software": "FNIT TorchFLIRT 0.16.0",
     "device": "CPU",
     "source_sha256": {
-      "src/fnit/flirt/core.py": "f5315f5823df98334f170d43df71bb45f83653d484087d0055ab572c63a3c6e4",
+      "src/fnit/flirt/core.py": "f2c530cbe75e06e0354a582f12d02b0d3971b8414d70c9c3cdb16e97ab4460f3",
       "src/fnit/flirt/types.py": "55a3abf2d7ce7889c297df95289890a589d1721b9fe3b157aa90e87819ed8e21",
       "src/fnit/flirt/coordinates.py": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e",
       "src/fnit/flirt/standalone.py": "bf6a86f16b72e49e1f4aaa2b3dd463860568822808c8cb0dd2622175a1597e8b",
@@ -25,11 +25,11 @@
     },
     "command": "fnit-flirt -in sub-02_T1w.nii.gz -ref sub-01_T1w.nii.gz -out fnit_moved.nii.gz -omat fnit.mat -dof 12 -cost corratio --device cpu",
     "timing": {
-      "wall_seconds": 126.06,
-      "maximum_resident_kib": 1875452
+      "wall_seconds": 279.05,
+      "maximum_resident_kib": 1686736
     },
-    "output_sha256": "a352a60ca42914d797d0ca52c995ed5e42b9c06dfd1beeb4e9f7d07d4ea9a073",
-    "matrix_sha256": "23b5fbecc9c072515b70ed7609870a5e07ad32f428cf27421e130282f02dce5d"
+    "output_sha256": "836efb5ddc02ff0679c28ef5cf15f2671a7ba74b585d3868cbca288e1ac9af37",
+    "matrix_sha256": "ebd7d370e22a56116189b3ea1b5324da63239ae1e5c46e1863b70a04cccdfd9f"
   },
   "reference_implementation": {
     "software": "FSL FLIRT 6.0.7.4",
@@ -43,38 +43,23 @@
     "matrix_sha256": "137c261f4500d50af99f93b128805e8233b93392d212b3804e802974af8d03dc"
   },
   "hardware": {
-    "cpu": "Intel(R) Xeon(R) Gold 6418H",
+    "cpu": "gpucw1-shared-CPU",
     "same_host": true,
     "shared_node": true
   },
   "comparison": {
     "mask_definition": "nonzero voxels in the public reference T1w derivative",
     "mask_voxels": 1681332,
-    "matrix_rmsdiff_mm": 0.19614070816367427,
-    "moved_pearson_r": 0.9959552794679274,
-    "moved_mae": 18.919676007896676,
-    "moved_rmse": 34.95898890468357,
-    "moved_normalized_mae": 0.01009433031443421,
-    "moved_normalized_rmse": 0.018651882903027977,
+    "matrix_rmsdiff_mm": 0.19655529457994625,
+    "moved_pearson_r": 0.9959598995525065,
+    "moved_mae": 18.920156524781337,
+    "moved_rmse": 34.93903244322705,
+    "moved_normalized_mae": 0.010094586687542999,
+    "moved_normalized_rmse": 0.01864123541023976,
     "shape_equal": true,
     "affine_max_abs": 0.0,
     "dtype_equal": true,
     "numerically_equivalent": false
   },
-  "figure": "docs/flirt/figures/flirt_public_current.png",
-  "current_source_chain": {
-    "measurement_source_sha256": "f5315f5823df98334f170d43df71bb45f83653d484087d0055ab572c63a3c6e4",
-    "current_source_sha256": "ce375d5a144aa80e0b0607b05319be107a651a1d3611cd37e8d5869587001112",
-    "covered_profile": {
-      "degrees_of_freedom": 12,
-      "cost": "corratio"
-    },
-    "attestation": {
-      "path": "../runtime_dependencies/flirt_profile_source_equivalence.public.json",
-      "sha256": "33e53b39815dec58e6f0ef7dece34e2ff97ecdb9dd2f902edc4fe0d7d2ed4533"
-    },
-    "source_equivalent_for_covered_profile": true,
-    "fresh_current_hash_full_real_data_rerun": false,
-    "excluded_profile": "6-DOF normmi; its 8 mm search-cost path changed"
-  }
+  "figure": "docs/flirt/figures/flirt_public_current.png"
 }

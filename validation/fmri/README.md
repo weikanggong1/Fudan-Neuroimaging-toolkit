@@ -41,6 +41,7 @@ FSL MCFLIRT 实测 397.54 秒；其余 11 个已单独计时的影像命令合�
 ## 分步与其他模块
 
 - [固定官方运动矩阵的插值核对照](motion_spline_summary.json)：8 个真实时间点；区分插值误差与运动矩阵误差。
+- [MCFLIRT 运动求解差异](mcflirt_difference.public.json)：同一真实 490 帧的矩阵误差、搜索步骤及计时范围；FNIT 求解器与 MCFLIRT 未达到数值等价。
 - [EPI→T1 BBR](bbr_summary.json)：同一初始矩阵和同一白质分割的受控对照，以及 FNIT 白质分割的独立影响。
 - [MELODIC/PICA](pica_summary.json)：同一真实 4D 输入与掩膜的组件数、重建和耗时检查；原版程序状态保留在摘要中。
 - [当前 T1→MNI152 2 mm FNIRT 对照](t1_fnirt_20260929.public.json)：同一真实 T1、模板和脑掩膜的 FSL 配对精度、时间、显存及输入/源码 SHA256。此前 FSL 与 SynthMorph 标量保留在[参照摘要](registration_summary.json)。

@@ -1,6 +1,6 @@
 # Connectome 解剖算子：输入、调用与软件对照
 
-本页对应 [UKB-connectomics 追踪脚本](https://github.com/sina-mansour/UKB-connectomics/blob/main/scripts/bash/probabilistic_tractography_native_space.sh)与 [atlas 合并脚本](https://github.com/sina-mansour/UKB-connectomics/blob/main/scripts/python/combine_volumetric_atlases.py)。分割采用官方 FreeSurfer `recon-all` 输出；下列算子运行在 PyTorch CUDA float32/float64 张量上，默认允许 TF32，未使用 float16 或 bfloat16。影像读取和写出示例采用 nibabel。5TT、GMWMI 与固定矩阵采样数据来自公开 ds004666 `sub-01/ses-2mm`；当前 6DOF 求解指标来自匹配 UKB 真实输入。两组数据的完整命令、范围和脑图分别见[公开阶段报告](../../validation/connectome/ds004666/ANATOMY_STAGE_20260927.md)和[脱敏配准报告](../../validation/connectome/ORIGINAL_UKB_FLIRT_STAGE_20260927.md)。
+本页对应 [UKB-connectomics 追踪脚本](https://github.com/sina-mansour/UKB-connectomics/blob/main/scripts/bash/probabilistic_tractography_native_space.sh)与 [atlas 合并脚本](https://github.com/sina-mansour/UKB-connectomics/blob/main/scripts/python/combine_volumetric_atlases.py)。分割采用官方 FreeSurfer `recon-all` 输出；下列算子运行在 PyTorch CUDA float32/float64 张量上，默认允许 TF32，未使用 float16 或 bfloat16。影像读取和写出示例采用 nibabel。5TT、GMWMI 与固定矩阵采样数据来自公开 ds004666 `sub-01/ses-2mm`；当前 6DOF 求解指标来自匹配 UKB 真实输入。两组数据的完整命令、范围和脑图分别见[公开阶段报告](../../validation/connectome/ds004666/ANATOMY_STAGE_20260927.md)和[脱敏配准报告](../../validation/connectome/ORIGINAL_UKB_FLIRT_STAGE_20260929.md)。
 
 ## `freesurfer_five_tissue(segmentation)`
 
@@ -65,7 +65,7 @@ world_dwi_to_t1 = result.moving_to_fixed_world
 fsl_matrix = result.matrix
 ```
 
-**软件命令。** `flirt -in b0_brain.nii.gz -ref t1_brain.nii.gz -cost normmi -dof 6 -omat diff2struct_fsl.txt`。**同输入对照。** 当前实现的粗搜索使用 FSL 默认 CorrRatio，精化使用 normmi。匹配 UKB 的矩阵相对 FSL 在世界空间网格的位移均值／95 分位／最大值为 0.186655／0.285483／0.367350 mm；重采样图的非零掩膜 Dice 0.997655、非零强度 Pearson 0.999512、双方非零体素 MAE 75.967 原始强度单位。PyTorch GPU 求解与重采样用时 19.155 s、峰值分配显存 0.746 GiB，FSL CPU 用时 10.02 s。固定 **FSL 矩阵** 后，PyTorch 与 `flirt -applyxfm -init` 重采样的 Pearson 0.999999995、MAE 0.149；两侧分别用时 0.512／0.73 s。详见[匹配 UKB 脱敏报告](../../validation/connectome/ORIGINAL_UKB_FLIRT_STAGE_20260927.md)。
+**软件命令。** `flirt -in b0_brain.nii.gz -ref t1_brain.nii.gz -cost normmi -dof 6 -omat diff2struct_fsl.txt`。**同输入对照。** 当前实现的粗搜索使用 FSL 默认 CorrRatio，精化使用 normmi。匹配 UKB 的矩阵相对 FSL 的世界空间位移 RMS 为 0.009932 mm（CPU）和 0.009983 mm（H100）；重采样图非零强度 Pearson 分别为 0.9999993 和 0.9999724。FSL 完整 CPU 命令用时 10.02 s；FNIT CPU 从已载入影像的求解及重采样调用用时 45.26 s。当前 H100 被其他任务占满，GPU 时间不用于加速比。详见[匹配 UKB 脱敏报告](../../validation/connectome/ORIGINAL_UKB_FLIRT_STAGE_20260929.md)。
 
 ## `resample_labels_nearest(labels, source_affine, target_shape, target_affine, target_to_source_world)`
 

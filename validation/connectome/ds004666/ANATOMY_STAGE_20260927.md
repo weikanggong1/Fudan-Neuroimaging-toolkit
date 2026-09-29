@@ -17,7 +17,7 @@
 
 ![同一 T1 和校正 DWI 的 FreeSurfer、5TT、GMWMI 和 atlas 示例](../../../docs/connectome/figures/ds004666_anatomy_stage.png)
 
-[示例图记录](anatomy_example_image.public.json)保存图像哈希、切面和标签来源。图中皮层/皮层下图来自冻结的 FreeSurfer 标签，验证坐标变换和合并顺序；色彩仅表示示例测试标签。5TT/GMWMI 图为 MRtrix 参考；逐值比较表明 PyTorch 数组与之相同。6DOF 配准求解器更新后的真实数据对照见[匹配 UKB 报告](../ORIGINAL_UKB_FLIRT_STAGE_20260927.md)。计时范围和软硬件开销不同，表中单项时间不能拼成完整流程的加速倍数。
+[示例图记录](anatomy_example_image.public.json)保存图像哈希、切面和标签来源。图中皮层/皮层下图来自冻结的 FreeSurfer 标签，验证坐标变换和合并顺序；色彩仅表示示例测试标签。5TT/GMWMI 图为 MRtrix 参考；逐值比较表明 PyTorch 数组与之相同。6DOF 配准求解器更新后的真实数据对照见[匹配 UKB 报告](../ORIGINAL_UKB_FLIRT_STAGE_20260929.md)。计时范围和软硬件开销不同，表中单项时间不能拼成完整流程的加速倍数。
 
 ## 可复跑入口
 
@@ -54,4 +54,4 @@ python tools/benchmark_connectome_atlas_merge.py --aparc-aseg aparc+aseg.mgz \
 
 单张标签图的 MRtrix 参考命令为 `mrtransform aparc+aseg.mgz reference_aparc_dwi.nii.gz -linear diff2struct_mrtrix.txt -inverse -interp nearest -datatype uint32 -template b0_brain.nii.gz`。两张 atlas 的参考文件由最后一个脚本用同样参数独立生成；不同 NIfTI 存储轴顺序先依据 affine 重排到 b0 网格，之后才逐体素比较。图像入口为 [`tools/plot_connectome_anatomy.py`](../../../tools/plot_connectome_anatomy.py)。
 
-这些结果验证此样本的官方分割输入、5TT/GMWMI、固定矩阵重采样和 atlas 操作。现行 6DOF 矩阵求解、原 UKB 的 FIRST 网格和 Tian atlas 分别见[配准](../ORIGINAL_UKB_FLIRT_STAGE_20260927.md)、[FIRST/5TT](../FIRST_MESH_5TT_STAGE_20260927.md)与[原流程 atlas](../../../docs/connectome/ORIGINAL_ATLAS_OPERATORS.md)报告；尚存的数值差异均在各报告中列出。概率纤维追踪、FOD 与 SIFT2 的差异见[连接矩阵报告](README.md)。
+这些结果验证此样本的官方分割输入、5TT/GMWMI、固定矩阵重采样和 atlas 操作。现行 6DOF 矩阵求解、原 UKB 的 FIRST 网格和 Tian atlas 分别见[配准](../ORIGINAL_UKB_FLIRT_STAGE_20260929.md)、[FIRST/5TT](../FIRST_MESH_5TT_STAGE_20260927.md)与[原流程 atlas](../../../docs/connectome/ORIGINAL_ATLAS_OPERATORS.md)报告；尚存的数值差异均在各报告中列出。概率纤维追踪、FOD 与 SIFT2 的差异见[连接矩阵报告](README.md)。

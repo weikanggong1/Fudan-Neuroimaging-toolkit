@@ -1,6 +1,6 @@
 # TorchFLIRT：线性配准
 
-[返回首页](../../README.md) · [源码](../../src/fnit/flirt/) · [当前 10 例报告](../../validation/flirt/report.public.json) · [公开示例报告](../../validation/flirt/public_example.current.json)
+[返回首页](../../README.md) · [源码](../../src/fnit/flirt/) · [10 例 CPU 报告](../../validation/flirt/report.cpu.current.json) · [4 例 H100 配对报告](../../validation/flirt/report.public.json) · [公开示例报告](../../validation/flirt/public_example.current.json)
 
 `TorchFLIRT` 在 FNIT 内实现单被试线性配准。候选程序只依赖 PyTorch、NumPy 和 nibabel，运行时不调用 FSL。FSL 6.0.7.4 只用于本页的对照测试。
 
@@ -132,6 +132,16 @@ flirt \
 
 两套命令的 `-in`、`-ref`、`-out`、`-omat`、`-init`、`-inweight`、`-refweight`、`-dof` 和 `-cost` 含义一致。FNIT 另外提供 `--device` 和 `--overwrite`。当前接口不接受 FSL 的其他 cost、DOF、schedule、搜索范围和插值选项。
 
+去脑 b0 到去脑 T1 的刚性配准改用 6 自由度与归一化互信息：
+
+```bash
+fnit-flirt -in b0_brain.nii.gz -ref T1_brain.nii.gz \
+  -out b0_in_T1.nii.gz -omat b0_to_T1.mat \
+  -dof 6 -cost normmi --device cuda:0
+```
+
+这里 `-in` 是去脑 b0，`-ref` 是去脑 T1；`-out` 写 T1 网格上的 b0，`-omat` 写 b0→T1 矩阵。对应的原软件指令是 `flirt -in b0_brain.nii.gz -ref T1_brain.nii.gz -out b0_in_T1.nii.gz -omat b0_to_T1.mat -dof 6 -cost normmi`。真实数据对照见下文。
+
 ## `.mat` 坐标约定
 
 FSL `.mat` 不是 NIfTI world-RAS affine。设 input 和 reference 的 voxel-to-world 矩阵为 `W_in`、`W_ref`，对应的 FSL scaled-mm 基为 `S_in`、`S_ref`，FLIRT 矩阵为 `A`，则 world-RAS 正向变换为：
@@ -142,43 +152,46 @@ W_ref @ inverse(S_ref) @ A @ S_in @ inverse(W_in)
 
 FSL 在 voxel-to-world 线性部分行列式为正时翻转 scaled-mm 第一轴。FNIT 的 `.mat` 读写和 world-RAS 转换使用同一规则。不能把该矩阵直接当作 FreeSurfer LTA 或 NIfTI affine。
 
-## 真实数据测量与当前 12-DOF 路径
+## 真实数据测量
 
-测试使用 10 例真实 T1w 经 FSL FAST 得到的 GM PVE，以及同一 UKB group-GM template。FNIT CPU、FNIT H100 GPU 和 FSL 使用相同 input、reference 与 12-DOF/corratio 配置。FSL 官方矩阵用于重新运行 `flirt -applyxfm`，因此影像指标比较的是直接 FLIRT 重采样结果，不包含 VBM 后续 mask 或调制步骤。指标在 `template_GM > 0` 的 258,990 个体素内计算。
+修订依据 FSL FLIRT 2111.2 源码：角度样本与 8 mm 搜索代价插值按原实现的 float32 运算；候选姿态的自由优化使用 `min(dof, 7)`。旧版始终优化 7 个参数，使 `-dof 6` 的候选姿态含额外缩放。修订没有改变 `.mat` 的 scaled-mm 坐标定义或输出网格。
 
-候选源码 SHA-256 写入[合并报告](../../validation/flirt/report.public.json)。CPU 和 GPU 的完整逐例记录分别见 [CPU 报告](../../validation/flirt/report.cpu.current.json) 和 [GPU 报告](../../validation/flirt/report.gpu.current.json)。这组数据由 `flirt/core.py` `f5315f…` 生成；当前文件为 `ce375d…`。差异位于 6-DOF/normmi 的搜索代价函数和运行时 QC，12-DOF/corratio 使用的 `_DefaultFLIRTEngine` 及 QC 构造前的调用路径 AST 均未变化。逐项 hash 和 AST 指纹见[配置限定的源码等价证明](../../validation/runtime_dependencies/flirt_profile_source_equivalence.public.json)。因此本节数值可继承到当前 **12-DOF/corratio** 路径，但它不是当前 hash 的 fresh 完整真实数据重跑，也不能证明 6-DOF/normmi 数值等价。
+**6-DOF/normmi，真实 UKB 去脑 b0→T1。** 相同输入、相同 FSL 官方矩阵，在 b0 视野 13³ 个点计算两份矩阵的世界坐标位移差；重采样图比较非零体素交集。完整指标和源码 SHA-256 见[刚性配准报告](../../validation/connectome/original_ukb_flirt.public.json)。
 
-| 指标 | FNIT CPU | FNIT H100 GPU，TF32 |
+| 指标 | 修订前 FNIT GPU | 修订后 FNIT CPU | 修订后 FNIT H100 TF32 |
+|---|---:|---:|---:|
+| 相对 FSL 矩阵位移 RMS | 0.195330 mm | 0.009932 mm | 0.009983 mm |
+| moved Pearson | 0.999512 | 0.9999993 | 0.9999724 |
+| moved Dice | 0.997655 | 0.999892 | 0.999557 |
+| moved MAE，原始强度 | 75.967 | 2.903 | 17.411 |
+
+FSL 完整 CPU 命令用时 10.02 秒；FNIT CPU 已载入图像后的求解与重采样调用为 45.26 秒，不含写盘。修订后的 H100 调用为 337.75 秒，当时 GPU 被其他作业持续占满，不计算加速比。这是一例跨模态病例，不代表所有 b0→T1 图像均达到 0.01 mm。
+
+**12-DOF/corratio，真实 GM→UKB group GM。** 10 例真实 T1w 的 GM PVE 用同一模板，FSL 官方矩阵另经 `flirt -applyxfm` 生成直接重采样参考图；在 `template_GM > 0` 的 258,990 个体素比较。修订后的 [CPU 10 例报告](../../validation/flirt/report.cpu.current.json)和 [H100 4 例报告](../../validation/flirt/report.gpu.current.json)保留各自测量源码 SHA-256。最终源码进一步限制 6-DOF 候选自由度，对 12-DOF 仍使用 7 自由度；同一真实 GM 病例的最终 `.mat` 与 10 例测量源码的 `.mat` 逐元素一致，见[源码范围核对](../../validation/runtime_dependencies/flirt_profile_source_equivalence.public.json)。
+
+| 指标 | FNIT CPU，10 例 | FNIT H100 TF32，前 4 例 |
 |---|---:|---:|
-| 矩阵 RMS 差，中位数 [Q1–Q3] | 0.018468 [0.008390–0.027364] mm | 0.007994 [0.006268–0.025214] mm |
-| 矩阵 RMS 差，最大值 | 0.078530 mm | 0.063188 mm |
-| `rmsdiff <= 0.05 mm` | 9/10 | 9/10 |
-| moved Pearson，中位数；最小值 | 0.999985；0.999835 | 0.999823；0.999597 |
-| moved Dice@0.2，中位数；最小值 | 0.999187；0.997356 | 0.997048；0.995527 |
-| moved MAE，中位数 | 0.001013 | 0.003812 |
-| moved RMSE，中位数 | 0.001735 | 0.005935 |
+| 相对 FSL 矩阵 RMS 中位数；最大值 | 0.019811；0.078530 mm | 0.007118；0.021722 mm |
+| `rmsdiff <= 0.05 mm` | 9/10 | 4/4 |
+| moved Pearson 中位数；最小值 | 0.999985；0.999835 | 0.999806；0.999597 |
+| moved Dice@0.2 中位数 | 0.999160 | 0.996611 |
+| moved MAE 中位数 | 0.001056 | 0.004244 |
 
-CPU 和 GPU 都有 1 例超过预设的 0.05 mm 矩阵门限，因此当前实现没有通过 10/10 的矩阵判据，也不声明逐元素或完整数值等价。直接重采样影像仍保持很高的一致性。CPU 的差异小于默认 TF32 GPU，说明 TF32 和不同设备上的归约顺序会影响串行搜索落点。
+CPU 的第 10 例超过 0.05 mm；GPU 只完成 4 例，不能推断 10/10。12-DOF 精度没有因本次 float32 搜索修订而整体改善，也不满足逐矩阵数值等价。GPU 峰值 PyTorch allocated memory 为 438,002,176 bytes（约 0.41 GiB）。
 
-完整命令时间包括 Python/FSL 进程启动、图像读取、优化、重采样以及矩阵和影像写盘：
+| 完整命令时间 | FSL CPU，10 例参考 | FNIT CPU，10 例 | FNIT H100，4 例 |
+|---|---:|---:|---:|
+| 中位数 | 27.70 秒 | 170.21 秒 | 406.86 秒 |
 
-| 实现 | 硬件 | 中位数 [Q1–Q3] | 相对 FSL |
-|---|---|---:|---:|
-| FSL FLIRT 6.0.7.4 | Xeon Gold 6430 CPU | 27.705 [24.867–30.215] s | 1.00 |
-| FNIT TorchFLIRT | Xeon Gold 6418H CPU | 82.159 [76.455–88.879] s | 2.97× |
-| FNIT TorchFLIRT | H100 PCIe GPU，TF32 | 30.165 [27.574–33.002] s | 1.09× |
-
-H100 相对 FNIT CPU 的中位时间为 0.367，即约快 2.72 倍；它在这组小规模搜索上仍比 FSL C++ CPU 慢约 9%。GPU 峰值 allocated memory 为 487,223,808 bytes（0.454 GiB），峰值 reserved memory 为 870,318,080 bytes（0.811 GiB）。FSL `-applyxfm` 的单独复核中位数为 2.56 s；该数值只包含重采样，不能与完整配准时间直接比较。
-
-所有计时来自共享节点。GPU 计时开始时同卡没有观测到其他计算负载，但有其他进程保留显存；CPU 计时使用另一台同代 Xeon 节点。因此这些时间用于说明当前实现的实际量级，不代表独占硬件吞吐上限。
+时间包含进程启动、读图、优化、重采样和写盘。FSL 参考来自较早的独立运行；本次 CPU/GPU 测量时节点有其他作业，H100 也处于满载。表中只记录观察值，不计算稳定加速比。
 
 ## 公开 OpenNeuro 示例
 
-下图使用仓库内 OpenNeuro ds000114 v1.0.2 的 CC0 去面部派生数据：sub-02 T1w 为 input，sub-01 T1w 为 reference。两者分别运行 FSL FLIRT 6.0.7.4 和 FNIT CPU 的 12-DOF/corratio 测量源码。该配置可按上述证明继承到当前源码。图中 FSL 与 FNIT 使用相同显示范围，差值图单独缩放。
+下图使用仓库内 OpenNeuro ds000114 v1.0.2 的 CC0 去面部派生数据：sub-02 T1w 为 input，sub-01 T1w 为 reference。两者分别运行 FSL FLIRT 6.0.7.4 和最终 FNIT 源码的 12-DOF/corratio。图中 FSL 与 FNIT 使用相同显示范围，差值图单独缩放。
 
 ![OpenNeuro T1w 上 FSL FLIRT 与 FNIT TorchFLIRT 的配准结果](figures/flirt_public_current.png)
 
-该公开 T1w→T1w 示例的 moved Pearson 为 0.995955，normalized RMSE 为 0.018652，矩阵 RMS 差为 0.196141 mm；FNIT CPU 与 FSL CPU 用时分别为 126.06 s 和 40.41 s。它用于复现图示和检查一般 T1w 输入，不属于上面的 GM 门限数据集。输入来源、文件 hash、命令、源码 hash 和完整指标见[公开示例报告](../../validation/flirt/public_example.current.json)。
+该公开 T1w→T1w 示例的 moved Pearson 为 0.995960，normalized RMSE 为 0.018641，矩阵 RMS 差为 0.196555 mm；FNIT CPU 本次用时 279.05 秒，FSL CPU 参考运行用时 40.41 秒。两次运行相隔且使用共享节点，时间不构成硬件加速比。它用于复现图示和检查一般 T1w 输入，不属于上面的 GM 门限数据集。输入来源、文件 hash、命令、源码 hash 和完整指标见[公开示例报告](../../validation/flirt/public_example.current.json)。
 
 ## 结果解释
 
@@ -186,7 +199,7 @@ H100 相对 FNIT CPU 的中位时间为 0.367，即约快 2.72 倍；它在这�
 
 该移植依据 FSL 源码，受非商业 [FSL Software Licence](../../licenses/FSL-6.0.txt) 约束。第三方说明见 [THIRD_PARTY_NOTICES.md](../../THIRD_PARTY_NOTICES.md)。
 
-## Reference
+## 参考文献与原实现
 
 - 参考文献：Jenkinson et al., *Improved Optimization for the Robust and Accurate Linear Registration and Motion Correction of Brain Images*, NeuroImage (2002), [doi:10.1006/nimg.2002.1132](https://doi.org/10.1006/nimg.2002.1132)。
 - 原实现代码库：[FSL `flirt`](https://git.fmrib.ox.ac.uk/fsl/flirt)。

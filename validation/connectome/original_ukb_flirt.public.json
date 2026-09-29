@@ -1,48 +1,54 @@
 {
-  "stage": "b0_to_t1_rigid_registration",
-  "reference_source": "UKB-connectomics probabilistic_tractography_native_space.sh, fixed real UKB DWI/T1 pair",
-  "subject_count": 1,
-  "reference_software": {
-    "mrtrix_commit": "eeab681d3e0cb004cf1d1d31579d3892197ef5b6",
-    "fsl_version": "6.0.7.4",
-    "flirt_source_version": "2111.2"
+  "date": "2026-09-29",
+  "profile": "6-DOF normmi；8 mm 默认 searchcost corratio",
+  "input": {
+    "description": "同一例真实 UK Biobank 平均去脑 b0 到去脑 T1",
+    "b0_shape": [104, 104, 72],
+    "t1_shape": [162, 215, 180],
+    "b0_sha256": "dea31df8e9628eb11001d4436fa0bd9d969220814bba1a8a037b7c0461606abd",
+    "t1_sha256": "7c702c5040fce960c49a09dab2e6c22854f4652031986d639b735f0f4a85399d"
   },
-  "input_grid": {
-    "b0_brain": [104, 104, 72],
-    "t1_brain": [162, 215, 180]
+  "reference": {
+    "software": "FSL FLIRT 6.0.7.4",
+    "command": "flirt -in b0_brain.nii.gz -ref T1_brain.nii.gz -cost normmi -dof 6 -omat b0_to_T1.mat -out b0_in_T1.nii.gz",
+    "cpu_full_command_wall_seconds": 10.02
   },
-  "matrix_comparison": {
-    "coordinate_system": "world RAS",
-    "sampling": "13 x 13 x 13 grid across the moving b0 field of view",
-    "displacement_mm": {
-      "mean": 0.18665487655438537,
-      "p95": 0.2854834918434151,
-      "max": 0.36735000461557255,
-      "rms": 0.19533012229396549
+  "candidate": {
+    "source_sha256": "f2c530cbe75e06e0354a582f12d02b0d3971b8414d70c9c3cdb16e97ab4460f3",
+    "cpu": {
+      "matrix_world_grid_displacement_mm": {
+        "mean": 0.00918289958234025,
+        "p95": 0.01521724009479447,
+        "maximum": 0.02001116498562255,
+        "rms": 0.009932427354112115
+      },
+      "moved_foreground_pearson": 0.9999992768227066,
+      "moved_foreground_dice": 0.9998922109777963,
+      "moved_foreground_mae_raw_intensity": 2.9034909347167677,
+      "call_wall_seconds_including_optimization_and_resampling_excluding_file_io": 45.256363759282976
+    },
+    "h100_cuda_tf32": {
+      "matrix_world_grid_displacement_mm": {
+        "mean": 0.00922314823105298,
+        "p95": 0.015355113970253355,
+        "maximum": 0.02030113473276326,
+        "rms": 0.009983306166922761
+      },
+      "moved_foreground_pearson": 0.9999723527177774,
+      "moved_foreground_dice": 0.9995572880786147,
+      "moved_foreground_mae_raw_intensity": 17.411342636421526,
+      "call_wall_seconds_under_gpu_contention": 337.75111634191126
     }
   },
-  "estimated_matrix_moved_image": {
-    "shape": [162, 215, 180],
-    "foreground_dice": 0.9976549715166204,
-    "pearson_both_nonzero": 0.9995119857559678,
-    "mae_both_nonzero_raw_intensity": 75.96712700737608,
-    "mae_all_raw_intensity": 19.363913245053922,
-    "p95_abs_difference_both_nonzero_raw_intensity": 287.5053955078123
+  "search_stage": {
+    "source_difference": "FSL 在 search_cost 后用 min(requested_dof, 7) 做自由优化；旧版 FNIT 固定为 7，现改为 6",
+    "old_8mm_candidate_nearest_matrix_frobenius": [0.7896951191511633, 3.8829690123651623],
+    "current_8mm_candidate_nearest_matrix_frobenius": [0.0006794827661990039, 0.001392931168604175],
+    "old_grid_rms_displacement_mm": 0.19533012229396549,
+    "old_gpu_moved_foreground_pearson": 0.9995119857559678
   },
-  "fixed_fsl_matrix_resampling": {
-    "foreground_dice": 0.9999950011247469,
-    "pearson_both_nonzero": 0.999999995132402,
-    "mae_both_nonzero_raw_intensity": 0.14903690402410463,
-    "mae_all_raw_intensity": 0.0380439558076202
-  },
-  "timing_and_memory": {
-    "fsl_flirt_cpu_wall_seconds_including_command_io": 10.02,
-    "torch_flirt_h100_cuda_seconds_call_including_optimization_and_resampling": 19.155467541888356,
-    "torch_flirt_peak_allocated_gib": 0.745729923248291,
-    "fsl_applyxfm_cpu_wall_seconds_including_command_io": 0.73,
-    "torch_fixed_matrix_resampling_cuda_seconds_excluding_io": 0.5116634778678417,
-    "torch_fixed_matrix_resampling_peak_allocated_gib": 0.6927890777587891
-  },
-  "exact_matrix_or_voxel_equality": false,
-  "note": "Single real paired input; FSL and GPU timings have different IO scope and hardware. Raw images, transforms and subject identifiers remain private."
+  "sampling": "13×13×13 个输入体素网格点，变换到 world-RAS 后计算两矩阵的位移",
+  "timing_note": "FSL 计时是旧次完整命令；FNIT 当前 CPU/GPU 从已载入图像的调用开始，不含写盘。当前 GPU 同卡有其他任务，利用率持续 100%，337.75 秒不能用于加速比。",
+  "numerically_equivalent": false,
+  "subject_count": 1
 }

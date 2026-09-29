@@ -1,6 +1,6 @@
 # 验证索引
 
-本页只索引当前发布代码采用的证据。机器可读报告记录候选源码或调用链的 SHA-256、输入边界、参考软件版本、计时范围和限制。真实数据报告保留实际测量源码 hash；若当前源码只改动报告未覆盖的分支，则另以机器可读证明记录旧、新 hash、适用配置和 AST 指纹。当前有两条这种继承链：[FLIRT 的 QC-only 第一段](runtime_dependencies/flirt_qc_source_equivalence.public.json)与[12-DOF/corratio 第二段](runtime_dependencies/flirt_profile_source_equivalence.public.json)，以及 [SynthMorph registration linear 路径](runtime_dependencies/synthmorph_linear_source_equivalence.public.json)和 [FNIRT/SynthMorph/dMRI 报告的公共包入口](runtime_dependencies/package_entry_source_equivalence.public.json)。这些证明均明确 `fresh=false`，不能写成当前 hash 的完整真实数据重跑，也不能外推到 FLIRT 6-DOF/normmi、SynthMorph nearest 或公共入口证明未列出的命令。
+本页只索引当前发布代码采用的证据。机器可读报告记录候选源码或调用链的 SHA-256、输入边界、参考软件版本、计时范围和限制。真实数据报告保留实际测量源码 hash。FLIRT 的 [12-DOF 测量源码范围核对](runtime_dependencies/flirt_profile_source_equivalence.public.json)记录本次修订前后的精确差异和一例真实病例矩阵逐字节复核；6-DOF 则由最终源码直接重跑。其他保留的继承链有 [SynthMorph registration linear 路径](runtime_dependencies/synthmorph_linear_source_equivalence.public.json)和 [FNIRT/SynthMorph/dMRI 报告的公共包入口](runtime_dependencies/package_entry_source_equivalence.public.json)。这些记录不能写成当前 hash 的完整多例重跑，也不能外推到未列出的配置。
 
 官方程序只用于生成参考结果。FNIT 候选运行不调用已安装的 FSL、FreeSurfer、SPM、MRtrix3、AFNI、DIPY 或工作流封装包。没有人工真值的比较衡量的是与参考实现的一致性，不代表生物学准确度。
 
@@ -18,7 +18,7 @@
 | [SynthSR](../docs/synthsr/README.md) | [12 例 T1w 与公开 FLAIR 示例](synthsr/report.public.json) | shape、affine、uint8 合同一致；输出与 FreeSurfer CPU 参考近似一致 | 报告含 GPU/CPU 时间和峰值显存；功能页展示合成 T1w |
 | [TorchFAST](../docs/fast/README.md) | [真实 brain-only T1w](fast/report.public.json) | 分割、PVE、bias field 与 bias-corrected 图按图比较；不是逐体素等价实现 | 报告含 FSL/FNIT 时间和峰值显存；功能页展示 GM、差值和偏置校正 |
 | [FastVBM](../docs/fast_vbm/README.md) | [单例真实 GM 掩膜定位](fast_vbm/README.md) | 关闭隐式零值掩膜后，固定 FSL GM 输入的三项相关性约 0.996；完整链仍有上游差异 | 本版单例完整链已复测；FSL 缺少同边界耗时，多例尚待复测 |
-| [TorchFLIRT](../docs/flirt/README.md) | [12-DOF 真实 MRI 对照](flirt/report.public.json) | FSL scaled-mm 矩阵合同和 reference-grid 输出均独立比较；仅 12-DOF/corratio 可通过两段证明继承 | 报告区分 CPU/GPU 与共享节点计时边界；没有 fresh current-hash 全量重跑；功能页展示公开 T1w 配准图 |
+| [TorchFLIRT](../docs/flirt/README.md) | [12-DOF GM CPU 10 例](flirt/report.cpu.current.json)、[H100 4 例](flirt/report.public.json)与[6-DOF b0→T1 一例](connectome/original_ukb_flirt.public.json) | 6-DOF 相对 FSL 矩阵位移 RMS 为 CPU 0.00993 mm、H100 0.00998 mm；12-DOF CPU 9/10 例通过 0.05 mm 门限 | 共享节点时间只报观察值；公开 T1w 图和完整边界见功能页 |
 | [TorchFNIRT](../docs/fnirt/README.md) | [当前真实 FA matched-input 对照](fnirt/report.real.current.json) | coefficient、warped FA、两类 Jacobian 和标准网格合同分别核对；连续值差异超过浮点误差 | 报告含三阶段 FSL 与 FNIT 配准时间、显存；功能页展示真实 FA 对照 |
 | [TorchApplyWarp](../docs/applywarp/README.md) | [真实 FA 与 intent-2007 coefficient warp](applywarp/report.real.current.json) | shape、affine、dtype 一致；连续值误差按 union support 报告 | 报告含三次 FSL/FNIT 计时和峰值显存；功能页展示 FA 与差值 |
 | [TorchConvertWarp](../docs/convertwarp/README.md) | [真实 DWI 组合场](convertwarp/README.md)及[TBSS/MMORF pipeline 分支](probtrackx/README.md) | 默认 TBSS 系数场与 FSL 分量 MAE 1.98×10⁻⁶ mm；MMORF 转场后重采样 FA 与原 pipeline r≈1 | FSL TBSS 完整命令 49.73 s，FNIT Python 调用 10.02 s；MMORF FNIT 调用 7.27 s，计时边界不同 |

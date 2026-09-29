@@ -20,7 +20,7 @@
 ## 未完成的官方一致性门槛
 
 1. **T1/5TT：** 官方 `recon-all` 输入保留为外部产物。FIRST 网格 PVE 仍有 52 个体素差异（最大 0.001），5TT 有 92 个元素差异，GMWMI 有 228 个体素差异；需固定完整 FIRST 几何、修复并重跑。见 [FIRST/5TT](FIRST_MESH_5TT_STAGE_20260927.md)。
-2. **配准及 atlas：** 同输入 6DOF/normmi FLIRT 的世界坐标位移均值仍为 0.186655 mm；8 mm 搜索候选已出现分叉，需定位搜索路径。Tian S2–S4、七套皮层加亚皮层 atlas 的标签、顺序及合并优先级尚未全量核对。见 [FLIRT](ORIGINAL_UKB_FLIRT_STAGE_20260927.md)与[atlas](../../docs/connectome/ORIGINAL_ATLAS_OPERATORS.md)。
+2. **配准及 atlas：** 6DOF/normmi FLIRT 候选自由度已按 FSL 修正；同输入 b0→T1 的世界坐标位移 RMS 为 0.009932 mm（CPU）。Tian S2–S4、七套皮层加亚皮层 atlas 的标签、顺序及合并优先级尚未全量核对。见 [FLIRT](ORIGINAL_UKB_FLIRT_STAGE_20260929.md)与[atlas](../../docs/connectome/ORIGINAL_ATLAS_OPERATORS.md)。
 3. **追踪：** 该阶段的采样器已经被 MRtrix 式校准拒绝采样替换，旧时间和矩阵数值不再作为当前基准。新实现的真实 10,000 次播种、多种子误差与时间见[当前追踪报告](ds004666/ifod2_rejection_20260929.md)；原流程的 1,000 万次播种仍未验收。
 4. **最终输出：** 尚无相同 UKB 输入下七套 atlas、四指标共 28 张矩阵的完整闭环比较。需固定同一追踪产物，逐矩阵报告标签、维度、相关、误差、稳定性、运行时间和连接图；当前四张 20 区公开矩阵不能外推为原流程一致。
 5. **文件几何和安装：** 自动 BET 数组已与官方一致，但当前 NIfTI 保存仍使用原 DWI affine/header；公开样本官方 mean b0 的 x/y zoom 相差 9.54e−7 mm，sform x 平移相差 −8.39233e−5 mm。应独立校验输出头与 affine。新版本还需从干净 Conda 环境安装、运行正式整链并核对所有最终产物。

@@ -24,4 +24,4 @@
 
 ![当前 TorchFLIRT 与 FSL FLIRT 6.0.7.4 的公开 T1w 配准对照](../flirt/figures/flirt_public_current.png)
 
-当前发布源码的 10 例真实 GM 对照中，CPU 与默认 TF32 GPU 分别有 9/10 例满足矩阵 `rmsdiff <= 0.05 mm`；moved Pearson 中位数分别为 `0.999985` 和 `0.999823`。公开 OpenNeuro 示例、完整时间和误差边界见 [TorchFLIRT 功能页](../flirt/README.md)。
+本轮真实 GM 对照中，CPU 的 10 例有 9 例、H100 TF32 已完成的 4 例有 4 例满足矩阵 `rmsdiff <= 0.05 mm`；moved Pearson 中位数分别为 `0.999985` 和 `0.999806`。图中公开 OpenNeuro T1w 由最终源码重新生成；时间、源码边界和跨模态 b0→T1 结果见 [TorchFLIRT 功能页](../flirt/README.md)。

@@ -170,6 +170,9 @@ def worker(args):
 
 
 def run(args):
+    sys.path.insert(0, str(Path(args.source_root).resolve() / "src"))
+    from fnit import __version__
+
     study = Path(args.study_root)
     output = Path(args.output_root)
     output.mkdir(parents=True, exist_ok=True)
@@ -311,7 +314,7 @@ def run(args):
             "comparison_mask": mask_record,
         },
         "candidate": {
-            "version": "0.14.0",
+            "version": __version__,
             "device": args.device,
             "threads": args.threads,
             "tf32_default": args.device.startswith("cuda"),
@@ -469,11 +472,10 @@ def combine(args):
             "fsl_cpu_median_seconds": reference_median,
             "fnit_cpu_median_seconds": cpu_median,
             "fnit_cuda_tf32_median_seconds": gpu_median,
-            "fnit_cpu_over_fsl": cpu_median / reference_median,
-            "fnit_cuda_tf32_over_fsl": gpu_median / reference_median,
-            "fnit_cuda_tf32_over_fnit_cpu": gpu_median / cpu_median,
+            "valid_for_speedup_claim": False,
             "interpretation": (
-                "observed wall-time ratios on shared nodes; not exclusive-hardware throughput"
+                "measurements came from different runs on shared nodes; concurrent CPU/GPU jobs "
+                "prevent a hardware-normalized speed ratio"
             ),
         },
         "acceptance": {

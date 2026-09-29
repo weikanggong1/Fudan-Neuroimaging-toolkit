@@ -1,12 +1,12 @@
 # FLIRT 验证资产
 
-本目录保留最新一轮真实数据测量，以及测量源码到当前源码的可核验继承关系。真实数据报告由 `flirt/core.py` `f5315f…` 生成；当前文件为 `ce375d…`。两者仅在 **12-DOF/corratio** 配置下源码等价，且没有以当前 hash 重新跑完整真实数据。证明见 [`flirt_profile_source_equivalence.public.json`](../runtime_dependencies/flirt_profile_source_equivalence.public.json)。当前 6-DOF/normmi 的 8 mm 搜索路径已经改变，不在该证明范围内。
+本目录保留修订后的真实数据测量。12-DOF GM 的 10 例 CPU 和 4 例 H100 报告由 `flirt/core.py` `56a934…` 生成；最终源码 `f2c530…` 只在候选自由度处增加 `min(dof, 7)` 分支。对 12-DOF 该值仍为 7，一例真实 GM 的最终 `.mat` 与测量源码逐元素一致。该核对不等于最终源码的 10 例完整重跑；详见[源码范围记录](../runtime_dependencies/flirt_profile_source_equivalence.public.json)。最终源码直接完成了一例 6-DOF b0→T1 的 CPU/GPU 对照和一例公开 12-DOF T1w→T1w 对照。
 
 | 文件 | 内容 |
 |---|---|
-| `report.public.json` | 10 例真实 GM 的 CPU/GPU 合并报告；含源码 hash、逐例矩阵与影像指标、时间和显存。 |
-| `report.cpu.current.json` | `f5315f…` 测量源码的 CPU 逐例报告；保留原 source hash。 |
-| `report.gpu.current.json` | `f5315f…` 测量源码的 H100 默认 TF32 逐例报告；保留原 source hash。 |
+| `report.public.json` | 真实 GM 前 4 例的 CPU/H100 配对报告；含源码 hash、逐例矩阵与影像指标、观察时间和显存。 |
+| `report.cpu.current.json` | 10 例真实 GM CPU 逐例报告，保留测量源码 hash。 |
+| `report.gpu.current.json` | 前 4 例真实 GM 的 H100 默认 TF32 报告；运行时有其他 GPU 作业。 |
 | `public_example.current.json` | OpenNeuro ds000114 公开 T1w 示例的来源、命令、hash、指标和时间。 |
 | `validate_real.py` | 运行候选、用 fresh FSL `-applyxfm` 输出计算指标，并合并 CPU/GPU 报告。 |
 | `plot_public_example.py` | 生成公开示例 JSON 和 `docs/flirt/figures/flirt_public_current.png`。 |
@@ -56,4 +56,4 @@ python validation/flirt/validate_real.py combine \
 
 `--reuse-existing --process-log <log>` 可在不重复优化的情况下，使用已保存的 `caseNN/candidate.nii.gz`、`candidate.mat` 和 `worker.json` 重新计算报告。日志每行格式为 `caseNN matrix_rmsdiff process_wall_seconds`。
 
-当前矩阵门限为 `rmsdiff <= 0.05 mm`。CPU 和 GPU 均通过 9/10 例；因此报告把 `numerically_equivalent` 保持为 `false`。
+当前矩阵门限为 `rmsdiff <= 0.05 mm`。CPU 通过 9/10 例，H100 已完成的 4 例通过 4/4；GPU 全 10 例尚无本次修订后的测量。共享节点的非同步时间不能计算加速比。最终源码的 6-DOF 同输入对照见[刚性配准报告](../connectome/original_ukb_flirt.public.json)。

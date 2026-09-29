@@ -157,7 +157,7 @@ filtered_path = highpass_nifti(
 
 | 对照 | FNIT | FSL | 精度和范围 |
 |---|---:|---:|---|
-| 490 帧运动估计；FNIT 优化区使用官方 mask | 21.64 秒，GPU 峰值 1.04 GB | MCFLIRT 397.54 秒 | 逐帧平移差中位 0.328 mm、95% 位 0.620 mm；旋转差中位 0.208°。 |
+| 490 帧运动估计；FNIT 优化区使用官方 mask | 仅拟合 21.64 秒，GPU 峰值 1.04 GB | MCFLIRT 完整命令 397.54 秒 | 计时范围不同；逐帧平移差中位 0.328 mm、95% 位 0.620 mm；旋转差中位 0.208°。 |
 | 固定官方 8 帧 MCFLIRT 矩阵，原始 BOLD→SBRef 三线性插值（独立函数 `linear` 选项） | 含保存中位 0.948 秒 | 8 次 `applywarp --premat` 合计中位 2.148 秒 | 全体素 MAE 0.1066、RMSE 0.1436、r=0.9999999990；最大差 26.66，位于边界。 |
 | 同一真实 BOLD 的 8 帧和同一 mask，整段中位数缩放 | 含压缩保存中位 0.353 秒 | `fslstats`＋`fslmaths` 1.163 秒 | 乘数 1.5420054353 vs 1.5420054173；4D float32 输出逐体素相同。 |
 | 真实 BOLD 的 16³×490 裁剪块高通 | CUDA 1.02 秒，峰值 0.052 GB | `fslmaths -bptf 68.0272108844 -1` 2.04 秒 | MAE 2.47×10⁻⁶，RMSE 7.06×10⁻⁶，最大误差 2.44×10⁻⁴；比较时 FNIT 关闭加回均值以匹配单条命令。 |
@@ -165,3 +165,16 @@ filtered_path = highpass_nifti(
 固定官方运动矩阵的另一次真实 8 帧测试中，`interpolation="spline"` 的 CPU 样条计算为 1.548 秒，相对 FSL `-spline_final` 的脑区 MAE 2.776、RMSE 30.18；三线性 MAE 约 100。FNIT 自估矩阵加样条对官方结果的 MAE 仍为 83.63，说明运动矩阵仍是剩余误差来源。该 8 帧耗时只测重采样，不能与含优化的整次 MCFLIRT 时间直接比较。
 
 整例 FEAT 核心与跳过 GDC/B0 的官方流程对照见 [验证页](../../validation/fmri/README.md)。官方 FEAT 掩膜的实际步骤和本函数默认 SynthStrip 的差异须一起解释，不把上述单步接近误写为整链逐体素等价。
+
+## 运动估计与 MCFLIRT 的差异
+
+上述 490 帧比较的官方命令是 `mcflirt -in BOLD.nii.gz -reffile SBREF.nii.gz -out prefiltered_func_data_mcf -mats -plots -spline_final`。`-mats` 输出每帧到 SBRef 的 FSL scaled-mm 矩阵，`-plots` 输出每帧六列旋转和平移参数，`-spline_final` 指定最终影像重采样。FNIT 的 `estimate_motion(input_bold=..., reference=..., mask=..., resample=False)` 只估计矩阵，没有在 21.64 秒内重采样和写出 4D 图像；FSL 的 397.54 秒包含这些工作。因此这两个时间不能当作同范围加速比。
+
+两者的搜索过程也不同。MCFLIRT 默认代价为 `normcorr`，先在 8 mm 优化，再在 4 mm 优化两次，并使用相邻时间帧的结果作为后续帧初值。FNIT 用带掩膜的标准化相关和 Adam，按 8 mm、4 mm、原分辨率三级优化，每帧从零初值独立开始。本次 FNIT 测试还显式提供了官方脑掩膜，而对应 MCFLIRT 命令没有掩膜输入。矩阵坐标和文件结构能互通，但这不是 MCFLIRT 求解器的源码级复现。
+
+同一例真实 490 帧的相对矩阵，平移差中位数／95% 位为 0.328／0.620 mm，旋转差为 0.208／0.287°。详见[逐项记录](../../validation/fmri/mcflirt_difference.public.json)。本次 FLIRT 只修改角度采样和粗网格插值；`motion.py` 的 SHA-256 与该 490 帧测试时的源码相同，因此 FLIRT 的修改不会改变此处的 MCFLIRT 结果。
+
+## 参考文献与原实现
+
+- Jenkinson et al., *Improved Optimization for the Robust and Accurate Linear Registration and Motion Correction of Brain Images*, NeuroImage 2002，[doi:10.1006/nimg.2002.1132](https://doi.org/10.1006/nimg.2002.1132)。
+- [FSL MCFLIRT 使用与算法说明](https://pages.fmrib.ox.ac.uk/docs-881397/registration/mcflirt.html)；[原实现代码库](https://git.fmrib.ox.ac.uk/fsl/mcflirt)。
