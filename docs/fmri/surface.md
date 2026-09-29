@@ -132,7 +132,7 @@ msm --inmesh=/absolute/path/work/msmsulc_inputs/L.sphere_rot.surf.gii \
 
 `run_newmsm_msmsulc` 使用 FNIT 自己的 PyTorch 实现：面积校正的 sulc 重采样，依次使用 162、642、2,562 个控制点和 2,562、10,242、40,962 个数据点，以局部脑沟相关和三角形形变能选取离散位移。它不调用 newMSM；当前搜索是逐控制点局部更新，**尚未复现官方的标签提案及高阶联合优化**。默认 `registration="msmsulc"` 不受此实验分支影响。
 
-`inputs` 是上例 `prepare_msmsulc_inputs` 返回的 `{"L": MSMSulcInputs, "R": MSMSulcInputs}`。每侧读取 `rotated_sphere`（100 mm 原生球面）、`native_sulc`（同一原生顶点顺序）、`reference_sphere` 和 `reference_sulc`（fsLR 164k 模板）；`native_sphere`、`affine` 由准备函数一并记录。`output_dir` 指定输出文件夹；`device` 指定 PyTorch 设备，CUDA 默认启用 TF32。返回字典的 `L`、`R` 是原生顶点顺序的注册球面路径。目录中还保存 `registration_report.json`，逐侧记录仿射角度、三个级别的控制点数、数据点数、迭代轮数、末轮位移更新数和耗时。
+`inputs` 是上例 `prepare_msmsulc_inputs` 返回的 `{"L": MSMSulcInputs, "R": MSMSulcInputs}`。每侧读取 `rotated_sphere`（100 mm 原生球面）、`native_sulc`（同一原生顶点顺序）、`reference_sphere` 和 `reference_sulc`（fsLR 164k 模板）；`native_sphere`、`affine` 由准备函数一并记录。`output_dir` 指定输出文件夹；`device` 指定 PyTorch 设备，CUDA 默认启用 TF32。返回字典的 `L`、`R` 是原生顶点顺序的注册球面路径。目录中还保存 `registration_report.json`，逐侧记录仿射角度、三个级别的控制点数、数据点数、迭代轮数、末轮位移更新数、球面折叠面片修复前后数量、最大修复位移和耗时。若局部折叠无法修复，函数报错，不会输出该侧球面。
 
 ```python
 from fnit import run_newmsm_msmsulc
@@ -162,7 +162,7 @@ newmsm --inmesh=/absolute/path/work/msmsulc_inputs/L.sphere_rot.surf.gii \
 
 | 实现 | 左侧角差中位数 / 95% | 右侧角差中位数 / 95% | 左 / 右耗时 |
 |---|---:|---:|---:|
-| FNIT 逐级离散实验分支 vs 官方 newMSM | 0.494° / 1.291° | 0.495° / 1.768° | 48.48 / 42.68 秒 |
+| FNIT 逐级离散实验分支 vs 官方 newMSM | 0.494° / 1.291° | 0.495° / 1.768° | 40.34 / 36.39 秒 |
 | 官方 newMSM | 0° / 0° | 0° / 0° | 312.61 / 241.95 秒 |
 
 固定回归后 BOLD、T1w 表面、ROI、模板和 Workbench 命令，仅替换左右注册球面。对每个灰质坐标先计算 490 帧 Pearson r，再在区域内取均值；常数序列不参与相关均值，MAE 使用全部对应值。
@@ -173,7 +173,11 @@ newmsm --inmesh=/absolute/path/work/msmsulc_inputs/L.sphere_rot.surf.gii \
 | 右皮层 | 29,716 | 29,684 | 0.8989 | 0.9505 | 26.15 |
 | 皮层下 | 31,870 | — | 1.0000 | 1.0000 | 0 |
 
-该次实验球面的 490 帧投影及 CIFTI 组装耗时 493.05 秒，复用已生成的 T1w BOLD，不含上述球面注册时间。实验分支的球面角差和双侧平均时间相关仍未达到预设的 0.25°、0.95 目标；因此目前只供显式选择和比较，不作为数值等价的默认分支。下文默认 FNIT 与旧版 MSM 的指标是另一组对照。
+该次实验球面的 490 帧投影及 CIFTI 组装耗时 493.05 秒，复用已生成的 T1w BOLD，不含上述球面注册时间。完成这次投影后，检查发现左侧 240,066 个面片中有 3 个折叠，右侧 245,896 个面片没有折叠。现版注册在写出前局部修复：左侧 3→0，最大顶点位移 0.119 mm；右侧 0→0。用修复后的左球面重做 490 帧皮层重采样，平均时间相关相对官方为 0.918351，原输出为 0.918353；两版输出的 MAE 为 0.00054。实验分支的球面角差和双侧平均时间相关仍未达到预设的 0.25°、0.95 目标；因此目前只供显式选择和比较，不作为数值等价的默认分支。下文默认 FNIT 与旧版 MSM 的指标是另一组对照。
+
+同一输入、配置和 8 个 CPU 线程重跑官方 newMSM，左右球面相对首次官方结果的中位角差分别为 0.394°、0.353°。固定其余投影输入后，两次官方结果的皮层逐点时间相关均值为左 0.943、右 0.954。FNIT 实验分支相对第二次官方结果分别为 0.914、0.893；相对首次结果见上表。重复跑说明单次官方球面本身不是逐顶点稳定的数值真值，但 FNIT 的时间序列差异仍大于两次官方运行之间的差异。影响官方运行间波动的具体环节尚未定位。
+
+逐项消融进一步限定了误差来源：只改用官方标签的距离范围和逐轮缩放、继续逐控制点选标签时，球面中位角差反而升至左 0.611°、右 0.697°；从当前候选出发增加一次高阶面片图割细化，仅降至 0.492°、0.492°；把各级形变改由细数据网格传递得到 0.491°、0.497°。因此标签提案、面片能量的联合求解和逐级传递必须合并验证，不能把单项消融当成已复现官方算法。
 
 原版完整流程的命令格式如下；`--cifti-output 91k` 指定 91,282 个灰质坐标，`--msm` 启用官方 MSMSulc，`--fs-subjects-dir` 使用已有的同被试 FreeSurfer subject。这是原软件等价入口的说明，不是下文固定输入 benchmark 的运行命令；原版从 BIDS 原始数据重算上游流程，不会直接读取 FNIT 已回归的 BOLD。[官方参数说明](https://fmriprep.org/en/latest/usage.html)与[fsLR 输出说明](https://fmriprep.org/en/latest/outputs.html)给出其空间和球面约定。
 

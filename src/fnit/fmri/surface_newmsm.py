@@ -208,6 +208,50 @@ def _local_energy(nodes,positions,original,faces,layout,reference_map,reference_
     return energy.sum(-1),candidates
 
 
+def _repair_folds(original, deformed, faces, device):
+    """Move vertices of inverted output faces until their local orientation is valid."""
+    before=original[faces]
+    after=deformed[faces]
+    signed_before=np.einsum('ij,ij->i',np.cross(before[:,1]-before[:,0],
+                                               before[:,2]-before[:,0]),before[:,0])
+    signed_after=np.einsum('ij,ij->i',np.cross(after[:,1]-after[:,0],
+                                              after[:,2]-after[:,0]),after[:,0])
+    inverted=np.flatnonzero(signed_after/signed_before<=0)
+    if not len(inverted):
+        return deformed,0,0.0
+    moving=np.unique(faces[inverted].ravel())
+    affected=np.flatnonzero(np.isin(faces,moving).any(axis=1))
+    selected=torch.device(device)
+    full=torch.as_tensor(deformed,device=selected)
+    ids=torch.as_tensor(moving,device=selected,dtype=torch.long)
+    local_faces=torch.as_tensor(faces[affected].astype(np.int64),device=selected)
+    reference=torch.as_tensor(signed_before[affected],device=selected)
+    starting=full[ids].detach()
+    parameters=torch.nn.Parameter(starting.clone())
+    optimizer=torch.optim.Adam([parameters],lr=0.02)
+    radius=float(np.linalg.norm(original,axis=1).mean())
+    for _ in range(250):
+        positions=F.normalize(parameters,dim=1)*radius
+        triangles=full.index_copy(0,ids,positions)[local_faces]
+        signed=(torch.cross(triangles[:,1]-triangles[:,0],
+                            triangles[:,2]-triangles[:,0],dim=1)*triangles[:,0]).sum(1)
+        ratio=signed/reference
+        if bool((ratio>0.05).all()):
+            break
+        loss=F.relu(0.1-ratio).square().sum()+0.0001*(positions-starting).square().sum()
+        optimizer.zero_grad(set_to_none=True)
+        loss.backward()
+        optimizer.step()
+    corrected=full.index_copy(0,ids,F.normalize(parameters,dim=1)*radius).detach().cpu().numpy()
+    check=corrected[faces[affected]]
+    signed=np.einsum('ij,ij->i',np.cross(check[:,1]-check[:,0],
+                                        check[:,2]-check[:,0]),check[:,0])
+    if np.any(signed/signed_before[affected]<=0):
+        raise RuntimeError(f"sphere still has folded triangles after local repair")
+    movement=np.linalg.norm(corrected[moving]-deformed[moving],axis=1)
+    return corrected.astype(np.float32),len(inverted),float(movement.max())
+
+
 def run_newmsm_msmsulc(
     inputs: dict[str, MSMSulcInputs], output_dir: str | Path, *,
     device: str = "cuda:0",
@@ -283,10 +327,14 @@ def run_newmsm_msmsulc(
         ids,weights,_=prior_map.weights(native)
         vertices=F.normalize((prior_deformed[ids]*weights[:,:,None]).sum(1),dim=1)*100
         vertices=vertices.cpu().numpy().astype(np.float32)@affine.T
+        vertices,folded_before,max_repair_mm=_repair_folds(
+            native_xyz,vertices,native_faces,device)
         path=output/f'{hemi}.sphere.discrete.native.surf.gii'
         nib.save(nib.GiftiImage(darrays=[
             nib.gifti.GiftiDataArray(vertices,intent='NIFTI_INTENT_POINTSET'),
             nib.gifti.GiftiDataArray(native_faces,intent='NIFTI_INTENT_TRIANGLE')]),str(path))
-        report[hemi]={'seconds':time.perf_counter()-start,'affine_angles_deg':angles,'stages':stages}
+        report[hemi]={'seconds':time.perf_counter()-start,'affine_angles_deg':angles,
+                      'folded_before_repair':folded_before,'folded_after_repair':0,
+                      'maximum_repair_displacement_mm':max_repair_mm,'stages':stages}
     (output/'registration_report.json').write_text(json.dumps(report,indent=2)+'\n', encoding='utf-8')
     return {hemi: output/f'{hemi}.sphere.discrete.native.surf.gii' for hemi in 'LR'}
