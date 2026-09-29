@@ -45,6 +45,12 @@
 | [BIDS→MNI152 2 mm fMRI](../docs/fmri/README.md) | [FEAT](fmri/feat_summary.json)、[BBR](fmri/bbr_summary.json)、[PICA](fmri/pica_summary.json)、[T1 FNIRT 配准](fmri/t1_fnirt_20260929.public.json)、[FNIRT volume 整链](fmri/fmri_volume_fnirt_20260929.public.json)与[默认整链](fmri/e2e_summary.json) | FEAT 子阶段分别比较；最终 AROMA 输出没有可逐体素配对的 UKB FIX 参考 | 报告记录阶段时间、显存和限制；功能页的真实数据图同时展示 FEAT mean BOLD、BBR、T1→MNI 配准和 PICA |
 | [MS-HBM 17 网络](../docs/mshbm/README.md) | [真实 fsLR32k 静息态时序](mshbm/report.public.json) | 输入 profile、网络标签和 Dice/ARI 按顶点比较 | 报告含 CBIG/FNIT 的匹配计时与内存；功能页展示网络标签与差异 |
 
+## Postanalysis
+
+| 功能 | 当前真实数据报告 | 输出一致性结论 | 时间、显存与示意图 |
+|---|---|---|---|
+| [BigFLICA](../docs/bigflica/README.md) | [真实 UKB 四模态同输入与 2,050 人分块测试](bigflica/README.md) | CPU 对 notebook 逐图几乎一致；GPU 直接体素 FLICA course 相关最低 0.999999978，压缩 GPU 仅在 mMIGP 符号对齐参考后最低 0.999994827；独立 GPU 压缩结果仍受符号与非凸 DicL 影响 | 报告逐阶段耗时、显存/内存、缓存复用和 2,050 人随机特征分解残差；真实 UKB 派生 PNG 保留在用户远程目录。 |
+
 recon-all 与 Connectome 的验证边界由各自功能页维护，不纳入本页审计表。
 
 公开报告不含账号、私有绝对路径、源病例编号、权重或临床原图。可再分发样例及来源校验见 [T1w 示例](../examples/README.md)与 [FLAIR 示例](../examples/WMH.md)。独立环境求解与固定 NumPy wheel 的证据见[环境验证](environment/README.md)。
