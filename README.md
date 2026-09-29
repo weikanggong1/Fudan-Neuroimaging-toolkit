@@ -104,7 +104,7 @@ fsLR32k 表面投影的 HCP 公开模板不属于模型权重，单独下载并�
 fnit-setup-fmri-surface-assets --output-dir /absolute/path/hcp_surface_assets --fmriprep
 ```
 
-该命令包含 fsLR32k 投影和 MSMSulc 配准所需的球面、脑沟参考图、ROI，以及生成 91k CIFTI 的 HCP 皮层下分区。被试需提供已生成的 white、pial、sphere、sphere.reg、sulc 和 thickness；这条 fMRIPrep 表面路径不使用 FLAIR、髓鞘图或 wmparc。完整用法见 [fMRI 表面投影](docs/fmri/surface.md)。
+该命令包含 fsLR32k 投影和 MSMSulc 配准所需的球面、脑沟参考图、ROI、官方 MSMSulc 对照配置，以及生成 91k CIFTI 的 HCP 皮层下分区。被试需提供已生成的 white、pial、sphere、sphere.reg、sulc 和 thickness；这条 fMRIPrep 表面路径不使用 FLAIR、髓鞘图或 wmparc。完整用法见 [fMRI 表面投影](docs/fmri/surface.md)。
 
 脑干亚区另需约 2.3 MB 图谱包，可独立下载和生成 PyTorch 平滑先验：
 

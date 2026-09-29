@@ -2,14 +2,18 @@
   "data": "one real UK Biobank resting-state BOLD; aggregate statistics only",
   "frames": 490,
   "tr_seconds": 0.735,
-  "cifti_shape": [490, 91282],
+  "cifti_shape": [
+    490,
+    91282
+  ],
   "inputs": "the same confound-regressed BOLD, T1w surfaces, cortex masks, MNI volume, TemplateFlow labels and HCP dseg; sphere comparison changes only native-to-fsLR registration",
   "reference_source": {
     "fmriprep_commit": "e56dc9938e742c789510705372f88fdb5a8206c2",
     "fmriprep_resampling_py_sha256": "96d73cdf1b2f8eef1f565739028e09e8754eddfb0776652b759f3fcfbd708374",
     "niworkflows_commit": "0eb323521639665483f651cf088c86047382d656",
     "niworkflows_cifti_py_sha256": "1c243989bdb1ff9ffdc040b48932dfe408cd23427681a79fb004fc9ccec162b1",
-    "hcp_dseg_sha256": "9c25e63edec37b3876756b749a3f0127511c6b63bf2855060a44007bb479b987"
+    "hcp_dseg_sha256": "9c25e63edec37b3876756b749a3f0127511c6b63bf2855060a44007bb479b987",
+    "fnit_surface_msmsulc_py_sha256": "422d881521c39a03eec7870aecce08162a17f3c9a947d09413892598132b5ee5"
   },
   "fixed_official_sphere": {
     "t1w_surface_geometry_and_cortex_mask_vs_independent_preparation_exact": true,
@@ -25,40 +29,101 @@
     }
   },
   "fnit_pytorch_msmsulc_vs_official_msm_sphere": {
-    "only_variable": "registered sphere; other volume, surfaces, masks, templates and Workbench commands fixed",
-    "all": {"grayordinates": 91282, "valid": 90536, "mean_temporal_r": 0.8084734127, "median_temporal_r": 0.9071931703, "mae": 30.2293239223},
-    "cortex_left": {"grayordinates": 29696, "valid": 29694, "mean_temporal_r": 0.7244680355, "median_temporal_r": 0.7832033788, "mae": 43.6355900885},
-    "cortex_right": {"grayordinates": 29716, "valid": 29669, "mean_temporal_r": 0.6913139992, "median_temporal_r": 0.7388664586, "mae": 49.2526135082},
-    "subcortex": {"grayordinates": 31870, "valid": 31173, "mean_temporal_r": 1.0, "median_temporal_r": 1.0, "mae": 0.0}
+    "only_variable": "registered sphere; same 490-frame BOLD, T1w surfaces, masks, templates and Workbench commands",
+    "cortex_left": {
+      "grayordinates": 29696,
+      "valid": 29688,
+      "mean_temporal_r": 0.804478866847898,
+      "median_temporal_r": 0.8529655001324573,
+      "mean_absolute_difference": 35.98827362060547
+    },
+    "cortex_right": {
+      "grayordinates": 29716,
+      "valid": 29667,
+      "mean_temporal_r": 0.781368659661789,
+      "median_temporal_r": 0.8449892710838507,
+      "mean_absolute_difference": 40.43488311767578
+    },
+    "subcortex": {
+      "grayordinates": 31870,
+      "valid": 31173,
+      "mean_temporal_r": 1.0,
+      "mean_absolute_difference": 0.0
+    },
+    "all": {
+      "grayordinates": 91282,
+      "valid": 90528,
+      "mean_temporal_r": 0.8642324211864473,
+      "mean_absolute_difference": 24.870957693327856
+    },
+    "native_sphere_angle_deg": {
+      "L": {
+        "median": 0.9053404257443195,
+        "p95": 2.034879761987028,
+        "mean": 0.9675579799648739,
+        "max": 3.4824037732296595
+      },
+      "R": {
+        "median": 0.9724068427078741,
+        "p95": 2.3731096293873706,
+        "mean": 1.1088255468085397,
+        "max": 4.264743587821543
+      }
+    },
+    "reference_sulc_r_atlas_roi": {
+      "L": {
+        "initial": 0.7900589624553446,
+        "fnit": 0.8434952338035346,
+        "official": 0.8463013177738165
+      },
+      "R": {
+        "initial": 0.7803245693791981,
+        "fnit": 0.8359999264672132,
+        "official": 0.8431144213147407
+      }
+    },
+    "edge_abs_log_strain_p95": {
+      "L": {
+        "fnit": 0.13502647038360152,
+        "official": 0.1292171033105465
+      },
+      "R": {
+        "fnit": 0.14199573919409136,
+        "official": 0.12831598630780333
+      }
+    },
+    "folded_triangles": {
+      "L": 0,
+      "R": 0
+    }
   },
-  "msmsulc_cause_diagnostic": {
-    "initial_sphere_coordinates_and_native_sulc_arrays_equal_across_runs": true,
-    "official_hcp_and_smriprep_msm_final_config_parameters_equal": true,
-    "official_config": "NMI affine, then three correlation-based discrete levels; icosahedral control/data grids and higher-order strain regularization",
-    "fnit_optimizer": "four graph-smoothed squared-error stages, continuous Adam, fixed Fibonacci control points, edge/area penalties",
-    "left": {
-      "fnit_to_official_sphere_angle_deg_median_p95": [1.14184, 2.67516],
-      "reference_sulc_r_initial_fnit_official": [0.79023, 0.89126, 0.84915],
-      "edge_abs_log_strain_p95_fnit_official": [0.29083, 0.12922],
-      "angle_vs_temporal_r_spearman": -0.86255,
-      "mean_temporal_r_by_increasing_angle_quartile": [0.93738, 0.81989, 0.67361, 0.46700]
+  "official_stage_diagnostic": {
+    "affine_only_to_final_median_angle_deg": {
+      "L": 1.590779526774419,
+      "R": 2.044998851559562
     },
-    "right": {
-      "fnit_to_official_sphere_angle_deg_median_p95": [1.30442, 3.11005],
-      "reference_sulc_r_initial_fnit_official": [0.78623, 0.88936, 0.84469],
-      "edge_abs_log_strain_p95_fnit_official": [0.29689, 0.12832],
-      "angle_vs_temporal_r_spearman": -0.85087,
-      "mean_temporal_r_by_increasing_angle_quartile": [0.93818, 0.78518, 0.60067, 0.44126]
-    },
-    "interpretation": "The only changed projection input was the registration sphere. Greater FNIT-to-official spherical displacement is strongly associated with lower per-grayordinate temporal correlation. FNIT matches the sulcal metric more closely under this diagnostic yet distorts edges more; that does not establish better anatomical correspondence."
+    "left_first_discrete_level_to_final_median_angle_deg": 0.9066016502377613,
+    "interpretation": "The three discrete MSM levels, rather than affine initialization alone, account for most of the remaining sphere displacement."
   },
   "timing_seconds_same_host": {
-    "t1w_surface_preparation": 22.6918746028,
-    "eight_frame_highlevel_wall_including_zip_extraction": 73.2153805108,
+    "fnit_msmsulc_both_hemispheres_gpu_wall": 65.06229450087994,
+    "fnit_msmsulc_per_hemisphere_optimization_excluding_affine_and_preparation": {
+      "L": 17.609352550003678,
+      "R": 22.851310130674392
+    },
+    "fnit_msmsulc_peak_gpu_reserved_gb": {
+      "L": 0.297795584,
+      "R": 0.3145728
+    },
+    "official_msm_per_hemisphere_cpu_wall": {
+      "L": 2799.45,
+      "R": 2802.17
+    },
     "490_frame_workbench_ribbon_and_dilate_sum": 289.5566173932,
     "490_frame_workbench_native_mask_resample_and_atlas_mask_sum": 119.9875210323,
     "490_frame_fnit_cifti_assembly": 19.5686099669,
-    "490_frame_official_niworkflows_cifti_assembly": 19.1427056850
+    "490_frame_official_niworkflows_cifti_assembly": 19.142705685,
+    "490_frame_surface_projection_with_existing_t1w_wall": 447.0390989780426
   },
-  "limits": "Workbench stage times are summed from separate runs, not a full fMRIPrep wall time. Upstream BBR, MNI registration and denoising differ from fMRIPrep. The default FNIT MSMSulc sphere is not numerically equivalent to official MSM."
+  "limits": "One real UK Biobank subject, also used to screen the optimizer settings; no independent subject validation. FNIT runs registration on GPU and official MSM on CPU, so speed figures are not matched hardware comparisons. FNIT uses a continuous sulc-MSE optimizer with 2562 Fibonacci controls and an approximate triangle-strain penalty; it does not reproduce the official multilevel discrete HOCR objective, and its default sphere is not numerically equivalent. Upstream BBR, MNI registration and denoising differ from fMRIPrep."
 }

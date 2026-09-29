@@ -42,10 +42,10 @@ ASSETS = (
     (MESH + "fsaverage.R_LR.spherical_std.164k_fs_LR.surf.gii", "85e718e424a1d87521fb0f3942538db16d8c745fe5b9ee20405baac2aff1dbb1"),
     (MESH + "Avgwmparc.nii.gz", "c8d80a4a0327daf3855168ce36ee3a5f4b9c660fd38d4ebf9865d2b915887a1b"),
     ("global/templates/91282_Greyordinates/Atlas_ROIs.2.nii.gz", "764c5c0139c37f4e0ec288525e8a83f0d5d6821bc82fefcc979c1ac0c35b1cd4"),
+    ("MSMConfig/MSMSulcStrainFinalconf", "46b250404cb2570b4f645d8e53c30fabde799663d61761d61cf54ff110318203"),
 )
 
 MSMALL_ASSETS = (
-    ("MSMConfig/MSMSulcStrainFinalconf", "46b250404cb2570b4f645d8e53c30fabde799663d61761d61cf54ff110318203"),
     ("MSMConfig/MSMAllStrainFinalconf1to1_1to3_1", "ec9348a2bd2aea5ce2bf1a7387997dabb3443784c15a017faa4871e4ea38cc2e"),
     ("MSMConfig/MSMAllStrainFinalconf1to1_1to3_2", "646f100e7826d0c285f379f2a9121f0c0c8cd61a3d2d200cc241c416617b8555"),
     (MESH + "Conte69.MyelinMap_BC.164k_fs_LR.dscalar.nii", "66f5726a4d4e02189e2d28643cf4017f1bcd4b7c0ef07a6282e05180b73de070"),

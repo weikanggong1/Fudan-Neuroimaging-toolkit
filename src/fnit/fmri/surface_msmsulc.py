@@ -11,7 +11,7 @@ import time
 import nibabel as nib
 import numpy as np
 from scipy import sparse
-from scipy.spatial import cKDTree
+from scipy.spatial import ConvexHull, cKDTree
 import torch
 import torch.nn.functional as F
 
@@ -59,6 +59,40 @@ def _control_points(count: int, radius: float) -> np.ndarray:
                                       np.sqrt(1 - z * z) * np.sin(angle), z))).astype(np.float32)
 
 
+def _affine_initialization(initial: np.ndarray, target: np.ndarray,
+                           native: np.ndarray, reference: np.ndarray,
+                           source_graph: sparse.csr_matrix,
+                           target_graph: sparse.csr_matrix,
+                           device: torch.device) -> tuple[np.ndarray, np.ndarray, list[float]]:
+    base = torch.from_numpy(initial).to(device)
+    target_xyz = torch.from_numpy(target).to(device)
+    source = torch.from_numpy(_smooth_metric(native, source_graph, 8)).to(device)
+    reference_metric = torch.from_numpy(_smooth_metric(reference, target_graph, 8)).to(device)
+    tree = cKDTree(target)
+    angles = torch.nn.Parameter(torch.zeros(3, device=device))
+    optimizer = torch.optim.Adam([angles], lr=0.001)
+    neighbors = None
+    for step in range(200):
+        x, y, z = angles.unbind()
+        skew = torch.stack((torch.stack((x * 0, -z, y)),
+                            torch.stack((z, y * 0, -x)),
+                            torch.stack((-y, x, z * 0))))
+        rotated = base @ torch.matrix_exp(skew).T
+        if step % 5 == 0:
+            neighbors = torch.from_numpy(tree.query(
+                rotated.detach().cpu().numpy(), k=12, workers=4,
+            )[1].astype(np.int64)).to(device)
+        distance_sq = ((rotated[:, None, :] - target_xyz[neighbors]) ** 2).sum(dim=-1)
+        weights = torch.softmax(-distance_sq / (2 * 5.0 ** 2), dim=1)
+        sampled = (weights * reference_metric[neighbors]).sum(dim=1)
+        loss = (sampled - source).square().mean() + 0.1 * angles.square().sum()
+        optimizer.zero_grad(set_to_none=True)
+        loss.backward()
+        optimizer.step()
+    matrix = torch.matrix_exp(skew).detach().cpu().numpy().astype(np.float32)
+    return target @ matrix, matrix, (angles.detach().cpu().numpy() * 180 / np.pi).tolist()
+
+
 def run_msmsulc(
     inputs: dict[str, MSMSulcInputs],
     output_dir: str | Path,
@@ -100,6 +134,8 @@ def run_msmsulc(
             raise ValueError(f"{hemi} rotated sphere must have approximately 100-mm radius")
         source_graph, edges = _smoothing_graph(faces, len(initial))
         target_graph, _ = _smoothing_graph(target_faces, len(target))
+        target, affine_matrix, affine_angles_deg = _affine_initialization(
+            initial, target, native, reference, source_graph, target_graph, selected)
         base = torch.from_numpy(initial).to(selected)
         target_xyz = torch.from_numpy(target).to(selected)
         edge_i = torch.from_numpy(edges[:, 0].astype(np.int64)).to(selected)
@@ -112,9 +148,20 @@ def run_msmsulc(
                        * triangle[:, 0]).sum(dim=1)
         if bool((signed_base.abs() < 1e-5).any()):
             raise ValueError(f"{hemi} sphere has degenerate triangles")
-        controls = _control_points(25000, radius)
+        controls = _control_points(2562, radius)
+        control_face = torch.from_numpy(
+            ConvexHull(controls).simplices.astype(np.int64)).to(selected)
+        control_base = torch.from_numpy(controls).to(selected)
+        control_triangle = control_base[control_face]
+        control_u = control_triangle[:, 1] - control_triangle[:, 0]
+        control_v = control_triangle[:, 2] - control_triangle[:, 0]
+        g0_uu = control_u.square().sum(dim=1)
+        g0_uv = (control_u * control_v).sum(dim=1)
+        g0_vv = control_v.square().sum(dim=1)
+        det_g0 = g0_uu * g0_vv - g0_uv.square()
         distances, indices = cKDTree(controls).query(initial, k=8)
-        weights = np.exp(-distances ** 2 / (2 * 2.8 ** 2)).astype(np.float32)
+        bandwidth = 2.8 * np.sqrt(25000 / len(controls))
+        weights = np.exp(-distances ** 2 / (2 * bandwidth ** 2)).astype(np.float32)
         weights /= weights.sum(axis=1, keepdims=True)
         control_indices = torch.from_numpy(indices.astype(np.int64)).to(selected)
         control_weights = torch.from_numpy(weights).to(selected)
@@ -155,13 +202,28 @@ def run_msmsulc(
                           * triangle[:, 0]).sum(dim=1)
                 area_ratio = signed / signed_base
                 barrier = torch.relu(0.8 - area_ratio).square().mean()
+                control_xyz = F.normalize(control_base + delta_parameters, dim=1) * radius
+                control_triangle = control_xyz[control_face]
+                deformed_u = control_triangle[:, 1] - control_triangle[:, 0]
+                deformed_v = control_triangle[:, 2] - control_triangle[:, 0]
+                g1_uu = deformed_u.square().sum(dim=1)
+                g1_uv = (deformed_u * deformed_v).sum(dim=1)
+                g1_vv = deformed_v.square().sum(dim=1)
+                det_g1 = g1_uu * g1_vv - g1_uv.square()
+                jacobian = torch.sqrt(det_g1.clamp_min(1e-8) / det_g0)
+                trace = (g1_uu * g0_vv + g1_vv * g0_uu - 2 * g1_uv * g0_uv) / det_g0
+                shear = (trace / jacobian.clamp_min(1e-6) - 2).clamp_min(0)
+                bulk = (jacobian - 1).square()
+                hyperelastic = (0.4 * shear + 1.6 * bulk).square().mean()
                 loss = (similarity + regularization * smoothness
-                        + 0.0005 * displacement + 0.2 * strain + 20 * barrier)
+                        + 0.0005 * displacement + 0.2 * strain + 20 * barrier
+                        + 10 * hyperelastic)
                 optimizer.zero_grad(set_to_none=True)
                 loss.backward()
                 optimizer.step()
             stages.append({"sulc_mse": float(similarity.detach()),
                            "edge_strain": float(strain.detach()),
+                           "hyperelastic": float(hyperelastic.detach()),
                            "folded_triangles": int((area_ratio <= 0).sum())})
         with torch.no_grad():
             delta = (delta_parameters[control_indices] * control_weights[:, :, None]).sum(dim=1)
@@ -173,7 +235,7 @@ def run_msmsulc(
             folded = int((ratio <= 0).sum())
             if folded:
                 raise RuntimeError(f"{hemi} registration folded {folded} triangles")
-            vertices = xyz.cpu().numpy().astype(np.float32)
+            vertices = xyz.cpu().numpy().astype(np.float32) @ affine_matrix.T
         destination = output / f"{hemi}.sphere.sulc_registered.native.surf.gii"
         nib.save(nib.GiftiImage(darrays=[
             nib.gifti.GiftiDataArray(vertices, intent="NIFTI_INTENT_POINTSET"),
@@ -182,6 +244,8 @@ def run_msmsulc(
         result[hemi] = destination
         report[hemi] = {"vertices": len(vertices), "faces": len(faces),
                         "folded_triangles": folded,
+                        "control_points": len(controls),
+                        "affine_angles_deg": affine_angles_deg,
                         "seconds": time.perf_counter() - start,
                         "peak_gpu_reserved_gb": (torch.cuda.max_memory_reserved(selected) / 1e9
                                                  if selected.type == "cuda" else 0),
