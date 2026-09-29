@@ -35,6 +35,7 @@ python validation/recon_all/python_gpu_port/plot_filled_difference.py \
 | 缺陷体积映射 | 真实 T1 冻结输入，16,777,216 个体素全部一致；新 Conda 自编译 `mri_label2vol` | [精度、时间和输入](defects_volume_20260929.json)、[函数说明](../../../docs/recon_all/DEFECTS_VOLUME.md) |
 | Talairach affine 子进程 | 冻结真实 SynthStrip 输入，XFM、LTA 与直接路径逐字节一致；需整例显存复核 | [记录](talairach_child_20260929.json) |
 | SynthSeg 显存 | 同一 T1、同一 GPU 的候选分割与旧路径逐体素一致，体积 CSV 逐字节一致；独立阶段进程采样 18,450 MiB | [记录](synthseg_memory_20260929.json)、[资源说明](../../../docs/recon_all/GPU_MEMORY.md) |
+| SynthSeg CPU 后端 | nodecw10 上 PyTorch 2.5.1 的 MKLDNN 路径段错误；关闭该后端后独立真实 T1 推理及完整 CPU runner 的 SynthSeg 阶段均通过，后续仍在复跑 | [阶段与测试记录](synthseg_cpu_backend_20260930.json) |
 | BA/VPnl 注释 | 修正相同统计值时的标签顺序后，六张注释的双侧顶点编码全部与冻结参考一致 | [记录](exvivo_wiring_20260929.json)、[注释说明](LABEL2ANNOT.md) |
 | 图谱曲率 | 冻结球面上的 `avg_curv` 相关性超过 0.999999999999；四张曲率附图超过 0.999999999999999 | [函数说明及计时](../../../docs/recon_all/CURVATURE_OUTPUTS.md) |
 | Jacobian、灰白对比、SNR | 双侧 Jacobian 相关性超过 0.9999999999999；百分比图逐顶点一致；70 行 SNR 数据行一致 | [记录](surface_metrics_wiring_20260929.json)、[函数说明](../../../docs/recon_all/SURFACE_EXTRA_METRICS.md) |

@@ -96,7 +96,9 @@ fnit synthseg --i sub-01_T1w.nii.gz --o sub-01_synthseg.nii.gz \
 | CSV 最大绝对误差 | 104.06 mm³ |
 | FNIT H100 完整命令 | 中位数 9.48 s [8.84–10.13] |
 
-FNIT CPU 单例为 55.57 s；与原版相比只有 1 个标签体素不同，CSV 最大差 0.24 mm³。原版三例 CPU 参考任务所在时段有重叠，中位数 304.23 s，因此不计算稳定加速倍数。GPU 单例 Torch 峰值 allocated 19,769 MiB、reserved 22,820 MiB。
+2026-09-27 的旧 CPU 路径单例为 55.57 s；与原版相比只有 1 个标签体素不同，CSV 最大差 0.24 mm³。原版三例 CPU 参考任务所在时段有重叠，中位数 304.23 s，因此不计算稳定加速倍数。GPU 单例 Torch 峰值 allocated 19,769 MiB、reserved 22,820 MiB。
+
+2026-09-30 在 nodecw10 的 PyTorch 2.5.1 上，CPU oneDNN 路径处理真实 `sub-02` 时发生段错误。现版在 CPU 推理这一段关闭 MKLDNN，并在返回后恢复原设置；同输入的独立阶段和 recon-all 连续运行都通过 SynthSeg，后者耗时 368.14 秒，写出的软体积总量为 1,452,089.5 mm³。独立阶段观测进程 RSS 最大约 97.4 GiB。该设置不影响 CUDA 路径；旧 CPU 耗时不能代表现版。完整 recon-all CPU 续跑尚待结束。[阶段记录](../../validation/recon_all/python_gpu_port/synthseg_cpu_backend_20260930.json)。
 
 完整逐例标签 Dice、CSV、shape/affine/dtype、输出哈希、实际命令和边界见[验证页](../../validation/synthseg/README.md)与[机器报告](../../validation/synthseg/report.public.json)。三例没有人工结构分割真值，这些数值只衡量对参考实现的复现程度。
 

@@ -1,0 +1,37 @@
+{
+  "date": "2026-09-30",
+  "host": "nodecw10",
+  "environment": "homepage Conda environment, PyTorch 2.5.1, CPU",
+  "input": "real examples/data/sub-02_T1w.nii.gz conformed to subject_02_v11_cpu/mri/orig.mgz",
+  "default_mkldnn": {
+    "full_run_exit_code": 139,
+    "last_completed_stage": "brainmask",
+    "next_stage": "SynthSeg",
+    "kernel_log": "four Python threads recorded a segmentation fault at the same instruction on 2026-09-30 00:10:42 CST"
+  },
+  "disabled_mkldnn_stage_probe": {
+    "exit_code": 0,
+    "total_intracranial_mm3": 1452089.5,
+    "near_tie_voxels": 0,
+    "largest_observed_rss_kib": 102114476,
+    "prior_gpu_run_total_intracranial_mm3": 1452047.6,
+    "scope": "isolated real-input SynthSeg call, no full CPU recon-all output"
+  },
+  "code_change": "disable MKLDNN only during CPU posterior inference with a restoring PyTorch context manager; CUDA path unchanged",
+  "full_cpu_rerun_stage": {
+    "subject": "subject_02_v12_cpu",
+    "synthseg_status": "passed",
+    "synthseg_wall_seconds": 368.14299101382494,
+    "written_csv_total_intracranial_mm3": 1452089.5,
+    "complete_reconstruction_status_at_record_time": "running"
+  },
+  "tests": {
+    "command": "PYTHONPATH=src python -m pytest -q tests/synthseg_parc tests/recon_all tests/test_setup_weights.py",
+    "passed": 253,
+    "skipped": 4,
+    "failed": 0,
+    "wall_seconds": 15.55,
+    "host": "headcw"
+  },
+  "limit": "The full CPU runner has passed SynthSeg but must complete remaining stages and output checks before end-to-end acceptance."
+}

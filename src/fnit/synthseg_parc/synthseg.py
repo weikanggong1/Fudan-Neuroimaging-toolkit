@@ -122,7 +122,10 @@ class SynthSeg:
                  keep_geometry: bool = False,
                  color_lut: str | Path | None = None) -> SynthSegResult:
         prepared = preprocess_t1(image, device=self.device)
-        posterior = self.segmenter.posterior(prepared.image)
+        # The large CPU 3D convolution can crash in oneDNN; native torch convolutions complete.
+        with torch.backends.mkldnn.flags(
+                enabled=self.device.type != "cpu" and torch.backends.mkldnn.enabled):
+            posterior = self.segmenter.posterior(prepared.image)
         ordinary_labels, posterior = postprocess_segmentation(
             posterior, self.segmenter.labels, self.topology, prepared.content_slices,
             foreground_threshold=_SYNTHSEG_FOREGROUND_THRESHOLD)
