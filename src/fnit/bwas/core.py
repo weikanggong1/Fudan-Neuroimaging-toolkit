@@ -360,7 +360,7 @@ def run_bwas(bids_root: str | Path, participants_tsv: str | Path,
                     rr, cc = np.where(np.abs(z) > cdt)
                 edges.extend((i+int(a), j+int(b), float(z[a, b])) for a, b in zip(rr, cc))
                 completed_tiles += 1
-                if completed_tiles % 50 == 0 or completed_tiles == total_tiles:
+                if completed_tiles % 10 == 0 or completed_tiles == total_tiles:
                     print(f"BWAS voxel tiles {completed_tiles}/{total_tiles}", flush=True)
         matrices.clear()
     labels, table = _clusters(edges, coords, cdt, width)
