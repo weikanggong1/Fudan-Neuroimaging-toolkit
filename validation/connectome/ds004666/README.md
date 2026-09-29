@@ -1,6 +1,6 @@
 # ds004666 配对 T1/DWI：历史整链基线与分阶段验证
 
-本页的独立追踪和整链矩阵运行于球谐函数查表修正之前，保留作历史基线。当前版的[固定单弧精度、耗时和冻结输入矩阵 A/B](ifod2_single_arc_20260929.md)已单独发表；最终 connectome 尚未达到官方多种子误差范围。
+本页的独立追踪和整链矩阵运行于球谐函数查表、连续初始方向修正之前，保留作历史基线。后续的[固定单弧](ifod2_single_arc_20260929.md)和[连续初始方向、五次矩阵 A/B](ifod2_initial_direction_20260929.md)分别记录实际结果；最终 connectome 尚未达到官方多种子误差范围。
 
 [OpenNeuro ds004666](https://openneuro.org/datasets/ds004666) `sub-01/ses-2mm` 提供同次真实 T1w、AP/PA DWI。源文件、字节数及 SHA-256 见 [download_manifest.tsv](download_manifest.tsv)。本例先以 FSL TOPUP/EDDY 校正 DWI 并旋转 bvec；元数据缺少实测总读出时间，因此 TOPUP/EDDY 都采用假定 `0.05 s`，命令与 QC 见[输入来源](corrected_input_provenance.public.json)。T1 使用官方 FreeSurfer 8.2 `recon-all`；PyTorch 不替代它。两臂固定同一校正 DWI、bval/bvec、`aparc+aseg.mgz`、20 区 SynthSeg atlas、脑掩膜和 DWI→T1 世界变换。此处整链旧报告显式提供脑掩膜，没有测试新默认 BET 分支；其单独基准见 connectome 主文档。
 
@@ -25,7 +25,7 @@
 
 这些数字来自分别固定上游中间图像/流线的配对实验。各脚本参数、输入/输出结构、等价命令、真实图像、核心时间、参考时间及显存见链接报告与[完整函数文档](../../../docs/connectome/README.md)。固定轨迹的赋值一致不代替独立追踪后最终矩阵的验证。
 
-## 当前整链 seed 0
+## 历史整链 seed 0（追踪更新之前）
 
 [PyTorch 四矩阵 CSV、输入/参考 SHA-256、时间与显存](current_seed_0/report.json)对应以上相同的校正 DWI、官方 T1 分割、脑掩膜、atlas 和固定世界变换。实际输出存放在 [current_seed_0](current_seed_0/)；四个参考 CSV 在 [corrected_mrtrix_fs5tt_act_adapted](corrected_mrtrix_fs5tt_act_adapted/)。参考 CSV 的 SHA-256 与整链报告逐一相同。严格上三角 190 条边：
 
@@ -60,7 +60,7 @@ PyTorch 10,000 次播种接受 2,827 条流线；`UKBConnectome` 调用耗时 **
 
 此图使用**全边相对 L1**，不是上表的共同边 nMAE；完整配对边集合与两个公式均在机器报告中。
 
-count/FBC 误差与官方随机波动部分重叠，但共同边 FA 的九次跨软件比较均劣于三次官方内部比较；当前不能称四张矩阵已与官方一致。固定同一批官方 TCK 的 FA 采样和 atlas 赋值已接近或达到逐值一致，剩余差异集中在独立 iFOD2/ACT 轨迹。正在按 MRtrix 源码改进皮层下 GM 的 ACT 终止规则，再以相同输入做单改动复测。原 UKB 1,000 万次播种的显存和时间未在此例测量。
+count/FBC 误差与官方随机波动部分重叠，但共同边 FA 的九次跨软件比较均劣于三次官方内部比较；当前不能称四张矩阵已与官方一致。固定同一批官方 TCK 的 FA 采样和 atlas 赋值已接近或达到逐值一致，剩余差异集中在独立 iFOD2/ACT 轨迹。之后已将初始方向改为连续抽样，真实 FOD 的有效起点分布接近官方，但[五次冻结输入矩阵实验](ifod2_initial_direction_20260929.md)没有消除 FA 差异。传播拒绝采样及 ACT 状态还需逐项验证。原 UKB 1,000 万次播种的显存和时间未在此例测量。
 
 ## 复跑
 

@@ -45,13 +45,53 @@ def _sample(volume: torch.Tensor, points: torch.Tensor, inverse_affine: torch.Te
                          align_corners=True).reshape(volume.shape[-1], -1).T
 
 
-def _sphere(count: int, device: torch.device):
-    """Return ``[count,3]`` float32 near-uniform unit vectors on ``device``."""
-    index = torch.arange(count, device=device, dtype=torch.float32)
-    z = 1 - 2 * (index + 0.5) / count
-    angle = index * (math.pi * (3 - math.sqrt(5)))
-    radial = (1 - z.square()).sqrt()
-    return torch.stack((radial * angle.cos(), radial * angle.sin(), z), dim=-1)
+def _initial_directions(
+    coefficients: torch.Tensor, generator: torch.Generator, *, lmax: int, cutoff: float,
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    """Draw MRtrix iFOD2 initial directions for real FOD coefficients ``[B,C]``.
+
+    Directions are sampled uniformly from the unit ball, then normalised.
+    The first direction with FOD amplitude strictly above ``cutoff`` is
+    retained, up to 1000 attempts per seed. Returns float32 directions
+    ``[B,3]``, a bool success mask ``[B]``, and int32 attempt counts ``[B]``.
+    Failed seeds receive a harmless x-axis direction and must be filtered by
+    the caller. MRtrix equivalents are ``MethodBase::random_direction()`` and
+    ``iFOD2::init()`` in commit eeab681d3e0c.
+    """
+    width = (lmax + 1) * (lmax + 2) // 2
+    if coefficients.ndim != 2 or coefficients.shape[1] != width or coefficients.dtype != torch.float32:
+        raise ValueError("coefficients must be float32 [B,C] for the chosen lmax")
+    batch = coefficients.shape[0]
+    initial = coefficients.new_zeros((batch, 3))
+    initial[:, 0] = 1
+    valid = torch.zeros(batch, dtype=torch.bool, device=coefficients.device)
+    attempts = torch.zeros(batch, dtype=torch.int32, device=coefficients.device)
+    for offset in range(0, 1000, 16):
+        pending = (~valid).nonzero(as_tuple=False).flatten()
+        if pending.numel() == 0:
+            break
+        count = min(16, 1000 - offset)
+        candidate = 2 * torch.rand((len(pending), count, 3), device=coefficients.device,
+                                   generator=generator) - 1
+        outside = candidate.square().sum(-1) > 1
+        while bool(outside.any()):
+            candidate[outside] = 2 * torch.rand((int(outside.sum()), 3),
+                                                device=coefficients.device,
+                                                generator=generator) - 1
+            outside = candidate.square().sum(-1) > 1
+        candidate = F.normalize(candidate, dim=-1)
+        basis = tracking_sh_precomputed(candidate.reshape(-1, 3), lmax).reshape(
+            len(pending), count, width,
+        )
+        amplitude = (coefficients[pending, None] * basis).sum(-1)
+        accepted = torch.isfinite(amplitude) & (amplitude > cutoff)
+        first = accepted.int().argmax(-1)
+        success = accepted.any(-1)
+        attempts[pending] += torch.where(success, first + 1, count).int()
+        selected = pending[success]
+        initial[selected] = candidate[success, first[success]]
+        valid[selected] = True
+    return initial, valid, attempts
 
 
 def _five_tissue_values(five_tissue: torch.Tensor, points: torch.Tensor,
@@ -399,7 +439,6 @@ def probabilistic_tractography(
     fa: torch.Tensor | None = None,
     seed: int = 0,
     batch_size: int = 8192,
-    sphere_samples: int = 128,
     arc_proposals: int = 16,
     max_length_mm: float = 250.,
     min_length_mm: float | None = None,
@@ -422,9 +461,9 @@ def probabilistic_tractography(
 
     MRtrix equivalent: ``tckgen -algorithm iFOD2 -seed_gmwmi gmwmi.mif
     -act 5tt.mif -seeds N -select 0 -maxlength 250 -cutoff 0.1 -samples 3
-    -power 0.5 wm_fod_norm.mif tracks.tck``. GMWMI seed sampling follows
-    MRtrix 3.0.3; curved-arc FOD sampling follows iFOD2, while finite
-    proposal resampling and sampled-point ACT sGM truncation remain approximate.
+    -power 0.5 wm_fod_norm.mif tracks.tck``. Initial directions use the
+    MRtrix continuous sphere rule and 1000 attempts; finite arc proposal
+    resampling and sampled-point ACT sGM truncation remain approximate.
     """
     if (wm_sh.ndim != 4 or fod_affine.shape != (4, 4) or
             five_tissue.ndim != 4 or five_tissue.shape[-1] != 5 or
@@ -433,8 +472,8 @@ def probabilistic_tractography(
         raise ValueError('expected WM SH [X,Y,Z,C], 5TT [X,Y,Z,5], matching GMWMI and two affines')
     if fa is not None and fa.shape != wm_sh.shape[:3]:
         raise ValueError('FA must match the FOD grid')
-    if n_seeds < 1 or batch_size < 1 or sphere_samples < 16 or arc_proposals < 1:
-        raise ValueError('n_seeds, batch_size, sphere_samples and arc_proposals must be positive')
+    if n_seeds < 1 or batch_size < 1 or arc_proposals < 1:
+        raise ValueError('n_seeds, batch_size and arc_proposals must be positive')
     device = wm_sh.device
     if device.type == 'cuda':
         torch.backends.cuda.matmul.allow_tf32 = True
@@ -453,9 +492,7 @@ def probabilistic_tractography(
     min_length_mm = 2 * float(voxel_mm.min()) if min_length_mm is None else min_length_mm
     if min_length_mm < 0 or min_length_mm > max_length_mm:
         raise ValueError('minimum length must lie between zero and maximum length')
-    directions = _sphere(sphere_samples, device)
-    basis = tracking_sh_precomputed(directions, lmax)
-    if wm_sh.shape[-1] != basis.shape[-1]:
+    if lmax < 0 or lmax % 2 or wm_sh.shape[-1] != (lmax + 1) * (lmax + 2) // 2:
         raise ValueError('WM SH coefficient count does not match lmax')
     generator = torch.Generator(device=device).manual_seed(seed)
     seeds = sample_gmwmi_seeds(gmwmi, five_tissue, five_tissue_affine,
@@ -468,13 +505,9 @@ def probabilistic_tractography(
     fa_image = fa.to(device=device, dtype=torch.float32)[..., None] if fa is not None else None
     for first in range(0, n_seeds, batch_size):
         batch_seeds = seeds[first:first + batch_size]
-        amplitude = (_sample(wm_sh, batch_seeds, fod_inverse) @ basis.T).clamp_min(0)
-        # MRtrix tries uniformly drawn initial directions until FOD > seed_cutoff.
-        legal = amplitude >= cutoff
-        valid_seed = legal.any(-1)
-        initial = directions[torch.multinomial(
-            torch.where(valid_seed[:, None], legal.float(), torch.ones_like(amplitude)),
-            1, generator=generator).squeeze(-1)]
+        initial, valid_seed, _ = _initial_directions(
+            _sample(wm_sh, batch_seeds, fod_inverse), generator, lmax=lmax, cutoff=cutoff,
+        )
         forward, nf, gf, lf, wf = _grow(
             batch_seeds, initial, wm_sh, five_tissue, fod_inverse, five_inverse,
             generator, lmax=lmax, proposals_per_step=arc_proposals,

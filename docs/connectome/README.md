@@ -109,7 +109,7 @@ fnit connectome \
 | `FreeSurferSubject` / `fs_aparc_atlas` | 完成的 recon-all 目录 → `brain.mgz`、`aparc+aseg.mgz` 路径；整数分割 `[A,B,C]` → 连续节点标签 `[A,B,C]` 与 84 行 `ConnectomeNode`；[同输入实测](../../validation/connectome/fs_aparc84_subject_dir_20260928.md) |
 | `freesurfer_five_tissue` / `gmwmi_from_five_tissue` | 官方 FreeSurfer 整数标签 `[A,B,C]` → float32 5TT `[A,B,C,5]` → GMWMI `[A,B,C]` |
 | `tracking_sh_precomputed` | 非零 float32 方向 `[...,3]`、偶数 `lmax` → 同设备 float32 球谐函数值 `[...,C]`；参数、等价原版运算及真实单弧基准见[专项报告](../../validation/connectome/ds004666/ifod2_single_arc_20260929.md) |
-| `probabilistic_tractography` | 归一化 WM SH/affine、5TT/affine、GMWMI、播种次数 → `Tractogram` 的世界毫米流线、端点、长度和已接受种子 |
+| `probabilistic_tractography` | 归一化 WM SH/affine、5TT/affine、GMWMI、播种次数 → `Tractogram` 的世界毫米流线、端点、长度和已接受种子；连续初始方向、失败掩膜、1,000 次上限及真实基准见[专项报告](../../validation/connectome/ds004666/ifod2_initial_direction_20260929.md) |
 | `estimate_sift2_weights` | 同序流线、WM SH/affine、5TT/affine、`step_size_mm` → float64 逐流线权重 `[T]` |
 | `sample_streamline_mean_precise` | 同序流线、float32 FA `[X,Y,Z]`、DWI affine → float32 沿轨迹均值 `[T]` |
 | `build_connectomes` | 端点 `[T,2,3]`、整数 atlas/affine、逐轨权重/长度/FA、可选 `node_count` → 四张对称 `[K,K]` 矩阵；`node_count` 保留没有体素的末尾节点零行列 |
@@ -121,7 +121,7 @@ fnit connectome \
 | 输入/掩膜 | UKB `data_ud` + 旋转梯度；BET b0 掩膜；Dhollander 不传 `-mask` 时由 DWI 自建掩膜 | FSL TOPUP/EDDY 校正 AP-DWI；已有阶段对照使用固定 SynthSeg 脑掩膜 | 调用方提供校正 DWI、旋转梯度；LAS DWI 默认运行 PyTorch BET，也可固定外部 BET 掩膜；默认响应掩膜从 DWI 计算，FOD/归一化使用 BET 掩膜的六邻域两轮膨胀/侵蚀 |
 | 响应与 FOD | `dwi2response dhollander` → `dwi2fod msmt_csd` → `mtnormalise` | 同序；默认 WM `lmax=8`；固定参考掩膜 | `estimate_mrtrix_dhollander`、`fit_mrtrix_msmt_csd`、`normalise_mrtrix_three_tissue`；响应/FOD 的 float64 约束求解输出 float32 SH |
 | T1/5TT/配准 | FreeSurfer 7.1 + FIRST；`5ttgen freesurfer -first -nocrop -sgm_amyg_hipp`、`5tt2gmwmi`；6-DOF/normmi FLIRT | 官方 FreeSurfer 8.2 `recon-all` 外置；安装的 MRtrix 3.0.3 无 `-first`，用 `5ttgen freesurfer -nocrop -sgm_amyg_hipp`；校正 b0 重新 FLIRT | 读取官方 `aparc+aseg.mgz` 构建 5TT/GMWMI；可固定变换或运行 TorchFLIRT 6-DOF/normmi；不重做 recon-all/FIRST |
-| 流线/SIFT2 | `tckgen -seed_gmwmi -act -seeds N -select 0 -maxlength 250 -cutoff 0.1 -samples 3 -power 0.5`；`tcksift2 -act` | 同参数，10,000 次播种；固定 FOD/5TT/同 atlas 的阶段验证 | PyTorch GMWMI/双向 iFOD2 风格采样与 ACT 组织终止；MRtrix FMLS/处理掩膜/精确体素映射和 SIFT2 优化实现，随机方向接受律仍有差异 |
+| 流线/SIFT2 | `tckgen -seed_gmwmi -act -seeds N -select 0 -maxlength 250 -cutoff 0.1 -samples 3 -power 0.5`；`tcksift2 -act` | 同参数，10,000 次播种；固定 FOD/5TT/同 atlas 的阶段验证 | PyTorch GMWMI 与连续初始方向；传播仍用每步 16 个候选方向、ACT 组织终止未完全匹配；MRtrix FMLS/处理掩膜/精确体素映射和 SIFT2 优化已有独立实现 |
 | atlas/矩阵 | 皮层 parcellation + Tian 亚皮层图；`tck2connectome -symmetric -assignment_radial_search 4`；原脚本另采样 MD、MO、S0、NODDI 等 | 固定相同 20 区 SynthSeg 示例 atlas；只比较四张矩阵 | `fs-aparc` 可从 recon-all 目录自动构建 84 节点 atlas；四张矩阵，长度与精确沿程 FA；不提供原脚本所有扩展指标 |
 
 [原追踪脚本](https://github.com/sina-mansour/UKB-connectomics/blob/main/scripts/bash/probabilistic_tractography_native_space.sh)、[原矩阵脚本](https://github.com/sina-mansour/UKB-connectomics/blob/main/scripts/bash/map_structural_connectivity.sh)、[校正参考命令](../../validation/connectome/ds004666/corrected_mrtrix_commands.public.txt)和[FreeSurfer 适配命令](../../validation/connectome/ds004666/corrected_mrtrix_fs5tt_act_adapted/commands.public.txt)给出实际调用。原 UKB 的 FIRST、Tian 分区及 1,000 万次播种都没有在公开样本上逐项复跑。
@@ -161,7 +161,7 @@ tck2connectome -symmetric -assignment_radial_search 4 tracks.tck atlas_dwi.nii.g
 | Dhollander 响应（公开 ds004666） | 11/11 选择掩膜 XOR 0；WM/GM/CSF 最大误差 3.89e−9 / 9.06e−10 / 1.24e−10 | 当前版 CPU 核心 3.748 s；MRtrix 命令 17.01 s；[报告](../../validation/connectome/ds004666/response_fod_stage_20260927.md) |
 | 全脑原始 MSMT-CSD（公开 ds004666） | 208,522 体素、9,383,490 个 WM SH 值，MAE 1.98e−12，最大 1.21e−6；尚未 mtnormalise | 当前版 H100 核心 267.419 s、batch_size=4096、峰值 1.253 GiB；MRtrix CPU 命令 185.51 s；[报告](../../validation/connectome/ds004666/response_fod_full.public.json) |
 | 三组织 mtnormalise | 固定官方原始 FOD，WM SH 7,967,115 元素 MAE 4.79e−10、最大 5.96e−8 | H100 核心 0.568 s；MRtrix 命令 2.41 s；[报告与图](../../validation/connectome/ds004666/mtnormalise_stage_20260927.md) |
-| GMWMI 播种与 iFOD2/ACT 风格追踪 | 历史直接 SH 版本：种子 8 mm 空间分箱 r=0.4660，官方独立重复 r=0.4664；10,000 次播种，MRtrix/PyTorch 分别接受 2,767/2,950 条，长度 KS=0.0577。当前查表单弧 80/80 判定一致，路径概率最大误差 1.58e−6；冻结输入 10,000 次播种接受 2,987 条，矩阵误差未改善 | 历史追踪 PyTorch 58.45 s、MRtrix 2.96 s；[旧版报告与图](../../validation/connectome/ds004666/tracking_act_stage.md)。[当前单弧精度、时间、图和矩阵 A/B](../../validation/connectome/ds004666/ifod2_single_arc_20260929.md)。随机轨迹不能逐条比对 |
+| GMWMI 播种与 iFOD2/ACT 风格追踪 | 历史直接 SH 版：10,000 次播种 MRtrix/FNIT 接受 2,767/2,950 条；查表单弧 80/80 判定一致，路径概率最大误差 1.58e−6。当前连续初始方向：五次有效起点为 MRtrix 9,659–9,664、FNIT 9,656–9,661；冻结输入 count 相对 L1 15 对均值 0.29668→0.27932，但 mean FA 0.09496→0.09927，最终矩阵仍未对齐 | 旧版追踪 PyTorch 58.45 s、MRtrix 2.96 s；[历史追踪](../../validation/connectome/ds004666/tracking_act_stage.md)、[单弧](../../validation/connectome/ds004666/ifod2_single_arc_20260929.md)、[当前初始方向与矩阵图](../../validation/connectome/ds004666/ifod2_initial_direction_20260929.md)；计时边界和设备见各报告 |
 | SIFT2 固定 FOD/5TT/官方 TCK | 处理掩膜 285/778,752 体素不同，非零支持 Dice=1；fixel 总数两臂均 243,822；全 fixel TDI r=0.9999999371；固定 2,758 条轨迹最终权重 r=0.999999903、MAE 3.44e−5 | [FMLS/处理掩膜图](../../validation/connectome/ds004666/sift2_fmls_stage_20260927.md)、[轨迹映射图](../../validation/connectome/ds004666/sift2_mapping_stage.md)、[优化器报告](../../validation/connectome/ds004666/sift2_optimizer_fmls_exact.public.json) |
 | 固定 2,758 条轨迹精确 FA 均值 | 原 MIF 几何逐轨 r=0.9999999949、MAE 5.58e−7，最大 0.0005499 | CPU 首轮 0.124 s、后续中位 0.102 s；MRtrix 命令 0.03 s；[报告与图](../../validation/connectome/ds004666/tcksample_precise_stage.md) |
 | 固定真实轨迹的四矩阵赋值 | 2,915 条双端分配一致；count 400/400 元素完全一致，FBC/长度/FA 最大误差 8.99e−6 / 5.63e−6 mm / 2.96e−8 | [赋值报告](../../validation/connectome/ds004666_fsl_act_real_tracks_assignment_report.json) |
@@ -176,9 +176,11 @@ tck2connectome -symmetric -assignment_radial_search 4 tracks.tck atlas_dwi.nii.g
 
 ![相同 FOD/5TT 的 ACT 追踪密度](../../validation/connectome/ds004666/tracking_act_density.png)
 
-![当前整链 seed 0 的四矩阵与差值](../../validation/connectome/ds004666/current_seed_0/connectome_comparison.png)
+![真实 FOD 连续初始方向与冻结输入矩阵 A/B](../../validation/connectome/ds004666/ifod2_initial_20260929/initial_direction_comparison.png)
 
-**当前整链 seed 0：** 10,000 次播种接受 2,827 条流线，H100 调用 266.83 s、峰值 Torch 分配 2.720 GiB。相同校正 DWI、官方 T1 分割、atlas、掩膜及变换下，count/FBC 上三角 Pearson r=0.98864/0.98527，支持 Dice=0.73585；mean length/FA 全边 r=0.57720/0.62107。完整指标、CSV 和差异诊断见[当前验证](../../validation/connectome/ds004666/README.md)。三次官方与三次 FNIT 的固定随机种子比较已完成：count/FBC 误差与官方波动部分重叠，但共同边的 FA 跨软件 9/9 对均超出官方重复的 3/3 最大误差。
+![连续初始方向更新之前的整链 seed 0 四矩阵与差值](../../validation/connectome/ds004666/current_seed_0/connectome_comparison.png)
+
+**历史整链 seed 0（连续初始方向更新之前）：** 10,000 次播种接受 2,827 条流线，H100 调用 266.83 s、峰值 Torch 分配 2.720 GiB。相同校正 DWI、官方 T1 分割、atlas、掩膜及变换下，count/FBC 上三角 Pearson r=0.98864/0.98527，支持 Dice=0.73585；mean length/FA 全边 r=0.57720/0.62107。完整指标、CSV 和差异诊断见[历史验证](../../validation/connectome/ds004666/README.md)。三次官方与三次 FNIT 的固定随机种子比较已完成：count/FBC 误差与官方波动部分重叠，但共同边的 FA 跨软件 9/9 对均超出官方重复的 3/3 最大误差。
 
 ## 复跑阶段与整链比较
 
@@ -189,6 +191,7 @@ tck2connectome -symmetric -assignment_radial_search 4 tracks.tck atlas_dwi.nii.g
 | 响应、FOD、掩膜 | [`benchmark_connectome_response_fod_dhollander.py`](../../tools/benchmark_connectome_response_fod_dhollander.py)、[`benchmark_connectome_response_fod.py`](../../tools/benchmark_connectome_response_fod.py)、[`benchmark_connectome_maskfilter.py`](../../tools/benchmark_connectome_maskfilter.py) |
 | mtnormalise、解剖、追踪 | [`benchmark_connectome_mtnormalise.py`](../../tools/benchmark_connectome_mtnormalise.py)、[`benchmark_connectome_anatomy.py`](../../tools/benchmark_connectome_anatomy.py)、[`benchmark_connectome_tracking_act.py`](../../tools/benchmark_connectome_tracking_act.py) |
 | iFOD2 单弧球谐函数 | [`benchmark_connectome_ifod2_single_arc.py`](../../tools/benchmark_connectome_ifod2_single_arc.py)；输入/输出结构及官方源码观测程序见[单弧报告](../../validation/connectome/ds004666/ifod2_single_arc_20260929.md) |
+| iFOD2 初始方向与固定输入矩阵 | [`benchmark_connectome_ifod2_initial_directions.py`](../../tools/benchmark_connectome_ifod2_initial_directions.py)、[`benchmark_connectome_ifod2_initial_ab.py`](../../tools/benchmark_connectome_ifod2_initial_ab.py)；官方观测程序、输入/输出、时间及矩阵图见[初始方向报告](../../validation/connectome/ds004666/ifod2_initial_direction_20260929.md) |
 | SIFT2、FA、矩阵 | [`benchmark_sift2_processing_mask.py`](../../tools/benchmark_sift2_processing_mask.py)、[`benchmark_sift2_fixels.py`](../../tools/benchmark_sift2_fixels.py)、[`benchmark_connectome_sift2_mapping.py`](../../tools/benchmark_connectome_sift2_mapping.py)、[`benchmark_connectome_sift2_optimizer.py`](../../tools/benchmark_connectome_sift2_optimizer.py)、[`benchmark_connectome_tcksample_precise.py`](../../tools/benchmark_connectome_tcksample_precise.py)、[`compare_connectome_matrices.py`](../../tools/compare_connectome_matrices.py) |
 
 当前整链脚本 [`benchmark_connectome_end_to_end.py`](../../tools/benchmark_connectome_end_to_end.py)要求固定同一校正 DWI、旋转梯度、官方 aparc+aseg、T1 brain、atlas、脑掩膜、DWI→T1 RAS-mm 变换与参考矩阵目录；可再传响应/FOD/归一化掩膜、FA 和 shell 标签。参考目录接受原始 MRtrix 的 `count.csv` 等文件名，也接受公开归档的 `connectome_count.csv` 等文件名。脚本写出 `candidate_*.csv`、轨迹 TCK、逐轨权重/长度/FA 和带输入 SHA-256、边指标、时间、Torch 峰值显存的 `report.json`。三个 FNIT 种子和三个官方固定 RNG 种子的四矩阵、输入哈希与官方自身随机波动已核验；见[3×3 同口径报告](../../validation/connectome/ds004666/official_mrtrix_rng_variability/official_fnit_3x3.public.json)。

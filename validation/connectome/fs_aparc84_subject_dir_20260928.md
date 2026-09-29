@@ -60,7 +60,7 @@ mrtransform atlas_t1.nii.gz atlas_dwi_reference.nii.gz \
 
 ## 10,000 次播种的 84 节点矩阵
 
-本节的 84 节点 5×5 基准运行于 2026-09-28，使用直接 SH 的上一版追踪函数。当前版已经改用 MRtrix 风格查表；[真实 FOD 单弧和冻结输入矩阵 A/B](ds004666/ifod2_single_arc_20260929.md)是这项改动的新验证。以下整链数值保留为历史对照，不能充当当前版的 5×5 验收。
+本节的 84 节点 5×5 基准运行于 2026-09-28，使用直接 SH 的上一版追踪函数。之后已改用 MRtrix 风格查表和连续初始方向；[真实 FOD 单弧](ds004666/ifod2_single_arc_20260929.md)及[初始方向五次 A/B](ds004666/ifod2_initial_direction_20260929.md)分别验证这两项改动。以下整链数值保留为历史对照，不能充当更新后的 5×5 验收。
 
 公开 ds004666 的 FNIT 新入口使用自动 BET、TorchFLIRT、FreeSurfer → 5TT、`fs-aparc`、追踪与 SIFT2，seed 0 接受 3,268 / 10,000 条，完整命令 369.84 s、峰值进程 RSS 1,789,384 KiB。MRtrix 对照使用相同的校正 DWI、配对 FreeSurfer 产物与**相同 FNIT DWI atlas**，但各自的中间 FOD、脑掩膜、配准和 5TT 由对应流程生成，因此这是原始输入层级的整链比较，不是固定中间张量的单算子比较。四矩阵见 [数值报告](ds004666/fs_aparc84_matrix_10k.json)与下图。
 

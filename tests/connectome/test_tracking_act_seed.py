@@ -37,7 +37,7 @@ def test_tractography_accepts_separate_fod_and_anatomy_grids(device):
     import math
     from fnit.connectome.anatomy import gmwmi_from_five_tissue
     from fnit.connectome.fod import real_sh
-    from fnit.connectome.tracking import _sphere, probabilistic_tractography
+    from fnit.connectome.tracking import probabilistic_tractography
 
     shape = (22, 11, 11)
     five = torch.zeros((*shape, 5), dtype=torch.float32, device=device)
@@ -48,7 +48,11 @@ def test_tractography_accepts_separate_fod_and_anatomy_grids(device):
     anatomy_affine = torch.diag(torch.tensor([.5, .5, .5, 1.], device=device))
     anatomy_affine[:3, 3] = -.25
     gmwmi = gmwmi_from_five_tissue(five)
-    directions = _sphere(256, torch.device(device))
+    index = torch.arange(256, device=device, dtype=torch.float32)
+    z = 1 - 2 * (index + .5) / 256
+    angle = index * (math.pi * (3 - math.sqrt(5)))
+    directions = torch.stack(((1 - z.square()).sqrt() * angle.cos(),
+                              (1 - z.square()).sqrt() * angle.sin(), z), dim=-1)
     target = (5 / (4 * math.pi)) * directions[:, 0].pow(4)
     coefficient = torch.linalg.lstsq(real_sh(directions, 4), target).solution
     fod = torch.zeros((*shape, 15), dtype=torch.float32, device=device)
@@ -57,7 +61,7 @@ def test_tractography_accepts_separate_fod_and_anatomy_grids(device):
     tracks = probabilistic_tractography(
         fod, torch.eye(4, device=device), five, anatomy_affine,
         gmwmi, n_seeds=100, lmax=4, fa=fa, seed=11, cutoff=.01,
-        power=2., max_angle_degrees=20, sphere_samples=256,
+        power=2., max_angle_degrees=20,
     )
     assert len(tracks.paths) > 1
     assert tracks.endpoints.shape == (len(tracks.paths), 2, 3)
