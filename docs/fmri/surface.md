@@ -45,7 +45,7 @@ print(result.dtseries)  # 91k CIFTI 时间序列
 | `sub-0001_task-rest_hemi-R_space-fsLR_den-32k_desc-clean_bold.func.gii` | 右半球 32k 顶点的 T 帧时间序列。 |
 | `sub-0001_task-rest_space-fsLR_den-91k_desc-clean_bold.dtseries.nii` | 皮层加皮层下的 T×灰质坐标 CIFTI。 |
 
-每个输出旁有 JSON，记录源 BIDS BOLD、volume 派生文件、TR、配准方法、投影耗时和 CIFTI 覆盖率。`FMRISurfaceResult` 返回三条绝对路径、CIFTI JSON 路径和投影分步耗时。
+每个输出旁有 JSON，记录所用 volume 派生文件、TR、配准方法、投影耗时和 CIFTI 覆盖率。volume 的 JSON 可进一步追溯到原始 BIDS BOLD。`FMRISurfaceResult` 返回三条绝对路径、CIFTI JSON 路径和投影分步耗时。
 
 ## 真实数据对照
 

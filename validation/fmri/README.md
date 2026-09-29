@@ -44,6 +44,7 @@ FSL MCFLIRT 实测 397.54 秒；其余 11 个已单独计时的影像命令合�
 - [MCFLIRT 运动求解差异](mcflirt_difference.public.json)：同一真实 490 帧的矩阵误差、搜索步骤及计时范围；FNIT 求解器与 MCFLIRT 未达到数值等价。
 - [EPI→T1 BBR](bbr_summary.json)：同一初始矩阵和同一白质分割的受控对照，以及 FNIT 白质分割的独立影响。
 - [MELODIC/PICA](pica_summary.json)：同一真实 4D 输入与掩膜的组件数、重建和耗时检查；原版程序状态保留在摘要中。
+- [独立 MELODIC BIDS 入口](melodic_bids_current.json)：同一真实 BOLD 的前 64 帧，在完成 volume 回归后检查成分图、混合矩阵、收敛状态、BIDS 来源链接及 CPU 耗时。
 - [当前 T1→MNI152 2 mm FNIRT 对照](t1_fnirt_20260929.public.json)：同一真实 T1、模板和脑掩膜的 FSL 配对精度、时间、显存及输入/源码 SHA256。此前 FSL 与 SynthMorph 标量保留在[参照摘要](registration_summary.json)。
 - [ICA-AROMA 与完整 BIDS→MNI152 2 mm 结果](e2e_summary.json)：最终运行的组件数、噪声分类、输出完整性和各阶段耗时。
 - [当前 fMRI volume FNIRT 整链](fmri_volume_fnirt_20260929.public.json)：同一例真实 490 帧 BOLD 的退出码、全体素有限值、模板网格、掩膜外零值、TR、GPU 显存、时间和输入/输出 SHA256。

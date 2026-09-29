@@ -36,7 +36,7 @@ CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核。模型、影像张
 | [fMRIVolume_pipeline](docs/fmri/README.md) | FSL FEAT、ICA-AROMA | 原始 BIDS 单 run 到 BIDS Derivatives 体积 BOLD。 |
 | [fMRISurface_pipeline](docs/fmri/surface.md) | fMRIPrep fsLR 重采样、Workbench | 读取已完成的 volume 与 T1 recon-all，写出 fsLR32k GIFTI 和 91k CIFTI。 |
 | [fnit.msm.run_msmsulc](docs/msm/README.md) | newMSM MSMSulc | 独立的 HOCR/FastPD 脑沟球面配准。 |
-| [fnit.melodic.decompose_spatial_ica](docs/melodic/README.md) | FSL MELODIC | 独立的 PyTorch 单被试空间 PICA。 |
+| [fnit.melodic.run_melodic_bids](docs/melodic/README.md) | FSL MELODIC | 独立的 PyTorch 单被试空间 PICA，输入和输出均为 BIDS Derivatives。 |
 
 ### dMRI
 

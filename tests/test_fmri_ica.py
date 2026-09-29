@@ -7,6 +7,7 @@ import numpy as np
 import pytest
 
 from fnit.melodic.ica import decompose_spatial_ica
+from fnit.melodic import run_melodic_bids
 
 
 def test_two_skewed_components_recover_temporal_modes(tmp_path):
@@ -83,3 +84,47 @@ def test_pica_mixture_probability_separates_null_and_signal():
     assert (probability[:9000] >= 0.5).mean() < 0.2
     assert (probability[9000:14000] >= 0.5).mean() > 0.9
     assert (probability[14000:] >= 0.5).mean() > 0.9
+
+
+def test_standalone_melodic_writes_bids_derivatives(tmp_path):
+    import json
+
+    raw = tmp_path / "raw"
+    source = tmp_path / "preproc"
+    output = tmp_path / "fnit"
+    raw.mkdir()
+    (raw / "dataset_description.json").write_text(json.dumps({
+        "Name": "Test raw BIDS", "BIDSVersion": "1.11.1",
+    }))
+    source.mkdir()
+    (source / "dataset_description.json").write_text(json.dumps({
+        "Name": "Test preprocessing", "BIDSVersion": "1.11.1",
+        "DatasetType": "derivative",
+        "DatasetLinks": {"raw": "../raw"},
+    }))
+    folder = source / "sub-01" / "func"
+    folder.mkdir(parents=True)
+    bold = folder / "sub-01_task-rest_desc-preproc_bold.nii.gz"
+    mask = folder / "sub-01_task-rest_desc-brain_mask.nii.gz"
+    rng = np.random.default_rng(42)
+    spatial = rng.exponential(size=(8 * 8 * 8, 2))
+    times = rng.normal(size=(60, 2))
+    data = (spatial @ times.T + rng.normal(scale=0.1, size=(512, 60)))
+    nib.save(nib.Nifti1Image(data.reshape(8, 8, 8, 60).astype(np.float32), np.eye(4)), bold)
+    nib.save(nib.Nifti1Image(np.ones((8, 8, 8), dtype=np.uint8), np.eye(4)), mask)
+
+    result = run_melodic_bids(
+        source_derivatives_root=source, derivatives_root=output,
+        input_bold=bold, brain_mask=mask, n_components=2,
+        device="cpu", voxel_batch_size=256, random_state=0,
+    )
+    assert nib.load(result.components).shape == (8, 8, 8, 2)
+    assert nib.load(result.posterior).shape == (8, 8, 8, 2)
+    assert nib.load(result.thresholded).shape == (8, 8, 8, 2)
+    assert result.mixing.read_text().splitlines()[0] == "melodic_0\tmelodic_1"
+    assert json.loads(result.metadata.read_text())["Sources"] == [
+        "bids:preproc:sub-01/func/sub-01_task-rest_desc-preproc_bold.nii.gz",
+        "bids:preproc:sub-01/func/sub-01_task-rest_desc-brain_mask.nii.gz",
+    ]
+    description = json.loads((output / "dataset_description.json").read_text())
+    assert description["DatasetLinks"] == {"raw": "../raw", "preproc": "../preproc"}
