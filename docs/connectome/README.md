@@ -2,13 +2,15 @@
 
 [返回首页](../../README.md) · [源码](../../src/fnit/connectome/) · [ds004666 验证](../../validation/connectome/ds004666/README.md)
 
-**工作流边界：** `fs-aparc` 是 FNIT 的原生 84 节点输出，不等于原 UKB-connectomics 的七套「皮层 atlas + Tian」组合。现已接入七套图谱的生成入口；默认 5TT 使用 FreeSurfer 分割，不加入 FIRST。原 UKB 的 FIRST、完整七图谱矩阵比较和 1,000 万次播种仍属于兼容性验收。
+**工作流边界：** `fs-aparc` 是 FNIT 的原生 84 节点输出，不等于原 UKB-connectomics 的七套「皮层 atlas + Tian」组合。现已接入七套图谱的生成入口；默认 5TT 使用 FreeSurfer 分割，不加入 FIRST。原 UKB 的 FIRST、FNIRT 标签与 1,000 万次播种整链仍属于兼容性验收。
 
 `UKBConnectome` 从**已完成畸变、运动和涡流校正**的 DWI、配套 bval 和 eddy 旋转后的 bvec 起步，结合配对 T1 已完成的**官方 FreeSurfer recon-all** subject 目录、DWI 脑掩膜与自动生成的 84 节点 atlas，返回 count、SIFT2 FBC、加权 mean length 和加权 mean FA 四张矩阵。响应、FOD、强度归一化、5TT/GMWMI、追踪、SIFT2、FA 采样与矩阵赋值由 PyTorch 在指定 CPU/CUDA 设备执行。CUDA 默认允许 TF32；图像主要为 float32，条件数敏感的求解和几何步骤使用 float64，不自动转为 float16/bfloat16。
 
 **当前状态：** `recon-all` 目录可自动生成 84 节点 `fs-aparc` 或原 UKB 七套皮层+Tian 图谱；其中 216 节点 Schaefer200+Tian S1 已通过公开真实 DWI 的[一键四矩阵产物检查](../../validation/connectome/ds004666/atlas_synthmorph_20260929.md)。追踪已改为 iFOD2 校准拒绝采样，固定真实 FOD 的 80 条圆弧和 52 条连续两弧与官方概率最大误差分别为 `1.58×10⁻⁶` 和 `1.49×10⁻⁶`；真实 5TT 的 12,600 个 ACT 状态点与官方无分歧。10,000 固定位置的三次独立追踪与三次官方运行完成 3×3 四矩阵比较；共同边 mean FA 误差有 6/9 对落入官方自身重复范围，count 相对 L1 有 4/9 对落入，仍未达到全指标匹配。[当前追踪报告](../../validation/connectome/ds004666/ifod2_rejection_20260929.md)列出精度、时间、显存和脑图。
 
 进一步的[公开真实输入 100k 比较](../../validation/connectome/ds004666/tracking_100k_matrices_20260929.md)包含三次 MRtrix 与一次 FNIT 的独立追踪、SIFT2、FA、四矩阵和轨迹密度。count 相对 L1 的跨软件比较有 2/3 进入官方自身重复范围；长度 KS、端点分布和 8 mm TDI 仍略超出。FNIT 100k 本次追踪耗时 1,443.91 s、后处理 36.53 s、全链 Torch 峰值 2.473 GiB；共享 H100 的负载与早前纯追踪计时不同。100 万及 1,000 万次播种尚未实测。
+
+[七套原 UKB atlas 的同轨迹与独立轨迹矩阵对照](../../validation/connectome/ds004666/seven_atlas_100k_20260929.md)现已覆盖 84–1054 节点、四种矩阵和真实连接图。同一 27,616 条官方 TCK、权重、长度、FA 和七张 DWI atlas 下，七个 count 矩阵均逐元素一致，FBC/平均长度/平均 FA 最大绝对误差分别不超过 `5.07e−5`、`5.05e−4 mm`、`5.58e−7`。FNIT 自身 100k 轨迹与三次官方随机范围比较仍有未进入的矩阵指标；图谱 Tian 使用 SynthMorph，不能等同原 UKB 的 FNIRT 标签。这七套固定轨迹及独立轨迹 `.npz`、节点表、时间、显存和图已入库；除 Schaefer200+Tian S1 外，各套还没有分别完成正式 CLI 从 DWI 的一键运行。
 
 多 atlas 的函数级验证已覆盖 Schaefer200、500、1000 的 fsaverage→native 表面与 T1 ribbon 体积投影；500/1000 在同一真实 T1 上与原脚本均逐体素一致，Tian S4 合并后 554/1054 个节点在 DWI 网格均有体素，见[扩展图谱报告和脑图](../../validation/connectome/ds004666/atlas_schaefer_multi_20260929.md)。原生 aparc/a2009s 皮层体积也与原版逐体素一致；与 Tian S1 合并后生成 84/164 节点，见[原生图谱实测](../../validation/connectome/ds004666/atlas_native_aparc_20260929.md)。Glasser 皮层体积与原版逐体素一致；与 Tian S1/S4 合并后为 376/414 节点，其中各有两个极小的皮层节点在 DWI 降采样后无体素，见[Glasser 图谱实测与脑图](../../validation/connectome/ds004666/atlas_glasser_20260929.md)。Tian S1/S4 改用 FNIT PyTorch SynthMorph 时，标签与官方 SynthMorph 的前景 Dice 均为 0.981；固定官方形变后，最近邻标签逐体素一致，见[配准实测](../../validation/connectome/ds004666/atlas_synthmorph_20260929.md)。七套原 UKB 图谱均已接入 CLI；仅 Schaefer200+Tian S1 已完成公开真实 DWI 的四矩阵一键产物检查。
 
@@ -164,7 +166,7 @@ fnit connectome \
 | 流线/SIFT2 | `tckgen -seed_gmwmi -act -seeds N -select 0 -maxlength 250 -cutoff 0.1 -samples 3 -power 0.5`；`tcksift2 -act` | 同参数，10,000 次播种；固定 FOD/5TT/同 atlas 的阶段验证 | 连续初始方向、校准拒绝采样和 ACT 逐点状态已有独立 PyTorch 实现；`arc_proposals=16` 是每轮 GPU 并行数，单弧仍最多试 1,000 次。SIFT2、FA 和矩阵按现有函数执行；随机流线群体的矩阵误差仍见当前报告 |
 | atlas/矩阵 | 皮层 parcellation + Tian 亚皮层图；`tck2connectome -symmetric -assignment_radial_search 4`；原脚本另采样 MD、MO、S0、NODDI 等 | 固定相同 20 区 SynthSeg 示例 atlas；只比较四张矩阵 | `fs-aparc` 可从 recon-all 目录自动构建 84 节点 atlas；四张矩阵，长度与精确沿程 FA；不提供原脚本所有扩展指标 |
 
-[原追踪脚本](https://github.com/sina-mansour/UKB-connectomics/blob/main/scripts/bash/probabilistic_tractography_native_space.sh)、[原矩阵脚本](https://github.com/sina-mansour/UKB-connectomics/blob/main/scripts/bash/map_structural_connectivity.sh)、[校正参考命令](../../validation/connectome/ds004666/corrected_mrtrix_commands.public.txt)和[FreeSurfer 适配命令](../../validation/connectome/ds004666/corrected_mrtrix_fs5tt_act_adapted/commands.public.txt)给出实际调用。原 UKB 的 FIRST、七套组合图谱的完整矩阵比较及 1,000 万次播种都没有在公开样本上逐项复跑。
+[原追踪脚本](https://github.com/sina-mansour/UKB-connectomics/blob/main/scripts/bash/probabilistic_tractography_native_space.sh)、[原矩阵脚本](https://github.com/sina-mansour/UKB-connectomics/blob/main/scripts/bash/map_structural_connectivity.sh)、[校正参考命令](../../validation/connectome/ds004666/corrected_mrtrix_commands.public.txt)和[FreeSurfer 适配命令](../../validation/connectome/ds004666/corrected_mrtrix_fs5tt_act_adapted/commands.public.txt)给出实际调用。公开样本的[七套图谱固定/独立 100k 矩阵对照](../../validation/connectome/ds004666/seven_atlas_100k_20260929.md)已完成；原 UKB 的 FIRST、FNIRT Tian 标签和 1,000 万次播种整链尚未逐项复跑。
 
 以下是对应阶段的参考命令骨架；实际 ds004666 参数、线程数、路径和校正条件以[校正参考命令清单](../../validation/connectome/ds004666/corrected_mrtrix_commands.public.txt)与[FreeSurfer 适配清单](../../validation/connectome/ds004666/corrected_mrtrix_fs5tt_act_adapted/commands.public.txt)为准：
 

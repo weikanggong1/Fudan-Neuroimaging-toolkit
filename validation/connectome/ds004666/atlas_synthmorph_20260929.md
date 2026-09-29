@@ -42,7 +42,7 @@ mri_synthmorph apply -m nearest -t int16 mni_to_t1.mgz Tian_S4.nii.gz tian_s4_t1
 
 为直接验收 `recon-all` 输入网格，又以同一 UKB 的 `brain.mgz` 作为 256³ 目标 T1，FSL 对给定 coefficient 重新执行 `invwarp` 与 `applywarp --interp=nn`，FNIT 用同一个 `brain.mgz` 调用上述函数。Tian S1 **0 / 16,777,216 个体素不同**，16 标签最低 Dice 1.0。FNIT 含读写 85.24 s、峰值 Torch 分配显存 3.426 GiB；FSL 两命令分别 136.97 s 和 27.12 s，服务器负载不同。官方命令见[`benchmark_tian_fnirt_conformed_official.sh`](../../../tools/reference/benchmark_tian_fnirt_conformed_official.sh)。私有影像、coefficient 和逐文件哈希留在服务器；仓库只放脱敏数值。
 
-同一皮层和 Tian S1 体积送入合并函数后，FNIT 的 216 节点图谱与原 `combine_volumetric_atlases.py` 输出逐体素一致（XOR 0 / 16,777,216）；FNIT 合并 0.645 s，原脚本 4.80 s。这只验证合并规则：正式七套图谱的 DWI 重采样和所有 atlas 组合仍需逐项验证。合并记录见[JSON](atlas_synthmorph_20260929/fnit_combined_schaefer200_tian_s1/report.json)。
+同一皮层和 Tian S1 体积送入合并函数后，FNIT 的 216 节点图谱与原 `combine_volumetric_atlases.py` 输出逐体素一致（XOR 0 / 16,777,216）；FNIT 合并 0.645 s，原脚本 4.80 s。这一步验证合并规则；后续七套图谱的 DWI 标签与 100k 四矩阵已另行[逐项核对](seven_atlas_100k_20260929.md)。合并记录见[JSON](atlas_synthmorph_20260929/fnit_combined_schaefer200_tian_s1/report.json)。
 
 ![同一真实 T1 的 Schaefer200 参考、FNIT 和逐体素差异](atlas_synthmorph_20260929/fnit_schaefer200_volume/schaefer200_comparison.png)
 

@@ -35,4 +35,6 @@ nodes = result.nodes                          # 输出：84 个矩阵行列定�
 
 [新 100k 真实输入验证](../../../validation/connectome/ds004666/tracking_100k_matrices_20260929.md)已比较三次官方与一次 FNIT 的轨迹、SIFT2 和四矩阵：count 相对 L1 有 2/3 组跨软件配对进入官方自身范围，长度、端点和 TDI 的跨软件差异仍略超范围。当前该规模全链 Torch 峰值 2.473 GiB，追踪速度仍明显慢于独立 MRtrix CPU 参考。
 
+[七套原 UKB atlas 的 100k 矩阵验证](../../../validation/connectome/ds004666/seven_atlas_100k_20260929.md)复用同一 TCK 或 FNIT 独立 TCK 生成 84–1054 节点的四矩阵。同一官方 TCK 和逐轨数值时七套 count 矩阵均逐值一致；独立追踪后仍有随机范围外的指标。报告提供每套行列节点表、矩阵压缩文件、计时和连接图。
+
 [真实 b0/T1 无 Surfa 自动配准核对](../../../validation/connectome_registration_no_surfa_20260928/README.md)只覆盖配准矩阵；完整连接组未因该迁移重新验收。

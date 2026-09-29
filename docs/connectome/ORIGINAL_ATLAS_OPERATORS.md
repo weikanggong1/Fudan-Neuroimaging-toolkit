@@ -99,4 +99,4 @@ applywarp --ref="$T1_IMAGE" --in="$TIAN_MNI" \
 
 ## 范围与安装
 
-两函数在包内 `fnit.connectome.atlas_surface` 与 `fnit.connectome.atlas_tian`；项目主页 `environment.yml` 提供 PyTorch、nibabel 和绘图依赖，wheel 通过 `pyproject.toml` 声明 PyTorch/nibabel。官方软件只用于单独参考 benchmark。当前完成 `aparc` 皮层映射，以及 Tian S1 逆场和最终标签的同输入对照；Tian S2–S4、TorchFNIRT 与 FSL 前向输出的一致性及最终七套 connectome 仍需逐项验证。
+两函数在包内 `fnit.connectome.atlas_surface` 与 `fnit.connectome.atlas_tian`；项目主页 `environment.yml` 提供 PyTorch、nibabel 和绘图依赖，wheel 通过 `pyproject.toml` 声明 PyTorch/nibabel。官方软件只用于单独参考 benchmark。七套原 UKB 图谱已在公开真实 DWI 上完成[固定/独立 100k 四矩阵对照](../../validation/connectome/ds004666/seven_atlas_100k_20260929.md)；原 UKB FNIRT 系数下的 Tian S2–S4、TorchFNIRT 与 FSL 前向输出的一致性及原 UKB FNIRT/FIRST 整链仍需逐项验证。
