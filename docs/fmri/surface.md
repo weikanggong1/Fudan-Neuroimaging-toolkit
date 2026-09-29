@@ -165,7 +165,15 @@ newmsm --inmesh=/absolute/path/work/msmsulc_inputs/L.sphere_rot.surf.gii \
 | FNIT 逐级离散实验分支 vs 官方 newMSM | 0.494° / 1.291° | 0.495° / 1.768° | 48.48 / 42.68 秒 |
 | 官方 newMSM | 0° / 0° | 0° / 0° | 312.61 / 241.95 秒 |
 
-该实验分支尚未完成与官方 newMSM 固定其他输入后的整段 490 帧 fsLR32k 时间序列对照；不能把下文默认 FNIT 与旧版 MSM 的 CIFTI 指标当作该分支的指标。
+固定回归后 BOLD、T1w 表面、ROI、模板和 Workbench 命令，仅替换左右注册球面。对每个灰质坐标先计算 490 帧 Pearson r，再在区域内取均值；常数序列不参与相关均值，MAE 使用全部对应值。
+
+| 实验分支 vs 官方 newMSM 球面 | 灰质坐标 | 有效相关 | 平均 r | 中位 r | MAE |
+|---|---:|---:|---:|---:|---:|
+| 左皮层 | 29,696 | 29,695 | 0.9184 | 0.9564 | 21.55 |
+| 右皮层 | 29,716 | 29,684 | 0.8989 | 0.9505 | 26.15 |
+| 皮层下 | 31,870 | — | 1.0000 | 1.0000 | 0 |
+
+该次实验球面的 490 帧投影及 CIFTI 组装耗时 493.05 秒，复用已生成的 T1w BOLD，不含上述球面注册时间。实验分支的球面角差和双侧平均时间相关仍未达到预设的 0.25°、0.95 目标；因此目前只供显式选择和比较，不作为数值等价的默认分支。下文默认 FNIT 与旧版 MSM 的指标是另一组对照。
 
 原版完整流程的命令格式如下；`--cifti-output 91k` 指定 91,282 个灰质坐标，`--msm` 启用官方 MSMSulc，`--fs-subjects-dir` 使用已有的同被试 FreeSurfer subject。这是原软件等价入口的说明，不是下文固定输入 benchmark 的运行命令；原版从 BIDS 原始数据重算上游流程，不会直接读取 FNIT 已回归的 BOLD。[官方参数说明](https://fmriprep.org/en/latest/usage.html)与[fsLR 输出说明](https://fmriprep.org/en/latest/outputs.html)给出其空间和球面约定。
 
