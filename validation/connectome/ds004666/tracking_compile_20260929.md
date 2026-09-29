@@ -75,3 +75,9 @@ python tools/benchmark_connectome_tracking_100k_matrices.py "${compile_args[@]}"
 ![编译版 100k 轨迹长度和 TDI 脑图](tracking_compile_20260929/compiled_100k/population.png)
 
 编译只解决一部分 Python/核函数开销；当前仍逐条保存 GPU 路径，100 万和 1,000 万次播种的总时间、峰值和全链输出尚未测量。下一步需按块保存轨迹，并对独立轨迹群体的长度、端点及 TDI 偏差继续定位。
+
+## 参考文献与原实现
+
+- Tournier JD 等，*MRtrix3: A fast, flexible and open software framework for medical image processing and visualisation*，NeuroImage 202:116137，2019。[论文](https://pubmed.ncbi.nlm.nih.gov/31473352/)
+- Smith RE 等，*Anatomically-constrained tractography: improved diffusion MRI streamlines tractography through effective use of anatomical information*，NeuroImage 62:1924–1938，2012。[论文](https://pubmed.ncbi.nlm.nih.gov/22705374/)
+- [原版 iFOD2 代码](https://github.com/MRtrix3/mrtrix3/blob/eeab681d3e0cb004cf1d1d31579d3892197ef5b6/src/dwi/tractography/algorithms/iFOD2.h)；[原 UKB-connectomics 流程](https://github.com/sina-mansour/UKB-connectomics)；[PyTorch `torch.compile` 文档](https://pytorch.org/docs/stable/generated/torch.compile.html)。

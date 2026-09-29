@@ -155,6 +155,7 @@ fnit connectome \
 | `FreeSurferSubject` / `fs_aparc_atlas` | 完成的 recon-all 目录 → `brain.mgz`、`aparc+aseg.mgz` 路径；整数分割 `[A,B,C]` → 连续节点标签 `[A,B,C]` 与 84 行 `ConnectomeNode`；[同输入实测](../../validation/connectome/fs_aparc84_subject_dir_20260928.md) |
 | `schaefer_to_t1` / `native_annotation_to_t1` / `glasser_to_t1` / `synthmorph_tian_to_t1` / `fnirt_tian_to_t1` / `combine_cortical_tian` | fsaverage Schaefer 注释、recon-all 原生 aparc 注释或 Glasser fsLR dlabel 与球面 → 皮层 T1 标签及节点表；T1 脑图、MNI 模板和 Tian 标签 → SynthMorph 原生标签及可复用形变；已给定 FNIRT 前向 coefficient → 原流程原生标签；同网格皮层/Tian 标签与名称 → 连续整数合并 atlas；各参数、原版命令及[配准实测](../../validation/connectome/ds004666/atlas_synthmorph_20260929.md)、[原生图谱实测](../../validation/connectome/ds004666/atlas_native_aparc_20260929.md)、[Glasser 实测](../../validation/connectome/ds004666/atlas_glasser_20260929.md) |
 | `freesurfer_five_tissue` / `gmwmi_from_five_tissue` | 官方 FreeSurfer 整数标签 `[A,B,C]` → float32 5TT `[A,B,C,5]` → GMWMI `[A,B,C]` |
+| `sample_gmwmi_seeds` | 同网格 float32 GMWMI `[A,B,C]`、5TT `[A,B,C,5]`、体素→RAS 毫米仿射 `[4,4]`、返回位置数、PyTorch generator → 同设备 float32 `[N,3]` 世界毫米位置；[真实 100k 播种分布、命令、时间和图](../../validation/connectome/ds004666/gmwmi_seed_100k_20260929.md) |
 | `tracking_sh_precomputed` | 非零 float32 方向 `[...,3]`、偶数 `lmax` → 同设备 float32 球谐函数值 `[...,C]`；参数、等价原版运算及真实单弧基准见[专项报告](../../validation/connectome/ds004666/ifod2_single_arc_20260929.md) |
 | `probabilistic_tractography` | 归一化 WM SH/affine、5TT/affine、GMWMI、播种次数，以及可选 5TT 头文件体素尺寸 `five_tissue_spacing_mm=(sx,sy,sz)` → `Tractogram` 的世界毫米流线、端点、长度和已接受种子；每步最多 1,000 次校准拒绝采样、ACT 整数深度状态；可选 `compile_arc=True` 编译 CUDA 圆弧核，默认关闭。详见[同输入 10k 精度](../../validation/connectome/ds004666/ifod2_rejection_20260929.md)、[100k 四矩阵和轨迹分布](../../validation/connectome/ds004666/tracking_100k_matrices_20260929.md)与[编译核精度、时间和图](../../validation/connectome/ds004666/tracking_compile_20260929.md) |
 | `estimate_sift2_weights` | 同序流线、WM SH/affine、5TT/affine、`step_size_mm` → float64 逐流线权重 `[T]` |
@@ -208,7 +209,7 @@ tck2connectome -symmetric -assignment_radial_search 4 tracks.tck atlas_dwi.nii.g
 | Dhollander 响应（公开 ds004666） | 11/11 选择掩膜 XOR 0；WM/GM/CSF 最大误差 3.89e−9 / 9.06e−10 / 1.24e−10 | 当前版 CPU 核心 3.748 s；MRtrix 命令 17.01 s；[报告](../../validation/connectome/ds004666/response_fod_stage_20260927.md) |
 | 全脑原始 MSMT-CSD（公开 ds004666） | 208,522 体素、9,383,490 个 WM SH 值，MAE 1.98e−12，最大 1.21e−6；尚未 mtnormalise | 当前版 H100 核心 267.419 s、batch_size=4096、峰值 1.253 GiB；MRtrix CPU 命令 185.51 s；[报告](../../validation/connectome/ds004666/response_fod_full.public.json) |
 | 三组织 mtnormalise | 固定官方原始 FOD，WM SH 7,967,115 元素 MAE 4.79e−10、最大 5.96e−8 | H100 核心 0.568 s；MRtrix 命令 2.41 s；[报告与图](../../validation/connectome/ds004666/mtnormalise_stage_20260927.md) |
-| GMWMI 播种与 iFOD2/ACT 追踪 | 真实 FOD 校准方向 7/7，拒绝乘数绝对误差 `1.96×10⁻⁵`；80 条固定圆弧正／零概率判定一致；ACT 12,600 个逐点状态无分歧。10,000 固定种子的 FNIT 三次接受 2,713/2,727/2,691 条，官方 TCK 三次为 2,758/2,728/2,727 条；四矩阵 3×3 比较尚有差异 | H100 追踪核心 66.25/69.96/72.20 s，峰值 Torch 分配均约 2.176 GiB；[数值、官方时间、矩阵和图](../../validation/connectome/ds004666/ifod2_rejection_20260929.md) |
+| GMWMI 播种与 iFOD2/ACT 追踪 | 100k GMWMI 位置的 8 mm 三维直方图相关 FNIT 对官方 0.92689、官方两次 0.92458；真实 FOD 校准方向 7/7，拒绝乘数绝对误差 `1.96×10⁻⁵`；80 条固定圆弧正／零概率判定一致；ACT 12,600 个逐点状态无分歧。10,000 固定种子的 FNIT 三次接受 2,713/2,727/2,691 条，官方 TCK 三次为 2,758/2,728/2,727 条；四矩阵 3×3 比较尚有差异 | 播种 H100 核心 2.64 s、Torch 峰值 0.461 GiB；官方 Seedtest 1.26–1.36 s。[播种报告与图](../../validation/connectome/ds004666/gmwmi_seed_100k_20260929.md)；追踪 H100 核心 66.25/69.96/72.20 s、峰值约 2.176 GiB，[报告](../../validation/connectome/ds004666/ifod2_rejection_20260929.md) |
 | SIFT2 固定 FOD/5TT/官方 TCK | 处理掩膜 285/778,752 体素不同，非零支持 Dice=1；fixel 总数两臂均 243,822；全 fixel TDI r=0.9999999371；固定 2,758 条轨迹最终权重 r=0.999999903、MAE 3.44e−5 | [FMLS/处理掩膜图](../../validation/connectome/ds004666/sift2_fmls_stage_20260927.md)、[轨迹映射图](../../validation/connectome/ds004666/sift2_mapping_stage.md)、[优化器报告](../../validation/connectome/ds004666/sift2_optimizer_fmls_exact.public.json) |
 | 固定 2,758 条轨迹精确 FA 均值 | 原 MIF 几何逐轨 r=0.9999999949、MAE 5.58e−7，最大 0.0005499 | CPU 首轮 0.124 s、后续中位 0.102 s；MRtrix 命令 0.03 s；[报告与图](../../validation/connectome/ds004666/tcksample_precise_stage.md) |
 | 固定真实轨迹的四矩阵赋值 | 2,915 条双端分配一致；count 400/400 元素完全一致，FBC/长度/FA 最大误差 8.99e−6 / 5.63e−6 mm / 2.96e−8 | [赋值报告](../../validation/connectome/ds004666_fsl_act_real_tracks_assignment_report.json) |
@@ -255,3 +256,9 @@ python tools/benchmark_connectome_end_to_end.py \
 ```
 
 四张矩阵的比较固定脑区顺序，按严格上三角同时报告全边与共同非零边指标；长度/FA 的共同边指标用于区分数值偏差与连接支持差异。固定真实轨迹的赋值一致性不能代替独立追踪后的矩阵一致性。
+
+## 参考文献与原实现
+
+- Tournier JD 等，*MRtrix3: A fast, flexible and open software framework for medical image processing and visualisation*，NeuroImage 202:116137，2019。[论文](https://pubmed.ncbi.nlm.nih.gov/31473352/)
+- Smith RE 等，*Anatomically-constrained tractography: improved diffusion MRI streamlines tractography through effective use of anatomical information*，NeuroImage 62:1924–1938，2012。[论文](https://pubmed.ncbi.nlm.nih.gov/22705374/)
+- [原 UKB-connectomics 代码库](https://github.com/sina-mansour/UKB-connectomics)、[本次对照的 MRtrix3 源码提交](https://github.com/MRtrix3/mrtrix3/tree/eeab681d3e0cb004cf1d1d31579d3892197ef5b6)、[PyTorch 代码库](https://github.com/pytorch/pytorch)。

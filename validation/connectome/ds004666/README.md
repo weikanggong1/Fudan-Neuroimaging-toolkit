@@ -13,6 +13,7 @@
 | 5TT、GMWMI、DWI↔T1、atlas | [解剖报告](ANATOMY_STAGE_20260927.md)；固定官方分割的 5TT/GMWMI 逐值一致 |
 | 掩膜、响应、FOD、mtnormalise | [掩膜](maskfilter_stage_20260927.md)、[响应/FOD](response_fod_stage_20260927.md)、[归一化](mtnormalise_stage_20260927.md)；固定输入的主要数值误差与脑图分别列明 |
 | iFOD2/ACT | [当前拒绝采样与 ACT 报告](ifod2_rejection_20260929.md)；固定单弧最大概率误差 1.58×10⁻⁶，12,600 个真实 5TT 采样点 ACT 状态零差异；独立随机轨迹未全面进入官方重复包络 |
+| GMWMI 播种位置 | [100k 两次官方与一次 FNIT 空间分布和脑图](gmwmi_seed_100k_20260929.md)；8 mm 网格直方图相关跨软件 0.92689、官方两次 0.92458；界面 GM−WM 差值中位数仍有小差异 |
 | 100k 播种规模 | [同空间纯追踪](tracking_scale_100k_20260929.md)记录 FNIT 27,401 条、819.68 s、Torch 峰值 0.973 GiB；[三次官方与一次 FNIT 的全链四矩阵、轨迹分布和脑图](tracking_100k_matrices_20260929.md)另测 FNIT 追踪 1,443.91 s、全链 Torch 峰值 2.473 GiB。count 相对 L1 有 2/3 个跨软件比较进入官方自身范围，长度/端点/TDI 仍超出 |
 | 可选 CUDA 圆弧编译核 | [同输入 128/1k/100k 对照与图](tracking_compile_20260929.md)；100k 首次编译计入的追踪 782.49 s、保留 27,353 条、全链 Torch 峰值 2.468 GiB。不同时间的共享 GPU 负载不能用于稳定加速比；长度/端点/TDI 仍超出官方自身重复范围 |
 | 七套 atlas 的 100k 四矩阵 | [固定与独立 TCK 对照](seven_atlas_100k_20260929.md)；84–1054 节点的七套 count 在同一官方 TCK/逐轨数值下全部逐元素一致；独立 FNIT 轨迹的五项矩阵指标仍未全面进入三次官方互比范围，Tian 标签使用 SynthMorph |

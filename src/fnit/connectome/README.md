@@ -41,3 +41,8 @@ nodes = result.nodes                          # 输出：84 个矩阵行列定�
 [七套原 UKB atlas 的 100k 矩阵验证](../../../validation/connectome/ds004666/seven_atlas_100k_20260929.md)复用同一 TCK 或 FNIT 独立 TCK 生成 84–1054 节点的四矩阵。同一官方 TCK 和逐轨数值时七套 count 矩阵均逐值一致；独立追踪后仍有随机范围外的指标。报告提供每套行列节点表、矩阵压缩文件、计时和连接图。
 
 [真实 b0/T1 无 Surfa 自动配准核对](../../../validation/connectome_registration_no_surfa_20260928/README.md)只覆盖配准矩阵；完整连接组未因该迁移重新验收。
+
+## 参考文献与原实现
+
+- [MRtrix3 方法论文](https://pubmed.ncbi.nlm.nih.gov/31473352/)；[ACT 方法论文](https://pubmed.ncbi.nlm.nih.gov/22705374/)。
+- [原 UKB-connectomics 代码库](https://github.com/sina-mansour/UKB-connectomics)；[MRtrix3 本次对照的 iFOD2 源码](https://github.com/MRtrix3/mrtrix3/blob/eeab681d3e0cb004cf1d1d31579d3892197ef5b6/src/dwi/tractography/algorithms/iFOD2.h)。

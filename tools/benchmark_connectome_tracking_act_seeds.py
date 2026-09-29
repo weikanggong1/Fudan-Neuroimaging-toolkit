@@ -1,20 +1,20 @@
-"""Compare GPU GMWMI seed positions with MRtrix Seedtest on one 5TT image.
+"""用真实 5TT 对照 FNIT GPU GMWMI 种子与 MRtrix Seedtest 种子分布。
 
-MRtrix reference::
+官方参考命令::
 
      tckgen -algorithm Seedtest -seed_gmwmi gmwmi.mif -act 5tt.mif \
-      -seeds 10000 -select 0 -nthreads 8 -output_seeds seeds.txt \
+      -seeds N -select 0 -nthreads 0 -output_seeds seeds.txt \
       wm_fod_norm.mif seedtest.tck
 
-Python use::
+FNIT 对照命令::
 
      python tools/benchmark_connectome_tracking_act_seeds.py \
       --five-tissue five_tissue.nii.gz --gmwmi gmwmi.nii.gz \
       --reference-seeds seeds.txt --reference-repeat-seeds seeds_repeat.txt \
-      --output seed_benchmark.json
+      --reference-attempts N --candidate-points fnit_seeds.npy \
+      --output seed_benchmark.json --seed 0 --device cuda:0
 
-MRtrix and PyTorch have different RNG streams; compare distributions rather
-than row-wise coordinates. Inputs are paired real data, not synthetic tests.
+两种随机数序列不同，指标比较空间分布，不比较逐行坐标。
 """
 
 import argparse
@@ -28,11 +28,11 @@ import numpy as np
 from scipy.spatial import cKDTree
 import torch
 
-from fnit.connectome.tracking import _five_tissue_values, sample_gmwmi_seeds
+from fnit.connectome.tracking import _five_tissue_mrtrix, sample_gmwmi_seeds
 
 
 def _sha(path: Path) -> str:
-    """Return the input file's hexadecimal SHA-256 provenance digest."""
+    """返回单个输入或输出文件的 SHA-256。"""
     digest = hashlib.sha256()
     with path.open("rb") as handle:
         for block in iter(lambda: handle.read(1 << 20), b""):
@@ -41,11 +41,13 @@ def _sha(path: Path) -> str:
 
 
 def main() -> None:
-    """Compare real GMWMI seeds with two independent MRtrix Seedtest runs."""
+    """用两次官方播种与一次 FNIT 播种生成分布指标 JSON。"""
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("five-tissue", "gmwmi", "reference-seeds", "reference-repeat-seeds", "output"):
         parser.add_argument("--" + name, required=True, type=Path)
     parser.add_argument("--seed", type=int, default=7)
+    parser.add_argument("--reference-attempts", type=int, default=None)
+    parser.add_argument("--candidate-points", type=Path)
     parser.add_argument("--device", default="cuda:0")
     args = parser.parse_args()
     five_image = nib.load(args.five_tissue)
@@ -73,10 +75,16 @@ def main() -> None:
         torch.cuda.synchronize(device)
     elapsed = perf_counter() - start
     candidate = candidate_tensor.cpu().numpy()
-    inverse = torch.linalg.inv(affine)
+    if args.candidate_points is not None:
+        args.candidate_points.parent.mkdir(parents=True, exist_ok=True)
+        np.save(args.candidate_points, candidate)
+    effective_affine = affine.clone()
+    spacing = torch.as_tensor(five_image.header.get_zooms()[:3], dtype=torch.float64, device=device)
+    effective_affine[:3, :3] *= spacing / torch.linalg.vector_norm(effective_affine[:3, :3], dim=0)
+    inverse = torch.linalg.inv(effective_affine)
     def fractions(points):
-        """Return absolute GM-WM difference quantiles at RAS-mm seed points."""
-        values = _five_tissue_values(five, torch.as_tensor(points, device=device), inverse)
+        """计算世界毫米种子处的 GM-WM 差值分位数。"""
+        values = _five_tissue_mrtrix(five, torch.as_tensor(points, device=device), inverse)
         difference = values[:, 0] + values[:, 1] - values[:, 2]
         return torch.quantile(difference.abs(),
                               torch.tensor([0., .5, .9, .99, 1.], device=device)).cpu().tolist()
@@ -95,8 +103,11 @@ def main() -> None:
                          "gmwmi": _sha(args.gmwmi),
                          "reference_seeds": _sha(args.reference_seeds),
                          "reference_repeat_seeds": _sha(args.reference_repeat_seeds)},
-        "software": "MRtrix 3.0.3-103-g026e850d Seedtest vs PyTorch GPU float32/TF32 (float64 geometry)",
-        "reference_command": "tckgen -algorithm Seedtest -seed_gmwmi GMWMI -act 5TT -seeds 10000 -select 0 -nthreads 8 -output_seeds seeds.txt FOD seedtest.tck",
+        "software": "independent MRtrix3 Seedtest vs FNIT PyTorch GPU float32/TF32 (float64 geometry)",
+        "reference_command": "tckgen -algorithm Seedtest -seed_gmwmi GMWMI -act 5TT -seeds N -select 0 -output_seeds seeds.txt FOD seedtest.tck",
+        "reference_attempts": args.reference_attempts,
+        "candidate_points_sha256": (_sha(args.candidate_points)
+                                    if args.candidate_points is not None else None),
         "candidate_function": "sample_gmwmi_seeds(gmwmi, five_tissue, five_tissue_affine, n_seeds, generator)",
         "seed_count": len(reference),
         "reference_repeat_seed_count": len(reference_repeat),
