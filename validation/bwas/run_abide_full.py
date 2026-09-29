@@ -74,7 +74,7 @@ def main():
     result = run_bwas(
         args.bids_root, selected_tsv, final_mask,
         args.output_root, phenotype="case", covariates=("age", "sex", *site_columns),
-        cdt=5.0, block_size=2048, subject_block_size=8,
+        cdt=5.0, block_size=2048, subject_block_size=16,
         num_workers=8, device=args.device, fwhm=args.fwhm,
         cache_root=args.cache_root, _prepared_cache_dir=args.prepared_cache_dir,
         validate_direct_ols=args.validate_direct_ols,

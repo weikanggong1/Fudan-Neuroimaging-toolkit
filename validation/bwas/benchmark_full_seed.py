@@ -107,7 +107,7 @@ def main():
         "seeds": len(seeds), "voxel_pairs_compared": int(valid.sum()),
         "cdt": 5.0, "original_source_sha256": source_hash,
         "original_cpu_seconds": original_seconds,
-        "fnit_cpu_seconds": fnit_seconds,
+        "fnit_elapsed_seconds": fnit_seconds,
         "z_mean_absolute_difference": float(difference.mean()),
         "z_max_absolute_difference": float(difference.max()),
         "cdt_disagreements": int(np.count_nonzero(
