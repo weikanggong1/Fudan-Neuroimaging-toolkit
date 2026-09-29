@@ -70,7 +70,7 @@ CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核；BWAS 的连接和�
 | [run_bigflica / apply_model](docs/bigflica/README.md) | [BigFLICA](https://github.com/weikanggong/BigFLICA) mMIGP、DicL、FLICA | 从每人一目录的多模态标准空间 NIfTI 提取跨模态成分，输出被试 course、各模态成分 z 图和 top-voxel 脑图；CUDA 路径逐被试建库、分块处理 mMIGP 与 DicL，可选跳过两者直接拟合体素 FLICA，并投影新被试。 |
 | [run_bwas](docs/bwas/README.md) | [weikanggong/BWAS](https://github.com/weikanggong/BWAS) | 对多被试 2 mm BIDS volume BOLD 的逐体素连接做表型 GLM、6D 连接簇校正和 MA 图。 |
 
-各功能页给出带参数注释的 Python 单被试示例、输入/输出结构、原软件命令、真实数据精度与计时结果，并在末尾列出参考文献和原实现代码库。统一入口中的子命令用 `fnit <子命令> --help` 查看；fMRI 使用 `fnit-fmri --help`，MS-HBM 使用 `fnit-mshbm --help`，recon-all 使用 `fnit-recon-all --help`。全部独立入口见 [pyproject.toml](pyproject.toml)。
+各功能页给出带参数注释的 Python 示例、输入/输出结构、原软件命令、真实数据精度与计时结果，并在末尾列出参考文献和原实现代码库。统一入口中的子命令用 `fnit <子命令> --help` 查看；fMRI 使用 `fnit-fmri --help`，MS-HBM 使用 `fnit-mshbm --help`，recon-all 使用 `fnit-recon-all --help`。全部独立入口见 [pyproject.toml](pyproject.toml)。
 
 ## 安装
 

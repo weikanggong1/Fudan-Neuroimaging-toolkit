@@ -9,6 +9,7 @@ import csv
 import gzip
 import json
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import nullcontext
 from tempfile import TemporaryDirectory
 from dataclasses import dataclass
 from pathlib import Path
@@ -176,16 +177,22 @@ def _clusters(edges: list[tuple[int, int, float]], coords: np.ndarray,
 
 
 def _fisher_block(matrices, start: int, stop: int, i: int, j: int,
-                  n_i: int, n_j: int, device: torch.device) -> torch.Tensor:
+                  n_i: int, n_j: int, device: torch.device,
+                  voxel_major: bool = False) -> torch.Tensor:
     count = stop-start
-    lengths = np.array([len(matrices[subject]) for subject in range(start, stop)])
+    lengths = np.array([matrices[subject].shape[1] if voxel_major
+                        else len(matrices[subject]) for subject in range(start, stop)])
     max_time = int(lengths.max())
     a = np.zeros((count, max_time, n_i), dtype=np.float32)
     b = np.zeros((count, max_time, n_j), dtype=np.float32)
     for row, subject in enumerate(range(start, stop)):
         series = matrices[subject]
-        a[row, :len(series)] = series[:, i:i+n_i]
-        b[row, :len(series)] = series[:, j:j+n_j]
+        if voxel_major:
+            a[row, :lengths[row]] = series[i:i+n_i].T
+            b[row, :lengths[row]] = series[j:j+n_j].T
+        else:
+            a[row, :lengths[row]] = series[:, i:i+n_i]
+            b[row, :lengths[row]] = series[:, j:j+n_j]
     left = torch.from_numpy(a).to(device=device, dtype=torch.float64)
     right = torch.from_numpy(b).to(device=device, dtype=torch.float64)
     r = torch.bmm(left.transpose(1, 2), right)
@@ -201,7 +208,9 @@ def run_bwas(bids_root: str | Path, participants_tsv: str | Path,
              subject_block_size: int = 16,
              num_workers: int = 1,
              device: str = "cuda:0", fwhm: float | None = None,
-             validate_direct_ols: bool = False) -> BWASResult:
+             validate_direct_ols: bool = False,
+             cache_root: str | Path | None = None,
+             _prepared_cache_dir: str | Path | None = None) -> BWASResult:
     """Run one group BWAS on 2 mm clean BIDS Derivatives BOLD images."""
     start = perf_counter()
     if not 0 < cdt < 20 or min(block_size, subject_block_size, num_workers) < 1:
@@ -209,10 +218,24 @@ def run_bwas(bids_root: str | Path, participants_tsv: str | Path,
     files, ids, design, mask_img, mask, task = _inputs(
         Path(bids_root), Path(participants_tsv), Path(mask_file), phenotype,
         tuple(covariates))
+    if len(files) > 512:
+        try:
+            import resource
+        except ImportError:
+            pass
+        else:
+            soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
+            required = len(files)+128
+            if hard != resource.RLIM_INFINITY and required > hard:
+                raise OSError(f"open-file hard limit {hard} is below required {required}")
+            if required > soft:
+                resource.setrlimit(resource.RLIMIT_NOFILE, (required, hard))
     output_root = Path(output_root).expanduser().resolve()
     if output_root.exists() and any(output_root.iterdir()):
         raise FileExistsError(f"BWAS output directory is not empty: {output_root}")
     output_root.mkdir(parents=True, exist_ok=True)
+    cache_parent = Path(cache_root).expanduser().resolve() if cache_root else output_root
+    cache_parent.mkdir(parents=True, exist_ok=True)
     if str(device).startswith("cuda"):
         torch.backends.cuda.matmul.allow_tf32 = True
         torch.backends.cudnn.allow_tf32 = True
@@ -234,7 +257,11 @@ def run_bwas(bids_root: str | Path, participants_tsv: str | Path,
     direct_weights = direct_inverse @ design.T if validate_direct_ols else None
     direct_gpu_weights = (torch.as_tensor(direct_weights, device=dev)
                           if validate_direct_ols and dev.type == "cuda" else None)
-    with TemporaryDirectory(prefix="bwas-cache-", dir=output_root) as scratch:
+    if _prepared_cache_dir is not None and fwhm is None:
+        raise ValueError("a prepared cache requires the measured fwhm")
+    cache_context = (nullcontext(Path(_prepared_cache_dir)) if _prepared_cache_dir
+                     else TemporaryDirectory(prefix="bwas-cache-", dir=cache_parent))
+    with cache_context as scratch:
         matrices, widths = [], []
         def prepare_subject(item):
             subject, file = item
@@ -248,17 +275,24 @@ def run_bwas(bids_root: str | Path, participants_tsv: str | Path,
                 raise ValueError(f"nonfinite or constant masked BOLD voxels: {file}")
             series /= std
             cache_file = Path(scratch) / f"subject-{subject}.npy"
-            np.save(cache_file, series)
+            np.save(cache_file, np.ascontiguousarray(series.T))
             return cache_file, subject_width
 
-        with ThreadPoolExecutor(max_workers=num_workers) as executor:
-            for subject, (cache_file, subject_width) in enumerate(
-                    executor.map(prepare_subject, enumerate(files))):
-                if subject_width is not None:
-                    widths.append(subject_width)
-                matrices.append(np.load(cache_file, mmap_mode="r"))
-                if (subject+1) % 100 == 0 or subject+1 == len(files):
-                    print(f"BWAS prepared {subject+1}/{len(files)} BOLD images", flush=True)
+        if _prepared_cache_dir is None:
+            with ThreadPoolExecutor(max_workers=num_workers) as executor:
+                for subject, (cache_file, subject_width) in enumerate(
+                        executor.map(prepare_subject, enumerate(files))):
+                    if subject_width is not None:
+                        widths.append(subject_width)
+                    matrices.append(np.load(cache_file, mmap_mode="r"))
+                    if (subject+1) % 100 == 0 or subject+1 == len(files):
+                        print(f"BWAS prepared {subject+1}/{len(files)} BOLD images", flush=True)
+        else:
+            for subject, file in enumerate(files):
+                series = np.load(Path(scratch) / f"subject-{subject}.npy", mmap_mode="r")
+                if series.shape != (nvox, nib.load(str(file)).shape[3]):
+                    raise ValueError(f"prepared cache shape differs from BOLD: {file}")
+                matrices.append(series)
         width = float(max(2.0, np.mean(widths))) if fwhm is None else float(fwhm)
         if not np.isfinite(width) or width <= 0:
             raise ValueError("fwhm must be positive and finite")
@@ -274,7 +308,8 @@ def run_bwas(bids_root: str | Path, participants_tsv: str | Path,
                             if validate_direct_ols else None)
                 for st in range(0, len(ids), subject_block_size):
                     en = min(st+subject_block_size, len(ids))
-                    values = _fisher_block(matrices, st, en, i, j, n_i, n_j, dev)
+                    values = _fisher_block(matrices, st, en, i, j, n_i, n_j,
+                                           dev, voxel_major=True)
                     xy += x[st:en].T @ values
                     yy += (values * values).sum(dim=0)
                     if direct_y is not None:

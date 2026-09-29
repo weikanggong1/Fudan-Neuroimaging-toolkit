@@ -17,6 +17,7 @@ def main(argv=None):
     parser.add_argument("--block-size", type=int, default=128, help="voxel tile edge length")
     parser.add_argument("--subject-block-size", type=int, default=16, help="subjects per GPU batch")
     parser.add_argument("--num-workers", type=int, default=1, help="parallel BOLD preparation workers")
+    parser.add_argument("--cache-root", help="optional local directory for temporary voxel-major BOLD cache")
     parser.add_argument("--device", default="cuda:0", help="PyTorch device")
     parser.add_argument("--fwhm", type=float, help="optional known spatial smoothness in voxels")
     parser.add_argument("--validate-direct-ols", action="store_true",
@@ -27,6 +28,7 @@ def main(argv=None):
                       cdt=args.cdt, block_size=args.block_size,
                       subject_block_size=args.subject_block_size,
                       num_workers=args.num_workers,
+                      cache_root=args.cache_root,
                       device=args.device, fwhm=args.fwhm,
                       validate_direct_ols=args.validate_direct_ols)
     print(result)

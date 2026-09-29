@@ -21,6 +21,10 @@ def main():
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--upstream-source", type=Path, required=True)
     parser.add_argument("--min-valid-voxels", type=int, required=True)
+    parser.add_argument("--cache-root", type=Path)
+    parser.add_argument("--prepared-cache-dir", type=Path)
+    parser.add_argument("--fwhm", type=float)
+    parser.add_argument("--validate-direct-ols", action="store_true")
     args = parser.parse_args()
     with (args.bids_root / "participants.tsv").open() as stream:
         rows = list(csv.DictReader(stream, delimiter="\t"))
@@ -71,7 +75,9 @@ def main():
         args.bids_root, selected_tsv, final_mask,
         args.output_root, phenotype="case", covariates=("age", "sex", *site_columns),
         cdt=5.0, block_size=2048, subject_block_size=8,
-        num_workers=8, device=args.device, validate_direct_ols=True,
+        num_workers=8, device=args.device, fwhm=args.fwhm,
+        cache_root=args.cache_root, _prepared_cache_dir=args.prepared_cache_dir,
+        validate_direct_ols=args.validate_direct_ols,
     )
     metadata = json.loads(result.metadata.read_text())
     public = {
@@ -90,7 +96,7 @@ def main():
         "fwhm_voxels": metadata["FWHMInVoxels"],
         "fnit_elapsed_seconds": metadata["ElapsedSeconds"],
         "peak_cuda_allocated_bytes": metadata["PeakCUDAAllocatedBytes"],
-        "direct_ols_validation": metadata["DirectOLSValidation"],
+        "direct_ols_validation": metadata.get("DirectOLSValidation"),
         "upstream_source_sha256": hashlib.sha256(args.upstream_source.read_bytes()).hexdigest(),
     }
     report = args.output_root / "validation_summary.public.json"
