@@ -211,7 +211,7 @@ FNIT 保留 AMICO 起点；原版 Toolbox 使用网格搜索和 MATLAB `fmincon`
 
 轴向等价的主方向角差中位数为 `0.013°`，90 百分位为 `3.28°`。这是 24 个固定真实体素的数值一致性检查；输入与原版 Toolbox 的 SHA-256、运行环境和实测耗时见 [`classic_original_real_24.public.json`](../../validation/amico_noddi/classic_original_real_24.public.json)。
 
-同一病例的全脑 `242,261` 个 mask 体素也完成了当前默认经典模式的一次运行：H100 PCIe 上设置进程显存分配上限 20%，包含读写耗时 `209.55 s`，其中 AMICO 初始化 `84.63 s`、连续拟合 `118.09 s`；PyTorch 峰值 allocation `9.95 GB`。此前 LUT 批量 100 的单次运行耗时 `340.86 s`、峰值 allocation `2.30 GB`；改为 400 后，五张全脑图与旧图最大逐值差异为 `5.4e-7`。这两次测试均为共享 GPU，计时不能解释为隔离条件下的加速比。五张结果图全部为有限值、mask 外为零；归一化 RMSE 的中位数 `0.0362`、99 百分位 `0.1025`，另有 19 个体素超过 1。全脑输入、输出哈希和逐图检查见 [`classic_whole_brain.public.json`](../../validation/amico_noddi/classic_whole_brain.public.json)。
+同一病例的全脑 `242,261` 个 mask 体素也完成了当前默认经典模式的一次运行：H100 PCIe 上设置进程显存分配上限 20%，包含读写耗时 `209.55 s`，其中 AMICO 初始化 `84.63 s`、连续拟合 `118.09 s`；PyTorch 峰值 allocation `9.95 GB`。此前 LUT 批量 100 的单次运行耗时 `340.86 s`、峰值 allocation `2.30 GB`；改为 400 后，五张全脑图与旧图最大逐值差异为 `5.4e-7`。这两次测试均为共享 GPU，当前测试前后利用率为 99–100%；计时不能解释为隔离条件下的加速比。五张结果图全部为有限值、mask 外为零；归一化 RMSE 的中位数 `0.0362`、99 百分位 `0.1025`，另有 19 个体素超过 1。全脑输入、输出哈希和逐图检查见 [`classic_whole_brain.public.json`](../../validation/amico_noddi/classic_whole_brain.public.json)。
 
 ## Reference
 
