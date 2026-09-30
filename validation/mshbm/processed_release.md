@@ -5,7 +5,7 @@
 ## 参照来源与匹配
 
 - Surface：用户提供的 UKB 官方 release，`surf_fMRI/CIFTIs/bb.rfMRI.MNI.MSMAll.dtseries.nii`，490×91,282，TR 0.735 s。参照文件是官方处理结果，未用 FNIT 的球面/投影结果替代。
-- Volume：同一次扫描 UKB rfMRI ZIP 的 `rfMRI.ica/filtered_func_data_clean.nii.gz`，使用同 ZIP 的 `reg/example_func2standard_warp.nii.gz`，经原版 FSL 6.0.7.22 `applywarp` 生成 91×109×91×490 的 MNI152 2 mm BOLD。
+- Volume：清理 BOLD 和 warp 的 SHA-256 均与官方 ZIP 成员逐字节一致。使用同一次扫描 UKB rfMRI ZIP 的 `rfMRI.ica/filtered_func_data_clean.nii.gz`，使用同 ZIP 的 `reg/example_func2standard_warp.nii.gz`，经原版 FSL 6.0.7.22 `applywarp` 生成 91×109×91×490 的 MNI152 2 mm BOLD。
 - 官方 release 的左右白质表面与匹配 FreeSurfer 存档的 scanner-RAS 几何逐点核对，顶点数为 120,035/122,950，最大坐标差 0.0000267 mm。两份时序的帧数、TR 与起始时间相同。
 - 官方 volume 在 996 个抽样皮层下灰质坐标做 2 mm FWHM 平滑后，与官方 CIFTI 的时间相关性中位数为 0.9999745、均值 0.9438834；不同 atlas dilation/masking 的边界仍有差异。这一检查进一步支持使用的是匹配扫描，不将解剖或帧数相同单独当作时序来源证明。
 - 官方 CIFTI provenance 对应 Workbench 1.4.2、MSMAll 及 2 mm FWHM 表面平滑；原软件发布文件名对应 [UKB `bb_surf_clean`](https://git.fmrib.ox.ac.uk/falmagro/UK_biobank_pipeline_v_1/-/blob/master/bb_surf_pipeline/bb_surf_clean) 与 [UKB surface 发布字段](https://biobank.ctsu.ox.ac.uk/ukb/field.cgi?id=32136)。无法从这些文件确定整个发布 pipeline 的源码 commit，不将当前 upstream commit 当作发布版本。
