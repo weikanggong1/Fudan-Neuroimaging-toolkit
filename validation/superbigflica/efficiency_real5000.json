@@ -1,0 +1,522 @@
+{
+  "scope": "Completed audit fixes, numerical regression checks and two full real 5000-subject/C20/50-epoch pipeline observations on the same shared H100.",
+  "baseline_commit": "82c7a1eff614004c7d7fe18e1ba23d2ae949d9f4",
+  "baseline": {
+    "subjects": 5000,
+    "components": 20,
+    "max_epochs": 50,
+    "batch_size": 64,
+    "initialization": "random",
+    "class_weight": "balanced",
+    "best_epoch": 5,
+    "stage_timings_s": {
+      "match_load_normalize_s": 557.1481585111469,
+      "training_selection_prediction_s": 760.1853617844172,
+      "spatial_maps_s": 188.20011861482635,
+      "summary_plots_s": 9.180590664967895
+    },
+    "pipeline_wall_s": 1517.1636843038723,
+    "peak_gpu_allocated_gib": 1.0295500755310059,
+    "peak_process_rss_gib": 1.4370994567871094,
+    "input_hashes": {
+      "images_combined_sha256": "7870341ef88b725e1d96d41ea111f2c404f24505b51c16186b41132802d2bb80",
+      "subjects_sha256": "0ff71ccc0042927289ee20533c79cfc8a2c3c0a8bdf882de8aaa11511e83c251",
+      "matched_phenotypes_sha256": "691ffc3378c3625cce9b165b3c27b44c6a92cc70d6a4554187361cc691e79507",
+      "masks_sha256": {
+        "vbm": "c21b4b44617c05713c16880a51dd24ecb8c7c2fface62c9367d971460f27a8df",
+        "fa": "6e61f0ba80c449ffebde9b18438eba984e045d0e647d50ac92e19005eedf49a3",
+        "md": "29c42a1cd96436660f76b5d14b8296c47ea6a3f782a04c58f25c95ddd12e126a"
+      }
+    },
+    "model_sha256": "6fe736a07b82f53d7aed4137bd4dee752ae8262e2e481684c1bbbe907ac25067",
+    "implementation_sha256": {
+      "__init__.py": "4eca0e5fe959bf8636ed00c3cece822e4929537fccbafadf9d5bc4857084aa2c",
+      "cli.py": "e3f128029106afa21637808a019ee9f973e6aee9dd02333cad3ce6614713822a",
+      "data.py": "28fe6749ee52ae2f9d0554bb046a5009e9f038dedf2dda03259034e5c760255d",
+      "model.py": "7906e532d57195ccb526e96573935a16ef97dc9f22a89edba5e650d6a5658364",
+      "pipeline.py": "496139fc8d9c685d0010da14a7b74691dcffb59d3f993aa10efd21dd2524d634",
+      "plotting.py": "d5a51c4625cf430ea1d65a72c17da398dae0fbdc9628f8a6164fbeaf801e4d16",
+      "benchmark_real.py": "9e51273e8606158f60ee5b125ab9d80dc78f89344d4b8b4f6a5c47d5c5a88d30"
+    },
+    "runtime_dependencies_sha256": {
+      "pipeline.py": "bc33e997e2142c311bdf37c5fb4c53fa3a5b489a3441016869d74bc610428af4",
+      "stats_torch.py": "fa16238df1e76dbde6d221de5d8275e24c8f5ca2cb23f592a552df7e6c71b0a6"
+    },
+    "metrics": {
+      "train": {
+        "p20023_i0": {
+          "n": 3000,
+          "type": "continuous",
+          "mae": 71.14929962158203,
+          "rmse": 95.1226806640625,
+          "r2": 0.0644115647604333,
+          "pearson_r": 0.2749493874536637
+        },
+        "Incident_I9_HYPTENS": {
+          "n": 3000,
+          "type": "categorical",
+          "accuracy": 0.714,
+          "balanced_accuracy": 0.7476165254237288,
+          "macro_f1": 0.6686363109720774,
+          "roc_auc": 0.8292346398305086
+        }
+      },
+      "validation": {
+        "p20023_i0": {
+          "n": 1000,
+          "type": "continuous",
+          "mae": 73.41626739501953,
+          "rmse": 93.72364807128906,
+          "r2": 0.03233385516517129,
+          "pearson_r": 0.18464115855638166
+        },
+        "Incident_I9_HYPTENS": {
+          "n": 1000,
+          "type": "categorical",
+          "accuracy": 0.641,
+          "balanced_accuracy": 0.6452237354665903,
+          "macro_f1": 0.5865155701650828,
+          "roc_auc": 0.7064445120532599
+        }
+      },
+      "test": {
+        "p20023_i0": {
+          "n": 1000,
+          "type": "continuous",
+          "mae": 73.49878692626953,
+          "rmse": 102.06216430664062,
+          "r2": 0.025445553771214602,
+          "pearson_r": 0.17305837394369514
+        },
+        "Incident_I9_HYPTENS": {
+          "n": 1000,
+          "type": "categorical",
+          "accuracy": 0.661,
+          "balanced_accuracy": 0.6716269663725682,
+          "macro_f1": 0.608233340382822,
+          "roc_auc": 0.722551318073626
+        }
+      }
+    },
+    "environment": {
+      "python": "3.11.7",
+      "pytorch": "2.5.1",
+      "numpy": "1.26.4",
+      "nibabel": "5.4.0",
+      "scipy": "1.11.4",
+      "scikit_learn": "1.7.1",
+      "h5py": "3.8.0"
+    }
+  },
+  "input_probe": "input_profile_real192.json",
+  "regression_checks": {
+    "passed": 60,
+    "failed": 0,
+    "skipped": 0,
+    "wall_s": 40.11,
+    "files": [
+      "tests/test_superbigflica_efficiency.py",
+      "tests/test_superbigflica_rank_audit.py",
+      "tests/test_superbigflica_plotting_audit.py",
+      "tests/test_superbigflica.py",
+      "tests/test_bigflica.py"
+    ],
+    "environment": {
+      "python": "3.11.16",
+      "pytorch": "2.5.1",
+      "numpy": "1.26.4",
+      "scipy": "1.17.1",
+      "scikit_learn": "1.5.2",
+      "h5py": "3.16.0",
+      "nibabel": "5.4.2",
+      "gpu": "NVIDIA GeForce RTX 3060"
+    },
+    "coverage": [
+      "component units do not alter full rank or spatial z maps",
+      "true and float32 roundoff rank deficiency rejected",
+      "CPU/GPU Student-t ordinary and underflow-tail agreement",
+      "public fit/apply remain float32 under float64 global default",
+      "anisotropic brain sections use physical aspect",
+      "class labels cannot collide with macro/micro ROC keys",
+      "GPU cache preserves row order and duplicates exactly",
+      "insufficient budget and partial allocation failure return to HDF5",
+      "tensor spatial regression matches independent least-squares reference",
+      "cached/HDF5 complete fit state, losses, held-out predictions, courses and z maps are bitwise equal",
+      "shared BigFLICA regression tests"
+    ],
+    "test_sha256": {
+      "tests/test_superbigflica_efficiency.py": "8caa450a69ff4260b4617b357477e8c3e9b7d7e5841368568aaecd08918dbd31",
+      "tests/test_superbigflica_rank_audit.py": "0dddb7cc841cb8a70b316e0d7ae7ac12b26008db7e8827b433f04e289f51742e",
+      "tests/test_superbigflica_plotting_audit.py": "5e2df97a9ee9ac53b901305476733df94fa36118d2df1cb90bc0a808aab354a4",
+      "tests/test_superbigflica.py": "5b9683b40345e0a02f762ab52d96a58dff0669c6ec695d0e616a5904423b0b0f",
+      "tests/test_bigflica.py": "9953edfad421621d0250ca6dc4b3fb02c853b1a78c86605c1a8fe181c9a1207b"
+    }
+  },
+  "timing_notes": "Baseline and optimized runs are single observations on a shared GPU. Prefetch time is included in pipeline wall time. The 192-row probe alone is not a complete-cohort benchmark.",
+  "implementation_commit": "aef3b4f85fcaa4288edd30c32547d6e6f2f8b70e",
+  "verified_core_sha256": {
+    "src/fnit/superbigflica/pipeline.py": "a7fc4934ff4103dbfd11e793e367e162c88f4f854cb094a390461bca4870a13b",
+    "src/fnit/superbigflica/plotting.py": "b5c782a30de663a2d369b45164c25f9aa0dc082fdb6abb1c8593ac3154b3b5bd",
+    "src/fnit/bigflica/stats_torch.py": "02be27e7008bf06cd045eb496d3da2009fa6b099a1322241ba5eee03070f3186"
+  },
+  "optimized": {
+    "subjects": 5000,
+    "components": 20,
+    "max_epochs": 50,
+    "batch_size": 64,
+    "initialization": "random",
+    "class_weight": "balanced",
+    "best_epoch": 5,
+    "input_cache": "cuda",
+    "input_cache_gib": 11.220928281545639,
+    "spatial_courses": "training-centered and scaled float64; float32 effective rank",
+    "stage_timings_s": {
+      "match_load_normalize_s": 489.5657921489328,
+      "input_cache_s": 38.855131627991796,
+      "training_selection_prediction_s": 101.37126747705042,
+      "spatial_maps_s": 18.295792744960636,
+      "summary_plots_s": 8.209676428698003
+    },
+    "pipeline_wall_s": 660.0358636900783,
+    "peak_gpu_allocated_gib": 12.252206325531006,
+    "peak_process_rss_gib": 1.3928680419921875,
+    "input_hashes": {
+      "images_combined_sha256": "7870341ef88b725e1d96d41ea111f2c404f24505b51c16186b41132802d2bb80",
+      "subjects_sha256": "0ff71ccc0042927289ee20533c79cfc8a2c3c0a8bdf882de8aaa11511e83c251",
+      "matched_phenotypes_sha256": "691ffc3378c3625cce9b165b3c27b44c6a92cc70d6a4554187361cc691e79507",
+      "masks_sha256": {
+        "vbm": "c21b4b44617c05713c16880a51dd24ecb8c7c2fface62c9367d971460f27a8df",
+        "fa": "6e61f0ba80c449ffebde9b18438eba984e045d0e647d50ac92e19005eedf49a3",
+        "md": "29c42a1cd96436660f76b5d14b8296c47ea6a3f782a04c58f25c95ddd12e126a"
+      }
+    },
+    "model_sha256": "6fe736a07b82f53d7aed4137bd4dee752ae8262e2e481684c1bbbe907ac25067",
+    "implementation_sha256": {
+      "__init__.py": "4eca0e5fe959bf8636ed00c3cece822e4929537fccbafadf9d5bc4857084aa2c",
+      "cli.py": "e3f128029106afa21637808a019ee9f973e6aee9dd02333cad3ce6614713822a",
+      "data.py": "28fe6749ee52ae2f9d0554bb046a5009e9f038dedf2dda03259034e5c760255d",
+      "model.py": "7906e532d57195ccb526e96573935a16ef97dc9f22a89edba5e650d6a5658364",
+      "pipeline.py": "a7fc4934ff4103dbfd11e793e367e162c88f4f854cb094a390461bca4870a13b",
+      "plotting.py": "b5c782a30de663a2d369b45164c25f9aa0dc082fdb6abb1c8593ac3154b3b5bd",
+      "benchmark_real.py": "65254c693a092da7ee78ce0436b5f9c040c2c4f19572a45421391e1d48d59685"
+    },
+    "runtime_dependencies_sha256": {
+      "pipeline.py": "bc33e997e2142c311bdf37c5fb4c53fa3a5b489a3441016869d74bc610428af4",
+      "stats_torch.py": "02be27e7008bf06cd045eb496d3da2009fa6b099a1322241ba5eee03070f3186"
+    },
+    "metrics": {
+      "train": {
+        "p20023_i0": {
+          "n": 3000,
+          "type": "continuous",
+          "mae": 71.14929962158203,
+          "rmse": 95.1226806640625,
+          "r2": 0.0644115647604333,
+          "pearson_r": 0.2749493874536637
+        },
+        "Incident_I9_HYPTENS": {
+          "n": 3000,
+          "type": "categorical",
+          "accuracy": 0.714,
+          "balanced_accuracy": 0.7476165254237288,
+          "macro_f1": 0.6686363109720774,
+          "roc_auc": 0.8292346398305086
+        }
+      },
+      "validation": {
+        "p20023_i0": {
+          "n": 1000,
+          "type": "continuous",
+          "mae": 73.41626739501953,
+          "rmse": 93.72364807128906,
+          "r2": 0.03233385516517129,
+          "pearson_r": 0.18464115855638166
+        },
+        "Incident_I9_HYPTENS": {
+          "n": 1000,
+          "type": "categorical",
+          "accuracy": 0.641,
+          "balanced_accuracy": 0.6452237354665903,
+          "macro_f1": 0.5865155701650828,
+          "roc_auc": 0.7064445120532599
+        }
+      },
+      "test": {
+        "p20023_i0": {
+          "n": 1000,
+          "type": "continuous",
+          "mae": 73.49878692626953,
+          "rmse": 102.06216430664062,
+          "r2": 0.025445553771214602,
+          "pearson_r": 0.17305837394369514
+        },
+        "Incident_I9_HYPTENS": {
+          "n": 1000,
+          "type": "categorical",
+          "accuracy": 0.661,
+          "balanced_accuracy": 0.6716269663725682,
+          "macro_f1": 0.608233340382822,
+          "roc_auc": 0.722551318073626
+        }
+      }
+    },
+    "environment": {
+      "python": "3.11.7",
+      "pytorch": "2.5.1",
+      "numpy": "1.26.4",
+      "nibabel": "5.4.0",
+      "scipy": "1.11.4",
+      "scikit_learn": "1.7.1",
+      "h5py": "3.8.0"
+    }
+  },
+  "comparison": {
+    "scope": "Same 5000 real subjects, images, masks, shuffled CSV, split, initialization seed, targets and 50 epochs; separate observations on a shared GPU. Private per-subject outputs compared internally; public errors are aggregate only.",
+    "same_input_hashes": true,
+    "saved_parameters": {
+      "model": {
+        "tensors": 11,
+        "all_exact": true,
+        "maximum_absolute_difference": 0.0,
+        "maximum_relative_l2_difference": 0.0,
+        "changed_values": 0
+      },
+      "objective": {
+        "tensors": 7,
+        "all_exact": true,
+        "maximum_absolute_difference": 0.0,
+        "maximum_relative_l2_difference": 0.0,
+        "changed_values": 0
+      }
+    },
+    "history": {
+      "training_loss": {
+        "shape": [
+          50
+        ],
+        "exact": true,
+        "maximum_absolute_difference": 0.0,
+        "relative_l2_difference": 0.0,
+        "changed_values": 0
+      },
+      "validation_loss": {
+        "shape": [
+          50
+        ],
+        "exact": true,
+        "maximum_absolute_difference": 0.0,
+        "relative_l2_difference": 0.0,
+        "changed_values": 0
+      },
+      "reconstruction_loss": {
+        "shape": [
+          50
+        ],
+        "exact": true,
+        "maximum_absolute_difference": 0.0,
+        "relative_l2_difference": 0.0,
+        "changed_values": 0
+      },
+      "spatial_l1": {
+        "shape": [
+          50
+        ],
+        "exact": true,
+        "maximum_absolute_difference": 0.0,
+        "relative_l2_difference": 0.0,
+        "changed_values": 0
+      },
+      "supervision_loss": {
+        "shape": [
+          50
+        ],
+        "exact": true,
+        "maximum_absolute_difference": 0.0,
+        "relative_l2_difference": 0.0,
+        "changed_values": 0
+      },
+      "prediction_regularization": {
+        "shape": [
+          50
+        ],
+        "exact": true,
+        "maximum_absolute_difference": 0.0,
+        "relative_l2_difference": 0.0,
+        "changed_values": 0
+      }
+    },
+    "course": {
+      "shape": [
+        5000,
+        20
+      ],
+      "exact": true,
+      "maximum_absolute_difference": 0.0,
+      "relative_l2_difference": 0.0,
+      "changed_values": 0
+    },
+    "predictions": {
+      "p20023_i0__prediction": {
+        "shape": [
+          5000
+        ],
+        "exact": true,
+        "maximum_absolute_difference": 0.0,
+        "relative_l2_difference": 0.0,
+        "changed_values": 0
+      },
+      "p20023_i0__observed": {
+        "shape": [
+          5000
+        ],
+        "exact": true,
+        "maximum_absolute_difference": 0.0,
+        "relative_l2_difference": 0.0,
+        "changed_values": 0
+      },
+      "Incident_I9_HYPTENS__observed": {
+        "shape": [
+          5000
+        ],
+        "exact": true,
+        "maximum_absolute_difference": 0.0,
+        "relative_l2_difference": 0.0,
+        "changed_values": 0
+      },
+      "Incident_I9_HYPTENS__prob_000": {
+        "shape": [
+          5000
+        ],
+        "exact": true,
+        "maximum_absolute_difference": 0.0,
+        "relative_l2_difference": 0.0,
+        "changed_values": 0
+      },
+      "Incident_I9_HYPTENS__prob_001": {
+        "shape": [
+          5000
+        ],
+        "exact": true,
+        "maximum_absolute_difference": 0.0,
+        "relative_l2_difference": 0.0,
+        "changed_values": 0
+      }
+    },
+    "categorical_predicted_classes_exact": true,
+    "maps": {
+      "vbm": {
+        "zstat_array": {
+          "shape": [
+            157901,
+            20
+          ],
+          "exact": false,
+          "maximum_absolute_difference": 5.960464477539063e-08,
+          "relative_l2_difference": 1.628863654682734e-11,
+          "changed_values": 1
+        },
+        "nifti_count": 40,
+        "all_nifti_exact": false,
+        "nifti_maximum_absolute_difference": 5.960464477539063e-08,
+        "nifti_maximum_relative_l2_difference": 7.782415238254445e-11,
+        "nifti_changed_values": 1,
+        "nonzero_support_changed_voxels": 0
+      },
+      "fa": {
+        "zstat_array": {
+          "shape": [
+            222257,
+            20
+          ],
+          "exact": false,
+          "maximum_absolute_difference": 4.76837158203125e-07,
+          "relative_l2_difference": 1.1949091117914735e-10,
+          "changed_values": 5
+        },
+        "nifti_count": 40,
+        "all_nifti_exact": false,
+        "nifti_maximum_absolute_difference": 4.76837158203125e-07,
+        "nifti_maximum_relative_l2_difference": 5.613145264879839e-10,
+        "nifti_changed_values": 5,
+        "nonzero_support_changed_voxels": 0
+      },
+      "md": {
+        "zstat_array": {
+          "shape": [
+            222261,
+            20
+          ],
+          "exact": false,
+          "maximum_absolute_difference": 1.1920928955078125e-07,
+          "relative_l2_difference": 2.7088600877647225e-11,
+          "changed_values": 3
+        },
+        "nifti_count": 40,
+        "all_nifti_exact": false,
+        "nifti_maximum_absolute_difference": 1.1920928955078125e-07,
+        "nifti_maximum_relative_l2_difference": 9.361244539780692e-11,
+        "nifti_changed_values": 3,
+        "nonzero_support_changed_voxels": 0
+      }
+    },
+    "source_snapshot_files_hashes_verified": true,
+    "source_files_same": {
+      "__init__.py": true,
+      "cli.py": true,
+      "data.py": true,
+      "model.py": true,
+      "pipeline.py": false,
+      "plotting.py": false,
+      "benchmark_real.py": false
+    },
+    "runtime_dependency_files_same": {
+      "pipeline.py": true,
+      "stats_torch.py": false
+    },
+    "same_gpu_uuid": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+    "timing_scope": "Separate full pipeline observations on the same shared GPU. Utilization sampled at launch and after completion does not describe every instant; timings do not estimate a stable hardware acceleration factor. API wall includes automatic plotting; separate labels redraw is additional.",
+    "gpu_observations": {
+      "old_start": {
+        "free_gib": 48.8046875,
+        "utilization_percent": 100,
+        "gpu_uuid": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba"
+      },
+      "old_end": null,
+      "new_start": {
+        "free_gib": 55.2841796875,
+        "utilization_percent": 100,
+        "gpu_uuid": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba"
+      },
+      "new_end": {
+        "gpu_uuid": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+        "free_gib": 55.3623046875,
+        "utilization_percent": 100,
+        "scope": "sampled after pipeline and postprocessing completed"
+      }
+    },
+    "old_end_note": "No GPU endpoint snapshot was recorded for the preserved original baseline."
+  },
+  "issues_fixed": [
+    {
+      "issue": "成分数值尺度导致有效秩误判和不稳定空间回归",
+      "fix": "只对统计课程逐列中心化/缩放为float64，秩阈值保留源float32精度；保存成分和权重保持原单位。"
+    },
+    {
+      "issue": "极端Student-t尾部CPU/GPU概率下限不同",
+      "fix": "双侧概率统一使用float64最小正规数下限。"
+    },
+    {
+      "issue": "调用方float64全局默认类型与公开float32输入冲突",
+      "fix": "公开训练、目标函数和冻结推理显式转换为float32。"
+    },
+    {
+      "issue": "非等距体素脑图切面比例失真",
+      "fix": "按canonical affine的实际体素毫米尺寸设置切面比例。"
+    },
+    {
+      "issue": "分类标签与macro_auc/micro_auc摘要字段冲突",
+      "fix": "每类AUC存入独立class_auc映射。"
+    }
+  ],
+  "optimization": "Automatically cache complete standardized float32 matrices on CUDA when the budget covers input data, model/optimizer and batch buffers; otherwise retain HDF5 input. Spatial regression slices features before gathering training rows and accepts CUDA tensors directly."
+}

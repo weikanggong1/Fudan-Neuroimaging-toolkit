@@ -1,0 +1,309 @@
+{
+  "scope": "Bounded probe of three real 64-subject batches; saved C20 model reset before each data path; genuine measured targets used privately; no model output or individual values published. No whole-cohort training.",
+  "components": 20,
+  "sampled_rows": 192,
+  "batch_size": 64,
+  "feature_dimensions": [
+    157901,
+    222257,
+    222261
+  ],
+  "dtype": "float32",
+  "tf32": true,
+  "allocator_cap_gib": 19,
+  "full_float32_matrix_gib": 11.220928281545639,
+  "model_sha256": "6fe736a07b82f53d7aed4137bd4dee752ae8262e2e481684c1bbbe907ac25067",
+  "environment": {
+    "python": "3.11.7",
+    "torch": "2.5.1",
+    "numpy": "1.26.4",
+    "h5py": "3.8.0"
+  },
+  "cache_scope": "Only these 192 rows cached; full 5000-row residency was not allocated in this probe.",
+  "timing_scope": "Single observations on a shared GPU; CPU reads were bounded to the same three real batches.",
+  "implementation_sha256": {
+    "__init__.py": "4eca0e5fe959bf8636ed00c3cece822e4929537fccbafadf9d5bc4857084aa2c",
+    "cli.py": "e3f128029106afa21637808a019ee9f973e6aee9dd02333cad3ce6614713822a",
+    "data.py": "28fe6749ee52ae2f9d0554bb046a5009e9f038dedf2dda03259034e5c760255d",
+    "model.py": "7906e532d57195ccb526e96573935a16ef97dc9f22a89edba5e650d6a5658364",
+    "pipeline.py": "496139fc8d9c685d0010da14a7b74691dcffb59d3f993aa10efd21dd2524d634",
+    "plotting.py": "d5a51c4625cf430ea1d65a72c17da398dae0fbdc9628f8a6164fbeaf801e4d16"
+  },
+  "probe_sha256": "4d9cdfe72d3a0dabc4141ca971758bdeb6e02d6b5cce053a4550058b07ce9bfe",
+  "hdf_chunks": [
+    [
+      1,
+      32768
+    ],
+    [
+      1,
+      32768
+    ],
+    [
+      1,
+      32768
+    ]
+  ],
+  "initial_cpu_hdf_row_reads_s": [
+    8.129273152910173,
+    8.3174515562132,
+    6.914898005779833
+  ],
+  "small_pinned_cache_build_s": 0.7100934647023678,
+  "small_gpu_cache_upload": {
+    "wall_s": 0.012874510139226913,
+    "cuda_event_s": 0.01046009635925293
+  },
+  "small_cache_gib": 0.43088364601135254,
+  "paths": {
+    "hdf_pageable": {
+      "batches": [
+        {
+          "cpu_fetch_s": 0.1951086255721748,
+          "h2d_or_gpu_gather": {
+            "wall_s": 0.020720829721540213,
+            "cuda_event_s": 0.0184718074798584
+          },
+          "forward_and_objective": {
+            "wall_s": 0.024075554683804512,
+            "cuda_event_s": 0.022128639221191407
+          },
+          "backward": {
+            "wall_s": 0.017693981062620878,
+            "cuda_event_s": 0.0152489595413208
+          },
+          "both_optimizer_steps": {
+            "wall_s": 0.0015030712820589542,
+            "cuda_event_s": 0.0014683200120925903
+          },
+          "input_float32_exact": true
+        },
+        {
+          "cpu_fetch_s": 0.21686198515817523,
+          "h2d_or_gpu_gather": {
+            "wall_s": 0.017777237109839916,
+            "cuda_event_s": 0.016268159866333006
+          },
+          "forward_and_objective": {
+            "wall_s": 0.023983877152204514,
+            "cuda_event_s": 0.02207472038269043
+          },
+          "backward": {
+            "wall_s": 0.012932350859045982,
+            "cuda_event_s": 0.010434816360473633
+          },
+          "both_optimizer_steps": {
+            "wall_s": 0.002843542955815792,
+            "cuda_event_s": 0.0028124160766601564
+          },
+          "input_float32_exact": true
+        },
+        {
+          "cpu_fetch_s": 0.23268100712448359,
+          "h2d_or_gpu_gather": {
+            "wall_s": 0.016495563089847565,
+            "cuda_event_s": 0.016161247253417967
+          },
+          "forward_and_objective": {
+            "wall_s": 0.023779890965670347,
+            "cuda_event_s": 0.02184320068359375
+          },
+          "backward": {
+            "wall_s": 0.012759183067828417,
+            "cuda_event_s": 0.010295840263366699
+          },
+          "both_optimizer_steps": {
+            "wall_s": 0.0027917888946831226,
+            "cuda_event_s": 0.0027595839500427245
+          },
+          "input_float32_exact": true
+        }
+      ],
+      "numerical_comparisons_to_hdf": []
+    },
+    "cpu_pinned_cache": {
+      "batches": [
+        {
+          "cpu_fetch_s": 0.03789790719747543,
+          "h2d_or_gpu_gather": {
+            "wall_s": 0.005736915860325098,
+            "cuda_event_s": 0.003571615934371948
+          },
+          "forward_and_objective": {
+            "wall_s": 0.024009302258491516,
+            "cuda_event_s": 0.021974048614501952
+          },
+          "backward": {
+            "wall_s": 0.015098696108907461,
+            "cuda_event_s": 0.012643168449401856
+          },
+          "both_optimizer_steps": {
+            "wall_s": 0.002368361223489046,
+            "cuda_event_s": 0.0023226239681243895
+          },
+          "input_float32_exact": true
+        },
+        {
+          "cpu_fetch_s": 0.012122815940529108,
+          "h2d_or_gpu_gather": {
+            "wall_s": 0.004130426794290543,
+            "cuda_event_s": 0.0035040640830993654
+          },
+          "forward_and_objective": {
+            "wall_s": 0.024178987368941307,
+            "cuda_event_s": 0.022155807495117186
+          },
+          "backward": {
+            "wall_s": 0.012733661103993654,
+            "cuda_event_s": 0.010256287574768066
+          },
+          "both_optimizer_steps": {
+            "wall_s": 0.0015008589252829552,
+            "cuda_event_s": 0.001459264039993286
+          },
+          "input_float32_exact": true
+        },
+        {
+          "cpu_fetch_s": 0.009155191946774721,
+          "h2d_or_gpu_gather": {
+            "wall_s": 0.004497631918638945,
+            "cuda_event_s": 0.00304748797416687
+          },
+          "forward_and_objective": {
+            "wall_s": 0.02394314482808113,
+            "cuda_event_s": 0.02192742347717285
+          },
+          "backward": {
+            "wall_s": 0.01272723637521267,
+            "cuda_event_s": 0.010256287574768066
+          },
+          "both_optimizer_steps": {
+            "wall_s": 0.0032118037343025208,
+            "cuda_event_s": 0.0031685760021209716
+          },
+          "input_float32_exact": true
+        }
+      ],
+      "numerical_comparisons_to_hdf": [
+        {
+          "predictions_max_abs": 0.0,
+          "aggregate_loss_abs": 0.0,
+          "gradients_max_abs": 0.0
+        },
+        {
+          "predictions_max_abs": 0.0,
+          "aggregate_loss_abs": 0.0,
+          "gradients_max_abs": 0.0
+        },
+        {
+          "predictions_max_abs": 0.0,
+          "aggregate_loss_abs": 0.0,
+          "gradients_max_abs": 0.0
+        }
+      ]
+    },
+    "gpu_cache": {
+      "batches": [
+        {
+          "cpu_fetch_s": 1.2489035725593567e-06,
+          "h2d_or_gpu_gather": {
+            "wall_s": 0.0026214891113340855,
+            "cuda_event_s": 0.00039027199149131774
+          },
+          "forward_and_objective": {
+            "wall_s": 0.02391641680151224,
+            "cuda_event_s": 0.02189014434814453
+          },
+          "backward": {
+            "wall_s": 0.01288672722876072,
+            "cuda_event_s": 0.01041318416595459
+          },
+          "both_optimizer_steps": {
+            "wall_s": 0.002099714707583189,
+            "cuda_event_s": 0.0020554559230804444
+          },
+          "input_float32_exact": true
+        },
+        {
+          "cpu_fetch_s": 7.902272045612335e-07,
+          "h2d_or_gpu_gather": {
+            "wall_s": 0.002659411635249853,
+            "cuda_event_s": 0.00039155200123786927
+          },
+          "forward_and_objective": {
+            "wall_s": 0.02437592577189207,
+            "cuda_event_s": 0.022308128356933594
+          },
+          "backward": {
+            "wall_s": 0.012811671011149883,
+            "cuda_event_s": 0.010323936462402344
+          },
+          "both_optimizer_steps": {
+            "wall_s": 0.0012569022364914417,
+            "cuda_event_s": 0.0012108800411224365
+          },
+          "input_float32_exact": true
+        },
+        {
+          "cpu_fetch_s": 6.710179150104523e-07,
+          "h2d_or_gpu_gather": {
+            "wall_s": 0.0026309327222406864,
+            "cuda_event_s": 0.0003797760009765625
+          },
+          "forward_and_objective": {
+            "wall_s": 0.02373476093634963,
+            "cuda_event_s": 0.0218089599609375
+          },
+          "backward": {
+            "wall_s": 0.012697964906692505,
+            "cuda_event_s": 0.010228575706481934
+          },
+          "both_optimizer_steps": {
+            "wall_s": 0.0022597159259021282,
+            "cuda_event_s": 0.0022129280567169188
+          },
+          "input_float32_exact": true
+        }
+      ],
+      "numerical_comparisons_to_hdf": [
+        {
+          "predictions_max_abs": 0.0,
+          "aggregate_loss_abs": 0.0,
+          "gradients_max_abs": 0.0
+        },
+        {
+          "predictions_max_abs": 0.0,
+          "aggregate_loss_abs": 0.0,
+          "gradients_max_abs": 0.0
+        },
+        {
+          "predictions_max_abs": 0.0,
+          "aggregate_loss_abs": 0.0,
+          "gradients_max_abs": 0.0
+        }
+      ]
+    }
+  },
+  "spatial_sampled_block_read": {
+    "sampled_training_rows": 192,
+    "features": 2048,
+    "modality": "vbm",
+    "sorted_fancy_cpu_s": 0.026910203974694014,
+    "per_row_cpu_s": 0.007657879032194614,
+    "pinned_cache_cpu_gather_s": 0.00037541380152106285,
+    "gpu_cache_gather": {
+      "wall_s": 0.002482105977833271,
+      "cuda_event_s": 1.360000018030405e-05
+    },
+    "per_row_exact": true,
+    "cpu_cache_exact": true,
+    "gpu_cache_exact": true
+  },
+  "peak_gpu_allocated_gib": 1.4598159790039062,
+  "peak_rss_gib": 2.6874656677246094,
+  "hardware": {
+    "hostname": "gpucw1",
+    "gpu": "NVIDIA H100 PCIe",
+    "threads": 8
+  }
+}
