@@ -58,6 +58,32 @@ def test_subject_blocks_equal_direct_regression_with_unequal_scan_lengths():
     torch.testing.assert_close(beta, direct_beta, atol=1e-12, rtol=0)
     torch.testing.assert_close(sigma, direct_sigma, atol=1e-12, rtol=0)
 
+    # Match the production float32 path: nuisance QR and subject-wise QᵀY sums.
+    design32 = design.to(torch.float32)
+    nuisance, _ = torch.linalg.qr(design32[:, 1:], mode="reduced")
+    phenotype = design32[:, 0] - nuisance @ (nuisance.T @ design32[:, 0])
+    orthogonal = torch.column_stack((phenotype / torch.linalg.vector_norm(phenotype),
+                                     nuisance))
+    direct_values = _fisher_block(voxel_major, 0, 6, 0, 0, 4, 4, device,
+                                  voxel_major=True, dtype=torch.float32)
+    direct_coefficients = torch.linalg.lstsq(design32, direct_values).solution
+    direct_residual = direct_values - design32 @ direct_coefficients
+    phenotype_variance = (torch.linalg.pinv(design32)[0] ** 2).sum()
+    direct_t = direct_coefficients[0] / torch.sqrt(
+        (direct_residual ** 2).sum(0) * phenotype_variance / 3)
+    blocked_xy = torch.zeros((3, 16), dtype=torch.float32)
+    blocked_yy = torch.zeros(16, dtype=torch.float32)
+    for start in range(0, 6, 2):
+        part = _fisher_block(voxel_major, start, start + 2, 0, 0, 4, 4,
+                             device, voxel_major=True, dtype=torch.float32)
+        blocked_xy += orthogonal[start:start + 2].T @ part
+        blocked_yy += (part ** 2).sum(0)
+    blocked_t = blocked_xy[0] / torch.sqrt(
+        (blocked_yy - (blocked_xy ** 2).sum(0)) / 3)
+    off_diagonal = ~torch.eye(4, dtype=torch.bool).reshape(-1)
+    torch.testing.assert_close(blocked_t[off_diagonal], direct_t[off_diagonal],
+                               atol=1e-4, rtol=1e-4)
+
 
 def test_six_dimensional_cluster_excludes_corner_only_neighbors():
     coords = np.array([[0, 0, 0], [1, 1, 1], [1, 1, 0]])
