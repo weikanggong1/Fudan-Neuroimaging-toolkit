@@ -280,7 +280,7 @@ def rasterize_priors_compact(
                               all_tet[:, 3] - all_v0), dim=-1)
     all_inv, all_info = torch.linalg.inv_ex(all_matrix, check_errors=False)
     all_singular = (all_info != 0) | (torch.linalg.det(all_matrix).abs() <= 1e-10)
-    values_parts, covered_parts = [], []
+    selected_parts, point_parts, covered_parts = [], [], []
     for points, ids, candidate_mask, batch_ids, point_rows in batches:
         with torch.no_grad():
             lookup = lookup_candidates(points, ids, candidate_mask, all_v0, all_inv,
@@ -296,21 +296,29 @@ def rasterize_priors_compact(
                 covered = (best_score >= -float(tolerance)).flatten()[point_rows]
             else:
                 selected_ids, covered = lookup
+        selected_parts.append(selected_ids)
+        point_parts.append(points.reshape(-1, 3)[point_rows])
+        covered_parts.append(covered.flatten())
+
+    if selected_parts:
+        selected_ids = torch.cat(selected_parts)
+        selected_points = torch.cat(point_parts)
+        covered = torch.cat(covered_parts)
         selected_cells = tetrahedra[selected_ids]
-        selected_rel = points.reshape(-1, 3)[point_rows] - all_v0[selected_ids]
+        selected_rel = selected_points - all_v0[selected_ids]
         selected_w123 = torch.einsum("pij,pj->pi", all_inv[selected_ids], selected_rel)
         selected_weights = torch.cat((1.0 - selected_w123.sum(-1, keepdim=True), selected_w123), dim=-1)
         values = (alphas[selected_cells] * selected_weights[..., None]).sum(dim=1)
         values = values.clamp_min(0)
         values = values / values.sum(-1, keepdim=True).clamp_min(torch.finfo(values.dtype).eps)
-        values_parts.append(torch.where(covered[..., None], values, 0).reshape(-1, k))
-        covered_parts.append(covered.flatten())
+        values = torch.where(covered[..., None], values, 0)
+    else:
+        values = torch.zeros((0, k), device=vertices.device, dtype=alphas.dtype)
+        covered = torch.zeros((0,), device=vertices.device, dtype=torch.bool)
 
     # One gather restores mask order, including voxels in blocks with no cells.
-    values_parts.append(torch.zeros((1, k), device=vertices.device, dtype=alphas.dtype))
-    covered_parts.append(torch.zeros((1,), device=vertices.device, dtype=torch.bool))
-    out = torch.cat(values_parts)[reorder]
-    covered = torch.cat(covered_parts)[reorder]
+    out = torch.cat((values, torch.zeros((1, k), device=vertices.device, dtype=alphas.dtype)))[reorder]
+    covered = torch.cat((covered, torch.zeros((1,), device=vertices.device, dtype=torch.bool)))[reorder]
     if background_channel is not None:
         bg = int(background_channel)
         out[:, bg] = torch.where(~covered, torch.ones_like(out[:, bg]), out[:, bg])

@@ -36,6 +36,7 @@ def test_compact_priors_and_gradients_match_dense(device, background, mask_kind)
     linear = torch.arange(np.prod(shape), device=device).reshape(shape)
     mask = torch.ones(shape, device=device, dtype=torch.bool) if mask_kind == "full" else linear % 3 != 0
     index = build_block_index(vertices.cpu().numpy(), tetrahedra.cpu().numpy(), shape, block_size=4)
+    assert len(index.device_compact_batches(mask, device, vertices.dtype)[0]) > 1
     dense_vertices = vertices.clone().requires_grad_(True)
     compact_vertices = vertices.clone().requires_grad_(True)
     dense_alphas = alphas.clone().requires_grad_(True)

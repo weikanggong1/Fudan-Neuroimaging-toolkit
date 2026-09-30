@@ -60,8 +60,23 @@ def input_hashes(report):
 
 
 def official_rows(report):
-    return {row["label"]: row for comparison in report["comparisons"].values()
+    rows = {row["label"]: dict(row) for comparison in report["comparisons"].values()
             for row in comparison["regions"] + comparison.get("empty_hard_regions", [])}
+    for row in rows.values():
+        row.setdefault("hard_evaluation_status", "both_empty" if
+                       row["reference_voxels"] == row["fnit_voxels"] == 0 else "evaluated")
+    inferred = []
+    # The original compare() lists the union of reference/candidate hard labels.
+    # An omitted metadata label from a compared structure is therefore empty in both.
+    for identifier, value in report["label_metadata"].items():
+        label = int(identifier)
+        if label not in rows and value["source"] in report["comparisons"]:
+            rows[label] = {**value, "label": label, "reference_voxels": 0, "fnit_voxels": 0,
+                           "reference_hard_volume_mm3": 0.0, "fnit_hard_volume_mm3": 0.0,
+                           "dice": None, "hard_volume_difference": None, "accepted": None,
+                           "hard_evaluation_status": "both_empty"}
+            inferred.append(label)
+    return rows, sorted(inferred)
 
 
 def change(old, new):
@@ -177,7 +192,8 @@ def main():
     new_metadata = {int(label): value for label, value in new["label_metadata"].items()}
     metadata = {**old_metadata, **new_metadata}
     old_inputs, new_inputs = input_hashes(old), input_hashes(new)
-    old_official, new_official = official_rows(old), official_rows(new)
+    old_official, old_inferred_empty = official_rows(old)
+    new_official, new_inferred_empty = official_rows(new)
     checks = {"input_sha256_equal": old_inputs == new_inputs,
               "validation_mode_equal": old["validation_mode"] == new["validation_mode"],
               "both_full_runs": all(run["validation_mode"] in ("official_stage_inputs", "raw_t1_end_to_end")
@@ -232,6 +248,7 @@ def main():
         "native": native, "highres": highres,
         "brainstem_four_labels": [row for row in native["per_label"] if row["label"] in BRAINSTEM_IDS],
         "official_joint_acceptance": accepted,
+        "inferred_empty_hard_labels": {"old": old_inferred_empty, "new": new_inferred_empty},
         "official_thresholds": {"dice_min": .95, "relative_hard_volume_difference_max": .05,
                                 "both_empty": "excluded from hard-label acceptance; soft volumes retained"},
         "performance": {"api_wall_seconds": change(old_wall, new_wall),

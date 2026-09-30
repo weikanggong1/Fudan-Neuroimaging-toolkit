@@ -66,7 +66,8 @@ def lookup_candidates(points, ids, candidate_mask, all_v0, all_inv,
     Inputs match ``BlockIndex.device_compact_batches`` and the geometry computed
     by PyTorch. Only real ``point_rows`` are searched. Geometry may be strided;
     coordinates and index tensors must be contiguous. All floating arithmetic
-    uses FP32, with compiler contraction disabled; interpolation remains outside
+    uses FP32 with fused multiply-add, matching PyTorch's CUDA accumulation;
+    interpolation remains outside
     this nondifferentiable lookup. CUDA numerical acceptance is tested separately.
     """
     tensors = (points, ids, candidate_mask, all_v0, all_inv, all_singular, point_rows)
@@ -100,7 +101,7 @@ def lookup_candidates(points, ids, candidate_mask, all_v0, all_inv,
         points, ids, candidate_mask, all_v0, all_inv, all_singular,
         point_rows, selected, covered, int(points.shape[1]), width,
         *all_v0.stride(), *all_inv.stride(), float(tolerance), triton.next_power_of_2(width),
-        num_warps=warps, enable_fp_fusion=False)
+        num_warps=warps, enable_fp_fusion=True)
     return selected, covered
 
 
