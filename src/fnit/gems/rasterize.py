@@ -36,12 +36,13 @@ class BlockIndex:
         if key not in self._device_cache:
             groups = {}
             for points, ids, _, _ in self.device_blocks(device, dtype):
-                width = ((len(ids) + 7) // 8) * 8
+                width = 1 << (len(ids) - 1).bit_length()
                 groups.setdefault((len(points), width), []).append((points, ids))
             batches = []
             for (n_points, width), blocks in groups.items():
-                for start in range(0, len(blocks), 16):
-                    subset = blocks[start:start + 16]
+                batch_size = max(1, min(16, 8_388_608 // (n_points * width)))
+                for start in range(0, len(blocks), batch_size):
+                    subset = blocks[start:start + batch_size]
                     points = torch.stack([block[0] for block in subset])
                     ids = torch.stack([torch.nn.functional.pad(block[1], (0, width - len(block[1])))
                                        for block in subset])
@@ -150,7 +151,6 @@ def rasterize_priors(
                               all_tet[:, 3] - all_v0), dim=-1)
     all_inv, all_info = torch.linalg.inv_ex(all_matrix, check_errors=False)
     all_singular = (all_info != 0) | (torch.linalg.det(all_matrix).abs() <= 1e-10)
-
     for points, ids, candidate_mask, batch_ids, (x, y, z) in block_index.device_batches(vertices.device, vertices.dtype):
         # Lookup is discrete. Retaining every candidate's graph consumes GBs
         # although only one tetrahedron per voxel contributes to the gradient.
@@ -161,8 +161,8 @@ def rasterize_priors(
             singular = all_singular[ids] | ~candidate_mask
             score = weights.amin(-1).masked_fill(singular[:, None], -torch.inf)
             best_score, best = score.max(dim=2)
-            valid = best_score >= -float(tolerance)
             selected_ids = ids[batch_ids, best]
+            valid = best_score >= -float(tolerance)
         selected_cells = tetrahedra[selected_ids]
         selected_rel = points - all_v0[selected_ids]
         selected_w123 = torch.einsum("bpij,bpj->bpi", all_inv[selected_ids], selected_rel)

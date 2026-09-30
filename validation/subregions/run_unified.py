@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import asdict
 import hashlib
 import json
 import logging
@@ -13,18 +14,23 @@ import nibabel as nib
 from nibabel.processing import resample_from_to
 import numpy as np
 import torch
+import fnit
 
 from fnit import segment_subregions
 
 
-def compare(reference: Path, candidate: np.ndarray, image, *, offset=0) -> dict:
+def compare(reference: Path, candidate: np.ndarray, image, *, offset=0, label_ids=None) -> dict:
     source = nib.load(str(reference))
     if source.shape != image.shape or not np.allclose(source.affine, image.affine, atol=1e-5):
         source = resample_from_to(source, (image.shape, image.affine), order=0)
     truth = np.asarray(source.dataobj, dtype=np.int32)
     if offset:
         truth[truth != 0] += offset
+    if label_ids is not None:
+        truth = np.where(np.isin(truth, label_ids), truth, 0)
+        candidate = np.where(np.isin(candidate, label_ids), candidate, 0)
     rows = []
+    voxel_volume = abs(np.linalg.det(image.affine[:3, :3]))
     for label in np.union1d(np.unique(truth), np.unique(candidate)):
         if label == 0:
             continue
@@ -34,6 +40,8 @@ def compare(reference: Path, candidate: np.ndarray, image, *, offset=0) -> dict:
         dice = 2 * int(np.count_nonzero(expected & got)) / max(n_ref + n_got, 1)
         difference = abs(n_got - n_ref) / n_ref if n_ref else None
         rows.append({"label": int(label), "reference_voxels": n_ref, "fnit_voxels": n_got,
+                     "reference_hard_volume_mm3": n_ref * voxel_volume,
+                     "fnit_hard_volume_mm3": n_got * voxel_volume,
                      "dice": dice, "hard_volume_difference": difference,
                      "accepted": dice >= 0.95 and difference is not None and difference <= 0.05})
     foreground = truth != 0
@@ -96,7 +104,7 @@ def main():
         torch.cuda.set_device(args.device)
         torch.cuda.set_per_process_memory_fraction(args.gpu_memory_fraction, args.device)
         torch.cuda.reset_peak_memory_stats(args.device)
-    source_root = Path(__file__).resolve().parents[2] / "src" / "fnit"
+    source_root = Path(fnit.__file__).resolve().parent
     source_hashes = {str(path.relative_to(source_root)): hashlib.sha256(path.read_bytes()).hexdigest()
                      for package in ("gems", "synthseg_parc")
                      for path in sorted((source_root / package).rglob("*.py"))
@@ -136,6 +144,8 @@ def main():
         for row in comparison["regions"]:
             identifier = row["label"]
             metadata = result.label_metadata.get(identifier)
+            if metadata is not None:
+                row.update(asdict(metadata))
             reference_name = (metadata.name.removeprefix("Left-").removeprefix("Right-")
                               if metadata is not None and name.startswith("hippo-amygdala") else
                               metadata.name if metadata is not None else None)
@@ -145,6 +155,18 @@ def main():
             row["fnit_soft_volume_mm3"] = fnit_volume
             row["soft_volume_difference"] = (abs(fnit_volume - reference_volume) / reference_volume
                                               if fnit_volume is not None and reference_volume else None)
+    families = {}
+    for name, comparison in comparisons.items():
+        parents = sorted({row.get("parent", name) for row in comparison["regions"]})
+        for parent in parents:
+            rows = [row for row in comparison["regions"] if row.get("parent", name) == parent]
+            side = name.rsplit("-", 1)[-1] if name.startswith("hippo-amygdala") else None
+            key = parent + ("-" + side if side else "")
+            family = compare(references[name], output, result.labels,
+                             offset=10000 if side == "right" else 0,
+                             label_ids=[row["label"] for row in rows])
+            family["regions"] = rows
+            families[key] = family
     report = {"validation_mode": "quick_diagnostic" if args.quick else
               "official_stage_inputs" if args.aseg else "raw_t1_end_to_end",
               "input": str(args.t1), "aseg": str(args.aseg) if args.aseg else None,
@@ -157,11 +179,22 @@ def main():
                                for path in (args.t1, args.aseg, args.wmparc) if path is not None},
               "torch_version": torch.__version__, "cuda_version": torch.version.cuda,
               "source_sha256": source_hashes,
-              "comparisons": comparisons, "initialization": result.initialization,
+              "comparisons": comparisons, "families": families,
+              "label_metadata": {identifier: asdict(metadata)
+                                 for identifier, metadata in result.label_metadata.items()},
+              "initialization": result.initialization,
               "volumes": result.volumes, "output": str(native_path)}
     (args.output_dir / "report.json").write_text(
         json.dumps(report, indent=2, default=lambda value: value.item()
                    if isinstance(value, np.generic) else str(value)) + "\n")
+    columns = ("label", "name", "parent", "hemisphere", "dice", "reference_hard_volume_mm3",
+               "fnit_hard_volume_mm3", "hard_volume_difference", "reference_soft_volume_mm3",
+               "fnit_soft_volume_mm3", "soft_volume_difference", "accepted")
+    with (args.output_dir / "comparison.tsv").open("w") as stream:
+        stream.write("\t".join(columns) + "\n")
+        for comparison in comparisons.values():
+            for row in comparison["regions"]:
+                stream.write("\t".join(str(row.get(column, "")) for column in columns) + "\n")
     print(json.dumps({"mode": report["validation_mode"], "seconds": elapsed,
                       "peak_gpu_gib": report["peak_gpu_gib"],
                       "comparisons": {name: f"{value['accepted']}/{value['labels']}"

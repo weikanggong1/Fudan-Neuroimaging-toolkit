@@ -75,6 +75,34 @@ def test_raster_gradient_matches_finite_difference_inside_a_tetrahedron():
     assert torch.autograd.gradcheck(value, (vertices,))
 
 
+def test_cached_spatial_index_matches_fresh_after_mesh_movement():
+    from fnit.gems.rasterize import build_block_index
+    atlas = _atlas()
+    vertices = torch.tensor(atlas.vertices, dtype=torch.float32)
+    tetrahedra = torch.tensor(atlas.tetrahedra)
+    alphas = torch.tensor(atlas.alphas)
+    index = build_block_index(atlas.vertices, atlas.tetrahedra, (8, 8, 8), margin=2)
+    rasterize_priors(vertices, tetrahedra, alphas, (8, 8, 8), block_index=index)
+    moved = vertices + torch.tensor([.7, -.4, .2])
+    cached, covered = rasterize_priors(moved, tetrahedra, alphas, (8, 8, 8), block_index=index)
+    fresh, fresh_covered = rasterize_priors(moved, tetrahedra, alphas, (8, 8, 8))
+    torch.testing.assert_close(cached, fresh)
+    assert torch.equal(covered, fresh_covered)
+
+
+def test_compact_gaussian_statistics_match_full_zero_masked_image():
+    image = torch.arange(125, dtype=torch.float32).reshape(5, 5, 5)
+    image[0] = 0
+    responsibilities = torch.stack((torch.full_like(image, .3), torch.full_like(image, .7)))
+    hyper = {"mean_hyper": torch.tensor([40., 90.]), "n_hyper": torch.tensor([10., 5.])}
+    full = update_gaussians(image, responsibilities, **hyper)
+    valid = image != 0
+    compact = update_gaussians(image[valid].reshape(-1, 1, 1),
+                               responsibilities[:, valid].reshape(2, -1, 1, 1), **hyper)
+    torch.testing.assert_close(compact.means, full.means)
+    torch.testing.assert_close(compact.covariances, full.covariances)
+
+
 def test_atlas_smoothing_preserves_normalized_vertex_alphas():
     from fnit.gems.smoothing import smooth_atlas_alphas
 
@@ -174,6 +202,18 @@ def test_outer_em_cycles_each_fit_the_mesh():
         mean_hyper=torch.tensor([1., 2.]), n_hyper=torch.tensor([10., 10.]))
     assert len(result.objective_history) == 7
     assert torch.isfinite(result.gaussian_parameters.means).all()
+    torch.testing.assert_close(result.vertices, torch.tensor(atlas.vertices, dtype=torch.float32))
+
+
+def test_sliding_mesh_stops_inner_and_outer_iterations_when_nodes_do_not_move():
+    from dataclasses import replace
+    atlas = replace(_atlas(), can_move=np.zeros((4, 3), bool))
+    result = TorchGEMS(atlas)(
+        torch.ones(8, 8, 8), em_iterations=100, em_relative_cost_stop=1e-5,
+        deform_iterations=30, outer_iterations=7, deform_optimizer="lbfgs",
+        boundary_transform=np.eye(3),
+        mean_hyper=torch.tensor([1., 2.]), n_hyper=torch.tensor([10., 10.]))
+    assert len(result.objective_history) == 2
     torch.testing.assert_close(result.vertices, torch.tensor(atlas.vertices, dtype=torch.float32))
 
 

@@ -117,6 +117,34 @@ def test_thalamic_hyperparameters_split_brighter_and_darker(tmp_path):
     assert counts[13] == counts[14] == 25
 
 
+def test_recipe_smooths_transformed_mesh_and_ignores_population_cache(tmp_path, monkeypatch):
+    import json
+    import fnit.gems.smoothing as smoothing
+    atlas = _atlas(np.asarray([0, 10]), ("Unknown", "ROI"))
+    classes = np.asarray([0, 1])
+    cached_name = "seg-sigma1-first.npy"
+    np.save(tmp_path / cached_name, atlas.alphas)
+    (tmp_path / "config.json").write_text(json.dumps({
+        "alpha_label_classes": {cached_name: classes.tolist()}}))
+    references = []
+    def smooth(current_atlas, current_classes, sigma, *, device):
+        references.append(current_atlas.reference_vertices.copy())
+        return current_atlas.alphas
+    monkeypatch.setattr(smoothing, "smooth_atlas_alphas", smooth)
+    class Recipe(GEMSRecipe):
+        def synthetic_means(self, atlas, classes):
+            return np.asarray([1., 2.], np.float32)
+    recipe = Recipe("test", tmp_path)
+    recipe._reference_vertices = atlas.reference_vertices
+    transform = np.diag([2., 2., 2., 1.])
+    transform[:3, 3] = 5
+    recipe._fit(atlas.transformed(transform), np.ones((25, 25, 25), np.float32),
+                np.eye(4), classes, ((1., 0),), synthetic=True, device=torch.device("cpu"))
+    assert len(references) == 1
+    np.testing.assert_allclose(np.ptp(references[0], axis=0),
+                               2 * np.ptp(atlas.reference_vertices, axis=0))
+
+
 def test_gpu_cpu_fixed_gaussian_consistency_when_cuda_available():
     if not torch.cuda.is_available():
         return

@@ -107,39 +107,22 @@ def prepare_subregion_atlases(output_root: str | Path | None = None, *,
                     shutil.copy2(source, target / filename)
         recipe = (ThalamusRecipe(pack, target) if pack == "thalamus" else
                   HippoAmygdalaRecipe("left", target))
-        atlas = recipe.atlas()
-        alpha_classes = {}
-        for synthetic, schedule in ((True, recipe.seg_schedule),
-                                    (False, recipe.image_schedule)):
-            for index, (sigma, _) in enumerate(schedule):
-                if sigma == 0:
-                    continue
-                classes = (recipe.segmentation_groups(atlas) if synthetic else
-                           recipe.intensity_groups(atlas, index))
-                name = (f"{'seg' if synthetic else 'image'}-sigma{sigma:g}-"
-                        f"{'second' if not synthetic and index > 0 else 'first'}.npy")
-                path = target / name
-                np.save(path, smooth_atlas_alphas(atlas, classes, sigma, device=device))
-                alpha_classes[name] = classes.tolist()
-        if pack == "hippo-amygdala-left":
-            recipe.high_res_input = True
-            for index, (sigma, _) in enumerate(recipe.image_schedule):
-                if sigma == 0:
-                    continue
-                name = (f"image-sigma{sigma:g}-"
-                        f"{'second' if index else 'first'}-highres.npy")
-                path = target / name
-                np.save(path, smooth_atlas_alphas(
-                    atlas, recipe.intensity_groups(atlas, index), sigma, device=device))
-                alpha_classes[name] = recipe.intensity_groups(atlas, index).tolist()
+        # These alphas depend on the subject affine and working resolution.
+        # Remove earlier population-grid caches; recipes now smooth in place.
+        for pattern in ("seg-sigma*-first.npy", "image-sigma*.npy"):
+            for path in target.glob(pattern):
+                path.unlink()
         config = {"atlas_family": official, "working_resolution_mm": recipe.resolution_mm,
                   "segmentation_schedule": recipe.seg_schedule,
                   "intensity_schedule": recipe.image_schedule,
-                  "alpha_label_classes": alpha_classes}
+                  "alpha_smoothing": "transformed_reference_mesh"}
         (target / "config.json").write_text(json.dumps(config, indent=2) + "\n")
     source = root / "hippo-amygdala-left"
     target = root / "hippo-amygdala-right"
     target.mkdir(exist_ok=True)
+    for pattern in ("seg-sigma*-first.npy", "image-sigma*.npy"):
+        for path in target.glob(pattern):
+            path.unlink()
     for path in source.iterdir():
         if path.name == "config.json" or not path.is_file():
             continue
@@ -152,7 +135,7 @@ def prepare_subregion_atlases(output_root: str | Path | None = None, *,
     (target / "config.json").write_text(json.dumps({
         "atlas_family": "HippoSF", "side": "right",
         "working_resolution_mm": 0.33333,
-        "alpha_label_classes": json.loads((source / "config.json").read_text())["alpha_label_classes"],
+        "alpha_smoothing": "transformed_reference_mesh",
         "segmentation_schedule": HippoAmygdalaRecipe.seg_schedule,
         "intensity_schedule": HippoAmygdalaRecipe.image_schedule}, indent=2) + "\n")
     return root

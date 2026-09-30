@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, replace
 import logging
-import json
 from pathlib import Path
 from time import monotonic
 
@@ -172,9 +171,6 @@ class GEMSRecipe:
         previous_params = None
         previous_classes = None
         hyper = (None, None)
-        config_path = self.directory / "config.json"
-        alpha_classes = (json.loads(config_path.read_text()).get("alpha_label_classes", {})
-                         if config_path.is_file() else {})
         for index, (sigma, iterations) in enumerate(schedule):
             logger.info("%s %s stage %d/%d: sigma=%g iterations=%d", self.name,
                         "segmentation" if synthetic else "intensity", index + 1,
@@ -192,16 +188,11 @@ class GEMSRecipe:
                     hyper = self.gaussian_hyperparameters(context, atlas, classes)
                     previous_params = None
             previous_classes = classes.copy()
-            alpha_file = self.directory / (f"{'seg' if synthetic else 'image'}-sigma{sigma:g}"
-                                           f"-{'second' if not synthetic and index > 0 else 'first'}"
-                                           f"{'-highres' if not synthetic and getattr(self, 'high_res_input', False) else ''}.npy")
-            use_cache = alpha_file.is_file() and np.array_equal(
-                alpha_classes.get(alpha_file.name, []), classes)
-            if sigma and use_cache:
-                alphas = np.load(alpha_file)
-            if sigma and (not use_cache or
-                          alphas.shape != (len(atlas.vertices), int(classes.max()) + 1)):
+            if sigma:
                 from ..smoothing import smooth_atlas_alphas
+                # KVL smooths in the transformed reference mesh's coordinates.
+                # A population-grid cache has a different bandwidth after the
+                # subject affine and the high-resolution working-grid scaling.
                 alphas = smooth_atlas_alphas(atlas, classes, sigma, device=device)
             if not sigma:
                 alphas = np.zeros((len(atlas.vertices), int(classes.max()) + 1), np.float32)
@@ -254,6 +245,7 @@ class GEMSRecipe:
         report["outer_em_iterations"] = [step for _, step in self.image_schedule]
         report["mesh_iterations_per_outer"] = self.mesh_iterations
         report["em_iterations_per_outer"] = self.em_iterations
+        report["alpha_smoothing"] = "transformed_reference_mesh"
         return result, image, report
 
     def postprocess(self, fit: TorchGEMSResult, context: SubregionContext,
