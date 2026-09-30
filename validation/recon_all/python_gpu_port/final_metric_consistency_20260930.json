@@ -1,0 +1,51 @@
+{
+  "date": "2026-09-30",
+  "scope": "FNIT continuous single-T1 standard recon-all outputs versus independent FreeSurfer 8.2 outputs for two real T1 images",
+  "method": "Match aparc, aseg and wmparc statistics by hemisphere and structure name or SegId; report Pearson correlation across regions, mean absolute error and median absolute relative error. Compare global measures by name. Surface nearest-vertex distances are diagnostic because vertex counts and order differ.",
+  "sub-01": {
+    "input_t1_sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
+    "global_relative_difference_percent": {
+      "synthseg_tiv": -0.002906,
+      "brain_segmentation_volume": 0.3053,
+      "total_cortical_gray_volume": 1.1121,
+      "white_surface_area_lh": 0.1036,
+      "white_surface_area_rh": -0.0744
+    },
+    "global_mean_thickness_delta_mm": {"lh": 0.02621, "rh": 0.02818},
+    "aparc_68_matched_regions": {
+      "surface_area": {"pearson_r": 0.999813, "mae_mm2": 23.89706, "median_absolute_relative_error_percent": 1.1393, "p90_absolute_relative_error_percent": 4.7705},
+      "gray_volume": {"pearson_r": 0.999751, "mae_mm3": 90.38235, "median_absolute_relative_error_percent": 1.7422, "p90_absolute_relative_error_percent": 4.8948},
+      "mean_thickness": {"pearson_r": 0.9943, "mae_mm": 0.0376, "median_absolute_relative_error_percent": 1.3993, "max_absolute_error_mm": 0.183},
+      "mean_curvature": {"pearson_r": 0.993286, "mae_per_mm": 0.00253}
+    },
+    "aseg_45_matched_regions": {"volume_pearson_r": 0.999999935536446, "volume_mae_mm3": 12.89556, "median_absolute_relative_error_percent": 0.0534},
+    "wmparc_70_matched_regions": {"volume_pearson_r": 0.9998437814038323, "volume_mae_mm3": 63.48571, "median_absolute_relative_error_percent": 1.3939, "p90_absolute_relative_error_percent": 4.8678, "maximum_absolute_relative_error_percent": 12.9987},
+    "destrieux_local_outlier": {"hemisphere": "lh", "region": "S_interm_prim-Jensen", "reference_vertices": 3, "candidate_vertices": 97, "reference_mean_thickness_mm": 1.705, "candidate_mean_thickness_mm": 2.948, "absolute_difference_mm": 1.243}
+  },
+  "sub-02": {
+    "input_t1_sha256": "326d1e0a948b76344150c28bbcf0299b58040092c2f037f09c754103d32f747d",
+    "global_relative_difference_percent": {
+      "synthseg_tiv": 0.000131,
+      "brain_segmentation_volume": 0.0397,
+      "total_cortical_gray_volume": 0.0942,
+      "white_surface_area_lh": 0.0329,
+      "white_surface_area_rh": 0.3753
+    },
+    "global_mean_thickness_delta_mm": {"lh": -0.02584, "rh": 0.02175},
+    "aparc_68_matched_regions": {
+      "surface_area": {"pearson_r": 0.999663, "mae_mm2": 30.72059, "median_absolute_relative_error_percent": 1.1934, "p90_absolute_relative_error_percent": 3.7045},
+      "gray_volume": {"pearson_r": 0.999622, "mae_mm3": 94.48529, "median_absolute_relative_error_percent": 1.6313, "p90_absolute_relative_error_percent": 3.3661},
+      "mean_thickness": {"pearson_r": 0.988941, "mae_mm": 0.0351, "median_absolute_relative_error_percent": 1.111, "max_absolute_error_mm": 0.161},
+      "mean_curvature": {"pearson_r": 0.987273, "mae_per_mm": 0.00216}
+    },
+    "aseg_45_matched_regions": {"volume_pearson_r": 0.9999999531837012, "volume_mae_mm3": 7.26889, "median_absolute_relative_error_percent": 0.0323},
+    "wmparc_70_matched_regions": {"volume_pearson_r": 0.9997739493141126, "volume_mae_mm3": 99.00286, "median_absolute_relative_error_percent": 1.5584, "p90_absolute_relative_error_percent": 5.5072, "maximum_absolute_relative_error_percent": 9.3313}
+  },
+  "surface_geometry_diagnostic": {
+    "method": "Bidirectional nearest vertex in surface RAS, not a vertex correspondence or surface registration metric",
+    "white_mean_nearest_distance_range_mm": [0.3058, 0.3252],
+    "pial_mean_nearest_distance_range_mm": [0.3447, 0.3611],
+    "maximum_observed_nearest_distance_mm": 5.5135
+  },
+  "interpretation": "Global and major aparc region metrics are close on these two subjects, while cortical thickness and local white-matter/Destrieux parcels have material deviations. Different mesh vertex counts prevent index-wise vertex-map agreement; two subjects do not establish population-level reliability."
+}
