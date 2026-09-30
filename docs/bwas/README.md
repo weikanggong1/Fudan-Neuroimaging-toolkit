@@ -146,9 +146,9 @@ python BWAS_main.py -toolbox_dir /path/to/BWAS \
 
 ## 绘制灰质体素连接
 
-`plot_bwas_connectivity` 读取 `run_bwas` 的连接表、簇表和 MA 图。`all_clusters=True` 时，它扫描**全部显著簇内连接**，按簇和 z 符号各汇总一条代表管线：两端取该组连接端点的平均 MNI 坐标，颜色取平均 z，粗细随边数的对数增加。同一簇若含正负两类边会分成两条线。这样每个显著簇都出现在图中，不受 `top_k` 限制。黄色点是汇总端点；管线仅表示**群体 FC 统计连接**，不代表解剖纤维或每条边的轨迹。默认模式仍可按 `top_k` 画单条连接，`bundle_strength` 仅弯曲该模式的显示线，不改变端点或统计结果。
+`plot_bwas_connectivity` 读取 `run_bwas` 的连接表、簇表和 MA 图。`all_clusters=True` 时，它扫描**全部显著簇内连接**，从每个簇按固定随机种子抽取真实体素对；显示额度按簇内边数的平方根分配，因此大簇显示更多线，同时每个簇至少保留一条。每条线的两端仍是原始体素的 MNI 坐标，只在中段向该簇全部连接的平均路径靠拢。同一簇的正负 z 分开集束。黄色点是真实体素端点；弯线表示**群体 FC 统计连接**，不代表解剖纤维。`voxel_edge_budget` 控制整张图的线数，默认 600；所有显著簇都会出现，但图中并未逐条画出全部连接。默认单边模式仍可用 `top_k` 选择强连接。
 
-脑轮廓优先读取用户提供的 [BrainNet Viewer ICBM152 `.nv` 表面](https://github.com/mingruixia/BrainNet-Viewer/tree/master/Data/SurfTemplate)。所用 2019 版 `BrainMesh_ICBM152.nv` 有 81,924 个顶点、163,840 个三角面；若不提供，函数仍从 2 mm 灰质掩膜提取较粗的表面。模板不随 FNIT 分发；可从 BrainNet Viewer 原站获取，或从已有 `BrainNetViewer_20191031.zip` 提取 `Data/SurfTemplate/BrainMesh_ICBM152.nv`。该 ZIP 内网格为 5,659,708 字节，SHA-256 `471e43f955a1cb9f0350aaca2822f02fc74e393718d1e385fddaf0e578ffe572`；目前原站网格为 5,413,890 字节，SHA-256 `fdbc3770838952193b0bcdabe38ce092afe718607b4edd9dfccab98a6647d4a9`，两版顶点与面逐项相同。Python 代码独立读取 `.nv`，运行时不调用 MATLAB、BrainNet Viewer 或 BrainGL。正 z 为红色，负 z 为蓝色，采用 [FSLeyes 的红蓝配色名称](https://github.com/pauldmccarthy/fsleyes/blob/main/fsleyes/assets/colourmaps/order.txt)所对应的视觉约定；未复制原色表。
+脑轮廓可读取用户提供的 [BrainNet Viewer ICBM152 `.nv` 表面](https://github.com/mingruixia/BrainNet-Viewer/tree/master/Data/SurfTemplate)，并叠加同一源码包中的 `BrainMesh_Cerebellum.nv` 形成清晰的小脑。2019 版大脑网格有 81,924 个顶点、163,840 个三角面；小脑网格有 45,406 个顶点、90,788 个三角面。若不提供大脑表面，函数从 2 mm 灰质掩膜提取较粗的外轮廓。两个网格均不随 FNIT 分发，可从 BrainNet Viewer 原站获取，或从已有 `BrainNetViewer_20191031.zip` 的 `Data/SurfTemplate/` 提取。该 ZIP 内大脑网格 SHA-256 为 `471e43f955a1cb9f0350aaca2822f02fc74e393718d1e385fddaf0e578ffe572`，小脑网格为 `44faea7e04dc4132fc15bbd086d4b78e5dc76b2ea09dbdc17e8f228aee5b54bc`。Python 代码独立读取 `.nv`，运行时不调用 MATLAB、BrainNet Viewer 或 BrainGL。正 z 为红色，负 z 为蓝色，采用 [FSLeyes 的红蓝配色名称](https://github.com/pauldmccarthy/fsleyes/blob/main/fsleyes/assets/colourmaps/order.txt)所对应的视觉约定；未复制原色表。
 
 主页的 `environment.yml` 已包含 PyVista/VTK；单独安装可用 `pip install '.[bwas-visualization]'`。绘图无需 CUDA 计算，但 VTK 需要 OpenGL；无界面服务器可使用 EGL 或 OSMesa。
 
@@ -161,16 +161,23 @@ from fnit.bwas import plot_bwas_connectivity
 bwas_output_root = Path("/data/derivatives/fnit-bwas")  # 已完成的 run_bwas 输出根目录
 gray_matter_mask_file = Path("/data/MNI152_2mm_graymatter_mask.nii.gz")  # 与统计结果同网格的输入灰质掩膜
 brain_surface_file = Path("/data/BrainNetViewer/Data/SurfTemplate/BrainMesh_ICBM152.nv")  # 从 BrainNet Viewer 原站取得的 MNI 表面网格
+cerebellum_surface_file = Path("/data/BrainNetViewer/Data/SurfTemplate/BrainMesh_Cerebellum.nv")  # 同一来源的小脑网格
 output_png = (bwas_output_root / "group" / "figures" /
-              "task-rest_space-MNI152NLin6Asym_desc-BWASallClusters_figure.png")  # 新图像路径
+              "task-rest_space-MNI152NLin6Asym_desc-BWASvoxelBundles_figure.png")  # 新图像路径
 
 figure_path = plot_bwas_connectivity(
     bwas_output_root=bwas_output_root,  # 自动寻找该目录中唯一一组 BWAS 结果文件
     gray_matter_mask_file=gray_matter_mask_file,  # 2 mm 体素坐标参考；须与 MA 图同网格
     output_png=output_png,  # 写出 PNG；已存在时不覆盖
     cluster_p_max=0.05,  # 只显示簇水平 FWER p < 0.05 的连接
-    all_clusters=True,  # 扫描所有显著连接，按簇及正负 z 汇总；不按 top_k 截断
+    all_clusters=True,  # 所有显著簇都显示真实体素级连接
+    voxel_edge_budget=600,  # 全图显示 600 条体素对；大簇按比例显示更多
+    bundle_strength=0.85,  # 仅使每条线中段靠近本簇平均路径，两端保持原坐标
     brain_surface_file=brain_surface_file,  # 可选：清晰脑沟轮廓；不提供则使用灰质掩膜表面
+    cerebellum_surface_file=cerebellum_surface_file,  # 可选：加入清晰小脑表面
+    surface_opacity=0.18,  # 灰色脑表面透明度：0 全透明，1 不透明
+    colorbar_max_abs_z=8.0,  # 红蓝色条范围固定为 -8 到 +8；None 使用数据范围
+    show_colorbar=True,  # 是否显示 signed z 色条
     view="signed_six",  # 一张六联图：上排正 z、下排负 z；每排左/俯/右视
 )
 print(figure_path)
@@ -182,19 +189,24 @@ print(figure_path)
 | `gray_matter_mask_file` | 与 MA 图相同 shape、affine 的 2 mm 灰质掩膜，提供体素坐标。 |
 | `output_png` | 新 PNG 文件路径，已存在时不覆盖。 |
 | `cluster_p_max` | 簇水平 FWER p 的严格上限，取 `(0, 1]`，默认 `0.05`。 |
-| `all_clusters` | 默认 `False`；开启后每个显著簇按正负 z 汇总为代表管线，忽略 `top_k`。 |
+| `all_clusters` | 默认 `False`；开启后从每个显著簇按比例抽取真实体素对并集束，忽略 `top_k`。 |
+| `voxel_edge_budget` | 全簇模式的总显示线数，默认 `600`；须不小于显著簇及 z 符号组数，较大值会增加遮挡。 |
 | `brain_surface_file` | 可选 BrainNet Viewer `.nv` 网格；默认从输入灰质掩膜提取外轮廓。 |
+| `cerebellum_surface_file` | 可选 BrainNet Viewer 小脑 `.nv` 网格，与大脑表面合并绘制。 |
+| `surface_opacity` | 灰色脑表面透明度，取 `[0, 1]`；默认外置网格 `0.23`、掩膜表面 `0.12`。 |
+| `colorbar_max_abs_z` | 可选正数；将红蓝色条设为对称的 `[-值, +值]`，超过范围的 z 在端色饱和；默认按图中 z 自动取值。 |
+| `show_colorbar` | 默认 `True`，控制是否显示 signed z 色条。 |
 | `view` | `montage` 四联图；`six` 为六个独立方向；`signed_six` 为正负分行、每行左/俯/右视，仅与 `all_clusters=True` 联用；也可取 `left`、`right`、`superior`、`inferior`、`anterior`、`posterior`、`oblique` 单视角。 |
 | `top_k` | 默认 `500`，单边模式最多显示的 `|z|` 最高边数；全簇模式不使用。 |
 | `cluster_id` | 单边模式可指定一个已显著的正整数簇编号；默认 `None`。不能与 `all_clusters=True` 合用。 |
 | `min_abs_z` | 单边模式可附加非负的 `|z|` 下限；默认 `None`。不能与全簇模式合用。 |
-| `bundle_strength` | 单边模式的视觉弯曲程度，取 `[0, 1]`，默认 `0`；不改变端点。不能与全簇模式合用。 |
+| `bundle_strength` | 集束弯曲程度，取 `[0, 1]`，不改变体素端点；默认单边模式 `0`、全簇模式 `0.85`，显式传 `0` 可关闭集束。 |
 
-下图来自 ABIDE I+II 的 1748 人全脑结果。`p_fwer < 0.05` 的 **60 个显著 FC 簇**共含 **1,154,192 条连接**，全部汇总到同一张六联图：32 条正 z 管线、28 条负 z 管线。红色表示病例组连接 Fisher z 较高的正统计量，蓝色表示较低的负统计量。图中没有个体影像、逐边矩阵或被试标识。
+下图来自 ABIDE I+II 的 1748 人全脑结果。`p_fwer < 0.05` 的 **60 个显著 FC 簇**共含 **1,154,192 条连接**；图中按比例显示 600 条真实体素对连接，其中最小簇 3 条、最大簇 62 条。正负结果分行，线条在本簇内集束；黄色点保留各条线的真实体素端点。红色表示病例组连接 Fisher z 较高，蓝色表示较低。图中没有个体影像、逐边矩阵或被试标识。
 
-![ABIDE I+II 全部显著 FC 簇：正负分行的左视、俯视和右视](figures/abide_all_clusters_brainnet_signed_six.png)
+![ABIDE I+II 所有显著 FC 簇的体素级集束连接及小脑：正负分行的左视、俯视和右视](figures/abide_voxel_bundles_cerebellum_signed_six.png)
 
-[同一批显著簇的六个独立视角：左、俯、右、后、仰、前](figures/abide_all_clusters_brainnet_six.png)。在 gpucw1 的 PyVista 0.49.0、VTK 9.7.1 和 NVIDIA H100 EGL 环境下，两张 2700×1800 图依次耗时 `11.00 s`、`11.58 s`，均包含读取压缩连接表、汇总和写出 PNG。共享 GPU 负载会影响计时；本机缺少可用的软件 OpenGL 渲染库，尚无同机 CPU/GPU 加速比。
+[同一批体素级连接的六个独立视角：左、俯、右、后、仰、前](figures/abide_voxel_bundles_cerebellum_six.png)。在 gpucw1 的 PyVista 0.49.0、VTK 9.7.1 和 NVIDIA H100 EGL 环境下，两张 2700×1800 图依次耗时 `12.68 s`、`12.38 s`，均包含读取压缩连接表、按簇抽样集束和写出 PNG。共享 GPU 负载会影响计时；本机缺少可用的软件 OpenGL 渲染库，尚无同机 CPU/GPU 加速比。
 
 ## ABIDE 真实数据 benchmark
 

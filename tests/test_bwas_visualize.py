@@ -78,6 +78,28 @@ def test_cluster_bundles_use_every_significant_edge(tmp_path):
     assert len(bundles) == 2
     assert sum(bundle[1] for bundle in bundles) == 3
     assert {(bundle[1], bundle[2]) for bundle in bundles} == {(1, -7.0), (2, 5.5)}
+    assert sum(len(bundle[4]) for bundle in bundles) == 3
+    assert {sample[0] for bundle in bundles for sample in bundle[4]} == {
+        (1, 1, 1, 5, 5, 3), (2, 2, 2, 4, 4, 3), (3, 3, 1, 3, 4, 3)}
+    with pytest.raises(ValueError, match="cover every significant"):
+        _cluster_bundles(edges, {1}, nib.load(mask).affine, edge_budget=1)
+
+
+def test_cluster_voxel_budget_is_proportional_and_keeps_every_cluster(tmp_path):
+    _, mask, edges, _ = _example(tmp_path)
+    with gzip.open(edges, "wt", newline="") as stream:
+        writer = csv.writer(stream, delimiter="\t")
+        writer.writerow(["voxel1_i", "voxel1_j", "voxel1_k", "voxel2_i",
+                         "voxel2_j", "voxel2_k", "z", "cluster"])
+        for cluster, count in ((1, 2), (2, 10), (3, 40)):
+            writer.writerows((index, 1, 1, 5, 5, 3, 5.0, cluster)
+                             for index in range(count))
+    bundles = _cluster_bundles(edges, {1, 2, 3}, nib.load(mask).affine, edge_budget=12)
+    repeated = _cluster_bundles(edges, {1, 2, 3}, nib.load(mask).affine, edge_budget=12)
+    samples = {cluster: len(sample) for cluster, _, _, _, sample in bundles}
+    assert sum(samples.values()) == 12
+    assert 1 <= samples[1] < samples[2] < samples[3]
+    assert [bundle[4] for bundle in bundles] == [bundle[4] for bundle in repeated]
 
 
 def test_brainnet_surface_uses_one_based_face_indices(tmp_path):
@@ -159,9 +181,15 @@ def test_all_clusters_six_views_with_supplied_surface(tmp_path, view):
     surface_file = tmp_path / "template.nv"
     surface_file.write_text("4\n-6 -6 -4\n6 -6 -4\n0 6 -4\n0 0 6\n4\n"
                             "1 2 3\n1 2 4\n1 3 4\n2 3 4\n")
+    cerebellum_file = tmp_path / "cerebellum.nv"
+    cerebellum_file.write_text("4\n-2 -3 -9\n2 -3 -9\n0 1 -9\n0 -1 -5\n4\n"
+                               "1 2 3\n1 2 4\n1 3 4\n2 3 4\n")
     output = tmp_path / "bundles.png"
     plot_bwas_connectivity(root, mask, output, all_clusters=True, top_k=0,
-                           brain_surface_file=surface_file, view=view)
+                           voxel_edge_budget=2, brain_surface_file=surface_file,
+                           cerebellum_surface_file=cerebellum_file,
+                           surface_opacity=0.4, colorbar_max_abs_z=8.0,
+                           show_colorbar=False, view=view)
     assert struct.unpack(">II", output.read_bytes()[16:24]) == (2700, 1800)
 
 
@@ -176,6 +204,18 @@ def test_signed_six_requires_cluster_mode(tmp_path):
     root, mask, *_ = _example(tmp_path)
     with pytest.raises(ValueError, match="signed_six requires all_clusters"):
         plot_bwas_connectivity(root, mask, tmp_path / "wrong.png", view="signed_six")
+
+
+@pytest.mark.parametrize("parameter,value,message", [
+    ("surface_opacity", 1.1, "surface_opacity"),
+    ("colorbar_max_abs_z", 0, "colorbar_max_abs_z"),
+    ("voxel_edge_budget", 0, "voxel_edge_budget"),
+])
+def test_visual_parameter_ranges(tmp_path, parameter, value, message):
+    root, mask, *_ = _example(tmp_path)
+    with pytest.raises(ValueError, match=message):
+        plot_bwas_connectivity(root, mask, tmp_path / "wrong.png",
+                               all_clusters=True, **{parameter: value})
 
 
 @pytest.mark.parametrize("strength", [-0.1, 1.1, float("nan")])
