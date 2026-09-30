@@ -298,7 +298,7 @@ def _run_white_mri_chain(subject: Path, weights: Path, assets: Path,
           device="cpu", threads=threads)
     stage("mni_nonlinear", run_mni_nonlinear_chain, subject, weights, assets,
           warp_convert=warp_binaries[0], ca_register=warp_binaries[1],
-          mri_convert=warp_binaries[2], device="cpu", threads=threads)
+          mri_convert=warp_binaries[2], device=device, threads=threads)
     stage("brain_finalsurfs", run_finalsurfs, subject, device="cpu")
 
 
@@ -622,7 +622,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                                   "cudnn_tf32_default": True,
                                   "fp16_or_bf16_enabled": False,
                                   "fp32_exceptions": ["SynthStrip", "SynthSeg",
-                                                      "Talairach affine"]},
+                                                      "Talairach affine",
+                                                      "MNI nonlinear CUDA"]},
                     "gpu_memory_mode": ("no_cuda_allocator_cache" if cuda_memory_cache_disabled
                                         else "torch_cuda_allocator"),
                     "stages": [], "status": "running"}
@@ -662,6 +663,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                                  "sha256": defect_binary[1]}
     report["mni_nonlinear"] = {
         "implementation": "PyTorch deform + Conda source-built warp conversion",
+        "device": device,
+        "precision": "FP32 CUDA exception" if torch.device(device).type == "cuda" else "FP32 CPU",
         "native_sha256": {name: binary[1] for name, binary in zip(
             ("mri_warp_convert", "mri_ca_register", "mri_convert"), warp_binaries)}}
 

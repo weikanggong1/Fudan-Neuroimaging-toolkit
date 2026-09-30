@@ -26,7 +26,9 @@ def run_mni_nonlinear_chain(subject_dir: str | Path, weights_dir: str | Path,
     subject_dir 提供 conform orig、裁剪 T1 与初始 affine LTA；weights_dir
     和 assets_dir 提供固定权重与 1 mm MNI 模板。三个具名原生程序路径分别
     完成 warp 转换、求逆和最近邻检查图。device 默认 CPU，threads 默认 4。
-    返回三个绝对输出路径、模型与设备、各子步骤秒数；NIfTI 位移单位为 mm。
+    CUDA 的本阶段固定使用 FP32：同输入验证表明 TF32 会放大位移误差；
+    其他阶段的 TF32 设置在返回时恢复。返回三个绝对输出路径、模型、设备、
+    精度设置及各子步骤秒数；NIfTI 位移单位为 mm。
     缺少输入、原生程序失败或输出网格不符时抛出异常。
     """
     subject = Path(subject_dir)
@@ -47,10 +49,21 @@ def run_mni_nonlinear_chain(subject_dir: str | Path, weights_dir: str | Path,
     torch.set_num_threads(threads)
     timings = {}
     tick = time.perf_counter()
-    result = SynthMorph(weights=weights_dir, device=device, model="deform", extent=256)(
-        crop, cropped_target, init=affine, transform_only=True)
+    previous_matmul_tf32 = torch.backends.cuda.matmul.allow_tf32
+    previous_cudnn_tf32 = torch.backends.cudnn.allow_tf32
+    cuda = torch.device(device).type == "cuda"
+    try:
+        registration = SynthMorph(weights=weights_dir, device=device, model="deform", extent=256)
+        if cuda:
+            torch.backends.cuda.matmul.allow_tf32 = False
+            torch.backends.cudnn.allow_tf32 = False
+        result = registration(crop, cropped_target, init=affine, transform_only=True)
+    finally:
+        torch.backends.cuda.matmul.allow_tf32 = previous_matmul_tf32
+        torch.backends.cudnn.allow_tf32 = previous_cudnn_tf32
     ras_warp = temporary / "deform.mgz"
     result.transform.save(ras_warp)
+    del registration, result
     timings["deform_model_and_save"] = time.perf_counter() - tick
 
     crop_image, original_image = nib.load(str(crop)), nib.load(str(original))
@@ -86,4 +99,5 @@ def run_mni_nonlinear_chain(subject_dir: str | Path, weights_dir: str | Path,
         raise ValueError("MNI152 nonlinear outputs have unexpected grids")
     return {"forward": str(forward), "inverse": str(inverse), "check": str(check),
             "model": "pytorch-synthmorph-deform", "device": device,
+            "precision": {"cuda_fp32_exception": cuda, "fp16_or_bf16": False},
             "timings_seconds": timings}

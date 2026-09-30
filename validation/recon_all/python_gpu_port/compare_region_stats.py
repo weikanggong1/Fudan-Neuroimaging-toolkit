@@ -56,16 +56,30 @@ def _metric(reference: dict[str, dict[str, str]],
     a = np.array([float(reference[name][field]) for name in names], np.float64)
     b = np.array([float(candidate[name][field]) for name in names], np.float64)
     error = np.abs(a - b)
-    relative = 100 * error / np.maximum(np.abs(a), np.finfo(np.float64).eps)
+    nonzero = a != 0
+    relative = 100 * error[nonzero] / np.abs(a[nonzero])
+    regions = {name: {"reference": float(first), "candidate": float(second),
+                      "absolute_error": float(abs(second - first)),
+                      "signed_relative_difference_percent":
+                      float(100 * (second - first) / first) if first else None}
+               for name, first, second in zip(names, a, b)}
     correlation = (float(np.corrcoef(a, b)[0, 1]) if len(names) > 1 and
                    np.std(a) > 0 and np.std(b) > 0 else None)
     return {"matched_regions": len(names),
             "missing_in_candidate": sorted(reference.keys() - candidate.keys()),
             "extra_in_candidate": sorted(candidate.keys() - reference.keys()),
             "pearson_r": correlation, "mae": float(error.mean()),
-            "median_absolute_relative_error_percent": float(np.median(relative)),
-            "p90_absolute_relative_error_percent": float(np.quantile(relative, .9)),
-            "maximum_absolute_error": float(error.max())}
+            "median_absolute_relative_error_percent": float(np.median(relative))
+            if relative.size else None,
+            "p90_absolute_relative_error_percent": float(np.quantile(relative, .9))
+            if relative.size else None,
+            "maximum_absolute_error": float(error.max()),
+            "zero_reference_regions": [name for name, value in zip(names, a) if value == 0],
+            "worst_regions_by_relative_error": sorted(
+                (name for name in names if regions[name]["reference"] != 0),
+                key=lambda name: abs(regions[name]["signed_relative_difference_percent"]),
+                reverse=True)[:10],
+            "per_region": regions}
 
 
 def main() -> None:
@@ -105,6 +119,7 @@ def main() -> None:
                            for field in ("SurfArea", "GrayVol", "ThickAvg", "MeanCurv")},
               "aseg": _metric(aseg_ref, aseg_got, "Volume_mm3"),
               "wmparc": _metric(wm_ref, wm_got, "Volume_mm3"),
+              "missing_global_measures": sorted(globals_ref.keys() - globals_got.keys()),
               "global_brainvol_measures": global_rows}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2) + "\n")
