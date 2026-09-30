@@ -1,5 +1,9 @@
 # BigFLICA：真实 UKB 输入、GPU 对照与内存测试
 
+## 原始体素先行的定位试验
+
+固定1000人和完整三模态掩膜，使用 MATLAB 整体 RMS/SVD 设置，原始体素 FLICA 在 GPU1000次更新后仍保留20个成分；同初态 CPU/GPU100次参数相对差最大 `1.65e-10`。[原始体素基线](raw_flica_real1000_20261001.md)记录 z-stat、残差、阶段时间和显存。随后同输入 mMIGP 原投影/归一化投影为1/19个成分，同投影 CPU/GPU DicL 后均为7。[压缩对照](compression_after_raw_real1000_20261001.md)区分数值误差与尺度、DD、噪声坐标变化。[数学修复](flica_math_fixes_20261001.md)及这些定位试验不替代下面独立30,000人默认流程的失败结果。
+
 ## 30,000 人独立 CPU/GPU 对比（当前结论）
 
 按用户后续指令启动的 30,000 人试验已结束，**CPU 和 GPU 均未通过 C20 验收**。CPU 保留 17 个有效成分，GPU 保留 13 个；两端在 FLICA 诊断后停止，没有生成最终 C20 course、z-stat 脑图、阈值图或可用于新被试的完整模型。对比脚本完成不代表算法验收完成。[不含被试 ID 的结果](bigflica_real30000_cpu_gpu_20260930.json)记录状态 `scientific_acceptance_incomplete`。
