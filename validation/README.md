@@ -36,7 +36,7 @@
 | [TorchMMORF](../docs/mmorf/README.md) | [当前双标量真实数据对照](mmorf/report.public.json) | T1、FA 两组标量与 DTI tensor 共享 warp；记录自动 PyTorchFLIRT、warp、Jacobian、两张 warped scalar 的配对精度 | 分别记录线性、非线性、官方 MMORF 时间及共享 GPU 负载；功能页提供当前对照图 |
 | [dMRI 参数图 pipeline](../docs/dmri_pipeline/README.md) | [TBSS 原软件对照](dmri_pipeline/tbss_e2e.real.current.json)、[真实 BIDS 输入预检](dmri_pipeline/bids_preflight.real.final.json)、[无 T1w 的 1 mm TBSS 整链](dmri_pipeline/bids_tbss.real.current.json)、[带 T1w 的 2 mm MMORF 整链](dmri_pipeline/bids_mmorf_2mm.real.current.json) | 两条 BIDS 路径均生成九张标准图；TBSS 另生成九张 skeleton 图。1 mm MMORF 曾因共享 GPU 显存不足退出，见[失败记录](dmri_pipeline/bids_mmorf.shared_gpu_oom.json) | TBSS/MMORF 完整命令分别为 1649.82/1829.25 s；FSL 数值对照沿用输入边界不同的既有 TBSS 报告 |
 | [TorchBEDPOSTX](../docs/bedpostx/README.md) | [真实 dMRI ROI 与 crossing-fibre 检查](bedpostx/report.public.json) | 比较纤维数、fraction、方向轴和角度；采样随机流不同，不要求后验体积逐元素相同 | 报告含 FSL CPU、FNIT CPU/GPU 时间；功能页展示真实方向轴 |
-| [TorchProbtrackX](../docs/probtrackx/README.md) | [默认追踪](probtrackx/report.default.latest.public.json)、[当前 GPU](probtrackx/report.current.latest.public.json)、[matrix/target 汇总](probtrackx/README.md)与[MNI seed 两分支自动转换](probtrackx/README.md) | 比较密度、路径长度、稀疏矩阵和 ROI 矩阵；真实 MNI seed 自动转换与直接传入转换结果的追踪图完全相同 | 原追踪报告含 FSL/FNIT CPU/GPU 计时；功能页展示连接矩阵和真实掩膜 |
+| [TorchProbtrackX](../docs/probtrackx/README.md) | [默认追踪](probtrackx/report.default.latest.public.json)、[当前 GPU](probtrackx/report.current.latest.public.json)、[NbM→Cingulum 单 waypoint 加 avoid](probtrackx/cholinergic_nbm_cingulum.public.json)、[matrix/target 汇总](probtrackx/README.md)与[MNI seed 两分支自动转换](probtrackx/README.md) | 比较密度、路径长度、稀疏矩阵和 ROI 矩阵；新约束组合优化前后真实全输入输出完全一致 | 原追踪报告含 FSL/FNIT CPU/GPU 计时；新约束组合热缓存 FNIT 109.64→11.84 s，共享 GPU 计时 |
 
 ## fMRI
 

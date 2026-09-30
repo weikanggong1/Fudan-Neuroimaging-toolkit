@@ -92,3 +92,59 @@ def accumulate_paths(forward, backward, roi_row, roi_lookup, nregions,
                 if mean_path_length:
                     length_sum[voxel] += lengths[voxel]
                     visit_count[voxel] += 1
+
+
+@njit(cache=True)
+def accumulate_single_waypoint_paths(forward, backward, avoid, waypoint,
+                                     density, totals, roi_row):
+    """单 waypoint 和 avoid 的计数路径；每条有效轨迹对体素只计一次。"""
+    seen = np.zeros(density.size, dtype=np.int32)
+    for stream in range(forward.shape[0]):
+        count_forward = 0
+        hit_forward = False
+        rejected = False
+        for step in range(forward.shape[1]):
+            voxel = forward[stream, step]
+            if voxel < 0:
+                break
+            count_forward += 1
+            rejected |= avoid[voxel]
+            if step > 0:
+                hit_forward |= waypoint[voxel]
+        if rejected:
+            count_forward = 0
+            hit_forward = False
+
+        count_backward = 0
+        hit_backward = False
+        rejected = False
+        for step in range(backward.shape[1]):
+            voxel = backward[stream, step]
+            if voxel < 0:
+                break
+            count_backward += 1
+            rejected |= avoid[voxel]
+            if step > 0:
+                hit_backward |= waypoint[voxel]
+        if rejected:
+            count_backward = 0
+            hit_backward = False
+
+        tag = stream + 1
+        visited = False
+        if hit_forward:
+            for step in range(count_forward):
+                voxel = forward[stream, step]
+                if seen[voxel] != tag:
+                    seen[voxel] = tag
+                    density[voxel] += 1
+                    visited = True
+        if hit_forward or hit_backward:
+            for step in range(count_backward):
+                voxel = backward[stream, step]
+                if seen[voxel] != tag:
+                    seen[voxel] = tag
+                    density[voxel] += 1
+                    visited = True
+        if visited:
+            totals[roi_row] += 1

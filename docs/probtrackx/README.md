@@ -211,7 +211,7 @@ probtrackx2 -s /data/subject.bedpostX/merged \
 | `pathdist`, `mean_path_length` | 路径长度加权与平均路径长度，仅已有密度及 ROI 网络模式支持；和新稀疏矩阵或 `targetmasks` 同时使用会报错 | `--pd`, `--ompl` |
 | `device`, `batch_size` | `cpu` 或 `cuda:0`，每批并行轨迹数 | FNIT 选项 |
 
-`distthresh1/3` 仅过滤对应稀疏矩阵的更新，不改变 `fdt_paths` 与 `waytotal`。`matrix1`、`matrix2`、`matrix3` 可以同次运行。每条有效轨迹对 matrix1/2 的同一列及 seed→target 的同一 ROI 最多计一次；matrix3 对该轨迹经过的每对目标体素各计一次。`targetmasks` 可为 Python 路径列表，或文本列表路径；文本列表中的相对路径按列表所在目录解析。`waypoints`、`wtstop` 也接受单个同网格 3D NIfTI、Python 路径列表或文本列表；默认 `waycond="AND"` 要求经过全部 waypoint，`"OR"` 要求经过至少一个。默认两个半轨迹可合并满足条件；`onewaycondition=True` 改为逐半轨迹判定。`wayorder=True` 仅与 `AND` 合用，并按 waypoint 列表顺序检查。`stop` 在进入 mask 时终止，`wtstop` 则允许进入并在离开后终止。在 9 组 9×5×5 合成直线场的 waypoint/`wtstop` 配对中，FNIT 与 FSL 6.0.7.22 的 `waytotal` 和 `fdt_paths` 逐项相同，AND 条件下的 matrix2 `.dot` 也逐项相同。本次默认及矩阵真实 DWI 配对未使用这些约束。当前公开真实 DWI benchmark 覆盖默认追踪、三类矩阵、target mask 与五区 network；waypoint/`wtstop` 的真实 DWI 数值和时间未列入当前发布证据。
+`distthresh1/3` 仅过滤对应稀疏矩阵的更新，不改变 `fdt_paths` 与 `waytotal`。`matrix1`、`matrix2`、`matrix3` 可以同次运行。每条有效轨迹对 matrix1/2 的同一列及 seed→target 的同一 ROI 最多计一次；matrix3 对该轨迹经过的每对目标体素各计一次。`targetmasks` 可为 Python 路径列表，或文本列表路径；文本列表中的相对路径按列表所在目录解析。`waypoints`、`wtstop` 也接受单个同网格 3D NIfTI、Python 路径列表或文本列表；默认 `waycond="AND"` 要求经过全部 waypoint，`"OR"` 要求经过至少一个。默认两个半轨迹可合并满足条件；`onewaycondition=True` 改为逐半轨迹判定。`wayorder=True` 仅与 `AND` 合用，并按 waypoint 列表顺序检查。`stop` 在进入 mask 时终止，`wtstop` 则允许进入并在离开后终止。在 9 组 9×5×5 合成直线场的 waypoint/`wtstop` 配对中，FNIT 与 FSL 6.0.7.22 的 `waytotal` 和 `fdt_paths` 逐项相同，AND 条件下的 matrix2 `.dot` 也逐项相同。当前另有一例[真实 DWI 的单 waypoint 加 avoid GPU 对照](#nbmcingulum-真实-dwi-对照)；`wtstop` 的真实 DWI 数值和时间尚无公开配对。
 
 ## 输出及结构
 
@@ -301,7 +301,7 @@ fnit probtrackx --samples-dir /absolute/path/subject.bedpostX \
 | 类别 | 已实现 | 尚有差异 |
 | --- | --- | --- |
 | 输入和空间 | BEDPOSTX 后验、diffusion 或 MNI 网格体积 mask；MNI mask 先显式反变换到 diffusion，独立追踪 mask、体积避让和停止 | `--simple` ASCII 点、表面 seed/target、`--seedref`、`--meshspace`、`--xfm`、`--invxfm`，以及非 network 多 ROI 输入；`target2` 低分辨率网格未支持 |
-| 步进和过滤 | 双向 Euler、`-P/-S`、`--steplength`、`--cthr`、`--fibthresh`、`--randfib`、`--fibst`、`--usef`、`--sampvox`、`--distthresh`、`--rseed`、体积 `--avoid`、`--stop`、`--forcefirststep`、`--waypoints`/`--waycond`/`--wayorder`/`--onewaycondition`、`--wtstop` | `--modeuler`、`--loopcheck`、局部方向/曲率及表面约束选项；随机数流不逐轨迹一致；waypoint/停止组合已做合成场配对；单 waypoint 真实 DWI 配对已完成但指标未公开，其他约束组合仍待验证 |
+| 步进和过滤 | 双向 Euler、`-P/-S`、`--steplength`、`--cthr`、`--fibthresh`、`--randfib`、`--fibst`、`--usef`、`--sampvox`、`--distthresh`、`--rseed`、体积 `--avoid`、`--stop`、`--forcefirststep`、`--waypoints`/`--waycond`/`--wayorder`/`--onewaycondition`、`--wtstop` | `--modeuler`、`--loopcheck`、局部方向/曲率及表面约束选项；随机数流不逐轨迹一致；waypoint/停止组合已做合成场配对；单 waypoint 加 avoid 的真实 DWI 配对见下文，其他约束组合仍待验证 |
 | 输出 | 密度图、`--pd`/`--ompl` 的密度及网络结果、`--network`、同网格体积计数的 `--omatrix1/2/3` 与 `--targetmasks/--os2t` | 新矩阵和 seed→target 的 `--pd/--ompl`、`--omatrix4`、`--fopd`、`--opathdir`、`--otargetpaths`、`--savepaths`、`--closestvertex`；`--s2tastext` 当前自动写，不能独立控制 |
 | 文件和运行控制 | FSL 风格矩阵 `.dot`、坐标表、target2 lookup，FNIT 自有归一化连接矩阵 | 官方 `-o/--out`、`--dir/--forcedir` 目录命名、`--verbose`；FNIT 固定写密度图 |
 
@@ -358,6 +358,33 @@ fnit probtrackx --samples-dir /absolute/path/subject.bedpostX \
 上图来自同一例真实 DWI 的 GPU 五区网络 `--opd --pd --ompl` 配对。上排为累计长度加权连接矩阵，下排为命中轨迹的平均长度；从左到右依次为 FSL、当前 FNIT 和 FNIT−FSL。区域标签只保留通用的 JHU 解剖名称，不含病例编号或服务器路径。图中矩阵来自当前源码哈希绑定的同一组输出，与[长度加权报告](../../validation/probtrackx/report.current.latest.public.json)中的矩阵 MAE、密度图和时间统计对应；绘图脚本见[plot_network_report.py](../../validation/probtrackx/plot_network_report.py)。
 
 原始 DWI、BEDPOSTX 后验、seed、逐体素密度图和完整文本矩阵仍保留在授权服务器；仓库公开六份配对汇总 JSON、一份性能分段 JSON 和这一张去标识连接矩阵图。双方随机数流不同，这张图比较的是网络汇总结果，不能证明逐轨迹一致。当前证据只有一例数据、五个 ROI，且网络较稀疏；它不能替代多病例或全脑分区验证。[复现命令和指标定义](../../validation/probtrackx/README.md)列出比较方法。合成直线场的 FSL 逐项相同测试只验证计数规则，不替代这组真实数据误差。`tests/probtrackx/` 的 42 项 CPU/CUDA 测试已在 gpucw1 通过。
+
+## NbM→Cingulum 真实 DWI 对照
+
+用一例真实 DWI 的完整 NbM seed（91 体素）及 BEDPOSTX 三纤维、每纤维 50 份后验，复跑用户提供的 FSL 6.0.6.5 `probtrackx2_gpu10.2` 命令。追踪网格为 104×104×72，Cingulum waypoint 为 713 体素。每个 seed 体素 5000 条、总步数 2000、步长 0.5 mm，输出 `fdt_paths.nii.gz` 和 `waytotal`。原命令连续两次写 `--avoid`；该版本的单值选项解析器使后一个 brainstem 覆盖前一个 AC。原命令及其压缩包内输出复跑后字节哈希一致，`waytotal=4212`。若希望同时避开 AC 和 brainstem，应先将两张二值 mask 取并集，再传给一次 `--avoid`。
+
+```bash
+probtrackx2_gpu10.2 -s /data/subject.bedpostX/merged \
+  -m /data/subject/nodif_brain_mask.nii.gz -x /data/subject/NbM.nii.gz \
+  --waypoints=/data/subject/Cingulum_ALL.nii.gz \
+  --avoid=/data/subject/AC.nii.gz --avoid=/data/subject/brainstem.nii.gz \
+  --dir=/data/fsl_output -P 5000 --forcedir --opd
+
+fnit probtrackx --samples-dir /data/subject.bedpostX \
+  --mask /data/subject/nodif_brain_mask.nii.gz \
+  --seed /data/subject/NbM.nii.gz \
+  --waypoints /data/subject/Cingulum_ALL.nii.gz \
+  --avoid /data/subject/brainstem.nii.gz \
+  --output-dir /data/fnit_output --device cuda:0 --nsamples 5000 --nsteps 2000
+```
+
+| 同一输入的运行 | `waytotal` | 与 FSL 原图的密度 r / 非零支持 Dice / 强连接 top 10% Dice | 完整进程墙钟 |
+| --- | ---: | ---: | ---: |
+| FSL 原命令复跑 | 4212 | 1 / 1 / 1 | 28.63 s；热缓存重复 10.21 s |
+| FNIT 优化前与优化后 | 4298 | 0.99837 / 0.64773 / 0.86270 | 热缓存优化前 109.64 s；优化后 11.84 s |
+| FSL 更换随机种子为 67890 | 4195 | 0.99867 / 0.65319 / 0.88447 | 16.49 s |
+
+FNIT 的新单 waypoint 加 avoid 计数路径将逐轨迹 Python 过滤和累加移到已有的 Numba 汇总层；优化前后完整 `fdt_paths.nii.gz` 哈希、全部体素及 `waytotal` 均相同。本次热缓存墙钟约缩短 9.3 倍，PyTorch 峰值分配约 2.81 GB；共享 H100 在运行前后均显示 100% 利用率，故耗时只表示这次观测。FSL 与 FNIT 的随机数流不同；强连接图接近，但稀疏非零支持及 `waytotal` 并不逐项一致。一种 FSL 随机种子变更仅提供波动参照，不构成等价阈值。输入与源码哈希、计时、密度指标及输出一致性见[去标识验证记录](../../validation/probtrackx/cholinergic_nbm_cingulum.public.json)。原始影像和逐体素输出仍在授权服务器。
 
 ## Reference
 

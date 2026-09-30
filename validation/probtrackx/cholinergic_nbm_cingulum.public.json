@@ -1,0 +1,307 @@
+{
+  "scope": "one user-provided real UKB-format EDDY-corrected dMRI; full NbM seed mask to Cingulum waypoint",
+  "raw_data_in_repository": false,
+  "archive_sha256": "2b3ac623da62758a414f2f2c7dcf8a5e75f63bc95513f0d08a76cfd149d35cc6",
+  "archive_inputs": {
+    "tracking_mask": {
+      "sha256": "8c79fdc96a58e7389ed987be271ff8c06a21db4fc624a8356be62d4bbf932d1d",
+      "archive_member_matches_extracted": true
+    },
+    "seed_NbM": {
+      "sha256": "d10ad117347b6bb90f8b7b1d8790c040501a9878f90121c9888f4a5fe3085963",
+      "archive_member_matches_extracted": true
+    },
+    "waypoint_Cingulum_ALL": {
+      "sha256": "063a7817484b41c588c2e1223b3b96fbc1565d1112d275b2cf5d05a6d27f6832",
+      "archive_member_matches_extracted": true
+    },
+    "avoid_AC": {
+      "sha256": "73c604ad84bbe2b80123766550481605d31c31e430caa513b5f55383b8249e17",
+      "archive_member_matches_extracted": true
+    },
+    "avoid_brainstem": {
+      "sha256": "abacc46a589d94363fca8af464334b39ef91b3fb332f7a39865a6e41f8f6457c",
+      "archive_member_matches_extracted": true
+    },
+    "merged_th1samples": {
+      "sha256": "912d097d67280ec474144fca5cfb23fee0171a6cdb6657bd54d3c95d17bdfc49",
+      "archive_member_matches_extracted": true
+    },
+    "merged_ph1samples": {
+      "sha256": "4dc3f9c46cbd4d20aa7d962ed793b13fcee530ea3cd8e39728827b3802ef83be",
+      "archive_member_matches_extracted": true
+    },
+    "merged_f1samples": {
+      "sha256": "d7c358f8a6fd2472712952f318a22c4df9f115a4fa20a389fe9b687ce612dcac",
+      "archive_member_matches_extracted": true
+    },
+    "merged_th2samples": {
+      "sha256": "6e78663eca538383407d27cd5f99c57b9b54ae7c8b89b30075fd1f563b4d5500",
+      "archive_member_matches_extracted": true
+    },
+    "merged_ph2samples": {
+      "sha256": "23b9508a95102b5ca506765e6c5cd11877901131ded0d2d366fc46c033577741",
+      "archive_member_matches_extracted": true
+    },
+    "merged_f2samples": {
+      "sha256": "2b4c178505ed0e36d7987719d42e231564adbc23726c1a0674ac96108216f7ea",
+      "archive_member_matches_extracted": true
+    },
+    "merged_th3samples": {
+      "sha256": "dc27cb3a41d7dae9c93f6728c3985bafbe440ab5745cc17c54e0265317c836b7",
+      "archive_member_matches_extracted": true
+    },
+    "merged_ph3samples": {
+      "sha256": "bbf5809d1d2caaf40383389e291bb36274ea6d480576959f625ce972ab50d1e1",
+      "archive_member_matches_extracted": true
+    },
+    "merged_f3samples": {
+      "sha256": "2d789761045c437c5206a1e16c3090c57c16bd5ed8774b7de1bc44c420f3fd43",
+      "archive_member_matches_extracted": true
+    }
+  },
+  "input_geometry": {
+    "shape": [
+      104,
+      104,
+      72
+    ],
+    "bedpostx_samples_per_fibre": 50,
+    "posterior_fibres": 3,
+    "tracking_mask_voxels": 185118,
+    "seed_NbM_voxels": 91,
+    "waypoint_Cingulum_ALL_voxels": 713,
+    "all_inputs_match_tracking_grid": true
+  },
+  "command_interpretation": {
+    "original_requested_options": [
+      "waypoints=Cingulum_ALL",
+      "avoid=AC",
+      "avoid=brainstem",
+      "P=5000",
+      "forcedir",
+      "opd"
+    ],
+    "effective_avoid": "brainstem",
+    "reason": "FSL 6.0.6.5 --avoid is one Option<string>; later repeated value overwrites earlier value. FNIT argparse has the same last-value behavior.",
+    "default_rseed": 12345,
+    "nsteps": 2000,
+    "steplength_mm": 0.5,
+    "cthr": 0.2,
+    "fibthresh": 0.01,
+    "fsl_options_header_sha256": "9af16c042f85d29828f63321a7f3dbf97d87eca4b437ba3be17730cd2e481f2c",
+    "fsl_options_parser_sha256": "b5085dceaa389d59a14987af036f8ae92e0a1c34b2a0247c8606721ac27c5e8e"
+  },
+  "reference": {
+    "software": "FSL 6.0.6.5 probtrackx2_gpu10.2",
+    "binary_sha256": "49b75bc78a1a123d6724d2d9f465d816cd9e1834f41919c3634caaafd77e36db",
+    "provided_waytotal": 4212,
+    "provided_fdt_paths_sha256": "e6fbbeed0a409fe36c505ed54108c7518170e34a99c12ddacbb84c22d4d1654a",
+    "exact_command_rerun": {
+      "exit_code": 0,
+      "wall_seconds": 28.63094948604703,
+      "gpu_before": [
+        "0, 24316, 56691, 100",
+        "1, 32892, 48115, 100"
+      ],
+      "gpu_after": [
+        "0, 24316, 56691, 100",
+        "1, 32892, 48115, 100"
+      ],
+      "peak_process_gpu_memory_mib": 448,
+      "memory_limit_exceeded": false,
+      "output_paths_exists": true,
+      "output_waytotal_exists": true,
+      "waytotal": 4212,
+      "fdt_paths_sha256": "e6fbbeed0a409fe36c505ed54108c7518170e34a99c12ddacbb84c22d4d1654a"
+    },
+    "same_seed_warm_repeat": {
+      "exit_code": 0,
+      "wall_seconds": 10.213646367192268,
+      "gpu_before": [
+        "0, 24316, 56691, 100",
+        "1, 32892, 48115, 100"
+      ],
+      "gpu_after": [
+        "0, 24316, 56691, 100",
+        "1, 32892, 48115, 100"
+      ],
+      "peak_process_gpu_memory_mib": null,
+      "memory_limit_exceeded": false,
+      "output_paths_exists": true,
+      "output_waytotal_exists": true,
+      "waytotal": 4212,
+      "fdt_paths_sha256": "e6fbbeed0a409fe36c505ed54108c7518170e34a99c12ddacbb84c22d4d1654a",
+      "memory_sample_note": "Short run finished between process-memory samples."
+    },
+    "alternate_seed_67890": {
+      "exit_code": 0,
+      "wall_seconds": 16.490447564050555,
+      "gpu_before": [
+        "0, 24316, 56691, 100",
+        "1, 32892, 48115, 100"
+      ],
+      "gpu_after": [
+        "0, 24316, 56691, 100",
+        "1, 32892, 48115, 100"
+      ],
+      "peak_process_gpu_memory_mib": 778,
+      "memory_limit_exceeded": false,
+      "output_paths_exists": true,
+      "output_waytotal_exists": true,
+      "waytotal": 4195,
+      "fdt_paths_sha256": "09bd839f6cdb2b55659befb2ff01687dfe3496ddc401ecd21f0c9804a6fdfe71"
+    },
+    "exact_rerun_matches_provided_fdt_paths": true
+  },
+  "fnit": {
+    "source_sha256": {
+      "src/fnit/probtrackx/pipeline.py": "75dd078ec3f627b975b39a7ae9e201c022df12dd131f95fda1bd11459d5b7edd",
+      "src/fnit/probtrackx/_fast_counts.py": "ae45aa58c273e8a5211be8a889d9ee8522f9134237fcdee8ad5a0c0c7883b9e7",
+      "src/fnit/probtrackx/_triton.py": "10ca096263bfe04d32a1e23acf6eff3876cf317f7955772e7e9d4aeaf220e3af",
+      "src/fnit/probtrackx/cli.py": "cb9ff06973eb7b85f02895a70e685219c1842a65246100fc9b5266022d9a06e0"
+    },
+    "rseed": 12345,
+    "batch_size": 16384,
+    "baseline_first_run": {
+      "wall_seconds_including_io": 108.84314820170403,
+      "internal_elapsed_seconds": 108.83501982316375,
+      "seed_points": 91,
+      "accepted_streamlines": 4298,
+      "gpu_memory_fraction_limit": 0.2,
+      "gpu_before": [
+        "0, 24872, 56135, 100",
+        "1, 32892, 48115, 100"
+      ],
+      "gpu_after": [
+        "0, 27638, 53369, 100",
+        "1, 32892, 48115, 100"
+      ],
+      "peak_cuda_memory_bytes": 2805528064,
+      "device": "NVIDIA H100 PCIe",
+      "torch_version": "2.5.1"
+    },
+    "baseline_warm_run": {
+      "wall_seconds_including_io": 109.63575561670586,
+      "internal_elapsed_seconds": 109.63138428423554,
+      "seed_points": 91,
+      "accepted_streamlines": 4298,
+      "gpu_memory_fraction_limit": 0.2,
+      "gpu_before": [
+        "0, 24770, 56237, 100",
+        "1, 32972, 48035, 100"
+      ],
+      "gpu_after": [
+        "0, 27536, 53471, 100",
+        "1, 32972, 48035, 100"
+      ],
+      "peak_cuda_memory_bytes": 2805528064,
+      "device": "NVIDIA H100 PCIe",
+      "torch_version": "2.5.1"
+    },
+    "optimized_run": {
+      "wall_seconds_including_io": 11.840882798656821,
+      "internal_elapsed_seconds": 11.83386665629223,
+      "seed_points": 91,
+      "accepted_streamlines": 4298,
+      "gpu_memory_fraction_limit": 0.2,
+      "gpu_before": [
+        "0, 24770, 56237, 100",
+        "1, 32892, 48115, 100"
+      ],
+      "gpu_after": [
+        "0, 27536, 53471, 100",
+        "1, 32892, 48115, 100"
+      ],
+      "peak_cuda_memory_bytes": 2805528064,
+      "device": "NVIDIA H100 PCIe",
+      "torch_version": "2.5.1"
+    },
+    "observed_warm_runtime_ratio_old_over_new": 9.259086292885398,
+    "optimized_output_exactly_matches_baseline": {
+      "same_shape": true,
+      "same_affine": true,
+      "all_voxels_exactly_equal": true,
+      "different_voxels": 0,
+      "max_abs_difference": 0.0,
+      "old_waytotal": 4298,
+      "new_waytotal": 4298,
+      "old_map_sha256": "e53974377167015843a90b5a36a973af61be500791d875a99a818b43dc9060e0",
+      "new_map_sha256": "e53974377167015843a90b5a36a973af61be500791d875a99a818b43dc9060e0"
+    }
+  },
+  "comparison_to_provided_fsl": {
+    "shape": [
+      104,
+      104,
+      72
+    ],
+    "affine_matches": true,
+    "both_finite": true,
+    "reference_waytotal": 4212,
+    "fnit_waytotal": 4298,
+    "reference_nonzero_voxels": 12996,
+    "fnit_nonzero_voxels": 13379,
+    "support_dice": 0.6477345971563981,
+    "top_10_percent_dice": 0.8627019089574156,
+    "pearson_union": 0.9983661737745787,
+    "pearson_common": 0.9984319462266922,
+    "cosine_union": 0.9983948777486024,
+    "mae_union": 2.1366006841249368,
+    "p99_absolute_error_union": 18.0,
+    "reference_sum": 196861.0,
+    "fnit_sum": 203885.0,
+    "reference_max": 2295.0,
+    "fnit_max": 2312.0,
+    "reference_sha256": "e6fbbeed0a409fe36c505ed54108c7518170e34a99c12ddacbb84c22d4d1654a",
+    "fnit_sha256": "e53974377167015843a90b5a36a973af61be500791d875a99a818b43dc9060e0",
+    "reference_waytotal_sha256": "1b0675c110b0b55b5c7f7aba468ef9bc3471ae93c045d9866c617b7dc879ab6a",
+    "fnit_waytotal_sha256": "ae7355367d2f7ff94c581fa7fcc12a56618b1391442ae43f306ea982d81542c7",
+    "AC_reference_density_sum": 2574.0,
+    "AC_fnit_density_sum": 2413.0,
+    "brainstem_reference_density_sum": 0.0,
+    "brainstem_fnit_density_sum": 0.0,
+    "Cingulum_ALL_reference_density_sum": 31664.0,
+    "Cingulum_ALL_fnit_density_sum": 31889.0,
+    "NbM_reference_density_sum": 21079.0,
+    "NbM_fnit_density_sum": 21500.0
+  },
+  "fsl_random_seed_variation_default_vs_67890": {
+    "shape": [
+      104,
+      104,
+      72
+    ],
+    "affine_matches": true,
+    "both_finite": true,
+    "reference_waytotal": 4212,
+    "alternate_fsl_waytotal": 4195,
+    "reference_nonzero_voxels": 12996,
+    "alternate_fsl_nonzero_voxels": 13033,
+    "support_dice": 0.6531945138115179,
+    "top_10_percent_dice": 0.8844711177794449,
+    "pearson_union": 0.9986719037525044,
+    "pearson_common": 0.9987421309171463,
+    "cosine_union": 0.9986979391425302,
+    "mae_union": 1.9941236878137836,
+    "p99_absolute_error_union": 17.0,
+    "reference_sum": 196861.0,
+    "alternate_fsl_sum": 198880.0,
+    "reference_max": 2295.0,
+    "alternate_fsl_max": 2308.0,
+    "reference_sha256": "e6fbbeed0a409fe36c505ed54108c7518170e34a99c12ddacbb84c22d4d1654a",
+    "alternate_fsl_sha256": "09bd839f6cdb2b55659befb2ff01687dfe3496ddc401ecd21f0c9804a6fdfe71",
+    "reference_waytotal_sha256": "1b0675c110b0b55b5c7f7aba468ef9bc3471ae93c045d9866c617b7dc879ab6a",
+    "alternate_fsl_waytotal_sha256": "ecde9a3b49c14ed634d3aeb5a87136297d371e69f694992bf2627aeeaa37ae4b",
+    "AC_reference_density_sum": 2574.0,
+    "AC_alternate_fsl_density_sum": 2549.0,
+    "brainstem_reference_density_sum": 0.0,
+    "brainstem_alternate_fsl_density_sum": 0.0,
+    "Cingulum_ALL_reference_density_sum": 31664.0,
+    "Cingulum_ALL_alternate_fsl_density_sum": 32597.0,
+    "NbM_reference_density_sum": 21079.0,
+    "NbM_alternate_fsl_density_sum": 20753.0
+  },
+  "interpretation": "Density and strong-tract distribution agree at the summary level; stochastic path samples and sparse support are not voxelwise identical. One FSL alternate seed gives a scale for random variation, not an equivalence threshold.",
+  "timing_note": "One complete run per setting on a shared H100 at 100% utilization before and after FNIT; durations and observed ratio are not isolated hardware speedups. FNIT allocator cap was 20% of H100 memory."
+}

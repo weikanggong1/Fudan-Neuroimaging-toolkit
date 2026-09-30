@@ -529,6 +529,14 @@ class TorchProbtrackX:
                        and stop_mask is None and waypoint_masks is None
                        and wtstop_masks is None and m1 is None and m2 is None
                        and m3 is None and s2t is None)
+        fast_single_waypoint = (self.device.type == "cuda" and regions is None
+                                and avoid_mask is not None and stop_mask is None
+                                and waypoint_masks is not None and len(waypoint_masks) == 1
+                                and wtstop_masks is None and m1 is None and m2 is None
+                                and m3 is None and s2t is None and not self.pathdist
+                                and not self.mean_path_length and self.distthresh == 0
+                                and not forcefirststep and not onewaycondition
+                                and not wayorder)
         if fast_counts:
             from ._fast_counts import accumulate_paths
             roi_lookup = np.full(nvox, -1, dtype=np.int16)
@@ -542,6 +550,8 @@ class TorchProbtrackX:
                                     else np.empty((0, 0), np.float64))
             fast_network_count = (network_count if network_count is not None
                                   else np.empty((0, 0), np.int64))
+        if fast_single_waypoint:
+            from ._fast_counts import accumulate_single_waypoint_paths
         points_per_batch = max(1, self.batch_size // self.nsamples)
         for roi_row, roi in enumerate(masks):
             other_targets = (np.delete(network_targets, roi_row, axis=0)
@@ -564,6 +574,11 @@ class TorchProbtrackX:
                                          self.mean_path_length, density, fast_length_sum,
                                          fast_visit_count, fast_network,
                                          fast_network_lengths, fast_network_count, totals)
+                        continue
+                    if fast_single_waypoint:
+                        accumulate_single_waypoint_paths(
+                            forward, backward, avoid_mask, waypoint_masks[0],
+                            density, totals, roi_row)
                         continue
                     for seed_id, path_a, path_b in zip(ids, forward, backward):
                         point = points[seed_id]
