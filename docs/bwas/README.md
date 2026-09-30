@@ -146,7 +146,9 @@ python BWAS_main.py -toolbox_dir /path/to/BWAS \
 
 ## 绘制灰质体素连接
 
-`plot_bwas_connectivity` 自动读取一个 BWAS 结果目录里的连接表、簇表和 MA 图，流式扫描连接表，只保留满足簇水平 p 值条件且 `|z|` 最大的少量边，生成 PNG。灰色线框表示输入灰质掩膜；端点大小参考 MA 边数。连接线是**体素对的群体统计关联**，不是解剖纤维束。正 z 为红色系、负 z 为蓝色系，参考 [FSLeyes 的 Red 与 Blue 配色名称](https://github.com/pauldmccarthy/fsleyes/blob/main/fsleyes/assets/colourmaps/order.txt)；这是独立配色，不复制 FSL 色表。绘图只使用 CPU，不需要 CUDA，也不调用 FSL。
+`plot_bwas_connectivity` 自动读取一个 BWAS 结果目录里的连接表、簇表和 MA 图，流式扫描连接表，只保留满足簇水平 p 值条件且 `|z|` 最大的少量边，生成 PNG。它从输入灰质掩膜提取平滑的半透明三角网格，避免原先规则网格的方格背景；端点大小参考 MA 边数。连接线是**体素对的群体统计关联**，不是解剖纤维束。正 z 为红色系、负 z 为蓝色系，参考 [FSLeyes 的 Red 与 Blue 配色名称](https://github.com/pauldmccarthy/fsleyes/blob/main/fsleyes/assets/colourmaps/order.txt)；这是独立配色，不复制 FSL 色表。绘图只使用 CPU，不需要 CUDA，也不调用 FSL。
+
+原版 BWAS 将正负连接分别导出为两端坐标加统计值的七列文本，供 [BrainGL](https://github.com/rschurade/braingl) 显示；BrainGL 使用体积等值面和图形渲染。FNIT 独立实现了 CPU 等值面绘图，没有移植其 C++/OpenGL 程序，也没有复制原版 `braingl_bg.nii.gz`。本图的外形来自 2 mm 灰质分析掩膜，不能表现 1 mm 解剖背景的全部脑沟细节。
 
 ```python
 from pathlib import Path
@@ -159,7 +161,7 @@ output_png = (bwas_output_root / "group" / "figures" /
 
 figure_path = plot_bwas_connectivity(
     bwas_output_root=bwas_output_root,  # 自动寻找该目录中唯一一组 BWAS 结果文件
-    gray_matter_mask_file=gray_matter_mask_file,  # 2 mm 灰质轮廓与体素坐标参考
+    gray_matter_mask_file=gray_matter_mask_file,  # 2 mm 灰质表面与体素坐标参考
     output_png=output_png,  # 写出 PNG；已存在时不覆盖
     top_k=500,  # 最多显示 |z| 最大的 500 条边，不影响原统计结果
     cluster_p_max=0.05,  # 只显示簇水平 FWER p < 0.05 的连接
@@ -195,7 +197,8 @@ print(figure_path)
 
 ## 来源
 
-- [原版 weikanggong/BWAS](https://github.com/weikanggong/BWAS) 的 [BWAS_cpu.py](https://github.com/weikanggong/BWAS/blob/master/BWAS_cpu.py) 与 [BWAS_main.py](https://github.com/weikanggong/BWAS/blob/master/BWAS_main.py)（Apache 2.0；参考源码 SHA-256 `1b78a98efb04ae5c1b764b101ec434ed8c8277f815481ae0ca940ebd910323c2`）。
+- [原版 weikanggong/BWAS](https://github.com/weikanggong/BWAS) 的 [BWAS_cpu.py](https://github.com/weikanggong/BWAS/blob/master/BWAS_cpu.py) 与 [BWAS_main.py](https://github.com/weikanggong/BWAS/blob/master/BWAS_main.py)（Python 源文件头标注 Apache 2.0；参考源码 SHA-256 `1b78a98efb04ae5c1b764b101ec434ed8c8277f815481ae0ca940ebd910323c2`）。原版背景影像 `braingl_bg.nii.gz` 没有随这项源码授权，不纳入 FNIT。
 - Gong W, et al. [Statistical testing and power analysis for brain-wide association study](https://doi.org/10.1016/j.media.2018.03.014). *Medical Image Analysis* 47 (2018): 15–30.
+- [BrainGL 源码](https://github.com/rschurade/braingl)与 [Connexel visualization 论文](https://doi.org/10.3389/fnins.2014.00015)：仅参考等值面视觉设计，没有纳入 FNIT 运行时。
 - [ABIDE II 表型变量释义](https://fcon_1000.projects.nitrc.org/indi/abide/ABIDEII_Data_Legend.pdf)。
 - [ABIDE I 官方表型表](https://s3.amazonaws.com/fcp-indi/data/Projects/ABIDE_Initiative/Phenotypic_V1_0b_preprocessed1.csv)和[ABIDE II 官方表型表](https://fcon_1000.projects.nitrc.org/indi/abide2/release/phenotypic_data/ABIDEII_Composite_Phenotypic.csv)。

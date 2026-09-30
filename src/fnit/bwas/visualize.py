@@ -13,7 +13,9 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.colors import LinearSegmentedColormap, TwoSlopeNorm
 from matplotlib.figure import Figure
 from matplotlib.cm import ScalarMappable
-from mpl_toolkits.mplot3d.art3d import Line3DCollection
+from mpl_toolkits.mplot3d.art3d import Line3DCollection, Poly3DCollection
+from scipy.ndimage import gaussian_filter
+from skimage.measure import marching_cubes
 
 
 _EDGE_SUFFIX = "_desc-BWASedges_relmat.tsv.gz"
@@ -82,26 +84,17 @@ def _top_edges(path: Path, clusters: set[int], top_k: int,
     return [(item[2], item[3], item[4]) for item in sorted(heap, reverse=True)]
 
 
-def _draw_gray_matter(ax, mask: np.ndarray, affine: np.ndarray,
-                      depth_axis: int, near_side: str) -> None:
-    other = [axis for axis in range(3) if axis != depth_axis]
-    positions = [affine[axis, axis] * np.arange(mask.shape[axis]) + affine[axis, 3]
-                 for axis in range(3)]
-    axis_indices = np.arange(mask.shape[depth_axis]).reshape(
-        [mask.shape[depth_axis] if axis == depth_axis else 1 for axis in range(3)])
-    if near_side == "min":
-        shell = np.where(mask, axis_indices, mask.shape[depth_axis]).min(axis=depth_axis)
-        valid = shell < mask.shape[depth_axis]
-    else:
-        shell = np.where(mask, axis_indices, -1).max(axis=depth_axis)
-        valid = shell >= 0
-    first, second = np.meshgrid(positions[other[0]], positions[other[1]], indexing="ij")
-    surface = [None, None, None]
-    surface[other[0]], surface[other[1]] = first, second
-    surface[depth_axis] = positions[depth_axis][np.clip(shell, 0, mask.shape[depth_axis] - 1)]
-    surface = [np.where(valid, plane, np.nan) for plane in surface]
-    ax.plot_surface(*surface, rstride=2, cstride=2, color="#a5aaae",
-                    alpha=0.12, linewidth=0.15, edgecolor="#737a7e", shade=False)
+def _gray_matter_surface(mask: np.ndarray, affine: np.ndarray) -> np.ndarray:
+    """Build a translucent closed mesh from the supplied analysis mask on CPU."""
+    smooth = gaussian_filter(np.pad(mask.astype(np.float32), 1), sigma=1.0)
+    vertices, faces, _, _ = marching_cubes(smooth, level=0.25, step_size=2)
+    return nib.affines.apply_affine(affine, vertices - 1)[faces]
+
+
+def _draw_gray_matter(ax, triangles: np.ndarray) -> None:
+    ax.add_collection3d(Poly3DCollection(
+        triangles, linewidths=0, facecolors=(0.55, 0.58, 0.60, 0.07),
+        edgecolors="none", zsort="average"))
 
 
 def plot_bwas_connectivity(
@@ -128,10 +121,8 @@ def plot_bwas_connectivity(
         raise ValueError("cluster_p_max must be in (0, 1]")
     if min_abs_z is not None and (not np.isfinite(min_abs_z) or min_abs_z < 0):
         raise ValueError("min_abs_z must be finite and nonnegative")
-    views = {"superior": (90, -90, 2, "max"),
-             "left": (0, 180, 0, "min"), "right": (0, 0, 0, "max"),
-             "anterior": (0, 90, 1, "max"),
-             "oblique": (25, -60, 2, "max")}
+    views = {"superior": (90, -90), "left": (0, 180), "right": (0, 0),
+             "anterior": (0, 90), "oblique": (25, -60)}
     if view != "montage" and view not in views:
         raise ValueError(f"view must be montage or one of {', '.join(views)}")
     output_png = Path(output_png).expanduser().resolve()
@@ -171,6 +162,7 @@ def plot_bwas_connectivity(
                        np.diag(np.diag(canonical.affine[:3, :3])), atol=1e-3):
         raise ValueError("gray-matter mask must have axes aligned to MNI coordinates")
     display_mask = np.asarray(canonical.dataobj) != 0
+    surface_triangles = _gray_matter_surface(display_mask, canonical.affine)
     panel_views = ("superior", "left", "right", "oblique") if view == "montage" else (view,)
     figure = Figure(figsize=(12, 10) if view == "montage" else (8, 8),
                     dpi=180, facecolor="white")
@@ -206,8 +198,8 @@ def plot_bwas_connectivity(
         else:
             bounds = (0.01, 0.08, 0.86, 0.84)
         ax = figure.add_axes(bounds, projection="3d")
-        elevation, azimuth, depth_axis, near_side = views[panel_view]
-        _draw_gray_matter(ax, display_mask, canonical.affine, depth_axis, near_side)
+        elevation, azimuth = views[panel_view]
+        _draw_gray_matter(ax, surface_triangles)
         if edges:
             ax.add_collection3d(Line3DCollection(
                 world, colors=colors, linewidths=0.25 + 0.55 * strength, zorder=10))
