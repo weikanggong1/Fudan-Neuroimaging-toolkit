@@ -24,17 +24,44 @@ def _write_json(path: Path, value: dict) -> None:
                     encoding='utf-8')
 
 
-def _batch(files: list[h5py.File], rows: np.ndarray, device: torch.device):
+def _batch(files: list[h5py.File | torch.Tensor], rows: np.ndarray, device: torch.device):
     batches = []
+    indices = None
     for file in files:
-        dataset = file['data']
-        # Stores are chunked by subject; contiguous row reads avoid HDF5 fancy-index overhead.
-        values = np.stack([dataset[int(row)] for row in rows])
-        batches.append(torch.as_tensor(values, device=device, dtype=torch.float32))
+        if isinstance(file, torch.Tensor):
+            if indices is None:
+                indices = torch.as_tensor(rows, device=device)
+            batches.append(file.index_select(0, indices))
+        else:
+            dataset = file['data']
+            # Stores are chunked by subject; contiguous reads avoid fancy-index overhead.
+            values = np.stack([dataset[int(row)] for row in rows])
+            batches.append(torch.as_tensor(values, device=device, dtype=torch.float32))
     return batches
 
 
-def _infer(model: SupervisedComponents, files: list[h5py.File], rows: np.ndarray,
+def _cache_inputs(files: list[h5py.File], device: torch.device, budget: float,
+                  reserve: float, batch_size: int) -> list[h5py.File | torch.Tensor]:
+    """Cache float32 inputs only when both the data and training states fit."""
+    data_bytes = sum(file['data'].size * 4 for file in files)
+    if device.type != 'cuda' or data_bytes + reserve > budget:
+        return files
+    try:
+        cached = [torch.empty(file['data'].shape, device=device, dtype=torch.float32)
+                  for file in files]
+    except torch.cuda.OutOfMemoryError:
+        # An external job or a caller's allocator limit can lower available memory.
+        torch.cuda.empty_cache()
+        return files
+    for values, file in zip(cached, files):
+        dataset = file['data']
+        for first in range(0, len(values), batch_size):
+            last = min(first + batch_size, len(values))
+            values[first:last].copy_(torch.from_numpy(dataset[first:last]))
+    return cached
+
+
+def _infer(model: SupervisedComponents, files: list[h5py.File | torch.Tensor], rows: np.ndarray,
            batch_size: int, device: torch.device):
     model.eval()
     latent, prediction = [], []
@@ -45,6 +72,21 @@ def _infer(model: SupervisedComponents, files: list[h5py.File], rows: np.ndarray
             latent.append(scores.cpu().numpy())
             prediction.append(estimates.cpu().numpy())
     return np.concatenate(latent), np.concatenate(prediction)
+
+
+def _statistics_courses(courses: np.ndarray) -> np.ndarray:
+    """Remove arbitrary component units before effective-rank checks and regression."""
+    normalized = courses.astype(np.float64)
+    normalized -= normalized.mean(axis=0)
+    scale = normalized.std(axis=0)
+    normalized /= np.where(scale > 0, scale, 1.)
+    design = np.column_stack((normalized, np.ones(len(normalized))))
+    singular = np.linalg.svd(design, compute_uv=False)
+    # Courses are stored in float32; roundoff must not create extra components.
+    tolerance = np.finfo(np.float32).eps * max(design.shape) * singular[0]
+    if np.count_nonzero(singular > tolerance) < design.shape[1]:
+        raise ValueError('Selected component courses are rank deficient; reduce n_components')
+    return normalized
 
 
 def _probabilities(values: np.ndarray) -> np.ndarray:
@@ -188,7 +230,8 @@ def run_superbigflica(subjects_root: str | Path,
              for target in cohort.targets]
     budget = max_gpu_gb * 2 ** 30
     if backend.type == 'cuda':
-        budget = min(budget, torch.cuda.mem_get_info(backend)[0] * 0.85)
+        budget = min(budget - torch.cuda.memory_allocated(backend),
+                     torch.cuda.mem_get_info(backend)[0] * 0.85)
     # Parameters, gradients, optimizer state, activations and backward buffers.
     parameter_bytes = 4 * 8 * (sum(n_features) * n_components +
                                (n_components + 1) * sum(sizes))
@@ -201,17 +244,27 @@ def run_superbigflica(subjects_root: str | Path,
                              'reduce n_components or mask size')
     rng = np.random.default_rng(random_state)
     torch.manual_seed(random_state)
-    model = SupervisedComponents(n_features, n_components, sizes, dropout).to(backend)
-    objective = SupervisedObjective(len(specs), cohort.targets, sizes, relative_weight).to(backend)
+    model = SupervisedComponents(n_features, n_components, sizes, dropout).to(
+        device=backend, dtype=torch.float32)
+    objective = SupervisedObjective(len(specs), cohort.targets, sizes, relative_weight).to(
+        device=backend, dtype=torch.float32)
     optimizer = torch.optim.RMSprop(model.parameters(), lr=learning_rate, momentum=0.9)
     scale_optimizer = torch.optim.Adam(objective.parameters(), lr=learning_rate)
     schedule = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, max_epochs)
     scale_schedule = torch.optim.lr_scheduler.CosineAnnealingLR(scale_optimizer, max(1, max_epochs - 10))
     history, best_score, best_state, best_epoch = [], float('inf'), None, None
-    training_start = time.perf_counter()
     with contextlib.ExitStack() as stack:
         files = [stack.enter_context(h5py.File(destination / 'input_store' / f'{name}.h5', 'r'))
                  for name in specs]
+        cache_start = time.perf_counter()
+        sources = _cache_inputs(files, backend, budget,
+                                parameter_bytes + per_subject_bytes * (effective_batch + 1),
+                                effective_batch)
+        cached = isinstance(sources[0], torch.Tensor)
+        timings['input_cache_s'] = time.perf_counter() - cache_start
+        input_cache_gib = (sum(value.numel() * value.element_size() for value in sources)
+                           / 2 ** 30 if cached else 0.)
+        training_start = time.perf_counter()
         for epoch in range(max_epochs):
             model.train()
             batches = list(np.array_split(rng.permutation(training),
@@ -221,7 +274,7 @@ def run_superbigflica(subjects_root: str | Path,
                 batches[-1] = np.concatenate([batches[-1], last])
             average_loss, average_terms = 0.0, np.zeros(4)
             for rows in batches:
-                images = _batch(files, rows, backend)
+                images = _batch(sources, rows, backend)
                 labels = torch.as_tensor(cohort.y[rows], device=backend)
                 optimizer.zero_grad(set_to_none=True)
                 scale_optimizer.zero_grad(set_to_none=True)
@@ -236,7 +289,7 @@ def run_superbigflica(subjects_root: str | Path,
                 fraction = len(rows) / len(training)
                 average_loss += float(loss.detach()) * fraction
                 average_terms += terms.detach().cpu().numpy() * fraction
-            _, validation_prediction = _infer(model, files, validation, effective_batch, backend)
+            _, validation_prediction = _infer(model, sources, validation, effective_batch, backend)
             score = _validation_loss(validation_prediction, cohort.y[validation], cohort.targets, sizes)
             if not np.isfinite(score):
                 raise RuntimeError('Nonfinite validation loss')
@@ -253,7 +306,7 @@ def run_superbigflica(subjects_root: str | Path,
             if epoch >= 10:
                 scale_schedule.step()
         model.load_state_dict(best_state)
-        latent, prediction = _infer(model, files, np.arange(len(cohort.ids)), effective_batch, backend)
+        latent, prediction = _infer(model, sources, np.arange(len(cohort.ids)), effective_batch, backend)
         if not np.isfinite(latent).all() or not np.isfinite(prediction).all():
             raise RuntimeError('Selected model has nonfinite outputs')
         if backend.type == 'cuda':
@@ -274,9 +327,7 @@ def run_superbigflica(subjects_root: str | Path,
             report[split] = _metrics(prediction[rows], cohort.y[rows], cohort.targets, sizes)
         _write_json(destination / 'metrics.json', report)
         spatial_start = time.perf_counter()
-        design = np.column_stack([latent[training], np.ones(len(training), dtype=np.float32)]).astype(np.float32)
-        if np.linalg.matrix_rank(design) < n_components + 1:
-            raise ValueError('Selected component courses are rank deficient; reduce n_components')
+        statistics_courses = _statistics_courses(latent[training])
         spatial_feature_block = feature_block
         statistic_block = max(feature_block, 1_000_000 // n_components)
         regression = None
@@ -286,21 +337,26 @@ def run_superbigflica(subjects_root: str | Path,
             del optimizer, scale_optimizer, schedule, scale_schedule, objective, model
             del images, labels, rebuilt, loss, terms
             torch.cuda.empty_cache()
-            regression = SpatialRegression(latent[training].astype(np.float64), device=str(backend))
+            regression = SpatialRegression(statistics_courses, device=str(backend))
             available = min(max_gpu_gb * 2 ** 30 - torch.cuda.memory_allocated(backend),
                             torch.cuda.mem_get_info(backend)[0] * 0.85)
             spatial_feature_block = min(feature_block, int(available / (8 * 6 * len(training))))
             statistic_block = min(statistic_block, int(available / (8 * 64 * n_components)))
             if min(spatial_feature_block, statistic_block) < 1:
                 raise ValueError('Spatial statistics exceed GPU budget; reduce n_components')
-        for name, file in zip(specs, files):
+        training_indices = torch.as_tensor(training, device=backend) if cached else None
+        for name, file, source in zip(specs, files, sources):
             z = np.empty((file['data'].shape[1], n_components), dtype=np.float32)
             t_values = np.empty(z.shape, dtype=np.float64) if regression is not None else None
             for first in range(0, z.shape[0], spatial_feature_block):
                 last = min(first + spatial_feature_block, z.shape[0])
-                standardized = file['data'][training, first:last].T.astype(np.float64)
+                if cached:
+                    # Slice features first, then gather rows; never copy the full training matrix.
+                    standardized = source[:, first:last].index_select(0, training_indices).T
+                else:
+                    standardized = file['data'][training, first:last].T.astype(np.float64)
                 if regression is None:
-                    z[first:last] = _spatial_z(latent[training].astype(np.float64), standardized)
+                    z[first:last] = _spatial_z(statistics_courses, standardized)
                 else:
                     t_values[first:last] = regression.t(standardized)
             if regression is not None:
@@ -329,6 +385,8 @@ def run_superbigflica(subjects_root: str | Path,
                     max_gpu_gb=max_gpu_gb, feature_block=feature_block,
                     spatial_feature_block=spatial_feature_block, statistic_block=statistic_block,
                     top_voxels=top_voxels, make_plots=make_plots,
+                    input_cache='cuda' if cached else 'hdf5', input_cache_gib=input_cache_gib,
+                    spatial_courses='training-centered and scaled float64; float32 effective rank',
                     timings=timings, wall_time_s=time.perf_counter() - start,
                     peak_gpu_allocated_gib=(torch.cuda.max_memory_allocated(backend) / 2 ** 30
                                             if backend.type == 'cuda' else None),
@@ -360,7 +418,7 @@ def apply_model(model_dir: str | Path, subject_dir: str | Path, *,
     backend = _device(device)
     model = SupervisedComponents([spec['n_features'] for spec in metadata['modalities'].values()],
                                   metadata['n_components'], metadata['output_sizes'],
-                                  metadata['dropout']).to(backend)
+                                  metadata['dropout']).to(device=backend, dtype=torch.float32)
     model.load_state_dict(torch.load(directory / 'model.pt', map_location=backend,
                                      weights_only=True)['model'])
     images = []
