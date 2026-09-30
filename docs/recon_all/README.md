@@ -66,6 +66,31 @@ report = run_recon_all_python(
 
 批量 Python API `run_recon_all_python_batch(jobs=..., weights_dir=..., assets_dir=..., devices=..., threads=..., native_bin_dir=None)` 中，`jobs` 是按顺序排列的 `{"t1": 路径, "subject_dir": 空目录}` 列表；`devices` 是可用设备列表；其余参数与单被试一致。返回值为同序的报告列表；任一被试失败时抛出 `RuntimeError`。每个设备一次运行一例。
 
+## 真实 T1 benchmark（2026-09-30）
+
+两例去标识的真实 T1w 分别从原始影像连续运行 FNIT 标准单 T1 流程，并与单独生成的 FreeSurfer 8.2 结果比较。FNIT 运行使用固定源码 `9ae7939`；`sub-02` 加入了后来在 `b66ff97` 发布的 CPU SynthSeg 修复。官方参考执行 `recon-all -i T1w.nii.gz -s subject -sd subjects -all -parallel -openmp 4 -itkthreads 1`。输入 SHA-256、程序哈希与逐例状态见[整例记录](../../validation/recon_all/python_gpu_port/current_full_runs_20260930.json)。
+
+| 真实被试与 FNIT 设备 | FNIT 耗时 | 官方参考耗时 | 输出与网格 | 严格逐文件比较 |
+| --- | ---: | ---: | --- | ---: |
+| `sub-01`，H100 GPU | 6398.6 秒 | 约 6790 秒 | 138/138 项；双侧通过 | 5/138 项 |
+| `sub-02`，CPU | 5622.3 秒 | 约 4144 秒 | 138/138 项；双侧通过 | 2/138 项 |
+
+官方时间取自各被试的 `recon-all.log`。`sub-01` 的 FNIT 与官方参考使用不同设备、日期；`sub-02` 虽在同一 CPU 主机运行，两项任务也有并发负载。这些单次耗时不支持稳定的速度比。`sub-01` 的进程 GPU 占用每 2 秒采样的最大值为 18,452 MiB（约 19.35 GB），采样未保证捕获连续峰值。
+
+按同名脑区配对的[最终指标报告](../../validation/recon_all/python_gpu_port/final_metric_consistency_20260930.json)给出比逐文件通过数更直接的汇总值比较。下表的百分比是相对官方参考的绝对误差中位数；`r` 在同一被试的匹配脑区之间计算。
+
+| 最终指标 | `sub-01` | `sub-02` |
+| --- | ---: | ---: |
+| 颅内容积相对差 | −0.0029% | +0.00013% |
+| 皮层灰质总体积相对差 | +1.112% | +0.094% |
+| aparc 68 区表面积 | `r=0.999813`；中位误差 1.14% | `r=0.999663`；中位误差 1.19% |
+| aparc 68 区灰质体积 | `r=0.999751`；中位误差 1.74% | `r=0.999622`；中位误差 1.63% |
+| aparc 68 区平均厚度 | `r=0.9943`；MAE 0.0376 mm | `r=0.9889`；MAE 0.0351 mm |
+| aseg 45 个结构的体积 | 中位误差 0.053% | 中位误差 0.032% |
+| wmparc 70 个白质分区的体积 | 中位误差 1.39% | 中位误差 1.56% |
+
+主要汇总指标接近，但局部图谱仍有明显差异：白质分区的最大相对误差为 13.0% / 9.3%；`sub-01` 的 Destrieux `S_interm_prim-Jensen` 在官方结果中有 3 个顶点，FNIT 中有 97 个，脑区平均厚度相差 1.243 mm。候选与官方的表面顶点数不同，因此这项脑区统计不能证明逐顶点厚度图一致。当前证据覆盖两例真实 T1，局部标注与顶点指标仍需继续验证。
+
 ## 验证与边界
 
 ```bash
