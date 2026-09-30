@@ -239,6 +239,31 @@ def test_matching_brain_mask_draws_complete_outline(tmp_path):
     assert output.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
 
 
+def test_brain_mask_preserves_outline_with_anatomical_reference(tmp_path, monkeypatch):
+    import pyvista as pv
+
+    root, mask, *_ = _example(tmp_path)
+    image = nib.load(mask)
+    brain_file = tmp_path / "brain_mask.nii.gz"
+    nib.save(nib.Nifti1Image(np.ones(image.shape, dtype=np.uint8), image.affine), brain_file)
+    reference_file = _box_surface(tmp_path / "reference.nv", (-1, 1, -1, 1, -1, 1))
+    checked = []
+    original = visualization._check_surface_projection
+
+    def tracked_projection(surface, world, directions):
+        checked.append(surface.n_points)
+        original(surface, world, directions)
+
+    monkeypatch.setattr(visualization, "_check_surface_projection", tracked_projection)
+    output = tmp_path / "anatomical.png"
+    plot_bwas_connectivity(root, mask, output, brain_mask_file=brain_file,
+                           brain_surface_file=reference_file, all_clusters=True,
+                           bundle_strength=0.95, view="signed_six")
+    assert checked and checked[0] > 8  # Coverage uses the full mask, not the reference box.
+    pixels = pv.read_texture(output).to_image().active_scalars
+    assert np.ptp(pixels) > 100  # The translucent overlay must not produce an empty frame.
+
+
 @pytest.mark.parametrize("error", ["shape", "affine", "empty", "nonbinary"])
 def test_brain_mask_must_be_matching_and_binary(tmp_path, error):
     root, mask, *_ = _example(tmp_path)

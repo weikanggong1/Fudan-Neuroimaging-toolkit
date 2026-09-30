@@ -250,16 +250,14 @@ def plot_bwas_connectivity(
     allocating more lines to larger clusters and preserving each endpoint.
     ``brain_mask_file`` supplies a matching whole-brain mask; its union with
     the analysis mask defines the display outline, including the cerebellum.
-    External meshes must cover all displayed endpoint centers in each view.
+    Optional external meshes add anatomical detail inside this faint outline.
+    Without a brain mask, external meshes must cover all displayed endpoints.
     Blue means negative z, while red means positive z. Endpoint size follows
     the MA significant-edge count.
     Curves are not anatomical fiber paths.
     """
     if not isinstance(all_clusters, bool):
         raise ValueError("all_clusters must be a boolean")
-    if brain_mask_file is not None and (brain_surface_file is not None or
-                                        cerebellum_surface_file is not None):
-        raise ValueError("brain_mask_file cannot be combined with external surface files")
     if all_clusters and (isinstance(voxel_edge_budget, bool) or
                          not isinstance(voxel_edge_budget, (int, np.integer)) or
                          voxel_edge_budget < 1):
@@ -380,13 +378,18 @@ def plot_bwas_connectivity(
 
     surface = pv.PolyData(surface_vertices, np.column_stack((
         np.full(len(surface_faces), 3), surface_faces)).ravel())
+    outline = surface
+    if brain_mask_file is not None and brain_surface_file is not None:
+        vertices, faces = _mask_surface(np.asarray(canonical.dataobj) != 0, canonical.affine)
+        outline = pv.PolyData(vertices, np.column_stack((
+            np.full(len(faces), 3), faces)).ravel())
     if edges:
         _check_surface_projection(
-            surface, nib.affines.apply_affine(mask_img.affine,
+            outline, nib.affines.apply_affine(mask_img.affine,
                                               np.unique(coordinates.reshape(-1, 3), axis=0)),
             {name: views[name][0] for name in dict.fromkeys(panel_views)})
-    center = np.asarray(surface.center)
-    extent = np.asarray(surface.bounds).reshape(3, 2)
+    center = np.asarray(outline.center)
+    extent = np.asarray(outline.bounds).reshape(3, 2)
     spans = extent[:, 1] - extent[:, 0]
     connections_by_sign = {}
     markers_by_sign = {}
@@ -426,11 +429,17 @@ def plot_bwas_connectivity(
     plotter = pv.Plotter(shape=shape, off_screen=True,
                          window_size=window_size, border=False)
     try:
+        # Multisampling can produce empty EGL frames with overlapping translucent meshes.
+        plotter.render_window.SetMultiSamples(0)
         plotter.set_background("white", all_renderers=True)
         colorbar_panel = (2 if view == "signed_six" and False not in connections_by_sign
                           else len(panel_views) - 1)
         for panel_index, panel_view in enumerate(panel_views):
             plotter.subplot(panel_index // shape[1], panel_index % shape[1])
+            if outline is not surface:
+                plotter.add_mesh(outline, color="#aeb3b5", opacity=surface_opacity * 0.15,
+                                 show_edges=False, smooth_shading=True, lighting=True,
+                                 ambient=0.35, diffuse=0.65, specular=0.15)
             plotter.add_mesh(surface, color="#aeb3b5", opacity=surface_opacity,
                              show_edges=False, smooth_shading=True, lighting=True,
                              ambient=0.35, diffuse=0.65, specular=0.15)
