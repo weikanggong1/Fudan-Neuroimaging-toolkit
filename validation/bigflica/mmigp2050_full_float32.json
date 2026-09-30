@@ -1,0 +1,100 @@
+{
+  "dataset": "2050 real subjects; VBM, FA, MD and zstat1 full modality masks",
+  "masked_voxels": {
+    "vbm": 157901,
+    "fa": 222257,
+    "md": 222261,
+    "zstat1": 293754
+  },
+  "host": "gpucw1",
+  "gpu": "H100 GPU 0, shared node",
+  "migp_dim": 100,
+  "input_cache": "same 7.514 GB normalized float32 HDF5 cache for CPU and GPU",
+  "strict_float32": {
+    "cpu_threads8": {
+      "wall_s": 31.308983300812542,
+      "covariance_s": 19.517158690840006,
+      "eigensolver_s": 0.8751991591416299,
+      "projection_s": 10.733348092995584,
+      "iterations": 90,
+      "relative_residual": 7.783801265759394e-7,
+      "max_pair_relative_residual": 2.9426078640426567e-7,
+      "peak_rss_gib": 0.48285675048828125
+    },
+    "gpu0": {
+      "wall_s": 21.71388145722449,
+      "covariance_s": 8.787912514060736,
+      "eigensolver_s": 1.1481788801029325,
+      "projection_s": 11.572664836421609,
+      "iterations": 90,
+      "relative_residual": 4.282418615275674e-7,
+      "max_pair_relative_residual": 1.324823841741818e-7,
+      "tf32_enabled_during_fit": false,
+      "tf32_restored_after_fit": true,
+      "peak_rss_gib": 0.733795166015625,
+      "peak_gpu_allocated_gib": 0.06772279739379883
+    },
+    "gpu_wall_speedup_vs_cpu8": 1.4418879168374403,
+    "cpu_gpu_match": {
+      "U_relative_frobenius_error": 5.848490151578128e-5,
+      "U_max_absolute_error": 0.002204097807407379,
+      "largest_subspace_principal_angle_degrees": 0.014003153443550477,
+      "projected_relative_frobenius_error": {
+        "vbm": 2.662822495635168e-5,
+        "fa": 1.8191983305746715e-5,
+        "md": 1.2501212242894554e-5,
+        "zstat1": 6.525034500570378e-6
+      }
+    }
+  },
+  "gpu_float32_vs_existing_gpu_float64": {
+    "U_relative_frobenius_error": 5.500737756338669e-5,
+    "largest_subspace_principal_angle_degrees": 0.001254019697391124,
+    "projected_relative_frobenius_error": {
+      "vbm": 2.488586880469202e-5,
+      "fa": 1.6942129607314276e-5,
+      "md": 1.1615672962361773e-5,
+      "zstat1": 5.875847968214503e-6
+    }
+  },
+  "existing_float64_gpu_baseline": {
+    "wall_s": 54.58919341303408,
+    "covariance_s": 24.018918341957033,
+    "eigensolver_s": 0.9702711189165711,
+    "projection_s": 28.699723025783896
+  },
+  "cache_conversion_from_existing_float64": {
+    "wall_s": 45.0059585920535,
+    "float32_cache_bytes": 7513806656,
+    "peak_rss_gib": 0.13537216186523438,
+    "note": "Conversion cost applies when reusing an existing float64 cache; new preparation can write float32 directly. New preparation wall time was not measured here."
+  },
+  "io_profile": {
+    "blocks_per_phase": 32,
+    "block_shape": "2050 by up to 2048",
+    "profile_uses_sync_per_operator": true,
+    "float64_covariance_read_s": 2.4880248378030956,
+    "float64_covariance_h2d_s": 0.14280725922435522,
+    "float64_covariance_gemm_s": 0.15535644348710775,
+    "float64_projection_read_s": 2.7032458754256368,
+    "float64_projection_h2d_s": 0.16180023550987244,
+    "float64_projection_gemm_s": 0.07050562091171741,
+    "float64_projection_d2h_s": 0.011669347994029522,
+    "float64_projection_write_s": 0.05795936658978462
+  },
+  "tf32_candidate_on_same_float32_cache": {
+    "wall_s": 22.310444314964116,
+    "iterations": 120,
+    "relative_residual": 0.00022073497530072927,
+    "max_pair_relative_residual": 0.00010880954505410045,
+    "U_relative_error_vs_strict_float32_120_iterations": 0.0010574361244974956,
+    "largest_subspace_principal_angle_degrees": 0.1591416062640471,
+    "projected_relative_error_vs_strict_float32_120_iterations": {
+      "vbm": 0.0005002374877777782,
+      "fa": 0.0003519680073373572,
+      "md": 0.0002571072918125405,
+      "zstat1": 0.00013146834778965874
+    }
+  },
+  "limits": "The H100 was shared with other users. These are observed wall times, not an uncontended throughput guarantee. No 30000-subject run was performed."
+}

@@ -1,0 +1,140 @@
+{
+  "dataset": "2050 real subjects, full-mask VBM/FA/MD; task zstat excluded",
+  "input": {
+    "normalized_dtype": "float32",
+    "shapes": {
+      "vbm": [
+        2050,
+        157901
+      ],
+      "fa": [
+        2050,
+        222257
+      ],
+      "md": [
+        2050,
+        222261
+      ]
+    },
+    "h5_bytes": {
+      "vbm": 1331961866,
+      "fa": 1861384378,
+      "md": 1861384442
+    }
+  },
+  "parameters": {
+    "migp_dim": 100,
+    "feature_block": 2048,
+    "cpu_threads": 8,
+    "max_gpu_gb": 20.0,
+    "compute_dtype": "float32"
+  },
+  "source_streaming_sha256": "b4cb6404966cc2a61613a90b389ae1d091f6c173b009b1cec3c276b216bd34e3",
+  "gpu_free_before_gib": 53.859619140625,
+  "gpu_free_after_gib": 53.006103515625,
+  "prewarm_io_s_excluded": 20.81362666701898,
+  "order": [
+    "cpu",
+    "cuda:0",
+    "cuda:0",
+    "cpu"
+  ],
+  "runs": [
+    {
+      "backend": "cpu",
+      "wall_s": 22.091888742987067,
+      "covariance_s": 13.245416943915188,
+      "eigensolver_s": 1.0807752623222768,
+      "projection_s": 7.584401750937104,
+      "iterations": 90,
+      "eigensolver": "subspace_iteration",
+      "relative_residual": 8.409405722886731e-07,
+      "max_pair_relative_residual": 4.028400439892721e-07,
+      "target_residual": 1e-06,
+      "converged": true,
+      "tf32_enabled_during_fit": false,
+      "peak_process_rss_gib_to_date": 0.6159820556640625
+    },
+    {
+      "backend": "cuda:0",
+      "wall_s": 15.472202463075519,
+      "covariance_s": 5.752764301840216,
+      "eigensolver_s": 1.5838543558493257,
+      "projection_s": 7.9635824877768755,
+      "iterations": 90,
+      "eigensolver": "subspace_iteration",
+      "relative_residual": 5.563865101976262e-07,
+      "max_pair_relative_residual": 1.4843055851088138e-07,
+      "target_residual": 1e-06,
+      "converged": true,
+      "tf32_enabled_during_fit": false,
+      "peak_process_rss_gib_to_date": 0.7830543518066406,
+      "peak_gpu_allocated_gib": 0.06772279739379883,
+      "peak_gpu_reserved_gib": 0.072265625
+    },
+    {
+      "backend": "cuda:0",
+      "wall_s": 14.174267148133367,
+      "covariance_s": 5.377234063111246,
+      "eigensolver_s": 0.9449381986632943,
+      "projection_s": 7.683511192910373,
+      "iterations": 90,
+      "eigensolver": "subspace_iteration",
+      "relative_residual": 5.563865101976262e-07,
+      "max_pair_relative_residual": 1.4843055851088138e-07,
+      "target_residual": 1e-06,
+      "converged": true,
+      "tf32_enabled_during_fit": false,
+      "peak_process_rss_gib_to_date": 0.7887802124023438,
+      "peak_gpu_allocated_gib": 0.06772279739379883,
+      "peak_gpu_reserved_gib": 0.072265625
+    },
+    {
+      "backend": "cpu",
+      "wall_s": 21.636954684741795,
+      "covariance_s": 12.910001541022211,
+      "eigensolver_s": 1.1240445938892663,
+      "projection_s": 7.428940752055496,
+      "iterations": 90,
+      "eigensolver": "subspace_iteration",
+      "relative_residual": 8.409405722886731e-07,
+      "max_pair_relative_residual": 4.028400439892721e-07,
+      "target_residual": 1e-06,
+      "converged": true,
+      "tf32_enabled_during_fit": false,
+      "peak_process_rss_gib_to_date": 0.807952880859375
+    }
+  ],
+  "cpu_gpu_match": {
+    "u_relative_frobenius_error": 5.447697889673753e-05,
+    "u_max_absolute_error": 0.0011761188507080078,
+    "largest_subspace_principal_angle_deg": 0.002850828703151731,
+    "projected": {
+      "vbm": {
+        "shape": [
+          157901,
+          100
+        ],
+        "relative_frobenius_error": 1.712175249417779e-05,
+        "max_absolute_error": 0.08194875717163086
+      },
+      "fa": {
+        "shape": [
+          222257,
+          100
+        ],
+        "relative_frobenius_error": 1.1628258819735657e-05,
+        "max_absolute_error": 0.08225440979003906
+      },
+      "md": {
+        "shape": [
+          222261,
+          100
+        ],
+        "relative_frobenius_error": 8.310415345898835e-06,
+        "max_absolute_error": 0.08636689186096191
+      }
+    }
+  },
+  "scope": "mMIGP only; prepared cache reused; DicL and FLICA excluded"
+}

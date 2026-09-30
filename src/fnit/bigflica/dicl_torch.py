@@ -16,6 +16,60 @@ import torch
 from .pipeline import _device
 
 
+def _randomized_svd_dictionary(projected: h5py.Dataset, samples_gpu: torch.Tensor | None,
+                               mean_gpu: torch.Tensor, std_gpu: torch.Tensor,
+                               n_components: int, rng: np.random.RandomState,
+                               feature_block: int) -> torch.Tensor:
+    """Match sklearn's seeded randomized SVD with float64 CUDA arithmetic."""
+    n_voxels, n_features = projected.shape
+    backend = mean_gpu.device
+    n_random = n_components + 10
+    q_bytes = n_voxels * n_random * 8
+    if q_bytes > min(8 * 2**30, torch.cuda.mem_get_info(backend)[0] // 3):
+        raise MemoryError("Randomized SVD basis exceeds the GPU memory budget")
+    q = torch.as_tensor(rng.normal(size=(n_features, n_random)),
+                        device=backend, dtype=torch.float64)
+
+    def multiply_x(matrix: torch.Tensor) -> torch.Tensor:
+        if samples_gpu is not None:
+            return samples_gpu @ matrix
+        output = torch.empty((n_voxels, matrix.shape[1]), device=backend,
+                             dtype=torch.float64)
+        for start in range(0, n_voxels, feature_block):
+            block = torch.as_tensor(projected[start:start + feature_block],
+                                    device=backend, dtype=torch.float64)
+            output[start:start + block.shape[0]] = ((block - mean_gpu) / std_gpu) @ matrix
+        return output
+
+    def multiply_xt(matrix: torch.Tensor) -> torch.Tensor:
+        if samples_gpu is not None:
+            return samples_gpu.T @ matrix
+        output = torch.zeros((n_features, matrix.shape[1]), device=backend,
+                             dtype=torch.float64)
+        for start in range(0, n_voxels, feature_block):
+            block = torch.as_tensor(projected[start:start + feature_block],
+                                    device=backend, dtype=torch.float64)
+            output += ((block - mean_gpu) / std_gpu).T @ matrix[start:start + block.shape[0]]
+        return output
+
+    n_iter = 7 if n_components < 0.1 * min(n_voxels, n_features) else 4
+    for _ in range(n_iter):
+        q = torch.linalg.qr(multiply_x(q), mode="reduced")[0]
+        q = torch.linalg.qr(multiply_xt(q), mode="reduced")[0]
+    q = torch.linalg.qr(multiply_x(q), mode="reduced")[0]
+    u_small, singular_values, right = torch.linalg.svd(
+        multiply_xt(q).T, full_matrices=False)
+    left = q @ u_small
+    indices = left.abs().argmax(dim=0)
+    signs = torch.sign(left[indices, torch.arange(left.shape[1], device=backend)])
+    count = min(n_components, right.shape[0])
+    dictionary = torch.zeros((n_components, n_features), device=backend,
+                             dtype=torch.float64)
+    dictionary[:count] = (singular_values[:count, None] * right[:count] *
+                          signs[:count, None])
+    return dictionary
+
+
 def _sparse_codes_lars(samples: torch.Tensor, dictionary: torch.Tensor,
                        alpha: float, max_events: int | None = None) -> torch.Tensor:
     """Batched Lasso-LARS path on CUDA, stopping at the sklearn penalty alpha."""
@@ -31,15 +85,20 @@ def _sparse_codes_lars(samples: torch.Tensor, dictionary: torch.Tensor,
     active[rows, initial] = ~done
     signs[rows, initial] = torch.sign(response[rows, initial]) * (~done)
     identity = torch.eye(atoms, device=samples.device, dtype=samples.dtype)
+    solve_failed = torch.zeros((), device=samples.device, dtype=torch.bool)
     limit = max_events or 3 * atoms
-    for _ in range(limit):
-        if bool(done.all()):
+    for event in range(limit):
+        if event % 4 == 0 and bool(done.all()):
             break
         correlation = response - code @ gram
         current = (correlation * active).abs().amax(dim=1)
         masked = gram[None] * active[:, :, None] * active[:, None, :]
         masked = masked + torch.diag_embed((~active).to(samples.dtype))
-        direction = torch.linalg.solve(masked + identity[None] * 1e-10, signs[..., None])[..., 0]
+        solved = torch.linalg.solve_ex(
+            masked + identity[None] * 1e-10, signs[..., None],
+            check_errors=False)
+        solve_failed |= (solved.info != 0).any()
+        direction = solved.result[..., 0]
         scale = torch.rsqrt((direction * signs).sum(dim=1).clamp_min(1e-20))
         direction = direction * scale[:, None]
         correlations_slope = direction @ gram
@@ -70,12 +129,19 @@ def _sparse_codes_lars(samples: torch.Tensor, dictionary: torch.Tensor,
         done |= reached_target
         dropping = (~done) & (drop_step < enter_step)
         entering = (~done) & (~dropping)
-        active[rows[dropping], drop_index[dropping]] = False
-        signs[rows[dropping], drop_index[dropping]] = 0
-        code[rows[dropping], drop_index[dropping]] = 0
-        active[rows[entering], enter_index[entering]] = True
-        signs[rows[entering], enter_index[entering]] = torch.where(
-            entering_positive[entering], signs.new_tensor(1.), signs.new_tensor(-1.))
+        drop_at = drop_index[:, None]
+        drop_mask = dropping[:, None]
+        active.scatter_(1, drop_at, active.gather(1, drop_at) & ~drop_mask)
+        signs.scatter_(1, drop_at, torch.where(drop_mask, 0, signs.gather(1, drop_at)))
+        code.scatter_(1, drop_at, torch.where(drop_mask, 0, code.gather(1, drop_at)))
+        enter_at = enter_index[:, None]
+        enter_mask = entering[:, None]
+        active.scatter_(1, enter_at, active.gather(1, enter_at) | enter_mask)
+        entering_sign = torch.where(entering_positive[:, None], 1., -1.)
+        signs.scatter_(1, enter_at, torch.where(enter_mask, entering_sign,
+                                               signs.gather(1, enter_at)))
+    if bool(solve_failed):
+        raise ValueError("LARS linear solve failed")
     if not bool(done.all()):
         raise ValueError("LARS path exceeded sparse_iterations; increase the limit")
     return code
@@ -112,40 +178,6 @@ def fit_dicl_gpu_streaming(projected_dir: str | Path,
             mean_gpu = torch.as_tensor(mean, device=backend, dtype=torch.float64)
             std_gpu = torch.as_tensor(std, device=backend, dtype=torch.float64)
 
-            covariance = torch.zeros((n_features, n_features), device=backend,
-                                     dtype=torch.float64)
-            for start in range(0, n_voxels, feature_block):
-                samples = torch.as_tensor(projected[start:start + feature_block],
-                                          device=backend, dtype=torch.float64)
-                samples = (samples - mean_gpu) / std_gpu
-                covariance.addmm_(samples.T, samples, alpha=1 / n_voxels)
-            eigenvalues, eigenvectors = torch.linalg.eigh(covariance)
-            n_initial = min(dicl_dim, n_features)
-            dictionary = torch.zeros((dicl_dim, n_features), device=backend,
-                                     dtype=torch.float64)
-            dictionary[:n_initial] = (
-                eigenvectors[:, -n_initial:].flip(1).T *
-                torch.sqrt(eigenvalues[-n_initial:].flip(0).clamp_min(0) * n_voxels)[:, None]
-            )
-            # sklearn's randomized SVD fixes signs from left singular vectors.
-            largest = torch.zeros(n_initial, device=backend, dtype=torch.float64)
-            orientation = torch.ones(n_initial, device=backend, dtype=torch.float64)
-            for start in range(0, n_voxels, feature_block):
-                samples = torch.as_tensor(projected[start:start + feature_block],
-                                          device=backend, dtype=torch.float64)
-                left = ((samples - mean_gpu) / std_gpu) @ dictionary[:n_initial].T
-                indices = left.abs().argmax(dim=0)
-                values = left[indices, torch.arange(n_initial, device=backend)]
-                update = values.abs() > largest
-                orientation[update] = torch.sign(values[update])
-                largest = torch.maximum(largest, values.abs())
-            dictionary[:n_initial] *= orientation[:, None]
-            inner_a = torch.zeros((dicl_dim, dicl_dim), device=backend,
-                                  dtype=torch.float64)
-            inner_b = torch.zeros((n_features, dicl_dim), device=backend,
-                                  dtype=torch.float64)
-            rng = np.random.RandomState(random_state)
-            rng.normal(size=(n_features, dicl_dim + 10))
             projected_bytes = n_voxels * n_features * 8
             keep_on_gpu = projected_bytes < min(4 * 2**30, torch.cuda.mem_get_info(backend)[0] // 4)
             samples_gpu = None
@@ -153,6 +185,13 @@ def fit_dicl_gpu_streaming(projected_dir: str | Path,
                 samples_gpu = torch.as_tensor(projected[:], device=backend,
                                               dtype=torch.float64)
                 samples_gpu = (samples_gpu - mean_gpu) / std_gpu
+            rng = np.random.RandomState(random_state)
+            dictionary = _randomized_svd_dictionary(
+                projected, samples_gpu, mean_gpu, std_gpu, dicl_dim, rng, feature_block)
+            inner_a = torch.zeros((dicl_dim, dicl_dim), device=backend,
+                                  dtype=torch.float64)
+            inner_b = torch.zeros((n_features, dicl_dim), device=backend,
+                                  dtype=torch.float64)
             permutation = torch.as_tensor(rng.permutation(n_voxels).copy())
             n_batches = (n_voxels + batch_size - 1) // batch_size
             step = 0
@@ -183,8 +222,9 @@ def fit_dicl_gpu_streaming(projected_dir: str | Path,
                     inner_a.mul_(beta).addmm_(code.T, code, alpha=1 / size)
                     inner_b.mul_(beta).addmm_(samples.T, code, alpha=1 / size)
                     # sklearn updates each atom against the already updated atoms.
+                    all_atoms_alive = bool((torch.diagonal(inner_a) > 1e-6).all())
                     for atom in range(dicl_dim):
-                        if inner_a[atom, atom] > 1e-6:
+                        if all_atoms_alive or inner_a[atom, atom] > 1e-6:
                             dictionary[atom] += ((inner_b[:, atom] - inner_a[atom] @ dictionary) /
                                                  inner_a[atom, atom])
                         else:

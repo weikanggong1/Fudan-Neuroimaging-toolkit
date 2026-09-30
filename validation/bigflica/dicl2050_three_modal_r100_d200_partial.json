@@ -1,0 +1,68 @@
+{
+  "dataset": "2050 real subjects; full-mask VBM/FA/MD; task zstat excluded",
+  "shared_input": "same three-modal CPU mMIGP R100 projections, float32 HDF5 converted to float64 for both DicL fits",
+  "input_projected_sha256": {
+    "vbm": "d77f63630c58515bead81dceeab5c339a55d5f614d63639b53cf0c1021306b39",
+    "fa": "988510f8b65816d6314d8330cafbe8aca43413a99ae570221dbde34609dbc818",
+    "md": "a6565f2f2d1e5747bf7cccfe8e5e92e1436beb25af0bd360ccd6b44820e82df6"
+  },
+  "source_sha256": {
+    "gpu_dicl_snapshot": "84a2124c3516328aad73d8a67d8bba7de73b3e2947613c3c93de43fcce4222af",
+    "cpu_pipeline": "06d12f853ae62754e53f11156cd134c49a2ea1c194bd54a84d2cd7f8c94381fc",
+    "executed_benchmark_script": "f1df0a03308c51104e058c827e4a86c6ad902f3202376e0901500f0da28d2fdc"
+  },
+  "parameters": {
+    "migp_dim": 100,
+    "dicl_dim": 200,
+    "max_iter": 1000,
+    "batch_size": 32,
+    "gpu_sparse_iterations": 120,
+    "random_state": 0,
+    "cpu_threads": 8,
+    "gpu_compute_dtype": "float64",
+    "tf32_flag_from_device_helper": true,
+    "tf32_applicability": "float64 operations do not use TF32"
+  },
+  "cpu_fit_s": {
+    "vbm": 138.74011915782467,
+    "fa": 12.777993381023407,
+    "md": 156.8940291898325
+  },
+  "cpu_fit_total_s": 308.4121417286806,
+  "gpu_fit_s": {
+    "vbm": 654.4176922780462,
+    "fa": null,
+    "md": null
+  },
+  "gpu_three_modal_total_s": null,
+  "vbm_gpu_over_cpu_wall_ratio": 4.716859811354273,
+  "vbm_cpu_gpu_match": {
+    "shape": [
+      200,
+      100
+    ],
+    "relative_frobenius_error": 4.2945664476435895e-06,
+    "max_absolute_error": 7.200637035822965e-05,
+    "direct_atom_abs_cosine_min": 0.9999999996722548,
+    "direct_atom_abs_cosine_median": 0.9999999999987137,
+    "best_assignment_atom_abs_cosine_min": 0.9999999996722548,
+    "best_assignment_atom_abs_cosine_median": 0.9999999999987137,
+    "best_assignment_identity_count": 200
+  },
+  "cpu_three_modal_dictionary_spectrum": {
+    "relative_rank_1e_minus_6": 99,
+    "s20_over_s1": 0.8630245339550405
+  },
+  "gpu_vbm_dictionary_spectrum": {
+    "relative_rank_1e_minus_6": 99,
+    "s20_over_s1": 0.6770529394162282
+  },
+  "all_saved_dictionaries_finite": true,
+  "gpu_memory": {
+    "sampled_process_gpu_mib": 2846,
+    "samples_near_end_of_fit": 19,
+    "exact_whole_fit_peak_available": false
+  },
+  "stop_reason": "Stopped after completed GPU VBM fit because its wall time failed the speed gate; GPU FA/MD unmeasured",
+  "scope": "DicL stage only; no three-modal GPU DicL total or C20 FLICA claim"
+}

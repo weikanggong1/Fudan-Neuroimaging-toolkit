@@ -9,7 +9,6 @@ The upstream numerical updates are retained for same-input comparison.
 import numpy as np
 import copy
 import scipy as sc
-from numpy.lib.stride_tricks import as_strided
 from numpy import size, identity, trace
 from scipy import interpolate
 from scipy.optimize import fmin
@@ -364,21 +363,14 @@ def update_H(input_dict):
      input_dict['H_PCs'] = np.vstack([alb_dum, np.transpose(input_dict['eta'])])
      for k in range (0,input_dict['K']):
          input_dict['W'][k]=np.squeeze(np.array(input_dict['W'][k].T)).astype('float64')
-         tmp_lambda_NH = input_dict['Lambda'][k] + np.zeros((input_dict['NH'],1))
-
-         #print(input_dict['WtW'][k].shape)
-         #print(input_dict['XtDX'][k].shape)
-         #print(tmp_lambda_NH.T.shape)
-
-         #aaa=np.array(np.dot( np.multiply(input_dict['WtW'][k].flatten(), input_dict['XtDX'][k].flatten()).T, tmp_lambda_NH.T))#,order="F")
-         aaa=np.array(np.multiply( np.multiply(input_dict['WtW'][k], input_dict['XtDX'][k].T), tmp_lambda_NH.T))#,order="F")
-         #print(aaa.shape)
-         #print(input_dict['L'])
-         #print(input_dict['NH'])
-         aaa=as_strided(aaa,shape=(input_dict['L'],input_dict['L'],input_dict['NH']))
-         if input_dict['NH'] ==1:
-             aaa=aaa[:,:,0] #try to remove this loop
-         tmpVinv_LxLxNH = tmpVinv_LxLxNH + aaa; #del aaa
+         component_precision = np.asarray(
+             np.multiply(input_dict['WtW'][k], input_dict['XtDX'][k].T))
+         lambda_values = np.asarray(input_dict['Lambda'][k]).reshape(-1)
+         if input_dict['NH'] == 1:
+             tmpVinv_LxLxNH = tmpVinv_LxLxNH + component_precision * lambda_values[0]
+         else:
+             tmpVinv_LxLxNH = (tmpVinv_LxLxNH + component_precision[:, :, None]
+                                * lambda_values[None, None, :])
          spm=np.dot(np.transpose(input_dict['X'][k]), input_dict['Y'][k])
          tmpM = tmpM + input_dict['DD'][k] * np.dot( np.dot( np.diag(input_dict['W'][k]) , spm) , np.diag(np.array(input_dict['lambda_R'][k].flatten())[0])  )
          input_dict['H_PCs'][k] = np.dot( np.multiply(np.diag(input_dict['WtW'][k]) , np.diag(input_dict['XtDX'][k]) )  , np.mean(input_dict['lambda_R'][k],dtype='float64'))
@@ -578,7 +570,8 @@ def flica_init_params(Y,opts):
     opts=flica_parseoptions(R, opts)
 
     #Compute degrees of freedom per voxel, if not provided
-    if opts['dof_per_voxel']=='auto_eigenspectrum':
+    if (isinstance(opts['dof_per_voxel'], str) and
+            opts['dof_per_voxel']=='auto_eigenspectrum'):
         opts['dof_per_voxel'] = np.ones(K);
         for k in range (0,K):
             if Y[k].shape[1]<Y[k].shape[0]:
@@ -591,7 +584,7 @@ def flica_init_params(Y,opts):
     # Multiply data by Virtual Decimation factor (often sqrt'd!) and Initialize <X> and <H> using PCA:
     N=np.zeros(K).astype('float64') #num of voxels per data type
 
-    if opts['initH']=='PCA':
+    if isinstance(opts['initH'], str) and opts['initH']=='PCA':
         print('Initialize FLICA using concatenated PCA across modalities...')
 
         cov_mat=np.zeros((R,R))
@@ -613,7 +606,7 @@ def flica_init_params(Y,opts):
             X[k]=np.dot(np.dot(np.linalg.pinv(np.dot(H,H.T)),H),Y[k].T * np.sqrt(DD[k])).T
             #X[k]=np.dot(Y[k] * np.sqrt(DD[k]),H.T)
 
-    if opts['initH']=='Bigdata':
+    if isinstance(opts['initH'], str) and opts['initH']=='Bigdata':
 
         print('Initialize FLICA using provided subject mode...')
         X=[np.array(a).astype('float64') for a in range (0,K)] #list to save variables
@@ -626,7 +619,7 @@ def flica_init_params(Y,opts):
             N[k] = Y[k].shape[0]
             X[k]=np.dot(Y[k] * np.sqrt(DD[k]),H.T)
 
-    if opts['initH']=='PCAnew':
+    if isinstance(opts['initH'], str) and opts['initH']=='PCAnew':
 
         print('Initialize FLICA using modality-wise PCA...')
 
@@ -651,9 +644,16 @@ def flica_init_params(Y,opts):
         #tmpV=tmpV/K
         H = np.divide(tmpV.T , K*np.sqrt(np.mean(DD)))
 
-#    else:
-#        tmpV = opts['initH'].T
-#        tmpU = np.squeeze(np.linalg.lstsq(tmpV,tmpYcat.T)[0]).T
+    if not isinstance(opts['initH'], str):
+        # MATLAB flica.m accepts an L×R subject-mode initializer.
+        initial_h = np.asarray(opts['initH'], dtype='float64')
+        H = initial_h / np.sqrt(np.mean(DD))
+        inverse_h = np.linalg.pinv(initial_h)
+        X = [np.array(a).astype('float64') for a in range(0,K)]
+        for k in range(0,K):
+            Y[k] = np.ascontiguousarray(Y[k], dtype='float64')
+            N[k] = Y[k].shape[0]
+            X[k] = (Y[k] * np.sqrt(DD[k])) @ inverse_h
 
 
 

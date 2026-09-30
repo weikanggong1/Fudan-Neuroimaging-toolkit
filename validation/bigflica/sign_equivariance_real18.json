@@ -1,0 +1,46 @@
+{
+  "dataset": "real18_aligned_fourmodal_C3",
+  "parameters": {
+    "n_subjects": 18,
+    "modalities": ["vbm", "fa", "md", "zstat1"],
+    "migp_dim": 10,
+    "dicl_dim": 40,
+    "dicl_max_iter": 20,
+    "dicl_batch_size": 32,
+    "flica_max_iter": 100,
+    "random_state": 0
+  },
+  "experiment_scope": "Read-only real-data cache analysis followed by CPU sklearn DicL and CPU FLICA controlled refits. The original CPU U and outputs were used only after each sign choice for validation. This is not an independently rerun GPU DicL/FLICA result.",
+  "scipy_orientation_from_gpu_cache": {
+    "method": "Accumulate the 18-by-18 covariance in float64 from the GPU normalized float32 cache, in modality order, and call scipy.linalg.eigh with subset_by_index for the leading 10 pairs. Infer a diagonal sign transform by columnwise dot products with the saved GPU U; apply it to saved GPU U and projections before refitting DicL/FLICA.",
+    "signs_relative_to_saved_gpu_u": [1, 1, -1, 1, 1, -1, -1, 1, 1, -1],
+    "signs_relative_to_saved_cpu_u_for_validation": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    "u_relative_error_to_saved_cpu": 7.992122690582458e-9,
+    "u_relative_error_to_sign_corrected_gpu": 3.215115901708305e-6,
+    "course_abs_corr_to_original_cpu": [0.999996961151455, 0.9999990304907034, 0.9999995946436216],
+    "z_maps_min_corr_to_original_cpu": 0.9999970228490106,
+    "z_maps_max_mae_to_original_cpu": 0.0019592612516134977,
+    "dictionary_relative_error_to_original_cpu": {
+      "vbm": 0.0002652867080249827,
+      "fa": 0.0001589145810724228,
+      "md": 0.0002117359192507199,
+      "zstat1": 0.00005447281171604522
+    }
+  },
+  "independent_canonical_orientation": {
+    "method": "For each U column, make its largest-absolute-value subject entry positive; apply the same diagonal sign transform to that column of U and each projected modality. Perform this independently on CPU and GPU caches, then refit CPU DicL/FLICA in the common coordinates.",
+    "canonical_cpu_to_gpu_dictionary_relative_error": {
+      "vbm": 0.00022392040796944228,
+      "fa": 0.0000879850627401555,
+      "md": 0.00045815250032679825,
+      "zstat1": 0.00022679144879719968
+    },
+    "canonical_cpu_to_gpu_course_abs_corr": [0.9999999750545417, 0.9999999819671817, 0.9999999643458218],
+    "canonical_cpu_to_gpu_z_maps_min_corr": 0.9999999560758721,
+    "canonical_cpu_course_abs_corr_to_original_untouched_cpu": [0.3506910311022042, 0.5962361218195662, 0.8918279745946186],
+    "canonical_cpu_z_maps_min_corr_to_original_untouched_cpu": 0.22264394271546323,
+    "canonical_gpu_course_abs_corr_to_original_untouched_cpu": [0.35067423592204744, 0.5962108184652378, 0.8918974957918344],
+    "canonical_gpu_z_maps_min_corr_to_original_untouched_cpu": 0.22267576205780937
+  },
+  "interpretation": "Canonical orientation gives a reference-free CPU/GPU comparison when both are canonicalized, but it does not reproduce the untouched notebook output. On these 18 subjects, replaying SciPy's eigenvector orientation from the GPU cache recovers the untouched output closely without loading the CPU U during sign selection. SciPy/LAPACK orientation is implementation- and perturbation-dependent; this controlled recovery does not establish a portable GPU-only rule or scalable 30000-subject equivalence."
+}

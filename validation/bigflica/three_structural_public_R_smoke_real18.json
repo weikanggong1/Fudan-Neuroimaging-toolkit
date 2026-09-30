@@ -1,0 +1,81 @@
+{
+  "input": "18 real UKB subjects, VBM/FA/MD, three established small QA masks; task zstat1 excluded",
+  "backend": "CUDA PyTorch public run_bigflica compressed workflow",
+  "parameters": {
+    "migp_dim": 10,
+    "dicl_dim": 40,
+    "dicl_max_iter": 20,
+    "flica_max_iter": 100,
+    "flica_lambda_dims": "R",
+    "top_voxels": 100,
+    "max_gpu_gb": 19,
+    "feature_block": 2048
+  },
+  "modes": {
+    "python_api": {
+      "n_subjects": 18,
+      "n_components": 3,
+      "rank": 3,
+      "singular_value_ratios": [
+        1.0,
+        0.9629109245940247,
+        0.8526471388789931
+      ],
+      "per_modality_reconstruction_ratio": {
+        "vbm": 0.5335802311387358,
+        "fa": 0.5629507492956745,
+        "md": 0.5584047767553547
+      },
+      "overall_reconstruction_ratio": 0.5517962498053743,
+      "voxel_counts": {
+        "vbm": 7896,
+        "fa": 11113,
+        "md": 11114
+      },
+      "n_float32_map_nifti": 9,
+      "zstat_nifti_roundtrip_max_abs": 0.0,
+      "stage_timings_s": {
+        "load_standardize_s": 0.901166396215558,
+        "mmigp_s": 0.7787258741445839,
+        "dicl_s": 24.47794745210558,
+        "flica_s": 0.9044999429024756,
+        "spatial_maps_s": 2.517152938991785,
+        "projection_model_s": 0.12189038330689073
+      },
+      "wall_time_s": 30.03242139518261
+    },
+    "cli": {
+      "n_subjects": 18,
+      "n_components": 3,
+      "rank": 3,
+      "singular_value_ratios": [
+        1.0,
+        0.9629109245940247,
+        0.8526471388789931
+      ],
+      "per_modality_reconstruction_ratio": {
+        "vbm": 0.5335802311387358,
+        "fa": 0.5629507492956745,
+        "md": 0.5584047767553547
+      },
+      "overall_reconstruction_ratio": 0.5517962498053743,
+      "voxel_counts": {
+        "vbm": 7896,
+        "fa": 11113,
+        "md": 11114
+      },
+      "n_float32_map_nifti": 9,
+      "zstat_nifti_roundtrip_max_abs": 0.0,
+      "stage_timings_s": {
+        "load_standardize_s": 0.0031073959544301033,
+        "mmigp_reused": true,
+        "dicl_reused": true,
+        "flica_s": 1.7628562119789422,
+        "spatial_maps_s": 2.362564935348928,
+        "projection_model_s": 0.09406495885923505
+      },
+      "wall_time_s": 8.345522006042302,
+      "normalized_migp_dicl_cache_reused": true
+    }
+  }
+}

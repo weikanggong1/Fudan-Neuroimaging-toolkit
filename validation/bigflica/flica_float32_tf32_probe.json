@@ -1,0 +1,24 @@
+{
+  "date": "2026-09-30",
+  "input": "2050 real UKB subjects; four sparse-mask DicL dictionaries, each 50 x 100",
+  "requested_components": 20,
+  "flica_updates": 101,
+  "device": "gpucw1 H100 PCIe cuda:1; shared GPU was occupied by other jobs",
+  "method": "Isolated copy of flica_torch.py with torch.float64 and np.float64 changed to float32; not the production path",
+  "runs": [
+    {"mode": "strict_float32", "initialization_s": 0.525, "fit_s": 3.827, "effective_h_rank_relative_1e_6": 2},
+    {"mode": "tf32", "initialization_s": 0.273, "fit_s": 3.726, "effective_h_rank_relative_1e_6": 2},
+    {"mode": "strict_float32_repeat", "initialization_s": 0.246, "fit_s": 3.753, "effective_h_rank_relative_1e_6": 2}
+  ],
+  "tf32_vs_strict_float32": {
+    "initial_h_relative_error": 0.8541222,
+    "final_h_relative_error": 0.0009394,
+    "final_x_relative_errors": [0.0025797, 0.0035560, 0.0158055, 1.2292686]
+  },
+  "strict_repeat_vs_first": {
+    "initial_h_relative_error": 0.0,
+    "final_h_relative_error": 0.0,
+    "final_x_relative_errors": [0.0, 0.0, 0.0, 0.0]
+  },
+  "interpretation": "The first probe was invalid because pipeline._device re-enabled TF32. After disabling that reset in this isolated trial, strict float32 is exactly reproducible but differs from TF32. The fourth X matrix nearly vanishes, so its relative difference is unstable. Both modes prune to two effective components. Timings are not a meaningful speed comparison for an accepted 20-component model."
+}
