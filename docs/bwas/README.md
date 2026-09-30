@@ -146,9 +146,11 @@ python BWAS_main.py -toolbox_dir /path/to/BWAS \
 
 ## 绘制灰质体素连接
 
-`plot_bwas_connectivity` 自动读取一个 BWAS 结果目录里的连接表、簇表和 MA 图，流式扫描连接表，只保留满足簇水平 p 值条件且 `|z|` 最大的少量边，生成 PNG。它从输入灰质掩膜提取平滑的半透明三角网格，避免原先规则网格的方格背景；端点大小参考 MA 边数。连接线是**体素对的群体统计关联**，不是解剖纤维束。正 z 为红色系、负 z 为蓝色系，参考 [FSLeyes 的 Red 与 Blue 配色名称](https://github.com/pauldmccarthy/fsleyes/blob/main/fsleyes/assets/colourmaps/order.txt)；这是独立配色，不复制 FSL 色表。绘图只使用 CPU，不需要 CUDA，也不调用 FSL。
+`plot_bwas_connectivity` 自动读取一个 BWAS 结果目录里的连接表、簇表和 MA 图，流式扫描连接表，只保留显著簇中 `|z|` 最大的少量边。PyVista/VTK 将输入的 2 mm 灰质掩膜生成半透明表面，并渲染俯视、左右侧视和斜视。端点大小参考 MA 边数；正 z 用红色、负 z 用蓝色，配色参考 [FSLeyes 的 Red 与 Blue 名称](https://github.com/pauldmccarthy/fsleyes/blob/main/fsleyes/assets/colourmaps/order.txt)，未复制原色表。图中的线是**体素对的群体统计关联**，不是解剖纤维束。
 
-原版 BWAS 将正负连接分别导出为两端坐标加统计值的七列文本，供 [BrainGL](https://github.com/rschurade/braingl) 显示；BrainGL 使用体积等值面和图形渲染。FNIT 独立实现了 CPU 等值面绘图，没有移植其 C++/OpenGL 程序，也没有复制原版 `braingl_bg.nii.gz`。本图的外形来自 2 mm 灰质分析掩膜，不能表现 1 mm 解剖背景的全部脑沟细节。
+原版 [BWAS](https://github.com/weikanggong/BWAS) 将两端坐标和统计值导出给 [BrainGL](https://github.com/rschurade/braingl) GUI。BWAS 的六维连接簇检验已由 `run_bwas` 实现；BrainGL 的视觉集束是另一件事。这里的 `bundle_strength` 只让同一显著簇、同一 z 符号的显示线靠拢，体素端点、z、簇编号和 p 值均不变；弯线也不是推断出的神经纤维路径。FNIT 没有复制 BrainGL C++ 程序或原版背景影像 `braingl_bg.nii.gz`。本图使用 2 mm 分析掩膜生成外形，不能表现 1 mm 解剖背景的全部脑沟细节。
+
+主页的 `environment.yml` 包含 PyVista/VTK；若在已有 Python 环境中单独安装 FNIT，可用 `pip install '.[bwas-visualization]'`。该函数不使用 CUDA 计算，但 VTK 需要 OpenGL 上下文；无界面服务器可由 EGL 或 OSMesa 提供。本地测试使用 Mesa `llvmpipe` CPU 渲染；gpucw1 的真实 ABIDE 图使用 NVIDIA EGL。gpucw1 没有可用的 CPU 软件渲染库，因此暂无同机 CPU/GPU 速度对照。
 
 ```python
 from pathlib import Path
@@ -165,17 +167,25 @@ figure_path = plot_bwas_connectivity(
     output_png=output_png,  # 写出 PNG；已存在时不覆盖
     top_k=500,  # 最多显示 |z| 最大的 500 条边，不影响原统计结果
     cluster_p_max=0.05,  # 只显示簇水平 FWER p < 0.05 的连接
+    cluster_id=None,  # None 显示全部显著簇；填正整数只显示指定簇
     min_abs_z=None,  # 可选附加 |z| 下限；None 表示只按 top_k 筛选
+    bundle_strength=0.0,  # 0 为直线；0～1 仅改变显示线的弯曲程度
     view="montage",  # 默认四联图：俯视、左侧、右侧、斜视
 )
 print(figure_path)
 ```
 
-`top_k` 必须为正整数；`cluster_p_max` 取 `(0, 1]`；`min_abs_z` 若设置需为非负有限数。`gray_matter_mask_file` 须与 MA 图具有相同的 3D shape 和 affine；`view` 可选默认四联图 `montage`，或单视角 `superior`、`left`、`right`、`anterior`、`oblique`。PNG 只显示所选边，不改变全量连接表和簇统计量。
+`top_k` 必须为正整数；`cluster_p_max` 取 `(0, 1]`；`cluster_id` 若设置，须是簇表中达到该 p 值条件的正整数；`min_abs_z` 若设置须为非负有限数；`bundle_strength` 取 `[0, 1]`。`gray_matter_mask_file` 须与 MA 图具有相同的 3D shape 和 affine；`view` 可选默认四联图 `montage`，或单视角 `superior`、`left`、`right`、`anterior`、`oblique`。PNG 只显示所选边，不改变全量连接表和簇统计量。
 
-下图由 ABIDE I+II 的 1748 人全脑组水平结果在 CPU 上绘制，显示簇水平 `p_fwer < 0.05` 且 `|z|` 最大的 500 条边，依次为俯视、左侧、右侧和斜视。红色表示病例组连接 Fisher z 较高的正统计量，蓝色表示较低的负统计量；直线仅用于展示统计关联，不表示解剖纤维。图中不包含个体影像或被试标识。
+下图由 ABIDE I+II 的 1748 人全脑组水平结果绘制，显示簇水平 `p_fwer < 0.05` 且 `|z|` 最大的 500 条边，依次为俯视、左侧、右侧和斜视。红色表示病例组连接 Fisher z 较高的正统计量，蓝色表示较低的负统计量。图中不包含个体影像或被试标识。
 
 ![ABIDE I+II 灰质体素连接：俯视、左侧、右侧和斜视](figures/abide_full_connectivity_montage.png)
+
+对同一真实结果的第 1 个显著簇设置 `cluster_id=1, bundle_strength=0.85` 后，分散的红色线在簇内形成更清晰的共同走向，端点仍对应原体素。其他簇若集束后遮挡端点，可保持默认直线。第 1 簇共有 289,105 条越阈值连接；图中只取 `|z|` 最高的 500 条。
+
+![ABIDE I+II 第 1 显著簇的可选视觉集束](figures/abide_cluster1_bundled_montage.png)
+
+在 gpucw1 的 PyVista 0.49.0、VTK 9.7.1 与 NVIDIA H100 EGL 离屏环境下，最终代码顺序绘制全簇直线、第 1 簇直线和第 1 簇集束四联图各一次，分别耗时 `6.77 s`、`4.80 s`、`7.13 s`。耗时包括读取压缩连接表、提取灰质表面和写出 2160×1800 PNG；共享 GPU 有其他负载，不能据此判断集束或 GPU 的加速比。
 
 ## ABIDE 真实数据 benchmark
 
@@ -199,6 +209,7 @@ print(figure_path)
 
 - [原版 weikanggong/BWAS](https://github.com/weikanggong/BWAS) 的 [BWAS_cpu.py](https://github.com/weikanggong/BWAS/blob/master/BWAS_cpu.py) 与 [BWAS_main.py](https://github.com/weikanggong/BWAS/blob/master/BWAS_main.py)（Python 源文件头标注 Apache 2.0；参考源码 SHA-256 `1b78a98efb04ae5c1b764b101ec434ed8c8277f815481ae0ca940ebd910323c2`）。原版背景影像 `braingl_bg.nii.gz` 没有随这项源码授权，不纳入 FNIT。
 - Gong W, et al. [Statistical testing and power analysis for brain-wide association study](https://doi.org/10.1016/j.media.2018.03.014). *Medical Image Analysis* 47 (2018): 15–30.
-- [BrainGL 源码](https://github.com/rschurade/braingl)与 [Connexel visualization 论文](https://doi.org/10.3389/fnins.2014.00015)：仅参考等值面视觉设计，没有纳入 FNIT 运行时。
+- [BrainGL 源码](https://github.com/rschurade/braingl)与 [Connexel visualization 论文](https://doi.org/10.3389/fnins.2014.00015)：用于区分统计簇与显示线集束；FNIT 未纳入其运行时或逐行移植集束算法。
+- [PyVista](https://docs.pyvista.org/) 和 [VTK](https://vtk.org/) 官方文档：灰质等值面、多视角离屏渲染与三维连线。
 - [ABIDE II 表型变量释义](https://fcon_1000.projects.nitrc.org/indi/abide/ABIDEII_Data_Legend.pdf)。
 - [ABIDE I 官方表型表](https://s3.amazonaws.com/fcp-indi/data/Projects/ABIDE_Initiative/Phenotypic_V1_0b_preprocessed1.csv)和[ABIDE II 官方表型表](https://fcon_1000.projects.nitrc.org/indi/abide2/release/phenotypic_data/ABIDEII_Composite_Phenotypic.csv)。

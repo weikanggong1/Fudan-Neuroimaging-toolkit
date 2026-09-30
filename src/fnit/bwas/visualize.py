@@ -1,4 +1,4 @@
-"""Plot significant BWAS voxel connections on a gray-matter outline."""
+"""Plot significant BWAS voxel connections on a gray-matter surface."""
 
 from __future__ import annotations
 
@@ -9,13 +9,8 @@ from pathlib import Path
 
 import nibabel as nib
 import numpy as np
-from matplotlib.backends.backend_agg import FigureCanvasAgg
-from matplotlib.colors import LinearSegmentedColormap, TwoSlopeNorm
-from matplotlib.figure import Figure
-from matplotlib.cm import ScalarMappable
-from mpl_toolkits.mplot3d.art3d import Line3DCollection, Poly3DCollection
+from matplotlib.colors import LinearSegmentedColormap
 from scipy.ndimage import gaussian_filter
-from skimage.measure import marching_cubes
 
 
 _EDGE_SUFFIX = "_desc-BWASedges_relmat.tsv.gz"
@@ -84,17 +79,41 @@ def _top_edges(path: Path, clusters: set[int], top_k: int,
     return [(item[2], item[3], item[4]) for item in sorted(heap, reverse=True)]
 
 
-def _gray_matter_surface(mask: np.ndarray, affine: np.ndarray) -> np.ndarray:
-    """Build a translucent closed mesh from the supplied analysis mask on CPU."""
+def _gray_matter_surface(mask: np.ndarray, affine: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Build a closed mesh from the supplied analysis mask."""
+    import pyvista as pv
+
     smooth = gaussian_filter(np.pad(mask.astype(np.float32), 1), sigma=1.0)
-    vertices, faces, _, _ = marching_cubes(smooth, level=0.25, step_size=2)
-    return nib.affines.apply_affine(affine, vertices - 1)[faces]
+    coarse = smooth[::2, ::2, ::2]
+    grid = pv.ImageData(dimensions=coarse.shape, spacing=(2, 2, 2),
+                        origin=(-1, -1, -1))
+    grid.point_data["mask"] = coarse.ravel(order="F")
+    surface = grid.contour([0.25], scalars="mask").triangulate()
+    return nib.affines.apply_affine(affine, surface.points), surface.faces.reshape(-1, 4)[:, 1:]
 
 
-def _draw_gray_matter(ax, triangles: np.ndarray) -> None:
-    ax.add_collection3d(Poly3DCollection(
-        triangles, linewidths=0, facecolors=(0.55, 0.58, 0.60, 0.07),
-        edgecolors="none", zsort="average"))
+def _connection_paths(world: np.ndarray, cluster_ids: np.ndarray,
+                      z_values: np.ndarray, bundle_strength: float) -> tuple[np.ndarray, np.ndarray]:
+    """Optionally bend display lines toward same-cluster, same-sign centroids."""
+    steps = np.linspace(0.0, 1.0, 9 if bundle_strength else 2)
+    paths = (world[:, 0, None, :] * (1.0 - steps)[None, :, None] +
+             world[:, 1, None, :] * steps[None, :, None])
+    if bundle_strength:
+        weight = bundle_strength * np.sin(np.pi * steps) ** 2
+        for cluster_id, positive in set(zip(cluster_ids, z_values >= 0)):
+            group = np.flatnonzero((cluster_ids == cluster_id) & ((z_values >= 0) == positive))
+            if len(group) < 2:
+                continue
+            centers = world[group].mean(axis=0)
+            spine = (centers[0, None, :] * (1.0 - steps)[:, None] +
+                     centers[1, None, :] * steps[:, None])
+            paths[group] += weight[None, :, None] * (spine[None, :, :] - paths[group])
+        paths[:, 0] = world[:, 0]
+        paths[:, -1] = world[:, 1]
+    width = len(steps)
+    lines = np.column_stack((np.full(len(world), width),
+                             np.arange(len(world) * width).reshape(-1, width))).ravel()
+    return paths.reshape(-1, 3), lines
 
 
 def plot_bwas_connectivity(
@@ -104,25 +123,39 @@ def plot_bwas_connectivity(
     *,
     top_k: int = 500,
     cluster_p_max: float = 0.05,
+    cluster_id: int | None = None,
     min_abs_z: float | None = None,
+    bundle_strength: float = 0.0,
     view: str = "montage",
 ) -> Path:
     """Create a PNG of significant BWAS edges on the 2 mm gray-matter mask.
 
     The single BWAS group result is found below ``bwas_output_root/group/func``.
     Only the strongest ``top_k`` significant edges are retained in memory.
-    Blue means negative z, while red means positive z; endpoint size
-    follows the MA significant-edge count. The plot is illustrative, not a
-    tractography or anatomical fiber map.
+    ``cluster_id`` selects one significant 6D cluster; ``bundle_strength``
+    bends display lines within a cluster and sign without moving endpoints.
+    Blue means negative z, while red means positive z; endpoint size follows
+    the MA significant-edge count. Curves are not anatomical fiber paths.
     """
     if isinstance(top_k, bool) or not isinstance(top_k, (int, np.integer)) or top_k < 1:
         raise ValueError("top_k must be a positive integer")
     if not 0 < cluster_p_max <= 1:
         raise ValueError("cluster_p_max must be in (0, 1]")
+    if cluster_id is not None and (isinstance(cluster_id, bool) or
+                                   not isinstance(cluster_id, (int, np.integer)) or
+                                   cluster_id < 1):
+        raise ValueError("cluster_id must be a positive integer or None")
     if min_abs_z is not None and (not np.isfinite(min_abs_z) or min_abs_z < 0):
         raise ValueError("min_abs_z must be finite and nonnegative")
-    views = {"superior": (90, -90), "left": (0, 180), "right": (0, 0),
-             "anterior": (0, 90), "oblique": (25, -60)}
+    if not np.isfinite(bundle_strength) or not 0 <= bundle_strength <= 1:
+        raise ValueError("bundle_strength must be in [0, 1]")
+    views = {
+        "superior": ((0, 0, 1), (0, 1, 0)),
+        "left": ((-1, 0, 0), (0, 0, 1)),
+        "right": ((1, 0, 0), (0, 0, 1)),
+        "anterior": ((0, 1, 0), (0, 0, 1)),
+        "oblique": ((1, -1, 0.7), (0, 0, 1)),
+    }
     if view != "montage" and view not in views:
         raise ValueError(f"view must be montage or one of {', '.join(views)}")
     output_png = Path(output_png).expanduser().resolve()
@@ -145,6 +178,10 @@ def plot_bwas_connectivity(
         raise ValueError("gray-matter mask must be nonempty and MA values nonnegative/finite")
 
     significant = _significant_clusters(clusters_file, cluster_p_max)
+    if cluster_id is not None:
+        if cluster_id not in significant:
+            raise ValueError("cluster_id is not significant at cluster_p_max")
+        significant = {cluster_id}
     edges = _top_edges(edges_file, significant, top_k, min_abs_z)
     if edges:
         coordinates = np.asarray([entry[0] for entry in edges], dtype=np.int64).reshape(-1, 2, 3)
@@ -162,61 +199,66 @@ def plot_bwas_connectivity(
                        np.diag(np.diag(canonical.affine[:3, :3])), atol=1e-3):
         raise ValueError("gray-matter mask must have axes aligned to MNI coordinates")
     display_mask = np.asarray(canonical.dataobj) != 0
-    surface_triangles = _gray_matter_surface(display_mask, canonical.affine)
+    surface_vertices, surface_faces = _gray_matter_surface(display_mask, canonical.affine)
     panel_views = ("superior", "left", "right", "oblique") if view == "montage" else (view,)
-    figure = Figure(figsize=(12, 10) if view == "montage" else (8, 8),
-                    dpi=180, facecolor="white")
-    FigureCanvasAgg(figure)
+    import pyvista as pv
+
+    surface = pv.PolyData(surface_vertices, np.column_stack((
+        np.full(len(surface_faces), 3), surface_faces)).ravel())
+    center = np.asarray(surface.center)
+    extent = np.asarray(surface.bounds).reshape(3, 2)
+    spans = extent[:, 1] - extent[:, 0]
     world = nib.affines.apply_affine(mask_img.affine, coordinates) if edges else None
     if edges:
         values = np.asarray([entry[1] for entry in edges])
         limit = max(1.0, float(np.max(np.abs(values))))
-        norm = TwoSlopeNorm(vmin=-limit, vcenter=0, vmax=limit)
-        strength = np.abs(values) / limit
-        colors = color_map(norm(values))
-        colors[:, 3] = 0.08 + 0.28 * strength
+        cluster_ids = np.asarray([entry[2] for entry in edges])
+        line_points, lines = _connection_paths(world, cluster_ids, values, bundle_strength)
+        connections = pv.PolyData(line_points, lines=lines)
+        connections.cell_data["signed_z"] = values
         endpoints = np.unique(coordinates.reshape(-1, 3), axis=0)
         points = nib.affines.apply_affine(mask_img.affine, endpoints)
         counts = ma[tuple(endpoints.T)]
-        denominator = np.log1p(max(1.0, float(counts.max())))
-        point_sizes = 1.0 + 5.0 * np.log1p(counts) / denominator
-        color_axis = figure.add_axes((0.91, 0.29, 0.018, 0.42) if view == "montage"
-                                     else (0.89, 0.28, 0.025, 0.43))
-        figure.colorbar(ScalarMappable(norm=norm, cmap=color_map), cax=color_axis,
-                        label="signed z (blue: negative; red: positive)")
-    else:
-        figure.text(0.5, 0.07, "No edges pass the cluster and z thresholds",
-                    ha="center", fontsize=10)
-    corners = np.array(np.meshgrid(*[(0, s - 1) for s in mask.shape], indexing="ij"))
-    world_corners = nib.affines.apply_affine(mask_img.affine, corners.reshape(3, -1).T)
-    minimum, maximum = world_corners.min(axis=0), world_corners.max(axis=0)
-    for panel_index, panel_view in enumerate(panel_views):
-        if view == "montage":
-            left = (0.01, 0.44)[panel_index % 2]
-            bottom = (0.52, 0.10)[panel_index // 2]
-            bounds = (left, bottom, 0.42, 0.39)
-        else:
-            bounds = (0.01, 0.08, 0.86, 0.84)
-        ax = figure.add_axes(bounds, projection="3d")
-        elevation, azimuth = views[panel_view]
-        _draw_gray_matter(ax, surface_triangles)
-        if edges:
-            ax.add_collection3d(Line3DCollection(
-                world, colors=colors, linewidths=0.25 + 0.55 * strength, zorder=10))
-            ax.scatter(points[:, 0], points[:, 1], points[:, 2], s=point_sizes,
-                       c="#30373b", alpha=0.38, depthshade=False, zorder=11)
-        ax.set(xlim=(minimum[0], maximum[0]), ylim=(minimum[1], maximum[1]),
-               zlim=(minimum[2], maximum[2]))
-        ax.set_box_aspect(maximum - minimum, zoom=1.5 if view == "montage" else 1.45)
-        ax.view_init(elev=elevation, azim=azimuth)
-        ax.set_axis_off()
-        if view == "montage":
-            ax.set_title(panel_view.capitalize(), fontsize=11, pad=0)
-    figure.suptitle(f"BWAS voxel-pair associations · top {len(edges):,} edges\n"
-                     f"cluster FWER p < {cluster_p_max:g}", fontsize=13, y=0.96)
-    figure.text(0.03, 0.025, "Straight lines: voxel-pair associations, not anatomical fibers.\n"
-                "Endpoint size ∝ log(1 + MA significant-edge count).",
-                fontsize=8, color="#4d5356")
+        point_cloud = pv.PolyData(points)
+        point_cloud["radius"] = 0.6 + 1.3 * np.log1p(counts) / np.log1p(max(1.0, float(counts.max())))
+        markers = point_cloud.glyph(scale="radius", geom=pv.Sphere(
+            theta_resolution=8, phi_resolution=8), orient=False)
+    shape = (2, 2) if view == "montage" else (1, 1)
     output_png.parent.mkdir(parents=True, exist_ok=True)
-    figure.savefig(output_png, dpi=180, facecolor="white")
+    plotter = pv.Plotter(shape=shape, off_screen=True,
+                         window_size=(2160, 1800) if view == "montage" else (1440, 1440),
+                         border=False)
+    try:
+        plotter.set_background("white", all_renderers=True)
+        for panel_index, panel_view in enumerate(panel_views):
+            plotter.subplot(panel_index // shape[1], panel_index % shape[1])
+            plotter.add_mesh(surface, color="#a2a7aa", opacity=0.12,
+                             show_edges=False, smooth_shading=True, lighting=True)
+            if edges:
+                plotter.add_mesh(connections, scalars="signed_z", cmap=color_map,
+                                 clim=(-limit, limit), line_width=1.5,
+                                 render_lines_as_tubes=True, opacity=0.75,
+                                 lighting=False,
+                                 show_scalar_bar=view != "montage" or panel_index == 3,
+                                 scalar_bar_args={"title": "signed z", "vertical": False,
+                                                  "position_x": 0.18, "position_y": 0.06,
+                                                  "width": 0.64, "height": 0.09,
+                                                  "title_font_size": 21,
+                                                  "label_font_size": 17,
+                                                  "n_labels": 2, "fmt": "%.1f"})
+                plotter.add_mesh(markers, color="#373d41", opacity=0.65,
+                                 lighting=False, show_scalar_bar=False)
+            direction, up = (np.asarray(value, dtype=float) for value in views[panel_view])
+            direction /= np.linalg.norm(direction)
+            plotter.camera_position = (center + direction * max(spans) * 3, center, up)
+            plotter.enable_parallel_projection()
+            plotter.camera.parallel_scale = max(spans) * 0.55
+            plotter.add_text(panel_view.capitalize(), position="upper_left",
+                             font_size=13, color="#30363a")
+            if not edges:
+                plotter.add_text("No edges pass the cluster and z thresholds",
+                                 position="lower_left", font_size=10, color="#555555")
+        plotter.screenshot(output_png)
+    finally:
+        plotter.close()
     return output_png

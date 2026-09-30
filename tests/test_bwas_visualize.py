@@ -8,7 +8,7 @@ import pytest
 
 from fnit.bwas import plot_bwas_connectivity
 import fnit.bwas.visualize as visualization
-from fnit.bwas.visualize import _result_files, _significant_clusters, _top_edges
+from fnit.bwas.visualize import _connection_paths, _result_files, _significant_clusters, _top_edges
 
 
 def _example(tmp_path):
@@ -57,6 +57,20 @@ def test_streaming_top_edges_filter_significance_and_rank(tmp_path):
     assert _top_edges(edges, set(), top_k=2, min_abs_z=None) == []
 
 
+def test_visual_bundling_preserves_endpoints_and_sign_groups():
+    world = np.array([[[0, 0, 0], [10, 0, 0]],
+                      [[0, 4, 0], [10, 4, 0]],
+                      [[0, 8, 0], [10, 8, 0]]], dtype=float)
+    points, lines = _connection_paths(world, np.array([1, 1, 1]),
+                                      np.array([5.0, 6.0, -5.0]), 1.0)
+    paths = points.reshape(3, 9, 3)
+    np.testing.assert_array_equal(paths[:, 0], world[:, 0])
+    np.testing.assert_array_equal(paths[:, -1], world[:, 1])
+    np.testing.assert_allclose(paths[0, 4], paths[1, 4])
+    np.testing.assert_allclose(paths[2, 4], [5, 8, 0])
+    assert len(lines) == 3 * 10
+
+
 def test_plot_montage_reads_edges_once_and_refuses_overwrite(tmp_path, monkeypatch):
     root, mask, *_ = _example(tmp_path)
     output = tmp_path / "figures" / "bwas.png"
@@ -89,6 +103,40 @@ def test_invalid_view(tmp_path):
     root, mask, *_ = _example(tmp_path)
     with pytest.raises(ValueError, match="view must be montage"):
         plot_bwas_connectivity(root, mask, tmp_path / "wrong.png", view="bottom")
+
+
+@pytest.mark.parametrize("cluster_id", [0, -1, True, 1.5])
+def test_cluster_id_must_be_positive_integer(tmp_path, cluster_id):
+    root, mask, *_ = _example(tmp_path)
+    with pytest.raises(ValueError, match="cluster_id must be a positive integer"):
+        plot_bwas_connectivity(root, mask, tmp_path / "wrong.png", cluster_id=cluster_id)
+
+
+def test_cluster_id_must_pass_significance_threshold(tmp_path):
+    root, mask, *_ = _example(tmp_path)
+    with pytest.raises(ValueError, match="cluster_id is not significant"):
+        plot_bwas_connectivity(root, mask, tmp_path / "wrong.png", cluster_id=2)
+
+
+def test_selected_cluster_is_passed_to_edge_filter(tmp_path, monkeypatch):
+    root, mask, *_ = _example(tmp_path)
+    selected = []
+    original = visualization._top_edges
+
+    def tracked_edges(path, clusters, top_k, min_abs_z):
+        selected.append(clusters)
+        return original(path, clusters, top_k, min_abs_z)
+
+    monkeypatch.setattr(visualization, "_top_edges", tracked_edges)
+    plot_bwas_connectivity(root, mask, tmp_path / "cluster.png", cluster_id=1)
+    assert selected == [{1}]
+
+
+@pytest.mark.parametrize("strength", [-0.1, 1.1, float("nan")])
+def test_bundle_strength_range(tmp_path, strength):
+    root, mask, *_ = _example(tmp_path)
+    with pytest.raises(ValueError, match="bundle_strength must be in"):
+        plot_bwas_connectivity(root, mask, tmp_path / "wrong.png", bundle_strength=strength)
 
 
 @pytest.mark.parametrize("top_k", [0, 1.5, float("inf"), True])
