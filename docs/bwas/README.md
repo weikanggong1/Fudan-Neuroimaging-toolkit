@@ -148,7 +148,9 @@ python BWAS_main.py -toolbox_dir /path/to/BWAS \
 
 `plot_bwas_connectivity` 读取 `run_bwas` 的连接表、簇表和 MA 图。`all_clusters=True` 时，它扫描**全部显著簇内连接**，从每个簇按固定随机种子抽取真实体素对；显示额度按簇内边数的平方根分配，因此大簇显示更多线，同时每个簇至少保留一条。每条线的两端仍是原始体素的 MNI 坐标，只在中段向该簇全部连接的平均路径靠拢。同一簇的正负 z 分开集束。黄色点是真实体素端点；弯线表示**群体 FC 统计连接**，不代表解剖纤维。`voxel_edge_budget` 控制整张图的线数，默认 600；所有显著簇都会出现，但图中并未逐条画出全部连接。默认单边模式仍可用 `top_k` 选择强连接。
 
-脑轮廓可读取用户提供的 [BrainNet Viewer ICBM152 `.nv` 表面](https://github.com/mingruixia/BrainNet-Viewer/tree/master/Data/SurfTemplate)，并叠加同一源码包中的 `BrainMesh_Cerebellum.nv` 形成清晰的小脑。2019 版大脑网格有 81,924 个顶点、163,840 个三角面；小脑网格有 45,406 个顶点、90,788 个三角面。若不提供大脑表面，函数从 2 mm 灰质掩膜提取较粗的外轮廓。两个网格均不随 FNIT 分发，可从 BrainNet Viewer 原站获取，或从已有 `BrainNetViewer_20191031.zip` 的 `Data/SurfTemplate/` 提取。该 ZIP 内大脑网格 SHA-256 为 `471e43f955a1cb9f0350aaca2822f02fc74e393718d1e385fddaf0e578ffe572`，小脑网格为 `44faea7e04dc4132fc15bbd086d4b78e5dc76b2ea09dbdc17e8f228aee5b54bc`。Python 代码独立读取 `.nv`，运行时不调用 MATLAB、BrainNet Viewer 或 BrainGL。正 z 为红色，负 z 为蓝色，采用 [FSLeyes 的红蓝配色名称](https://github.com/pauldmccarthy/fsleyes/blob/main/fsleyes/assets/colourmaps/order.txt)所对应的视觉约定；未复制原色表。
+建议通过 `brain_mask_file` 提供与 BOLD 同空间、同网格的 **2 mm 全脑二值掩膜**，例如 [FSL 标准模板](https://git.fmrib.ox.ac.uk/fsl/data_standard)中的 `MNI152_T1_2mm_brain_mask.nii.gz`。函数以它和分析灰质掩膜的并集构建显示轮廓，包含小脑；全分辨率提取后轻度平滑网格，保留有效分析体素。若未提供全脑掩膜，轮廓只显示分析灰质范围。模板须从原作者获取，不随 FNIT 分发；运行时只用 Nibabel 读取 NIfTI，无需 FSL 可执行程序。
+
+也可提供 [BrainNet Viewer `.nv` 网格](https://github.com/mingruixia/BrainNet-Viewer/tree/master/Data/SurfTemplate)，但它必须与影像空间匹配。函数逐视角检查端点是否被表面投影覆盖；不匹配时报告遗漏端点数，并提示改用同网格的 `brain_mask_file`。全脑掩膜与外置网格二选一，不自动配准、移动或删除端点。点标记半径为 `0.25–0.50 mm`，随 MA 增大。运行时不调用 MATLAB、BrainNet Viewer 或 BrainGL。正 z 为红色，负 z 为蓝色，采用 [FSLeyes 的红蓝配色名称](https://github.com/pauldmccarthy/fsleyes/blob/main/fsleyes/assets/colourmaps/order.txt)所对应的视觉约定。
 
 主页的 `environment.yml` 已包含 PyVista/VTK；单独安装可用 `pip install '.[bwas-visualization]'`。绘图无需 CUDA 计算，但 VTK 需要 OpenGL；无界面服务器可使用 EGL 或 OSMesa。
 
@@ -160,8 +162,7 @@ from fnit.bwas import plot_bwas_connectivity
 
 bwas_output_root = Path("/data/derivatives/fnit-bwas")  # 已完成的 run_bwas 输出根目录
 gray_matter_mask_file = Path("/data/MNI152_2mm_graymatter_mask.nii.gz")  # 与统计结果同网格的输入灰质掩膜
-brain_surface_file = Path("/data/BrainNetViewer/Data/SurfTemplate/BrainMesh_ICBM152.nv")  # 从 BrainNet Viewer 原站取得的 MNI 表面网格
-cerebellum_surface_file = Path("/data/BrainNetViewer/Data/SurfTemplate/BrainMesh_Cerebellum.nv")  # 同一来源的小脑网格
+brain_mask_file = Path("/data/templates/MNI152_T1_2mm_brain_mask.nii.gz")  # 与分析掩膜同 shape、affine 的全脑二值掩膜，包含小脑
 output_png = (bwas_output_root / "group" / "figures" /
               "task-rest_space-MNI152NLin6Asym_desc-BWASvoxelBundles_figure.png")  # 新图像路径
 
@@ -172,10 +173,9 @@ figure_path = plot_bwas_connectivity(
     cluster_p_max=0.05,  # 只显示簇水平 FWER p < 0.05 的连接
     all_clusters=True,  # 所有显著簇都显示真实体素级连接
     voxel_edge_budget=600,  # 全图显示 600 条体素对；大簇按比例显示更多
-    bundle_strength=0.85,  # 仅使每条线中段靠近本簇平均路径，两端保持原坐标
-    brain_surface_file=brain_surface_file,  # 可选：清晰脑沟轮廓；不提供则使用灰质掩膜表面
-    cerebellum_surface_file=cerebellum_surface_file,  # 可选：加入清晰小脑表面
-    surface_opacity=0.18,  # 灰色脑表面透明度：0 全透明，1 不透明
+    bundle_strength=0.95,  # 仅使每条线中段靠近本簇平均路径，两端保持原坐标
+    brain_mask_file=brain_mask_file,  # 从同网格全脑掩膜构建轮廓，包含小脑
+    surface_opacity=0.10,  # 灰色脑表面不透明度：0 全透明，1 不透明
     colorbar_max_abs_z=8.0,  # 红蓝色条范围固定为 -8 到 +8；None 使用数据范围
     show_colorbar=True,  # 是否显示 signed z 色条
     view="signed_six",  # 一张六联图：上排正 z、下排负 z；每排左/俯/右视
@@ -191,9 +191,10 @@ print(figure_path)
 | `cluster_p_max` | 簇水平 FWER p 的严格上限，取 `(0, 1]`，默认 `0.05`。 |
 | `all_clusters` | 默认 `False`；开启后从每个显著簇按比例抽取真实体素对并集束，忽略 `top_k`。 |
 | `voxel_edge_budget` | 全簇模式的总显示线数，默认 `600`；须不小于显著簇及 z 符号组数，较大值会增加遮挡。 |
-| `brain_surface_file` | 可选 BrainNet Viewer `.nv` 网格；默认从输入灰质掩膜提取外轮廓。 |
-| `cerebellum_surface_file` | 可选 BrainNet Viewer 小脑 `.nv` 网格，与大脑表面合并绘制。 |
-| `surface_opacity` | 灰色脑表面透明度，取 `[0, 1]`；默认外置网格 `0.23`、掩膜表面 `0.12`。 |
+| `brain_mask_file` | 推荐提供同网格的全脑二值 NIfTI 掩膜；与分析灰质掩膜取并集形成显示轮廓。默认 `None`，此时只显示灰质分析范围。不能与外置网格合用。 |
+| `brain_surface_file` | 可选且已匹配影像空间的 BrainNet Viewer `.nv` 网格；各视角须覆盖全部显示端点，否则报错。 |
+| `cerebellum_surface_file` | 外置网格模式可叠加同空间的小脑 `.nv`；全脑掩膜模式已经包含小脑。 |
+| `surface_opacity` | 灰色脑表面不透明度，取 `[0, 1]`；默认外置网格 `0.23`、掩膜表面 `0.12`。 |
 | `colorbar_max_abs_z` | 可选正数；将红蓝色条设为对称的 `[-值, +值]`，超过范围的 z 在端色饱和；默认按图中 z 自动取值。 |
 | `show_colorbar` | 默认 `True`，控制是否显示 signed z 色条。 |
 | `view` | `montage` 四联图；`six` 为六个独立方向；`signed_six` 为正负分行、每行左/俯/右视，仅与 `all_clusters=True` 联用；也可取 `left`、`right`、`superior`、`inferior`、`anterior`、`posterior`、`oblique` 单视角。 |
@@ -204,9 +205,17 @@ print(figure_path)
 
 下图来自 ABIDE I+II 的 1748 人全脑结果。`p_fwer < 0.05` 的 **60 个显著 FC 簇**共含 **1,154,192 条连接**；图中按比例显示 600 条真实体素对连接，其中最小簇 3 条、最大簇 62 条。正负结果分行，线条在本簇内集束；黄色点保留各条线的真实体素端点。红色表示病例组连接 Fisher z 较高，蓝色表示较低。图中没有个体影像、逐边矩阵或被试标识。
 
-![ABIDE I+II 所有显著 FC 簇的体素级集束连接及小脑：正负分行的左视、俯视和右视](figures/abide_voxel_bundles_cerebellum_signed_six.png)
+![ABIDE I+II 同空间全脑轮廓中的体素级集束连接：正负分行的左视、俯视和右视](figures/abide_voxel_bundles_mni_mask_signed_six.png)
 
-[同一批体素级连接的六个独立视角：左、俯、右、后、仰、前](figures/abide_voxel_bundles_cerebellum_six.png)。在 gpucw1 的 PyVista 0.49.0、VTK 9.7.1 和 NVIDIA H100 EGL 环境下，两张 2700×1800 图依次耗时 `12.68 s`、`12.38 s`，均包含读取压缩连接表、按簇抽样集束和写出 PNG。共享 GPU 负载会影响计时；本机缺少可用的软件 OpenGL 渲染库，尚无同机 CPU/GPU 加速比。
+[同一批体素级连接的六个独立视角：左、俯、右、后、仰、前](figures/abide_voxel_bundles_mni_mask_six.png)。两张图使用 `bundle_strength=0.95`、`surface_opacity=0.10`。参考脑掩膜 SHA-256 为 `b71a9f2015bd10262c37e51b4d17a655d0eb0a0dec4ba48322fb5af55c86b97c`；它与分析掩膜同网格，并集额外保留 142 个有效分析体素。
+
+[真实端点与轮廓覆盖检查](../../validation/bwas/surface_outline.json)使用 1097 个不同端点。检查图为 1200×1200 的实心表面投影；正式图为 2700×1800。端点位移为 `0 mm`；最近端点到显示表面的距离为 `1.08 mm`，大于点标记的最大半径 `0.50 mm`。旧网格在本例会被新覆盖检查拒绝。PyVista 0.49 / VTK 9.7.1 在共享 H100 服务器上通过 EGL 渲染；正负分行六联图耗时 `15.16 s`，六方向图耗时 `12.28 s`，均含结果表读取、表面生成、覆盖检查与 PNG 写出。
+
+| 超出显示轮廓的端点中心 | 原 BrainNet 网格 | 同网格全脑轮廓 |
+|---|---:|---:|
+| 侧视 | 5 | 0 |
+| 俯视 | 97 | 0 |
+| 前视 | 90 | 0 |
 
 ## ABIDE 真实数据 benchmark
 
