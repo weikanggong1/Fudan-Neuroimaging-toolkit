@@ -1,8 +1,12 @@
 # Fudan Neuroimaging Toolkit (FNIT)
 
-FNIT 提供脑 MRI 处理和群体分析的 Python 与命令行接口。主要计算由 PyTorch 实现，NIfTI 读写使用 Nibabel；除各功能页明确列出的参考对照外，运行 FNIT 不需要安装 FSL、FreeSurfer、SPM、MRtrix3、AFNI、DIPY 或工作流封装包。Python 包名为 `fnit`，统一命令行入口为 `fnit`。
+**本工具包仍处于开发阶段，部分算法尚未完成严格验证，目前不宜作为常规数据处理与分析的默认工具。**
 
-CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核；BWAS 为匹配原版统计结果，单独使用普通 float32 连接计算和 QR 正交化回归。模型、影像张量与 NIfTI 输出保持 float32；不会自动使用 float16 或 bfloat16。除 recon-all、Connectome 和群体 BWAS 专页另行维护的范围外，本页审计的功能只提供单被试 Python API 和单被试命令行接口。多个病例由调用方在包外通过任务调度器、进程池或作业系统分配 CPU/GPU；这些单被试功能不提供多被试调度层。
+FNIT 提供人脑磁共振（MRI）处理和群体分析的 Python 与命令行接口。主要计算由 PyTorch 实现，NIfTI 读写使用 Nibabel。Python 包名为 `fnit`，统一命令行入口为 `fnit`。各功能的运行依赖与安装要求见对应功能页；当前 Connectome 的自动结构重建仍需用户安装并许可的官方 FreeSurfer `recon-all`。
+
+CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹配原版统计结果，使用普通 float32 连接计算和 QR 正交化回归。模型、影像张量与 NIfTI 输出保持 float32，不自动使用 float16 或 bfloat16。
+
+影像处理以单被试 Python API 和命令行接口为主；多被试任务可在包外通过任务调度器、进程池或作业系统分配 CPU/GPU。recon-all、Connectome、BigFLICA 和 BWAS 的处理范围与调用方式见对应功能页。
 
 ## 功能
 
@@ -11,6 +15,17 @@ CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核；BWAS 为匹配原�
 | 函数名 | 原软件函数名 | 功能 |
 |---|---|---|
 | [run_fslmaths](docs/fslmaths/README.md) | FSL `fslmaths` | 3D/4D NIfTI 算术、阈值、滤波、形态学与时间统计。 |
+
+### 多模态
+
+| 函数名 | 原软件函数名 | 功能 |
+|---|---|---|
+| [TorchFLIRT](docs/flirt/README.md) | FSL `flirt` | 线性配准；`applyxfm` 应用已知矩阵或按 qform/sform 在 MNI152 不同分辨率间重采样。 |
+| [TorchFNIRT](docs/fnirt/README.md) | FSL `fnirt` | 非线性配准、Jacobian 与系数场。 |
+| [TorchApplyWarp](docs/applywarp/README.md) | FSL `applywarp` | 应用形变场及前后仿射矩阵。 |
+| [TorchConvertWarp](docs/convertwarp/README.md) | FSL `convertwarp` | 组合线性与非线性变换，转换 MMORF 场。 |
+| [TorchInvWarp](docs/invwarp/README.md) | FSL `invwarp` | 在指定网格上计算位移场的反场。 |
+| [convert_space](docs/space_conversion/README.md) | CBIG RF-ANTs；HCP Workbench `-metric-resample` | MNI152、fsaverage 与 fsLR 皮层标量或标签图互转，支持多种体素网格与表面密度。 |
 
 ### sMRI
 
@@ -52,25 +67,14 @@ CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核；BWAS 为匹配原�
 | [DMRIPipeline](docs/dmri_pipeline/README.md) | UK Biobank dMRI pipeline（FSL `topup`、`eddy`、`dtifit`、TBSS） | 读取单被试原始 BIDS 或 UKB 格式 DWI；无 T1w 用 TBSS，有 T1w 可选 MMORF；生成九张标准空间扩散参数图。 |
 | [UKBConnectome_pipeline](docs/connectome/README.md) | BIDS DWI/T1 结构连接组网 | 从原始 BIDS 自动执行 TOPUP、EDDY、必要时的官方 recon-all，并从一次追踪输出单套或多套 atlas 矩阵；[真实数据对照](validation/connectome/ds004666/README.md)。 |
 
-### 多模态
-
-| 函数名 | 原软件函数名 | 功能 |
-|---|---|---|
-| [TorchFLIRT](docs/flirt/README.md) | FSL `flirt` | 线性配准；`applyxfm` 应用已知矩阵或按 qform/sform 在 MNI152 不同分辨率间重采样。 |
-| [TorchFNIRT](docs/fnirt/README.md) | FSL `fnirt` | 非线性配准、Jacobian 与系数场。 |
-| [TorchApplyWarp](docs/applywarp/README.md) | FSL `applywarp` | 应用形变场及前后仿射矩阵。 |
-| [TorchConvertWarp](docs/convertwarp/README.md) | FSL `convertwarp` | 组合线性与非线性变换，转换 MMORF 场。 |
-| [TorchInvWarp](docs/invwarp/README.md) | FSL `invwarp` | 在指定网格上计算位移场的反场。 |
-| [convert_space](docs/space_conversion/README.md) | CBIG RF-ANTs；HCP Workbench `-metric-resample` | MNI152、fsaverage 与 fsLR 皮层标量或标签图互转，支持多种体素网格与表面密度。 |
-
-### Post analysis
+### 后续分析（Post analysis）
 
 | 函数名 | 原软件函数名 | 功能 |
 |---|---|---|
 | [run_bigflica / apply_model](docs/bigflica/README.md) | [BigFLICA](https://github.com/weikanggong/BigFLICA) mMIGP、DicL、FLICA | 从每人一目录的多模态标准空间 NIfTI 提取跨模态成分，输出被试 course、各模态成分 z 图和 top-voxel 脑图；CUDA 路径逐被试建库、分块处理 mMIGP 与 DicL，可选跳过两者直接拟合体素 FLICA，并投影新被试。 |
 | [run_bwas / plot_bwas_connectivity](docs/bwas/README.md) | [weikanggong/BWAS](https://github.com/weikanggong/BWAS) | 对多被试 2 mm BIDS volume BOLD 的逐体素连接做表型 GLM、6D 连接簇校正、MA 图和多视角连接可视化。 |
 
-各功能页给出带参数注释的 Python 示例、输入/输出结构、原软件命令、真实数据精度与计时结果，并在末尾列出参考文献和原实现代码库。统一入口中的子命令用 `fnit <子命令> --help` 查看；fMRI 使用 `fnit-fmri --help`，MS-HBM 使用 `fnit-mshbm --help`，recon-all 使用 `fnit-recon-all --help`。全部独立入口见 [pyproject.toml](pyproject.toml)。
+各功能页说明输入、输出、参数与调用示例，并汇总已有的真实数据验证结果、原软件命令、参考文献和原实现链接。统一入口中的子命令用 `fnit <子命令> --help` 查看；fMRI 使用 `fnit-fmri --help`，MS-HBM 使用 `fnit-mshbm --help`，recon-all 使用 `fnit-recon-all --help`。全部独立入口见 [pyproject.toml](pyproject.toml)。
 
 ## 安装
 
@@ -93,11 +97,9 @@ CONDA_OVERRIDE_GLIBC=2.17 conda env create -p "$FNIT_ENV_PREFIX" -f environment.
 conda activate "$FNIT_ENV_PREFIX"
 ```
 
-[Conda 环境验证](validation/environment/README.md)和[机器可读报告](validation/environment/report.public.json)记录了依赖 dry-run、目标 ABI、固定 wheel 的下载校验与实际导入结果。dry-run 证明依赖可解析，不代表任意机器已经完成环境创建。
+[Conda 环境验证](validation/environment/README.md)和[机器可读报告](validation/environment/report.public.json)记录了依赖解析、目标 ABI、固定 wheel 的下载校验与实际导入结果。具体安装结果以目标机器上的环境创建和导入检查为准。
 
-只需基础 Python 安装时也可使用虚拟环境：
-
-该方式需预先安装支持 C++17 的编译器，以构建表面 MSMSulc 的 FastPD 扩展。
+也可使用 Python 虚拟环境安装；需预先安装支持 C++17 的编译器，以构建表面 MSMSulc 的 FastPD 扩展：
 
 ```bash
 python3 -m venv .venv
@@ -109,7 +111,7 @@ recon-all 的 Python 依赖和原生编译工具链已列入主页 Conda 环境�
 
 ## 下载和配置权重
 
-Git 仓库与 wheel 不包含模型权重。配置脚本优先从 [FNIT 固定版本 Release](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1)下载；Release 不可用时回退到原作者地址。每个文件均检查大小和 SHA-256，再保存默认权重目录。推理过程不会自动联网。
+Git 仓库与 wheel 不包含模型权重。配置脚本优先从 [FNIT 固定版本 Release](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1)下载；Release 不可用时回退到原作者地址。每个文件均检查大小和 SHA-256，再保存到默认权重目录。推理过程不会自动联网。
 
 下载全部模型：
 
@@ -167,6 +169,6 @@ API 的显式 `weights=`、CLI 的 `--weights`、`FNIT_WEIGHTS` 环境变量、�
 
 ## 验证、样例与许可
 
-[验证索引](validation/README.md)汇总当前源码对应的真实数据精度、运行时间、峰值显存和示意图，并链接机器可读报告。公开样例见 [T1w](examples/README.md)与 [FLAIR](examples/WMH.md)。官方软件只用于生成参考结果，不是 FNIT 候选运行时依赖。
+[验证索引](validation/README.md)汇总当前源码对应的真实数据精度、运行时间、峰值显存和示意图，并链接机器可读报告。公开样例见 [T1w](examples/README.md)与 [FLAIR](examples/WMH.md)。各功能的验证范围和运行依赖以对应功能页为准。
 
-FSL 派生代码及随包保存的上游源码受 [FSL Software Licence 6.0](licenses/FSL-6.0.txt) 的非商业使用条款约束；其他第三方来源、许可与引用见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)和[来源记录](docs/provenance.json)。
+FSL 派生代码及随包保存的上游源码受 [FSL Software Licence 6.0](licenses/FSL-6.0.txt) 的非商业使用条款约束；其他第三方来源、许可与引用见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) 和 [来源记录](docs/provenance.json)。
