@@ -40,6 +40,22 @@ def _signature(records: object) -> str:
     return hashlib.sha256(json.dumps(records, sort_keys=True).encode()).hexdigest()
 
 
+def _flica_directory(destination: Path, n_components: int, lambda_dims: str) -> Path:
+    suffix = "" if lambda_dims == "o" else "_lambda_R"
+    return destination / f"components_{n_components}{suffix}"
+
+
+def _check_flica_output(directory: Path, signature: str,
+                        modalities: Sequence[str]) -> None:
+    model_file = directory / "model.json"
+    if model_file.is_file():
+        model = json.loads(model_file.read_text(encoding="utf-8"))
+        prior_modalities = model.get("source_modalities", model.get("modalities", {}))
+        if model.get("input_signature") != signature or list(prior_modalities) != list(modalities):
+            raise ValueError("Existing FLICA model has different inputs or modalities; "
+                             "use a fresh output_dir")
+
+
 def _file_record(path: Path) -> tuple[str, int, int]:
     stat = path.stat()
     return str(path.resolve()), stat.st_size, stat.st_mtime_ns
@@ -157,23 +173,26 @@ def fit_dicl(projected: Mapping[str, np.ndarray], dicl_dim: int,
 
 def _fit_flica(dictionaries: Mapping[str, np.ndarray], n_components: int,
                max_iter: int, output_dir: Path,
-               device: str = "cpu") -> tuple[np.ndarray, np.ndarray]:
+               device: str = "cpu", lambda_dims: str = "o"
+               ) -> tuple[np.ndarray, np.ndarray]:
     from . import flica_vb
 
     names = list(dictionaries)
     data = [dictionaries[name] for name in names]
     if not 1 <= n_components < data[0].shape[1] - 1:
         raise ValueError("n_components must be at least 1 and < migp_dim - 1")
+    if lambda_dims not in ("o", "R"):
+        raise ValueError("lambda_dims must be 'o' or 'R'")
     output_dir.mkdir(parents=True, exist_ok=True)
     if _device(device).type == "cuda":
         from .flica_torch import initialize_flica_torch, iterate_flica_torch
         priors, posteriors, constants = initialize_flica_torch(
-            data, n_components, device=device)
+            data, n_components, device=device, lambda_dims=lambda_dims)
         fitted = iterate_flica_torch(data, priors, posteriors, constants,
                                      max_iter, device=device)
     else:
         opts = {"num_components": n_components, "maxits": max_iter,
-                "lambda_dims": "o", "initH": "PCA",
+                "lambda_dims": lambda_dims, "initH": "PCA",
                 "dof_per_voxel": "auto_eigenspectrum", "computeF": 0,
                 "output_dir": str(output_dir)}
         with (output_dir / "flica.log").open("w", encoding="utf-8") as stream:
@@ -181,15 +200,37 @@ def _fit_flica(dictionaries: Mapping[str, np.ndarray], n_components: int,
                 priors, posteriors, constants = flica_vb.flica_init_params(data, opts)
                 fitted = flica_vb.flica_iterate(data, opts, priors, posteriors, constants)
     h = np.asarray(fitted["H"], dtype=np.float64).T
+    if not np.isfinite(h).all():
+        raise ValueError("FLICA returned nonfinite subject components")
     strengths = np.zeros(n_components, dtype=np.float64)
+    ratios = {}
+    reconstructed_sq = 0.0
+    input_sq = 0.0
     for index, spatial in enumerate(fitted["X"]):
         weights = np.asarray(fitted["W"][index]).reshape(-1)
         reconstructed = (np.asarray(spatial) * weights) @ h.T
+        reconstructed_sq += float(np.square(reconstructed).sum())
+        input_sq += float(np.square(data[index]).sum())
         ratio = np.linalg.norm(reconstructed) / np.linalg.norm(data[index])
-        if not np.isfinite(ratio) or ratio < 1e-6:
-            raise ValueError("FLICA collapsed to a near-zero reconstruction; increase "
-                             "dicl_dim or training sample size")
+        if not np.isfinite(ratio):
+            raise ValueError(f"FLICA returned a nonfinite reconstruction: {names[index]}")
+        ratios[names[index]] = float(ratio)
         strengths += (np.asarray(spatial) ** 2).sum(axis=0) * weights ** 2
+    singular_values = np.linalg.svd(h, compute_uv=False)
+    singular_ratios = (singular_values / singular_values[0] if singular_values[0]
+                       else np.zeros_like(singular_values))
+    rank = int(np.count_nonzero(singular_ratios > 1e-6))
+    (output_dir / "flica_reconstruction.json").write_text(json.dumps({
+        "flica_lambda_dims": lambda_dims,
+        "per_modality_ratio": ratios,
+        "overall_ratio": float(np.sqrt(reconstructed_sq / input_sq)),
+        "component_rank": rank, "requested_components": n_components,
+        "rank_relative_threshold": 1e-6,
+        "singular_value_ratios": singular_ratios.tolist(),
+        "component_row_norms": np.linalg.norm(h, axis=0).tolist()}, indent=2))
+    if rank < n_components or any(value < 1e-6 for value in ratios.values()):
+        raise ValueError("FLICA collapsed or pruned requested components; "
+                         "inspect flica_reconstruction.json")
     order = np.argsort(strengths)[::-1]
     contribution = np.asarray(fitted["H_PCs"])[:len(names), order]
     return h[:, order], contribution
@@ -220,19 +261,21 @@ def _write_maps(name: str, z: np.ndarray, mask_image: nib.spatialimages.SpatialI
     destination.mkdir(parents=True, exist_ok=True)
     if top_voxels < 1:
         raise ValueError("top_voxels must be positive")
+    map_header = mask_image.header.copy()
+    map_header.set_data_dtype(np.float32)
     for component in range(z.shape[1]):
         vector = z[:, component]
         volume = np.zeros(mask.shape, dtype=np.float32)
         volume[mask] = vector
         prefix = f"component-{component + 1:03d}"
-        nib.save(nib.Nifti1Image(volume, mask_image.affine, mask_image.header),
+        nib.save(nib.Nifti1Image(volume, mask_image.affine, map_header),
                  destination / f"{prefix}_zstat.nii.gz")
         selected = np.zeros_like(vector, dtype=bool)
         count = min(top_voxels, vector.size)
         selected[np.argpartition(np.abs(vector), -count)[-count:]] = True
         thresholded = np.zeros(mask.shape, dtype=np.float32)
         thresholded[mask] = np.where(selected, vector, 0)
-        nib.save(nib.Nifti1Image(thresholded, mask_image.affine, mask_image.header),
+        nib.save(nib.Nifti1Image(thresholded, mask_image.affine, map_header),
                  destination / f"{prefix}_top-{count}.nii.gz")
         fig, axes = plt.subplots(1, 3, figsize=(11, 4))
         bound = max(float(np.abs(vector[selected]).max()), 1.0)
@@ -255,10 +298,11 @@ def run_bigflica(subjects_root: str | Path, modalities: Mapping[str, Mapping[str
                  dicl_dim: int | None = None, *, subjects: Sequence[str] | None = None,
                  device: str = "auto", dicl_max_iter: int = 1000,
                  flica_max_iter: int = 1000, top_voxels: int = 1000,
-                 random_state: int = 0, max_gpu_gb: float = 28.0,
+                 random_state: int = 0, max_gpu_gb: float = 19.0,
                  feature_block: int = 2048, dicl_batch_size: int = 32,
                  dicl_sparse_iterations: int = 120,
-                 use_mmigp_dicl: bool = True) -> Path:
+                 use_mmigp_dicl: bool = True,
+                 flica_lambda_dims: str = "o") -> Path:
     """Fit BigFLICA from subject directories; return the saved model directory."""
     root, destination = Path(subjects_root), Path(output_dir)
     if not root.is_dir() or not modalities:
@@ -266,6 +310,10 @@ def run_bigflica(subjects_root: str | Path, modalities: Mapping[str, Mapping[str
     if (max_gpu_gb <= 0 or feature_block < 1 or dicl_batch_size < 1 or
             dicl_sparse_iterations < 1):
         raise ValueError("GPU budget and block/iteration sizes must be positive")
+    if flica_lambda_dims not in ("o", "R"):
+        raise ValueError("flica_lambda_dims must be 'o' or 'R'")
+    if not use_mmigp_dicl and flica_lambda_dims == "R":
+        raise ValueError("flica_lambda_dims='R' requires the compressed mMIGP+DicL path")
     names = list(modalities)
     if len(set(names)) != len(names) or any(
         re.fullmatch(r"[A-Za-z][A-Za-z0-9_-]*", name) is None for name in names
@@ -295,6 +343,9 @@ def run_bigflica(subjects_root: str | Path, modalities: Mapping[str, Mapping[str
     signature = _signature({"ids": ids, "specs": specs,
                             "masks": {name: _file_record(Path(specs[name]["mask"])) for name in names},
                             "images": image_records})
+    if use_mmigp_dicl:
+        _check_flica_output(_flica_directory(destination, n_components,
+                                             flica_lambda_dims), signature, names)
     destination.mkdir(parents=True, exist_ok=True)
     if _device(device).type == "cuda":
         from .pipeline_gpu import run_bigflica_gpu, run_bigflica_raw_gpu
@@ -307,11 +358,17 @@ def run_bigflica(subjects_root: str | Path, modalities: Mapping[str, Mapping[str
                                 n_components, migp_dim, dicl_dim, dicl_max_iter,
                                 flica_max_iter, top_voxels, random_state, device,
                                 max_gpu_gb, feature_block, dicl_batch_size,
-                                dicl_sparse_iterations)
+                                dicl_sparse_iterations, flica_lambda_dims)
     if not use_mmigp_dicl:
         raise ValueError("Direct voxel FLICA requires a CUDA device")
     if dicl_batch_size != 32:
         raise ValueError("CPU sklearn comparison uses batch_size=32")
+    if len(ids) > 2048:
+        from .pipeline_cpu_stream import run_bigflica_cpu_stream
+        return run_bigflica_cpu_stream(
+            root, specs, destination, ids, masks, signature, n_components,
+            migp_dim, dicl_dim, dicl_max_iter, flica_max_iter, top_voxels,
+            random_state, max_gpu_gb, feature_block, flica_lambda_dims)
     timings = {}
     mmigp_dir = destination / f"mmigp_{migp_dim}"
     mmigp_sig = _signature([signature, migp_dim])
@@ -357,9 +414,11 @@ def run_bigflica(subjects_root: str | Path, modalities: Mapping[str, Mapping[str
             np.save(dicl_dir / f"{name}_dictionary.npy", dictionaries[name])
         _save_manifest(dicl_dir, {"signature": dicl_sig, "mmigp_signature": mmigp_sig})
         timings["dicl_s"] = time.perf_counter() - start
-    result_dir = destination / f"components_{n_components}"
+    result_dir = _flica_directory(destination, n_components, flica_lambda_dims)
+    _check_flica_output(result_dir, signature, names)
     start = time.perf_counter()
-    h_migp, contribution = _fit_flica(dictionaries, n_components, flica_max_iter, result_dir)
+    h_migp, contribution = _fit_flica(dictionaries, n_components,
+                                      flica_max_iter, result_dir, "cpu", flica_lambda_dims)
     timings["flica_s"] = time.perf_counter() - start
     subject_course = u @ h_migp
     np.save(result_dir / "subj_course.npy", subject_course)
@@ -397,7 +456,10 @@ def run_bigflica(subjects_root: str | Path, modalities: Mapping[str, Mapping[str
              "n_components": n_components, "migp_dim": migp_dim,
              "dicl_dim": dicl_dim, "dicl_max_iter": dicl_max_iter,
              "dicl_batch_size": 32, "dicl_sparse_iterations": None,
-             "flica_max_iter": flica_max_iter, "top_voxels": top_voxels,
+             "flica_max_iter": flica_max_iter, "flica_lambda_dims": flica_lambda_dims,
+             "flica_signature": _signature([dicl_sig, n_components, flica_max_iter,
+                                             flica_lambda_dims]),
+             "top_voxels": top_voxels,
              "random_state": random_state, "input_signature": signature,
              "device": "cpu", "use_mmigp_dicl": True,
              "timings": timings, "reference": "weikanggong/BigFLICA; notebook sklearn DicL"}

@@ -8,7 +8,8 @@ import pytest
 
 from fnit.bwas import plot_bwas_connectivity
 import fnit.bwas.visualize as visualization
-from fnit.bwas.visualize import _result_files, _significant_clusters, _top_edges
+from fnit.bwas.visualize import (_brainnet_surface, _cluster_bundles, _connection_paths,
+                                 _result_files, _significant_clusters, _top_edges)
 
 
 def _example(tmp_path):
@@ -57,6 +58,62 @@ def test_streaming_top_edges_filter_significance_and_rank(tmp_path):
     assert _top_edges(edges, set(), top_k=2, min_abs_z=None) == []
 
 
+def test_visual_bundling_preserves_endpoints_and_sign_groups():
+    world = np.array([[[0, 0, 0], [10, 0, 0]],
+                      [[0, 4, 0], [10, 4, 0]],
+                      [[0, 8, 0], [10, 8, 0]]], dtype=float)
+    points, lines = _connection_paths(world, np.array([1, 1, 1]),
+                                      np.array([5.0, 6.0, -5.0]), 1.0)
+    paths = points.reshape(3, 9, 3)
+    np.testing.assert_array_equal(paths[:, 0], world[:, 0])
+    np.testing.assert_array_equal(paths[:, -1], world[:, 1])
+    np.testing.assert_allclose(paths[0, 4], paths[1, 4])
+    np.testing.assert_allclose(paths[2, 4], [5, 8, 0])
+    assert len(lines) == 3 * 10
+
+
+def test_cluster_bundles_use_every_significant_edge(tmp_path):
+    _, mask, edges, _ = _example(tmp_path)
+    bundles = _cluster_bundles(edges, {1}, nib.load(mask).affine)
+    assert len(bundles) == 2
+    assert sum(bundle[1] for bundle in bundles) == 3
+    assert {(bundle[1], bundle[2]) for bundle in bundles} == {(1, -7.0), (2, 5.5)}
+    assert sum(len(bundle[4]) for bundle in bundles) == 3
+    assert {sample[0] for bundle in bundles for sample in bundle[4]} == {
+        (1, 1, 1, 5, 5, 3), (2, 2, 2, 4, 4, 3), (3, 3, 1, 3, 4, 3)}
+    with pytest.raises(ValueError, match="cover every significant"):
+        _cluster_bundles(edges, {1}, nib.load(mask).affine, edge_budget=1)
+
+
+def test_cluster_voxel_budget_is_proportional_and_keeps_every_cluster(tmp_path):
+    _, mask, edges, _ = _example(tmp_path)
+    with gzip.open(edges, "wt", newline="") as stream:
+        writer = csv.writer(stream, delimiter="\t")
+        writer.writerow(["voxel1_i", "voxel1_j", "voxel1_k", "voxel2_i",
+                         "voxel2_j", "voxel2_k", "z", "cluster"])
+        for cluster, count in ((1, 2), (2, 10), (3, 40)):
+            writer.writerows((index, 1, 1, 5, 5, 3, 5.0, cluster)
+                             for index in range(count))
+    bundles = _cluster_bundles(edges, {1, 2, 3}, nib.load(mask).affine, edge_budget=12)
+    repeated = _cluster_bundles(edges, {1, 2, 3}, nib.load(mask).affine, edge_budget=12)
+    samples = {cluster: len(sample) for cluster, _, _, _, sample in bundles}
+    assert sum(samples.values()) == 12
+    assert 1 <= samples[1] < samples[2] < samples[3]
+    assert [bundle[4] for bundle in bundles] == [bundle[4] for bundle in repeated]
+
+
+def test_brainnet_surface_uses_one_based_face_indices(tmp_path):
+    path = tmp_path / "template.nv"
+    path.write_text("4\n0 0 0\n2 0 0\n0 2 0\n0 0 2\n4\n"
+                    "1 2 3\n1 2 4\n1 3 4\n2 3 4\n")
+    vertices, faces = _brainnet_surface(path)
+    assert vertices.shape == (4, 3)
+    np.testing.assert_array_equal(faces[0], [0, 1, 2])
+    path.write_text(path.read_text().replace("2 3 4", "2 3 5"))
+    with pytest.raises(ValueError, match="face indices"):
+        _brainnet_surface(path)
+
+
 def test_plot_montage_reads_edges_once_and_refuses_overwrite(tmp_path, monkeypatch):
     root, mask, *_ = _example(tmp_path)
     output = tmp_path / "figures" / "bwas.png"
@@ -89,6 +146,83 @@ def test_invalid_view(tmp_path):
     root, mask, *_ = _example(tmp_path)
     with pytest.raises(ValueError, match="view must be montage"):
         plot_bwas_connectivity(root, mask, tmp_path / "wrong.png", view="bottom")
+
+
+@pytest.mark.parametrize("cluster_id", [0, -1, True, 1.5])
+def test_cluster_id_must_be_positive_integer(tmp_path, cluster_id):
+    root, mask, *_ = _example(tmp_path)
+    with pytest.raises(ValueError, match="cluster_id must be a positive integer"):
+        plot_bwas_connectivity(root, mask, tmp_path / "wrong.png", cluster_id=cluster_id)
+
+
+def test_cluster_id_must_pass_significance_threshold(tmp_path):
+    root, mask, *_ = _example(tmp_path)
+    with pytest.raises(ValueError, match="cluster_id is not significant"):
+        plot_bwas_connectivity(root, mask, tmp_path / "wrong.png", cluster_id=2)
+
+
+def test_selected_cluster_is_passed_to_edge_filter(tmp_path, monkeypatch):
+    root, mask, *_ = _example(tmp_path)
+    selected = []
+    original = visualization._top_edges
+
+    def tracked_edges(path, clusters, top_k, min_abs_z):
+        selected.append(clusters)
+        return original(path, clusters, top_k, min_abs_z)
+
+    monkeypatch.setattr(visualization, "_top_edges", tracked_edges)
+    plot_bwas_connectivity(root, mask, tmp_path / "cluster.png", cluster_id=1)
+    assert selected == [{1}]
+
+
+@pytest.mark.parametrize("view", ["six", "signed_six"])
+def test_all_clusters_six_views_with_supplied_surface(tmp_path, view):
+    root, mask, *_ = _example(tmp_path)
+    surface_file = tmp_path / "template.nv"
+    surface_file.write_text("4\n-6 -6 -4\n6 -6 -4\n0 6 -4\n0 0 6\n4\n"
+                            "1 2 3\n1 2 4\n1 3 4\n2 3 4\n")
+    cerebellum_file = tmp_path / "cerebellum.nv"
+    cerebellum_file.write_text("4\n-2 -3 -9\n2 -3 -9\n0 1 -9\n0 -1 -5\n4\n"
+                               "1 2 3\n1 2 4\n1 3 4\n2 3 4\n")
+    output = tmp_path / "bundles.png"
+    plot_bwas_connectivity(root, mask, output, all_clusters=True, top_k=0,
+                           voxel_edge_budget=2, brain_surface_file=surface_file,
+                           cerebellum_surface_file=cerebellum_file,
+                           surface_opacity=0.4, colorbar_max_abs_z=8.0,
+                           show_colorbar=False, view=view)
+    assert struct.unpack(">II", output.read_bytes()[16:24]) == (2700, 1800)
+
+
+def test_all_clusters_rejects_edge_filters(tmp_path):
+    root, mask, *_ = _example(tmp_path)
+    with pytest.raises(ValueError, match="cannot be combined"):
+        plot_bwas_connectivity(root, mask, tmp_path / "wrong.png",
+                               all_clusters=True, cluster_id=1)
+
+
+def test_signed_six_requires_cluster_mode(tmp_path):
+    root, mask, *_ = _example(tmp_path)
+    with pytest.raises(ValueError, match="signed_six requires all_clusters"):
+        plot_bwas_connectivity(root, mask, tmp_path / "wrong.png", view="signed_six")
+
+
+@pytest.mark.parametrize("parameter,value,message", [
+    ("surface_opacity", 1.1, "surface_opacity"),
+    ("colorbar_max_abs_z", 0, "colorbar_max_abs_z"),
+    ("voxel_edge_budget", 0, "voxel_edge_budget"),
+])
+def test_visual_parameter_ranges(tmp_path, parameter, value, message):
+    root, mask, *_ = _example(tmp_path)
+    with pytest.raises(ValueError, match=message):
+        plot_bwas_connectivity(root, mask, tmp_path / "wrong.png",
+                               all_clusters=True, **{parameter: value})
+
+
+@pytest.mark.parametrize("strength", [-0.1, 1.1, float("nan")])
+def test_bundle_strength_range(tmp_path, strength):
+    root, mask, *_ = _example(tmp_path)
+    with pytest.raises(ValueError, match="bundle_strength must be in"):
+        plot_bwas_connectivity(root, mask, tmp_path / "wrong.png", bundle_strength=strength)
 
 
 @pytest.mark.parametrize("top_k", [0, 1.5, float("inf"), True])

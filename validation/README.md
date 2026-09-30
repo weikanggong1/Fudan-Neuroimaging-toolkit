@@ -49,7 +49,7 @@
 
 | 功能 | 当前真实数据报告 | 输出一致性结论 | 时间、显存与示意图 |
 |---|---|---|---|
-| [BigFLICA](../docs/bigflica/README.md) | [真实 UKB 四模态同输入与 2,050 人分块测试](bigflica/README.md) | CPU 对 notebook 逐图几乎一致；GPU 直接体素 FLICA course 相关最低 0.999999978，压缩 GPU 仅在 mMIGP 符号对齐参考后最低 0.999994827；独立 GPU 压缩结果仍受符号与非凸 DicL 影响 | 报告逐阶段耗时、显存/内存、缓存复用和 2,050 人随机特征分解残差；真实 UKB 派生 PNG 保留在用户远程目录。 |
+| [BigFLICA](../docs/bigflica/README.md) | [真实 UKB 同输入与 2,050 人完整掩膜三模态测试](bigflica/README.md) | CPU/GPU 公开 API 均跑通 C3，但独立成分图与课程显著不同；固定相同 mMIGP 投影后两端九张图相关均 >0.999999998；C20 分别仅保留 CPU 16/20、GPU 11/20 个有效成分 | 共享节点冷启动观察为 CPU 732.75 秒、GPU 1045.08 秒，瓶颈在 GPU DicL；C3 的 VBM 重建很弱，不能视为有效 C20 或端到端等价证明。 |
 
 recon-all 与 Connectome 的验证边界由各自功能页维护，不纳入本页审计表。
 

@@ -61,7 +61,7 @@ derivatives/fnit-bwas/
 | `result.ma_map`：`BWASMA_statmap.nii.gz` | 与输入掩膜同网格的 float32 3D NIfTI。每个体素值是其参与 `p_fwer < 0.05` 连接簇的边数，供定位和绘图；它不是逐体素 z 图，也不是体素×体素矩阵。若没有显著簇，全图为零。 |
 | `result.metadata`：`BWASMA_statmap.json` | 记录被试 ID、设计列、阈值、FWHM、设备、分块、精度、耗时与显存峰值；包含被试标识，分享时应先核查。 |
 | `dataset_description.json` | 记录生成软件和 BIDS Derivatives 基本信息。 |
-| `plot_bwas_connectivity` 返回的 PNG（可选） | 灰质掩膜上的显著体素对连接示意图，默认从俯视、左侧、右侧和斜视展示。它仅显示筛选后的少量边，不是全部统计结果。 |
+| `plot_bwas_connectivity` 返回的 PNG（可选） | 多视角脑表面连接示意图。默认显示筛选后的少量体素对；`all_clusters=True` 则汇总并显示每个显著连接簇。PNG 是可视化，不是逐边统计数据或解剖纤维束。 |
 
 `BWASResult` 另返回 `subjects`、`voxels` 和 `suprathreshold_edges` 三个计数。没有显著簇时，越阈值连接表和簇表仍保留，MA 图为零。
 
@@ -146,9 +146,13 @@ python BWAS_main.py -toolbox_dir /path/to/BWAS \
 
 ## 绘制灰质体素连接
 
-`plot_bwas_connectivity` 自动读取一个 BWAS 结果目录里的连接表、簇表和 MA 图，流式扫描连接表，只保留满足簇水平 p 值条件且 `|z|` 最大的少量边，生成 PNG。它从输入灰质掩膜提取平滑的半透明三角网格，避免原先规则网格的方格背景；端点大小参考 MA 边数。连接线是**体素对的群体统计关联**，不是解剖纤维束。正 z 为红色系、负 z 为蓝色系，参考 [FSLeyes 的 Red 与 Blue 配色名称](https://github.com/pauldmccarthy/fsleyes/blob/main/fsleyes/assets/colourmaps/order.txt)；这是独立配色，不复制 FSL 色表。绘图只使用 CPU，不需要 CUDA，也不调用 FSL。
+`plot_bwas_connectivity` 读取 `run_bwas` 的连接表、簇表和 MA 图。`all_clusters=True` 时，它扫描**全部显著簇内连接**，从每个簇按固定随机种子抽取真实体素对；显示额度按簇内边数的平方根分配，因此大簇显示更多线，同时每个簇至少保留一条。每条线的两端仍是原始体素的 MNI 坐标，只在中段向该簇全部连接的平均路径靠拢。同一簇的正负 z 分开集束。黄色点是真实体素端点；弯线表示**群体 FC 统计连接**，不代表解剖纤维。`voxel_edge_budget` 控制整张图的线数，默认 600；所有显著簇都会出现，但图中并未逐条画出全部连接。默认单边模式仍可用 `top_k` 选择强连接。
 
-原版 BWAS 将正负连接分别导出为两端坐标加统计值的七列文本，供 [BrainGL](https://github.com/rschurade/braingl) 显示；BrainGL 使用体积等值面和图形渲染。FNIT 独立实现了 CPU 等值面绘图，没有移植其 C++/OpenGL 程序，也没有复制原版 `braingl_bg.nii.gz`。本图的外形来自 2 mm 灰质分析掩膜，不能表现 1 mm 解剖背景的全部脑沟细节。
+脑轮廓可读取用户提供的 [BrainNet Viewer ICBM152 `.nv` 表面](https://github.com/mingruixia/BrainNet-Viewer/tree/master/Data/SurfTemplate)，并叠加同一源码包中的 `BrainMesh_Cerebellum.nv` 形成清晰的小脑。2019 版大脑网格有 81,924 个顶点、163,840 个三角面；小脑网格有 45,406 个顶点、90,788 个三角面。若不提供大脑表面，函数从 2 mm 灰质掩膜提取较粗的外轮廓。两个网格均不随 FNIT 分发，可从 BrainNet Viewer 原站获取，或从已有 `BrainNetViewer_20191031.zip` 的 `Data/SurfTemplate/` 提取。该 ZIP 内大脑网格 SHA-256 为 `471e43f955a1cb9f0350aaca2822f02fc74e393718d1e385fddaf0e578ffe572`，小脑网格为 `44faea7e04dc4132fc15bbd086d4b78e5dc76b2ea09dbdc17e8f228aee5b54bc`。Python 代码独立读取 `.nv`，运行时不调用 MATLAB、BrainNet Viewer 或 BrainGL。正 z 为红色，负 z 为蓝色，采用 [FSLeyes 的红蓝配色名称](https://github.com/pauldmccarthy/fsleyes/blob/main/fsleyes/assets/colourmaps/order.txt)所对应的视觉约定；未复制原色表。
+
+主页的 `environment.yml` 已包含 PyVista/VTK；单独安装可用 `pip install '.[bwas-visualization]'`。绘图无需 CUDA 计算，但 VTK 需要 OpenGL；无界面服务器可使用 EGL 或 OSMesa。
+
+原 BrainNet Viewer 的对应 MATLAB 调用是 `BrainNet_MapCfg('BrainMesh_ICBM152.nv','nodes.node','edges.edge','Cfg.mat')`，需先生成节点和邻接矩阵文件。FNIT 的 Python 函数直接读取 BWAS 输出 TSV，不调用该程序。
 
 ```python
 from pathlib import Path
@@ -156,26 +160,53 @@ from fnit.bwas import plot_bwas_connectivity
 
 bwas_output_root = Path("/data/derivatives/fnit-bwas")  # 已完成的 run_bwas 输出根目录
 gray_matter_mask_file = Path("/data/MNI152_2mm_graymatter_mask.nii.gz")  # 与统计结果同网格的输入灰质掩膜
+brain_surface_file = Path("/data/BrainNetViewer/Data/SurfTemplate/BrainMesh_ICBM152.nv")  # 从 BrainNet Viewer 原站取得的 MNI 表面网格
+cerebellum_surface_file = Path("/data/BrainNetViewer/Data/SurfTemplate/BrainMesh_Cerebellum.nv")  # 同一来源的小脑网格
 output_png = (bwas_output_root / "group" / "figures" /
-              "task-rest_space-MNI152NLin6Asym_desc-BWASconnectivity_figure.png")  # 新图像路径
+              "task-rest_space-MNI152NLin6Asym_desc-BWASvoxelBundles_figure.png")  # 新图像路径
 
 figure_path = plot_bwas_connectivity(
     bwas_output_root=bwas_output_root,  # 自动寻找该目录中唯一一组 BWAS 结果文件
-    gray_matter_mask_file=gray_matter_mask_file,  # 2 mm 灰质表面与体素坐标参考
+    gray_matter_mask_file=gray_matter_mask_file,  # 2 mm 体素坐标参考；须与 MA 图同网格
     output_png=output_png,  # 写出 PNG；已存在时不覆盖
-    top_k=500,  # 最多显示 |z| 最大的 500 条边，不影响原统计结果
     cluster_p_max=0.05,  # 只显示簇水平 FWER p < 0.05 的连接
-    min_abs_z=None,  # 可选附加 |z| 下限；None 表示只按 top_k 筛选
-    view="montage",  # 默认四联图：俯视、左侧、右侧、斜视
+    all_clusters=True,  # 所有显著簇都显示真实体素级连接
+    voxel_edge_budget=600,  # 全图显示 600 条体素对；大簇按比例显示更多
+    bundle_strength=0.85,  # 仅使每条线中段靠近本簇平均路径，两端保持原坐标
+    brain_surface_file=brain_surface_file,  # 可选：清晰脑沟轮廓；不提供则使用灰质掩膜表面
+    cerebellum_surface_file=cerebellum_surface_file,  # 可选：加入清晰小脑表面
+    surface_opacity=0.18,  # 灰色脑表面透明度：0 全透明，1 不透明
+    colorbar_max_abs_z=8.0,  # 红蓝色条范围固定为 -8 到 +8；None 使用数据范围
+    show_colorbar=True,  # 是否显示 signed z 色条
+    view="signed_six",  # 一张六联图：上排正 z、下排负 z；每排左/俯/右视
 )
 print(figure_path)
 ```
 
-`top_k` 必须为正整数；`cluster_p_max` 取 `(0, 1]`；`min_abs_z` 若设置需为非负有限数。`gray_matter_mask_file` 须与 MA 图具有相同的 3D shape 和 affine；`view` 可选默认四联图 `montage`，或单视角 `superior`、`left`、`right`、`anterior`、`oblique`。PNG 只显示所选边，不改变全量连接表和簇统计量。
+| 绘图参数 | 含义 |
+|---|---|
+| `bwas_output_root` | 已完成的单组 BWAS 输出根目录。 |
+| `gray_matter_mask_file` | 与 MA 图相同 shape、affine 的 2 mm 灰质掩膜，提供体素坐标。 |
+| `output_png` | 新 PNG 文件路径，已存在时不覆盖。 |
+| `cluster_p_max` | 簇水平 FWER p 的严格上限，取 `(0, 1]`，默认 `0.05`。 |
+| `all_clusters` | 默认 `False`；开启后从每个显著簇按比例抽取真实体素对并集束，忽略 `top_k`。 |
+| `voxel_edge_budget` | 全簇模式的总显示线数，默认 `600`；须不小于显著簇及 z 符号组数，较大值会增加遮挡。 |
+| `brain_surface_file` | 可选 BrainNet Viewer `.nv` 网格；默认从输入灰质掩膜提取外轮廓。 |
+| `cerebellum_surface_file` | 可选 BrainNet Viewer 小脑 `.nv` 网格，与大脑表面合并绘制。 |
+| `surface_opacity` | 灰色脑表面透明度，取 `[0, 1]`；默认外置网格 `0.23`、掩膜表面 `0.12`。 |
+| `colorbar_max_abs_z` | 可选正数；将红蓝色条设为对称的 `[-值, +值]`，超过范围的 z 在端色饱和；默认按图中 z 自动取值。 |
+| `show_colorbar` | 默认 `True`，控制是否显示 signed z 色条。 |
+| `view` | `montage` 四联图；`six` 为六个独立方向；`signed_six` 为正负分行、每行左/俯/右视，仅与 `all_clusters=True` 联用；也可取 `left`、`right`、`superior`、`inferior`、`anterior`、`posterior`、`oblique` 单视角。 |
+| `top_k` | 默认 `500`，单边模式最多显示的 `|z|` 最高边数；全簇模式不使用。 |
+| `cluster_id` | 单边模式可指定一个已显著的正整数簇编号；默认 `None`。不能与 `all_clusters=True` 合用。 |
+| `min_abs_z` | 单边模式可附加非负的 `|z|` 下限；默认 `None`。不能与全簇模式合用。 |
+| `bundle_strength` | 集束弯曲程度，取 `[0, 1]`，不改变体素端点；默认单边模式 `0`、全簇模式 `0.85`，显式传 `0` 可关闭集束。 |
 
-下图由 ABIDE I+II 的 1748 人全脑组水平结果在 CPU 上绘制，显示簇水平 `p_fwer < 0.05` 且 `|z|` 最大的 500 条边，依次为俯视、左侧、右侧和斜视。红色表示病例组连接 Fisher z 较高的正统计量，蓝色表示较低的负统计量；直线仅用于展示统计关联，不表示解剖纤维。图中不包含个体影像或被试标识。
+下图来自 ABIDE I+II 的 1748 人全脑结果。`p_fwer < 0.05` 的 **60 个显著 FC 簇**共含 **1,154,192 条连接**；图中按比例显示 600 条真实体素对连接，其中最小簇 3 条、最大簇 62 条。正负结果分行，线条在本簇内集束；黄色点保留各条线的真实体素端点。红色表示病例组连接 Fisher z 较高，蓝色表示较低。图中没有个体影像、逐边矩阵或被试标识。
 
-![ABIDE I+II 灰质体素连接：俯视、左侧、右侧和斜视](figures/abide_full_connectivity_montage.png)
+![ABIDE I+II 所有显著 FC 簇的体素级集束连接及小脑：正负分行的左视、俯视和右视](figures/abide_voxel_bundles_cerebellum_signed_six.png)
+
+[同一批体素级连接的六个独立视角：左、俯、右、后、仰、前](figures/abide_voxel_bundles_cerebellum_six.png)。在 gpucw1 的 PyVista 0.49.0、VTK 9.7.1 和 NVIDIA H100 EGL 环境下，两张 2700×1800 图依次耗时 `12.68 s`、`12.38 s`，均包含读取压缩连接表、按簇抽样集束和写出 PNG。共享 GPU 负载会影响计时；本机缺少可用的软件 OpenGL 渲染库，尚无同机 CPU/GPU 加速比。
 
 ## ABIDE 真实数据 benchmark
 
@@ -199,6 +230,8 @@ print(figure_path)
 
 - [原版 weikanggong/BWAS](https://github.com/weikanggong/BWAS) 的 [BWAS_cpu.py](https://github.com/weikanggong/BWAS/blob/master/BWAS_cpu.py) 与 [BWAS_main.py](https://github.com/weikanggong/BWAS/blob/master/BWAS_main.py)（Python 源文件头标注 Apache 2.0；参考源码 SHA-256 `1b78a98efb04ae5c1b764b101ec434ed8c8277f815481ae0ca940ebd910323c2`）。原版背景影像 `braingl_bg.nii.gz` 没有随这项源码授权，不纳入 FNIT。
 - Gong W, et al. [Statistical testing and power analysis for brain-wide association study](https://doi.org/10.1016/j.media.2018.03.014). *Medical Image Analysis* 47 (2018): 15–30.
-- [BrainGL 源码](https://github.com/rschurade/braingl)与 [Connexel visualization 论文](https://doi.org/10.3389/fnins.2014.00015)：仅参考等值面视觉设计，没有纳入 FNIT 运行时。
+- [BrainGL 源码](https://github.com/rschurade/braingl)与 [Connexel visualization 论文](https://doi.org/10.3389/fnins.2014.00015)：用于区分统计簇与显示线集束；FNIT 未纳入其运行时或逐行移植集束算法。
+- [BrainNet Viewer 官方源码与 ICBM152 表面](https://github.com/mingruixia/BrainNet-Viewer)、[Xia 等的工具论文](https://doi.org/10.1371/journal.pone.0068910)：提供外置网格格式与多视角展示参考；FNIT 未复制其 MATLAB 绘图代码，也不分发网格。
+- [PyVista](https://docs.pyvista.org/) 和 [VTK](https://vtk.org/) 官方文档：灰质等值面、多视角离屏渲染与三维连线。
 - [ABIDE II 表型变量释义](https://fcon_1000.projects.nitrc.org/indi/abide/ABIDEII_Data_Legend.pdf)。
 - [ABIDE I 官方表型表](https://s3.amazonaws.com/fcp-indi/data/Projects/ABIDE_Initiative/Phenotypic_V1_0b_preprocessed1.csv)和[ABIDE II 官方表型表](https://fcon_1000.projects.nitrc.org/indi/abide2/release/phenotypic_data/ABIDEII_Composite_Phenotypic.csv)。

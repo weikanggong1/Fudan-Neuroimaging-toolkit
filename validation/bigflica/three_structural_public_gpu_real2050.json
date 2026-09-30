@@ -1,0 +1,93 @@
+{
+  "dataset": "2050 real subjects; full-mask VBM/FA/MD; task excluded",
+  "backend": "cuda:0_public_api_cold_start",
+  "parameters": {
+    "migp_dim": 100,
+    "dicl_dim": 200,
+    "dicl_max_iter": 1000,
+    "flica_max_iter": 100,
+    "flica_lambda_dims": "R",
+    "feature_block": 2048,
+    "max_gpu_gb": 19.0
+  },
+  "requested_components_attempts": [
+    {
+      "components": 3,
+      "status": "accepted"
+    }
+  ],
+  "accepted_run_reused_prior_attempt_cache": false,
+  "effective_rank": 3,
+  "reconstruction_norm_ratio": {
+    "vbm": 4.690427258738352e-05,
+    "fa": 0.18339741095443868,
+    "md": 0.11094998474111867
+  },
+  "course_shape": [
+    2050,
+    3
+  ],
+  "maps": {
+    "vbm": {
+      "voxels": 157901,
+      "components": 3,
+      "nifti_array_max_abs_error": 0.0
+    },
+    "fa": {
+      "voxels": 222257,
+      "components": 3,
+      "nifti_array_max_abs_error": 0.0
+    },
+    "md": {
+      "voxels": 222261,
+      "components": 3,
+      "nifti_array_max_abs_error": 0.0
+    }
+  },
+  "held_out_apply_model": {
+    "finite": true,
+    "components": 3,
+    "score_norm": 249.6068759493613
+  },
+  "stage_timings_s": {
+    "load_standardize_s": 139.8525249902159,
+    "mmigp_s": 14.165122270118445,
+    "dicl_s": 871.6072927056812,
+    "flica_s": 1.198021317832172,
+    "spatial_maps_s": 4.225310354027897,
+    "projection_model_s": 12.229084162041545
+  },
+  "total_wall_s": 1045.079352997709,
+  "peak_process_rss_gib": 1.1704330444335938,
+  "scope": "C3 or C2 functional smoke; C20 scientific acceptance remains separate",
+  "gpu_free_before_gib": 20.8214111328125,
+  "peak_gpu_allocated_gib": 1.1065807342529297,
+  "peak_gpu_reserved_gib": 1.923828125,
+  "input_signature_sha256": "a72b508100b94d1de6a8919bb61680af461eff1f2a5f246660f7fb71a1edd7d5",
+  "cache_signatures_sha256": {
+    "normalized": "bdb94ad277382b286cbbea16fcc9f620e4b52f4ecfcffe7465fba867b0484bc1",
+    "mmigp": "8d859137dd7b64bb0a18efb402b18023b921475579ef718c658507cfb53e04ce",
+    "dicl": "85ff193469b6a47d129d5624c764ac0069010403cd7a04f5ffdae5bd23f54a24"
+  },
+  "source_sha256": {
+    "pipeline.py": "933d5846d0a39d9765f5af9ae954623f3f7a252d865f934bf3dd9091856512d6",
+    "pipeline_cpu_stream.py": "893da714d2cfbdd5f661686cc80611ffd723efc70ab461501015385a32f2caec",
+    "pipeline_gpu.py": "267faddcb17d505353f77bb42ba0e19408278b2dc157f4a94c5d84cc8b7157d5",
+    "streaming.py": "104cfc3597637e0a3857ff484ea748c11d3b80aa8d6ef27d6aae26c8b1ef506a",
+    "dicl_torch.py": "84a2124c3516328aad73d8a67d8bba7de73b3e2947613c3c93de43fcce4222af",
+    "flica_vb.py": "b469b924b07ae16030a8af9087e4a12f2ecc907a9fb1f8f4474bfaf95c1168b3",
+    "flica_torch.py": "029e9ac6b4fbf32cab16463e8e806a6c5e7088d55614cb3346ab17e33ecaaa4e"
+  },
+  "validation_script_sha256": "76b474e148d276c60d0e86849fc3e1d8373ed6405e61817d7d5cd873d4b828e2",
+  "hardware_context": {
+    "host": "gpucw1",
+    "cpu_model": "Intel Xeon Gold 6430",
+    "cpu_threads": 8,
+    "gpu_model": "NVIDIA H100 PCIe",
+    "physical_gpu_index": 1,
+    "gpu_utilization_percent_at_start": 100,
+    "gpu_memory_free_mib_at_start_nvidia_smi": 21774,
+    "gpu_memory_free_mib_at_end_nvidia_smi": 43734,
+    "os_page_cache": "uncontrolled; this run followed CPU reading the same NIfTI inputs"
+  }
+}

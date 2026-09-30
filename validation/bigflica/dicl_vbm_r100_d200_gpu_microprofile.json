@@ -1,0 +1,46 @@
+{
+  "dataset": "2050 real subjects, full-mask VBM; task modality excluded",
+  "stage": "DicL projected input, R=100, D=200",
+  "microtrajectory_note": "The microbenchmarks use real projected VBM samples and the production randomized-SVD initialization. After each observed batch, 1e-3 is added to the update matrix diagonal to keep every atom live; later microbatches therefore do not reproduce the exact full-fit trajectory.",
+  "projected_shape": [157901, 100],
+  "hardware_note": "Shared gpucw1 H100 GPU 1 had approximately 100% utilization from other jobs; short timings are observational.",
+  "precision": "float64 except explicit strict-float32 comparison; TF32 disabled there",
+  "production_full_vbm_fit_seconds": {
+    "sklearn_cpu_8_threads": 138.74011915782467,
+    "current_gpu_float64": 654.4176922780462,
+    "gpu_over_cpu": 4.716859811354273,
+    "cpu_gpu_final_dictionary_relative_frobenius_error": 4.2945664476435895e-06
+  },
+  "real_first_three_batch_stage_profile": {
+    "randomized_svd_init_seconds": 0.3617021581158042,
+    "batch_indices": [0, 1, 2],
+    "lars_event_counts": [100, 24, 32],
+    "maximum_active_atoms": [100, 22, 23],
+    "lars_seconds": [0.8447415819391608, 0.19449750613421202, 0.2572089247405529],
+    "sequential_200_atom_update_seconds": [0.04628049395978451, 0.014068609103560448, 0.013944211881607771]
+  },
+  "experimental_packed_float64_lars": {
+    "capacity": 64,
+    "overflow_fallback_to_original": true,
+    "batch_indices": [0, 1, 2, 3, 4],
+    "original_seconds": [0.972690693102777, 0.19752255594357848, 0.2688386980444193, 0.16341836703941226, 0.13119650725275278],
+    "packed_seconds": [1.412199255079031, 0.1642755651846528, 0.20963014801964164, 0.14346843678504229, 0.10607408219948411],
+    "used_fallback": [true, false, false, false, false],
+    "relative_code_error": [0.0, 1.0037238679548881e-15, 9.370663997553627e-16, 7.904051424664988e-16, 6.321961521419381e-16]
+  },
+  "experimental_single_kernel_float64_atom_update": {
+    "input": "Real VBM projected first 32 voxels, final dictionary; approximate codes used only to form a representative update matrix",
+    "ordinary_five_updates_seconds": 0.06958872405812144,
+    "triton_five_updates_seconds": 0.03605390712618828,
+    "relative_dictionary_error": 2.310312745775242e-16,
+    "max_absolute_dictionary_error": 2.498001805406602e-16,
+    "scope": "One update microbenchmark, not a full DicL fit"
+  },
+  "strict_float32_lars": {
+    "batch_indices": [0, 1, 2, 3, 4],
+    "float64_seconds": [0.9716149959713221, 0.1945581268519163, 0.26727841002866626, 0.1630369108170271, 0.1036742702126503],
+    "float32_seconds": [0.9537770966999233, 0.22612311085686088, 0.26637001195922494, 0.1912594041787088, 0.17204580595716834],
+    "relative_code_error": [1.1105686297456738e-06, 1.5327689170579025e-06, 1.2111090592263626e-06, 2.1083859146411937e-06, 1.10654262670974e-06]
+  },
+  "interpretation": "Current LARS spends most batch time in many sequential Python/PyTorch events, each solving a padded 32-by-200-by-200 system. Shrinking the solve to 64 active atoms preserved local float64 codes but yielded only about 1.1-1.3x on the four non-overflow batches. Isolated fused atom update was about 1.9x but covered a small fraction of batch time. Strict float32 did not materially improve LARS wall time. Neither candidate meets the full-stage 4.7x speed gap; no production replacement was made. A fully fused active-set LARS kernel needs separate development and full real-data validation."
+}
