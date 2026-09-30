@@ -1,0 +1,538 @@
+{
+  "software": {
+    "deepprep_version": "25.1.0",
+    "upstream_source_commit": "04af8f3541737505de41530b23804cd9f2b6efa1",
+    "container_source": "registry.cn-beijing.aliyuncs.com/pbfslab/deepprep",
+    "OCI_digest": "sha256:8d35461da04b055c7a5cd005500dc1db8b00220379f5d266975e5a40e3e9bbff",
+    "SIF_sha256": "a3bb4af8753b5d840ca9885676db1f525151ac2d4c54805d4abf754f8e5f0941",
+    "SIF_size_bytes": 14234120192,
+    "singularity": "singularity-ce version 4.2.2",
+    "GPU": "index, name, driver_version, memory.total [MiB]\n0, NVIDIA H100 PCIe, 535.216.03, 81559 MiB\n1, NVIDIA H100 PCIe, 535.216.03, 81559 MiB\n",
+    "CPU": "2 x Intel Xeon Gold 6430; 128 logical CPUs",
+    "container_preflight": {
+      "packages": {
+        "torch": "2.0.1+cu118",
+        "tensorflow": "2.11.1",
+        "nibabel": "5.2.1",
+        "numpy": "1.26.4"
+      },
+      "torch_cuda": "11.8",
+      "cuda_test_physical_gpu_index": 1,
+      "cuda_test_passed": true,
+      "torch_allow_tf32_matmul_default": false,
+      "torch_allow_tf32_cudnn_default": true,
+      "weights": [
+        {
+          "file": "/opt/model/FastCSR/brain_finalsurfs_model.pth",
+          "size_bytes": 123433599,
+          "sha256": "c6bbfe3abee5304053e7da9ca608c607217b030b61ee599ca1ef144ae971b5d4"
+        },
+        {
+          "file": "/opt/model/FastCSR/lh_model.pth",
+          "size_bytes": 123411967,
+          "sha256": "d09056c362687439da4146d88250f066c1ffeeb5ab4897d5b62e8d0f9469d934"
+        },
+        {
+          "file": "/opt/model/FastCSR/nnUNet_trained_models/nnUNet/3d_fullres/Task601_filled/nnUNetTrainerV2__nnUNetPlansv2.1/fold_0/final.model",
+          "size_bytes": 246478922,
+          "sha256": "d3238668991bbc3b3540a7f413cfa1f9b01645d9b68bbcc37c9ba8cbda573710"
+        },
+        {
+          "file": "/opt/model/FastCSR/nnUNet_trained_models/nnUNet/3d_fullres/Task601_filled/nnUNetTrainerV2__nnUNetPlansv2.1/fold_0/final.model.pkl",
+          "size_bytes": 164233,
+          "sha256": "1a664571431ed2534d79809a3db9bdf0292d81dccd32a3ff1e6ca3657e28c93e"
+        },
+        {
+          "file": "/opt/model/FastCSR/nnUNet_trained_models/nnUNet/3d_fullres/Task601_filled/nnUNetTrainerV2__nnUNetPlansv2.1/plans.pkl",
+          "size_bytes": 163769,
+          "sha256": "a44715a8b9e9cff8f4dc7c9c40b9de73bf66a0bc0b4f836d2ee8a87581496b73"
+        },
+        {
+          "file": "/opt/model/FastCSR/nnUNet_trained_models/nnUNet/3d_fullres/Task602_AsegPresurf/nnUNetTrainerV2__nnUNetPlansv2.1/fold_0/final.model",
+          "size_bytes": 246606218,
+          "sha256": "99d1d4fb9b6f23907b84408d7f2b2d116d1436e2057410b3cc95b1e737f2bd30"
+        },
+        {
+          "file": "/opt/model/FastCSR/nnUNet_trained_models/nnUNet/3d_fullres/Task602_AsegPresurf/nnUNetTrainerV2__nnUNetPlansv2.1/fold_0/final.model.pkl",
+          "size_bytes": 164319,
+          "sha256": "f50868d036a402d593254996d269b097dc45b76379e17485fedda8338946c523"
+        },
+        {
+          "file": "/opt/model/FastCSR/nnUNet_trained_models/nnUNet/3d_fullres/Task602_AsegPresurf/nnUNetTrainerV2__nnUNetPlansv2.1/plans.pkl",
+          "size_bytes": 163855,
+          "sha256": "1e8c6ba2bd222bc0654710c5c0f372340205866bb90ab238674d37255b90e95a"
+        },
+        {
+          "file": "/opt/model/FastCSR/rh_model.pth",
+          "size_bytes": 123411967,
+          "sha256": "001f709ffdf462585ab001cfac34fed98de4ac0985bad0cb65d4aea137b7b22c"
+        },
+        {
+          "file": "/opt/model/SUGAR/model_files/fsaverage3/lh_NoRigid_904_fsaverage3.model",
+          "size_bytes": 8880437,
+          "sha256": "44d6a015de140ef429bf651cd8c607c9b56ad3283a2898e9a4323419b3711d33"
+        },
+        {
+          "file": "/opt/model/SUGAR/model_files/fsaverage3/rh_NoRigid_904_fsaverage3.model",
+          "size_bytes": 8880437,
+          "sha256": "6aee00f012ef945c82d9006d3f2d32aab53e53b9e3bd3e90eaf10cbcf9f8aac2"
+        },
+        {
+          "file": "/opt/model/SUGAR/model_files/fsaverage4/lh_NoRigid_904_fsaverage4.model",
+          "size_bytes": 27549877,
+          "sha256": "aed345c9c99fbf33a5384b64b4b2d99f8ebca1cbbfa6eb53b34600ed44331f62"
+        },
+        {
+          "file": "/opt/model/SUGAR/model_files/fsaverage4/rh_NoRigid_904_fsaverage4.model",
+          "size_bytes": 27549877,
+          "sha256": "21e79b24cc1fdf1ebc2a6622e6b5710c7154b4b88ca2ca8c28c6810237aeb4b2"
+        },
+        {
+          "file": "/opt/model/SUGAR/model_files/fsaverage5/lh_NoRigid_904_fsaverage5.model",
+          "size_bytes": 79169525,
+          "sha256": "21ef2fd7f5d20de34af596bad15b1ea2b0059f47462f355680a35c434959f65a"
+        },
+        {
+          "file": "/opt/model/SUGAR/model_files/fsaverage5/rh_NoRigid_904_fsaverage5.model",
+          "size_bytes": 79169589,
+          "sha256": "f0a110b7d47f3c8c9a0373810549458e90cc90757411d037ebb47c1ff8995e55"
+        },
+        {
+          "file": "/opt/model/SUGAR/model_files/fsaverage6/lh_NoRigid_904_fsaverage6.model",
+          "size_bytes": 229593077,
+          "sha256": "54cfa79b0040657d44368353b23e6b0effd1ff3a218708426f6d05a9df549d50"
+        },
+        {
+          "file": "/opt/model/SUGAR/model_files/fsaverage6/lh_Rigid_904_fsaverage6.model",
+          "size_bytes": 229592455,
+          "sha256": "bcdbe1915dd814e5ca8fc4b5eeec5342d4c7e74b5a9e857aefcfd919f6c7425b"
+        },
+        {
+          "file": "/opt/model/SUGAR/model_files/fsaverage6/rh_NoRigid_904_fsaverage6.model",
+          "size_bytes": 229593077,
+          "sha256": "62219c69a11cc7fa7d029360fb0b4dc53612f88e8f95f18bcbb5cc7dafb8213d"
+        },
+        {
+          "file": "/opt/model/SUGAR/model_files/fsaverage6/rh_Rigid_904_fsaverage6.model",
+          "size_bytes": 229592455,
+          "sha256": "93adfd243b619b2a4ba3a1c9ccc7a10bd75999dbad30ec1f85e1a757e5f46e6a"
+        },
+        {
+          "file": "/opt/model/SynthMorph/models/synthmorph.affine.2.h5",
+          "size_bytes": 51455312,
+          "sha256": "1ac5304b683036e5177f5b4ad38fa09fcbbe7883e742d6fa5bdaedd0e619ced6"
+        },
+        {
+          "file": "/opt/model/SynthMorph/models/synthmorph.deform.2.h5",
+          "size_bytes": 3508630384,
+          "sha256": "0cfb8f7a5073f15efba6e2108c3c6e05cc2ef28d21a94822150df7a760afe156"
+        },
+        {
+          "file": "/opt/model/SynthMorph/models/synthmorph.rigid.1.h5",
+          "size_bytes": 51656152,
+          "sha256": "284c145fce47e98ecf3fdeda2163f646ac3ebb0240e87dd50d71d879f4d5b3af"
+        },
+        {
+          "file": "/opt/DeepPrep/deepprep/FastSurfer/checkpoints/Axial_Weights_FastSurferCNN/ckpts/Epoch_30_training_state.pkl",
+          "size_bytes": 21677617,
+          "sha256": "edd59e09e89fc13d013a50305cbd97d166a82d2f3916d64af8a78c65f3b384a2"
+        },
+        {
+          "file": "/opt/DeepPrep/deepprep/FastSurfer/checkpoints/Coronal_Weights_FastSurferCNN/ckpts/Epoch_30_training_state.pkl",
+          "size_bytes": 21677617,
+          "sha256": "d47d18c759a881c81aa6c2a88c5327f2d6007c888bffeec3c7abba6e5f01d399"
+        },
+        {
+          "file": "/opt/DeepPrep/deepprep/FastSurfer/checkpoints/Sagittal_Weights_FastSurferCNN/ckpts/Epoch_30_training_state.pkl",
+          "size_bytes": 21655777,
+          "sha256": "23fdcefbb808a68114170f20c64f6c03f30893b24dd10ace1996025ffba0f458"
+        },
+        {
+          "file": "/opt/DeepPrep/deepprep/FastSurfer/checkpoints/aparc_vinn_axial_v2.0.0.pkl",
+          "size_bytes": 22399769,
+          "sha256": "81ab25ccbfc432cc41fb6089d11ff2a45b5a88e659092096cb1e067269f806b8"
+        },
+        {
+          "file": "/opt/DeepPrep/deepprep/FastSurfer/checkpoints/aparc_vinn_coronal_v2.0.0.pkl",
+          "size_bytes": 22399783,
+          "sha256": "73813957e83ec99d2c4e22f7854308916ec276d66ab7ed8ef8bf3998ba05e289"
+        },
+        {
+          "file": "/opt/DeepPrep/deepprep/FastSurfer/checkpoints/aparc_vinn_sagittal_v2.0.0.pkl",
+          "size_bytes": 22375598,
+          "sha256": "edae6262d69526fea39a019f2dfd8df75eb705f8f025b9b97166e3e17b917414"
+        }
+      ]
+    },
+    "license_file_present": true
+  },
+  "input": {
+    "data_type": "real MRI",
+    "participants": 1,
+    "inputs": [
+      {
+        "file": "sub-benchmark/anat/sub-benchmark_T1w.nii.gz",
+        "size_bytes": 17244377,
+        "sha256": "3ecd8196fc47b440c4fba28eec8a801411d8e4b2aba224a243a89dec48b0b4dc",
+        "shape": [
+          208,
+          256,
+          256
+        ],
+        "zooms": [
+          0.9999997615814209,
+          1.0,
+          1.0
+        ]
+      },
+      {
+        "file": "sub-benchmark/func/sub-benchmark_task-rest_run-01_bold.nii.gz",
+        "size_bytes": 352694898,
+        "sha256": "67717caaa823141c6e59d46db52e92deb4419d232ba699c399c69eb8888a0e92",
+        "shape": [
+          88,
+          88,
+          64,
+          490
+        ],
+        "zooms": [
+          2.3863637447357178,
+          2.3863637447357178,
+          2.3999998569488525,
+          0.7350000143051147
+        ]
+      }
+    ],
+    "bold_frames": 490,
+    "TR_seconds": 0.735,
+    "fieldmaps_provided": false,
+    "SDC_requested": false,
+    "anatomical_reconstruction_reused": false,
+    "outputs_requested": {
+      "volume": "MNI152NLin6Asym",
+      "volume_resolution_mm": 2,
+      "surface": "fsaverage6"
+    },
+    "source_dataset": "existing restricted UKB research input; no data redistribution"
+  },
+  "timing_notes": [
+    "每种输出均从原始 T1w 和完整 490 帧 BOLD 开始，未复用解剖重建和 Nextflow 结果。",
+    "pipeline_wall_seconds 包含容器启动、处理、写出和 QC；下载、配置、缓存复制和输出验证另行完成。",
+    "branch_span_seconds 是该分支首次任务开始至最后任务完成的时间，分支可能重叠，不能相加。",
+    "GPU 显存按 2 秒采样，最高采样值不是连续峰值；整卡用量包含共享任务。"
+  ],
+  "runs": [
+    {
+      "mode": "volume",
+      "pipeline_wall_seconds": 2091.360639083199,
+      "started_utc": "2026-09-30T13:00:06.678606+00:00",
+      "finished_utc": "2026-09-30T13:34:58.042431+00:00",
+      "exit_code": 0,
+      "validated_outputs": [
+        {
+          "file": "BOLD/sub-benchmark/func/sub-benchmark_task-rest_run-01_space-MNI152NLin6Asym_res-2_desc-preproc_bold.nii.gz",
+          "shape": [
+            91,
+            109,
+            91,
+            490
+          ],
+          "finite": true,
+          "sha256": "c9101dcf560f59d0811b549d1186a6e7dd0991a6bf8600bdd4ea0459df46c61d",
+          "size_bytes": 1104471395,
+          "zooms": [
+            2.0,
+            2.0,
+            2.0,
+            0.7350000143051147
+          ],
+          "xyzt_units": [
+            "mm",
+            "sec"
+          ]
+        },
+        {
+          "file": "Recon/sub-benchmark/surf/lh.white",
+          "vertices": 109524,
+          "faces": 219044,
+          "finite": true
+        },
+        {
+          "file": "Recon/sub-benchmark/surf/lh.pial",
+          "vertices": 109524,
+          "faces": 219044,
+          "finite": true
+        },
+        {
+          "file": "Recon/sub-benchmark/surf/lh.sphere.reg",
+          "vertices": 109524,
+          "faces": 219044,
+          "finite": true
+        },
+        {
+          "file": "Recon/sub-benchmark/surf/rh.white",
+          "vertices": 110716,
+          "faces": 221428,
+          "finite": true
+        },
+        {
+          "file": "Recon/sub-benchmark/surf/rh.pial",
+          "vertices": 110716,
+          "faces": 221428,
+          "finite": true
+        },
+        {
+          "file": "Recon/sub-benchmark/surf/rh.sphere.reg",
+          "vertices": 110716,
+          "faces": 221428,
+          "finite": true
+        },
+        {
+          "file": "BOLD/sub-benchmark/func/sub-benchmark_task-rest_run-01_desc-confounds_timeseries.tsv",
+          "rows": 490
+        }
+      ],
+      "configuration": {
+        "input_frames": 490,
+        "gpu_index": 1,
+        "cpus": 10,
+        "host_memory_gb": 32,
+        "gpu_tasks_serialized": true,
+        "cold_output": true,
+        "anatomical_reconstruction_reused": false,
+        "precision": "Official DeepPrep model defaults; no added precision changes",
+        "TF_FORCE_GPU_ALLOW_GROWTH": true
+      },
+      "branch_span_seconds": {
+        "anat_wf": 1534.855,
+        "bold_wf": 2065.736
+      },
+      "completed_task_count": 83,
+      "slowest_tasks": [
+        {
+          "name": "bold_wf:bold_pre_process (sub-benchmark_task-rest_run-01)",
+          "realtime_seconds": 603.999
+        },
+        {
+          "name": "anat_wf:anat_fill (sub-benchmark)",
+          "realtime_seconds": 300.136
+        },
+        {
+          "name": "anat_wf:anat_ribbon (sub-benchmark)",
+          "realtime_seconds": 257.445
+        },
+        {
+          "name": "anat_wf:anat_sphere (sub-benchmark)",
+          "realtime_seconds": 176.908
+        },
+        {
+          "name": "anat_wf:anat_pial_surface (sub-benchmark)",
+          "realtime_seconds": 160.452
+        },
+        {
+          "name": "bold_wf:bold_transform_chain (sub-benchmark_task-rest_run-01)",
+          "realtime_seconds": 150.65
+        },
+        {
+          "name": "anat_wf:anat_pial_surface (sub-benchmark)",
+          "realtime_seconds": 144.995
+        },
+        {
+          "name": "anat_wf:anat_white_surface (sub-benchmark)",
+          "realtime_seconds": 115.472
+        },
+        {
+          "name": "anat_wf:anat_white_surface (sub-benchmark)",
+          "realtime_seconds": 110.508
+        },
+        {
+          "name": "bold_wf:bold_confounds_part2 (sub-benchmark)",
+          "realtime_seconds": 104.542
+        },
+        {
+          "name": "bold_wf:bold_anat_prepare (sub-benchmark)",
+          "realtime_seconds": 104.025
+        },
+        {
+          "name": "bold_wf:bold_synthmorph_joint (sub-benchmark)",
+          "realtime_seconds": 102.085
+        }
+      ],
+      "gpu_samples": {
+        "count": 984,
+        "benchmark_highest_sample_mib": 18656.0,
+        "whole_card_memory_range_mib": [
+          30671.0,
+          73308.0
+        ],
+        "whole_card_utilization_range_percent": [
+          48.0,
+          100.0
+        ]
+      },
+      "status": "complete",
+      "trace_file": "volume_trace.tsv",
+      "trace_sha256": "9f97ce8f4f4c7f135e5a90b9158d710e7833cdb9a9005d4a007eca6936f5162c"
+    },
+    {
+      "mode": "surface",
+      "pipeline_wall_seconds": 1969.4499840196222,
+      "started_utc": "2026-09-30T13:35:22.744472+00:00",
+      "finished_utc": "2026-09-30T14:08:12.197674+00:00",
+      "exit_code": 0,
+      "validated_outputs": [
+        {
+          "file": "BOLD/sub-benchmark/func/sub-benchmark_task-rest_run-01_hemi-L_space-fsaverage6_bold.func.gii",
+          "shape": [
+            40962,
+            490
+          ],
+          "finite": true,
+          "sha256": "178e4430580f1e8afe7cdb271529126ff1ad540fbab841a823fae7bd1e613079",
+          "size_bytes": 94853960
+        },
+        {
+          "file": "BOLD/sub-benchmark/func/sub-benchmark_task-rest_run-01_hemi-R_space-fsaverage6_bold.func.gii",
+          "shape": [
+            40962,
+            490
+          ],
+          "finite": true,
+          "sha256": "a4343b14b1b19e543ddaea80ce57010cd4e4ca538f6a6037cf3bd50f41bb5c94",
+          "size_bytes": 94927357
+        },
+        {
+          "file": "Recon/sub-benchmark/surf/lh.white",
+          "vertices": 109524,
+          "faces": 219044,
+          "finite": true
+        },
+        {
+          "file": "Recon/sub-benchmark/surf/lh.pial",
+          "vertices": 109524,
+          "faces": 219044,
+          "finite": true
+        },
+        {
+          "file": "Recon/sub-benchmark/surf/lh.sphere.reg",
+          "vertices": 109524,
+          "faces": 219044,
+          "finite": true
+        },
+        {
+          "file": "Recon/sub-benchmark/surf/rh.white",
+          "vertices": 110716,
+          "faces": 221428,
+          "finite": true
+        },
+        {
+          "file": "Recon/sub-benchmark/surf/rh.pial",
+          "vertices": 110716,
+          "faces": 221428,
+          "finite": true
+        },
+        {
+          "file": "Recon/sub-benchmark/surf/rh.sphere.reg",
+          "vertices": 110716,
+          "faces": 221428,
+          "finite": true
+        },
+        {
+          "file": "BOLD/sub-benchmark/func/sub-benchmark_task-rest_run-01_desc-confounds_timeseries.tsv",
+          "rows": 490
+        }
+      ],
+      "configuration": {
+        "input_frames": 490,
+        "gpu_index": 1,
+        "cpus": 10,
+        "host_memory_gb": 32,
+        "gpu_tasks_serialized": true,
+        "cold_output": true,
+        "anatomical_reconstruction_reused": false,
+        "precision": "Official DeepPrep model defaults; no added precision changes",
+        "TF_FORCE_GPU_ALLOW_GROWTH": true
+      },
+      "branch_span_seconds": {
+        "anat_wf": 1420.474,
+        "bold_wf": 1945.108
+      },
+      "completed_task_count": 78,
+      "slowest_tasks": [
+        {
+          "name": "bold_wf:bold_pre_process (sub-benchmark_task-rest_run-01)",
+          "realtime_seconds": 659.614
+        },
+        {
+          "name": "anat_wf:anat_fill (sub-benchmark)",
+          "realtime_seconds": 301.16
+        },
+        {
+          "name": "anat_wf:anat_ribbon (sub-benchmark)",
+          "realtime_seconds": 255.739
+        },
+        {
+          "name": "anat_wf:anat_sphere (sub-benchmark)",
+          "realtime_seconds": 174.163
+        },
+        {
+          "name": "anat_wf:anat_pial_surface (sub-benchmark)",
+          "realtime_seconds": 171.835
+        },
+        {
+          "name": "anat_wf:anat_pial_surface (sub-benchmark)",
+          "realtime_seconds": 146.904
+        },
+        {
+          "name": "anat_wf:anat_white_surface (sub-benchmark)",
+          "realtime_seconds": 114.414
+        },
+        {
+          "name": "anat_wf:anat_white_surface (sub-benchmark)",
+          "realtime_seconds": 108.662
+        },
+        {
+          "name": "bold_wf:bold_confounds_part2 (sub-benchmark)",
+          "realtime_seconds": 101.405
+        },
+        {
+          "name": "bold_wf:bold_anat_prepare (sub-benchmark)",
+          "realtime_seconds": 101.116
+        },
+        {
+          "name": "anat_wf:anat_T1 (sub-benchmark)",
+          "realtime_seconds": 86.714
+        },
+        {
+          "name": "anat_wf:anat_sphere (sub-benchmark)",
+          "realtime_seconds": 67.796
+        }
+      ],
+      "gpu_samples": {
+        "count": 928,
+        "benchmark_highest_sample_mib": 6766.0,
+        "whole_card_memory_range_mib": [
+          42721.0,
+          75183.0
+        ],
+        "whole_card_utilization_range_percent": [
+          62.0,
+          100.0
+        ]
+      },
+      "status": "complete",
+      "trace_file": "surface_trace.tsv",
+      "trace_sha256": "b692b6776106fbcb8764d3e30d2be134da5679575c735282b2eb02beab007cae",
+      "validation_note": "Post-run validation confirms 40962 vertices x 490 frames per hemisphere with the final format recognizer; pipeline timing unchanged."
+    }
+  ],
+  "qc_validation": {
+    "qc_report": "runs/surface/QC/sub-benchmark/sub-benchmark.html",
+    "html_exists": true,
+    "checked_local_references": 5,
+    "missing_local_references": [],
+    "qc_tuple_warning_occurrences": 5,
+    "warning_type": "Input tuple does not match tuple declaration in process bold_wf:qc_bold_create_report"
+  },
+  "privacy": "Only anonymous scalar checks, hashes, timings and task metadata; MRI, individual geometry, license files, weights and private logs remain on the data holder server."
+}

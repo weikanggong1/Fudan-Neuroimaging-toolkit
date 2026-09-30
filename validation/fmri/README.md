@@ -1,6 +1,6 @@
 # fMRI volume 与 surface 全流程 benchmark
 
-[volume 用法](../../docs/fmri/README.md) · [surface 用法](../../docs/fmri/surface.md) · [单被试测量脚本](benchmark_bids.py)
+[volume 用法](../../docs/fmri/README.md) · [surface 用法](../../docs/fmri/surface.md) · [单被试测量脚本](benchmark_bids.py) · [FNIT / DeepPrep 实测对照](deepprep/README.md)
 
 2026-09-30 在 gpucw1 上用 `3f8b756` 的运行源码，连续运行同一例真实 UKB 的完整 490 帧 BIDS volume 和 surface 接口。BOLD 为 88×88×64×490，TR 0.735 s，使用同次 SBRef。T1 取自同被试 FreeSurfer 存档的 `orig/001.mgz`，以 nibabel 转成 NIfTI，逐体素差为 0；它是存档的重建输入，更早的结构预处理未核对。surface 使用同一存档的既有皮层几何，不运行或计时 recon-all。
 
@@ -23,7 +23,7 @@
 
 两个 API 相加为 **2624.89 s，43.75 分钟**，边界是本次 BOLD 输入到 volume 和 surface 输出，外加已提供的 T1 与皮层几何。未计入皮层重建、数据下载或更早的结构预处理。验证进程计时另包含导入、输入哈希及事后检查；API 计时排除这些步骤和 CUDA 上下文初始化，包含首次权重加载。它们是共享 H100 上各一次冷调用，使用 8 个 CPU 线程、float32/TF32，不能外推到其他负载或被试。
 
-volume 的 ICA 自动得到 95 个成分，在 115 次迭代后收敛，AROMA 识别 55 个噪声成分；WM、CSF、运动回归均开启。候选输入和输出 SHA、全部相关运行源码 SHA、阶段时间、环境和显存见 JSON。当前算法文件已与这些测量哈希核对。验证脚本为保存实际 warp 额外复制矩阵和位移场，用时 0.052 s；API 墙钟已扣除这一开销，阶段时间仍包含该开销。
+volume 的 ICA 自动得到 95 个成分，在 115 次迭代后收敛，AROMA 识别 55 个噪声成分；WM、CSF、运动回归均开启。候选输入和输出 SHA、全部相关运行源码 SHA、阶段时间、环境和显存见 JSON。计时对应报告中的运行提交；之后 main 的算法改动不包含在本次测量内。验证脚本为保存实际 warp 额外复制矩阵和位移场，用时 0.052 s；API 墙钟已扣除这一开销，阶段时间仍包含该开销。
 
 | volume 阶段 | 秒 |
 |---|---:|
