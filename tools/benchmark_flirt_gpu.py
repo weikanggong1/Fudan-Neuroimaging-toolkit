@@ -324,11 +324,16 @@ class Instrumentation:
 
 def paired_metrics(result, moving, fixed, fsl_matrix, fsl_moved, comparison_mask, core):
     matrix = np.loadtxt(fsl_matrix)
-    official_world = core.flirt_to_world_affine(matrix, moving.affine, fixed.affine, moving.shape, fixed.shape)
+    # Both artifacts are FSL scaled-mm matrices. Header pixdim, rather than
+    # affine column norms or a legacy result.world field, defines that space.
+    geometry = (moving.affine, fixed.affine, moving.shape, fixed.shape,
+                moving.header.get_zooms()[:3], fixed.header.get_zooms()[:3])
+    official_world = core.flirt_to_world_affine(matrix, *geometry)
+    candidate_world = core.flirt_to_world_affine(result.matrix, *geometry)
     axes = [np.linspace(0, size - 1, 13) for size in moving.shape]
     points = np.stack(np.meshgrid(*axes, indexing="ij"), -1).reshape(-1, 3)
     points = nib.affines.apply_affine(moving.affine, points)
-    distances = np.linalg.norm(nib.affines.apply_affine(result.moving_to_fixed_world, points) - nib.affines.apply_affine(official_world, points), axis=1)
+    distances = np.linalg.norm(nib.affines.apply_affine(candidate_world, points) - nib.affines.apply_affine(official_world, points), axis=1)
     official = nib.load(str(fsl_moved))
     first = np.asarray(official.dataobj, dtype=np.float32)
     second = np.asarray(result.moved.dataobj, dtype=np.float32)

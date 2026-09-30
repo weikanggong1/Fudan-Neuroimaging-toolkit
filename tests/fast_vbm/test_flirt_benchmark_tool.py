@@ -37,6 +37,31 @@ def test_instrumentation_preserves_resampling_callable(benchmark_tool, tmp_path)
     assert instrumentation.report()["stages"]["final_resampling"]["calls"] == 1
 
 
+def test_paired_matrix_score_uses_header_pixdim_for_both_artifacts(benchmark_tool, tmp_path):
+    shape = (7, 8, 9)
+    data = np.arange(np.prod(shape), dtype=np.float32).reshape(shape)
+    moving_affine = np.array([[-2., .5, 0, 0], [0, 2, 0, 0],
+                              [0, 0, 2, 0], [0, 0, 0, 1]])
+    fixed_affine = np.diag([-2., 2., 2., 1.])
+    moving = nib.Nifti1Image(data, moving_affine)
+    fixed = nib.Nifti1Image(data, fixed_affine)
+    moving.header.set_zooms((2, 2, 2))
+    matrix_path, moved_path = tmp_path / "fsl.mat", tmp_path / "fsl.nii.gz"
+    np.savetxt(matrix_path, np.eye(4))
+    nib.save(fixed, moved_path)
+    # Identical saved scaled-mm matrices must have zero displacement. With
+    # equal header pixdim, this matrix maps identical voxel indices. Do not
+    # trust legacy result.world fields built with affine norms instead.
+    result = SimpleNamespace(
+        matrix=np.eye(4), moved=fixed, moving_to_fixed_world=np.eye(4),
+        qc={"cost_value": 0., "cost_evaluations": 1},
+    )
+    metrics = benchmark_tool.paired_metrics(
+        result, moving, fixed, matrix_path, moved_path, None, core,
+    )
+    assert metrics["world_grid_displacement_mm"]["rms"] == 0
+
+
 def test_stage_timers_cover_complete_registration(benchmark_tool):
     arguments = resample_arguments("cpu")
     image = nib.Nifti1Image(arguments[0], arguments[2])

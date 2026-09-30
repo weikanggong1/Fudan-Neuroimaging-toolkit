@@ -512,9 +512,11 @@ class FSLCorrelationRatio:
         ref_max = self.reference_values.max()
         if float(ref_max - ref_min) == 0:
             ref_max = ref_max + 1
+        ref_range = ref_max - ref_min
+        bin_factor = self.bins / ref_range
+        bin_offset = (-ref_min * self.bins) / ref_range
         bin_index = torch.trunc(
-            self.reference_values * (self.bins / (ref_max - ref_min))
-            - ref_min * (self.bins / (ref_max - ref_min))
+            self.reference_values * bin_factor + bin_offset
         ).to(torch.long)
         self.bin_index = bin_index.clamp(0, self.bins - 1)
         self.bin_sort_order = torch.argsort(self.bin_index, stable=True)
@@ -588,7 +590,7 @@ class FSLCorrelationRatio:
             sorted_weights * sorted_values, "sum", lengths=lengths, initial=0
         )
         sums2 = torch.segment_reduce(
-            sorted_weights * sorted_values.square(),
+            (sorted_weights * sorted_values) * sorted_values,
             "sum",
             lengths=lengths,
             initial=0,
@@ -611,7 +613,9 @@ class FSLCorrelationRatio:
         if float(total_variance) <= 0:
             return 1.0
         cost = (within * n).sum() / total_n / total_variance
-        return float(cost)
+        # NEWIMAGE returns float(1-r) from p_corr_ratio_smoothed, then
+        # float(1-p) from Costfn::cost.  Preserve both float32 roundings.
+        return float(1.0 - (1.0 - cost))
 
 
 
@@ -625,6 +629,7 @@ class FSLNormalizedMutualInformation(FSLCorrelationRatio):
         if float(test_range) == 0:
             test_range = test_range + 1
         self.test_factor = self.bins / test_range
+        self.test_offset = (-self.test_min * self.bins) / test_range
 
     def __call__(self, moving_to_reference):
         coefficients = _fsl_pull_coefficients(
@@ -652,11 +657,12 @@ class FSLNormalizedMutualInformation(FSLCorrelationRatio):
                         (upper - coordinates) / smooth, 1.0),
         ).prod(dim=0).clamp_min_(0)
         weight = edge_weight * valid
-        bin_float = (values - self.test_min) * self.test_factor
+        bin_float = values * self.test_factor + self.test_offset
         truncated = torch.trunc(bin_float)
-        centre = truncated.long().clamp(0, self.bins - 1)
-        minus = (centre - 1).clamp_min(0)
-        plus = (centre + 1).clamp_max(self.bins - 1)
+        raw_centre = truncated.long()
+        minus = (raw_centre - 1).clamp_min(0)
+        plus = (raw_centre + 1).clamp_max(self.bins - 1)
+        centre = raw_centre.clamp(0, self.bins - 1)
         fractional = (bin_float - truncated).abs()
         centre_weight = torch.where(
             fractional < 0.5, 0.5 + fractional,
@@ -676,7 +682,8 @@ class FSLNormalizedMutualInformation(FSLCorrelationRatio):
         first = joint.sum(1)
         second = joint.sum(0)
         total = second.sum()
-        if float(total) <= 0:
+        total_value = float(total)
+        if not math.isfinite(total_value) or total_value <= 0:
             return -1.0
 
         def entropy(histogram):
@@ -685,8 +692,8 @@ class FSLNormalizedMutualInformation(FSLCorrelationRatio):
             return -(probabilities[selected] * probabilities[selected].log()).sum()
 
         joint_entropy = entropy(joint)
-        if float(joint_entropy) <= 0:
-            return -1.0
+        if abs(float(joint_entropy)) < 1e-9:
+            return 0.0
         return float(-(entropy(first) + entropy(second)) / joint_entropy)
 
 
@@ -792,7 +799,7 @@ def _optimize_one_dimension(
     x1, middle, x2, y1, y_middle, y2 = _initial_bound(
         x1, middle, y1, y_middle, function, unit, point
     )
-    minimum_distance = f32(f32(0.1) * unit_tolerance)
+    minimum_distance = f32(0.1 * float(unit_tolerance))
     iteration = 0
     while (
         iteration < maximum_iterations
@@ -852,7 +859,9 @@ def fsl_coordinate_optimize(
             point, value = _optimize_one_dimension(
                 point, direction, tolerance, function, 100, value, guess
             )
-        average_tolerance = np.abs((initial - point) * inverse_tolerance).sum()
+        average_tolerance = np.float32(
+            np.abs((initial - point) * inverse_tolerance).sum()
+        )
         if average_tolerance < 1.0:
             break
     return point, float(value)
@@ -915,11 +924,24 @@ def _rms_deviation(first, second, radius=80.0):
     linear = difference[:3, :3]
     translation = difference[:3, 3]
     return float(
-        np.sqrt(
+        np.float32(np.sqrt(
             translation @ translation
             + (float(radius) ** 2 / 5.0) * np.trace(linear.T @ linear)
-        )
+        ))
     )
+
+
+def _search_cost_threshold(costs):
+    """FLIRT search_cost's float threshold, including its strict tie boundary."""
+    minimum, maximum = np.float32(costs.min()), np.float32(costs.max())
+    threshold = np.float32(min(
+        np.float32(minimum + np.float32(np.float32(0.2) * np.float32(maximum - minimum))),
+        _newimage_percentile(costs, 0.2),
+    ))
+    if threshold <= minimum:
+        threshold = np.float32(max(float(minimum) * 1.0001,
+                                   float(minimum) * 0.9999))
+    return threshold
 
 
 def _find_cost_minima(costs):
@@ -1403,13 +1425,7 @@ class _DefaultFLIRTEngine:
                 values = [self.cost(matrix) for matrix in matrices]
             costs[:] = np.asarray(values, dtype=np.float32).reshape(costs.shape)
 
-        minimum, maximum = float(costs.min()), float(costs.max())
-        threshold = min(
-            minimum + 0.2 * (maximum - minimum),
-            _newimage_percentile(costs, 0.2),
-        )
-        if threshold <= minimum:
-            threshold = max(minimum * 1.0001, minimum * 0.9999)
+        threshold = _search_cost_threshold(costs)
         selected = [index for index in np.ndindex(costs.shape)
                     if costs[index] < threshold]
         with self.phase("angular_fine_refinement"):
@@ -1479,6 +1495,38 @@ class _DefaultFLIRTEngine:
                     for value, (_, matrix) in zip(values, candidates)]
         return [(self.cost(matrix), matrix.copy()) for _, matrix in candidates]
 
+    def _schedule_measure(self, candidates):
+        # FLIRT usrmeasurecost decomposes/recomposes even a zero perturbation.
+        parameters = [fsl_parameters_from_affine(matrix, self.level.centre) + np.zeros(12)
+                      for _, matrix in candidates]
+        matrices = self._parameter_matrices(parameters, 12)
+        return self._measure([(0.0, matrix) for matrix in matrices])
+
+    def _schedule_optimize(self, candidates, dof, maximum_iterations):
+        # usroptimise's zero perturbation precedes optimise_strategy1's decomposition.
+        return self._optimize(candidates, dof, maximum_iterations, np.zeros(12))
+
+    def _schedule_perturbations(self):
+        fine = (self._angles(delta=math.pi / 10) if self.angular_search
+                else np.array([0.0]))
+        angle = float(np.float32(
+            0.5 * (float(fine[1]) - float(fine[0])) if len(fine) > 1
+            else 3.0 * _BASE_TOLERANCE[0] * self.requested_scale
+        ))
+        perturbations = []
+        for axis in range(3):
+            for sign in (1, -1):
+                value = np.zeros(12)
+                value[axis] = sign * angle
+                perturbations.append(value)
+        # The default schedule specifies absolute scale perturbations, including
+        # with -dof 6; the following six-DOF composition drops those scales.
+        for scale in (0.1, -0.1, 0.2, -0.2):
+            value = np.zeros(12)
+            value[6] = scale
+            perturbations.append(value)
+        return perturbations
+
     def _optimize(self, candidates, dof, maximum_iterations, perturbation=None):
         if self.execution == "batched":
             from .search import coordinate_trials, evaluate_trials
@@ -1521,29 +1569,19 @@ class _DefaultFLIRTEngine:
         with self.phase("level_4mm"):
             self.set_scale(4)
         with self.phase("measure_4mm"):
-            search_costs = self._measure(search)
-            presearch_costs = self._measure(presearch)
+            search_costs = self._schedule_measure(search)
+            presearch_costs = self._schedule_measure(presearch)
         paired = sorted(zip(search_costs, presearch_costs), key=lambda item: item[0][0])
         search_costs = [item[0] for item in paired]
         presearch_costs = [item[1] for item in paired]
         with self.phase("local_4mm_initial"):
-            candidates = self._optimize(
+            candidates = self._schedule_optimize(
                 search_costs[:3] + presearch_costs[:3] + [(0.0, np.eye(4))],
                 min(dof, 7), 4,
             )
         best = self._sort(candidates)
         candidates = best[:4]
-        fine_step = math.pi / 10
-        perturbations = []
-        for axis in range(3):
-            for sign in (1, -1):
-                value = np.zeros(12)
-                value[axis] = sign * fine_step / 2
-                perturbations.append(value)
-        for scale in (0.1, -0.1, 0.2, -0.2):
-            value = np.zeros(12)
-            value[6] = scale if dof >= 7 else 0.0
-            perturbations.append(value)
+        perturbations = self._schedule_perturbations()
         with self.phase("local_4mm_perturbations"):
             if self.execution == "batched":
                 perturbed_parameters = []
@@ -1563,21 +1601,21 @@ class _DefaultFLIRTEngine:
         with self.phase("level_2mm"):
             self.set_scale(2)
         with self.phase("measure_2mm"):
-            measured = self._sort(self._measure(best))
+            measured = self._sort(self._schedule_measure(best))
         with self.phase("local_2mm"):
-            best = self._optimize(measured[:1], min(dof, 7), 4)
+            best = self._schedule_optimize(measured[:1], min(dof, 7), 4)
             self.bound_guess = (1.0,)
             if dof > 7:
-                best = self._optimize(best[:1], 9, 1)
+                best = self._schedule_optimize(best[:1], 9, 1)
             if dof > 9:
-                best = self._optimize(best[:1], 12, 2)
+                best = self._schedule_optimize(best[:1], 12, 2)
         best = self._sort(best)
 
         with self.phase("level_1mm"):
             self.set_scale(1)
         with self.phase("local_1mm"):
-            final = self._optimize((best + [(0.0, qsform_matrix)])[:2], dof, 1)
-            final.append((self.cost(qsform_matrix), qsform_matrix.copy()))
+            final = self._schedule_optimize((best + [(0.0, qsform_matrix)])[:2], dof, 1)
+            final += self._schedule_measure([(0.0, qsform_matrix)])
         cost, residual = self._sort(final)[0]
         return cost, residual @ self.initial_matrix
 
@@ -1622,16 +1660,63 @@ def _resample_output(
     moving = _blur(moving, min(fixed_voxel_sizes), moving_voxel_sizes,
                    boundary=blur_boundary)
     grid = _voxel_grid(fixed_shape, device=device)
-    moving_fsl = torch.as_tensor(moving_fsl, dtype=torch.float32, device=device)
-    fixed_fsl = torch.as_tensor(fixed_fsl, dtype=torch.float32, device=device)
-    matrix = torch.as_tensor(matrix, dtype=torch.float32, device=device)
-    pull = torch.linalg.inv(moving_fsl) @ torch.linalg.inv(matrix) @ fixed_fsl
+    # NEWMAT inverts/composes in double, then NEWIMAGE narrows its twelve
+    # sampling coefficients to float. These small matrices are already on CPU.
+    pull = np.linalg.inv(moving_fsl) @ np.linalg.inv(matrix) @ fixed_fsl
+    pull = torch.as_tensor(pull, dtype=torch.float32, device=device)
     coordinates = pull[:3, :3] @ grid + pull[:3, 3:4]
     upper = torch.tensor(moving.shape, device=device)[:, None] - 1
     valid = ((coordinates >= 0) & (coordinates <= upper)).all(0)
-    output = torch.zeros(grid.shape[1], dtype=torch.float32, device=device)
-    output[valid] = _manual_trilinear(moving, coordinates[:, valid])
+    # Avoid CUDA nonzero/dynamic-size indexing and its host synchronization.
+    output = torch.where(valid, _manual_trilinear(moving, coordinates),
+                         _edge_background(moving))
     return output.reshape(fixed_shape)
+
+
+def _edge_background(data):
+    """NEWIMAGE's sorted 10th percentile of the two-voxel edge shell."""
+    nx, ny, nz = data.shape
+    ex, ey, ez = min(2, nx - 1), min(2, ny - 1), min(2, nz - 1)
+    # Use the same face partition; tiny images can have overlapping faces.
+    faces = (
+        data[ex:nx-ex, ey:ny-ey, :ez],
+        data[ex:nx-ex, ey:ny-ey, nz-ez:],
+        data[ex:nx-ex, :ey, :], data[ex:nx-ex, ny-ey:, :],
+        data[:ex, :, :], data[nx-ex:, :, :],
+    )
+    values = torch.cat([face.reshape(-1) for face in faces])
+    if values.numel() == 0:
+        return data.new_zeros(())
+    return values.kthvalue(values.numel() // 10 + 1).values
+
+
+def _output_image(data, moving, fixed, pull_voxel, *, applyxfm=False):
+    """Preserve FSL's output dtype and reference qform/sform rules."""
+    dtype = moving.get_data_dtype()
+    if not np.issubdtype(dtype, np.floating) and np.ptp(data) < 1.5:
+        dtype = np.dtype("float32")  # Preserve fractional resampled masks.
+    image = new_image(data.astype(dtype, copy=False), fixed)
+    qform, qcode = fixed.get_qform(), int(fixed.header["qform_code"])
+    sform, scode = fixed.get_sform(), int(fixed.header["sform_code"])
+    if not applyxfm and not qcode and scode:
+        qform, qcode = sform, scode
+    if not applyxfm and not scode and qcode:
+        sform, scode = qform, qcode
+    if not applyxfm and not qcode and not scode:
+        source, code = moving.get_sform(coded=True)
+        if not code:
+            source, code = moving.get_qform(coded=True)
+        if code:
+            qform = sform = source @ pull_voxel
+            qcode = scode = code
+    image.set_qform(qform, int(qcode))
+    image.set_sform(sform, int(scode))
+    # NEWIMAGE retains reference pixdim even when the qform copied from a
+    # sheared sform requires an orthogonal approximation. nibabel's set_qform
+    # recomputes zooms from that matrix, so restore the independent header data.
+    image.header.set_zooms(fixed.header.get_zooms()[:3])
+    image.header["cal_min"] = image.header["cal_max"] = 0
+    return image
 
 
 def _load_fsl_matrix(init):
@@ -1704,8 +1789,8 @@ class TorchFLIRT:
         fixed_data = _single_frame(fixed, "fixed")
         moving_world = np.asarray(moving.affine, dtype=np.float64)
         fixed_world = np.asarray(fixed.affine, dtype=np.float64)
-        moving_sizes = tuple(float(value) for value in nib.affines.voxel_sizes(moving.affine))
-        fixed_sizes = tuple(float(value) for value in nib.affines.voxel_sizes(fixed.affine))
+        moving_sizes = tuple(float(value) for value in moving.header.get_zooms()[:3])
+        fixed_sizes = tuple(float(value) for value in fixed.header.get_zooms()[:3])
 
         def load_weight(value, image, data, name):
             if value is None:
@@ -1772,7 +1857,8 @@ class TorchFLIRT:
                 fixed_sizes,
                 self.device,
             ).cpu().numpy()
-        moved = new_image(moved_data.astype(np.float32, copy=False), fixed)
+        pull_voxel = np.linalg.inv(moving_fsl) @ np.linalg.inv(matrix) @ fixed_fsl
+        moved = _output_image(moved_data, moving, fixed, pull_voxel)
         forward_world = flirt_to_world_affine(
             matrix,
             moving_world,
@@ -1868,7 +1954,7 @@ class TorchFLIRT:
             moving_data, fixed_data.shape, moving_fsl, fixed_fsl, matrix,
             moving_sizes, fixed_sizes, self.device, blur_boundary="replicate",
         ).cpu().numpy()
-        moved_data = moved_data.astype(moving.get_data_dtype(), copy=False)
+        pull_voxel = np.linalg.inv(moving_fsl) @ np.linalg.inv(matrix) @ fixed_fsl
         forward_world = flirt_to_world_affine(
             matrix, moving_world, fixed_world,
             moving_data.shape, fixed_data.shape, moving_sizes, fixed_sizes,
@@ -1876,7 +1962,7 @@ class TorchFLIRT:
         pull_world = np.linalg.inv(forward_world)
         pull_world[3] = (0, 0, 0, 1)
         return FLIRTResult(
-            moved=new_image(moved_data, fixed),
+            moved=_output_image(moved_data, moving, fixed, pull_voxel, applyxfm=True),
             matrix=matrix,
             moving_to_fixed_world=forward_world,
             fixed_to_moving_world=pull_world,

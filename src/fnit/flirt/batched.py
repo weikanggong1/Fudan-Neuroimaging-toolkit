@@ -62,6 +62,8 @@ class BatchedAffineCost:
         self._planned_chunk_size = None
         self._cuda_sum_kernel = None
         self._cuda_sum_imported = False
+        self._cuda_sample_kernel = None
+        self._cuda_sample_imported = False
         self.reduction_lanes = torch.arange(
             128, dtype=torch.long, device=self.device
         )[None, None]
@@ -168,6 +170,32 @@ class BatchedAffineCost:
         return (temp6 - temp5) * dz + temp5
 
     def _sample(self, coefficients):
+        if self.device.type == "cuda" and not self.cost.weighted:
+            if not self._cuda_sample_imported:
+                self._cuda_sample_imported = True
+                try:
+                    from ._batched_cuda import _sample_kernel
+                    self._cuda_sample_kernel = _sample_kernel
+                except ImportError:
+                    pass
+            if self._cuda_sample_kernel is not None:
+                coefficients = coefficients.contiguous()
+                size = self.grid.shape[1]
+                values = torch.empty((len(coefficients), size), dtype=torch.float32,
+                                     device=self.device)
+                weights = torch.empty_like(values)
+                with torch.cuda.device(self.device):
+                    self._cuda_sample_kernel[((size + 255) // 256, len(coefficients))](
+                        self.grid, coefficients, self.moving_flat, self.upper, self.smooth,
+                        values, weights, N=size, SIZE_X=self.moving.shape[0],
+                        SIZE_Y=self.moving.shape[1], SIZE_Z=self.moving.shape[2],
+                        TAPER=self.cost.smooth_size > 0 or self.nmi, BLOCK=256,
+                        num_warps=4, enable_fp_fusion=False,
+                    )
+                return values, weights
+        return self._sample_tensor(coefficients)
+
+    def _sample_tensor(self, coefficients):
         coordinates = self._coordinates(coefficients)
         valid = ((coordinates >= 0) & (coordinates <= self.upper)).all(dim=1)
         interpolation_coordinates = torch.minimum(coordinates.clamp_min(0), self.upper)
@@ -217,7 +245,7 @@ class BatchedAffineCost:
 
         counts = segmented_sum(sorted_weights)
         sums = segmented_sum(sorted_weights * sorted_values)
-        sums2 = segmented_sum(sorted_weights * sorted_values.square())
+        sums2 = segmented_sum((sorted_weights * sorted_values) * sorted_values)
         keep = counts > 2
         n = torch.where(keep, counts, 0)
         y = torch.where(keep, sums, 0)
@@ -236,6 +264,7 @@ class BatchedAffineCost:
         safe_total = total_n.clamp_min(2)
         total_variance = (total_sum2 - total_sum.square() / safe_total) / (safe_total - 1)
         cost = numerator / safe_total / total_variance
+        cost = 1.0 - (1.0 - cost)
         return torch.where((total_n > 1) & (total_variance > 0), cost, 1.0)
 
     def _compact_sum(self, packed, lengths):
@@ -303,11 +332,15 @@ class BatchedAffineCost:
         return value[..., 0]
 
     def _normmi(self, values, weights):
-        bin_float = (values - self.cost.test_min) * self.cost.test_factor
+        bin_float = values * self.cost.test_factor + self.cost.test_offset
+        # Failed CUDA inverse lanes contain NaNs and receive the failure cost
+        # below.  Keep their unused scatter indices within the histogram.
+        bin_float = torch.where(torch.isfinite(bin_float), bin_float, 0)
         truncated = torch.trunc(bin_float)
-        centre = truncated.long().clamp(0, self.cost.bins - 1)
-        minus = (centre - 1).clamp_min(0)
-        plus = (centre + 1).clamp_max(self.cost.bins - 1)
+        raw_centre = truncated.long()
+        minus = (raw_centre - 1).clamp_min(0)
+        plus = (raw_centre + 1).clamp_max(self.cost.bins - 1)
+        centre = raw_centre.clamp(0, self.cost.bins - 1)
         fractional = (bin_float - truncated).abs()
         centre_weight = torch.where(
             fractional < 0.5, 0.5 + fractional,
@@ -339,8 +372,11 @@ class BatchedAffineCost:
             return -self._compact_sum(packed[:, None], positive.sum(dim=1))[:, 0]
 
         joint_entropy = entropy(joint)
-        result = -(entropy(first) + entropy(second)) / joint_entropy
-        return torch.where((total > 0) & (joint_entropy > 0), result, -1.0)
+        nonzero_entropy = joint_entropy.abs() >= 1e-9
+        safe_entropy = torch.where(nonzero_entropy, joint_entropy, 1)
+        result = -(entropy(first) + entropy(second)) / safe_entropy
+        result = torch.where(nonzero_entropy, result, 0)
+        return torch.where(total > 0, result, -1.0)
 
     @torch.no_grad()
     def evaluate(self, matrices, *, chunk_size=None):

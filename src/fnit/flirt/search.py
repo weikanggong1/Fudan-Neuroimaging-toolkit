@@ -58,7 +58,7 @@ def _dimension_trials(point, direction, tolerance, maximum_iterations, initial_v
     y_middle = f32(initial_value if initial_value != 0 else (yield point))
     y1 = f32((yield (float(x1) * unit + point)))
     (x1, middle, x2, y1, y_middle, y2) = (yield from _bound_trials(x1, middle, y1, y_middle, unit, point))
-    minimum_distance = f32(f32(0.1) * unit_tolerance)
+    minimum_distance = f32(0.1 * float(unit_tolerance))
     iteration = 0
     while iteration < maximum_iterations and abs((x2 - x1) / unit_tolerance) > 1.0:
         iteration += 1
@@ -104,7 +104,7 @@ def coordinate_trials(point, tolerance, *, maximum_iterations=4, bound_guess=(10
             direction = np.zeros_like(point)
             direction[index] = 1
             (point, value) = (yield from _dimension_trials(point, direction, tolerance, 100, value, guess))
-        average_tolerance = np.abs((initial - point) * inverse_tolerance).sum()
+        average_tolerance = np.float32(np.abs((initial - point) * inverse_tolerance).sum())
         if average_tolerance < 1.0:
             break
     return (point, float(value))
