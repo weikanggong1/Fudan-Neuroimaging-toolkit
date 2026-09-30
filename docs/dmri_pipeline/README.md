@@ -2,24 +2,29 @@
 
 [返回首页](../../README.md) · [PyTorch MMORF](../mmorf/README.md)
 
-本流程实现以下固定链：
+## 流程策略
 
-~~~mermaid
-flowchart LR
-  A[UKB AP 或 BIDS dwi + optional reverse PE] --> B{reverse PE present?}
-  B -->|yes| C[TorchTOPUP]
-  B -->|no| D[zero susceptibility field]
-  C --> E[TorchEDDY]
-  D --> E
-  E --> F[TorchDTIFIT b≈1000]
-  E --> G[TorchAMICONODDI all shells: AMICO or classic]
-  F --> H{registration backend}
-  G --> H
-  H -->|tbss| I[weighted TorchFLIRT + three-stage TorchFNIRT]
-  H -->|mmorf| J[SynthStrip T1 + two TorchFLIRT + run_mmorf]
-  I --> K[9 maps on selected MNI template grid]
-  J --> K
-~~~
+```mermaid
+flowchart TD
+    IN["BIDS 或 UKB AP DWI、bval/bvec、采集参数"] --> SEL["选择单被试 DWI 与可选反向相位编码图"]
+    SEL --> REV{"反向相位编码图完整？"}
+    REV -- 是 --> TOP["TorchTOPUP：估计畸变场"] --> EDDY["TorchEDDY：校正 DWI 并旋转 bvec"]
+    REV -- 否 --> ZERO["零 susceptibility field"] --> EDDY
+    EDDY --> DWI["校正 DWI 与旋转梯度"]
+    DWI --> DTI["TorchDTIFIT：b≈1000 shell"]
+    DWI --> NODDI["TorchAMICONODDI：全部 shell；AMICO 或 classic"]
+    DTI --> REG{"配准后端？"}
+    NODDI --> REG
+    REG -- TBSS --> TBSS["FA → 加权 TorchFLIRT → 三阶段 TorchFNIRT"]
+    FA["FMRIB58 FA 与 skeleton 模板"] --> TBSS
+    REG -- MMORF --> MMORF["T1 SynthStrip → 两次 TorchFLIRT → TorchMMORF"]
+    T1["同被试 T1w、MNI T1 与 tensor 模板"] --> MMORF
+    TBSS --> WARP["将九张参数图映射到所选 MNI 网格"]
+    MMORF --> WARP
+    WARP --> OUT["FA、MD、L1–L3、MO、ICVF、OD、ISOVF"]
+    TBSS --> SKEL["TBSS 另输出九张 skeleton-mask 图"]
+    classDef default fill:#ffffff,stroke:#000000,color:#000000;
+```
 
 两条分支输出相同的九个参数名：FA、MD、L1、L2、L3、MO、ICVF、OD、ISOVF。输入的 FA、T1 和 tensor 模板采用同一 MNI 网格时，两条分支的标准空间图也有相同的 shape、affine 和 float32 dtype；TBSS/FNIRT 与 MMORF 仍会估计不同的非线性形变。TBSS 分支另输出九张 UKB 风格 skeleton-mask 图。
 

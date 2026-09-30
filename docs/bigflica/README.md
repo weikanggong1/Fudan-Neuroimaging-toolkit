@@ -6,6 +6,26 @@
 
 CUDA 路径先逐被试读取，把标准化矩阵作为 HDF5 分块存盘；后续任何阶段都不在内存中装入完整的“被试 × 体素”模态矩阵。默认 `max_gpu_gb=28`，给 32 GB 显存留余量。协方差仍需 `N × N × 8` 字节；当维度或配置超过预算时会报错。磁盘需求不受 32 GB 内存限制，例如 37,182 人 × 100 万掩膜体素的 float64 标准化缓存约 277 GiB/**每模态**。请预留相应的磁盘空间。大于 2,048 人时 mMIGP 使用 GPU 随机子空间特征分解；直接体素 FLICA 的自由度改为 1，因此这两个大样本近似需要另行核验，不能当作逐点一致。
 
+## 流程策略
+
+```mermaid
+flowchart TD
+    IN["每名被试的多模态标准空间 NIfTI"] --> CHECK["核对被试、模态掩膜与各模态网格"]
+    MASK["每模态独立的 3D 掩膜"] --> CHECK
+    CHECK --> CACHE["逐被试读取与逐体素标准化；分块写 HDF5"]
+    CACHE --> MODE{"启用 mMIGP 与 DicL？"}
+    MODE -- 是 --> MIGP["联合 mMIGP：低维被试子空间"] --> DICL["每模态 DicL 稀疏字典"] --> FLICA["多模态 FLICA 成分拟合"]
+    MODE -- 否 --> RAW["直接使用标准化体素矩阵"] --> FLICA
+    FLICA --> COURSE["被试成分 course 与模态贡献"]
+    FLICA --> MAP["空间回归与 t→z 转换"]
+    MAP --> OUT["各模态 z-stat NIfTI、top-voxel 图与 PNG"]
+    FLICA --> MODEL["保存固定模型及标准化参数"]
+    MODEL --> APPLY["可选 apply_model：投影新的单名被试"]
+    NEW["未参与训练的新被试同模态影像"] --> APPLY
+    APPLY --> NEWCOURSE["新被试成分 course"]
+    classDef default fill:#ffffff,stroke:#000000,color:#000000;
+```
+
 ## 安装与输入
 
 在仓库根目录运行 `conda env create -f environment.yml`，再运行 `conda activate fnit`。环境包含 PyTorch、nibabel、h5py、scikit-learn、SciPy、matplotlib；运行时不调用 FSL、FreeSurfer、SPM、MRtrix3 或 AFNI。

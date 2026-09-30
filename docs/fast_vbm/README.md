@@ -6,22 +6,32 @@
 
 流程在 Python 进程内运行，不启动 FreeSurfer 或 FSL 可执行文件。CUDA 默认允许 TF32 matmul 和 cuDNN 内核；输入、模型权重、主要图像张量和 NIfTI 输出仍为 float32，不启用 float16 或 bfloat16。实际开关写入 `fast_vbm_report.json`。
 
+## 流程策略
+
 ```mermaid
-flowchart LR
-  A[raw T1w] --> B[SynthStrip 或显式脑 mask]
-  B --> C[TorchFAST<br/>CSF / GM / WM PVE + bias]
-  C --> D[GM PVE]
-  D --> E[TorchFLIRT<br/>12-DOF correlation ratio]
-  E --> F1[PyTorch SynthMorph deform]
-  E --> F2[PyTorch TorchFNIRT GM config]
-  F1 --> G[统一转换为 FSL relative pull field]
-  F2 --> G
-  G --> H[GPU TorchApplyWarp]
-  G --> I[nonlinear-only Jacobian]
-  H --> J[warped GM]
-  I --> K[warped GM × Jacobian]
-  J --> K
-  K --> L[modulated GM]
+flowchart TD
+    T1["单幅原始 T1w"] --> MASK{"已提供脑掩膜？"}
+    MASK -- 是 --> BRAIN["使用显式脑掩膜"]
+    MASK -- 否 --> STRIP["FNIT SynthStrip 脑提取"] --> BRAIN
+    BRAIN --> FAST["TorchFAST：CSF、GM、WM 分割与偏置校正"]
+    FAST --> NATIVE["输入空间脑图、分割与 GM PVE"]
+    FAST --> FLIRT["TorchFLIRT：GM 到模板的 12 自由度仿射"]
+    TPL["GM 模板与可选参考掩膜"] --> FLIRT
+    FLIRT --> BACK{"非线性配准后端？"}
+    BACK -- SynthMorph --> SM["PyTorch SynthMorph deform"]
+    BACK -- FNIRT --> FN["TorchFNIRT GM 配置"]
+    TPL --> SM
+    TPL --> FN
+    SM --> FIELD["转换为统一的 relative pull field"]
+    FN --> FIELD
+    NATIVE --> APPLY["TorchApplyWarp：GM 重采样到模板网格"]
+    FIELD --> APPLY
+    FIELD --> JAC["计算 nonlinear-only Jacobian"]
+    APPLY --> WARPED["warped GM"]
+    WARPED --> MOD["warped GM × Jacobian"]
+    JAC --> MOD
+    MOD --> OUT["modulated GM 与阶段报告"]
+    classDef default fill:#ffffff,stroke:#000000,color:#000000;
 ```
 
 ## 输入

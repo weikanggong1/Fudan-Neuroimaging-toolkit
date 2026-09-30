@@ -4,6 +4,30 @@
 
 `run_bwas` 接收已经完成预处理、位于 MNI152NLin6Asym 2 mm 空间的多被试 BOLD。它逐人计算体素对的时间相关并作 Fisher z 变换，再对每条连接拟合“表型 + 协变量 + 截距”的线性模型。高于连接定义阈值（CDT）的连接按两端体素的空间邻接关系聚簇，使用原版 BWAS 的六维高斯随机场公式计算簇水平 FWER p 值。运行时只使用 PyTorch、NumPy、SciPy 和 Nibabel；不调用原版 BWAS 或 FSL。
 
+## 流程策略
+
+```mermaid
+flowchart TD
+    BOLD["多被试 2 mm clean BOLD BIDS Derivatives"] --> CHECK["按 participant_id 对齐 BOLD、表型与协变量"]
+    TSV["participants.tsv：表型、协变量"] --> CHECK
+    MASK["同网格 2 mm 灰质分析掩膜"] --> CHECK
+    CHECK --> PREP["逐被试估计平滑度并标准化体素时间序列"]
+    PREP --> CACHE["分块缓存体素×时间矩阵"]
+    CHECK --> QR["表型、协变量与截距的 QR 正交化设计"]
+    CACHE --> CONN["体素对分块：时间相关与 Fisher z"]
+    CONN --> GLM["按被试块累加充分统计量并拟合连接 GLM"]
+    QR --> GLM
+    GLM --> CDT["t→z；按双侧 CDT 选出连接"]
+    CDT --> CLUSTER["两端体素空间邻接的 6D 连接聚簇"]
+    PREP --> CLUSTER
+    CLUSTER --> FWER["六维随机场簇水平 FWER 校正"]
+    FWER --> TABLE["越阈值连接表与簇统计表"]
+    FWER --> MA["显著簇的体素连接数 MA 图"]
+    TABLE --> OUT["group/func/ BIDS Derivatives 与 JSON"]
+    MA --> OUT
+    classDef default fill:#ffffff,stroke:#000000,color:#000000;
+```
+
 ## 输入与输出
 
 输入目录是 BIDS Derivatives；每个 `participant_id` 必须恰好对应一份 `sub-*/[ses-*]/func/*_space-MNI152NLin6Asym_res-2_desc-clean_bold.nii.gz`。所有 BOLD 与 3D 分析掩膜必须有相同的 shape、affine 和 2 mm 体素。`participants.tsv` 的 `participant_id` 与 BIDS 目录名精确匹配，不依赖文件排序；表型和协变量必须是数值列，设计矩阵需满秩。不同被试的时间帧数可以不同。若有多个 site，把 site 编码为哑变量并省略一个参考 site。
