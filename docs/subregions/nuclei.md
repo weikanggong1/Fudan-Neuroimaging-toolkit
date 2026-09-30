@@ -1,10 +1,12 @@
-# 丘脑核团、海马亚区与杏仁核分割
+# 旧核团阶段验证接口：`segment_nuclei`
 
-[返回首页](../../README.md) · [逐区验证](../../validation/subregions/nuclei.md)
+[统一原始 T1 接口](README.md) · [逐区验证](../../validation/subregions/nuclei.md)
+
+普通用户请使用[统一 `segment_subregions`](README.md)，从一张 T1 生成脑干、丘脑、海马和杏仁核的合并标签。本页记录旧的 `segment_nuclei`，供与 FreeSurfer 8.2 的 `norm/aseg/wmparc` 相同输入进行参考验证；已有脚本仍可使用。其历史精度和耗时仅属于旧路径，不能写成新 TorchGEMS recipe 的测试结果。
 
 `segment_nuclei` 接收同一受试者、同一体素网格上的强度图 `norm`、粗结构分割 `aseg` 和白质分区 `wmparc`。它按 FreeSurfer GEMS 横断面流程拟合两个图谱：ThalamicNuclei 和 HippoSF。海马与杏仁核分别处理左右半球。运行时不调用 FreeSurfer 程序，也不需要安装 FreeSurfer；图谱约 30 MB，单独下载。当前只有使用相同 `norm/aseg/wmparc` 的阶段对照，不能当成原始 T1 到最终核团的独立全流程验证。
 
-四面体网格载入、平滑、概率栅格化和变形优化由 Conda 内编译的 C++/ITK 扩展执行。插值及配准的密集体素循环也在 C++ 中；Python 负责组织各阶段，PyTorch 参与小矩阵运算。此路径目前主要在 CPU 上运行，不宣称 GPU 加速。仓库已裁去未编译、未链接的 GEMS 文件，包括未使用的原版配准类和其他优化器源码。它复用 FNIT 已有的图谱数据下载器，但与[PyTorch 脑干接口](README.md)独立。
+四面体网格载入、平滑、概率栅格化和变形优化由 Conda 内编译的 C++/ITK 扩展执行。插值及配准的密集体素循环也在 C++ 中；Python 负责组织各阶段，PyTorch 参与小矩阵运算。此旧路径目前主要在 CPU 上运行，不宣称 GPU 加速。仓库已裁去未编译、未链接的 GEMS 文件，包括未使用的原版配准类和其他优化器源码。它复用 FNIT 已有的图谱数据下载器。
 
 ## 安装与图谱
 

@@ -5,6 +5,22 @@ from __future__ import annotations
 import torch
 
 
+def sliding_boundary_projectors(can_move: torch.Tensor, transform: torch.Tensor) -> torch.Tensor:
+    """Project image-space gradients onto each transformed atlas boundary.
+
+    The allowed directions are the affine's columns selected by the original
+    atlas mobility flags, as in KVL's sliding boundary condition.
+    """
+    matrices = torch.zeros((8, 3, 3), device=transform.device, dtype=transform.dtype)
+    matrices[7] = torch.eye(3, device=transform.device, dtype=transform.dtype)
+    for pattern in range(1, 7):
+        allowed = [(pattern & bit) != 0 for bit in (4, 2, 1)]
+        basis, _ = torch.linalg.qr(transform[:, allowed], mode="reduced")
+        matrices[pattern] = basis @ basis.T
+    indices = (can_move.long() * can_move.new_tensor([4, 2, 1], dtype=torch.long)).sum(1)
+    return matrices[indices]
+
+
 def ashburner_prior(
     vertices: torch.Tensor,
     reference_vertices: torch.Tensor,

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import json
+import logging
 from pathlib import Path
 from time import monotonic
 
@@ -19,7 +20,11 @@ from .atlas import GEMSAtlas
 from .brainstem import (brainstem_gaussian_hyperparameters,
                         fit_brainstem_segmentation, make_brainstem_working_image)
 from .core import TorchGEMS, TorchGEMSResult
+from .gaussian import GaussianParameters
 from .initialize import estimate_label_centroid_affine, estimate_mask_affine
+
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -29,6 +34,8 @@ class SubregionResult:
     structure_results: dict[str, TorchGEMSResult]
     confidence: torch.Tensor
     initialization: dict[str, dict]
+    volumes: dict[int, dict[str, float]] | None = None
+    label_metadata: dict[int, "SubregionLabel"] | None = None
 
     def mask(self, label: int | str) -> np.ndarray:
         if isinstance(label, str):
@@ -37,6 +44,16 @@ class SubregionResult:
                 raise KeyError(label)
             label = matches[0]
         return np.asanyarray(self.labels.dataobj) == int(label)
+
+
+@dataclass(frozen=True)
+class SubregionLabel:
+    id: int
+    name: str
+    parent: str
+    family: str
+    hemisphere: str | None
+    source: str
 
 
 def _load_spec(directory: Path):
@@ -62,7 +79,7 @@ def _native_coarse_segmentation(t1, weights, device):
     return np.asanyarray(result.segmentation.dataobj, dtype=np.int32)
 
 
-def segment_subregions(
+def _segment_atlas_packs(
     t1: str | Path | nib.spatialimages.SpatialImage,
     atlas_root: str | Path,
     *,
@@ -235,6 +252,9 @@ def segment_subregions(
             mask_to_atlas=bool(config.get("mask_to_atlas", False)),
             fit_alpha_stages=fit_stages,
         )
+        crop_to_work = np.eye(4)
+        crop_to_work[:3, 3] = lo
+        result.affine = working_image.affine @ crop_to_work
         intensity_fitted = tick()
         confidence, _ = result.posterior.max(0)
         candidate = result.labels
@@ -320,3 +340,147 @@ def segment_subregions(
     out.set_qform(image.affine, code=0)
     out.set_sform(image.affine, code=2)
     return SubregionResult(out, table, results, best_conf, init_report)
+
+
+_CANONICAL = ("brainstem", "thalamus", "hippo-amygdala-left", "hippo-amygdala-right")
+
+
+def _merge_native(combined: np.ndarray, best_conf: np.ndarray,
+                  candidate: np.ndarray, confidence: np.ndarray,
+                  support: np.ndarray) -> None:
+    take = (candidate != 0) & support
+    take &= (combined == 0) | (confidence > best_conf)
+    combined[take] = candidate[take]
+    best_conf[take] = confidence[take]
+
+
+def _expand_structures(structures) -> list[str]:
+    requested = _CANONICAL if structures == "all" else (
+        [structures] if isinstance(structures, str) else list(structures))
+    expanded = []
+    for name in requested:
+        members = ("hippo-amygdala-left", "hippo-amygdala-right") if name == "hippo-amygdala" else (name,)
+        for member in members:
+            if member not in expanded:
+                expanded.append(member)
+    if not expanded:
+        raise ValueError("structures must not be empty")
+    return expanded
+
+
+def segment_subregions(
+    t1: str | Path | nib.spatialimages.SpatialImage,
+    atlas_root: str | Path | None = None,
+    *,
+    structures: str | list[str] | tuple[str, ...] = "all",
+    coarse_segmentation: str | Path | nib.spatialimages.SpatialImage | np.ndarray | None = None,
+    cortical_parcellation: str | Path | nib.spatialimages.SpatialImage | np.ndarray | None = None,
+    wmparc: str | Path | nib.spatialimages.SpatialImage | np.ndarray | None = None,
+    synthseg_weights: str | Path | None = None,
+    synthseg_parc_weights: str | Path | None = None,
+    auto_initialize: bool = True,
+    device: str | torch.device = "cuda:0",
+    em_iterations: int = 8,
+    deform_iterations: int = 0,
+) -> SubregionResult:
+    """Segment requested subregions on one raw T1 and merge on its native grid."""
+    selected = _expand_structures(structures)
+    root = Path(atlas_root) if atlas_root is not None else None
+    if root is None:
+        from .setup import configured_subregion_root
+        from ..weights import cache_dir
+        root = configured_subregion_root() or cache_dir() / "subregion_atlases"
+        if not all((root / name / "AtlasMesh.gz").is_file()
+                   for name in selected if name in _CANONICAL):
+            from .setup import prepare_subregion_atlases
+            prepare_subregion_atlases(root, device="cpu")
+    if any(name not in _CANONICAL for name in selected):
+        return _segment_atlas_packs(
+            t1, root, structures=structures, coarse_segmentation=coarse_segmentation,
+            synthseg_weights=synthseg_weights, auto_initialize=auto_initialize,
+            device=device, em_iterations=em_iterations,
+            deform_iterations=deform_iterations)
+    missing = [name for name in selected if not (root / name / "AtlasMesh.gz").is_file()]
+    if missing:
+        raise FileNotFoundError(f"Subregion atlas packs not found: {missing}")
+    from .context import SubregionContext
+    from .recipes import make_recipe
+    device = configure_device(device)
+    if device.type == "cuda":
+        torch.backends.cuda.matmul.allow_tf32 = True
+        torch.backends.cudnn.allow_tf32 = True
+        torch.cuda.reset_peak_memory_stats(device)
+    preprocessing_started = monotonic()
+    context = SubregionContext.prepare(
+        t1, need_coarse=True, need_parc=any(name.startswith("hippo-amygdala") for name in selected),
+        coarse_segmentation=coarse_segmentation, cortical_parcellation=cortical_parcellation,
+        wmparc=wmparc, synthseg_weights=synthseg_weights,
+        synthseg_parc_weights=synthseg_parc_weights, device=device)
+    combined = np.zeros(context.image.shape, np.int32)
+    best_conf = np.zeros(context.image.shape, np.float32)
+    table: dict[int, str] = {0: "Unknown"}
+    metadata: dict[int, SubregionLabel] = {}
+    volumes: dict[int, dict[str, float]] = {}
+    detailed: dict[str, TorchGEMSResult] = {}
+    reports: dict[str, dict] = {"shared_preprocessing": {
+        "seconds": monotonic() - preprocessing_started,
+        "coarse_source": "provided" if coarse_segmentation is not None else "SynthSeg",
+        "wmparc_source": "provided" if wmparc is not None else
+                          "proxy" if context.wmparc_proxy is not None else None,
+        "peak_gpu_gib": torch.cuda.max_memory_allocated(device) / 2**30
+                        if device.type == "cuda" else None,
+    }}
+    voxel_volume = abs(np.linalg.det(context.image.affine[:3, :3]))
+    for name in selected:
+        if device.type == "cuda":
+            torch.cuda.reset_peak_memory_stats(device)
+        recipe = make_recipe(name, root)
+        logger.info("Starting %s", name)
+        outcome = recipe.run(context, device)
+        outcome.fit.highres_labels = outcome.highres_labels
+        _merge_native(combined, best_conf, outcome.native_labels,
+                      outcome.native_confidence, outcome.native_support)
+        if device.type == "cuda":
+            fit = outcome.fit
+            fit.labels = fit.labels.detach().cpu()
+            fit.posterior = fit.posterior.detach().cpu()
+            fit.priors = fit.priors.detach().cpu()
+            fit.vertices = fit.vertices.detach().cpu()
+            fit.gaussian_parameters = GaussianParameters(
+                fit.gaussian_parameters.means.detach().cpu(),
+                fit.gaussian_parameters.covariances.detach().cpu())
+            torch.cuda.empty_cache()
+        detailed[name] = outcome.fit
+        reports[name] = outcome.report
+        logger.info("Finished %s: %s", name, outcome.report)
+        atlas = GEMSAtlas.from_freesurfer(recipe.directory / "AtlasMesh.gz",
+                                          recipe.directory / "compressionLookupTable.txt")
+        side = name.rsplit("-", 1)[-1] if name.startswith("hippo-amygdala") else None
+        offset = 10000 if side == "right" else 0
+        allowed = (set(int(v) for v in atlas.label_ids if 200 <= int(v) <= 246 and int(v) != 201
+                       or 7000 <= int(v) < 8000) if side else
+                   {int(v) for v in atlas.label_ids if int(v) in outcome.soft_volumes_mm3})
+        for label, label_name in zip(atlas.label_ids, atlas.label_names):
+            old_id = int(label)
+            if old_id not in allowed:
+                continue
+            identifier = old_id + offset
+            label_name = (side.title() + "-" + label_name if side else label_name)
+            if identifier in table and table[identifier] != label_name:
+                raise ValueError(f"Output label collision for {identifier}: {table[identifier]} vs {label_name}")
+            table[identifier] = label_name
+            family = ("HippoSF" if side else "ThalamicNuclei" if name == "thalamus" else "BrainstemSS")
+            hemisphere = side if side else ("left" if label_name.startswith("Left-") else
+                                            "right" if label_name.startswith("Right-") else None)
+            parent = ("amygdala" if side and old_id >= 7000 else
+                      "hippocampus" if side else name)
+            metadata[identifier] = SubregionLabel(identifier, label_name, parent,
+                                                   family, hemisphere, name)
+            volumes[identifier] = {"soft_volume_mm3": outcome.soft_volumes_mm3.get(identifier, 0.0)}
+    for identifier in volumes:
+        volumes[identifier]["hard_volume_mm3"] = float(np.count_nonzero(combined == identifier) * voxel_volume)
+    out = new_image(combined, context.image, affine=context.image.affine)
+    out.set_qform(context.image.affine, code=0)
+    out.set_sform(context.image.affine, code=2)
+    return SubregionResult(out, table, detailed, torch.as_tensor(best_conf), reports,
+                           volumes, metadata)

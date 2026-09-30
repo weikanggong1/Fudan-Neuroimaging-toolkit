@@ -31,6 +31,28 @@ class BlockIndex:
             self._device_cache[key] = tuple(blocks)
         return self._device_cache[key]
 
+    def device_batches(self, device, dtype):
+        key = ("batches", str(device), dtype)
+        if key not in self._device_cache:
+            groups = {}
+            for points, ids, _, _ in self.device_blocks(device, dtype):
+                width = ((len(ids) + 7) // 8) * 8
+                groups.setdefault((len(points), width), []).append((points, ids))
+            batches = []
+            for (n_points, width), blocks in groups.items():
+                for start in range(0, len(blocks), 16):
+                    subset = blocks[start:start + 16]
+                    points = torch.stack([block[0] for block in subset])
+                    ids = torch.stack([torch.nn.functional.pad(block[1], (0, width - len(block[1])))
+                                       for block in subset])
+                    counts = torch.as_tensor([len(block[1]) for block in subset], device=device)
+                    candidate_mask = torch.arange(width, device=device)[None] < counts[:, None]
+                    batch_ids = torch.arange(len(subset), device=device)[:, None]
+                    coordinates = points.reshape(-1, 3).long().unbind(-1)
+                    batches.append((points, ids, candidate_mask, batch_ids, coordinates))
+            self._device_cache[key] = tuple(batches)
+        return self._device_cache[key]
+
 
 def build_block_index(vertices: np.ndarray, tetrahedra: np.ndarray,
                       shape: tuple[int, int, int], block_size: int = 8,
@@ -120,30 +142,40 @@ def rasterize_priors(
     assigned_weights = (torch.zeros((*shape, 4), device=vertices.device, dtype=vertices.dtype)
                         if return_assignment else None)
 
-    for points, ids, point_ids, (x, y, z) in block_index.device_blocks(vertices.device, vertices.dtype):
-        cells = tetrahedra[ids]
-        tet = vertices[cells]  # M,4,3
-        v0 = tet[:, 0]
-        matrix = torch.stack((tet[:, 1] - v0, tet[:, 2] - v0, tet[:, 3] - v0), dim=-1)
-        inv, info = torch.linalg.inv_ex(matrix, check_errors=False)
-        rel = points[:, None, :] - v0[None, :, :]
-        w123 = torch.einsum("mij,pmj->pmi", inv, rel)
-        weights = torch.cat((1.0 - w123.sum(-1, keepdim=True), w123), dim=-1)
-        singular = (info != 0) | (torch.linalg.det(matrix).abs() <= 1e-10)
-        score = weights.amin(-1).masked_fill(singular[None], -torch.inf)
-        best_score, best = score.max(dim=1)
-        valid = best_score >= -float(tolerance)
-        selected_cells = cells[best]
-        selected_weights = weights[point_ids, best]
-        values = (alphas[selected_cells] * selected_weights[..., None]).sum(dim=1)
+    # Each tetrahedron can appear in many blocks. Solve its geometry once;
+    # autograd accumulates the block contributions before differentiating it.
+    all_tet = vertices[tetrahedra]
+    all_v0 = all_tet[:, 0]
+    all_matrix = torch.stack((all_tet[:, 1] - all_v0, all_tet[:, 2] - all_v0,
+                              all_tet[:, 3] - all_v0), dim=-1)
+    all_inv, all_info = torch.linalg.inv_ex(all_matrix, check_errors=False)
+    all_singular = (all_info != 0) | (torch.linalg.det(all_matrix).abs() <= 1e-10)
+
+    for points, ids, candidate_mask, batch_ids, (x, y, z) in block_index.device_batches(vertices.device, vertices.dtype):
+        # Lookup is discrete. Retaining every candidate's graph consumes GBs
+        # although only one tetrahedron per voxel contributes to the gradient.
+        with torch.no_grad():
+            rel = points[:, :, None, :] - all_v0[ids][:, None]
+            w123 = torch.einsum("bcij,bpcj->bpci", all_inv[ids], rel)
+            weights = torch.cat((1.0 - w123.sum(-1, keepdim=True), w123), dim=-1)
+            singular = all_singular[ids] | ~candidate_mask
+            score = weights.amin(-1).masked_fill(singular[:, None], -torch.inf)
+            best_score, best = score.max(dim=2)
+            valid = best_score >= -float(tolerance)
+            selected_ids = ids[batch_ids, best]
+        selected_cells = tetrahedra[selected_ids]
+        selected_rel = points - all_v0[selected_ids]
+        selected_w123 = torch.einsum("bpij,bpj->bpi", all_inv[selected_ids], selected_rel)
+        selected_weights = torch.cat((1.0 - selected_w123.sum(-1, keepdim=True), selected_w123), dim=-1)
+        values = (alphas[selected_cells] * selected_weights[..., None]).sum(dim=2)
         values = values.clamp_min(0)
         values = values / values.sum(-1, keepdim=True).clamp_min(torch.finfo(values.dtype).eps)
 
-        out[x, y, z] = torch.where(valid[:, None], values, 0)
-        covered[x, y, z] = valid
+        out[x, y, z] = torch.where(valid[..., None], values, 0).reshape(-1, k)
+        covered[x, y, z] = valid.flatten()
         if return_assignment:
-            assigned_cells[x, y, z] = torch.where(valid[:, None], selected_cells, 0)
-            assigned_weights[x, y, z] = torch.where(valid[:, None], selected_weights, 0)
+            assigned_cells[x, y, z] = torch.where(valid[..., None], selected_cells, 0).reshape(-1, 4)
+            assigned_weights[x, y, z] = torch.where(valid[..., None], selected_weights, 0).reshape(-1, 4)
 
     if background_channel is not None:
         bg = int(background_channel)

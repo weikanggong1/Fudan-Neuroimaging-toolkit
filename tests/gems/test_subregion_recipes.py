@@ -1,0 +1,207 @@
+import numpy as np
+import nibabel as nib
+import torch
+from types import SimpleNamespace
+
+from fnit.gems.atlas import GEMSAtlas, read_compression_lut
+from fnit.gems.context import SubregionContext, build_wmparc_proxy
+from fnit.gems.pipeline import _expand_structures, _merge_native
+from fnit.gems.recipes import HippoAmygdalaRecipe, ThalamusRecipe
+from fnit.gems.recipes.base import GEMSRecipe
+
+
+def _atlas(ids, names):
+    vertices = np.asarray([[1, 1, 1], [5, 1, 1], [1, 5, 1], [1, 1, 5]], float)
+    alpha = np.full((4, len(ids)), 1 / len(ids), np.float32)
+    return GEMSAtlas(vertices, vertices, np.asarray([[0, 1, 2, 3]]), alpha, 0.05,
+                     np.ones((4, 3), bool), ids, names)
+
+
+def test_structure_alias_and_support_first_merge():
+    assert _expand_structures("hippo-amygdala") == ["hippo-amygdala-left", "hippo-amygdala-right"]
+    assert _expand_structures(["brainstem", "thalamus", "brainstem"]) == ["brainstem", "thalamus"]
+    labels = np.zeros((2, 2, 2), np.int32)
+    confidence = np.zeros(labels.shape, np.float32)
+    first = np.full(labels.shape, 173, np.int32)
+    _merge_native(labels, confidence, first, np.full(labels.shape, 0.9),
+                  np.asarray([[[True, False], [False, False]],
+                              [[False, False], [False, False]]]))
+    second = np.full(labels.shape, 8109, np.int32)
+    _merge_native(labels, confidence, second, np.full(labels.shape, 0.8),
+                  np.asarray([[[True, True], [False, False]],
+                              [[False, False], [False, False]]]))
+    assert labels[0, 0, 0] == 173
+    assert labels[0, 0, 1] == 8109
+    assert np.count_nonzero(labels) == 2
+
+
+def test_wmparc_proxy_stays_in_own_hemisphere_and_white_matter():
+    coarse = np.zeros((12, 6, 4), np.int32)
+    coarse[:6, 1:5] = 2
+    coarse[6:, 1:5] = 41
+    cortex = np.zeros_like(coarse)
+    cortex[0, 2, 1] = 1006
+    cortex[0, 3, 1] = 1007
+    cortex[0, 4, 1] = 1016
+    cortex[11, 2, 1] = 2006
+    cortex[11, 3, 1] = 2007
+    cortex[11, 4, 1] = 2016
+    proxy = build_wmparc_proxy(coarse, cortex)
+    assert proxy.shape == coarse.shape
+    assert set(np.unique(proxy[coarse == 2])) <= {3006, 3007, 3016}
+    assert set(np.unique(proxy[coarse == 41])) <= {4006, 4007, 4016}
+    assert set(np.unique(proxy[coarse == 0])) == {0}
+    assert all(np.any(proxy == value) for value in (3006, 3007, 3016,
+                                                   4006, 4007, 4016))
+    distant = np.zeros((40, 2, 2), np.int32)
+    distant[1:39] = 2
+    parc = np.zeros_like(distant)
+    parc[0] = 1006
+    local = build_wmparc_proxy(distant, parc, max_distance_mm=10)
+    assert local[5, 0, 0] == 3006 and local[30, 0, 0] == 2
+
+
+def test_native_geometry_rejects_mismatched_auxiliary_image():
+    from fnit.gems.context import _native_labels
+    source = nib.Nifti1Image(np.ones((8, 8, 8), np.float32), np.eye(4))
+    shifted = nib.Nifti1Image(np.ones((8, 8, 8), np.int16),
+                             np.diag([1, 1, 1, 1]).astype(float))
+    shifted.affine[0, 3] = 2
+    try:
+        _native_labels(shifted, source, "wmparc")
+    except ValueError as error:
+        assert "shape and affine" in str(error)
+    else:
+        raise AssertionError("mismatched native affine must be rejected")
+
+
+def test_official_label_groups_include_two_thalamic_components(tmp_path):
+    from importlib.resources import files
+    thal = files("fnit").joinpath("gems/data/thalamus_compressionLookupTable.txt")
+    hippo = files("fnit").joinpath("gems/data/hippo_compressionLookupTable.txt")
+    thal_atlas = _atlas(*read_compression_lut(thal))
+    hippo_atlas = _atlas(*read_compression_lut(hippo))
+    recipe = ThalamusRecipe("thalamus", tmp_path)
+    assert recipe.segmentation_groups(thal_atlas).max() == 13
+    first = recipe.intensity_groups(thal_atlas, 0)
+    second = recipe.intensity_groups(thal_atlas, 1)
+    assert first.max() == 13 and second.max() == 14
+    name_index = {name: index for index, name in enumerate(thal_atlas.label_names)}
+    assert second[name_index["Left-PuA"]] != second[name_index["Left-CL"]]
+    left = HippoAmygdalaRecipe("left", tmp_path)
+    right = HippoAmygdalaRecipe("right", tmp_path)
+    synthetic = left.segmentation_groups(hippo_atlas)
+    ids = {name: index for index, name in enumerate(hippo_atlas.label_names)}
+    assert synthetic[ids["fimbria"]] == synthetic[ids["Left-Cerebral-Cortex"]]
+    assert synthetic[ids["fimbria"]] != synthetic[ids["Left-Cerebral-White-Matter"]]
+    assert left.intensity_groups(hippo_atlas, 0).max() == 12
+    left.high_res_input = True
+    highres = left.intensity_groups(hippo_atlas, 0)
+    assert highres.max() == 13
+    assert highres[ids["molecular_layer_HP-head"]] != highres[ids["CA1-head"]]
+    assert left.alignment_ids == (17, 18) and right.alignment_ids == (53, 54)
+    assert left.resolution_mm == right.resolution_mm == 0.33333
+
+
+def test_thalamic_hyperparameters_split_brighter_and_darker(tmp_path):
+    ids, names = read_compression_lut(__import__("importlib.resources", fromlist=["files"]).files("fnit").joinpath(
+        "gems/data/thalamus_compressionLookupTable.txt"))
+    atlas = _atlas(ids, names)
+    data = np.full((10, 10, 10), 80, np.float32)
+    coarse = np.full(data.shape, 10, np.int32)
+    context = SubregionContext(nib.Nifti1Image(data, np.eye(4)), data, coarse, None, None)
+    recipe = ThalamusRecipe("thalamus", tmp_path)
+    groups = recipe.intensity_groups(atlas, 1)
+    means, counts = recipe.gaussian_hyperparameters(context, atlas, groups)
+    assert means[13] == 85 and means[14] == 75
+    assert counts[13] == counts[14] == 25
+
+
+def test_gpu_cpu_fixed_gaussian_consistency_when_cuda_available():
+    if not torch.cuda.is_available():
+        return
+    from fnit.gems.core import TorchGEMS
+    from fnit.gems.gaussian import GaussianParameters
+    atlas = _atlas(np.asarray([0, 10]), ("Unknown", "ROI"))
+    image = np.ones((8, 8, 8), np.float32)
+    params_cpu = GaussianParameters(torch.tensor([[1.], [2.]]),
+                                    torch.ones((2, 1, 1)))
+    cpu = TorchGEMS(atlas, device="cpu")(image, fixed_gaussians=params_cpu,
+                                          em_iterations=1)
+    params_gpu = GaussianParameters(params_cpu.means.cuda(), params_cpu.covariances.cuda())
+    gpu = TorchGEMS(atlas, device="cuda:0")(image, fixed_gaussians=params_gpu,
+                                             em_iterations=1)
+    np.testing.assert_array_equal(cpu.labels.numpy(), gpu.labels.cpu().numpy())
+
+
+def test_posterior_soft_volume_uses_working_voxel_volume(tmp_path):
+    class TinyRecipe(GEMSRecipe):
+        support_ids = (10,)
+
+        def foreground_ids(self, atlas):
+            return {10}
+
+    atlas = _atlas(np.asarray([0, 10]), ("Unknown", "ROI"))
+    image = nib.Nifti1Image(np.ones((4, 4, 4), np.float32), np.eye(4))
+    context = SubregionContext(image, np.ones(image.shape, np.float32),
+                               np.full(image.shape, 10, np.int32), None, None)
+    posterior = torch.stack((torch.full(image.shape, 0.75),
+                             torch.full(image.shape, 0.25)))
+    affine = np.diag([0.5, 0.5, 0.5, 1])
+    fit = SimpleNamespace(labels=torch.full(image.shape, 10), posterior=posterior,
+                          affine=affine)
+    result = TinyRecipe("tiny", tmp_path).postprocess(fit, context, atlas)
+    assert result.soft_volumes_mm3[10] == 4 * 4 * 4 * 0.25 * 0.5**3
+
+
+def test_all_recipes_merge_on_native_grid_with_metadata(tmp_path, monkeypatch):
+    from fnit.gems import pipeline
+    import fnit.gems.recipes as recipes
+    from fnit.gems.recipes.base import RecipeResult
+
+    image = nib.Nifti1Image(np.ones((5, 5, 5), np.float32),
+                            np.diag([-1, 1, 1, 1]))
+    atlas_root = tmp_path / "atlases"
+    names = ("brainstem", "thalamus", "hippo-amygdala-left", "hippo-amygdala-right")
+    atlas_labels = (173, 8109, 238, 7001)
+    for name in names:
+        folder = atlas_root / name
+        folder.mkdir(parents=True)
+        (folder / "AtlasMesh.gz").touch()
+        (folder / "compressionLookupTable.txt").touch()
+
+    def fake_atlas(path, lut):
+        index = names.index(path.parent.name)
+        identifier = atlas_labels[index]
+        return _atlas(np.asarray([0, identifier]), ("Unknown", ("Midbrain", "Left-LGN",
+                      "CA1-body", "Lateral-nucleus")[index]))
+
+    class FakeRecipe:
+        def __init__(self, name):
+            self.name = name
+            self.directory = atlas_root / name
+
+        def run(self, context, device):
+            index = names.index(self.name)
+            label = atlas_labels[index] + (10000 if index == 3 else 0)
+            output = np.zeros(image.shape, np.int32)
+            output[index, 1, 1] = label
+            conf = np.full(image.shape, 0.8, np.float32)
+            fit = SimpleNamespace(labels=torch.as_tensor(output), affine=image.affine)
+            return RecipeResult(fit, image, output, conf, output != 0,
+                                {label: 1.25}, {"seconds": 0.0})
+
+    monkeypatch.setattr(pipeline.GEMSAtlas, "from_freesurfer", fake_atlas)
+    monkeypatch.setattr(recipes, "make_recipe", lambda name, root: FakeRecipe(name))
+    coarse = np.ones(image.shape, np.int32)
+    result = pipeline.segment_subregions(image, atlas_root, coarse_segmentation=coarse,
+                                        wmparc=coarse, device="cpu")
+    assert result.labels.shape == image.shape
+    np.testing.assert_array_equal(result.labels.affine, image.affine)
+    assert set(result.structure_results) == set(names)
+    assert result.mask("Midbrain").sum() == 1
+    assert result.mask("Left-LGN").sum() == 1
+    assert result.mask("Left-CA1-body").sum() == 1
+    assert result.mask("Right-Lateral-nucleus").sum() == 1
+    assert result.label_metadata[17001].parent == "amygdala"
+    assert result.volumes[17001]["soft_volume_mm3"] == 1.25
