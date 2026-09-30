@@ -1,10 +1,12 @@
 # MS-HBM 真实数据验证
 
-本目录保存 2026-09-27 的 MSC02 五分钟 fsLR32k 静息态对照。公开报告为 [`report.public.json`](report.public.json)，表面图位于 [`docs/mshbm/figures/mshbm_cbig_comparison.png`](../../docs/mshbm/figures/mshbm_cbig_comparison.png)。原始时序、CBIG 中间 profile 和 MATLAB 标签不进入仓库；报告记录原始时序 SHA-256。
+最新的完整 490 帧 UKB volume/surface 与官方发布数据对照见 [`processed_release.md`](processed_release.md)，包括输入来源匹配、每网络 Dice、连接差异、时间与图示。
+
+本页保留核心算法与 CBIG 的 MSC02 五分钟数值对照（2026-09-27）。公开报告为 [`report.public.json`](report.public.json)，表面图位于 [`docs/mshbm/figures/mshbm_cbig_comparison.png`](../../docs/mshbm/figures/mshbm_cbig_comparison.png)。原始时序、CBIG 中间 profile 和 MATLAB 标签不进入仓库；报告记录原始时序 SHA-256。
 
 ## 输入和比较边界
 
-- FNIT 当前源码读取 `100×59412` 的 `float32` 时序，并按前后各 50 frame 拆成两个 pseudo-session。
+- 该次 FNIT 源码读取 `100×59412` 的 `float32` 时序，并按前后各 50 frame 拆成两个 pseudo-session。
 - CBIG 参考使用 Kong2019 MS-HBM commit `b69b822a15e2a94f1e439606552fc44b6858cf3c` 与 MATLAB R2018b。
 - 精度比较包含两节 `59412×1483` 二值 profile 和最终 `64984` 个表面标签。
 - 计时比较从同一对已保存 profile 开始，到标签写出结束；两边均使用 8 线程并包含解释器启动和文件 I/O。
@@ -53,4 +55,4 @@ PYTHONPATH="$FNIT_SOURCE/src" \
 python validation/mshbm/compare_real.py --help
 ```
 
-报告绑定的 `core.py`、`cli.py`、资产和两个验证脚本 SHA-256 均写在 `source_sha256`。当前结果为两节 profile 各 88,107,996 个值全同、64,984 个标签全同；matched 计时 FNIT 141.29 秒、CBIG 145.71 秒。
+报告绑定该次源码与资产的 SHA-256，写在 `source_sha256`。新增 volume/文件输出接口改变了 CLI，核心 `core.py` 与 HCP_40 prior 保持不变。本次数值结果为两节 profile 各 88,107,996 个值全同、64,984 个标签全同；matched 计时 FNIT 141.29 秒、CBIG 145.71 秒。
