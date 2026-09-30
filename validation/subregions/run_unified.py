@@ -73,6 +73,34 @@ def _official_soft_volumes(name: str, reference: Path) -> dict[str, float]:
     return values
 
 
+def _add_region_volumes(comparisons, metadata, volumes, official_volumes):
+    metadata = {int(identifier): value for identifier, value in metadata.items()}
+    volumes = {int(identifier): value for identifier, value in volumes.items()}
+    for name, comparison in comparisons.items():
+        observed = {row["label"] for row in comparison["regions"]}
+        empty = []
+        for identifier, value in metadata.items():
+            if value["source"] == name and identifier not in observed:
+                empty.append({"label": identifier, "reference_voxels": 0, "fnit_voxels": 0,
+                              "reference_hard_volume_mm3": 0.0, "fnit_hard_volume_mm3": 0.0,
+                              "dice": None, "hard_volume_difference": None, "accepted": None})
+        comparison["empty_hard_regions"] = empty
+        for row in comparison["regions"] + empty:
+            identifier = row["label"]
+            value = metadata.get(identifier, {})
+            row.update(value)
+            row["hard_evaluation_status"] = "evaluated" if identifier in observed else "both_empty"
+            reference_name = value.get("name")
+            if reference_name is not None and name.startswith("hippo-amygdala"):
+                reference_name = reference_name.removeprefix("Left-").removeprefix("Right-")
+            reference_volume = official_volumes[name].get(reference_name)
+            fnit_volume = volumes.get(identifier, {}).get("soft_volume_mm3")
+            row["reference_soft_volume_mm3"] = reference_volume
+            row["fnit_soft_volume_mm3"] = fnit_volume
+            row["soft_volume_difference"] = (abs(fnit_volume - reference_volume) / reference_volume
+                                              if fnit_volume is not None and reference_volume else None)
+
+
 def main():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
     parser = argparse.ArgumentParser(description=__doc__)
@@ -139,25 +167,13 @@ def main():
                                   offset=10000 if name.endswith("right") else 0)
                    for name, reference in references.items()
                    if reference is not None and name in result.structure_results}
-    for name, comparison in comparisons.items():
-        official_volumes = _official_soft_volumes(name, references[name])
-        for row in comparison["regions"]:
-            identifier = row["label"]
-            metadata = result.label_metadata.get(identifier)
-            if metadata is not None:
-                row.update(asdict(metadata))
-            reference_name = (metadata.name.removeprefix("Left-").removeprefix("Right-")
-                              if metadata is not None and name.startswith("hippo-amygdala") else
-                              metadata.name if metadata is not None else None)
-            reference_volume = official_volumes.get(reference_name)
-            fnit_volume = result.volumes.get(identifier, {}).get("soft_volume_mm3")
-            row["reference_soft_volume_mm3"] = reference_volume
-            row["fnit_soft_volume_mm3"] = fnit_volume
-            row["soft_volume_difference"] = (abs(fnit_volume - reference_volume) / reference_volume
-                                              if fnit_volume is not None and reference_volume else None)
+    metadata = {identifier: asdict(value) for identifier, value in result.label_metadata.items()}
+    _add_region_volumes(comparisons, metadata, result.volumes,
+                        {name: _official_soft_volumes(name, references[name]) for name in comparisons})
     families = {}
     for name, comparison in comparisons.items():
-        parents = sorted({row.get("parent", name) for row in comparison["regions"]})
+        parents = sorted({row.get("parent", name)
+                          for row in comparison["regions"] + comparison["empty_hard_regions"]})
         for parent in parents:
             rows = [row for row in comparison["regions"] if row.get("parent", name) == parent]
             side = name.rsplit("-", 1)[-1] if name.startswith("hippo-amygdala") else None
@@ -166,6 +182,8 @@ def main():
                              offset=10000 if side == "right" else 0,
                              label_ids=[row["label"] for row in rows])
             family["regions"] = rows
+            family["empty_hard_regions"] = [row for row in comparison["empty_hard_regions"]
+                                             if row["parent"] == parent]
             families[key] = family
     report = {"validation_mode": "quick_diagnostic" if args.quick else
               "official_stage_inputs" if args.aseg else "raw_t1_end_to_end",
@@ -180,8 +198,7 @@ def main():
               "torch_version": torch.__version__, "cuda_version": torch.version.cuda,
               "source_sha256": source_hashes,
               "comparisons": comparisons, "families": families,
-              "label_metadata": {identifier: asdict(metadata)
-                                 for identifier, metadata in result.label_metadata.items()},
+              "label_metadata": metadata,
               "initialization": result.initialization,
               "volumes": result.volumes, "output": str(native_path)}
     (args.output_dir / "report.json").write_text(
@@ -189,12 +206,13 @@ def main():
                    if isinstance(value, np.generic) else str(value)) + "\n")
     columns = ("label", "name", "parent", "hemisphere", "dice", "reference_hard_volume_mm3",
                "fnit_hard_volume_mm3", "hard_volume_difference", "reference_soft_volume_mm3",
-               "fnit_soft_volume_mm3", "soft_volume_difference", "accepted")
+               "fnit_soft_volume_mm3", "soft_volume_difference", "accepted", "hard_evaluation_status")
     with (args.output_dir / "comparison.tsv").open("w") as stream:
         stream.write("\t".join(columns) + "\n")
         for comparison in comparisons.values():
-            for row in comparison["regions"]:
-                stream.write("\t".join(str(row.get(column, "")) for column in columns) + "\n")
+            for row in comparison["regions"] + comparison["empty_hard_regions"]:
+                stream.write("\t".join("" if row.get(column) is None else str(row[column])
+                                        for column in columns) + "\n")
     print(json.dumps({"mode": report["validation_mode"], "seconds": elapsed,
                       "peak_gpu_gib": report["peak_gpu_gib"],
                       "comparisons": {name: f"{value['accepted']}/{value['labels']}"

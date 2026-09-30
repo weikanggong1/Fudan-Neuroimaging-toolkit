@@ -99,7 +99,7 @@ segment_subregions thalamus --cross fs_sub01 --sd /absolute/path/subjects --thre
 segment_subregions hippo-amygdala --cross fs_sub01 --sd /absolute/path/subjects --threads 4
 ```
 
-脑干历史结果见[逐区验证](../../validation/subregions/README.md)；新 TorchGEMS 丘脑/海马的同阶段和原始 T1 全流程结果分别记录，未达标标签保留原始数字，不据此宣称逐区等价。
+脑干历史结果见[逐区验证](../../validation/subregions/README.md)。[两个完整真实 T1 运行](../../validation/subregions/unified.md)已完成：同阶段输入的脑干 4/4 区达标，丘脑及海马/杏仁核尚未全部达标；原始 T1 全流程的逐区精度也未达到目标。所有标签、硬/软体积、实际耗时和脑图分别记录。当前不能宣称逐区等价或完整 GPU 提速。
 
 ### Reference
 
