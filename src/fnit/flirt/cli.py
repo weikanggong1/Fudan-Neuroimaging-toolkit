@@ -3,7 +3,11 @@
 import argparse
 import sys
 
-from .standalone import run_flirt
+
+def run_flirt(*args, **kwargs):
+    """Load the numerical implementation only when running a command."""
+    from .standalone import run_flirt as run
+    return run(*args, **kwargs)
 
 
 def build_parser(prog="fnit-flirt"):
@@ -17,6 +21,12 @@ def build_parser(prog="fnit-flirt"):
         ),
         allow_abbrev=False,
     )
+    add_arguments(parser)
+    return parser
+
+
+def add_arguments(parser):
+    """Shared arguments for ``fnit flirt`` and ``fnit-flirt``."""
     parser.add_argument("-in", "--in", dest="input", required=True,
                         help="input/moving 3D image")
     parser.add_argument("-ref", "--ref", dest="reference", required=True,
@@ -74,28 +84,33 @@ def build_parser(prog="fnit-flirt"):
     return parser
 
 
+def run_from_args(args, runner):
+    """Forward the shared parsed arguments to the selected Python entry."""
+    return runner(
+        args.input,
+        args.reference,
+        output=args.output,
+        omat=args.omat,
+        init=args.init,
+        inweight=args.inweight,
+        refweight=args.refweight,
+        dof=args.dof,
+        cost=args.cost,
+        applyxfm=args.applyxfm,
+        usesqform=args.usesqform,
+        device=args.device,
+        execution=args.execution,
+        candidate_batch_size=args.candidate_batch_size,
+        memory_budget_gb=args.memory_budget_gb,
+        overwrite=args.overwrite,
+    )
+
+
 def main(argv=None, *, prog="fnit-flirt"):
     parser = build_parser(prog=prog)
     args = parser.parse_args(sys.argv[1:] if argv is None else argv)
     try:
-        run_flirt(
-            args.input,
-            args.reference,
-            output=args.output,
-            omat=args.omat,
-            init=args.init,
-            inweight=args.inweight,
-            refweight=args.refweight,
-            dof=args.dof,
-            cost=args.cost,
-            applyxfm=args.applyxfm,
-            usesqform=args.usesqform,
-            device=args.device,
-            execution=args.execution,
-            candidate_batch_size=args.candidate_batch_size,
-            memory_budget_gb=args.memory_budget_gb,
-            overwrite=args.overwrite,
-        )
+        run_from_args(args, run_flirt)
     except (FileExistsError, FileNotFoundError, ImportError,
             NotImplementedError, TypeError, ValueError) as error:
         parser.error(str(error))

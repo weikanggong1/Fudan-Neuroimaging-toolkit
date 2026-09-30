@@ -22,6 +22,6 @@
 
 ## TorchFLIRT
 
-![当前 TorchFLIRT 与 FSL FLIRT 6.0.7.4 的公开 T1w 配准对照](../flirt/figures/flirt_public_current.png)
+![当前 TorchFLIRT GPU 批量实现与 FSL FLIRT 6.0.7.4 的公开 T1w 配准对照](../flirt/figures/flirt_public_current.png)
 
-本轮真实 GM 对照中，CPU 的 10 例有 9 例、H100 TF32 已完成的 4 例有 4 例满足矩阵 `rmsdiff <= 0.05 mm`；moved Pearson 中位数分别为 `0.999985` 和 `0.999806`。图中公开 OpenNeuro T1w 由最终源码重新生成；时间、源码边界和跨模态 b0→T1 结果见 [TorchFLIRT 功能页](../flirt/README.md)。
+图中使用同一组 CC0 公开 OpenNeuro ds000114 v1.0.2 去面部 T1w，比较 FSL 与当前 FNIT GPU 批量结果。官方输出非零区域的 moved Pearson 为 `0.9952013`，moving 视野 13³ 个世界坐标点的位移 RMS 为 `0.37208 mm`。源码绑定、CPU/FSL 对照、性能与精度范围见 [TorchFLIRT 功能页](../flirt/README.md)。

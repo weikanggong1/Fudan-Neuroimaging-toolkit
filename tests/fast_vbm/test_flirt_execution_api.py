@@ -2,6 +2,8 @@
 
 from contextlib import nullcontext
 from types import SimpleNamespace
+import subprocess
+import sys
 
 import numpy as np
 import pytest
@@ -145,6 +147,75 @@ def test_cli_forwards_execution_options(monkeypatch, entrypoint):
     assert options["candidate_batch_size"] == 31
     assert options["memory_budget_gb"] == 9.5
     assert options["device"] == "cuda:0"
+    assert options["applyxfm"] is False
+    assert options["usesqform"] is False
+
+
+@pytest.mark.parametrize("transform_arguments,expected_init,expected_qform", (
+    (["-usesqform"], None, True),
+    (["-init", "input_to_reference.mat"], "input_to_reference.mat", False),
+))
+def test_root_and_dedicated_cli_forward_the_same_applyxfm_options(
+    monkeypatch, transform_arguments, expected_init, expected_qform
+):
+    calls = []
+
+    def capture(*images, **options):
+        calls.append((images, options))
+
+    monkeypatch.setattr(flirt_cli, "run_flirt", capture)
+    monkeypatch.setattr(flirt_module, "run_flirt", capture)
+    arguments = ["-in", "moving.nii.gz", "-ref", "reference.nii.gz",
+                 "-out", "moved.nii.gz", "-omat", "saved.mat", "-applyxfm",
+                 *transform_arguments, "--device", "cpu", "--execution", "reference",
+                 "--candidate-batch-size", "31", "--memory-budget-gb", "9.5", "--overwrite"]
+
+    assert flirt_cli.main(arguments) == 0
+    toolkit_cli.main(["flirt", *arguments, "--threads", "1"])
+
+    expected = (("moving.nii.gz", "reference.nii.gz"), {
+        "output": "moved.nii.gz", "omat": "saved.mat", "init": expected_init,
+        "inweight": None, "refweight": None, "dof": 12, "cost": "corratio",
+        "applyxfm": True, "usesqform": expected_qform, "device": "cpu",
+        "execution": "reference", "candidate_batch_size": 31,
+        "memory_budget_gb": 9.5, "overwrite": True,
+    })
+    assert calls == [expected, expected]
+
+
+def test_root_and_dedicated_applyxfm_write_identical_images_and_matrices(tmp_path):
+    import nibabel as nib
+
+    affine = np.diag([-2.0, 2.0, 2.0, 1.0])
+    image = FNITNifti1Image(np.arange(120, dtype=np.float32).reshape(4, 5, 6), affine)
+    reference = FNITNifti1Image(np.zeros((4, 5, 6), dtype=np.float32), affine)
+    moving_path, reference_path = tmp_path / "moving.nii.gz", tmp_path / "reference.nii.gz"
+    image.save(moving_path)
+    reference.save(reference_path)
+    outputs = []
+    for entrypoint in ("standalone", "toolkit"):
+        moved_path, matrix_path = tmp_path / f"{entrypoint}.nii.gz", tmp_path / f"{entrypoint}.mat"
+        arguments = ["-in", str(moving_path), "-ref", str(reference_path),
+                     "-out", str(moved_path), "-omat", str(matrix_path),
+                     "-applyxfm", "-usesqform", "--device", "cpu"]
+        if entrypoint == "standalone":
+            assert flirt_cli.main(arguments) == 0
+        else:
+            toolkit_cli.main(["flirt", *arguments])
+        outputs.append((nib.load(moved_path), np.loadtxt(matrix_path)))
+
+    np.testing.assert_array_equal(outputs[0][0].dataobj, outputs[1][0].dataobj)
+    np.testing.assert_array_equal(outputs[0][0].affine, outputs[1][0].affine)
+    assert outputs[0][0].header.binaryblock == outputs[1][0].header.binaryblock
+    np.testing.assert_array_equal(outputs[0][1], outputs[1][1])
+
+
+def test_dedicated_cli_argument_import_does_not_load_torch_or_registration():
+    code = ("import sys; import fnit.flirt.cli; "
+            "assert 'torch' not in sys.modules; "
+            "assert 'fnit.flirt.core' not in sys.modules; "
+            "assert 'fnit.flirt.standalone' not in sys.modules")
+    subprocess.run([sys.executable, "-c", code], check=True)
 
 
 def test_public_model_passes_execution_options_to_engine_and_qc(monkeypatch):

@@ -959,7 +959,6 @@ class _Level:
     reference: torch.Tensor
     moving: torch.Tensor
     reference_sizes: tuple
-    moving_sizes: tuple
     cost: FSLCorrelationRatio
     centre: np.ndarray
 
@@ -1156,7 +1155,7 @@ class _DefaultFLIRTEngine:
         sampling = np.diag([*self.moving_sizes, 1.0])
         centre = _centre_of_gravity(moving, sampling)
         self.level = _Level(
-            reference, moving, reference_sizes, self.moving_sizes, cost, centre
+            reference, moving, reference_sizes, cost, centre
         )
         self._cache.clear()
 
@@ -1823,7 +1822,7 @@ class TorchFLIRT:
             "initial_matrix_used": init is not None,
             "input_weight_used": inweight is not None,
             "reference_weight_used": refweight is not None,
-            "reference_validation_report": "validation/flirt/report.public.json",
+            "reference_validation_report": "validation/flirt/gpu_batch.current.public.json",
             "current_input_compared_with_fsl": False,
             "validated_fsl_equivalent": False,
             "validation_scope": (

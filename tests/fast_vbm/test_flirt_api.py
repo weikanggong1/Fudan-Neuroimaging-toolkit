@@ -103,7 +103,7 @@ def test_reference_validation_is_not_reported_as_current_input_equivalence(
     result = TorchFLIRT(device="cpu", angular_search=False)(_volume(), _volume())
 
     assert result.qc["reference_validation_report"] == (
-        "validation/flirt/report.public.json"
+        "validation/flirt/gpu_batch.current.public.json"
     )
     assert result.qc["current_input_compared_with_fsl"] is False
     assert result.qc["validated_fsl_equivalent"] is False
