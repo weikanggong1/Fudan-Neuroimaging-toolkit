@@ -287,7 +287,8 @@ def fMRIVolume_pipeline(
     resample_world(
         clean_native, mni_template, to_epi_world, clean_mni,
         pre_affine_pull_ras=t1_to_mni.pull_ras,
-        output_mask=mask_mni, batch_size=batch_size, device=selected,
+        output_mask=mask_mni, interpolation="spline",
+        batch_size=batch_size, device=selected,
     )
     timing["mni_resampling"] = time.perf_counter() - started
     timing["total"] = sum(timing.values())
@@ -298,6 +299,7 @@ def fMRIVolume_pipeline(
         "mni_shape": list(template.shape),
         "mni_voxel_mm": [float(value) for value in template.header.get_zooms()[:3]],
         "registration_backend": registration_backend,
+        "mni_interpolation": "cubic-bspline-periodic",
         "t1_to_mni_qc": t1_to_mni.qc,
         "ica_components": aroma.ica.n_components,
         "ica_converged": aroma.ica.converged,
@@ -346,6 +348,7 @@ def fMRIVolume_pipeline(
             "ConfoundRegression": {"wm": regress_wm, "csf": regress_csf,
                                   "motion": regress_motion},
             "RegistrationBackend": registration_backend,
+            "MNIInterpolation": "cubic-bspline-periodic",
             "TimingSeconds": timing,
             "Report": json.loads(report.read_text(encoding="utf-8")),
         },

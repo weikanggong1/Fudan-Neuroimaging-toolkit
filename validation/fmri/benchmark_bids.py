@@ -8,6 +8,7 @@ import argparse
 import hashlib
 import json
 import platform
+import shutil
 from pathlib import Path
 import time
 
@@ -31,7 +32,7 @@ def sha256(path):
 def source_hashes(root):
     paths = []
     for component in ("fmri", "msm", "fast", "flirt", "fnirt", "applywarp",
-                      "synthstrip", "synthmorph"):
+                      "synthstrip", "synthmorph", "eddy"):
         paths.extend((root / "src/fnit" / component).rglob("*.py"))
     paths.extend((root / "src/fnit/msm/_fastpd_src").glob("*"))
     paths.extend((root / "src/fnit").glob("_*.py"))
@@ -73,6 +74,8 @@ def main():
     parser.add_argument("--source-root", type=Path, required=True)
     parser.add_argument("--source-revision", required=True)
     parser.add_argument("--report-out", type=Path, required=True)
+    parser.add_argument("--capture-resampling-inputs", type=Path,
+                        help="Volume validation only: preserve its exact MNI pull field and affine privately")
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--threads", type=int, default=8)
     parser.add_argument("--mni-template", type=Path)
@@ -98,6 +101,22 @@ def main():
         raise ValueError("benchmark requires one unambiguous T1w image")
     input_hashes = {"bold": sha256(inputs.bold), "sbref": sha256(inputs.sbref)
                     if inputs.sbref else None, "t1w": sha256(inputs.t1w_images[0])}
+    capture_seconds = [0.0]
+    if args.capture_resampling_inputs:
+        from fnit.fmri import end_to_end
+        resample_original = end_to_end.resample_world
+
+        def capture_resample(*positional, **keywords):
+            if keywords.get("output_mask") is not None:
+                capture_start = time.perf_counter()
+                directory = args.capture_resampling_inputs
+                directory.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(keywords["pre_affine_pull_ras"], directory / "mni_to_t1_pull_ras.nii.gz")
+                np.savetxt(directory / "reference_to_source_world.txt", positional[2])
+                capture_seconds[0] += time.perf_counter() - capture_start
+            return resample_original(*positional, **keywords)
+
+        end_to_end.resample_world = capture_resample
     started = time.perf_counter()
     if args.stage == "volume":
         if args.mni_template is None:
@@ -122,7 +141,7 @@ def main():
         )
     if cuda:
         torch.cuda.synchronize(args.device)
-    api_wall = time.perf_counter() - started
+    api_wall = time.perf_counter() - started - capture_seconds[0]
     memory = {"peak_cuda_allocated_bytes": torch.cuda.max_memory_allocated(args.device) if cuda else 0,
               "peak_cuda_reserved_bytes": torch.cuda.max_memory_reserved(args.device) if cuda else 0}
     metadata = json.loads(result.metadata.read_text())
@@ -144,7 +163,7 @@ def main():
         if not pipeline["ica_converged"]:
             raise ValueError("ICA did not converge")
         algorithm = {key: pipeline[key] for key in (
-            "registration_backend", "ica_components", "ica_converged",
+            "registration_backend", "mni_interpolation", "ica_components", "ica_converged",
             "ica_iterations", "aroma_noise_components", "wm_csf_motion_regression")}
         limits = ["No GDC or B0 correction: corresponding raw inputs are unavailable.",
                   "ICA-AROMA replaces UKB FIX, so there is no paired final UKB voxelwise oracle."]
@@ -188,6 +207,7 @@ def main():
                        "t1w_shape": list(nib.load(str(inputs.t1w_images[0])).shape)},
               "input_sha256": input_hashes, "algorithm": algorithm, "checks": checks,
               "timing_seconds": {"public_api_including_output_save": api_wall,
+                                 "validation_capture_overhead_excluded": capture_seconds[0],
                                  "pipeline_stages": result.timing_seconds}, "memory": memory,
               "environment": {"host": platform.node(), "python": platform.python_version(),
                               "torch": torch.__version__, "cuda_runtime": torch.version.cuda,
