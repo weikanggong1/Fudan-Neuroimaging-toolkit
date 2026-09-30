@@ -26,17 +26,29 @@ def main() -> None:
     fit.add_argument('--learning-rate', type=float, default=0.001)
     fit.add_argument('--dropout', type=float, default=0.2)
     fit.add_argument('--relative-weight', type=float, default=0.5)
+    fit.add_argument('--class-weight', choices=('balanced', 'none'), default='balanced',
+                     help='classification loss weights computed from training labels only')
     fit.add_argument('--random-state', type=int, default=0)
     fit.add_argument('--device', default='auto')
     fit.add_argument('--max-gpu-gb', type=float, default=19.0)
     fit.add_argument('--feature-block', type=int, default=2048)
     fit.add_argument('--top-voxels', type=int, default=1000)
+    fit.add_argument('--no-plots', action='store_true', help='skip summary figures; use plot later')
+    plot = commands.add_parser('plot', help='redraw model weights, top components and test predictions')
+    plot.add_argument('--model-dir', required=True)
+    plot.add_argument('--output-dir')
+    plot.add_argument('--labels', help='JSON mapping target columns to display names with units')
     apply = commands.add_parser('apply', help='predict one subject using a frozen model')
     apply.add_argument('--model-dir', required=True)
     apply.add_argument('--subject-dir', required=True)
     apply.add_argument('--device', default='auto')
     apply.add_argument('--output-file', required=True, help='JSON predictions and components')
     args = parser.parse_args()
+    if args.command == 'plot':
+        from .plotting import plot_superbigflica
+        labels = json.loads(Path(args.labels).read_text(encoding='utf-8')) if args.labels else None
+        print(plot_superbigflica(args.model_dir, args.output_dir, labels=labels))
+        return
     if args.command == 'apply':
         result = apply_model(args.model_dir, args.subject_dir,
                              device=args.device, output_file=args.output_file)
@@ -54,9 +66,11 @@ def main() -> None:
         validation_fraction=args.validation_fraction, test_fraction=args.test_fraction,
         max_epochs=args.max_epochs, batch_size=args.batch_size,
         learning_rate=args.learning_rate, dropout=args.dropout,
-        relative_weight=args.relative_weight, random_state=args.random_state,
+        relative_weight=args.relative_weight, class_weight=args.class_weight,
+        random_state=args.random_state,
         device=args.device, max_gpu_gb=args.max_gpu_gb,
-        feature_block=args.feature_block, top_voxels=args.top_voxels)
+        feature_block=args.feature_block, top_voxels=args.top_voxels,
+        make_plots=not args.no_plots)
     print(result)
 
 

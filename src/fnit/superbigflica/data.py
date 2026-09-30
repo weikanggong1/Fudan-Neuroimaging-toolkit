@@ -83,12 +83,15 @@ def load_cohort(subjects_root: str | Path,
                 id_column: str = "subject_id", split_column: str | None = None,
                 validation_fraction: float = .2, test_fraction: float = .2,
                 random_state: int = 0,
-                subjects: Sequence[str] | None = None) -> Cohort:
+                subjects: Sequence[str] | None = None,
+                class_weight: str = "balanced") -> Cohort:
     """Match exact directory IDs and encode targets using training subjects only."""
     root, specs = _specifications(subjects_root, modalities)
-    if not targets or any(kind not in ("continuous", "categorical")
+    if class_weight not in ("balanced", "none"):
+        raise ValueError("class_weight must be balanced or none")
+    if not targets or any(kind not in ("continuous", "categorical", "binary", "multiclass")
                           for kind in targets.values()):
-        raise ValueError("targets must specify continuous or categorical for each column")
+        raise ValueError("targets must specify continuous, categorical, binary, or multiclass")
     if id_column in targets or split_column in targets:
         raise ValueError("ID and split columns cannot also be prediction targets")
     required = [id_column, *targets]
@@ -130,7 +133,7 @@ def load_cohort(subjects_root: str | Path,
                 validation_fraction + test_fraction >= 1):
             raise ValueError("Validation/test fractions must be positive and sum to less than 1")
         categorical = next((name for name, kind in targets.items()
-                            if kind == "categorical"), None)
+                            if kind != "continuous"), None)
         strata = None
         if categorical is not None:
             values = [None if _missing(rows[subject][categorical]) else
@@ -162,7 +165,8 @@ def load_cohort(subjects_root: str | Path,
     train = splits == "train"
     y = np.full((len(ids), len(targets)), np.nan, dtype=np.float32)
     descriptions = []
-    for column, (name, kind) in enumerate(targets.items()):
+    for column, (name, requested_type) in enumerate(targets.items()):
+        kind = "continuous" if requested_type == "continuous" else "categorical"
         values = [rows[subject][name] for subject in ids]
         if kind == "continuous":
             try:
@@ -190,8 +194,13 @@ def load_cohort(subjects_root: str | Path,
                               if is_train and label is not None})
             if len(classes) < 2:
                 raise ValueError(f"Categorical target needs at least two train classes: {name}")
-            if any(sum(is_train and label == category for label, is_train in zip(labels, train)) < 2
-                   for category in classes):
+            if requested_type == "binary" and len(classes) != 2:
+                raise ValueError(f"Binary target must have exactly two training classes: {name}")
+            if requested_type == "multiclass" and len(classes) < 3:
+                raise ValueError(f"Multiclass target must have at least three training classes: {name}")
+            class_counts = [int(sum(is_train and label == category for label, is_train in zip(labels, train)))
+                            for category in classes]
+            if any(count < 2 for count in class_counts):
                 raise ValueError(f"Categorical target needs at least two train labels per class: {name}; "
                                  "supply an explicit split_column or more subjects")
             if not any(label is not None for label, split in zip(labels, splits)
@@ -203,7 +212,13 @@ def load_cohort(subjects_root: str | Path,
                     if label not in encoding:
                         raise ValueError(f"Unknown held-out category for {name}: {label}")
                     y[index, column] = encoding[label]
-            descriptions.append({"name": name, "type": kind, "classes": classes})
+            observed_count = sum(class_counts)
+            class_weights = ([observed_count / (len(classes) * count) for count in class_counts]
+                             if class_weight == "balanced" else [1.] * len(classes))
+            descriptions.append({"name": name, "type": kind, "classes": classes,
+                                 "requested_type": requested_type,
+                                 "classification_mode": "binary" if len(classes) == 2 else "multiclass",
+                                 "class_counts": class_counts, "class_weights": class_weights})
     return Cohort(ids, splits, y, descriptions, report)
 
 

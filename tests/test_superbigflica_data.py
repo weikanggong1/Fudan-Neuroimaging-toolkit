@@ -119,3 +119,32 @@ def test_validation_targets_cannot_be_entirely_missing(tmp_path):
     table = _table(tmp_path, rows)
     with pytest.raises(ValueError, match="two validation labels"):
         load_cohort(root, modalities, table, {"age": "continuous"}, split_column="split")
+
+
+def test_balanced_class_weights_use_training_observed_counts_only(tmp_path):
+    root, modalities, rows = _cohort_files(tmp_path, count=12)
+    rows[0][2] = ""  # The missing training label is excluded from class frequencies.
+    table = _table(tmp_path, rows)
+    balanced = load_cohort(root, modalities, table, {"group": "binary"}, split_column="split")
+    description = balanced.targets[0]
+    assert description["type"] == "categorical"
+    assert description["requested_type"] == "binary"
+    assert description["classification_mode"] == "binary"
+    assert description["class_counts"] == [3, 4]
+    np.testing.assert_allclose(description["class_weights"], [7 / 6, 7 / 8])
+    assert np.isnan(balanced.y[0, 0])
+    for row in rows:
+        if row[3] != "train":
+            row[2] = "B"
+    table = _table(tmp_path, rows)
+    changed = load_cohort(root, modalities, table, {"group": "binary"}, split_column="split")
+    assert changed.targets == balanced.targets
+    plain = load_cohort(root, modalities, table, {"group": "binary"},
+                        split_column="split", class_weight="none")
+    assert plain.targets[0]["class_counts"] == [3, 4]
+    assert plain.targets[0]["class_weights"] == [1., 1.]
+    with pytest.raises(ValueError, match="at least three training classes"):
+        load_cohort(root, modalities, table, {"group": "multiclass"}, split_column="split")
+    with pytest.raises(ValueError, match="class_weight must"):
+        load_cohort(root, modalities, table, {"group": "categorical"},
+                    split_column="split", class_weight="automatic")

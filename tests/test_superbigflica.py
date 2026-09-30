@@ -15,6 +15,27 @@ from fnit.superbigflica.pipeline import apply_model, run_superbigflica
 torch.set_num_threads(1)
 
 
+
+def test_subject_chunked_batch_preserves_shuffled_rows_exactly(tmp_path):
+    import contextlib
+    import h5py
+    from fnit.superbigflica.pipeline import _batch
+
+    values = [np.arange(77, dtype=np.float32).reshape(7, 11),
+              np.arange(49, dtype=np.float32).reshape(7, 7) / 3]
+    rows = np.array([5, 0, 6, 2, 1])
+    with contextlib.ExitStack() as stack:
+        files = []
+        for index, array in enumerate(values):
+            file = stack.enter_context(h5py.File(tmp_path / f'{index}.h5', 'w'))
+            file.create_dataset('data', data=array, chunks=(1, 4))
+            files.append(file)
+        batches = _batch(files, rows, torch.device('cpu'))
+        for actual, array in zip(batches, values):
+            assert actual.dtype == torch.float32
+            assert np.array_equal(actual.numpy(), array[rows])
+
+
 def test_forward_matches_fixed_encoder_reconstruction_and_prediction_equations():
     model = SupervisedComponents([3, 2], 2, [1, 3], dropout=0).double()
     spatial = [np.array([[.2, -.5], [1.2, .3], [-.8, .7]]),
@@ -161,7 +182,7 @@ def _fit(root, modalities, table, output):
                             {"score": "continuous", "group": "categorical"}, output,
                             n_components=2, split_column="split", max_epochs=3,
                             batch_size=3, learning_rate=.001, dropout=.1,
-                            random_state=42, device="cpu", feature_block=3, top_voxels=2)
+                            random_state=42, device="cpu", feature_block=3, top_voxels=2, make_plots=False)
 
 
 def test_mixed_pipeline_reload_outputs_and_test_label_independence(tmp_path):
@@ -173,6 +194,9 @@ def test_mixed_pipeline_reload_outputs_and_test_label_independence(tmp_path):
     assert metadata["output_sizes"] == [1, 3]
     assert metadata["dtype"] == "float32" and metadata["tf32"] is True
     assert metadata["targets"][1]["classes"] == ["A", "B", "C"]
+    assert metadata["initialization"] == "random" and metadata["class_weight"] == "balanced"
+    assert metadata["targets"][1]["class_counts"] == [3, 2, 2]
+    np.testing.assert_allclose(metadata["targets"][1]["class_weights"], [7 / 9, 7 / 6, 7 / 6])
     assert 1 <= metadata["best_epoch"] <= 3
     courses = np.load(output / "subj_course.npy")
     assert courses.shape == (13, 2) and courses.dtype == np.float32
@@ -235,7 +259,7 @@ def test_cuda_training_frozen_prediction_and_spatial_maps_match_cpu_statistics(t
         root, modalities, table, {'score': 'continuous', 'group': 'categorical'},
         tmp_path / 'cuda_model', n_components=2, split_column='split', max_epochs=2,
         batch_size=3, random_state=42, device='cuda:0', max_gpu_gb=1,
-        feature_block=3, top_voxels=2)
+        feature_block=3, top_voxels=2, make_plots=False)
     courses = np.load(output / 'subj_course.npy')
     predicted = apply_model(output, root / rows[12][0], device='cuda:0')
     np.testing.assert_allclose(predicted['components'], courses[12], rtol=2e-4, atol=2e-5)
@@ -264,7 +288,7 @@ def test_rank_deficient_courses_are_rejected_before_saving_model(tmp_path):
                          {"score": "continuous", "group": "categorical"}, destination,
                          n_components=2, split_column="split", max_epochs=1,
                          batch_size=3, dropout=0, random_state=42, device="cpu",
-                         feature_block=3, top_voxels=2)
+                         feature_block=3, top_voxels=2, make_plots=False)
     assert not (destination / "model.pt").exists()
     assert not (destination / "model.json").exists()
 
@@ -285,7 +309,7 @@ def test_cuda_spatial_block_budget_clamps_and_matches_cpu_statistics(tmp_path):
                               tmp_path / "cuda_model", n_components=2,
                               split_column="split", max_epochs=1, batch_size=3,
                               dropout=0, random_state=42, device="cuda:0",
-                              max_gpu_gb=budget_gib, feature_block=requested_block, top_voxels=2)
+                              max_gpu_gb=budget_gib, feature_block=requested_block, top_voxels=2, make_plots=False)
     metadata = json.loads((output / "model.json").read_text())
     assert metadata["feature_block"] == requested_block
     assert 1 <= metadata["spatial_feature_block"] < requested_block
@@ -298,3 +322,132 @@ def test_cuda_spatial_block_budget_clamps_and_matches_cpu_statistics(tmp_path):
             expected = _spatial_z(courses, handle["data"][:7].T.astype(np.float64))
         np.testing.assert_allclose(np.load(output / f"{name}_zstat.npy"), expected,
                                    rtol=1e-4, atol=1e-4)
+
+
+def test_weighted_categorical_training_and_validation_match_same_equation():
+    from fnit.superbigflica.pipeline import _validation_loss
+
+    target = {"name": "group", "type": "categorical", "class_weights": [2., .5, 1.25]}
+    model = SupervisedComponents([2], 2, [3], dropout=0).double()
+    objective = SupervisedObjective(1, [target], [3]).double()
+    logits = np.array([[.1, 1.2, -.3], [100., -200., 5.], [.4, -.2, 1.3], [1.4, -.5, .2]])
+    labels = np.array([[0.], [np.nan], [2.], [1.]])
+    observed = np.array([0, 2, 3])
+    selected_logits = logits[observed]
+    logsum = np.log(np.exp(selected_logits - selected_logits.max(axis=1, keepdims=True)).sum(axis=1))
+    actual = labels[observed, 0].astype(int)
+    cross_entropy = logsum - selected_logits[np.arange(3), actual] + selected_logits.max(axis=1)
+    weights = np.array(target["class_weights"])[actual]
+    expected = (weights * cross_entropy).sum() / weights.sum()
+    images = [torch.zeros((4, 2), dtype=torch.float64)]
+    label_tensor = torch.from_numpy(labels)
+    original = label_tensor.clone()
+    _, terms = objective(model, images, images, torch.from_numpy(logits), label_tensor, 4)
+    assert terms[2].item() == pytest.approx(expected + np.log(2), rel=1e-12)
+    assert _validation_loss(logits, labels, [target], [3]) == pytest.approx(expected, rel=1e-12)
+    torch.testing.assert_close(label_tensor, original, equal_nan=True)
+    assert not objective.get_buffer("class_weights_0").requires_grad
+    assert abs(expected - cross_entropy.mean()) > .01
+    unweighted = dict(target, class_weights=[1., 1., 1.])
+    assert _validation_loss(logits, labels, [unweighted], [3]) == pytest.approx(cross_entropy.mean())
+
+
+def test_explicit_multiclass_alias_uses_frozen_categorical_head(tmp_path):
+    from fnit.superbigflica.data import load_cohort
+
+    root, modalities, masks, affine, table, rows = _mixed_inputs(tmp_path)
+    cohort = load_cohort(root, modalities, table, {"group": "multiclass"}, split_column="split")
+    description = cohort.targets[0]
+    assert description["type"] == "categorical"
+    assert description["requested_type"] == "multiclass"
+    assert description["classification_mode"] == "multiclass"
+    assert description["classes"] == ["A", "B", "C"]
+    assert description["class_counts"] == [3, 2, 2]
+    with pytest.raises(ValueError, match="exactly two training classes"):
+        load_cohort(root, modalities, table, {"group": "binary"}, split_column="split")
+
+
+def test_class_weight_cli_passes_choice_and_default(tmp_path, monkeypatch, capsys):
+    import fnit.superbigflica.cli as cli
+    import sys
+
+    config = tmp_path / "config.json"
+    config.write_text(json.dumps({"modalities": {}, "targets": {"group": "multiclass"}}))
+    calls = []
+    monkeypatch.setattr(cli, "run_superbigflica", lambda *args, **kwargs: calls.append(kwargs) or tmp_path)
+    arguments = ["fnit-superbigflica", "fit", "--subjects-root", str(tmp_path), "--config", str(config),
+                 "--phenotypes-csv", str(tmp_path / "table.csv"), "--output-dir", str(tmp_path / "out"),
+                 "--n-components", "20"]
+    monkeypatch.setattr(sys, "argv", arguments + ["--class-weight", "none"])
+    cli.main()
+    assert calls[-1]["class_weight"] == "none"
+    monkeypatch.setattr(sys, "argv", arguments)
+    cli.main()
+    assert calls[-1]["class_weight"] == "balanced"
+    capsys.readouterr()
+
+
+def test_nature_plots_match_saved_test_predictions_and_train_only_ranking(tmp_path):
+    from fnit.superbigflica import plot_superbigflica
+    from fnit.superbigflica.plotting import _ranking
+
+    root, modalities, masks, affine, table, rows = _mixed_inputs(tmp_path)
+    rows[10][1] = ''  # Missing continuous test labels are not filled in.
+    _write_phenotypes(table, rows)
+    output = run_superbigflica(root, modalities, table,
+                              {'score': 'continuous', 'group': 'multiclass'},
+                              tmp_path / 'with_plots', n_components=2,
+                              split_column='split', max_epochs=1, batch_size=3,
+                              random_state=42, device='cpu', feature_block=3, top_voxels=2)
+    summary = json.loads((output / 'plots' / 'summary.json').read_text())
+    metrics = json.loads((output / 'metrics.json').read_text())
+    metadata = json.loads((output / 'model.json').read_text())
+    assert metadata['make_plots'] is True and metadata['timings']['summary_plots_s'] > 0
+    assert summary['ranking_split'] == 'train' and summary['prediction_split'] == 'test'
+    continuous = summary['targets']['score']
+    assert continuous['test']['n'] == 2
+    assert continuous['test']['rmse'] == pytest.approx(metrics['test']['score']['rmse'], rel=1e-5)
+    classes = summary['targets']['group']['test']['roc_auc']
+    assert all(classes[label] is not None for label in ('A', 'B', 'C'))
+    assert 0 <= classes['macro_auc'] <= 1 and 0 <= classes['micro_auc'] <= 1
+    assert 's000' not in json.dumps(summary)
+    for stem in ('latent_weights', 'target-001_top-components', 'target-002_top-components',
+                 'target-001_test-scatter', 'target-002_test-roc'):
+        for extension in ('png', 'svg', 'pdf'):
+            assert (output / 'plots' / f'{stem}.{extension}').stat().st_size > 100
+        assert '<text' in (output / 'plots' / f'{stem}.svg').read_text()
+    courses = np.load(output / 'subj_course.npy')
+    observed = np.asarray([float(row[1]) for row in rows[:7]])
+    metric, signals, order = _ranking(courses[:7], observed, 'continuous')
+    assert metric == continuous['ranking_metric']
+    np.testing.assert_allclose(continuous['training_signal_by_component'], signals, atol=1e-6)
+    np.testing.assert_array_equal(continuous['selected_components'], order + 1)
+    # Change only held-out labels and shuffle rows. Training component choices remain fixed.
+    with (output / 'predictions.csv').open() as stream:
+        records = list(csv.DictReader(stream))
+    for row in records:
+        if row['split'] == 'test':
+            row['score__observed'] = '10000'
+    with (output / 'predictions.csv').open('w', newline='') as stream:
+        writer = csv.DictWriter(stream, fieldnames=records[0].keys())
+        writer.writeheader()
+        writer.writerows(records[::-1])
+    redrawn = plot_superbigflica(output, tmp_path / 'redrawn', labels={'score': 'Cognitive score (units)'})
+    second = json.loads((redrawn / 'summary.json').read_text())
+    assert second['targets']['score']['label'] == 'Cognitive score (units)'
+    assert 'Observed Cognitive score (units)' in (redrawn / 'target-001_test-scatter.svg').read_text()
+    assert second['targets']['score']['selected_components'] == continuous['selected_components']
+    assert second['targets']['score']['training_signal_by_component'] == continuous['training_signal_by_component']
+
+
+def test_multiclass_roc_with_absent_test_class_keeps_micro_but_not_full_macro(tmp_path):
+    from fnit.superbigflica.plotting import _roc_figure
+    probabilities = np.array([[.7, .2, .1], [.2, .7, .1]])
+    result = _roc_figure(np.array([0, 1]), probabilities, ['A', 'B', 'C'],
+                         'three groups', tmp_path / 'partial')
+    assert result['C'] is None and result['macro_auc'] is None
+    assert result['micro_auc'] == pytest.approx(1.)
+    result = _roc_figure(np.array([0]), probabilities[:1], ['A', 'B', 'C'],
+                         'one observed group', tmp_path / 'single')
+    assert result['A'] is None and result['macro_auc'] is None
+    assert result['micro_auc'] == pytest.approx(1.)
