@@ -8,6 +8,8 @@ import math
 import numpy as np
 import torch
 
+from ._raster_triton import lookup_candidates
+
 
 @dataclass(frozen=True)
 class BlockIndex:
@@ -281,14 +283,19 @@ def rasterize_priors_compact(
     values_parts, covered_parts = [], []
     for points, ids, candidate_mask, batch_ids, point_rows in batches:
         with torch.no_grad():
-            rel = points[:, :, None, :] - all_v0[ids][:, None]
-            w123 = torch.einsum("bcij,bpcj->bpci", all_inv[ids], rel)
-            weights = torch.cat((1.0 - w123.sum(-1, keepdim=True), w123), dim=-1)
-            singular = all_singular[ids] | ~candidate_mask
-            score = weights.amin(-1).masked_fill(singular[:, None], -torch.inf)
-            best_score, best = score.max(dim=2)
-            selected_ids = ids[batch_ids, best].flatten()[point_rows]
-            covered = (best_score >= -float(tolerance)).flatten()[point_rows]
+            lookup = lookup_candidates(points, ids, candidate_mask, all_v0, all_inv,
+                                       all_singular, point_rows, tolerance=tolerance)
+            if lookup is None:
+                rel = points[:, :, None, :] - all_v0[ids][:, None]
+                w123 = torch.einsum("bcij,bpcj->bpci", all_inv[ids], rel)
+                weights = torch.cat((1.0 - w123.sum(-1, keepdim=True), w123), dim=-1)
+                singular = all_singular[ids] | ~candidate_mask
+                score = weights.amin(-1).masked_fill(singular[:, None], -torch.inf)
+                best_score, best = score.max(dim=2)
+                selected_ids = ids[batch_ids, best].flatten()[point_rows]
+                covered = (best_score >= -float(tolerance)).flatten()[point_rows]
+            else:
+                selected_ids, covered = lookup
         selected_cells = tetrahedra[selected_ids]
         selected_rel = points.reshape(-1, 3)[point_rows] - all_v0[selected_ids]
         selected_w123 = torch.einsum("pij,pj->pi", all_inv[selected_ids], selected_rel)

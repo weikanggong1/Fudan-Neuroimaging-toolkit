@@ -41,6 +41,7 @@ import numpy as np
 import torch
 
 from fnit.gems.atlas import GEMSAtlas
+from fnit.gems import rasterize as raster_module
 from fnit.gems.deformation import ashburner_prior, prepare_deformation_reference
 from fnit.gems.gaussian import gaussian_log_likelihood, initialise_gaussians
 from fnit.gems.rasterize import BlockIndex, build_block_index, rasterize_priors, rasterize_priors_compact
@@ -98,6 +99,16 @@ def main():
     torch.backends.cudnn.allow_tf32 = args.tf32
     if device.type == "cuda":
         torch.cuda.set_per_process_memory_fraction(args.memory_fraction, device)
+
+    lookup_calls = {"triton": 0, "torch_fallback": 0}
+    original_lookup = raster_module.lookup_candidates
+
+    def tracked_lookup(*inputs, **kwargs):
+        result = original_lookup(*inputs, **kwargs)
+        lookup_calls["torch_fallback" if result is None else "triton"] += 1
+        return result
+
+    raster_module.lookup_candidates = tracked_lookup
 
     def synchronize():
         if device.type == "cuda":
@@ -258,6 +269,7 @@ def main():
         source_status = subprocess.check_output(["git", "status", "--short"], cwd=source_root, text=True).splitlines()
     source_paths = [Path(__file__).resolve(), *[Path(inspect.getsourcefile(item)) for item in
                     (rasterize_priors, ashburner_prior, gaussian_log_likelihood, GEMSAtlas, type(recipe))]]
+    source_paths.append(Path(inspect.getsourcefile(original_lookup)))
     report = {
         "mode": f"real_{args.structure}_mesh_cost_component", "structure": args.structure,
         "scope": "saved real-data mesh objective component; excludes preparation, EM iterations and whole-subject runtime",
@@ -270,6 +282,7 @@ def main():
         "background_channel": background, "stiffness": atlas.stiffness, "block_size": indices["dense"].block_size,
         "block_index_seconds": index_seconds, "gaussian_initialization_seconds": initialization_seconds,
         "reference_cache_setup_seconds": reference_setup_seconds, "counts": counts,
+        "compact_lookup_calls": lookup_calls,
         "timings_and_costs": runs, "pytorch_memory": memory, "comparisons": comparisons,
         "numerical_gate": {"enforced": not tf32_active, "thresholds": thresholds, "worst": worst,
                            "thresholds_met": parity_passed,
