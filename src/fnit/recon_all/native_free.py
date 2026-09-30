@@ -622,8 +622,11 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
             ("mri_warp_convert", "mri_ca_register", "mri_convert"), warp_binaries)}}
 
     def stage(name, function, *args, **kwargs):
-        tick = time.perf_counter()
+        """同步目标 GPU 后记录阶段墙钟、可用的显存峰值与失败状态。"""
         gpu = torch.device(device).type == "cuda" and torch.cuda.is_available()
+        if gpu and torch.cuda.is_initialized():
+            torch.cuda.synchronize(device)
+        tick = time.perf_counter()
         if gpu and torch.cuda.is_initialized() and not cuda_memory_cache_disabled:
             torch.cuda.reset_peak_memory_stats()
         try:
@@ -640,6 +643,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                           total_seconds=time.perf_counter() - started)
             (subject / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
             raise
+        if gpu and torch.cuda.is_initialized():
+            torch.cuda.synchronize(device)
         row = {"name": name, "seconds": time.perf_counter() - tick}
         if isinstance(value, dict) and value.get("talairach_child_gpu"):
             row["talairach_child_gpu"] = value["talairach_child_gpu"]
@@ -699,7 +704,7 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
 
     stage("brain_second_normalize", normalize_t1_aseg,
           mri / "norm.mgz", mri / "aseg.presurf.mgz",
-          mri / "brainmask.mgz", mri / "brain.mgz", device="cpu")
+          mri / "brainmask.mgz", mri / "brain.mgz", device=device)
     stage("entowm", mri_entowm_seg, mri / "nu.mgz", mri / "entowm.mgz",
           weights, device="cpu", stats_path=stats / "entowm.stats",
           talairach_lta=mri / "transforms/talairach.xfm.lta")

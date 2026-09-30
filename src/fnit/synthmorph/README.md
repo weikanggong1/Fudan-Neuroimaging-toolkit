@@ -23,6 +23,7 @@ result = model(
     mid_space=False,  # 是否使用初始仿射的中间空间
     header_only=False,  # 仅 affine/rigid 支持只修改头信息
     output_dir=None,  # 可选调试输出目录
+    transform_only=False,  # 仅需变换时可跳过两张重采样图像
 )
 result.moved.save(path="moving_in_fixed.nii.gz")  # 输出路径：moving 在 fixed 网格的图像
 result.transform.save(path="moving_to_fixed.mgz")  # 输出路径：moving→fixed 变换
@@ -53,7 +54,7 @@ labels = apply_transform(
 labels.save(path="labels_in_fixed.nii.gz")  # 输出路径：重采样后的标签图
 ```
 
-`RegistrationResult` 包含 moving→fixed 图像 `moved`、fixed→moving 图像 `fixed_moved`、正向变换 `transform` 和反向变换 `inverse`。affine/rigid 变换建议保存为 `.lta`，joint/deform 的 RAS 位移场建议保存为 `.mgz`；普通三通道数组缺少 source/target geometry，不能直接替代。`convert_warp_to_fsl` 必须同时获得原 moving 和 fixed 图像；生成的 NIfTI 可直接交给本包或 FSL `applywarp`。
+`RegistrationResult` 包含 moving→fixed 图像 `moved`、fixed→moving 图像 `fixed_moved`、正向变换 `transform` 和反向变换 `inverse`。当 `transform_only=True` 时前两项为 `None`，双向变换仍有完整几何；不能与 `header_only=True` 同用。affine/rigid 变换建议保存为 `.lta`，joint/deform 的 RAS 位移场建议保存为 `.mgz`；普通三通道数组缺少 source/target geometry，不能直接替代。`convert_warp_to_fsl` 必须同时获得原 moving 和 fixed 图像；生成的 NIfTI 可直接交给本包或 FSL `applywarp`。
 
 ## 命令行与原软件对应
 

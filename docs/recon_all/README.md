@@ -8,6 +8,8 @@
 
 2026-09-30 的工作分支 `b8cd17b` 已修复 conform 单精度矩阵求逆顺序，并从原始 T1 连续重跑两例到 `filled.mgz`。[现版前段逐阶段报告](VOLUME_PREFIX_PARITY_20260930.md)列出修复前后体素、N4 浮点首差、四组 EM 交叉输入和资源采样；本页下方的 5/138、2/138 整例结果仍对应此前明确标出的旧源码，不能替代这次新整例的验收。
 
+本轮性能回归已让第二次归一化随主流程设备使用现有 PyTorch CUDA 路径，并让 MNI 非线性链跳过无人使用的两幅模型重采样图。两例同输入 `brain.mgz` 均与 CPU 逐体素一致，MNI 三个输出与原 CPU 路径的文件哈希一致；各阶段耗时、显存和未接入的 GPU 诊断见[性能记录](../../validation/recon_all/python_gpu_port/performance_20260930/README.md)。完整优化后整例须与下方旧整例分开验收。
+
 ## 安装
 
 在仓库根目录创建[主页 Conda 环境](../../environment.yml)，然后运行[原生程序安装脚本](../../tools/setup_recon_all_native_conda.sh)。脚本从固定 FreeSurfer 源码提交编译所需程序并安装至当前 Conda 环境；不会调用系统安装的 FreeSurfer。模型、模板及个人许可证单独提供。

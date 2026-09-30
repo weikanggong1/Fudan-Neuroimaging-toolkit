@@ -27,8 +27,8 @@ from .spatial import compose, surfa_nearest, transform
 
 @dataclass
 class RegistrationResult:
-    moved: FNITNifti1Image
-    fixed_moved: FNITNifti1Image
+    moved: FNITNifti1Image | None
+    fixed_moved: FNITNifti1Image | None
     transform: AffineTransform | DenseWarp
     inverse: AffineTransform | DenseWarp
 
@@ -203,11 +203,23 @@ class SynthMorph:
         mid_space=False,
         header_only=False,
         output_dir=None,
+        transform_only=False,
     ):
+        """计算 moving 到 fixed 的配准，返回带图像几何的双向变换。
+
+        moving/fixed 是单帧 3D 图像或路径；init 是匹配这两幅图几何的
+        LTA 或 4×4 世界坐标仿射。mid_space 默认关闭；header_only 默认
+        关闭且仅适用于 affine/rigid；output_dir 默认不写调试图。
+        transform_only 默认关闭；开启后 moved/fixed_moved 为 None，
+        transform/inverse 仍保留原坐标空间和单位，省去两幅重采样图。
+        无效参数或输入几何不符时抛出异常。
+        """
         mov, fix = _load(moving), _load(fixed)
         is_matrix = self.model in ("affine", "rigid")
         if header_only and not is_matrix:
             raise ValueError("header_only requires affine or rigid model")
+        if transform_only and header_only:
+            raise ValueError("transform_only and header_only cannot be combined")
         if mid_space and init is None:
             raise ValueError("mid_space initialization requires init")
 
@@ -261,7 +273,9 @@ class SynthMorph:
             inverse = AffineTransform(
                 inverse_voxel, source=fix, target=mov, space="voxel"
             ).convert(space="world")
-            if header_only:
+            if transform_only:
+                moved = fixed_moved = None
+            elif header_only:
                 moved = _header_transform(mov, forward)
                 fixed_moved = _header_transform(fix, inverse)
             else:
@@ -282,10 +296,13 @@ class SynthMorph:
                 source=fix,
                 target=mov,
             )
-            moved = _resampled_image(mov, forward_pull, fix, self.device, fill=0)
-            fixed_moved = _resampled_image(
-                fix, inverse_pull, mov, self.device, fill=0
-            )
+            if transform_only:
+                moved = fixed_moved = None
+            else:
+                moved = _resampled_image(mov, forward_pull, fix, self.device, fill=0)
+                fixed_moved = _resampled_image(
+                    fix, inverse_pull, mov, self.device, fill=0
+                )
 
         if output_dir:
             root = Path(output_dir)

@@ -49,7 +49,7 @@ print(report["total_seconds"], report["steps"])
 
 ## 带 aseg 与 brainmask 的第二轮归一化
 
-第二个函数对应 `mri_normalize -seed 1234 -mprage -aseg aseg.presurf.mgz -mask brainmask.mgz norm.mgz brain.mgz`。输入为同一 conform 网格的 `norm.mgz`、`aseg.presurf.mgz`、`brainmask.mgz`，输出 `brain.mgz`；也返回步骤和耗时报告。Fast Marching 内侧白质 ridge、离群点过滤、初始偏置场、温和校正和两轮三维迭代由 NumPy/Numba/PyTorch 完成，不调用 FreeSurfer。CPU 精确路径已对照，第二轮 CUDA 路径尚未与官方配对。
+第二个函数对应 `mri_normalize -seed 1234 -mprage -aseg aseg.presurf.mgz -mask brainmask.mgz norm.mgz brain.mgz`。输入为同一 1 mm、256³ conform 网格的 `norm.mgz`（uint8 强度）、`aseg.presurf.mgz`（整数标签）、`brainmask.mgz`（uint8 掩膜），输出同网格 uint8 `brain.mgz`；也返回步骤和耗时报告。Fast Marching 内侧白质 ridge、离群点过滤、初始偏置场、温和校正和两轮三维迭代由 NumPy/Numba/PyTorch 完成，不调用 FreeSurfer。调度使用用户选择的 CPU/CUDA 设备；控制点搜索仍在 CPU，偏置场计算使用选定设备。
 
 ```bash
 fnit-normalize-aseg \
@@ -57,10 +57,10 @@ fnit-normalize-aseg \
   --aseg /subjects/sub01/mri/aseg.presurf.mgz \
   --brainmask /subjects/sub01/mri/brainmask.mgz \
   --output /subjects/sub01/mri/brain.mgz \
-  --device cpu
+  --device cuda:0
 ```
 
-`--norm`、`--aseg`、`--brainmask` 依次指定三张同网格输入图；`--output` 指输出 `brain.mgz`，`--device` 选 CPU/CUDA。返回字典除 `total_seconds` 外，还记录 ridge 和初始偏置场耗时、控制点数量、白质峰值及后续迭代信息。
+`--norm`、`--aseg`、`--brainmask` 依次指定三张同网格输入图；`--output` 指输出 `brain.mgz`，`--device` 选 CPU/CUDA。Python 函数的 `device=None` 默认有 CUDA 时使用 `cuda:0`，否则使用 CPU；`three_d_iterations=2`，只接受 0、1、2。同网格检查或迭代次数检查失败会抛出异常。返回字典除 `total_seconds` 外，还记录 ridge 和初始偏置场耗时、控制点数量、白质峰值及后续迭代信息。
 
 ```python
 from fnit.recon_all.normalization import normalize_t1_aseg
@@ -70,12 +70,15 @@ report = normalize_t1_aseg(
     aseg_file="/subjects/sub01/mri/aseg.presurf.mgz",  # 皮层下结构标签
     brainmask_file="/subjects/sub01/mri/brainmask.mgz",  # 脑掩膜
     output_file="/subjects/sub01/mri/brain.mgz",  # 归一化脑图输出路径
-    device="cpu",  # 已验证的精确 CPU 路径
+    device="cuda:0",  # 设备；两例真实 T1 的同输入输出与 CPU 逐体素一致
+    three_d_iterations=2,  # 三维控制点与偏置场重复两轮
 )
 # report["total_seconds"] 是墙钟秒数，report["completion"] 记录后续归一化步骤。
 ```
 
 在冻结的 `fs_sub01` 输入上，独立 Python ridge、过滤后的控制点掩膜、离群图和初始 float32 偏置场均与官方诊断图一致。默认两轮的完整 `brain.mgz` 为 **0/16,777,216** 个差异体素，MGH 头前 284 字节和体素负载一致。新运行的官方文件在末尾多 996 字节元数据，旧存档输出多 451 字节，因此完整文件哈希不同。这只是单例阶段验证，整例数值一致性仍需检验。[第二轮报告](../../validation/recon_all/python_gpu_port/NORMALIZE_SECOND_PASS.md)列出原始证据。
+
+2026-09-30 在两例新生成的 FNIT 连续链输入上，CPU/CUDA 的 `brain.mgz` 各有 **0/16,777,216** 个差异体素，仿射矩阵一致。`sub-01` 同在 gpucw1 上 CPU 阶段 85.17 秒、CUDA 阶段 59.15 秒；`sub-02` 的 CPU 在 nodecw10 为 85.96 秒，CUDA 在 gpucw1 为 71.09 秒，跨主机时间不能算配对加速。两次 CUDA 父子进程显存每 2 秒采样峰值均为 1,247,805,440 字节；这不是整例显存。输入、源码、计时与采样见[本轮性能记录](../../validation/recon_all/python_gpu_port/performance_20260930/README.md)。
 
 ## 参考文献与原实现
 

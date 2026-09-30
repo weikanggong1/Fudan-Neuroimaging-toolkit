@@ -1,0 +1,45 @@
+{
+  "code_commit": "c7f637b84620020e44afac452fa079db4f4c6326-plus-mni-timing",
+  "host": "gpucw1",
+  "stage_source_sha256": "319fe907485640ab904e189fc32cf07570f62467e0ebdc12f03d2bed71569d15",
+  "benchmark_script_sha256": "95fc24c1603efcc3023c6ac94195169976a50a9609d52dbf3ca2ace18f80b1bd",
+  "device": "cuda:0",
+  "threads": 4,
+  "precision": {
+    "tf32_default": true,
+    "float16_or_bfloat16": false
+  },
+  "input_sha256": {
+    "orig.mgz": "c729806417f04abdd7029f8771911a5c0f750f83f63e95dc6f90b7e0f45d4b58",
+    "transforms/synthmorph.1.0mm.1.0mm/aff.lta": "c4df2bc3b901f221aa508616e9c12009adb8cd907033f24faac1dcf449c9a874",
+    "transforms/synthmorph.1.0mm.1.0mm/invol.crop.nii.gz": "4a38fed518e638466ac7092793a759401bc856f4ef62b8b215c69b6199a427c0"
+  },
+  "native_binary_sha256": {
+    "mri_warp_convert": "527255204f1cb6b71d47ac3f9032af388eae873bd46b7d69d8293b433e001059",
+    "mri_ca_register": "a0f3902b38963cd4b322b94342dde513903cb6455779f2282174c618b4ff0987",
+    "mri_convert": "cca67a9b3ae61632377406724e09cb6c16409d40b8972c6836b9d36a5ced2ebe"
+  },
+  "seconds_including_model_io_conversion": 149.64098535757512,
+  "stage_timings_seconds": {
+    "deform_model_and_save": 9.505292934831232,
+    "warp_convert": 18.949682699050754,
+    "warp_inverse": 110.8430459164083,
+    "resample_check": 9.394057852216065
+  },
+  "outputs": {
+    "forward": {
+      "sha256": "18245545f5766e991db91a859dddb21fb8497e91b397fe26d7aba28f0933bea4",
+      "size_bytes": 46944069
+    },
+    "inverse": {
+      "sha256": "bdec5d7fdcf3b5a163d078198d45bda21c4c9050e809e854a069d6b6f25acaba",
+      "size_bytes": 137581451
+    },
+    "check": {
+      "sha256": "3c165542aded22d692bed996bc8f874f258132a7302152ab3517c4c1a9490052",
+      "size_bytes": 2940527
+    }
+  },
+  "gpu_peak_allocated_bytes": 13308258816,
+  "gpu_peak_reserved_bytes": 19478347776
+}
