@@ -6,33 +6,25 @@
 
 ## 当前单 T1 标准流程
 
-入口已固定执行 MNI152 非线性变换、拓扑修复、真实 `white.preaparc`、标准球面与配准、最终 white、Conda 源码构建的四轮 pial 以及体积/顶点后处理，不再通过多个开关组合近似表面。Python pial 保留为可单独调用的同输入验证函数。[同一自产输入的双引擎比较](native_pial_candidate_20260929.json)给出输出差异与耗时。文件完整性与数值验收是运行报告中的不同字段。主页安装脚本已在新 Conda 环境从[完整固定源码树编译并安装 14 个必需程序](build_full_14_20260929.json)；源代码快照的 [recon-all 与权重清单测试](rebased_tests_20260929.json)为 237 项通过。此前的[固定源码初次构建](source_codeload_build_20260929.json)还记录了同输入真实 T1 的 `mri_segment` 逐体素一致。[资产安装记录](asset_setup_20260929.json)显示首次全新下载在 80 项处中断；[续传后的全新安装](asset_fresh_install_20260930.json)和当前源码 `--verify-only` 对 98 项标准资产均通过。 当前权重清单的 [11 项模型文件](weights_verify_20260930.json)也已在主页环境逐项核对大小和 SHA-256；这次核对使用已安装权重。无预装软件环境中的整例隔离验证仍待完成。[安装说明](../../../docs/recon_all/CONDA_CPP_BUILD.md)。 当前源码在主页环境的首次整例重跑于共享 GPU 0 的 SynthSeg 阶段因可用显存不足而停下，详见 [v8 OOM 记录](v8_shared_gpu_oom_20260929.json)；随后改用 GPU 1 完成 v9 整例。独立 `sub-02` 的同版重跑也在共享 GPU 0 的 SynthSeg 阶段因其他任务占用显存而中断，见 [v10 OOM 记录](v10_shared_gpu_oom_20260930.json)。
+入口固定执行 MNI152 非线性变换、拓扑修复、white.preaparc、标准球面与配准、最终 white、四轮 pial 和完整后处理。GPU 的第二次归一化、厚度、white/pial 面积及曲率复用现有 PyTorch 函数；MNI 非线性使用 FP32 CUDA 例外。CPU 路径保留 Conda 源码构建组件。Python pial 仍用于独立同输入验证，未因 GPU 名称替换更快的 C++ 放置路径。[阶段说明](../../../docs/recon_all/CONDA_CPP_STAGES.md)。
 
-旧版 v5 开发链从原始 T1 完成了 59 个阶段，双侧 white/pial 的[独立网格检查](mesh_validation_20260929.json)通过，但因使用早期代码快照缺少固定清单中的 18 项，运行报告为 `incomplete`，耗时 11,651 秒。与归档官方整例严格比较仅 5/138 项通过，通过项均是 MRI；它不能代表现版交付。v6 主页安装链在 Python pial 阶段结束，未形成完整整例。
+主页安装的证据覆盖[固定源码编译安装的 14 个程序](build_full_14_20260929.json)、[98 项资产新安装及续传校验](asset_fresh_install_20260930.json)和[11 项已安装权重校验](weights_verify_20260930.json)。无预装软件的整例物理隔离尚未验证。源码、输入和二进制哈希按各报告的实际执行版本解释，不能把安装或同输入结果当作当前整例结果。
 
-固定源码快照的 v7 标准链使用新建 Conda 环境从原始 T1 跑完当时调度的计算阶段，耗时 7,414 秒；两侧[网格质量](v7_mesh_validation_20260929.json)另行检查为闭合、Euler 特征数 2、white/pial 自相交数 0。当时固定清单缺 4 项；在同一自产上游上单独补跑 `entowm.stats` 和[非线性配准](mni_nonlinear_real_20260929.json)后，138 项均存在。补跑不算一次当前 HEAD 的原始 T1 整例。严格[138 项整例比较](v7_138_comparison_20260929.json)仍只有 5 项通过，不能宣称数值验收。候选与官方表面顶点数不同，[双向最近点距离](v7_surface_nearest_20260929.json)仅用于定位形状差异，不能替代同索引比较。[34 个 aparc 脑区的统计](v7_region_comparison_20260929.json)中，平均厚度相关性左侧 0.9924、右侧 0.9978，均未达到 0.9999；[前段体积比较](v7_volume_comparison_20260929.json)中 WM 与 filled 也未达到 0.9957 门槛。整例进程 GPU 占用每 2 秒采样的最大值为 18,452 MiB，约 19.35 GB；采样最大值不等于连续峰值。
+## 本轮性能与精度
 
-现版两例已从原始 T1 连续完成 66 个阶段，各自生成 138/138 项，双侧网格检查均通过；[完整运行及严格比较](current_full_runs_20260930.json)显示 `sub-01` 通过 5/138 项、`sub-02` 通过 2/138 项；这是严格逐文件口径，终点指标另按脑区比较。GPU `sub-01` 耗时 6398.57 秒，进程每 2 秒采样的最大占用为 18,452 MiB；CPU `sub-02` 耗时 5622.32 秒。两例设备和主机不同，不以其耗时计算速度比。`sub-01` 的[前段体积对照](v9_volume_prefix_20260930.json)中 `wm` 相关性为 0.96216，`filled` 两侧标签 Dice 为 0.99415 / 0.99345，显示前段分割仍有差异。
+[2026-09-30 性能配对](performance_20260930/README.md)记录原始 T1 整例、同输入算子和完整资源采样。基线为 b8cd17b；中间版本 bb28e0c 两例输出及网格均完整，与基线的 138 项诊断全部通过，七张分割图所有分区 Dice=1，最终脑区统计差为零。耗时分别由 5884.96/6080.80 s 变为 5951.02/6055.82 s，未见稳定整例提速。8957e07 的主设备漏传已由 279e09f 修复，失败运行与修复回归单独保留；后续完整版本从原始 T1 和新空目录运行。
 
-[最终指标同名脑区比较](final_metric_consistency_20260930.json)显示：两例 aparc 68 区的平均厚度 MAE 分别为 0.0376 / 0.0351 mm，面积中位绝对相对误差为 1.14% / 1.19%，灰质体积为 1.74% / 1.63%；45 个 aseg 结构的体积中位误差为 0.053% / 0.032%，70 个 wmparc 白质分区为 1.39% / 1.56%。总体指标接近，局部脑区仍有明显偏差：`sub-01` 的 Destrieux `S_interm_prim-Jensen` 从官方 3 个顶点变为 FNIT 97 个顶点，平均厚度相差 1.243 mm。候选与官方顶点数不同，不能按同一顶点比较厚度图或把同名脑区相关性视为完整数值验收。
+[前段数值定位](../../../docs/recon_all/VOLUME_PREFIX_PARITY_20260930.md)已修复 conform 单精度矩阵乘法顺序，两例 orig 的体素与仿射对官方均一致；sub-02 的 195 个灰度首差不再存在。N4 的 ITK 版本、浮点尾差、四组 EM 输入及误差传播保留真实报告，不把全部差异归因于随机性。官方同主机 N4/EM 重放与跨主机差异分别记录，未完成官方整例全面重复性测试。
 
-`sub-02` 的同主机整例对照已定位到[最早的体积差异](sub02_conform_prefix_20260930.json)：导入图和 `rawavg.mgz` 的体素、仿射完全一致，conform 后的 `orig.mgz` 有 195/16,777,216 个体素相差 1 灰度级。[后续体积比较](sub02_volume_prefix_20260930.json)中 WM 相关性为 0.98421，低于 0.9957；两个 filled 标签 Dice 为 0.99675 / 0.99714。conform 的微小差异尚不能解释全部下游偏差。
+[两例完整指标与图示](performance_20260930/sub01/full_279e09f_pair/summary.json)及[sub-02](performance_20260930/sub02/full_279e09f_pair/summary.json)包含对官方的严格诊断、分区 Dice、逐脑区误差和双向点到三角面距离。旧版本的整例摘要由现版配对替换；原始阶段参考记录保留其冻结输入边界。
 
-独立真实 `sub-02` 的同一冻结快照完成双侧表面和大部分统计，但 `brain_volume_stats` 遇到 4 个未分侧的标签 77 体素而停下。修正后对该阶段、后续统计和非线性配准分别手动续算，[138/138 项存在、两侧网格质量通过](sub02_fixed_stage_audit_20260929.json)。标签 77 的[同输入官方配对](brain_volume_label77_pair_20260929.json)显示左右白质体积完全相同，16 项统计最大误差 0.000826 mm³。手动续算不算当前 HEAD 的原始 T1 完整整例通过。
+本轮最终 `279e09f` 两例已连续完成；GPU 6303.79 s、CPU 6099.80 s，相对基线慢 7.12%/0.31%，没有观察到整例加速。分割、white/pial 几何与主要脑区统计相对基线无改变；GPU 五项新增严格差异及厚度传播诊断详见性能目录。
 
-![真实 T1 的 filled 分割与差异](../../../docs/recon_all/figures/v7_filled_difference_sub01.png)
+严格复现、优化是否引入退化、整体指标等效分别报告。[138 项门槛](RELEASE_GATES.md)不变，整体指标等效阈值尚未正式确认，当前为 not_assessed。不能用平均相关性或文件通过数代替局部检查，也不因未判定总体等效而阻止已通过相应回归的性能优化。
 
-图中三列是 conform 网格差异体素最多的 X=128、Y=64、Z=105 切片；前两行分别为官方和 FNIT v7，青色、粉色对应标签 127、255，末行红点标出不一致体素。三张切片分别有 80、103、67 个差异体素，全体积共有 4,885 个；切片图不能替代全体积 Dice。
-[绘图脚本](plot_filled_difference.py)以 `--reference` 接受官方单被试目录、`--candidate` 接受 FNIT 单被试目录、`--output` 指定 PNG 路径；三者均需写明。例如：
+[复现方法](../../../docs/recon_all/BENCHMARK_METHODS.md)列出所有比较脚本的输入、输出、单位、参数与具名示例，以及已初始化 CUDA API、指定 GPU 统计和外层命令计时范围。
 
-```bash
-python validation/recon_all/python_gpu_port/plot_filled_difference.py \
-  --reference /data/reference-sub01 \
-  --candidate /data/subjects/sub01 \
-  --output /data/filled-difference.png
-```
-
-## 2026-09-29 的现版同输入记录
+## 保留的冻结同输入参考记录
 
 | 范围 | 实测与边界 | 记录 |
 | --- | --- | --- |

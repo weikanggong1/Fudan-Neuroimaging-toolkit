@@ -48,6 +48,8 @@ mris_place_surface --curv-map surf/lh.white 2 10 surf/lh.curv
 
 两例双侧及 pial 的逐图报告、程序和输入 SHA-256、PyTorch allocated/reserved 见[性能验证目录](../../validation/recon_all/python_gpu_port/performance_20260930/README.md)。完整整例另比较 138 项及最终脑区指标，不用阶段结果宣称整例数值验收通过。
 
+修正调度设备传递的 `279e09f` 另直接调用生产封装，冻结 sub-01 左侧最终 white/pial 并显式启用 TF32：五张图均无超限顶点，厚度 8.39 s、white/pial 面积 0.014/0.010 s、曲率 0.727/0.655 s；PyTorch allocated/reserved 为 482,308,096/517,996,544 字节。该探针启用 CUDA 分配缓存，不代表默认关闭缓存的整例显存。[封装回归报告](../../validation/recon_all/python_gpu_port/performance_20260930/surface_metrics_wiring_tf32_279e09f.json)绑定实际源码和输入 SHA-256。
+
 ## 三方比较脚本
 
 `benchmark_surface_metrics.py` 的 `--subject` 是 FNIT 被试目录，`--hemi` 选择半球，`--metric` 为 area/curv/thickness，`--surface` 默认为 white，选择 area/curv 的输入表面；厚度固定读取 white 和 pial。`--native-binary`、`--reference-binary` 是候选和官方程序路径；`--assets` 为候选资产；`--output` 必须不存在，写出三张同序标量图、程序日志和 JSON。`--device` 默认 cuda:0，`--threads` 默认 4，`--code-commit` 记录实际候选源码提交。任一计算或文件检查失败时脚本报错。
