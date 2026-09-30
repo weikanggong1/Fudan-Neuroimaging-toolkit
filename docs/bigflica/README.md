@@ -2,29 +2,11 @@
 
 `run_bigflica` 读取“每名被试一个目录”的 3D NIfTI。每个模态指定相对于被试目录的影像路径和自己的 3D 掩膜。输出被试成分 course、每模态每成分的原网格 z-stat NIfTI、绝对 z 值最高的若干体素的阈值图与 PNG，以及可投影新被试的固定模型。模态间可有不同网格；同一模态的影像必须与其掩膜形状和仿射一致。输入必须已经在所需标准空间；函数不做配准。
 
+**当前验收状态：**30,000名真实被试的VBM/FA/MD完整掩膜CPU/GPU试验已结束，C20有效秩分别为17/13，均未通过；未生成最终C20成分脑图或新被试模型。mMIGP的CPU/GPU相对差为 `6.07e-6`，DicL字典匹配后的差异为16%–30%，GPU的VBM重建几乎为零。运行至失败分别耗时153.04/112.55分钟，DicL和FLICA的GPU耗时均高于CPU；共享GPU及不同精度下的这些时间不能称为等价全流程加速。[完整报告、复现脚本与剩余工作](../../validation/bigflica/README.md#30000-人独立-cpugpu-对比当前结论)。
+
 默认 `use_mmigp_dicl=True`：逐体素跨被试标准化 → 联合 mMIGP → 每模态 Lasso-LARS 字典学习 → FLICA。CUDA 路径用 PyTorch 执行协方差、特征分解、稀疏编码、字典更新、FLICA、空间回归和 t→z 转换；nibabel/HDF5 负责 CPU 文件读写和分块传输。为复现原 FLICA 的自由度拟合，GPU 特征分解后每模态将少量特征值送给 SciPy 做一次标量优化；这一步属于 CPU 计算。`use_mmigp_dicl=False` 时，标准化后直接把体素送入 FLICA，不建立 mMIGP 或 DicL 模型。此模式保留体素信息，但每轮须读取全部模态矩阵，适合较小训练集；大样本建议开启预处理。`device="cpu"` 保留原 notebook 的 sklearn DicL 对照路径。
 
 CUDA 压缩路径先逐被试读取，把 float32 标准化矩阵作为 HDF5 分块存盘；后续阶段不在内存中装入完整的“被试 × 体素”模态矩阵。默认 `max_gpu_gb=19`，按 20 GiB 显存目标预留空间。float32 协方差本身需 `N × N × 4` 字节，计算还要为临时数组留空间；超过配置预算时报错。磁盘需求不受内存预算限制，例如 37,182 人 × 100 万掩膜体素的 float32 标准化缓存约 138.5 GiB/**每模态**。大于 2,048 人时，mMIGP 根据目标秩和显存预算选择完整 GPU 特征分解或随机子空间；随机路径与直接体素 FLICA 的自由度近似仍需单独核验，不能当作逐点一致。
-
-## 流程策略
-
-```mermaid
-flowchart TD
-    IN["每名被试的多模态标准空间 NIfTI"] --> CHECK["核对被试、模态掩膜与各模态网格"]
-    MASK["每模态独立的 3D 掩膜"] --> CHECK
-    CHECK --> CACHE["逐被试读取与逐体素标准化；分块写 HDF5"]
-    CACHE --> MODE{"启用 mMIGP 与 DicL？"}
-    MODE -- 是 --> MIGP["联合 mMIGP：低维被试子空间"] --> DICL["每模态 DicL 稀疏字典"] --> FLICA["多模态 FLICA 成分拟合"]
-    MODE -- 否 --> RAW["直接使用标准化体素矩阵"] --> FLICA
-    FLICA --> COURSE["被试成分 course 与模态贡献"]
-    FLICA --> MAP["空间回归与 t→z 转换"]
-    MAP --> OUT["各模态 z-stat NIfTI、top-voxel 图与 PNG"]
-    FLICA --> MODEL["保存固定模型及标准化参数"]
-    MODEL --> APPLY["可选 apply_model：投影新的单名被试"]
-    NEW["未参与训练的新被试同模态影像"] --> APPLY
-    APPLY --> NEWCOURSE["新被试成分 course"]
-    classDef default fill:#ffffff,stroke:#000000,color:#000000;
-```
 
 ## 流程策略
 
@@ -50,7 +32,7 @@ flowchart TD
 
 CUDA DicL 用批量 ADMM 识别稀疏系数的非零位置，再求解活动集方程，并检查系数符号、最优性条件和矩阵枢轴。每20步用 CUDA Graph 重放，减少 Python 调度；前四个批次、未归一化的初始化字典、检查失败或达到计算限额时，从当前小批次重新运行 LARS。LARS 回退仍用活动集逆矩阵增量更新，并保留原 LU 求解器处理失效逆矩阵。重复原子的非唯一解会回退，避免仅用目标值或最优性条件误接受不同的稀疏表示。字典原子全部有效时，按原顺序重放更新图；重采样时保留已有随机数顺序。批次默认32，alpha默认1，初始化、随机种子、字典更新和 sklearn 停止规则保留。
 
-DicL内部仍沿用float64，mMIGP投影为float32；均值/方差分块汇总和兼容随机数生成仍在CPU执行。矩阵、稀疏求解和字典更新在GPU完成，只使用项目已有PyTorch依赖，未安装或调用SPORCO。ADMM方程参考 [SPORCO BPDN](https://sporco.readthedocs.io/en/latest/modules/sporco.admm.bpdn.html)；完整阶段实测见[验证记录](../../validation/bigflica/README.md#2026-09-30admm-活动集校正与回退)。
+DicL内部仍沿用float64，mMIGP投影为float32；均值/方差分块汇总和兼容随机数生成仍在CPU执行。矩阵、稀疏求解和字典更新在GPU完成，只使用项目已有PyTorch依赖，未安装或调用SPORCO。ADMM方程参考 [SPORCO BPDN](https://sporco.readthedocs.io/en/latest/modules/sporco.admm.bpdn.html)；完整阶段实测见[验证记录](../../validation/bigflica/README.md#当前实现所需的补充证据)。
 
 GPU字典缓存版本改为 `rsvd3bpdn`；旧版字典不会自动复用，mMIGP缓存可继续复用。原有CLI和Python参数无需修改。此优化没有消除独立CPU/GPU全链输入差异经非凸字典学习放大的问题，也没有解决20个有效成分的验收。
 
@@ -161,7 +143,7 @@ new_subject_course = apply_model(
 )
 ```
 
-只用结构模态时，应另设输出目录以免复用四模态模型。以下 `18` 人、三个小核验掩膜、`C=3/R=10/D=40` 示例用于说明 API 与 CLI；主要性能和精度测试使用 `2,050` 名真实被试的 VBM/FA/MD 完整掩膜。大样本公开调用的 C3 输出已核对，C20/R100/D200 尚未通过有效秩验收，见[三模态基准](../../validation/bigflica/README.md)。
+只用结构模态时，应另设输出目录以免复用四模态模型。以下 `18` 人、三个小核验掩膜、`C=3/R=10/D=40` 示例用于说明 API 与 CLI；完整掩膜的性能和精度测试已扩展到30,000人。此前2,050人公开调用的C3输出已核对，C20/R100/D200在两个样本规模均未通过有效秩验收，见[三模态基准](../../validation/bigflica/README.md)。
 
 ```python
 structural_modalities = {name: modalities[name] for name in ("vbm", "fa", "md")}
@@ -251,8 +233,6 @@ BigFLICA(
 
 [上游 `BigFLICA_cpu.py`](https://github.com/weikanggong/BigFLICA/blob/master/BigFLICA_cpu.py) 用 SPAMS 字典学习；本功能的压缩模式对照用户 notebook 的 sklearn DicL 变体。原 `sKPCR_regression` 实际计算 t 值却命名为 Z；FNIT 按相同回归和自由度将双侧 t 转为带符号正态 z。mMIGP 特征向量本身有任意正负号；CUDA 实现固定最大绝对载荷为正以便复现，但它不保证与 SciPy 参考的符号一致。字典学习是非凸问题，符号改变会改变固定种子下的拟合轨迹，因此比较压缩模式时必须记录并处理这一差异。`apply_model` 是 FNIT 新增的冻结载荷投影，不等同于原 FLICA 对新被试重新推断后验。
 
-同一批真实四模态字典上的原版 [FLICA_cpu.py](https://github.com/weikanggong/BigFLICA/blob/master/FLICA_cpu.py)（原文件 SHA-256：`5c82361a381597980f7a81ac89cdf0f7ef3de2639937df3d7021a562d6f5a061`）与 FNIT 移植在 10、30、100 轮的 H、X、W 于浮点容差内一致；20 个请求成分在 30 轮降到 2 个有效成分。见 [独立原版对照](../../validation/bigflica/upstream_flica_parity.json)。上述 R1000/D500 是原 notebook 的维度，历史结果保留 17/20 个有效成分，当前影像数据尚未验证为稳定的 20 成分模型；R100/D50 的小试验不能作为验收结果。官方 MATLAB 的逐被试噪声精度模式与 notebook 的标量模式不同；实验性对照见 [成分维度诊断](../../validation/bigflica/flica_dimensionality_audit.json)。
-
-2,050 名真实被试的 VBM/FA/MD 完整掩膜 CPU 和 GPU 公开调用均已从原始 NIfTI 跑通 C3，分别耗时 `732.75` 和 `1045.08` 秒，并逐图核对输出与数组。CPU/GPU 的 VBM 重建范数比仅 `7.93e-6/4.69e-5`；C20 分别只保留 `16/20` 和 `11/20` 个有效成分，未通过科学验收。两条独立链路的成分图失配；固定相同 float32 mMIGP 投影再拟合 DicL/FLICA 时，九张图相关均大于 `0.9999999984`，表明小幅上游投影差异经非凸训练放大。GPU DicL 耗时 `871.61` 秒，是本次运行的主要瓶颈；GPU 当时有外部负载，且 CPU 使用 float64、GPU 使用 float32 标准化，不能把总时间比当作受控硬件对照。完整来源和边界见[验证报告](../../validation/bigflica/README.md)。
+原软件数值核对、当前求解器的同投影控制、缓存输出与留出投影检查，见[必要对照证据](../../validation/bigflica/README.md#当前实现所需的补充证据)。这些小样本及C3检查用于定位和接口核验；30,000人C20结论、阶段时间与剩余工作以本文开头和最新报告为准。
 
 参考：Gong W, Beckmann CF, Smith SM. [Phenotype Discovery from Population Brain Imaging](https://www.sciencedirect.com/science/article/pii/S1361841521000967). *Medical Image Analysis*, 2021；[BigFLICA 原仓库](https://github.com/weikanggong/BigFLICA)。

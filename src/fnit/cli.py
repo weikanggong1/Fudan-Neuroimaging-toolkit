@@ -186,21 +186,10 @@ def _run_flirt(args):
     import torch
 
     from .flirt import run_flirt
+    from .flirt.cli import run_from_args
 
     torch.set_num_threads(args.threads)
-    return run_flirt(
-        args.input,
-        args.reference,
-        output=args.output,
-        omat=args.omat,
-        init=args.init,
-        inweight=args.inweight,
-        refweight=args.refweight,
-        dof=args.dof,
-        cost=args.cost,
-        device=args.device,
-        overwrite=args.overwrite,
-    )
+    return run_from_args(args, run_flirt)
 
 
 def _run_fnirt(args):
@@ -676,27 +665,15 @@ def main(argv=None):
     fast.add_argument('-b', '--save-bias', action='store_true')
     fast.add_argument('-B', '--save-restored', action='store_true')
     fast.add_argument('--overwrite', action='store_true')
+    from .flirt.cli import add_arguments as add_flirt_arguments
     flirt = commands.add_parser(
         'flirt',
         help=(
-            'Source-derived PyTorch implementation of the supported FLIRT '
-            '12-DOF correlation-ratio or 6-DOF normmi path'
+            'Source-derived PyTorch FLIRT registration or known-transform resampling'
         ),
         allow_abbrev=False)
-    flirt.add_argument('-in', '--in', dest='input', required=True,
-                       help='moving/input image')
-    flirt.add_argument('-ref', '--ref', dest='reference', required=True,
-                       help='fixed/reference image defining the output grid')
-    flirt.add_argument('-out', '--out', dest='output')
-    flirt.add_argument('-omat', '--omat')
-    flirt.add_argument('-init', '--init')
-    flirt.add_argument('-inweight', '--inweight')
-    flirt.add_argument('-refweight', '--refweight')
-    flirt.add_argument('-dof', type=int, choices=(6, 12), default=12)
-    flirt.add_argument('-cost', choices=('corratio', 'normmi'), default='corratio')
-    flirt.add_argument('--device')
+    add_flirt_arguments(flirt)
     flirt.add_argument('--threads', type=int, default=1)
-    flirt.add_argument('--overwrite', action='store_true')
     from .fnirt.cli import add_arguments as add_fnirt_arguments
     fnirt = commands.add_parser(
         'fnirt', help='PyTorch FNIRT default, GM, T1 or TBSS registration',

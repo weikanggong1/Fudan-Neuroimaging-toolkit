@@ -19,7 +19,8 @@ class _Moved:
 
 def _fake_model(captured):
     class Model:
-        def __init__(self, *, device, dof, cost):
+        def __init__(self, *, device, dof, cost, execution,
+                     candidate_batch_size, memory_budget_gb):
             captured["device"] = device
             captured["profile"] = (dof, cost)
 

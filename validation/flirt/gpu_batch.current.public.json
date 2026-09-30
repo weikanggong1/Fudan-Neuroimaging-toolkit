@@ -1,0 +1,1938 @@
+{
+  "schema_version": 1,
+  "scope": "TorchFLIRT execution optimization; no BBR or FNIRT algorithm changes",
+  "benchmark_tool_sha256": "f2c716a14dd087acb589164bb5fd46a087ca55c460708c72d63a41f262b8bff3",
+  "timing_scope": "already materialized input images; full schedule, optimization, resampling, device-to-host result; excludes input/output file I/O",
+  "cold_definition": "first registration in fresh process; CUDA context and constructor setup precede timing",
+  "warm_definition": "repeat full registration in same process; no fitted-matrix reuse",
+  "profile_timing": "Separate instrumented registration excluded from performance timings",
+  "precision": "float32 images/costs, float64 affine construction/inverse and NMI histogram; no FP16/BF16; TF32 defaults preserved, cost arithmetic does not use TF32 GEMM",
+  "schedule": "Full 8/4/2/1 mm; angular search, candidate ordering, pruning and stopping retained",
+  "kernel_count_scope": "Per-case complete profiles: WSL reports actual runtime launch calls without a device timeline; Linux H100 reports both runtime launch calls and device kernel events",
+  "transfer_count_scope": "Total cudaMemcpyAsync runtime calls, potentially including device-to-device copies; no direction totals inferred where the device timeline is unavailable",
+  "cases": [
+    {
+      "name": "Public OpenNeuro T1w to T1w, 12-DOF/corratio",
+      "data_provenance": "Repository CC0 example images from OpenNeuro ds000114 v1.0.2; sub-02 to sub-01",
+      "official_version": "FSL 6.0.7.4, independently saved oracle with verified SHA-256",
+      "public_input_and_oracle_sha256": {
+        "moving": "326d1e0a948b76344150c28bbcf0299b58040092c2f037f09c754103d32f747d",
+        "reference": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
+        "fsl_matrix": "137c261f4500d50af99f93b128805e8233b93392d212b3804e802974af8d03dc",
+        "fsl_moved": "3d76d501590fdbdc9fd427dbe0bc1d570c003db16c8b34faa32b5483e1f82783"
+      },
+      "environment": {
+        "torch": "2.5.1",
+        "cuda_runtime": "11.8",
+        "cuda_module_loading": "LAZY",
+        "gpu_name": "NVIDIA GeForce RTX 3060",
+        "total_memory_bytes": 12884246528,
+        "compute_capability": [
+          8,
+          6
+        ]
+      },
+      "baseline": {
+        "execution": "default",
+        "source_sha256": {
+          "src/fnit/flirt/standalone.py": "873fbbce98b7f1fb5c8ec60b01fd5b89a6782ba6adf0b684e0bace029d20bb6d",
+          "src/fnit/flirt/types.py": "55a3abf2d7ce7889c297df95289890a589d1721b9fe3b157aa90e87819ed8e21",
+          "src/fnit/flirt/coordinates.py": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e",
+          "src/fnit/flirt/__init__.py": "58b1ae43c50bd2942398f272c013f5bc743ce6a78abdaab7c93eeae1949447af",
+          "src/fnit/flirt/core.py": "b0ed42eb1032c89e643e17b27c96eb74a1a2df31debfeea3a0ed7499e8b2bd92",
+          "src/fnit/_nib.py": "568d113432c1a0c50a3b0b635188173e69be1c7436d851de2568bca9b55ab94e"
+        },
+        "runs": [
+          {
+            "condition": "cold",
+            "wall_seconds": 59.39277237200076,
+            "external_stage_timings": {
+              "stages": {
+                "reference_pyramid": {
+                  "calls": 1,
+                  "wall_seconds": 0.24609841699930257,
+                  "cost_evaluations": 0
+                },
+                "moving_level_preparation/8mm": {
+                  "calls": 2,
+                  "wall_seconds": 0.11029810299442033,
+                  "cost_evaluations": 0
+                },
+                "angular_search": {
+                  "calls": 1,
+                  "wall_seconds": 27.626795046999177,
+                  "cost_evaluations": 4474
+                },
+                "moving_level_preparation/4mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.021749322000687243,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/4mm": {
+                  "calls": 13,
+                  "wall_seconds": 23.800918105003802,
+                  "cost_evaluations": 4115
+                },
+                "moving_level_preparation/2mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.013959849999082508,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/2mm": {
+                  "calls": 3,
+                  "wall_seconds": 2.5361391020014707,
+                  "cost_evaluations": 185
+                },
+                "moving_level_preparation/1mm": {
+                  "calls": 1,
+                  "wall_seconds": 3.551299960236065e-05,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/1mm": {
+                  "calls": 1,
+                  "wall_seconds": 2.4523512220002885,
+                  "cost_evaluations": 162
+                },
+                "final_resampling": {
+                  "calls": 1,
+                  "wall_seconds": 0.17027650899763103,
+                  "cost_evaluations": 0
+                }
+              },
+              "scope": "CPU wall clocks around actual methods; no profiler or extra CUDA synchronization; final resampling dispatch can finish asynchronously before the following result copy"
+            },
+            "peak_allocated_bytes": 1302615552,
+            "peak_reserved_bytes": 1493172224,
+            "paired": {
+              "world_grid_displacement_mm": {
+                "mean": 0.3473745627752049,
+                "median": 0.3511883422947771,
+                "p95": 0.5567924577794795,
+                "minimum": 0.06072382312034057,
+                "maximum": 0.7665530123379395,
+                "rms": 0.3720839173525591
+              },
+              "warped": {
+                "comparison_mask": "official output foreground; unchanged across paths",
+                "voxels": 1737594,
+                "pearson_r": 0.9952013445111899,
+                "mae": 20.56731101072935,
+                "rmse": 38.120974885041186,
+                "support_dice": 0.9960736703210328
+              },
+              "grid_header": {
+                "shape_equal": true,
+                "affine_max_abs": 0.0,
+                "dtype_equal": true,
+                "qform_code_equal": true,
+                "sform_code_equal": true
+              },
+              "cost": 0.1907898634672165,
+              "cost_evaluations": 8987
+            },
+            "whole_gpu_utilization_percent": {
+              "mean": 36.719298245614034,
+              "median": 37.0,
+              "p95": 73.39999999999999,
+              "minimum": 2.0,
+              "maximum": 77.0
+            },
+            "gpu_utilization_scope": "Whole GPU including desktop or unrelated processes",
+            "cost_evaluations": 8987
+          },
+          {
+            "condition": "warm",
+            "wall_seconds": 59.07678601800217,
+            "external_stage_timings": {
+              "stages": {
+                "reference_pyramid": {
+                  "calls": 1,
+                  "wall_seconds": 0.019603558001108468,
+                  "cost_evaluations": 0
+                },
+                "moving_level_preparation/8mm": {
+                  "calls": 2,
+                  "wall_seconds": 0.046122636002110085,
+                  "cost_evaluations": 0
+                },
+                "angular_search": {
+                  "calls": 1,
+                  "wall_seconds": 27.321413720001146,
+                  "cost_evaluations": 4474
+                },
+                "moving_level_preparation/4mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.11277327800053172,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/4mm": {
+                  "calls": 13,
+                  "wall_seconds": 24.230712447995757,
+                  "cost_evaluations": 4115
+                },
+                "moving_level_preparation/2mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.017339587000606116,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/2mm": {
+                  "calls": 3,
+                  "wall_seconds": 2.5192751430040516,
+                  "cost_evaluations": 185
+                },
+                "moving_level_preparation/1mm": {
+                  "calls": 1,
+                  "wall_seconds": 2.9360999178607017e-05,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/1mm": {
+                  "calls": 1,
+                  "wall_seconds": 2.1638743430012255,
+                  "cost_evaluations": 162
+                },
+                "final_resampling": {
+                  "calls": 1,
+                  "wall_seconds": 0.10286129000087385,
+                  "cost_evaluations": 0
+                }
+              },
+              "scope": "CPU wall clocks around actual methods; no profiler or extra CUDA synchronization; final resampling dispatch can finish asynchronously before the following result copy"
+            },
+            "peak_allocated_bytes": 1301679104,
+            "peak_reserved_bytes": 1493172224,
+            "paired": {
+              "world_grid_displacement_mm": {
+                "mean": 0.3473745627752049,
+                "median": 0.3511883422947771,
+                "p95": 0.5567924577794795,
+                "minimum": 0.06072382312034057,
+                "maximum": 0.7665530123379395,
+                "rms": 0.3720839173525591
+              },
+              "warped": {
+                "comparison_mask": "official output foreground; unchanged across paths",
+                "voxels": 1737594,
+                "pearson_r": 0.9952013445111899,
+                "mae": 20.56731101072935,
+                "rmse": 38.120974885041186,
+                "support_dice": 0.9960736703210328
+              },
+              "grid_header": {
+                "shape_equal": true,
+                "affine_max_abs": 0.0,
+                "dtype_equal": true,
+                "qform_code_equal": true,
+                "sform_code_equal": true
+              },
+              "cost": 0.1907898634672165,
+              "cost_evaluations": 8987
+            },
+            "whole_gpu_utilization_percent": {
+              "mean": 37.67857142857143,
+              "median": 38.0,
+              "p95": 74.0,
+              "minimum": 5.0,
+              "maximum": 77.0
+            },
+            "gpu_utilization_scope": "Whole GPU including desktop or unrelated processes",
+            "cost_evaluations": 8987
+          }
+        ],
+        "profile": {
+          "cost_evaluations_by_type_and_scale": {
+            "FSLCorrelationRatio/8mm": 4474,
+            "FSLCorrelationRatio/4mm": 4121,
+            "FSLCorrelationRatio/2mm": 229,
+            "FSLCorrelationRatio/1mm": 163
+          },
+          "cuda_tensor_api_calls": {
+            "__float__": 26971,
+            "cpu": 7,
+            "__bool__": 17974,
+            "explicit_cuda_synchronize": 72
+          },
+          "cuda_tensor_api_scope": "whole profiled registration; scalar conversions and cpu() API calls, not an exact runtime synchronization count",
+          "profiler_scope": "complete registration; raw runtime counts include profiler window boundaries",
+          "full_profile_event_windows": 71,
+          "profiler_event_counts": {
+            "complete_registration:cudaMemcpyAsync": 197772,
+            "complete_registration:cudaStreamSynchronize": 161816,
+            "complete_registration:cudaLaunchKernel": 1295056,
+            "complete_registration:cuLaunchKernel": 8987,
+            "complete_registration:cudaDeviceSynchronize": 72
+          },
+          "cuda_device_timeline_available": false,
+          "kernel_launch_runtime_api_count": 1304043,
+          "peak_allocated_bytes": 1301679104,
+          "peak_reserved_bytes": 1493172224,
+          "instrumentation_changes_timing": true
+        }
+      },
+      "optimized": {
+        "execution": "batched",
+        "source_sha256": {
+          "src/fnit/flirt/affine_batch.py": "8aa427ea1b185deea2ff2295e01c972bb371cb5a4b23504ce13ef79ca1d6155f",
+          "src/fnit/flirt/batched.py": "49046fe03f3840e5669243c12adfe64f345ef72e01e9a23a7a43120861c8aba3",
+          "src/fnit/flirt/cli.py": "fb203e6e50bc9b29fbf81da30ad9e9f1e896c4752a74947114cc3cd887f7c26b",
+          "src/fnit/flirt/coordinates.py": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e",
+          "src/fnit/flirt/core.py": "eed70e63e7b950e84858c1fc0e538990c7ce30e492c04cdac926a18451c101eb",
+          "src/fnit/flirt/search.py": "8b24cdd7295de253fb9717935ce7528b2f8bbb2c0c2aa454f87833e69cfd541f",
+          "src/fnit/flirt/standalone.py": "a5ffc8e847bfc5219ef8e068a34eb81bab4b6fceb7ea39a497eb573108a8115e",
+          "src/fnit/flirt/types.py": "55a3abf2d7ce7889c297df95289890a589d1721b9fe3b157aa90e87819ed8e21",
+          "src/fnit/flirt/_batched_cuda.py": "2c9ca00bb3524b18cc96bd9632ac1c6476ff7a4e3eeac53a9f0cfa72e640f7f1",
+          "src/fnit/flirt/__init__.py": "58b1ae43c50bd2942398f272c013f5bc743ce6a78abdaab7c93eeae1949447af",
+          "src/fnit/flirt/__main__.py": "03eb6210ee12d659108106a6126a870a9d5bc89ba95c116cd519e2764b0e092f",
+          "src/fnit/_nib.py": "568d113432c1a0c50a3b0b635188173e69be1c7436d851de2568bca9b55ab94e"
+        },
+        "runs": [
+          {
+            "condition": "cold",
+            "wall_seconds": 17.34298273600143,
+            "external_stage_timings": {
+              "stages": {
+                "reference_pyramid": {
+                  "calls": 1,
+                  "wall_seconds": 0.2647307360020932,
+                  "cost_evaluations": 0
+                },
+                "moving_level_preparation/8mm": {
+                  "calls": 2,
+                  "wall_seconds": 0.12156928699914715,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/8mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.48970094499964034,
+                  "cost_evaluations": 240
+                },
+                "angular_search": {
+                  "calls": 1,
+                  "wall_seconds": 3.2822274720019777,
+                  "cost_evaluations": 4474
+                },
+                "moving_level_preparation/4mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.01528055600283551,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/4mm": {
+                  "calls": 2,
+                  "wall_seconds": 6.697602470001584,
+                  "cost_evaluations": 4115
+                },
+                "moving_level_preparation/2mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.01310386700060917,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/2mm": {
+                  "calls": 3,
+                  "wall_seconds": 2.4143545269980677,
+                  "cost_evaluations": 185
+                },
+                "moving_level_preparation/1mm": {
+                  "calls": 1,
+                  "wall_seconds": 2.78349980362691e-05,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/1mm": {
+                  "calls": 1,
+                  "wall_seconds": 1.9204110119972029,
+                  "cost_evaluations": 162
+                },
+                "final_resampling": {
+                  "calls": 1,
+                  "wall_seconds": 0.14296911699784687,
+                  "cost_evaluations": 0
+                }
+              },
+              "scope": "CPU wall clocks around actual methods; no profiler or extra CUDA synchronization; final resampling dispatch can finish asynchronously before the following result copy"
+            },
+            "peak_allocated_bytes": 4619712512,
+            "peak_reserved_bytes": 5672796160,
+            "paired": {
+              "world_grid_displacement_mm": {
+                "mean": 0.3473745627752049,
+                "median": 0.3511883422947771,
+                "p95": 0.5567924577794795,
+                "minimum": 0.06072382312034057,
+                "maximum": 0.7665530123379395,
+                "rms": 0.3720839173525591
+              },
+              "warped": {
+                "comparison_mask": "official output foreground; unchanged across paths",
+                "voxels": 1737594,
+                "pearson_r": 0.9952013445111899,
+                "mae": 20.56731101072935,
+                "rmse": 38.120974885041186,
+                "support_dice": 0.9960736703210328
+              },
+              "grid_header": {
+                "shape_equal": true,
+                "affine_max_abs": 0.0,
+                "dtype_equal": true,
+                "qform_code_equal": true,
+                "sform_code_equal": true
+              },
+              "cost": 0.1907898634672165,
+              "cost_evaluations": 8987
+            },
+            "whole_gpu_utilization_percent": {
+              "mean": 60.11764705882353,
+              "median": 78.0,
+              "p95": 91.8,
+              "minimum": 3.0,
+              "maximum": 99.0
+            },
+            "gpu_utilization_scope": "Whole GPU including desktop or unrelated processes",
+            "cost_evaluations": 8987
+          },
+          {
+            "condition": "warm",
+            "wall_seconds": 15.718342437998217,
+            "external_stage_timings": {
+              "stages": {
+                "reference_pyramid": {
+                  "calls": 1,
+                  "wall_seconds": 0.038435430000390625,
+                  "cost_evaluations": 0
+                },
+                "moving_level_preparation/8mm": {
+                  "calls": 2,
+                  "wall_seconds": 0.08094338299997617,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/8mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.49356482999792206,
+                  "cost_evaluations": 240
+                },
+                "angular_search": {
+                  "calls": 1,
+                  "wall_seconds": 2.0594337430011365,
+                  "cost_evaluations": 4474
+                },
+                "moving_level_preparation/4mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.014727621997735696,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/4mm": {
+                  "calls": 2,
+                  "wall_seconds": 6.681871270000556,
+                  "cost_evaluations": 4115
+                },
+                "moving_level_preparation/2mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.013529265001125168,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/2mm": {
+                  "calls": 3,
+                  "wall_seconds": 2.4268576269969344,
+                  "cost_evaluations": 185
+                },
+                "moving_level_preparation/1mm": {
+                  "calls": 1,
+                  "wall_seconds": 2.693799979169853e-05,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/1mm": {
+                  "calls": 1,
+                  "wall_seconds": 1.9553177590023552,
+                  "cost_evaluations": 162
+                },
+                "final_resampling": {
+                  "calls": 1,
+                  "wall_seconds": 0.10167226300109178,
+                  "cost_evaluations": 0
+                }
+              },
+              "scope": "CPU wall clocks around actual methods; no profiler or extra CUDA synchronization; final resampling dispatch can finish asynchronously before the following result copy"
+            },
+            "peak_allocated_bytes": 2754070016,
+            "peak_reserved_bytes": 5672796160,
+            "paired": {
+              "world_grid_displacement_mm": {
+                "mean": 0.3473745627752049,
+                "median": 0.3511883422947771,
+                "p95": 0.5567924577794795,
+                "minimum": 0.06072382312034057,
+                "maximum": 0.7665530123379395,
+                "rms": 0.3720839173525591
+              },
+              "warped": {
+                "comparison_mask": "official output foreground; unchanged across paths",
+                "voxels": 1737594,
+                "pearson_r": 0.9952013445111899,
+                "mae": 20.56731101072935,
+                "rmse": 38.120974885041186,
+                "support_dice": 0.9960736703210328
+              },
+              "grid_header": {
+                "shape_equal": true,
+                "affine_max_abs": 0.0,
+                "dtype_equal": true,
+                "qform_code_equal": true,
+                "sform_code_equal": true
+              },
+              "cost": 0.1907898634672165,
+              "cost_evaluations": 8987
+            },
+            "whole_gpu_utilization_percent": {
+              "mean": 62.6,
+              "median": 78.0,
+              "p95": 88.3,
+              "minimum": 3.0,
+              "maximum": 89.0
+            },
+            "gpu_utilization_scope": "Whole GPU including desktop or unrelated processes",
+            "cost_evaluations": 8987
+          }
+        ],
+        "profile": {
+          "cost_evaluations_by_type_and_scale": {
+            "batched_FSLCorrelationRatio/8mm": 4474,
+            "batched_FSLCorrelationRatio/4mm": 4121,
+            "batched_FSLCorrelationRatio/2mm": 229,
+            "batched_FSLCorrelationRatio/1mm": 163
+          },
+          "cuda_tensor_api_calls": {
+            "__float__": 10,
+            "cpu": 778,
+            "explicit_cuda_synchronize": 8
+          },
+          "cuda_tensor_api_scope": "whole profiled registration; scalar conversions and cpu() API calls, not an exact runtime synchronization count",
+          "profiler_scope": "complete registration; raw runtime counts include profiler window boundaries",
+          "full_profile_event_windows": 7,
+          "profiler_event_counts": {
+            "complete_registration:cudaMemcpyAsync": 2406,
+            "complete_registration:cudaStreamSynchronize": 841,
+            "complete_registration:cudaLaunchKernel": 113360,
+            "complete_registration:cuLaunchKernel": 1568,
+            "complete_registration:cudaDeviceSynchronize": 8
+          },
+          "cuda_device_timeline_available": false,
+          "kernel_launch_runtime_api_count": 114928,
+          "peak_allocated_bytes": 2754070016,
+          "peak_reserved_bytes": 5672796160,
+          "instrumentation_changes_timing": true
+        }
+      },
+      "parity_gate": {
+        "schema_version": 1,
+        "status": "pass",
+        "comparison": "saved artifacts, bitwise",
+        "conditions_equal": true,
+        "runs": {
+          "cold_0": {
+            "matrix_values_bitwise_equal": true,
+            "matrix_file_bytes_equal": true,
+            "voxels_bitwise_equal": true,
+            "header_bitwise_equal": true,
+            "affine_bitwise_equal": true,
+            "cost_bitwise_equal": true,
+            "evaluations_equal": true,
+            "fsl_paired_metrics_unchanged": true
+          },
+          "warm_1": {
+            "matrix_values_bitwise_equal": true,
+            "matrix_file_bytes_equal": true,
+            "voxels_bitwise_equal": true,
+            "header_bitwise_equal": true,
+            "affine_bitwise_equal": true,
+            "cost_bitwise_equal": true,
+            "evaluations_equal": true,
+            "fsl_paired_metrics_unchanged": true
+          }
+        },
+        "angular_search": {
+          "status": "captured",
+          "candidate_records_equal": true,
+          "scope": "captured candidate matrix ordering, costs and retained counts",
+          "records": 1
+        },
+        "fsl_paired_scope": "reported benchmark summaries; no FSL execution or metric recomputation",
+        "errors": []
+      },
+      "interpretation": "Saved matrix text, image/header bits, cost, evaluation count and captured retained angular candidates are unchanged. This is agreement with the prior FNIT GPU path, not bitwise FSL equivalence."
+    }
+  ],
+  "h100_scalar_payload_sha256": "c8edd90c048f3c51a9f4418a349815931788c324a96286937476703aabb9d523",
+  "h100_real_data": {
+    "schema_version": 1,
+    "scope": "one real UK Biobank case; two registration tasks; all timing is from a shared, nonexclusive GPU",
+    "cold_warm_scope": "materialized inputs; full original search schedule, optimization, resampling and host result; input/output I/O excluded",
+    "cold_definition": "first registration in a new process after CUDA-context initialization; disk JIT cache may already exist",
+    "warm_definition": "complete repeated registration in same process; no fitted transform reuse",
+    "profile_timing_note": "instrumented profile duration is independent and must not be used as speed measurement",
+    "utilization_note": "nvidia-smi whole-GPU observations include other processes and are not FNIT process utilization",
+    "runtime": {
+      "torch": "2.5.1",
+      "cuda_runtime": "11.8",
+      "gpu_name": "NVIDIA H100 PCIe",
+      "total_memory_bytes": 84942979072,
+      "compute_capability": [
+        9,
+        0
+      ]
+    },
+    "official_fsl_version": "6.0.7.22",
+    "official_cost_note": "default official FLIRT log did not emit an internal final cost",
+    "official_oracles": {
+      "b0_to_t1_6dof": {
+        "wall_seconds": 11.35,
+        "host_scope": "CPU login host",
+        "includes_image_IO": true,
+        "real_child_exit_zero": true,
+        "wrapper_exit_status": 255,
+        "matches_pinned_matrix_exact": true,
+        "matches_pinned_voxel_values_bitwise": true,
+        "header_changed_from_pinned": true,
+        "paired_scope": "baseline original oracle header differs from fresh rerun; strict companion re-pairing uses the fresh oracle"
+      },
+      "t1_to_mni_12dof": {
+        "wall_seconds": 20.12,
+        "host_scope": "CPU on GPU compute host",
+        "includes_image_IO": true,
+        "real_child_exit_zero": true,
+        "wrapper_exit_status": 255,
+        "proof_scope": "independent actual FLIRT registration under strace; matrix and moved-image container hashes identical to timed oracle",
+        "strace_verification_wall_seconds": 18.95
+      }
+    },
+    "source_sha256": {
+      "baseline": {
+        "src/fnit/flirt/__init__.py": "58b1ae43c50bd2942398f272c013f5bc743ce6a78abdaab7c93eeae1949447af",
+        "src/fnit/flirt/__main__.py": "03eb6210ee12d659108106a6126a870a9d5bc89ba95c116cd519e2764b0e092f",
+        "src/fnit/flirt/cli.py": "ce238e50f0046a0ded7dc1c01318cfc6df74e12f65ecc89ce73c2905510708b9",
+        "src/fnit/flirt/coordinates.py": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e",
+        "src/fnit/flirt/core.py": "b0ed42eb1032c89e643e17b27c96eb74a1a2df31debfeea3a0ed7499e8b2bd92",
+        "src/fnit/flirt/standalone.py": "873fbbce98b7f1fb5c8ec60b01fd5b89a6782ba6adf0b684e0bace029d20bb6d",
+        "src/fnit/flirt/types.py": "55a3abf2d7ce7889c297df95289890a589d1721b9fe3b157aa90e87819ed8e21",
+        "src/fnit/_nib.py": "568d113432c1a0c50a3b0b635188173e69be1c7436d851de2568bca9b55ab94e"
+      },
+      "optimized": {
+        "src/fnit/flirt/search.py": "8b24cdd7295de253fb9717935ce7528b2f8bbb2c0c2aa454f87833e69cfd541f",
+        "src/fnit/flirt/batched.py": "49046fe03f3840e5669243c12adfe64f345ef72e01e9a23a7a43120861c8aba3",
+        "src/fnit/flirt/__main__.py": "03eb6210ee12d659108106a6126a870a9d5bc89ba95c116cd519e2764b0e092f",
+        "src/fnit/flirt/cli.py": "fb203e6e50bc9b29fbf81da30ad9e9f1e896c4752a74947114cc3cd887f7c26b",
+        "src/fnit/flirt/types.py": "55a3abf2d7ce7889c297df95289890a589d1721b9fe3b157aa90e87819ed8e21",
+        "src/fnit/flirt/standalone.py": "a5ffc8e847bfc5219ef8e068a34eb81bab4b6fceb7ea39a497eb573108a8115e",
+        "src/fnit/flirt/__init__.py": "58b1ae43c50bd2942398f272c013f5bc743ce6a78abdaab7c93eeae1949447af",
+        "src/fnit/flirt/affine_batch.py": "8aa427ea1b185deea2ff2295e01c972bb371cb5a4b23504ce13ef79ca1d6155f",
+        "src/fnit/flirt/core.py": "eed70e63e7b950e84858c1fc0e538990c7ce30e492c04cdac926a18451c101eb",
+        "src/fnit/flirt/coordinates.py": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e",
+        "src/fnit/flirt/_batched_cuda.py": "2c9ca00bb3524b18cc96bd9632ac1c6476ff7a4e3eeac53a9f0cfa72e640f7f1",
+        "src/fnit/_nib.py": "568d113432c1a0c50a3b0b635188173e69be1c7436d851de2568bca9b55ab94e"
+      }
+    },
+    "tool_sha256": {
+      "b0_to_t1_6dof": {
+        "baseline_cold_warm": null,
+        "baseline_cold_warm_tool_digest_scope": "not recorded by legacy cold/warm recorder; do not infer from subsequent tool versions",
+        "optimized_cold_warm": "f2c716a14dd087acb589164bb5fd46a087ca55c460708c72d63a41f262b8bff3",
+        "baseline_stage_probe": "f2c716a14dd087acb589164bb5fd46a087ca55c460708c72d63a41f262b8bff3",
+        "baseline_full_profile": "d8c32de71ba4adcc55e2ae716aef51cd99886921be19ca296e84d48777524430",
+        "optimized_full_profile": "d8c32de71ba4adcc55e2ae716aef51cd99886921be19ca296e84d48777524430"
+      },
+      "t1_to_mni_12dof": {
+        "baseline_cold_warm": null,
+        "baseline_cold_warm_tool_digest_scope": "not recorded by legacy cold/warm recorder; do not infer from subsequent tool versions",
+        "optimized_cold_warm": "f2c716a14dd087acb589164bb5fd46a087ca55c460708c72d63a41f262b8bff3",
+        "baseline_stage_probe": "f2c716a14dd087acb589164bb5fd46a087ca55c460708c72d63a41f262b8bff3",
+        "baseline_full_profile": "d8c32de71ba4adcc55e2ae716aef51cd99886921be19ca296e84d48777524430",
+        "optimized_full_profile": "d8c32de71ba4adcc55e2ae716aef51cd99886921be19ca296e84d48777524430"
+      }
+    },
+    "cases": {
+      "b0_to_t1_6dof": {
+        "dof": 6,
+        "cost": "normmi",
+        "baseline": [
+          {
+            "condition": "cold",
+            "wall_seconds": 535.1068225009367,
+            "peak_allocated_bytes": 801161728,
+            "peak_reserved_bytes": 914358272,
+            "whole_gpu_utilization_percent": {
+              "mean": 99.98790322580645,
+              "median": 100.0,
+              "p95": 100.0,
+              "minimum": 96.0,
+              "maximum": 100.0
+            },
+            "cost_evaluations": 5971,
+            "fnit_search_cost": -1.1885619163513184,
+            "cost_scope": "FNIT search cost, not official FSL internal final cost",
+            "fsl_world_grid_displacement_mm": {
+              "mean": 0.0088621375661312,
+              "median": 0.008967711500957364,
+              "p95": 0.014494761279865995,
+              "minimum": 0.0006936823698218175,
+              "maximum": 0.018790726993129492,
+              "rms": 0.009554563830735907
+            },
+            "fsl_warped_image": {
+              "pearson_r": 0.9999717848104563,
+              "mae": 17.44310252143974,
+              "rmse": 31.65024303736089,
+              "support_dice": 0.9995544752430703
+            },
+            "fsl_grid_header": {
+              "shape_equal": true,
+              "affine_max_abs": 0.0,
+              "dtype_equal": true,
+              "qform_code_equal": true,
+              "sform_code_equal": true
+            },
+            "phase_timings": null,
+            "phase_timing_note": "host wall scopes; nested angular/local scopes overlap; CUDA final resampling dispatch precedes final host-copy wait"
+          },
+          {
+            "condition": "warm",
+            "wall_seconds": 482.2303996779956,
+            "peak_allocated_bytes": 800114176,
+            "peak_reserved_bytes": 914358272,
+            "whole_gpu_utilization_percent": {
+              "mean": 99.99553571428571,
+              "median": 100.0,
+              "p95": 100.0,
+              "minimum": 99.0,
+              "maximum": 100.0
+            },
+            "cost_evaluations": 5971,
+            "fnit_search_cost": -1.1885619163513184,
+            "cost_scope": "FNIT search cost, not official FSL internal final cost",
+            "fsl_world_grid_displacement_mm": {
+              "mean": 0.0088621375661312,
+              "median": 0.008967711500957364,
+              "p95": 0.014494761279865995,
+              "minimum": 0.0006936823698218175,
+              "maximum": 0.018790726993129492,
+              "rms": 0.009554563830735907
+            },
+            "fsl_warped_image": {
+              "pearson_r": 0.9999717848104563,
+              "mae": 17.44310252143974,
+              "rmse": 31.65024303736089,
+              "support_dice": 0.9995544752430703
+            },
+            "fsl_grid_header": {
+              "shape_equal": true,
+              "affine_max_abs": 0.0,
+              "dtype_equal": true,
+              "qform_code_equal": true,
+              "sform_code_equal": true
+            },
+            "phase_timings": null,
+            "phase_timing_note": "host wall scopes; nested angular/local scopes overlap; CUDA final resampling dispatch precedes final host-copy wait"
+          }
+        ],
+        "optimized": [
+          {
+            "condition": "cold",
+            "wall_seconds": 5.195251441095024,
+            "peak_allocated_bytes": 3375516160,
+            "peak_reserved_bytes": 3827302400,
+            "whole_gpu_utilization_percent": {
+              "mean": 99.8,
+              "median": 100.0,
+              "p95": 100.0,
+              "minimum": 99.0,
+              "maximum": 100.0
+            },
+            "cost_evaluations": 5971,
+            "fnit_search_cost": -1.1885619163513184,
+            "cost_scope": "FNIT search cost, not official FSL internal final cost",
+            "fsl_world_grid_displacement_mm": {
+              "mean": 0.0088621375661312,
+              "median": 0.008967711500957364,
+              "p95": 0.014494761279865995,
+              "minimum": 0.0006936823698218175,
+              "maximum": 0.018790726993129492,
+              "rms": 0.009554563830735907
+            },
+            "fsl_warped_image": {
+              "pearson_r": 0.9999717848104563,
+              "mae": 17.44310252143974,
+              "rmse": 31.65024303736089,
+              "support_dice": 0.9995544752430703
+            },
+            "fsl_grid_header": {
+              "shape_equal": true,
+              "affine_max_abs": 0.0,
+              "dtype_equal": true,
+              "qform_code_equal": true,
+              "sform_code_equal": true
+            },
+            "phase_timings": {
+              "stages": {
+                "reference_pyramid": {
+                  "calls": 1,
+                  "wall_seconds": 0.21929540624842048,
+                  "cost_evaluations": 0
+                },
+                "moving_level_preparation/8mm": {
+                  "calls": 2,
+                  "wall_seconds": 0.11517623765394092,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/8mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.3313347273506224,
+                  "cost_evaluations": 204
+                },
+                "angular_search": {
+                  "calls": 1,
+                  "wall_seconds": 1.9785629198886454,
+                  "cost_evaluations": 4360
+                },
+                "moving_level_preparation/4mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.024904966820031404,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/4mm": {
+                  "calls": 2,
+                  "wall_seconds": 1.2950246753171086,
+                  "cost_evaluations": 1475
+                },
+                "moving_level_preparation/2mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.0028128521516919136,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/2mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.4006752441637218,
+                  "cost_evaluations": 35
+                },
+                "moving_level_preparation/1mm": {
+                  "calls": 1,
+                  "wall_seconds": 2.0875129848718643e-05,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/1mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.5171989388763905,
+                  "cost_evaluations": 64
+                },
+                "final_resampling": {
+                  "calls": 1,
+                  "wall_seconds": 0.08955605095252395,
+                  "cost_evaluations": 0
+                }
+              },
+              "scope": "CPU wall clocks around actual methods; no profiler or extra CUDA synchronization; final resampling dispatch can finish asynchronously before the following result copy"
+            },
+            "phase_timing_note": "host wall scopes; nested angular/local scopes overlap; CUDA final resampling dispatch precedes final host-copy wait"
+          },
+          {
+            "condition": "warm",
+            "wall_seconds": 3.9500443069264293,
+            "peak_allocated_bytes": 3375516160,
+            "peak_reserved_bytes": 3827302400,
+            "whole_gpu_utilization_percent": {
+              "mean": 100.0,
+              "median": 100.0,
+              "p95": 100.0,
+              "minimum": 100.0,
+              "maximum": 100.0
+            },
+            "cost_evaluations": 5971,
+            "fnit_search_cost": -1.1885619163513184,
+            "cost_scope": "FNIT search cost, not official FSL internal final cost",
+            "fsl_world_grid_displacement_mm": {
+              "mean": 0.0088621375661312,
+              "median": 0.008967711500957364,
+              "p95": 0.014494761279865995,
+              "minimum": 0.0006936823698218175,
+              "maximum": 0.018790726993129492,
+              "rms": 0.009554563830735907
+            },
+            "fsl_warped_image": {
+              "pearson_r": 0.9999717848104563,
+              "mae": 17.44310252143974,
+              "rmse": 31.65024303736089,
+              "support_dice": 0.9995544752430703
+            },
+            "fsl_grid_header": {
+              "shape_equal": true,
+              "affine_max_abs": 0.0,
+              "dtype_equal": true,
+              "qform_code_equal": true,
+              "sform_code_equal": true
+            },
+            "phase_timings": {
+              "stages": {
+                "reference_pyramid": {
+                  "calls": 1,
+                  "wall_seconds": 0.019624515902251005,
+                  "cost_evaluations": 0
+                },
+                "moving_level_preparation/8mm": {
+                  "calls": 2,
+                  "wall_seconds": 0.030646224971860647,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/8mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.32928608590736985,
+                  "cost_evaluations": 204
+                },
+                "angular_search": {
+                  "calls": 1,
+                  "wall_seconds": 1.1682210410945117,
+                  "cost_evaluations": 4360
+                },
+                "moving_level_preparation/4mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.025887399911880493,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/4mm": {
+                  "calls": 2,
+                  "wall_seconds": 1.163957488257438,
+                  "cost_evaluations": 1475
+                },
+                "moving_level_preparation/2mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.02414747281000018,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/2mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.4138871217146516,
+                  "cost_evaluations": 35
+                },
+                "moving_level_preparation/1mm": {
+                  "calls": 1,
+                  "wall_seconds": 1.3840850442647934e-05,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/1mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.5179738658480346,
+                  "cost_evaluations": 64
+                },
+                "final_resampling": {
+                  "calls": 1,
+                  "wall_seconds": 0.030942934099584818,
+                  "cost_evaluations": 0
+                }
+              },
+              "scope": "CPU wall clocks around actual methods; no profiler or extra CUDA synchronization; final resampling dispatch can finish asynchronously before the following result copy"
+            },
+            "phase_timing_note": "host wall scopes; nested angular/local scopes overlap; CUDA final resampling dispatch precedes final host-copy wait"
+          }
+        ],
+        "gate": {
+          "schema_version": 1,
+          "status": "pass",
+          "comparison": "saved artifacts, bitwise",
+          "conditions_equal": true,
+          "runs": {
+            "cold_0": {
+              "matrix_values_bitwise_equal": true,
+              "matrix_file_bytes_equal": true,
+              "voxels_bitwise_equal": true,
+              "header_bitwise_equal": true,
+              "affine_bitwise_equal": true,
+              "cost_bitwise_equal": true,
+              "evaluations_equal": true,
+              "fsl_paired_metrics_unchanged": true,
+              "header_binaryblock_equal": true,
+              "extensions_equal": true,
+              "proxy_scaling_equal": true
+            },
+            "warm_1": {
+              "matrix_values_bitwise_equal": true,
+              "matrix_file_bytes_equal": true,
+              "voxels_bitwise_equal": true,
+              "header_bitwise_equal": true,
+              "affine_bitwise_equal": true,
+              "cost_bitwise_equal": true,
+              "evaluations_equal": true,
+              "fsl_paired_metrics_unchanged": true,
+              "header_binaryblock_equal": true,
+              "extensions_equal": true,
+              "proxy_scaling_equal": true
+            }
+          },
+          "angular_search": {
+            "status": "captured",
+            "candidate_records_equal": true,
+            "scope": "captured candidate matrix ordering, costs and retained counts",
+            "records": 1
+          },
+          "fsl_paired_scope": "reported benchmark summaries; no FSL execution or metric recomputation",
+          "errors": []
+        },
+        "gate_provenance": "check_flirt_gpu_parity.py on explicit posthoc companions; original serialized outputs re-paired to verified fresh oracle without changing original reports or timing",
+        "form_codes": {
+          "qform_code": {
+            "baseline": 1,
+            "optimized": 1,
+            "official": 1
+          },
+          "sform_code": {
+            "baseline": 1,
+            "optimized": 1,
+            "official": 1
+          }
+        },
+        "header_difference_note": "Original T1-to-MNI qform code differs from official FSL; optimized and baseline headers are identical. No header definition was changed for performance.",
+        "full_profile_artifact_gate": {
+          "baseline": {
+            "status": "pass",
+            "checks": {
+              "voxels_bitwise_equal": true,
+              "header_bitwise_equal": true,
+              "affine_bitwise_equal": true,
+              "header_binaryblock_equal": true,
+              "extensions_equal": true,
+              "proxy_scaling_equal": true,
+              "matrix_values_bitwise_equal": true,
+              "matrix_file_bytes_equal": true,
+              "scientific_inputs_equal": true,
+              "dof_cost_equal": true,
+              "recorded_source_hashes_match_unprofiled_path": true,
+              "cost_bitwise_equal": true,
+              "evaluations_equal": true
+            },
+            "profile_tool_sha256": "d8c32de71ba4adcc55e2ae716aef51cd99886921be19ca296e84d48777524430",
+            "source_fingerprint_coverage_identical": false,
+            "fingerprint_coverage_note": "old six-DOF cold/warm recorder did not record _nib.py; all original recorded hashes match the frozen full-profile source",
+            "scope": "independent whole profiled registration vs original baseline serialized artifacts; matrix save has 12 significant digits"
+          },
+          "optimized": {
+            "status": "pass",
+            "checks": {
+              "voxels_bitwise_equal": true,
+              "header_bitwise_equal": true,
+              "affine_bitwise_equal": true,
+              "header_binaryblock_equal": true,
+              "extensions_equal": true,
+              "proxy_scaling_equal": true,
+              "matrix_values_bitwise_equal": true,
+              "matrix_file_bytes_equal": true,
+              "scientific_inputs_equal": true,
+              "dof_cost_equal": true,
+              "recorded_source_hashes_match_unprofiled_path": true,
+              "cost_bitwise_equal": true,
+              "evaluations_equal": true
+            },
+            "profile_tool_sha256": "d8c32de71ba4adcc55e2ae716aef51cd99886921be19ca296e84d48777524430",
+            "source_fingerprint_coverage_identical": true,
+            "fingerprint_coverage_note": "all original recorded source hashes match the full-profile frozen source",
+            "scope": "independent whole profiled registration vs original baseline serialized artifacts; matrix save has 12 significant digits"
+          }
+        },
+        "baseline_stage_probe": [
+          {
+            "condition": "cold",
+            "wall_seconds": 334.03780361497775,
+            "peak_allocated_bytes": 801161728,
+            "peak_reserved_bytes": 914358272,
+            "whole_gpu_utilization_percent": {
+              "mean": 99.80564263322884,
+              "median": 100.0,
+              "p95": 100.0,
+              "minimum": 90.0,
+              "maximum": 100.0
+            },
+            "cost_evaluations": 5971,
+            "fnit_search_cost": -1.1885619163513184,
+            "cost_scope": "FNIT search cost, not official FSL internal final cost",
+            "fsl_world_grid_displacement_mm": {
+              "mean": 0.0088621375661312,
+              "median": 0.008967711500957364,
+              "p95": 0.014494761279865995,
+              "minimum": 0.0006936823698218175,
+              "maximum": 0.018790726993129492,
+              "rms": 0.009554563830735907
+            },
+            "fsl_warped_image": {
+              "pearson_r": 0.9999717848104563,
+              "mae": 17.44310252143974,
+              "rmse": 31.65024303736089,
+              "support_dice": 0.9995544752430703
+            },
+            "fsl_grid_header": {
+              "shape_equal": true,
+              "affine_max_abs": 0.0,
+              "dtype_equal": true,
+              "qform_code_equal": true,
+              "sform_code_equal": true
+            },
+            "phase_timings": {
+              "stages": {
+                "reference_pyramid": {
+                  "calls": 1,
+                  "wall_seconds": 0.1879761479794979,
+                  "cost_evaluations": 0
+                },
+                "moving_level_preparation/8mm": {
+                  "calls": 2,
+                  "wall_seconds": 0.12866785796359181,
+                  "cost_evaluations": 0
+                },
+                "angular_search": {
+                  "calls": 1,
+                  "wall_seconds": 244.21482344157994,
+                  "cost_evaluations": 4360
+                },
+                "moving_level_preparation/4mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.028903427068144083,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/4mm": {
+                  "calls": 13,
+                  "wall_seconds": 78.04992714617401,
+                  "cost_evaluations": 1475
+                },
+                "moving_level_preparation/2mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.06545679969713092,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/2mm": {
+                  "calls": 1,
+                  "wall_seconds": 3.081797196995467,
+                  "cost_evaluations": 35
+                },
+                "moving_level_preparation/1mm": {
+                  "calls": 1,
+                  "wall_seconds": 2.0440202206373215e-05,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/1mm": {
+                  "calls": 1,
+                  "wall_seconds": 4.546254241839051,
+                  "cost_evaluations": 64
+                },
+                "final_resampling": {
+                  "calls": 1,
+                  "wall_seconds": 0.08842902397736907,
+                  "cost_evaluations": 0
+                }
+              },
+              "scope": "CPU wall clocks around actual methods; no profiler or extra CUDA synchronization; final resampling dispatch can finish asynchronously before the following result copy"
+            },
+            "phase_timing_note": "host wall scopes; nested angular/local scopes overlap; CUDA final resampling dispatch precedes final host-copy wait"
+          }
+        ],
+        "baseline_full_profile": {
+          "profiler_scope": "complete registration; raw runtime counts include profiler window boundaries",
+          "instrumented_wall_seconds": 465.58243145328015,
+          "instrumentation_changes_timing": true,
+          "cuda_tensor_api_calls": {
+            "__float__": 17927,
+            "cpu": 7,
+            "__bool__": 10331,
+            "explicit_cuda_synchronize": 48
+          },
+          "cuda_tensor_api_scope": "whole profiled registration; scalar conversions and cpu() API calls, not an exact runtime synchronization count",
+          "profiled_cost_calls": {},
+          "full_profile_event_windows": 47,
+          "profiler_event_counts": {
+            "complete_registration:cudaMemcpyAsync": 118542,
+            "complete_registration:device_memcpy": 118542,
+            "complete_registration:H2D": 23903,
+            "complete_registration:cudaStreamSynchronize": 101092,
+            "complete_registration:cudaLaunchKernel": 917383,
+            "complete_registration:kernel": 923354,
+            "complete_registration:D2H": 77189,
+            "complete_registration:device_memset": 219,
+            "complete_registration:cuLaunchKernel": 5971,
+            "complete_registration:cudaDeviceSynchronize": 48
+          },
+          "profiled_cuda_device_time_us": {
+            "complete_registration": 4806623.256000164
+          },
+          "cuda_device_timeline_available": true,
+          "kernel_launch_runtime_api_count": 923354,
+          "peak_allocated_bytes": 801161728,
+          "peak_reserved_bytes": 914358272,
+          "cost_evaluations_by_type_and_scale": {
+            "FSLCorrelationRatio/8mm": 4360,
+            "FSLNormalizedMutualInformation/4mm": 1479,
+            "FSLNormalizedMutualInformation/2mm": 67,
+            "FSLNormalizedMutualInformation/1mm": 65
+          },
+          "batch_cost_calls_by_type_and_scale": {},
+          "device_memcpy_direction_scope": {
+            "H2D": 23903,
+            "D2H": 77189,
+            "other_unclassified_device_memcpy": 17450,
+            "D2D": null,
+            "note": "H2D and D2H are device event directions; other device memcpy events were counted but their names were not retained. D2D count is unknown. cudaMemcpyAsync is an independent runtime API count."
+          }
+        },
+        "optimized_full_profile": {
+          "profiler_scope": "complete registration; raw runtime counts include profiler window boundaries",
+          "instrumented_wall_seconds": 14.061802555341274,
+          "instrumentation_changes_timing": true,
+          "cuda_tensor_api_calls": {
+            "__float__": 14,
+            "cpu": 426,
+            "explicit_cuda_synchronize": 5
+          },
+          "cuda_tensor_api_scope": "whole profiled registration; scalar conversions and cpu() API calls, not an exact runtime synchronization count",
+          "profiled_cost_calls": {},
+          "full_profile_event_windows": 4,
+          "profiler_event_counts": {
+            "complete_registration:cudaMemcpyAsync": 1355,
+            "complete_registration:device_memcpy": 1355,
+            "complete_registration:H2D": 468,
+            "complete_registration:cudaStreamSynchronize": 497,
+            "complete_registration:cudaLaunchKernel": 73934,
+            "complete_registration:kernel": 75533,
+            "complete_registration:D2H": 458,
+            "complete_registration:device_memset": 87,
+            "complete_registration:cuLaunchKernel": 1599,
+            "complete_registration:cudaDeviceSynchronize": 5
+          },
+          "profiled_cuda_device_time_us": {
+            "complete_registration": 1810001.5159999733
+          },
+          "cuda_device_timeline_available": true,
+          "kernel_launch_runtime_api_count": 75533,
+          "peak_allocated_bytes": 3375516160,
+          "peak_reserved_bytes": 3827302400,
+          "cost_evaluations_by_type_and_scale": {
+            "batched_FSLCorrelationRatio/8mm": 4360,
+            "batched_FSLNormalizedMutualInformation/4mm": 1479,
+            "batched_FSLNormalizedMutualInformation/2mm": 67,
+            "batched_FSLNormalizedMutualInformation/1mm": 65
+          },
+          "batch_cost_calls_by_type_and_scale": {
+            "batched_FSLCorrelationRatio/8mm": 172,
+            "batched_FSLNormalizedMutualInformation/4mm": 171,
+            "batched_FSLNormalizedMutualInformation/2mm": 36,
+            "batched_FSLNormalizedMutualInformation/1mm": 40
+          },
+          "device_memcpy_direction_scope": {
+            "H2D": 468,
+            "D2H": 458,
+            "other_unclassified_device_memcpy": 429,
+            "D2D": null,
+            "note": "H2D and D2H are device event directions; other device memcpy events were counted but their names were not retained. D2D count is unknown. cudaMemcpyAsync is an independent runtime API count."
+          }
+        }
+      },
+      "t1_to_mni_12dof": {
+        "dof": 12,
+        "cost": "corratio",
+        "baseline": [
+          {
+            "condition": "cold",
+            "wall_seconds": 447.77311062114313,
+            "peak_allocated_bytes": 300236800,
+            "peak_reserved_bytes": 597688320,
+            "whole_gpu_utilization_percent": {
+              "mean": 99.76359338061465,
+              "median": 100.0,
+              "p95": 100.0,
+              "minimum": 87.0,
+              "maximum": 100.0
+            },
+            "cost_evaluations": 7461,
+            "fnit_search_cost": 0.0935388058423996,
+            "cost_scope": "FNIT search cost, not official FSL internal final cost",
+            "fsl_world_grid_displacement_mm": {
+              "mean": 0.11193330775297985,
+              "median": 0.11042974190133255,
+              "p95": 0.19346803339131888,
+              "minimum": 0.006700164805119727,
+              "maximum": 0.2553493783497069,
+              "rms": 0.122688944026159
+            },
+            "fsl_warped_image": {
+              "pearson_r": 0.9968224407545891,
+              "mae": 10.505329054034476,
+              "rmse": 40.413130258830165,
+              "support_dice": 0.9724139697574276
+            },
+            "fsl_grid_header": {
+              "shape_equal": true,
+              "affine_max_abs": 0.0,
+              "dtype_equal": true,
+              "qform_code_equal": false,
+              "sform_code_equal": true
+            },
+            "phase_timings": null,
+            "phase_timing_note": "host wall scopes; nested angular/local scopes overlap; CUDA final resampling dispatch precedes final host-copy wait"
+          },
+          {
+            "condition": "warm",
+            "wall_seconds": 502.4324136637151,
+            "peak_allocated_bytes": 301174784,
+            "peak_reserved_bytes": 597688320,
+            "whole_gpu_utilization_percent": {
+              "mean": 99.90849673202614,
+              "median": 100.0,
+              "p95": 100.0,
+              "minimum": 91.0,
+              "maximum": 100.0
+            },
+            "cost_evaluations": 7461,
+            "fnit_search_cost": 0.0935388058423996,
+            "cost_scope": "FNIT search cost, not official FSL internal final cost",
+            "fsl_world_grid_displacement_mm": {
+              "mean": 0.11193330775297985,
+              "median": 0.11042974190133255,
+              "p95": 0.19346803339131888,
+              "minimum": 0.006700164805119727,
+              "maximum": 0.2553493783497069,
+              "rms": 0.122688944026159
+            },
+            "fsl_warped_image": {
+              "pearson_r": 0.9968224407545891,
+              "mae": 10.505329054034476,
+              "rmse": 40.413130258830165,
+              "support_dice": 0.9724139697574276
+            },
+            "fsl_grid_header": {
+              "shape_equal": true,
+              "affine_max_abs": 0.0,
+              "dtype_equal": true,
+              "qform_code_equal": false,
+              "sform_code_equal": true
+            },
+            "phase_timings": null,
+            "phase_timing_note": "host wall scopes; nested angular/local scopes overlap; CUDA final resampling dispatch precedes final host-copy wait"
+          }
+        ],
+        "optimized": [
+          {
+            "condition": "cold",
+            "wall_seconds": 5.708445860538632,
+            "peak_allocated_bytes": 5418760192,
+            "peak_reserved_bytes": 6308233216,
+            "whole_gpu_utilization_percent": {
+              "mean": 100.0,
+              "median": 100.0,
+              "p95": 100.0,
+              "minimum": 100.0,
+              "maximum": 100.0
+            },
+            "cost_evaluations": 7461,
+            "fnit_search_cost": 0.0935388058423996,
+            "cost_scope": "FNIT search cost, not official FSL internal final cost",
+            "fsl_world_grid_displacement_mm": {
+              "mean": 0.11193330775297985,
+              "median": 0.11042974190133255,
+              "p95": 0.19346803339131888,
+              "minimum": 0.006700164805119727,
+              "maximum": 0.2553493783497069,
+              "rms": 0.122688944026159
+            },
+            "fsl_warped_image": {
+              "pearson_r": 0.9968224407545891,
+              "mae": 10.505329054034476,
+              "rmse": 40.413130258830165,
+              "support_dice": 0.9724139697574276
+            },
+            "fsl_grid_header": {
+              "shape_equal": true,
+              "affine_max_abs": 0.0,
+              "dtype_equal": true,
+              "qform_code_equal": false,
+              "sform_code_equal": true
+            },
+            "phase_timings": {
+              "stages": {
+                "reference_pyramid": {
+                  "calls": 1,
+                  "wall_seconds": 0.13746155705302954,
+                  "cost_evaluations": 0
+                },
+                "moving_level_preparation/8mm": {
+                  "calls": 2,
+                  "wall_seconds": 0.18032329948619008,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/8mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.3886638982221484,
+                  "cost_evaluations": 251
+                },
+                "angular_search": {
+                  "calls": 1,
+                  "wall_seconds": 1.9579497049562633,
+                  "cost_evaluations": 4440
+                },
+                "moving_level_preparation/4mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.0195361552760005,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/4mm": {
+                  "calls": 2,
+                  "wall_seconds": 1.4439344871789217,
+                  "cost_evaluations": 2601
+                },
+                "moving_level_preparation/2mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.017051955219358206,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/2mm": {
+                  "calls": 3,
+                  "wall_seconds": 0.7199033228680491,
+                  "cost_evaluations": 179
+                },
+                "moving_level_preparation/1mm": {
+                  "calls": 1,
+                  "wall_seconds": 2.0168256014585495e-05,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/1mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.6273011500015855,
+                  "cost_evaluations": 188
+                },
+                "final_resampling": {
+                  "calls": 1,
+                  "wall_seconds": 0.1097354176454246,
+                  "cost_evaluations": 0
+                }
+              },
+              "scope": "CPU wall clocks around actual methods; no profiler or extra CUDA synchronization; final resampling dispatch can finish asynchronously before the following result copy"
+            },
+            "phase_timing_note": "host wall scopes; nested angular/local scopes overlap; CUDA final resampling dispatch precedes final host-copy wait"
+          },
+          {
+            "condition": "warm",
+            "wall_seconds": 4.572665255051106,
+            "peak_allocated_bytes": 5418760192,
+            "peak_reserved_bytes": 6308233216,
+            "whole_gpu_utilization_percent": {
+              "mean": 99.0,
+              "median": 100.0,
+              "p95": 100.0,
+              "minimum": 95.0,
+              "maximum": 100.0
+            },
+            "cost_evaluations": 7461,
+            "fnit_search_cost": 0.0935388058423996,
+            "cost_scope": "FNIT search cost, not official FSL internal final cost",
+            "fsl_world_grid_displacement_mm": {
+              "mean": 0.11193330775297985,
+              "median": 0.11042974190133255,
+              "p95": 0.19346803339131888,
+              "minimum": 0.006700164805119727,
+              "maximum": 0.2553493783497069,
+              "rms": 0.122688944026159
+            },
+            "fsl_warped_image": {
+              "pearson_r": 0.9968224407545891,
+              "mae": 10.505329054034476,
+              "rmse": 40.413130258830165,
+              "support_dice": 0.9724139697574276
+            },
+            "fsl_grid_header": {
+              "shape_equal": true,
+              "affine_max_abs": 0.0,
+              "dtype_equal": true,
+              "qform_code_equal": false,
+              "sform_code_equal": true
+            },
+            "phase_timings": {
+              "stages": {
+                "reference_pyramid": {
+                  "calls": 1,
+                  "wall_seconds": 0.02208105009049177,
+                  "cost_evaluations": 0
+                },
+                "moving_level_preparation/8mm": {
+                  "calls": 2,
+                  "wall_seconds": 0.04584798216819763,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/8mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.45114690670743585,
+                  "cost_evaluations": 251
+                },
+                "angular_search": {
+                  "calls": 1,
+                  "wall_seconds": 1.1570150540210307,
+                  "cost_evaluations": 4440
+                },
+                "moving_level_preparation/4mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.01794923096895218,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/4mm": {
+                  "calls": 2,
+                  "wall_seconds": 1.5536194499582052,
+                  "cost_evaluations": 2601
+                },
+                "moving_level_preparation/2mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.015650049317628145,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/2mm": {
+                  "calls": 3,
+                  "wall_seconds": 0.6918279062956572,
+                  "cost_evaluations": 179
+                },
+                "moving_level_preparation/1mm": {
+                  "calls": 1,
+                  "wall_seconds": 6.06258399784565e-05,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/1mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.5717585529200733,
+                  "cost_evaluations": 188
+                },
+                "final_resampling": {
+                  "calls": 1,
+                  "wall_seconds": 0.058547318913042545,
+                  "cost_evaluations": 0
+                }
+              },
+              "scope": "CPU wall clocks around actual methods; no profiler or extra CUDA synchronization; final resampling dispatch can finish asynchronously before the following result copy"
+            },
+            "phase_timing_note": "host wall scopes; nested angular/local scopes overlap; CUDA final resampling dispatch precedes final host-copy wait"
+          }
+        ],
+        "gate": {
+          "schema_version": 1,
+          "status": "pass",
+          "comparison": "saved artifacts, bitwise",
+          "conditions_equal": true,
+          "runs": {
+            "cold_0": {
+              "matrix_values_bitwise_equal": true,
+              "matrix_file_bytes_equal": true,
+              "voxels_bitwise_equal": true,
+              "header_bitwise_equal": true,
+              "affine_bitwise_equal": true,
+              "cost_bitwise_equal": true,
+              "evaluations_equal": true,
+              "fsl_paired_metrics_unchanged": true,
+              "header_binaryblock_equal": true,
+              "extensions_equal": true,
+              "proxy_scaling_equal": true
+            },
+            "warm_1": {
+              "matrix_values_bitwise_equal": true,
+              "matrix_file_bytes_equal": true,
+              "voxels_bitwise_equal": true,
+              "header_bitwise_equal": true,
+              "affine_bitwise_equal": true,
+              "cost_bitwise_equal": true,
+              "evaluations_equal": true,
+              "fsl_paired_metrics_unchanged": true,
+              "header_binaryblock_equal": true,
+              "extensions_equal": true,
+              "proxy_scaling_equal": true
+            }
+          },
+          "angular_search": {
+            "status": "captured",
+            "candidate_records_equal": true,
+            "scope": "captured candidate matrix ordering, costs and retained counts",
+            "records": 1
+          },
+          "fsl_paired_scope": "reported benchmark summaries; no FSL execution or metric recomputation",
+          "errors": []
+        },
+        "gate_provenance": "check_flirt_gpu_parity.py on explicit posthoc companions; original serialized outputs re-paired to verified fresh oracle without changing original reports or timing",
+        "form_codes": {
+          "qform_code": {
+            "baseline": 0,
+            "optimized": 0,
+            "official": 2
+          },
+          "sform_code": {
+            "baseline": 2,
+            "optimized": 2,
+            "official": 2
+          }
+        },
+        "header_difference_note": "Original T1-to-MNI qform code differs from official FSL; optimized and baseline headers are identical. No header definition was changed for performance.",
+        "full_profile_artifact_gate": {
+          "baseline": {
+            "status": "pass",
+            "checks": {
+              "voxels_bitwise_equal": true,
+              "header_bitwise_equal": true,
+              "affine_bitwise_equal": true,
+              "header_binaryblock_equal": true,
+              "extensions_equal": true,
+              "proxy_scaling_equal": true,
+              "matrix_values_bitwise_equal": true,
+              "matrix_file_bytes_equal": true,
+              "scientific_inputs_equal": true,
+              "dof_cost_equal": true,
+              "recorded_source_hashes_match_unprofiled_path": true,
+              "cost_bitwise_equal": true,
+              "evaluations_equal": true
+            },
+            "profile_tool_sha256": "d8c32de71ba4adcc55e2ae716aef51cd99886921be19ca296e84d48777524430",
+            "source_fingerprint_coverage_identical": true,
+            "fingerprint_coverage_note": "all original recorded source hashes match the full-profile frozen source",
+            "scope": "independent whole profiled registration vs original baseline serialized artifacts; matrix save has 12 significant digits"
+          },
+          "optimized": {
+            "status": "pass",
+            "checks": {
+              "voxels_bitwise_equal": true,
+              "header_bitwise_equal": true,
+              "affine_bitwise_equal": true,
+              "header_binaryblock_equal": true,
+              "extensions_equal": true,
+              "proxy_scaling_equal": true,
+              "matrix_values_bitwise_equal": true,
+              "matrix_file_bytes_equal": true,
+              "scientific_inputs_equal": true,
+              "dof_cost_equal": true,
+              "recorded_source_hashes_match_unprofiled_path": true,
+              "cost_bitwise_equal": true,
+              "evaluations_equal": true
+            },
+            "profile_tool_sha256": "d8c32de71ba4adcc55e2ae716aef51cd99886921be19ca296e84d48777524430",
+            "source_fingerprint_coverage_identical": true,
+            "fingerprint_coverage_note": "all original recorded source hashes match the full-profile frozen source",
+            "scope": "independent whole profiled registration vs original baseline serialized artifacts; matrix save has 12 significant digits"
+          }
+        },
+        "baseline_stage_probe": [
+          {
+            "condition": "cold",
+            "wall_seconds": 381.0680706179701,
+            "peak_allocated_bytes": 300236800,
+            "peak_reserved_bytes": 597688320,
+            "whole_gpu_utilization_percent": {
+              "mean": 99.59065934065934,
+              "median": 100.0,
+              "p95": 100.0,
+              "minimum": 74.0,
+              "maximum": 100.0
+            },
+            "cost_evaluations": 7461,
+            "fnit_search_cost": 0.0935388058423996,
+            "cost_scope": "FNIT search cost, not official FSL internal final cost",
+            "fsl_world_grid_displacement_mm": {
+              "mean": 0.11193330775297985,
+              "median": 0.11042974190133255,
+              "p95": 0.19346803339131888,
+              "minimum": 0.006700164805119727,
+              "maximum": 0.2553493783497069,
+              "rms": 0.122688944026159
+            },
+            "fsl_warped_image": {
+              "pearson_r": 0.9968224407545891,
+              "mae": 10.505329054034476,
+              "rmse": 40.413130258830165,
+              "support_dice": 0.9724139697574276
+            },
+            "fsl_grid_header": {
+              "shape_equal": true,
+              "affine_max_abs": 0.0,
+              "dtype_equal": true,
+              "qform_code_equal": false,
+              "sform_code_equal": true
+            },
+            "phase_timings": {
+              "stages": {
+                "reference_pyramid": {
+                  "calls": 1,
+                  "wall_seconds": 0.14305745577439666,
+                  "cost_evaluations": 0
+                },
+                "moving_level_preparation/8mm": {
+                  "calls": 2,
+                  "wall_seconds": 0.17655806196853518,
+                  "cost_evaluations": 0
+                },
+                "angular_search": {
+                  "calls": 1,
+                  "wall_seconds": 207.67985972901806,
+                  "cost_evaluations": 4440
+                },
+                "moving_level_preparation/4mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.01946716010570526,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/4mm": {
+                  "calls": 13,
+                  "wall_seconds": 150.20211054384708,
+                  "cost_evaluations": 2601
+                },
+                "moving_level_preparation/2mm": {
+                  "calls": 1,
+                  "wall_seconds": 0.03944577602669597,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/2mm": {
+                  "calls": 3,
+                  "wall_seconds": 7.614063830114901,
+                  "cost_evaluations": 179
+                },
+                "moving_level_preparation/1mm": {
+                  "calls": 1,
+                  "wall_seconds": 7.907906547188759e-05,
+                  "cost_evaluations": 0
+                },
+                "local_optimization/1mm": {
+                  "calls": 1,
+                  "wall_seconds": 10.083855792880058,
+                  "cost_evaluations": 188
+                },
+                "final_resampling": {
+                  "calls": 1,
+                  "wall_seconds": 0.13745658192783594,
+                  "cost_evaluations": 0
+                }
+              },
+              "scope": "CPU wall clocks around actual methods; no profiler or extra CUDA synchronization; final resampling dispatch can finish asynchronously before the following result copy"
+            },
+            "phase_timing_note": "host wall scopes; nested angular/local scopes overlap; CUDA final resampling dispatch precedes final host-copy wait"
+          }
+        ],
+        "baseline_full_profile": {
+          "profiler_scope": "complete registration; raw runtime counts include profiler window boundaries",
+          "instrumented_wall_seconds": 620.7731826761737,
+          "instrumentation_changes_timing": true,
+          "cuda_tensor_api_calls": {
+            "__float__": 22393,
+            "cpu": 7,
+            "__bool__": 14922,
+            "explicit_cuda_synchronize": 60
+          },
+          "cuda_tensor_api_scope": "whole profiled registration; scalar conversions and cpu() API calls, not an exact runtime synchronization count",
+          "profiled_cost_calls": {},
+          "full_profile_event_windows": 59,
+          "profiler_event_counts": {
+            "complete_registration:cudaMemcpyAsync": 164200,
+            "complete_registration:device_memcpy": 164200,
+            "complete_registration:H2D": 29863,
+            "complete_registration:cudaStreamSynchronize": 134348,
+            "complete_registration:cudaLaunchKernel": 1075312,
+            "complete_registration:kernel": 1082773,
+            "complete_registration:D2H": 104485,
+            "complete_registration:device_memset": 471,
+            "complete_registration:cuLaunchKernel": 7461,
+            "complete_registration:cudaDeviceSynchronize": 60
+          },
+          "profiled_cuda_device_time_us": {
+            "complete_registration": 4144232.31900046
+          },
+          "cuda_device_timeline_available": true,
+          "kernel_launch_runtime_api_count": 1082773,
+          "peak_allocated_bytes": 300236800,
+          "peak_reserved_bytes": 597688320,
+          "cost_evaluations_by_type_and_scale": {
+            "FSLCorrelationRatio/8mm": 4440,
+            "FSLCorrelationRatio/4mm": 2609,
+            "FSLCorrelationRatio/2mm": 223,
+            "FSLCorrelationRatio/1mm": 189
+          },
+          "batch_cost_calls_by_type_and_scale": {},
+          "device_memcpy_direction_scope": {
+            "H2D": 29863,
+            "D2H": 104485,
+            "other_unclassified_device_memcpy": 29852,
+            "D2D": null,
+            "note": "H2D and D2H are device event directions; other device memcpy events were counted but their names were not retained. D2D count is unknown. cudaMemcpyAsync is an independent runtime API count."
+          }
+        },
+        "optimized_full_profile": {
+          "profiler_scope": "complete registration; raw runtime counts include profiler window boundaries",
+          "instrumented_wall_seconds": 18.00699908286333,
+          "instrumentation_changes_timing": true,
+          "cuda_tensor_api_calls": {
+            "__float__": 10,
+            "cpu": 696,
+            "explicit_cuda_synchronize": 7
+          },
+          "cuda_tensor_api_scope": "whole profiled registration; scalar conversions and cpu() API calls, not an exact runtime synchronization count",
+          "profiled_cost_calls": {},
+          "full_profile_event_windows": 6,
+          "profiler_event_counts": {
+            "complete_registration:cudaMemcpyAsync": 2946,
+            "complete_registration:device_memcpy": 2946,
+            "complete_registration:H2D": 740,
+            "complete_registration:cudaStreamSynchronize": 761,
+            "complete_registration:cudaLaunchKernel": 102361,
+            "complete_registration:kernel": 103759,
+            "complete_registration:D2H": 720,
+            "complete_registration:device_memset": 59,
+            "complete_registration:cuLaunchKernel": 1398,
+            "complete_registration:cudaDeviceSynchronize": 7
+          },
+          "profiled_cuda_device_time_us": {
+            "complete_registration": 1281298.7549999934
+          },
+          "cuda_device_timeline_available": true,
+          "kernel_launch_runtime_api_count": 103759,
+          "peak_allocated_bytes": 5418760192,
+          "peak_reserved_bytes": 6308233216,
+          "cost_evaluations_by_type_and_scale": {
+            "batched_FSLCorrelationRatio/8mm": 4440,
+            "batched_FSLCorrelationRatio/4mm": 2609,
+            "batched_FSLCorrelationRatio/2mm": 223,
+            "batched_FSLCorrelationRatio/1mm": 189
+          },
+          "batch_cost_calls_by_type_and_scale": {
+            "batched_FSLCorrelationRatio/8mm": 159,
+            "batched_FSLCorrelationRatio/4mm": 214,
+            "batched_FSLCorrelationRatio/2mm": 180,
+            "batched_FSLCorrelationRatio/1mm": 136
+          },
+          "device_memcpy_direction_scope": {
+            "H2D": 740,
+            "D2H": 720,
+            "other_unclassified_device_memcpy": 1486,
+            "D2D": null,
+            "note": "H2D and D2H are device event directions; other device memcpy events were counted but their names were not retained. D2D count is unknown. cudaMemcpyAsync is an independent runtime API count."
+          }
+        }
+      }
+    }
+  },
+  "report_export_scope": "Private real cases contain only scalar summaries and code hashes; no private input hashes, identifiers, images, per-voxel values, or affine arrays",
+  "current_benchmark_tool_sha256": "d8c32de71ba4adcc55e2ae716aef51cd99886921be19ca296e84d48777524430",
+  "tool_revision_note": "The published tool additionally saves profiled artifacts outside timing. Public cold/warm and profile measurements used the earlier tool hash recorded in the report; no registration runtime code changed.",
+  "public_example_figure": {
+    "path": "docs/flirt/figures/flirt_public_current.png",
+    "sha256": "5cd3353ec4e0c39a45c82e4733a47767074821f3ee86d10897f802555ea2292b",
+    "plot_tool": "validation/flirt/plot_public_example.py",
+    "plot_tool_sha256": "887838965436682ece64ce10d4066174d94afe859d6d083e18a65a10b6179fa8",
+    "dataset": "CC0 OpenNeuro ds000114 v1.0.2, repository published defaced T1w examples",
+    "candidate_condition": "first public case, optimized cold registration",
+    "candidate_execution": "batched",
+    "candidate_moved_sha256": "788b9758f208e3f37958a61c13ea53ef8bb1df5250c80d2d287ba4bd43ed4790",
+    "candidate_matrix_sha256": "ea948c9efdb971d5621da4f0c4961a7ed0cab571e3315beae0c99a5362395526",
+    "candidate_source_sha256": {
+      "src/fnit/flirt/affine_batch.py": "8aa427ea1b185deea2ff2295e01c972bb371cb5a4b23504ce13ef79ca1d6155f",
+      "src/fnit/flirt/batched.py": "49046fe03f3840e5669243c12adfe64f345ef72e01e9a23a7a43120861c8aba3",
+      "src/fnit/flirt/cli.py": "fb203e6e50bc9b29fbf81da30ad9e9f1e896c4752a74947114cc3cd887f7c26b",
+      "src/fnit/flirt/coordinates.py": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e",
+      "src/fnit/flirt/core.py": "eed70e63e7b950e84858c1fc0e538990c7ce30e492c04cdac926a18451c101eb",
+      "src/fnit/flirt/search.py": "8b24cdd7295de253fb9717935ce7528b2f8bbb2c0c2aa454f87833e69cfd541f",
+      "src/fnit/flirt/standalone.py": "a5ffc8e847bfc5219ef8e068a34eb81bab4b6fceb7ea39a497eb573108a8115e",
+      "src/fnit/flirt/types.py": "55a3abf2d7ce7889c297df95289890a589d1721b9fe3b157aa90e87819ed8e21",
+      "src/fnit/flirt/_batched_cuda.py": "2c9ca00bb3524b18cc96bd9632ac1c6476ff7a4e3eeac53a9f0cfa72e640f7f1",
+      "src/fnit/flirt/__init__.py": "58b1ae43c50bd2942398f272c013f5bc743ce6a78abdaab7c93eeae1949447af",
+      "src/fnit/flirt/__main__.py": "03eb6210ee12d659108106a6126a870a9d5bc89ba95c116cd519e2764b0e092f",
+      "src/fnit/_nib.py": "568d113432c1a0c50a3b0b635188173e69be1c7436d851de2568bca9b55ab94e"
+    },
+    "input_and_oracle_sha256": {
+      "moving": "326d1e0a948b76344150c28bbcf0299b58040092c2f037f09c754103d32f747d",
+      "reference": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
+      "fsl_matrix": "137c261f4500d50af99f93b128805e8233b93392d212b3804e802974af8d03dc",
+      "fsl_moved": "3d76d501590fdbdc9fd427dbe0bc1d570c003db16c8b34faa32b5483e1f82783"
+    },
+    "display": "Shared FSL/FNIT intensity range; absolute difference independently scaled; three orthogonal views"
+  },
+  "cleanup_regression": {
+    "date": "2026-09-30",
+    "scope": "Public real T1w 12-DOF/corratio, complete cold/warm registration after cleanup",
+    "source_sha256": {
+      "src/fnit/flirt/affine_batch.py": "8aa427ea1b185deea2ff2295e01c972bb371cb5a4b23504ce13ef79ca1d6155f",
+      "src/fnit/flirt/batched.py": "49046fe03f3840e5669243c12adfe64f345ef72e01e9a23a7a43120861c8aba3",
+      "src/fnit/flirt/cli.py": "f57d65c320aee278820de2fb31cc764e7bee911e3228d3a904108d2a75e8142e",
+      "src/fnit/flirt/coordinates.py": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e",
+      "src/fnit/flirt/core.py": "2d9d46a11acd38c27385a578b108be8538346559db5364a1622457b303bfb72f",
+      "src/fnit/flirt/search.py": "8b24cdd7295de253fb9717935ce7528b2f8bbb2c0c2aa454f87833e69cfd541f",
+      "src/fnit/flirt/standalone.py": "a5ffc8e847bfc5219ef8e068a34eb81bab4b6fceb7ea39a497eb573108a8115e",
+      "src/fnit/flirt/types.py": "55a3abf2d7ce7889c297df95289890a589d1721b9fe3b157aa90e87819ed8e21",
+      "src/fnit/flirt/_batched_cuda.py": "2c9ca00bb3524b18cc96bd9632ac1c6476ff7a4e3eeac53a9f0cfa72e640f7f1",
+      "src/fnit/flirt/__init__.py": "58b1ae43c50bd2942398f272c013f5bc743ce6a78abdaab7c93eeae1949447af",
+      "src/fnit/flirt/__main__.py": "03eb6210ee12d659108106a6126a870a9d5bc89ba95c116cd519e2764b0e092f",
+      "src/fnit/_nib.py": "568d113432c1a0c50a3b0b635188173e69be1c7436d851de2568bca9b55ab94e"
+    },
+    "root_cli_sha256": "9906f3c33edbbaaa99be1a6787fb8646ce185386aa395656a11fabcb8d36710f",
+    "benchmark_tool_sha256": "d8c32de71ba4adcc55e2ae716aef51cd99886921be19ca296e84d48777524430",
+    "gate_tool_sha256": "abcaca93b3e9e9ecd51bda005a338c5e6bdaa97543e260f0e0b69d491c30391e",
+    "gate": {
+      "schema_version": 1,
+      "status": "pass",
+      "comparison": "saved artifacts, bitwise",
+      "conditions_equal": true,
+      "runs": {
+        "cold_0": {
+          "matrix_values_bitwise_equal": true,
+          "matrix_file_bytes_equal": true,
+          "voxels_bitwise_equal": true,
+          "header_bitwise_equal": true,
+          "affine_bitwise_equal": true,
+          "cost_bitwise_equal": true,
+          "evaluations_equal": true,
+          "fsl_paired_metrics_unchanged": true
+        },
+        "warm_1": {
+          "matrix_values_bitwise_equal": true,
+          "matrix_file_bytes_equal": true,
+          "voxels_bitwise_equal": true,
+          "header_bitwise_equal": true,
+          "affine_bitwise_equal": true,
+          "cost_bitwise_equal": true,
+          "evaluations_equal": true,
+          "fsl_paired_metrics_unchanged": true
+        }
+      },
+      "angular_search": {
+        "status": "not captured"
+      },
+      "fsl_paired_scope": "reported benchmark summaries; no FSL execution or metric recomputation",
+      "errors": []
+    },
+    "cost": 0.1907898634672165,
+    "cost_evaluations": 8987,
+    "paired_fsl_metrics": {
+      "world_grid_displacement_mm": {
+        "mean": 0.3473745627752049,
+        "median": 0.3511883422947771,
+        "p95": 0.5567924577794795,
+        "minimum": 0.06072382312034057,
+        "maximum": 0.7665530123379395,
+        "rms": 0.3720839173525591
+      },
+      "warped": {
+        "comparison_mask": "official output foreground; unchanged across paths",
+        "voxels": 1737594,
+        "pearson_r": 0.9952013445111899,
+        "mae": 20.56731101072935,
+        "rmse": 38.120974885041186,
+        "support_dice": 0.9960736703210328
+      },
+      "grid_header": {
+        "shape_equal": true,
+        "affine_max_abs": 0.0,
+        "dtype_equal": true,
+        "qform_code_equal": true,
+        "sform_code_equal": true
+      },
+      "cost": 0.1907898634672165,
+      "cost_evaluations": 8987
+    },
+    "core_review": {
+      "previous_sha256": "eed70e63e7b950e84858c1fc0e538990c7ce30e492c04cdac926a18451c101eb",
+      "current_sha256": "2d9d46a11acd38c27385a578b108be8538346559db5364a1622457b303bfb72f",
+      "changes": [
+        "Removed unread private _Level.moving_sizes field and its sole construction argument",
+        "Updated runtime QC external benchmark report path"
+      ],
+      "ast_identical_after_reversing_these_changes": true,
+      "normalized_ast_sha256": "2165bed9ad3a1a1998a986a8462548bf1305258610d20e3a5a55fb199ac8a82c"
+    },
+    "tests": {
+      "scope": "tests/fast_vbm, tests/flirt, TF32 defaults, fMRI BBR and normalization APIs",
+      "passed": 240
+    },
+    "interpretation": "Prior measured source hashes, performance timings and FSL metrics remain unchanged. This check validates cleanup outputs, not a new speedup or a new H100 cohort benchmark. Angular candidate capture was not enabled in this cold/warm check; the prior full-profile angular gate is preserved above."
+  }
+}

@@ -1,6 +1,6 @@
 # 验证索引
 
-本页只索引当前发布代码采用的证据。机器可读报告记录候选源码或调用链的 SHA-256、输入边界、参考软件版本、计时范围和限制。真实数据报告保留实际测量源码 hash。FLIRT 的 [12-DOF 测量源码范围核对](runtime_dependencies/flirt_profile_source_equivalence.public.json)记录本次修订前后的精确差异和一例真实病例矩阵逐字节复核；6-DOF 则由最终源码直接重跑。其他保留的继承链有 [SynthMorph registration linear 路径](runtime_dependencies/synthmorph_linear_source_equivalence.public.json)和 [FNIRT/SynthMorph/dMRI 报告的公共包入口](runtime_dependencies/package_entry_source_equivalence.public.json)。这些记录不能写成当前 hash 的完整多例重跑，也不能外推到未列出的配置。
+本页只索引当前发布代码采用的证据。机器可读报告记录候选源码或调用链的 SHA-256、输入边界、参考软件版本、计时范围和限制。真实数据报告保留实际测量源码 hash。FLIRT 的最新证据见 [GPU 批量优化](flirt/gpu_batch.current.public.json)；[早期 12-DOF 源码范围核对](runtime_dependencies/flirt_profile_source_equivalence.public.json)仅覆盖旧串行分支。其他保留的继承链有 [SynthMorph registration linear 路径](runtime_dependencies/synthmorph_linear_source_equivalence.public.json)和 [FNIRT/SynthMorph/dMRI 报告的公共包入口](runtime_dependencies/package_entry_source_equivalence.public.json)。这些记录不能写成当前 hash 的完整多例重跑，也不能外推到未列出的配置。
 
 官方程序只用于生成参考结果。FNIT 候选运行不调用已安装的 FSL、FreeSurfer、SPM、MRtrix3、AFNI、DIPY 或工作流封装包。没有人工真值的比较衡量的是与参考实现的一致性，不代表生物学准确度。
 
@@ -18,7 +18,7 @@
 | [SynthSR](../docs/synthsr/README.md) | [12 例 T1w 与公开 FLAIR 示例](synthsr/report.public.json) | shape、affine、uint8 合同一致；输出与 FreeSurfer CPU 参考近似一致 | 报告含 GPU/CPU 时间和峰值显存；功能页展示合成 T1w |
 | [TorchFAST](../docs/fast/README.md) | [真实 brain-only T1w](fast/report.public.json) | 分割、PVE、bias field 与 bias-corrected 图按图比较；不是逐体素等价实现 | 报告含 FSL/FNIT 时间和峰值显存；功能页展示 GM、差值和偏置校正 |
 | [FastVBM](../docs/fast_vbm/README.md) | [原始 T1→13 幅输出，两分支](fast_vbm/README.md) | 对同一 FSL 完整链，FNIRT / SynthMorph 调制 GM r=0.865489 / 0.616679；两分支均未数值等价 | 进程内含保存 901.93 / 607.16 s；原始 FSL 命令合计 3195.14 s，边界及负载不同；附模板空间对照图 |
-| [TorchFLIRT](../docs/flirt/README.md) | [12-DOF GM CPU 10 例](flirt/report.cpu.current.json)、[H100 4 例](flirt/report.public.json)与[6-DOF b0→T1 一例](connectome/original_ukb_flirt.public.json) | 6-DOF 相对 FSL 矩阵位移 RMS 为 CPU 0.00947 mm、H100 0.00955 mm；12-DOF CPU 9/10 例通过 0.05 mm 门限 | 共享节点时间只报观察值；公开 T1w 图和完整边界见功能页 |
+| [TorchFLIRT](../docs/flirt/README.md) | [GPU 批量优化](flirt/gpu_batch.current.public.json)、[GM CPU 10 例](flirt/report.cpu.current.json)与[原串行 H100 4 例](flirt/report.gpu.current.json) | 批量与串行在真实 b0→T1、T1→MNI152 及公开 T1w→T1w 的保存矩阵、影像、cost 和评价次数一致；对 FSL 的误差不变 | 公开 RTX 3060 cold/warm 为 59.39/59.08→17.34/15.72 s；H100 共享负载观察值、阶段时间、完整 profile 和边界见功能页 |
 | [TorchFNIRT](../docs/fnirt/README.md) | [当前真实 FA matched-input 对照](fnirt/report.real.current.json) | coefficient、warped FA、两类 Jacobian 和标准网格合同分别核对；连续值差异超过浮点误差 | 报告含三阶段 FSL 与 FNIT 配准时间、显存；功能页展示真实 FA 对照 |
 | [TorchApplyWarp](../docs/applywarp/README.md) | [真实 FA 与 intent-2007 coefficient warp](applywarp/report.real.current.json) | shape、affine、dtype 一致；连续值误差按 union support 报告 | 报告含三次 FSL/FNIT 计时和峰值显存；功能页展示 FA 与差值 |
 | [TorchConvertWarp](../docs/convertwarp/README.md) | [真实 DWI 组合场](convertwarp/README.md)及[TBSS/MMORF pipeline 分支](probtrackx/README.md) | 默认 TBSS 系数场与 FSL 分量 MAE 1.98×10⁻⁶ mm；MMORF 转场后重采样 FA 与原 pipeline r≈1 | FSL TBSS 完整命令 49.73 s，FNIT Python 调用 10.02 s；MMORF FNIT 调用 7.27 s，计时边界不同 |
@@ -42,15 +42,15 @@
 
 | 功能 | 当前真实数据报告 | 输出一致性结论 | 时间、显存与示意图 |
 |---|---|---|---|
-| [BIDS→MNI152 2 mm fMRI](../docs/fmri/README.md) | [完整 490 帧 volume](fmri/README.md)、[当前 FEAT 对照](fmri/feat_current.public.json) | pre-ICA FEAT 4D r=0.996419，时间 r 中位数 0.966773；最终 AROMA 没有同算法 UKB FIX 参照 | 完整 API 含保存 1598.01 s，allocated 13.34 GB；附 MNI 时间标准差及帧图 |
-| [fsLR32k / 91k surface](../docs/fmri/surface.md) | [同次新 volume→surface](fmri/fmri_surface.public.json)、[官方球面控制](fmri/fmri_surface_comparison.public.json) | 左/右皮层时间 r 均值 0.941705 / 0.942001；固定 volume、只换官方 newMSM 球面，皮层下逐值相同 | 完整 API 847.83 s，volume+surface 合计 2445.84 s，均不含既有皮层重建；附标准球面相关图 |
+| [BIDS→MNI152 2 mm fMRI](../docs/fmri/README.md) | [完整 490 帧 volume](fmri/README.md)、[当前 FEAT 对照](fmri/feat_current.public.json)、[DeepPrep 对照](fmri/deepprep/README.md) | pre-ICA FEAT 4D r=0.996417，时间 r 中位数 0.966798；最终 AROMA 没有同算法 UKB FIX 参照 | 完整 API 含保存 1719.19 s，allocated 13.34 GB；DeepPrep volume 2091.36 s 含结构重建，范围不同；附 MNI 时间标准差及帧图 |
+| [fsLR32k / 91k surface](../docs/fmri/surface.md) | [同次新 volume→surface](fmri/fmri_surface.public.json)、[官方球面控制](fmri/fmri_surface_comparison.public.json)、[DeepPrep 对照](fmri/deepprep/README.md) | 左/右皮层时间 r 均值 0.940496 / 0.941404；固定 volume、只换官方 newMSM 球面，皮层下逐值相同 | 完整 API 905.71 s，volume+surface 合计 2624.89 s，不含既有皮层重建；DeepPrep fsaverage6 1969.45 s 含结构与 BOLD，空间和范围不同；附标准球面相关图 |
 | [MS-HBM 17 网络](../docs/mshbm/README.md) | [真实 fsLR32k 静息态时序](mshbm/report.public.json) | 输入 profile、网络标签和 Dice/ARI 按顶点比较 | 报告含 CBIG/FNIT 的匹配计时与内存；功能页展示网络标签与差异 |
 
 ## Postanalysis
 
 | 功能 | 当前真实数据报告 | 输出一致性结论 | 时间、显存与示意图 |
 |---|---|---|---|
-| [BigFLICA](../docs/bigflica/README.md) | [真实 UKB 同输入与 2,050 人完整掩膜三模态测试](bigflica/README.md) | CPU/GPU 公开 API 均跑通 C3，但独立成分图与课程显著不同；固定相同 mMIGP 投影后两端九张图相关均 >0.999999998；C20 分别仅保留 CPU 16/20、GPU 11/20 个有效成分 | 共享节点冷启动观察为 CPU 732.75 秒、GPU 1045.08 秒，瓶颈在 GPU DicL；C3 的 VBM 重建很弱，不能视为有效 C20 或端到端等价证明。 |
+| [BigFLICA](../docs/bigflica/README.md) | [30,000人VBM/FA/MD完整掩膜独立CPU/GPU对比](bigflica/README.md) | mMIGP相对差6.07e-6；DicL匹配后相对差16%–30%；CPU/GPU有效成分仅17/13，均未通过C20验收 | 至失败墙钟153.04/112.55分钟；GPU DicL及FLICA均慢于CPU，VBM重建几乎为零；尚无最终C20 course和脑图一致性结果。 |
 | [SuperBigFLICA](../docs/superbigflica/README.md) | [5,000 名真实 UKB、20 成分 H100 完整流程与 8 人原版连续模型比较](superbigflica/README.md) | 固定参数连续模型前向/损失/梯度通过；1,000 人测试反应时间 MAE 73.50 ms、r=0.1731；高血压 AUC=0.7226、balanced accuracy=0.6716；真实分类基准为二分类 | 50 轮训练，验证选第 5 轮；共享 H100 全流程 1517.16 s，PyTorch 峰值 allocation 1.03 GiB；120 张 NIfTI、冻结推理和五张真实图 |
 
 recon-all 与 Connectome 的验证边界由各自功能页维护，不纳入本页审计表。
