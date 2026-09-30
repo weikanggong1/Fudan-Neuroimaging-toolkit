@@ -1,8 +1,8 @@
 # TorchFLIRT：线性配准
 
-[返回首页](../../README.md) · [源码](../../src/fnit/flirt/) · [10 例 CPU 报告](../../validation/flirt/report.cpu.current.json) · [4 例 H100 配对报告](../../validation/flirt/report.public.json) · [公开示例报告](../../validation/flirt/public_example.current.json)
+[返回首页](../../README.md) · [源码](../../src/fnit/flirt/) · [GPU 批量优化报告](../../validation/flirt/gpu_batch.current.public.json) · [10 例 CPU 报告](../../validation/flirt/report.cpu.current.json) · [4 例 H100 配对报告](../../validation/flirt/report.public.json) · [公开示例报告](../../validation/flirt/public_example.current.json)
 
-`TorchFLIRT` 在 FNIT 内实现单被试线性配准和已知线性变换的重采样。候选程序只依赖 PyTorch、NumPy 和 nibabel，运行时不调用 FSL。FSL 6.0.7.4 只用于本页的对照测试。
+`TorchFLIRT` 在 FNIT 内实现单被试线性配准和已知线性变换的重采样。运行时主要依赖 PyTorch、NumPy 和 nibabel，CUDA 批量 NMI 另需 Conda 环境已包含的 Triton；不调用 FSL。FSL 只用于离线对照；本次 GPU 优化重新核验的官方版本为 6.0.7.22，较早对照使用的版本保留在各自报告中。
 
 当前公开接口支持两组参数：
 
@@ -10,7 +10,7 @@
 - `dof=6, cost="normmi"`：6 自由度刚体配准，对应 FSL `flirt -dof 6 -cost normmi`。
 - `applyxfm=True`：直接应用已知 `.mat`，或根据两张图的 qform/sform 对齐同一世界空间；不执行配准优化。
 
-实现包含 FSL scaled-mm 坐标、8/4/2/1 mm 多层搜索、Brent 坐标优化、correlation ratio、normalized mutual information 和默认三线性输出路径。CUDA 使用 float32，默认启用 TF32；没有使用 float16 或 bfloat16。
+实现包含 FSL scaled-mm 坐标、8/4/2/1 mm 多层搜索、Brent 坐标优化、correlation ratio、normalized mutual information 和默认三线性输出路径。图像与 cost 使用 float32，矩阵构造保留原路径的 double 精度；NMI 直方图保留 float64 累加。CUDA 默认允许 TF32，cost 坐标与归约保持原运算顺序，不使用 TF32 GEMM；没有使用 float16 或 bfloat16。
 
 ## 输入
 
@@ -28,6 +28,9 @@
 | `dof` | `-dof` | `6` 或 `12` | 变换自由度。当前只接受 `12/corratio` 和 `6/normmi` 两种组合。 |
 | `cost` | `-cost` | `corratio` 或 `normmi` | 优化代价函数，必须与 `dof` 使用上述组合。 |
 | `device` | `--device` | PyTorch 设备字符串 | 例如 `"cuda:0"` 或 `"cpu"`；省略时有 CUDA 则使用 CUDA。 |
+| `execution` | `--execution` | `auto`、`reference` 或 `batched` | 默认 `auto`：CUDA 采用批量执行，CPU 保留串行参考路径；CUDA NMI 缺少 Triton 时自动使用 `reference`。 |
+| `candidate_batch_size` | `--candidate-batch-size` | 正整数，默认 `128` | 每次 GPU chunk 的候选上限；不改变角度样本数量、搜索范围或迭代上限。 |
+| `memory_budget_gb` | `--memory-budget-gb` | 正数，默认 `20.0` | 批量临时张量的显存预算，单位 GiB；同时根据设备剩余显存分块，图像每层只保存一份。 |
 | `overwrite` | `--overwrite` | 布尔值 | 是否替换已有输出。默认保护已有文件。 |
 
 ## Python 单被试调用
@@ -46,6 +49,9 @@ result = run_flirt(
     dof=12,  # 12 自由度仿射模型
     cost="corratio",  # FSL correlation-ratio 代价函数
     device="cuda:0",  # CUDA float32，默认允许 TF32；也可写 "cpu"
+    execution="auto",  # CUDA 批量执行；reference 可重跑原串行路径
+    candidate_batch_size=128,  # 候选分块上限，不减少搜索候选
+    memory_budget_gb=20.0,  # 显存预算，GiB
     overwrite=False,  # False 时不覆盖已有文件
 )
 ```
@@ -60,6 +66,9 @@ model = TorchFLIRT(
     angular_search=True,  # 执行默认角度搜索
     dof=12,  # 12 自由度仿射模型
     cost="corratio",  # correlation-ratio 代价函数
+    execution="auto",  # CUDA 使用批量候选求值，CPU 使用参考路径
+    candidate_batch_size=128,  # 最大候选分块
+    memory_budget_gb=20.0,  # 显存预算，GiB
 )
 result = model(
     moving="subject_GM.nii.gz",  # moving 图像路径或 nibabel 空间影像
@@ -80,7 +89,7 @@ result = model(
 | `matrix` / `fsl_matrix` | NumPy `(4, 4)` 数组 | input→reference 的 FSL scaled-mm 矩阵。 |
 | `moving_to_fixed_world` | NumPy `(4, 4)` 数组 | input world-RAS→reference world-RAS 的正向矩阵。 |
 | `fixed_to_moving_world` | NumPy `(4, 4)` 数组 | 重采样使用的 reference world-RAS→input world-RAS pull 矩阵。 |
-| `qc` | 字典 | 设备、TF32 状态、代价函数、搜索层级、评价次数和坐标方向。运行时 QC 不把仓库基准解释为当前输入已与 FSL 比较。 |
+| `qc` | 字典 | 设备、执行路径、TF32 状态、代价函数、搜索层级、评价次数、分阶段墙钟时间和坐标方向。运行时 QC 不把仓库基准解释为当前输入已与 FSL 比较。 |
 
 写盘后的结构为：
 
@@ -133,7 +142,7 @@ flirt \
   -cost corratio
 ```
 
-两套命令的 `-in`、`-ref`、`-out`、`-omat`、`-init`、`-inweight`、`-refweight`、`-dof` 和 `-cost` 含义一致。FNIT 另外提供 `--device` 和 `--overwrite`。当前接口不接受 FSL 的其他 cost、DOF、schedule、搜索范围和插值选项。
+两套命令的 `-in`、`-ref`、`-out`、`-omat`、`-init`、`-inweight`、`-refweight`、`-dof` 和 `-cost` 含义一致。FNIT 另外提供 `--device`、`--execution`、`--candidate-batch-size`、`--memory-budget-gb` 和 `--overwrite`。当前接口不接受 FSL 的其他 cost、DOF、schedule、搜索范围和插值选项。
 
 去脑 b0 到去脑 T1 的刚性配准改用 6 自由度与归一化互信息：
 
@@ -206,7 +215,129 @@ W_ref @ inverse(S_ref) @ A @ S_in @ inverse(W_in)
 
 FSL 在 voxel-to-world 线性部分行列式为正时翻转 scaled-mm 第一轴。FNIT 的 `.mat` 读写和 world-RAS 转换使用同一规则。不能把该矩阵直接当作 FreeSurfer LTA 或 NIfTI affine。
 
+## GPU 批量执行
+
+`execution="batched"` 将独立候选的矩阵、坐标变换、三线性采样和 cost 按块计算。8 mm 的粗角度候选、1,331 个细角度候选及各候选的独立 Brent 搜索共享一批 GPU 求值；各搜索仍按原顺序接收自己的 cost。矩阵在 CPU 批量按原 double 运算构造，Brent 状态与分支保留在 CPU；采样和 cost 归约在 GPU 执行。4 mm 扰动优化也按同样方式执行。2/1 mm 中只有单条搜索时，仍保留顺序依赖。
+
+这一模式保持原参考路径的 8/4/2/1 mm 层级、角度范围、候选顺序、筛选与剪枝、自由度进阶、Brent 停止条件、cost 定义、mask 和输出格式。没有减少迭代或加入改变算法的 `fast` 模式。当前 6/normmi 在 8 mm 角度初始化搜索中仍联合优化共同尺度和三轴平移；官方 FSL 的 6-DOF 在该子步骤固定尺度为 1，只优化三轴平移。后续候选姿态与最终优化使用 6 自由度，本次批量执行保留该已有初始化差异。`execution="reference"` 可运行优化前 FNIT 的串行路径；它不代表与官方 FSL 逐位等价。
+
+reference grid、分箱排序、图像、权重和 sampling 常量在每层缓存。批量 cost 不返回每个候选的 Python 标量；需要 Brent 分支时，每一轮只回传一个 cost 向量。CorrRatio 分段归约保持每个候选的 16-byte 起点对齐，以保留串行 CUB 的求和顺序；补齐部分独立归约后丢弃。NMI 直方图使用 float64 累加，概率及熵使用 float32；Triton 融合归约保持当前参考 CUDA 分组并关闭 FMA。主页 Conda 环境已包含 PyTorch 2.5.1 和 Triton 3.1.0，无需安装 FSL 或新增编译依赖。显式 CUDA `batched/normmi` 需要 Triton；`reference` 不需要它。
+
+```python
+from fnit.flirt import TorchFLIRT
+
+registration_model = TorchFLIRT(
+    device="cuda:0",  # 单块 GPU
+    dof=6,  # EPI/b0→T1 刚体模型
+    cost="normmi",  # 保留 NMI cost
+    execution="batched",  # 独立候选批量执行
+    candidate_batch_size=128,  # 可降到 32/64；总候选与 schedule 不变
+    memory_budget_gb=20.0,  # 自动按剩余显存进一步分块，单位 GiB
+)
+registration_result = registration_model(
+    moving="/absolute/path/b0_brain.nii.gz",  # 已去脑 moving 图像
+    fixed="/absolute/path/T1_brain.nii.gz",  # 已去脑 fixed 图像
+)
+print(registration_result.qc["phase_timings_seconds"])
+print(registration_result.qc["cost_evaluations"])
+```
+
+QC 中的 `phase_timings_seconds` 是各主机执行区间的墙钟时间；CUDA 的异步准备工作可能在下一个区间完成，搜索区间包含等待 cost 的时间。`batched_host_result_transfers` 只计批量求值的回传次数。完整同步和 kernel launch 计数由独立 profiler 获得，不能用该字段推断参考路径没有同步。
+
+### 重跑性能与精度对照
+
+[测量脚本](../../tools/benchmark_flirt_gpu.py)读取已经生成的官方 `.mat` 和重采样影像，在 FNIT 运行过程中不执行 FSL。下面两次调用使用相同输入和 oracle，分别测量串行参考与批量路径；12 自由度改用 `--dof 12 --cost corratio`。
+
+```bash
+python tools/benchmark_flirt_gpu.py \
+  --moving /absolute/path/b0_brain.nii.gz \
+  --reference /absolute/path/T1_brain.nii.gz \
+  --fsl-matrix /absolute/path/fsl_b0_to_T1.mat \
+  --fsl-moved /absolute/path/fsl_b0_in_T1.nii.gz \
+  --dof 6 --cost normmi --device cuda:0 --execution reference \
+  --output-dir /absolute/path/benchmark/reference --warm-repeats 1 --profile-full
+
+python tools/benchmark_flirt_gpu.py \
+  --moving /absolute/path/b0_brain.nii.gz \
+  --reference /absolute/path/T1_brain.nii.gz \
+  --fsl-matrix /absolute/path/fsl_b0_to_T1.mat \
+  --fsl-moved /absolute/path/fsl_b0_in_T1.nii.gz \
+  --dof 6 --cost normmi --device cuda:0 --execution batched \
+  --output-dir /absolute/path/benchmark/batched --warm-repeats 1 --profile-full
+
+python tools/check_flirt_gpu_parity.py \
+  --baseline-dir /absolute/path/benchmark/reference \
+  --optimized-dir /absolute/path/benchmark/batched \
+  --output-json /absolute/path/benchmark/parity.json
+```
+
+`cold` 是新进程内的第一次完整配准，CUDA context 与读图在计时前完成；`warm` 在同一进程重新执行全部搜索，不复用拟合矩阵。时间包含优化、重采样和结果回传，不含读写文件。profile 是第三次独立运行，其耗时不用于速度表。报告记录源码和输入 SHA-256、阶段时间、显存、实际 CUDA runtime 调用计数及同输入 FSL 精度；gate 检查两条路径的保存矩阵、影像与 header、cost、评价次数和已捕获的角度候选。矩阵文本保存 12 位有效数字，文件相同不等于未舍入的 double 矩阵逐 bit 相同。
+
 ## 真实数据测量
+
+### 本次 GPU 批量优化
+
+保留完整搜索与同一 FSL oracle，比对优化前串行实现和本次批量执行。两条路径的保存矩阵、重采样体素、NIfTI header、最终 cost 和评价次数一致；精度没有因执行方式变化而退化。[标量报告](../../validation/flirt/gpu_batch.current.public.json)记录实际测量源码与工具的 SHA-256。最早 H100 cold/warm 未记录工具 hash，6-DOF 当时未记录 `_nib.py` hash；报告明确保留这些缺项，新阶段测量和完整 profile 记录各自实际 hash。
+
+| 真实数据与 GPU | 串行 cold / warm | 批量 cold / warm | 批量峰值 allocated / reserved |
+|---|---:|---:|---:|
+| b0→T1，6-DOF/normmi，H100 | 535.11 / 482.23 秒 | 5.20 / 3.95 秒 | 3.14 / 3.56 GiB |
+| T1→MNI152，12-DOF/corratio，H100 | 447.77 / 502.43 秒 | 5.71 / 4.57 秒 | 5.05 / 5.88 GiB |
+| 公开 T1w→T1w，12-DOF/corratio，RTX 3060 | 59.39 / 59.08 秒 | 17.34 / 15.72 秒 | 4.30 / 5.28 GiB |
+
+H100 全卡利用率约 100%，包括其他作业，以上是共享节点的观察值，不据此计算独占 H100 加速比。RTX 3060 的全卡平均利用率在 cold 为 36.7%→60.1%，warm 为 37.7%→62.6%，包括桌面渲染；该公开病例的 cold/warm 加速为 3.42×/3.76×。显存为本进程 PyTorch peak allocated/reserved，两者都低于 20 GiB。
+
+| 对 FSL 的精度：优化前 = 优化后 | b0→T1 | T1→MNI152 | 公开 T1w→T1w |
+|---|---:|---:|---:|
+| world-grid 位移 mean / median | 0.00886 / 0.00897 mm | 0.11193 / 0.11043 mm | 0.34737 / 0.35119 mm |
+| 位移 p95 / RMS | 0.01449 / 0.00955 mm | 0.19347 / 0.12269 mm | 0.55679 / 0.37208 mm |
+| 重采样 Pearson / MAE | 0.9999718 / 17.4431 | 0.9968224 / 10.5053 | 0.9952013 / 20.5673 |
+| support Dice | 0.999554 | 0.972414 | 0.996074 |
+| FNIT 最终搜索 cost | −1.188561916 | 0.093538806 | 0.190789863 |
+| cost evaluation 次数 | 5,971 | 7,461 | 8,987 |
+
+位移在 moving 视野的 13³ 世界坐标点计算，图像 Pearson/MAE 使用固定的官方输出非零区域；MAE 单位为原始影像强度。最终 cost 是 FNIT 搜索 cost，官方默认日志没有提供其内部最终 cost。前两例对照 FSL 6.0.7.22；公开示例使用已核验 hash 的 6.0.7.4 oracle。T1→MNI152 的 shape、affine 和 sform code 与 FSL 一致，原有 qform code 差异保留（FNIT 为 0，FSL 为 2）；本次优化前后的 header 逐位相同。这些结果验证执行优化不退化，不代表 FNIT 与 FSL 逐位等价。
+
+公开 T1w 病例的完整 profiler 记录如下，独立 profile 耗时未纳入速度表：
+
+| 完整 profile 指标，RTX 3060 | 串行 | 批量 |
+|---|---:|---:|
+| CUDA kernel launch API 调用 | 1,304,043 | 114,928 |
+| `cudaStreamSynchronize` | 161,816 | 841 |
+| `cudaMemcpyAsync` 总调用 | 197,772 | 2,406 |
+| CUDA tensor `float()` / `bool()` | 26,971 / 17,974 | 10 / 0 |
+| cost evaluation | 8,987 | 8,987 |
+
+WSL profiler 未提供 GPU device timeline，表中 kernel 数是实际记录的 runtime launch 调用，不能当作 device event 时间。同步计数包含 profiler 边界；传输方向未从缺失的 timeline 推断。批量版剩余 scalar conversion 出现在初始化，Brent 每轮仍需一次 cost 向量回传以决定下一轮试探。
+
+Linux H100 提供了完整 GPU timeline，两例的 kernel event 数与 runtime launch 数一致。以下均来自完整搜索，未用采样外推（串行→批量）：
+
+| 完整 profile 指标，H100 | b0→T1，6-DOF | T1→MNI152，12-DOF |
+|---|---:|---:|
+| kernel 数 | 923,354→75,533 | 1,082,773→103,759 |
+| `cudaStreamSynchronize` | 101,092→497 | 134,348→761 |
+| Host→Device copy events | 23,903→468 | 29,863→740 |
+| Device→Host copy events | 77,189→458 | 104,485→720 |
+| `cudaMemcpyAsync` 总调用 | 118,542→1,355 | 164,200→2,946 |
+
+copy event 与 runtime API 调用是不同计数；API 总数还可包含其他方向，不能将 Host→Device 和 Device→Host 相加当作总数。profile 的矩阵、影像、header、cost 和评价次数单独与无 profiler 的结果核对一致。完整设备时间、初始化 scalar API 计数及 profile 峰值显存见报告。
+
+公开病例的 warm 角度搜索为 27.32→2.06 秒，4 mm 局部优化为 24.23→6.68 秒；2 mm 为 2.52→2.43 秒，1 mm 为 2.16→1.96 秒。后两层的收益较小，因为单条 Brent 搜索仍有顺序依赖。
+
+H100 的阶段时间另由一次无 profiler 的 cold 运行测量（秒，串行→批量）：
+
+| 阶段 | b0→T1，6-DOF | T1→MNI152，12-DOF |
+|---|---:|---:|
+| reference pyramid | 0.188→0.219 | 0.143→0.137 |
+| 角度搜索，含 8 mm refinement | 244.21→1.98 | 207.68→1.96 |
+| 4 mm 局部优化 | 78.05→1.30 | 150.20→1.44 |
+| 2 mm 局部优化 | 3.08→0.40 | 7.61→0.72 |
+| 1 mm 局部优化 | 4.55→0.52 | 10.08→0.63 |
+| 最终重采样 dispatch | 0.088→0.090 | 0.137→0.110 |
+
+逐层图像准备及各阶段 cost 次数见标量报告。阶段时间是 host wall scope，不是独立 CUDA event 时间；最后一行不含随后等待结果回传的时间。嵌套的 8 mm 局部优化包含在角度搜索中，不能重复相加。共享 H100 的负载变化使这次串行阶段测量的总时间与 cold/warm 速度表不同，两次测量分别保留。
+
+### 其他已验证数据与重采样路径
 
 **MNI152 模板 1 mm↔2 mm 的 `applyxfm -usesqform`。** 以 FSL 发布的原始 MNI152_T1 1 mm、2 mm 图像为双向输入及 reference，FNIT 与官方 FLIRT 各自从新进程读图、重采样并写出 gzip NIfTI。两边输出的 shape 和 affine 均等于 reference。源码哈希、模板 SHA-256、逐方向矩阵和完整指标见 [CPU 实测报告](../../validation/flirt/applyxfm_mni.cpu.json)、[H100 实测报告](../../validation/flirt/applyxfm_mni.gpu.json)；[重测脚本](../../validation/flirt/benchmark_applyxfm.py)不在 FNIT 运行时调用。
 

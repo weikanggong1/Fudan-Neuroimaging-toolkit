@@ -199,6 +199,9 @@ def _run_flirt(args):
         dof=args.dof,
         cost=args.cost,
         device=args.device,
+        execution=args.execution,
+        candidate_batch_size=args.candidate_batch_size,
+        memory_budget_gb=args.memory_budget_gb,
         overwrite=args.overwrite,
     )
 
@@ -695,6 +698,9 @@ def main(argv=None):
     flirt.add_argument('-dof', type=int, choices=(6, 12), default=12)
     flirt.add_argument('-cost', choices=('corratio', 'normmi'), default='corratio')
     flirt.add_argument('--device')
+    flirt.add_argument('--execution', choices=('auto', 'reference', 'batched'), default='auto')
+    flirt.add_argument('--candidate-batch-size', type=int, default=128)
+    flirt.add_argument('--memory-budget-gb', type=float, default=20.0)
     flirt.add_argument('--threads', type=int, default=1)
     flirt.add_argument('--overwrite', action='store_true')
     from .fnirt.cli import add_arguments as add_fnirt_arguments

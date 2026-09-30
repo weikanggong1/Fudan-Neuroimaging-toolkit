@@ -60,6 +60,14 @@ def build_parser(prog="fnit-flirt"):
         help="PyTorch device, for example cpu, cuda, or cuda:1; default: CUDA when available",
     )
     parser.add_argument(
+        "--execution", choices=("auto", "reference", "batched"), default="auto",
+        help="candidate execution; auto batches CUDA and preserves scalar CPU execution",
+    )
+    parser.add_argument("--candidate-batch-size", type=int, default=128,
+                        help="maximum independent affine candidates per GPU chunk")
+    parser.add_argument("--memory-budget-gb", type=float, default=20.0,
+                        help="GPU memory budget; chunks also adapt to available memory")
+    parser.add_argument(
         "--overwrite", action="store_true",
         help="replace existing output files; outputs are otherwise protected",
     )
@@ -83,9 +91,13 @@ def main(argv=None, *, prog="fnit-flirt"):
             applyxfm=args.applyxfm,
             usesqform=args.usesqform,
             device=args.device,
+            execution=args.execution,
+            candidate_batch_size=args.candidate_batch_size,
+            memory_budget_gb=args.memory_budget_gb,
             overwrite=args.overwrite,
         )
-    except (FileExistsError, FileNotFoundError, NotImplementedError, TypeError, ValueError) as error:
+    except (FileExistsError, FileNotFoundError, ImportError,
+            NotImplementedError, TypeError, ValueError) as error:
         parser.error(str(error))
     return 0
 

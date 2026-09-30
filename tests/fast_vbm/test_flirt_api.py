@@ -78,6 +78,14 @@ def test_reference_validation_is_not_reported_as_current_input_equivalence(
         monkeypatch):
     class FakeEngine:
         cost_evaluations = 1
+        phase_timings = {}
+        phase_cost_evaluations = {}
+        batch_evaluations = 0
+        host_result_transfers = 0
+
+        def phase(self, name):
+            from contextlib import nullcontext
+            return nullcontext()
 
         def __init__(self, *args, **kwargs):
             pass

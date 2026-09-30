@@ -1,9 +1,12 @@
 # FLIRT 验证资产
 
-本目录保留修订后的真实数据测量。12-DOF GM 的 10 例 CPU 和 4 例 H100 报告由 `flirt/core.py` `56a934…` 生成；最终源码 `f2c530…` 只在候选自由度处增加 `min(dof, 7)` 分支。对 12-DOF 该值仍为 7，一例真实 GM 的最终 `.mat` 与测量源码逐元素一致。该核对不等于最终源码的 10 例完整重跑；详见[源码范围记录](../runtime_dependencies/flirt_profile_source_equivalence.public.json)。最终源码直接完成了一例 6-DOF b0→T1 的 CPU/GPU 对照和一例公开 12-DOF T1w→T1w 对照。
+本次 [GPU 批量优化报告](gpu_batch.current.public.json)包含真实 6-DOF b0→T1、12-DOF T1→MNI152 及公开 T1w→T1w 的 cold/warm 时间、阶段测量、完整 profile 和同输入 FSL 精度。保存矩阵、影像、header、cost、评价次数及捕获的角度候选与原串行路径一致；运行时不调用 FSL。测量和严格检查工具见 [benchmark](../../tools/benchmark_flirt_gpu.py)、[parity gate](../../tools/check_flirt_gpu_parity.py)，用法见[功能页](../../docs/flirt/README.md#重跑性能与精度对照)。真实私有病例只发布汇总标量。
+
+本目录同时保留其他输入类型的既有对照。原串行路径的 12-DOF GM 10 例 CPU 和 4 例 H100 报告由 `flirt/core.py` `56a934…` 生成；随后 `f2c530…` 只在候选自由度处增加 `min(dof, 7)` 分支。对 12-DOF 该值仍为 7，一例真实 GM 的 `.mat` 与测量源码逐元素一致。该核对不等于当前批量源码的 10 例完整重跑；详见[源码范围记录](../runtime_dependencies/flirt_profile_source_equivalence.public.json)。旧路径直接完成的一例 6-DOF b0→T1 CPU/GPU 和公开 12-DOF T1w→T1w 对照按各自 hash 保留。
 
 | 文件 | 内容 |
 |---|---|
+| `gpu_batch.current.public.json` | 最新批量实现与原串行路径的速度、精度、kernel/copy/sync、显存及逐 bit gate 汇总；不含私有影像、输入路径或被试标识。 |
 | `report.public.json` | 真实 GM 前 4 例的 CPU/H100 配对报告；含源码 hash、逐例矩阵与影像指标、观察时间和显存。 |
 | `report.cpu.current.json` | 10 例真实 GM CPU 逐例报告，保留测量源码 hash。 |
 | `report.gpu.current.json` | 前 4 例真实 GM 的 H100 默认 TF32 报告；运行时有其他 GPU 作业。 |
@@ -59,4 +62,4 @@ python validation/flirt/validate_real.py combine \
 
 `--reuse-existing --process-log <log>` 可在不重复优化的情况下，使用已保存的 `caseNN/candidate.nii.gz`、`candidate.mat` 和 `worker.json` 重新计算报告。日志每行格式为 `caseNN matrix_rmsdiff process_wall_seconds`。
 
-当前矩阵门限为 `rmsdiff <= 0.05 mm`。CPU 通过 9/10 例，H100 已完成的 4 例通过 4/4；GPU 全 10 例尚无本次修订后的测量。共享节点的非同步时间不能计算加速比。最终源码的 6-DOF 同输入对照见[刚性配准报告](../connectome/original_ukb_flirt.public.json)。
+GM 对照的矩阵门限为 `rmsdiff <= 0.05 mm`。CPU 通过 9/10 例，原串行 H100 的 4 例通过 4/4；当前批量源码尚无全部 10 例 GM 测量。共享节点时间只作为观察值。原串行 6-DOF CPU/GPU 对照见[刚性配准报告](../connectome/original_ukb_flirt.public.json)，最新批量对照见本页首段。
