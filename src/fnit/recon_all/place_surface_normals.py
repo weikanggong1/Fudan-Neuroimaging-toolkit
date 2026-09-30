@@ -49,20 +49,21 @@ def _normals(xyz: np.ndarray, faces: np.ndarray, face_ids: np.ndarray, corners: 
 
 
 def initial_vertex_normals(vertices: np.ndarray, triangles: np.ndarray) -> np.ndarray:
-    """Return normals using each vertex's incident faces in file order."""
+    """按原有面顺序计算每顶点单位法向，复用已有单精度数值内核。
+
+    vertices 为 (N, 3) 坐标，triangles 为 (F, 3) 有序顶点索引；输入转换为
+    float32/int32。坐标单位不影响单位法向；返回 (N, 3) float32，无关联面
+    的顶点返回零向量。稳定排序只构造关联索引，不重排面或更改累计顺序。
+    属于 mris_sphere / mris_place_surface 的内部几何步骤，无独立 CLI。
+    非法索引沿用 NumPy/Numba 的错误行为；真实回归与计时见性能记录。
+    """
     xyz = np.asarray(vertices, dtype=np.float32)
     faces = np.asarray(triangles, dtype=np.int32)
     counts = np.bincount(faces.ravel(), minlength=len(xyz))
     offsets = np.empty(len(xyz) + 1, dtype=np.int32)
     offsets[0] = 0
     np.cumsum(counts, out=offsets[1:])
-    face_ids = np.empty(len(faces) * 3, dtype=np.int32)
-    corners = np.empty_like(face_ids)
-    cursor = offsets[:-1].copy()
-    for face_id, triangle in enumerate(faces):
-        for corner, vertex in enumerate(triangle):
-            position = cursor[vertex]
-            face_ids[position] = face_id
-            corners[position] = corner
-            cursor[vertex] += 1
+    order = np.argsort(faces.ravel(), kind="stable")
+    face_ids = (order // 3).astype(np.int32)
+    corners = (order % 3).astype(np.int32)
     return _normals(xyz, faces, face_ids, corners, offsets)
