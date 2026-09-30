@@ -4,6 +4,50 @@
 
 输入原始 BIDS DWI、可选反向相位编码图像和配对 T1w，流程依次运行 PyTorch TOPUP、PyTorch EDDY、官方 FreeSurfer `recon-all`、响应估计、MSMT-CSD、ACT/iFOD2 追踪、SIFT2 和 atlas 端点赋值。已有完整 FreeSurfer subject 或已校正 DWI 时跳过相应阶段。多个 atlas 共用一次追踪和 SIFT2，各输出 count、SIFT2 FBC、mean length、mean FA 四张矩阵。
 
+## 流程策略
+
+以同一次扫描的 BIDS 元数据确定 DWI、梯度和可选反向相位编码图像；已提供校正 DWI 与旋转 bvec 时直接使用。T1w 的结构重建采用已完成的官方 `recon-all` subject，缺失时才运行官方命令。FNIT 从这些输入计算 DWI 模型、5TT/GMWMI、配准和追踪；先完成**一次全脑追踪与 SIFT2**，再让所选的一套或多套 atlas 分别给同一批流线端点赋值。atlas 的节点编号以各自的 `nodes.tsv` 为准。
+
+```mermaid
+flowchart TD
+    B["BIDS DWI、bval/bvec、JSON"] --> SEL["选定受试者、session 和 run"]
+    SEL --> CORR{"已提供校正 DWI 与旋转 bvec？"}
+    CORR -- 是 --> DWI["校正 DWI 与旋转梯度"]
+    CORR -- 否 --> REV{"有配对的反向相位编码图像？"}
+    REV -- 有 --> TOP["PyTorch TOPUP"] --> EDDY["PyTorch EDDY"]
+    REV -- 无 --> EDDY
+    EDDY --> DWI
+
+    T1["BIDS T1w 或已完成的 subject"] --> FS{"recon-all 已完成？"}
+    FS -- 否 --> RECON["官方 FreeSurfer recon-all"] --> ANAT["读取分割、表面与注释"]
+    FS -- 是 --> ANAT
+
+    DWI --> B0["mean b0、脑掩膜"] --> REG["TorchFLIRT：DWI 到 T1"]
+    DWI --> FOD["Dhollander → MSMT-CSD → mtnormalise"]
+    DWI --> FA["张量拟合 → FA"]
+    ANAT --> TISSUE["5TT 与 GMWMI"]
+    ANAT --> ATL["构建所选 1..N 套 atlas"]
+    REG --> TISSUE_ALIGN["将 5TT/GMWMI 对齐 DWI 世界"]
+    TISSUE --> TISSUE_ALIGN
+    REG --> ATLAS_DWI["每套 atlas 映射至 DWI"]
+    ATL --> ATLAS_DWI
+
+    FOD --> TRACK["一次 iFOD2 + ACT 追踪"]
+    TISSUE_ALIGN --> TRACK
+    TRACK --> SIFT["一次 SIFT2 估计"]
+    FOD --> SIFT
+    TISSUE_ALIGN --> SIFT
+    TRACK --> METRIC["逐流线长度与平均 FA"]
+    FA --> METRIC
+    TRACK --> MATRIX["每套 atlas 分别做端点赋值与矩阵汇总"]
+    SIFT --> MATRIX
+    METRIC --> MATRIX
+    ATLAS_DWI --> MATRIX
+    MATRIX --> OUT["每套 atlas：nodes.tsv、count、FBC、mean length、mean FA"]
+```
+
+Tian 路径还需将 MNI 模板标签映射到个体 T1：默认使用 FNIT SynthMorph，提供 `--tian-fnirt-coeff` 时使用已有变形系数；这一分支只影响相应 atlas 的构建。图中官方 `recon-all` 是用户已许可的结构像前置程序，其他计算由 FNIT 完成；Glasser 模板目前另有下文说明的 Workbench 依赖。
+
 ## BIDS 用法
 
 ```bash
@@ -142,3 +186,34 @@ Python 入口 `UKBConnectome_pipeline(device="cuda:0").run_bids(bids_root, outpu
 | 独立 100k 追踪 | 部分 count/support 落入 MRtrix 自身三次重复范围；长度、8 mm 端点和 TDI 未全面进入 | [三次对照和脑图](../../validation/connectome/ds004666/tracking_100k_three_seed_20260929.md) |
 
 最终随机追踪验收采用**MRtrix 自身重复范围**：双方固定同一输入，各运行多个种子，比较接受率、长度分布、端点、TDI 及每套 atlas 的四张矩阵；FNIT 落入参考范围即可，无需比官方自身更稳定。固定轨迹矩阵精度已高，独立追踪仍有指标未达成；BIDS 编排的加入不等于原 UKB 全链数值一致。100 万及 1,000 万播种仍需实测性能。
+
+### BEDPOSTX + ProbtrackX2 能否作为完整对照？
+
+**可以作为同一输入的 FSL-FDT 独立流程，不能代替原 UKB-connectomics 的 MRtrix 数值基准。**独立流程可共用同一份校正 DWI、旋转梯度、脑掩膜、DWI 空间的 atlas ROI 及 `nodes.tsv` 顺序：`BEDPOSTX` 估计逐体素纤维方向后验，`ProbtrackX2 --network` 从每个 ROI 播种并输出 `fdt_network_matrix`。官方定义中，第 *i* 行第 *j* 列是从 ROI *i* 发出的样本到达 ROI *j* 的计数，因此通常是有向矩阵；[BEDPOSTX](https://fsl.fmrib.ox.ac.uk/fsl/docs/diffusion/bedpostx.html)和[ProbtrackX](https://fsl.fmrib.ox.ac.uk/fsl/docs/diffusion/probtrackx.html)文档给出输入与矩阵语义。
+
+独立 FSL benchmark 的命令形式如下。先将同一张 `atlas_dwi.nii.gz` 按 `nodes.tsv` 顺序拆成各节点的二值 NIfTI，并逐行写入 `roi_list.txt`；`BEDPOSTX_INPUT` 目录放校正后的 `data.nii.gz`、`bvals`、旋转后的 `bvecs` 和 `nodif_brain_mask.nii.gz`。这条全脑串联目前是**待验证的对照设计**，不是 `UKBConnectome_pipeline` 已运行的分支。
+
+```bash
+BEDPOSTX_INPUT=/data/fsl_reference/sub-01             # 同一校正 DWI、梯度和脑掩膜
+ROI_LIST=/data/fsl_reference/sub-01/roi_list.txt       # 每行一个 DWI 空间二值 ROI，顺序同 nodes.tsv
+FSL_NETWORK_DIR=/data/fsl_reference/sub-01/network     # 官方网络矩阵输出目录
+
+bedpostx "$BEDPOSTX_INPUT" -n 3 -model 2 -w 1 -b 1000 -j 1250 -s 25
+probtrackx2 -s "${BEDPOSTX_INPUT}.bedpostX/merged" \
+  -m "${BEDPOSTX_INPUT}.bedpostX/nodif_brain_mask.nii.gz" \
+  -x "$ROI_LIST" --network --dir="$FSL_NETWORK_DIR" --forcedir \
+  -P 5000 -S 2000 --steplength=0.5
+```
+
+| 比较对象 | 原 UKB / 本流程 | FSL-FDT 独立流程 | 可比性 |
+|---|---|---|---|
+| 局部方向模型 | Dhollander 响应、MSMT-CSD、归一化 WM FOD | BEDPOSTX 纤维方向后验 | 同 DWI 可分别验证模型输出；参数不是同一个量。 |
+| 播种与追踪 | GMWMI 播种，iFOD2 + 5TT/ACT，生成一次全脑流线集 | 各 ROI 体素播种，从后验抽方向并传播 | 比较空间覆盖、长度和重复性；播种分布与解剖约束不同。 |
+| 边权 | 端点配对的流线条数与 SIFT2 权重和 | 种子 ROI 到目标 ROI 的样本命中数 | 矩阵可按相同节点对齐后比较支持和秩；原始值、方向性和单位不同。 |
+| 其他矩阵 | SIFT2 加权 mean length、mean FA | 可另算路径长度；默认 `--network` 不产生这两张同定义矩阵 | 不能把 FSL 原始 network 矩阵当成四张 UKB 矩阵的逐值参考。 |
+
+因此，若“完全对照”指**从同一 BIDS 输入独立得到 ROI×ROI 结果**，FSL 路线可行；若指**复现原 [UKB 追踪脚本](https://github.com/sina-mansour/UKB-connectomics/blob/main/scripts/bash/probabilistic_tractography_native_space.sh)的四种边权和端点定义**，答案是否定的。给 FSL 计数做归一化或对称化后，可以研究跨方法的一致性，但不会变成 [MRtrix `tcksift2`](https://mrtrix.readthedocs.io/en/latest/reference/commands/tcksift2.html) 加 [`tck2connectome`](https://mrtrix.readthedocs.io/en/latest/reference/commands/tck2connectome.html) 的结果。FSL `matrix1/2/3` 也各有种子或目标体素定义，不应改名充当原 UKB 的端点矩阵。
+
+FNIT 已有独立的 [TorchBEDPOSTX](../bedpostx/README.md) 和 [TorchProbtrackX](../probtrackx/README.md)；后者支持 DWI 网格体积 ROI 的 `regions` 网络模式。现有真实 DWI 证据只覆盖 BEDPOSTX 的小范围体素检查，以及**固定 FSL BEDPOSTX 后验**时 ProbtrackX 的五区网络：计数模式的网络密度图 r 为 0.9290（CPU）/0.9436（GPU），非零支持 Dice 为 0.5516/0.5303，原始 ROI 矩阵 MAE 为 0.60/0.76；见[现有 FSL 比较与图](../probtrackx/README.md#与-fsl-的真实-dwi-benchmark)。这没有验证 TorchBEDPOSTX→TorchProbtrackX 的独立全脑串联，更不能证明它与 MRtrix 流程相同。当前 TorchProbtrackX 也未覆盖官方表面播种等全部模式。
+
+若增加这条**独立验证分支**，应依次固定校正 DWI/梯度/掩膜、分辨率和 ROI 顺序；先比较同输入 BEDPOSTX 后验，再固定同一份后验比较 ProbtrackX2 的 `fdt_network_matrix`，最后比较两套独立串联流程。每阶段都记录真实数据墙钟、显存、ROI 矩阵误差及重复运行的支持范围。FSL 原程序只在独立 benchmark 环境运行，不接入 `UKBConnectome_pipeline` 的 FNIT 运行时。
