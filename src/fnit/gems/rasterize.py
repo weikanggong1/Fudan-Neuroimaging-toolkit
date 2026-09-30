@@ -76,7 +76,8 @@ class BlockIndex:
                 continue
             rows = order[start:stop]
             width = 1 << (len(ids) - 1).bit_length()
-            groups.setdefault((len(rows), width), []).append((coordinates[rows], ids, rows))
+            n_points = 1 << (len(rows) - 1).bit_length()
+            groups.setdefault((n_points, width), []).append((coordinates[rows], ids, rows))
         batches = []
         reorder = np.full(len(coordinates), -1, dtype=np.int64)
         offset = 0
@@ -84,16 +85,22 @@ class BlockIndex:
             batch_size = max(1, min(16, 8_388_608 // (n_points * width)))
             for start in range(0, len(blocks), batch_size):
                 subset = blocks[start:start + batch_size]
-                points = torch.as_tensor(np.stack([block[0] for block in subset]), device=device, dtype=dtype)
+                points = torch.as_tensor(np.stack([np.pad(block[0], ((0, n_points - len(block[0])), (0, 0)),
+                                                          mode="edge") for block in subset]),
+                                         device=device, dtype=dtype)
                 ids = torch.as_tensor(np.stack([np.pad(block[1], (0, width - len(block[1])))
                                                for block in subset]), device=device, dtype=torch.long)
                 counts = torch.as_tensor([len(block[1]) for block in subset], device=device)
                 candidate_mask = torch.arange(width, device=device)[None] < counts[:, None]
                 batch_ids = torch.arange(len(subset), device=device)[:, None]
                 rows = np.concatenate([block[2] for block in subset])
+                # Only the lookup evaluates padding; interpolation and its
+                # autograd graph retain real points using this static mapping.
+                point_rows = torch.as_tensor(np.concatenate([
+                    np.arange(len(block[0])) + i * n_points for i, block in enumerate(subset)]), device=device)
                 reorder[rows] = np.arange(offset, offset + len(rows))
                 offset += len(rows)
-                batches.append((points, ids, candidate_mask, batch_ids))
+                batches.append((points, ids, candidate_mask, batch_ids, point_rows))
         result = (tuple(batches), torch.as_tensor(reorder, device=device))
         # Keep the mask alive so a later tensor cannot reuse its identity.
         self._device_cache[key] = (valid_mask, version, result)
@@ -272,7 +279,7 @@ def rasterize_priors_compact(
     all_inv, all_info = torch.linalg.inv_ex(all_matrix, check_errors=False)
     all_singular = (all_info != 0) | (torch.linalg.det(all_matrix).abs() <= 1e-10)
     values_parts, covered_parts = [], []
-    for points, ids, candidate_mask, batch_ids in batches:
+    for points, ids, candidate_mask, batch_ids, point_rows in batches:
         with torch.no_grad():
             rel = points[:, :, None, :] - all_v0[ids][:, None]
             w123 = torch.einsum("bcij,bpcj->bpci", all_inv[ids], rel)
@@ -280,13 +287,13 @@ def rasterize_priors_compact(
             singular = all_singular[ids] | ~candidate_mask
             score = weights.amin(-1).masked_fill(singular[:, None], -torch.inf)
             best_score, best = score.max(dim=2)
-            selected_ids = ids[batch_ids, best]
-            covered = best_score >= -float(tolerance)
+            selected_ids = ids[batch_ids, best].flatten()[point_rows]
+            covered = (best_score >= -float(tolerance)).flatten()[point_rows]
         selected_cells = tetrahedra[selected_ids]
-        selected_rel = points - all_v0[selected_ids]
-        selected_w123 = torch.einsum("bpij,bpj->bpi", all_inv[selected_ids], selected_rel)
+        selected_rel = points.reshape(-1, 3)[point_rows] - all_v0[selected_ids]
+        selected_w123 = torch.einsum("pij,pj->pi", all_inv[selected_ids], selected_rel)
         selected_weights = torch.cat((1.0 - selected_w123.sum(-1, keepdim=True), selected_w123), dim=-1)
-        values = (alphas[selected_cells] * selected_weights[..., None]).sum(dim=2)
+        values = (alphas[selected_cells] * selected_weights[..., None]).sum(dim=1)
         values = values.clamp_min(0)
         values = values / values.sum(-1, keepdim=True).clamp_min(torch.finfo(values.dtype).eps)
         values_parts.append(torch.where(covered[..., None], values, 0).reshape(-1, k))
@@ -300,4 +307,4 @@ def rasterize_priors_compact(
     if background_channel is not None:
         bg = int(background_channel)
         out[:, bg] = torch.where(~covered, torch.ones_like(out[:, bg]), out[:, bg])
-    return out.T, covered
+    return out.T.contiguous(), covered

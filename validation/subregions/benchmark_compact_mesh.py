@@ -1,13 +1,15 @@
 """真实保存阶段的丘脑或海马–杏仁核网格组件对照；不代表全脑或整条流程。
 
-输入：官方保存阶段目录中的 processedImageMasked.mgz、alignedAtlasImage.mgz、
+输入：旧 FNIT 原生实现保存阶段目录中的 processedImageMasked.mgz、alignedAtlasImage.mgz、
 warpedOriginalMesh.txt.gz，以及原图谱 compressionLookupTable.txt。输出 JSON 记录
 输入/源码哈希、首次与交替重复耗时、独立显存峰值、先验/目标函数/梯度差异。
 两条路径共用一次 dense 初始化得到的 Gaussian 参数，全部计算保持 float32。
 资源由用户在原许可范围内提供；本脚本不下载或复制图谱、影像。
+保存阶段示例：丘脑 port_thalamus_debug；左海马/杏仁核
+port_hippo_integrated_fullfix_left_tmp。这些输入来自旧 FNIT 原生路径。
 
 示例（变量使用绝对路径）：
-  prepared_stage=/absolute/path/official_saved_thalamus_stage  # 官方保存的真实阶段
+  prepared_stage=/absolute/path/port_thalamus_debug  # 旧 FNIT 保存的真实阶段
   compression_lut=/absolute/path/thalamus/compressionLookupTable.txt  # 图谱标签顺序
   benchmark_output=/absolute/path/compact_thalamus_fp32.json  # 组件结果
   python validation/subregions/benchmark_compact_mesh.py \\
@@ -73,7 +75,7 @@ def differences(dense, compact):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--prepared-stage", required=True, type=Path, help="含三个官方保存阶段文件的目录")
+    parser.add_argument("--prepared-stage", required=True, type=Path, help="含三个旧 FNIT 原生实现保存阶段文件的目录")
     parser.add_argument("--lut", required=True, type=Path, help="对应图谱的 compressionLookupTable.txt")
     parser.add_argument("--structure", required=True,
                         choices=("thalamus", "hippo-amygdala-left", "hippo-amygdala-right"),
@@ -207,13 +209,18 @@ def main():
 
     dense_batches = indices["dense"].device_batches(device, torch.float32)
     compact_batches, reorder = indices["compact"].device_compact_batches(valid, device, torch.float32)
+    # The candidate search evaluates padded point slots; interpolation uses real valid points.
+    compact_points = sum(batch[0].shape[0] * batch[0].shape[1] for batch in compact_batches)
+    compact_valid_points = int((reorder >= 0).sum())
     counts = {"grid_blocks": len(indices["dense"].candidates),
               "dense_active_blocks": sum(len(batch[0]) for batch in dense_batches),
               "dense_batches": len(dense_batches),
               "dense_rasterized_points": sum(batch[0].shape[0] * batch[0].shape[1] for batch in dense_batches),
               "compact_active_blocks": sum(len(batch[0]) for batch in compact_batches),
               "compact_batches": len(compact_batches),
-              "compact_rasterized_points": sum(batch[0].shape[0] * batch[0].shape[1] for batch in compact_batches),
+              "compact_rasterized_points": compact_points,
+              "compact_valid_points": compact_valid_points,
+              "compact_padding_points": compact_points - compact_valid_points,
               "valid_points_without_candidates": int((reorder < 0).sum())}
     del dense_batches, compact_batches, reorder, reference_geometry
 

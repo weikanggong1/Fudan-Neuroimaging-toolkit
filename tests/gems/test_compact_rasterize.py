@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 import torch
 
-from fnit.gems.rasterize import (build_block_index, rasterize_priors,
+from fnit.gems.rasterize import (BlockIndex, build_block_index, rasterize_priors,
                                   rasterize_priors_compact)
 
 
@@ -84,6 +84,26 @@ def test_compact_cache_only_contains_masked_points_and_tracks_mask_changes(devic
                                                         valid_mask=mask, block_index=index)
     torch.testing.assert_close(compact, dense[:, mask])
     assert torch.equal(compact_coverage, coverage[mask])
+
+
+def test_compact_batches_merge_point_counts_with_bounded_lookup_padding(device):
+    shape = (32, 32, 8)
+    mask_np = np.zeros(shape, dtype=bool)
+    for block in range(16):
+        x, y, z = np.unravel_index(np.arange(129 + block), (8, 8, 8))
+        mask_np[x + (block // 4) * 8, y + (block % 4) * 8, z] = True
+    mask = torch.as_tensor(mask_np, device=device)
+    index = BlockIndex(shape, 8, tuple(np.asarray([0], dtype=np.int64) for _ in range(16)))
+    batches, reorder = index.device_compact_batches(mask, device, torch.float32)
+    # Sixteen distinct point counts share one batch instead of sixteen.
+    assert len(batches) == 1
+    points, _, _, _, point_rows = batches[0]
+    assert points.shape == (16, 256, 3)
+    assert points.numel() // 3 < 2 * int(mask_np.sum())
+    assert len(point_rows) == int(mask_np.sum())
+    assert torch.equal(reorder.sort().values, torch.arange(len(reorder), device=device))
+    real_points = points.reshape(-1, 3)[point_rows]
+    assert mask[real_points.long().unbind(-1)].all()
 
 
 def test_refreshed_index_rebuilds_compact_mapping_after_mesh_movement(device):
