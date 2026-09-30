@@ -6,6 +6,8 @@
 
 本页描述当前源码的调用方式。阶段的同输入结果不代表从原始 T1 连续重建已通过验收。现版两例整例的输出完整性、数值比较与资源记录见[当前真实数据报告](../../validation/recon_all/python_gpu_port/current_full_runs_20260930.json)和[验收说明](../../validation/recon_all/python_gpu_port/RELEASE_GATES.md)；严格比较通过 5/138 和 2/138 项，数值验收尚未通过。
 
+2026-09-30 的工作分支 `b8cd17b` 已修复 conform 单精度矩阵求逆顺序，并从原始 T1 连续重跑两例到 `filled.mgz`。[现版前段逐阶段报告](VOLUME_PREFIX_PARITY_20260930.md)列出修复前后体素、N4 浮点首差、四组 EM 交叉输入和资源采样；本页下方的 5/138、2/138 整例结果仍对应此前明确标出的旧源码，不能替代这次新整例的验收。
+
 ## 安装
 
 在仓库根目录创建[主页 Conda 环境](../../environment.yml)，然后运行[原生程序安装脚本](../../tools/setup_recon_all_native_conda.sh)。脚本从固定 FreeSurfer 源码提交编译所需程序并安装至当前 Conda 环境；不会调用系统安装的 FreeSurfer。模型、模板及个人许可证单独提供。
