@@ -13,10 +13,12 @@ import torch
 
 from .._dmri import configure_device
 from .atlas import GEMSAtlas
-from .deformation import ashburner_prior, sliding_boundary_projectors
+from .deformation import (ashburner_prior, prepare_deformation_reference,
+                          sliding_boundary_projectors)
 from .gaussian import (GaussianParameters, gaussian_log_likelihood,
                        initialise_gaussians, label_posterior, update_gaussians)
-from .rasterize import BlockIndex, build_block_index, rasterize_priors
+from .rasterize import (BlockIndex, build_block_index, rasterize_priors,
+                       rasterize_priors_compact)
 
 
 logger = logging.getLogger(__name__)
@@ -98,6 +100,7 @@ class TorchGEMS:
             raise ValueError("image must be [X,Y,Z] or [M,X,Y,Z]")
         shape = tuple(image.shape[-3:])
         vertices, reference, tetra, alphas, movable, label_ids = self._tensors()
+        reference_geometry = prepare_deformation_reference(reference, tetra)
         projection = (None if boundary_transform is None else sliding_boundary_projectors(
             movable.bool(), torch.as_tensor(boundary_transform, device=self.device, dtype=self.dtype)))
         if label_classes is None:
@@ -159,9 +162,15 @@ class TorchGEMS:
 
         def infer(current_vertices, params=None, n_em=em_iterations):
             refresh_index(current_vertices)
-            priors, _ = rasterize_priors(current_vertices, tetra, class_alphas, shape,
-                                          block_index=index, background_channel=class_background)
-            em_priors = priors[:, valid].reshape(n_classes, -1, 1, 1) if compact_em else priors
+            if compact_em:
+                priors, _ = rasterize_priors_compact(
+                    current_vertices, tetra, class_alphas, shape, valid_mask=valid,
+                    block_index=index, background_channel=class_background)
+                em_priors = priors.reshape(n_classes, -1, 1, 1)
+            else:
+                priors, _ = rasterize_priors(current_vertices, tetra, class_alphas, shape,
+                                              block_index=index, background_channel=class_background)
+                em_priors = priors
             if fixed_gaussians is not None:
                 params = fixed_gaussians
             elif params is None:
@@ -190,8 +199,9 @@ class TorchGEMS:
                 if fixed_gaussians is None:
                     params = update_gaussians(em_image, posterior, mean_hyper=mean_hyper,
                                               n_hyper=n_hyper)
-            ll = gaussian_log_likelihood(image, params)
-            posterior, nll = label_posterior(priors, ll, class_ids, valid)
+            ll = gaussian_log_likelihood(em_image, params)
+            posterior, nll = label_posterior(em_priors, ll, class_ids,
+                                            None if compact_em else valid)
             return priors, posterior, params, nll
 
         history_tensors: list[torch.Tensor] = []
@@ -215,9 +225,9 @@ class TorchGEMS:
                         priors, posterior, params, nll = infer(vertices, params=params,
                                                                n_em=em_iterations)
                     # Likelihood stays fixed while optimizing the mesh geometry.
-                    likelihood = gaussian_log_likelihood(image, params).detach()
+                    likelihood = gaussian_log_likelihood(em_image, params).detach()
                     if compact_em:
-                        likelihood = likelihood[:, valid]
+                        likelihood = likelihood.reshape(n_classes, -1)
                         logger.info("GEMS outer %d/%d EM: %.2f s", outer + 1, outer_iterations,
                                     monotonic() - em_started)
                     mesh_started = monotonic()
@@ -239,17 +249,20 @@ class TorchGEMS:
                             evaluations += 1
                             refresh_index(vertices)
                             optimizer.zero_grad(set_to_none=True)
-                            priors, _ = rasterize_priors(vertices, tetra, class_alphas, shape,
-                                                          block_index=index,
-                                                          background_channel=class_background)
                             if compact_em:
-                                joint = priors[:, valid].clamp_min(torch.finfo(priors.dtype).tiny).log() + likelihood
+                                priors, _ = rasterize_priors_compact(
+                                    vertices, tetra, class_alphas, shape, valid_mask=valid,
+                                    block_index=index, background_channel=class_background)
+                                joint = priors.clamp_min(torch.finfo(priors.dtype).tiny).log() + likelihood
                                 data_cost = -joint.logsumexp(dim=0).sum()
                             else:
+                                priors, _ = rasterize_priors(vertices, tetra, class_alphas, shape,
+                                                              block_index=index,
+                                                              background_channel=class_background)
                                 _, data_cost = label_posterior(
                                     priors, likelihood, class_ids, valid)
                             prior_cost, _ = ashburner_prior(vertices, reference, tetra,
-                                                             self.atlas.stiffness)
+                                self.atlas.stiffness, reference_geometry=reference_geometry)
                             objective = data_cost + float(deformation_weight) * prior_cost
                             objective.backward()
                             if vertices.grad is not None:
@@ -306,13 +319,16 @@ class TorchGEMS:
 
         class_alphas = torch.zeros((len(vertices), n_classes), device=self.device, dtype=self.dtype)
         class_alphas.index_add_(1, label_classes, alphas)
-        _, _, params, _ = infer(vertices, params=params,
-                                n_em=0 if em_relative_cost_stop is not None else 1)
+        if em_relative_cost_stop is not None:
+            refresh_index(vertices)
+        else:
+            _, _, params, _ = infer(vertices, params=params, n_em=1)
         priors, _ = rasterize_priors(vertices, tetra, alphas, shape,
                                       block_index=index, background_channel=background_channel)
         posterior, _ = label_posterior(priors, gaussian_log_likelihood(image, params), label_classes)
         posterior = torch.where(valid[None], posterior, priors)
-        _, jac = ashburner_prior(vertices, reference, tetra, self.atlas.stiffness)
+        _, jac = ashburner_prior(vertices, reference, tetra, self.atlas.stiffness,
+                                reference_geometry=reference_geometry)
         hard = torch.where(valid, label_ids[posterior.argmax(0)], label_ids[0])
         history = torch.stack(history_tensors).cpu().tolist()
         return TorchGEMSResult(hard, posterior, priors, vertices, params, history,

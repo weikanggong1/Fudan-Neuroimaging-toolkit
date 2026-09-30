@@ -205,6 +205,39 @@ def test_outer_em_cycles_each_fit_the_mesh():
     torch.testing.assert_close(result.vertices, torch.tensor(atlas.vertices, dtype=torch.float32))
 
 
+def test_compact_mesh_fit_matches_dense_valid_voxel_path(monkeypatch):
+    import fnit.gems.core as core
+
+    image = torch.zeros(8, 8, 8)
+    image[1:6, 1:6, 1:6] = 1
+    image[2:5, 2:5, 2:5] = 2
+    settings = dict(em_iterations=8, em_relative_cost_stop=1e-5,
+                    deform_iterations=3, outer_iterations=2,
+                    deform_optimizer="lbfgs", deform_lr=0.5,
+                    boundary_transform=np.eye(3),
+                    mean_hyper=torch.tensor([1., 2.]), n_hyper=torch.tensor([10., 10.]))
+    compact = TorchGEMS(_atlas())(image, **settings)
+
+    def dense_selected(vertices, tetrahedra, alphas, shape, *, valid_mask, **kwargs):
+        priors, covered = core.rasterize_priors(vertices, tetrahedra, alphas, shape, **kwargs)
+        return priors[:, valid_mask], covered[valid_mask]
+
+    monkeypatch.setattr(core, "rasterize_priors_compact", dense_selected)
+    dense = TorchGEMS(_atlas())(image, **settings)
+    torch.testing.assert_close(compact.vertices, dense.vertices, rtol=1e-4, atol=1e-5)
+    torch.testing.assert_close(compact.posterior, dense.posterior, rtol=1e-4, atol=1e-5)
+    torch.testing.assert_close(compact.gaussian_parameters.means, dense.gaussian_parameters.means)
+    torch.testing.assert_close(compact.gaussian_parameters.covariances, dense.gaussian_parameters.covariances)
+    assert torch.equal(compact.labels, dense.labels)
+
+
+def test_compact_em_with_empty_valid_mask_keeps_soft_atlas_prior():
+    fit = TorchGEMS(_atlas())(torch.zeros(8, 8, 8), em_iterations=2,
+                              em_relative_cost_stop=1e-5)
+    assert torch.count_nonzero(fit.labels) == 0
+    torch.testing.assert_close(fit.posterior, fit.priors)
+
+
 def test_sliding_mesh_stops_inner_and_outer_iterations_when_nodes_do_not_move():
     from dataclasses import replace
     atlas = replace(_atlas(), can_move=np.zeros((4, 3), bool))

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 import torch
 
 
@@ -21,6 +23,27 @@ def sliding_boundary_projectors(can_move: torch.Tensor, transform: torch.Tensor)
     return matrices[indices]
 
 
+@dataclass(frozen=True)
+class ReferenceGeometry:
+    inverse_edges: torch.Tensor
+    volumes: torch.Tensor
+
+
+@torch.no_grad()
+def prepare_deformation_reference(reference_vertices: torch.Tensor,
+                                  tetrahedra: torch.Tensor) -> ReferenceGeometry:
+    """Cache fixed reference geometry in its current coordinates, dtype and device.
+
+    Rebuild this cache after changing the reference mesh or tetrahedron ordering.
+    Reference vertices are treated as constants in the cached path.
+    """
+    ref = reference_vertices[tetrahedra.long()]
+    edges = torch.stack((ref[:, 1]-ref[:, 0], ref[:, 2]-ref[:, 0],
+                         ref[:, 3]-ref[:, 0]), -1)
+    volumes = (torch.linalg.det(edges) / 6.0).abs()
+    return ReferenceGeometry(torch.linalg.inv(edges), volumes)
+
+
 def ashburner_prior(
     vertices: torch.Tensor,
     reference_vertices: torch.Tensor,
@@ -28,6 +51,7 @@ def ashburner_prior(
     stiffness: float,
     *,
     invalid_penalty: float = 1e12,
+    reference_geometry: ReferenceGeometry | None = None,
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """Return the KVL GEMS tetrahedral deformation-prior cost and Jacobians.
 
@@ -40,21 +64,25 @@ def ashburner_prior(
     PyTorch autograd supplies its derivative, avoiding a second hand-written
     gradient implementation.  A non-positive determinant receives a finite
     barrier cost so optimizers can reject the step.
+
+    ``reference_geometry`` may reuse fixed reference matrices across evaluations.
     """
     if tetrahedra.numel() == 0:
         zero = vertices.sum() * 0
         return zero, torch.empty((0,), device=vertices.device, dtype=vertices.dtype)
     cells = tetrahedra.long()
-    ref = reference_vertices[cells]
     cur = vertices[cells]
-    dm = torch.stack((ref[:, 1]-ref[:, 0], ref[:, 2]-ref[:, 0], ref[:, 3]-ref[:, 0]), -1)
     ds = torch.stack((cur[:, 1]-cur[:, 0], cur[:, 2]-cur[:, 0], cur[:, 3]-cur[:, 0]), -1)
-    ref_det = torch.linalg.det(dm)
-    ref_volume = ref_det / 6.0
-    # Atlas files are consistently oriented in KVL; retain magnitude in case a
-    # converted atlas uses the opposite global orientation.
-    ref_volume = ref_volume.abs()
-    j = ds @ torch.linalg.inv(dm)
+    if reference_geometry is None:
+        ref = reference_vertices[cells]
+        dm = torch.stack((ref[:, 1]-ref[:, 0], ref[:, 2]-ref[:, 0], ref[:, 3]-ref[:, 0]), -1)
+        # Retain magnitude if an atlas uses the opposite global orientation.
+        ref_volume = (torch.linalg.det(dm) / 6.0).abs()
+        inverse_reference = torch.linalg.inv(dm)
+    else:
+        ref_volume = reference_geometry.volumes
+        inverse_reference = reference_geometry.inverse_edges
+    j = ds @ inverse_reference
     detj = torch.linalg.det(j)
     safe_det = detj.clamp_min(torch.finfo(vertices.dtype).eps)
     frob = j.square().sum(dim=(-2, -1))
