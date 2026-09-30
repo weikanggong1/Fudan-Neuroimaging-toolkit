@@ -10,6 +10,8 @@
 
 CUDA 流程已接入既有第二次归一化、SynthMorph 非线性配准和[厚度、面积、曲率](SURFACE_METRICS.md)函数；SynthMorph 跳过无人使用的两幅重采样图，MNI 保留已验证的 FP32 例外。两例归一化同输入体素一致；20 张表面指标图全部通过已有算子容差。warp 的 CPU/CUDA 浮点尾差及检查图差异完整保留，阶段加速不当作整例提速。实测见[性能记录](../../validation/recon_all/python_gpu_port/performance_20260930/README.md)。
 
+随后按真实剖析优化[球面法向的面关联索引](SURFACE_NORMALS.md)，复用已有单精度内核，保持面、角点与累加顺序。八张真实网格逐元素一致，冻结左半球球面阶段观察耗时减少 46.64%；两例从原始 T1 再跑整例，结果如下。
+
 ## 安装
 
 在仓库根目录创建[主页 Conda 环境](../../environment.yml)，然后运行[原生程序安装脚本](../../tools/setup_recon_all_native_conda.sh)。脚本从固定 FreeSurfer 源码提交编译所需程序并安装至当前 Conda 环境；不会调用系统安装的 FreeSurfer。模型、模板及个人许可证单独提供。
@@ -72,28 +74,32 @@ report = run_recon_all_python(
 
 ## 真实 T1 benchmark（2026-09-30）
 
-本轮候选计算源码固定为 `279e09f0d2a166237871b3d683a6be75bd5e99b4`，基线为 `b8cd17b`。两例均从原始 T1 和新空目录连续运行，使用主页 Conda 安装产物；输入、11 项权重、资产、原生程序、源码归档及逐报告 SHA-256 见[机器可读整例记录](../../validation/recon_all/python_gpu_port/current_full_runs_20260930.json)。GPU 例验证预初始化 CUDA 的 Python API；CPU 例验证 CLI。两者的 PyTorch/支持该选项的原生程序均设置 4 线程；Numba 默认分别为 128/192，没有全局限制 BLAS/OpenMP。
+本轮候选计算源码固定为 `e036f57b62b99d2af4cd8853ab2f1e6d2a9f8c68`，直接基线为 `279e09f0d2a166237871b3d683a6be75bd5e99b4`。两例均从原始 T1 和新空目录连续运行，使用相同主页 Conda 安装产物；两幅输入、11 项权重、102 项已安装资产、14 个 Conda 程序与 6 个参考程序重新核验，哈希变化数为 0。源码归档及逐报告 SHA-256 见[机器可读整例记录](../../validation/recon_all/python_gpu_port/current_full_runs_20260930.json)。GPU 例验证预初始化 CUDA 的 Python API，CUDA 可见设备与 NVML 采样均固定到 GPU 1 的 UUID；CPU 例验证 CLI。两者的 PyTorch/支持该选项的原生程序均设置 4 线程；Numba 默认分别为 128/192，没有全局限制 BLAS/OpenMP。
 
 | 真实 T1 与设备 | 基线函数全程 | 当前函数全程 | 本次观察变化 | 当前外层命令全程 | 输出与网格 |
 | --- | ---: | ---: | ---: | ---: | --- |
-| sub-01，gpucw1 H100 GPU | 5884.96 s | 6303.79 s | 慢 7.12% | 6316.84 s | 138/138，双侧通过 |
-| sub-02，nodecw10 CPU | 6080.80 s | 6099.80 s | 慢 0.31% | 6107.05 s | 138/138，双侧通过 |
+| sub-01，gpucw1 H100 GPU | 6303.79 s | 7422.34 s | 慢 17.74% | 7437.40 s | 138/138，双侧通过 |
+| sub-02，nodecw10 CPU | 6099.80 s | 5756.04 s | 快 5.64% | 5764.93 s | 138/138，双侧通过 |
 
-两例均完成 66 阶段、退出码 0。本轮**未观察到整例提速**。函数全程包括阶段加载、传输、计算和读写；外层时间另含导入、入口资源校验和初始化。基线未记录外层同口径时间，不计算外层提速比。GPU 与其他任务共享，单次耗时不能证明稳定速度；独立阶段的 GPU 厚度 5–7 s 在当前整例左侧为约 25 s，不能据局部快推断整例快。主要剩余热点为双侧 surface（1118/935 s；1014/944 s）、球面配准及最终 white/pial。[完整阶段与资源表](../../validation/recon_all/python_gpu_port/performance_20260930/README.md)。
+两例均完成 66 阶段、退出码 0。CPU 整例本次缩短 343.76 秒；GPU 双侧 surface 从 1117.56/935.27 s 降到 832.94/735.07 s，但整例变慢。WM 编辑、wm_pretess 和 MNI 分别增加约 633、281、652 秒，这些前段实现没有因法向优化而改变；延迟原因尚未确认，所有等待保留在实际总时间中。同一 WM 输入在整例结束后独立重跑为 31.68/31.94 秒，体素与几何一致，但该诊断未重建父进程 CUDA 状态，不能据此认定慢在 CUDA 同步。当前 GPU 最慢阶段为 MNI 1018 s、双侧 surface 833/735 s、WM 编辑 666 s 与 GCA 注册 654 s；CPU 为双侧 surface 829/796 s、最终表面 633/640 s。[完整阶段与诊断](../../validation/recon_all/python_gpu_port/performance_20260930/README.md)。
 
-GPU 显存最大采样父子进程合计为 **19,411,238,912 字节（19.41 GB，18.08 GiB）**，2824 行的间隔中位数 2 s、最大 20 s。观察值低于 20,000,000,000 字节，连续峰值未验证。已初始化 CUDA 的 API 显式关闭分配缓存；缓存开启的完整 API 和无预装软件的干净环境仍未验证。[显存口径](GPU_MEMORY.md)。
+函数全程包括加载、传输、计算和读写；外层时间另含导入、资源校验和初始化。最初 `b8cd17b` 的函数全程为 5884.96/6080.80 s，本次相对它为慢 26.12% / 快 5.34%。共享硬件单次观察不能证明稳定吞吐，未把局部提速或扣除等待后的时间称为 GPU 整例提速。
+
+整例结束后，冻结同一 FNIT 输入重跑 MNI 为 166.33 s，其中求逆 110.46 s；三个输出的数组、dtype、仿射与头全部一致。[重放报告](../../validation/recon_all/python_gpu_port/performance_20260930/sub01/mni_e036f57_after_full_report.json)与[逐值回归](../../validation/recon_all/python_gpu_port/performance_20260930/sub01/mni_e036f57_after_full_comparison.json)确认计算结果未变；独立新进程不复现原整例状态，该时间没有替代整例的 1018.06 s。
+
+GPU 显存最大采样父子进程合计为 **19,411,238,912 字节（19.41 GB，18.08 GiB）**，2611 行的间隔中位数 2 s、最大 656 s，五个间隔超过 30 s。最大观察值低于预算，但采样存在长空窗，整例持续低于 20,000,000,000 字节**未验证**。已初始化 CUDA 的 API 显式关闭分配缓存；缓存开启的完整 API 和无预装软件的干净环境仍未验证。[显存口径](GPU_MEMORY.md)。
 
 ### 严格复现与优化退化
 
 | 比较 | sub-01 GPU | sub-02 CPU |
 | --- | ---: | ---: |
-| 相对优化前基线，138 项严格诊断 | 133/138 | 138/138 |
+| 相对直接优化前基线，138 项严格诊断 | 138/138 | 138/138 |
 | 相对独立官方参考，138 项严格诊断 | 5/138 | 2/138 |
 | 相对基线，七张离散分割图全部标签 Dice | 1 | 1 |
 | 相对基线，68/45/70 区统计差 | 0 | 0 |
 | 相对基线，同网格 white/pial 坐标差 | 0 mm | 0 mm |
 
-GPU 五项新增严格差异为 MNI 前向/逆向 warp、检查图及双侧 w-g.pct。warp 的 P99 差为约 0.000015/0.000031 mm，逆向最大差 0.000473 mm；最近邻检查图有 19 个体素不同、最大 42 灰度级。w-g.pct 有 123/89 个顶点改变，最大 0.000683/0.000973 百分点，P99 为 0；冻结体积、white、cortex，仅交换厚度后完全重现候选图，确认厚度尾差经采样坐标传播。所有失败保留，严格阈值没有放宽；整体指标等效仍为 `not_assessed`。
+本次法向优化没有新增严格失败。此前 `279e09f` 相对最初 `b8cd17b` 的 GPU 五项差异仍保留：MNI 前向/逆向 warp、检查图及双侧 w-g.pct。warp 的 P99 差约 0.000015/0.000031 mm，逆向最大差 0.000473 mm；最近邻检查图有 19 个体素不同、最大 42 灰度级。w-g.pct 有 123/89 个顶点改变，最大 0.000683/0.000973 百分点，P99 为 0；冻结体积、white、cortex，仅交换厚度后完全重现候选图，确认厚度尾差经采样坐标传播。对应[直接基线记录](../../validation/recon_all/python_gpu_port/performance_20260930/summary_279e09f/current_full_runs_20260930.json)继续用于诊断，严格阈值没有放宽；整体指标等效仍为 `not_assessed`。
 
 ### 相对官方的最终指标与局部差异
 
@@ -114,13 +120,13 @@ GPU 五项新增严格差异为 MNI 前向/逆向 warp、检查图及双侧 w-g.
 
 候选和官方网格不同，不能将同名区域统计写成逐顶点一致。双向点到三角面距离的 white 均值为 0.071–0.084 / 0.035–0.041 mm，pial 均值为 0.081–0.109 / 0.060–0.073 mm；局部最大值仍达 6.339 / 3.185 mm。sub-01 的最低 Dice 为左侧 `S_interm_prim-Jensen`，该区及局部边界差异不能被平均相关性掩盖。球面与 sphere.reg 向内/退化面数为 0；white/pial 各自自相交通过，二者相互穿越尚未单独验收。
 
-![sub-01 的真实 T1 与 white/pial 叠加](../../validation/recon_all/python_gpu_port/performance_20260930/sub01/full_279e09f_pair/figures/t1_surface_overlay.png)
+![sub-01 的真实 T1 与 white/pial 叠加](../../validation/recon_all/python_gpu_port/performance_20260930/sub01/full_e036f57_pair/figures/t1_surface_overlay.png)
 
-![sub-01 的脑区指标偏差](../../validation/recon_all/python_gpu_port/performance_20260930/sub01/full_279e09f_pair/figures/region_errors.png)
+![sub-01 的脑区指标偏差](../../validation/recon_all/python_gpu_port/performance_20260930/sub01/full_e036f57_pair/figures/region_errors.png)
 
-![sub-01 最低 Dice 脑区的局部边界](../../validation/recon_all/python_gpu_port/performance_20260930/sub01/full_279e09f_pair/figures/local_region_boundary.png)
+![sub-01 最低 Dice 脑区的局部边界](../../validation/recon_all/python_gpu_port/performance_20260930/sub01/full_e036f57_pair/figures/local_region_boundary.png)
 
-图示分别显示 conform T1 切面上的参考/候选表面、最差十区有符号偏差和最低 Dice 分区边界。实际文件名、输入及脚本哈希见[完整 sub-01 配对](../../validation/recon_all/python_gpu_port/performance_20260930/sub01/full_279e09f_pair/summary.json)与[sub-02 配对](../../validation/recon_all/python_gpu_port/performance_20260930/sub02/full_279e09f_pair/summary.json)。图用于定位，不替代逐值报告或整体等效判定。
+图示分别显示 conform T1 切面上的参考/候选表面、最差十区有符号偏差和最低 Dice 分区边界。实际文件名、输入及脚本哈希见[完整 sub-01 配对](../../validation/recon_all/python_gpu_port/performance_20260930/sub01/full_e036f57_pair/summary.json)与[sub-02 配对](../../validation/recon_all/python_gpu_port/performance_20260930/sub02/full_e036f57_pair/summary.json)。图用于定位，不替代逐值报告或整体等效判定。
 
 ## 验证与边界
 

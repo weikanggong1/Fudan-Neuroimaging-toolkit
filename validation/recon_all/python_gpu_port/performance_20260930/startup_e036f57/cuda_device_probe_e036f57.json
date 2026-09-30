@@ -1,0 +1,55 @@
+{
+  "host": "gpucw1",
+  "time_utc": "2026-09-30T11:58:46Z",
+  "target_nvml_uuid": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+  "inventory_before": "0, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 00000000:1F:00.0, 6358\n1, GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba, 00000000:58:00.0, 24338\n",
+  "command": "import json,torch; from fnit.recon_all.native_free import run_recon_all_python; torch.set_num_threads(4); torch.cuda.init(); print(\"actual_uuid\",torch.cuda.get_device_properties(0).uuid,flush=True); print(\"free_bytes\",torch.cuda.mem_get_info(0),flush=True); x=torch.ones(1,dtype=torch.float32,device=\"cuda:0\"); torch.cuda.synchronize(0); print(\"succeeded\",x.item(),flush=True)",
+  "threads": 4,
+  "precision": "float32",
+  "allocator_cache": false,
+  "source_commit": "e036f57b62b99d2af4cd8853ab2f1e6d2a9f8c68",
+  "records": [
+    {
+      "mask": "1",
+      "seconds": 4.371086854021996,
+      "exit_code": 0,
+      "stdout": "actual_uuid e25cac06-0ce8-a833-abf9-09ab18c9c9ba\nfree_bytes (25044647936, 84942979072)\nsucceeded 1.0\n",
+      "stderr": ""
+    },
+    {
+      "mask": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+      "seconds": 4.135054778307676,
+      "exit_code": 0,
+      "stdout": "actual_uuid e25cac06-0ce8-a833-abf9-09ab18c9c9ba\nfree_bytes (25044647936, 84942979072)\nsucceeded 1.0\n",
+      "stderr": ""
+    },
+    {
+      "mask": "1",
+      "seconds": 4.7204110799357295,
+      "exit_code": 0,
+      "stdout": "actual_uuid e25cac06-0ce8-a833-abf9-09ab18c9c9ba\nfree_bytes (25044647936, 84942979072)\nsucceeded 1.0\n",
+      "stderr": ""
+    },
+    {
+      "mask": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+      "seconds": 2.786038723308593,
+      "exit_code": 0,
+      "stdout": "actual_uuid e25cac06-0ce8-a833-abf9-09ab18c9c9ba\nfree_bytes (28770828288, 84942979072)\nsucceeded 1.0\n",
+      "stderr": ""
+    },
+    {
+      "mask": "1",
+      "seconds": 2.6593589521944523,
+      "exit_code": 0,
+      "stdout": "actual_uuid e25cac06-0ce8-a833-abf9-09ab18c9c9ba\nfree_bytes (28770828288, 84942979072)\nsucceeded 1.0\n",
+      "stderr": ""
+    },
+    {
+      "mask": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+      "seconds": 2.726131015922874,
+      "exit_code": 0,
+      "stdout": "actual_uuid e25cac06-0ce8-a833-abf9-09ab18c9c9ba\nfree_bytes (28770828288, 84942979072)\nsucceeded 1.0\n",
+      "stderr": ""
+    }
+  ]
+}

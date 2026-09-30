@@ -19,7 +19,7 @@ gpu_uuid=$(nvidia-smi --query-gpu=index,uuid --format=csv,noheader,nounits |
   awk -F, -v wanted="$gpu_index" '$1+0==wanted {gsub(/ /,"",$2); print $2}')
 test -n "$gpu_uuid"
 export PYTHONPATH="$code_root"
-export CUDA_VISIBLE_DEVICES="$gpu_index"
+export CUDA_VISIBLE_DEVICES="$gpu_uuid"
 export PYTORCH_NO_CUDA_MEMORY_CACHING=1
 
 started_ns=$(date +%s%N)

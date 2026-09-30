@@ -16,9 +16,11 @@
 
 [前段数值定位](../../../docs/recon_all/VOLUME_PREFIX_PARITY_20260930.md)已修复 conform 单精度矩阵乘法顺序，两例 orig 的体素与仿射对官方均一致；sub-02 的 195 个灰度首差不再存在。N4 的 ITK 版本、浮点尾差、四组 EM 输入及误差传播保留真实报告，不把全部差异归因于随机性。官方同主机 N4/EM 重放与跨主机差异分别记录，未完成官方整例全面重复性测试。
 
-[两例完整指标与图示](performance_20260930/sub01/full_279e09f_pair/summary.json)及[sub-02](performance_20260930/sub02/full_279e09f_pair/summary.json)包含对官方的严格诊断、分区 Dice、逐脑区误差和双向点到三角面距离。旧版本的整例摘要由现版配对替换；原始阶段参考记录保留其冻结输入边界。
+[两例完整指标与图示](performance_20260930/sub01/full_e036f57_pair/summary.json)及[sub-02](performance_20260930/sub02/full_e036f57_pair/summary.json)包含对官方的严格诊断、分区 Dice、逐脑区误差和双向点到三角面距离。当前摘要绑定实际计算提交 `e036f57b62b99d2af4cd8853ab2f1e6d2a9f8c68`；`279e09f` 记录继续承担直接基线对照，不作为现版结果。
 
-本轮最终 `279e09f` 两例已连续完成；GPU 6303.79 s、CPU 6099.80 s，相对基线慢 7.12%/0.31%，没有观察到整例加速。分割、white/pial 几何与主要脑区统计相对基线无改变；GPU 五项新增严格差异及厚度传播诊断详见性能目录。
+本轮按真实剖析以稳定排序优化法向关联索引，复用已有数值内核；八张真实网格法向元素一致，左半球完整冻结球面由 541.31 s 降到 288.84 s，右半球回归也一致。[函数与回归说明](../../../docs/recon_all/SURFACE_NORMALS.md)。`e036f57` 两例已从原始 T1、新空目录连续完成 66 阶段、138 项输出及双侧网格检查；GPU 7422.34 s、CPU 5756.04 s，相对直接基线 6303.79/6099.80 s 为慢 17.74% / 快 5.64%。分割、white/pial 几何与脑区统计相对直接基线无改变，两例严格诊断均 138/138；对官方仍为 5/138、2/138。此前 GPU 尾差没有被抹掉或改用 CPU 掩盖。
+
+当前 GPU 双侧 surface 合计缩短 484.83 s，但前段多阶段明显变慢，原因未确认。父子进程合计采样最大值 19.41 GB，实际最大间隔 656 s，不能判定整例持续低于 20 GB。原始输入、11 项权重、102 项资产、14 个 Conda 程序及 6 个参考程序重新核验均未变化；启动失败和独立 WM 重放分开记录，见[完整性能记录](performance_20260930/README.md)。
 
 严格复现、优化是否引入退化、整体指标等效分别报告。[138 项门槛](RELEASE_GATES.md)不变，整体指标等效阈值尚未正式确认，当前为 not_assessed。不能用平均相关性或文件通过数代替局部检查，也不因未判定总体等效而阻止已通过相应回归的性能优化。
 
@@ -33,7 +35,7 @@
 | 缺陷体积映射 | 真实 T1 冻结输入，16,777,216 个体素全部一致；新 Conda 自编译 `mri_label2vol` | [精度、时间和输入](defects_volume_20260929.json)、[函数说明](../../../docs/recon_all/DEFECTS_VOLUME.md) |
 | Talairach affine 子进程 | 冻结真实 SynthStrip 输入，XFM、LTA 与直接路径逐字节一致；需整例显存复核 | [记录](talairach_child_20260929.json) |
 | SynthSeg 显存 | 同一 T1、同一 GPU 的候选分割与旧路径逐体素一致，体积 CSV 逐字节一致；独立阶段进程采样 18,450 MiB | [记录](synthseg_memory_20260929.json)、[资源说明](../../../docs/recon_all/GPU_MEMORY.md) |
-| SynthSeg CPU 后端 | nodecw10 上 PyTorch 2.5.1 的 MKLDNN 路径段错误；关闭该后端后独立真实 T1 推理及完整 CPU runner 的 SynthSeg 阶段均通过，后续仍在复跑 | [阶段与测试记录](synthseg_cpu_backend_20260930.json) |
+| SynthSeg CPU 后端 | nodecw10 上 PyTorch 2.5.1 的 MKLDNN 路径段错误；关闭该后端后独立真实 T1 推理及本轮完整 CPU runner 均通过 | [阶段与测试记录](synthseg_cpu_backend_20260930.json) |
 | BA/VPnl 注释 | 修正相同统计值时的标签顺序后，六张注释的双侧顶点编码全部与冻结参考一致 | [记录](exvivo_wiring_20260929.json)、[注释说明](LABEL2ANNOT.md) |
 | 图谱曲率 | 冻结球面上的 `avg_curv` 相关性超过 0.999999999999；四张曲率附图超过 0.999999999999999 | [函数说明及计时](../../../docs/recon_all/CURVATURE_OUTPUTS.md) |
 | Jacobian、灰白对比、SNR | 双侧 Jacobian 相关性超过 0.9999999999999；百分比图逐顶点一致；70 行 SNR 数据行一致 | [记录](surface_metrics_wiring_20260929.json)、[函数说明](../../../docs/recon_all/SURFACE_EXTRA_METRICS.md) |

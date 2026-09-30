@@ -6,11 +6,11 @@
 
 ## 两种计时与显存
 
-主调度的 `total_seconds` 包含各阶段加载模型、读写影像、传输和计算，GPU 阶段在计时边界同步指定设备；它从入口资产校验后开始。外层 `command_wall_nanoseconds` 从启动 Python 前计时，另包含导入、入口校验和初始化。两种时间分开报告；旧基线没有外层时间时，不编造同范围的命令总时间比。共享硬件的单次差值只作为本次观察，不能当作独占资源的稳定速度比。
+主调度的 `total_seconds` 包含各阶段加载模型、读写影像、传输和计算，指定设备的末尾同步计入阶段秒数；开始同步在阶段计时点之前，仍包含在函数总时间中。它从入口资产校验后开始。外层 `command_wall_nanoseconds` 从启动 Python 前计时，另包含导入、入口校验和初始化。两种时间分开报告；旧基线没有外层时间时，不编造同范围的命令总时间比。共享硬件的单次差值只作为本次观察，不能当作独占资源的稳定速度比。本次 GPU 总时间减去阶段秒数之和约 1.23 s；不能把几百秒的异常阶段耗时称为计时外的等待或从总时间中扣除。
 
 本轮前后均设置 PyTorch 与支持该选项的原生程序为 4 线程；没有全局限制 Numba、BLAS 或 OpenMP。Numba 默认可用线程在 gpucw1 为 128、nodecw10 为 192，不能将这两例描述成整个进程仅使用四线程。硬件、库版本及运行进程的线程环境保存在逐主机 JSON 中。
 
-[GPU 启动器](../../validation/recon_all/python_gpu_port/performance_20260930/launch_full_recon_gpu.sh)使用九个路径/资源参数和一个汇总路径：`python_bin` 为主页 Conda Python，`code_root` 为固定源码的 `src/`，`input_t1` 为原始 T1，`subject` 为不存在的输出目录，`weights`/`assets` 为已校验资源，`gpu_index` 为物理 GPU 编号，`sample_csv` 为采样表，`run_log` 为 stdout/stderr，`run_summary` 为退出码、采样最大值、次数和外层时间。`FS_LICENSE` 只传许可证路径。指定 GPU 上每一行分别记录父进程、当时的子进程和两者合计字节数；不同时间的峰值不相加。采样循环睡眠 2 秒，查询耗时使实际间隔略长，连续峰值未获保证。
+[GPU 启动器](../../validation/recon_all/python_gpu_port/performance_20260930/launch_full_recon_gpu.sh)使用九个路径/资源参数和一个汇总路径：`python_bin` 为主页 Conda Python，`code_root` 为固定源码的 `src/`，`input_t1` 为原始 T1，`subject` 为不存在的输出目录，`weights`/`assets` 为已校验资源，`gpu_index` 为 NVML 物理 GPU 编号，`sample_csv` 为采样表，`run_log` 为 stdout/stderr，`run_summary` 为退出码、采样最大值、次数和外层时间。启动器查询该编号的 UUID，同时用于 CUDA 可见设备和显存采样；逻辑设备为 `cuda:0`。`FS_LICENSE` 只传许可证路径。每一行分别记录父进程、当时的子进程和两者合计字节数；不同时间的峰值不相加。采样循环睡眠 2 秒，查询耗时使实际间隔略长，连续峰值未获保证。
 
 ```bash
 python_bin=/data/conda/envs/fnit/bin/python  # 已安装 FNIT 的 Conda Python
@@ -31,7 +31,21 @@ bash validation/recon_all/python_gpu_port/performance_20260930/launch_full_recon
 
 [CPU 启动器](../../validation/recon_all/python_gpu_port/performance_20260930/launch_full_recon_cpu.sh)使用同样的路径参数，省去 `gpu_index` 和 `sample_csv`。两个启动器都在被试目录已存在时失败；重建失败仍保存外层退出码，成功不表示官方数值复现通过。运行期间不改写启动器或源码快照。
 
-[已初始化 CUDA API 脚本](../../validation/recon_all/python_gpu_port/run_initialized_cuda_api.py)先在 `--device`（默认 `cuda:0`）保留一个 float32 元素，再调用真实 API。两个位置参数为原始 T1 与空输出目录；`--weights-dir`、`--assets-dir` 必填，`--threads` 默认 4。完成后另存 `run-api-invocation.json`，含调用方式、计时、CUDA 预初始化状态、四字节保留张量与脚本哈希。已有 CUDA 缓存的调用方保留可用 allocated/reserved 统计；关闭缓存的运行不能把统计接口返回的 0 写成零显存。非默认逻辑 `cuda:1` 的错误路径探针只验证指定设备统计，不代表整例重建。
+[已初始化 CUDA API 脚本](../../validation/recon_all/python_gpu_port/run_initialized_cuda_api.py)先设置 `--threads`，再在 `--device`（默认 `cuda:0`）保留一个 float32 元素并调用真实 API。两个位置参数为原始 T1 与空输出目录；`--weights-dir`、`--assets-dir` 必填，`--threads` 默认 4。完成后另存 `run-api-invocation.json`，含调用方式、计时、CUDA 预初始化状态、启动线程预算、四字节保留张量与脚本哈希；失败时抛异常，侧车仅在成功后写出。已有 CUDA 缓存的调用方保留可用 allocated/reserved 统计；关闭缓存的运行不能把统计接口返回的 0 写成零显存。非默认逻辑 `cuda:1` 的错误路径探针只验证指定设备统计，不代表整例重建。
+
+`279e09f` 已完成的整例包装器在首次小张量后、进入 FNIT 时才设置四线程。`e036f57` 的第三次 GPU 尝试将设置提前，但 Talairach 子进程仍启动失败；随后从另一新空目录完成了显式 UUID 的整例。缓存、模块加载及小张量对照记录在[启动诊断](../../validation/recon_all/python_gpu_port/performance_20260930/startup_e036f57/README.md)。不能将失败尝试的秒数计为提速，或仅凭线程设置后的某次成功认定 CUDA OOM 已修复。
+
+```bash
+input_t1=/data/sub01_T1w.nii.gz            # 原始单幅 T1w
+subject=/data/subjects/sub01-api-new       # 新的空被试目录
+weights_dir=/data/fnit-weights             # 已校验权重目录
+assets_dir=/data/fnit-assets               # 已校验资产目录
+device=cuda:0                              # 当前可见 GPU 的逻辑编号
+threads=4                                  # 初始化前即设置的 PyTorch 线程预算
+python validation/recon_all/python_gpu_port/run_initialized_cuda_api.py \
+  "$input_t1" "$subject" --weights-dir "$weights_dir" \
+  --assets-dir "$assets_dir" --device "$device" --threads "$threads"
+```
 
 ## 优化前后与官方参考
 
@@ -94,13 +108,40 @@ python validation/recon_all/python_gpu_port/probe_contrast_thickness.py \
 
 ## 生成机器可读摘要
 
-`summarize_performance_runs.py` 只汇总本轮固定文件名的记录，不运行重建，也没有对应的官方命令。具名参数 `--reports` 指向 `performance_20260930`（完整阶段 JSON、比较目录、固定源码清单、实时资源哈希、外层退出码、GPU CSV 与 API 调用侧车）；`--output-dir` 必须不存在。它核对完成状态、退出码和提交后，写出 `current_full_runs_20260930.json` 与 `final_metric_consistency_20260930.json`：前者保存调用方式、两种耗时、慢阶段、线程和同时刻显存；后者保存 Dice、脑区偏差及优化前后距离。输入报告的 SHA-256 随结果保留。记录缺失、运行未完成、版本或资源哈希不符时抛异常，不能生成成功摘要。GPU 间隔以 CSV 的 UTC 时间计算，受整秒时间戳精度限制。
+`summarize_performance_runs.py` 只汇总本轮固定命名的记录，不运行重建，也没有对应的官方命令。具名参数 `--reports` 指向 `performance_20260930`（完整阶段 JSON、比较目录、固定源码清单、实时资源哈希、外层退出码、GPU CSV 与 API 调用侧车）；`--output-dir` 必须不存在。`--candidate-tag` 默认 `e036f57`，`--baseline-tag` 默认 `279e09f`，选择已收集的版本文件，不控制数值阈值；旧配对使用 `--candidate-tag 279e09f --baseline-tag b8cd`。它核对完成状态、退出码和提交后，写出 `current_full_runs_20260930.json` 与 `final_metric_consistency_20260930.json`：前者保存调用方式、两种耗时、相对直接基线及最初 b8cd 的变化、慢阶段、线程和同时刻显存；后者保存 Dice、脑区偏差及优化前后距离。采样记录另列实际 UUID、最大五个空窗、超过 30 秒的间隔数和预算未验证状态；30 秒仅为诊断计数，不是新验收阈值。输入报告的 SHA-256 随结果保留。记录缺失、运行未完成、版本或资源哈希不符时抛异常，不能生成成功摘要。GPU 间隔以 CSV 的 UTC 时间计算，受整秒时间戳精度限制。
 
 ```bash
 reports=/data/fnit-validation/performance_20260930  # 已收集的两例完整实测记录
 output_dir=/data/fnit-validation/current-summary  # 必须不存在的摘要目录
+candidate_tag=e036f57                              # 实际计算提交对应的报告版本
+baseline_tag=279e09f                               # 同 T1、同设备的直接优化前基线
 python validation/recon_all/python_gpu_port/summarize_performance_runs.py \
-  --reports "$reports" --output-dir "$output_dir"
+  --reports "$reports" --output-dir "$output_dir" \
+  --candidate-tag "$candidate_tag" --baseline-tag "$baseline_tag"
+```
+
+## 版本核验与异常阶段重放
+
+以下脚本只复现本轮已授权服务器的固定实验，路径、提交和输出名在脚本中明确声明，没有隐含参数或独立官方等价命令；通用重建与算子入口仍使用上文的具名参数。输出目录或 JSON 必须不存在，输入缺失、版本不符或回归失败时抛异常。
+
+| 脚本 | 全部输入及输出结构 |
+| --- | --- |
+| `performance_20260930/fingerprint_e036f57.py` | 读取本轮 provenance、14 程序构建清单及其声明的两个原始 T1、权重、资产、候选/参考程序；输出 `runtime_fingerprints_e036f57.json`，逐文件保存 SHA-256、字节大小与 mismatches。`fingerprint(path=...)` 返回 `{size_bytes: int, sha256: str}`，文件读取失败时抛异常。不读取许可证或参考影像。 |
+| `performance_20260930/hardware_e036f57.py` | 在 gpucw1/nodecw10 的主页 Conda 环境读取版本、CPU/NVML 和本次正在运行的候选父进程 `/proc`；输出 `hardware_主机_e036f57.json`，含线程及六个声明的环境变量。只读取本人的目标进程，不初始化 CUDA；不是恰好一个本次父进程时失败，须在整例运行中执行。 |
+| `performance_20260930/benchmark_wm_edit_repeat_e036f57.py` | 冻结本次 FNIT 的 entowm、aseg.presurf、wm.seg、brain（1 mm conform 网格）与 Conda WM 编辑程序，参数由 command 数组完整保存；输出两个新 WM 与日志、report.json。报告含 shape/dtype、仿射一致性、差异体素数、最大/P99 灰度差、秒数及程序/输入/脚本哈希。Linux `children_max_rss_bytes` 为该诊断父进程累计子进程最大 RSS，单位字节，不是单个子进程的独立峰值。 |
+| `performance_20260930/launch_mni_e036f57_after_full.sh` | 使用本次已完成 FNIT 整例的 orig、裁剪 T1、aff.lta 和不变的权重/资产/Conda 三程序，显式调用既有 `benchmark_mni_nonlinear.py`，设备 UUID、四线程、关闭分配缓存固定；输出新的 MNI 诊断目录、四子步骤计时 JSON、日志、退出码与外层纳秒数。模型阶段沿用已验证 FP32 例外，调用后恢复 TF32。未另测本次独立阶段进程显存，allocated/reserved 为不可用，不能写成零。 |
+| `performance_20260930/compare_mni_replay_e036f57.py` | 读取上述两套 FNIT MNI 输出，复用既有严格体积比较器；输出比较 JSON，含三个 NIfTI 的输入哈希、dtype、shape、仿射/头一致性及最大/P99 差。向量 warp 与强度检查图保留各自原网格，不重采样；1e-6 浮点容差沿用比较器，不改变门槛。 |
+
+WM 编辑对应 `mri_edit_wm_with_aseg -keep-in -fix-ento-wm entowm.mgz 3 255 255 -fix-acj aseg.presurf.mgz 255 255 -fill-seg-wm -fix-scm-ha 1 wm.seg.mgz brain.mgz aseg.presurf.mgz wm.asegedit.mgz`；生产执行文件来自主页 Conda 固定源码构建，原实现见[固定 WM 编辑源码](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/mri_edit_wm_with_aseg/mri_edit_wm_with_aseg.cpp)。MNI 输入空间、各输出形状、官方命令及原实现见[MNI 非线性链](MNI_NONLINEAR_CHAIN.md)。本轮 WM 重放计时包含原生输入/写出和日志，未建立父进程 CUDA 状态，不等价于恢复整例现场。
+
+```python
+from pathlib import Path
+from fingerprint_e036f57 import fingerprint  # 固定实验脚本目录须位于 Python 搜索路径
+
+image_fingerprint = fingerprint(
+    path=Path("/data/sub01_T1w.nii.gz"),  # 可读的原始 T1 文件，仅散列字节，不载入影像
+)
+# image_fingerprint 的 size_bytes 为文件大小；sha256 为该文件实际字节的摘要。
 ```
 
 ## 官方复现与独立部署的证据范围
