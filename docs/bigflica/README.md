@@ -4,7 +4,7 @@
 
 默认 `use_mmigp_dicl=True`：逐体素跨被试标准化 → 联合 mMIGP → 每模态 Lasso-LARS 字典学习 → FLICA。CUDA 路径用 PyTorch 执行协方差、特征分解、稀疏编码、字典更新、FLICA、空间回归和 t→z 转换；nibabel/HDF5 负责 CPU 文件读写和分块传输。为复现原 FLICA 的自由度拟合，GPU 特征分解后每模态将少量特征值送给 SciPy 做一次标量优化；这一步属于 CPU 计算。`use_mmigp_dicl=False` 时，标准化后直接把体素送入 FLICA，不建立 mMIGP 或 DicL 模型。此模式保留体素信息，但每轮须读取全部模态矩阵，适合较小训练集；大样本建议开启预处理。`device="cpu"` 保留原 notebook 的 sklearn DicL 对照路径。
 
-CUDA 压缩路径先逐被试读取，把 float32 标准化矩阵作为 HDF5 分块存盘；后续阶段不在内存中装入完整的“被试 × 体素”模态矩阵。默认 `max_gpu_gb=28`，给 32 GB 显存留余量。float32 协方差本身需 `N × N × 4` 字节，计算还要为临时数组留空间；超过配置预算时报错。磁盘需求不受内存预算限制，例如 37,182 人 × 100 万掩膜体素的 float32 标准化缓存约 138.5 GiB/**每模态**。大于 2,048 人时，mMIGP 根据目标秩和显存预算选择完整 GPU 特征分解或随机子空间；随机路径与直接体素 FLICA 的自由度近似仍需单独核验，不能当作逐点一致。
+CUDA 压缩路径先逐被试读取，把 float32 标准化矩阵作为 HDF5 分块存盘；后续阶段不在内存中装入完整的“被试 × 体素”模态矩阵。默认 `max_gpu_gb=19`，按 20 GiB 显存目标预留空间。float32 协方差本身需 `N × N × 4` 字节，计算还要为临时数组留空间；超过配置预算时报错。磁盘需求不受内存预算限制，例如 37,182 人 × 100 万掩膜体素的 float32 标准化缓存约 138.5 GiB/**每模态**。大于 2,048 人时，mMIGP 根据目标秩和显存预算选择完整 GPU 特征分解或随机子空间；随机路径与直接体素 FLICA 的自由度近似仍需单独核验，不能当作逐点一致。
 
 ## 流程策略
 
@@ -87,7 +87,7 @@ fnit-bigflica fit \
   --dicl-max-iter 20 --dicl-batch-size 32 \
   --dicl-sparse-iterations 120 --flica-max-iter 100 \
   --top-voxels 300 --random-state 0 \
-  --device cuda:0 --max-gpu-gb 28 --feature-block 2048
+  --device cuda:0 --max-gpu-gb 19 --feature-block 2048
 
 # 使用训练时冻结的均值、标准差和空间载荷，不重新拟合。
 fnit-bigflica apply \
@@ -106,7 +106,7 @@ fnit-bigflica fit \
   --subjects-file /absolute/path/subjects.txt \
   --output-dir /absolute/path/bigflica_raw_output \
   --n-components 3 --no-mmigp-dicl \
-  --flica-max-iter 1000 --device cuda:0 --max-gpu-gb 28
+  --flica-max-iter 1000 --device cuda:0 --max-gpu-gb 19
 ```
 
 Python API 的变量名与文件用途对应：
@@ -138,7 +138,7 @@ model_dir = run_bigflica(
     subjects=training_subject_ids,
     use_mmigp_dicl=True,  # 改为 False 时省略 migp_dim、dicl_dim
     device="cuda:0",
-    max_gpu_gb=28,
+    max_gpu_gb=19,
     feature_block=2048,
     dicl_batch_size=32,
     dicl_sparse_iterations=120,
@@ -153,7 +153,7 @@ new_subject_course = apply_model(
 )
 ```
 
-只用结构模态时，应另设输出目录以免复用四模态模型。以下 `18` 人、三个小核验掩膜、`C=3/R=10/D=40` 已跑通 Python API 与 CLI，并逐张核对了 float32 z-stat NIfTI；完整掩膜 `C=20/R=100/D=200` 尚未通过有效秩验收，见[三模态基准](../../validation/bigflica/README.md)。
+只用结构模态时，应另设输出目录以免复用四模态模型。以下 `18` 人、三个小核验掩膜、`C=3/R=10/D=40` 示例用于说明 API 与 CLI；主要性能和精度测试使用 `2,050` 名真实被试的 VBM/FA/MD 完整掩膜。大样本公开调用的 C3 输出已核对，C20/R100/D200 尚未通过有效秩验收，见[三模态基准](../../validation/bigflica/README.md)。
 
 ```python
 structural_modalities = {name: modalities[name] for name in ("vbm", "fa", "md")}
@@ -219,7 +219,7 @@ bigflica_output/
 | `top_voxels` / `--top-voxels` | 各成分按绝对 z 值保留最高的体素数，默认 1000。 |
 | `random_state` / `--random-state` | DicL 随机种子，默认 0。 |
 | `device` / `--device` | `auto` 优先 CUDA；可显式指定 `cuda:0` 或 `cpu`。直接体素模式要求 CUDA。 |
-| `max_gpu_gb` / `--max-gpu-gb` | mMIGP/直接 FLICA 的显存预算，默认 28 GiB；被试数超过 2,048 的 CPU mMIGP 将同一数值用作协方差的内存预算。 |
+| `max_gpu_gb` / `--max-gpu-gb` | mMIGP/直接 FLICA 的显存预算，默认 19 GiB；被试数超过 2,048 的 CPU mMIGP 将同一数值用作协方差的内存预算。 |
 | `feature_block` / `--feature-block` | 逐批处理的体素列数，拟合默认 2048，投影默认 32768。 |
 | `model_dir` / `--model-dir` | 已拟合的 `components_*` 目录。 |
 | `subject_dir` / `--subject-dir` | 不在训练列表的新被试目录；各影像须与冻结掩膜同网格。 |
@@ -245,4 +245,6 @@ BigFLICA(
 
 同一批真实四模态字典上的原版 [FLICA_cpu.py](https://github.com/weikanggong/BigFLICA/blob/master/FLICA_cpu.py)（原文件 SHA-256：`5c82361a381597980f7a81ac89cdf0f7ef3de2639937df3d7021a562d6f5a061`）与 FNIT 移植在 10、30、100 轮的 H、X、W 于浮点容差内一致；20 个请求成分在 30 轮降到 2 个有效成分。见 [独立原版对照](../../validation/bigflica/upstream_flica_parity.json)。上述 R1000/D500 是原 notebook 的维度，历史结果保留 17/20 个有效成分，当前影像数据尚未验证为稳定的 20 成分模型；R100/D50 的小试验不能作为验收结果。官方 MATLAB 的逐被试噪声精度模式与 notebook 的标量模式不同；实验性对照见 [成分维度诊断](../../validation/bigflica/flica_dimensionality_audit.json)。
 
-真实 UKB 输入、逐阶段耗时、精度和验证边界见 [验证报告](../../validation/bigflica/README.md)。参考：Gong W, Beckmann CF, Smith SM. [Phenotype Discovery from Population Brain Imaging](https://www.sciencedirect.com/science/article/pii/S1361841521000967). *Medical Image Analysis*, 2021；[BigFLICA 原仓库](https://github.com/weikanggong/BigFLICA)。
+2,050 名真实被试的 VBM/FA/MD 完整掩膜 CPU 和 GPU 公开调用均已从原始 NIfTI 跑通 C3，分别耗时 `732.75` 和 `1045.08` 秒，并逐图核对输出与数组。CPU/GPU 的 VBM 重建范数比仅 `7.93e-6/4.69e-5`；C20 分别只保留 `16/20` 和 `11/20` 个有效成分，未通过科学验收。两条独立链路的成分图失配；固定相同 float32 mMIGP 投影再拟合 DicL/FLICA 时，九张图相关均大于 `0.9999999984`，表明小幅上游投影差异经非凸训练放大。GPU DicL 耗时 `871.61` 秒，是本次运行的主要瓶颈；GPU 当时有外部负载，且 CPU 使用 float64、GPU 使用 float32 标准化，不能把总时间比当作受控硬件对照。完整来源和边界见[验证报告](../../validation/bigflica/README.md)。
+
+参考：Gong W, Beckmann CF, Smith SM. [Phenotype Discovery from Population Brain Imaging](https://www.sciencedirect.com/science/article/pii/S1361841521000967). *Medical Image Analysis*, 2021；[BigFLICA 原仓库](https://github.com/weikanggong/BigFLICA)。

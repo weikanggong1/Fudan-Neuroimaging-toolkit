@@ -298,7 +298,7 @@ def run_bigflica(subjects_root: str | Path, modalities: Mapping[str, Mapping[str
                  dicl_dim: int | None = None, *, subjects: Sequence[str] | None = None,
                  device: str = "auto", dicl_max_iter: int = 1000,
                  flica_max_iter: int = 1000, top_voxels: int = 1000,
-                 random_state: int = 0, max_gpu_gb: float = 28.0,
+                 random_state: int = 0, max_gpu_gb: float = 19.0,
                  feature_block: int = 2048, dicl_batch_size: int = 32,
                  dicl_sparse_iterations: int = 120,
                  use_mmigp_dicl: bool = True,

@@ -2,6 +2,8 @@
 
 2026-09-30 在用户指定的 UKB 多模态目录核验，共有 87,720 个被试目录；其中 37,182 个同时含 `VBM_2mm.nii.gz`、`dti_FA_2mm_mmorf.nii.gz`、`dti_MD_2mm_mmorf.nii.gz` 和 `zstat1s.nii.gz`。抽查影像为 `91×109×91`、2 mm MNI 网格。任务图文件是 **zstat**，不是 tstat。
 
+性能和成分数判断以 **2,050 人、VBM/FA/MD 三模态完整掩膜**为当前主要样本；18 人小掩膜结果仅用于接口、数值定位和新被试调用检查。两种样本的输入和输出范围在各节分别注明，不互相外推。
+
 同输入精度测试取排序后的前 18 名四模态齐全被试拟合，下一名只用于 `apply_model`。每模态从前三名共同非零体素中每隔 20 个取一个：VBM 7,896、FA 11,113、MD 11,114、zstat1 14,688 个体素。掩膜用于快速同输入核验，不是推荐的全脑生物学掩膜。参数固定为 `n_components=3`、`migp_dim=10`、`dicl_dim=40`、`dicl_max_iter=20`、`flica_max_iter=100`、`top_voxels=300`、`random_state=0`。原 notebook 的最大迭代数为 1000；本报告结论只适用于所列参数。影像、被试名单和脑图保留在用户远程验证目录；仓库仅保存不含被试 ID 的汇总结果。
 
 参考算法是用户 notebook 中的 NumPy/SciPy mMIGP、sklearn `MiniBatchDictionaryLearning` 与[原作者 FLICA 变分推断](https://github.com/weikanggong/BigFLICA/blob/master/FLICA_cpu.py)。上游检出为 `125d44451f288977810105edd29f4869ee5d8317`，含 NumPy 兼容修订。原 `BigFLICA_cpu.py` 用 SPAMS DicL；本次比的是用户指定的 **sklearn 版本**。原回归函数将 t 值命名为 Z；两边的成分图均按相同自由度换成带符号标准正态 z 后比较。
@@ -28,7 +30,7 @@
 | 阶段 / 路径 | 秒 | 说明 |
 |---|---:|---|
 | notebook CPU：读取/标准化、mMIGP、sklearn DicL、FLICA | 0.99 / 0.012 / 4.45 / 0.357 | 四阶段合计 5.81；不含成分 NIfTI/PNG 与新被试模型；[原始记录](benchmark.json)。 |
-| FNIT 当前 CPU：读取/标准化、mMIGP、sklearn DicL、FLICA、成图、投影模型 | 1.14 / 0.195 / 5.08 / 0.457 / 2.72 / 0.053 | 冷启动带全部输出墙钟 9.71；[当前源码重跑](cpu_final_metadata.json)。 |
+| FNIT 历史 CPU 测量：读取/标准化、mMIGP、sklearn DicL、FLICA、成图、投影模型 | 1.14 / 0.195 / 5.08 / 0.457 / 2.72 / 0.053 | 冷启动带全部输出墙钟 9.71；[当时的源码快照记录](cpu_final_metadata.json)，不能视为当前源码的重新测量。 |
 | GPU 直接体素：读取/标准化、FLICA、成图、投影模型 | 1.28 / 43.74 / 3.43 / 0.213 | 墙钟 48.76；进程峰值显存 0.157 GiB、内存 0.882 GiB；原 CPU 直接体素 FLICA 同输入为 2.39 秒。 |
 | GPU 压缩、默认 batch=32：读取、mMIGP、DicL、FLICA、成图、投影模型 | 1.37 / 1.12 / 474.47 / 7.15 / 3.67 / 0.189 | 墙钟 488.10；显存峰值 0.156 GiB、内存 0.985 GiB；[完整结果](gpu_default32_final.json)。 |
 | GPU 压缩、batch=32，仅 DicL 四模态 | 486.33 | 符号对齐实验；VBM 单模态 119.46 秒，对照 CPU 1.52 秒。当前 PyTorch LARS 在小批量上明显慢于 sklearn。 |
@@ -38,7 +40,7 @@
 
 **2,050 名真实被试分块测试**使用 VBM 和 FA 两个模态、同一核验掩膜：标准化 HDF5 实际数据 311,747,600 字节，逐被试建库 68.39 秒；mMIGP 2.17 秒，进程峰值显存 0.125 GiB、内存 0.743 GiB。初版 6 次 GPU 子空间迭代的特征对残差为 3.47×10⁻⁴；新增自适应迭代在第 18 次达到 3.03×10⁻⁹，mMIGP 2.83 秒，显存峰值 0.095 GiB，见[分块基准](large2050.json)和[改进结果](large2050_refined.json)。测试覆盖了 `N>2048` 的随机特征分解分支，但这两个模态在所选小掩膜下本就可以放入 32 GB 内存；“完整大模态不进内存”由逐被试 HDF5 写入及逐体素块读取实现，**未**做 37,182 人 × 全脑体素的端到端耗时实测。按 100 万掩膜体素估算，float64 规范化缓存约 277 GiB/模态，实际磁盘容量必须单独安排。
 
-直接体素模式在大于 2,048 人时使用随机特征分解，并将原 FLICA 的自动空间自由度估计固定为 1；此大样本分支尚未完成与原软件的精度对照。大样本端到端 CPU/GPU 加速比尚不能报告。真实 UKB 派生 PNG 从远程复制到本地工作区曾被自动审批拒绝，理由是可能含敏感数据；本仓库不附脑图，原图保留在用户远程结果目录。
+直接体素模式在大于 2,048 人时使用随机特征分解，并将原 FLICA 的自动空间自由度估计固定为 1；此大样本分支尚未完成与原软件的精度对照。大样本端到端的受控 CPU/GPU 加速比尚不能报告；后文的 2,050 人 C3 冷启动只给共享节点观察时间。真实 UKB 派生 PNG 从远程复制到本地工作区曾被自动审批拒绝，理由是可能含敏感数据；本仓库不附脑图，原图保留在用户远程结果目录。
 
 ## 中规模速度门槛与算法修正
 
@@ -83,7 +85,7 @@ DicL 的严格 float32/Triton 候选在同一 18 人输入下，和 CPU float32 
 
 ### 去掉 task 的三结构模态基准
 
-按同一 2,050 名真实被试，只保留 VBM（157,901 体素）、FA（222,257）和 MD（222,261）；以下计时均复用已生成的 float32 HDF5，不包含 NIfTI 解码和首次建库。完整掩膜 mMIGP 的 R=100、8 线程 CPU 两次为 `22.09/21.64` 秒，严格 float32 GPU 两次为 `15.47/14.17` 秒，按中位数快约 `1.48` 倍。GPU 与 CPU 的 U 相对差 `5.45e-5`、最大子空间主角 `0.00285°`，三模态投影相对差为 `1.71e-5/1.16e-5/8.31e-6`；两端均满足 `1e-6` 特征对残差门槛。[同输入 ABBA 记录](mmigp2050_three_modal_float32.json)与[可复现脚本](benchmark_three_modal_mmigp_real2050.py)。
+按同一 2,050 名真实被试，只保留 VBM（157,901 体素）、FA（222,257）和 MD（222,261）；以下计时均复用已生成的 float32 HDF5，不包含 NIfTI 解码和首次建库。完整掩膜 mMIGP 的 R=100、8 线程 CPU 两次为 `22.09/21.64` 秒，严格 float32 GPU 两次为 `15.47/14.17` 秒，按中位数快约 `1.48` 倍。GPU 与 CPU 的 U 相对差 `5.45e-5`、最大子空间主角 `0.00285°`，三模态投影相对差为 `1.71e-5/1.16e-5/8.31e-6`；两端均满足 `1e-6` 特征对残差门槛。[同输入 ABBA 记录](mmigp2050_three_modal_float32.json)保留当时源码 SHA-256：`streaming.py` 为 `b4cb6404...`，当前版本为 `104cfc35...`，属于历史冻结源测量；[脚本](benchmark_three_modal_mmigp_real2050.py)说明测试方法，不保证逐字节复现当时结果。
 
 先只在 FLICA 阶段去掉 zstat1，使用此前**四模态 mMIGP**产生的 VBM/FA/MD 三个真实 D=200×R=100 字典，逐被试噪声模式 C=20 迭代 101 次后保留 `20/20` 个有效成分。GPU 独立初始化修正后，自由度 DD 对 CPU 的相对差 `1.40e-16`，20 条 course 最小绝对相关 `0.9999999999999785`；CPU 初始化加拟合 `2.57` 秒，GPU `3.93` 秒，仍慢约 `1.53` 倍。VBM/FA/MD 重建范数比分别约为 `0.37/0.48/0.48`，保留 20 个成分并不等于达到所需重建质量。[修正后同输入记录](flica2050_dd_fixed_fourderived_three_structural.json)。该 FLICA 试验不能充当三模态端到端结果。
 
@@ -95,7 +97,25 @@ DicL 的严格 float32/Triton 候选在同一 18 人输入下，和 CPU float32 
 
 进一步的有限敏感性检查表明，三字典的第 20 奇异值/首奇异值分别为 `0.677/0.778/0.820`，未在输入阶段缺秩。普通联合 PCA 的 20 维投影可达到 `0.550/0.520/0.478` 的三模态重建范数比。将 FLICA 请求成分改为 17、使用 `PCAnew` 初始化、固定空间自由度为 1 或把 VBM 输入乘 2，100 轮后的有效秩分别为 `16/17`、`1/20`、`10/20` 和 `13/20`；这些简单改动均未通过 20 成分验收。它提示后续应检查变分更新中的模态竞争及成分剪枝，而不能只调一个权重掩盖结果。[完整汇总](three_structural_cpu_flica_diagnostic_real2050.json)与[可复现 CPU 诊断脚本](diagnose_three_modal_flica.py)。
 
-同一真实字典上追踪原版数值更新，1/10/20/30/50/101 次后的有效秩为 `20/20/19/18/17/17`；第 10 次的 VBM 重建范数比已降至 `0.0082`，到第 101 次仍只有 `0.0262`。因此提前截断在 10 次虽可保留 20 个非零 course，却不是收敛后的 20 成分解，也不能修复 VBM 模态被弱化的问题。[逐轮脱敏结果](three_modal_rank_trajectory_public.json)和[复现脚本](diagnose_three_modal_rank_trajectory.py)。
+同一真实字典上追踪 FNIT 修复广播错误后的逐被试噪声更新，1/10/20/30/50/101 次后的有效秩为 `20/20/19/18/17/17`；第 10 次的 VBM 重建范数比已降至 `0.0082`，到第 101 次仍只有 `0.0262`。因此提前截断在 10 次虽可保留 20 个非零 course，却不是收敛后的 20 成分解，也不能修复 VBM 模态被弱化的问题。[逐轮脱敏结果](three_modal_rank_trajectory_public.json)和[复现脚本](diagnose_three_modal_rank_trajectory.py)。
+
+### 2,050 人公开接口冷启动
+
+另从同一 2,050 人的原始 VBM/FA/MD NIfTI、三个完整掩膜，独立运行 CPU `run_bigflica`，不把上述阶段试验缓存伪装成公开 API 缓存。C=3/R=100/D=200、逐被试噪声模式的首次运行用时 `732.75` 秒：读取及标准化 `342.59`、mMIGP `43.37`、sklearn DicL `321.61`、FLICA `1.04`、z 图 `4.37`、固定投影模型 `15.92` 秒；进程峰值 RSS `1.91` GiB，未超过 `32` GiB 上限。输出 `2050×3` course、三个模态共九张 z-stat NIfTI、对应阈值图与 PNG；逐图 NIfTI 与 `.npy` 在掩膜内完全一致，一名未参训真实被试的 `apply_model` 返回有限的三个值。[公开调用聚合报告](three_structural_public_cpu_real2050.json)和[实跑时冻结脚本](benchmark_public_cpu_real2050_frozen.py)，脚本 SHA-256 为 `60743e67...`。
+
+同一节点的 H100 上也从原始 NIfTI 独立冷启动 GPU `run_bigflica`，使用同一有序被试清单、掩膜和参数，float32 标准化及 `max_gpu_gb=19`。GPU 总墙钟 `1045.08` 秒：读取及标准化 `139.85`、mMIGP `14.17`、PyTorch DicL `871.61`、FLICA `1.20`、z 图 `4.23`、投影模型 `12.23` 秒。峰值主机 RSS `1.17` GiB、CUDA 分配 `1.11` GiB、保留 `1.92` GiB。GPU 也生成 `2050×3` course、九张 z-stat NIfTI 和阈值图，并对同一名留出被试完成 `apply_model`。两次运行均在 gpucw1、CPU 限八线程，依次使用新输出目录；CPU 标准化为 float64，GPU 为 float32，操作系统页面缓存未控制，GPU 开始时有外部作业占满 GPU 计算。因此 GPU 总时间为 CPU 的 `1.43` 倍、DicL 阶段为 `2.71` 倍，**只是本次共享节点的观察值**，不是受控加速比。[GPU 聚合报告](three_structural_public_gpu_real2050.json)和[GPU 实跑脚本](benchmark_public_real2050.py)，脚本 SHA-256 为 `76b474e1...`。后一脚本可作为 CPU/GPU 同入口重跑模板，但它并非上述 CPU 测量时的逐字节脚本；其 docstring 保留了原文件名。
+
+两份报告记录了测量时源码 SHA-256。本轮随后把公开入口默认显存预算调为 19 GiB；实测调用原本就显式传入 19 GiB，运行参数没有变化。
+
+两条公开链路的输入签名及有序被试清单相同。mMIGP U 逐列无符号翻转，CPU/GPU 相对 L2 差 `2.18e-5`；VBM/FA/MD 投影差分别为 `6.92e-6/4.75e-6/3.39e-6`。经过 Hungarian 原子匹配和符号校正，三个 DicL 字典的相对 L2 差仍为 `0.549/0.453/0.896`，匹配原子的绝对余弦中位数为 `0.935/0.939/0.604`。三个成分的最优匹配 course 绝对相关为 `0.719/0.132/0.9997`；第二张 z 图在 VBM/FA/MD 的符号及排列校正后相关为 `-0.155/-0.048/-0.265`。分歧从 DicL 阶段扩大并传到 FLICA、脑图；仅凭两条独立运行还不能区分上游输入扰动与 DicL 实现差异，下面的同投影控制进一步区分。此前在**同一 float32 VBM 投影**上的受控 GPU/CPU DicL 字典相对差 `4.29e-6`，说明本次大差异不能仅按 GPU 算术误差解释。[逐阶段、课程与 z 图聚合对照](three_structural_public_cpu_gpu_compare_real2050.json)及[对照脚本](compare_public_cpu_gpu_real2050.py)。
+
+为固定完整三模态的中间输入，又直接读取本次 GPU 公开运行生成的**同一 float32 mMIGP 投影**，转为 float64 后交给 CPU sklearn DicL；GPU DicL 内部也使用 float64 算术。VBM/FA/MD 三个字典相对 GPU 字典的误差分别只有 `1.05e-5/1.55e-6/6.56e-5`，同序原子的最小绝对余弦均大于 `0.99999998`。再以同一 GPU U 拟合 CPU FLICA C3，2050 人三个 course 与 GPU 成分最优匹配后的相关均大于 `0.9999999984`，三模态九张 z 图的相关也均大于 `0.9999999984`。这说明**固定投影时** DicL 和 FLICA 实现高度一致；独立全链的失配由上游微小投影差异在非凸 DicL 中放大。CPU 三模态 DicL 耗时共 `163.37` 秒，GPU 公开运行中 DicL 为 `871.61` 秒；GPU 共享负载和缓存条件不同，这两个数只记录本次观察，不能作受控加速比。[同投影控制报告](three_structural_f32_same_projected_control_real2050.json)及[复现脚本](diagnose_public_gpu_projected_dicl_cpu_real2050.py)。
+
+这两个 C=3 模型虽然通过数值秩门槛，CPU 的 VBM/FA/MD 重建范数比仅 `7.93e-6/0.195/0.196`，GPU 仅 `4.69e-5/0.183/0.111`，因此只用于大样本调用链功能检查。用**本次各自新产生的字典**另跑 C=20 的 FLICA，101 次更新后 CPU float64 仅 `16/20`、GPU float32 仅 `11/20` 个有效成分，均未通过验收；也不能把它们与此前 float32 阶段 CPU 字典的 `17/20` 合并。[CPU C20 诊断](three_structural_public_cpu_c20_probe_real2050.json)、[GPU C20 诊断](three_structural_public_gpu_c20_probe_real2050.json)。
+
+两套 CPU 字典的差别也经过定位：float64 与 float32 mMIGP 的 U 相对差为 `3.73e-5`，100 列没有符号翻转，而同序 sklearn DicL 字典相对差达到 VBM `0.769`、FA `0.629`、MD `0.990`。旧四模态与新三模态 float64 标准化缓存每模态抽查首、中、尾三个数据块完全相同；显著分歧出现在 mMIGP 精度和之后的非凸字典学习链路，尚不能把 C20 秩变化归因于某一个单独步骤。[输入及字典对照](three_structural_dicl_cpu_f64_vs_f32_real2050.json)。
+
+另以这次 float64 字典有限尝试 C24/C25/C28，101 次更新分别得到 `16/18/20` 个有效成分；C28 在 101、201、501 次后均为 `20/28`，恰有八行 H 的范数不超过最大值的 `1e-6`，保留列集合在这三次中相同。旧 float32 字典的 C28 在 101、201 次也得到 `20/28`，但保留列集合与 float64 不同。过完备拟合后筛选可作为后续研究方向；当前公开 API 会拒绝这八条退化列，且删列后的模型不能称作原软件 **C20 同参数**输出。[小范围参数试验](three_structural_public_cpu_overcomplete_probe_real2050.json)、[float64 稳定性](three_structural_public_cpu_c28_stability_real2050.json)、[float32 稳定性](three_structural_old_cpu_f32_c28_stability_real2050.json)和[复现脚本](probe_overcomplete_flica_real2050.py)。
 
 公开调用链也用 18 名真实被试、三个小核验掩膜验证了纯结构模态的 `R` 模式，阈值图取前 `100` 个体素：Python API 首次运行 `30.03` 秒，其中标准化 `0.90`、mMIGP `0.78`、DicL `24.48`、FLICA `0.90`、脑图 `2.52` 秒；请求的 `3/3` 个成分均有效。CLI 复用 mMIGP/DicL 缓存后 `8.35` 秒。九张 z-stat NIfTI 均为 float32，与内存 z 图逐体素往返误差 `0`；输出不含 zstat1。[公开入口与输出检查](three_structural_public_R_smoke_real18.json)。这是小掩膜功能核验，不能替代 2,050 人完整掩膜的 20 成分验收。
 

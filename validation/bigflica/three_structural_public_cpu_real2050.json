@@ -1,0 +1,85 @@
+{
+  "dataset": "2050 real subjects; full-mask VBM/FA/MD; task excluded",
+  "backend": "cpu_public_api_cold_start",
+  "parameters": {
+    "migp_dim": 100,
+    "dicl_dim": 200,
+    "dicl_max_iter": 1000,
+    "flica_max_iter": 100,
+    "flica_lambda_dims": "R",
+    "feature_block": 2048
+  },
+  "requested_components_attempts": [
+    {
+      "components": 3,
+      "status": "accepted"
+    }
+  ],
+  "effective_rank": 3,
+  "reconstruction_norm_ratio": {
+    "vbm": 7.927011065248673e-06,
+    "fa": 0.19471345205865798,
+    "md": 0.1961158745596741
+  },
+  "course_shape": [
+    2050,
+    3
+  ],
+  "maps": {
+    "vbm": {
+      "voxels": 157901,
+      "components": 3,
+      "nifti_array_max_abs_error": 0.0
+    },
+    "fa": {
+      "voxels": 222257,
+      "components": 3,
+      "nifti_array_max_abs_error": 0.0
+    },
+    "md": {
+      "voxels": 222261,
+      "components": 3,
+      "nifti_array_max_abs_error": 0.0
+    }
+  },
+  "held_out_apply_model": {
+    "finite": true,
+    "components": 3,
+    "score_norm": 238.10198122765868
+  },
+  "stage_timings_s": {
+    "load_standardize_s": 342.5852758982219,
+    "mmigp_s": 43.37100238725543,
+    "dicl_s": 321.6107696071267,
+    "flica_s": 1.0352374203503132,
+    "spatial_maps_s": 4.368198690935969,
+    "projection_model_s": 15.921537430025637
+  },
+  "total_wall_s": 732.7498297682032,
+  "peak_process_rss_gib": 1.9081573486328125,
+  "scope": "C3 or C2 functional smoke; C20 scientific acceptance remains separate",
+  "input_signature_sha256": "a72b508100b94d1de6a8919bb61680af461eff1f2a5f246660f7fb71a1edd7d5",
+  "cache_signatures_sha256": {
+    "normalized": "1018142e29af8acbaeb64421d56768c68e9ec8bc210184edcfbc6856f82fb1c4",
+    "mmigp": "89aec8387af160da61707fa89036b82711dc4a15d6e0ebf2b2291bb742c1fa8a",
+    "dicl": "20a8b1f48b9426d9a4e8f019a4d0727ca0034b4eb0a9a39271c91200b1a516db"
+  },
+  "source_sha256": {
+    "pipeline.py": "933d5846d0a39d9765f5af9ae954623f3f7a252d865f934bf3dd9091856512d6",
+    "pipeline_cpu_stream.py": "893da714d2cfbdd5f661686cc80611ffd723efc70ab461501015385a32f2caec",
+    "pipeline_gpu.py": "267faddcb17d505353f77bb42ba0e19408278b2dc157f4a94c5d84cc8b7157d5",
+    "streaming.py": "104cfc3597637e0a3857ff484ea748c11d3b80aa8d6ef27d6aae26c8b1ef506a",
+    "dicl_torch.py": "84a2124c3516328aad73d8a67d8bba7de73b3e2947613c3c93de43fcce4222af",
+    "flica_vb.py": "b469b924b07ae16030a8af9087e4a12f2ecc907a9fb1f8f4474bfaf95c1168b3",
+    "flica_torch.py": "029e9ac6b4fbf32cab16463e8e806a6c5e7088d55614cb3346ab17e33ecaaa4e"
+  },
+  "validation_script_sha256": "60743e67996aaa027a822bbdca496091bf57408ad95ab4fa0e558e7cb53226ef",
+  "hardware_context": {
+    "host": "gpucw1",
+    "cpu_model": "Intel Xeon Gold 6430",
+    "cpu_threads": 8,
+    "normalized_dtype": "float64",
+    "virtual_address_limit_gib": 32,
+    "os_page_cache": "uncontrolled; fresh output/cache directories do not imply cold OS page cache"
+  }
+}

@@ -254,7 +254,7 @@ def test_public_compressed_run_routes_subjectwise_noise(tmp_path, monkeypatch):
     monkeypatch.setattr(pipeline_module, "_device", lambda requested: torch.device("cuda"))
 
     def gpu_run(*args):
-        observed.append(args[-1])
+        observed.append((args[-5], args[-1]))
         return tmp_path / "model"
 
     monkeypatch.setattr(pipeline_gpu_module, "run_bigflica_gpu", gpu_run)
@@ -262,7 +262,7 @@ def test_public_compressed_run_routes_subjectwise_noise(tmp_path, monkeypatch):
                            tmp_path / "out", 1, migp_dim=3, dicl_dim=2,
                            device="cuda:0", flica_lambda_dims="R")
     assert result == tmp_path / "model"
-    assert observed == ["R"]
+    assert observed == [(19.0, "R")]
     existing = _flica_directory(tmp_path / "out", 1, "R")
     existing.mkdir(parents=True)
     (existing / "model.json").write_text(json.dumps({
@@ -271,7 +271,7 @@ def test_public_compressed_run_routes_subjectwise_noise(tmp_path, monkeypatch):
         run_bigflica(root, {"vbm": {"image": "vbm.nii.gz", "mask": str(mask)}},
                      tmp_path / "out", 1, migp_dim=3, dicl_dim=2,
                      device="cuda:0", flica_lambda_dims="R")
-    assert observed == ["R"]
+    assert observed == [(19.0, "R")]
 
 
 @pytest.mark.parametrize("device", ["cpu", "cuda:0"])
@@ -324,6 +324,7 @@ def test_cli_passes_flica_lambda_option(tmp_path, monkeypatch):
                                       "--n-components", "2", "--flica-lambda-dims", "R"])
     bigflica_cli.main()
     assert observed["flica_lambda_dims"] == "R"
+    assert observed["max_gpu_gb"] == 19.0
 
 
 def test_flica_maps_keep_float_z_values_with_uint8_mask(tmp_path):

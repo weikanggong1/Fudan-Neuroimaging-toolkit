@@ -26,7 +26,7 @@ def main() -> None:
     fit.add_argument("--top-voxels", type=int, default=1000)
     fit.add_argument("--random-state", type=int, default=0)
     fit.add_argument("--device", default="auto")
-    fit.add_argument("--max-gpu-gb", type=float, default=28.0)
+    fit.add_argument("--max-gpu-gb", type=float, default=19.0)
     fit.add_argument("--feature-block", type=int, default=2048)
     fit.add_argument("--dicl-batch-size", type=int, default=32)
     fit.add_argument("--dicl-sparse-iterations", type=int, default=120,
