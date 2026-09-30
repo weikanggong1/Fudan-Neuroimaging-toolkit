@@ -44,6 +44,7 @@ flowchart TD
     METRIC --> MATRIX
     ATLAS_DWI --> MATRIX
     MATRIX --> OUT["每套 atlas：nodes.tsv、count、FBC、mean length、mean FA"]
+    classDef default fill:#ffffff,stroke:#000000,color:#000000;
 ```
 
 Tian 路径还需将 MNI 模板标签映射到个体 T1：默认使用 FNIT SynthMorph，提供 `--tian-fnirt-coeff` 时使用已有变形系数；这一分支只影响相应 atlas 的构建。图中官方 `recon-all` 是用户已许可的结构像前置程序，其他计算由 FNIT 完成；Glasser 模板目前另有下文说明的 Workbench 依赖。

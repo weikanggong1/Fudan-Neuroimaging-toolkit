@@ -2,6 +2,40 @@
 
 `fMRIVolume_pipeline` 每次处理一个原始 BIDS BOLD run，输出 BIDS Derivatives。步骤依次为 SynthStrip 脑提取、FEAT 核心运动校正与高通、TorchFAST 组织分割、BBR、T1→MNI152NLin6Asym 2 mm 配准、[FNIT MELODIC/PICA](../melodic/README.md)、ICA-AROMA 和可选 WM/CSF/运动回归。最后分别保存个体 EPI 网格与 MNI 网格的清理后 BOLD。运算时不调用 FSL、FreeSurfer 或 fMRIPrep。GPU 默认允许 TF32。
 
+## 流程策略
+
+```mermaid
+flowchart TD
+    BIDS["原始 BIDS BOLD、JSON、同被试 T1w"] --> SEL["选择 subject、session 与 BOLD run"]
+    SEL --> EPI["BOLD 或 SBRef 参考图"]
+    SEL --> T1["同被试 T1w"]
+    EPI --> MASK["SynthStrip：EPI 脑掩膜"] --> FEAT["FEAT 核心：运动校正与高通滤波"]
+    T1 --> BRAIN["SynthStrip：T1 脑图与掩膜"] --> FAST["TorchFAST：WM、CSF 部分体积分数"]
+    FEAT --> BBR["BBR：EPI 到 T1w 的仿射"]
+    FAST --> BBR
+    BRAIN --> REG{"T1 到 MNI 配准后端？"}
+    MNI["MNI152NLin6Asym 2 mm 模板；掩膜可选"] --> REG
+    REG -- SynthMorph --> SM["FNIT SynthMorph 非线性配准"]
+    REG -- FNIRT --> FN["TorchFNIRT 非线性配准"]
+    SM --> XFM["T1 到 MNI 形变"]
+    FN --> XFM
+    FEAT --> ICA["FNIT MELODIC/PICA → ICA-AROMA"]
+    BBR --> ICA
+    XFM --> ICA
+    ICA --> CONF{"启用 WM、CSF、运动等回归？"}
+    FAST --> CONF
+    CONF -- 是 --> REGRESS["回归选定混杂项"] --> CLEAN["清理后的原生 EPI BOLD"]
+    CONF -- 否 --> CLEAN
+    CLEAN --> NATIVE["保存原生 EPI 网格 BOLD"]
+    BRAIN --> AUX["保存 T1 脑图与 BBR 矩阵"]
+    BBR --> AUX
+    CLEAN --> RESAMPLE["合成 BBR 与 T1→MNI 变换并重采样"]
+    BBR --> RESAMPLE
+    XFM --> RESAMPLE
+    RESAMPLE --> OUT["保存 MNI 2 mm BOLD、脑掩膜与 BIDS JSON"]
+    classDef default fill:#ffffff,stroke:#000000,color:#000000;
+```
+
 ## 输入与安装
 
 在仓库根目录运行 `conda env create -f environment.yml`，激活 `fnit`，再运行 `fnit-setup-weights --model fmri`。选 `registration_backend="fnirt"` 时只需要 SynthStrip 权重。`mni_template` 须为与 FNIT ICA-AROMA 掩膜同网格的 MNI152 T1 2 mm NIfTI；`mni_brain_mask` 可选，但需与模板同网格。原始 BIDS 至少包含 `dataset_description.json`、`sub-<label>/func/*_bold.nii.gz` 及含 `TaskName`、`RepetitionTime` 的 JSON、同被试 `anat/*_T1w.nii.gz`。SBRef 可选。多 run、echo 或 T1w 候选需明确选择。

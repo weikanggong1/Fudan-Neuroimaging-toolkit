@@ -4,6 +4,31 @@
 
 先运行 `fMRIVolume_pipeline`，至少启用 WM、CSF 或运动回归中的一项。`recon_all` 必须是同一源 T1w 已完成重建的目录，或含 `FreeSurfer/` 的 ZIP；代码核对 `mri/orig/001.mgz` 与 volume 所用 T1w 的尺寸和仿射。默认只需要 T1w。T2w 或 FLAIR 可用于外部 recon-all 重建，但本流程不读取它们，也不做髓鞘图或 MSMAll。HCP 资源下载：`fnit-setup-fmri-surface-assets --output-dir /absolute/path/hcp_surface_assets --fmriprep`。安装器优先从 [FNIT 固定 Release](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1)获取已核对许可的 HCP 文件，失败后回退 HCPpipelines 原站；TemplateFlow dseg 保持原站下载。需另安装允许使用的 Connectome Workbench。
 
+## 流程策略
+
+```mermaid
+flowchart TD
+    VOL["已完成的 volume BIDS Derivatives"] --> CHECK["核对来源 T1w、混杂回归与 BOLD 时间维"]
+    FS["同一 T1w 的 recon-all subject 或 ZIP"] --> CHECK
+    CHECK --> NATIVE["原生 EPI clean BOLD 与 BBR 矩阵"]
+    CHECK --> MNI["MNI 2 mm clean BOLD"]
+    NATIVE --> T1BOLD["按 BBR 将 BOLD 重采样到 T1w 网格"]
+    FS --> GEO["读取双侧 white、pial、sphere、sulc 与 ROI"]
+    HCP["HCP/fsLR 几何、ROI 与球面模板"] --> GEO
+    GEO --> SPHERE{"已提供注册球面？"}
+    SPHERE -- 否 --> MSM["FNIT MSMSulc：配准到 fsLR"] --> READY["双侧注册球面与 32k 几何"]
+    SPHERE -- 是 --> READY
+    HCP --> READY
+    T1BOLD --> PROJ["Workbench ribbon 投影、dilate、mask 与 32k 重采样"]
+    READY --> PROJ
+    PROJ --> GIFTI["左、右 fsLR32k clean BOLD GIFTI"]
+    MNI --> SUB["按 HCP dseg 取得皮层下时间序列"]
+    DSEG["TemplateFlow HCP 2 mm dseg"] --> SUB
+    PROJ --> CIFTI["组装 91k CIFTI dtseries 与 JSON"]
+    SUB --> CIFTI
+    classDef default fill:#ffffff,stroke:#000000,color:#000000;
+```
+
 ## Python 调用
 
 ```python

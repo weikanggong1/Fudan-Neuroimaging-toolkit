@@ -30,6 +30,7 @@ flowchart LR
   H --> I[aparc+aseg、wmparc]
   F --> J[脑区统计]
   I --> J
+    classDef default fill:#ffffff,stroke:#000000,color:#000000;
 ```
 
 当前入口在 C–I 多处使用替代算法或省略阶段。图中箭头代表需用 **Python 上一阶段的真实输出** 接续核验的依赖关系；用冻结官方输入单独通过某一步，还不是整例通过。
