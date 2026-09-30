@@ -25,6 +25,8 @@ flowchart TD
 
 丘脑和海马的合成标签阶段最多执行 300、150 次 L-BFGS 网格更新。图像阶段的日程是外层 EM/网格交替轮数：丘脑为 7、5、5、3，海马为 7、5、3；每轮 EM 最多 100 次、网格更新最多 30 次，按成本变化收敛，网格停止移动时结束迭代。滑动边界随图谱仿射投影到工作网格。默认 CUDA 使用 FP32 和 TF32；每项结构完成后将详细结果移到 CPU，释放显存，再拟合下一项。
 
+丘脑和海马强度拟合只在有效体素上计算 EM 先验和网格数据成本，缓存固定参考网格的逆矩阵和体积，合并点批次及插值。CUDA FP32 使用主页环境已有的 Triton 四面体查找，梯度继续由 PyTorch 计算；CPU 或不支持该 kernel 的输入使用 PyTorch 查找。最终解剖先验和后验仍按完整工作网格输出，分辨率与拟合日程保持原配置。
+
 图谱加载、裁剪、三次插值、图谱平滑中的 Gaussian 卷积、形态学处理、白质标签传播、海马部分容积超参数准备和最终 Nibabel 重采样仍在 CPU 上执行。SynthSeg、SynthSeg+、仿射优化、网格先验栅格化、Gaussian EM 和形变优化使用指定设备。运行时间包含这些 CPU 步骤；安装环境所需依赖已列在主页 Conda 环境中。
 
 ## 准备图谱
@@ -99,7 +101,7 @@ segment_subregions thalamus --cross fs_sub01 --sd /absolute/path/subjects --thre
 segment_subregions hippo-amygdala --cross fs_sub01 --sd /absolute/path/subjects --threads 4
 ```
 
-脑干历史结果见[逐区验证](../../validation/subregions/README.md)。[两个完整真实 T1 运行](../../validation/subregions/unified.md)已完成：同阶段输入的脑干 4/4 区达标，丘脑及海马/杏仁核尚未全部达标；原始 T1 全流程的逐区精度也未达到目标。所有标签、硬/软体积、实际耗时和脑图分别记录。当前不能宣称逐区等价或完整 GPU 提速。
+脑干历史结果见[逐区验证](../../validation/subregions/README.md)。[优化后的两个完整真实 T1 运行](../../validation/subregions/unified.md#2026-10-01优化后的两个完整运行)已完成：共享 H100 上，同阶段输入由 277.63 min 降至 45.02 min，原始 T1 全流程由 248.68 min 降至 41.33 min。阶段输入仍有脑干 4/4 区达标，全部亚区为 26/103 区达标；原始 T1 为 0/104。丘脑指标改善，同阶段输入的左海马、左杏仁核指标下降，尚未达到官方逐区精度目标。报告保留全部 110 项软体积、失败标签、显存和负载记录，以及六张轴位脑图。
 
 ### Reference
 

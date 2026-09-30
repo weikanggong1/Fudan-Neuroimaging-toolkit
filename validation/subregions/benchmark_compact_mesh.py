@@ -269,7 +269,7 @@ def main():
         source_status = subprocess.check_output(["git", "status", "--short"], cwd=source_root, text=True).splitlines()
     source_paths = [Path(__file__).resolve(), *[Path(inspect.getsourcefile(item)) for item in
                     (rasterize_priors, ashburner_prior, gaussian_log_likelihood, GEMSAtlas, type(recipe))]]
-    source_paths.append(Path(inspect.getsourcefile(original_lookup)))
+    source_paths.append(Path(inspect.getsourcefile(inspect.unwrap(original_lookup))))
     report = {
         "mode": f"real_{args.structure}_mesh_cost_component", "structure": args.structure,
         "scope": "saved real-data mesh objective component; excludes preparation, EM iterations and whole-subject runtime",

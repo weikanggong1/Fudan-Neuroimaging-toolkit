@@ -8,9 +8,9 @@
 
 示例：
   old_run=/absolute/path/full_raw_v7  # 旧完整运行目录
-  new_run=/absolute/path/full_raw_v11  # 新完整运行目录，同一真实输入
+  new_run=/absolute/path/full_raw_v12  # 新完整运行目录，同一真实输入
   old_gpu_log=/absolute/path/full_raw_v7_gpu_load.jsonl  # 旧日志在运行目录的父目录
-  new_gpu_log=/absolute/path/full_raw_v11_gpu_load.jsonl  # 新日志同样在父目录
+  new_gpu_log=/absolute/path/full_raw_v12_gpu_load.jsonl  # 新日志同样在父目录
   comparison_json=/absolute/path/full_raw_optimization.json  # 对照结果
   python validation/subregions/compare_optimization.py \\
       --old "$old_run" --new "$new_run" \\
