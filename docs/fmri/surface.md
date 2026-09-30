@@ -74,15 +74,15 @@ print(result.dtseries)  # 91k CIFTI 时间序列
 
 ## 真实数据 benchmark
 
-2026-09-30 用当前公开 API 连续运行一例真实 UKB 的完整 490 帧 volume 和 surface。本次 surface 直接使用刚完成的 volume，输出双侧 490×32,492 GIFTI 与 490×91,282 CIFTI，数值、时间轴和 JSON 检查全部通过。
+2026-09-30 用 `3f8b756` 的公开 API，在修补 volume 最终 MNI 样条插值后连续运行一例真实 UKB 的完整 490 帧 volume 和 surface。本次 surface 直接使用刚完成的 volume，输出双侧 490×32,492 GIFTI 与 490×91,282 CIFTI，数值、时间轴和 JSON 检查全部通过。
 
 | 测量 | 结果 |
 |---|---|
-| 完整 surface API，含球面估计、写盘和清理 | 847.83 s |
-| volume + surface API 合计 | 2445.84 s（40.76 分钟） |
+| 完整 surface API，含球面估计、写盘和清理 | 905.71 s |
+| volume + surface API 合计 | 2624.89 s（43.75 分钟） |
 | surface 峰值 CUDA allocated / reserved | 0.73 / 1.26 GB |
-| 固定 volume，只替换官方 newMSM 球面：左 / 右皮层时间 r 均值 | 0.941705 / 0.942001 |
-| 同一对照的左 / 右皮层 MAE | 18.4463 / 20.0270 |
+| 固定 volume，只替换官方 newMSM 球面：左 / 右皮层时间 r 均值 | 0.940496 / 0.941404 |
+| 同一对照的左 / 右皮层 MAE | 18.1565 / 19.7100 |
 | 同一对照的皮层下最大绝对差 | 0 |
 
 参照控制只替换注册球面，投影和组装仍使用同一 FNIT/Workbench 路径，定位的是皮层对应关系差异。完整候选与官方皮层时序尚不等价，也没有最终 UKB FIX 或独立完整 fMRIPrep 的逐值参照。两次 API 的总时间不含既有皮层重建，T1 来自匹配存档的重建输入；更早的结构处理未核对。单次共享 H100 计时不作为稳定加速比。
