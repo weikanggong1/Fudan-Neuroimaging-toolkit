@@ -2,7 +2,7 @@
 
 FNIT 提供脑 MRI 处理和群体分析的 Python 与命令行接口。主要计算由 PyTorch 实现，NIfTI 读写使用 Nibabel；除各功能页明确列出的参考对照外，运行 FNIT 不需要安装 FSL、FreeSurfer、SPM、MRtrix3、AFNI、DIPY 或工作流封装包。Python 包名为 `fnit`，统一命令行入口为 `fnit`。
 
-CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核；BWAS 的连接和回归计算为匹配原版临界 z 值使用 float64。模型、影像张量与 NIfTI 输出保持 float32；不会自动使用 float16 或 bfloat16。除 recon-all、Connectome 和群体 BWAS 专页另行维护的范围外，本页审计的功能只提供单被试 Python API 和单被试命令行接口。多个病例由调用方在包外通过任务调度器、进程池或作业系统分配 CPU/GPU；这些单被试功能不提供多被试调度层。
+CUDA 路径默认允许 NVIDIA TF32 matmul 和 cuDNN 内核；BWAS 为匹配原版统计结果，单独使用普通 float32 连接计算和 QR 正交化回归。模型、影像张量与 NIfTI 输出保持 float32；不会自动使用 float16 或 bfloat16。除 recon-all、Connectome 和群体 BWAS 专页另行维护的范围外，本页审计的功能只提供单被试 Python API 和单被试命令行接口。多个病例由调用方在包外通过任务调度器、进程池或作业系统分配 CPU/GPU；这些单被试功能不提供多被试调度层。
 
 ## 功能
 

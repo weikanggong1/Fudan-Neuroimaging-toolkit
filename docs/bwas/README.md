@@ -44,8 +44,8 @@ result = run_bwas(
     phenotype="case",  # 表型列；0/1 病例对照或连续数值
     covariates=("age", "sex", *site_columns),  # 数值协变量列，自动加截距
     cdt=5.0,  # 双侧 |z| 连接定义阈值；原版建议正式分析不低于 5
-    block_size=2048,  # 每维体素分块宽度，影响计算吞吐及显存
-    subject_block_size=8,  # 每次送入 GPU 的被试数，限制显存
+    block_size=5120,  # 每维体素分块宽度；此示例已在 H100 上验证
+    subject_block_size=16,  # 每次送入 GPU 的被试数，限制显存
     num_workers=8,  # 并发读取、平滑度估计与时间序列标准化的被试数；占用更多主机内存
     cache_root=Path("/data/local-scratch"),  # 可选：本地临时盘；需容纳全部被试的标准化 BOLD
     device="cuda:0",  # PyTorch 设备；无 CUDA 时可用 "cpu"
@@ -64,7 +64,7 @@ print(result.edges, result.clusters, result.ma_map)
 | `phenotype` | 欲检验的单个数值列名；系数对应模型第一列。 |
 | `covariates` | 数值协变量列名元组；函数自动追加截距。多类别 site 需先转换为哑变量。 |
 | `cdt` | 对双侧 z 值取绝对值的连接阈值，默认 `5.0`；原版建议正式全脑分析不低于 `5`。 |
-| `block_size` | 每个体素轴的块宽，默认 `128`；整脑建议在显存允许时加大。 |
+| `block_size` | 每个体素轴的块宽，默认 `128`；示例中的 `5120` 适用于已验证的 H100 配置，其他 GPU 需按可用显存调整。 |
 | `subject_block_size` | 每个 GPU 批次的被试数，默认 `16`。 |
 | `num_workers` | 读取、平滑度估计和标准化 BOLD 的并发 worker 数，默认 `1`；增大可缩短准备时间，但会增加主机内存和磁盘负载。 |
 | `cache_root` | 可选临时缓存目录，默认使用 `output_root`；本地高速盘可加快反复读取体素块，需有约 `4 × 总帧数 × 掩膜体素数` 字节可用空间，运行结束自动清理。 |
@@ -72,7 +72,7 @@ print(result.edges, result.clusters, result.ma_map)
 | `fwhm` | 三轴共用的空间平滑度，单位为体素；默认从所有 BOLD 估计并至少取 `2`。 |
 | `validate_direct_ols` | 默认关闭。开启后，对每个无序体素对比较被试分块与一次性直接回归的 z 值，并记录平均/最大误差及 CDT 判定分歧；额外主机内存上限约为 `8 × 被试数 × block_size²` 字节。 |
 
-体素块和被试块共同限制显存。每块仅存当前被试组的 Fisher 连接和回归充分统计量 `XᵀY`、`YᵀY`；标准化时间序列按“体素×时间”连续存放在临时缓存目录，运行结束自动清理。GPU 允许 TF32，但连接与回归矩阵乘法使用 float64，以避免临界阈值附近连接翻转；BOLD 缓存与 MA NIfTI 为 float32，不使用 float16。
+体素块和被试块共同限制显存。每块仅存当前被试组的 Fisher 连接和回归充分统计量 `QᵀY`、`YᵀY`；其中 `Q` 来自对表型和协变量的 QR 正交化，避免站点哑变量造成的病态矩阵逆。标准化时间序列按“体素×时间”连续存放在临时缓存目录，运行结束自动清理。连接和群体回归均用普通 float32；本功能关闭 TF32，BOLD 缓存与 MA NIfTI 也为 float32，不使用 float16。CUDA 输入批次使用页锁定内存传输。
 超过 512 人时，Linux 版本会把当前进程的文件描述符软上限提高到 `被试数+128`；若系统硬上限仍不足，会在计算前报错并说明所需数量。
 
 单站点的命令行调用：
@@ -83,7 +83,7 @@ fnit-bwas --bids-root /data/derivatives/fnit-volume \
   --mask /data/MNI152_2mm_graymatter_mask.nii.gz \
   --output-root /data/derivatives/fnit-bwas \
   --phenotype case --covariate age --covariate sex \
-  --cdt 5 --block-size 2048 --subject-block-size 8 --num-workers 8 \
+  --cdt 5 --block-size 5120 --subject-block-size 16 --num-workers 8 \
   --cache-root /data/local-scratch --device cuda:0
 ```
 

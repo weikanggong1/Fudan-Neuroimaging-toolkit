@@ -46,7 +46,7 @@ def main():
     parser.add_argument("--device", default="cuda:0")
     args = parser.parse_args()
     original, source_hash = load_original(args.upstream_source)
-    torch.backends.cuda.matmul.allow_tf32 = True
+    torch.backends.cuda.matmul.allow_tf32 = False
     start = perf_counter()
     with (args.bids_root / "participants.tsv").open() as stream:
         rows = list(csv.DictReader(stream, delimiter="\t"))
@@ -120,26 +120,28 @@ def main():
     # The same FNIT Fisher values and design are fitted either all at once or
     # in subject chunks. This tests the user's required separable GLM identity.
     dev = torch.device(args.device)
-    x = torch.as_tensor(design, dtype=torch.float64, device=dev)
-    inverse = torch.linalg.pinv(x.T @ x)
-    weights = inverse @ x.T
+    x = torch.as_tensor(design, dtype=torch.float32, device=dev)
+    nuisance, _ = torch.linalg.qr(x[:, 1:], mode="reduced")
+    phenotype_vector = x[:, 0] - nuisance @ (nuisance.T @ x[:, 0])
+    x = torch.column_stack((phenotype_vector / torch.linalg.vector_norm(phenotype_vector),
+                            nuisance))
     width = v
-    full = _fisher_block(matrices, 0, n, 0, 0, width, width, dev)
-    full_beta = weights @ full
-    full_sigma = ((full-x@full_beta)**2).sum(dim=0)
-    batch_xy = torch.zeros_like(full_beta)
+    full = _fisher_block(matrices, 0, n, 0, 0, width, width, dev,
+                         dtype=torch.float32)
+    full_xy = x.T @ full
+    full_sigma = (full**2).sum(dim=0) - (full_xy**2).sum(dim=0)
+    batch_xy = torch.zeros_like(full_xy)
     batch_yy = torch.zeros_like(full_sigma)
     for st in range(0, n, 7):
         en = min(st+7, n)
-        batch_values = _fisher_block(matrices, st, en, 0, 0, width, width, dev)
+        batch_values = _fisher_block(matrices, st, en, 0, 0, width, width, dev,
+                                     dtype=torch.float32)
         batch_xy += x[st:en].T @ batch_values
         batch_yy += (batch_values**2).sum(dim=0)
-    batch_beta = inverse @ batch_xy
-    batch_sigma = batch_yy - (batch_beta*batch_xy).sum(dim=0)
+    batch_sigma = batch_yy - (batch_xy**2).sum(dim=0)
     df = n-x.shape[1]
-    scale = torch.sqrt(inverse[0, 0] / df)
-    full_t = full_beta[0]/(torch.sqrt(full_sigma)*scale)
-    batch_t = batch_beta[0]/(torch.sqrt(batch_sigma)*scale)
+    full_t = full_xy[0]/torch.sqrt(full_sigma/df)
+    batch_t = batch_xy[0]/torch.sqrt(batch_sigma/df)
     finite = torch.isfinite(full_t) & torch.isfinite(batch_t)
     full_z = stats.norm.ppf(stats.t.cdf(full_t.cpu().numpy(), int(df)-1))
     batch_z = stats.norm.ppf(stats.t.cdf(batch_t.cpu().numpy(), int(df)-1))
@@ -184,7 +186,7 @@ def main():
         "fwhm_abs_difference": abs(max(2.0, float(np.mean(smoothness)))-meta["FWHMInVoxels"]),
         "fwhm_subject_max_error": max(smoothness_error),
         "representative_cluster_p_abs_error": abs(float(original_p)-fnit_p),
-        "subject_block_beta_max_error": float((full_beta-batch_beta).abs().max()),
+        "subject_block_projection_max_error": float((full_xy-batch_xy).abs().max()),
         "subject_block_sigma_max_error": float((full_sigma-batch_sigma).abs().max()),
         "subject_block_t_max_error": float((full_t[finite]-batch_t[finite]).abs().max()),
         "subject_block_z_max_error": float(np.max(np.abs(full_z[finite.cpu().numpy()]

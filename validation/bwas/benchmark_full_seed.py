@@ -62,8 +62,15 @@ def main():
 
     start = perf_counter()
     observed = np.empty((len(rows), len(seeds)*voxels), dtype=np.float32)
+    layout_seconds = 0.0
     for subject, series in enumerate(matrices):
-        corr = original["BWAS_correlation"](series[:, seeds], series)
+        if series.shape[0] == voxels:
+            layout_start = perf_counter()
+            time_major = np.ascontiguousarray(series.T)
+            layout_seconds += perf_counter()-layout_start
+        else:
+            time_major = series
+        corr = original["BWAS_correlation"](time_major[:, seeds], time_major)
         corr[corr > 0.9999] = 0
         observed[subject] = original["BWAS_fisher_z"](corr).reshape(-1)
     beta = original["BWAS_regression_online1"](
@@ -79,22 +86,28 @@ def main():
 
     start = perf_counter()
     device = torch.device(args.device)
-    x = torch.as_tensor(design, dtype=torch.float64, device=device)
-    inverse = torch.linalg.pinv(x.T @ x)
+    if device.type == "cuda":
+        torch.backends.cuda.matmul.allow_tf32 = False
+    x = torch.as_tensor(design, dtype=torch.float32, device=device)
+    nuisance, _ = torch.linalg.qr(x[:, 1:], mode="reduced")
+    phenotype_vector = x[:, 0] - nuisance @ (nuisance.T @ x[:, 0])
+    x = torch.column_stack((phenotype_vector / torch.linalg.vector_norm(phenotype_vector),
+                            nuisance))
     xy = torch.zeros((x.shape[1], len(seeds)*voxels),
-                     device=device, dtype=torch.float64)
-    yy = torch.zeros(len(seeds)*voxels, device=device, dtype=torch.float64)
+                     device=device, dtype=torch.float32)
+    yy = torch.zeros(len(seeds)*voxels, device=device, dtype=torch.float32)
     for begin in range(0, len(rows), args.subject_block_size):
         end = min(begin+args.subject_block_size, len(rows))
         values = torch.cat([
-            _fisher_block(matrices, begin, end, seed, 0, 1, voxels, device)
+            _fisher_block(matrices, begin, end, seed, 0, 1, voxels, device,
+                          voxel_major=matrices[0].shape[0] == voxels,
+                          dtype=torch.float32)
             for seed in seeds], dim=1)
         xy += x[begin:end].T @ values
         yy += (values*values).sum(0)
-    beta = inverse @ xy
-    sigma = yy-(beta*xy).sum(0)
+    sigma = yy-(xy*xy).sum(0)
     df = len(rows)-x.shape[1]
-    t = (beta[0]/torch.sqrt(sigma*(inverse[0, 0]/df))).cpu().numpy()
+    t = (xy[0]/torch.sqrt(sigma/df)).cpu().numpy()
     z_fnit = stats.norm.ppf(stats.t.cdf(t, int(df)-1))
     fnit_seconds = perf_counter()-start
     valid = np.isfinite(z_reference) & np.isfinite(z_fnit)
@@ -106,7 +119,9 @@ def main():
         "matched_subjects": 1778, "subjects": len(rows), "gray_voxels": voxels,
         "seeds": len(seeds), "voxel_pairs_compared": int(valid.sum()),
         "cdt": 5.0, "original_source_sha256": source_hash,
-        "original_cpu_seconds": original_seconds,
+        "original_cpu_seconds_including_layout": original_seconds,
+        "original_layout_seconds": layout_seconds,
+        "original_cpu_core_seconds": original_seconds-layout_seconds,
         "fnit_elapsed_seconds": fnit_seconds,
         "z_mean_absolute_difference": float(difference.mean()),
         "z_max_absolute_difference": float(difference.max()),

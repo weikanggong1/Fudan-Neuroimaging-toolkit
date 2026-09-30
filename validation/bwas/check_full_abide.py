@@ -28,7 +28,7 @@ def main():
     upstream_hash = "1b78a98efb04ae5c1b764b101ec434ed8c8277f815481ae0ca940ebd910323c2"
     core_hash = hashlib.sha256(Path(core.__file__).read_bytes()).hexdigest()
     assert report["upstream_source_sha256"] == upstream_hash
-    assert core_hash == "2e9b2b9132110285a2cffce83bd2d434178386155eabc5c065018c9512107d82"
+    assert core_hash == "7a6b4be38996b16bb3c56a2522dd572aff502dc2e66c2085b95c4d8ca4bfbc37"
     assert report["peak_cuda_allocated_bytes"] < 20 * 1024**3
     assert np.isfinite(report["fwhm_voxels"]) and report["fwhm_voxels"] >= 2
     assert (output / "dataset_description.json").is_file()
@@ -43,6 +43,9 @@ def main():
     assert metadata["VoxelCount"] == 112215
     assert metadata["SuprathresholdEdgeCount"] == report["suprathreshold_edges"]
     assert metadata["FWHMInVoxels"] == report["fwhm_voxels"]
+    assert metadata["Precision"] == "float32"
+    assert metadata["TF32Enabled"] is False
+    assert metadata["DesignOrthogonalization"] == "QR"
     assert np.isfinite(metadata["ElapsedSeconds"])
 
     mask = nib.load(args.mask_file)

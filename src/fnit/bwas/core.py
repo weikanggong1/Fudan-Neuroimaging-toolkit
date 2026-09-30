@@ -178,7 +178,8 @@ def _clusters(edges: list[tuple[int, int, float]], coords: np.ndarray,
 
 def _fisher_block(matrices, start: int, stop: int, i: int, j: int,
                   n_i: int, n_j: int, device: torch.device,
-                  voxel_major: bool = False) -> torch.Tensor:
+                  voxel_major: bool = False,
+                  dtype: torch.dtype = torch.float64) -> torch.Tensor:
     count = stop-start
     lengths = np.array([matrices[subject].shape[1] if voxel_major
                         else len(matrices[subject]) for subject in range(start, stop)])
@@ -202,11 +203,11 @@ def _fisher_block(matrices, start: int, stop: int, i: int, j: int,
     if device.type == "cuda":
         left = left.pin_memory()
         right = right.pin_memory()
-    left = left.to(device=device, dtype=torch.float64, non_blocking=device.type == "cuda")
-    right = right.to(device=device, dtype=torch.float64, non_blocking=device.type == "cuda")
+    left = left.to(device=device, dtype=dtype, non_blocking=device.type == "cuda")
+    right = right.to(device=device, dtype=dtype, non_blocking=device.type == "cuda")
     r = (torch.bmm(left, right.transpose(1, 2)) if voxel_major else
          torch.bmm(left.transpose(1, 2), right))
-    r /= torch.as_tensor(lengths, device=device, dtype=torch.float64)[:, None, None]
+    r /= torch.as_tensor(lengths, device=device, dtype=dtype)[:, None, None]
     r = torch.where(r > 0.9999, 0, r).clamp(-0.999999, 0.999999)
     return torch.atanh(r).reshape(count, -1)
 
@@ -247,17 +248,20 @@ def run_bwas(bids_root: str | Path, participants_tsv: str | Path,
     cache_parent = Path(cache_root).expanduser().resolve() if cache_root else output_root
     cache_parent.mkdir(parents=True, exist_ok=True)
     if str(device).startswith("cuda"):
-        torch.backends.cuda.matmul.allow_tf32 = True
+        torch.backends.cuda.matmul.allow_tf32 = False
         torch.backends.cudnn.allow_tf32 = True
     dev = torch.device(device)
     if dev.type == "cuda":
         torch.cuda.set_device(dev)
         torch.cuda.reset_peak_memory_stats(dev)
     coords = np.column_stack(np.where(mask))
-    x = torch.as_tensor(design, dtype=torch.float64, device=dev)
-    inv = torch.linalg.pinv(x.T @ x)
+    x = torch.as_tensor(design, dtype=torch.float32, device=dev)
+    nuisance, _ = torch.linalg.qr(x[:, 1:], mode="reduced")
+    phenotype_vector = x[:, 0] - nuisance @ (nuisance.T @ x[:, 0])
+    x = torch.column_stack((phenotype_vector / torch.linalg.vector_norm(phenotype_vector),
+                            nuisance))
     df = len(ids) - x.shape[1]
-    scale = torch.sqrt(inv[0, 0] / df)
+    t_threshold = float(stats.t.isf(stats.norm.sf(cdt), df-1))
     nvox = len(coords)
     edges = []
     validation = {"count": 0, "sum_abs_z_error": 0.0, "max_abs_z_error": 0.0,
@@ -267,6 +271,8 @@ def run_bwas(bids_root: str | Path, participants_tsv: str | Path,
     direct_weights = direct_inverse @ design.T if validate_direct_ols else None
     direct_gpu_weights = (torch.as_tensor(direct_weights, device=dev)
                           if validate_direct_ols and dev.type == "cuda" else None)
+    direct_gpu_design = (torch.as_tensor(design, device=dev)
+                         if direct_gpu_weights is not None else None)
     if _prepared_cache_dir is not None and fwhm is None:
         raise ValueError("a prepared cache requires the measured fwhm")
     cache_context = (nullcontext(Path(_prepared_cache_dir)) if _prepared_cache_dir
@@ -312,24 +318,24 @@ def run_bwas(bids_root: str | Path, participants_tsv: str | Path,
         for i in range(0, nvox, block_size):
             for j in range(i, nvox, block_size):
                 n_i, n_j = min(block_size, nvox-i), min(block_size, nvox-j)
-                xy = torch.zeros((x.shape[1], n_i*n_j), device=dev, dtype=torch.float64)
-                yy = torch.zeros(n_i*n_j, device=dev, dtype=torch.float64)
+                xy = torch.zeros((x.shape[1], n_i*n_j), device=dev, dtype=torch.float32)
+                yy = torch.zeros(n_i*n_j, device=dev, dtype=torch.float32)
                 direct_y = (np.empty((len(ids), n_i*n_j), dtype=np.float64)
                             if validate_direct_ols else None)
                 for st in range(0, len(ids), subject_block_size):
                     en = min(st+subject_block_size, len(ids))
                     values = _fisher_block(matrices, st, en, i, j, n_i, n_j,
-                                           dev, voxel_major=True)
+                                           dev, voxel_major=True,
+                                           dtype=torch.float32)
                     xy += x[st:en].T @ values
                     yy += (values * values).sum(dim=0)
                     if direct_y is not None:
                         direct_y[st:en] = values.cpu().numpy()
-                beta = inv @ xy
-                sigma = yy - (beta * xy).sum(dim=0)
-                t = (beta[0] / (torch.sqrt(sigma) * scale)).cpu().numpy()
-                z = stats.norm.ppf(stats.t.cdf(t, df-1)).reshape(n_i, n_j)
+                sigma = yy - (xy * xy).sum(dim=0)
+                t = (xy[0] / torch.sqrt(sigma / df)).cpu().numpy().reshape(n_i, n_j)
                 if direct_y is not None:
                     check_start = perf_counter()
+                    z = stats.norm.ppf(stats.t.cdf(t, df-1))
                     flat_z = z.reshape(-1)
                     for lo in range(0, n_i*n_j, 65536):
                         hi = min(lo+65536, n_i*n_j)
@@ -344,7 +350,7 @@ def run_bwas(bids_root: str | Path, participants_tsv: str | Path,
                             observed = torch.as_tensor(
                                 np.ascontiguousarray(direct_y[:, lo:hi]), device=dev)
                             direct_beta = direct_gpu_weights @ observed
-                            residual = observed - x @ direct_beta
+                            residual = observed - direct_gpu_design @ direct_beta
                             direct_sigma = (residual*residual).sum(dim=0)
                             direct_t = (direct_beta[0] / torch.sqrt(
                                 direct_sigma * (direct_inverse[0, 0] / df))).cpu().numpy()
@@ -365,10 +371,12 @@ def run_bwas(bids_root: str | Path, participants_tsv: str | Path,
                             np.abs(direct_z[keep]) > cdt))
                     validation["seconds"] += perf_counter()-check_start
                 if i == j:
-                    rr, cc = np.where(np.triu(np.abs(z) > cdt, k=1))
+                    rr, cc = np.where(np.triu(np.abs(t) > t_threshold, k=1))
                 else:
-                    rr, cc = np.where(np.abs(z) > cdt)
-                edges.extend((i+int(a), j+int(b), float(z[a, b])) for a, b in zip(rr, cc))
+                    rr, cc = np.where(np.abs(t) > t_threshold)
+                selected_z = stats.norm.ppf(stats.t.cdf(t[rr, cc], df-1))
+                edges.extend((i+int(a), j+int(b), float(value))
+                             for a, b, value in zip(rr, cc, selected_z))
                 completed_tiles += 1
                 if completed_tiles % 10 == 0 or completed_tiles == total_tiles:
                     print(f"BWAS voxel tiles {completed_tiles}/{total_tiles}", flush=True)
@@ -409,6 +417,8 @@ def run_bwas(bids_root: str | Path, participants_tsv: str | Path,
         "DegreesOfFreedom": int(df), "VoxelCount": nvox,
         "SuprathresholdEdgeCount": len(edges), "Device": str(dev),
         "VoxelBlockSize": block_size, "SubjectBlockSize": subject_block_size,
+        "Precision": "float32", "TF32Enabled": False,
+        "DesignOrthogonalization": "QR",
         "PreparationWorkers": num_workers,
         "PeakCUDAAllocatedBytes": torch.cuda.max_memory_allocated(dev)
         if dev.type == "cuda" else None,
