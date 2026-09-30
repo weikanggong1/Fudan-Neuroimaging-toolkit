@@ -46,13 +46,13 @@ flowchart TD
     classDef default fill:#ffffff,stroke:#000000,color:#000000;
 ```
 
-## DicL 增量求解
+## GPU DicL 求解
 
-当前 CUDA DicL 用活动集逆矩阵的增量更新代替每次事件的完整 LU 分解，并用 CUDA Graph 重放每四次路径事件。批次默认32、种子和 sklearn 停止规则保留；活动方程残差或枢轴检查失败时，回到原 PyTorch 求解器重新计算该批次。字典原子全部有效时也重放按原顺序执行的更新；重采样时保留已有随机数顺序。DicL内部仍沿用float64，输入的mMIGP投影为float32；均值/方差分块汇总和兼容随机数生成仍在CPU执行。新增代码只使用已有PyTorch依赖。
+CUDA DicL 用批量 ADMM 识别稀疏系数的非零位置，再求解活动集方程，并检查系数符号、最优性条件和矩阵枢轴。每20步用 CUDA Graph 重放，减少 Python 调度；前四个批次、未归一化的初始化字典、检查失败或达到计算限额时，从当前小批次重新运行 LARS。LARS 回退仍用活动集逆矩阵增量更新，并保留原 LU 求解器处理失效逆矩阵。重复原子的非唯一解会回退，避免仅用目标值或最优性条件误接受不同的稀疏表示。字典原子全部有效时，按原顺序重放更新图；重采样时保留已有随机数顺序。批次默认32，alpha默认1，初始化、随机种子、字典更新和 sklearn 停止规则保留。
 
-2,050人三模态完整掩膜、同一mMIGP投影的正式GPU拟合合计238.72秒；本轮已测CPU对照为165.84秒。GPU显存分配峰值1.23 GiB，最终字典误差不超过6.57e-5，C3 course和九张z图在符号校正后相关超过0.9999999984。共享H100有持续外部负载；此前GPU的871.61秒不能作为受控加速比的分母。本轮仍未达到全部阶段快于CPU，独立全链的一致性和20个有效成分也未验收。完整参数、逐模态耗时、代码哈希和复现方法见[本轮验证](../../validation/bigflica/README.md#2026-09-30增量-lars-与-cuda-graph)。
+DicL内部仍沿用float64，mMIGP投影为float32；均值/方差分块汇总和兼容随机数生成仍在CPU执行。矩阵、稀疏求解和字典更新在GPU完成，只使用项目已有PyTorch依赖，未安装或调用SPORCO。ADMM方程参考 [SPORCO BPDN](https://sporco.readthedocs.io/en/latest/modules/sporco.admm.bpdn.html)；完整阶段实测见[验证记录](../../validation/bigflica/README.md#2026-09-30admm-活动集校正与回退)。
 
-GPU字典缓存版本改为 `rsvd2invgraph`；升级后使用新目录，旧版字典不会自动复用。mMIGP缓存可继续复用。原有CLI和Python参数无需修改。
+GPU字典缓存版本改为 `rsvd3bpdn`；旧版字典不会自动复用，mMIGP缓存可继续复用。原有CLI和Python参数无需修改。此优化没有消除独立CPU/GPU全链输入差异经非凸字典学习放大的问题，也没有解决20个有效成分的验收。
 
 ## 安装与输入
 
@@ -191,7 +191,7 @@ bigflica_output/
   mmigp_10/U.npy                      # [被试, mMIGP 维度]
   mmigp_10/vbm_projected.h5, ...      # [掩膜体素, mMIGP 维度]
   mmigp_10/eigen_diagnostics.json     # 阶段耗时、收敛次数、整体/逐特征对残差
-  dicl_10_40_20_0_32_120_rsvd2invgraph_cuda/ # 每模态 dictionary.npy 与 manifest.json
+  dicl_10_40_20_0_32_120_rsvd3bpdn_cuda/ # 每模态 dictionary.npy 与 manifest.json
   components_3/
     model.json                         # 参数、被试顺序、输入签名、阶段耗时
     flica_reconstruction.json          # 重建比、有效秩、H 奇异值比例及成分范数；失败时也保留

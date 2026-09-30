@@ -50,8 +50,8 @@ def main():
     model=output/'components_3_lambda_R'
     resumed=(model/'model.json').is_file()
     mmigp_signature=json.loads((old/'mmigp_100/manifest.json').read_text())['signature']
-    dicl_signature=_signature([mmigp_signature,200,1000,0,32,120,'rsvd2invgraph'])
-    dictionary_dir=output/'dicl_100_200_1000_0_32_120_rsvd2invgraph_cuda'
+    dicl_signature=_signature([mmigp_signature,200,1000,0,32,120,'rsvd3bpdn'])
+    dictionary_dir=output/'dicl_100_200_1000_0_32_120_rsvd3bpdn_cuda'
     started=time.perf_counter()
     if not resumed:
         output.mkdir(parents=True,exist_ok=False)

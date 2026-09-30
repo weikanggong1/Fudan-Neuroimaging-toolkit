@@ -19,7 +19,7 @@ import fnit.bigflica.flica_vb as flica_vb_module
 import fnit.bigflica.pipeline as pipeline_module
 import fnit.bigflica.pipeline_gpu as pipeline_gpu_module
 from fnit.bigflica import apply_model
-from fnit.bigflica.dicl_torch import (_DictionaryUpdater, _LarsInverseSolver,
+from fnit.bigflica.dicl_torch import (_DictionaryUpdater, _LarsInverseSolver, _SparseCodesBPDN,
                                       _randomized_svd_dictionary, _sparse_codes_lars)
 from fnit.bigflica.flica_torch import _estimate_dd_eigenvalues, _scaled_inverse
 from fnit.bigflica.flica_vb import fit_eigenspectrum, flica_init_params, update_H
@@ -90,6 +90,40 @@ def test_lars_mixed_finished_rows_match_sklearn():
     actual = _sparse_codes_lars(torch.as_tensor(samples),
                                torch.as_tensor(dictionary), 0.8).numpy()
     np.testing.assert_allclose(actual, expected, atol=1e-7, rtol=1e-7)
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required")
+def test_bpdn_polish_matches_sklearn_and_reuses_workspaces():
+    generator = np.random.default_rng(73)
+    dictionary = generator.normal(size=(40, 20))
+    dictionary /= np.linalg.norm(dictionary, axis=1, keepdims=True)
+    solver = _SparseCodesBPDN(32, 40, "cuda", torch.float64, alpha=0.4)
+    dictionary_gpu = torch.as_tensor(dictionary, device="cuda")
+    for index in range(7):
+        samples = generator.normal(size=(32, 20)) if index < 6 else np.zeros((32, 20))
+        samples[::4] = 0
+        expected = sparse_encode(samples, dictionary, algorithm="lasso_lars", alpha=0.4)
+        actual = solver(torch.as_tensor(samples, device="cuda"), dictionary_gpu, 0.4, 120)
+        np.testing.assert_allclose(actual.cpu().numpy(), expected, atol=1e-7, rtol=1e-7)
+    assert solver.polish_checks > 0
+    assert solver.fallback_count == 4
+    with pytest.raises(ValueError, match="alpha differs"):
+        solver(torch.zeros((32, 20), device="cuda"), dictionary_gpu, 0.8, 120)
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required")
+def test_bpdn_nonunique_support_restarts_lars():
+    # ADMM can split coefficients across identical atoms. KKT alone accepts
+    # that solution, whereas sklearn LARS selects a single atom.
+    dictionary = torch.tensor([[1., 0.], [1., 0.], [0., 1.]], device="cuda")
+    samples = torch.tensor([[2., 0.]], device="cuda")
+    dictionary = dictionary.double(); samples = samples.double()
+    solver = _SparseCodesBPDN(1, 3, "cuda", torch.float64)
+    solver.calls = 4
+    actual = solver(samples, dictionary, 1., 120)
+    expected = _sparse_codes_lars(samples, dictionary, 1., 120)
+    torch.testing.assert_close(actual, expected)
+    assert solver.fallback_count == 1
 
 
 @pytest.mark.parametrize("backend", ["cpu", pytest.param("cuda", marks=pytest.mark.skipif(
