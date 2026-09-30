@@ -289,7 +289,15 @@ def _run_defects_volume(binary: Path, subject: Path, hemi: str,
 
 def _run_white_mri_chain(subject: Path, weights: Path, assets: Path,
                          threads: int, warp_binaries: tuple[Path, Path, Path],
-                         stage) -> None:
+                         stage, *, device: str) -> None:
+    """生成 MNI 辅助图、非线性变换和 finalsurfs；显式传递主设备。
+
+    subject 提供自产 conform MRI；weights、assets 为已校验资源，threads
+    为线程数，warp_binaries 按转换/求逆/重采样排列。stage 是记录耗时和
+    失败的回调，device 为 CPU 或 CUDA。输出写入 subject，返回 None；
+    原生程序或任一计算失败时抛出异常。辅助图和 finalsurfs 使用 CPU，
+    非线性变换使用 device；空间、命令与实测见 MNI_NONLINEAR_CHAIN.md。
+    """
     from .finalsurfs_python import run_finalsurfs
     from .mni_aux_chain import run_mni_aux_chain
     from .mni_nonlinear_chain import run_mni_nonlinear_chain
@@ -776,8 +784,16 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     # 固定 recon-all 脚本此处执行 cp filled.mgz filled.auto.mgz。
     stage("filled_auto_checkpoint", shutil.copyfile,
           mri / "filled.mgz", mri / "filled.auto.mgz")
-    _run_white_mri_chain(subject, weights, assets, threads,
-                         tuple(binary[0] for binary in warp_binaries), stage)
+    try:
+        _run_white_mri_chain(subject, weights, assets, threads,
+                             tuple(binary[0] for binary in warp_binaries), stage,
+                             device=device)
+    except Exception as error:
+        if report["status"] != "failed":
+            report.update(status="failed", failed_stage="white_mri_chain",
+                          error=f"{type(error).__name__}: {error}")
+            (subject / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
+        raise
     for hemi in ("lh", "rh"):
         result = stage(f"surface_{hemi}", _surface_pair, subject, hemi,
                        mri / "filled.mgz", mri / "norm.mgz",
