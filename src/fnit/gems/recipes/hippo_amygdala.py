@@ -54,12 +54,13 @@ class HippoAmygdalaRecipe(GEMSRecipe):
 
     def prepare_working_image(self, context):
         image, labels, report = working_image(context, self.crop_ids, self.resolution_mm)
-        native_voxel = np.linalg.norm(context.image.affine[:3, :3], axis=0).mean()
-        roi = ndimage.binary_dilation(np.isin(context.coarse_segmentation, self.alignment_ids),
-                                      iterations=max(1, int(round(5 / native_voxel))))
-        sampled = _native(roi.astype(np.uint8), context.image.affine, image, 0).astype(bool)
-        sampled = ndimage.binary_dilation(sampled,
+        roi = np.isin(context.coarse_segmentation, self.alignment_ids)
+        merged = ndimage.binary_dilation(self.synthetic_labels(context.coarse_segmentation) > 1,
+                                         structure=np.ones((3, 3, 3)), iterations=2)
+        sampled = _native(roi.astype(np.float32), context.image.affine, image, 1) >= 0.5
+        sampled = ndimage.binary_dilation(sampled, structure=np.ones((3, 3, 3)),
                                           iterations=int(round(3 / self.resolution_mm)))
+        sampled &= _native(merged.astype(np.uint8), context.image.affine, image, 0).astype(bool)
         data = np.asarray(image.dataobj).copy()
         data[~sampled] = 0
         return nib.Nifti1Image(data, image.affine), labels, report
@@ -121,6 +122,9 @@ class HippoAmygdalaRecipe(GEMSRecipe):
         voxel_volume = abs(np.linalg.det(context.image.affine[:3, :3]))
         radius = max(1, int(np.rint(1 / np.linalg.norm(context.image.affine[:3, :3], axis=0).mean())))
         neighborhood = spherical_neighborhood(radius)
+        local_background = ndimage.binary_dilation(
+            np.isin(context.coarse_segmentation, self.alignment_ids),
+            structure=np.ones((3, 3, 3)), iterations=5)
         for group in range(len(means)):
             ids = set(int(v) for v in atlas.label_ids[classes == group])
             if 3 in ids or any(7000 <= value < 8000 for value in ids):
@@ -134,7 +138,10 @@ class HippoAmygdalaRecipe(GEMSRecipe):
                 target_ids = tuple(side_map[value] for value in ids if value in side_map)
             if not target_ids:
                 continue
-            mask = ndimage.binary_erosion(np.isin(coarse, target_ids),
+            sampling_mask = np.isin(coarse, target_ids)
+            if 0 in ids:
+                sampling_mask &= local_background
+            mask = ndimage.binary_erosion(sampling_mask,
                                           structure=neighborhood, border_value=1)
             values = context.data[mask & (context.data > 0)]
             if values.size:

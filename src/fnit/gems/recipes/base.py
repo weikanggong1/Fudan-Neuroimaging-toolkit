@@ -164,6 +164,8 @@ class GEMSRecipe:
                                           block_index=block_index, background_channel=None)
             mask = ndimage.binary_erosion(covered.cpu().numpy(),
                 structure=spherical_neighborhood(3 if synthetic else 5), border_value=1)
+            if not synthetic:
+                mask &= image.cpu().numpy() > 0
             image = image.clone()
             image[~torch.as_tensor(mask, device=device)] = 0
         del block_index, covered, vertices, tetrahedra, occupancy

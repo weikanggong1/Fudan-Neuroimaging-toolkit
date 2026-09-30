@@ -35,7 +35,8 @@ def smooth_atlas_alphas(
 
     This mirrors the reference atlas preparation: spatial Gaussian filtering
     of voxel priors followed by ten vertex-alpha EM updates. The result is
-    subject independent and can be stored alongside the atlas.
+    defined in the supplied reference mesh's coordinates; a transformed
+    subject mesh therefore needs its own smoothing.
     """
     classes = np.asarray(label_classes, dtype=np.int64)
     if classes.shape != (atlas.n_labels,):

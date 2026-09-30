@@ -88,6 +88,8 @@ def test_official_label_groups_include_two_thalamic_components(tmp_path):
     assert first.max() == 13 and second.max() == 14
     name_index = {name: index for index, name in enumerate(thal_atlas.label_names)}
     assert second[name_index["Left-PuA"]] != second[name_index["Left-CL"]]
+    assert second[name_index["Left-CL"]] == 13
+    assert second[name_index["Left-PuA"]] == 14
     left = HippoAmygdalaRecipe("left", tmp_path)
     right = HippoAmygdalaRecipe("right", tmp_path)
     synthetic = left.segmentation_groups(hippo_atlas)
@@ -115,6 +117,58 @@ def test_thalamic_hyperparameters_split_brighter_and_darker(tmp_path):
     means, counts = recipe.gaussian_hyperparameters(context, atlas, groups)
     assert means[13] == 85 and means[14] == 75
     assert counts[13] == counts[14] == 25
+
+
+def test_thalamic_reticular_group_samples_recoded_bilateral_white_matter(tmp_path):
+    atlas = _atlas(np.asarray([0, 2, 8125, 8225, 8109, 8226, 28, 60]),
+                   ("Unknown", "WM", "Left-R", "Right-R", "Left-CL", "Right-MDm", "LDC", "RDC"))
+    coarse = np.zeros((30, 30, 30), np.int32)
+    data = np.full(coarse.shape, 40, np.float32)
+    coarse[3:10, 3:10, 3:10] = 2
+    coarse[13:20, 3:10, 3:10] = 41
+    coarse[3:10, 15:22, 3:10] = 10
+    coarse[13:20, 15:22, 3:10] = 49
+    data[coarse == 2] = 100
+    data[coarse == 41] = 120
+    data[np.isin(coarse, (10, 49))] = 80
+    original = coarse.copy()
+    context = SubregionContext(nib.Nifti1Image(data, np.eye(4)), data, coarse, None, None)
+    means, counts = ThalamusRecipe("thalamus", tmp_path).gaussian_hyperparameters(
+        context, atlas, np.asarray([0, 1, 1, 1, 2, 2, 3, 3]))
+    assert means[1] == 110 and means[2] == 80
+    assert counts[1] == counts[2] and counts[1] > 10
+    assert np.array_equal(coarse, original)
+
+
+def test_hippocampal_background_hyperprior_uses_only_local_roi(tmp_path, monkeypatch):
+    atlas = _atlas(np.asarray([0, 2, 3]), ("Unknown", "WM", "GM"))
+    coarse = np.zeros((31, 31, 31), np.int32)
+    coarse[15, 15, 15] = 17
+    data = np.full(coarse.shape, 200, np.float32)
+    data[10:21, 10:21, 10:21] = 60
+    wm = coarse.copy()
+    context = SubregionContext(nib.Nifti1Image(data, np.eye(4)), data, coarse, None, wm)
+    recipe = HippoAmygdalaRecipe("left", tmp_path)
+    monkeypatch.setattr(recipe, "_partial_volume_hyperparameters",
+                         lambda atlas, classes, means, counts, context: (means, counts))
+    means, counts = recipe.gaussian_hyperparameters(context, atlas, np.arange(3))
+    assert means[0] == 60
+    assert 1000 < counts[0] < 30000
+    assert np.array_equal(wm, coarse)
+
+
+def test_hippocampal_image_mask_dilates_three_mm_after_linear_resampling(tmp_path):
+    coarse = np.full((31, 31, 31), 3, np.int32)
+    coarse[15, 15, 15] = 17
+    data = np.full(coarse.shape, 100, np.float32)
+    context = SubregionContext(nib.Nifti1Image(data, np.eye(4)), data, coarse, None, None)
+    image, _, _ = HippoAmygdalaRecipe("left", tmp_path).prepare_working_image(context)
+    def sample(point):
+        index = np.rint((np.linalg.inv(image.affine) @ [*point, 1])[:3]).astype(int)
+        return np.asarray(image.dataobj)[tuple(index)]
+    assert sample((15, 15, 15)) == 100
+    assert sample((18, 18, 18)) == 100
+    assert sample((20, 15, 15)) == 0
 
 
 def test_recipe_smooths_transformed_mesh_and_ignores_population_cache(tmp_path, monkeypatch):

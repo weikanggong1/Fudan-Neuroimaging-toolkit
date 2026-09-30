@@ -6,7 +6,8 @@ import numpy as np
 import nibabel as nib
 from scipy import ndimage
 
-from .base import GEMSRecipe, RecipeResult, _native, group_labels, spherical_neighborhood
+from .base import (GEMSRecipe, RecipeResult, _native, group_labels,
+                   spherical_neighborhood, working_image)
 
 
 _NUCLEI = (
@@ -53,25 +54,40 @@ class ThalamusRecipe(GEMSRecipe):
                               for name in _NUCLEI if f"{side}-{name}" in atlas.label_names))
         else:
             base.append(tuple(f"{side}-{name}" for side in ("Left", "Right")
-                              for name in _NUCLEI if name in _BRIGHT
+                              for name in _NUCLEI if name not in _BRIGHT
                               and f"{side}-{name}" in atlas.label_names))
             base.append(tuple(f"{side}-{name}" for side in ("Left", "Right")
-                              for name in _NUCLEI if name not in _BRIGHT
+                              for name in _NUCLEI if name in _BRIGHT
                               and f"{side}-{name}" in atlas.label_names))
         return group_labels(atlas, tuple(base))
 
-    def synthetic_labels(self, coarse):
+    def _recoded_segmentation(self, coarse):
         source = np.asarray(coarse)
         data = source.copy()
         recode = {5: 4, 44: 4, 14: 4, 15: 4, 17: 3, 53: 3, 18: 3, 54: 3,
                   24: 4, 30: 2, 62: 2, 72: 4, 77: 2, 80: 0, 85: 0,
                   41: 2, 42: 3, 43: 4, 46: 7, 47: 8, 50: 11, 51: 12,
-                  52: 13, 58: 26, 63: 31, 28: 10, 60: 49}
+                  52: 13, 58: 26, 63: 31}
         for old, new in recode.items():
             data[source == old] = new
         data[source > 250] = 2
         data[data == 0] = 1
         return data
+
+    def synthetic_labels(self, coarse):
+        data = self._recoded_segmentation(coarse)
+        data[data == 28] = 10
+        data[data == 60] = 49
+        return data
+
+    def prepare_working_image(self, context):
+        image, labels, report = working_image(context, self.alignment_ids, self.resolution_mm)
+        mask = ndimage.binary_dilation(self.synthetic_labels(context.coarse_segmentation) > 1,
+                                       structure=np.ones((3, 3, 3)), iterations=2)
+        sampled = _native(mask.astype(np.uint8), context.image.affine, image, 0).astype(bool)
+        data = np.asarray(image.dataobj).copy()
+        data[~sampled] = 0
+        return nib.Nifti1Image(data, image.affine), labels, report
 
     def synthetic_means(self, atlas, classes):
         means = np.zeros(int(classes.max()) + 1, np.float32)
@@ -87,17 +103,17 @@ class ThalamusRecipe(GEMSRecipe):
         means = np.zeros(int(classes.max()) + 1, np.float32)
         counts = np.zeros_like(means)
         voxel_volume = abs(np.linalg.det(context.image.affine[:3, :3]))
-        coarse = context.coarse_segmentation
+        coarse = self._recoded_segmentation(context.coarse_segmentation)
         radius = max(1, int(np.rint(1 / np.linalg.norm(context.image.affine[:3, :3], axis=0).mean())))
         neighborhood = spherical_neighborhood(radius)
         for group in range(len(means)):
             ids = atlas.label_ids[classes == group]
-            if np.any(ids >= 8100):
+            if np.any(ids > 8225):
                 target_ids = (10, 49)
             elif np.any(ids == 28):
                 target_ids = (28, 60)
             elif np.any(ids == 0):
-                target_ids = (0,)
+                target_ids = (1,)
             else:
                 target_ids = tuple(int(v) for v in ids)
             mask = ndimage.binary_erosion(np.isin(coarse, target_ids),
