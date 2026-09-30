@@ -1,7 +1,7 @@
 # ProbtrackX 当前实现验证
 
 [功能、输入输出及官方对应命令](../../docs/probtrackx/README.md) · [默认计数](report.default.latest.public.json) · [长度加权](report.current.latest.public.json)
-[matrix1](report.matrix1.cpu.latest.public.json) · [matrix2 与网络](report.matrix2.cpu.latest.public.json) · [matrix3](report.matrix3.cpu.latest.public.json) · [seed→ROI](report.targets.cpu.latest.public.json) · [性能分段记录](report.performance.public.json) · [NbM→Cingulum GPU 复现](cholinergic_nbm_cingulum.public.json)
+[matrix1](report.matrix1.cpu.latest.public.json) · [matrix2 与网络](report.matrix2.cpu.latest.public.json) · [matrix3](report.matrix3.cpu.latest.public.json) · [seed→ROI](report.targets.cpu.latest.public.json) · [性能分段记录](report.performance.public.json) · [NbM→Cingulum GPU 复现](cholinergic_nbm_cingulum.public.json) · [AC∪brainstem 合并排除](cholinergic_nbm_cingulum_union.public.json)
 
 ## MNI 掩膜自动映射：两条真实 dMRI pipeline 分支
 
@@ -186,6 +186,8 @@ export PRIVATE_WAYPOINT_OUT=/absolute/path/new-private-waypoint-run
 双方使用同一 104×104×72 网格、每 seed 体素 5000 条、2000 总步与默认 `rseed=12345`。FNIT 输出 `waytotal=4298`；密度图在非零并集上的 Pearson r 为 0.998366，非零支持 Dice 为 0.647735，前 10% 强连接 Dice 为 0.862702。FSL 只把随机种子改为 67890 后与原图比较，对应 r 为 0.998672、支持 Dice 0.653195、强连接 Dice 0.884471。这个额外运行仅描述随机抽样波动，不能证明两种实现数值等价。
 
 FNIT 对该常用约束组合增加 Numba 计数路径。优化前后 455000 条发出轨迹的完整输出 NIfTI SHA-256、所有体素及 `waytotal` 均完全一致；热缓存完整进程墙钟从 109.64 秒降到 11.84 秒。FSL 原命令复跑为 28.63 秒，热缓存重复为 10.21 秒。测试时共享 H100 的 GPU 0 前后均为 100% 利用率，FNIT 显存分配限制为总显存的 20%，峰值分配约 2.81 GB；这些秒数是单次实测，不能当成独占 GPU 的稳定加速比。完整哈希、各轮状态和误差见[去标识机器报告](cholinergic_nbm_cingulum.public.json)，原始 DWI 和体素图留在授权服务器。[功能页](../../docs/probtrackx/README.md#nbmcingulum-真实-dwi-对照)给出同等参数的原版与 FNIT 命令。
+
+进一步将同网格 AC 与 brainstem 非零体素取并集（275+2700=2975 体素，两者无重叠），只传入一次 `--avoid`。FSL 和 FNIT 各在相同 seed、waypoint、样本数与随机种子下重新运行，`waytotal` 分别从 4212→3792、4298→3866；两种输出在 AC 与 brainstem 内的密度均为 0。合并版 FSL 与 FNIT 的全图密度 r 为 0.998593，非零支持 Dice 0.598793，强连接前 10% Dice 0.881875。单次完整进程墙钟为 FSL 11.58 秒、FNIT 16.80 秒，GPU 0 已被其他任务持续占满，不作稳定速度排名。[合并排除掩膜报告](cholinergic_nbm_cingulum_union.public.json)记录并集掩膜及四份输出哈希、全部指标和显存状态；[轴位切片绘图脚本](plot_axial_tracts.py)可在授权服务器读取原始命令、合并版 FSL 与 FNIT 密度图生成对照图。原始影像与逐体素图仍留在授权服务器。
 
 ## 指标解释与规则回归
 

@@ -386,6 +386,41 @@ fnit probtrackx --samples-dir /data/subject.bedpostX \
 
 FNIT 的新单 waypoint 加 avoid 计数路径将逐轨迹 Python 过滤和累加移到已有的 Numba 汇总层；优化前后完整 `fdt_paths.nii.gz` 哈希、全部体素及 `waytotal` 均相同。本次热缓存墙钟约缩短 9.3 倍，PyTorch 峰值分配约 2.81 GB；共享 H100 在运行前后均显示 100% 利用率，故耗时只表示这次观测。FSL 与 FNIT 的随机数流不同；强连接图接近，但稀疏非零支持及 `waytotal` 并不逐项一致。一种 FSL 随机种子变更仅提供波动参照，不构成等价阈值。输入与源码哈希、计时、密度指标及输出一致性见[去标识验证记录](../../validation/probtrackx/cholinergic_nbm_cingulum.public.json)。原始影像和逐体素输出仍在授权服务器。
 
+### 同时避开 AC 与 brainstem
+
+把两张同网格排除掩膜按非零取并集，作为唯一的 `--avoid` 输入。以下代码只写一张 3D NIfTI，不改 BEDPOSTX 后验或 seed：
+
+```python
+from pathlib import Path
+import nibabel as nib
+import numpy as np
+
+ac_path = Path("/data/subject/AC.nii.gz")  # 输入：AC 二值掩膜
+brainstem_path = Path("/data/subject/brainstem.nii.gz")  # 输入：brainstem 二值掩膜
+union_path = Path("/data/subject/AC_brainstem_union.nii.gz")  # 输出：同网格 uint8 并集掩膜
+ac_image = nib.load(ac_path)
+brainstem_image = nib.load(brainstem_path)
+assert ac_image.shape == brainstem_image.shape
+assert np.allclose(ac_image.affine, brainstem_image.affine)
+union_mask = (np.asarray(ac_image.dataobj) > 0) | (np.asarray(brainstem_image.dataobj) > 0)
+union_header = ac_image.header.copy()
+union_header.set_data_dtype(np.uint8)
+nib.save(nib.Nifti1Image(union_mask.astype(np.uint8), ac_image.affine, union_header), union_path)
+```
+
+在前面的两条命令中，FSL 删除两个旧 `--avoid` 并使用一次 `--avoid=/data/subject/AC_brainstem_union.nii.gz`；FNIT 则把 `--avoid` 的值改为同一张并集掩膜。其他参数仍为 NbM seed、Cingulum waypoint、每体素 5000 条、2000 步和默认随机种子。
+
+| 真实全输入结果 | 原命令有效排除 brainstem：FSL / FNIT | 合并排除 AC∪brainstem：FSL / FNIT |
+| --- | ---: | ---: |
+| `waytotal` | 4212 / 4298 | 3792 / 3866 |
+| AC 内密度和 | 2574 / 2413 | 0 / 0 |
+| brainstem 内密度和 | 0 / 0 | 0 / 0 |
+| FSL 与 FNIT 密度 r | 0.99837 | 0.99859 |
+| FSL 与 FNIT 非零支持 Dice | 0.64773 | 0.59879 |
+| FSL 与 FNIT 强连接 top 10% Dice | 0.86270 | 0.88187 |
+
+合并后 FSL 的 `waytotal` 比原命令减少 9.97%，FNIT 减少 10.05%；两者都清除了 AC 内的路径密度。合并版的强连接 Dice 略高，而稀疏支持 Dice 更低，仍不能认为两套随机追踪逐体素等价。合并版完整进程单次墙钟为 FSL 11.58 秒、FNIT 16.80 秒；GPU 0 当时已有约 43.4 GiB 占用且前后均为 100% 利用率，因此不据此判断稳定速度排名。输入、输出哈希与全部比较指标见[合并排除掩膜报告](../../validation/probtrackx/cholinergic_nbm_cingulum_union.public.json)。
+
 ## Reference
 
 - 参考文献：Behrens et al., *Probabilistic diffusion tractography with multiple fibre orientations: What can we gain?*, NeuroImage (2007), [doi:10.1016/j.neuroimage.2006.09.018](https://doi.org/10.1016/j.neuroimage.2006.09.018)。
