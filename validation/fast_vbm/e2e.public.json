@@ -1,0 +1,457 @@
+{
+  "schema_version": 1,
+  "source_revision": "f958121",
+  "data": {
+    "subjects": 1,
+    "kind": "real clinical T1w; anonymous scalar results only"
+  },
+  "branches": {
+    "fnirt": {
+      "candidate": {
+        "implementation": "FNIT FastVBM",
+        "backend": "fnirt",
+        "device": "cuda:0",
+        "tf32": {
+          "matmul": true,
+          "cudnn": true,
+          "reduced_precision_tensor_dtype": false
+        }
+      },
+      "contracts": {
+        "warped_gm": {
+          "same_shape": true,
+          "same_affine": true,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32"
+        },
+        "jacobian": {
+          "same_shape": true,
+          "same_affine": true,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32"
+        },
+        "modulated_gm": {
+          "same_shape": true,
+          "same_affine": true,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32"
+        }
+      },
+      "accuracy": {
+        "warped_gm": {
+          "voxels": 292019,
+          "pearson": 0.8910256981706666,
+          "mae": 0.08880123890262864,
+          "rmse": 0.18167164439772074,
+          "maximum_absolute_error": 1.0000001192092896,
+          "dice_at_0.2": 0.9088925137234748
+        },
+        "jacobian": {
+          "voxels": 292019,
+          "pearson": 0.8857822385573828,
+          "mae": 0.10674822785594064,
+          "rmse": 0.16833895985446246,
+          "maximum_absolute_error": 2.5712196826934814,
+          "dice_at_0.2": 1.0
+        },
+        "modulated_gm": {
+          "voxels": 292019,
+          "pearson": 0.8654889022781168,
+          "mae": 0.11159282127779548,
+          "rmse": 0.23836700356132998,
+          "maximum_absolute_error": 5.313045978546143,
+          "dice_at_0.2": 0.9047850977101067
+        }
+      },
+      "upstream_diagnosis": {
+        "native_gm_contract": {
+          "same_shape": false,
+          "same_affine": false,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32"
+        },
+        "brain_mask_contract": {
+          "same_shape": false,
+          "same_affine": false,
+          "candidate_dtype": "uint8",
+          "reference_dtype": "float32"
+        }
+      },
+      "timing_seconds": {
+        "compute_including_input_load_and_lazy_weights": 896.1272634430788,
+        "nifti_save_13_outputs_and_report": 5.254368814174086,
+        "in_process_total": 901.9336019158363,
+        "pipeline_stage_report": {
+          "brain_extraction": 9.114527967758477,
+          "fast": 10.666070383042097,
+          "registration_jacobian_modulation": 875.9779991237447,
+          "total": 896.1230094470084
+        }
+      },
+      "memory": {
+        "peak_cuda_allocated_bytes": 12966290432,
+        "process_max_rss_kib": 2373036
+      },
+      "output_checks": {
+        "images": {
+          "brain": {
+            "same_shape": true,
+            "same_affine": true,
+            "candidate_dtype": "int16",
+            "reference_dtype": "int16",
+            "all_finite": true
+          },
+          "brain_mask": {
+            "same_shape": true,
+            "same_affine": true,
+            "candidate_dtype": "uint8",
+            "reference_dtype": "int16",
+            "all_finite": true
+          },
+          "pve_csf": {
+            "same_shape": true,
+            "same_affine": true,
+            "candidate_dtype": "float32",
+            "reference_dtype": "int16",
+            "all_finite": true
+          },
+          "pve_gm": {
+            "same_shape": true,
+            "same_affine": true,
+            "candidate_dtype": "float32",
+            "reference_dtype": "int16",
+            "all_finite": true
+          },
+          "pve_wm": {
+            "same_shape": true,
+            "same_affine": true,
+            "candidate_dtype": "float32",
+            "reference_dtype": "int16",
+            "all_finite": true
+          },
+          "hard_segmentation": {
+            "same_shape": true,
+            "same_affine": true,
+            "candidate_dtype": "int32",
+            "reference_dtype": "int16",
+            "all_finite": true
+          },
+          "pve_segmentation": {
+            "same_shape": true,
+            "same_affine": true,
+            "candidate_dtype": "int32",
+            "reference_dtype": "int16",
+            "all_finite": true
+          },
+          "mixel_type": {
+            "same_shape": true,
+            "same_affine": true,
+            "candidate_dtype": "int32",
+            "reference_dtype": "int16",
+            "all_finite": true
+          },
+          "bias_field": {
+            "same_shape": true,
+            "same_affine": true,
+            "candidate_dtype": "float32",
+            "reference_dtype": "int16",
+            "all_finite": true
+          },
+          "restored": {
+            "same_shape": true,
+            "same_affine": true,
+            "candidate_dtype": "float32",
+            "reference_dtype": "int16",
+            "all_finite": true
+          },
+          "warped_gm": {
+            "same_shape": true,
+            "same_affine": true,
+            "candidate_dtype": "float32",
+            "reference_dtype": "float32",
+            "all_finite": true
+          },
+          "jacobian": {
+            "same_shape": true,
+            "same_affine": true,
+            "candidate_dtype": "float32",
+            "reference_dtype": "float32",
+            "all_finite": true
+          },
+          "modulated_gm": {
+            "same_shape": true,
+            "same_affine": true,
+            "candidate_dtype": "float32",
+            "reference_dtype": "float32",
+            "all_finite": true
+          }
+        },
+        "pve_sum_max_absolute_error": 0.0,
+        "pve_support_definition": "brain_mask > 0 and brain intensity > 0, as used by TorchFAST",
+        "pve_support_voxels": 3091264,
+        "brain_mask_nonpositive_intensity_voxels": 1276,
+        "modulation_max_absolute_error": 0.0,
+        "nonpositive_jacobian_voxels": 0,
+        "jacobian_range": [
+          0.26619961857795715,
+          5.495026111602783
+        ]
+      },
+      "source_sha256": {
+        "src/fnit/fast_vbm/pipeline.py": "2d0b6a2778f78e53cce5623de9574c9f594a10b854281c2337a0a2fbbba3b10e",
+        "src/fnit/fast_vbm/registration.py": "2a931f509543429d687792571c162283f67f49643d492b52096d2e1fcddb111b",
+        "src/fnit/fast_vbm/synthmorph_backend.py": "547de082dc4bb65d630f254d2d4d34c5da81233fb6c91019a337f9f40424b211",
+        "src/fnit/fast/pipeline.py": "4f003e47cd33de27fd9c829b05fcef1c83bea1dc3eb522411039331685bf2129",
+        "src/fnit/synthstrip/pipeline.py": "3cc23ab81eebb6ad11ac9814691f9d3b5c13c93fc2569ee1f4dddea70ec37de7",
+        "src/fnit/synthmorph/pipeline.py": "81f971dd73f0bed3cd652e97f0627bf54e0b00a8dcf0cb8785c4ee0c696aa538",
+        "src/fnit/flirt/core.py": "b0ed42eb1032c89e643e17b27c96eb74a1a2df31debfeea3a0ed7499e8b2bd92",
+        "src/fnit/fnirt/registration.py": "d52b4f112dd0f409da96f992a614182ab6184b3559f5eb55ce2b4d61a2ee008c",
+        "src/fnit/applywarp/core.py": "cf6de438f3ac1551804d38682ce3fbb11b8fb042ad881562ebc93aada80f2df5",
+        "src/fnit/_nib.py": "568d113432c1a0c50a3b0b635188173e69be1c7436d851de2568bca9b55ab94e",
+        "src/fnit/_transforms.py": "be01fa24cd0c17bb1aa8ac7792cdf0b62c657037808c643427a1b11cc4c05340"
+      }
+    },
+    "synthmorph": {
+      "candidate": {
+        "implementation": "FNIT FastVBM",
+        "backend": "synthmorph",
+        "device": "cuda:0",
+        "tf32": {
+          "matmul": true,
+          "cudnn": true,
+          "reduced_precision_tensor_dtype": false
+        }
+      },
+      "contracts": {
+        "warped_gm": {
+          "same_shape": true,
+          "same_affine": true,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32"
+        },
+        "jacobian": {
+          "same_shape": true,
+          "same_affine": true,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32"
+        },
+        "modulated_gm": {
+          "same_shape": true,
+          "same_affine": true,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32"
+        }
+      },
+      "accuracy": {
+        "warped_gm": {
+          "voxels": 292019,
+          "pearson": 0.6836590144045221,
+          "mae": 0.1833179040568585,
+          "rmse": 0.30988272951690543,
+          "maximum_absolute_error": 1.0000001192092896,
+          "dice_at_0.2": 0.8103229857655533
+        },
+        "jacobian": {
+          "voxels": 292019,
+          "pearson": 0.292743495259862,
+          "mae": 0.2375886282098298,
+          "rmse": 0.35073620999386235,
+          "maximum_absolute_error": 4.9555246233940125,
+          "dice_at_0.2": 1.0
+        },
+        "modulated_gm": {
+          "voxels": 292019,
+          "pearson": 0.6166788179547664,
+          "mae": 0.2296464150508053,
+          "rmse": 0.3915117580306282,
+          "maximum_absolute_error": 5.401036441326141,
+          "dice_at_0.2": 0.8063206311828075
+        }
+      },
+      "upstream_diagnosis": {
+        "native_gm_contract": {
+          "same_shape": false,
+          "same_affine": false,
+          "candidate_dtype": "float32",
+          "reference_dtype": "float32"
+        },
+        "brain_mask_contract": {
+          "same_shape": false,
+          "same_affine": false,
+          "candidate_dtype": "uint8",
+          "reference_dtype": "float32"
+        }
+      },
+      "timing_seconds": {
+        "compute_including_input_load_and_lazy_weights": 601.3531355322339,
+        "nifti_save_13_outputs_and_report": 5.298936621285975,
+        "in_process_total": 607.1551632299088,
+        "pipeline_stage_report": {
+          "brain_extraction": 9.043372876010835,
+          "fast": 9.947773494757712,
+          "registration_jacobian_modulation": 582.0335269169882,
+          "total": 601.3476241119206
+        }
+      },
+      "memory": {
+        "peak_cuda_allocated_bytes": 15488136704,
+        "process_max_rss_kib": 2427060
+      },
+      "output_checks": {
+        "images": {
+          "brain": {
+            "same_shape": true,
+            "same_affine": true,
+            "candidate_dtype": "int16",
+            "reference_dtype": "int16",
+            "all_finite": true
+          },
+          "brain_mask": {
+            "same_shape": true,
+            "same_affine": true,
+            "candidate_dtype": "uint8",
+            "reference_dtype": "int16",
+            "all_finite": true
+          },
+          "pve_csf": {
+            "same_shape": true,
+            "same_affine": true,
+            "candidate_dtype": "float32",
+            "reference_dtype": "int16",
+            "all_finite": true
+          },
+          "pve_gm": {
+            "same_shape": true,
+            "same_affine": true,
+            "candidate_dtype": "float32",
+            "reference_dtype": "int16",
+            "all_finite": true
+          },
+          "pve_wm": {
+            "same_shape": true,
+            "same_affine": true,
+            "candidate_dtype": "float32",
+            "reference_dtype": "int16",
+            "all_finite": true
+          },
+          "hard_segmentation": {
+            "same_shape": true,
+            "same_affine": true,
+            "candidate_dtype": "int32",
+            "reference_dtype": "int16",
+            "all_finite": true
+          },
+          "pve_segmentation": {
+            "same_shape": true,
+            "same_affine": true,
+            "candidate_dtype": "int32",
+            "reference_dtype": "int16",
+            "all_finite": true
+          },
+          "mixel_type": {
+            "same_shape": true,
+            "same_affine": true,
+            "candidate_dtype": "int32",
+            "reference_dtype": "int16",
+            "all_finite": true
+          },
+          "bias_field": {
+            "same_shape": true,
+            "same_affine": true,
+            "candidate_dtype": "float32",
+            "reference_dtype": "int16",
+            "all_finite": true
+          },
+          "restored": {
+            "same_shape": true,
+            "same_affine": true,
+            "candidate_dtype": "float32",
+            "reference_dtype": "int16",
+            "all_finite": true
+          },
+          "warped_gm": {
+            "same_shape": true,
+            "same_affine": true,
+            "candidate_dtype": "float32",
+            "reference_dtype": "float32",
+            "all_finite": true
+          },
+          "jacobian": {
+            "same_shape": true,
+            "same_affine": true,
+            "candidate_dtype": "float32",
+            "reference_dtype": "float32",
+            "all_finite": true
+          },
+          "modulated_gm": {
+            "same_shape": true,
+            "same_affine": true,
+            "candidate_dtype": "float32",
+            "reference_dtype": "float32",
+            "all_finite": true
+          }
+        },
+        "pve_sum_max_absolute_error": 0.0,
+        "pve_support_definition": "brain_mask > 0 and brain intensity > 0, as used by TorchFAST",
+        "pve_support_voxels": 3091264,
+        "brain_mask_nonpositive_intensity_voxels": 1276,
+        "modulation_max_absolute_error": 0.0,
+        "nonpositive_jacobian_voxels": 0,
+        "jacobian_range": [
+          0.24159926176071167,
+          3.230544090270996
+        ]
+      },
+      "source_sha256": {
+        "src/fnit/fast_vbm/pipeline.py": "2d0b6a2778f78e53cce5623de9574c9f594a10b854281c2337a0a2fbbba3b10e",
+        "src/fnit/fast_vbm/registration.py": "2a931f509543429d687792571c162283f67f49643d492b52096d2e1fcddb111b",
+        "src/fnit/fast_vbm/synthmorph_backend.py": "547de082dc4bb65d630f254d2d4d34c5da81233fb6c91019a337f9f40424b211",
+        "src/fnit/fast/pipeline.py": "4f003e47cd33de27fd9c829b05fcef1c83bea1dc3eb522411039331685bf2129",
+        "src/fnit/synthstrip/pipeline.py": "3cc23ab81eebb6ad11ac9814691f9d3b5c13c93fc2569ee1f4dddea70ec37de7",
+        "src/fnit/synthmorph/pipeline.py": "81f971dd73f0bed3cd652e97f0627bf54e0b00a8dcf0cb8785c4ee0c696aa538",
+        "src/fnit/flirt/core.py": "b0ed42eb1032c89e643e17b27c96eb74a1a2df31debfeea3a0ed7499e8b2bd92",
+        "src/fnit/fnirt/registration.py": "d52b4f112dd0f409da96f992a614182ab6184b3559f5eb55ce2b4d61a2ee008c",
+        "src/fnit/applywarp/core.py": "cf6de438f3ac1551804d38682ce3fbb11b8fb042ad881562ebc93aada80f2df5",
+        "src/fnit/_nib.py": "568d113432c1a0c50a3b0b635188173e69be1c7436d851de2568bca9b55ab94e",
+        "src/fnit/_transforms.py": "be01fa24cd0c17bb1aa8ac7792cdf0b62c657037808c643427a1b11cc4c05340"
+      }
+    }
+  },
+  "reference": {
+    "implementation": "FSL 6.0.7.4 UKB v1.5 T1-to-VBM selected chain",
+    "timing_seconds": {
+      "existing_command_wall_times": {
+        "robustfov": 2.8511923369951546,
+        "crop": 6.47641372284852,
+        "bet": 17.217954804189503,
+        "standard_space_roi": 72.73703509708866,
+        "flirt_xyztrans": 36.01586451008916,
+        "xfm_inverse": 0.1077131750062108,
+        "xfm_concat": 0.22121038706973195,
+        "fnirt_t1": 1417.856412914116,
+        "invwarp": 508.15355073311366,
+        "mask_to_native": 21.628383856033906,
+        "brain": 2.00960833998397,
+        "fast": 254.28063586214557,
+        "fsl_reg_ukb": 855.3916570278816,
+        "modulate_ukb": 0.19056516303680837
+      },
+      "sum_complete_selected_chain": 3195.1381979295984
+    },
+    "same_raw_input_template_and_mask_verified_privately": true,
+    "fresh_current_resource_load": false,
+    "limits": [
+      "GDC was disabled because scanner coefficients were unavailable.",
+      "This run starts from raw T1 and includes UKB structural preparation before GM VBM; FNIT uses different preparation algorithms.",
+      "The sum covers the selected sequential commands, not a fresh whole-process wall-time measurement; do not infer a matched speedup.",
+      "The native GM grids differ due to FSL cropping, so native PVE is not directly compared voxelwise.",
+      "Subject images, logs with absolute paths, identifiers and scanner reconstruction data are not published."
+    ]
+  },
+  "privacy": "No subject identifiers, private paths, input/output hashes, images or voxelwise data are exported. Source hashes refer exclusively to public package code. Full private reports remain on the server.",
+  "limits": [
+    "One real subject and one cold API call per branch on a shared H100.",
+    "FSL timings are retained individual command-wall observations; not a fresh paired whole-process speed measurement.",
+    "SynthStrip/TorchFAST preparation differs from UKB cropping and FSL tissue estimation; the native GM grids differ."
+  ]
+}

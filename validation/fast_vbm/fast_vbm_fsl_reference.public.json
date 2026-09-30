@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "reference": "FSL 6.0.7.4 UKB v1.5 T1-to-VBM steps",
+  "data": "one real clinical T1w, same input and GM template as the current FastVBM runs",
+  "source_sha256": "290b85afaf3cb7742ace320da6fc6de303103e12eb276512a6ce533c73a5ea75",
+  "input_output_sha256": {
+    "raw_t1w": "916cc95237a89e7824ab742c8921268c3517617556ea341ff2e750fe5af36a1d",
+    "gm_template": "ab933db7455d7c4b88624d54f41a3065be4ba4289d00b9230daec0cdb1597a77",
+    "warped_gm": "e57970ede5866c250363b4b41f4ee0fea92a6ffde685df57eef25c8ca09b4616",
+    "jacobian": "096e1f30ccb5a5e8d9e25b0c682abfcfb421ceecd63292183d363d3089476726",
+    "modulated_gm": "ced0d00d423fc27dd17a14874d85e018117455b37228454515ea05077095a47e",
+    "native_gm": "ef3d49d4d35e23c85f89214e24f1f0d98c69e5a7b33cc61d1808af5cc00ca5e0",
+    "reference_mask": "342d41e1c445d87a812ca288786a116306e96a5595a198e46ba7e7515d4f221c"
+  },
+  "contracts": {
+    "raw_t1w": {
+      "shape": [
+        208,
+        320,
+        320
+      ],
+      "dtype": "int16"
+    },
+    "gm_template": {
+      "shape": [
+        91,
+        109,
+        91
+      ],
+      "dtype": "float32"
+    },
+    "warped_gm": {
+      "shape": [
+        91,
+        109,
+        91
+      ],
+      "dtype": "float32"
+    },
+    "jacobian": {
+      "shape": [
+        91,
+        109,
+        91
+      ],
+      "dtype": "float32"
+    },
+    "modulated_gm": {
+      "shape": [
+        91,
+        109,
+        91
+      ],
+      "dtype": "float32"
+    },
+    "native_gm": {
+      "shape": [
+        208,
+        231,
+        185
+      ],
+      "dtype": "float32"
+    },
+    "reference_mask": {
+      "shape": [
+        91,
+        109,
+        91
+      ],
+      "dtype": "uint8"
+    }
+  },
+  "timing_seconds": {
+    "existing_command_wall_times": {
+      "robustfov": 2.8511923369951546,
+      "crop": 6.47641372284852,
+      "bet": 17.217954804189503,
+      "standard_space_roi": 72.73703509708866,
+      "flirt_xyztrans": 36.01586451008916,
+      "xfm_inverse": 0.1077131750062108,
+      "xfm_concat": 0.22121038706973195,
+      "fnirt_t1": 1417.856412914116,
+      "invwarp": 508.15355073311366,
+      "mask_to_native": 21.628383856033906,
+      "brain": 2.00960833998397,
+      "fast": 254.28063586214557,
+      "fsl_reg_ukb": 855.3916570278816,
+      "modulate_ukb": 0.19056516303680837
+    },
+    "sum_complete_selected_chain": 3195.1381979295984
+  },
+  "timing_provenance": {
+    "kind": "previous real-data reference run, retained command-wall timings and output files",
+    "timing_file_mtime_local": "2026-09-24T00:43:58+08:00",
+    "mtime_is_not_execution_date": true,
+    "same_current_resource_load": false,
+    "timing_file_sha256": "cab9eb092c7c9c64e66230cd6310ca55938b0bca1e538d3adae791aafeb84b0c"
+  },
+  "limits": [
+    "GDC was disabled because scanner coefficients were unavailable.",
+    "This run starts from raw T1 and includes UKB structural preparation before GM VBM; FNIT uses different preparation algorithms.",
+    "The sum covers the selected sequential commands, not a fresh whole-process wall-time measurement; do not infer a matched speedup.",
+    "The native GM grids differ due to FSL cropping, so native PVE is not directly compared voxelwise.",
+    "Subject images, logs with absolute paths, identifiers and scanner reconstruction data are not published."
+  ]
+}

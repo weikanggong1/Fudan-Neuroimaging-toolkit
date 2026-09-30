@@ -110,9 +110,27 @@ print(result.clean_mni)     # MNI152 2 mm 清理后 4D BOLD
 
 `FMRIVolumeResult` 返回上述五条绝对路径、MNI BOLD 的 JSON 路径及各阶段耗时。中间的 FEAT、PICA 与 AROMA 文件只在运行时工作目录中存在。表面处理需随后调用 [`fMRISurface_pipeline`](surface.md)。
 
-## 真实数据对照
+## 全流程 benchmark
 
-一例 UKB 490 帧 BOLD 的 no-GDC/no-B0 FEAT 同输入对照：滤波后 4D Pearson r 0.997429、MAE 426.525；交集掩膜内逐体素时间相关中位 0.973472。FNIT 的整链 490 帧 MNI 输出尺寸 91×109×91×490，TR 0.735 秒。重构后的 BIDS 入口另用同一真实 BOLD 的前 64 帧在 CPU 上从头运行：退出码 0，MNI 输出为 91×109×91×64，原生输出为 88×88×64×64，两份影像全部有限，TR 和 WM/CSF/运动回归配置写入 JSON；当前源码的分步耗时合计 529.37 秒。64 帧运行用于验收文件结构，不能作为 490 帧性能对照。细分精度与限制见[验证摘要](../../validation/fmri/README.md)。ICA-AROMA 与 UKB FIX 的数值不同。
+2026-09-30 用 `f958121` 的运行源码，使用一例真实 UKB 原始 BOLD/SBRef 和同被试重建存档中的 `orig/001.mgz` T1 输入，完成完整 490 帧 BIDS volume 流程，启用 WM、CSF 和 24 项运动回归，使用默认 SynthMorph 配准。T1 经 nibabel 逐体素无误差转换；它是存档的皮层重建输入，更早的结构预处理未核对。
+
+| 检查 | 结果 |
+|---|---|
+| 原生 / MNI BOLD 网格 | 88×88×64×490 / 91×109×91×490 |
+| 输出合同 | float32；全部数值有限；TR 0.735 s；MNI 掩膜外为零 |
+| ICA / AROMA | 95 个成分，55 次迭代后收敛；53 个噪声成分 |
+| volume API 耗时，含最终写盘 | 1598.01 s |
+| 峰值 CUDA allocated / reserved | 13.34 / 16.96 GB |
+| pre-ICA FEAT 与原 FSL 的 4D r / MAE | 0.996419 / 423.379 |
+| 交集掩膜内逐体素时间相关中位数 | 0.966773 |
+
+时间为共享 H100 上一次冷调用，排除导入、预先哈希和事后检查。FEAT 对照使用相同原始 BOLD/SBRef 的 FSL 6.0.7.22 no-GDC/no-B0 参照；96,774 个交集体素，掩膜 Dice 0.916308。最终 ICA-AROMA 加混杂回归的结果没有可逐体素配对的 UKB FIX 参照，因此 FEAT 的相关性不能当成最终 MNI 清理图的一致性。
+
+下面依次显示 MNI 解剖模板、清理后 BOLD 的时间标准差、清理后的一个时间点。混杂回归去掉截距后时间均值接近零，因此不以均值图展示结构。模板只提供解剖参照，不是官方清理后 BOLD。
+
+![完整 490 帧 volume 输出](figures/fmri_volume.png)
+
+全部阶段时间、当前 surface 接续运行、官方对照边界和单被试复现命令见[全流程验证页](../../validation/fmri/README.md)，输入/输出与代码哈希见[volume 报告](../../validation/fmri/fmri_volume.public.json)。
 
 ## 参考文献与原实现
 

@@ -17,7 +17,7 @@
 | [SynthSeg](../docs/synthseg/README.md) | [3 例公开 T1w](synthseg/report.public.json) | shape、affine、int32、qform/sform 合同一致；标签与软体积近似一致 | 报告含 GPU/CPU 时间和峰值显存；功能页展示标签与差异 |
 | [SynthSR](../docs/synthsr/README.md) | [12 例 T1w 与公开 FLAIR 示例](synthsr/report.public.json) | shape、affine、uint8 合同一致；输出与 FreeSurfer CPU 参考近似一致 | 报告含 GPU/CPU 时间和峰值显存；功能页展示合成 T1w |
 | [TorchFAST](../docs/fast/README.md) | [真实 brain-only T1w](fast/report.public.json) | 分割、PVE、bias field 与 bias-corrected 图按图比较；不是逐体素等价实现 | 报告含 FSL/FNIT 时间和峰值显存；功能页展示 GM、差值和偏置校正 |
-| [FastVBM](../docs/fast_vbm/README.md) | [单例真实 GM 掩膜定位](fast_vbm/README.md) | 关闭隐式零值掩膜后，固定 FSL GM 输入的三项相关性约 0.996；完整链仍有上游差异 | 本版单例完整链已复测；FSL 缺少同边界耗时，多例尚待复测 |
+| [FastVBM](../docs/fast_vbm/README.md) | [原始 T1→13 幅输出，两分支](fast_vbm/README.md) | 对同一 FSL 完整链，FNIRT / SynthMorph 调制 GM r=0.865489 / 0.616679；两分支均未数值等价 | 进程内含保存 901.93 / 607.16 s；原始 FSL 命令合计 3195.14 s，边界及负载不同；附模板空间对照图 |
 | [TorchFLIRT](../docs/flirt/README.md) | [12-DOF GM CPU 10 例](flirt/report.cpu.current.json)、[H100 4 例](flirt/report.public.json)与[6-DOF b0→T1 一例](connectome/original_ukb_flirt.public.json) | 6-DOF 相对 FSL 矩阵位移 RMS 为 CPU 0.00947 mm、H100 0.00955 mm；12-DOF CPU 9/10 例通过 0.05 mm 门限 | 共享节点时间只报观察值；公开 T1w 图和完整边界见功能页 |
 | [TorchFNIRT](../docs/fnirt/README.md) | [当前真实 FA matched-input 对照](fnirt/report.real.current.json) | coefficient、warped FA、两类 Jacobian 和标准网格合同分别核对；连续值差异超过浮点误差 | 报告含三阶段 FSL 与 FNIT 配准时间、显存；功能页展示真实 FA 对照 |
 | [TorchApplyWarp](../docs/applywarp/README.md) | [真实 FA 与 intent-2007 coefficient warp](applywarp/report.real.current.json) | shape、affine、dtype 一致；连续值误差按 union support 报告 | 报告含三次 FSL/FNIT 计时和峰值显存；功能页展示 FA 与差值 |
@@ -42,7 +42,8 @@
 
 | 功能 | 当前真实数据报告 | 输出一致性结论 | 时间、显存与示意图 |
 |---|---|---|---|
-| [BIDS→MNI152 2 mm fMRI](../docs/fmri/README.md) | [FEAT](fmri/feat_summary.json)、[BBR](fmri/bbr_summary.json)、[PICA](fmri/pica_summary.json)、[T1 FNIRT 配准](fmri/t1_fnirt_20260929.public.json)、[FNIRT volume 整链](fmri/fmri_volume_fnirt_20260929.public.json)与[默认整链](fmri/e2e_summary.json) | FEAT 子阶段分别比较；最终 AROMA 输出没有可逐体素配对的 UKB FIX 参考 | 报告记录阶段时间、显存和限制；功能页的真实数据图同时展示 FEAT mean BOLD、BBR、T1→MNI 配准和 PICA |
+| [BIDS→MNI152 2 mm fMRI](../docs/fmri/README.md) | [完整 490 帧 volume](fmri/README.md)、[当前 FEAT 对照](fmri/feat_current.public.json) | pre-ICA FEAT 4D r=0.996419，时间 r 中位数 0.966773；最终 AROMA 没有同算法 UKB FIX 参照 | 完整 API 含保存 1598.01 s，allocated 13.34 GB；附 MNI 时间标准差及帧图 |
+| [fsLR32k / 91k surface](../docs/fmri/surface.md) | [同次新 volume→surface](fmri/fmri_surface.public.json)、[官方球面控制](fmri/fmri_surface_comparison.public.json) | 左/右皮层时间 r 均值 0.941705 / 0.942001；固定 volume、只换官方 newMSM 球面，皮层下逐值相同 | 完整 API 847.83 s，volume+surface 合计 2445.84 s，均不含既有皮层重建；附标准球面相关图 |
 | [MS-HBM 17 网络](../docs/mshbm/README.md) | [真实 fsLR32k 静息态时序](mshbm/report.public.json) | 输入 profile、网络标签和 Dice/ARI 按顶点比较 | 报告含 CBIG/FNIT 的匹配计时与内存；功能页展示网络标签与差异 |
 
 ## Postanalysis

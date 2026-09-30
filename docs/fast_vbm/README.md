@@ -357,9 +357,18 @@ python tools/setup_weights.py --model fast-vbm
 
 该命令安装两后端的权重超集。GM template 和 reference mask 是运行输入，不是模型权重，也不由该脚本下载。下载公开 UKB 模板的方法见 [UKB/FSL 专页](../ukb_vbm/README.md)。
 
-## 当前验证状态
+## 全流程 benchmark
 
-单例真实数据的固定 FSL GM 和仿射输入对照将此前 FNIRT 低相关性主要定位到隐式零值掩膜。关闭两个掩膜后，warped GM、Jacobian、modulated GM 与 FSL 的 Pearson r 分别为 0.996、0.997、0.996。本版从原始 T1w 完整链复测的三项相关性分别为 0.783、0.733、0.726；FNIT compute 为 110.72 s、写盘 7.56 s、峰值 CUDA allocated 12.97 GB。FSL 缺少相同边界的完整链计时，不能计算加速比。上游脑提取、裁剪、偏置校正和 GM 分割仍需分阶段核对；单例结果不能声明多例或逐体素等价。指标、对照边界见[验证页](../../validation/fast_vbm/README.md)。
+一例真实原始 T1w 已在 `f958121` 的运行源码上完成两个分支的全流程复测，并检查全部 13 幅输出。与同输入 FSL VBM 比较：
+
+| 分支 | warped GM r | Jacobian r | modulated GM r | 进程内总耗时，含写盘 | 峰值 CUDA allocated |
+|---|---:|---:|---:|---:|---:|
+| FNIRT | 0.8910 | 0.8858 | 0.8655 | 901.93 s | 12.97 GB |
+| SynthMorph | 0.6837 | 0.2927 | 0.6167 | 607.16 s | 15.49 GB |
+
+这是 raw T1 到调制 GM 的比较，未固定 FSL GM 或仿射矩阵。全部输出网格和有限值检查通过，PVE 和、调制公式检查通过；两分支都未达到 FSL 数值等价。FSL 既有完整链的命令计时合计 3195.14 s，来自不同运行与处理边界，不能据此计算加速比。阶段耗时、MAE/RMSE/Dice、参照边界与复现命令见[全流程验证页](../../validation/fast_vbm/README.md)，匿名标量及源码哈希见[JSON](../../validation/fast_vbm/e2e.public.json)。对照图和输入/输出哈希见同一验证页。
+
+![FNIRT 完整流程与 FSL 的模板空间对照](figures/fast_vbm_fnirt.png)
 
 ## Reference
 
