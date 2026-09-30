@@ -8,7 +8,8 @@ import pytest
 
 from fnit.bwas import plot_bwas_connectivity
 import fnit.bwas.visualize as visualization
-from fnit.bwas.visualize import _connection_paths, _result_files, _significant_clusters, _top_edges
+from fnit.bwas.visualize import (_brainnet_surface, _cluster_bundles, _connection_paths,
+                                 _result_files, _significant_clusters, _top_edges)
 
 
 def _example(tmp_path):
@@ -71,6 +72,26 @@ def test_visual_bundling_preserves_endpoints_and_sign_groups():
     assert len(lines) == 3 * 10
 
 
+def test_cluster_bundles_use_every_significant_edge(tmp_path):
+    _, mask, edges, _ = _example(tmp_path)
+    bundles = _cluster_bundles(edges, {1}, nib.load(mask).affine)
+    assert len(bundles) == 2
+    assert sum(bundle[1] for bundle in bundles) == 3
+    assert {(bundle[1], bundle[2]) for bundle in bundles} == {(1, -7.0), (2, 5.5)}
+
+
+def test_brainnet_surface_uses_one_based_face_indices(tmp_path):
+    path = tmp_path / "template.nv"
+    path.write_text("4\n0 0 0\n2 0 0\n0 2 0\n0 0 2\n4\n"
+                    "1 2 3\n1 2 4\n1 3 4\n2 3 4\n")
+    vertices, faces = _brainnet_surface(path)
+    assert vertices.shape == (4, 3)
+    np.testing.assert_array_equal(faces[0], [0, 1, 2])
+    path.write_text(path.read_text().replace("2 3 4", "2 3 5"))
+    with pytest.raises(ValueError, match="face indices"):
+        _brainnet_surface(path)
+
+
 def test_plot_montage_reads_edges_once_and_refuses_overwrite(tmp_path, monkeypatch):
     root, mask, *_ = _example(tmp_path)
     output = tmp_path / "figures" / "bwas.png"
@@ -130,6 +151,31 @@ def test_selected_cluster_is_passed_to_edge_filter(tmp_path, monkeypatch):
     monkeypatch.setattr(visualization, "_top_edges", tracked_edges)
     plot_bwas_connectivity(root, mask, tmp_path / "cluster.png", cluster_id=1)
     assert selected == [{1}]
+
+
+@pytest.mark.parametrize("view", ["six", "signed_six"])
+def test_all_clusters_six_views_with_supplied_surface(tmp_path, view):
+    root, mask, *_ = _example(tmp_path)
+    surface_file = tmp_path / "template.nv"
+    surface_file.write_text("4\n-6 -6 -4\n6 -6 -4\n0 6 -4\n0 0 6\n4\n"
+                            "1 2 3\n1 2 4\n1 3 4\n2 3 4\n")
+    output = tmp_path / "bundles.png"
+    plot_bwas_connectivity(root, mask, output, all_clusters=True, top_k=0,
+                           brain_surface_file=surface_file, view=view)
+    assert struct.unpack(">II", output.read_bytes()[16:24]) == (2700, 1800)
+
+
+def test_all_clusters_rejects_edge_filters(tmp_path):
+    root, mask, *_ = _example(tmp_path)
+    with pytest.raises(ValueError, match="cannot be combined"):
+        plot_bwas_connectivity(root, mask, tmp_path / "wrong.png",
+                               all_clusters=True, cluster_id=1)
+
+
+def test_signed_six_requires_cluster_mode(tmp_path):
+    root, mask, *_ = _example(tmp_path)
+    with pytest.raises(ValueError, match="signed_six requires all_clusters"):
+        plot_bwas_connectivity(root, mask, tmp_path / "wrong.png", view="signed_six")
 
 
 @pytest.mark.parametrize("strength", [-0.1, 1.1, float("nan")])
