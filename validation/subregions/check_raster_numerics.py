@@ -5,6 +5,7 @@ This is a local numerical check; whole-subject benchmarks use run_unified.py.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -61,6 +62,10 @@ def main():
         gradients.append(vertices.grad.detach())
         assignments.append(cells.detach())
     report = {"mode": "local_atlas_numerical_check", "shape": shape, "device": args.device,
+              "torch_version": torch.__version__, "cuda_version": torch.version.cuda,
+              "reference_raster_sha256": hashlib.sha256(args.reference_raster.read_bytes()).hexdigest(),
+              "fnit_raster_sha256": hashlib.sha256(
+                  Path(sys.modules[rasterize_priors.__module__].__file__).read_bytes()).hexdigest(),
               "forward_backward_seconds": times,
               "tf32": args.tf32, "atlas_offset_voxels": args.offset,
               "changed_tetrahedron_assignments": int(
