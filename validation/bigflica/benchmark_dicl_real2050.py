@@ -1,6 +1,6 @@
 """Compare complete DicL fits on the same real 2,050-person projections.
 
-python benchmark_dicl_incremental_real2050.py PROJECTED_DIR OLD_GPU_DICL_DIR CPU_BASELINE_DIR OUTPUT_DIR
+python benchmark_dicl_real2050.py PROJECTED_DIR CPU_BASELINE_DIR OUTPUT_DIR
 
 CPU_BASELINE_DIR is a completed prior same-input benchmark; use - to fit a
 fresh CPU control. Reused CPU times are explicitly marked. Only aggregate.json is suitable for publication. Dictionaries stay on the
@@ -59,7 +59,7 @@ def correlation(first, second):
 
 
 def main():
-    projected, old_gpu, cpu_baseline, output = map(Path, sys.argv[1:])
+    projected, cpu_baseline, output = map(Path, sys.argv[1:])
     baseline = (None if str(cpu_baseline) == '-' else
                 json.loads((cpu_baseline/'aggregate.json').read_text()))
     output.mkdir(parents=True, exist_ok=False)
@@ -120,7 +120,6 @@ def main():
         gpu_seconds = time.perf_counter()-start
         gpu_dicts[name] = gpu
         np.save(output/f'{name}_gpu_dictionary.npy', gpu)
-        old = np.load(old_gpu/f'{name}_dictionary.npy')
         report['modalities'][name] = {'shape': list(shape), 'projected_sha256': sha(source),
                                     ('cpu_fit_seconds_reused' if baseline else 'cpu_fit_seconds'):cpu_seconds, 'gpu_fit_seconds':gpu_seconds,
                                     'cpu_dictionary_sha256':sha(cpu_file),
@@ -129,9 +128,7 @@ def main():
                                     'peak_reserved_gib':torch.cuda.max_memory_reserved()/2**30,
                                     'peak_rss_gib':resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/2**20,
                                     'solver_calls': {'calls':sum(item.calls for item in instances),
-                                                     'fallbacks':sum(item.fallback_count for item in instances)}, 'cpu_gpu':compare(cpu,gpu),
-                                    'old_gpu_new_gpu':compare(old,gpu),
-                                    'old_gpu_dictionary_sha256':sha(old_gpu/f'{name}_dictionary.npy')}
+                                                     'fallbacks':sum(item.fallback_count for item in instances)}, 'cpu_gpu':compare(cpu,gpu)}
         (output/'aggregate.json').write_text(json.dumps(report,indent=2))
         print(json.dumps({'completed':name,**report['modalities'][name]}),flush=True)
         if report['modalities'][name]['cpu_gpu']['relative_frobenius_error'] > 1e-3:

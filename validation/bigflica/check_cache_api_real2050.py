@@ -1,6 +1,6 @@
 """Check public outputs using validated 2,050-person stage caches.
 
-python check_incremental_cache_api_real2050.py OLD_PUBLIC_DIR STAGE_OUTPUT_DIR NEW_OUTPUT_DIR
+python check_cache_api_real2050.py EXISTING_PUBLIC_DIR STAGE_OUTPUT_DIR NEW_OUTPUT_DIR
 
 The two upstream cache directories are reused. The dictionaries already fitted
 by the production stage benchmark are imported with their verified input hashes.

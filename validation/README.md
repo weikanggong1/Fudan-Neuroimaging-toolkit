@@ -50,7 +50,7 @@
 
 | 功能 | 当前真实数据报告 | 输出一致性结论 | 时间、显存与示意图 |
 |---|---|---|---|
-| [BigFLICA](../docs/bigflica/README.md) | [真实 UKB 同输入与 2,050 人完整掩膜三模态测试](bigflica/README.md) | CPU/GPU 公开 API 均跑通 C3，但独立成分图与课程显著不同；固定相同 mMIGP 投影后两端九张图相关均 >0.999999998；C20 分别仅保留 CPU 16/20、GPU 11/20 个有效成分 | 共享节点冷启动观察为 CPU 732.75 秒、GPU 1045.08 秒，瓶颈在 GPU DicL；C3 的 VBM 重建很弱，不能视为有效 C20 或端到端等价证明。 |
+| [BigFLICA](../docs/bigflica/README.md) | [30,000人VBM/FA/MD完整掩膜独立CPU/GPU对比](bigflica/README.md) | mMIGP相对差6.07e-6；DicL匹配后相对差16%–30%；CPU/GPU有效成分仅17/13，均未通过C20验收 | 至失败墙钟153.04/112.55分钟；GPU DicL及FLICA均慢于CPU，VBM重建几乎为零；尚无最终C20 course和脑图一致性结果。 |
 | [SuperBigFLICA](../docs/superbigflica/README.md) | [5,000 名真实 UKB、20 成分 H100 完整流程与 8 人原版连续模型比较](superbigflica/README.md) | 固定参数连续模型前向/损失/梯度通过；1,000 人测试反应时间 MAE 73.50 ms、r=0.1731；高血压 AUC=0.7226、balanced accuracy=0.6716；真实分类基准为二分类 | 50 轮训练，验证选第 5 轮；共享 H100 全流程 1517.16 s，PyTorch 峰值 allocation 1.03 GiB；120 张 NIfTI、冻结推理和五张真实图 |
 
 recon-all 与 Connectome 的验证边界由各自功能页维护，不纳入本页审计表。
