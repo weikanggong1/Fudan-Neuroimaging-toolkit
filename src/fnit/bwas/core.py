@@ -6,6 +6,7 @@ Independent implementation of Gong et al. (Medical Image Analysis, 2018).
 from __future__ import annotations
 
 import csv
+import gc
 import gzip
 import json
 from concurrent.futures import ThreadPoolExecutor
@@ -22,6 +23,9 @@ from scipy import special, stats
 import torch
 
 from .. import __version__
+from .cache import build_packed_cache, open_packed_cache
+from .cluster_union import edge_components
+from .packed_loader import PackedTileLoader
 
 
 @dataclass(frozen=True)
@@ -136,32 +140,10 @@ def _cluster_p(nvoxels: int, cdt: float, size: int, fwhm: float) -> tuple[float,
 
 def _clusters(edges: list[tuple[int, int, float]], coords: np.ndarray,
               cdt: float, fwhm: float):
-    lookup = {(i, j): k for k, (i, j, _) in enumerate(edges)}
-    voxel_lookup = {tuple(coord): i for i, coord in enumerate(coords)}
-    neighbors = []
-    offsets = np.array([(x, y, z) for x in (-1, 0, 1)
-                        for y in (-1, 0, 1) for z in (-1, 0, 1)
-                        if x*x+y*y+z*z < 1.5**2])
-    for coord in coords:
-        neighbors.append([voxel_lookup[tuple(other)] for other in coord + offsets
-                          if tuple(other) in voxel_lookup])
-    parent = np.arange(len(edges))
-
-    def find(i):
-        while parent[i] != i:
-            parent[i] = parent[parent[i]]
-            i = parent[i]
-        return i
-
-    for k, (i, j, _) in enumerate(edges):
-        for ni in neighbors[i]:
-            for nj in neighbors[j]:
-                other = lookup.get((ni, nj))
-                if other is not None:
-                    parent[find(other)] = find(k)
+    roots = edge_components(edges, coords)
     members = {}
-    for k in range(len(edges)):
-        members.setdefault(find(k), []).append(k)
+    for k, root in enumerate(roots):
+        members.setdefault(int(root), []).append(k)
     ordered = sorted(members.values(), key=lambda m: (-len(m), m[0]))
     labels = np.empty(len(edges), dtype=np.int32)
     table = []
@@ -208,23 +190,205 @@ def _fisher_block(matrices, start: int, stop: int, i: int, j: int,
     r = (torch.bmm(left, right.transpose(1, 2)) if voxel_major else
          torch.bmm(left.transpose(1, 2), right))
     r /= torch.as_tensor(lengths, device=device, dtype=dtype)[:, None, None]
-    r = torch.where(r > 0.9999, 0, r).clamp(-0.999999, 0.999999)
-    return torch.atanh(r).reshape(count, -1)
+    r.masked_fill_(r > 0.9999, 0).clamp_(-0.999999, 0.999999)
+    return r.atanh_().reshape(count, -1)
+
+
+def _glm_blocks(blocks, subjects: int):
+    """Keep the original 16-subject GLM reduction order across I/O batches."""
+    pending = {}
+    for column, start, stop, values in blocks:
+        position = 0
+        while start < stop:
+            end = min(stop, (start//16+1)*16)
+            offset = start % 16
+            count = end-start
+            part = values[position:position+count]
+            if offset == 0 and (end % 16 == 0 or end == subjects):
+                yield column, start, end, part
+            else:
+                if column not in pending:
+                    pending[column] = values.new_empty((16, values.shape[1]))
+                pending[column][offset:offset+count].copy_(part)
+                if end % 16 == 0 or end == subjects:
+                    yield column, start-offset, end, pending[column][:offset+count]
+            del part
+            position += count
+            start = end
+        del values
+
+
+def _tune_subject_block(matrices, x: torch.Tensor, nvox: int,
+                        device: torch.device):
+    # Contiguous windows preserve the cohort's actual scan-length grouping.
+    starts = sorted({int(start)//32*32 for start in
+                     np.linspace(0, max(0, len(matrices)-32), 4)})
+    indices = [subject for start in starts
+               for subject in range(start, min(start+32, len(matrices)))]
+    sample = [matrices[subject] for subject in indices]
+    design = x[indices]
+    width = min(4096, max(1, nvox//3))
+    span = min(3*width, nvox)
+    columns = [(j, min(width, nvox-j)) for j in range(width, span, width)] or [(0, width)]
+    candidates = sorted({min(count, len(sample)) for count in (8, 16, 32)})
+    timings = {count: [] for count in candidates}
+    for repetition in range(3):
+        for count in candidates if repetition < 2 else candidates[::-1]:
+            shards = []
+            for st in range(0, len(sample), count):
+                group = sample[st:st+count]
+                lengths = np.asarray([matrix.shape[1] for matrix in group], dtype=np.int32)
+                packed = np.zeros((span, len(group), int(lengths.max())), dtype=np.float32)
+                for subject, matrix in enumerate(group):
+                    packed[:, subject, :lengths[subject]] = matrix[:span]
+                shards.append((packed, lengths))
+            loader = PackedTileLoader(shards, device, async_h2d=True)
+            torch.cuda.synchronize(device)
+            begin = perf_counter()
+            xy_blocks = [torch.zeros((x.shape[1], width*n_j), device=device)
+                         for _, n_j in columns]
+            yy_blocks = [torch.zeros(width*n_j, device=device) for _, n_j in columns]
+            for column, st, en, values in _glm_blocks(
+                    loader.fisher_tiles(0, columns, width), len(sample)):
+                xy_blocks[column].addmm_(design[st:en].T, values)
+                yy_blocks[column] += values.square_().sum(0)
+            del values
+            for xy, yy in zip(xy_blocks, yy_blocks):
+                sigma = yy-(xy*xy).sum(0)
+                t = xy[0]/torch.sqrt(sigma)
+                torch.nonzero(torch.abs(t) > 5).cpu()
+            torch.cuda.synchronize(device)
+            if repetition:
+                timings[count].append(perf_counter()-begin)
+            del loader, shards, xy_blocks, yy_blocks, xy, yy, sigma, t
+            torch.cuda.empty_cache()
+    return min(timings, key=lambda count: np.median(timings[count])), timings
+
+
+def _tune_voxel_block(shards, x: torch.Tensor, nvox: int,
+                      device: torch.device, fixed_width: int | None = None,
+                      fixed_columns: int | None = None,
+                      fixed_cache_row: bool | None = None):
+    longest = max(range(len(shards)), key=lambda k: int(shards[k][1].max()))
+    groups = list(range(min(8, len(shards))))
+    if longest not in groups:
+        groups.append(longest)
+    starts = np.cumsum([0]+[len(lengths) for _, lengths in shards])
+    sampled_shards = [shards[k] for k in groups]
+    sampled_design = torch.cat([x[int(starts[k]):int(starts[k+1])]
+                                for k in groups], dim=0)
+    candidates = ([min(nvox, fixed_width)] if fixed_width is not None else
+                  sorted({min(nvox, size) for size in
+                          (512, 1024, 2048, 4096, 5120, 6144, 7168, 8192)}))
+    timings = {}
+    peak_allocated = peak_reserved = 0
+    def pilot(width, columns, cache_row):
+        torch.cuda.synchronize(device)
+        loader = PackedTileLoader(shards if cache_row else sampled_shards, device,
+                                  async_h2d=True, cache_row=cache_row)
+        preload_seconds = 0.0
+        if cache_row:
+            preload_start = perf_counter()
+            loader._load_row(0, width)
+            preload_seconds = perf_counter()-preload_start
+            loader.row_views = [loader.row_views[k] for k in groups]
+            loader.shards = sampled_shards
+        begin = perf_counter()
+        xy_blocks = [torch.zeros((x.shape[1], width*n_j), device=device)
+                     for _, n_j in columns]
+        yy_blocks = [torch.zeros(width*n_j, device=device) for _, n_j in columns]
+        for column, st, en, values in _glm_blocks(
+                loader.fisher_tiles(0, columns, width), len(sampled_design)):
+            xy_blocks[column].addmm_(sampled_design[st:en].T, values)
+            yy_blocks[column] += values.square_().sum(0)
+        del values
+        for column, (_, n_j) in enumerate(columns):
+            xy, yy = xy_blocks[column], yy_blocks[column]
+            sigma = yy-(xy*xy).sum(0)
+            t = (xy[0]/torch.sqrt(sigma)).reshape(width, n_j)
+            selected = torch.nonzero(torch.abs(t) > 5)
+            selected.cpu()
+            xy_blocks[column] = yy_blocks[column] = None
+            del xy, yy, sigma, t, selected
+        torch.cuda.synchronize(device)
+        # Extrapolate the sampled groups and amortize one full row preload.
+        pilot_seconds = perf_counter()-begin
+        seconds = pilot_seconds*len(x)/len(sampled_design)
+        row_batches = ((nvox+width-1)//width+1)/(2*len(columns))
+        return seconds + preload_seconds/row_batches, pilot_seconds, preload_seconds
+
+    configurations = [(width, count, cache_row) for width in candidates
+                      for count in ((1, 2) if fixed_columns is None else (fixed_columns,))
+                      for cache_row in ((False, True) if fixed_cache_row is None
+                                        else (fixed_cache_row,))]
+    for repetition in range(3):
+        order = configurations if repetition < 2 else configurations[::-1]
+        for width, count, cache_row in order:
+            key = f"{width}x{count}-row{int(cache_row)}"
+            if repetition == 2 and key not in timings:
+                continue
+            j = width if nvox >= (count+1)*width else 0
+            columns = [(start, min(width, nvox-start))
+                       for start in range(j, min(j+count*width, nvox), width)]
+            try:
+                torch.cuda.reset_peak_memory_stats(device)
+                seconds, measured, preload = pilot(width, columns, cache_row)
+                allocated = torch.cuda.max_memory_allocated(device)
+                reserved = torch.cuda.max_memory_reserved(device)
+                # Leave space below the allocator cap for final sparse output.
+                if reserved < 16_500_000_000:
+                    entry = timings.setdefault(key, {"block_size": width,
+                        "column_tiles": count, "gpu_row_cache": cache_row,
+                        "pilot_seconds": [], "row_preload_seconds": [],
+                        "estimated_full_tile_seconds": [],
+                        "peak_allocated_bytes": 0, "peak_reserved_bytes": 0})
+                    if repetition:
+                        entry["pilot_seconds"].append(measured)
+                        entry["row_preload_seconds"].append(preload)
+                        entry["estimated_full_tile_seconds"].append(seconds)
+                    entry["peak_allocated_bytes"] = max(entry["peak_allocated_bytes"], allocated)
+                    entry["peak_reserved_bytes"] = max(entry["peak_reserved_bytes"], reserved)
+                    if repetition:
+                        entry["estimated_pairs_per_second"] = (
+                            width*sum(n_j for _, n_j in columns) /
+                            float(np.median(entry["estimated_full_tile_seconds"])))
+                else:
+                    timings.pop(key, None)
+            except torch.cuda.OutOfMemoryError:
+                timings.pop(key, None)
+            finally:
+                peak_allocated = max(peak_allocated, torch.cuda.max_memory_allocated(device))
+                peak_reserved = max(peak_reserved, torch.cuda.max_memory_reserved(device))
+                gc.collect()
+                torch.cuda.empty_cache()
+    if not timings:
+        raise MemoryError("no BWAS voxel block fits the 17 GB CUDA cap")
+    best = max(timings.values(), key=lambda item: item["estimated_pairs_per_second"])
+    return best["block_size"], best["column_tiles"], best["gpu_row_cache"], {
+        "Candidates": timings, "SampledSubjects": len(sampled_design),
+        "CohortSubjects": len(x), "PeakAllocatedBytes": peak_allocated,
+        "PeakReservedBytes": peak_reserved}
 
 
 def run_bwas(bids_root: str | Path, participants_tsv: str | Path,
              mask_file: str | Path, output_root: str | Path, *,
              phenotype: str, covariates: tuple[str, ...] = ("age", "sex"),
-             cdt: float = 5.0, block_size: int = 128,
-             subject_block_size: int = 16,
+             cdt: float = 5.0, block_size: int | None = None,
+             subject_block_size: int | None = None,
              num_workers: int = 1,
              device: str = "cuda:0", fwhm: float | None = None,
              validate_direct_ols: bool = False,
              cache_root: str | Path | None = None,
-             _prepared_cache_dir: str | Path | None = None) -> BWASResult:
+             column_tiles: int | None = None,
+             gpu_row_cache: bool | None = None,
+             _prepared_cache_dir: str | Path | None = None,
+             _prepared_packed_cache_dir: str | Path | None = None) -> BWASResult:
     """Run one group BWAS on 2 mm clean BIDS Derivatives BOLD images."""
     start = perf_counter()
-    if not 0 < cdt < 20 or min(block_size, subject_block_size, num_workers) < 1:
+    if (not 0 < cdt < 20 or num_workers < 1 or
+            (block_size is not None and block_size < 1) or
+            (subject_block_size is not None and subject_block_size < 1) or
+            column_tiles not in (None, 1, 2)):
         raise ValueError("cdt must be in (0, 20) and block sizes/workers must be positive")
     files, ids, design, mask_img, mask, task = _inputs(
         Path(bids_root), Path(participants_tsv), Path(mask_file), phenotype,
@@ -253,6 +417,9 @@ def run_bwas(bids_root: str | Path, participants_tsv: str | Path,
     dev = torch.device(device)
     if dev.type == "cuda":
         torch.cuda.set_device(dev)
+        total_memory = torch.cuda.get_device_properties(dev).total_memory
+        torch.cuda.set_per_process_memory_fraction(
+            min(17_000_000_000 / total_memory, 1.0), dev)
         torch.cuda.reset_peak_memory_stats(dev)
     coords = np.column_stack(np.where(mask))
     x = torch.as_tensor(design, dtype=torch.float32, device=dev)
@@ -312,76 +479,172 @@ def run_bwas(bids_root: str | Path, participants_tsv: str | Path,
         width = float(max(2.0, np.mean(widths))) if fwhm is None else float(fwhm)
         if not np.isfinite(width) or width <= 0:
             raise ValueError("fwhm must be positive and finite")
+        tuning = {}
+        if subject_block_size is None:
+            if _prepared_packed_cache_dir is not None:
+                manifest = json.loads((Path(_prepared_packed_cache_dir) /
+                                       "manifest.json").read_text())
+                subject_block_size = int(manifest["subject_block_size"])
+            elif dev.type == "cuda":
+                subject_block_size, timings = _tune_subject_block(
+                    matrices, x, nvox, dev)
+                tuning["SubjectBlockPilotSeconds"] = timings
+            else:
+                subject_block_size = 16
+        cache_build_seconds = 0.0
+        loader = None
+        if dev.type == "cuda" and not validate_direct_ols:
+            packed_dir = (Path(_prepared_packed_cache_dir) if _prepared_packed_cache_dir
+                          else Path(scratch) / f"packed-b{subject_block_size}")
+            if _prepared_packed_cache_dir is None and not packed_dir.exists():
+                cache_build_seconds = build_packed_cache(
+                    matrices, packed_dir, subject_block_size)
+            matrices.clear()
+            shards = open_packed_cache(packed_dir, len(ids), nvox, subject_block_size)
+            loader = PackedTileLoader(shards, dev, async_h2d=True, measure=True,
+                                      cache_row=bool(gpu_row_cache))
+        if loader is not None and (block_size is None or column_tiles is None or
+                                   gpu_row_cache is None):
+            block_size, tuned_columns, cache_row, timings = _tune_voxel_block(
+                shards, x, nvox, dev, fixed_width=block_size,
+                fixed_columns=column_tiles, fixed_cache_row=gpu_row_cache)
+            tuning["VoxelBlockPilot"] = timings
+            loader.cache_row = cache_row
+            column_tiles = tuned_columns
+        elif block_size is None:
+            block_size = 128
+        stages = {key: 0.0 for key in ("cache_read", "h2d", "correlation",
+                                      "fisher_glm", "threshold", "clustering")}
         nblocks = (nvox+block_size-1)//block_size
         total_tiles = nblocks*(nblocks+1)//2
         completed_tiles = 0
+        column_tiles = (column_tiles or 1) if loader is not None else 1
+        print(f"BWAS blocks: voxel={block_size}, subjects={subject_block_size}, "
+              f"columns={column_tiles}, GPU row={bool(getattr(loader, 'cache_row', False))}",
+              flush=True)
         for i in range(0, nvox, block_size):
-            for j in range(i, nvox, block_size):
-                n_i, n_j = min(block_size, nvox-i), min(block_size, nvox-j)
-                xy = torch.zeros((x.shape[1], n_i*n_j), device=dev, dtype=torch.float32)
-                yy = torch.zeros(n_i*n_j, device=dev, dtype=torch.float32)
+            n_i = min(block_size, nvox-i)
+            for first_j in range(i, nvox, block_size*column_tiles):
+                columns = [(j, min(block_size, nvox-j))
+                           for j in range(first_j, min(first_j+block_size*column_tiles,
+                                                      nvox), block_size)]
+                xy_blocks = [torch.zeros((x.shape[1], n_i*n_j), device=dev)
+                             for _, n_j in columns]
+                yy_blocks = [torch.zeros(n_i*n_j, device=dev) for _, n_j in columns]
+                j, n_j = columns[0]
                 direct_y = (np.empty((len(ids), n_i*n_j), dtype=np.float64)
                             if validate_direct_ols else None)
-                for st in range(0, len(ids), subject_block_size):
-                    en = min(st+subject_block_size, len(ids))
-                    values = _fisher_block(matrices, st, en, i, j, n_i, n_j,
-                                           dev, voxel_major=True,
-                                           dtype=torch.float32)
-                    xy += x[st:en].T @ values
-                    yy += (values * values).sum(dim=0)
-                    if direct_y is not None:
-                        direct_y[st:en] = values.cpu().numpy()
-                sigma = yy - (xy * xy).sum(dim=0)
-                t = (xy[0] / torch.sqrt(sigma / df)).cpu().numpy().reshape(n_i, n_j)
-                if direct_y is not None:
-                    check_start = perf_counter()
-                    z = stats.norm.ppf(stats.t.cdf(t, df-1))
-                    flat_z = z.reshape(-1)
-                    for lo in range(0, n_i*n_j, 65536):
-                        hi = min(lo+65536, n_i*n_j)
-                        if direct_gpu_weights is None:
-                            observed = direct_y[:, lo:hi]
-                            direct_beta = direct_weights @ observed
-                            residual = observed - design @ direct_beta
-                            direct_sigma = np.sum(residual*residual, axis=0)
-                            direct_t = direct_beta[0] / np.sqrt(
-                                direct_sigma * (direct_inverse[0, 0] / df))
-                        else:
-                            observed = torch.as_tensor(
-                                np.ascontiguousarray(direct_y[:, lo:hi]), device=dev)
-                            direct_beta = direct_gpu_weights @ observed
-                            residual = observed - direct_gpu_design @ direct_beta
-                            direct_sigma = (residual*residual).sum(dim=0)
-                            direct_t = (direct_beta[0] / torch.sqrt(
-                                direct_sigma * (direct_inverse[0, 0] / df))).cpu().numpy()
-                        direct_z = stats.norm.ppf(stats.t.cdf(direct_t, df-1))
-                        positions = np.arange(lo, hi)
-                        keep = ((i + positions // n_j) < (j + positions % n_j))
-                        keep &= np.isfinite(direct_z) & np.isfinite(flat_z[lo:hi])
-                        difference = np.abs(flat_z[lo:hi][keep]-direct_z[keep])
-                        validation["count"] += int(keep.sum())
-                        validation["sum_abs_z_error"] += float(difference.sum())
-                        if len(difference):
-                            validation["max_abs_z_error"] = max(
-                                validation["max_abs_z_error"], float(difference.max()))
-                        validation["threshold_disagreements"] += int(np.count_nonzero(
-                            (np.abs(flat_z[lo:hi][keep]) > cdt) !=
-                            (np.abs(direct_z[keep]) > cdt)))
-                        validation["reference_edges"] += int(np.count_nonzero(
-                            np.abs(direct_z[keep]) > cdt))
-                    validation["seconds"] += perf_counter()-check_start
-                if i == j:
-                    rr, cc = np.where(np.triu(np.abs(t) > t_threshold, k=1))
+                if loader is None:
+                    blocks = ((0, _st, min(_st+subject_block_size, len(ids)),
+                               _fisher_block(matrices, _st,
+                                             min(_st+subject_block_size, len(ids)),
+                                             i, j, n_i, n_j, dev, voxel_major=True,
+                                             dtype=torch.float32))
+                              for _st in range(0, len(ids), subject_block_size))
                 else:
-                    rr, cc = np.where(np.abs(t) > t_threshold)
-                selected_z = stats.norm.ppf(stats.t.cdf(t[rr, cc], df-1))
-                edges.extend((i+int(a), j+int(b), float(value))
-                             for a, b, value in zip(rr, cc, selected_z))
-                completed_tiles += 1
-                if completed_tiles % 10 == 0 or completed_tiles == total_tiles:
-                    print(f"BWAS voxel tiles {completed_tiles}/{total_tiles}", flush=True)
+                    blocks = _glm_blocks(loader.fisher_tiles(i, columns, n_i), len(ids))
+                glm_events = []
+                for column, st, en, values in blocks:
+                    xy, yy = xy_blocks[column], yy_blocks[column]
+                    glm_start = perf_counter()
+                    if loader is not None:
+                        gpu_start = torch.cuda.Event(enable_timing=True)
+                        gpu_start.record()
+                    xy.addmm_(x[st:en].T, values)
+                    if direct_y is not None:
+                        yy += (values * values).sum(dim=0)
+                        direct_y[st:en] = values.cpu().numpy()
+                    else:
+                        yy += values.square_().sum(dim=0)
+                    if loader is not None:
+                        gpu_end = torch.cuda.Event(enable_timing=True)
+                        gpu_end.record()
+                        glm_events.append((gpu_start, gpu_end))
+                    else:
+                        stages["fisher_glm"] += perf_counter()-glm_start
+                    del values
+                del xy, yy
+                if loader is not None:
+                    measured = loader.drain_timings()
+                    for name, duration in measured.items():
+                        stages["fisher_glm" if name == "fisher" else name] += duration
+                    stages["fisher_glm"] += sum(
+                        first.elapsed_time(last) for first, last in glm_events) / 1000
+                for column, (j, n_j) in enumerate(columns):
+                    xy, yy = xy_blocks[column], yy_blocks[column]
+                    threshold_start = perf_counter()
+                    sigma = yy - (xy * xy).sum(dim=0)
+                    t_gpu = (xy[0] / torch.sqrt(sigma / df)).reshape(n_i, n_j)
+                    if direct_y is not None:
+                        t = t_gpu.cpu().numpy()
+                        check_start = perf_counter()
+                        z = stats.norm.ppf(stats.t.cdf(t, df-1))
+                        flat_z = z.reshape(-1)
+                        for lo in range(0, n_i*n_j, 65536):
+                            hi = min(lo+65536, n_i*n_j)
+                            if direct_gpu_weights is None:
+                                observed = direct_y[:, lo:hi]
+                                direct_beta = direct_weights @ observed
+                                residual = observed - design @ direct_beta
+                                direct_sigma = np.sum(residual*residual, axis=0)
+                                direct_t = direct_beta[0] / np.sqrt(
+                                    direct_sigma * (direct_inverse[0, 0] / df))
+                            else:
+                                observed = torch.as_tensor(
+                                    np.ascontiguousarray(direct_y[:, lo:hi]), device=dev)
+                                direct_beta = direct_gpu_weights @ observed
+                                residual = observed - direct_gpu_design @ direct_beta
+                                direct_sigma = (residual*residual).sum(dim=0)
+                                direct_t = (direct_beta[0] / torch.sqrt(
+                                    direct_sigma * (direct_inverse[0, 0] / df))).cpu().numpy()
+                            direct_z = stats.norm.ppf(stats.t.cdf(direct_t, df-1))
+                            positions = np.arange(lo, hi)
+                            keep = ((i + positions // n_j) < (j + positions % n_j))
+                            keep &= np.isfinite(direct_z) & np.isfinite(flat_z[lo:hi])
+                            difference = np.abs(flat_z[lo:hi][keep]-direct_z[keep])
+                            validation["count"] += int(keep.sum())
+                            validation["sum_abs_z_error"] += float(difference.sum())
+                            if len(difference):
+                                validation["max_abs_z_error"] = max(
+                                    validation["max_abs_z_error"], float(difference.max()))
+                            validation["threshold_disagreements"] += int(np.count_nonzero(
+                                (np.abs(flat_z[lo:hi][keep]) > cdt) !=
+                                (np.abs(direct_z[keep]) > cdt)))
+                            validation["reference_edges"] += int(np.count_nonzero(
+                                np.abs(direct_z[keep]) > cdt))
+                        validation["seconds"] += perf_counter()-check_start
+                    if dev.type == "cuda" and direct_y is None:
+                        keep = torch.abs(t_gpu) > t_threshold
+                        if i == j:
+                            keep.triu_(diagonal=1)
+                        selected = torch.nonzero(keep)
+                        rr = selected[:, 0].cpu().numpy()
+                        cc = selected[:, 1].cpu().numpy()
+                        t_selected = t_gpu[keep].cpu().numpy()
+                    else:
+                        if direct_y is None:
+                            t = t_gpu.cpu().numpy()
+                        if i == j:
+                            rr, cc = np.where(np.triu(np.abs(t) > t_threshold, k=1))
+                        else:
+                            rr, cc = np.where(np.abs(t) > t_threshold)
+                        t_selected = t[rr, cc]
+                    selected_z = stats.norm.ppf(stats.t.cdf(t_selected, df-1))
+                    edges.extend((i+int(a), j+int(b), float(value))
+                                 for a, b, value in zip(rr, cc, selected_z))
+                    stages["threshold"] += perf_counter()-threshold_start
+                    completed_tiles += 1
+                    if completed_tiles % 10 == 0 or completed_tiles == total_tiles:
+                        print(f"BWAS voxel tiles {completed_tiles}/{total_tiles}", flush=True)
+                    xy_blocks[column] = yy_blocks[column] = None
+                    del xy, yy, sigma, t_gpu
+                    if dev.type == "cuda" and direct_y is None:
+                        del keep, selected
+                del xy_blocks, yy_blocks, direct_y
         matrices.clear()
+    cluster_start = perf_counter()
     labels, table = _clusters(edges, coords, cdt, width)
+    stages["clustering"] = perf_counter()-cluster_start
     group_dir = output_root / "group" / "func"
     group_dir.mkdir(parents=True)
     prefix = f"{task}_space-MNI152NLin6Asym_res-2"
@@ -417,11 +680,23 @@ def run_bwas(bids_root: str | Path, participants_tsv: str | Path,
         "DegreesOfFreedom": int(df), "VoxelCount": nvox,
         "SuprathresholdEdgeCount": len(edges), "Device": str(dev),
         "VoxelBlockSize": block_size, "SubjectBlockSize": subject_block_size,
+        "GLMSubjectBlockSize": 16 if loader is not None else subject_block_size,
+        "ColumnTilesPerRowBatch": column_tiles,
+        "GPUResidentRowBlock": bool(getattr(loader, "cache_row", False)),
         "Precision": "float32", "TF32Enabled": False,
         "DesignOrthogonalization": "QR",
+        "RuntimeVersions": {"numpy": np.__version__, "scipy": scipy.__version__,
+                            "torch": torch.__version__, "cuda": torch.version.cuda},
         "PreparationWorkers": num_workers,
-        "PeakCUDAAllocatedBytes": torch.cuda.max_memory_allocated(dev)
+        "PeakCUDAAllocatedBytes": max(torch.cuda.max_memory_allocated(dev),
+            tuning.get("VoxelBlockPilot", {}).get("PeakAllocatedBytes", 0))
         if dev.type == "cuda" else None,
+        "PeakCUDAReservedBytes": max(torch.cuda.max_memory_reserved(dev),
+            tuning.get("VoxelBlockPilot", {}).get("PeakReservedBytes", 0))
+        if dev.type == "cuda" else None,
+        "PackedCacheBuildSeconds": cache_build_seconds,
+        "StageSeconds": stages,
+        "BlockTuning": tuning,
         "ElapsedSeconds": perf_counter()-start,
         "Source": "https://github.com/weikanggong/BWAS",
     }

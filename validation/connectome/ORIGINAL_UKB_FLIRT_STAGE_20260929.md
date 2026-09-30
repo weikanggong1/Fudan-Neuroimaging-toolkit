@@ -1,4 +1,6 @@
-# 原 UKB 流程：b0→T1 刚性配准同输入核对
+# 原 UKB 流程：b0→T1 串行参考配准核对
+
+本页记录批量优化前的同输入 CPU/FSL 对照及原测量源码。当前 CUDA 默认使用批量执行，最新耗时和精度见 [TorchFLIRT 功能页](../../docs/flirt/README.md#真实数据测量)，本页旧 GPU 时间不代表当前默认路径。
 
 ## 功能与来源
 
@@ -42,23 +44,21 @@ result = run_flirt(
 
 `result` 是 `FLIRTResult`：`moved` 为带 T1 几何信息的 `nibabel.Nifti1Image`；`matrix`/`fsl_matrix` 是输入到参考的 FSL scaled-mm NumPy 4×4 矩阵；`moving_to_fixed_world` 是对应的 RAS 世界坐标正向 4×4 矩阵；`fixed_to_moving_world` 是逆向 4×4 矩阵；`qc` 是包含代价、求解器、评估次数和设备的字典。FSL `.mat` 不能直接当成世界坐标矩阵使用。`output` 或 `omat` 至少指定一项。完整命令行参数见[FLIRT 使用说明](../../docs/flirt/README.md)。
 
-独立比较命令如下；每个参数显式给出，`--output` 为**私有**报告路径，因为原始报告含输入哈希和矩阵：
+当前复测使用共享的 FLIRT benchmark 工具，报告输出留在私有工作目录：
 
 ```bash
-python tools/benchmark_connectome_registration.py \
-  --b0 dwi_meanbzero_brain.nii.gz \
-  --t1 T1_brain.nii.gz \
-  --fsl-matrix DWI_to_T1_FSL.mat \
-  --fsl-moved b0_in_T1_FSL.nii.gz \
-  --device cuda:0 \
-  --output private_registration_report.json
+python tools/benchmark_flirt_gpu.py \
+  --moving dwi_meanbzero_brain.nii.gz --reference T1_brain.nii.gz \
+  --fsl-matrix DWI_to_T1_FSL.mat --fsl-moved b0_in_T1_FSL.nii.gz \
+  --dof 6 --cost normmi --device cuda:0 --execution batched \
+  --output-dir private_registration_benchmark --warm-repeats 1
 ```
 
-其中 `--b0`/`--t1` 是同输入图像，`--fsl-matrix` 是独立官方矩阵，`--fsl-moved` 是固定官方矩阵生成的 T1 网格参考图，`--device` 是 FNIT 设备，`--output` 是私有完整比较记录。固定矩阵重采样隔离测试用 `tools/benchmark_connectome_registration_resample.py`，它另外要求 `--scratch` 私有临时目录；如已提供 `--fsl-moved`，便复用该参考图，不再调用 FSL。
+`--moving`/`--reference` 是同输入图像，`--fsl-matrix`/`--fsl-moved` 是预先生成的官方输出；脚本运行中不调用 FSL。串行对照使用 `--execution reference`，输出到另一个目录。该命令使用当前代码，指标 mask 与下述旧报告的交集定义不同；最新结果见[功能页](../../docs/flirt/README.md)。固定矩阵重采样使用公开 `run_flirt(..., applyxfm=True, init=...)` 接口，见[已知变换用法](../../docs/flirt/README.md#已知线性变换mni152-分辨率转换)。
 
 ## 同一真实病例的修订后对照
 
-参考矩阵取原始 UKB 命令的 FSL FLIRT 6.0.7.4 输出。双方使用同一去脑 b0（104×104×72）和去脑 T1（162×215×180）。把两份 input→reference 矩阵转成 world-RAS 后，在 b0 视野内取 13×13×13 个点，测量同一点的配准位置差；影像指标取双方非零体素交集。完整聚合值与当前源码 SHA-256 见[数值报告](original_ukb_flirt.public.json)。
+参考矩阵取原始 UKB 命令的 FSL FLIRT 6.0.7.4 输出。双方使用同一去脑 b0（104×104×72）和去脑 T1（162×215×180）。把两份 input→reference 矩阵转成 world-RAS 后，在 b0 视野内取 13×13×13 个点，测量同一点的配准位置差；影像指标取双方非零体素交集。完整聚合值与当次测量源码 SHA-256 见[数值报告](original_ukb_flirt.public.json)。
 
 | 指标 | 修订前 FNIT GPU | 修订后 FNIT CPU | 修订后 FNIT H100 TF32 |
 |---|---:|---:|---:|

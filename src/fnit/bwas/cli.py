@@ -14,8 +14,13 @@ def main(argv=None):
     parser.add_argument("--phenotype", required=True, help="binary or continuous target column")
     parser.add_argument("--covariate", action="append", default=[], help="numeric covariate column; repeat")
     parser.add_argument("--cdt", type=float, default=5.0, help="absolute z cluster threshold")
-    parser.add_argument("--block-size", type=int, default=128, help="voxel tile edge length")
-    parser.add_argument("--subject-block-size", type=int, default=16, help="subjects per GPU batch")
+    parser.add_argument("--block-size", type=int, help="voxel tile edge length; GPU auto if omitted")
+    parser.add_argument("--subject-block-size", type=int,
+                        help="subjects per GPU batch; GPU auto if omitted")
+    parser.add_argument("--column-tiles", type=int, choices=(1, 2),
+                        help="column tiles sharing a row; GPU auto if omitted")
+    parser.add_argument("--gpu-row-cache", action=argparse.BooleanOptionalAction,
+                        default=None, help="keep the current cohort row on GPU; auto if omitted")
     parser.add_argument("--num-workers", type=int, default=1, help="parallel BOLD preparation workers")
     parser.add_argument("--cache-root", help="optional local directory for temporary voxel-major BOLD cache")
     parser.add_argument("--device", default="cuda:0", help="PyTorch device")
@@ -27,6 +32,7 @@ def main(argv=None):
                       phenotype=args.phenotype, covariates=tuple(args.covariate),
                       cdt=args.cdt, block_size=args.block_size,
                       subject_block_size=args.subject_block_size,
+                      column_tiles=args.column_tiles, gpu_row_cache=args.gpu_row_cache,
                       num_workers=args.num_workers,
                       cache_root=args.cache_root,
                       device=args.device, fwhm=args.fwhm,

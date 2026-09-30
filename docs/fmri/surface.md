@@ -85,9 +85,11 @@ print(result.dtseries)  # 91k CIFTI 时间序列
 | 同一对照的左 / 右皮层 MAE | 18.1565 / 19.7100 |
 | 同一对照的皮层下最大绝对差 | 0 |
 
-参照控制只替换注册球面，投影和组装仍使用同一 FNIT/Workbench 路径，定位的是皮层对应关系差异。完整候选与官方皮层时序尚不等价，也没有最终 UKB FIX 或独立完整 fMRIPrep 的逐值参照。两次 API 的总时间不含既有皮层重建，T1 来自匹配存档的重建输入；更早的结构处理未核对。单次共享 H100 计时不作为稳定加速比。
+参照控制只替换注册球面，投影和组装仍使用同一 FNIT/Workbench 路径，定位的是皮层对应关系差异。完整候选与官方皮层时序尚不等价，本页的球面对照不能替代官方 release 的整链对照。最新 [MS-HBM 下游验证](../../validation/mshbm/processed_release.md)已使用同扫描的 UKB MSMAll 发布 CIFTI，记录网络标签、时序与连接差异。两次 API 的总时间不含既有皮层重建，T1 来自匹配存档的重建输入；更早的结构处理未核对。单次共享 H100 计时不作为稳定加速比。
 
 下图展示标准 fsLR32k 球面上的时间相关及全皮层分布，不导出被试几何。详细计时范围、资源校验、输出合同、复测命令及独立阶段参照见[全流程 benchmark](../../validation/fmri/README.md)、[surface 运行报告](../../validation/fmri/fmri_surface.public.json)和[球面对照](../../validation/fmri/fmri_surface_comparison.public.json)。
+
+同一完整 BOLD 的官方 DeepPrep 25.1.0 fsaverage6 surface 实测为 1969.45 s，包含结构重建、BOLD 预处理与 QC。本页 905.71 s 从已完成的 volume 和既有皮层几何开始，输出为 fsLR32k / 91k；计时起点与空间不同。见[FNIT / DeepPrep 对照](../../validation/fmri/deepprep/README.md)。
 
 ![surface 球面对照](figures/fmri_surface_agreement.png)
 

@@ -408,7 +408,7 @@ def test_nature_plots_match_saved_test_predictions_and_train_only_ranking(tmp_pa
     assert continuous['test']['n'] == 2
     assert continuous['test']['rmse'] == pytest.approx(metrics['test']['score']['rmse'], rel=1e-5)
     classes = summary['targets']['group']['test']['roc_auc']
-    assert all(classes[label] is not None for label in ('A', 'B', 'C'))
+    assert all(classes['class_auc'][label] is not None for label in ('A', 'B', 'C'))
     assert 0 <= classes['macro_auc'] <= 1 and 0 <= classes['micro_auc'] <= 1
     assert 's000' not in json.dumps(summary)
     for stem in ('latent_weights', 'target-001_top-components', 'target-002_top-components',
@@ -445,9 +445,9 @@ def test_multiclass_roc_with_absent_test_class_keeps_micro_but_not_full_macro(tm
     probabilities = np.array([[.7, .2, .1], [.2, .7, .1]])
     result = _roc_figure(np.array([0, 1]), probabilities, ['A', 'B', 'C'],
                          'three groups', tmp_path / 'partial')
-    assert result['C'] is None and result['macro_auc'] is None
+    assert result['class_auc']['C'] is None and result['macro_auc'] is None
     assert result['micro_auc'] == pytest.approx(1.)
     result = _roc_figure(np.array([0]), probabilities[:1], ['A', 'B', 'C'],
                          'one observed group', tmp_path / 'single')
-    assert result['A'] is None and result['macro_auc'] is None
+    assert result['class_auc']['A'] is None and result['macro_auc'] is None
     assert result['micro_auc'] == pytest.approx(1.)

@@ -89,6 +89,7 @@ def _brain_figure(directory: Path, metadata: dict, indices: np.ndarray,
             subgrid = grid[row, column].subgridspec(1, 3, wspace=.025)
             image = images[modality, int(component)]
             data = np.asarray(image.dataobj)
+            voxel_sizes = nib.affines.voxel_sizes(image.affine)
             background = backgrounds[modality]
             peak = np.asarray(np.unravel_index(np.abs(data).argmax(), data.shape))
             location = nib.affines.apply_affine(image.affine, peak)
@@ -98,12 +99,15 @@ def _brain_figure(directory: Path, metadata: dict, indices: np.ndarray,
                 high = low + 1
             for orientation in range(3):
                 axis = figure.add_subplot(subgrid[0, orientation])
+                plane_axes = [dimension for dimension in range(3) if dimension != orientation]
+                aspect = voxel_sizes[plane_axes[1]] / voxel_sizes[plane_axes[0]]
                 layer = np.rot90(np.take(data, peak[orientation], axis=orientation))
                 gray = np.rot90(np.take(background, peak[orientation], axis=orientation))
                 axis.imshow(np.ma.masked_where(gray == 0, gray), cmap='gray',
-                            vmin=low, vmax=high, interpolation='nearest')
+                            vmin=low, vmax=high, interpolation='nearest', aspect=aspect)
                 shown = axis.imshow(np.ma.masked_where(layer == 0, layer), cmap=cmap,
-                                    vmin=-bound, vmax=bound, interpolation='nearest', alpha=.9)
+                                    vmin=-bound, vmax=bound, interpolation='nearest', alpha=.9,
+                                    aspect=aspect)
                 axis.set_axis_off()
                 axis.set_title(f'{"xyz"[orientation]}={location[orientation]:.0f} mm', fontsize=6, pad=2)
                 if orientation == 1:
@@ -124,35 +128,35 @@ def _roc_figure(observed: np.ndarray, probabilities: np.ndarray, classes: list[s
                 name: str, destination: Path) -> dict:
     import matplotlib.pyplot as plt
     figure, axis = plt.subplots(figsize=(3.54, 3.1))
-    curves, grid, interpolated = {}, np.linspace(0, 1, 201), []
+    class_auc, grid, interpolated = {}, np.linspace(0, 1, 201), []
+    result = {'class_auc': class_auc, 'macro_auc': None, 'micro_auc': None}
     for category in range(1 if len(classes) == 2 else 0, len(classes)):
         binary = observed == category
         if len(np.unique(binary)) < 2:
-            curves[classes[category]] = None
+            class_auc[classes[category]] = None
             continue
         false_positive, true_positive, _ = roc_curve(binary, probabilities[:, category])
         score = auc(false_positive, true_positive)
         axis.plot(false_positive, true_positive, color=COLORS[category % len(COLORS)], lw=1,
                   label=f'{classes[category]}  AUC={score:.3f}')
-        curves[classes[category]] = float(score)
+        class_auc[classes[category]] = float(score)
         interpolated.append(np.interp(grid, false_positive, true_positive))
     if len(classes) > 2:
         complete = len(interpolated) == len(classes)
-        curves['macro_auc'] = (float(np.mean(list(curves.values()))) if complete else None)
+        result['macro_auc'] = (float(np.mean(list(class_auc.values()))) if complete else None)
         if complete:
             mean_curve = np.mean(interpolated, axis=0)
             axis.plot(grid, mean_curve, color='black', lw=1.2,
-                      label=f'Macro AUC={curves["macro_auc"]:.3f}')
+                      label=f'Macro AUC={result["macro_auc"]:.3f}')
         elif len(observed):
             axis.text(.04, .96, 'Macro AUC undefined: a test class is absent',
                       transform=axis.transAxes, va='top', fontsize=6)
-        curves['micro_auc'] = None
         if len(observed):
             encoded = np.eye(len(classes))[observed.astype(int)]
             fpr, tpr, _ = roc_curve(encoded.ravel(), probabilities.ravel())
             axis.plot(fpr, tpr, color='#777777', ls='--', lw=.9,
                       label=f'Micro AUC={auc(fpr, tpr):.3f}')
-            curves['micro_auc'] = float(auc(fpr, tpr))
+            result['micro_auc'] = float(auc(fpr, tpr))
     axis.plot([0, 1], [0, 1], color='#777777', lw=.7, ls=':')
     axis.set(xlim=(0, 1), ylim=(0, 1.02), xlabel='False positive rate', ylabel='True positive rate')
     axis.set_title(f'{name} · test n={len(observed)}', fontsize=7)
@@ -164,7 +168,7 @@ def _roc_figure(observed: np.ndarray, probabilities: np.ndarray, classes: list[s
     _axis_style(axis)
     figure.tight_layout()
     _save(figure, destination)
-    return curves
+    return result
 
 
 def plot_superbigflica(model_dir: str | Path, output_dir: str | Path | None = None, *,

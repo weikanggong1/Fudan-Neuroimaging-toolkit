@@ -20,8 +20,11 @@ class SpatialRegression:
         self.se_multiplier = torch.sqrt(torch.diagonal(
             torch.linalg.pinv(self.design.T @ self.design))[:-1, None])
 
-    def t(self, projected: np.ndarray) -> np.ndarray:
-        y = torch.as_tensor(projected.T.copy(), device=self.backend, dtype=torch.float64)
+    def t(self, projected: np.ndarray | torch.Tensor) -> np.ndarray:
+        if isinstance(projected, torch.Tensor):
+            y = projected.T.to(device=self.backend, dtype=torch.float64).contiguous()
+        else:
+            y = torch.as_tensor(projected.T.copy(), device=self.backend, dtype=torch.float64)
         coefficients = self.inverse @ y
         residual = y - self.design @ coefficients
         sigma = torch.sqrt(residual.square().sum(dim=0) / self.df)
@@ -77,6 +80,6 @@ def t_to_z_gpu(t_values: np.ndarray, df: int,
     direct = factor * _beta_fraction(a, b, x) / a
     complement = 1 - factor * _beta_fraction(b, a, 1 - x) / b
     p_two_sided = torch.where(x < (a + 1) / (a + b + 2), direct, complement)
-    p_two_sided = p_two_sided.clamp(1e-300, 1)
+    p_two_sided = p_two_sided.clamp(np.finfo(np.float64).tiny, 1)
     z = -torch.sign(t) * torch.special.ndtri(p_two_sided / 2)
     return z.float().cpu().numpy()

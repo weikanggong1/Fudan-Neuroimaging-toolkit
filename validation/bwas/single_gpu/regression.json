@@ -1,0 +1,37 @@
+{
+  "baseline_commit": "fbdd131",
+  "full_suite": {
+    "passed": 1017,
+    "skipped": 76,
+    "failed": 1,
+    "elapsed_seconds": 71.15,
+    "failure": "tests/test_public_api.py::test_public_feature_sources_do_not_import_banned_packages",
+    "existing_failure_paths": [
+      "src/fnit/gems/native_samseg/subregions/process.py",
+      "src/fnit/gems/native_samseg/subregions/hippocampus.py",
+      "src/fnit/gems/native_samseg/subregions/utils.py",
+      "src/fnit/gems/native_samseg/subregions/thalamus.py",
+      "src/fnit/gems/native_samseg/subregions/core.py"
+    ],
+    "existing_failure_reason": "These unchanged GEMS files import surfa; the original source dependency check fails.",
+    "original_policy_test_preserved": true,
+    "command": "python -m pytest tests --import-mode=importlib -q",
+    "environment": "project Conda runtime with declared PyVista/VTK dependencies and built existing FastPD extension"
+  },
+  "bwas_single_gpu_suite": {
+    "passed": 6,
+    "failed": 0,
+    "elapsed_seconds": 9.96,
+    "scope": "final public column_tiles/gpu_row_cache controls, automatic tuning, canonical 16-subject GLM, pinned streams, row reuse, block/subject-block CDT/cluster/MA parity",
+    "command": "CUDA_VISIBLE_DEVICES=1 python -m pytest tests/test_bwas.py -q"
+  },
+  "upstream_main_commit": "cb1748d",
+  "tested_snapshot_commit": "3753148",
+  "production_source_sha256": {
+    "src/fnit/bwas/core.py": "b059dbfe84dd916beb1e19fbe81c081daaac7efbd2ddc611c178488dfb45a6b2",
+    "src/fnit/bwas/cli.py": "c567d5cb6fa28b2de118b204bef505941eef87fded5bd775adff224c639d82e6",
+    "src/fnit/bwas/cache.py": "7132eb3cefc38ec818692b61c07567b89db69c093ea1a639f7addcee785349f0",
+    "src/fnit/bwas/packed_loader.py": "54b63c9a5e67fdb17e827e15f7ba3b2602558044be7bf6e33a2b72fe77414352",
+    "src/fnit/bwas/cluster_union.py": "75c3b4a566a907298b99520e148dd893206c0d2f97734db491a9f997153af90f"
+  }
+}
