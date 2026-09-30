@@ -2,7 +2,7 @@
 
 [返回主页](../../README.md) · [验证代码](../../validation/bwas/benchmark_abide.py)
 
-`run_bwas` 接收已经完成预处理、位于 MNI152NLin6Asym 2 mm 空间的多被试 BOLD。它逐人计算体素对的时间相关并作 Fisher z 变换，再对每条连接拟合“表型 + 协变量 + 截距”的线性模型。高于连接定义阈值（CDT）的连接按两端体素的空间邻接关系聚簇，使用原版 BWAS 的六维高斯随机场公式计算簇水平 FWER p 值。运行时只使用 PyTorch、NumPy、SciPy 和 Nibabel；不调用原版 BWAS 或 FSL。
+`run_bwas` 接收已经完成预处理、位于 MNI152NLin6Asym 2 mm 空间的多被试 BOLD。它逐人计算体素对的时间相关并作 Fisher z 变换，再对每条连接拟合“表型 + 协变量 + 截距”的线性模型。高于连接定义阈值（CDT）的连接按两端体素的空间邻接关系聚簇，使用原版 BWAS 的六维高斯随机场公式计算簇水平 FWER p 值。运行时使用 PyTorch、NumPy、SciPy、Nibabel 和 Numba；Numba 用于精确连接聚类，已包含在主页 Conda 环境中。不调用原版 BWAS 或 FSL。
 
 ## 流程策略
 
@@ -89,8 +89,10 @@ result = run_bwas(
     phenotype="case",  # 表型列；0/1 病例对照或连续数值
     covariates=("age", "sex", *site_columns),  # 数值协变量列，自动加截距
     cdt=5.0,  # 双侧 |z| 连接定义阈值；原版建议正式分析不低于 5
-    block_size=5120,  # 每维体素分块宽度；此示例已在 H100 上验证
-    subject_block_size=16,  # 每次送入 GPU 的被试数，限制显存
+    block_size=4096,  # 本次全脑 benchmark 的最优已验证块宽
+    subject_block_size=16,  # 缓存、传输和相关批次；GLM 保持 16 人归约
+    column_tiles=2,  # 相邻两个 column tiles 共用 row 数据
+    gpu_row_cache=True,  # 全部被试的当前 row 留在 GPU，后续列块复用
     num_workers=8,  # 并发读取、平滑度估计与时间序列标准化的被试数；占用更多主机内存
     cache_root=Path("/data/local-scratch"),  # 可选：本地临时盘；需容纳全部被试的标准化 BOLD
     device="cuda:0",  # PyTorch 设备；无 CUDA 时可用 "cpu"
@@ -109,15 +111,17 @@ print(result.edges, result.clusters, result.ma_map)
 | `phenotype` | 欲检验的单个数值列名；系数对应模型第一列。 |
 | `covariates` | 数值协变量列名元组；函数自动追加截距。多类别 site 需先转换为哑变量。 |
 | `cdt` | 对双侧 z 值取绝对值的连接阈值，默认 `5.0`；原版建议正式全脑分析不低于 `5`。 |
-| `block_size` | 每个体素轴的块宽，默认 `128` 仅适合小掩膜验证；全脑需显式设置较大块宽，示例 `5120` 适用于已验证的 H100 配置，其他 GPU 按可用显存调整。 |
-| `subject_block_size` | 每个 GPU 批次的被试数，默认 `16`。 |
+| `block_size` | 每个体素轴的块宽。默认 `None`：CUDA 上以真实缓存测量候选块的吞吐和显存，选择最快的安全配置；CPU 上使用 `128`。显式整数固定块宽。 |
+| `subject_block_size` | 每个缓存、H2D 和相关批次的被试数。默认 `None`：CUDA 上比较 8、16、32 人批次的实测耗时；CPU 上使用 `16`。小数据集的候选批次不超过实际人数。CUDA GLM 独立保持原来的 16 人累加顺序，避免传输批次变化影响靠近 CDT 的边。 |
+| `column_tiles` | 同时累积的列块数，可选 `1` 或 `2`；默认 `None` 由 GPU pilot 选择。两个列块共用 row，但各有独立 GLM 充分统计量。 |
+| `gpu_row_cache` | 默认 `None`，由实测吞吐和显存决定是否将全部被试的当前 row 常驻 GPU。`True` 固定开启，`False` 固定关闭。显式开启仍受 `17 GB` allocator 上限约束。 |
 | `num_workers` | 读取、平滑度估计和标准化 BOLD 的并发 worker 数，默认 `1`；增大可缩短准备时间，但会增加主机内存和磁盘负载。 |
-| `cache_root` | 可选临时缓存目录，默认使用 `output_root`；本地高速盘可加快反复读取体素块，需有约 `4 × 总帧数 × 掩膜体素数` 字节可用空间，运行结束自动清理。 |
+| `cache_root` | 可选临时缓存目录，默认使用 `output_root`。CUDA 路径先生成标准化逐人缓存，再合并为 voxel-major 分片，需同时容纳两种布局；分片内不同扫描长度用零补齐。运行结束自动清理临时缓存。建议使用本地高速盘。 |
 | `device` | 默认 `cuda:0`。 |
 | `fwhm` | 三轴共用的空间平滑度，单位为体素；默认从所有 BOLD 估计并至少取 `2`。 |
 | `validate_direct_ols` | 默认关闭。开启后，对每个无序体素对比较被试分块与一次性直接回归的 z 值，并记录平均/最大误差及 CDT 判定分歧；额外主机内存上限约为 `8 × 被试数 × block_size²` 字节。 |
 
-体素块和被试块共同限制显存。每块仅存当前被试组的 Fisher 连接和回归充分统计量 `QᵀY`、`YᵀY`；其中 `Q` 来自对表型和协变量的 QR 正交化，避免站点哑变量造成的病态矩阵逆。标准化时间序列按“体素×时间”连续存放在临时缓存目录，运行结束自动清理。连接和群体回归均用普通 float32；本功能关闭 TF32，BOLD 缓存与 MA NIfTI 也为 float32，不使用 float16。CUDA 输入批次使用页锁定内存传输。
+体素块和被试块共同限制显存。每块仅存当前被试组的 Fisher 连接和回归充分统计量 `QᵀY`、`YᵀY`；其中 `Q` 来自对表型和协变量的 QR 正交化，避免站点哑变量造成的病态矩阵逆。连接和群体回归保持现有普通 float32；本功能关闭 TF32，不使用 float16。没有减少体素、连接或被试，也没有低秩近似。
 超过 512 人时，Linux 版本会把当前进程的文件描述符软上限提高到 `被试数+128`；若系统硬上限仍不足，会在计算前报错并说明所需数量。
 
 单站点的命令行调用：
@@ -128,7 +132,8 @@ fnit-bwas --bids-root /data/derivatives/fnit-volume \
   --mask /data/MNI152_2mm_graymatter_mask.nii.gz \
   --output-root /data/derivatives/fnit-bwas \
   --phenotype case --covariate age --covariate sex \
-  --cdt 5 --block-size 5120 --subject-block-size 16 --num-workers 8 \
+  --cdt 5 --block-size 4096 --subject-block-size 16 \
+  --column-tiles 2 --gpu-row-cache --num-workers 8 \
   --cache-root /data/local-scratch --device cuda:0
 ```
 
@@ -143,6 +148,57 @@ python BWAS_main.py -toolbox_dir /path/to/BWAS \
 ```
 
 原版按影像文件名排序读取 `target`/`covariates` 行；使用它作对照时必须先按相同排序生成 `.npy`。FNIT 的 TSV 通过 `participant_id` 显式关联。为了复现原版统计输出，FNIT 同样先以 `n-p` 估计 t 值，再以原版代码中的 `n-p-1` 自由度转成 z 值；这是与通常单一残差自由度写法不同的原版数值约定。
+
+## 单 GPU 数据流与 profiling
+
+CUDA 计算只使用 `device` 指定的一张卡。PyTorch allocator 上限设为十进制 `17 GB`，为 CUDA context 等开销留出空间。自动调优以实际吞吐选择块宽和同时处理的列块数，包含最长扫描所在的被试组；候选无法放入 allocator 时予以排除。调优和正式计算的 allocated/reserved 峰值都记录到 JSON。显式设置过大的块会报显存不足，应缩小块宽或被试批次。
+
+```mermaid
+flowchart TD
+    BOLD["按 TSV 行顺序标准化全部 BOLD"] --> RAW["逐人 voxel × time 缓存"]
+    RAW --> SBS["实测选择 subject block"]
+    SBS --> PACK["packed 分片：voxel × subject-in-block × time"]
+    PACK --> TUNE["实测 block 吞吐、列块复用和显存"]
+    TUNE --> ROW["按实测吞吐和显存，选择 GPU 常驻当前 row"]
+    ROW --> HOST["复用两组 pinned host buffers，准备本策略所需数据"]
+    HOST --> COPY["copy stream：H2D 下一组"]
+    COPY --> GPU["compute stream：当前组相关 → Fisher z"]
+    GPU --> GLM["原位累计 QᵀY 与 YᵀY，释放当前 Fisher 张量"]
+    GLM --> NEXT["保留充分统计量，继续全部被试"]
+    NEXT --> HOST
+    NEXT --> T["全部被试完成：计算当前 tile 的 t"]
+    T --> THRESH["GPU |t| > t_CDT；对角块只留上三角"]
+    THRESH --> CPU["仅越阈值边坐标与统计量传回 CPU"]
+    CPU --> CLUSTER["整数连接键 + union-find；保持原 6D 邻接"]
+    CLUSTER --> OUT["原簇推断、连接 TSV 与 MA 图"]
+```
+
+分片保留 TSV 中的被试顺序和各人的真实扫描长度。补齐的零不进入相关系数的分母。Fisher 的截断约定、QR 设计矩阵、残差自由度、CDT、簇邻接和六维随机场公式沿用原实现。GPU threshold 用与原 t→z 变换等价的 t 阈值，仍由 SciPy 将选中的 t 转为原输出 z。
+
+同一 row block 可以在一个被试组内供相邻的两个 column blocks 使用，读入和 H2D 一次后计算两个 tile。显存允许且实测吞吐更好时，调参器还可将全部被试的当前 row 留在 GPU，供后续所有 column blocks 复用。每个 tile 的 `QᵀY`、`YᵀY` 独立累积；CUDA 路径把任意传输批次分割或拼接为按原行顺序排列的 16 人 GLM 块，末块使用余下人数。这样保持原 GLM 的浮点归约顺序，不增加容差或修改 CDT。两套 host/GPU buffers 用 CUDA events 保护生命周期，避免下一批覆盖正在使用的数据。聚类以整数 `voxel1 × nvox + voxel2` 查找连接，并使用原版端点间 18 邻域及自身的组合；未增加角点邻接。
+
+输出 JSON 额外记录：
+
+| 字段 | 含义 |
+|---|---|
+| `VoxelBlockSize`、`SubjectBlockSize`、`ColumnTilesPerRowBatch` | 正式计算最终使用的块参数。 |
+| `GLMSubjectBlockSize` | GLM 的实际归约人数；正式 CUDA 路径固定 `16`，独立于缓存及传输批次。 |
+| `GPUResidentRowBlock` | 是否将全部被试的当前 row 保留在 GPU。 |
+| `BlockTuning` | 预热后的两次实测 pilot 耗时及峰值显存；第二次反转候选顺序。voxel pilot 同时记录完整 row 加载耗时、按被试数估计的完整 tile 耗时和吞吐，用于选择参数。 |
+| `StageSeconds.cache_read` | 主机从 packed memory maps 复制到 pinned buffers 的 wall time，包含可能发生的文件读取。 |
+| `StageSeconds.h2d` | CUDA events 测量的传输时间。 |
+| `StageSeconds.correlation` | CUDA events 测量的相关计算与原截断操作时间。 |
+| `StageSeconds.fisher_glm` | Fisher 变换及充分统计量累积的 CUDA events 时间。 |
+| `StageSeconds.threshold` | 计算 tile 的 t、筛选和选中边传回 CPU、转成 z 的 wall time。 |
+| `StageSeconds.clustering` | 完整 6D 聚类及簇统计表计算时间，含首次 Numba 编译。 |
+| `PackedCacheBuildSeconds` | 标准化逐人缓存合并成分片的额外准备时间。 |
+| `ElapsedSeconds` | 整个函数的 wall time，包含 BIDS 检查、缓存准备、调优、计算、聚类和输出。 |
+| `PeakCUDAAllocatedBytes`、`PeakCUDAReservedBytes` | 当前进程 PyTorch 峰值；GB 按 `10⁹` 字节换算。 |
+| `RuntimeVersions` | NumPy、SciPy、PyTorch 与 CUDA 版本，供同环境数值对照。 |
+
+CPU 准备、H2D 和 GPU 计算可重叠，因此各阶段耗时**不能相加当作总耗时**。CUDA context 和其他用户进程不计入 PyTorch allocator 数值；独立 benchmark 另检查本进程的驱动侧显存。CPU 路径及直接 OLS 验证路径保持原逐人布局；上述细分 GPU 时间针对正式 packed CUDA 路径。
+
+将 `block_size`、`subject_block_size`、`column_tiles`、`gpu_row_cache` 均设为 `None`，可重新测量本机的安全配置；CLI 中省略相应四个参数即可。pilot 预热后测量两次，并反转第二次候选顺序。调参不会减少正式分析的被试、体素或连接。
 
 ## 绘制灰质体素连接
 
@@ -240,6 +296,78 @@ print(figure_path)
 | 1748 人、112,215 体素全对全 | 未运行原版全对全对照 | `3828.74 s`；CUDA 峰值已分配 `11.66 GB` | `run_bwas` 含连接、回归、聚类、结果写出；不含 BIDS 读取及缓存准备。 |
 
 全对全 FNIT 运行计算了 `6,296,047,005` 条无序体素对，得到 `1,235,519` 条越过 CDT 5 的连接、`5,133` 个连接簇；MA 图有 `31,359` 个非零体素。见[全量汇总](../../validation/bwas/abide_full_summary.json)和[输出文件验收](../../validation/bwas/abide_full_artifact_check.json)。原版 CPU 逐值比较覆盖两枚 seed 到全灰质，未覆盖全部 62.96 亿条连接；上述耗时的计时范围不同，不应直接计算端到端加速比。实验不上传个体影像、表型行或连接矩阵。
+
+### 当前推荐的单 GPU 策略
+
+目前完整全脑实验中耗时最低的配置为 **4096 体素块、16 人 I/O 批次、两个 column tiles、GPU row 常驻**。正式实现使用 packed voxel-major 缓存、持久 pinned/GPU buffers、copy stream、流式 Fisher/GLM、GPU threshold 和整数键聚类。保持普通 float32、`TF32=False` 和原统计定义。
+
+[完整结果](../../validation/bwas/single_gpu/full-row-v4.json)与[独立驱动显存记录](../../validation/bwas/single_gpu/full-row-driver-memory.json)覆盖全部 `6,296,047,005` 条无序体素对：
+
+| 完整全脑计算 | 原 FNIT 记录 | 最优已验证配置 |
+|---|---:|---:|
+| 时间，含连接、GLM、聚类和写出 | 3828.74 s | **2452.32 s** |
+| PyTorch 峰值 allocated / reserved | 11.66 GB / 未记录 | 15.11 / 15.12 GB |
+| 本进程驱动侧显存峰值 | 未记录 | **17.09 GB** |
+| CDT 5 连接数 | 1,235,519 | 1,235,519；端点坐标与判定一致 |
+| z 平均 / 最大绝对差 | 参考 | `4.39×10⁻⁹` / `3.99×10⁻⁶` |
+| 簇分区、大小、p 值与端点数量 | 参考 | 完全一致 |
+| MA 图值与 affine | 参考 | 逐值一致 |
+
+这是共享 H100 PCIe 上的实际观测，耗时比原记录减少约 `36%`，落在 `1500–2500 s` 目标内。它使用已标准化并已合并的缓存；首次生成 `packed-b16` 另需约 `835.65 s`、`165.45 GB`，不能省略首次准备成本。不同 voxel block 沿用原 tile 遍历和簇编号规则，文件行顺序及同大小簇的编号可能改变；统计对照按端点坐标和簇分区匹配。
+
+自动入口也已通过[完整全脑验收](../../validation/bwas/single_gpu/automatic-canonical.json)：本次选择 4096/32、单列、row 常驻，GLM 仍为 16 人。包含调参的时间为 `2607.34 s`，allocated/reserved 为 `16.96/16.99 GB`，[驱动显存峰值](../../validation/bwas/single_gpu/automatic-canonical-driver.json)为 `18.94 GB`，CDT、簇统计和 MA 一致。该次未达到 2500 s；共享服务器上这些单次结果不能证明某个被试批次在所有负载下都更快。
+
+### 瓶颈与数值保护
+
+初始真实 `5120 × 5120` tile、全部 1748 人的 profile 为 `29.52 s`：缓存准备 `15.48 s`、pin memory `0.99 s`、H2D `0.63 s`、相关 `4.96 s`、Fisher/GLM `5.87 s`。因此优化重点是数据准备、复用和充分统计量。最优完整运行的阶段时间如下；传输与计算可重叠，**不能将各行相加**。
+
+| 阶段 | 最优完整运行 |
+|---|---:|
+| cache/read | 762.15 s |
+| H2D | 48.16 s |
+| correlation | 1136.42 s |
+| Fisher/GLM | 778.56 s |
+| threshold | 11.38 s |
+| clustering | 14.80 s |
+
+对同一完整越阈值边集合，旧聚类约 `197.53 s`，整数键 union-find 约 `14.56 s`，簇标签逐值一致。原 6D 邻接保留端点 18 邻域及自身的组合，排除 3D 角点。
+
+传输批次与 GLM 归约批次必须分开。此前直接按 32 人归约会改变 8 条临界边；正式 CUDA 路径按原顺序组装 16 人 GLM 块，末块处理剩余被试。[真实 8 个完整 tile 的诊断](../../validation/bwas/single_gpu/canonical-glm-tiles.json)使用全部 1748 人，对 8/16/32 人 I/O 批次得到相同 CDT 边，全部 `67,062` 个选中 z 值逐值一致；自动入口的完整全脑验收确认修复有效。
+
+已完成的串行消融也说明不能只改块大小：[本轮基线](../../validation/bwas/single_gpu/ablation-baseline.json)为 `4472.99 s`，[流式 Fisher/GLM](../../validation/bwas/single_gpu/ablation-streaming-glm.json)为 `4106.24 s`；[4096/32 用于原缓存](../../validation/bwas/single_gpu/ablation-block-tuning.json)反而为 `5376.88 s`，主要增加主机数组准备开销。该原缓存策略没有被采用为正式优化路径。剩余消融按用户要求停止，未发布未完成阶段的结果。
+
+### 复核完整结果
+
+[`benchmark_optimized_full.py`](../../validation/bwas/benchmark_optimized_full.py)运行全部无序体素对，读取固定参考结果的相同表型、协变量、CDT 和 FWHM，比较 CDT 边、z、簇分区、簇大小、p 值、端点数量及 MA 图；[`monitor_gpu_process.py`](../../validation/bwas/monitor_gpu_process.py)另检查本进程驱动显存，达到十进制 `20 GB` 或观测到超过一张 GPU时停止验证。正式入口设置 `17 GB` allocator 上限，独立监测为 benchmark 验收证据。
+
+```bash
+repository_root=/path/to/Fudan-Neuroimaging-toolkit  # 本仓库根目录
+bids_root=/data/derivatives/fnit-volume  # 全部真实被试的 BIDS Derivatives BOLD
+participants_tsv=/data/participants.tsv  # 固定行顺序及表型、协变量
+analysis_mask=/data/graymatter_mask.nii.gz  # 固定的全脑分析掩膜
+normalized_cache=/data/local-scratch/bwas-normalized  # 同 TSV 顺序的 subject-N.npy，voxel × time
+packed_cache=/data/local-scratch/bwas-packed16  # 同输入的 voxel-major 分片
+reference_root=/data/benchmark/bwas-reference  # 原 FNIT 的完整输出目录
+candidate_root=/data/benchmark/bwas-optimized  # 新建私有结果目录
+subject_count=1748  # 本例 TSV 中的真实被试数
+summary_json=/data/benchmark/bwas-summary.json  # 对外仅分享核查后的汇总指标
+memory_json=/data/benchmark/bwas-memory.json  # 本进程驱动显存汇总
+
+PYTHONPATH="$repository_root/src" python "$repository_root/validation/bwas/pack_cache.py" \
+  --source-dir "$normalized_cache" --packed-dir "$packed_cache" \
+  --subjects "$subject_count" --subject-block-size 16
+CUDA_VISIBLE_DEVICES=0 PYTHONPATH="$repository_root/src" python \
+  "$repository_root/validation/bwas/monitor_gpu_process.py" --output-json "$memory_json" -- \
+  python "$repository_root/validation/bwas/benchmark_optimized_full.py" \
+  --bids-root "$bids_root" --participants "$participants_tsv" --mask "$analysis_mask" \
+  --cache-dir "$normalized_cache" --packed-cache-dir "$packed_cache" \
+  --baseline-root "$reference_root" --output-root "$candidate_root" --summary "$summary_json" \
+  --block-size 4096 --subject-block-size 16 --column-tiles 2 --gpu-row-cache
+```
+
+正式数值验收统一使用 NumPy `1.26.4`、SciPy `1.17.1`、PyTorch `2.5.1`、CUDA `11.8`；尤其保持参考与候选的 SciPy 相同，保留原 `t.cdf → norm.ppf`。结果目录含被试标识和连接表，应放在私有存储；仓库仅保存汇总 JSON。
+
+[回归检查记录](../../validation/bwas/single_gpu/regression.json)：最终 BWAS 单 GPU 测试 `6 passed`；合入最新 main 并补齐其声明依赖后，全仓库 `1017 passed / 76 skipped / 1 failed`。唯一失败是原有 GEMS 的 `surfa` 导入静态检查；该代码和检查与基线相同。全仓库测试尚未全部通过。
 
 ## 来源
 
