@@ -169,6 +169,44 @@ def _run_accurate_sphere_pair(inflate_binary: Path, subject: Path,
              "sphere": sphere_report["total_seconds_including_io"]}, sphere_report)
 
 
+def _run_surface_metrics(binary: Path, subject: Path, hemi: str,
+                         assets: Path, *, device: str) -> dict[str, float]:
+    """从对应的 white/pial 计算厚度、双侧面积和平均曲率顶点图。
+
+    subject 为被试目录，hemi 为 lh/rh；输入表面为 surface RAS（mm），
+    顶点与有序面须对应。CUDA 使用已有 PyTorch 函数，CPU 使用 binary
+    指定的 Conda mris_place_surface；assets 是原生程序的 FNIT 资产目录。
+    写出 H.thickness（mm）、H.area/H.area.pial（mm²）、
+    H.curv/H.curv.pial（mm⁻¹），返回包含读写与 GPU 同步的逐图秒数。
+    参数固定为 20 跳、5 mm 最大厚度、2 阶邻域及 10 次曲率平滑，
+    对应官方 --thickness/--area-map/--curv-map；失败抛异常。
+    同输入精度、速度及完整示例见 docs/recon_all/SURFACE_METRICS.md。
+    """
+    surf = subject / "surf"
+    white, pial = surf / f"{hemi}.white", surf / f"{hemi}.pial"
+    if torch.device(device).type == "cuda":
+        from .surface_area_gpu import area_map
+        from .surface_curvature_gpu import curvature_map
+        from .surface_thickness_gpu import thickness_map
+
+        timings = {}
+        for name, function, kwargs in (
+            ("thickness", thickness_map, {"white_file": white, "pial_file": pial,
+                                         "output_file": surf / f"{hemi}.thickness"}),
+            ("area", area_map, {"surface": white, "output": surf / f"{hemi}.area"}),
+            ("area.pial", area_map, {"surface": pial, "output": surf / f"{hemi}.area.pial"}),
+            ("curv", curvature_map, {"surface": white, "output": surf / f"{hemi}.curv"}),
+            ("curv.pial", curvature_map, {"surface": pial, "output": surf / f"{hemi}.curv.pial"}),
+        ):
+            torch.cuda.synchronize(device)
+            tick = time.perf_counter()
+            function(**kwargs, device=device)
+            torch.cuda.synchronize(device)
+            timings[name] = time.perf_counter() - tick
+        return timings
+    return _run_native_surface_metrics(binary, subject, hemi, assets)
+
+
 def _run_native_surface_metrics(binary: Path, subject: Path, hemi: str,
                                 assets: Path) -> dict[str, float]:
     surf = subject / "surf"
@@ -396,14 +434,14 @@ def _finish_cortical_surface(subject: Path, hemi: str, binary: Path,
     white_report = run_final_white(subject, hemi, binary, assets, threads=threads)
     pial_report = _run_native_pial(binary, subject, hemi, assets, threads)
     shutil.copyfile(surf / f"{hemi}.pial.T1", surf / f"{hemi}.pial")
-    metric_seconds = _run_native_surface_metrics(binary, subject, hemi, assets)
+    metric_seconds = _run_surface_metrics(binary, subject, hemi, assets, device=device)
     mid_area_map(surf / f"{hemi}.area", surf / f"{hemi}.area.pial",
                  surf / f"{hemi}.area.mid", device=device)
     vertex_volume_map(surf / f"{hemi}.white", surf / f"{hemi}.pial",
                       labels / f"{hemi}.cortex.label",
                       surf / f"{hemi}.volume", device=device)
     return {"final_white_report": white_report, "pial_report": pial_report,
-            "native_metric_seconds": metric_seconds,
+            "metric_seconds": metric_seconds,
             "mean_thickness_mm": float(np.mean(fs.read_morph_data(
                 str(surf / f"{hemi}.thickness")))),
             "placement_pending": False}
@@ -514,11 +552,15 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          weights_dir: str | Path, assets_dir: str | Path,
                          *, device: str = "cuda:0", threads: int = 4,
                          native_bin_dir: str | Path | None = None) -> dict:
-    """Reconstruct one T1 into FreeSurfer-style mri/surf/label/stats folders.
+    """从单幅原始 T1 连续生成 conform 体积、双侧表面和脑区统计。
 
-    Return the same run-report dict written to fnit-native-free-run.json:
-    stage timings, per-hemisphere surfaces, implementation provenance and
-    success/failure status. The subject directory must be empty on entry.
+    t1、subject_dir、weights_dir、assets_dir 是输入影像、空输出目录、
+    已校验权重和资产的路径；native_bin_dir=None 时使用当前 Conda bin。
+    device 默认 cuda:0，threads 默认 4；不自动使用 FP16/BF16。
+    成功返回与 fnit-native-free-run.json 相同的字典，含输出路径、耗时、
+    网格检查及程序来源。失败抛异常，已开始的阶段另保存失败报告。
+    体积为 1 mm conform 网格，表面使用 surface RAS（mm）；完整参数、
+    输出结构、限制、官方命令和真实数据见 docs/recon_all/README.md。
     """
     from fnit.synthseg_parc import SynthSeg
     from .brain_volume_stats_python import compute_brain_volume_stats
@@ -602,7 +644,9 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         "final_smoothwm": "Python 3 passes on CPU",
         "final_white_pial": "Conda source-built C++ white and pial after annotation"}
     report["surface_metrics"] = {
-        "implementation": "native-c++", "binary": str(metrics_binary[0]),
+        "implementation": ("PyTorch CUDA" if torch.device(device).type == "cuda"
+                           else "Conda source-built C++"),
+        "binary": str(metrics_binary[0]),
         "sha256": metrics_binary[1], "upstream": "placed final white/pial"}
     report["sphere_generation"] = {
         "implementation": "Conda mris_inflate + Python quick/standard sphere",
@@ -628,17 +672,17 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
             torch.cuda.synchronize(device)
         tick = time.perf_counter()
         if gpu and torch.cuda.is_initialized() and not cuda_memory_cache_disabled:
-            torch.cuda.reset_peak_memory_stats()
+            torch.cuda.reset_peak_memory_stats(device)
         try:
             value = function(*args, **kwargs)
         except Exception as error:
             if gpu and torch.cuda.is_initialized() and not cuda_memory_cache_disabled:
                 report["gpu_peak_allocated_bytes"] = max(
                     report.get("gpu_peak_allocated_bytes", 0),
-                    torch.cuda.max_memory_allocated())
+                    torch.cuda.max_memory_allocated(device))
                 report["gpu_peak_reserved_bytes"] = max(
                     report.get("gpu_peak_reserved_bytes", 0),
-                    torch.cuda.max_memory_reserved())
+                    torch.cuda.max_memory_reserved(device))
             report.update(status="failed", failed_stage=name, error=repr(error),
                           total_seconds=time.perf_counter() - started)
             (subject / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
@@ -651,8 +695,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
             for key in ("gpu_peak_allocated_bytes", "gpu_peak_reserved_bytes"):
                 report[key] = max(report.get(key, 0), value["talairach_child_gpu"][key])
         if gpu and torch.cuda.is_initialized() and not cuda_memory_cache_disabled:
-            row["gpu_peak_allocated_bytes"] = torch.cuda.max_memory_allocated()
-            row["gpu_peak_reserved_bytes"] = torch.cuda.max_memory_reserved()
+            row["gpu_peak_allocated_bytes"] = torch.cuda.max_memory_allocated(device)
+            row["gpu_peak_reserved_bytes"] = torch.cuda.max_memory_reserved(device)
             for key in ("gpu_peak_allocated_bytes", "gpu_peak_reserved_bytes"):
                 report[key] = max(report.get(key, 0), row[key])
         report["stages"].append(row)

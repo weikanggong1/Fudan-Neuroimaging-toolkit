@@ -15,6 +15,8 @@ MNI 链继续以 CPU 为生产默认。两例全输出的 SHA-256 原样保留�
 
 标准球面梯度平滑用当前真实 `sub-02` 网格做了线程实验：1024 轮、119,363 顶点的输出 SHA-256 在 4–128 线程间相同，时间随线程数上升从 3.20 s 降至 0.51 s。[微核记录](sub02/sphere_average_threads_head.json)。因此没有为了这个核降低 Numba 线程数；完整球面与球面配准仍是主要 CPU 热点，微核计时不能替代整例时间。
 
+另用 `sub-01` 的同一 `lh.aparc` 输入对 GCSA 标注做了四线程 CPU/CUDA 配对：CPU [27.23 秒](sub01/annot_lh_aparc_cpu_threads4_report.json)、CUDA [28.53 秒](sub01/annot_lh_aparc_gpu_threads4_report.json)，输出 annotation SHA-256 相同。两者差距仅 1.30 秒，保留现有 CUDA 调度；完整整例中的单次标注耗时还受共享负载影响。[CUDA 进程采样](sub01/annot_lh_aparc_gpu_threads4_summary.txt)峰值为 2,006,974,464 字节。
+
 ## 复现入口
 
 三个脚本均在仓库根目录、已安装主页 Conda 环境和有权访问真实输入的机器上执行；每次输出请指定不存在的路径。`benchmark_mni_nonlinear.py` 的 `--source-subject` 为已生成 `orig.mgz`、裁剪 T1 和 `aff.lta` 的 FNIT 被试目录，`--output-subject` 是新的隔离诊断目录。`--weights`、`--assets` 已按固定清单校验，`--native-bin` 为当前 Conda `bin`；`--device` 选 CPU 或 CUDA，`--threads` 为 PyTorch 线程数。它写出前向/逆向/check 及含阶段、输入、程序 SHA-256 的 JSON；输入缺失或程序失败时抛出异常。
