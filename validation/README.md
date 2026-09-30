@@ -50,6 +50,7 @@
 | 功能 | 当前真实数据报告 | 输出一致性结论 | 时间、显存与示意图 |
 |---|---|---|---|
 | [BigFLICA](../docs/bigflica/README.md) | [真实 UKB 同输入与 2,050 人完整掩膜三模态测试](bigflica/README.md) | CPU/GPU 公开 API 均跑通 C3，但独立成分图与课程显著不同；固定相同 mMIGP 投影后两端九张图相关均 >0.999999998；C20 分别仅保留 CPU 16/20、GPU 11/20 个有效成分 | 共享节点冷启动观察为 CPU 732.75 秒、GPU 1045.08 秒，瓶颈在 GPU DicL；C3 的 VBM 重建很弱，不能视为有效 C20 或端到端等价证明。 |
+| [SuperBigFLICA](../docs/superbigflica/README.md) | [500 名真实 UKB 完整掩膜混合目标与 8 人原版连续模型比较](superbigflica/README.md) | 固定参数连续模型前向/损失/梯度通过；测试反应时间 MAE 75.50 ms、r=0.1595，高血压 AUC=0.6492、balanced accuracy=0.5；分类为 FNIT 扩展 | 共享 CPU 8 线程全流程 338.47 s，峰值 RSS 1.14 GiB；18 张成分 NIfTI 与冻结推理核对；真实 GPU 基准待测 |
 
 recon-all 与 Connectome 的验证边界由各自功能页维护，不纳入本页审计表。
 

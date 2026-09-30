@@ -1,0 +1,134 @@
+{
+  "scope": "Same trained spatial weights and frozen BN; continuous head only; two upstream nn.Module classes executed by AST; dropout disabled; no missing labels",
+  "real_training_rows": 8,
+  "modalities": 3,
+  "feature_dimensions": [
+    157901,
+    222257,
+    222261
+  ],
+  "components": 3,
+  "dtype": "float32",
+  "device": "cpu",
+  "upstream_commit": "6695b638802aab50f43f889e97af223f8191018e",
+  "upstream_source_sha256": "d957949a731be4234acf2ce480b1223e7cb66ee2ca1568a534a99ca795ddd1de",
+  "candidate_model_sha256": "db1a13675ccfeb8100e815fd8acf5a20a5ce95a24c16e882bfa48cda51054b32",
+  "implementation_sha256": {
+    "__init__.py": "330705c86b678b7db188813a22841f2aa4cfb0adedd48fa26e66e2507c6cd723",
+    "cli.py": "69b4263346293790d2176ccdcc1b10822dc3003190a7cf5b933914fd8cde356b",
+    "data.py": "feb80d1b4c381f4614560dfb87438ccdcd9fb0bcb59ddb998f74c9453f9dcc5d",
+    "model.py": "4bb0b346b29e7dc19b0bf77affa58734cfef0b7a1ead8d0755b5ad4cdfd3a446",
+    "pipeline.py": "a93bc3057c262f1bd26efd4048eab5c7b4c19899b8e7c56e8853318126a42bd9"
+  },
+  "comparisons": {
+    "latent": {
+      "max_abs": 0.0,
+      "relative_l2": 0.0,
+      "allclose_rtol_1e4_atol_1e5": true
+    },
+    "continuous_prediction": {
+      "max_abs": 0.0,
+      "relative_l2": 0.0,
+      "allclose_rtol_1e4_atol_1e5": true
+    },
+    "total_loss": {
+      "max_abs": 2.384185791015625e-07,
+      "relative_l2": 9.343538209805047e-08,
+      "allclose_rtol_1e4_atol_1e5": true
+    },
+    "four_loss_terms": {
+      "max_abs": 2.384185791015625e-07,
+      "relative_l2": 4.235216621850668e-08,
+      "allclose_rtol_1e4_atol_1e5": true
+    },
+    "reconstruction": {
+      "vbm": {
+        "max_abs": 5.960464477539063e-08,
+        "relative_l2": 5.5031819101714063e-08,
+        "allclose_rtol_1e4_atol_1e5": true
+      },
+      "fa": {
+        "max_abs": 5.960464477539063e-08,
+        "relative_l2": 5.7993119639832e-08,
+        "allclose_rtol_1e4_atol_1e5": true
+      },
+      "md": {
+        "max_abs": 5.960464477539063e-08,
+        "relative_l2": 6.022765575153244e-08,
+        "allclose_rtol_1e4_atol_1e5": true
+      }
+    },
+    "gradients": {
+      "modality_logits": {
+        "max_abs": 1.4551915228366852e-10,
+        "relative_l2": 1.5336937053689326e-07,
+        "allclose_rtol_1e4_atol_1e5": true
+      },
+      "prediction_weight": {
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "allclose_rtol_1e4_atol_1e5": true
+      },
+      "prediction_bias": {
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "allclose_rtol_1e4_atol_1e5": true
+      },
+      "batchnorm_weight": {
+        "max_abs": 8.731149137020111e-10,
+        "relative_l2": 4.8066709723570966e-08,
+        "allclose_rtol_1e4_atol_1e5": true
+      },
+      "batchnorm_bias": {
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "allclose_rtol_1e4_atol_1e5": true
+      },
+      "spatial_0": {
+        "max_abs": 9.094947017729282e-13,
+        "relative_l2": 3.227583889042762e-08,
+        "allclose_rtol_1e4_atol_1e5": true
+      },
+      "spatial_1": {
+        "max_abs": 4.547473508864641e-13,
+        "relative_l2": 2.361340456502603e-08,
+        "allclose_rtol_1e4_atol_1e5": true
+      },
+      "spatial_2": {
+        "max_abs": 4.547473508864641e-13,
+        "relative_l2": 2.7068004726515937e-08,
+        "allclose_rtol_1e4_atol_1e5": true
+      },
+      "scale_0": {
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "allclose_rtol_1e4_atol_1e5": true
+      },
+      "scale_1": {
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "allclose_rtol_1e4_atol_1e5": true
+      },
+      "scale_2": {
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "allclose_rtol_1e4_atol_1e5": true
+      },
+      "scale_3": {
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "allclose_rtol_1e4_atol_1e5": true
+      },
+      "scale_4": {
+        "max_abs": 0.0,
+        "relative_l2": 0.0,
+        "allclose_rtol_1e4_atol_1e5": true
+      }
+    }
+  },
+  "all_comparisons_passed": true,
+  "observed_forward_loss_backward_seconds": {
+    "upstream_cpu": 0.03432783484458923,
+    "fnit_cpu": 0.015771900303661823
+  }
+}

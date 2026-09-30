@@ -1,0 +1,191 @@
+{
+  "dataset": "500 real UKB subjects; full-mask VBM/FA/MD; two measured targets",
+  "scope": "Public supervised API, held-out metrics and frozen inference checks",
+  "targets": {
+    "p20023_i0": {
+      "type": "continuous",
+      "meaning": "Mean time to correctly identify matches",
+      "unit": "ms"
+    },
+    "Incident_I9_HYPTENS": {
+      "type": "categorical"
+    }
+  },
+  "subjects": 500,
+  "components": 3,
+  "course_shape": [
+    500,
+    3
+  ],
+  "splits": {
+    "train": 300,
+    "validation": 100,
+    "test": 100
+  },
+  "device": "cpu",
+  "dtype": "float32",
+  "tf32": true,
+  "max_epochs": 20,
+  "batch_size": 32,
+  "effective_batch_size": 32,
+  "best_epoch": 18,
+  "random_state": 0,
+  "metrics": {
+    "train": {
+      "p20023_i0": {
+        "n": 300,
+        "type": "continuous",
+        "mae": 63.41487121582031,
+        "rmse": 87.10322570800781,
+        "r2": 0.16703490160949575,
+        "pearson_r": 0.6777030338633522
+      },
+      "Incident_I9_HYPTENS": {
+        "n": 300,
+        "type": "categorical",
+        "accuracy": 0.79,
+        "balanced_accuracy": 0.49789915966386555,
+        "macro_f1": 0.441340782122905,
+        "roc_auc": 0.8202087286527514
+      }
+    },
+    "validation": {
+      "p20023_i0": {
+        "n": 100,
+        "type": "continuous",
+        "mae": 70.28578186035156,
+        "rmse": 90.60279083251953,
+        "r2": 0.025530821883506527,
+        "pearson_r": 0.2868872690159099
+      },
+      "Incident_I9_HYPTENS": {
+        "n": 100,
+        "type": "categorical",
+        "accuracy": 0.79,
+        "balanced_accuracy": 0.5,
+        "macro_f1": 0.441340782122905,
+        "roc_auc": 0.6262808921036769
+      }
+    },
+    "test": {
+      "p20023_i0": {
+        "n": 100,
+        "type": "continuous",
+        "mae": 75.49884033203125,
+        "rmse": 98.59259796142578,
+        "r2": 0.0017559513838049101,
+        "pearson_r": 0.1595161886697813
+      },
+      "Incident_I9_HYPTENS": {
+        "n": 100,
+        "type": "categorical",
+        "accuracy": 0.79,
+        "balanced_accuracy": 0.5,
+        "macro_f1": 0.441340782122905,
+        "roc_auc": 0.6491862567811935
+      }
+    }
+  },
+  "maps": {
+    "vbm": {
+      "shape": [
+        91,
+        109,
+        91
+      ],
+      "mask_voxels": 157901,
+      "nifti_maps": 6,
+      "dtype": "float32",
+      "finite": true,
+      "outside_mask_zero": true,
+      "zstat_matches_array": true
+    },
+    "fa": {
+      "shape": [
+        91,
+        109,
+        91
+      ],
+      "mask_voxels": 222257,
+      "nifti_maps": 6,
+      "dtype": "float32",
+      "finite": true,
+      "outside_mask_zero": true,
+      "zstat_matches_array": true
+    },
+    "md": {
+      "shape": [
+        91,
+        109,
+        91
+      ],
+      "mask_voxels": 222261,
+      "nifti_maps": 6,
+      "dtype": "float32",
+      "finite": true,
+      "outside_mask_zero": true,
+      "zstat_matches_array": true
+    }
+  },
+  "frozen_apply": {
+    "cpu": {
+      "course_max_abs_error": 2.097503471326645e-07,
+      "prediction_max_abs_errors": {
+        "p20023_i0": 9.332762488156732e-06,
+        "Incident_I9_HYPTENS": 1.4901161193847656e-08
+      }
+    }
+  },
+  "stage_timings_s": {
+    "match_load_normalize_s": 130.67585942801088,
+    "training_selection_prediction_s": 193.13971171248704,
+    "spatial_maps_s": 13.146493113599718
+  },
+  "pipeline_wall_s": 338.4695586040616,
+  "harness_wall_s": 340.35893899109215,
+  "peak_process_rss_gib": 1.1405105590820312,
+  "peak_gpu_allocated_gib": null,
+  "input_hashes": {
+    "images_combined_sha256": "ddd1a816e6701955fb4706fae1f7c74e8642830cb846b6dd91c858f56ff8b157",
+    "subjects_sha256": "b3d82a759456e5729453643c80baa9a98d30ba291ed612a9bb3f97de3a1ff282",
+    "matched_phenotypes_sha256": "72c8a1db5f7f5c5ef6f8883a7332d5dd1011be1901487c2f8c633a1dffe8812a",
+    "masks_sha256": {
+      "vbm": "c21b4b44617c05713c16880a51dd24ecb8c7c2fface62c9367d971460f27a8df",
+      "fa": "6e61f0ba80c449ffebde9b18438eba984e045d0e647d50ac92e19005eedf49a3",
+      "md": "29c42a1cd96436660f76b5d14b8296c47ea6a3f782a04c58f25c95ddd12e126a"
+    }
+  },
+  "implementation_sha256": {
+    "__init__.py": "330705c86b678b7db188813a22841f2aa4cfb0adedd48fa26e66e2507c6cd723",
+    "cli.py": "69b4263346293790d2176ccdcc1b10822dc3003190a7cf5b933914fd8cde356b",
+    "data.py": "feb80d1b4c381f4614560dfb87438ccdcd9fb0bcb59ddb998f74c9453f9dcc5d",
+    "model.py": "4bb0b346b29e7dc19b0bf77affa58734cfef0b7a1ead8d0755b5ad4cdfd3a446",
+    "pipeline.py": "a93bc3057c262f1bd26efd4048eab5c7b4c19899b8e7c56e8853318126a42bd9",
+    "benchmark_real.py": "88275597f526b3883077795265e88cd0c028a7c3a29e86d2a313be7738787d60"
+  },
+  "model_sha256": "db1a13675ccfeb8100e815fd8acf5a20a5ce95a24c16e882bfa48cda51054b32",
+  "hardware": {
+    "hostname": "headcw",
+    "cpu_threads": 8,
+    "gpu": null
+  },
+  "notes": "Single observation on a shared host. Test metrics describe this cohort and setting; not clinical validity or an independent external cohort.",
+  "environment": {
+    "python": "3.11.7",
+    "pytorch": "2.5.1",
+    "numpy": "1.26.4",
+    "nibabel": "5.4.0",
+    "scipy": "1.11.4",
+    "scikit_learn": "1.7.1",
+    "h5py": "3.8.0"
+  },
+  "training_course_checks": {
+    "shape": [
+      300,
+      3
+    ],
+    "finite": true,
+    "component_rank": 3,
+    "component_plus_intercept_rank": 4
+  }
+}
