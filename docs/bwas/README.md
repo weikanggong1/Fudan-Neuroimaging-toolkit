@@ -42,7 +42,28 @@ participants.tsv: participant_id  case  age  sex  site_01  site_02  ...
 graymatter_mask.nii.gz: 与 BOLD 同网格的 2 mm 灰质二值掩膜
 ```
 
-输出采用 BIDS Derivatives 的数据集说明与 `group/func/` 布局；连接和簇表使用 BWAS 自定义的组水平文件名。`_desc-BWASedges_relmat.tsv.gz` 每行保存一条越阈值连接的两端体素索引、z 值和簇编号；`_desc-BWASclusters_stat.tsv` 保存簇的连接数、校正/未校正 p 值及两端区域的体素数；`_desc-BWASMA_statmap.nii.gz` 是每个体素参与显著连接簇的连接数，附 JSON sidecar。根目录有 `dataset_description.json`。没有显著簇时 MA 图全零，越阈值连接和簇表仍保留。
+`output_root` 使用 BIDS Derivatives 的数据集说明与 `group/func/` 布局；BWAS 组水平文件名是本工具的自定义扩展。以 `task-rest` 为例：
+
+```text
+derivatives/fnit-bwas/
+├── dataset_description.json
+└── group/func/
+    ├── task-rest_space-MNI152NLin6Asym_res-2_desc-BWASedges_relmat.tsv.gz
+    ├── task-rest_space-MNI152NLin6Asym_res-2_desc-BWASclusters_stat.tsv
+    ├── task-rest_space-MNI152NLin6Asym_res-2_desc-BWASMA_statmap.nii.gz
+    └── task-rest_space-MNI152NLin6Asym_res-2_desc-BWASMA_statmap.json
+```
+
+| 文件 / 返回值 | 内容与解读 |
+|---|---|
+| `result.edges`：`BWASedges_relmat.tsv.gz` | 每行一条 `|z| > CDT` 的无序体素对。`voxel1_i/j/k`、`voxel2_i/j/k` 是 NIfTI 体素坐标，可用掩膜 affine 换算成 MNI 毫米坐标；`cluster` 是从 1 开始的连接簇编号。`z` 是控制协变量后的**群体表型效应统计量**，不是某个人的功能连接 Fisher z。若 `case=1` 表示病例，正 z 表示病例的连接 Fisher z 较高，负 z 表示对照较高。此表包含所有越过 CDT 的边，包括未达到簇水平显著性的边。 |
+| `result.clusters`：`BWASclusters_stat.tsv` | 每簇一行。`edges` 为簇内边数，`p_fwer` 为六维随机场校正后的簇水平 p 值，`p_uncorrected` 为未校正 p 值；`max_z` 是簇内带符号 z 的最大值，`region1_voxels`、`region2_voxels` 描述两端体素。通常以 `p_fwer < 0.05` 筛选显著簇。 |
+| `result.ma_map`：`BWASMA_statmap.nii.gz` | 与输入掩膜同网格的 float32 3D NIfTI。每个体素值是其参与 `p_fwer < 0.05` 连接簇的边数，供定位和绘图；它不是逐体素 z 图，也不是体素×体素矩阵。若没有显著簇，全图为零。 |
+| `result.metadata`：`BWASMA_statmap.json` | 记录被试 ID、设计列、阈值、FWHM、设备、分块、精度、耗时与显存峰值；包含被试标识，分享时应先核查。 |
+| `dataset_description.json` | 记录生成软件和 BIDS Derivatives 基本信息。 |
+| `plot_bwas_connectivity` 返回的 PNG（可选） | 灰质掩膜上的显著体素对连接示意图，默认从俯视、左侧、右侧和斜视展示。它仅显示筛选后的少量边，不是全部统计结果。 |
+
+`BWASResult` 另返回 `subjects`、`voxels` 和 `suprathreshold_edges` 三个计数。没有显著簇时，越阈值连接表和簇表仍保留，MA 图为零。
 
 ## Python 调用
 
@@ -123,15 +144,54 @@ python BWAS_main.py -toolbox_dir /path/to/BWAS \
 
 原版按影像文件名排序读取 `target`/`covariates` 行；使用它作对照时必须先按相同排序生成 `.npy`。FNIT 的 TSV 通过 `participant_id` 显式关联。为了复现原版统计输出，FNIT 同样先以 `n-p` 估计 t 值，再以原版代码中的 `n-p-1` 自由度转成 z 值；这是与通常单一残差自由度写法不同的原版数值约定。
 
-## 真实数据验证
+## 绘制灰质体素连接
 
-使用 ABIDE II 同一采集站点 32 人（16 病例、16 对照）的真实预处理 BOLD，插值到 2 mm 后在中心 512 个体素上验证。此实验的 `CDT=3` 用于产生足够多的越阈值连接以核对聚类规则，不作疾病发现推断。参考程序从其原始 `BWAS_cpu.py` 直接加载相关、GLM、平滑度、邻接和六维校正函数；未把原版代码纳入 FNIT 运行时。[复现脚本](../../validation/bwas/benchmark_abide.py) 和[最新汇总](../../validation/bwas/abide32_summary.json)记录全部 130,816 条无序体素对的 float32 z 值比较：与原版相比，MAE `3.70×10⁻⁶`、最大误差 `7.75×10⁻⁵`、CDT 判定分歧 `0`。777/777 条越阈值连接和 40 个连接簇的大小一致。一次性回归与被试分块回归的最大 z 差为 `2.73×10⁻⁵`。原版核心计算用 `1.05 s`；FNIT 一次 `run_bwas` 包括 BIDS 读写、平滑度、聚类与结果写出，用 `1.79 s`，两者计时范围不同。
+`plot_bwas_connectivity` 自动读取一个 BWAS 结果目录里的连接表、簇表和 MA 图，流式扫描连接表，只保留满足簇水平 p 值条件且 `|z|` 最大的少量边，生成 PNG。灰色线框表示输入灰质掩膜；端点大小参考 MA 边数。连接线是**体素对的群体统计关联**，不是解剖纤维束。正 z 为红色系、负 z 为蓝色系，参考 [FSLeyes 的 Red 与 Blue 配色名称](https://github.com/pauldmccarthy/fsleyes/blob/main/fsleyes/assets/colourmaps/order.txt)；这是独立配色，不复制 FSL 色表。绘图只使用 CPU，不需要 CUDA，也不调用 FSL。
 
-全脑实验从 ABIDE I 与 II 的 1778 份真实预处理 BOLD 及官方表型表建立 BIDS 2 mm 输入。以本地 FSL 2 mm 灰质概率图 `>0.5` 定义初始 128,190 体素掩膜；该模板不随 FNIT 分发。源数据有一份全零影像，因此预先固定每人至少 120,000 个有效灰质体素的质量标准：保留 1748 人（792 病例、956 对照），共有 112,215 个有效灰质体素。模型包含年龄、性别、35 个站点哑变量和截距，设计矩阵满秩；正式连接阈值为 `CDT=5`。[BIDS 准备脚本](../../validation/bwas/prepare_abide.py)、[全量运行脚本](../../validation/bwas/run_abide_full.py)和[原版整脑 seed→voxel 对照脚本](../../validation/bwas/benchmark_full_seed.py)可复核输入、覆盖筛选和统计量；实验不上传个体影像、表型行或连接矩阵。
+```python
+from pathlib import Path
+from fnit.bwas import plot_bwas_connectivity
 
-全量 FNIT 运行计算了全部 `6,296,047,005` 条无序体素对，得到 `1,235,519` 条越过 CDT 5 的连接、`5,133` 个连接簇，MA 图有 `31,359` 个非零体素。[运行汇总](../../validation/bwas/abide_full_summary.json)和[结果文件验收](../../validation/bwas/abide_full_artifact_check.json)记录了源码哈希、连接表行数与簇表汇总的一致性。运行使用预先准备的 BOLD 缓存，`run_bwas` 耗时 `3828.74 s`，包含连接计算、回归、聚类及结果写出；不包含 BIDS 影像读取与缓存准备。PyTorch 报告的 CUDA 峰值已分配显存为 `11.66 GB`。
+bwas_output_root = Path("/data/derivatives/fnit-bwas")  # 已完成的 run_bwas 输出根目录
+gray_matter_mask_file = Path("/data/MNI152_2mm_graymatter_mask.nii.gz")  # 与统计结果同网格的输入灰质掩膜
+output_png = (bwas_output_root / "group" / "figures" /
+              "task-rest_space-MNI152NLin6Asym_desc-BWASconnectivity_figure.png")  # 新图像路径
 
-原版 CPU 的逐值对照使用全部 1748 人的两枚灰质 seed，各自连接到整张共同灰质掩膜，共比较 `224,428` 条有效连接；参考与 FNIT 的 float32 z 值 MAE 为 `3.34×10⁻⁶`、最大差 `3.78×10⁻⁵`。CDT 3 时双方均有 `1,850` 条越阈值连接，CDT 5 时双方均无越阈值连接，两档阈值的判定分歧均为 `0`。[原版对照汇总](../../validation/bwas/abide_full_seed_fp32_summary.json)记录原版 CPU 核心 `354.12 s`、其额外缓存布局转换 `320.13 s`、FNIT GPU 核心 `302.35 s`；这些是共享服务器上的一次观测。使用相同的两枚 seed，比对一次性 float32 回归与 16 人一块的回归，z 值 MAE 为 `5.64×10⁻⁷`、最大差 `2.43×10⁻⁵`，CDT 3/5 均无判定分歧，见[被试分块验证](../../validation/bwas/abide_full_seed_direct_fp32_summary.json)。原版 CPU 的逐值对照覆盖两条 seed 到整张灰质掩膜；全部体素对的完整运行与结果文件验收由 FNIT 完成。
+figure_path = plot_bwas_connectivity(
+    bwas_output_root=bwas_output_root,  # 自动寻找该目录中唯一一组 BWAS 结果文件
+    gray_matter_mask_file=gray_matter_mask_file,  # 2 mm 灰质轮廓与体素坐标参考
+    output_png=output_png,  # 写出 PNG；已存在时不覆盖
+    top_k=500,  # 最多显示 |z| 最大的 500 条边，不影响原统计结果
+    cluster_p_max=0.05,  # 只显示簇水平 FWER p < 0.05 的连接
+    min_abs_z=None,  # 可选附加 |z| 下限；None 表示只按 top_k 筛选
+    view="montage",  # 默认四联图：俯视、左侧、右侧、斜视
+)
+print(figure_path)
+```
+
+`top_k` 必须为正整数；`cluster_p_max` 取 `(0, 1]`；`min_abs_z` 若设置需为非负有限数。`gray_matter_mask_file` 须与 MA 图具有相同的 3D shape 和 affine；`view` 可选默认四联图 `montage`，或单视角 `superior`、`left`、`right`、`anterior`、`oblique`。PNG 只显示所选边，不改变全量连接表和簇统计量。
+
+下图由 ABIDE I+II 的 1748 人全脑组水平结果在 CPU 上绘制，显示簇水平 `p_fwer < 0.05` 且 `|z|` 最大的 500 条边，依次为俯视、左侧、右侧和斜视。红色表示病例组连接 Fisher z 较高的正统计量，蓝色表示较低的负统计量；直线仅用于展示统计关联，不表示解剖纤维。图中不包含个体影像或被试标识。
+
+![ABIDE I+II 灰质体素连接：俯视、左侧、右侧和斜视](figures/abide_full_connectivity_montage.png)
+
+## ABIDE 真实数据 benchmark
+
+32 人检查使用 ABIDE II 同一站点的真实预处理 BOLD（16 病例、16 对照），插值到 2 mm 后取 512 个灰质体素；`CDT=3` 只用于核对越阈值边与聚簇。全脑实验使用 ABIDE I+II 的 1778 份预处理 BOLD 与官方表型表。以本地 FSL 2 mm 灰质概率图 `>0.5` 定义初始 128,190 体素掩膜；该模板不随 FNIT 分发。预先固定每人至少 120,000 个有效灰质体素的质量标准后，保留 1748 人（792 病例、956 对照）和共同的 112,215 个灰质体素。模型包含年龄、性别、35 个站点哑变量和截距，正式连接阈值为 `CDT=5`。[BIDS 准备](../../validation/bwas/prepare_abide.py)、[全量运行](../../validation/bwas/run_abide_full.py)与[原版对照](../../validation/bwas/benchmark_full_seed.py)脚本提供复核步骤。
+
+| float32 精度检查 | 对照范围 | z 值 MAE / 最大差 | 阈值与簇 |
+|---|---:|---:|---|
+| [FNIT 对原版，32 人](../../validation/bwas/abide32_summary.json) | 130,816 条无序体素对 | `3.70×10⁻⁶` / `7.75×10⁻⁵` | CDT 3 判定分歧 0；双方均有 777 条边、40 个同大小连接簇。 |
+| [FNIT 对原版，1748 人](../../validation/bwas/abide_full_seed_fp32_summary.json) | 两枚 seed→全灰质，共 224,428 条 | `3.34×10⁻⁶` / `3.78×10⁻⁵` | CDT 3：双方均 1850 条边、分歧 0；CDT 5：双方均 0 条边。 |
+| [16 人分块对一次性回归](../../validation/bwas/abide_full_seed_direct_fp32_summary.json) | 同上，共 224,428 条 | `5.64×10⁻⁷` / `2.43×10⁻⁵` | CDT 3/5 判定分歧均为 0。 |
+
+| 速度与资源 | 原版 CPU | FNIT | 计时范围 |
+|---|---:|---:|---|
+| 32 人、512 体素 | `1.05 s` | `1.79 s` | 原版仅核心计算；FNIT 一次 `run_bwas` 含 BIDS 读写、平滑度、聚类和输出。 |
+| 1748 人、两枚 seed→全灰质 | 核心 `354.12 s`；另有缓存布局转换 `320.13 s` | GPU 核心 `302.35 s` | 从预先准备的缓存计算相关、回归和 z 值；共享服务器上的一次观测。 |
+| 1748 人、112,215 体素全对全 | 未运行原版全对全对照 | `3828.74 s`；CUDA 峰值已分配 `11.66 GB` | `run_bwas` 含连接、回归、聚类、结果写出；不含 BIDS 读取及缓存准备。 |
+
+全对全 FNIT 运行计算了 `6,296,047,005` 条无序体素对，得到 `1,235,519` 条越过 CDT 5 的连接、`5,133` 个连接簇；MA 图有 `31,359` 个非零体素。见[全量汇总](../../validation/bwas/abide_full_summary.json)和[输出文件验收](../../validation/bwas/abide_full_artifact_check.json)。原版 CPU 逐值比较覆盖两枚 seed 到全灰质，未覆盖全部 62.96 亿条连接；上述耗时的计时范围不同，不应直接计算端到端加速比。实验不上传个体影像、表型行或连接矩阵。
 
 ## 来源
 
