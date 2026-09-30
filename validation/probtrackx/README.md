@@ -187,7 +187,7 @@ export PRIVATE_WAYPOINT_OUT=/absolute/path/new-private-waypoint-run
 
 FNIT 对该常用约束组合增加 Numba 计数路径。优化前后 455000 条发出轨迹的完整输出 NIfTI SHA-256、所有体素及 `waytotal` 均完全一致；热缓存完整进程墙钟从 109.64 秒降到 11.84 秒。FSL 原命令复跑为 28.63 秒，热缓存重复为 10.21 秒。测试时共享 H100 的 GPU 0 前后均为 100% 利用率，FNIT 显存分配限制为总显存的 20%，峰值分配约 2.81 GB；这些秒数是单次实测，不能当成独占 GPU 的稳定加速比。完整哈希、各轮状态和误差见[去标识机器报告](cholinergic_nbm_cingulum.public.json)，原始 DWI 和体素图留在授权服务器。[功能页](../../docs/probtrackx/README.md#nbmcingulum-真实-dwi-对照)给出同等参数的原版与 FNIT 命令。
 
-进一步将同网格 AC 与 brainstem 非零体素取并集（275+2700=2975 体素，两者无重叠），只传入一次 `--avoid`。FSL 和 FNIT 各在相同 seed、waypoint、样本数与随机种子下重新运行，`waytotal` 分别从 4212→3792、4298→3866；两种输出在 AC 与 brainstem 内的密度均为 0。合并版 FSL 与 FNIT 的全图密度 r 为 0.998593，非零支持 Dice 0.598793，强连接前 10% Dice 0.881875。单次完整进程墙钟为 FSL 11.58 秒、FNIT 16.80 秒，GPU 0 已被其他任务持续占满，不作稳定速度排名。[合并排除掩膜报告](cholinergic_nbm_cingulum_union.public.json)记录并集掩膜及四份输出哈希、全部指标和显存状态；[轴位切片绘图脚本](plot_axial_tracts.py)可在授权服务器读取原始命令、合并版 FSL 与 FNIT 密度图生成对照图。原始影像与逐体素图仍留在授权服务器。
+进一步将同网格 AC 与 brainstem 非零体素取并集（275+2700=2975 体素，两者无重叠），只传入一次 `--avoid`。FSL 和 FNIT 各在相同 seed、waypoint、样本数与随机种子下重新运行，`waytotal` 分别从 4212→3792、4298→3866；两种输出在 AC 与 brainstem 内的密度均为 0。合并版 FSL 与 FNIT 的全图密度 r 为 0.998593，非零支持 Dice 0.598793，强连接前 10% Dice 0.881875。单次完整进程墙钟为 FSL 11.58 秒、FNIT 16.80 秒，GPU 0 已被其他任务持续占满，不作稳定速度排名。[合并排除掩膜报告](cholinergic_nbm_cingulum_union.public.json)记录并集掩膜及四份输出哈希、全部指标和显存状态；[四张轴位切片对照图](../../docs/probtrackx/figures/nbm_cingulum_union_axial.png)由[绘图脚本](plot_axial_tracts.py)在授权服务器读取原始命令、合并版 FSL 与 FNIT 密度图生成。原始影像与逐体素图仍留在授权服务器。
 
 ## 指标解释与规则回归
 

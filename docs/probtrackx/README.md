@@ -421,6 +421,10 @@ nib.save(nib.Nifti1Image(union_mask.astype(np.uint8), ac_image.affine, union_hea
 
 合并后 FSL 的 `waytotal` 比原命令减少 9.97%，FNIT 减少 10.05%；两者都清除了 AC 内的路径密度。合并版的强连接 Dice 略高，而稀疏支持 Dice 更低，仍不能认为两套随机追踪逐体素等价。合并版完整进程单次墙钟为 FSL 11.58 秒、FNIT 16.80 秒；GPU 0 当时已有约 43.4 GiB 占用且前后均为 100% 利用率，因此不据此判断稳定速度排名。输入、输出哈希与全部比较指标见[合并排除掩膜报告](../../validation/probtrackx/cholinergic_nbm_cingulum_union.public.json)。
 
+![真实 DWI 的 NbM→Cingulum 追踪：原命令、合并排除掩膜后的 FSL 与 FNIT，以及两者差值；四个轴位切片](figures/nbm_cingulum_union_axial.png)
+
+上图在原始斜轴采集网格的第 22、26、29、35 张轴位切片显示路径密度，背景为同一例的 `nodif_brain`，青色轮廓为 AC 掩膜。前三排采用相同的 `log(1 + visits)` 色阶；底排是合并版 FNIT−FSL 的原始计数差，色阶截在非零绝对差的第 99 百分位。图中没有对密度设显示阈值；上表的数值始终由完整 3D 原图计算。原命令在 AC 内仍有密度，合并后 FSL 与 FNIT 均清除这些路径。[绘图脚本](../../validation/probtrackx/plot_axial_tracts.py)可在授权服务器复现此图；原始 NIfTI 不随仓库发布。
+
 ## Reference
 
 - 参考文献：Behrens et al., *Probabilistic diffusion tractography with multiple fibre orientations: What can we gain?*, NeuroImage (2007), [doi:10.1016/j.neuroimage.2006.09.018](https://doi.org/10.1016/j.neuroimage.2006.09.018)。
