@@ -99,9 +99,9 @@ def run_bigflica_gpu(root: Path, specs: Mapping[str, Mapping[str, str]],
         timings["mmigp_s"] = time.perf_counter() - start
     dicl_dir = destination / (
         f"dicl_{migp_dim}_{dicl_dim}_{dicl_max_iter}_{random_state}_"
-        f"{dicl_batch_size}_{dicl_sparse_iterations}_rsvd1_cuda")
+        f"{dicl_batch_size}_{dicl_sparse_iterations}_rsvd2invgraph_cuda")
     dicl_sig = _signature([mmigp_sig, dicl_dim, dicl_max_iter, random_state,
-                           dicl_batch_size, dicl_sparse_iterations, "rsvd1"])
+                           dicl_batch_size, dicl_sparse_iterations, "rsvd2invgraph"])
     dicl_files = [f"{name}_dictionary.npy" for name in names]
     if _valid_cache(dicl_dir, dicl_sig, dicl_files):
         dictionaries = {name: np.load(dicl_dir / f"{name}_dictionary.npy") for name in names}

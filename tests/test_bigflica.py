@@ -8,8 +8,10 @@ import pytest
 import torch
 from scipy.stats import norm, t as student_t
 from sklearn.decomposition import sparse_encode
+from sklearn.decomposition._dict_learning import _update_dict
 from sklearn.utils.extmath import randomized_svd
 
+import fnit.bigflica.dicl_torch as dicl_torch_module
 import fnit.bigflica.streaming as streaming_module
 import fnit.bigflica.cli as bigflica_cli
 import fnit.bigflica.flica_torch as flica_torch_module
@@ -17,7 +19,8 @@ import fnit.bigflica.flica_vb as flica_vb_module
 import fnit.bigflica.pipeline as pipeline_module
 import fnit.bigflica.pipeline_gpu as pipeline_gpu_module
 from fnit.bigflica import apply_model
-from fnit.bigflica.dicl_torch import _randomized_svd_dictionary, _sparse_codes_lars
+from fnit.bigflica.dicl_torch import (_DictionaryUpdater, _LarsInverseSolver,
+                                      _randomized_svd_dictionary, _sparse_codes_lars)
 from fnit.bigflica.flica_torch import _estimate_dd_eigenvalues, _scaled_inverse
 from fnit.bigflica.flica_vb import fit_eigenspectrum, flica_init_params, update_H
 from fnit.bigflica.pipeline import (_check_flica_output, _fit_flica,
@@ -87,6 +90,68 @@ def test_lars_mixed_finished_rows_match_sklearn():
     actual = _sparse_codes_lars(torch.as_tensor(samples),
                                torch.as_tensor(dictionary), 0.8).numpy()
     np.testing.assert_allclose(actual, expected, atol=1e-7, rtol=1e-7)
+
+
+@pytest.mark.parametrize("backend", ["cpu", pytest.param("cuda", marks=pytest.mark.skipif(
+    not torch.cuda.is_available(), reason="CUDA required"))])
+def test_incremental_lars_workspace_reuse_matches_sklearn(backend):
+    generator = np.random.default_rng(17)
+    dictionary = generator.normal(size=(40, 10))
+    dictionary /= np.linalg.norm(dictionary, axis=1, keepdims=True)
+    solver = _LarsInverseSolver(32, 40, backend, torch.float64, alpha=0.8)
+    for scale in (1., 0.5, 0.):
+        samples = scale * generator.normal(size=(32, 10))
+        samples[::4] = 0
+        expected = sparse_encode(samples, dictionary, algorithm="lasso_lars", alpha=0.8)
+        actual = solver(torch.as_tensor(samples, device=backend),
+                        torch.as_tensor(dictionary, device=backend), 0.8).cpu().numpy()
+        np.testing.assert_allclose(actual, expected, atol=1e-7, rtol=1e-7)
+    assert solver.fallback_count == 0
+
+
+def test_incremental_lars_bad_inverse_restarts_original_solver(monkeypatch):
+    generator = np.random.default_rng(7)
+    samples = torch.as_tensor(generator.normal(size=(16, 6)))
+    dictionary = torch.as_tensor(generator.normal(size=(9, 6)))
+    dictionary /= torch.linalg.vector_norm(dictionary, dim=1)[:, None]
+    expected = _sparse_codes_lars(samples, dictionary, 0.4)
+    original_event = dicl_torch_module._lars_inverse_event
+
+    def failed_event(*args, **kwargs):
+        original_event(*args, **kwargs)
+        args[7].fill_(True)
+
+    solver = _LarsInverseSolver(16, 9, "cpu", torch.float64, alpha=0.4)
+    with monkeypatch.context() as context:
+        context.setattr(dicl_torch_module, "_lars_inverse_event", failed_event)
+        torch.testing.assert_close(solver(samples, dictionary, 0.4), expected)
+    assert solver.fallback_count == 1
+    # The next batch must clear the previous failure and active-set state.
+    torch.testing.assert_close(solver(samples * 0, dictionary, 0.4), torch.zeros_like(expected))
+    assert solver.fallback_count == 1
+
+
+@pytest.mark.parametrize("backend", ["cpu", pytest.param("cuda", marks=pytest.mark.skipif(
+    not torch.cuda.is_available(), reason="CUDA required"))])
+def test_dictionary_updates_match_sklearn_with_dead_atoms(backend):
+    generator = np.random.default_rng(25)
+    samples = generator.normal(size=(32, 10))
+    dictionary = generator.normal(size=(40, 10))
+    dictionary /= np.linalg.norm(dictionary, axis=1, keepdims=True)
+    updater = _DictionaryUpdater(40, 10, backend, torch.float64)
+    for dead_atoms in ((1, 7, 25), ()):
+        codes = generator.normal(size=(32, 40))
+        codes[:, dead_atoms] = 0
+        a, b = codes.T @ codes, samples.T @ codes
+        expected = dictionary.copy()
+        expected_rng = np.random.RandomState(0)
+        _update_dict(expected, samples, codes.copy(), A=a.copy(), B=b.copy(), random_state=expected_rng)
+        actual = torch.as_tensor(dictionary.copy(), device=backend)
+        actual_rng = np.random.RandomState(0)
+        updater(actual, torch.as_tensor(a, device=backend), torch.as_tensor(b, device=backend),
+                torch.as_tensor(samples, device=backend), actual_rng)
+        np.testing.assert_allclose(actual.cpu().numpy(), expected, atol=1e-12, rtol=1e-12)
+        np.testing.assert_array_equal(actual_rng.get_state()[1], expected_rng.get_state()[1])
 
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required")

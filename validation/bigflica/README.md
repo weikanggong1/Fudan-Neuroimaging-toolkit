@@ -124,3 +124,62 @@ DicL 的严格 float32/Triton 候选在同一 18 人输入下，和 CPU float32 
 这一小样本机制试验发现，mMIGP 的十列 U 数值逐列几乎相同，五列方向相反；统一方向后的 U 相对误差为 `1.61e-5`，三模态投影相对误差为 `1.28e-5–1.56e-5`。原 GPU 字典仅在训练后翻转方向，仍与 CPU 差约 `1.02–1.05`；在 DicL **训练前**统一方向，再用 CPU sklearn DicL 和 CPU FLICA 受控重跑，course 最低相关 `0.9999829`，九张 z 图最低相关 `0.9999809`。仅从 GPU float32 规范化缓存重算 SciPy mMIGP 方向，也得到与原 CPU 相同的十列符号；这提供小样本兼容路径，不能作为大样本 GPU 算法的速度成绩。该受控试验没有重跑修正方向后的 GPU DicL/FLICA，因此**尚未**证明独立 GPU 端到端输出等价。[逐阶段符号隔离](three_structural_orientation_real18.json)。
 
 从 GPU `R` 模式模型投影一名未参加训练的真实被试，在 CPU 上得到形状 `(3,)` 且全部有限的 course，耗时 `0.332` 秒。[新被试调用检查](three_structural_public_R_heldout_apply_real1.json)。以上 18 人结果和本项单被试调用均为小掩膜功能与机制核验，不构成 2,050 人完整掩膜、20 成分模型的验收。
+
+## 2026-09-30：增量 LARS 与 CUDA Graph
+
+本轮把每次 LARS 路径事件的完整 `32×200×200` LU 求解，改为活动集逆矩阵的增量更新：加入原子时使用 Schur 补，移除原子时作逆矩阵降阶。每四次事件用 CUDA Graph 重放，减少 Python 调度；检查活动方程残差和枢轴，异常时从当前小批次重新运行原 PyTorch LU 求解器。字典原子全部有效时，按原顺序重放原子更新图；存在未使用原子时保留原来的 NumPy 随机数顺序和重采样过程。没有更换 Lasso 目标、批次、种子或提前停止条件，也没有引入新依赖。
+
+正式实现的同输入测试使用 **2,050 人 VBM/FA/MD 完整掩膜的同一份 float32 mMIGP 投影**，R100/D200、batch32、seed0、最多1000 epoch。两端 DicL 内部沿用已有 float64 算术，本轮未尝试 float16。CPU sklearn 先实际拟合，后续开发试验复用其字典与测量记录，核对三个投影文件的 SHA-256，不重复拟合 CPU。实测环境为 PyTorch 2.5.1、NumPy 1.26.4、sklearn 1.7.1；项目 Conda 文件仍固定 sklearn 1.5.2，因此本表不是指定 Conda 环境的完整重建测试。
+
+| 模态 | CPU sklearn 秒（本轮已测、随后复用） | 正式 GPU 实现秒 | 字典相对 Frobenius 误差 |
+|---|---:|---:|---:|
+| VBM：157,901 体素 | 139.05 | 199.33 | 1.0645×10⁻⁵ |
+| FA：222,257 体素 | 13.38 | 16.46 | 1.5480×10⁻⁶ |
+| MD：222,261 体素 | 13.41 | 22.93 | 6.5621×10⁻⁵ |
+| 合计 | **165.84** | **238.72** | — |
+
+三个模态共 2,541 个小批次，均未触发 LU 回退。相对旧 GPU 字典的误差分别为 `1.12e-7/7.62e-9/1.59e-8`；与 CPU 对应原子的最小绝对余弦均大于 `0.99999998`。沿用同一个 U，再运行 CPU/GPU C3 FLICA 和空间回归，course 及九张 z 图的同序成分在符号校正后相关均大于 `0.9999999984`。GPU DicL 峰值分配显存 `1.23 GiB`、保留显存 `1.77 GiB`，主机 RSS `1.10 GiB`。见[正式实现聚合报告](dicl_incremental_real2050.json)与[阶段复现脚本](benchmark_dicl_incremental_real2050.py)。报告的实现 SHA-256 与本轮提交的 `dicl_torch.py` 一致。
+
+开发期间仅替换 LARS 的首次完整三模态试验耗时 `147.02/11.95/17.86` 秒，随后图捕获覆盖全部原子条件分支的试验为 `189.89/11.87/12.74` 秒。这些是不同时间段的共享节点观测，不能据此决定原子更新图是否加速。正式代码仅在所有原子有效时捕获原有更新操作，未采用覆盖全部条件分支的版本。另试了 `torch.compile` 融合事件，首次设置增加 `14.32` 秒，五个批次相对普通图捕获没有稳定的优势，未加入运行时。
+
+正式测量时 H100 持续有外部作业、利用率为100%；空闲显存由约19.7 GiB下降到17.2 GiB，我们自己的分配峰值仍只有1.23 GiB。旧公开 GPU 运行的 DicL 为871.61秒，本次为238.72秒，观察到耗时减少约72.6%；两次负载和测量边界不同，**这不是受控加速比**。本次 GPU 仍比已测 CPU 慢约44%，没有达到“各阶段明显快于CPU再跑30,000人”的门槛，未启动30,000人试验。
+
+公开 `run_bigflica` 另复用已核对的标准化、mMIGP 和本轮正式代码生成的字典缓存，完成后续输出检查：`2050×3` course、九张原网格 z-stat NIfTI、九张 top-1000 阈值 NIfTI 和九张 PNG 均存在；z NIfTI 与数组在掩膜内逐点相同；另一名未参训真实被试的 `apply_model` 返回三个有限值。此检查显式导入阶段字典缓存，没有重测冷启动总时间。核验脚本初次误把仅包含course值的TSV当作被试清单；修正后从数据目录选择未参训被试，并继续检查已生成的同一模型，没有重复拟合或成图。见[公开缓存与输出报告](dicl_incremental_cache_api_real2050.json)和[复现脚本](check_incremental_cache_api_real2050.py)。
+
+GPU DicL 缓存目录及签名升级为 `rsvd2invgraph`；旧 `rsvd1` 字典不会作为新版本缓存复用，mMIGP 缓存仍可复用。回归测试覆盖混合零输入、图工作区重用、自定义alpha、失效逆矩阵回退，以及未使用原子的随机数顺序和 sklearn 原子更新；本地 PyTorch 2.4.1 的 CPU/CUDA 测试共26项通过。H100/PyTorch2.5.1的精度与内存结论来自上面的真实完整拟合。
+
+### 仍未通过的验收
+
+- **独立端到端一致性**：本轮固定 mMIGP 投影以核验下游，没有消除 CPU/GPU 各自生成投影时的小差异经非凸 DicL 放大的问题；不能把本轮结果写成独立全链等价。
+- **20个有效成分与模态重建**：本轮同投影的CPU/GPU C20都只有 `11/20` 个有效成分；VBM重建范数比约 `7.10e-5/7.09e-5`，仍明显弱于FA/MD。此处的CPU输入不同于此前float64公开全链，不能与其16/20结果混为一谈。C3仍只作功能检查。
+- **CPU速度门槛**：需要继续减少LARS事件内的GPU小核与同步，进一步检查未使用原子重采样的标量传输；完整阶段胜出后才扩大样本。不能仅凭局部稀疏编码加速宣布全部阶段胜出。
+
+可复现阶段测试需要已经建立的三模态 R100 投影目录和旧GPU字典目录；不把原始整模态载入内存。将CPU基线参数设为 `-` 会重新拟合CPU对照；已有本脚本格式的基线时可传其私密输出目录，报告会明确标注时间复用：
+
+```bash
+OPENBLAS_NUM_THREADS=8 OMP_NUM_THREADS=8 CUDA_VISIBLE_DEVICES=1 \
+  python validation/bigflica/benchmark_dicl_incremental_real2050.py \
+  /absolute/private/mmigp_100 \
+  /absolute/private/old_gpu_dictionaries \
+  - /absolute/private/new_stage_benchmark
+```
+
+`new_stage_benchmark`保存私密字典、FLICA日志和诊断，只有不含被试ID的 `aggregate.json` 可上传。输出目录须尚不存在；投影输入与复用CPU基线的SHA-256不符会停止。该脚本还检查C3 course、各模态z图以及C20秩，不生成NIfTI和PNG；公开缓存检查脚本专门核对这些文件和留出被试调用。
+
+### 成熟稀疏编码策略的候选试验
+
+查阅 [SPORCO BPDN](https://sporco.readthedocs.io/en/latest/modules/sporco.admm.bpdn.html) 的批量 ADMM 方程与 [PyTorch Lasso](https://github.com/rfeinman/pytorch-lasso) 的 FISTA、Split Bregman 实现。前者源码为 BSD-3，后者为 MIT 且作者明确标注仍在开发；没有直接将整套库作为运行时依赖，也没有复制发布其源码。验证脚本独立用 PyTorch 实现 ADMM 方程，保留 `0.5*||code@dictionary-data||²+||code||₁` 目标，复用20步 CUDA Graph，字典改变时刷新矩阵分解。
+
+[候选报告](bpdn_probe_real2050.json)来自上述2,050人真实完整掩膜投影，每模态前32个体素，最终字典恢复单位范数约束。`rho=1`、200步的编码相对 LARS 误差为 `1.28e-10/7.57e-11/9.59e-11`，最优性条件最大残差均小于 `2e-14`；候选耗时 `0.0217/0.0220/0.0289` 秒，LARS为 `0.0616/0.0486/0.0436` 秒。图设置另需 `0.072/0.093/0.078` 秒。此处是共享GPU上的单批观测，候选时间包含矩阵分解但不含图设置，不能推断完整训练加速。其他rho在200步时仍有 `1e-6–1e-4` 级误差，说明不能用固定少量迭代直接替换。
+
+此候选还未覆盖初始SVD字典、原子重采样、全部训练批次、最终DicL字典及FLICA脑图，**未接入默认运行时**。下一步应在真实训练轨迹上检查最优性条件，必要时回退LARS，再验收完整三模态阶段。
+
+复现命令（只读取已存在的私密投影和本轮阶段字典）：
+
+```bash
+CUDA_VISIBLE_DEVICES=1 python validation/bigflica/benchmark_bpdn_real2050.py \
+  /absolute/private/mmigp_100 /absolute/private/new_stage_benchmark \
+  /absolute/private/bpdn_probe.json
+```
+
+三个参数依次是含 `*_projected.h5` 的目录、含 `*_gpu_dictionary.npy` 的目录、聚合JSON输出路径。不输出被试ID或影像，不替代完整阶段benchmark。
