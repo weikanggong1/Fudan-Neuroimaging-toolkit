@@ -72,11 +72,24 @@ print(result.dtseries)  # 91k CIFTI 时间序列
 
 每个输出旁有 JSON，记录所用 volume 派生文件、TR、配准方法、投影耗时和 CIFTI 覆盖率。volume 的 JSON 可进一步追溯到原始 BIDS BOLD。`FMRISurfaceResult` 返回三条绝对路径、CIFTI JSON 路径和投影分步耗时。
 
-## 真实数据对照
+## 真实数据 benchmark
 
-固定同一例真实 UKB 490 帧回归后 BOLD、T1w 表面、掩膜和官方注册球面，FNIT 投影与显式 Workbench 命令逐值一致；CIFTI 与从 NiWorkflows 官方源码提取的组装步骤最大绝对差 0，90,553 个非常数灰质坐标的逐点时间相关均值为 1。只换成 FNIT HOCR/FastPD MSMSulc 球面，与官方 newMSM 结果的左/右皮层逐点时间相关均值为 0.9414/0.9420，MAE 为 18.20/19.71；皮层下值一致。该差异来自球面对应关系，不能称为官方逐值等价。球面、耗时和折叠数详见 [MSMSulc 对照](../msm/README.md)及[标量摘要](../../validation/fmri/surface_current.json)。
+2026-09-30 用 `3f8b756` 的公开 API，在修补 volume 最终 MNI 样条插值后连续运行一例真实 UKB 的完整 490 帧 volume 和 surface。本次 surface 直接使用刚完成的 volume，输出双侧 490×32,492 GIFTI 与 490×91,282 CIFTI，数值、时间轴和 JSON 检查全部通过。
 
-重构后的 BIDS 入口也使用完整 490 帧真实数据完成一次端到端表面运行：双侧均写出 32,492 顶点 GIFTI，CIFTI 为 490×91,282，所有数值有限；三份输出及 JSON 均存在，总墙钟 923.80 秒。此次输入是把此前完成 WM/CSF/运动回归的真实 volume 结果按 BIDS Derivatives 路径接入，核对的是新入口和文件写出，未重新跑本次重构后的完整 490 帧 volume。见[本次入口验收摘要](../../validation/fmri/surface_bids_current.json)。
+| 测量 | 结果 |
+|---|---|
+| 完整 surface API，含球面估计、写盘和清理 | 905.71 s |
+| volume + surface API 合计 | 2624.89 s（43.75 分钟） |
+| surface 峰值 CUDA allocated / reserved | 0.73 / 1.26 GB |
+| 固定 volume，只替换官方 newMSM 球面：左 / 右皮层时间 r 均值 | 0.940496 / 0.941404 |
+| 同一对照的左 / 右皮层 MAE | 18.1565 / 19.7100 |
+| 同一对照的皮层下最大绝对差 | 0 |
+
+参照控制只替换注册球面，投影和组装仍使用同一 FNIT/Workbench 路径，定位的是皮层对应关系差异。完整候选与官方皮层时序尚不等价，也没有最终 UKB FIX 或独立完整 fMRIPrep 的逐值参照。两次 API 的总时间不含既有皮层重建，T1 来自匹配存档的重建输入；更早的结构处理未核对。单次共享 H100 计时不作为稳定加速比。
+
+下图展示标准 fsLR32k 球面上的时间相关及全皮层分布，不导出被试几何。详细计时范围、资源校验、输出合同、复测命令及独立阶段参照见[全流程 benchmark](../../validation/fmri/README.md)、[surface 运行报告](../../validation/fmri/fmri_surface.public.json)和[球面对照](../../validation/fmri/fmri_surface_comparison.public.json)。
+
+![surface 球面对照](figures/fmri_surface_agreement.png)
 
 ## 参考文献与原实现
 

@@ -11,7 +11,6 @@ from pathlib import Path
 import nibabel as nib
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
-from scipy.ndimage import gaussian_filter
 
 
 _EDGE_SUFFIX = "_desc-BWASedges_relmat.tsv.gz"
@@ -80,17 +79,39 @@ def _top_edges(path: Path, clusters: set[int], top_k: int,
     return [(item[2], item[3], item[4]) for item in sorted(heap, reverse=True)]
 
 
-def _gray_matter_surface(mask: np.ndarray, affine: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    """Build a closed mesh from the supplied analysis mask."""
+def _mask_surface(mask: np.ndarray, affine: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Contour the full-resolution mask and reduce voxel stair steps in the mesh."""
     import pyvista as pv
 
-    smooth = gaussian_filter(np.pad(mask.astype(np.float32), 1), sigma=1.0)
-    coarse = smooth[::2, ::2, ::2]
-    grid = pv.ImageData(dimensions=coarse.shape, spacing=(2, 2, 2),
-                        origin=(-1, -1, -1))
-    grid.point_data["mask"] = coarse.ravel(order="F")
-    surface = grid.contour([0.25], scalars="mask").triangulate()
+    padded = np.pad(mask.astype(np.float32), 1)
+    grid = pv.ImageData(dimensions=padded.shape, origin=(-1, -1, -1))
+    grid.point_data["mask"] = padded.ravel(order="F")
+    surface = grid.contour([0.5], scalars="mask").triangulate()
+    surface = surface.subdivide(1).smooth_taubin(n_iter=20, pass_band=0.1)
     return nib.affines.apply_affine(affine, surface.points), surface.faces.reshape(-1, 4)[:, 1:]
+
+
+def _check_surface_projection(surface, world: np.ndarray, directions: dict) -> None:
+    """Check the rendered outline using triangle hits, without requiring a closed mesh."""
+    from vtkmodules.vtkCommonCore import reference
+    from vtkmodules.vtkCommonDataModel import vtkStaticCellLocator
+
+    locator = vtkStaticCellLocator()
+    locator.SetDataSet(surface)
+    locator.BuildLocator()
+    ray_length = 4 * np.linalg.norm(np.ptp(surface.points, axis=0))
+    t, sub_id, cell_id = reference(0.0), reference(0), reference(0)
+    hit_point, local_point = [0.0] * 3, [0.0] * 3
+    for name, direction in directions.items():
+        offset = np.asarray(direction, dtype=float)
+        offset *= ray_length / np.linalg.norm(offset)
+        missing = sum(not locator.IntersectWithLine(
+            point - offset, point + offset, 1e-6, t, hit_point, local_point,
+            sub_id, cell_id) for point in world)
+        if missing:
+            raise ValueError(
+                f"brain surface misses {missing} displayed endpoints in the {name} view; "
+                "use brain_mask_file from the same space and grid as the analysis mask")
 
 
 def _brainnet_surface(path: Path) -> tuple[np.ndarray, np.ndarray]:
@@ -211,6 +232,7 @@ def plot_bwas_connectivity(
     bundle_strength: float | None = None,
     all_clusters: bool = False,
     voxel_edge_budget: int = 600,
+    brain_mask_file: str | Path | None = None,
     brain_surface_file: str | Path | None = None,
     cerebellum_surface_file: str | Path | None = None,
     surface_opacity: float | None = None,
@@ -226,6 +248,10 @@ def plot_bwas_connectivity(
     bends display lines within a cluster and sign without moving endpoints.
     ``all_clusters`` samples real voxel pairs from every significant cluster,
     allocating more lines to larger clusters and preserving each endpoint.
+    ``brain_mask_file`` supplies a matching whole-brain mask; its union with
+    the analysis mask defines the display outline, including the cerebellum.
+    Optional external meshes add anatomical detail inside this faint outline.
+    Without a brain mask, external meshes must cover all displayed endpoints.
     Blue means negative z, while red means positive z. Endpoint size follows
     the MA significant-edge count.
     Curves are not anatomical fiber paths.
@@ -314,13 +340,24 @@ def plot_bwas_connectivity(
         (0.00, "#173b86"), (0.40, "#76b7df"), (0.499, "#edf6fb"),
         (0.501, "#fceae7"), (0.60, "#e17b72"), (1.00, "#b91f2d"),
     ])
-    canonical = nib.as_closest_canonical(mask_img)
+    display_mask = mask
+    if brain_mask_file is not None:
+        brain_img = nib.load(str(brain_mask_file))
+        if (brain_img.ndim != 3 or brain_img.shape != mask_img.shape or
+                not np.allclose(brain_img.affine, mask_img.affine, atol=1e-3)):
+            raise ValueError("brain_mask_file must match the analysis mask shape and affine")
+        brain_mask = np.asarray(brain_img.dataobj)
+        if not np.isin(brain_mask, (0, 1)).all() or not brain_mask.any():
+            raise ValueError("brain_mask_file must be a nonempty binary mask")
+        display_mask = mask | (brain_mask != 0)
+    canonical = nib.as_closest_canonical(nib.Nifti1Image(
+        display_mask.astype(np.uint8), mask_img.affine))
     if not np.allclose(canonical.affine[:3, :3],
                        np.diag(np.diag(canonical.affine[:3, :3])), atol=1e-3):
         raise ValueError("gray-matter mask must have axes aligned to MNI coordinates")
     if brain_surface_file is None:
         display_mask = np.asarray(canonical.dataobj) != 0
-        surface_vertices, surface_faces = _gray_matter_surface(display_mask, canonical.affine)
+        surface_vertices, surface_faces = _mask_surface(display_mask, canonical.affine)
     else:
         surface_vertices, surface_faces = _brainnet_surface(Path(brain_surface_file))
     if cerebellum_surface_file is not None:
@@ -341,8 +378,18 @@ def plot_bwas_connectivity(
 
     surface = pv.PolyData(surface_vertices, np.column_stack((
         np.full(len(surface_faces), 3), surface_faces)).ravel())
-    center = np.asarray(surface.center)
-    extent = np.asarray(surface.bounds).reshape(3, 2)
+    outline = surface
+    if brain_mask_file is not None and brain_surface_file is not None:
+        vertices, faces = _mask_surface(np.asarray(canonical.dataobj) != 0, canonical.affine)
+        outline = pv.PolyData(vertices, np.column_stack((
+            np.full(len(faces), 3), faces)).ravel())
+    if edges:
+        _check_surface_projection(
+            outline, nib.affines.apply_affine(mask_img.affine,
+                                              np.unique(coordinates.reshape(-1, 3), axis=0)),
+            {name: views[name][0] for name in dict.fromkeys(panel_views)})
+    center = np.asarray(outline.center)
+    extent = np.asarray(outline.bounds).reshape(3, 2)
     spans = extent[:, 1] - extent[:, 0]
     connections_by_sign = {}
     markers_by_sign = {}
@@ -369,10 +416,9 @@ def plot_bwas_connectivity(
             counts = ma[tuple(endpoints.T)]
             point_cloud = pv.PolyData(points)
             scale = np.log1p(counts) / np.log1p(max(1.0, float(counts.max())))
-            point_cloud["radius"] = ((0.65 + 0.75 * scale) if all_clusters
-                                     else (0.6 + 1.3 * scale))
+            point_cloud["radius"] = 0.25 + 0.25 * scale
             markers_by_sign[sign] = point_cloud.glyph(scale="radius", geom=pv.Sphere(
-                theta_resolution=8, phi_resolution=8), orient=False)
+                radius=1.0, theta_resolution=8, phi_resolution=8), orient=False)
         connections = connections_by_sign[None]
         markers = markers_by_sign[None]
     has_connections = bool(edges)
@@ -383,11 +429,17 @@ def plot_bwas_connectivity(
     plotter = pv.Plotter(shape=shape, off_screen=True,
                          window_size=window_size, border=False)
     try:
+        # Multisampling can produce empty EGL frames with overlapping translucent meshes.
+        plotter.render_window.SetMultiSamples(0)
         plotter.set_background("white", all_renderers=True)
         colorbar_panel = (2 if view == "signed_six" and False not in connections_by_sign
                           else len(panel_views) - 1)
         for panel_index, panel_view in enumerate(panel_views):
             plotter.subplot(panel_index // shape[1], panel_index % shape[1])
+            if outline is not surface:
+                plotter.add_mesh(outline, color="#aeb3b5", opacity=surface_opacity * 0.15,
+                                 show_edges=False, smooth_shading=True, lighting=True,
+                                 ambient=0.35, diffuse=0.65, specular=0.15)
             plotter.add_mesh(surface, color="#aeb3b5", opacity=surface_opacity,
                              show_edges=False, smooth_shading=True, lighting=True,
                              ambient=0.35, diffuse=0.65, specular=0.15)

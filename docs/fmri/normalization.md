@@ -1,6 +1,6 @@
 # T1→MNI152 2 mm 配准与 BOLD 重采样
 
-`register_t1_to_mni` 先用 FNIT `TorchFLIRT` 求 T1→模板的 12 自由度初始矩阵，再从 `SynthMorph` 或 `TorchFNIRT` 中选一个方法估计非线性形变。运行时不启动 FSL 或 FreeSurfer 可执行程序；现有 FNIT SynthMorph/FNIRT 后端仍以 Surfa `Volume`、`Affine`、`Warp` 管理几何与变换，SynthMorph 内部还用 Surfa 在 CPU 上重采样 T1；MNI 位移场与最终 BOLD 由 NiBabel 写出。两个后端都把最终变换写成 **MNI 网格上指向 T1 的位移场**，供 `resample_world` 与 EPI→T1 的 BBR 合成。BOLD 最终只插值一次。
+`register_t1_to_mni` 先用 FNIT `TorchFLIRT` 求 T1→模板的 12 自由度初始矩阵，再从 `SynthMorph` 或 `TorchFNIRT` 中选一个方法估计非线性形变。运行时不启动 FSL 或 FreeSurfer 可执行程序；几何与变换由 FNIT 自有 `AffineTransform`、`DenseWarp` 及 NiBabel 管理，重采样在 PyTorch 中计算；MNI 位移场与最终 BOLD 由 NiBabel 写出。两个后端都把最终变换写成 **MNI 网格上指向 T1 的位移场**，供 `resample_world` 与 EPI→T1 的 BBR 合成。BOLD 最终只插值一次；完整 volume 流程的最终 MNI BOLD 使用 GPU 三次 B 样条。
 
 ## 输入与输出
 
@@ -25,11 +25,11 @@
 | `output` | 写出的绝对路径；3D 输入生成 3D NIfTI，4D 输入生成 4D NIfTI，时间步长来自 `source` header。 |
 | `pre_affine_pull_ras` | 可选的目标网格 `X×Y×Z×3` 位移 NIfTI；传 `T1MNIResult.pull_ras` 时，先将目标 MNI world 坐标加上位移，再应用上面的 4×4 矩阵。 |
 | `output_mask` | 可选的目标网格 3D 二值 NIfTI；掩膜外输出强制为 0，默认 `None`。 |
-| `interpolation` | `"linear"`（默认）或 `"nearest"`。BOLD 用线性，二值标签宜用最近邻。 |
-| `batch_size` | 4D 输入每次送入 `grid_sample` 的帧数，默认 8；不改变输出网格。 |
+| `interpolation` | `"linear"`（低层函数默认）、`"nearest"` 或 `"spline"`。完整 volume 的最终 MNI BOLD 固定用 `"spline"`；连续组织图仍用线性，二值标签用最近邻。 |
+| `batch_size` | 4D 输入每次送入 GPU 的帧数，默认 8；样条系数按帧计算，不改变时间轴或输出网格。 |
 | `device` | PyTorch 设备；`None` 时优先 CUDA。 |
 
-`resample_world` 返回写出的 `Path`。输出数组是 float32，空间 header 来自 `reference`，4D 输出的 TR 和时间单位来自 `source`。它要求位移场的形状和 affine 与 `reference` 一致。
+`resample_world` 返回写出的 `Path`。输出数组是 float32，空间 header 来自 `reference`，4D 输出的 TR 和时间单位来自 `source`。它要求位移场的形状和 affine 与 `reference` 一致。`spline` 在 float32 下用 PyTorch FFT 求各帧的空间三次 B 样条系数，再复用 FNIT 的 GPU 采样核；不会过滤时间轴。源空间采用周期边界，超出源网格或输出掩膜的位置仍为零，保留回归后 BOLD 的负值。独立函数默认仍为线性，避免改变组织图、ICA 图和表面投影的采样策略。
 
 ```python
 import numpy as np
@@ -62,7 +62,7 @@ clean_mni = resample_world(
     output="/absolute/path/filtered_func_data_clean_MNI152_2mm.nii.gz",  # 输出 4D BOLD 文件
     pre_affine_pull_ras=registration.pull_ras,  # MNI world→T1 world 的完整位移场
     output_mask="/absolute/path/MNI152_2mm_brain_mask.nii.gz",  # 目标网格二值掩膜，掩膜外置零
-    interpolation="linear",  # 4D BOLD 使用三线性插值
+    interpolation="spline",  # 最终 MNI BOLD 使用三次 B 样条，减少采样位置造成的 SD 格纹
     batch_size=8,  # 每批 8 个时间帧；显存紧张可减小
     device="cuda:0",  # 与配准相同的 GPU，也可使用 CPU
 )
@@ -83,8 +83,10 @@ fnirt --in=T1.nii.gz --ref=MNI152_T1_2mm.nii.gz \
 applywarp --in=filtered_func_data_clean_epi.nii.gz \
   --ref=MNI152_T1_2mm.nii.gz --premat=example_func2highres.mat \
   --warp=T1_to_MNI_coeff.nii.gz \
-  --out=filtered_func_data_clean_MNI152_2mm.nii.gz
+  --out=filtered_func_data_clean_MNI152_2mm.nii.gz --interp=spline
 ```
+
+`--interp=spline` 选择三次样条；不指定时 FSL `applywarp` 默认用三线性。这里比较的是重采样方式，不能据此认定 SynthMorph 的形变等同于 FNIRT。
 
 固定**与 FNIT 完全相同的两张去颅骨输入**时，可把上面 `fnirt` 的 `--in`、`--ref` 换成 `T1_brain.nii.gz`、`MNI152_T1_2mm_brain.nii.gz`，并添加 `--refmask=MNI152_T1_2mm_brain_mask.nii.gz`。下面的实测对照使用这一组输入；它与 FSL 推荐的整头 FNIRT 输入不同。
 

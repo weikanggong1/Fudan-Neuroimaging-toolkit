@@ -52,3 +52,53 @@ def test_world_pull_rejects_wrong_reference_grid(tmp_path):
     with pytest.raises(ValueError, match="reference grid"):
         resample_world(source, reference, np.eye(4), tmp_path / "out.nii.gz",
                        pre_affine_pull_ras=pull, device="cpu")
+
+
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_spline_matches_independent_periodic_oracle_and_preserves_frames(tmp_path, device):
+    import torch
+    from scipy.ndimage import map_coordinates
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA unavailable")
+    rng = np.random.default_rng(31)
+    data = rng.normal(size=(11, 12, 10, 3)).astype(np.float32)
+    source = tmp_path / "source.nii.gz"
+    image = nib.Nifti1Image(data, np.eye(4))
+    image.header.set_zooms((1, 1, 1, .735))
+    image.header.set_xyzt_units(t="sec")
+    nib.save(image, source)
+    reference = tmp_path / "reference.nii.gz"
+    shape = (6, 7, 5)
+    nib.save(nib.Nifti1Image(np.zeros(shape, dtype=np.float32), np.eye(4)), reference)
+    affine = np.eye(4)
+    affine[:3, 3] = (1.37, 1.61, .42)
+    coordinates = np.indices(shape, dtype=float) + affine[:3, 3, None, None, None]
+    expected = np.stack([map_coordinates(data[..., frame], coordinates, order=3,
+                                        mode="grid-wrap") for frame in range(3)], axis=-1)
+    results = []
+    for batch in (1, 3):
+        path = resample_world(source, reference, affine, tmp_path / f"out-{batch}.nii.gz",
+                              interpolation="spline", batch_size=batch, device=device)
+        actual = nib.load(path)
+        np.testing.assert_allclose(np.asarray(actual.dataobj), expected, atol=3e-5, rtol=2e-5)
+        assert actual.header.get_zooms()[3] == pytest.approx(.735)
+        assert actual.header.get_xyzt_units()[1] == "sec"
+        results.append(np.asarray(actual.dataobj))
+    np.testing.assert_allclose(*results, atol=3e-5, rtol=2e-5)
+
+
+def test_spline_preserves_mask_and_out_of_field_zeros(tmp_path):
+    source, reference, mask = (tmp_path / f"{name}.nii.gz" for name in ("source", "reference", "mask"))
+    nib.save(nib.Nifti1Image(np.ones((5, 5, 5), dtype=np.float32), np.eye(4)), source)
+    nib.save(nib.Nifti1Image(np.zeros((5, 5, 5), dtype=np.float32), np.eye(4)), reference)
+    valid = np.ones((5, 5, 5), dtype=np.uint8)
+    valid[:, 0] = 0
+    nib.save(nib.Nifti1Image(valid, np.eye(4)), mask)
+    affine = np.eye(4)
+    affine[0, 3] = -.5
+    output = resample_world(source, reference, affine, tmp_path / "out.nii.gz",
+                            output_mask=mask, interpolation="spline", device="cpu")
+    values = np.asarray(nib.load(output).dataobj)
+    assert not values[0].any()
+    assert not values[:, 0].any()
+    np.testing.assert_allclose(values[1:, 1:], 1, atol=2e-6)

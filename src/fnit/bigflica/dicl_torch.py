@@ -285,6 +285,85 @@ class _LarsInverseSolver:
         return _sparse_codes_lars(samples, dictionary, alpha, max_events)
 
 
+class _SparseCodesBPDN:
+    """Identify Lasso support with batched ADMM, polish it, or restart LARS.
+
+    ADMM equations: https://sporco.readthedocs.io/en/latest/modules/sporco.admm.bpdn.html
+    The online dictionary updates and sklearn stopping rule are unchanged.
+    """
+
+    def __init__(self, batch, atoms, device, dtype, alpha=1.0):
+        self.reference = _LarsInverseSolver(batch, atoms, device, dtype, alpha)
+        self.alpha = alpha
+        self.calls = 0
+        self.fallback_count = 0
+        self.polish_checks = 0
+        self.graph = None
+        self.identity = torch.eye(atoms, device=device, dtype=dtype)
+        # Bound the temporary batched active-set matrix and graph workspace.
+        if self.identity.is_cuda and batch * atoms * atoms * self.identity.element_size() <= 32 * 2**20:
+            self.inverse = self.identity.clone()
+            self.response = torch.zeros((batch, atoms), device=device, dtype=dtype)
+            self.code = torch.zeros_like(self.response)
+            self.dual = torch.zeros_like(self.code)
+            stream = torch.cuda.Stream(device=device)
+            stream.wait_stream(torch.cuda.current_stream(device))
+            with torch.cuda.stream(stream):
+                self.step()
+            torch.cuda.current_stream(device).wait_stream(stream)
+            self.graph = torch.cuda.CUDAGraph()
+            with torch.cuda.graph(self.graph, stream=stream):
+                for _ in range(20):
+                    self.step()
+
+    def step(self):
+        estimate = (self.response + self.code - self.dual) @ self.inverse
+        relaxed = 1.8 * estimate + (1 - 1.8) * self.code
+        value = relaxed + self.dual
+        updated = value.sign() * (value.abs() - self.alpha).clamp_min(0)
+        self.dual.add_(relaxed - updated)
+        self.code.copy_(updated)
+
+    def fallback(self, samples, dictionary, alpha, max_events):
+        self.fallback_count += 1
+        return self.reference(samples, dictionary, alpha, max_events)
+
+    def __call__(self, samples, dictionary, alpha, max_events):
+        if alpha != self.alpha:
+            raise ValueError("Sparse solver alpha differs from captured alpha")
+        self.calls += 1
+        if self.graph is None:
+            return self.fallback(samples, dictionary, alpha, max_events)
+        gram = dictionary @ dictionary.T
+        response = samples @ dictionary.T
+        # Early updates contain unnormalized or unused SVD atoms. Retain the
+        # original solver while the online dictionary settles into its ball.
+        if self.calls <= 4 or bool(gram.diagonal().max() > 2):
+            return self.fallback(samples, dictionary, alpha, max_events)
+        self.inverse.copy_(torch.cholesky_inverse(torch.linalg.cholesky(gram + self.identity)))
+        self.response.copy_(response)
+        self.code.zero_(); self.dual.zero_()
+        for _ in range(20):
+            self.graph.replay()
+            self.polish_checks += 1
+            active = self.code.abs() > 1e-9
+            signs = self.code.sign() * active
+            masked = (gram[None] * active[:, :, None] * active[:, None, :] +
+                      torch.diag_embed((~active).to(samples.dtype)) + 1e-10 * self.identity)
+            lu, pivots, info = torch.linalg.lu_factor_ex(masked)
+            polished = torch.linalg.lu_solve(
+                lu, pivots, ((response - alpha * signs) * active)[..., None])[..., 0] * active
+            gradient = polished @ gram - response
+            sign_valid = ((polished * signs > 0) | ~active).all()
+            residual = torch.where(active, (gradient + alpha * signs).abs(),
+                                   (gradient.abs() - alpha).clamp_min(0)).max()
+            valid = ((info == 0).all() & sign_valid & (residual <= 1e-8) &
+                     (lu.diagonal(dim1=-2, dim2=-1).abs().min() > 1e-8))
+            if bool(valid):
+                return polished
+        return self.fallback(samples, dictionary, alpha, max_events)
+
+
 class _DictionaryUpdater:
     """Replay sequential atom updates; resample dead atoms with the original RNG."""
 
@@ -403,7 +482,7 @@ def fit_dicl_gpu_streaming(projected_dir: str | Path,
                         samples = ((samples - mean_gpu) / std_gpu)[torch.argsort(undo).to(backend)]
                     size = end - start
                     if size not in sparse_solvers:
-                        sparse_solvers[size] = _LarsInverseSolver(
+                        sparse_solvers[size] = _SparseCodesBPDN(
                             size, dicl_dim, backend, torch.float64, alpha)
                     code = sparse_solvers[size](samples, dictionary, alpha,
                                                 sparse_iterations)

@@ -301,8 +301,7 @@ warped T1 脑内 Pearson r 0.99584、支持区 Dice 0.99875、coefficient Pearso
 网格、gzip 和有限值检查通过，进程耗时 74.75 s。两次 FNIT 入口的初始仿射
 不同，不能直接比较耗时与形变。FSL FLIRT+FNIRT 的两段 CPU 时间合计 161.78 s，
 参照进程写出文件后返回 255；运行环境未隔离，不据此排序。输入哈希、指标定义与
-参照状态见[T1w 报告](../../validation/fmri/t1_fnirt_20260929.public.json)。fMRI volume
-分支的 490 帧真实 BOLD 整链见[整链报告](../../validation/fmri/fmri_volume_fnirt_20260929.public.json)。
+参照状态见[T1w 报告](../../validation/fmri/t1_fnirt_20260929.public.json)。当前公开 volume/surface 的 490 帧完整链见[全流程 benchmark](../../validation/fmri/README.md)；本次完整链计时覆盖默认 SynthMorph 分支，T1 FNIRT 数值精度由上述同输入报告衡量。
 
 ### TBSS/FA 专用预设的既有验证
 

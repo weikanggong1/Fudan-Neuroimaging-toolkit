@@ -90,6 +90,9 @@ def __getattr__(name):
     if name == 'convert_space':
         from .space_conversion import convert_space
         return convert_space
+    if name == 'run_superbigflica':
+        from .superbigflica import run_superbigflica
+        return run_superbigflica
     if name in ('run_bwas', 'BWASResult'):
         from . import bwas
         return getattr(bwas, name)

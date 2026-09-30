@@ -75,7 +75,7 @@ def main():
               'cpu_baseline_report_sha256':(sha(cpu_baseline/'aggregate.json') if baseline else None),
               'cpu_times_reused':baseline is not None, 'modalities': {}}
     cpu_dicts = {}; gpu_dicts = {}
-    original_solver = dicl_module._LarsInverseSolver
+    original_solver = dicl_module._SparseCodesBPDN
     instances = []
     class ObservedSolver(original_solver):
         def __init__(self, *args, **kwargs):
@@ -84,10 +84,9 @@ def main():
             instances.append(self)
 
         def __call__(self, *args, **kwargs):
-            self.calls += 1
             return super().__call__(*args, **kwargs)
 
-    dicl_module._LarsInverseSolver = ObservedSolver
+    dicl_module._SparseCodesBPDN = ObservedSolver
 
     for name in MODALITIES:
         source = projected/f'{name}_projected.h5'

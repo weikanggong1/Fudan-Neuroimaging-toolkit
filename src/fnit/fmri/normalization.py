@@ -87,6 +87,22 @@ def register_t1_to_mni(
     )
 
 
+def _periodic_cubic_coefficients(values):
+    """Invert the separable cubic B-spline kernel without filtering time."""
+    coefficients = values
+    for axis in (-3, -2, -1):
+        size = values.shape[axis]
+        frequency = torch.fft.rfftfreq(size, device=values.device, dtype=values.dtype)
+        response = (2 + torch.cos(2 * torch.pi * frequency)) / 3
+        shape = [1] * values.ndim
+        shape[axis] = len(frequency)
+        coefficients = torch.fft.irfft(
+            torch.fft.rfft(coefficients, dim=axis) / response.reshape(shape),
+            n=size, dim=axis,
+        )
+    return coefficients
+
+
 def resample_world(
     source,
     reference,
@@ -105,12 +121,15 @@ def resample_world(
     RAS millimetres. An optional fixed-grid pull displacement is added to the
     reference RAS coordinate *before* that affine. For MNI BOLD resampling,
     pass inverse(EPI-to-T1 BBR) and the MNI-to-T1 pull field.
+    ``spline`` prefilters each frame into cubic B-spline coefficients on
+    the selected device; time is never filtered. Source boundaries are
+    periodic, and samples outside the source or output mask are zero.
     """
     image = nib.load(str(source))
     target = nib.load(str(reference))
     if image.ndim not in (3, 4) or target.ndim != 3:
         raise ValueError("source must be 3D/4D and reference must be 3D")
-    if batch_size < 1 or interpolation not in ("linear", "nearest"):
+    if batch_size < 1 or interpolation not in ("linear", "nearest", "spline"):
         raise ValueError("invalid batch_size or interpolation")
     matrix = np.asarray(reference_to_source_world, dtype=np.float64)
     if matrix.shape != (4, 4) or not np.isfinite(matrix).all():
@@ -143,6 +162,9 @@ def resample_world(
         dtype=torch.float64, device=selected,
     )
     coords = transform[:3, :3] @ world + transform[:3, 3:4]
+    if interpolation == "spline":
+        from ..eddy.fsl2111_strict.spline import sample_cubic_periodic_fast
+        spline_coords = coords.reshape(1, 3, *shape).float()
     grid = torch.stack(
         [2 * coords[axis] / max(image.shape[axis] - 1, 1) - 1
          for axis in (2, 1, 0)], dim=-1,
@@ -172,11 +194,17 @@ def resample_world(
             np.moveaxis(source_batch, -1, 0).copy(),
             dtype=torch.float32, device=selected,
         )[:, None]
-        sampled = F.grid_sample(
-            source_tensor, grid.expand(stop - start, *grid.shape[1:]),
-            mode="bilinear" if interpolation == "linear" else "nearest",
-            padding_mode="zeros", align_corners=True,
-        )[:, 0]
+        if interpolation == "spline":
+            coefficients = _periodic_cubic_coefficients(source_tensor[:, 0])
+            sampled = sample_cubic_periodic_fast(
+                coefficients, spline_coords.expand(stop - start, -1, -1, -1, -1),
+            )
+        else:
+            sampled = F.grid_sample(
+                source_tensor, grid.expand(stop - start, *grid.shape[1:]),
+                mode="bilinear" if interpolation == "linear" else "nearest",
+                padding_mode="zeros", align_corners=True,
+            )[:, 0]
         sampled *= valid
         result[..., start:stop] = np.moveaxis(sampled.cpu().numpy(), 0, -1)
     if image.ndim == 3:

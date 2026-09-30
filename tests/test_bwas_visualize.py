@@ -9,6 +9,7 @@ import pytest
 from fnit.bwas import plot_bwas_connectivity
 import fnit.bwas.visualize as visualization
 from fnit.bwas.visualize import (_brainnet_surface, _cluster_bundles, _connection_paths,
+                                 _check_surface_projection, _mask_surface,
                                  _result_files, _significant_clusters, _top_edges)
 
 
@@ -46,6 +47,19 @@ def _example(tmp_path):
     nib.save(nib.Nifti1Image(ma, affine),
              folder / f"{prefix}_desc-BWASMA_statmap.nii.gz")
     return result_root, mask_file, edges, clusters
+
+
+def _box_surface(path, bounds):
+    import pyvista as pv
+
+    mesh = pv.Box(bounds=bounds).triangulate()
+    faces = mesh.faces.reshape(-1, 4)[:, 1:] + 1
+    with path.open("w") as stream:
+        stream.write(f"{mesh.n_points}\n")
+        np.savetxt(stream, mesh.points)
+        stream.write(f"{len(faces)}\n")
+        np.savetxt(stream, faces, fmt="%d")
+    return path
 
 
 def test_streaming_top_edges_filter_significance_and_rank(tmp_path):
@@ -178,9 +192,7 @@ def test_selected_cluster_is_passed_to_edge_filter(tmp_path, monkeypatch):
 @pytest.mark.parametrize("view", ["six", "signed_six"])
 def test_all_clusters_six_views_with_supplied_surface(tmp_path, view):
     root, mask, *_ = _example(tmp_path)
-    surface_file = tmp_path / "template.nv"
-    surface_file.write_text("4\n-6 -6 -4\n6 -6 -4\n0 6 -4\n0 0 6\n4\n"
-                            "1 2 3\n1 2 4\n1 3 4\n2 3 4\n")
+    surface_file = _box_surface(tmp_path / "template.nv", (-7, 7, -7, 7, -5, 7))
     cerebellum_file = tmp_path / "cerebellum.nv"
     cerebellum_file.write_text("4\n-2 -3 -9\n2 -3 -9\n0 1 -9\n0 -1 -5\n4\n"
                                "1 2 3\n1 2 4\n1 3 4\n2 3 4\n")
@@ -191,6 +203,81 @@ def test_all_clusters_six_views_with_supplied_surface(tmp_path, view):
                            surface_opacity=0.4, colorbar_max_abs_z=8.0,
                            show_colorbar=False, view=view)
     assert struct.unpack(">II", output.read_bytes()[16:24]) == (2700, 1800)
+
+
+def test_mismatched_surface_refuses_to_draw_valid_voxels_outside_outline(tmp_path):
+    root, mask, *_ = _example(tmp_path)
+    surface_file = _box_surface(tmp_path / "small.nv", (-1, 1, -1, 1, -1, 1))
+    output = tmp_path / "wrong.png"
+    with pytest.raises(ValueError, match="brain surface misses.*brain_mask_file"):
+        plot_bwas_connectivity(root, mask, output, brain_surface_file=surface_file)
+    assert not output.exists()
+
+
+def test_mask_surface_keeps_isolated_boundary_voxel_centers():
+    import pyvista as pv
+
+    mask = np.zeros((8, 8, 8), dtype=bool)
+    mask[0, 0, 0] = mask[7, 7, 7] = True
+    affine = np.diag([2., 2., 2., 1.])
+    vertices, faces = _mask_surface(mask, affine)
+    surface = pv.PolyData(vertices, np.column_stack((np.full(len(faces), 3), faces)).ravel())
+    world = nib.affines.apply_affine(affine, np.argwhere(mask))
+    assert surface.n_open_edges == 0
+    _check_surface_projection(surface, world, {
+        "left": (-1, 0, 0), "superior": (0, 0, 1), "oblique": (1, -1, 0.7)})
+
+
+def test_matching_brain_mask_draws_complete_outline(tmp_path):
+    root, mask, *_ = _example(tmp_path)
+    image = nib.load(mask)
+    brain_file = tmp_path / "brain_mask.nii.gz"
+    nib.save(nib.Nifti1Image(np.ones(image.shape, dtype=np.uint8), image.affine), brain_file)
+    output = tmp_path / "brain.png"
+    plot_bwas_connectivity(root, mask, output, brain_mask_file=brain_file,
+                           all_clusters=True, bundle_strength=0.95, view="signed_six")
+    assert output.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
+
+
+def test_brain_mask_preserves_outline_with_anatomical_reference(tmp_path, monkeypatch):
+    import pyvista as pv
+
+    root, mask, *_ = _example(tmp_path)
+    image = nib.load(mask)
+    brain_file = tmp_path / "brain_mask.nii.gz"
+    nib.save(nib.Nifti1Image(np.ones(image.shape, dtype=np.uint8), image.affine), brain_file)
+    reference_file = _box_surface(tmp_path / "reference.nv", (-1, 1, -1, 1, -1, 1))
+    checked = []
+    original = visualization._check_surface_projection
+
+    def tracked_projection(surface, world, directions):
+        checked.append(surface.n_points)
+        original(surface, world, directions)
+
+    monkeypatch.setattr(visualization, "_check_surface_projection", tracked_projection)
+    output = tmp_path / "anatomical.png"
+    plot_bwas_connectivity(root, mask, output, brain_mask_file=brain_file,
+                           brain_surface_file=reference_file, all_clusters=True,
+                           bundle_strength=0.95, view="signed_six")
+    assert checked and checked[0] > 8  # Coverage uses the full mask, not the reference box.
+    pixels = pv.read_texture(output).to_image().active_scalars
+    assert np.ptp(pixels) > 100  # The translucent overlay must not produce an empty frame.
+
+
+@pytest.mark.parametrize("error", ["shape", "affine", "empty", "nonbinary"])
+def test_brain_mask_must_be_matching_and_binary(tmp_path, error):
+    root, mask, *_ = _example(tmp_path)
+    image = nib.load(mask)
+    shape = (8, 7, 5) if error == "shape" else image.shape
+    affine = image.affine.copy()
+    if error == "affine":
+        affine[0, 3] += 10
+    values = np.full(shape, 0 if error == "empty" else 2 if error == "nonbinary" else 1,
+                     dtype=np.uint8)
+    brain_file = tmp_path / "wrong_brain_mask.nii.gz"
+    nib.save(nib.Nifti1Image(values, affine), brain_file)
+    with pytest.raises(ValueError, match="brain_mask_file"):
+        plot_bwas_connectivity(root, mask, tmp_path / "wrong.png", brain_mask_file=brain_file)
 
 
 def test_all_clusters_rejects_edge_filters(tmp_path):

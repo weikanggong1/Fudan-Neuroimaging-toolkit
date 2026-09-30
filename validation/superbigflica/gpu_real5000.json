@@ -1,0 +1,320 @@
+{
+  "dataset": "5000 real UKB subjects; full-mask VBM/FA/MD; two measured targets",
+  "scope": "Public supervised API, held-out metrics and frozen inference checks",
+  "targets": {
+    "p20023_i0": {
+      "type": "continuous",
+      "meaning": "Mean time to correctly identify matches",
+      "unit": "ms"
+    },
+    "Incident_I9_HYPTENS": {
+      "type": "categorical"
+    }
+  },
+  "subjects": 5000,
+  "components": 20,
+  "course_shape": [
+    5000,
+    20
+  ],
+  "training_course_checks": {
+    "shape": [
+      3000,
+      20
+    ],
+    "finite": true,
+    "component_rank": 20,
+    "component_plus_intercept_rank": 21
+  },
+  "splits": {
+    "train": 3000,
+    "validation": 1000,
+    "test": 1000
+  },
+  "device": "cuda:0",
+  "dtype": "float32",
+  "tf32": true,
+  "max_epochs": 50,
+  "batch_size": 64,
+  "effective_batch_size": 64,
+  "best_epoch": 5,
+  "random_state": 0,
+  "initialization": "random",
+  "dropout": 0.2,
+  "class_weight": "balanced",
+  "categorical_training_balance": {
+    "Incident_I9_HYPTENS": {
+      "counts": [
+        2360,
+        640
+      ],
+      "weights": [
+        0.635593220338983,
+        2.34375
+      ]
+    }
+  },
+  "metrics": {
+    "train": {
+      "p20023_i0": {
+        "n": 3000,
+        "type": "continuous",
+        "mae": 71.14929962158203,
+        "rmse": 95.1226806640625,
+        "r2": 0.0644115647604333,
+        "pearson_r": 0.2749493874536637
+      },
+      "Incident_I9_HYPTENS": {
+        "n": 3000,
+        "type": "categorical",
+        "accuracy": 0.714,
+        "balanced_accuracy": 0.7476165254237288,
+        "macro_f1": 0.6686363109720774,
+        "roc_auc": 0.8292346398305086
+      }
+    },
+    "validation": {
+      "p20023_i0": {
+        "n": 1000,
+        "type": "continuous",
+        "mae": 73.41626739501953,
+        "rmse": 93.72364807128906,
+        "r2": 0.03233385516517129,
+        "pearson_r": 0.18464115855638166
+      },
+      "Incident_I9_HYPTENS": {
+        "n": 1000,
+        "type": "categorical",
+        "accuracy": 0.641,
+        "balanced_accuracy": 0.6452237354665903,
+        "macro_f1": 0.5865155701650828,
+        "roc_auc": 0.7064445120532599
+      }
+    },
+    "test": {
+      "p20023_i0": {
+        "n": 1000,
+        "type": "continuous",
+        "mae": 73.49878692626953,
+        "rmse": 102.06216430664062,
+        "r2": 0.025445553771214602,
+        "pearson_r": 0.17305837394369514
+      },
+      "Incident_I9_HYPTENS": {
+        "n": 1000,
+        "type": "categorical",
+        "accuracy": 0.661,
+        "balanced_accuracy": 0.6716269663725682,
+        "macro_f1": 0.608233340382822,
+        "roc_auc": 0.722551318073626
+      }
+    }
+  },
+  "maps": {
+    "vbm": {
+      "shape": [
+        91,
+        109,
+        91
+      ],
+      "mask_voxels": 157901,
+      "nifti_maps": 40,
+      "dtype": "float32",
+      "finite": true,
+      "outside_mask_zero": true,
+      "zstat_matches_array": true
+    },
+    "fa": {
+      "shape": [
+        91,
+        109,
+        91
+      ],
+      "mask_voxels": 222257,
+      "nifti_maps": 40,
+      "dtype": "float32",
+      "finite": true,
+      "outside_mask_zero": true,
+      "zstat_matches_array": true
+    },
+    "md": {
+      "shape": [
+        91,
+        109,
+        91
+      ],
+      "mask_voxels": 222261,
+      "nifti_maps": 40,
+      "dtype": "float32",
+      "finite": true,
+      "outside_mask_zero": true,
+      "zstat_matches_array": true
+    }
+  },
+  "frozen_apply": {
+    "cpu": {
+      "course_max_abs_error": 1.9155878257751113e-05,
+      "prediction_max_abs_errors": {
+        "p20023_i0": 0.0045691754226027115,
+        "Incident_I9_HYPTENS": 2.3186206817626953e-05
+      }
+    },
+    "cuda:0": {
+      "course_max_abs_error": 1.911117477416957e-05,
+      "prediction_max_abs_errors": {
+        "p20023_i0": 0.004560382910540284,
+        "Incident_I9_HYPTENS": 2.3126602172851562e-05
+      }
+    },
+    "frozen_cpu_gpu_course_max_abs_error": 4.842877388000488e-08
+  },
+  "stage_timings_s": {
+    "match_load_normalize_s": 557.1481585111469,
+    "training_selection_prediction_s": 760.1853617844172,
+    "spatial_maps_s": 188.20011861482635,
+    "summary_plots_s": 9.180590664967895
+  },
+  "pipeline_wall_s": 1517.1636843038723,
+  "harness_wall_s": 1539.9372250731103,
+  "peak_process_rss_gib": 1.4370994567871094,
+  "peak_gpu_allocated_gib": 1.0295500755310059,
+  "input_hashes": {
+    "images_combined_sha256": "7870341ef88b725e1d96d41ea111f2c404f24505b51c16186b41132802d2bb80",
+    "subjects_sha256": "0ff71ccc0042927289ee20533c79cfc8a2c3c0a8bdf882de8aaa11511e83c251",
+    "matched_phenotypes_sha256": "691ffc3378c3625cce9b165b3c27b44c6a92cc70d6a4554187361cc691e79507",
+    "masks_sha256": {
+      "vbm": "c21b4b44617c05713c16880a51dd24ecb8c7c2fface62c9367d971460f27a8df",
+      "fa": "6e61f0ba80c449ffebde9b18438eba984e045d0e647d50ac92e19005eedf49a3",
+      "md": "29c42a1cd96436660f76b5d14b8296c47ea6a3f782a04c58f25c95ddd12e126a"
+    }
+  },
+  "implementation_sha256": {
+    "__init__.py": "4eca0e5fe959bf8636ed00c3cece822e4929537fccbafadf9d5bc4857084aa2c",
+    "cli.py": "e3f128029106afa21637808a019ee9f973e6aee9dd02333cad3ce6614713822a",
+    "data.py": "28fe6749ee52ae2f9d0554bb046a5009e9f038dedf2dda03259034e5c760255d",
+    "model.py": "7906e532d57195ccb526e96573935a16ef97dc9f22a89edba5e650d6a5658364",
+    "pipeline.py": "496139fc8d9c685d0010da14a7b74691dcffb59d3f993aa10efd21dd2524d634",
+    "plotting.py": "d5a51c4625cf430ea1d65a72c17da398dae0fbdc9628f8a6164fbeaf801e4d16",
+    "benchmark_real.py": "9e51273e8606158f60ee5b125ab9d80dc78f89344d4b8b4f6a5c47d5c5a88d30"
+  },
+  "runtime_dependencies_sha256": {
+    "pipeline.py": "bc33e997e2142c311bdf37c5fb4c53fa3a5b489a3441016869d74bc610428af4",
+    "stats_torch.py": "fa16238df1e76dbde6d221de5d8275e24c8f5ca2cb23f592a552df7e6c71b0a6"
+  },
+  "model_sha256": "6fe736a07b82f53d7aed4137bd4dee752ae8262e2e481684c1bbbe907ac25067",
+  "environment": {
+    "python": "3.11.7",
+    "pytorch": "2.5.1",
+    "numpy": "1.26.4",
+    "nibabel": "5.4.0",
+    "scipy": "1.11.4",
+    "scikit_learn": "1.7.1",
+    "h5py": "3.8.0"
+  },
+  "hardware": {
+    "hostname": "gpucw1",
+    "cpu_threads": 8,
+    "gpu": "NVIDIA H100 PCIe",
+    "initial_gpu_free_gib": 48.8046875,
+    "initial_gpu_utilization_percent": 100
+  },
+  "notes": "Single observation on a shared host. Test metrics describe this cohort and setting; not clinical validity or an independent external cohort.",
+  "final_redraw_wall_s": 7.1058308919891715,
+  "final_plotting_sha256": "d5a51c4625cf430ea1d65a72c17da398dae0fbdc9628f8a6164fbeaf801e4d16",
+  "final_render_implementation_sha256": {
+    "__init__.py": "4eca0e5fe959bf8636ed00c3cece822e4929537fccbafadf9d5bc4857084aa2c",
+    "cli.py": "e3f128029106afa21637808a019ee9f973e6aee9dd02333cad3ce6614713822a",
+    "data.py": "28fe6749ee52ae2f9d0554bb046a5009e9f038dedf2dda03259034e5c760255d",
+    "model.py": "7906e532d57195ccb526e96573935a16ef97dc9f22a89edba5e650d6a5658364",
+    "pipeline.py": "496139fc8d9c685d0010da14a7b74691dcffb59d3f993aa10efd21dd2524d634",
+    "plotting.py": "d5a51c4625cf430ea1d65a72c17da398dae0fbdc9628f8a6164fbeaf801e4d16"
+  },
+  "final_renderer_sha256": "b41f0f5948ca1cf3f2d7338dc2f5ab2926c9e368221e3ed361f45688e3fe7435",
+  "final_render_model_sha256": "6fe736a07b82f53d7aed4137bd4dee752ae8262e2e481684c1bbbe907ac25067",
+  "final_plot_files_sha256": {
+    "latent_weights.pdf": "07adf3405ab256c26b84ebc9b3e172e22ff2d0cc5ee444e98cf1f36736b41aad",
+    "latent_weights.png": "2bf3850070ea91580a996290b03347bcc3ff3e68244478e51d95c43ad7338850",
+    "latent_weights.svg": "87b87484fabcd6314e56c22c520b8dd9dc938327da37a976ff4f78a83d3e2927",
+    "summary.json": "0b1fe793bc394446b97ca66963b367de882aa4d8876930e221f0b07585e215d9",
+    "target-001_test-scatter.pdf": "9e124dbb1fffa9788a9323062669cfc8b2b1e20e171d8f90485f9a84ae6498b1",
+    "target-001_test-scatter.png": "d8aa1e26b1f189308c7b88709a9ac9f2e734bfc6dba91ebdde65162586916ed1",
+    "target-001_test-scatter.svg": "962d15e70a78084b14640ed693618092398a577d398ee9e4a9935e2619ee14c7",
+    "target-001_top-components.pdf": "67ef200f501cad4c79e172244a71b5b777894b9c530fdefac994faaaea342230",
+    "target-001_top-components.png": "e52966d7a2f4f5c28ca8d669cb2f48c4c1b52ba968b27b4922b050a7724f36c2",
+    "target-001_top-components.svg": "36d2f50b18fc18570a2af55400ee7c9d2f3b6614cc74b740dea460098f975e34",
+    "target-002_test-roc.pdf": "43d2cc5ea90dcd4d915d5e3a8ca6906e8926e09dc27bc4fbdf8de50a34a1142d",
+    "target-002_test-roc.png": "ac8b178990121ffe6dfaafe22c733b78a663544ba697032654e1e8d33af4040c",
+    "target-002_test-roc.svg": "0194d229d66e7f32a2a6890eb51b84e4ef319100415c21166869b317754d1ba6",
+    "target-002_top-components.pdf": "e79a3a36280ab1fc9831ed3f0292783711743a29632f4b8d9e70febe8ac21d12",
+    "target-002_top-components.png": "2894bfb5b52511775dd6ea33e5f7ec374e363eb06e44f73a615c946654b13c50",
+    "target-002_top-components.svg": "a977c31e09f556a07fd8a191d9a765bc2a559d180b3d8bc74e5a7583993bbd1b"
+  },
+  "final_render_environment": {
+    "python": "3.11.7",
+    "pytorch": "2.5.1",
+    "numpy": "1.26.4",
+    "matplotlib": "3.8.0"
+  },
+  "final_render_labels": {
+    "p20023_i0": "Reaction time (ms)",
+    "Incident_I9_HYPTENS": "Incident hypertension"
+  },
+  "io_read_check": {
+    "rows": 64,
+    "features": 157901,
+    "dtype": "float32",
+    "chunks": [
+      1,
+      32768
+    ],
+    "compression": null,
+    "readings": [
+      {
+        "method": "fancy",
+        "seconds": 0.8505538012832403
+      },
+      {
+        "method": "row",
+        "seconds": 0.03990945313125849
+      },
+      {
+        "method": "row",
+        "seconds": 0.037104226648807526
+      },
+      {
+        "method": "fancy",
+        "seconds": 0.40993444435298443
+      }
+    ],
+    "pairs_array_equal": [
+      true,
+      true
+    ],
+    "device": "cpu",
+    "host": "headcw",
+    "method": "Same fixed random 64 VBM rows: sorted fancy indexing plus inverse permutation and per-row dataset indexing plus np.stack; two reversed read orders; no extra GPU process.",
+    "early_epoch_aggregate_loss_check": {
+      "epochs": 5,
+      "columns": [
+        "training_loss",
+        "validation_loss",
+        "reconstruction_loss",
+        "spatial_l1",
+        "supervision_loss",
+        "prediction_regularization"
+      ],
+      "maximum_absolute_errors": {
+        "training_loss": 0.0,
+        "validation_loss": 0.0,
+        "reconstruction_loss": 0.0,
+        "spatial_l1": 0.0,
+        "supervision_loss": 0.0,
+        "prediction_regularization": 0.0
+      },
+      "all_exact": true
+    },
+    "observed_epoch_intervals_note": "The earlier partial pilot and current run execute at separate times on a shared GPU. Read latency and early-epoch losses are diagnostics; they do not estimate a stable whole-pipeline acceleration.",
+    "earlier_partial_pilot_pipeline_sha256": "357eaed022cdf058448dc457b389a640986d6ce2af8055bff16b284c2c9ed45a",
+    "current_pipeline_sha256": "496139fc8d9c685d0010da14a7b74691dcffb59d3f993aa10efd21dd2524d634"
+  }
+}

@@ -40,7 +40,7 @@ CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹�
 | [segment_nuclei](docs/subregions/nuclei.md) | FreeSurfer `segment_subregions thalamus/hippo-amygdala` | 旧的 `norm/aseg/wmparc` 阶段对照接口，供验证与旧脚本使用。 |
 | [SynthSR](docs/synthsr/README.md) | FreeSurfer `mri_synthsr` | 合成 1 mm T1w 图像。 |
 | [TorchFAST](docs/fast/README.md) | FSL `fast` | 三组织分割、部分体积分数与偏置场。 |
-| [FastVBM](docs/fast_vbm/README.md) | FSL `fslvbm` | 从 T1w 生成标准空间灰质、Jacobian 与调制灰质图。 |
+| [FastVBM](docs/fast_vbm/README.md) | FSL `fslvbm` | 从 T1w 生成标准空间灰质、Jacobian 与调制灰质图；[全流程 benchmark](validation/fast_vbm/README.md)。 |
 | [run_recon_all_python](docs/recon_all/README.md) | FreeSurfer `recon-all` | 从 T1w 生成脑分割、皮层表面、顶点指标与脑区统计。 |
 
 ### fMRI
@@ -48,8 +48,8 @@ CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹�
 | 函数名 | 原软件函数名 | 功能 |
 |---|---|---|
 | [parcellate](docs/mshbm/README.md) | CBIG `CBIG_MSHBM_parcellation_single_subject.m` | 生成个体 fsLR32k 17 网络标签。 |
-| [fMRIVolume_pipeline](docs/fmri/README.md) | FSL FEAT、ICA-AROMA | 原始 BIDS 单 run 到 BIDS Derivatives 体积 BOLD。 |
-| [fMRISurface_pipeline](docs/fmri/surface.md) | fMRIPrep fsLR 重采样、Workbench | 读取已完成的 volume 与 T1 recon-all，写出 fsLR32k GIFTI 和 91k CIFTI。 |
+| [fMRIVolume_pipeline](docs/fmri/README.md) | FSL FEAT、ICA-AROMA | 原始 BIDS 单 run 到 BIDS Derivatives 体积 BOLD；[全流程 benchmark](validation/fmri/README.md)。 |
+| [fMRISurface_pipeline](docs/fmri/surface.md) | fMRIPrep fsLR 重采样、Workbench | 读取已完成的 volume 与 T1 recon-all，写出 fsLR32k GIFTI 和 91k CIFTI；[全流程 benchmark](validation/fmri/README.md)。 |
 | [fnit.msm.run_msmsulc](docs/msm/README.md) | newMSM MSMSulc | 独立的 HOCR/FastPD 脑沟球面配准。 |
 | [fnit.melodic.run_melodic_bids](docs/melodic/README.md) | FSL MELODIC | 独立的 PyTorch 单被试空间 PICA，输入和输出均为 BIDS Derivatives。 |
 
@@ -71,7 +71,8 @@ CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹�
 
 | 函数名 | 原软件函数名 | 功能 |
 |---|---|---|
-| [run_bigflica / apply_model](docs/bigflica/README.md) | [BigFLICA](https://github.com/weikanggong/BigFLICA) mMIGP、DicL、FLICA | 从每人一目录的多模态标准空间 NIfTI 提取跨模态成分，输出被试 course、各模态成分 z 图和 top-voxel 脑图；CUDA 路径逐被试建库，分块处理 mMIGP 并用增量 LARS 训练 DicL，可选跳过两者直接拟合体素 FLICA，并投影新被试。 |
+| [run_bigflica / apply_model](docs/bigflica/README.md) | [BigFLICA](https://github.com/weikanggong/BigFLICA) mMIGP、DicL、FLICA | 从每人一目录的多模态标准空间 NIfTI 提取跨模态成分，输出被试 course、各模态成分 z 图和 top-voxel 脑图；CUDA 路径逐被试建库，分块处理 mMIGP 并用批量 ADMM 与 LARS 回退训练 DicL，可选跳过两者直接拟合体素 FLICA，并投影新被试。 |
+| [run_superbigflica / apply_model / plot_superbigflica](docs/superbigflica/README.md) | [SuperBigFLICA](https://github.com/weikanggong/SuperBigFLICA) | 沿用 BigFLICA 的多模态影像目录，以被试 ID 匹配独立 CSV；随机初始化监督共享成分，预测连续表型、二分类或多分类；自动绘制成分权重、Top 3 脑图与测试集散点/ROC 图，并保存新被试模型。 |
 | [run_bwas / plot_bwas_connectivity](docs/bwas/README.md) | [weikanggong/BWAS](https://github.com/weikanggong/BWAS) | 对多被试 2 mm BIDS volume BOLD 的逐体素连接做表型 GLM、6D 连接簇校正、MA 图和多视角连接可视化。 |
 
 各功能页说明输入、输出、参数与调用示例，并汇总已有的真实数据验证结果、原软件命令、参考文献和原实现链接。统一入口中的子命令用 `fnit <子命令> --help` 查看；fMRI 使用 `fnit-fmri --help`，MS-HBM 使用 `fnit-mshbm --help`，recon-all 使用 `fnit-recon-all --help`。全部独立入口见 [pyproject.toml](pyproject.toml)。

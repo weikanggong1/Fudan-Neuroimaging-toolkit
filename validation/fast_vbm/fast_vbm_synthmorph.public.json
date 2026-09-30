@@ -1,0 +1,258 @@
+{
+  "schema_version": 1,
+  "data": {
+    "kind": "one deidentified real clinical T1w",
+    "subjects": 1,
+    "subject_identifier_published": false
+  },
+  "candidate": {
+    "implementation": "FNIT FastVBM",
+    "backend": "synthmorph",
+    "device": "cuda:0",
+    "source_sha256": {
+      "src/fnit/fast_vbm/pipeline.py": "2d0b6a2778f78e53cce5623de9574c9f594a10b854281c2337a0a2fbbba3b10e",
+      "src/fnit/fast_vbm/registration.py": "2a931f509543429d687792571c162283f67f49643d492b52096d2e1fcddb111b",
+      "src/fnit/fast_vbm/synthmorph_backend.py": "547de082dc4bb65d630f254d2d4d34c5da81233fb6c91019a337f9f40424b211",
+      "src/fnit/fast/pipeline.py": "4f003e47cd33de27fd9c829b05fcef1c83bea1dc3eb522411039331685bf2129",
+      "src/fnit/synthstrip/pipeline.py": "3cc23ab81eebb6ad11ac9814691f9d3b5c13c93fc2569ee1f4dddea70ec37de7",
+      "src/fnit/synthmorph/pipeline.py": "81f971dd73f0bed3cd652e97f0627bf54e0b00a8dcf0cb8785c4ee0c696aa538",
+      "src/fnit/flirt/core.py": "b0ed42eb1032c89e643e17b27c96eb74a1a2df31debfeea3a0ed7499e8b2bd92",
+      "src/fnit/fnirt/registration.py": "d52b4f112dd0f409da96f992a614182ab6184b3559f5eb55ce2b4d61a2ee008c",
+      "src/fnit/applywarp/core.py": "cf6de438f3ac1551804d38682ce3fbb11b8fb042ad881562ebc93aada80f2df5",
+      "src/fnit/_nib.py": "568d113432c1a0c50a3b0b635188173e69be1c7436d851de2568bca9b55ab94e",
+      "src/fnit/_transforms.py": "be01fa24cd0c17bb1aa8ac7792cdf0b62c657037808c643427a1b11cc4c05340"
+    },
+    "tf32": {
+      "matmul": true,
+      "cudnn": true,
+      "reduced_precision_tensor_dtype": false
+    }
+  },
+  "reference": {
+    "implementation": "existing FSL/UKB VBM outputs",
+    "warped_gm": "fsl_reg/FNIRT output",
+    "jacobian": "FNIRT nonlinear-only Jacobian",
+    "modulated_gm": "warped GM multiplied by Jacobian in float32",
+    "timing_report": "fast_vbm_fsl_reference.public.json"
+  },
+  "accuracy_mask": {
+    "definition": "explicit template-grid reference mask > 0",
+    "voxels": 292019
+  },
+  "contracts": {
+    "warped_gm": {
+      "same_shape": true,
+      "same_affine": true,
+      "candidate_dtype": "float32",
+      "reference_dtype": "float32"
+    },
+    "jacobian": {
+      "same_shape": true,
+      "same_affine": true,
+      "candidate_dtype": "float32",
+      "reference_dtype": "float32"
+    },
+    "modulated_gm": {
+      "same_shape": true,
+      "same_affine": true,
+      "candidate_dtype": "float32",
+      "reference_dtype": "float32"
+    }
+  },
+  "accuracy": {
+    "warped_gm": {
+      "voxels": 292019,
+      "pearson": 0.6836590144045221,
+      "mae": 0.1833179040568585,
+      "rmse": 0.30988272951690543,
+      "maximum_absolute_error": 1.0000001192092896,
+      "dice_at_0.2": 0.8103229857655533
+    },
+    "jacobian": {
+      "voxels": 292019,
+      "pearson": 0.292743495259862,
+      "mae": 0.2375886282098298,
+      "rmse": 0.35073620999386235,
+      "maximum_absolute_error": 4.9555246233940125,
+      "dice_at_0.2": 1.0
+    },
+    "modulated_gm": {
+      "voxels": 292019,
+      "pearson": 0.6166788179547664,
+      "mae": 0.2296464150508053,
+      "rmse": 0.3915117580306282,
+      "maximum_absolute_error": 5.401036441326141,
+      "dice_at_0.2": 0.8063206311828075
+    }
+  },
+  "upstream_diagnosis": {
+    "native_gm_contract": {
+      "same_shape": false,
+      "same_affine": false,
+      "candidate_dtype": "float32",
+      "reference_dtype": "float32"
+    },
+    "brain_mask_contract": {
+      "same_shape": false,
+      "same_affine": false,
+      "candidate_dtype": "uint8",
+      "reference_dtype": "float32"
+    }
+  },
+  "timing_seconds": {
+    "compute_including_input_load_and_lazy_weights": 601.3531355322339,
+    "nifti_save_13_outputs_and_report": 5.298936621285975,
+    "in_process_total": 607.1551632299088,
+    "pipeline_stage_report": {
+      "brain_extraction": 9.043372876010835,
+      "fast": 9.947773494757712,
+      "registration_jacobian_modulation": 582.0335269169882,
+      "total": 601.3476241119206
+    }
+  },
+  "memory": {
+    "peak_cuda_allocated_bytes": 15488136704,
+    "process_max_rss_kib": 2427060
+  },
+  "environment": {
+    "host": "gpucw1",
+    "python": "3.11.16",
+    "torch": "2.5.1",
+    "cuda_runtime": "11.8",
+    "gpu": "NVIDIA H100 PCIe",
+    "cpu_threads": 4
+  },
+  "input_sha256": {
+    "raw_t1w": "916cc95237a89e7824ab742c8921268c3517617556ea341ff2e750fe5af36a1d",
+    "gm_template": "ab933db7455d7c4b88624d54f41a3065be4ba4289d00b9230daec0cdb1597a77",
+    "reference_mask": "342d41e1c445d87a812ca288786a116306e96a5595a198e46ba7e7515d4f221c",
+    "official_warped_gm": "e57970ede5866c250363b4b41f4ee0fea92a6ffde685df57eef25c8ca09b4616",
+    "official_jacobian": "096e1f30ccb5a5e8d9e25b0c682abfcfb421ceecd63292183d363d3089476726",
+    "synthstrip_weights": "37417f802196186441aae3e7f385d94f8a98c64a88acaeaa2723af995c653e33",
+    "synthmorph_weights": "95b367cd30788cc647e4704b650642fc1d70d7e419c20c04f1ba1b2902bc6536"
+  },
+  "output_sha256": {
+    "warped_gm": "03bb5d2b794deea76f7aaaf5ba94f976f851f88d20cbe4efd4e2484ea184695b",
+    "jacobian": "9d0056fe2b9fcf89408e767fe3d27b193bc2507f37345608b4fb4486ac759d84",
+    "modulated_gm": "eefc247ffef293f0cd93d8cedf43993912c17a55960caa497004bcfa7fbf7aec"
+  },
+  "artifacts": {
+    "figure": "fast_vbm_synthmorph.png",
+    "pipeline_report": "fast_vbm_report.json",
+    "public_figure": "docs/fast_vbm/figures/fast_vbm_synthmorph.png",
+    "public_figure_sha256": "6e0293acc4b118ffec08bdeecac60e1e9a11b27231637990eeb1b06b99b0fad8"
+  },
+  "limits": [
+    "one real subject",
+    "the official maps were existing FSL/UKB outputs and were not regenerated inside this script",
+    "FastVBM and FSL/UKB use different brain extraction, tissue segmentation, affine, and nonlinear optimizers",
+    "the timings are one cold in-process run and are not a repeated benchmark"
+  ],
+  "output_checks": {
+    "images": {
+      "brain": {
+        "same_shape": true,
+        "same_affine": true,
+        "candidate_dtype": "int16",
+        "reference_dtype": "int16",
+        "all_finite": true
+      },
+      "brain_mask": {
+        "same_shape": true,
+        "same_affine": true,
+        "candidate_dtype": "uint8",
+        "reference_dtype": "int16",
+        "all_finite": true
+      },
+      "pve_csf": {
+        "same_shape": true,
+        "same_affine": true,
+        "candidate_dtype": "float32",
+        "reference_dtype": "int16",
+        "all_finite": true
+      },
+      "pve_gm": {
+        "same_shape": true,
+        "same_affine": true,
+        "candidate_dtype": "float32",
+        "reference_dtype": "int16",
+        "all_finite": true
+      },
+      "pve_wm": {
+        "same_shape": true,
+        "same_affine": true,
+        "candidate_dtype": "float32",
+        "reference_dtype": "int16",
+        "all_finite": true
+      },
+      "hard_segmentation": {
+        "same_shape": true,
+        "same_affine": true,
+        "candidate_dtype": "int32",
+        "reference_dtype": "int16",
+        "all_finite": true
+      },
+      "pve_segmentation": {
+        "same_shape": true,
+        "same_affine": true,
+        "candidate_dtype": "int32",
+        "reference_dtype": "int16",
+        "all_finite": true
+      },
+      "mixel_type": {
+        "same_shape": true,
+        "same_affine": true,
+        "candidate_dtype": "int32",
+        "reference_dtype": "int16",
+        "all_finite": true
+      },
+      "bias_field": {
+        "same_shape": true,
+        "same_affine": true,
+        "candidate_dtype": "float32",
+        "reference_dtype": "int16",
+        "all_finite": true
+      },
+      "restored": {
+        "same_shape": true,
+        "same_affine": true,
+        "candidate_dtype": "float32",
+        "reference_dtype": "int16",
+        "all_finite": true
+      },
+      "warped_gm": {
+        "same_shape": true,
+        "same_affine": true,
+        "candidate_dtype": "float32",
+        "reference_dtype": "float32",
+        "all_finite": true
+      },
+      "jacobian": {
+        "same_shape": true,
+        "same_affine": true,
+        "candidate_dtype": "float32",
+        "reference_dtype": "float32",
+        "all_finite": true
+      },
+      "modulated_gm": {
+        "same_shape": true,
+        "same_affine": true,
+        "candidate_dtype": "float32",
+        "reference_dtype": "float32",
+        "all_finite": true
+      }
+    },
+    "pve_sum_max_absolute_error": 0.0,
+    "pve_support_definition": "brain_mask > 0 and brain intensity > 0, as used by TorchFAST",
+    "pve_support_voxels": 3091264,
+    "brain_mask_nonpositive_intensity_voxels": 1276,
+    "modulation_max_absolute_error": 0.0,
+    "nonpositive_jacobian_voxels": 0,
+    "jacobian_range": [
+      0.24159926176071167,
+      3.230544090270996
+    ]
+  },
+  "source_revision": "f958121",
+  "output_validator_sha256": "fe80655916fd030316a0962e988ed7a14540d9cc5ff6d0acb15148093ad060e5"
+}
