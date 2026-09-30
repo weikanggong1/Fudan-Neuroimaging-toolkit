@@ -24,4 +24,4 @@
 
 ![当前 TorchFLIRT GPU 批量实现与 FSL FLIRT 6.0.7.4 的公开 T1w 配准对照](../flirt/figures/flirt_public_current.png)
 
-图中使用同一组 CC0 公开 OpenNeuro ds000114 v1.0.2 去面部 T1w，比较 FSL 与当前 FNIT GPU 批量结果。官方输出非零区域的 moved Pearson 为 `0.9952013`，moving 视野 13³ 个世界坐标点的位移 RMS 为 `0.37208 mm`。源码绑定、CPU/FSL 对照、性能与精度范围见 [TorchFLIRT 功能页](../flirt/README.md)。
+图中使用同一组 CC0 公开 OpenNeuro ds000114 v1.0.2 去面部 T1w，比较 FSL 与当前 FNIT GPU 批量结果。修复 header 采样距离与搜索层级后，官方输出非零区域的 moved Pearson 为 `0.9999965`，moving 视野 13³ 个世界坐标点的位移 RMS 为 `0.01355 mm`。源码绑定、CPU/FSL 对照、性能与精度范围见 [TorchFLIRT 功能页](../flirt/README.md)。

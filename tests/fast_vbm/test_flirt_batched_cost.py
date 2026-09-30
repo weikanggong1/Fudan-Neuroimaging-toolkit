@@ -127,8 +127,9 @@ def test_invalid_overlap_and_constant_images_keep_reference_sentinel(
 
     result = BatchedAffineCost(reference_cost)(matrices)
 
-    assert [reference_cost(matrix) for matrix in matrices] == [sentinel, sentinel]
-    np.testing.assert_array_equal(result.cpu().numpy(), [sentinel, sentinel])
+    constant_cost = 0.0 if cost_class is FSLNormalizedMutualInformation else sentinel
+    assert [reference_cost(matrix) for matrix in matrices] == [constant_cost, sentinel]
+    np.testing.assert_array_equal(result.cpu().numpy(), [constant_cost, sentinel])
 
 
 @pytest.mark.parametrize("device", _DEVICES)

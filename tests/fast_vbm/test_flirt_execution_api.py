@@ -298,6 +298,7 @@ def test_batched_schedule_keeps_serial_candidate_and_perturbation_order(dof):
     def run(execution):
         engine = object.__new__(core._DefaultFLIRTEngine)
         engine.execution = execution
+        engine.angular_search = True
         engine.initial_matrix = np.eye(4)
         engine.level = SimpleNamespace(centre=np.array([1.7, -.4, 2.3]))
         engine.phase_timings = {}
