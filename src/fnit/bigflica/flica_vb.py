@@ -3,11 +3,13 @@
 Copyright Weikang Gong. Adaptation and public redistribution authorized by
 the rights holder in the FNIT development conversation, 2026-09-30.
 Original: https://github.com/weikanggong/BigFLICA/blob/master/FLICA_cpu.py
-The upstream numerical updates are retained for same-input comparison.
+The coordinate updates retain the upstream model. Free-energy formulas,
+reduction precision and iteration bookkeeping are corrected below.
 """
 
 import numpy as np
 import copy
+import math
 import scipy as sc
 from numpy import size, identity, trace
 from scipy import interpolate
@@ -38,14 +40,14 @@ def flica_parseoptions(R, opts={"num_components":10,"maxits":2000,"dof_per_voxel
 
 def logdet(M,ignorezeros):
     if ignorezeros=='chol':
-        ld = 2*np.sum(np.log(np.diag(np.linalg.cholesky(M)),dtype="float32"))
+        ld = 2*np.sum(np.log(np.diag(np.linalg.cholesky(M))), dtype=np.float64)
     else:
        print('not implemented, not used in .m?')
 
     return ld
 
 def apply3_logdet(X,ignorezeros):
-    out=np.zeros([1,1,X.shape[2]]).astype('float32')
+    out=np.zeros([1,1,X.shape[2]], dtype=np.float64)
     for i in range (0,X.shape[2]):
         out[:,:,i]=logdet(X[:,:,i],ignorezeros)
     #test=np.apply_along_axis(various.logdet, 2, X,ignorezeros)#, *args, **kwargs)
@@ -66,29 +68,28 @@ def sum_dims(M,dims):
 #%   sum_dims(M,[5 4]) = sum(M(:))
 #%   sum_dims(N,[5 4]) = sum(N)*5.
 #% An error will result if there's a size mismatch, e.g. sum_dims(M,[6 0]).
-    for d in range (0,len(dims)):
-        if dims[d]==0:
-            1
-        elif dims[d]==M.shape[d]:
-            M=np.sum(M,d,dtype="float64").astype("float32")
-            if dims[d]==1: # added to match sum from matlab
-                M=np.expand_dims(M,axis=d)
-        elif (dims[d]>0) & (M.shape[d]==1):
-            #M = M*dims[d] its correct
-            M = np.multiply(M,dims[d],dtype="float32")
-        else:# dims[d]>1 & M.shape[d]>1:
-            print("some error, check .m")
-    return M[0,0]
+    M = np.asarray(M, dtype=np.float64)
+    if M.ndim < len(dims):
+        M = M.reshape(M.shape + (1,) * (len(dims) - M.ndim))
+    for axis, dimension in enumerate(dims):
+        count = int(np.asarray(dimension).item())
+        if count == 0:
+            continue
+        actual = M.shape[axis]
+        if count < 0 or actual not in (1, count):
+            raise ValueError("sum_dims input does not match conceptual dimensions")
+        M = M.sum(axis=axis, keepdims=True) * (count / actual)
+    return M
 
 def apply3_diag(X):
-    out=np.zeros([X.shape[0],X.shape[0],X.shape[2]]).astype('float32');
+    out=np.zeros([X.shape[0],X.shape[0],X.shape[2]], dtype=np.float64);
     for i in range (0,X.shape[2]):
 		#out[:,:,i]=np.diagflat(X[:,:,i])
         out[:,:,i]=np.diagflat(X[:,:,i])
     return out
 
 def apply3_diag2(X):
-	out=np.zeros([X.shape[0],X.shape[2]]).astype('float32');
+	out=np.zeros([X.shape[0],X.shape[2]], dtype=np.float64);
 	for i in range (0,X.shape[2]):
 		#out[:,:,i]=np.diagflat(X[:,:,i])
 		out[:,i]=np.diag(X[:,:,i])
@@ -101,7 +102,7 @@ def inv_prescale(inp):
 	return out
 
 def apply3_inv_prescale(X):
-	out=np.zeros([X.shape[0],X.shape[0],X.shape[2]]).astype('float32');
+	out=np.zeros([X.shape[0],X.shape[0],X.shape[2]], dtype=np.float64);
 	for i in range (0,X.shape[2]):
 		out[:,:,i]=inv_prescale(X[:,:,i])
 
@@ -295,8 +296,7 @@ def update_X_k(input_dict):
         input_dict['sumN_Dq_k'][:,i] = np.multiply(input_dict['DD_k'] , np.matrix(np.sum(qki,0,dtype='float64')),dtype='float64')
         input_dict['sumN_DqXq_k'][:,i] = np.multiply(input_dict['DD_k'] , np.matrix(np.sum(np.multiply(qki,Xqki),0,dtype='float64')),dtype='float64')
         input_dict['sumN_DqXq2_k'][:,i] = np.multiply(input_dict['DD_k'] , np.matrix(np.sum( np.multiply(qki,  Xq2ki,order='F' ),0,dtype='float64')).astype('float64'))
-        tmp_qlogq = np.multiply(qki,np.log(qki,dtype="float64"),order='F')
-        tmp_qlogq[qki==0] = 0;  #% limit as q->0 of q*log(q) is 0.
+        tmp_qlogq = sc.special.xlogy(qki, qki)
         input_dict['sumN_Dqlogq_k'][:,i] = np.multiply(input_dict['DD_k'] , np.matrix(np.sum(tmp_qlogq,0,dtype='float64')),
                                           order='F', dtype='float64')
         input_dict['X_k'][:,i] = np.squeeze(np.sum( np.multiply(Xqki, qki,order='K', dtype='float64'), 1))
@@ -491,7 +491,7 @@ def update_lambda(input_dict):
 
      return output_Lambda_dict
 
-def compute_F(input_dict): #NEED TO IMPROVE SUM_DIMS ...
+def compute_F(input_dict):
 
     for key,val in list(input_dict.items()): #load all
              exec(key + '=val')
@@ -504,10 +504,10 @@ def compute_F(input_dict): #NEED TO IMPROVE SUM_DIMS ...
     Fpart["Hprior"]=(sum_dims(np.dot(input_dict['eta_log'],np.matrix(input_dict['Gmat'])),[L, R])/2)- (np.log(2*np.pi)*L*R/2)- (sum_dims(np.multiply(input_dict['eta'],np.matrix(input_dict['H2Gmat']).T),[L,G])/2)
     if size(input_dict['H_colcov'].shape)==2: #case lambda='o'
         tmp1=logdet(input_dict['H_colcov'],'chol')
-        Fpart["Hpost"] = 0.5*L*R*(1+2*np.pi) + 0.5*np.sum(input_dict['Gmat'])*tmp1;
+        Fpart["Hpost"] = 0.5*L*R*(1+np.log(2*np.pi)) + 0.5*np.sum(input_dict['Gmat'])*tmp1;
     else: #case lambda='R'
         tmp1= apply3_logdet(input_dict['H_colcov'],'chol')
-        Fpart["Hpost"] = 0.5*L*R*(1+2*np.pi) + 0.5* sum_dims(tmp1,[1, 1, R])
+        Fpart["Hpost"] = 0.5*L*R*(1+np.log(2*np.pi)) + 0.5* sum_dims(tmp1,[1, 1, R])
     Fpart["etaPrior"] = -sum_dims(np.matrix(sc.special.gammaln(input_dict['prior_eta_c'])),[L, G]) +sum_dims(np.matrix(np.multiply(input_dict['prior_eta_c']-1,input_dict['eta_log'])),[L, G]) -sum_dims(np.matrix(input_dict['prior_eta_c']*np.log(input_dict['prior_eta_b'])),[L, G])  -sum_dims(np.matrix(input_dict['eta']/input_dict['prior_eta_b']),[L, G]);
     Fpart["etaPost"] = sum_dims(np.matrix(sc.special.gammaln(input_dict['eta_c'])),[L, G]) -sum_dims(np.multiply((input_dict['eta_c']-1),input_dict['eta_log']),[L, G])  +sum_dims(np.multiply(-input_dict['eta_c'],np.log(input_dict['eta_binv'])),[L, G]) +sum_dims(np.multiply(input_dict['eta'],input_dict['eta_binv']),[L, G]);
 
@@ -532,8 +532,8 @@ def compute_F(input_dict): #NEED TO IMPROVE SUM_DIMS ...
 
     for kk in range(0,K):
         Fpart["Wprior"].append(sum_dims(np.matrix(np.log(1./input_dict['prior_W_var'],dtype="float64"),dtype="float64"),[1, L])/2 - np.log(2*np.pi,dtype="float64")*1*L/2 - trace(input_dict['WtW'][kk])/2/input_dict['prior_W_var'])
-        Fpart["Wpost"].append(0.5*1*L*(1+2*np.pi) + 0.5*logdet(input_dict['W_rowcov'][kk],'chol'))
-        Fpart["muPrior"].append(-0.5/input_dict['prior_mu_var']*sum_dims(np.matrix(input_dict['mu2'][kk]),[3, L])  +0.5*np.log(2*np.pi*input_dict['prior_mu_var'],dtype="float64") * 3*L)
+        Fpart["Wpost"].append(0.5*1*L*(1+np.log(2*np.pi)) + 0.5*logdet(input_dict['W_rowcov'][kk],'chol'))
+        Fpart["muPrior"].append(-0.5/input_dict['prior_mu_var']*sum_dims(np.matrix(input_dict['mu2'][kk]),[3, L])  -0.5*np.log(2*np.pi*input_dict['prior_mu_var'],dtype="float64") * 3*L)
         Fpart["muPost"].append(0.5*(1+np.log(2*np.pi,dtype="float64"))*3*L +0.5*sum_dims(np.matrix(np.log(input_dict['mu_var'][kk],dtype="float64")),[3, L]))
         Fpart["betaPrior"].append(-np.mean(np.mean(sc.special.gammaln(input_dict['prior_beta_c'][kk])))*3*L +np.mean(np.mean( np.multiply( (input_dict['prior_beta_c'][kk]-1) , input_dict['beta_log'][kk])))*3*L -  np.mean(np.mean(  np.multiply(input_dict['prior_beta_c'][kk],np.log(input_dict['prior_beta_b'][kk]))))*3*L -np.mean(np.mean( np.multiply( 1./input_dict['prior_beta_b'][kk], input_dict['beta'][kk])))*3*L)
         Fpart["betaPost"].append(sum_dims(np.matrix(sc.special.gammaln(input_dict['beta_c'][kk])),[3, L]) -sum_dims(  np.matrix(np.multiply((input_dict['beta_c'][kk]-1),input_dict['beta_log'][kk])),[3, L]) +sum_dims(  np.matrix(np.multiply(input_dict['beta_c'][kk],-np.log(input_dict['beta_binv'][kk]))),[3, L]) +sum_dims(  np.matrix(np.multiply(input_dict['beta_binv'][kk],input_dict['beta'][kk])),[3, L]))
@@ -542,15 +542,20 @@ def compute_F(input_dict): #NEED TO IMPROVE SUM_DIMS ...
         Fpart["qPrior"].append(sum_dims( np.matrix(np.multiply(input_dict['sumN_Dq'][kk] , input_dict['pi_log'][kk])), [3, L]))
         Fpart["qPost"].append(- sum_dims(np.matrix(input_dict['sumN_Dqlogq'][kk]), [3, L]))
         Fpart["Ylike1"].append(input_dict['N'][kk]*input_dict['DD'][kk]/2 * sum_dims(input_dict['lambda_log_R'][kk]-np.log(2*np.pi,dtype="float64"),[R, 1]))
-        Fpart["Ylike2"].append(-0.5*input_dict['Y2D_sumN'][kk]*input_dict['lambda_R'][kk])
+        Fpart["Ylike2"].append(-0.5 * np.dot(
+            np.asarray(input_dict['Y2D_sumN'][kk]).reshape(-1),
+            np.asarray(input_dict['lambda_R'][kk]).reshape(-1)))
         Fpart["Ylike3"].append(input_dict['DD'][kk] * (np.dot( np.sum( np.multiply(input_dict['Y'][kk]  , np.dot(np.dot(input_dict['X'][kk],np.diagflat(input_dict['W'][kk])),input_dict['H'])),0) ,input_dict['lambda_R'][kk])))
         Fpart["Ylike4"].append(-0.5 * sum_dims(np.matrix( np.multiply(np.multiply( input_dict['XtDX'][kk] , input_dict['HlambdaHt'][kk]) , input_dict['WtW'][kk])), [L, L]))
-        Fpart["lambdaPrior"].append(-np.sum(sc.special.gammaln(input_dict['prior_lambda_c'][kk])) +np.sum(np.multiply((input_dict['prior_lambda_c'][kk]-1),input_dict['lambda_log'][kk])) -np.sum(np.multiply(input_dict['prior_lambda_c'][kk],np.log(input_dict['prior_lambda_b'][kk]))) -np.sum(1./np.multiply(input_dict['prior_lambda_b'][kk],input_dict['Lambda'][kk])))
+        Fpart["lambdaPrior"].append(-np.sum(sc.special.gammaln(input_dict['prior_lambda_c'][kk])) +np.sum(np.multiply((input_dict['prior_lambda_c'][kk]-1),input_dict['lambda_log'][kk])) -np.sum(np.multiply(input_dict['prior_lambda_c'][kk],np.log(input_dict['prior_lambda_b'][kk]))) -np.sum(input_dict['Lambda'][kk]/input_dict['prior_lambda_b'][kk]))
         Fpart["lambdaPost"].append(np.sum(sc.special.gammaln(input_dict['lambda_c'][kk])) -np.sum(np.multiply((input_dict['lambda_c'][kk]-1),input_dict['lambda_log'][kk])) -np.sum(np.multiply(input_dict['lambda_c'][kk],np.log(input_dict['lambda_binv'][kk]))) +np.sum(np.multiply(input_dict['lambda_binv'][kk],input_dict['Lambda'][kk])))
         Fpart["XPrior"].append(sum_dims( np.matrix((0.5 * np.multiply( (input_dict['beta_log'][kk]-np.log(2*np.pi,dtype="float64")) , input_dict['sumN_Dq'][kk])) - (0.5 * np.multiply(input_dict['beta'][kk] , input_dict['sumN_DqXq2'][kk])) + np.multiply( np.multiply(input_dict['beta'][kk] , input_dict['mu'][kk]) , input_dict['sumN_DqXq'][kk])  - (0.5* np.multiply( np.multiply( input_dict['beta'][kk] , input_dict['mu2'][kk]) , input_dict['sumN_Dq'][kk]))) , [3, L]))
         Fpart["XPost"].append(-sum_dims(np.matrix( -0.5*  np.multiply( input_dict['sumN_Dq'][kk], (1+np.log(2*np.pi,dtype="float64")+np.log(input_dict['Xq_var'][kk],dtype="float64")).T)), [3, L]))
 
-    F = np.sum(sum([i for i in Fpart.values()])) #np.sum(np.sum(list(Fpart.values())),dtype="float64") #np.sum(sum([i for i in Fpart.values()])) #sum_carefully(Fpart); % add up all the bits
+    # Sum every scalar/array element once, as MATLAB sum_carefully does.
+    F = math.fsum(float(np.asarray(part, dtype=np.float64).sum())
+                  for value in Fpart.values()
+                  for part in (value if isinstance(value, list) else [value]))
     return F, Fpart
 
 def zeros32(*args, **kwargs):
@@ -801,28 +806,10 @@ def flica_init_params(Y,opts):
 
 
 def flica_iterate(Y,opts,Priors, Posteriors, Constants):
-    #define list to keep info for free energy
-
-    # Fpart = {k: zeros32(Constants['k']) for k in [listofvals]}
-
-    Fpart = {"Hprior":np.zeros(1),"Hpost":np.zeros(1),
-             "etaPrior":np.zeros(1),"etaPost":np.zeros(1),
-             "Wprior":np.zeros(Constants['K']),"Wpost":np.zeros(Constants['K']),
-             "muPrior":np.zeros(Constants['K']),"muPost":np.zeros(Constants['K']),
-             "betaPrior":np.zeros(Constants['K']), "betaPost":np.zeros(Constants['K']),
-             "piPrior":np.zeros(Constants['K']), "piPost":np.zeros(Constants['K']),
-             "qPrior":np.zeros(Constants['K']), "qPost":np.zeros(Constants['K']),
-             "Ylike1":np.zeros(Constants['K']), "Ylike2":np.zeros(Constants['K']),
-             "Ylike3":np.zeros(Constants['K']), "Ylike4":np.zeros(Constants['K']),
-             "lambdaPrior":np.zeros(Constants['K']),"lambdaPost":np.zeros(Constants['K']) ,
-             "XPrior":np.zeros(Constants['K']),"XPost":np.zeros(Constants['K'])}
-
-    F_history = [];
-    convergence_flag=0
-    its=-1
-    # iterate the updates
-    while convergence_flag == 0 :
-         its=its+1
+    if opts['maxits'] < 1:
+        raise ValueError("maxits must be positive")
+    F_history = []
+    for its in range(opts['maxits']):
          print('its = %s' % its)
          tt=time.time()
 
@@ -959,65 +946,16 @@ def flica_iterate(Y,opts,Priors, Posteriors, Constants):
          Posteriors['lambda_c']=output_lambda_dict['lambda_c']
          print('Time of Lambda', time.time()-tt2)
 
-#%% Compute F, if desired
-         if opts['computeF']==1:
-             input_FE_computation={'Fpart':Fpart, 'Y':Y,'X':Posteriors['X'],'H':Posteriors['H'],'W':Posteriors['W'],
-                             'K':Constants['K'], 'L':Constants['L'],'DD':Constants['DD'],'R':Constants['R'],'N':Constants['N'],'G':Constants['G'],
-                             'H_colcov':Posteriors['H_colcov'],'H2Gmat':Posteriors['H2Gmat'],'W_rowcov':Posteriors['W_rowcov'],
-                             'WtW':Posteriors['WtW'],'mu2':Posteriors['mu2'],'mu_var':Posteriors['mu_var'],'Gmat':Posteriors['Gmat'],
-                             'beta':Posteriors['beta'],'beta_log':Posteriors['beta_log'],'beta_c':Posteriors['beta_c'],'beta_binv':Posteriors['beta_binv'],
-                             'pi_log':Posteriors['pi_log'],'pi_weights':Posteriors['pi_weights'],
-                             'eta':Posteriors['eta'],'eta_c':Posteriors['eta_c'],'eta_binv':Posteriors['eta_binv'],'eta_log':Posteriors['eta_log'],
-                             'sumN_Dqlogq':Posteriors['sumN_Dqlogq'],'lambda_log_R':Posteriors['lambda_log_R'],
-                             'Y2D_sumN':Posteriors['Y2D_sumN'],'lambda_R':Posteriors['lambda_R'],'lambda_log':Posteriors['lambda_log'],
-                             'lambda_binv':Posteriors['lambda_binv'],'lambda_c':Posteriors['lambda_c'],'Lambda':Posteriors['Lambda'],
-                             'HlambdaHt':Posteriors['HlambdaHt'],'sumN_Dq':Posteriors['sumN_Dq'],'XtDX':Posteriors['XtDX'],
-                             'mu':Posteriors['mu'],'sumN_DqXq':Posteriors['sumN_DqXq'],'sumN_DqXq2':Posteriors['sumN_DqXq2'],'Xq_var':Posteriors['Xq_var'],
-                             'prior_eta_b': Priors['prior_eta_b'],'prior_eta_c': Priors['prior_eta_c'],
-                             'prior_W_var':Priors['prior_W_var'] ,'prior_mu_var':Priors['prior_mu_var'] ,
-                             'prior_beta_c':Priors['prior_beta_c'],'prior_beta_b':Priors['prior_beta_b'],
-                             'prior_pi_weights':Priors['prior_pi_weights'],'prior_lambda_c':Priors['prior_lambda_c'],
-                             'prior_lambda_b':Priors['prior_lambda_b']}
-
-             #tt2=time.time()
-             F, Fpart = compute_F(input_FE_computation)
-             F_history.append(F);
-             #print 'cost_F =', time.time()-tt2
+#%% Compute F, if desired; uncomputed history entries remain NaN.
+         F = np.nan
+         if opts['computeF'] == 1 or its == opts['maxits'] - 1:
+             F, Fpart = compute_F({**Constants, **Priors, **Posteriors, 'Y': Y})
              print('F =', F)
-         else:
-             F_history.append(9999)
-             F=9999
-             print('F = not computed...')
-             if its > (opts['maxits']-2):
-                 input_FE_computation={'Fpart':Fpart, 'Y':Y,'X':Posteriors['X'],'H':Posteriors['H'],'W':Posteriors['W'],
-                     'K':Constants['K'], 'L':Constants['L'],'DD':Constants['DD'],'R':Constants['R'],'N':Constants['N'],'G':Constants['G'],
-                     'H_colcov':Posteriors['H_colcov'],'H2Gmat':Posteriors['H2Gmat'],'W_rowcov':Posteriors['W_rowcov'],
-                     'WtW':Posteriors['WtW'],'mu2':Posteriors['mu2'],'mu_var':Posteriors['mu_var'],'Gmat':Posteriors['Gmat'],
-                     'beta':Posteriors['beta'],'beta_log':Posteriors['beta_log'],'beta_c':Posteriors['beta_c'],'beta_binv':Posteriors['beta_binv'],
-                     'pi_log':Posteriors['pi_log'],'pi_weights':Posteriors['pi_weights'],
-                     'eta':Posteriors['eta'],'eta_c':Posteriors['eta_c'],'eta_binv':Posteriors['eta_binv'],'eta_log':Posteriors['eta_log'],
-                     'sumN_Dqlogq':Posteriors['sumN_Dqlogq'],'lambda_log_R':Posteriors['lambda_log_R'],
-                     'Y2D_sumN':Posteriors['Y2D_sumN'],'lambda_R':Posteriors['lambda_R'],'lambda_log':Posteriors['lambda_log'],
-                     'lambda_binv':Posteriors['lambda_binv'],'lambda_c':Posteriors['lambda_c'],'Lambda':Posteriors['Lambda'],
-                     'HlambdaHt':Posteriors['HlambdaHt'],'sumN_Dq':Posteriors['sumN_Dq'],'XtDX':Posteriors['XtDX'],
-                     'mu':Posteriors['mu'],'sumN_DqXq':Posteriors['sumN_DqXq'],'sumN_DqXq2':Posteriors['sumN_DqXq2'],'Xq_var':Posteriors['Xq_var'],
-                     'prior_eta_b': Priors['prior_eta_b'],'prior_eta_c': Priors['prior_eta_c'],
-                     'prior_W_var':Priors['prior_W_var'] ,'prior_mu_var':Priors['prior_mu_var'] ,
-                     'prior_beta_c':Priors['prior_beta_c'],'prior_beta_b':Priors['prior_beta_b'],
-                     'prior_pi_weights':Priors['prior_pi_weights'],'prior_lambda_c':Priors['prior_lambda_c'],
-                     'prior_lambda_b':Priors['prior_lambda_b']}
-                 F, Fpart = compute_F(input_FE_computation)
-                 F_history.append(F);
-                 print('F final = ', F)
+         F_history.append(float(F))
+         if its > 0 and np.isfinite(F_history[-2]) and F != 0:
+             print('Difference of F between iteration = ',
+                   (F - F_history[-2]) / abs(F))
 
-         if its>0:
-            dF = (F - F_history[its-1])#/(its-tmpPrevIt);
-            print('Difference of F between iteration = ',float(dF)/float(np.abs(F)))
-
-            #import pdb;pdb.set_trace()
-            if its > (opts['maxits']-1): #| (dF<
-                convergence_flag=1
-                #GATHER OUTPUT
          FLICA_OUTPUT_DICT ={"H":Posteriors['H'],"lambda":Posteriors['Lambda'],"W":Posteriors['W'],"beta":Posteriors['beta'],"mu":Posteriors['mu'],
                 "pi":Posteriors['pi_mean'],"X":Posteriors['X'], "H_PCs":Posteriors['H_PCs'],"F":F,"F_history":F_history,
                                "DD":Constants['DD'],"opts":opts}
@@ -1025,10 +963,7 @@ def flica_iterate(Y,opts,Priors, Posteriors, Constants):
          print('cost_per_iteration =', time.time()-tt, ' seconds...')
 
          output_dir=opts['output_dir']
-         iters_to_save=np.array(list(range(25,opts['maxits']+1,25)));
-         if sum(its==iters_to_save)==1:
-             #if os.path.exists(os.path.join(output_dir,'iter'+str(its)) )==0:
-                 #os.mkdir( os.path.join(output_dir,'iter'+str(its))  )
+         if (its + 1) % 25 == 0 or its + 1 == opts['maxits']:
              np.savez(os.path.join(output_dir,'flica_result.npz'),DD=FLICA_OUTPUT_DICT['DD'],F=FLICA_OUTPUT_DICT['F'],
                       F_history=FLICA_OUTPUT_DICT['F_history'],
                       H=FLICA_OUTPUT_DICT['H'],H_PCs=FLICA_OUTPUT_DICT['H_PCs'],

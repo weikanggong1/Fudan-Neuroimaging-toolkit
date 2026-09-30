@@ -6,6 +6,8 @@
 
 默认 `use_mmigp_dicl=True`：逐体素跨被试标准化 → 联合 mMIGP → 每模态 Lasso-LARS 字典学习 → FLICA。CUDA 路径用 PyTorch 执行协方差、特征分解、稀疏编码、字典更新、FLICA、空间回归和 t→z 转换；nibabel/HDF5 负责 CPU 文件读写和分块传输。为复现原 FLICA 的自由度拟合，GPU 特征分解后每模态将少量特征值送给 SciPy 做一次标量优化；这一步属于 CPU 计算。`use_mmigp_dicl=False` 时，标准化后直接把体素送入 FLICA，不建立 mMIGP 或 DicL 模型。此模式保留体素信息，但每轮须读取全部模态矩阵，适合较小训练集；大样本建议开启预处理。`device="cpu"` 保留原 notebook 的 sklearn DicL 对照路径。
 
+**FLICA 数学修复：**自由能求和、分布公式、辅助函数精度、更新次数和历史记录已修复。67 项回归测试通过，包括直接体素 `o/R` 参数传递与输出检查；真实 30,000 人同字典同初始化控制的 CPU/GPU 拟合矩阵相对差不超过 `1.02e-13`，修正后的 1000 项自由能全部有限且逐轮上升。该控制仍只有 17 个有效成分。严格 MATLAB 初始化在字典输入上未改善 C20；下一步先验收原始体素 FLICA，再接入 mMIGP/DicL。[修复与验证记录](../../validation/bigflica/flica_math_fixes_20261001.md)。
+
 CUDA 压缩路径先逐被试读取，把 float32 标准化矩阵作为 HDF5 分块存盘；后续阶段不在内存中装入完整的“被试 × 体素”模态矩阵。默认 `max_gpu_gb=19`，按 20 GiB 显存目标预留空间。float32 协方差本身需 `N × N × 4` 字节，计算还要为临时数组留空间；超过配置预算时报错。磁盘需求不受内存预算限制，例如 37,182 人 × 100 万掩膜体素的 float32 标准化缓存约 138.5 GiB/**每模态**。大于 2,048 人时，mMIGP 根据目标秩和显存预算选择完整 GPU 特征分解或随机子空间；随机路径与直接体素 FLICA 的自由度近似仍需单独核验，不能当作逐点一致。
 
 ## 流程策略
@@ -87,7 +89,7 @@ fnit-bigflica apply \
   --ridge 1e-6 --device cuda:0 --feature-block 32768
 ```
 
-直接体素模式省略 mMIGP/DicL 维度，另设输出目录以保留两套模型。以下仅展示调用形式；该模式尚未完成相同输入的成分秩和精度验收：
+直接体素模式省略 mMIGP/DicL 维度，另设输出目录以保留两套模型。支持标量 `o` 和逐被试 `R` 噪声精度，输出前执行与压缩流程相同的有效秩和模态重建检查。以下展示调用形式；默认预处理仍是逐体素标准化，不能等同于 MATLAB 的整体 RMS 预处理，真实原始体素对照正在单独验收：
 
 ```bash
 fnit-bigflica fit \
@@ -204,8 +206,8 @@ bigflica_output/
 | `dicl_max_iter` / `--dicl-max-iter` | DicL 最大 epoch 数，默认 1000；沿用 sklearn 提前停止规则。 |
 | `dicl_batch_size` / `--dicl-batch-size` | GPU LARS 每批体素数，默认 32，与指定 notebook 一致。改动后结果可能变化。 |
 | `dicl_sparse_iterations` / `--dicl-sparse-iterations` | GPU LARS 每个体素最多路径事件数，默认 120；到限未收敛时报错。 |
-| `flica_max_iter` / `--flica-max-iter` | FLICA 变分更新上限，默认 1000；与原实现一样实际更新 `max_iter + 1` 次。 |
-| `flica_lambda_dims` / `--flica-lambda-dims` | 压缩模式的噪声精度维度：默认 `o` 为每模态一个值，与指定 notebook 一致；`R` 为每模态、每个 mMIGP 维度各一个值。直接体素模式当前仅支持 `o`。更改此项会改变模型，须分别验收成分稳定性和重建。 |
+| `flica_max_iter` / `--flica-max-iter` | FLICA 变分更新次数，默认 1000，必须为正整数。CPU/GPU 均执行指定次数；旧版多更新一次的问题已修复。 |
+| `flica_lambda_dims` / `--flica-lambda-dims` | 噪声精度维度：默认 `o` 为每模态一个值，与指定 notebook 一致。`R` 在直接体素模式中为每模态、每个原始被试一个值，在压缩模式中为每模态、每个 mMIGP 坐标一个值。更改此项会改变模型，须分别验收成分稳定性和重建。 |
 | `top_voxels` / `--top-voxels` | 各成分按绝对 z 值保留最高的体素数，默认 1000。 |
 | `random_state` / `--random-state` | DicL 随机种子，默认 0。 |
 | `device` / `--device` | `auto` 优先 CUDA；可显式指定 `cuda:0` 或 `cpu`。直接体素模式要求 CUDA。 |

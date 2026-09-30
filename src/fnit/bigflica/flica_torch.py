@@ -274,8 +274,8 @@ def iterate_flica_torch(y_arrays: Sequence[np.ndarray | RawVoxelMatrix], priors:
     backend = _device(device)
     if backend.type != "cuda":
         raise ValueError("CUDA device required for FLICA GPU iteration")
-    if max_iter < 0:
-        raise ValueError("max_iter must be nonnegative")
+    if max_iter < 1:
+        raise ValueError("max_iter must be positive")
     n_modalities, n_components, n_reduced = (int(constants[key]) for key in ("K", "L", "R"))
     lambda_dims = constants.get("lambda_dims", "o")
     if lambda_dims not in ("o", "R"):
@@ -353,8 +353,8 @@ def iterate_flica_torch(y_arrays: Sequence[np.ndarray | RawVoxelMatrix], priors:
                         dtype=torch.float64)
     sum_y2 = [squared_sum(index) for index in range(n_modalities)]
 
-    # Upstream indexes from zero and exits after maxits + 1 updates.
-    for _ in range(max(2, max_iter + 1)):
+    # Run the requested number of complete coordinate updates.
+    for _ in range(max_iter):
         eta_c = prior_eta_c + n_reduced / 2
         eta_binv = 1 / prior_eta_b + h2 / 2
         eta = eta_c / eta_binv

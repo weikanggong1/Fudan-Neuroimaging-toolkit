@@ -323,9 +323,6 @@ def test_flica_lambda_option_and_existing_output_guard(tmp_path):
     with pytest.raises(ValueError, match="flica_lambda_dims"):
         run_bigflica(tmp_path, modalities, tmp_path / "out", 2,
                      flica_lambda_dims="invalid")
-    with pytest.raises(ValueError, match="compressed"):
-        run_bigflica(tmp_path, modalities, tmp_path / "out", 2,
-                     use_mmigp_dicl=False, flica_lambda_dims="R")
     scalar = _flica_directory(tmp_path, 2, "o")
     subjectwise = _flica_directory(tmp_path, 2, "R")
     assert scalar != subjectwise

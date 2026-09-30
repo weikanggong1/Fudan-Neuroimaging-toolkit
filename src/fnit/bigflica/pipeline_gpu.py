@@ -16,7 +16,7 @@ import torch
 from .dicl_torch import fit_dicl_gpu_streaming
 from .flica_torch import (RawVoxelMatrix, initialize_flica_raw,
                           iterate_flica_torch)
-from .pipeline import (_check_flica_output, _device, _fit_flica,
+from .pipeline import (_check_flica_fit, _check_flica_output, _device, _fit_flica,
                        _flica_directory, _save_manifest, _signature,
                        _valid_cache, _write_maps)
 from .stats_torch import SpatialRegression, t_to_z_gpu
@@ -27,8 +27,11 @@ def run_bigflica_raw_gpu(root: Path, specs: Mapping[str, Mapping[str, str]],
                          destination: Path, ids: Sequence[str], masks: dict,
                          signature: str, n_components: int,
                          flica_max_iter: int, top_voxels: int, random_state: int,
-                         device: str, max_gpu_gb: float, feature_block: int) -> Path:
+                         device: str, max_gpu_gb: float, feature_block: int,
+                         flica_lambda_dims: str = "o") -> Path:
     names = list(specs)
+    result_dir = _flica_directory(destination, n_components, flica_lambda_dims)
+    _check_flica_output(result_dir, signature, names)
     timings: dict[str, float | bool] = {}
     start = time.perf_counter()
     store = prepare_modalities(root, specs, ids, destination / "normalized",
@@ -39,19 +42,14 @@ def run_bigflica_raw_gpu(root: Path, specs: Mapping[str, Mapping[str, str]],
         y = [RawVoxelMatrix(stack.enter_context(h5py.File(
             store / f"{name}.h5", "r"))["data"], feature_block) for name in names]
         priors, posteriors, constants = initialize_flica_raw(
-            y, n_components, device=device, max_gpu_gb=max_gpu_gb)
+            y, n_components, device=device, max_gpu_gb=max_gpu_gb,
+            lambda_dims=flica_lambda_dims)
         fitted = iterate_flica_torch(y, priors, posteriors, constants,
                                      flica_max_iter, device=device)
         source_norms = [value.squared_sum for value in y]
     h = np.asarray(fitted["H"], dtype=np.float64)
-    strengths = np.zeros(n_components, dtype=np.float64)
-    for k, spatial in enumerate(fitted["X"]):
-        weight = np.asarray(fitted["W"][k]).reshape(-1)
-        weighted = np.asarray(spatial) * weight
-        reconstructed_norm = np.sum((weighted.T @ weighted) * (h @ h.T))
-        if not np.isfinite(reconstructed_norm) or reconstructed_norm / source_norms[k] < 1e-12:
-            raise ValueError("Direct FLICA collapsed to a near-zero reconstruction")
-        strengths += np.square(spatial).sum(axis=0) * weight ** 2
+    strengths = _check_flica_fit(fitted, names, source_norms, n_components,
+                                result_dir, flica_lambda_dims)
     order = np.argsort(strengths)[::-1]
     contribution = np.asarray(fitted["H_PCs"])[:len(names), order]
     timings["flica_s"] = time.perf_counter() - start
@@ -59,7 +57,8 @@ def run_bigflica_raw_gpu(root: Path, specs: Mapping[str, Mapping[str, str]],
                              n_components, None, None, 0, flica_max_iter,
                              top_voxels, random_state, device, max_gpu_gb,
                              feature_block, None, None, store, None, None, h.T[:, order],
-                             contribution, timings)
+                             contribution, timings,
+                             flica_lambda_dims=flica_lambda_dims)
 
 
 def run_bigflica_gpu(root: Path, specs: Mapping[str, Mapping[str, str]],
