@@ -25,10 +25,13 @@ def _write_json(path: Path, value: dict) -> None:
 
 
 def _batch(files: list[h5py.File], rows: np.ndarray, device: torch.device):
-    order = np.argsort(rows)
-    inverse = np.argsort(order)
-    return [torch.as_tensor(file['data'][rows[order]][inverse], device=device,
-                            dtype=torch.float32) for file in files]
+    batches = []
+    for file in files:
+        dataset = file['data']
+        # Stores are chunked by subject; contiguous row reads avoid HDF5 fancy-index overhead.
+        values = np.stack([dataset[int(row)] for row in rows])
+        batches.append(torch.as_tensor(values, device=device, dtype=torch.float32))
+    return batches
 
 
 def _infer(model: SupervisedComponents, files: list[h5py.File], rows: np.ndarray,
@@ -64,7 +67,10 @@ def _validation_loss(prediction: np.ndarray, labels: np.ndarray,
             # Stable log-softmax avoids underflow for confidently wrong labels.
             shifted = head - head.max(axis=1, keepdims=True)
             log_probability = shifted - np.log(np.exp(shifted).sum(axis=1, keepdims=True))
-            losses.append(float(-log_probability[np.arange(len(head)), actual.astype(int)].mean()))
+            classes = actual.astype(int)
+            weights = np.asarray(target.get('class_weights', [1.] * width), dtype=np.float64)[classes]
+            losses.append(float(np.sum(-log_probability[np.arange(len(head)), classes] * weights)
+                                / weights.sum()))
         offset += width
     return float(np.mean(losses))
 
@@ -141,9 +147,11 @@ def run_superbigflica(subjects_root: str | Path,
                      validation_fraction: float = 0.2, test_fraction: float = 0.2,
                      max_epochs: int = 50, batch_size: int = 64,
                      learning_rate: float = 0.001, dropout: float = 0.2,
-                     relative_weight: float = 0.5, random_state: int = 0,
+                     relative_weight: float = 0.5, class_weight: str = 'balanced',
+                     random_state: int = 0,
                      device: str = 'auto', max_gpu_gb: float = 19.0,
-                     feature_block: int = 2048, top_voxels: int = 1000) -> Path:
+                     feature_block: int = 2048, top_voxels: int = 1000,
+                     make_plots: bool = True) -> Path:
     """Fit and select on validation subjects; evaluate the held-out test once."""
     if (n_components < 1 or max_epochs < 1 or batch_size < 2 or
             not np.isfinite(learning_rate) or learning_rate <= 0 or
@@ -158,7 +166,8 @@ def run_superbigflica(subjects_root: str | Path,
     cohort = load_cohort(subjects_root, modalities, phenotypes_csv, targets,
                          id_column=id_column, split_column=split_column,
                          validation_fraction=validation_fraction, test_fraction=test_fraction,
-                         random_state=random_state, subjects=subjects)
+                         random_state=random_state, subjects=subjects,
+                         class_weight=class_weight)
     training = np.flatnonzero(cohort.splits == 'train')
     validation = np.flatnonzero(cohort.splits == 'validation')
     if len(training) <= n_components + 1:
@@ -239,6 +248,7 @@ def run_superbigflica(subjects_root: str | Path,
                                 validation_loss=score, reconstruction_loss=float(average_terms[0]),
                                 spatial_l1=float(average_terms[1]), supervision_loss=float(average_terms[2]),
                                 prediction_regularization=float(average_terms[3])))
+            _write_csv(destination / 'history.csv', history)
             schedule.step()
             if epoch >= 10:
                 scale_schedule.step()
@@ -306,24 +316,32 @@ def run_superbigflica(subjects_root: str | Path,
     np.save(destination / 'prediction_weights.npy', best_state['prediction_weight'].numpy())
     metadata = dict(schema_version=1, method='superbigflica', modalities=specs,
                     targets=cohort.targets, n_components=n_components, output_sizes=sizes,
-                    dropout=dropout, relative_weight=relative_weight, learning_rate=learning_rate,
+                    dropout=dropout, relative_weight=relative_weight, class_weight=class_weight,
+                    initialization='random', learning_rate=learning_rate,
                     max_epochs=max_epochs, batch_size=batch_size, effective_batch_size=effective_batch,
                     random_state=random_state, id_column=id_column, split_column=split_column,
                     validation_fraction=validation_fraction, test_fraction=test_fraction,
                     best_epoch=best_epoch, best_validation_loss=best_score,
-                    model_selection='mean validation standardized MSE / cross entropy',
+                    model_selection='mean validation standardized MSE / training-weighted cross entropy',
                     counts={split: int(np.sum(cohort.splits == split))
                             for split in ('train', 'validation', 'test')},
                     device=str(backend), dtype='float32', spatial_statistics_dtype='float64', tf32=True,
                     max_gpu_gb=max_gpu_gb, feature_block=feature_block,
                     spatial_feature_block=spatial_feature_block, statistic_block=statistic_block,
-                    top_voxels=top_voxels,
+                    top_voxels=top_voxels, make_plots=make_plots,
                     timings=timings, wall_time_s=time.perf_counter() - start,
                     peak_gpu_allocated_gib=(torch.cuda.max_memory_allocated(backend) / 2 ** 30
                                             if backend.type == 'cuda' else None),
                     upstream_commit='6695b638802aab50f43f889e97af223f8191018e',
                     reference='Gong et al. TMI 42(3):834-849; DOI:10.1109/TMI.2022.3218720')
     _write_json(destination / 'model.json', metadata)
+    if make_plots:
+        from .plotting import plot_superbigflica
+        plot_start = time.perf_counter()
+        plot_superbigflica(destination)
+        timings['summary_plots_s'] = time.perf_counter() - plot_start
+        metadata['wall_time_s'] = time.perf_counter() - start
+        _write_json(destination / 'model.json', metadata)
     return destination
 
 

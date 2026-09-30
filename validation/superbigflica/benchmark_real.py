@@ -117,8 +117,9 @@ def main() -> None:
     parser.add_argument('output_dir', type=Path)
     parser.add_argument('summary_json', type=Path)
     parser.add_argument('--device', required=True)
-    parser.add_argument('--max-epochs', type=int, default=30)
-    parser.add_argument('--batch-size', type=int, default=32)
+    parser.add_argument('--n-components', type=int, default=20)
+    parser.add_argument('--max-epochs', type=int, default=50)
+    parser.add_argument('--batch-size', type=int, default=64)
     args = parser.parse_args()
     started = time.perf_counter()
     modalities = json.loads(args.config.read_text())['modalities']
@@ -139,32 +140,57 @@ def main() -> None:
     implementation_hashes = {path.name: sha256(path)
                               for path in sorted(source_root.glob('*.py'))}
     implementation_hashes['benchmark_real.py'] = sha256(Path(__file__))
+    dependency_root = source_root.parent / 'bigflica'
+    runtime_hashes = {name: sha256(dependency_root / name)
+                      for name in ('pipeline.py', 'stats_torch.py')}
     write_json(progress, {'status': 'fitting', 'subjects': len(subjects), 'device': args.device})
+    if args.device.startswith('cuda'):
+        total_memory = torch.cuda.get_device_properties(args.device).total_memory
+        torch.cuda.set_per_process_memory_fraction(min(1., 19 * 2 ** 30 / total_memory),
+                                                   args.device)
     model_dir = run_superbigflica(
         args.subjects_root, modalities, args.phenotypes_csv,
         {'p20023_i0': 'continuous', 'Incident_I9_HYPTENS': 'categorical'},
-        args.output_dir, n_components=3, id_column='eid', subjects=subjects,
+        args.output_dir, n_components=args.n_components, id_column='eid', subjects=subjects,
         validation_fraction=.2, test_fraction=.2, max_epochs=args.max_epochs,
         batch_size=args.batch_size, random_state=0, device=args.device,
+        dropout=.2, class_weight='balanced',
         max_gpu_gb=19, feature_block=2048, top_voxels=1000,
     )
     write_json(progress, {'status': 'verifying_outputs', 'subjects': len(subjects)})
     metadata = json.loads((model_dir / 'model.json').read_text())
     metrics = json.loads((model_dir / 'metrics.json').read_text())
     course = np.load(model_dir / 'subj_course.npy')
-    if course.shape != (len(subjects), 3) or not np.isfinite(course).all():
+    if course.shape != (len(subjects), args.n_components) or not np.isfinite(course).all():
         raise ValueError('Invalid real subject course output')
+    with (model_dir / 'subj_course.tsv').open() as stream:
+        training = np.array([row['split'] == 'train'
+                             for row in csv.DictReader(stream, delimiter='\t')])
+    training_course = course[training].astype(np.float64)
+    design = np.column_stack((np.ones(training.sum()), training_course))
+    rank, design_rank = int(np.linalg.matrix_rank(training_course)), int(np.linalg.matrix_rank(design))
+    if rank != args.n_components or design_rank != args.n_components + 1:
+        raise ValueError('Real training component course is rank deficient')
+    import sys, scipy, sklearn, h5py
     report = {
-        'dataset': '500 real UKB subjects; full-mask VBM/FA/MD; two measured targets',
+        'dataset': f'{len(subjects)} real UKB subjects; full-mask VBM/FA/MD; two measured targets',
         'scope': 'Public supervised API, held-out metrics and frozen inference checks',
         'targets': {'p20023_i0': {'type': 'continuous',
                                  'meaning': 'Mean time to correctly identify matches', 'unit': 'ms'},
                     'Incident_I9_HYPTENS': {'type': 'categorical'}},
-        'subjects': len(subjects), 'components': 3, 'course_shape': list(course.shape),
+        'subjects': len(subjects), 'components': args.n_components, 'course_shape': list(course.shape),
+        'training_course_checks': {'shape': list(training_course.shape), 'finite': True,
+                                   'component_rank': rank, 'component_plus_intercept_rank': design_rank},
         'splits': metadata['counts'], 'device': args.device, 'dtype': metadata['dtype'],
         'tf32': metadata['tf32'], 'max_epochs': args.max_epochs,
         'batch_size': args.batch_size, 'effective_batch_size': metadata['effective_batch_size'],
         'best_epoch': metadata['best_epoch'], 'random_state': 0,
+        'initialization': metadata['initialization'],
+        'dropout': metadata['dropout'], 'class_weight': metadata['class_weight'],
+        'categorical_training_balance': {target['name']: {'counts': target['class_counts'],
+                                                         'weights': target['class_weights']}
+                                         for target in metadata['targets']
+                                         if target['type'] == 'categorical'},
         'metrics': sanitized_metrics(metrics), 'maps': verify_maps(model_dir, metadata),
         'frozen_apply': verify_apply(model_dir, args.subjects_root, metadata),
         'stage_timings_s': metadata['timings'], 'pipeline_wall_s': metadata['wall_time_s'],
@@ -172,7 +198,12 @@ def main() -> None:
         'peak_process_rss_gib': resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 2 ** 20,
         'peak_gpu_allocated_gib': metadata['peak_gpu_allocated_gib'],
         'input_hashes': hashes, 'implementation_sha256': implementation_hashes,
+        'runtime_dependencies_sha256': runtime_hashes,
         'model_sha256': sha256(model_dir / 'model.pt'),
+        'environment': {'python': sys.version.split()[0], 'pytorch': torch.__version__,
+                        'numpy': np.__version__, 'nibabel': nib.__version__,
+                        'scipy': scipy.__version__, 'scikit_learn': sklearn.__version__,
+                        'h5py': h5py.__version__},
         'hardware': {'hostname': __import__('socket').gethostname(),
                      'cpu_threads': torch.get_num_threads(),
                      'gpu': torch.cuda.get_device_name() if args.device.startswith('cuda') else None},

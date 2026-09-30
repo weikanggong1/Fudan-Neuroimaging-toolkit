@@ -39,13 +39,17 @@ class SupervisedObjective(nn.Module):
 
     Positive scales are squared raw parameters. The continuous complete-label
     objective agrees with the fixed upstream equations; missing labels average
-    over observed entries, and categorical heads use cross entropy.
+    over observed entries, and categorical heads use training-weighted cross entropy.
     """
 
     def __init__(self, n_modalities: int, targets: list[dict],
                  output_sizes: list[int], relative_weight: float = 0.5):
         super().__init__()
         self.targets, self.output_sizes = targets, output_sizes
+        for index, (target, width) in enumerate(zip(targets, output_sizes)):
+            if target['type'] == 'categorical':
+                self.register_buffer(f'class_weights_{index}', torch.tensor(
+                    target.get('class_weights', [1.] * width), dtype=torch.float32))
         self.scales = nn.ParameterList([nn.Parameter(torch.ones(size)) for size in
                                         (n_modalities, n_modalities, len(targets),
                                          len(targets), len(targets))])
@@ -76,7 +80,8 @@ class SupervisedObjective(nn.Module):
                     task_loss = (head[observed, 0] - labels[observed, i]).square().mean()
                     supervision = supervision + task_loss / (2 * scales[2][i].square())
                 else:
-                    task_loss = F.cross_entropy(head[observed], labels[observed, i].long())
+                    task_loss = F.cross_entropy(head[observed], labels[observed, i].long(),
+                                                weight=getattr(self, f'class_weights_{i}'))
                     supervision = supervision + task_loss / scales[2][i]
                 supervision = supervision + torch.log1p(scales[2][i])
             weights = model.prediction_weight[:, offset:offset + width]
