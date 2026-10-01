@@ -118,6 +118,19 @@ def test_disabled_cache_runs_again_without_reusing_persistent_results(anatomy):
     assert calls["registration"] == 2
 
 
+def test_scipy_version_change_invalidates_verified_anatomical_cache(anatomy, monkeypatch):
+    source, template, options, calls = anatomy
+    first = cache.prepare_anatomical(source, template, **options)
+    assert cache.prepare_anatomical(source, template, **options).reused
+    monkeypatch.setattr(cache.scipy, "__version__", cache.scipy.__version__ + ".changed")
+    changed = cache.prepare_anatomical(source, template, **options)
+    assert not changed.reused
+    assert changed.fingerprint != first.fingerprint
+    assert calls == {"strip": 2, "fast": 2, "registration": 2}
+    assert cache.prepare_anatomical(source, template, **options).reused
+    assert calls["registration"] == 2
+
+
 def test_cache_hit_retains_cold_fast_cuda_policy_without_running_a_gpu_fit(anatomy, monkeypatch):
     import torch
     source, template, options, calls = anatomy

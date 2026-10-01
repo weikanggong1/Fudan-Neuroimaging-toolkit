@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "runtime_revision": "3b9b0f8128f10da77d3fbb6c395e9127353c3e46",
+  "runtime_tests": {
+    "host": "gpucw1",
+    "command": "pytest -q tests/test_fmri_*.py tests/test_feat_temporal.py tests/flirt tests/test_registration_gpu_benchmark.py tests/fast_vbm/test_flirt_fused_sampling.py tests/fast_vbm/test_flirt_schedule_parity.py",
+    "passed_unique_tests": 212,
+    "devices": [
+      "cpu",
+      "cuda"
+    ],
+    "runs": [
+      {
+        "passed": 209,
+        "failed": 3,
+        "seconds": 349.02,
+        "failure_reason": "Snapshot omitted tools/benchmark_registration_gpu.py; no runtime numerical failures."
+      },
+      {
+        "command": "pytest -q tests/test_registration_gpu_benchmark.py",
+        "passed": 3,
+        "failed": 0,
+        "seconds": 0.33,
+        "exit_code": 0,
+        "repair": "Restored omitted tool from the same frozen Git commit; runtime source unchanged."
+      }
+    ]
+  },
+  "deepprep_report_control": {
+    "frozen_reports_regenerated_identically": true,
+    "different_revisions_rejected_before_writing": true
+  },
+  "scope": "Unit and interface controls complement, and do not replace, the real full-run comparisons."
+}

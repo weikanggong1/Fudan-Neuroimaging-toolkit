@@ -9,6 +9,7 @@ import time
 
 import nibabel as nib
 import numpy as np
+import scipy
 import torch
 
 from ..fast import TorchFAST
@@ -80,6 +81,7 @@ def _fingerprint(t1w, template, template_mask, strip, backend, morph_weights,
         "fnirt_execution": fnirt_execution,
         "implementation": _implementation_hash(), "device_type": torch.device(device).type,
         "torch": torch.__version__, "numpy": np.__version__, "nibabel": nib.__version__,
+        "scipy": scipy.__version__,
         "cuda_version": torch.version.cuda,
         "cudnn_version": torch.backends.cudnn.version(),
         "gpu": ({"name": torch.cuda.get_device_name(device),

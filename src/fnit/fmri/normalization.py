@@ -189,6 +189,14 @@ def resample_world(
         dtype=torch.float64, device=selected,
     )
     coords = transform[:3, :3] @ world + transform[:3, 3:4]
+    # Inverse-affine roundoff can put an exact edge voxel slightly outside
+    # its grid. Correct only these sub-microvoxel excursions before sampling.
+    valid = torch.ones(coords.shape[1], dtype=torch.bool, device=selected)
+    for axis in range(3):
+        upper = image.shape[axis] - 1
+        within = (coords[axis] >= -1e-6) & (coords[axis] <= upper + 1e-6)
+        coords[axis] = torch.where(within, coords[axis].clamp(0, upper), coords[axis])
+        valid &= within
     if interpolation == "spline":
         from ..eddy.fsl2111_strict.spline import sample_cubic_periodic_fast
         spline_coords = coords.reshape(1, 3, *shape).float()
@@ -196,9 +204,6 @@ def resample_world(
         [2 * coords[axis] / max(image.shape[axis] - 1, 1) - 1
          for axis in (2, 1, 0)], dim=-1,
     ).reshape(1, *shape, 3).float()
-    valid = torch.ones(coords.shape[1], dtype=torch.bool, device=selected)
-    for axis in range(3):
-        valid &= (coords[axis] >= 0) & (coords[axis] <= image.shape[axis] - 1)
     valid = valid.reshape(1, *shape)
     if output_mask is not None:
         mask_image = nib.load(str(output_mask))

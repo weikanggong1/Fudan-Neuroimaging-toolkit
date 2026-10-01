@@ -108,7 +108,9 @@ def clean_confounds(
     tissue signals, motion, and frequencies are projected out together.
     ``bandpass=(low, high)`` uses Hz and a discrete Fourier-bin projector.
     Projection arithmetic is float64 to avoid TF32 residual drift on long BOLD
-    runs; NIfTI input and output remain float32.
+    runs; NIfTI input and output remain float32. Nuisance columns are centered
+    and normalized before solving, so motion units and tissue baselines do not
+    determine which columns survive the numerical rank cutoff.
     """
     image, data = _load_bold(input_bold)
     nt = data.shape[3]
@@ -133,6 +135,16 @@ def clean_confounds(
 
     t = np.linspace(-1.0, 1.0, nt)
     design = np.column_stack((np.ones(nt), t, (3 * t**2 - 1) / 2, *regressors))
+    if not np.isfinite(design).all():
+        raise ValueError("confound design must contain only finite values")
+    # Keep the intercept separately. Constant nuisance columns add no new
+    # direction; centering other columns preserves the span with the intercept.
+    varying = np.r_[True, np.ptp(design[:, 1:], axis=0) > 0]
+    design = design[:, varying]
+    design[:, 1:] -= design[:, 1:].mean(axis=0)
+    column_norms = np.linalg.norm(design, axis=0)
+    nonzero = column_norms > 0
+    design = design[:, nonzero] / column_norms[nonzero]
     keep = None
     if bandpass is not None:
         if tr is None:
@@ -156,6 +168,12 @@ def clean_confounds(
         keep = torch.as_tensor(keep_np, device=selected)
     design_tensor = torch.as_tensor(design, dtype=torch.float64, device=selected)
     filtered_design = _bandpass(design_tensor, keep)
+    # A stopband-only column can leave FFT roundoff. Do not normalize that
+    # roundoff into an additional passband regressor. Input columns have unit
+    # norm, making this tolerance independent of their physical units.
+    filtered_norms = torch.linalg.vector_norm(filtered_design, dim=0)
+    effective = filtered_norms > np.finfo(np.float64).eps * max(design.shape)
+    filtered_design = filtered_design[:, effective] / filtered_norms[effective]
     pseudoinverse = torch.as_tensor(
         np.linalg.pinv(filtered_design.cpu().numpy(), rcond=1e-8),
         dtype=torch.float64,

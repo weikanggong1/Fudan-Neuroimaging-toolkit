@@ -35,6 +35,53 @@ class FMRISurfaceResult:
     timing_seconds: dict[str, float]
 
 
+def _validate_volume_metadata(metadata, inputs, source_t1):
+    """Require the selected run and completed AROMA, without imposing extra regression."""
+    required_sources = {
+        f"bids:raw:{path.relative_to(inputs.bids_root).as_posix()}"
+        for path in (inputs.bold, source_t1)
+    }
+    sources = metadata.get("Sources", [])
+    if not isinstance(sources, list) or not required_sources.issubset(sources):
+        raise ValueError("volume derivative sources do not match the selected BIDS BOLD and T1w")
+    recorded_tr = metadata.get("RepetitionTime")
+    if (isinstance(recorded_tr, bool) or not isinstance(recorded_tr, (int, float))
+            or not np.isfinite(recorded_tr) or not np.isclose(recorded_tr, inputs.tr, rtol=1e-5, atol=1e-6)):
+        raise ValueError("volume derivative RepetitionTime differs from the selected BIDS run")
+    details = metadata.get("FNIT", {})
+    report = details.get("Report", {})
+    denoising = details.get("Denoising")
+    if denoising is None:
+        completed = report.get("aroma_mode") in ("nonaggr", "aggr") and report.get("ica_converged") is True
+    else:
+        completed = (isinstance(denoising, dict) and denoising.get("Method") == "ICA-AROMA"
+                     and denoising.get("Mode") in ("nonaggr", "aggr")
+                     and denoising.get("Completed") is True)
+        if "ica_converged" in report and report["ica_converged"] is not True:
+            completed = False
+    if not completed:
+        raise ValueError("volume derivative lacks completed ICA-AROMA denoising")
+
+
+def _validate_native_bold(image, inputs):
+    raw = nib.load(str(inputs.bold))
+    reference = nib.load(str(inputs.sbref or inputs.bold))
+    if (image.ndim != 4 or image.shape[:3] != reference.shape[:3]
+            or image.shape[3] != raw.shape[3]
+            or not np.allclose(image.affine, reference.affine, rtol=0, atol=1e-4)):
+        raise ValueError("native volume derivative does not match the selected BIDS BOLD reference grid")
+    if not _tr_matches(image, inputs.tr):
+        raise ValueError("native volume derivative TR differs from the selected BIDS run")
+
+
+def _tr_matches(image, tr):
+    unit = image.header.get_xyzt_units()[1]
+    scale = {"sec": 1.0, "msec": 0.001, "usec": 0.000001}.get(unit)
+    return image.ndim == 4 and scale is not None and np.isclose(
+        float(image.header.get_zooms()[3]) * scale, tr, rtol=1e-5, atol=1e-6
+    )
+
+
 def fMRISurface_pipeline(
     bids_root: str | Path,
     derivatives_root: str | Path,
@@ -91,18 +138,17 @@ def fMRISurface_pipeline(
     if paths is None:
         raise FileNotFoundError("completed FNIT volume BIDS derivative not found")
     ensure_derivative_dataset(paths.root, inputs.bids_root)
-    for path in (paths.clean_native, paths.clean_mni, paths.t1_brain,
-                 paths.bbr_matrix, mni_sidecar):
-        if not path.is_file():
-            raise FileNotFoundError(path)
+    if not mni_sidecar.is_file():
+        raise FileNotFoundError(mni_sidecar)
     metadata = json.loads(mni_sidecar.read_text(encoding="utf-8"))
     source_t1 = inputs.bids_root / metadata.get("FNIT", {}).get("SourceT1w", "")
     if source_t1.resolve() not in [p.resolve() for p in inputs.t1w_images]:
         raise ValueError("volume derivative T1w does not belong to this BIDS subject")
     paths = fmri_derivative_paths(inputs, source_t1, derivatives_root)
-    if not any(metadata.get("FNIT", {}).get("ConfoundRegression", {}).get(key, False)
-               for key in ("wm", "csf", "motion")):
-        raise ValueError("volume derivative lacks completed WM, CSF or motion regression")
+    for path in (paths.clean_native, paths.clean_mni, paths.t1_brain, paths.bbr_matrix):
+        if not path.is_file():
+            raise FileNotFoundError(path)
+    _validate_volume_metadata(metadata, inputs, source_t1)
     if paths.dtseries.exists() and not overwrite:
         raise FileExistsError(paths.dtseries)
     assets = Path(hcp_assets_dir).expanduser().resolve()
@@ -113,8 +159,11 @@ def fMRISurface_pipeline(
     clean_mni = paths.clean_mni
     t1 = paths.t1_brain
     epi_image = nib.load(str(native))
+    _validate_native_bold(epi_image, inputs)
     t1_image = nib.load(str(t1))
     mni_image = nib.load(str(clean_mni))
+    if not _tr_matches(mni_image, inputs.tr):
+        raise ValueError("MNI volume derivative TR differs from the selected BIDS run")
     label_image = nib.load(str(dseg))
     canonical_mni = nib.as_closest_canonical(mni_image)
     canonical_label = nib.as_closest_canonical(label_image)

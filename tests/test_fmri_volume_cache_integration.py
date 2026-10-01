@@ -145,6 +145,11 @@ def test_multiple_bids_runs_reuse_anatomy_and_execute_run_specific_projection(tm
     assert not first_report["anatomical_cache"]["reused"]
     assert second_report["anatomical_cache"]["reused"]
     assert first_report["anatomical_cache"]["fingerprint"] == second_report["anatomical_cache"]["fingerprint"]
+    for report in (first_report, second_report):
+        assert report["configuration"]["reuse_anatomical"] is True
+        assert report["configuration"]["bbr_execution"] == "reference"
+        assert report["configuration"]["fnirt_execution"] == "reference"
+        assert report["configuration"]["anatomical_cache"] == report["anatomical_cache"]
     for phase in ("t1_synthstrip", "template_preparation", "fast", "t1_to_mni_affine", "t1_to_mni_nonlinear", "warp_conversion"):
         assert second.timing_seconds[phase] == 0
     for result in (first, second):
