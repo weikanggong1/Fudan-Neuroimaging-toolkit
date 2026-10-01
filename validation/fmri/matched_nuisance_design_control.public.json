@@ -1,0 +1,177 @@
+{
+  "schema_version": 1,
+  "source_revision": "ec57972ceb7d715dd8b91ba32e3512bc7743b9c5",
+  "reference_source_revision": "380e23dbedcc36d1e34bd7eed414196089d6fe67",
+  "scope": "Existing full real AROMA/clean data; two actual nuisance designs crossed under a single independent float64 SVD joint projection. No new ICA or pipeline run.",
+  "data": {
+    "anonymous_id": "real_run_01",
+    "shape": [
+      88,
+      88,
+      64,
+      490
+    ],
+    "candidate_brain_voxels": 97348,
+    "reference_brain_voxels": 99372,
+    "common_brain_voxels": 96823,
+    "candidate_wm_voxels": 18201,
+    "candidate_csf_voxels": 4362
+  },
+  "design": {
+    "candidate_shape": [
+      490,
+      29
+    ],
+    "reference_shape": [
+      490,
+      29
+    ],
+    "candidate_rank": 29,
+    "reference_rank": 29,
+    "rank_rcond": 1e-08,
+    "method": "Intercept, linear/quadratic trends, WM/CSF means and Friston-24. Nonconstant columns centered and L2-normalized; joint projection without additional filter or mean restoration.",
+    "candidate_mean_computation": "Float64 tissue means streamed from float32 AROMA. Fortran voxel summation order may differ by float64 roundoff from production C-order; actual-clean numerical control is included.",
+    "normalized_candidate_design_sha256": "ce912dd06b8d20efac6c6696b3aa3b702b05f2bc493901061c0b839a64f7c063",
+    "raw_candidate_design_sha256": "49db316270debbda90e73ca014f6df339fcb232856478fde1b6ca8ee5dd760eb",
+    "principal_cosine": {
+      "mean": 0.5788617711269262,
+      "median": 0.6505263400499675,
+      "p05": 0.04713805176256547,
+      "minimum": 0.02347174974721595
+    }
+  },
+  "comparisons": {
+    "aroma_no_projection": {
+      "evaluated_values": 47443270,
+      "mae": 258.9861078084735,
+      "rmse": 425.18645689554677,
+      "max_absolute_difference": 6673.255859375,
+      "valid_voxel_temporal_r": 96644,
+      "mean_voxel_temporal_r": 0.855935705393553,
+      "median_voxel_temporal_r": 0.8769572583299352,
+      "p05_voxel_temporal_r": 0.7114408691452266,
+      "pooled_time_demeaned_r": 0.8237270051773067,
+      "temporal_rms_threshold": 1e-06
+    },
+    "own_designs": {
+      "evaluated_values": 47443270,
+      "mae": 84.40328842047394,
+      "rmse": 119.8771935889496,
+      "max_absolute_difference": 4362.991170411856,
+      "valid_voxel_temporal_r": 96644,
+      "mean_voxel_temporal_r": 0.8504705998537376,
+      "median_voxel_temporal_r": 0.8714440901303675,
+      "p05_voxel_temporal_r": 0.7116962419041326,
+      "pooled_time_demeaned_r": 0.816525169474295,
+      "temporal_rms_threshold": 1e-06
+    },
+    "both_using_candidate_design": {
+      "evaluated_values": 47443270,
+      "mae": 76.6820725437315,
+      "rmse": 110.88222814079022,
+      "max_absolute_difference": 4216.354481549597,
+      "valid_voxel_temporal_r": 96644,
+      "mean_voxel_temporal_r": 0.8770350120241095,
+      "median_voxel_temporal_r": 0.8979991323838518,
+      "p05_voxel_temporal_r": 0.7396510742447449,
+      "pooled_time_demeaned_r": 0.845322882761107,
+      "temporal_rms_threshold": 1e-06
+    },
+    "both_using_reference_design": {
+      "evaluated_values": 47443270,
+      "mae": 73.61476665142263,
+      "rmse": 105.96470780218104,
+      "max_absolute_difference": 4468.689272352846,
+      "valid_voxel_temporal_r": 96644,
+      "mean_voxel_temporal_r": 0.8840031758418359,
+      "median_voxel_temporal_r": 0.9037438459733221,
+      "p05_voxel_temporal_r": 0.7575117957540287,
+      "pooled_time_demeaned_r": 0.8553864896235127,
+      "temporal_rms_threshold": 1e-06
+    },
+    "candidate_aroma_changing_design": {
+      "evaluated_values": 47443270,
+      "mae": 43.52965856696209,
+      "rmse": 62.8176355608295,
+      "max_absolute_difference": 4324.065379168598,
+      "valid_voxel_temporal_r": 96644,
+      "mean_voxel_temporal_r": 0.9571651117063412,
+      "median_voxel_temporal_r": 0.963989409984115,
+      "p05_voxel_temporal_r": 0.9107783828598038,
+      "pooled_time_demeaned_r": 0.9488501190447051,
+      "temporal_rms_threshold": 1e-06
+    },
+    "reference_aroma_changing_design": {
+      "evaluated_values": 47443270,
+      "mae": 46.25417760531633,
+      "rmse": 66.35805968373778,
+      "max_absolute_difference": 4034.298813215648,
+      "valid_voxel_temporal_r": 96819,
+      "mean_voxel_temporal_r": 0.9527791207170833,
+      "median_voxel_temporal_r": 0.9587158595762052,
+      "p05_voxel_temporal_r": 0.9105959288252539,
+      "pooled_time_demeaned_r": 0.9448886749359742,
+      "temporal_rms_threshold": 1e-06
+    },
+    "candidate_independent_vs_actual_clean": {
+      "evaluated_values": 47443270,
+      "mae": 3.2663566093723953e-06,
+      "rmse": 4.989715453284838e-06,
+      "max_absolute_difference": 0.00024230537383118644,
+      "valid_voxel_temporal_r": 96644,
+      "mean_voxel_temporal_r": 0.9999999999999999,
+      "median_voxel_temporal_r": 0.9999999999999997,
+      "p05_voxel_temporal_r": 0.9999999999999996,
+      "pooled_time_demeaned_r": 0.9999999999999991,
+      "temporal_rms_threshold": 1e-06
+    },
+    "reference_independent_vs_actual_clean": {
+      "evaluated_values": 47443270,
+      "mae": 3.2514027207481258e-06,
+      "rmse": 5.0170484122702334e-06,
+      "max_absolute_difference": 0.00024265385400212836,
+      "valid_voxel_temporal_r": 96819,
+      "mean_voxel_temporal_r": 0.9999999999999999,
+      "median_voxel_temporal_r": 0.9999999999999997,
+      "p05_voxel_temporal_r": 0.9999999999999996,
+      "pooled_time_demeaned_r": 1.0,
+      "temporal_rms_threshold": 1e-06
+    },
+    "actual_clean_pair": {
+      "evaluated_values": 47443270,
+      "mae": 84.40328842145904,
+      "rmse": 119.87719359081267,
+      "max_absolute_difference": 4362.9912109375,
+      "valid_voxel_temporal_r": 96644,
+      "mean_voxel_temporal_r": 0.8504705998532451,
+      "median_voxel_temporal_r": 0.8714440899677525,
+      "p05_voxel_temporal_r": 0.7116962429181486,
+      "pooled_time_demeaned_r": 0.8165251694723769,
+      "temporal_rms_threshold": 1e-06
+    }
+  },
+  "input_sha256": {
+    "candidate_aroma": "bd27683bf6743bbe01fdf43e9c7955e7cbf5b185433c9a168c54d920495eda60",
+    "reference_aroma": "03f675f3aa999a181cec8fb1bf89d428fb2cab8f91f6e00810781516e26e82e4",
+    "candidate_brain_mask": "5769fe335c370c10efaf57361a7cdd1353fc4a6714194339157df196e11e2463",
+    "reference_brain_mask": "8148636e405a0881d68fa24b5a6a6852e08641ef5b88f400c1e7f5778f54695c",
+    "candidate_wm_mask": "e803cd57d23cb72496a383652d95bf266a72d7fb63fb1e2bbc41662311b7ff8b",
+    "candidate_csf_mask": "bd0346451e1fa62536af12eb981b046712308c1f5fff8b0ebed3b00bb046ce45",
+    "candidate_motion": "8050d3ad1da8d4461bde8c95f1052155b270d0241fc2b086a628f46c0e8dacbf",
+    "reference_normalized_design": "50fa3acba5d24b7216bf16d1a167959131dbab65a476be0fd2f9256958172692",
+    "candidate_clean": "06b8fe87bb1897f4d4646fe38be1fda0ff0d49a29a05cf610aa30174132ae6a7",
+    "reference_clean": "57ecb643b9bc7ae0d990f11bd5deac6a9f434518b8d6e3f520f7d9820cad3f89"
+  },
+  "software": {
+    "numpy": "1.26.4",
+    "nibabel": "5.4.2",
+    "driver_sha256": "40d515814edd8d651512a367cabe8b5b5c439ea77a4a295c4f89a37d0c0d1f79"
+  },
+  "host_peak_rss_bytes": 909570048,
+  "wall_seconds_including_read_hash_and_comparison": 22.25043014390394,
+  "limits": [
+    "Cross-projection fixes already estimated designs; tissue means are not re-estimated after swapping a design.",
+    "Own-run AROMA input, masks, motion and decompositions may differ; these controls separate measured projection effects rather than infer a unique upstream cause."
+  ],
+  "privacy": "Anonymous scalars and hashes only; tissue designs, private paths and voxel data remain private."
+}

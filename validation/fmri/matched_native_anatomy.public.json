@@ -1,0 +1,181 @@
+{
+  "schema_version": 1,
+  "stage": "anatomy",
+  "steps": [
+    {
+      "name": "epi_synthstrip",
+      "process_wall_seconds": 8.556854200083762,
+      "exit_code": 0,
+      "output_checks": {
+        "shape": [
+          88,
+          88,
+          64
+        ],
+        "dtype": "uint16",
+        "all_finite": true,
+        "sha256": "691a700dbaae117946f5bfa7c1ed6630381120afae3e3341282ce09d07899f3a"
+      },
+      "validated_abnormal_exit": false
+    },
+    {
+      "name": "t1_synthstrip",
+      "process_wall_seconds": 9.376869122032076,
+      "exit_code": 0,
+      "output_checks": {
+        "shape": [
+          162,
+          215,
+          180
+        ],
+        "dtype": "float32",
+        "all_finite": true,
+        "sha256": "542f7a92bda1cf1c419b7178a157b11acfc568689b4b6772ac0fe7c5a67dffe4"
+      },
+      "validated_abnormal_exit": false
+    },
+    {
+      "name": "fast",
+      "process_wall_seconds": 149.99806854408234,
+      "exit_code": 255,
+      "output_checks": {
+        "shape": [
+          162,
+          215,
+          180
+        ],
+        "dtype": "float32",
+        "all_finite": true,
+        "sha256": "413952314e99b8527fd0339fa8b363ea5acf591857e4afc3b299972b7d32b474"
+      },
+      "validated_abnormal_exit": true
+    }
+  ],
+  "fsl_installation_version": "6.0.7.22",
+  "threads": 8,
+  "input_sha256": {
+    "t1w": "762cb85469a27f8c64555252f97130d2ecb964f8c0d8f67e6c245ca7d9aa17f3",
+    "sbref": "ff4e0e49a504527468234456cba6ad367d63c1f3f529d8ff3519bc78e2076323",
+    "synthstrip_weights": "37417f802196186441aae3e7f385d94f8a98c64a88acaeaa2723af995c653e33"
+  },
+  "checks": {
+    "epi_synthstrip_mask": {
+      "shape": [
+        88,
+        88,
+        64
+      ],
+      "dtype": "uint8",
+      "all_finite": true,
+      "sha256": "8148636e405a0881d68fa24b5a6a6852e08641ef5b88f400c1e7f5778f54695c",
+      "voxels": 99372
+    },
+    "t1_synthstrip_mask": {
+      "shape": [
+        162,
+        215,
+        180
+      ],
+      "dtype": "uint8",
+      "all_finite": true,
+      "sha256": "e7880c2ac50e4f8b40017418e764492cbd72282b58a5b8c01910ffc6672aa411",
+      "voxels": 1397746
+    },
+    "fast_pve_0": {
+      "shape": [
+        162,
+        215,
+        180
+      ],
+      "dtype": "float32",
+      "all_finite": true,
+      "sha256": "e077dd9bd152e29c78c5cb9de6d4ff19d302347caebb18f17dc1af8457ffdc4a"
+    },
+    "fast_pve_1": {
+      "shape": [
+        162,
+        215,
+        180
+      ],
+      "dtype": "float32",
+      "all_finite": true,
+      "sha256": "3612e2889dec4120bb52a3a7c0363d59f8e85f5ea61eba64ff53e9291e679244"
+    },
+    "fast_pve_2": {
+      "shape": [
+        162,
+        215,
+        180
+      ],
+      "dtype": "float32",
+      "all_finite": true,
+      "sha256": "413952314e99b8527fd0339fa8b363ea5acf591857e4afc3b299972b7d32b474"
+    },
+    "fast_seg": {
+      "shape": [
+        162,
+        215,
+        180
+      ],
+      "dtype": "int32",
+      "all_finite": true,
+      "sha256": "ec2c6f2d36aa632ab186a5c5759800f92204d10ee0b40f4677d54ef5d4fcca63"
+    },
+    "fast_restore": {
+      "shape": [
+        162,
+        215,
+        180
+      ],
+      "dtype": "float32",
+      "all_finite": true,
+      "sha256": "29c5bfcca3eecc1c7503a2711449d27cdf1d5d133f39ba3bca6e58419058e20a"
+    },
+    "fast_bias": {
+      "shape": [
+        162,
+        215,
+        180
+      ],
+      "dtype": "float32",
+      "all_finite": true,
+      "sha256": "3aeab40e729d967710ff59dd01d02d0c50147c8ca3de8efe8f1f155f634cfc75"
+    }
+  },
+  "component_packages": {
+    "fast4": {
+      "name": "fsl-fast4",
+      "version": "2111.3",
+      "build": "h8c873e0_9"
+    },
+    "flirt": {
+      "name": "fsl-flirt",
+      "version": "2111.4",
+      "build": "h28ab0de_3"
+    },
+    "fnirt": {
+      "name": "fsl-fnirt",
+      "version": "2203.2",
+      "build": "ha905fa9_5"
+    },
+    "melodic": {
+      "name": "fsl-melodic",
+      "version": "2601.1",
+      "build": "h46763b2_0"
+    }
+  },
+  "component_sha256": {
+    "mri_synthstrip_source": "bbc2ff8f8779862039401b05d5cd6039fb4f3583e0032a793ac9adb3f4521590",
+    "python": "c502d03a78bfafb464a218c69ba653d29bf27f3fea24324b010ddfa4d8af9153",
+    "fast": "b56036717d3468f6025c0ddcf10e277575e7d84ef0b3c0c0f0f28d83bb748466"
+  },
+  "scope": "Original software on one real input; no BET, threshold/dilation, smoothing, GDC/B0 or FIX added.",
+  "privacy": "Anonymous checks and hashes only. Full paths and logs stay in the private output directory.",
+  "synthstrip_execution": {
+    "device": "cuda",
+    "original_source_unmodified": true,
+    "explicit_gpu_python": true
+  },
+  "sum_process_wall_seconds": 167.93179186619818,
+  "timing_boundary": "Each original child process includes startup and image read/write. Hashes and integrity checks are outside these timers."
+}

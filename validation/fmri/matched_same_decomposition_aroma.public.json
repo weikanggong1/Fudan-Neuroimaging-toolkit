@@ -1,0 +1,59 @@
+{
+  "source_revision": "3b9b0f8128f10da77d3fbb6c395e9127353c3e46",
+  "scope": "Auxiliary control: one existing real full 490-frame captured FNIT decomposition, identical preICA BOLD/mixing/noise list, native fsl_regfilt vs captured FNIT AROMA; no new ICA or full-pipeline comparison.",
+  "inputs_sha256": {
+    "preica": "60b4e4203cd8330482227cfa2b923f1a7f08cd4d7c897e59ae139761fca1f4a7",
+    "mixing": "79b04c21bc568a997b1b420ebd23d74916b21c43ce8b872fb9878834294610e6",
+    "motion": "29ebd3266b69575830643690bd7cd6b1624f25c5854973bbd3f8e2d536734a8e",
+    "noise_components": "1309fc7ee0341afe487ce16896b4f0e9e0b24ddcc2a653ddf21132e34911ba65",
+    "fnit_aroma": "fc96afcc126aeff71682bcd30f24b33794ec32faf42a2d14a97ff08b481bba72"
+  },
+  "native_output_sha256": "bd7ce775cfb9abc904a95b0514c87d817d6a1ac33f8c465dc997f47a043b6f86",
+  "sample_row_control": {
+    "samples": 1000,
+    "rows_per_sample": 441,
+    "identical_ordered_indices": true,
+    "ordered_indices_sha256": "7922cf3da0f9b539024069d4e1a69bf6a044d615f3e47ae4c992b088bc6bd987",
+    "python_version": "3.11.16",
+    "scope": "Global random.seed(0)+random.sample vs separate random.Random(0).sample on the same Python interpreter; does not assert equality of FSL C++ and Torch ICA initialization."
+  },
+  "motion_feature": {
+    "mae": 4.484716691577935e-17,
+    "max_absolute_difference": 3.3306690738754696e-16,
+    "native_wall_seconds": 1.2749259620904922,
+    "fnit_wall_seconds": 0.9619245738722384
+  },
+  "frequency_feature": {
+    "max_absolute_difference": 0.0
+  },
+  "nonaggressive_regression": {
+    "evaluated_values": 47699050,
+    "pooled_correlation": 1.0,
+    "mae": 0.0,
+    "rmse": 0.0,
+    "max_absolute_difference": 0.0,
+    "candidate_rms": 11512.42921686296,
+    "reference_rms": 11512.42921686296,
+    "valid_temporal_correlation_voxels": 97132,
+    "median_voxel_temporal_correlation": 1.0,
+    "per_voxel_rms_threshold": 1e-06
+  },
+  "all_brain_values_float32_identical": true,
+  "native_regfilt_exit_status": 255,
+  "native_command_wall_seconds": 21.707850366830826,
+  "native_mean_check": {
+    "retained_brain_voxels": 97132,
+    "zeroed_nonzero_mean_brain_voxels": 213,
+    "mean_mae": 9.309063196332744e-06,
+    "mean_rmse": 1.3172169895193381e-05,
+    "mean_max_absolute_difference": 0.00015545280621154234
+  },
+  "mask_zero_status_equal": true,
+  "software": {
+    "fnit_aroma_source_sha256": "d7a8d9a8436d2b1d1b4fe4899dd89bbf134ccefa25a66d601db8cc1a9481b28d",
+    "external_official_compat_sha256": "e1ab18e85be963cc14fda1216f0a31382b814f108c89c7e8a68b7112cd339da6",
+    "native_regfilt_binary_sha256": "11408be15e30a02ea43f9f1f030e613b741eb26396fd4fe4ea5d2fc010c9a4b8",
+    "driver_sha256": "5c9b4b1e997e2ccd6ea85232a6be656ca92a110f471131866ddd840d5000967c"
+  },
+  "privacy": "Anonymous hashes and scalar values only."
+}

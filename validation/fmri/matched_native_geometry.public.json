@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "scope": "Independent saved-output geometry audit on the completed real native FSL registration and FNIT FNIRT run; no registration, resampling or decomposition rerun.",
+  "native_source_revision": "380e23dbedcc36d1e34bd7eed414196089d6fe67",
+  "software": {
+    "python": "3.11.16",
+    "numpy": "1.26.4",
+    "nibabel": "5.4.2"
+  },
+  "inverse_diagnostic_enabled": false,
+  "inverse_scope": "Forward EPI-to-MNI composition uses inverse of the BBR affine only. It does not invert a nonlinear warp. Optional native invwarp is a separate diagnostic excluded from primary registration timing.",
+  "checks": {
+    "raw_t1_and_brain_shape_equal": true,
+    "raw_t1_and_brain_affine_equal": true,
+    "raw_t1_and_brain_pixdim_equal": true,
+    "epi_reference_equals_original_sbref_values": true,
+    "epi_reference_equals_original_sbref_affine": true,
+    "mni_brain_equals_full_times_mask": true,
+    "native_candidate_template_arrays_equal": true,
+    "native_candidate_template_affines_equal": true,
+    "native_candidate_template_header_equal": true,
+    "wm_boundary_matches_native_fast_pve_ge_0p5": true,
+    "coefficient_intent_2007": true,
+    "coefficient_sform_contains_t1_affine_float32": true,
+    "coefficient_qoffset_contains_target_shape": true,
+    "coefficient_intent_params_contain_target_pixdim": true,
+    "all_command_outputs_match_published_hashes": true,
+    "all_actual_registration_children_exit_zero": true,
+    "native_t1_fsl_grid_matches_template": true,
+    "native_epi_fsl_grid_matches_template": true,
+    "native_t1_ras_grid_matches_template": true,
+    "native_epi_ras_grid_matches_template": true,
+    "candidate_t1_ras_grid_matches_template": true,
+    "wm_epi_mask_matches_pve_ge_0p8_intersection": true,
+    "csf_epi_mask_matches_pve_ge_0p8_intersection": true,
+    "mni_mask_matches_warped_epi_and_template_intersection": true,
+    "bbr_world_inverse_file_matches_independent_conversion": true
+  },
+  "saved_t1_ras_vs_independent_fsl_conversion_mm": {
+    "mean": 6.888312800512387e-07,
+    "median": 5.963829211007976e-07,
+    "p95": 1.6612652447324963e-06,
+    "rms": 8.17321063065397e-07,
+    "maximum": 2.1255334635731408e-06
+  },
+  "saved_epi_ras_vs_independent_fsl_conversion_mm": {
+    "mean": 6.803836171802175e-07,
+    "median": 5.824638109118418e-07,
+    "p95": 1.6603686442076122e-06,
+    "rms": 8.11477319940648e-07,
+    "maximum": 2.1242343327208068e-06
+  },
+  "native_convertwarp_vs_independent_bbr_t1_composition_mm": {
+    "mean": 6.660552813451034e-06,
+    "median": 6.077826907579732e-06,
+    "p95": 1.3393420033086214e-05,
+    "rms": 7.518069980766858e-06,
+    "maximum": 2.8377716433601446e-05
+  },
+  "native_vs_fnit_t1_affine_pull_mm": {
+    "mean": 0.07370411952406285,
+    "median": 0.07321680592000535,
+    "p95": 0.11909826172503313,
+    "rms": 0.0786203235939126,
+    "maximum": 0.1503627819756347
+  },
+  "native_vs_fnit_complete_t1_pull_mm": {
+    "mean": 0.09724303058743591,
+    "median": 0.053866643109170595,
+    "p95": 0.2764664321478478,
+    "rms": 0.23184097061641723,
+    "maximum": 4.87262588469014
+  },
+  "coefficient_shape": [
+    21,
+    24,
+    21,
+    3
+  ],
+  "coefficient_knot_spacing_voxels": [
+    5.0,
+    5.0,
+    5.0
+  ],
+  "sha256": {
+    "audit_script": "4b1ffd13a13f5006a486d325b6c560797af0207fb15b78e7e83d871c7374075c",
+    "native_registration_report": "b0c1f4e1e352115b1cd0a15939cb5b23c314c485779f9de4f85dc2ff091788b9",
+    "native_template": "7570451af5189a7e70c7a8514ff3d861bd9a19edba5f2a77f1b75ee26974d0e0",
+    "candidate_template": "7570451af5189a7e70c7a8514ff3d861bd9a19edba5f2a77f1b75ee26974d0e0",
+    "candidate_t1_brain": "de75206cd67fa6ff39e77e8c5d8fd75c31525af1990920ab1752c595373df714",
+    "candidate_t1_affine": "6b795ed58de2194dffb94ba6021a76c3c9b89cbd6c5d6f72358748db5b161641",
+    "candidate_t1_pull": "6c7bde939bfdf921e1ce4bee8a7eb740282956a997c6da9f3612280b76225e65"
+  },
+  "privacy": "Only anonymous booleans, scalar metrics and hashes; all arrays and paths remain private."
+}

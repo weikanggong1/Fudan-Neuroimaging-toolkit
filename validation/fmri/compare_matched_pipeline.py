@@ -22,6 +22,7 @@ import numpy as np
 
 IMAGE_STAGES = {
     "epi_synthstrip_mask", "t1_synthstrip_mask", "fast_csf", "fast_gm", "fast_wm",
+    "mni_brain_mask", "native_wm_mask", "native_csf_mask",
     "motion_corrected", "feat_filtered", "aroma_native", "clean_native", "clean_mni",
     "t1_registered", "epi_registered",
 }

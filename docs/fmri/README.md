@@ -119,50 +119,41 @@ print(result.clean_mni)     # MNI152 2 mm 清理后 4D BOLD
 
 `bbr_execution="reference"` 和 `fnirt_execution="reference"` 用于逐项回归，选择同一算法的串行成本/原张量算子；它们保留本次坐标、边界与优化流程的修正。CLI 对应 `--bbr-execution`、`--fnirt-execution`。后者只在 `registration_backend="fnirt"` 时可切换。
 
+WM/CSF 概率图投到 EPI 网格时，使用本包 `TorchFLIRT.applyxfm` 的默认降采样预滤波与三线性采样，再以概率≥0.8 交 EPI 脑掩膜。JSON 中 `FNIT.TissueInterpolation="flirt-trilinear-prefilter-float32-coordinates"` 标明这一步；坐标按 float32 逐项计算，其余 CUDA 计算仍默认允许 TF32。
+
 ## 全流程 benchmark
 
-2026-10-01 用 `3b9b0f8` 合并后的源码，重新处理一例完整 490 帧 UKB BOLD/SBRef，包含最新 FLIRT、BBR 和解剖缓存。T1 为同被试重建存档的 `orig/001.mgz`，经 nibabel 逐体素无误差转换；更早的结构预处理未核对。开启 WM、CSF 和 24 项运动回归，默认 SynthMorph 配准、ICA-AROMA 非激进清理。输出目录是全新目录，`anatomical_cache.reused=false`。
+2026-10-01，从同一例原始 BOLD/SBRef 与存档 T1 输入，完整运行修复后 `ec57972` 的 FNIT FNIRT 分支和原软件的相同步骤。原参照使用未修改的 SynthStrip、FSL MCFLIRT/FAST/FLIRT/BBR/FNIRT/MELODIC/applywarp，以及作者 ICA-AROMA；双方再做相同定义的 WM、CSF 与 24 项运动回归。T1 来自同被试重建存档，经 nibabel 逐体素无误差转换；未核对更早的结构预处理。
 
-| 检查 | 结果 |
-|---|---|
-| 原生 / MNI BOLD 网格 | 88×88×64×490 / 91×109×91×490 |
-| 输出合同 | float32；全部有限；TR 0.735 s；MNI 掩膜外为零 |
-| ICA / AROMA | 95 个成分，55 次迭代收敛；52 个噪声成分 |
-| volume API，含最终写盘 | **551.07 s** |
-| BBR 与 T1→MNI 阶段合计 | **16.94 s** |
-| 峰值 CUDA allocated / reserved | 13.30 / 16.96 GB |
-| 同输入 pre-ICA 与原 FSL 的时间 r，中位数 / 均值 | 0.966773 / 0.950993 |
-| 同 warp 首 8 真实帧与 FSL 插值 r / RMSE | 0.99999999993 / 0.002063 |
-| 最终原生回归与独立 float64 参照 RMSE | 0.000005237 |
+| 完整单例检查 | FNIT | 原软件参照 |
+|---|---:|---:|
+| 原生 / MNI BOLD 网格 | 88×88×64×490 / 91×109×91×490 | 相同 |
+| 完整调用 / 连续链墙钟 | **455.62 s（7.59 min）** | **2570.47 s（42.84 min）** |
+| 独立验证进程墙钟 | 530.35 s | 2601.72 s |
+| CUDA allocated / reserved，GB | 6.239 / 7.317 | 未单独记录 |
+| ICA / AROMA 噪声成分 | 96 / 62 | 95 / 50 |
+| EPI WM / CSF 回归 mask Dice | **0.987102 / 0.928375** | 比较基准 |
 
-修复了混杂矩阵量纲导致的秩截断、微小浮点越界置零、未启用回归仍构建原生组织掩膜，以及 surface 拒绝 AROMA-only 派生结果。JSON 补齐配置、源码和去噪完成状态；新解剖缓存加入 SciPy 版本校验。212 项目标 CPU/CUDA 测试通过，过程记录及真实控制见[修复验证](../../validation/fmri/volume_fixed.md)。
+双方从新目录开始，不命中解剖缓存。FNIT 为共享 H100 上的 float32/TF32 GPU 实现；原 SynthStrip 用 GPU，其余原 FSL 命令用 CPU，均为 8 线程。FNIT API 包含最终写盘，扣除 benchmark 捕获中间影像的额外复制；原连续链包含阶段内检查和原 MELODIC HTML report。不同计时边界与共享负载使这些单次值不能作为稳定加速比。
 
-同一病例上一版 `3f8b756` API 为 1719.19 s，配准阶段为 1186.44 s。两次均在共享 H100 上运行，不能由单次观测给出稳定加速比。新旧 pre-ICA 时间 r 中位数为 0.999386，最终原生及 MNI 为 0.946607、0.943486；预处理、BBR 和 ICA 成分均有变化，不能把整个差值只归因于回归修复。合成 MNI→EPI 采样位置变化中位数 0.115 mm，p95 0.202 mm。
+| 与原软件比较：逐体素 490 帧时间 Pearson r | 均值 | 中位数 |
+|---|---:|---:|
+| 运动校正 BOLD | 0.941467 | 0.964133 |
+| 强度缩放与高通后的 pre-ICA BOLD | 0.951153 | 0.966887 |
+| 原生最终 clean BOLD | **0.850471** | **0.871444** |
+| MNI 最终 clean BOLD | **0.853589** | **0.872108** |
+| 固定同一 clean BOLD，只换两套 warp | 0.994511 | 0.997152 |
+| 固定原场：FNIT sampler / 原 FSL applywarp | 0.999999999921 | 0.999999999945 |
 
-| 与实际官方 UKB 发布结果比较 | 时间 r 均值 / 中位数 |
-|---|---|
-| 原生清理图；96,009 个共同非常数体素 | 0.426345 / 0.499333 |
-| FNIT MNI / 官方结果生成的 MNI 参照；220,863 个共同非常数体素 | 0.271534 / 0.229497 |
-| 两侧清理图使用同一 FNIT warp | 0.472114 / 0.561490 |
-| 同一官方清理图使用 FNIT / 官方 warp | 0.488609 / 0.526425 |
+本次修复了 WM/CSF PVE 投到 EPI 时漏用 FLIRT 降采样预滤波的问题。固定原 PVE 和 BBR 后，WM/CSF mask Dice 为 1.00000/0.99989。重跑完整链后，前端运动估计、ICA 分解及回归设计仍存在差异；输出尚未逐体素等价。最终固定场样条采样的 RMSE 为 0.002215，主要端到端差异不在 `applywarp`。
 
-MNI 参照文件 `ukb_fix_mni2mm.nii.gz` 由 UKB 发布的原生 `filtered_func_data_clean.nii.gz` 与官方 `example_func2standard_warp.nii.gz`，通过原版 FSL `applywarp --interp=spline` 生成，使用 FSL 的 MNI152 T1 2 mm 模板和脑掩膜。它不是发布 ZIP 中直接提供的同名 MNI 文件；网格为 91×109×91×490，TR 0.735 s，完整 SHA-256 见比较报告中的 `mni.input_sha256.official_fix_official_warp`。
+图中四行依次是 MNI 模板、FNIT 时间标准差、原软件时间标准差和两边时间 r。SD 共用色阶、切面一致，未追加平滑。回归移除时间均值，因此用 SD 展示结构。
 
-本流程选择 ICA-AROMA；官方 UKB 使用 FIX，并包含 GDC/B0 和自身配准，本次候选没有 GDC/B0。表中量化处理差异，同 warp 与同清理图控制用于区分去噪和空间映射的影响。插值固定 warp 下已接近数值一致；官方完整 MNI 的时间 r 与上一版 0.273070 接近。时间相关性不等于去噪质量。定义及全部文件哈希见[新旧与官方比较](../../validation/fmri/volume_fixed_comparison.public.json)。
+![相同步骤 FNIT 与原软件完整490帧结果](figures/fmri_matched_native.png)
 
-最终 MNI BOLD 使用三次 B 样条，边界仅允许源 voxel 坐标 `1e-6` 的浮点容差。此前固定 490 帧输入与 warp 的控制显示：样条使采样位置对 SD 的影响斜率下降 38.4%，relative SD 中位数由 0.558 提高到 0.837。残留格纹与插值细节见[重采样验证](../../validation/fmri/resampling.md)。未对最终时序或示例图追加平滑。
+逐阶段参数、原命令、哈希、交叉控制、运行边界和复测说明见[相同步骤原软件对照](../../validation/fmri/matched_native.md)。此前 SynthMorph/AROMA 对 UKB FIX 发布图的 MNI 时间 r 约为 0.272：它还包含 GDC/B0、配准和清理策略差异，属于另一处理协议，见[先前 SynthMorph 分支验证](../../validation/fmri/volume_fixed.md)。该次没有本轮组织预滤波修复，不能当成当前 FNIRT 结果。
 
-下面为本次输出：MNI 解剖模板、时间标准差和一个时间点。回归去掉截距后时间均值接近零，因此用时间标准差展示空间结构。
-
-![当前 490 帧 volume 输出](figures/fmri_volume.png)
-
-新旧 FNIT 与官方发布图的时间标准差使用同一色阶、同一切面。
-
-![新旧 FNIT 与官方时间标准差](figures/fmri_volume_comparison.png)
-
-全部阶段及复测命令见[全流程验证页](../../validation/fmri/README.md)，配置与源码哈希见[volume 报告](../../validation/fmri/fmri_volume.public.json)。surface 与 MS-HBM 的既有对照保留各自日期和输入，本次没有重跑它们。
-
-官方 DeepPrep 25.1.0 在同一完整 490 帧 BOLD 上的既有实测为 2091.36 s，包含独立结构重建及 QC；输入、计时和去噪范围不同。该次实验见[DeepPrep 对照](../../validation/fmri/deepprep/README.md)，没有随这次更新重测。
+surface 与 MS-HBM 未在本轮重跑，保留各自注明的运行日期、输入和范围，见[全流程验证索引](../../validation/fmri/README.md)。既有 [DeepPrep 对照](../../validation/fmri/deepprep/README.md)包含独立结构重建及 QC，处理和计时范围不同。
 
 ## 独立配准与解剖缓存实测
 
@@ -175,7 +166,7 @@ MNI 参照文件 `ukb_fix_mni2mm.nii.gz` 由 UKB 发布的原生 `filtered_func_
 | T1 FNIRT，固定官方初始矩阵与模板掩膜 | 32.595 / 30.422 s | warped T1 r 0.99771788；完整 pull 位移中位数 / p95 0.05176 / 0.23294 mm。 |
 | 解剖准备，FNIT FLIRT＋FNIRT，第二次复用全部解剖产物 | 41.118 / 0.0785 s | 两次产物 SHA-256 相同；第二次时间为缓存核验，不重新估计配准。 |
 
-BBR 的官方 CPU 命令观测为 45.093 s，FNIRT 为 217.558 s，均含启动与输入读写，计时边界不同。BBR 固定官方 WM/init 的精度不能代表自产 FAST/init 的完整配准链；FNIRT 表不包含 FLIRT 或最终 BOLD 重采样。当前 optimized FNIRT 与 reference 求和顺序不同，完整误差与逐项消融保留在 [BBR 页](bbr.md#真实-ukb-数据对照)、[T1→MNI 页](normalization.md#当前真实数据-benchmark)和[独立配准报告](../../validation/fmri/registration_gpu.current.public.json)。本轮独立缓存测试使用 FNIRT；上面的 `3b9b0f8` 完整 volume 使用 SynthMorph，二者未合并计时。
+BBR 的官方 CPU 命令观测为 45.093 s，FNIRT 为 217.558 s，均含启动与输入读写，计时边界不同。BBR 固定官方 WM/init 的精度不能代表自产 FAST/init 的完整配准链；FNIRT 表不包含 FLIRT 或最终 BOLD 重采样。当前 optimized FNIRT 与 reference 求和顺序不同，完整误差与逐项消融保留在 [BBR 页](bbr.md#真实-ukb-数据对照)、[T1→MNI 页](normalization.md#当前真实数据-benchmark)和[独立配准报告](../../validation/fmri/registration_gpu.current.public.json)。独立缓存测试的输入与计时边界不同于上面的完整 FNIRT volume，两类时间分别报告。
 
 ## 参考文献与原实现
 
