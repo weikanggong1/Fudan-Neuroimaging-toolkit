@@ -273,7 +273,7 @@ sub-0001/func/
 
 [CIFTI 契约测试](../../tests/test_fmri_surface_contracts.py)、[灰坐标顺序测试](../../tests/test_fmri_surface_pipeline.py)、[公开 API 契约测试](../../tests/test_fmri_surface_public_contracts.py)和[共享准备函数测试](../../tests/test_fmri_surface_preparation.py)核对资源完整性、有限值、帧数、TR、来源匹配、实际体素大小、显式变换、错误半球、已有球面、悬空链接与发布回滚。锁定 NiWorkflows 1.14.4 的同输入组装对照中，两帧索引信号的数值、BrainModelAxis、SeriesAxis 和内嵌 metadata 逐项一致；检查范围为文件格式、灰坐标顺序与时间轴。
 
-[合并合同门禁](../../validation/fmri/fmriprep/nonmsm_contract_gate.public.json)通过 **248 项、0 skipped**；随后 T1w 来源路径补丁的[局部门禁](../../validation/fmri/fmriprep/surface_source_path_gate.public.json)通过 **42 项、0 skipped**，包含 8 个新路径用例。两次门禁分别保留测试与源码哈希。[发布源码回溯](../../validation/fmri/fmriprep/publication_runtime_provenance.public.json)保留真实执行快照的逐文件 SHA；后续 main 的 MSM 更新及未使用旧函数清理单列，不能将该快照视为之后全部模块逐 SHA 相同的证明。
+[合并合同门禁](../../validation/fmri/fmriprep/nonmsm_contract_gate.public.json)通过 **248 项、0 skipped**；随后 T1w 来源路径补丁的[局部门禁](../../validation/fmri/fmriprep/surface_source_path_gate.public.json)通过 **42 项、0 skipped**，包含 8 个新路径用例。两次门禁分别保留测试与源码哈希。[发布源码回溯](../../validation/fmri/fmriprep/publication_runtime_provenance.public.json)记录 surface 实测的 103/106 个模块字节一致；另外三个文件是 main 的包入口与 MSM 内部更新，固定球面实验未运行 MSM 估计。 最新 main 的[接口整合检查](../../validation/fmri/fmriprep/latest_main_integration_gate.public.json)另记首轮 142 passed、10 failed、1 skipped：9 项使用的旧原生扩展缺接口，1 项是既有可选 GEMS 模块的导入规则检查；原始失败结果保留。
 
 此前 `c3c921cc`/`bac3c395` 的完整测量与固定投影对照保留在[历史 STC 关闭记录](../../validation/fmri/HISTORY_20261001_STCOFF_PREPROC.md)。
 

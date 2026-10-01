@@ -15,7 +15,7 @@
 | 切片时间校正 | 固定镜像 AFNI 的 Fourier 校正与 PyTorch；默认关闭，另做显式开启控制 | [合成数值控制](fmriprep/stc_control.public.json)和[真实全 490 帧 CPU 报告](fmriprep/stc_real_full490.public.json)；真实最大误差门禁未通过 |
 | 固定官方镜像 | 用户提供的 25.2.4 SIF、实际安装源码与二进制 | [镜像记录](fmriprep/reference_image.public.json)、[安装源码校验](fmriprep/installed_sources.public.json) |
 
-SynthMorph/preproc 的完整测量固定到 `50eb098`/`ca3df003`；main `1eb9c417` 的 clean/FNIRT、组件对照分别记录源码 SHA、协议和计时范围。之后 main 已更新 MSM 并删除未使用的旧准备函数，不能将实测快照的全部模块 SHA 视为新 main 已逐项相同。旧 `c3c921c`/`bac3c395` 的结果保留为历史快照。
+SynthMorph/preproc 的完整测量固定到 `50eb098`/`ca3df003`；main `1eb9c417` 的 clean/FNIRT、组件对照分别记录源码 SHA、协议和计时范围。随后合入 main 的包入口与 MSM 内部清理。surface 实测覆盖的 103/106 个模块字节一致；其余三个文件继承 main，固定球面控制未运行 MSM 估计。volume 的 102/106 个模块一致，另含其未调用的 surface 来源路径补丁。逐文件差异见[发布源码回溯](fmriprep/publication_runtime_provenance.public.json)。旧 `c3c921c`/`bac3c395` 的结果保留为历史快照。
 
 真实全帧验证使用同一例 88×88×64×490 BOLD、TR 0.735 s、同次 SBRef 和逐体素一致的 T1 重建输入。当前 FNIT API/CLI 默认关闭 STC；历史页的两次 FNIT volume 均开启 STC，参考位置为 0.5，关闭 SDC，保留全部 490 帧。固定投影实验直接共用已有 `preproc`，不重新执行 STC。首次官方原始 BIDS 运行关闭 STC，因旧版 FreeSurfer 重建缺少新版所需文件而失败；它不构成整链对照。官方流程只用于生成参照，FNIT 运行时不调用它。
 
@@ -37,7 +37,7 @@ SynthMorph/preproc 的完整测量固定到 `50eb098`/`ca3df003`；main `1eb9c41
 
 FEAT 核心 700.033 s，PICA/AROMA/混杂回归 171.502 s，clean MNI 重采样 47.151 s，T1w/MNI preproc 单次插值与写盘 254.356 s；ICA 为 95 成分、37 次迭代，其中 AROMA 判定 39 个噪声成分。完整 API 同时生成 preproc 与 clean；单次共享 GPU 测量不推断稳定加速比。
 
-`50eb098` 源码的[完整合同门禁](fmriprep/nonmsm_contract_gate.public.json)为 **248 passed、0 skipped、67.21 s**。后续 `ca3df003` 仅修改 surface 的外部 BIDS 符号链接 T1w 来源选择，由[42 项局部门禁](fmriprep/surface_source_path_gate.public.json)覆盖（0 skipped、10.39 s，新增 8 个用例）；该补丁不改变 volume 数值链。旧 `c3c921c`/`bac3c395` 完整测量移至[STC 关闭历史记录](HISTORY_20261001_STCOFF_PREPROC.md)，旧 204 项合同见[历史门禁](fmriprep/nonmsm_contract_gate_9a383580.public.json)。源码、依赖和许可校验见[打包门禁](fmriprep/nonmsm_package_gate.public.json)。[发布源码回溯](fmriprep/publication_runtime_provenance.public.json)保留测量时 106 个模块的逐文件 SHA、volume/surface 的路径补丁范围，以及后续 main 的实际差异；它不将之后主分支的模块变化改写成测量时已相同。实际执行提交标识和计时保留，不因清理发布历史而改名。
+`50eb098` 源码的[完整合同门禁](fmriprep/nonmsm_contract_gate.public.json)为 **248 passed、0 skipped、67.21 s**。后续 `ca3df003` 仅修改 surface 的外部 BIDS 符号链接 T1w 来源选择，由[42 项局部门禁](fmriprep/surface_source_path_gate.public.json)覆盖（0 skipped、10.39 s，新增 8 个用例）；该补丁不改变 volume 数值链。旧 `c3c921c`/`bac3c395` 完整测量移至[STC 关闭历史记录](HISTORY_20261001_STCOFF_PREPROC.md)，旧 204 项合同见[历史门禁](fmriprep/nonmsm_contract_gate_9a383580.public.json)。源码、依赖和许可校验见[打包门禁](fmriprep/nonmsm_package_gate.public.json)。[发布源码回溯](fmriprep/publication_runtime_provenance.public.json)记录 106 个模块的逐文件 SHA、surface 的 103 个一致文件、volume 的 102 个一致文件及后续 main 的实际差异。实际执行提交标识和计时保留，不因清理发布历史而改名。 最新 main 的[接口整合检查](fmriprep/latest_main_integration_gate.public.json)另记首轮 142 passed、10 failed、1 skipped：9 项使用的旧原生扩展缺接口，1 项是既有可选 GEMS 模块的导入规则检查；原始失败结果保留。
 
 ## 历史 STC 开启测量
 
