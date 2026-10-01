@@ -349,7 +349,7 @@ def run_bigflica(subjects_root: str | Path, modalities: Mapping[str, Mapping[str
                  flica_max_iter: int = 1000, top_voxels: int = 1000,
                  random_state: int = 0, max_gpu_gb: float = 19.0,
                  feature_block: int = 2048, dicl_batch_size: int = 32,
-                 dicl_sparse_iterations: int = 120,
+                 dicl_sparse_iterations: int = 1000,
                  use_mmigp_dicl: bool = True,
                  flica_lambda_dims: str = "o") -> Path:
     """Fit BigFLICA from subject directories; return the saved model directory."""

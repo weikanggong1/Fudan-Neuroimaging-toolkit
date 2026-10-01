@@ -1,8 +1,12 @@
 # BigFLICA：真实 UKB 输入、GPU 对照与内存测试
 
+## 当前DicL效果匹配
+
+同一1000人完整VBM/FA/MD掩膜R500/D200投影，对照服务器sklearn1.7.1的 `MiniBatchDictionaryLearning`。已移除额外ridge，匹配LARS节点停止，并修复统计顺序、SVD驱动及整模态GPU缓存读取。独立初始化的三模态字典、原子余弦及LASSO指标通过预设容差；FA/MD的OMP30重建仍未通过。[最新报告、误差轨迹、因果控制和复现命令](dicl_match_real1000_20261001.md)记录实际来源、耗时与87项定向回归。本轮仅验收DicL，未重新运行FLICA或30,000人全链。
+
 ## mMIGP 500维测试
 
-同1000人、完整VBM/FA/MD掩膜，R500/D200/C20测试已完成。mMIGP约25.57秒；CPU/GPU两种字典来源及o/R两种噪声的八个拟合均由初始20成分收缩为零，未通过C20。列数超过字典原子数使当前自动DD走取1分支，不能把结果只解释为增加PC。[测试配置、阶段耗时与限制](mmigp500_real1000_20261001.md)。
+DicL本轮修复前，同1000人完整VBM/FA/MD掩膜的R500/D200/C20测试已完成。mMIGP约25.57秒；当时CPU/GPU两种字典来源及o/R两种噪声的八个拟合均由初始20成分收缩为零，未通过C20。列数超过字典原子数使当前自动DD走取1分支，不能把结果只解释为增加PC；改善后的字典未重跑FLICA。[历史测试配置、阶段耗时与限制](mmigp500_real1000_20261001.md)。
 
 ## 初始化与逐模态先验修复
 
@@ -112,11 +116,11 @@ python validation/bigflica/compare_public_real30000.py "$benchmark_directory"
 | CPU与原notebook输出比较 | 18人、四个小掩膜、C3/R10/D40；course绝对相关约1，z图相关最低0.9999999999999993 | [原软件输出对照](map_compare.json) |
 | FLICA原源码排查 | 同一2,050人四模态R100/D200字典，原Python与FNIT在10/30/100轮的H、X、W一致；有效秩同为20→2→2 | [原源码对照](upstream_flica_parity.json)、[维度和噪声诊断](flica_dimensionality_audit.json) |
 | 固定相同投影的DicL/FLICA控制 | 2,050人VBM/FA/MD完整掩膜，R100/D200；字典相对差约1e-6–7e-5，C3 course及九张z图相关均超过0.9999999984 | [同投影隔离](three_structural_f32_same_projected_control_real2050.json) |
-| 当前ADMM/LARS运行时 | 同一2,050人投影，内部float64；沿用已测CPU基线，GPU各模态字典误差1.06e-5/1.54e-6/6.56e-5；CPU/GPU C20均为11/20 | [正式阶段报告](dicl_bpdn_real2050.json) |
+| 此前ADMM/LARS运行时 | 同一2,050人投影，内部float64；沿用已测CPU基线，GPU各模态字典误差1.06e-5/1.54e-6/6.56e-5；CPU/GPU C20均为11/20 | [历史阶段报告](dicl_bpdn_real2050.json) |
 | 当前缓存与输出 | 2,050×3 course、九张z NIfTI、阈值图和PNG；掩膜内NIfTI与数组相同，留出被试返回有限course；复用缓存耗时22.19秒 | [缓存及输出检查](dicl_bpdn_cache_api_real2050.json) |
 | 单被试接口示例 | 18人三个小掩膜，C3/R10/D40、噪声R；API与CLI输出检查及独立留出投影 | [接口检查](three_structural_public_R_smoke_real18.json)、[留出投影](three_structural_public_R_heldout_apply_real1.json) |
 
-当前运行时的DicL正式阶段耗时为CPU165.84秒（同输入实测后复用）和GPU144.23秒，GPU峰值分配显存1.29 GiB；共享负载与测量时窗不同，不能作受控加速比。这个固定投影结果与30,000人独立全链的CPU DicL79.85秒、GPU145.19秒属于不同输入和比较条件。
+此前2,050人DicL阶段耗时为CPU165.84秒（同输入实测后复用）和GPU144.23秒，GPU峰值分配显存1.29 GiB；共享负载与测量时窗不同，不能作受控加速比。这个固定投影结果与30,000人独立全链的CPU DicL79.85秒、GPU145.19秒属于不同输入和比较条件。
 
 [阶段脚本](benchmark_dicl_real2050.py)接受三个位置参数：含R100 float32投影及U的目录、已完成的同输入CPU基线目录（填 `-` 时重新拟合）、新的私密输出目录。[缓存检查脚本](check_cache_api_real2050.py)接受已有完整C3公开模型的父目录、阶段脚本输出目录、新的私密模型输出目录，验证输入哈希后复用mMIGP/DicL。[同投影定位脚本](diagnose_public_gpu_projected_dicl_cpu_real2050.py)读取已有GPU投影、字典和C3模型，隔离CPU sklearn与GPU DicL的差异。上述脚本仍对应2,050人阶段核验，不作为30,000人冷启动模板。
 
@@ -135,4 +139,4 @@ CUDA_VISIBLE_DEVICES=GPU-REPLACE-WITH-YOUR-UUID PYTHONPATH=src \
   "$existing_model_directory" "$stage_output_directory" "$cache_check_directory"
 ```
 
-阶段脚本的C3只用于数值与接口检查；C20检查失败也会在报告中保留，`status=complete`仅表示阶段测试结束。正式DicL实现SHA-256为 `fa6f41c3ca7b2a477b986ec2c72482cf748f3e8002318e883fc56b1eb4364b52`；历史阶段测量的其余元数据保留在所链接JSON中。清理后的目录不保留早期求解器候选、部分运行结果和重复版本；已有提交历史可追溯当时文件。
+历史阶段脚本的C3只用于数值与接口检查；C20检查失败也会在报告中保留，`status=complete`仅表示阶段测试结束。该历史DicL实现SHA-256为 `fa6f41c3ca7b2a477b986ec2c72482cf748f3e8002318e883fc56b1eb4364b52`；其余元数据保留在所链接JSON中。当前源码及验收见页首最新效果报告；早期候选、部分运行结果和重复版本仍可从提交历史追溯。

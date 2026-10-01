@@ -6,6 +6,7 @@ online objective; projected voxels are read from disk in bounded blocks.
 
 from __future__ import annotations
 
+import operator
 from pathlib import Path
 from typing import Sequence
 
@@ -14,6 +15,76 @@ import numpy as np
 import torch
 
 from .pipeline import _device
+
+
+def _streaming_numpy_axis0_stats(projected, feature_block: int) -> tuple[np.ndarray, np.ndarray]:
+    """Bounded two-pass statistics in NumPy's C-order float64 row order.
+
+    Float32 storage is promoted before arithmetic: its reference is a full
+    C-order float64 copy, not NumPy's default float32 mean/std accumulation.
+    Constant-column std remains zero for the caller's 0.1 replacement.
+    """
+    feature_block = operator.index(feature_block)
+    if feature_block < 1 or len(projected.shape) != 2:
+        raise ValueError("Expected a two-dimensional projection and positive feature_block")
+    rows, columns = projected.shape
+    if rows < 1 or columns < 2:
+        raise ValueError("Streamed DicL statistics require nonempty input and at least two PCs")
+    if np.dtype(projected.dtype) not in (np.dtype(np.float32), np.dtype(np.float64)):
+        raise ValueError("Streamed DicL statistics require float32 or float64 storage")
+    if isinstance(projected, np.ndarray) and not projected.flags.c_contiguous:
+        raise ValueError("Streamed DicL statistics use the C-order axis-0 reference")
+    scratch = np.empty((min(feature_block, rows) + 1, columns), dtype=np.float64)
+
+    def accumulate(center=None):
+        total = np.zeros(columns, dtype=np.float64)
+        for start in range(0, rows, feature_block):
+            end = min(start + feature_block, rows)
+            block = scratch[:end - start + 1]
+            block[0] = total
+            block[1:] = projected[start:end]
+            if not np.isfinite(block[1:]).all():
+                raise ValueError("DicL projection contains non-finite values")
+            if center is not None:
+                np.subtract(block[1:], center, out=block[1:])
+                np.multiply(block[1:], block[1:], out=block[1:])
+            # Carry the prefix through every row, rather than independently
+            # summing each block and changing the floating-point reduction.
+            np.cumsum(block, axis=0, dtype=np.float64, out=block)
+            total[:] = block[-1]
+        return total
+
+    mean = accumulate()
+    np.true_divide(mean, rows, out=mean)
+    std = accumulate(mean)
+    np.true_divide(std, rows, out=std)
+    np.sqrt(std, out=std)
+    return mean, std
+
+
+def _preload_standardized_projection(projected, mean: torch.Tensor,
+                                     std: torch.Tensor,
+                                     feature_block: int) -> torch.Tensor:
+    """Preallocate the device cache and fill it from bounded CPU row windows.
+
+    Subtraction and division retain the original float64 element operations.
+    Normalizing the destination slice in place avoids full-size device
+    subtraction/division temporaries and never loads projected[:] into RAM.
+    """
+    feature_block = operator.index(feature_block)
+    if feature_block < 1:
+        raise ValueError("feature_block must be positive")
+    samples = torch.empty(projected.shape, device=mean.device, dtype=torch.float64)
+    for start in range(0, projected.shape[0], feature_block):
+        end = min(start + feature_block, projected.shape[0])
+        chunk_cpu = torch.as_tensor(projected[start:end])
+        destination = samples[start:end]
+        # Default blocking transfer keeps the CPU chunk alive through the
+        # copy; only this row window and the allocated device cache are held.
+        destination.copy_(chunk_cpu)
+        destination.sub_(mean).div_(std)
+        del chunk_cpu, destination
+    return samples
 
 
 def _randomized_svd_dictionary(projected: h5py.Dataset, samples_gpu: torch.Tensor | None,
@@ -25,7 +96,8 @@ def _randomized_svd_dictionary(projected: h5py.Dataset, samples_gpu: torch.Tenso
     backend = mean_gpu.device
     n_random = n_components + 10
     q_bytes = n_voxels * n_random * 8
-    if q_bytes > min(8 * 2**30, torch.cuda.mem_get_info(backend)[0] // 3):
+    if (backend.type == "cuda" and
+            q_bytes > min(8 * 2**30, torch.cuda.mem_get_info(backend)[0] // 3)):
         raise MemoryError("Randomized SVD basis exceeds the GPU memory budget")
     q = torch.as_tensor(rng.normal(size=(n_features, n_random)),
                         device=backend, dtype=torch.float64)
@@ -57,8 +129,10 @@ def _randomized_svd_dictionary(projected: h5py.Dataset, samples_gpu: torch.Tenso
         q = torch.linalg.qr(multiply_x(q), mode="reduced")[0]
         q = torch.linalg.qr(multiply_xt(q), mode="reduced")[0]
     q = torch.linalg.qr(multiply_x(q), mode="reduced")[0]
-    u_small, singular_values, right = torch.linalg.svd(
-        multiply_xt(q).T, full_matrices=False)
+    svd_options = {"full_matrices": False}
+    if backend.type == "cuda":
+        svd_options["driver"] = "gesvd"
+    u_small, singular_values, right = torch.linalg.svd(multiply_xt(q).T, **svd_options)
     left = q @ u_small
     indices = left.abs().argmax(dim=0)
     signs = torch.sign(left[indices, torch.arange(left.shape[1], device=backend)])
@@ -84,7 +158,6 @@ def _sparse_codes_lars(samples: torch.Tensor, dictionary: torch.Tensor,
     rows = torch.arange(batch, device=samples.device)
     active[rows, initial] = ~done
     signs[rows, initial] = torch.sign(response[rows, initial]) * (~done)
-    identity = torch.eye(atoms, device=samples.device, dtype=samples.dtype)
     solve_failed = torch.zeros((), device=samples.device, dtype=torch.bool)
     limit = max_events or 3 * atoms
     for event in range(limit):
@@ -94,10 +167,13 @@ def _sparse_codes_lars(samples: torch.Tensor, dictionary: torch.Tensor,
         current = (correlation * active).abs().amax(dim=1)
         masked = gram[None] * active[:, :, None] * active[:, None, :]
         masked = masked + torch.diag_embed((~active).to(samples.dtype))
-        solved = torch.linalg.solve_ex(
-            masked + identity[None] * 1e-10, signs[..., None],
-            check_errors=False)
-        solve_failed |= (solved.info != 0).any()
+        # Adding a ridge changes the LASSO coefficients and can accumulate
+        # through the online dictionary updates. Solve the unregularized
+        # active Gram; a genuinely singular system must remain diagnosable.
+        solved = torch.linalg.solve_ex(masked, signs[..., None],
+                                       check_errors=False)
+        solve_failed |= ((solved.info != 0).any() |
+                         ~torch.isfinite(solved.result).all())
         direction = solved.result[..., 0]
         scale = torch.rsqrt((direction * signs).sum(dim=1).clamp_min(1e-20))
         direction = direction * scale[:, None]
@@ -141,15 +217,125 @@ def _sparse_codes_lars(samples: torch.Tensor, dictionary: torch.Tensor,
         signs.scatter_(1, enter_at, torch.where(enter_mask, entering_sign,
                                                signs.gather(1, enter_at)))
     if bool(solve_failed):
-        raise ValueError("LARS linear solve failed")
+        raise ValueError("LARS active Gram solve failed: singular or non-finite system")
     if not bool(done.all()):
         raise ValueError("LARS path exceeded sparse_iterations; increase the limit")
     return code
 
 
+def _sparse_codes_lars_compatible(samples: torch.Tensor, dictionary: torch.Tensor,
+                                  alpha: float,
+                                  max_events: int | None = None) -> torch.Tensor:
+    """Follow sklearn's LARS nodes and its float32-epsilon stopping rule.
+
+    A path node within epsilon of alpha is returned without interpolation.
+    Otherwise the last segment is interpolated to alpha. This differs from
+    always solving the exact target LASSO, even with float64 input arithmetic.
+    The implementation uses PyTorch throughout; no sklearn call is made.
+    """
+    gram = dictionary @ dictionary.T
+    response = samples @ dictionary.T
+    batch, atoms = response.shape
+    rows = torch.arange(batch, device=samples.device)
+    code = torch.zeros_like(response)
+    covariance = response.clone()
+    active = torch.zeros_like(response, dtype=torch.bool)
+    signs = torch.zeros_like(response)
+    blocked = torch.zeros_like(active)
+    done = torch.zeros(batch, device=samples.device, dtype=torch.bool)
+    add_atom = torch.ones_like(done)
+    previous_code = code.clone()
+    previous_c = response.abs().amax(dim=1)
+    has_previous = torch.zeros_like(done)
+    failed = torch.zeros((), device=samples.device, dtype=torch.bool)
+    tolerance = samples.shape[1] * np.finfo(np.float32).eps
+    tiny = np.finfo(np.float32).tiny
+    decimals = 15 if samples.dtype == torch.float64 else 6
+    limit = max_events or 3 * atoms
+
+    # The extra pass only checks the final node; it performs no path event.
+    for event in range(limit + 1):
+        candidate_covariance = torch.where(active | blocked, 0., covariance)
+        current, entering_index = candidate_covariance.abs().max(dim=1)
+        stopping = (~done) & (current <= alpha + tolerance)
+        interpolate = stopping & has_previous & ((current - alpha).abs() > tolerance)
+        denominator = previous_c - current
+        valid_segment = (denominator > 0) & torch.isfinite(denominator)
+        failed |= (interpolate & ~valid_segment).any()
+        fraction = (previous_c - alpha) / torch.where(valid_segment, denominator, 1.)
+        interpolated = previous_code + fraction[:, None] * (code - previous_code)
+        code = torch.where((interpolate & valid_segment)[:, None], interpolated, code)
+        done |= stopping
+        if event % 4 == 0 and bool(done.all()):
+            break
+        if event == limit:
+            break
+
+        adding = (~done) & add_atom
+        selected_covariance = covariance[rows, entering_index]
+        active[rows, entering_index] |= adding
+        signs[rows, entering_index] = torch.where(
+            adding, selected_covariance.sign(), signs[rows, entering_index])
+        covariance[rows, entering_index] = torch.where(
+            adding, 0., covariance[rows, entering_index])
+
+        masked = (gram[None] * active[:, :, None] * active[:, None, :] +
+                  torch.diag_embed((~active).to(samples.dtype)))
+        solved = torch.linalg.solve_ex(masked, signs[..., None], check_errors=False)
+        raw_direction = solved.result[..., 0]
+        signed_sum = (raw_direction * signs).sum(dim=1)
+        bad_system = ((solved.info != 0) | ~torch.isfinite(raw_direction).all(dim=1) |
+                      ~torch.isfinite(signed_sum) | (signed_sum <= 0)) & ~done
+        # A dependent newly entered atom is excluded explicitly, never
+        # regularized. Other failures cannot be recovered by changing alpha.
+        rejected = bad_system & adding
+        active[rows, entering_index] &= ~rejected
+        signs[rows, entering_index] = torch.where(
+            rejected, 0., signs[rows, entering_index])
+        blocked[rows, entering_index] |= rejected
+        failed |= (bad_system & ~adding).any()
+        processing = (~done) & ~bad_system
+        raw_direction = torch.where(processing[:, None], raw_direction, 0.)
+        scale = torch.rsqrt(torch.where(processing, signed_sum, 1.))
+        direction = raw_direction * scale[:, None]
+        slope = torch.round(direction @ gram, decimals=decimals)
+        possible = (~active) & (~blocked) & processing[:, None]
+        positive = (current[:, None] - covariance) / (scale[:, None] - slope + tiny)
+        negative = (current[:, None] + covariance) / (scale[:, None] + slope + tiny)
+        positive = torch.where(possible & (positive > 0), positive, torch.inf)
+        negative = torch.where(possible & (negative > 0), negative, torch.inf)
+        gamma = torch.minimum(positive.amin(dim=1), negative.amin(dim=1))
+        gamma = torch.minimum(gamma, current / scale)
+        crossing = -code / (direction + tiny)
+        crossing = torch.where(active & processing[:, None] & (crossing > 0),
+                               crossing, torch.inf)
+        drop_step = crossing.amin(dim=1)
+        dropping = processing & (drop_step < gamma)
+        gamma = torch.where(dropping, drop_step, gamma)
+        gamma = torch.where(processing, gamma, 0.)
+        previous_code = torch.where(processing[:, None], code, previous_code)
+        previous_c = torch.where(processing, current, previous_c)
+        has_previous |= processing
+        # sklearn clears inactive coefficients on each new path segment.
+        updated_code = torch.where(active, code + gamma[:, None] * direction, 0.)
+        code = torch.where(processing[:, None], updated_code, code)
+        covariance = torch.where(possible, covariance - gamma[:, None] * slope,
+                                 covariance)
+        drop_mask = active & dropping[:, None] & (crossing == drop_step[:, None])
+        dropped_covariance = response - code @ gram
+        covariance = torch.where(drop_mask, dropped_covariance, covariance)
+        active &= ~drop_mask
+        signs = torch.where(drop_mask, 0., signs)
+        add_atom = torch.where(processing, ~dropping, torch.ones_like(add_atom))
+
+    if bool(failed):
+        raise ValueError("Compatible LARS active Gram or interpolation failed")
+    if not bool(done.all()):
+        raise ValueError("Compatible LARS path exceeded sparse_iterations; increase the limit")
+    return code
+
+
 def _lars_inverse_event(gram, response, code, active, signs, done, inverse, invalid, rows, alpha=1.0):
-    # Match the regularizer in the original full linear solve.
-    ridge = 1e-10
     correlation = response - code @ gram
     current = (correlation * active).abs().amax(dim=1)
     raw_direction = torch.bmm(inverse, signs[..., None])[..., 0]
@@ -157,7 +343,8 @@ def _lars_inverse_event(gram, response, code, active, signs, done, inverse, inva
     direction = raw_direction * scale[:, None]
     slope = direction @ gram
     # Check each active system before accepting the accumulated inverse.
-    residual = (slope + ridge * direction - scale[:, None] * signs) * active
+    residual = (slope - scale[:, None] * signs) * active
+    invalid |= (~torch.isfinite(raw_direction).all(dim=1) & ~done).any()
     invalid |= (((residual.abs().amax(dim=1) / scale.clamp_min(1e-20)) > 1e-7)
                 & ~done).any()
     target_step = ((current - alpha) / scale).clamp_min(0)
@@ -189,8 +376,9 @@ def _lars_inverse_event(gram, response, code, active, signs, done, inverse, inva
     # Remove an active atom with a Schur complement downdate.
     column = inverse[rows, :, drop_index]
     pivot = inverse[rows, drop_index, drop_index]
-    denominator = torch.where(dropping, pivot, 1)
-    invalid |= (dropping & (pivot <= 0)).any()
+    valid_pivot = (pivot > 0) & torch.isfinite(pivot)
+    denominator = torch.where(dropping & valid_pivot, pivot, 1)
+    invalid |= (dropping & ~valid_pivot).any()
     inverse -= (column[:, :, None] * column[:, None, :] *
                 dropping[:, None, None] / denominator[:, None, None])
     drop_at = drop_index[:, None]
@@ -204,9 +392,12 @@ def _lars_inverse_event(gram, response, code, active, signs, done, inverse, inva
     # Add an atom with a rank-one inverse update, avoiding a fresh LU solve.
     cross = gram[:, enter_index].T
     vector = torch.bmm(inverse, cross[..., None])[..., 0]
-    schur = gram[enter_index, enter_index] + ridge - (cross * vector).sum(dim=1)
-    invalid |= (entering & (schur <= 0)).any()
-    denominator = torch.where(entering, schur, 1).clamp_min(1e-20)
+    schur = gram[enter_index, enter_index] - (cross * vector).sum(dim=1)
+    valid_schur = (schur > 0) & torch.isfinite(schur)
+    invalid |= (entering & ~valid_schur).any()
+    # Invalid rows restart the full checked solver. Keep graph intermediates
+    # finite rather than silently regularizing a degenerate Schur complement.
+    denominator = torch.where(entering & valid_schur, schur, 1)
     inverse += (vector[:, :, None] * vector[:, None, :] *
                 entering[:, None, None] / denominator[:, None, None])
     new_row = -vector / denominator[:, None]
@@ -267,7 +458,12 @@ class _LarsInverseSolver:
         initial = self.response.abs().argmax(dim=1)
         self.active[self.rows, initial] = ~self.done
         self.signs[self.rows, initial] = torch.sign(self.response[self.rows, initial]) * (~self.done)
-        self.inverse[self.rows, initial, initial] = (~self.done) / (self.gram[initial, initial] + 1e-10)
+        initial_diagonal = self.gram[initial, initial]
+        valid_initial = ((~self.done) & (initial_diagonal > 0) &
+                         torch.isfinite(initial_diagonal))
+        self.invalid |= ((~self.done) & ~valid_initial).any()
+        denominator = torch.where(valid_initial, initial_diagonal, 1)
+        self.inverse[self.rows, initial, initial] = valid_initial / denominator
         limit = max_events or 3 * self.response.shape[1]
         for start in range(0, limit, 4):
             if self.graph is not None and start + 4 <= limit:
@@ -278,30 +474,78 @@ class _LarsInverseSolver:
             finished, invalid = torch.stack((self.done.all(), self.invalid)).tolist()
             if invalid:
                 self.fallback_count += 1
-                return _sparse_codes_lars(samples, dictionary, alpha, max_events)
+                return _sparse_codes_lars_compatible(samples, dictionary, alpha, max_events)
             if finished:
                 return self.code.clone()
         self.fallback_count += 1
-        return _sparse_codes_lars(samples, dictionary, alpha, max_events)
+        return _sparse_codes_lars_compatible(samples, dictionary, alpha, max_events)
+
+
+def _nearby_lars_knots(gram: torch.Tensor, response: torch.Tensor,
+                       code: torch.Tensor, active_direction: torch.Tensor,
+                       alpha: float, tolerance: float) -> dict[str, torch.Tensor]:
+    """Conservatively detect either adjacent path node near target alpha.
+
+    active_direction is the existing active Gram solve G_AA^-1 sign(code).
+    Along this segment c(alpha + delta) = c(alpha) - delta * direction.
+    No coefficient is changed; a sensitive row requires compatible LARS.
+    """
+    active = code != 0
+    product = code @ gram
+    correlation = response - product
+    slope = active_direction @ gram
+    scale = torch.maximum(response.abs().amax(dim=1), product.abs().amax(dim=1))
+    scale = scale.clamp_min(max(1., alpha))
+    buffer = 64 * torch.finfo(code.dtype).eps * scale
+    infinity = torch.full_like(code, torch.inf)
+    active_zero = torch.where(active & (active_direction != 0),
+                              code / active_direction, infinity)
+    positive_bound = torch.where(~active & (slope != 1),
+                                 (alpha - correlation) / (slope - 1), infinity)
+    negative_bound = torch.where(~active & (slope != -1),
+                                 (-alpha - correlation) / (slope + 1), infinity)
+    distance = torch.stack((active_zero, positive_bound, negative_bound), dim=2).flatten(1)
+    legal = torch.isfinite(distance) & (alpha + distance >= 0)
+    above = torch.where(legal & (distance > 0), distance, torch.inf).amin(dim=1)
+    below = torch.where(legal & (distance < 0), -distance, torch.inf).amin(dim=1)
+    zero_knot = (legal & (distance == 0)).any(dim=1)
+    # A bound already tied at alpha can give 0/0; it must not disappear
+    # merely because an event-distance denominator is zero.
+    boundary_tie = ((~active) &
+                    ((correlation.abs() - alpha).abs() <= buffer[:, None])).any(dim=1)
+    invalid = (~torch.isfinite(active_direction).all(dim=1) |
+               ~torch.isfinite(code).all(dim=1) | ~torch.isfinite(response).all(dim=1))
+    near_above = above <= tolerance + buffer
+    near_below = below <= tolerance + buffer
+    return dict(sensitive_rows=near_above | near_below | zero_knot | boundary_tie | invalid,
+                nearest_above_distance=above, nearest_below_distance=below,
+                near_above=near_above, near_below=near_below, zero_knot=zero_knot,
+                boundary_tie=boundary_tie, invalid=invalid)
 
 
 class _SparseCodesBPDN:
-    """Identify Lasso support with batched ADMM, polish it, or restart LARS.
+    """Compatible LARS, or optional ADMM support identification and polishing.
 
     ADMM equations: https://sporco.readthedocs.io/en/latest/modules/sporco.admm.bpdn.html
     The online dictionary updates and sklearn stopping rule are unchanged.
     """
 
-    def __init__(self, batch, atoms, device, dtype, alpha=1.0):
-        self.reference = _LarsInverseSolver(batch, atoms, device, dtype, alpha)
+    def __init__(self, batch, atoms, device, dtype, alpha=1.0,
+                 *, compatibility_mode=False):
+        # All-LARS remains a diagnostic reference. Default ADMM is accepted
+        # only away from nodes where sklearn's stopping rule changes codes.
+        self.compatibility_mode = compatibility_mode
         self.alpha = alpha
         self.calls = 0
         self.fallback_count = 0
+        self.near_node_fallback_count = 0
+        self.admm_accepted_count = 0
         self.polish_checks = 0
         self.graph = None
         self.identity = torch.eye(atoms, device=device, dtype=dtype)
         # Bound the temporary batched active-set matrix and graph workspace.
-        if self.identity.is_cuda and batch * atoms * atoms * self.identity.element_size() <= 32 * 2**20:
+        if (not compatibility_mode and self.identity.is_cuda and
+                batch * atoms * atoms * self.identity.element_size() <= 32 * 2**20):
             self.inverse = self.identity.clone()
             self.response = torch.zeros((batch, atoms), device=device, dtype=dtype)
             self.code = torch.zeros_like(self.response)
@@ -326,12 +570,14 @@ class _SparseCodesBPDN:
 
     def fallback(self, samples, dictionary, alpha, max_events):
         self.fallback_count += 1
-        return self.reference(samples, dictionary, alpha, max_events)
+        return _sparse_codes_lars_compatible(samples, dictionary, alpha, max_events)
 
     def __call__(self, samples, dictionary, alpha, max_events):
         if alpha != self.alpha:
             raise ValueError("Sparse solver alpha differs from captured alpha")
         self.calls += 1
+        if self.compatibility_mode:
+            return self.fallback(samples, dictionary, alpha, max_events)
         if self.graph is None:
             return self.fallback(samples, dictionary, alpha, max_events)
         gram = dictionary @ dictionary.T
@@ -349,7 +595,7 @@ class _SparseCodesBPDN:
             active = self.code.abs() > 1e-9
             signs = self.code.sign() * active
             masked = (gram[None] * active[:, :, None] * active[:, None, :] +
-                      torch.diag_embed((~active).to(samples.dtype)) + 1e-10 * self.identity)
+                      torch.diag_embed((~active).to(samples.dtype)))
             lu, pivots, info = torch.linalg.lu_factor_ex(masked)
             polished = torch.linalg.lu_solve(
                 lu, pivots, ((response - alpha * signs) * active)[..., None])[..., 0] * active
@@ -357,9 +603,19 @@ class _SparseCodesBPDN:
             sign_valid = ((polished * signs > 0) | ~active).all()
             residual = torch.where(active, (gradient + alpha * signs).abs(),
                                    (gradient.abs() - alpha).clamp_min(0)).max()
-            valid = ((info == 0).all() & sign_valid & (residual <= 1e-8) &
+            valid = ((info == 0).all() & torch.isfinite(polished).all() &
+                     sign_valid & (residual <= 1e-8) &
                      (lu.diagonal(dim1=-2, dim2=-1).abs().min() > 1e-8))
             if bool(valid):
+                active_direction = torch.linalg.lu_solve(
+                    lu, pivots, signs[..., None])[..., 0] * active
+                nearby = _nearby_lars_knots(
+                    gram, response, polished, active_direction, alpha,
+                    samples.shape[1] * np.finfo(np.float32).eps)
+                if bool(nearby["sensitive_rows"].any()):
+                    self.near_node_fallback_count += 1
+                    return self.fallback(samples, dictionary, alpha, max_events)
+                self.admm_accepted_count += 1
                 return polished
         return self.fallback(samples, dictionary, alpha, max_events)
 
@@ -413,7 +669,7 @@ class _DictionaryUpdater:
 def fit_dicl_gpu_streaming(projected_dir: str | Path,
                            modality_names: Sequence[str], dicl_dim: int,
                            *, device: str = "cuda:0", max_iter: int = 1000,
-                           batch_size: int = 32, sparse_iterations: int = 120,
+                           batch_size: int = 32, sparse_iterations: int = 1000,
                            alpha: float = 1.0, random_state: int = 0,
                            feature_block: int = 4096) -> dict[str, np.ndarray]:
     """Fit K×R dictionaries without reading a full P×R modality into RAM."""
@@ -423,22 +679,17 @@ def fit_dicl_gpu_streaming(projected_dir: str | Path,
     if dicl_dim < 2 or max_iter < 1 or batch_size < 1 or sparse_iterations < 1:
         raise ValueError("Invalid dictionary dimensions or iteration counts")
     output = {}
-    sparse_solvers = {}
     atom_updaters = {}
     for name in modality_names:
+        # The cold LARS calls belong to each seeded modality fit. Sharing
+        # solver call counters changes the later modalities' encoding path.
+        sparse_solvers = {}
         with h5py.File(Path(projected_dir) / f"{name}_projected.h5", "r") as file:
             projected = file["data"]
             n_voxels, n_features = projected.shape
             if n_voxels < dicl_dim:
                 raise ValueError(f"Too few masked voxels for DicL: {name}")
-            sums = np.zeros(n_features, dtype=np.float64)
-            squares = np.zeros(n_features, dtype=np.float64)
-            for start in range(0, n_voxels, feature_block):
-                chunk = projected[start:start + feature_block].astype(np.float64)
-                sums += chunk.sum(axis=0)
-                squares += np.square(chunk).sum(axis=0)
-            mean = sums / n_voxels
-            std = np.sqrt(np.maximum(squares / n_voxels - mean ** 2, 0))
+            mean, std = _streaming_numpy_axis0_stats(projected, feature_block)
             std[std == 0] = 0.1
             mean_gpu = torch.as_tensor(mean, device=backend, dtype=torch.float64)
             std_gpu = torch.as_tensor(std, device=backend, dtype=torch.float64)
@@ -447,9 +698,8 @@ def fit_dicl_gpu_streaming(projected_dir: str | Path,
             keep_on_gpu = projected_bytes < min(4 * 2**30, torch.cuda.mem_get_info(backend)[0] // 4)
             samples_gpu = None
             if keep_on_gpu:
-                samples_gpu = torch.as_tensor(projected[:], device=backend,
-                                              dtype=torch.float64)
-                samples_gpu = (samples_gpu - mean_gpu) / std_gpu
+                samples_gpu = _preload_standardized_projection(
+                    projected, mean_gpu, std_gpu, feature_block)
             rng = np.random.RandomState(random_state)
             dictionary = _randomized_svd_dictionary(
                 projected, samples_gpu, mean_gpu, std_gpu, dicl_dim, rng, feature_block)
