@@ -46,8 +46,9 @@ def anatomy(tmp_path, monkeypatch):
                                    mask=Volume(np.ones(image.shape, dtype=np.uint8), image))
 
     class FAST:
-        def __init__(self, *, device):
+        def __init__(self, *, device, execution):
             assert device == "cpu"
+            assert execution == "fsl"
 
         def __call__(self, path, *, mask):
             calls["fast"] += 1
