@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "scope": "Same real native BOLD frames and exact composed EPI-to-MNI warp.",
+  "frames": 8,
+  "fsl_version": "6.0.7.22",
+  "fsl_exit_code": 255,
+  "fsl_command": "applywarp --in=source_frames --ref=MNI --warp=composed_fsl --mask=MNI_mask --rel --interp=spline --out=reference",
+  "checks": {
+    "gzip_crc_passed": true,
+    "grid_matches": true,
+    "all_finite": true,
+    "shape": [
+      91,
+      109,
+      91,
+      8
+    ],
+    "interior_voxels": 182661,
+    "outside_mask_max_abs": 0.0,
+    "fsl_version_file": "6.0.7.22",
+    "output_dtype": "float32",
+    "tr_seconds": 0.7350000143051147,
+    "tr_matches_source": true,
+    "time_unit": "sec"
+  },
+  "same_mask": {
+    "values": 1768464,
+    "pearson_r": 0.9999999999285679,
+    "mae": 0.0014608734694441477,
+    "rmse": 0.002063324628972925,
+    "maximum_absolute_difference": 0.054962158203125
+  },
+  "interior": {
+    "values": 1461288,
+    "pearson_r": 0.9999999999275956,
+    "mae": 0.001451745623605091,
+    "rmse": 0.0020236602744565027,
+    "maximum_absolute_difference": 0.03790283203125
+  },
+  "timing_seconds": {
+    "fsl_process_including_io": 9.392305989284068
+  },
+  "sha256": {
+    "fsl_executable": "fe05b2ec68cbd876c85872e5e71281180885ebbd3d44ef98d048e982ceab88bb",
+    "native": "3859b4fc89856621a1c7369123a81c856e36befefa18df356faf955629ae6a18",
+    "candidate": "4eccc3695d0746db5020f2ef64cde6d7e68d431913713208b4d018f92bb8bf48",
+    "reference": "0585cd056bf5ccfb8bf97a5f6a66082d4e7caad525718fc11e40d80a827fcb92",
+    "pull": "fc8bf9c36209bfbbff680d25690cdb35c3c424e74233b1494684d824fd665746",
+    "matrix": "b2aceb5ae751ab894c1f4c7b088dee2ca6a51207840310ee74c83346e7426ae6",
+    "composed_fsl_field": "13977cd5b2ca6eef1ec3a25db022f15cea1b50292eceff2b9a3a90f8b9e022f5",
+    "fsl_output": "7eeee124a3ff1e38eaf8ee0d71ef374470b2a28d568ca1ead5ffe34d01aa79d5"
+  },
+  "limits": [
+    "Fixed-warp real-frame comparison tests interpolation, not nonlinear registration or the complete UKB pipeline.",
+    "FNIT uses periodic spline boundaries; FSL applywarp uses its own source-edge policy.",
+    "Timing is comparable only for equal frame counts and the same input/warp, with different process/import boundaries noted."
+  ],
+  "privacy": "Anonymous scalar metrics and hashes; images and logs remain private.",
+  "date": "2026-10-01",
+  "source_commit": "3b9b0f8128f10da77d3fbb6c395e9127353c3e46",
+  "frame_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "source_sha256": {
+    "src/fnit/fmri/normalization.py": "314b856e50083d7496c0c541767511437010829e61543f259839d83f00ce29bb",
+    "src/fnit/fmri/_anatomical.py": "6ad73d127a1009890d4fef2115fb16a30a45e7e486069b72de9c28afb9c4bfe2",
+    "src/fnit/fmri/bbr.py": "0ca14f3343d6b5bf09ea93f6ec94de9f2c0cce19fdf8ea005a87ff8e03f48fc2",
+    "src/fnit/synthmorph/fsl_warp.py": "61177712062c536ec31e7e6985d1f7801c8992a1775312a74d058d8dd7124dd4",
+    "validation/fmri/compare_fsl_resampling.py": "f849faa1808b0f674748150aadcbf440f0f752aaf7ac61c728fc3c65b3c45456",
+    "validation/fmri/validate_resampling.py": "e1cbfbf773089248afd50a9ab8f1b56edbb0a737e0027d4c277a41a036f7c767"
+  },
+  "acceptance": "FSL exit code 255 retained. Its complete output passed gzip CRC, shape/affine, finite-value, target-mask-zero and TR checks; conditionally accepted as an interpolation oracle."
+}

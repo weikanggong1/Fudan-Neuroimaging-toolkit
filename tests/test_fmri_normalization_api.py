@@ -13,7 +13,11 @@ def test_t1_to_mni_uses_nibabel_images_and_world_pull(tmp_path, monkeypatch):
     moving = tmp_path / "t1.nii.gz"
     fixed = tmp_path / "mni.nii.gz"
     for path in (moving, fixed):
-        nib.save(nib.Nifti1Image(np.ones((4, 5, 6), dtype=np.float32), np.eye(4)), path)
+        affine = np.eye(4)
+        affine[0, 1] = .2
+        image = nib.Nifti1Image(np.ones((4, 5, 6), dtype=np.float32), affine)
+        image.header.set_zooms((1, 1, 1))
+        nib.save(image, path)
 
     class FakeFLIRT:
         def __init__(self, *, device):
@@ -43,3 +47,11 @@ def test_t1_to_mni_uses_nibabel_images_and_world_pull(tmp_path, monkeypatch):
     )
     assert nib.load(str(result.pull_ras)).shape == (4, 5, 6, 3)
     np.testing.assert_array_equal(result.moving_to_fixed_world, np.eye(4))
+    assert set(result.timing_seconds) == {
+        "t1_to_mni_affine", "t1_to_mni_nonlinear", "warp_conversion",
+    }
+    assert all(value >= 0 for value in result.timing_seconds.values())
+    output = nib.load(result.pull_ras)
+    np.testing.assert_array_equal(output.header.get_zooms()[:3], (1, 1, 1))
+    assert output.header["qform_code"] == nib.load(fixed).header["qform_code"]
+    assert output.header["sform_code"] == nib.load(fixed).header["sform_code"]

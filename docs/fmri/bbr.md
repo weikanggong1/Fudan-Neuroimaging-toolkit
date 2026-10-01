@@ -11,9 +11,11 @@
 | `wmseg` | T1 网格的 3D 白质二值分割；形状及 affine 须与 `t1` 一致。可用 FNIT `TorchFAST` 的白质部分容积图 `pve_wm≥0.5` 生成。 |
 | `init` | 可选的 EPI→T1、**FLIRT scaled-mm** 4×4 初始矩阵，可传文本文件路径或 NumPy 数组。`None` 时调用现有 FNIT `TorchFLIRT` 6 自由度 normmi 求初始矩阵，此时 `epi`、`t1` 必须是文件路径。 |
 | `device` | `"cuda:0"`、`"cpu"` 等 PyTorch 设备；`None` 时优先 CUDA。GPU 默认允许 TF32，未使用 float16。 |
-| `grid_search` | 是否先做 FSL `bbr.sch` 风格的粗网格搜索；默认 `True`。 |
+| `grid_search` | 默认 `True`，执行官方 `bbr.sch` 的粗网格与微网格。`False` 跳过两轮网格，仅在已有初始化附近优化；用于明确限定的调用，默认 benchmark 不关闭。 |
+| `execution` | `"batched"`（默认）批量计算独立候选；`"reference"` 使用相同边界、成本、候选顺序和优化器逐项求值。 |
+| `candidate_batch_size` | 独立候选每批上限，默认 128；程序再按边界点数量限制块大小。减小只影响内存与执行方式，不缩小搜索范围。 |
 
-返回 `BBRResult`，包含 `moved`（T1 网格、float32 的 3D NiBabel NIfTI）、`matrix`（EPI→T1 的 FLIRT scaled-mm 4×4）、`moving_to_fixed_world`（同一变换的 RAS world 4×4）、`initial_cost`、`final_cost`、`boundary_points` 和 `runtime_seconds`。`save(output=..., omat=...)` 分别写配准后的 NIfTI 和 FLIRT 格式文本矩阵。`matrix` 可直接交给接受 FLIRT `.mat` 的 FNIT 重采样函数；不能把它当作 NIfTI affine 或 RAS world 矩阵使用。应用到 4D BOLD 时，应把 BBR 与每帧运动矩阵及后续空间形变组合后只重采样一次。
+返回 `BBRResult`，包含 `moved`（T1 网格、float32 的 3D NiBabel NIfTI）、`matrix`（EPI→T1 的 FLIRT scaled-mm 4×4）、`moving_to_fixed_world`（同一变换的 RAS world 4×4）、`initial_cost`、`final_cost`、`boundary_points` 和 `runtime_seconds`。`phase_timings` 分别返回初始化、边界准备、粗级与细级 BBR、最终重采样耗时；`cost_evaluations`、`phase_cost_evaluations`、`host_result_transfers` 用于核对计算量和主机取值次数。`save(output=..., omat=...)` 分别写配准后的 NIfTI 和 FLIRT 格式文本矩阵。`matrix` 可直接交给接受 FLIRT `.mat` 的 FNIT 重采样函数；不能把它当作 NIfTI affine 或 RAS world 矩阵使用。应用到 4D BOLD 时，应把 BBR 与每帧运动矩阵及后续空间形变组合后只重采样一次。
 
 ```python
 from fnit.fmri.bbr import register_bbr
@@ -24,7 +26,9 @@ result = register_bbr(
     wmseg="/absolute/path/T1_wmseg.nii.gz",      # T1 网格白质二值掩膜
     init=None,                                    # EPI→T1 FLIRT 4×4 初始矩阵；None 自动估计
     device="cuda:0",                             # PyTorch 设备；无 GPU 可用 "cpu"
-    grid_search=True,                             # 做粗网格搜索后再优化边界代价
+    grid_search=True,                             # 保留官方粗网格、微网格与局部优化
+    execution="batched",                        # reference 可复核同一算法的串行求值
+    candidate_batch_size=128,                     # 候选分块上限；内存紧张时减小
 )
 result.save(
     output="/absolute/path/example_func2T1.nii.gz",  # T1 网格中的 3D EPI 输出文件
@@ -51,22 +55,67 @@ flirt -in example_func.nii.gz -ref T1_brain.nii.gz \
   -omat example_func2T1.mat -out example_func2T1.nii.gz
 ```
 
-官方 [FLIRT BBR](https://fsl.fmrib.ox.ac.uk/fsl/docs/registration/flirt/bbr.html)使用白质边界法线两侧的 EPI 强度，默认采样距离为 2 mm。FNIT 的边界点生成、粗搜索、局部 Powell 优化和三线性重采样独立实现；优化轨迹、边界法线的离散计算及边缘插值不保证逐值等同于 FSL。
+官方 [FLIRT BBR](https://fsl.fmrib.ox.ac.uk/fsl/docs/registration/flirt/bbr.html)使用白质边界法线两侧的 EPI 强度，默认采样距离为 2 mm。当前实现按对应官方源码修正：
+
+- 按 radiological storage、x 轴最快的顺序生成边界点，因此 `bbrstep=200` 与官方抽取同一类子集；2 mm 白质平滑采用官方核半径、零填充及逐偏移 float32 舍入，法线用 27 点加权梯度。
+- 输入采用 FLIRT robust clamp 与强制 1 mm 级别的 blur 行为。成本插值使用 zero-valued corner，坐标、灰白质强度比、有符号 `tanh` 与归约保留官方对应精度；矩阵转换使用 header `pixdim`。
+- 粗搜索包括 qform/sform 与已给初始矩阵两个起点、每个起点 729 个候选；之后按源 `Brent→Powell→Brent` 局部优化，再执行 729 个微网格候选和细级优化。保留网格枚举顺序、浮点参数解析和稳定的最小值选择。
+- 输出复用 FNIT FLIRT 的三线性采样、边缘背景及 header 规则，避免另一套逐 slab 输出代码。
+
+未降低 iteration、搜索范围或分辨率。Brent/Powell 存在前后依赖，局部优化仍需主机控制；候选批量化不改变这一依赖。原代码的 SciPy Powell、边界中心旋转、单轮粗网格及 border replication 已被替换。官方 MISCMATHS 原源码的独立编译 oracle 用于单元测试，不是 FNIT 运行依赖。当前与官方是否数值一致以以下真实数据配对为准。
 
 ## 真实 UKB 数据对照
 
-使用同一次真实静息态采集的 3D EPI 参考影像与同被试去颅骨 T1；两套实现均跳过 GDC 和 B0 场图校正。比较只包含这一例。计时均在 gpucw1 进行；FSL 使用 CPU，FNIT 使用 CUDA。下表第一组固定**完全相同的 FSL FAST 白质掩膜和 FSL normmi 初始矩阵**，因此单独比较 BBR 步骤。矩阵误差为在 T1 脑内采样点，把 T1 点逆变换到 EPI 后的两套坐标距离。影像指标在 T1 脑掩膜内计算，强度单位为原 EPI 值。
+2026-10-01 在共享 H100 PCIe 上，用一例真实 UKB 静息态 EPI 参考影像及同被试去颅骨 T1 比较。FSL 6.0.7.22 BBR 已重新运行，实际二进制子进程退出 0，矩阵、影像及 header 与固定参照逐位一致；安装包装器返回的 255 单独保留。两侧不做 GDC 或 B0 畸变校正。
 
-| 指标 | FNIT BBR | FSL FLIRT BBR |
+### 相同初始化与白质掩膜
+
+固定完全相同的 FSL normmi **初始**矩阵与 FSL FAST 白质分割。矩阵误差是在 T1 脑内点上计算 T1→EPI 逆变换的坐标距离；影像 r/MAE/RMSE 在 T1 脑内计算，强度单位为原 EPI 值。
+
+| 指标 | 修改前 `7952b33` | 当前批量融合路径 |
 |---|---:|---:|
-| BBR 耗时 | 3.73 s | 66.84 s |
-| 峰值内存 | GPU 0.060 GB | CPU RSS 0.260 GB |
-| 变换位移差 | 中位 0.180 mm；95 百分位 0.301 mm；最大 0.361 mm | 参照 |
-| 配准后影像 | 与 FSL Pearson r=0.998683；平均绝对差 168.94 | 参照 |
-| FNIT 边界代价 | 0.33050 | FSL 矩阵代入 FNIT 代价为 0.33074 |
+| 首次 / 热调用 | 11.156 / 10.860 s | 3.581 / 1.409 s |
+| 峰值 allocated / reserved | 0.060 / 0.080 GB | 0.844 / 1.103 GB |
+| 逆变换位移 mean / median / p95 / RMS | 0.09056 / 0.09206 / 0.14117 / 0.09619 mm | 0.00242 / 0.00240 / 0.00400 / 0.00260 mm |
+| 影像 Pearson r | 0.99966894 | 0.99999970 |
+| 影像 MAE / RMSE | 87.097 / 167.529 | 2.646 / 5.014 |
+| 成本求值次数 | 1754 | 2604 |
 
-默认组织分割链另以同一 T1 比较：FNIT `TorchFAST` 的白质部分容积阈值 `≥0.5` 与 FSL FAST 白质掩膜 Dice=0.995177。FNIT FAST 耗时 1.995 s，随后 FNIT BBR 耗时 2.011 s，合计峰值 GPU 显存 1.325 GB；FSL FAST 耗时 211.51 s。此组**仍共用 FSL normmi 初始矩阵**，FNIT FAST+BBR 对 FSL FAST+BBR 最终变换的位移差中位 0.075 mm、95 百分位 0.107 mm。FSL normmi 初始化另耗时 10.61 s；这些 FAST/BBR 时间均不包含 EPI 的运动估计、AROMA、MNI 变换或文件解压。
+当前初始/最终成本为 0.4562233 / 0.3413588；官方最终矩阵代入**当前 FNIT 成本**为 0.3413580。修改前与当前边界/成本不同，不把两个版本的代价值直接相减。当前 schedule 补全后求值次数增加；速度提升来自独立候选批量化、缓存和融合采样，未删减搜索。修正后的非融合张量路径耗时 11.523 s、峰值分配 8.005 GB；其矩阵文件、影像、header、affine、缩放与融合结果逐位一致。
 
-先前的完整配准链用 **FNIT 自身的 FAST 白质分割与 TorchFLIRT normmi 初始矩阵**测量：FNIT FAST 2.582 s、TorchFLIRT 初始化 47.604 s、BBR 4.756 s，三步串行合计 54.94 s；官方对应三步合计 288.96 s。两套初始矩阵的逆变换位移差中位 0.848 mm、95 百分位 1.372 mm；经 BBR 后，对官方最终矩阵的差异降至中位 0.099 mm、95 百分位 0.148 mm。T1 脑掩膜内配准影像 Pearson r=0.999605、平均绝对差 96.41 原强度单位。整条 FNIT 链的 GPU 显存峰值为已分配 1.325 GB、已预留 1.904 GB。该链测量时 `flirt/core.py` 的 SHA256 为 `d590686ce9970b67cf29c8f762d3cdc19113d2c6a2af8b41e9a6382d2b9ee042`；本次 FLIRT 修订后的 6-DOF 求解结果见[当前独立配准对照](../flirt/README.md)，**上述 BBR 整链数值尚未用修订后的初始矩阵重跑**。这次旧链计时未预热且 GPU 非独占；FSL 计时来自另一次 CPU 运行，不能计算稳定加速比。
+本轮 FSL BBR CPU 命令为 45.093 s，包含输入读写、启动及只记录 exec/exit 的追踪；FNIT 函数钟包含影像 ArrayProxy 读入/解压及 CPU 结果转换，排除最终写盘。GPU 与 CPU 均共享，计时边界也不同，不能据此发布稳定 CPU/GPU 加速倍数。“首次”是进程首个函数调用，CUDA 初始化已完成，未清空 Triton 磁盘缓存。
 
-原始场图缺失，无法用这组数据评价带畸变校正的 BBR；去颅骨 T1 也不能代表原始 T1 采集。FNIT 与 FSL 的代价函数和优化结果接近，但未达到逐值相同。所有公开数值仅为汇总标量，见 [`bbr_summary.json`](../../validation/fmri/bbr_summary.json)。
+### FNIT FAST＋FLIRT＋BBR 完整配准链
+
+同一 T1 重新生成 FNIT 白质分割和 FNIT 6-DOF normmi 初始化，再执行 BBR；精度参照仍为官方 FAST/init/BBR 结果。
+
+| 指标 | 修改前 | 当前 |
+|---|---:|---:|
+| 首次 / 热调用 | 17.507 / 14.962 s | 6.932 / 5.072 s |
+| 最终位移 median / p95 / RMS | 0.10059 / 0.15916 / 0.10645 mm | 0.06707 / 0.10897 / 0.07203 mm |
+| 影像 Pearson r | 0.9995740 | 0.9997382 |
+| 影像 MAE / RMSE | 98.212 / 190.026 | 80.034 / 148.914 |
+| 峰值 allocated / reserved | 1.360 / 1.904 GB | 1.360 / 1.904 GB |
+
+当前热调用中 FAST 为 1.329 s，初始 FLIRT 为 2.738 s，BBR 函数为 0.999 s。BBR 的阶段钟为边界准备 0.180 s、粗级搜索与优化 0.208 s、细级搜索与优化 0.551 s、最终采样 0.059 s；已显式提供初始化，函数内初始化钟仅计入读取。阶段钟采用 CPU wall，无额外 GPU fence，不能与包含它们的总钟再次相加。
+
+### GPU profile 与回归门槛
+
+profile 独立运行，插桩时间不进入上面的速度表。
+
+| 完整 BBR profile | 修改前 | 当前 |
+|---|---:|---:|
+| CUDA kernels | 53,672 | 2,163 |
+| `cudaStreamSynchronize` | 5,289 | 463 |
+| H2D / D2H 事件 | 3,523 / 1,766 | 473 / 426 |
+| CUDA 张量转 Python float | 1,754 | 2 |
+
+剩余 D2H 主要用于有依赖的 Brent/Powell 主机分支；每次候选批次只返回成本向量。整张 GPU 的热调用平均利用率为 97.4% / 89.0%，包含其他作业，不能解释为 FNIT 自身利用率。报告保留完整链的 profile、所有阶段及环境。旧工具对两个单矩阵调用各把 `len(4×4)` 记为 4，共多计 6；当前成本次数采用 `BBRResult.cost_evaluations`，原测量哈希和计数更正注释保留。
+
+回归测试覆盖官方 MISCMATHS Brent/Powell trial trace、边界/平滑/插值，以及真实 NIfTI 常见的 Fortran 布局。融合 kernel 前将驻留影像转换为连续布局；此前按 C 顺序误读 Fortran 数据的错误候选已排除。配对冷/热/profile 产物逐位一致；与 FSL 仍有上表所列误差。这是一例不含畸变校正的对照，不能验证 fieldmap BBR 或外推其他采集。匿名汇总与源码哈希见 [当前配准报告](../../validation/fmri/registration_gpu.current.public.json)。
+
+## 原实现与参考文献
+
+- FSL FLIRT 源码：[`flirt`](https://git.fmrib.ox.ac.uk/fsl/flirt)，重点为 `costfns.cc`、`flirt.cc` 与 `flirtsch/bbr.sch`；核验版本见 [vendor 清单](../../src/fnit/_vendor_fsl/README.md)。
+- 优化器：[FSL MISCMATHS](https://git.fmrib.ox.ac.uk/fsl/miscmaths) 的 `optimise.cc`；边界平滑/梯度：[FSL NEWIMAGE](https://git.fmrib.ox.ac.uk/fsl/newimage)。
+- Greve DN, Fischl B. *Accurate and robust brain image alignment using boundary-based registration*. NeuroImage 48(1):63–72, 2009. [doi:10.1016/j.neuroimage.2009.06.060](https://pubmed.ncbi.nlm.nih.gov/19573611/)。

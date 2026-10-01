@@ -1,4 +1,5 @@
 """由两套真实运行报告生成计时对照；不同处理范围不计算加速比。"""
+import argparse
 import csv
 import hashlib
 import json
@@ -7,9 +8,16 @@ from pathlib import Path
 
 def main():
     root = Path(__file__).resolve().parent
-    paths = [root.parent / 'fmri_volume.public.json',
-             root.parent / 'fmri_surface.public.json', root / 'benchmark.public.json']
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--volume-report', type=Path, default=root.parent / 'fmri_volume.public.json')
+    parser.add_argument('--surface-report', type=Path, default=root.parent / 'fmri_surface.public.json')
+    parser.add_argument('--deepprep-report', type=Path, default=root / 'benchmark.public.json')
+    parser.add_argument('--output-dir', type=Path, default=root)
+    args = parser.parse_args()
+    paths = [args.volume_report, args.surface_report, args.deepprep_report]
     volume, surface, deepprep = [json.loads(p.read_text(encoding='utf-8')) for p in paths]
+    if volume['source_revision'] != surface['source_revision']:
+        raise ValueError('Volume and surface revisions differ; supply reports from the same recorded chain.')
     inputs = {p['file'].split('_')[-1]: p for p in deepprep['input']['inputs']}
     bold = inputs['bold.nii.gz']
     t1w = inputs['T1w.nii.gz']
@@ -35,7 +43,9 @@ def main():
                          includes_anatomical_reconstruction=True, starts_from_completed_volume=False,
                          source_revision=deepprep['software']['upstream_source_commit']))
     result = dict(schema_version=1, benchmark_date='2026-09-30',
-                  source_report_sha256={p.relative_to(root.parent).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths},
+                  source_report_sha256={name: hashlib.sha256(p.read_bytes()).hexdigest()
+                                        for name, p in zip(('fmri_volume.public.json', 'fmri_surface.public.json',
+                                                            'deepprep/benchmark.public.json'), paths)},
                   same_bold_file=True, bold_sha256=bold['sha256'], frames=490,
                   same_t1w_file=volume['input_sha256']['t1w'] == t1w['sha256'],
                   matched_end_to_end_comparison=False, rows=rows,
@@ -48,8 +58,9 @@ def main():
                           'FNIT includes ICA-AROMA and confound regression; DeepPrep exports preprocessed BOLD and confounds.',
                           'Shared H100, different CPU quotas, timing and memory definitions; one observation per mode.',
                           'FNIT timings are frozen to the recorded source revision, not later main revisions.'])
-    (root / 'comparison.public.json').write_text(json.dumps(result, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
-    with (root / 'timings.csv').open('w', newline='', encoding='utf-8') as stream:
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+    (args.output_dir / 'comparison.public.json').write_text(json.dumps(result, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
+    with (args.output_dir / 'timings.csv').open('w', newline='', encoding='utf-8') as stream:
         writer = csv.DictWriter(stream, fieldnames=list(rows[0]), lineterminator='\n')
         writer.writeheader()
         writer.writerows(rows)

@@ -44,6 +44,7 @@ result = run_fnirt(
     jout="subject_GM_JAC_nl.nii.gz",  # 输出：nonlinear Jacobian determinant
     refmask="MNI152_T1_2mm_brain_mask_dil.nii.gz",  # 输入：reference-grid 二值 mask
     config="gm",  # 配置：官方 GM schedule；省略时使用 FSL 无配置默认值
+    execution="optimized",  # GPU 执行优化；reference 保留原 dense 算子供复核
     device="cuda:0",  # 运行设备
     overwrite=False,  # 不覆盖已有文件
 )
@@ -56,4 +57,4 @@ Jacobian、pull transform 和 QC。
 
 CUDA 默认允许 TF32；图像和写出的 coefficient NIfTI 使用 float32，优化器内部 state 和主计算使用 float64，不使用 float16/bfloat16。当前实现匹配 FSL 的 implicit-mask 阈值、建立顺序、`volume<char>` warped-mask 截断以及 newimage 的有效 FOV 边界。
 
-2026 年 9 月 28 日的候选源码曾用 1 例真实 FA 完成 matched-input 验证：TorchFNIRT 与 FSL 6.0.7.4 固定相同 FA、FMRIB58_FA_1mm、FSL affine 和 Oxford 三阶段配置。coefficient、warped FA、nonlinear Jacobian、含 affine Jacobian 的 Pearson r 分别为 `0.999893`、`0.999203`、`0.999064`、`0.994737`；shape、affine、float32 与 coefficient intent-2007 合同通过。误差超过浮点舍入，因此数值等价仍判定失败。H100 同步优化核心为 `16.933 s`、进程外部 wall 为 `25.16 s`、peak CUDA allocation 为 `3.598 GB`；FSL 三阶段 CPU wall 合计 `1265.14 s`。两侧运行均未隔离，不发布加速比。这是旧候选的历史结果，本次预设调整未重新执行 FA 的同输入数值对照；数字仅对应报告中的源码哈希。完整报告见 [`docs/fnirt/README.md`](../../../docs/fnirt/README.md)。
+当前 T1 六级预设的 FSL 配对、冷/热调用、CUDA profile 和 reference/optimized 数值差异统一记录在[功能页](../../../docs/fnirt/README.md#真实数据验证)与[配准报告](../../../validation/fmri/registration_gpu.current.public.json)。FA/TBSS 另有对应版本的验证，不能用 T1 测量替代。

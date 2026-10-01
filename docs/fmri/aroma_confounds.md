@@ -2,7 +2,7 @@
 
 `run_aroma_pipeline` 读取已经高通的原生 EPI BOLD、脑掩膜和 T×6 运动参数，调用本包单被试 [PICA](../melodic/README.md)，再按 ICA-AROMA 的运动相关、边缘比例、高频比例和 CSF 比例选择噪声成分。给定 MNI 模板、T1→MNI pull 和 EPI→T1 BBR 时，它先把阈值 IC 图映射到 MNI152 2 mm，再用官方三张标准掩膜分类；[整链入口](README.md)默认走这一路径。分类后在原生 EPI 空间回归噪声 IC；WM/CSF/motion、带通和全脑信号回归可选。独立调用时不提供配准参数，也可用与 BOLD 同网格的三张掩膜分类。
 
-## 单函数批量时间序列调用
+## 单被试 Python 调用
 
 此函数处理一份 4D BOLD（T 个时间点），内部 ICA 与回归联合使用全部 T 帧。`brain_mask` 必须与 BOLD 同网格；分类用的 `csf_mask`、`edge_mask` 和 `outside_mask` 必须与阈值 IC 图的分类网格一致。给定 `mni_template`、`mni_pull_ras`、`epi_to_t1_world` 时，分类网格为 MNI152 2 mm；三者均不提供时为 BOLD 原网格。`regression_csf_mask` 单独指定原生 EPI 网格的完整 CSF 组织掩膜供可选信号回归；在 MNI 分类模式启用 `regress_csf=True` 时必须填写，不能把 MNI 分类掩膜用于原生 EPI 信号回归。
 
@@ -94,7 +94,9 @@ cleaned_path = clean_confounds(
 )
 ```
 
-`classify_aroma` 返回每成分的最大运动相关、edge fraction、high-frequency content、CSF fraction，以及 **0 起始**的 `noise_indices`。`denoise_aroma` 返回输出路径；`nonaggr` 用全部 IC 拟合、只减去噪声 IC 的部分贡献，`aggr` 仅拟合噪声 IC。`clean_confounds` 返回输出路径：先构造截距、一次/二次趋势及选择的信号列，然后把带通与回归写入同一个投影，避免顺序滤波使已去除频率回流。`motion_regressors` 返回 T×6/12/24 NumPy 数组。
+`classify_aroma` 返回每成分的最大运动相关、edge fraction、high-frequency content、CSF fraction，以及 **0 起始**的 `noise_indices`。`denoise_aroma` 返回输出路径；`nonaggr` 用全部 IC 拟合、只减去噪声 IC 的部分贡献，`aggr` 仅拟合噪声 IC。AROMA 保留体素的时间均值；额外混杂回归去除时间均值，输出仍为原网格、原 TR 的 float32 BOLD。`motion_regressors` 返回 T×6/12/24 NumPy 数组。
+
+`clean_confounds` 先构造截距、一次/二次趋势及选择的信号列。截距保留，其余列去掉常数列后中心化，并按 L2 范数归一化，避免组织信号的大基线或运动参数单位影响数值秩。启用 `bandpass` 时，BOLD 和设计矩阵使用同一个频段；带通后删除只剩 FFT 舍入误差的列，重新归一化有效列，再以 float64 求投影。带通与混杂回归仍是同一个联合投影。`bandpass=None` 时只做混杂和趋势回归，FEAT 阶段的高通另行完成。
 
 ## 原软件运行方式与实测
 
@@ -116,6 +118,20 @@ fsl_regfilt -i filtered_func_data.nii.gz -d melodic_mix \
 | 490×106 的官方 MELODIC mixing，运动相关 1000 次抽样 | 6.28 秒 | 官方 ICA-AROMA 函数 6.17 秒 | MAE 4.67×10⁻¹⁷；高频比例逐项一致。 |
 | 官方 106 张阈值 IC 图与官方 MNI 2 mm 三张掩膜 | 空间特征 2.33 秒 | 官方 201.02 秒 | edge fraction MAE 3.51×10⁻⁷、CSF fraction MAE 2.32×10⁻⁸；106/106 个噪声判定一致。固定官方 IC 输入，不代表本包自产成分身份相同。 |
 | 真实 BOLD 20³×490 裁剪、官方 106 列 mixing，示例噪声 IC 1–3 | CUDA 含 I/O：nonaggr 2.83 秒、aggr 1.27 秒 | FSL `fsl_regfilt`：2.02 / 1.85 秒 | 两种输出逐体素 float32 相同；噪声索引用于算法测试，非真实分类结果。 |
-| 真实 BOLD 8000 体素×490 帧裁剪，WM/CSF/motion 与带通联合投影 | CUDA 含 I/O 1.83 秒，峰值 0.144 GB | 同输入 NumPy float64 独立投影 0.095 秒，不含 I/O | MAE 1.26×10⁻⁶、最大误差 1.10×10⁻⁴；未与 MATLAB/AFNI 作实测数值对照。 |
 
-上述分类器对照固定了官方 MELODIC IC 和官方掩膜；端到端自产 PICA、配准与清理后影像仍应按 [整链验证](../../validation/fmri/README.md)分别验收。
+上述测量固定了官方 MELODIC IC 和官方掩膜，检验分类特征和 IC 回归。当前自产 PICA、配准、AROMA 及最终影像的整链结果与耗时见 [2026-10-01 整链验证](../../validation/fmri/volume_fixed.md)。
+
+## 当前混杂回归的真实数据验证
+
+2026-10-01 用合并后源码 `3b9b0f8` 重跑整链，使用一例真实 UKB BOLD，共 490 帧。独立 NumPy float64 SVD 参考读取该次捕获的 AROMA 输出、WM/CSF 掩膜和运动参数，检查全部 97,345 个脑体素，共 47,699,050 个值。WM/CSF 掩膜均为 88×88×64，分别含 25,995 和 11,947 个体素，与原生 BOLD 对齐且位于脑掩膜内。
+
+| 同输入检查 | 结果 |
+|---|---:|
+| 490×29 设计矩阵，旧伪逆算法 / 当前算法的有效秩 | 23 / 29 |
+| 当前 native 输出 vs 独立参考，相关 / MAE / RMSE | ≈1 / 3.395×10⁻⁶ / 5.237×10⁻⁶ |
+| 当前 native 输出 vs float32 参考，最大绝对差 | 3.052×10⁻⁵ |
+| 旋转从 rad 改写为 degree，当前回归残差 RMSE | 1.045×10⁻¹¹ |
+| WM 信号×8+10,000,000、CSF 信号×4+5,000,000，当前回归残差 RMSE | 3.309×10⁻¹⁰ |
+| 最终 native BOLD 在脑掩膜外的最大绝对值 | 0 |
+
+单位与基线控制固定同一份真实 AROMA 数据，只改变设计矩阵的表达方式。它们验证当前投影的单位与基线不变性；实际输出与独立参考的差值处于 float32 数值误差量级。复现方法见 [整链验证中的回归检查](../../validation/fmri/volume_fixed.md)，逐项定义、输入哈希和源码标记见 [匿名回归报告](../../validation/fmri/volume_fixed_confounds.public.json)。

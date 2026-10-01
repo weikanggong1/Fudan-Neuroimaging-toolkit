@@ -2,6 +2,7 @@ import math
 from pathlib import Path
 
 import torch
+import pytest
 
 from fnit.fnirt.spline import (
     BendingOperator,
@@ -63,29 +64,33 @@ def test_zoomfield_matches_fsl_basisfield_2203_1_oracle():
     )
 
 
-def test_bending_energy_and_gradient_match_fsl_basisfield_2203_1_oracle():
+@pytest.mark.parametrize("execution", ["reference", "optimized"])
+@pytest.mark.parametrize("device", ["cpu", pytest.param("cuda", marks=pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA unavailable"))])
+def test_bending_energy_and_gradient_match_fsl_basisfield_2203_1_oracle(execution, device):
     records = _records()
     shape = (8, 9, 7)
     spacing = (3, 3, 3)
     control_shape = fsl_control_shape(shape, spacing)
     coefficients = _from_fsl_vector(
         _deterministic(math.prod(control_shape)), control_shape
-    )
+    ).to(device)
     operator = BendingOperator(
         shape,
         spacing,
         (2.0, 2.5, 3.0),
-        device="cpu",
+        device=device,
         dtype=torch.float64,
+        execution=execution,
     )
     expected_energy = float(records["BEND_ENERGY"][0])
     expected_gradient = torch.tensor(
         [float(value) for value in records["BEND_GRAD"][1:]],
         dtype=torch.float64,
+        device=device,
     )
     torch.testing.assert_close(
         operator.energy(coefficients),
-        torch.tensor(expected_energy, dtype=torch.float64),
+        torch.tensor(expected_energy, dtype=torch.float64, device=device),
         atol=5e-14,
         rtol=5e-14,
     )

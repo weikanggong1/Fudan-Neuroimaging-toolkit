@@ -4,6 +4,10 @@
 
 本目录按预设和源码哈希记录真实数据对照。
 
+## T1 六级预设：2026-10-01 当前 GPU 修复版
+
+最新 before/reference/optimized、FSL 配对、完整 pull 坐标、冷/热计时及 CUDA profile 统一记录在[当前配准报告](../fmri/registration_gpu.current.public.json)。函数用法、完整精度表和 Gram 消融见[FNIRT 功能页](../../docs/fnirt/README.md#t1w-专用预设当前-gpu-修复版)。optimized 热调用为 30.422 s，FSL warped T1 r=0.99771788，支持区 Dice=0.99922162，pull median/p95=0.05176/0.23294 mm。共享 H100 单例不用于稳定加速比；函数与原软件仍非逐位等价。下列其他预设报告均按其注明源码保留。
+
 ## FSL 无配置默认值：2026-09-29
 
 同一真实去脑 T1、MNI152 2 mm 模板和 FSL FLIRT 初始矩阵分别输入无 `--config`
