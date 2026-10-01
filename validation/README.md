@@ -43,9 +43,9 @@
 
 | 功能 | 当前真实数据报告 | 输出一致性结论 | 时间、显存与示意图 |
 |---|---|---|---|
-| [TorchMCFLIRT](../docs/mcflirt/README.md) | [main 完整490帧GPU](mcflirt/full490_gpu.public.json)、[CPU估计](mcflirt/full490_cpu.public.json) | motion时间r均值0.999578，GPU pull RMS均值0.00881 mm；双方int32，尚未逐值相同 | CPU只估计387.60 s；GPU未从FEAT973.12 s分离；MNI均值/SD/r对照图 |
+| [TorchMCFLIRT](../docs/mcflirt/README.md) | [最新融合 cost GPU](mcflirt/gpu_optimization_latest.public.json)、[此前另一共享 GPU](mcflirt/gpu_optimization.public.json)、[原软件对照](mcflirt/full490_gpu.public.json) | 融合优化对冻结 FNIT 的矩阵、参数及运动 int32 图逐值同；对原 MCFLIRT 时间 r 均值0.999578、pull RMS均值0.00881 mm，尚未逐值同 | 最新共享 GPU 0 独立 API 278.454 s，此前共享 GPU 1 为159.275 s；含读取/估计/采样/类型转换，不含写盘，各45,972次cost；与完整FEAT分开计时 |
 | [MELODIC/PICA](../docs/melodic/README.md) | [固定原490帧输入](fmri/ica_fixed_input.public.json) | 95成分/40步相同；时间/空间配对r中位数0.999999978/0.999999970，阈值Dice中位数0.999562 | GPU拟合与写出117.49 s，原完整命令651.87 s还含HTML；当前IC脑图 |
-| [BIDS→MNI152 2 mm fMRI](../docs/fmri/README.md) | [当前验证汇总](fmri/README.md)、[合并源码 STC 关闭的 490 帧](fmri/fmriprep/fnit_volume_stcoff_50eb098.public.json)、[main clean FNIRT](fmri/matched_native.md) | 当前 preproc 与官方独立 MNI 流程的共同脑内时间 r 均值 0.630705；clean FNIRT 最终 native/MNI r 均值 0.940704/0.938768；完整流程尚未数值等价 | 合并源码 API 1225.840 s、allocation 13.306 GB；clean FNIRT API 1318.04 s、allocation 8.316 GB；不同分支分别计时 |
+| [BIDS→MNI152 2 mm fMRI](../docs/fmri/README.md) | [当前验证汇总](fmri/README.md)、[最新 FNIRT 完整 API](fmri/mcflirt_optimization_api.public.json)、[原同步骤 clean 比较](fmri/mcflirt_optimization_native.public.json) | 最新 clean native/MNI 时间 r 均值 0.941029/0.939162；运动与冻结 FNIT 逐值同，独立完整 clean 尚未逐值同；SynthMorph/preproc 历史控制另列 | `cfb7beee` 同时生成 preproc＋clean：707.287 s，allocation/reserved 6.503/10.775 GB；原 clean 链2570.468 s范围不同；附最新 MNI 脑图 |
 | [fsLR32k / 91k surface](../docs/fmri/surface.md) | [main MSMSulc](msm/README.md)、[当前实际输入投影](fmri/fmriprep/surface_stcoff_ca3df003_projection_paired.public.json) | main 单例注册球面及固定 clean volume 的 490 帧逐值一致；非 MSM preproc 控制的 GIFTI/CIFTI、axes 和 metadata 逐值一致；各阶段分别验证 | main 配准冷/热 201.99/198.08 s、投影 303.77 s；本轮固定球面公开 API 234.313 s，官方投影 183.835 s，计时边界不同 |
 | [MS-HBM 17 网络](../docs/mshbm/README.md) | [真实 fsLR32k 静息态时序](mshbm/report.public.json) | 输入 profile、网络标签和 Dice/ARI 按顶点比较 | 报告含 CBIG/FNIT 的匹配计时与内存；功能页展示网络标签与差异 |
 

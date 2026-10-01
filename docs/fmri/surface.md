@@ -1,5 +1,7 @@
 # fMRI 表面流程：fsLR32k 时间序列与 91k CIFTI
 
+## 功能简介与流程图
+
 `fMRISurface_pipeline` 将同一 run 的 [FNIT volume BIDS Derivatives](README.md) 和 T1w recon-all 几何转换为双侧 fsLR32k GIFTI 与 91k CIFTI。默认 `signal="preproc"`：皮层读取 volume 保存的 T1w 空间、原生 BOLD 分辨率时间序列，皮层下读取对应的 MNI152NLin6Asym 2 mm 时间序列；两者保留相同原始帧数与 BIDS TR。该输入包含 volume 实际执行的切片时间校正和运动变换，不经过 AROMA、混杂回归、时间滤波或全局强度归一化。
 
 切片时间校正默认关闭，由 volume 的 `slice_timing=False` 控制；volume CLI 可显式写 `--ignore-slice-timing`。surface 读取其实际 STC 状态，不再次进行时间校正。需要开启时在 volume API 设置 `slice_timing=True`，重新生成对应 preproc 后再投影。
@@ -8,7 +10,36 @@
 
 本地 MSMSulc 扩展须与源码同步。拉取包含 C++ 变更的更新后，在已激活的 FNIT 环境、仓库根目录执行 `python -m pip install .` 重新编译；本轮重建与复测记录见验证部分。
 
-## 输入与资源
+```mermaid
+flowchart TD
+    RAW["原始 BIDS：BOLD、T1w 与 TR"] --> CHECK["核对 volume 来源、T1 身份、模板、帧数与 TR"]
+    VOL["同 run 的 volume BIDS Derivatives"] --> CHECK
+    FS["recon-all 几何与已有 midthickness 或 graymid"] --> CHECK
+    CHECK --> SIGNAL{"signal"}
+    SIGNAL -- preproc 默认 --> T1BOLD["T1w 空间原生 BOLD 分辨率 preproc BOLD"]
+    SIGNAL -- clean 显式 --> CLEAN["原生 EPI clean BOLD 经 BBR 到 T1w"]
+    SIGNAL --> MNI["同 signal 的 MNI152NLin6Asym 2 mm BOLD"]
+    FS --> GEO["tkRAS 到源 T1w scanner-RAS；white、pial、中层面与 ROI"]
+    XFM["可选 fsnative 到 T1w 世界仿射"] --> GEO
+    HCP["固定 HCP/fsLR 球面、sulc、ROI 与 Finalconf"] --> READY["原生与 32k 表面几何"]
+    GEO --> SPHERE{"提供 registered_spheres？"}
+    SPHERE -- 否 --> MSM["FNIT MSMSulc：HOCR 与 FastPD"] --> READY
+    SPHERE -- 是 --> PROVIDED["保留提供球面及真实方法记录"] --> READY
+    T1BOLD --> PROJ["ribbon、dilate、native mask、ADAP_BARY_AREA 与 atlas mask"]
+    CLEAN --> PROJ
+    READY --> PROJ
+    PROJ --> GIFTI["双侧 fsLR32k GIFTI"]
+    MNI --> SUB["固定 HCP dseg：19 个皮层下结构"]
+    DSEG["经 SHA-256 核验的 TemplateFlow 2 mm dseg"] --> SUB
+    GIFTI --> CIFTI["91,282 灰坐标 CIFTI；内嵌 metadata 与 JSON"]
+    SUB --> CIFTI
+    CIFTI --> OUT["整批发布时间序列、QC、注册球面及 sidecar"]
+    classDef default fill:#ffffff,stroke:#000000,color:#000000;
+```
+
+## Python 调用、输入输出与参数
+
+### 输入与资源
 
 先运行当前 `fMRIVolume_pipeline`，保留以下输入：
 
@@ -40,7 +71,7 @@ fnit-setup-fmri-surface-assets \
 
 已核对再分发许可的 HCP 文件优先从 [FNIT 固定 Release](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1)获取，失败后回退 HCPpipelines 原站；TemplateFlow HCP dseg 保持原站下载。文件清单与许可见[权重和资源说明](../WEIGHTS.md)。
 
-显式 `signal="clean"` 可接续只完成 ICA-AROMA 的 volume；WM、CSF、运动、全脑信号回归和带通均可选。原生 clean BOLD 和 MNI clean BOLD 的 JSON 都必须匹配所选原始 BOLD、源 T1w 和 TR，并记录已完成的 ICA-AROMA；显式标为其他 `Signal` 的文件会被拒绝。旧 clean JSON 可没有 `Signal` 字段，但仍需通过上述来源和去噪检查。preproc 按自身来源与空间身份检查。旧 volume 缺少本页新增 preproc 或模板身份字段时需重跑，不以改名补齐。
+clean 的原生/MNI JSON 都须匹配来源、TR 和已完成的 ICA-AROMA；旧 clean JSON 可没有 `Signal`，但若显式标成其他信号会拒绝。preproc 缺失时需重跑 volume 或明确选择 clean，不能自动换分支。
 
 ### 单独准备已有重建的表面
 
@@ -75,40 +106,11 @@ left_initial_sphere, right_initial_sphere = surface_preparation.initial_spheres
 left_native_roi, right_native_roi = surface_preparation.individual_rois
 ```
 
-本次修复了共享准备子函数的发布问题：原几何函数可能先写左侧、再因右侧缺文件或已有输出失败；完整准备函数原先没有对球面和 ROI 应用覆盖保护。现在对六个或 16 个产物统一预检，在同一文件系统中暂存后发布，失败保留之前的完整结果。`overwrite=False` 同样保护悬空符号链接，并在创建最终文件时拒绝并发出现的同名文件。该修改保留原坐标变换、顶点顺序和 Workbench 运算。
+共享准备子函数已修复发布问题：原几何函数可能先写左侧、再因右侧缺文件或已有输出失败；完整准备函数原先没有对球面和 ROI 应用覆盖保护。现在对六个或 16 个产物统一预检，在同一文件系统中暂存后发布，失败保留之前的完整结果。`overwrite=False` 同样保护悬空符号链接，并在创建最终文件时拒绝并发出现的同名文件。该修改保留原坐标变换、顶点顺序和 Workbench 运算。
 
 低层 `run_fmriprep_surface_projection` 也共用覆盖保护，要求 T1w BOLD 使用有限、可逆的毫米世界仿射；帧数、TR 单位及 MNI/dseg 网格检查与完整入口一致。
 
-## 流程图
-
-```mermaid
-flowchart TD
-    RAW["原始 BIDS：BOLD、T1w 与 TR"] --> CHECK["核对 volume 来源、T1 身份、模板、帧数与 TR"]
-    VOL["同 run 的 volume BIDS Derivatives"] --> CHECK
-    FS["recon-all 几何与已有 midthickness 或 graymid"] --> CHECK
-    CHECK --> SIGNAL{"signal"}
-    SIGNAL -- preproc 默认 --> T1BOLD["T1w 空间原生 BOLD 分辨率 preproc BOLD"]
-    SIGNAL -- clean 显式 --> CLEAN["原生 EPI clean BOLD 经 BBR 到 T1w"]
-    SIGNAL --> MNI["同 signal 的 MNI152NLin6Asym 2 mm BOLD"]
-    FS --> GEO["tkRAS 到源 T1w scanner-RAS；white、pial、中层面与 ROI"]
-    XFM["可选 fsnative 到 T1w 世界仿射"] --> GEO
-    HCP["固定 HCP/fsLR 球面、sulc、ROI 与 Finalconf"] --> READY["原生与 32k 表面几何"]
-    GEO --> SPHERE{"提供 registered_spheres？"}
-    SPHERE -- 否 --> MSM["FNIT MSMSulc：HOCR 与 FastPD"] --> READY
-    SPHERE -- 是 --> PROVIDED["保留提供球面及真实方法记录"] --> READY
-    T1BOLD --> PROJ["ribbon、dilate、native mask、ADAP_BARY_AREA 与 atlas mask"]
-    CLEAN --> PROJ
-    READY --> PROJ
-    PROJ --> GIFTI["双侧 fsLR32k GIFTI"]
-    MNI --> SUB["固定 HCP dseg：19 个皮层下结构"]
-    DSEG["经 SHA-256 核验的 TemplateFlow 2 mm dseg"] --> SUB
-    GIFTI --> CIFTI["91,282 灰坐标 CIFTI；内嵌 metadata 与 JSON"]
-    SUB --> CIFTI
-    CIFTI --> OUT["整批发布时间序列、QC、注册球面及 sidecar"]
-    classDef default fill:#ffffff,stroke:#000000,color:#000000;
-```
-
-## Python 调用与参数
+### Python 调用与参数
 
 ```python
 from fnit import fMRISurface_pipeline
@@ -171,39 +173,7 @@ print(surface_result.registered_spheres)  # 持久化的 (左, 右) 注册球面
 
 默认球面遵循 HCP/sMRIPrep 的 `simval=3,2,2,2`、最大迭代数 `50,10,15,15`。`msm_config` 仅在估计球面时使用，不能与 `registered_spheres` 同时指定。独立用法及各配置参数见 [MSMSulc](../msm/README.md)。命令行可加 `--msm-config /absolute/path/MSMSulcStrainFinalconf` 和 `--msm-execution reference` 复测相同科学配置的执行路径。
 
-## 命令行与原版参考
-
-```bash
-fnit-fmri surface \
-  --bids-root /absolute/path/bids \
-  --derivatives-root /absolute/path/bids/derivatives/fnit \
-  --subject 0001 \
-  --recon-all /absolute/path/recon-all/sub-0001 \
-  --surface-assets-dir /absolute/path/hcp_surface_assets \
-  --signal preproc \
-  --device cuda:0
-```
-
-`--signal clean` 选择 clean 分支；`--fsnative-to-t1w /absolute/path/fsnative_to_T1w_world.txt` 提供世界仿射。`--registered-spheres /absolute/path/L.surf.gii /absolute/path/R.surf.gii` 选择外部球面，`--goodvoxels /absolute/path/roi.nii.gz` 提供额外 volume ROI；对应 Python 参数见上表。完整 CLI 参数用 `fnit-fmri surface --help` 查看。
-
-以下原版命令供独立参考环境使用，固定 fMRIPrep 25.2.4 和已完成的同源 FreeSurfer subjects；按当前默认关闭 STC 与 SDC，保留全部帧。`--msm` 选择原版 MSMSulc 配准；本轮固定球面的投影对照不验证该配准。FNIT 不执行该命令。
-
-```bash
-fmriprep /absolute/path/bids /absolute/path/reference participant \
-  --participant-label 0001 \
-  --fs-subjects-dir /absolute/path/subjects \
-  --fs-license-file /absolute/path/license.txt \
-  --output-spaces T1w MNI152NLin6Asym:res-2 fsnative \
-  --cifti-output 91k \
-  --msm \
-  --ignore fieldmaps slicetiming \
-  --dummy-scans 0 \
-  --random-seed 0
-```
-
-具体对照环境、输入约束和运行脚本见[固定参考清单](../../validation/fmri/fmriprep/reference_image.public.json)与[参考运行脚本](../../validation/fmri/fmriprep/run_reference.py)。
-
-## 输出与检查
+### 输出与检查
 
 输出位于 `sub-0001/func/`；有 session 时为 `sub-0001/ses-<label>/func/`。文件名继承源 BOLD 的 run、acq 等实体。默认 `preproc` 的完整产物如下；显式 clean 分支将对应 `desc-preproc`/`desc-preprocReg` 改为 `desc-clean`/`desc-cleanReg`。
 
@@ -236,9 +206,59 @@ sub-0001/func/
 
 `FMRISurfaceResult` 返回 `left`、`right`、`dtseries`、CIFTI JSON 的 `metadata`、分步 `timing_seconds`、`qc_report` 和 `registered_spheres`。其中 `total` 在最终 JSON 和发布前记录；完整 API 墙钟时间由调用方测量。CUDA 峰值记录需同时核对所选配准器是否重置内部计数；本轮固定球面投影控制不调用该配准器。
 
-## 实测快照与历史记录
+## 命令行调用
 
-### STC 关闭的真实公开 API（实测快照 `ca3df003`）
+<a id="命令行与原版参考"></a>
+
+```bash
+fnit-fmri surface \
+  --bids-root /absolute/path/bids \
+  --derivatives-root /absolute/path/bids/derivatives/fnit \
+  --subject 0001 \
+  --recon-all /absolute/path/recon-all/sub-0001 \
+  --surface-assets-dir /absolute/path/hcp_surface_assets \
+  --signal preproc \
+  --device cuda:0
+```
+
+`--signal clean` 选择 clean 分支；`--fsnative-to-t1w /absolute/path/fsnative_to_T1w_world.txt` 提供世界仿射。`--registered-spheres /absolute/path/L.surf.gii /absolute/path/R.surf.gii` 选择外部球面，`--goodvoxels /absolute/path/roi.nii.gz` 提供额外 volume ROI；对应 Python 参数见上表。完整 CLI 参数用 `fnit-fmri surface --help` 查看。
+
+CLI 的 `--surface-assets-dir` 对应 Python 的 `hcp_assets_dir`；`--msm-config` 只接受配置路径，Python 还可传 `MSMSulcConfig` 对象；`--fsnative-to-t1w` 只接受文本矩阵路径，Python 还可传 4×4 数组。其余选项与上表逐项对应。
+
+## 原软件调用
+
+以下原版命令供独立参考环境使用，固定 fMRIPrep 25.2.4 和已完成的同源 FreeSurfer subjects；按当前默认关闭 STC 与 SDC，保留全部帧。`--msm` 选择原版 MSMSulc 配准；本轮固定球面的投影对照不验证该配准。FNIT 不执行该命令。
+
+```bash
+original_bids_root=/absolute/path/bids                 # 原始 BIDS
+reference_derivatives_root=/absolute/path/reference  # 独立参照输出
+reference_subjects_root=/absolute/path/subjects      # 已完成的同源重建
+freesurfer_license_path=/absolute/path/license.txt    # 用户自行取得的许可
+reference_work_root=/absolute/path/reference-work    # 新的参照工作目录
+
+fmriprep "$original_bids_root" "$reference_derivatives_root" participant \
+  --participant-label 0001 \
+  --fs-subjects-dir "$reference_subjects_root" \
+  --fs-license-file "$freesurfer_license_path" \
+  --output-spaces T1w MNI152NLin6Asym:res-2 fsnative \
+  --cifti-output 91k \
+  --msm \
+  --ignore fieldmaps slicetiming \
+  --dummy-scans 0 \
+  --random-seed 0 \
+  --nprocs 8 --omp-nthreads 8 --mem-mb 19000 \
+  --work-dir "$reference_work_root"
+```
+
+具体对照环境、输入约束和运行脚本见[固定参考清单](../../validation/fmri/fmriprep/reference_image.public.json)与[参考运行脚本](../../validation/fmri/fmriprep/run_reference.py)。
+
+该完整原命令包含官方 MSM 估计，不是下节固定球面投影的复测命令。固定实际输入的投影/grayords 节点通过[原工作流驱动](../../validation/fmri/fmriprep/run_projection_reference.py)独立执行，输入 SHA 与版本见[当前配对报告](../../validation/fmri/fmriprep/surface_stcoff_ca3df003_projection_paired.public.json)。仅球面配准的原 `newmsm` 调用和配置见 [MSMSulc 原命令](../msm/README.md#原版对照命令)。
+
+## 最新真实数据精度、耗时与脑图
+
+<a id="实测快照与历史记录"></a>
+
+### 固定实际输入的公开 API 与原 fMRIPrep 投影
 
 源码 `ca3df003` 读取 `50eb098` 保存的完整 490 帧 preproc，STC 关闭、TR 为 0.735 s，输入 SHA-256 与 volume 报告一致。显式提供 FS→fsLR 初始化球面；API 执行同源 T1 身份核验、已有中层面与 ROI 准备、投影、CIFTI 组装、QC 和发布，成功保存全部 11 个持久输出并清理 NFS 临时目录。
 
@@ -271,11 +291,27 @@ sub-0001/func/
 
 该对照核验固定输入下的投影和 CIFTI 组装。FNIT 的 234.313 s 还包含几何准备与最终发布，两个计时范围不同。完整逐值结果见[配对报告](../../validation/fmri/fmriprep/surface_stcoff_ca3df003_projection_paired.public.json)，官方执行、资源与输入校验见[参考报告](../../validation/fmri/fmriprep/reference_projection_stcoff_ca3df003_actual_api.public.json)。配对使用同一套已准备几何与球面；独立原始 BIDS volume 的差异另见[完整 MNI 对照](../../validation/fmri/fmriprep/independent_mni_stcoff_50eb098.public.json)。
 
-### 独立完整流程的范围
+### 当前 MSMSulc 子函数与固定 clean 的真实对照
 
-固定输入的 0 误差涵盖投影和 CIFTI 组装。独立原始 BIDS 对照完成的是 volume-only：两方各自估计运动、BBR 与 T1→MNI，全部 490 帧共同脑 MNI 时间 r 均值/中位数为 **0.630705 / 0.739228**，RMSE/relative RMSE 为 **1145.306 / 0.139568**。独立完整 surface/CIFTI 没有相应门禁；这一 volume 差异与下面的历史网络图各有独立输入范围。数值和共同 mask 定义见[独立 MNI 对照](../../validation/fmri/fmriprep/independent_mni_stcoff_50eb098.public.json)。
+[当前 MSM 报告](../../validation/msm/current.public.json)绑定实测快照 `4f7bd9f2` 及逐文件 SHA；后续清理保留数值实现和报告，没有重命名为新的整链运行。真实同一 run 的几何、sulc、HCP 模板与四级配置用于双方。精度参照固定到可重复的官方 newMSM 单线程输出；该次官方 8 线程重复球面有差异，仅列耗时。
 
-### 已公开脑图：历史 UKB release 的下游网络对照
+| 独立测量 | FNIT | 原软件 / 固定参照 |
+|---|---:|---:|
+| 双侧球面配准，冷 / 紧接热调用 | **201.99 / 198.08 s** | 单线程 **1587.70 s**；8 线程 **378.03 s** |
+| 保存球面的角差，左右 mean/median/p95/max | 全部 **0°** | 同原生顶点与拓扑，float32 保存球面逐值一致 |
+| 固定 clean volume，490 帧全部 21 个结构的逐点时间 r | 全部 **1** | MAE、最大绝对差均为 **0**；时间轴与 BrainModelAxis 相同 |
+| 固定 clean 投影，含各球面重新生成的 32k 面积表面 | **303.77 s** | 复用官方固定球面已完成投影，另一次观测 **315.41 s** |
+| 默认配准峰值 CUDA allocated | **0.344 GB** | FNIT 使用共享 H100；四个 CPU 线程 |
+
+配准计时含双侧输入读取和球面/报告保存，排除投影及事后比较；“冷”是在导入和 CUDA 初始化后的首次完整调用。投影排除 T1w volume 准备与球面估计，两次不能相加为新的完整 surface API。最终 float32 球面翻折数左 1、右 0，与参照相同并保存在 QC。配准分步时间为嵌套主机钟，详见[MSM 分步表](../../validation/msm/README.md#阶段耗时与-profile)。
+
+这两项控制分别验证球面估计及固定输入下的投影/组装。当前默认 `registered_spheres=None` 的完整 surface API 未在最新 volume 上重新计时；没有独立 raw BIDS→完整 surface 的逐值门禁。原始 BIDS 独立估计的历史 volume 对照见[独立 MNI 差异](../../validation/fmri/fmriprep/independent_mni_stcoff_50eb098.public.json)。
+
+官方 DeepPrep 25.1.0 的 fsaverage6 为 **1969.45 s**，从完整 T1w＋BOLD 开始，包含结构重建、预处理及 QC；其顶点数、起点和输出空间与上述 FNIT 控制不同，见 [DeepPrep 参照](../../validation/fmri/deepprep/README.md)。
+
+<a id="已公开脑图历史-ukb-release-的下游网络对照"></a>
+
+### 脑图示例：已公开的历史下游网络
 
 现有公开 surface 脑图来自上游 `3f8b756`、MS-HBM 推断 `09a0313` 的历史实验：分别给 FNIT clean CIFTI 与同一扫描的 UKB 官方 **FIX/MSMAll release** 运行相同 HCP_40 17-network MS-HBM。图的上下行为左右半球，三列依次为 FNIT 网络标签、官方 release 网络标签、标签不同的位置（红色）。这是下游网络图，不是本次 `ca3df003` 与 fMRIPrep 的 preproc 投影图。
 
@@ -292,27 +328,20 @@ sub-0001/func/
 
 图的公开来源与 SHA-256 见[脑图清单](../../validation/fmri/fmriprep/published_comparison_figures.public.json)。本轮 fMRIPrep 验证仅公开聚合指标和报告。
 
-### 契约测试与历史结果
+## 最近版本与 benchmark 记录
 
-[CIFTI 契约测试](../../tests/test_fmri_surface_contracts.py)、[灰坐标顺序测试](../../tests/test_fmri_surface_pipeline.py)、[公开 API 契约测试](../../tests/test_fmri_surface_public_contracts.py)和[共享准备函数测试](../../tests/test_fmri_surface_preparation.py)核对资源完整性、有限值、帧数、TR、来源匹配、实际体素大小、显式变换、错误半球、已有球面、悬空链接与发布回滚。锁定 NiWorkflows 1.14.4 的同输入组装对照中，两帧索引信号的数值、BrainModelAxis、SeriesAxis 和内嵌 metadata 逐项一致；检查范围为文件格式、灰坐标顺序与时间轴。
+| 源码 / 报告快照 | 变化、实际测量与记录 |
+|---|---|
+| `3940a72` | STC 开启的 volume 与固定输入投影，见[ON 历史](../../validation/fmri/HISTORY_20261001_STCON_PREPROC.md)。 |
+| `c3c921cc` / `bac3c395` | NFS 暂存 CIFTI 的 mapping 导致清理 `EBUSY`，改为非映射读取并关闭句柄后通过完整 API；数值定义保持，见[OFF 历史](../../validation/fmri/HISTORY_20261001_STCOFF_PREPROC.md)。 |
+| `50eb098` / `ca3df003` | volume 增加 preproc；surface 修复外部 BIDS T1w 符号链接来源路径。完整 surface API **234.313 s**，固定实际输入投影逐值同；未估计 MSM。见[API 报告](../../validation/fmri/fmriprep/surface_stcoff_ca3df003.public.json)。 |
+| MSM 实测 `4f7bd9f2` | 修复子函数的缓存面积、浮点配置、刚性 WLS 和 Rodrigues 旋转规则；保存球面与固定 clean CIFTI 逐值同，冷/热双侧 **201.99 / 198.08 s**。见[当前 MSM 报告](../../validation/msm/current.public.json)。 |
+| volume `cfb7beee` | 新完整 FNIRT preproc＋clean **707.287 s**；本次没有重测 surface，不能合成 raw BIDS→CIFTI 时间。见[volume 复测](../../validation/fmri/mcflirt_optimization.md)。 |
+| 2026-10-01 代码与文档整理 | 按七项结构统一参数、输出、CLI、原软件命令与版本记录；surface 算法保持当前实现，CIFTI 公共模板合同及输入/发布测试通过。见[本次 85 项检查与真实覆盖验证](../../validation/fmri/organization_20261001.public.json)。 |
 
-[合并合同门禁](../../validation/fmri/fmriprep/nonmsm_contract_gate.public.json)通过 **248 项、0 skipped**；随后 T1w 来源路径补丁的[局部门禁](../../validation/fmri/fmriprep/surface_source_path_gate.public.json)通过 **42 项、0 skipped**，包含 8 个新路径用例。两次门禁分别保留测试与源码哈希。[发布源码回溯](../../validation/fmri/fmriprep/publication_runtime_provenance.public.json)记录 surface 实测的 103/106 个模块字节一致；另外三个文件是 main 的包入口与 MSM 内部更新，固定球面实验未运行 MSM 估计。
+共享准备函数对六个几何或 16 个完整准备产物统一预检、暂存和发布，保护悬空链接并回滚失败；低层投影与完整入口共用覆盖保护。具体检查由[CIFTI 合同](../../tests/test_fmri_surface_contracts.py)、[公开 surface API 合同](../../tests/test_fmri_surface_public_contracts.py)和[准备函数](../../tests/test_fmri_surface_preparation.py)覆盖。
 
-最新 main 的[接口整合检查](../../validation/fmri/fmriprep/latest_main_integration_gate.public.json)另记首轮 142 passed、10 failed、1 skipped：9 项使用的旧原生扩展缺接口，1 项是既有可选 GEMS 模块的导入规则检查；原始失败结果保留。[重编译后复测](../../validation/fmri/fmriprep/latest_main_native_rebuild_gate.public.json)的 10 个节点全部通过（0 failed、0 skipped、17.74 s）：9 个原生接口失败已解决，另一个 CIFTI 节点使用已校验的公开模板通过。首轮 GEMS 全包导入扫描失败仍保留。随后 main 移除旧模块后的[公共接口刷新](../../validation/fmri/fmriprep/latest_main_public_api_refresh_gate.public.json)为 **47 passed、0 failed、0 skipped**，原 GEMS 静态规则也实际通过。
-
-此前 `c3c921cc`/`bac3c395` 的完整测量与固定投影对照保留在[历史 STC 关闭记录](../../validation/fmri/HISTORY_20261001_STCOFF_PREPROC.md)。
-
-源码 `3940a72` 开启 STC 的完整 volume、两次固定输入投影及公开 surface API 测量保留在[历史 STC 开启记录](../../validation/fmri/HISTORY_20261001_STCON_PREPROC.md)，包含原执行参数、计时边界和机器可读报告。
-
-旧 MSMSulc 实现的完整 surface API 报告已移除，不作为当前实现的测量依据。
-
-### main 的 MSMSulc 对照
-
-main 的球面精度、冷/热配准速度和完整 490 帧逐顶点时间相关见 [MSMSulc 功能页](../msm/README.md)与[配准验证](../../validation/msm/README.md)。对照固定同一 clean volume、几何、ROI 和投影顺序，只改变注册球面；每套球面分别生成自己的 32k 面积表面。
-
-这项测量覆盖球面估计及其对 fsLR32k 时间序列的影响：FNIT 双侧配准冷/热调用为 **201.99 / 198.08 s**，固定 clean volume 的投影为 **303.77 s**。配准、投影与完整 volume 分别测量，不能合成一次新的完整 surface API 或 raw BIDS→CIFTI 耗时。各次范围见[验证汇总](../../validation/fmri/README.md)。最终输出为左右 32k GIFTI 和 91k CIFTI；相关性按各灰质坐标的全部时间点计算，再平均。
-
-固定官方球面时，Workbench 投影和 CIFTI 组装已逐值匹配独立命令对照。UKB MSMAll 发布空间、去噪方法以及从原始数据开始的整条 fMRIPrep 流程属于不同对照；相关结果见 [MS-HBM 验证](../../validation/mshbm/processed_release.md)和 [DeepPrep 实测](../../validation/fmri/deepprep/README.md)。
+实测源码与发布源码的逐文件差异、248 项合同门禁、42 项路径复测、原生扩展重建及 47 项公共 API 刷新分别保留在[验证索引](../../validation/fmri/README.md)和[源码回溯](../../validation/fmri/fmriprep/publication_runtime_provenance.public.json)。旧 MSM 完整 API 测量已移除；历史图保留其原协议和来源。
 
 ## 参考文献与原实现
 

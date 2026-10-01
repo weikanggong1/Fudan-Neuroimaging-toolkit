@@ -1,6 +1,7 @@
 """Whole-stage output contracts on a small BIDS run."""
 
 import json
+from types import SimpleNamespace
 
 import nibabel as nib
 import numpy as np
@@ -48,6 +49,64 @@ def test_feat_core_writes_named_prefixed_outputs(tmp_path):
     assert filtered.header.get_xyzt_units()[1] == "sec"
     assert nib.load(str(result.mask)).get_data_dtype() == np.dtype(np.uint8)
     assert result.intensity_factor > 0
+
+
+def test_feat_core_overwrite_shorter_run_replaces_only_frame_matrices(tmp_path, monkeypatch):
+    """Check the overwrite contract, independently of motion-fit accuracy."""
+    import fnit.fmri.pipeline as pipeline
+
+    class MotionFit:
+        def __init__(self, **kwargs):
+            pass
+
+        def run(self, raw, reference, **kwargs):
+            frames = raw.shape[3]
+            return SimpleNamespace(
+                matrices=np.repeat(np.eye(4)[None], frames, axis=0),
+                parameters=np.zeros((frames, 6)), corrected=raw,
+            )
+
+    monkeypatch.setattr(pipeline, "TorchMCFLIRT", MotionFit)
+    bids = tmp_path / "bids"
+    anat = bids / "sub-01" / "anat"
+    func = bids / "sub-01" / "func"
+    anat.mkdir(parents=True)
+    func.mkdir()
+    (bids / "dataset_description.json").write_text(json.dumps({
+        "Name": "overwrite contract", "BIDSVersion": "1.11.0",
+    }))
+    bold_path = func / "sub-01_task-rest_bold.nii.gz"
+    (func / "sub-01_task-rest_bold.json").write_text(json.dumps({
+        "TaskName": "rest", "RepetitionTime": 0.8,
+    }))
+    values = np.arange(4 * 5 * 6 * 8, dtype=np.float32).reshape(4, 5, 6, 8) + 1000
+    bold = nib.Nifti1Image(values, np.eye(4))
+    bold.header.set_zooms((1, 1, 1, 0.8))
+    bold.header.set_xyzt_units("mm", "sec")
+    nib.save(bold, bold_path)
+    nib.save(nib.Nifti1Image(values[..., 0], bold.affine), anat / "sub-01_T1w.nii.gz")
+    mask_path = tmp_path / "mask.nii.gz"
+    nib.save(nib.Nifti1Image(np.ones(values.shape[:3], dtype=np.uint8), bold.affine), mask_path)
+    options = dict(bids_root=bids, output_dir=tmp_path / "feat", subject="01",
+                   brain_mask=mask_path, device="cpu")
+    first = run_feat_core(**options)
+    assert len(list(first.motion_matrices.glob("MAT_*"))) == 8
+    retained = (first.motion_matrices / "MAT_notes", first.motion_matrices / "MAT_0002.backup")
+    for path in retained:
+        path.write_text("user file")
+    retained_directory = first.motion_matrices / "MAT_0010"
+    retained_directory.mkdir()
+    nib.save(nib.Nifti1Image(values[..., :2], bold.affine, bold.header), bold_path)
+
+    second = run_feat_core(**options, overwrite=True)
+
+    matrices = sorted(path.name for path in second.motion_matrices.iterdir() if path.is_file()
+                      and path.name[4:].isascii() and path.name[4:].isdigit())
+    assert matrices == ["MAT_0000", "MAT_0001"]
+    assert np.loadtxt(second.motion_parameters).shape == (2, 6)
+    assert nib.load(second.filtered_func_data).shape == (*values.shape[:3], 2)
+    assert all(path.read_text() == "user file" for path in retained)
+    assert retained_directory.is_dir()
 
 
 @pytest.mark.parametrize("classify_mni", [False, True])

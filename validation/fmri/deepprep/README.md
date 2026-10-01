@@ -7,7 +7,7 @@
 | DeepPrep volume，MNI152NLin6Asym 2 mm | **2091.36 s（34 分 51 秒）** | 原始完整 T1w 与 BOLD；包含独立结构重建、容器启动、BOLD 预处理、混杂变量导出、写盘及 QC |
 | DeepPrep surface，fsaverage6 | **1969.45 s（32 分 49 秒）** | 独立空目录，从同一原始 T1w 与 BOLD 重新开始；包含结构重建、预处理、双侧 surface 与 QC |
 
-两行分别从原始输入重建解剖；相加会重复计算重建，不能当作一次同时输出 volume 和 surface 的时间。DeepPrep 的 surface 时间包含结构重建和 BOLD 预处理；FNIT surface 从已经清理的 volume 与既有重建开始，两者起点不同。
+两行分别从原始输入重建解剖；相加会重复计算重建，不能当作一次同时输出 volume 和 surface 的时间。DeepPrep 的 surface 时间包含结构重建和 BOLD 预处理；FNIT surface 从已完成的 volume derivatives 与既有重建开始，默认读取 `preproc`，两者起点不同。
 
 DeepPrep 源码固定到 [`04af8f3`](https://github.com/pBFSLab/DeepPrep/tree/04af8f3541737505de41530b23804cd9f2b6efa1)。[机器可读报告](benchmark.public.json)保存实际运行、输出检查、软件及镜像哈希。已移除旧 FNIT 实现的组合计时与重复报告；本页保留这两次独立 DeepPrep 参照。
 

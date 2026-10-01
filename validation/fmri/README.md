@@ -4,6 +4,12 @@
 
 当前最新完整 volume 为 `cfb7beee` 的 FNIRT preproc＋clean，公开 API **707.287 s**；运动校正与冻结 FNIT 逐值相同，完整 MNI clean 对原同步骤软件的时间 r 均值 **0.939162**。下文保留此前固定 fMRIPrep 25.2.4 的 preproc/surface 控制：原始强度 `preproc`、单次插值、真实 midthickness/graymid、fsLR32k 投影及 91k CIFTI。`clean` 继续提供 ICA-AROMA、混杂回归和时间滤波；MSM 与固定共同球面控制保留各自来源，本次 volume 更新没有重新测量 surface。
 
+## 2026-10-01 代码与文档整理检查
+
+volume、surface 和 FEAT 文档按七项结构组织，参数与当前公共 API/CLI 逐项对应；模块职责见[代码索引](../../src/fnit/fmri/README.md)。本次算法计算复用当前子功能，修复 `run_feat_core(overwrite=True)` 覆盖较短 run 时旧数字运动矩阵残留的问题，并在 [FEAT 子功能页](../../docs/fmri/feat.md#最近版本与-benchmark-记录)说明。
+
+服务器 Conda 环境中的八份合同测试初轮为 **84 passed、1 skipped**；配置现场已校验的 HCP/TemplateFlow dseg 后，唯一跳过的 CIFTI 模板排序节点通过，合计 **85 个节点全部验证**。覆盖用例在移除修复代码后明确失败。真实同一 490 帧 BOLD 的前 8→2 帧覆盖检查通过，矩阵、参数和过滤后 BOLD 与 fresh 2 帧逐值相同；这项检查用于文件管理，不作为完整性能 benchmark。公开聚合报告见[本次记录](organization_20261001.public.json)。现场再次读取上述冻结 volume 与 `ca3df003` surface 的完整运行报告和持久输出头，形状、类型、TR 与公开记录一致；完整计时仍使用各自原源码标识。
+
 ## 对照范围
 
 | 检查 | 输入与参照 | 结论的范围 |

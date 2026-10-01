@@ -110,6 +110,12 @@ def run_feat_core(
         resample=motion_only, interpolation="spline",
     )
     matrices = fit.matrices
+    if overwrite:
+        # A shorter rerun must not retain matrices from the previous frames.
+        for previous in matrices_dir.glob("MAT_*"):
+            frame_number = previous.name[4:]
+            if frame_number.isascii() and frame_number.isdigit() and previous.is_file():
+                previous.unlink()
     for frame, matrix in enumerate(matrices):
         np.savetxt(matrices_dir / f"MAT_{frame:04d}", matrix, fmt="%.12g")
     par_path = mc_dir / "prefiltered_func_data_mcf.par"

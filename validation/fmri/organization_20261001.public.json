@@ -1,0 +1,160 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-01",
+  "scope": "organize volume/surface/FEAT code and seven-section documentation; fix shorter-run FEAT overwrite",
+  "base_revision": "a86a849f4c975f0a2def8a7ee2677bc9c0832c77",
+  "changed_python_sha256": {
+    "src/fnit/fmri/pipeline.py": "028333ba91d9929cb0aca34a0c29562ea302bb37d44c0cbf61fbb23c4ae059f4",
+    "src/fnit/fmri/end_to_end.py": "62e7745b066496fa0091a6697445b76ebbafebf454d591ccf4f03dadf0ee10bc",
+    "src/fnit/fmri/cli.py": "87859a54fc4bcec535c47a22ae1b2a3971015c0e016cdbfd5573076f024afd3f",
+    "tests/test_fmri_pipeline.py": "69b4a3b28aa1a84df2b6a51869787e8d8cac36d21c369aeeaaba9c81d917ab37"
+  },
+  "algorithm_changes": false,
+  "new_runtime_dependencies": [],
+  "regression_before_fix": {
+    "test_node": "tests/test_fmri_pipeline.py::test_feat_core_overwrite_shorter_run_replaces_only_frame_matrices",
+    "exit_code": 1,
+    "extra_matrix_count": 6
+  },
+  "server_tests": {
+    "python": "3.11.16",
+    "torch": "2.5.1",
+    "numpy": "1.26.4",
+    "nibabel": "5.4.2",
+    "pytest": "9.1.1",
+    "suite_files": [
+      "tests/test_fmri_pipeline.py",
+      "tests/test_fmri_volume_contract.py",
+      "tests/test_fmri_surface_public_contracts.py",
+      "tests/test_fmri_surface_pipeline.py",
+      "tests/test_fmri_derivatives.py",
+      "tests/test_fmri_anatomical_cache.py",
+      "tests/test_fmri_volume_cache_integration.py",
+      "tests/test_fmri_surface_preparation.py"
+    ],
+    "initial_suite": {
+      "passed": 84,
+      "failed": 0,
+      "skipped": 1,
+      "wall_seconds": 7.12,
+      "skip_reason": "FNIT_TEST_FMRI_SURFACE_ASSETS not set"
+    },
+    "skipped_node_recheck": {
+      "node": "tests/test_fmri_surface_pipeline.py::test_cifti_uses_templateflow_vertex_and_fortran_voxel_order",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "wall_seconds": 4.42,
+      "assets": "existing SHA-verified HCP and TemplateFlow HCP dseg; no downloads"
+    },
+    "unique_nodes_validated": 85
+  },
+  "real_overwrite": {
+    "schema_version": 1,
+    "purpose": "real-data FEAT overwrite contract; not a full-run benchmark or numerical equivalence claim",
+    "input": {
+      "full_bold_sha256": "67717caaa823141c6e59d46db52e92deb4419d232ba699c399c69eb8888a0e92",
+      "full_shape": [
+        88,
+        88,
+        64,
+        490
+      ],
+      "full_tr_seconds": 0.7350000143051147,
+      "frame_indices_first_run": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "frame_indices_second_run": [
+        0,
+        1
+      ],
+      "reference": "same real SBRef in all calls",
+      "brain_mask": "FNIT SynthStrip on the real SBRef"
+    },
+    "configuration": {
+      "device": "shared H100 physical GPU 1",
+      "tf32": true,
+      "cpu_threads": 8,
+      "cuda_limit_bytes": 20000000000,
+      "motion_iterations": [
+        1,
+        1,
+        1
+      ],
+      "highpass_cutoff_seconds": 100.0,
+      "low_precision": false
+    },
+    "checks": {
+      "initial_matrix_count": 8,
+      "final_matrix_names": [
+        "MAT_0000",
+        "MAT_0001"
+      ],
+      "parameters_shape": [
+        2,
+        6
+      ],
+      "filtered_bold_shape": [
+        88,
+        88,
+        64,
+        2
+      ],
+      "filtered_bold_finite": true,
+      "user_notes_retained": true,
+      "fresh_two_frame_matrices_exact": true,
+      "fresh_two_frame_parameters_exact": true,
+      "fresh_two_frame_filtered_bold_exact": true,
+      "filtered_bold_max_abs_difference": 0.0
+    },
+    "peak_cuda_allocated_bytes": 6503141376,
+    "passed": true
+  },
+  "frozen_full_runs_rechecked": {
+    "method": "read original reports, source hashes and persistent image headers; no new full pipeline run or complete finite-value rescan",
+    "volume": {
+      "source_revision": "cfb7beee202f7e89072faf1a8e69b78d143e451f",
+      "report": "mcflirt_optimization_api.public.json",
+      "public_api_seconds": 707.2867331113666,
+      "source_files_sha256_matched": 107,
+      "original_report_sha256": "9c60242377253d3ebbd4c1abe0383153509708b713d2c22d33de238aae9eef88",
+      "headers_matched": true,
+      "independent_exit_file_found": false
+    },
+    "surface": {
+      "source_revision": "ca3df003a0d0e56bb97e244b48c65d38e3990789",
+      "report": "fmriprep/surface_stcoff_ca3df003.public.json",
+      "public_api_seconds": 234.3126849620603,
+      "scope": "provided registered spheres; no sphere estimation",
+      "source_files_sha256_matched": 106,
+      "original_report_sha256": "8e83be7471271711062e41281bd9acd8d84f9b03de5831a3cec9e928eb139a1c",
+      "headers_matched": true,
+      "exit_code": 0
+    }
+  },
+  "documentation_checks": {
+    "volume_api_parameters": 38,
+    "surface_api_parameters": 21,
+    "python_examples_ast_valid": true,
+    "bash_examples_syntax_valid": true,
+    "local_file_links_valid": true,
+    "each_document_has_seven_top_level_sections": true,
+    "volume_cli_help_passed": true,
+    "surface_cli_help_passed": true,
+    "remote_source_sha256_matches_local": true
+  },
+  "resource_checks": {
+    "existing_hcp_files_sha256_passed": 20,
+    "existing_templateflow_hcp_dseg_bytes": 25762,
+    "existing_templateflow_hcp_dseg_size_and_sha256_passed": true,
+    "no_resources_redistributed": true
+  },
+  "passed": true
+}

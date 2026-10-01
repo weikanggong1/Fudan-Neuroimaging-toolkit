@@ -1,10 +1,21 @@
 # FEAT 核心：运动、掩膜、强度缩放和高通
 
+## 功能简介与流程图
+
 `run_feat_core` 从一个原始 BIDS run 生成 PICA 前的 `filtered_func_data.nii.gz`。它调用本包 `TorchMCFLIRT` 估计每帧到 SBRef 的刚体运动，使用三次 B 样条重采样 BOLD，求 EPI 均值和脑掩膜，按整段掩膜内第 50 百分位缩放到 10000，再做高斯加权局部直线高通。缺少 SBRef 时以 BOLD 中间帧为参考。没有场图/GDC warp 时直接使用 TorchMCFLIRT 的 Constant 样条和原输出类型转换；提供共享形变时，将运动矩阵与形变组合后只采样一次。场图估计不包含在本函数内。
 
 脑提取默认使用 PyTorch SynthStrip 对重采样后的 EPI 均值求掩膜。若有同网格现成掩膜，传 `brain_mask`；`brain_extraction="otsu"` 保留无需权重的独立 EPI 掩膜算法。默认与官方 FEAT 的 BET/强度阈值掩膜定义不同，因此整链对照须分别记录掩膜差异和后续数值差异。完整 `fMRIVolume_pipeline` 会先对 SBRef（缺失时 BOLD 中间帧）运行 SynthStrip，再把该掩膜通过 `brain_mask` 显式交给本函数；本页独立调用的 `brain_mask=None` 则对运动校正后的 EPI 均值运行 SynthStrip。
 
-## BIDS 输入与调用
+```mermaid
+flowchart LR
+    BIDS["单 run BIDS 与参考图"] --> MOTION["TorchMCFLIRT：运动矩阵与单次重采样"]
+    MOTION --> MASK["提供的掩膜，或 EPI 均值 SynthStrip"]
+    MASK --> SCALE["掩膜内 p50 缩放至 10000"]
+    SCALE --> HIGH["高斯局部直线高通，保留均值"]
+    HIGH --> OUT["filtered BOLD、均值、掩膜与运动参数"]
+```
+
+## Python 调用、输入输出与参数
 
 输入必须包括 `dataset_description.json`、3D T1w、4D BOLD 和 BOLD JSON 的 `TaskName`、`RepetitionTime`。T1w 在此函数只检查，不进入配准；完整流程由 [总入口](README.md)处理。`locate_bids_inputs` 返回 `BIDSInputs.bold`、`t1w_images`、`sbref`、`fieldmaps`、`tr`、`bold_metadata` 和所用 JSON 路径。多 run 的 `session/run/acquisition/direction/reconstruction/echo` 必须指定到唯一一份 BOLD。识别到关联场图但未提供形变时会报错。
 
@@ -29,7 +40,7 @@ feat = run_feat_core(
     postmat=None,                                # warp 参考空间→最终参考网格的 FLIRT 矩阵
     highpass_cutoff_seconds=100.0,               # 高通截止周期，秒
     device="cuda:0",                             # PyTorch 设备；None 自动选择
-    batch_size=8,                                # 每批重采样的 BOLD 帧数
+    batch_size=8,                                # 带共享 warp 时每批帧数；motion-only 不使用
     motion_iterations=(1, 1, 1),                 # 8/4/4 mm 各一次 Brent 坐标优化轮回
     overwrite=False,                             # 已存在最终输出时是否覆盖
 )
@@ -37,8 +48,6 @@ print(feat.filtered_func_data)                   # X×Y×Z×T float32，原生 E
 print(feat.motion_matrices)                      # 每帧的 4×4 FLIRT 矩阵目录
 print(feat.intensity_factor)                     # 整段强度乘数
 ```
-
-`run_feat_core` 的独立入口目前是上述 Python 函数。运动校正的独立命令行见 [`fnit mcflirt`](../mcflirt/README.md)；完整 BIDS→MNI 体积命令行为 [`fnit-fmri volume`](README.md)，它包含本页 FEAT 核心步骤。
 
 | 文件或返回值 | 含义 |
 |---|---|
@@ -51,7 +60,11 @@ print(feat.intensity_factor)                     # 整段强度乘数
 | `mean_func.nii.gz` | 上一文件的 3D 时间均值。 |
 | `FeatCoreResult.unwarp_applied` | 有无使用 `spatial_warp` 的布尔值；不是自动估计场图的标志。 |
 
-## 子函数和官方命令
+## 命令行调用
+
+`run_feat_core` 的独立入口目前是上述 Python 函数。运动校正的独立命令行见 [`fnit mcflirt`](../mcflirt/README.md)；完整 BIDS→MNI 体积命令行为 [`fnit-fmri volume`](README.md)，它包含本页 FEAT 核心步骤。CLI 的各项参数与完整示例见[体积命令行](README.md#命令行调用)。
+
+## 原软件调用
 
 | FNIT 函数 | 输入、输出 | 相应 FSL 命令 |
 |---|---|---|
@@ -133,7 +146,11 @@ filtered_path = highpass_nifti(
 
 `MCFLIRTResult.parameters` 是 T×6 原 MCFLIRT 参数，`matrices` 是 T×4×4 输入→参考 FLIRT 矩阵；`corrected` 只在 `resample=True` 时返回。以上独立演示显式使用 Otsu 掩膜；完整 volume 默认使用 SynthStrip。`apply_motion_warp` 与 `epi_brain_mask` 返回 NiBabel 影像；`grand_mean_scale` 返回 4D 数组与乘数，`gaussian_highpass` 返回 4D 数组。
 
-## 冻结版本的原软件对照
+## 最新真实数据精度、耗时与脑图
+
+最新完整 volume 的 FEAT 阶段为 **177.787 s**，独立 MCFLIRT 的运动输出对冻结 FNIT 逐值一致，固定同一掩膜后的高通输出也逐值一致；完整 volume 重新提取的 EPI 掩膜有一个边界体素差异。完整 490 帧的最新 MNI 脑图见[volume 精度与脑图](README.md#latest-real-benchmark)，运动脑图见 [TorchMCFLIRT](../mcflirt/README.md)。下表保留原软件对照的实际源码与计时范围。
+
+### 冻结版本的原软件对照
 
 2026-10-01，冻结源码 `1eb9c417` 使用同一例真实 88×88×64×490 BOLD 和 SBRef，TR 为 0.735 秒，完整处理所有帧。独立原参照采用 SynthStrip 掩膜，因此这个同步骤对照没有混入默认 BET 掩膜差异。
 
@@ -149,7 +166,7 @@ filtered_path = highpass_nifti(
 
 完整 FEAT 与后续去噪、MNI 输出的最新结果见[优化后的全流程对照](../../validation/fmri/mcflirt_optimization.md)，原冻结结果见[历史对照](../../validation/fmri/matched_native.md)。带 GDC/B0 的共享 warp 路径在本轮未做完整对照；其空间方向与采样合同保持原有实现。
 
-## FEAT 耗时来源
+### FEAT 耗时来源
 
 最新源码 `cfb7beee` 的完整 volume 在同一例 490 帧数据上测得 **FEAT 177.79 s**。该阶段包括运动估计、最终采样、使用已提供的 EPI 掩膜、强度缩放、高通以及阶段文件保存；SBRef 脑提取另计。完整 API 为 707.29 s，还保存 T1w 和 MNI 两份单次采样的 preproc BOLD；这两份新增输出耗时 251.85 s。详见[阶段计时](../../validation/fmri/mcflirt_optimization_api.public.json)。
 
@@ -175,6 +192,12 @@ filtered_path = highpass_nifti(
 最终样条继续逐帧执行空间轴递推、坐标累加和 64 邻点加权，再传回 CPU。motion-only 分支不使用 `batch_size`，调大该参数不会改变这一执行方式；估计和最终采样仍分别读取完整 BOLD。它在优化前 profile 中占 4.2%，本次保持该采样实现。
 
 各次测量使用共享 H100，负载、缓存状态和验证输出集合不同。旧 profile 的 728.28 s、冻结 volume FEAT 的 973.12 s、最新 volume FEAT 的 177.79 s 和独立运动计时分别记录，不用相减推算全流程时间。复测参考图还须匹配 `pixdim`：FEAT 保存并重读的 `example_func.nii.gz` 可能与原 SBRef 有微小头信息舍入差异，即使像素和 affine 相同。
+
+## 最近版本与 benchmark 记录
+
+2026-10-01 修复 `run_feat_core` 的覆盖 bug：同一输出目录先处理较长 BOLD，再用 `overwrite=True` 处理较短 BOLD 时，旧版本会残留超出当前帧数的 `MAT_数字` 矩阵。当前实现等待运动拟合成功后清理该函数生成的旧矩阵，再写当前帧的矩阵；目录中的其他文件和子目录保留。新增 8→2 帧回归检查，修复前明确失败，修复后通过。另从同一真实 490 帧 BOLD 取前 8 帧再覆盖为前 2 帧：仅留下两份矩阵，参数为 2×6，过滤后 BOLD 为 88×88×64×2；三项输出与新目录中的 2 帧结果逐值相同，用户附加文件保留。见[本次验证](../../validation/fmri/organization_20261001.public.json)。这是覆盖行为检查；完整精度与计时沿用上文冻结的 490 帧 benchmark。完整 volume 使用独立临时 FEAT 目录，不受旧文件残留问题影响。
+
+近期算法与 benchmark 的变化按实际源码保留：`1eb9c417` 为原路径完整 490 帧对照；融合 cost 输入准备后的独立 GPU 1 运动为 159.275 s；`cfb7beee` 完整 volume FEAT 为 177.787 s，独立共享 GPU 0 运动为 278.454 s。各次范围和输出见上文，完整记录见[volume 版本表](README.md#最近版本与-benchmark-记录)和 [MCFLIRT 更新记录](../mcflirt/README.md)。
 
 ## 参考文献与原实现
 

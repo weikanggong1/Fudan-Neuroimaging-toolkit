@@ -1,4 +1,4 @@
-"""One-run raw BIDS to ICA-AROMA cleaned BOLD on a 2-mm MNI152 grid."""
+"""One-run BIDS to T1w/MNI preproc and native/MNI ICA-AROMA clean BOLD."""
 
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -31,7 +31,7 @@ from .timing import prepare_timing_parameters
 
 @dataclass(frozen=True)
 class FMRIVolumeResult:
-    """Persistent BIDS Derivatives paths for a completed volume run."""
+    """Persistent preproc/clean BOLD, anatomy, transforms and run metadata."""
 
     clean_native: Path
     clean_mni: Path
@@ -203,13 +203,17 @@ def fMRIVolume_pipeline(
     bbr_execution="batched",
     fnirt_execution="optimized",
 ):
-    """Run motion/FEAT, SynthStrip/FAST, BBR, PICA/AROMA and MNI resampling.
+    """Generate both preproc and clean derivatives for one selected BIDS run.
 
-    Slice timing is disabled by default; explicitly enable it for preproc.
+    Preproc preserves raw intensity with one motion/spatial interpolation to
+    T1w at BOLD resolution and MNI at 2 mm. Slice timing is off by default.
+    Clean adds FEAT scaling/highpass, PICA/AROMA and optional confound
+    regression, and is saved on the native EPI and MNI grids.
 
-    B0 fieldmap and GDC estimation are deliberately absent because no raw
-    fieldmaps or GDC warp are available in the specified UKB example. Any
-    associated BIDS fieldmaps currently cause an explicit error in FEAT core.
+    Motion and anatomical estimation reuse TorchMCFLIRT, SynthStrip,
+    source-ordered TorchFAST, BBR and the selected SynthMorph/FNIRT backend.
+    Associated fieldmaps require a supplied B0 warp in the FEAT subfunction;
+    this full entry does not estimate or accept B0/GDC warps.
     """
     pipeline_started = time.perf_counter()
     if registration_backend not in ("synthmorph", "fnirt"):
