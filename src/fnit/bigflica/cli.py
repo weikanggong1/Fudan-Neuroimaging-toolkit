@@ -29,8 +29,8 @@ def main() -> None:
     fit.add_argument("--max-gpu-gb", type=float, default=19.0)
     fit.add_argument("--feature-block", type=int, default=2048)
     fit.add_argument("--dicl-batch-size", type=int, default=32)
-    fit.add_argument("--dicl-sparse-iterations", type=int, default=120,
-                     help="maximum LARS path events per voxel")
+    fit.add_argument("--dicl-sparse-iterations", type=int, default=1000,
+                     help="sparse solve budget for ADMM and fallback LARS")
     apply = commands.add_parser("apply", help="project one unseen subject")
     apply.add_argument("--model-dir", required=True)
     apply.add_argument("--subject-dir", required=True)

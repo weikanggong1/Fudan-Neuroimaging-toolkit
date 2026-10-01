@@ -10,7 +10,9 @@
 
 **100维真实1000人结果：**新先验下原始体素R控制仍为20个成分，归一化投影为19个；同一保存字典的新初始化R控制CPU/GPU均为7，当前拟合函数默认o均为2并拒绝C20输出。这些输入采用整体RMS，未作为公开默认逐体素z-score全链验收。原始GPU1000次拟合观测约91秒，小字典o阶段CPU/GPU约15.47/28.56秒；共享资源和缓存条件下未形成受控加速结论。
 
-**500维测试：**同1000人改为R500/D200，当前初始化自动DD=1；CPU/GPU字典来源与o/R噪声的八个C20拟合均收缩为零，未输出最终模型或脑图。本次GPU DicL将 `dicl_sparse_iterations` 设为1000以匹配CPU求解预算，原120的预算不足。[500维配置、耗时与数值结果](../../validation/bigflica/mmigp500_real1000_20261001.md)。
+**DicL本轮修复前的500维测试：**同1000人改为R500/D200，当前初始化自动DD=1；当时CPU/GPU字典来源与o/R噪声的八个C20拟合均收缩为零，未输出最终模型或脑图。本次GPU DicL将 `dicl_sparse_iterations` 设为1000以匹配CPU求解预算，原120的预算不足；以下新字典未重新拟合FLICA。[历史500维配置、耗时与数值结果](../../validation/bigflica/mmigp500_real1000_20261001.md)。
+
+**DicL效果匹配：**同一1000人R500/D200投影，修复额外ridge、LARS节点停步、分块统计和CUDA SVD精度后，独立初始化的VBM/FA/MD字典相对差降到 `1.22e-7/1.07e-4/5.85e-4`，字典与LASSO门槛均通过；补查sklearn实际OMP30 `.transform()` 时FA/MD重建差仍为2.44%/5.33%。当前BigFLICA只使用拟合字典，没有新增GPU OMP接口。完整训练及共用初态控制见[真实效果报告](../../validation/bigflica/dicl_match_real1000_20261001.md)。
 
 **此前原始体素基线：**固定 1000 人、完整 VBM/FA/MD 掩膜，MATLAB 整体 RMS 预处理、SVD 初始化和旧共享 W 先验；GPU 执行 1000 次更新仍保留 20 个有效成分。CPU/GPU 同初态 100 次参数相对差最大 `1.65e-10`，60 张 z-stat 图与独立 NumPy/SciPy 对照最大差 `1.91e-6`。1000 次 GPU 拟合观测耗时 87.69 秒，来自私密显存缓存运行器，不能当作公开流式 API 或默认预处理的端到端耗时；收敛及压缩模型仍须单独验收。[原始体素历史记录](../../validation/bigflica/raw_flica_real1000_20261001.md)。
 
@@ -40,11 +42,13 @@ flowchart TD
 
 ## GPU DicL 求解
 
-CUDA DicL 用批量 ADMM 识别稀疏系数的非零位置，再求解活动集方程，并检查系数符号、最优性条件和矩阵枢轴。每20步用 CUDA Graph 重放，减少 Python 调度；前四个批次、未归一化的初始化字典、检查失败或达到计算限额时，从当前小批次重新运行 LARS。LARS 回退仍用活动集逆矩阵增量更新，并保留原 LU 求解器处理失效逆矩阵。重复原子的非唯一解会回退，避免仅用目标值或最优性条件误接受不同的稀疏表示。字典原子全部有效时，按原顺序重放更新图；重采样时保留已有随机数顺序。批次默认32，alpha默认1，初始化、随机种子、字典更新和 sklearn 停止规则保留。
+CUDA DicL 用批量 ADMM 找到稀疏系数的非零位置，再解活动集方程并检查系数符号、最优性条件和矩阵枢轴。每20步用 CUDA Graph 重放。求解器还检查目标 alpha 附近的 LARS 路径节点：sklearn 会直接接受浮点容差内的节点，精确目标解会产生不同的训练轨迹。遇到近节点、重复原子、检查失败或计算预算不足时，当前整批回退到 PyTorch LARS，按 sklearn 的节点停止和条件插值规则重新求解；前四批也使用这条路径。活动集不加额外 ridge。字典原子按原顺序更新，重采样保留随机数顺序，每模态分别重置求解状态。批次默认32，alpha默认1，稀疏求解预算默认1000，保留 sklearn 的训练停止规则。
 
-DicL内部仍沿用float64，mMIGP投影为float32；均值/方差分块汇总和兼容随机数生成仍在CPU执行。矩阵、稀疏求解和字典更新在GPU完成，只使用项目已有PyTorch依赖，未安装或调用SPORCO。ADMM方程参考 [SPORCO BPDN](https://sporco.readthedocs.io/en/latest/modules/sporco.admm.bpdn.html)；完整阶段实测见[验证记录](../../validation/bigflica/README.md#当前实现所需的补充证据)。
+模块内的精确目标 LARS 和增量逆求解器用于解析回归及诊断，默认训练的回退使用节点兼容求解器。退化活动集会明确诊断或排除依赖原子；这不构成所有退化输入与 sklearn 逐位相同的保证。
 
-GPU字典缓存版本为 `rsvd3bpdn`。本轮归一化版本更新会使旧的归一化、mMIGP和DicL缓存失效；用新输出目录重新拟合可保留历史结果。CLI和Python参数无需修改。此优化没有消除独立CPU/GPU全链输入差异经非凸字典学习放大的问题，C20结果仍须检查。
+DicL内部仍沿用float64，mMIGP投影为float32。CPU按固定行顺序分块计算两遍均值/中心化方差；float32存储先提升到float64，参考的是NumPy全矩阵float64统计。兼容随机数生成仍在CPU执行。投影适合显存缓存时也逐块读取，避免在主机内存中读入整个模态；矩阵、稀疏求解和字典更新在GPU完成。随机SVD保留QR幂迭代，在CUDA上显式使用 `gesvd`。只使用项目已有依赖，未安装或调用SPORCO。ADMM方程参考 [SPORCO BPDN](https://sporco.readthedocs.io/en/latest/modules/sporco.admm.bpdn.html)；完整阶段实测见[验证记录](../../validation/bigflica/README.md)。
+
+GPU字典缓存版本为 `rsvd4bpdn`。本轮稀疏求解修复会使旧DicL缓存失效；已有输入标准化和mMIGP缓存仍可复用。CLI和Python默认 `dicl_sparse_iterations=1000`，显式设置120的旧调用仍按120运行。此优化没有消除独立CPU/GPU全链输入差异经非凸字典学习放大的问题，C20结果仍须检查。
 
 ## 安装与输入
 
@@ -85,7 +89,7 @@ fnit-bigflica fit \
   --output-dir /absolute/path/bigflica_output \
   --n-components 3 --migp-dim 10 --dicl-dim 40 \
   --dicl-max-iter 20 --dicl-batch-size 32 \
-  --dicl-sparse-iterations 120 --flica-max-iter 100 \
+  --dicl-sparse-iterations 1000 --flica-max-iter 100 \
   --top-voxels 300 --random-state 0 \
   --device cuda:0 --max-gpu-gb 19 --feature-block 2048
 
@@ -141,7 +145,7 @@ model_dir = run_bigflica(
     max_gpu_gb=19,
     feature_block=2048,
     dicl_batch_size=32,
-    dicl_sparse_iterations=120,
+    dicl_sparse_iterations=1000,
     dicl_max_iter=20,
     flica_max_iter=100,
     top_voxels=300,
@@ -217,7 +221,7 @@ bigflica_output/
 | `dicl_dim` / `--dicl-dim` | 压缩模式每模态的字典原子数；直接模式可省略。 |
 | `dicl_max_iter` / `--dicl-max-iter` | DicL 最大 epoch 数，默认 1000；沿用 sklearn 提前停止规则。 |
 | `dicl_batch_size` / `--dicl-batch-size` | GPU LARS 每批体素数，默认 32，与指定 notebook 一致。改动后结果可能变化。 |
-| `dicl_sparse_iterations` / `--dicl-sparse-iterations` | GPU LARS 每个体素最多路径事件数，默认 120；到限未收敛时报错。 |
+| `dicl_sparse_iterations` / `--dicl-sparse-iterations` | GPU 稀疏求解预算，默认1000；用于ADMM迭代和回退LARS的路径事件数。预算耗尽且回退仍未求解时会报错，不返回截断编码。 |
 | `flica_max_iter` / `--flica-max-iter` | FLICA 变分更新次数，默认 1000，必须为正整数。CPU/GPU 均执行指定次数；旧版多更新一次的问题已修复。 |
 | `flica_lambda_dims` / `--flica-lambda-dims` | 噪声精度维度：默认 `o` 为每模态一个值，与指定 notebook 一致。`R` 在直接体素模式中为每模态、每个原始被试一个值，在压缩模式中为每模态、每个 mMIGP 坐标一个值。更改此项会改变模型，须分别验收成分稳定性和重建。 |
 | `top_voxels` / `--top-voxels` | 各成分按绝对 z 值保留最高的体素数，默认 1000。 |

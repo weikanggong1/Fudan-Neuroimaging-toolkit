@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "source_revision": "ec57972ceb7d715dd8b91ba32e3512bc7743b9c5",
+  "scope": "Focused checks for FLIRT output coordinate precision and fMRI volume tissue-mask routing, after the real-data prefilter diagnosis.",
+  "checks": [
+    {
+      "command": "PYTHONPATH=src python -m pytest -q tests/test_fmri_volume_contract.py tests/test_fmri_aroma_confounds.py tests/flirt/test_output_semantics.py tests/flirt/test_cost_fsl_semantics.py",
+      "passed": 46,
+      "failed": 0,
+      "wall_seconds": 15.42
+    },
+    {
+      "command": "PYTHONPATH=src python -m pytest -q tests/test_fmri_benchmark_reference.py tests/test_fmri_matched_pipeline_comparison.py",
+      "passed": 12,
+      "failed": 0,
+      "wall_seconds": 5.8,
+      "scope": "Before the runtime fix; new benchmark scripts only. Additional mask labels were separately checked with the same comparison tests."
+    }
+  ],
+  "source_sha256": {
+    "src/fnit/flirt/core.py": "e6ce6185fafb89666be631069f66e96ce9c6a561ab3d7c7fab4c661d317885c1",
+    "src/fnit/fmri/end_to_end.py": "991cef205074c0efd63493c2beaef0428d3233a1d05ab6d1bb05e96fb5e58372",
+    "tests/test_fmri_volume_contract.py": "81371f7f827ada2d1c158937b4691dc6d76063bba2a46715a1f89b665032b354"
+  }
+}

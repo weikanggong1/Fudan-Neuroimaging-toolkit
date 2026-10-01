@@ -1,0 +1,162 @@
+{
+  "schema_version": 1,
+  "stage": "feat",
+  "steps": [
+    {
+      "name": "mcflirt",
+      "process_wall_seconds": 326.09642137400806,
+      "exit_code": 255,
+      "output_checks": {
+        "shape": [
+          88,
+          88,
+          64,
+          490
+        ],
+        "dtype": "int32",
+        "all_finite": true,
+        "sha256": "1dc77bf11be1517c4583c0635d4299006db12625adc89dd2ce2b12f7761aea13",
+        "tr_seconds": 0.7350000143051147,
+        "time_unit": "sec"
+      },
+      "validated_abnormal_exit": true
+    },
+    {
+      "name": "mask_bold",
+      "process_wall_seconds": 36.860060974024236,
+      "exit_code": 255,
+      "output_checks": {
+        "shape": [
+          88,
+          88,
+          64,
+          490
+        ],
+        "dtype": "float32",
+        "all_finite": true,
+        "sha256": "251207044067f390372768a29d98bcb9345ec28b96bd81a6f89a6357e573eead",
+        "tr_seconds": 0.7350000143051147,
+        "time_unit": "sec"
+      },
+      "validated_abnormal_exit": true
+    },
+    {
+      "name": "masked_p50",
+      "process_wall_seconds": 15.094065222889185,
+      "exit_code": 255,
+      "value": 6964.0
+    },
+    {
+      "name": "intensity_scale",
+      "process_wall_seconds": 21.503374784253538,
+      "exit_code": 255,
+      "output_checks": {
+        "shape": [
+          88,
+          88,
+          64,
+          490
+        ],
+        "dtype": "float32",
+        "all_finite": true,
+        "sha256": "2fdfab628af59431377c9a9d50daa3f8a7f0e94e731287826bbd969071912bd9",
+        "tr_seconds": 0.7350000143051147,
+        "time_unit": "sec"
+      },
+      "validated_abnormal_exit": true
+    },
+    {
+      "name": "temporal_mean",
+      "process_wall_seconds": 7.6415979149751365,
+      "exit_code": 255,
+      "output_checks": {
+        "shape": [
+          88,
+          88,
+          64
+        ],
+        "dtype": "float32",
+        "all_finite": true,
+        "sha256": "37647bc91261b3cde710f4336f745a023b4479c7526ae24f35239f9af93a9855"
+      },
+      "validated_abnormal_exit": true
+    },
+    {
+      "name": "gaussian_highpass",
+      "process_wall_seconds": 157.56879660114646,
+      "exit_code": 255,
+      "output_checks": {
+        "shape": [
+          88,
+          88,
+          64,
+          490
+        ],
+        "dtype": "float32",
+        "all_finite": true,
+        "sha256": "47897cbd6ccce263e0ff326fd154b3812076127d469c9a1ac9d10f101ca5f6d9",
+        "tr_seconds": 0.7350000143051147,
+        "time_unit": "sec"
+      },
+      "validated_abnormal_exit": true
+    },
+    {
+      "name": "filtered_mean",
+      "process_wall_seconds": 7.680941451340914,
+      "exit_code": 255,
+      "output_checks": {
+        "shape": [
+          88,
+          88,
+          64
+        ],
+        "dtype": "float32",
+        "all_finite": true,
+        "sha256": "8b18d7d45b0f77fde0f2a903e72260ad90b14c6c99dd8c825a333525f10c8a86"
+      },
+      "validated_abnormal_exit": true
+    }
+  ],
+  "fsl_installation_version": "6.0.7.22",
+  "threads": 8,
+  "input_sha256": {
+    "bold": "67717caaa823141c6e59d46db52e92deb4419d232ba699c399c69eb8888a0e92",
+    "sbref": "ff4e0e49a504527468234456cba6ad367d63c1f3f529d8ff3519bc78e2076323",
+    "epi_mask": "8148636e405a0881d68fa24b5a6a6852e08641ef5b88f400c1e7f5778f54695c"
+  },
+  "checks": {},
+  "component_packages": {
+    "fast4": {
+      "name": "fsl-fast4",
+      "version": "2111.3",
+      "build": "h8c873e0_9"
+    },
+    "flirt": {
+      "name": "fsl-flirt",
+      "version": "2111.4",
+      "build": "h28ab0de_3"
+    },
+    "fnirt": {
+      "name": "fsl-fnirt",
+      "version": "2203.2",
+      "build": "ha905fa9_5"
+    },
+    "melodic": {
+      "name": "fsl-melodic",
+      "version": "2601.1",
+      "build": "h46763b2_0"
+    }
+  },
+  "component_sha256": {
+    "mcflirt": "e5fbe9be9dbd4f1ae027a9e8fd38ea41e8507e45fbc1aedb36550c11fb5302cb",
+    "fslmaths": "81898048ff97fccd67ef0231b419359f82597e5c592427a10fe10333e7f40e12",
+    "fslstats": "9e1a2d10568c554818667dd886622c3670439f8022cf99e89c319ccebc791c73"
+  },
+  "scope": "Original software on one real input; no BET, threshold/dilation, smoothing, GDC/B0 or FIX added.",
+  "privacy": "Anonymous checks and hashes only. Full paths and logs stay in the private output directory.",
+  "intensity_factor": 1.4359563469270533,
+  "highpass_sigma_volumes": 68.02721088435375,
+  "highpass_cutoff_seconds": 100.0,
+  "sum_process_wall_seconds": 572.4452583226375,
+  "timing_boundary": "Each original child process includes startup and image read/write. Hashes and integrity checks are outside these timers."
+}

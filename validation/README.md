@@ -42,7 +42,7 @@
 
 | 功能 | 当前真实数据报告 | 输出一致性结论 | 时间、显存与示意图 |
 |---|---|---|---|
-| [BIDS→MNI152 2 mm fMRI](../docs/fmri/README.md) | [完整 490 帧 volume](fmri/README.md)、[当前 FEAT 对照](fmri/feat_current.public.json)、[DeepPrep 对照](fmri/deepprep/README.md) | pre-ICA FEAT 4D r=0.996419，时间 r 中位数 0.966773；最终 AROMA 没有同算法 UKB FIX 参照 | 2026-10-01 完整 API 含保存 551.07 s，allocated 13.30 GB；DeepPrep volume 2091.36 s 含结构重建，范围不同；附 MNI 时间标准差及帧图 |
+| [BIDS→MNI152 2 mm fMRI](../docs/fmri/README.md) | [完整 490 帧同步骤 volume](fmri/README.md)、[FNIRT/AROMA 实测](fmri/matched_native.md)、[DeepPrep 对照](fmri/deepprep/README.md) | pre-ICA 时间 r 均值 0.951153；原生/MNI clean 时间 r 均值 0.850471/0.853589；原软件同步骤参照与 UKB FIX 分开 | FNIT API 455.62 s、原软件连续链 2570.47 s，边界不同；FNIT allocated 6.239 GB；附同网格时间标准差及帧图 |
 | [fsLR32k / 91k surface](../docs/fmri/surface.md) | [当前 MSMSulc](msm/README.md)、[固定球面投影](fmri/surface_fixed_sphere.public.json)、[历史完整 API](fmri/fmri_surface.public.json) | 同输入官方 newMSM 球面与 490 帧逐灰质坐标时间相关见 MSM 专页；固定官方球面投影与组装逐值一致 | 最新配准冷/热调用与 profile 单列；历史完整 surface API 905.71 s，不含皮层重建 |
 | [MS-HBM 17 网络](../docs/mshbm/README.md) | [真实 fsLR32k 静息态时序](mshbm/report.public.json) | 输入 profile、网络标签和 Dice/ARI 按顶点比较 | 报告含 CBIG/FNIT 的匹配计时与内存；功能页展示网络标签与差异 |
 
