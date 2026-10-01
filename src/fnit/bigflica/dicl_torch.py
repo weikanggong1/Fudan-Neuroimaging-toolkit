@@ -7,12 +7,25 @@ online objective; projected voxels are read from disk in bounded blocks.
 from __future__ import annotations
 
 import operator
+import threading
+from collections import OrderedDict
 from pathlib import Path
 from typing import Sequence
 
 import h5py
 import numpy as np
 import torch
+
+# The Conda environment includes Triton. Keep CPU and installations without
+# Triton usable through the unchanged PyTorch dictionary-update operations.
+try:
+    import triton as _dicl_triton
+    import triton.language as _dicl_tl
+    from triton.language.extra.cuda import libdevice as _dicl_libdevice
+except ImportError:
+    _dicl_triton = None
+    _dicl_tl = None
+    _dicl_libdevice = None
 
 from .pipeline import _device
 
@@ -223,7 +236,273 @@ def _sparse_codes_lars(samples: torch.Tensor, dictionary: torch.Tensor,
     return code
 
 
+class _CompatibleLarsGraph:
+    """Replay each event around eager LU, retaining four-event host checks.
+
+    All persistent path state has fixed storage. The post-LU graph ends at
+    the next node check, so a replay cannot advance past a host checkpoint.
+    """
+
+    def __init__(self, batch: int, atoms: int, device, dtype):
+        self.gram = torch.eye(atoms, device=device, dtype=dtype)
+        self.response = torch.zeros((batch, atoms), device=device, dtype=dtype)
+        self.rows = torch.arange(batch, device=device)
+        self.code = torch.zeros_like(self.response)
+        self.covariance = torch.zeros_like(self.response)
+        self.active = torch.zeros_like(self.response, dtype=torch.bool)
+        self.signs = torch.zeros_like(self.response)
+        self.blocked = torch.zeros_like(self.active)
+        self.done = torch.ones(batch, device=device, dtype=torch.bool)
+        self.add_atom = torch.ones_like(self.done)
+        self.previous_code = torch.zeros_like(self.response)
+        self.previous_c = torch.zeros(batch, device=device, dtype=dtype)
+        self.current = torch.zeros_like(self.previous_c)
+        self.entering_index = torch.zeros(batch, device=device, dtype=torch.long)
+        self.has_previous = torch.zeros_like(self.done)
+        self.failed = torch.zeros((), device=device, dtype=torch.bool)
+        self.alpha = torch.ones((), device=device, dtype=dtype)
+        self.tolerance = torch.zeros((), device=device, dtype=dtype)
+        self.node_threshold = torch.zeros((), device=device, dtype=dtype)
+        self.tiny = np.finfo(np.float32).tiny
+        self.decimals = 15 if dtype == torch.float64 else 6
+        self.adding = torch.zeros_like(self.done)
+        self.masked = torch.empty((batch, atoms, atoms), device=device, dtype=dtype)
+        self.raw_result = torch.zeros_like(self.response)
+        self.solve_info = torch.zeros(batch, device=device, dtype=torch.int32)
+        # LU stays eager: batched D200 solve_ex cannot be captured on every
+        # supported torch/CUDA backend. Only the surrounding arithmetic is
+        # captured, without changing its expression order.
+        current = torch.cuda.current_stream(device)
+        side = torch.cuda.Stream(device=device)
+        side.wait_stream(current)
+        with torch.cuda.stream(side):
+            for _ in range(3):
+                self._prepare()
+                self._solve()
+                self._finish()
+                self._node()
+        current.wait_stream(side)
+        capture_stream = torch.cuda.Stream(device=device)
+        capture_stream.wait_stream(current)
+        self.pre_graph = torch.cuda.CUDAGraph()
+        with torch.cuda.graph(self.pre_graph, stream=capture_stream,
+                              capture_error_mode="thread_local"):
+            self._prepare()
+        self.post_graph = torch.cuda.CUDAGraph()
+        with torch.cuda.graph(self.post_graph, stream=capture_stream,
+                              capture_error_mode="thread_local"):
+            self._finish()
+            self._node()
+        current.wait_stream(capture_stream)
+        self.completion = torch.cuda.Event()
+        self.completion.record(current)
+
+    def _node(self):
+        candidate_covariance = torch.where(self.active | self.blocked, 0.,
+                                           self.covariance)
+        current, entering_index = candidate_covariance.abs().max(dim=1)
+        self.current.copy_(current)
+        self.entering_index.copy_(entering_index)
+        stopping = (~self.done) & (current <= self.node_threshold)
+        interpolate = (stopping & self.has_previous &
+                       ((current - self.alpha).abs() > self.tolerance))
+        denominator = self.previous_c - current
+        valid_segment = (denominator > 0) & torch.isfinite(denominator)
+        self.failed |= (interpolate & ~valid_segment).any()
+        fraction = ((self.previous_c - self.alpha) /
+                    torch.where(valid_segment, denominator, 1.))
+        interpolated = (self.previous_code + fraction[:, None] *
+                        (self.code - self.previous_code))
+        self.code.copy_(torch.where((interpolate & valid_segment)[:, None],
+                                    interpolated, self.code))
+        self.done |= stopping
+        return current, entering_index
+
+    def _prepare(self):
+        current, entering_index = self.current, self.entering_index
+        adding = (~self.done) & self.add_atom
+        self.adding.copy_(adding)
+        selected_covariance = self.covariance[self.rows, entering_index]
+        self.active[self.rows, entering_index] |= adding
+        self.signs[self.rows, entering_index] = torch.where(
+            adding, selected_covariance.sign(), self.signs[self.rows, entering_index])
+        self.covariance[self.rows, entering_index] = torch.where(
+            adding, 0., self.covariance[self.rows, entering_index])
+        masked = (self.gram[None] * self.active[:, :, None] * self.active[:, None, :] +
+                  torch.diag_embed((~self.active).to(self.response.dtype)))
+        self.masked.copy_(masked)
+
+    def _solve(self):
+        solved = torch.linalg.solve_ex(self.masked, self.signs[..., None],
+                                       check_errors=False)
+        self.raw_result.copy_(solved.result[..., 0])
+        self.solve_info.copy_(solved.info)
+
+    def _finish(self):
+        current, entering_index, adding = self.current, self.entering_index, self.adding
+        raw_direction = self.raw_result
+        signed_sum = (raw_direction * self.signs).sum(dim=1)
+        bad_system = ((self.solve_info != 0) | ~torch.isfinite(raw_direction).all(dim=1) |
+                      ~torch.isfinite(signed_sum) | (signed_sum <= 0)) & ~self.done
+        rejected = bad_system & adding
+        self.active[self.rows, entering_index] &= ~rejected
+        self.signs[self.rows, entering_index] = torch.where(
+            rejected, 0., self.signs[self.rows, entering_index])
+        self.blocked[self.rows, entering_index] |= rejected
+        self.failed |= (bad_system & ~adding).any()
+        processing = (~self.done) & ~bad_system
+        raw_direction = torch.where(processing[:, None], raw_direction, 0.)
+        scale = torch.rsqrt(torch.where(processing, signed_sum, 1.))
+        direction = raw_direction * scale[:, None]
+        slope = torch.round(direction @ self.gram, decimals=self.decimals)
+        possible = (~self.active) & (~self.blocked) & processing[:, None]
+        positive = ((current[:, None] - self.covariance) /
+                    (scale[:, None] - slope + self.tiny))
+        negative = ((current[:, None] + self.covariance) /
+                    (scale[:, None] + slope + self.tiny))
+        positive = torch.where(possible & (positive > 0), positive, torch.inf)
+        negative = torch.where(possible & (negative > 0), negative, torch.inf)
+        gamma = torch.minimum(positive.amin(dim=1), negative.amin(dim=1))
+        gamma = torch.minimum(gamma, current / scale)
+        crossing = -self.code / (direction + self.tiny)
+        crossing = torch.where(self.active & processing[:, None] & (crossing > 0),
+                               crossing, torch.inf)
+        drop_step = crossing.amin(dim=1)
+        dropping = processing & (drop_step < gamma)
+        gamma = torch.where(dropping, drop_step, gamma)
+        gamma = torch.where(processing, gamma, 0.)
+        self.previous_code.copy_(torch.where(processing[:, None], self.code,
+                                             self.previous_code))
+        self.previous_c.copy_(torch.where(processing, current, self.previous_c))
+        self.has_previous |= processing
+        updated_code = torch.where(self.active, self.code + gamma[:, None] * direction, 0.)
+        self.code.copy_(torch.where(processing[:, None], updated_code, self.code))
+        self.covariance.copy_(torch.where(possible, self.covariance - gamma[:, None] * slope,
+                                          self.covariance))
+        drop_mask = self.active & dropping[:, None] & (crossing == drop_step[:, None])
+        dropped_covariance = self.response - self.code @ self.gram
+        self.covariance.copy_(torch.where(drop_mask, dropped_covariance, self.covariance))
+        self.active &= ~drop_mask
+        self.signs.copy_(torch.where(drop_mask, 0., self.signs))
+        self.add_atom.copy_(torch.where(processing, ~dropping,
+                                        torch.ones_like(self.add_atom)))
+
+    def _event(self):
+        self.pre_graph.replay()
+        self._solve()
+        self.post_graph.replay()
+
+    def __call__(self, samples, dictionary, alpha, max_events):
+        stream = torch.cuda.current_stream(samples.device)
+        # A retained output clone may still be reading these buffers on the
+        # preceding call's stream. Never reset them before that copy finishes.
+        stream.wait_event(self.completion)
+        try:
+            return self._run(samples, dictionary, alpha, max_events)
+        finally:
+            self.completion.record(stream)
+
+    def _run(self, samples, dictionary, alpha, max_events):
+        self.gram.copy_(dictionary @ dictionary.T)
+        self.response.copy_(samples @ dictionary.T)
+        self.code.zero_()
+        self.covariance.copy_(self.response)
+        self.active.zero_()
+        self.signs.zero_()
+        self.blocked.zero_()
+        self.done.zero_()
+        self.add_atom.fill_(True)
+        self.previous_code.zero_()
+        self.previous_c.copy_(self.response.abs().amax(dim=1))
+        self.has_previous.zero_()
+        self.failed.zero_()
+        self.alpha.fill_(alpha)
+        self.tolerance.fill_(samples.shape[1] * np.finfo(np.float32).eps)
+        # Eager computes this scalar sum before casting it to the tensor
+        # dtype. Adding two already-rounded float32 buffers changes a node.
+        self.node_threshold.fill_(alpha + samples.shape[1] * np.finfo(np.float32).eps)
+        limit = max_events or 3 * dictionary.shape[0]
+        self._node()
+        event = 0
+        while True:
+            if event % 4 == 0 and bool(self.done.all()):
+                break
+            if event == limit:
+                break
+            if event + 4 <= limit:
+                for _ in range(4):
+                    self._event()
+                event += 4
+            else:
+                # At most three events remain. Preserve the final node-only
+                # check rather than replaying events beyond sparse_iterations.
+                self._event()
+                event += 1
+        if bool(self.failed):
+            raise ValueError("Compatible LARS active Gram or interpolation failed")
+        if not bool(self.done.all()):
+            raise ValueError("Compatible LARS path exceeded sparse_iterations; increase the limit")
+        # Callers can retain a result while the same workspace is reused.
+        return self.code.clone()
+
+
+_COMPATIBLE_LARS_GRAPH_LOCAL = threading.local()
+_COMPATIBLE_LARS_GRAPH_CAPTURE_LOCK = threading.Lock()
+_COMPATIBLE_LARS_GRAPH_CACHE_LIMIT = 4
+
+
+def _compatible_lars_graph_cache():
+    # Separate workspaces preserve independent concurrent subject calls.
+    cache = getattr(_COMPATIBLE_LARS_GRAPH_LOCAL, "cache", None)
+    if cache is None:
+        cache = OrderedDict()
+        _COMPATIBLE_LARS_GRAPH_LOCAL.cache = cache
+    return cache
+
+
 def _sparse_codes_lars_compatible(samples: torch.Tensor, dictionary: torch.Tensor,
+                                  alpha: float,
+                                  max_events: int | None = None) -> torch.Tensor:
+    """Use unchanged LARS arithmetic, with bounded CUDA launch graphs.
+
+    CPU and unsupported CUDA dimensions retain the original eager path.
+    The dense LU solve stays eager because some batched backends cannot be
+    captured. Only its preceding and following tensor operations are graphed.
+    """
+    if (samples.device.type != "cuda" or samples.ndim != 2 or dictionary.ndim != 2 or
+            samples.device != dictionary.device or samples.dtype != dictionary.dtype or
+            samples.shape[1] != dictionary.shape[1]):
+        return _sparse_codes_lars_compatible_eager(samples, dictionary, alpha, max_events)
+    batch, atoms = samples.shape[0], dictionary.shape[0]
+    limit = operator.index(max_events or 3 * atoms)
+    if (batch < 1 or batch > 32 or atoms < 1 or atoms > 256 or limit < 0 or
+            samples.requires_grad or dictionary.requires_grad or
+            samples.dtype not in (torch.float32, torch.float64)):
+        return _sparse_codes_lars_compatible_eager(samples, dictionary, alpha, max_events)
+    # Captured matmul kernels retain the precision/determinism options used
+    # during capture. A later option change must select a separate graph.
+    key = (samples.device.index, samples.dtype, batch, atoms,
+           torch.backends.cuda.matmul.allow_tf32,
+           torch.get_float32_matmul_precision(),
+           torch.are_deterministic_algorithms_enabled())
+    cache = _compatible_lars_graph_cache()
+    with torch.cuda.device(samples.device):
+        if torch.cuda.is_current_stream_capturing():
+            return _sparse_codes_lars_compatible_eager(samples, dictionary, alpha, max_events)
+        solver = cache.pop(key, None)
+        if solver is None:
+            while len(cache) >= _COMPATIBLE_LARS_GRAPH_CACHE_LIMIT:
+                _, discarded = cache.popitem(last=False)
+                discarded.completion.synchronize()
+            # Graph construction is rare. Serializing capture protects CUDA
+            # allocator/library capture state without serializing solves.
+            with _COMPATIBLE_LARS_GRAPH_CAPTURE_LOCK:
+                solver = _CompatibleLarsGraph(batch, atoms, samples.device, samples.dtype)
+        cache[key] = solver
+        return solver(samples, dictionary, alpha, max_events)
+
+
+def _sparse_codes_lars_compatible_eager(samples: torch.Tensor, dictionary: torch.Tensor,
                                   alpha: float,
                                   max_events: int | None = None) -> torch.Tensor:
     """Follow sklearn's LARS nodes and its float32-epsilon stopping rule.
@@ -539,6 +818,8 @@ class _SparseCodesBPDN:
         self.calls = 0
         self.fallback_count = 0
         self.near_node_fallback_count = 0
+        self.fallback_rows = 0
+        self.near_node_fallback_rows = 0
         self.admm_accepted_count = 0
         self.polish_checks = 0
         self.graph = None
@@ -570,6 +851,7 @@ class _SparseCodesBPDN:
 
     def fallback(self, samples, dictionary, alpha, max_events):
         self.fallback_count += 1
+        self.fallback_rows += len(samples)
         return _sparse_codes_lars_compatible(samples, dictionary, alpha, max_events)
 
     def __call__(self, samples, dictionary, alpha, max_events):
@@ -612,12 +894,84 @@ class _SparseCodesBPDN:
                 nearby = _nearby_lars_knots(
                     gram, response, polished, active_direction, alpha,
                     samples.shape[1] * np.finfo(np.float32).eps)
-                if bool(nearby["sensitive_rows"].any()):
+                # Each row is an independent sparse-code problem. Keep the
+                # accepted polished rows and restart only sensitive paths.
+                # nonzero replaces the previous host-side any check, so this
+                # branch needs only one index-size synchronization.
+                sensitive_indices = torch.nonzero(
+                    nearby["sensitive_rows"], as_tuple=False).flatten()
+                if sensitive_indices.numel():
                     self.near_node_fallback_count += 1
-                    return self.fallback(samples, dictionary, alpha, max_events)
+                    self.near_node_fallback_rows += sensitive_indices.numel()
+                    compatible = self.fallback(
+                        samples.index_select(0, sensitive_indices), dictionary,
+                        alpha, max_events)
+                    polished.index_copy_(0, sensitive_indices, compatible)
+                    return polished
                 self.admm_accepted_count += 1
                 return polished
         return self.fallback(samples, dictionary, alpha, max_events)
+
+
+if _dicl_triton is not None:
+    @_dicl_triton.jit
+    def _dicl_update_atom_kernel(D, A, B, PRODUCT, ATOM,
+                            FEATURES: _dicl_tl.constexpr,
+                            D_ROW: _dicl_tl.constexpr, D_COLUMN: _dicl_tl.constexpr,
+                            A_ROW: _dicl_tl.constexpr, A_COLUMN: _dicl_tl.constexpr,
+                            B_ROW: _dicl_tl.constexpr, B_COLUMN: _dicl_tl.constexpr,
+                            PRODUCT_STRIDE: _dicl_tl.constexpr,
+                            BLOCK: _dicl_tl.constexpr):
+        offset = _dicl_tl.program_id(0) * BLOCK + _dicl_tl.arange(0, BLOCK)
+        valid = offset < FEATURES
+        old = _dicl_tl.load(D + ATOM * D_ROW + offset * D_COLUMN, valid, 0)
+        target = _dicl_tl.load(B + offset * B_ROW + ATOM * B_COLUMN, valid, 0)
+        product = _dicl_tl.load(PRODUCT + offset * PRODUCT_STRIDE, valid, 0)
+        diagonal = _dicl_tl.load(A + ATOM * (A_ROW + A_COLUMN))
+        # Preserve the original subtraction, division, then addition; contraction
+        # is disabled at launch, and division is rounded to nearest for fp32/fp64.
+        correction = _dicl_libdevice.div_rn(target - product, diagonal)
+        _dicl_tl.store(D + ATOM * D_ROW + offset * D_COLUMN, old + correction, valid)
+
+
+    @_dicl_triton.jit
+    def _dicl_normalize_atom_kernel(D, NORM, ATOM,
+                               FEATURES: _dicl_tl.constexpr,
+                               D_ROW: _dicl_tl.constexpr, D_COLUMN: _dicl_tl.constexpr,
+                               BLOCK: _dicl_tl.constexpr):
+        offset = _dicl_tl.program_id(0) * BLOCK + _dicl_tl.arange(0, BLOCK)
+        valid = offset < FEATURES
+        # torch.clamp_min propagates NaN. Triton's default maximum need not.
+        norm = _dicl_tl.maximum(_dicl_tl.load(NORM), 1., propagate_nan=_dicl_tl.PropagateNan.ALL)
+        old = _dicl_tl.load(D + ATOM * D_ROW + offset * D_COLUMN, valid, 0)
+        _dicl_tl.store(D + ATOM * D_ROW + offset * D_COLUMN,
+                 _dicl_libdevice.div_rn(old, norm), valid)
+
+
+def _dicl_update_atom_after_matvec(dictionary, a, b, product, atom: int) -> None:
+    """In-place ``D[j] += (B[:, j] - product) / A[j, j]`` on CUDA.
+
+    ``product`` is the caller's unchanged ``A[j] @ D``. Strides are respected;
+    no full-matrix copy, reduction, RNG draw, or atom reordering is performed.
+    """
+    features = dictionary.shape[1]
+    _dicl_update_atom_kernel[(_dicl_triton.cdiv(features, 128),)](
+        dictionary, a, b, product, atom, features,
+        dictionary.stride(0), dictionary.stride(1),
+        a.stride(0), a.stride(1), b.stride(0), b.stride(1), product.stride(0),
+        128, enable_fp_fusion=False)
+
+
+def _dicl_normalize_atom_after_torch_norm(dictionary, norm, atom: int) -> None:
+    """In-place ``D[j] /= norm.clamp_min(1)`` on CUDA without a reduction.
+
+    ``norm`` is the caller's unchanged ``torch.linalg.vector_norm(D[j])``.
+    """
+    features = dictionary.shape[1]
+    _dicl_normalize_atom_kernel[(_dicl_triton.cdiv(features, 128),)](
+        dictionary, norm, atom, features,
+        dictionary.stride(0), dictionary.stride(1),
+        128, enable_fp_fusion=False)
 
 
 class _DictionaryUpdater:
@@ -639,10 +993,21 @@ class _DictionaryUpdater:
                 self.update()
 
     def update(self):
+        # Keep cuBLAS matvec, Torch norm reduction, and Gauss-Seidel atom order.
+        # Only the intervening elementwise operations are fused on CUDA.
+        fused = (_dicl_triton is not None and self.dictionary.is_cuda and
+                 self.dictionary.dtype in (torch.float32, torch.float64))
         for atom in range(len(self.dictionary)):
-            self.dictionary[atom] += ((self.b[:, atom] - self.a[atom] @ self.dictionary) /
-                                      self.a[atom, atom])
-            self.dictionary[atom] /= torch.linalg.vector_norm(self.dictionary[atom]).clamp_min(1)
+            if fused:
+                product = self.a[atom] @ self.dictionary
+                _dicl_update_atom_after_matvec(
+                    self.dictionary, self.a, self.b, product, atom)
+                norm = torch.linalg.vector_norm(self.dictionary[atom])
+                _dicl_normalize_atom_after_torch_norm(self.dictionary, norm, atom)
+            else:
+                self.dictionary[atom] += ((self.b[:, atom] - self.a[atom] @ self.dictionary) /
+                                          self.a[atom, atom])
+                self.dictionary[atom] /= torch.linalg.vector_norm(self.dictionary[atom]).clamp_min(1)
 
     def __call__(self, dictionary, a, b, samples, rng):
         all_alive = bool((torch.diagonal(a) > 1e-6).all())

@@ -138,8 +138,8 @@ def test_nearby_knot_guard_checks_both_directions_and_tied_bound_without_mutatio
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required")
 def test_admm_near_nodes_fall_back_to_cpu_compatible_codes():
     tolerance = 2 * np.finfo(np.float32).eps
-    # The third row is far from either node: any sensitive row must restart
-    # the whole batch, rather than requiring every row to be sensitive.
+    # The third row is far from either node: only the first two sensitive
+    # rows restart LARS, while this row retains the accepted polished code.
     samples = np.array([[2., 1. + tolerance / 2],
                         [2., 1. - tolerance / 2], [2., .5]])
     expected = sparse_encode(samples, np.eye(2), algorithm="lasso_lars", alpha=1.)
