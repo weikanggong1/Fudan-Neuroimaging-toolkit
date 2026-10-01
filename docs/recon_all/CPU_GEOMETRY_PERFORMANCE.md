@@ -8,7 +8,8 @@
 qsphere.nofix，供拓扑修复的球面前处理使用。两者是固定上游算法的
 Python/Numba CPU 移植，保留完整步骤；生产不执行原软件命令。
 
-本页接口对应生产提交 **`c24852054f3321c1142b1ae88fa3d2bf68329bb3`**。
+本页 remesh/quick 实测绑定 **`c24852054f3321c1142b1ae88fa3d2bf68329bb3`**；
+标准球面接口与新实测绑定 **`74ae022edd932e9f3c57c6e253678f13853f8842`**。
 真实配对实际运行的是下面记录的源码归档，当前 remesh/quick 模块与实测
 归档 SHA 相同。两例从原始T1开始的新整例已完成：GPU命令墙钟减少14.676%，CPU减少0.388%，不能将局部阶段提速等同于整例提速；[完整配对](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/WHOLE_RESULTS.md)保留未修改原生阶段变慢的实测。
 Numba 已在主页 [environment.yml](../../environment.yml) 和

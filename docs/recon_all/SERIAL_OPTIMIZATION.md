@@ -193,3 +193,11 @@ python -m fnit.recon_all.sphere_standard_run \
 |sub02 rh|162.809|110.374|0|
 
 全部有序面与坐标相同；GPU采样峰值约0.49GB，仅为本阶段，整体等效仍未判定。完整程序/输入/源码哈希与监控边界见 [stage3_summary.json](../../validation/recon_all/optimizations/20261001_serial/stage3_summary.json)。
+
+## 第四阶段：N4/GCA
+
+两例原生N4量化前与量化后零差异，新增完整参数与实际分段时间见
+[N4说明](N4_ITK_CONDA.md)。实际拟合占约98%，空间重建四线程没有整段收益，
+生产保留1线程；GCA现有Python只有第一EM方向，保留成熟Conda完整优化器。
+修复主页构建时间戳循环，记录编译器、源文件、ITKConfig和二进制SHA。
+这阶段没有宣称提速，整例记录实际N4子段，旧程序能力缺失时明确标记。
