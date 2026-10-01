@@ -157,6 +157,7 @@ def _run_fast(args):
         mrf=args.mrf,
         mixel_mrf=args.mixel_mrf,
         pve_steps=args.pve_steps,
+        execution=args.execution,
     )
     prefix = Path(args.output_prefix)
     prefix.parent.mkdir(parents=True, exist_ok=True)
@@ -661,6 +662,8 @@ def main(argv=None):
     fast.add_argument('-H', '--mrf', type=float, default=0.1)
     fast.add_argument('-R', '--mixel-mrf', type=float, default=0.3)
     fast.add_argument('--pve-steps', type=int, default=100)
+    fast.add_argument('--execution', choices=('tensor', 'fsl'), default='tensor',
+                      help='tensor 同步更新；fsl 保留原 FAST 顺序更新')
     fast.add_argument('-N', '--no-bias', action='store_true')
     fast.add_argument('-b', '--save-bias', action='store_true')
     fast.add_argument('-B', '--save-restored', action='store_true')

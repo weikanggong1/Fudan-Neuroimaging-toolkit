@@ -46,7 +46,8 @@ def _fake_fast(captured, saved):
     return FakeFast
 
 
-def test_fast_cli_writes_fsl_names_through_temporary_files(tmp_path, monkeypatch, capsys):
+@pytest.mark.parametrize("execution", ["tensor", "fsl"])
+def test_fast_cli_writes_fsl_names_through_temporary_files(tmp_path, monkeypatch, capsys, execution):
     captured, saved = {}, []
     monkeypatch.setattr(fast_module, "TorchFAST", _fake_fast(captured, saved))
     prefix = tmp_path / "nested" / "subject"
@@ -59,6 +60,7 @@ def test_fast_cli_writes_fsl_names_through_temporary_files(tmp_path, monkeypatch
         "--device", "cuda:7", "--threads", "3", "-W", "2", "-I", "5",
         "-O", "6", "-l", "12", "-f", "0.03", "-H", "0.2", "-R", "0.4",
         "--pve-steps", "11", "-N", "-b", "-B", "--overwrite",
+        "--execution", execution,
     ])
 
     assert captured == {
@@ -66,6 +68,7 @@ def test_fast_cli_writes_fsl_names_through_temporary_files(tmp_path, monkeypatch
             "device": "cuda:7", "threads": 3, "init_iterations": 2,
             "bias_iterations": 5, "fixed_iterations": 6, "bias_fwhm_mm": 0.0,
             "init_mrf": 0.03, "mrf": 0.2, "mixel_mrf": 0.4, "pve_steps": 11,
+            "execution": execution,
         },
         "call": ("input.nii.gz", "mask.nii.gz"),
     }
