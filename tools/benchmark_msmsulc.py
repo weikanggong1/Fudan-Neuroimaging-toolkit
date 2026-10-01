@@ -16,7 +16,6 @@ from functools import wraps
 from dataclasses import replace
 import hashlib
 import importlib.util
-import inspect
 import json
 from pathlib import Path
 import resource
@@ -214,22 +213,16 @@ class Measure:
                             ('_adaptive_resample', 'adaptive_metric_resampling'),
                             ('_face_costs', 'face_costs'), ('_rotated_label', 'label_rotation'),
                             ('_rotation_matrices', 'label_rotation_preparation'),
-                            ('_face_layout', 'face_layout'), ('_repair_folds', 'fold_repair'),
+                            ('_face_layout', 'face_layout'),
                             ('_unfold', 'topology_unfolding'), ('_sphere_warp', 'progressive_sphere_warp'),
                             ('_variance_normalize', 'variance_normalization')]:
             self.wrap(self.msm, name, label)
-        for class_name in ('SphereMap', 'RadialSphereMap'):
-            if hasattr(self.msm, class_name):
-                self.wrap(getattr(self.msm, class_name), '__init__', class_name.lower()+'_preparation')
-                self.wrap(getattr(self.msm, class_name), 'weights', class_name.lower()+'_weights')
+        if hasattr(self.msm, 'RadialSphereMap'):
+            self.wrap(self.msm.RadialSphereMap, '__init__', 'radialspheremap_preparation')
+            self.wrap(self.msm.RadialSphereMap, 'weights', 'radialspheremap_weights')
         affine_module = sys.modules.get(getattr(getattr(self.msm, '_affine_initialization', None), '__module__', ''))
         if affine_module is not None and hasattr(affine_module, '_RigidCost'):
-            rigid_cost = affine_module._RigidCost
-            # Stateful source-compatible initialization evaluates coordinates
-            # directly. Legacy builds expose only the rotation-call interface.
-            # Hook one leaf API so __call__ forwarding does not count twice.
-            evaluator = 'evaluate_positions' if hasattr(rigid_cost, 'evaluate_positions') else '__call__'
-            self.wrap(rigid_cost, evaluator, 'rigid_cost_evaluation')
+            self.wrap(affine_module._RigidCost, 'evaluate_positions', 'rigid_cost_evaluation')
         self.wrap(self.native, 'optimize', 'hocr_fastpd', work=True)
         self.wrap(self.native, 'source_wls_cost', 'affine_source_wls')
         self.wrap(self.native, 'source_rotation_matrices', 'source_rotation_matrices')
@@ -258,8 +251,7 @@ class Measure:
 
 
 def safe_registration_report(report):
-    allowed = {'seconds', 'affine_angles_deg', 'folded_before_repair',
-               'folded_after_repair', 'maximum_repair_displacement_mm',
+    allowed = {'seconds', 'affine_angles_deg',
                'peak_allocated_gb', 'control_points', 'data_points', 'labels',
                'iterations', 'stages', 'changed', 'affine_seconds', 'affine',
                'folded_output_faces', 'energy', 'applied', 'converged', 'similarity',
@@ -301,27 +293,22 @@ def project(case, spheres, directory):
     return run_fmriprep_surface_projection(**parameters, output_dir=directory)
 
 
-def registration_options(case, function):
+def registration_options(case):
     """Interpret private configuration paths without placing them in a report."""
     options = dict(case.get('run_options', {}))
     if 'config' in options or 'device' in options:
         raise ValueError('use config_file/config_options and the device CLI option')
-    supported = 'config' in inspect.signature(function).parameters
     requested = 'config_file' in case or 'config_options' in case
     if 'config_file' in case and 'config_options' in case:
         raise ValueError('supply only one of config_file and config_options')
-    display = {'requested': requested, 'supported_by_measured_source': supported,
-               'applied': False, 'values': None}
-    if supported:
-        from fnit.msm.config import MSMSulcConfig
-        if 'config_file' in case:
-            configuration = MSMSulcConfig.from_file(case['config_file'])
-        else:
-            configuration = MSMSulcConfig(**case.get('config_options', {}))
-        options['config'] = configuration
-        display.update(applied=True, values=configuration.to_dict())
-    elif requested:
-        display['limitation'] = 'baseline source has its own hard-coded schedule; requested config cannot be applied'
+    from fnit.msm.config import MSMSulcConfig
+    if 'config_file' in case:
+        configuration = MSMSulcConfig.from_file(case['config_file'])
+    else:
+        configuration = MSMSulcConfig(**case.get('config_options', {}))
+    options['config'] = configuration
+    display = {'requested': requested, 'supported_by_measured_source': True,
+               'applied': True, 'values': configuration.to_dict()}
     return options, display
 
 
@@ -347,7 +334,7 @@ def main():
     for entry in inputs.values():
         for name in entry.__dataclass_fields__:
             if not getattr(entry, name).is_file(): raise FileNotFoundError('missing prepared MSMSulc input')
-    options, configuration = registration_options(case, msmsulc.run_msmsulc)
+    options, configuration = registration_options(case)
     files = sorted((source/'src/fnit/msm').glob('*.py')) + sorted((source/'src/fnit/msm/_fastpd_src').glob('*'))
     report = {'schema_version': 1, 'function': 'run_msmsulc',
               'source_sha256': {str(path.relative_to(source)): sha256(path) for path in files if path.is_file()},

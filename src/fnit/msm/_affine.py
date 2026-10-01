@@ -136,9 +136,6 @@ class _RigidCost:
         self.valid=torch.as_tensor(mask,device=device)
         self.sigma=_mean_neighbor_distance(vertices,faces)
 
-    def __call__(self,rotation):
-        return self.evaluate_positions(_point_matmul(self.vertices,rotation))
-
     def evaluate_positions(self,positions):
         normals=_local_normals(positions,self.faces,self.normal_incident)
         _,_,face=self.mapper.weights(positions)
@@ -165,7 +162,7 @@ class _RigidCost:
         return self.wls_cost(payload.detach().cpu().numpy(),len(positions),ids.shape[1],self.sigma)
 
 
-def _affine_initialization(vertices,faces,source,reference,device,config,execution="optimized",*,return_positions=False):
+def _affine_initialization(vertices,faces,source,reference,device,config,execution="optimized"):
     """Run the original finite-difference update and rejection sequence.
 
     newMSM's historical NMI option 3 becomes pairwise Pearson option 2. A
@@ -211,4 +208,4 @@ def _affine_initialization(vertices,faces,source,reference,device,config,executi
         "final_best_similarity":best,"constant_similarity":False})
     # Source rotates mesh coordinates after each accepted update. Reapplying
     # one accumulated matrix loses that rounding history at shared mesh edges.
-    return (*result,positions) if return_positions else result
+    return (*result,positions)

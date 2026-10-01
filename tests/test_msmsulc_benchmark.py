@@ -73,22 +73,11 @@ def test_source_report_export_drops_paths_and_input_hashes():
     assert 'private' not in str(safe) and 'abcdef' not in str(safe)
 
 
-def test_legacy_source_cannot_claim_requested_config_applied():
-    def old_function(inputs, output_dir, *, device='cpu'):
-        pass
-    options, report = tool().registration_options({'config_file': '/private/config'}, old_function)
-    assert options == {}
-    assert report['requested'] and not report['applied']
-    assert '/private' not in str(report)
-
-
 def test_configuration_role_rejects_conflicting_options():
-    def function(inputs, output_dir, *, device='cpu', config=None):
-        pass
     with pytest.raises(ValueError, match='only one'):
-        tool().registration_options({'config_file': '/private/a', 'config_options': {}}, function)
+        tool().registration_options({'config_file': '/private/a', 'config_options': {}})
     with pytest.raises(ValueError, match='device CLI'):
-        tool().registration_options({'run_options': {'device': 'cuda:0'}}, function)
+        tool().registration_options({'run_options': {'device': 'cuda:0'}})
 
 
 def test_peak_measurement_retains_values_before_source_resets(tmp_path):
@@ -111,25 +100,17 @@ def test_peak_measurement_retains_values_before_source_resets(tmp_path):
     assert state == {'allocated': 0, 'reserved': 0}
 
 
-@pytest.mark.parametrize('position_api', [False, True])
-def test_measure_finds_affine_cost_module_after_wrapping_initialization(tmp_path, monkeypatch, position_api):
+def test_measure_finds_affine_cost_module_after_wrapping_initialization(tmp_path, monkeypatch):
     from types import ModuleType, SimpleNamespace
     import sys
     benchmark = tool()
     affine_module = ModuleType('fnit_test_affine_measurement')
     class RigidCost:
-        def __call__(self, value):
+        def evaluate_positions(self, value):
             return value + 1
-    if position_api:
-        class RigidCost(RigidCost):
-            def evaluate_positions(self, value):
-                return super().__call__(value)
-            def __call__(self, value):
-                return self.evaluate_positions(value)
     def initialize():
         cost = affine_module._RigidCost()
-        first = cost.evaluate_positions(1) if position_api else cost(1)
-        return first + cost(2)
+        return cost.evaluate_positions(1) + cost.evaluate_positions(2)
     initialize.__module__ = affine_module.__name__
     affine_module._RigidCost = RigidCost
     monkeypatch.setitem(sys.modules, affine_module.__name__, affine_module)
@@ -142,7 +123,7 @@ def test_measure_finds_affine_cost_module_after_wrapping_initialization(tmp_path
     assert measure.counts['affine_initialization'] == 1
     assert measure.counts['rigid_cost_evaluation'] == 2
     assert msm._affine_initialization is initialize
-    assert RigidCost()(1) == 2
+    assert RigidCost().evaluate_positions(1) == 2
 
 
 def test_projection_recomputes_area_surfaces_from_each_registered_sphere(tmp_path, monkeypatch):
