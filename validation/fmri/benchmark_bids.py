@@ -145,19 +145,33 @@ def main():
         stage_capture_seconds[stage] = stage_capture_seconds.get(stage, 0.0) + elapsed
 
     if args.capture_intermediates:
-        from fnit.fmri import end_to_end
+        from fnit.fmri import end_to_end, pipeline
 
         capture_root = args.capture_intermediates
         feat_original = end_to_end.run_feat_core
         anatomical_original = end_to_end.prepare_anatomical
         aroma_original = end_to_end.run_aroma_pipeline
+        motion_resample_original = pipeline.apply_motion_warp
+
+        def capture_motion_resample(*positional, **keywords):
+            result = motion_resample_original(*positional, **keywords)
+            started = time.perf_counter()
+            destination = capture_root / "feat/prefiltered_func_data_mcf.nii.gz"
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            nib.save(result, str(destination))
+            seconds = time.perf_counter() - started
+            capture_seconds[0] += seconds
+            stage_capture_seconds["feat_core"] = stage_capture_seconds.get("feat_core", 0.0) + seconds
+            return result
 
         def capture_feat(**keywords):
             result = feat_original(**keywords)
             names = ("filtered_func_data.nii.gz", "mask.nii.gz", "mean_func.nii.gz",
                      "example_func.nii.gz", "mc/prefiltered_func_data_mcf.par")
-            capture_files("feat_core", [(result.output_dir / name, capture_root / "feat" / name)
-                                        for name in names])
+            files = [(result.output_dir / name, capture_root / "feat" / name) for name in names]
+            files.extend((path, capture_root / "feat/mc/prefiltered_func_data_mcf.mat" / path.name)
+                         for path in sorted(result.motion_matrices.glob("MAT_*")))
+            capture_files("feat_core", files)
             return result
 
         def capture_anatomical(*positional, **keywords):
@@ -165,7 +179,8 @@ def main():
             registration = result.registration
             files = [(registration.affine, capture_root / "reg" / registration.affine.name),
                      (registration.pull_ras, capture_root / "reg" / registration.pull_ras.name)]
-            for name in ("T1_brain.nii.gz", "T1_pve_wm.nii.gz", "T1_pve_csf.nii.gz", "T1_wmseg.nii.gz"):
+            for name in ("T1_brain.nii.gz", "T1_mask.nii.gz", "MNI_brain.nii.gz", "MNI_mask.nii.gz",
+                         "T1_pve_wm.nii.gz", "T1_pve_csf.nii.gz", "T1_wmseg.nii.gz"):
                 files.append((result.path(name), capture_root / "masks" / name))
             # Internal anatomical phase timers have already stopped here. Only
             # the enclosing API/total timer includes this extra file copying.
@@ -193,6 +208,7 @@ def main():
         end_to_end.run_feat_core = capture_feat
         end_to_end.prepare_anatomical = capture_anatomical
         end_to_end.run_aroma_pipeline = capture_aroma
+        pipeline.apply_motion_warp = capture_motion_resample
     if args.capture_resampling_inputs:
         from fnit.fmri import end_to_end
         resample_original = end_to_end.resample_world
