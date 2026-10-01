@@ -103,7 +103,7 @@ mri_synthstrip -i subject_T1w.nii.gz \
 
 通过 `checkpoint["model_state_dict"]` 严格加载，无权重转换或精度压缩。下载、许可和 SHA-256 见 [WEIGHTS.md](../WEIGHTS.md)。推理使用本地权重，不调用 FreeSurfer 命令。
 
-U-Net 在所选设备执行。nibabel 影像读写、SciPy conform/crop、归一化、SDT 扩展、连通域和最终重采样在 CPU 执行。单例的 4D 输入逐帧处理，每次网络推理一个 frame。GPU 可加快网络部分，完整进程耗时还取决于预后处理和 I/O。
+U-Net、1 mm 最近邻重采样和 SDT 回采样在所选 PyTorch 设备执行。nibabel 负责影像读写；离散轴重排、裁剪、归一化在 CPU 完成，SDT 扩展和连通域使用 SciPy。4D 输入逐帧处理，每次网络推理一个 frame。
 
 ## 源码组织
 
@@ -129,8 +129,8 @@ U-Net 在所选设备执行。nibabel 影像读写、SciPy conform/crop、归一
 
 ## 每帧处理
 
-1. 使用原影像几何将输入变换至 LIA 方向、1 mm 各向同性、float32，使用最近邻重采样。
-2. 按非零包围盒裁剪；各轴尺寸向上取 64 的倍数，再限制在 192–320；居中裁剪或补零。
+1. 先通过离散轴重排转为 LIA，再按 NIfTI `pixdim` 决定 1 mm 网格尺寸，使用最近邻重采样和 float32 数据。保留官方 `shape / 2` 定义的视野中心；网格和中间 affine 使用 float64，采样坐标使用逐项 float32 运算，不受 TF32 矩阵乘法影响。
+2. 按强度 `> 0` 的包围盒裁剪；各轴尺寸向上取 64 的倍数，再限制在 192–320；居中裁剪或补零。奇数个体素需裁掉时，多裁的一个体素位于高索引端。
    此上限是官方行为，大视野超过 320 mm 的部分可能被裁掉。
 3. 减去全图最小值，除以第 99 百分位数，限制到 `[0,1]`。这里的百分位数包含零值。
 4. U-Net 预测窄带 signed distance transform (SDT)。`border` 大于窄带范围时，按官方
@@ -145,67 +145,62 @@ U-Net 在所选设备执行。nibabel 影像读写、SciPy conform/crop、归一
 
 ## 功能差异与验证
 
-官方脚本集成了参数解析和执行流程，本包允许导入并缓存模型。当前影像几何处理使用 nibabel 和 SciPy；日志、版本和帮助格式由本包维护，未要求与 FreeSurfer 逐字一致。统一 CLI 名称为 `fnit synthstrip`，不会替换系统 `mri_synthstrip`。
+官方脚本集成参数解析和执行流程；本包将同一网络和影像处理拆成可导入接口。生产运行使用 nibabel、PyTorch 和 SciPy，不调用 FreeSurfer，也不依赖 Surfa。统一 CLI 为 `fnit synthstrip`。
 
-当前 12 例真实临床 T1w 回归使用固定输入清单、同一官方权重和独立 CLI
-进程，对照 FreeSurfer 8.2.0 未修改的 `mri_synthstrip` 源码 CUDA 路径。
-公开报告不含病例标识或私有路径。当前候选源码 hash 为
-`pipeline.py=3cc23ab81eebb6ad11ac9814691f9d3b5c13c93fc2569ee1f4dddea70ec37de7`、
-`model.py=6afcff10848a8a2a57b9c00d4b637eda90e4c0e21f301d8a8031107d783a5f44`
-和 `_nib.py=bffd56aeaca423b2448432ba318212e83549e9e31aa27af6bf20a60888218586`，
-与本页源码一致。
+本次在 gpucw1 的 H100 上，以一例真实受试者的原始 SBRef 和存档 T1 作固定输入控制，使用同一官方 `synthstrip.1.pt`。存档 T1 的转换保留体素和 affine，但尚未确认是扫描仪直接输出的原始 T1。候选 `pipeline.py` SHA-256 为 `41304bafc412bcc914d76a6cbbd29550173df4419c1aa3a54d31d95739bda95d`。官方几何参照使用 Surfa 0.6.3；独立脑掩膜参照来自未修改的 FreeSurfer 8.2 `mri_synthstrip`。
 
-两边的三项输出 shape、affine 和 dtype 全部一致。候选采用本包要求的默认
-TF32，官方参考运行设置了 `NVIDIA_TF32_OVERRIDE=0`；影像几何实现也分别为
-nibabel/SciPy 与官方 Surfa。因此该组结果衡量功能和数值接近程度，不声明逐体素
-完全相同。
+修复了通用 `conform` 与官方视野中心定义、NIfTI `pixdim` 网格尺寸以及边界采样的差异。两幅真实输入的 1 mm LIA 数组和网络归一化输入均逐元素相同。
 
-| 当前 12 例 GPU 对照 | 结果 |
-|---|---:|
-| mask Dice，最小值 | 0.993925 |
-| 单例 mask 不同体素数，最大值 | 38,094 |
-| distance MAE，12 例平均 / 单例最大（mm） | 0.338627 / 0.610645 |
-| brain image Pearson r，最小值 | 0.994261 |
-| brain image MAE，单例最大值 | 0.116816 |
+| 当前真实输入控制 | SBRef | T1 |
+|---|---:|---:|
+| 1 mm LIA 数组是否逐元素一致 | 是 | 是 |
+| 1 mm LIA affine 最大差异（mm） | 0 | 0 |
+| 归一化网络输入是否逐元素一致 | 是 | 是 |
+| 同一网络预测，经两种实现回采样后 SDT RMSE（mm） | 0 | 2.91 × 10⁻⁹ |
+| 同一网络预测，经两种实现回采样后 mask 是否逐元素一致 | 是 | 是 |
+| 与原程序独立推理所得 mask Dice | 0.999995 | 0.999991 |
+| 与原程序独立推理所得 mask 不同体素数 | 1 | 25 |
+| 控制运行时间（s） | 7.61 | 4.83 |
 
-墙钟时间包含 Python 启动、权重和影像加载、推理、后处理以及 brain、mask、
-distance 三次 NIfTI 写盘。gpucw1 的 H100 共享节点上，FreeSurfer / FNIT 的
-12 例中位数为 `16.916 / 16.395 s`；FNIT 与参考的中位数比为 `0.969`。
-FNIT 单例 PyTorch peak allocation 为 `8.316 GB`，低于 20 GB；FNIT / 参考
-进程最大 RSS 中位数为 `1,216,022 / 1,035,954 KiB`。共享节点计时不解释为
-独占硬件加速比。
+上表时间从模型构造前开始，到网络预测、双实现回采样和 mask 比较后停止；不含 Python 启动、输入 conform/归一化或最终写盘。它是共享 GPU 上的控制计时，不是双方完整 CLI 的速度比较。候选保留默认 TF32；重复控制中 SBRef 有 1–2 个、T1 有 19–25 个阈值附近体素不同。同一次预测的回采样 mask 始终一致，独立 GPU 推理的二值输出仍存在微小数值差异。
 
-下图取固定清单的 case01，以同一切面和灰度范围展示输入、FreeSurfer 脑图与
-当前 FNIT 脑图。真实病例没有人工脑掩膜真值，因此这些指标验证对官方实现的
-复现程度，不代表独立临床准确率。
-
-![当前 SynthStrip 在真实 T1w 上与 FreeSurfer 8.2 的脑提取对照](figures/synthstrip_current_real_case01.png)
-
-机器可读逐例指标、输入 SHA-256、源码 SHA-256、计时、RSS 和显存见
-[`report.real.current.json`](../../validation/synthstrip/report.real.current.json)；
-复现脚本为
-[`current_regression.py`](../../validation/synthstrip/current_regression.py)。
-脚本只在验证阶段读取已单独运行的 FreeSurfer 输出作为参照，FNIT 运行时不调用
-FreeSurfer。
+完整输入、权重和源码 SHA-256、环境以及重复结果见 [机器可读报告](../../validation/fmri/synthstrip_geometry_control.public.json)。体积流程的模板空间脑图见 [fMRI 完整对照](../../validation/fmri/matched_native.md)。原始头部图像留在服务器。
 
 ## 测试与复现
 
-单元测试和当前真实数据回归分别使用：
+几何回归测试覆盖视野中心、原 header 体素尺寸、正值包围盒、奇数裁剪、最近邻半体素及线性采样末端边界。本次以下测试共 28 项通过：
 
 ```bash
-python -m pytest tests/synthstrip tests/test_public_api.py
-python validation/synthstrip/current_regression.py \
-  --manifest /path/to/deidentified_manifest.json \
-  --reference-root /path/to/freesurfer_reference \
-  --output-root /path/to/fnit_outputs \
-  --weights /path/to/synthstrip.1.pt \
-  --source-root . \
-  --python /path/to/fnit/python \
-  --device cuda:0 \
-  --threads 8
+# 检查 SynthStrip 几何、公开接口和默认 TF32 设置。
+python -m pytest tests/synthstrip tests/test_tf32_defaults.py
+
+# 在装有官方 Surfa 的验证环境中，对同一真实输入和权重比较几何及回采样。
+# 该验证脚本使用 FNIT 推理，不从生产接口启动 FreeSurfer。
+python validation/fmri/compare_synthstrip_geometry.py \
+  --manifest /path/to/private_manifest.json \
+  --private-output /path/to/private_controls \
+  --report /path/to/public_summary.json \
+  --device cuda:1
 ```
 
-`--manifest` 只列输入路径、匿名病例号和 SHA-256；`--reference-root` 保存事先由官方 `mri_synthstrip` 生成的三项输出；`--output-root` 保存当前 FNIT 输出与报告；`--source-root` 固定待验证源码；`--python` 固定实际运行环境。该脚本不会在 FNIT 推理过程中调用 FreeSurfer。
+私有清单格式如下。`weights` 指向官方权重文件；`original_program` 用于记录原脚本的 SHA-256；每个 `input` 为待验证影像，`original_mask` 为事先运行未修改的官方程序得到的脑掩膜。`--private-output` 保存控制生成的 mask；`--report` 只写匿名汇总和哈希。
+
+```json
+{
+  "weights": "/path/to/synthstrip.1.pt",
+  "original_program": "/path/to/freesurfer/python/scripts/mri_synthstrip",
+  "cases": {
+    "sbref": {
+      "input": "/path/to/SBRef.nii.gz",
+      "original_mask": "/path/to/original_SBRef_mask.nii.gz"
+    },
+    "t1w": {
+      "input": "/path/to/T1w.nii.gz",
+      "original_mask": "/path/to/original_T1w_mask.nii.gz"
+    }
+  }
+}
+```
 
 ## Reference
 
