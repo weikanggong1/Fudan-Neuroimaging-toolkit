@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "function": "FNIT MSMAll and shared pipeline regression",
+  "date": "2026-10-02",
+  "repository_base_commit": "77ab09e396f8fe48409d229218c3d660c2e99ee5",
+  "source_sha256": {
+    "src/fnit/msm/__init__.py": "773c12c8aebc9c8084ac3ac18e6095be9ef31c3d01720634c27cb0cd23954067",
+    "src/fnit/msm/_affine.py": "fb9268e69482ca9e9b1cd2eaa3a80fdd039822cdcd32940d2131072527219e4e",
+    "src/fnit/msm/_sphere_map.py": "0b54a766f316ef3532cb75a121c6a770e1958138d25a241b3e7bcb81c7d707f9",
+    "src/fnit/msm/cli.py": "53c5c662fc453f19842cb07bf5ee354b21414ecb1439fbde00550f28cfb610ed",
+    "src/fnit/msm/config.py": "20afadd2860c2782fa3983f56d1351e31a56e415f75761798223ad455335e8c9",
+    "src/fnit/msm/config_msmall.py": "63e21ca7114a4a415408cd52bd9b88d5eeadf5fd394be995105ac0906bddb467",
+    "src/fnit/msm/feature_cli.py": "c65838b9136ebe26d29cfd320e155a246bd88c5a6ce2e3ffcf662a9909a11586",
+    "src/fnit/msm/features.py": "7e598efeeab5665ca05957d06d0867edea8b4714292bcb1b8b41be76f57fb6b2",
+    "src/fnit/msm/msmall.py": "249919f2fb544584987e57a038fb1c6e0b1d9b8bb537c81f7b0aa702ca0a1cd5",
+    "src/fnit/msm/msmsulc.py": "5433eeef19c17001a0514af7d5d4801eee226c69a3d2de3be56c00cb078a87fc",
+    "src/fnit/msm/prepare.py": "30dc5fdb17628b70ec42e87f0d04c3d7e5f7c4faf35292e0a89493536006d675",
+    "src/fnit/msm/_fastpd_src/FastPD.h": "d21f2640701d743b53d83d7ecd119db454bc36bf877c5862846de04254183698",
+    "src/fnit/msm/_fastpd_src/block.h": "9aafefcf97a94e55027baae2d518cff2bc0739024b1f017747da6d310426cddb",
+    "src/fnit/msm/_fastpd_src/fastpd_module.cpp": "ccb48d830a075564f18ed2eca2b7de8ae3e5cd0e22045088ebac4af374b45411",
+    "src/fnit/msm/_fastpd_src/fnit_fastpd_model_stub.h": "a11a81379cef2466b410039956ffbebab4f979abaa94122e761a833dd4b310d5",
+    "src/fnit/msm/_fastpd_src/graph.h": "b75781e1719df32a6bc5741cbbd97745568207045e5397897629b00d4ab93fd9",
+    "src/fnit/fmri/surface_pipeline.py": "695ec82ec313ffa7bfa551a49623ab139d15a1e48f4df7c7d88c246b4a3cfd96",
+    "src/fnit/fmri/normalization.py": "8bd3526743dd110e0291ddf64022d10b92d7d241948bdb96ad122370a7cf8527",
+    "src/fnit/fmri/assets_setup.py": "ddb854b53abc405c106b13306a9c97c16021c11cf02b649e850e294bba74ac8c",
+    "src/fnit/fmri/cli.py": "602769e84b6093a081f3c6b974bcc1ae6c2735ba8cc6be4ccb4ceb72e0cde8aa"
+  },
+  "test_runs": [
+    {
+      "scope": "MSMAll and existing MSMSulc operators/configs/native optimizer, real-SDK public golden cases, features/CLI/assets, surface BIDS/public API, shared resample_world geometry/interpolation/headers",
+      "passed": 357,
+      "skipped": 10,
+      "seconds": 46.66,
+      "command": "PYTHONPATH=src python -m pytest -q tests/test_msm_*.py tests/test_msmall_*.py tests/test_msmsulc_benchmark.py tests/test_fmri_msmsulc_config.py tests/test_fmri_surface_*.py tests/test_setup_fmri_surface_assets.py tests/test_public_api.py tests/test_fmri_normalization.py",
+      "skipped_reason": "external verified assets or Workbench required by selected local controls",
+      "source_delta_after_run": "Only explicit CUDA initialization was added before registration timing/peak-statistics; no mathematical change."
+    },
+    {
+      "scope": "standalone MSMAll and MSMSulc GPU entry in a fresh Python process without prior CUDA initialization",
+      "passed": 2,
+      "skipped": 0,
+      "seconds": 15.27,
+      "command": "PYTHONPATH=src python -m pytest -q tests/test_msm_cuda_startup.py"
+    }
+  ],
+  "native_precision": {
+    "compiler_options": [
+      "-O3",
+      "-std=c++17",
+      "-fno-fast-math",
+      "-ffp-contract=off"
+    ],
+    "runtime_official_software_dependency": false,
+    "compiled_in_conda_environment": true
+  },
+  "wheel_probe": {
+    "status": "final-source wheel built; isolated imports, config, native helpers, source bytes, entry points and licenses verified",
+    "isolated_imports": [
+      "MSMAllConfig",
+      "MSMAllInputs",
+      "run_msmall"
+    ],
+    "native_helpers": [
+      "source_radial_selection",
+      "source_sphere_warp",
+      "source_triangle_nearest"
+    ],
+    "entry_points": [
+      "fnit-msm",
+      "fnit-msm-features"
+    ],
+    "required_licenses": [
+      "newMSM-MIT",
+      "FastPD-research-only",
+      "HCPpipelines"
+    ],
+    "bundled_imaging_assets": "only three pre-existing ICA-AROMA standard masks; no clinical images, subject spheres, feature files or template additions",
+    "sha256": "045a7395ee23e1a4ad8fd00c4671595404fda8393bcd1358e906c78d72231c06",
+    "bytes": 4503630
+  },
+  "scope_note": "Unit fixtures validate operators and contracts; only separate real-data paired reports support registration or BOLD accuracy and runtime claims.",
+  "public_operator_fixtures": {
+    "tests/data/msm_multivariate_copy_area.json": "191cae1363cfde4654c87478f7bb13084e6de144f94a7883e1b2a76660b76ca4",
+    "tests/data/msm_multivariate_nearest.json": "1bee6208bb37013bca773ca88a23b2c6313495e038689bfaf32cace7663ce7ee"
+  }
+}

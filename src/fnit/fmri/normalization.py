@@ -413,11 +413,18 @@ def resample_world(
         result = result[..., 0]
     header = target.header.copy()
     header.set_data_dtype(np.float32)
+    spatial_unit = target.header.get_xyzt_units()[0]
+    # This API's affines and pull fields are in RAS millimetres. A generated
+    # reference can omit its unit flag; retain an explicit mm source flag
+    # instead of losing that declaration in the output header.
+    if spatial_unit == "unknown" and image.header.get_xyzt_units()[0] == "mm":
+        spatial_unit = "mm"
+    header.set_xyzt_units(xyz=spatial_unit)
     output_image = nib.Nifti1Image(result, target.affine, header)
     if image.ndim == 4:
         output_image.header.set_zooms((*target.header.get_zooms()[:3], image.header.get_zooms()[3]))
         output_image.header.set_xyzt_units(
-            xyz=target.header.get_xyzt_units()[0],
+            xyz=spatial_unit,
             t=image.header.get_xyzt_units()[1],
         )
     output_image.set_qform(target.affine, code=int(target.header["qform_code"]))

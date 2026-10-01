@@ -51,6 +51,7 @@ CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹�
 | [fMRIVolume_pipeline](docs/fmri/README.md) | FSL FEAT、ICA-AROMA；fMRIPrep 单次重采样 | 原始 BIDS 单 run 同时生成 T1w 原生 BOLD 分辨率/MNI 2 mm preproc 与 FEAT/AROMA clean 体积 BOLD；默认关闭 slice timing；[验证记录](validation/fmri/README.md)。 |
 | [fMRISurface_pipeline](docs/fmri/surface.md) | fMRIPrep fsLR 重采样、Workbench | 默认读取 volume preproc 和同源 T1 recon-all 的已有中层面，输出 fsLR32k GIFTI、91k CIFTI、注册球面与 QC；可显式选 clean。 |
 | [fnit.msm.run_msmsulc](docs/msm/README.md) | newMSM MSMSulc | 独立的 HOCR/FastPD 脑沟球面配准。 |
+| [fnit.msm.run_msmall](docs/msm/msmall.md) | newMSM / HCP MSMAll | 独立的加权多特征球面配准；附 [VN、DR/WRN 与 C/CA/CAT 特征准备](docs/msm/features.md)，可接入 surface。真实 C 模式的完整一级/三级配置与固定 490 帧投影逐值匹配官方；[测量记录](validation/msm/README.md#独立-msmall-验证)。 |
 | [fnit.melodic.run_melodic_bids](docs/melodic/README.md) | FSL MELODIC | 独立的 PyTorch 单被试空间 PICA，输入和输出均为 BIDS Derivatives。 |
 
 ### dMRI
@@ -91,7 +92,7 @@ python -c "import fnit, torch; print(fnit.__version__, torch.__version__, torch.
 fnit --help
 ```
 
-`environment.yml` 固定 Python 3.11、PyTorch 2.5.1、CUDA 11.8、Triton 3.1.0、Connectome Workbench 2.1.0、构建 MSMSulc 扩展所需的 C++ 编译器，以及 AMICO 逐体素对照使用的 NumPy 1.26.4 x86_64 wheel。目标 GPU 节点为 glibc 2.17 时，可在共享文件系统上按该 ABI 求解：
+`environment.yml` 固定 Python 3.11、PyTorch 2.5.1、CUDA 11.8、Triton 3.1.0、Connectome Workbench 2.1.0、构建 MSM 原生扩展所需的 C++ 编译器，以及 AMICO 逐体素对照使用的 NumPy 1.26.4 x86_64 wheel。目标 GPU 节点为 glibc 2.17 时，可在共享文件系统上按该 ABI 求解：
 
 ```bash
 FNIT_ENV_PREFIX=/path/on/shared-storage/fnit-conda
@@ -101,7 +102,7 @@ conda activate "$FNIT_ENV_PREFIX"
 
 [Conda 环境验证](validation/environment/README.md)和[机器可读报告](validation/environment/report.public.json)记录了依赖解析、目标 ABI、固定 wheel 的下载校验与实际导入结果。具体安装结果以目标机器上的环境创建和导入检查为准。
 
-也可使用 Python 虚拟环境安装；需预先安装支持 C++17 的编译器，以构建表面 MSMSulc 的 FastPD 扩展：
+也可使用 Python 虚拟环境安装；需预先安装支持 C++17 的编译器，以构建 MSMSulc/MSMAll 共用的原生扩展：
 
 ```bash
 python3 -m venv .venv
@@ -147,6 +148,8 @@ fnit-setup-fmri-surface-assets --output-dir /absolute/path/hcp_surface_assets --
 ```
 
 该命令包含 fsLR32k/MSMSulc 的球面、脑沟参考图、ROI 与配置，以及 `fmriprep/` 下的三个 TemplateFlow 文件。volume 核对模板体素内容身份，surface 默认使用其单次插值 preproc；缺少 preproc 或身份字段的旧 volume 需重新运行。被试须提供同源 recon-all 的 white、pial、sphere、sphere.reg、sulc、thickness，及每侧已有的 midthickness 或 graymid；完整参数与源 T1/世界仿射要求见 [fMRI 表面投影](docs/fmri/surface.md)，模板大小和 SHA-256 见[原站模板清单](docs/WEIGHTS.md#fmri-templateflow-原站模板)。
+
+使用可选 [MSMAll](docs/msm/msmall.md) 时，资源命令加 `--msmall`，下载多特征配准配置、d40 参考及 WRN 的 d7–d21 图，并校验固定大小和 SHA-256。无个体髓鞘图时须明确选择连接特征 `C`；默认 surface 仍使用 T1w-only MSMSulc。
 
 统一脑亚区分割使用经哈希校验的 BrainstemSS、ThalamicNuclei 和 HippoSF 图谱。可提前准备，以便离线运行；脑干沿用预计算先验，丘脑和海马先验在个体仿射变换后的参考网格上平滑：
 

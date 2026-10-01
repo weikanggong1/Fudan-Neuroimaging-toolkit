@@ -106,6 +106,11 @@ def __getattr__(name):
                 'VBMRegistrationResult'):
         from . import fast_vbm
         return getattr(fast_vbm, name)
+    if name in ('MSMAllConfig', 'MSMAllInputs', 'run_msmall',
+                'MSMAllRegressionResult', 'run_msmall_regression', 'prepare_msmall_inputs',
+                'compute_msmall_variance_normalization'):
+        from . import msm
+        return getattr(msm, name)
     if name in ('FeatCoreResult', 'run_feat_core', 'BIDSInputs', 'locate_bids_inputs',
                 'BBRResult', 'register_bbr',
                 'FMRIVolumeResult', 'fMRIVolume_pipeline', 'T1MNIResult',

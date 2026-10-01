@@ -41,6 +41,8 @@
 
 3D 输入生成 3D float32 NIfTI，4D 输入生成同帧数的 float32 NIfTI。空间 header 来自 `reference`，4D 的 TR 和时间单位来自 `source`。位移场和输出 mask 的 shape、affine 必须与目标一致；位移和源影像中的非有限值会报错。BOLD 的有限负值保留。
 
+MSMAll 整链验证发现，共享 `resample_world` 在生成的目标网格未填写空间单位时会丢失源影像明确的毫米单位，导致后续 surface 输入检查报错。现已修复：此 API 的变换使用 RAS 毫米；目标单位为 `unknown`、源单位明确为 `mm` 时，输出保留 `mm`。目标已有单位时仍采用目标单位，两者均未知时不猜测。修复只改变 header 单位标记，3D/4D 身份重采样测试验证影像值、affine 和 4D TR 不变。历史文件仍须先核实其毫米网格来源，不能直接修改未知单位。
+
 `grid-constant` 样条按 SciPy 的三次 B 样条零扩展定义：先在三个空间轴补 12 个零体素，再用 float64 镜像系统求系数和查询；输入影像及保存结果为 float32。`linear`/`nearest` 使用零扩展的 `grid_sample`。这一分支不把微小图像外坐标夹回边界。
 
 `periodic` 样条使用 float32 周期系数。三种插值在这个显式分支都保留源 FOV 规则：源体素坐标落在 `[−1e-6, N−1+1e-6]` 时夹回 `[0, N−1]`，更远的图像外位置置零。该规则消除斜切 affine 求逆产生的边界舍入误差；[既有 clean 重采样报告](../../validation/fmri/resampling.md#边界回归测试)使用这个分支。

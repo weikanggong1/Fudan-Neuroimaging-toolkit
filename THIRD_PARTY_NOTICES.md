@@ -44,8 +44,9 @@ The containing newMSM repository also publishes an MIT license, preserved in
 restriction remains applicable to this component.
 FNIT's triangle-to-quadratic HOCR reduction in `fastpd_module.cpp` is an
 independent implementation. Upstream ELC source is not included. Its
-`source_wls_cost` and `source_rotation_matrices` helpers reproduce the pinned
-newMSM rigid weighted-similarity and Point/Rodrigues arithmetic using standard
+`source_wls_cost`, `source_rotation_matrices`, `source_radial_selection`, and
+`source_sphere_warp`, and `source_triangle_nearest` helpers reproduce the pinned newMSM weighted-similarity,
+Point/Rodrigues, radial projection, and sphere reconstruction arithmetic using standard
 C++ double operations and libm; the newMSM MIT notice applies to these
 source-derived helpers. They do not link to newMSM or FSL libraries.
 `src/fnit/msm/_affine.py`, `_sphere_map.py`, `config.py`, and `msmsulc.py`
@@ -73,6 +74,17 @@ license above apply to that source-derived portion. Copyright (c) The nilearn
 developers; the unmodified Nilearn BSD 3-Clause license is preserved in
 [`licenses/Nilearn-BSD-3-Clause.txt`](licenses/Nilearn-BSD-3-Clause.txt).
 Neither Nilearn nor NiWorkflows is added as an FNIT runtime dependency.
+
+`src/fnit/msm/msmall.py` and `config_msmall.py` independently implement the
+same pinned newMSM multivariate Pearson triangle objective and HCP MSMAll
+discrete schedules. The newMSM MIT notice applies to these source-derived parts.
+`src/fnit/msm/features.py` follows the ComputeVN, MSMregression, and feature
+combination formulas from HCPpipelines v4.7.0, commit
+`f8cac6892f88bdf889d644711ff038198eb81533`, under HCP's BSD-style license.
+The upstream license is preserved in [`licenses/HCPpipelines.txt`](licenses/HCPpipelines.txt).
+Official MATLAB code and compiled HCP feature executables are not distributed
+or invoked by FNIT. Reference images remain external downloads with pinned
+size and SHA-256 checks; adding their download metadata does not mirror them.
 
 - `synthstrip/` adapts FreeSurfer's `mri_synthstrip`, by Andrew Hoopes, Jocelyn S. Mora, Adrian V. Dalca, Bruce Fischl, Malte Hoffmann and collaborators. The original implementation already uses PyTorch. Preserve the accompanying FreeSurfer license (`licenses/FreeSurfer.txt`).
 - `synthmorph/pipeline.py` and the image-space workflow adapt FreeSurfer's SynthMorph registration code by Malte Hoffmann and collaborators. Preserve the accompanying FreeSurfer license.

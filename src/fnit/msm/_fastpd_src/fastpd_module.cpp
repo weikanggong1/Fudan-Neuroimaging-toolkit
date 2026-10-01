@@ -362,12 +362,266 @@ PyObject* source_rotation_matrices(PyObject*, PyObject* args) {
     return output;
 }
 
+Point3 subtract_point(const Point3& first, const Point3& second) {
+    return {{first[0]-second[0], first[1]-second[1], first[2]-second[2]}};
+}
+
+Point3 cross_point(const Point3& first, const Point3& second) {
+    return {{first[1]*second[2]-first[2]*second[1],
+             second[0]*first[2]-second[2]*first[0],
+             first[0]*second[1]-second[0]*first[1]}};
+}
+
+double dot_point(const Point3& first, const Point3& second) {
+    return (first[0]*second[0]+first[1]*second[1])+first[2]*second[2];
+}
+
+bool same_triangle_side(const Point3& point, const Point3& opposite,
+                        const Point3& first, const Point3& second) {
+    const auto edge = subtract_point(second, first);
+    return dot_point(cross_point(edge, subtract_point(point, first)),
+                     cross_point(edge, subtract_point(opposite, first))) > -1e-8;
+}
+
+double finite_triangle_distance(const Point3& point, const std::array<Point3, 3>& triangle) {
+    double best = std::numeric_limits<double>::max();
+    const int edges[3][2] = {{0,1},{0,2},{1,2}};
+    for (const auto& pair : edges) {
+        const auto first_delta = subtract_point(point, triangle[pair[0]]);
+        const auto second_delta = subtract_point(point, triangle[pair[1]]);
+        const auto edge = subtract_point(triangle[pair[1]], triangle[pair[0]]);
+        if (dot_point(first_delta, edge) > 0 && dot_point(second_delta, edge) < 0) {
+            const double distance = point_norm(cross_point(first_delta, second_delta))/point_norm(edge);
+            if (distance < best) best = distance;
+        }
+    }
+    for (const auto& corner : triangle) {
+        const double distance = point_norm(subtract_point(point, corner));
+        if (distance < best) best = distance;
+    }
+    return best;
+}
+
+PyObject* source_radial_selection(PyObject*, PyObject* args) {
+    // Independent scalar implementation of the pinned Point projection and
+    // finite-edge comparisons. Resolve ambiguous containing candidates;
+    // retain GPU evaluation for ordinary points and all feature sampling.
+    Py_buffer vertices{}, faces{}, queries{}, candidates{};
+    Py_ssize_t vertex_count, face_count, query_count, width;
+    auto release = [&]() {
+        for (auto* buffer : {&vertices, &faces, &queries, &candidates})
+            if (buffer->obj) PyBuffer_Release(buffer);
+    };
+    if (!PyArg_ParseTuple(args, "y*y*y*y*nnnn", &vertices, &faces, &queries, &candidates,
+                          &vertex_count, &face_count, &query_count, &width)) {
+        release(); return nullptr;
+    }
+    if (vertex_count < 1 || face_count < 1 || query_count < 0 || width < 1 ||
+        vertices.len != vertex_count*3*Py_ssize_t(sizeof(double)) ||
+        faces.len != face_count*3*Py_ssize_t(sizeof(std::int64_t)) ||
+        queries.len != query_count*3*Py_ssize_t(sizeof(double)) ||
+        candidates.len != query_count*width*Py_ssize_t(sizeof(std::int64_t))) {
+        release(); PyErr_SetString(PyExc_ValueError, "invalid radial-selection buffer dimensions");
+        return nullptr;
+    }
+    auto* output = PyBytes_FromStringAndSize(nullptr, query_count*4*sizeof(double));
+    if (!output) { release(); return nullptr; }
+    auto read_point = [](const Py_buffer& buffer, Py_ssize_t index) {
+        Point3 point;
+        std::memcpy(point.data(), static_cast<const char*>(buffer.buf)+index*3*sizeof(double), 3*sizeof(double));
+        return point;
+    };
+    for (Py_ssize_t row = 0; row < query_count; ++row) {
+        const Point3 point = read_point(queries, row);
+        double best = std::numeric_limits<double>::max();
+        double result[4] = {-1, 0, 0, 0};
+        for (Py_ssize_t column = 0; column < width; ++column) {
+            std::int64_t face;
+            std::memcpy(&face, static_cast<const char*>(candidates.buf)+(row*width+column)*sizeof(face), sizeof(face));
+            if (face < 0 || face >= face_count) {
+                release(); Py_DECREF(output); PyErr_SetString(PyExc_ValueError, "radial candidate is outside the mesh");
+                return nullptr;
+            }
+            std::array<Point3, 3> triangle;
+            for (int corner = 0; corner < 3; ++corner) {
+                std::int64_t vertex;
+                std::memcpy(&vertex, static_cast<const char*>(faces.buf)+(face*3+corner)*sizeof(vertex), sizeof(vertex));
+                if (vertex < 0 || vertex >= vertex_count) {
+                    release(); Py_DECREF(output); PyErr_SetString(PyExc_ValueError, "triangle vertex is outside the mesh");
+                    return nullptr;
+                }
+                triangle[corner] = read_point(vertices, vertex);
+            }
+            auto first = subtract_point(triangle[2], triangle[0]); normalize_point(first);
+            auto second = subtract_point(triangle[1], triangle[0]); normalize_point(second);
+            auto normal = cross_point(first, second); normalize_point(normal);
+            const double scale = dot_point(normal, triangle[0])/dot_point(normal, point);
+            const Point3 projected{{point[0]*scale, point[1]*scale, point[2]*scale}};
+            if (!same_triangle_side(projected, triangle[0], triangle[1], triangle[2]) ||
+                !same_triangle_side(projected, triangle[1], triangle[2], triangle[0]) ||
+                !same_triangle_side(projected, triangle[2], triangle[0], triangle[1])) continue;
+            const double distance = finite_triangle_distance(projected, triangle);
+            if (distance < best) {
+                best = distance; result[0] = static_cast<double>(face);
+                for (int dimension = 0; dimension < 3; ++dimension) result[dimension+1] = projected[dimension];
+            }
+        }
+        std::memcpy(PyBytes_AS_STRING(output)+row*4*sizeof(double), result, sizeof(result));
+    }
+    release(); return output;
+}
+
+PyObject* source_sphere_warp(PyObject*, PyObject* args) {
+    // Rebuild a sphere point in scalar order at the warp boundary. The
+    // face lookup remains batched; no host crossings occur per point.
+    Py_buffer vertices{}, faces{}, target{}, queries{}, patches{};
+    Py_ssize_t vertex_count, face_count, query_count;
+    auto release = [&]() {
+        for (auto* buffer : {&vertices, &faces, &target, &queries, &patches})
+            if (buffer->obj) PyBuffer_Release(buffer);
+    };
+    if (!PyArg_ParseTuple(args, "y*y*y*y*y*nnn", &vertices, &faces, &target,
+                         &queries, &patches, &vertex_count, &face_count, &query_count)) {
+        release(); return nullptr;
+    }
+    const Py_ssize_t maximum = std::numeric_limits<Py_ssize_t>::max();
+    if (vertex_count < 1 || face_count < 1 || query_count < 0 ||
+        vertex_count > maximum/(3*sizeof(double)) ||
+        face_count > maximum/(3*sizeof(std::int64_t)) ||
+        query_count > maximum/(3*sizeof(double)) ||
+        vertices.len != vertex_count*3*Py_ssize_t(sizeof(double)) ||
+        target.len != vertices.len ||
+        faces.len != face_count*3*Py_ssize_t(sizeof(std::int64_t)) ||
+        queries.len != query_count*3*Py_ssize_t(sizeof(double)) ||
+        patches.len != query_count*Py_ssize_t(sizeof(std::int64_t))) {
+        release(); PyErr_SetString(PyExc_ValueError, "invalid sphere-warp buffer dimensions");
+        return nullptr;
+    }
+    auto* output = PyBytes_FromStringAndSize(nullptr, queries.len);
+    if (!output) { release(); return nullptr; }
+    auto read_point = [](const Py_buffer& buffer, Py_ssize_t index) {
+        Point3 point;
+        std::memcpy(point.data(), static_cast<const char*>(buffer.buf)+index*3*sizeof(double), 3*sizeof(double));
+        return point;
+    };
+    for (Py_ssize_t row = 0; row < query_count; ++row) {
+        std::int64_t face;
+        std::memcpy(&face, static_cast<const char*>(patches.buf)+row*sizeof(face), sizeof(face));
+        if (face < 0 || face >= face_count) {
+            release(); Py_DECREF(output); PyErr_SetString(PyExc_ValueError, "warp face is outside the mesh");
+            return nullptr;
+        }
+        std::array<Point3, 3> triangle;
+        std::array<std::int64_t, 3> ids;
+        for (int corner = 0; corner < 3; ++corner) {
+            std::memcpy(&ids[corner], static_cast<const char*>(faces.buf)+(face*3+corner)*sizeof(std::int64_t), sizeof(std::int64_t));
+            if (ids[corner] < 0 || ids[corner] >= vertex_count) {
+                release(); Py_DECREF(output); PyErr_SetString(PyExc_ValueError, "warp vertex is outside the mesh");
+                return nullptr;
+            }
+            triangle[corner] = read_point(vertices, ids[corner]);
+        }
+        auto first = subtract_point(triangle[2], triangle[0]); normalize_point(first);
+        auto second = subtract_point(triangle[1], triangle[0]); normalize_point(second);
+        auto normal = cross_point(first, second); normalize_point(normal);
+        const auto point = read_point(queries, row);
+        const double scale = dot_point(normal, triangle[0])/dot_point(normal, point);
+        const Point3 projected{{point[0]*scale, point[1]*scale, point[2]*scale}};
+        const auto area = [&](int first_corner, int second_corner) {
+            return 0.5*point_norm(cross_point(subtract_point(triangle[first_corner], projected),
+                                             subtract_point(triangle[second_corner], projected)));
+        };
+        std::array<double, 3> weights{{area(1, 2), area(0, 2), area(0, 1)}};
+        const double total = (weights[0]+weights[1])+weights[2];
+        std::array<int, 3> order{{0, 1, 2}};
+        std::sort(order.begin(), order.end(), [&](int a, int b) { return ids[a] < ids[b]; });
+        Point3 result{{0, 0, 0}};
+        for (int corner : order) {
+            const auto destination = read_point(target, ids[corner]);
+            const double weight = weights[corner]/total;
+            for (int dimension = 0; dimension < 3; ++dimension)
+                result[dimension] += destination[dimension]*weight;
+        }
+        normalize_point(result);
+        for (double& value : result) value *= 100;
+        if (!std::isfinite(result[0]) || !std::isfinite(result[1]) || !std::isfinite(result[2])) {
+            release(); Py_DECREF(output); PyErr_SetString(PyExc_ValueError, "sphere warp produced a nonfinite point");
+            return nullptr;
+        }
+        std::memcpy(PyBytes_AS_STRING(output)+row*3*sizeof(double), result.data(), 3*sizeof(double));
+    }
+    release(); return output;
+}
+
+PyObject* source_triangle_nearest(PyObject*, PyObject* args) {
+    Py_buffer vertices{}, faces{}, queries{}, patches{};
+    Py_ssize_t vertex_count, face_count, query_count;
+    auto release = [&]() {
+        for (auto* buffer : {&vertices, &faces, &queries, &patches})
+            if (buffer->obj) PyBuffer_Release(buffer);
+    };
+    if (!PyArg_ParseTuple(args, "y*y*y*y*nnn", &vertices, &faces, &queries,
+                         &patches, &vertex_count, &face_count, &query_count)) {
+        release(); return nullptr;
+    }
+    const Py_ssize_t maximum = std::numeric_limits<Py_ssize_t>::max();
+    if (vertex_count < 1 || face_count < 1 || query_count < 0 ||
+        vertex_count > maximum/(3*sizeof(double)) ||
+        face_count > maximum/(3*sizeof(std::int64_t)) ||
+        query_count > maximum/(3*sizeof(double)) ||
+        vertices.len != vertex_count*3*Py_ssize_t(sizeof(double)) ||
+        faces.len != face_count*3*Py_ssize_t(sizeof(std::int64_t)) ||
+        queries.len != query_count*3*Py_ssize_t(sizeof(double)) ||
+        patches.len != query_count*Py_ssize_t(sizeof(std::int64_t))) {
+        release(); PyErr_SetString(PyExc_ValueError, "invalid triangle-nearest buffer dimensions");
+        return nullptr;
+    }
+    auto* output = PyBytes_FromStringAndSize(nullptr, patches.len);
+    if (!output) { release(); return nullptr; }
+    for (Py_ssize_t row = 0; row < query_count; ++row) {
+        std::int64_t face;
+        std::memcpy(&face, static_cast<const char*>(patches.buf)+row*sizeof(face), sizeof(face));
+        if (face < 0 || face >= face_count) {
+            release(); Py_DECREF(output); PyErr_SetString(PyExc_ValueError, "nearest face is outside the mesh");
+            return nullptr;
+        }
+        Point3 point;
+        std::memcpy(point.data(), static_cast<const char*>(queries.buf)+row*3*sizeof(double), 3*sizeof(double));
+        double best = std::numeric_limits<double>::max();
+        std::int64_t selected = -1;
+        for (int corner = 0; corner < 3; ++corner) {
+            std::int64_t vertex;
+            std::memcpy(&vertex, static_cast<const char*>(faces.buf)+(face*3+corner)*sizeof(vertex), sizeof(vertex));
+            if (vertex < 0 || vertex >= vertex_count) {
+                release(); Py_DECREF(output); PyErr_SetString(PyExc_ValueError, "nearest vertex is outside the mesh");
+                return nullptr;
+            }
+            Point3 coordinates;
+            std::memcpy(coordinates.data(), static_cast<const char*>(vertices.buf)+vertex*3*sizeof(double), 3*sizeof(double));
+            const double distance = point_norm(subtract_point(point, coordinates));
+            if (distance < best) { best = distance; selected = vertex; }
+        }
+        if (selected < 0) {
+            release(); Py_DECREF(output); PyErr_SetString(PyExc_ValueError, "nearest point distances are nonfinite");
+            return nullptr;
+        }
+        std::memcpy(PyBytes_AS_STRING(output)+row*sizeof(selected), &selected, sizeof(selected));
+    }
+    release(); return output;
+}
+
 PyMethodDef methods[] = {
     {"optimize", optimize, METH_VARARGS, "HOCR and FastPD fusion for triangle costs."},
     {"source_wls_cost", source_wls_cost, METH_VARARGS,
      "Ordered source WLS reduction: float64 distance/similarity/valid buffer, rows, width, sigma."},
     {"source_rotation_matrices", source_rotation_matrices, METH_VARARGS,
      "Source Point rotations: float64 prior [count,3], centre [3], count -> row-major float64 [count,3,3] bytes."},
+    {"source_radial_selection", source_radial_selection, METH_VARARGS,
+     "Ordered radial projection: float64 vertices/points, int64 faces/candidates, V,F,Q,K -> float64 [Q,4] face/projection."},
+    {"source_sphere_warp", source_sphere_warp, METH_VARARGS,
+     "Ordered sphere warp: float64 source/target/queries, int64 faces/patches, V,F,Q -> float64 [Q,3]."},
+    {"source_triangle_nearest", source_triangle_nearest, METH_VARARGS,
+     "Closest original triangle corner: float64 vertices/queries, int64 faces/patches, V,F,Q -> int64 [Q]."},
     {nullptr, nullptr, 0, nullptr},
 };
 PyModuleDef module = {PyModuleDef_HEAD_INIT, "_fastpd_native", nullptr, -1, methods};

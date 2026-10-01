@@ -1,6 +1,6 @@
 """Map a verified BIDS Derivatives volume run to fsLR32k with MSMSulc."""
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import json
@@ -13,7 +13,7 @@ import nibabel as nib
 import numpy as np
 
 from ..flirt.coordinates import flirt_to_world_affine
-from ..msm import prepare_msmsulc_inputs, run_msmsulc
+from ..msm import MSMAllConfig, MSMAllInputs, prepare_msmsulc_inputs, run_msmsulc
 from ..msm.config import MSMSulcConfig
 from .assets_setup import BASE_URL, MESH, _sha256
 from .bids import locate_bids_inputs
@@ -154,6 +154,57 @@ def _tr_matches(image, tr):
     )
 
 
+def _refine_msmall(inputs, native_spheres, native_geometry, assets, output,
+                   configuration, device, execution, wb_command):
+    """Refine native features or compose a prepared fsLR32k registration.
+
+    Native feature arrays retain recon-all vertex order. Features on the
+    canonical 32k sphere describe the MSMSulc representation; their estimated
+    warp is composed onto the native MSMSulc spheres before BOLD projection.
+    """
+    from ..msm import run_msmall
+    from ..msm._affine import _surface
+
+    entries = {}
+    topology = {}
+    for hemi, native_sphere, geometry in zip(("L", "R"), native_spheres, native_geometry):
+        entry = inputs[hemi]
+        source_points, source_faces = _surface(entry.source_sphere)
+        native_points, native_faces = _surface(geometry.midthickness)
+        atlas_file = assets / MESH / f"{hemi}.sphere.32k_fs_LR.surf.gii"
+        atlas_points, atlas_faces = _surface(atlas_file)
+        if len(source_points) == len(native_points) and np.array_equal(source_faces, native_faces):
+            topology[hemi] = "native"
+            if entry.initial_sphere is None:
+                entry = replace(entry, initial_sphere=Path(native_sphere))
+        elif (source_points.shape == atlas_points.shape
+              and np.array_equal(source_faces, atlas_faces)
+              and np.allclose(source_points, atlas_points, atol=1e-5, rtol=0)):
+            topology[hemi] = "fsLR32k"
+        else:
+            raise ValueError(f"{hemi} MSMAll source features must use matching native topology or the canonical fsLR32k sphere")
+        entries[hemi] = entry
+    registered = run_msmall(entries, output / "msmall", device=device,
+                           config=configuration, execution=execution)
+    executable = shutil.which(str(wb_command))
+    if executable is None:
+        raise FileNotFoundError(wb_command)
+    final = {}
+    for hemi, native_sphere in zip(("L", "R"), native_spheres):
+        if topology[hemi] == "native":
+            final[hemi] = registered[hemi]
+        else:
+            final[hemi] = output / "msmall" / f"{hemi}.sphere.MSMAll.native.surf.gii"
+            # Keep the 32k solver sphere and composed native sphere distinct.
+            if final[hemi] == registered[hemi]:
+                final[hemi] = output / "msmall" / f"{hemi}.sphere.MSMAll.composed-native.surf.gii"
+            subprocess.run([
+                executable, "-surface-sphere-project-unproject", str(native_sphere),
+                str(entries[hemi].source_sphere), str(registered[hemi]), str(final[hemi]),
+            ], check=True, capture_output=True, text=True)
+    return (final["L"], final["R"]), topology
+
+
 def fMRISurface_pipeline(
     bids_root: str | Path, derivatives_root: str | Path, *,
     subject: str, recon_all: str | Path, hcp_assets_dir: str | Path,
@@ -165,6 +216,8 @@ def fMRISurface_pipeline(
     registered_spheres: tuple[str | Path, str | Path] | None = None,
     msm_config: MSMSulcConfig | str | Path | None = None,
     msm_execution: str = "optimized",
+    msmall_inputs: dict[str, MSMAllInputs] | str | Path | None = None,
+    msmall_config: MSMAllConfig | str | Path | None = None,
     goodvoxels: str | Path | None = None,
     signal: str = "preproc",
     fsnative_to_t1w: str | Path | np.ndarray | None = None,
@@ -184,6 +237,26 @@ def fMRISurface_pipeline(
         raise ValueError("registered_spheres must contain left and right paths")
     if registered_spheres is not None and msm_config is not None:
         raise ValueError("msm_config cannot be applied to supplied registered_spheres")
+    if registered_spheres is not None and msmall_inputs is not None:
+        raise ValueError("msmall_inputs cannot be applied to supplied registered_spheres")
+    if msmall_inputs is None and msmall_config is not None:
+        raise ValueError("msmall_config requires prepared msmall_inputs")
+    msmall_configuration = None
+    if msmall_inputs is not None:
+        from ..msm.cli import load_inputs
+        if isinstance(msmall_inputs, (str, Path)):
+            msmall_inputs = load_inputs(msmall_inputs, MSMAllInputs)
+        if (not isinstance(msmall_inputs, dict) or set(msmall_inputs) != {"L", "R"}
+                or not all(isinstance(value, MSMAllInputs) for value in msmall_inputs.values())):
+            raise ValueError("msmall_inputs must contain prepared L/R MSMAllInputs")
+        if msmall_config is None:
+            msmall_configuration = MSMAllConfig()
+        elif isinstance(msmall_config, (str, Path)):
+            msmall_configuration = MSMAllConfig.from_file(msmall_config)
+        elif isinstance(msmall_config, MSMAllConfig):
+            msmall_configuration = msmall_config
+        else:
+            raise TypeError("msmall_config must be MSMAllConfig or a config path")
     if msm_execution not in ("optimized", "reference"):
         raise ValueError("msm_execution must be 'optimized' or 'reference'")
     if msm_config is None:
@@ -243,7 +316,15 @@ def fMRISurface_pipeline(
             or any(character.lower() not in "0123456789abcdef" for character in template_hash)):
         raise ValueError("volume derivative lacks verified MNI152NLin6Asym template identity; rerun volume")
     paths = fmri_derivative_paths(inputs, source_t1, derivatives_root, signal=signal)
-    qc_report, sphere_paths, sphere_sidecars = _surface_extra_paths(paths, signal)
+    output_signal = signal
+    if msmall_inputs is not None:
+        output_signal = f"MSMAll{signal}"
+        paths = replace(paths, **{
+            name: getattr(paths, name).with_name(getattr(paths, name).name.replace(
+                f"_desc-{signal}_bold", f"_desc-{output_signal}_bold"))
+            for name in ("left", "right", "dtseries")
+        })
+    qc_report, sphere_paths, sphere_sidecars = _surface_extra_paths(paths, output_signal)
     final_data = (paths.left, paths.right, paths.dtseries)
     final_sidecars = tuple(sidecar(path) for path in final_data)
     final_outputs = (*final_data, *final_sidecars, qc_report, *sphere_paths, *sphere_sidecars)
@@ -371,6 +452,32 @@ def fMRISurface_pipeline(
             spheres = tuple(Path(path).expanduser().resolve() for path in registered_spheres)
             registration = "provided registered spheres"
             registration_qc = None
+        msmall_seconds = None
+        if msmall_inputs is not None:
+            msmall_started = time.perf_counter()
+            spheres, feature_topology = _refine_msmall(
+                msmall_inputs, spheres, (prepared.geometry.left, prepared.geometry.right),
+                assets, work, msmall_configuration, device, msm_execution, wb_command,
+            )
+            msmall_seconds = time.perf_counter() - msmall_started
+            msmall_report = json.loads((work / "msmall/registration_report.json").read_text())
+            registration_qc = {
+                "InitialMSMSulc": registration_qc,
+                "MSMAll": {"Report": msmall_report, "InputsSHA256": {
+                    hemi: {name: _sha256(Path(path)) for name, path in asdict(entry).items()
+                           if path is not None}
+                    for hemi, entry in msmall_inputs.items()
+                }},
+            }
+            registration = "MSMAll-HOCR-FastPD"
+            registration_details = {
+                "Method": "FNIT MSMAll-HOCR-FastPD",
+                "InitialRegistration": registration_details,
+                "Configuration": msmall_configuration.to_dict(), "Execution": msm_execution,
+                "FeatureTopology": feature_topology,
+                "FeaturePreparation": "provided multimodal feature/weight files",
+                "Hemispheres": msmall_report,
+            }
         hemispheres = {}
         identity["MidthicknessSource"] = {}
         for hemi, geometry, individual_roi, sphere in zip(
@@ -417,6 +524,8 @@ def fMRISurface_pipeline(
         timing = {**projection.timing_seconds, "total": time.perf_counter() - started}
         if registration_seconds is not None:
             timing["msmsulc_preparation_and_registration"] = registration_seconds
+        if msmall_seconds is not None:
+            timing["msmall_registration_and_native_composition"] = msmall_seconds
         coverage = json.loads(projection.coverage_report.read_text(encoding="utf-8"))
         details = {**{key: metadata[key] for key in (
             "TaskName", "EchoTime", "FlipAngle", "MagneticFieldStrength", "Manufacturer",

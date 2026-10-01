@@ -211,6 +211,31 @@ def test_spline_preserves_mask_and_out_of_field_zeros(tmp_path):
     np.testing.assert_allclose(values[1:, 1:], 1, atol=2e-6)
 
 
+@pytest.mark.parametrize("ndim", [3, 4])
+def test_mm_world_resampler_retains_source_unit_on_unknown_reference(tmp_path, ndim):
+    shape = (5, 6, 7) if ndim == 3 else (5, 6, 7, 2)
+    values = np.arange(np.prod(shape), dtype=np.float32).reshape(shape)
+    affine = np.diag([2., 2., 2., 1.])
+    source = nib.Nifti1Image(values, affine)
+    source.header.set_xyzt_units(xyz="mm", t="sec")
+    if ndim == 4:
+        source.header.set_zooms((2., 2., 2., .735))
+    source_path = tmp_path / "source.nii.gz"
+    reference_path = tmp_path / "reference.nii.gz"
+    nib.save(source, source_path)
+    nib.save(nib.Nifti1Image(np.zeros(shape[:3], dtype=np.float32), affine), reference_path)
+    result = nib.load(resample_world(
+        source_path, reference_path, np.eye(4), tmp_path / "output.nii.gz",
+        interpolation="nearest", device="cpu",
+    ))
+    np.testing.assert_array_equal(np.asarray(result.dataobj), values)
+    np.testing.assert_array_equal(result.affine, affine)
+    assert result.header.get_xyzt_units()[0] == "mm"
+    if ndim == 4:
+        assert result.header.get_xyzt_units()[1] == "sec"
+        assert result.header.get_zooms()[3] == nib.load(source_path).header.get_zooms()[3]
+
+
 @pytest.mark.parametrize("device", ["cpu", "cuda"])
 @pytest.mark.parametrize("interpolation", ["linear", "nearest", "spline"])
 def test_oblique_identity_preserves_boundary_voxels_and_time_axis(tmp_path, device, interpolation):

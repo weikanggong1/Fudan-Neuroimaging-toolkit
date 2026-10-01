@@ -69,10 +69,11 @@ def _area_weights(triangles, points):
 
 
 class RadialSphereMap:
-    def __init__(self, vertices, faces, device, *, execution='optimized'):
+    def __init__(self, vertices, faces, device, *, execution='optimized', source_precision=False):
         if execution not in ('optimized', 'reference'):
             raise ValueError("sphere execution must be 'optimized' or 'reference'")
         self.execution = execution
+        self.source_precision = source_precision
         self.device = torch.device(device)
         self.vertices = torch.as_tensor(vertices, dtype=torch.float64, device=self.device)
         self.faces = torch.as_tensor(faces, dtype=torch.long, device=self.device)
@@ -85,6 +86,10 @@ class RadialSphereMap:
         for vertex, items in enumerate(incident):
             table[vertex] = items+[items[0]]*(width-len(items))
         self.incident = torch.as_tensor(table, device=self.device)
+        if source_precision:
+            self.incident_cpu = table
+            self.vertex_bytes = np.asarray(vertices, dtype=np.float64).tobytes()
+            self.face_bytes = np.asarray(faces, dtype=np.int64).tobytes()
         if execution == 'optimized':
             self.triangles = self.vertices[self.faces]
             self.normal, self.normal_dot_a, self.edge_normals = _projection_geometry(self.triangles)
@@ -116,7 +121,27 @@ class RadialSphereMap:
         exists = torch.isfinite(minimum)
         choice = ordered.argmin(-1)
         row = torch.arange(len(points), device=self.device)
-        return candidates[row, choice], projected[row, choice], exists
+        ambiguous = inside.sum(-1) > 1 if self.source_precision else None
+        return candidates[row, choice], projected[row, choice], exists, ambiguous
+
+    def _source_select(self, query, nearest, face, projection, ambiguous):
+        """Resolve only overlapping containing candidates in scalar order."""
+        if ambiguous.any():
+            from . import _fastpd_native
+            selected = np.flatnonzero(ambiguous)
+            candidates = self.incident_cpu[nearest[selected]].reshape(len(selected), -1)
+            candidates = np.sort(candidates, axis=1).astype(np.int64, copy=False)
+            values = np.frombuffer(_fastpd_native.source_radial_selection(
+                self.vertex_bytes, self.face_bytes,
+                np.asarray(query[selected], dtype=np.float64).tobytes(), candidates.tobytes(),
+                len(self.vertices), len(self.faces), len(selected), candidates.shape[1]),
+                dtype=np.float64).reshape(-1, 4)
+            if np.any(values[:, 0] < 0):
+                raise RuntimeError('no containing source-precision sphere candidate')
+            ids = torch.as_tensor(selected, device=self.device)
+            face[ids] = torch.as_tensor(values[:, 0].astype(np.int64), device=self.device)
+            projection[ids] = torch.tensor(values[:, 1:], device=self.device)
+        return face, projection
 
     def _fallback(self, points, query, face, projection, missing):
         if missing.any():
@@ -125,9 +150,12 @@ class RadialSphereMap:
             expanded = self.tree.query(query[missing], k=k, workers=4)[1]
             expanded = np.asarray(expanded).reshape(len(missing_ids), k)
             ids = torch.as_tensor(missing_ids, device=self.device)
-            better, q, found = self._select(points[ids], torch.as_tensor(expanded, device=self.device))
+            better, q, found, _ = self._select(points[ids], torch.as_tensor(expanded, device=self.device))
             if not bool(found.all()):
                 raise RuntimeError('no containing radial sphere triangle; check folded input mesh')
+            if self.source_precision:
+                better, q = self._source_select(query[missing], expanded, better, q,
+                                                np.ones(len(expanded), dtype=bool))
             face[ids] = better
             projection[ids] = q
         return face, projection
@@ -149,20 +177,34 @@ class RadialSphereMap:
         for start in range(0, len(query), batch_size):
             stop = min(start+batch_size, len(query)); p = points[start:stop]
             near = torch.as_tensor(nearest[start:stop], device=self.device)
-            face, projection, inside = self._select(p, near)
+            face, projection, inside, ambiguous = self._select(p, near)
             if self.execution == 'reference':
-                missing = (~inside).detach().cpu().numpy()
+                if self.source_precision:
+                    masks = torch.stack((~inside, ambiguous), -1).detach().cpu().numpy()
+                    missing = masks[:, 0]
+                    face, projection = self._source_select(query[start:stop], nearest[start:stop],
+                                                          face, projection, masks[:, 1])
+                else:
+                    missing = (~inside).detach().cpu().numpy()
                 face, projection = self._fallback(p, query[start:stop], face, projection, missing)
                 w = _area_weights(self.vertices[self.faces[face]], projection if project else p)
                 chosen_faces.append(self.faces[face]); chosen_weights.append(w); chosen_patches.append(face)
             else:
-                blocks.append((start, stop, face, projection, inside))
+                blocks.append((start, stop, face, projection, inside, ambiguous))
         if self.execution == 'optimized':
             # The only containment-mask transfer for the entire call. All
             # chunks retain their original order and fallback candidate order.
-            missing_all = (~torch.cat([item[4] for item in blocks])).detach().cpu().numpy()
-            for start, stop, face, projection, _ in blocks:
+            inside_all = torch.cat([item[4] for item in blocks])
+            if self.source_precision:
+                masks = torch.stack((~inside_all, torch.cat([item[5] for item in blocks])), -1).detach().cpu().numpy()
+                missing_all = masks[:, 0]
+            else:
+                missing_all = (~inside_all).detach().cpu().numpy()
+            for start, stop, face, projection, _, _ in blocks:
                 p = points[start:stop]
+                if self.source_precision:
+                    face, projection = self._source_select(query[start:stop], nearest[start:stop],
+                                                          face, projection, masks[start:stop, 1])
                 face, projection = self._fallback(p, query[start:stop], face, projection, missing_all[start:stop])
                 w = _area_weights(self.triangles[face], projection if project else p)
                 chosen_faces.append(self.faces[face]); chosen_weights.append(w); chosen_patches.append(face)

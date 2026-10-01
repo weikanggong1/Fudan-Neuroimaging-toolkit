@@ -60,11 +60,11 @@ def _vertex_area(vertices,faces):
     return total/counts
 
 
-def _adaptive_resample(vertices,faces,values,new_vertices,new_faces,device='cuda:0',execution='optimized',*,old_area=None,new_area=None):
+def _adaptive_resample(vertices,faces,values,new_vertices,new_faces,device='cuda:0',execution='optimized',*,old_area=None,new_area=None,source_precision=False):
     """Resample a scalar metric using forward and reverse area corrected weights."""
     selected=torch.device(device)
-    forward_map=RadialSphereMap(vertices,faces,selected,execution=execution)
-    reverse_map=RadialSphereMap(new_vertices,new_faces,selected,execution=execution)
+    forward_map=RadialSphereMap(vertices,faces,selected,execution=execution,source_precision=source_precision)
+    reverse_map=RadialSphereMap(new_vertices,new_faces,selected,execution=execution,source_precision=source_precision)
     forward_ids,forward_weight,_=forward_map.weights(torch.as_tensor(new_vertices,device=selected))
     reverse_ids,reverse_weight,_=reverse_map.weights(torch.as_tensor(vertices,device=selected))
     fi=forward_ids.cpu().numpy();fw=forward_weight.cpu().numpy()
@@ -87,9 +87,18 @@ def _adaptive_resample(vertices,faces,values,new_vertices,new_faces,device='cuda
     row_sum=np.asarray(weighted.sum(axis=1)).ravel()
     normalized=sparse.diags(np.divide(1.,row_sum,out=np.zeros_like(row_sum),where=row_sum>0))@weighted
     return np.asarray(normalized@values,dtype=np.float64)
-def _sphere_warp(points,from_vertices,faces,to_vertices,device,execution="optimized"):
-    mapper=RadialSphereMap(from_vertices,faces,device,execution=execution)
-    ids,weights,_=mapper.weights(points)
+def _sphere_warp(points,from_vertices,faces,to_vertices,device,execution="optimized",*,source_precision=False):
+    mapper=RadialSphereMap(from_vertices,faces,device,execution=execution,source_precision=source_precision)
+    ids,weights,patch=mapper.weights(points)
+    if source_precision:
+        from . import _fastpd_native
+        query=points.detach().cpu().numpy().astype(np.float64,copy=False)
+        destination=to_vertices.detach().cpu().numpy().astype(np.float64,copy=False)
+        values=np.frombuffer(_fastpd_native.source_sphere_warp(
+            mapper.vertex_bytes,mapper.face_bytes,destination.tobytes(),query.tobytes(),
+            patch.detach().cpu().numpy().astype(np.int64,copy=False).tobytes(),
+            len(from_vertices),len(faces),len(query)),dtype=np.float64).reshape(-1,3)
+        return torch.tensor(values,device=device)
     order=ids.argsort(1)
     ids=ids.gather(1,order);weights=weights.gather(1,order)
     # sphere_project_warp iterates a std::map<int,double> in vertex-ID order.
@@ -171,6 +180,13 @@ def _face_costs(current,candidate,original,faces,layout,reference_map,reference_
     else:
         similarity=1-(1+corr)*0.5
 
+    cost=_regularized_triangle_cost(similarity,proposed,original,faces,lam,config,
+                                    current,fold_reference)
+    return cost.detach().cpu().numpy()
+
+
+def _regularized_triangle_cost(similarity,proposed,original,faces,lam,config,current,fold_reference=None):
+    """Shared strain/folding term; preserve the MSMSulc arithmetic order."""
     old=original[faces][:,None,:,:]
     u0=old[:,:,1,:]-old[:,:,0,:];v0=old[:,:,2,:]-old[:,:,0,:]
     u1=proposed[:,:,1,:]-proposed[:,:,0,:]
@@ -194,7 +210,7 @@ def _face_costs(current,candidate,original,faces,layout,reference_map,reference_
                                current_triangles[:,2]-current_triangles[:,0],dim=-1)
     folded=(torch.cross(u1,v1,dim=-1)*current_normal[:,None,:]).sum(-1)<0
     cost=torch.where(folded,torch.full_like(similarity,1e7*lam),similarity+lam*regularization)
-    return cost.detach().cpu().numpy()
+    return cost
 
 
 def _label_samples(grid,faces,max_distance):
@@ -389,6 +405,7 @@ def run_msmsulc(
     if selected.type == "cuda":
         torch.backends.cuda.matmul.allow_tf32=True
         torch.backends.cudnn.allow_tf32=True
+        torch.cuda.init()
     output=Path(output_dir).expanduser().resolve()
     output.mkdir(parents=True,exist_ok=True)
     report={}

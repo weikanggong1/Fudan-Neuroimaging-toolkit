@@ -140,6 +140,45 @@ def test_default_preproc_selects_metadata_t1_and_preserves_qc_spheres(public_cas
 
 
 @pytest.mark.parametrize("signal", ["preproc", "clean"])
+def test_msmall_outputs_coexist_with_default_registration(public_case, monkeypatch, signal):
+    from fnit.msm import MSMAllInputs
+
+    def resample(input_file, reference, affine, output_file, **kwargs):
+        import shutil
+        shutil.copyfile(input_file, output_file)
+        return output_file
+
+    monkeypatch.setattr(pipeline, "resample_world", resample)
+    default = pipeline.fMRISurface_pipeline(**public_case.arguments, signal=signal)
+
+    def refine(inputs, spheres, native_geometry, assets, work, configuration, device, execution, wb_command):
+        output = work / "msmall"
+        output.mkdir()
+        write_json(output / "registration_report.json", {
+            hemisphere: {"feature_count": 33, "weighted_cost": True}
+            for hemisphere in "LR"})
+        return spheres, {"L": "fsLR32k", "R": "fsLR32k"}
+
+    monkeypatch.setattr(pipeline, "_refine_msmall", refine)
+    entry = MSMAllInputs(*(public_case.sphere for _ in range(4)))
+    refined = pipeline.fMRISurface_pipeline(**public_case.arguments, signal=signal,
+                                            msmall_inputs={"L": entry, "R": entry})
+    assert default.dtseries.is_file() and refined.dtseries.is_file()
+    assert default.dtseries != refined.dtseries
+    assert f"_desc-MSMAll{signal}_bold" in refined.dtseries.name
+    assert all(f"_desc-MSMAll{signal}Reg_sphere" in sphere.name
+               for sphere in refined.registered_spheres)
+    details = json.loads(refined.metadata.read_text())["FNIT"]
+    assert details["Signal"] == signal and details["Registration"] == "MSMAll-HOCR-FastPD"
+    assert details["RegistrationDetails"]["InitialRegistration"]["Method"] == "FNIT MSMSulc-HOCR-FastPD"
+    assert details["RegistrationDetails"]["FeatureTopology"] == {"L": "fsLR32k", "R": "fsLR32k"}
+    assert "msmall_registration_and_native_composition" in details["TimingSeconds"]
+    qc = json.loads(refined.qc_report.read_text())["MSM"]
+    assert qc["MSMAll"]["Report"]["L"]["feature_count"] == 33
+    assert qc["InitialMSMSulc"]["Report"]["L"]["configuration"]["it"] == [50, 10, 15, 15]
+
+
+@pytest.mark.parametrize("signal", ["preproc", "clean"])
 def test_external_storage_t1_symlink_keeps_its_bids_name_and_source(public_case, monkeypatch, signal):
     target = public_case.raw.parent / "external-original-T1w.nii.gz"
     public_case.source_t1.rename(target)

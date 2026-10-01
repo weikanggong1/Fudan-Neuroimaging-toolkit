@@ -1,8 +1,12 @@
-# FNIT MSMSulc
+# FNIT MSM：MSMSulc 与 MSMAll
 
 2026-10-01 完整 surface 另以 `7102c187` 和独立原版输入准备重测：球面角差均值左 **0.221050°**、右 **0.319595°**；CIFTI 时间 r 均值 **0.977911**。初始化/旋转球面、脑沟标量和科学配置一致，当前这次完整链尚未逐值匹配。见[最新完整 surface 报告](../../validation/fmri/surface_e2e/README.md)；本页 `4f7bd9f2` 的固定输入专项结果保留其原实测范围。
 
-`fnit.msm` 独立完成双侧脑沟球面配准。先按 newMSM 的有限差分规则估计刚性初始化，再用 162→642→2,562 个控制点优化脑沟相似度和三角形应变；HOCR 降阶与 FastPD 选择联合位移。输出球面保持原生顶点顺序。运行时不调用官方 MSM 或 FreeSurfer；准备阶段使用 Connectome Workbench。当前功能为 **MSMSulc**。
+`fnit.msm` 提供独立的 MSMSulc、[MSMAll 多特征配准](msmall.md)和 [VN、DR/WRN 与特征准备](features.md)。本页介绍 MSMSulc：先按 newMSM 的有限差分规则估计刚性初始化，再用 162→642→2,562 个控制点优化脑沟相似度和三角形应变；HOCR 降阶与 FastPD 选择联合位移。输出球面保持原生顶点顺序。运行时不调用官方 MSM 或 FreeSurfer；准备阶段使用 Connectome Workbench。MSMAll 使用独立的 `MSMAllConfig` 与 `run_msmall`，默认 MSMSulc 调用保持原接口。
+
+新增 MSMAll 以一例真实 WRN `C` 特征独立验证：完整一级和三级配置的双侧球面及固定 490 帧投影均与官方逐值相同。H100 冷/热配准分别为 **20.31/20.39 s** 与 **167.72/166.63 s**，对应官方单线程为 **105.02 s** 与 **2,155.63 s**。这是准备好的连接特征到球面及固定 BOLD 的专项对照，结果与上方默认 MSMSulc 完整 surface 的测量分别记录；输入、配置、范围及修复原因见 [MSMAll 功能页](msmall.md)和[匿名汇总](../../validation/msm/msmall.current.public.json)。
+
+MSMAll 集成测试还定位了共享 MSMSulc 入口的 CUDA 启动问题：独立 Python 进程中，第一次分配 CUDA 张量前重置显存统计可能报 `invalid-device`。现在先初始化 CUDA，再进入阶段计时和显存统计；配准计算未变。MSMSulc 与 MSMAll 两种新进程 GPU 调用测试均已通过。
 
 默认使用 HCP/sMRIPrep 的四级配置：`simval=3,2,2,2`，最大迭代数 `50,10,15,15`。官方 newMSM 将历史仿射相似度值 3 转为 Pearson 2；FNIT 保持该行为。几何、相似度和优化标量使用 float64，写出的 GIFTI 顶点为 float32；没有使用 FP16/BF16。刚性坐标与离散成本在 PyTorch 上计算，刚性加权相似度、每轮 Rodrigues 矩阵及 HOCR/FastPD 使用包内独立 C++ 算子；矩阵缓存后，所有位移标签在 GPU 应用。默认优化路径缓存固定几何并合并传输，`execution="reference"` 保留逐块检查供回归对照；二者使用相同的算法和停止条件。
 
@@ -47,7 +51,7 @@ print(spheres["R"])  # R.sphere.MSMSulc.native.surf.gii
 
 ### 配置参数
 
-下面的四元组依次对应刚性初始化和三个离散阶段。`config=None` 与 `MSMSulcConfig()` 相同；路径输入通过 `MSMSulcConfig.from_file` 读取受支持的官方选项。解析器拒绝改变为 MSMAll、MCMC 等未实现的流程。
+下面的四元组依次对应刚性初始化和三个离散阶段。`config=None` 与 `MSMSulcConfig()` 相同；路径输入通过 `MSMSulcConfig.from_file` 读取受支持的官方选项。本配置仅用于 MSMSulc；MSMAll 使用独立配置，MCMC 等其他 newMSM 流程不在本配置支持范围。
 
 | 参数 | 默认值 | 含义 |
 |---|---|---|
@@ -67,6 +71,17 @@ print(spheres["R"])  # R.sphere.MSMSulc.native.surf.gii
 浮点配置按官方 `Option<float>` 的精度读取，再提升为 double 计算。因此步长 `0.01` 的有效值为 `0.009999999776482582`，shear/bulk 的有效值分别为 `0.4000000059604645` 和 `1.600000023841858`；报告保存这些实际数值。
 
 官方配置的 `--numthreads=N` 是 CPU 执行参数，FNIT 识别该字段并使用所选 PyTorch 设备；旧 `--threads=N` 写法仍可读取。配置文件支持本页的 MSMSulc 选项，不覆盖 newMSM 的其他注册算法。
+
+## 命令行调用
+
+```bash
+fnit-msm msmsulc \
+  --inputs-json /absolute/path/msmsulc.inputs.json \
+  --output-dir /absolute/path/work/msmsulc \
+  --device cuda:0
+```
+
+JSON 顶层含 `L`、`R`；每侧填 `MSMSulcInputs` 的六个文件路径，可用绝对路径或相对清单目录的路径。`--config` 与 `--execution` 对应上述 Python 参数。MSMAll 命令使用 `fnit-msm msmall`，完整输入和例子见[功能页](msmall.md)。
 
 ## 原版对照命令
 
@@ -108,6 +123,14 @@ newmsm --inmesh=/absolute/path/work/msm-inputs/L.sphere_rot.surf.gii \
 固定官方球面时，Workbench 投影与 CIFTI 组装对独立对照逐值一致，见 [固定球面报告](../../validation/fmri/surface_fixed_sphere.public.json)。pipeline 传递注册配置，并将写出球面的质控保留在 BIDS sidecar。
 
 本例最终原生输出翻折数为左侧 **1**、右侧 **0**，与官方相同；报告按实际 float32 保存坐标计算，保留迭代中的展开处理。
+
+## 最近版本与 benchmark 记录
+
+| 实测或更新 | 范围与记录 |
+|---|---|
+| `4f7bd9f2` 独立 MSMSulc | 修复缓存面积、浮点配置、刚性 WLS 和 Rodrigues 顺序；本例保存球面及固定 clean 时序逐值相同，见上表和[专项报告](../../validation/msm/current.public.json)。 |
+| `7102c187` 完整 surface | 重新准备几何、估计球面并投影 preproc；CIFTI 时间 r 均值 0.977911，范围包含完整 surface，见[最新完整报告](../../validation/fmri/surface_e2e/README.md)。 |
+| 2026-10 MSMAll 扩展 | 新增独立 MSMAll、VN/DR/WRN 与 C/CA/CAT 特征准备；共享应变成本保留既有 MSMSulc 运算顺序。MSMAll 的真实 C 模式结果单独记录，以上测量保留原源码快照。 |
 
 ## 参考文献与原实现
 
