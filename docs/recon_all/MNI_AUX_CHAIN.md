@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | `write_mni_voxel_lta(output_file, matrix, source_file, target_file)` | `matrix` 是完整 MNI152 体素到被试体素的 4×4 NumPy 矩阵；`source_file` 是完整 MNI152 模板；`target_file` 是被试 `orig.mgz`；`output_file` 是写入位置 | 写 type-0 `reg.targ_to_invol.lta`，包含矩阵及两端的体积形状、体素大小、方向和中心；返回 `None`。只负责序列化，不执行配准。 |
 | `register_mni152_affine(subject_dir, weights_dir, assets_dir, device="cpu", threads=4)` | `subject_dir/mri/orig.mgz`；外置 `synthmorph.affine.2.h5`；`assets_dir/average/mni_icbm152_nlin_asym_09c/reg-targets/` 中 cropped/full 1 mm MNI152 NIfTI 模板 | 写 `mri/transforms/synthmorph.1.0mm.1.0mm/invol.crop.nii.gz`、`aff.lta`、`reg.targ_to_invol.lta`，返回最后一项路径。最终 type-0 4×4 LTA 将完整 MNI152 体素映射到被试体素，并记录两端体积几何信息。 |
-| `run_mni_aux_chain(subject_dir, weights_dir, assets_dir, device="cpu", threads=4)` | 上述配准输入；`subject_dir/mri/nu.mgz`、`synthseg.rca.mgz`；MCA/dura 与静脉窦 H5 权重；`assets_dir/average/` 下的三个先验 | 写上述 LTA、`mri/mca-dura.mgz`（标签 0、6101、6102）、`mri/vsinus.mgz`（标签 0、6111、6112、6115、6116、6117）和 `stats/vsinus.stats`；返回 `lta`、`mca_dura`、`vsinus` 三个 `Path` 值的字典。两张标签图保留 `nu.mgz` 的 conform 网格与 float32 MGH 元数据。 |
+| `run_mni_aux_chain(subject_dir, weights_dir, assets_dir, device="cpu", threads=4)` | 上述配准输入；`subject_dir/mri/nu.mgz`、`synthseg.rca.mgz`；MCA/dura 与静脉窦 H5 权重；`assets_dir/average/` 下的三个先验 | 写上述 LTA、`mri/mca-dura.mgz`（标签 0、6101、6102）、`mri/vsinus.mgz`（标签 0、6111、6112、6115、6116、6117）和 `stats/vsinus.stats`；返回 `lta`、`mca_dura`、`vsinus` 三个路径字段及runtime实际前向记录的字典。两张标签图保留 `nu.mgz` 的 conform 网格与 float32 MGH 元数据。 |
 
 裁切区域取 conform 后 `orig.mgz` 的非零包围盒，外扩三个体素。SynthMorph 估计裁切后的被试图像至裁切 MNI152 的 world 变换；矩阵组合将完整 MNI152 目标体素转成被试体素，以供先验重采样。辅助模型读取 LTA，在注册先验确定的范围内裁切 `nu.mgz`、执行 PyTorch 推理，再将硬标签贴回被试网格。静脉窦函数会清除 `synthseg.rca.mgz` 标为皮层（3、42）的体素。
 
@@ -88,3 +88,5 @@ mri_vsinus_seg --s sub01 --rca-synthseg --threads 4 \
 
 - Fischl B. FreeSurfer. *NeuroImage*. 2012;62(2):774–781. [doi:10.1016/j.neuroimage.2012.01.021](https://doi.org/10.1016/j.neuroimage.2012.01.021)。
 - [FreeSurfer 固定源码提交](https://github.com/freesurfer/freesurfer/tree/d932c45b7941662ea380a05efef580568b98d41a)。
+
+串行候选：recon-all GPU profile的MNI affine、MCA/dura、vsinus随主设备执行；MCA双侧复用模型，裁剪推理改为内存nibabel影像。新增precision_report及结构见[串行说明](SERIAL_OPTIMIZATION.md)。两例同GPU三张标签图零差异，CPU→GPU局部差异单列。

@@ -37,3 +37,5 @@ CUDA FP32 的第一例独立链用时 161.73 秒，CPU 为 339.99 秒，进程�
 三个 MNI 非线性输出属于固定输出范围，后续 white/pial 依赖的是另一条 affine/辅助分割链；其实际调用关系见 `native_free.py`、`mni_aux_chain.py` 和 `aux_seg.py`。完整运行仍单列分区 Dice、双向表面距离和脑区指标，整体指标等效在尚无正式门槛时保持未判定。当前尚未定位全部与官方的历史局部位移差，不能将这些差异一概归因于随机性。
 
 参考文献：Hoffmann M, et al. SynthMorph: learning contrast-invariant registration without acquired images. *IEEE Trans Med Imaging*. 2022;41:543–558. [doi:10.1109/TMI.2021.3116879](https://doi.org/10.1109/TMI.2021.3116879)。
+
+串行候选省去未消费的网络逆向积分/合成，反对称velocity两次前向及原生数值求逆保留。两例固定自产输入的forward、inverse、check与旧GPU路径SHA-256完全相同；阶段136.720→123.601秒、121.549→129.343秒，尚未证明稳定整阶段加速。实际前向与复现见[串行说明](SERIAL_OPTIMIZATION.md)。
