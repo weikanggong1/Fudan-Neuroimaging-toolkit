@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "runtime_revision": "a7c5a64463972c7052db930419a36c4f02e83ac7",
+  "runtime_tests": {
+    "host": "gpucw1",
+    "command": "pytest -q tests/test_fmri_*.py tests/test_feat_temporal.py tests/flirt tests/fast_vbm/test_flirt_fused_sampling.py tests/fast_vbm/test_flirt_schedule_parity.py",
+    "passed": 173,
+    "seconds": 23.2,
+    "exit_code": 0,
+    "devices": [
+      "cpu",
+      "cuda"
+    ]
+  },
+  "benchmark_reference_tests": {
+    "command": "PYTHONPATH=src python -m pytest -q tests/test_fmri_benchmark_reference.py",
+    "passed": 2,
+    "seconds": 3.97,
+    "exit_code": 0,
+    "device": "cpu",
+    "scope": "New benchmark validation only; no runtime algorithm change after measured revision."
+  },
+  "deepprep_report_control": {
+    "frozen_reports_regenerated_identically": true,
+    "different_revisions_rejected_before_writing": true
+  },
+  "scope": "Unit and interface controls complement, and do not replace, the real full-run comparisons."
+}

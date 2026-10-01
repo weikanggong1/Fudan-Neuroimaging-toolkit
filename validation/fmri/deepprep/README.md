@@ -11,7 +11,7 @@
 
 FNIT 两个连续 API 合计 **2624.89 s（43.75 分钟）**，不含既有皮层重建。DeepPrep 两行来自两个独立运行，分别重建解剖；相加会重复计算重建，不能当作一次同时输出 volume 和 surface 的时间。DeepPrep 的 surface 时间已经包含 BOLD 预处理，与 FNIT 仅 surface API 的起点不同。
 
-本页 FNIT 结果固定到实际运行提交 [`3f8b756`](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/commit/3f8b756def9a76d8fe4a842db8d7543ec4e7b91d)，复用[volume 报告](../fmri_volume.public.json)和[surface 报告](../fmri_surface.public.json)，不代表之后 main 改动的耗时。DeepPrep 源码固定到 [`04af8f3`](https://github.com/pBFSLab/DeepPrep/tree/04af8f3541737505de41530b23804cd9f2b6efa1)。[机器可读对照](comparison.public.json)、[CSV](timings.csv)由 [compare_results.py](compare_results.py)从三份报告生成，保留报告哈希和计时范围。
+本页 FNIT 结果固定到实际运行提交 [`3f8b756`](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/commit/3f8b756def9a76d8fe4a842db8d7543ec4e7b91d)，复用[该次 volume 报告](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/blob/f12dba7e23ce5547206983aeb024a3aea5eac1bf/validation/fmri/fmri_volume.public.json)和[surface 报告](../fmri_surface.public.json)，不代表之后 main 改动的耗时。DeepPrep 源码固定到 [`04af8f3`](https://github.com/pBFSLab/DeepPrep/tree/04af8f3541737505de41530b23804cd9f2b6efa1)。[机器可读对照](comparison.public.json)、[CSV](timings.csv)由 [compare_results.py](compare_results.py)从三份报告生成，保留报告哈希和计时范围。2026-10-01 的当前 volume 实测见[最新验证](../README.md)，本页既有对照没有重跑。重建本页表格时，将上面固定提交的 volume 报告另存，再以 `compare_results.py --volume-report /private/reports/volume_20260930.json --output-dir /private/results/comparison` 读取；脚本会拒绝把不同运行提交的 volume 与 surface 相加。
 
 ## 输入与算法差异
 

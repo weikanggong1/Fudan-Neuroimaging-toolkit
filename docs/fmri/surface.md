@@ -1,14 +1,14 @@
 # fMRI 表面流程：fsLR32k 时间序列
 
-`fMRISurface_pipeline` 读取已完成混杂回归的 [FNIT volume BIDS Derivatives](README.md)，使用同被试 T1w 的 recon-all 结果和 HCP fsLR 模板。原生 EPI BOLD 经 BBR 重采样到 T1w 后投到 white/pial ribbon；MNI152 2 mm BOLD 提供皮层下信号。FS 初始球面再经 [FNIT MSMSulc](../msm/README.md) 注册到 fsLR，按 fMRIPrep 顺序运行 Workbench ribbon 投影、dilate、mask、ADAP_BARY_AREA 重采样，并组装 91k CIFTI。直接投向皮层的是 **T1w 网格的 BOLD**。运行时不调用 FreeSurfer、FSL、fMRIPrep 或 Nipype。
+`fMRISurface_pipeline` 读取已完成 ICA-AROMA 清理的 [FNIT volume BIDS Derivatives](README.md)，使用同被试 T1w 的 recon-all 结果和 HCP fsLR 模板。原生 EPI BOLD 经 BBR 重采样到 T1w 后投到 white/pial ribbon；MNI152 2 mm BOLD 提供皮层下信号。FS 初始球面再经 [FNIT MSMSulc](../msm/README.md) 注册到 fsLR，按 fMRIPrep 顺序运行 Workbench ribbon 投影、dilate、mask、ADAP_BARY_AREA 重采样，并组装 91k CIFTI。直接投向皮层的是 **T1w 网格的 BOLD**。运行时不调用 FreeSurfer、FSL、fMRIPrep 或 Nipype。
 
-先运行 `fMRIVolume_pipeline`，至少启用 WM、CSF 或运动回归中的一项。`recon_all` 必须是同一源 T1w 已完成重建的目录，或含 `FreeSurfer/` 的 ZIP；代码核对 `mri/orig/001.mgz` 与 volume 所用 T1w 的尺寸和仿射。默认只需要 T1w。T2w 或 FLAIR 可用于外部 recon-all 重建，但本流程不读取它们，也不做髓鞘图或 MSMAll。HCP 资源下载：`fnit-setup-fmri-surface-assets --output-dir /absolute/path/hcp_surface_assets --fmriprep`。安装器优先从 [FNIT 固定 Release](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1)获取已核对许可的 HCP 文件，失败后回退 HCPpipelines 原站；TemplateFlow dseg 保持原站下载。需另安装允许使用的 Connectome Workbench。
+先运行 `fMRIVolume_pipeline`。额外的 WM、CSF、运动、全脑信号回归和带通均可选；仅 ICA-AROMA 清理后的 volume 也可接续。接口核对原始 BOLD/T1 来源、AROMA 完成状态、TR 与输出网格。`recon_all` 必须是同一源 T1w 已完成重建的目录，或含 `FreeSurfer/` 的 ZIP；代码核对 `mri/orig/001.mgz` 与 volume 所用 T1w 的尺寸和仿射。默认只需要 T1w。T2w 或 FLAIR 可用于外部 recon-all 重建，但本流程不读取它们，也不做髓鞘图或 MSMAll。HCP 资源下载：`fnit-setup-fmri-surface-assets --output-dir /absolute/path/hcp_surface_assets --fmriprep`。安装器优先从 [FNIT 固定 Release](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1)获取已核对许可的 HCP 文件，失败后回退 HCPpipelines 原站；TemplateFlow dseg 保持原站下载。需另安装允许使用的 Connectome Workbench。
 
 ## 流程策略
 
 ```mermaid
 flowchart TD
-    VOL["已完成的 volume BIDS Derivatives"] --> CHECK["核对来源 T1w、混杂回归与 BOLD 时间维"]
+    VOL["已完成的 volume BIDS Derivatives"] --> CHECK["核对来源 T1w、AROMA 状态与 BOLD 时间维"]
     FS["同一 T1w 的 recon-all subject 或 ZIP"] --> CHECK
     CHECK --> NATIVE["原生 EPI clean BOLD 与 BBR 矩阵"]
     CHECK --> MNI["MNI 2 mm clean BOLD"]
@@ -74,12 +74,14 @@ print(result.dtseries)  # 91k CIFTI 时间序列
 
 ## 真实数据 benchmark
 
-2026-09-30 用 `3f8b756` 的公开 API，在修补 volume 最终 MNI 样条插值后连续运行一例真实 UKB 的完整 490 帧 volume 和 surface。本次 surface 直接使用刚完成的 volume，输出双侧 490×32,492 GIFTI 与 490×91,282 CIFTI，数值、时间轴和 JSON 检查全部通过。
+本节 surface 测量保留原运行日期和输入；2026-10-01 的 volume 复测见[完整验证页](../../validation/fmri/README.md)，没有与下面旧 surface 时间相加。
+
+2026-09-30 用 `3f8b756` 的公开 API，在修补 volume 最终 MNI 样条插值后连续运行一例真实 UKB 的完整 490 帧 volume 和 surface。该次 surface 直接使用同日生成的 volume，输出双侧 490×32,492 GIFTI 与 490×91,282 CIFTI，数值、时间轴和 JSON 检查全部通过。
 
 | 测量 | 结果 |
 |---|---|
 | 完整 surface API，含球面估计、写盘和清理 | 905.71 s |
-| volume + surface API 合计 | 2624.89 s（43.75 分钟） |
+| 2026-09-30 volume + surface API 合计 | 2624.89 s（43.75 分钟） |
 | surface 峰值 CUDA allocated / reserved | 0.73 / 1.26 GB |
 | 固定 volume，只替换官方 newMSM 球面：左 / 右皮层时间 r 均值 | 0.940496 / 0.941404 |
 | 同一对照的左 / 右皮层 MAE | 18.1565 / 19.7100 |

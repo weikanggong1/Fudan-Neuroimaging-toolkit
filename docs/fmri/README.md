@@ -94,7 +94,7 @@ print(result.clean_native)  # 个体 EPI 空间清理后 4D BOLD
 print(result.clean_mni)     # MNI152 2 mm 清理后 4D BOLD
 ```
 
-命令行：`fnit-fmri volume --bids-root /absolute/path/bids --derivatives-root /absolute/path/bids/derivatives/fnit --subject 0001 --mni-template /absolute/path/MNI152_T1_2mm.nii.gz --regress-wm --regress-csf --regress-motion --device cuda:0`。完整选项见 `fnit-fmri volume --help`。
+命令行：`fnit-fmri volume --bids-root /absolute/path/bids --derivatives-root /absolute/path/bids/derivatives/fnit --subject 0001 --mni-template /absolute/path/MNI152_T1_2mm.nii.gz --regress-wm --regress-csf --regress-motion --device cuda:0`。这条命令选择一个被试的 BOLD run，执行上图完整流程，并额外回归 WM、CSF 和运动项；将清理后原生及 MNI BOLD 写入指定的 derivatives 根目录。完整选项见 `fnit-fmri volume --help`。
 
 ## 输出
 
@@ -103,38 +103,55 @@ print(result.clean_mni)     # MNI152 2 mm 清理后 4D BOLD
 | 路径（省略 `sub-0001/`） | 含义 |
 |---|---|
 | `func/sub-0001_task-rest_space-boldref_desc-clean_bold.nii.gz` | 原生 EPI 参考网格的清理后 BOLD，供 surface 皮层投影前重采样到 T1w。 |
-| `func/sub-0001_task-rest_space-MNI152NLin6Asym_res-2_desc-clean_bold.nii.gz` | MNI152 2 mm 清理后 BOLD，供皮层下 CIFTI。相邻 JSON 记录 TR、来源、回归配置、耗时及 `FNIT.MNIInterpolation="cubic-bspline-periodic"`。 |
+| `func/sub-0001_task-rest_space-MNI152NLin6Asym_res-2_desc-clean_bold.nii.gz` | MNI152 2 mm 清理后 BOLD，供皮层下 CIFTI。相邻 JSON 保留源 TaskName，记录 TR、来源、回归配置、耗时及 `FNIT.MNIInterpolation="cubic-bspline-periodic"`。 |
 | `func/sub-0001_task-rest_space-MNI152NLin6Asym_res-2_desc-brain_mask.nii.gz` | MNI 网格脑掩膜。 |
 | `func/sub-0001_task-rest_from-boldref_to-T1w_mode-image_xfm.txt` | BBR FLIRT 4×4 矩阵；surface 流程用它把 EPI BOLD 采样到 T1w。 |
 | `anat/sub-0001_desc-brain_T1w.nii.gz` | SynthStrip 提取的 T1w 脑影像；与源 T1w 同网格。 |
 
-`FMRIVolumeResult` 返回上述五条绝对路径、MNI BOLD 的 JSON 路径及各阶段耗时。已有输出不会自动更新。重跑时用新的 `derivatives_root`，或设置 `overwrite=True`（命令行 `--overwrite`）；新版 MNI BOLD 的 JSON 应包含上述 `MNIInterpolation` 字段。中间的 FEAT、PICA 与 AROMA 文件只在运行时工作目录中存在。表面处理需随后调用 [`fMRISurface_pipeline`](surface.md)。
+`FMRIVolumeResult` 返回上述五条绝对路径、MNI BOLD 的 JSON 路径及各阶段耗时。已有输出不会自动更新。重跑时用新的 `derivatives_root`，或设置 `overwrite=True`（命令行 `--overwrite`）；新版 MNI BOLD 的 JSON 应包含上述 `MNIInterpolation` 字段。`FNIT.Configuration` 记录本次全部处理参数、FAST 配置、模板与权重位置；`FNIT.Denoising` 记录 ICA-AROMA 模式与完成状态；`FNIT.Source` 记录 Python 源码清单 SHA-256 和 PyTorch、NumPy、nibabel、SciPy 版本。此源码清单不包含权重或模板文件内容，资源哈希由安装器及 benchmark 另行核对。WM/CSF 回归关闭时不生成对应原生掩膜；BBR 所需 T1 白质分割仍会生成。中间的 FEAT、PICA 与 AROMA 文件只在运行时工作目录中存在。表面处理需随后调用 [`fMRISurface_pipeline`](surface.md)。
 
 ## 全流程 benchmark
 
-2026-09-30 用 `3f8b756` 的运行源码，使用一例真实 UKB 原始 BOLD/SBRef 和同被试重建存档中的 `orig/001.mgz` T1 输入，完成完整 490 帧 BIDS volume 流程，启用 WM、CSF 和 24 项运动回归，使用默认 SynthMorph 配准。T1 经 nibabel 逐体素无误差转换；它是存档的皮层重建输入，更早的结构预处理未核对。
+2026-10-01 用 `a7c5a64` 的源码和当前 FLIRT，重新处理一例完整 490 帧 UKB BOLD/SBRef。使用同被试重建存档的 `orig/001.mgz` T1，经 nibabel 逐体素无误差转换；更早的结构预处理未核对。开启 WM、CSF 和 24 项运动回归，默认 SynthMorph 配准、ICA-AROMA 非激进清理。ICA-AROMA 是本流程选定的去噪方法。
 
 | 检查 | 结果 |
 |---|---|
 | 原生 / MNI BOLD 网格 | 88×88×64×490 / 91×109×91×490 |
-| 输出合同 | float32；全部数值有限；TR 0.735 s；MNI 掩膜外为零 |
+| 输出合同 | float32；全部有限；TR 0.735 s；MNI 掩膜外为零 |
 | ICA / AROMA | 95 个成分，115 次迭代后收敛；55 个噪声成分 |
-| volume API 耗时，含最终写盘 | 1719.19 s |
+| volume API，含最终写盘 | **491.36 s** |
+| BBR 与 T1→MNI 阶段 | **32.22 s** |
 | 峰值 CUDA allocated / reserved | 13.34 / 16.96 GB |
-| pre-ICA FEAT 与原 FSL 的 4D r / MAE | 0.996417 / 423.501 |
-| 交集掩膜内逐体素时间相关中位数 | 0.966798 |
+| 同输入 pre-ICA 与原 FSL 的逐体素时间 r，中位数 / 均值 | 0.966798 / 0.951027 |
+| 同 warp 首 8 真实帧与 FSL 样条插值 r / RMSE | 0.99999999993 / 0.001956 |
+| 最终原生回归与独立 float64 参照 RMSE | 0.000005080 |
 
-时间为共享 H100 上一次冷调用，排除导入、预先哈希和事后检查。FEAT 对照使用相同原始 BOLD/SBRef 的 FSL 6.0.7.22 no-GDC/no-B0 参照；96,776 个交集体素，掩膜 Dice 0.916318。最终 ICA-AROMA 加混杂回归的结果没有可逐体素配对的 UKB FIX 参照，因此 FEAT 的相关性不能当成最终 MNI 清理图的一致性。
+这次修复了混杂矩阵量纲导致的秩截断、微小浮点越界导致的重采样置零、未启用回归仍构建组织掩膜，以及 surface 对 AROMA-only 派生结果的拒绝。JSON 同时补齐处理配置、源代码和去噪完成状态。173 项 CPU/CUDA 测试通过；benchmark 的 SBRef 网格验证另有 2 项测试。修复和真实数据控制见[修复验证页](../../validation/fmri/volume_fixed.md)。
 
-最终 MNI 重采样已由三线性改为 GPU 三次 B 样条。在同一 490 帧 BOLD、同一矩阵和位移场的控制中，SD 对采样位置的回归斜率下降 38.4%，relative SD 中位数由 0.558 提高到 0.837。仍有残留格纹；未对时序或示例图做平滑。单独重采样含读写耗时为线性 39.13 s、样条 54.09 s。定义、FSL 插值参照和共享色阶对照图见[重采样验证](../../validation/fmri/resampling.md)。
+同一病例上一版 API 为 1719.19 s，其中配准为 1186.44 s。新旧都是共享 H100 上的单次冷调用，负载不同；这里报告观察到的耗时，不据此给出稳定加速比。新旧 pre-ICA 文件 SHA-256 完全相同；最终原生和 MNI BOLD 的逐体素时间 r 中位数分别为 0.993736、0.991469。MNI→EPI 合成采样位置的变化中位数为 0.083 mm。
 
-下面依次显示 MNI 解剖模板、清理后 BOLD 的时间标准差、清理后的一个时间点。混杂回归去掉截距后时间均值接近零，因此不以均值图展示结构。模板只提供解剖参照，不是官方清理后 BOLD。
+| 与实际官方 UKB 发布结果比较 | 时间 r 均值 / 中位数 |
+|---|---|
+| 原生清理图；96,011 个共同非常数体素 | 0.428608 / 0.502603 |
+| 各自完整 MNI 清理图；220,977 个共同非常数体素 | 0.271106 / 0.228182 |
+| 两侧清理图使用同一 FNIT warp | 0.473946 / 0.564422 |
+| 同一官方清理图使用 FNIT / 官方 warp | 0.486080 / 0.523288 |
 
-![完整 490 帧 volume 输出](figures/fmri_volume.png)
+官方 UKB 使用 FIX 并包含 GDC/B0 和自身配准，本次候选没有 GDC/B0。表中量化这些处理差异；同 warp 与同清理图控制用于区分去噪和空间映射的影响。插值在固定 warp 下已接近数值一致，更新 FLIRT 后的整链时间相关性与上一版接近。不能把同输入 pre-ICA 的高相关当作最终 MNI 的相关性，也不能把时间相关性直接解释为去噪质量。详细掩膜、来源哈希及定义见[新旧与官方比较](../../validation/fmri/volume_fixed_comparison.public.json)。
 
-全部阶段时间、当前 surface 接续运行、官方对照边界和单被试复现命令见[全流程验证页](../../validation/fmri/README.md)，输入/输出与代码哈希见[volume 报告](../../validation/fmri/fmri_volume.public.json)。
+最终 MNI BOLD 使用三次 B 样条，边界仅允许源 voxel 坐标 `1e-6` 的浮点容差。早先固定同一 490 帧输入与 warp 的控制显示：改用样条后采样位置对 SD 的影响斜率下降 38.4%，relative SD 中位数由 0.558 提高到 0.837。它是空间插值的局部验证；残留格纹与三次插值的细节见[重采样验证](../../validation/fmri/resampling.md)。未对最终时序或示例图追加平滑。
 
-同一完整 490 帧 BOLD 的官方 DeepPrep 25.1.0 volume 实测为 2091.36 s，包含独立结构重建及 QC。与本页 FNIT 的 1719.19 s 计时相比，T1 输入、SBRef 和去噪范围不同；完整计时表、输出检查及复现命令见[FNIT / DeepPrep 对照](../../validation/fmri/deepprep/README.md)。
+下面为本次输出：MNI 解剖模板、时间标准差和一个时间点。回归去掉截距后时间均值接近零，因此用时间标准差展示空间结构。
+
+![当前 490 帧 volume 输出](figures/fmri_volume.png)
+
+新旧 FNIT 与官方发布图的时间标准差使用同一色阶、同一切面；官方 FIX 保留的时间均值不影响 SD。
+
+![新旧 FNIT 与官方时间标准差](figures/fmri_volume_comparison.png)
+
+全部阶段时间与单被试复测命令见[全流程验证页](../../validation/fmri/README.md)，配置、文件与源码哈希见[volume 报告](../../validation/fmri/fmri_volume.public.json)。surface 球面和 MS-HBM 的既有对照注明各自运行日期和源码，本次只重新执行 volume。
+
+官方 DeepPrep 25.1.0 在同一完整 490 帧 BOLD 上的既有实测为 2091.36 s，包含独立结构重建及 QC；计时范围、T1 输入和去噪方法均不同。既有实验见[FNIT / DeepPrep 对照](../../validation/fmri/deepprep/README.md)，它没有随本次 FLIRT 更新重新测量。
 
 ## 参考文献与原实现
 

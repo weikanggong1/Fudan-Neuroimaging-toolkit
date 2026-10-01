@@ -80,6 +80,12 @@ def check_volume(path, template=None, mask=None):
             "sha256": sha256(path)}
 
 
+def check_native_volume(path, inputs):
+    """Validate native output against the EPI reference selected by the pipeline."""
+    reference = nib.load(str(inputs.sbref or inputs.bold))
+    return check_volume(path, reference)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("stage", choices=("volume", "surface"))
@@ -233,7 +239,7 @@ def main():
         mask = np.asarray(mask_image.dataobj) > 0
         if not mask.any():
             raise ValueError("empty MNI mask")
-        checks = {"clean_native": check_volume(result.clean_native, nib.load(str(inputs.bold))),
+        checks = {"clean_native": check_native_volume(result.clean_native, inputs),
                   "clean_mni": check_volume(result.clean_mni, template, mask),
                   "mask_voxels": int(mask.sum()), "mask_sha256": sha256(result.mask_mni),
                   "bbr_matrix_finite_4x4": bool(np.loadtxt(result.bbr_matrix).shape == (4, 4)
