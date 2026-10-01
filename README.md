@@ -36,11 +36,10 @@ CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹�
 | [WMHSynthSeg](docs/wmh_synthseg/README.md) | FreeSurfer `mri_WMHsynthseg` | 脑结构与白质高信号标签、软体积。 |
 | [SynthSeg](docs/synthseg/README.md) | FreeSurfer `mri_synthseg` | 33 类脑结构标签与软体积。 |
 | [SynthSegPlus](docs/synthseg_plus/README.md) | FreeSurfer `mri_synthseg --parc` | 33 类结构与 68 区皮层分区。 |
-| [segment_subregions](docs/subregions/README.md) | FreeSurfer `segment_subregions brainstem` | 脑干四亚区标签。 |
-| [segment_nuclei](docs/subregions/nuclei.md) | FreeSurfer `segment_subregions thalamus/hippo-amygdala` | 丘脑核团、海马亚区和杏仁核标签与体积；逐区阈值尚未全部通过。 |
 | [SynthSR](docs/synthsr/README.md) | FreeSurfer `mri_synthsr` | 合成 1 mm T1w 图像。 |
 | [TorchFAST](docs/fast/README.md) | FSL `fast` | 三组织分割、部分体积分数与偏置场。 |
 | [FastVBM](docs/fast_vbm/README.md) | FSL `fslvbm` | 从 T1w 生成标准空间灰质、Jacobian 与调制灰质图；[全流程 benchmark](validation/fast_vbm/README.md)。 |
+| [segment_4_subregions](docs/subregions/README.md) | FreeSurfer `segment_subregions brainstem/thalamus/hippo-amygdala` | 一张 T1 完成脑干、双侧丘脑、海马和杏仁核分割，保存原网格标签、110 项硬/软体积及高分辨率结果；CPU/GPU 均支持。[完整 benchmark](validation/subregions/segment_4_subregions/README.md)：原始 T1 7.10 分钟，相同阶段输入 8.17 分钟。 |
 | [run_recon_all_python](docs/recon_all/README.md) | FreeSurfer `recon-all` | 从 T1w 生成脑分割、皮层表面、顶点指标与脑区统计。 |
 
 ### fMRI
@@ -114,7 +113,7 @@ recon-all 的 Python 依赖和原生编译工具链已列入主页 Conda 环境�
 
 ## 下载和配置权重
 
-Git 仓库与 wheel 不包含模型权重。配置脚本优先从 [FNIT 固定版本 Release](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1)下载；Release 不可用时回退到原作者地址。每个文件均检查大小和 SHA-256，再保存到默认权重目录。推理过程不会自动联网。
+Git 仓库与 wheel 不包含模型权重。配置脚本优先从 [FNIT 固定版本 Release](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1)下载；Release 不可用时回退到原作者地址。每个文件均检查大小和 SHA-256，再保存到默认权重目录。统一脑亚区接口在首次缺少所需资源时会自动准备；离线运行请先配置权重和图谱。
 
 下载全部模型：
 
@@ -149,24 +148,41 @@ fnit-setup-fmri-surface-assets --output-dir /absolute/path/hcp_surface_assets --
 
 该命令包含 fsLR32k 投影和 MSMSulc 配准所需的球面、脑沟参考图、ROI、官方 MSMSulc 对照配置，以及生成 91k CIFTI 的 HCP 皮层下分区。被试需提供已生成的 white、pial、sphere、sphere.reg、sulc 和 thickness；这条 fMRIPrep 表面路径不使用 FLAIR、髓鞘图或 wmparc。完整用法见 [fMRI 表面投影](docs/fmri/surface.md)。
 
-脑干亚区另需约 2.3 MB 图谱包，可独立下载和生成 PyTorch 平滑先验：
+统一脑亚区分割使用经哈希校验的 BrainstemSS、ThalamicNuclei 和 HippoSF 图谱。可提前准备，以便离线运行；脑干沿用预计算先验，丘脑和海马先验在个体仿射变换后的参考网格上平滑：
 
 ```bash
-# --output-root：生成 brainstem/ 图谱目录的根路径；--device：先验计算设备
-fnit-setup-brainstem-atlas --output-root /absolute/path/atlases --device cuda:0
+# --output-root：生成四个结构目录的根路径；--device：先验计算设备
+fnit-setup-subregion-atlases --output-root /absolute/path/subregion_atlases --device cpu
 ```
 
-输入、输出及 FreeSurfer 同输入对照见[脑干亚区说明](docs/subregions/README.md)。
-
-丘脑、海马与杏仁核使用独立的 Conda 原生扩展环境，需从仓库根目录编译一次：
-
-```bash
-conda env create -f environment-gems-native.yml
-conda run -n fnit-gems-native python tools/build_gems_native.py
-conda run -n fnit-gems-native fnit-nuclei setup --atlas-root /absolute/path/nuclei_atlases
+```mermaid
+flowchart TD
+    T1[一张三维 T1] --> SS[一次共享 SynthSeg+]
+    SS --> LABELS[粗结构标签及 DK 68 区皮层分区]
+    LABELS --> WM[生成 wmparc 白质代理]
+    WM --> RECIPES[依次拟合脑干、丘脑及左右海马和杏仁核]
+    LABELS --> RECIPES
+    T1 --> RECIPES
+    RECIPES --> MERGE[合并到输入 T1 网格]
+    MERGE --> SAVE[保存标签、110 项体积及报告]
+    RECIPES -. 可选 .-> HIGH[高分辨率标签和后验]
+    HIGH --> SAVE
 ```
 
-运行输入为同网格的 `norm.mgz`、`aseg.mgz` 和 `wmparc.mgz`；用法、实际精度和时间见[核团分割说明](docs/subregions/nuclei.md)。
+```python
+from fnit import segment_4_subregions
+
+subregion_result = segment_4_subregions(
+    t1="/absolute/path/sub-01_T1w.nii.gz",          # 输入：一张原始 T1
+    atlas_root="/absolute/path/subregion_atlases",  # 输入：已准备的统一图谱
+    output_dir="/absolute/path/sub-01_subregions", # 输出：标签、表格和报告目录
+    device="cuda:0",                             # 输入：CUDA 设备；也支持 cpu
+    threads=4,                                  # 输入：PyTorch CPU 线程数
+    optimization="fast",                         # 输入：默认速度配置
+)
+```
+
+默认运行全部四项结构，设置输出目录后自动保存原 T1 网格的 `subregions_native.nii.gz`、`labels.tsv`、`volumes.tsv`、`report.json` 和四项 `highres/` 标签。`save_posteriors=False` 默认不写较大的后验图；需要时显式设为 `True`。完整参数、命令行和官方对照见[统一脑亚区说明](docs/subregions/README.md)。
 
 API 的显式 `weights=`、CLI 的 `--weights`、`FNIT_WEIGHTS` 环境变量、已保存目录和默认缓存按此顺序解析。TorchFAST、TorchFLIRT、TorchMCFLIRT、TorchFNIRT、TorchApplyWarp、TorchConvertWarp、TorchInvWarp、TorchTOPUP、TorchEDDY、TorchDTIFIT、TorchAMICONODDI、TorchMMORF、TorchBEDPOSTX、TorchProbtrackX 与 dMRI pipeline 的 TBSS 分支没有预训练权重；从原始 T1w 启动的流程可能仍需 SynthStrip。文件清单、官方 URL、SHA-256、许可和离线部署见[权重说明](docs/WEIGHTS.md)。
 

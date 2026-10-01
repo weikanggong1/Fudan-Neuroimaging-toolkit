@@ -102,16 +102,30 @@ def _run_synthseg(args):
     print(target)
 
 
-def _run_subregions(args):
-    from .gems import segment_subregions
-    result = segment_subregions(
-        args.i, args.atlas_root, structures="all" if not args.structure else args.structure,
+def _run_segment_4_subregions(args):
+    import shutil
+    from .gems import segment_4_subregions
+    selected = "all" if not args.structure else args.structure
+    save_outputs = (args.output_dir or args.report_json or args.save_highres or args.save_posteriors)
+    output = Path(args.output_dir) if args.output_dir else Path(args.o).parent
+    result = segment_4_subregions(
+        args.i, args.atlas_root, structures=selected,
         coarse_segmentation=args.coarse_segmentation, synthseg_weights=args.synthseg_weights,
-        auto_initialize=not args.no_auto_initialize, device=args.device,
-        em_iterations=args.em_iterations, deform_iterations=args.deform_iterations)
-    Path(args.o).parent.mkdir(parents=True, exist_ok=True)
-    result.labels.save(args.o)
-    print(args.o)
+        cortical_parcellation=args.cortical_parcellation, wmparc=args.wmparc,
+        synthseg_parc_weights=args.synthseg_parc_weights,
+        device=args.device, threads=args.threads,
+        optimization=args.optimization, output_dir=output if save_outputs else None,
+        save_highres=args.save_highres, save_posteriors=args.save_posteriors)
+    target = Path(args.o)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    if not result.output_files or target.resolve() != result.output_files["labels"]:
+        result.labels.save(target)
+    if args.report_json:
+        report = Path(args.report_json)
+        report.parent.mkdir(parents=True, exist_ok=True)
+        if report.resolve() != result.output_files["report"]:
+            shutil.copyfile(result.output_files["report"], report)
+    print(target)
 
 
 def _synthsr_suffix(path):
@@ -622,17 +636,27 @@ def main(argv=None):
     synthseg.add_argument('--parc', action='store_true', help='SynthSeg 2.0 cortical parcellation')
     synthseg.add_argument('--parc-weights', help='official synthseg_parc_2.0.h5 or directory')
     synthseg.add_argument('--parc-out', help='optional cortex-only parcel image')
-    subregions = commands.add_parser('subregions', help='experimental PyTorch GEMS subregions')
+    subregions = commands.add_parser('segment-4-subregions', help='end-to-end native T1 brainstem, thalamus, hippocampus and amygdala segmentation')
     subregions.add_argument('--i', '-i', required=True, help='native 3-D T1 image')
     subregions.add_argument('--o', '-o', required=True, help='native-grid labels')
-    subregions.add_argument('--atlas-root', required=True, help='directory of GEMS atlas packs')
-    subregions.add_argument('--structure', action='append', help='atlas-pack name; repeat for several')
+    subregions.add_argument('--atlas-root', help='prepared atlas cache; default is FNIT cache')
+    subregions.add_argument('--structure', action='append',
+                            choices=('all', 'brainstem', 'thalamus', 'hippo-amygdala-left',
+                                     'hippo-amygdala-right', 'hippo-amygdala'),
+                            help='select structures; default is all four recipes')
     subregions.add_argument('--coarse-segmentation', help='native-grid coarse labels')
+    subregions.add_argument('--cortical-parcellation', help='native-grid DK68 cortical labels')
+    subregions.add_argument('--wmparc', help='native-grid white matter parcellation')
     subregions.add_argument('--synthseg-weights', help='SynthSeg weights for initialization')
-    subregions.add_argument('--no-auto-initialize', action='store_true')
-    subregions.add_argument('--em-iterations', type=int, default=8)
-    subregions.add_argument('--deform-iterations', type=int, default=0)
+    subregions.add_argument('--synthseg-parc-weights', help='SynthSeg+ cortical weights')
+    subregions.add_argument('--output-dir', help='labels, volumes and report output directory')
+    subregions.add_argument('--save-highres', action='store_true', help='save fine-grid labels')
+    subregions.add_argument('--save-posteriors', action='store_true', help='save fine-grid posterior channels')
+    subregions.add_argument('--report-json', help='machine-readable processing report')
     subregions.add_argument('--device', default='cuda:0')
+    subregions.add_argument('--threads', type=int, default=4, help='positive CPU thread count')
+    subregions.add_argument('--optimization', choices=('fast', 'balanced'), default='fast',
+                           help='fast fine-grid fitting or balanced fitting with a longer mesh budget')
     sr = commands.add_parser('synthsr', help='synthesize a 1 mm T1-weighted image')
     sr.add_argument('--i', '-i', required=True, help='single input image')
     sr.add_argument('--o', '-o', required=True, help='output image or directory for this image')
@@ -824,8 +848,8 @@ def main(argv=None):
     if selected and selected[0] == "synthseg":
         _run_synthseg(parser.parse_args(selected))
         return
-    if selected and selected[0] == "subregions":
-        _run_subregions(parser.parse_args(selected))
+    if selected and selected[0] == "segment-4-subregions":
+        _run_segment_4_subregions(parser.parse_args(selected))
         return
     if selected and selected[0] == "mcflirt":
         from .mcflirt.cli import run_from_args
@@ -887,8 +911,8 @@ def main(argv=None):
     if args.command == 'synthseg':
         _run_synthseg(args)
         return
-    if args.command == 'subregions':
-        _run_subregions(args)
+    if args.command == 'segment-4-subregions':
+        _run_segment_4_subregions(args)
         return
     if args.command == 'fnirt':
         _run_fnirt(args)

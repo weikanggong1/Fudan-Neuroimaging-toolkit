@@ -1,0 +1,258 @@
+{
+  "recipes/base.py": {
+    "versions": {
+      "v14": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v14/src/fnit/gems/recipes/base.py",
+        "sha256": "48a6ed65c9956507929e9685c80cb6648c874fa7d53217011f6bc0648220ffab",
+        "constants": {
+          "mesh_iterations": "30",
+          "fast_mesh_iterations": "12",
+          "coarse_outer_iterations": "2",
+          "coarse_mesh_iterations": "8"
+        },
+        "methods": {
+          "segmentation_groups": {
+            "line": 166,
+            "ast_sha256": "67bdd8585cd9ed43e25243ca9e803d3e5ee56cea9503bbb9b4cc9542ba2b9eb7",
+            "source": "def segmentation_groups(self, atlas: GEMSAtlas) -> np.ndarray:\n    raise NotImplementedError"
+          },
+          "synthetic_labels": {
+            "line": 172,
+            "ast_sha256": "5b8a35b3f3e6307119eff4b8cd3062739ff5f93c827b446f18e781d44ef74360",
+            "source": "def synthetic_labels(self, coarse: np.ndarray) -> np.ndarray:\n    raise NotImplementedError"
+          },
+          "synthetic_means": {
+            "line": 175,
+            "ast_sha256": "8185585e1c8fbd4383f0f35bca32f3ed3a881f3a835978a19cbc342a56d2a5e8",
+            "source": "def synthetic_means(self, atlas: GEMSAtlas, classes: np.ndarray) -> np.ndarray:\n    raise NotImplementedError"
+          },
+          "_fit": {
+            "line": 189,
+            "ast_sha256": "8d21efa605d5ba1766550f17e1c3eedf18b84bc6762732158042acd2b3e3c160",
+            "source": "def _fit(self, atlas: GEMSAtlas, data: np.ndarray, affine: np.ndarray, classes: np.ndarray, schedule: tuple[tuple[float, int], ...], *, synthetic: bool, context: SubregionContext | None=None, device: torch.device, stage_offset: int=0, stage_count: int | None=None, mesh_iterations: int | None=None, working_resolution_mm: float | None=None, warm_start: bool=False) -> tuple[GEMSAtlas, TorchGEMSResult]:\n    \"\"\"Return an atlas on the input grid and a fit on its cropped grid.\"\"\"\n\n    def tick():\n        if device.type == 'cuda':\n            torch.cuda.synchronize(device)\n        return monotonic()\n    fit_started = tick()\n    mesh_steps = self.mesh_iterations if mesh_iterations is None else mesh_iterations\n    fast = self.optimization_profile == 'fast'\n    stop_options = {'deformation_stop': 0.005, 'cost_stop_patience': 3} if fast else {}\n    resolution_scale = self.resolution_mm / working_resolution_mm if working_resolution_mm is not None else 1.0\n    block_size = max(2, int(round(8 * resolution_scale)))\n    margin = max(3, int(np.ceil(sum((steps for _, steps in schedule)) * 0.05 + 3)))\n    if working_resolution_mm is not None:\n        margin = max(1, int(np.ceil(margin * resolution_scale)))\n    low = np.maximum(np.floor(atlas.vertices.min(0)).astype(int) - margin, 0)\n    high = np.minimum(np.ceil(atlas.vertices.max(0)).astype(int) + margin + 1, data.shape)\n    if np.any(high <= low):\n        raise ValueError(f'{self.name} atlas does not intersect the working image')\n    crop = tuple((slice(int(a), int(b)) for a, b in zip(low, high)))\n    shift = np.eye(4)\n    shift[:3, 3] = -low\n    atlas = atlas.transformed(shift, transform_reference=True)\n    reference = self._reference_vertices\n    affine_fit = np.linalg.lstsq(np.column_stack((reference, np.ones(len(reference)))), atlas.reference_vertices, rcond=None)[0]\n    boundary_transform = affine_fit[:3].T\n    crop_affine = affine.copy()\n    crop_affine[:3, 3] += affine[:3, :3] @ low\n    image = torch.as_tensor(data[crop], device=device, dtype=torch.float32)\n    with torch.no_grad():\n        vertices = torch.as_tensor(atlas.vertices, device=device, dtype=torch.float32)\n        tetrahedra = torch.as_tensor(atlas.tetrahedra, device=device)\n        occupancy = torch.ones((len(vertices), 1), device=device)\n        block_index = build_block_index(atlas.vertices, atlas.tetrahedra, tuple(image.shape), block_size=block_size, margin=3 * resolution_scale)\n        _, covered = rasterize_priors(vertices, tetrahedra, occupancy, tuple(image.shape), block_index=block_index, background_channel=None)\n        neighborhood = spherical_neighborhood(3 if synthetic else 5)\n        if working_resolution_mm is not None and (not synthetic):\n            neighborhood = physical_neighborhood(5 * self.resolution_mm, np.linalg.norm(affine[:3, :3], axis=0))\n        mask = ndimage.binary_erosion(covered.cpu().numpy(), structure=neighborhood, border_value=1)\n        if not synthetic:\n            mask &= image.cpu().numpy() > 0\n        image = image.clone()\n        image[~torch.as_tensor(mask, device=device)] = 0\n    del block_index, covered, vertices, tetrahedra, occupancy\n    result = None\n    previous_params = None\n    previous_classes = None\n    hyper = (None, None)\n    stage_stats = []\n    for index, (sigma, iterations) in enumerate(schedule):\n        stage_started = fit_started if index == 0 else tick()\n        logger.info('%s %s stage %d/%d: sigma=%g iterations=%d', self.name, 'segmentation' if synthetic else 'intensity warm-start' if warm_start else 'intensity', index + stage_offset + 1, stage_count or len(schedule), sigma, iterations)\n        if not synthetic:\n            classes = self.intensity_groups(atlas, index + stage_offset)\n        if synthetic:\n            means = self.synthetic_means(atlas, classes)\n            fixed = GaussianParameters(torch.as_tensor(means[:, None], device=device, dtype=torch.float32), torch.full((len(means), 1, 1), 0.01, device=device))\n            hyper = (None, None)\n        else:\n            fixed = None\n            if previous_classes is None or not np.array_equal(previous_classes, classes):\n                hyper_atlas = atlas\n                if working_resolution_mm is not None:\n                    hyper_atlas = atlas.transformed(np.diag([1 / resolution_scale] * 3 + [1.0]), transform_reference=True)\n                means, counts = self.gaussian_hyperparameters(context, hyper_atlas, classes)\n                hyper = (means, counts * resolution_scale ** 3)\n                previous_params = None\n        previous_classes = classes.copy()\n        if sigma:\n            from ..smoothing import smooth_atlas_alphas\n            alphas = smooth_atlas_alphas(atlas, classes, sigma * resolution_scale, device=device)\n        if not sigma:\n            alphas = np.zeros((len(atlas.vertices), int(classes.max()) + 1), np.float32)\n            for channel, group in enumerate(classes):\n                alphas[:, group] += atlas.alphas[:, channel]\n        solver_started = tick()\n        result = TorchGEMS(atlas, device=device, block_size=block_size)(image, label_classes=classes, em_iterations=1 if synthetic else self.em_iterations, background_channel=atlas.label_names.index('Unknown'), deform_lr=1.0, deform_optimizer='lbfgs', deform_em_interval=iterations + 1 if synthetic else mesh_steps + 1, index_margin=3.0 * resolution_scale, adaptive_index=True, boundary_transform=boundary_transform, mean_hyper=None if synthetic else torch.as_tensor(hyper[0], device=device), n_hyper=None if synthetic else torch.as_tensor(hyper[1], device=device), fixed_gaussians=fixed, initial_gaussians=previous_params, relative_cost_stop=(1e-06 if fast else 1e-10) if synthetic else None, outer_iterations=1 if synthetic else iterations, em_relative_cost_stop=None if synthetic else 1e-05, outer_relative_cost_stop=None if synthetic else 1e-05 if fast else 1e-06, fit_alpha_stages=[(alphas, iterations if synthetic else mesh_steps)], **stop_options)\n        solver_finished = tick()\n        atlas = atlas.with_vertices(result.vertices.detach().cpu().numpy())\n        previous_params = result.gaussian_parameters\n        stage_finished = tick()\n        stage_stats.append({**(getattr(result, 'optimization_stats', None) or {}), 'stage_index': index + stage_offset + 1, 'synthetic': synthetic, 'warm_start': warm_start, 'block_size': block_size, 'resolution_mm': float(np.mean(np.linalg.norm(affine[:3, :3], axis=0))), 'alpha_sigma_voxels': sigma * resolution_scale, 'alpha_sigma_mm': sigma * resolution_scale * float(np.mean(np.linalg.norm(affine[:3, :3], axis=0))), 'outer_iteration_limit': 1 if synthetic else iterations, 'mesh_iteration_limit': iterations if synthetic else mesh_steps, 'preparation_seconds': solver_started - stage_started, 'gems_fit_seconds': solver_finished - solver_started, 'post_fit_seconds': stage_finished - solver_finished, 'total_seconds': stage_finished - stage_started})\n    assert result is not None\n    result.optimization_stats = _fit_statistics(stage_stats)\n    result.affine = crop_affine\n    unshift = np.eye(4)\n    unshift[:3, 3] = low\n    return (atlas.transformed(unshift, transform_reference=True), result)"
+          },
+          "fit_segmentation_mesh": {
+            "line": 331,
+            "ast_sha256": "ea53c99132793fbce8d6f81d812c9ab873895d4c70ee569625090063623b64f5",
+            "source": "def fit_segmentation_mesh(self, atlas: GEMSAtlas, context: SubregionContext, device: torch.device) -> tuple[GEMSAtlas, dict]:\n    start = monotonic()\n    classes = self.segmentation_groups(atlas)\n    synthetic = self.synthetic_labels(context.coarse_segmentation)\n    fitted, result = self._fit(atlas, synthetic.astype(np.float32), context.image.affine, classes, self.seg_schedule, synthetic=True, device=device)\n    displacement = np.linalg.norm(fitted.vertices - atlas.vertices, axis=1)\n    return (fitted, {'seconds': monotonic() - start, 'min_jacobian': result.min_jacobian, 'mean_displacement_voxels': float(displacement.mean()), 'p95_displacement_voxels': float(np.percentile(displacement, 95)), 'mesh_solver': result.optimization_stats})"
+          }
+        }
+      },
+      "v15": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/src/fnit/gems/recipes/base.py",
+        "sha256": "e0a965ec1d08a487cbd48e6b114b63c4156bee56895b0421f34939ff73dd4856",
+        "constants": {
+          "mesh_iterations": "30",
+          "fast_mesh_iterations": "20"
+        },
+        "methods": {
+          "segmentation_groups": {
+            "line": 131,
+            "ast_sha256": "67bdd8585cd9ed43e25243ca9e803d3e5ee56cea9503bbb9b4cc9542ba2b9eb7",
+            "source": "def segmentation_groups(self, atlas: GEMSAtlas) -> np.ndarray:\n    raise NotImplementedError"
+          },
+          "synthetic_labels": {
+            "line": 137,
+            "ast_sha256": "5b8a35b3f3e6307119eff4b8cd3062739ff5f93c827b446f18e781d44ef74360",
+            "source": "def synthetic_labels(self, coarse: np.ndarray) -> np.ndarray:\n    raise NotImplementedError"
+          },
+          "synthetic_means": {
+            "line": 140,
+            "ast_sha256": "8185585e1c8fbd4383f0f35bca32f3ed3a881f3a835978a19cbc342a56d2a5e8",
+            "source": "def synthetic_means(self, atlas: GEMSAtlas, classes: np.ndarray) -> np.ndarray:\n    raise NotImplementedError"
+          },
+          "_fit": {
+            "line": 154,
+            "ast_sha256": "324fe622a5d62604a80d7691eabaecef1f86a3048b796c1abdef710ea87832dc",
+            "source": "def _fit(self, atlas: GEMSAtlas, data: np.ndarray, affine: np.ndarray, classes: np.ndarray, schedule: tuple[tuple[float, int], ...], *, synthetic: bool, context: SubregionContext | None=None, device: torch.device, stage_offset: int=0, stage_count: int | None=None, mesh_iterations: int | None=None) -> tuple[GEMSAtlas, TorchGEMSResult]:\n    \"\"\"Return an atlas on the input grid and a fit on its cropped grid.\"\"\"\n\n    def tick():\n        if device.type == 'cuda':\n            torch.cuda.synchronize(device)\n        return monotonic()\n    fit_started = tick()\n    mesh_steps = self.mesh_iterations if mesh_iterations is None else mesh_iterations\n    fast = self.optimization_profile == 'fast'\n    stop_options = {'deformation_stop': 0.005, 'cost_stop_patience': 3} if fast else {}\n    block_size = 8\n    margin = max(3, int(np.ceil(sum((steps for _, steps in schedule)) * 0.05 + 3)))\n    low = np.maximum(np.floor(atlas.vertices.min(0)).astype(int) - margin, 0)\n    high = np.minimum(np.ceil(atlas.vertices.max(0)).astype(int) + margin + 1, data.shape)\n    if np.any(high <= low):\n        raise ValueError(f'{self.name} atlas does not intersect the working image')\n    crop = tuple((slice(int(a), int(b)) for a, b in zip(low, high)))\n    shift = np.eye(4)\n    shift[:3, 3] = -low\n    atlas = atlas.transformed(shift, transform_reference=True)\n    reference = self._reference_vertices\n    affine_fit = np.linalg.lstsq(np.column_stack((reference, np.ones(len(reference)))), atlas.reference_vertices, rcond=None)[0]\n    boundary_transform = affine_fit[:3].T\n    crop_affine = affine.copy()\n    crop_affine[:3, 3] += affine[:3, :3] @ low\n    image = torch.as_tensor(data[crop], device=device, dtype=torch.float32)\n    with torch.no_grad():\n        vertices = torch.as_tensor(atlas.vertices, device=device, dtype=torch.float32)\n        tetrahedra = torch.as_tensor(atlas.tetrahedra, device=device)\n        occupancy = torch.ones((len(vertices), 1), device=device)\n        block_index = build_block_index(atlas.vertices, atlas.tetrahedra, tuple(image.shape), block_size=block_size, margin=3)\n        _, covered = rasterize_priors(vertices, tetrahedra, occupancy, tuple(image.shape), block_index=block_index, background_channel=None)\n        neighborhood = spherical_neighborhood(3 if synthetic else 5)\n        mask = ndimage.binary_erosion(covered.cpu().numpy(), structure=neighborhood, border_value=1)\n        if not synthetic:\n            mask &= image.cpu().numpy() > 0\n        image = image.clone()\n        image[~torch.as_tensor(mask, device=device)] = 0\n    del block_index, covered, vertices, tetrahedra, occupancy\n    result = None\n    previous_params = None\n    previous_classes = None\n    hyper = (None, None)\n    stage_stats = []\n    for index, (sigma, iterations) in enumerate(schedule):\n        stage_started = fit_started if index == 0 else tick()\n        logger.info('%s %s stage %d/%d: sigma=%g iterations=%d', self.name, 'segmentation' if synthetic else 'intensity', index + stage_offset + 1, stage_count or len(schedule), sigma, iterations)\n        if not synthetic:\n            classes = self.intensity_groups(atlas, index + stage_offset)\n        if synthetic:\n            means = self.synthetic_means(atlas, classes)\n            fixed = GaussianParameters(torch.as_tensor(means[:, None], device=device, dtype=torch.float32), torch.full((len(means), 1, 1), 0.01, device=device))\n            hyper = (None, None)\n        else:\n            fixed = None\n            if previous_classes is None or not np.array_equal(previous_classes, classes):\n                means, counts = self.gaussian_hyperparameters(context, atlas, classes)\n                hyper = (means, counts)\n                previous_params = None\n        previous_classes = classes.copy()\n        if sigma:\n            from ..smoothing import smooth_atlas_alphas\n            alphas = smooth_atlas_alphas(atlas, classes, sigma, device=device)\n        if not sigma:\n            alphas = np.zeros((len(atlas.vertices), int(classes.max()) + 1), np.float32)\n            for channel, group in enumerate(classes):\n                alphas[:, group] += atlas.alphas[:, channel]\n        solver_started = tick()\n        result = TorchGEMS(atlas, device=device, block_size=block_size)(image, label_classes=classes, em_iterations=1 if synthetic else self.em_iterations, background_channel=atlas.label_names.index('Unknown'), deform_lr=1.0, deform_optimizer='lbfgs', deform_em_interval=iterations + 1 if synthetic else mesh_steps + 1, index_margin=3.0, adaptive_index=True, boundary_transform=boundary_transform, mean_hyper=None if synthetic else torch.as_tensor(hyper[0], device=device), n_hyper=None if synthetic else torch.as_tensor(hyper[1], device=device), fixed_gaussians=fixed, initial_gaussians=previous_params, relative_cost_stop=(1e-06 if fast else 1e-10) if synthetic else None, outer_iterations=1 if synthetic else iterations, em_relative_cost_stop=None if synthetic else 1e-05, outer_relative_cost_stop=None if synthetic else 1e-05 if fast else 1e-06, fit_alpha_stages=[(alphas, iterations if synthetic else mesh_steps)], **stop_options)\n        solver_finished = tick()\n        atlas = atlas.with_vertices(result.vertices.detach().cpu().numpy())\n        previous_params = result.gaussian_parameters\n        stage_finished = tick()\n        stage_stats.append({**(getattr(result, 'optimization_stats', None) or {}), 'stage_index': index + stage_offset + 1, 'synthetic': synthetic, 'block_size': block_size, 'resolution_mm': float(np.mean(np.linalg.norm(affine[:3, :3], axis=0))), 'alpha_sigma_voxels': sigma, 'alpha_sigma_mm': sigma * float(np.mean(np.linalg.norm(affine[:3, :3], axis=0))), 'outer_iteration_limit': 1 if synthetic else iterations, 'mesh_iteration_limit': iterations if synthetic else mesh_steps, 'preparation_seconds': solver_started - stage_started, 'gems_fit_seconds': solver_finished - solver_started, 'post_fit_seconds': stage_finished - solver_finished, 'total_seconds': stage_finished - stage_started})\n    assert result is not None\n    result.optimization_stats = _fit_statistics(stage_stats)\n    result.affine = crop_affine\n    unshift = np.eye(4)\n    unshift[:3, 3] = low\n    return (atlas.transformed(unshift, transform_reference=True), result)"
+          },
+          "fit_segmentation_mesh": {
+            "line": 280,
+            "ast_sha256": "ea53c99132793fbce8d6f81d812c9ab873895d4c70ee569625090063623b64f5",
+            "source": "def fit_segmentation_mesh(self, atlas: GEMSAtlas, context: SubregionContext, device: torch.device) -> tuple[GEMSAtlas, dict]:\n    start = monotonic()\n    classes = self.segmentation_groups(atlas)\n    synthetic = self.synthetic_labels(context.coarse_segmentation)\n    fitted, result = self._fit(atlas, synthetic.astype(np.float32), context.image.affine, classes, self.seg_schedule, synthetic=True, device=device)\n    displacement = np.linalg.norm(fitted.vertices - atlas.vertices, axis=1)\n    return (fitted, {'seconds': monotonic() - start, 'min_jacobian': result.min_jacobian, 'mean_displacement_voxels': float(displacement.mean()), 'p95_displacement_voxels': float(np.percentile(displacement, 95)), 'mesh_solver': result.optimization_stats})"
+          }
+        }
+      }
+    },
+    "method_comparisons": {
+      "_fit": {
+        "ast_equal": false,
+        "old_line": 189,
+        "new_line": 154,
+        "diff": "--- v14\n+++ v15\n@@ -1,4 +1,4 @@\n-def _fit(self, atlas: GEMSAtlas, data: np.ndarray, affine: np.ndarray, classes: np.ndarray, schedule: tuple[tuple[float, int], ...], *, synthetic: bool, context: SubregionContext | None=None, device: torch.device, stage_offset: int=0, stage_count: int | None=None, mesh_iterations: int | None=None, working_resolution_mm: float | None=None, warm_start: bool=False) -> tuple[GEMSAtlas, TorchGEMSResult]:\n+def _fit(self, atlas: GEMSAtlas, data: np.ndarray, affine: np.ndarray, classes: np.ndarray, schedule: tuple[tuple[float, int], ...], *, synthetic: bool, context: SubregionContext | None=None, device: torch.device, stage_offset: int=0, stage_count: int | None=None, mesh_iterations: int | None=None) -> tuple[GEMSAtlas, TorchGEMSResult]:\n     \"\"\"Return an atlas on the input grid and a fit on its cropped grid.\"\"\"\n \n     def tick():\n@@ -9,11 +9,8 @@\n     mesh_steps = self.mesh_iterations if mesh_iterations is None else mesh_iterations\n     fast = self.optimization_profile == 'fast'\n     stop_options = {'deformation_stop': 0.005, 'cost_stop_patience': 3} if fast else {}\n-    resolution_scale = self.resolution_mm / working_resolution_mm if working_resolution_mm is not None else 1.0\n-    block_size = max(2, int(round(8 * resolution_scale)))\n+    block_size = 8\n     margin = max(3, int(np.ceil(sum((steps for _, steps in schedule)) * 0.05 + 3)))\n-    if working_resolution_mm is not None:\n-        margin = max(1, int(np.ceil(margin * resolution_scale)))\n     low = np.maximum(np.floor(atlas.vertices.min(0)).astype(int) - margin, 0)\n     high = np.minimum(np.ceil(atlas.vertices.max(0)).astype(int) + margin + 1, data.shape)\n     if np.any(high <= low):\n@@ -32,11 +29,9 @@\n         vertices = torch.as_tensor(atlas.vertices, device=device, dtype=torch.float32)\n         tetrahedra = torch.as_tensor(atlas.tetrahedra, device=device)\n         occupancy = torch.ones((len(vertices), 1), device=device)\n-        block_index = build_block_index(atlas.vertices, atlas.tetrahedra, tuple(image.shape), block_size=block_size, margin=3 * resolution_scale)\n+        block_index = build_block_index(atlas.vertices, atlas.tetrahedra, tuple(image.shape), block_size=block_size, margin=3)\n         _, covered = rasterize_priors(vertices, tetrahedra, occupancy, tuple(image.shape), block_index=block_index, background_channel=None)\n         neighborhood = spherical_neighborhood(3 if synthetic else 5)\n-        if working_resolution_mm is not None and (not synthetic):\n-            neighborhood = physical_neighborhood(5 * self.resolution_mm, np.linalg.norm(affine[:3, :3], axis=0))\n         mask = ndimage.binary_erosion(covered.cpu().numpy(), structure=neighborhood, border_value=1)\n         if not synthetic:\n             mask &= image.cpu().numpy() > 0\n@@ -50,7 +45,7 @@\n     stage_stats = []\n     for index, (sigma, iterations) in enumerate(schedule):\n         stage_started = fit_started if index == 0 else tick()\n-        logger.info('%s %s stage %d/%d: sigma=%g iterations=%d', self.name, 'segmentation' if synthetic else 'intensity warm-start' if warm_start else 'intensity', index + stage_offset + 1, stage_count or len(schedule), sigma, iterations)\n+        logger.info('%s %s stage %d/%d: sigma=%g iterations=%d', self.name, 'segmentation' if synthetic else 'intensity', index + stage_offset + 1, stage_count or len(schedule), sigma, iterations)\n         if not synthetic:\n             classes = self.intensity_groups(atlas, index + stage_offset)\n         if synthetic:\n@@ -60,27 +55,24 @@\n         else:\n             fixed = None\n             if previous_classes is None or not np.array_equal(previous_classes, classes):\n-                hyper_atlas = atlas\n-                if working_resolution_mm is not None:\n-                    hyper_atlas = atlas.transformed(np.diag([1 / resolution_scale] * 3 + [1.0]), transform_reference=True)\n-                means, counts = self.gaussian_hyperparameters(context, hyper_atlas, classes)\n-                hyper = (means, counts * resolution_scale ** 3)\n+                means, counts = self.gaussian_hyperparameters(context, atlas, classes)\n+                hyper = (means, counts)\n                 previous_params = None\n         previous_classes = classes.copy()\n         if sigma:\n             from ..smoothing import smooth_atlas_alphas\n-            alphas = smooth_atlas_alphas(atlas, classes, sigma * resolution_scale, device=device)\n+            alphas = smooth_atlas_alphas(atlas, classes, sigma, device=device)\n         if not sigma:\n             alphas = np.zeros((len(atlas.vertices), int(classes.max()) + 1), np.float32)\n             for channel, group in enumerate(classes):\n                 alphas[:, group] += atlas.alphas[:, channel]\n         solver_started = tick()\n-        result = TorchGEMS(atlas, device=device, block_size=block_size)(image, label_classes=classes, em_iterations=1 if synthetic else self.em_iterations, background_channel=atlas.label_names.index('Unknown'), deform_lr=1.0, deform_optimizer='lbfgs', deform_em_interval=iterations + 1 if synthetic else mesh_steps + 1, index_margin=3.0 * resolution_scale, adaptive_index=True, boundary_transform=boundary_transform, mean_hyper=None if synthetic else torch.as_tensor(hyper[0], device=device), n_hyper=None if synthetic else torch.as_tensor(hyper[1], device=device), fixed_gaussians=fixed, initial_gaussians=previous_params, relative_cost_stop=(1e-06 if fast else 1e-10) if synthetic else None, outer_iterations=1 if synthetic else iterations, em_relative_cost_stop=None if synthetic else 1e-05, outer_relative_cost_stop=None if synthetic else 1e-05 if fast else 1e-06, fit_alpha_stages=[(alphas, iterations if synthetic else mesh_steps)], **stop_options)\n+        result = TorchGEMS(atlas, device=device, block_size=block_size)(image, label_classes=classes, em_iterations=1 if synthetic else self.em_iterations, background_channel=atlas.label_names.index('Unknown'), deform_lr=1.0, deform_optimizer='lbfgs', deform_em_interval=iterations + 1 if synthetic else mesh_steps + 1, index_margin=3.0, adaptive_index=True, boundary_transform=boundary_transform, mean_hyper=None if synthetic else torch.as_tensor(hyper[0], device=device), n_hyper=None if synthetic else torch.as_tensor(hyper[1], device=device), fixed_gaussians=fixed, initial_gaussians=previous_params, relative_cost_stop=(1e-06 if fast else 1e-10) if synthetic else None, outer_iterations=1 if synthetic else iterations, em_relative_cost_stop=None if synthetic else 1e-05, outer_relative_cost_stop=None if synthetic else 1e-05 if fast else 1e-06, fit_alpha_stages=[(alphas, iterations if synthetic else mesh_steps)], **stop_options)\n         solver_finished = tick()\n         atlas = atlas.with_vertices(result.vertices.detach().cpu().numpy())\n         previous_params = result.gaussian_parameters\n         stage_finished = tick()\n-        stage_stats.append({**(getattr(result, 'optimization_stats', None) or {}), 'stage_index': index + stage_offset + 1, 'synthetic': synthetic, 'warm_start': warm_start, 'block_size': block_size, 'resolution_mm': float(np.mean(np.linalg.norm(affine[:3, :3], axis=0))), 'alpha_sigma_voxels': sigma * resolution_scale, 'alpha_sigma_mm': sigma * resolution_scale * float(np.mean(np.linalg.norm(affine[:3, :3], axis=0))), 'outer_iteration_limit': 1 if synthetic else iterations, 'mesh_iteration_limit': iterations if synthetic else mesh_steps, 'preparation_seconds': solver_started - stage_started, 'gems_fit_seconds': solver_finished - solver_started, 'post_fit_seconds': stage_finished - solver_finished, 'total_seconds': stage_finished - stage_started})\n+        stage_stats.append({**(getattr(result, 'optimization_stats', None) or {}), 'stage_index': index + stage_offset + 1, 'synthetic': synthetic, 'block_size': block_size, 'resolution_mm': float(np.mean(np.linalg.norm(affine[:3, :3], axis=0))), 'alpha_sigma_voxels': sigma, 'alpha_sigma_mm': sigma * float(np.mean(np.linalg.norm(affine[:3, :3], axis=0))), 'outer_iteration_limit': 1 if synthetic else iterations, 'mesh_iteration_limit': iterations if synthetic else mesh_steps, 'preparation_seconds': solver_started - stage_started, 'gems_fit_seconds': solver_finished - solver_started, 'post_fit_seconds': stage_finished - solver_finished, 'total_seconds': stage_finished - stage_started})\n     assert result is not None\n     result.optimization_stats = _fit_statistics(stage_stats)\n     result.affine = crop_affine"
+      },
+      "fit_segmentation_mesh": {
+        "ast_equal": true,
+        "old_line": 331,
+        "new_line": 280
+      },
+      "segmentation_groups": {
+        "ast_equal": true,
+        "old_line": 166,
+        "new_line": 131
+      },
+      "synthetic_labels": {
+        "ast_equal": true,
+        "old_line": 172,
+        "new_line": 137
+      },
+      "synthetic_means": {
+        "ast_equal": true,
+        "old_line": 175,
+        "new_line": 140
+      }
+    }
+  },
+  "recipes/thalamus.py": {
+    "versions": {
+      "v14": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v14/src/fnit/gems/recipes/thalamus.py",
+        "sha256": "906bbe5523b218940205aa4ec3f4f96eb2d91ceac4acb62bc5ed0ba355e5e5c7",
+        "constants": {
+          "seg_schedule": "((3.0, 300), (2.0, 150))",
+          "image_schedule": "((1.5, 7), (1.125, 5), (0.75, 5), (0.0, 3))",
+          "fast_image_schedule": "((1.5, 3), (1.125, 3), (0.75, 2), (0.0, 2))"
+        },
+        "methods": {
+          "segmentation_groups": {
+            "line": 38,
+            "ast_sha256": "2c2bfab28227bba9bfd273c82b19b77fafaf2e6163d1a5f76166b5032c703c0e",
+            "source": "def segmentation_groups(self, atlas):\n    groups = _BASE + (tuple((f'{side}-{name}' for name in _NUCLEI + ('R',) for side in ('Left',) if f'{side}-{name}' in atlas.label_names)) + ('Left-VentralDC',), tuple((f'Right-{name}' for name in _NUCLEI + ('R',) if f'Right-{name}' in atlas.label_names)) + ('Right-VentralDC',))\n    return group_labels(atlas, groups)"
+          },
+          "synthetic_labels": {
+            "line": 78,
+            "ast_sha256": "5b5529a6ca43483d4f99abb176b00754942b44905da9441f8a91ac438f73a597",
+            "source": "def synthetic_labels(self, coarse):\n    data = self._recoded_segmentation(coarse)\n    data[data == 28] = 10\n    data[data == 60] = 49\n    return data"
+          },
+          "synthetic_means": {
+            "line": 93,
+            "ast_sha256": "a61ff879a53742ae56e48009ab68bcd98c964c04bdf6fedcdcf5ddd268b70d41",
+            "source": "def synthetic_means(self, atlas, classes):\n    means = np.zeros(int(classes.max()) + 1, np.float32)\n    for group in range(len(means)):\n        ids = atlas.label_ids[classes == group]\n        first = int(ids[0])\n        means[group] = 10 if np.any((ids >= 8100) & (ids < 8200)) else 49 if np.any((ids >= 8200) & (ids < 8300)) else 1 if first == 0 else first\n    return means"
+          }
+        }
+      },
+      "v15": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/src/fnit/gems/recipes/thalamus.py",
+        "sha256": "b1607aa027cdbfc6b5a54707ff6622535e64574a7444b3e3129d87e0ab2a5575",
+        "constants": {
+          "seg_schedule": "((3.0, 300), (2.0, 150))",
+          "image_schedule": "((1.5, 7), (1.125, 5), (0.75, 5), (0.0, 3))"
+        },
+        "methods": {
+          "segmentation_groups": {
+            "line": 37,
+            "ast_sha256": "2c2bfab28227bba9bfd273c82b19b77fafaf2e6163d1a5f76166b5032c703c0e",
+            "source": "def segmentation_groups(self, atlas):\n    groups = _BASE + (tuple((f'{side}-{name}' for name in _NUCLEI + ('R',) for side in ('Left',) if f'{side}-{name}' in atlas.label_names)) + ('Left-VentralDC',), tuple((f'Right-{name}' for name in _NUCLEI + ('R',) if f'Right-{name}' in atlas.label_names)) + ('Right-VentralDC',))\n    return group_labels(atlas, groups)"
+          },
+          "synthetic_labels": {
+            "line": 77,
+            "ast_sha256": "5b5529a6ca43483d4f99abb176b00754942b44905da9441f8a91ac438f73a597",
+            "source": "def synthetic_labels(self, coarse):\n    data = self._recoded_segmentation(coarse)\n    data[data == 28] = 10\n    data[data == 60] = 49\n    return data"
+          },
+          "synthetic_means": {
+            "line": 92,
+            "ast_sha256": "a61ff879a53742ae56e48009ab68bcd98c964c04bdf6fedcdcf5ddd268b70d41",
+            "source": "def synthetic_means(self, atlas, classes):\n    means = np.zeros(int(classes.max()) + 1, np.float32)\n    for group in range(len(means)):\n        ids = atlas.label_ids[classes == group]\n        first = int(ids[0])\n        means[group] = 10 if np.any((ids >= 8100) & (ids < 8200)) else 49 if np.any((ids >= 8200) & (ids < 8300)) else 1 if first == 0 else first\n    return means"
+          }
+        }
+      }
+    },
+    "method_comparisons": {
+      "segmentation_groups": {
+        "ast_equal": true,
+        "old_line": 38,
+        "new_line": 37
+      },
+      "synthetic_labels": {
+        "ast_equal": true,
+        "old_line": 78,
+        "new_line": 77
+      },
+      "synthetic_means": {
+        "ast_equal": true,
+        "old_line": 93,
+        "new_line": 92
+      }
+    }
+  },
+  "recipes/hippo_amygdala.py": {
+    "versions": {
+      "v14": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v14/src/fnit/gems/recipes/hippo_amygdala.py",
+        "sha256": "b0cd1c6a2ad6442c99efbea40dbbda9ba43e40980acdd79de58233850d1fd1f0",
+        "constants": {
+          "seg_schedule": "((3.0, 300), (2.0, 150))",
+          "image_schedule": "((1.5, 7), (0.75, 5), (0.0, 3))",
+          "fast_image_schedule": "((1.5, 3), (0.75, 3), (0.0, 2))"
+        },
+        "methods": {
+          "segmentation_groups": {
+            "line": 69,
+            "ast_sha256": "7a7afa0615183df231efa0ad715bd9ea5dc2983cd4dbc608d4fb47c9467f1042",
+            "source": "def segmentation_groups(self, atlas):\n    groups = (_GM + ('alveus', 'fimbria'), ('Left-Cerebral-White-Matter',), ('Left-Lateral-Ventricle',), ('Left-choroid-plexus',), ('Unknown', 'hippocampal-fissure'), ('Left-VentralDC',), ('Left-Putamen',), ('Left-Pallidum',), ('Left-Thalamus-Proper',), ('Left-Accumbens-area',), ('Left-Caudate',))\n    return group_labels(atlas, groups)"
+          },
+          "synthetic_labels": {
+            "line": 93,
+            "ast_sha256": "7b799ac61eb9e103d14c4a44318c29fea528392a4252103e605ff036d3d5e03f",
+            "source": "def synthetic_labels(self, coarse):\n    source = np.asarray(coarse)\n    data = np.ones(source.shape, dtype=np.int32)\n    mappings = {2: 2, 3: 3, 4: 4, 10: 10, 11: 11, 12: 12, 13: 13, 17: 3, 18: 3, 26: 26, 28: 28, 31: 31} if self.side == 'left' else {41: 2, 42: 3, 43: 4, 49: 10, 50: 11, 51: 12, 52: 13, 53: 3, 54: 3, 58: 26, 60: 28, 63: 31}\n    for old, new in mappings.items():\n        data[source == old] = new\n    for old, new in ((14, 4), (24, 4), (77, 2), (72, 4)):\n        data[source == old] = new\n    data[source == (30 if self.side == 'left' else 62)] = 2\n    data[source == (5 if self.side == 'left' else 44)] = 4\n    data[source > 250] = 2\n    return data"
+          },
+          "synthetic_means": {
+            "line": 110,
+            "ast_sha256": "d0a1e556bc6282c2d2050de595b53a3d5d8bcef565fdfb804b9bc34ec95926e3",
+            "source": "def synthetic_means(self, atlas, classes):\n    values = (3, 2, 4, 31, 1, 28, 12, 13, 10, 26, 11)\n    return np.asarray(values, dtype=np.float32)"
+          }
+        }
+      },
+      "v15": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/src/fnit/gems/recipes/hippo_amygdala.py",
+        "sha256": "1211a0950041ff1b65f72dc347f31c23dd8674071ed85a27aed92b0fd18b8a5a",
+        "constants": {
+          "seg_schedule": "((3.0, 300), (2.0, 150))",
+          "image_schedule": "((1.5, 7), (0.75, 5), (0.0, 3))"
+        },
+        "methods": {
+          "segmentation_groups": {
+            "line": 68,
+            "ast_sha256": "7a7afa0615183df231efa0ad715bd9ea5dc2983cd4dbc608d4fb47c9467f1042",
+            "source": "def segmentation_groups(self, atlas):\n    groups = (_GM + ('alveus', 'fimbria'), ('Left-Cerebral-White-Matter',), ('Left-Lateral-Ventricle',), ('Left-choroid-plexus',), ('Unknown', 'hippocampal-fissure'), ('Left-VentralDC',), ('Left-Putamen',), ('Left-Pallidum',), ('Left-Thalamus-Proper',), ('Left-Accumbens-area',), ('Left-Caudate',))\n    return group_labels(atlas, groups)"
+          },
+          "synthetic_labels": {
+            "line": 92,
+            "ast_sha256": "7b799ac61eb9e103d14c4a44318c29fea528392a4252103e605ff036d3d5e03f",
+            "source": "def synthetic_labels(self, coarse):\n    source = np.asarray(coarse)\n    data = np.ones(source.shape, dtype=np.int32)\n    mappings = {2: 2, 3: 3, 4: 4, 10: 10, 11: 11, 12: 12, 13: 13, 17: 3, 18: 3, 26: 26, 28: 28, 31: 31} if self.side == 'left' else {41: 2, 42: 3, 43: 4, 49: 10, 50: 11, 51: 12, 52: 13, 53: 3, 54: 3, 58: 26, 60: 28, 63: 31}\n    for old, new in mappings.items():\n        data[source == old] = new\n    for old, new in ((14, 4), (24, 4), (77, 2), (72, 4)):\n        data[source == old] = new\n    data[source == (30 if self.side == 'left' else 62)] = 2\n    data[source == (5 if self.side == 'left' else 44)] = 4\n    data[source > 250] = 2\n    return data"
+          },
+          "synthetic_means": {
+            "line": 109,
+            "ast_sha256": "d0a1e556bc6282c2d2050de595b53a3d5d8bcef565fdfb804b9bc34ec95926e3",
+            "source": "def synthetic_means(self, atlas, classes):\n    values = (3, 2, 4, 31, 1, 28, 12, 13, 10, 26, 11)\n    return np.asarray(values, dtype=np.float32)"
+          }
+        }
+      }
+    },
+    "method_comparisons": {
+      "segmentation_groups": {
+        "ast_equal": true,
+        "old_line": 69,
+        "new_line": 68
+      },
+      "synthetic_labels": {
+        "ast_equal": true,
+        "old_line": 93,
+        "new_line": 92
+      },
+      "synthetic_means": {
+        "ast_equal": true,
+        "old_line": 110,
+        "new_line": 109
+      }
+    }
+  },
+  "synthetic_interpretation": {
+    "segmentation_schedule_equal": true,
+    "fit_segmentation_mesh_ast_equal": true,
+    "synthetic_label_groups_means_functions_ast_equal": true,
+    "core_optimizer_raster_deformation_smoothing_ast_source_hashes_equal": true,
+    "fit_changes_for_synthetic_default_arguments": "removed working_resolution_mm=None leaves scale1: block8,margin3,sigma unscaled,synthetic fixed means/variance,limits300/150,relativecost1e-6,displacement0.005,patience3 unchanged; mesh_steps12to20 ignored by synthetic fit_alpha_stages",
+    "new_synthetic_budget_logic_difference_found": false
+  }
+}

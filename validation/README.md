@@ -11,8 +11,7 @@
 | 功能 | 当前真实数据报告 | 输出一致性结论 | 时间、显存与示意图 |
 |---|---|---|---|
 | [SynthSeg+](../docs/synthseg_plus/README.md) | [公开 T1w 对照](synthseg_plus/README.md) | GPU 合并图逐体素一致率 0.9999758；CPU 仅 6 个体素不同，软体积最大差 0.293 mm³ | 官方与 FNIT 的 CPU/GPU 完整命令计时、GPU Python 调用计时、逐标签报告及切面图 |
-| [TorchGEMS 脑干亚区](../docs/subregions/README.md) | [两张真实 T1 的 BrainstemSS 对照](subregions/README.md) | 两例四区均达逐区 Dice ≥0.95、体积差 ≤5% | 官方/FNIT 命令时间、逐区体积差、阶段耗时和切面图 |
-| [GEMS 丘脑、海马与杏仁核](../docs/subregions/nuclei.md) | [同输入真实 T1 对照](subregions/nuclei.md) | 新 Conda 环境前景 Dice 0.9819–0.9957；逐区阈值未通过 | 官方/FNIT 阶段时间、逐标签 JSON 和切面图 |
+| [segment_4_subregions](../docs/subregions/README.md) | [四结构 end-to-end 实测](subregions/README.md) | 原始 T1 及同一官方阶段输入分别比较；110 项硬/软体积和逐区差异 | 继承 v16 原生 GPU 实现，完整 API/进程计时、显存、源码及脑图 |
 | [SynthStrip](../docs/synthstrip/README.md) | [当前真实 SBRef/T1 控制](fmri/synthstrip_geometry_control.public.json) | 原 conform/网络输入逐元素相同，同预测回采样 mask 相同；独立 GPU 推断仍有少量边界差异 | 控制 7.61/4.83 s，排除 conform/写盘；完整调用另见 volume；新增当前模板脑图 |
 | [SynthMorph](../docs/synthmorph/README.md) | [12 例 GPU](synthmorph/report.real.current.gpu.json)、[12 例 CPU](synthmorph/report.real.current.cpu.json)与[公开 T1w 示例](synthmorph/public_example.current.json) | moved image 与 RAS-mm pull warp 接近参考；测量 hash 通过 linear-only 证明继承，nearest 另有定向测试 | 两份报告使用同一计时边界；没有 fresh current-hash 全量重跑；功能页展示公开配准图 |
 | [WMH-SynthSeg](../docs/wmh_synthseg/README.md) | [3 例公开 FLAIR GPU 与 1 例 CPU](wmh/report.public.json) | 标签、WMH、软体积及 NIfTI 合同与 FreeSurfer 参考近似一致 | 报告含 GPU/CPU 时间和峰值显存；功能页展示 WMH overlay |
