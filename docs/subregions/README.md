@@ -25,13 +25,21 @@ flowchart TD
 
 各结构共用一次粗分割。脑干沿用既有 TorchGEMS 配置；丘脑先以合成粗标签拟合网格，再在 0.5 mm T1 工作图像上拟合，强度阶段分为内侧偏暗和外侧偏亮两组；左右海马/杏仁核分别在约 0.333 mm 工作网格上拟合，并对 alveus、fissure 及高分辨率 T1 下单独成组的 molecular layer 用图谱先验、组织强度和模糊核模拟部分容积。工作网格标签和后验保存在 `structure_results`，主标签以最近邻重采样回原 T1 网格。跨图谱合并先按所属粗结构掩膜限定候选，仅在支持掩膜重叠处比较后验置信度。
 
-默认 `optimization="fast"`：丘脑和海马使用各结构原有工作网格，保留全部平滑级别及外层日程，每轮最多更新网格 20 次。`"balanced"` 使用同一日程，每轮最多更新 30 次，停止阈值更严格。两种配置均使用 Gaussian EM 与带 strong-Wolfe 线搜索的 L-BFGS；合成标签拟合有两个平滑级别，分别最多更新 300、150 次。滑动边界随图谱仿射投影到工作网格。默认 CUDA 使用 FP32 和 TF32；每项结构完成后将详细结果移到 CPU，释放显存，再拟合下一项。
+默认 `optimization="fast"`：丘脑和海马保留原工作网格、全部平滑级别和外层日程，每轮最多更新网格 20 次。丘脑非零 sigma 阶段的网格数据项使用固定四分之一空间采样，并按有效体素总数加权；最后阶段恢复全部有效体素。海马/杏仁核所有阶段均使用全部有效体素。Gaussian EM、超先验、固定掩膜和最终标签/后验始终使用原细网格。`"balanced"` 全阶段使用全部有效体素，每轮最多更新 30 次，停止阈值更严格。两者均使用 Gaussian EM 和带 strong-Wolfe 线搜索的 L-BFGS；合成标签拟合保留两级及 300、150 次更新上限。CUDA 几何、图像和梯度保持 FP32/TF32；`fast` 的网格数据成本仅在最后求和时用 float64，减少总成本量化对线搜索的影响。每项结构完成后将详细结果移到 CPU，再拟合下一项。
 
-网格候选索引按四面体包围盒批量生成并稳定排序，保持每个块内的候选顺序；生成坐标的临时数组分块，极大索引回退逐块遍历。单通道拟合只在有效体素上计算 EM 先验和网格数据成本，缓存固定参考网格的逆矩阵和体积，合并点批次及插值。每次成本评估中，栅格化和形变先验共用当前四面体几何；形变先验使用解析梯度。CUDA FP32 使用主页环境已有的 Triton 四面体查找，其余梯度由 PyTorch 计算；CPU 或不支持该 kernel 的输入使用 PyTorch 查找。最终解剖先验和后验仍按完整工作网格输出。
+网格候选索引按四面体包围盒批量生成并稳定排序，保持每个块内的候选顺序；生成坐标的临时数组分块，极大索引回退逐块遍历。单通道拟合只在有效体素上计算 EM 先验和网格数据成本，缓存固定参考网格的逆矩阵和体积，合并点批次及插值。每次成本评估中，栅格化和形变先验共用当前四面体几何；形变先验使用解析梯度。CUDA FP32 使用主页环境已有的 Triton 处理四面体查找及数据项解析顶点梯度，形变先验用 PyTorch 解析梯度；CPU 或不支持该 kernel 的输入回退 PyTorch。最终解剖先验和后验仍按完整工作网格输出。
+
+有效体素路径和完整网格路径都先在 CPU 打包点坐标、候选索引、候选掩膜及所需行索引，每类缓冲区一次传到 GPU，再建立批次视图；完整网格的浮点采样坐标和整数写入坐标分别打包。候选顺序、分组及坐标布局保留，减少逐批小数据传输和 CUDA 张量创建。固定掩膜的侵蚀、块内点归类、稳定排序和坐标生成仍在 CPU；新索引或新掩膜需要重新准备这些布局。
 
 L-BFGS 缓存线搜索实际接受点的成本和已投影梯度，用于下一次网格更新的起始评估，省去重复栅格化与反向传播。缓存随外层 EM、Gaussian 模型或 alpha 变化失效；停止判断读取接受点成本。该缓存保留同一目标和线搜索，`fast` 的较短网格更新预算与停止阈值改变拟合预算，标签与体积差异通过真实数据 benchmark 检查。实现见 [优化器](../../src/fnit/gems/optim.py)、[TorchGEMS](../../src/fnit/gems/core.py)、[结构日程](../../src/fnit/gems/recipes/base.py)和 [PyTorch L-BFGS](https://github.com/pytorch/pytorch/blob/v2.5.1/torch/optim/lbfgs.py)。
 
-图谱加载、裁剪、三次插值、图谱平滑中的 Gaussian 卷积、形态学处理、白质标签传播、海马部分容积超参数准备和最终 Nibabel 重采样仍在 CPU 上执行。SynthSeg、SynthSeg+、仿射优化、网格先验栅格化、Gaussian EM 和形变优化使用指定设备。运行时间包含这些 CPU 步骤；安装环境所需依赖已列在主页 Conda 环境中。
+CUDA FP32 的网格数据成本使用 Triton 合并先验插值、Gaussian 混合似然及解析顶点梯度；CPU 和不支持该 kernel 的输入自动使用 PyTorch autograd。`fast` 在严格内部点复用旧四面体归属，先验证当前重心坐标；边界点重新完整搜索，每八次闭包强制完整搜索，候选索引或有效体素布局改变时缓存失效。该复用假设网格没有全局交叠，Jacobian 和真实分割对照另行记录。EM 和最终输出仍完整搜索。脑干粗网格也复用有效体素计算、参考几何、解析形变梯度和优化器缓存。合成标签阶段和中间强度阶段只返回网格、Gaussian 参数及数值报告，最后一个强度阶段生成完整标签、先验和后验。
+
+图谱平滑的分离卷积、十轮顶点 alpha EM，以及海马部分容积的先验栅格化、合成强度和 Gaussian 模糊在指定 GPU 上完成。平滑保留原离散核和边界模式，部分容积保留原 Gaussian 的截断半径与反射边界；不同 sigma 复用同一参考网格的栅格化结果，类别或参考图谱变化时缓存失效。薄结构的小样本 median/KDE、图谱加载、裁剪、三次插值、形态学、白质标签传播和最终 Nibabel 重采样仍在 CPU。运行时间包含这些步骤，依赖沿用主页 Conda 环境。
+
+仍会影响 GPU 连续计算的部分包括 CPU 上的 L-BFGS 线搜索与阶段循环，以及收敛、网格移动和索引刷新判断所需的 GPU 标量同步。组织强度取样和连通域后处理也在 CPU。上述准备与控制开销和网格成本评估分别记录，整例耗时包含全部步骤。
+
+海马部分容积准备同时修复 NumPy 标量向 PyTorch 掩膜张量赋值的兼容问题：组织均值转换为 Python 标量再赋值，原均值、计数和 KDE 规则保留。对应测试实际覆盖 alveus 薄结构分支。
 
 ## 速度配置
 
@@ -41,6 +49,9 @@ L-BFGS 缓存线搜索实际接受点的成本和已投影梯度，用于下一�
 | 丘脑外层 EM/网格轮数上限 | 7、5、5、3 | 7、5、5、3 |
 | 每侧海马/杏仁核外层轮数上限 | 7、5、3 | 7、5、3 |
 | 每轮网格更新上限 | 20 | 30 |
+| 网格数据项体素 | 丘脑非零 sigma 阶段固定四分之一加权采样，最后阶段全部体素；海马/杏仁核全阶段全部体素 | 全阶段使用全部有效体素 |
+| 数据成本求和 | float64；图像、几何和梯度仍 FP32 | FP32 |
+| 网格归属查找 | 验证内部旧归属；边界和周期刷新完整搜索 | 完整搜索 |
 | 每轮 Gaussian EM 上限及相对成本阈值 | 100 次；`1e-5` | 100 次；`1e-5` |
 | 合成标签网格相对成本阈值 | `1e-6`，连续 3 次满足后停止 | `1e-10`，满足一次后停止 |
 | 每次更新的最大顶点位移阈值 | 工作网格 `0.005` 体素，连续 3 次满足后停止 | 工作网格 `1e-10` 体素，满足一次后停止 |
@@ -68,7 +79,7 @@ fnit-setup-subregion-atlases --output-root /absolute/path/subregion_atlases \
 ```python
 from fnit import segment_subregions
 
-result = segment_subregions(
+subregion_result = segment_subregions(
     t1="/absolute/path/sub-01_T1w.nii.gz",       # 输入：原始三维 T1
     atlas_root=None,                              # 输入：图谱缓存；None 使用 FNIT 默认缓存
     structures="all",                            # 输入：全部四项；也可选单项或列表
@@ -78,7 +89,7 @@ result = segment_subregions(
     synthseg_weights=None,                       # 输入：可选的 SynthSeg 权重路径
     synthseg_parc_weights=None,                  # 输入：可选的 SynthSeg+ 皮层权重路径
     device="cuda:0",                             # 输入：计算设备；也支持 "cpu"
-    optimization="fast",                         # 输入：原网格及完整阶段；balanced 使用更多网格更新
+    optimization="fast",                         # 输入：丘脑早期加权采样，海马完整积分；balanced 使用全部体素
     output_dir="/absolute/path/subregions",       # 输出：自动保存标签、体积、元数据和报告
     save_highres=True,                           # 输出：保存每个结构的高分辨率标签
     save_posteriors=False,                       # 输出：后验体积较大，需要时才保存
@@ -86,9 +97,9 @@ result = segment_subregions(
     em_iterations=8,                             # 输入：旧自定义图谱的 EM 默认迭代数
     deform_iterations=0,                         # 输入：旧自定义图谱的网格默认迭代数
 )
-print(result.output_files["labels"])            # 输出：原 T1 网格 int32 标签路径
-pons_mask = result.mask("Pons")                 # 输出：与 T1 同形状的布尔掩膜
-ca1_mask = result.mask("Left-CA1-head")         # 输出：左侧 CA1 头部掩膜
+print(subregion_result.output_files["labels"])            # 输出：原 T1 网格 int32 标签路径
+pons_mask = subregion_result.mask("Pons")                 # 输出：与 T1 同形状的布尔掩膜
+ca1_mask = subregion_result.mask("Left-CA1-head")         # 输出：左侧 CA1 头部掩膜
 ```
 
 | 参数 | 含义 |
@@ -101,7 +112,7 @@ ca1_mask = result.mask("Left-CA1-head")         # 输出：左侧 CA1 头部掩�
 | `wmparc` | 同 T1 网格的官方白质分区；若提供，海马强度模型直接使用。 |
 | `synthseg_weights`、`synthseg_parc_weights` | 对应模型权重文件或缓存；需要自动分割时才读取。 |
 | `device` | `"cuda:0"` 默认，或 `"cpu"`；CUDA 使用 FP32 和 TF32。 |
-| `optimization` | `"fast"` 默认；`"balanced"` 使用同一网格及外层日程，每轮允许更多更新，停止阈值更严格。用于标准丘脑、海马/杏仁核 recipe。 |
+| `optimization` | `"fast"` 默认：每轮最多 20 次更新；丘脑非零 sigma 阶段的网格项使用四分之一加权空间采样，最终阶段与海马各阶段使用全部体素；Gaussian EM 和最终输出均使用全部有效体素。`"balanced"` 保留同一网格及外层日程，每轮最多 30 次更新、全阶段使用全部体素，停止阈值更严格。用于标准丘脑、海马/杏仁核 recipe。 |
 | `output_dir` | 自动保存全部输出的目录；`None` 只返回内存结果。也可稍后调用 `result.save(output_dir)`。 |
 | `save_highres` | `True`：设置输出目录时保存各结构的高分辨率标签。 |
 | `save_posteriors` | `False`：后验图较大，显式设为 `True` 才保存，最后一维为标签通道。 |
@@ -118,6 +129,13 @@ ca1_mask = result.mask("Left-CA1-head")         # 输出：左侧 CA1 头部掩�
 | `reuse_geometry` | `True`：每次 closure 共用当前四面体几何。 |
 | `analytic_prior` | `True`：形变先验使用解析梯度；`False` 使用 PyTorch autograd。 |
 | `cache_mesh_evaluations` | `True`：L-BFGS 复用接受点成本与投影梯度；`False` 调用原 PyTorch L-BFGS。对 Adam 无效。 |
+| `fused_data_cost_enabled` | `True`：支持的 CUDA FP32 输入使用融合的混合似然成本和一阶顶点梯度；`False` 用原 autograd 路径。 |
+| `materialize_outputs` | `True`：生成完整标签、先验和后验。`False` 仅用于中间网格阶段，这三个字段为 `None`，其余拟合结果保留。主入口始终返回完整最终输出。 |
+| `mesh_sampling_stride` | `1`：网格数据项包含全部有效体素。大于 1 时按固定空间余数均匀采样，并以有效体素总数与采样数之比加权；Gaussian EM 和最终输出使用全部有效体素。 |
+| `owner_hint_enabled` | `False`：完整四面体搜索。`True`：网格成本评估验证并复用严格内部归属，边界点仍完整搜索；EM 和最终输出不使用该近似。 |
+| `owner_hint_refresh_interval` | `8`：启用归属复用时，每八次闭包强制完整搜索，必须为正整数。 |
+| `owner_hint_tolerance` | `2e-4`：四个重心坐标均大于此值才复用旧归属，必须为有限正数。 |
+| `double_data_cost_accumulation` | `False`：FP32 数据成本求和；`True` 只将单通道 compact 网格数据成本的最终求和改为 float64，梯度仍为 FP32。 |
 | `deformation_stop` | `1e-10`：每次更新最大顶点位移的停止阈值，单位为当前工作网格体素；须为有限非负数。 |
 | `cost_stop_patience` | `1`：位移或内层相对成本条件须连续满足的次数；须为正整数。 |
 
@@ -174,9 +192,11 @@ segment_subregions thalamus --cross fs_sub01 --sd /absolute/path/subjects --thre
 segment_subregions hippo-amygdala --cross fs_sub01 --sd /absolute/path/subjects --threads 4
 ```
 
-当前默认 `fast` 已完成[两个整例 benchmark](../../validation/subregions/speed_v15/README.md)，使用同一个公开 T1 开发病例。共享 H100 上，原始 T1 全流程计算 **21.56 min**，同阶段输入计算 **25.02 min**；PyTorch 分配峰值分别为 15.47/6.35 GiB，本进程采样峰值为 18,928/10,908 MiB，均低于约 20 GB 限制。历史 v12 分别为 41.33/45.02 min；其他进程负载不同，耗时比为实测观测。
+当前默认 `fast` 已完成[两个 v16 整例 benchmark](../../validation/subregions/speed_v16/README.md)，采用同一个公开 T1 开发病例、共享 H100、四个 CPU 线程、FP32/TF32。原始 T1 全流程计算 **7.18 min**，含自动保存的 API 总时间为 **431.356 s**；相同 `norm/aseg/wmparc` 输入计算 **8.50 min**。两项从 Python 进程启动到退出分别为 **7.60/9.25 min**。两种输入均一次运行全部四项结构，保存统一标签、110 项硬/软体积和四份高分辨率标签。原始 T1 的 PyTorch 分配峰值为 **15.47 GiB**，本进程显存采样峰值为 **18,930 MiB**；阶段输入分别为 **4.91 GiB / 9,736 MiB**。不含首次下载与一次性图谱安装；官方对照计算在 API 计时之外。
 
-官方逐区门槛仍为 Dice≥0.95 且硬体积差≤5%：同阶段输入 **35/103**（脑干 4/4），原始 T1 **0/105**，尚不能宣称官方逐区等价。同阶段输入的左海马相对 v12 硬/软体积增加 7.00%/6.76%，其官方前景 Dice 提高到 0.9629；原始 T1 右杏仁核 Dice 仍比 v12 低 0.0173。报告保留全部 110 项软体积、逐标签失败项、六类结构的体积和质心变化、显存与负载日志，以及六层轴位脑图。[历史 v12](../../validation/subregions/unified.md#2026-10-01优化后的两个完整运行)和[脑干历史验证](../../validation/subregions/README.md)保留供复核。
+原始 T1 相对 v15 的六类结构 Dice 为 **0.9716–0.9985**，家族硬/软体积变化最大 **1.45%**；阶段输入为 **0.9772–0.9993 / 2.42%**。110 项软体积完整且有限，最终 Jacobian 均为正，输入/输出网格及源码核验通过。细亚区保留差异：原始 T1 的 **80/110** 项软体积变化在 5% 内，超过 5% 的标签均属于丘脑；Left-PuM 增加 114.80 mm³（15.33%），其软体积与 Dice 更接近官方，其他细核也有下降。阶段输入为 **108/110**，右杏仁核官方 Dice 比 v15 低 0.01554。完整逐标签指标、细核官方对照、未采用候选和六层轴位图见[当前验证页](../../validation/subregions/speed_v16/README.md)。当前结果来自一例开发病例，逐区官方等价尚未达到。
+
+此前 [v15 整例基线](../../validation/subregions/speed_v15/README.md)分别为 21.56/25.02 min，[v12](../../validation/subregions/unified.md#2026-10-01优化后的两个完整运行)为 41.33/45.02 min。共享 GPU 负载不同，时间比为整例实测观测。[GPU 组件对照](../../validation/subregions/speed_v16/layout_components/README.md)分别记录冷布局准备、预热 kernel、数值检查、显存和负载。完整 PyTorch CPU 亚区耗时本轮未测。
 
 ### Reference
 

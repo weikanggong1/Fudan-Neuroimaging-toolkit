@@ -54,12 +54,14 @@ def test_fast_retains_fine_input_mesh_and_all_thalamic_groups(tmp_path):
     assert "coarse_working_image" not in report
 
 
-@pytest.mark.parametrize("resolution", [.5, .33333])
-def test_real_crop_keeps_world_geometry_hyperprior_and_stage_statistics(tmp_path, monkeypatch, resolution):
+@pytest.mark.parametrize("recipe_type,resolution", [(ThalamusRecipe, .5), (HippoAmygdalaRecipe, .33333)])
+def test_real_crop_keeps_world_geometry_hyperprior_and_stage_statistics(tmp_path, monkeypatch, recipe_type, resolution):
     import fnit.gems.recipes.base as base
     import fnit.gems.smoothing as smoothing
     calls = []
-    class Recipe(GEMSRecipe):
+    class Recipe(recipe_type):
+        def __init__(self, name, directory):
+            GEMSRecipe.__init__(self, name, directory)
         resolution_mm = resolution
         image_schedule = ((1.5, 7), (.75, 5), (0., 3))
         em_iterations = 1
@@ -106,6 +108,10 @@ def test_real_crop_keeps_world_geometry_hyperprior_and_stage_statistics(tmp_path
     assert [call[2]["outer_iterations"] for call in calls] == [7, 5, 3]
     assert all(call[2]["fit_alpha_stages"][0][1] == 20 for call in calls)
     assert all(call[2]["deformation_stop"] == .005 and call[2]["cost_stop_patience"] == 3 for call in calls)
+    assert [call[2]["materialize_outputs"] for call in calls] == [False, False, True]
+    assert [call[2]["mesh_sampling_stride"] for call in calls] == ([4, 4, 1] if recipe_type is ThalamusRecipe else [1, 1, 1])
+    assert all(call[2]["owner_hint_enabled"] for call in calls)
+    assert all(call[2]["double_data_cost_accumulation"] for call in calls)
     stats = fit.optimization_stats
     assert stats["mesh_evaluations"] == 9 and stats["mesh_steps"] == 6
     assert [stage["stage_index"] for stage in stats["stages"]] == [1, 2, 3]

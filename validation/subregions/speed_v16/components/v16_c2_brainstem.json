@@ -1,0 +1,143 @@
+{
+  "kind": "real_brainstem_coarse_mesh_comparison",
+  "host": "gpucw1",
+  "scope": "40-step coarse mesh component; excludes raw T1 preprocessing, intensity fit and native outputs",
+  "dependency_scope": "saved brainstem function with current shared raster/deformation dependencies",
+  "device": "cuda:0",
+  "threads": 4,
+  "iterations": 40,
+  "optimizer": "adam",
+  "dtype": "float32",
+  "tf32": true,
+  "alignment_dice": 0.824019193649292,
+  "alignment_matrix": [
+    [
+      -0.9042490463321431,
+      0.07809373256871951,
+      0.07809893156762586,
+      151.78341835940944
+    ],
+    [
+      -0.04217212122528656,
+      0.1546841054284702,
+      -0.9591502137546492,
+      188.662782735828
+    ],
+    [
+      0.08530443263325019,
+      0.9428785272423905,
+      0.15477531488732824,
+      83.94213549279137
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "input_sha256": {
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_reference_gpucw1/fs_sub01/mri/norm.mgz": "d9b6b94c365d2b2b789edbed016953ae64e6cae65072c53ecb42f12410ab1615",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_reference_gpucw1/fs_sub01/mri/aseg.mgz": "29fbcff5dff5300599ee863e0c7c425867af725134631741685b41ca44639bc2",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/atlases/brainstem/AtlasMesh.gz": "90b0c6a6ade8aa388ef7c682b652ffc6bbd602271fd6b6068f47197514b2df3f",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/atlases/brainstem/compressionLookupTable.txt": "8c343757d9ee13ed2d02daeb5f5f5fc764a6adb850b19b9d1b0ad352c96ca15b",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/atlases/brainstem/AtlasDump.mgz": "14523eaf5e7f596be68d251a50f98ef277f5b7ef8904cca786a3efef8e9e3e7f",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/atlases/brainstem/config.json": "eb719453d594f4a0332323e435c7e2b900e4d0e6abf9446b665509cd49f73664"
+  },
+  "source_sha256": {
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/src/fnit/gems/brainstem.py": "c545168b5aaf84be202c2e3838f41e8627693c87da78fbae7e7906f49310e1dd",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v16_c2/src/fnit/gems/brainstem.py": "37d3055d4f33812f41c042a179b04291e9f01750578f33615f6f0e539588049d",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v16_c2/src/fnit/gems/deformation.py": "ec71ed9d77980ee762b3b99de40f0c4402527658125586270c31d2d343c9d9c1",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v16_c2/src/fnit/gems/rasterize.py": "a702eb213b29038c59d696af857294828ce64b958d9a3f14babd9b269406c0e1",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v16_c2/src/fnit/gems/optim.py": "4bd1f0061bc6d37ff3600451431ca602a6baed62a7c30228f3fcffbf20286e48"
+  },
+  "same_geometry": {
+    "dense": {
+      "seconds": 0.5579810170456767,
+      "objective": 22470.580078125,
+      "data_cost": 22470.580078125,
+      "prior_cost": 1.208068715641275e-05,
+      "min_jacobian": 0.9999991655349731,
+      "valid_voxels": 161509,
+      "shape": [
+        88,
+        118,
+        89
+      ]
+    },
+    "compact": {
+      "seconds": 1.2907088557258248,
+      "objective": 22470.578125,
+      "data_cost": 22470.580078125,
+      "prior_cost": -0.0013566731940954924,
+      "min_jacobian": 0.9999991655349731,
+      "valid_voxels": 161509,
+      "shape": [
+        88,
+        118,
+        89
+      ]
+    },
+    "gradient_max_abs_difference": 9.1552734375e-05,
+    "gradient_relative_l2_difference": 1.4859000430078595e-07
+  },
+  "full_fits": {
+    "reference": {
+      "mask_dice": 0.9718503952026367,
+      "min_jacobian": 0.3285881578922272,
+      "max_displacement_voxels": 5.002867221832275,
+      "seconds": 19.074281076435,
+      "wall_seconds": 19.080369005911052,
+      "peak_gpu_gib": 0.2716994285583496,
+      "terminal_dense_objective": {
+        "seconds": 0.3714771792292595,
+        "objective": 10458.0048828125,
+        "data_cost": 8335.072265625,
+        "prior_cost": 2122.932373046875,
+        "min_jacobian": 0.3285881578922272,
+        "valid_voxels": 161509,
+        "shape": [
+          88,
+          118,
+          89
+        ]
+      }
+    },
+    "optimized": {
+      "mask_dice": 0.9717193841934204,
+      "min_jacobian": 0.21996153891086578,
+      "max_displacement_voxels": 5.003312110900879,
+      "seconds": 7.124051171820611,
+      "mesh_solver": {
+        "compact": true,
+        "shared_geometry": true,
+        "analytic_prior": true,
+        "mesh_evaluations": 40,
+        "mesh_steps": 40,
+        "accepted_cache_hits": 0,
+        "valid_voxels": 161509
+      },
+      "wall_seconds": 7.133857510052621,
+      "peak_gpu_gib": 0.1960921287536621,
+      "terminal_dense_objective": {
+        "seconds": 0.46738847717642784,
+        "objective": 10466.609375,
+        "data_cost": 8333.23046875,
+        "prior_cost": 2133.37939453125,
+        "min_jacobian": 0.21996153891086578,
+        "valid_voxels": 161509,
+        "shape": [
+          88,
+          118,
+          89
+        ]
+      }
+    }
+  },
+  "terminal_vertex_difference": {
+    "max_abs": 1.0022773742675781,
+    "mean_l2": 0.05555941075277711,
+    "max_l2": 1.2343608589896455
+  },
+  "wall_ratio_reference_over_optimized": 2.6746215464808616
+}

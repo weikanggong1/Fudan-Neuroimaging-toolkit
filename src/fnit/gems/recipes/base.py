@@ -87,6 +87,9 @@ def _fit_statistics(stages: list[dict]) -> dict:
     """Accumulate all stage counters; keep per-stage configuration and timing."""
     stats = {"stages": stages}
     for key in ("mesh_evaluations", "mesh_steps", "accepted_cache_hits", "index_rebuilds",
+                "fused_data_evaluations",
+                "owner_hint_evaluations", "owner_full_evaluations",
+                "owner_hint_evaluated_points", "owner_hint_reused_points",
                 "preparation_seconds", "gems_fit_seconds", "post_fit_seconds", "total_seconds"):
         stats[key] = sum(stage.get(key, 0) for stage in stages)
     for key in ("compact", "shared_geometry", "analytic_prior"):
@@ -107,6 +110,7 @@ class GEMSRecipe:
     em_iterations = 100
     optimization_profile = "balanced"
     fast_mesh_iterations = 20
+    fast_mesh_sampling_stride = 4
 
     def __init__(self, name: str, directory: Path):
         self.name = name
@@ -162,6 +166,7 @@ class GEMSRecipe:
                 torch.cuda.synchronize(device)
             return monotonic()
         fit_started = tick()
+        self._preparation_device = device
         mesh_steps = self.mesh_iterations if mesh_iterations is None else mesh_iterations
         fast = self.optimization_profile == "fast"
         stop_options = {"deformation_stop": 0.005, "cost_stop_patience": 3} if fast else {}
@@ -204,6 +209,8 @@ class GEMSRecipe:
         previous_params = None
         previous_classes = None
         hyper = (None, None)
+        smoothing_cache = {}
+        smoothing_atlas = atlas
         stage_stats = []
         for index, (sigma, iterations) in enumerate(schedule):
             stage_started = fit_started if index == 0 else tick()
@@ -229,7 +236,8 @@ class GEMSRecipe:
                 # KVL smooths in the transformed reference mesh's coordinates.
                 # A population-grid cache has a different bandwidth after the
                 # subject affine and the high-resolution working-grid scaling.
-                alphas = smooth_atlas_alphas(atlas, classes, sigma, device=device)
+                alphas = smooth_atlas_alphas(smoothing_atlas, classes, sigma, device=device,
+                                             cache=smoothing_cache)
             if not sigma:
                 alphas = np.zeros((len(atlas.vertices), int(classes.max()) + 1), np.float32)
                 for channel, group in enumerate(classes):
@@ -250,6 +258,10 @@ class GEMSRecipe:
                 em_relative_cost_stop=None if synthetic else 1e-5,
                 outer_relative_cost_stop=None if synthetic else (1e-5 if fast else 1e-6),
                 fit_alpha_stages=[(alphas, iterations if synthetic else mesh_steps)],
+                materialize_outputs=not synthetic and index == len(schedule) - 1,
+                mesh_sampling_stride=self.fast_mesh_sampling_stride if fast and not synthetic and sigma else 1,
+                owner_hint_enabled=fast and not synthetic,
+                double_data_cost_accumulation=fast and not synthetic,
                 **stop_options)
             solver_finished = tick()
             atlas = atlas.with_vertices(result.vertices.detach().cpu().numpy())
@@ -313,6 +325,12 @@ class GEMSRecipe:
         report["mesh_iterations_per_outer"] = mesh_steps
         report["em_iterations_per_outer"] = self.em_iterations
         report["alpha_smoothing"] = "transformed_reference_mesh"
+        report["mesh_sampling_strides"] = [
+            self.fast_mesh_sampling_stride if self.optimization_profile == "fast" and sigma else 1
+            for sigma, _ in schedule]
+        report["owner_hint_enabled"] = self.optimization_profile == "fast"
+        report["data_cost_accumulation"] = (
+            "float64" if self.optimization_profile == "fast" else "float32")
         if self.optimization_profile == "fast":
             report["deformation_stop_voxels"] = 0.005
             report["cost_stop_patience"] = 3

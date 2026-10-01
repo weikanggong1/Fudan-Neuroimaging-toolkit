@@ -36,7 +36,7 @@ CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹�
 | [WMHSynthSeg](docs/wmh_synthseg/README.md) | FreeSurfer `mri_WMHsynthseg` | 脑结构与白质高信号标签、软体积。 |
 | [SynthSeg](docs/synthseg/README.md) | FreeSurfer `mri_synthseg` | 33 类脑结构标签与软体积。 |
 | [SynthSegPlus](docs/synthseg_plus/README.md) | FreeSurfer `mri_synthseg --parc` | 33 类结构与 68 区皮层分区。 |
-| [segment_subregions](docs/subregions/README.md) | FreeSurfer `segment_subregions brainstem/thalamus/hippo-amygdala` | 一张 T1 一次完成脑干、双侧丘脑、海马和杏仁核分割，自动保存统一标签、硬/软体积和高分辨率结果；[整例 benchmark](validation/subregions/speed_v15/README.md)，逐区精度尚未全部达标。 |
+| [segment_subregions](docs/subregions/README.md) | FreeSurfer `segment_subregions brainstem/thalamus/hippo-amygdala` | 一张 T1 一次完成脑干、双侧丘脑、海马和杏仁核分割，自动保存统一标签、硬/软体积和高分辨率结果；[整例 benchmark](validation/subregions/speed_v16/README.md)：真实单例原始 T1 7.18 分钟，相同阶段输入 8.50 分钟；保留逐区差异和脑图。 |
 | [SynthSR](docs/synthsr/README.md) | FreeSurfer `mri_synthsr` | 合成 1 mm T1w 图像。 |
 | [TorchFAST](docs/fast/README.md) | FSL `fast` | 三组织分割、部分体积分数与偏置场。 |
 | [FastVBM](docs/fast_vbm/README.md) | FSL `fslvbm` | 从 T1w 生成标准空间灰质、Jacobian 与调制灰质图；[全流程 benchmark](validation/fast_vbm/README.md)。 |

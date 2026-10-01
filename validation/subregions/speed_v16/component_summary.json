@@ -1,0 +1,671 @@
+{
+  "kind": "real_subregion_gpu_component_evidence_summary",
+  "phase": "component evidence collected while v16_c3 whole raw T1 run is pending",
+  "environment": {
+    "host": "gpucw1",
+    "gpu": "NVIDIA H100 PCIe",
+    "physical_gpu_index": 1,
+    "cpu_threads": 4,
+    "torch": "2.5.1",
+    "dtype": "float32",
+    "tf32": true,
+    "shared_gpu": true
+  },
+  "scope": "one real sub-01 T1 subject and its saved native inputs/reference meshes; no reference neuroimaging executable called in these component runs",
+  "archive_verification": [
+    {
+      "manifest": "components/archive_manifest.json",
+      "file_count": 13,
+      "all_size_and_sha256_match": true
+    },
+    {
+      "manifest": "candidates/archive_manifest.json",
+      "file_count": 8,
+      "all_size_and_sha256_match": true
+    }
+  ],
+  "frozen_source": {
+    "v16_c2": {
+      "manifest": {
+        "path": "v16_c2/source_manifest.json",
+        "bytes": 73135,
+        "sha256": "5d1f8c57e73f679cf3fc5640736fc0f030a9d8b12c84be35e703bcae2dd1c338"
+      },
+      "base_commit": "d90020e12b08ffd28a872f82dd6885a748cd9587",
+      "working_patch_sha256": "ed0b1858d51330aebc4b288ec6cbf5d9309f94e5c494633708a0cf517d38f470",
+      "source_file_count": 429,
+      "remote_all_size_and_sha256_match": true
+    },
+    "v16_c3": {
+      "manifest": {
+        "path": "v16_c3/source_manifest.json",
+        "bytes": 73482,
+        "sha256": "4cfb92c6bac8b2a026850e795bf700ebdf997bd1d21cd91917eab06e45776548"
+      },
+      "base_commit": "d90020e12b08ffd28a872f82dd6885a748cd9587",
+      "working_patch_sha256": "b3ed5e5812d2f2c1dae86d05fc21935530691deb52bbe905708e6fdfacd631c7",
+      "source_file_count": 431,
+      "remote_all_size_and_sha256_match": true
+    }
+  },
+  "fused_mesh_static": {
+    "thalamus": {
+      "source": {
+        "path": "components/v16_c2_fused_thalamus.json",
+        "bytes": 7498,
+        "sha256": "1f7dd76f5d3b7c4ec6903931b6f923496db10f7196b97780edfb88f42324aaa7"
+      },
+      "scope": "saved real T1 full-valid-voxel mesh component, excludes EM/preparation/end-to-end",
+      "geometry": {
+        "shape": [
+          148,
+          101,
+          114
+        ],
+        "valid_voxels": 717531,
+        "selected_voxels": 717531,
+        "vertices": 23027,
+        "tetrahedra": 135299,
+        "classes": 14
+      },
+      "dtype": "float32",
+      "tf32": true,
+      "mesh_sampling_stride": 1,
+      "first_and_warm_measurements": {
+        "autograd": {
+          "first_seconds": 1.6191737386398017,
+          "warm_seconds": [
+            0.09399892808869481,
+            0.11123410193249583,
+            0.11269955988973379
+          ],
+          "warm_median_seconds": 0.11123410193249583
+        },
+        "fused": {
+          "first_seconds": 2.227234423160553,
+          "warm_seconds": [
+            0.06803541677072644,
+            0.06642939196899533,
+            0.06308161886408925
+          ],
+          "warm_median_seconds": 0.06642939196899533
+        }
+      },
+      "observed_warm_ratio_autograd_over_fused": 1.6744711736096012,
+      "difference_max_across_4_repetitions": {
+        "gradient_relative_l2": 1.465122952648884e-07,
+        "gradient_max_absolute": 0.000244140625,
+        "all_gradients_finite": true,
+        "data_cost_absolute": 0.0,
+        "objective_absolute": 0.0,
+        "prior_cost_absolute": 0.0,
+        "min_jacobian_absolute": 0.0
+      },
+      "tensor_memory_bytes": {
+        "autograd": {
+          "resident_bytes": 174885376,
+          "peak_allocated_bytes": 772733952,
+          "peak_reserved_bytes": 891289600
+        },
+        "fused": {
+          "resident_bytes": 174885376,
+          "peak_allocated_bytes": 269887488,
+          "peak_reserved_bytes": 891289600
+        }
+      },
+      "sampled_process_memory_and_load": {
+        "file": "components/v16_c2_fused_thalamus_gpu_load.jsonl",
+        "sample_count": 4,
+        "sample_max_own_process_memory_mib": 2670,
+        "physical_gpu_index": 1,
+        "shared_gpu_used_mib_range": [
+          8408.0,
+          13273.0
+        ],
+        "shared_gpu_utilization_percent_range": [
+          34.0,
+          98.0
+        ],
+        "timing_scope": "about 5-second process/GPU samples; not per-kernel load measurements"
+      },
+      "numerical_gate_reported": {
+        "enforced": false,
+        "passed": true
+      }
+    },
+    "hippo-amygdala-left": {
+      "source": {
+        "path": "components/v16_c2_fused_hippo-amygdala-left.json",
+        "bytes": 7560,
+        "sha256": "12170e46fdd0cbfb5dbdad36c6e0617cf4201051d36aa9f5374b37ffffc9af35"
+      },
+      "scope": "saved real T1 full-valid-voxel mesh component, excludes EM/preparation/end-to-end",
+      "geometry": {
+        "shape": [
+          156,
+          156,
+          197
+        ],
+        "valid_voxels": 526626,
+        "selected_voxels": 526626,
+        "vertices": 20100,
+        "tetrahedra": 122333,
+        "classes": 13
+      },
+      "dtype": "float32",
+      "tf32": true,
+      "mesh_sampling_stride": 1,
+      "first_and_warm_measurements": {
+        "autograd": {
+          "first_seconds": 0.5252516241744161,
+          "warm_seconds": [
+            0.04483021795749664,
+            0.05475807888433337,
+            0.02611354412510991
+          ],
+          "warm_median_seconds": 0.04483021795749664
+        },
+        "fused": {
+          "first_seconds": 0.6348979822359979,
+          "warm_seconds": [
+            0.027891938108950853,
+            0.021861074026674032,
+            0.02164274826645851
+          ],
+          "warm_median_seconds": 0.021861074026674032
+        }
+      },
+      "observed_warm_ratio_autograd_over_fused": 2.050686892272381,
+      "difference_max_across_4_repetitions": {
+        "gradient_relative_l2": 1.3493140561270072e-07,
+        "gradient_max_absolute": 0.0009765625,
+        "all_gradients_finite": true,
+        "data_cost_absolute": 0.0,
+        "objective_absolute": 0.0,
+        "prior_cost_absolute": 0.0,
+        "min_jacobian_absolute": 0.0
+      },
+      "tensor_memory_bytes": {
+        "autograd": {
+          "resident_bytes": 163906048,
+          "peak_allocated_bytes": 580579840,
+          "peak_reserved_bytes": 658505728
+        },
+        "fused": {
+          "resident_bytes": 163906048,
+          "peak_allocated_bytes": 242756096,
+          "peak_reserved_bytes": 629145600
+        }
+      },
+      "sampled_process_memory_and_load": {
+        "file": "components/v16_c2_fused_hippo-amygdala-left_gpu_load.jsonl",
+        "sample_count": 3,
+        "sample_max_own_process_memory_mib": 1640,
+        "physical_gpu_index": 1,
+        "shared_gpu_used_mib_range": [
+          8054.0,
+          13002.0
+        ],
+        "shared_gpu_utilization_percent_range": [
+          33.0,
+          75.0
+        ],
+        "timing_scope": "about 5-second process/GPU samples; not per-kernel load measurements"
+      },
+      "numerical_gate_reported": {
+        "enforced": false,
+        "passed": true
+      }
+    }
+  },
+  "preparation": {
+    "source": {
+      "path": "components/v16_c2_preparation.json",
+      "bytes": 9591,
+      "sha256": "0fd0622036615b8e16588c31ee595e2831e91d56ee2aba4c90023a7c16f16cff"
+    },
+    "scope": "real saved reference mesh alpha smoothing and real subject hyperparameter preparation; measured once per listed sigma/path",
+    "execution": {
+      "old_smoothing": "GPU dense raster + D2H + SciPy CPU convolution + H2D + GPU 10-step alpha EM",
+      "new_smoothing": "GPU dense reference raster, reused across sigmas + GPU separable convolution + GPU chunked 10-step alpha EM",
+      "old_hippocampus_hyperparameters": "native-grid CPU tissue sampling + CPU atlas raster + CPU Gaussian filter/KDE",
+      "new_hippocampus_hyperparameters": "native-grid CPU tissue sampling + GPU atlas raster/Gaussian filter + CPU KDE"
+    },
+    "cache_scope": "sigma=1.5 populates fixed reference raster cache; sigma=0.75 reuses the same geometry/classes; comparing alpha differences tests the entire GPU/chunked preparation path, not a cache-only perturbation",
+    "cases": {
+      "thalamus": {
+        "inputs": [
+          {
+            "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_thalamus_debug/processedImageMasked.mgz",
+            "bytes": 2478761,
+            "sha256": "0dc40a0f1bef990ec32ec91d7100ee883c0bff6900523843e26da2d5853a3a6b"
+          },
+          {
+            "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_thalamus_debug/alignedAtlasImage.mgz",
+            "bytes": 857890,
+            "sha256": "4899f59a91315e81eadcc2a671ad67dab9231b459a3dd73581e222d2eea63d9e"
+          },
+          {
+            "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_thalamus_debug/warpedOriginalMesh.txt.gz",
+            "bytes": 6147061,
+            "sha256": "d876f463c49346c04a2afb1bba3f9c5e9596523caec657fbee9133d9f5821ee4"
+          },
+          {
+            "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/atlases/thalamus/compressionLookupTable.txt",
+            "bytes": 2130,
+            "sha256": "9f480319b803a2c44606c6595c46a26fbb74726bdc800e88b443011fedb175ff"
+          }
+        ],
+        "vertices": 23027,
+        "tetrahedra": 135299,
+        "classes": 14,
+        "reference_grid_shape": [
+          147,
+          100,
+          113
+        ],
+        "smoothing": {
+          "1.5": {
+            "old": {
+              "seconds": 5.511772160883993,
+              "phase_seconds": {
+                "rasterize_priors": 4.738956781104207,
+                "convolve1d": 0.4097229242324829
+              },
+              "remaining_seconds": 0.36309245554730296,
+              "peak_torch_allocated_gib": 0.8964920043945312
+            },
+            "new": {
+              "seconds": 7.114912205375731,
+              "phase_seconds": {
+                "rasterize_priors": 6.953446531202644,
+                "_separable_convolve": 0.026008381973952055
+              },
+              "remaining_seconds": 0.13545729219913483,
+              "peak_torch_allocated_gib": 0.4253706932067871
+            },
+            "observed_ratio_old_over_new": 0.774678871893813,
+            "max_abs_alpha_difference": 2.980232238769531e-07,
+            "mean_abs_alpha_difference": 3.974212070545491e-09,
+            "vertex_normalization_max_error": 2.384185791015625e-07
+          },
+          "0.75": {
+            "old": {
+              "seconds": 13.025353553704917,
+              "phase_seconds": {
+                "rasterize_priors": 12.326593024190515,
+                "convolve1d": 0.37053847638890147
+              },
+              "remaining_seconds": 0.3282220531255007,
+              "peak_torch_allocated_gib": 1.0291900634765625
+            },
+            "new": {
+              "seconds": 0.13841510377824306,
+              "phase_seconds": {
+                "_separable_convolve": 0.015595982782542706
+              },
+              "remaining_seconds": 0.12281912099570036,
+              "peak_torch_allocated_gib": 0.3547825813293457
+            },
+            "observed_ratio_old_over_new": 94.10355660732685,
+            "max_abs_alpha_difference": 4.172325134277344e-07,
+            "mean_abs_alpha_difference": 2.9354956243565766e-09,
+            "vertex_normalization_max_error": 2.384185791015625e-07
+          }
+        }
+      },
+      "hippo-amygdala-left": {
+        "inputs": [
+          {
+            "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_hippo_integrated_fullfix_left_tmp/processedImageMasked.mgz",
+            "bytes": 1942883,
+            "sha256": "6df365922c33c112663630e51c268afcf3a847413ca33f54a8242dfb9dcd014c"
+          },
+          {
+            "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_hippo_integrated_fullfix_left_tmp/alignedAtlasImage.mgz",
+            "bytes": 406538,
+            "sha256": "bb4be281d6bbdda3bd754ea5656c7fde3e34dccbe7eca939c54ea57371c45c3e"
+          },
+          {
+            "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_hippo_integrated_fullfix_left_tmp/warpedOriginalMesh.txt.gz",
+            "bytes": 5682313,
+            "sha256": "ae705020dc4a819df465408a59e7a662b652a094a1e78d7390036663e7a83c19"
+          },
+          {
+            "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/atlases/hippo-amygdala-left/compressionLookupTable.txt",
+            "bytes": 2595,
+            "sha256": "5962518cb188de252a03796cf04ea8991cd444907b7733b14fc501cd898da362"
+          }
+        ],
+        "vertices": 20100,
+        "tetrahedra": 122333,
+        "classes": 13,
+        "reference_grid_shape": [
+          155,
+          155,
+          196
+        ],
+        "smoothing": {
+          "1.5": {
+            "old": {
+              "seconds": 18.732658582739532,
+              "phase_seconds": {
+                "rasterize_priors": 16.969102459028363,
+                "convolve1d": 1.0829410273581743
+              },
+              "remaining_seconds": 0.6806150963529944,
+              "peak_torch_allocated_gib": 1.5090751647949219
+            },
+            "new": {
+              "seconds": 15.128626280929893,
+              "phase_seconds": {
+                "rasterize_priors": 14.83237762376666,
+                "_separable_convolve": 0.17792647378519177
+              },
+              "remaining_seconds": 0.11832218337804079,
+              "peak_torch_allocated_gib": 0.9386777877807617
+            },
+            "observed_ratio_old_over_new": 1.238226011726698,
+            "max_abs_alpha_difference": 7.471442222595215e-05,
+            "mean_abs_alpha_difference": 3.0123587180241884e-07,
+            "vertex_normalization_max_error": 2.980232238769531e-07
+          },
+          "0.75": {
+            "old": {
+              "seconds": 16.49055576417595,
+              "phase_seconds": {
+                "rasterize_priors": 14.954623486846685,
+                "convolve1d": 0.9492182875983417
+              },
+              "remaining_seconds": 0.5867139897309244,
+              "peak_torch_allocated_gib": 1.8179407119750977
+            },
+            "new": {
+              "seconds": 0.16983320703729987,
+              "phase_seconds": {
+                "_separable_convolve": 0.02465679030865431
+              },
+              "remaining_seconds": 0.14517641672864556,
+              "peak_torch_allocated_gib": 0.8158082962036133
+            },
+            "observed_ratio_old_over_new": 97.09853598038804,
+            "max_abs_alpha_difference": 0.00023245811462402344,
+            "mean_abs_alpha_difference": 3.4468519061192637e-06,
+            "vertex_normalization_max_error": 2.384185791015625e-07
+          }
+        },
+        "hyperparameters": {
+          "old": {
+            "seconds": 27.434842600952834,
+            "phase_seconds": {
+              "rasterize_priors": 18.118794798851013
+            },
+            "remaining_seconds": 9.31604780210182,
+            "peak_torch_allocated_gib": 0.03125
+          },
+          "new": {
+            "seconds": 17.965902925934643,
+            "phase_seconds": {
+              "rasterize_priors": 10.293378334958106
+            },
+            "remaining_seconds": 7.672524590976536,
+            "peak_torch_allocated_gib": 0.7447652816772461
+          },
+          "old_means": [
+            44.0,
+            94.0,
+            63.591514587402344,
+            7.0,
+            36.30388259887695,
+            88.0,
+            67.0,
+            58.0,
+            77.0,
+            55.0,
+            90.0,
+            56.0,
+            24.0
+          ],
+          "new_means": [
+            44.0,
+            94.0,
+            63.588600158691406,
+            7.0,
+            36.305198669433594,
+            88.0,
+            67.0,
+            58.0,
+            77.0,
+            55.0,
+            90.0,
+            56.0,
+            24.0
+          ],
+          "max_abs_mean_difference": 0.0029144287109375,
+          "counts_equal": true,
+          "observed_ratio_old_over_new": 1.5270505865502213
+        }
+      }
+    },
+    "sampled_process_memory_and_load": {
+      "file": "components/v16_c2_preparation_gpu_load.jsonl",
+      "sample_count": 25,
+      "sample_max_own_process_memory_mib": 3134,
+      "physical_gpu_index": 1,
+      "shared_gpu_used_mib_range": [
+        11957.0,
+        33892.0
+      ],
+      "shared_gpu_utilization_percent_range": [
+        13.0,
+        100.0
+      ],
+      "timing_scope": "about 5-second process/GPU samples; not per-kernel load measurements"
+    },
+    "peak_memory_interpretation": "peak_torch_allocated_gib counts CUDA tensor allocations only; old CPU PV raster tensors/RAM are not included"
+  },
+  "brainstem": {
+    "source": {
+      "path": "components/v16_c2_brainstem.json",
+      "bytes": 5605,
+      "sha256": "b0c731e4aa6ee109c780c111cd01a1e324fddf9cbc84cbaa632433567e0e6378"
+    },
+    "scope": "40-step coarse mesh component; excludes raw T1 preprocessing, intensity fit and native outputs",
+    "dependency_scope": "saved brainstem function with current shared raster/deformation dependencies",
+    "dtype": "float32",
+    "tf32": true,
+    "threads": 4,
+    "iterations": 40,
+    "optimizer": "adam",
+    "same_geometry": {
+      "dense": {
+        "seconds": 0.5579810170456767,
+        "objective": 22470.580078125,
+        "data_cost": 22470.580078125,
+        "prior_cost": 1.208068715641275e-05,
+        "min_jacobian": 0.9999991655349731,
+        "valid_voxels": 161509,
+        "shape": [
+          88,
+          118,
+          89
+        ]
+      },
+      "compact": {
+        "seconds": 1.2907088557258248,
+        "objective": 22470.578125,
+        "data_cost": 22470.580078125,
+        "prior_cost": -0.0013566731940954924,
+        "min_jacobian": 0.9999991655349731,
+        "valid_voxels": 161509,
+        "shape": [
+          88,
+          118,
+          89
+        ]
+      },
+      "gradient_max_abs_difference": 9.1552734375e-05,
+      "gradient_relative_l2_difference": 1.4859000430078595e-07
+    },
+    "same_geometry_timing_interpretation": "one first-call evaluation per path; includes allocation/cache/compiler effects and is not a warmed median",
+    "full_fits": {
+      "reference": {
+        "mask_dice": 0.9718503952026367,
+        "min_jacobian": 0.3285881578922272,
+        "max_displacement_voxels": 5.002867221832275,
+        "seconds": 19.074281076435,
+        "wall_seconds": 19.080369005911052,
+        "peak_gpu_gib": 0.2716994285583496,
+        "terminal_dense_objective": {
+          "seconds": 0.3714771792292595,
+          "objective": 10458.0048828125,
+          "data_cost": 8335.072265625,
+          "prior_cost": 2122.932373046875,
+          "min_jacobian": 0.3285881578922272,
+          "valid_voxels": 161509,
+          "shape": [
+            88,
+            118,
+            89
+          ]
+        }
+      },
+      "optimized": {
+        "mask_dice": 0.9717193841934204,
+        "min_jacobian": 0.21996153891086578,
+        "max_displacement_voxels": 5.003312110900879,
+        "seconds": 7.124051171820611,
+        "mesh_solver": {
+          "compact": true,
+          "shared_geometry": true,
+          "analytic_prior": true,
+          "mesh_evaluations": 40,
+          "mesh_steps": 40,
+          "accepted_cache_hits": 0,
+          "valid_voxels": 161509
+        },
+        "wall_seconds": 7.133857510052621,
+        "peak_gpu_gib": 0.1960921287536621,
+        "terminal_dense_objective": {
+          "seconds": 0.46738847717642784,
+          "objective": 10466.609375,
+          "data_cost": 8333.23046875,
+          "prior_cost": 2133.37939453125,
+          "min_jacobian": 0.21996153891086578,
+          "valid_voxels": 161509,
+          "shape": [
+            88,
+            118,
+            89
+          ]
+        }
+      }
+    },
+    "terminal_vertex_difference_voxels": {
+      "max_abs": 1.0022773742675781,
+      "mean_l2": 0.05555941075277711,
+      "max_l2": 1.2343608589896455
+    },
+    "terminal_dense_objective_relative_signed_difference": 0.0008227661283311593,
+    "observed_component_wall_ratio": 2.6746215464808616,
+    "terminal_states_identical": false,
+    "sampled_process_memory_and_load": {
+      "file": "components/v16_c2_brainstem_gpu_load.jsonl",
+      "sample_count": 9,
+      "sample_max_own_process_memory_mib": 1344,
+      "physical_gpu_index": 1,
+      "shared_gpu_used_mib_range": [
+        24318.0,
+        27231.0
+      ],
+      "shared_gpu_utilization_percent_range": [
+        77.0,
+        100.0
+      ],
+      "timing_scope": "about 5-second process/GPU samples; not per-kernel load measurements"
+    }
+  },
+  "owner_reuse_moving_mesh": {
+    "source": {
+      "path": "candidates/v16_c3_owner_thalamus.json",
+      "bytes": 90980,
+      "sha256": "926e1e4d8434eac65678719eb6c6241da99b93e11c4c8dd1fdee80f6dcc20c06"
+    },
+    "scope": "saved real T1 mesh component with deterministic smooth vertex moves; excludes EM/preparation/end-to-end",
+    "approximation": "strict interior owner reuse assumes local mesh cells do not globally overlap; boundary points use full maxscore search; periodic full search resets hints",
+    "controlled_moves_on_real_mesh": "4 repetitions, 16 deterministic smooth mesh positions per repetition; not a fitted end-to-end trajectory",
+    "dtype": "float32",
+    "tf32": true,
+    "sampling_stride": 4,
+    "sampling_scale": 4.000105921573437,
+    "double_data_cost_accumulation": true,
+    "valid_voxels": 717531,
+    "selected_voxels": 179378,
+    "hint_tolerance": 0.0002,
+    "refresh_interval": 8,
+    "warm_median_seconds": {
+      "full": 0.029258574126288295,
+      "hint": 0.023010911187157035
+    },
+    "observed_warm_ratio_full_over_hint": 1.2715087155096334,
+    "warm_scope": "repetition > 0 and step not in (0,8); excludes first compilation, index reset and full-refresh cases",
+    "first_repetition_first_hint_seconds": 5.593694061972201,
+    "index_rebuild_seconds_range": [
+      0.30515945982187986,
+      0.34999321587383747
+    ],
+    "differences_max_across_64_positions": {
+      "owner_disagreement_points": 0,
+      "coverage_disagreement_points": 0,
+      "gradient_relative_l2": 2.3128360116803967e-08,
+      "gradient_max_absolute": 3.0517578125e-05,
+      "objective_absolute": 0.0,
+      "min_jacobian_absolute": 0.0
+    },
+    "tensor_memory_bytes": {
+      "peak_allocated_bytes": 1344394240,
+      "peak_reserved_bytes": 1717567488
+    },
+    "sampled_own_process_peak_mib": null,
+    "numerical_gate_reported": {
+      "enforced": false,
+      "passed": true
+    }
+  },
+  "whole_subject_status": {
+    "v16_c2": {
+      "role": "full-voxel pure computation optimization candidate",
+      "cancellation_evidence": {
+        "path": "candidates/full_raw_v16_c2_20261001_cancellation.json",
+        "bytes": 369,
+        "sha256": "6fbf440cc34858ccfa0d3b486e405c860451d240fc5d2b8bcf62b132b7f2dffe"
+      },
+      "state": "cancelled_optimization_candidate",
+      "elapsed_at_cancel_seconds": 834.8319780826569,
+      "completed": false,
+      "target_less_than_600_seconds": false,
+      "final_accuracy_metrics": null,
+      "final_compute_seconds": null,
+      "sampled_own_process_peak_mib": 18926,
+      "own_process_memory_limit_mib": 19073,
+      "monitor_exit_code": -15,
+      "monitor_failed_state_means": "SIGTERM requested after runtime target had already been exceeded; not a numerical exception"
+    },
+    "v16_c3": {
+      "role": "mesh-only fixed quadrature plus owner reuse/FP64 scalar summation candidate",
+      "state": "whole_raw_T1_run_pending_at_component_report",
+      "completed": false,
+      "final_compute_seconds": null,
+      "final_accuracy_metrics": null,
+      "target_less_than_600_seconds": null
+    }
+  },
+  "interpretation": [
+    "Static/warmed components are not complete fits or whole-subject timings.",
+    "Preparation cache reuse is a different scope from first reference rasterization.",
+    "CUDA allocated tensor peak and sampled nvidia-smi own-process memory are separate measurements.",
+    "Component ratios are shared-GPU observations; do not add isolated component timings or apply their ratios to predict whole-subject duration.",
+    "Same-geometry costs/gradients do not imply equal optimizer terminal meshes or segmentation outputs.",
+    "c2 whole raw T1 exceeded the 600-second target before completion; c3 whole results remain pending in this report."
+  ]
+}

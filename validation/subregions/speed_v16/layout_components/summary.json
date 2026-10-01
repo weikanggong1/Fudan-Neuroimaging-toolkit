@@ -1,0 +1,1378 @@
+{
+  "kind": "real_subregion_packed_layout_component_evidence",
+  "scope": "one real saved sub-01 T1 subject; compact layout plus fixed mixture data cost/backward and dense layout plus raster only; excludes raw-T1 preprocessing, EM, optimization iterations and whole pipeline",
+  "environment": {
+    "host": "gpucw1",
+    "physical_gpu_index": 0,
+    "logical_device": "cuda:0",
+    "cpu_threads": 4,
+    "torch": "2.5.1",
+    "dtype": "float32",
+    "tf32": true,
+    "allocator_fraction": 0.1,
+    "shared_gpu": true,
+    "gpu_mapping_evidence": "archived actual component drivers set CUDA_VISIBLE_DEVICES=0; driver files were inspected after completion; launch PID evidence is separately retained in status/load records"
+  },
+  "timing_rules": {
+    "first_repetition": 0,
+    "warm_repetitions": [
+      1,
+      2,
+      3
+    ],
+    "new_gpu_layout_every_repetition": true,
+    "alternating_legacy_packed_order": true,
+    "cpu_bounding_box_index_excluded_from_layout_plus_compute": true,
+    "first_kernel_use_or_jit_not_separately_timed": true,
+    "shared_load_means_times_are_observations_not_fixed_causal_speedups": true
+  },
+  "archive_verification": [
+    {
+      "manifest": {
+        "path": "archive_manifest.json",
+        "bytes": 5293,
+        "sha256": "78402794f2c5a89eea34772e73a272457a11357f49028fad1d18b457c587e15b"
+      },
+      "files": 30,
+      "all_size_and_sha256_match": true
+    },
+    {
+      "manifest": {
+        "path": "driver_archive_manifest.json",
+        "bytes": 652,
+        "sha256": "cab8aa91ccd55f763dfeab46e6b1e01277cd2b3e05a42758921e1cf864a55a65"
+      },
+      "files": 3,
+      "all_size_and_sha256_match": true
+    }
+  ],
+  "frozen_source": {
+    "v16_c4": {
+      "manifest": {
+        "path": "validation/subregions/speed_v16/v16_c4/source_manifest.json",
+        "bytes": 73842,
+        "sha256": "f09689ab047e01abdd2d36ebc056e4396ba3ae690cf9d0da89577b9099ea7f93"
+      },
+      "base_commit": "d90020e12b08ffd28a872f82dd6885a748cd9587",
+      "working_patch_sha256": "fe74c70cca544084b9bd782df29f0a3d8f1216288c5c02582fb7264b61107b19",
+      "source_file_count": 433
+    },
+    "v16_c5": {
+      "manifest": {
+        "path": "validation/subregions/speed_v16/v16_c5/source_manifest.json",
+        "bytes": 74197,
+        "sha256": "09b95fe73bfc990f301e73d8e29c20c58690724174224d27944f1f5e6821b361"
+      },
+      "base_commit": "d90020e12b08ffd28a872f82dd6885a748cd9587",
+      "working_patch_sha256": "52c21a64d9c1e593803ca37e9c91e81a0aa539187a3f9b6baf7bb4fac15f5b5b",
+      "source_file_count": 435
+    }
+  },
+  "compact_layout": {
+    "hippo-amygdala-left_stride1": {
+      "source": {
+        "path": "v16_c4_layout_hippo-amygdala-left_stride1.json",
+        "bytes": 5738,
+        "sha256": "b67f4c3d00c20951996762c96565d5634209de9f89acc84fb0cda2114ecdc8be"
+      },
+      "input_scope": "real saved T1 fresh index compact layout and unchanged full data cost, excludes preparation/EM/full pipeline",
+      "shape": [
+        156,
+        156,
+        197
+      ],
+      "dtype": "float32",
+      "tf32": true,
+      "cpu_bounding_box_index_seconds": 0.3385546407662332,
+      "first_measurement": {
+        "repetition": 0,
+        "order": [
+          "legacy",
+          "packed"
+        ],
+        "legacy": {
+          "layout_seconds": 1.8324501612223685,
+          "warm_cost_gradient_seconds": 0.41510066390037537,
+          "fresh_layout_plus_cost_seconds": 2.247550825122744
+        },
+        "packed": {
+          "layout_seconds": 0.17932838294655085,
+          "warm_cost_gradient_seconds": 0.06720838975161314,
+          "fresh_layout_plus_cost_seconds": 0.246536772698164
+        }
+      },
+      "warm_median_seconds": {
+        "legacy": {
+          "layout_seconds": 1.7823563762940466,
+          "warm_cost_gradient_seconds": 0.061737931333482265,
+          "fresh_layout_plus_cost_seconds": 1.844094307627529
+        },
+        "packed": {
+          "layout_seconds": 0.1438825698569417,
+          "warm_cost_gradient_seconds": 0.06780944531783462,
+          "fresh_layout_plus_cost_seconds": 0.21803693659603596
+        }
+      },
+      "all_measurements": [
+        {
+          "repetition": 0,
+          "order": [
+            "legacy",
+            "packed"
+          ],
+          "legacy": {
+            "layout_seconds": 1.8324501612223685,
+            "warm_cost_gradient_seconds": 0.41510066390037537,
+            "fresh_layout_plus_cost_seconds": 2.247550825122744
+          },
+          "packed": {
+            "layout_seconds": 0.17932838294655085,
+            "warm_cost_gradient_seconds": 0.06720838975161314,
+            "fresh_layout_plus_cost_seconds": 0.246536772698164
+          }
+        },
+        {
+          "repetition": 1,
+          "order": [
+            "packed",
+            "legacy"
+          ],
+          "packed": {
+            "layout_seconds": 0.1438825698569417,
+            "warm_cost_gradient_seconds": 0.1644042283296585,
+            "fresh_layout_plus_cost_seconds": 0.3082867981866002
+          },
+          "legacy": {
+            "layout_seconds": 1.757195461075753,
+            "warm_cost_gradient_seconds": 0.061816050205379725,
+            "fresh_layout_plus_cost_seconds": 1.8190115112811327
+          }
+        },
+        {
+          "repetition": 2,
+          "order": [
+            "legacy",
+            "packed"
+          ],
+          "legacy": {
+            "layout_seconds": 1.8481577602215111,
+            "warm_cost_gradient_seconds": 0.04977670731022954,
+            "fresh_layout_plus_cost_seconds": 1.8979344675317407
+          },
+          "packed": {
+            "layout_seconds": 0.15039040986448526,
+            "warm_cost_gradient_seconds": 0.0676465267315507,
+            "fresh_layout_plus_cost_seconds": 0.21803693659603596
+          }
+        },
+        {
+          "repetition": 3,
+          "order": [
+            "packed",
+            "legacy"
+          ],
+          "packed": {
+            "layout_seconds": 0.13986296392977238,
+            "warm_cost_gradient_seconds": 0.06780944531783462,
+            "fresh_layout_plus_cost_seconds": 0.207672409247607
+          },
+          "legacy": {
+            "layout_seconds": 1.7823563762940466,
+            "warm_cost_gradient_seconds": 0.061737931333482265,
+            "fresh_layout_plus_cost_seconds": 1.844094307627529
+          }
+        }
+      ],
+      "numerical_gate": {
+        "comparison_count": 4,
+        "every_layout_tensor_bitwise_equal": true,
+        "maximum_cost_absolute_difference": 0.0,
+        "maximum_gradient_relative_l2": 8.065748998027465e-08,
+        "maximum_gradient_element_absolute_difference": 1.52587890625e-05,
+        "all_gradients_finite": true,
+        "script_gradient_relative_l2_threshold": 0.0002,
+        "prior_and_coverage_direct_comparison": "not reported by compact layout benchmark",
+        "passed": true
+      },
+      "memory": {
+        "peak_allocated_bytes": 894472704,
+        "peak_reserved_bytes": 1170210816,
+        "peak_allocated_gib": 0.8330426216125488,
+        "peak_reserved_gib": 1.08984375
+      },
+      "monitor": {
+        "source": {
+          "path": "v16_c4_layout_hippo-amygdala-left_stride1_gpu_load.jsonl",
+          "bytes": 564,
+          "sha256": "1a07dd210b1326c2ab91b5aa8e39721b3671c7460eb2bf50a21c9e8f0d0d0e1a"
+        },
+        "samples": 4,
+        "max_sample_gap_seconds": 5.124792814254761,
+        "max_own_process_memory_mib": 1900,
+        "gpu0_memory_used_mib_range": [
+          69052,
+          70957
+        ],
+        "gpu0_memory_free_mib_range": [
+          10050,
+          11955
+        ],
+        "gpu0_utilization_percent_range": [
+          100,
+          100
+        ],
+        "gpu0_utilization_percent_median": 100.0
+      },
+      "inputs": [
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_hippo_integrated_fullfix_left_tmp/processedImageMasked.mgz",
+          "bytes": 1942883,
+          "sha256": "6df365922c33c112663630e51c268afcf3a847413ca33f54a8242dfb9dcd014c"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_hippo_integrated_fullfix_left_tmp/alignedAtlasImage.mgz",
+          "bytes": 406538,
+          "sha256": "bb4be281d6bbdda3bd754ea5656c7fde3e34dccbe7eca939c54ea57371c45c3e"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_hippo_integrated_fullfix_left_tmp/warpedOriginalMesh.txt.gz",
+          "bytes": 5682313,
+          "sha256": "ae705020dc4a819df465408a59e7a662b652a094a1e78d7390036663e7a83c19"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/atlases/hippo-amygdala-left/compressionLookupTable.txt",
+          "bytes": 2595,
+          "sha256": "5962518cb188de252a03796cf04ea8991cd444907b7733b14fc501cd898da362"
+        }
+      ],
+      "source_bindings": [
+        {
+          "source": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v16_c4/validation/subregions/benchmark_compact_layout.py",
+            "bytes": 11883,
+            "sha256": "258f8d5f856b0a473a2fe6b698fb72373061ce63ae72e8192da9723a6abe3678"
+          },
+          "relative_path": "validation/subregions/benchmark_compact_layout.py",
+          "matches_original_frozen_manifest": true,
+          "expected_driver_only_fix": false
+        },
+        {
+          "source": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v16_c4/src/fnit/gems/rasterize.py",
+            "bytes": 25333,
+            "sha256": "4a3f38faaf3a3ddbe5c5c483565d5dc42900c3d7eb206955b9532987e136fdc1"
+          },
+          "relative_path": "src/fnit/gems/rasterize.py",
+          "matches_original_frozen_manifest": true,
+          "expected_driver_only_fix": false
+        }
+      ],
+      "valid_voxels": 526626,
+      "sampled_voxels": 526626,
+      "sampling_stride": 1,
+      "sampling_scope": "legacy and packed both use the same fixed selected subset; no comparison of quadrature with all-voxel integral"
+    },
+    "hippo-amygdala-left_stride4": {
+      "source": {
+        "path": "v16_c4_layout_hippo-amygdala-left_stride4.json",
+        "bytes": 5742,
+        "sha256": "3f2efbc4e1d71f644cc06b08aae47ded86406bf013001bd07f238a1d21db2281"
+      },
+      "input_scope": "real saved T1 fresh index compact layout and unchanged full data cost, excludes preparation/EM/full pipeline",
+      "shape": [
+        156,
+        156,
+        197
+      ],
+      "dtype": "float32",
+      "tf32": true,
+      "cpu_bounding_box_index_seconds": 0.3859605290926993,
+      "first_measurement": {
+        "repetition": 0,
+        "order": [
+          "legacy",
+          "packed"
+        ],
+        "legacy": {
+          "layout_seconds": 1.7155810240656137,
+          "warm_cost_gradient_seconds": 0.42472832929342985,
+          "fresh_layout_plus_cost_seconds": 2.1403093533590436
+        },
+        "packed": {
+          "layout_seconds": 0.13090701727196574,
+          "warm_cost_gradient_seconds": 0.3398050260730088,
+          "fresh_layout_plus_cost_seconds": 0.4707120433449745
+        }
+      },
+      "warm_median_seconds": {
+        "legacy": {
+          "layout_seconds": 1.6839879807084799,
+          "warm_cost_gradient_seconds": 0.0258804839104414,
+          "fresh_layout_plus_cost_seconds": 1.710157971829176
+        },
+        "packed": {
+          "layout_seconds": 0.14204245014116168,
+          "warm_cost_gradient_seconds": 0.026322230231016874,
+          "fresh_layout_plus_cost_seconds": 0.16836676513776183
+        }
+      },
+      "all_measurements": [
+        {
+          "repetition": 0,
+          "order": [
+            "legacy",
+            "packed"
+          ],
+          "legacy": {
+            "layout_seconds": 1.7155810240656137,
+            "warm_cost_gradient_seconds": 0.42472832929342985,
+            "fresh_layout_plus_cost_seconds": 2.1403093533590436
+          },
+          "packed": {
+            "layout_seconds": 0.13090701727196574,
+            "warm_cost_gradient_seconds": 0.3398050260730088,
+            "fresh_layout_plus_cost_seconds": 0.4707120433449745
+          }
+        },
+        {
+          "repetition": 1,
+          "order": [
+            "packed",
+            "legacy"
+          ],
+          "packed": {
+            "layout_seconds": 0.15464267693459988,
+            "warm_cost_gradient_seconds": 0.026322230231016874,
+            "fresh_layout_plus_cost_seconds": 0.18096490716561675
+          },
+          "legacy": {
+            "layout_seconds": 1.597631904296577,
+            "warm_cost_gradient_seconds": 0.0258804839104414,
+            "fresh_layout_plus_cost_seconds": 1.6235123882070184
+          }
+        },
+        {
+          "repetition": 2,
+          "order": [
+            "legacy",
+            "packed"
+          ],
+          "legacy": {
+            "layout_seconds": 1.6839879807084799,
+            "warm_cost_gradient_seconds": 0.026169991120696068,
+            "fresh_layout_plus_cost_seconds": 1.710157971829176
+          },
+          "packed": {
+            "layout_seconds": 0.12013850221410394,
+            "warm_cost_gradient_seconds": 0.025506109930574894,
+            "fresh_layout_plus_cost_seconds": 0.14564461214467883
+          }
+        },
+        {
+          "repetition": 3,
+          "order": [
+            "packed",
+            "legacy"
+          ],
+          "packed": {
+            "layout_seconds": 0.14204245014116168,
+            "warm_cost_gradient_seconds": 0.02632431499660015,
+            "fresh_layout_plus_cost_seconds": 0.16836676513776183
+          },
+          "legacy": {
+            "layout_seconds": 1.722954181022942,
+            "warm_cost_gradient_seconds": 0.02550939191132784,
+            "fresh_layout_plus_cost_seconds": 1.74846357293427
+          }
+        }
+      ],
+      "numerical_gate": {
+        "comparison_count": 4,
+        "every_layout_tensor_bitwise_equal": true,
+        "maximum_cost_absolute_difference": 0.0,
+        "maximum_gradient_relative_l2": 6.56235075515203e-08,
+        "maximum_gradient_element_absolute_difference": 3.814697265625e-06,
+        "all_gradients_finite": true,
+        "script_gradient_relative_l2_threshold": 0.0002,
+        "prior_and_coverage_direct_comparison": "not reported by compact layout benchmark",
+        "passed": true
+      },
+      "memory": {
+        "peak_allocated_bytes": 894472704,
+        "peak_reserved_bytes": 1153433600,
+        "peak_allocated_gib": 0.8330426216125488,
+        "peak_reserved_gib": 1.07421875
+      },
+      "monitor": {
+        "source": {
+          "path": "v16_c4_layout_hippo-amygdala-left_stride4_gpu_load.jsonl",
+          "bytes": 563,
+          "sha256": "96621d8933696a506d8c7d4ccfa5b52a4f22cccf358231c50f3549dc10d749f5"
+        },
+        "samples": 4,
+        "max_sample_gap_seconds": 5.113710880279541,
+        "max_own_process_memory_mib": 1884,
+        "gpu0_memory_used_mib_range": [
+          69052,
+          70941
+        ],
+        "gpu0_memory_free_mib_range": [
+          10066,
+          11955
+        ],
+        "gpu0_utilization_percent_range": [
+          100,
+          100
+        ],
+        "gpu0_utilization_percent_median": 100.0
+      },
+      "inputs": [
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_hippo_integrated_fullfix_left_tmp/processedImageMasked.mgz",
+          "bytes": 1942883,
+          "sha256": "6df365922c33c112663630e51c268afcf3a847413ca33f54a8242dfb9dcd014c"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_hippo_integrated_fullfix_left_tmp/alignedAtlasImage.mgz",
+          "bytes": 406538,
+          "sha256": "bb4be281d6bbdda3bd754ea5656c7fde3e34dccbe7eca939c54ea57371c45c3e"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_hippo_integrated_fullfix_left_tmp/warpedOriginalMesh.txt.gz",
+          "bytes": 5682313,
+          "sha256": "ae705020dc4a819df465408a59e7a662b652a094a1e78d7390036663e7a83c19"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/atlases/hippo-amygdala-left/compressionLookupTable.txt",
+          "bytes": 2595,
+          "sha256": "5962518cb188de252a03796cf04ea8991cd444907b7733b14fc501cd898da362"
+        }
+      ],
+      "source_bindings": [
+        {
+          "source": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v16_c4/validation/subregions/benchmark_compact_layout.py",
+            "bytes": 11883,
+            "sha256": "258f8d5f856b0a473a2fe6b698fb72373061ce63ae72e8192da9723a6abe3678"
+          },
+          "relative_path": "validation/subregions/benchmark_compact_layout.py",
+          "matches_original_frozen_manifest": true,
+          "expected_driver_only_fix": false
+        },
+        {
+          "source": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v16_c4/src/fnit/gems/rasterize.py",
+            "bytes": 25333,
+            "sha256": "4a3f38faaf3a3ddbe5c5c483565d5dc42900c3d7eb206955b9532987e136fdc1"
+          },
+          "relative_path": "src/fnit/gems/rasterize.py",
+          "matches_original_frozen_manifest": true,
+          "expected_driver_only_fix": false
+        }
+      ],
+      "valid_voxels": 526626,
+      "sampled_voxels": 131721,
+      "sampling_stride": 4,
+      "sampling_scope": "legacy and packed both use the same fixed selected subset; no comparison of quadrature with all-voxel integral"
+    },
+    "thalamus_stride1": {
+      "source": {
+        "path": "v16_c4_layout_thalamus_stride1.json",
+        "bytes": 5646,
+        "sha256": "01e38ff6aeb254a7fa27b4c259ccf423af782cb4813b10264d60dec3a9e40328"
+      },
+      "input_scope": "real saved T1 fresh index compact layout and unchanged full data cost, excludes preparation/EM/full pipeline",
+      "shape": [
+        148,
+        101,
+        114
+      ],
+      "dtype": "float32",
+      "tf32": true,
+      "cpu_bounding_box_index_seconds": 0.5875713601708412,
+      "first_measurement": {
+        "repetition": 0,
+        "order": [
+          "legacy",
+          "packed"
+        ],
+        "legacy": {
+          "layout_seconds": 3.754691989161074,
+          "warm_cost_gradient_seconds": 0.6030616699717939,
+          "fresh_layout_plus_cost_seconds": 4.357753659132868
+        },
+        "packed": {
+          "layout_seconds": 0.2212771619670093,
+          "warm_cost_gradient_seconds": 0.0969054033048451,
+          "fresh_layout_plus_cost_seconds": 0.3181825652718544
+        }
+      },
+      "warm_median_seconds": {
+        "legacy": {
+          "layout_seconds": 2.5841976539231837,
+          "warm_cost_gradient_seconds": 0.08942930912598968,
+          "fresh_layout_plus_cost_seconds": 2.679189587943256
+        },
+        "packed": {
+          "layout_seconds": 0.18563242489472032,
+          "warm_cost_gradient_seconds": 0.09467386268079281,
+          "fresh_layout_plus_cost_seconds": 0.28066717786714435
+        }
+      },
+      "all_measurements": [
+        {
+          "repetition": 0,
+          "order": [
+            "legacy",
+            "packed"
+          ],
+          "legacy": {
+            "layout_seconds": 3.754691989161074,
+            "warm_cost_gradient_seconds": 0.6030616699717939,
+            "fresh_layout_plus_cost_seconds": 4.357753659132868
+          },
+          "packed": {
+            "layout_seconds": 0.2212771619670093,
+            "warm_cost_gradient_seconds": 0.0969054033048451,
+            "fresh_layout_plus_cost_seconds": 0.3181825652718544
+          }
+        },
+        {
+          "repetition": 1,
+          "order": [
+            "packed",
+            "legacy"
+          ],
+          "packed": {
+            "layout_seconds": 0.18427903810516,
+            "warm_cost_gradient_seconds": 0.08383562183007598,
+            "fresh_layout_plus_cost_seconds": 0.268114659935236
+          },
+          "legacy": {
+            "layout_seconds": 2.627669584006071,
+            "warm_cost_gradient_seconds": 0.08942930912598968,
+            "fresh_layout_plus_cost_seconds": 2.7170988931320608
+          }
+        },
+        {
+          "repetition": 2,
+          "order": [
+            "legacy",
+            "packed"
+          ],
+          "legacy": {
+            "layout_seconds": 2.4935506931506097,
+            "warm_cost_gradient_seconds": 0.08628460112959146,
+            "fresh_layout_plus_cost_seconds": 2.579835294280201
+          },
+          "packed": {
+            "layout_seconds": 0.2367636221460998,
+            "warm_cost_gradient_seconds": 0.09467386268079281,
+            "fresh_layout_plus_cost_seconds": 0.3314374848268926
+          }
+        },
+        {
+          "repetition": 3,
+          "order": [
+            "packed",
+            "legacy"
+          ],
+          "packed": {
+            "layout_seconds": 0.18563242489472032,
+            "warm_cost_gradient_seconds": 0.09503475297242403,
+            "fresh_layout_plus_cost_seconds": 0.28066717786714435
+          },
+          "legacy": {
+            "layout_seconds": 2.5841976539231837,
+            "warm_cost_gradient_seconds": 0.09499193402007222,
+            "fresh_layout_plus_cost_seconds": 2.679189587943256
+          }
+        }
+      ],
+      "numerical_gate": {
+        "comparison_count": 4,
+        "every_layout_tensor_bitwise_equal": true,
+        "maximum_cost_absolute_difference": 0.0,
+        "maximum_gradient_relative_l2": 8.5581030436621e-08,
+        "maximum_gradient_element_absolute_difference": 2.288818359375e-05,
+        "all_gradients_finite": true,
+        "script_gradient_relative_l2_threshold": 0.0002,
+        "prior_and_coverage_direct_comparison": "not reported by compact layout benchmark",
+        "passed": true
+      },
+      "memory": {
+        "peak_allocated_bytes": 1345954304,
+        "peak_reserved_bytes": 1713373184,
+        "peak_allocated_gib": 1.2535176277160645,
+        "peak_reserved_gib": 1.595703125
+      },
+      "monitor": {
+        "source": {
+          "path": "v16_c4_layout_thalamus_stride1_gpu_load.jsonl",
+          "bytes": 843,
+          "sha256": "97c7abb2e09600e286d0352c979ef562e2694e8aa83e1108846c3868816a5f32"
+        },
+        "samples": 6,
+        "max_sample_gap_seconds": 5.247666120529175,
+        "max_own_process_memory_mib": 2418,
+        "gpu0_memory_used_mib_range": [
+          69052,
+          71475
+        ],
+        "gpu0_memory_free_mib_range": [
+          9532,
+          11955
+        ],
+        "gpu0_utilization_percent_range": [
+          100,
+          100
+        ],
+        "gpu0_utilization_percent_median": 100.0
+      },
+      "inputs": [
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_thalamus_debug/processedImageMasked.mgz",
+          "bytes": 2478761,
+          "sha256": "0dc40a0f1bef990ec32ec91d7100ee883c0bff6900523843e26da2d5853a3a6b"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_thalamus_debug/alignedAtlasImage.mgz",
+          "bytes": 857890,
+          "sha256": "4899f59a91315e81eadcc2a671ad67dab9231b459a3dd73581e222d2eea63d9e"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_thalamus_debug/warpedOriginalMesh.txt.gz",
+          "bytes": 6147061,
+          "sha256": "d876f463c49346c04a2afb1bba3f9c5e9596523caec657fbee9133d9f5821ee4"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/atlases/thalamus/compressionLookupTable.txt",
+          "bytes": 2130,
+          "sha256": "9f480319b803a2c44606c6595c46a26fbb74726bdc800e88b443011fedb175ff"
+        }
+      ],
+      "source_bindings": [
+        {
+          "source": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v16_c4/validation/subregions/benchmark_compact_layout.py",
+            "bytes": 11883,
+            "sha256": "258f8d5f856b0a473a2fe6b698fb72373061ce63ae72e8192da9723a6abe3678"
+          },
+          "relative_path": "validation/subregions/benchmark_compact_layout.py",
+          "matches_original_frozen_manifest": true,
+          "expected_driver_only_fix": false
+        },
+        {
+          "source": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v16_c4/src/fnit/gems/rasterize.py",
+            "bytes": 25333,
+            "sha256": "4a3f38faaf3a3ddbe5c5c483565d5dc42900c3d7eb206955b9532987e136fdc1"
+          },
+          "relative_path": "src/fnit/gems/rasterize.py",
+          "matches_original_frozen_manifest": true,
+          "expected_driver_only_fix": false
+        }
+      ],
+      "valid_voxels": 717531,
+      "sampled_voxels": 717531,
+      "sampling_stride": 1,
+      "sampling_scope": "legacy and packed both use the same fixed selected subset; no comparison of quadrature with all-voxel integral"
+    },
+    "thalamus_stride4": {
+      "source": {
+        "path": "v16_c4_layout_thalamus_stride4.json",
+        "bytes": 5665,
+        "sha256": "f462b6e27e8da10097d3e78c75cce73605b76090a4299f7693177c9496c07d40"
+      },
+      "input_scope": "real saved T1 fresh index compact layout and unchanged full data cost, excludes preparation/EM/full pipeline",
+      "shape": [
+        148,
+        101,
+        114
+      ],
+      "dtype": "float32",
+      "tf32": true,
+      "cpu_bounding_box_index_seconds": 0.399322303943336,
+      "first_measurement": {
+        "repetition": 0,
+        "order": [
+          "legacy",
+          "packed"
+        ],
+        "legacy": {
+          "layout_seconds": 2.1805914319120347,
+          "warm_cost_gradient_seconds": 0.38749511912465096,
+          "fresh_layout_plus_cost_seconds": 2.5680865510366857
+        },
+        "packed": {
+          "layout_seconds": 0.21889534639194608,
+          "warm_cost_gradient_seconds": 1.2803485612384975,
+          "fresh_layout_plus_cost_seconds": 1.4992439076304436
+        }
+      },
+      "warm_median_seconds": {
+        "legacy": {
+          "layout_seconds": 2.0684113488532603,
+          "warm_cost_gradient_seconds": 0.033095389138907194,
+          "fresh_layout_plus_cost_seconds": 2.106483608484268
+        },
+        "packed": {
+          "layout_seconds": 0.1877595642581582,
+          "warm_cost_gradient_seconds": 0.03812598530203104,
+          "fresh_layout_plus_cost_seconds": 0.22063964325934649
+        }
+      },
+      "all_measurements": [
+        {
+          "repetition": 0,
+          "order": [
+            "legacy",
+            "packed"
+          ],
+          "legacy": {
+            "layout_seconds": 2.1805914319120347,
+            "warm_cost_gradient_seconds": 0.38749511912465096,
+            "fresh_layout_plus_cost_seconds": 2.5680865510366857
+          },
+          "packed": {
+            "layout_seconds": 0.21889534639194608,
+            "warm_cost_gradient_seconds": 1.2803485612384975,
+            "fresh_layout_plus_cost_seconds": 1.4992439076304436
+          }
+        },
+        {
+          "repetition": 1,
+          "order": [
+            "packed",
+            "legacy"
+          ],
+          "packed": {
+            "layout_seconds": 0.1877595642581582,
+            "warm_cost_gradient_seconds": 0.03288007900118828,
+            "fresh_layout_plus_cost_seconds": 0.22063964325934649
+          },
+          "legacy": {
+            "layout_seconds": 2.0178192709572613,
+            "warm_cost_gradient_seconds": 0.033095389138907194,
+            "fresh_layout_plus_cost_seconds": 2.0509146600961685
+          }
+        },
+        {
+          "repetition": 2,
+          "order": [
+            "legacy",
+            "packed"
+          ],
+          "legacy": {
+            "layout_seconds": 2.086259562987834,
+            "warm_cost_gradient_seconds": 0.02612880477681756,
+            "fresh_layout_plus_cost_seconds": 2.1123883677646518
+          },
+          "packed": {
+            "layout_seconds": 0.21822411892935634,
+            "warm_cost_gradient_seconds": 0.038311264012008905,
+            "fresh_layout_plus_cost_seconds": 0.25653538294136524
+          }
+        },
+        {
+          "repetition": 3,
+          "order": [
+            "packed",
+            "legacy"
+          ],
+          "packed": {
+            "layout_seconds": 0.1781729031354189,
+            "warm_cost_gradient_seconds": 0.03812598530203104,
+            "fresh_layout_plus_cost_seconds": 0.21629888843744993
+          },
+          "legacy": {
+            "layout_seconds": 2.0684113488532603,
+            "warm_cost_gradient_seconds": 0.03807225963100791,
+            "fresh_layout_plus_cost_seconds": 2.106483608484268
+          }
+        }
+      ],
+      "numerical_gate": {
+        "comparison_count": 4,
+        "every_layout_tensor_bitwise_equal": true,
+        "maximum_cost_absolute_difference": 0.0,
+        "maximum_gradient_relative_l2": 7.572159674161006e-08,
+        "maximum_gradient_element_absolute_difference": 1.33514404296875e-05,
+        "all_gradients_finite": true,
+        "script_gradient_relative_l2_threshold": 0.0002,
+        "prior_and_coverage_direct_comparison": "not reported by compact layout benchmark",
+        "passed": true
+      },
+      "memory": {
+        "peak_allocated_bytes": 1345954304,
+        "peak_reserved_bytes": 1690304512,
+        "peak_allocated_gib": 1.2535176277160645,
+        "peak_reserved_gib": 1.57421875
+      },
+      "monitor": {
+        "source": {
+          "path": "v16_c4_layout_thalamus_stride4_gpu_load.jsonl",
+          "bytes": 560,
+          "sha256": "e32ab49bd92ccc201efebcf19b99108ad8f640b2cab22227b999eb0a604e2b79"
+        },
+        "samples": 4,
+        "max_sample_gap_seconds": 5.24378514289856,
+        "max_own_process_memory_mib": 2396,
+        "gpu0_memory_used_mib_range": [
+          69052,
+          71453
+        ],
+        "gpu0_memory_free_mib_range": [
+          9554,
+          11955
+        ],
+        "gpu0_utilization_percent_range": [
+          100,
+          100
+        ],
+        "gpu0_utilization_percent_median": 100.0
+      },
+      "inputs": [
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_thalamus_debug/processedImageMasked.mgz",
+          "bytes": 2478761,
+          "sha256": "0dc40a0f1bef990ec32ec91d7100ee883c0bff6900523843e26da2d5853a3a6b"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_thalamus_debug/alignedAtlasImage.mgz",
+          "bytes": 857890,
+          "sha256": "4899f59a91315e81eadcc2a671ad67dab9231b459a3dd73581e222d2eea63d9e"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_thalamus_debug/warpedOriginalMesh.txt.gz",
+          "bytes": 6147061,
+          "sha256": "d876f463c49346c04a2afb1bba3f9c5e9596523caec657fbee9133d9f5821ee4"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/atlases/thalamus/compressionLookupTable.txt",
+          "bytes": 2130,
+          "sha256": "9f480319b803a2c44606c6595c46a26fbb74726bdc800e88b443011fedb175ff"
+        }
+      ],
+      "source_bindings": [
+        {
+          "source": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v16_c4/validation/subregions/benchmark_compact_layout.py",
+            "bytes": 11883,
+            "sha256": "258f8d5f856b0a473a2fe6b698fb72373061ce63ae72e8192da9723a6abe3678"
+          },
+          "relative_path": "validation/subregions/benchmark_compact_layout.py",
+          "matches_original_frozen_manifest": true,
+          "expected_driver_only_fix": false
+        },
+        {
+          "source": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v16_c4/src/fnit/gems/rasterize.py",
+            "bytes": 25333,
+            "sha256": "4a3f38faaf3a3ddbe5c5c483565d5dc42900c3d7eb206955b9532987e136fdc1"
+          },
+          "relative_path": "src/fnit/gems/rasterize.py",
+          "matches_original_frozen_manifest": true,
+          "expected_driver_only_fix": false
+        }
+      ],
+      "valid_voxels": 717531,
+      "sampled_voxels": 179378,
+      "sampling_stride": 4,
+      "sampling_scope": "legacy and packed both use the same fixed selected subset; no comparison of quadrature with all-voxel integral"
+    }
+  },
+  "dense_layout": {
+    "hippo-amygdala-left": {
+      "source": {
+        "path": "v16_c5_driverfix_dense_layout_hippo-amygdala-left.json",
+        "bytes": 5298,
+        "sha256": "1d3faa6a5efc4fabf3c42acfc733bf4688cd829b8c0de6584b93290e09468989"
+      },
+      "input_scope": "real saved T1 fresh dense index layout+raster component; excludes EM/preparation/full pipeline",
+      "shape": [
+        156,
+        156,
+        197
+      ],
+      "dtype": "float32",
+      "tf32": true,
+      "cpu_bounding_box_index_seconds": 0.40609710616990924,
+      "first_measurement": {
+        "repetition": 0,
+        "order": [
+          "legacy",
+          "packed"
+        ],
+        "legacy": {
+          "layout_seconds": 7.463688597083092,
+          "warm_dense_raster_seconds": 1.2374730403535068,
+          "fresh_layout_plus_raster_seconds": 8.701161637436599
+        },
+        "packed": {
+          "layout_seconds": 0.46548461681231856,
+          "warm_dense_raster_seconds": 0.3513255133293569,
+          "fresh_layout_plus_raster_seconds": 0.8168101301416755
+        }
+      },
+      "warm_median_seconds": {
+        "legacy": {
+          "layout_seconds": 4.557833331171423,
+          "warm_dense_raster_seconds": 0.16999414283782244,
+          "fresh_layout_plus_raster_seconds": 4.72618342936039
+        },
+        "packed": {
+          "layout_seconds": 0.46950902603566647,
+          "warm_dense_raster_seconds": 0.16225425992161036,
+          "fresh_layout_plus_raster_seconds": 0.6317632859572768
+        }
+      },
+      "all_measurements": [
+        {
+          "repetition": 0,
+          "order": [
+            "legacy",
+            "packed"
+          ],
+          "legacy": {
+            "layout_seconds": 7.463688597083092,
+            "warm_dense_raster_seconds": 1.2374730403535068,
+            "fresh_layout_plus_raster_seconds": 8.701161637436599
+          },
+          "packed": {
+            "layout_seconds": 0.46548461681231856,
+            "warm_dense_raster_seconds": 0.3513255133293569,
+            "fresh_layout_plus_raster_seconds": 0.8168101301416755
+          }
+        },
+        {
+          "repetition": 1,
+          "order": [
+            "packed",
+            "legacy"
+          ],
+          "packed": {
+            "layout_seconds": 0.44149349723011255,
+            "warm_dense_raster_seconds": 0.16087673977017403,
+            "fresh_layout_plus_raster_seconds": 0.6023702370002866
+          },
+          "legacy": {
+            "layout_seconds": 4.557833331171423,
+            "warm_dense_raster_seconds": 0.1683500981889665,
+            "fresh_layout_plus_raster_seconds": 4.72618342936039
+          }
+        },
+        {
+          "repetition": 2,
+          "order": [
+            "legacy",
+            "packed"
+          ],
+          "legacy": {
+            "layout_seconds": 3.89964149100706,
+            "warm_dense_raster_seconds": 0.16999414283782244,
+            "fresh_layout_plus_raster_seconds": 4.069635633844882
+          },
+          "packed": {
+            "layout_seconds": 0.46950902603566647,
+            "warm_dense_raster_seconds": 0.16225425992161036,
+            "fresh_layout_plus_raster_seconds": 0.6317632859572768
+          }
+        },
+        {
+          "repetition": 3,
+          "order": [
+            "packed",
+            "legacy"
+          ],
+          "packed": {
+            "layout_seconds": 0.5390432626008987,
+            "warm_dense_raster_seconds": 0.1640189979225397,
+            "fresh_layout_plus_raster_seconds": 0.7030622605234385
+          },
+          "legacy": {
+            "layout_seconds": 25.031674118246883,
+            "warm_dense_raster_seconds": 0.24521945090964437,
+            "fresh_layout_plus_raster_seconds": 25.276893569156528
+          }
+        }
+      ],
+      "numerical_gate": {
+        "comparison_count": 4,
+        "every_layout_tensor_bitwise_equal": true,
+        "maximum_prior_absolute_difference": 0.0,
+        "maximum_coverage_disagreement_voxels": 0,
+        "passed": true
+      },
+      "memory": {
+        "peak_allocated_bytes": 834520064,
+        "peak_reserved_bytes": 1145044992,
+        "peak_allocated_gib": 0.7772073745727539,
+        "peak_reserved_gib": 1.06640625
+      },
+      "monitor": {
+        "source": {
+          "path": "v16_c5_driverfix_dense_layout_hippo-amygdala-left_gpu_load.jsonl",
+          "bytes": 1837,
+          "sha256": "61ded8b830248cabf19ad4f8d552c1664f4063180ba103f8acb0a87ff1503005"
+        },
+        "samples": 13,
+        "max_sample_gap_seconds": 5.262281179428101,
+        "max_own_process_memory_mib": 1876,
+        "gpu0_memory_used_mib_range": [
+          45508,
+          70893
+        ],
+        "gpu0_memory_free_mib_range": [
+          10114,
+          35499
+        ],
+        "gpu0_utilization_percent_range": [
+          33,
+          100
+        ],
+        "gpu0_utilization_percent_median": 100
+      },
+      "inputs": [
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_hippo_integrated_fullfix_left_tmp/processedImageMasked.mgz",
+          "bytes": 1942883,
+          "sha256": "6df365922c33c112663630e51c268afcf3a847413ca33f54a8242dfb9dcd014c"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_hippo_integrated_fullfix_left_tmp/alignedAtlasImage.mgz",
+          "bytes": 406538,
+          "sha256": "bb4be281d6bbdda3bd754ea5656c7fde3e34dccbe7eca939c54ea57371c45c3e"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_hippo_integrated_fullfix_left_tmp/warpedOriginalMesh.txt.gz",
+          "bytes": 5682313,
+          "sha256": "ae705020dc4a819df465408a59e7a662b652a094a1e78d7390036663e7a83c19"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/atlases/hippo-amygdala-left/compressionLookupTable.txt",
+          "bytes": 2595,
+          "sha256": "5962518cb188de252a03796cf04ea8991cd444907b7733b14fc501cd898da362"
+        }
+      ],
+      "source_bindings": [
+        {
+          "source": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v16_c5_driverfix/validation/subregions/benchmark_dense_layout.py",
+            "bytes": 8030,
+            "sha256": "41297c6d848ff705fe962408c08ec6d059bd8e8561dfe2e22bcb2f0c2fcc8546"
+          },
+          "relative_path": "validation/subregions/benchmark_dense_layout.py",
+          "matches_original_frozen_manifest": false,
+          "expected_driver_only_fix": true
+        },
+        {
+          "source": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v16_c5_driverfix/src/fnit/gems/rasterize.py",
+            "bytes": 27213,
+            "sha256": "8db0baa5aa32194b398845e85e9d410e6d80ce2f572799afe51489594d6cfb76"
+          },
+          "relative_path": "src/fnit/gems/rasterize.py",
+          "matches_original_frozen_manifest": true,
+          "expected_driver_only_fix": false
+        }
+      ],
+      "classes": 13
+    },
+    "thalamus": {
+      "source": {
+        "path": "v16_c5_driverfix_dense_layout_thalamus.json",
+        "bytes": 5226,
+        "sha256": "9b86b41c6260088a8e67bef144f2d31fd341053bb6cdbb37d5b5dbd446a45bb7"
+      },
+      "input_scope": "real saved T1 fresh dense index layout+raster component; excludes EM/preparation/full pipeline",
+      "shape": [
+        148,
+        101,
+        114
+      ],
+      "dtype": "float32",
+      "tf32": true,
+      "cpu_bounding_box_index_seconds": 0.3745740307494998,
+      "first_measurement": {
+        "repetition": 0,
+        "order": [
+          "legacy",
+          "packed"
+        ],
+        "legacy": {
+          "layout_seconds": 12.171816861256957,
+          "warm_dense_raster_seconds": 1.3082522200420499,
+          "fresh_layout_plus_raster_seconds": 13.480069081299007
+        },
+        "packed": {
+          "layout_seconds": 0.2852173801511526,
+          "warm_dense_raster_seconds": 0.42348988680168986,
+          "fresh_layout_plus_raster_seconds": 0.7087072669528425
+        }
+      },
+      "warm_median_seconds": {
+        "legacy": {
+          "layout_seconds": 3.478852559812367,
+          "warm_dense_raster_seconds": 0.10113061033189297,
+          "fresh_layout_plus_raster_seconds": 3.605672782752663
+        },
+        "packed": {
+          "layout_seconds": 0.25435656728222966,
+          "warm_dense_raster_seconds": 0.12727413000538945,
+          "fresh_layout_plus_raster_seconds": 0.3805391169153154
+        }
+      },
+      "all_measurements": [
+        {
+          "repetition": 0,
+          "order": [
+            "legacy",
+            "packed"
+          ],
+          "legacy": {
+            "layout_seconds": 12.171816861256957,
+            "warm_dense_raster_seconds": 1.3082522200420499,
+            "fresh_layout_plus_raster_seconds": 13.480069081299007
+          },
+          "packed": {
+            "layout_seconds": 0.2852173801511526,
+            "warm_dense_raster_seconds": 0.42348988680168986,
+            "fresh_layout_plus_raster_seconds": 0.7087072669528425
+          }
+        },
+        {
+          "repetition": 1,
+          "order": [
+            "packed",
+            "legacy"
+          ],
+          "packed": {
+            "layout_seconds": 0.25435656728222966,
+            "warm_dense_raster_seconds": 0.1288042338564992,
+            "fresh_layout_plus_raster_seconds": 0.38316080113872886
+          },
+          "legacy": {
+            "layout_seconds": 3.478852559812367,
+            "warm_dense_raster_seconds": 0.12682022294029593,
+            "fresh_layout_plus_raster_seconds": 3.605672782752663
+          }
+        },
+        {
+          "repetition": 2,
+          "order": [
+            "legacy",
+            "packed"
+          ],
+          "legacy": {
+            "layout_seconds": 1.2329005300998688,
+            "warm_dense_raster_seconds": 0.10113061033189297,
+            "fresh_layout_plus_raster_seconds": 1.3340311404317617
+          },
+          "packed": {
+            "layout_seconds": 0.25463758083060384,
+            "warm_dense_raster_seconds": 0.12590153608471155,
+            "fresh_layout_plus_raster_seconds": 0.3805391169153154
+          }
+        },
+        {
+          "repetition": 3,
+          "order": [
+            "packed",
+            "legacy"
+          ],
+          "packed": {
+            "layout_seconds": 0.24473342904821038,
+            "warm_dense_raster_seconds": 0.12727413000538945,
+            "fresh_layout_plus_raster_seconds": 0.37200755905359983
+          },
+          "legacy": {
+            "layout_seconds": 4.379637037869543,
+            "warm_dense_raster_seconds": 0.09216389060020447,
+            "fresh_layout_plus_raster_seconds": 4.471800928469747
+          }
+        }
+      ],
+      "numerical_gate": {
+        "comparison_count": 4,
+        "every_layout_tensor_bitwise_equal": true,
+        "maximum_prior_absolute_difference": 0.0,
+        "maximum_coverage_disagreement_voxels": 0,
+        "passed": true
+      },
+      "memory": {
+        "peak_allocated_bytes": 415251968,
+        "peak_reserved_bytes": 532676608,
+        "peak_allocated_gib": 0.3867335319519043,
+        "peak_reserved_gib": 0.49609375
+      },
+      "monitor": {
+        "source": {
+          "path": "v16_c5_driverfix_dense_layout_thalamus_gpu_load.jsonl",
+          "bytes": 1125,
+          "sha256": "b5bb3994a1eef5de06eff4b6ceda8724bb1568c4dfd88e6057ae5d97bb1fc7fc"
+        },
+        "samples": 8,
+        "max_sample_gap_seconds": 5.25048303604126,
+        "max_own_process_memory_mib": 1292,
+        "gpu0_memory_used_mib_range": [
+          46806,
+          69657
+        ],
+        "gpu0_memory_free_mib_range": [
+          11350,
+          34201
+        ],
+        "gpu0_utilization_percent_range": [
+          50,
+          100
+        ],
+        "gpu0_utilization_percent_median": 100.0
+      },
+      "inputs": [
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_thalamus_debug/processedImageMasked.mgz",
+          "bytes": 2478761,
+          "sha256": "0dc40a0f1bef990ec32ec91d7100ee883c0bff6900523843e26da2d5853a3a6b"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_thalamus_debug/alignedAtlasImage.mgz",
+          "bytes": 857890,
+          "sha256": "4899f59a91315e81eadcc2a671ad67dab9231b459a3dd73581e222d2eea63d9e"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_thalamus_debug/warpedOriginalMesh.txt.gz",
+          "bytes": 6147061,
+          "sha256": "d876f463c49346c04a2afb1bba3f9c5e9596523caec657fbee9133d9f5821ee4"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/atlases/thalamus/compressionLookupTable.txt",
+          "bytes": 2130,
+          "sha256": "9f480319b803a2c44606c6595c46a26fbb74726bdc800e88b443011fedb175ff"
+        }
+      ],
+      "source_bindings": [
+        {
+          "source": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v16_c5_driverfix/validation/subregions/benchmark_dense_layout.py",
+            "bytes": 8030,
+            "sha256": "41297c6d848ff705fe962408c08ec6d059bd8e8561dfe2e22bcb2f0c2fcc8546"
+          },
+          "relative_path": "validation/subregions/benchmark_dense_layout.py",
+          "matches_original_frozen_manifest": false,
+          "expected_driver_only_fix": true
+        },
+        {
+          "source": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v16_c5_driverfix/src/fnit/gems/rasterize.py",
+            "bytes": 27213,
+            "sha256": "8db0baa5aa32194b398845e85e9d410e6d80ce2f572799afe51489594d6cfb76"
+          },
+          "relative_path": "src/fnit/gems/rasterize.py",
+          "matches_original_frozen_manifest": true,
+          "expected_driver_only_fix": false
+        }
+      ],
+      "classes": 14
+    }
+  },
+  "failed_dense_attempt": {
+    "state": "failed",
+    "exit_code": 1,
+    "scope": "stdout-only completed measurements followed by failed JSON report serialization; excluded from formal result tables",
+    "log": {
+      "path": "v16_c5_dense_layout_thalamus.log",
+      "bytes": 3432,
+      "sha256": "1391bce0251cdde225a6fe8ebcb0a7014bb230c92f22e0f7e4b2dc7f60430741"
+    },
+    "status": {
+      "path": "v16_c5_components_status.json",
+      "bytes": 1324,
+      "sha256": "b7caf088546e4004572115e6c4e5aa0915b776aa5f10ec1ccdb7738bca2be954"
+    },
+    "error": "TypeError: Object of type int32 is not JSON serializable",
+    "formal_result_json_exists": false,
+    "hippo_amygdala_left_started": false,
+    "failed_stdout_warm_median_fresh_layout_plus_raster_seconds": {
+      "legacy": 15.753473159391433,
+      "packed": 0.5107675134204328
+    },
+    "monitor": {
+      "source": {
+        "path": "v16_c5_dense_layout_thalamus_gpu_load.jsonl",
+        "bytes": 2969,
+        "sha256": "6a7f113a40be75b620dffdfaa56aada4198aab0e91301747532225198d43bee3"
+      },
+      "samples": 21,
+      "max_sample_gap_seconds": 5.258971691131592,
+      "max_own_process_memory_mib": 1292,
+      "gpu0_memory_used_mib_range": [
+        69052,
+        70349
+      ],
+      "gpu0_memory_free_mib_range": [
+        10658,
+        11955
+      ],
+      "gpu0_utilization_percent_range": [
+        100,
+        100
+      ],
+      "gpu0_utilization_percent_median": 100
+    },
+    "fix": "benchmark shape elements converted to Python int; product rasterize.py SHA unchanged from v16_c5; formal retry values are kept separate because shared GPU load changed"
+  },
+  "source_remote_verification": {
+    "v16_c5_source_remote_verification.json": {
+      "source": {
+        "path": "v16_c5_source_remote_verification.json",
+        "bytes": 173,
+        "sha256": "d942b0231f844e01b4bb979f98afc9d5486d3511ae2c11bdba5da92d5adc9caa"
+      },
+      "all_reported_files_match": true,
+      "file_count": 435
+    },
+    "v16_c5_driverfix_source_remote_verification.json": {
+      "source": {
+        "path": "v16_c5_driverfix_source_remote_verification.json",
+        "bytes": 25,
+        "sha256": "017b755b20836cc9b414aa3e1dd6355fce068ce568416997c52ee08db6c517f2"
+      },
+      "all_reported_files_match": true,
+      "file_count": 435
+    }
+  },
+  "completed_status": {
+    "v16_c4_components_status.json": {
+      "source": {
+        "path": "v16_c4_components_status.json",
+        "bytes": 4892,
+        "sha256": "a7c12ff3f313baf7f47e5deeea3e9b18b8daa2f3c58b85513d97372b9ccd09ef"
+      },
+      "state": "completed",
+      "steps": 4,
+      "every_exit_code_zero": true
+    },
+    "v16_c5_driverfix_components_status.json": {
+      "source": {
+        "path": "v16_c5_driverfix_components_status.json",
+        "bytes": 2544,
+        "sha256": "5012b17164d7a1f941664c365883ca35ecb922f5b4862788dcd69dcb000c6a66"
+      },
+      "state": "completed",
+      "steps": 2,
+      "every_exit_code_zero": true
+    }
+  },
+  "overall_gates": {
+    "formal_json_count": 6,
+    "compact_comparison_count": 16,
+    "dense_comparison_count": 8,
+    "all_24_layout_comparisons_bitwise_equal": true,
+    "all_16_compact_cost_differences_zero": true,
+    "all_8_dense_prior_differences_zero": true,
+    "all_8_dense_coverage_differences_zero": true,
+    "all_6_formal_reports_numerical_gate_passed": true,
+    "whole_pipeline_10_minute_claim_from_components": false
+  }
+}

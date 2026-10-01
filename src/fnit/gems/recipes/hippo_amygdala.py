@@ -26,6 +26,10 @@ _GM = tuple(name for name in (
 
 
 class HippoAmygdalaRecipe(GEMSRecipe):
+    # Keep the fine hippocampal/amygdala data integral at all valid voxels.
+    # Sparse quadrature changed right-side boundaries on real stage inputs.
+    fast_mesh_sampling_stride = 1
+
     resolution_mm = 0.33333
     seg_schedule = ((3.0, 300), (2.0, 150))
     image_schedule = ((1.5, 7), (0.75, 5), (0.0, 3))
@@ -41,6 +45,7 @@ class HippoAmygdalaRecipe(GEMSRecipe):
         super().__init__(f"hippo-amygdala-{side}", directory)
 
     def run(self, context, device):
+        self._preparation_device = torch.device(device)
         self.high_res_input = np.linalg.norm(context.image.affine[:3, :3], axis=0).mean() < 0.99
         return super().run(context, device)
 
@@ -154,35 +159,44 @@ class HippoAmygdalaRecipe(GEMSRecipe):
         grouped = np.zeros((len(atlas.vertices), len(means)), np.float32)
         for channel, group in enumerate(classes):
             grouped[:, group] += atlas.alphas[:, channel]
-        vertices = torch.as_tensor(atlas.vertices, dtype=torch.float32)
-        tetra = torch.as_tensor(atlas.tetrahedra, dtype=torch.long)
+        device = torch.device(getattr(self, "_preparation_device", "cpu"))
+        vertices = torch.as_tensor(atlas.vertices, dtype=torch.float32, device=device)
+        tetra = torch.as_tensor(atlas.tetrahedra, dtype=torch.long, device=device)
         shape = tuple(np.ceil(atlas.vertices.max(0)).astype(int) + 2)
         if min(shape) <= 0:
             return means, counts
-        priors, covered = rasterize_priors(vertices, tetra, torch.as_tensor(grouped), shape,
+        priors, covered = rasterize_priors(vertices, tetra, torch.as_tensor(grouped, device=device), shape,
                                             background_channel=None)
-        winning = priors.argmax(0).numpy()
+        winning = priors.argmax(0)
+        del priors
         def group(label):
             matches = np.flatnonzero(atlas.label_ids == label)
             return int(classes[matches[0]]) if len(matches) else None
         gm, wm, alveus = group(3), group(2), group(201)
         csf, fissure, molecular = group(4), group(215), group(245)
-        synthetic = means[winning]
+        synthetic = torch.as_tensor(means, device=device)[winning]
         if alveus is not None:
-            synthetic[winning == alveus] = means[wm]
+            synthetic[winning == alveus] = float(means[wm])
         if fissure is not None:
-            synthetic[winning == fissure] = means[csf]
+            synthetic[winning == fissure] = float(means[csf])
         if molecular is not None and molecular != gm:
-            synthetic[winning == molecular] = means[wm]
-        synthetic[~covered.numpy()] = 0
+            synthetic[winning == molecular] = float(means[wm])
+        synthetic[~covered] = 0
         voxel_size = np.linalg.norm(context.image.affine[:3, :3], axis=0).mean()
-        smoothed = ndimage.gaussian_filter(synthetic, voxel_size / (2.355 * self.resolution_mm))
+        sigma = voxel_size / (2.355 * self.resolution_mm)
+        if device.type == "cuda":
+            from ..smoothing import _gaussian_filter3d
+            smoothed = _gaussian_filter3d(synthetic, sigma)
+        else:
+            smoothed = torch.as_tensor(ndimage.gaussian_filter(synthetic.numpy(), sigma))
         for thin, first, second in ((alveus, gm, wm),
                                     (fissure, csf, gm),
                                     (molecular if molecular != gm else None, wm, gm)):
             if thin is None:
                 continue
-            samples = smoothed[winning == thin]
+            # Only thin-label intensities leave the device for the existing
+            # scalar median/KDE estimator, rather than full dense priors.
+            samples = smoothed[winning == thin].cpu().numpy()
             if samples.size:
                 if thin == alveus and samples.size > 1 and np.ptp(samples) > 0:
                     grid = np.linspace(samples.min(), samples.max(), 1000)

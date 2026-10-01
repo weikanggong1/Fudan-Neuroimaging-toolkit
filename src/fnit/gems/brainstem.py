@@ -11,8 +11,11 @@ from scipy import ndimage
 import torch
 
 from .atlas import GEMSAtlas
-from .deformation import ashburner_prior
-from .rasterize import build_block_index, rasterize_priors
+from .deformation import (ashburner_prior, prepare_current_geometry,
+                          prepare_deformation_reference)
+from .optim import CachedLBFGS
+from .rasterize import (build_block_index, rasterize_priors,
+                       rasterize_priors_compact)
 
 
 def brainstem_gaussian_hyperparameters(
@@ -133,23 +136,35 @@ def fit_brainstem_segmentation(
     mask = torch.as_tensor(interior, device=device)
     target = torch.as_tensor(np.isin(coarse_labels[crop], [16, 7, 8, 15, 28, 46, 47, 60]),
                              device=device)
+    # The reference objective only evaluates the eroded atlas mask. Keep that
+    # mask fixed and rasterize its points directly instead of allocating the
+    # full crop for every trial in the line search.
+    expected = target[mask]
+    reference_geometry = prepare_deformation_reference(reference, tetrahedra)
     movable = torch.as_tensor(local.can_move, device=device)
+    mesh_evaluations = 0
     if optimizer_name == "adam":
         optimizer = torch.optim.Adam([vertices], lr=0.1)
     elif optimizer_name == "lbfgs":
-        optimizer = torch.optim.LBFGS([vertices], lr=0.8, max_iter=1,
-                                      history_size=12, line_search_fn="strong_wolfe")
+        optimizer = CachedLBFGS([vertices], lr=0.8, max_iter=1,
+                                history_size=12, line_search_fn="strong_wolfe")
     else:
         raise ValueError("optimizer_name must be adam or lbfgs")
     for _ in range(int(iterations)):
         def closure():
+            nonlocal mesh_evaluations
+            mesh_evaluations += 1
             optimizer.zero_grad(set_to_none=True)
-            priors, _ = rasterize_priors(vertices, tetrahedra, alphas, shape,
-                                         block_index=index, background_channel=1)
-            p = priors[0][mask].clamp(1e-5, 1 - 1e-5)
-            y = target[mask]
-            data_cost = -torch.where(y, torch.log(p), torch.log1p(-p)).sum()
-            regularizer, _ = ashburner_prior(vertices, reference, tetrahedra, atlas.stiffness)
+            geometry = prepare_current_geometry(vertices, tetrahedra)
+            priors, _ = rasterize_priors_compact(
+                vertices, tetrahedra, alphas, shape, valid_mask=mask,
+                block_index=index, background_channel=1, current_geometry=geometry)
+            p = priors[0].clamp(1e-5, 1 - 1e-5)
+            data_cost = -torch.where(expected, torch.log(p), torch.log1p(-p)).sum()
+            regularizer, _ = ashburner_prior(
+                vertices, reference, tetrahedra, atlas.stiffness,
+                reference_geometry=reference_geometry, current_geometry=geometry,
+                analytic_gradient=True)
             objective = data_cost + regularizer
             objective.backward()
             vertices.grad.mul_(movable)
@@ -161,13 +176,23 @@ def fit_brainstem_segmentation(
         else:
             optimizer.step(closure)
     with torch.no_grad():
-        priors, _ = rasterize_priors(vertices, tetrahedra, alphas, shape,
-                                     block_index=index, background_channel=1)
-        predicted = priors[0][mask] > 0.5
-        expected = target[mask]
+        geometry = prepare_current_geometry(vertices, tetrahedra)
+        priors, _ = rasterize_priors_compact(
+            vertices, tetrahedra, alphas, shape, valid_mask=mask,
+            block_index=index, background_channel=1, current_geometry=geometry)
+        predicted = priors[0] > 0.5
         dice = 2 * (predicted & expected).sum() / (predicted.sum() + expected.sum()).clamp_min(1)
-        _, jacobian = ashburner_prior(vertices, reference, tetrahedra, atlas.stiffness)
+        _, jacobian = ashburner_prior(
+            vertices, reference, tetrahedra, atlas.stiffness,
+            reference_geometry=reference_geometry, current_geometry=geometry,
+            analytic_gradient=True)
         displacement = (vertices - reference).norm(dim=1).max()
     fitted = atlas.with_vertices(vertices.detach().cpu().numpy() + low)
     return fitted, {"mask_dice": float(dice), "min_jacobian": float(jacobian.min()),
-                    "max_displacement_voxels": float(displacement), "seconds": monotonic() - start}
+                    "max_displacement_voxels": float(displacement), "seconds": monotonic() - start,
+                    "mesh_solver": {"compact": True, "shared_geometry": True,
+                                    "analytic_prior": True,
+                                    "mesh_evaluations": mesh_evaluations,
+                                    "mesh_steps": int(iterations),
+                                    "accepted_cache_hits": getattr(optimizer, "cache_hits", 0),
+                                    "valid_voxels": int(mask.sum())}}

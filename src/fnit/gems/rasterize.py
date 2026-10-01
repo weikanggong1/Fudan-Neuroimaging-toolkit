@@ -8,8 +8,16 @@ import math
 import numpy as np
 import torch
 
-from ._raster_triton import lookup_candidates
+from ._raster_triton import (fused_data_cost, lookup_candidates,
+                            supports_fused_data_cost)
 from .deformation import CurrentGeometry
+
+
+def _packed_device_buffer(parts, dtype, device):
+    if not parts:
+        return torch.empty((0,), device=device, dtype=dtype)
+    host = torch.as_tensor(np.concatenate(parts, axis=None), dtype=dtype)
+    return host.to(device=device)
 
 
 @dataclass(frozen=True)
@@ -38,22 +46,41 @@ class BlockIndex:
         key = ("batches", str(device), dtype)
         if key not in self._device_cache:
             groups = {}
-            for points, ids, _, _ in self.device_blocks(device, dtype):
+            for block_id, ids in enumerate(self.candidates):
+                if len(ids) == 0:
+                    continue
+                points = _block_points_array(block_id, self)
                 width = 1 << (len(ids) - 1).bit_length()
                 groups.setdefault((len(points), width), []).append((points, ids))
-            batches = []
+            point_parts, id_parts, mask_parts, batch_shapes = [], [], [], []
             for (n_points, width), blocks in groups.items():
                 batch_size = max(1, min(16, 8_388_608 // (n_points * width)))
                 for start in range(0, len(blocks), batch_size):
                     subset = blocks[start:start + batch_size]
-                    points = torch.stack([block[0] for block in subset])
-                    ids = torch.stack([torch.nn.functional.pad(block[1], (0, width - len(block[1])))
-                                       for block in subset])
-                    counts = torch.as_tensor([len(block[1]) for block in subset], device=device)
-                    candidate_mask = torch.arange(width, device=device)[None] < counts[:, None]
-                    batch_ids = torch.arange(len(subset), device=device)[:, None]
-                    coordinates = points.reshape(-1, 3).long().unbind(-1)
-                    batches.append((points, ids, candidate_mask, batch_ids, coordinates))
+                    point_parts.append(np.stack([block[0] for block in subset]))
+                    id_parts.append(np.stack([np.pad(block[1], (0, width - len(block[1]))) for block in subset]))
+                    counts = np.asarray([len(block[1]) for block in subset])
+                    mask_parts.append(np.arange(width)[None] < counts[:, None])
+                    batch_shapes.append((len(subset), n_points, width))
+            # The dense route never creates the old per-block CUDA tensors.
+            # Coordinates are converted on CPU and transferred as two packed
+            # buffers (floating interpolation points and integer write indices).
+            packed_points = _packed_device_buffer(point_parts, dtype, device)
+            packed_coordinates = _packed_device_buffer(point_parts, torch.long, device)
+            packed_ids = _packed_device_buffer(id_parts, torch.long, device)
+            packed_masks = _packed_device_buffer(mask_parts, torch.bool, device)
+            batch_ids = torch.arange(max((item[0] for item in batch_shapes), default=0), device=device)[:, None]
+            batches = []
+            point_offset = id_offset = 0
+            for count, n_points, width in batch_shapes:
+                point_count, id_count = count * n_points * 3, count * width
+                points = packed_points[point_offset:point_offset + point_count].view(count, n_points, 3)
+                coordinates = packed_coordinates[point_offset:point_offset + point_count].view(-1, 3).unbind(-1)
+                ids = packed_ids[id_offset:id_offset + id_count].view(count, width)
+                candidate_mask = packed_masks[id_offset:id_offset + id_count].view(count, width)
+                batches.append((points, ids, candidate_mask, batch_ids[:count], coordinates))
+                point_offset += point_count
+                id_offset += id_count
             self._device_cache[key] = tuple(batches)
         return self._device_cache[key]
 
@@ -81,29 +108,48 @@ class BlockIndex:
             width = 1 << (len(ids) - 1).bit_length()
             n_points = 1 << (len(rows) - 1).bit_length()
             groups.setdefault((n_points, width), []).append((coordinates[rows], ids, rows))
-        batches = []
+        batch_shapes = []
+        point_parts, id_parts, mask_parts, row_parts = [], [], [], []
         reorder = np.full(len(coordinates), -1, dtype=np.int64)
         offset = 0
         for (n_points, width), blocks in groups.items():
             batch_size = max(1, min(16, 8_388_608 // (n_points * width)))
             for start in range(0, len(blocks), batch_size):
                 subset = blocks[start:start + batch_size]
-                points = torch.as_tensor(np.stack([np.pad(block[0], ((0, n_points - len(block[0])), (0, 0)),
-                                                          mode="edge") for block in subset]),
-                                         device=device, dtype=dtype)
-                ids = torch.as_tensor(np.stack([np.pad(block[1], (0, width - len(block[1])))
-                                               for block in subset]), device=device, dtype=torch.long)
-                counts = torch.as_tensor([len(block[1]) for block in subset], device=device)
-                candidate_mask = torch.arange(width, device=device)[None] < counts[:, None]
-                batch_ids = torch.arange(len(subset), device=device)[:, None]
+                point_parts.append(np.stack([np.pad(block[0], ((0, n_points - len(block[0])), (0, 0)),
+                                                    mode="edge") for block in subset]))
+                id_parts.append(np.stack([np.pad(block[1], (0, width - len(block[1])))
+                                          for block in subset]))
+                counts = np.asarray([len(block[1]) for block in subset])
+                mask_parts.append(np.arange(width)[None] < counts[:, None])
                 rows = np.concatenate([block[2] for block in subset])
                 # Only the lookup evaluates padding; interpolation and its
                 # autograd graph retain real points using this static mapping.
-                point_rows = torch.as_tensor(np.concatenate([
-                    np.arange(len(block[0])) + i * n_points for i, block in enumerate(subset)]), device=device)
+                row_parts.append(np.concatenate([
+                    np.arange(len(block[0])) + i * n_points for i, block in enumerate(subset)]))
                 reorder[rows] = np.arange(offset, offset + len(rows))
                 offset += len(rows)
-                batches.append((points, ids, candidate_mask, batch_ids, point_rows))
+                batch_shapes.append((len(subset), n_points, width, len(rows)))
+        # A refreshed index can contain hundreds of batches. Transfer each
+        # homogeneous buffer once, then create contiguous GPU views; per-batch
+        # H2D copies and CUDA arange/compare launches used to dominate cold fits.
+        packed_points = _packed_device_buffer(point_parts, dtype, device)
+        packed_ids = _packed_device_buffer(id_parts, torch.long, device)
+        packed_masks = _packed_device_buffer(mask_parts, torch.bool, device)
+        packed_rows = _packed_device_buffer(row_parts, torch.long, device)
+        batch_ids = torch.arange(max((item[0] for item in batch_shapes), default=0), device=device)[:, None]
+        batches = []
+        point_offset = id_offset = row_offset = 0
+        for count, n_points, width, real_count in batch_shapes:
+            point_count, id_count = count * n_points * 3, count * width
+            points = packed_points[point_offset:point_offset + point_count].view(count, n_points, 3)
+            ids = packed_ids[id_offset:id_offset + id_count].view(count, width)
+            candidate_mask = packed_masks[id_offset:id_offset + id_count].view(count, width)
+            point_rows = packed_rows[row_offset:row_offset + real_count]
+            batches.append((points, ids, candidate_mask, batch_ids[:count], point_rows))
+            point_offset += point_count
+            id_offset += id_count
+            row_offset += real_count
         result = (tuple(batches), torch.as_tensor(reorder, device=device))
         # Keep the mask alive so a later tensor cannot reuse its identity.
         self._device_cache[key] = (valid_mask, version, result)
@@ -165,6 +211,17 @@ def build_block_index(vertices: np.ndarray, tetrahedra: np.ndarray,
     boundaries = np.cumsum(np.bincount(block_ids, minlength=block_count))
     return BlockIndex(tuple(shape), int(block_size),
                       tuple(np.split(packed, boundaries[:-1])))
+
+
+def _block_points_array(block_id: int, index: BlockIndex):
+    bs = index.block_size
+    nb = tuple(int(math.ceil(s / bs)) for s in index.shape)
+    bx = block_id // (nb[1] * nb[2])
+    rem = block_id % (nb[1] * nb[2])
+    by, bz = divmod(rem, nb[2])
+    xyz = [np.arange(block * bs, min((block + 1) * bs, size), dtype=np.int64)
+           for block, size in zip((bx, by, bz), index.shape)]
+    return np.stack(np.meshgrid(*xyz, indexing="ij"), -1).reshape(-1, 3)
 
 
 def _block_points(block_id: int, index: BlockIndex, device, dtype):
@@ -240,14 +297,21 @@ def rasterize_priors(
         # Lookup is discrete. Retaining every candidate's graph consumes GBs
         # although only one tetrahedron per voxel contributes to the gradient.
         with torch.no_grad():
-            rel = points[:, :, None, :] - all_v0[ids][:, None]
-            w123 = torch.einsum("bcij,bpcj->bpci", all_inv[ids], rel)
-            weights = torch.cat((1.0 - w123.sum(-1, keepdim=True), w123), dim=-1)
-            singular = all_singular[ids] | ~candidate_mask
-            score = weights.amin(-1).masked_fill(singular[:, None], -torch.inf)
-            best_score, best = score.max(dim=2)
-            selected_ids = ids[batch_ids, best]
-            valid = best_score >= -float(tolerance)
+            rows = torch.arange(points.shape[0] * points.shape[1], device=vertices.device)
+            lookup = lookup_candidates(points, ids, candidate_mask, all_v0,
+                                       all_inv, all_singular, rows, tolerance=tolerance)
+            if lookup is None:
+                rel = points[:, :, None, :] - all_v0[ids][:, None]
+                w123 = torch.einsum("bcij,bpcj->bpci", all_inv[ids], rel)
+                weights = torch.cat((1.0 - w123.sum(-1, keepdim=True), w123), dim=-1)
+                singular = all_singular[ids] | ~candidate_mask
+                score = weights.amin(-1).masked_fill(singular[:, None], -torch.inf)
+                best_score, best = score.max(dim=2)
+                selected_ids = ids[batch_ids, best]
+                valid = best_score >= -float(tolerance)
+            else:
+                selected_ids = lookup[0].reshape(points.shape[:2])
+                valid = lookup[1].reshape(points.shape[:2])
         selected_cells = tetrahedra[selected_ids]
         selected_rel = points - all_v0[selected_ids]
         selected_w123 = torch.einsum("bpij,bpj->bpi", all_inv[selected_ids], selected_rel)
@@ -270,6 +334,104 @@ def rasterize_priors(
         out[..., bg] = torch.where(missing, torch.ones_like(out[..., bg]), out[..., bg])
     result = (out.permute(3, 0, 1, 2).contiguous(), covered)
     return (*result, assigned_cells, assigned_weights) if return_assignment else result
+
+
+def _compact_lookup(vertices, tetrahedra, valid_mask, block_index,
+                    current_geometry=None, tolerance=2e-5, *,
+                    cache_owner_hints=False, owner_hints=False,
+                    hint_tolerance=2e-4, hint_stats=None):
+    batches, reorder = block_index.device_compact_batches(valid_mask, vertices.device, vertices.dtype)
+    if current_geometry is None:
+        all_tet = vertices[tetrahedra]
+        all_v0 = all_tet[:, 0]
+        all_matrix = torch.stack((all_tet[:, 1] - all_v0, all_tet[:, 2] - all_v0,
+                                  all_tet[:, 3] - all_v0), dim=-1)
+        all_inv, all_info = torch.linalg.inv_ex(all_matrix, check_errors=False)
+        all_singular = (all_info != 0) | (torch.linalg.det(all_matrix).abs() <= 1e-10)
+    else:
+        all_v0, all_inv = current_geometry.origins, current_geometry.inverse_edges
+        all_singular = current_geometry.singular
+    selected_parts, point_parts, covered_parts, hint_parts = [], [], [], []
+    for points, ids, candidate_mask, batch_ids, point_rows in batches:
+        hint_key = ("owner_hints", id(valid_mask), id(tetrahedra),
+                    None if torch.is_inference(tetrahedra) else tetrahedra._version,
+                    id(points), id(ids), id(point_rows))
+        previous = block_index._device_cache.get(hint_key) if owner_hints else None
+        with torch.no_grad():
+            lookup = lookup_candidates(points, ids, candidate_mask, all_v0, all_inv,
+                                       all_singular, point_rows, tolerance=tolerance,
+                                       previous_selected=previous, hint_tolerance=hint_tolerance,
+                                       return_hint_hits=hint_stats is not None)
+            if lookup is None:
+                rel = points[:, :, None, :] - all_v0[ids][:, None]
+                w123 = torch.einsum("bcij,bpcj->bpci", all_inv[ids], rel)
+                weights = torch.cat((1.0 - w123.sum(-1, keepdim=True), w123), dim=-1)
+                singular = all_singular[ids] | ~candidate_mask
+                score = weights.amin(-1).masked_fill(singular[:, None], -torch.inf)
+                best_score, best = score.max(dim=2)
+                selected_ids = ids[batch_ids, best].flatten()[point_rows]
+                covered = (best_score >= -float(tolerance)).flatten()[point_rows]
+            else:
+                selected_ids, covered = lookup[:2]
+                if hint_stats is not None and lookup[2] is not None:
+                    hint_parts.append(lookup[2])
+            if cache_owner_hints:
+                # Hints came from this block's current candidates. A replacement
+                # index/mask layout or changed tetrahedron ordering starts empty.
+                block_index._device_cache[hint_key] = selected_ids.detach()
+        selected_parts.append(selected_ids)
+        point_parts.append(points.reshape(-1, 3)[point_rows])
+        covered_parts.append(covered.flatten())
+    if selected_parts:
+        selected_ids = torch.cat(selected_parts)
+        selected_points = torch.cat(point_parts)
+        covered = torch.cat(covered_parts)
+    else:
+        selected_ids = torch.empty((0,), device=vertices.device, dtype=torch.long)
+        selected_points = torch.empty((0, 3), device=vertices.device, dtype=vertices.dtype)
+        covered = torch.zeros((0,), device=vertices.device, dtype=torch.bool)
+    if hint_stats is not None:
+        hint_stats["reused_points"] = (torch.cat(hint_parts).sum() if hint_parts else
+                                       torch.zeros((), device=vertices.device, dtype=torch.long))
+        hint_stats["evaluated_points"] = selected_ids.numel()
+        if hint_stats.get("include_assignments", False):
+            hint_stats["selected_ids"] = selected_ids.detach()
+            hint_stats["covered"] = covered.detach()
+    return all_v0, all_inv, selected_ids, selected_points, covered, reorder
+
+
+def compact_data_cost(vertices, tetrahedra, alphas, shape, *, valid_mask,
+                      block_index, likelihood, background_channel=0,
+                      current_geometry=None, tolerance=2e-5,
+                      cache_owner_hints=False, owner_hints=False,
+                      hint_tolerance=2e-4, hint_stats=None,
+                      double_accumulation=False):
+    """Fused compact mixture cost, or ``None`` for the autograd fallback.
+
+    CUDA FP32 evaluates every masked voxel with the same cell ownership as
+    compact rasterization. Fixed alphas and Gaussian log likelihood are required;
+    an analytic derivative is returned only for the vertex positions. This path
+    avoids allocating the interpolated prior and its four-node autograd graph.
+    """
+    if not supports_fused_data_cost(vertices, tetrahedra, alphas, likelihood):
+        return None
+    if tetrahedra.numel() == 0:
+        return None
+    if valid_mask.dtype != torch.bool or tuple(valid_mask.shape) != tuple(shape):
+        raise ValueError("valid_mask must be a boolean tensor matching the raster grid")
+    if block_index.shape != tuple(shape):
+        raise ValueError("block index shape differs from requested raster grid")
+    if background_channel is not None and not 0 <= int(background_channel) < alphas.shape[1]:
+        raise ValueError("background_channel is out of range")
+    all_v0, all_inv, selected_ids, points, covered, reorder = _compact_lookup(
+        vertices, tetrahedra, valid_mask, block_index, current_geometry, tolerance,
+        cache_owner_hints=cache_owner_hints, owner_hints=owner_hints,
+        hint_tolerance=hint_tolerance, hint_stats=hint_stats)
+    if likelihood.shape != (alphas.shape[1], reorder.numel()):
+        raise ValueError("likelihood must be [classes, valid voxels]")
+    return fused_data_cost(vertices, tetrahedra, alphas, points, selected_ids,
+                           covered, reorder, all_v0, all_inv, likelihood,
+                           background_channel, double_accumulation)
 
 
 def rasterize_priors_compact(
@@ -305,42 +467,9 @@ def rasterize_priors_compact(
     k = int(alphas.shape[1])
     if background_channel is not None and not 0 <= int(background_channel) < k:
         raise ValueError("background_channel is out of range")
-    batches, reorder = block_index.device_compact_batches(valid_mask, vertices.device, vertices.dtype)
-
-    if current_geometry is None:
-        all_tet = vertices[tetrahedra]
-        all_v0 = all_tet[:, 0]
-        all_matrix = torch.stack((all_tet[:, 1] - all_v0, all_tet[:, 2] - all_v0,
-                                  all_tet[:, 3] - all_v0), dim=-1)
-        all_inv, all_info = torch.linalg.inv_ex(all_matrix, check_errors=False)
-        all_singular = (all_info != 0) | (torch.linalg.det(all_matrix).abs() <= 1e-10)
-    else:
-        all_v0, all_inv = current_geometry.origins, current_geometry.inverse_edges
-        all_singular = current_geometry.singular
-    selected_parts, point_parts, covered_parts = [], [], []
-    for points, ids, candidate_mask, batch_ids, point_rows in batches:
-        with torch.no_grad():
-            lookup = lookup_candidates(points, ids, candidate_mask, all_v0, all_inv,
-                                       all_singular, point_rows, tolerance=tolerance)
-            if lookup is None:
-                rel = points[:, :, None, :] - all_v0[ids][:, None]
-                w123 = torch.einsum("bcij,bpcj->bpci", all_inv[ids], rel)
-                weights = torch.cat((1.0 - w123.sum(-1, keepdim=True), w123), dim=-1)
-                singular = all_singular[ids] | ~candidate_mask
-                score = weights.amin(-1).masked_fill(singular[:, None], -torch.inf)
-                best_score, best = score.max(dim=2)
-                selected_ids = ids[batch_ids, best].flatten()[point_rows]
-                covered = (best_score >= -float(tolerance)).flatten()[point_rows]
-            else:
-                selected_ids, covered = lookup
-        selected_parts.append(selected_ids)
-        point_parts.append(points.reshape(-1, 3)[point_rows])
-        covered_parts.append(covered.flatten())
-
-    if selected_parts:
-        selected_ids = torch.cat(selected_parts)
-        selected_points = torch.cat(point_parts)
-        covered = torch.cat(covered_parts)
+    all_v0, all_inv, selected_ids, selected_points, covered, reorder = _compact_lookup(
+        vertices, tetrahedra, valid_mask, block_index, current_geometry, tolerance)
+    if selected_ids.numel():
         selected_cells = tetrahedra[selected_ids]
         selected_rel = selected_points - all_v0[selected_ids]
         selected_w123 = torch.einsum("pij,pj->pi", all_inv[selected_ids], selected_rel)
