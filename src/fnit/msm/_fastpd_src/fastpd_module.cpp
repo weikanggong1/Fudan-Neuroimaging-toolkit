@@ -256,10 +256,118 @@ PyObject* source_wls_cost(PyObject*, PyObject* args) {
     return PyFloat_FromDouble(cost);
 }
 
+using Point3 = std::array<double, 3>;
+
+double point_norm(const Point3& point) {
+    return std::sqrt((point[0]*point[0] + point[1]*point[1]) +
+                     point[2]*point[2]);
+}
+
+void normalize_point(Point3& point) {
+    const double length = point_norm(point);
+    if (length > 1e-8) {
+        point[0] /= length;
+        point[1] /= length;
+        point[2] /= length;
+    }
+}
+
+PyObject* source_rotation_matrices(PyObject*, PyObject* args) {
+    // Independently authored scalar Point/Rodrigues arithmetic following
+    // MIT-licensed newMSM point.cpp at the pinned source revision above.
+    // Cache once per iteration at the existing prior-coordinate host copy;
+    // application to all proposed labels remains a batched GPU operation.
+    Py_buffer prior_buffer{}, centre_buffer{};
+    Py_ssize_t count;
+    if (!PyArg_ParseTuple(args, "y*y*n", &prior_buffer, &centre_buffer, &count))
+        return nullptr;
+    constexpr Py_ssize_t point_bytes = 3*sizeof(double);
+    constexpr Py_ssize_t matrix_bytes = 9*sizeof(double);
+    const auto maximum = std::numeric_limits<Py_ssize_t>::max();
+    const auto release = [&]() {
+        PyBuffer_Release(&prior_buffer);
+        PyBuffer_Release(&centre_buffer);
+    };
+    if (count < 0 || count > maximum/matrix_bytes ||
+        prior_buffer.len != count*point_bytes || centre_buffer.len != point_bytes) {
+        release();
+        PyErr_SetString(PyExc_ValueError,
+            "expected float64 prior [count,3] and centre [3] buffers");
+        return nullptr;
+    }
+    Point3 centre;
+    std::memcpy(centre.data(), centre_buffer.buf, point_bytes);
+    for (double value : centre) if (!std::isfinite(value)) {
+        release();
+        PyErr_SetString(PyExc_ValueError, "rotation coordinates must be finite");
+        return nullptr;
+    }
+    normalize_point(centre);
+    PyObject* output = PyBytes_FromStringAndSize(nullptr, count*matrix_bytes);
+    if (!output) { release(); return nullptr; }
+    char* matrices = PyBytes_AS_STRING(output);
+    const char* points = static_cast<const char*>(prior_buffer.buf);
+    for (Py_ssize_t index = 0; index < count; ++index) {
+        Point3 point;
+        std::memcpy(point.data(), points+index*point_bytes, point_bytes);
+        for (double value : point) if (!std::isfinite(value)) {
+            release();
+            Py_DECREF(output);
+            PyErr_SetString(PyExc_ValueError, "rotation coordinates must be finite");
+            return nullptr;
+        }
+        normalize_point(point);
+        const double cosine = (centre[0]*point[0]+centre[1]*point[1]) +
+                               centre[2]*point[2];
+        // Do not clamp the cosine or alter the source EPS branches. A same
+        // direction cosine slightly above one still selects identity below.
+        const double angle = std::acos(cosine);
+        Point3 axis{{centre[1]*point[2]-centre[2]*point[1],
+                     centre[2]*point[0]-centre[0]*point[2],
+                     centre[0]*point[1]-centre[1]*point[0]}};
+        normalize_point(axis);
+        double matrix[9];
+        if (std::fabs(1-cosine) < 1e-8) {
+            const double identity[9] = {1,0,0,0,1,0,0,0,1};
+            std::memcpy(matrix, identity, sizeof(matrix));
+        } else if (point_norm(axis) < 1e-8) {
+            const double opposite[9] = {-1,0,0,0,-1,0,0,0,-1};
+            std::memcpy(matrix, opposite, sizeof(matrix));
+        } else if (std::fabs(-1-cosine) < 1e-8) {
+            for (int row = 0; row < 3; ++row)
+                for (int column = 0; column < 3; ++column)
+                    matrix[3*row+column] = 2*(axis[row]*axis[column]) -
+                                           (row == column ? 1.0 : 0.0);
+        } else {
+            const double skew[9] = {0,-axis[2],axis[1],
+                                    axis[2],0,-axis[0],
+                                    -axis[1],axis[0],0};
+            const double sine = std::sin(angle);
+            const double one_minus_cosine = 1-std::cos(angle);
+            for (int row = 0; row < 3; ++row) {
+                for (int column = 0; column < 3; ++column) {
+                    const double squared =
+                        (skew[3*row]*skew[column] +
+                         skew[3*row+1]*skew[3+column]) +
+                         skew[3*row+2]*skew[6+column];
+                    matrix[3*row+column] =
+                        ((row == column ? 1.0 : 0.0) +
+                         skew[3*row+column]*sine) + one_minus_cosine*squared;
+                }
+            }
+        }
+        std::memcpy(matrices+index*matrix_bytes, matrix, sizeof(matrix));
+    }
+    release();
+    return output;
+}
+
 PyMethodDef methods[] = {
     {"optimize", optimize, METH_VARARGS, "HOCR and FastPD fusion for triangle costs."},
     {"source_wls_cost", source_wls_cost, METH_VARARGS,
      "Ordered source WLS reduction: float64 distance/similarity/valid buffer, rows, width, sigma."},
+    {"source_rotation_matrices", source_rotation_matrices, METH_VARARGS,
+     "Source Point rotations: float64 prior [count,3], centre [3], count -> row-major float64 [count,3,3] bytes."},
     {nullptr, nullptr, 0, nullptr},
 };
 PyModuleDef module = {PyModuleDef_HEAD_INIT, "_fastpd_native", nullptr, -1, methods};

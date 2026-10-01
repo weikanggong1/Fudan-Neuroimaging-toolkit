@@ -32,10 +32,10 @@ The containing newMSM repository also publishes an MIT license, preserved in
 restriction remains applicable to this component.
 FNIT's triangle-to-quadratic HOCR reduction in `fastpd_module.cpp` is an
 independent implementation. Upstream ELC source is not included. Its
-`source_wls_cost` helper reproduces the pinned newMSM rigid weighted-similarity
-arithmetic using standard C++ double operations and libm; the newMSM MIT
-notice applies to this source-derived helper. It does not link to newMSM or
-FSL libraries.
+`source_wls_cost` and `source_rotation_matrices` helpers reproduce the pinned
+newMSM rigid weighted-similarity and Point/Rodrigues arithmetic using standard
+C++ double operations and libm; the newMSM MIT notice applies to these
+source-derived helpers. They do not link to newMSM or FSL libraries.
 `src/fnit/msm/_affine.py`, `_sphere_map.py`, `config.py`, and `msmsulc.py`
 are modified Python/PyTorch implementations of the same pinned newMSM
 MSMSulc geometry, rigid initialization, resampling, label proposals and

@@ -168,6 +168,13 @@ class Measure:
                 # Observing its byte size adds no CUDA operation or transfer.
                 self.counts['affine_wls_host_payload_bytes'] += memoryview(args[0]).nbytes
                 self.counts['affine_wls_query_slots'] += args[1]*args[2]
+            if label == 'source_rotation_matrices':
+                # The producer reuses its existing host prior-coordinate
+                # copy. Buffer metadata observes no extra GPU operation.
+                self.counts['control_rotation_points'] += args[2]
+                self.counts['control_rotation_host_input_bytes'] += (
+                    memoryview(args[0]).nbytes+memoryview(args[1]).nbytes)
+                self.counts['control_rotation_host_result_bytes'] += len(result)
             if work:
                 self.work_units += 1
                 if self.profiler: self.profiler.step()
@@ -206,6 +213,7 @@ class Measure:
         for name, label in [('_affine_initialization', 'affine_initialization'),
                             ('_adaptive_resample', 'adaptive_metric_resampling'),
                             ('_face_costs', 'face_costs'), ('_rotated_label', 'label_rotation'),
+                            ('_rotation_matrices', 'label_rotation_preparation'),
                             ('_face_layout', 'face_layout'), ('_repair_folds', 'fold_repair'),
                             ('_unfold', 'topology_unfolding'), ('_sphere_warp', 'progressive_sphere_warp'),
                             ('_variance_normalize', 'variance_normalization')]:
@@ -224,6 +232,7 @@ class Measure:
             self.wrap(rigid_cost, evaluator, 'rigid_cost_evaluation')
         self.wrap(self.native, 'optimize', 'hocr_fastpd', work=True)
         self.wrap(self.native, 'source_wls_cost', 'affine_source_wls')
+        self.wrap(self.native, 'source_rotation_matrices', 'source_rotation_matrices')
         if self.full:
             for name in ['__float__', '__int__', '__bool__', 'item', 'cpu', 'numpy']:
                 original = getattr(self.torch.Tensor, name)

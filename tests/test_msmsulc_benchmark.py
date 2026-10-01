@@ -196,3 +196,31 @@ def test_measure_records_native_wls_payload_once_without_extra_gpu_transfer(tmp_
     assert measure.counts['affine_wls_host_payload_bytes'] == payload.nbytes
     assert measure.counts['affine_wls_query_slots'] == 6
     assert measure.times['affine_source_wls']['calls'] == 1
+
+
+def test_measure_separates_native_rotation_cache_from_label_application(tmp_path):
+    from types import SimpleNamespace
+    benchmark = tool()
+    prior = np.zeros((5, 3), np.float64)
+    centre = np.ones(3, np.float64)
+    seen = []
+    def build(buffer, raw_centre, count):
+        seen.append((buffer, raw_centre, count))
+        return bytes(count*9*8)
+    native = SimpleNamespace(source_rotation_matrices=build)
+    def prepare(points, origin):
+        return native.source_rotation_matrices(points, origin, len(points))
+    msm = SimpleNamespace(_rotation_matrices=prepare)
+    fake_torch = SimpleNamespace(cuda=SimpleNamespace(is_available=lambda: False))
+    with benchmark.Measure(fake_torch, msm, native, tmp_path) as measure:
+        result = msm._rotation_matrices(prior, centre)
+    assert len(seen) == 1 and seen[0][0] is prior and seen[0][1] is centre
+    assert native.source_rotation_matrices is build
+    assert measure.counts['source_rotation_matrices'] == 1
+    assert measure.counts['control_rotation_points'] == 5
+    assert measure.counts['control_rotation_host_input_bytes'] == prior.nbytes+centre.nbytes
+    assert measure.counts['control_rotation_host_result_bytes'] == len(result)
+    assert measure.times['source_rotation_matrices']['calls'] == 1
+    assert measure.counts['label_rotation_preparation'] == 1
+    assert measure.times['label_rotation_preparation']['calls'] == 1
+    assert measure.counts['label_rotation'] == 0

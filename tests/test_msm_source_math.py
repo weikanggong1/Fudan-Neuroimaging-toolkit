@@ -15,6 +15,7 @@ from fnit.msm.msmsulc import (
     _ico, _area_weights, _face_costs, _face_layout, _vertex_area,
     _label_samples, _normalize_sphere, _rescaled_labels, _sphere_warp,
     _unfold, _variance_normalize, _native_output_qc, _triplet_data_weights,
+    _rotation_matrices, _rotated_label,
 )
 from fnit.msm._sphere_map import RadialSphereMap
 
@@ -335,6 +336,35 @@ def test_affine_point_product_preserves_source_three_term_order():
                                rz@ry@rx,rtol=0,atol=2e-16)
 
 
+
+@pytest.mark.parametrize('device',['cpu','cuda'])
+def test_cached_label_rotation_preserves_source_three_term_order(device):
+    if device=='cuda' and not torch.cuda.is_available():pytest.skip('CUDA unavailable')
+    rotations=torch.ones((2,3,3),dtype=torch.float64,device=device)
+    actual=_rotated_label(rotations,np.array([1e16,-1e16,1.]))
+    torch.testing.assert_close(actual,torch.ones((2,3),dtype=torch.float64,device=device),rtol=0,atol=0)
+
+
+@pytest.mark.parametrize('device',['cpu','cuda'])
+def test_source_rotation_cache_matches_native_matrix_buffer(device):
+    from fnit.msm import _fastpd_native
+    if device=='cuda' and not torch.cuda.is_available():pytest.skip('CUDA unavailable')
+    xyz,_=_ico(1)
+    centre=xyz[12]
+    expected=np.frombuffer(_fastpd_native.source_rotation_matrices(xyz,centre,len(xyz)),np.float64).reshape(-1,3,3)
+    cached=_rotation_matrices(xyz,centre,device)
+    np.testing.assert_array_equal(cached.cpu().numpy(),expected)
+    # The zero label is still transformed, rather than replacing the source
+    # operation with the prior CP coordinates.
+    label,_=_rescaled_labels(centre,centre[None,:],1.)
+    actual=_rotated_label(cached,label[0]).cpu().numpy()
+    scalar=[]
+    for matrix in expected:
+        scalar.append([(matrix[i,0]*label[0,0]+matrix[i,1]*label[0,1])+matrix[i,2]*label[0,2]
+                       for i in range(3)])
+    np.testing.assert_array_equal(actual,np.asarray(scalar))
+
+
 def test_affine_returns_statefully_rotated_mesh_not_one_accumulated_product(monkeypatch):
     from fnit.msm import _affine as implementation
     class KnownCost:
@@ -382,11 +412,19 @@ def test_native_output_qc_reports_orientation_flip_without_repairing_coordinates
     np.testing.assert_array_equal(moved,saved)
 
 
-def test_complete_small_mesh_execution_paths_match(tmp_path):
+def test_complete_small_mesh_execution_paths_match(tmp_path,monkeypatch):
     # Small mathematical fixture checks the full level/fusion/serialization
     # path. Accuracy and timing benchmarks use the server's real sulcal data.
     import nibabel as nib
-    from fnit.msm import MSMSulcInputs,run_msmsulc
+    from fnit.msm import MSMSulcInputs,run_msmsulc,_fastpd_native
+    # Source get_rotations runs once per iteration, then all fusion labels
+    # reuse those matrices. Keep that boundary independent of label count.
+    rotation_calls=[]
+    original_rotation=_fastpd_native.source_rotation_matrices
+    def observe_rotation(prior,centre,count):
+        rotation_calls.append(count)
+        return original_rotation(prior,centre,count)
+    monkeypatch.setattr(_fastpd_native,'source_rotation_matrices',observe_rotation)
     previous=torch.get_num_threads()
     torch.set_num_threads(1)
     try:
@@ -404,6 +442,7 @@ def test_complete_small_mesh_execution_paths_match(tmp_path):
                               config=config,execution='optimized')
         reference=run_msmsulc({'L':entry,'R':entry},tmp_path/'reference',device='cpu',
                               config=config,execution='reference')
+        assert rotation_calls==[42]*12  # 3 stages × 2 hemispheres × 2 executions
         for hemisphere in 'LR':
             np.testing.assert_array_equal(nib.load(str(optimized[hemisphere])).darrays[0].data,
                                            nib.load(str(reference[hemisphere])).darrays[0].data)

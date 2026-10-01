@@ -246,29 +246,20 @@ def _rescaled_labels(centre,samples,scale):
     return labels,scale*0.8
 
 
-def _rotated_label(positions,centre,sample,scale=None):
-    selected=positions.device
-    source=_unit3(torch.as_tensor(centre,dtype=positions.dtype,device=selected))
-    label=torch.as_tensor(sample,dtype=positions.dtype,device=selected)
-    if scale is not None:
-        label=_unit3(torch.as_tensor(centre+(centre-sample)*scale,
-                                     dtype=positions.dtype,device=selected))*100
-    target=_unit3(positions)
-    crossing=torch.cross(source.expand_as(target),target,dim=1)
-    product=target*source
-    cosine=(product[:,0]+product[:,1])+product[:,2]
-    axis=_unit3(crossing)
-    x,y,z=axis.unbind(1);zero=torch.zeros_like(x)
-    skew=torch.stack((zero,-z,y,z,zero,-x,-y,x,zero),1).reshape(-1,3,3)
-    identity=torch.eye(3,dtype=positions.dtype,device=selected).expand(len(positions),-1,-1)
-    theta=torch.acos(cosine)
-    rotation=identity+skew*torch.sin(theta)[:,None,None]+(1-torch.cos(theta))[:,None,None]*(skew@skew)
-    antipodal=2*axis[:,:,None]*axis[:,None,:]-identity
-    rotation=torch.where((cosine+1).abs()[:,None,None]<1e-8,antipodal,rotation)
-    axis_length=torch.sqrt((crossing[:,0].square()+crossing[:,1].square())+crossing[:,2].square())
-    rotation=torch.where((axis_length<1e-8)[:,None,None],-identity,rotation)
-    rotation=torch.where((cosine-1).abs()[:,None,None]<1e-8,identity,rotation)
-    return (rotation[:,:,0]*label[0]+rotation[:,:,1]*label[1])+rotation[:,:,2]*label[2]
+def _rotation_matrices(positions,centre,device):
+    """Cache the source Point/libm Rodrigues matrices once per iteration."""
+    from . import _fastpd_native
+    points=np.ascontiguousarray(positions,dtype=np.float64)
+    origin=np.ascontiguousarray(centre,dtype=np.float64)
+    data=_fastpd_native.source_rotation_matrices(points,origin,len(points))
+    matrices=np.frombuffer(data,dtype=np.float64).reshape(-1,3,3).copy()
+    return torch.as_tensor(matrices,device=device)
+
+
+def _rotated_label(rotations,sample):
+    """Apply the cached matrices in source three-term Point order."""
+    label=torch.as_tensor(sample,dtype=rotations.dtype,device=rotations.device)
+    return (rotations[:,:,0]*label[0]+rotations[:,:,1]*label[1])+rotations[:,:,2]*label[2]
 
 
 def _normalize_sphere(vertices):
@@ -486,7 +477,9 @@ def run_msmsulc(
             for iteration in range(config.iterations[stage_index]):
                 iteration_started=time.perf_counter()
                 prior=cp_positions.clone()
-                current_map=RadialSphereMap(prior.detach().cpu().numpy(),faces_np,selected,execution=execution)
+                prior_np=prior.detach().cpu().numpy()
+                rotations=_rotation_matrices(prior_np,centre,selected)
+                current_map=RadialSphereMap(prior_np,faces_np,selected,execution=execution)
                 _,_,patch=current_map.weights(source_positions)
                 weights=_triplet_data_weights(prior,face_tensor,patch,source_positions)
                 layout=_face_layout(sorted_faces,patch,weights,source_values,selected)
@@ -496,11 +489,11 @@ def run_msmsulc(
                 # Source costs and applyLabeling rotate every label, including
                 # label zero. R(prior)*centre differs from prior by rounding;
                 # retaining prior for zero labels alters near-tie proposals.
-                cp_positions=_rotated_label(prior,centre,label_positions[0])
+                cp_positions=_rotated_label(rotations,label_positions[0])
                 for _ in range(2):
                     for label,sample in enumerate(label_positions):
                         if np.all(labels==label):continue
-                        candidate=_rotated_label(prior,centre,sample)
+                        candidate=_rotated_label(rotations,sample)
                         costs=_face_costs(cp_positions,candidate,strain_original,face_tensor,
                                           layout,target_map,target_values,lam,
                                           simval=config.simval[stage_index],config=config,fold_reference=prior)
@@ -527,7 +520,7 @@ def run_msmsulc(
                     iterations.append({"changed":changed,"energy":energy,"applied":False,
                                        "seconds":time.perf_counter()-iteration_started})
                     break
-                source_positions=_sphere_warp(source_positions,prior.detach().cpu().numpy(),
+                source_positions=_sphere_warp(source_positions,prior_np,
                                               faces_np,cp_positions,selected,execution=execution)
                 cp_positions,moved=_unfold(cp_positions,faces_np);control_unfold+=moved
                 source_positions,moved=_unfold(source_positions,data_faces);source_unfold+=moved
