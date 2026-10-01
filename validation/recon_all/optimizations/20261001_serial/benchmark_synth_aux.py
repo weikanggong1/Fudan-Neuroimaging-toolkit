@@ -53,7 +53,7 @@ def main():
     outputs={n:info(a.output/"mri"/n) for n in ("entowm.mgz","mca-dura.mgz","vsinus.mgz")}
     weights={n:sha(a.weights/n) for n in (
         "synthmorph.affine.2.h5","entowm.fsm31.t1.nstd00-30.nstd21-108.h5",
-        "entowm.ctab","mca-dura.both-lh.nstd21.fhs.h5","vsinus.fhs.1.h5") if (a.weights/n).is_file()}
+        "entowm.ctab","mca-dura.both-lh.nstd21.fhs.h5","vsinus.no-sp.m.all.nstd10-070.h5") if (a.weights/n).is_file()}
     assets={str(x.relative_to(a.assets)):sha(x) for x in a.assets.rglob("*")
             if x.is_file() and ("mni152.1.0mm" in x.name or "prior" in x.name)}
     report={"code_commit":a.commit,"host":platform.node(),"threads":a.threads,
