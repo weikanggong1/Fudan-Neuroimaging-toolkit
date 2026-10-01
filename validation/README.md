@@ -2,6 +2,8 @@
 
 本页只索引当前发布代码采用的证据。机器可读报告记录候选源码或调用链的 SHA-256、输入边界、参考软件版本、计时范围和限制。真实数据报告保留实际测量源码 hash。FLIRT 的最新证据见 [GPU 批量优化](flirt/gpu_batch.current.public.json)；[早期 12-DOF 源码范围核对](runtime_dependencies/flirt_profile_source_equivalence.public.json)仅覆盖旧串行分支。其他保留的继承链有 [SynthMorph registration linear 路径](runtime_dependencies/synthmorph_linear_source_equivalence.public.json)和 [FNIRT/SynthMorph/dMRI 报告的公共包入口](runtime_dependencies/package_entry_source_equivalence.public.json)。这些记录不能写成当前 hash 的完整多例重跑，也不能外推到未列出的配置。
 
+当前 MCFLIRT 的源码来源、许可、元数据、文档与公开报告共 74 项已通过[源码分发包内容核对](mcflirt/source_distribution.public.json)。该记录只验证列出的文件在 sdist 中与工作树逐字节相同，不代表完整仓库 release 验收或运行时数值等价。
+
 官方程序只用于生成参考结果。FNIT 候选运行不调用已安装的 FSL、FreeSurfer、SPM、MRtrix3、AFNI、DIPY 或工作流封装包。没有人工真值的比较衡量的是与参考实现的一致性，不代表生物学准确度。
 
 ## sMRI 与通用配准
