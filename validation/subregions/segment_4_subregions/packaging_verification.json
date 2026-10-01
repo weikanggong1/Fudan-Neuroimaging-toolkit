@@ -1,17 +1,449 @@
 {
-  "created_utc": "2026-10-01T09:19:44.372318+00:00",
+  "created_utc": "2026-10-01T09:34:42.691682+00:00",
   "verification": "passed",
-  "method": "Clean /tmp source tree; installed setuptools.build_meta built wheel and sdist without installing new dependencies. Archive checks inspected actual member bytes and metadata. Existing repository build cache was not used or changed.",
+  "source_commit": "b586266a0f87741f270dd878c7d13059f85660ae",
+  "source_commit_scope": "Final merged source commit before this packaging-verification metadata update.",
+  "method": "Fresh /tmp source copy; installed setuptools.build_meta built wheel and sdist without new dependencies or repository build caches. Actual archive source bytes checked against the complete current src snapshot.",
   "python": "3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]",
   "setuptools_version": "79.0.1",
   "platform": "Linux-6.18.40.1-microsoft-standard-WSL2-x86_64-with-glibc2.35",
-  "clean_source_root": "/tmp/fnit_segment4_clean_build_20261001",
-  "copied_files_count": 3701,
-  "frozen_source_manifest": "validation/subregions/segment_4_subregions/source/source_manifest.json",
-  "frozen_source_base_commit": "5250aa540bb6e3b1fda7d7a596c42b39006da14d",
-  "frozen_source_files_count": 457,
-  "frozen_source_copy_mismatches": [],
-  "build_log": "/tmp/fnit_segment4_clean_build.log",
+  "clean_source_root": "/tmp/fnit_segment4_final_clean_b586266",
+  "source_copy_manifest_path": "/tmp/fnit_segment4_final_clean_b586266/clean_copy_manifest.json",
+  "source_copy_manifest_sha256": "27f797461be19aef42ec5924022523700ab168c4eef021b693b84b8626513b99",
+  "copied_files_count": 3718,
+  "current_src_snapshot_files_count": 1167,
+  "current_src_snapshot_python_files_count": 417,
+  "current_src_snapshot_still_matches_repository": true,
+  "build_log": "/tmp/fnit_segment4_final_build.log",
+  "initial_build_summary": {
+    "created_utc": "2026-10-01T09:19:44.372318+00:00",
+    "verification": "passed",
+    "frozen_source_base_commit": "5250aa540bb6e3b1fda7d7a596c42b39006da14d",
+    "frozen_source_files_count": 457,
+    "source_copy_manifest_sha256": "8917daaf8c3972df858a1c29fa40f187bf08fcaeb7709c8f9e47de5ad3f0bd6f",
+    "label": "pre_merge_clean_build",
+    "artifacts": [
+      {
+        "path": "/tmp/fnit_segment4_clean_dist_20261001/fudan_neuroimaging_toolkit-0.16.0-cp311-cp311-linux_x86_64.whl",
+        "bytes": 4383322,
+        "sha256": "310eb63d512facce336d9e15df5e9c675f7a2a9df1dba081498496209340bb52",
+        "files_count": 1183
+      },
+      {
+        "path": "/tmp/fnit_segment4_clean_dist_20261001/fudan_neuroimaging_toolkit-0.16.0.tar.gz",
+        "bytes": 31834123,
+        "sha256": "03173b5cbd83ae67f1e0b57082df9c645c1e402ece61375aa47186b506427174",
+        "files_count": 2309
+      }
+    ],
+    "frozen_runtime_python_files_count": 407
+  },
+  "measured_source_manifest": "validation/subregions/segment_4_subregions/source/source_manifest.json",
+  "measured_source_base_commit": "5250aa540bb6e3b1fda7d7a596c42b39006da14d",
+  "measured_source_files_count": 457,
+  "changes_from_measured_frozen_files": [
+    {
+      "path": "src/fnit/__init__.py",
+      "change": "modified",
+      "frozen_sha256": "6a2936e698da0e72111a8d2699a66bffb829670181d80ede104cc5e4c3cb85fd",
+      "current_sha256": "5af956c5e0f9ab716ae3c18a1750f599ee8a9d85101a249cec9fa39335c0bd90"
+    },
+    {
+      "path": "src/fnit/bigflica/__init__.py",
+      "change": "modified",
+      "frozen_sha256": "bbc74a934618620de7aca0f8e66ab4fa1c47fc714d043a856e31d20a9536ac3d",
+      "current_sha256": "e33767512075911f0eb38053a4afb24c62974a90546656fb4e634648403e4cfe"
+    },
+    {
+      "path": "src/fnit/bigflica/dicl_torch.py",
+      "change": "removed",
+      "frozen_sha256": "56735ea2ecd7543e8078a51c9a772f1db3d55fdfed132194015f8982ed76474f"
+    },
+    {
+      "path": "src/fnit/bigflica/pipeline.py",
+      "change": "modified",
+      "frozen_sha256": "6116f0106eb2c0fff0ed1c12e46574e0209b44aaa22fd8510816a8c36a86da16",
+      "current_sha256": "779d37dc32a74b23728db9ca9de39b246148449518a21938d28bd52666b67b48"
+    },
+    {
+      "path": "src/fnit/bigflica/pipeline_cpu_stream.py",
+      "change": "modified",
+      "frozen_sha256": "95ab3821118d1634bab4a99bc6065b6db68c46d0152b24cfa5dc30056f857eec",
+      "current_sha256": "d02a4a975e9f4fe625223c8ddabb5e333ffa4cb9feba19602767e9ee9206dbd2"
+    },
+    {
+      "path": "src/fnit/bigflica/pipeline_gpu.py",
+      "change": "modified",
+      "frozen_sha256": "a0c809bb6fe7513b4e79714e0ddcbdca28658cc4ebb23ffad403d857f51a6cbe",
+      "current_sha256": "a6c423640e39f76d2d522141dfc58174e198f4d47f5af1ed34deba1cd1accb18"
+    },
+    {
+      "path": "src/fnit/fmri/surface_prepare.py",
+      "change": "modified",
+      "frozen_sha256": "41d28c25bb0d0bd329662783fc467295976b0b410cc1e199bd3a53aca55583c9",
+      "current_sha256": "f69a9e3160050e94952889b11113c5cdd453c367a8adce8803970257a8d800d1"
+    },
+    {
+      "path": "src/fnit/msm/_affine.py",
+      "change": "modified",
+      "frozen_sha256": "d6cf3064c6c528ba08b371918206811f9ad156b2cfb9874e8711c93a76e0672b",
+      "current_sha256": "fb9268e69482ca9e9b1cd2eaa3a80fdd039822cdcd32940d2131072527219e4e"
+    },
+    {
+      "path": "src/fnit/msm/msmsulc.py",
+      "change": "modified",
+      "frozen_sha256": "1b80dfbfa6e21f842f42c25cc85a820b56fabc93d6ea0252d6f751f0fe1d3544",
+      "current_sha256": "d20b4cd6ff3dbdcf785c593e2460c28bfc3a3ddf6e8608d7dd5260886c4d8abf"
+    }
+  ],
+  "new_runtime_python_files_since_measured_snapshot": [
+    {
+      "path": "src/fnit/dictionary_learning/__init__.py",
+      "change": "added",
+      "current_sha256": "59dec9097d54135ba8e08670266dac7a6ba2a9e5b72102047d43f40662772768"
+    },
+    {
+      "path": "src/fnit/dictionary_learning/cpu.py",
+      "change": "added",
+      "current_sha256": "b6a4cde5d0b51dbb51bc8253cbdf816a3076103eb7c88cf68db53795eff09f97"
+    },
+    {
+      "path": "src/fnit/dictionary_learning/torch_backend.py",
+      "change": "added",
+      "current_sha256": "6f225f0ac9727934fe6fd2f298d586e7aea178a5e8db756c63e7acc8a8e72a99"
+    }
+  ],
+  "gems_runtime_dependency_verification": {
+    "matches_measured_snapshot": true,
+    "verified_files_count": 36,
+    "scope": "All Python modules under gems and synthseg_parc (including synthseg_plus.py), shared _dmri/_nib/weights, recon_all assets and package initializer/batch import dependency. Root fnit.__init__ changed only for unrelated exports; actual segment_4_subregions dispatch is validated through wheel import.",
+    "files": [
+      {
+        "path": "src/fnit/_dmri.py",
+        "current_sha256": "b6bf837f8b5a0a8f0d910706631e882a9e3f8dfc1f1ef77e1cfac7efe36fafbf",
+        "frozen_sha256": "b6bf837f8b5a0a8f0d910706631e882a9e3f8dfc1f1ef77e1cfac7efe36fafbf",
+        "matches_measured_snapshot": true,
+        "current_bytes": 2523,
+        "frozen_bytes": 2523,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/_nib.py",
+        "current_sha256": "568d113432c1a0c50a3b0b635188173e69be1c7436d851de2568bca9b55ab94e",
+        "frozen_sha256": "568d113432c1a0c50a3b0b635188173e69be1c7436d851de2568bca9b55ab94e",
+        "matches_measured_snapshot": true,
+        "current_bytes": 2021,
+        "frozen_bytes": 2021,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/gems/__init__.py",
+        "current_sha256": "028efcf28fa9ef09e74913df677e556aa7d3f358e8ee35ad92636cb485fe68e7",
+        "frozen_sha256": "028efcf28fa9ef09e74913df677e556aa7d3f358e8ee35ad92636cb485fe68e7",
+        "matches_measured_snapshot": true,
+        "current_bytes": 1103,
+        "frozen_bytes": 1103,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/gems/_raster_triton.py",
+        "current_sha256": "5c8524829584e3d6623ae5cd09ad79f68263b037726954c280cdebdce3b07f1d",
+        "frozen_sha256": "5c8524829584e3d6623ae5cd09ad79f68263b037726954c280cdebdce3b07f1d",
+        "matches_measured_snapshot": true,
+        "current_bytes": 16173,
+        "frozen_bytes": 16173,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/gems/atlas.py",
+        "current_sha256": "f6415958b02956f50f6efa6043428513610c3d3a00b734ff2aeff353930cf975",
+        "frozen_sha256": "f6415958b02956f50f6efa6043428513610c3d3a00b734ff2aeff353930cf975",
+        "matches_measured_snapshot": true,
+        "current_bytes": 10149,
+        "frozen_bytes": 10149,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/gems/brainstem.py",
+        "current_sha256": "37d3055d4f33812f41c042a179b04291e9f01750578f33615f6f0e539588049d",
+        "frozen_sha256": "37d3055d4f33812f41c042a179b04291e9f01750578f33615f6f0e539588049d",
+        "matches_measured_snapshot": true,
+        "current_bytes": 9730,
+        "frozen_bytes": 9730,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/gems/context.py",
+        "current_sha256": "36feb53a1fef373a6c2ba33cf628f724ffeb94e6e450943758e5438c46de87bc",
+        "frozen_sha256": "36feb53a1fef373a6c2ba33cf628f724ffeb94e6e450943758e5438c46de87bc",
+        "matches_measured_snapshot": true,
+        "current_bytes": 6834,
+        "frozen_bytes": 6834,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/gems/core.py",
+        "current_sha256": "80e9f24a07d77f01c1ae19caa5d5230cdfa00bf385160f89abf44c9ade2923b1",
+        "frozen_sha256": "80e9f24a07d77f01c1ae19caa5d5230cdfa00bf385160f89abf44c9ade2923b1",
+        "matches_measured_snapshot": true,
+        "current_bytes": 28477,
+        "frozen_bytes": 28477,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/gems/deformation.py",
+        "current_sha256": "ec71ed9d77980ee762b3b99de40f0c4402527658125586270c31d2d343c9d9c1",
+        "frozen_sha256": "ec71ed9d77980ee762b3b99de40f0c4402527658125586270c31d2d343c9d9c1",
+        "matches_measured_snapshot": true,
+        "current_bytes": 9498,
+        "frozen_bytes": 9498,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/gems/gaussian.py",
+        "current_sha256": "b0a147a76834e8da9c10592017cd4e800b8675082d25917a50b2507c2f24febc",
+        "frozen_sha256": "b0a147a76834e8da9c10592017cd4e800b8675082d25917a50b2507c2f24febc",
+        "matches_measured_snapshot": true,
+        "current_bytes": 4737,
+        "frozen_bytes": 4737,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/gems/initialize.py",
+        "current_sha256": "ab5bc936c751a5b1fa897957d9382343544127eba7afac93d5b761a334dac187",
+        "frozen_sha256": "ab5bc936c751a5b1fa897957d9382343544127eba7afac93d5b761a334dac187",
+        "matches_measured_snapshot": true,
+        "current_bytes": 6457,
+        "frozen_bytes": 6457,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/gems/optim.py",
+        "current_sha256": "4bd1f0061bc6d37ff3600451431ca602a6baed62a7c30228f3fcffbf20286e48",
+        "frozen_sha256": "4bd1f0061bc6d37ff3600451431ca602a6baed62a7c30228f3fcffbf20286e48",
+        "matches_measured_snapshot": true,
+        "current_bytes": 4489,
+        "frozen_bytes": 4489,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/gems/output.py",
+        "current_sha256": "a67e5aeb863ba4a6370ced77110d519b7e6185c34aa2eb72f8659e95866e873c",
+        "frozen_sha256": "a67e5aeb863ba4a6370ced77110d519b7e6185c34aa2eb72f8659e95866e873c",
+        "matches_measured_snapshot": true,
+        "current_bytes": 4523,
+        "frozen_bytes": 4523,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/gems/pipeline.py",
+        "current_sha256": "6827a7925e7bf8d0945d5249b99eba4b729dc1ab451ab5064a2b2cea6eb1a0a0",
+        "frozen_sha256": "6827a7925e7bf8d0945d5249b99eba4b729dc1ab451ab5064a2b2cea6eb1a0a0",
+        "matches_measured_snapshot": true,
+        "current_bytes": 10739,
+        "frozen_bytes": 10739,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/gems/rasterize.py",
+        "current_sha256": "8db0baa5aa32194b398845e85e9d410e6d80ce2f572799afe51489594d6cfb76",
+        "frozen_sha256": "8db0baa5aa32194b398845e85e9d410e6d80ce2f572799afe51489594d6cfb76",
+        "matches_measured_snapshot": true,
+        "current_bytes": 27213,
+        "frozen_bytes": 27213,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/gems/recipes/__init__.py",
+        "current_sha256": "2109d5d096c7bfbf3533e75009956bfcaf8b4b66326929b47acc9ee91f6f63b9",
+        "frozen_sha256": "2109d5d096c7bfbf3533e75009956bfcaf8b4b66326929b47acc9ee91f6f63b9",
+        "matches_measured_snapshot": true,
+        "current_bytes": 626,
+        "frozen_bytes": 626,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/gems/recipes/base.py",
+        "current_sha256": "b4e776fcf5e5a1d3d496aaa6590e4c8061209c4271bb1b09375c45fe274e0257",
+        "frozen_sha256": "b4e776fcf5e5a1d3d496aaa6590e4c8061209c4271bb1b09375c45fe274e0257",
+        "matches_measured_snapshot": true,
+        "current_bytes": 20137,
+        "frozen_bytes": 20137,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/gems/recipes/brainstem.py",
+        "current_sha256": "29eb6b5b59993fcbed58824c7f37b63991e52e7342d59656d9edb80048d79d15",
+        "frozen_sha256": "29eb6b5b59993fcbed58824c7f37b63991e52e7342d59656d9edb80048d79d15",
+        "matches_measured_snapshot": true,
+        "current_bytes": 8493,
+        "frozen_bytes": 8493,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/gems/recipes/hippo_amygdala.py",
+        "current_sha256": "96eac5a5ef766c22e9f16e4472bec241e50b129e65e7001af9110c922ed4bf8b",
+        "frozen_sha256": "96eac5a5ef766c22e9f16e4472bec241e50b129e65e7001af9110c922ed4bf8b",
+        "matches_measured_snapshot": true,
+        "current_bytes": 11899,
+        "frozen_bytes": 11899,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/gems/recipes/thalamus.py",
+        "current_sha256": "b1607aa027cdbfc6b5a54707ff6622535e64574a7444b3e3129d87e0ab2a5575",
+        "frozen_sha256": "b1607aa027cdbfc6b5a54707ff6622535e64574a7444b3e3129d87e0ab2a5575",
+        "matches_measured_snapshot": true,
+        "current_bytes": 7417,
+        "frozen_bytes": 7417,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/gems/setup.py",
+        "current_sha256": "ccd6c6c9952df395c972e3dbc32842c20fb7b666bcc10f8c1afe274753ab561d",
+        "frozen_sha256": "ccd6c6c9952df395c972e3dbc32842c20fb7b666bcc10f8c1afe274753ab561d",
+        "matches_measured_snapshot": true,
+        "current_bytes": 7366,
+        "frozen_bytes": 7366,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/gems/smoothing.py",
+        "current_sha256": "dcbc8112d876db139362621c2c03e73442afa1379a6d56c59800f2545c9a9e36",
+        "frozen_sha256": "dcbc8112d876db139362621c2c03e73442afa1379a6d56c59800f2545c9a9e36",
+        "matches_measured_snapshot": true,
+        "current_bytes": 6920,
+        "frozen_bytes": 6920,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/recon_all/__init__.py",
+        "current_sha256": "d9691fbe92139d94364422748de32dff8cbc7f9d3b8408e4d45dc2abf878108a",
+        "frozen_sha256": "d9691fbe92139d94364422748de32dff8cbc7f9d3b8408e4d45dc2abf878108a",
+        "matches_measured_snapshot": true,
+        "current_bytes": 156,
+        "frozen_bytes": 156,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/recon_all/assets.py",
+        "current_sha256": "ee03a40b6d4006b8157e9b84d5cf15ff5ded63bb67f8976e968a95c12f4afa41",
+        "frozen_sha256": "ee03a40b6d4006b8157e9b84d5cf15ff5ded63bb67f8976e968a95c12f4afa41",
+        "matches_measured_snapshot": true,
+        "current_bytes": 27515,
+        "frozen_bytes": 27515,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/recon_all/batch.py",
+        "current_sha256": "3387ddca2ccd6299d9f38caf8677efac117cb50580d82adb70e31dab07a5cd82",
+        "frozen_sha256": "3387ddca2ccd6299d9f38caf8677efac117cb50580d82adb70e31dab07a5cd82",
+        "matches_measured_snapshot": true,
+        "current_bytes": 3708,
+        "frozen_bytes": 3708,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/synthseg_parc/__init__.py",
+        "current_sha256": "2312fbc3ac445bb13774c02246239300ab0517f3a564453644ad7c329f701c3a",
+        "frozen_sha256": "2312fbc3ac445bb13774c02246239300ab0517f3a564453644ad7c329f701c3a",
+        "matches_measured_snapshot": true,
+        "current_bytes": 472,
+        "frozen_bytes": 472,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/synthseg_parc/labels.py",
+        "current_sha256": "c20f61fc973b34ded1c2d3d0ae451ee48480f2d63626e2e1aa0ca8176581951e",
+        "frozen_sha256": "c20f61fc973b34ded1c2d3d0ae451ee48480f2d63626e2e1aa0ca8176581951e",
+        "matches_measured_snapshot": true,
+        "current_bytes": 1596,
+        "frozen_bytes": 1596,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/synthseg_parc/model.py",
+        "current_sha256": "b44be3fe3332a6096141b7f1051370a8beb64d2e46c17b01b20d3942f0139c78",
+        "frozen_sha256": "b44be3fe3332a6096141b7f1051370a8beb64d2e46c17b01b20d3942f0139c78",
+        "matches_measured_snapshot": true,
+        "current_bytes": 4127,
+        "frozen_bytes": 4127,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/synthseg_parc/pipeline.py",
+        "current_sha256": "7df985927ae9c01c751346ce5f48904d0dc74d4bedf6397edff483a58f85972b",
+        "frozen_sha256": "7df985927ae9c01c751346ce5f48904d0dc74d4bedf6397edff483a58f85972b",
+        "matches_measured_snapshot": true,
+        "current_bytes": 3866,
+        "frozen_bytes": 3866,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/synthseg_parc/postprocess.py",
+        "current_sha256": "730cecec349015ea15d5ff6e203e4383b3060103797d1d805846d2bd97870b5e",
+        "frozen_sha256": "730cecec349015ea15d5ff6e203e4383b3060103797d1d805846d2bd97870b5e",
+        "matches_measured_snapshot": true,
+        "current_bytes": 3753,
+        "frozen_bytes": 3753,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/synthseg_parc/preprocess.py",
+        "current_sha256": "67159d8d1c646df82d7023c4dd5f4e57222fc94386673987b1c25e110c946d49",
+        "frozen_sha256": "67159d8d1c646df82d7023c4dd5f4e57222fc94386673987b1c25e110c946d49",
+        "matches_measured_snapshot": true,
+        "current_bytes": 5959,
+        "frozen_bytes": 5959,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/synthseg_parc/segment.py",
+        "current_sha256": "d007f27a5d05eb804fad9a4093ee6ebc0adf781eccebe3c3568c47e49f1da8df",
+        "frozen_sha256": "d007f27a5d05eb804fad9a4093ee6ebc0adf781eccebe3c3568c47e49f1da8df",
+        "matches_measured_snapshot": true,
+        "current_bytes": 10137,
+        "frozen_bytes": 10137,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/synthseg_parc/synthseg.py",
+        "current_sha256": "bdfbb91c190c4608d44d9b67890fe82a3a6530948f865dbde2990a1b1c92d33c",
+        "frozen_sha256": "bdfbb91c190c4608d44d9b67890fe82a3a6530948f865dbde2990a1b1c92d33c",
+        "matches_measured_snapshot": true,
+        "current_bytes": 7685,
+        "frozen_bytes": 7685,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/synthseg_parc/synthseg_io.py",
+        "current_sha256": "0aa8f43914d727ef7bbc639e37d23e3e0bc208a09be20725db4038c6cbd8134c",
+        "frozen_sha256": "0aa8f43914d727ef7bbc639e37d23e3e0bc208a09be20725db4038c6cbd8134c",
+        "matches_measured_snapshot": true,
+        "current_bytes": 6503,
+        "frozen_bytes": 6503,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/synthseg_parc/synthseg_plus.py",
+        "current_sha256": "b49cfbc26f4733e7b6c8ceffaceb102f0f5a6a57044dfb1a5f4a048b3f14786b",
+        "frozen_sha256": "b49cfbc26f4733e7b6c8ceffaceb102f0f5a6a57044dfb1a5f4a048b3f14786b",
+        "matches_measured_snapshot": true,
+        "current_bytes": 7426,
+        "frozen_bytes": 7426,
+        "matches_measured_size": true
+      },
+      {
+        "path": "src/fnit/weights.py",
+        "current_sha256": "81e8d6cce1ed83967573ef92845deef001a8d5d0f0b0d3f474ac0d2022c9dfb1",
+        "frozen_sha256": "81e8d6cce1ed83967573ef92845deef001a8d5d0f0b0d3f474ac0d2022c9dfb1",
+        "matches_measured_snapshot": true,
+        "current_bytes": 14468,
+        "frozen_bytes": 14468,
+        "matches_measured_size": true
+      }
+    ]
+  },
   "retired_paths_checked": [
     "fnit/gems/nuclei.py",
     "fnit/gems/nuclei_cli.py",
@@ -22,18 +454,24 @@
   ],
   "artifacts": [
     {
-      "path": "/tmp/fnit_segment4_clean_dist_20261001/fudan_neuroimaging_toolkit-0.16.0-cp311-cp311-linux_x86_64.whl",
-      "bytes": 4383322,
-      "sha256": "310eb63d512facce336d9e15df5e9c675f7a2a9df1dba081498496209340bb52",
-      "files_count": 1183,
+      "path": "/tmp/fnit_segment4_final_dist_b586266/fudan_neuroimaging_toolkit-0.16.0-cp311-cp311-linux_x86_64.whl",
+      "bytes": 4383126,
+      "sha256": "3f29bc8d76583529cf67d36a7718b659739433680f15efe786e6d1ffc2ae30a8",
+      "files_count": 1185,
       "checks": {
         "retired_backend_files_absent": true,
         "retired_files_found": [],
         "fnit_nuclei_entrypoint_absent": true,
         "fnit_cli_entrypoint": true,
-        "frozen_runtime_python_files_count": 407,
-        "frozen_runtime_python_matches": true,
-        "frozen_runtime_python_mismatches": [],
+        "current_python_files_count": 417,
+        "all_current_python_files_in_package": true,
+        "current_python_files_missing": [],
+        "included_source_files_match_current_snapshot": true,
+        "included_source_files_mismatches": [],
+        "matched_current_src_files_count": 1167,
+        "generated_extension_files": [
+          "fnit/msm/_fastpd_native.cpython-311-x86_64-linux-gnu.so"
+        ],
         "fnit___init__.py_valid_python": true,
         "fnit___init__.py_new_export_present": true,
         "fnit___init__.py_retired_exports_absent": true,
@@ -54,37 +492,41 @@
           "path": "fnit/gems/data/brainstem_compressionLookupTable.txt",
           "bytes": 1291,
           "sha256": "8c343757d9ee13ed2d02daeb5f5f5fc764a6adb850b19b9d1b0ad352c96ca15b",
-          "matches_source": true
+          "matches_current_source": true
         },
         {
           "path": "fnit/gems/data/hippo_compressionLookupTable.txt",
           "bytes": 2595,
           "sha256": "5962518cb188de252a03796cf04ea8991cd444907b7733b14fc501cd898da362",
-          "matches_source": true
+          "matches_current_source": true
         },
         {
           "path": "fnit/gems/data/thalamus_compressionLookupTable.txt",
           "bytes": 2130,
           "sha256": "9f480319b803a2c44606c6595c46a26fbb74726bdc800e88b443011fedb175ff",
-          "matches_source": true
+          "matches_current_source": true
         }
       ],
       "freesurfer_license_archive_path": "fudan_neuroimaging_toolkit-0.16.0.dist-info/licenses/licenses/FreeSurfer.txt",
       "console_scripts_count": 32
     },
     {
-      "path": "/tmp/fnit_segment4_clean_dist_20261001/fudan_neuroimaging_toolkit-0.16.0.tar.gz",
-      "bytes": 31834123,
-      "sha256": "03173b5cbd83ae67f1e0b57082df9c645c1e402ece61375aa47186b506427174",
-      "files_count": 2309,
+      "path": "/tmp/fnit_segment4_final_dist_b586266/fudan_neuroimaging_toolkit-0.16.0.tar.gz",
+      "bytes": 32340911,
+      "sha256": "9472449139baefa0d9e98cb8dbd28ec4a6910613a02f16c01737d4f91cd4977f",
+      "files_count": 2325,
       "checks": {
         "retired_backend_files_absent": true,
         "retired_files_found": [],
         "fnit_nuclei_entrypoint_absent": true,
         "fnit_cli_entrypoint": true,
-        "frozen_runtime_python_files_count": 407,
-        "frozen_runtime_python_matches": true,
-        "frozen_runtime_python_mismatches": [],
+        "current_python_files_count": 417,
+        "all_current_python_files_in_package": true,
+        "current_python_files_missing": [],
+        "included_source_files_match_current_snapshot": true,
+        "included_source_files_mismatches": [],
+        "matched_current_src_files_count": 1167,
+        "generated_extension_files": [],
         "fnit___init__.py_valid_python": true,
         "fnit___init__.py_new_export_present": true,
         "fnit___init__.py_retired_exports_absent": true,
@@ -105,33 +547,78 @@
           "path": "fudan_neuroimaging_toolkit-0.16.0/src/fnit/gems/data/brainstem_compressionLookupTable.txt",
           "bytes": 1291,
           "sha256": "8c343757d9ee13ed2d02daeb5f5f5fc764a6adb850b19b9d1b0ad352c96ca15b",
-          "matches_source": true
+          "matches_current_source": true
         },
         {
           "path": "fudan_neuroimaging_toolkit-0.16.0/src/fnit/gems/data/hippo_compressionLookupTable.txt",
           "bytes": 2595,
           "sha256": "5962518cb188de252a03796cf04ea8991cd444907b7733b14fc501cd898da362",
-          "matches_source": true
+          "matches_current_source": true
         },
         {
           "path": "fudan_neuroimaging_toolkit-0.16.0/src/fnit/gems/data/thalamus_compressionLookupTable.txt",
           "bytes": 2130,
           "sha256": "9f480319b803a2c44606c6595c46a26fbb74726bdc800e88b443011fedb175ff",
-          "matches_source": true
+          "matches_current_source": true
         }
       ],
       "freesurfer_license_archive_path": "fudan_neuroimaging_toolkit-0.16.0/licenses/FreeSurfer.txt",
       "console_scripts_count": 32
     }
   ],
-  "scope": "Publication packaging checks. Real-data accuracy and runtime are recorded separately under raw/ and stage/.",
-  "source_copy_manifest_path": "/tmp/fnit_segment4_clean_build_20261001/clean_copy_manifest.json",
-  "source_copy_manifest_sha256": "8917daaf8c3972df858a1c29fa40f187bf08fcaeb7709c8f9e47de5ad3f0bd6f",
   "wheel_import_check": {
-    "fnit_path": "/tmp/fnit_segment4_wheel_import_20261001/fnit/__init__.py",
-    "pipeline_path": "/tmp/fnit_segment4_wheel_import_20261001/fnit/gems/pipeline.py",
+    "fnit_path": "/tmp/fnit_segment4_final_wheel_import_b586266/fnit/__init__.py",
+    "pipeline_path": "/tmp/fnit_segment4_final_wheel_import_b586266/fnit/gems/pipeline.py",
     "signature": "(t1: 'str | Path | nib.spatialimages.SpatialImage', atlas_root: 'str | Path | None' = None, *, structures: 'str | list[str] | tuple[str, ...]' = 'all', coarse_segmentation: 'str | Path | nib.spatialimages.SpatialImage | np.ndarray | None' = None, cortical_parcellation: 'str | Path | nib.spatialimages.SpatialImage | np.ndarray | None' = None, wmparc: 'str | Path | nib.spatialimages.SpatialImage | np.ndarray | None' = None, synthseg_weights: 'str | Path | None' = None, synthseg_parc_weights: 'str | Path | None' = None, device: 'str | torch.device' = 'cuda:0', threads: 'int' = 4, optimization: 'str' = 'fast', output_dir: 'str | Path | None' = None, save_highres: 'bool' = True, save_posteriors: 'bool' = False) -> 'SubregionResult'",
     "sole_public_function": "segment_4_subregions",
+    "dictionary_learning_export_preserved": true,
     "passed": true
+  },
+  "scope": "Final merged publication source packaging verification. Real-data accuracy and time describe the measured frozen GEMS dependency snapshot; unrelated main changes are enumerated instead of asserting all original 407 runtime files are unchanged.",
+  "current_native_runtime_python_files_count": 409,
+  "vendor_python_files_excluded_from_measured_gpu_snapshot": {
+    "scope": "These existing licensed vendor source files were intentionally omitted from the frozen GPU execution snapshot. They are present in both initial and final packaging source copies and are not new main changes.",
+    "files": [
+      {
+        "path": "src/fnit/_vendor_fsl/__init__.py",
+        "current_sha256": "9fc0beac8821e3a455f95a8ff70225fdb2781c6bf40315f50863f7158531e11e",
+        "matches_initial_clean_copy": true
+      },
+      {
+        "path": "src/fnit/_vendor_fsl/sources/ptx2-2608.0/fsl_streamlines/fsl_streamlines/__init__.py",
+        "current_sha256": "f2e91b39ccb76b9206c1ec5de859a86c8c3ca6b394a8a9a54bf4a9242c909e48",
+        "matches_initial_clean_copy": true
+      },
+      {
+        "path": "src/fnit/_vendor_fsl/sources/ptx2-2608.0/fsl_streamlines/fsl_streamlines/__main__.py",
+        "current_sha256": "4a30710a197caa75a09781583e858ce973dab1be93a4a574ea9fcabd2f8f7117",
+        "matches_initial_clean_copy": true
+      },
+      {
+        "path": "src/fnit/_vendor_fsl/sources/ptx2-2608.0/fsl_streamlines/fsl_streamlines/main.py",
+        "current_sha256": "588106462ae4bbfff9ae9cead340e3541c6927d2dfa04b70087633bad5895bb2",
+        "matches_initial_clean_copy": true
+      },
+      {
+        "path": "src/fnit/_vendor_fsl/sources/ptx2-2608.0/fsl_streamlines/fsl_streamlines/streamliner.py",
+        "current_sha256": "c9fce175b2b0813e543313d9a2c6a612830d643d27dea8e186dc4b548a6e1fa3",
+        "matches_initial_clean_copy": true
+      },
+      {
+        "path": "src/fnit/_vendor_fsl/sources/ptx2-2608.0/fsl_streamlines/fsl_streamlines/test/__init__.py",
+        "current_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "matches_initial_clean_copy": true
+      },
+      {
+        "path": "src/fnit/_vendor_fsl/sources/ptx2-2608.0/fsl_streamlines/fsl_streamlines/test/test_main.py",
+        "current_sha256": "76f47505962e3e9cb1047c6899622a064be0687958b651e29507e257aa16ce11",
+        "matches_initial_clean_copy": true
+      },
+      {
+        "path": "src/fnit/_vendor_fsl/sources/ptx2-2608.0/fsl_streamlines/fsl_streamlines/util.py",
+        "current_sha256": "5f2920571a9f3078f877b13bb21cc9ff8efe2222127394cd7bd6b65c72f065b6",
+        "matches_initial_clean_copy": true
+      }
+    ]
   }
 }

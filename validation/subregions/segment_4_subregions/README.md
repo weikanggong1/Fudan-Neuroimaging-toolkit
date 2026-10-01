@@ -78,7 +78,7 @@
 
 冻结源清单含 457 个文件、407 个运行时 Python 文件，两次运行全部核对大小和 SHA-256；每次的 8 项服务器实际输出也记录大小及 SHA-256。影像、图谱和权重保留在服务器，仓库保存报告及公开数据派生脑图。与历史 C6 相比，339 个共同运行时文件 SHA 相同，48 个路径改变；具体差异见 [source_facts](raw/source_facts.json)。历史 C6 报告及计时保留原身份。
 
-本地相关功能测试 **331 passed、6 skipped**，见 [测试日志](tests_local.log)。[本地冻结源核对](source/local_source_verification.json)和[发布包验收](packaging_verification.json)分别记录源码与 wheel/sdist 检查。
+本地相关功能测试 **331 passed、6 skipped**，见 [测试日志](tests_local.log)；最终合入 main 的独立字典学习及 MSM/surface 更新后，公开入口等定向复核 **65 passed**，见 [合并后测试](tests_after_main_merge.log)。[本地冻结源核对](source/local_source_verification.json)、[发布时依赖核对](source/publication_source_verification.json)和[发布包验收](packaging_verification.json)分别记录实测快照、最终源码依赖与 wheel/sdist 检查。最终 main 更新涉及的 9 个冻结源路径属于公开导出或其他功能，四类分割使用的 36 个源文件大小及 SHA 保持一致。
 
 ## Reference
 
