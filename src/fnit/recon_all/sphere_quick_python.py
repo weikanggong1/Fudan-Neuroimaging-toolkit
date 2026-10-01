@@ -2,7 +2,7 @@
 
 The connected inflation and four-epoch optimizer match the frozen bilateral
 ``fs_sub01`` ordered geometry. This NumPy CPU stage is independent of a
-FreeSurfer runtime but is not yet connected to the full recon-all runner.
+FreeSurfer runtime and is used for ``qsphere.nofix`` by the recon-all runner.
 """
 
 from __future__ import annotations
@@ -13,7 +13,7 @@ from pathlib import Path
 
 import numpy as np
 
-from .inflate_python import average_gradient, matrix
+from .inflate_python import _accumulate_corner_normals, average_gradient, matrix
 from .sphere_python import inflate_before_quick_sphere
 from .smooth_surface_python import ordered_neighbors
 from .sphere_python import initial_scale, project_radially
@@ -22,8 +22,14 @@ from .sphere_python import initial_scale, project_radially
 _SPHERE_AREA = np.float32(4.0 * np.pi * 100.0 * 100.0)
 
 
-def _face_geometry(vertices: np.ndarray, faces: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    points = np.asarray(vertices, np.float32)[faces]
+def _face_geometry_from_points(points: np.ndarray) -> tuple[np.ndarray, np.ndarray,
+                                                           np.ndarray, np.ndarray]:
+    """复用一次面坐标 gather，返回两边向量、叉积和绝对面积。
+
+    points 是 float32(F,3,3) surface RAS/mm；返回向量为 (F,3)，面积为
+    (F,) mm²，均保留既有 float32 运算顺序。调用者负责合法形状/有限输入；
+    无写出，非法数组会抛 NumPy 异常。这是 mris_sphere -q 的内部步骤。
+    """
     edge_a = points[:, 1] - points[:, 0]
     edge_b = points[:, 2] - points[:, 0]
     cross = np.cross(edge_a, edge_b)
@@ -31,7 +37,17 @@ def _face_geometry(vertices: np.ndarray, faces: np.ndarray) -> tuple[np.ndarray,
     squared += cross[:, 1] * cross[:, 1]
     squared += cross[:, 2] * cross[:, 2]
     length = np.sqrt(squared)
-    return edge_a, edge_b, length * np.float32(0.5)
+    return edge_a, edge_b, cross, length * np.float32(0.5)
+
+
+def _face_geometry(vertices: np.ndarray, faces: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """从 (N,3) mm 坐标和 (F,3) 有序面返回两边向量及 mm² 面积。
+
+    兼容既有返回结构；float32 运算及异常行为由面坐标内核提供。
+    """
+    edge_a, edge_b, _, area = _face_geometry_from_points(
+        np.asarray(vertices, np.float32)[faces])
+    return edge_a, edge_b, area
 
 
 def reference_face_areas(input_vertices: np.ndarray, faces: np.ndarray) -> np.ndarray:
@@ -46,16 +62,18 @@ def nonlinear_area_gradient(
     original_total_area: float,
     k: float,
 ) -> tuple[np.ndarray, float, int]:
-    """Translate ``mrisComputeNonlinearAreaTerm`` for the fixed q-sphere weights.
+    """计算 mris_sphere -q 的非线性面积梯度、能量及翻折面数。
 
-    ``k`` takes the four native epochs 10, 40, 160, and 640.  The original
-    per-face area is fixed at spherical inflation setup, not remeasured on
-    every projected sphere.
+    vertices 为 float32(N,3) surface RAS/mm，faces 为有序 (F,3) 顶点索引。
+    original_face_area 为球面初始化时固定的 (F,) mm² 面积，
+    original_total_area 为相应总面积 mm²；k 为原四轮 10/40/160/640。
+    返回 float32(N,3) 梯度、float 能量和 int 负面积面数，不改输入。
+    复用 inflate 的顺序角点累加内核，保持面序/角点序 float32 加法。
+    非法形状/索引会抛异常；这里没有独立官方 CLI。
     """
     xyz = np.asarray(vertices, np.float32)
     points = xyz[faces]
-    a, b, absolute_area = _face_geometry(xyz, faces)
-    cross = np.cross(a, b)
+    a, b, cross, absolute_area = _face_geometry_from_points(points)
     length = absolute_area * np.float32(2)
     center = points[:, 0] + points[:, 1] + points[:, 2]
     outward = center[:, 0] * cross[:, 0]
@@ -77,8 +95,9 @@ def nonlinear_area_gradient(
     terms = np.stack(((b_cross_n - a_cross_n) * delta[:, None],
                       b_cross_n * (-delta[:, None]),
                       a_cross_n * delta[:, None]), axis=1).astype(np.float32)
-    gradient = np.zeros_like(xyz)
-    np.add.at(gradient, faces.ravel(), terms.reshape(-1, 3))
+    gradient = _accumulate_corner_normals(
+        faces.reshape(-1).astype(np.int32, copy=False),
+        terms.reshape(-1, 3), len(xyz))
     sse = float(np.sum(np.logaddexp(0, -k * area) / k))
     return gradient, sse, int(np.count_nonzero(signed_area < 0))
 
@@ -103,10 +122,15 @@ def projected_step(vertices: np.ndarray, gradient: np.ndarray, dt: float) -> np.
 
 def nonlinear_area_sse(vertices: np.ndarray, faces: np.ndarray,
                        original_total_area: float, k: float) -> float:
-    """Translate the q-sphere negative-area energy for line-search trials."""
+    """返回 quick-sphere 试探坐标的负面积能量 float；不改输入。
+
+    vertices 为 (N,3) surface RAS/mm，faces 为 (F,3) 有序面，
+    original_total_area 为初始化 mm² 总面积，k 为当前固定轮次权重。
+    面 gather/叉积只算一次，float32 面面积和 float64 能量公式不变；
+    非法形状/索引抛异常。属于 mris_sphere -q 的内部线搜索，无独立 CLI。
+    """
     points = np.asarray(vertices, np.float32)[faces]
-    a, b, absolute_area = _face_geometry(vertices, faces)
-    cross = np.cross(a, b)
+    _, _, cross, absolute_area = _face_geometry_from_points(points)
     center = points[:, 0] + points[:, 1] + points[:, 2]
     outward = center[:, 0] * cross[:, 0]
     outward += center[:, 1] * cross[:, 1]
@@ -159,7 +183,14 @@ def _quadratic_minimum32(steps: tuple[float, float, float],
 
 def _line_minimize(vertices: np.ndarray, gradient: np.ndarray, faces: np.ndarray,
                    original_total_area: float, k: float) -> float:
-    """Source-order five-candidate nonlinear-area line search."""
+    """保持原候选顺序选择线搜索步长，返回 dt float，无文件写出。
+
+    vertices/gradient 为 (N,3) float32、faces 为 (F,3) 有序面；坐标 mm，
+    original_total_area 单位 mm²，k 为当前轮权重。只在一次调用内缓存两份
+    float64 试探基础数组，每个候选仍按相同表达式更新、量化和径向投影；
+    试探范围/二次拟合/接受规则不变。零平均梯度返回 0，其他非法输入抛异常。
+    对应 mris_sphere -q 内部线搜索，没有独立 CLI。
+    """
     squared = gradient[:, 0] * gradient[:, 0]
     squared += gradient[:, 1] * gradient[:, 1]
     squared += gradient[:, 2] * gradient[:, 2]
@@ -168,9 +199,13 @@ def _line_minimize(vertices: np.ndarray, gradient: np.ndarray, faces: np.ndarray
         return 0.0
     min_dt, max_dt = .001 / mean, 12.2 / mean
     starting = nonlinear_area_sse(vertices, faces, original_total_area, k)
+    xyz64 = np.asarray(vertices, np.float32).astype(np.float64)
+    gradient64 = np.asarray(gradient, np.float32).astype(np.float64)
 
     def energy(dt: float) -> float:
-        return nonlinear_area_sse(projected_step(vertices, gradient, dt), faces,
+        moved = (xyz64 + float(dt) * gradient64).astype(np.float32)
+        projected = project_radially(moved, already_sphere=True)
+        return nonlinear_area_sse(projected, faces,
                                   original_total_area, k)
 
     best_dt, best_sse = 0.0, starting

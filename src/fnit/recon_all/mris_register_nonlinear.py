@@ -6,10 +6,13 @@ import math
 import struct
 from dataclasses import dataclass
 
+import numpy as np
 import torch
 
 from .mris_register_kernels import project_sphere
 from .mris_register_objective import _atan_table
+from .mris_register_average_numba import three_hop_neighbor_total
+from .place_surface_normals import ordered_face_csr
 
 
 @torch.no_grad()
@@ -45,21 +48,30 @@ class RegistrationForceCache:
 @torch.no_grad()
 def ordered_face_incidence(faces: torch.Tensor, nvertices: int
                            ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-    """Keep the input face and corner order for every vertex."""
-    rows: list[list[tuple[int, int]]] = [[] for _ in range(nvertices)]
-    for face_no, face in enumerate(faces.cpu().tolist()):
-        for corner, vertex in enumerate(face):
-            rows[vertex].append((face_no, corner))
-    degrees = torch.tensor([len(row) for row in rows], dtype=torch.int64,
-                           device=faces.device)
-    width = int(degrees.max())
-    face_indices = torch.zeros((len(rows), width), dtype=torch.int64)
-    corner_indices = torch.zeros_like(face_indices)
-    for vertex, row in enumerate(rows):
-        for index, (face_no, corner) in enumerate(row):
-            face_indices[vertex, index] = face_no
-            corner_indices[vertex, index] = corner
-    return face_indices.to(faces.device), corner_indices.to(faces.device), degrees
+    """保留每顶点 face/corner 次序，返回用于配准法向的整数表。
+
+    ``faces`` 是任意 CPU/CUDA 设备上的 (F,3) 整数三角面张量；
+    ``nvertices`` 为非负总顶点数，包含孤立顶点。共享 NumPy CSR 仅在
+    CPU 建立一次，再向量化填入表并返回原 faces.device。返回 int64
+    ``face_indices``、``corner_indices`` (N,K) 和 ``degrees`` (N,)，
+    K 为最大关联面数量；仅前 degree 列有效，其余列填零。重复角点及
+    原面序完整保留；无面时 K=0。不改变浮点累计、坐标空间或单位，
+    没有算法默认参数。形状、dtype、顶点数或索引非法时抛 ValueError。
+    属于 mris_register 内部准备阶段，无独立官方 CLI。
+    """
+    offsets, face_ids, corners = ordered_face_csr(
+        faces.detach().cpu().numpy(), nvertices=nvertices)
+    degrees = np.diff(offsets)
+    width = int(degrees.max(initial=0))
+    face_indices = np.zeros((nvertices, width), dtype=np.int64)
+    corner_indices = np.zeros_like(face_indices)
+    rows = np.repeat(np.arange(nvertices, dtype=np.int64), degrees)
+    columns = np.arange(len(face_ids), dtype=np.int64) - offsets[rows]
+    face_indices[rows, columns] = face_ids
+    corner_indices[rows, columns] = corners
+    return (torch.from_numpy(face_indices).to(faces.device),
+            torch.from_numpy(corner_indices).to(faces.device),
+            torch.from_numpy(degrees).to(faces.device))
 
 
 @torch.no_grad()
@@ -134,23 +146,15 @@ def sphere_vertex_normals(positions: torch.Tensor,
 
 
 def three_hop_avg_nbrs(neighbors: torch.Tensor, degrees: torch.Tensor) -> float:
-    """Registration's historical three-hop neighbor count stored as float32."""
-    neighbor_cpu = neighbors.cpu().tolist()
-    degree_cpu = degrees.cpu().tolist()
-    rows = [row[:degree] for row, degree in zip(neighbor_cpu, degree_cpu)]
-    total = 0
-    for vertex in range(len(rows)):
-        seen = {vertex}
-        frontier = {vertex}
-        for _ in range(3):
-            following = set()
-            for neighbor in frontier:
-                following.update(rows[neighbor])
-            following.difference_update(seen)
-            seen.update(following)
-            frontier = following
-        total += len(seen) - 1
-    return _float32(_float32(total) / _float32(len(rows)))
+    """返回三跳可达邻点数的顶点均值，沿用 float32 存储和舍入顺序。
+
+    neighbors 为 (N, K) 的有序 int64 邻接；degrees 为 (N,) 有效列数。
+    自身不计入邻点，重复路径只计一次；输出是 Python float。整数 BFS
+    在 CPU Numba 执行，CUDA 输入只将静态邻接搬回一次；不缓存不同网格。
+    调用者提供合法非空邻接；属于 mris_register 内部距离权重准备步骤。
+    """
+    total = three_hop_neighbor_total(neighbors.cpu().numpy(), degrees.cpu().numpy())
+    return _float32(_float32(total) / _float32(len(degrees)))
 
 
 @torch.no_grad()

@@ -695,8 +695,12 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         "implementation": "Conda mris_inflate + Python quick/standard sphere",
         "mris_inflate": {"binary": str(inflate_binary[0]), "sha256": inflate_binary[1]},
         "finish_device": "cpu", "upstream": "repaired topology"}
+    registration_device = torch.device(device)
+    if registration_device.type == "cuda" and registration_device.index is None:
+        registration_device = torch.device("cuda", torch.cuda.current_device())
     report["sphere_registration"] = {
-        "implementation": "Python/Numba", "overlap_device": "cpu",
+        "implementation": "Python/Numba + ordered CUDA averaging" if registration_device.type == "cuda" else "Python/Numba",
+        "averaging_device": str(registration_device), "overlap_device": "cpu",
         "hemisphere_seconds": {}, "reports": {}}
     report["extra_curvature"] = {
         "mrisp_paint_sha256": paint_binary[1],
@@ -843,7 +847,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         result = stage(f"register_{hemi}", run_register_sphere,
                        surf / f"{hemi}.sphere", surf / f"{hemi}.smoothwm",
                        surf / f"{hemi}.sulc", registration_atlases[hemi],
-                       surf / f"{hemi}.sphere.reg", overlap_device="cpu")
+                       surf / f"{hemi}.sphere.reg", overlap_device="cpu",
+                       averaging_device=str(registration_device))
         report["sphere_registration"]["hemisphere_seconds"][hemi] = result[
             "total_seconds_including_io"]
         report["sphere_registration"]["reports"][hemi] = result
@@ -951,6 +956,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     native_bin_dir=None 使用当前 Conda bin。device 默认 cuda:0，threads=4
     约束 Torch intraop 和调用线程的 Numba 掩码，退出时恢复调用方设置。
     profile_stages=False 不插入阶段同步；True 分列 CUDA 等待与父子 CPU 秒数。
+    球面配准在 device 上执行完整有序 float32 梯度平均，其余目标函数、
+    步长决策及末尾清理保持 CPU；不自动启用半精度，计时包含往返传输。
     cuda_allocator_cache=auto 保留已初始化 API 的 allocator，首次 CUDA
     默认关闭缓存；enabled/disabled 必须在初始化前选择。无自动半精度。
     返回完整路径、精度、线程、耗时和执行/完整性/网格检查字典；同时写 JSON。

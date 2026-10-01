@@ -1,5 +1,7 @@
 # 单幅 T1w 的 recon-all 重建
 
+最新阶段优化见 [超过 100 秒阶段的实测与复用](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/README.md)、[CPU 几何优化](CPU_GEOMETRY_PERFORMANCE.md)及[球面配准优化](SPHERE_REGISTRATION_PERFORMANCE.md)。这些工作使用独立源码归档；冻结 `1b8c36d` 的整例表仍是优化前基线，新整例结果完成后另行绑定版本。
+
 [返回首页](../../README.md) · [安装与原生程序](CONDA_CPP_BUILD.md) · [阶段与官方命令](CONDA_CPP_STAGES.md) · [验收范围](../../validation/recon_all/python_gpu_port/RELEASE_GATES.md)
 
 `fnit-recon-all` 从一幅 T1w 生成体积分割、双侧皮层表面、顶点指标、脑区标注和统计。标准路径依次执行[MNI152 非线性变换](MNI_NONLINEAR_CHAIN.md)、拓扑修复、`white.preaparc`、球面生成与配准、最终 white、[Conda 源码构建的四轮 pial 放置](NATIVE_PIAL_PLACEMENT.md)和后处理。必要程序或资产缺失时，入口在运行前报错；阶段失败时抛出异常并保存报告。当前支持单幅 T1w；多 T1、T2/FLAIR 和纵向重建不在此接口的范围内。

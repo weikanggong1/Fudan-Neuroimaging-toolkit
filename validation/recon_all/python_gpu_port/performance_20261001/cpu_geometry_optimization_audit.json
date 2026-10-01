@@ -1,0 +1,180 @@
+{
+  "scope": "readonly_bottleneck_audit_and_pending_rule_preserving_cpu_optimization",
+  "working_tree_base_commit": "764607c2e34c04bdc418fa64540380ff9d22c112",
+  "optimized_real_stage_regression": "pending",
+  "whole_speedup": "not_measured",
+  "overall_metric_equivalence": "not_assessed",
+  "dependencies": "existing NumPy/Numba/nibabel; no new runtime dependency",
+  "sources": {
+    "src/fnit/recon_all/mris_remesh_python.py": "fc4cb44cb9517b17a164e87f68125148cba96005f6911367d297ac9ff308f9d1",
+    "src/fnit/recon_all/sphere_quick_python.py": "e511ce901f8115cd2cc4d4f4bb8d405dd8891fbb075b8e29dc66bf8d6d4e210b",
+    "validation/recon_all/python_gpu_port/benchmark_cpu_geometry_pair.py": "b9f1ee6496a459c71e708f0419540820926d17095cfbdf5ac88ac70e5225f6db",
+    "tests/recon_all/test_cpu_geometry_order.py": "04aa78ea7ff4df45ad5d1a0b0b26e62eab27790c3e8b3d1de58646e0e7b9ba03"
+  },
+  "timing_boundaries": {
+    "assignment_source": {
+      "file": "src/fnit/recon_all/native_free.py",
+      "source_sha256": "d4c3d1797eac9c8b39b5692ae75ddb0ec97cea5c4ed219772cd0248f2631050a",
+      "start_line": 115,
+      "end_line": 153
+    },
+    "remesh_key": "surfaces.<hemi>.topology_remesh_seconds",
+    "remesh_scope": "only remesh_surface including nibabel read/write/footer; excludes topology GA and intersection",
+    "topology_python_key": "surfaces.<hemi>.topology_python_seconds",
+    "topology_python_scope": "smoothwm.nofix smoothing + remesh + intersection; excludes GA and quick sphere",
+    "topology_native_key": "surfaces.<hemi>.topology_native_seconds",
+    "topology_native_scope": "separate native topology GA including preflight",
+    "quick_key": "surfaces.<hemi>.sphere_seconds.qsphere_nofix_python",
+    "quick_scope": "write_quick_sphere including read/write; includes own quick inflation, excludes preceding mris_inflate",
+    "standard_key": "surfaces.<hemi>.standard_sphere_report.total_seconds_including_io",
+    "standard_scope": "full standard sphere including IO/JIT/metric/update/finish; setup and finish must not be added again"
+  },
+  "observed_frozen_1b_whole_cases": [
+    {
+      "subject": "sub01",
+      "hemi": "lh",
+      "actual_candidate_version": "1b8c36d",
+      "raw_report": "validation/recon_all/python_gpu_port/performance_20261001/whole/sub01/candidate_run.json",
+      "raw_report_sha256": "9b880e1529278705c28168852c3f232b3708a4997606335697f8bdc45b08ccca",
+      "remesh_seconds_including_io": 130.7138277841732,
+      "topology_python_seconds": 141.0425618919544,
+      "topology_native_seconds": 81.61755978409201,
+      "quick_seconds_including_io": 76.30488767614588,
+      "standard_seconds_including_io": 238.42560185398906,
+      "standard_metric_seconds_including_jit": 25.814932490233332,
+      "standard_finish_seconds": 1.7661496088840067,
+      "standard_updates": 212,
+      "standard_updates_sum_seconds": 210.0559491557069
+    },
+    {
+      "subject": "sub01",
+      "hemi": "rh",
+      "actual_candidate_version": "1b8c36d",
+      "raw_report": "validation/recon_all/python_gpu_port/performance_20261001/whole/sub01/candidate_run.json",
+      "raw_report_sha256": "9b880e1529278705c28168852c3f232b3708a4997606335697f8bdc45b08ccca",
+      "remesh_seconds_including_io": 126.88793735858053,
+      "topology_python_seconds": 135.2452438804321,
+      "topology_native_seconds": 118.81757815601304,
+      "quick_seconds_including_io": 77.86937276599929,
+      "standard_seconds_including_io": 176.04607992898673,
+      "standard_metric_seconds_including_jit": 23.13480656966567,
+      "standard_finish_seconds": 1.4536666609346867,
+      "standard_updates": 188,
+      "standard_updates_sum_seconds": 151.26440446358174
+    },
+    {
+      "subject": "sub02",
+      "hemi": "lh",
+      "actual_candidate_version": "1b8c36d",
+      "raw_report": "validation/recon_all/python_gpu_port/performance_20261001/whole/sub02/candidate_run.json",
+      "raw_report_sha256": "36c4bc93013aff82d8262a8411354d8186c4a1f735533c67fd99e705b84de672",
+      "remesh_seconds_including_io": 124.65500646084547,
+      "topology_python_seconds": 131.1533425077796,
+      "topology_native_seconds": 70.75597733259201,
+      "quick_seconds_including_io": 81.84146968275309,
+      "standard_seconds_including_io": 156.99002726376057,
+      "standard_metric_seconds_including_jit": 26.213899232447147,
+      "standard_finish_seconds": 0.01709466427564621,
+      "standard_updates": 144,
+      "standard_updates_sum_seconds": 130.30366500467062
+    },
+    {
+      "subject": "sub02",
+      "hemi": "rh",
+      "actual_candidate_version": "1b8c36d",
+      "raw_report": "validation/recon_all/python_gpu_port/performance_20261001/whole/sub02/candidate_run.json",
+      "raw_report_sha256": "36c4bc93013aff82d8262a8411354d8186c4a1f735533c67fd99e705b84de672",
+      "remesh_seconds_including_io": 120.31078729778528,
+      "topology_python_seconds": 126.8047137632966,
+      "topology_native_seconds": 93.91742867231369,
+      "quick_seconds_including_io": 83.07918173074722,
+      "standard_seconds_including_io": 141.24143869429827,
+      "standard_metric_seconds_including_jit": 24.225069038569927,
+      "standard_finish_seconds": 1.9248582497239113,
+      "standard_updates": 121,
+      "standard_updates_sum_seconds": 114.892901904881
+    }
+  ],
+  "optimization": {
+    "remesh_initial_queues": "same unique length+edge-index priority tuples; append+heapify O(E), dynamic reinsertion unchanged",
+    "remesh_smooth": "Numba cache=True fastmath=False sequential float64; same face/corner accumulation and ascending-neighbour in-place ascending-vertex updates; area/normal geometry reuse; no parallel/GPU Jacobi replacement",
+    "quick_sphere": "reuse existing ordered inflate corner accumulation; share one face gather/cross; cache float64 line-search bases; exact trial/schedule/stopping rules",
+    "standard_sphere": "readonly; complete optimizer remains CPU; existing GPU finish is small substage and registration kernels use different objective"
+  },
+  "local_verification": {
+    "scope": "synthetic operation/CLI checks only, not real benchmark",
+    "pytest": {
+      "files": [
+        "tests/recon_all/test_cpu_geometry_order.py",
+        "tests/recon_all/test_sphere_python.py"
+      ],
+      "passed": 9,
+      "seconds": 4.87,
+      "interpreter": "/tmp/fnit_bwas_final311/bin/python",
+      "cache_dir": "/tmp/fnit_cpu_geometry_local_20261001_package"
+    },
+    "frozen_764_operation_checks": "smooth 1/2/3 float64 exact; full remesh ordered float32/faces exact; quick flipped-face full25 iteration 116-step trace and final float32 exact",
+    "real_data_status": "not run by audit agent; parent runs isolated CPU pair",
+    "versions": {
+      "python": "3.11.16",
+      "numpy": "1.26.4",
+      "numba": "0.67.0",
+      "nibabel": "5.4.2",
+      "torch": "2.5.1",
+      "host": "DESKTOP-VEATQ7U"
+    },
+    "synthetic_cli_smoke_reports": {
+      "remesh": {
+        "path": "/tmp/fnit_cpu_geometry_cli_smoke_20261001/report.json",
+        "sha256": "1b638ed1df2995c6f40bc0e1ce77be57727e3ffa6ad9a650343b6b6e18c8023d",
+        "status": "complete",
+        "strict_regression_passed": true,
+        "runs": 2,
+        "warning": "synthetic data; not real-data performance evidence"
+      },
+      "quick-sphere": {
+        "path": "/tmp/fnit_quick_geometry_cli_smoke_20261001/report.json",
+        "sha256": "fd057f975e9381d1e0e63e610178cd78fd18ab17dc565b1af2cb62bab34477bd",
+        "status": "complete",
+        "strict_regression_passed": true,
+        "runs": 1,
+        "warning": "synthetic data; not real-data performance evidence"
+      }
+    }
+  },
+  "next_script": "validation/recon_all/python_gpu_port/benchmark_cpu_geometry_pair.py",
+  "standard_readonly_hotspots": [
+    {
+      "file": "src/fnit/recon_all/sphere_standard_line_search.py",
+      "source_sha256": "8777cb96ca93ad0584d34e3f2d2f13827b1302dbaf600fc9454fdd39cd323296",
+      "start_line": 107,
+      "end_line": 176,
+      "cost": "per-update Python ordered norm summation and per-trial float64 conversions",
+      "evidence": "source audit; current suboperator profile not measured"
+    },
+    {
+      "file": "src/fnit/recon_all/sphere_standard_line_search.py",
+      "source_sha256": "8777cb96ca93ad0584d34e3f2d2f13827b1302dbaf600fc9454fdd39cd323296",
+      "start_line": 18,
+      "end_line": 29,
+      "cost": "O(M) spherical-distance trial traversal",
+      "evidence": "old e036 profile only; no current share claim"
+    },
+    {
+      "file": "src/fnit/recon_all/sphere_standard_average.py",
+      "source_sha256": "f79dc72a574d3bef756f06b97ab2546d35662c1d6acbd769e034fa542d84bd78",
+      "start_line": 10,
+      "end_line": 29,
+      "cost": "O(rounds*(N+E)) ordered iterative average",
+      "evidence": "source audit; cannot skip rounds"
+    },
+    {
+      "file": "src/fnit/recon_all/sphere_standard_metric.py",
+      "source_sha256": "dde4f42db3f8f526c2ccb1c1379db4edc5369b0f41cbb72ed8b84dc14030ca92",
+      "start_line": 202,
+      "end_line": 216,
+      "cost": "O(sum d_vertex*d_neighbour) reciprocal linear search",
+      "evidence": "source audit; preserve repeated-update traversal semantics"
+    }
+  ]
+}

@@ -1,8 +1,4 @@
-"""Experimental control-point selection for FreeSurfer's first gentle pass.
-
-Translates MRInormGentlyFindControlPoints at FreeSurfer d932c45; the 3D
-Voronoi and bias interpolation are tracked separately.
-"""
+"""温和归一化的白质控制点，沿用 MRInormGentlyFindControlPoints 规则。"""
 
 from __future__ import annotations
 
@@ -15,7 +11,20 @@ import numpy as np
 from scipy import ndimage
 import torch
 
+from .normalize_3d_controls import _remove_outliers_ordered
+
+
 def gentle_controls(image: torch.Tensor) -> tuple[torch.Tensor, dict]:
+    """按整数强度窗口选择白质控制点，并执行有序原地离群清理。
+
+    ``image`` 是三维 (x, y, z) 强度张量，空间和强度单位沿用输入，不做
+    RAS 变换。输入在 CPU 转为 float32 后截断为整数强度，以 7/5 体素
+    窗口判断均匀区。离群清理复用三维控制点的串行 Numba 内核，保留
+    z/y/x 顺序和裁剪边界；不改变 TF32 设置。返回同 shape、同设备的
+    uint8 控制图（0/1），以及三个锚点/清理计数构成的 dict。没有可调
+    算法参数；非三维输入抛出 ValueError。属于 ``mri_normalize -g 1``
+    的内部步骤，没有独立官方 CLI；后续 Voronoi 和偏置场另行计算。
+    """
     if image.ndim != 3:
         raise ValueError("expected a 3D volume")
     # Native val0/val are int, so float input intensities truncate on read.
@@ -29,14 +38,7 @@ def gentle_controls(image: torch.Tensor) -> tuple[torch.Tensor, dict]:
         maximum = ndimage.maximum_filter(src, size=width, mode="nearest")
         control |= (minimum >= low) & (maximum <= high)
         counts.append(int(control.sum()))
-    # mriRemoveOutliers scans z, then y, then x, mutating the mask in place.
-    for z, y, x in zip(*np.nonzero(control.transpose(2, 1, 0))):
-        # The transpose above yields coordinates (z, y, x) in source scan order.
-        lo = (max(0, x - 1), max(0, y - 1), max(0, z - 1))
-        hi = (min(src.shape[0], x + 2), min(src.shape[1], y + 2),
-              min(src.shape[2], z + 2))
-        if control[lo[0]:hi[0], lo[1]:hi[1], lo[2]:hi[2]].sum() - 1 < 2:
-            control[x, y, z] = False
+    _remove_outliers_ordered(control)
     return torch.as_tensor(control.astype(np.uint8), device=image.device), {
         "first_7x7x7": counts[0], "after_5x5x5": counts[1],
         "after_outlier_removal": int(control.sum())}

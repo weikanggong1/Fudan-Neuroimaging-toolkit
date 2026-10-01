@@ -1,4 +1,4 @@
-"""Experimental 3D WM controls from FreeSurfer MRInormFindControlPoints."""
+"""三维白质控制点：复用 MRInormFindControlPoints 的阈值和有序更新规则。"""
 
 from __future__ import annotations
 
@@ -8,6 +8,7 @@ from pathlib import Path
 
 import nibabel as nib
 import numpy as np
+from numba import njit
 from scipy import ndimage
 
 from .normalize_tissue_peaks import tissue_peaks
@@ -39,8 +40,46 @@ def _neighbor_sum(image: np.ndarray, control: np.ndarray, kernel: np.ndarray,
     return count, total
 
 
+@njit(cache=True)
+def _remove_outliers_ordered(control: np.ndarray) -> int:
+    """原地删除少于两个邻居的控制点，返回删除数量。
+
+    ``control`` 是 (x, y, z) 体素网格的三维 bool 数组；邻域半径为一个
+    体素，图像边界处裁剪，不重复边界值。按 z/y/x 顺序访问并立即删除，
+    后面的体素读取更新后的邻域。这是 ``mri_normalize`` 的
+    ``mriRemoveOutliers`` 内部步骤，没有独立官方命令。仅使用 CPU 整数
+    计数；不并行、不启用 fastmath，不改变图像空间或强度精度。
+    """
+    size_x, size_y, size_z = control.shape
+    removed = 0
+    for z in range(size_z):
+        for y in range(size_y):
+            for x in range(size_x):
+                if not control[x, y, z]:
+                    continue
+                count = 0
+                for neighbor_x in range(max(0, x - 1), min(size_x, x + 2)):
+                    for neighbor_y in range(max(0, y - 1), min(size_y, y + 2)):
+                        for neighbor_z in range(max(0, z - 1), min(size_z, z + 2)):
+                            count += int(control[neighbor_x, neighbor_y, neighbor_z])
+                if count - 1 < 2:
+                    control[x, y, z] = False
+                    removed += 1
+    return removed
+
+
 def controls_3d(source: np.ndarray, wm_peak: float | None = None,
                 gm_peak: float | None = None) -> tuple[np.ndarray, dict]:
+    """从归一化强度图选择三维白质控制点，不调用外部软件。
+
+    输入 ``source`` 为三维 (x, y, z) 强度数组，使用输入体素网格，无 RAS
+    变换；内部强度为 float32，邻域窗口沿用上游整数转换。``wm_peak``、
+    ``gm_peak`` 是白质、灰质强度峰（归一化强度单位），默认 None；任一
+    未给出时重新估计两者。返回同 shape 的 uint8 控制图（0/1）和 dict，
+    其中各键记录锚点、扩展及离群清理数量，自动估计时另含组织峰报告。
+    非三维输入抛出 ValueError；没有可选组织区域时保留现有失败行为。
+    对应 ``mri_normalize`` 的内部三维控制点阶段，参数不改变输出空间。
+    """
     if source.ndim != 3:
         raise ValueError("expected a 3D float image")
     raw = np.asarray(source, dtype=np.float32)
@@ -111,13 +150,7 @@ def controls_3d(source: np.ndarray, wm_peak: float | None = None,
     details["six_added"] = six_added
     details["before_outlier_removal"] = int(control.sum())
 
-    # mriRemoveOutliers mutates in z/y/x scan order.
-    for z, y, x in zip(*np.nonzero(control.transpose(2, 1, 0))):
-        lo = (max(0, x - 1), max(0, y - 1), max(0, z - 1))
-        hi = (min(image.shape[0], x + 2), min(image.shape[1], y + 2),
-              min(image.shape[2], z + 2))
-        if control[lo[0]:hi[0], lo[1]:hi[1], lo[2]:hi[2]].sum() - 1 < 2:
-            control[x, y, z] = False
+    _remove_outliers_ordered(control)
     details["after_outlier_removal"] = int(control.sum())
     return control.astype(np.uint8), details
 
