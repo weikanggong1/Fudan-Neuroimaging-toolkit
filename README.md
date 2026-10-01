@@ -36,8 +36,7 @@ CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹�
 | [WMHSynthSeg](docs/wmh_synthseg/README.md) | FreeSurfer `mri_WMHsynthseg` | 脑结构与白质高信号标签、软体积。 |
 | [SynthSeg](docs/synthseg/README.md) | FreeSurfer `mri_synthseg` | 33 类脑结构标签与软体积。 |
 | [SynthSegPlus](docs/synthseg_plus/README.md) | FreeSurfer `mri_synthseg --parc` | 33 类结构与 68 区皮层分区。 |
-| [segment_subregions](docs/subregions/README.md) | FreeSurfer `segment_subregions brainstem/thalamus/hippo-amygdala` | 一张 T1 的脑干、双侧丘脑、海马和杏仁核亚区统一标签；已完成真实 T1 全流程；丘脑、海马与杏仁核逐区精度尚未全部达标。 |
-| [segment_nuclei](docs/subregions/nuclei.md) | FreeSurfer `segment_subregions thalamus/hippo-amygdala` | 旧的 `norm/aseg/wmparc` 阶段对照接口，供验证与旧脚本使用。 |
+| [segment_subregions](docs/subregions/README.md) | FreeSurfer `segment_subregions brainstem/thalamus/hippo-amygdala` | 一张 T1 一次完成脑干、双侧丘脑、海马和杏仁核分割，自动保存统一标签、硬/软体积和高分辨率结果；[整例 benchmark](validation/subregions/speed_v15/README.md)，逐区精度尚未全部达标。 |
 | [SynthSR](docs/synthsr/README.md) | FreeSurfer `mri_synthsr` | 合成 1 mm T1w 图像。 |
 | [TorchFAST](docs/fast/README.md) | FSL `fast` | 三组织分割、部分体积分数与偏置场。 |
 | [FastVBM](docs/fast_vbm/README.md) | FSL `fslvbm` | 从 T1w 生成标准空间灰质、Jacobian 与调制灰质图；[全流程 benchmark](validation/fast_vbm/README.md)。 |
@@ -112,7 +111,7 @@ recon-all 的 Python 依赖和原生编译工具链已列入主页 Conda 环境�
 
 ## 下载和配置权重
 
-Git 仓库与 wheel 不包含模型权重。配置脚本优先从 [FNIT 固定版本 Release](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1)下载；Release 不可用时回退到原作者地址。每个文件均检查大小和 SHA-256，再保存到默认权重目录。推理过程不会自动联网。
+Git 仓库与 wheel 不包含模型权重。配置脚本优先从 [FNIT 固定版本 Release](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1)下载；Release 不可用时回退到原作者地址。每个文件均检查大小和 SHA-256，再保存到默认权重目录。统一脑亚区接口在首次缺少所需资源时会自动准备；离线运行请先配置权重和图谱。
 
 下载全部模型：
 
@@ -147,27 +146,28 @@ fnit-setup-fmri-surface-assets --output-dir /absolute/path/hcp_surface_assets --
 
 该命令包含 fsLR32k 投影和 MSMSulc 配准所需的球面、脑沟参考图、ROI、官方 MSMSulc 对照配置，以及生成 91k CIFTI 的 HCP 皮层下分区。被试需提供已生成的 white、pial、sphere、sphere.reg、sulc 和 thickness；这条 fMRIPrep 表面路径不使用 FLAIR、髓鞘图或 wmparc。完整用法见 [fMRI 表面投影](docs/fmri/surface.md)。
 
-统一脑亚区分割需先准备经哈希校验的 BrainstemSS、ThalamicNuclei 和 HippoSF 图谱。脑干沿用预计算先验；丘脑和海马先验在个体仿射变换后的参考网格上平滑：
+统一脑亚区分割使用经哈希校验的 BrainstemSS、ThalamicNuclei 和 HippoSF 图谱。可提前准备，以便离线运行；脑干沿用预计算先验，丘脑和海马先验在个体仿射变换后的参考网格上平滑：
 
 ```bash
 # --output-root：生成四个结构目录的根路径；--device：先验计算设备
 fnit-setup-subregion-atlases --output-root /absolute/path/subregion_atlases --device cpu
-fnit subregions --i /absolute/path/sub-01_T1w.nii.gz \
-  --o /absolute/path/sub-01_subregions.nii.gz \
-  --atlas-root /absolute/path/subregion_atlases --structure all --device cuda:0
 ```
 
-输入、输出、高分辨率结果和官方对照见[统一脑亚区说明](docs/subregions/README.md)。原脑干图谱命令 `fnit-setup-brainstem-atlas` 仍可运行旧脚本。
+```python
+from fnit import segment_subregions
 
-旧的核团阶段对照路径保留，需从仓库根目录编译原生扩展：
-
-```bash
-conda env create -f environment-gems-native.yml
-conda run -n fnit-gems-native python tools/build_gems_native.py
-conda run -n fnit-gems-native fnit-nuclei setup --atlas-root /absolute/path/nuclei_atlases
+subregion_result = segment_subregions(
+    t1="/absolute/path/sub-01_T1w.nii.gz",          # 输入：一张原始 T1
+    atlas_root="/absolute/path/subregion_atlases",  # 输入：已准备的统一图谱
+    output_dir="/absolute/path/sub-01_subregions", # 输出：标签、表格和报告目录
+    device="cuda:0",                             # 输入：CUDA 设备；也支持 cpu
+    optimization="fast",                         # 输入：默认速度配置
+)
 ```
 
-旧路径输入为同网格的 `norm.mgz`、`aseg.mgz` 和 `wmparc.mgz`；历史精度和时间见[核团分割说明](docs/subregions/nuclei.md)。
+默认运行全部四项结构，自动保存原 T1 网格的 `subregions_native.nii.gz`、`labels.tsv`、`volumes.tsv`、`report.json` 和四项 `highres/` 标签。`save_posteriors=False` 默认不写较大的后验图；需要时显式设为 `True`。完整参数、命令行和官方对照见[统一脑亚区说明](docs/subregions/README.md)。
+
+旧 `segment_nuclei` 保留原五参数、三结构默认值及嵌套路径返回形式，内部调用一次统一 PyTorch 分割；`fnit-nuclei` 保留旧命令参数。两者使用主页 Conda 环境，兼容说明与历史验证链接见[核团接口兼容](docs/subregions/nuclei.md)。原脑干图谱命令 `fnit-setup-brainstem-atlas` 仍可运行旧脚本。
 
 API 的显式 `weights=`、CLI 的 `--weights`、`FNIT_WEIGHTS` 环境变量、已保存目录和默认缓存按此顺序解析。TorchFAST、TorchFLIRT、TorchFNIRT、TorchApplyWarp、TorchConvertWarp、TorchInvWarp、TorchTOPUP、TorchEDDY、TorchDTIFIT、TorchAMICONODDI、TorchMMORF、TorchBEDPOSTX、TorchProbtrackX 与 dMRI pipeline 的 TBSS 分支没有预训练权重；从原始 T1w 启动的流程可能仍需 SynthStrip。文件清单、官方 URL、SHA-256、许可和离线部署见[权重说明](docs/WEIGHTS.md)。
 

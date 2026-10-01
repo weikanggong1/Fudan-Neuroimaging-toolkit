@@ -1,0 +1,742 @@
+{
+  "scope": "failed real official_stage_inputs run; incomplete output is not a speed or accuracy benchmark",
+  "label": "full_stage_fast_v15_20261001",
+  "state": "failed",
+  "exit_code": 1,
+  "driver_elapsed_until_failure_seconds": 2196.278386116028,
+  "compute_wall_seconds": null,
+  "api_total_seconds": null,
+  "output_save_seconds": null,
+  "final_result_available": false,
+  "run_output_directory_was_empty_after_failure": true,
+  "unavailable_final_metrics": [
+    "six_family_native_comparison",
+    "110_soft_volumes",
+    "all_official_thresholds",
+    "four_final_min_jacobians",
+    "highres_outputs"
+  ],
+  "failure": {
+    "exception": "torch.OutOfMemoryError",
+    "message": "torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 776.00 MiB. GPU 0 has a total capacity of 79.11 GiB of which 443.06 MiB is free. Process 31669 has 804.00 MiB memory in use. Process 111021 has 43.64 GiB memory in use. Process 128734 has 23.03 GiB memory in use. Including non-PyTorch memory, this process has 6.59 GiB memory in use. Process 112955 has 948.00 MiB memory in use. Process 25390 has 3.68 GiB memory in use. 11.08 GiB allowed; Of the allocated memory 2.99 GiB is allocated by PyTorch, and 100.14 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)",
+    "structure": "hippo-amygdala-right",
+    "phase": "fine intensity stage 1/3 posterior construction after outer 7/7",
+    "allocation_requested_mib": 776.0,
+    "global_free_mib_at_error": 443.06,
+    "own_including_non_pytorch_gib_at_error": 6.59,
+    "pytorch_allocated_gib_at_error": 2.99,
+    "pytorch_reserved_unallocated_mib_at_error": 100.14,
+    "pytorch_allocator_limit_gib_from_error": 11.08,
+    "frame": "gems/gaussian.py:101 log_joint = log_prior + class_log_likelihood[label_classes.long()]",
+    "interpretation": "allocation exceeded the reported free memory on the shared GPU; no complete candidate result was saved"
+  },
+  "status": {
+    "state": "failed",
+    "command": [
+      "/home1/gongwk/anaconda3/bin/python",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/validation/subregions/run_unified.py",
+      "--atlas-root",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/atlases",
+      "--structures",
+      "all",
+      "--device",
+      "cuda:0",
+      "--gpu-memory-fraction",
+      "0.14",
+      "--output-dir",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_stage_fast_v15_20261001",
+      "--reference-brainstem",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/official_brainstem/brainstemSsLabels.FSvoxelSpace.mgz",
+      "--reference-thalamus",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/official_thalamus_gpucw1_full_sub01_20260929/ThalamicNuclei.FSvoxelSpace.mgz",
+      "--reference-left",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/official_hippo_gpucw1_full_sub01_20260929/lh.hippoAmygLabels.FSvoxelSpace.mgz",
+      "--reference-right",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/official_hippo_gpucw1_full_sub01_20260929/rh.hippoAmygLabels.FSvoxelSpace.mgz",
+      "--t1",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_reference_gpucw1/fs_sub01/mri/norm.mgz",
+      "--aseg",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_reference_gpucw1/fs_sub01/mri/aseg.mgz",
+      "--wmparc",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_reference_gpucw1/fs_sub01/mri/wmparc.mgz",
+      "--optimization",
+      "fast"
+    ],
+    "source": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15",
+    "physical_gpu_index": 0,
+    "allocator_fraction": 0.14,
+    "own_process_limit_mib": 19073,
+    "started_unix": 1790823761.983461,
+    "max_own_process_memory_mib": 10888,
+    "pid": 70444,
+    "last_sample_unix": 1790825957.9862297,
+    "exit_code": 1,
+    "finished_unix": 1790825958.261847
+  },
+  "launch": {
+    "driver_pid": 70441,
+    "source_commit": "971a07f529f07b7103e7d4b68cd1347d81005610",
+    "command": [
+      "/home1/gongwk/anaconda3/bin/python",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/validation/subregions/benchmark_speed.py",
+      "--root",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930",
+      "--source",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15",
+      "--python",
+      "/home1/gongwk/anaconda3/bin/python",
+      "--mode",
+      "stage",
+      "--label",
+      "full_stage_fast_v15_20261001",
+      "--physical-gpu",
+      "0",
+      "--optimization",
+      "fast",
+      "--memory-fraction",
+      "0.14",
+      "--own-memory-limit-mib",
+      "19073",
+      "--threads",
+      "4"
+    ],
+    "launched_unix": 1790823761.9106119
+  },
+  "gpu_load": {
+    "file": {
+      "path": "/mnt/c/users/admin/documents/codex/2026-09-29/new-chat/work/fnit-dmri-perf/validation/subregions/speed_v15/full_stage_fast_v15_20261001_gpu_load.jsonl",
+      "bytes": 60166,
+      "sha256": "6edc455d7937e5c7dc45356692561932332164ef71908e7c183ea4ca60473fa2"
+    },
+    "samples": 428,
+    "first_sample_utc": "2026-10-01T03:02:41.987590+00:00",
+    "last_sample_utc": "2026-10-01T03:39:17.986230+00:00",
+    "sample_span_seconds": 2195.998640060425,
+    "max_sampling_gap_seconds": 5.971644163131714,
+    "median_sampling_gap_seconds": 5.1148176193237305,
+    "gaps_above_20_seconds": 0,
+    "own_process_memory_mib": {
+      "min": 0.0,
+      "max": 10888.0,
+      "median": 5862.0
+    },
+    "max_sampled_own_process_memory_mib": 10888,
+    "gpus": {
+      "0": {
+        "used_memory_mib": {
+          "min": 69092.0,
+          "max": 80939.0,
+          "median": 76083.0
+        },
+        "free_memory_mib": {
+          "min": 68.0,
+          "max": 11915.0,
+          "median": 4924.0
+        },
+        "utilization_percent": {
+          "min": 87.0,
+          "max": 100.0,
+          "median": 100.0
+        }
+      },
+      "1": {
+        "used_memory_mib": {
+          "min": 24900.0,
+          "max": 63437.0,
+          "median": 30508.0
+        },
+        "free_memory_mib": {
+          "min": 17570.0,
+          "max": 56107.0,
+          "median": 50499.0
+        },
+        "utilization_percent": {
+          "min": 60.0,
+          "max": 100.0,
+          "median": 100.0
+        }
+      }
+    },
+    "scope": "complete supplied log interval; sampled maxima are not continuous process memory peaks"
+  },
+  "sampled_own_process_peak_mib": 10888,
+  "pytorch_peak_gpu_gib": null,
+  "source_commit_claim": "971a07f529f07b7103e7d4b68cd1347d81005610",
+  "executed_stack_source_files": [
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/validation/subregions/benchmark_speed.py",
+      "bytes": 5892,
+      "sha256": "14d848643325148f6aee3aed2807b02dd965fc289e219b73ab039e1d1dadf2d0",
+      "manifest_sha256": "14d848643325148f6aee3aed2807b02dd965fc289e219b73ab039e1d1dadf2d0",
+      "manifest_match": true
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/validation/subregions/run_unified.py",
+      "bytes": 12857,
+      "sha256": "02248e898a0b0e3c0f3d6cc6fd1c69317abbbe5aed0951df8ce1ea5828a32c8e",
+      "manifest_sha256": "02248e898a0b0e3c0f3d6cc6fd1c69317abbbe5aed0951df8ce1ea5828a32c8e",
+      "manifest_match": true
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/src/fnit/gems/pipeline.py",
+      "bytes": 26492,
+      "sha256": "e4b23743203849a3fbb9569f780b3b5010680cc188173071201f96cd213b5d3f",
+      "manifest_sha256": "e4b23743203849a3fbb9569f780b3b5010680cc188173071201f96cd213b5d3f",
+      "manifest_match": true
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/src/fnit/gems/recipes/base.py",
+      "bytes": 19036,
+      "sha256": "e0a965ec1d08a487cbd48e6b114b63c4156bee56895b0421f34939ff73dd4856",
+      "manifest_sha256": "e0a965ec1d08a487cbd48e6b114b63c4156bee56895b0421f34939ff73dd4856",
+      "manifest_match": true
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/src/fnit/gems/recipes/hippo_amygdala.py",
+      "bytes": 11102,
+      "sha256": "1211a0950041ff1b65f72dc347f31c23dd8674071ed85a27aed92b0fd18b8a5a",
+      "manifest_sha256": "1211a0950041ff1b65f72dc347f31c23dd8674071ed85a27aed92b0fd18b8a5a",
+      "manifest_match": true
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/src/fnit/gems/core.py",
+      "bytes": 22682,
+      "sha256": "65b2bebcb58a9a1d3b54aa472d097ae64049a40e8b574f7422abcb248f325943",
+      "manifest_sha256": "65b2bebcb58a9a1d3b54aa472d097ae64049a40e8b574f7422abcb248f325943",
+      "manifest_match": true
+    },
+    {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/src/fnit/gems/gaussian.py",
+      "bytes": 4737,
+      "sha256": "b0a147a76834e8da9c10592017cd4e800b8675082d25917a50b2507c2f24febc",
+      "manifest_sha256": "b0a147a76834e8da9c10592017cd4e800b8675082d25917a50b2507c2f24febc",
+      "manifest_match": true
+    }
+  ],
+  "stack_source_hashes_match_manifest": true,
+  "completed_structure_log_metadata": {
+    "brainstem": {
+      "mode": "target_mask_affine",
+      "target_label_ids": [
+        16
+      ],
+      "soft_dice": 0.824019193649292,
+      "atlas_to_native_voxel": [
+        [
+          -0.9042490463321431,
+          0.07809373256871951,
+          0.07809893156762586,
+          151.78341835940944
+        ],
+        [
+          -0.04217212122528656,
+          0.1546841054284702,
+          -0.9591502137546492,
+          188.662782735828
+        ],
+        [
+          0.08530443263325019,
+          0.9428785272423905,
+          0.15477531488732824,
+          83.94213549279137
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "segmentation_fit": {
+        "mask_dice": 0.9718503952026367,
+        "min_jacobian": 0.3285881578922272,
+        "max_displacement_voxels": 5.002867221832275,
+        "seconds": 84.96629212703556
+      },
+      "working_image": {
+        "resolution_mm": 0.5,
+        "crop_start_native": [
+          90,
+          100,
+          93
+        ],
+        "crop_stop_native": [
+          171,
+          199,
+          161
+        ],
+        "grid_origin_native_voxel": [
+          89.99999758601174,
+          99.99999409913946,
+          92.99999797344196
+        ],
+        "working_shape": [
+          162,
+          198,
+          136
+        ]
+      },
+      "crop_start": [
+        0,
+        0,
+        0
+      ],
+      "crop_stop": [
+        158,
+        198,
+        135
+      ],
+      "timing_seconds": {
+        "alignment": 10.568797345273197,
+        "segmentation_fit": 95.46637332299724,
+        "image_preparation": 3.7283166516572237,
+        "intensity_mesh_fit": 37.50339034711942,
+        "postprocess": 1.3060206891968846,
+        "total": 148.57289835624397
+      },
+      "peak_gpu_gib": 2.7639522552490234,
+      "optimization": "fast",
+      "mesh_solver": {
+        "compact": true,
+        "mesh_evaluations": 60,
+        "mesh_steps": 60,
+        "accepted_cache_hits": 0,
+        "index_rebuilds": 0,
+        "shared_geometry": true,
+        "analytic_prior": true
+      }
+    },
+    "thalamus": {
+      "alignment_dice": 0.9035182595252991,
+      "atlas_to_native_voxel": [
+        [
+          -0.4526800030684492,
+          0.0616917582046797,
+          0.043377048956364836,
+          157.67256269138366
+        ],
+        [
+          -0.03131693806261151,
+          0.04950718999536136,
+          -0.480845844789459,
+          131.70219254175123
+        ],
+        [
+          0.05231997216545492,
+          0.47558293721523065,
+          0.005568559300532375,
+          95.29270205953577
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "segmentation_fit": {
+        "seconds": 48.68218200886622,
+        "min_jacobian": 0.016024824231863022,
+        "mean_displacement_voxels": 0.0079237791054409,
+        "p95_displacement_voxels": 0.022371683629798227,
+        "mesh_solver": {
+          "stages": [
+            {
+              "compact": true,
+              "mesh_evaluations": 23,
+              "mesh_steps": 7,
+              "accepted_cache_hits": 6,
+              "index_rebuilds": 3,
+              "shared_geometry": true,
+              "analytic_prior": true,
+              "stage_index": 1,
+              "synthetic": true,
+              "block_size": 8,
+              "resolution_mm": 0.9999999205271403,
+              "alpha_sigma_voxels": 3.0,
+              "alpha_sigma_mm": 2.999999761581421,
+              "outer_iteration_limit": 1,
+              "mesh_iteration_limit": 300,
+              "preparation_seconds": 9.348685844801366,
+              "gems_fit_seconds": 15.32514519803226,
+              "post_fit_seconds": 0.008731422945857048,
+              "total_seconds": 24.682562465779483
+            },
+            {
+              "compact": true,
+              "mesh_evaluations": 66,
+              "mesh_steps": 25,
+              "accepted_cache_hits": 23,
+              "index_rebuilds": 2,
+              "shared_geometry": true,
+              "analytic_prior": true,
+              "stage_index": 2,
+              "synthetic": true,
+              "block_size": 8,
+              "resolution_mm": 0.9999999205271403,
+              "alpha_sigma_voxels": 2.0,
+              "alpha_sigma_mm": 1.9999998410542805,
+              "outer_iteration_limit": 1,
+              "mesh_iteration_limit": 150,
+              "preparation_seconds": 3.2198157138191164,
+              "gems_fit_seconds": 18.382449795957655,
+              "post_fit_seconds": 0.009643056895583868,
+              "total_seconds": 21.611908566672355
+            }
+          ],
+          "mesh_evaluations": 89,
+          "mesh_steps": 32,
+          "accepted_cache_hits": 29,
+          "index_rebuilds": 5,
+          "preparation_seconds": 12.568501558620483,
+          "gems_fit_seconds": 33.707594993989915,
+          "post_fit_seconds": 0.018374479841440916,
+          "total_seconds": 46.29447103245184,
+          "compact": true,
+          "shared_geometry": true,
+          "analytic_prior": true
+        }
+      },
+      "working_image": {
+        "resolution_mm": 0.5,
+        "crop_start_native": [
+          90,
+          85,
+          92
+        ],
+        "crop_stop_native": [
+          171,
+          149,
+          161
+        ],
+        "working_shape": [
+          162,
+          128,
+          138
+        ],
+        "working_image_preparation_seconds": 5.525772964116186,
+        "optimization_profile": "fast",
+        "outer_em_iterations": [
+          7,
+          5,
+          5,
+          3
+        ],
+        "mesh_iterations_per_outer": 20,
+        "em_iterations_per_outer": 100,
+        "alpha_smoothing": "transformed_reference_mesh",
+        "deformation_stop_voxels": 0.005,
+        "cost_stop_patience": 3,
+        "outer_relative_cost_stop": 1e-05
+      },
+      "seconds": 861.1228620647453,
+      "peak_gpu_gib": 4.10179328918457,
+      "optimization": "fast",
+      "mesh_solver": {
+        "stages": [
+          {
+            "compact": true,
+            "mesh_evaluations": 445,
+            "mesh_steps": 129,
+            "accepted_cache_hits": 59,
+            "index_rebuilds": 126,
+            "shared_geometry": true,
+            "analytic_prior": true,
+            "stage_index": 1,
+            "synthetic": false,
+            "block_size": 8,
+            "resolution_mm": 0.5,
+            "alpha_sigma_voxels": 1.5,
+            "alpha_sigma_mm": 0.75,
+            "outer_iteration_limit": 7,
+            "mesh_iteration_limit": 20,
+            "preparation_seconds": 41.42842659819871,
+            "gems_fit_seconds": 458.51585208578035,
+            "post_fit_seconds": 0.00991846201941371,
+            "total_seconds": 499.9541971459985
+          },
+          {
+            "compact": true,
+            "mesh_evaluations": 223,
+            "mesh_steps": 96,
+            "accepted_cache_hits": 72,
+            "index_rebuilds": 32,
+            "shared_geometry": true,
+            "analytic_prior": true,
+            "stage_index": 2,
+            "synthetic": false,
+            "block_size": 8,
+            "resolution_mm": 0.5,
+            "alpha_sigma_voxels": 1.125,
+            "alpha_sigma_mm": 0.5625,
+            "outer_iteration_limit": 5,
+            "mesh_iteration_limit": 20,
+            "preparation_seconds": 24.75691074319184,
+            "gems_fit_seconds": 156.72604820504785,
+            "post_fit_seconds": 0.007131409831345081,
+            "total_seconds": 181.49009035807103
+          },
+          {
+            "compact": true,
+            "mesh_evaluations": 158,
+            "mesh_steps": 93,
+            "accepted_cache_hits": 84,
+            "index_rebuilds": 4,
+            "shared_geometry": true,
+            "analytic_prior": true,
+            "stage_index": 3,
+            "synthetic": false,
+            "block_size": 8,
+            "resolution_mm": 0.5,
+            "alpha_sigma_voxels": 0.75,
+            "alpha_sigma_mm": 0.375,
+            "outer_iteration_limit": 5,
+            "mesh_iteration_limit": 20,
+            "preparation_seconds": 16.434772151988,
+            "gems_fit_seconds": 65.47332177497447,
+            "post_fit_seconds": 0.005062601994723082,
+            "total_seconds": 81.91315652895719
+          },
+          {
+            "compact": true,
+            "mesh_evaluations": 69,
+            "mesh_steps": 60,
+            "accepted_cache_hits": 57,
+            "index_rebuilds": 0,
+            "shared_geometry": true,
+            "analytic_prior": true,
+            "stage_index": 4,
+            "synthetic": false,
+            "block_size": 8,
+            "resolution_mm": 0.5,
+            "alpha_sigma_voxels": 0.0,
+            "alpha_sigma_mm": 0.0,
+            "outer_iteration_limit": 3,
+            "mesh_iteration_limit": 20,
+            "preparation_seconds": 0.010517398826777935,
+            "gems_fit_seconds": 37.577061265241355,
+            "post_fit_seconds": 0.008199984673410654,
+            "total_seconds": 37.59577864874154
+          }
+        ],
+        "mesh_evaluations": 895,
+        "mesh_steps": 378,
+        "accepted_cache_hits": 272,
+        "index_rebuilds": 162,
+        "preparation_seconds": 82.63062689220533,
+        "gems_fit_seconds": 718.292283331044,
+        "post_fit_seconds": 0.030312458518892527,
+        "total_seconds": 800.9532226817682,
+        "compact": true,
+        "shared_geometry": true,
+        "analytic_prior": true
+      }
+    },
+    "hippo-amygdala-left": {
+      "alignment_dice": 0.8552411198616028,
+      "atlas_to_native_voxel": [
+        [
+          -0.28703337375161303,
+          0.03935543788462501,
+          0.035029642819808124,
+          163.6778470342969
+        ],
+        [
+          -0.026950381660726424,
+          0.08967489811211089,
+          -0.27208048691293335,
+          129.89387910212253
+        ],
+        [
+          0.03216241440716262,
+          0.23183140233051586,
+          0.05859386588650081,
+          87.7363091737512
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "segmentation_fit": {
+        "seconds": 46.09319923305884,
+        "min_jacobian": 0.0402027927339077,
+        "mean_displacement_voxels": 0.0025301778853927866,
+        "p95_displacement_voxels": 0.008649911369713631,
+        "mesh_solver": {
+          "stages": [
+            {
+              "compact": true,
+              "mesh_evaluations": 29,
+              "mesh_steps": 11,
+              "accepted_cache_hits": 10,
+              "index_rebuilds": 0,
+              "shared_geometry": true,
+              "analytic_prior": true,
+              "stage_index": 1,
+              "synthetic": true,
+              "block_size": 8,
+              "resolution_mm": 0.9999999205271403,
+              "alpha_sigma_voxels": 3.0,
+              "alpha_sigma_mm": 2.999999761581421,
+              "outer_iteration_limit": 1,
+              "mesh_iteration_limit": 300,
+              "preparation_seconds": 6.532550455071032,
+              "gems_fit_seconds": 10.512635637074709,
+              "post_fit_seconds": 0.0028104246594011784,
+              "total_seconds": 17.047996516805142
+            },
+            {
+              "compact": true,
+              "mesh_evaluations": 60,
+              "mesh_steps": 21,
+              "accepted_cache_hits": 17,
+              "index_rebuilds": 6,
+              "shared_geometry": true,
+              "analytic_prior": true,
+              "stage_index": 2,
+              "synthetic": true,
+              "block_size": 8,
+              "resolution_mm": 0.9999999205271403,
+              "alpha_sigma_voxels": 2.0,
+              "alpha_sigma_mm": 1.9999998410542805,
+              "outer_iteration_limit": 1,
+              "mesh_iteration_limit": 150,
+              "preparation_seconds": 2.483232595026493,
+              "gems_fit_seconds": 24.89163429895416,
+              "post_fit_seconds": 0.005369479302316904,
+              "total_seconds": 27.38023637328297
+            }
+          ],
+          "mesh_evaluations": 89,
+          "mesh_steps": 32,
+          "accepted_cache_hits": 27,
+          "index_rebuilds": 6,
+          "preparation_seconds": 9.015783050097525,
+          "gems_fit_seconds": 35.40426993602887,
+          "post_fit_seconds": 0.008179903961718082,
+          "total_seconds": 44.42823289008811,
+          "compact": true,
+          "shared_geometry": true,
+          "analytic_prior": true
+        }
+      },
+      "working_image": {
+        "resolution_mm": 0.33333,
+        "crop_start_native": [
+          124,
+          100,
+          85
+        ],
+        "crop_stop_native": [
+          179,
+          154,
+          156
+        ],
+        "working_shape": [
+          166,
+          163,
+          214
+        ],
+        "working_image_preparation_seconds": 6.550193145871162,
+        "optimization_profile": "fast",
+        "outer_em_iterations": [
+          7,
+          5,
+          3
+        ],
+        "mesh_iterations_per_outer": 20,
+        "em_iterations_per_outer": 100,
+        "alpha_smoothing": "transformed_reference_mesh",
+        "deformation_stop_voxels": 0.005,
+        "cost_stop_patience": 3,
+        "outer_relative_cost_stop": 1e-05
+      },
+      "seconds": 642.6153346812353,
+      "peak_gpu_gib": 6.354437351226807,
+      "optimization": "fast",
+      "mesh_solver": {
+        "stages": [
+          {
+            "compact": true,
+            "mesh_evaluations": 301,
+            "mesh_steps": 93,
+            "accepted_cache_hits": 52,
+            "index_rebuilds": 71,
+            "shared_geometry": true,
+            "analytic_prior": true,
+            "stage_index": 1,
+            "synthetic": false,
+            "block_size": 8,
+            "resolution_mm": 0.33333,
+            "alpha_sigma_voxels": 1.5,
+            "alpha_sigma_mm": 0.499995,
+            "outer_iteration_limit": 7,
+            "mesh_iteration_limit": 20,
+            "preparation_seconds": 88.47865277575329,
+            "gems_fit_seconds": 239.57517553120852,
+            "post_fit_seconds": 0.005209426861256361,
+            "total_seconds": 328.05903773382306
+          },
+          {
+            "compact": true,
+            "mesh_evaluations": 173,
+            "mesh_steps": 60,
+            "accepted_cache_hits": 40,
+            "index_rebuilds": 27,
+            "shared_geometry": true,
+            "analytic_prior": true,
+            "stage_index": 2,
+            "synthetic": false,
+            "block_size": 8,
+            "resolution_mm": 0.33333,
+            "alpha_sigma_voxels": 0.75,
+            "alpha_sigma_mm": 0.2499975,
+            "outer_iteration_limit": 5,
+            "mesh_iteration_limit": 20,
+            "preparation_seconds": 28.892021154984832,
+            "gems_fit_seconds": 122.5761459749192,
+            "post_fit_seconds": 0.0063049569725990295,
+            "total_seconds": 151.47447208687663
+          },
+          {
+            "compact": true,
+            "mesh_evaluations": 102,
+            "mesh_steps": 36,
+            "accepted_cache_hits": 25,
+            "index_rebuilds": 11,
+            "shared_geometry": true,
+            "analytic_prior": true,
+            "stage_index": 3,
+            "synthetic": false,
+            "block_size": 8,
+            "resolution_mm": 0.33333,
+            "alpha_sigma_voxels": 0.0,
+            "alpha_sigma_mm": 0.0,
+            "outer_iteration_limit": 3,
+            "mesh_iteration_limit": 20,
+            "preparation_seconds": 0.0050608571618795395,
+            "gems_fit_seconds": 74.89019632386044,
+            "post_fit_seconds": 0.004970529116690159,
+            "total_seconds": 74.900227710139
+          }
+        ],
+        "mesh_evaluations": 576,
+        "mesh_steps": 189,
+        "accepted_cache_hits": 117,
+        "index_rebuilds": 109,
+        "preparation_seconds": 117.3757347879,
+        "gems_fit_seconds": 437.04151782998815,
+        "post_fit_seconds": 0.01648491295054555,
+        "total_seconds": 554.4337375308387,
+        "compact": true,
+        "shared_geometry": true,
+        "analytic_prior": true
+      }
+    }
+  },
+  "replacement_run_label": "full_stage_fast_v15_gpu1_20261001",
+  "replacement_source_is_unchanged": true
+}

@@ -1,0 +1,220 @@
+{
+  "mode": "real_saved_mesh_cpu_block_index_comparison",
+  "host": "gpucw1",
+  "started_utc": "2026-10-01T02:18:22.120600+00:00",
+  "python": "3.11.7",
+  "numpy": "1.26.4",
+  "gpu_used": false,
+  "repeats": 3,
+  "timing_scope": "build_block_index only; image loading, hashes, equality and tracemalloc excluded",
+  "old_function_sha256": "1395586dfe92c275d2287aac88f92ea6d62e046458f5665d95f706c0730203dc",
+  "new_function_sha256": "7f66478ec6f43417233b78c7bbb5de621ee0082c987c7cb58a92a5fa39455732",
+  "source_files": {
+    "old": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v13/src/fnit/gems/rasterize.py",
+      "bytes": 17841,
+      "sha256": "56f91602f927442cbb7ce93dac7660729145071abc7017aa4a50c69d81b01fcd"
+    },
+    "new": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/speed_analysis_v14/fnit_block_index_csr_candidate.py",
+      "bytes": 2988,
+      "sha256": "3be2708100aced1c3a46c3a7aea68d3935645ec49b3f96812128ba4a6be7bb69"
+    }
+  },
+  "cases": {
+    "thalamus": {
+      "inputs": [
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_thalamus_debug/warpedOriginalMesh.txt.gz",
+          "bytes": 6147061,
+          "sha256": "d876f463c49346c04a2afb1bba3f9c5e9596523caec657fbee9133d9f5821ee4"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_thalamus_debug/processedImageMasked.mgz",
+          "bytes": 2478761,
+          "sha256": "0dc40a0f1bef990ec32ec91d7100ee883c0bff6900523843e26da2d5853a3a6b"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_thalamus_debug/alignedAtlasImage.mgz",
+          "bytes": 857890,
+          "sha256": "4899f59a91315e81eadcc2a671ad67dab9231b459a3dd73581e222d2eea63d9e"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/atlases/thalamus/compressionLookupTable.txt",
+          "bytes": 2130,
+          "sha256": "9f480319b803a2c44606c6595c46a26fbb74726bdc800e88b443011fedb175ff"
+        }
+      ],
+      "coordinate_transform": [
+        [
+          -0.9064788819236469,
+          0.12349737293489545,
+          0.08625262318768277,
+          126.4449042432409
+        ],
+        [
+          -0.06302597380062738,
+          0.0981241909201381,
+          -0.9619948862401635,
+          89.49048960494545
+        ],
+        [
+          0.10480212937868319,
+          0.9517018791440622,
+          0.01044519988473603,
+          0.577781393213165
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "vertex_input_dtype": "float32",
+      "shape": [
+        148,
+        101,
+        114
+      ],
+      "vertices": 23027,
+      "tetrahedra": 135299,
+      "block_size": 8,
+      "margin": 3.0,
+      "blocks": 3705,
+      "candidate_pairs": 1835815,
+      "candidate_bytes": 14686520,
+      "max_candidates_per_block": 2376,
+      "every_block_array_equal": true,
+      "old_candidate_sha256": "9ec9f0335c17dce17ae7370cca0b824b6238169d7c8138308318c13c0a8105e1",
+      "new_candidate_sha256": "9ec9f0335c17dce17ae7370cca0b824b6238169d7c8138308318c13c0a8105e1",
+      "times_seconds": {
+        "old": [
+          1.3846897133626044,
+          1.3931053960695863,
+          1.4008169588632882
+        ],
+        "new": [
+          0.32346877129748464,
+          0.32669080793857574,
+          0.32628988614305854
+        ]
+      },
+      "vectorized_path": true,
+      "coordinate_chunk_pairs_limit": 1048576,
+      "global_sort_pairs_limit": 8388608,
+      "median_seconds": {
+        "old": 1.3931053960695863,
+        "new": 0.32628988614305854
+      },
+      "observed_median_ratio_old_over_new": 4.269532876231392,
+      "tracemalloc_separate_pass": {
+        "old": {
+          "current_bytes": 15137244,
+          "peak_bytes": 55388652
+        },
+        "new": {
+          "current_bytes": 15133326,
+          "peak_bytes": 116480094
+        }
+      }
+    },
+    "hippo-amygdala-left": {
+      "inputs": [
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_hippo_integrated_fullfix_left_tmp/warpedOriginalMesh.txt.gz",
+          "bytes": 5682313,
+          "sha256": "ae705020dc4a819df465408a59e7a662b652a094a1e78d7390036663e7a83c19"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_hippo_integrated_fullfix_left_tmp/processedImageMasked.mgz",
+          "bytes": 1942883,
+          "sha256": "6df365922c33c112663630e51c268afcf3a847413ca33f54a8242dfb9dcd014c"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_hippo_integrated_fullfix_left_tmp/alignedAtlasImage.mgz",
+          "bytes": 406538,
+          "sha256": "bb4be281d6bbdda3bd754ea5656c7fde3e34dccbe7eca939c54ea57371c45c3e"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/atlases/hippo-amygdala-left/compressionLookupTable.txt",
+          "bytes": 2595,
+          "sha256": "5962518cb188de252a03796cf04ea8991cd444907b7733b14fc501cd898da362"
+        }
+      ],
+      "coordinate_transform": [
+        [
+          -0.8796210573412415,
+          0.1285446187200038,
+          0.09287259918379222,
+          114.9156508271639
+        ],
+        [
+          -0.06679978074961905,
+          0.2699695207744901,
+          -0.8318859380325422,
+          89.95404553747886
+        ],
+        [
+          0.12014430080565039,
+          0.6927477768825111,
+          0.14030405316006583,
+          0.21507640253809512
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "vertex_input_dtype": "float32",
+      "shape": [
+        156,
+        156,
+        197
+      ],
+      "vertices": 20100,
+      "tetrahedra": 122333,
+      "block_size": 8,
+      "margin": 3.0,
+      "blocks": 10000,
+      "candidate_pairs": 1907283,
+      "candidate_bytes": 15258264,
+      "max_candidates_per_block": 1906,
+      "every_block_array_equal": true,
+      "old_candidate_sha256": "deb189042252f6fc9879c50a6e22fc901db0e87611c9ba11cf1187931085cc1a",
+      "new_candidate_sha256": "deb189042252f6fc9879c50a6e22fc901db0e87611c9ba11cf1187931085cc1a",
+      "times_seconds": {
+        "old": [
+          1.3300335286185145,
+          1.3470279858447611,
+          1.3440731638111174
+        ],
+        "new": [
+          0.33605291275307536,
+          0.33155267499387264,
+          0.333936202339828
+        ]
+      },
+      "vectorized_path": true,
+      "coordinate_chunk_pairs_limit": 1048576,
+      "global_sort_pairs_limit": 8388608,
+      "median_seconds": {
+        "old": 1.3440731638111174,
+        "new": 0.333936202339828
+      },
+      "observed_median_ratio_old_over_new": 4.024939956774528,
+      "tracemalloc_separate_pass": {
+        "old": {
+          "current_bytes": 16468034,
+          "peak_bytes": 55438282
+        },
+        "new": {
+          "current_bytes": 16460382,
+          "peak_bytes": 118984654
+        }
+      }
+    }
+  }
+}
