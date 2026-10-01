@@ -95,7 +95,7 @@ def volume_dependencies(tmp_path, monkeypatch):
     def bbr(**kwargs):
         state.bbr_kwargs = kwargs
         return SimpleNamespace(
-            moving_to_fixed_world=np.eye(4), save=bbr_save,
+            matrix=np.eye(4), moving_to_fixed_world=np.eye(4), save=bbr_save,
             phase_timings={name: .01 for name in ("initial_flirt", "boundary_preparation", "coarse_bbr", "local_bbr", "final_resampling")},
         )
 
@@ -118,6 +118,15 @@ def volume_dependencies(tmp_path, monkeypatch):
             ica=SimpleNamespace(n_components=2, converged=True, n_iterations=12),
         )
 
+    class TissueSampler:
+        def __init__(self, **kwargs):
+            pass
+
+        def applyxfm(self, moving, fixed, *, init):
+            destination = tmp_path / (Path(moving).stem + "_epi.nii.gz")
+            path = resample(moving, fixed, init, destination)
+            return SimpleNamespace(moved=nib.load(path))
+
     monkeypatch.setattr(end_to_end, "locate_bids_inputs", lambda *args, **kwargs: inputs)
     monkeypatch.setattr(end_to_end, "SynthStrip", Strip)
     monkeypatch.setattr(end_to_end, "prepare_anatomical", anatomical)
@@ -125,6 +134,7 @@ def volume_dependencies(tmp_path, monkeypatch):
     monkeypatch.setattr("fnit.fmri.bbr.register_bbr", bbr)
     monkeypatch.setattr(end_to_end, "resample_world", resample)
     monkeypatch.setattr(end_to_end, "run_aroma_pipeline", aroma)
+    monkeypatch.setattr(end_to_end, "TorchFLIRT", TissueSampler)
     state.inputs = inputs
     state.call = dict(
         bids_root=root, derivatives_root=tmp_path / "derivatives", subject="01",

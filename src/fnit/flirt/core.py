@@ -1664,7 +1664,7 @@ def _resample_output(
     # sampling coefficients to float. These small matrices are already on CPU.
     pull = np.linalg.inv(moving_fsl) @ np.linalg.inv(matrix) @ fixed_fsl
     pull = torch.as_tensor(pull, dtype=torch.float32, device=device)
-    coordinates = pull[:3, :3] @ grid + pull[:3, 3:4]
+    coordinates = _coordinates_from_fsl_coefficients(pull[:3, :], grid)
     upper = torch.tensor(moving.shape, device=device)[:, None] - 1
     valid = ((coordinates >= 0) & (coordinates <= upper)).all(0)
     # Avoid CUDA nonzero/dynamic-size indexing and its host synchronization.
