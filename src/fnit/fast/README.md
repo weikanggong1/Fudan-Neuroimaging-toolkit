@@ -1,36 +1,39 @@
 # TorchFAST 源码目录
 
-`TorchFAST` 对脑提取后的单通道 T1w 做 CSF、GM、WM 三组织分割，同时估计乘性 bias field 和 partial-volume fraction。算法使用 HMRF-EM 与 PyTorch，可在 CPU 或 CUDA 上运行；不调用 FSL，也不需要模型权重。
-
-## Python 单被试示例
+对脑提取后的单帧 T1w 估计 CSF、GM、WM 部分体积和乘性偏置场。输入可为路径或 nibabel 影像，八幅输出保留输入网格；不需要权重，不调用 FSL。CPU 使用 PyTorch，CUDA 顺序扫描使用项目 Conda 环境中的 Triton。
 
 ```python
 from fnit.fast import TorchFAST
 
-model = TorchFAST(
-    device="cuda:0",  # 计算设备；可改为 "cpu"
-    threads=1,  # 影像读取、写盘和部分归约使用的 CPU 线程数
+fast = TorchFAST(
+    device="cuda:0",  # 计算设备
+    threads=1,  # CPU 线程数
+    execution="fsl",  # 保留 FAST4 的原位扫描和内部 radiological X 方向
 )
-result = model(
-    image="T1_brain.nii.gz",  # 输入：脑提取后的单帧 3D T1w
-    mask=None,  # 可选输入：同网格脑 mask；None 使用 image > 0
+result = fast(
+    image="T1_brain.nii.gz",  # 脑提取后的 T1w
+    mask=None,  # 省略时以正输入体素为脑区；显式 mask 需同网格
 )
-result.pve_gm.save(path="T1_brain_pve_1.nii.gz")  # 输出路径：GM 部分体积图
-result.bias_field.save(path="T1_brain_bias.nii.gz")  # 输出路径：乘性偏置场
-result.restored.save(path="T1_brain_restore.nii.gz")  # 输出路径：偏置校正影像
+result.pve_gm.save(path="T1_brain_pve_1.nii.gz")  # GM 部分体积
+result.bias_field.save(path="T1_brain_bias.nii.gz")  # 乘性偏置场
+result.restored.save(path="T1_brain_restore.nii.gz")  # input / bias_field
 ```
 
-输入可以是路径或 nibabel 空间影像。PVE 顺序固定为 CSF、GM、WM；所有影像输出是 `nibabel.Nifti1Image` 子类，并保留输入 shape 和 affine。`bias_field` 是 acquired image 中的乘性场；脑内满足 `restored = input / bias_field`。
-
-## 命令行与原软件对应
+对应单被试命令：
 
 ```bash
-fnit fast -i T1_brain.nii.gz -o T1_brain --device cuda:0 --threads 1 -b -B
-fast -b -B -o T1_brain T1_brain.nii.gz
+fnit fast -i T1_brain.nii.gz -o results/T1_brain --execution fsl --device cuda:0 -b -B
+fast -t 1 -n 3 -b -B -o results/T1_brain T1_brain.nii.gz
 ```
 
-`-i` 是 brain-only T1w，`-o` 是输出 basename，`-b` 写 bias field，`-B` 写 bias-corrected 图像。FNIT 还写三张 PVE、hard segmentation、PVE segmentation 和 mixel type；完整文件树见[功能说明](../../../docs/fast/README.md)。
+第一条调用本包；第二条是原 FSL 的对应命令。输入是脑图，输出前缀为 results/T1_brain；-b/-B 保存偏置场及校正图，同时生成三张 PVE 和分类图。独立接口默认 execution="tensor"，需要原 FAST 顺序时显式用 fsl。
 
-2026-09-27 当前 Nibabel I/O 已用一幅真实 brain-only T1w 完整回归。GM PVE 对 FSL FAST 的 Pearson、MAE 和 0.5 Dice 分别为 0.984627、0.015411 和 0.992328；对应文件的 shape、affine、dtype 和 qform/sform code 一致。GPU 测量进程为 12.55 s，Torch 显存 allocated 峰值 2,352 MiB。源码树 SHA-256 为 `433723da856c798faca9a66ea95784bdbb5ad5b13f66f451ce32e7030559943b`。GPU 同步 HMRF 与 FSL 逐体素更新不同，因此不声明逐体素等价。当前命令、完整输出和图见[功能说明](../../../docs/fast/README.md)与[验证记录](../../../validation/fast/README.md)。
+| 文件 | 分工 |
+|---|---|
+| `pipeline.py` | nibabel 输入检查、内部 X 翻转、输出影像与网格 |
+| `algorithm.py` | 三组织 HMRF-EM、bias、混合类型和 PVE |
+| `_fsl_scan.py` | glibc 连续随机流、18 邻域原顺序波前、单次 ICM、逐项卷积 |
 
-该移植和保留的 `upstream_fast4/` 源码受非商业 FSL 6.0 许可证约束；上游源码不由 Python 包编译或导入。
+当前固定同一真实 T1 脑图的三张 PVE 对原 FAST Pearson 为 0.999999993 / 0.999999992 / 0.999999998，三张分类图逐体素相同。PVE 仍有 28 / 40 / 12 个体素的一档 0.01 差异；八图不能整体称为逐位相同。H100 返回完整八图的调用时间 10.95 s，allocated 峰值 872.5 MiB，排除输入读取和压缩写盘；原 CPU 独立进程 150.00 s。共享负载和计时范围见[验证记录](../../../validation/fast/README.md)。
+
+全部参数、输出合同、当前模板空间图、原命令及文献见[专属说明](../../../docs/fast/README.md)。已有上游参考和改写受 [FSL 6.0 非商业许可](../../../licenses/FSL-6.0.txt)约束。
