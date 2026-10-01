@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "scope": "Local surface SourceT1w path, provenance and merge-integration contracts; geometry, registration and projection computation are mocked. This is not an accuracy or performance benchmark.",
+  "base_source_revision": "50eb09803bcaeb5a479f35d12792ef29744ce115",
+  "source_state": "Working-tree SourceT1w selection fix based on the recorded revision; exact tested files are identified by SHA-256 below.",
+  "sha256": {
+    "src/fnit/fmri/surface_pipeline.py": "374f57711cb5eed941e6b6dd13c288327a530ae0312ed8334ea79f64c5bcf7a9",
+    "src/fnit/fmri/cli.py": "beeed7be2ddeacef39dc5ae0f4a0a47db8ed32f786e91fcfa01d9054d1d8f3ba",
+    "tests/test_fmri_surface_public_contracts.py": "37450fba0657096f938e91c0449684d922d5dee80237ff9cde480ed829e0f1be",
+    "tests/test_fmri_msmsulc_config.py": "6ebb3f55484f4c6fe075879af7e9689b2ef34f0782c62d3a26c461aaf39a40d4",
+    "docs/fmri/README.md": "c3d5209db12400e8525dc828cecb103eda8d713f5d4cef3985447cac46db8e63",
+    "docs/fmri/surface.md": "eb5a998e1beb323caf456f443c40a3ab2d99dae74552568e0849c36a1ee6706a"
+  },
+  "test_command": "PYTHONPATH=src python -m pytest -q tests/test_fmri_surface_public_contracts.py tests/test_fmri_msmsulc_config.py",
+  "pytest": {
+    "exit_code": 0,
+    "passed": 42,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_seconds": 10.39,
+    "completion_output": "42 passed in 10.39s"
+  },
+  "new_parameterized_cases": 8,
+  "new_contracts": [
+    "An external-storage T1 file symlink retains its BIDS name and Sources in preproc and clean modes.",
+    "Either exact logical BIDS T1 path can be selected when two candidates link to one physical file.",
+    "Absolute SourceT1w values and any parent path component are rejected.",
+    "A T1 belonging to another subject is rejected.",
+    "A non-exact alias cannot choose between multiple candidates with one physical target."
+  ],
+  "additional_orchestration_control": {
+    "scope": "Read-only control using the same public contract fixture; no real MSM invocation.",
+    "custom_msm_configuration_forwarded": true,
+    "reference_execution_forwarded": true,
+    "registration_details_configuration_and_execution_preserved": true,
+    "registration_timing_preserved_in_return_sidecar_and_qc": true
+  },
+  "documentation_signature_binding": {
+    "fMRIVolume_pipeline": 38,
+    "fMRISurface_pipeline": 21,
+    "prepare_t1w_surface_geometry": 4,
+    "prepare_fmriprep_surface_inputs": 6,
+    "all_bound_successfully": true
+  },
+  "diff_check_passed": true,
+  "privacy": "Contains only relative source paths, hashes, aggregate test results and test descriptions; no real participant data, credentials or private absolute paths.",
+  "python_version": "3.11.16"
+}

@@ -1,5 +1,17 @@
 # Third-party notices
 
+`src/fnit/fmri/slice_timing.py` is a modified, independent PyTorch adaptation of
+AFNI's default Fourier `3dTshift` algorithm, including detrending, FFT padding,
+phase shifting, range clipping and trend restoration. The inspected source is
+[AFNI commit 86c4e88](https://github.com/afni/afni/tree/86c4e8822786f9266ff45edce85f72845300d1ad),
+by Robert W. Cox and AFNI collaborators. The MCW portions are available under
+CC BY 4.0 following the May 2026 relicensing; NIH work is in the public domain.
+The complete source license and copyright notice are preserved in
+[`licenses/AFNI.txt`](licenses/AFNI.txt) and
+[`licenses/AFNI-README.copyright.txt`](licenses/AFNI-README.copyright.txt).
+FNIT does not ship or invoke AFNI binaries. The container's AFNI_25.2.09
+`3dTshift` is used only for numerical reference validation.
+
 `assets/connectome/` includes the Schaefer 2018 fsaverage annotations for 200,
 500 and 1000 parcels from Thomas Yeo Lab / CBIG under the MIT license in
 [`licenses/CBIG-MIT.txt`](licenses/CBIG-MIT.txt), and the Tian S1/S4 3T
@@ -43,6 +55,25 @@ strain objective. The newMSM MIT notice above applies to these source-derived
 parts. Official newMSM binaries and additional upstream test-oracle source
 are not distributed or invoked at runtime.
 
+`src/fnit/fmri/surface_fmriprep.py` adapts the 91k CIFTI assembly and metadata
+rules of [NiWorkflows 1.14.4](https://github.com/nipreps/niworkflows/blob/1.14.4/niworkflows/interfaces/cifti.py),
+Copyright 2021 The NiPreps Developers. `src/fnit/fmri/timing.py` adapts the
+post-realignment timing metadata rules in
+[fMRIPrep 25.2.4](https://github.com/nipreps/fmriprep/blob/25.2.4/fmriprep/workflows/bold/outputs.py),
+Copyright The NiPreps Developers. These are modified adaptations distributed
+under [Apache License 2.0](licenses/Apache-2.0.txt), with direct nibabel/NumPy
+handling, explicit input checks and no NiPreps workflow runtime.
+
+`src/fnit/fmri/sampling_reference.py` is a modified nibabel/NumPy adaptation
+informed by NiWorkflows 1.14.4 `GenerateSamplingReference` / `_gen_reference`
+and [Nilearn 0.11.1 `resample_img`](https://github.com/nilearn/nilearn/blob/0.11.1/nilearn/image/resampling.py).
+It retains the rounded voxel sizes, field-of-view and header semantics while
+using FNIT's own input checks and I/O. The NiPreps attribution and Apache 2.0
+license above apply to that source-derived portion. Copyright (c) The nilearn
+developers; the unmodified Nilearn BSD 3-Clause license is preserved in
+[`licenses/Nilearn-BSD-3-Clause.txt`](licenses/Nilearn-BSD-3-Clause.txt).
+Neither Nilearn nor NiWorkflows is added as an FNIT runtime dependency.
+
 - `synthstrip/` adapts FreeSurfer's `mri_synthstrip`, by Andrew Hoopes, Jocelyn S. Mora, Adrian V. Dalca, Bruce Fischl, Malte Hoffmann and collaborators. The original implementation already uses PyTorch. Preserve the accompanying FreeSurfer license (`licenses/FreeSurfer.txt`).
 - `synthmorph/pipeline.py` and the image-space workflow adapt FreeSurfer's SynthMorph registration code by Malte Hoffmann and collaborators. Preserve the accompanying FreeSurfer license.
 - `synthmorph/models.py` and `synthmorph/spatial.py` implement VoxelMorph/Neurite algorithms, originally distributed under Apache License 2.0 (`licenses/Apache-2.0.txt`). Modified for PyTorch, channels-first tensors, direct HDF5 loading, and reusable inference.
@@ -72,6 +103,7 @@ are not distributed or invoked at runtime.
 - `src/fnit/fmri/aroma.py` reimplements the ICA-AROMA feature definitions, fixed classifier coefficients, and regression of [Maarten Mennes and collaborators](https://github.com/maartenmennes/ICA-AROMA), distributed under Apache License 2.0 (`licenses/Apache-2.0.txt`). The three MNI152 2 mm classifier masks in `src/fnit/fmri/assets/` (`mask_csf.nii.gz`, `mask_edge.nii.gz`, `mask_out.nii.gz`) are redistributed from the same [upstream repository](https://github.com/maartenmennes/ICA-AROMA) under that license. No official executable is invoked at runtime.
 - `src/fnit/bigflica/flica_vb.py` adapts the numerical FLICA inference core in [Weikang Gong's BigFLICA](https://github.com/weikanggong/BigFLICA/blob/master/FLICA_cpu.py), source checkout `125d44451f288977810105edd29f4869ee5d8317`. The rights holder explicitly authorized adaptation and public redistribution for this FNIT integration on 2026-09-30. The repository adds disk-backed PyTorch CUDA mMIGP, Lasso-LARS DicL and FLICA, NIfTI input/output and new-subject projection; sklearn remains the explicit CPU comparison path. It does not bundle SPAMS or upstream data.
 - `src/fnit/fmri/assets_setup.py` (also exposed by `tools/setup_fmri_surface_assets.py`) installs selected fsLR geometry, cortical ROI, and 2 mm atlas ROI templates from the fixed [FNIT assets-v1 release](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1), falling back to [HCPpipelines v4.7.0](https://github.com/Washington-University/HCPpipelines/tree/f8cac6892f88bdf889d644711ff038198eb81533) (commit `f8cac6892f88bdf889d644711ff038198eb81533`). Each file is checked against the original SHA-256. The redistributed `LICENSE.md` retains the HCP/CCF copyright, redistribution conditions, and disclaimer; these templates are not included in the wheel. HCP S1200 d25/d50 group ICA maps and UK Biobank-specific MSMAll registration assets are not mirrored and require separate access under their providers' terms.
+- The installer's `--fmriprep` option separately fetches the MNI152NLin6Asym 2 mm T1w, brain mask and HCP dseg from their original TemplateFlow URLs, with fixed byte counts and SHA-256 checks. These three files are not mirrored in the FNIT release or included in the repository or wheel. A TemplateFlow client code license does not itself grant redistribution permission for every template dataset; see [the external asset list](docs/WEIGHTS.md#fmri-templateflow-原站模板).
 - The [UKB-connectomics workflow](https://github.com/sina-mansour/UKB-connectomics) by Mansour and colleagues informs the subject-level ordering and four structural matrix definitions in [src/fnit/connectome/](src/fnit/connectome/). No UKB-connectomics source or executable is bundled. The original workflow uses FreeSurfer/FIRST and a cortical plus Tian atlas; this package uses externally prepared official FreeSurfer aparc+aseg; its LAS corrected-DWI brain mask and 84-node FreeSurfer atlas can be generated natively. Cite Mansour et al., *Connectomes for 40,000 UK Biobank participants: A multi-modal, multi-scale brain network resource* (2023) when using that workflow as the methodological reference.
 - `src/fnit/connectome/data/fs_aparc84.tsv` maps FreeSurfer 8.2 `FreeSurferColorLUT.txt` labels to the 84-node MRtrix3 3.0.3 `fs_default.txt` order. The latter is under Mozilla Public License 2.0 (`licenses/MPL-2.0.txt`); the FreeSurfer label definitions retain the FreeSurfer Software License (`licenses/FreeSurfer.txt`). No FreeSurfer or MRtrix executable is used at runtime.
 - The PyTorch ports of MRtrix3 response estimation, MSMT-CSD, mtnormalise, mask morphology, 5TT/GMWMI rules, ACT/iFOD2-style tracking, SIFT2 FMLS/mapping/optimization, precise streamline sampling and connectome assignment in [src/fnit/connectome/](src/fnit/connectome/) are modified, source-derived implementations based on [MRtrix3 commit 026e850d](https://github.com/MRtrix3/mrtrix3/tree/026e850d) (3.0.3-103-g026e850d), Copyright 2008–2022 the MRtrix3 contributors. The affected Python modules are anatomy.py, assignment.py, first_5tt.py, first_mesh_pve.py, fod.py, masks.py, mtnormalise.py, response.py, tracking.py, sift2.py, sift2_fixels.py, sift2_mapping.py, sift2_optimizer.py, sift2_proc_mask.py and tcksample_precise.py. The derived [1281-direction SIFT2 asset](src/fnit/connectome/data/README.md) retains its source and SHA-256 record. These modified files and asset are distributed under the [Mozilla Public License 2.0](licenses/MPL-2.0.txt); source is provided in the named paths. No MRtrix executable is bundled, and stage-level numerical comparisons do not establish full connectome equivalence. Optional TorchFLIRT and external FreeSurfer inputs retain their separate notices and terms above.

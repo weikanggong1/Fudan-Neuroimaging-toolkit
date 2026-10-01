@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "scope": "Explicitly enabled optional slice timing on all voxels and all490 frames of a real BOLD. Default FNIT pipelines keep slice timing disabled. This is a kernel comparison with existing AFNI output, not a full pipeline equivalence test.",
+  "reference": "AFNI25.2.09 3dTshift in user-provided fMRIPrep25.2.4 image",
+  "shape": [
+    88,
+    88,
+    64,
+    490
+  ],
+  "tr_seconds": 0.735,
+  "reference_time_seconds": 0.312,
+  "ignore_initial_volumes": 0,
+  "candidate_device": "CPU",
+  "candidate_threads": 8,
+  "candidate_wall_seconds_including_io": 58.586578832007945,
+  "reference_wall_seconds_including_io": 72.26969621889293,
+  "input_sha256": "67717caaa823141c6e59d46db52e92deb4419d232ba699c399c69eb8888a0e92",
+  "reference_sha256": "ca415f01654d308d1f0fbc5771d2549f06710228fc8a344589d0ea99c28be000",
+  "candidate_sha256": "778490a1761c5b7152e9d73b7809978d84ff959203e19155afbfcb75a6bfac90",
+  "candidate_source_sha256": "74cefa748c1c3239cc64ca73c2691652a511ac6ab004ddfc2404d822b2465e55",
+  "change": "Correct float32 recursive phase multiplication and float32 weighted products before double trend accumulation, matching AFNI operation definitions.",
+  "baseline": {
+    "candidate_sha256": "204bc8c14265ab414f5facf98b3e546848f1500408e3177a3f1fa9d8bba4fc7a",
+    "candidate_source_sha256": "2f545ee4bc9692724bc2e4744abaa176d91487c257a96c89e11d032e4c966905",
+    "comparisons": {
+      "count": 242851840,
+      "max_abs": 0.041015625,
+      "mae": 0.00010920397283392299,
+      "rmse": 0.0002705562884830497,
+      "r": 0.999999999999997
+    },
+    "gate_passed": false
+  },
+  "comparisons_all_voxels_all_frames": {
+    "count": 242851840,
+    "max_abs": 0.021484375,
+    "mae": 3.8406848225466256e-05,
+    "rmse": 0.00014753962482234775,
+    "r": 0.9999999999999989
+  },
+  "gate": {
+    "max_abs": 0.01,
+    "r": 0.999999
+  },
+  "gate_passed": false,
+  "limits": [
+    "AFNI uses its own paired complex float32 FFT; PyTorch FFT ordering differs. No bitwise equivalence is claimed.",
+    "The original absolute-error threshold is retained even when it fails.",
+    "HMC, registration, surfaces, MSM and denoising are outside this kernel control."
+  ]
+}

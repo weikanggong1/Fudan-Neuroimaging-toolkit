@@ -103,9 +103,49 @@ def sample_cubic_periodic(coeff: torch.Tensor, coordinates: torch.Tensor) -> tor
     return out
 
 
+def _pad_cubic_coefficients(coeff: torch.Tensor, boundary: str) -> torch.Tensor:
+    """Add the sampler's two-voxel pad to BxXxYxZ coefficients.
+
+    ``periodic`` wraps indices and ``mirror`` reflects around the end voxel.
+    Explicit indices support axes of length one or two, where PyTorch's
+    reflect/circular padding can reject the required width. Ordinary grids
+    retain the original F.pad operation and its numerical values.
+    The result is Bx1x(X+4)x(Y+4)x(Z+4), on the input device and dtype.
+    """
+    if boundary not in ("periodic", "mirror"):
+        raise ValueError("boundary must be periodic or mirror")
+    if coeff.ndim != 4 or min(coeff.shape[-3:]) < 1:
+        raise ValueError("coeff must be BxXxYxZ with nonempty spatial axes")
+    minimum = 3 if boundary == "mirror" else 2
+    if min(coeff.shape[-3:]) >= minimum:
+        return F.pad(coeff[:, None], (2, 2, 2, 2, 2, 2),
+                     mode="reflect" if boundary == "mirror" else "circular")
+    padded = coeff
+    for axis in (-3, -2, -1):
+        length = padded.shape[axis]
+        indices = torch.arange(-2, length + 2, device=coeff.device)
+        if boundary == "periodic":
+            indices = torch.remainder(indices, length)
+        elif length == 1:
+            indices = torch.zeros_like(indices)
+        else:
+            indices = torch.remainder(indices, 2 * (length - 1))
+            indices = torch.minimum(indices, 2 * (length - 1) - indices)
+        padded = padded.index_select(axis, indices)
+    return padded[:, None]
+
+
 def sample_cubic_periodic_fast(coeff: torch.Tensor, coordinates: torch.Tensor,
-                               boundary: str = 'periodic') -> torch.Tensor:
-    """Evaluate the cubic spline with eight trilinear GPU fetches."""
+                               boundary: str = 'periodic', *,
+                               padded_coeff: torch.Tensor | None = None) -> torch.Tensor:
+    """Evaluate the cubic spline with eight trilinear GPU fetches.
+
+    ``coeff`` contains prefiltered XxYxZ or BxXxYxZ coefficients;
+    ``coordinates`` contains Bx3xXoxYoxZo source voxel coordinates.
+    ``boundary`` selects periodic wrapping or whole-sample mirror edges.
+    ``padded_coeff`` can reuse the Bx1 two-voxel pad from
+    ``_pad_cubic_coefficients``. Single-voxel mirror axes stay constant.
+    """
     if coeff.ndim == 3:
         coeff = coeff[None]
     if coordinates.ndim == 4:
@@ -126,7 +166,12 @@ def sample_cubic_periodic_fast(coeff: torch.Tensor, coordinates: torch.Tensor,
         sums.append((a,b))
     if boundary not in ('periodic','mirror'):
         raise ValueError('boundary must be periodic or mirror')
-    padded=F.pad(coeff[:,None],(2,2,2,2,2,2),mode='reflect' if boundary=='mirror' else 'circular')
+    padded = padded_coeff
+    if padded is None:
+        padded=_pad_cubic_coefficients(coeff, boundary)
+    elif (padded.shape != (coeff.shape[0], 1, X+4, Y+4, Z+4)
+          or padded.dtype != coeff.dtype or padded.device != coeff.device):
+        raise ValueError('padded_coeff must match the coefficient batch, dtype, device and two-voxel pad')
     grids=[]; products=[]
     for ix in range(2):
         for iy in range(2):
@@ -134,8 +179,11 @@ def sample_cubic_periodic_fast(coeff: torch.Tensor, coordinates: torch.Tensor,
                 xyz=[positions[0][ix],positions[1][iy],positions[2][iz]]
                 folded=[]
                 for d,n in enumerate((X,Y,Z)):
-                    pos=torch.remainder(xyz[d],2*n-2 if boundary=='mirror' else n)
-                    if boundary=='mirror': pos=torch.minimum(pos,2*n-2-pos)
+                    if boundary == 'mirror' and n == 1:
+                        pos = torch.zeros_like(xyz[d])
+                    else:
+                        pos=torch.remainder(xyz[d],2*n-2 if boundary=='mirror' else n)
+                        if boundary=='mirror': pos=torch.minimum(pos,2*n-2-pos)
                     folded.append(2*(pos+2)/(n+3)-1)
                 normalized=folded
                 grids.append(torch.stack((normalized[2],normalized[1],normalized[0]),-1))

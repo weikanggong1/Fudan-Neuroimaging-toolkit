@@ -1,6 +1,6 @@
-"""Map a BIDS Derivatives volume run to fsLR32k with MSMSulc."""
+"""Map a verified BIDS Derivatives volume run to fsLR32k with MSMSulc."""
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import json
@@ -15,28 +15,78 @@ import numpy as np
 from ..flirt.coordinates import flirt_to_world_affine
 from ..msm import prepare_msmsulc_inputs, run_msmsulc
 from ..msm.config import MSMSulcConfig
-from .assets_setup import BASE_URL, MESH
+from .assets_setup import BASE_URL, MESH, _sha256
 from .bids import locate_bids_inputs
 from .derivatives import ensure_derivative_dataset, fmri_derivative_paths, sidecar, write_json
 from .normalization import resample_world
 from .surface import SurfaceHemisphere
-from .surface_fmriprep import run_fmriprep_surface_projection
-from .surface_prepare import prepare_fmriprep_surface_inputs
+from .surface_fmriprep import (
+    _cifti_assets, _las, _millimeter_affine, _mni_grid, _publish_projection, _tr_seconds,
+    fmriprep_cifti_metadata, run_fmriprep_surface_projection,
+)
+from .surface_prepare import load_fsnative_to_t1w, prepare_fmriprep_surface_inputs
 
 
 @dataclass(frozen=True)
 class FMRISurfaceResult:
-    """Persistent fsLR32k GIFTI and 91k CIFTI BIDS Derivatives paths."""
+    """Persistent BIDS surface data, metadata, QC and registered spheres."""
 
     left: Path
     right: Path
     dtseries: Path
     metadata: Path
     timing_seconds: dict[str, float]
+    qc_report: Path | None = None
+    registered_spheres: tuple[Path, Path] | None = None
 
 
-def _validate_volume_metadata(metadata, inputs, source_t1):
-    """Require the selected run and completed AROMA, without imposing extra regression."""
+def _world_affine(value):
+    matrix = load_fsnative_to_t1w(value)
+    if not np.isfinite(np.linalg.det(matrix[:3, :3])):
+        raise ValueError("fsnative_to_t1w must have a finite invertible world affine")
+    return matrix
+
+
+def _matching_original_t1(subject_dir, source_t1, world_affine):
+    scanner = nib.as_closest_canonical(nib.load(str(subject_dir / "mri/orig/001.mgz")))
+    raw = nib.as_closest_canonical(nib.load(str(source_t1)))
+    if scanner.ndim != 3 or raw.ndim != 3:
+        raise ValueError("recon-all original T1 and source BIDS T1 must be 3D")
+    if world_affine is not None:
+        return {"OriginalT1Identity": "explicit fsnative-to-T1w world affine",
+                "FsnativeToT1wWorldAffine": world_affine.tolist()}
+    if scanner.shape != raw.shape or not np.allclose(scanner.affine, raw.affine, rtol=0, atol=1e-4):
+        raise ValueError("recon-all original T1 and source BIDS T1 have different grids; provide fsnative_to_t1w")
+    scanner_data = np.asarray(scanner.dataobj, dtype=np.float32)
+    raw_data = np.asarray(raw.dataobj, dtype=np.float32)
+    if (not np.isfinite(scanner_data).all() or not np.isfinite(raw_data).all()
+            or not np.allclose(scanner_data, raw_data, rtol=1e-5, atol=1e-3)):
+        raise ValueError("recon-all original T1 does not match the source BIDS T1 image content")
+    return {"OriginalT1Identity": "matching source image grid and voxel content",
+            "FsnativeToT1wWorldAffine": np.eye(4).tolist()}
+
+
+def _surface_extra_paths(paths, signal):
+    report = sidecar(paths.dtseries).with_name(
+        sidecar(paths.dtseries).name.removesuffix("_bold.json") + "_report.json"
+    )
+    spheres = tuple(path.with_name(
+        path.name.split("_space-fsLR_")[0] + f"_space-fsLR_desc-{signal}Reg_sphere.surf.gii"
+    ) for path in (paths.left, paths.right))
+    sphere_json = tuple(path.with_name(path.name.removesuffix(".surf.gii") + ".json") for path in spheres)
+    return report, spheres, sphere_json
+
+
+def _check_final_outputs(destinations, overwrite):
+    for path in destinations:
+        if path.is_dir():
+            raise ValueError(f"output file is a directory: {path}")
+        if (path.exists() or path.is_symlink()) and not overwrite:
+            raise FileExistsError(path)
+
+
+def _validate_run_metadata(metadata, inputs, source_t1):
+    """Require the selected BOLD/T1w sources and recorded repetition time."""
     required_sources = {
         f"bids:raw:{path.relative_to(inputs.bids_root).as_posix()}"
         for path in (inputs.bold, source_t1)
@@ -48,7 +98,16 @@ def _validate_volume_metadata(metadata, inputs, source_t1):
     if (isinstance(recorded_tr, bool) or not isinstance(recorded_tr, (int, float))
             or not np.isfinite(recorded_tr) or not np.isclose(recorded_tr, inputs.tr, rtol=1e-5, atol=1e-6)):
         raise ValueError("volume derivative RepetitionTime differs from the selected BIDS run")
+
+
+def _validate_volume_metadata(metadata, inputs, source_t1):
+    """Require completed AROMA, without imposing extra regression."""
+    _validate_run_metadata(metadata, inputs, source_t1)
     details = metadata.get("FNIT", {})
+    if details.get("Signal") not in (None, "clean"):
+        raise ValueError("clean volume metadata explicitly identifies a different signal")
+    if details.get("SourceT1w") != source_t1.relative_to(inputs.bids_root).as_posix():
+        raise ValueError("clean volume derivative does not identify the selected source T1w")
     report = details.get("Report", {})
     denoising = details.get("Denoising")
     if denoising is None:
@@ -61,6 +120,19 @@ def _validate_volume_metadata(metadata, inputs, source_t1):
             completed = False
     if not completed:
         raise ValueError("volume derivative lacks completed ICA-AROMA denoising")
+
+
+def _validate_preproc_metadata(metadata, inputs, source_t1):
+    _validate_run_metadata(metadata, inputs, source_t1)
+    details = metadata.get("FNIT", {})
+    denoising = details.get("Denoising") or {}
+    if (details.get("Signal") != "preproc"
+            or not isinstance(denoising, dict)
+            or denoising.get("Completed") is True
+            or any(details.get("ConfoundRegression", {}).values())
+            or details.get("TemporalFiltering") is not None
+            or details.get("IntensityNormalization") is not None):
+        raise ValueError("preprocessed volume metadata describes cleaned or scaled data; rerun volume")
 
 
 def _validate_native_bold(image, inputs):
@@ -83,29 +155,31 @@ def _tr_matches(image, tr):
 
 
 def fMRISurface_pipeline(
-    bids_root: str | Path,
-    derivatives_root: str | Path,
-    *,
-    subject: str,
-    recon_all: str | Path,
-    hcp_assets_dir: str | Path,
-    session: str | None = None,
-    task: str = "rest",
-    run: str | None = None,
-    acquisition: str | None = None,
-    direction: str | None = None,
-    reconstruction: str | None = None,
-    echo: str | None = None,
-    wb_command: str | Path = "wb_command",
-    device: str = "cuda:0",
+    bids_root: str | Path, derivatives_root: str | Path, *,
+    subject: str, recon_all: str | Path, hcp_assets_dir: str | Path,
+    session: str | None = None, task: str = "rest", run: str | None = None,
+    acquisition: str | None = None, direction: str | None = None,
+    reconstruction: str | None = None, echo: str | None = None,
+    wb_command: str | Path = "wb_command", device: str = "cuda:0",
     overwrite: bool = False,
     registered_spheres: tuple[str | Path, str | Path] | None = None,
     msm_config: MSMSulcConfig | str | Path | None = None,
     msm_execution: str = "optimized",
     goodvoxels: str | Path | None = None,
+    signal: str = "preproc",
+    fsnative_to_t1w: str | Path | np.ndarray | None = None,
 ) -> FMRISurfaceResult:
-    """Project completed volume derivatives using matching T1 recon-all surfaces."""
+    """Project one verified volume run and publish its complete surface result.
+
+    ``signal='preproc'`` uses the volume's retained T1w/MNI preprocessed
+    series, matching fMRIPrep's projection input. ``signal='clean'`` explicitly
+    selects denoised volume data. Missing preprocessed data never fall back
+    to clean data. ``fsnative_to_t1w`` maps recon-all scanner RAS to the source
+    T1w RAS; omitting it requires the original images to match in content.
+    """
     started = time.perf_counter()
+    if signal not in ("preproc", "clean"):
+        raise ValueError("signal must be 'preproc' or 'clean'")
     if registered_spheres is not None and len(registered_spheres) != 2:
         raise ValueError("registered_spheres must contain left and right paths")
     if registered_spheres is not None and msm_config is not None:
@@ -120,191 +194,274 @@ def fMRISurface_pipeline(
         configuration = MSMSulcConfig.from_file(msm_config)
     else:
         raise TypeError("msm_config must be MSMSulcConfig or a config path")
-    registration = {"Method": "provided spheres"}
+    registration_details = {"Method": "provided spheres"}
     registration_seconds = None
+    world_affine = None if fsnative_to_t1w is None else _world_affine(fsnative_to_t1w)
     inputs = locate_bids_inputs(
         bids_root, subject=subject, session=session, task=task, run=run,
-        acquisition=acquisition, direction=direction,
-        reconstruction=reconstruction, echo=echo,
+        acquisition=acquisition, direction=direction, reconstruction=reconstruction, echo=echo,
     )
-    mni_sidecar = None
-    paths = None
-    for t1_candidate in inputs.t1w_images:
-        candidate = fmri_derivative_paths(inputs, t1_candidate, derivatives_root)
-        if candidate.clean_mni.is_file():
-            paths = candidate
-            mni_sidecar = sidecar(candidate.clean_mni)
-            break
-    if paths is None:
-        raise FileNotFoundError("completed FNIT volume BIDS derivative not found")
-    ensure_derivative_dataset(paths.root, inputs.bids_root)
-    if not mni_sidecar.is_file():
-        raise FileNotFoundError(mni_sidecar)
+    # The run's functional paths are independent of which T1 was selected.
+    # Resolve SourceT1w before checking any T1-specific derivative.
+    probe = fmri_derivative_paths(inputs, inputs.t1w_images[0], derivatives_root, signal=signal)
+    mni_bold = probe.preproc_mni if signal == "preproc" else probe.clean_mni
+    mni_sidecar = sidecar(mni_bold)
+    if not mni_bold.is_file() or not mni_sidecar.is_file():
+        if signal == "preproc":
+            raise FileNotFoundError("preprocessed FNIT volume derivatives are missing; rerun volume or explicitly select signal='clean'")
+        raise FileNotFoundError("completed FNIT clean volume BIDS derivative not found")
     metadata = json.loads(mni_sidecar.read_text(encoding="utf-8"))
-    source_t1 = inputs.bids_root / metadata.get("FNIT", {}).get("SourceT1w", "")
-    if source_t1.resolve() not in [p.resolve() for p in inputs.t1w_images]:
+    source_label = metadata.get("FNIT", {}).get("SourceT1w")
+    if not isinstance(source_label, str) or not source_label:
+        raise ValueError("volume derivative does not identify its source T1w; rerun volume")
+    source_relative = Path(source_label)
+    if source_relative.is_absolute() or ".." in source_relative.parts:
+        raise ValueError("SourceT1w must be a relative BIDS source path without '..'")
+    recorded_source = inputs.bids_root / source_relative
+    logical_matches = [path for path in inputs.t1w_images if path == recorded_source]
+    identity_matches = logical_matches or [
+        path for path in inputs.t1w_images if path.resolve() == recorded_source.resolve()
+    ]
+    if not identity_matches:
         raise ValueError("volume derivative T1w does not belong to this BIDS subject")
-    paths = fmri_derivative_paths(inputs, source_t1, derivatives_root)
-    for path in (paths.clean_native, paths.clean_mni, paths.t1_brain, paths.bbr_matrix):
+    if len(identity_matches) != 1:
+        raise ValueError("volume derivative SourceT1w is ambiguous; record its exact BIDS path")
+    # A BIDS image may link to external storage. Use the listed logical
+    # candidate for derivative naming and Sources; resolve only for identity.
+    source_t1 = identity_matches[0]
+    source_label = source_t1.relative_to(inputs.bids_root).as_posix()
+    expected_bold_source = f"bids:raw:{inputs.bold.relative_to(inputs.bids_root).as_posix()}"
+    if expected_bold_source not in metadata.get("Sources", []):
+        raise ValueError("volume derivative does not identify the requested raw BOLD source; rerun volume")
+    space = metadata.get("FNIT", {})
+    if signal == "preproc":
+        _validate_preproc_metadata(metadata, inputs, source_t1)
+    template_hash = space.get("StandardTemplateSHA256", "")
+    if (space.get("StandardSpace") != "MNI152NLin6Asym"
+            or space.get("StandardTemplateIdentity") != "TemplateFlow:MNI152NLin6Asym:res-02"
+            or not isinstance(template_hash, str) or len(template_hash) != 64
+            or any(character.lower() not in "0123456789abcdef" for character in template_hash)):
+        raise ValueError("volume derivative lacks verified MNI152NLin6Asym template identity; rerun volume")
+    paths = fmri_derivative_paths(inputs, source_t1, derivatives_root, signal=signal)
+    qc_report, sphere_paths, sphere_sidecars = _surface_extra_paths(paths, signal)
+    final_data = (paths.left, paths.right, paths.dtseries)
+    final_sidecars = tuple(sidecar(path) for path in final_data)
+    final_outputs = (*final_data, *final_sidecars, qc_report, *sphere_paths, *sphere_sidecars)
+    _check_final_outputs(final_outputs, overwrite)
+    selected_mni = paths.preproc_mni if signal == "preproc" else paths.clean_mni
+    selected_t1w = paths.preproc_t1w if signal == "preproc" else paths.clean_native
+    required = (selected_mni, selected_t1w, paths.t1_brain)
+    if signal == "preproc":
+        required += (sidecar(selected_t1w),)
+    if signal == "clean":
+        required += (paths.bbr_matrix, sidecar(selected_t1w))
+        _validate_volume_metadata(metadata, inputs, source_t1)
+    for path in required:
         if not path.is_file():
+            if signal == "preproc":
+                raise FileNotFoundError(f"preprocessed FNIT input is missing: {path}; rerun volume or select signal='clean'")
             raise FileNotFoundError(path)
-    _validate_volume_metadata(metadata, inputs, source_t1)
-    if paths.dtseries.exists() and not overwrite:
-        raise FileExistsError(paths.dtseries)
+    ensure_derivative_dataset(paths.root, inputs.bids_root)
     assets = Path(hcp_assets_dir).expanduser().resolve()
+    mesh = assets / MESH
+    left_roi = mesh / "L.atlasroi.32k_fs_LR.shape.gii"
+    right_roi = mesh / "R.atlasroi.32k_fs_LR.shape.gii"
     dseg = assets / "fmriprep/tpl-MNI152NLin6Asym_res-02_atlas-HCP_dseg.nii.gz"
-    if not dseg.is_file():
-        raise FileNotFoundError(dseg)
-    native = paths.clean_native
-    clean_mni = paths.clean_mni
-    t1 = paths.t1_brain
-    epi_image = nib.load(str(native))
-    _validate_native_bold(epi_image, inputs)
-    t1_image = nib.load(str(t1))
-    mni_image = nib.load(str(clean_mni))
-    if not _tr_matches(mni_image, inputs.tr):
-        raise ValueError("MNI volume derivative TR differs from the selected BIDS run")
-    label_image = nib.load(str(dseg))
-    canonical_mni = nib.as_closest_canonical(mni_image)
-    canonical_label = nib.as_closest_canonical(label_image)
-    if (epi_image.ndim != 4 or mni_image.ndim != 4 or
-            epi_image.shape[3] != mni_image.shape[3] or
-            canonical_mni.shape[:3] != canonical_label.shape or
-            not np.allclose(canonical_mni.affine, canonical_label.affine,
-                            rtol=0, atol=1e-4)):
-        raise ValueError("volume BOLD and TemplateFlow HCP 2-mm atlas are incompatible")
-    epi_to_t1 = flirt_to_world_affine(
-        np.loadtxt(paths.bbr_matrix), epi_image.affine, t1_image.affine,
-        epi_image.shape[:3], t1_image.shape,
-        epi_image.header.get_zooms()[:3], t1_image.header.get_zooms()[:3],
-    )
-    with TemporaryDirectory(prefix="fnit-surface-") as work_dir:
-        output = Path(work_dir)
-        t1_bold = output / "clean_T1w.nii.gz"
-        resample_world(native, t1, np.linalg.inv(epi_to_t1), t1_bold,
-                       device=device)
+    labels, _ = _cifti_assets(left_roi, right_roi, dseg)
+    mni_image = nib.load(str(selected_mni))
+    input_image = nib.load(str(selected_t1w))
+    t1_image = nib.load(str(paths.t1_brain))
+    _tr_seconds(mni_image, "MNI BOLD", inputs.tr)
+    _tr_seconds(input_image, "T1w BOLD" if signal == "preproc" else "native BOLD", inputs.tr)
+    if input_image.shape[3] != mni_image.shape[3] or input_image.shape[3] != nib.load(str(inputs.bold)).shape[3]:
+        raise ValueError("surface inputs and raw BOLD must have equal frame counts")
+    _mni_grid(_las(mni_image), labels)
+    if signal == "clean":
+        native_metadata = json.loads(sidecar(selected_t1w).read_text(encoding="utf-8"))
+        _validate_volume_metadata(native_metadata, inputs, source_t1)
+        _validate_native_bold(input_image, inputs)
+    if signal == "preproc":
+        t1w_metadata = json.loads(sidecar(selected_t1w).read_text(encoding="utf-8"))
+        _validate_preproc_metadata(t1w_metadata, inputs, source_t1)
+        if (t1w_metadata.get("Resolution") != "native BOLD resolution"
+                or t1w_metadata.get("SpatialReference") != f"bids:raw:{source_label}"
+                or t1w_metadata.get("FNIT", {}).get("SourceT1w") != source_label):
+            raise ValueError("preprocessed T1w BOLD lacks its native-resolution source-T1w identity")
+        _millimeter_affine(input_image, "preprocessed T1w BOLD")
+        native_reference = nib.as_closest_canonical(nib.load(str(inputs.sbref or inputs.bold)))
+        native_zooms = np.round(native_reference.header.get_zooms()[:3], 3)
+        if not np.allclose(nib.affines.voxel_sizes(input_image.affine), native_zooms,
+                           rtol=1e-6, atol=1e-5):
+            raise ValueError("preprocessed T1w BOLD does not use the native BOLD voxel sizes")
+    executable = shutil.which(str(wb_command))
+    if executable is None:
+        raise FileNotFoundError(wb_command)
+    paths.func_dir.parent.mkdir(parents=True, exist_ok=True)
+    with TemporaryDirectory(prefix=".fnit-surface-", dir=paths.func_dir.parent) as work_dir:
+        work = Path(work_dir)
+        t1_bold = selected_t1w
+        if signal == "clean":
+            epi_to_t1 = flirt_to_world_affine(
+                np.loadtxt(paths.bbr_matrix), input_image.affine, t1_image.affine,
+                input_image.shape[:3], t1_image.shape,
+                input_image.header.get_zooms()[:3], t1_image.header.get_zooms()[:3],
+            )
+            t1_bold = work / "clean_T1w.nii.gz"
+            resample_world(selected_t1w, paths.t1_brain, np.linalg.inv(epi_to_t1), t1_bold, device=device)
         source = Path(recon_all).expanduser().resolve()
-        with TemporaryDirectory(prefix="recon_all_", dir=output) as temporary:
-            if source.is_file() and source.suffix.lower() == ".zip":
-                subject_dir = Path(temporary) / "FreeSurfer"
-                required = ("mri/orig.mgz", "mri/orig/001.mgz") + tuple(
-                    f"surf/{hemi}.{name}"
-                    for hemi in ("lh", "rh")
-                    for name in ("white", "pial", "sphere.reg", "thickness", "sphere", "sulc")
-                )
-                with zipfile.ZipFile(source) as archive:
-                    for name in required:
-                        target = subject_dir / name
-                        target.parent.mkdir(parents=True, exist_ok=True)
-                        with archive.open(f"FreeSurfer/{name}") as reader, target.open("wb") as writer:
-                            shutil.copyfileobj(reader, writer)
-            else:
-                subject_dir = source / "FreeSurfer" if (source / "FreeSurfer").is_dir() else source
-            scanner = nib.load(str(subject_dir / "mri/orig/001.mgz"))
-            if scanner.shape != t1_image.shape or not np.allclose(
-                    scanner.affine, t1_image.affine, atol=1e-4, rtol=0):
-                raise ValueError("recon-all scanner T1 and volume-pipeline T1 have different grids")
-            prepared = prepare_fmriprep_surface_inputs(
-                subject_dir=subject_dir, hcp_assets_dir=assets,
-                output_dir=output / "prepared", wb_command=wb_command,
+        subject_dir = (source / "FreeSurfer" if (source / "FreeSurfer").is_dir() else source).resolve()
+        if source.is_file() and source.suffix.lower() == ".zip":
+            subject_dir = work / "recon_all" / "FreeSurfer"
+            required_recon = ("mri/orig.mgz", "mri/orig/001.mgz") + tuple(
+                f"surf/{hemi}.{name}" for hemi in ("lh", "rh")
+                for name in ("white", "pial", "sphere.reg", "thickness", "sphere", "sulc")
             )
-            if registered_spheres is None:
-                registration_started = time.perf_counter()
-                sulc_inputs = prepare_msmsulc_inputs(
-                    subject_dir=subject_dir,
-                    initial_spheres=prepared.initial_spheres,
-                    hcp_assets_dir=assets, output_dir=output / "msmsulc_inputs",
-                    wb_command=wb_command,
-                )
-                spheres = run_msmsulc(sulc_inputs, output / "msmsulc", device=device,
-                                     config=configuration, execution=msm_execution)
-                spheres = (spheres["L"], spheres["R"])
-                registration_seconds = time.perf_counter() - registration_started
-                report = json.loads((output / "msmsulc/registration_report.json").read_text(
-                    encoding="utf-8"))
-                registration = {
-                    "Method": "FNIT MSMSulc-HOCR-FastPD",
-                    "Configuration": configuration.to_dict(),
-                    "Execution": msm_execution,
-                    "Hemispheres": {
-                        hemi: {key: report[hemi][key] for key in (
-                            "seconds", "peak_allocated_gb", "folded_output_faces",
-                            "folded_solver_faces", "minimum_output_orientation_ratio",
-                            "minimum_solver_orientation_ratio", "degenerate_input_faces",
-                        ) if key in report[hemi]} for hemi in ("L", "R")
-                    },
+            with zipfile.ZipFile(source) as archive:
+                names = set(archive.namelist())
+                for hemisphere in ("lh", "rh"):
+                    middle = next((f"surf/{hemisphere}.{name}" for name in ("midthickness", "graymid")
+                                   if f"FreeSurfer/surf/{hemisphere}.{name}" in names), None)
+                    if middle is None:
+                        raise FileNotFoundError(f"recon-all ZIP lacks {hemisphere}.midthickness or graymid")
+                    required_recon += (middle,)
+                for name in required_recon:
+                    target = subject_dir / name
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    with archive.open(f"FreeSurfer/{name}") as reader, target.open("wb") as writer:
+                        shutil.copyfileobj(reader, writer)
+        identity = _matching_original_t1(subject_dir, source_t1, world_affine)
+        prepared = prepare_fmriprep_surface_inputs(
+            subject_dir=subject_dir, hcp_assets_dir=assets,
+            output_dir=work / "prepared", wb_command=wb_command,
+            fsnative_to_t1w=world_affine,
+        )
+        if registered_spheres is None:
+            registration_started = time.perf_counter()
+            sulc_inputs = prepare_msmsulc_inputs(
+                subject_dir=subject_dir, initial_spheres=prepared.initial_spheres,
+                hcp_assets_dir=assets, output_dir=work / "msmsulc_inputs", wb_command=wb_command,
+            )
+            estimates = run_msmsulc(sulc_inputs, work / "msmsulc", device=device,
+                                   config=configuration, execution=msm_execution)
+            spheres = (Path(estimates["L"]), Path(estimates["R"]))
+            registration = "MSMSulc-HOCR-FastPD"
+            registration_qc = {
+                "Report": json.loads((work / "msmsulc" / "registration_report.json").read_text()),
+                "InputsSHA256": {
+                    hemi: {name: _sha256(Path(path)) for name, path in asdict(entry).items()
+                           if path is not None}
+                    for hemi, entry in sulc_inputs.items()
+                },
+            }
+            registration_seconds = time.perf_counter() - registration_started
+            report = registration_qc["Report"]
+            registration_details = {
+                "Method": "FNIT MSMSulc-HOCR-FastPD",
+                "Configuration": configuration.to_dict(),
+                "Execution": msm_execution,
+                "Hemispheres": {
+                    hemi: {key: report[hemi][key] for key in (
+                        "seconds", "peak_allocated_gb", "folded_output_faces",
+                        "folded_solver_faces", "minimum_output_orientation_ratio",
+                        "minimum_solver_orientation_ratio", "degenerate_input_faces",
+                    ) if key in report[hemi]} for hemi in ("L", "R")
+                },
+            }
+        else:
+            spheres = tuple(Path(path).expanduser().resolve() for path in registered_spheres)
+            registration = "provided registered spheres"
+            registration_qc = None
+        hemispheres = {}
+        identity["MidthicknessSource"] = {}
+        for hemi, geometry, individual_roi, sphere in zip(
+            ("L", "R"), (prepared.geometry.left, prepared.geometry.right), prepared.individual_rois, spheres,
+        ):
+            middle_source = getattr(geometry, "midthickness_source", None)
+            if middle_source is not None:
+                identity["MidthicknessSource"][hemi] = {
+                    "File": Path(middle_source).relative_to(subject_dir).as_posix(),
+                    "SHA256": _sha256(Path(middle_source)),
                 }
-            else:
-                spheres = registered_spheres
-            mesh = assets / "global/templates/standard_mesh_atlases"
-            executable = shutil.which(str(wb_command))
-            if executable is None:
-                raise FileNotFoundError(wb_command)
-            hemispheres = {}
-            for hemi, geometry, individual_roi, sphere in zip(
-                ("L", "R"), (prepared.geometry.left, prepared.geometry.right),
-                prepared.individual_rois, spheres,
-            ):
-                atlas_mid = output / "registered" / hemi / "midthickness.32k_fsLR.surf.gii"
-                atlas_mid.parent.mkdir(parents=True, exist_ok=True)
-                subprocess.run([
-                    executable, "-surface-resample", str(geometry.midthickness),
-                    str(sphere), str(mesh / f"{hemi}.sphere.32k_fs_LR.surf.gii"),
-                    "BARYCENTRIC", str(atlas_mid),
-                ], check=True, capture_output=True, text=True)
-                hemispheres[hemi] = SurfaceHemisphere(
-                    white=geometry.white, pial=geometry.pial,
-                    midthickness=geometry.midthickness,
-                    registered_sphere=sphere,
-                    native_roi=individual_roi,
-                    atlas_sphere=mesh / f"{hemi}.sphere.32k_fs_LR.surf.gii",
-                    atlas_midthickness=atlas_mid,
-                    atlas_roi=mesh / f"{hemi}.atlasroi.32k_fs_LR.shape.gii",
-                )
-            projection = run_fmriprep_surface_projection(
-                clean_t1w=t1_bold, clean_mni=clean_mni,
-                left=hemispheres["L"], right=hemispheres["R"],
-                left_label=mesh / "L.atlasroi.32k_fs_LR.shape.gii",
-                right_label=mesh / "R.atlasroi.32k_fs_LR.shape.gii",
-                hcp_dseg=dseg, output_dir=output / "projection",
-                goodvoxels=goodvoxels, wb_command=wb_command,
+            atlas_mid = work / "registered" / hemi / "midthickness.32k_fsLR.surf.gii"
+            atlas_mid.parent.mkdir(parents=True, exist_ok=True)
+            subprocess.run([
+                executable, "-surface-resample", str(geometry.midthickness), str(sphere),
+                str(mesh / f"{hemi}.sphere.32k_fs_LR.surf.gii"), "BARYCENTRIC", str(atlas_mid),
+            ], check=True, capture_output=True, text=True)
+            hemispheres[hemi] = SurfaceHemisphere(
+                white=geometry.white, pial=geometry.pial, midthickness=geometry.midthickness,
+                registered_sphere=sphere, native_roi=individual_roi,
+                atlas_sphere=mesh / f"{hemi}.sphere.32k_fs_LR.surf.gii",
+                atlas_midthickness=atlas_mid, atlas_roi=mesh / f"{hemi}.atlasroi.32k_fs_LR.shape.gii",
             )
-        for current, destination in ((projection.left_metric, paths.left),
-                                     (projection.right_metric, paths.right),
-                                     (projection.dtseries, paths.dtseries)):
-            destination.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(current, destination)
+        projection = run_fmriprep_surface_projection(
+            clean_t1w=t1_bold, clean_mni=selected_mni,
+            left=hemispheres["L"], right=hemispheres["R"], left_label=left_roi, right_label=right_roi,
+            hcp_dseg=dseg, output_dir=work / "projection", tr_seconds=inputs.tr,
+            goodvoxels=goodvoxels, wb_command=wb_command,
+        )
+        publish = work / "publish"
+        publish.mkdir()
+        for current, destination in zip(
+            (projection.left_metric, projection.right_metric, projection.dtseries), final_data,
+        ):
+            shutil.copyfile(current, publish / destination.name)
+        sphere_info = {}
+        for hemisphere, current, destination in zip(("L", "R"), spheres, sphere_paths):
+            shutil.copyfile(current, publish / destination.name)
+            sphere_info[hemisphere] = {
+                "File": f"bids::{destination.relative_to(paths.root).as_posix()}",
+                "SHA256": _sha256(current),
+                "EstimatedHere": registered_spheres is None,
+            }
         timing = {**projection.timing_seconds, "total": time.perf_counter() - started}
         if registration_seconds is not None:
             timing["msmsulc_preparation_and_registration"] = registration_seconds
+        coverage = json.loads(projection.coverage_report.read_text(encoding="utf-8"))
         details = {**{key: metadata[key] for key in (
-                       "TaskName", "EchoTime", "FlipAngle", "MagneticFieldStrength",
-                       "Manufacturer", "PhaseEncodingDirection", "Units",
-                   ) if key in metadata},
-                   "Sources": [
-                       f"bids::{paths.clean_native.relative_to(paths.root).as_posix()}",
-                       f"bids::{paths.clean_mni.relative_to(paths.root).as_posix()}",
-                   ],
-                   "RepetitionTime": inputs.tr,
-                   "SkullStripped": True,
-                   "FNIT": {"Registration": registration["Method"],
-                            "RegistrationDetails": registration,
-                            "Projection": "fMRIPrep-style T1w cortex + MNI subcortex",
-                            "TimingSeconds": timing,
-                            "Coverage": json.loads(projection.coverage_report.read_text(encoding="utf-8"))}}
-        for path in (paths.left, paths.right, paths.dtseries):
+            "TaskName", "EchoTime", "FlipAngle", "MagneticFieldStrength", "Manufacturer",
+            "PhaseEncodingDirection", "Units", "SliceTimingCorrected", "StartTime", "DelayTime",
+            "AcquisitionDuration", "VolumeTiming",
+        ) if key in metadata},
+            "Sources": [f"bids::{selected_t1w.relative_to(paths.root).as_posix()}",
+                        f"bids::{selected_mni.relative_to(paths.root).as_posix()}"],
+            "RepetitionTime": inputs.tr, "SkullStripped": metadata.get("SkullStripped", signal == "clean"),
+            "FNIT": {"Registration": registration, "RegisteredSpheres": sphere_info,
+                     "RegistrationDetails": registration_details,
+                     "RegistrationQC": f"bids::{qc_report.relative_to(paths.root).as_posix()}",
+                     "SourceT1w": source_label, "ReconAllSource": str(source), "Signal": signal,
+                     "VolumeProcessing": {key: space[key] for key in (
+                         "TemporalFiltering", "IntensityNormalization", "Interpolation",
+                         "SliceTimingCorrection", "SusceptibilityCorrection",
+                     ) if key in space},
+                     "Projection": "fMRIPrep-style T1w cortex + MNI subcortex",
+                     "StandardSpace": space["StandardSpace"],
+                     "StandardTemplateSHA256": template_hash,
+                     "StandardTemplateIdentity": space["StandardTemplateIdentity"],
+                     "TimingSeconds": timing, "Coverage": coverage, "Geometry": identity,
+                     "SurfaceAssetsSHA256": {"LeftROI": _sha256(left_roi), "RightROI": _sha256(right_roi),
+                                              "HCPdseg": _sha256(dseg)}},
+        }
+        for path, json_path in zip(final_data, final_sidecars):
             item = dict(details)
-            item["Density"] = ("32,492 vertices per hemisphere" if path != paths.dtseries
-                               else "91,282 grayordinates; 32,492 fsLR vertices per hemisphere")
             if path == paths.dtseries:
-                item["SpatialReference"] = {
-                    "VolumeReference": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym_res-02_T1w.nii.gz",
-                    "CIFTI_STRUCTURE_CORTEX_LEFT": BASE_URL + MESH + "L.sphere.32k_fs_LR.surf.gii",
-                    "CIFTI_STRUCTURE_CORTEX_RIGHT": BASE_URL + MESH + "R.sphere.32k_fs_LR.surf.gii",
-                }
+                item.update(fmriprep_cifti_metadata())
             else:
                 hemi = "L" if path == paths.left else "R"
-                item["SpatialReference"] = BASE_URL + MESH + f"{hemi}.sphere.32k_fs_LR.surf.gii"
-            write_json(sidecar(path), item)
-    return FMRISurfaceResult(paths.left, paths.right, paths.dtseries,
-                             sidecar(paths.dtseries), timing)
+                item.update(Density="32,492 vertices per hemisphere",
+                            SpatialReference=BASE_URL + MESH + f"{hemi}.sphere.32k_fs_LR.surf.gii")
+            write_json(publish / json_path.name, item)
+        write_json(publish / qc_report.name, {
+            "Sources": details["Sources"], "Registration": registration,
+            "RegisteredSpheres": sphere_info, "Geometry": identity,
+            "MSM": registration_qc,
+            "Coverage": coverage, "TimingSeconds": timing,
+        })
+        for hemisphere, destination in zip(("L", "R"), sphere_sidecars):
+            write_json(publish / destination.name, {
+                "Sources": [f"bids:raw:{source_label}"], "Registration": registration,
+                "Geometry": identity, **sphere_info[hemisphere],
+            })
+        _publish_projection(publish, paths.func_dir, tuple(path.name for path in final_outputs), overwrite)
+    return FMRISurfaceResult(paths.left, paths.right, paths.dtseries, sidecar(paths.dtseries),
+                             timing, qc_report, sphere_paths)

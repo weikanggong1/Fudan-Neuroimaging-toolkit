@@ -1,0 +1,244 @@
+{
+  "schema_version": 1,
+  "scope": "Fixed-input projection and assembly only: installed fMRIPrep 25.2.4 init_bold_fsLR_resampling_wf followed by init_bold_grayords_wf. Supplied volumes, white/pial/actual midthickness, cortex masks, area surfaces and registration spheres are held common. No geometry preparation, MSM estimation, motion, BBR or T1-to-MNI estimation is validated by this run. This is not an independent raw-BIDS fMRIPrep end-to-end comparison.",
+  "validation_complete": true,
+  "packages": {
+    "fmriprep": "25.2.4",
+    "smriprep": "0.19.2",
+    "niworkflows": "1.14.4",
+    "nibabel": "5.3.2",
+    "templateflow": "25.0.4",
+    "nipype": "1.10.0",
+    "numpy": "2.2.6"
+  },
+  "installed_source_sha256": {
+    "fmriprep/workflows/bold/resampling.py": "aa7c6f3b7da700ce745504dd8402805a8970f26fde7c43fff2936d8bf3a0db03",
+    "niworkflows/interfaces/cifti.py": "1c243989bdb1ff9ffdc040b48932dfe408cd23427681a79fb004fc9ccec162b1"
+  },
+  "reference_workbench": {
+    "sha256": "e5e34c7f44fd057d9bb38592a0c173887bbaf0058040fc9cfaa92b69fe01fe52",
+    "version": "Connectome Workbench\nType: Command Line Application\nVersion: 2.0.1\nQt Compiled Version: 6.8.2\nQt Runtime Version: 6.8.3\nCommit: 77852c0c616b467915b06330c94db3238214c406\nCommit Date: 2025-03-10 11:51:55 -0400\nCompiler: x86_64-conda-linux-gnu-c++ (/home/conda/feedstock_root/build_artifacts/connectome-workbench-split_1741622047586/_build_env/bin)\nCompiler Version: 13.3.0\nCompiled Debug: NO\nOperating System: Linux\nCompiled with OpenMP: YES"
+  },
+  "reference_script_sha256": "6ae91bfd7dadd3fc0668bf171586b6e096932c9e4b7cd3606a55c4185e9bc8c9",
+  "signal": "preproc",
+  "sphere_kind": "initialization_control",
+  "registration_estimated_here": false,
+  "projection_inputs_sha256": {
+    "bold_file": "2c48692eee34f18988b6bb519ef96dd588d87930afd8efee7bbf37c8926d35bf",
+    "bold_std": "821ffd1676d1060fb3b0321ab9835f55a18f955a303106519c13c6d21de90102",
+    "volume_roi": null,
+    "white": [
+      "133abc3d4bef4f79ebe452412de74c5e2662910f6210fc2b045f8c9e94ced839",
+      "0f7c94c2e7c754e5980d1d6a2512ae61c722e077539c70d1b2edc0cb931441a9"
+    ],
+    "pial": [
+      "6e341fe093ec93cc9b87112939c4cf6f5b4129f98068b9a0be1cf1555db5054f",
+      "cbce8a2eb6aac463b21265fa816170b199e94c77fcda41fb7459dbd767ede196"
+    ],
+    "midthickness": [
+      "5d707bc85fb608961ae45e22d409039ba94e2bed1a9f3188ccd58a6aec3d35f1",
+      "433c416714c454ee292c59cc16b6bfdab7ecc5e8df4e7cf05a37960892d2112a"
+    ],
+    "midthickness_fsLR": [
+      "343a46ac62e737385f29b992c1fe43a4352ed47377b525fd3725f581ec7d84bb",
+      "a7a72a5148af14e95ebd7aebbd0ccbad03e200a3413265e20dd435903fdc97d9"
+    ],
+    "sphere_reg_fsLR": [
+      "f58c7849b41883570a68f27da5eeb5319263cd1b35539affe0d06ec6546399b7",
+      "ea79b882b76a3d21e144b5d2d05dab721cd4f6cc9db92f7b962d28a545c671a6"
+    ],
+    "cortex_mask": [
+      "45ab1eb3f317293124c68696cb5ebfa48ea40e1d1132d150ff597c5b4e2d12ab",
+      "f3d473c9f08c87eea840f59d8fb6d0defc2824b4e68a751df0f5907db4664e43"
+    ]
+  },
+  "geometry": {
+    "L": {
+      "native_vertices": 120035,
+      "native_faces": 240066,
+      "fsLR_vertices": 32492,
+      "fsLR_faces": 64980
+    },
+    "R": {
+      "native_vertices": 122950,
+      "native_faces": 245896,
+      "fsLR_vertices": 32492,
+      "fsLR_faces": 64980
+    }
+  },
+  "volume_inputs": {
+    "T1w": {
+      "shape": [
+        59,
+        74,
+        64,
+        490
+      ],
+      "affine": [
+        [
+          2.385999917984009,
+          0.0,
+          0.0,
+          -65.26929473876953
+        ],
+        [
+          0.0,
+          2.385999917984009,
+          0.0,
+          -105.20697021484375
+        ],
+        [
+          0.0,
+          0.0,
+          2.4000000953674316,
+          -100.79496002197266
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "MNI": {
+      "shape": [
+        91,
+        109,
+        91,
+        490
+      ],
+      "affine": [
+        [
+          -2.0,
+          0.0,
+          0.0,
+          90.0
+        ],
+        [
+          0.0,
+          2.0,
+          0.0,
+          -126.0
+        ],
+        [
+          0.0,
+          0.0,
+          2.0,
+          -72.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "actual_template_resources": {
+    "surface_spheres": [
+      {
+        "name": "tpl-fsLR_hemi-L_den-32k_sphere.surf.gii",
+        "sha256": "1846b053f870405466776d004d714cc1da0cec7361761c65a864782dd09f30a8"
+      },
+      {
+        "name": "tpl-fsLR_hemi-R_den-32k_sphere.surf.gii",
+        "sha256": "1a898433a9f1070e4e0435d4db966776ecc3291bfcd444efc7910aeffb91561c"
+      }
+    ],
+    "surface_rois": [
+      {
+        "name": "L.atlasroi.32k_fs_LR.shape.gii",
+        "sha256": "4ac9199dab151ccdc2a35bdddb5bac4f4907da7dfebd90807c09b82e2eb9d512"
+      },
+      {
+        "name": "R.atlasroi.32k_fs_LR.shape.gii",
+        "sha256": "698f46b399f5a89829f83cc697e32dc8841031fbf31ffef75aaaa0c4a16c3015"
+      }
+    ],
+    "cifti_surface_labels": [
+      {
+        "name": "tpl-fsLR_hemi-L_den-32k_desc-nomedialwall_dparc.label.gii",
+        "sha256": "4ac9199dab151ccdc2a35bdddb5bac4f4907da7dfebd90807c09b82e2eb9d512"
+      },
+      {
+        "name": "tpl-fsLR_hemi-R_den-32k_desc-nomedialwall_dparc.label.gii",
+        "sha256": "698f46b399f5a89829f83cc697e32dc8841031fbf31ffef75aaaa0c4a16c3015"
+      }
+    ],
+    "cifti_volume_dseg": [
+      {
+        "name": "tpl-MNI152NLin6Asym_res-02_atlas-HCP_dseg.nii.gz",
+        "sha256": "9c25e63edec37b3876756b749a3f0127511c6b63bf2855060a44007bb479b987"
+      }
+    ]
+  },
+  "templates_unchanged": true,
+  "input_files_unchanged": true,
+  "workflow_wall_seconds": 223.79513583192602,
+  "threads": 8,
+  "execution_plugin": "Linear",
+  "uses_gpu": false,
+  "projection_output_checks": {
+    "L": {
+      "shape": [
+        490,
+        32492
+      ],
+      "all_finite": true,
+      "sha256": "df50ed04f11e7f94541b1dd22a19e002acd4c85f4c4c80a1dd71dbe7311560be"
+    },
+    "R": {
+      "shape": [
+        490,
+        32492
+      ],
+      "all_finite": true,
+      "sha256": "25006be10bc51e1b5d51fc937da2f97c58a778dfd4bfca0170759e5872fcfefd"
+    }
+  },
+  "cifti_output_checks": {
+    "shape": [
+      490,
+      91282
+    ],
+    "all_finite": true,
+    "brain_models": {
+      "CIFTI_STRUCTURE_CORTEX_LEFT": 29696,
+      "CIFTI_STRUCTURE_CORTEX_RIGHT": 29716,
+      "CIFTI_STRUCTURE_ACCUMBENS_LEFT": 135,
+      "CIFTI_STRUCTURE_ACCUMBENS_RIGHT": 140,
+      "CIFTI_STRUCTURE_AMYGDALA_LEFT": 315,
+      "CIFTI_STRUCTURE_AMYGDALA_RIGHT": 332,
+      "CIFTI_STRUCTURE_BRAIN_STEM": 3472,
+      "CIFTI_STRUCTURE_CAUDATE_LEFT": 728,
+      "CIFTI_STRUCTURE_CAUDATE_RIGHT": 755,
+      "CIFTI_STRUCTURE_CEREBELLUM_LEFT": 8709,
+      "CIFTI_STRUCTURE_CEREBELLUM_RIGHT": 9144,
+      "CIFTI_STRUCTURE_DIENCEPHALON_VENTRAL_LEFT": 706,
+      "CIFTI_STRUCTURE_DIENCEPHALON_VENTRAL_RIGHT": 712,
+      "CIFTI_STRUCTURE_HIPPOCAMPUS_LEFT": 764,
+      "CIFTI_STRUCTURE_HIPPOCAMPUS_RIGHT": 795,
+      "CIFTI_STRUCTURE_PALLIDUM_LEFT": 297,
+      "CIFTI_STRUCTURE_PALLIDUM_RIGHT": 260,
+      "CIFTI_STRUCTURE_PUTAMEN_LEFT": 1060,
+      "CIFTI_STRUCTURE_PUTAMEN_RIGHT": 1010,
+      "CIFTI_STRUCTURE_THALAMUS_LEFT": 1288,
+      "CIFTI_STRUCTURE_THALAMUS_RIGHT": 1248
+    },
+    "start_seconds": 0.0,
+    "tr_seconds": 0.735,
+    "sha256": "f99e0f0bec60ce762a1b3949ec26e6b9bfa80e59ceedf86af5352dadd6555235"
+  },
+  "cifti_metadata": {
+    "Density": "91,282 grayordinates corresponding to all of the grey matter sampled at a 2mm average vertex spacing on the surface and as 2mm voxels subcortically",
+    "SpatialReference": {
+      "VolumeReference": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-02_T1w.nii.gz",
+      "CIFTI_STRUCTURE_LEFT_CORTEX": "https://templateflow.s3.amazonaws.com/tpl-fsLR/tpl-fsLR_den-32k_hemi-L_midthickness.surf.gii",
+      "CIFTI_STRUCTURE_RIGHT_CORTEX": "https://templateflow.s3.amazonaws.com/tpl-fsLR/tpl-fsLR_den-32k_hemi-R_midthickness.surf.gii"
+    }
+  },
+  "sif_sha256": "8e32238619053c1f9d1739b26f4afd72df809d914f5a5771707bf5da4b1d0f39",
+  "container_wall_seconds": 315.82098364504054
+}

@@ -101,6 +101,8 @@ def main():
                         help="Volume validation only: keep private FEAT, AROMA, tissue masks and registration files")
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--threads", type=int, default=8)
+    parser.add_argument("--gpu-memory-limit-gb", type=float, default=20)
+    parser.add_argument("--signal", choices=("preproc", "clean"), default="preproc")
     parser.add_argument("--mni-template", type=Path)
     parser.add_argument("--mni-brain-mask", type=Path)
     parser.add_argument("--registration-backend", choices=("synthmorph", "fnirt"), default="synthmorph")
@@ -123,6 +125,11 @@ def main():
     torch.backends.cudnn.allow_tf32 = True
     if cuda:
         torch.cuda.init()
+        total_memory = torch.cuda.get_device_properties(args.device).total_memory
+        if args.gpu_memory_limit_gb <= 0:
+            parser.error("gpu-memory-limit-gb must be positive")
+        torch.cuda.set_per_process_memory_fraction(
+            min(1.0, args.gpu_memory_limit_gb * 1e9 / total_memory), args.device)
         torch.cuda.reset_peak_memory_stats(args.device)
     inputs = locate_bids_inputs(args.bids_root, subject=args.subject)
     if len(inputs.t1w_images) != 1:
@@ -264,6 +271,7 @@ def main():
             recon_all=args.recon_all, hcp_assets_dir=args.hcp_assets_dir,
             wb_command=args.wb_command, device=args.device,
             registered_spheres=args.registered_spheres,
+            signal=args.signal,
         )
     if cuda:
         torch.cuda.synchronize(args.device)
@@ -282,6 +290,10 @@ def main():
             raise ValueError("empty MNI mask")
         checks = {"clean_native": check_native_volume(result.clean_native, inputs),
                   "clean_mni": check_volume(result.clean_mni, template, mask),
+                  "preproc_t1w": check_volume(result.preproc_t1w),
+                  "preproc_mni": check_volume(result.preproc_mni, template),
+                  "motion_pull_sha256": sha256(result.motion_pull),
+                  "mni_pull_sha256": sha256(result.mni_pull),
                   "mask_voxels": int(mask.sum()), "mask_sha256": sha256(result.mask_mni),
                   "bbr_matrix_finite_4x4": bool(np.loadtxt(result.bbr_matrix).shape == (4, 4)
                                                and np.isfinite(np.loadtxt(result.bbr_matrix)).all())}
@@ -320,7 +332,7 @@ def main():
                   "brain_models": {name: int(model.size) for name, _, model in
                                    cifti.header.get_axis(1).iter_structures()}}
         algorithm = {"registration": metadata["FNIT"]["Registration"],
-                     "coverage": metadata["FNIT"]["Coverage"]}
+                     "coverage": metadata["FNIT"]["Coverage"], "signal": args.signal}
         if args.registered_spheres:
             algorithm["registration"] = "provided registered spheres; MSMSulc estimation skipped"
             input_hashes["registered_spheres"] = [sha256(p) for p in args.registered_spheres]
@@ -350,6 +362,7 @@ def main():
                               "torch": torch.__version__, "cuda_runtime": torch.version.cuda,
                               "gpu": torch.cuda.get_device_name(args.device) if cuda else None,
                               "cpu_threads": args.threads, "tf32": True,
+                              "gpu_memory_limit_gb": args.gpu_memory_limit_gb,
                               "low_precision_enabled": False},
               "limits": limits + ["Single cold run on a shared H100; not a controlled speed comparison.",
                                   "Hashing and validation occur outside the API timer."],

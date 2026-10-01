@@ -63,8 +63,17 @@ MSMALL_ASSETS = (
 FMRIPREP_ASSETS = (
     ("fmriprep/tpl-MNI152NLin6Asym_res-02_atlas-HCP_dseg.nii.gz",
      "9c25e63edec37b3876756b749a3f0127511c6b63bf2855060a44007bb479b987"),
+    ("fmriprep/tpl-MNI152NLin6Asym_res-02_T1w.nii.gz",
+     "2a814da50173599a857d96246dc057d548072bd6dffa499f75724dbad20792b1"),
+    ("fmriprep/tpl-MNI152NLin6Asym_res-02_desc-brain_mask.nii.gz",
+     "e4e2b284170271afdafe26ac0997b2af5a0f5ddac35e28a7e796b52e8bc5adb1"),
 )
 FMRIPREP_BASE = "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/"
+FMRIPREP_SIZES = {
+    "fmriprep/tpl-MNI152NLin6Asym_res-02_atlas-HCP_dseg.nii.gz": 25762,
+    "fmriprep/tpl-MNI152NLin6Asym_res-02_T1w.nii.gz": 1412252,
+    "fmriprep/tpl-MNI152NLin6Asym_res-02_desc-brain_mask.nii.gz": 28557,
+}
 RELEASE_CHECKSUMS = dict(ASSETS + MSMALL_ASSETS)
 
 
@@ -79,7 +88,10 @@ def _sha256(path: Path) -> str:
 def _install_one(output_dir: Path, relative_path: str, expected_sha256: str,
                  opener=urlopen, base_urls=(RELEASE_BASE, BASE_URL, FALLBACK_URL)) -> Path:
     destination = output_dir / relative_path
+    expected_size = FMRIPREP_SIZES.get(relative_path)
     if destination.exists():
+        if expected_size is not None and destination.stat().st_size != expected_size:
+            raise ValueError(f"size mismatch in existing file: {destination}")
         if _sha256(destination) != expected_sha256:
             raise ValueError(f"SHA-256 mismatch in existing file: {destination}")
         return destination
@@ -102,6 +114,8 @@ def _install_one(output_dir: Path, relative_path: str, expected_sha256: str,
                     temporary = Path(target.name)
                     for chunk in iter(lambda: source.read(1024 * 1024), b""):
                         target.write(chunk)
+            if expected_size is not None and temporary.stat().st_size != expected_size:
+                raise ValueError(f"size mismatch in download: {relative_path}")
             if _sha256(temporary) != expected_sha256:
                 raise ValueError(f"SHA-256 mismatch in download: {relative_path}")
             os.replace(temporary, destination)
@@ -118,7 +132,7 @@ def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, required=True, help="Absolute destination directory")
     parser.add_argument("--msmall", action="store_true", help="Install public MSMAll d40 templates and MSM configuration")
-    parser.add_argument("--fmriprep", action="store_true", help="Install the TemplateFlow HCP dseg for 91k CIFTI")
+    parser.add_argument("--fmriprep", action="store_true", help="Install original TemplateFlow MNI6 T1w, mask and HCP dseg")
     args = parser.parse_args(argv)
     if not args.output_dir.is_absolute():
         parser.error("--output-dir must be an absolute path")

@@ -49,6 +49,12 @@ def test_multiple_bids_runs_reuse_anatomy_and_execute_run_specific_projection(tm
     # the full atlas grid. No official-mask accuracy claim follows from them.
     controlled_module = tmp_path / "controlled_fmri" / "end_to_end.py"
     monkeypatch.setattr(end_to_end, "__file__", str(controlled_module))
+    # A small unit grid substitutes only the fixed-template identity check.
+    monkeypatch.setattr(end_to_end, "_standard_template_identity", lambda path: {
+        "StandardSpace": "MNI152NLin6Asym",
+        "StandardTemplateIdentity": "TemplateFlow:MNI152NLin6Asym:res-02",
+        "StandardTemplateSHA256": "a" * 64,
+    })
     for name in ("csf", "edge", "out"):
         classifier_mask = np.zeros(shape, dtype=np.uint8)
         classifier_mask[0, 0, 0] = 1

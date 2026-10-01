@@ -1,0 +1,39 @@
+{
+  "scope": "synthetic numerical STC unit test; not a real-data benchmark",
+  "fmriprep": "25.2.4",
+  "afni_version": "++ Compile date = Aug 24 2025 {AFNI_25.2.09:linux_ubuntu_16_64_glw_local_shared}",
+  "3dTshift_sha256": "6433f32fdce3deadc5dcff9cf2704247e8632eec39cde5de4f97a513872d7384",
+  "shape": [
+    7,
+    5,
+    8,
+    99
+  ],
+  "TR": 0.8,
+  "tzero": 0.35,
+  "command_args": [
+    "-TR",
+    "0.8s",
+    "-tzero",
+    "0.35",
+    "-tpattern",
+    "@/control/timings.txt",
+    "-prefix",
+    "/control/official.nii.gz",
+    "/control/input.nii.gz"
+  ],
+  "comparisons": {
+    "cpu": {
+      "max_abs": 0.000244140625,
+      "mean_abs": 1.035748118738411e-05,
+      "rmse": 3.375836240593344e-05,
+      "r": 0.9999999999991187
+    },
+    "cuda": {
+      "max_abs": 0.000244140625,
+      "mean_abs": 1.0423536878079176e-05,
+      "rmse": 3.3841857657535e-05,
+      "r": 0.9999999999991146
+    }
+  }
+}

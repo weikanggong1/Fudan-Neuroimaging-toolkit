@@ -1,0 +1,541 @@
+{
+  "schema_version": 1,
+  "scope": "Fixed-input projection and assembly comparison against the installed fMRIPrep 25.2.4 workflows. Both use the same complete preproc volumes, prepared white/pial/actual midthickness, native cortex masks, area surfaces and supplied registration spheres. This comparison does not test geometry preparation, MSM estimation, motion, BBR, MNI estimation or an independent raw-BIDS end-to-end workflow.",
+  "validation_complete": true,
+  "worker_sha256": "52c3fdc8d8cd97ee5cfb635a27d60cb63bca5e28741c607b46a32e43c1cab195",
+  "candidate_source_sha256": {
+    "surface.py": "b5b3c9712dcbaa6e63b93ce690374b25a28ad2f70a7ff22d4fbb36e231df70e2",
+    "surface_fmriprep.py": "754ef46cad516b2ff180301be6fec93048c042f45307efe8254d7fe5a7e6cfcb",
+    "assets_setup.py": "0c2d1452a52203b326fd8b53ee507f46663aef64a420220b68bc681032307fc5"
+  },
+  "candidate_packages": {
+    "torch": "2.5.1",
+    "numpy": "1.26.4",
+    "nibabel": "5.4.2"
+  },
+  "signal": "preproc",
+  "sphere_kind": "initialization_control",
+  "registration_estimated_here": false,
+  "geometry": {
+    "L": {
+      "native_vertices": 120035,
+      "native_faces": 240066,
+      "fsLR_vertices": 32492,
+      "fsLR_faces": 64980
+    },
+    "R": {
+      "native_vertices": 122950,
+      "native_faces": 245896,
+      "fsLR_vertices": 32492,
+      "fsLR_faces": 64980
+    }
+  },
+  "projection_inputs_sha256": {
+    "bold_file": "10a4143160b2b26dd32e94f45bd3ea7850795c1ba3b1408666aed8688a678438",
+    "bold_std": "ca2864f235dc0c7b851b808df38cc0ea8addc85d3b5b446918d8beec3c92265e",
+    "volume_roi": null,
+    "white": [
+      "133abc3d4bef4f79ebe452412de74c5e2662910f6210fc2b045f8c9e94ced839",
+      "0f7c94c2e7c754e5980d1d6a2512ae61c722e077539c70d1b2edc0cb931441a9"
+    ],
+    "pial": [
+      "6e341fe093ec93cc9b87112939c4cf6f5b4129f98068b9a0be1cf1555db5054f",
+      "cbce8a2eb6aac463b21265fa816170b199e94c77fcda41fb7459dbd767ede196"
+    ],
+    "midthickness": [
+      "5d707bc85fb608961ae45e22d409039ba94e2bed1a9f3188ccd58a6aec3d35f1",
+      "433c416714c454ee292c59cc16b6bfdab7ecc5e8df4e7cf05a37960892d2112a"
+    ],
+    "midthickness_fsLR": [
+      "d1ecb56de1ffb73f8c433522f34d0a0f154c24aef29d46cf5b3dafb19f8c6756",
+      "dad30651f73529dc0acb6b41f8078e45c11689669d55539e65711269436abd50"
+    ],
+    "sphere_reg_fsLR": [
+      "f58c7849b41883570a68f27da5eeb5319263cd1b35539affe0d06ec6546399b7",
+      "ea79b882b76a3d21e144b5d2d05dab721cd4f6cc9db92f7b962d28a545c671a6"
+    ],
+    "cortex_mask": [
+      "422413d267449d226906ecfeb9ac06638eac58fc96c6815e613e891c4a2bc263",
+      "76c50a7353a3d0ad9381d580ee2a60a460f4906c8edbe17bd190f47f1e3c4703"
+    ]
+  },
+  "input_files_unchanged": true,
+  "candidate_template_resources": {
+    "surface_spheres": [
+      {
+        "name": "L.sphere.32k_fs_LR.surf.gii",
+        "sha256": "1846b053f870405466776d004d714cc1da0cec7361761c65a864782dd09f30a8"
+      },
+      {
+        "name": "R.sphere.32k_fs_LR.surf.gii",
+        "sha256": "1a898433a9f1070e4e0435d4db966776ecc3291bfcd444efc7910aeffb91561c"
+      }
+    ],
+    "surface_rois": [
+      {
+        "name": "L.atlasroi.32k_fs_LR.shape.gii",
+        "sha256": "4ac9199dab151ccdc2a35bdddb5bac4f4907da7dfebd90807c09b82e2eb9d512"
+      },
+      {
+        "name": "R.atlasroi.32k_fs_LR.shape.gii",
+        "sha256": "698f46b399f5a89829f83cc697e32dc8841031fbf31ffef75aaaa0c4a16c3015"
+      }
+    ],
+    "cifti_volume_dseg": [
+      {
+        "name": "tpl-MNI152NLin6Asym_res-02_atlas-HCP_dseg.nii.gz",
+        "sha256": "9c25e63edec37b3876756b749a3f0127511c6b63bf2855060a44007bb479b987"
+      }
+    ]
+  },
+  "templates_unchanged": true,
+  "actual_reference_template_resources": {
+    "surface_spheres": [
+      {
+        "name": "tpl-fsLR_hemi-L_den-32k_sphere.surf.gii",
+        "sha256": "1846b053f870405466776d004d714cc1da0cec7361761c65a864782dd09f30a8"
+      },
+      {
+        "name": "tpl-fsLR_hemi-R_den-32k_sphere.surf.gii",
+        "sha256": "1a898433a9f1070e4e0435d4db966776ecc3291bfcd444efc7910aeffb91561c"
+      }
+    ],
+    "surface_rois": [
+      {
+        "name": "L.atlasroi.32k_fs_LR.shape.gii",
+        "sha256": "4ac9199dab151ccdc2a35bdddb5bac4f4907da7dfebd90807c09b82e2eb9d512"
+      },
+      {
+        "name": "R.atlasroi.32k_fs_LR.shape.gii",
+        "sha256": "698f46b399f5a89829f83cc697e32dc8841031fbf31ffef75aaaa0c4a16c3015"
+      }
+    ],
+    "cifti_surface_labels": [
+      {
+        "name": "tpl-fsLR_hemi-L_den-32k_desc-nomedialwall_dparc.label.gii",
+        "sha256": "4ac9199dab151ccdc2a35bdddb5bac4f4907da7dfebd90807c09b82e2eb9d512"
+      },
+      {
+        "name": "tpl-fsLR_hemi-R_den-32k_desc-nomedialwall_dparc.label.gii",
+        "sha256": "698f46b399f5a89829f83cc697e32dc8841031fbf31ffef75aaaa0c4a16c3015"
+      }
+    ],
+    "cifti_volume_dseg": [
+      {
+        "name": "tpl-MNI152NLin6Asym_res-02_atlas-HCP_dseg.nii.gz",
+        "sha256": "9c25e63edec37b3876756b749a3f0127511c6b63bf2855060a44007bb479b987"
+      }
+    ]
+  },
+  "template_resource_semantic_comparison": {
+    "surface_spheres": {
+      "L": {
+        "points_exact": true,
+        "triangles_exact": true
+      },
+      "R": {
+        "points_exact": true,
+        "triangles_exact": true
+      }
+    },
+    "surface_rois": {
+      "L": {
+        "retained_vertex_indices_exact": true,
+        "retained_vertices": 29696
+      },
+      "R": {
+        "retained_vertex_indices_exact": true,
+        "retained_vertices": 29716
+      }
+    },
+    "cifti_surface_labels": {
+      "L": {
+        "retained_vertex_indices_exact": true,
+        "retained_vertices": 29696
+      },
+      "R": {
+        "retained_vertex_indices_exact": true,
+        "retained_vertices": 29716
+      }
+    },
+    "cifti_volume_dseg": {
+      "canonical_affine_exact": true,
+      "canonical_labels_exact": true
+    }
+  },
+  "workbench": {
+    "version": "Connectome Workbench\nType: Command Line Application\nVersion: 2.1.0\nQt Compiled Version: 6.11.1\nQt Runtime Version: 6.11.2\nCommit: f724d200fc8a43cd966de6c87ed7d1912c6e42d4\nCommit Date: 2026-08-04 05:42:13 -0400\nCompiler: x86_64-conda-linux-gnu-c++ (/home/conda/feedstock_root/build_artifacts/connectome-workbench-split_1785836626221/_build_env/bin)\nCompiler Version: 14.4.0\nCompiled Debug: NO\nOperating System: Linux\nCompiled with OpenMP: YES",
+    "sha256": "b0944851ba0da729cfd02a854c949207950e2a2f5c91e0bc222332085ae88458",
+    "same_binary_as_oracle": false
+  },
+  "reference_workbench": {
+    "sha256": "e5e34c7f44fd057d9bb38592a0c173887bbaf0058040fc9cfaa92b69fe01fe52",
+    "version": "Connectome Workbench\nType: Command Line Application\nVersion: 2.0.1\nQt Compiled Version: 6.8.2\nQt Runtime Version: 6.8.3\nCommit: 77852c0c616b467915b06330c94db3238214c406\nCommit Date: 2025-03-10 11:51:55 -0400\nCompiler: x86_64-conda-linux-gnu-c++ (/home/conda/feedstock_root/build_artifacts/connectome-workbench-split_1741622047586/_build_env/bin)\nCompiler Version: 13.3.0\nCompiled Debug: NO\nOperating System: Linux\nCompiled with OpenMP: YES"
+  },
+  "candidate_projection_wall_seconds": 216.63823465863243,
+  "candidate_stage_seconds": {
+    "L_ribbon": 27.186428894288838,
+    "L_dilate": 36.44071964966133,
+    "L_native_mask": 17.8003659369424,
+    "L_resample": 9.963693868834525,
+    "L_atlas_mask": 4.665587266907096,
+    "R_ribbon": 27.967409584205598,
+    "R_dilate": 36.2181417462416,
+    "R_native_mask": 17.942877089604735,
+    "R_resample": 10.53983941487968,
+    "R_atlas_mask": 4.726216391194612,
+    "cifti": 21.8424205891788
+  },
+  "reference_workflow_wall_seconds": 214.63915145676583,
+  "threads": 8,
+  "gpu": {
+    "used_for_projection": false,
+    "process_peak_was_reset": false,
+    "name": "NVIDIA H100 PCIe",
+    "limit_gb": 20.0,
+    "allocation_start_gb": 0.0,
+    "allocation_end_gb": 0.0,
+    "process_peak_allocated_gb": 0.0
+  },
+  "comparison": {
+    "L": {
+      "shape": [
+        490,
+        32492
+      ],
+      "values": 15921080,
+      "nonfinite_values": 0,
+      "values_exact": true,
+      "differing_values": 0,
+      "maximum_absolute_error": 0.0,
+      "mean_absolute_error": 0.0,
+      "rmse": 0.0,
+      "relative_rmse": 0.0,
+      "pearson_r": 1.0
+    },
+    "R": {
+      "shape": [
+        490,
+        32492
+      ],
+      "values": 15921080,
+      "nonfinite_values": 0,
+      "values_exact": true,
+      "differing_values": 0,
+      "maximum_absolute_error": 0.0,
+      "mean_absolute_error": 0.0,
+      "rmse": 0.0,
+      "relative_rmse": 0.0,
+      "pearson_r": 1.0
+    },
+    "CIFTI": {
+      "shape": [
+        490,
+        91282
+      ],
+      "time_axis_equal": true,
+      "brain_model_axis_equal": true,
+      "embedded_metadata_equal": true,
+      "start_seconds": 0.0,
+      "tr_seconds": 0.735,
+      "candidate_varying_grayordinates": 91251,
+      "reference_varying_grayordinates": 91251,
+      "values": 44728180,
+      "nonfinite_values": 0,
+      "values_exact": true,
+      "differing_values": 0,
+      "maximum_absolute_error": 0.0,
+      "mean_absolute_error": 0.0,
+      "rmse": 0.0,
+      "relative_rmse": 0.0,
+      "pearson_r": 1.0,
+      "per_structure": {
+        "CIFTI_STRUCTURE_CORTEX_LEFT": {
+          "grayordinates": 29696,
+          "values": 14551040,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_CORTEX_RIGHT": {
+          "grayordinates": 29716,
+          "values": 14560840,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_ACCUMBENS_LEFT": {
+          "grayordinates": 135,
+          "values": 66150,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_ACCUMBENS_RIGHT": {
+          "grayordinates": 140,
+          "values": 68600,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_AMYGDALA_LEFT": {
+          "grayordinates": 315,
+          "values": 154350,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_AMYGDALA_RIGHT": {
+          "grayordinates": 332,
+          "values": 162680,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_BRAIN_STEM": {
+          "grayordinates": 3472,
+          "values": 1701280,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_CAUDATE_LEFT": {
+          "grayordinates": 728,
+          "values": 356720,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_CAUDATE_RIGHT": {
+          "grayordinates": 755,
+          "values": 369950,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_CEREBELLUM_LEFT": {
+          "grayordinates": 8709,
+          "values": 4267410,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_CEREBELLUM_RIGHT": {
+          "grayordinates": 9144,
+          "values": 4480560,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_DIENCEPHALON_VENTRAL_LEFT": {
+          "grayordinates": 706,
+          "values": 345940,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_DIENCEPHALON_VENTRAL_RIGHT": {
+          "grayordinates": 712,
+          "values": 348880,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_HIPPOCAMPUS_LEFT": {
+          "grayordinates": 764,
+          "values": 374360,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_HIPPOCAMPUS_RIGHT": {
+          "grayordinates": 795,
+          "values": 389550,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_PALLIDUM_LEFT": {
+          "grayordinates": 297,
+          "values": 145530,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_PALLIDUM_RIGHT": {
+          "grayordinates": 260,
+          "values": 127400,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_PUTAMEN_LEFT": {
+          "grayordinates": 1060,
+          "values": 519400,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_PUTAMEN_RIGHT": {
+          "grayordinates": 1010,
+          "values": 494900,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_THALAMUS_LEFT": {
+          "grayordinates": 1288,
+          "values": 631120,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_THALAMUS_RIGHT": {
+          "grayordinates": 1248,
+          "values": 611520,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        }
+      }
+    }
+  },
+  "numeric_gate": {
+    "criterion": "Exact equality of all retained float32 GIFTI and CIFTI values",
+    "predeclared_maximum_absolute_error": 0.0,
+    "reason": "The input data, geometry and projection/assembly operators are held common. This strict gate does not waive any observed difference between Workbench builds.",
+    "passed": true
+  },
+  "coverage_report_verified": true,
+  "candidate_coverage": {
+    "frames": 490,
+    "grayordinates": 91282,
+    "varying_grayordinates": 91251,
+    "nonfinite_values": 0,
+    "tr_seconds": 0.735,
+    "timing_seconds": {
+      "L_ribbon": 27.186428894288838,
+      "L_dilate": 36.44071964966133,
+      "L_native_mask": 17.8003659369424,
+      "L_resample": 9.963693868834525,
+      "L_atlas_mask": 4.665587266907096,
+      "R_ribbon": 27.967409584205598,
+      "R_dilate": 36.2181417462416,
+      "R_native_mask": 17.942877089604735,
+      "R_resample": 10.53983941487968,
+      "R_atlas_mask": 4.726216391194612,
+      "cifti": 21.8424205891788
+    }
+  },
+  "cifti_sidecar_metadata_equal": true,
+  "output_sha256": {
+    "L": "37256497e331832f04a3c6286b22e833e0e53478c7670ea62fd6451d69506d5d",
+    "R": "ac73cf469da6f98c86383b4d53d9c40f6a3becb4bda255d3226b4954943aad71",
+    "CIFTI": "ffd3e7076108759a1f3179c38351382ac932be0550ce2766119587a843bc1c5b"
+  }
+}
