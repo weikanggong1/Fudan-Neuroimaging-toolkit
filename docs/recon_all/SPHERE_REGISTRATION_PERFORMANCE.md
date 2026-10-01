@@ -319,7 +319,8 @@ UUID 的 `cuda:0` averaging，float32/TF32，无 autocast 或半精度。
 | sub02 LH，对保存的 1b 精度基线 | 未重测 | 167.211978 s | 同上 | complete |
 | sub02 RH，对保存的 1b 精度基线 | 未重测 | 180.185278 s | 同上 | complete |
 | 加共享 CSR 后 sub01 LH，对保存的 1b 精度基线 | 未重测 | 150.171479 s | 同上 | complete |
-| c248520 从原始 T1 的新整例提速/显存 | — | — | — | pending / not_assessed |
+| c248520 原始T1整例，sub01 GPU | 4972.667 s | 4242.884 s | 同序表面相同，严格137/138；采样14.508 GB | complete；整体等效not_assessed |
+| c248520 原始T1整例，sub02 CPU | 5295.422 s | 5274.884 s | 严格138/138 | complete；整体等效not_assessed |
 
 完整配准阶段时间比为 **2.9843 倍**，减少 334.993856 s（66.49%）。这是
 共享机器上的一次同机阶段配对观察，没有重复轮次或整例加速结论。两份
@@ -422,13 +423,13 @@ cProfile 不能填写成新候选的 CPU/GPU 配对结果。
 | `1b8c36d25a68e253a1e59b6d02114890afa467de` | 旧整例、LH cProfile 与本轮 CPU 配对基线 | 冻结基线 |
 | `764607c` + [GPU 快照](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/gpu_candidate_source_snapshot.json)，归档 `f7691862…` | 实际梯度算子、LH 完整性能配对、其余三侧保存结果回归 | 尚无共享 CSR |
 | `764607c` + [最终快照](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/final_candidate_source_snapshot.json)，归档 `098ccb63…` | 四侧 CSR/法向、LH 完整保存结果回归 | 与 c248520 的相关生产源文件 SHA 相同 |
-| `c24852054f3321c1142b1ae88fa3d2bf68329bb3` | 已提交相同源码及按 recon-all device 选择 averaging | 原始 T1 新整例 pending；不改写以上实际运行版本 |
+| `c24852054f3321c1142b1ae88fa3d2bf68329bb3` | 已提交相同源码及按 recon-all device 选择 averaging | 两例66阶段、138项齐全；GPU墙钟减少14.676%，CPU0.388%；不改写以上阶段实测版本 |
 
 所有具体源码和输入 SHA 见各原始 JSON。当前资源另经
 [运行资源指纹](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/runtime_fingerprints_hotspot_candidate.json)
 复核，权重/资产/候选程序/输入没有哈希不符；这是资源复核，没有证明无预装
 软件的干净部署。整体指标等效标准未获正式确认，阶段严格通过不构成整体
-等效批准，也不能推算新提交的 recon-all 整例时间。
+等效批准。新提交原始T1整例的实际耗时、精度、显存及局部异常见[完整结果](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/WHOLE_RESULTS.md)。
 
 ## 官方调用、原代码与文献
 

@@ -23,7 +23,7 @@
 
 quick sphere 四侧 [配对](quick_sphere_four_pair.json)均通过坐标/面/尾部和全部 trace 回归：sub-01 LH/RH 为 79.449/82.657 → 70.325/74.927 s，sub-02 LH/RH 为 92.659/95.266 → 85.156/85.288 s，单次减少 8.10%–11.48%。
 
-sub-01 CPU 归一化 [配对](normalize_sub01_pair.json)：第一轮 84.645 → 80.945 s，第二轮 94.228 → 90.358 s；最终影像及全部诊断控制图的体素、dtype、shape、仿射完全相同。sub-02 第一轮 84.114 → 80.687 s、第二轮 105.981 → 100.384 s，同样通过所有终图和诊断图回归。新整例提速和整体指标等效尚未测得。
+sub-01 CPU 归一化 [配对](normalize_sub01_pair.json)：第一轮 84.645 → 80.945 s，第二轮 94.228 → 90.358 s；最终影像及全部诊断控制图的体素、dtype、shape、仿射完全相同。sub-02 第一轮 84.114 → 80.687 s、第二轮 105.981 → 100.384 s，同样通过所有终图和诊断图回归。CPU阶段回归不能推算整例提速；现已完成的整例另见[当前结果](WHOLE_RESULTS.md)，整体指标等效仍未判定。
 
 ## 自有 CPU 阶段的加速空间
 
@@ -38,7 +38,7 @@ sub-01 CPU 归一化 [配对](normalize_sub01_pair.json)：第一轮 84.645 → 
 
 MNI 模型当前还生成下游未读取的逆向 DenseWarp，然后按既定语义用独立构建程序求逆。可研究仅省去未消费的后向积分、组合和 D2H；两次 UNet 构成反对称 velocity，不能省略其中一次。此项只有源码定位，没有本轮性能结论。
 
-GPU 测试显式指定 UUID，保留 4 线程、现有 allocator 策略和 TF32 默认，不启用半精度。标量有序平均不涉及 TF32 矩阵算子。外部监测按同次 NVML 查询统计父子进程合计；关闭缓存时 PyTorch 峰值记为 unavailable。共享 CPU/GPU 的单次观察不代表稳定吞吐。
+GPU 测试显式指定 UUID，保留 4 线程、现有 allocator 策略和 TF32 默认，不启用半精度。标量有序平均不涉及 TF32 矩阵算子。外部监测按同次 NVML 查询统计父子进程合计；PyTorch峰值字段是否可用按实际allocator策略判断，不将零值当作零进程显存。共享 CPU/GPU 的单次观察不代表稳定吞吐。
 
 ## 当前时间主要花在哪里
 
@@ -141,7 +141,7 @@ GPU 测试显式指定 UUID，保留 4 线程、现有 allocator 策略和 TF32 
 
 生产代码提交为 `c24852054f3321c1142b1ae88fa3d2bf68329bb3`，工作分支为 `recon-all-hotspots-20261001`。最后 CPU/GPU 共用 [快照](final_candidate_source_snapshot.json)归档 SHA-256 为 `098ccb63a3931a4f749710fb76dd9beb4751f7b8b14c0f130fa922f9698b708e`；18 个源码、测试及脚本文件与提交的 SHA 核对一致，见 [绑定](tested_commit_binding.json)。最后 CSR 接入后的 LH 完整配准重放为 [150.171 s](register_final_csr_sub01_lh.json)，输出与保存轨迹一致；这不是与前一轮 168.824 s 配对的性能比较。
 
-第一次空目录整例因启动器未传已声明的 FS_LICENSE 路径，在 mri_em_register 许可检查失败。保留两例失败报告；补齐启动环境后，从原始 T1 和新的空目录重启 `retry1`，没有复制失败目录中的中间结果。sub-01 为 gpucw1/H100 已初始化 CUDA 的 Python API，sub-02 为 nodecw10 CPU CLI；两者均4线程。配置见 [sub-01](sub01_whole_retry1_config.json)、[sub-02](sub02_whole_retry1_config.json)，使用 [启动器](../run_full_hotspots_launcher.py)及 [只读比较器](../collect_hotspot_whole_comparison.py)。整例还在运行，完成后以包含导入、校验、加载、传输及读写的墙钟判断提速。
+第一次空目录整例因启动器未传已声明的 FS_LICENSE 路径，在 mri_em_register 许可检查失败。保留两例失败报告；补齐启动环境后，从原始 T1 和新的空目录重启 `retry1`，没有复制失败目录中的中间结果。sub-01 为 gpucw1/H100 已初始化 CUDA 的 Python API，sub-02 为 nodecw10 CPU CLI；两者均4线程。配置见 [sub-01](sub01_whole_retry1_config.json)、[sub-02](sub02_whole_retry1_config.json)，使用 [启动器](../run_full_hotspots_launcher.py)及 [只读比较器](../collect_hotspot_whole_comparison.py)。两例均已完成66阶段、138项输出。[当前整例结果](WHOLE_RESULTS.md)采用包含导入、校验、加载、传输及读写的完整命令墙钟：GPU4972.667→4242.884 s（减少14.676%），CPU5295.422→5274.884 s（减少0.388%）。相对优化前GPU严格137/138、CPU138/138；分割与主要脑区统计零差异，唯一GPU统计表头差异见面积累加诊断。GPU同次父子进程采样峰值14.508 GB；整体等效未判定。
 
 [热点来源与自有替代审计](../../../../docs/recon_all/HOTSPOT_ACCELERATION_AUDIT.md)明确区分原生 Conda 程序、自有 CPU/GPU 计算、成熟替代与待补连续验证的实现。输入、11个权重、102个资产和14个候选程序的大小与 SHA 当前复核差异为0；未读取许可证内容、未下载新数据。参考程序哈希沿用已完成记录，本轮未重新运行官方程序；干净隔离环境验收仍未完成。
 

@@ -10,7 +10,7 @@ Python/Numba CPU 移植，保留完整步骤；生产不执行原软件命令。
 
 本页接口对应生产提交 **`c24852054f3321c1142b1ae88fa3d2bf68329bb3`**。
 真实配对实际运行的是下面记录的源码归档，当前 remesh/quick 模块与实测
-归档 SHA 相同。该提交从原始 T1 开始的新整例尚未完成，不预估整例提速。
+归档 SHA 相同。两例从原始T1开始的新整例已完成：GPU命令墙钟减少14.676%，CPU减少0.388%，不能将局部阶段提速等同于整例提速；[完整配对](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/WHOLE_RESULTS.md)保留未修改原生阶段变慢的实测。
 Numba 已在主页 [environment.yml](../../environment.yml) 和
 [pyproject.toml](../../pyproject.toml) 中声明，无新增依赖或半精度。
 
@@ -284,9 +284,9 @@ python validation/recon_all/python_gpu_port/benchmark_cpu_geometry_pair.py \
   `fc4cb44cb9517b17a164e87f68125148cba96005f6911367d297ac9ff308f9d1`，
   quick 模块 SHA `e511ce901f8115cd2cc4d4f4bb8d405dd8891fbb075b8e29dc66bf8d6d4e210b`，
   与实测归档相同，不能把旧归档运行记录重新标成当前提交实测。
-- 标准 sphere 的完整新阶段时间、新提交原始T1整例耗时/显存均待完成。
-  本页两个函数只用CPU，没有新的 GPU 显存测量；完整流程20,000,000,000字节
-  预算须由整例同一时刻父子进程监控验证，不能从CPU子阶段推断。
+- 当前完整整例及所有内部阶段时间见[GPU配对](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/whole/sub01/timing_pair_summary.json)与[CPU配对](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/whole/sub02/timing_pair_summary.json)。
+  本页两个函数只用CPU；完整GPU流程同一时刻父子进程采样峰值14,508,097,536字节，
+  低于20,000,000,000字节预算，但未证明连续峰值。不能从CPU子阶段推断显存。
 
 分别保留执行完成、输出完整性、网格质量、严格阶段复现和整例指标状态。
 目前整体指标等效标准尚未正式确认，阶段完全相同不构成整体等效批准；

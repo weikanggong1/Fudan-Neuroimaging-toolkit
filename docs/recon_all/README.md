@@ -1,6 +1,6 @@
 # 单幅 T1w 的 recon-all 重建
 
-最新阶段优化见 [超过 100 秒阶段的实测与复用](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/README.md)、[原生替代与热点审计](HOTSPOT_ACCELERATION_AUDIT.md)、[CPU 几何优化](CPU_GEOMETRY_PERFORMANCE.md)及[球面配准优化](SPHERE_REGISTRATION_PERFORMANCE.md)。生产源码已固定为 `c248520`，两例从原始 T1 的新整例正在运行；冻结 `1b8c36d` 的整例表仍是优化前基线，新整例结果完成后另行绑定版本。
+最新热点优化的生产代码为 `c248520`，两例已从原始 T1 连续完成66阶段，各138项输出齐全。[当前整例结果](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/WHOLE_RESULTS.md)：GPU完整命令4972.667→4242.884秒，减少14.676%；CPU5295.422→5274.884秒，减少0.388%。相对优化前严格诊断GPU137/138、CPU138/138，分割与主要脑区统计均零差异；GPU唯一表头差异已定位到面积尾差经float32累加和文本舍入放大。GPU采样峰值14.508 GB，连续峰值未验证。官方差异与white/pial穿越仍保留，整体指标等效未判定。热点和具体实现见 [实测与复用](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/README.md)、[原生替代审计](HOTSPOT_ACCELERATION_AUDIT.md)、[CPU 几何](CPU_GEOMETRY_PERFORMANCE.md)及[球面配准](SPHERE_REGISTRATION_PERFORMANCE.md)。
 
 [返回首页](../../README.md) · [安装与原生程序](CONDA_CPP_BUILD.md) · [阶段与官方命令](CONDA_CPP_STAGES.md) · [验收范围](../../validation/recon_all/python_gpu_port/RELEASE_GATES.md)
 
