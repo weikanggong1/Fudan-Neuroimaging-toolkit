@@ -98,7 +98,7 @@ def _normcorr_reduce(reference, values, weights):
 class FSLMotionNormCorr:
     """MCFLIRT 的 1 mm 边界降权 NCC；全部 moving 体素参与，不使用脑掩膜。"""
 
-    def __init__(self, reference, moving, reference_sizes, moving_sizes):
+    def __init__(self, reference, moving, reference_sizes, moving_sizes, *, centre=None):
         self.reference = reference.permute(2, 1, 0).contiguous()
         self.moving = moving.contiguous()
         self.reference_sizes = reference_sizes
@@ -112,15 +112,30 @@ class FSLMotionNormCorr:
         self.xsize = reference.shape[0]
         self.upper = moving.new_tensor([size - 1.0001 for size in moving.shape])
         self.smooth = moving.new_tensor([1.0 / size for size in moving_sizes])
-        self.centre = _centre_of_gravity(moving, np.diag([*moving_sizes, 1.0]))
+        self.centre = (_centre_of_gravity(moving, np.diag([*moving_sizes, 1.0]))
+                       if centre is None else centre)
         self.cost_evaluations = 0
         self.reducer = _normcorr_reduce
+        self.sampler = None
         if self.device.type == "cuda":
             # The fixed small reference grid lets Inductor fuse row-wise
             # scalar accumulation without changing float32 arithmetic.
             self.reducer = torch.compile(_normcorr_reduce, fullgraph=True)
+            try:
+                from ._cost_cuda import FusedMotionSampler
+            except ImportError:
+                # The tensor path remains available without optional Triton.
+                pass
+            else:
+                self.sampler = FusedMotionSampler(self.reference, self.moving, moving_sizes)
 
     def __call__(self, matrix):
+        if self.sampler is not None:
+            coefficients = _fsl_pull_coefficients(
+                matrix, self.moving_sizes, self.reference_sizes, device="cpu").numpy()
+            reference, values, weights = self.sampler.prepare(coefficients)
+            self.cost_evaluations += 1
+            return float(self.reducer(reference, values, weights))
         coefficients = _fsl_pull_coefficients(matrix, self.moving_sizes,
                                              self.reference_sizes, device=self.device)
         # NEWIMAGE starts each row at xmin and then updates coordinates by
@@ -242,6 +257,14 @@ class TorchMCFLIRT:
                       for scale in (8.0, 4.0)}
         matrices = np.repeat(np.eye(4)[None], frame_count, axis=0)
         order = list(range(reference_index + 1, frame_count)) + list(range(reference_index - 1, -1, -1))
+        # Reuse each frame across the 8/4/4 mm stages when its full float32
+        # series fits a conservative cache budget; large inputs stream frames.
+        frame_cache = {}
+        centre_cache = {}
+        cache_frames = False
+        if self.device.type == "cuda":
+            free_bytes, _ = torch.cuda.mem_get_info(self.device)
+            cache_frames = data.nbytes <= min(4 * 1024 ** 3, free_bytes // 4)
         cost_evaluations = 0
         for stage, (scale, tolerance_multiplier) in enumerate(((8.0, .8), (4.0, .8), (4.0, .1))):
             if stage >= stages or not stage_iterations[stage]:
@@ -249,9 +272,15 @@ class TorchMCFLIRT:
             previous = matrices.copy()
             initial = matrices.copy()
             for frame in order:
-                moving = torch.as_tensor(_flip_to_radiological(data[..., frame], image.affine),
-                                         device=self.device)
-                cost = FSLMotionNormCorr(references[scale], moving, (scale,) * 3, sizes)
+                moving = frame_cache.get(frame)
+                if moving is None:
+                    moving = torch.as_tensor(_flip_to_radiological(data[..., frame], image.affine),
+                                             device=self.device)
+                    if cache_frames:
+                        frame_cache[frame] = moving
+                cost = FSLMotionNormCorr(references[scale], moving, (scale,) * 3, sizes,
+                                         centre=centre_cache.get(frame))
+                centre_cache[frame] = cost.centre
                 parameters = fsl_parameters_from_affine(initial[frame], cost.centre)
                 def objective(values):
                     matrix = fsl_affine_from_parameters(torch.as_tensor(values, dtype=torch.float64),
