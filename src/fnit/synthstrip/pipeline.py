@@ -204,8 +204,9 @@ class SynthStrip:
             raise RuntimeError("CUDA was requested but is not available")
         if threads is not None:
             torch.set_num_threads(threads)
-        # Match the executable's convolution backend settings.
-        torch.backends.cudnn.benchmark = True
+        # Fixed algorithm selection avoids cross-process boundary changes
+        # from timing-based autotuning on shared GPUs; retain TF32 below.
+        torch.backends.cudnn.benchmark = False
         torch.backends.cudnn.deterministic = True
         torch.backends.cuda.matmul.allow_tf32 = True
         torch.backends.cudnn.allow_tf32 = True
