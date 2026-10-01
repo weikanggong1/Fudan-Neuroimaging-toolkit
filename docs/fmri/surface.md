@@ -50,6 +50,8 @@ result = fMRISurface_pipeline(
     wb_command="wb_command",                          # Workbench 可执行文件名或绝对路径
     device="cuda:0",                                  # BOLD 重采样与 MSMSulc 的 PyTorch 设备
     registered_spheres=None,                          # 默认运行 FNIT MSMSulc；给 L/R 球面可作固定球面对照
+    msm_config=None,                                  # 默认 HCP 四级配置；也可填 MSMSulcConfig 或官方配置文件
+    msm_execution="optimized",                       # 同一算法的缓存/传输优化；reference 用于执行对照
     goodvoxels=None,                                  # 可选 T1w 网格 3D 掩膜；默认不额外限制体素
     overwrite=False,                                  # 是否覆盖同名最终结果
 )
@@ -70,7 +72,9 @@ print(result.dtseries)  # 91k CIFTI 时间序列
 | `sub-0001_task-rest_hemi-R_space-fsLR_den-32k_desc-clean_bold.func.gii` | 右半球 32k 顶点的 T 帧时间序列。 |
 | `sub-0001_task-rest_space-fsLR_den-91k_desc-clean_bold.dtseries.nii` | 皮层加皮层下的 T×灰质坐标 CIFTI。 |
 
-每个输出旁有 JSON，记录所用 volume 派生文件、TR、配准方法、投影耗时和 CIFTI 覆盖率。volume 的 JSON 可进一步追溯到原始 BIDS BOLD。`FMRISurfaceResult` 返回三条绝对路径、CIFTI JSON 路径和投影分步耗时。
+每个输出旁有 JSON，记录所用 volume 派生文件、TR、配准方法、实际 MSM 配置、执行方式、双侧配准显存/折叠数、投影耗时和 CIFTI 覆盖率。`msmsulc_preparation_and_registration` 单列输入准备与球面估计的时间；提供注册球面时不生成这项计时。volume 的 JSON 可进一步追溯到原始 BIDS BOLD。`FMRISurfaceResult` 返回三条绝对路径、CIFTI JSON 路径和分步耗时。
+
+默认球面遵循 HCP/sMRIPrep 的 `simval=3,2,2,2`、最大迭代数 `50,10,15,15`。`msm_config` 仅在估计球面时使用，不能与 `registered_spheres` 同时指定。独立用法及各配置参数见 [MSMSulc](../msm/README.md)。命令行可加 `--msm-config /absolute/path/MSMSulcStrainFinalconf` 和 `--msm-execution reference` 复测相同科学配置的执行路径。
 
 ## 真实数据 benchmark
 

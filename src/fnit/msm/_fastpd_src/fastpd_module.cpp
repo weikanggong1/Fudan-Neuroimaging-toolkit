@@ -3,6 +3,9 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <cmath>
+#include <limits>
+#include <map>
 #include <cstring>
 #include <exception>
 #include <iostream>
@@ -29,7 +32,6 @@ struct Terms {
     std::unordered_map<std::uint64_t, std::size_t> index;
 
     void add(int first, int second, double coefficient) {
-        if (coefficient == 0.0) return;
         if (first > second) std::swap(first, second);
         const auto key = (std::uint64_t(std::uint32_t(first)) << 32) |
                          std::uint32_t(second);
@@ -46,8 +48,12 @@ struct Terms {
 std::string fuse(const char* face_bytes, const char* cost_bytes,
                  int vertices, int face_count) {
     std::vector<Face> faces(face_count);
-    std::vector<double> cubic(face_count);
     Terms unary, pair, reduced_unary, reduced_pair;
+    // The source creates zero unary terms before adding higher-order cliques.
+    // This also preserves unconnected original variables in the reduction.
+    for (int node = 0; node < vertices; ++node) unary.add(node, node, 0.0);
+    std::vector<std::pair<std::array<int, 3>, double>> cubic;
+    std::map<std::array<int, 3>, std::size_t> cubic_index;
     double constant = 0.0;
     for (int f = 0; f < face_count; ++f) {
         Face& face = faces[f];
@@ -58,28 +64,50 @@ std::string fuse(const char* face_bytes, const char* cost_bytes,
         }
         for (int j = 0; j < 8; ++j)
             std::memcpy(&face.cost[j], cost_bytes + (8*f+j)*sizeof(double), sizeof(double));
-        const auto& c = face.cost;
-        const auto a = face.ids[0], b = face.ids[1], d = face.ids[2];
-        constant += c[0];
-        unary.add(d, d, c[1]-c[0]);
-        unary.add(b, b, c[2]-c[0]);
-        pair.add(b, d, c[3]-c[2]-c[1]+c[0]);
-        unary.add(a, a, c[4]-c[0]);
-        pair.add(a, d, c[5]-c[4]-c[1]+c[0]);
-        pair.add(a, b, c[6]-c[4]-c[2]+c[0]);
-        cubic[f] = c[7]-c[6]-c[5]-c[3]+c[4]+c[2]+c[1]-c[0];
+        // Moebius coefficients, in the reference's ascending energy-table
+        // summation order. Hand-written differences change rounding near ties.
+        for (int bits = 0; bits < 8; ++bits) {
+            double coefficient = 0.0;
+            for (int state = 0; state < 8; ++state) {
+                int sign = 0;
+                if ((~bits & state) == 0) {
+                    unsigned parity = static_cast<unsigned>(bits ^ state);
+                    int odd = 0;
+                    while (parity) { odd ^= parity & 1; parity >>= 1; }
+                    sign = odd ? -1 : 1;
+                }
+                coefficient += face.cost[state] * sign;
+            }
+            if (coefficient == 0.0) continue;
+            if (bits == 0) { constant += coefficient; continue; }
+            std::array<int, 3> variables{};
+            int degree = 0;
+            for (int j = 0; j < 3; ++j)
+                if (bits & (4 >> j)) variables[degree++] = face.ids[j];
+            if (degree == 1) unary.add(variables[0], variables[0], coefficient);
+            else if (degree == 2) pair.add(variables[0], variables[1], coefficient);
+            else {
+                auto found = cubic_index.find(variables);
+                if (found == cubic_index.end()) {
+                    cubic_index[variables] = cubic.size();
+                    cubic.push_back({variables, coefficient});
+                } else cubic[found->second].second += coefficient;
+            }
+        }
     }
 
     int nodes = vertices;
-    for (int f = 0; f < face_count; ++f) {
-        const double c = cubic[f];
-        if (c == 0.0) continue;
+    // Aggregate repeated cubic monomials before introducing their auxiliary
+    // variables, as HOCR does. One variable per input face is not equivalent
+    // to one variable per monomial under approximate FastPD optimization.
+    for (const auto& term : cubic) {
+        const double c = term.second;
         const int extra = nodes++;
-        for (int id : faces[f].ids)
+        for (int id : term.first)
             reduced_pair.add(id, extra, c < 0.0 ? c : -c);
         reduced_unary.add(extra, extra, c < 0.0 ? -2*c : c);
-        if (c > 0.0) {
-            const auto& ids = faces[f].ids;
+        if (c >= 0.0) {
+            const auto& ids = term.first;
             reduced_pair.add(ids[0], ids[1], c);
             reduced_pair.add(ids[0], ids[2], c);
             reduced_pair.add(ids[1], ids[2], c);
@@ -93,12 +121,10 @@ std::string fuse(const char* face_bytes, const char* cost_bytes,
     auto model = std::make_shared<newmeshreg::DiscreteModel>();
     model->AddNode(nodes);
     for (const auto& term : reduced_pair.values)
-        if (term.coefficient != 0.0)
-            model->AddPairwiseTerm(term.first, term.second, 0, 0, 0,
-                                   term.coefficient);
+        model->AddPairwiseTerm(term.first, term.second, 0, 0, 0,
+                               term.coefficient);
     for (const auto& term : reduced_unary.values)
-        if (term.coefficient != 0.0)
-            model->AddUnaryTerm(term.first, 0, term.coefficient);
+        model->AddUnaryTerm(term.first, 0, term.coefficient);
     model->AddUnaryTerm(0, constant, constant);
 
     FPD::FastPD optimizer(model, 5);
@@ -115,23 +141,48 @@ PyObject* optimize(PyObject*, PyObject* args) {
     int vertices;
     if (!PyArg_ParseTuple(args, "y*y*i", &face_buffer, &cost_buffer, &vertices))
         return nullptr;
-    const auto face_count = face_buffer.len / (3*sizeof(std::int32_t));
+    constexpr Py_ssize_t face_width = 3*sizeof(std::int32_t);
+    constexpr Py_ssize_t cost_width = 8*sizeof(double);
+    const Py_ssize_t face_count = face_buffer.len / face_width;
     if (vertices <= 0 || face_buffer.len == 0 ||
-        face_buffer.len % (3*sizeof(std::int32_t)) != 0 ||
-        cost_buffer.len != face_count * 8 * sizeof(double)) {
+        face_buffer.len % face_width != 0 ||
+        face_count > std::numeric_limits<Py_ssize_t>::max()/cost_width ||
+        cost_buffer.len != face_count * cost_width) {
         PyBuffer_Release(&face_buffer);
         PyBuffer_Release(&cost_buffer);
         PyErr_SetString(PyExc_ValueError, "expected sorted int32 faces [F,3] and float64 costs [F,8]");
         return nullptr;
     }
-    const auto* ids = static_cast<const std::int32_t*>(face_buffer.buf);
+    if (face_count > std::numeric_limits<int>::max() ||
+        face_count > std::numeric_limits<int>::max() - vertices) {
+        PyBuffer_Release(&face_buffer);
+        PyBuffer_Release(&cost_buffer);
+        PyErr_SetString(PyExc_ValueError, "too many faces or vertices for FastPD");
+        return nullptr;
+    }
+    // Buffers can start at arbitrary byte offsets. Reading through typed
+    // pointers is undefined on unaligned input, so validation also uses memcpy.
+    const auto* face_data = static_cast<const char*>(face_buffer.buf);
+    const auto* cost_data = static_cast<const char*>(cost_buffer.buf);
     for (Py_ssize_t f = 0; f < face_count; ++f) {
-        if (ids[3*f] < 0 || ids[3*f+2] >= vertices ||
-            !(ids[3*f] < ids[3*f+1] && ids[3*f+1] < ids[3*f+2])) {
+        std::int32_t ids[3];
+        std::memcpy(ids, face_data + f*3*sizeof(std::int32_t), sizeof(ids));
+        if (ids[0] < 0 || ids[2] >= vertices ||
+            !(ids[0] < ids[1] && ids[1] < ids[2])) {
             PyBuffer_Release(&face_buffer);
             PyBuffer_Release(&cost_buffer);
             PyErr_SetString(PyExc_ValueError, "face IDs must be sorted, distinct and in range");
             return nullptr;
+        }
+        for (int state = 0; state < 8; ++state) {
+            double value;
+            std::memcpy(&value, cost_data + (8*f+state)*sizeof(double), sizeof(value));
+            if (!std::isfinite(value)) {
+                PyBuffer_Release(&face_buffer);
+                PyBuffer_Release(&cost_buffer);
+                PyErr_SetString(PyExc_ValueError, "face costs must be finite");
+                return nullptr;
+            }
         }
     }
     PyObject* answer = nullptr;

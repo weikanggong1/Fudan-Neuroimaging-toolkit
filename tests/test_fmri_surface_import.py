@@ -18,12 +18,13 @@ def reject_surfa(name, *args, **kwargs):
 
 builtins.__import__ = reject_surfa
 surface = importlib.import_module("fnit.fmri.surface")
-from fnit import fMRISurface_pipeline
+from fnit import fMRISurface_pipeline, MSMSulcConfig
 from fnit.fmri import (
     SurfaceHemisphere, FMRISurfaceResult, fMRISurface_pipeline,
     prepare_fmriprep_surface_inputs,
 )
 assert callable(fMRISurface_pipeline)
+assert MSMSulcConfig().simval == (3, 2, 2, 2)
 assert SurfaceHemisphere is surface.SurfaceHemisphere
 assert callable(fMRISurface_pipeline)
 assert callable(prepare_fmriprep_surface_inputs)

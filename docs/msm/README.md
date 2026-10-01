@@ -1,6 +1,8 @@
 # FNIT MSMSulc
 
-`fnit.msm` 独立完成双侧脑沟球面配准。`prepare_msmsulc_inputs` 从已有 T1w recon-all 的 `sphere`、`sulc` 和 HCP 参考图生成原生 sulc、旋转球面；`run_msmsulc` 按 162→642→2,562 个控制点逐级优化脑沟相似度和三角形应变，用 HOCR 降阶与 FastPD 选择联合位移，输出原生顶点顺序的注册球面。它不调用 FSL MSM 或 FreeSurfer 命令；准备阶段使用 Connectome Workbench。CUDA 默认允许 TF32。当前只实现 **MSMSulc**，不提供 MSMAll、髓鞘图或 DeDrift。
+`fnit.msm` 独立完成双侧脑沟球面配准。先按 newMSM 的有限差分规则估计刚性初始化，再用 162→642→2,562 个控制点优化脑沟相似度和三角形应变；HOCR 降阶与 FastPD 选择联合位移。输出球面保持原生顶点顺序。运行时不调用官方 MSM 或 FreeSurfer；准备阶段使用 Connectome Workbench。当前功能为 **MSMSulc**。
+
+默认使用 HCP/sMRIPrep 的四级配置：`simval=3,2,2,2`，最大迭代数 `50,10,15,15`。官方 newMSM 将历史仿射相似度值 3 转为 Pearson 2；FNIT 保持该行为。几何、相似度和优化标量使用 float64，写出的 GIFTI 顶点为 float32；没有使用 FP16/BF16。默认优化路径缓存固定几何并合并传输，`execution="reference"` 保留逐块检查供回归对照；二者使用相同的算法和停止条件。
 
 ## 输入与调用
 
@@ -8,7 +10,7 @@
 
 ```python
 from fnit import prepare_fmriprep_surface_inputs
-from fnit.msm import prepare_msmsulc_inputs, run_msmsulc
+from fnit.msm import MSMSulcConfig, prepare_msmsulc_inputs, run_msmsulc
 
 prepared = prepare_fmriprep_surface_inputs(
     subject_dir="/absolute/path/recon-all/sub-0001",  # 已完成 T1w recon-all 的目录
@@ -28,12 +30,35 @@ spheres = run_msmsulc(
     inputs=inputs,                                    # {"L": MSMSulcInputs, "R": MSMSulcInputs}
     output_dir="/absolute/path/work/msm-output",    # 注册球面与 JSON 报告目录
     device="cuda:0",                                 # PyTorch 计算设备，也可为 cpu
+    config=MSMSulcConfig(),                           # 默认 HCP 四级配置，也可填官方配置文件路径
+    execution="optimized",                          # 缓存和合并传输；reference 用于执行方式对照
 )
 print(spheres["L"])  # L.sphere.MSMSulc.native.surf.gii
 print(spheres["R"])  # R.sphere.MSMSulc.native.surf.gii
 ```
 
-`MSMSulcInputs` 每侧包括 `native_sphere`、`rotated_sphere`、`native_sulc`、`reference_sphere`、`reference_sulc`、`affine` 六个绝对路径。`run_msmsulc` 读取旋转球面与两侧脑沟图，返回 `L`/`R` GIFTI 路径；`registration_report.json` 记录仿射角度、逐级控制点/数据点数、位移更新、耗时、显存和折叠修复。球面可传入 `fMRISurface_pipeline(registered_spheres=(spheres["L"], spheres["R"]))` 做固定球面投影对照。独立调用的工作目录是中间文件；最终 fMRI 时间序列由 surface 流程写成 BIDS Derivatives。
+`MSMSulcInputs` 每侧包括 `native_sphere`、`rotated_sphere`、`native_sulc`、`reference_sphere`、`reference_sulc`、`affine` 六个绝对路径，分别保存原生球面、FS→fsLR 旋转球面、原生脑沟图、参考球面、参考脑沟图和初始旋转矩阵。`run_msmsulc` 返回 `{"L": Path, "R": Path}`；每个 `.surf.gii` 含 N×3 顶点坐标及 F×3 三角形索引，可直接用于 Workbench 表面重采样。
+
+`registration_report.json` 记录实际配置、仿射角度、逐级能量、更新数量、停止位置、展开操作、耗时、峰值已分配显存和写出折叠数。球面可传给 `fMRISurface_pipeline(registered_spheres=(spheres["L"], spheres["R"]))` 做固定球面投影对照；使用已注册球面时不再指定 `msm_config`。独立配准输出是工作文件，最终 fMRI 时间序列由 surface 流程写成 BIDS Derivatives。
+
+### 配置参数
+
+下面的四元组依次对应刚性初始化和三个离散阶段。`config=None` 与 `MSMSulcConfig()` 相同；路径输入通过 `MSMSulcConfig.from_file` 读取受支持的官方选项。解析器拒绝改变为 MSMAll、MCMC 等未实现的流程。
+
+| 参数 | 默认值 | 含义 |
+|---|---|---|
+| `simval` | `(3, 2, 2, 2)` | 相似度；1 为 SSD，2 为 Pearson，刚性阶段的 3 按官方行为转为 2。 |
+| `iterations` | `(50, 10, 15, 15)` | 每阶段最大迭代数，离散阶段按官方能量条件提前停止。 |
+| `control_grid` | `(6, 2, 3, 4)` | icosphere 控制网格级别；离散控制点数为 162、642、2,562。 |
+| `sampling_grid` | `(6, 4, 5, 6)` | 位移标签取样网格级别。 |
+| `data_grid` | `(6, 4, 5, 6)` | 脑沟特征网格级别；离散数据点数为 2,562、10,242、40,962。 |
+| `regularization` | `(0, 10, 7.5, 7.5)` | 应变正则项权重。 |
+| `affine_step_size` | `0.01` | 刚性 Euler 更新的初始步长，单位为弧度。 |
+| `affine_gradient_spacing` | `0.5` | 刚性有限差分的初始角度间隔，单位为弧度。 |
+| `shear_modulus` / `bulk_modulus` | `0.4` / `1.6` | 三角形形状与面积应变权重。 |
+| `strain_exponent` / `regularization_exponent` | `2` / `2` | 应变势和正则项的指数。 |
+
+`MSMSulcConfig.ssd_affine()` 只将刚性阶段改为 SSD，即 `(1,2,2,2)`，用于复测采用该配置的参照。比较双方必须使用同一配置。
 
 ## 原版对照命令
 

@@ -109,7 +109,7 @@ def __getattr__(name):
                 'clean_confounds', 'motion_regressors',
                 'SurfaceHemisphere', 'SurfaceProjectionResult',
                 'create_fmriprep_cifti', 'run_fmriprep_surface_projection',
-                'MSMSulcInputs', 'prepare_msmsulc_inputs', 'run_msmsulc',
+                'MSMSulcConfig', 'MSMSulcInputs', 'prepare_msmsulc_inputs', 'run_msmsulc',
                 'FMRISurfaceResult', 'fMRISurface_pipeline',
                 'T1SurfacePair', 'T1SurfaceGeometry', 'T1SurfacePreparation',
                 'prepare_fmriprep_surface_inputs', 'prepare_t1w_surface_geometry'):

@@ -32,6 +32,12 @@ The containing newMSM repository also publishes an MIT license, preserved in
 restriction remains applicable to this component.
 FNIT's triangle-to-quadratic HOCR reduction in `fastpd_module.cpp` is an
 independent implementation. Upstream ELC source is not included.
+`src/fnit/msm/_affine.py`, `_sphere_map.py`, `config.py`, and `msmsulc.py`
+are modified Python/PyTorch implementations of the same pinned newMSM
+MSMSulc geometry, rigid initialization, resampling, label proposals and
+strain objective. The newMSM MIT notice above applies to these source-derived
+parts. Official newMSM binaries and additional upstream test-oracle source
+are not distributed or invoked at runtime.
 
 - `synthstrip/` adapts FreeSurfer's `mri_synthstrip`, by Andrew Hoopes, Jocelyn S. Mora, Adrian V. Dalca, Bruce Fischl, Malte Hoffmann and collaborators. The original implementation already uses PyTorch. Preserve the accompanying FreeSurfer license (`licenses/FreeSurfer.txt`).
 - `synthmorph/pipeline.py` and the image-space workflow adapt FreeSurfer's SynthMorph registration code by Malte Hoffmann and collaborators. Preserve the accompanying FreeSurfer license.
