@@ -755,7 +755,10 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         folder.mkdir(parents=True, exist_ok=True)
     nu0 = mri / "tmp/nu0.mgz"
     from .n4_itk import correct_volume
-    stage("n4", correct_volume, mri / "orig.mgz", nu0, binary=n4_binary[0])
+    n4_profile = subject / "scripts/n4.profile.json"
+    stage("n4", correct_volume, mri / "orig.mgz", nu0, binary=n4_binary[0],
+          reconstruction_threads=1, profile_path=n4_profile)
+    report["n4_runtime"] = json.loads(n4_profile.read_text())
     stage("nu", make_nu, mri / "orig.mgz", nu0,
           initial["talairach_xfm"], mri / "nu.mgz")
     stage("T1_normalize", normalize_t1, mri / "nu.mgz",

@@ -28,6 +28,7 @@ def main() -> None:
     parser.add_argument("--weights-dir", type=Path, required=True)
     parser.add_argument("--assets-dir", type=Path, required=True)
     parser.add_argument("--device", default="cuda:0")
+    parser.add_argument("--native-bin-dir", type=Path)
     parser.add_argument("--threads", type=int, default=4)
     parser.add_argument("--profile-stages", action="store_true")
     parser.add_argument("--cuda-allocator-cache", choices=("auto", "enabled", "disabled"),
@@ -50,12 +51,13 @@ def main() -> None:
     result = run_recon_all_python(
         t1=args.t1, subject_dir=args.subject,
         weights_dir=args.weights_dir, assets_dir=args.assets_dir,
-        device=args.device, threads=args.threads, native_bin_dir=None,
+        device=args.device, threads=args.threads, native_bin_dir=args.native_bin_dir,
         profile_stages=args.profile_stages, cuda_allocator_cache="auto")
     torch.cuda.synchronize(args.device)
     metadata = {"invocation": "initialized CUDA Python API",
                 "cuda_initialized_before_api": True,
                 "device": args.device, "threads": args.threads,
+                "native_bin_dir": str(args.native_bin_dir) if args.native_bin_dir else None,
                 "thread_budget_set_before_cuda": True,
                 "allocator_before_initialization": allocator_before_initialization,
                 "device_uuid": device_uuid,

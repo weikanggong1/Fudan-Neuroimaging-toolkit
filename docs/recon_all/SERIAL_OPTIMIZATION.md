@@ -9,6 +9,15 @@ recon-all-serial-20261001 顺序完成。既有整例绑定 c248520，不能将�
 原始T1 → conform/N4 → SynthStrip/Talairach → SynthSeg → 归一化/GCA → WM/filled
 → MNI辅助/非线性 → 拓扑/remesh → white.preaparc/球面/配准 → white/pial → 指标。
 
+~~~mermaid
+flowchart LR
+  A[Synth GPU与模型生命周期] --> B[归一化有序GPU内核]
+  B --> C[网格与标准球面]
+  C --> D[N4重建与GCA审查]
+  D --> E[white与pial热点]
+  E --> F[原始T1与空目录两例整例验收]
+~~~
+
 开发顺序为全部Synth GPU、归一化、网格/球面/拓扑、N4/GCA、white/pial。
 每阶段固定同输入先回归，最后从原始T1与空目录跑两例整例；冻结检查点不算整例。
 默认TF32，保留已验证FP32例外，不启用半精度。

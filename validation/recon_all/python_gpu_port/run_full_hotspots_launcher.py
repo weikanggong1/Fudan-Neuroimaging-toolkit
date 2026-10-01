@@ -28,6 +28,7 @@ base=[c["python"]]
 if c["invocation"]=="initialized_cuda_api": base += [c["api_script"]]
 else: base += ["-m","fnit.recon_all.native_free"]
 base += [c["input"],c["output"],"--weights-dir",c["weights"],"--assets-dir",c["assets"],"--device",c["device"],"--threads",str(threads),"--profile-stages"]
+if c.get("native_bin_dir"):base += ["--native-bin-dir",c["native_bin_dir"]]
 if c["device"].startswith("cuda"):base += ["--cuda-allocator-cache","disabled"]
 command=base
 if c["device"].startswith("cuda"):command=[c["python"],c["monitor_script"],"--gpu-uuid",c["gpu_uuid"],"--output",str(root/"gpu_monitor"),"--interval","1","--",*base]

@@ -1,6 +1,6 @@
 # N4 偏置场校正：Conda C++ 与 Python 入口
 
-FreeSurfer 8.2 在 recon-all 中通过 `AntsN4BiasFieldCorrectionFs` 将 `orig.mgz` 校正为 `nu0.mgz`。当前 FNIT 用仓库内 [`n4_itk.cpp`](../../tools/n4_itk/n4_itk.cpp) 调用 Conda ITK 5.4.7 的 N4 类，使用 4 倍缩小、四级各 50 次迭代、收敛阈值 0、覆盖全体素的掩膜和单 CPU 线程。NiBabel 包装器处理 MGH/MGZ、几何、uchar 取整和临时文件。不调用 SimpleITK、ANTsPy 或已安装的 FreeSurfer。
+FreeSurfer 8.2 在 recon-all 中通过 `AntsN4BiasFieldCorrectionFs` 将 `orig.mgz` 校正为 `nu0.mgz`。当前 FNIT 用仓库内 [`n4_itk.cpp`](../../tools/n4_itk/n4_itk.cpp) 调用 Conda ITK 5.4.7 的 N4 类，使用 4 倍缩小、四级各 50 次迭代、收敛阈值 0、覆盖全体素的掩膜和单 CPU 线程拟合；空间重建另有可配置线程。NiBabel 包装器处理 MGH/MGZ、几何、uchar 取整和临时文件。不调用 SimpleITK、ANTsPy 或已安装的 FreeSurfer。
 
 ## 安装与编译
 
@@ -16,13 +16,15 @@ bash tools/setup_recon_all_native_conda.sh
 
 ## 输入、输出和调用
 
-`correct_volume(input_file, output_file, *, binary) -> None` 接受：
+`correct_volume(input_file, output_file, *, binary, reconstruction_threads=1, profile_path=None) -> None` 接受：
 
 | 参数 | 含义 |
 | --- | --- |
 | `input_file` | 三维 `.mgh` 或 `.mgz` 原始 T1，通常为 `mri/orig.mgz`。体素转成 float32 后送入 N4。 |
 | `output_file` | 待写入的 uchar 三维 `.mgh` 或 `.mgz`，通常为 `mri/tmp/nu0.mgz`；沿用输入的仿射与头信息。 |
 | `binary` | 本仓库源码经 Conda 编译生成的 `fnit_n4_itk` 可执行文件路径。 |
+| `reconstruction_threads` | 正整数，默认1；只控制全分辨率B样条和逐体素重建，拟合始终1。旧程序不支持时实际仍为1。 |
+| `profile_path` | 默认None；JSON输出路径，保存实际线程及拟合、B样条、逐体素运算、原始读写子时间。旧程序无内部时间时明确记录unavailable。 |
 
 函数返回 `None`；图像写入 `output_file`。输出数据类型为 uint8，维度和仿射与输入相同。MGH 尾部沿用输入，完整文件字节不保证与官方相同。Python 调用：
 
@@ -33,6 +35,8 @@ correct_volume(
     input_file="/data/sub01/mri/orig.mgz",  # 三维原始 T1
     output_file="/data/sub01/mri/tmp/nu0.mgz",  # 输出的 N4 校正图
     binary="/path/to/native-build/bin/fnit_n4_itk",  # Conda 编译程序
+    reconstruction_threads=4,  # 仅独立空间重建，拟合保持单线程
+    profile_path="/data/sub01/scripts/n4.profile.json",  # 实际线程与子段秒数
 )
 ```
 
@@ -42,7 +46,9 @@ correct_volume(
 python -m fnit.recon_all.n4_itk \
   --i /data/sub01/mri/orig.mgz \
   --o /data/sub01/mri/tmp/nu0.mgz \
-  --binary /path/to/native-build/bin/fnit_n4_itk
+  --binary /path/to/native-build/bin/fnit_n4_itk \
+  --reconstruction-threads 4 \
+  --profile /data/sub01/scripts/n4.profile.json
 ```
 
 官方同一子步的参考命令为：
@@ -89,3 +95,21 @@ result = run_input_n4_chain(
 - Fischl B. FreeSurfer. *NeuroImage*. 2012;62(2):774–781. [doi:10.1016/j.neuroimage.2012.01.021](https://doi.org/10.1016/j.neuroimage.2012.01.021)。
 - [FreeSurfer 固定源码提交](https://github.com/freesurfer/freesurfer/tree/d932c45b7941662ea380a05efef580568b98d41a)。
 - [ITK N4 原实现代码库](https://github.com/InsightSoftwareConsortium/ITK)。
+
+
+## 本次串行性能验证
+
+本次源码版本3b5b104：拟合规则保持原值，只允许空间重建并行；同输入比较
+旧程序、新程序1线程与4线程，保留量化前完整float32与uint8结果。
+两例配对正在执行，不将历史107.89秒作为本轮结果。
+实际重建线程与程序支持能力由JSON记录；旧程序兼容路径已由专项测试覆盖。
+不合法线程、非3D MGH、程序缺失、输出字节错误及子进程失败均抛异常。
+构建脚本每次显式CMake配置后禁止Ninja按时间戳自动再配置，解决当前共享
+文件系统时间戳导致的循环；源码/编译器/ITKConfig/程序SHA写build.json。
+主页安装脚本沿用该构建入口，无新依赖。动态库检查仍只是诊断，未完成
+无预装软件的干净环境隔离整例。
+
+GCA生产保留Conda固定源码构建的mri_em_register：已有register_t1调用
+first_em_line_search，只有第一方向搜索，没有完整L-BFGS循环回归。
+不能把这个前缀作为完整程序替换或省略余下迭代。当前整例耗时由新报告记录；
+早期220.34/164.93秒仅用于定位，不作为本轮性能数值。
