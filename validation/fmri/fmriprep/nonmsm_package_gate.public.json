@@ -1,6 +1,7 @@
 {
-  "scope": "Frozen source/package integrity and license presence, not legal approval or benchmark",
-  "source_repository_head": "edb5f6602258a3485b9e7fbe62189c8dc15635a1",
+  "scope": "Immutable source/package integrity and license presence, not legal approval or benchmark",
+  "source_repository_head": "403227684c75ceab2cee41ad6a65f98b9d8795e2",
+  "snapshot_origin": "git archive of the named immutable HEAD commit",
   "builder": "setuptools.build_meta/direct-no-isolation",
   "build_environment": {
     "python": "3.11.16",
@@ -12,17 +13,28 @@
   "runtime_source_unchanged_during_build": true,
   "changed_snapshot_files_during_build": [],
   "added_snapshot_files_during_build": [],
+  "repository_head_after_build": "403227684c75ceab2cee41ad6a65f98b9d8795e2",
   "snapshot_source_unchanged_during_build": true,
-  "repository_head_after_build": "edb5f6602258a3485b9e7fbe62189c8dc15635a1",
+  "tracked_worktree_clean_before_and_after_build": true,
   "matched": true,
-  "wall_seconds": 127.99585004500113,
-  "schema_version": 2,
-  "build_sequence": "clean git-controlled snapshot -> sdist -> fresh unpacked sdist -> wheel",
-  "complete_gate_report_sha256": "f370148636e4db6c4b9a1bdab562f0bfb40a2e458044a2588fc3aeb5c0b3fab3",
-  "wheel_import_gate_report_sha256": "708e3353d2473a31c36af2de13076ac05d0c667399a7d4d5220ff76af2e735cd",
-  "controlled_snapshot_files": 3868,
+  "schema_version": 3,
+  "build_sequence": "clean immutable HEAD git archive -> sdist -> fresh unpacked sdist -> wheel",
+  "snapshot_archive_seconds": 10.287654263011063,
+  "backend_and_integrity_seconds": 40.11206744000083,
+  "complete_gate_report_sha256": "74faa68ce9ed2f76c633592fd55b6b6fa58cc4d731f0086015d2cefefae6ab9e",
+  "wheel_import_gate_report_sha256": "497401f498ee12edd25683d16db0659bc611a64cee6f7ae327c70f5006b2c21b",
+  "committed_blob_gate_report_sha256": "2de81855552a45130328851f886d554ecf1d43e80cbb055b903f3cddd93a4601",
+  "controlled_snapshot_files": 4350,
   "catalogue_hash_encoding": "SHA-256 of UTF-8 JSON with sorted keys and compact separators",
-  "controlled_snapshot_catalogue_sha256": "b91bccc537821197542fd258111bbdefe831556e7a438061a30645c8b53945c8",
+  "controlled_snapshot_catalogue_sha256": "b90e6f1bd464cc3e526a9fb060293bee85c088a666398f435569d06bef0b5c3d",
+  "committed_blob_verification": {
+    "controlled_head_blobs_verified": 4350,
+    "runtime_python_head_blobs_verified": 420,
+    "license_and_notice_head_blobs_verified": 15,
+    "head_git_blobs_match_archive_catalog": true,
+    "untracked_report_files_do_not_affect_this_gate": true
+  },
+  "excluded_snapshot_entries": [],
   "excluded_unapproved_image_names": [
     "fmri_projection_control_490.png",
     "fmri_volume_preproc_3940a72.png"
@@ -35,15 +47,15 @@
   "artifacts": [
     {
       "filename": "fudan_neuroimaging_toolkit-0.16.0.tar.gz",
-      "bytes": 22605217,
-      "sha256": "b8d1c0a5eb4e372571d0cd27161b7fe0baf418fda47f555c59a1778de87508bf",
-      "member_count": 2089,
+      "bytes": 32664759,
+      "sha256": "e852a56f20606d3a8f6cd946e95ad8a22d9230cf7840fc7ac970e1eecafd6e97",
+      "member_count": 2393,
       "prohibited_members": [],
       "blocked_upstream_originals": {},
       "blocked_unapproved_images": {},
       "native_extension_members": [],
-      "runtime_python_files_verified": 425,
-      "runtime_source_catalogue_sha256": "8a89de0f1bf8730acc47274a84f11c6e3f3a58a8c28778de3b324469730d1063",
+      "runtime_python_files_verified": 420,
+      "runtime_source_catalogue_sha256": "0320a4aa4b78f08f9f413e0cc74eda14aa2351da8f752a6ed09810b7b2a2986e",
       "licenses_verified": 15,
       "licenses": {
         "licenses/AFNI-README.copyright.txt": {
@@ -104,23 +116,23 @@
         },
         "THIRD_PARTY_NOTICES.md": {
           "member": "fudan_neuroimaging_toolkit-0.16.0/THIRD_PARTY_NOTICES.md",
-          "sha256": "c895320d6c90cbc88bd62f47db8d16d14a9e8eb2e1a79ee983ee9ee017a95d53"
+          "sha256": "e4efe4f37cd1695d6f2ca6aad93836c049c5fe906c32d92a8165a9235898318d"
         }
       }
     },
     {
       "filename": "fudan_neuroimaging_toolkit-0.16.0-cp311-cp311-linux_x86_64.whl",
-      "bytes": 4407936,
-      "sha256": "0586b936d5e5ffb0b1249fb058fef5f4c7ff37bec6515025bbcedc91513ce410",
-      "member_count": 1196,
+      "bytes": 4410810,
+      "sha256": "8544e1016f74dc6fd81c8055d0c90da5f60f69bc4c27abfe7549cfd660522334",
+      "member_count": 1191,
       "prohibited_members": [],
       "blocked_upstream_originals": {},
       "blocked_unapproved_images": {},
       "native_extension_members": [
         "fnit/msm/_fastpd_native.cpython-311-x86_64-linux-gnu.so"
       ],
-      "runtime_python_files_verified": 425,
-      "runtime_source_catalogue_sha256": "8a89de0f1bf8730acc47274a84f11c6e3f3a58a8c28778de3b324469730d1063",
+      "runtime_python_files_verified": 420,
+      "runtime_source_catalogue_sha256": "0320a4aa4b78f08f9f413e0cc74eda14aa2351da8f752a6ed09810b7b2a2986e",
       "licenses_verified": 15,
       "licenses": {
         "licenses/AFNI-README.copyright.txt": {
@@ -181,7 +193,7 @@
         },
         "THIRD_PARTY_NOTICES.md": {
           "member": "fudan_neuroimaging_toolkit-0.16.0.dist-info/licenses/THIRD_PARTY_NOTICES.md",
-          "sha256": "c895320d6c90cbc88bd62f47db8d16d14a9e8eb2e1a79ee983ee9ee017a95d53"
+          "sha256": "e4efe4f37cd1695d6f2ca6aad93836c049c5fe906c32d92a8165a9235898318d"
         }
       },
       "fresh_wheel_import": {
@@ -203,7 +215,7 @@
   "limits": [
     "This check verifies package/source integrity and required license text presence; it does not replace numerical validation or confer legal approval.",
     "The wheel ABI is Linux x86_64 CPython 3.11. Its native extension was compiled from the freshly unpacked sdist, without reusing a repository binary.",
-    "The controlled source/document snapshot was frozen at the stated commit. This new gate report is written after the build and is not claimed to be embedded in its own checked artifacts.",
+    "The artifact snapshot is the stated immutable source commit. This report and later public API reports are metadata written after the build, and are not claimed to be embedded in their own checked artifacts.",
     "Unapproved individual-derived PNGs, private graymid prototypes and caches, the 11 excluded upstream MSM originals, and prebuilt source binaries were excluded. Existing main source and required notices were retained."
   ]
 }

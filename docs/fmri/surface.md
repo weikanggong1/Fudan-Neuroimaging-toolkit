@@ -261,15 +261,36 @@ sub-0001/func/
 
 将上述成功 API 保留的 14 个 volume、几何、ROI 与面积文件原样交给 fMRIPrep 25.2.4 的 fsLR 重采样和 grayords 工作流。两边逐文件 SHA-256 一致，官方工作流使用 NiWorkflows 1.14.4、Workbench 2.0.1 和 8 个 CPU 线程。
 
-| 对照范围 | 结果 |
-|---|---|
-| 左、右 GIFTI 各 490×32,492 个值 | 全部逐值相等，最大绝对误差、RMSE 和相对 RMSE 均为 0 |
-| CIFTI 490×91,282 个值 | 全部逐值相等，21 个结构逐项误差均为 0 |
-| 时间轴、灰坐标顺序与内嵌 metadata | 全部相同；起点 0 s，TR 0.735 s |
-| 实际信号覆盖 | 两边均为 91,251 个变化坐标与 31 个恒定坐标 |
-| 官方投影与组装工作流墙钟 | **183.835 s**，从已有准备输入开始 |
+| 全部 490 帧数值对照 | 数值个数 | 不同值个数 | 最大绝对误差 / RMSE / relative RMSE |
+|---|---:|---:|---:|
+| 左 fsLR32k GIFTI，490×32,492 | 15,921,080 | 0 | 0 / 0 / 0 |
+| 右 fsLR32k GIFTI，490×32,492 | 15,921,080 | 0 | 0 / 0 / 0 |
+| 91k CIFTI，490×91,282 | 44,728,180 | 0 | 0 / 0 / 0 |
+
+两侧 GIFTI 和 CIFTI 的 Pearson r 均为 1；全部有限。21 个结构、时间轴、灰坐标顺序与内嵌 metadata 相同，起点 0 s、TR 0.735 s；两边均为 91,251 个变化坐标与 31 个恒定坐标。官方投影和组装工作流耗时 **183.835 s**，从已准备输入开始。
 
 该对照核验固定输入下的投影和 CIFTI 组装。FNIT 的 234.313 s 还包含几何准备与最终发布，两个计时范围不同。完整逐值结果见[配对报告](../../validation/fmri/fmriprep/surface_stcoff_ca3df003_projection_paired.public.json)，官方执行、资源与输入校验见[参考报告](../../validation/fmri/fmriprep/reference_projection_stcoff_ca3df003_actual_api.public.json)。配对使用同一套已准备几何与球面；独立原始 BIDS volume 的差异另见[完整 MNI 对照](../../validation/fmri/fmriprep/independent_mni_stcoff_50eb098.public.json)。
+
+### 独立完整流程的范围
+
+固定输入的 0 误差涵盖投影和 CIFTI 组装。独立原始 BIDS 对照完成的是 volume-only：两方各自估计运动、BBR 与 T1→MNI，全部 490 帧共同脑 MNI 时间 r 均值/中位数为 **0.630705 / 0.739228**，RMSE/relative RMSE 为 **1145.306 / 0.139568**。独立完整 surface/CIFTI 没有相应门禁；这一 volume 差异与下面的历史网络图各有独立输入范围。数值和共同 mask 定义见[独立 MNI 对照](../../validation/fmri/fmriprep/independent_mni_stcoff_50eb098.public.json)。
+
+### 已公开脑图：历史 UKB release 的下游网络对照
+
+现有公开 surface 脑图来自上游 `3f8b756`、MS-HBM 推断 `09a0313` 的历史实验：分别给 FNIT clean CIFTI 与同一扫描的 UKB 官方 **FIX/MSMAll release** 运行相同 HCP_40 17-network MS-HBM。图的上下行为左右半球，三列依次为 FNIT 网络标签、官方 release 网络标签、标签不同的位置（红色）。这是下游网络图，不是本次 `ca3df003` 与 fMRIPrep 的 preproc 投影图。
+
+| 图对应的历史指标 | 结果 |
+|---|---:|
+| 完整皮层顶点数 | 59,412 |
+| 网络标签一致率 / 平均 Dice | 0.724365 / 0.717516 |
+| 原时序逐顶点 r 均值 / 中位数 | 0.269508 / 0.246646 |
+| 固定官方标签的 17-network FC 上三角 r | 0.818932 |
+
+官方 release 含 FIX、GDC/B0、MSMAll 和表面 2 mm 平滑；历史 FNIT 用 ICA-AROMA/混杂回归、无 GDC/B0、MSMSulc。图和这些指标衡量处理协议差异后的网络结果，不表示当前固定投影的误差，也不将差异归因到单个步骤。来源和定义见[历史下游报告](../../validation/mshbm/processed_release.md)与[surface 聚合指标](../../validation/mshbm/surface_release_comparison.public.json)。
+
+![已公开历史FNIT clean与UKB FIX MSMAll release的MS-HBM17网络对照](../mshbm/figures/mshbm_surface_release.png)
+
+图的公开来源与 SHA-256 见[脑图清单](../../validation/fmri/fmriprep/published_comparison_figures.public.json)。本轮 fMRIPrep 验证仅公开聚合指标和报告。
 
 ### 契约测试与历史结果
 
@@ -277,7 +298,7 @@ sub-0001/func/
 
 [合并合同门禁](../../validation/fmri/fmriprep/nonmsm_contract_gate.public.json)通过 **248 项、0 skipped**；随后 T1w 来源路径补丁的[局部门禁](../../validation/fmri/fmriprep/surface_source_path_gate.public.json)通过 **42 项、0 skipped**，包含 8 个新路径用例。两次门禁分别保留测试与源码哈希。[发布源码回溯](../../validation/fmri/fmriprep/publication_runtime_provenance.public.json)记录 surface 实测的 103/106 个模块字节一致；另外三个文件是 main 的包入口与 MSM 内部更新，固定球面实验未运行 MSM 估计。
 
-最新 main 的[接口整合检查](../../validation/fmri/fmriprep/latest_main_integration_gate.public.json)另记首轮 142 passed、10 failed、1 skipped：9 项使用的旧原生扩展缺接口，1 项是既有可选 GEMS 模块的导入规则检查；原始失败结果保留。[重编译后复测](../../validation/fmri/fmriprep/latest_main_native_rebuild_gate.public.json)的 10 个节点全部通过（0 failed、0 skipped、17.74 s）：9 个原生接口失败已解决，另一个 CIFTI 节点使用已校验的公开模板通过。首轮 GEMS 全包导入扫描失败仍保留。随后 main 已移除这套旧模块；其公共接口复检另行记录。
+最新 main 的[接口整合检查](../../validation/fmri/fmriprep/latest_main_integration_gate.public.json)另记首轮 142 passed、10 failed、1 skipped：9 项使用的旧原生扩展缺接口，1 项是既有可选 GEMS 模块的导入规则检查；原始失败结果保留。[重编译后复测](../../validation/fmri/fmriprep/latest_main_native_rebuild_gate.public.json)的 10 个节点全部通过（0 failed、0 skipped、17.74 s）：9 个原生接口失败已解决，另一个 CIFTI 节点使用已校验的公开模板通过。首轮 GEMS 全包导入扫描失败仍保留。随后 main 移除旧模块后的[公共接口刷新](../../validation/fmri/fmriprep/latest_main_public_api_refresh_gate.public.json)为 **47 passed、0 failed、0 skipped**，原 GEMS 静态规则也实际通过。
 
 此前 `c3c921cc`/`bac3c395` 的完整测量与固定投影对照保留在[历史 STC 关闭记录](../../validation/fmri/HISTORY_20261001_STCOFF_PREPROC.md)。
 

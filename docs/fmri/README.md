@@ -205,7 +205,7 @@ WM/CSF 概率图投到 EPI 网格时，使用本包 `TorchFLIRT.applyxfm` 的默
 
 [早期 STC 数值报告](../../validation/fmri/fmriprep/stc_control.public.json)为合成信号单元检查。随后用一例真实 88×88×64×490 BOLD 核对全部体素与帧，修复共享 STC 函数中直接计算频率相位、提前将时间加权乘法提升为 double 的差异，改为 AFNI 的 float32 相位递推和乘法后 double 累加。修复后 CPU 输出的 MAE 为 0.0000384、RMSE 为 0.0001475、最大绝对误差为 0.021484；原最大误差门槛 0.01 **仍未通过**，不能称为与 AFNI 严格等价。完整源码和输入/输出哈希、前后误差见[真实 STC 报告](../../validation/fmri/fmriprep/stc_real_full490.public.json)。STC 默认关闭；此显式开启的控制不属于默认完整流程计时。
 
-## 当前完整 volume 实测（源码 `50eb098`，STC 关闭）
+## 完整 volume 实测（快照 `50eb098`，STC 关闭）
 
 本次用冻结源码 `50eb098` 处理一例真实 UKB 88×88×64×490 BOLD，TR 为 0.735 s；默认关闭 STC，未执行 SDC 或 GDC。流程采用当前 TorchMCFLIRT 的 `(1,1,1)` 坐标优化、FAST `execution="fsl"`、SynthMorph 配准和 ICA-AROMA nonaggr，同时保存 preproc 与 clean；clean 另做 WM、CSF 与 24 项运动回归。解剖缓存关闭，PICA 自动估计 95 个成分，37 次迭代收敛，AROMA 标记 39 个噪声成分。
 
@@ -222,7 +222,38 @@ WM/CSF 概率图投到 EPI 网格时，使用本包 `TorchFLIRT.applyxfm` 的默
 
 四份 BOLD 均为有限 float32，保留全部 490 帧与原始 TR；MNI clean 的脑掩膜外为零。环境为共享 H100 PCIe、8 个 CPU 线程、float32/TF32，进程 CUDA 额度为 20 GB。API 与额外验证复制分别计时；这是一次冷运行观测，不推断稳定加速比。配置、逐输出检查、输入及源码 SHA-256 见[本次 volume 报告](../../validation/fmri/fmriprep/fnit_volume_stcoff_50eb098.public.json)。
 
-独立从同一原始 BOLD/T1w 运行 fMRIPrep 25.2.4 后，双方各自估计运动、BBR 和 T1→MNI 变换。在 220,717 个共同脑体素的全部 490 帧中，逐体素时间 r 均值为 **0.630705**、中位数 **0.739228**，相对 RMSE 为 **0.139568**。比较直接使用保存的 float32 强度，没有追加强度拟合、归一化或平滑；完整流程仍有明显差异。完整场误差、独立掩膜、实际输出 flags 和范围见[独立 MNI 对照](../../validation/fmri/fmriprep/independent_mni_stcoff_50eb098.public.json)。固定输入投影的逐值一致性只覆盖其单独验证的阶段。
+### 与独立 fMRIPrep 25.2.4 volume 的对照
+
+两方从同一原始 BOLD 和存档 T1 重建输入开始，分别估计运动、BBR 和 T1→MNI 变换；均关闭 STC/SDC，保留全部 490 帧、TR 0.735 s。官方运行采用已完成的 FreeSurfer 7 升级副本，不重新计入结构升级时间。本次只比较未去噪的 `preproc`。
+
+| 运行范围 | FNIT `50eb098` | fMRIPrep 25.2.4 |
+|---|---|---|
+| T1→MNI 配准 | SynthMorph | ANTs |
+| T1w preproc 网格 | 59×75×64×490 | 57×73×60×490 |
+| MNI preproc 网格 | 91×109×91×490 | 相同 |
+| 实际退出 | 0 | 0 |
+| 墙钟 | 1225.840 s；API 包含 preproc 和额外 clean | 3775.517 s；容器 volume-only 预处理，未请求 MSM/CIFTI |
+
+共享服务器、工作范围和计时边界不同，两次时间不构成稳定加速比。官方参数、实际 TOML、输入 SHA 和输出检查见[完整参考报告](../../validation/fmri/fmriprep/reference_volume_stcoff_no_msm.public.json)。T1w 网格不同，没有直接逐值比较；共同 MNI 网格上的完整 490 帧结果如下。
+
+| 比较域 | 体素数 / 数值个数 | 时间 r 均值 / 中位数 | RMSE / relative RMSE | 最大绝对误差 |
+|---|---:|---:|---:|---:|
+| 完整 MNI 网格 | 902,629 / 442,288,210 | 0.331901 / 0.338287 | 894.752 / 0.205119 | 25,693.808 |
+| 两方功能脑 mask 交集 | 220,717 / 108,151,330 | **0.630705 / 0.739228** | **1145.306 / 0.139568** | 21,406.856 |
+
+双方 mask 为 223,131 / 250,625 体素，两方掩膜 Dice 为 0.931775。时间 r 逐体素计算，排除任一时序标准差 ≤1e-6 的常数体素（本例为 0 个）；relative RMSE 为误差二范数除以官方信号二范数。直接使用保存的 float32 强度，没有拟合尺度、偏移或追加平滑。独立完整流程仍有明显差异，不能据固定投影逐值一致推断整链等价。见[完整独立 MNI 报告](../../validation/fmri/fmriprep/independent_mni_stcoff_50eb098.public.json)。
+
+### 固定官方变换的单次插值控制
+
+另将官方实际输入、运动/BBR/ANTs 变换和目标网格固定，仅核对组合坐标与三次 B 样条采样。表中是 `normalization.py` 的 `268f61b2` 实现与归档依赖快照的独立控制，不重新估计配准，也不作为完整 API 的第二次计时。
+
+| 全部 490 帧控制 | 数值个数 | 最大绝对误差 | RMSE | 实际产物门禁 |
+|---|---:|---:|---:|---|
+| T1w FNIT vs 官方保存产物 | 122,333,400 | 0.000976563 | 8.86e-8 | 通过 |
+| MNI FNIT vs 官方保存产物 | 442,288,210 | 22,930.414 | 33.6142 | 未通过 |
+| MNI FNIT vs 安装源码串行回放 | 442,288,210 | 0.000244141 | 1.46e-8 | 仅串行数值控制通过 |
+
+官方 MNI 保存产物与同参数串行回放在 12 帧有差异，实际产物门禁失败保留；不能用串行结果替换官方产物或断言它是独立流程差异的唯一原因。上面的独立 MNI 表没有剔除这 12 帧。详见[实际节点全帧控制](../../validation/fmri/fmriprep/actual_node_interpolation_full490.public.json)和[回放差异诊断](../../validation/fmri/fmriprep/actual_node_mni_replay_failure.public.json)。
 
 同一份 preproc 随后用于[公开 surface API 与固定输入投影对照](surface.md#实测快照与历史记录)。此前 `c3c921cc`/`bac3c395` 的 STC 关闭测量保留在[历史 OFF 记录](../../validation/fmri/HISTORY_20261001_STCOFF_PREPROC.md)；`3940a72` 开启 STC 的测量保留在[历史 ON 记录](../../validation/fmri/HISTORY_20261001_STCON_PREPROC.md)。
 
@@ -256,9 +287,13 @@ WM/CSF 概率图投到 EPI 网格时，使用本包 `TorchFLIRT.applyxfm` 的默
 
 共享 H100、8 线程，FNIT 默认 TF32；PCA/ICA 的关键计算采用 float64，没有使用 float16。双方从新目录开始、不复用解剖缓存。FNIT API 扣除捕获中间影像的 27.05 s 额外复制；原连续链还包含阶段检查和 MELODIC HTML 输出。时间边界与共享负载不同，本表不据单次值计算稳定加速比。FEAT 占 973.12 s，包含顺序运动估计、最终采样、缩放、高通和阶段输出，尚未单独分离运动函数时间。
 
-图中为同一 2 mm 模板切面：模板、FNIT temporal SD、原软件 temporal SD、逐体素时间 r。两行 SD 共用色阶，没有追加平滑。
+### 已公开脑图：clean FNIRT 与原软件同步骤参照
 
-![源码1eb9c417的完整490帧FNIT与原软件对照](figures/fmri_matched_native.png)
+下图已经公开，来自本节 `1eb9c417` 的 **clean FNIRT** 对照。原软件一侧为 SynthStrip、FSL、ICA-AROMA 连续链；不是 `50eb098` 的 fMRIPrep preproc 对照。四行依次为同一 2 mm MNI 模板、FNIT clean BOLD 时间标准差、原软件 clean BOLD 时间标准差、逐体素 490 帧时间 r。两行 SD 共用色阶，没有追加平滑。
+
+![已公开1eb9c417 clean FNIRT与原SynthStrip FSL ICA-AROMA的490帧对照](figures/fmri_matched_native.png)
+
+图的公开来源与 SHA-256 见[脑图清单](../../validation/fmri/fmriprep/published_comparison_figures.public.json)。本轮 fMRIPrep 验证仅公开聚合指标和报告。
 
 [完整结果、原命令和复测方法](../../validation/fmri/matched_native.md) · [机器可读比较](../../validation/fmri/matched_pipeline.public.json) · [源码/输入/输出独立核对](../../validation/fmri/matched_fnirt_contract.public.json)。这次 clean FNIRT 复测没有重跑 surface 与 MS-HBM，保留各自的日期和输入范围；[验证索引](../../validation/fmri/README.md)明确两类测量边界。
 

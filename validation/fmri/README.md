@@ -39,7 +39,7 @@ FEAT 核心 700.033 s，PICA/AROMA/混杂回归 171.502 s，clean MNI 重采样 
 
 `50eb098` 源码的[完整合同门禁](fmriprep/nonmsm_contract_gate.public.json)为 **248 passed、0 skipped、67.21 s**。后续 `ca3df003` 仅修改 surface 的外部 BIDS 符号链接 T1w 来源选择，由[42 项局部门禁](fmriprep/surface_source_path_gate.public.json)覆盖（0 skipped、10.39 s，新增 8 个用例）；该补丁不改变 volume 数值链。旧 `c3c921c`/`bac3c395` 完整测量移至[STC 关闭历史记录](HISTORY_20261001_STCOFF_PREPROC.md)，旧 204 项合同见[历史门禁](fmriprep/nonmsm_contract_gate_9a383580.public.json)。源码、依赖和许可校验见[打包门禁](fmriprep/nonmsm_package_gate.public.json)。[发布源码回溯](fmriprep/publication_runtime_provenance.public.json)记录 106 个模块的逐文件 SHA、surface 的 103 个一致文件、volume 的 102 个一致文件及后续 main 的实际差异。实际执行提交标识和计时保留，不因清理发布历史而改名。
 
-最新 main 的[接口整合检查](fmriprep/latest_main_integration_gate.public.json)另记首轮 142 passed、10 failed、1 skipped：9 项使用的旧原生扩展缺接口，1 项是既有可选 GEMS 模块的导入规则检查；原始失败结果保留。[重编译后复测](fmriprep/latest_main_native_rebuild_gate.public.json)的 10 个节点全部通过（0 failed、0 skipped、17.74 s）：9 个原生接口失败已解决，另一个 CIFTI 节点使用已校验的公开模板通过。首轮 GEMS 全包导入扫描失败仍保留。随后 main 已移除这套旧模块；其公共接口复检另行记录。
+最新 main 的[接口整合检查](fmriprep/latest_main_integration_gate.public.json)另记首轮 142 passed、10 failed、1 skipped：9 项使用的旧原生扩展缺接口，1 项是既有可选 GEMS 模块的导入规则检查；原始失败结果保留。[重编译后复测](fmriprep/latest_main_native_rebuild_gate.public.json)的 10 个节点全部通过（0 failed、0 skipped、17.74 s）：9 个原生接口失败已解决，另一个 CIFTI 节点使用已校验的公开模板通过。首轮 GEMS 全包导入扫描失败仍保留。随后 main 移除旧模块后的[公共接口刷新](fmriprep/latest_main_public_api_refresh_gate.public.json)为 **47 passed、0 failed、0 skipped**，原 GEMS 静态规则也实际通过。
 
 ## 历史 STC 开启测量
 
@@ -113,7 +113,7 @@ FNIT API 含最终保存为 **1318.04 s**，验证进程为 1372.24 s；原连�
 
 [完整报告与原命令](matched_native.md) · [数值比较](matched_pipeline.public.json) · [FNIT 调用](matched_fnirt_volume.public.json) · [输入/输出及源码核对](matched_fnirt_contract.public.json) · [原连续链](matched_native_pipeline.public.json)。当前结果尚未逐体素等价；固定同一 warp 的清理图 r 均值约 0.9449，固定同一数据仅换 warp 约 0.9935，固定原场 sampler 为 0.999999999921。
 
-![完整490帧当前volume对照](../../docs/fmri/figures/fmri_matched_native.png)
+![已公开1eb9c417 clean FNIRT与原软件的完整490帧对照](../../docs/fmri/figures/fmri_matched_native.png)
 
 
 ## 子函数专项控制
@@ -141,6 +141,12 @@ FNIT 双侧配准冷/热调用为 **201.99 / 198.08 s**，固定 clean volume �
 
 [BBR 与 T1 FNIRT 独立冷/热调用](registration_gpu.current.public.json)使用各自注明的 WM、初始化矩阵、仿射和模板，细节见 [BBR](../../docs/fmri/bbr.md)与 [FNIRT](../../docs/fnirt/README.md)。它们不能替代上面的完整 volume 对照。
 
+
+## 公开脑图与指标来源
+
+功能页展示两张已在 main 公开的脑图：[clean FNIRT 与原软件的 SD/时间相关图](../../docs/fmri/README.md#clean-fnirt-同步骤实测快照源码-1eb9c417)和[历史 UKB release 的表面网络对照](../../docs/fmri/surface.md#已公开脑图历史-ukb-release-的下游网络对照)。前者采用原 SynthStrip/FSL/ICA-AROMA 同步骤参照；后者采用 UKB FIX/MSMAll release 与相同 MS-HBM 模型。各图按自己的输入、版本和处理协议解读。
+
+本轮 fMRIPrep 25.2.4 的 `50eb098`/`ca3df003` 验证公开聚合指标和报告；脑图复用已有公开文件。两张图的字节数、SHA-256、公开 main 提交和对应报告见[公开脑图来源清单](fmriprep/published_comparison_figures.public.json)。
 
 ## 复测
 
