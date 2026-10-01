@@ -150,5 +150,11 @@
     "motion_estimation_preparation_and_output_dtype_cast": "Outer TorchMCFLIRT.run wall minus nested apply_motion_warp wall; includes load/pyramid/frame preparation, fitting, parameter conversion and int32 output cast; not a pure optimizer timer.",
     "remaining_preparation_masks_small_outputs_and_text": "FEAT wall minus other listed non-overlapping components; includes unwrapped mask/CPU operations, initialization, small NIfTI saves and matrix text writes."
   },
-  "counter_nesting": "Optimizer includes cost. Outer MCFLIRT includes final resampling; resampling includes frame sampler; frame sampler includes coordinates/spline-coefficients/cubic interpolation. Nested counters must not be added."
+  "counter_nesting": "Optimizer includes cost. Outer MCFLIRT includes final resampling; resampling includes frame sampler; frame sampler includes coordinates/spline-coefficients/cubic interpolation. Nested counters must not be added.",
+  "gpu_observation_columns": [
+    "physical_index",
+    "utilization_percent",
+    "memory_used_MiB"
+  ],
+  "cuda_memory_statistic": "allocated_bytes and reserved_bytes are process peaks measured by torch.cuda.max_memory_allocated/max_memory_reserved on the selected device"
 }
