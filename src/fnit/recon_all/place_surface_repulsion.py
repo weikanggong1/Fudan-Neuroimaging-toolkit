@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 from numba import njit
 
-from .place_surface_normals import _unit
+from .place_surface_normals import _unit, FaceNormalTopology, ordered_face_csr
 
 
 @njit(cache=True)
@@ -38,41 +38,100 @@ def _original_normals(xyz: np.ndarray, faces: np.ndarray, ids: np.ndarray, corne
     return result
 
 
-def original_vertex_normals(vertices: np.ndarray, triangles: np.ndarray) -> np.ndarray:
-    """Recompute mrisComputeOrigNormal from ordered faces without face ripping."""
+def original_vertex_normals(vertices: np.ndarray, triangles: np.ndarray, *,
+                            topology: FaceNormalTopology | None = None) -> np.ndarray:
+    """原surface法向：同序(N,3)mm坐标/(F,3)面→float32单位法向。
+
+    topology=None；可传同网格整数CSR，仍重算坐标及原定义法向。
+    与current法向不同：累加前不归一化每个面法向，不能互换。
+    非法拓扑抛ValueError，属于mris_place_surface内部步骤，没有独立CLI。
+    """
     xyz = np.asarray(vertices, dtype=np.float32)
+    if xyz.ndim != 2 or xyz.shape[1] != 3:
+        raise ValueError("vertices must have shape (N, 3)")
     faces = np.asarray(triangles, dtype=np.int32)
-    counts = np.bincount(faces.ravel(), minlength=len(xyz))
-    offsets = np.empty(len(xyz) + 1, dtype=np.int32)
-    offsets[0] = 0
-    np.cumsum(counts, out=offsets[1:])
-    ids = np.empty(len(faces) * 3, dtype=np.int32)
-    corners = np.empty_like(ids)
-    cursor = offsets[:-1].copy()
-    for face_id, triangle in enumerate(faces):
-        for corner, vertex in enumerate(triangle):
-            position = cursor[vertex]
-            ids[position] = face_id
-            corners[position] = corner
-            cursor[vertex] += 1
+    if topology is None:
+        offsets, ids, corners = ordered_face_csr(triangles, nvertices=len(xyz))
+    else:
+        topology.validate(triangles, len(xyz))
+        offsets, ids, corners = topology.offsets, topology.face_ids, topology.corners
     return _original_normals(xyz, faces, ids, corners, offsets)
 
 
 def vertex_buckets(current: np.ndarray, original: np.ndarray, ripped: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    """Return original-vertex bucket candidates in source insertion order."""
-    original_key = (np.asarray(original, dtype=np.float32) + np.float32(1000)).astype(np.int32)
-    current_key = (np.asarray(current, dtype=np.float32) + np.float32(1000)).astype(np.int32)
-    buckets: dict[tuple[int, int, int], list[int]] = {}
-    for vertex in range(len(original_key)):
-        if not ripped[vertex]:
-            buckets.setdefault(tuple(original_key[vertex]), []).append(vertex)
-    offsets = np.zeros(len(current_key) + 1, dtype=np.int32)
-    flat: list[int] = []
-    for vertex in range(len(current_key)):
-        if not ripped[vertex]:
-            flat.extend(buckets.get(tuple(current_key[vertex]), ()))
-        offsets[vertex + 1] = len(flat)
-    return offsets, np.asarray(flat, dtype=np.int32)
+    """原候选桶完整接口；三组同N坐标/固定mask→int32 CSR，不截断候选。
+
+    坐标surface RAS/mm；先float32加1000再向零取整，与原规则一致。
+    一次调用建立索引；连续迭代应显式复用OriginalVertexBuckets。
+    当前坐标每次重算键，桶内保持原顶点升序；非法数组抛ValueError。
+    """
+    return OriginalVertexBuckets(original, ripped).query(current)
+
+
+@njit(cache=True)
+def _query_vertex_buckets(current_keys, sorted_keys, vertex_ids, ripped):
+    offsets = np.zeros(len(current_keys) + 1, dtype=np.int32)
+    starts = np.zeros(len(current_keys), dtype=np.int64)
+    for vertex in range(len(current_keys)):
+        offsets[vertex + 1] = offsets[vertex]
+        if ripped[vertex]:
+            continue
+        x, y, z = current_keys[vertex]
+        low, high = 0, len(sorted_keys)
+        while low < high:
+            mid = (low + high) // 2
+            sx, sy, sz = sorted_keys[mid]
+            if sx < x or (sx == x and (sy < y or (sy == y and sz < z))):
+                low = mid + 1
+            else:
+                high = mid
+        starts[vertex] = low
+        stop = low
+        while stop < len(sorted_keys):
+            sx, sy, sz = sorted_keys[stop]
+            if sx != x or sy != y or sz != z:
+                break
+            stop += 1
+        offsets[vertex + 1] += stop - low
+    flat = np.empty(offsets[-1], dtype=np.int32)
+    for vertex in range(len(current_keys)):
+        for entry in range(offsets[vertex], offsets[vertex + 1]):
+            flat[entry] = vertex_ids[starts[vertex] + entry - offsets[vertex]]
+    return offsets, flat
+
+
+class OriginalVertexBuckets:
+    """固定原表面/rip的整数索引；当前几何每次查询，不缓存变化坐标。
+
+    original为float32(N,3)surface RAS/mm，ripped为(N,)布尔mask；
+    两者的索引信息构造时复制并冻结。query(current)同N有限坐标返回
+    offsets(N+1)/candidate_ids(M) int32，桶内原顶点顺序，完整M无上限。
+    原表面或rip改变须新建实例；非法shape/非有限值抛ValueError。
+    属于mris_place_surface内部步骤，无独立官方CLI、设备或精度开关。
+    """
+    def __init__(self, original: np.ndarray, ripped: np.ndarray):
+        xyz = np.asarray(original, dtype=np.float32)
+        if xyz.ndim != 2 or xyz.shape[1] != 3 or not np.isfinite(xyz).all():
+            raise ValueError("original must contain finite (N, 3) coordinates")
+        self.ripped = np.array(ripped, dtype=np.bool_, copy=True)
+        if self.ripped.shape != (len(xyz),):
+            raise ValueError("ripped must have shape (N,)")
+        self.nvertices = len(xyz)
+        keys = (xyz + np.float32(1000)).astype(np.int32)
+        ids = np.flatnonzero(~self.ripped).astype(np.int32)
+        selected = keys[ids]
+        order = np.lexsort((ids, selected[:, 2], selected[:, 1], selected[:, 0]))
+        self.keys, self.ids = selected[order], ids[order]
+        for array in (self.keys, self.ids, self.ripped):
+            array.flags.writeable = False
+
+    def query(self, current: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        """当前同N坐标→完整桶候选CSR；保留向零取整与顶点插入次序。"""
+        xyz = np.asarray(current, dtype=np.float32)
+        if xyz.shape != (self.nvertices, 3) or not np.isfinite(xyz).all():
+            raise ValueError("current must contain finite matching (N, 3) coordinates")
+        keys = (xyz + np.float32(1000)).astype(np.int32)
+        return _query_vertex_buckets(keys, self.keys, self.ids, self.ripped)
 
 
 @njit(cache=True)
