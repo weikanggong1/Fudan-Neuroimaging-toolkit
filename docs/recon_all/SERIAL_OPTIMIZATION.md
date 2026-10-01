@@ -96,3 +96,31 @@ mri_synthmorph、mri_entowm_seg、mri_mcadura_seg、mri_vsinus_seg；
 无新增生产依赖，PyTorch/nibabel/h5py已在主页Conda声明。pytest在隔离testdeps，
 不修改生产环境。干净安装/运行隔离未验证，PATH/ldd不足以宣布通过。
 原实现和文献：[FreeSurfer源码](https://github.com/freesurfer/freesurfer)及上述功能页。
+
+
+## 第二阶段：有序GPU内核与缓冲复用
+
+保留已有normalize_t1/normalize_t1_aseg及控制点规则，优化它们调用的
+voronoi_fill_torch、smooth_bias_torch。公开参数与输出不变：
+前者输入同shape三维source/control，返回同设备float32偏置及levels/controls/wall_seconds；
+后者输入同shape偏置/source/control，sigma默认8体素，返回偏置和核长度/设备/秒数。
+shape错误、空控制点等沿用异常，无近似传播或窗口缩小。
+
+传播一层一个CUDA kernel，按原dz/dy/dx顺序，仅读更早层，边界夹取的重复
+邻居仍计数。距离、稳定索引排序继续使用原SciPy/NumPy实现；排序索引只搬入一次。
+每个浮点和及除法保留float32，不启用FMA融合或半精度。
+平滑每轴一次kernel，按原65项核顺序累加、nearest边界，两份缓冲交替使用，
+控制点原强度恢复不变。CPU显式接口保留原实现。Triton已在主页Conda环境声明。
+
+新增内部ordered_wavefront参数是连续同设备float32 field、int32 distance、
+int64 ordered和CPU层边界；原位返回field。ordered_smoothing输入三维float32
+CUDA偏置及一维同设备核，返回同shape偏置；调用方负责控制点恢复与计时。
+两者属于mri_normalize内部步骤，没有独立官方CLI，不改变空间或TF32配置。
+
+15项专项回归通过，包含边界重复、非连续输入、sigma=1/2/8及逐元素严格相等。
+首例冻结自产输入、同GPU4线程且保留关闭分配缓存时，两轮含加载/传输/读写：
+236.794→45.345秒、257.361→57.177秒。T1/brain与旧版本均零差异体素、
+几何/dtype一致、保存SHA相同。第二例154.839→45.231秒、210.151→63.332秒，同样两张输出零差异、SHA相同。两例是同输入阶段实测，不是整例提速。
+同输入未修改实现打开缓存时45.758/58.844秒，证明分配策略对当前实现开销很大。
+本次保留低显存策略，通过减少临时张量和CUDA启动消除开销。
+关闭缓存的PyTorch统计标为unavailable，不将零值当零显存；NVML报告另列。
