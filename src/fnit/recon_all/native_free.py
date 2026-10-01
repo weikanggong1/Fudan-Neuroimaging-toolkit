@@ -958,20 +958,79 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     最终报告写出/CLI 启动仍由外层命令计时。体积为 conform 网格；表面为
     surface RAS/mm。Numba 请求超过初始线程容量、输入非法或阶段失败抛异常。
     不支持同一进程内多个线程并发更改全局 Torch 线程预算。
+    阶段失败时补记本次线程恢复与公开 API 耗时；恢复失败将已有 complete
+    改为 failed。阶段和恢复同时失败时保留阶段异常，附记恢复错误。
+    失败报告读取/写入错误不遮盖原异常，也不改写先前运行的未变报告。
+    thread_setup_and_restore_seconds 是公开/内部计时差，包含线程设置/恢复
+    及内部末尾报告写出/返回开销，不能视为纯线程操作时间。
     """
     tick = time.perf_counter()
     from .thread_budget import thread_budget
 
-    with thread_budget(threads=threads) as budget:
-        report = _run_recon_all_python(
-            t1=t1, subject_dir=subject_dir, weights_dir=weights_dir, assets_dir=assets_dir,
-            device=device, threads=threads, native_bin_dir=native_bin_dir,
-            profile_stages=profile_stages, cuda_allocator_cache=cuda_allocator_cache)
+    report_path = Path(subject_dir) / "fnit-native-free-run.json"
+
+    def report_version():
+        """返回现有报告的 stat 版本；不存在或不可访问时不读取其内容。"""
+        try:
+            stat = report_path.stat()
+            return stat.st_ino, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns
+        except OSError:
+            return None
+
+    entry_version = report_version()
+    report = budget = pipeline_error = None
+
+    def record_public_timing(value: dict, wall: float) -> None:
+        """更新本次公开入口的秒数/线程记录，最终元数据写出不计入 wall。"""
+        if budget is not None:
+            value["thread_budget"] = budget
+        timing = value.setdefault("timing", {})
+        timing["total_scope"] = (
+            "API entry through validation, thread restoration, loading, transfers "
+            "and output writes; excludes final public metadata write")
+        timing["thread_setup_and_restore_seconds"] = wall - value["total_seconds"]
+        timing["thread_setup_and_restore_scope"] = (
+            "public-wrapper residual including thread setup/restoration and "
+            "internal final report write/return overhead")
+        value["total_seconds"] = wall
+
+    try:
+        with thread_budget(threads=threads) as budget:
+            try:
+                report = _run_recon_all_python(
+                    t1=t1, subject_dir=subject_dir, weights_dir=weights_dir, assets_dir=assets_dir,
+                    device=device, threads=threads, native_bin_dir=native_bin_dir,
+                    profile_stages=profile_stages, cuda_allocator_cache=cuda_allocator_cache)
+            except Exception as error:
+                pipeline_error = error
+                raise
+    except Exception as error:
+        wall = time.perf_counter() - tick
+        original_error = pipeline_error if pipeline_error is not None else error
+        restoration_error = error if pipeline_error is not None and error is not pipeline_error else None
+        try:
+            # 输入校验可能拒绝已有被试目录；不得把以前的报告改成本次失败。
+            if report is None and report_version() != entry_version:
+                report = json.loads(report_path.read_text())
+            if isinstance(report, dict):
+                record_public_timing(report, wall)
+                report.update(status="failed", error=repr(original_error))
+                if pipeline_error is None:
+                    report["failed_stage"] = "thread_budget_restore"
+                else:
+                    report.setdefault("failed_stage", "pipeline")
+                if restoration_error is not None:
+                    report["thread_budget_restoration_error"] = repr(restoration_error)
+                report_path.write_text(json.dumps(report, indent=2))
+        except Exception as metadata_error:
+            if hasattr(original_error, "add_note"):
+                original_error.add_note(f"Public failure metadata could not be saved: {metadata_error!r}")
+        if original_error is not error:
+            raise original_error.with_traceback(original_error.__traceback__) from error
+        raise
     wall = time.perf_counter() - tick
-    report["thread_budget"] = budget
-    report["timing"]["thread_setup_and_restore_seconds"] = wall - report["total_seconds"]
-    report["total_seconds"] = wall
-    (Path(subject_dir) / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
+    record_public_timing(report, wall)
+    report_path.write_text(json.dumps(report, indent=2))
     return report
 
 

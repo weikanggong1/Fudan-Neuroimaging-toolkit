@@ -63,3 +63,31 @@ def test_allocator_selection_before_context(monkeypatch):
     monkeypatch.delenv("PYTORCH_NO_CUDA_MEMORY_CACHING", raising=False)
     assert configure_cuda_allocator("cuda:1")["effective"] == "disabled"
     assert configure_cuda_allocator("cuda:1", "enabled")["effective"] == "enabled"
+
+
+@pytest.mark.parametrize("value", ["1", "0", ""])
+def test_existing_allocator_environment_is_presence_based(monkeypatch, value):
+    monkeypatch.setattr(torch.cuda, "is_initialized", lambda: False)
+    monkeypatch.setenv("PYTORCH_NO_CUDA_MEMORY_CACHING", value)
+    report = configure_cuda_allocator("cuda:1", "auto")
+    assert report["effective"] == "disabled"
+    assert report["torch_stats_known_unavailable"]
+    assert not report["torch_stats_known_valid"]
+    assert report["environment_after_selection"] == value
+
+
+def test_failed_presynchronization_records_current_stage_and_preserves_error(monkeypatch):
+    monkeypatch.setattr(torch.cuda, "is_initialized", lambda: True)
+    monkeypatch.setattr(torch.cuda, "synchronize", Mock(side_effect=RuntimeError("sync-failure")))
+    monkeypatch.setattr(torch.cuda, "max_memory_allocated", Mock(side_effect=RuntimeError("stats-failure")))
+    body = Mock()
+    profiler = StageProfiler(device="cuda:1", synchronize=True,
+        allocator={"torch_stats_known_unavailable": False, "torch_stats_known_valid": True})
+    profiler.last_row = {"name": "previous"}
+    with pytest.raises(RuntimeError, match="sync-failure"):
+        profiler.run("current", body)
+    body.assert_not_called()
+    assert profiler.last_row["name"] == "current"
+    assert "sync-failure" in profiler.last_row["error"]
+    assert profiler.last_row["function_seconds"] == 0
+    assert profiler.last_row["torch_memory_stats_status"] == "failed"

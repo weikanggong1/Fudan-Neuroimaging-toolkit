@@ -103,9 +103,11 @@ def _clip_mean(distances):
 
 def _radius_candidates(query_np, source, target, normal, base_normal,
                        direct, tree, *, reverse=False):
-    """完整空间候选，浮点方向筛选仍在当前 PyTorch 设备上执行。"""
+    """完整空间候选；CPU 查询最多使用调用者 Torch 线程预算内的四个线程。"""
     radius = np.minimum(direct.cpu().numpy().astype(np.float64), 5.0) + 1e-4
-    nearby = tree.query_ball_point(query_np, radius, workers=4, return_sorted=True)
+    nearby = tree.query_ball_point(query_np, radius,
+                                   workers=min(4, torch.get_num_threads()),
+                                   return_sorted=True)
     counts = np.fromiter((len(row) for row in nearby), dtype=np.int64,
                          count=len(nearby))
     offsets = np.empty(len(counts) + 1, dtype=np.int64)
@@ -133,7 +135,9 @@ def thickness_map(white_file: str | Path, pial_file: str | Path,
     surface RAS、单位 mm；output_file 写同顺序 float32 morph 厚度（mm）。
     device 默认 cuda:0，也支持 cpu。每方向保留法向条件、20 跳和 5 mm
     截断，完整查询能影响截断后输出的候选，没有固定最近点数量上限。
-    不改变 TF32 设置或启用半精度。返回顶点数、分步/总秒数和候选数。
+    CPU 空间查询使用 min(4, torch.get_num_threads()) 个线程；调用期间
+    保持调用者线程设置不变。不改变 TF32 设置或启用半精度。返回顶点数、
+    分步/总秒数、候选数和实际空间查询线程预算 kdtree_workers。
     输入不匹配、非有限值、I/O 或设备错误抛异常，不生成近似结果。
     官方命令：mris_place_surface --thickness white pial 20 5 thickness。
     """
@@ -141,6 +145,7 @@ def thickness_map(white_file: str | Path, pial_file: str | Path,
     if gpu:
         torch.cuda.synchronize(device)
     start = time.perf_counter()
+    kdtree_workers = min(4, torch.get_num_threads())
     white_np, white_faces = fs.read_geometry(str(white_file))
     pial_np, pial_faces = fs.read_geometry(str(pial_file))
     if white_np.shape != pial_np.shape or not np.array_equal(white_faces, pial_faces) \
@@ -183,6 +188,7 @@ def thickness_map(white_file: str | Path, pial_file: str | Path,
             "setup_seconds": setup_seconds, "compute_seconds": compute_seconds,
             "total_seconds": time.perf_counter() - start,
             "candidate_pairs": candidate_pairs, "peak_candidate_pairs": peak_candidate_pairs,
+            "kdtree_workers": kdtree_workers,
             "candidate_search": "complete-radius", "radius_guard_mm": 1e-4,
             "maximum_hops": 20, "maximum_direction_thickness_mm": 5.0}
 

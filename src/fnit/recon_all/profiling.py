@@ -46,7 +46,8 @@ def configure_cuda_allocator(device: str, policy: str = "auto") -> dict:
         else:
             os.environ.pop("PYTORCH_NO_CUDA_MEMORY_CACHING", None)
     environment = os.environ.get("PYTORCH_NO_CUDA_MEMORY_CACHING")
-    known_disabled = cuda and not initialized and environment == "1"
+    # PyTorch native allocator checks presence, including "0" and "".
+    known_disabled = cuda and not initialized and environment is not None
     known_enabled = cuda and not initialized and not known_disabled
     return {"requested": policy, "cuda_initialized_at_entry": initialized,
             "environment_at_entry": entry_environment, "environment_after_selection": environment,
@@ -95,29 +96,42 @@ class StageProfiler:
         post = 0.0
         synchronized = False
         error = None
-        if self.synchronize and self._cuda_active():
-            sync_tick = time.perf_counter()
-            torch.cuda.synchronize(self.device)
-            synchronized = True
-            pre = time.perf_counter() - sync_tick
-            if self._memory()["torch_memory_stats_status"] == "available":
-                torch.cuda.reset_peak_memory_stats(self.device)
-        body_tick = time.perf_counter()
+        body = 0.0
+        body_tick = None
         try:
-            value = function(*args, **kwargs)
-            body = time.perf_counter() - body_tick
             if self.synchronize and self._cuda_active():
                 sync_tick = time.perf_counter()
-                torch.cuda.synchronize(self.device)
-                synchronized = True
-                post = time.perf_counter() - sync_tick
+                try:
+                    torch.cuda.synchronize(self.device)
+                    synchronized = True
+                finally:
+                    pre = time.perf_counter() - sync_tick
+                if self._memory()["torch_memory_stats_status"] == "available":
+                    torch.cuda.reset_peak_memory_stats(self.device)
+            body_tick = time.perf_counter()
+            value = function(*args, **kwargs)
+            body = time.perf_counter() - body_tick
+            body_tick = None
+            if self.synchronize and self._cuda_active():
+                sync_tick = time.perf_counter()
+                try:
+                    torch.cuda.synchronize(self.device)
+                    synchronized = True
+                finally:
+                    post = time.perf_counter() - sync_tick
             return value
         except Exception as caught:
-            body = time.perf_counter() - body_tick
+            if body_tick is not None:
+                body = time.perf_counter() - body_tick
             error = repr(caught)
             raise
         finally:
             child_after = resource.getrusage(resource.RUSAGE_CHILDREN)
+            try:
+                memory = self._memory()
+            except Exception as memory_error:
+                memory = {"torch_memory_stats_status": "failed",
+                          "torch_memory_stats_error": repr(memory_error)}
             self.last_row = {"name": name, "seconds": time.perf_counter() - tick,
                              "function_seconds": body,
                              "cuda_pre_sync_seconds": pre, "cuda_post_sync_seconds": post,
@@ -126,6 +140,6 @@ class StageProfiler:
                              "parent_cpu_seconds": time.process_time() - cpu,
                              "child_cpu_seconds": ((child_after.ru_utime + child_after.ru_stime)
                                                    - (child.ru_utime + child.ru_stime)),
-                             **self._memory()}
+                             **memory}
             if error is not None:
                 self.last_row["error"] = error

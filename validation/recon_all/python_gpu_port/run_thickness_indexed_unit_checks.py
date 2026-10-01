@@ -1,4 +1,4 @@
-"""没有 pytest 的主页 Conda 环境：执行六项厚度 CPU 单元语义检查。
+"""没有 pytest 的主页 Conda 环境：执行七项厚度 CPU 单元语义检查。
 
 读取候选源码、冻结原 FNIT 源码及测试源码；通过标准库 AST 选取相同测试
 函数和 patch 上下文执行，不模拟真实数据。输出含输入 SHA-256 的 JSON。
@@ -42,6 +42,7 @@ def main():
              "test_compiled_reachability_checks_all_equal_distance_candidates",
              "test_reachability_workspace_does_not_leak_previous_vertices",
              "test_clip_mean_preserves_existing_float32_conversion",
+             "test_radius_candidates_preserves_values_across_thread_budgets",
              "test_indexed_cpu_matches_existing_folded_surface",
              "test_indexed_search_includes_candidates_beyond_256"]
     selected = [node for node in ast.parse(args.tests.read_text()).body

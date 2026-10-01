@@ -107,6 +107,43 @@ def test_clip_mean_preserves_existing_float32_conversion():
     np.testing.assert_array_equal(stage._clip_mean(distances), old)
 
 
+def test_radius_candidates_preserves_values_across_thread_budgets():
+    from scipy.spatial import cKDTree
+
+    # 真实空间索引包含 400 个非等距点，混合方向及法向拒绝，覆盖超过 256 候选。
+    grid = np.arange(20, dtype=np.float32) * 0.1 - 1
+    x, y = np.meshgrid(grid, grid)
+    target_np = np.column_stack((x.ravel(), y.ravel(),
+                                1 + 0.2 * np.sin(x.ravel() + y.ravel()))).astype(np.float32)
+    target_np[::5, 2] *= -1
+    target_np[0] = [3, 0, 1]
+    query_np = np.array([[0, 0, 0], [.3, 0, 0], [.2, -.2, .1]], dtype=np.float32)
+    source = torch.as_tensor(query_np)
+    target = torch.as_tensor(target_np)
+    normal = torch.zeros_like(target)
+    normal[:, 2] = 1
+    normal[::7, 2] = -1
+    base_normal = torch.tensor([[0., 0., 1.]]).expand_as(source)
+    direct = torch.linalg.vector_norm(target[:len(source)] - source, dim=1)
+    tree = cKDTree(target_np)
+    previous_threads = torch.get_num_threads()
+    try:
+        for reverse in (False, True):
+            torch.set_num_threads(1)
+            single = stage._radius_candidates(query_np, source, target, normal,
+                                              base_normal, direct, tree, reverse=reverse)
+            torch.set_num_threads(4)
+            parallel = stage._radius_candidates(query_np, source, target, normal,
+                                                base_normal, direct, tree, reverse=reverse)
+            assert single[0][1] - single[0][0] > 256
+            assert single[2].any() and (~single[2]).any()
+            assert np.unique(single[3]).size > 256
+            for expected, actual in zip(single, parallel):
+                np.testing.assert_array_equal(actual, expected)
+    finally:
+        torch.set_num_threads(previous_threads)
+
+
 def test_parallel_surfaces_have_unit_thickness(tmp_path):
     white = np.array([[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0]], dtype=np.float32)
     pial = white.copy()
@@ -119,6 +156,7 @@ def test_parallel_surfaces_have_unit_thickness(tmp_path):
     report = thickness_map(white_file, pial_file, output, device="cpu")
     np.testing.assert_allclose(fs.read_morph_data(str(output)), 1, atol=1e-6)
     assert report["vertices"] == 4
+    assert report["kdtree_workers"] == min(4, torch.get_num_threads())
 
 
 def test_rejects_different_white_pial_topology(tmp_path):
