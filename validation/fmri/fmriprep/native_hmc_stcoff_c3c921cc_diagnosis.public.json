@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "scope": "Read-only comparison of retained native-grid HMC resampled 490-frame intermediate images from old FNIT c3c921cc and official fMRIPrep25.2.4. HMC estimators, reference images and interpolation kernels are independently selected. No EPI/T1 or T1/MNI transformation is applied at this stage. Different reference contents limit attribution to estimation error alone.",
+  "signal": "native HMC only, before intensity normalization and denoising",
+  "STC": false,
+  "SDC": false,
+  "frames": 490,
+  "shape": [
+    88,
+    88,
+    64,
+    490
+  ],
+  "candidate_source_revision": "c3c921cc4928c2c01fe4429ebc5da91546a6849b",
+  "reference_fmriprep_version": "25.2.4",
+  "input_sha256": {
+    "raw_bold": "67717caaa823141c6e59d46db52e92deb4419d232ba699c399c69eb8888a0e92",
+    "raw_t1": "762cb85469a27f8c64555252f97130d2ecb964f8c0d8f67e6c245ca7d9aa17f3"
+  },
+  "output_sha256": {
+    "candidate_preproc": "cbe3a4f1cc3dd3bf6f8ec3414b91bb936b052e32492e562f79cf3ad1f34d0773",
+    "reference_preproc": "cc06b7221b894218c3cb6130b0402b4e4fafa6f2cf367866c5e325692ec081c8",
+    "candidate_mask": "67ec5fbf51c85eab71332a3a4360b058e3a657d0b8dcd87e8268fa5f9ef2891d",
+    "reference_mask": "7d990b0e9ebacfb3ca062a51291c7cb27328c71ba2fbcbecfc00190875914d35"
+  },
+  "mask": {
+    "kind": "intersection of independently produced native functional brain masks",
+    "candidate_voxels": 97345,
+    "reference_voxels": 99158,
+    "intersection_voxels": 94631,
+    "union_voxels": 101872,
+    "dice": 0.9631506898113514,
+    "intersection_sha256": "a2daf054db98355dd5207c455766359ec2717e33534e89cbf460fa29af218fe6"
+  },
+  "comparison": {
+    "full_grid": {
+      "values": 242851840,
+      "all_finite": true,
+      "time_varying_in_both_voxels": 495616,
+      "constant_in_either_voxels": 0,
+      "constant_threshold_std": 1e-06,
+      "temporal_pearson_r_mean": 0.9582291683586327,
+      "temporal_pearson_r_median": 0.9776089531737217,
+      "temporal_pearson_r_percentiles": {
+        "5": 0.8729539833700934,
+        "25": 0.956153971800973,
+        "75": 0.9877790078821267,
+        "95": 0.9939992135818625
+      },
+      "maximum_absolute_error": 14415.388381958008,
+      "rmse": 137.6598569336765,
+      "relative_rmse": 0.037175794475735956
+    },
+    "common_brain": {
+      "values": 46369190,
+      "all_finite": true,
+      "time_varying_in_both_voxels": 94631,
+      "constant_in_either_voxels": 0,
+      "constant_threshold_std": 1e-06,
+      "temporal_pearson_r_mean": 0.9545776209755735,
+      "temporal_pearson_r_median": 0.9749129960531436,
+      "temporal_pearson_r_percentiles": {
+        "5": 0.8496195155913391,
+        "25": 0.948686162384537,
+        "75": 0.9863798690860024,
+        "95": 0.9930862664654825
+      },
+      "maximum_absolute_error": 13885.398834228516,
+      "rmse": 247.38323770743347,
+      "relative_rmse": 0.030372384049277737
+    }
+  },
+  "intensity_comparison": "Original float32 output intensities; no scale normalization, regression fit, smoothing or intensity offset adjustment is applied.",
+  "run_flags": {
+    "STC": false,
+    "SDC": false,
+    "dummy_scans": 0,
+    "flags_from_successful_run_reports": true
+  },
+  "time_axis": {
+    "matched_frames": true,
+    "original_TR_seconds": 0.735,
+    "discarded_frames": 0,
+    "intermediate_headers": {
+      "candidate_preproc": {
+        "time_unit": "sec",
+        "fourth_zoom": 0.7350000143051147
+      },
+      "reference_preproc": {
+        "time_unit": "unknown",
+        "fourth_zoom": 0.7350000143051147
+      }
+    },
+    "TR_verified_from_successful_source_run_reports": true
+  },
+  "limits": [
+    "One real run; no accuracy or speed claim over other subjects.",
+    "HMC images use independently estimated motion and different reference contents; this is not a common-transform sampling control.",
+    "Old FNIT HMC estimator is masked Pearson/Adam35-25-15; official MCFLIRT plus cubic grid-constant resampling. Latest merged FNIT MCFLIRT is measured separately.",
+    "Both retained native HMC output images and masks share the same 88x88x64 grid and affine; no new fit or resampling is performed by this observer.",
+    "No denoised clean BOLD is compared with reference preproc.",
+    "FreeSurfer 7 reference upgrade inherited autorecon1; structural timing is reported separately."
+  ],
+  "source_sha256": {
+    "observer": "5d7524d3bfd9592d26f5c41881955396c2e522b88973fc930d73d4d2962403af",
+    "candidate_report": "6f7a63dce645cf1218cd1c72f8820477de042408a2ea4974ebb7ba4b8ddb4064",
+    "reference_report": "14caad7a85ea3863393adbb5cef62d0122bdfa731fea9611aeff3063b3d64f12"
+  },
+  "observer_wall_seconds": 31.94347770884633,
+  "privacy": "Only aggregate statistics, shapes and SHA-256; no images, voxel values, private paths or identifiers."
+}

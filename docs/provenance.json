@@ -61,9 +61,9 @@
       "applywarp": "src/fnit/applywarp/core.py",
       "fnirt_method": "PyTorch port of the FSL FNIRT 2203.0 UKB GM path with basisfield 2203.1, miscmaths 2203.2, newimage 2203.11 and warpfns 2203.0 source references",
       "source_provenance_manifest": "src/fnit/_vendor_fsl/manifest.json",
-      "fsl_flirt_equivalence_status": "\u5f53\u524d\u4fee\u590d\u7248\u5728\u771f\u5b9e b0\u2192T1\u3001T1\u2192MNI152 \u548c\u516c\u5f00 T1w\u2192T1w \u4e0a\u5b8c\u6210\u540c\u8f93\u5165 FSL \u5bf9\u7167\u53ca\u672a\u878d\u5408\u2192\u878d\u5408 gate\u3002b0 \u5bf9\u672c\u8f6e\u4e24\u79cd CPU \u73af\u5883\u7684 FSL RMS \u4e3a 0.00216 / 0.18629 mm\uff1bT1\u2192MNI RMS 0.12624 mm\u3001Pearson 0.9999838\uff1b\u516c\u5f00 T1w RMS 0.01355 mm\u3001Pearson 0.9999965\u3002\u4fdd\u5b58\u77e9\u9635\u3001\u4f53\u7d20\u3001header\u3001cost \u548c\u6c42\u503c\u6b21\u6570\u7684\u6267\u884c gate \u901a\u8fc7\uff1bT1\u2192MNI \u77e9\u9635 RMS \u8f83\u65e7\u7248\u589e\u52a0 0.00355 mm\uff0c\u62a5\u544a\u4fdd\u7559\u8fd9\u9879\u5c0f\u5e45\u9000\u5316\u3002GM CPU 10 \u4f8b\u53ca\u539f\u4e32\u884c H100 4 \u4f8b\u6309\u5b9e\u9645\u5386\u53f2\u6d4b\u91cf\u6e90\u7801\u4fdd\u7559\u3002\u8be6\u89c1 validation/flirt/gpu_batch.current.public.json\uff1b\u6ca1\u6709\u5efa\u7acb\u4e0e FSL \u9010\u77e9\u9635\u6216\u9010\u4f53\u7d20\u7b49\u4ef7\u3002",
-      "fsl_fnirt_equivalence_status": "\u5f53\u524d 1 \u4f8b\u771f\u5b9e FA matched-input \u5bf9\u7167\u56fa\u5b9a\u76f8\u540c input\u3001FMRIB58_FA_1mm\u3001FSL affine \u4e0e Oxford \u4e09\u9636\u6bb5\u914d\u7f6e\u3002coefficient\u3001warped FA\u3001nonlinear Jacobian\u3001\u542b affine Jacobian \u7684 r \u5206\u522b\u4e3a 0.999893\u30010.999203\u30010.999064\u30010.994737\uff1bshape\u3001affine\u3001dtype \u4e0e intent \u5408\u540c\u901a\u8fc7\uff0c\u4f46\u5dee\u5f02\u8d85\u8fc7\u6d6e\u70b9\u8bef\u5dee\uff0cfsl_fnirt_numerically_equivalent \u4ecd\u4e3a false\u3002\u8be6\u89c1 validation/fnirt/report.real.current.json\u3002",
-      "fast_vbm_validation_status": "FastVBM GM \u914d\u51c6\u5df2\u6309 FSL GM \u914d\u7f6e\u5173\u95ed implicit reference/input mask\u3002\u5355\u4f8b\u56fa\u5b9a FSL GM \u8f93\u5165\u7684\u8bca\u65ad\u4e09\u9879 Pearson r \u4e3a 0.996/0.997/0.996\uff1b\u672c\u7248\u539f\u59cb T1w \u5b8c\u6574\u94fe\u590d\u6d4b\u4e3a 0.783/0.733/0.726\uff0ccompute 110.72 s\uff0c\u5cf0\u503c CUDA allocated 12.97 GB\u3002FSL \u7f3a\u5c11\u540c\u8fb9\u754c\u5b8c\u6574\u94fe\u8ba1\u65f6\uff0c\u5c1a\u672a\u5b8c\u6210\u591a\u4f8b\u590d\u6d4b\uff1b\u8be6\u89c1 validation/fast_vbm/README.md\u3002",
+      "fsl_flirt_equivalence_status": "当前修复版在真实 b0→T1、T1→MNI152 和公开 T1w→T1w 上完成同输入 FSL 对照及未融合→融合 gate。b0 对本轮两种 CPU 环境的 FSL RMS 为 0.00216 / 0.18629 mm；T1→MNI RMS 0.12624 mm、Pearson 0.9999838；公开 T1w RMS 0.01355 mm、Pearson 0.9999965。保存矩阵、体素、header、cost 和求值次数的执行 gate 通过；T1→MNI 矩阵 RMS 较旧版增加 0.00355 mm，报告保留这项小幅退化。GM CPU 10 例及原串行 H100 4 例按实际历史测量源码保留。详见 validation/flirt/gpu_batch.current.public.json；没有建立与 FSL 逐矩阵或逐体素等价。",
+      "fsl_fnirt_equivalence_status": "当前 1 例真实 FA matched-input 对照固定相同 input、FMRIB58_FA_1mm、FSL affine 与 Oxford 三阶段配置。coefficient、warped FA、nonlinear Jacobian、含 affine Jacobian 的 r 分别为 0.999893、0.999203、0.999064、0.994737；shape、affine、dtype 与 intent 合同通过，但差异超过浮点误差，fsl_fnirt_numerically_equivalent 仍为 false。详见 validation/fnirt/report.real.current.json。",
+      "fast_vbm_validation_status": "FastVBM GM 配准已按 FSL GM 配置关闭 implicit reference/input mask。单例固定 FSL GM 输入的诊断三项 Pearson r 为 0.996/0.997/0.996；本版原始 T1w 完整链复测为 0.783/0.733/0.726，compute 110.72 s，峰值 CUDA allocated 12.97 GB。FSL 缺少同边界完整链计时，尚未完成多例复测；详见 validation/fast_vbm/README.md。",
       "current_fnirt_matched_validation": "validation/fnirt/report.real.current.json",
       "current_flirt_validation": "validation/flirt/gpu_batch.current.public.json"
     },
@@ -377,7 +377,7 @@
     "warp_contract": "reference-grid relative pull displacement in millimetres along the reference image axes",
     "validation_report": "validation/mmorf/report.public.json",
     "validation_figure": "docs/mmorf/figures/mmorf_fsl_comparison.png",
-    "validation_status": "1 \u4f8b\u771f\u5b9e T1w + FA \u53cc\u6807\u91cf\u548c DTI tensor\uff0c\u56fa\u5b9a\u76f8\u540c affine \u4e0e sampler\uff1awarp r=0.978064\u3001Jacobian r=0.970834\u3001warped T1 r=0.958732\u3001warped FA r=0.983303\u3002\u9ed8\u8ba4 TF32 GPU \u5cf0\u503c 14.30 GB\uff1b\u672a\u8fbe\u5230\u9010\u4f53\u7d20\u6570\u503c\u7b49\u4ef7\u3002",
+    "validation_status": "1 例真实 T1w + FA 双标量和 DTI tensor，固定相同 affine 与 sampler：warp r=0.978064、Jacobian r=0.970834、warped T1 r=0.958732、warped FA r=0.983303。默认 TF32 GPU 峰值 14.30 GB；未达到逐体素数值等价。",
     "numerically_equivalent": false
   },
   "dmri_pipeline_reference": {
@@ -459,5 +459,76 @@
     "tests": "194 scoped registration/pipeline tests and 3 benchmark contract/instrumentation tests passed; fixtures do not replace the real-data report",
     "anatomical_cache": "Content/implementation/environment-keyed subject/session cache; verified outputs, lock and manifest-last. Real cold/hit 41.118/0.07847 s, all artifact hashes unchanged.",
     "benchmark_limitations": "One real processed T1/EPI case, shared H100/CPU, no B0/GDC; cold/warm function timings separated from full CUDA profile and output persistence. Not a new 490-frame full-pipeline or FA/GM validation."
+  },
+  "fmri_surface_reference": {
+    "reference_pipeline": {
+      "repository": "https://github.com/nipreps/fmriprep",
+      "tag": "25.2.4",
+      "pinned_image_record": "validation/fmri/fmriprep/reference_image.public.json",
+      "runtime_dependency": false
+    },
+    "cifti_assembly": {
+      "implementation": "src/fnit/fmri/surface_fmriprep.py",
+      "source": "https://github.com/nipreps/niworkflows/blob/1.14.4/niworkflows/interfaces/cifti.py",
+      "version": "1.14.4",
+      "copyright": "Copyright 2021 The NiPreps Developers",
+      "implementation_type": "Modified direct nibabel/NumPy adaptation of the 91k assembly and metadata rules with additional validation and atomic outputs",
+      "license": "Apache-2.0",
+      "license_file": "licenses/Apache-2.0.txt",
+      "upstream_source_files_distributed": false,
+      "runtime_dependency": false
+    },
+    "timing_metadata": {
+      "implementation": "src/fnit/fmri/timing.py",
+      "source": "https://github.com/nipreps/fmriprep/blob/25.2.4/fmriprep/workflows/bold/outputs.py",
+      "function": "prepare_timing_parameters",
+      "copyright": "Copyright The NiPreps Developers",
+      "implementation_type": "Modified adaptation with explicit output-specific correction status and timing validation",
+      "license": "Apache-2.0",
+      "license_file": "licenses/Apache-2.0.txt",
+      "upstream_source_files_distributed": false
+    },
+    "sampling_reference": {
+      "implementation": "src/fnit/fmri/sampling_reference.py",
+      "implementation_type": "Modified nibabel/NumPy adaptation informed by NiWorkflows and Nilearn grid and header semantics",
+      "sources": [
+        {
+          "url": "https://github.com/nipreps/niworkflows/blob/1.14.4/niworkflows/interfaces/nibabel.py",
+          "version": "1.14.4",
+          "routines": [
+            "GenerateSamplingReference",
+            "_gen_reference"
+          ],
+          "copyright": "The NiPreps Developers",
+          "license": "Apache-2.0",
+          "license_file": "licenses/Apache-2.0.txt"
+        },
+        {
+          "url": "https://github.com/nilearn/nilearn/blob/0.11.1/nilearn/image/resampling.py",
+          "version": "0.11.1",
+          "routines": [
+            "resample_img"
+          ],
+          "copyright": "Copyright (c) The nilearn developers",
+          "license": "BSD-3-Clause",
+          "license_file": "licenses/Nilearn-BSD-3-Clause.txt",
+          "license_sha256": "03ae849df6d8e68eb5074444ff0fab34e8370bdbedf7cabc9f5b5a30c4a8787c"
+        }
+      ],
+      "upstream_source_files_distributed": false,
+      "runtime_dependencies_added": []
+    },
+    "template_distribution": {
+      "hcp_assets_manifest": "src/fnit/fmri/assets_setup.py",
+      "templateflow_files": [
+        "tpl-MNI152NLin6Asym_res-02_T1w.nii.gz",
+        "tpl-MNI152NLin6Asym_res-02_desc-brain_mask.nii.gz",
+        "tpl-MNI152NLin6Asym_res-02_atlas-HCP_dseg.nii.gz"
+      ],
+      "templateflow_download_base": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/",
+      "templateflow_mirrored_in_fnit_release": false,
+      "templateflow_files_in_repository_or_wheel": false,
+      "templateflow_download_validation": "Per-file byte count and SHA-256 in assets_setup.py"
+    }
   }
 }

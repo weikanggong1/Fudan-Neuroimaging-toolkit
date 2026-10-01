@@ -1,0 +1,300 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-01",
+  "reference_version": "25.2.4",
+  "reference_kind": "actual_installed_resample_image_on_held_FNIT_transforms",
+  "scope": "Same complete 490-frame source and fixed FNIT HMC/BBR/MNI transforms; tests composition and one spatial interpolation, not transform estimation.",
+  "actual_official_workflow_node_used": false,
+  "transform_estimation_revision": "3940a72d0425cc2697485f42608a60deac34003c",
+  "minimal_source_provenance": {
+    "kind": "recreated_slice_timing_stage",
+    "raw_sha256": "67717caaa823141c6e59d46db52e92deb4419d232ba699c399c69eb8888a0e92",
+    "frames": 490,
+    "slice_timing_corrected": true,
+    "original_minimal_retained": false,
+    "slice_timing_helper_sha256": "2f545ee4bc9692724bc2e4744abaa176d91487c257a96c89e11d032e4c966905",
+    "source_revision": "3940a72d0425cc2697485f42608a60deac34003c",
+    "minimal_sha256": "204bc8c14265ab414f5facf98b3e546848f1500408e3177a3f1fa9d8bba4fc7a",
+    "parameters": {
+      "reference_fraction": 0.5,
+      "ignore": 0,
+      "voxel_batch_size": 4096
+    }
+  },
+  "raw_sha256": "67717caaa823141c6e59d46db52e92deb4419d232ba699c399c69eb8888a0e92",
+  "source_sha256": "204bc8c14265ab414f5facf98b3e546848f1500408e3177a3f1fa9d8bba4fc7a",
+  "coordinate_precision_mode": "fmriprep",
+  "interpolation": "cubic_bspline",
+  "boundary": "grid-constant",
+  "installed_source_sha256": {
+    "fmriprep.interfaces.resampling": "c1b8bd1ddc2ed4d9f39a211b25b9635840fafc44d887decad045a7ee499d03b6",
+    "nitransforms.DenseFieldTransform": "6770b0bc449d8303eedb6e361c6f77080b4290c4f7e8c35cbef42325a3c8dbbe"
+  },
+  "spaces": [
+    {
+      "space": "T1w",
+      "frames": 490,
+      "oracle_threads": 8,
+      "shape": [
+        59,
+        74,
+        64,
+        490
+      ],
+      "agreement": {
+        "samples": 136917760,
+        "r": 1.0,
+        "rmse": 4.340422738155854e-08,
+        "relative_rmse": 1.0977207181484813e-11,
+        "mae": 5.721314727675241e-12,
+        "max_abs": 0.00048828125,
+        "reference_std": 3954.031901189601
+      },
+      "reference_nonzero_agreement": {
+        "samples": 136917760,
+        "r": 1.0,
+        "rmse": 4.340422738155854e-08,
+        "relative_rmse": 1.0977207181484813e-11,
+        "mae": 5.721314727675241e-12,
+        "max_abs": 0.00048828125,
+        "reference_std": 3954.031901189601
+      },
+      "candidate_image": {
+        "shape": [
+          59,
+          74,
+          64,
+          490
+        ],
+        "dtype": "float32",
+        "tr_seconds": 0.7350000143051147,
+        "time_unit": "sec",
+        "all_finite": true,
+        "header_pixdim_tr": 0.7350000143051147,
+        "sha256": "851c135ca22c7627efdf7efc137d380e750d7379ea7f0e9cbe1ec12135c6e99e"
+      },
+      "reference_image": {
+        "shape": [
+          59,
+          74,
+          64,
+          490
+        ],
+        "dtype": "float32",
+        "tr_seconds": 0.7350000143051147,
+        "time_unit": "unknown",
+        "all_finite": true,
+        "header_pixdim_tr": 0.7350000143051147,
+        "sha256": "60edc52869031d7d5ef1d1375a89f26e6dc0a4a903c6c19bd9245e6693155915"
+      },
+      "source_sha256": "204bc8c14265ab414f5facf98b3e546848f1500408e3177a3f1fa9d8bba4fc7a",
+      "target_sha256": "6d116533727458818ca4d49241a150e654d3451476fc9c1a8ce9e2fd3cd523c5",
+      "affine_sha256": "96835bcfab3d9826848d5e7bd85e39ffde27982127d66688c1b402361bd82770",
+      "motion_sha256": "2ef2788dd57264f63ac1e20270918ddfa5428dba1d2a5d0668f6decc9ab50d8b",
+      "mni_pull": null,
+      "target_origin": {
+        "kind": "3d_grid_from_completed_fnit_preproc",
+        "source_image_sha256": "2c48692eee34f18988b6bb519ef96dd588d87930afd8efee7bbf37c8926d35bf",
+        "source_image_shape": [
+          59,
+          74,
+          64,
+          490
+        ]
+      },
+      "candidate_runtime": {
+        "gpu_candidate_seconds_including_io": 43.83039867319167,
+        "device": "cuda:0",
+        "threads": 8,
+        "tf32": true,
+        "allocator_limit_gb": 20.0,
+        "peak_allocated_gb": 0.921906688,
+        "normalization_sha256": "aefa21eae661bfd412369447f56f96283856a55c40b64245c0936fc1d0b52073",
+        "cuda_visible_devices": "1",
+        "gpu_name": "NVIDIA H100 PCIe"
+      },
+      "oracle_seconds_including_io_and_diagnostics": 45.44197297375649,
+      "numerical_gates": {
+        "max_abs": true,
+        "relative_rmse": true,
+        "r": true
+      },
+      "tolerances": {
+        "max_abs": 0.01,
+        "relative_rmse": 1e-06,
+        "min_correlation": 0.999999
+      },
+      "passed": true
+    },
+    {
+      "space": "MNI152NLin6Asym",
+      "frames": 490,
+      "oracle_threads": 1,
+      "shape": [
+        91,
+        109,
+        91,
+        490
+      ],
+      "agreement": {
+        "samples": 442288210,
+        "r": 1.0,
+        "rmse": 3.3883694016977805e-08,
+        "relative_rmse": 9.254513927379392e-12,
+        "mae": 3.829715407350499e-12,
+        "max_abs": 0.00048828125,
+        "reference_std": 3661.3153627370116
+      },
+      "reference_nonzero_agreement": {
+        "samples": 442288210,
+        "r": 1.0,
+        "rmse": 3.3883694016977805e-08,
+        "relative_rmse": 9.254513927379392e-12,
+        "mae": 3.829715407350499e-12,
+        "max_abs": 0.00048828125,
+        "reference_std": 3661.3153627370116
+      },
+      "candidate_image": {
+        "shape": [
+          91,
+          109,
+          91,
+          490
+        ],
+        "dtype": "float32",
+        "tr_seconds": 0.7350000143051147,
+        "time_unit": "sec",
+        "all_finite": true,
+        "header_pixdim_tr": 0.7350000143051147,
+        "sha256": "4cfacf763af483f570fafc57706940e4684ddd3c2eb430967ff5909bae63a52e"
+      },
+      "reference_image": {
+        "shape": [
+          91,
+          109,
+          91,
+          490
+        ],
+        "dtype": "float32",
+        "tr_seconds": 0.7350000143051147,
+        "time_unit": "unknown",
+        "all_finite": true,
+        "header_pixdim_tr": 0.7350000143051147,
+        "sha256": "fe7b8b70a692c89fdaf50d16b4e6405d5f0850190f418db4b6a60e84a8f6ee6a"
+      },
+      "source_sha256": "204bc8c14265ab414f5facf98b3e546848f1500408e3177a3f1fa9d8bba4fc7a",
+      "target_sha256": "4935fe93889ddb4c81fc20f76703c632bbb8ab3011d0c17d26a6c57d60860c86",
+      "affine_sha256": "96835bcfab3d9826848d5e7bd85e39ffde27982127d66688c1b402361bd82770",
+      "motion_sha256": "2ef2788dd57264f63ac1e20270918ddfa5428dba1d2a5d0668f6decc9ab50d8b",
+      "mni_pull": {
+        "sha256": "bf8a4e9f8adeef961ff419faec56e91a516f38ef9c00d6e0ee8f7c6815ae6eb4",
+        "dtype": "float32",
+        "shape": [
+          91,
+          109,
+          91,
+          3
+        ],
+        "all_finite": true
+      },
+      "target_origin": {
+        "kind": "3d_grid_from_completed_fnit_preproc",
+        "source_image_sha256": "821ffd1676d1060fb3b0321ab9835f55a18f955a303106519c13c6d21de90102",
+        "source_image_shape": [
+          91,
+          109,
+          91,
+          490
+        ]
+      },
+      "candidate_runtime": {
+        "gpu_candidate_seconds_including_io": 107.16963948123157,
+        "device": "cuda:0",
+        "threads": 8,
+        "tf32": true,
+        "allocator_limit_gb": 20.0,
+        "peak_allocated_gb": 1.062370816,
+        "normalization_sha256": "aefa21eae661bfd412369447f56f96283856a55c40b64245c0936fc1d0b52073",
+        "cuda_visible_devices": "1",
+        "gpu_name": "NVIDIA H100 PCIe"
+      },
+      "oracle_seconds_including_io_and_diagnostics": 431.94373655691743,
+      "numerical_gates": {
+        "max_abs": true,
+        "relative_rmse": true,
+        "r": true
+      },
+      "tolerances": {
+        "max_abs": 0.01,
+        "relative_rmse": 1e-06,
+        "min_correlation": 0.999999
+      },
+      "passed": true
+    }
+  ],
+  "mni_serial_integrity": {
+    "threads": 1,
+    "frames": 490,
+    "scope": "Actual installed resample_image; same held source/transforms, with per-frame hashing controls.",
+    "selected_worker": {
+      "source_sha256": "e35ee1dad8f702985a2b930eea3f79a641b62263d6ff0a91c6c2e6779edc2f0b",
+      "source_unchanged": true,
+      "output_sha256_on_return": "de5c34266debf1e2891ac28cb00df805a2f0af0fe88cb6b06690ba64639acb6b",
+      "coordinates_max_abs_vs_independent": 7.105427357601002e-15,
+      "result_vs_independent_abs": 0.0
+    },
+    "installed_resample_seconds_with_hashing": 343.38259649509564,
+    "worker_count": 490,
+    "source_mutation_count": 0,
+    "worker_vs_series_hash_mismatch_count": 0,
+    "series_return_vs_independent_abs": 0.0,
+    "result_flags_F_contiguous": true,
+    "result_flags_C_contiguous": false,
+    "before_save_vs_written_hash_mismatch_count": 0,
+    "written_selected_vs_independent_abs": 0.0
+  },
+  "prior_reference_nonrepeatability": {
+    "oracle_threads": 8,
+    "same_input_and_transform_file_hashes": true,
+    "full_490_outputs_not_identical": true,
+    "selected_source_frame_sha256": "e35ee1dad8f702985a2b930eea3f79a641b62263d6ff0a91c6c2e6779edc2f0b",
+    "single_and_eight_frame_controls_match_direct_scipy": true,
+    "file_payload_decode_matches_nibabel_and_stdlib_gzip": true,
+    "serial_reference_sha256": "fe7b8b70a692c89fdaf50d16b4e6405d5f0850190f418db4b6a60e84a8f6ee6a",
+    "conclusion": "Preserved failed references. The exact cause of the inconsistent parallel full-series outputs was not established. Serial worker/series/write hashes agree; the strict numerical gate uses that serial reference.",
+    "candidate_vs_inconsistent_parallel_reference_rmse": 30.76000689210001,
+    "candidate_vs_inconsistent_parallel_reference_max_abs": 27205.09310913086,
+    "named_independent_replay_comparison": {
+      "captured_parallel_replay": {
+        "threads": 8,
+        "image_sha256": "fe7b8b70a692c89fdaf50d16b4e6405d5f0850190f418db4b6a60e84a8f6ee6a",
+        "capture_report_sha256": "3726fb5f7411d5b21318fa449dc26ee0313bfefdafb40fc76b9bd23c367bd1d0"
+      },
+      "independent_serial_replay": {
+        "threads": 1,
+        "image_sha256": "fe7b8b70a692c89fdaf50d16b4e6405d5f0850190f418db4b6a60e84a8f6ee6a",
+        "reference_report_sha256": "b3e24120de8eed04542a003707af2f17ea6cac24fd506710d6cd053090709f07",
+        "capture_report_sha256": "6e6e5f60c58da02031c2ce3ab5d12ce325629ffcb0adb96cfe7ba53b8cb8ce20"
+      },
+      "image_sha256_identical": true,
+      "note": "The earlier captured parallel replay is distinct from the inconsistent original reference and exact-runner parallel replay. These are two separately executed and separately written full490 images, not retained copies of one execution."
+    }
+  },
+  "post_measurement_small_axis_fix": {
+    "measured_normalization_sha256": "aefa21eae661bfd412369447f56f96283856a55c40b64245c0936fc1d0b52073",
+    "frozen_normalization_sha256": "17c269c3e3be1144d5b55398b76f3d94b72fbb5e9e20478f92837226deb7c66a",
+    "shared_spline_sha256": "b55f7abc9aba63483a0777989cecd5a610db542f41950bf41007507d9f7fbfc8",
+    "change": "The normal-grid F.pad operation is unchanged. Short mirror/periodic axes use explicit index padding; single-voxel mirror folding returns zero.",
+    "independent_scipy_controls_passed": 8,
+    "coordinate_controls_passed": 2,
+    "test_sha256": "7f4b8c23cd8b1e06309acbfa0d0c683f19a71b7361e32c58dc8943e8cb982d41"
+  },
+  "passed": true,
+  "limits": [
+    "This held control explicitly enabled STC and recreated the removed minimal intermediate from the frozen helper. FNIT now defaults STC off; this is not its final whole-pipeline benchmark.",
+    "The oracle was the actual installed container function, not a fabricated Nipype result or a replay of an official estimated transform.",
+    "The official function emits unknown time units here; its positive header TR was checked against the original BIDS TR. FNIT output explicitly records seconds.",
+    "MNI oracle time includes per-frame hashing diagnostics. CPU/GPU times have different diagnostic boundaries and shared-load conditions; no speedup claim is made.",
+    "Normal-coordinate math was measured before the isolated short-axis helper change; its ordinary-grid F.pad branch remains unchanged. Final pipeline validation records the frozen source separately."
+  ]
+}

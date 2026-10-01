@@ -48,6 +48,13 @@ def main(argv=None):
     volume.add_argument("--batch-size", type=int, default=8)
     volume.add_argument("--motion-iterations", nargs=3, type=int, default=(1, 1, 1))
     volume.add_argument("--highpass-cutoff-seconds", type=float, default=100)
+    timing = volume.add_mutually_exclusive_group()
+    timing.add_argument("--slice-timing", dest="slice_timing", action="store_true",
+                        help="显式开启 preproc 切片时间校正；默认关闭")
+    timing.add_argument("--ignore-slice-timing", dest="slice_timing", action="store_false",
+                        help="关闭切片时间校正（默认）")
+    volume.set_defaults(slice_timing=False)
+    volume.add_argument("--slice-time-reference", type=float, default=0.5)
     volume.add_argument("--n-splits", type=int, default=1000)
     volume.add_argument("--random-state", type=int, default=0)
     surface = commands.add_parser("surface", help="completed volume derivatives to fsLR32k")
@@ -55,6 +62,10 @@ def main(argv=None):
     surface.add_argument("--recon-all", required=True)
     surface.add_argument("--surface-assets-dir", required=True)
     surface.add_argument("--wb-command", default="wb_command")
+    surface.add_argument("--signal", choices=("preproc", "clean"), default="preproc")
+    surface.add_argument("--fsnative-to-t1w", help="4x4 forward scanner-RAS affine text file")
+    surface.add_argument("--registered-spheres", nargs=2, help="L/R registered native spheres; skips estimation")
+    surface.add_argument("--goodvoxels", help="optional 3D ROI on the T1w BOLD grid")
     surface.add_argument("--msm-config", help="official MSMSulc configuration file; default HCP schedule")
     surface.add_argument("--msm-execution", choices=("optimized", "reference"), default="optimized")
     args = parser.parse_args(argv)
@@ -83,6 +94,8 @@ def main(argv=None):
             global_signal=args.global_signal, batch_size=args.batch_size,
             motion_iterations=tuple(args.motion_iterations),
             highpass_cutoff_seconds=args.highpass_cutoff_seconds,
+            slice_timing=args.slice_timing,
+            slice_time_reference=args.slice_time_reference,
             n_splits=args.n_splits, random_state=args.random_state,
         )
         print(result.clean_mni)
@@ -91,6 +104,8 @@ def main(argv=None):
             **common, recon_all=args.recon_all,
             hcp_assets_dir=args.surface_assets_dir,
             wb_command=args.wb_command,
+            signal=args.signal, fsnative_to_t1w=args.fsnative_to_t1w,
+            registered_spheres=args.registered_spheres, goodvoxels=args.goodvoxels,
             msm_config=args.msm_config,
             msm_execution=args.msm_execution,
         )

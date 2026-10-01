@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 import json
 import os
+from tempfile import TemporaryDirectory
 
 from .. import __version__
 from .bids import BIDSInputs
@@ -22,9 +23,16 @@ class FMRIDerivativePaths:
     left: Path
     right: Path
     dtseries: Path
+    preproc_t1w: Path
+    preproc_mni: Path
+    motion_pull: Path
+    mni_pull: Path
 
 
-def fmri_derivative_paths(inputs: BIDSInputs, t1w: Path, root: str | Path) -> FMRIDerivativePaths:
+def fmri_derivative_paths(inputs: BIDSInputs, t1w: Path, root: str | Path,
+                          *, signal: str = "clean") -> FMRIDerivativePaths:
+    if signal not in ("preproc", "clean"):
+        raise ValueError("signal must be 'preproc' or 'clean'")
     root = Path(root).expanduser().resolve()
     name = inputs.bold.name
     if name.endswith("_bold.nii.gz"):
@@ -46,9 +54,13 @@ def fmri_derivative_paths(inputs: BIDSInputs, t1w: Path, root: str | Path) -> FM
         mask_mni=func / f"{stem}_space-MNI152NLin6Asym_res-2_desc-brain_mask.nii.gz",
         t1_brain=anat / f"{t1_stem}_desc-brain_T1w.nii.gz",
         bbr_matrix=func / f"{stem}_from-boldref_to-T1w_mode-image_xfm.txt",
-        left=func / f"{stem}_hemi-L_space-fsLR_den-32k_desc-clean_bold.func.gii",
-        right=func / f"{stem}_hemi-R_space-fsLR_den-32k_desc-clean_bold.func.gii",
-        dtseries=func / f"{stem}_space-fsLR_den-91k_desc-clean_bold.dtseries.nii",
+        left=func / f"{stem}_hemi-L_space-fsLR_den-32k_desc-{signal}_bold.func.gii",
+        right=func / f"{stem}_hemi-R_space-fsLR_den-32k_desc-{signal}_bold.func.gii",
+        dtseries=func / f"{stem}_space-fsLR_den-91k_desc-{signal}_bold.dtseries.nii",
+        preproc_t1w=func / f"{stem}_space-T1w_res-native_desc-preproc_bold.nii.gz",
+        preproc_mni=func / f"{stem}_space-MNI152NLin6Asym_res-2_desc-preproc_bold.nii.gz",
+        motion_pull=func / f"{stem}_from-boldref_to-orig_mode-image_desc-pull_xfm.npy",
+        mni_pull=func / f"{stem}_from-MNI152NLin6Asym_to-T1w_mode-image_desc-pull_xfm.nii.gz",
     )
 
 
@@ -65,6 +77,47 @@ def sidecar(path: Path) -> Path:
 def write_json(path: Path, data: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def publish_derivatives(files, root: Path, *, overwrite: bool):
+    """Publish already staged data/sidecars together, restoring old files on error."""
+    files = [(Path(source), Path(destination)) for source, destination in files]
+    if len({destination for _, destination in files}) != len(files):
+        raise ValueError("duplicate derivative destination")
+    for source, destination in files:
+        if not source.is_file():
+            raise FileNotFoundError(source)
+        if destination.is_dir():
+            raise ValueError(f"output file is a directory: {destination}")
+        if (destination.exists() or destination.is_symlink()) and not overwrite:
+            raise FileExistsError(destination)
+    with TemporaryDirectory(prefix=".fnit-volume-backup-", dir=root) as directory:
+        backups = []
+        published = []
+        try:
+            for index, (source, destination) in enumerate(files):
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                if destination.is_dir():
+                    raise ValueError(f"output file is a directory: {destination}")
+                if destination.exists() or destination.is_symlink():
+                    if not overwrite:
+                        raise FileExistsError(destination)
+                    backup = Path(directory) / str(index)
+                    os.replace(destination, backup)
+                    backups.append((backup, destination))
+                if overwrite:
+                    os.replace(source, destination)
+                    published.append(destination)
+                else:
+                    os.link(source, destination)
+                    published.append(destination)
+                    source.unlink()
+        except BaseException:
+            for destination in reversed(published):
+                destination.unlink(missing_ok=True)
+            for backup, destination in reversed(backups):
+                os.replace(backup, destination)
+            raise
 
 
 def ensure_derivative_dataset(root: Path, raw_root: Path) -> None:

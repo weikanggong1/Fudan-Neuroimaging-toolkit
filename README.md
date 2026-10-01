@@ -49,8 +49,8 @@ CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹�
 |---|---|---|
 | [TorchMCFLIRT](docs/mcflirt/README.md) | FSL `mcflirt` | BOLD 每帧刚体运动估计、FSL 矩阵与六列参数、图像重采样；[真实数据对照](validation/mcflirt/README.md)。 |
 | [parcellate](docs/mshbm/README.md) | CBIG `CBIG_MSHBM_parcellation_single_subject.m` | fsLR32k 或 MNI BOLD 到个体 17 网络标签与连接矩阵。 |
-| [fMRIVolume_pipeline](docs/fmri/README.md) | FSL FEAT、ICA-AROMA | 原始 BIDS 单 run 到 BIDS Derivatives 体积 BOLD；[全流程 benchmark](validation/fmri/README.md)。 |
-| [fMRISurface_pipeline](docs/fmri/surface.md) | fMRIPrep fsLR 重采样、Workbench | 读取已完成的 volume 与 T1 recon-all，写出 fsLR32k GIFTI 和 91k CIFTI；[全流程 benchmark](validation/fmri/README.md)。 |
+| [fMRIVolume_pipeline](docs/fmri/README.md) | FSL FEAT、ICA-AROMA；fMRIPrep 单次重采样 | 原始 BIDS 单 run 同时生成 T1w 原生 BOLD 分辨率/MNI 2 mm preproc 与 FEAT/AROMA clean 体积 BOLD；默认关闭 slice timing；[验证记录](validation/fmri/README.md)。 |
+| [fMRISurface_pipeline](docs/fmri/surface.md) | fMRIPrep fsLR 重采样、Workbench | 默认读取 volume preproc 和同源 T1 recon-all 的已有中层面，输出 fsLR32k GIFTI、91k CIFTI、注册球面与 QC；可显式选 clean。 |
 | [fnit.msm.run_msmsulc](docs/msm/README.md) | newMSM MSMSulc | 独立的 HOCR/FastPD 脑沟球面配准。 |
 | [fnit.melodic.run_melodic_bids](docs/melodic/README.md) | FSL MELODIC | 独立的 PyTorch 单被试空间 PICA，输入和输出均为 BIDS Derivatives。 |
 
@@ -141,13 +141,13 @@ fnit-setup-weights --all --dest /path/to/weights
 fnit-setup-weights --all --dest /path/to/weights --verify-only
 ```
 
-fsLR32k 表面投影的 HCP 公开模板不属于模型权重，同样优先从固定版本 Release 下载并逐文件校验；`--fmriprep` 的 TemplateFlow dseg 仍从原站获取：
+fsLR32k 表面投影的 HCP 公开模板不属于模型权重，同样优先从固定版本 Release 下载并逐文件校验；`--fmriprep` 的 TemplateFlow MNI152NLin6Asym 2 mm T1w、脑掩膜和 HCP dseg 仅从原站获取，核对固定大小和 SHA-256：
 
 ```bash
 fnit-setup-fmri-surface-assets --output-dir /absolute/path/hcp_surface_assets --fmriprep
 ```
 
-该命令包含 fsLR32k 投影和 MSMSulc 配准所需的球面、脑沟参考图、ROI、官方 MSMSulc 对照配置，以及生成 91k CIFTI 的 HCP 皮层下分区。被试需提供已生成的 white、pial、sphere、sphere.reg、sulc 和 thickness；这条 fMRIPrep 表面路径不使用 FLAIR、髓鞘图或 wmparc。完整用法见 [fMRI 表面投影](docs/fmri/surface.md)。
+该命令包含 fsLR32k/MSMSulc 的球面、脑沟参考图、ROI 与配置，以及 `fmriprep/` 下的三个 TemplateFlow 文件。volume 核对模板体素内容身份，surface 默认使用其单次插值 preproc；缺少 preproc 或身份字段的旧 volume 需重新运行。被试须提供同源 recon-all 的 white、pial、sphere、sphere.reg、sulc、thickness，及每侧已有的 midthickness 或 graymid；完整参数与源 T1/世界仿射要求见 [fMRI 表面投影](docs/fmri/surface.md)，模板大小和 SHA-256 见[原站模板清单](docs/WEIGHTS.md#fmri-templateflow-原站模板)。
 
 脑干亚区另需约 2.3 MB 图谱包，可独立下载和生成 PyTorch 平滑先验：
 

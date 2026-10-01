@@ -68,11 +68,13 @@ def volume_dependencies(tmp_path, monkeypatch):
         state.anatomical_kwargs = kwargs
         output = kwargs["work_dir"] / "anatomical"
         _save(output / "T1_brain.nii.gz", np.ones((4, 5, 6)))
+        _save(output / "T1_mask.nii.gz", np.ones((4, 5, 6)))
         _save(output / "T1_pve_wm.nii.gz", np.full((4, 5, 6), state.wm_pve))
         _save(output / "T1_pve_csf.nii.gz", np.full((4, 5, 6), state.csf_pve))
         _save(output / "T1_wmseg.nii.gz", np.full((4, 5, 6), state.wm_pve >= .5))
         template_image = nib.load(mni_template)
         _save(output / "MNI_mask.nii.gz", np.ones(template_image.shape), template_image.affine)
+        _save(output / "pull.nii.gz", np.zeros((*template_image.shape, 3)), template_image.affine)
         return SimpleNamespace(
             path=lambda name: output / name, reused=False, fingerprint=None,
             timing_seconds={name: 0. for name in ("t1_synthstrip", "template_preparation", "fast", "t1_to_mni_affine", "t1_to_mni_nonlinear", "warp_conversion", "anatomical_cache_lookup")},
@@ -86,7 +88,12 @@ def volume_dependencies(tmp_path, monkeypatch):
         filtered = _save(output / "filtered_func_data.nii.gz", np.ones((4, 5, 6, 3)), tr=.8)
         motion = output / "motion.par"
         np.savetxt(motion, np.zeros((3, 6)))
-        return SimpleNamespace(output_dir=output, mask=mask, filtered_func_data=filtered, motion_parameters=motion)
+        matrices = output / "motion_matrices"
+        matrices.mkdir()
+        for frame in range(3):
+            np.savetxt(matrices / f"MAT_{frame:04d}", np.eye(4))
+        return SimpleNamespace(output_dir=output, mask=mask, filtered_func_data=filtered,
+                               motion_parameters=motion, motion_matrices=matrices)
 
     def bbr_save(output, omat):
         _save(Path(output), np.ones((4, 5, 6)))
@@ -135,6 +142,12 @@ def volume_dependencies(tmp_path, monkeypatch):
     monkeypatch.setattr(end_to_end, "resample_world", resample)
     monkeypatch.setattr(end_to_end, "run_aroma_pipeline", aroma)
     monkeypatch.setattr(end_to_end, "TorchFLIRT", TissueSampler)
+    # This fixture tests orchestration, independently of the fixed-template gate.
+    monkeypatch.setattr(end_to_end, "_standard_template_identity", lambda path: {
+        "StandardSpace": "MNI152NLin6Asym",
+        "StandardTemplateIdentity": "TemplateFlow:MNI152NLin6Asym:res-02",
+        "StandardTemplateSHA256": hashlib.sha256(Path(path).read_bytes()).hexdigest(),
+    })
     state.inputs = inputs
     state.call = dict(
         bids_root=root, derivatives_root=tmp_path / "derivatives", subject="01",
@@ -151,6 +164,46 @@ def test_aroma_only_does_not_require_unused_csf_or_wm_masks(volume_dependencies)
     assert state.aroma_kwargs["wm_mask"] is None
     assert state.aroma_kwargs["regression_csf_mask"] is None
     assert not any(name.startswith("T1_pve_") for name in state.resampled_sources)
+
+
+def test_default_volume_keeps_slice_timing_disabled_with_bids_onsets(volume_dependencies):
+    state = volume_dependencies
+    state.inputs.bold_metadata.update({"RepetitionTime": .8,
+                                      "SliceTiming": [0., .1, .2, .3, .4, .5]})
+    # Three frames would fail the STC kernel's length check if accidentally run.
+    result = end_to_end.fMRIVolume_pipeline(**state.call)
+    metadata = json.loads(sidecar(result.preproc_mni).read_text())
+    assert metadata["SliceTimingCorrected"] is False
+    assert "StartTime" not in metadata
+    assert metadata["FNIT"]["Configuration"]["slice_timing"] is False
+
+
+@pytest.mark.parametrize("flags,enabled", [([], False), (["--slice-timing"], True),
+                                        (["--ignore-slice-timing"], False)])
+def test_volume_cli_slice_timing_is_opt_in(monkeypatch, flags, enabled):
+    from fnit.fmri import cli
+    calls = []
+    def run(**kwargs):
+        calls.append(kwargs)
+        return SimpleNamespace(clean_mni=Path("output.nii.gz"))
+    monkeypatch.setattr(cli, "fMRIVolume_pipeline", run)
+    cli.main(["volume", "--bids-root", "bids", "--derivatives-root", "derivatives",
+              "--subject", "01", "--mni-template", "template.nii.gz", *flags])
+    assert calls[0]["slice_timing"] is enabled
+
+
+def test_explicit_symlink_t1_retains_its_bids_source(volume_dependencies, tmp_path):
+    state = volume_dependencies
+    logical_t1 = state.inputs.t1w_images[0]
+    actual_t1 = tmp_path / "external" / "t1.nii.gz"
+    actual_t1.parent.mkdir()
+    actual_t1.write_bytes(logical_t1.read_bytes())
+    logical_t1.unlink()
+    logical_t1.symlink_to(actual_t1)
+    result = end_to_end.fMRIVolume_pipeline(**state.call, t1w_image=logical_t1)
+    metadata = json.loads(result.metadata.read_text())
+    assert metadata["FNIT"]["SourceT1w"] == "sub-01/anat/sub-01_T1w.nii.gz"
+    assert "bids:raw:sub-01/anat/sub-01_T1w.nii.gz" in metadata["Sources"]
 
 
 def test_requested_csf_regression_rejects_empty_tissue_mask(volume_dependencies):
@@ -177,6 +230,7 @@ def test_volume_metadata_preserves_task_and_execution_settings(volume_dependenci
     )
     metadata = json.loads(result.metadata.read_text())
     assert metadata["TaskName"] == "Resting State"
+    assert metadata["FNIT"]["Signal"] == "clean"
     configuration = metadata["FNIT"]["Configuration"]
     expected = {
         "ica_n_components": 2, "ica_max_iter": 123, "aroma_mode": "aggr",
@@ -192,6 +246,11 @@ def test_volume_metadata_preserves_task_and_execution_settings(volume_dependenci
     assert source["SourceSHA256"]["fmri/end_to_end.py"] == hashlib.sha256(Path(end_to_end.__file__).read_bytes()).hexdigest()
     assert all(not Path(key).is_absolute() for key in source["SourceSHA256"])
     assert metadata["FNIT"]["Denoising"] == {"Method": "ICA-AROMA", "Mode": "aggr", "Completed": True}
+    preproc_metadata = json.loads(sidecar(result.preproc_mni).read_text())
+    assert preproc_metadata["FNIT"]["Denoising"] == {"Method": None, "Mode": None, "Completed": False}
+    assert preproc_metadata["FNIT"]["IntensityNormalization"] is None
+    assert preproc_metadata["FNIT"]["ConfoundRegression"] == {"wm": False, "csf": False, "motion": False}
+    assert result.motion_pull.is_file() and result.mni_pull.is_file()
     assert metadata["FNIT"]["Report"]["configuration"] == configuration
     assert configuration["reuse_anatomical"] is True
     assert configuration["anatomical_cache"] == {"reused": False, "fingerprint": None}
@@ -202,6 +261,29 @@ def test_volume_metadata_preserves_task_and_execution_settings(volume_dependenci
 
 def test_fast_metadata_matches_source_ordered_anatomical_estimator():
     assert asdict(FASTConfig(execution="fsl")) == asdict(TorchFAST(device="cpu", execution="fsl").config)
+
+
+def test_volume_template_identity_rejects_matching_header_with_wrong_content(tmp_path):
+    template = nib.load(Path(end_to_end.__file__).parent / "assets/mask_csf.nii.gz")
+    lookalike = _save(tmp_path / "lookalike.nii.gz", np.ones(template.shape), template.affine)
+    with pytest.raises(ValueError, match="content is not the verified TemplateFlow"):
+        end_to_end._standard_template_identity(lookalike)
+
+
+def test_second_run_rejects_changed_shared_t1_without_publishing(volume_dependencies):
+    state = volume_dependencies
+    first = end_to_end.fMRIVolume_pipeline(**state.call)
+    _save(first.t1_brain, np.full((4, 5, 6), 2.))
+    state.inputs.bold = _save(
+        state.inputs.bold.with_name("sub-01_task-rest_run-2_bold.nii.gz"),
+        np.ones((4, 5, 6, 3)), tr=state.inputs.tr,
+    )
+    second_paths = fmri_derivative_paths(state.inputs, state.inputs.t1w_images[0], state.call["derivatives_root"])
+    with pytest.raises(FileExistsError, match="shared T1w derivative differs"):
+        end_to_end.fMRIVolume_pipeline(**state.call)
+    assert not second_paths.clean_mni.exists()
+    assert not second_paths.preproc_mni.exists()
+    np.testing.assert_array_equal(nib.load(first.t1_brain).get_fdata(), 2.)
 
 
 def test_registration_execution_and_cache_options_are_forwarded_and_recorded(volume_dependencies):
@@ -221,7 +303,10 @@ def test_registration_execution_and_cache_options_are_forwarded_and_recorded(vol
 
 
 def _handoff_metadata(inputs, *, legacy=False):
-    details = {"SourceT1w": inputs.t1w_images[-1].relative_to(inputs.bids_root).as_posix()}
+    details = {"SourceT1w": inputs.t1w_images[-1].relative_to(inputs.bids_root).as_posix(),
+               "StandardSpace": "MNI152NLin6Asym",
+               "StandardTemplateIdentity": "TemplateFlow:MNI152NLin6Asym:res-02",
+               "StandardTemplateSHA256": "a" * 64}
     if legacy:
         details["Report"] = {"aroma_mode": "nonaggr", "ica_converged": True}
     else:
@@ -265,10 +350,11 @@ def test_surface_uses_selected_t1_before_checking_anatomical_derivative(volume_d
     _save(paths.t1_brain, np.ones((4, 5, 6)))
     paths.bbr_matrix.write_text("matrix")
     sidecar(paths.clean_mni).write_text(json.dumps(_handoff_metadata(inputs)))
+    sidecar(paths.clean_native).write_text(json.dumps(_handoff_metadata(inputs)))
     monkeypatch.setattr(surface_pipeline, "locate_bids_inputs", lambda *args, **kwargs: inputs)
     # Passing handoff validation reaches the missing asset, not the first T1's nonexistent derivative.
-    with pytest.raises(FileNotFoundError, match="tpl-MNI152NLin6Asym"):
-        surface_pipeline.fMRISurface_pipeline(inputs.bids_root, root, subject="01", recon_all=tmp_path / "recon", hcp_assets_dir=tmp_path / "assets", device="cpu")
+    with pytest.raises(FileNotFoundError, match="atlasroi"):
+        surface_pipeline.fMRISurface_pipeline(inputs.bids_root, root, subject="01", recon_all=tmp_path / "recon", hcp_assets_dir=tmp_path / "assets", device="cpu", signal="clean")
 
 
 def test_native_derivative_must_match_raw_reference_grid_and_tr(volume_dependencies):
