@@ -93,16 +93,16 @@ def initialize_flica_torch(y_arrays: Sequence[np.ndarray], n_components: int,
         covariance = sum(dd[k] * (value.T @ value) for k, value in enumerate(y))
         eigenvalues, eigenvectors = torch.linalg.eigh(covariance)
         dominant = eigenvalues[-n_components:].flip(0)
-        h = dominant[:, None] * eigenvectors[:, -n_components:].flip(1).T
-        x = [((torch.linalg.pinv(h @ h.T) @ h) @ (value.T * torch.sqrt(dd[k]))).T
-             for k, value in enumerate(y)]
+        h_pre = (dominant.clamp_min(0).sqrt()[:, None] *
+                 eigenvectors[:, -n_components:].flip(1).T /
+                 np.sqrt(sum(value.shape[0] for value in y)))
     else:
         h_pre = _tensor(init_h, backend)
         if h_pre.shape != (n_components, n_reduced):
             raise ValueError("init_h must have shape (n_components, n_reduced)")
-        h = h_pre / torch.sqrt(dd.mean())
-        projector = torch.linalg.pinv(h_pre)
-        x = [(value * torch.sqrt(dd[k])) @ projector for k, value in enumerate(y)]
+    h = h_pre / torch.sqrt(dd.mean())
+    projector = torch.linalg.pinv(h_pre)
+    x = [(value * torch.sqrt(dd[k])) @ projector for k, value in enumerate(y)]
     return _initial_state(h, x, dd, [value.shape[0] for value in y],
                           [value.square().mean(dim=0 if lambda_dims == "R" else None)
                            for value in y], backend, lambda_dims)
@@ -135,7 +135,7 @@ def _initial_state(h: torch.Tensor, x: list[torch.Tensor], dd: torch.Tensor,
     prior_lambda_c = [h.new_tensor(1e-12) for _ in range(n_modalities)]
     lam = [torch.reciprocal(mean_squares[k]) for k in range(n_modalities)]
     priors = {"prior_pi_weights": prior_pi, "prior_beta_b": prior_beta_b,
-              "prior_beta_c": prior_beta_c, "prior_W_var": 1 / dd[-1],
+              "prior_beta_c": prior_beta_c, "prior_W_var": 1 / dd,
               "prior_mu_var": h.new_tensor(1e4),
               "prior_eta_b": h.new_tensor(1e6),
               "prior_eta_c": h.new_tensor(1e-3),
@@ -242,26 +242,22 @@ def initialize_flica_raw(y: Sequence[RawVoxelMatrix], n_components: int,
             values, vectors = torch.linalg.eigh(reduced)
             eigenvalues = values[-n_components:].flip(0)
             eigenvectors = basis @ vectors[:, -n_components:].flip(1)
-        h = (eigenvalues[:, None] * eigenvectors.T).to(torch.float64)
-        projector = torch.linalg.pinv(h @ h.T) @ h
+        h_pre = (eigenvalues.clamp_min(0).sqrt()[:, None] * eigenvectors.T /
+                 np.sqrt(sum(value.shape[0] for value in y)))
     else:
         h_pre = _tensor(init_h, backend)
         if h_pre.shape != (n_components, n_subjects):
             raise ValueError("init_h must have shape (n_components, n_reduced)")
-        h = h_pre / torch.sqrt(dd.mean())
-        projector = torch.linalg.pinv(h_pre)
+    h = h_pre / torch.sqrt(dd.mean())
+    projector = torch.linalg.pinv(h_pre)
     del covariance, total_covariance
     spatial = []
     for k, value in enumerate(y):
         x = torch.empty((value.shape[0], n_components), device=backend,
                         dtype=torch.float64)
         for start, block in value.blocks(backend):
-            if init_h is None:
-                x[start:start + block.shape[0]] = (
-                    block @ projector.T) * torch.sqrt(dd[k])
-            else:
-                x[start:start + block.shape[0]] = (
-                    block * torch.sqrt(dd[k])) @ projector
+            x[start:start + block.shape[0]] = (
+                block * torch.sqrt(dd[k])) @ projector
         spatial.append(x)
     return _initial_state(h, spatial, dd, [value.shape[0] for value in y],
                           mean_squares, backend, lambda_dims)
@@ -340,7 +336,13 @@ def iterate_flica_torch(y_arrays: Sequence[np.ndarray | RawVoxelMatrix], priors:
     prior_pi = [_tensor(value, backend) for value in priors["prior_pi_weights"]]
     prior_beta_b = [_tensor(value, backend) for value in priors["prior_beta_b"]]
     prior_beta_c = [_tensor(value, backend) for value in priors["prior_beta_c"]]
-    prior_w_var = _tensor(priors["prior_W_var"], backend).reshape(-1)[0]
+    prior_w_var = _tensor(priors["prior_W_var"], backend).reshape(-1)
+    if prior_w_var.numel() == 1:
+        prior_w_var = prior_w_var.expand(n_modalities)
+    elif prior_w_var.numel() != n_modalities:
+        raise ValueError("prior_W_var must be scalar or have one value per modality")
+    if not bool(torch.all(torch.isfinite(prior_w_var) & (prior_w_var > 0))):
+        raise ValueError("prior_W_var must contain finite positive variances")
     prior_mu_var = _tensor(priors["prior_mu_var"], backend).reshape(-1)[0]
     prior_eta_b = _tensor(priors["prior_eta_b"], backend).reshape(-1)[0]
     prior_eta_c = _tensor(priors["prior_eta_c"], backend).reshape(-1)[0]
@@ -391,7 +393,7 @@ def iterate_flica_torch(y_arrays: Sequence[np.ndarray | RawVoxelMatrix], priors:
                           lam[k] * (h @ h.T + n_reduced * h_cov))
             hlambda.append(weighted_h)
             w_cov[k], w_inverse_info = _scaled_inverse(
-                xtdx[k] * weighted_h + unit / prior_w_var)
+                xtdx[k] * weighted_h + unit / prior_w_var[k])
             inverse_info.append(w_inverse_info)
             target = (dd[k] * torch.diagonal((old_cross[k] * lam[k][None, :]) @ h.T)
                       if subjectwise else

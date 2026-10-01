@@ -3,8 +3,8 @@
 Copyright Weikang Gong. Adaptation and public redistribution authorized by
 the rights holder in the FNIT development conversation, 2026-09-30.
 Original: https://github.com/weikanggong/BigFLICA/blob/master/FLICA_cpu.py
-The coordinate updates retain the upstream model. Free-energy formulas,
-reduction precision and iteration bookkeeping are corrected below.
+Free-energy formulas, PCA scaling, modality-specific W priors, reduction
+precision and iteration bookkeeping are corrected below.
 """
 
 import numpy as np
@@ -397,7 +397,18 @@ def update_H(input_dict):
      return output_H_dict
 
 
+def _W_prior_variances(value, modalities):
+    """Accept an old shared scalar or one positive finite variance per modality."""
+    variances = np.asarray(value, dtype=np.float64).reshape(-1)
+    if variances.size not in (1, modalities):
+        raise ValueError('prior_W_var must be scalar or have one value per modality')
+    if not np.isfinite(variances).all() or np.any(variances <= 0):
+        raise ValueError('prior_W_var must contain finite positive variances')
+    return np.broadcast_to(variances, (modalities,))
+
+
 def update_HlambdaHt_and_W(input_dict):
+    prior_W_var = _W_prior_variances(input_dict['prior_W_var'], input_dict['K'])
     for k in range (0,input_dict['K']):
             input_dict['HlambdaHt'][k] = np.dot( np.dot(input_dict['H'] , np.diag(np.array(input_dict['lambda_R'][k].flatten())[0])    ) ,np.transpose(input_dict['H']))
             if size(input_dict['H_colcov'].shape)==2:
@@ -412,7 +423,7 @@ def update_HlambdaHt_and_W(input_dict):
                         input_dict['HlambdaHt'][k] = input_dict['HlambdaHt'][k] + np.dot(input_dict['H_colcov'][:,:,g] , np.dot( np.transpose(input_dict['Gmat'][:,g]) , input_dict['lambda_R'][k]))
 
             #%% Update W
-            tmpL = np.multiply(input_dict['XtDX'][k] , input_dict['HlambdaHt'][k]) + ( (1./input_dict['prior_W_var']) * identity(input_dict['L'])).astype('float64')
+            tmpL = np.multiply(input_dict['XtDX'][k] , input_dict['HlambdaHt'][k]) + ( (1./prior_W_var[k]) * identity(input_dict['L'])).astype('float64')
             tmpCov = inv_prescale(tmpL);
             input_dict['W_rowcov'][k] = (np.float64(0.5)*(tmpCov+np.transpose(tmpCov))).astype('float64')
             spm=np.dot( np.transpose(input_dict['X'][k]) , input_dict['Y'][k])
@@ -500,6 +511,7 @@ def compute_F(input_dict):
     R = input_dict['R']
     G = input_dict['G']
     K = input_dict['K']
+    prior_W_var = _W_prior_variances(input_dict['prior_W_var'], K)
     F = np.nan;
     Fpart["Hprior"]=(sum_dims(np.dot(input_dict['eta_log'],np.matrix(input_dict['Gmat'])),[L, R])/2)- (np.log(2*np.pi)*L*R/2)- (sum_dims(np.multiply(input_dict['eta'],np.matrix(input_dict['H2Gmat']).T),[L,G])/2)
     if size(input_dict['H_colcov'].shape)==2: #case lambda='o'
@@ -531,7 +543,8 @@ def compute_F(input_dict):
     Fpart["XPost"] = []
 
     for kk in range(0,K):
-        Fpart["Wprior"].append(sum_dims(np.matrix(np.log(1./input_dict['prior_W_var'],dtype="float64"),dtype="float64"),[1, L])/2 - np.log(2*np.pi,dtype="float64")*1*L/2 - trace(input_dict['WtW'][kk])/2/input_dict['prior_W_var'])
+        Fpart["Wprior"].append(-0.5 * L * np.log(2*np.pi*prior_W_var[kk])
+                              - trace(input_dict['WtW'][kk])/2/prior_W_var[kk])
         Fpart["Wpost"].append(0.5*1*L*(1+np.log(2*np.pi)) + 0.5*logdet(input_dict['W_rowcov'][kk],'chol'))
         Fpart["muPrior"].append(-0.5/input_dict['prior_mu_var']*sum_dims(np.matrix(input_dict['mu2'][kk]),[3, L])  -0.5*np.log(2*np.pi*input_dict['prior_mu_var'],dtype="float64") * 3*L)
         Fpart["muPost"].append(0.5*(1+np.log(2*np.pi,dtype="float64"))*3*L +0.5*sum_dims(np.matrix(np.log(input_dict['mu_var'][kk],dtype="float64")),[3, L]))
@@ -589,7 +602,7 @@ def flica_init_params(Y,opts):
     # Multiply data by Virtual Decimation factor (often sqrt'd!) and Initialize <X> and <H> using PCA:
     N=np.zeros(K).astype('float64') #num of voxels per data type
 
-    if isinstance(opts['initH'], str) and opts['initH']=='PCA':
+    if isinstance(opts['initH'], str) and opts['initH'] in ('PCA', 'PCA_legacy'):
         print('Initialize FLICA using concatenated PCA across modalities...')
 
         cov_mat=np.zeros((R,R))
@@ -598,17 +611,26 @@ def flica_init_params(Y,opts):
             Y[k]=np.ascontiguousarray(Y[k],dtype='float64')
             N[k] = Y[k].shape[0]
             cov_mat=cov_mat+np.dot(Y[k].T * np.sqrt(DD[k]),Y[k]* np.sqrt(DD[k]))
-        ds,us=np.linalg.eig(cov_mat)
+        # MATLAB flica.m normalizes the concatenated left SVD modes to RMS=1.
+        # The explicit legacy option preserves only the old initialization scale.
+        ds,us=(np.linalg.eig(cov_mat) if opts['initH']=='PCA_legacy'
+               else np.linalg.eigh(cov_mat))
         us=np.real(us)
         ds=np.real(ds)
         indx1=np.argsort(-ds)
         ds=ds[indx1]
         us=us[:,indx1]
 
-        H=np.dot(np.diag(ds[0:L]),us[:,0:L].T)
+        legacy_pca = opts['initH']=='PCA_legacy'
+        initial_h = (np.dot(np.diag(ds[0:L]),us[:,0:L].T) if legacy_pca else
+                     np.sqrt(np.maximum(ds[:L], 0))[:, None] * us[:, :L].T / np.sqrt(N.sum()))
+        H = initial_h if legacy_pca else initial_h / np.sqrt(np.mean(DD))
         for k in range (0,K):
             print((k+1))
-            X[k]=np.dot(np.dot(np.linalg.pinv(np.dot(H,H.T)),H),Y[k].T * np.sqrt(DD[k])).T
+            if legacy_pca:
+                X[k] = ((np.linalg.pinv(H @ H.T) @ H) @ (Y[k].T * np.sqrt(DD[k]))).T
+            else:
+                X[k] = (Y[k] * np.sqrt(DD[k])) @ np.linalg.pinv(initial_h)
             #X[k]=np.dot(Y[k] * np.sqrt(DD[k]),H.T)
 
     if isinstance(opts['initH'], str) and opts['initH']=='Bigdata':
@@ -678,6 +700,9 @@ def flica_init_params(Y,opts):
     XtDX=copy.deepcopy(default_list_of_arrays)
     Y2D_sumN=copy.deepcopy(default_list_of_arrays)
     X2=copy.deepcopy(default_list_of_arrays)
+    # The upstream MATLAB loop also overwrote this scalar with the last DD.
+    # Each modality's N(0, 1/DD[k]) prior must follow that modality on reorder.
+    prior_W_var = _W_prior_variances(1. / DD, K).copy()
     for  k in range (0,K): # De-concatenate to get X[k] estimates:
         #if k==0:
         #    X[k] = tmpU[0:N.astype(int)[0],0:L]; # / sqrt(DD(k));
@@ -687,7 +712,6 @@ def flica_init_params(Y,opts):
         #W_rowcov[k] = np.multiply(np.matlib.eye(L),pow(10,-12)).astype('float64')
         W_rowcov[k] = np.multiply(np.eye(L),pow(10,-12)).astype('float64')
 
-        prior_W_var = np.divide(np.ones(1).astype('float64'),DD[k])
         WtW[k] = np.multiply(W[k][np.newaxis, :].T , W[k]) + W_rowcov[k];
         XtDX[k] = np.dot (np.dot(X[k].T , X[k]), DD[k]) # double prec.?
         Y2D_sumN[k] = np.multiply(DD[k] , np.sum(np.square(Y[k]),0) )    # double prec.?

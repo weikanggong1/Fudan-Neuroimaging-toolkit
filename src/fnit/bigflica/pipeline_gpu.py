@@ -16,7 +16,8 @@ import torch
 from .dicl_torch import fit_dicl_gpu_streaming
 from .flica_torch import (RawVoxelMatrix, initialize_flica_raw,
                           iterate_flica_torch)
-from .pipeline import (_check_flica_fit, _check_flica_output, _device, _fit_flica,
+from .pipeline import (_FLICA_ALGORITHM_VERSION, _NORMALIZATION_VERSION,
+                       _check_flica_fit, _check_flica_output, _device, _fit_flica,
                        _flica_directory, _save_manifest, _signature,
                        _valid_cache, _write_maps)
 from .stats_torch import SpatialRegression, t_to_z_gpu
@@ -31,7 +32,7 @@ def run_bigflica_raw_gpu(root: Path, specs: Mapping[str, Mapping[str, str]],
                          flica_lambda_dims: str = "o") -> Path:
     names = list(specs)
     result_dir = _flica_directory(destination, n_components, flica_lambda_dims)
-    _check_flica_output(result_dir, signature, names)
+    _check_flica_output(result_dir, signature, names, _FLICA_ALGORITHM_VERSION)
     timings: dict[str, float | bool] = {}
     start = time.perf_counter()
     store = prepare_modalities(root, specs, ids, destination / "normalized",
@@ -118,7 +119,7 @@ def run_bigflica_gpu(root: Path, specs: Mapping[str, Mapping[str, str]],
                                   "mmigp_signature": mmigp_sig})
         timings["dicl_s"] = time.perf_counter() - start
     result_dir = _flica_directory(destination, n_components, flica_lambda_dims)
-    _check_flica_output(result_dir, signature, names)
+    _check_flica_output(result_dir, signature, names, _FLICA_ALGORITHM_VERSION)
     start = time.perf_counter()
     h_migp, contribution = _fit_flica(dictionaries, n_components,
                                       flica_max_iter, result_dir, device,
@@ -132,7 +133,8 @@ def run_bigflica_gpu(root: Path, specs: Mapping[str, Mapping[str, str]],
                              h_migp, contribution, timings,
                              flica_lambda_dims=flica_lambda_dims,
                              flica_signature=_signature([dicl_sig, n_components,
-                                                         flica_max_iter, flica_lambda_dims]))
+                                                         flica_max_iter, flica_lambda_dims,
+                                                         _FLICA_ALGORITHM_VERSION]))
 
 
 def _save_gpu_results(root: Path, specs: Mapping[str, Mapping[str, str]],
@@ -222,8 +224,15 @@ def _save_gpu_results(root: Path, specs: Mapping[str, Mapping[str, str]],
              "dicl_sparse_iterations": dicl_sparse_iterations,
              "flica_max_iter": flica_max_iter,
              "flica_lambda_dims": flica_lambda_dims,
+             "flica_algorithm_version": _FLICA_ALGORITHM_VERSION,
+             "normalization_version": _NORMALIZATION_VERSION,
+             "course_coordinates": ("subject" if u is None else
+                                     "legacy_spectral_PC_zscore"),
+             "brainmap_space": "subject" if u is None else "mMIGP_PC",
+             "brainmap_df": int(h_migp.shape[0] - n_components - 1),
              "flica_signature": flica_signature or _signature([
-                 signature, n_components, flica_max_iter, flica_lambda_dims, "raw"]),
+                 signature, n_components, flica_max_iter, flica_lambda_dims,
+                 "raw", _FLICA_ALGORITHM_VERSION]),
              "top_voxels": top_voxels,
              "random_state": random_state, "input_signature": signature,
              "device": device, "max_gpu_gb": max_gpu_gb,

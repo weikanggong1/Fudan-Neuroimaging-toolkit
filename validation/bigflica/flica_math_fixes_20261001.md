@@ -1,5 +1,7 @@
 # FLICA 数学错误修复与验收
 
+本页记录 `f12dba7` 及之前的自由能修复和定位试验。后续已将默认 PCA 尺度和逐模态 W 先验改正，详见[初始化与先验修复](flica_initialization_prior_fix_real1000_20261001.md)。下文的“尚未替换”描述保留当时的实验状态。
+
 ## 已合并到本地实现的修复
 
 对照 [官方 MATLAB FLICA 发布包](https://fsl.fmrib.ox.ac.uk/fsl/docs/utilities/flica_2013-01-15.tar.gz)及概率分布解析式，修复了以下问题。运行流程仍使用仓库 Python/PyTorch，不调用 MATLAB 或 FSL。
@@ -61,10 +63,10 @@ PYTHONPATH=src python -m pytest \
 令加权拼接矩阵 `Z = concat(sqrt(DD[k]) * Y[k]) = U S Vᵀ`，总空间行数为 P。严格 MATLAB 初始化为：
 
 - `X[k] = sqrt(P) * U[k, :C]`；
-- `H = S[:C] * V[:C].T / sqrt(P * mean(DD))`；
+- `H = S[:C, None] * V[:, :C].T / sqrt(P * mean(DD))`；
 - `W[k] = sqrt(mean(DD) / DD[k])`。
 
-仓库现有数值初始化入口应传 `H_pre = S[:C] * V[:C].T / sqrt(P)`。对应初始重建为每模态的 rank-C 投影，拼接 X 的每列 RMS 为 1。
+仓库现有数值初始化入口应传 `H_pre = S[:C, None] * V[:, :C].T / sqrt(P)`，这里 S 为奇异值向量。对应初始重建为每模态的 rank-C 投影，拼接 X 的每列 RMS 为 1。
 
 四个真实字典控制保留原自动 DD、R 模式、1001 次更新，仅替换初始化及注明的 W 先验：
 

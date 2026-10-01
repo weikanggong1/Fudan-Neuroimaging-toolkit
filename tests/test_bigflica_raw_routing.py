@@ -177,6 +177,23 @@ def test_gram_quality_metrics_match_independent_dense_reconstruction(tmp_path):
                                np.linalg.norm(fitted["H"], axis=1), rtol=1e-13)
 
 
+def test_updated_fit_preserves_older_model_instead_of_overwriting(tmp_path):
+    directory = tmp_path / "components_2"
+    directory.mkdir()
+    path = directory / "model.json"
+    previous = {"input_signature": "same-input", "source_modalities": {"vbm": {}}}
+    path.write_text(json.dumps(previous))
+    original_bytes = path.read_bytes()
+    with pytest.raises(ValueError, match="algorithm version.*fresh output_dir"):
+        pipeline._check_flica_output(directory, "same-input", ["vbm"],
+                                     pipeline._FLICA_ALGORITHM_VERSION)
+    assert path.read_bytes() == original_bytes
+    previous["flica_algorithm_version"] = pipeline._FLICA_ALGORITHM_VERSION
+    path.write_text(json.dumps(previous))
+    pipeline._check_flica_output(directory, "same-input", ["vbm"],
+                                 pipeline._FLICA_ALGORITHM_VERSION)
+
+
 @pytest.mark.parametrize("invalid", [0, -1, True, np.bool_(False), 1.5,
                                       np.float64(2), "10", None])
 def test_invalid_iterations_fail_before_input_io(tmp_path, monkeypatch, invalid):
