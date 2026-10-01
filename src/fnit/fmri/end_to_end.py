@@ -15,6 +15,7 @@ import torch
 
 from ..synthstrip import SynthStrip
 from ..fast import FASTConfig
+from ..flirt import TorchFLIRT
 from .. import __version__
 from ..weights import resolve_weights
 from .aroma_pipeline import run_aroma_pipeline
@@ -253,14 +254,15 @@ def fMRIVolume_pipeline(
     epi_ref = feat.output_dir / "example_func.nii.gz"
     brain = np.asarray(nib.load(str(feat.mask)).dataobj) > 0
     tissue_masks = {}
+    tissue_resampler = TorchFLIRT(device=str(selected))
+    t1_to_epi_matrix = np.linalg.inv(bbr.matrix)
     for name, enabled, pve in (("csf", regress_csf, csf_pve), ("wm", regress_wm, wm_pve)):
         if not enabled:
             continue
-        epi_pve = resample_world(
-            pve, epi_ref, bbr.moving_to_fixed_world,
-            mask_dir / f"{name}_pve_epi.nii.gz", device=selected,
-        )
-        tissue = (np.asarray(nib.load(str(epi_pve)).dataobj) >= 0.8) & brain
+        # FLIRT 在较粗的 EPI 网格采样前预滤波，防止概率图降采样混叠。
+        epi_pve = tissue_resampler.applyxfm(pve, epi_ref, init=t1_to_epi_matrix).moved
+        nib.save(epi_pve, str(mask_dir / f"{name}_pve_epi.nii.gz"))
+        tissue = (np.asarray(epi_pve.dataobj) >= 0.8) & brain
         if not tissue.any():
             raise ValueError(f"regress_{name}=True requires a nonempty EPI {name.upper()} mask")
         tissue_masks[name] = _save_mask(tissue, epi_ref, mask_dir / f"{name}_epi.nii.gz")
@@ -418,6 +420,7 @@ def fMRIVolume_pipeline(
             "Configuration": configuration,
             "Source": provenance,
             "MNIInterpolation": "cubic-bspline-periodic",
+            "TissueInterpolation": "flirt-trilinear-prefilter-float32-coordinates",
             "TimingSeconds": timing,
             "Report": json.loads(report.read_text(encoding="utf-8")),
         },

@@ -1,6 +1,8 @@
 # fMRI volume 修复与真实数据复测
 
-2026-10-01，在 gpucw1 上用 `3b9b0f8128f10da77d3fbb6c395e9127353c3e46` 完整处理一例真实 UKB 的 490 帧 BOLD，使用当前 FLIRT、SynthMorph、ICA-AROMA、WM/CSF/24 项运动回归。运行时没有调用 FSL、FreeSurfer、AFNI 或封装软件；原 FSL 仅用于独立参照。
+2026-10-01，在 gpucw1 上用 `3b9b0f8128f10da77d3fbb6c395e9127353c3e46` 完整处理一例真实 UKB 的 490 帧 BOLD，使用该提交的 FLIRT、SynthMorph、ICA-AROMA、WM/CSF/24 项运动回归。运行时没有调用 FSL、FreeSurfer、AFNI 或封装软件；原 FSL 仅用于独立参照。
+
+本页记录的是组织预滤波修复前的 SynthMorph 分支。修复后当前 FNIRT 分支与原软件的完整同步骤结果见[最新对照](matched_native.md)。
 
 ## 修改了什么
 
@@ -76,7 +78,7 @@ python validation/fmri/check_real_confounds.py \
 
 MNI 参照文件 `ukb_fix_mni2mm.nii.gz` 由 UKB 发布的原生 `filtered_func_data_clean.nii.gz` 与官方 `example_func2standard_warp.nii.gz`，通过原版 FSL `applywarp --interp=spline` 生成，使用 FSL 的 MNI152 T1 2 mm 模板和脑掩膜。它不是发布 ZIP 中直接提供的同名 MNI 文件；网格为 91×109×91×490，TR 0.735 s，完整 SHA-256 见比较报告中的 `mni.input_sha256.official_fix_official_warp`。
 
-官方发布数据的 FIX、GDC/B0 和配准与本流程不同。完整 MNI 时间 r 均值 0.271534 与上一版 0.273070 接近；当前使用 ICA-AROMA，不以 FIX 等价作为验收目标。固定同一个 warp 或同一个官方清理图的控制见[新旧与官方报告](volume_fixed_comparison.public.json)和[全流程表格](README.md)。同场插值的一致性不意味着配准估计等价。
+官方发布数据的 FIX、GDC/B0 和配准与本流程不同。完整 MNI 时间 r 均值 0.271534 与上一版 0.273070 接近；当前使用 ICA-AROMA，不以 FIX 等价作为验收目标。固定同一个 warp 或同一个官方清理图的控制见[新旧与官方报告](volume_fixed_comparison.public.json)和[比较报告中的完整控制](volume_fixed_comparison.public.json)。同场插值的一致性不意味着配准估计等价。
 
 复测新旧完整结果需传入私有运行目录、官方文件及模板：
 

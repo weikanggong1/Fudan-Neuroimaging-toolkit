@@ -12,7 +12,7 @@
 
 实现包含 FSL scaled-mm 坐标、8/4/2/1 mm 多层搜索、Brent 坐标优化、correlation ratio、normalized mutual information 和默认三线性输出路径。默认角度搜索遵循 FSL 的 `search 12`，包括 `dof=6` 的初始化；`dof` 决定后续优化和最终变换的自由度。
 
-图像与 cost 使用 float32，矩阵构造使用 double，NMI 直方图使用 float64 累加。CUDA 默认允许 TF32；候选 cost 的坐标与融合采样使用明确的 float32 运算，不使用 TF32 GEMM，并关闭 FMA。没有使用 float16 或 bfloat16。与官方 FSL 的误差及测量范围见本页真实数据对照。
+图像与 cost 使用 float32，矩阵构造使用 double，NMI 直方图使用 float64 累加。CUDA 默认允许 TF32；候选 cost 的坐标与融合采样使用明确的 float32 运算，不使用 TF32 GEMM，并关闭 FMA。输出采样及 `applyxfm` 的坐标也按 float32 系数逐项计算，避免 TF32 矩阵乘法改变采样位置。没有使用 float16 或 bfloat16。与官方 FSL 的误差及测量范围见本页真实数据对照。
 
 ## 输入
 
@@ -171,6 +171,8 @@ result = run_flirt(
 ```
 
 同一计算也可直接取得内存结果：`TorchFLIRT(device="cuda:0").applyxfm(mni_1mm, mni_2mm, usesqform=True)`。如果已有由 FLIRT 产生的 input→reference `.mat`，把上面 `usesqform=True` 改为 `init="/absolute/path/input_to_reference.mat"`，保留 `applyxfm=True`；这时直接应用该矩阵。`init` 和 `usesqform` 必须二选一。`-inweight`、`-refweight`、非默认 `-dof/-cost` 只用于配准，不用于 `applyxfm`。
+
+真实 T1 FAST 概率图到 EPI 网格的同输入、同矩阵控制，验证了默认降采样预滤波与上述坐标精度；GPU 保持 TF32 默认开启。精度及 0.8 阈值后的组织掩膜一致性见[fMRI 相同步骤对照](../../validation/fmri/matched_native.md)。
 
 FNIT 命令行与对应原软件命令：
 
