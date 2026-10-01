@@ -1,0 +1,2185 @@
+{
+  "schema_version": 1,
+  "function": "FNIT MSMSulc/newMSM",
+  "scope": "source-bound real-data registration and identical fixed confound-regressed 490-frame BOLD projection; anonymous aggregate scalars only",
+  "privacy_checks": {
+    "no_subject_identifiers": true,
+    "no_input_paths_or_hashes": true,
+    "no_native_vertex_or_face_counts": true,
+    "no_affine_parameter_arrays": true,
+    "no_vertex_or_image_arrays": true
+  },
+  "summary_helper_sha256": "c52356317e6cad7aab5aacf3f023a7c53772046d21a1219e38ca81887f11ffb5",
+  "configuration": {
+    "canonical_sha256": "46b250404cb2570b4f645d8e53c30fabde799663d61761d61cf54ff110318203",
+    "official_strict_sha256": "17c473d3090b10349909a374efb182a020a06bc6908a284a3f3fe4424252716e",
+    "official_threads8_sha256": "cd3c2453fde7dde61fea937a15021513fa3c429ead4d0a873fc1d98f68b8bb2c",
+    "strict_change": "append --numthreads=1; no other canonical changes",
+    "official_numthreads_is_config_option": true,
+    "fnit_values": {
+      "simval": "3,2,2,2",
+      "iterations": "50,10,15,15",
+      "control_grid": "6,2,3,4",
+      "sampling_grid": "6,4,5,6",
+      "data_grid": "6,4,5,6",
+      "regularization": "0.0,10.0,7.5,7.5",
+      "affine_step_size": 0.009999999776482582,
+      "affine_gradient_spacing": 0.5,
+      "shear_modulus": 0.4000000059604645,
+      "bulk_modulus": 1.600000023841858,
+      "strain_exponent": 2.0,
+      "regularization_exponent": 2.0
+    },
+    "fnit_cpu_threads": 4
+  },
+  "official": {
+    "binary_sha256": "af5c04246cfeea19233232168acbc1f31266f28b1a7cb6779b8f1bfa32eb9615",
+    "source_audit": {
+      "recipe_declared_revision": "393a69079ff3c9c90a624fb6ab1ea703585dda27",
+      "matched_algorithm_revision": "260718953547743c028a45f8c885d163441df87a",
+      "matched_cpp_header_files": 45,
+      "all_matched_bytes": true,
+      "algorithm_scope": "39 core/geometry source files,4Fusion/FastPD headers,2ELC headers",
+      "affine_simval3_parser_remaps_to_pearson2": true
+    },
+    "threads1": {
+      "L_seconds": 801.2372827683575,
+      "R_seconds": 786.4617640632205,
+      "paired_hemispheres_seconds": 1587.699046831578,
+      "both_exit_code_zero": true,
+      "L_repeat_seconds": 800.9694077270105,
+      "L_repeat_vertices_bitwise_exact": true,
+      "L_repeat_faces_bitwise_exact": true,
+      "L_repeat_sphere_angle_deg": {
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "maximum": 0.0
+      }
+    },
+    "threads8": {
+      "L_seconds": 190.79035434266552,
+      "R_seconds": 187.2416681619361,
+      "paired_hemispheres_seconds": 378.0320225046016,
+      "both_exit_code_zero": true,
+      "L_repeat_seconds": 185.53656947799027,
+      "L_repeat_sphere_angle_deg": {
+        "mean": 0.3429245160454457,
+        "median": 0.3062454330363156,
+        "p95": 0.7446357738125383,
+        "maximum": 1.5957492556717643
+      },
+      "reproducibility_scope": "two independent left-hemisphere repeats; source contains unsynchronized shared metric-correction accumulation"
+    }
+  },
+  "before8d": {
+    "bindings": {
+      "source_sha256": {
+        "src/fnit/msm/__init__.py": "de41e468144cd9a173d939543b9885b6f5907eec182b478a6d44629b9aceb942",
+        "src/fnit/msm/_affine.py": "03df2e9d935bd5dfc227b89f23a4d65010f368e464f04a236670dc436c4ac0ac",
+        "src/fnit/msm/msmsulc.py": "89fe1e509c9f280fe0b309e3da51fca66b6efa20ed061bf96e9e1444df08634c",
+        "src/fnit/msm/prepare.py": "30dc5fdb17628b70ec42e87f0d04c3d7e5f7c4faf35292e0a89493536006d675",
+        "src/fnit/msm/_fastpd_src/FastPD.h": "d21f2640701d743b53d83d7ecd119db454bc36bf877c5862846de04254183698",
+        "src/fnit/msm/_fastpd_src/block.h": "9aafefcf97a94e55027baae2d518cff2bc0739024b1f017747da6d310426cddb",
+        "src/fnit/msm/_fastpd_src/fastpd_module.cpp": "9bb1820141b81b530bf557d5dbdccb11c0fbad09bed86a0b5a9617463da3686d",
+        "src/fnit/msm/_fastpd_src/fnit_fastpd_model_stub.h": "a11a81379cef2466b410039956ffbebab4f979abaa94122e761a833dd4b310d5",
+        "src/fnit/msm/_fastpd_src/graph.h": "b75781e1719df32a6bc5741cbbd97745568207045e5397897629b00d4ab93fd9"
+      },
+      "benchmark_tool_sha256": "ab46722297c201c184b003582b5e036826eda81706be75c84d20eee84faa2065",
+      "native_extension_sha256": "70fd1c4e57e5b5ea16b32a55f606de65f0e9ac67df5915a405bb1dbd9109435f",
+      "environment": {
+        "torch": "2.5.1",
+        "cuda_runtime": "11.8",
+        "device": "cuda",
+        "cpu_threads": 4,
+        "gpu_name": "NVIDIA H100 PCIe"
+      },
+      "timing_scope": "complete paired registration including input reads and output sphere/report writes; excludes offline metrics and projection",
+      "cold_definition": "first full call after Python import and CUDA context initialization in this process"
+    },
+    "requested_canonical_applied": false,
+    "comparison_scope": "historical hard-coded first DISCRETE SSD and 8-iteration schedule; not a same-algorithm speed comparison",
+    "runs": [
+      {
+        "condition": "cold_0",
+        "wall_seconds": 217.03653534734622,
+        "process_peak_cpu_rss_kb": 1169660,
+        "measurement": {
+          "phase_timings": {
+            "affine_initialization": {
+              "calls": 2,
+              "wall_seconds": 17.922927983570844,
+              "exclusive_wall_seconds": 17.922927983570844
+            },
+            "spheremap_weights": {
+              "calls": 1792,
+              "wall_seconds": 120.32242484297603,
+              "exclusive_wall_seconds": 120.32242484297603
+            },
+            "adaptive_metric_resampling": {
+              "calls": 12,
+              "wall_seconds": 8.685907776467502,
+              "exclusive_wall_seconds": 7.856362861581147
+            },
+            "radialspheremap_weights": {
+              "calls": 152,
+              "wall_seconds": 12.824641095940024,
+              "exclusive_wall_seconds": 12.824641095940024
+            },
+            "face_layout": {
+              "calls": 48,
+              "wall_seconds": 0.7860878673382103,
+              "exclusive_wall_seconds": 0.7860878673382103
+            },
+            "label_rotation": {
+              "calls": 1768,
+              "wall_seconds": 12.15593030070886,
+              "exclusive_wall_seconds": 12.15593030070886
+            },
+            "face_costs": {
+              "calls": 1768,
+              "wall_seconds": 131.44991634972394,
+              "exclusive_wall_seconds": 11.957036421634257
+            },
+            "hocr_fastpd": {
+              "calls": 1768,
+              "wall_seconds": 22.066079253330827,
+              "exclusive_wall_seconds": 22.066079253330827
+            },
+            "fold_repair": {
+              "calls": 2,
+              "wall_seconds": 0.26482931105419993,
+              "exclusive_wall_seconds": 0.26482931105419993
+            }
+          },
+          "operation_counts": {
+            "affine_initialization": 2,
+            "spheremap_weights": 1792,
+            "adaptive_metric_resampling": 12,
+            "radialspheremap_weights": 152,
+            "face_layout": 48,
+            "label_rotation": 1768,
+            "face_costs": 1768,
+            "hocr_fastpd": 1768,
+            "fold_repair": 2
+          },
+          "cuda_tensor_api_calls": {},
+          "actual_cuda_event_counts": {},
+          "profiled_cuda_device_time_us": {},
+          "profile_windows": 0,
+          "profiler_scope": "not profiled",
+          "phase_timing_scope": "nested host wall clocks without additional GPU fences; not isolated GPU kernel duration",
+          "instrumentation_changes_timing": false
+        },
+        "whole_gpu_observation": {
+          "scope": "whole GPU; includes unrelated processes",
+          "sample_interval_seconds": 1.0,
+          "samples": 200,
+          "gpu_utilization_percent": {
+            "mean": 97.95,
+            "median": 100.0,
+            "p95": 100.0,
+            "minimum": 65.0,
+            "maximum": 100.0
+          },
+          "whole_gpu_used_mib": {
+            "mean": 26958.75,
+            "median": 27105.0,
+            "p95": 27105.0,
+            "minimum": 25741.0,
+            "maximum": 27105.0
+          },
+          "uuid_mapping_available": true
+        },
+        "peak_after_last_source_reset_bytes": 726682624,
+        "reserved_after_last_source_reset_bytes": 891289600,
+        "hemisphere_stages": {
+          "L": {
+            "seconds": 109.39972689794376,
+            "peak_allocated_gb": 0.726403072,
+            "discrete_levels": {
+              "1": {
+                "seconds": 14.329244317021221,
+                "completed_iterations": 8
+              },
+              "2": {
+                "seconds": 25.409668838139623,
+                "completed_iterations": 8
+              },
+              "3": {
+                "seconds": 57.936618788167834,
+                "completed_iterations": 8
+              }
+            }
+          },
+          "R": {
+            "seconds": 107.63268215907738,
+            "peak_allocated_gb": 0.726682624,
+            "discrete_levels": {
+              "1": {
+                "seconds": 14.306328267324716,
+                "completed_iterations": 8
+              },
+              "2": {
+                "seconds": 24.929654149804264,
+                "completed_iterations": 8
+              },
+              "3": {
+                "seconds": 58.136215067934245,
+                "completed_iterations": 8
+              }
+            }
+          }
+        },
+        "sphere_paired": {
+          "L": {
+            "native_topology_exact": true,
+            "sphere_angle_deg": {
+              "mean": 0.4930420412377775,
+              "median": 0.3986120121308234,
+              "p95": 1.154191190055716,
+              "maximum": 3.819122258655895
+            },
+            "chord_difference_mm": {
+              "mean": 0.860509431222427,
+              "median": 0.6957078184467982,
+              "p95": 2.0144095806542146,
+              "maximum": 6.664392034837122
+            },
+            "fnit_folded_faces": 0,
+            "official_folded_faces": 1
+          },
+          "R": {
+            "native_topology_exact": true,
+            "sphere_angle_deg": {
+              "mean": 0.4697058047598605,
+              "median": 0.43484519514059283,
+              "p95": 0.9299927498693995,
+              "maximum": 1.4840819951315585
+            },
+            "chord_difference_mm": {
+              "mean": 0.8197868523060529,
+              "median": 0.7589462087582293,
+              "p95": 1.6231257541672766,
+              "maximum": 2.59013923997367
+            },
+            "fnit_folded_faces": 0,
+            "official_folded_faces": 0
+          }
+        }
+      },
+      {
+        "condition": "warm_1",
+        "wall_seconds": 216.2507308148779,
+        "process_peak_cpu_rss_kb": 1173328,
+        "measurement": {
+          "phase_timings": {
+            "affine_initialization": {
+              "calls": 2,
+              "wall_seconds": 15.952427000273019,
+              "exclusive_wall_seconds": 15.952427000273019
+            },
+            "spheremap_weights": {
+              "calls": 1792,
+              "wall_seconds": 120.4595377878286,
+              "exclusive_wall_seconds": 120.4595377878286
+            },
+            "adaptive_metric_resampling": {
+              "calls": 12,
+              "wall_seconds": 8.407100246287882,
+              "exclusive_wall_seconds": 7.655474506318569
+            },
+            "radialspheremap_weights": {
+              "calls": 152,
+              "wall_seconds": 12.873269862961024,
+              "exclusive_wall_seconds": 12.873269862961024
+            },
+            "face_layout": {
+              "calls": 48,
+              "wall_seconds": 0.7928728959523141,
+              "exclusive_wall_seconds": 0.7928728959523141
+            },
+            "label_rotation": {
+              "calls": 1768,
+              "wall_seconds": 12.706766257528216,
+              "exclusive_wall_seconds": 12.706766257528216
+            },
+            "face_costs": {
+              "calls": 1768,
+              "wall_seconds": 132.05360426567495,
+              "exclusive_wall_seconds": 12.345692217815667
+            },
+            "hocr_fastpd": {
+              "calls": 1768,
+              "wall_seconds": 22.26446339301765,
+              "exclusive_wall_seconds": 22.26446339301765
+            },
+            "fold_repair": {
+              "calls": 2,
+              "wall_seconds": 0.12337420834228396,
+              "exclusive_wall_seconds": 0.12337420834228396
+            }
+          },
+          "operation_counts": {
+            "affine_initialization": 2,
+            "spheremap_weights": 1792,
+            "adaptive_metric_resampling": 12,
+            "radialspheremap_weights": 152,
+            "face_layout": 48,
+            "label_rotation": 1768,
+            "face_costs": 1768,
+            "hocr_fastpd": 1768,
+            "fold_repair": 2
+          },
+          "cuda_tensor_api_calls": {},
+          "actual_cuda_event_counts": {},
+          "profiled_cuda_device_time_us": {},
+          "profile_windows": 0,
+          "profiler_scope": "not profiled",
+          "phase_timing_scope": "nested host wall clocks without additional GPU fences; not isolated GPU kernel duration",
+          "instrumentation_changes_timing": false
+        },
+        "whole_gpu_observation": {
+          "scope": "whole GPU; includes unrelated processes",
+          "sample_interval_seconds": 1.0,
+          "samples": 197,
+          "gpu_utilization_percent": {
+            "mean": 97.9238578680203,
+            "median": 100.0,
+            "p95": 100.0,
+            "minimum": 73.0,
+            "maximum": 100.0
+          },
+          "whole_gpu_used_mib": {
+            "mean": 28163.274111675128,
+            "median": 27105.0,
+            "p95": 32314.4,
+            "minimum": 27105.0,
+            "maximum": 36186.0
+          },
+          "uuid_mapping_available": true
+        },
+        "peak_after_last_source_reset_bytes": 726682624,
+        "reserved_after_last_source_reset_bytes": 891289600,
+        "hemisphere_stages": {
+          "L": {
+            "seconds": 106.27152184210718,
+            "peak_allocated_gb": 0.726403072,
+            "discrete_levels": {
+              "1": {
+                "seconds": 14.086339057888836,
+                "completed_iterations": 8
+              },
+              "2": {
+                "seconds": 25.04254448506981,
+                "completed_iterations": 8
+              },
+              "3": {
+                "seconds": 57.28236672794446,
+                "completed_iterations": 8
+              }
+            }
+          },
+          "R": {
+            "seconds": 109.974809656851,
+            "peak_allocated_gb": 0.726682624,
+            "discrete_levels": {
+              "1": {
+                "seconds": 14.266309374012053,
+                "completed_iterations": 8
+              },
+              "2": {
+                "seconds": 25.426580018363893,
+                "completed_iterations": 8
+              },
+              "3": {
+                "seconds": 60.16994168702513,
+                "completed_iterations": 8
+              }
+            }
+          }
+        },
+        "sphere_paired": {
+          "L": {
+            "native_topology_exact": true,
+            "sphere_angle_deg": {
+              "mean": 0.4930420412377775,
+              "median": 0.3986120121308234,
+              "p95": 1.154191190055716,
+              "maximum": 3.819122258655895
+            },
+            "chord_difference_mm": {
+              "mean": 0.860509431222427,
+              "median": 0.6957078184467982,
+              "p95": 2.0144095806542146,
+              "maximum": 6.664392034837122
+            },
+            "fnit_folded_faces": 0,
+            "official_folded_faces": 1
+          },
+          "R": {
+            "native_topology_exact": true,
+            "sphere_angle_deg": {
+              "mean": 0.4697058047598605,
+              "median": 0.43484519514059283,
+              "p95": 0.9299927498693995,
+              "maximum": 1.4840819951315585
+            },
+            "chord_difference_mm": {
+              "mean": 0.8197868523060529,
+              "median": 0.7589462087582293,
+              "p95": 1.6231257541672766,
+              "maximum": 2.59013923997367
+            },
+            "fnit_folded_faces": 0,
+            "official_folded_faces": 0
+          }
+        }
+      }
+    ],
+    "strict1_projection": {
+      "wall_seconds_including_sphere_specific_area_surfaces": 304.9330510376021,
+      "projection_tool_sha256": "08511ad875fc9d3d42ec8e47e16791404188cbd8e1080818b5f0d1138de88bef",
+      "projection_source_sha256": {
+        "surface.py": "6809dbfcbbebfd3c63854b9051c9dfa6a59755ccf2a55c750be80eed93fa3970",
+        "surface_fmriprep.py": "0d1e55c3431758782ad576a285e37117cf49074bbe2767987361f6a488eee76f"
+      },
+      "sphere_paired": {
+        "L": {
+          "native_topology_exact": true,
+          "sphere_angle_deg": {
+            "mean": 0.5235352178410924,
+            "median": 0.43505339382360003,
+            "p95": 1.1331915380767428,
+            "maximum": 3.9019872902277464
+          },
+          "chord_difference_mm": {
+            "mean": 0.9137276384816562,
+            "median": 0.7593095751208316,
+            "p95": 1.9777601064573638,
+            "maximum": 6.808936487014111
+          },
+          "fnit_folded_faces": 0,
+          "official_folded_faces": 1
+        },
+        "R": {
+          "native_topology_exact": true,
+          "sphere_angle_deg": {
+            "mean": 0.4697058047598605,
+            "median": 0.43484519514059283,
+            "p95": 0.9299927498693995,
+            "maximum": 1.4840819951315585
+          },
+          "chord_difference_mm": {
+            "mean": 0.8197868523060529,
+            "median": 0.7589462087582293,
+            "p95": 1.6231257541672766,
+            "maximum": 2.59013923997367
+          },
+          "fnit_folded_faces": 0,
+          "official_folded_faces": 0
+        }
+      },
+      "cifti_paired": {
+        "frames": 490,
+        "time_axis_exact": true,
+        "brain_model_axis_exact": true,
+        "correlation_definition": "Pearson across time for each valid grayordinate, then arithmetic mean",
+        "structures": {
+          "CIFTI_STRUCTURE_CORTEX_LEFT": {
+            "mean_temporal_r": 0.9208028593424604,
+            "median_temporal_r": 0.9628860424779117,
+            "mean_absolute_difference": 21.020293280639727,
+            "maximum_absolute_difference": 764.2099151611328
+          },
+          "CIFTI_STRUCTURE_CORTEX_RIGHT": {
+            "mean_temporal_r": 0.941544980883716,
+            "median_temporal_r": 0.9637727479855046,
+            "mean_absolute_difference": 20.049062881022007,
+            "maximum_absolute_difference": 879.6320495605469
+          },
+          "CIFTI_STRUCTURE_ACCUMBENS_LEFT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_ACCUMBENS_RIGHT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_AMYGDALA_LEFT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_AMYGDALA_RIGHT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_BRAIN_STEM": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_CAUDATE_LEFT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_CAUDATE_RIGHT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_CEREBELLUM_LEFT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_CEREBELLUM_RIGHT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_DIENCEPHALON_VENTRAL_LEFT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_DIENCEPHALON_VENTRAL_RIGHT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_HIPPOCAMPUS_LEFT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_HIPPOCAMPUS_RIGHT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_PALLIDUM_LEFT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_PALLIDUM_RIGHT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_PUTAMEN_LEFT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_PUTAMEN_RIGHT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_THALAMUS_LEFT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_THALAMUS_RIGHT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          }
+        }
+      }
+    }
+  },
+  "after": {
+    "bindings": {
+      "source_sha256": {
+        "src/fnit/msm/__init__.py": "ef44375f8c3fa066ca435528e1457b636573f3c789984638edea48caa029c605",
+        "src/fnit/msm/_affine.py": "d6cf3064c6c528ba08b371918206811f9ad156b2cfb9874e8711c93a76e0672b",
+        "src/fnit/msm/_sphere_map.py": "db87a40e788161c03fe1dd8d67e6b3a77247c3f1e198e964f34e4c2120e9c63a",
+        "src/fnit/msm/config.py": "20afadd2860c2782fa3983f56d1351e31a56e415f75761798223ad455335e8c9",
+        "src/fnit/msm/msmsulc.py": "1b80dfbfa6e21f842f42c25cc85a820b56fabc93d6ea0252d6f751f0fe1d3544",
+        "src/fnit/msm/prepare.py": "30dc5fdb17628b70ec42e87f0d04c3d7e5f7c4faf35292e0a89493536006d675",
+        "src/fnit/msm/_fastpd_src/FastPD.h": "d21f2640701d743b53d83d7ecd119db454bc36bf877c5862846de04254183698",
+        "src/fnit/msm/_fastpd_src/block.h": "9aafefcf97a94e55027baae2d518cff2bc0739024b1f017747da6d310426cddb",
+        "src/fnit/msm/_fastpd_src/fastpd_module.cpp": "6c6fc7001eaeea145f49ff85ba347e3776ed2ea0c7a3c024aaf86e0f9f4ddfea",
+        "src/fnit/msm/_fastpd_src/fnit_fastpd_model_stub.h": "a11a81379cef2466b410039956ffbebab4f979abaa94122e761a833dd4b310d5",
+        "src/fnit/msm/_fastpd_src/graph.h": "b75781e1719df32a6bc5741cbbd97745568207045e5397897629b00d4ab93fd9"
+      },
+      "benchmark_tool_sha256": "887aba5bd028564128e7a5b0751aabdc383505a3777b3f51f1a7a6ab39da2708",
+      "native_extension_sha256": "41c4c3e4f6bb9713bcde534aac5611ff50425a243d91d11aba77faa8ac57b13f",
+      "environment": {
+        "torch": "2.5.1",
+        "cuda_runtime": "11.8",
+        "device": "cuda",
+        "cpu_threads": 4,
+        "gpu_name": "NVIDIA H100 PCIe"
+      },
+      "timing_scope": "complete paired registration including input reads and output sphere/report writes; excludes offline metrics and projection",
+      "cold_definition": "first full call after Python import and CUDA context initialization in this process"
+    },
+    "first_validation": {
+      "condition": "cold_0",
+      "wall_seconds": 209.5862593143247,
+      "process_peak_cpu_rss_kb": 921560,
+      "measurement": {
+        "phase_timings": {
+          "radialspheremap_preparation": {
+            "calls": 150,
+            "wall_seconds": 15.60548742627725,
+            "exclusive_wall_seconds": 15.60548742627725
+          },
+          "radialspheremap_weights": {
+            "calls": 2115,
+            "wall_seconds": 148.06945008737966,
+            "exclusive_wall_seconds": 148.06945008737966
+          },
+          "adaptive_metric_resampling": {
+            "calls": 16,
+            "wall_seconds": 11.464659191668034,
+            "exclusive_wall_seconds": 0.679006437305361
+          },
+          "variance_normalization": {
+            "calls": 16,
+            "wall_seconds": 0.12382047204300761,
+            "exclusive_wall_seconds": 0.12382047204300761
+          },
+          "affine_source_wls": {
+            "calls": 162,
+            "wall_seconds": 1.431625995784998,
+            "exclusive_wall_seconds": 1.431625995784998
+          },
+          "rigid_cost_evaluation": {
+            "calls": 162,
+            "wall_seconds": 9.43322885595262,
+            "exclusive_wall_seconds": 1.668443058617413
+          },
+          "affine_initialization": {
+            "calls": 2,
+            "wall_seconds": 11.92615913785994,
+            "exclusive_wall_seconds": 2.2368137114681304
+          },
+          "progressive_sphere_warp": {
+            "calls": 62,
+            "wall_seconds": 7.952669516671449,
+            "exclusive_wall_seconds": 0.04766524909064174
+          },
+          "topology_unfolding": {
+            "calls": 96,
+            "wall_seconds": 0.6622086674906313,
+            "exclusive_wall_seconds": 0.6622086674906313
+          },
+          "source_rotation_matrices": {
+            "calls": 48,
+            "wall_seconds": 0.007959684357047081,
+            "exclusive_wall_seconds": 0.007959684357047081
+          },
+          "label_rotation_preparation": {
+            "calls": 48,
+            "wall_seconds": 0.08400690043345094,
+            "exclusive_wall_seconds": 0.07604721607640386
+          },
+          "face_layout": {
+            "calls": 48,
+            "wall_seconds": 0.7759883529506624,
+            "exclusive_wall_seconds": 0.7759883529506624
+          },
+          "label_rotation": {
+            "calls": 1811,
+            "wall_seconds": 3.472163163125515,
+            "exclusive_wall_seconds": 3.472163163125515
+          },
+          "face_costs": {
+            "calls": 1811,
+            "wall_seconds": 147.52522498043254,
+            "exclusive_wall_seconds": 10.737909309566021
+          },
+          "hocr_fastpd": {
+            "calls": 1763,
+            "wall_seconds": 15.467055990826339,
+            "exclusive_wall_seconds": 15.467055990826339
+          }
+        },
+        "operation_counts": {
+          "radialspheremap_preparation": 150,
+          "radialspheremap_weights": 2115,
+          "adaptive_metric_resampling": 16,
+          "variance_normalization": 16,
+          "affine_source_wls": 162,
+          "affine_wls_host_payload_bytes": 1911123072,
+          "affine_wls_query_slots": 79630128,
+          "rigid_cost_evaluation": 162,
+          "affine_initialization": 2,
+          "progressive_sphere_warp": 62,
+          "topology_unfolding": 96,
+          "source_rotation_matrices": 48,
+          "control_rotation_points": 53856,
+          "control_rotation_host_input_bytes": 1293696,
+          "control_rotation_host_result_bytes": 3877632,
+          "label_rotation_preparation": 48,
+          "face_layout": 48,
+          "label_rotation": 1811,
+          "face_costs": 1811,
+          "face_configuration_evaluations": 31754240,
+          "hocr_fastpd": 1763
+        },
+        "cuda_tensor_api_calls": {},
+        "actual_cuda_event_counts": {},
+        "profiled_cuda_device_time_us": {},
+        "profile_windows": 0,
+        "profiler_scope": "not profiled",
+        "phase_timing_scope": "nested host wall clocks without additional GPU fences; not isolated GPU kernel duration",
+        "instrumentation_changes_timing": false
+      },
+      "whole_gpu_observation": {
+        "scope": "whole GPU; includes unrelated processes",
+        "sample_interval_seconds": 1.0,
+        "samples": 193,
+        "gpu_utilization_percent": {
+          "mean": 98.10362694300518,
+          "median": 100.0,
+          "p95": 100.0,
+          "minimum": 41.0,
+          "maximum": 100.0
+        },
+        "whole_gpu_used_mib": {
+          "mean": 43423.96373056995,
+          "median": 46639.0,
+          "p95": 48647.0,
+          "minimum": 30357.0,
+          "maximum": 49419.0
+        },
+        "uuid_mapping_available": true
+      },
+      "peak_after_last_source_reset_bytes": 330396160,
+      "reserved_after_last_source_reset_bytes": 425721856,
+      "peak_allocated_bytes": 343583232,
+      "peak_reserved_bytes": 425721856,
+      "hemisphere_stages": {
+        "L": {
+          "seconds": 107.1079062349163,
+          "affine_seconds": 7.983246703166515,
+          "affine": {
+            "cost_evaluations": 77,
+            "initial_similarity": 24002.327790282776,
+            "final_best_similarity": 24047.388111093576,
+            "constant_similarity": false
+          },
+          "folded_output_faces": 1,
+          "folded_solver_faces": 1,
+          "minimum_output_orientation_ratio": -2.3807452682675962,
+          "minimum_solver_orientation_ratio": -2.3807531609527746,
+          "degenerate_input_faces": 0,
+          "peak_allocated_gb": 0.343583232,
+          "discrete_levels": {
+            "1": {
+              "seconds": 13.901570087764412,
+              "maximum_iterations": 10,
+              "converged": true,
+              "source_unfold_updates": 0,
+              "control_unfold_updates": 0,
+              "completed_iterations": 10
+            },
+            "2": {
+              "seconds": 25.322303812019527,
+              "maximum_iterations": 15,
+              "converged": true,
+              "source_unfold_updates": 0,
+              "control_unfold_updates": 0,
+              "completed_iterations": 8
+            },
+            "3": {
+              "seconds": 58.735254533123225,
+              "maximum_iterations": 15,
+              "converged": true,
+              "source_unfold_updates": 0,
+              "control_unfold_updates": 0,
+              "completed_iterations": 8
+            }
+          }
+        },
+        "R": {
+          "seconds": 102.47254091035575,
+          "affine_seconds": 8.08553005894646,
+          "affine": {
+            "cost_evaluations": 85,
+            "initial_similarity": 23539.002512351573,
+            "final_best_similarity": 23609.868502765785,
+            "constant_similarity": false
+          },
+          "folded_output_faces": 0,
+          "folded_solver_faces": 0,
+          "minimum_output_orientation_ratio": 0.47816521499101894,
+          "minimum_solver_orientation_ratio": 0.4781495532529904,
+          "degenerate_input_faces": 0,
+          "peak_allocated_gb": 0.33039616,
+          "discrete_levels": {
+            "1": {
+              "seconds": 9.517741709016263,
+              "maximum_iterations": 10,
+              "converged": true,
+              "source_unfold_updates": 0,
+              "control_unfold_updates": 0,
+              "completed_iterations": 6
+            },
+            "2": {
+              "seconds": 25.356228180695325,
+              "maximum_iterations": 15,
+              "converged": true,
+              "source_unfold_updates": 0,
+              "control_unfold_updates": 0,
+              "completed_iterations": 8
+            },
+            "3": {
+              "seconds": 58.09114232985303,
+              "maximum_iterations": 15,
+              "converged": true,
+              "source_unfold_updates": 0,
+              "control_unfold_updates": 0,
+              "completed_iterations": 8
+            }
+          }
+        }
+      },
+      "sphere_paired": {
+        "L": {
+          "native_topology_exact": true,
+          "sphere_angle_deg": {
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "maximum": 0.0
+          },
+          "chord_difference_mm": {
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "maximum": 0.0
+          },
+          "fnit_folded_faces": 1,
+          "official_folded_faces": 1
+        },
+        "R": {
+          "native_topology_exact": true,
+          "sphere_angle_deg": {
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "maximum": 0.0
+          },
+          "chord_difference_mm": {
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "maximum": 0.0
+          },
+          "fnit_folded_faces": 0,
+          "official_folded_faces": 0
+        }
+      }
+    },
+    "optimized_runs": [
+      {
+        "condition": "cold_0",
+        "wall_seconds": 201.99315331690013,
+        "process_peak_cpu_rss_kb": 926508,
+        "measurement": {
+          "phase_timings": {
+            "radialspheremap_preparation": {
+              "calls": 150,
+              "wall_seconds": 15.171320531517267,
+              "exclusive_wall_seconds": 15.171320531517267
+            },
+            "radialspheremap_weights": {
+              "calls": 2115,
+              "wall_seconds": 143.99252485344186,
+              "exclusive_wall_seconds": 143.99252485344186
+            },
+            "adaptive_metric_resampling": {
+              "calls": 16,
+              "wall_seconds": 11.234529958106577,
+              "exclusive_wall_seconds": 0.6375555880367756
+            },
+            "variance_normalization": {
+              "calls": 16,
+              "wall_seconds": 0.12195684853941202,
+              "exclusive_wall_seconds": 0.12195684853941202
+            },
+            "affine_source_wls": {
+              "calls": 162,
+              "wall_seconds": 1.522247635293752,
+              "exclusive_wall_seconds": 1.522247635293752
+            },
+            "rigid_cost_evaluation": {
+              "calls": 162,
+              "wall_seconds": 9.183136744890362,
+              "exclusive_wall_seconds": 1.5362311601638794
+            },
+            "affine_initialization": {
+              "calls": 2,
+              "wall_seconds": 11.58112237136811,
+              "exclusive_wall_seconds": 2.1497094961814582
+            },
+            "progressive_sphere_warp": {
+              "calls": 62,
+              "wall_seconds": 7.709442452061921,
+              "exclusive_wall_seconds": 0.046629499178379774
+            },
+            "topology_unfolding": {
+              "calls": 96,
+              "wall_seconds": 0.6174091957509518,
+              "exclusive_wall_seconds": 0.6174091957509518
+            },
+            "source_rotation_matrices": {
+              "calls": 48,
+              "wall_seconds": 0.008493241854012012,
+              "exclusive_wall_seconds": 0.008493241854012012
+            },
+            "label_rotation_preparation": {
+              "calls": 48,
+              "wall_seconds": 0.08213819563388824,
+              "exclusive_wall_seconds": 0.07364495377987623
+            },
+            "face_layout": {
+              "calls": 48,
+              "wall_seconds": 0.7356314910575747,
+              "exclusive_wall_seconds": 0.7356314910575747
+            },
+            "label_rotation": {
+              "calls": 1811,
+              "wall_seconds": 3.050702807959169,
+              "exclusive_wall_seconds": 3.050702807959169
+            },
+            "face_costs": {
+              "calls": 1811,
+              "wall_seconds": 142.74925350025296,
+              "exclusive_wall_seconds": 9.780975078698248
+            },
+            "hocr_fastpd": {
+              "calls": 1763,
+              "wall_seconds": 15.295516407582909,
+              "exclusive_wall_seconds": 15.295516407582909
+            }
+          },
+          "operation_counts": {
+            "radialspheremap_preparation": 150,
+            "radialspheremap_weights": 2115,
+            "adaptive_metric_resampling": 16,
+            "variance_normalization": 16,
+            "affine_source_wls": 162,
+            "affine_wls_host_payload_bytes": 1911123072,
+            "affine_wls_query_slots": 79630128,
+            "rigid_cost_evaluation": 162,
+            "affine_initialization": 2,
+            "progressive_sphere_warp": 62,
+            "topology_unfolding": 96,
+            "source_rotation_matrices": 48,
+            "control_rotation_points": 53856,
+            "control_rotation_host_input_bytes": 1293696,
+            "control_rotation_host_result_bytes": 3877632,
+            "label_rotation_preparation": 48,
+            "face_layout": 48,
+            "label_rotation": 1811,
+            "face_costs": 1811,
+            "face_configuration_evaluations": 31754240,
+            "hocr_fastpd": 1763
+          },
+          "cuda_tensor_api_calls": {},
+          "actual_cuda_event_counts": {},
+          "profiled_cuda_device_time_us": {},
+          "profile_windows": 0,
+          "profiler_scope": "not profiled",
+          "phase_timing_scope": "nested host wall clocks without additional GPU fences; not isolated GPU kernel duration",
+          "instrumentation_changes_timing": false
+        },
+        "whole_gpu_observation": {
+          "scope": "whole GPU; includes unrelated processes",
+          "sample_interval_seconds": 1.0,
+          "samples": 186,
+          "gpu_utilization_percent": {
+            "mean": 97.59139784946237,
+            "median": 100.0,
+            "p95": 100.0,
+            "minimum": 43.0,
+            "maximum": 100.0
+          },
+          "whole_gpu_used_mib": {
+            "mean": 25240.36559139785,
+            "median": 25242.0,
+            "p95": 25256.0,
+            "minimum": 24850.0,
+            "maximum": 25256.0
+          },
+          "uuid_mapping_available": true
+        },
+        "peak_after_last_source_reset_bytes": 330396160,
+        "reserved_after_last_source_reset_bytes": 425721856,
+        "peak_allocated_bytes": 343583232,
+        "peak_reserved_bytes": 425721856,
+        "hemisphere_stages": {
+          "L": {
+            "seconds": 103.61115823080763,
+            "affine_seconds": 7.850161647889763,
+            "affine": {
+              "cost_evaluations": 77,
+              "initial_similarity": 24002.327790282776,
+              "final_best_similarity": 24047.388111093576,
+              "constant_similarity": false
+            },
+            "folded_output_faces": 1,
+            "folded_solver_faces": 1,
+            "minimum_output_orientation_ratio": -2.3807452682675962,
+            "minimum_solver_orientation_ratio": -2.3807531609527746,
+            "degenerate_input_faces": 0,
+            "peak_allocated_gb": 0.343583232,
+            "discrete_levels": {
+              "1": {
+                "seconds": 13.75234735570848,
+                "maximum_iterations": 10,
+                "converged": true,
+                "source_unfold_updates": 0,
+                "control_unfold_updates": 0,
+                "completed_iterations": 10
+              },
+              "2": {
+                "seconds": 24.594781171996146,
+                "maximum_iterations": 15,
+                "converged": true,
+                "source_unfold_updates": 0,
+                "control_unfold_updates": 0,
+                "completed_iterations": 8
+              },
+              "3": {
+                "seconds": 56.4433259870857,
+                "maximum_iterations": 15,
+                "converged": true,
+                "source_unfold_updates": 0,
+                "control_unfold_updates": 0,
+                "completed_iterations": 8
+              }
+            }
+          },
+          "R": {
+            "seconds": 98.37620265129954,
+            "affine_seconds": 7.850330998189747,
+            "affine": {
+              "cost_evaluations": 85,
+              "initial_similarity": 23539.002512351573,
+              "final_best_similarity": 23609.868502765785,
+              "constant_similarity": false
+            },
+            "folded_output_faces": 0,
+            "folded_solver_faces": 0,
+            "minimum_output_orientation_ratio": 0.47816521499101894,
+            "minimum_solver_orientation_ratio": 0.4781495532529904,
+            "degenerate_input_faces": 0,
+            "peak_allocated_gb": 0.33039616,
+            "discrete_levels": {
+              "1": {
+                "seconds": 9.301048131193966,
+                "maximum_iterations": 10,
+                "converged": true,
+                "source_unfold_updates": 0,
+                "control_unfold_updates": 0,
+                "completed_iterations": 6
+              },
+              "2": {
+                "seconds": 24.300489337649196,
+                "maximum_iterations": 15,
+                "converged": true,
+                "source_unfold_updates": 0,
+                "control_unfold_updates": 0,
+                "completed_iterations": 8
+              },
+              "3": {
+                "seconds": 55.985734032001346,
+                "maximum_iterations": 15,
+                "converged": true,
+                "source_unfold_updates": 0,
+                "control_unfold_updates": 0,
+                "completed_iterations": 8
+              }
+            }
+          }
+        },
+        "sphere_paired": {
+          "L": {
+            "native_topology_exact": true,
+            "sphere_angle_deg": {
+              "mean": 0.0,
+              "median": 0.0,
+              "p95": 0.0,
+              "maximum": 0.0
+            },
+            "chord_difference_mm": {
+              "mean": 0.0,
+              "median": 0.0,
+              "p95": 0.0,
+              "maximum": 0.0
+            },
+            "fnit_folded_faces": 1,
+            "official_folded_faces": 1
+          },
+          "R": {
+            "native_topology_exact": true,
+            "sphere_angle_deg": {
+              "mean": 0.0,
+              "median": 0.0,
+              "p95": 0.0,
+              "maximum": 0.0
+            },
+            "chord_difference_mm": {
+              "mean": 0.0,
+              "median": 0.0,
+              "p95": 0.0,
+              "maximum": 0.0
+            },
+            "fnit_folded_faces": 0,
+            "official_folded_faces": 0
+          }
+        }
+      },
+      {
+        "condition": "warm_1",
+        "wall_seconds": 198.07860789913684,
+        "process_peak_cpu_rss_kb": 926508,
+        "measurement": {
+          "phase_timings": {
+            "radialspheremap_preparation": {
+              "calls": 150,
+              "wall_seconds": 15.109735047910362,
+              "exclusive_wall_seconds": 15.109735047910362
+            },
+            "radialspheremap_weights": {
+              "calls": 2115,
+              "wall_seconds": 140.46222624694929,
+              "exclusive_wall_seconds": 140.46222624694929
+            },
+            "adaptive_metric_resampling": {
+              "calls": 16,
+              "wall_seconds": 10.793511022813618,
+              "exclusive_wall_seconds": 0.5904824105091393
+            },
+            "variance_normalization": {
+              "calls": 16,
+              "wall_seconds": 0.12527912855148315,
+              "exclusive_wall_seconds": 0.12527912855148315
+            },
+            "affine_source_wls": {
+              "calls": 162,
+              "wall_seconds": 1.4974161265417933,
+              "exclusive_wall_seconds": 1.4974161265417933
+            },
+            "rigid_cost_evaluation": {
+              "calls": 162,
+              "wall_seconds": 8.98616135912016,
+              "exclusive_wall_seconds": 1.4103701286949217
+            },
+            "affine_initialization": {
+              "calls": 2,
+              "wall_seconds": 11.387357304338366,
+              "exclusive_wall_seconds": 2.198449599556625
+            },
+            "progressive_sphere_warp": {
+              "calls": 62,
+              "wall_seconds": 7.681557377800345,
+              "exclusive_wall_seconds": 0.025951304472982883
+            },
+            "topology_unfolding": {
+              "calls": 96,
+              "wall_seconds": 0.42144671035930514,
+              "exclusive_wall_seconds": 0.42144671035930514
+            },
+            "source_rotation_matrices": {
+              "calls": 48,
+              "wall_seconds": 0.008143530692905188,
+              "exclusive_wall_seconds": 0.008143530692905188
+            },
+            "label_rotation_preparation": {
+              "calls": 48,
+              "wall_seconds": 0.08650947315618396,
+              "exclusive_wall_seconds": 0.07836594246327877
+            },
+            "face_layout": {
+              "calls": 48,
+              "wall_seconds": 0.733867724891752,
+              "exclusive_wall_seconds": 0.733867724891752
+            },
+            "label_rotation": {
+              "calls": 1811,
+              "wall_seconds": 3.068969310261309,
+              "exclusive_wall_seconds": 3.068969310261309
+            },
+            "face_costs": {
+              "calls": 1811,
+              "wall_seconds": 139.6779110133648,
+              "exclusive_wall_seconds": 9.786001321393996
+            },
+            "hocr_fastpd": {
+              "calls": 1763,
+              "wall_seconds": 15.2815030538477,
+              "exclusive_wall_seconds": 15.2815030538477
+            }
+          },
+          "operation_counts": {
+            "radialspheremap_preparation": 150,
+            "radialspheremap_weights": 2115,
+            "adaptive_metric_resampling": 16,
+            "variance_normalization": 16,
+            "affine_source_wls": 162,
+            "affine_wls_host_payload_bytes": 1911123072,
+            "affine_wls_query_slots": 79630128,
+            "rigid_cost_evaluation": 162,
+            "affine_initialization": 2,
+            "progressive_sphere_warp": 62,
+            "topology_unfolding": 96,
+            "source_rotation_matrices": 48,
+            "control_rotation_points": 53856,
+            "control_rotation_host_input_bytes": 1293696,
+            "control_rotation_host_result_bytes": 3877632,
+            "label_rotation_preparation": 48,
+            "face_layout": 48,
+            "label_rotation": 1811,
+            "face_costs": 1811,
+            "face_configuration_evaluations": 31754240,
+            "hocr_fastpd": 1763
+          },
+          "cuda_tensor_api_calls": {},
+          "actual_cuda_event_counts": {},
+          "profiled_cuda_device_time_us": {},
+          "profile_windows": 0,
+          "profiler_scope": "not profiled",
+          "phase_timing_scope": "nested host wall clocks without additional GPU fences; not isolated GPU kernel duration",
+          "instrumentation_changes_timing": false
+        },
+        "whole_gpu_observation": {
+          "scope": "whole GPU; includes unrelated processes",
+          "sample_interval_seconds": 1.0,
+          "samples": 183,
+          "gpu_utilization_percent": {
+            "mean": 97.40983606557377,
+            "median": 100.0,
+            "p95": 100.0,
+            "minimum": 51.0,
+            "maximum": 100.0
+          },
+          "whole_gpu_used_mib": {
+            "mean": 25282.4043715847,
+            "median": 25256.0,
+            "p95": 25310.0,
+            "minimum": 25256.0,
+            "maximum": 25310.0
+          },
+          "uuid_mapping_available": true
+        },
+        "peak_after_last_source_reset_bytes": 331435008,
+        "reserved_after_last_source_reset_bytes": 440401920,
+        "peak_allocated_bytes": 343453696,
+        "peak_reserved_bytes": 440401920,
+        "hemisphere_stages": {
+          "L": {
+            "seconds": 101.29279105784371,
+            "affine_seconds": 7.330968949012458,
+            "affine": {
+              "cost_evaluations": 77,
+              "initial_similarity": 24002.327790282776,
+              "final_best_similarity": 24047.388111093576,
+              "constant_similarity": false
+            },
+            "folded_output_faces": 1,
+            "folded_solver_faces": 1,
+            "minimum_output_orientation_ratio": -2.3807452682675962,
+            "minimum_solver_orientation_ratio": -2.3807531609527746,
+            "degenerate_input_faces": 0,
+            "peak_allocated_gb": 0.343453696,
+            "discrete_levels": {
+              "1": {
+                "seconds": 13.885103302076459,
+                "maximum_iterations": 10,
+                "converged": true,
+                "source_unfold_updates": 0,
+                "control_unfold_updates": 0,
+                "completed_iterations": 10
+              },
+              "2": {
+                "seconds": 24.13278897292912,
+                "maximum_iterations": 15,
+                "converged": true,
+                "source_unfold_updates": 0,
+                "control_unfold_updates": 0,
+                "completed_iterations": 8
+              },
+              "3": {
+                "seconds": 55.0061182170175,
+                "maximum_iterations": 15,
+                "converged": true,
+                "source_unfold_updates": 0,
+                "control_unfold_updates": 0,
+                "completed_iterations": 8
+              }
+            }
+          },
+          "R": {
+            "seconds": 96.78098271274939,
+            "affine_seconds": 7.6485805083066225,
+            "affine": {
+              "cost_evaluations": 85,
+              "initial_similarity": 23539.002512351573,
+              "final_best_similarity": 23609.868502765785,
+              "constant_similarity": false
+            },
+            "folded_output_faces": 0,
+            "folded_solver_faces": 0,
+            "minimum_output_orientation_ratio": 0.47816521499101894,
+            "minimum_solver_orientation_ratio": 0.4781495532529904,
+            "degenerate_input_faces": 0,
+            "peak_allocated_gb": 0.331435008,
+            "discrete_levels": {
+              "1": {
+                "seconds": 9.450040400028229,
+                "maximum_iterations": 10,
+                "converged": true,
+                "source_unfold_updates": 0,
+                "control_unfold_updates": 0,
+                "completed_iterations": 6
+              },
+              "2": {
+                "seconds": 24.578799010254443,
+                "maximum_iterations": 15,
+                "converged": true,
+                "source_unfold_updates": 0,
+                "control_unfold_updates": 0,
+                "completed_iterations": 8
+              },
+              "3": {
+                "seconds": 54.16642594989389,
+                "maximum_iterations": 15,
+                "converged": true,
+                "source_unfold_updates": 0,
+                "control_unfold_updates": 0,
+                "completed_iterations": 8
+              }
+            }
+          }
+        },
+        "sphere_paired": {
+          "L": {
+            "native_topology_exact": true,
+            "sphere_angle_deg": {
+              "mean": 0.0,
+              "median": 0.0,
+              "p95": 0.0,
+              "maximum": 0.0
+            },
+            "chord_difference_mm": {
+              "mean": 0.0,
+              "median": 0.0,
+              "p95": 0.0,
+              "maximum": 0.0
+            },
+            "fnit_folded_faces": 1,
+            "official_folded_faces": 1
+          },
+          "R": {
+            "native_topology_exact": true,
+            "sphere_angle_deg": {
+              "mean": 0.0,
+              "median": 0.0,
+              "p95": 0.0,
+              "maximum": 0.0
+            },
+            "chord_difference_mm": {
+              "mean": 0.0,
+              "median": 0.0,
+              "p95": 0.0,
+              "maximum": 0.0
+            },
+            "fnit_folded_faces": 0,
+            "official_folded_faces": 0
+          }
+        }
+      }
+    ],
+    "reference_run": {
+      "condition": "cold_0",
+      "wall_seconds": 590.8972112252377,
+      "process_peak_cpu_rss_kb": 914904,
+      "measurement": {
+        "phase_timings": {
+          "radialspheremap_preparation": {
+            "calls": 150,
+            "wall_seconds": 15.288826917298138,
+            "exclusive_wall_seconds": 15.288826917298138
+          },
+          "radialspheremap_weights": {
+            "calls": 2115,
+            "wall_seconds": 532.3486849768087,
+            "exclusive_wall_seconds": 532.3486849768087
+          },
+          "adaptive_metric_resampling": {
+            "calls": 16,
+            "wall_seconds": 15.666580277495086,
+            "exclusive_wall_seconds": 0.6318758139386773
+          },
+          "variance_normalization": {
+            "calls": 16,
+            "wall_seconds": 0.12354527739807963,
+            "exclusive_wall_seconds": 0.12354527739807963
+          },
+          "affine_source_wls": {
+            "calls": 162,
+            "wall_seconds": 1.3488267166540027,
+            "exclusive_wall_seconds": 1.3488267166540027
+          },
+          "rigid_cost_evaluation": {
+            "calls": 162,
+            "wall_seconds": 19.462727634701878,
+            "exclusive_wall_seconds": 1.571359099354595
+          },
+          "affine_initialization": {
+            "calls": 2,
+            "wall_seconds": 21.930911381728947,
+            "exclusive_wall_seconds": 2.2233958332799375
+          },
+          "progressive_sphere_warp": {
+            "calls": 62,
+            "wall_seconds": 10.589239934459329,
+            "exclusive_wall_seconds": 0.04234503721818328
+          },
+          "topology_unfolding": {
+            "calls": 96,
+            "wall_seconds": 0.6894079195335507,
+            "exclusive_wall_seconds": 0.6894079195335507
+          },
+          "source_rotation_matrices": {
+            "calls": 48,
+            "wall_seconds": 0.0073484862223267555,
+            "exclusive_wall_seconds": 0.0073484862223267555
+          },
+          "label_rotation_preparation": {
+            "calls": 48,
+            "wall_seconds": 0.09607964148744941,
+            "exclusive_wall_seconds": 0.08873115526512265
+          },
+          "face_layout": {
+            "calls": 48,
+            "wall_seconds": 0.7337652929127216,
+            "exclusive_wall_seconds": 0.7337652929127216
+          },
+          "label_rotation": {
+            "calls": 1811,
+            "wall_seconds": 3.352766706608236,
+            "exclusive_wall_seconds": 3.352766706608236
+          },
+          "face_costs": {
+            "calls": 1811,
+            "wall_seconds": 512.4563368079253,
+            "exclusive_wall_seconds": 9.95078472327441
+          },
+          "hocr_fastpd": {
+            "calls": 1763,
+            "wall_seconds": 14.845292054582387,
+            "exclusive_wall_seconds": 14.845292054582387
+          }
+        },
+        "operation_counts": {
+          "radialspheremap_preparation": 150,
+          "radialspheremap_weights": 2115,
+          "adaptive_metric_resampling": 16,
+          "variance_normalization": 16,
+          "affine_source_wls": 162,
+          "affine_wls_host_payload_bytes": 1911123072,
+          "affine_wls_query_slots": 79630128,
+          "rigid_cost_evaluation": 162,
+          "affine_initialization": 2,
+          "progressive_sphere_warp": 62,
+          "topology_unfolding": 96,
+          "source_rotation_matrices": 48,
+          "control_rotation_points": 53856,
+          "control_rotation_host_input_bytes": 1293696,
+          "control_rotation_host_result_bytes": 3877632,
+          "label_rotation_preparation": 48,
+          "face_layout": 48,
+          "label_rotation": 1811,
+          "face_costs": 1811,
+          "face_configuration_evaluations": 31754240,
+          "hocr_fastpd": 1763
+        },
+        "cuda_tensor_api_calls": {},
+        "actual_cuda_event_counts": {},
+        "profiled_cuda_device_time_us": {},
+        "profile_windows": 0,
+        "profiler_scope": "not profiled",
+        "phase_timing_scope": "nested host wall clocks without additional GPU fences; not isolated GPU kernel duration",
+        "instrumentation_changes_timing": false
+      },
+      "whole_gpu_observation": {
+        "scope": "whole GPU; includes unrelated processes",
+        "sample_interval_seconds": 1.0,
+        "samples": 545,
+        "gpu_utilization_percent": {
+          "mean": 98.4183486238532,
+          "median": 100.0,
+          "p95": 100.0,
+          "minimum": 50.0,
+          "maximum": 100.0
+        },
+        "whole_gpu_used_mib": {
+          "mean": 27787.867889908255,
+          "median": 28423.0,
+          "p95": 30187.0,
+          "minimum": 24890.0,
+          "maximum": 34827.0
+        },
+        "uuid_mapping_available": true
+      },
+      "peak_after_last_source_reset_bytes": 124856832,
+      "reserved_after_last_source_reset_bytes": 184549376,
+      "peak_allocated_bytes": 124856832,
+      "peak_reserved_bytes": 184549376,
+      "hemisphere_stages": {
+        "L": {
+          "seconds": 293.71701450273395,
+          "affine_seconds": 12.84198793489486,
+          "affine": {
+            "cost_evaluations": 77,
+            "initial_similarity": 24002.327790282776,
+            "final_best_similarity": 24047.388111093576,
+            "constant_similarity": false
+          },
+          "folded_output_faces": 1,
+          "folded_solver_faces": 1,
+          "minimum_output_orientation_ratio": -2.3807452682675962,
+          "minimum_solver_orientation_ratio": -2.3807531609527746,
+          "degenerate_input_faces": 0,
+          "peak_allocated_gb": 0.124786688,
+          "discrete_levels": {
+            "1": {
+              "seconds": 24.972490465268493,
+              "maximum_iterations": 10,
+              "converged": true,
+              "source_unfold_updates": 0,
+              "control_unfold_updates": 0,
+              "completed_iterations": 10
+            },
+            "2": {
+              "seconds": 57.44131776597351,
+              "maximum_iterations": 15,
+              "converged": true,
+              "source_unfold_updates": 0,
+              "control_unfold_updates": 0,
+              "completed_iterations": 8
+            },
+            "3": {
+              "seconds": 197.30369743704796,
+              "maximum_iterations": 15,
+              "converged": true,
+              "source_unfold_updates": 0,
+              "control_unfold_updates": 0,
+              "completed_iterations": 8
+            }
+          }
+        },
+        "R": {
+          "seconds": 297.1752642756328,
+          "affine_seconds": 14.477563585154712,
+          "affine": {
+            "cost_evaluations": 85,
+            "initial_similarity": 23539.002512351573,
+            "final_best_similarity": 23609.868502765785,
+            "constant_similarity": false
+          },
+          "folded_output_faces": 0,
+          "folded_solver_faces": 0,
+          "minimum_output_orientation_ratio": 0.47816521499101894,
+          "minimum_solver_orientation_ratio": 0.4781495532529904,
+          "degenerate_input_faces": 0,
+          "peak_allocated_gb": 0.124856832,
+          "discrete_levels": {
+            "1": {
+              "seconds": 16.73456095997244,
+              "maximum_iterations": 10,
+              "converged": true,
+              "source_unfold_updates": 0,
+              "control_unfold_updates": 0,
+              "completed_iterations": 6
+            },
+            "2": {
+              "seconds": 63.69287772197276,
+              "maximum_iterations": 15,
+              "converged": true,
+              "source_unfold_updates": 0,
+              "control_unfold_updates": 0,
+              "completed_iterations": 8
+            },
+            "3": {
+              "seconds": 201.12820390984416,
+              "maximum_iterations": 15,
+              "converged": true,
+              "source_unfold_updates": 0,
+              "control_unfold_updates": 0,
+              "completed_iterations": 8
+            }
+          }
+        }
+      },
+      "sphere_paired": {
+        "L": {
+          "native_topology_exact": true,
+          "sphere_angle_deg": {
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "maximum": 0.0
+          },
+          "chord_difference_mm": {
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "maximum": 0.0
+          },
+          "fnit_folded_faces": 1,
+          "official_folded_faces": 1
+        },
+        "R": {
+          "native_topology_exact": true,
+          "sphere_angle_deg": {
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "maximum": 0.0
+          },
+          "chord_difference_mm": {
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "maximum": 0.0
+          },
+          "fnit_folded_faces": 0,
+          "official_folded_faces": 0
+        }
+      }
+    },
+    "optimized_profile": {
+      "condition": "profiled",
+      "wall_seconds": 469.1273958720267,
+      "process_peak_cpu_rss_kb": 4736844,
+      "measurement": {
+        "phase_timings": {
+          "radialspheremap_preparation": {
+            "calls": 150,
+            "wall_seconds": 15.305919418577105,
+            "exclusive_wall_seconds": 15.305919418577105
+          },
+          "radialspheremap_weights": {
+            "calls": 2115,
+            "wall_seconds": 154.81865980150178,
+            "exclusive_wall_seconds": 154.81865980150178
+          },
+          "adaptive_metric_resampling": {
+            "calls": 16,
+            "wall_seconds": 11.759097821544856,
+            "exclusive_wall_seconds": 0.6298843240365386
+          },
+          "variance_normalization": {
+            "calls": 16,
+            "wall_seconds": 0.12850265158340335,
+            "exclusive_wall_seconds": 0.12850265158340335
+          },
+          "affine_source_wls": {
+            "calls": 162,
+            "wall_seconds": 1.384525062981993,
+            "exclusive_wall_seconds": 1.384525062981993
+          },
+          "rigid_cost_evaluation": {
+            "calls": 162,
+            "wall_seconds": 10.115767018403858,
+            "exclusive_wall_seconds": 1.9478344703093171
+          },
+          "affine_initialization": {
+            "calls": 2,
+            "wall_seconds": 12.621945195365697,
+            "exclusive_wall_seconds": 2.2603450287133455
+          },
+          "progressive_sphere_warp": {
+            "calls": 62,
+            "wall_seconds": 7.830728370230645,
+            "exclusive_wall_seconds": 0.06769693084061146
+          },
+          "topology_unfolding": {
+            "calls": 96,
+            "wall_seconds": 0.6846570675261319,
+            "exclusive_wall_seconds": 0.6846570675261319
+          },
+          "source_rotation_matrices": {
+            "calls": 48,
+            "wall_seconds": 0.007322262041270733,
+            "exclusive_wall_seconds": 0.007322262041270733
+          },
+          "label_rotation_preparation": {
+            "calls": 48,
+            "wall_seconds": 0.09343948913738132,
+            "exclusive_wall_seconds": 0.08611722709611058
+          },
+          "face_layout": {
+            "calls": 48,
+            "wall_seconds": 0.7825297988019884,
+            "exclusive_wall_seconds": 0.7825297988019884
+          },
+          "label_rotation": {
+            "calls": 1811,
+            "wall_seconds": 3.781954993493855,
+            "exclusive_wall_seconds": 3.781954993493855
+          },
+          "face_costs": {
+            "calls": 1811,
+            "wall_seconds": 154.6461047353223,
+            "exclusive_wall_seconds": 12.336072260513902
+          },
+          "hocr_fastpd": {
+            "calls": 1763,
+            "wall_seconds": 15.24742108816281,
+            "exclusive_wall_seconds": 15.24742108816281
+          }
+        },
+        "operation_counts": {
+          "radialspheremap_preparation": 150,
+          "radialspheremap_weights": 2115,
+          "adaptive_metric_resampling": 16,
+          "variance_normalization": 16,
+          "affine_source_wls": 162,
+          "affine_wls_host_payload_bytes": 1911123072,
+          "affine_wls_query_slots": 79630128,
+          "rigid_cost_evaluation": 162,
+          "affine_initialization": 2,
+          "progressive_sphere_warp": 62,
+          "topology_unfolding": 96,
+          "source_rotation_matrices": 48,
+          "control_rotation_points": 53856,
+          "control_rotation_host_input_bytes": 1293696,
+          "control_rotation_host_result_bytes": 3877632,
+          "label_rotation_preparation": 48,
+          "face_layout": 48,
+          "label_rotation": 1811,
+          "face_costs": 1811,
+          "face_configuration_evaluations": 31754240,
+          "hocr_fastpd": 1763
+        },
+        "cuda_tensor_api_calls": {
+          "cpu": 6367,
+          "__bool__": 132
+        },
+        "actual_cuda_event_counts": {
+          "cudaStreamIsCapturing": 40,
+          "cudaMalloc": 40,
+          "cudaMemcpyAsync": 25576,
+          "H2D": 15163,
+          "cudaStreamSynchronize": 22614,
+          "cudaLaunchKernel": 2837850,
+          "kernel": 2837850,
+          "D2H": 7451,
+          "cudaHostAlloc": 2,
+          "D2D": 2962,
+          "cudaDeviceGetAttribute": 1200,
+          "cudaFuncGetAttributes": 63,
+          "cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags": 496,
+          "cudaGetDeviceCount": 1,
+          "cudaPeekAtLastError": 5712,
+          "cudaDeviceSynchronize": 15,
+          "cudaMemsetAsync": 16,
+          "device_memset": 16
+        },
+        "profiled_cuda_device_time_us": {
+          "H2D": 175440.94900018105,
+          "kernel": 11240229.70199792,
+          "D2H": 597543.2079999065,
+          "D2D": 5887.451000054163,
+          "device_memset": 14.529000000504311
+        },
+        "profile_windows": 14,
+        "profiler_scope": "complete CUDA registration, window fences included",
+        "phase_timing_scope": "nested host wall clocks without additional GPU fences; not isolated GPU kernel duration",
+        "instrumentation_changes_timing": true
+      },
+      "whole_gpu_observation": {
+        "scope": "whole GPU; includes unrelated processes",
+        "sample_interval_seconds": 1.0,
+        "samples": 368,
+        "gpu_utilization_percent": {
+          "mean": 97.52173913043478,
+          "median": 100.0,
+          "p95": 100.0,
+          "minimum": 64.0,
+          "maximum": 100.0
+        },
+        "whole_gpu_used_mib": {
+          "mean": 30157.07608695652,
+          "median": 29337.0,
+          "p95": 42287.0,
+          "minimum": 25302.0,
+          "maximum": 44233.0
+        },
+        "uuid_mapping_available": true
+      },
+      "peak_after_last_source_reset_bytes": 330396160,
+      "reserved_after_last_source_reset_bytes": 425721856,
+      "peak_allocated_bytes": 343583232,
+      "peak_reserved_bytes": 425721856,
+      "hemisphere_stages": {
+        "L": {
+          "seconds": 231.29009011900052,
+          "affine_seconds": 9.216719200834632,
+          "affine": {
+            "cost_evaluations": 77,
+            "initial_similarity": 24002.327790282776,
+            "final_best_similarity": 24047.388111093576,
+            "constant_similarity": false
+          },
+          "folded_output_faces": 1,
+          "folded_solver_faces": 1,
+          "minimum_output_orientation_ratio": -2.3807452682675962,
+          "minimum_solver_orientation_ratio": -2.3807531609527746,
+          "degenerate_input_faces": 0,
+          "peak_allocated_gb": 0.343583232,
+          "discrete_levels": {
+            "1": {
+              "seconds": 31.959719530772418,
+              "maximum_iterations": 10,
+              "converged": true,
+              "source_unfold_updates": 0,
+              "control_unfold_updates": 0,
+              "completed_iterations": 10
+            },
+            "2": {
+              "seconds": 54.58144118171185,
+              "maximum_iterations": 15,
+              "converged": true,
+              "source_unfold_updates": 0,
+              "control_unfold_updates": 0,
+              "completed_iterations": 8
+            },
+            "3": {
+              "seconds": 134.62680357322097,
+              "maximum_iterations": 15,
+              "converged": true,
+              "source_unfold_updates": 0,
+              "control_unfold_updates": 0,
+              "completed_iterations": 8
+            }
+          }
+        },
+        "R": {
+          "seconds": 212.48810841795057,
+          "affine_seconds": 7.875212850980461,
+          "affine": {
+            "cost_evaluations": 85,
+            "initial_similarity": 23539.002512351573,
+            "final_best_similarity": 23609.868502765785,
+            "constant_similarity": false
+          },
+          "folded_output_faces": 0,
+          "folded_solver_faces": 0,
+          "minimum_output_orientation_ratio": 0.47816521499101894,
+          "minimum_solver_orientation_ratio": 0.4781495532529904,
+          "degenerate_input_faces": 0,
+          "peak_allocated_gb": 0.33039616,
+          "discrete_levels": {
+            "1": {
+              "seconds": 39.10018091602251,
+              "maximum_iterations": 10,
+              "converged": true,
+              "source_unfold_updates": 0,
+              "control_unfold_updates": 0,
+              "completed_iterations": 6
+            },
+            "2": {
+              "seconds": 46.17210543202236,
+              "maximum_iterations": 15,
+              "converged": true,
+              "source_unfold_updates": 0,
+              "control_unfold_updates": 0,
+              "completed_iterations": 8
+            },
+            "3": {
+              "seconds": 118.50597247574478,
+              "maximum_iterations": 15,
+              "converged": true,
+              "source_unfold_updates": 0,
+              "control_unfold_updates": 0,
+              "completed_iterations": 8
+            }
+          }
+        }
+      },
+      "sphere_paired": {
+        "L": {
+          "native_topology_exact": true,
+          "sphere_angle_deg": {
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "maximum": 0.0
+          },
+          "chord_difference_mm": {
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "maximum": 0.0
+          },
+          "fnit_folded_faces": 1,
+          "official_folded_faces": 1
+        },
+        "R": {
+          "native_topology_exact": true,
+          "sphere_angle_deg": {
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "maximum": 0.0
+          },
+          "chord_difference_mm": {
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "maximum": 0.0
+          },
+          "fnit_folded_faces": 0,
+          "official_folded_faces": 0
+        }
+      }
+    },
+    "strict1_projection": {
+      "wall_seconds_including_sphere_specific_area_surfaces": 303.7718636319041,
+      "projection_tool_sha256": "887aba5bd028564128e7a5b0751aabdc383505a3777b3f51f1a7a6ab39da2708",
+      "projection_source_sha256": {
+        "surface.py": "6809dbfcbbebfd3c63854b9051c9dfa6a59755ccf2a55c750be80eed93fa3970",
+        "surface_fmriprep.py": "0d1e55c3431758782ad576a285e37117cf49074bbe2767987361f6a488eee76f"
+      },
+      "sphere_paired": {
+        "L": {
+          "native_topology_exact": true,
+          "sphere_angle_deg": {
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "maximum": 0.0
+          },
+          "chord_difference_mm": {
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "maximum": 0.0
+          },
+          "fnit_folded_faces": 1,
+          "official_folded_faces": 1
+        },
+        "R": {
+          "native_topology_exact": true,
+          "sphere_angle_deg": {
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "maximum": 0.0
+          },
+          "chord_difference_mm": {
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "maximum": 0.0
+          },
+          "fnit_folded_faces": 0,
+          "official_folded_faces": 0
+        }
+      },
+      "cifti_paired": {
+        "frames": 490,
+        "time_axis_exact": true,
+        "brain_model_axis_exact": true,
+        "correlation_definition": "Pearson across time for each valid grayordinate, then arithmetic mean",
+        "structures": {
+          "CIFTI_STRUCTURE_CORTEX_LEFT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_CORTEX_RIGHT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_ACCUMBENS_LEFT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_ACCUMBENS_RIGHT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_AMYGDALA_LEFT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_AMYGDALA_RIGHT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_BRAIN_STEM": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_CAUDATE_LEFT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_CAUDATE_RIGHT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_CEREBELLUM_LEFT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_CEREBELLUM_RIGHT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_DIENCEPHALON_VENTRAL_LEFT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_DIENCEPHALON_VENTRAL_RIGHT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_HIPPOCAMPUS_LEFT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_HIPPOCAMPUS_RIGHT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_PALLIDUM_LEFT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_PALLIDUM_RIGHT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_PUTAMEN_LEFT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_PUTAMEN_RIGHT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_THALAMUS_LEFT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          },
+          "CIFTI_STRUCTURE_THALAMUS_RIGHT": {
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "mean_absolute_difference": 0.0,
+            "maximum_absolute_difference": 0.0
+          }
+        }
+      }
+    }
+  },
+  "gates": {
+    "saved_spheres_exact_to_strict1_official": true,
+    "optimized_coldwarm_reference_profile_saved_spheres_exact": true,
+    "same_configuration_and_software_bindings": true,
+    "reference_optimized_iteration_trace_exact": true,
+    "profile_optimized_iteration_trace_exact": true,
+    "same_fixed_bold_before_after": true,
+    "projection_area_surfaces_recomputed_for_each_registered_sphere": true,
+    "all_structures_temporal_r_1_mae_max_0": true
+  },
+  "measurement_notes": {
+    "own_gpu_jobs_serial": true,
+    "gpu_shared": true,
+    "gpu_utilization_scope": "whole GPU includes unrelated processes; not FNIT process utilization",
+    "cold_warm_scope": "complete paired registration including input reads and output sphere/report writes; excludes offline metrics and projection",
+    "profile_runtime_not_speed_table": true,
+    "profile_counts_include_window_fences": true,
+    "phase_timings_scope": "nested host clocks; inclusive phases overlap and cannot be added; no extra phase GPU fences",
+    "before_after_timing_definitions_differ_with_scientific_schedule": "compare reference and optimized for execution changes; before8d is bug baseline only",
+    "official_projection_seconds": 315.40600218391046,
+    "official_projection_reused_for_after": true,
+    "T1w_volume_preparation_excluded": true,
+    "new_raw_volume_pipeline_not_benchmarked_here": true
+  },
+  "runtime_package_versions": {
+    "python": "3.11.16",
+    "numpy": "1.26.4",
+    "scipy": "1.17.1",
+    "nibabel": "5.4.2"
+  }
+}

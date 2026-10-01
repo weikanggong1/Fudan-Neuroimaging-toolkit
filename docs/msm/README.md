@@ -68,14 +68,19 @@ print(spheres["R"])  # R.sphere.MSMSulc.native.surf.gii
 
 ## 原版对照命令
 
-以下命令只在独立基准环境中运行；`--conf` 为 HCP 安装包内对应的 MSMSulc 配置文件，按实际路径填写。FNIT 不调用此命令。
+以下命令只在独立基准环境中运行。安装器提供的 HCP 配置 SHA-256 为 `46b250404cb2570b4f645d8e53c30fabde799663d61761d61cf54ff110318203`，未指定线程数。对照时复制配置并在末尾追加 `--numthreads=1`；线程数是配置选项。FNIT 不调用官方命令。
 
 ```bash
+mkdir -p /absolute/path/reference
+cp /absolute/path/hcp_surface_assets/MSMConfig/MSMSulcStrainFinalconf \
+  /absolute/path/reference/MSMSulc.singlethread.conf
+printf '\n--numthreads=1\n' >> /absolute/path/reference/MSMSulc.singlethread.conf
+
 newmsm --inmesh=/absolute/path/work/msm-inputs/L.sphere_rot.surf.gii \
   --refmesh=/absolute/path/hcp_surface_assets/global/templates/standard_mesh_atlases/fsaverage.L_LR.spherical_std.164k_fs_LR.surf.gii \
   --indata=/absolute/path/work/msm-inputs/L.sulc.native.shape.gii \
   --refdata=/absolute/path/hcp_surface_assets/global/templates/standard_mesh_atlases/L.refsulc.164k_fs_LR.shape.gii \
-  --conf=/absolute/path/hcp_surface_assets/MSMConfig/MSMSulcStrainFinalconf \
+  --conf=/absolute/path/reference/MSMSulc.singlethread.conf \
   --out=/absolute/path/reference/L.
 ```
 
@@ -85,9 +90,22 @@ newmsm --inmesh=/absolute/path/work/msm-inputs/L.sphere_rot.surf.gii \
 
 最新球面、fsLR32k 时间序列、冷/热调用及 profile 汇总见 [MSM 验证页](../../validation/msm/README.md)。配准包含读取和球面/报告写盘，不包含 BOLD 投影、Python 导入与 CUDA 上下文初始化。历史完整 surface API 时间见 [全流程报告](../../validation/fmri/README.md)，不能与本次单函数时间混加。
 
+| 对单线程官方参照 | 修复前左 / 右 | 修复后左 / 右 |
+|---|---:|---:|
+| 保存球面角差中位数 | 0.4351° / 0.4348° | **0° / 0°** |
+| 保存球面角差 p95 | 1.1332° / 0.9300° | **0° / 0°** |
+| 490 帧逐点时间 r 均值 | 0.920803 / 0.941545 | **1 / 1** |
+| 时间序列 MAE | 21.0203 / 20.0491 | **0 / 0** |
+
+本例修复后的 GIFTI 球面与固定 volume 生成的 CIFTI 均逐值一致。FNIT 双侧配准冷/热调用为 **201.99 / 198.08 秒**，官方单线程左右合计 **1,587.70 秒**，8 线程合计 **378.03 秒**。FNIT 峰值已分配显存 **0.344 GB**。这是共享 H100 上的单例测量；官方 8 线程重复结果存在差异，精度表统一使用可重复的单线程参照。
+
+修复前版本未应用传入的四级配置，使用固定 schedule；现按相同官方配置执行逐级 DATA→原生球面→新网格变形、标签顺序和 HOCR/FastPD 联合优化。因此修复前后的时间用于描述版本表现，不作为相同算法的执行优化倍率。
+
 本次在独立 MSM 子函数修复了缓存三角形面积、官方浮点配置精度、刚性 WLS 和 Rodrigues 旋转的运算差异。WLS 的 GPU 除法与指数舍入组合使成本相差 1 ULP；旋转中的融合乘加及三角函数舍入使零位移标签产生约 `6×10⁻¹³` 的坐标偏差。它们在网格顶点和边处改变后续邻域选择。采用 FNIT C++ 的官方运算顺序后，真实调用的全部 77 次刚性成本及对应逐点值逐位一致，前两轮控制点和 DATA 坐标也逐位一致；完整球面精度另按全流程测量。surface pipeline 继续调用修复后的 `fnit.msm`。
 
 固定官方球面时，Workbench 投影与 CIFTI 组装对独立对照逐值一致，见 [固定球面报告](../../validation/fmri/surface_fixed_sphere.public.json)。pipeline 传递注册配置，并将写出球面的质控保留在 BIDS sidecar。
+
+本例最终原生输出翻折数为左侧 **1**、右侧 **0**，与官方相同；报告按实际 float32 保存坐标计算，保留迭代中的展开处理。
 
 ## 参考文献与原实现
 
