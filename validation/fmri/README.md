@@ -52,6 +52,8 @@ FNIT volume 不调用 FSL、FreeSurfer、fMRIPrep；surface 投影和组装使�
 | 两侧清理图，固定同一 FNIT warp | 0.472114 | 0.561490 |
 | 同一官方清理图，FNIT / 官方 warp | 0.488609 | 0.526425 |
 
+MNI 参照文件 `ukb_fix_mni2mm.nii.gz` 由 UKB 发布的原生 `filtered_func_data_clean.nii.gz` 与官方 `example_func2standard_warp.nii.gz`，通过原版 FSL `applywarp --interp=spline` 生成，使用 FSL 的 MNI152 T1 2 mm 模板和脑掩膜。它不是发布 ZIP 中直接提供的同名 MNI 文件；网格为 91×109×91×490，TR 0.735 s，完整 SHA-256 见比较报告中的 `mni.input_sha256.official_fix_official_warp`。
+
 原生为 96,009 个共同非常数体素；MNI 为新旧输出掩膜交集中的 220,863 个共同非常数体素。UKB 官方使用 FIX、GDC/B0 和官方配准，本流程选择 ICA-AROMA，候选无 GDC/B0。表格报告处理差异，时间 r 不是去噪质量标准。新旧 MNI→EPI 采样位置变化中位数 0.115 mm、p95 0.202 mm；对官方完整 MNI 的相关性接近上一版 0.273070。[比较报告](volume_fixed_comparison.public.json)包含哈希与定义。
 
 当前 warp 首 8 个真实帧对 FSL `applywarp --interp=spline`，脑内 r=0.99999999993、RMSE=0.002063。FSL 返回 255，完整输出通过 CRC、网格、有限值、TR 和掩膜检查，原退出码保留于[报告](volume_fixed_resampling.public.json)。这检验固定场插值；此前 490 帧插值和 SD 格纹控制见[专门验证](resampling.md)。

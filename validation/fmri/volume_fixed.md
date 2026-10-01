@@ -74,6 +74,8 @@ python validation/fmri/check_real_confounds.py \
 
 新旧 pre-ICA 时间 r 中位数为 0.999386，最终 MNI 为 0.943486。新旧 MNI→T1 采样位置变化中位数 0.011 mm，合成 MNI→EPI 为 0.115 mm，p95 为 0.202 mm。配准阶段合计从 1186.44 s 降到 16.94 s，API 从 1719.19 s 降到 551.07 s；共享负载不同，不能归因成单一优化的受控加速比。
 
+MNI 参照文件 `ukb_fix_mni2mm.nii.gz` 由 UKB 发布的原生 `filtered_func_data_clean.nii.gz` 与官方 `example_func2standard_warp.nii.gz`，通过原版 FSL `applywarp --interp=spline` 生成，使用 FSL 的 MNI152 T1 2 mm 模板和脑掩膜。它不是发布 ZIP 中直接提供的同名 MNI 文件；网格为 91×109×91×490，TR 0.735 s，完整 SHA-256 见比较报告中的 `mni.input_sha256.official_fix_official_warp`。
+
 官方发布数据的 FIX、GDC/B0 和配准与本流程不同。完整 MNI 时间 r 均值 0.271534 与上一版 0.273070 接近；当前使用 ICA-AROMA，不以 FIX 等价作为验收目标。固定同一个 warp 或同一个官方清理图的控制见[新旧与官方报告](volume_fixed_comparison.public.json)和[全流程表格](README.md)。同场插值的一致性不意味着配准估计等价。
 
 复测新旧完整结果需传入私有运行目录、官方文件及模板：

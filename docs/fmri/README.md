@@ -142,9 +142,11 @@ print(result.clean_mni)     # MNI152 2 mm 清理后 4D BOLD
 | 与实际官方 UKB 发布结果比较 | 时间 r 均值 / 中位数 |
 |---|---|
 | 原生清理图；96,009 个共同非常数体素 | 0.426345 / 0.499333 |
-| 各自完整 MNI 清理图；220,863 个共同非常数体素 | 0.271534 / 0.229497 |
+| FNIT MNI / 官方结果生成的 MNI 参照；220,863 个共同非常数体素 | 0.271534 / 0.229497 |
 | 两侧清理图使用同一 FNIT warp | 0.472114 / 0.561490 |
 | 同一官方清理图使用 FNIT / 官方 warp | 0.488609 / 0.526425 |
+
+MNI 参照文件 `ukb_fix_mni2mm.nii.gz` 由 UKB 发布的原生 `filtered_func_data_clean.nii.gz` 与官方 `example_func2standard_warp.nii.gz`，通过原版 FSL `applywarp --interp=spline` 生成，使用 FSL 的 MNI152 T1 2 mm 模板和脑掩膜。它不是发布 ZIP 中直接提供的同名 MNI 文件；网格为 91×109×91×490，TR 0.735 s，完整 SHA-256 见比较报告中的 `mni.input_sha256.official_fix_official_warp`。
 
 本流程选择 ICA-AROMA；官方 UKB 使用 FIX，并包含 GDC/B0 和自身配准，本次候选没有 GDC/B0。表中量化处理差异，同 warp 与同清理图控制用于区分去噪和空间映射的影响。插值固定 warp 下已接近数值一致；官方完整 MNI 的时间 r 与上一版 0.273070 接近。时间相关性不等于去噪质量。定义及全部文件哈希见[新旧与官方比较](../../validation/fmri/volume_fixed_comparison.public.json)。
 
