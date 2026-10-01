@@ -31,13 +31,28 @@ def sha256(path):
 
 def source_hashes(root):
     paths = []
-    for component in ("fmri", "msm", "fast", "flirt", "fnirt", "applywarp",
+    for component in ("fmri", "feat", "melodic", "msm", "fast", "flirt", "fnirt", "applywarp",
                       "synthstrip", "synthmorph", "eddy"):
         paths.extend((root / "src/fnit" / component).rglob("*.py"))
+    for suffix in ("*.sch", "*.cu", "*.cpp", "*.h"):
+        paths.extend((root / "src/fnit/flirt").rglob(suffix))
+    paths.extend((root / "src/fnit/fmri/assets").glob("mask_*.nii.gz"))
     paths.extend((root / "src/fnit/msm/_fastpd_src").glob("*"))
     paths.extend((root / "src/fnit").glob("_*.py"))
     return {p.relative_to(root).as_posix(): sha256(p)
             for p in sorted(set(paths)) if p.is_file()}
+
+
+def public_configuration(configuration):
+    """Keep numerical settings while removing private template/weight paths."""
+    settings = {key: value for key, value in configuration.items()
+                if key not in ("mni_template", "mni_brain_mask", "weights")}
+    settings["weights"] = {
+        name: {key: value for key, value in details.items() if key != "Path"}
+        for name, details in configuration.get("weights", {}).items()
+        if isinstance(details, dict)
+    }
+    return settings
 
 
 def check_volume(path, template=None, mask=None):
@@ -76,6 +91,8 @@ def main():
     parser.add_argument("--report-out", type=Path, required=True)
     parser.add_argument("--capture-resampling-inputs", type=Path,
                         help="Volume validation only: preserve its exact MNI pull field and affine privately")
+    parser.add_argument("--capture-intermediates", type=Path,
+                        help="Volume validation only: keep private FEAT, AROMA, tissue masks and registration files")
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--threads", type=int, default=8)
     parser.add_argument("--mni-template", type=Path)
@@ -89,6 +106,8 @@ def main():
     parser.add_argument("--registered-spheres", type=Path, nargs=2,
                         help="Surface control only: replace estimation with two existing registered spheres")
     args = parser.parse_args()
+    if args.stage != "volume" and (args.capture_intermediates or args.capture_resampling_inputs):
+        parser.error("intermediate capture is only available for the volume benchmark")
     torch.set_num_threads(args.threads)
     cuda = str(args.device).startswith("cuda")
     torch.backends.cuda.matmul.allow_tf32 = True
@@ -101,19 +120,79 @@ def main():
         raise ValueError("benchmark requires one unambiguous T1w image")
     input_hashes = {"bold": sha256(inputs.bold), "sbref": sha256(inputs.sbref)
                     if inputs.sbref else None, "t1w": sha256(inputs.t1w_images[0])}
+    if args.stage == "volume":
+        input_hashes["mni_template"] = sha256(args.mni_template) if args.mni_template else None
+        input_hashes["mni_brain_mask"] = sha256(args.mni_brain_mask) if args.mni_brain_mask else None
     capture_seconds = [0.0]
+    stage_capture_seconds = {}
+
+    def capture_files(stage, files):
+        capture_start = time.perf_counter()
+        for source, destination in files:
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(source, destination)
+        elapsed = time.perf_counter() - capture_start
+        capture_seconds[0] += elapsed
+        stage_capture_seconds[stage] = stage_capture_seconds.get(stage, 0.0) + elapsed
+
+    if args.capture_intermediates:
+        from fnit.fmri import end_to_end
+
+        capture_root = args.capture_intermediates
+        feat_original = end_to_end.run_feat_core
+        registration_original = end_to_end.register_t1_to_mni
+        aroma_original = end_to_end.run_aroma_pipeline
+
+        def capture_feat(**keywords):
+            result = feat_original(**keywords)
+            names = ("filtered_func_data.nii.gz", "mask.nii.gz", "mean_func.nii.gz",
+                     "example_func.nii.gz", "mc/prefiltered_func_data_mcf.par")
+            capture_files("feat_core", [(result.output_dir / name, capture_root / "feat" / name)
+                                        for name in names])
+            return result
+
+        def capture_registration(*positional, **keywords):
+            result = registration_original(*positional, **keywords)
+            capture_files("bbr_and_t1_to_mni", [(result.affine, capture_root / "reg" / result.affine.name),
+                                               (result.pull_ras, capture_root / "reg" / result.pull_ras.name)])
+            return result
+
+        def capture_aroma(**keywords):
+            result = aroma_original(**keywords)
+            files = [(result.denoised_bold, capture_root / "aroma/filtered_func_data_aroma.nii.gz"),
+                     (result.features, capture_root / "aroma/aroma_features.tsv"),
+                     (result.noise_components, capture_root / "aroma/aroma_noise_components.txt")]
+            for name in ("mixing", "frequency_power", "thresholded_maps"):
+                path = getattr(result.ica, name)
+                files.append((path, capture_root / "aroma/ica" / path.name))
+            for name in ("wm_mask", "regression_csf_mask"):
+                if keywords.get(name) is not None:
+                    files.append((keywords[name], capture_root / "masks" / (name + ".nii.gz")))
+            masks = keywords["output_dir"].parent / "masks"
+            for name in ("T1_pve_wm.nii.gz", "T1_pve_csf.nii.gz", "T1_wmseg.nii.gz"):
+                if (masks / name).is_file():
+                    files.append((masks / name, capture_root / "masks" / name))
+            capture_files("pica_aroma_confounds", files)
+            return result
+
+        end_to_end.run_feat_core = capture_feat
+        end_to_end.register_t1_to_mni = capture_registration
+        end_to_end.run_aroma_pipeline = capture_aroma
     if args.capture_resampling_inputs:
         from fnit.fmri import end_to_end
         resample_original = end_to_end.resample_world
 
         def capture_resample(*positional, **keywords):
             if keywords.get("output_mask") is not None:
-                capture_start = time.perf_counter()
                 directory = args.capture_resampling_inputs
                 directory.mkdir(parents=True, exist_ok=True)
-                shutil.copyfile(keywords["pre_affine_pull_ras"], directory / "mni_to_t1_pull_ras.nii.gz")
+                capture_files("mni_resampling", [(keywords["pre_affine_pull_ras"],
+                                                  directory / "mni_to_t1_pull_ras.nii.gz")])
+                capture_start = time.perf_counter()
                 np.savetxt(directory / "reference_to_source_world.txt", positional[2])
-                capture_seconds[0] += time.perf_counter() - capture_start
+                elapsed = time.perf_counter() - capture_start
+                capture_seconds[0] += elapsed
+                stage_capture_seconds["mni_resampling"] += elapsed
             return resample_original(*positional, **keywords)
 
         end_to_end.resample_world = capture_resample
@@ -165,8 +244,9 @@ def main():
         algorithm = {key: pipeline[key] for key in (
             "registration_backend", "mni_interpolation", "ica_components", "ica_converged",
             "ica_iterations", "aroma_noise_components", "wm_csf_motion_regression")}
-        limits = ["No GDC or B0 correction: corresponding raw inputs are unavailable.",
-                  "ICA-AROMA replaces UKB FIX, so there is no paired final UKB voxelwise oracle."]
+        algorithm["configuration"] = public_configuration(metadata["FNIT"].get("Configuration", {}))
+        limits = ["No GDC or B0 correction in this candidate run.",
+                  "ICA-AROMA is the selected denoising method; comparison with official UKB FIX quantifies processing differences, not equivalent denoising."]
     else:
         cifti = nib.load(str(result.dtseries))
         values = np.asarray(cifti.dataobj, dtype=np.float32)
@@ -200,6 +280,11 @@ def main():
     if nib.load(str(inputs.bold)).shape[3] != (checks["clean_mni"]["shape"][3]
             if args.stage == "volume" else checks["cifti_shape"][0]):
         raise ValueError("frame count changed")
+    stage_times = dict(result.timing_seconds)
+    for stage, seconds in stage_capture_seconds.items():
+        stage_times[stage] -= seconds
+    if "total" in stage_times:
+        stage_times["total"] -= capture_seconds[0]
     report = {"schema_version": 1, "source_revision": args.source_revision,
               "source_sha256": source_hashes(args.source_root), "stage": args.stage,
               "data": {"kind": "one real UK Biobank run", "subjects": 1,
@@ -208,7 +293,9 @@ def main():
               "input_sha256": input_hashes, "algorithm": algorithm, "checks": checks,
               "timing_seconds": {"public_api_including_output_save": api_wall,
                                  "validation_capture_overhead_excluded": capture_seconds[0],
-                                 "pipeline_stages": result.timing_seconds}, "memory": memory,
+                                 "pipeline_stages": stage_times,
+                                 "private_capture_seconds_by_stage": stage_capture_seconds,
+                                 "pipeline_stages_include_capture_overhead": False}, "memory": memory,
               "environment": {"host": platform.node(), "python": platform.python_version(),
                               "torch": torch.__version__, "cuda_runtime": torch.version.cuda,
                               "gpu": torch.cuda.get_device_name(args.device) if cuda else None,
