@@ -77,19 +77,29 @@ def smooth_bias(voronoi: np.ndarray, source: np.ndarray, control: np.ndarray,
 
 def smooth_bias_torch(voronoi: torch.Tensor, source: torch.Tensor,
                       control: torch.Tensor, sigma: float = 8.0) -> tuple[torch.Tensor, dict]:
+    """三轴按固定核顺序平滑偏置，并恢复控制点原强度。
+
+    voronoi/source/control为同shape三维张量；sigma=8，单位体素。
+    返回同设备float32偏置及核长度/设备/秒数；CUDA复用两缓冲，不改算术顺序。
+    nearest边界与CPU接口一致，shape不符抛ValueError；属于mri_normalize内部步骤。
+    """
     if voronoi.shape != source.shape or source.shape != control.shape:
         raise ValueError("input shapes differ")
     started = time.perf_counter()
     kernel = torch.as_tensor(fs_gaussian_kernel(sigma), device=source.device)
-    bias = voronoi.float()
-    for axis in (0, 1, 2):
-        length = bias.shape[axis]
-        index = torch.arange(length, device=bias.device)
-        result = torch.zeros_like(bias)
-        for offset in range(len(kernel)):
-            neighbor = (index + offset - len(kernel) // 2).clamp(0, length - 1)
-            result += bias.index_select(axis, neighbor) * kernel[offset]
-        bias = result
+    if source.is_cuda:
+        from ._normalization_cuda import ordered_smoothing
+        bias = ordered_smoothing(voronoi, kernel)
+    else:
+        bias = voronoi.float()
+        for axis in (0, 1, 2):
+            length = bias.shape[axis]
+            index = torch.arange(length, device=bias.device)
+            result = torch.zeros_like(bias)
+            for offset in range(len(kernel)):
+                neighbor = (index + offset - len(kernel) // 2).clamp(0, length - 1)
+                result += bias.index_select(axis, neighbor) * kernel[offset]
+            bias = result
     bias[control > 0] = source[control > 0].float()
     if source.is_cuda:
         torch.cuda.synchronize(source.device)

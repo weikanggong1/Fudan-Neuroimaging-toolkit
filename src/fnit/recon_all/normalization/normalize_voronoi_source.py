@@ -57,7 +57,13 @@ def voronoi_fill(source: np.ndarray, control: np.ndarray) -> tuple[np.ndarray, d
 
 
 def voronoi_fill_torch(source: torch.Tensor, control: torch.Tensor) -> tuple[torch.Tensor, dict]:
-    """Run the same level-ordered average with Torch gathers on the selected device."""
+    """在同网格按原层/邻域顺序传播float32；CUDA用融合内核减少分配。
+
+    source/control为同shape三维张量，control非零为控制点；空控制抛ValueError。
+    chessboard距离仍由既有SciPy计算，每层仅依赖之前层；保留边界重复邻居。
+    返回同设备偏置图及levels/controls/wall_seconds，不改变TF32或空间。
+    CPU仍用原Torch gathers；属于mri_normalize内部步骤，无独立CLI。
+    """
     if source.ndim != 3 or source.shape != control.shape:
         raise ValueError("source and control must have matching 3D shapes")
     started = time.perf_counter()
@@ -73,21 +79,27 @@ def voronoi_fill_torch(source: torch.Tensor, control: torch.Tensor) -> tuple[tor
     sx, sy, sz = source.shape
     stride = sy * sz
     maximum = int(distance_cpu.max())
-    for level in range(1, maximum + 1):
-        linear = torch.as_tensor(sorted_indices[boundaries[level - 1]:boundaries[level]],
-                                 device=source.device)
-        x, y, z = linear // stride, (linear // sz) % sy, linear % sz
-        total = torch.zeros(len(linear), dtype=torch.float32, device=source.device)
-        count = torch.zeros(len(linear), dtype=torch.int32, device=source.device)
-        for dz in (-1, 0, 1):
-            zi = (z + dz).clamp(0, sz - 1)
-            for dy in (-1, 0, 1):
-                yi = (y + dy).clamp(0, sy - 1)
-                for dx in (-1, 0, 1):
-                    xi = (x + dx).clamp(0, sx - 1)
-                    total += field[xi, yi, zi]
-                    count += (distance[xi, yi, zi] < level)
-        field[x, y, z] = total / count.float()
+    if source.is_cuda:
+        from ._normalization_cuda import ordered_wavefront
+        field = field.contiguous()
+        ordered = torch.as_tensor(sorted_indices, device=source.device)
+        field = ordered_wavefront(field, distance.contiguous(), ordered, boundaries)
+    else:
+        for level in range(1, maximum + 1):
+            linear = torch.as_tensor(sorted_indices[boundaries[level - 1]:boundaries[level]],
+                                     device=source.device)
+            x, y, z = linear // stride, (linear // sz) % sy, linear % sz
+            total = torch.zeros(len(linear), dtype=torch.float32, device=source.device)
+            count = torch.zeros(len(linear), dtype=torch.int32, device=source.device)
+            for dz in (-1, 0, 1):
+                zi = (z + dz).clamp(0, sz - 1)
+                for dy in (-1, 0, 1):
+                    yi = (y + dy).clamp(0, sy - 1)
+                    for dx in (-1, 0, 1):
+                        xi = (x + dx).clamp(0, sx - 1)
+                        total += field[xi, yi, zi]
+                        count += (distance[xi, yi, zi] < level)
+            field[x, y, z] = total / count.float()
     if source.is_cuda:
         torch.cuda.synchronize(source.device)
     return field, {"levels": maximum, "controls": int(marked.sum()),
