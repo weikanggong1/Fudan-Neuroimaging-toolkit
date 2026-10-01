@@ -34,7 +34,7 @@
 
 三种插值共享同一套源网格边界规则。对某轴长度 `N`，有效坐标范围为 `[−1e-6, N−1+1e-6]`，单位是**源体素**；落在容差内的微小越界坐标夹回 `0` 或 `N−1`。这样可消除斜切 affine 求逆时产生的边界舍入误差。超过容差的真实图像外坐标、以及输出掩膜外位置仍置零，容差不会扩展输出视野。边界修复与验证见[重采样报告](../../validation/fmri/resampling.md#边界回归测试)。
 
-2026-10-01 还复核了整链 `a7c5a64` 的实际输出：取前 8 个真实 BOLD 时间点，固定该版本估计的 BBR、非线性位移场及目标脑掩膜，与原 FSL `applywarp --rel --interp=spline` 比较。脑掩膜内 r=0.999999999931，MAE=0.001380、RMSE=0.001956，最大绝对差 0.05362；输出网格、float32、TR 0.735 s、有限值及掩膜外零值均通过检查。对应的[8 帧报告](../../validation/fmri/volume_fixed_resampling.public.json)记录输入和源码哈希、FSL 耗时及退出码。该报告验证固定变换下的插值；当前 BBR/FNIRT 执行优化与解剖缓存的测量见[当前配准报告](../../validation/fmri/registration_gpu.current.public.json)。
+2026-10-01 复核了当前整链 `3b9b0f8` 的实际输出：取前 8 个真实 BOLD 时间点，固定该版本估计的 BBR、非线性位移场及目标脑掩膜，与原 FSL `applywarp --rel --interp=spline` 比较。脑掩膜内 r=0.999999999929，MAE=0.001461、RMSE=0.002063，最大绝对差 0.05496；输出网格、float32、TR 0.735 s、有限值及掩膜外零值均通过检查。对应的[8 帧报告](../../validation/fmri/volume_fixed_resampling.public.json)记录输入和源码哈希、FSL 耗时及退出码。该报告验证固定变换下的插值；当前 BBR/FNIRT 执行优化与解剖缓存的测量见[当前配准报告](../../validation/fmri/registration_gpu.current.public.json)。
 
 ```python
 import numpy as np

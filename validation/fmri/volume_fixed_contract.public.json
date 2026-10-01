@@ -1,11 +1,12 @@
 {
-  "source_revision": "a7c5a64463972c7052db930419a36c4f02e83ac7",
-  "public_source_files": 93,
+  "schema_version": 1,
+  "source_revision": "3b9b0f8128f10da77d3fbb6c395e9127353c3e46",
+  "public_source_files": 96,
   "public_source_mismatches": [],
   "derivative_provenance": [
     {
       "file": "mni",
-      "source_files": 75,
+      "source_files": 77,
       "mismatches": [],
       "manifest_matches": true,
       "dependencies": {
@@ -13,11 +14,12 @@
         "numpy": "1.26.4",
         "nibabel": "5.4.2",
         "scipy": "1.17.1"
-      }
+      },
+      "dependencies_match_runtime": true
     },
     {
       "file": "native",
-      "source_files": 75,
+      "source_files": 77,
       "mismatches": [],
       "manifest_matches": true,
       "dependencies": {
@@ -25,11 +27,32 @@
         "numpy": "1.26.4",
         "nibabel": "5.4.2",
         "scipy": "1.17.1"
-      }
+      },
+      "dependencies_match_runtime": true
     }
   ],
   "native_mni_configuration_identical": true,
   "public_configuration_matches_sanitized_metadata": true,
+  "taskname_matches_raw_metadata": true,
+  "input_hashes_match_runtime_files": {
+    "bold": true,
+    "t1w": true,
+    "mni_template": true,
+    "sbref": true
+  },
+  "anatomical_cache": {
+    "reused": false,
+    "fingerprint": "d0e4c50e6f9ad3fa5c3f807750e8b4a6a4f3a7f49a8f587d9934c99164f1f2f1"
+  },
+  "execution": {
+    "registration_backend": "synthmorph",
+    "bbr": "batched",
+    "fnirt": "optimized"
+  },
+  "weight_sizes_match_recorded_configuration": {
+    "synthstrip": true,
+    "synthmorph": true
+  },
   "checks": {
     "clean_mni": {
       "shape": [
@@ -44,6 +67,7 @@
       "time_unit": "sec",
       "reference_shape_matches": true,
       "reference_affine_matches": true,
+      "frame_count_matches_input": true,
       "metadata_tr_matches": true,
       "sha256_matches_report": true,
       "outside_mask_max_abs": 0.0
@@ -61,43 +85,85 @@
       "time_unit": "sec",
       "reference_shape_matches": true,
       "reference_affine_matches": true,
+      "frame_count_matches_input": true,
       "metadata_tr_matches": true,
       "sha256_matches_report": true,
       "outside_mask_max_abs": null
     }
   },
+  "mask_check": {
+    "shape": [
+      91,
+      109,
+      91
+    ],
+    "dtype": "uint8",
+    "all_finite": true,
+    "binary": true,
+    "nonempty": true,
+    "voxels": 221058,
+    "reference_shape_matches": true,
+    "reference_affine_matches": true,
+    "sha256_matches_report": true
+  },
   "timing": {
-    "public_api_including_output_save": 491.3648130130023,
-    "validation_capture_overhead_excluded": 2.4282017829827964,
+    "public_api_including_output_save": 551.0734481331892,
+    "validation_capture_overhead_excluded": 1.7984479451552033,
     "pipeline_stages": {
-      "synthstrip": 8.846078323200345,
-      "feat_core": 250.29317235806957,
-      "fast": 1.4833325799554586,
-      "bbr_and_t1_to_mni": 32.21742656780407,
-      "aroma_masks": 0.20004206476733088,
-      "pica_aroma_confounds": 137.07823484623805,
-      "mni_resampling": 55.824117202777416,
-      "total": 485.94240394281223
+      "epi_synthstrip": 6.046531016007066,
+      "t1_synthstrip": 6.289535593241453,
+      "template_preparation": 0.06631194101646543,
+      "fast": 2.9157954598776996,
+      "t1_to_mni_affine": 5.735217912122607,
+      "t1_to_mni_nonlinear": 6.852687049191445,
+      "warp_conversion": 0.4928146037273109,
+      "anatomical_cache_lookup": 4.104650598950684,
+      "feat_core": 294.4596467334777,
+      "bbr_initial_flirt": 2.7510514887981117,
+      "bbr_refinement": 1.0423278068192303,
+      "bbr_final_resampling": 0.06539368722587824,
+      "aroma_masks": 0.2094597090035677,
+      "pica_aroma_confounds": 168.1727834502235,
+      "mni_resampling": 45.52679595351219,
+      "total": 547.5306813707575
     },
     "private_capture_seconds_by_stage": {
-      "feat_core": 1.3149535898119211,
-      "bbr_and_t1_to_mni": 0.05266174813732505,
-      "pica_aroma_confounds": 0.8845210028812289,
-      "mni_resampling": 0.17606544215232134
+      "anatomical_capture": 0.12879037205129862,
+      "feat_core": 0.8694772818125784,
+      "pica_aroma_confounds": 0.77615309599787,
+      "mni_resampling": 0.024027195293456316
     },
     "pipeline_stages_include_capture_overhead": false
   },
-  "private_minus_public_stage_seconds": {
-    "synthstrip": 0.0,
-    "feat_core": 1.3149535898119211,
-    "fast": 0.0,
-    "bbr_and_t1_to_mni": 0.05266174813732505,
-    "aroma_masks": 0.0,
-    "pica_aroma_confounds": 0.8845210028812289,
-    "mni_resampling": 0.17606544215232134,
-    "total": 2.4282017829827964
+  "bbr_phase_timings": {
+    "initial_flirt": 2.7510514887981117,
+    "boundary_preparation": 0.2567081251181662,
+    "coarse_bbr": 0.2837610458955169,
+    "local_bbr": 0.5018586358055472,
+    "final_resampling": 0.06539368722587824
   },
+  "private_minus_public_stage_seconds": {
+    "epi_synthstrip": 0.0,
+    "t1_synthstrip": 0.0,
+    "template_preparation": 0.0,
+    "fast": 0.0,
+    "t1_to_mni_affine": 0.0,
+    "t1_to_mni_nonlinear": 0.0,
+    "warp_conversion": 0.0,
+    "anatomical_cache_lookup": 0.0,
+    "feat_core": 0.8694772818125784,
+    "bbr_initial_flirt": 0.0,
+    "bbr_refinement": 0.0,
+    "bbr_final_resampling": 0.0,
+    "aroma_masks": 0.0,
+    "pica_aroma_confounds": 0.77615309599787,
+    "mni_resampling": 0.024027195293456316,
+    "total": 1.7984479451552033
+  },
+  "capture_corrections_match": true,
   "capture_stage_sum_matches": true,
-  "raw_api_wall_reconstructed": 493.7930147959851,
-  "api_minus_net_stages": 5.422409070190042
+  "anatomical_capture_excluded_from_api_and_total_only": true,
+  "raw_api_wall_reconstructed": 552.8718960783444,
+  "api_minus_net_stages": 3.542766762431711,
+  "privacy": "Full image arrays were inspected on the server. Only anonymous scalar checks, execution settings and source hashes are published."
 }
