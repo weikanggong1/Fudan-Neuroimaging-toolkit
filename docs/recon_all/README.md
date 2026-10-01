@@ -1,6 +1,6 @@
 # 单幅 T1w 的 recon-all 重建
 
-最新阶段优化见 [超过 100 秒阶段的实测与复用](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/README.md)、[CPU 几何优化](CPU_GEOMETRY_PERFORMANCE.md)及[球面配准优化](SPHERE_REGISTRATION_PERFORMANCE.md)。这些工作使用独立源码归档；冻结 `1b8c36d` 的整例表仍是优化前基线，新整例结果完成后另行绑定版本。
+最新阶段优化见 [超过 100 秒阶段的实测与复用](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/README.md)、[原生替代与热点审计](HOTSPOT_ACCELERATION_AUDIT.md)、[CPU 几何优化](CPU_GEOMETRY_PERFORMANCE.md)及[球面配准优化](SPHERE_REGISTRATION_PERFORMANCE.md)。生产源码已固定为 `c248520`，两例从原始 T1 的新整例正在运行；冻结 `1b8c36d` 的整例表仍是优化前基线，新整例结果完成后另行绑定版本。
 
 [返回首页](../../README.md) · [安装与原生程序](CONDA_CPP_BUILD.md) · [阶段与官方命令](CONDA_CPP_STAGES.md) · [验收范围](../../validation/recon_all/python_gpu_port/RELEASE_GATES.md)
 

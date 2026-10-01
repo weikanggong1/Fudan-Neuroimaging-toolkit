@@ -1,5 +1,7 @@
 # 球面配准的性能优化与验证
 
+## 功能与流程
+
 FNIT 的 `run_register_sphere(...)` 连续执行 sulc 配准、smoothwm 配准和末尾
 相交清理，写出 `sphere.reg`。它是固定 FreeSurfer 8.2 配准算法的
 Python/PyTorch 移植；本轮优化计算方式和重复开销，没有改变目标函数、
@@ -8,6 +10,23 @@ Python/PyTorch 移植；本轮优化计算方式和重复开销，没有改变�
 独立阶段 API 的 `averaging_device="cpu"` 默认保留。标准 recon-all
 调度根据 `device` 选择平均后端；CUDA 使用明确的目标 GPU。`overlap_device`
 独立选择末尾清理设备；本页示例和配对验证保持它为 CPU。
+
+本页接口对应生产提交 **`c24852054f3321c1142b1ae88fa3d2bf68329bb3`**。
+阶段测试先后使用下面记录的不可变源码归档；当前相关生产源码与最终归档
+逐文件 SHA 相同。该提交从原始 T1 开始的新整例正在准备，尚无完成结果。
+已完成的 1b 整例继续作为冻结输入和精度基线，不代表 c248520 整例。
+
+```mermaid
+flowchart LR
+    A[CPU 目标函数与梯度] --> B[CUDA 保序 Jacobi 平均]
+    B --> C[传回 CPU：线搜索与接受步长]
+    C --> D{当前尺度是否完成}
+    D -->|继续迭代或下一尺度| A
+    D -->|全部尺度完成| E[CPU 相交清理与 sphere.reg 写出]
+```
+
+CPU 调用把图中平均后端换为既有 Numba。GPU 只执行保序平均；目标函数、
+步长决策、全部迭代和末尾清理仍按同一算法执行，球面输出供后续图谱标注。
 
 ## 真实剖析找到了什么
 
@@ -109,6 +128,15 @@ CUDA 帧、非 float32 帧或需要梯度的输入保留既有 PyTorch 路径；
 复用该整数内核，将总数按既有 float32 存储/除法顺序转换为顶点均值。
 它仅用于静态邻域准备，不缓存会随顶点位置变化的几何量。
 
+### 关联面索引：共享稳定排序的 CSR
+
+[`ordered_face_csr`](../../src/fnit/recon_all/place_surface_normals.py) 用稳定排序
+构建每顶点的 face/corner 序列，保留原面顺序、重复角点与孤立顶点的空行。
+配准的 [`ordered_face_incidence`](../../src/fnit/recon_all/mris_register_nonlinear.py)
+复用该 CSR，再用整数向量索引填入 padded 表，代替逐顶点 Torch 标量写入。
+法向计算继续使用已有 float32 顺序内核；关联索引的 int64 dtype 不降低
+精度，也不改变浮点加法次序。每遍优化构建一次静态索引，不跨网格复用。
+
 ### 梯度平均：共享邻接，显式选择 CPU 或 CUDA
 
 `RegistrationGradientAverager` 接入已有的 sulc 和 smoothwm 完整配准函数。
@@ -179,17 +207,24 @@ Triton 3.1.0 已在主页 [Conda 环境](../../environment.yml) 声明，本轮�
 | `blur_atlas_frame(frame, sigma)` | 二维非空 Tensor，轴顺序为方位角/极角；`sigma` 必填、正且有限，配准尺度为 4/2/1/0.5 | 同 shape/dtype/device 的新张量；不改输入。sigma 是参数化网格尺度，不是 MRI 的 mm；数值单位继承原帧。无效维度或 sigma 抛 ValueError |
 | `three_hop_neighbor_total(neighbors, degrees)` | CPU NumPy int64(N,K) 保序邻接、int64(N) 有效列数 | 三跳内去重邻点总数整数，不计自身；支持断连/孤立点。内部调用者须保证合法索引和列数 |
 | `three_hop_avg_nbrs(neighbors, degrees)` | Torch int64(N,K)、int64(N)；合法非空静态邻接 | 按原 float32 舍入生成 Python float 均值；CUDA 邻接搬回 CPU 后计算；该内部函数不单独验证邻接 |
+| `average_gradients_exact_cpu(gradient, neighbors, degrees, iterations)` | 全部为CPU Tensor；float32(N,3)梯度、int64(N,K)/(N)邻接/degree、非负整数轮数，均必填 | 新CPU float32(N,3)梯度；非CPU梯度抛ValueError，低层邻接合法性由平均器核验；不改输入 |
 | `RegistrationGradientAverager(neighbors, degrees, device="cpu")` | Torch int64(N,K) 保序邻接、int64(N) 有效列数、CPU/CUDA 设备 | 可调用对象，缓存本表面邻接与倒数；shape/dtype/有效邻点索引或列数错误抛 ValueError |
 | `averager(gradient, iterations)` | float32(N,3) 梯度、非负平均轮数；梯度分量采用原球面坐标方向 | 返回同 shape/dtype/device 新张量，不改梯度；负轮数/梯度结构错误抛 ValueError；CUDA 不可用或编译失败抛异常 |
 | `average_on_cuda(current, following, neighbors, degrees, reciprocals, iterations)` | 两份连续 float32(N,3) 缓冲、int64(N,K)/(N) 邻接/列数、float32(N) CPU 原规则倒数、完整轮数；同一 CUDA 设备 | 返回最终 CUDA 缓冲；内部算子，输入校验由平均器负责；默认调度不直接调用 |
+| `ordered_face_csr(faces, nvertices)` | NumPy 整数(F,3) 面、非负顶点总数 N；二者必填 | int64 `offsets`(N+1,)、`face_ids`(3F,)、`corners`(3F,)；每行包含原序关联面/0–2角点，无坐标或物理单位。保留重复项和空行，非法形状/dtype/索引/顶点数抛 ValueError |
+| `ordered_face_incidence(faces, nvertices)` | 任意 CPU/CUDA 整数 Tensor(F,3)、非负 N；二者必填 | 原设备的 int64 `face_indices/corner_indices`(N,K)、`degrees`(N,)；K 为最大 degree，非有效列填零，无面时 K=0。CPU 建 CSR 后向量化填表；非法输入抛 ValueError |
+| `initial_vertex_normals(vertices, triangles)` | NumPy (N,3) 坐标、整数(F,3)三角面；二者必填，内部转 float32/int64 | float32(N,3)单位法向，无单位，孤立点为零；非法数组/面索引抛 ValueError。几何有限性由阶段调用者检查 |
 
 这些 blur、BFS 和平均器是 `mris_register` 的内部步骤，没有各自独立的
 官方 CLI。不能用同名的 reciprocal distance 平均或无序 scatter 替换这里
 的邻接梯度平均；不同算子的定义和依赖顺序需要分别验证。
+CPU 平均后端要求梯度及邻接/degree 都在CPU；CUDA平均器可接收CPU梯度，
+返回同输入设备。`iterations` 是非负整数轮数，不支持用小数轮数近似执行。
 
-## 完整具名示例
+## Python 调用
 
-以下显式请求 CUDA averaging；它没有修改生产默认。先创建独立输出目录，
+以下独立 API 显式请求 CUDA averaging；标准 recon-all 则随 `device` 选择。
+先创建独立输出目录，
 只使用 FNIT 自产表面和声明图谱。
 
 ```python
@@ -209,9 +244,53 @@ report = run_register_sphere(
 )
 ```
 
+共享索引和法向的独立调用使用同一三角网格：
+
+```python
+from nibabel.freesurfer.io import read_geometry
+from fnit.recon_all.place_surface_normals import ordered_face_csr, initial_vertex_normals
+
+surface_vertices, surface_triangles = read_geometry(
+    filepath="/data/fnit_subject/surf/lh.sphere",          # 有序三角面；surface RAS/mm
+)
+face_offsets, face_ids, corner_ids = ordered_face_csr(
+    faces=surface_triangles,                              # (F,3)整数面，保留面/角点次序
+    nvertices=len(surface_vertices),                      # N包含无关联面的孤立顶点
+)
+surface_normals = initial_vertex_normals(
+    vertices=surface_vertices,                            # (N,3)mm坐标；内部转float32
+    triangles=surface_triangles,                          # 同一有序面；返回float32(N,3)单位法向
+)
+```
+
 GPU 性能测试在指定设备调用前后同步；报告显式保存 GPU UUID、线程、TF32
 和 allocator 设置。上述 API 返回耗时不能代替包含 Python 导入/CUDA 初始化
 的进程墙钟，也不能把禁用缓存后的 allocator 统计 0 解释为零显存。
+
+## CLI 调用
+
+完整函数自带模块 CLI；三个表面/顶点图输入、图谱和输出都是必填的位置
+参数，顺序与 Python 接口一致，不能写成不存在的 `--sphere` 等选项。
+两个设备选项均默认 `cpu`；`--report` 默认不写独立文件，JSON 仍输出到
+标准输出。父目录须提前创建，已有输出可能被覆盖，建议使用新诊断目录。
+
+```bash
+# 完整 sulc+smoothwm 配准；输入依次为自产球面、同序 smoothwm、sulc、声明图谱。
+python -m fnit.recon_all.mris_register_run \
+  /data/fnit_subject/surf/lh.sphere \
+  /data/fnit_subject/surf/lh.smoothwm \
+  /data/fnit_subject/surf/lh.sulc \
+  /data/fnit_assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif \
+  /data/validation/register_new/lh.sphere.reg \
+  --overlap-device cpu \
+  --averaging-device cuda:0 \
+  --report /data/validation/register_new/api_report.json
+```
+
+`overlap-device` 保持已测 CPU 清理；`averaging-device` 明确仅平均内核使用
+逻辑 GPU 0；`report` 保存返回字典，含两遍轨迹及输入/输出哈希。模块 CLI
+没有线程参数；需要严格 4 线程、GPU 前后同步和源码核验的测量使用下节
+独立 benchmark CLI，它会在模型/内核导入前设置线程预算。
 
 ## 完整配准的同输入验证
 
@@ -236,8 +315,11 @@ UUID 的 `cuda:0` averaging，float32/TF32，无 autocast 或半精度。
 | --- | ---: | ---: | --- | --- |
 | sub01 LH 完整配准阶段，含初始化/同步/读写/JIT | 503.817845 s | 168.823989 s | 坐标/面/尾部及全部保存轨迹一致 | complete |
 | 同次独立进程，另含 Python 导入 | 506.790789 s | 171.645117 s | 同上 | complete |
-| sub01 RH、sub02 LH/RH，对保存的 1b 冻结精度基线 | 不重新计时旧结果 | 待测 | 待比较 | pending |
-| 新候选从原始 T1 的整例提速/显存 | — | — | — | not_assessed |
+| sub01 RH，对保存的 1b 精度基线 | 未重测 | 155.726229 s | 坐标/面/尾部、seed 与保存轨迹一致 | complete |
+| sub02 LH，对保存的 1b 精度基线 | 未重测 | 167.211978 s | 同上 | complete |
+| sub02 RH，对保存的 1b 精度基线 | 未重测 | 180.185278 s | 同上 | complete |
+| 加共享 CSR 后 sub01 LH，对保存的 1b 精度基线 | 未重测 | 150.171479 s | 同上 | complete |
+| c248520 从原始 T1 的新整例提速/显存 | — | — | — | pending / not_assessed |
 
 完整配准阶段时间比为 **2.9843 倍**，减少 334.993856 s（66.49%）。这是
 共享机器上的一次同机阶段配对观察，没有重复轮次或整例加速结论。两份
@@ -254,6 +336,46 @@ UUID 的 `cuda:0` averaging，float32/TF32，无 autocast 或半精度。
 SHA 为 `64305cb719d13fa6b7fd7e49f531f6da6c0bee4ee52af4c41432f9e1dd5e6a1e`；
 [外层监控 JSON](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/register_pair_sub01_lh_monitor.json)
 SHA 为 `343a045870a1c4f7820672e5d20502e012858f066a1e896bcfe87e44d82e187e`。
+
+后三侧使用与第一次 LH 配对相同的 GPU 源码归档 `f7691862…`，同一 H100、
+Torch intraop/Numba 4、interop 1，目标设备前后同步、float32/TF32、
+autocast 关闭。坐标最大/P99 误差和不同分量数均为 0，有序面、尾部、
+sulc-seed SHA 及全部保存轨迹一致，四份阶段输入 SHA 与原记录相同。
+包含导入的独立候选进程墙钟分别为 159.223020、170.396617、183.249422 s。
+以下报告同时保存输入和源码前后哈希；旧阶段耗时没有与本次 GPU 测量配对。
+
+| 保存基线回归报告 | SHA-256 |
+| --- | --- |
+| [sub01 RH](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/register_saved_sub01_rh.json) | `9a6800d369d65f8621865ced167683622fb74ad8bc3ed4e886c6051b95e497ab` |
+| [sub02 LH](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/register_saved_sub02_lh.json) | `41b29f277a0ca4313c7915fbf56f4591c2a0da65d7d028f8f4eb90562b8af2a3` |
+| [sub02 RH](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/register_saved_sub02_rh.json) | `4bbb9a1c090928305e86e261dfc98ab191fbe0a1670003e95dd1674fa20c9659` |
+
+### 最终共享 CSR 的范围
+
+最终候选归档为
+`098ccb63a3931a4f749710fb76dd9beb4751f7b8b14c0f130fa922f9698b708e`。
+四张真实 sphere 每张做一次 CPU 顺序配对，face/corner/degrees 与 CSR
+整数数组逐元素一致，已有 float32 法向逐位一致，最大/P99 误差为 0。
+
+| 冻结网格 | 旧 incidence 构造 | 新 incidence 构造 | 旧/新法向，含各自 CSR |
+| --- | ---: | ---: | ---: |
+| sub01 LH | 5.731256 s | 0.098330 s | 2.817187 / 0.798715 s |
+| sub01 RH | 6.525221 s | 0.084628 s | 0.222737 / 0.213711 s |
+| sub02 LH | 7.466030 s | 0.099341 s | 0.274457 / 0.251923 s |
+| sub02 RH | 7.464913 s | 0.096381 s | 0.247978 / 0.244793 s |
+
+这是内部构造/法向的单次函数计时，文件读入另外记录，完整测试 33.476354 s。
+首次法向调用包括各自 JIT/缓存加载，不能将首行时间比推广为暖法向速度。
+[四侧原始报告](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/ordered_face_csr_four_pair.json)
+SHA 为 `24ff496f54f0031ed6740134d89c00db8a565e8e21af20a635d84a181f2df52d`。
+
+该最终归档又执行一次 sub01 LH 完整配准，阶段 150.171479 s，进程含导入
+153.257819 s；输出 SHA、seed、坐标/面/尾部与保存轨迹严格一致。
+[完整 LH 回归](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/register_final_csr_sub01_lh.json)
+SHA 为 `0aee5e878f9a77ea9a2920febf9f158a6bbce45810ad2d2a3edf6f3ea23dbd55`。
+这次没有同时 CPU 或前一 GPU 版本重跑，不能将 168.824 与 150.171 s 的
+差直接解释为 CSR 的因果提速。最终共享 CSR 的后三侧完整配准尚未另跑；
+四侧整数/法向回归和旧 GPU 归档的四侧完整回归分开保留。
 
 其余三个半球使用
 [benchmark_register_saved_pair.py](../../validation/recon_all/python_gpu_port/benchmark_register_saved_pair.py)
@@ -287,12 +409,28 @@ python validation/recon_all/python_gpu_port/benchmark_register_saved_pair.py \
 目录，保存报告、候选表面及日志；`threads` 固定为 4。overlap 保持 CPU。
 运行/哈希/结构失败退出 1；运行完成但严格阶段比较失败退出 2并保留结果；
 严格阶段通过退出 0，不将它视为整例指标等效通过。
+CLI 参数或新输出目录的前置检查失败时，可能尚未创建 report.json。
 
 严格复现保留为诊断；本页没有新增或放宽数值容差。优化是否引入退化按
 实际同输入报告单独判断，整体脑区指标等效仍为 `not_assessed`。已测旧
 cProfile 不能填写成新候选的 CPU/GPU 配对结果。
 
-## 官方命令、固定源码与文献
+## 版本记录
+
+| 实际代码 | 已完成验证 | 与当前提交的关系 |
+| --- | --- | --- |
+| `1b8c36d25a68e253a1e59b6d02114890afa467de` | 旧整例、LH cProfile 与本轮 CPU 配对基线 | 冻结基线 |
+| `764607c` + [GPU 快照](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/gpu_candidate_source_snapshot.json)，归档 `f7691862…` | 实际梯度算子、LH 完整性能配对、其余三侧保存结果回归 | 尚无共享 CSR |
+| `764607c` + [最终快照](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/final_candidate_source_snapshot.json)，归档 `098ccb63…` | 四侧 CSR/法向、LH 完整保存结果回归 | 与 c248520 的相关生产源文件 SHA 相同 |
+| `c24852054f3321c1142b1ae88fa3d2bf68329bb3` | 已提交相同源码及按 recon-all device 选择 averaging | 原始 T1 新整例 pending；不改写以上实际运行版本 |
+
+所有具体源码和输入 SHA 见各原始 JSON。当前资源另经
+[运行资源指纹](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/runtime_fingerprints_hotspot_candidate.json)
+复核，权重/资产/候选程序/输入没有哈希不符；这是资源复核，没有证明无预装
+软件的干净部署。整体指标等效标准未获正式确认，阶段严格通过不构成整体
+等效批准，也不能推算新提交的 recon-all 整例时间。
+
+## 官方调用、原代码与文献
 
 固定参考工作流的完整阶段命令为：
 
@@ -317,12 +455,3 @@ FNIT 已有阶段对照和命令记录见
 intersubject averaging and a coordinate system for the cortical surface.*
 Human Brain Mapping 8(4), 272–284 (1999).
 [原论文索引](https://pubmed.ncbi.nlm.nih.gov/10619420/)。
-
-
-## 共享面关联索引与生产接入
-
-复用 place_surface_normals.ordered_face_csr(faces=surface_triangles, nvertices=len(surface_vertices))，返回 int64 offsets(N+1)、face_ids(3F)、corners(3F)，完整保留原面/角点顺序、重复项与孤立顶点。配准按同一 CSR 向量化填零 padding 的 (N,K) int64 表，浮点法向体保持原样。非法形状、非整数及越界索引抛 ValueError。坐标为 surface RAS/mm，initial_vertex_normals(vertices=surface_vertices, triangles=surface_triangles) 输出无单位的 (N,3) float32 法向。完整具名参数与中文注释见两个函数的 docstring。
-
-[四网格验证](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/ordered_face_csr_four_pair.json)的索引与法向逐位一致，关联表构造 5.731/6.525/7.466/7.465 s→0.098/0.085/0.099/0.096 s。包含该修改的 [最终 LH 配准](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/register_final_csr_sub01_lh.json) 为150.171 s，表面、sulc seed和保存轨迹完全相同；这是候选重放，前面的503.818/168.824 s属于另一次配对。
-
-原始T1整例另行验证，整体指标等效仍未判定。

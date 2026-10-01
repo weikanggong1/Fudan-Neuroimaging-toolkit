@@ -6,7 +6,7 @@
 
 同输入 sub-01 LH 完整球面配准 cProfile 为 **524.378 s**；有序面及坐标与冻结 1b 保存结果完全相同。[报告](baseline_register_profile/report.json)记录：103 次有序平均累计 241.165 s，27 次图谱平滑累计 117.288 s，其中有 10,773,744 次 `torch.roll`。剖析包含记录开销，不能当作无剖析的性能基线。
 
-据此修改了自有算子：CPU 图谱平滑使用有序 double 累加的 Numba；三跳邻域使用整数 BFS；梯度平均增加可选 CUDA float32 有序 Jacobi 内核。remesh 复用顺序 Numba 平滑、缓存静态邻接并用 heapify 建初始队列；quick sphere 复用已有角点累加内核并减少重复几何计算；两处归一化控制点清理共用同一顺序 Numba 内核。59 项本地回归通过，真实阶段配对正在运行；四侧真实回归通过后，生产入口已按目标 device 选择 CUDA 或 CPU 平均。
+据此修改了自有算子：CPU 图谱平滑使用有序 double 累加的 Numba；三跳邻域使用整数 BFS；梯度平均增加可选 CUDA float32 有序 Jacobi 内核。remesh 复用顺序 Numba 平滑、缓存静态邻接并用 heapify 建初始队列；quick sphere 复用已有角点累加内核并减少重复几何计算；两处归一化控制点清理共用同一顺序 Numba 内核。59 项本地回归通过，真实阶段配对已完成；四侧真实回归通过后，生产入口已按目标 device 选择 CUDA 或 CPU 平均。
 
 四个真实 remesh 配对均通过：坐标、有序面、尾部及拆缩边接受数量完全相同。计时含读写和首次编译/缓存加载；gpucw1，4 线程，逐侧各一次配对观察。[前三侧](remesh_other_three_pair.json)、[sub-02 RH](remesh_sub02_rh_pair.json)保存完整轨迹与哈希。
 
@@ -19,11 +19,11 @@
 
 真实 sub-01 LH 首轮梯度的 16,384 次平均，暖运行四次中位数为 **39.496 → 0.318 s**，包含传输和完整迭代；0/1/64 轮同样通过零容差数值回归。首次 GPU 调用含编译为 2.805 s，静态邻接构造另计。[算子报告](gpu_average_sub01_lh.json)、[外部采样](gpu_average_sub01_lh_monitor.json)记录最大采样进程显存 486,539,264 字节（0.487 GB）、366 次样本、请求间隔 0.5 s、最大间隔 1.728 s，未验证连续峰值。这是算子结果，不能推算完整配准或整例提速。
 
-完整 sub-01 LH 配准 [同输入配对](register_pair_sub01_lh.json)为 **503.818 → 168.824 s（2.984 倍、减少 66.49%）**。输出 SHA、坐标、有序面、尾部和所有保存轨迹一致。此处计时包含读写/JIT/设备初始化和同步，外层进程为 506.791 → 171.645 s。其余三侧正在与冻结相同输入结果比较；旧保存时间不会当作同时性能对照。
+完整 sub-01 LH 配准 [同输入配对](register_pair_sub01_lh.json)为 **503.818 → 168.824 s（2.984 倍、减少 66.49%）**。输出 SHA、坐标、有序面、尾部和所有保存轨迹一致。此处计时包含读写/JIT/设备初始化和同步，外层进程为 506.791 → 171.645 s。其余三侧与冻结相同输入结果比较也已通过：sub-01 RH 155.726 s、sub-02 LH 167.212 s、RH 180.185 s；保存轨迹、面与坐标一致。这里仅有新实现的重放耗时，旧保存时间不作同时性能对照。
 
 quick sphere 四侧 [配对](quick_sphere_four_pair.json)均通过坐标/面/尾部和全部 trace 回归：sub-01 LH/RH 为 79.449/82.657 → 70.325/74.927 s，sub-02 LH/RH 为 92.659/95.266 → 85.156/85.288 s，单次减少 8.10%–11.48%。
 
-sub-01 CPU 归一化 [配对](normalize_sub01_pair.json)：第一轮 84.645 → 80.945 s，第二轮 94.228 → 90.358 s；最终影像及全部诊断控制图的体素、dtype、shape、仿射完全相同。sub-02 继续验证。新整例提速和整体指标等效尚未测得。
+sub-01 CPU 归一化 [配对](normalize_sub01_pair.json)：第一轮 84.645 → 80.945 s，第二轮 94.228 → 90.358 s；最终影像及全部诊断控制图的体素、dtype、shape、仿射完全相同。sub-02 第一轮 84.114 → 80.687 s、第二轮 105.981 → 100.384 s，同样通过所有终图和诊断图回归。新整例提速和整体指标等效尚未测得。
 
 ## 自有 CPU 阶段的加速空间
 
@@ -31,8 +31,8 @@ sub-01 CPU 归一化 [配对](normalize_sub01_pair.json)：第一轮 84.645 → 
 | --- | --- | --- |
 | 球面配准 | 本次剖析：有序平均与重复 roll 合计约 358 s | 编译平滑和 BFS；实测 GPU 有序平均 |
 | remesh | 本次 sub-02 RH 新实现的 collapse 约 78 s，三次 smooth 合计约 2.41 s | 优化平滑和建堆；保留动态拓扑顺序 |
-| standard sphere | 旧整例 141–238 s；本轮尚无新内部剖析 | 核查多轮平均、metric 和 line-search，保留已验证主体 |
-| T1/brain 归一化 | 旧 GPU 整例分别 185/175 s，含 CPU 控制点选择与传输 | 有序清理已编译；完整阶段配对在队列中 |
+| standard sphere | 旧整例 141–238 s；本轮 headcw 同输入 CPU 剖析 156.913 s | 实测距离 SSE 64.410 s、法向22.248 s、平均16.288 s；下一步缓存静态 CSR 并优化距离目标 |
+| T1/brain 归一化 | 旧 GPU 整例分别 185/175 s，含 CPU 控制点选择与传输 | 有序清理已编译；两例 CPU 完整阶段同输入配对已通过 |
 | SynthSeg | 旧 sub-02 CPU 368.81 s，GPU 实现已存在 | 使用已有 GPU 路径，保留经过验证的 cuDNN FP32 例外 |
 | MNI 非线性链 | 旧 sub-01：模型/保存 170.74，转换 16.81，求逆 89.47，检查图 7.13 s | 已使用 PyTorch deform，需拆分加载、前向、双向组合及保存计时 |
 
@@ -136,3 +136,13 @@ GPU 测试显式指定 UUID，保留 4 线程、现有 allocator 策略和 TF32 
 [资源复核](runtime_fingerprints_hotspot_candidate.json)重新读取两幅原始T1、11项权重、102项资产及14个Conda程序：大小/SHA改变数为0。官方程序SHA沿用既有核验记录，本遍没有重新生成官方参考，也未验证干净部署。
 
 [最终源码快照](final_candidate_source_snapshot.json)绑定生产选择与共享CSR；前两份快照保留作阶段对照。新整例使用该快照、原始T1和新空目录，执行、完整性、网格质量、严格复现、优化退化与整体等效分别报告。
+
+## 本次原始 T1 整例与代码绑定
+
+生产代码提交为 `c24852054f3321c1142b1ae88fa3d2bf68329bb3`，工作分支为 `recon-all-hotspots-20261001`。最后 CPU/GPU 共用 [快照](final_candidate_source_snapshot.json)归档 SHA-256 为 `098ccb63a3931a4f749710fb76dd9beb4751f7b8b14c0f130fa922f9698b708e`；18 个源码、测试及脚本文件与提交的 SHA 核对一致，见 [绑定](tested_commit_binding.json)。最后 CSR 接入后的 LH 完整配准重放为 [150.171 s](register_final_csr_sub01_lh.json)，输出与保存轨迹一致；这不是与前一轮 168.824 s 配对的性能比较。
+
+第一次空目录整例因启动器未传已声明的 FS_LICENSE 路径，在 mri_em_register 许可检查失败。保留两例失败报告；补齐启动环境后，从原始 T1 和新的空目录重启 `retry1`，没有复制失败目录中的中间结果。sub-01 为 gpucw1/H100 已初始化 CUDA 的 Python API，sub-02 为 nodecw10 CPU CLI；两者均4线程。配置见 [sub-01](sub01_whole_retry1_config.json)、[sub-02](sub02_whole_retry1_config.json)，使用 [启动器](../run_full_hotspots_launcher.py)及 [只读比较器](../collect_hotspot_whole_comparison.py)。整例还在运行，完成后以包含导入、校验、加载、传输及读写的墙钟判断提速。
+
+[热点来源与自有替代审计](../../../../docs/recon_all/HOTSPOT_ACCELERATION_AUDIT.md)明确区分原生 Conda 程序、自有 CPU/GPU 计算、成熟替代与待补连续验证的实现。输入、11个权重、102个资产和14个候选程序的大小与 SHA 当前复核差异为0；未读取许可证内容、未下载新数据。参考程序哈希沿用已完成记录，本轮未重新运行官方程序；干净隔离环境验收仍未完成。
+
+标准球面另在 headcw、4线程、相同 sub-01 LH 输入做本轮 [cProfile](standard_sphere_profile.json)：156.913 s，坐标和有序面与保存结果完全相同。距离 SSE 累计64.410 s（2103次），法向22.248 s（212次），有序平均16.288 s（212次）。其中线搜索与其 SSE 属于嵌套耗时，不能重复相加；下一步优先缓存不变拓扑并优化逐顶点距离目标，不能沿用配准平均的124倍算子结果推算标准球面提速。
