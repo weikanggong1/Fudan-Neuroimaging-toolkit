@@ -63,3 +63,42 @@ mris_place_surface --adgws-in ../surf/autodet.gw.stats.lh.dat \
 
 - Fischl B. FreeSurfer. *NeuroImage*. 2012;62(2):774–781. [doi:10.1016/j.neuroimage.2012.01.021](https://doi.org/10.1016/j.neuroimage.2012.01.021)。
 - [FreeSurfer 固定源码提交](https://github.com/freesurfer/freesurfer/tree/d932c45b7941662ea380a05efef580568b98d41a)。
+
+
+## 当前串行优化：复用静态索引
+
+实测候选8178bf2。完整四轮函数复用已有FaceNormalTopology，固定面CSR只准备
+一次；每个当前坐标版本仍重算法向。原表面法向沿用自己的累加定义，累加前
+不归一化各面，不能用current法向替代。原始white坐标和rip标签的桶索引固定，
+每次对当前坐标重新生成键；Numba查询替代每轮两个Python逐顶点字典循环。
+保留float32加1000再向零取整、桶内原顶点顺序、所有候选及原排斥梯度。
+异步接受、拒绝试步状态、步长、目标值、四轮切换及最后相交清理均保留。
+生产默认仍为Conda完整pial；该替换必须先通过同输入回归，不能把组件加速
+直接计入生产整例提速。
+
+新增内部OriginalVertexBuckets(original, ripped)输入(N,3)float32原始surface
+RAS/mm坐标和(N,)bool标签mask，复制并冻结整数键和mask。query(current)输入
+同N的有限坐标，返回offsets(N+1)与candidate_ids(M) int32；M为全部候选数，
+没有固定上限。原表面或rip改变须新建；shape或有限性不合法抛ValueError。
+vertex_buckets(current, original, ripped)保留原入口，单次使用相同完整算法。
+original_vertex_normals(vertices, triangles, *, topology=None)接收同序有限坐标
+和整数三角面，返回(N,3)float32单位法向；无面顶点为零，不兼容拓扑抛异常。
+_query_vertex_buckets输入当前/排序整数键、原顶点ids及固定rip，返回同CSR。
+这些都是上游mris_place_surface内部步骤，没有独立官方CLI或GPU/精度选项。
+
+~~~python
+import nibabel.freesurfer.io as surface_io
+import numpy as np
+from fnit.recon_all.place_surface_normals import FaceNormalTopology
+from fnit.recon_all.place_surface_repulsion import OriginalVertexBuckets, original_vertex_normals
+vertices, faces = surface_io.read_geometry("/data/self/surf/lh.white")  # 有序三角面，surface RAS/mm
+ripped = np.zeros(len(vertices), dtype=bool)  # 示例保留全部顶点；生产来自真实rip标签
+normal_topology = FaceNormalTopology(triangles=faces, nvertices=len(vertices))  # 仅缓存整数拓扑
+original_normals = original_vertex_normals(vertices=vertices, triangles=faces, topology=normal_topology)  # 原表面法向定义
+candidate_index = OriginalVertexBuckets(original=vertices, ripped=ripped)  # 本次white与固定rip
+candidate_offsets, candidate_ids = candidate_index.query(current=vertices)  # 下一轮传其真实当前坐标
+~~~
+
+真实完整回归与CPU剖析正在执行，报告绑定源码/输入SHA，固定4线程、200步上限。
+未更改默认white：现有Python white只覆盖前缀，无法代替完整四轮优化。
+已有GPU厚度/面积/曲率继续由主runner调用，不重新实现；整例实测另行报告。
