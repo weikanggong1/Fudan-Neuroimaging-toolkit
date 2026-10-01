@@ -73,15 +73,9 @@ def summarize(root, case, implementations):
              **implementations.get(name, {"implementation": "unclassified"}),
              "over_100_seconds": c[name]["seconds"] > 100,
              "candidate_profile": c[name]} for name in c]
-    stages_csv = directory/"timing.csv"
-    with stages_csv.open("x", newline="") as stream:
-        fields = ["name","baseline_seconds","candidate_seconds","saved_seconds",
-                  "time_reduction_percent","speedup","implementation","source_paths",
-                  "over_100_seconds"]
-        writer = csv.DictWriter(stream, fieldnames=fields, extrasaction="ignore")
-        writer.writeheader()
-        writer.writerows(rows)
-    comparison_files = [path for path in sorted((directory/"paired").glob("*.json"))]
+    comparison_files = [directory/"paired"/(name+".json") for name in
+                        ("summary",*[kind+"_vs_"+reference for reference in
+                        ("baseline","official") for kind in ("strict","region","dice","surface")])]
     quality_files = [directory/name/"report.json" for name in
                      ("quality","quality_baseline","quality_official")]
     comparisons = {path.stem: read(path) for path in comparison_files}
@@ -119,7 +113,7 @@ def summarize(root, case, implementations):
         "comparisons":comparisons,"quality":quality,
         "overall_metric_equivalence":"not_assessed; no confirmed whole-case thresholds",
         "source_files":[binding(path,root) for path in
-                        [*files.values(),*comparison_files,*quality_files,stages_csv]],
+                        [*files.values(),*comparison_files,*quality_files]],
     }
 
 
@@ -135,6 +129,9 @@ def main():
     provenance=read(root/"runtime_fingerprints_61926c7.json")
     if provenance["mismatches"]:
         raise ValueError(provenance["mismatches"])
+    for case in ("sub01","sub02"):
+        if (root/"whole"/case/"timing.csv").exists():
+            raise FileExistsError(root/"whole"/case/"timing.csv")
     report={"schema":"fnit_serial_whole_v1",
             "resources":provenance,
             "script_sha256":hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
@@ -142,6 +139,15 @@ def main():
             "isolation_validation":"not_verified; host has separately installed official software",
             "continuous_gpu_peak":"not_verified; NVML sampling only",
             "overall_metric_equivalence":"not_assessed"}
+    for case,value in report["cases"].items():
+        stages_csv=root/"whole"/case/"timing.csv"
+        with stages_csv.open("x",newline="") as stream:
+            fields=["name","baseline_seconds","candidate_seconds","saved_seconds",
+                    "time_reduction_percent","speedup","implementation","source_paths",
+                    "over_100_seconds"]
+            writer=csv.DictWriter(stream,fieldnames=fields,extrasaction="ignore")
+            writer.writeheader();writer.writerows(value["stages"])
+        value["source_files"].append(binding(stages_csv,root))
     args.output.write_text(json.dumps(report,indent=2)+"\n")
 
 
