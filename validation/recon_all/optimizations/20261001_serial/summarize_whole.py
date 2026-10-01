@@ -38,6 +38,22 @@ def pair(before, after):
             "speedup": before/after}
 
 
+def hemisphere_reports(run):
+    """提取父阶段包含的内部计时；run为完整运行JSON，不另加到总时间。"""
+    return {hemi: {
+        "topology_native_seconds": surface["topology_native_seconds"],
+        "topology_python_seconds": surface["topology_python_seconds"],
+        "remesh_seconds": surface["topology_remesh_seconds"],
+        "intersection_seconds": surface["topology_intersection_seconds"],
+        "white_preaparc": surface["white_preaparc_report"],
+        "standard_sphere": surface["standard_sphere_report"],
+        "sphere_registration": run["sphere_registration"]["reports"][hemi],
+        "final_white": surface["final_white_report"],
+        "pial": surface["pial_report"],
+        "metrics": surface["metric_seconds"],
+    } for hemi, surface in run["surfaces"].items()}
+
+
 def summarize(root, case, implementations):
     directory = root/"whole"/case
     files = {name: directory/(name+".json") for name in
@@ -72,6 +88,7 @@ def summarize(root, case, implementations):
     rows = [{"name": name, **pair(b[name]["seconds"], c[name]["seconds"]),
              **implementations.get(name, {"implementation": "unclassified"}),
              "over_100_seconds": c[name]["seconds"] > 100,
+             "baseline_profile": b[name],
              "candidate_profile": c[name]} for name in c]
     comparison_files = [directory/"paired"/(name+".json") for name in
                         ("summary",*[kind+"_vs_"+reference for reference in
@@ -80,20 +97,11 @@ def summarize(root, case, implementations):
                      ("quality","quality_baseline","quality_official")]
     comparisons = {path.stem: read(path) for path in comparison_files}
     quality = {path.parent.name: read(path) for path in quality_files}
-    by_hemi = {}
-    for hemi,surface in after["surfaces"].items():
-        by_hemi[hemi] = {
-            "topology_native_seconds": surface["topology_native_seconds"],
-            "topology_python_seconds": surface["topology_python_seconds"],
-            "remesh_seconds": surface["topology_remesh_seconds"],
-            "intersection_seconds": surface["topology_intersection_seconds"],
-            "white_preaparc": surface["white_preaparc_report"],
-            "standard_sphere": surface["standard_sphere_report"],
-            "sphere_registration": after["sphere_registration"]["reports"][hemi],
-            "final_white": surface["final_white_report"],
-            "pial": surface["pial_report"],
-            "metrics": surface["metric_seconds"],
-        }
+    sampled_files = [directory/(kind+"_gpu_samples.csv") for kind in ("baseline","candidate")]
+    for path in sampled_files:
+        if not path.is_file():
+            raise FileNotFoundError(path)
+    optional_files = [path for path in directory.glob("*.json") if path not in files.values()]
     return {
         "case":case,"checks":checks,"candidate_commit":launch["code_commit"],
         "candidate_archive_sha256":launch["source_archive_sha256"],
@@ -108,12 +116,13 @@ def summarize(root, case, implementations):
         "output_completeness":after["output_validation"],
         "precision":after["precision"],"allocator":after["cuda_allocator"],
         "thread_budget":after["thread_budget"],
-        "stages":rows,"nested_hemisphere_reports":by_hemi,
+        "stages":rows,"nested_hemisphere_reports":hemisphere_reports(after),
+        "baseline_nested_hemisphere_reports":hemisphere_reports(before),
         "nested_timing_caution":"included in parent stages, do not add nested times again",
         "comparisons":comparisons,"quality":quality,
         "overall_metric_equivalence":"not_assessed; no confirmed whole-case thresholds",
         "source_files":[binding(path,root) for path in
-                        [*files.values(),*comparison_files,*quality_files]],
+                        [*files.values(),*comparison_files,*quality_files,*sampled_files,*optional_files]],
     }
 
 

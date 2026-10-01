@@ -1,8 +1,8 @@
 # 单幅 T1w 的 recon-all 重建
 
-本轮候选 `61926c7` 已按[五阶段串行优化](SERIAL_OPTIMIZATION.md)完成阶段回归：全部辅助网络GPU、有序归一化内核和标准球面平均已接入；N4拟合与完整GCA保留合适的源码构建实现。Python pial单次同输入配对减少15.17%，与官方完整坐标一致，但仍慢于生产C++，因此保留默认并单列其局部差异。两例原始T1整例与整体等效尚未判定；首个CUDA OOM失败尝试保留日志，新空目录retry1正在运行。报告均绑定实际代码，不将阶段加速当成整例提速。
+本轮候选 `61926c7` 已按[五阶段串行优化](SERIAL_OPTIMIZATION.md)完成阶段回归：全部辅助网络GPU、有序归一化内核和标准球面平均已接入；N4拟合与完整GCA保留合适的源码构建实现。Python pial单次同输入配对减少15.17%，与官方完整坐标一致，但仍慢于生产C++，因此保留默认并单列其局部差异。[当前整例结果](../../validation/recon_all/optimizations/20261001_serial/WHOLE_RESULTS.md)：首例138项齐全，完整命令4242.884→3557.969秒，减少16.143%，采样显存16.186 GB；第二例GPU配对仍在运行，严格比较和整体等效尚未判定。首个CUDA OOM失败尝试保留日志，根因未定位。报告均绑定实际代码，不将阶段加速当成整例提速。
 
-此前完成的热点优化生产代码为 `c248520`，两例已从原始 T1 连续完成66阶段，各138项输出齐全。[当前整例结果](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/WHOLE_RESULTS.md)：GPU完整命令4972.667→4242.884秒，减少14.676%；CPU5295.422→5274.884秒，减少0.388%。相对优化前严格诊断GPU137/138、CPU138/138，分割与主要脑区统计均零差异；GPU唯一表头差异已定位到面积尾差经float32累加和文本舍入放大。GPU采样峰值14.508 GB，连续峰值未验证。官方差异与white/pial穿越仍保留，整体指标等效未判定。热点和具体实现见 [实测与复用](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/README.md)、[原生替代审计](HOTSPOT_ACCELERATION_AUDIT.md)、[CPU 几何](CPU_GEOMETRY_PERFORMANCE.md)及[球面配准](SPHERE_REGISTRATION_PERFORMANCE.md)。
+此前完成的热点优化生产代码为 `c248520`，两例已从原始 T1 连续完成66阶段，各138项输出齐全。[此前c248520整例结果](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/WHOLE_RESULTS.md)：GPU完整命令4972.667→4242.884秒，减少14.676%；CPU5295.422→5274.884秒，减少0.388%。相对优化前严格诊断GPU137/138、CPU138/138，分割与主要脑区统计均零差异；GPU唯一表头差异已定位到面积尾差经float32累加和文本舍入放大。GPU采样峰值14.508 GB，连续峰值未验证。官方差异与white/pial穿越仍保留，整体指标等效未判定。热点和具体实现见 [实测与复用](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/README.md)、[原生替代审计](HOTSPOT_ACCELERATION_AUDIT.md)、[CPU 几何](CPU_GEOMETRY_PERFORMANCE.md)及[球面配准](SPHERE_REGISTRATION_PERFORMANCE.md)。
 
 [返回首页](../../README.md) · [安装与原生程序](CONDA_CPP_BUILD.md) · [阶段与官方命令](CONDA_CPP_STAGES.md) · [验收范围](../../validation/recon_all/python_gpu_port/RELEASE_GATES.md)
 
@@ -22,7 +22,7 @@ CUDA 流程已接入既有第二次归一化、SynthMorph 非线性配准和[厚
 
 [CPU 优化前后](../../validation/recon_all/python_gpu_port/performance_20261001/cpu_control_precision_summary.json)138/138 诊断通过，解析数值、几何及分区指标均零差异；[GPU 优化前后](../../validation/recon_all/python_gpu_port/performance_20261001/gpu_control_precision_summary.json)也为 138/138，但 20 张顶点图存在容差内尾差，最大曲率差 0.00010145 mm⁻¹。标签、区域统计及有序表面几何仍零差异。[同版曲率重复测试](SURFACE_METRICS.md#curvature-repeatability-20261001)观察到相近量级 GPU 尾差，官方及 Conda 两轮相同；未据此解释全部差异或关闭 TF32。
 
-当前官方对照为 6/138、2/138，68 区厚度 MAE 为 0.04184/0.02169 mm；[扩展质量补检](../../validation/recon_all/python_gpu_port/performance_20261001/surface_quality_extended_summary.json)发现 white/pial 穿越阳性，原 `passed` 不覆盖这一项。实测和局部异常已纳入[当前说明与脑图](../../validation/recon_all/python_gpu_port/performance_20261001/README.md)，整体指标等效尚未判定。
+此前c248520官方对照为 6/138、2/138，68 区厚度 MAE 为 0.04184/0.02169 mm；[扩展质量补检](../../validation/recon_all/python_gpu_port/performance_20261001/surface_quality_extended_summary.json)发现 white/pial 穿越阳性，原 `passed` 不覆盖这一项。实测和局部异常已纳入[当前说明与脑图](../../validation/recon_all/python_gpu_port/performance_20261001/README.md)，整体指标等效尚未判定。
 
 本轮已改为[五阶段串行优化](SERIAL_OPTIMIZATION.md)，新候选与上述完整整例分开记录。
 
