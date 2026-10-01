@@ -77,12 +77,13 @@ def run_input_talairach_chain(t1: str | Path, subject_dir: str | Path,
     result = run_input_chain(t1, root, device=device)
     strip_file = root / "mri/synthstrip.mgz"
     started = time.perf_counter()
+    forwards = []
     previous_cudnn_tf32 = torch.backends.cudnn.allow_tf32
     try:
         strip = SynthStrip(weights=weights, device=device, threads=threads, configure_precision=False)
-        # The SynthStrip constructor enables TF32; exact uint8 masks need FP32 cuDNN.
+        # 经验证的SynthStrip cuDNN FP32例外在模型构造后施加。
         torch.backends.cudnn.allow_tf32 = False
-        strip(result["conformed"]).image.save(str(strip_file))
+        strip(result["conformed"], precision_report=forwards).image.save(str(strip_file))
     finally:
         torch.backends.cudnn.allow_tf32 = previous_cudnn_tf32
     del strip
@@ -104,7 +105,7 @@ def run_input_talairach_chain(t1: str | Path, subject_dir: str | Path,
         child_gpu = json.loads(memory_report.read_text())
     else:
         register_talairach(strip_file, template, weights, xfm, lta,
-                           device=device, threads=threads)
+                           device=device, threads=threads, precision_report=forwards)
     voxel_lta = root / "mri/transforms/talairach.xfm.lta"
     write_voxel_lta_from_ras(source_lta=lta, output_lta=voxel_lta)
     talairach_seconds = time.perf_counter() - started
@@ -113,7 +114,7 @@ def run_input_talairach_chain(t1: str | Path, subject_dir: str | Path,
             "talairach_voxel_lta": str(voxel_lta), "threads": threads,
             "synthstrip_seconds": strip_seconds,
             "talairach_seconds": talairach_seconds,
-            "talairach_child_gpu": child_gpu}
+            "talairach_child_gpu": child_gpu, "actual_forwards": forwards}
 
 
 def main() -> None:

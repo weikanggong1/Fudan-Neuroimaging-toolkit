@@ -51,13 +51,14 @@ def run_mni_nonlinear_chain(subject_dir: str | Path, weights_dir: str | Path,
     tick = time.perf_counter()
     previous_matmul_tf32 = torch.backends.cuda.matmul.allow_tf32
     previous_cudnn_tf32 = torch.backends.cudnn.allow_tf32
+    forwards = []
     cuda = torch.device(device).type == "cuda"
     try:
         registration = SynthMorph(weights=weights_dir, device=device, model="deform", extent=256, configure_precision=False)
         if cuda:
             torch.backends.cuda.matmul.allow_tf32 = False
             torch.backends.cudnn.allow_tf32 = False
-        result = registration(crop, cropped_target, init=affine, transform_only=True, compute_inverse=False)
+        result = registration(crop, cropped_target, init=affine, transform_only=True, compute_inverse=False, precision_report=forwards)
     finally:
         torch.backends.cuda.matmul.allow_tf32 = previous_matmul_tf32
         torch.backends.cudnn.allow_tf32 = previous_cudnn_tf32
@@ -99,5 +100,5 @@ def run_mni_nonlinear_chain(subject_dir: str | Path, weights_dir: str | Path,
         raise ValueError("MNI152 nonlinear outputs have unexpected grids")
     return {"forward": str(forward), "inverse": str(inverse), "check": str(check),
             "model": "pytorch-synthmorph-deform", "device": device,
-            "precision": {"cuda_fp32_exception": cuda, "fp16_or_bf16": False},
+            "precision": {"cuda_fp32_exception": cuda, "fp16_or_bf16": False, "actual_forwards": forwards},
             "timings_seconds": timings}

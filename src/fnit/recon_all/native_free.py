@@ -729,6 +729,10 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
             (subject / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
             raise
         row = profiler.last_row
+        if isinstance(value, dict) and value.get("actual_forwards"):
+            row["actual_forwards"] = value["actual_forwards"]
+        if name == "mni_nonlinear" and isinstance(value, dict):
+            row["precision"] = value.get("precision")
         if isinstance(value, dict) and "timings_seconds" in value:
             row["timings_seconds"] = value["timings_seconds"]
         if isinstance(value, dict) and isinstance(value.get("seconds"), dict):

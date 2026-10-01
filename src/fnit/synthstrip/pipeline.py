@@ -124,7 +124,7 @@ class SynthStrip:
         self.model.load_state_dict(checkpoint["model_state_dict"], strict=True)
 
     @torch.no_grad()
-    def __call__(self, image, border=1, fill=None):
+    def __call__(self, image, border=1, fill=None, *, precision_report=None):
         image = load_image(image)
         source = np.asanyarray(image.dataobj)
         if source.ndim not in (3, 4):
@@ -152,6 +152,9 @@ class SynthStrip:
             tensor = torch.from_numpy(
                 np.ascontiguousarray(conformed_data[np.newaxis, np.newaxis])
             ).to(self.device)
+            if precision_report is not None:
+                from fnit.recon_all.profiling import record_network_forward
+                record_network_forward(self.model, tensor, precision_report, model="SynthStrip")
             prediction = self.model(tensor).squeeze().cpu().numpy()
             distance = extend_sdt(new_image(prediction, conformed), border=border)
             resampled = resample_from_to(distance, (frame.shape, frame.affine),

@@ -52,7 +52,8 @@ def write_talairach_xfm(matrix: np.ndarray, output: str | Path) -> None:
 def register_talairach(moving: str | Path, template: str | Path,
                        weights: str | Path, output_xfm: str | Path,
                        output_lta: str | Path | None = None,
-                       device: str = "cpu", threads: int = 4) -> np.ndarray:
+                       device: str = "cpu", threads: int = 4,
+                       precision_report: list | None = None) -> np.ndarray:
     """Run affine registration with local FP32 inference and restore TF32 flags."""
     torch.set_num_threads(threads)
     previous_matmul_tf32 = torch.backends.cuda.matmul.allow_tf32
@@ -61,7 +62,8 @@ def register_talairach(moving: str | Path, template: str | Path,
         model = SynthMorph(weights=weights, device=device, model="affine", extent=256, configure_precision=False)
         torch.backends.cuda.matmul.allow_tf32 = False
         torch.backends.cudnn.allow_tf32 = False
-        affine = model(moving, template, header_only=True).transform
+        kwargs = {} if precision_report is None else {"precision_report": precision_report}
+        affine = model(moving, template, header_only=True, **kwargs).transform
     finally:
         torch.backends.cuda.matmul.allow_tf32 = previous_matmul_tf32
         torch.backends.cudnn.allow_tf32 = previous_cudnn_tf32
@@ -90,12 +92,13 @@ def main() -> None:
     torch.backends.cudnn.deterministic = True
     torch.backends.cuda.matmul.allow_tf32 = True
     torch.backends.cudnn.allow_tf32 = True
+    forwards = []
     register_talairach(args.moving, args.template, args.weights,
-                       args.xfm, args.lta, args.device, args.threads)
+                       args.xfm, args.lta, args.device, args.threads, precision_report=forwards)
     if args.memory_report is not None:
         args.memory_report.parent.mkdir(parents=True, exist_ok=True)
         args.memory_report.write_text(json.dumps({
-            "device": args.device,
+            "device": args.device, "actual_forwards": forwards,
             "gpu_peak_allocated_bytes": (torch.cuda.max_memory_allocated(args.device)
                                          if torch.device(args.device).type == "cuda" else None),
             "gpu_peak_reserved_bytes": (torch.cuda.max_memory_reserved(args.device)

@@ -48,7 +48,7 @@ def main():
     aux=time.perf_counter()-start
     def info(path):
         im=nib.load(path)
-        return {"sha256":sha(path),"shape":list(im.shape),"dtype":str(im.get_data_dtype()),
+        return {"sha256":sha(path),"shape":[int(x) for x in im.shape],"dtype":str(im.get_data_dtype()),
                 "affine":im.affine.tolist()}
     outputs={n:info(a.output/"mri"/n) for n in ("entowm.mgz","mca-dura.mgz","vsinus.mgz")}
     weights={n:sha(a.weights/n) for n in (

@@ -223,15 +223,8 @@ def segment_sclimbic_image(source: nib.spatialimages.SpatialImage, *,
         model = LimbicUNet.from_h5(model_path).to(device).eval()
     with torch.backends.cudnn.flags(enabled=True, allow_tf32=True):
         if precision_report is not None:
-            from .profiling import autocast_state
-            precision_report.append({
-                "model": str(model_path), "device": str(conformed.device),
-                "input_dtype": str(conformed.dtype),
-                "model_dtypes": sorted({str(p.dtype) for p in model.parameters()}),
-                "matmul_tf32": torch.backends.cuda.matmul.allow_tf32,
-                "cudnn_tf32": torch.backends.cudnn.allow_tf32,
-                "autocast": autocast_state(conformed.device.type),
-            })
+            from .profiling import record_network_forward
+            record_network_forward(model, conformed, precision_report, model=str(model_path))
         posterior = model(conformed[None, None])[0]
     posterior, box = _cleanup(posterior)
     labels = torch.tensor([label for label, _ in rows], dtype=torch.int32, device=device)

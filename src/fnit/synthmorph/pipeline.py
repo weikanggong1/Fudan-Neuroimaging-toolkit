@@ -267,16 +267,9 @@ class SynthMorph:
             inputs.append(normalized / maximum)
 
         if precision_report is not None:
-            from fnit.recon_all.profiling import autocast_state
-            precision_report.append({
-                "model": self.model, "device": str(inputs[0].device),
-                "input_dtype": str(inputs[0].dtype),
-                "model_dtypes": sorted({str(p.dtype) for p in self.network.parameters()}),
-                "matmul_tf32": torch.backends.cuda.matmul.allow_tf32,
-                "cudnn_tf32": torch.backends.cudnn.allow_tf32,
-                "autocast": autocast_state(inputs[0].device.type),
-                "compute_inverse": bool(compute_inverse),
-            })
+            from fnit.recon_all.profiling import record_network_forward
+            record_network_forward(self.network, inputs[0], precision_report,
+                                   model=self.model, compute_inverse=bool(compute_inverse))
         if compute_inverse:
             forward_network, backward_network = self.network(*inputs)
         else:

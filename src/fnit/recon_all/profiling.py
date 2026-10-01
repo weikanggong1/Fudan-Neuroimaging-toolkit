@@ -22,6 +22,23 @@ def autocast_state(device_type: str) -> dict:
     return {"enabled": bool(enabled), "dtype": str(dtype)}
 
 
+def record_network_forward(module, inputs: torch.Tensor, records: list, **metadata) -> None:
+    """在调用前记录实际设备、dtype、TF32及autocast，不同步CUDA或修改精度。
+
+    module为已构造网络，inputs为真实前向张量，records为调用者列表；
+    metadata可附模型名/是否计算逆变换。只追加JSON兼容字典，返回None。
+    输出含模型设备集合；列表由调用者保存，不形成全局缓存。
+    """
+    records.append({
+        **metadata, "device": str(inputs.device), "input_dtype": str(inputs.dtype),
+        "model_devices": sorted({str(p.device) for p in module.parameters()}),
+        "model_dtypes": sorted({str(p.dtype) for p in module.parameters()}),
+        "matmul_tf32": bool(torch.backends.cuda.matmul.allow_tf32),
+        "cudnn_tf32": bool(torch.backends.cudnn.allow_tf32),
+        "autocast": autocast_state(inputs.device.type),
+    })
+
+
 def configure_cuda_allocator(device: str, policy: str = "auto") -> dict:
     """在 CUDA 初始化前选择分配缓存，并记录能够确认的实际状态。
 
