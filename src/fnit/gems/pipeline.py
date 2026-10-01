@@ -44,10 +44,8 @@ class SubregionResult:
              save_posteriors: bool = False) -> dict[str, Path]:
         """Save native labels, metadata, volumes, report and optional fine grids."""
         from .output import save_subregion_result
-        started = monotonic()
         self.output_files = save_subregion_result(
             self, output_dir, save_highres=save_highres, save_posteriors=save_posteriors)
-        self.timings["save_seconds"] = monotonic() - started
         return self.output_files
 
     def mask(self, label: int | str) -> np.ndarray:

@@ -9,6 +9,7 @@ import numpy as np
 import torch
 
 from fnit.gems.pipeline import SubregionLabel, SubregionResult
+import fnit.gems.output as subregion_output
 
 
 def test_native_and_fine_outputs_and_explicit_posterior_channels(tmp_path):
@@ -44,3 +45,31 @@ def test_native_and_fine_outputs_and_explicit_posterior_channels(tmp_path):
     np.testing.assert_allclose(image.affine, fine_affine)
     np.testing.assert_array_equal(image.dataobj, np.moveaxis(posterior.numpy(), 0, -1))
     assert image.shape == (2, 3, 4, 2)
+
+
+def test_saved_report_refreshes_timing_before_json_write(tmp_path, monkeypatch):
+    labels = np.ones((2, 3, 4), np.int32)
+    result = SubregionResult(nib.Nifti1Image(labels, np.eye(4)), {0: "Unknown"},
+                            {}, torch.ones(labels.shape), {}, timings={"compute_seconds": 42.})
+    clock = [0.]
+    image_durations = iter((2., 5.))
+    original_save = nib.save
+    original_write = type(tmp_path).write_text
+
+    def save_image(*args, **kwargs):
+        original_save(*args, **kwargs)
+        clock[0] += next(image_durations)
+
+    def write_report(path, *args, **kwargs):
+        value = original_write(path, *args, **kwargs)
+        clock[0] += 100.  # Report I/O lies outside save_seconds.
+        return value
+
+    monkeypatch.setattr(subregion_output, "monotonic", lambda: clock[0])
+    monkeypatch.setattr(nib, "save", save_image)
+    monkeypatch.setattr(type(tmp_path), "write_text", write_report)
+    for duration in (2., 5.):
+        files = result.save(tmp_path, save_highres=False)
+        report = json.loads(files["report"].read_text())
+        assert report["timings"] == result.timings
+        assert report["timings"] == {"compute_seconds": 42., "save_seconds": duration}

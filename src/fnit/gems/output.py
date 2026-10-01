@@ -4,6 +4,7 @@ from dataclasses import asdict
 import csv
 import json
 from pathlib import Path
+from time import monotonic
 
 import nibabel as nib
 import numpy as np
@@ -25,6 +26,7 @@ def _minimum_jacobian(fit):
 
 
 def save_subregion_result(result, output_dir, *, save_highres=True, save_posteriors=False):
+    started = monotonic()
     root = Path(output_dir).expanduser().resolve()
     root.mkdir(parents=True, exist_ok=True)
     files = {"labels": root / "subregions_native.nii.gz",
@@ -68,6 +70,8 @@ def save_subregion_result(result, output_dir, *, save_highres=True, save_posteri
                 path = highres / f"{name}_posterior.nii.gz"
                 nib.save(nib.Nifti1Image(np.moveaxis(posterior, 0, -1), fit.affine), path)
                 files[f"posterior/{name}"] = path
+    # Include image/table I/O; exclude report serialization and its final write.
+    result.timings["save_seconds"] = monotonic() - started
     report = {"input": result.input_source, "output": str(files["labels"]),
               "structures": list(result.structure_results),
               "labels": {str(key): asdict(value) for key, value in metadata.items()},
