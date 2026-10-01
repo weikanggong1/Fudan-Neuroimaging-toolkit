@@ -106,7 +106,23 @@ mcflirt -in sub-01_task-rest_bold.nii.gz \
 | 前 8 帧 CPU 估计 | 6.15 秒，772 次 cost。 |
 | 前 8 帧 CUDA 冷运行 | 35.94 秒，759 次 cost；包含首次 TorchInductor 编译，CUDA 分配显存峰值 0.305 GB。 |
 | 同进程再次估计前 8 帧 | CPU 5.41 秒；CUDA 11.13 秒，分配显存峰值 0.0545 GB。各 device 两次矩阵最大差 0。 |
+| 固定原矩阵文本的最终样条采样与 int32 转换 | 脑内 RMSE 0.2816，时间 r 均值 0.9999987、中位数 1；93.54% 的脑内体素时间点整数值相同。CPU 8 帧采样 1.49 秒。 |
+| CPU，完整 490 帧估计 | 4 线程，387.60 秒，45,794 次 cost；包括路径输入的解压、准备和估计，不包括最终重采样和写盘。 |
+| CPU，完整 490 帧脑内 pull RMS | 逐帧均值 0.00906 mm、中位数 0.00864 mm、p95 0.01699 mm、最大 0.02603 mm；最坏为第 413 帧，其体素距离 p95 为 0.04123 mm。 |
 
-这些是共享 H100 服务器上的同输入真实控制结果，CPU 在此次小样本估计中更快；尚不能据此推广整段 BOLD 的速度。详细匿名记录见 [CPU/GPU 同进程重复控制](../../validation/mcflirt/first8_warm.public.json)。NCC 在最优点附近很平坦，float32 累加/融合差异会改变 Brent 在相近 cost 中的选择，因此矩阵尚未逐元素相同。完整 fMRI 处理的时序一致性、完整耗时和标准空间脑图见[全流程对照](../../validation/fmri/matched_native.md)。
+完整 490 帧与原 `.par` 的逐列对照：
+
+| 参数 | Pearson r | RMSE |
+|---|---:|---:|
+| x 转角 | 0.999642 | 0.0000787 rad |
+| y 转角 | 0.996269 | 0.0001071 rad |
+| z 转角 | 0.991151 | 0.0001182 rad |
+| x 平移 | 0.999087 | 0.003109 mm |
+| y 平移 | 0.999773 | 0.003576 mm |
+| z 平移 | 0.999727 | 0.003122 mm |
+
+这些是共享 H100 服务器上的同输入真实控制结果。完整 CPU 对照覆盖全部 490 帧，包括最后一帧，没有截取片段造成的初值差异；详细匿名统计和哈希见[完整 CPU 估计](../../validation/mcflirt/full490_cpu.public.json)。原 MCFLIRT 独立命令为 326.10 秒，包含最终采样和写盘；本次 CPU 只估计矩阵，计时边界不同，不能据此声称加速。CPU 在前 8 帧暖运行控制中更快，完整 GPU 运行仍需单独测量。另见 [CPU/GPU 同进程重复控制](../../validation/mcflirt/first8_warm.public.json)和[固定原矩阵采样](../../validation/mcflirt/first8_sampling.public.json)。
+
+实际安装的 MCFLIRT 为 2111.0，依赖 NEWIMAGE 2601.0 和 MISCMATHS 2412.6。对应的 `costfns.cc`、`optimise.cc` 与项目审计过的版本逐字一致；Euler 旋转、矩阵组合及分解函数去除空白和注释后也一致。NCC 在最优点附近很平坦，float32 累加/融合差异会改变 Brent 在相近 cost 中的选择，因此矩阵尚未逐元素相同。原矩阵文本精度也会影响整数截断；采样控制未取得原运行的内存矩阵，不能将所有余差归因于插值实现。完整 fMRI 处理的时序一致性、完整耗时和标准空间脑图见[全流程对照](../../validation/fmri/matched_native.md)。
 
 参考：[FSL MCFLIRT 文档](https://fsl.fmrib.ox.ac.uk/fsl/docs/registration/mcflirt.html)；Jenkinson M, Bannister P, Brady M, Smith S. Improved optimization for the robust and accurate linear registration and motion correction of brain images. *NeuroImage* 17:825–841, 2002. [DOI](https://doi.org/10.1006/nimg.2002.1132)。
