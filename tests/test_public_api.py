@@ -197,8 +197,7 @@ def test_public_feature_sources_do_not_import_banned_packages():
     distribution_excludes = read_configuration(
         project_root / "pyproject.toml", expand=False
     )["tool"]["setuptools"]["packages"]["find"].get("exclude", [])
-    for package in ("fnit.gems.native_samseg", "fnit.gems.native_samseg.subregions"):
-        assert any(fnmatchcase(package, pattern) for pattern in distribution_excludes)
+    assert not (root / "gems" / "native_samseg").exists()
     excluded = {"recon_all", "connectome", "fmri", "_vendor_fsl"}
     banned = {
         "surfa", "dipy", "trx", "nipype", "fmriprep", "smriprep",
@@ -222,7 +221,7 @@ def test_public_feature_sources_do_not_import_banned_packages():
                     violations.append(
                         f"{path.relative_to(root)}:{line_number}: {line.strip()}"
                     )
-    assert root / "gems" / "nuclei.py" in scanned
+    assert root / "gems" / "pipeline.py" in scanned
     assert root / "gems" / "output.py" in scanned
     assert not violations, "\n".join(violations)
 

@@ -1,4 +1,4 @@
-"""Nibabel output shared by the Python API and both command-line spellings."""
+"""Nibabel output shared by segment_4_subregions and its command-line entry."""
 
 from dataclasses import asdict
 import csv

@@ -46,7 +46,7 @@ def prepare_brainstem_atlas(
 ) -> Path:
     """Create ``output_root/brainstem`` from three verified FreeSurfer data files.
 
-    ``output_root`` is the later ``segment_subregions(atlas_root=...)`` argument.
+    ``output_root`` is the later ``segment_4_subregions(atlas_root=...)`` argument.
     ``asset_dir`` stores downloaded assets; existing hash-valid files are reused.
     ``device`` runs atlas-prior preparation on CPU or a chosen CUDA device.
     """

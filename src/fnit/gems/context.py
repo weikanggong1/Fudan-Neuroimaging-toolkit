@@ -73,7 +73,7 @@ class SubregionContext:
         image = nib.load(str(t1)) if isinstance(t1, (str, Path)) else t1
         data = np.asanyarray(image.dataobj, dtype=np.float32)
         if data.ndim != 3:
-            raise ValueError("segment_subregions expects one 3-D T1 image")
+            raise ValueError("segment_4_subregions expects one 3-D T1 image")
         coarse = None if coarse_segmentation is None else _native_labels(coarse_segmentation, image, "coarse_segmentation")
         parc = None if cortical_parcellation is None else _native_labels(cortical_parcellation, image, "cortical_parcellation")
         wm = None if wmparc is None else _native_labels(wmparc, image, "wmparc")

@@ -303,7 +303,7 @@ def test_all_recipes_merge_on_native_grid_with_metadata(tmp_path, monkeypatch, p
     coarse = np.ones(image.shape, np.int32)
     provided_coarse = preprocessing in ("provided", "provided-coarse-plus")
     provided_wm = preprocessing in ("provided", "SynthSeg")
-    result = pipeline.segment_subregions(image, atlas_root,
+    result = pipeline.segment_4_subregions(image, atlas_root,
                                         coarse_segmentation=coarse if provided_coarse else None,
                                         wmparc=coarse if provided_wm else None,
                                         synthseg_weights="unused-mocked-weights",

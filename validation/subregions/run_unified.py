@@ -16,7 +16,7 @@ import numpy as np
 import torch
 import fnit
 
-from fnit import segment_subregions
+from fnit import segment_4_subregions
 
 
 def compare(reference: Path, candidate: np.ndarray, image, *, offset=0, label_ids=None) -> dict:
@@ -139,11 +139,11 @@ def main():
                      for path in sorted((source_root / package).rglob("*.py"))
                      if "native_samseg" not in path.parts}
     started = monotonic()
-    result = segment_subregions(
+    result = segment_4_subregions(
         args.t1, atlas_root=args.atlas_root, structures=args.structures,
         coarse_segmentation=args.aseg, wmparc=args.wmparc,
         synthseg_weights=args.weights, synthseg_parc_weights=args.weights,
-        device=args.device, optimization=args.optimization,
+        device=args.device, threads=4, optimization=args.optimization,
         output_dir=args.output_dir, save_highres=True, save_posteriors=False)
     if args.device.startswith("cuda"):
         torch.cuda.synchronize(args.device)
@@ -198,6 +198,7 @@ def main():
               "api_report": str(api_report),
               "fit_min_jacobians": saved_api_report["fit_min_jacobians"],
               "optimization": args.optimization,
+              "public_function": "segment_4_subregions",
               "peak_gpu_gib": (max(value.get("peak_gpu_gib") or 0
                                     for value in result.initialization.values())
                                if args.device.startswith("cuda") else None),

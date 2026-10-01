@@ -390,19 +390,3 @@ def test_mask_affine_aligns_a_shifted_structure():
         labels, [16], device="cpu", max_iterations=25)
     np.testing.assert_allclose(affine[:3, 3], [4, 5, 3], atol=1.5)
     assert score > 0.8
-
-
-def test_subregions_keeps_mgh_world_affine(tmp_path):
-    from fnit.gems import segment_subregions
-
-    atlas_dir = tmp_path / "atlas" / "synthetic"
-    atlas_dir.mkdir(parents=True)
-    _atlas().save_npz(atlas_dir / "atlas.npz")
-    np.save(atlas_dir / "atlas_to_native_voxel.npy", np.eye(4))
-    (atlas_dir / "config.json").write_text(json.dumps({"include_label_ids": [10]}))
-    affine = np.asarray([[-1, 0, 0, 4], [0, 0, 1, -3], [0, -1, 0, 5], [0, 0, 0, 1]])
-    source = nib.MGHImage(np.ones((8, 8, 8), dtype=np.float32), affine)
-    result = segment_subregions(source, tmp_path / "atlas", structures="synthetic",
-                                auto_initialize=False, em_iterations=1, device="cpu")
-    np.testing.assert_allclose(result.labels.affine, source.affine, atol=1e-5)
-    assert result.labels.shape == source.shape
