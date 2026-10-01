@@ -42,7 +42,13 @@ fnit-recon-all /data/sub01_T1w.nii.gz /data/subjects/sub01 \
 
 运行入口默认查找当前 Conda 环境的 `bin/`，检查必要程序可执行和资产哈希，并在报告中记录程序哈希。`FREESURFER_HOME` 在子进程中指向经过校验的 FNIT 数据资产目录；变量名不能用来推断是否调用了预装软件。严格隔离验收还须在没有系统 FreeSurfer/FSL 等软件的环境中核查进程、动态库和文件访问。
 
-已有[2026-09-27 环境安装记录](../../validation/recon_all/python_gpu_port/conda_yaml_install_20260927/README.md)只对应当时的独立 `environment-recon-all-cpp.yml`。现版主页环境已完成安装、程序发现和[两例真实 T1 连续运行](../../validation/recon_all/python_gpu_port/current_full_runs_20260930.json)；138 项均存在且网格质量通过，但严格数值比较仅通过 5/138 和 2/138 项。无预装 FreeSurfer/FSL 环境中的整例隔离验收仍待完成。各程序输入输出、官方命令和阶段数据见[阶段索引](CONDA_CPP_STAGES.md)。
+已有[2026-09-27 环境安装记录](../../validation/recon_all/python_gpu_port/conda_yaml_install_20260927/README.md)只对应当时的独立 `environment-recon-all-cpp.yml`。现版主页环境已完成安装、程序发现和[两例真实 T1 连续运行](../../validation/recon_all/python_gpu_port/current_full_runs_20260930.json)；138 项均存在且当时的标准mesh_validation通过（未覆盖后续发现的white/pial穿越），但严格数值比较仅通过 5/138 和 2/138 项。无预装 FreeSurfer/FSL 环境中的整例隔离验收仍待完成。各程序输入输出、官方命令和阶段数据见[阶段索引](CONDA_CPP_STAGES.md)。
+
+## 当前N4构建与安装范围
+
+五阶段串行优化新增N4能力查询、内部拟合/重建计时和可选重建线程，接口见[N4说明](N4_ITK_CONDA.md)。主页安装脚本已经调用同一build_n4_itk_conda.sh；显式CMake配置后关闭Ninja自动重生成，避免共享文件系统时间戳造成反复配置。实际新产物已在现有主页Conda环境独立编译，两例量化前后与旧程序零差异，1/4重建线程没有整段收益，默认保留1。生产原生程序束只连接源码构建产物；[清单](../../validation/recon_all/optimizations/20261001_serial/native_bundle_manifest.json)与[实际构建](../../validation/recon_all/optimizations/20261001_serial/stage4/build.json)绑定哈希。
+
+本轮复用了已有环境与13项原生程序，没有重新创建干净环境或重编全部程序。新整例正在运行，干净隔离验收仍未验证；哈希、启动和ldd检查不代替这一项。
 
 ## 参考文献与原实现
 

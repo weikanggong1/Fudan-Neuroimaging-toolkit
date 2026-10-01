@@ -31,17 +31,17 @@ report = normalize_t1(
 print(report["total_seconds"], report["steps"])
 ```
 
-输出是 uint8 `T1.mgz`；各轮之间保留 float32 图像。输入 `nu.mgz` 必须是 FreeSurfer conform 网格，Talairach 变换需与其几何信息配套。实现参照 FreeSurfer 提交 `d932c45b7941662ea380a05efef580568b98d41a`。在 `fs_sub01` 的 CPU 对照中，中间 float32 图、控制点掩膜、偏置场及最终 256³ uint8 图逐体素一致；H100 对照的最终 `T1.mgz` 也一致。[检查点和计时报告](../../validation/recon_all/python_gpu_port/experimental/NORMALIZE_FIRST_PASS.md)记录了逐步结果。现有验证只覆盖一例。
+输出是 uint8 `T1.mgz`；各轮之间保留 float32 图像。输入 `nu.mgz` 必须是 FreeSurfer conform 网格，Talairach 变换需与其几何信息配套。实现参照 FreeSurfer 提交 `d932c45b7941662ea380a05efef580568b98d41a`。在 `fs_sub01` 的 CPU 对照中，中间 float32 图、控制点掩膜、偏置场及最终 256³ uint8 图逐体素一致；H100 对照的最终 `T1.mgz` 也一致。[检查点和计时报告](../../validation/recon_all/python_gpu_port/experimental/NORMALIZE_FIRST_PASS.md)记录了逐步结果。该历史官方对照只覆盖一例；本轮两例同输入GPU回归另见下文。
 
 ## CPU 与 GPU 分工
 
 | 设置 `--device cuda:0` 时的步骤 | 执行位置 |
 | --- | --- |
 | MGH/MGZ 读写、Talairach 解析、一维直方图和样条系数 | CPU，NiBabel/NumPy/SciPy |
-| 一维体素缩放及各轮偏置场应用 | H100，PyTorch float32 |
+| 一维体素缩放及各轮偏置场应用 | H100，PyTorch/Triton float32 |
 | 温和校正、两轮三维控制点选择、组织直方图和邻域判断 | CPU，NumPy/SciPy；有序离群清理使用共享 Numba 内核 |
 | Voronoi chessboard 距离和索引排序 | CPU，SciPy/NumPy |
-| Voronoi 波前平均与三次 sigma-8 高斯卷积 | H100，PyTorch float32 |
+| Voronoi 波前平均与三次 sigma-8 高斯卷积 | H100，PyTorch/Triton float32 |
 
 精确 CPU 路径以 Numba 按源码顺序累加高斯值。生产函数没有 subprocess 调用或 FreeSurfer 程序查找；官方程序只用于单独生成对照输出和计时。
 
@@ -163,6 +163,53 @@ python validation/recon_all/python_gpu_port/benchmark_normalize_ordered_outliers
 本次内核的真实数据回归与整例提速须由上述新报告判断，不能沿用前文的历史秒数。
 局部边界测试保护扫描顺序和原地传播，不替代真实 T1 benchmark；最终整例仍须
 从原始 T1 与新空目录运行，冻结归一化输入配对不构成连续整例。
+
+## 2026-10-02：有序CUDA内核与缓冲复用
+
+两例自产固定输入、gpucw1/H100、4线程，优化前0c8ab32与候选198c309的阶段配对：
+
+| 输入 | 第一轮旧/新秒 | 第二轮旧/新秒 | 输出与旧版 |
+| --- | ---: | ---: | --- |
+| sub01 | 236.794 / 45.345 | 257.361 / 57.177 | 两图零差异体素、几何/dtype/SHA相同 |
+| sub02 | 154.839 / 45.231 | 210.151 / 63.332 | 两图零差异体素、几何/dtype/SHA相同 |
+
+这是相同输入阶段回归，计时含读图、控制点、CPU/GPU搬运和写出，不是整例提速。
+[完整JSON](../../validation/recon_all/optimizations/20261001_serial/stage2/)保留各轮子段。
+当前138项整例和官方指标比较见[串行记录](SERIAL_OPTIMIZATION.md)，旧版本的变慢
+记录仍按其原提交保留。15项专项测试通过。
+
+复用voronoi_fill_torch与smooth_bias_torch，仅CUDA分支调用已声明Triton。
+原实现在关闭分配缓存时频繁创建邻域/卷积张量并启动小kernel；同输入未修改
+实现打开缓存约45.758/58.844秒，说明分配策略是主要开销来源。本次保留低显存
+措施，每层一次kernel，三轴卷积复用两份缓冲。顺序、边界重复、控制点、65项
+核及float32累加/除法均保留，不启用FMA融合、半精度或近似卷积。
+
+| 函数 | 输入和默认值 | 输出 |
+| --- | --- | --- |
+| voronoi_fill_torch(source, control) | 同设备同shape三维张量，source为强度，control非零为控制点；无额外默认参数 | 同网格/设备float32偏置图，及levels、controls、wall_seconds字典 |
+| smooth_bias_torch(voronoi, source, control, sigma=8.0) | 同设备三维偏置/原强度/控制图；正sigma单位体素，默认8对应65项核 | float32偏置及sigma、kernel_length、device、wall_seconds；控制点恢复source强度 |
+
+输入须保持相同体素网格，无空间变换；函数不携带affine，由调用者与影像关联。
+source/control形状不符、空控制点等沿用异常；设备不兼容会报错，不静默回退。
+sigma须为正，当前没有新增自动修正无效sigma的行为。GPU计时同步显式设备。
+属于mri_normalize内部步骤，没有独立官方CLI；官方整体命令与输入含义见前文。
+
+~~~python
+import nibabel as nib
+import numpy as np
+import torch
+from fnit.recon_all.normalization.normalize_voronoi_source import voronoi_fill_torch
+from fnit.recon_all.normalization.normalize_gaussian_source import smooth_bias_torch
+source_image = nib.load("/data/self/mri/nu.mgz")  # 自产conform网格
+control_image = nib.load("/data/diagnostic/controls.mgz")  # 同网格真实控制点，非脑掩膜
+source_tensor = torch.as_tensor(np.asarray(source_image.dataobj, dtype=np.float32), device="cuda:0")  # 强度float32
+control_tensor = torch.as_tensor(np.asarray(control_image.dataobj).copy(), device="cuda:0")  # 保留控制标签
+voronoi_tensor, propagation_report = voronoi_fill_torch(source=source_tensor, control=control_tensor)  # 完整有序传播
+bias_tensor, smoothing_report = smooth_bias_torch(voronoi=voronoi_tensor, source=source_tensor, control=control_tensor, sigma=8.0)  # 单位体素
+~~~
+
+这是内部算子示例，不省去完整归一化的控制点选择、强度校正及量化步骤。
+公开normalize_t1/normalize_t1_aseg参数与返回结构保持兼容；CPU分支继续保留原实现。
 
 ## 参考文献与原实现
 

@@ -67,7 +67,7 @@ labels.save(path=output_dir / "labels_in_fixed.nii.gz")  # 输出路径：重采
 
 ### 模型构造
 
-`SynthMorph(weights=None, device="cpu", model="joint", extent=256, hyper=0.5, steps=7)`：
+`SynthMorph(weights=None, device="cpu", model="joint", extent=256, hyper=0.5, steps=7, configure_precision=True)`：
 
 | 参数 | 含义 |
 |---|---|
@@ -79,12 +79,13 @@ labels.save(path=output_dir / "labels_in_fixed.nii.gz")  # 输出路径：重采
 | `extent` | 192 或 256，每轴网络网格大小，分辨率 1 mm，默认 256 |
 | `hyper` | 非线性正则化参数，`0 < hyper < 1`，默认 0.5；实例构造时固定 |
 | `steps` | scaling-and-squaring 次数，至少 5，默认 7 |
+| `configure_precision` | 默认 `True` 延续独立TF32配置；`False`保留调用方策略。recon-all构造后应用已验证的阶段FP32例外，不开启半精度。 |
 
 模型使用 float32 张量；CUDA 构造默认允许 TF32 matmul 和 cuDNN 内核，不使用 float16 或 bfloat16。不同 `hyper` 需构造另一实例；底层 `DeformNetwork.set_hyper()` 是显式重新计算特化权重的入口。改变实例的普通属性不会自动更新这些权重。Python 的 CPU 线程数可用 `torch.set_num_threads()` 设置；统一 CLI 提供 `-j` 参数。
 
 ### 配准调用与结果
 
-`register(moving, fixed, init=None, mid_space=False, header_only=False, output_dir=None)`：
+`register(moving, fixed, init=None, mid_space=False, header_only=False, output_dir=None, transform_only=False, compute_inverse=True, precision_report=None)`：
 
 | 参数 | 含义 |
 |---|---|
@@ -93,6 +94,9 @@ labels.save(path=output_dir / "labels_in_fixed.nii.gz")  # 输出路径：重采
 | `mid_space` | 使用初始仿射的中间空间；为 `True` 时必须提供 `init` |
 | `header_only` | 仅改变影像头信息，限 affine / rigid |
 | `output_dir` | 调试输出目录：`inp_1.nii.gz`、`inp_2.nii.gz` 和 `network_transforms.npz` |
+| `transform_only` | 默认 `False`；`True`不重采样两幅影像，`moved`/`fixed_moved`为`None`，与`header_only`不能同时开启。 |
+| `compute_inverse` | 默认 `True`；`False`仅允许非线性模型、`transform_only=True`且无调试目录，`inverse=None`。两次反对称velocity前向保留，只省去未消费的反向积分/合成；不代替recon-all的原生数值求逆。非法组合抛`ValueError`。 |
+| `precision_report` | 默认 `None`；列表收集真实前向设备、输入/模型dtype、TF32和autocast，不插入额外同步。 |
 
 返回 `RegistrationResult`：
 
@@ -103,7 +107,7 @@ labels.save(path=output_dir / "labels_in_fixed.nii.gz")  # 输出路径：重采
 | `transform` | moving → fixed 的带几何变换 |
 | `inverse` | fixed → moving 的带几何变换 |
 
-重采样时图像采用目标网格；`header_only=True` 保留数据并更新 affine。每次调用都会计算双向结果。affine / rigid 返回 world-space `AffineTransform`，保存为 `.lta`；joint / deform 返回 target-grid、target→source 的 world-RAS 毫米位移 `DenseWarp`，可保存为 `.mgz`、`.mgh` 或 NIfTI。普通三通道数组不携带足够的源/目标几何，不能直接替代内存中的变换对象。直接在 Python 中保存时，由调用者准备输出父目录。
+重采样时图像采用目标网格；`header_only=True` 保留数据并更新 affine。默认计算双向结果；显式关闭未消费逆变换的接口见上表。affine / rigid 返回 world-space `AffineTransform`，保存为 `.lta`；joint / deform 返回 target-grid、target→source 的 world-RAS 毫米位移 `DenseWarp`，可保存为 `.mgz`、`.mgh` 或 NIfTI。普通三通道数组不携带足够的源/目标几何，不能直接替代内存中的变换对象。直接在 Python 中保存时，由调用者准备输出父目录。
 
 ### 应用已有变换
 

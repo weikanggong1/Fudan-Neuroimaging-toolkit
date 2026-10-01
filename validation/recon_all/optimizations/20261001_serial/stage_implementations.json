@@ -1,0 +1,266 @@
+{
+  "input_talairach": {
+    "implementation": "FNIT PyTorch/IO；FS模型权重复用",
+    "source_paths": "conform_gpu.py;input_talairach_chain.py"
+  },
+  "n4": {
+    "implementation": "FNIT C++封装＋ITK N4，CPU",
+    "source_paths": "n4_itk.py;tools/n4_itk/n4_itk.cpp"
+  },
+  "nu": {
+    "implementation": "FNIT NumPy；FS wrapper规则移植",
+    "source_paths": "n4_wrapper.py"
+  },
+  "T1_normalize": {
+    "implementation": "FNIT PyTorch/Triton CUDA; NumPy/Numba CPU控制点",
+    "source_paths": "normalization/normalize_voronoi_source.py;normalization/normalize_gaussian_source.py;normalization/_normalization_cuda.py"
+  },
+  "brainmask": {
+    "implementation": "FNIT PyTorch；FS mask规则移植",
+    "source_paths": "mri_mask_gpu.py"
+  },
+  "SynthSeg": {
+    "implementation": "FNIT PyTorch；官方网络和权重复用",
+    "source_paths": "src/fnit/synthseg_parc/segment.py"
+  },
+  "mri_em_register": {
+    "implementation": "固定FS源码Conda C++，CPU",
+    "source_paths": "native_free.py"
+  },
+  "mri_ca_normalize": {
+    "implementation": "FNIT NumPy/Numba；FS算法移植，CPU",
+    "source_paths": "ca_normalize_python.py"
+  },
+  "mri_cc": {
+    "implementation": "FNIT Python/SciPy；FS算法移植，CPU",
+    "source_paths": "mri_cc_python.py"
+  },
+  "brain_second_normalize": {
+    "implementation": "FNIT PyTorch/Triton CUDA; NumPy/Numba CPU控制点",
+    "source_paths": "normalization/normalize_voronoi_source.py;normalization/normalize_gaussian_source.py;normalization/_normalization_cuda.py"
+  },
+  "entowm": {
+    "implementation": "FNIT PyTorch CUDA;上游网络权重复用;CPU影像读写/后处理",
+    "source_paths": "sclimbic.py"
+  },
+  "ants_denoise": {
+    "implementation": "FNIT NumPy/Numba，CPU；ITK/ANTs算法移植",
+    "source_paths": "ants_denoise_python.py;ants_denoise_core.py"
+  },
+  "mri_segment": {
+    "implementation": "固定FS源码Conda C++，CPU",
+    "source_paths": "native_free.py"
+  },
+  "mri_edit_wm_with_aseg": {
+    "implementation": "固定FS源码Conda C++，CPU",
+    "source_paths": "native_free.py"
+  },
+  "wm_pretess": {
+    "implementation": "FNIT NumPy；FS算法移植，CPU",
+    "source_paths": "pretess_python.py"
+  },
+  "wm_fix_ento": {
+    "implementation": "FNIT Python/NumPy；FS规则移植，CPU",
+    "source_paths": "wm_edits_python.py"
+  },
+  "wm_fix_acj": {
+    "implementation": "FNIT Python/NumPy；FS规则移植，CPU",
+    "source_paths": "wm_edits_python.py"
+  },
+  "mri_fill": {
+    "implementation": "FNIT Python/SciPy；FS算法移植，CPU",
+    "source_paths": "fill_cutting_plane_python.py"
+  },
+  "filled_auto_checkpoint": {
+    "implementation": "FNIT标准检查点文件复制",
+    "source_paths": "native_free.py"
+  },
+  "mni_aux": {
+    "implementation": "FNIT PyTorch CUDA;上游网络权重复用;CPU影像读写/后处理",
+    "source_paths": "mni_aux_chain.py"
+  },
+  "mni_nonlinear": {
+    "implementation": "FNIT PyTorch＋固定FS源码Conda warp/逆变换/重采样",
+    "source_paths": "mni_nonlinear_chain.py"
+  },
+  "brain_finalsurfs": {
+    "implementation": "FNIT NumPy/PyTorch；FS编辑规则移植，默认CPU",
+    "source_paths": "finalsurfs_python.py"
+  },
+  "surface_lh": {
+    "implementation": "混合: FNIT NumPy/Numba remesh和标准球面;标准球面CUDA平均;Conda源码构建拓扑/inflate/whitepre/defects",
+    "source_paths": "native_free.py;sphere_standard_run.py;mris_remesh_python.py"
+  },
+  "surface_rh": {
+    "implementation": "混合: FNIT NumPy/Numba remesh和标准球面;标准球面CUDA平均;Conda源码构建拓扑/inflate/whitepre/defects",
+    "source_paths": "native_free.py;sphere_standard_run.py;mris_remesh_python.py"
+  },
+  "register_lh": {
+    "implementation": "FNIT Python/Numba CPU objective and line search; ordered PyTorch/Triton CUDA gradient averaging; Numba CPU atlas blur",
+    "source_paths": "mris_register_run.py;mris_register_average_numba.py;mris_register_average_gpu.py;mris_register_blur.py"
+  },
+  "avg_curv_lh": {
+    "implementation": "固定FS源码Conda mrisp_paint，CPU",
+    "source_paths": "native_free.py"
+  },
+  "register_rh": {
+    "implementation": "FNIT Python/Numba CPU objective and line search; ordered PyTorch/Triton CUDA gradient averaging; Numba CPU atlas blur",
+    "source_paths": "mris_register_run.py;mris_register_average_numba.py;mris_register_average_gpu.py;mris_register_blur.py"
+  },
+  "avg_curv_rh": {
+    "implementation": "固定FS源码Conda mrisp_paint，CPU",
+    "source_paths": "native_free.py"
+  },
+  "annot_lh_aparc": {
+    "implementation": "FNIT FS-GCSA移植；特征部分GPU，分类/Gibbs主体CPU",
+    "source_paths": "gcsa_label_python.py"
+  },
+  "annot_lh_aparc.a2009s": {
+    "implementation": "FNIT FS-GCSA移植；特征部分GPU，分类/Gibbs主体CPU",
+    "source_paths": "gcsa_label_python.py"
+  },
+  "annot_lh_aparc.DKTatlas": {
+    "implementation": "FNIT FS-GCSA移植；特征部分GPU，分类/Gibbs主体CPU",
+    "source_paths": "gcsa_label_python.py"
+  },
+  "annot_rh_aparc": {
+    "implementation": "FNIT FS-GCSA移植；特征部分GPU，分类/Gibbs主体CPU",
+    "source_paths": "gcsa_label_python.py"
+  },
+  "annot_rh_aparc.a2009s": {
+    "implementation": "FNIT FS-GCSA移植；特征部分GPU，分类/Gibbs主体CPU",
+    "source_paths": "gcsa_label_python.py"
+  },
+  "annot_rh_aparc.DKTatlas": {
+    "implementation": "FNIT FS-GCSA移植；特征部分GPU，分类/Gibbs主体CPU",
+    "source_paths": "gcsa_label_python.py"
+  },
+  "finish_surface_lh": {
+    "implementation": "混合：FS Conda white/pial；CUDA五指标FNIT PyTorch，CPU五指标FS Conda；mid-area/TH3为FNIT",
+    "source_paths": "native_free.py;final_white_conda.py"
+  },
+  "finish_surface_rh": {
+    "implementation": "混合：FS Conda white/pial；CUDA五指标FNIT PyTorch，CPU五指标FS Conda；mid-area/TH3为FNIT",
+    "source_paths": "native_free.py;final_white_conda.py"
+  },
+  "exvivo_annotations": {
+    "implementation": "FNIT Python标签映射；FS定义移植，CPU",
+    "source_paths": "label2label_surface_python.py"
+  },
+  "jacobian_lh": {
+    "implementation": "FNIT PyTorch；FS面积比定义，默认CPU",
+    "source_paths": "surface_jacobian_gpu.py"
+  },
+  "contrast_lh": {
+    "implementation": "FNIT Python/PyTorch；FS采样定义，默认CPU",
+    "source_paths": "vol2surf_contrast_python.py"
+  },
+  "jacobian_rh": {
+    "implementation": "FNIT PyTorch；FS面积比定义，默认CPU",
+    "source_paths": "surface_jacobian_gpu.py"
+  },
+  "contrast_rh": {
+    "implementation": "FNIT Python/PyTorch；FS采样定义，默认CPU",
+    "source_paths": "vol2surf_contrast_python.py"
+  },
+  "ribbon": {
+    "implementation": "FNIT NumPy/Numba；FS定义移植，CPU",
+    "source_paths": "volmask_python.py"
+  },
+  "relabel_hypointensities": {
+    "implementation": "FNIT NumPy；FS规则移植，CPU",
+    "source_paths": "relabel_hypointensities_python.py"
+  },
+  "aseg_ribbon_fix": {
+    "implementation": "FNIT Python；FS规则移植，CPU",
+    "source_paths": "surf2volseg_fix_python.py"
+  },
+  "project_aparc_volumes": {
+    "implementation": "FNIT Python；FS cortical投射定义移植，CPU",
+    "source_paths": "surf2volseg_cortex_python.py"
+  },
+  "project_wmparc": {
+    "implementation": "FNIT Python；FS WM投射定义移植，CPU",
+    "source_paths": "surf2volseg_wm_python.py"
+  },
+  "brain_volume_stats": {
+    "implementation": "FNIT NumPy；FS统计定义移植，CPU",
+    "source_paths": "brain_volume_stats_python.py"
+  },
+  "aseg_stats": {
+    "implementation": "FNIT NumPy；FS统计定义移植，CPU",
+    "source_paths": "segstats_aseg_python.py"
+  },
+  "wmparc_stats": {
+    "implementation": "FNIT NumPy/Numba；FS统计定义移植，CPU",
+    "source_paths": "segstats_wmparc_python.py"
+  },
+  "stats_lh_aparc": {
+    "implementation": "FNIT统计缓存/PyTorch＋FS统计定义移植；CPU/GPU混合",
+    "source_paths": "surface_stats_cache.py;anatomical_stats_file.py"
+  },
+  "stats_lh_aparc.a2009s": {
+    "implementation": "FNIT统计缓存/PyTorch＋FS统计定义移植；CPU/GPU混合",
+    "source_paths": "surface_stats_cache.py;anatomical_stats_file.py"
+  },
+  "stats_lh_aparc.DKTatlas": {
+    "implementation": "FNIT统计缓存/PyTorch＋FS统计定义移植；CPU/GPU混合",
+    "source_paths": "surface_stats_cache.py;anatomical_stats_file.py"
+  },
+  "stats_lh_aparc.pial": {
+    "implementation": "FNIT统计缓存/PyTorch＋FS统计定义移植；CPU/GPU混合",
+    "source_paths": "surface_stats_cache.py;anatomical_stats_file.py"
+  },
+  "stats_lh_BA_exvivo": {
+    "implementation": "FNIT统计缓存/PyTorch＋FS统计定义移植；CPU/GPU混合",
+    "source_paths": "surface_stats_cache.py;anatomical_stats_file.py"
+  },
+  "stats_lh_BA_exvivo.thresh": {
+    "implementation": "FNIT统计缓存/PyTorch＋FS统计定义移植；CPU/GPU混合",
+    "source_paths": "surface_stats_cache.py;anatomical_stats_file.py"
+  },
+  "stats_lh_w-g.pct": {
+    "implementation": "FNIT NumPy；FS SNR定义移植，CPU",
+    "source_paths": "segstats_surface_snr_python.py"
+  },
+  "stats_lh_curv": {
+    "implementation": "固定FS源码Conda mris_curvature_stats，CPU",
+    "source_paths": "native_free.py"
+  },
+  "stats_rh_aparc": {
+    "implementation": "FNIT统计缓存/PyTorch＋FS统计定义移植；CPU/GPU混合",
+    "source_paths": "surface_stats_cache.py;anatomical_stats_file.py"
+  },
+  "stats_rh_aparc.a2009s": {
+    "implementation": "FNIT统计缓存/PyTorch＋FS统计定义移植；CPU/GPU混合",
+    "source_paths": "surface_stats_cache.py;anatomical_stats_file.py"
+  },
+  "stats_rh_aparc.DKTatlas": {
+    "implementation": "FNIT统计缓存/PyTorch＋FS统计定义移植；CPU/GPU混合",
+    "source_paths": "surface_stats_cache.py;anatomical_stats_file.py"
+  },
+  "stats_rh_aparc.pial": {
+    "implementation": "FNIT统计缓存/PyTorch＋FS统计定义移植；CPU/GPU混合",
+    "source_paths": "surface_stats_cache.py;anatomical_stats_file.py"
+  },
+  "stats_rh_BA_exvivo": {
+    "implementation": "FNIT统计缓存/PyTorch＋FS统计定义移植；CPU/GPU混合",
+    "source_paths": "surface_stats_cache.py;anatomical_stats_file.py"
+  },
+  "stats_rh_BA_exvivo.thresh": {
+    "implementation": "FNIT统计缓存/PyTorch＋FS统计定义移植；CPU/GPU混合",
+    "source_paths": "surface_stats_cache.py;anatomical_stats_file.py"
+  },
+  "stats_rh_w-g.pct": {
+    "implementation": "FNIT NumPy；FS SNR定义移植，CPU",
+    "source_paths": "segstats_surface_snr_python.py"
+  },
+  "stats_rh_curv": {
+    "implementation": "固定FS源码Conda mris_curvature_stats，CPU",
+    "source_paths": "native_free.py"
+  },
+  "mesh_validation": {
+    "implementation": "FNIT Python质量检查，CPU",
+    "source_paths": "native_free.py"
+  }
+}
