@@ -200,8 +200,8 @@ def test_volume_metadata_preserves_task_and_execution_settings(volume_dependenci
     assert state.anatomical_kwargs["reuse"] is True
 
 
-def test_default_fast_metadata_matches_actual_anatomical_estimator_defaults():
-    assert asdict(FASTConfig(execution="fsl")) == asdict(TorchFAST(device="cpu").config)
+def test_fast_metadata_matches_source_ordered_anatomical_estimator():
+    assert asdict(FASTConfig(execution="fsl")) == asdict(TorchFAST(device="cpu", execution="fsl").config)
 
 
 def test_registration_execution_and_cache_options_are_forwarded_and_recorded(volume_dependencies):
