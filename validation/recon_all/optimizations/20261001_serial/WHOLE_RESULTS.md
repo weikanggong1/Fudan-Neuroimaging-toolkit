@@ -15,7 +15,7 @@ Torch intraop、Numba与OpenMP/BLAS预算为4；API调用方既有interop设置�
 | 输入与调用 | 旧版完整命令 | 候选完整命令 | 时间减少 | 输出 |
 | --- | ---: | ---: | ---: | --- |
 | sub-01，已初始化CUDA的Python API | 4242.884 s | 3557.969 s | 684.915 s，16.143%，1.193倍 | 66阶段完成，138/138存在 |
-| sub-02，GPU CLI | 运行中 | 待运行 | 尚无结果 | 尚无结果 |
+| sub-02，GPU CLI | 4043.589 s | 重跑中 | 尚无结果 | 基线66阶段完成、138/138存在 |
 
 sub-01复用此前完成的 `c248520` GPU API基线；其生产src树与本轮起点 `0c8ab32`
 完全相同，见[源码身份](baseline_source_identity.json)。这不是本轮新测基线，共享负载
@@ -76,8 +76,10 @@ sub-01候选父子进程同次查询合计最大采样值为 **16,185,819,136字
 15.074 GiB；旧基线为14,508,097,536字节。新运行请求1 s，3037个样本，最大间隔
 3.557 s，失败查询0。低于20,000,000,000字节的是观察最大值，连续峰值未验证。
 [原始采样](whole/sub01/candidate_gpu_samples.csv)、[监控摘要](whole/sub01/candidate_monitor.json)。
-已初始化CUDA API的allocator状态明确记录为preserved_preinitialized_unknown；
-PyTorch allocated/reserved不可用时不填零。CLI的实际策略另随第二例报告。
+API包装器侧车确认在CUDA初始化前设置disabled，并保留4字节张量；
+重建函数不追溯调用方初始化过程，入口状态记录为preserved_preinitialized_unknown。
+这两个记录范围分别保留。PyTorch allocated/reserved不可用时不填零；
+CLI的实际策略另随第二例报告。
 
 TF32默认保留。实际SynthSeg前向在cuda:0、float32、cuDNN TF32关闭、autocast关闭；
 其他已验证FP32例外保持。所有实际Synth及辅助网络调用使用FNIT GPU实现，未用半精度。
@@ -87,9 +89,18 @@ TF32默认保留。实际SynthSeg前向在cuda:0、float32、cuDNN TF32关闭、
 保留大小、SHA及主机版本。无新增生产依赖。全新环境安装和没有预装脑影像软件的
 隔离整例未在本轮验证，不能凭PATH或ldd宣布通过。
 
-首个整例尝试在Talairach子进程CUDA模型分配处失败。相同原始T1、配置及初始化CUDA
-调用在隔离输入链重放成功；retry1从新的空目录完整运行成功。未复现的根因保持未定位，
-没有改用CPU、半精度或更换GPU。失败日志见[保留目录](whole_failed_attempt1/)。
+sub-01 API与sub-02 CLI各有一次Talairach子进程CUDA模型分配失败，分别在28.709秒
+和37.254秒监控命令墙钟后退出；不计入成功整例或提速。两次采样没有显示目标GPU
+耗尽，但没有排除未采到的瞬时峰值。失败后GPU仍有约80GB空闲，主机内存大部分为
+可回收文件缓存；没有证据把OOM确定归因于GPU容量、主机内存或某个初始化操作。
+
+sub-01同配置新空目录已完整成功；sub-02保持61926c7、设备、精度与allocator配置，
+在新空目录retry2重跑。两例原输入链另做六次监控重放（原入口3次、子进程提前CUDA
+初始化3次），均成功，orig/SynthStrip数组、dtype、几何和LTA矩阵均零差异。
+对照没有复现失败，因此没有将提前初始化作为已证实修复接入生产。
+失败证据见[sub-01](whole_failed_attempt1/)与[sub-02](whole_failed_sub02_attempt1/)，
+[六次诊断](cuda_bootstrap_diag/summary.json)。执行稳定性尚未通过；未改用CPU、
+半精度或更换GPU，也没有自动隐藏失败重试。
 
 ## 复现
 
@@ -102,9 +113,9 @@ python validation/recon_all/python_gpu_port/run_full_hotspots_launcher.py \
 python validation/recon_all/python_gpu_port/run_full_hotspots_launcher.py \
   --config /bench/whole_sub02_baseline_retry1.json  # 同GPU旧版CLI基线，新的空输出目录
 python validation/recon_all/python_gpu_port/run_full_hotspots_launcher.py \
-  --config /bench/whole_sub02_candidate_retry1.json  # 同GPU候选CLI，新的空输出目录
+  --config /bench/whole_sub02_candidate_retry2.json  # 同GPU候选CLI，新的空输出目录
 python validation/recon_all/python_gpu_port/collect_hotspot_whole_comparison.py \
-  --config /bench/whole_comparison_retry1_config.json  # 仅在整例完成后只读比较
+  --config /bench/whole_comparison_retry2_config.json  # 仅在整例完成后只读比较
 # 两例完整原始报告和比较结果收回后汇总；输出路径必须不存在。
 python validation/recon_all/optimizations/20261001_serial/summarize_whole.py \
   --reports validation/recon_all/optimizations/20261001_serial \

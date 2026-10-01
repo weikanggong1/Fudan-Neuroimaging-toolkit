@@ -1,6 +1,6 @@
 # 单幅 T1w 的 recon-all 重建
 
-本轮候选 `61926c7` 已按[五阶段串行优化](SERIAL_OPTIMIZATION.md)完成阶段回归：全部辅助网络GPU、有序归一化内核和标准球面平均已接入；N4拟合与完整GCA保留合适的源码构建实现。Python pial单次同输入配对减少15.17%，与官方完整坐标一致，但仍慢于生产C++，因此保留默认并单列其局部差异。[当前整例结果](../../validation/recon_all/optimizations/20261001_serial/WHOLE_RESULTS.md)：首例138项齐全，完整命令4242.884→3557.969秒，减少16.143%，采样显存16.186 GB；第二例GPU配对仍在运行，严格比较和整体等效尚未判定。首个CUDA OOM失败尝试保留日志，根因未定位。报告均绑定实际代码，不将阶段加速当成整例提速。
+本轮候选 `61926c7` 已按[五阶段串行优化](SERIAL_OPTIMIZATION.md)完成阶段回归：全部辅助网络GPU、有序归一化内核和标准球面平均已接入；N4拟合与完整GCA保留合适的源码构建实现。Python pial单次同输入配对减少15.17%，与官方完整坐标一致，但仍慢于生产C++，因此保留默认并单列其局部差异。[当前整例结果](../../validation/recon_all/optimizations/20261001_serial/WHOLE_RESULTS.md)：首例138项齐全，完整命令4242.884→3557.969秒，减少16.143%，采样显存16.186 GB；第二例GPU配对仍在运行，严格比较和整体等效尚未判定。API与CLI两次Talairach CUDA OOM失败尝试均保留日志；六次输入链重放成功，根因未定位。报告均绑定实际代码，不将阶段加速当成整例提速。
 
 此前完成的热点优化生产代码为 `c248520`，两例已从原始 T1 连续完成66阶段，各138项输出齐全。[此前c248520整例结果](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/WHOLE_RESULTS.md)：GPU完整命令4972.667→4242.884秒，减少14.676%；CPU5295.422→5274.884秒，减少0.388%。相对优化前严格诊断GPU137/138、CPU138/138，分割与主要脑区统计均零差异；GPU唯一表头差异已定位到面积尾差经float32累加和文本舍入放大。GPU采样峰值14.508 GB，连续峰值未验证。官方差异与white/pial穿越仍保留，整体指标等效未判定。热点和具体实现见 [实测与复用](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/README.md)、[原生替代审计](HOTSPOT_ACCELERATION_AUDIT.md)、[CPU 几何](CPU_GEOMETRY_PERFORMANCE.md)及[球面配准](SPHERE_REGISTRATION_PERFORMANCE.md)。
 
@@ -8,7 +8,7 @@
 
 `fnit-recon-all` 从一幅 T1w 生成体积分割、双侧皮层表面、顶点指标、脑区标注和统计。标准路径依次执行[MNI152 非线性变换](MNI_NONLINEAR_CHAIN.md)、拓扑修复、`white.preaparc`、球面生成与配准、最终 white、[Conda 源码构建的四轮 pial 放置](NATIVE_PIAL_PLACEMENT.md)和后处理。必要程序或资产缺失时，入口在运行前报错；阶段失败时抛出异常并保存报告。当前支持单幅 T1w；多 T1、T2/FLAIR 和纵向重建不在此接口的范围内。
 
-本页描述当前源码的调用方式。[2026-10-01 修复与实测](../../validation/recon_all/python_gpu_port/performance_20261001/README.md)绑定本次实际计算提交；[此前完成的整例](../../validation/recon_all/python_gpu_port/current_full_runs_20260930.json)继续作为配对基线，不能代替新版本结果。执行完成、138 项完整性、网格质量、严格复现诊断与优化前后指标分别记录。整体指标等效阈值尚未正式确认，当前为 `not_assessed`；严格逐文件比较保留用于排错。具体口径见[比较方法](BENCHMARK_METHODS.md)与[验收说明](../../validation/recon_all/python_gpu_port/RELEASE_GATES.md)。
+本页描述当前源码的调用方式。[此前2026-10-01修复与实测](../../validation/recon_all/python_gpu_port/performance_20261001/README.md)绑定该版本实际计算提交；[此前完成的整例](../../validation/recon_all/python_gpu_port/current_full_runs_20260930.json)继续作为配对基线，不能代替新版本结果。执行完成、138 项完整性、网格质量、严格复现诊断与优化前后指标分别记录。整体指标等效阈值尚未正式确认，当前为 `not_assessed`；严格逐文件比较保留用于排错。具体口径见[比较方法](BENCHMARK_METHODS.md)与[验收说明](../../validation/recon_all/python_gpu_port/RELEASE_GATES.md)。
 
 本轮先修正 conform 单精度矩阵求逆的乘法顺序，再用同一原始 T1 连续验证前段；未增加体素或被试特例。[前段逐阶段报告](VOLUME_PREFIX_PARITY_20260930.md)保留修复前后体素、N4 浮点首差、四组 EM 交叉输入及资源记录。历史精度问题与性能优化新增差异分别记录。
 

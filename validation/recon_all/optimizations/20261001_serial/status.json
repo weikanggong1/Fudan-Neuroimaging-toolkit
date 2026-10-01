@@ -51,7 +51,7 @@
       "report": "stage5/summary.json"
     }
   ],
-  "whole_case_validation": "sub01 candidate complete 66 stages/138 outputs; sub02 fresh GPU baseline running, candidate queued",
+  "whole_case_validation": "sub01 complete; sub02 fresh GPU baseline complete, candidate retry1 Talairach CUDA OOM, same-code raw-T1 retry2 running",
   "metric_equivalence": "not_assessed",
   "whole_cases": {
     "sub01": {
@@ -60,8 +60,10 @@
       "comparison": "pending"
     },
     "sub02": {
-      "execution": "baseline running; candidate queued",
+      "execution": "baseline complete, candidate retry2 running",
+      "baseline_command_seconds": 4043.588950867299,
       "comparison": "pending"
     }
-  }
+  },
+  "execution_stability": "two Talairach child CUDA allocation failures across API/CLI; six monitored raw-T1 input-chain replays succeeded in both bootstrap modes, root cause unlocated"
 }

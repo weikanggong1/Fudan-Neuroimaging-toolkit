@@ -64,6 +64,8 @@ def summarize(root, case, implementations):
     bm, cm = data["baseline_monitor"], data["candidate_monitor"]
     launch, completion = data["candidate_launch"], data["candidate_completion"]
     baseline_launch = data["baseline_launch"]
+    api = {kind: read(directory/(kind+"_api.json"))
+           for kind in ("baseline","candidate") if (directory/(kind+"_api.json")).exists()}
     baseline_version = "c24852054f3321c1142b1ae88fa3d2bf68329bb3" if case=="sub01" else "0c8ab327c1a4d10eaf6c8066a16d050e09e30c90"
     checks = {
         "completed": before["status"] == after["status"] == "complete",
@@ -81,6 +83,12 @@ def summarize(root, case, implementations):
     }
     if not all(checks.values()):
         raise ValueError({key: value for key,value in checks.items() if not value})
+    if case=="sub01":
+        if api.keys() != {"baseline","candidate"}:
+            raise ValueError("initialized CUDA API sidecars missing")
+        for value in api.values():
+            if not value["cuda_initialized_before_api"] or value["device_uuid"].removeprefix("GPU-") != cm["gpu_uuid"].removeprefix("GPU-"):
+                raise ValueError("initialized CUDA API device differs from monitored device")
     b = {row["name"]: row for row in before["stages"]}
     c = {row["name"]: row for row in after["stages"]}
     if len(b) != len(before["stages"]) or len(c) != len(after["stages"]) or b.keys() != c.keys():
@@ -115,6 +123,7 @@ def summarize(root, case, implementations):
         "candidate_api_wall_seconds":after["total_seconds"],
         "output_completeness":after["output_validation"],
         "precision":after["precision"],"allocator":after["cuda_allocator"],
+        "initialized_cuda_api_sidecars":api or None,
         "thread_budget":after["thread_budget"],
         "stages":rows,"nested_hemisphere_reports":hemisphere_reports(after),
         "baseline_nested_hemisphere_reports":hemisphere_reports(before),
