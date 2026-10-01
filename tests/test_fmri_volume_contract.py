@@ -186,7 +186,7 @@ def test_volume_metadata_preserves_task_and_execution_settings(volume_dependenci
     }
     for key, value in expected.items():
         assert configuration[key] == value
-    assert configuration["fast_config"] == json.loads(json.dumps(asdict(FASTConfig())))
+    assert configuration["fast_config"] == json.loads(json.dumps(asdict(FASTConfig(execution="fsl"))))
     assert configuration["weights"]["synthstrip"]["SizeBytes"] == len(b"model-double")
     source = metadata["FNIT"]["Source"]
     assert source["SourceSHA256"]["fmri/end_to_end.py"] == hashlib.sha256(Path(end_to_end.__file__).read_bytes()).hexdigest()
@@ -200,8 +200,8 @@ def test_volume_metadata_preserves_task_and_execution_settings(volume_dependenci
     assert state.anatomical_kwargs["reuse"] is True
 
 
-def test_default_fast_metadata_matches_actual_anatomical_estimator_defaults():
-    assert asdict(FASTConfig()) == asdict(TorchFAST(device="cpu").config)
+def test_fast_metadata_matches_source_ordered_anatomical_estimator():
+    assert asdict(FASTConfig(execution="fsl")) == asdict(TorchFAST(device="cpu", execution="fsl").config)
 
 
 def test_registration_execution_and_cache_options_are_forwarded_and_recorded(volume_dependencies):

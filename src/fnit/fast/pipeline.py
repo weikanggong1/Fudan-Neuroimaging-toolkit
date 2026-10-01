@@ -48,7 +48,7 @@ class TorchFAST:
     def __init__(self, device="cpu", threads=None, *, init_iterations=15,
                  bias_iterations=4, fixed_iterations=4, bias_fwhm_mm=20.0,
                  init_mrf=0.02, mrf=0.1, mixel_mrf=0.3, pve_steps=100,
-                 mean_field_iterations=5, pve_chunk_size=8):
+                 mean_field_iterations=5, pve_chunk_size=8, execution="tensor"):
         self.device = torch.device(device)
         if self.device.type == "cuda" and not torch.cuda.is_available():
             raise RuntimeError("CUDA was requested but is not available")
@@ -72,6 +72,7 @@ class TorchFAST:
             pve_steps=pve_steps,
             mean_field_iterations=mean_field_iterations,
             pve_chunk_size=pve_chunk_size,
+            execution=execution,
         )
 
     @torch.inference_mode()
@@ -79,7 +80,8 @@ class TorchFAST:
         image = _load_volume(image, "image")
         data = _single_frame(image, "image")
         affine = np.asarray(image.affine, dtype=float)
-        voxel_size = tuple(np.linalg.norm(affine[:3, :3], axis=0))
+        voxel_size = (tuple(image.header.get_zooms()[:3]) if self.config.execution == "fsl"
+                      else tuple(np.linalg.norm(affine[:3, :3], axis=0)))
 
         mask_data = None
         if mask is not None:
@@ -94,9 +96,19 @@ class TorchFAST:
         mask_tensor = None
         if mask_data is not None:
             mask_tensor = torch.from_numpy(np.asarray(mask_data > 0).copy()).to(self.device)
+        # NEWIMAGE scans an internal radiological array. A neurological file is
+        # reversed in x on read and reversed back on write; this changes the
+        # direction of the ordered MRF updates but not the public image grid.
+        internal_x_flip = self.config.execution == "fsl" and np.linalg.det(affine[:3, :3]) > 0
+        if internal_x_flip:
+            tensor = tensor.flip(0)
+            if mask_tensor is not None:
+                mask_tensor = mask_tensor.flip(0)
         result = segment_t1(tensor, mask_tensor, voxel_size, self.config)
 
         def volume(value, dtype):
+            if internal_x_flip:
+                value = value.flip(-3)
             array = value.detach().cpu().numpy().astype(dtype, copy=False)
             return new_image(array, image)
 

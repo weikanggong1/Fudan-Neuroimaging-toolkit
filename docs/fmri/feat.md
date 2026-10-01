@@ -1,6 +1,6 @@
 # FEAT 核心：运动、掩膜、强度缩放和高通
 
-`run_feat_core` 从一个原始 BIDS run 生成 PICA/FIX 前的 `filtered_func_data.nii.gz`。它估计每帧到 SBRef 的刚体运动，使用三次 B 样条在一次插值中重采样 BOLD，求 EPI 均值和脑掩膜，按整段掩膜内第 50 百分位缩放到 10000，再做高斯加权局部直线高通。缺少 SBRef 时以 BOLD 中间帧为参考。没有场图/GDC warp 时只做运动重采样；不会自行制造畸变场。
+`run_feat_core` 从一个原始 BIDS run 生成 PICA 前的 `filtered_func_data.nii.gz`。它调用本包 `TorchMCFLIRT` 估计每帧到 SBRef 的刚体运动，使用三次 B 样条重采样 BOLD，求 EPI 均值和脑掩膜，按整段掩膜内第 50 百分位缩放到 10000，再做高斯加权局部直线高通。缺少 SBRef 时以 BOLD 中间帧为参考。没有场图/GDC warp 时直接使用 TorchMCFLIRT 的 Constant 样条和原输出类型转换；提供共享形变时，将运动矩阵与形变组合后只采样一次。场图估计不包含在本函数内。
 
 脑提取默认使用 PyTorch SynthStrip 对重采样后的 EPI 均值求掩膜。若有同网格现成掩膜，传 `brain_mask`；`brain_extraction="otsu"` 保留无需权重的独立 EPI 掩膜算法。默认与官方 FEAT 的 BET/强度阈值掩膜定义不同，因此整链对照须分别记录掩膜差异和后续数值差异。完整 `fMRIVolume_pipeline` 会先对 SBRef（缺失时 BOLD 中间帧）运行 SynthStrip，再把该掩膜通过 `brain_mask` 显式交给本函数；本页独立调用的 `brain_mask=None` 则对运动校正后的 EPI 均值运行 SynthStrip。
 
@@ -30,7 +30,7 @@ feat = run_feat_core(
     highpass_cutoff_seconds=100.0,               # 高通截止周期，秒
     device="cuda:0",                             # PyTorch 设备；None 自动选择
     batch_size=8,                                # 每批重采样的 BOLD 帧数
-    motion_iterations=(35, 25, 15),              # 运动配准三级迭代次数
+    motion_iterations=(1, 1, 1),                 # 8/4/4 mm 各一次 Brent 坐标优化轮回
     overwrite=False,                             # 已存在最终输出时是否覆盖
 )
 print(feat.filtered_func_data)                   # X×Y×Z×T float32，原生 EPI 网格
@@ -38,12 +38,7 @@ print(feat.motion_matrices)                      # 每帧的 4×4 FLIRT 矩阵�
 print(feat.intensity_factor)                     # 整段强度乘数
 ```
 
-同一函数的命令行：
-
-```bash
-fnit-fmri feat --bids-root /absolute/path/bids --subject 0001 \
-  --output-dir /absolute/path/sub-0001.feat --device cuda:0
-```
+`run_feat_core` 的独立入口目前是上述 Python 函数。运动校正的独立命令行见 [`fnit mcflirt`](../mcflirt/README.md)；完整 BIDS→MNI 体积命令行为 [`fnit-fmri volume`](README.md)，它包含本页 FEAT 核心步骤。
 
 | 文件或返回值 | 含义 |
 |---|---|
@@ -60,8 +55,8 @@ fnit-fmri feat --bids-root /absolute/path/bids --subject 0001 \
 
 | FNIT 函数 | 输入、输出 | 相应 FSL 命令 |
 |---|---|---|
-| `estimate_motion` | 4D BOLD、3D SBRef、可选 mask；返回 T×6 参数和 T×4×4 FLIRT 矩阵。 | `mcflirt -in BOLD -reffile SBREF -out mcf -mats -plots -spline_final`。优化轨迹和最终插值核不同。 |
-| `apply_motion_warp` | BOLD、参考、逐帧 FLIRT 矩阵、可选共享 warp/postmat；返回参考网格 4D NIfTI。独立调用默认三线性，`interpolation="spline"` 用 CPU 三次 B 样条；FEAT 核心默认选样条。 | MCFLIRT `-spline_final`；若同时给定空间 warp，对应 FEAT 的 `applywarp --premat=... --warp=... --postmat=... --interp=spline`。 |
+| `TorchMCFLIRT.run` | 4D BOLD、3D SBRef；返回 T×6 原 `.par` 参数、T×4×4 FLIRT 矩阵及可选校正图。 | `mcflirt -in BOLD -reffile SBREF -out mcf -mats -plots -spline_final`；默认 8/4/4 mm、原 NCC、相邻帧初值、Brent 优化。 |
+| `apply_motion_warp` | BOLD、参考、逐帧 FLIRT 矩阵、可选共享 warp/postmat；返回参考网格 4D NIfTI。独立调用默认三线性；带共享 warp 的 FEAT 使用周期边界 CPU 三次 B 样条，无 warp 的 FEAT 直接使用 TorchMCFLIRT 最终采样。 | MCFLIRT `-spline_final`；若同时给定空间 warp，对应 FEAT 的 `applywarp --premat=... --warp=... --postmat=... --interp=spline`。 |
 | `epi_brain_mask` | 3D EPI 均值→uint8 掩膜，仅在选择 `otsu` 时使用。 | FEAT 的 BET 加后续强度阈值、时间交集与扩张步骤；算法不同。 |
 | `grand_mean_scale` | 4D 数组和同网格掩膜→缩放 4D 数组及乘数。 | `fslstats input -k mask -p 50`，随后 `fslmaths input -mul factor output`。 |
 | `gaussian_highpass` | 4D 数组和体积单位 sigma→同形状 4D 数组。 | `fslmaths input -bptf sigma -1 -add tempMean output`。 |
@@ -72,9 +67,7 @@ fnit-fmri feat --bids-root /absolute/path/bids --subject 0001 \
 ```python
 import nibabel as nib
 import numpy as np
-from fnit import locate_bids_inputs
-from fnit.fmri.motion import estimate_motion
-from fnit.fmri.spatial import apply_motion_warp
+from fnit import locate_bids_inputs, TorchMCFLIRT
 from fnit.fmri.mask import epi_brain_mask
 from fnit.feat.temporal import grand_mean_scale, gaussian_highpass, scale_nifti, highpass_nifti
 
@@ -93,26 +86,15 @@ inputs = locate_bids_inputs(
 # inputs.fieldmaps 是关联场图路径元组；inputs.tr 为秒；bold_metadata 和 bold_sidecars 给出来源。
 assert inputs.sbref is not None, "本段独立子函数示例要求 SBRef；缺失时请调用 run_feat_core"
 
-motion = estimate_motion(
-    input_bold=inputs.bold,             # 4D 原始 BOLD 路径或 NiBabel 对象
-    reference=inputs.sbref,             # 同网格 3D SBRef 路径或 NiBabel 对象
-    mask=None,                          # 可选同网格 3D 优化掩膜；None 自动估计
-    device=None,                        # None 自动选 GPU/CPU，也可指定 cuda:0 或 cpu
-    batch_size=16,                      # 一次估计的 BOLD 帧数
-    iterations=(35, 25, 15),           # 8 mm、4 mm、原分辨率三层迭代次数
-    resample=False,                    # 是否同时返回已重采样的 BOLD
+motion = TorchMCFLIRT(device="cuda:0").run(
+    input_bold=inputs.bold,              # 4D BOLD 路径，X×Y×Z×T
+    reference=inputs.sbref,              # 同网格 3D SBRef
+    stage_iterations=(1, 1, 1),          # 8/4/4 mm 各一次坐标优化轮回
+    interpolation="spline",             # 本例匹配原 MCFLIRT -spline_final
+    resample=True,                       # 同时返回校正后的 NIfTI
 )
-aligned = apply_motion_warp(
-    input_bold=inputs.bold,             # 待重采样的 4D BOLD
-    reference=inputs.sbref,             # 最终 3D 参考网格
-    motion_matrices=motion.fsl_matrices, # 每帧输入→参考的 T×4×4 FLIRT 矩阵
-    warp=None,                          # 可选共享空间形变；None 只做运动校正
-    postmat=None,                       # 可选 warp 参考→最终参考的 4×4 FLIRT 矩阵
-    warp_convention="auto",             # dense warp 位移方向；按 FSL intent 自动识别
-    interpolation="spline",             # 三次 B 样条，CPU 实现；linear 使用 GPU 三线性
-    batch_size=16,                      # 一批重采样的帧数
-    device=None,                        # None 自动选 GPU/CPU
-)
+aligned = motion.corrected                # 原 uint16 输入会得到 int32 校正图
+# motion.parameters 是 T×6 原 .par 参数；motion.matrices 是 T×4×4 FLIRT 矩阵。
 mean_epi = nib.Nifti1Image(
     np.asarray(aligned.dataobj).mean(axis=3), aligned.affine
 )
@@ -149,30 +131,23 @@ filtered_path = highpass_nifti(
 )
 ```
 
-`MotionResult.parameters` 是 T×6 本地刚体参数，`fsl_matrices` 是 T×4×4 输入→参考 FLIRT 矩阵；`corrected` 只在 `resample=True` 时返回。`apply_motion_warp` 与 `epi_brain_mask` 返回 NiBabel 影像；`grand_mean_scale` 返回 4D 数组与乘数，`gaussian_highpass` 返回 4D 数组。
+`MCFLIRTResult.parameters` 是 T×6 原 MCFLIRT 参数，`matrices` 是 T×4×4 输入→参考 FLIRT 矩阵；`corrected` 只在 `resample=True` 时返回。以上独立演示显式使用 Otsu 掩膜；完整 volume 默认使用 SynthStrip。`apply_motion_warp` 与 `epi_brain_mask` 返回 NiBabel 影像；`grand_mean_scale` 返回 4D 数组与乘数，`gaussian_highpass` 返回 4D 数组。
 
-## 真实数据精度与耗时
+## 当前真实数据对照
 
-下列子函数对照使用同一例 88×88×64×490、TR 0.735 秒的 UKB BOLD/SBRef。官方 FSL 只用于独立基准；FNIT 运行时不调用 FSL。除注明的 8 帧或裁剪块外，均用真实完整影像。
+2026-10-01，冻结源码 `1eb9c417` 使用同一例真实 88×88×64×490 BOLD 和 SBRef，TR 为 0.735 秒，完整处理所有帧。独立原参照采用 SynthStrip 掩膜，因此这个同步骤对照没有混入默认 BET 掩膜差异。
 
-| 对照 | FNIT | FSL | 精度和范围 |
-|---|---:|---:|---|
-| 490 帧运动估计；FNIT 优化区使用官方 mask | 仅拟合 21.64 秒，GPU 峰值 1.04 GB | MCFLIRT 完整命令 397.54 秒 | 计时范围不同；逐帧平移差中位 0.328 mm、95% 位 0.620 mm；旋转差中位 0.208°。 |
-| 固定官方 8 帧 MCFLIRT 矩阵，原始 BOLD→SBRef 三线性插值（独立函数 `linear` 选项） | 含保存中位 0.948 秒 | 8 次 `applywarp --premat` 合计中位 2.148 秒 | 全体素 MAE 0.1066、RMSE 0.1436、r=0.9999999990；最大差 26.66，位于边界。 |
-| 同一真实 BOLD 的 8 帧和同一 mask，整段中位数缩放 | 含压缩保存中位 0.353 秒 | `fslstats`＋`fslmaths` 1.163 秒 | 乘数 1.5420054353 vs 1.5420054173；4D float32 输出逐体素相同。 |
-| 真实 BOLD 的 16³×490 裁剪块高通 | CUDA 1.02 秒，峰值 0.052 GB | `fslmaths -bptf 68.0272108844 -1` 2.04 秒 | MAE 2.47×10⁻⁶，RMSE 7.06×10⁻⁶，最大误差 2.44×10⁻⁴；比较时 FNIT 关闭加回均值以匹配单条命令。 |
+| 控制范围 | 与原软件比较 | 耗时边界 |
+|---|---|---|
+| 完整 GPU 运动估计与最终采样 | 逐体素时间 r 均值 0.99957825、中位数 0.99983382；脑内 pull RMS 均值 0.00881 mm；双方 int32 | 完整 FEAT 含运动、缩放、高通及阶段输出为 973.12 s，未独立分离运动函数耗时。 |
+| 完整 490 帧 CPU 运动估计 | pull RMS 均值 0.00906 mm、最大逐帧 RMS 0.02603 mm | 387.60 s，包含读取和参数估计，不含最终采样与写盘；原 MCFLIRT 的 326.10 s 包含二者。 |
+| 固定原矩阵文本的 8 帧样条采样 | 时间 r 均值 0.999998725、RMSE 0.28163，脑内 93.54% 整数值相同 | CPU 1.49 s，只测采样；原内存矩阵未取得，文本量化也可能影响整数边界。 |
+| 固定原运动输出的完整缩放 | 乘数同为 1.4359563469270533，全部解码值相同 | 单步控制，排除运动估计。 |
+| 固定原输入的完整高通 | 时间 r 中位数 0.999999999999144；RMSE 0.000505985 | GPU 调用 7.642 s，含数据传输及返回，排除读取与哈希；共享 GPU。 |
 
-固定官方运动矩阵的另一次真实 8 帧测试中，`interpolation="spline"` 的 CPU 样条计算为 1.548 秒，相对 FSL `-spline_final` 的脑区 MAE 2.776、RMSE 30.18；三线性 MAE 约 100。FNIT 自估矩阵加样条对官方结果的 MAE 仍为 83.63，说明运动矩阵仍是剩余误差来源。该 8 帧耗时只测重采样，不能与含优化的整次 MCFLIRT 时间直接比较。
+运动参数、样条实现和脑图见 [TorchMCFLIRT 专属页](../mcflirt/README.md)及[完整 GPU 报告](../../validation/mcflirt/full490_gpu.public.json)。固定输入的缩放、高通见[独立控制](../../validation/fmri/matched_highpass_control.public.json)。本轮运动实现替换了旧掩膜 NCC/Adam 路径；相邻帧初始化、原 NCC 的累加行为、8/4/4 mm 网格、Brent 容差和原整数输出转换均按 MCFLIRT 2111.0 处理。float32 累加及成本融合仍会改变平坦最优点附近的矩阵，输出尚未逐体素等价。
 
-整例 FEAT 核心与跳过 GDC/B0 的官方流程对照见 [验证页](../../validation/fmri/README.md)。官方 FEAT 掩膜的实际步骤和本函数默认 SynthStrip 的差异须一起解释，不把上述单步接近误写为整链逐体素等价。
-
-## 运动估计与 MCFLIRT 的差异
-
-上述 490 帧比较的官方命令是 `mcflirt -in BOLD.nii.gz -reffile SBREF.nii.gz -out prefiltered_func_data_mcf -mats -plots -spline_final`。`-mats` 输出每帧到 SBRef 的 FSL scaled-mm 矩阵，`-plots` 输出每帧六列旋转和平移参数，`-spline_final` 指定最终影像重采样。FNIT 的 `estimate_motion(input_bold=..., reference=..., mask=..., resample=False)` 只估计矩阵，没有在 21.64 秒内重采样和写出 4D 图像；FSL 的 397.54 秒包含这些工作。因此这两个时间不能当作同范围加速比。
-
-两者的搜索过程也不同。MCFLIRT 默认代价为 `normcorr`，先在 8 mm 优化，再在 4 mm 优化两次，并使用相邻时间帧的结果作为后续帧初值。FNIT 用带掩膜的标准化相关和 Adam，按 8 mm、4 mm、原分辨率三级优化，每帧从零初值独立开始。本次 FNIT 测试还显式提供了官方脑掩膜，而对应 MCFLIRT 命令没有掩膜输入。矩阵坐标和文件结构能互通，但这不是 MCFLIRT 求解器的源码级复现。
-
-同一例真实 490 帧的相对矩阵，平移差中位数／95% 位为 0.328／0.620 mm，旋转差为 0.208／0.287°。详见[逐项记录](../../validation/fmri/mcflirt_difference.public.json)。本次 FLIRT 只修改角度采样和粗网格插值；`motion.py` 的 SHA-256 与该 490 帧测试时的源码相同，因此 FLIRT 的修改不会改变此处的 MCFLIRT 结果。
+完整 FEAT 与后续去噪、MNI 输出的当前结果见[全流程对照](../../validation/fmri/matched_native.md)。带 GDC/B0 的共享 warp 路径在本轮未做完整对照；其空间方向与采样合同保持原有实现。
 
 ## 参考文献与原实现
 

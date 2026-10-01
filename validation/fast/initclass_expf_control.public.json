@@ -1,0 +1,353 @@
+{
+  "scope": "One real brain-extracted T1; identical native FAST input, without priors; three classes, T1 defaults",
+  "original_command": "fast -t 1 -n 3 -I 4 -W 15 -O 4 -f 0.02 -l 20 -H 0.1 -R 0.3 -B -b -o OUTPUT INPUT",
+  "native_wall_seconds": 149.99806854408234,
+  "native_exit_code": 255,
+  "native_outputs_validated_after_abnormal_exit": true,
+  "native_software": {
+    "fsl_installation": "6.0.7.22",
+    "fast4": "2111.3 / h8c873e0_9",
+    "threads": 8
+  },
+  "timing_boundary": "FNIT: loaded image to all output images returned, includes model construction, H2D, computation and D2H; excludes process startup, input file read, gzip output writes and comparisons; first run includes any Triton compilation",
+  "runtime_original_calls": false,
+  "input_sha256": "542f7a92bda1cf1c419b7178a157b11acfc568689b4b6772ac0fe7c5a67dffe4",
+  "native_output_sha256": {
+    "pve_0": "e077dd9bd152e29c78c5cb9de6d4ff19d302347caebb18f17dc1af8457ffdc4a",
+    "pve_1": "3612e2889dec4120bb52a3a7c0363d59f8e85f5ea61eba64ff53e9291e679244",
+    "pve_2": "413952314e99b8527fd0339fa8b363ea5acf591857e4afc3b299972b7d32b474",
+    "seg": "ec2c6f2d36aa632ab186a5c5759800f92204d10ee0b40f4677d54ef5d4fcca63",
+    "pveseg": "d0b31829815ac1c1d8da901deda39092c016cd42104adbeaea7c23cdd4abc700",
+    "mixeltype": "68dde5327b41f789ab9f20eb297ccd32cfb70b05afecd089f007c488206de3d5",
+    "bias": "3aeab40e729d967710ff59dd01d02d0c50147c8ca3de8efe8f1f155f634cfc75",
+    "restore": "29c5bfcca3eecc1c7503a2711449d27cdf1d5d133f39ba3bca6e58419058e20a"
+  },
+  "source_sha256": {
+    "src/fnit/fast/algorithm.py": "d9a612fa3430f0108fea7526db2f06eddbb0540516855adf546ed992e3bbc03b",
+    "src/fnit/fast/pipeline.py": "6fbbdc1f564cc5b700f6e462cc5bb09885ff20c46231d6bf9b8a72be0d0f28f4",
+    "src/fnit/fast/_fsl_scan.py": "03add4e07ec955995a833fd8adb8761d8278f3fec43abe3499f30fe4da58a643"
+  },
+  "driver_sha256": "64362149140cc1c0195a6234135c0d5130154971b136b78b3f8a976d8bc61bef",
+  "shape": [
+    162,
+    215,
+    180
+  ],
+  "header_pixdim_mm": [
+    0.9999997615814209,
+    1.0,
+    1.0
+  ],
+  "positive_mask_voxels": 1397628,
+  "software": {
+    "torch": "2.5.1",
+    "nibabel": "5.4.2",
+    "numpy": "1.26.4",
+    "cuda": "11.8"
+  },
+  "device": "cuda:1",
+  "tf32": {
+    "matmul": true,
+    "cudnn": true
+  },
+  "execution": {
+    "fsl": {
+      "wall_seconds": 10.53227212978527,
+      "outputs": {
+        "pve_0": {
+          "pearson": 0.9999766714484009,
+          "rmse": 0.002629136577768184,
+          "mae": 2.9943594247038426e-05,
+          "max_abs": 1.0,
+          "changed_voxels": 1845,
+          "dice_0.5": 0.9999384994819764,
+          "dice_0.8": 0.9999270250547312,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "37dcff50509f59852e3114a9793a27ed91b37836fc42d5167440e1dd1df5d514"
+        },
+        "pve_1": {
+          "pearson": 0.9999496982566892,
+          "rmse": 0.004196528364303177,
+          "mae": 6.857333514271747e-05,
+          "max_abs": 1.0,
+          "changed_voxels": 3719,
+          "dice_0.5": 0.9999322473716215,
+          "dice_0.8": 0.9998351369352616,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "168493666afa4b4e9ea9f692d41261a53768439f3e18d5c351de530e6dd11f8e"
+        },
+        "pve_2": {
+          "pearson": 0.9999702358968029,
+          "rmse": 0.0033810212660784207,
+          "mae": 4.01895271280657e-05,
+          "max_abs": 0.949999988079071,
+          "changed_voxels": 1894,
+          "dice_0.5": 0.9999561380691978,
+          "dice_0.8": 0.9999321654259147,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "feff8128f04da5f7989acf78ac47c4465503d7d49cfa9417774143368cb88cda"
+        },
+        "seg": {
+          "pearson": 0.9999179713109401,
+          "rmse": 0.009718319419570163,
+          "mae": 9.301473639623705e-05,
+          "max_abs": 2.0,
+          "changed_voxels": 129,
+          "agreement_fraction": 0.9999077007615761,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "9d937ab2aafaf9f34e4a4049b325d7d08253e1381c3ffd67d5c66365fc516711"
+        },
+        "pveseg": {
+          "pearson": 0.9999465545849413,
+          "rmse": 0.007752536982911769,
+          "mae": 5.867083372685722e-05,
+          "max_abs": 2.0,
+          "changed_voxels": 81,
+          "agreement_fraction": 0.9999420446642454,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "bfb239ad25330beb359d1e52644df68cf5ea2f797170788de47a0066c223d177"
+        },
+        "mixeltype": {
+          "pearson": 0.9996823863582728,
+          "rmse": 0.039638788416450466,
+          "mae": 0.0004808146373713177,
+          "max_abs": 4.0,
+          "changed_voxels": 217,
+          "agreement_fraction": 0.9998447369400155,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "c7ee3dc83ff5d557fc4b649c1509e9cb2877cfa36b2b0646b7163837720767d7"
+        },
+        "bias": {
+          "pearson": 0.99999964318961,
+          "rmse": 1.7253745965723067e-05,
+          "mae": 1.4116842047794601e-05,
+          "max_abs": 6.371736526489258e-05,
+          "changed_voxels": 1394179,
+          "dice_0.5": 1.0,
+          "dice_0.8": 1.0,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "df95a7efeebaad20967bb083e69c9309c1866eeec6a3b8f2e1faf65cc2b1f0b4"
+        },
+        "restore": {
+          "pearson": 0.9999999984388106,
+          "rmse": 0.018793141212759858,
+          "mae": 0.014930110511362404,
+          "max_abs": 0.0772705078125,
+          "changed_voxels": 1394577,
+          "dice_0.5": 1.0,
+          "dice_0.8": 1.0,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "2f30e3abb6ce8dbd6854c6626dba360e2749ac9d07dc35f77bb846a6f2679f20"
+        }
+      },
+      "config": {
+        "init_iterations": 15,
+        "bias_iterations": 4,
+        "fixed_iterations": 4,
+        "bias_fwhm_mm": 20.0,
+        "init_mrf": 0.02,
+        "mrf": 0.1,
+        "mixel_mrf": 0.3,
+        "pve_steps": 100,
+        "mean_field_iterations": 5,
+        "pve_chunk_size": 8,
+        "variance_floor_fraction": 1e-06,
+        "execution": "fsl"
+      },
+      "tissue_means": [
+        689.2578125,
+        1093.5343017578125,
+        1387.8443603515625
+      ],
+      "tissue_variances": [
+        46467.48046875,
+        10371.5986328125,
+        3652.81103515625
+      ],
+      "peak_torch_allocated_bytes": 914855936
+    },
+    "tensor": {
+      "wall_seconds": 1.8773126141168177,
+      "outputs": {
+        "pve_0": {
+          "pearson": 0.9901548166429323,
+          "rmse": 0.05405625357644191,
+          "mae": 0.008312547326832153,
+          "max_abs": 1.0,
+          "changed_voxels": 250441,
+          "dice_0.5": 0.987655059034524,
+          "dice_0.8": 0.9716808585375307,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "d3f9472ecfc5a6f2a5b047eec9e9dd9b3c757f02373add1e35d727eb39edbd9a"
+        },
+        "pve_1": {
+          "pearson": 0.9829821527989272,
+          "rmse": 0.07704208868224668,
+          "mae": 0.015030660816109724,
+          "max_abs": 1.0,
+          "changed_voxels": 443010,
+          "dice_0.5": 0.9897468195411573,
+          "dice_0.8": 0.957340283848169,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "4f770f11a984e5f6f5a65ae82d42c52ad781d9f9698438844ed69f0f2b387db5"
+        },
+        "pve_2": {
+          "pearson": 0.9932173285513595,
+          "rmse": 0.051024218540005016,
+          "mae": 0.006859696481009365,
+          "max_abs": 1.0,
+          "changed_voxels": 201738,
+          "dice_0.5": 0.9953386769585962,
+          "dice_0.8": 0.9904545708278287,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "4f64d295b3d5855d0e073a9bab4193893500e47be621bd48f4d3a66806f54698"
+        },
+        "seg": {
+          "pearson": 0.9998751010188442,
+          "rmse": 0.011992293042951713,
+          "mae": 0.00014238409648347056,
+          "max_abs": 2.0,
+          "changed_voxels": 198,
+          "agreement_fraction": 0.9998583314014888,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "fa9ecf82f8b572dc443043f728d381874a8c84a3d5f440542f2bd5c933b23996"
+        },
+        "pveseg": {
+          "pearson": 0.9897755602494407,
+          "rmse": 0.10726232980055134,
+          "mae": 0.011437950584848042,
+          "max_abs": 2.0,
+          "changed_voxels": 15939,
+          "agreement_fraction": 0.988595677819849,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "20977d5649a509a5d71fee3f5c1b6834d2ca3a14a2a6dca9fec139912d9d989b"
+        },
+        "mixeltype": {
+          "pearson": 0.8970859645272398,
+          "rmse": 0.7146930333591494,
+          "mae": 0.16408157249282357,
+          "max_abs": 5.0,
+          "changed_voxels": 79392,
+          "agreement_fraction": 0.9431951849848458,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "91080a6de41ebe8ef7619834f3ceb544b87e8b92e27d4d523a28795317b22620"
+        },
+        "bias": {
+          "pearson": 0.9999997269410585,
+          "rmse": 1.5087299124528439e-05,
+          "mae": 1.2389627828445913e-05,
+          "max_abs": 5.239248275756836e-05,
+          "changed_voxels": 1394475,
+          "dice_0.5": 1.0,
+          "dice_0.8": 1.0,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "ebd15a47e33d4b6a61e0f3e742fd41399476e08d8e30ab09ce05b43599e9007b"
+        },
+        "restore": {
+          "pearson": 0.9999999987886125,
+          "rmse": 0.01649393493284737,
+          "mae": 0.013126066833067598,
+          "max_abs": 0.0631103515625,
+          "changed_voxels": 1394549,
+          "dice_0.5": 1.0,
+          "dice_0.8": 1.0,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "5c7efe7690ed503ea707d366a46f95c78c16c981fe3738acaf7b4575d9208516"
+        }
+      },
+      "config": {
+        "init_iterations": 15,
+        "bias_iterations": 4,
+        "fixed_iterations": 4,
+        "bias_fwhm_mm": 20.0,
+        "init_mrf": 0.02,
+        "mrf": 0.1,
+        "mixel_mrf": 0.3,
+        "pve_steps": 100,
+        "mean_field_iterations": 5,
+        "pve_chunk_size": 8,
+        "variance_floor_fraction": 1e-06,
+        "execution": "tensor"
+      },
+      "tissue_means": [
+        689.2933959960938,
+        1093.550537109375,
+        1387.844482421875
+      ],
+      "tissue_variances": [
+        46472.10546875,
+        10370.22265625,
+        3652.496826171875
+      ],
+      "peak_torch_allocated_bytes": 1325642240
+    }
+  },
+  "gpu": "NVIDIA H100 PCIe",
+  "status": "Rejected precision audit candidate; not the released FAST implementation",
+  "validated_on": "2026-10-01",
+  "purpose": "Change only Initclass exp from float64 then float32 to float32 and compare the same archived native binary outputs"
+}

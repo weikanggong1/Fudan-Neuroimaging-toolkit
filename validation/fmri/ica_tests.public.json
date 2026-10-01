@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "scope": "Focused ICA tests for source matching, output contracts and extreme Gamma-tail posterior. Synthetic fixtures are unit tests, not a benchmark.",
+  "ica_source_sha256": "66b8cfeb887fbebb64cc37565141bf2009a8bbb089228774b8093086195fb228",
+  "test_source_sha256": "dc5248d0403faa9d3e002b1229d39233d05730db0a4fec9eba98bd52b2aac724",
+  "command": "PYTHONPATH=src python -m pytest -q tests/test_fmri_ica.py",
+  "passed": 7,
+  "failed": 0,
+  "wall_seconds": 4.15,
+  "checks": [
+    "Linux glibc rand stream in column order; seed zero and one agree",
+    "Odd frame count is padded to an even real-FFT size",
+    "ICA mixing columns have unit sample standard deviation",
+    "Header/grid/component/frequency and convergence contracts",
+    "Gamma signal posterior remains high in extreme tails",
+    "Posterior separates Gaussian background and positive/negative Gamma sources",
+    "Single-subject BIDS derivative output naming and source links"
+  ]
+}

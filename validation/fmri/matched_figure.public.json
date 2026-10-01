@@ -1,9 +1,39 @@
 {
   "schema_version": 1,
-  "scope": "Authorized deidentified template-space PNG from the corrected real 490-frame candidate and completed matched native oracle.",
-  "candidate_revision": "ec57972ceb7d715dd8b91ba32e3512bc7743b9c5",
-  "reference_revision": "380e23dbedcc36d1e34bd7eed414196089d6fe67",
-  "figure_sha256": "f5ff94dd6229c7f38d033a038972dff86decc6743dc67af7b8f0663934243616",
-  "render_script_sha256": "77146b5166c11543f6df7a15e7edbde8b088b7a2e69ad8e452d439a62b5bc584",
-  "data": "Same final clean_mni files and common MNI mask as matched_pipeline.public.json; temporal SD uses one shared 99th-percentile scale, voxel temporal r uses float64 centering and RMS>1e-6, no spatial smoothing."
+  "candidate_revision": "1eb9c417febebc8bdd450590d4759454e7160141",
+  "figure_sha256": "6694f82025d288cd058a31cae866139f7fba6dfe36283d1bcc4526cadaea2c07",
+  "driver": "validation/fmri/render_volume_comparison.py",
+  "driver_sha256": "77146b5166c11543f6df7a15e7edbde8b088b7a2e69ad8e452d439a62b5bc584",
+  "rows": [
+    "MNI anatomical template",
+    "FNIT temporal SD",
+    "matched native temporal SD",
+    "voxel temporal Pearson r"
+  ],
+  "frames": 490,
+  "grid": [
+    91,
+    109,
+    91
+  ],
+  "common_mask_voxels": 224709,
+  "same_sd_scale": true,
+  "r_color_limits": [
+    -1,
+    1
+  ],
+  "spatial_smoothing": false,
+  "input_sha256": {
+    "candidate": "4b2030ae437996e81abef53aff4776f37be20b1624f3a4727cb34b867886c14e",
+    "reference": "745cfb5b4029f37c28293523c1731b2a4d9dec41af0c3ea2bfcb88e1c2dabd2e",
+    "common_mask": "6978e14ec6698d03b804590850454a720ee88217f9851fc6c933922c7f8f4974",
+    "template": "0585cd056bf5ccfb8bf97a5f6a66082d4e7caad525718fc11e40d80a827fcb92"
+  },
+  "environment": {
+    "numpy": "1.26.4",
+    "nibabel": "5.4.0",
+    "matplotlib": "3.8.0"
+  },
+  "render_seconds": 53.91552279377356,
+  "privacy": "Only deidentified template-space PNG and anonymous scalar/hash provenance are public. Full BOLD remains on the private server."
 }

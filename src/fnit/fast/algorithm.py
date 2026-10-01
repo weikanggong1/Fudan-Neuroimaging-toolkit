@@ -1,13 +1,14 @@
-"""Tensor implementation of single-channel T1 tissue segmentation.
+"""Single-channel T1 tissue segmentation without native software calls.
 
-The implementation follows the HMRF-EM and partial-volume structure used by
-FAST4, but uses synchronous tensor updates so that the expensive spatial work
-can run on a GPU. It does not call FSL and is not a bitwise port of FAST.
+The default tensor path uses synchronous spatial updates. The explicit fsl
+path preserves the original FAST4 ordered scans and arithmetic conventions;
+its CUDA scans use wavefronts with the same directed dependencies.
 """
 
 from dataclasses import dataclass
 import math
 
+import numpy as np
 import torch
 import torch.nn.functional as F
 
@@ -27,8 +28,11 @@ class FASTConfig:
     mean_field_iterations: int = 5
     pve_chunk_size: int = 8
     variance_floor_fraction: float = 1e-6
+    execution: str = "tensor"
 
     def __post_init__(self):
+        if self.execution not in {"tensor", "fsl"}:
+            raise ValueError("execution must be 'tensor' or 'fsl'")
         integer_fields = (
             "init_iterations", "bias_iterations", "fixed_iterations",
             "pve_steps", "mean_field_iterations", "pve_chunk_size",
@@ -234,6 +238,174 @@ def _partial_volumes(values, means, variances, mask, mixel, fractions, pairs,
     return pve
 
 
+def _fsl_fractions(steps, *, device):
+    """The float32 loop variable, advanced by a double-precision step."""
+    delta = np.float32(0)
+    values = []
+    while delta <= 1:
+        values.append(delta)
+        delta = np.float32(float(delta) + 1.0 / steps)
+    return torch.tensor(np.asarray(values), device=device)
+
+
+def _fsl_moments(values, probabilities, mask):
+    """Float32 products, double reductions, then stored float32 moments."""
+    weights = probabilities * mask[None]
+    total = weights.sum(dim=(1, 2, 3), dtype=torch.float64)
+    first = weights * values
+    means = (first.sum(dim=(1, 2, 3), dtype=torch.float64) / total).float()
+    second = first * values
+    variances = (second.sum(dim=(1, 2, 3), dtype=torch.float64) / total
+                 - (means * means).double()).float()
+    if not torch.isfinite(means).all() or not torch.isfinite(variances).all() or (variances <= 0).any():
+        raise RuntimeError("FAST execution='fsl' encountered a non-positive class variance")
+    return means, variances
+
+
+def _fsl_energy(values, means, variances):
+    delta = (values.unsqueeze(0) - means[:, None, None, None]).float()
+    variance = variances[:, None, None, None]
+    scale = torch.log(torch.sqrt(2.0 * float(np.float32(math.pi)) * variance.double())).float()
+    quadratic = (0.5 * delta.double() * delta.double() / variance.double()).float()
+    return scale + quadratic
+
+
+def _fsl_initial_probabilities(values, means, variances, mask):
+    probability = torch.exp(-_fsl_energy(values, means, variances).double()).float()
+    total = (probability[0] + probability[1]) + probability[2]
+    return torch.where((mask & (total > 0))[None], probability / total[None], 0)
+
+
+def _fsl_bias_kernels(config, voxel_size, device):
+    kernels = []
+    for spacing in voxel_size:
+        sigma = np.float32(0.51 * float(np.float32(config.bias_fwhm_mm)) / spacing)
+        radius = 2 * int(sigma)
+        values = [np.float32(math.exp(-j * j / (2.0 * float(sigma) * float(sigma))))
+                  if sigma > 1e-6 else np.float32(j == 0)
+                  for j in range(-radius, radius + 1)]
+        total = np.float32(0)
+        for value in values:
+            total = np.float32(total + value)
+        kernels.append(torch.tensor(np.asarray(values, dtype=np.float64) / float(total), device=device))
+    return tuple(kernels)
+
+
+def _fsl_bias(log_input, probabilities, means, variances, mask, kernels):
+    from ._fsl_scan import blur
+
+    precision = probabilities / variances[:, None, None, None]
+    denominator = (precision[0] + precision[1]) + precision[2]
+    residual = log_input[None] - means[:, None, None, None]
+    numerator = precision * residual
+    numerator = (numerator[0] + numerator[1]) + numerator[2]
+    numerator = blur(numerator, kernels)
+    denominator = blur(denominator, kernels)
+    bias = torch.where(mask, numerator / denominator, 0)
+    offset = bias[mask].mean(dtype=torch.float64).float()
+    return torch.where(mask, bias - offset, 0)
+
+
+def _fsl_mixel_probabilities(values, means, variances, mask):
+    pure = torch.exp(-_fsl_energy(values, means, variances).double()).float()
+    fractions = _fsl_fractions(100, device=values.device)
+    evidence = [pure[0], pure[1], pure[2]]
+    for a, b in ((0, 1), (0, 2), (1, 2)):
+        probability = torch.zeros_like(values)
+        for fraction in fractions:
+            mean = fraction * means[a] + (1 - fraction) * means[b]
+            variance = fraction * fraction * variances[a] + (1 - fraction) * (1 - fraction) * variances[b]
+            energy = _fsl_energy(values, mean[None], variance[None])[0]
+            probability = (probability.double() + torch.exp(-energy.double()) * 0.01).float()
+        evidence.append(probability)
+    return torch.stack(evidence) * mask[None]
+
+
+def _fsl_partial_volumes(values, means, variances, mask, mixel, fractions, chunk_size):
+    result = torch.zeros((3, *values.shape), dtype=torch.float32, device=values.device)
+    for tissue in range(3):
+        result[tissue][mask & (mixel == tissue)] = 1
+    for code, (a, b) in enumerate(((0, 1), (0, 2), (1, 2)), start=3):
+        selected = mask & (mixel == code)
+        selected_values = values[selected]
+        if not selected_values.numel():
+            continue
+        minimum = torch.full_like(selected_values, 1e13)
+        best_fraction = torch.zeros_like(selected_values)
+        assigned = torch.zeros_like(selected_values, dtype=torch.bool)
+        for start in range(0, fractions.numel(), chunk_size):
+            fraction = fractions[start:start + chunk_size, None]
+            mean = fraction * means[a] + (1 - fraction) * means[b]
+            variance = fraction * fraction * variances[a] + (1 - fraction) * (1 - fraction) * variances[b]
+            delta = selected_values[None] - mean
+            energy = (delta * delta / variance + torch.log(variance)) / 2
+            chunk_energy, chunk_index = energy.min(dim=0)
+            improved = chunk_energy < minimum
+            minimum[improved] = chunk_energy[improved]
+            best_fraction[improved] = fractions[start + chunk_index[improved]]
+            assigned |= improved
+        result[a][selected] = torch.where(assigned, best_fraction, 0)
+        result[b][selected] = torch.where(assigned, 1 - best_fraction, 0)
+    return result
+
+
+def _segment_t1_fsl(original, mask, voxel_size, config):
+    """Ordered single-channel three-tissue FAST defaults, without FSL calls."""
+    from ._fsl_scan import GlibcRandom, icm, random_posteriors, schedule, tanaka
+
+    log_input = torch.where(mask, torch.log(original.double() + 1).float(), 0)
+    samples = torch.sort(log_input[mask]).values
+    means = torch.stack([samples[min(int(math.floor(samples.numel() * fraction)), samples.numel() - 1)]
+                         for fraction in (0.25, 0.5, 0.75)])
+    if not torch.all(means[1:] > means[:-1]):
+        raise ValueError("input does not contain three separable intensity ranges")
+    nearest = (log_input[None] - means[:, None, None, None]).square().argmin(dim=0)
+    probabilities = F.one_hot(nearest, num_classes=3).movedim(-1, 0).float() * mask[None]
+    for _ in range(config.init_iterations + config.fixed_iterations):
+        means, variances = _fsl_moments(log_input, probabilities, mask)
+        probabilities = _fsl_initial_probabilities(log_input, means, variances, mask)
+    if config.init_iterations + config.fixed_iterations == 0:
+        means, variances = _fsl_moments(log_input, probabilities, mask)
+    scan = schedule(mask, voxel_size)
+    random = GlibcRandom(-1)
+    kernels = _fsl_bias_kernels(config, voxel_size, original.device)
+    bias_enabled = config.bias_fwhm_mm > 0
+    bias_log = _fsl_bias(log_input, probabilities, means, variances, mask, kernels) if bias_enabled else torch.zeros_like(original)
+    corrected_log = log_input - bias_log
+    for _ in range(config.bias_iterations):
+        probabilities = tanaka(random_posteriors(scan, random),
+                               _fsl_energy(corrected_log, means, variances), scan,
+                               config.init_mrf, config.mean_field_iterations)
+        if bias_enabled:
+            bias_log = _fsl_bias(log_input, probabilities, means, variances, mask, kernels)
+            corrected_log = log_input - bias_log
+        means, variances = _fsl_moments(corrected_log, probabilities, mask)
+    beta = config.init_mrf
+    for _ in range(config.fixed_iterations):
+        probabilities = tanaka(random_posteriors(scan, random),
+                               _fsl_energy(corrected_log, means, variances), scan,
+                               beta, config.mean_field_iterations)
+        beta = config.mrf
+        means, variances = _fsl_moments(corrected_log, probabilities, mask)
+    order = torch.argsort(means, stable=True)
+    probabilities, means, variances = probabilities[order], means[order], variances[order]
+    hard = torch.where(mask, probabilities.argmax(dim=0) + 1, 0)
+    corrected_linear = torch.where(mask, torch.exp(corrected_log), 0)
+    linear_means, linear_variances = _fsl_moments(corrected_linear, probabilities, mask)
+    mixel = icm(_fsl_mixel_probabilities(corrected_linear, linear_means, linear_variances, mask),
+                mask, scan, config.mixel_mrf)
+    fractions = _fsl_fractions(config.pve_steps, device=original.device)
+    pve = _fsl_partial_volumes(corrected_linear, linear_means, linear_variances, mask,
+                              mixel, fractions, config.pve_chunk_size)
+    correction = torch.exp(-bias_log)
+    bias_field = 1 / correction
+    restored = torch.where(mask, original * correction, 0)
+    if not all(torch.isfinite(value).all() for value in (pve, bias_field, restored)):
+        raise RuntimeError("segmentation produced non-finite values")
+    return FASTTensorResult(pve, hard, torch.where(mask, pve.argmax(dim=0) + 1, 0),
+                            mixel, bias_field, restored, linear_means, linear_variances)
+
+
 @torch.no_grad()
 def segment_t1(image, mask=None, voxel_size=(1.0, 1.0, 1.0), config=None):
     """Segment one brain-extracted T1 tensor into CSF, GM and WM.
@@ -270,6 +442,8 @@ def segment_t1(image, mask=None, voxel_size=(1.0, 1.0, 1.0), config=None):
         raise ValueError("the positive brain mask contains fewer than three voxels")
 
     original = torch.where(mask, image, torch.zeros_like(image))
+    if config.execution == "fsl":
+        return _segment_t1_fsl(original, mask, voxel_size, config)
     log_input = torch.where(mask, torch.log1p(original), torch.zeros_like(original))
     samples = log_input[mask]
     ordered_samples = torch.sort(samples).values
