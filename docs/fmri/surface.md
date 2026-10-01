@@ -80,9 +80,9 @@ print(result.dtseries)  # 91k CIFTI 时间序列
 
 当前球面精度、冷/热配准速度和完整 490 帧逐顶点时间相关见 [MSMSulc 功能页](../msm/README.md)与[配准验证](../../validation/msm/README.md)。对照固定同一 clean volume、几何、ROI 和投影顺序，只改变注册球面；每套球面分别生成自己的 32k 面积表面。
 
-这项测量覆盖球面估计及其对 fsLR32k 时间序列的影响。完整 volume 的当前测量与之前完整 surface API 的运行范围见[全流程验证](../../validation/fmri/README.md)，两种计时单列。最终输出为左右 32k GIFTI 和 91k CIFTI；相关性按各灰质坐标的全部时间点计算，再平均。
+这项测量覆盖球面估计及其对 fsLR32k 时间序列的影响：双侧配准冷/热调用为 201.99 / 198.08 秒，投影为 303.77 秒。完整 volume 和 surface 各阶段的计时范围见[验证汇总](../../validation/fmri/README.md)。最终输出为左右 32k GIFTI 和 91k CIFTI；相关性按各灰质坐标的全部时间点计算，再平均。
 
-固定官方球面时，Workbench 投影和 CIFTI 组装已逐值匹配独立命令对照。UKB MSMAll 发布空间、去噪方法以及从原始数据开始的整条 fMRIPrep 流程属于不同对照；相关结果见 [MS-HBM 验证](../../validation/mshbm/processed_release.md)和 [DeepPrep 对照](../../validation/fmri/deepprep/README.md)。
+固定官方球面时，Workbench 投影和 CIFTI 组装已逐值匹配独立命令对照。UKB MSMAll 发布空间、去噪方法以及从原始数据开始的整条 fMRIPrep 流程属于不同对照；相关结果见 [MS-HBM 验证](../../validation/mshbm/processed_release.md)和 [DeepPrep 实测](../../validation/fmri/deepprep/README.md)。
 
 ## 参考文献与原实现
 

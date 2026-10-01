@@ -88,7 +88,7 @@ newmsm --inmesh=/absolute/path/work/msm-inputs/L.sphere_rot.surf.gii \
 
 同一例真实 UKB 的双侧初始球面、sulc、HCP 模板及完整四级配置用于双方。正式精度参照为 `fsl-newmsm 1.0 h442c261_5` 的单线程输出；同输入两次独立运行的左侧球面逐位相同。官方 8 线程耗时单列，其重复球面有差异。FNIT 使用 H100；球面角差按原生对应顶点计算，490 帧时间相关先逐灰质坐标计算 Pearson r，再取均值。
 
-最新球面、fsLR32k 时间序列、冷/热调用及 profile 汇总见 [MSM 验证页](../../validation/msm/README.md)。配准包含读取和球面/报告写盘，不包含 BOLD 投影、Python 导入与 CUDA 上下文初始化。历史完整 surface API 时间见 [全流程报告](../../validation/fmri/README.md)，不能与本次单函数时间混加。
+最新球面、fsLR32k 时间序列、冷/热调用及 profile 汇总见 [MSM 验证页](../../validation/msm/README.md)。配准包含读取和球面/报告写盘，不包含 BOLD 投影、Python 导入与 CUDA 上下文初始化。volume 与 surface 的测量范围见 [验证汇总](../../validation/fmri/README.md)，各阶段时间单独记录。
 
 | 对单线程官方参照 | 修复前左 / 右 | 修复后左 / 右 |
 |---|---:|---:|

@@ -121,7 +121,7 @@ def _triplet_data_weights(prior,faces,patch,points):
 
 
 def _face_layout(faces, patch, data_weights, source, device):
-    num_faces=len(faces);num_nodes=int(faces.max())+1
+    num_faces=len(faces)
     members=[[] for _ in range(num_faces)]
     for sample,face in enumerate(patch.cpu().numpy()):members[face].append(sample)
     max_points=max(map(len,members))
@@ -130,24 +130,14 @@ def _face_layout(faces, patch, data_weights, source, device):
     for face,items in enumerate(members):
         index[face,:len(items)]=items
         mask[face,:len(items)]=True
-    incident=[[] for _ in range(num_nodes)]
-    for face,triangle in enumerate(faces):
-        for node in triangle:incident[node].append(face)
-    max_inc=max(map(len,incident))
-    face_for_node=np.zeros((num_nodes,max_inc),np.int64)
-    valid=np.zeros((num_nodes,max_inc),bool)
-    for node,items in enumerate(incident):
-        face_for_node[node,:len(items)]=items
-        valid[node,:len(items)]=True
     packed=np.flatnonzero(mask.ravel())
     return (torch.as_tensor(index,device=device),torch.as_tensor(mask,device=device),
-            torch.as_tensor(face_for_node,device=device),torch.as_tensor(valid,device=device),
             data_weights,source,torch.as_tensor(packed,device=device))
 
 
-def _face_costs(current,candidate,original,faces,layout,reference_map,reference_metric,lam,simval,components=False,config=None,energy_only=False,fold_reference=None):
+def _face_costs(current,candidate,original,faces,layout,reference_map,reference_metric,lam,simval,config=None,energy_only=False,fold_reference=None):
     config=MSMSulcConfig() if config is None else config
-    index,valid,_,_,weights,source,packed=layout
+    index,valid,weights,source,packed=layout
     bits=torch.as_tensor([[i>>2&1,i>>1&1,i&1] for i in range(1 if energy_only else 8)],
                          device=current.device,dtype=torch.bool)
     fixed=current[faces]
@@ -204,10 +194,6 @@ def _face_costs(current,candidate,original,faces,layout,reference_map,reference_
                                current_triangles[:,2]-current_triangles[:,0],dim=-1)
     folded=(torch.cross(u1,v1,dim=-1)*current_normal[:,None,:]).sum(-1)<0
     cost=torch.where(folded,torch.full_like(similarity,1e7*lam),similarity+lam*regularization)
-    if components:
-        return (similarity.detach().cpu().numpy(),
-                regularization.detach().cpu().numpy(),
-                folded.detach().cpu().numpy())
     return cost.detach().cpu().numpy()
 
 
@@ -431,8 +417,7 @@ def run_msmsulc(
                                                               affine_grid,affine_faces,device=device,execution=execution,
                                                               old_area=reference_area,new_area=affine_area))
         affine,angles,affine_report,previous_positions=_affine_initialization(affine_grid,affine_faces,
-                                                          affine_source,affine_target,selected,config,execution=execution,
-                                                          return_positions=True)
+                                                          affine_source,affine_target,selected,config,execution=execution)
         previous_grid=affine_grid
         previous_faces=affine_faces
         affine_seconds=time.perf_counter()-affine_started
