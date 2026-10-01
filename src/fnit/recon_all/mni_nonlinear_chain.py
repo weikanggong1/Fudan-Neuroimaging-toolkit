@@ -53,11 +53,11 @@ def run_mni_nonlinear_chain(subject_dir: str | Path, weights_dir: str | Path,
     previous_cudnn_tf32 = torch.backends.cudnn.allow_tf32
     cuda = torch.device(device).type == "cuda"
     try:
-        registration = SynthMorph(weights=weights_dir, device=device, model="deform", extent=256)
+        registration = SynthMorph(weights=weights_dir, device=device, model="deform", extent=256, configure_precision=False)
         if cuda:
             torch.backends.cuda.matmul.allow_tf32 = False
             torch.backends.cudnn.allow_tf32 = False
-        result = registration(crop, cropped_target, init=affine, transform_only=True)
+        result = registration(crop, cropped_target, init=affine, transform_only=True, compute_inverse=False)
     finally:
         torch.backends.cuda.matmul.allow_tf32 = previous_matmul_tf32
         torch.backends.cudnn.allow_tf32 = previous_cudnn_tf32

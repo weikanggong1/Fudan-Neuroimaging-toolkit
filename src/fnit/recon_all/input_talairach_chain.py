@@ -79,12 +79,13 @@ def run_input_talairach_chain(t1: str | Path, subject_dir: str | Path,
     started = time.perf_counter()
     previous_cudnn_tf32 = torch.backends.cudnn.allow_tf32
     try:
-        strip = SynthStrip(weights=weights, device=device, threads=threads)
+        strip = SynthStrip(weights=weights, device=device, threads=threads, configure_precision=False)
         # The SynthStrip constructor enables TF32; exact uint8 masks need FP32 cuDNN.
         torch.backends.cudnn.allow_tf32 = False
         strip(result["conformed"]).image.save(str(strip_file))
     finally:
         torch.backends.cudnn.allow_tf32 = previous_cudnn_tf32
+    del strip
     strip_seconds = time.perf_counter() - started
     xfm = root / "mri/transforms/talairach.xfm"
     lta = root / "mri/transforms/synthmorph.mni305/aff.lta"

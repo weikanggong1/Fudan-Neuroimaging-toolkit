@@ -30,7 +30,7 @@ class RegistrationResult:
     moved: FNITNifti1Image | None
     fixed_moved: FNITNifti1Image | None
     transform: AffineTransform | DenseWarp
-    inverse: AffineTransform | DenseWarp
+    inverse: AffineTransform | DenseWarp | None
 
 
 def network_space(image, shape, center=None):
@@ -150,7 +150,11 @@ def _resampled_image(
 
 
 class SynthMorph:
-    """Reusable rigid, affine, deformable or joint registration model."""
+    """复用刚体、仿射和非线性模型；configure_precision=False保留调用方TF32策略。
+
+    configure_precision默认True，与既有独立接口一致；不会启用半精度。
+    recon-all构造后单独应用并记录已验证的FP32例外。
+    """
 
     def __init__(
         self,
@@ -160,6 +164,7 @@ class SynthMorph:
         extent=256,
         hyper=0.5,
         steps=7,
+        configure_precision=True,
     ):
         from .models import SynthMorphNetwork
 
@@ -184,8 +189,9 @@ class SynthMorph:
         self.device = torch.device(device)
         self.model = model
         self.extent = extent
-        torch.backends.cuda.matmul.allow_tf32 = True
-        torch.backends.cudnn.allow_tf32 = True
+        if configure_precision:
+            torch.backends.cuda.matmul.allow_tf32 = True
+            torch.backends.cudnn.allow_tf32 = True
         self.network = SynthMorphNetwork(
             weights=paths,
             model=model,
@@ -204,8 +210,14 @@ class SynthMorph:
         header_only=False,
         output_dir=None,
         transform_only=False,
+        compute_inverse=True,
+        precision_report=None,
     ):
-        """计算 moving 到 fixed 的配准，返回带图像几何的双向变换。
+        """计算 moving 到 fixed 的配准，返回带图像几何的变换。
+
+        compute_inverse默认True保留双向输出；False仅用于非线性transform_only、
+        无调试目录时，省去未消费的负velocity积分，inverse返回None。
+        两次反对称网络前向保持不变。precision_report可收集实际前向精度。
 
         moving/fixed 是单帧 3D 图像或路径；init 是匹配这两幅图几何的
         LTA 或 4×4 世界坐标仿射。mid_space 默认关闭；header_only 默认
@@ -220,6 +232,8 @@ class SynthMorph:
             raise ValueError("header_only requires affine or rigid model")
         if transform_only and header_only:
             raise ValueError("transform_only and header_only cannot be combined")
+        if not compute_inverse and (is_matrix or not transform_only or output_dir):
+            raise ValueError("compute_inverse=False requires nonlinear transform_only without debug output")
         if mid_space and init is None:
             raise ValueError("mid_space initialization requires init")
 
@@ -252,13 +266,27 @@ class SynthMorph:
                 raise ValueError("input has no intensity variation in network space")
             inputs.append(normalized / maximum)
 
-        forward_network, backward_network = self.network(*inputs)
+        if precision_report is not None:
+            from fnit.recon_all.profiling import autocast_state
+            precision_report.append({
+                "model": self.model, "device": str(inputs[0].device),
+                "input_dtype": str(inputs[0].dtype),
+                "model_dtypes": sorted({str(p.dtype) for p in self.network.parameters()}),
+                "matmul_tf32": torch.backends.cuda.matmul.allow_tf32,
+                "cudnn_tf32": torch.backends.cudnn.allow_tf32,
+                "autocast": autocast_state(inputs[0].device.type),
+                "compute_inverse": bool(compute_inverse),
+            })
+        if compute_inverse:
+            forward_network, backward_network = self.network(*inputs)
+        else:
+            forward_network, backward_network = self.network(*inputs, compute_inverse=False)
         forward_pull = compose(
             (net_to_mov, forward_network, fix_to_net), shape=fix.shape
         )
-        inverse_pull = compose(
+        inverse_pull = (compose(
             (net_to_fix, backward_network, mov_to_net), shape=mov.shape
-        )
+        ) if compute_inverse else None)
 
         if is_matrix:
             forward_voxel = _numpy(inverse_pull)
@@ -291,11 +319,11 @@ class SynthMorph:
                 source=mov,
                 target=fix,
             )
-            inverse = DenseWarp(
+            inverse = (DenseWarp(
                 voxel_displacement_to_ras(_numpy(inverse_pull), fix, mov),
                 source=fix,
                 target=mov,
-            )
+            ) if compute_inverse else None)
             if transform_only:
                 moved = fixed_moved = None
             else:

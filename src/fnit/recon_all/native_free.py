@@ -289,25 +289,26 @@ def _run_defects_volume(binary: Path, subject: Path, hemi: str,
 
 def _run_white_mri_chain(subject: Path, weights: Path, assets: Path,
                          threads: int, warp_binaries: tuple[Path, Path, Path],
-                         stage, *, device: str) -> None:
+                         stage, *, device: str) -> dict:
     """生成 MNI 辅助图、非线性变换和 finalsurfs；显式传递主设备。
 
     subject 提供自产 conform MRI；weights、assets 为已校验资源，threads
     为线程数，warp_binaries 按转换/求逆/重采样排列。stage 是记录耗时和
-    失败的回调，device 为 CPU 或 CUDA。输出写入 subject，返回 None；
-    原生程序或任一计算失败时抛出异常。辅助图和 finalsurfs 使用 CPU，
-    非线性变换使用 device；空间、命令与实测见 MNI_NONLINEAR_CHAIN.md。
+    失败的回调，device 为 CPU 或 CUDA。输出写入 subject，返回辅助网络实际
+    前向记录字典；原生程序或计算失败抛异常。全部网络使用 device，
+    finalsurfs 后处理使用 CPU；空间、命令与实测见 MNI_NONLINEAR_CHAIN.md。
     """
     from .finalsurfs_python import run_finalsurfs
     from .mni_aux_chain import run_mni_aux_chain
     from .mni_nonlinear_chain import run_mni_nonlinear_chain
 
-    stage("mni_aux", run_mni_aux_chain, subject, weights, assets,
-          device="cpu", threads=threads)
+    auxiliary = stage("mni_aux", run_mni_aux_chain, subject, weights, assets,
+          device=device, threads=threads)
     stage("mni_nonlinear", run_mni_nonlinear_chain, subject, weights, assets,
           warp_convert=warp_binaries[0], ca_register=warp_binaries[1],
           mri_convert=warp_binaries[2], device=device, threads=threads)
     stage("brain_finalsurfs", run_finalsurfs, subject, device="cpu")
+    return auxiliary["runtime"]
 
 
 def _place_preaparc_and_smooth(subject: Path, hemi: str, binary: Path,
@@ -795,9 +796,12 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     stage("brain_second_normalize", normalize_t1_aseg,
           mri / "norm.mgz", mri / "aseg.presurf.mgz",
           mri / "brainmask.mgz", mri / "brain.mgz", device=device)
+    auxiliary_forwards = []
     stage("entowm", mri_entowm_seg, mri / "nu.mgz", mri / "entowm.mgz",
-          weights, device="cpu", stats_path=stats / "entowm.stats",
-          talairach_lta=mri / "transforms/talairach.xfm.lta")
+          weights, device=device, stats_path=stats / "entowm.stats",
+          talairach_lta=mri / "transforms/talairach.xfm.lta",
+          precision_report=auxiliary_forwards)
+    report["precision"]["EntoWM_actual_forwards"] = auxiliary_forwards
     stage("ants_denoise", denoise_volume, mri / "brain.mgz",
           mri / "antsdn.brain.mgz")
     stage("mri_segment", _run_native_wm_segment,
@@ -820,7 +824,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     stage("filled_auto_checkpoint", shutil.copyfile,
           mri / "filled.mgz", mri / "filled.auto.mgz")
     try:
-        _run_white_mri_chain(subject, weights, assets, threads,
+        report["Synth_auxiliary_runtime"] = _run_white_mri_chain(subject, weights, assets, threads,
                              tuple(binary[0] for binary in warp_binaries), stage,
                              device=device)
     except Exception as error:

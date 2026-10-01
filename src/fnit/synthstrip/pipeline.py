@@ -104,7 +104,8 @@ class SynthStrip:
     the binary mask uses ``distance < border`` followed by connected components.
     """
 
-    def __init__(self, weights=None, device="cpu", no_csf=False, threads=None):
+    # configure_precision=False仅保留调用方TF32策略；默认True保持公共行为。
+    def __init__(self, weights=None, device="cpu", no_csf=False, threads=None, *, configure_precision=True):
         self.device = torch.device(device)
         if self.device.type == "cuda" and not torch.cuda.is_available():
             raise RuntimeError("CUDA was requested but is not available")
@@ -113,8 +114,9 @@ class SynthStrip:
         # Match the executable's convolution backend settings.
         torch.backends.cudnn.benchmark = True
         torch.backends.cudnn.deterministic = True
-        torch.backends.cuda.matmul.allow_tf32 = True
-        torch.backends.cudnn.allow_tf32 = True
+        if configure_precision:
+            torch.backends.cuda.matmul.allow_tf32 = True
+            torch.backends.cudnn.allow_tf32 = True
         name = "synthstrip.nocsf.1.pt" if no_csf else "synthstrip.1.pt"
         self.model_path = Path(resolve_weights(name, explicit=weights))
         self.model = StripModel().to(self.device).eval()

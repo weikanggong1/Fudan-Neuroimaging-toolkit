@@ -58,7 +58,7 @@ def register_talairach(moving: str | Path, template: str | Path,
     previous_matmul_tf32 = torch.backends.cuda.matmul.allow_tf32
     previous_cudnn_tf32 = torch.backends.cudnn.allow_tf32
     try:
-        model = SynthMorph(weights=weights, device=device, model="affine", extent=256)
+        model = SynthMorph(weights=weights, device=device, model="affine", extent=256, configure_precision=False)
         torch.backends.cuda.matmul.allow_tf32 = False
         torch.backends.cudnn.allow_tf32 = False
         affine = model(moving, template, header_only=True).transform

@@ -100,7 +100,7 @@ def _crop_nonzero(image: Path, output: Path) -> Path:
 
 def register_mni152_affine(subject_dir: str | Path, weights_dir: str | Path,
                            assets_dir: str | Path, *, device: str = "cpu",
-                           threads: int = 4) -> Path:
+                           threads: int = 4, precision_report: list | None = None) -> Path:
     """Write the full-MNI152-to-native voxel LTA used by auxiliary priors.
 
     Input: subject/mri/orig.mgz, external affine weight and cropped/full MNI152
@@ -119,8 +119,8 @@ def register_mni152_affine(subject_dir: str | Path, weights_dir: str | Path,
     transform_dir = subject / "mri/transforms/synthmorph.1.0mm.1.0mm"
     crop = _crop_nonzero(native, transform_dir / "invol.crop.nii.gz")
     torch.set_num_threads(threads)
-    model = SynthMorph(weights=weights_dir, device=device, model="affine", extent=256)
-    world_affine = model(crop, cropped_target, header_only=True).transform
+    model = SynthMorph(weights=weights_dir, device=device, model="affine", extent=256, configure_precision=False)
+    world_affine = model(crop, cropped_target, header_only=True, precision_report=precision_report).transform
     world_affine.save(str(transform_dir / "aff.lta"))
     native_image = nib.load(str(native))
     full_image = nib.load(str(full_target))
@@ -135,7 +135,7 @@ def register_mni152_affine(subject_dir: str | Path, weights_dir: str | Path,
 
 def run_mni_aux_chain(subject_dir: str | Path, weights_dir: str | Path,
                       assets_dir: str | Path, *, device: str = "cpu",
-                      threads: int = 4) -> dict[str, Path]:
+                      threads: int = 4) -> dict:
     """Generate the affine LTA and both conformed auxiliary label volumes.
 
     Requires subject/mri/orig.mgz, nu.mgz, synthseg.rca.mgz; external affine,
@@ -151,19 +151,21 @@ def run_mni_aux_chain(subject_dir: str | Path, weights_dir: str | Path,
     for file in (mri / "nu.mgz", mri / "synthseg.rca.mgz"):
         if not file.is_file():
             raise FileNotFoundError(file)
+    forwards = []
     lta = register_mni152_affine(subject, weights, assets,
-                                 device=device, threads=threads)
+                                 device=device, threads=threads, precision_report=forwards)
     torch.set_num_threads(threads)
     directory = lta.parent
     mca_dura = mri_mcadura_seg(mri / "nu.mgz", mri / "mca-dura.mgz",
-                               directory, assets, device=device, weights_dir=weights)
+                               directory, assets, device=device, weights_dir=weights, precision_report=forwards)
     talairach = mri / "transforms/talairach.xfm.lta"
     vsinus = mri_vsinus_seg(mri / "nu.mgz", mri / "vsinus.mgz",
                             directory, assets, ctxseg_path=mri / "synthseg.rca.mgz",
                             stats_path=subject / "stats/vsinus.stats",
                             talairach_lta=talairach if talairach.is_file() else None,
-                            device=device, weights_dir=weights)
-    return {"lta": lta, "mca_dura": mca_dura, "vsinus": vsinus}
+                            device=device, weights_dir=weights, precision_report=forwards)
+    return {"lta": lta, "mca_dura": mca_dura, "vsinus": vsinus,
+            "runtime": {"device": str(device), "auxiliary_forwards": forwards}}
 
 
 def main() -> None:
