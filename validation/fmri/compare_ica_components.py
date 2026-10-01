@@ -2,7 +2,9 @@
 
 输入是同一时间轴的两套 mixing 与噪声编号文件。先将每列居中并归一化，
 再最大化绝对 Pearson r 做一对一 Hungarian 匹配；不会将相同编号视为
-相同成分。公开报告仅保存匿名统计和 SHA。可选逐成分表写到私有目录。
+相同成分。可选同网格 component 和 thresholded maps 沿用时间配对与符号，
+比较空间 r 和非零阈值支持域 Dice。公开报告仅保存匿名统计和 SHA。
+可选逐成分表写到私有目录。
 不调用 FNIT、FSL、FreeSurfer，也不重新估计 ICA。
 """
 
@@ -88,6 +90,75 @@ def label_comparison(candidate, reference):
     }
 
 
+def spatial_alignment(args, rows, columns, signs, candidate_count, reference_count):
+    """Apply the temporal pairing/sign to maps on their existing voxel grid."""
+    import nibabel as nib
+
+    supplied = {name: getattr(args, name) for name in (
+        "candidate_maps", "reference_maps", "candidate_thresholded", "reference_thresholded")}
+    if not any(supplied.values()):
+        return None
+    raw = bool(supplied["candidate_maps"])
+    if raw != bool(supplied["reference_maps"]):
+        raise ValueError("Spatial comparison requires both raw component maps when either is supplied")
+    thresholded = bool(supplied["candidate_thresholded"])
+    if thresholded != bool(supplied["reference_thresholded"]):
+        raise ValueError("Spatial comparison requires both thresholded maps when either is supplied")
+    supplied = {name: path for name, path in supplied.items() if path is not None}
+    images = {name: nib.load(path) for name, path in supplied.items()}
+    map_suffix = "maps" if raw else "thresholded"
+    first = images["candidate_" + map_suffix]
+    arrays = {}
+    for name, image in images.items():
+        count = candidate_count if name.startswith("candidate") else reference_count
+        if (image.ndim != 4 or image.shape[-1] != count or image.shape[:3] != first.shape[:3]
+                or not np.allclose(image.affine, first.affine, atol=1e-4, rtol=0)):
+            raise ValueError("ICA maps must match their component count and share a spatial grid")
+        arrays[name] = np.asarray(image.dataobj, dtype=np.float32)
+        if not np.isfinite(arrays[name]).all():
+            raise ValueError("ICA component maps contain nonfinite values")
+    mask = np.ones(first.shape[:3], dtype=bool)
+    input_hashes = {name: sha256(path) for name, path in supplied.items()}
+    if args.comparison_mask is not None:
+        image = nib.load(args.comparison_mask)
+        data = np.asarray(image.dataobj)
+        if (image.shape != first.shape[:3] or not np.allclose(image.affine, first.affine, atol=1e-4, rtol=0)
+                or not np.isfinite(data).all() or not np.isin(data, [0, 1]).all()):
+            raise ValueError("ICA comparison mask must be finite, binary and on the component grid")
+        mask = data > 0
+        input_hashes["comparison_mask"] = sha256(args.comparison_mask)
+    if not mask.any():
+        raise ValueError("ICA comparison mask is empty")
+    correlations, errors, dices = [], [], []
+    constant_pairs = 0
+    for left, right, sign in zip(rows, columns, signs):
+        x = arrays["candidate_" + map_suffix][..., left][mask].astype(np.float64) * sign
+        y = arrays["reference_" + map_suffix][..., right][mask].astype(np.float64)
+        errors.append(float(np.sqrt(np.mean((x - y) ** 2))))
+        x -= x.mean()
+        y -= y.mean()
+        denominator = np.linalg.norm(x) * np.linalg.norm(y)
+        if denominator:
+            correlations.append(float(np.clip(np.dot(x, y) / denominator, -1, 1)))
+        else:
+            constant_pairs += 1
+        if thresholded:
+            a = arrays["candidate_thresholded"][..., left][mask] != 0
+            b = arrays["reference_thresholded"][..., right][mask] != 0
+            denominator = int(a.sum() + b.sum())
+            dices.append(float(2 * np.count_nonzero(a & b) / denominator) if denominator else 1.)
+    return {
+        "method": "Existing spatial maps paired by the temporal Hungarian assignment; candidate maps multiplied by temporal sign; threshold support is nonzero regardless of sign",
+        "shape": list(first.shape[:3]), "same_grid": True, "all_values_finite": True,
+        "map_kind": "unthresholded components" if raw else "thresholded components",
+        "comparison_mask_voxels": int(mask.sum()), "matched_pairs": len(rows),
+        "input_sha256": input_hashes,
+        "sign_aligned_map_pearson_r": distribution(correlations) if correlations else None,
+        "map_rmse": distribution(errors), "constant_map_pairs": constant_pairs,
+        "nonzero_threshold_support_dice": distribution(dices) if dices else None,
+    }
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("candidate-mixing", "reference-mixing", "candidate-noise", "reference-noise", "report-out"):
@@ -97,11 +168,19 @@ def main():
     parser.add_argument("--candidate-noise-index-base", choices=(0, 1), type=int, default=1)
     parser.add_argument("--reference-noise-index-base", choices=(0, 1), type=int, default=1)
     parser.add_argument("--rank-rcond", type=float, default=1e-8)
+    parser.add_argument("--validated-on", help="Optional YYYY-MM-DD date for the actual control")
+    for name in ("candidate-maps", "reference-maps", "candidate-thresholded", "reference-thresholded", "comparison-mask"):
+        parser.add_argument("--" + name, type=Path)
     parser.add_argument("--private-pairs-out", type=Path,
                         help="可选：保存成分编号、符号、r 和噪声标签的私有 TSV")
     args = parser.parse_args()
     if not 0 < args.rank_rcond < 1:
         parser.error("rank-rcond must lie strictly between zero and one")
+    if args.validated_on and not re.fullmatch(r"\d{4}-\d{2}-\d{2}", args.validated_on):
+        parser.error("validated-on must be YYYY-MM-DD")
+    for revision in (args.source_revision, args.reference_source_revision):
+        if not re.fullmatch(r"[0-9a-f]{7,40}", revision):
+            parser.error("source revisions must be Git identifiers")
     started = time.perf_counter()
     candidate = read_mixing(args.candidate_mixing)
     reference = read_mixing(args.reference_mixing)
@@ -130,6 +209,7 @@ def main():
         "schema_version": 1,
         "source_revision": args.source_revision,
         "reference_source_revision": args.reference_source_revision,
+        "validated_on": args.validated_on,
         "scope": "Independent alignment of existing real ICA mixing matrices and AROMA noise labels; no new ICA or full-pipeline execution.",
         "data": {"anonymous_id": "real_run_01", "time_points": int(candidate.shape[0]),
                  "candidate_components": int(candidate.shape[1]), "reference_components": int(reference.shape[1]),
@@ -158,6 +238,10 @@ def main():
                    "Label agreement is between two automatic classifications, not accuracy against ground-truth noise."],
         "privacy": "Anonymous summaries and hashes only; no subject IDs, private paths or voxel data.",
     }
+    maps = spatial_alignment(args, rows, columns, np.where(signed_r < 0, -1., 1.), candidate.shape[1], reference.shape[1])
+    if maps is not None:
+        report["spatial_alignment"] = maps
+    report["wall_seconds_including_read_and_comparison"] = time.perf_counter() - started
     if args.private_pairs_out is not None:
         args.private_pairs_out.parent.mkdir(parents=True, exist_ok=True)
         table = np.column_stack((rows + 1, columns + 1, signed_r, absolute_r,

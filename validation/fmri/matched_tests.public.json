@@ -1,25 +1,36 @@
 {
   "schema_version": 1,
-  "source_revision": "ec57972ceb7d715dd8b91ba32e3512bc7743b9c5",
-  "scope": "Focused checks for FLIRT output coordinate precision and fMRI volume tissue-mask routing, after the real-data prefilter diagnosis.",
+  "source_revision": "1eb9c417febebc8bdd450590d4759454e7160141",
+  "validated_on": "2026-10-01",
+  "scope": "Focused checks for current SynthStrip geometry, MCFLIRT interface/motion, ordered FAST, ICA, volume/cache metadata and matched validation drivers. Real 490-frame benchmark is reported separately.",
   "checks": [
     {
-      "command": "PYTHONPATH=src python -m pytest -q tests/test_fmri_volume_contract.py tests/test_fmri_aroma_confounds.py tests/flirt/test_output_semantics.py tests/flirt/test_cost_fsl_semantics.py",
-      "passed": 46,
+      "scope": "Final restored ordered FAST plus motion/ICA/SynthStrip/volume/cache/TF32 focused suite before freezing the real run",
+      "passed": 116,
       "failed": 0,
-      "wall_seconds": 15.42
+      "wall_seconds": 31.23
     },
     {
       "command": "PYTHONPATH=src python -m pytest -q tests/test_fmri_benchmark_reference.py tests/test_fmri_matched_pipeline_comparison.py",
       "passed": 12,
       "failed": 0,
-      "wall_seconds": 5.8,
-      "scope": "Before the runtime fix; new benchmark scripts only. Additional mask labels were separately checked with the same comparison tests."
+      "wall_seconds": 5.39,
+      "scope": "Rechecked after current comparison-driver updates"
     }
   ],
   "source_sha256": {
-    "src/fnit/flirt/core.py": "e6ce6185fafb89666be631069f66e96ce9c6a561ab3d7c7fab4c661d317885c1",
-    "src/fnit/fmri/end_to_end.py": "991cef205074c0efd63493c2beaef0428d3233a1d05ab6d1bb05e96fb5e58372",
-    "tests/test_fmri_volume_contract.py": "81371f7f827ada2d1c158937b4691dc6d76063bba2a46715a1f89b665032b354"
-  }
+    "src/fnit/synthstrip/pipeline.py": "41304bafc412bcc914d76a6cbbd29550173df4419c1aa3a54d31d95739bda95d",
+    "src/fnit/mcflirt/core.py": "f4f18579cb0a7f709f2975c3cef125e6cce392fc1dca3fa413428c365afb56fe",
+    "src/fnit/mcflirt/sampling.py": "af10cfd4f42f94adff2bb910eafe40834786a3b7646756a3967d5c9fc3aa0b8f",
+    "src/fnit/fast/algorithm.py": "b8eb36e776fe9631e94660a6784b469ddcfdf53753c9a4a75856970c067cedd1",
+    "src/fnit/fast/pipeline.py": "6fbbdc1f564cc5b700f6e462cc5bb09885ff20c46231d6bf9b8a72be0d0f28f4",
+    "src/fnit/fast/_fsl_scan.py": "03add4e07ec955995a833fd8adb8761d8278f3fec43abe3499f30fe4da58a643",
+    "src/fnit/melodic/ica.py": "66b8cfeb887fbebb64cc37565141bf2009a8bbb089228774b8093086195fb228",
+    "src/fnit/fmri/pipeline.py": "a71a0e0528a72c0de2dd38edbfee6e817dfde80a5640b1f620c120abdbd59311",
+    "src/fnit/fmri/_anatomical.py": "00cdbfbc70b2058f3f1627106f3feb97fc83a6bc65a5288a691d4d342b33dac4"
+  },
+  "limits": [
+    "Focused checks do not assert whole-pipeline numerical equivalence.",
+    "A separate broader public-API audit had 49 passes and one pre-existing GEMS native_samseg Surfa policy failure; those files match remote main and were not changed in this work. No claim that all repository tests pass."
+  ]
 }

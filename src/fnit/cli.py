@@ -157,6 +157,7 @@ def _run_fast(args):
         mrf=args.mrf,
         mixel_mrf=args.mixel_mrf,
         pve_steps=args.pve_steps,
+        execution=args.execution,
     )
     prefix = Path(args.output_prefix)
     prefix.parent.mkdir(parents=True, exist_ok=True)
@@ -661,6 +662,8 @@ def main(argv=None):
     fast.add_argument('-H', '--mrf', type=float, default=0.1)
     fast.add_argument('-R', '--mixel-mrf', type=float, default=0.3)
     fast.add_argument('--pve-steps', type=int, default=100)
+    fast.add_argument('--execution', choices=('tensor', 'fsl'), default='tensor',
+                      help='tensor 同步更新；fsl 保留原 FAST 顺序更新')
     fast.add_argument('-N', '--no-bias', action='store_true')
     fast.add_argument('-b', '--save-bias', action='store_true')
     fast.add_argument('-B', '--save-restored', action='store_true')
@@ -674,6 +677,10 @@ def main(argv=None):
         allow_abbrev=False)
     add_flirt_arguments(flirt)
     flirt.add_argument('--threads', type=int, default=1)
+    from .mcflirt.cli import add_arguments as add_mcflirt_arguments
+    mcflirt = commands.add_parser(
+        'mcflirt', help='单被试 BOLD 三阶段刚体运动校正', allow_abbrev=False)
+    add_mcflirt_arguments(mcflirt)
     from .fnirt.cli import add_arguments as add_fnirt_arguments
     fnirt = commands.add_parser(
         'fnirt', help='PyTorch FNIRT default, GM, T1 or TBSS registration',
@@ -819,6 +826,10 @@ def main(argv=None):
         return
     if selected and selected[0] == "subregions":
         _run_subregions(parser.parse_args(selected))
+        return
+    if selected and selected[0] == "mcflirt":
+        from .mcflirt.cli import run_from_args
+        run_from_args(parser.parse_args(selected))
         return
     if selected and selected[0] == "flirt":
         _run_flirt(parser.parse_args(selected))

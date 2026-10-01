@@ -46,7 +46,7 @@ def main(argv=None):
     volume.add_argument("--bandpass", nargs=2, type=float)
     volume.add_argument("--global-signal", action="store_true")
     volume.add_argument("--batch-size", type=int, default=8)
-    volume.add_argument("--motion-iterations", nargs=3, type=int, default=(35, 25, 15))
+    volume.add_argument("--motion-iterations", nargs=3, type=int, default=(1, 1, 1))
     volume.add_argument("--highpass-cutoff-seconds", type=float, default=100)
     volume.add_argument("--n-splits", type=int, default=1000)
     volume.add_argument("--random-state", type=int, default=0)

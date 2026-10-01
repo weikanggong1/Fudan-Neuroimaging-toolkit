@@ -75,7 +75,7 @@ def _source_provenance(registration_backend):
     """Identify the installed runtime sources without requiring a Git checkout."""
     package = Path(__file__).resolve().parents[1]
     directories = (
-        "fmri", "feat", "melodic", "fast", "synthstrip", "flirt",
+        "fmri", "feat", "melodic", "fast", "synthstrip", "flirt", "mcflirt",
         "applywarp", "eddy", registration_backend,
     )
     files = {path for directory in directories
@@ -133,7 +133,7 @@ def fMRIVolume_pipeline(
     highpass_cutoff_seconds=100.0,
     device=None,
     batch_size=8,
-    motion_iterations=(35, 25, 15),
+    motion_iterations=(1, 1, 1),
     ica_max_iter=500,
     n_splits=1000,
     random_state=0,
@@ -332,13 +332,15 @@ def fMRIVolume_pipeline(
         "highpass_cutoff_seconds": highpass_cutoff_seconds,
         "device": str(selected), "batch_size": batch_size,
         "motion_iterations": list(motion_iterations),
+        "motion_algorithm": "MCFLIRT-2111.0-8/4/4mm-coordinate-Brent",
+        "motion_output": "NEWIMAGE-float32-Constant-spline-source-dtype-cast",
         "n_splits": n_splits, "random_state": random_state,
         "brain_extraction": "synthstrip",
         "mni_template": str(Path(mni_template).expanduser().resolve()),
         "mni_brain_mask": (
             str(Path(mni_brain_mask).expanduser().resolve()) if mni_brain_mask is not None else None
         ),
-        "fast_config": asdict(FASTConfig()),
+        "fast_config": asdict(FASTConfig(execution="fsl")),
         "reuse_anatomical": reuse_anatomical,
         "anatomical_cache": {"reused": anatomical.reused, "fingerprint": anatomical.fingerprint},
         "bbr_execution": bbr_execution,

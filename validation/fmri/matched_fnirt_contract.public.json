@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "source_revision": "ec57972ceb7d715dd8b91ba32e3512bc7743b9c5",
-  "public_source_files": 96,
+  "source_revision": "1eb9c417febebc8bdd450590d4759454e7160141",
+  "public_source_files": 101,
   "public_source_mismatches": [],
   "derivative_provenance": [
     {
       "file": "mni",
-      "source_files": 82,
+      "source_files": 87,
       "mismatches": [],
       "manifest_matches": true,
       "dependencies": {
@@ -19,7 +19,7 @@
     },
     {
       "file": "native",
-      "source_files": 82,
+      "source_files": 87,
       "mismatches": [],
       "manifest_matches": true,
       "dependencies": {
@@ -44,12 +44,15 @@
   },
   "anatomical_cache": {
     "reused": false,
-    "fingerprint": "2bec6afad4d7ddb743dce7f0034cbe416f3649abeeba09294da812c1453d676d"
+    "fingerprint": null
   },
   "execution": {
     "registration_backend": "fnirt",
     "bbr": "batched",
-    "fnirt": "optimized"
+    "fnirt": "optimized",
+    "fast": "fsl",
+    "motion": "MCFLIRT-2111.0-8/4/4mm-coordinate-Brent",
+    "motion_output": "NEWIMAGE-float32-Constant-spline-source-dtype-cast"
   },
   "weight_sizes_match_recorded_configuration": {
     "synthstrip": true
@@ -102,14 +105,14 @@
     "all_finite": true,
     "binary": true,
     "nonempty": true,
-    "voxels": 223166,
+    "voxels": 224882,
     "reference_shape_matches": true,
     "reference_affine_matches": true,
     "sha256_matches_report": true
   },
   "native_brain_mask": {
-    "sha256": "5769fe335c370c10efaf57361a7cdd1353fc4a6714194339157df196e11e2463",
-    "voxels": 97348,
+    "sha256": "102b4bd98117d72836a13fc75356a659ad5bd3c5334c7e7cd42babb2fd7dc8b8",
+    "voxels": 99372,
     "dtype": "uint8",
     "all_finite": true,
     "binary": true,
@@ -126,10 +129,10 @@
       "dtype": "uint8",
       "all_finite": true,
       "binary": true,
-      "voxels": 18201,
+      "voxels": 18398,
       "inside_native_brain": true,
       "reference_grid_matches": true,
-      "sha256": "e803cd57d23cb72496a383652d95bf266a72d7fb63fb1e2bbc41662311b7ff8b"
+      "sha256": "c78d57aaaa2a62cfdc152861a63e72556ab9c50f3b09ce329702ee7c81f7348f"
     },
     "regression_csf_mask": {
       "shape": [
@@ -140,15 +143,15 @@
       "dtype": "uint8",
       "all_finite": true,
       "binary": true,
-      "voxels": 4362,
+      "voxels": 4746,
       "inside_native_brain": true,
       "reference_grid_matches": true,
-      "sha256": "bd0346451e1fa62536af12eb981b046712308c1f5fff8b0ebed3b00bb046ce45"
+      "sha256": "4f60f68aac129304e7f6a3971d0b9ae8428b2f18d4d94aabe0774952883adf1d"
     }
   },
   "memory": {
-    "peak_cuda_allocated_bytes": 6239413760,
-    "peak_cuda_reserved_bytes": 7316963328
+    "peak_cuda_allocated_bytes": 8315790848,
+    "peak_cuda_reserved_bytes": 9745465344
   },
   "environment": {
     "python": "3.11.16",
@@ -160,40 +163,40 @@
     "low_precision_enabled": false
   },
   "timing": {
-    "public_api_including_output_save": 455.62196824885905,
-    "validation_capture_overhead_excluded": 47.51700479211286,
+    "public_api_including_output_save": 1318.0372764160857,
+    "validation_capture_overhead_excluded": 27.052207542117685,
     "pipeline_stages": {
-      "epi_synthstrip": 4.414694270119071,
-      "t1_synthstrip": 4.73223151313141,
-      "template_preparation": 0.05923987366259098,
-      "fast": 1.7349314200691879,
-      "t1_to_mni_affine": 4.592648449819535,
-      "t1_to_mni_nonlinear": 29.06392764626071,
-      "warp_conversion": 0.5072237830609083,
-      "anatomical_cache_lookup": 0.06504269782453775,
-      "feat_core": 227.3737965063192,
-      "bbr_initial_flirt": 2.757940571755171,
-      "bbr_refinement": 1.2603558218106627,
-      "bbr_final_resampling": 0.058062172029167414,
-      "aroma_masks": 0.2657573642209172,
-      "pica_aroma_confounds": 123.76487377192825,
-      "mni_resampling": 49.02296559326351,
-      "total": 451.89116751076654
+      "epi_synthstrip": 11.393534400034696,
+      "t1_synthstrip": 8.037859328091145,
+      "template_preparation": 0.07623979076743126,
+      "fast": 13.799113559070975,
+      "t1_to_mni_affine": 8.17088463716209,
+      "t1_to_mni_nonlinear": 56.937655963003635,
+      "warp_conversion": 0.5238468027673662,
+      "anatomical_cache_lookup": 0.0,
+      "feat_core": 973.1186932199635,
+      "bbr_initial_flirt": 3.95375620899722,
+      "bbr_refinement": 2.0695873834192753,
+      "bbr_final_resampling": 0.07298832572996616,
+      "aroma_masks": 0.2800401961430907,
+      "pica_aroma_confounds": 182.3695791652426,
+      "mni_resampling": 50.543208865914494,
+      "total": 1314.3514298950322
     },
     "private_capture_seconds_by_stage": {
-      "anatomical_capture": 0.1485342886298895,
-      "feat_core": 46.51233385084197,
-      "pica_aroma_confounds": 0.8316016318276525,
-      "mni_resampling": 0.02453502081334591
+      "anatomical_capture": 0.11564836511388421,
+      "feat_core": 25.99583427608013,
+      "pica_aroma_confounds": 0.8838871619664133,
+      "mni_resampling": 0.05683773895725608
     },
     "pipeline_stages_include_capture_overhead": false
   },
   "bbr_phase_timings": {
-    "initial_flirt": 2.757940571755171,
-    "boundary_preparation": 0.1749389241449535,
-    "coarse_bbr": 0.6360736037604511,
-    "local_bbr": 0.4493432939052582,
-    "final_resampling": 0.058062172029167414
+    "initial_flirt": 3.95375620899722,
+    "boundary_preparation": 0.8168892990797758,
+    "coarse_bbr": 0.7668466311879456,
+    "local_bbr": 0.48585145315155387,
+    "final_resampling": 0.07298832572996616
   },
   "private_minus_public_stage_seconds": {
     "epi_synthstrip": 0.0,
@@ -204,37 +207,19 @@
     "t1_to_mni_nonlinear": 0.0,
     "warp_conversion": 0.0,
     "anatomical_cache_lookup": 0.0,
-    "feat_core": 46.51233385084197,
+    "feat_core": 25.99583427608013,
     "bbr_initial_flirt": 0.0,
     "bbr_refinement": 0.0,
     "bbr_final_resampling": 0.0,
     "aroma_masks": 0.0,
-    "pica_aroma_confounds": 0.8316016318276525,
-    "mni_resampling": 0.02453502081334591,
-    "total": 47.51700479211286
+    "pica_aroma_confounds": 0.8838871619664133,
+    "mni_resampling": 0.05683773895725608,
+    "total": 27.052207542117685
   },
   "capture_corrections_match": true,
   "capture_stage_sum_matches": true,
   "anatomical_capture_excluded_from_api_and_total_only": true,
-  "raw_api_wall_reconstructed": 503.1389730409719,
-  "api_minus_net_stages": 3.730800738092512,
-  "privacy": "Full image arrays were inspected on the server. Only anonymous scalar checks, execution settings and source hashes are published.",
-  "ica_and_aroma_contract": {
-    "components": 96,
-    "iterations": 70,
-    "converged": true,
-    "aroma_noise_components": 62,
-    "mixing_shape": [
-      490,
-      96
-    ],
-    "frequency_power_shape": [
-      245,
-      96
-    ],
-    "thresholded_maps_components": 96,
-    "public_metadata_capture_consistent": true,
-    "mixing_frequency_all_finite": true,
-    "noise_labels_valid_one_based": true
-  }
+  "raw_api_wall_reconstructed": 1345.0894839582033,
+  "api_minus_net_stages": 3.685846521053463,
+  "privacy": "Full image arrays were inspected on the server. Only anonymous scalar checks, execution settings and source hashes are published."
 }

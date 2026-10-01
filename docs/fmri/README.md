@@ -1,6 +1,6 @@
 # fMRI 体积流程
 
-`fMRIVolume_pipeline` 每次处理一个原始 BIDS BOLD run，输出 BIDS Derivatives。步骤依次为 SynthStrip 脑提取、FEAT 核心运动校正与高通、TorchFAST 组织分割、BBR、T1→MNI152NLin6Asym 2 mm 配准、[FNIT MELODIC/PICA](../melodic/README.md)、ICA-AROMA 和可选 WM/CSF/运动回归。最后分别保存个体 EPI 网格与 MNI 网格的清理后 BOLD。运算时不调用 FSL、FreeSurfer 或 fMRIPrep。GPU 默认允许 TF32。最终 MNI BOLD 采用三次 B 样条空间插值；组织图、标签和 surface 皮层投影保留各自的采样方法。
+`fMRIVolume_pipeline` 每次处理一个原始 BIDS BOLD run，输出 BIDS Derivatives。结构支路完成 SynthStrip 脑提取、严格 TorchFAST 组织分割和 T1→MNI152NLin6Asym 2 mm 配准；功能支路完成 EPI 脑提取、本包 TorchMCFLIRT 运动校正与高通。随后执行 BBR、[FNIT MELODIC/PICA](../melodic/README.md)、ICA-AROMA 和可选 WM/CSF/运动回归。最后分别保存个体 EPI 网格与 MNI 网格的清理后 BOLD。运算时不调用 FSL、FreeSurfer 或 fMRIPrep。GPU 默认允许 TF32。最终 MNI BOLD 采用三次 B 样条空间插值；组织图、标签和 surface 皮层投影保留各自的采样方法。
 
 ## 流程策略
 
@@ -9,8 +9,8 @@ flowchart TD
     BIDS["原始 BIDS BOLD、JSON、同被试 T1w"] --> SEL["选择 subject、session 与 BOLD run"]
     SEL --> EPI["BOLD 或 SBRef 参考图"]
     SEL --> T1["同被试 T1w"]
-    EPI --> MASK["SynthStrip：EPI 脑掩膜"] --> FEAT["FEAT 核心：运动校正与高通滤波"]
-    T1 --> BRAIN["SynthStrip：T1 脑图与掩膜"] --> FAST["TorchFAST：WM、CSF 部分体积分数"]
+    EPI --> MASK["SynthStrip：EPI 脑掩膜"] --> FEAT["TorchMCFLIRT → 强度缩放与高通滤波"]
+    T1 --> BRAIN["SynthStrip：T1 脑图与掩膜"] --> FAST["TorchFAST execution=fsl：WM、CSF 部分体积分数"]
     FEAT --> BBR["BBR：EPI 到 T1w 的仿射"]
     FAST --> BBR
     BRAIN --> REG{"T1 到 MNI 配准后端？"}
@@ -84,7 +84,7 @@ result = fMRIVolume_pipeline(
     highpass_cutoff_seconds=100.0,                    # FEAT 高通截止周期，秒
     device="cuda:0",                                  # PyTorch 设备
     batch_size=8,                                     # BOLD 重采样每批帧数
-    motion_iterations=(35, 25, 15),                   # 三层运动优化迭代数
+    motion_iterations=(1, 1, 1),                      # 8/4/4 mm 各一次 Brent 坐标优化
     ica_max_iter=500,                                 # ICA 迭代上限
     n_splits=1000,                                    # AROMA 随机抽样次数
     random_state=0,                                   # ICA/AROMA 随机种子
@@ -98,6 +98,10 @@ print(result.clean_mni)     # MNI152 2 mm 清理后 4D BOLD
 ```
 
 命令行：`fnit-fmri volume --bids-root /absolute/path/bids --derivatives-root /absolute/path/bids/derivatives/fnit --subject 0001 --mni-template /absolute/path/MNI152_T1_2mm.nii.gz --regress-wm --regress-csf --regress-motion --device cuda:0`。这条命令选择一个被试的 BOLD run，执行上图完整流程，并额外回归 WM、CSF 和运动项；将清理后原生及 MNI BOLD 写入指定的 derivatives 根目录。完整选项见 `fnit-fmri volume --help`。
+
+运动校正直接调用独立 [`TorchMCFLIRT`](../mcflirt/README.md)：8/4/4 mm 三阶段、原 NCC 目标、相邻帧初值传播，最终 Constant 三次样条采样。`motion_iterations` 现在表示每阶段坐标优化轮数，默认 `(1,1,1)`，对应原 MCFLIRT 默认；原来的 Adam 步数已移除。原始 uint16 BOLD 的校正值先按 NEWIMAGE 向零截断为 int32，再转 float32 进入 FEAT。命令行对应 `--motion-iterations 1 1 1`。
+
+解剖组织分割使用 [`TorchFAST(execution="fsl")`](../fast/README.md)，保留原 FAST 的 radiological 扫描方向、原位邻域更新、连续随机流与偏置场估计。独立 FAST 默认仍是兼容的 `tensor` 路径，pipeline 显式选择 `fsl`；实际配置写入输出 JSON，代码变更也会使旧解剖缓存失效。
 
 ## 输出
 
@@ -123,50 +127,35 @@ WM/CSF 概率图投到 EPI 网格时，使用本包 `TorchFLIRT.applyxfm` 的默
 
 ## 全流程 benchmark
 
-2026-10-01，从同一例原始 BOLD/SBRef 与存档 T1 输入，完整运行修复后 `ec57972` 的 FNIT FNIRT 分支和原软件的相同步骤。原参照使用未修改的 SynthStrip、FSL MCFLIRT/FAST/FLIRT/BBR/FNIRT/MELODIC/applywarp，以及作者 ICA-AROMA；双方再做相同定义的 WM、CSF 与 24 项运动回归。T1 来自同被试重建存档，经 nibabel 逐体素无误差转换；未核对更早的结构预处理。
+2026-10-01，从同一例真实 BOLD/SBRef 和匹配的存档 T1，完整运行冻结源码 `1eb9c417` 的 FNIT FNIRT 分支，与原 SynthStrip、FSL 和作者 ICA-AROMA 按相同步骤比较。双方处理全部 490 帧，100 秒高通、non-aggressive AROMA、WM/CSF 与 Friston-24 联合回归；不使用 GDC/B0、FIX 或空间平滑。存档 T1 经 nibabel 无误差转换，未核对更早的结构处理。
 
 | 完整单例检查 | FNIT | 原软件参照 |
 |---|---:|---:|
-| 原生 / MNI BOLD 网格 | 88×88×64×490 / 91×109×91×490 | 相同 |
-| 完整调用 / 连续链墙钟 | **455.62 s（7.59 min）** | **2570.47 s（42.84 min）** |
-| 独立验证进程墙钟 | 530.35 s | 2601.72 s |
-| CUDA allocated / reserved，GB | 6.239 / 7.317 | 未单独记录 |
-| ICA / AROMA 噪声成分 | 96 / 62 | 95 / 50 |
-| EPI WM / CSF 回归 mask Dice | **0.987102 / 0.928375** | 比较基准 |
+| 原生 / MNI 网格 | 88×88×64×490 / 91×109×91×490 | 相同 |
+| API 含保存 / 原连续链墙钟 | **1318.04 s（21.97 min）** | **2570.47 s（42.84 min）** |
+| 独立验证进程墙钟 | 1372.24 s | 2601.72 s |
+| CUDA allocated / reserved，十进制 GB | 8.316 / 9.745 | 未单独记录 |
+| ICA 成分 / 迭代 / AROMA 噪声成分 | 95 / 41 / 47 | 95 / 40 / 50 |
+| EPI WM / CSF 回归 mask Dice | 0.990405 / 0.970970 | 比较基准 |
 
-双方从新目录开始，不命中解剖缓存。FNIT 为共享 H100 上的 float32/TF32 GPU 实现；原 SynthStrip 用 GPU，其余原 FSL 命令用 CPU，均为 8 线程。FNIT API 包含最终写盘，扣除 benchmark 捕获中间影像的额外复制；原连续链包含阶段内检查和原 MELODIC HTML report。不同计时边界与共享负载使这些单次值不能作为稳定加速比。
-
-| 与原软件比较：逐体素 490 帧时间 Pearson r | 均值 | 中位数 |
+| 逐体素 490 帧时间 Pearson r | 均值 | 中位数 |
 |---|---:|---:|
-| 运动校正 BOLD | 0.941467 | 0.964133 |
-| 强度缩放与高通后的 pre-ICA BOLD | 0.951153 | 0.966887 |
-| 原生最终 clean BOLD | **0.850471** | **0.871444** |
-| MNI 最终 clean BOLD | **0.853589** | **0.872108** |
-| 固定同一 clean BOLD，只换两套 warp | 0.994511 | 0.997152 |
-| 固定原场：FNIT sampler / 原 FSL applywarp | 0.999999999921 | 0.999999999945 |
+| 运动校正 BOLD | **0.999578** | 0.999834 |
+| pre-ICA BOLD | **0.999356** | 0.999770 |
+| 原生最终 clean BOLD | **0.940704** | 0.951029 |
+| MNI 最终 clean BOLD | **0.938768** | 0.947436 |
 
-本次修复了 WM/CSF PVE 投到 EPI 时漏用 FLIRT 降采样预滤波的问题。固定原 PVE 和 BBR 后，WM/CSF mask Dice 为 1.00000/0.99989。重跑完整链后，前端运动估计、ICA 分解及回归设计仍存在差异；输出尚未逐体素等价。最终固定场样条采样的 RMSE 为 0.002215，主要端到端差异不在 `applywarp`。
+本轮修复了 SynthStrip 的 conform/回采样几何、独立 TorchMCFLIRT 的原 NCC/Brent/初值传播与整数输出、MELODIC 的 PCA/ICA/混合模型，以及 FAST 的顺序扫描和 bias/PVE 数值路径。完整流程已直接调用这些本包子函数。各自的固定输入控制、示例脑图及原命令见 [SynthStrip](../synthstrip/README.md)、[TorchMCFLIRT](../mcflirt/README.md)、[MELODIC](../melodic/README.md)和 [TorchFAST](../fast/README.md)。此前完整版本的 MNI 时间 r 均值约为 0.8536；本表是更新后的完整复测。
 
-图中四行依次是 MNI 模板、FNIT 时间标准差、原软件时间标准差和两边时间 r。SD 共用色阶、切面一致，未追加平滑。回归移除时间均值，因此用 SD 展示结构。
+固定原 pre-ICA 输入后，ICA 时间序列配对 r 中位数为 0.999999978，95 个分类标签全部匹配；完整链使用各自产生的 pre-ICA 数据，配对 r 中位数为 0.855702，噪声数为 47/50。固定同一 warp、只比较两份清理图时，MNI 时间 r 均值约 0.9449；固定同一清理图、只换 warp 为约 0.9935。原场下本包 sampler 对原 applywarp 的时间 r 均值为 0.999999999921、RMSE 0.002218。余差主要在分解与去噪的输入传播，完整流程尚未数值等价。
 
-![相同步骤 FNIT 与原软件完整490帧结果](figures/fmri_matched_native.png)
+共享 H100、8 线程，FNIT 默认 TF32；PCA/ICA 的关键计算采用 float64，没有使用 float16。双方从新目录开始、不复用解剖缓存。FNIT API 扣除捕获中间影像的 27.05 s 额外复制；原连续链还包含阶段检查和 MELODIC HTML 输出。时间边界与共享负载不同，本表不据单次值计算稳定加速比。FEAT 占 973.12 s，包含顺序运动估计、最终采样、缩放、高通和阶段输出，尚未单独分离运动函数时间。
 
-逐阶段参数、原命令、哈希、交叉控制、运行边界和复测说明见[相同步骤原软件对照](../../validation/fmri/matched_native.md)。此前 SynthMorph/AROMA 对 UKB FIX 发布图的 MNI 时间 r 约为 0.272：它还包含 GDC/B0、配准和清理策略差异，属于另一处理协议，见[先前 SynthMorph 分支验证](../../validation/fmri/volume_fixed.md)。该次没有本轮组织预滤波修复，不能当成当前 FNIRT 结果。
+图中为同一 2 mm 模板切面：模板、FNIT temporal SD、原软件 temporal SD、逐体素时间 r。两行 SD 共用色阶，没有追加平滑。
 
-surface 与 MS-HBM 未在本轮重跑，保留各自注明的运行日期、输入和范围，见[全流程验证索引](../../validation/fmri/README.md)。既有 [DeepPrep 对照](../../validation/fmri/deepprep/README.md)包含独立结构重建及 QC，处理和计时范围不同。
+![最新完整490帧FNIT与原软件对照](figures/fmri_matched_native.png)
 
-## 独立配准与解剖缓存实测
-
-2026-10-01 的 `8dbeea64` 更新另行测量一例真实 UKB BBR、T1 FNIRT 与解剖缓存。下面的函数计时包含输入解压和 CPU 结果转换，排除最终写盘；它们与上面含最终写盘的完整 volume API 计时分别报告。首次调用已完成 CUDA 初始化，未清空 Triton 磁盘缓存；热调用紧接首次调用。共享 GPU 上的这些单次观测不用于计算稳定加速倍数。
-
-| 独立测试范围 | 首次 / 热调用 | 与同输入 FSL 参照的精度 |
-|---|---:|---|
-| BBR，固定官方初始矩阵和白质分割 | 3.581 / 1.409 s | 影像 r 0.99999970；逆变换位移 RMS 0.00260 mm。 |
-| FNIT FAST＋FLIRT＋BBR | 6.932 / 5.072 s | 影像 r 0.9997382；逆变换位移 RMS 0.07203 mm。 |
-| T1 FNIRT，固定官方初始矩阵与模板掩膜 | 32.595 / 30.422 s | warped T1 r 0.99771788；完整 pull 位移中位数 / p95 0.05176 / 0.23294 mm。 |
-| 解剖准备，FNIT FLIRT＋FNIRT，第二次复用全部解剖产物 | 41.118 / 0.0785 s | 两次产物 SHA-256 相同；第二次时间为缓存核验，不重新估计配准。 |
-
-BBR 的官方 CPU 命令观测为 45.093 s，FNIRT 为 217.558 s，均含启动与输入读写，计时边界不同。BBR 固定官方 WM/init 的精度不能代表自产 FAST/init 的完整配准链；FNIRT 表不包含 FLIRT 或最终 BOLD 重采样。当前 optimized FNIRT 与 reference 求和顺序不同，完整误差与逐项消融保留在 [BBR 页](bbr.md#真实-ukb-数据对照)、[T1→MNI 页](normalization.md#当前真实数据-benchmark)和[独立配准报告](../../validation/fmri/registration_gpu.current.public.json)。独立缓存测试的输入与计时边界不同于上面的完整 FNIRT volume，两类时间分别报告。
+[完整结果、原命令和复测方法](../../validation/fmri/matched_native.md) · [机器可读比较](../../validation/fmri/matched_pipeline.public.json) · [源码/输入/输出独立核对](../../validation/fmri/matched_fnirt_contract.public.json)。surface 与 MS-HBM 没有在本轮重跑，保留各自的日期和输入范围；[验证索引](../../validation/fmri/README.md)明确两类测量边界。
 
 ## 参考文献与原实现
 

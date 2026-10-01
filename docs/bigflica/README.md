@@ -2,21 +2,13 @@
 
 `run_bigflica` 读取“每名被试一个目录”的 3D NIfTI。每个模态指定相对于被试目录的影像路径和自己的 3D 掩膜。输出被试成分 course、每模态每成分的原网格 z-stat NIfTI、绝对 z 值最高的若干体素的阈值图与 PNG，以及可投影新被试的固定模型。模态间可有不同网格；同一模态的影像必须与其掩膜形状和仿射一致。输入必须已经在所需标准空间；函数不做配准。
 
-**30,000 人基线：**旧版真实被试的VBM/FA/MD完整掩膜CPU/GPU试验已结束，C20有效秩分别为17/13，均未通过；未生成最终C20成分脑图或新被试模型。mMIGP的CPU/GPU相对差为 `6.07e-6`，DicL字典匹配后的差异为16%–30%，GPU的VBM重建几乎为零。运行至失败分别耗时153.04/112.55分钟，DicL和FLICA的GPU耗时均高于CPU；共享GPU及不同精度下的这些时间不能称为等价全流程加速。[历史报告、复现脚本与剩余工作](../../validation/bigflica/README.md#30000-人独立-cpugpu-对比当前结论)。
+**当前 DicL：**已完成敏感行 LARS 回退、兼容求解器分段图调度和字典逐元素融合。真实1000人、完整 VBM/FA/MD 掩膜、R500/D200 的同输入对照中，字典与 LASSO 指标通过本轮容差，FA/MD 的 OMP30 重建差仍为2.44%/5.33%，尚未通过。BigFLICA 训练使用拟合字典，未新增 GPU OMP 接口；阶段耗时与效果范围见[最新优化报告](../../validation/bigflica/dicl_speed_optimization_real1000_20261001.md)。
+
+**验收范围：**上述结论基于保存的同一 float64 R500 投影；公开入口的 float32 投影、默认逐体素标准化和从原始 NIfTI 开始的冷启动全链尚未验收。压缩流程的有效 C20、最终成分脑图和新被试模型也尚未通过。原始体素试验曾保留20个有效成分，旧版30,000人压缩对照仅保留 CPU17/GPU13个；这些不同设置的历史结果与剩余工作见[验证索引](../../validation/bigflica/README.md)。
 
 默认 `use_mmigp_dicl=True`：逐体素跨被试标准化 → 联合 mMIGP → 每模态 Lasso-LARS 字典学习 → FLICA。CUDA 路径用 PyTorch 执行协方差、特征分解、稀疏编码、字典更新、FLICA、空间回归和 t→z 转换；nibabel/HDF5 负责 CPU 文件读写和分块传输。为复现原 FLICA 的自由度拟合，GPU 特征分解后每模态将少量特征值送给 SciPy 做一次标量优化；这一步属于 CPU 计算。`use_mmigp_dicl=False` 时，标准化后直接把体素送入 FLICA，不建立 mMIGP 或 DicL 模型。此模式保留体素信息，但每轮须读取全部模态矩阵，适合较小训练集；大样本建议开启预处理。`device="cpu"` 保留原 notebook 的 sklearn DicL 对照路径。
 
-**FLICA 实现修复：**自由能、精度和迭代记录修复之后，默认 PCA 已按 MATLAB SVD 的尺度计算，并为每个模态分别使用 `W ~ N(0, 1/DD[k])`。旧代码在循环中将 W 先验覆盖为最后一个模态的值；旧 MATLAB 也有这一问题。还修复了非零影像正负抵消时被误当作零影像、归一化统计保存精度不一致的问题，并在脑图回归前检查含截距的设计矩阵。相关 BigFLICA/SuperBigFLICA 共137项回归测试通过。[初始化与先验修复、真实数据控制](../../validation/bigflica/flica_initialization_prior_fix_real1000_20261001.md)。较早的自由能修复及30,000人定位结果见[历史记录](../../validation/bigflica/flica_math_fixes_20261001.md)。
-
-**100维真实1000人结果：**新先验下原始体素R控制仍为20个成分，归一化投影为19个；同一保存字典的新初始化R控制CPU/GPU均为7，当前拟合函数默认o均为2并拒绝C20输出。这些输入采用整体RMS，未作为公开默认逐体素z-score全链验收。原始GPU1000次拟合观测约91秒，小字典o阶段CPU/GPU约15.47/28.56秒；共享资源和缓存条件下未形成受控加速结论。
-
-**DicL本轮修复前的500维测试：**同1000人改为R500/D200，当前初始化自动DD=1；当时CPU/GPU字典来源与o/R噪声的八个C20拟合均收缩为零，未输出最终模型或脑图。本次GPU DicL将 `dicl_sparse_iterations` 设为1000以匹配CPU求解预算，原120的预算不足；以下新字典未重新拟合FLICA。[历史500维配置、耗时与数值结果](../../validation/bigflica/mmigp500_real1000_20261001.md)。
-
-**DicL效果匹配：**同一1000人R500/D200投影，修复额外ridge、LARS节点停步、分块统计和CUDA SVD精度后，独立初始化的VBM/FA/MD字典相对差降到 `1.22e-7/1.07e-4/5.85e-4`，字典与LASSO门槛均通过；补查sklearn实际OMP30 `.transform()` 时FA/MD重建差仍为2.44%/5.33%。当前BigFLICA只使用拟合字典，没有新增GPU OMP接口。完整训练及共用初态控制见[真实效果报告](../../validation/bigflica/dicl_match_real1000_20261001.md)。
-
-**此前原始体素基线：**固定 1000 人、完整 VBM/FA/MD 掩膜，MATLAB 整体 RMS 预处理、SVD 初始化和旧共享 W 先验；GPU 执行 1000 次更新仍保留 20 个有效成分。CPU/GPU 同初态 100 次参数相对差最大 `1.65e-10`，60 张 z-stat 图与独立 NumPy/SciPy 对照最大差 `1.91e-6`。1000 次 GPU 拟合观测耗时 87.69 秒，来自私密显存缓存运行器，不能当作公开流式 API 或默认预处理的端到端耗时；收敛及压缩模型仍须单独验收。[原始体素历史记录](../../validation/bigflica/raw_flica_real1000_20261001.md)。
-
-**随后接入压缩：**同一 1000 人的 mMIGP 原投影及归一化投影分别保留1/19个成分；同投影 CPU/GPU DicL 后均为7，未通过 C20。同一投影的三模态 DicL 观测耗时 CPU193.85秒、GPU92.37秒，但小字典 FLICA 的 GPU 仍慢于 CPU。补充控制中，仅固定原始 DD 恢复到20，但FA/MD拟合仍弱；仅改共享噪声为16。未更换默认参数。压缩改变 DD 与噪声坐标，不能按原体素的成功结果宣称压缩模型等价。[逐段对照和原因分析](../../validation/bigflica/compression_after_raw_real1000_20261001.md)。
+**FLICA 已修复项：**已修正自由能、精度和迭代记录、PCA 的 MATLAB SVD 尺度、逐模态 W 先验、零影像判定及归一化统计保存精度，并在脑图回归前检查含截距的设计矩阵。主要修复与真实数据控制见[初始化和先验报告](../../validation/bigflica/flica_initialization_prior_fix_real1000_20261001.md)。
 
 CUDA 压缩路径先逐被试读取，把 float32 标准化矩阵作为 HDF5 分块存盘；后续阶段不在内存中装入完整的“被试 × 体素”模态矩阵。默认 `max_gpu_gb=19`，按 20 GiB 显存目标预留空间。float32 协方差本身需 `N × N × 4` 字节，计算还要为临时数组留空间；超过配置预算时报错。磁盘需求不受内存预算限制，例如 37,182 人 × 100 万掩膜体素的 float32 标准化缓存约 138.5 GiB/**每模态**。大于 2,048 人时，mMIGP 根据目标秩和显存预算选择完整 GPU 特征分解或随机子空间；随机路径与直接体素 FLICA 的自由度近似仍需单独核验，不能当作逐点一致。
 
@@ -42,13 +34,17 @@ flowchart TD
 
 ## GPU DicL 求解
 
-CUDA DicL 用批量 ADMM 找到稀疏系数的非零位置，再解活动集方程并检查系数符号、最优性条件和矩阵枢轴。每20步用 CUDA Graph 重放。求解器还检查目标 alpha 附近的 LARS 路径节点：sklearn 会直接接受浮点容差内的节点，精确目标解会产生不同的训练轨迹。遇到近节点、重复原子、检查失败或计算预算不足时，当前整批回退到 PyTorch LARS，按 sklearn 的节点停止和条件插值规则重新求解；前四批也使用这条路径。活动集不加额外 ridge。字典原子按原顺序更新，重采样保留随机数顺序，每模态分别重置求解状态。批次默认32，alpha默认1，稀疏求解预算默认1000，保留 sklearn 的训练停止规则。
+CUDA DicL 用批量 ADMM 找到稀疏系数的非零位置，每20步用 CUDA Graph 重放，再解活动集方程并检查系数符号、最优性条件和矩阵枢轴。求解器还检查目标 alpha 附近的 LARS 路径节点：sklearn 会直接接受浮点容差内的节点，精确目标解会产生不同的训练轨迹。活动集检查通过时，只把近节点等敏感样本行交给兼容 PyTorch LARS，其余行保留已通过检查的系数。每模态前四批、未归一化初始原子、活动集检查失败或 ADMM 预算用尽时仍整批回退。LARS 保留 sklearn 的节点停止、条件插值和原子退出规则，活动集不加额外 ridge。批次默认32，alpha默认1，稀疏求解预算默认1000，训练停止规则保持不变。
+
+兼容 LARS 在批次不超过32、字典原子不超过256时，用两段 CUDA Graph 重放 LU 求解前后的张量运算；LU 分解和求解仍按原 PyTorch eager 路径执行，每四个路径事件读取一次完成状态。其他维度与 CPU 保留原 eager 求解。分段 LARS 图工作区按线程独立缓存，最多保留4项；每次调用重置状态，返回独立的系数副本，并用完成事件保护跨 CUDA stream 的后续复用。字典更新只用 Triton 融合逐元素运算，保留 PyTorch 的矩阵向量乘法、范数归约、原子更新顺序和重采样随机数顺序。CPU 不使用 Triton；Triton 不可用时，GPU 字典更新保留原 PyTorch 算子。项目 Conda 环境已包含 Triton，无需新增依赖。
+
+本次还修复了分段图在 float32、任意 alpha 下可能对停止阈值进行两次舍入的问题：现在先求 `alpha + tolerance`，再一次舍入到输入精度，与原 eager 路径一致。这项边界修复不代表公开 float32 入口的全链验收已完成。
 
 模块内的精确目标 LARS 和增量逆求解器用于解析回归及诊断，默认训练的回退使用节点兼容求解器。退化活动集会明确诊断或排除依赖原子；这不构成所有退化输入与 sklearn 逐位相同的保证。
 
-DicL内部仍沿用float64，mMIGP投影为float32。CPU按固定行顺序分块计算两遍均值/中心化方差；float32存储先提升到float64，参考的是NumPy全矩阵float64统计。兼容随机数生成仍在CPU执行。投影适合显存缓存时也逐块读取，避免在主机内存中读入整个模态；矩阵、稀疏求解和字典更新在GPU完成。随机SVD保留QR幂迭代，在CUDA上显式使用 `gesvd`。只使用项目已有依赖，未安装或调用SPORCO。ADMM方程参考 [SPORCO BPDN](https://sporco.readthedocs.io/en/latest/modules/sporco.admm.bpdn.html)；完整阶段实测见[验证记录](../../validation/bigflica/README.md)。
+DicL 内部仍使用 float64，未改用低精度。公开 CUDA 压缩入口的 mMIGP 投影为 float32；GPU DicL 的统计先提升到 float64，再由 CPU 按固定行顺序分块计算两遍均值和中心化方差，参考的是 NumPy 全矩阵 float64 统计。它与 CPU float32 入口标准化的同输入对照尚未验收，已有 float64 投影结果不能代表该入口的效果匹配。兼容随机数生成仍在 CPU 执行，每模态分别重置求解状态。投影适合显存缓存时也逐块读取，避免在主机内存中读入整个模态；矩阵、稀疏求解和字典更新在 GPU 完成。随机 SVD 保留 QR 幂迭代，在 CUDA 上显式使用 `gesvd`。未安装或调用 SPORCO；ADMM 方程参考 [SPORCO BPDN](https://sporco.readthedocs.io/en/latest/modules/sporco.admm.bpdn.html)，本轮阶段实测见[最新优化报告](../../validation/bigflica/dicl_speed_optimization_real1000_20261001.md)。
 
-GPU字典缓存版本为 `rsvd4bpdn`。本轮稀疏求解修复会使旧DicL缓存失效；已有输入标准化和mMIGP缓存仍可复用。CLI和Python默认 `dicl_sparse_iterations=1000`，显式设置120的旧调用仍按120运行。此优化没有消除独立CPU/GPU全链输入差异经非凸字典学习放大的问题，C20结果仍须检查。
+GPU 字典缓存版本为 `rsvd5rowgraph`。敏感行回退、LARS 图调度和字典更新融合进入新的版本，旧 DicL 缓存不会复用；已有输入标准化和 mMIGP 缓存仍可复用。CLI 和 Python 默认 `dicl_sparse_iterations=1000`，显式设置120的旧调用仍按120运行。独立 CPU/GPU 全链输入差异仍可能经非凸字典学习放大，C20结果须另行验收。
 
 ## 安装与输入
 
@@ -187,7 +183,7 @@ bigflica_output/
   mmigp_10/U.npy                      # [被试, mMIGP 维度]
   mmigp_10/vbm_projected.h5, ...      # [掩膜体素, mMIGP 维度]
   mmigp_10/eigen_diagnostics.json     # 阶段耗时、收敛次数、整体/逐特征对残差
-  dicl_10_40_20_0_32_120_rsvd3bpdn_cuda/ # 每模态 dictionary.npy 与 manifest.json
+  dicl_10_40_20_0_32_1000_rsvd5rowgraph_cuda/ # 每模态 dictionary.npy 与 manifest.json
   components_3/
     model.json                         # 参数、被试顺序、输入签名、阶段耗时
     flica_reconstruction.json          # 重建比、有效秩、H 奇异值比例及成分范数；失败时也保留

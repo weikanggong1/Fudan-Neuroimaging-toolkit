@@ -21,11 +21,8 @@ result.mask.save(path="subject_mask.nii.gz")  # 输出路径：二值脑掩膜
 
 调用返回三个 `FNITNifti1Image`（`nibabel.Nifti1Image` 子类）：去颅骨图像 `image`、脑掩膜 `mask` 和符号距离图 `distance`。三者保留输入几何；输入可为 3D 图像或逐帧处理的 4D 图像。
 
-当前 12 例真实 T1w、H100 单进程 CLI 对照中，FreeSurfer 8.2 / FNIT
-墙钟中位数为 `16.916 / 16.395 s`；最低 mask Dice 为 `0.993925`，最低 brain
-image Pearson r 为 `0.994261`。FNIT 单例 PyTorch peak allocation 为
-`8.316 GB`。候选使用默认 TF32，官方参考关闭 TF32，因此不声明逐体素完全相同。
-当前报告绑定 `pipeline.py`、`model.py`、`_nib.py` 和 `weights.py` 的源码
-SHA-256；逐例指标和图见[功能说明](../../../docs/synthstrip/README.md)。
+当前固定真实 SBRef/T1 控制中，1 mm LIA 数组和归一化网络输入与官方 Surfa 逐元素一致。同一网络预测回采样后的脑 mask 也逐元素一致；对独立官方 GPU 推理，mask Dice 分别为 `0.999995 / 0.999991`，有 `1 / 25` 个体素不同。候选保留默认 TF32。
+
+网络、1 mm 重采样和 SDT 回采样使用所选 PyTorch 设备；nibabel 读写影像，SciPy 处理 SDT 扩展和连通域。控制计时为 `7.61 / 4.83 s`，不含输入 conform、Python 启动和最终写盘，不能视为完整 CLI 耗时。[当前机器可读报告](../../../validation/fmri/synthstrip_geometry_control.public.json)记录输入、权重、源码哈希及重复结果。
 
 [完整参数、CLI、源码分析与验证](../../../docs/synthstrip/README.md) · [权重](../../../docs/WEIGHTS.md)
