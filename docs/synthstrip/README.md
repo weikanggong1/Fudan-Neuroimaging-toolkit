@@ -147,6 +147,25 @@ U-Net、1 mm 最近邻重采样和 SDT 回采样在所选 PyTorch 设备执行�
 
 官方脚本集成参数解析和执行流程；本包将同一网络和影像处理拆成可导入接口。生产运行使用 nibabel、PyTorch 和 SciPy，不调用 FreeSurfer，也不依赖 Surfa。统一 CLI 为 `fnit synthstrip`。
 
+### 最新完整三维对照
+
+受测源码 `cfb7beee` 已在同一例真实 SBRef 和 T1 的完整原始网格上核对已保存输出。实际 `pipeline.py` SHA-256 为 `0ae5d3e3…`，与运行捕获的源码一致；官方 checkpoint SHA-256 为 `37417f80…`，30,851,709 字节，与原程序相同。输入文件的 SHA-256 也逐项一致。完整哈希、三维统计和计时来源见[最新版原程序对照](../../validation/synthstrip/latest_native_comparison.public.json)。
+
+| 最新完整三维对照 | SBRef / EPI | T1 |
+|---|---:|---:|
+| mask Dice | 0.999994968 | 0.999998569 |
+| mask 不同体素数 | 1 | 4 |
+| FNIT / 原程序脑内体素数 | 99,371 / 99,372 | 1,397,746 / 1,397,746 |
+| 脑图完整三维 RMSE | 未单独捕获脑图 | 0.389388 |
+| 脑图完整三维 spatial r | — | 0.999999655 |
+| 两份脑掩膜并集内脑图 RMSE / spatial r | — | 0.824671 / 0.999996445 |
+| FNIT 复用模型的子函数阶段（s） | 1.1654 | 1.4442 |
+| 原 FreeSurfer 独立进程（s） | 8.5569 | 9.3769 |
+
+FNIT 阶段计时包括影像处理、网络推理和该阶段结果保存，模型构造在两阶段计时之外；原进程包括 Python 启动、模型加载及影像读写。两种计时边界分别保留，未将它们相除为完整命令加速比。EPI 的流水线捕获保存了二值掩膜，没有单独保存 SynthStrip 脑图；T1 脑图比较覆盖全部 6,269,400 个体素，其强度差异只出现在上述 4 个 mask 边界体素。
+
+当前 T1 脑图和掩膜与 `1eb9c417` 的固定脑图示例输入逐值相同，文件 SHA-256 也相同。因此下方使用同一原 FNIRT 场的脑提取示例仍适用于当前输出；此核对范围是 SynthStrip 输出。
+
 ### 跨进程卷积选择修复
 
 完整 fMRI 流程的真实 T1 重复检查发现，旧构造函数同时开启 `cudnn.benchmark=True` 和 `cudnn.deterministic=True`。后者限制卷积算法本身的确定性，前者仍按每次进程的实测速度选择算法；共享 GPU 上的计时变化会使选择不同。此行为与 [PyTorch 2.5.1 的说明](https://github.com/pytorch/pytorch/blob/v2.5.1/docs/source/notes/randomness.rst)一致。
@@ -249,8 +268,9 @@ python validation/fmri/compare_synthstrip_geometry.py \
 
 | 版本与范围 | 更新及真实数据核对 | 耗时边界 |
 |---|---|---|
-| `1db5917` 几何修复，`1eb9c417` 完整流程冻结验收 | 修正官方视野中心、NIfTI `pixdim` 和回采样边界。真实 SBRef/T1 的归一化网络输入与官方实现逐值相同；独立 mask Dice 为 0.999995/0.999991。对应来源以[历史几何报告](../../validation/fmri/synthstrip_geometry_control.public.json)和[冻结脑图报告](../../validation/fmri/synthstrip_figure.public.json)为准。 | SBRef/T1 控制为 7.61/4.83 秒，含模型构造、预测、双实现回采样与比较；不含 Python 启动、输入 conform/归一化和写盘。 |
+| `cfb7beee` 合并版本验收 | SynthStrip 源码与 `44364a8` 一致；相对原 FreeSurfer，完整 EPI/T1 mask Dice 为 0.999994968/0.999998569，差异为 1/4 体素；当前 T1 脑图及 mask 与冻结图示输入逐值相同。见[最新版报告](../../validation/synthstrip/latest_native_comparison.public.json)。 | FNIT 复用模型子函数为 1.1654/1.4442 秒；原独立进程为 8.5569/9.3769 秒，分别保留模型构造与进程启动/读写边界。 |
 | `44364a8` 固定卷积算法选择 | 默认关闭 `cudnn.benchmark`，保留 deterministic、TF32 和原 API。旧策略真实 T1 两个新进程的 19 个边界差异及关闭 benchmark 后的逐值一致控制，保存在[跨进程报告](../../validation/synthstrip/cudnn_repeatability.public.json)的 `original_diagnostic`；报告顶层记录当前源码的新驱动验收及实际输入、模型状态、网络预测哈希。 | 新驱动的调用计时包含记录张量哈希的开销，新进程计时另含启动、模型加载和写盘；各次秒数读取该报告。此项测量限于 SynthStrip，不作为完整 fMRI 流程耗时或等价性结论。 |
+| `1db5917` 几何修复，`1eb9c417` 完整流程冻结验收 | 修正官方视野中心、NIfTI `pixdim` 和回采样边界。真实 SBRef/T1 的归一化网络输入与官方实现逐值相同；独立 mask Dice 为 0.999995/0.999991。对应来源以[历史几何报告](../../validation/fmri/synthstrip_geometry_control.public.json)和[冻结脑图报告](../../validation/fmri/synthstrip_figure.public.json)为准。 | SBRef/T1 控制为 7.61/4.83 秒，含模型构造、预测、双实现回采样与比较；不含 Python 启动、输入 conform/归一化和写盘。 |
 
 ## Reference
 

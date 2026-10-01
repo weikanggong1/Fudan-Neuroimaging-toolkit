@@ -1,21 +1,23 @@
 # MCFLIRT 真实数据验证
 
-## 当前优化：完整 490 帧
+## 最新验证：最终合并版本完整 490 帧
 
-[gpu_optimization.public.json](gpu_optimization.public.json)记录完整 490 帧真实 BOLD 的优化验证，候选源码为冻结的 `7456251842b5b6fac4affc95c83ba61265ad0a0a`，对照为 `1eb9c417` 的已保存完整 FNIT GPU 结果。测量使用共享 H100 PCIe、`cuda:0`、8 线程、TF32 和完整 float32；8/4/4 mm 三阶段均为一次坐标轮回，最终样条采样。报告确认运行前后源码哈希一致。
+[gpu_optimization_latest.public.json](gpu_optimization_latest.public.json)记录最终合并版本 `cfb7beee202f7e89072faf1a8e69b78d143e451f` 的完整 490 帧真实 BOLD 验证，对照为 `1eb9c417` 的已保存完整 FNIT GPU 结果。测量使用共享 H100 PCIe 的物理 GPU 0（逻辑 `cuda:0`）、8 线程、TF32 和完整 float32；8/4/4 mm 三阶段均为一次坐标轮回，最终样条采样。参考是冻结 FEAT 保存的图，报告确认运行前后源码哈希一致。
 
 全部 490 帧写出的矩阵文本和 `.par` 与冻结结果相同，SHA-256 相同。内存矩阵与冻结文本最大差为 4.44×10⁻¹²，参数比较也受到冻结文本保存精度的影响。运动校正 int32 图及固定掩膜高通 float32 图，各自在全部 242,851,840 个体素时间点上与冻结结果逐元素相同，RMSE 均为 0。此结果支持复用 [full490_gpu.public.json](full490_gpu.public.json)中相对原 FSL 的精度统计及现有脑图；逐元素一致性所比较的基线是冻结 FNIT。
 
 | 测量边界 | 秒数 |
 |---|---:|
-| `TorchMCFLIRT.run`：输入读取/解压、准备、估计、样条采样和 dtype 转换，不写盘 | 159.27 |
-| 其中同步记录的 `apply_motion_warp` 样条采样 | 24.83 |
-| API 时间扣除样条采样，仍含输入读取、准备、估计及 dtype 转换 | 134.45 |
-| API 加私有验证文件写盘，含额外完整精度 NumPy 数组 | 185.00 |
-| 固定脑掩膜的后续均值/掩膜准备、缩放、高通及保存 | 17.91 |
-| 运动 API、私有文件写盘和上述固定掩膜后续合计 | 202.91 |
+| `TorchMCFLIRT.run`：输入读取/解压、准备、估计、样条采样和 dtype 转换，不写盘 | 278.45 |
+| 其中同步记录的 `apply_motion_warp` 样条采样 | 32.01 |
+| API 时间扣除样条采样，仍含输入读取、准备、估计及 dtype 转换 | 246.44 |
+| API 加私有验证文件写盘，含额外完整精度 NumPy 数组 | 305.87 |
+| 固定脑掩膜的后续均值/掩膜准备、缩放、高通及保存 | 16.87 |
+| 运动 API、私有文件写盘和上述固定掩膜后续合计 | 322.74 |
 
-NCC 共调用 45,972 次。CUDA allocated 显存峰值 1.150 GB，reserved 峰值 1.372 GB。API 计时使用提前打开的 NIfTI header，四维数据读取/解压仍在计时内；哈希、冻结图读取和数值比较在候选计时外。185.00 秒的文件集合包含额外私有验证产物，与原 MCFLIRT 命令的输出集合不同。202.91 秒由运动 API 和给定掩膜的 FEAT 子函数构成，范围不含脑提取、BIDS 查找、warp 估计及完整 `run_feat_core` 入口。
+[安装包检查](optimization_package.public.json)记录最终合并版本的 wheel 构建及全部 Python 运行时文件的逐文件哈希核对；这是本地构建验证，GitHub 发布的是源码。
+
+NCC 共调用 45,972 次。CUDA allocated 显存峰值 1.150 GB，reserved 峰值 1.372 GB。API 计时使用提前打开的 NIfTI header，四维数据读取/解压仍在计时内；哈希、冻结图读取和数值比较在候选计时外。305.87 秒的文件集合包含额外私有验证产物，与原 MCFLIRT 命令的输出集合不同。322.74 秒由运动 API 和给定掩膜的 FEAT 子函数构成，范围不含脑提取、BIDS 查找、warp 估计及完整 `run_feat_core` 入口。
 
 冻结流程的[历史 profile](../fmri/feat_profile.public.json)为运动 API 709.11 秒、采样 30.74 秒，带有额外包装调用。原 MCFLIRT 的历史独立命令为 326.10 秒，包含估计、最终采样和写盘。共享 GPU 负载、缓存状态及输出集合未匹配，故这些历史观察与本次计时不构成受控的固定加速比。
 
@@ -26,7 +28,7 @@ NCC 共调用 45,972 次。CUDA allocated 显存峰值 1.150 GB，reserved 峰�
 ```bash
 # 所有影像、逐帧结果和验证产物留在服务器私有目录。
 # FEAT_SAVED_REFERENCE 是冻结流程实际保存的参考图；FRESH_OPTIMIZATION_OUTPUT 必须尚不存在。
-python validation/mcflirt/benchmark_optimization.py \
+CUDA_VISIBLE_DEVICES=0 python validation/mcflirt/benchmark_optimization.py \
   --bold "$RAW_BOLD" --reference "$FEAT_SAVED_REFERENCE" \
   --brain-mask "$FROZEN_EPI_MASK" \
   --baseline-matrices "$FROZEN_FNIT_MATRICES" \
@@ -90,12 +92,13 @@ CUDA_VISIBLE_DEVICES=0 OMP_NUM_THREADS=8 python validation/mcflirt/benchmark_cos
 
 以下报告保留各自测量时的源码哈希和计时边界，属于历史控制。
 
+- [gpu_optimization.public.json](gpu_optimization.public.json)：初次融合版本 `7456251` 在物理 GPU 1 上的同算法观察，完整 490 帧运动 API 159.27 秒，其中最终采样 24.83 秒；加额外私有验证写出为 185.00 秒，固定掩膜后续处理为 17.91 秒。它与最新报告的输入哈希和运行时源码哈希均相同，但物理 GPU、共享负载及缓存状态未匹配；两次计时不构成受控加速比。
 - [full490_cpu.public.json](full490_cpu.public.json)：完整 490 帧、4 线程 CPU 估计 387.60 秒、45,794 次 cost；包括路径解压、准备和估计，未含重采样与写盘，未在当前优化后重新测量。相对原 MCFLIRT 的逐帧脑内 pull RMS 均值 0.00906 mm、中位数 0.00864 mm、最大 0.02603 mm；旋转 RMSE 为 0.0000787–0.0001182 rad，平移 RMSE 为 0.003109–0.003576 mm。
-- [full490_gpu.public.json](full490_gpu.public.json)：冻结 `1eb9c417` 完整 GPU 流程的已保存结果，脑内时间 r 均值 0.99957825、中位数 0.99983382，SD 图 r 为 0.99999784；脑内 pull RMS 均值 0.00881 mm、最大 0.03008 mm。该运行 FEAT 阶段合计 973.119 秒，还包含脑提取、缩放和高通，未分别记录 MCFLIRT 估计与采样。
+- [full490_gpu.public.json](full490_gpu.public.json)：冻结 `1eb9c417` 完整 GPU 流程的已保存结果，脑内时间 r 均值 0.99957825、中位数 0.99983382，SD 图 r 为 0.99999784；脑内 pull RMS 均值 0.00881 mm、最大 0.03008 mm。该运行在预先给定脑掩膜下的 FEAT 阶段合计 973.119 秒，包含运动校正、掩膜准备、缩放和高通，未分别记录 MCFLIRT 估计与采样。
 - [first8_cpu.public.json](first8_cpu.public.json)、[first8_cuda.public.json](first8_cuda.public.json)、[first8_warm.public.json](first8_warm.public.json)：同例前 8 帧控制，只将前 7 帧与原完整 490 帧结果比较。最后一帧的粗阶段初值规则使截短序列的实验条件不同；早期冷/重复运行耗时不代表当前完整体积性能。
 - [first8_sampling.public.json](first8_sampling.public.json)：固定原矩阵文本，单独核对样条及 int32 截断；脑内 RMSE 0.2816、时间 r 均值 0.9999987，中位数 1。原运行的内存矩阵未捕获，文本量化可能影响整数边界。
 
-CPU/GPU 的相对旋转角在求角度前将 3×3 线性部分通过 SVD 投影到 SO(3)，避免文本精度和 float32 非正交误差影响 `acos(trace)`。完整链的其他处理边界与脑图见[全流程记录](../fmri/matched_native.md)。
+CPU/GPU 的相对旋转角在求角度前将 3×3 线性部分通过 SVD 投影到 SO(3)，避免文本精度和 float32 非正交误差影响 `acos(trace)`。完整链的最新处理边界与脑图见[全流程记录](../fmri/mcflirt_optimization.md)，原冻结流程见[历史记录](../fmri/matched_native.md)。
 
 复测时先在服务器完成原 FSL MCFLIRT 运行，再执行 FNIT 的独立控制：
 
