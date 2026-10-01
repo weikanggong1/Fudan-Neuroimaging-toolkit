@@ -354,7 +354,7 @@ fmriprep "$original_bids_root" "$reference_derivatives_root" participant \
 
 ![cfb7beee 完整490帧 FNIRT clean 与原同步骤软件对照](figures/fmri_mcflirt_optimized.png)
 
-[完整参数复测、版本记录和报告索引](../../validation/fmri/mcflirt_optimization.md)。本次没有重新测量 surface；此前其他分支的结果见下一节历史记录。
+[完整参数复测、版本记录和报告索引](../../validation/fmri/mcflirt_optimization.md)。随后用上述 `cfb7beee` 的完整 preproc 独立重测默认 surface：两次完整 API **443.929 / 441.334 s**，排除 recon-all 和 volume；全 490 帧 CIFTI 对独立原版的时间 r 均值 **0.977911**。见[surface 最新精度、耗时和脑图](surface.md#surface-e2e-latest)。两个入口分别测量，不合成为 raw BIDS→CIFTI 的一次整链耗时。
 
 ### preproc、STC 与子函数的独立控制
 

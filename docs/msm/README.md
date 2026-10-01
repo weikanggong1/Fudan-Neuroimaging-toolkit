@@ -1,5 +1,7 @@
 # FNIT MSMSulc
 
+2026-10-01 完整 surface 另以 `7102c187` 和独立原版输入准备重测：球面角差均值左 **0.221050°**、右 **0.319595°**；CIFTI 时间 r 均值 **0.977911**。初始化/旋转球面、脑沟标量和科学配置一致，当前这次完整链尚未逐值匹配。见[最新完整 surface 报告](../../validation/fmri/surface_e2e/README.md)；本页 `4f7bd9f2` 的固定输入专项结果保留其原实测范围。
+
 `fnit.msm` 独立完成双侧脑沟球面配准。先按 newMSM 的有限差分规则估计刚性初始化，再用 162→642→2,562 个控制点优化脑沟相似度和三角形应变；HOCR 降阶与 FastPD 选择联合位移。输出球面保持原生顶点顺序。运行时不调用官方 MSM 或 FreeSurfer；准备阶段使用 Connectome Workbench。当前功能为 **MSMSulc**。
 
 默认使用 HCP/sMRIPrep 的四级配置：`simval=3,2,2,2`，最大迭代数 `50,10,15,15`。官方 newMSM 将历史仿射相似度值 3 转为 Pearson 2；FNIT 保持该行为。几何、相似度和优化标量使用 float64，写出的 GIFTI 顶点为 float32；没有使用 FP16/BF16。刚性坐标与离散成本在 PyTorch 上计算，刚性加权相似度、每轮 Rodrigues 矩阵及 HOCR/FastPD 使用包内独立 C++ 算子；矩阵缓存后，所有位移标签在 GPU 应用。默认优化路径缓存固定几何并合并传输，`execution="reference"` 保留逐块检查供回归对照；二者使用相同的算法和停止条件。

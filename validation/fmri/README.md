@@ -2,7 +2,13 @@
 
 [volume 用法](../../docs/fmri/README.md) · [surface 用法](../../docs/fmri/surface.md) · [MSM 用法](../../docs/msm/README.md)
 
-当前最新完整 volume 为 `cfb7beee` 的 FNIRT preproc＋clean，公开 API **707.287 s**；运动校正与冻结 FNIT 逐值相同，完整 MNI clean 对原同步骤软件的时间 r 均值 **0.939162**。下文保留此前固定 fMRIPrep 25.2.4 的 preproc/surface 控制：原始强度 `preproc`、单次插值、真实 midthickness/graymid、fsLR32k 投影及 91k CIFTI。`clean` 继续提供 ICA-AROMA、混杂回归和时间滤波；MSM 与固定共同球面控制保留各自来源，本次 volume 更新没有重新测量 surface。
+当前最新完整 volume 为 `cfb7beee` 的 FNIRT preproc＋clean，公开 API **707.287 s**；运动校正与冻结 FNIT 逐值相同，完整 MNI clean 对原同步骤软件的时间 r 均值 **0.939162**。下文保留此前固定 fMRIPrep 25.2.4 的 preproc/surface 控制：原始强度 `preproc`、单次插值、真实 midthickness/graymid、fsLR32k 投影及 91k CIFTI。`clean` 继续提供 ICA-AROMA、混杂回归和时间滤波；最新默认 surface 已从这份 volume 和已有 recon-all 独立重测，完整包含双侧 MSM、投影和保存；历史 MSM 与共同球面控制保留各自来源。
+
+## 最新完整默认 surface（`7102c187`）
+
+复用 `cfb7beee` 的完整 490 帧 T1w/MNI preproc，双方从同源已有 recon-all 独立准备几何和 ROI，重新估计双侧默认 MSMSulc，再投影、组装、QC 和保存。FNIT 两个新进程/新输出目录的完整 API 为 **443.929 / 441.334 s**，不含 recon-all 和 volume；峰值 allocated/reserved **0.344 / 0.426 GB**。原版连续链严格单线程 MSM 为 **2825.612 s**，8 线程 MSM 的时间观察为 **846.768 s**。
+
+完整 CIFTI **44,728,180** 个值对独立原版单线程参照的时间 r 均值/中位数为 **0.977911 / 0.997039**；左、右皮层均值 **0.979065 / 0.953067**，全部 19 个皮层下结构逐值同。双方有效 MSM 输入标量、旋转球面和科学配置一致，新估计的球面角差均值左 **0.221050°**、右 **0.319595°**，当前完整 surface 未达到逐值一致。两次 FNIT 输出解码数组逐值相同。完整范围、逐结构指标、编译来源、启动失败记录、真实脑图及复现命令见[新报告](surface_e2e/README.md)。
 
 ## 2026-10-01 代码与文档整理检查
 
@@ -14,6 +20,7 @@ volume、surface 和 FEAT 文档按七项结构组织，参数与当前公共 AP
 
 | 检查 | 输入与参照 | 结论的范围 |
 |---|---|---|
+| 最新默认完整 surface | 相同已完成 T1w/MNI preproc 和同源已有 recon-all；独立原版几何、单线程 newMSM、投影及 CIFTI | [完整 surface 报告](surface_e2e/README.md)；CIFTI 时间 r 均值 0.977911，皮层下逐值同，皮层和注册球面尚未逐值同 |
 | 最新完整 FNIRT volume | 同一真实 490 帧 BOLD/SBRef/T1；原同步骤 clean 链与冻结 FNIT | [完整 API、精度和边界](mcflirt_optimization.md)；运动对冻结 FNIT 逐值同，独立完整 clean 并非逐值同 |
 | 单次空间插值 | 固定仿射、逐帧运动和空间变化的 pull；SciPy 三次 B 样条 `grid-constant` | 插值坐标合成与边界条件；CPU/GPU 最大误差低于 1e-6 的数值控制 |
 | T1w 原生 BOLD 分辨率网格 | 三种轴方向与斜切网格；固定 Nilearn 0.11.1 的参考网格 | 数组逐值一致，保存 affine 误差不超过 7.6e-7 mm |
@@ -55,7 +62,7 @@ volume、surface 和 FEAT 文档按七项结构组织，参数与当前公共 AP
 
 [与冻结 FNIT `1eb9c417` 比较](mcflirt_optimization_comparison.public.json)：运动解码图全部逐值相同；独立整链 EPI 掩膜差 1 个边界体素，pre-ICA 仅该体素的 490 个值不同。完整 MNI clean 时间 r 均值为 **0.992649**、RMSE **21.194244**；后续 AROMA/clean 并非逐值相同。独立 MCFLIRT 的最新共享物理 GPU 0 API 为 **278.454 s**，此前共享物理 GPU 1 为 **159.275 s**，两次都为 45,972 次 cost；这些独立时间与本次 FEAT 177.787 s 分别解释。固定矩阵的预热 cost 微基准仍为 eager CUDA 约 27.5 ms/次、融合约 4.5 ms/次，仅测 cost，见 [MCFLIRT 验证](../mcflirt/README.md)。
 
-[完整参数复测、最近版本和报告索引](mcflirt_optimization.md)。最新脑图见下文；后续 surface 没有因本次 volume 更新重新计时。
+[完整参数复测、最近版本和报告索引](mcflirt_optimization.md)。最新 volume 脑图见下文；随后基于这份完整 preproc 的 surface 复测见[新报告](surface_e2e/README.md)。
 
 ## STC 关闭的完整 volume 历史实测（`50eb098`）
 
@@ -167,9 +174,9 @@ FNIT API 含最终保存为 **1318.04 s**，验证进程为 1372.24 s；原连�
 
 历史[真实 490 帧 FEAT profile](feat_profile.public.json)为 **728.28 s**：运动估计、准备与输出类型转换 678.37 s，最终运动重采样 30.74 s，高通 1.91 s，最终保存 13.51 s；完整解码输出与当次原 FNIT 结果逐值相同。该独立测量包含分段 CUDA 同步及当时共享负载，不能替换 `50eb098` volume 内的 700.033 s 或最新 `cfb7beee` 的 177.787 s，也不能与另一次完整流程时间逐项相减推造提速。cost 与标量同步的瓶颈分析见[FEAT 功能页](../../docs/fmri/feat.md)。
 
-## main 的 surface 专项与配准控制
+## 历史 surface 专项与配准控制
 
-当前 [MSMSulc 验证](../msm/README.md)使用 HCP 四级配置和严格单线程官方 newMSM：本例保存球面逐值一致，固定 clean volume 的全部 490 帧 fsLR32k/91k 时间序列也逐值一致。每侧输出 490×32,492，CIFTI 为 490×91,282，时间轴及 BrainModel 轴相同。
+`4f7bd9f2` 的 [MSMSulc 验证](../msm/README.md)使用 HCP 四级配置和严格单线程官方 newMSM：本例保存球面逐值一致，固定 clean volume 的全部 490 帧 fsLR32k/91k 时间序列也逐值一致。每侧输出 490×32,492，CIFTI 为 490×91,282，时间轴及 BrainModel 轴相同。
 
 FNIT 双侧配准冷/热调用为 **201.99 / 198.08 s**，固定 clean volume 的投影为 **303.77 s**。配准、投影与完整 volume 分别测量；这些阶段时间不能合成一次新的完整 surface API 或 raw BIDS→CIFTI 计时。旧 MSMSulc 实现的完整 API 报告已移除。
 
