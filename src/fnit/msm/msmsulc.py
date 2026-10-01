@@ -2,6 +2,7 @@
 from pathlib import Path
 import json
 import time
+from functools import lru_cache
 
 import nibabel as nib
 import numpy as np
@@ -10,10 +11,12 @@ from scipy.spatial import cKDTree
 import torch
 import torch.nn.functional as F
 
-from ._affine import _surface, _smoothing_graph, _affine_initialization
+from ._affine import _surface, _affine_initialization
+from .config import MSMSulcConfig
+from ._sphere_map import RadialSphereMap, _area_weights, _cross, _dot, _normalize
 from .prepare import MSMSulcInputs
 
-def _ico(level):
+def _ico(level,*,cached_area=False):
     a,b=0.8506508084,0.5257311121
     vertices=np.array([(a,b,0),(-a,b,0),(-a,-b,0),(a,-b,0),
                        (b,0,a),(b,0,-a),(-b,0,-a),(-b,0,a),
@@ -23,7 +26,8 @@ def _ico(level):
                     (11,0,8),(1,11,8),(3,10,9),(10,2,9),
                     (0,4,8),(5,0,11),(3,9,4),(10,3,5),
                     (1,8,7),(11,1,6),(9,2,7),(2,10,6)],np.int64)[:,[0,2,1]]
-    for _ in range(level):
+    area=_vertex_area(vertices,faces) if cached_area and level==0 else None
+    for step in range(level):
         points=vertices.tolist();edges={};next_faces=[]
         def midpoint(i,j):
             edge=(min(i,j),max(i,j))
@@ -35,66 +39,32 @@ def _ico(level):
             p0=midpoint(v1,v2);p1=midpoint(v0,v2);p2=midpoint(v0,v1)
             next_faces.extend(((p2,p0,p1),(p1,v0,p2),(p0,v2,p1),(p2,v1,p0)))
         vertices=np.asarray(points,np.float64)
-        vertices/=np.linalg.norm(vertices,axis=1,keepdims=True)
         faces=np.asarray(next_faces,np.int64)
-    return vertices*100,faces
-
-
-class SphereMap:
-    def __init__(self, vertices, faces, device):
-        self.vertices=torch.as_tensor(vertices,dtype=torch.float32,device=device)
-        self.faces=torch.as_tensor(faces,dtype=torch.long,device=device)
-        self.tree=cKDTree(vertices)
-        incident=[[] for _ in range(len(vertices))]
-        for f,triangle in enumerate(faces):
-            for vertex in triangle: incident[vertex].append(f)
-        count=max(map(len,incident))
-        adjacent=np.empty((len(vertices),count),np.int64)
-        for vertex,items in enumerate(incident):
-            adjacent[vertex]=items+[items[0]]*(count-len(items))
-        self.adjacent=torch.as_tensor(adjacent,device=device)
-
-    def weights(self, points):
-        nearest=self.tree.query(points.detach().cpu().numpy(),k=1,workers=4)[1]
-        candidates=self.adjacent[torch.as_tensor(nearest,device=points.device)]
-        triangles=self.vertices[self.faces[candidates]]
-        e0=triangles[:,:,1]-triangles[:,:,0]
-        e1=triangles[:,:,2]-triangles[:,:,0]
-        q=points[:,None,:]-triangles[:,:,0]
-        aa=(e0*e0).sum(-1); ab=(e0*e1).sum(-1); bb=(e1*e1).sum(-1)
-        qa=(q*e0).sum(-1); qb=(q*e1).sum(-1)
-        det=(aa*bb-ab*ab).clamp_min(1e-8)
-        w1=(bb*qa-ab*qb)/det
-        w2=(aa*qb-ab*qa)/det
-        weights=torch.stack([1-w1-w2,w1,w2],-1)
-        projection=(triangles*weights[:,:,:,None]).sum(2)
-        score=(projection-points[:,None,:]).square().sum(-1)+1e4*F.relu(-weights.min(-1).values).square()
-        choice=score.argmin(1)
-        row=torch.arange(len(points),device=points.device)
-        selected=self.faces[candidates[row,choice]]
-        chosen_weights=weights[row,choice].clamp_min(0)
-        chosen_weights=chosen_weights/chosen_weights.sum(-1,keepdim=True)
-        return selected,chosen_weights,candidates[row,choice]
-
-    def sample(self, points, metric):
-        ids,weights,_=self.weights(points)
-        return (metric[ids]*weights).sum(-1)
+        # Official Triangle caches its constructor area. retessellate builds
+        # all four planar subtriangles before normalizing their midpoint
+        # vertices; true_rescale later changes coordinates, not cached areas.
+        if cached_area and step==level-1:area=_vertex_area(vertices,faces)
+        vertices/=np.linalg.norm(vertices,axis=1,keepdims=True)
+    # make_mesh_from_icosa is followed by true_rescale at every level.
+    vertices/=np.linalg.norm(vertices,axis=1,keepdims=True)
+    return (vertices*100,faces,area) if cached_area else (vertices*100,faces)
 
 
 def _vertex_area(vertices,faces):
     triangles=vertices[faces]
-    area=np.linalg.norm(np.cross(triangles[:,1]-triangles[:,0],
-                                 triangles[:,2]-triangles[:,0]),axis=1)*0.5
+    cross=np.cross(triangles[:,2]-triangles[:,0],triangles[:,1]-triangles[:,0])
+    squared=(cross[:,0]*cross[:,0]+cross[:,1]*cross[:,1])+cross[:,2]*cross[:,2]
+    area=np.sqrt(squared)*0.5
     total=np.bincount(faces.ravel(),weights=np.repeat(area,3),minlength=len(vertices))
     counts=np.bincount(faces.ravel(),minlength=len(vertices))
     return total/counts
 
 
-def _adaptive_resample(vertices,faces,values,new_vertices,new_faces,device='cuda:0'):
+def _adaptive_resample(vertices,faces,values,new_vertices,new_faces,device='cuda:0',execution='optimized',*,old_area=None,new_area=None):
     """Resample a scalar metric using forward and reverse area corrected weights."""
     selected=torch.device(device)
-    forward_map=SphereMap(vertices,faces,selected)
-    reverse_map=SphereMap(new_vertices,new_faces,selected)
+    forward_map=RadialSphereMap(vertices,faces,selected,execution=execution)
+    reverse_map=RadialSphereMap(new_vertices,new_faces,selected,execution=execution)
     forward_ids,forward_weight,_=forward_map.weights(torch.as_tensor(new_vertices,device=selected))
     reverse_ids,reverse_weight,_=reverse_map.weights(torch.as_tensor(vertices,device=selected))
     fi=forward_ids.cpu().numpy();fw=forward_weight.cpu().numpy()
@@ -104,73 +74,54 @@ def _adaptive_resample(vertices,faces,values,new_vertices,new_faces,device='cuda
     reverse=sparse.coo_matrix((rw.ravel(),(np.repeat(np.arange(n),3),ri.ravel())),shape=(n,m)).T.tocsr()
     choose=np.diff(reverse.indptr)>np.diff(forward.indptr)
     joined=sparse.diags(choose.astype(np.float64))@reverse + sparse.diags((~choose).astype(np.float64))@forward
-    old_area=_vertex_area(np.asarray(vertices,dtype=np.float64),np.asarray(faces,dtype=np.int64))
-    new_area=_vertex_area(np.asarray(new_vertices,dtype=np.float64),np.asarray(new_faces,dtype=np.int64))
+    old_area=(_vertex_area(np.asarray(vertices,dtype=np.float64),np.asarray(faces,dtype=np.int64))
+              if old_area is None else np.asarray(old_area,dtype=np.float64))
+    new_area=(_vertex_area(np.asarray(new_vertices,dtype=np.float64),np.asarray(new_faces,dtype=np.int64))
+              if new_area is None else np.asarray(new_area,dtype=np.float64))
+    if old_area.shape!=(n,) or new_area.shape!=(m,) or not np.isfinite(old_area).all() or not np.isfinite(new_area).all():
+        raise ValueError("adaptive resampling vertex-area arrays differ from their meshes")
     weighted=sparse.diags(new_area)@joined
     correction=np.asarray(weighted.sum(axis=0)).ravel()
     factors=np.divide(old_area,correction,out=np.zeros_like(old_area),where=correction>0)
     weighted=weighted@sparse.diags(factors)
     row_sum=np.asarray(weighted.sum(axis=1)).ravel()
     normalized=sparse.diags(np.divide(1.,row_sum,out=np.zeros_like(row_sum),where=row_sum>0))@weighted
-    return np.asarray(normalized@values,dtype=np.float32)
-class RadialSphereMap:
-    def __init__(self, vertices, faces, device):
-        self.device=torch.device(device)
-        self.vertices=torch.as_tensor(vertices,dtype=torch.float32,device=self.device)
-        self.faces=torch.as_tensor(faces,dtype=torch.long,device=self.device)
-        self.tree=cKDTree(np.asarray(vertices))
-        incident=[[] for _ in range(len(vertices))]
-        for face_id,triangle in enumerate(faces):
-            for vertex in triangle:incident[vertex].append(face_id)
-        width=max(map(len,incident))
-        table=np.empty((len(vertices),width),np.int64)
-        for vertex,items in enumerate(incident):
-            table[vertex]=items+[items[0]]*(width-len(items))
-        self.incident=torch.as_tensor(table,device=self.device)
+    return np.asarray(normalized@values,dtype=np.float64)
+def _sphere_warp(points,from_vertices,faces,to_vertices,device,execution="optimized"):
+    mapper=RadialSphereMap(from_vertices,faces,device,execution=execution)
+    ids,weights,_=mapper.weights(points)
+    order=ids.argsort(1)
+    ids=ids.gather(1,order);weights=weights.gather(1,order)
+    # sphere_project_warp iterates a std::map<int,double> in vertex-ID order.
+    triangles=to_vertices[ids]
+    result=(triangles[:,0]*weights[:,0,None]+triangles[:,1]*weights[:,1,None])+triangles[:,2]*weights[:,2,None]
+    return _unit3(result)*100
 
-    def weights(self,points,batch_size=4096):
-        query=points.detach().cpu().numpy()
-        nearest=self.tree.query(query,k=1,workers=4)[1][:,None]
-        chosen_faces=[];chosen_weights=[];chosen_patches=[];no_inside=0
-        for start in range(0,len(query),batch_size):
-            stop=min(start+batch_size,len(query))
-            p=points[start:stop]
-            near=torch.as_tensor(nearest[start:stop],device=p.device)
-            candidates=self.incident[near].reshape(len(p),-1)
-            triangles=self.vertices[self.faces[candidates]]
-            a=triangles[:,:,0];b=triangles[:,:,1];c=triangles[:,:,2]
-            u=b-a;v=c-a
-            normal=torch.cross(u,v,dim=-1)
-            top=(normal*a).sum(-1)
-            bottom=(normal*p[:,None,:]).sum(-1)
-            bottom=torch.where(bottom.abs()<1e-8,torch.full_like(bottom,1e-8),bottom)
-            q=p[:,None,:]*(top/bottom)[:,:,None]
-            d=q-a
-            uu=(u*u).sum(-1);uv=(u*v).sum(-1);vv=(v*v).sum(-1)
-            du=(d*u).sum(-1);dv=(d*v).sum(-1)
-            det=(uu*vv-uv*uv).clamp_min(1e-8)
-            w1=(vv*du-uv*dv)/det
-            w2=(uu*dv-uv*du)/det
-            weights=torch.stack([1-w1-w2,w1,w2],-1)
-            outside=torch.relu(-weights.min(-1).values)
-            no_inside+=int((outside.min(1).values>1e-4).sum())
-            residual=(p[:,None,:]-q).square().sum(-1)
-            score=residual+1e6*outside.square()
-            selected=score.argmin(1)
-            row=torch.arange(len(p),device=p.device)
-            face=candidates[row,selected]
-            w=weights[row,selected]
-            w=w.clamp_min(0)
-            w=w/w.sum(-1,keepdim=True)
-            chosen_faces.append(self.faces[face]);chosen_weights.append(w)
-            chosen_patches.append(face)
-        self.no_inside=no_inside
-        return (torch.cat(chosen_faces),torch.cat(chosen_weights),
-                torch.cat(chosen_patches))
+
+def _unit3(points):
+    squared=(points[...,0]*points[...,0]+points[...,1]*points[...,1])+points[...,2]*points[...,2]
+    norm=torch.sqrt(squared)
+    denominator=torch.where(norm>1e-8,norm,torch.ones_like(norm))
+    return points/denominator[...,None]
+
+
+def _triplet_data_weights(prior,faces,patch,points):
+    """Source likelihood projection in sorted triplet-corner order.
+
+    The Octree chooses a face in mesh order; get_target_data then constructs
+    that face again in sorted node-ID order. Reordering weights computed from
+    the original corners preserves their formula but changes floating-point
+    projection and area arithmetic. Recompute after the unchanged face lookup.
+    """
+    triangles=prior[faces[patch]]
+    first,second,third=triangles.unbind(1)
+    normal=_normalize(_cross(_normalize(third-first),_normalize(second-first)))
+    projected=points*(_dot(normal,first)/_dot(normal,points))[:,None]
+    return _area_weights(triangles,projected)
 
 
 def _face_layout(faces, patch, data_weights, source, device):
-    num_faces=len(faces);num_nodes=int(faces.max())+1
+    num_faces=len(faces)
     members=[[] for _ in range(num_faces)]
     for sample,face in enumerate(patch.cpu().numpy()):members[face].append(sample)
     max_points=max(map(len,members))
@@ -179,44 +130,46 @@ def _face_layout(faces, patch, data_weights, source, device):
     for face,items in enumerate(members):
         index[face,:len(items)]=items
         mask[face,:len(items)]=True
-    incident=[[] for _ in range(num_nodes)]
-    for face,triangle in enumerate(faces):
-        for node in triangle:incident[node].append(face)
-    max_inc=max(map(len,incident))
-    face_for_node=np.zeros((num_nodes,max_inc),np.int64)
-    valid=np.zeros((num_nodes,max_inc),bool)
-    for node,items in enumerate(incident):
-        face_for_node[node,:len(items)]=items
-        valid[node,:len(items)]=True
+    packed=np.flatnonzero(mask.ravel())
     return (torch.as_tensor(index,device=device),torch.as_tensor(mask,device=device),
-            torch.as_tensor(face_for_node,device=device),torch.as_tensor(valid,device=device),
-            data_weights,source)
+            data_weights,source,torch.as_tensor(packed,device=device))
 
 
-def _face_costs(current,candidate,original,faces,layout,reference_map,reference_metric,lam,simval,components=False):
-    index,valid,_,_,weights,source=layout
-    bits=torch.as_tensor([[i>>2&1,i>>1&1,i&1] for i in range(8)],
+def _face_costs(current,candidate,original,faces,layout,reference_map,reference_metric,lam,simval,config=None,energy_only=False,fold_reference=None):
+    config=MSMSulcConfig() if config is None else config
+    index,valid,weights,source,packed=layout
+    bits=torch.as_tensor([[i>>2&1,i>>1&1,i&1] for i in range(1 if energy_only else 8)],
                          device=current.device,dtype=torch.bool)
     fixed=current[faces]
     moved=candidate[faces]
     proposed=torch.where(bits[None,:,:,None],moved[:,None,:,:],fixed[:,None,:,:])
     sample_idx=index
     sample_weights=weights[sample_idx]
-    xyz=F.normalize((sample_weights[:,None,:,:,None]*proposed[:,:,None,:,:]).sum(-2),dim=-1)*100
-    target=reference_map.sample(xyz.reshape(-1,3),reference_metric).reshape(xyz.shape[:-1])
+    weighted=sample_weights[:,None,:,:,None]*proposed[:,:,None,:,:]
+    xyz=_unit3((weighted[:,:,:,0]+weighted[:,:,:,1])+weighted[:,:,:,2])*100
+    states=len(bits);width=index.shape[1]
+    packed_expanded=((packed//width)[:,None]*(states*width)+
+                     torch.arange(states,device=current.device)[None,:]*width+
+                     (packed%width)[:,None]).reshape(-1)
+    sampled=reference_map.sample(xyz.reshape(-1,3)[packed_expanded],reference_metric)
+    target=torch.zeros(xyz.shape[:-1],dtype=sampled.dtype,device=current.device)
+    target.reshape(-1)[packed_expanded]=sampled
     native=source[sample_idx][:,None,:]
-    observed=valid[:,None,:].float()
+    observed=valid[:,None,:].to(native.dtype)
     count=observed.sum(-1).clamp_min(1)
-    sx=(native*observed).sum(-1);sy=(target*observed).sum(-1)
-    cov=(native*target*observed).sum(-1)-sx*sy/count
-    vx=((native.square()*observed).sum(-1)-sx.square()/count).clamp_min(0)
-    vy=((target.square()*observed).sum(-1)-sy.square()/count).clamp_min(0)
-    corr=cov/(torch.sqrt(vx*vy)+1e-6)
-    use=(valid.sum(-1)[:,None]>=4)&(vx>1e-5)&(vy>1e-5)
+    mean_source=(native*observed).sum(-1)/count
+    mean_target=(target*observed).sum(-1)/count
+    centered_source=native-mean_source[:,:,None]
+    centered_target=target-mean_target[:,:,None]
+    cov=(centered_source*centered_target*observed).sum(-1)/count
+    vx=(centered_source.square()*observed).sum(-1)/count
+    vy=(centered_target.square()*observed).sum(-1)/count
+    denom=torch.sqrt(vx)*torch.sqrt(vy)
+    corr=torch.where((vx!=0)&(vy!=0),cov/torch.where(denom!=0,denom,1),0)
     if simval==1:
         similarity=torch.sqrt((((native-target)*observed).square()).sum(-1))/count
     else:
-        similarity=torch.where(use,(1-corr)/2,0.5)
+        similarity=1-(1+corr)*0.5
 
     old=original[faces][:,None,:,:]
     u0=old[:,:,1,:]-old[:,:,0,:];v0=old[:,:,2,:]-old[:,:,0,:]
@@ -228,96 +181,210 @@ def _face_costs(current,candidate,original,faces,layout,reference_map,reference_
     det1=(d*f-e*e).clamp_min(1e-8)
     j=torch.sqrt(det1/det0)
     trace=(d*c+f*a-2*e*b)/det0
-    shape=((trace/j).square()-4).clamp_min(0)
-    strain=0.5*(0.4*shape+1.6*(j.square()+j.reciprocal().square()-2))
-    signed=(torch.cross(u1,v1,dim=-1)*proposed[:,:,0,:]).sum(-1)
-    signed0=(torch.cross(u0,v0,dim=-1)*old[:,:,0,:]).sum(-1)
-    cost=similarity+lam*strain.square()+torch.where(signed/signed0<=0,1e4,0.)
-    if components:
-        return (similarity.detach().cpu().numpy(),
-                strain.square().detach().cpu().numpy(),
-                (signed/signed0<=0).detach().cpu().numpy())
+    invariant=trace/j
+    ratio=torch.where(invariant<=2,torch.ones_like(invariant),
+                      0.5*(invariant+torch.sqrt((invariant.square()-4).clamp_min(0))))
+    shape_power=ratio.pow(config.strain_exponent)
+    area_power=j.pow(config.strain_exponent)
+    strain=0.5*(config.shear_modulus*(shape_power+shape_power.reciprocal()-2)+
+                config.bulk_modulus*(area_power+area_power.reciprocal()-2))
+    regularization=strain.pow(config.regularization_exponent)
+    current_triangles=(current if fold_reference is None else fold_reference)[faces]
+    current_normal=torch.cross(current_triangles[:,1]-current_triangles[:,0],
+                               current_triangles[:,2]-current_triangles[:,0],dim=-1)
+    folded=(torch.cross(u1,v1,dim=-1)*current_normal[:,None,:]).sum(-1)<0
+    cost=torch.where(folded,torch.full_like(similarity,1e7*lam),similarity+lam*regularization)
     return cost.detach().cpu().numpy()
 
 
 def _label_samples(grid,faces,max_distance):
-    degree=np.bincount(faces.ravel(),minlength=len(grid))
-    centre=grid[np.flatnonzero(degree==6)[0]]
-    distance=np.linalg.norm(grid-centre,axis=1)
-    selected=np.flatnonzero((distance>0)&(distance<=max_distance))
-    selected=selected[np.argsort(distance[selected])]
-    return centre,grid[selected]
+    neighbours=[[] for _ in grid]
+    for a,b,c in faces:
+        for vertex,others in ((a,(b,c)),(b,(a,c)),(c,(a,b))):
+            for other in others:
+                if other not in neighbours[vertex]:neighbours[vertex].append(other)
+    centroid=next(i for i,n in enumerate(neighbours) if len(n)==6)
+    centre=grid[centroid]
+    frontier=[centroid];seen=set();samples={}
+    # std::map<double,Point> replaces equal-distance entries. Sorting vertex
+    # IDs by distance retains both and changes the expansion proposal order.
+    while frontier:
+        next_frontier=[]
+        for vertex in frontier:
+            for neighbour in neighbours[vertex]:
+                if neighbour==centroid or neighbour in seen:continue
+                delta=grid[neighbour]-centre
+                distance=float(np.sqrt(delta[0]*delta[0]+delta[1]*delta[1]+delta[2]*delta[2]))
+                if distance<=max_distance:
+                    samples[distance]=grid[neighbour]
+                    seen.add(neighbour);next_frontier.append(neighbour)
+        frontier=next_frontier
+    return centre,np.asarray([samples[d] for d in sorted(samples)],dtype=np.float64)
 
 
-def _rotated_label(positions,centre,sample,scale):
-    selected=positions.device
-    source=F.normalize(torch.as_tensor(centre,device=selected),dim=0)
-    raw=torch.as_tensor(centre+(centre-sample)*scale,device=selected)
-    label=F.normalize(raw,dim=0)
-    target=F.normalize(positions,dim=1)
-    crossing=torch.cross(source.expand_as(target),target,dim=1)
-    cosine=(target*source).sum(1,keepdim=True)
-    mapped=(label+torch.cross(crossing,label.expand_as(target),dim=1)+
-            torch.cross(crossing,torch.cross(crossing,label.expand_as(target),dim=1),dim=1)/
-            (1+cosine).clamp_min(1e-4))
-    axis=F.normalize(torch.cross(source,torch.tensor([0.,0.,1.],device=selected),dim=0),dim=0)
-    antipodal=2*(axis*label).sum()*axis-label
-    mapped=torch.where(cosine< -0.999,antipodal,mapped)
-    return F.normalize(mapped,dim=1)*100
+def _rescaled_labels(centre,samples,scale):
+    if scale>=0.25:
+        raw=centre+(centre-samples)*scale
+        labels=raw/np.linalg.norm(raw,axis=1,keepdims=True)*100
+    else:
+        scale=1.0
+        labels=samples.copy()
+    return labels,scale*0.8
 
 
-def _repair_folds(original, deformed, faces, device):
-    """Move vertices of inverted output faces until their local orientation is valid."""
-    before=original[faces]
-    after=deformed[faces]
-    signed_before=np.einsum('ij,ij->i',np.cross(before[:,1]-before[:,0],
-                                               before[:,2]-before[:,0]),before[:,0])
-    signed_after=np.einsum('ij,ij->i',np.cross(after[:,1]-after[:,0],
-                                              after[:,2]-after[:,0]),after[:,0])
-    inverted=np.flatnonzero(signed_after/signed_before<=0)
-    if not len(inverted):
-        return deformed,0,0.0
-    moving=np.unique(faces[inverted].ravel())
-    affected=np.flatnonzero(np.isin(faces,moving).any(axis=1))
-    selected=torch.device(device)
-    full=torch.as_tensor(deformed,device=selected)
-    ids=torch.as_tensor(moving,device=selected,dtype=torch.long)
-    local_faces=torch.as_tensor(faces[affected].astype(np.int64),device=selected)
-    reference=torch.as_tensor(signed_before[affected],device=selected)
-    starting=full[ids].detach()
-    parameters=torch.nn.Parameter(starting.clone())
-    optimizer=torch.optim.Adam([parameters],lr=0.02)
-    radius=float(np.linalg.norm(original,axis=1).mean())
-    for _ in range(250):
-        positions=F.normalize(parameters,dim=1)*radius
-        triangles=full.index_copy(0,ids,positions)[local_faces]
-        signed=(torch.cross(triangles[:,1]-triangles[:,0],
-                            triangles[:,2]-triangles[:,0],dim=1)*triangles[:,0]).sum(1)
-        ratio=signed/reference
-        if bool((ratio>0.05).all()):
-            break
-        loss=F.relu(0.1-ratio).square().sum()+0.0001*(positions-starting).square().sum()
-        optimizer.zero_grad(set_to_none=True)
-        loss.backward()
-        optimizer.step()
-    corrected=full.index_copy(0,ids,F.normalize(parameters,dim=1)*radius).detach().cpu().numpy()
-    check=corrected[faces[affected]]
-    signed=np.einsum('ij,ij->i',np.cross(check[:,1]-check[:,0],
-                                        check[:,2]-check[:,0]),check[:,0])
-    if np.any(signed/signed_before[affected]<=0):
-        raise RuntimeError(f"sphere still has folded triangles after local repair")
-    movement=np.linalg.norm(corrected[moving]-deformed[moving],axis=1)
-    return corrected.astype(np.float32),len(inverted),float(movement.max())
+def _rotation_matrices(positions,centre,device):
+    """Cache the source Point/libm Rodrigues matrices once per iteration."""
+    from . import _fastpd_native
+    points=np.ascontiguousarray(positions,dtype=np.float64)
+    origin=np.ascontiguousarray(centre,dtype=np.float64)
+    data=_fastpd_native.source_rotation_matrices(points,origin,len(points))
+    matrices=np.frombuffer(data,dtype=np.float64).reshape(-1,3,3).copy()
+    return torch.as_tensor(matrices,device=device)
+
+
+def _rotated_label(rotations,sample):
+    """Apply the cached matrices in source three-term Point order."""
+    label=torch.as_tensor(sample,dtype=rotations.dtype,device=rotations.device)
+    return (rotations[:,:,0]*label[0]+rotations[:,:,1]*label[1])+rotations[:,:,2]*label[2]
+
+
+def _normalize_sphere(vertices):
+    """newMSM's four-point sphere-origin estimate, then radius normalization."""
+    points=np.asarray(vertices,dtype=np.float64).copy()
+    samples=points[[len(points)//i-1 for i in range(1,5)]]
+    differences=samples[1:]-samples[0]
+    try:
+        center=np.linalg.solve(2*differences,np.square(samples[1:]).sum(1)-np.square(samples[0]).sum())
+    except np.linalg.LinAlgError:
+        center=np.zeros(3)
+    if np.linalg.norm(center)>1e-2:
+        nonzero=np.linalg.norm(points,axis=1)!=0
+        points[nonzero]-=center
+    norms=np.linalg.norm(points,axis=1,keepdims=True)
+    if np.any(norms<=1e-8):raise ValueError("sphere contains a zero-radius vertex")
+    return points/norms*100
+
+
+def _variance_normalize(values):
+    """The official sample-variance Welford update in original vertex order."""
+    values=np.asarray(values,dtype=np.float64)
+    mean=0.0;variance=0.0
+    for i,value in enumerate(values):
+        delta=value-mean
+        mean+=delta/(i+1)
+        variance+=delta*(value-mean)
+    variance/=len(values)-1
+    centered=values-mean
+    return centered/np.sqrt(variance) if variance>0 else centered
+
+
+@lru_cache(maxsize=12)
+def _unfold_incident(face_bytes,count):
+    faces=np.frombuffer(face_bytes,dtype=np.int64).reshape(-1,3).copy()
+    incident=[[] for _ in range(count)]
+    for i,triangle in enumerate(faces):
+        for vertex in triangle:incident[vertex].append(i)
+    width=max(map(len,incident))
+    table=np.asarray([ids+[ids[0]]*(width-len(ids)) for ids in incident],np.int64)
+    return faces,incident,table
+
+
+def _unfold(vertices,faces):
+    """The newMSM sequential area-gradient/step-halving unfolding operation."""
+    faces_np=np.asarray(faces,dtype=np.int64)
+    faces_np,incident,table=_unfold_incident(faces_np.tobytes(),len(vertices))
+    ids=torch.as_tensor(faces_np,device=vertices.device)
+    local=torch.as_tensor(table,device=vertices.device)
+    triangles=vertices[ids]
+    normals=F.normalize(torch.cross(triangles[:,2]-triangles[:,0],
+                                    triangles[:,1]-triangles[:,0],dim=-1),dim=-1)
+    intersections=(normals[local[:,0]][:,None,:]*normals[local]).sum(-1)<=0.5
+    if not bool(intersections.any()):return vertices,0
+    points=vertices.detach().cpu().numpy().copy()
+    moved=0
+    def normals_for(vertex):
+        triangle=points[faces_np[incident[vertex]]]
+        normal=np.cross(triangle[:,2]-triangle[:,0],triangle[:,1]-triangle[:,0])
+        normal/=np.linalg.norm(normal,axis=1,keepdims=True)
+        return normal
+    def folded(vertex):
+        normal=normals_for(vertex)
+        return np.any((normal[0]*normal).sum(1)<=0.5)
+    for _ in range(1000):
+        triangle=points[faces_np]
+        normal=np.cross(triangle[:,2]-triangle[:,0],triangle[:,1]-triangle[:,0])
+        normal/=np.linalg.norm(normal,axis=1,keepdims=True)
+        selected=np.flatnonzero(((normal[table[:,0]][:,None,:]*normal[table]).sum(-1)<=0.5).any(1))
+        if not len(selected):break
+        gradients=[]
+        for vertex in selected:
+            grad=np.zeros(3)
+            for face in incident[vertex]:
+                triangle_ids=faces_np[face]
+                corner=int(np.flatnonzero(triangle_ids==vertex)[0])
+                a,b,c=points[triangle_ids[[((corner+1)%3),((corner+2)%3),corner]]]
+                first=c-a;second=b-a
+                length=np.linalg.norm(second)
+                first=first/max(np.linalg.norm(first),1e-10)
+                second=second/max(length,1e-10)
+                n=np.cross(first,second);n/=max(np.linalg.norm(n),1e-10)
+                edge=np.cross(second,n)
+                if np.dot(first,edge)<0:edge=-edge
+                grad+=edge*(0.5*length)
+            gradients.append(grad)
+        # The gradients are frozen for this sweep; trial moves are applied in
+        # original vertex order and each checks the already moved neighbours.
+        for vertex,grad in zip(selected,gradients):
+            start=points[vertex].copy();step=1.0
+            while True:
+                proposed=start-grad*step
+                proposed/=np.linalg.norm(proposed)
+                points[vertex]=proposed*100
+                step*=0.5
+                if not folded(vertex) or step<=1e-3:break
+            moved+=1
+    return torch.as_tensor(points,dtype=vertices.dtype,device=vertices.device),moved
+
+
+def _native_output_qc(vertices,faces,original):
+    """Measure native orientation at solver and written GIFTI precision.
+
+    The official final transform interpolates the native sphere and saves it
+    without another unfolding operation. Preserve those coordinates and report
+    their orientation; DATA/control meshes retain the per-iteration unfolding.
+    """
+    points=np.asarray(vertices,dtype=np.float64)
+    if not np.isfinite(points).all():raise RuntimeError("output sphere contains nonfinite coordinates")
+    faces=np.asarray(faces,dtype=np.int64)
+    before=np.asarray(original,dtype=np.float64)[faces]
+    baseline=(np.cross(before[:,1]-before[:,0],before[:,2]-before[:,0])*before[:,0]).sum(1)
+    usable=baseline!=0
+    def orientation(coordinates):
+        triangles=np.asarray(coordinates,dtype=np.float64)[faces]
+        signed=(np.cross(triangles[:,1]-triangles[:,0],triangles[:,2]-triangles[:,0])*triangles[:,0]).sum(1)
+        ratios=np.divide(signed,baseline,out=np.full_like(signed,np.nan),where=usable)
+        return int(np.count_nonzero(ratios<=0)),float(ratios[usable].min()) if usable.any() else None
+    folded_solver,min_solver=orientation(points)
+    folded_written,min_written=orientation(points.astype(np.float32))
+    return {"folded_output_faces":folded_written,"folded_solver_faces":folded_solver,
+            "minimum_output_orientation_ratio":min_written,
+            "minimum_solver_orientation_ratio":min_solver,
+            "degenerate_input_faces":int(np.count_nonzero(~usable))}
 
 
 def run_msmsulc(
     inputs: dict[str, MSMSulcInputs], output_dir: str | Path, *,
-    device: str = "cuda:0",
+    device: str = "cuda:0", config: MSMSulcConfig | str | Path | None = None,
+    execution: str = "optimized",
 ) -> dict[str, Path]:
-    """Register both sulcal spheres and return native-order GIFTI paths."""
+    """Register both sulcal spheres with the explicit official MSMSulc schedule."""
     from . import _fastpd_native
     if set(inputs) != {"L", "R"}:
         raise ValueError("inputs must contain L and R MSMSulc inputs")
+    if config is None:config=MSMSulcConfig()
+    elif isinstance(config,(str,Path)):config=MSMSulcConfig.from_file(config)
+    elif not isinstance(config,MSMSulcConfig):raise TypeError("config must be MSMSulcConfig or a config path")
+    if execution not in ("optimized","reference"):raise ValueError("execution must be optimized or reference")
     selected=torch.device(device)
     if selected.type == "cuda":
         torch.backends.cuda.matmul.allow_tf32=True
@@ -327,77 +394,95 @@ def run_msmsulc(
     report={}
     for hemi in "LR":
         started=time.perf_counter()
+        if selected.type=="cuda":torch.cuda.reset_peak_memory_stats(selected)
         entry=inputs[hemi]
         native,native_faces=_surface(entry.rotated_sphere)
         reference_xyz,reference_faces=_surface(entry.reference_sphere)
-        source_metric=np.asarray(nib.load(str(entry.native_sulc)).darrays[0].data,np.float32)
-        reference_metric=np.asarray(nib.load(str(entry.reference_sulc)).darrays[0].data,np.float32)
-        native_graph,_=_smoothing_graph(native_faces,len(native))
-        reference_graph,_=_smoothing_graph(reference_faces,len(reference_xyz))
-        _,affine,angles=_affine_initialization(
-            native,reference_xyz,source_metric,reference_metric,
-            native_graph,reference_graph,selected)
-        native_positions=torch.as_tensor(native,device=selected)
-        if selected.type == "cuda":
-            torch.cuda.reset_peak_memory_stats(selected)
-        prior_map=None
-        prior_deformed=None
+        # File-loaded Triangle areas are cached before recentre/true_rescale.
+        native_area=_vertex_area(native,native_faces)
+        reference_area=_vertex_area(reference_xyz,reference_faces)
+        native=_normalize_sphere(native)
+        reference_xyz=_normalize_sphere(reference_xyz)
+        source_metric=np.asarray(nib.load(str(entry.native_sulc)).darrays[0].data,np.float64)
+        reference_metric=np.asarray(nib.load(str(entry.reference_sulc)).darrays[0].data,np.float64)
+        if (source_metric.shape!=(len(native),) or reference_metric.shape!=(len(reference_xyz),)
+                or not np.isfinite(source_metric).all() or not np.isfinite(reference_metric).all()):
+            raise ValueError(f"{hemi} sphere/metric dimensions differ or metric is not finite")
+        affine_started=time.perf_counter()
+        affine_grid,affine_faces,affine_area=_ico(config.data_grid[0],cached_area=True)
+        affine_source=_variance_normalize(_adaptive_resample(native,native_faces,source_metric,
+                                                              affine_grid,affine_faces,device=device,execution=execution,
+                                                              old_area=native_area,new_area=affine_area))
+        affine_target=_variance_normalize(_adaptive_resample(reference_xyz,reference_faces,reference_metric,
+                                                              affine_grid,affine_faces,device=device,execution=execution,
+                                                              old_area=reference_area,new_area=affine_area))
+        affine,angles,affine_report,previous_positions=_affine_initialization(affine_grid,affine_faces,
+                                                          affine_source,affine_target,selected,config,execution=execution)
+        previous_grid=affine_grid
+        previous_faces=affine_faces
+        affine_seconds=time.perf_counter()-affine_started
         stages=[]
-        for level,data_level,lam in ((2,4,10.),(3,5,7.5),(4,6,7.5)):
+        for stage_index in range(1,4):
             stage_started=time.perf_counter()
-            regular_double,faces_np=_ico(level)
-            data_double,data_faces=_ico(data_level)
-            regular_np=regular_double.astype(np.float32)
-            data_np=data_double.astype(np.float32)
-            regular=torch.as_tensor(regular_np,device=selected)
-            face_tensor=torch.as_tensor(faces_np,device=selected)
-            if prior_map is None:
-                cp_positions=regular.clone()
-                source_positions=torch.as_tensor(data_np,device=selected)
-            else:
-                ids,w,_=prior_map.weights(torch.as_tensor(data_np,device=selected))
-                source_positions=F.normalize((prior_deformed[ids]*w[:,:,None]).sum(1),dim=1)*100
-                ids,w,_=prior_map.weights(regular)
-                cp_positions=F.normalize((prior_deformed[ids]*w[:,:,None]).sum(1),dim=1)*100
-
-            src=_adaptive_resample(native,native_faces,source_metric,data_np,data_faces,device=device)
-            tgt=_adaptive_resample(reference_xyz,reference_faces,reference_metric,
-                                   data_np,data_faces,device=device)
+            level=config.control_grid[stage_index]
+            data_level=config.data_grid[stage_index]
+            lam=config.regularization[stage_index]
+            regular_np,faces_np=_ico(level)
+            data_np,data_faces,data_area=_ico(data_level,cached_area=True)
+            label_grid,label_faces=_ico(config.sampling_grid[stage_index])
+            regular=torch.as_tensor(regular_np,dtype=torch.float64,device=selected)
+            strain_original=torch.as_tensor(data_np[:len(regular_np)],dtype=torch.float64,device=selected)
+            # Official transfer: previous data grid -> native mesh -> the new
+            # data/control grids. Direct CP-to-CP transfer changes trajectories.
+            native_positions=_sphere_warp(torch.as_tensor(native,device=selected),previous_grid,
+                                          previous_faces,previous_positions,selected,execution=execution)
+            source_positions=_sphere_warp(torch.as_tensor(data_np,device=selected),native,
+                                          native_faces,native_positions,selected,execution=execution)
+            cp_positions=_sphere_warp(regular,native,native_faces,native_positions,selected,execution=execution)
+            source_positions,source_unfold=_unfold(source_positions,data_faces)
+            cp_positions,control_unfold=_unfold(cp_positions,faces_np)
+            src=_variance_normalize(_adaptive_resample(native,native_faces,source_metric,
+                                                        data_np,data_faces,device=device,execution=execution,
+                                                        old_area=native_area,new_area=data_area))
+            tgt=_variance_normalize(_adaptive_resample(reference_xyz,reference_faces,reference_metric,
+                                                        data_np,data_faces,device=device,execution=execution,
+                                                        old_area=reference_area,new_area=data_area))
             source_values=torch.as_tensor(src,device=selected)
-            source_values=(source_values-source_values.mean())/source_values.std()
             target_values=torch.as_tensor(tgt,device=selected)
-            target_values=(target_values-target_values.mean())/target_values.std()
-            target_map=SphereMap(data_np@affine,data_faces,selected)
+            target_map=RadialSphereMap(data_np,data_faces,selected,execution=execution)
             edges=np.unique(np.sort(np.concatenate((faces_np[:,[0,1]],
                 faces_np[:,[1,2]],faces_np[:,[2,0]])),axis=1),axis=0)
-            spacing=float(np.linalg.norm(regular_np[edges[:,0]]-regular_np[edges[:,1]],axis=1).max())
-            centre,samples=_label_samples(data_double,data_faces,0.5*spacing)
-            centre=centre.astype(np.float32)
-            samples=samples.astype(np.float32)
+            chord=np.linalg.norm(regular_np[edges[:,0]]-regular_np[edges[:,1]],axis=1)
+            spacing=float((200*np.arcsin(chord/200)).max())
+            centre,samples=_label_samples(label_grid,label_faces,0.5*spacing)
             sorted_faces=np.sort(faces_np,axis=1).astype(np.int32)
+            face_tensor=torch.as_tensor(sorted_faces.astype(np.int64),device=selected)
             face_bytes=sorted_faces.tobytes()
-            bits=np.asarray([[value>>2&1,value>>1&1,value&1] for value in range(8)],np.int8)
-            order=np.empty((len(faces_np),8),np.int8)
-            for face_id,triangle in enumerate(faces_np):
-                order[face_id]=bits[:,np.argsort(np.argsort(triangle))]@np.array([4,2,1],np.int8)
-            iterations=[]
-            for iteration in range(8):
+            iterations=[];scale=1.0;previous_energy=0.0;converged=False
+            for iteration in range(config.iterations[stage_index]):
                 iteration_started=time.perf_counter()
                 prior=cp_positions.clone()
-                current_map=RadialSphereMap(prior.cpu().numpy(),faces_np,selected)
-                _,weights,patch=current_map.weights(source_positions)
-                layout=_face_layout(faces_np,patch,weights,source_values,selected)
+                prior_np=prior.detach().cpu().numpy()
+                rotations=_rotation_matrices(prior_np,centre,selected)
+                current_map=RadialSphereMap(prior_np,faces_np,selected,execution=execution)
+                _,_,patch=current_map.weights(source_positions)
+                weights=_triplet_data_weights(prior,face_tensor,patch,source_positions)
+                layout=_face_layout(sorted_faces,patch,weights,source_values,selected)
                 labels=np.zeros(len(regular_np),np.int16)
                 changed=0
+                label_positions,scale=_rescaled_labels(centre,np.vstack((centre,samples)),scale)
+                # Source costs and applyLabeling rotate every label, including
+                # label zero. R(prior)*centre differs from prior by rounding;
+                # retaining prior for zero labels alters near-tie proposals.
+                cp_positions=_rotated_label(rotations,label_positions[0])
                 for _ in range(2):
-                    for label,sample in enumerate([centre,*samples]):
-                        if np.all(labels==label):
-                            continue
-                        candidate=_rotated_label(prior,centre,sample,0.8**iteration)
-                        costs=_face_costs(cp_positions,candidate,regular,face_tensor,
+                    for label,sample in enumerate(label_positions):
+                        if np.all(labels==label):continue
+                        candidate=_rotated_label(rotations,sample)
+                        costs=_face_costs(cp_positions,candidate,strain_original,face_tensor,
                                           layout,target_map,target_values,lam,
-                                          simval=1 if level==2 else 2)
-                        ordered=np.take_along_axis(costs,order,axis=1).astype(np.float64)
+                                          simval=config.simval[stage_index],config=config,fold_reference=prior)
+                        ordered=costs.astype(np.float64)
                         choice=np.frombuffer(_fastpd_native.optimize(
                             face_bytes,ordered.tobytes(),len(regular_np)),dtype=np.uint8)
                         update=(choice==1)&(labels!=label)
@@ -406,30 +491,49 @@ def run_msmsulc(
                             cp_positions[mask]=candidate[mask]
                             labels[update]=label
                             changed+=int(update.sum())
-                for key,positions in (("source",source_positions),("native",native_positions)):
-                    ids,w,_=current_map.weights(positions)
-                    warped=F.normalize((cp_positions[ids]*w[:,:,None]).sum(1),dim=1)*100
-                    if key=="source":
-                        source_positions=warped
-                    else:
-                        native_positions=warped
-                iterations.append({"changed":changed,"seconds":time.perf_counter()-iteration_started})
-            prior_map=RadialSphereMap(regular_np,faces_np,selected)
-            prior_deformed=cp_positions
+                energy_costs=_face_costs(cp_positions,cp_positions,strain_original,face_tensor,
+                                         layout,target_map,target_values,lam,
+                                         simval=config.simval[stage_index],config=config,
+                                         energy_only=True,fold_reference=prior)
+                # evaluateTotalCostSum adds triplets sequentially in face order.
+                energy=sum(float(value) for value in energy_costs[:,0])
+                # Source checks convergence before applyLabeling and before the
+                # control/data warp. Revert this tentative fusion on stopping.
+                stopping=iteration>2 and (iteration-1)%2==0 and previous_energy-energy<0.001
+                if stopping:
+                    cp_positions=prior;converged=True
+                    iterations.append({"changed":changed,"energy":energy,"applied":False,
+                                       "seconds":time.perf_counter()-iteration_started})
+                    break
+                source_positions=_sphere_warp(source_positions,prior_np,
+                                              faces_np,cp_positions,selected,execution=execution)
+                cp_positions,moved=_unfold(cp_positions,faces_np);control_unfold+=moved
+                source_positions,moved=_unfold(source_positions,data_faces);source_unfold+=moved
+                previous_energy=energy
+                iterations.append({"changed":changed,"energy":energy,"applied":True,
+                                   "seconds":time.perf_counter()-iteration_started})
+            previous_grid=data_np;previous_faces=data_faces;previous_positions=source_positions
             stages.append({"control_points":len(regular_np),"data_points":len(data_np),
-                           "labels":len(samples)+1,"iterations":iterations,
-                           "seconds":time.perf_counter()-stage_started})
-
-        vertices=native_positions.cpu().numpy().astype(np.float32)@affine.T
-        vertices,folded_before,max_repair_mm=_repair_folds(
-            native,vertices,native_faces,device)
+                           "labels":len(samples)+1,"similarity":config.simval[stage_index],
+                           "maximum_iterations":config.iterations[stage_index],"converged":converged,
+                           "source_unfold_updates":source_unfold,"control_unfold_updates":control_unfold,
+                           "iterations":iterations,"seconds":time.perf_counter()-stage_started})
+        vertices=_sphere_warp(torch.as_tensor(native,device=selected),previous_grid,
+                              previous_faces,previous_positions,selected,execution=execution).detach().cpu().numpy()
+        output_qc=_native_output_qc(vertices,native_faces,native)
+        # User-authorized source-compatible output: official transform() saves
+        # this interpolation directly. Its dense native output can contain a
+        # folded face even with unfolded DATA/control grids; the real paired
+        # oracle has confirmed the same face. Keep both actual-precision counts
+        # in the report and do not introduce an additional final deformation.
         path=output/f"{hemi}.sphere.MSMSulc.native.surf.gii"
         nib.save(nib.GiftiImage(darrays=[
-            nib.gifti.GiftiDataArray(vertices,intent="NIFTI_INTENT_POINTSET"),
-            nib.gifti.GiftiDataArray(native_faces,intent="NIFTI_INTENT_TRIANGLE")]),str(path))
+            nib.gifti.GiftiDataArray(vertices.astype(np.float32),intent="NIFTI_INTENT_POINTSET"),
+            nib.gifti.GiftiDataArray(native_faces.astype(np.int32),intent="NIFTI_INTENT_TRIANGLE")]),str(path))
         report[hemi]={"seconds":time.perf_counter()-started,
-                      "affine_angles_deg":angles,"folded_before_repair":folded_before,
-                      "folded_after_repair":0,"maximum_repair_displacement_mm":max_repair_mm,
+                      "affine_angles_deg":angles,"affine_seconds":affine_seconds,
+                      "affine":affine_report,"config":config.to_dict(),"execution":execution,
+                      **output_qc,
                       "peak_allocated_gb":(torch.cuda.max_memory_allocated(selected)/1e9
                                            if selected.type=="cuda" else None),"stages":stages}
     (output/"registration_report.json").write_text(json.dumps(report,indent=2)+"\n",encoding="utf-8")

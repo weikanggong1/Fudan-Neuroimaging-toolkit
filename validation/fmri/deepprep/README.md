@@ -1,32 +1,30 @@
-# FNIT 与 DeepPrep：真实 490 帧 volume / surface 计时
+# DeepPrep：真实 490 帧 volume / surface 参照
 
-2026-09-30 在同一共享 H100 PCIe 服务器上，完成 FNIT 公开 API 和官方 DeepPrep 25.1.0 的真实数据处理。两者 BOLD 文件 SHA-256 相同，均保留完整 490 帧、TR 0.735 s。下表记录各自实际处理范围；T1w、表面空间及结构重建范围不同，因此不计算加速比。
+2026-09-30 在共享 H100 PCIe 服务器上，完成官方 DeepPrep 25.1.0 的两个独立真实数据运行。两次使用相同原始 T1w 和 BOLD，保留完整 490 帧、TR 0.735 s。当前 FNIT 的结果见 [volume / surface 验证](../README.md)。
 
 | 方法与输出 | 墙钟时间 | 计时起点与内容 |
 |---|---:|---|
-| FNIT volume，MNI152NLin6Asym 2 mm | **1719.19 s（28 分 39 秒）** | BOLD/SBRef 与存档 T1 输入；公开 API 包含配准、PICA/AROMA、WM/CSF/运动回归及最终写盘 |
-| FNIT surface，fsLR32k / 91k CIFTI | **905.71 s（15 分 6 秒）** | 刚生成的 volume 与匹配的既有皮层几何；包含 MSMSulc、双侧投影、重采样与组装 |
 | DeepPrep volume，MNI152NLin6Asym 2 mm | **2091.36 s（34 分 51 秒）** | 原始完整 T1w 与 BOLD；包含独立结构重建、容器启动、BOLD 预处理、混杂变量导出、写盘及 QC |
 | DeepPrep surface，fsaverage6 | **1969.45 s（32 分 49 秒）** | 独立空目录，从同一原始 T1w 与 BOLD 重新开始；包含结构重建、预处理、双侧 surface 与 QC |
 
-FNIT 两个连续 API 合计 **2624.89 s（43.75 分钟）**，不含既有皮层重建。DeepPrep 两行来自两个独立运行，分别重建解剖；相加会重复计算重建，不能当作一次同时输出 volume 和 surface 的时间。DeepPrep 的 surface 时间已经包含 BOLD 预处理，与 FNIT 仅 surface API 的起点不同。
+两行分别从原始输入重建解剖；相加会重复计算重建，不能当作一次同时输出 volume 和 surface 的时间。DeepPrep 的 surface 时间包含结构重建和 BOLD 预处理；FNIT surface 从已经清理的 volume 与既有重建开始，两者起点不同。
 
-本页 FNIT 结果固定到实际运行提交 [`3f8b756`](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/commit/3f8b756def9a76d8fe4a842db8d7543ec4e7b91d)，复用[该次 volume 报告](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/blob/f12dba7e23ce5547206983aeb024a3aea5eac1bf/validation/fmri/fmri_volume.public.json)和[surface 报告](../fmri_surface.public.json)，不代表之后 main 改动的耗时。DeepPrep 源码固定到 [`04af8f3`](https://github.com/pBFSLab/DeepPrep/tree/04af8f3541737505de41530b23804cd9f2b6efa1)。[机器可读对照](comparison.public.json)、[CSV](timings.csv)由 [compare_results.py](compare_results.py)从三份报告生成，保留报告哈希和计时范围。2026-10-01 的当前 volume 实测见[最新验证](../README.md)，本页既有对照没有重跑。重建本页表格时，将上面固定提交的 volume 报告另存，再以 `compare_results.py --volume-report /private/reports/volume_20260930.json --output-dir /private/results/comparison` 读取；脚本会拒绝把不同运行提交的 volume 与 surface 相加。
+DeepPrep 源码固定到 [`04af8f3`](https://github.com/pBFSLab/DeepPrep/tree/04af8f3541737505de41530b23804cd9f2b6efa1)。[机器可读报告](benchmark.public.json)保存实际运行、输出检查、软件及镜像哈希。已移除旧 FNIT 实现的组合计时与重复报告；本页保留这两次独立 DeepPrep 参照。
 
-## 输入与算法差异
+## 输入与输出
 
-| 项目 | FNIT | DeepPrep 25.1.0 |
-|---|---|---|
-| BOLD | 88×88×64×490；SHA-256 `67717caaa823141c6e59d46db52e92deb4419d232ba699c399c69eb8888a0e92` | 同一文件、同一完整时间轴 |
-| T1w | 162×215×180，存档 `orig/001.mgz` 逐体素转换的重建输入；SHA-256 `762cb85469a27f8c64555252f97130d2ecb964f8c0d8f67e6c245ca7d9aa17f3` | 208×256×256 原始完整 T1w；SHA-256 `3ecd8196fc47b440c4fba28eec8a801411d8e4b2aba224a243a89dec48b0b4dc` |
-| SBRef | 使用同次独立 SBRef | 本次 BIDS 未提供 SBRef |
-| 结构重建 | 使用既有同 T1 几何，未计时 recon-all | 两次均新建 white、pial 和注册球面；volume 的 BBR 也需要结构处理 |
-| 去噪输出 | ICA-AROMA，加 WM、CSF 和 24 项运动回归后的 clean BOLD | preproc BOLD 与 confounds TSV；本次未追加与 FNIT 相同的混杂回归 |
-| surface | 双侧 32,492 顶点 GIFTI，加 91,282 灰质坐标 CIFTI | 双侧各 40,962 顶点 fsaverage6 GIFTI |
-| 畸变校正 | 无 GDC / B0 原始输入 | 无 fieldmap，`bold_sdc=False` |
-| CPU 与精度 | 8 线程，float32 / TF32 | Nextflow CPU 额度 10、主机内存 32 GB，保留官方模型精度默认值 |
+| 项目 | DeepPrep 25.1.0 本次运行 |
+|---|---|
+| BOLD | 88×88×64×490；SHA-256 `67717caaa823141c6e59d46db52e92deb4419d232ba699c399c69eb8888a0e92` |
+| T1w | 208×256×256 原始完整 T1w；SHA-256 `3ecd8196fc47b440c4fba28eec8a801411d8e4b2aba224a243a89dec48b0b4dc` |
+| SBRef | 本次 BIDS 未提供 SBRef |
+| 结构重建 | 两次均新建 white、pial 和注册球面；volume 的 BBR 也需要结构处理 |
+| 去噪输出 | preproc BOLD 与 confounds TSV；本次未追加混杂回归 |
+| surface | 双侧各 40,962 顶点 fsaverage6 GIFTI |
+| 畸变校正 | 无 fieldmap，`bold_sdc=False` |
+| CPU 与精度 | Nextflow CPU 额度 10、主机内存 32 GB，保留官方模型精度默认值 |
 
-两者同名 MNI 空间和输出尺寸通过检查；同名空间并不证明配准、强度处理或时间序列数值一致。本次没有计算 FNIT 与 DeepPrep 最终 BOLD 的逐值精度，也没有把 FNIT 对 FSL 或官方球面的已有指标当作 DeepPrep 一致性指标。若要测量相同任务的加速比，需统一 T1/SBRef、结构重建起点、表面空间、去噪、计时边界，并在相同负载下重复运行。
+本页没有 FNIT 与 DeepPrep 最终 BOLD 的逐值精度比较。若比较当前实现的速度与精度，需要统一 T1/SBRef、结构重建起点、表面空间、去噪和计时边界，并在相同负载下重复运行。
 
 ## DeepPrep 完成与资源记录
 
@@ -143,7 +141,7 @@ process {
 }
 ```
 
-可把本页 `benchmark.public.json` 的 `software` 与 `input` 对象分别保存为根目录的 `software_manifest.public.json` 与 `input_manifest.public.json`；复测时更新为实际机器、镜像和输入，不能沿用旧哈希。`python validation/fmri/deepprep/summarize_benchmark.py --root "$benchmark_root"` 读取这两份清单及两个完成的运行，检查退出状态、trace 和 GPU 采样，生成 `benchmark_results.public.json` 与 `benchmark_timings.csv`。`--root` 是其唯一参数，必填，指向同一根目录。仓库对照可运行 `python validation/fmri/deepprep/compare_results.py` 重算；该脚本无参数，只读取同目录 DeepPrep 报告及上级两份 FNIT 报告。
+可把本页 `benchmark.public.json` 的 `software` 与 `input` 对象分别保存为根目录的 `software_manifest.public.json` 与 `input_manifest.public.json`；复测时更新为实际机器、镜像和输入，不能沿用旧哈希。`python validation/fmri/deepprep/summarize_benchmark.py --root "$benchmark_root"` 读取这两份清单及两个完成的运行，检查退出状态、trace 和 GPU 采样，生成 `benchmark_results.public.json` 与 `benchmark_timings.csv`。`--root` 是其唯一参数，必填，指向同一根目录。
 
 ## 原实现、引用与数据边界
 

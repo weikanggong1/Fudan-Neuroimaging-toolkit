@@ -14,6 +14,7 @@ import numpy as np
 
 from ..flirt.coordinates import flirt_to_world_affine
 from ..msm import prepare_msmsulc_inputs, run_msmsulc
+from ..msm.config import MSMSulcConfig
 from .assets_setup import BASE_URL, MESH
 from .bids import locate_bids_inputs
 from .derivatives import ensure_derivative_dataset, fmri_derivative_paths, sidecar, write_json
@@ -99,12 +100,28 @@ def fMRISurface_pipeline(
     device: str = "cuda:0",
     overwrite: bool = False,
     registered_spheres: tuple[str | Path, str | Path] | None = None,
+    msm_config: MSMSulcConfig | str | Path | None = None,
+    msm_execution: str = "optimized",
     goodvoxels: str | Path | None = None,
 ) -> FMRISurfaceResult:
     """Project completed volume derivatives using matching T1 recon-all surfaces."""
     started = time.perf_counter()
     if registered_spheres is not None and len(registered_spheres) != 2:
         raise ValueError("registered_spheres must contain left and right paths")
+    if registered_spheres is not None and msm_config is not None:
+        raise ValueError("msm_config cannot be applied to supplied registered_spheres")
+    if msm_execution not in ("optimized", "reference"):
+        raise ValueError("msm_execution must be 'optimized' or 'reference'")
+    if msm_config is None:
+        configuration = MSMSulcConfig()
+    elif isinstance(msm_config, MSMSulcConfig):
+        configuration = msm_config
+    elif isinstance(msm_config, (str, Path)):
+        configuration = MSMSulcConfig.from_file(msm_config)
+    else:
+        raise TypeError("msm_config must be MSMSulcConfig or a config path")
+    registration = {"Method": "provided spheres"}
+    registration_seconds = None
     inputs = locate_bids_inputs(
         bids_root, subject=subject, session=session, task=task, run=run,
         acquisition=acquisition, direction=direction,
@@ -192,14 +209,31 @@ def fMRISurface_pipeline(
                 output_dir=output / "prepared", wb_command=wb_command,
             )
             if registered_spheres is None:
+                registration_started = time.perf_counter()
                 sulc_inputs = prepare_msmsulc_inputs(
                     subject_dir=subject_dir,
                     initial_spheres=prepared.initial_spheres,
                     hcp_assets_dir=assets, output_dir=output / "msmsulc_inputs",
                     wb_command=wb_command,
                 )
-                spheres = run_msmsulc(sulc_inputs, output / "msmsulc", device=device)
+                spheres = run_msmsulc(sulc_inputs, output / "msmsulc", device=device,
+                                     config=configuration, execution=msm_execution)
                 spheres = (spheres["L"], spheres["R"])
+                registration_seconds = time.perf_counter() - registration_started
+                report = json.loads((output / "msmsulc/registration_report.json").read_text(
+                    encoding="utf-8"))
+                registration = {
+                    "Method": "FNIT MSMSulc-HOCR-FastPD",
+                    "Configuration": configuration.to_dict(),
+                    "Execution": msm_execution,
+                    "Hemispheres": {
+                        hemi: {key: report[hemi][key] for key in (
+                            "seconds", "peak_allocated_gb", "folded_output_faces",
+                            "folded_solver_faces", "minimum_output_orientation_ratio",
+                            "minimum_solver_orientation_ratio", "degenerate_input_faces",
+                        ) if key in report[hemi]} for hemi in ("L", "R")
+                    },
+                }
             else:
                 spheres = registered_spheres
             mesh = assets / "global/templates/standard_mesh_atlases"
@@ -241,6 +275,8 @@ def fMRISurface_pipeline(
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(current, destination)
         timing = {**projection.timing_seconds, "total": time.perf_counter() - started}
+        if registration_seconds is not None:
+            timing["msmsulc_preparation_and_registration"] = registration_seconds
         details = {**{key: metadata[key] for key in (
                        "TaskName", "EchoTime", "FlipAngle", "MagneticFieldStrength",
                        "Manufacturer", "PhaseEncodingDirection", "Units",
@@ -251,7 +287,8 @@ def fMRISurface_pipeline(
                    ],
                    "RepetitionTime": inputs.tr,
                    "SkullStripped": True,
-                   "FNIT": {"Registration": "MSMSulc-HOCR-FastPD",
+                   "FNIT": {"Registration": registration["Method"],
+                            "RegistrationDetails": registration,
                             "Projection": "fMRIPrep-style T1w cortex + MNI subcortex",
                             "TimingSeconds": timing,
                             "Coverage": json.loads(projection.coverage_report.read_text(encoding="utf-8"))}}

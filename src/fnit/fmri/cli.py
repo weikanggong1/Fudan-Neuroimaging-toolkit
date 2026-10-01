@@ -55,6 +55,8 @@ def main(argv=None):
     surface.add_argument("--recon-all", required=True)
     surface.add_argument("--surface-assets-dir", required=True)
     surface.add_argument("--wb-command", default="wb_command")
+    surface.add_argument("--msm-config", help="official MSMSulc configuration file; default HCP schedule")
+    surface.add_argument("--msm-execution", choices=("optimized", "reference"), default="optimized")
     args = parser.parse_args(argv)
     common = dict(
         bids_root=args.bids_root, derivatives_root=args.derivatives_root,
@@ -89,6 +91,8 @@ def main(argv=None):
             **common, recon_all=args.recon_all,
             hcp_assets_dir=args.surface_assets_dir,
             wb_command=args.wb_command,
+            msm_config=args.msm_config,
+            msm_execution=args.msm_execution,
         )
         print(result.dtseries)
     return 0

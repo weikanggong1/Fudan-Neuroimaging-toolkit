@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 import torch
 
-import fnit.bigflica.dicl_torch as dicl
+import fnit.dictionary_learning.torch_backend as dicl
 
 
 CUDA = pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required")

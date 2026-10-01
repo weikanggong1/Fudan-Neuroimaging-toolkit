@@ -9,9 +9,10 @@ from typing import Mapping, Sequence
 import h5py
 import numpy as np
 
+from ..dictionary_learning import fit_dicl
 from .pipeline import (_FLICA_ALGORITHM_VERSION,
                        _check_flica_output, _fit_flica, _flica_directory,
-                       _save_manifest, _signature, _valid_cache, fit_dicl)
+                       _save_manifest, _signature, _valid_cache)
 from .pipeline_gpu import _save_gpu_results
 from .streaming import fit_mmigp_streaming, prepare_modalities
 

@@ -1,12 +1,8 @@
 # BigFLICA：真实 UKB 输入、GPU 对照与内存测试
 
-## 当前 DicL 速度优化
+## 字典学习独立模块
 
-已完成敏感行 LARS 回退、兼容求解器图调度和字典逐元素融合。真实1000人完整 VBM/FA/MD 掩膜、R500/D200 的首次完整 DicL 对照中，字典与 LASSO 指标通过本轮容差，FA/MD 的 OMP30 重建差仍为2.44%/5.33%。共享 GPU、计时范围和源码版本须与时间一起解读；压缩流程的有效 C20、最终脑图与公开 float32 入口仍待验收。[最新优化报告与复现记录](dicl_speed_optimization_real1000_20261001.md)汇总阶段对照和剩余工作。
-
-## DicL效果匹配基线
-
-同一1000人完整VBM/FA/MD掩膜R500/D200投影，对照服务器sklearn1.7.1的 `MiniBatchDictionaryLearning`。已移除额外ridge，匹配LARS节点停止，并修复统计顺序、SVD驱动及整模态GPU缓存读取。独立初始化的三模态字典、原子余弦及LASSO指标通过预设容差；FA/MD的OMP30重建仍未通过。[效果报告、误差轨迹、因果控制和复现命令](dicl_match_real1000_20261001.md)记录实际来源、耗时与87项定向回归。该轮仅验收DicL，未重新运行FLICA或30,000人全链。
+BigFLICA 通过 `fnit.dictionary_learning` 调用 CPU 和 GPU 字典学习。独立代码、效果匹配、速度优化和复现脚本集中在[字典学习验证索引](../dictionary_learning/README.md)，不再在此重复保存报告。真实1000人 R500/D200 的字典与 LASSO 通过原容差，FA/MD 的 OMP30 重建差仍为2.44%/5.33%；这些阶段结果不代替 BigFLICA 的有效 C20、最终脑图和公开 float32 全链验收。
 
 ## mMIGP 500维测试
 

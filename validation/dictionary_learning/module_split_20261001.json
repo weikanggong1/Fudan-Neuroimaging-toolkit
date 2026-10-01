@@ -1,0 +1,97 @@
+{
+  "baseline_commit": "571fc9ea57551bb55f89f23f65176f3b0d2c7b10",
+  "GPU_functions_and_classes_AST_unchanged": [
+    "_streaming_numpy_axis0_stats",
+    "_preload_standardized_projection",
+    "_randomized_svd_dictionary",
+    "_sparse_codes_lars",
+    "_CompatibleLarsGraph",
+    "_compatible_lars_graph_cache",
+    "_sparse_codes_lars_compatible",
+    "_sparse_codes_lars_compatible_eager",
+    "_lars_inverse_event",
+    "_LarsInverseSolver",
+    "_nearby_lars_knots",
+    "_SparseCodesBPDN",
+    "_dicl_update_atom_after_matvec",
+    "_dicl_normalize_atom_after_torch_norm",
+    "_DictionaryUpdater",
+    "fit_dicl_gpu_streaming"
+  ],
+  "GPU_top_level_function_and_class_count": 16,
+  "CPU_fit_AST_and_source_unchanged": true,
+  "device_selector_AST_unchanged": true,
+  "new_CPU_sha256": "b6a4cde5d0b51dbb51bc8253cbdf816a3076103eb7c88cf68db53795eff09f97",
+  "new_GPU_sha256": "6f225f0ac9727934fe6fd2f298d586e7aea178a5e8db756c63e7acc8a8e72a99",
+  "baseline_GPU_sha256": "56735ea2ecd7543e8078a51c9a772f1db3d55fdfed132194015f8982ed76474f",
+  "GPU_algorithm_version": "rsvd5rowgraph",
+  "full_real1000_benchmark_rerun": false,
+  "GPU_entire_module_AST_except_import_device_and_version_unchanged": true,
+  "status": "module_split_verified",
+  "date": "2026-10-01",
+  "public_module": "fnit.dictionary_learning",
+  "public_API": [
+    "fit_dictionary_learning",
+    "fit_dictionary_learning_streaming",
+    "fit_dicl",
+    "fit_dicl_gpu_streaming"
+  ],
+  "CPU_implementation": "src/fnit/dictionary_learning/cpu.py",
+  "GPU_implementation": "src/fnit/dictionary_learning/torch_backend.py",
+  "BigFLICA_callers": [
+    "src/fnit/bigflica/pipeline.py",
+    "src/fnit/bigflica/pipeline_cpu_stream.py",
+    "src/fnit/bigflica/pipeline_gpu.py"
+  ],
+  "old_bigflica_GPU_implementation_removed": true,
+  "independent_import_blocks_bigflica": true,
+  "existing_BigFLICA_fit_dicl_reexport_preserved": true,
+  "cache_algorithm_version_preserved": true,
+  "no_new_dependencies": true,
+  "targeted_regression": {
+    "passed": 152,
+    "skipped": 0,
+    "seconds": 52.59,
+    "warnings": 76,
+    "environment": {
+      "torch": "2.4.1",
+      "sklearn": "1.2.2",
+      "numpy": "1.26.4",
+      "GPU": "NVIDIA GeForce RTX 3060"
+    },
+    "command": "PYTHONPATH=src python -m pytest -q tests/test_dictionary_learning* tests/test_bigflica.py tests/test_bigflica_normalization_and_design.py tests/test_bigflica_raw_routing.py"
+  },
+  "historical_real_data_reference": {
+    "subjects": 1000,
+    "modalities": [
+      "vbm",
+      "fa",
+      "md"
+    ],
+    "R": 500,
+    "D": 200,
+    "GPU_final_observed_seconds": 63.6542395632714,
+    "GPU_peak_allocated_GiB": 2.3120598793029785,
+    "normalized_dictionary_relative_L2": [
+      1.223071624082628e-07,
+      0.00010714953695746867,
+      0.0005848760115579513
+    ],
+    "OMP30_reconstruction_relative_L2": [
+      1.328857935679605e-07,
+      0.024447479443757553,
+      0.05334080625625123
+    ],
+    "report": "dicl_speed_optimization_real1000_20261001.md",
+    "scope": "Existing float64 R500 projection; these are pre-extraction measurements, not a new benchmark."
+  },
+  "moved_independent_reports": [
+    "dicl_match_real1000_20261001.md",
+    "dicl_match_real1000_20261001.json",
+    "dicl_match_trace_20261001.png",
+    "dicl_speed_optimization_real1000_20261001.md",
+    "dicl_speed_optimization_real1000_20261001.json",
+    "benchmark_dicl_match.py"
+  ],
+  "current_benchmark_sha256": "80a2db6377f7716c9ef437b667ffb58e690aa0432ede200ba454fce276a7f7c4"
+}
