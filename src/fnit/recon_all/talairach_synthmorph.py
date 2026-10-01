@@ -95,8 +95,11 @@ def main() -> None:
     if args.memory_report is not None:
         args.memory_report.parent.mkdir(parents=True, exist_ok=True)
         args.memory_report.write_text(json.dumps({
-            "gpu_peak_allocated_bytes": torch.cuda.max_memory_allocated(),
-            "gpu_peak_reserved_bytes": torch.cuda.max_memory_reserved(),
+            "device": args.device,
+            "gpu_peak_allocated_bytes": (torch.cuda.max_memory_allocated(args.device)
+                                         if torch.device(args.device).type == "cuda" else None),
+            "gpu_peak_reserved_bytes": (torch.cuda.max_memory_reserved(args.device)
+                                        if torch.device(args.device).type == "cuda" else None),
         }, indent=2))
 
 

@@ -556,20 +556,49 @@ def _validate_meshes(subject: Path) -> dict:
     return result
 
 
-def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
+def _write_hemisphere_stats(subject: Path, hemi: str, volumes: dict, cache,
+                            stage, device: str) -> None:
+    """同一半球六套图谱共享统计缓存，white 与 pial 按文件版本分别保留。
+
+    subject 为完整被试目录；hemi 为 lh/rh；volumes 单位 mm³；cache 为
+    SurfaceStatsCache；stage 为计时调度函数；device 是 cache 的逻辑设备。
+    写出六套标准十列 .stats，无返回值；IO/网格/设备错误向上传递。
+    脑区体积沿用 -no-th3 定义，不读取 TH3 顶点 volume 图。
+    """
+    from .anatomical_stats_file import write_anatomical_stats
+
+    stats = subject / "stats"
+    for atlas, surface in (("aparc", "white"), ("aparc.a2009s", "white"),
+                           ("aparc.DKTatlas", "white"), ("aparc", "pial"),
+                           ("BA_exvivo", "white"), ("BA_exvivo.thresh", "white")):
+        suffix = "aparc.pial" if surface == "pial" else atlas
+        stage(f"stats_{hemi}_{suffix}", write_anatomical_stats,
+              subject, hemi, atlas, surface, volumes, stats / f"{hemi}.{suffix}.stats",
+              device=device, cache=cache)
+
+
+def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          weights_dir: str | Path, assets_dir: str | Path,
                          *, device: str = "cuda:0", threads: int = 4,
-                         native_bin_dir: str | Path | None = None) -> dict:
+                         native_bin_dir: str | Path | None = None,
+                         profile_stages: bool = False,
+                         cuda_allocator_cache: str = "auto") -> dict:
     """从单幅原始 T1 连续生成 conform 体积、双侧表面和脑区统计。
 
     t1、subject_dir、weights_dir、assets_dir 是输入影像、空输出目录、
     已校验权重和资产的路径；native_bin_dir=None 时使用当前 Conda bin。
     device 默认 cuda:0，threads 默认 4；不自动使用 FP16/BF16。
+    profile_stages=False 不增加阶段 CUDA 同步；True 分别记录前同步、函数、
+    后同步和父子 CPU 秒数。cuda_allocator_cache=auto 延续首次 CUDA 调用
+    关闭缓存的策略，并保留已初始化 API 的 allocator；enabled/disabled
+    仅可在初始化前显式选择。total_seconds 包含校验、加载、传输及输出读写。
     成功返回与 fnit-native-free-run.json 相同的字典，含输出路径、耗时、
     网格检查及程序来源。失败抛异常，已开始的阶段另保存失败报告。
     体积为 1 mm conform 网格，表面使用 surface RAS（mm）；完整参数、
     输出结构、限制、官方命令和真实数据见 docs/recon_all/README.md。
     """
+    started = time.perf_counter()
+    from .profiling import StageProfiler, configure_cuda_allocator, autocast_state
     from fnit.synthseg_parc import SynthSeg
     from .brain_volume_stats_python import compute_brain_volume_stats
     from .ca_normalize_python import run_ca_normalize
@@ -580,8 +609,10 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     from .normalization import normalize_t1
     from .segstats_aseg_python import write_aseg_stats
     from .segstats_wmparc_python import write_wmparc_stats
-    from .anatomical_stats_file import write_anatomical_stats
 
+    if threads < 1:
+        raise ValueError("threads must be positive")
+    allocator = configure_cuda_allocator(device, cuda_allocator_cache)
     t1, subject = Path(t1).resolve(), Path(subject_dir).resolve()
     weights, assets = Path(weights_dir).resolve(), Path(assets_dir).resolve()
     if not t1.is_file() or not weights.is_dir() or not assets.is_dir():
@@ -614,26 +645,29 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     wm_edit_binary = _native_binary(native_bin_dir, "mri_edit_wm_with_aseg")
     registration_atlases = {hemi: _folding_atlas(assets, hemi)
                             for hemi in ("lh", "rh")}
-    torch.set_num_threads(threads)
-    if torch.device(device).type == "cuda" and not torch.cuda.is_initialized():
-        os.environ.setdefault("PYTORCH_NO_CUDA_MEMORY_CACHING", "1")
-    cuda_memory_cache_disabled = os.environ.get("PYTORCH_NO_CUDA_MEMORY_CACHING") == "1"
     torch.backends.cuda.matmul.allow_tf32 = True
     torch.backends.cudnn.allow_tf32 = True
-    started = time.perf_counter()
+    validation_seconds = time.perf_counter() - started
+    pipeline_started = time.perf_counter()
     profile = "single-t1-standard"
+    caller_autocast = {kind: autocast_state(kind) for kind in ("cpu", "cuda")}
     report: dict = {"profile": profile, "input": str(t1),
                     "subject_dir": str(subject), "device": device,
                     "n4_binary": {"binary": str(n4_binary[0]),
                                   "sha256": n4_binary[1]}, "threads": threads,
                     "precision": {"matmul_tf32_default": True,
                                   "cudnn_tf32_default": True,
-                                  "fp16_or_bf16_enabled": False,
+                                  "fp16_or_bf16_requested_by_fnit": False,
+                                  "caller_autocast": caller_autocast,
+                                  "fp16_or_bf16_enabled": any(
+                                      value["enabled"] for value in caller_autocast.values()),
                                   "fp32_exceptions": ["SynthStrip", "SynthSeg",
                                                       "Talairach affine",
                                                       "MNI nonlinear CUDA"]},
-                    "gpu_memory_mode": ("no_cuda_allocator_cache" if cuda_memory_cache_disabled
-                                        else "torch_cuda_allocator"),
+                    "gpu_memory_mode": allocator["effective"], "cuda_allocator": allocator,
+                    "timing": {"profile_stages": profile_stages,
+                               "total_scope": "API entry through validation, loading, transfers and output writes",
+                               "validation_seconds": validation_seconds},
                     "stages": [], "status": "running"}
     report["gca_registration"] = {"implementation": "native-c++",
                                   "binary": str(native_em[0]), "sha256": native_em[1]}
@@ -676,39 +710,30 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         "native_sha256": {name: binary[1] for name, binary in zip(
             ("mri_warp_convert", "mri_ca_register", "mri_convert"), warp_binaries)}}
 
+    profiler = StageProfiler(device=device, synchronize=profile_stages, allocator=allocator)
+
     def stage(name, function, *args, **kwargs):
-        """同步目标 GPU 后记录阶段墙钟、可用的显存峰值与失败状态。"""
-        gpu = torch.device(device).type == "cuda" and torch.cuda.is_available()
-        if gpu and torch.cuda.is_initialized():
-            torch.cuda.synchronize(device)
-        tick = time.perf_counter()
-        if gpu and torch.cuda.is_initialized() and not cuda_memory_cache_disabled:
-            torch.cuda.reset_peak_memory_stats(device)
+        """记录包含函数内读写的墙钟；剖析模式另列 CUDA 等待与 CPU 时间。"""
         try:
-            value = function(*args, **kwargs)
+            value = profiler.run(name, function, *args, **kwargs)
         except Exception as error:
-            if gpu and torch.cuda.is_initialized() and not cuda_memory_cache_disabled:
-                report["gpu_peak_allocated_bytes"] = max(
-                    report.get("gpu_peak_allocated_bytes", 0),
-                    torch.cuda.max_memory_allocated(device))
-                report["gpu_peak_reserved_bytes"] = max(
-                    report.get("gpu_peak_reserved_bytes", 0),
-                    torch.cuda.max_memory_reserved(device))
+            report["stages"].append(profiler.last_row)
             report.update(status="failed", failed_stage=name, error=repr(error),
                           total_seconds=time.perf_counter() - started)
+            subject.mkdir(parents=True, exist_ok=True)
             (subject / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
             raise
-        if gpu and torch.cuda.is_initialized():
-            torch.cuda.synchronize(device)
-        row = {"name": name, "seconds": time.perf_counter() - tick}
+        row = profiler.last_row
+        if isinstance(value, dict) and "timings_seconds" in value:
+            row["timings_seconds"] = value["timings_seconds"]
+        if isinstance(value, dict) and isinstance(value.get("seconds"), dict):
+            row["substep_seconds"] = value["seconds"]
         if isinstance(value, dict) and value.get("talairach_child_gpu"):
             row["talairach_child_gpu"] = value["talairach_child_gpu"]
             for key in ("gpu_peak_allocated_bytes", "gpu_peak_reserved_bytes"):
                 report[key] = max(report.get(key, 0), value["talairach_child_gpu"][key])
-        if gpu and torch.cuda.is_initialized() and not cuda_memory_cache_disabled:
-            row["gpu_peak_allocated_bytes"] = torch.cuda.max_memory_allocated(device)
-            row["gpu_peak_reserved_bytes"] = torch.cuda.max_memory_reserved(device)
-            for key in ("gpu_peak_allocated_bytes", "gpu_peak_reserved_bytes"):
+        for key in ("gpu_peak_allocated_bytes", "gpu_peak_reserved_bytes"):
+            if key in row:
                 report[key] = max(report.get(key, 0), row[key])
         report["stages"].append(row)
         (subject / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
@@ -730,19 +755,25 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
           initial["synthstrip"], mri / "brainmask.mgz", device=device)
     if torch.device(device).type == "cuda":
         torch.cuda.empty_cache()
-    previous_cudnn_tf32 = torch.backends.cudnn.allow_tf32
-    torch.backends.cudnn.allow_tf32 = False
+    def run_synthseg_and_write():
+        """构造后应用卷积精度策略；阶段计时包括分割图和体积 CSV 写出。"""
+        model = SynthSeg(weights=weights, device=device, threads=threads, cudnn_tf32=False)
+        try:
+            result = model(mri / "orig.mgz", keep_geometry=True,
+                           color_lut=assets / "FreeSurferColorLUT.txt")
+        finally:
+            report["precision"]["SynthSeg_actual_forward"] = model.segmenter.precision
+        result.segmentation.save(str(mri / "synthseg.rca.mgz"))
+        result.write_volumes_csv(mri / "orig.mgz", stats / "synthseg.vol.csv")
+        return result
+
     try:
-        result = stage("SynthSeg", lambda: SynthSeg(weights=weights, device=device,
-                                                      threads=threads)(mri / "orig.mgz",
-                         keep_geometry=True, color_lut=assets / "FreeSurferColorLUT.txt"))
+        result = stage("SynthSeg", run_synthseg_and_write)
     finally:
-        torch.backends.cudnn.allow_tf32 = previous_cudnn_tf32
         if torch.device(device).type == "cuda":
             torch.cuda.empty_cache()
     stiv_mm3 = result.total_intracranial_mm3
-    result.segmentation.save(str(mri / "synthseg.rca.mgz"))
-    result.write_volumes_csv(mri / "orig.mgz", stats / "synthseg.vol.csv")
+    report["precision"]["SynthSeg_actual_forward"] = result.precision
     lta = mri / "transforms/talairach.lta"
     gca = assets / "average/RB_all_2020-01-02.gca"
     stage("mri_em_register", _run_native_em_register, native_em[0], mri, gca, assets)
@@ -859,28 +890,26 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     stage("project_aparc_volumes", _project_parcels, subject)
     stage("project_wmparc", _project_wmparc, subject)
 
-    volumes = stage("brain_volume_stats", compute_brain_volume_stats,
-                    subject, assets / "ASegStatsLUT.txt")
-    (stats / "brainvol.stats").write_text("".join(
-        f"# Measure {name}, {name}, {name}, {value:.6f}, mm^3\n"
-        for name, value in volumes.items()))
-    (stats / "synthseg.tiv.dat").write_text(f"{stiv_mm3:.6f}\n")
+    def compute_and_write_brain_volumes():
+        """计算全脑体积并写出 brainvol.stats/tiv；体积单位为 mm³。"""
+        values = compute_brain_volume_stats(subject, assets / "ASegStatsLUT.txt")
+        (stats / "brainvol.stats").write_text("".join(
+            f"# Measure {name}, {name}, {name}, {value:.6f}, mm^3\n"
+            for name, value in values.items()))
+        (stats / "synthseg.tiv.dat").write_text(f"{stiv_mm3:.6f}\n")
+        return values
+
+    volumes = stage("brain_volume_stats", compute_and_write_brain_volumes)
     stage("aseg_stats", write_aseg_stats, subject, assets / "ASegStatsLUT.txt",
           stats / "aseg.stats")
     stage("wmparc_stats", write_wmparc_stats, subject, assets / "WMParcStatsLUT.txt",
           stats / "wmparc.stats")
+    from .surface_stats_cache import SurfaceStatsCache
+
     for hemi in ("lh", "rh"):
-        for atlas in ("aparc", "aparc.a2009s", "aparc.DKTatlas"):
-            stage(f"stats_{hemi}_{atlas}", write_anatomical_stats,
-                  subject, hemi, atlas, "white", volumes,
-                  stats / f"{hemi}.{atlas}.stats", device=device)
-        for atlas, surface in (("aparc", "pial"),
-                               ("BA_exvivo", "white"),
-                               ("BA_exvivo.thresh", "white")):
-            suffix = "aparc.pial" if surface == "pial" else atlas
-            stage(f"stats_{hemi}_{suffix}", write_anatomical_stats,
-                  subject, hemi, atlas, surface, volumes,
-                  stats / f"{hemi}.{suffix}.stats", device=device)
+        with SurfaceStatsCache(device=device) as stats_cache:
+            _write_hemisphere_stats(subject, hemi, volumes, stats_cache, stage, device)
+            report.setdefault("surface_stats_cache", {})[hemi] = dict(stats_cache.counters)
         from .segstats_surface_snr_python import write_surface_snr_stats
         stage(f"stats_{hemi}_w-g.pct", write_surface_snr_stats,
               subject, hemi, stats / f"{hemi}.w-g.pct.stats")
@@ -902,10 +931,47 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     valid = not missing and report["mesh_validation"]["status"] == "passed"
     report.update(status="complete" if valid else "incomplete",
                   total_seconds=time.perf_counter() - started)
+    report["timing"]["pipeline_seconds"] = time.perf_counter() - pipeline_started
     (subject / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
     if not valid:
         raise RuntimeError(f"recon-all output or mesh validation failed; "
                            f"see {subject / 'fnit-native-free-run.json'}")
+    return report
+
+
+def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
+                         weights_dir: str | Path, assets_dir: str | Path,
+                         *, device: str = "cuda:0", threads: int = 4,
+                         native_bin_dir: str | Path | None = None,
+                         profile_stages: bool = False,
+                         cuda_allocator_cache: str = "auto") -> dict:
+    """从原始单 T1 连续重建；输入、输出及坐标定义见 recon-all 中文说明。
+
+    t1 为原始影像；subject_dir 须为空；weights_dir/assets_dir 为已校验资源；
+    native_bin_dir=None 使用当前 Conda bin。device 默认 cuda:0，threads=4
+    约束 Torch intraop 和调用线程的 Numba 掩码，退出时恢复调用方设置。
+    profile_stages=False 不插入阶段同步；True 分列 CUDA 等待与父子 CPU 秒数。
+    cuda_allocator_cache=auto 保留已初始化 API 的 allocator，首次 CUDA
+    默认关闭缓存；enabled/disabled 必须在初始化前选择。无自动半精度。
+    返回完整路径、精度、线程、耗时和执行/完整性/网格检查字典；同时写 JSON。
+    total_seconds 覆盖校验、线程设置/恢复、模型加载、传输、计算及数据读写；
+    最终报告写出/CLI 启动仍由外层命令计时。体积为 conform 网格；表面为
+    surface RAS/mm。Numba 请求超过初始线程容量、输入非法或阶段失败抛异常。
+    不支持同一进程内多个线程并发更改全局 Torch 线程预算。
+    """
+    tick = time.perf_counter()
+    from .thread_budget import thread_budget
+
+    with thread_budget(threads=threads) as budget:
+        report = _run_recon_all_python(
+            t1=t1, subject_dir=subject_dir, weights_dir=weights_dir, assets_dir=assets_dir,
+            device=device, threads=threads, native_bin_dir=native_bin_dir,
+            profile_stages=profile_stages, cuda_allocator_cache=cuda_allocator_cache)
+    wall = time.perf_counter() - tick
+    report["thread_budget"] = budget
+    report["timing"]["thread_setup_and_restore_seconds"] = wall - report["total_seconds"]
+    report["total_seconds"] = wall
+    (Path(subject_dir) / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
     return report
 
 
@@ -918,11 +984,17 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--threads", type=int, default=4)
     parser.add_argument("--native-bin-dir", type=Path)
+    parser.add_argument("--profile-stages", action="store_true",
+                        help="record CUDA synchronization and parent/child CPU time")
+    parser.add_argument("--cuda-allocator-cache", choices=("auto", "enabled", "disabled"),
+                        default="auto")
     args = parser.parse_args(argv)
     report = run_recon_all_python(args.t1, args.subject_dir, args.weights_dir,
                                   args.assets_dir, device=args.device,
                                   threads=args.threads,
-                                  native_bin_dir=args.native_bin_dir)
+                                  native_bin_dir=args.native_bin_dir,
+                                  profile_stages=args.profile_stages,
+                                  cuda_allocator_cache=args.cuda_allocator_cache)
     print(json.dumps(report, indent=2))
 
 

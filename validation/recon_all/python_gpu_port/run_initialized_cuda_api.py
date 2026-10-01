@@ -29,11 +29,19 @@ def main() -> None:
     parser.add_argument("--assets-dir", type=Path, required=True)
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--threads", type=int, default=4)
+    parser.add_argument("--profile-stages", action="store_true")
+    parser.add_argument("--cuda-allocator-cache", choices=("auto", "enabled", "disabled"),
+                        default="auto")
     args = parser.parse_args()
     if torch.device(args.device).type != "cuda":
         raise ValueError("this validation requires a CUDA device")
     started = time.perf_counter()
     torch.set_num_threads(args.threads)
+    allocator_before_initialization = None
+    if args.cuda_allocator_cache != "auto":
+        from fnit.recon_all.profiling import configure_cuda_allocator
+        allocator_before_initialization = configure_cuda_allocator(
+            device=args.device, policy=args.cuda_allocator_cache)
     retained = torch.ones(1, dtype=torch.float32, device=args.device)
     torch.cuda.synchronize(args.device)
     assert torch.cuda.is_initialized()
@@ -42,12 +50,14 @@ def main() -> None:
     result = run_recon_all_python(
         t1=args.t1, subject_dir=args.subject,
         weights_dir=args.weights_dir, assets_dir=args.assets_dir,
-        device=args.device, threads=args.threads, native_bin_dir=None)
+        device=args.device, threads=args.threads, native_bin_dir=None,
+        profile_stages=args.profile_stages, cuda_allocator_cache="auto")
     torch.cuda.synchronize(args.device)
     metadata = {"invocation": "initialized CUDA Python API",
                 "cuda_initialized_before_api": True,
                 "device": args.device, "threads": args.threads,
                 "thread_budget_set_before_cuda": True,
+                "allocator_before_initialization": allocator_before_initialization,
                 "device_uuid": device_uuid,
                 "CUDA_VISIBLE_DEVICES": os.environ.get("CUDA_VISIBLE_DEVICES"),
                 "PYTORCH_NO_CUDA_MEMORY_CACHING":
