@@ -328,7 +328,7 @@ class TorchGEMS:
                                 break
                         # Update Gaussian parameters after the accepted geometry step.
                         objective_changed = False
-                        if outer_iterations == 1 and em_relative_cost_stop is None and ((step + 1) % deform_em_interval == 0
+                        if outer_iterations == 1 and em_relative_cost_stop is None and fixed_gaussians is None and ((step + 1) % deform_em_interval == 0
                                                       or step + 1 == iterations):
                             with torch.no_grad():
                                 priors, posterior, params, nll = infer(vertices, params=params,
