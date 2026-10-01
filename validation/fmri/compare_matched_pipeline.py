@@ -360,6 +360,9 @@ def compare_manifest(manifest, directory, private_output=None, device="cuda:0"):
     for key in ("candidate_revision", "reference_revision"):
         if not re.fullmatch(r"[0-9a-f]{7,40}", manifest[key]):
             raise ValueError("Revisions must be Git commit identifiers")
+    validated_on = manifest.get("validated_on")
+    if validated_on is not None and not re.fullmatch(r"\d{4}-\d{2}-\d{2}", validated_on):
+        raise ValueError("validated_on must be YYYY-MM-DD")
     inputs = manifest.get("input_files", {})
     if not {"bold", "t1w", "mni_template"}.issubset(inputs):
         raise ValueError("Raw BOLD, T1w and MNI template are required for matched comparison")
@@ -383,6 +386,7 @@ def compare_manifest(manifest, directory, private_output=None, device="cuda:0"):
     report = {
         "schema_version": 1, "candidate_revision": manifest["candidate_revision"],
         "reference_revision": manifest["reference_revision"], "subjects": 1,
+        "validated_on": validated_on,
         "input_sha256": input_hashes, "same_raw_inputs_and_resources": input_matches,
         "images": {key: image_pair(value, directory) for key, value in stages.items()},
         "transforms": {key: affine_pair(value, directory) for key, value in transforms.items()},

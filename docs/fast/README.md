@@ -119,18 +119,27 @@ GPU 数字排除压缩写盘、输入读取和比对；Triton 编译缓存已建
 ## 张量接口与代码结构
 
 ```python
+import nibabel as nib
+import numpy as np
 import torch
 from fnit.fast import FASTConfig, segment_t1
 
-t1_tensor = torch.as_tensor(t1_array, device="cuda:0", dtype=torch.float32)  # [X,Y,Z]
-mask_tensor = t1_tensor > 0  # 同网格正脑区
+brain_t1_image = nib.load("T1_brain.nii.gz")  # 本例为3D脑提取T1
+brain_t1_array = np.asarray(brain_t1_image.dataobj, dtype=np.float32)
+flip_internal_x = np.linalg.det(brain_t1_image.affine[:3, :3]) > 0
+if flip_internal_x:
+    brain_t1_array = brain_t1_array[::-1].copy()  # FSL内部radiological网格
+t1_tensor = torch.as_tensor(brain_t1_array, device="cuda:0", dtype=torch.float32)
+mask_tensor = t1_tensor > 0  # 与内部扫描网格一致
 result = segment_t1(
     image=t1_tensor,
     mask=mask_tensor,
-    voxel_size=(1.0, 1.0, 1.0),  # header pixdim；单位 mm
+    voxel_size=brain_t1_image.header.get_zooms()[:3],  # header pixdim；mm
     config=FASTConfig(execution="fsl"),  # 原顺序实现
 )
 gm_tensor = result.pve[1]  # GM；张量接口的三组织轴在最前
+if flip_internal_x:
+    gm_tensor = torch.flip(gm_tensor, dims=(0,))  # 恢复到原NIfTI体素网格
 ```
 
 `segment_t1` 不接收 affine，调用者需先把正行列式影像翻 X 为内部扫描网格，返回后再翻回。常规影像调用用 `TorchFAST` 完成这一处理。代码分工为 `pipeline.py` 检查输入和回写几何，`algorithm.py` 组织分割/PVE/bias 步骤，`_fsl_scan.py` 实现连续随机流、顺序波前与卷积。

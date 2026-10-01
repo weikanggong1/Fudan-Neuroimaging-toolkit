@@ -109,20 +109,36 @@ mcflirt -in sub-01_task-rest_bold.nii.gz \
 | 固定原矩阵文本的最终样条采样与 int32 转换 | 脑内 RMSE 0.2816，时间 r 均值 0.9999987、中位数 1；93.54% 的脑内体素时间点整数值相同。CPU 8 帧采样 1.49 秒。 |
 | CPU，完整 490 帧估计 | 4 线程，387.60 秒，45,794 次 cost；包括路径输入的解压、准备和估计，不包括最终重采样和写盘。 |
 | CPU，完整 490 帧脑内 pull RMS | 逐帧均值 0.00906 mm、中位数 0.00864 mm、p95 0.01699 mm、最大 0.02603 mm；最坏为第 413 帧，其体素距离 p95 为 0.04123 mm。 |
+| GPU，完整 490 帧脑内 pull RMS | 逐帧均值 0.00881 mm、中位数 0.00816 mm、p95 0.01643 mm、最大 0.03008 mm；最坏为第 281 帧，其体素距离 p95 为 0.04915 mm。 |
+| GPU，完整 490 帧独立函数耗时 | 本次完整流程没有分别记录 MCFLIRT 估计与最终采样的时间；FEAT 阶段合计 973.119 秒还包含脑提取、缩放及高通，不能作为 MCFLIRT 函数耗时。 |
+| GPU，完整 490 帧校正图 | 时间 r 均值 0.999578、中位数 0.999834；4D RMSE 8.21084，18.26% 的脑内体素时间点整数值相同。原和 FNIT 输出均为 int32。 |
+| GPU，完整 490 帧 temporal SD 图 | EPI 空间 SD 图 r 为 0.99999784，RMSE 为 0.35877；原/FNIT 脑内平均 SD 为 239.3134/239.3228。 |
 
-完整 490 帧与原 `.par` 的逐列对照：
+CPU 和 GPU 完整 490 帧与原 `.par` 的逐列对照：
 
-| 参数 | Pearson r | RMSE |
-|---|---:|---:|
-| x 转角 | 0.999642 | 0.0000787 rad |
-| y 转角 | 0.996269 | 0.0001071 rad |
-| z 转角 | 0.991151 | 0.0001182 rad |
-| x 平移 | 0.999087 | 0.003109 mm |
-| y 平移 | 0.999773 | 0.003576 mm |
-| z 平移 | 0.999727 | 0.003122 mm |
+| 参数 | CPU Pearson r | CPU RMSE | GPU Pearson r | GPU RMSE |
+|---|---:|---:|---:|---:|
+| x 转角 | 0.999642 | 0.0000787 rad | 0.999600 | 0.0000831 rad |
+| y 转角 | 0.996269 | 0.0001071 rad | 0.996694 | 0.0001009 rad |
+| z 转角 | 0.991151 | 0.0001182 rad | 0.990908 | 0.0001198 rad |
+| x 平移 | 0.999087 | 0.003109 mm | 0.999202 | 0.002909 mm |
+| y 平移 | 0.999773 | 0.003576 mm | 0.999794 | 0.003377 mm |
+| z 平移 | 0.999727 | 0.003122 mm | 0.999756 | 0.002953 mm |
 
-这些是共享 H100 服务器上的同输入真实控制结果。完整 CPU 对照覆盖全部 490 帧，包括最后一帧，没有截取片段造成的初值差异；详细匿名统计和哈希见[完整 CPU 估计](../../validation/mcflirt/full490_cpu.public.json)。原 MCFLIRT 独立命令为 326.10 秒，包含最终采样和写盘；本次 CPU 只估计矩阵，计时边界不同，不能据此声称加速。CPU 在前 8 帧暖运行控制中更快，完整 GPU 运行仍需单独测量。另见 [CPU/GPU 同进程重复控制](../../validation/mcflirt/first8_warm.public.json)和[固定原矩阵采样](../../validation/mcflirt/first8_sampling.public.json)。
+这些是共享 H100 服务器上的同输入真实控制结果。完整 CPU/GPU 对照覆盖全部 490 帧，包括最后一帧，没有截取片段造成的初值差异；详细匿名统计和哈希见[完整 CPU 估计](../../validation/mcflirt/full490_cpu.public.json)和[完整 GPU 输出](../../validation/mcflirt/full490_gpu.public.json)。原 MCFLIRT 独立命令为 326.10 秒，包含最终采样和写盘；本次 CPU 只估计矩阵，计时边界不同，不能据此声称加速。完整 GPU 输出来自当前同一运行，估计和采样无法从 FEAT 阶段的 973.119 秒合计中分离；该阶段耗时及其它处理边界见[全流程对照](../../validation/fmri/matched_native.md)。图示脚本的 CPU 耗时也不作为模型运行速度。另见 [CPU/GPU 同进程重复控制](../../validation/mcflirt/first8_warm.public.json)和[固定原矩阵采样](../../validation/mcflirt/first8_sampling.public.json)。
 
 实际安装的 MCFLIRT 为 2111.0，依赖 NEWIMAGE 2601.0 和 MISCMATHS 2412.6。对应的 `costfns.cc`、`optimise.cc` 与项目审计过的版本逐字一致；Euler 旋转、矩阵组合及分解函数去除空白和注释后也一致。NCC 在最优点附近很平坦，float32 累加/融合差异会改变 Brent 在相近 cost 中的选择，因此矩阵尚未逐元素相同。原矩阵文本精度也会影响整数截断；采样控制未取得原运行的内存矩阵，不能将所有余差归因于插值实现。完整 fMRI 处理的时序一致性、完整耗时和标准空间脑图见[全流程对照](../../validation/fmri/matched_native.md)。
+
+## 真实数据图示
+
+![原 FSL MCFLIRT 和 FNIT 的均值、temporal SD 与时间相关图](figures/motion_correction_mni.png)
+
+同一例 490 帧 BOLD。均值、temporal SD（`ddof=0`）及逐体素时间 r 先在 EPI 空间计算，再用同一原 BBR 和 FNIRT pull 将三维指标图变换到 MNI，仅用于展示。均值和 SD 使用各自统一的色阶；时间 r 的色阶为 0.995–1，低于下限的体素显示为下限颜色。这里的 SD 不是将四维 BOLD 重采样到 MNI 后重新计算的 SD。没有额外空间平滑，只有获授权的去标识化模板空间 PNG 被公开。复现命令见[独立验证说明](../../validation/mcflirt/README.md)，图示实现为 [render_comparison.py](../../validation/mcflirt/render_comparison.py)。
+
+## 许可证与源码来源
+
+本模块是基于 FSL 源码改写的 Python/PyTorch 实现，沿用 [FSL Software Licence, Release 6.0](../../licenses/FSL-6.0.txt) 的非商业使用条款。许可证要求在无财务回报的再分发中向接收者保留条款，并随产品提供原始及修改后的源代码。因此，本包同时提供改写后的 `src/fnit/mcflirt/` 和官方 tag `2111.0` 的[完整六文件源码快照](../../src/fnit/_vendor_fsl/sources/mcflirt-2111.0/)；原始文件未修改，FNIT 不编译或执行这些文件。
+
+官方提交为 `fa24cb88fba970fb9adc959713fee57bf3706d3e`，Git tree 为 `ee503629cf36f06a698eb4bfc516e2ad2df8feff`。官方仓库、无前缀 `git archive --format=tar` 的 SHA-256、逐文件大小及 SHA-256 见[源码清单](../../src/fnit/_vendor_fsl/manifest.json)；共享 NEWIMAGE/MISCMATHS 来源及许可见[vendor 说明](../../src/fnit/_vendor_fsl/README.md)和[第三方声明](../../THIRD_PARTY_NOTICES.md)。这些来源记录不将 FNIT 标记为官方 FSL，也不扩大上文已测量的数值范围。
 
 参考：[FSL MCFLIRT 文档](https://fsl.fmrib.ox.ac.uk/fsl/docs/registration/mcflirt.html)；Jenkinson M, Bannister P, Brady M, Smith S. Improved optimization for the robust and accurate linear registration and motion correction of brain images. *NeuroImage* 17:825–841, 2002. [DOI](https://doi.org/10.1006/nimg.2002.1132)。
