@@ -166,6 +166,39 @@ U-Net、1 mm 最近邻重采样和 SDT 回采样在所选 PyTorch 设备执行�
 
 完整输入、权重和源码 SHA-256、环境以及重复结果见 [机器可读报告](../../validation/fmri/synthstrip_geometry_control.public.json)。体积流程的模板空间脑图见 [fMRI 完整对照](../../validation/fmri/matched_native.md)。原始头部图像留在服务器。
 
+### 模板空间脑提取示例
+
+下图使用同一份真实存档 T1 输入。第一行是原 FreeSurfer SynthStrip 的脑图，第二行是本包在 `1eb9c417` 完整流程中生成的脑图；两者共用原 FNIRT 的 MNI→T1 RAS pull 场，由本包 `resample_world` 转到同一 MNI152 2 mm 网格。脑图使用三阶样条，掩膜使用最近邻；两行使用相同切面和灰度范围。
+
+![原 SynthStrip 与 FNIT 的脑提取图，经同一原 FNIRT 场转到 MNI152 2 mm；第三行显示掩膜差异](figures/brain_extraction_fixed_warp.png)
+
+这次流程捕获的个体空间掩膜与原结果相差 4 个体素，Dice 为 0.999998569；最近邻转到 2 mm MNI 网格后，两个掩膜完全相同，第三行因此只显示灰色边界。若有不同体素，蓝色表示仅原结果包含，橙色表示仅本包包含。此图用固定变换展示脑提取差异，不用于判断两条流程的配准精度，也不表示独立推理的原空间输出始终逐体素相同。
+
+图像、输入及变换的哈希和生成参数见 [示例图报告](../../validation/fmri/synthstrip_figure.public.json)。复现脚本为 [render_synthstrip_comparison.py](../../validation/fmri/render_synthstrip_comparison.py)。在仓库根目录执行：
+
+```bash
+# 准备同一输入的两组脑图/掩膜，以及只使用一次的原配准场。
+current_brain_image=/path/to/fnit/T1_brain.nii.gz
+current_brain_mask=/path/to/fnit/T1_mask.nii.gz
+reference_brain_image=/path/to/original/T1_brain.nii.gz
+reference_brain_mask=/path/to/original/T1_mask.nii.gz
+mni_template_image=/path/to/MNI152_T1_2mm.nii.gz
+original_mni_to_t1_pull=/path/to/MNI152_2mm_to_T1_pull_ras.nii.gz
+candidate_source_revision=1eb9c417febebc8bdd450590d4759454e7160141
+
+# 用本包 CPU 采样两组结果；保存模板 PNG、匿名统计和私有中间图。
+PYTHONPATH=src python validation/fmri/render_synthstrip_comparison.py \
+  --current-brain "$current_brain_image" --current-mask "$current_brain_mask" \
+  --reference-brain "$reference_brain_image" --reference-mask "$reference_brain_mask" \
+  --template "$mni_template_image" --pull-ras "$original_mni_to_t1_pull" \
+  --source-revision "$candidate_source_revision" --device cpu --threads 4 \
+  --private-output /path/to/private/synthstrip_figure \
+  --figure-out results/synthstrip_comparison.png \
+  --report-out results/synthstrip_figure.public.json
+```
+
+`--pull-ras` 必须是模板网格上的相对 RAS-mm 位移：MNI 世界坐标加该位移后得到 T1 世界坐标；它已经包含线性部分，不是 FSL 系数场或 FSL scaled-mm 位移。`--private-output` 保存四幅重采样 NIfTI，`--figure-out` 保存上述三行对照 PNG，`--report-out` 保存标量统计与文件哈希。图像仅用于本地复现；本例公开的是获授权的模板 PNG 和匿名报告。
+
 ## 测试与复现
 
 几何回归测试覆盖视野中心、原 header 体素尺寸、正值包围盒、奇数裁剪、最近邻半体素及线性采样末端边界。本次以下测试共 28 项通过：
