@@ -1,0 +1,1768 @@
+{
+  "state": "completed",
+  "exit_code": 0,
+  "mode": "raw_t1",
+  "source_commit": "971a07f529f07b7103e7d4b68cd1347d81005610",
+  "conclusion": "right hippocampus official Dice recovered to historical v12; right amygdala still lower by 0.01731377, improved versus v14; no claim of complete precision recovery",
+  "performance_vs_v12": {
+    "api_wall_seconds": {
+      "old": 2479.607695993036,
+      "new": 1293.6531797181815,
+      "signed_difference": -1185.9545162748545,
+      "relative_abs_difference": 0.4782831244600982
+    },
+    "observed_wall_ratio_old_over_new": 1.9167484259832386,
+    "pytorch_peak_gpu_gib": {
+      "old": 15.471590042114258,
+      "new": 15.471590042114258,
+      "signed_difference": 0.0,
+      "relative_abs_difference": 0.0
+    },
+    "scope": "Python API including preprocessing, fitting and merging; excludes output saving/comparison",
+    "interpretation": "shared-GPU observation; differing load histories do not establish causal speedup"
+  },
+  "performance_vs_v14": {
+    "api_wall_seconds": {
+      "old": 972.7415611376055,
+      "new": 1293.6531797181815,
+      "signed_difference": 320.91161858057603,
+      "relative_abs_difference": 0.3299042946260825
+    },
+    "observed_wall_ratio_old_over_new": 0.7519338075986597,
+    "pytorch_peak_gpu_gib": {
+      "old": 15.471590042114258,
+      "new": 15.471590042114258,
+      "signed_difference": 0.0,
+      "relative_abs_difference": 0.0
+    },
+    "scope": "Python API including preprocessing, fitting and merging; excludes output saving/comparison",
+    "interpretation": "shared-GPU observation; differing load histories do not establish causal speedup"
+  },
+  "timings": {
+    "compute_seconds": 1293.6531797181815,
+    "api_including_output_seconds": 1294.1837579603307,
+    "output_save_seconds": 0.4798808339983225,
+    "scope": "compute includes preprocessing/fitting/merging; output saving separate; official validation comparison follows API measurement"
+  },
+  "checks_vs_v12": {
+    "input_sha256_equal": true,
+    "validation_mode_equal": true,
+    "both_full_runs": true,
+    "label_metadata_equal": true,
+    "both_have_110_labels": true,
+    "brainstem_has_four_expected_labels": true,
+    "official_rows_cover_all_labels": true,
+    "official_reference_paths_equal": true,
+    "soft_volumes_cover_all_labels": true,
+    "native_both_3d": true,
+    "native_same_geometry": true,
+    "native_both_int32": true,
+    "native_labels_in_table": true,
+    "brainstem_highres_3d_int32": true,
+    "brainstem_highres_spacing_correct": true,
+    "brainstem_highres_labels_in_table": true,
+    "thalamus_highres_3d_int32": true,
+    "thalamus_highres_spacing_correct": true,
+    "thalamus_highres_labels_in_table": true,
+    "hippo-amygdala-left_highres_3d_int32": true,
+    "hippo-amygdala-left_highres_spacing_correct": true,
+    "hippo-amygdala-left_highres_labels_in_table": true,
+    "hippo-amygdala-right_highres_3d_int32": true,
+    "hippo-amygdala-right_highres_spacing_correct": true,
+    "hippo-amygdala-right_highres_labels_in_table": true,
+    "old_manifest_source_hashes_match": true,
+    "old_monitor_completed": true,
+    "new_manifest_source_hashes_match": true,
+    "new_monitor_completed": true
+  },
+  "checks_vs_v14": {
+    "input_sha256_equal": true,
+    "validation_mode_equal": true,
+    "both_full_runs": true,
+    "label_metadata_equal": true,
+    "both_have_110_labels": true,
+    "brainstem_has_four_expected_labels": true,
+    "official_rows_cover_all_labels": true,
+    "official_reference_paths_equal": true,
+    "soft_volumes_cover_all_labels": true,
+    "native_both_3d": true,
+    "native_same_geometry": true,
+    "native_both_int32": true,
+    "native_labels_in_table": true,
+    "brainstem_highres_3d_int32": true,
+    "brainstem_highres_spacing_correct": true,
+    "brainstem_highres_labels_in_table": true,
+    "thalamus_highres_3d_int32": true,
+    "thalamus_highres_spacing_correct": true,
+    "thalamus_highres_labels_in_table": true,
+    "hippo-amygdala-left_highres_3d_int32": true,
+    "hippo-amygdala-left_highres_spacing_correct": true,
+    "hippo-amygdala-left_highres_labels_in_table": true,
+    "hippo-amygdala-right_highres_3d_int32": true,
+    "hippo-amygdala-right_highres_spacing_correct": true,
+    "hippo-amygdala-right_highres_labels_in_table": true,
+    "old_manifest_source_hashes_match": true,
+    "old_monitor_completed": true,
+    "new_manifest_source_hashes_match": true,
+    "new_monitor_completed": true
+  },
+  "both_comparisons_checks_passed": true,
+  "official_joint_acceptance": {
+    "labels": 110,
+    "old_evaluated_labels": 104,
+    "new_evaluated_labels": 105,
+    "old_accepted": 0,
+    "new_accepted": 0,
+    "accepted_count_change": 0,
+    "newly_accepted_labels": [],
+    "lost_accepted_labels": [],
+    "old_both_empty_labels": [
+      8117,
+      8119,
+      8130,
+      8217,
+      8219,
+      8230
+    ],
+    "new_both_empty_labels": [
+      8117,
+      8119,
+      8130,
+      8219,
+      8230
+    ]
+  },
+  "official_major_dice": {
+    "brainstem": {
+      "v12": 0.9359064562602607,
+      "v15": 0.9357951879900811,
+      "v14": 0.9358080943446797
+    },
+    "thalamus": {
+      "v12": 0.910006841221469,
+      "v15": 0.9111359681829481,
+      "v14": 0.9067033516758379
+    },
+    "hippocampus-left": {
+      "v12": 0.8991246352646937,
+      "v15": 0.8969137098467352,
+      "v14": 0.8894358974358975
+    },
+    "amygdala-left": {
+      "v12": 0.8805031446540881,
+      "v15": 0.8868859846777828,
+      "v14": 0.8642857142857143
+    },
+    "hippocampus-right": {
+      "v12": 0.8864978902953586,
+      "v15": 0.8865248226950354,
+      "v14": 0.8598739068537726
+    },
+    "amygdala-right": {
+      "v12": 0.8780487804878049,
+      "v15": 0.8607350096711799,
+      "v14": 0.8397312859884837
+    }
+  },
+  "families_vs_v12": {
+    "brainstem": {
+      "old_foreground_voxels": 14542,
+      "new_foreground_voxels": 14537,
+      "both_empty": false,
+      "foreground_union_voxels": 14548,
+      "old_new_foreground_dice": 0.9994153856735101,
+      "hard_volume_mm3": {
+        "old": 18895.52448732946,
+        "new": 18889.027607778047,
+        "signed_difference": -6.4968795514141675,
+        "relative_abs_difference": 0.00034383166001931834,
+        "signed_change_percent": -0.03438316600193183
+      },
+      "centroid_world_mm": {
+        "old": [
+          -0.7498803054434404,
+          13.094105291254465,
+          -54.37585710138012
+        ],
+        "new": [
+          -0.7462531857479036,
+          13.090587023252525,
+          -54.38189324720541
+        ]
+      },
+      "centroid_shift_mm": 0.007872055858758279,
+      "label_different_voxels_in_union": 20,
+      "label_difference_percent_union": 0.13747594171020072,
+      "foreground_boundary_changed_voxels": 17,
+      "foreground_internal_label_switched_voxels": 3,
+      "soft_volume_mm3": {
+        "old": 18727.954986572266,
+        "new": 18730.009552001953,
+        "signed_difference": 2.0545654296875,
+        "relative_abs_difference": 0.00010970580777028781,
+        "signed_change_percent": 0.01097058077702878
+      },
+      "labels": [
+        175,
+        174,
+        178,
+        173
+      ]
+    },
+    "thalamus": {
+      "old_foreground_voxels": 8286,
+      "new_foreground_voxels": 8299,
+      "both_empty": false,
+      "foreground_union_voxels": 8367,
+      "old_new_foreground_dice": 0.9910159782936389,
+      "hard_volume_mm3": {
+        "old": 10766.628792601563,
+        "new": 10783.520679435236,
+        "signed_difference": 16.891886833673198,
+        "relative_abs_difference": 0.0015689114168476479,
+        "signed_change_percent": 0.15689114168476478
+      },
+      "centroid_world_mm": {
+        "old": [
+          -2.278663665473445,
+          15.092965999490048,
+          -25.119687138232308
+        ],
+        "new": [
+          -2.3196012680008664,
+          15.084920258875002,
+          -25.104394050321986
+        ]
+      },
+      "centroid_shift_mm": 0.04443534382190123,
+      "label_different_voxels_in_union": 405,
+      "label_difference_percent_union": 4.840444603800646,
+      "foreground_boundary_changed_voxels": 149,
+      "foreground_internal_label_switched_voxels": 256,
+      "soft_volume_mm3": {
+        "old": 10839.425941467285,
+        "new": 10818.278056144714,
+        "signed_difference": -21.1478853225708,
+        "relative_abs_difference": 0.0019510152508785078,
+        "signed_change_percent": -0.19510152508785078
+      },
+      "labels": [
+        8109,
+        8209,
+        8215,
+        8115,
+        8121,
+        8123,
+        8111,
+        8133,
+        8106,
+        8128,
+        8120,
+        8113,
+        8118,
+        8127,
+        8112,
+        8104,
+        8126,
+        8116,
+        8130,
+        8105,
+        8122,
+        8119,
+        8103,
+        8117,
+        8129,
+        8110,
+        8221,
+        8223,
+        8211,
+        8233,
+        8206,
+        8228,
+        8220,
+        8213,
+        8218,
+        8227,
+        8212,
+        8226,
+        8216,
+        8204,
+        8230,
+        8222,
+        8205,
+        8229,
+        8217,
+        8219,
+        8203,
+        8210,
+        8108,
+        8208
+      ]
+    },
+    "hippocampus-left": {
+      "old_foreground_voxels": 2436,
+      "new_foreground_voxels": 2401,
+      "both_empty": false,
+      "foreground_union_voxels": 2458,
+      "old_new_foreground_dice": 0.9836675625387638,
+      "hard_volume_mm3": {
+        "old": 3165.2797174483953,
+        "new": 3119.801560588505,
+        "signed_difference": -45.47815685989053,
+        "relative_abs_difference": 0.014367816091953959,
+        "signed_change_percent": -1.4367816091953958
+      },
+      "centroid_world_mm": {
+        "old": [
+          -24.2403060716817,
+          13.801496943302936,
+          -42.14026630000015
+        ],
+        "new": [
+          -24.320931853229624,
+          13.690579945728132,
+          -42.120491407632414
+        ]
+      },
+      "centroid_shift_mm": 0.13854292969826384,
+      "label_different_voxels_in_union": 215,
+      "label_difference_percent_union": 8.746948738812042,
+      "foreground_boundary_changed_voxels": 79,
+      "foreground_internal_label_switched_voxels": 136,
+      "soft_volume_mm3": {
+        "old": 3294.816879272461,
+        "new": 3250.250820159912,
+        "signed_difference": -44.56605911254883,
+        "relative_abs_difference": 0.013526111084628655,
+        "signed_change_percent": -1.3526111084628656
+      },
+      "labels": [
+        226,
+        236,
+        238,
+        235,
+        215,
+        233,
+        237,
+        234,
+        203,
+        245,
+        246,
+        243,
+        240,
+        244,
+        241,
+        242,
+        212,
+        239,
+        211
+      ]
+    },
+    "amygdala-left": {
+      "old_foreground_voxels": 1174,
+      "new_foreground_voxels": 1167,
+      "both_empty": false,
+      "foreground_union_voxels": 1191,
+      "old_new_foreground_dice": 0.9824861170439982,
+      "hard_volume_mm3": {
+        "old": 1525.4673186717637,
+        "new": 1516.3716872997854,
+        "signed_difference": -9.095631371978243,
+        "relative_abs_difference": 0.005962521294718972,
+        "signed_change_percent": -0.5962521294718972
+      },
+      "centroid_world_mm": {
+        "old": [
+          -25.751335081191385,
+          31.34844377286592,
+          -42.81157137464979
+        ],
+        "new": [
+          -25.719871611233827,
+          31.29288498477591,
+          -42.781682315533885
+        ]
+      },
+      "centroid_shift_mm": 0.07049882786709818,
+      "label_different_voxels_in_union": 59,
+      "label_difference_percent_union": 4.953820319059614,
+      "foreground_boundary_changed_voxels": 41,
+      "foreground_internal_label_switched_voxels": 18,
+      "soft_volume_mm3": {
+        "old": 1614.0926990509033,
+        "new": 1607.2654514312744,
+        "signed_difference": -6.827247619628906,
+        "relative_abs_difference": 0.004229774178176614,
+        "signed_change_percent": -0.42297741781766135
+      },
+      "labels": [
+        7001,
+        7003,
+        7008,
+        7010,
+        7005,
+        7006,
+        7007,
+        7009,
+        7015
+      ]
+    },
+    "hippocampus-right": {
+      "old_foreground_voxels": 2377,
+      "new_foreground_voxels": 2431,
+      "both_empty": false,
+      "foreground_union_voxels": 2485,
+      "old_new_foreground_dice": 0.96630615640599,
+      "hard_volume_mm3": {
+        "old": 3088.6165387417227,
+        "new": 3158.7828378969825,
+        "signed_difference": 70.16629915525982,
+        "relative_abs_difference": 0.02271771140092548,
+        "signed_change_percent": 2.271771140092548
+      },
+      "centroid_world_mm": {
+        "old": [
+          20.301856404633867,
+          20.581505402874058,
+          -39.83495218099358
+        ],
+        "new": [
+          20.356500143060344,
+          20.420892927524406,
+          -39.72300230649944
+        ]
+      },
+      "centroid_shift_mm": 0.20326111233194194,
+      "label_different_voxels_in_union": 559,
+      "label_difference_percent_union": 22.494969818913482,
+      "foreground_boundary_changed_voxels": 162,
+      "foreground_internal_label_switched_voxels": 397,
+      "soft_volume_mm3": {
+        "old": 3182.8227195739746,
+        "new": 3269.6735877990723,
+        "signed_difference": 86.85086822509766,
+        "relative_abs_difference": 0.02728737220925794,
+        "signed_change_percent": 2.7287372209257943
+      },
+      "labels": [
+        10226,
+        10236,
+        10238,
+        10235,
+        10215,
+        10233,
+        10237,
+        10234,
+        10203,
+        10245,
+        10246,
+        10243,
+        10240,
+        10244,
+        10241,
+        10242,
+        10212,
+        10239,
+        10211
+      ]
+    },
+    "amygdala-right": {
+      "old_foreground_voxels": 1081,
+      "new_foreground_voxels": 1099,
+      "both_empty": false,
+      "foreground_union_voxels": 1126,
+      "old_new_foreground_dice": 0.9669724770642202,
+      "hard_volume_mm3": {
+        "old": 1404.6253590154827,
+        "new": 1428.0141254005694,
+        "signed_difference": 23.388766385086683,
+        "relative_abs_difference": 0.016651248843663286,
+        "signed_change_percent": 1.6651248843663284
+      },
+      "centroid_world_mm": {
+        "old": [
+          16.271184908378615,
+          36.58138087043791,
+          -40.23408853235438
+        ],
+        "new": [
+          16.40591534114509,
+          36.611930703732426,
+          -40.11367506496066
+        ]
+      },
+      "centroid_shift_mm": 0.18326206633545863,
+      "label_different_voxels_in_union": 134,
+      "label_difference_percent_union": 11.900532859680284,
+      "foreground_boundary_changed_voxels": 72,
+      "foreground_internal_label_switched_voxels": 62,
+      "soft_volume_mm3": {
+        "old": 1553.0057983398438,
+        "new": 1563.0712661743164,
+        "signed_difference": 10.065467834472656,
+        "relative_abs_difference": 0.006481281554281766,
+        "signed_change_percent": 0.6481281554281765
+      },
+      "labels": [
+        17001,
+        17003,
+        17008,
+        17010,
+        17005,
+        17006,
+        17007,
+        17009,
+        17015
+      ]
+    }
+  },
+  "families_vs_v14": {
+    "brainstem": {
+      "old_foreground_voxels": 14543,
+      "new_foreground_voxels": 14537,
+      "both_empty": false,
+      "foreground_union_voxels": 14545,
+      "old_new_foreground_dice": 0.999656121045392,
+      "hard_volume_mm3": {
+        "old": 18896.823863239744,
+        "new": 18889.027607778047,
+        "signed_difference": -7.796255461697001,
+        "relative_abs_difference": 0.00041256962112364107,
+        "signed_change_percent": -0.04125696211236411
+      },
+      "centroid_world_mm": {
+        "old": [
+          -0.7473081139841753,
+          13.091037062633376,
+          -54.372437904389
+        ],
+        "new": [
+          -0.7462531857479036,
+          13.090587023252525,
+          -54.38189324720541
+        ]
+      },
+      "centroid_shift_mm": 0.009524647857208069,
+      "label_different_voxels_in_union": 10,
+      "label_difference_percent_union": 0.06875214850464077,
+      "foreground_boundary_changed_voxels": 10,
+      "foreground_internal_label_switched_voxels": 0,
+      "soft_volume_mm3": {
+        "old": 18730.009552001953,
+        "new": 18730.009552001953,
+        "signed_difference": 0.0,
+        "relative_abs_difference": 0.0,
+        "signed_change_percent": 0.0
+      },
+      "labels": [
+        175,
+        174,
+        178,
+        173
+      ]
+    },
+    "thalamus": {
+      "old_foreground_voxels": 8199,
+      "new_foreground_voxels": 8299,
+      "both_empty": false,
+      "foreground_union_voxels": 8582,
+      "old_new_foreground_dice": 0.9596314704812705,
+      "hard_volume_mm3": {
+        "old": 10653.583088406976,
+        "new": 10783.520679435236,
+        "signed_difference": 129.9375910282597,
+        "relative_abs_difference": 0.0121966093426028,
+        "signed_change_percent": 1.2196609342602798
+      },
+      "centroid_world_mm": {
+        "old": [
+          -2.623088232942422,
+          14.99914174118507,
+          -25.118655142248826
+        ],
+        "new": [
+          -2.3196012680008664,
+          15.084920258875002,
+          -25.104394050321986
+        ]
+      },
+      "centroid_shift_mm": 0.31569870245134773,
+      "label_different_voxels_in_union": 1723,
+      "label_difference_percent_union": 20.076905150314612,
+      "foreground_boundary_changed_voxels": 666,
+      "foreground_internal_label_switched_voxels": 1057,
+      "soft_volume_mm3": {
+        "old": 10712.185431480408,
+        "new": 10818.278056144714,
+        "signed_difference": 106.09262466430664,
+        "relative_abs_difference": 0.009903919731684929,
+        "signed_change_percent": 0.9903919731684928
+      },
+      "labels": [
+        8109,
+        8209,
+        8215,
+        8115,
+        8121,
+        8123,
+        8111,
+        8133,
+        8106,
+        8128,
+        8120,
+        8113,
+        8118,
+        8127,
+        8112,
+        8104,
+        8126,
+        8116,
+        8130,
+        8105,
+        8122,
+        8119,
+        8103,
+        8117,
+        8129,
+        8110,
+        8221,
+        8223,
+        8211,
+        8233,
+        8206,
+        8228,
+        8220,
+        8213,
+        8218,
+        8227,
+        8212,
+        8226,
+        8216,
+        8204,
+        8230,
+        8222,
+        8205,
+        8229,
+        8217,
+        8219,
+        8203,
+        8210,
+        8108,
+        8208
+      ]
+    },
+    "hippocampus-left": {
+      "old_foreground_voxels": 2513,
+      "new_foreground_voxels": 2401,
+      "both_empty": false,
+      "foreground_union_voxels": 2604,
+      "old_new_foreground_dice": 0.9401709401709402,
+      "hard_volume_mm3": {
+        "old": 3265.3316625401553,
+        "new": 3119.801560588505,
+        "signed_difference": -145.53010195165052,
+        "relative_abs_difference": 0.04456824512534823,
+        "signed_change_percent": -4.456824512534824
+      },
+      "centroid_world_mm": {
+        "old": [
+          -24.0959461949535,
+          13.833242320401865,
+          -42.15786608009256
+        ],
+        "new": [
+          -24.320931853229624,
+          13.690579945728132,
+          -42.120491407632414
+        ]
+      },
+      "centroid_shift_mm": 0.26901294712149704,
+      "label_different_voxels_in_union": 595,
+      "label_difference_percent_union": 22.849462365591396,
+      "foreground_boundary_changed_voxels": 294,
+      "foreground_internal_label_switched_voxels": 301,
+      "soft_volume_mm3": {
+        "old": 3403.018798828125,
+        "new": 3250.250820159912,
+        "signed_difference": -152.7679786682129,
+        "relative_abs_difference": 0.04489189972174723,
+        "signed_change_percent": -4.489189972174723
+      },
+      "labels": [
+        226,
+        236,
+        238,
+        235,
+        215,
+        233,
+        237,
+        234,
+        203,
+        245,
+        246,
+        243,
+        240,
+        244,
+        241,
+        242,
+        212,
+        239,
+        211
+      ]
+    },
+    "amygdala-left": {
+      "old_foreground_voxels": 1188,
+      "new_foreground_voxels": 1167,
+      "both_empty": false,
+      "foreground_union_voxels": 1242,
+      "old_new_foreground_dice": 0.9452229299363057,
+      "hard_volume_mm3": {
+        "old": 1543.65858141572,
+        "new": 1516.3716872997854,
+        "signed_difference": -27.2868941159345,
+        "relative_abs_difference": 0.017676767676767714,
+        "signed_change_percent": -1.7676767676767715
+      },
+      "centroid_world_mm": {
+        "old": [
+          -25.636146835096937,
+          31.5093671370812,
+          -42.81073900033101
+        ],
+        "new": [
+          -25.719871611233827,
+          31.29288498477591,
+          -42.781682315533885
+        ]
+      },
+      "centroid_shift_mm": 0.23392018155196098,
+      "label_different_voxels_in_union": 175,
+      "label_difference_percent_union": 14.090177133655395,
+      "foreground_boundary_changed_voxels": 129,
+      "foreground_internal_label_switched_voxels": 46,
+      "soft_volume_mm3": {
+        "old": 1624.9058742523193,
+        "new": 1607.2654514312744,
+        "signed_difference": -17.640422821044922,
+        "relative_abs_difference": 0.010856273646719351,
+        "signed_change_percent": -1.085627364671935
+      },
+      "labels": [
+        7001,
+        7003,
+        7008,
+        7010,
+        7005,
+        7006,
+        7007,
+        7009,
+        7015
+      ]
+    },
+    "hippocampus-right": {
+      "old_foreground_voxels": 2554,
+      "new_foreground_voxels": 2431,
+      "both_empty": false,
+      "foreground_union_voxels": 2639,
+      "old_new_foreground_dice": 0.9412236710130392,
+      "hard_volume_mm3": {
+        "old": 3318.6060748617415,
+        "new": 3158.7828378969825,
+        "signed_difference": -159.82323696475896,
+        "relative_abs_difference": 0.048159749412686005,
+        "signed_change_percent": -4.815974941268601
+      },
+      "centroid_world_mm": {
+        "old": [
+          20.422942909061277,
+          20.149109780181632,
+          -39.57011407988327
+        ],
+        "new": [
+          20.356500143060344,
+          20.420892927524406,
+          -39.72300230649944
+        ]
+      },
+      "centroid_shift_mm": 0.31883464393198535,
+      "label_different_voxels_in_union": 630,
+      "label_difference_percent_union": 23.872679045092838,
+      "foreground_boundary_changed_voxels": 293,
+      "foreground_internal_label_switched_voxels": 337,
+      "soft_volume_mm3": {
+        "old": 3446.1210021972656,
+        "new": 3269.6735877990723,
+        "signed_difference": -176.44741439819336,
+        "relative_abs_difference": 0.05120174662633423,
+        "signed_change_percent": -5.120174662633422
+      },
+      "labels": [
+        10226,
+        10236,
+        10238,
+        10235,
+        10215,
+        10233,
+        10237,
+        10234,
+        10203,
+        10245,
+        10246,
+        10243,
+        10240,
+        10244,
+        10241,
+        10242,
+        10212,
+        10239,
+        10211
+      ]
+    },
+    "amygdala-right": {
+      "old_foreground_voxels": 1115,
+      "new_foreground_voxels": 1099,
+      "both_empty": false,
+      "foreground_union_voxels": 1146,
+      "old_new_foreground_dice": 0.964769647696477,
+      "hard_volume_mm3": {
+        "old": 1448.8041399650908,
+        "new": 1428.0141254005694,
+        "signed_difference": -20.79001456452147,
+        "relative_abs_difference": 0.014349775784753355,
+        "signed_change_percent": -1.4349775784753356
+      },
+      "centroid_world_mm": {
+        "old": [
+          16.34166843390571,
+          36.634060859409544,
+          -40.01005320778708
+        ],
+        "new": [
+          16.40591534114509,
+          36.611930703732426,
+          -40.11367506496066
+        ]
+      },
+      "centroid_shift_mm": 0.12391488273900136,
+      "label_different_voxels_in_union": 152,
+      "label_difference_percent_union": 13.263525305410122,
+      "foreground_boundary_changed_voxels": 78,
+      "foreground_internal_label_switched_voxels": 74,
+      "soft_volume_mm3": {
+        "old": 1597.7693691253662,
+        "new": 1563.0712661743164,
+        "signed_difference": -34.698102951049805,
+        "relative_abs_difference": 0.021716590405061943,
+        "signed_change_percent": -2.1716590405061944
+      },
+      "labels": [
+        17001,
+        17003,
+        17008,
+        17010,
+        17005,
+        17006,
+        17007,
+        17009,
+        17015
+      ]
+    }
+  },
+  "final_intensity_min_jacobians": {
+    "brainstem": 0.25793588161468506,
+    "thalamus": 0.2120729684829712,
+    "hippo-amygdala-left": 0.23263587057590485,
+    "hippo-amygdala-right": 0.16369421780109406
+  },
+  "label_metadata_count": 110,
+  "soft_volume_label_count": 110,
+  "newly_nonempty_native_label": {
+    "label": 8217,
+    "reference_voxels": 0,
+    "fnit_voxels": 1,
+    "reference_hard_volume_mm3": 0.0,
+    "fnit_hard_volume_mm3": 1.2993759102825926,
+    "dice": 0.0,
+    "hard_volume_difference": null,
+    "accepted": false,
+    "id": 8217,
+    "name": "Right-Pc",
+    "parent": "thalamus",
+    "family": "ThalamicNuclei",
+    "hemisphere": "right",
+    "source": "thalamus",
+    "hard_evaluation_status": "evaluated",
+    "reference_soft_volume_mm3": 3.047274,
+    "fnit_soft_volume_mm3": 3.6058454513549805,
+    "soft_volume_difference": 0.18330201070037702
+  },
+  "intensity_stage_statistics": {
+    "thalamus": {
+      "stages": [
+        {
+          "compact": true,
+          "mesh_evaluations": 361,
+          "mesh_steps": 115,
+          "accepted_cache_hits": 63,
+          "index_rebuilds": 87,
+          "shared_geometry": true,
+          "analytic_prior": true,
+          "stage_index": 1,
+          "synthetic": false,
+          "block_size": 8,
+          "resolution_mm": 0.5,
+          "alpha_sigma_voxels": 1.5,
+          "alpha_sigma_mm": 0.75,
+          "outer_iteration_limit": 7,
+          "mesh_iteration_limit": 20,
+          "preparation_seconds": 20.32110956031829,
+          "gems_fit_seconds": 181.07702112197876,
+          "post_fit_seconds": 0.005395186133682728,
+          "total_seconds": 201.40352586843073
+        },
+        {
+          "compact": true,
+          "mesh_evaluations": 208,
+          "mesh_steps": 89,
+          "accepted_cache_hits": 69,
+          "index_rebuilds": 23,
+          "shared_geometry": true,
+          "analytic_prior": true,
+          "stage_index": 2,
+          "synthetic": false,
+          "block_size": 8,
+          "resolution_mm": 0.5,
+          "alpha_sigma_voxels": 1.125,
+          "alpha_sigma_mm": 0.5625,
+          "outer_iteration_limit": 5,
+          "mesh_iteration_limit": 20,
+          "preparation_seconds": 10.998629786074162,
+          "gems_fit_seconds": 69.6164340521209,
+          "post_fit_seconds": 0.005070677027106285,
+          "total_seconds": 80.62013451522216
+        },
+        {
+          "compact": true,
+          "mesh_evaluations": 155,
+          "mesh_steps": 100,
+          "accepted_cache_hits": 93,
+          "index_rebuilds": 2,
+          "shared_geometry": true,
+          "analytic_prior": true,
+          "stage_index": 3,
+          "synthetic": false,
+          "block_size": 8,
+          "resolution_mm": 0.5,
+          "alpha_sigma_voxels": 0.75,
+          "alpha_sigma_mm": 0.375,
+          "outer_iteration_limit": 5,
+          "mesh_iteration_limit": 20,
+          "preparation_seconds": 7.270030561834574,
+          "gems_fit_seconds": 31.30528092989698,
+          "post_fit_seconds": 0.004966240841895342,
+          "total_seconds": 38.58027773257345
+        },
+        {
+          "compact": true,
+          "mesh_evaluations": 66,
+          "mesh_steps": 60,
+          "accepted_cache_hits": 57,
+          "index_rebuilds": 0,
+          "shared_geometry": true,
+          "analytic_prior": true,
+          "stage_index": 4,
+          "synthetic": false,
+          "block_size": 8,
+          "resolution_mm": 0.5,
+          "alpha_sigma_voxels": 0.0,
+          "alpha_sigma_mm": 0.0,
+          "outer_iteration_limit": 3,
+          "mesh_iteration_limit": 20,
+          "preparation_seconds": 0.010441130958497524,
+          "gems_fit_seconds": 17.456046235747635,
+          "post_fit_seconds": 0.0037784003652632236,
+          "total_seconds": 17.470265767071396
+        }
+      ],
+      "mesh_evaluations": 790,
+      "mesh_steps": 364,
+      "accepted_cache_hits": 282,
+      "index_rebuilds": 112,
+      "preparation_seconds": 38.600211039185524,
+      "gems_fit_seconds": 299.45478233974427,
+      "post_fit_seconds": 0.01921050436794758,
+      "total_seconds": 338.07420388329774,
+      "compact": true,
+      "shared_geometry": true,
+      "analytic_prior": true
+    },
+    "hippo-amygdala-left": {
+      "stages": [
+        {
+          "compact": true,
+          "mesh_evaluations": 368,
+          "mesh_steps": 117,
+          "accepted_cache_hits": 55,
+          "index_rebuilds": 117,
+          "shared_geometry": true,
+          "analytic_prior": true,
+          "stage_index": 1,
+          "synthetic": false,
+          "block_size": 8,
+          "resolution_mm": 0.33333,
+          "alpha_sigma_voxels": 1.5,
+          "alpha_sigma_mm": 0.499995,
+          "outer_iteration_limit": 7,
+          "mesh_iteration_limit": 20,
+          "preparation_seconds": 59.56193979922682,
+          "gems_fit_seconds": 199.64320197794586,
+          "post_fit_seconds": 0.005199525970965624,
+          "total_seconds": 259.21034130314365
+        },
+        {
+          "compact": true,
+          "mesh_evaluations": 223,
+          "mesh_steps": 82,
+          "accepted_cache_hits": 53,
+          "index_rebuilds": 46,
+          "shared_geometry": true,
+          "analytic_prior": true,
+          "stage_index": 2,
+          "synthetic": false,
+          "block_size": 8,
+          "resolution_mm": 0.33333,
+          "alpha_sigma_voxels": 0.75,
+          "alpha_sigma_mm": 0.2499975,
+          "outer_iteration_limit": 5,
+          "mesh_iteration_limit": 20,
+          "preparation_seconds": 19.885264474898577,
+          "gems_fit_seconds": 107.3343193163164,
+          "post_fit_seconds": 0.005262193735688925,
+          "total_seconds": 127.22484598495066
+        },
+        {
+          "compact": true,
+          "mesh_evaluations": 107,
+          "mesh_steps": 48,
+          "accepted_cache_hits": 40,
+          "index_rebuilds": 5,
+          "shared_geometry": true,
+          "analytic_prior": true,
+          "stage_index": 3,
+          "synthetic": false,
+          "block_size": 8,
+          "resolution_mm": 0.33333,
+          "alpha_sigma_voxels": 0.0,
+          "alpha_sigma_mm": 0.0,
+          "outer_iteration_limit": 3,
+          "mesh_iteration_limit": 20,
+          "preparation_seconds": 0.004771673120558262,
+          "gems_fit_seconds": 29.006095631048083,
+          "post_fit_seconds": 0.0034138928167521954,
+          "total_seconds": 29.014281196985394
+        }
+      ],
+      "mesh_evaluations": 698,
+      "mesh_steps": 247,
+      "accepted_cache_hits": 148,
+      "index_rebuilds": 168,
+      "preparation_seconds": 79.45197594724596,
+      "gems_fit_seconds": 335.98361692531034,
+      "post_fit_seconds": 0.013875612523406744,
+      "total_seconds": 415.4494684850797,
+      "compact": true,
+      "shared_geometry": true,
+      "analytic_prior": true
+    },
+    "hippo-amygdala-right": {
+      "stages": [
+        {
+          "compact": true,
+          "mesh_evaluations": 343,
+          "mesh_steps": 115,
+          "accepted_cache_hits": 64,
+          "index_rebuilds": 87,
+          "shared_geometry": true,
+          "analytic_prior": true,
+          "stage_index": 1,
+          "synthetic": false,
+          "block_size": 8,
+          "resolution_mm": 0.33333,
+          "alpha_sigma_voxels": 1.5,
+          "alpha_sigma_mm": 0.499995,
+          "outer_iteration_limit": 7,
+          "mesh_iteration_limit": 20,
+          "preparation_seconds": 49.75317838508636,
+          "gems_fit_seconds": 183.55859587993473,
+          "post_fit_seconds": 0.005106661934405565,
+          "total_seconds": 233.3168809269555
+        },
+        {
+          "compact": true,
+          "mesh_evaluations": 212,
+          "mesh_steps": 84,
+          "accepted_cache_hits": 57,
+          "index_rebuilds": 34,
+          "shared_geometry": true,
+          "analytic_prior": true,
+          "stage_index": 2,
+          "synthetic": false,
+          "block_size": 8,
+          "resolution_mm": 0.33333,
+          "alpha_sigma_voxels": 0.75,
+          "alpha_sigma_mm": 0.2499975,
+          "outer_iteration_limit": 5,
+          "mesh_iteration_limit": 20,
+          "preparation_seconds": 13.415837934240699,
+          "gems_fit_seconds": 68.65806214697659,
+          "post_fit_seconds": 0.004551534075289965,
+          "total_seconds": 82.07845161529258
+        },
+        {
+          "compact": true,
+          "mesh_evaluations": 106,
+          "mesh_steps": 60,
+          "accepted_cache_hits": 53,
+          "index_rebuilds": 4,
+          "shared_geometry": true,
+          "analytic_prior": true,
+          "stage_index": 3,
+          "synthetic": false,
+          "block_size": 8,
+          "resolution_mm": 0.33333,
+          "alpha_sigma_voxels": 0.0,
+          "alpha_sigma_mm": 0.0,
+          "outer_iteration_limit": 3,
+          "mesh_iteration_limit": 20,
+          "preparation_seconds": 0.004845872055739164,
+          "gems_fit_seconds": 26.67295511625707,
+          "post_fit_seconds": 0.0025744009763002396,
+          "total_seconds": 26.68037538928911
+        }
+      ],
+      "mesh_evaluations": 661,
+      "mesh_steps": 259,
+      "accepted_cache_hits": 174,
+      "index_rebuilds": 125,
+      "preparation_seconds": 63.173862191382796,
+      "gems_fit_seconds": 278.8896131431684,
+      "post_fit_seconds": 0.01223259698599577,
+      "total_seconds": 342.0757079315372,
+      "compact": true,
+      "shared_geometry": true,
+      "analytic_prior": true
+    }
+  },
+  "synthetic_baseline_comparison": {
+    "full_raw_v12": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_v12/report.json",
+      "sha256": "ae31a8102c87d607422568d25dc3724efbafe619fabc4bdaf469200cccc205dd",
+      "synthetic": {
+        "thalamus": {
+          "seconds": 115.94195228489116,
+          "min_jacobian": 0.1371999830007553,
+          "mean_displacement_voxels": 0.007867864595124886,
+          "p95_displacement_voxels": 0.023868121809582303
+        },
+        "hippo-amygdala-left": {
+          "seconds": 247.14545951224864,
+          "min_jacobian": 0.02972901053726673,
+          "mean_displacement_voxels": 0.03420392413597889,
+          "p95_displacement_voxels": 0.1347511163438512
+        },
+        "hippo-amygdala-right": {
+          "seconds": 68.39018603693694,
+          "min_jacobian": 0.06491711735725403,
+          "mean_displacement_voxels": 0.007109663960920968,
+          "p95_displacement_voxels": 0.02473954835282287
+        }
+      }
+    },
+    "full_raw_fast_v14_20261001": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_fast_v14_20261001/report.json",
+      "sha256": "e9e2ac50046141fe522fa0badaacfe33630a67687e8bb4f930e9f665a9c4a19e",
+      "synthetic": {
+        "thalamus": {
+          "seconds": 43.793128923047334,
+          "min_jacobian": 0.048824943602085114,
+          "mean_displacement_voxels": 0.042421181563211605,
+          "p95_displacement_voxels": 0.13233879800538462,
+          "mesh_solver": {
+            "mesh_steps": 88,
+            "mesh_evaluations": 216,
+            "accepted_cache_hits": 79,
+            "index_rebuilds": 11
+          }
+        },
+        "hippo-amygdala-left": {
+          "seconds": 26.921380242798477,
+          "min_jacobian": 0.039043206721544266,
+          "mean_displacement_voxels": 0.01234663570744124,
+          "p95_displacement_voxels": 0.04511048717988218,
+          "mesh_solver": {
+            "mesh_steps": 56,
+            "mesh_evaluations": 133,
+            "accepted_cache_hits": 51,
+            "index_rebuilds": 5
+          }
+        },
+        "hippo-amygdala-right": {
+          "seconds": 24.869600569829345,
+          "min_jacobian": 0.014959252439439297,
+          "mean_displacement_voxels": 0.011227593228186472,
+          "p95_displacement_voxels": 0.03821869869539027,
+          "mesh_solver": {
+            "mesh_steps": 50,
+            "mesh_evaluations": 120,
+            "accepted_cache_hits": 46,
+            "index_rebuilds": 3
+          }
+        }
+      }
+    },
+    "full_raw_fast_v15_20261001": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_fast_v15_20261001/report.json",
+      "sha256": "6e79e1c10bfc5675130bfe62aff956db049f1f4bd4441adfcbf4b379cf051a6f",
+      "synthetic": {
+        "thalamus": {
+          "seconds": 19.394757955800742,
+          "min_jacobian": 0.02233228087425232,
+          "mean_displacement_voxels": 0.002548537368400359,
+          "p95_displacement_voxels": 0.007537448837160584,
+          "mesh_solver": {
+            "mesh_steps": 12,
+            "mesh_evaluations": 36,
+            "accepted_cache_hits": 8,
+            "index_rebuilds": 3
+          }
+        },
+        "hippo-amygdala-left": {
+          "seconds": 23.30426065903157,
+          "min_jacobian": 0.039107080549001694,
+          "mean_displacement_voxels": 0.005928381969840662,
+          "p95_displacement_voxels": 0.01994439435290416,
+          "mesh_solver": {
+            "mesh_steps": 29,
+            "mesh_evaluations": 73,
+            "accepted_cache_hits": 24,
+            "index_rebuilds": 7
+          }
+        },
+        "hippo-amygdala-right": {
+          "seconds": 17.005113195627928,
+          "min_jacobian": 0.050736524164676666,
+          "mean_displacement_voxels": 0.0036065569285070936,
+          "p95_displacement_voxels": 0.01116347082440377,
+          "mesh_solver": {
+            "mesh_steps": 16,
+            "mesh_evaluations": 46,
+            "accepted_cache_hits": 12,
+            "index_rebuilds": 4
+          }
+        }
+      }
+    }
+  },
+  "synthetic_source_review": "/mnt/c/users/admin/documents/codex/2026-09-29/new-chat/work/fnit-dmri-perf/validation/subregions/speed_v15/raw_v15_synthetic_source_review.json",
+  "gpu": {
+    "physical_index": 1,
+    "allocator_fraction": 0.23,
+    "own_process_cap_mib": 19073,
+    "monitor_own_process_peak_mib": 18928,
+    "pytorch_peak_gib": 15.471590042114258,
+    "v12_load": {
+      "file": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_v12_gpu_load.jsonl",
+        "bytes": 30659,
+        "sha256": "397fff5ffc0124d45b357a9267ecfe1cccd7728fb0ac13f70bc2a775d06dfe42"
+      },
+      "samples": 248,
+      "first_sample_utc": "2026-09-30T18:04:32.355277+00:00",
+      "last_sample_utc": "2026-09-30T18:46:06.732895+00:00",
+      "sample_span_seconds": 2494.3776173591614,
+      "max_sampling_gap_seconds": 10.159931898117065,
+      "median_sampling_gap_seconds": 10.098612785339355,
+      "gaps_above_20_seconds": 0,
+      "own_process_memory_mib": {
+        "min": 0.0,
+        "max": 17762.0,
+        "median": 4756.0
+      },
+      "max_sampled_own_process_memory_mib": 17762,
+      "gpus": {
+        "0": {
+          "used_memory_mib": {
+            "min": 27932.0,
+            "max": 70935.0,
+            "median": 46397.0
+          },
+          "free_memory_mib": {
+            "min": 10072.0,
+            "max": 53075.0,
+            "median": 34610.0
+          },
+          "utilization_percent": {
+            "min": 79.0,
+            "max": 100.0,
+            "median": 100.0
+          }
+        },
+        "1": {
+          "used_memory_mib": {
+            "min": 5450.0,
+            "max": 44801.0,
+            "median": 30335.0
+          },
+          "free_memory_mib": {
+            "min": 36206.0,
+            "max": 75557.0,
+            "median": 50672.0
+          },
+          "utilization_percent": {
+            "min": 0.0,
+            "max": 100.0,
+            "median": 100.0
+          }
+        }
+      },
+      "scope": "complete supplied log interval; sampled maxima are not continuous process memory peaks"
+    },
+    "v14_load": {
+      "file": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_fast_v14_20261001_gpu_load.jsonl",
+        "bytes": 27601,
+        "sha256": "1121757189c599bc94287f4946b9b3dfa691968afdf36d90b26cf3b0849c0803"
+      },
+      "samples": 195,
+      "first_sample_utc": "2026-10-01T02:25:53.959890+00:00",
+      "last_sample_utc": "2026-10-01T02:42:32.221431+00:00",
+      "sample_span_seconds": 998.2615406513214,
+      "max_sampling_gap_seconds": 5.991037607192993,
+      "median_sampling_gap_seconds": 5.1095967292785645,
+      "gaps_above_20_seconds": 0,
+      "own_process_memory_mib": {
+        "min": 0.0,
+        "max": 18930.0,
+        "median": 5920.0
+      },
+      "max_sampled_own_process_memory_mib": 18930,
+      "gpus": {
+        "0": {
+          "used_memory_mib": {
+            "min": 69979.0,
+            "max": 76299.0,
+            "median": 74997.0
+          },
+          "free_memory_mib": {
+            "min": 4708.0,
+            "max": 11028.0,
+            "median": 6010.0
+          },
+          "utilization_percent": {
+            "min": 99.0,
+            "max": 100.0,
+            "median": 100.0
+          }
+        },
+        "1": {
+          "used_memory_mib": {
+            "min": 8816.0,
+            "max": 49083.0,
+            "median": 34636.0
+          },
+          "free_memory_mib": {
+            "min": 31924.0,
+            "max": 72191.0,
+            "median": 46371.0
+          },
+          "utilization_percent": {
+            "min": 0.0,
+            "max": 100.0,
+            "median": 100.0
+          }
+        }
+      },
+      "scope": "complete supplied log interval; sampled maxima are not continuous process memory peaks"
+    },
+    "v15_load": {
+      "file": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_fast_v15_20261001_gpu_load.jsonl",
+        "bytes": 36186,
+        "sha256": "a9abc99cb9017dcc2179bc91bde454564d055629a6bda877655c9b601e1c08a1"
+      },
+      "samples": 257,
+      "first_sample_utc": "2026-10-01T03:02:41.987137+00:00",
+      "last_sample_utc": "2026-10-01T03:24:38.551126+00:00",
+      "sample_span_seconds": 1316.563988685608,
+      "max_sampling_gap_seconds": 5.381023645401001,
+      "median_sampling_gap_seconds": 5.112122893333435,
+      "gaps_above_20_seconds": 0,
+      "own_process_memory_mib": {
+        "min": 0.0,
+        "max": 18928.0,
+        "median": 6132.0
+      },
+      "max_sampled_own_process_memory_mib": 18928,
+      "gpus": {
+        "0": {
+          "used_memory_mib": {
+            "min": 69092.0,
+            "max": 77574.0,
+            "median": 74535.0
+          },
+          "free_memory_mib": {
+            "min": 3433.0,
+            "max": 11915.0,
+            "median": 6472.0
+          },
+          "utilization_percent": {
+            "min": 100.0,
+            "max": 100.0,
+            "median": 100.0
+          }
+        },
+        "1": {
+          "used_memory_mib": {
+            "min": 27322.0,
+            "max": 63437.0,
+            "median": 35306.0
+          },
+          "free_memory_mib": {
+            "min": 17570.0,
+            "max": 53685.0,
+            "median": 45701.0
+          },
+          "utilization_percent": {
+            "min": 60.0,
+            "max": 100.0,
+            "median": 100.0
+          }
+        }
+      },
+      "scope": "complete supplied log interval; sampled maxima are not continuous process memory peaks"
+    },
+    "interpretation": "shared-GPU observations; timing ratios not isolated causal speedup"
+  },
+  "actual_source_hash_verification": {
+    "speed_v12_source_manifest.json": {
+      "manifest_sha256": "dc19b75d8ebc6fa50eb804c45e0ece7a13e679208135fc09ae7526922cb5e2fc",
+      "source_directory": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v12",
+      "source_commit": "64250aa52d99925762927a576e7306fa9d6f2377",
+      "file_count": 30,
+      "actual_all_hashes_and_bytes_match": true,
+      "mismatches": []
+    },
+    "fnit-subregions-speed-v15-source_manifest.json": {
+      "manifest_sha256": "11ff5b6996929dcfd28a9f84fbd5bcdccca23e2ec68a63dc4903944aadf70788",
+      "source_directory": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15",
+      "source_commit": "971a07f529f07b7103e7d4b68cd1347d81005610",
+      "file_count": 426,
+      "actual_all_hashes_and_bytes_match": true,
+      "mismatches": []
+    }
+  },
+  "reported_source_coverage": {
+    "old": {
+      "verified_file_count": 30,
+      "reported_file_count": 30,
+      "complete_reported_source_coverage": true
+    },
+    "new": {
+      "verified_file_count": 32,
+      "reported_file_count": 32,
+      "complete_reported_source_coverage": true
+    }
+  },
+  "api_output_file_verification": {
+    "labels": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_fast_v15_20261001/subregions_native.nii.gz",
+      "exists": true,
+      "bytes": 202746
+    },
+    "label_table": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_fast_v15_20261001/labels.tsv",
+      "exists": true,
+      "bytes": 6968
+    },
+    "volumes": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_fast_v15_20261001/volumes.tsv",
+      "exists": true,
+      "bytes": 8076
+    },
+    "report": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_fast_v15_20261001/api_report.json",
+      "exists": true,
+      "bytes": 58619
+    },
+    "highres/brainstem": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_fast_v15_20261001/highres/brainstem.nii.gz",
+      "exists": true,
+      "bytes": 118234
+    },
+    "highres/thalamus": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_fast_v15_20261001/highres/thalamus.nii.gz",
+      "exists": true,
+      "bytes": 84537
+    },
+    "highres/hippo-amygdala-left": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_fast_v15_20261001/highres/hippo-amygdala-left.nii.gz",
+      "exists": true,
+      "bytes": 159029
+    },
+    "highres/hippo-amygdala-right": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_fast_v15_20261001/highres/hippo-amygdala-right.nii.gz",
+      "exists": true,
+      "bytes": 154077
+    }
+  },
+  "analysis_tools": {
+    "compare_speed.py": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/validation/subregions/compare_speed.py",
+      "bytes": 16422,
+      "sha256": "4fa32d1a080c5800f772ba510318cbccf7300d33bf431ea86c33a808cc40f0b4"
+    },
+    "plot_unified.py": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/validation/subregions/plot_unified.py",
+      "bytes": 4360,
+      "sha256": "c177fefd6d226b28726b4c0f80ef8ce43894db5a3cea298dd6284ad94d96888a"
+    }
+  },
+  "archive_manifest": "/mnt/c/users/admin/documents/codex/2026-09-29/new-chat/work/fnit-dmri-perf/validation/subregions/speed_v15/raw_v15_small_file_archive_manifest.json",
+  "plots": [
+    "/mnt/c/users/admin/documents/codex/2026-09-29/new-chat/work/fnit-dmri-perf/validation/subregions/speed_v15/full_raw_fast_v15_20261001_vs_official_axial.png",
+    "/mnt/c/users/admin/documents/codex/2026-09-29/new-chat/work/fnit-dmri-perf/validation/subregions/speed_v15/full_raw_fast_v15_20261001_vs_v12_axial.png"
+  ],
+  "benchmark_environments": {
+    "old": {
+      "optimization": "historical",
+      "device": "cuda:0",
+      "physical_gpu_index": 1,
+      "allocator_fraction": 0.23,
+      "torch": "2.5.1",
+      "cuda": "11.8",
+      "pytorch_peak_gpu_gib": 15.471590042114258,
+      "monitor_status": {
+        "physical_gpu_index": 1,
+        "own_process_limit_mib": 19073,
+        "command": [
+          "/home1/gongwk/anaconda3/bin/python",
+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v12/validation/subregions/run_unified.py",
+          "--atlas-root",
+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/atlases",
+          "--structures",
+          "all",
+          "--device",
+          "cuda:0",
+          "--gpu-memory-fraction",
+          "0.23",
+          "--output-dir",
+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_v12",
+          "--reference-brainstem",
+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/official_brainstem/brainstemSsLabels.FSvoxelSpace.mgz",
+          "--reference-thalamus",
+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/official_thalamus_gpucw1_full_sub01_20260929/ThalamicNuclei.FSvoxelSpace.mgz",
+          "--reference-left",
+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/official_hippo_gpucw1_full_sub01_20260929/lh.hippoAmygLabels.FSvoxelSpace.mgz",
+          "--reference-right",
+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/official_hippo_gpucw1_full_sub01_20260929/rh.hippoAmygLabels.FSvoxelSpace.mgz",
+          "--t1",
+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/examples/data/sub-01_T1w.nii.gz",
+          "--weights",
+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/weights"
+        ],
+        "state": "completed",
+        "started_unix": 1790791472.3510468,
+        "pid": 85176,
+        "exit_code": 0,
+        "finished_unix": 1790793975.430414
+      },
+      "monitor_status_file": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_v12_status.json",
+        "bytes": 1773,
+        "sha256": "c503d62de9b3f2673aa424b5dbfc999c1778e60aca898bee885c9f0651a4a837"
+      },
+      "sampled_own_process_peak_mib": 17762,
+      "gpu_load": {
+        "file": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_v12_gpu_load.jsonl",
+          "bytes": 30659,
+          "sha256": "397fff5ffc0124d45b357a9267ecfe1cccd7728fb0ac13f70bc2a775d06dfe42"
+        },
+        "samples": 248,
+        "first_sample_utc": "2026-09-30T18:04:32.355277+00:00",
+        "last_sample_utc": "2026-09-30T18:46:06.732895+00:00",
+        "sample_span_seconds": 2494.3776173591614,
+        "max_sampling_gap_seconds": 10.159931898117065,
+        "median_sampling_gap_seconds": 10.098612785339355,
+        "gaps_above_20_seconds": 0,
+        "own_process_memory_mib": {
+          "min": 0.0,
+          "max": 17762.0,
+          "median": 4756.0
+        },
+        "max_sampled_own_process_memory_mib": 17762,
+        "gpus": {
+          "0": {
+            "used_memory_mib": {
+              "min": 27932.0,
+              "max": 70935.0,
+              "median": 46397.0
+            },
+            "free_memory_mib": {
+              "min": 10072.0,
+              "max": 53075.0,
+              "median": 34610.0
+            },
+            "utilization_percent": {
+              "min": 79.0,
+              "max": 100.0,
+              "median": 100.0
+            }
+          },
+          "1": {
+            "used_memory_mib": {
+              "min": 5450.0,
+              "max": 44801.0,
+              "median": 30335.0
+            },
+            "free_memory_mib": {
+              "min": 36206.0,
+              "max": 75557.0,
+              "median": 50672.0
+            },
+            "utilization_percent": {
+              "min": 0.0,
+              "max": 100.0,
+              "median": 100.0
+            }
+          }
+        },
+        "scope": "complete supplied log interval; sampled maxima are not continuous process memory peaks"
+      },
+      "allocator_fraction_provenance": {
+        "source": "monitor_status.command",
+        "option": "--gpu-memory-fraction"
+      }
+    },
+    "new": {
+      "optimization": "fast",
+      "device": "cuda:0",
+      "physical_gpu_index": 1,
+      "allocator_fraction": 0.23,
+      "torch": "2.5.1",
+      "cuda": "11.8",
+      "pytorch_peak_gpu_gib": 15.471590042114258,
+      "monitor_status": {
+        "state": "completed",
+        "command": [
+          "/home1/gongwk/anaconda3/bin/python",
+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/validation/subregions/run_unified.py",
+          "--atlas-root",
+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/atlases",
+          "--structures",
+          "all",
+          "--device",
+          "cuda:0",
+          "--gpu-memory-fraction",
+          "0.23",
+          "--output-dir",
+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_fast_v15_20261001",
+          "--reference-brainstem",
+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/official_brainstem/brainstemSsLabels.FSvoxelSpace.mgz",
+          "--reference-thalamus",
+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/official_thalamus_gpucw1_full_sub01_20260929/ThalamicNuclei.FSvoxelSpace.mgz",
+          "--reference-left",
+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/official_hippo_gpucw1_full_sub01_20260929/lh.hippoAmygLabels.FSvoxelSpace.mgz",
+          "--reference-right",
+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/official_hippo_gpucw1_full_sub01_20260929/rh.hippoAmygLabels.FSvoxelSpace.mgz",
+          "--t1",
+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/examples/data/sub-01_T1w.nii.gz",
+          "--weights",
+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/weights",
+          "--optimization",
+          "fast"
+        ],
+        "source": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15",
+        "physical_gpu_index": 1,
+        "allocator_fraction": 0.23,
+        "own_process_limit_mib": 19073,
+        "started_unix": 1790823761.9816809,
+        "max_own_process_memory_mib": 18928,
+        "pid": 70443,
+        "last_sample_unix": 1790825078.5511255,
+        "exit_code": 0,
+        "finished_unix": 1790825082.079386
+      },
+      "monitor_status_file": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_fast_v15_20261001_status.json",
+        "bytes": 2050,
+        "sha256": "a370c79c7e7fe14605c99e536d9711e1f87396ab6a4e6c6cfb3d00b85f861506"
+      },
+      "sampled_own_process_peak_mib": 18928,
+      "gpu_load": {
+        "file": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_fast_v15_20261001_gpu_load.jsonl",
+          "bytes": 36186,
+          "sha256": "a9abc99cb9017dcc2179bc91bde454564d055629a6bda877655c9b601e1c08a1"
+        },
+        "samples": 257,
+        "first_sample_utc": "2026-10-01T03:02:41.987137+00:00",
+        "last_sample_utc": "2026-10-01T03:24:38.551126+00:00",
+        "sample_span_seconds": 1316.563988685608,
+        "max_sampling_gap_seconds": 5.381023645401001,
+        "median_sampling_gap_seconds": 5.112122893333435,
+        "gaps_above_20_seconds": 0,
+        "own_process_memory_mib": {
+          "min": 0.0,
+          "max": 18928.0,
+          "median": 6132.0
+        },
+        "max_sampled_own_process_memory_mib": 18928,
+        "gpus": {
+          "0": {
+            "used_memory_mib": {
+              "min": 69092.0,
+              "max": 77574.0,
+              "median": 74535.0
+            },
+            "free_memory_mib": {
+              "min": 3433.0,
+              "max": 11915.0,
+              "median": 6472.0
+            },
+            "utilization_percent": {
+              "min": 100.0,
+              "max": 100.0,
+              "median": 100.0
+            }
+          },
+          "1": {
+            "used_memory_mib": {
+              "min": 27322.0,
+              "max": 63437.0,
+              "median": 35306.0
+            },
+            "free_memory_mib": {
+              "min": 17570.0,
+              "max": 53685.0,
+              "median": 45701.0
+            },
+            "utilization_percent": {
+              "min": 60.0,
+              "max": 100.0,
+              "median": 100.0
+            }
+          }
+        },
+        "scope": "complete supplied log interval; sampled maxima are not continuous process memory peaks"
+      }
+    }
+  },
+  "analysis_annotation": "historical allocator fraction .23 added from verified old monitor command argv because old status has no top-level allocator_fraction; frozen comparison tool and historical v14 outputs unchanged",
+  "archive": {
+    "file_count": 19,
+    "total_bytes": 2699105,
+    "all_files_match_remote": true,
+    "nifti_downloaded": false
+  }
+}

@@ -1,0 +1,304 @@
+{
+  "audit_date": "2026-10-01",
+  "scope": "Existing v7 stage/raw report working_image and actual NIfTI headers; read-only CPU coordinate audit. No voxel resampling or segmentation, no new GPU job. This JSON archives already returned measurements without rereading inputs.",
+  "execution": {
+    "python": "/home1/gongwk/anaconda3/bin/python",
+    "cuda_visible_devices": "",
+    "omp_num_threads": 4,
+    "mkl_num_threads": 4,
+    "openblas_num_threads": 4
+  },
+  "formulas": {
+    "native_spacing": "column norm of native.affine[:3,:3]",
+    "step": "report resolution_mm / native_spacing",
+    "native_from_saved": "inv(native.affine) @ highres.affine",
+    "expected_linear": "diag(step)",
+    "working_origin": "report grid_origin_native_voxel if present, otherwise crop_start_native + ((crop_stop_native - crop_start_native) - working_shape * step) / 2",
+    "crop_offset": "(native_from_saved[:3,3] - working_origin) / step",
+    "bounds": "round(crop_offset) >= 0 and round(crop_offset) + saved_shape <= working_shape"
+  },
+  "aggregate": {
+    "files": 8,
+    "all_3d_int32": true,
+    "all_within_working_shape": true,
+    "max_spacing_abs_error_mm": 1.4828919314702205e-08,
+    "max_linear_abs_error": 1.4828918815101844e-08,
+    "max_crop_integer_error_voxels": 3.794017136467298e-06,
+    "proposed_crop_integer_tolerance_voxels": 0.001
+  },
+  "interpretation": "working_shape is the pre-mesh-crop work grid. Saved highres labels use fit.affine after an additional integer crop. Comparing working_shape to saved_shape alone does not show a cross-run geometry change.",
+  "records": [
+    {
+      "run": "full_stage_v7",
+      "structure": "brainstem",
+      "report_path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_stage_v7/report.json",
+      "native_path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_stage_v7/subregions_native.nii.gz",
+      "highres_path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_stage_v7/highres/brainstem.nii.gz",
+      "working_shape": [
+        162,
+        198,
+        136
+      ],
+      "saved_shape": [
+        158,
+        198,
+        135
+      ],
+      "rounded_crop_offset_working_voxel": [
+        0,
+        0,
+        0
+      ],
+      "resolution_mm": 0.5,
+      "spacing_max_abs_error_mm": 0,
+      "linear_max_abs_error": 2.220446181599274e-16,
+      "crop_offset_integer_error_voxels": 9.499490549735698e-07,
+      "within_working_shape": true,
+      "ndim": 3,
+      "dtype": "int32",
+      "native_shape": [
+        256,
+        256,
+        256
+      ]
+    },
+    {
+      "run": "full_stage_v7",
+      "structure": "thalamus",
+      "report_path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_stage_v7/report.json",
+      "native_path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_stage_v7/subregions_native.nii.gz",
+      "highres_path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_stage_v7/highres/thalamus.nii.gz",
+      "working_shape": [
+        162,
+        128,
+        138
+      ],
+      "saved_shape": [
+        156,
+        109,
+        122
+      ],
+      "rounded_crop_offset_working_voxel": [
+        5,
+        0,
+        2
+      ],
+      "resolution_mm": 0.5,
+      "spacing_max_abs_error_mm": 0,
+      "linear_max_abs_error": 2.220446181599274e-16,
+      "crop_offset_integer_error_voxels": 8.85454920496187e-07,
+      "within_working_shape": true,
+      "ndim": 3,
+      "dtype": "int32",
+      "native_shape": [
+        256,
+        256,
+        256
+      ]
+    },
+    {
+      "run": "full_stage_v7",
+      "structure": "hippo-amygdala-left",
+      "report_path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_stage_v7/report.json",
+      "native_path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_stage_v7/subregions_native.nii.gz",
+      "highres_path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_stage_v7/highres/hippo-amygdala-left.nii.gz",
+      "working_shape": [
+        166,
+        163,
+        214
+      ],
+      "saved_shape": [
+        161,
+        160,
+        207
+      ],
+      "rounded_crop_offset_working_voxel": [
+        3,
+        0,
+        4
+      ],
+      "resolution_mm": 0.33333,
+      "spacing_max_abs_error_mm": 5.40733335885335e-09,
+      "linear_max_abs_error": 5.407334080498316e-09,
+      "crop_offset_integer_error_voxels": 1.3550156430271252e-06,
+      "within_working_shape": true,
+      "ndim": 3,
+      "dtype": "int32",
+      "native_shape": [
+        256,
+        256,
+        256
+      ]
+    },
+    {
+      "run": "full_stage_v7",
+      "structure": "hippo-amygdala-right",
+      "report_path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_stage_v7/report.json",
+      "native_path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_stage_v7/subregions_native.nii.gz",
+      "highres_path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_stage_v7/highres/hippo-amygdala-right.nii.gz",
+      "working_shape": [
+        169,
+        163,
+        214
+      ],
+      "saved_shape": [
+        153,
+        155,
+        214
+      ],
+      "rounded_crop_offset_working_voxel": [
+        6,
+        0,
+        0
+      ],
+      "resolution_mm": 0.33333,
+      "spacing_max_abs_error_mm": 5.40733335885335e-09,
+      "linear_max_abs_error": 5.407334080498316e-09,
+      "crop_offset_integer_error_voxels": 3.0450679879834297e-06,
+      "within_working_shape": true,
+      "ndim": 3,
+      "dtype": "int32",
+      "native_shape": [
+        256,
+        256,
+        256
+      ]
+    },
+    {
+      "run": "full_raw_v7",
+      "structure": "brainstem",
+      "report_path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_v7/report.json",
+      "native_path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_v7/subregions_native.nii.gz",
+      "highres_path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_v7/highres/brainstem.nii.gz",
+      "working_shape": [
+        158,
+        162,
+        188
+      ],
+      "saved_shape": [
+        155,
+        153,
+        188
+      ],
+      "rounded_crop_offset_working_voxel": [
+        3,
+        0,
+        0
+      ],
+      "resolution_mm": 0.5,
+      "spacing_max_abs_error_mm": 8.84589468341801e-09,
+      "linear_max_abs_error": 8.845894516884556e-09,
+      "crop_offset_integer_error_voxels": 2.8673489627095705e-06,
+      "within_working_shape": true,
+      "ndim": 3,
+      "dtype": "int32",
+      "native_shape": [
+        256,
+        156,
+        256
+      ]
+    },
+    {
+      "run": "full_raw_v7",
+      "structure": "thalamus",
+      "report_path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_v7/report.json",
+      "native_path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_v7/subregions_native.nii.gz",
+      "highres_path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_v7/highres/thalamus.nii.gz",
+      "working_shape": [
+        158,
+        151,
+        126
+      ],
+      "saved_shape": [
+        152,
+        126,
+        112
+      ],
+      "rounded_crop_offset_working_voxel": [
+        0,
+        7,
+        14
+      ],
+      "resolution_mm": 0.5,
+      "spacing_max_abs_error_mm": 8.84589468341801e-09,
+      "linear_max_abs_error": 8.845894516884556e-09,
+      "crop_offset_integer_error_voxels": 3.794017136467298e-06,
+      "within_working_shape": true,
+      "ndim": 3,
+      "dtype": "int32",
+      "native_shape": [
+        256,
+        156,
+        256
+      ]
+    },
+    {
+      "run": "full_raw_v7",
+      "structure": "hippo-amygdala-left",
+      "report_path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_v7/report.json",
+      "native_path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_v7/subregions_native.nii.gz",
+      "highres_path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_v7/highres/hippo-amygdala-left.nii.gz",
+      "working_shape": [
+        160,
+        230,
+        169
+      ],
+      "saved_shape": [
+        153,
+        208,
+        169
+      ],
+      "rounded_crop_offset_working_voxel": [
+        3,
+        10,
+        0
+      ],
+      "resolution_mm": 0.33333,
+      "spacing_max_abs_error_mm": 1.4828919314702205e-08,
+      "linear_max_abs_error": 1.4828918815101844e-08,
+      "crop_offset_integer_error_voxels": 3.6318671390311863e-06,
+      "within_working_shape": true,
+      "ndim": 3,
+      "dtype": "int32",
+      "native_shape": [
+        256,
+        156,
+        256
+      ]
+    },
+    {
+      "run": "full_raw_v7",
+      "structure": "hippo-amygdala-right",
+      "report_path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_v7/report.json",
+      "native_path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_v7/subregions_native.nii.gz",
+      "highres_path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_v7/highres/hippo-amygdala-right.nii.gz",
+      "working_shape": [
+        163,
+        227,
+        169
+      ],
+      "saved_shape": [
+        146,
+        215,
+        166
+      ],
+      "rounded_crop_offset_working_voxel": [
+        8,
+        5,
+        3
+      ],
+      "resolution_mm": 0.33333,
+      "spacing_max_abs_error_mm": 1.4828919314702205e-08,
+      "linear_max_abs_error": 1.4828918815101844e-08,
+      "crop_offset_integer_error_voxels": 2.6594743993690884e-06,
+      "within_working_shape": true,
+      "ndim": 3,
+      "dtype": "int32",
+      "native_shape": [
+        256,
+        156,
+        256
+      ]
+    }
+  ]
+}

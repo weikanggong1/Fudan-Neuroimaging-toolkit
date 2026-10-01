@@ -6,7 +6,7 @@ from pathlib import Path
 
 import numpy as np
 
-from fnit.gems import segment_subregions
+from fnit.gems import segment_4_subregions
 
 
 def _json_value(value):
@@ -23,15 +23,14 @@ def main() -> None:
     parser.add_argument("--out-label", type=Path, required=True)
     parser.add_argument("--out-report", type=Path, required=True)
     parser.add_argument("--device", default="cuda:0")
-    parser.add_argument("--em-iterations", type=int, default=25)
     args = parser.parse_args()
-    result = segment_subregions(
+    result = segment_4_subregions(
         t1=args.t1,
         atlas_root=args.atlas_root,
         structures="brainstem",
         coarse_segmentation=args.coarse,
         device=args.device,
-        em_iterations=args.em_iterations,
+        threads=4,
     )
     args.out_label.parent.mkdir(parents=True, exist_ok=True)
     result.labels.save(args.out_label)

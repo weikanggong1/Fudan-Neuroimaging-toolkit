@@ -1,0 +1,256 @@
+{
+  "kind": "real_saved_mesh_preparation_comparison",
+  "host": "gpucw1",
+  "torch": "2.5.1",
+  "gpu": "NVIDIA H100 PCIe",
+  "dtype": "float32",
+  "matmul_tf32": true,
+  "cudnn_tf32": true,
+  "threads": 4,
+  "allocator_fraction": 0.14,
+  "cases": {
+    "thalamus": {
+      "inputs": [
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_thalamus_debug/processedImageMasked.mgz",
+          "bytes": 2478761,
+          "sha256": "0dc40a0f1bef990ec32ec91d7100ee883c0bff6900523843e26da2d5853a3a6b"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_thalamus_debug/alignedAtlasImage.mgz",
+          "bytes": 857890,
+          "sha256": "4899f59a91315e81eadcc2a671ad67dab9231b459a3dd73581e222d2eea63d9e"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_thalamus_debug/warpedOriginalMesh.txt.gz",
+          "bytes": 6147061,
+          "sha256": "d876f463c49346c04a2afb1bba3f9c5e9596523caec657fbee9133d9f5821ee4"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/atlases/thalamus/compressionLookupTable.txt",
+          "bytes": 2130,
+          "sha256": "9f480319b803a2c44606c6595c46a26fbb74726bdc800e88b443011fedb175ff"
+        }
+      ],
+      "vertices": 23027,
+      "tetrahedra": 135299,
+      "classes": 14,
+      "reference_grid_shape": [
+        147,
+        100,
+        113
+      ],
+      "smoothing": {
+        "1.5": {
+          "old": {
+            "seconds": 5.511772160883993,
+            "phase_seconds": {
+              "rasterize_priors": 4.738956781104207,
+              "convolve1d": 0.4097229242324829
+            },
+            "remaining_seconds": 0.36309245554730296,
+            "peak_torch_allocated_gib": 0.8964920043945312
+          },
+          "new": {
+            "seconds": 7.114912205375731,
+            "phase_seconds": {
+              "rasterize_priors": 6.953446531202644,
+              "_separable_convolve": 0.026008381973952055
+            },
+            "remaining_seconds": 0.13545729219913483,
+            "peak_torch_allocated_gib": 0.4253706932067871
+          },
+          "observed_ratio_old_over_new": 0.774678871893813,
+          "max_abs_alpha_difference": 2.980232238769531e-07,
+          "mean_abs_alpha_difference": 3.974212070545491e-09,
+          "vertex_normalization_max_error": 2.384185791015625e-07
+        },
+        "0.75": {
+          "old": {
+            "seconds": 13.025353553704917,
+            "phase_seconds": {
+              "rasterize_priors": 12.326593024190515,
+              "convolve1d": 0.37053847638890147
+            },
+            "remaining_seconds": 0.3282220531255007,
+            "peak_torch_allocated_gib": 1.0291900634765625
+          },
+          "new": {
+            "seconds": 0.13841510377824306,
+            "phase_seconds": {
+              "_separable_convolve": 0.015595982782542706
+            },
+            "remaining_seconds": 0.12281912099570036,
+            "peak_torch_allocated_gib": 0.3547825813293457
+          },
+          "observed_ratio_old_over_new": 94.10355660732685,
+          "max_abs_alpha_difference": 4.172325134277344e-07,
+          "mean_abs_alpha_difference": 2.9354956243565766e-09,
+          "vertex_normalization_max_error": 2.384185791015625e-07
+        }
+      }
+    },
+    "hippo-amygdala-left": {
+      "inputs": [
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_hippo_integrated_fullfix_left_tmp/processedImageMasked.mgz",
+          "bytes": 1942883,
+          "sha256": "6df365922c33c112663630e51c268afcf3a847413ca33f54a8242dfb9dcd014c"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_hippo_integrated_fullfix_left_tmp/alignedAtlasImage.mgz",
+          "bytes": 406538,
+          "sha256": "bb4be281d6bbdda3bd754ea5656c7fde3e34dccbe7eca939c54ea57371c45c3e"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_hippo_integrated_fullfix_left_tmp/warpedOriginalMesh.txt.gz",
+          "bytes": 5682313,
+          "sha256": "ae705020dc4a819df465408a59e7a662b652a094a1e78d7390036663e7a83c19"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/atlases/hippo-amygdala-left/compressionLookupTable.txt",
+          "bytes": 2595,
+          "sha256": "5962518cb188de252a03796cf04ea8991cd444907b7733b14fc501cd898da362"
+        }
+      ],
+      "vertices": 20100,
+      "tetrahedra": 122333,
+      "classes": 13,
+      "reference_grid_shape": [
+        155,
+        155,
+        196
+      ],
+      "smoothing": {
+        "1.5": {
+          "old": {
+            "seconds": 18.732658582739532,
+            "phase_seconds": {
+              "rasterize_priors": 16.969102459028363,
+              "convolve1d": 1.0829410273581743
+            },
+            "remaining_seconds": 0.6806150963529944,
+            "peak_torch_allocated_gib": 1.5090751647949219
+          },
+          "new": {
+            "seconds": 15.128626280929893,
+            "phase_seconds": {
+              "rasterize_priors": 14.83237762376666,
+              "_separable_convolve": 0.17792647378519177
+            },
+            "remaining_seconds": 0.11832218337804079,
+            "peak_torch_allocated_gib": 0.9386777877807617
+          },
+          "observed_ratio_old_over_new": 1.238226011726698,
+          "max_abs_alpha_difference": 7.471442222595215e-05,
+          "mean_abs_alpha_difference": 3.0123587180241884e-07,
+          "vertex_normalization_max_error": 2.980232238769531e-07
+        },
+        "0.75": {
+          "old": {
+            "seconds": 16.49055576417595,
+            "phase_seconds": {
+              "rasterize_priors": 14.954623486846685,
+              "convolve1d": 0.9492182875983417
+            },
+            "remaining_seconds": 0.5867139897309244,
+            "peak_torch_allocated_gib": 1.8179407119750977
+          },
+          "new": {
+            "seconds": 0.16983320703729987,
+            "phase_seconds": {
+              "_separable_convolve": 0.02465679030865431
+            },
+            "remaining_seconds": 0.14517641672864556,
+            "peak_torch_allocated_gib": 0.8158082962036133
+          },
+          "observed_ratio_old_over_new": 97.09853598038804,
+          "max_abs_alpha_difference": 0.00023245811462402344,
+          "mean_abs_alpha_difference": 3.4468519061192637e-06,
+          "vertex_normalization_max_error": 2.384185791015625e-07
+        }
+      },
+      "hyperparameters": {
+        "old": {
+          "seconds": 27.434842600952834,
+          "phase_seconds": {
+            "rasterize_priors": 18.118794798851013
+          },
+          "remaining_seconds": 9.31604780210182,
+          "peak_torch_allocated_gib": 0.03125
+        },
+        "new": {
+          "seconds": 17.965902925934643,
+          "phase_seconds": {
+            "rasterize_priors": 10.293378334958106
+          },
+          "remaining_seconds": 7.672524590976536,
+          "peak_torch_allocated_gib": 0.7447652816772461
+        },
+        "old_means": [
+          44.0,
+          94.0,
+          63.591514587402344,
+          7.0,
+          36.30388259887695,
+          88.0,
+          67.0,
+          58.0,
+          77.0,
+          55.0,
+          90.0,
+          56.0,
+          24.0
+        ],
+        "new_means": [
+          44.0,
+          94.0,
+          63.588600158691406,
+          7.0,
+          36.305198669433594,
+          88.0,
+          67.0,
+          58.0,
+          77.0,
+          55.0,
+          90.0,
+          56.0,
+          24.0
+        ],
+        "max_abs_mean_difference": 0.0029144287109375,
+        "counts_equal": true,
+        "observed_ratio_old_over_new": 1.5270505865502213
+      }
+    }
+  },
+  "source_files": {
+    "old_smoothing": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/src/fnit/gems/smoothing.py",
+      "bytes": 3047,
+      "sha256": "b6ae95d4c2c0dfd27a75ab428375f538055a9d4f14ccdc60b992b73afe595e24"
+    },
+    "new_smoothing": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v16_c2/src/fnit/gems/smoothing.py",
+      "bytes": 6920,
+      "sha256": "dcbc8112d876db139362621c2c03e73442afa1379a6d56c59800f2545c9a9e36"
+    },
+    "old_hippo": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/src/fnit/gems/recipes/hippo_amygdala.py",
+      "bytes": 11102,
+      "sha256": "1211a0950041ff1b65f72dc347f31c23dd8674071ed85a27aed92b0fd18b8a5a"
+    },
+    "new_hippo": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v16_c2/src/fnit/gems/recipes/hippo_amygdala.py",
+      "bytes": 11712,
+      "sha256": "bc7deb33fbfc1ba02cb486f4103890f53705c8e6dfa150c1a5e6d6d678a665a5"
+    }
+  },
+  "gpu_load_before": [
+    "0, 69052, 11955, 100",
+    "1, 19524, 61483, 66"
+  ],
+  "gpu_load_after": [
+    "0, 69052, 11955, 100",
+    "1, 25904, 55103, 100"
+  ]
+}

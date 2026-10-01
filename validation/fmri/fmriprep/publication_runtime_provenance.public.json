@@ -2,7 +2,7 @@
   "schema_version": 1,
   "scope": "Map the final publication runtime to its real API measurements and focused test gates by exact file hashes.",
   "measured_snapshot_visibility": "Measured Git revisions are retained as private benchmark snapshots; the file-hash mapping below identifies the runtime in the publication tree.",
-  "basis_main_revision": "e587751b169212b553b58de1d29800dad53a55e4",
+  "basis_main_revision": "d0ee4bebed0d1ee4d07f14cf22d05f9e07da214f",
   "volume_measurement": {
     "report": "fnit_volume_stcoff_50eb098.public.json",
     "report_sha256": "6929e19e3b7adda676d51ea3d58788c938f85819d0d4f7aef38ffd9420622dcb",
@@ -14,7 +14,7 @@
       "src/fnit/msm/_affine.py",
       "src/fnit/msm/msmsulc.py"
     ],
-    "difference_scope": "After the volume measurement, the surface SourceT1w selection patch and latest-main lazy dictionary-learning exports/MSM cleanup were integrated. The volume API does not invoke surface projection or MSM estimation; the measured volume numerical modules remain byte-identical."
+    "difference_scope": "After the volume measurement, the surface SourceT1w selection patch and latest-main lazy exports/MSM cleanup were integrated. The volume API does not invoke surface projection, MSM or GEMS estimation; the measured volume numerical modules remain byte-identical."
   },
   "surface_measurement": {
     "report": "surface_stcoff_ca3df003.public.json",
@@ -26,7 +26,7 @@
       "src/fnit/msm/_affine.py",
       "src/fnit/msm/msmsulc.py"
     ],
-    "difference_scope": "Latest main adds lazy dictionary-learning exports to the package initializer and removes obsolete MSM internals. The measured surface API used supplied registration spheres and did not execute MSM estimation. All 103 other measured modules, including the complete geometry, projection, CIFTI and source-selection implementation, remain byte-identical."
+    "difference_scope": "Latest main adds dictionary-learning lazy exports and replaces the GEMS lazy API in the package initializer, and removes obsolete MSM internals. The measured surface API used supplied registration spheres and did not execute MSM or GEMS estimation. All 103 other measured modules, including the complete geometry, projection, CIFTI and source-selection implementation, remain byte-identical."
   },
   "test_gates": {
     "merged_source": "nonmsm_contract_gate.public.json",
@@ -39,7 +39,7 @@
   },
   "new_msm_source_docs_or_vendor_changes_relative_to_basis_main": false,
   "published_runtime_sha256": {
-    "src/fnit/__init__.py": "510abfa0adb0851458efbc84433a02e668fc19d7cad139dbe89bfb5e6f184241",
+    "src/fnit/__init__.py": "5af956c5e0f9ab716ae3c18a1750f599ee8a9d85101a249cec9fa39335c0bd90",
     "src/fnit/_dmri.py": "b6bf837f8b5a0a8f0d910706631e882a9e3f8dfc1f1ef77e1cfac7efe36fafbf",
     "src/fnit/_nib.py": "568d113432c1a0c50a3b0b635188173e69be1c7436d851de2568bca9b55ab94e",
     "src/fnit/_transforms.py": "be01fa24cd0c17bb1aa8ac7792cdf0b62c657037808c643427a1b11cc4c05340",
@@ -151,7 +151,7 @@
     {
       "path": "src/fnit/__init__.py",
       "measured_source_sha256": "3311022536699c071aac156ce02fe2099ffd9fb08790e9e55ed7e45c64e628cd",
-      "published_source_sha256": "510abfa0adb0851458efbc84433a02e668fc19d7cad139dbe89bfb5e6f184241",
+      "published_source_sha256": "5af956c5e0f9ab716ae3c18a1750f599ee8a9d85101a249cec9fa39335c0bd90",
       "source": "Inherited unchanged from latest main"
     },
     {
@@ -166,5 +166,14 @@
       "published_source_sha256": "d20b4cd6ff3dbdcf785c593e2460c28bfc3a3ddf6e8608d7dd5260886c4d8abf",
       "source": "Inherited unchanged from latest main"
     }
-  ]
+  ],
+  "inherited_latest_main_subregion_update": {
+    "main_revision": "d0ee4bebed0d1ee4d07f14cf22d05f9e07da214f",
+    "effect_on_measured_fmri_modules": [
+      "src/fnit/__init__.py"
+    ],
+    "numeric_fmri_surface_msm_or_synthstrip_source_changes": false,
+    "old_native_samseg_removed_by_main": true,
+    "public_api_refresh_recorded_separately": true
+  }
 }

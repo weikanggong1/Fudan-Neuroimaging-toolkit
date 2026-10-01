@@ -39,10 +39,14 @@ class SegmentUNet(nn.Module):
             skips.append(skip)
             if level < 4:
                 x = F.max_pool3d(x, 2)
+        skips.pop()
+        del skip
         for level, block in enumerate(self.up):
             x = F.interpolate(x, scale_factor=2, mode="nearest")
-            x, _ = block(torch.cat((skips[3 - level], x), dim=1))
-        return torch.softmax(self.likelihood(x), dim=1)
+            x = block(torch.cat((skips.pop(), x), dim=1))[0]
+        logits = self.likelihood(x)
+        del x
+        return torch.softmax(logits, dim=1)
 
     def load_h5(self, path: str | Path):
         """Read the official Keras layer arrays without TensorFlow."""

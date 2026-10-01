@@ -1,0 +1,28 @@
+{"repetition": 0, "timings": {"legacy": {"layout_seconds": 16.944832651875913, "warm_dense_raster_seconds": 1.293780469801277, "fresh_layout_plus_raster_seconds": 18.23861312167719}, "packed": {"layout_seconds": 0.3206652789376676, "warm_dense_raster_seconds": 5.479573417920619, "fresh_layout_plus_raster_seconds": 5.800238696858287}}, "comparison": {"repetition": 0, "bitwise_layout_equal": true, "prior_max_abs_difference": 0.0, "coverage_disagreement_voxels": 0}}
+{"repetition": 1, "timings": {"packed": {"layout_seconds": 0.35187485814094543, "warm_dense_raster_seconds": 0.1893307939171791, "fresh_layout_plus_raster_seconds": 0.5412056520581245}, "legacy": {"layout_seconds": 15.598854353185743, "warm_dense_raster_seconds": 0.1913131522014737, "fresh_layout_plus_raster_seconds": 15.790167505387217}}, "comparison": {"repetition": 1, "bitwise_layout_equal": true, "prior_max_abs_difference": 0.0, "coverage_disagreement_voxels": 0}}
+{"repetition": 2, "timings": {"legacy": {"layout_seconds": 15.562156974337995, "warm_dense_raster_seconds": 0.19131618505343795, "fresh_layout_plus_raster_seconds": 15.753473159391433}, "packed": {"layout_seconds": 0.3236034605652094, "warm_dense_raster_seconds": 0.18716405285522342, "fresh_layout_plus_raster_seconds": 0.5107675134204328}}, "comparison": {"repetition": 2, "bitwise_layout_equal": true, "prior_max_abs_difference": 0.0, "coverage_disagreement_voxels": 0}}
+{"repetition": 3, "timings": {"packed": {"layout_seconds": 0.2548946477472782, "warm_dense_raster_seconds": 0.1896075434051454, "fresh_layout_plus_raster_seconds": 0.4445021911524236}, "legacy": {"layout_seconds": 13.96915943408385, "warm_dense_raster_seconds": 0.19201759388670325, "fresh_layout_plus_raster_seconds": 14.161177027970552}}, "comparison": {"repetition": 3, "bitwise_layout_equal": true, "prior_max_abs_difference": 0.0, "coverage_disagreement_voxels": 0}}
+Traceback (most recent call last):
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v16_c5/validation/subregions/benchmark_dense_layout.py", line 147, in <module>
+    main()
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v16_c5/validation/subregions/benchmark_dense_layout.py", line 140, in main
+    a.output.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n")
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home1/gongwk/anaconda3/lib/python3.11/json/__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ^^^^^^^^^^^
+  File "/home1/gongwk/anaconda3/lib/python3.11/json/encoder.py", line 202, in encode
+    chunks = list(chunks)
+             ^^^^^^^^^^^^
+  File "/home1/gongwk/anaconda3/lib/python3.11/json/encoder.py", line 432, in _iterencode
+    yield from _iterencode_dict(o, _current_indent_level)
+  File "/home1/gongwk/anaconda3/lib/python3.11/json/encoder.py", line 406, in _iterencode_dict
+    yield from chunks
+  File "/home1/gongwk/anaconda3/lib/python3.11/json/encoder.py", line 326, in _iterencode_list
+    yield from chunks
+  File "/home1/gongwk/anaconda3/lib/python3.11/json/encoder.py", line 439, in _iterencode
+    o = _default(o)
+        ^^^^^^^^^^^
+  File "/home1/gongwk/anaconda3/lib/python3.11/json/encoder.py", line 180, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+TypeError: Object of type int32 is not JSON serializable
