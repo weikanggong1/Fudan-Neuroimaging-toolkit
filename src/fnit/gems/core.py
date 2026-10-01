@@ -253,6 +253,7 @@ class TorchGEMS:
                     evaluations = 0
                     have_moved = False
                     cost_stalls = deformation_stalls = 0
+                    previous_mesh_cost = None
                     if deform_optimizer == "adam":
                         optimizer = torch.optim.Adam([vertices], lr=float(deform_lr))
                     elif deform_optimizer == "lbfgs":
@@ -304,7 +305,7 @@ class TorchGEMS:
                             optimizer.step()
                         else:
                             if isinstance(optimizer, CachedLBFGS):
-                                objective = optimizer.step(closure, cache_key=(id(index), id(likelihood), id(class_alphas)))
+                                objective = optimizer.step(closure, cache_key=(index_rebuilds, id(likelihood), id(class_alphas)))
                                 if optimizer.accepted_objective is not None:
                                     objective = optimizer.accepted_objective
                             else:
@@ -315,6 +316,8 @@ class TorchGEMS:
                             index = build_block_index(vertices.detach().cpu().numpy(),
                                                       self.atlas.tetrahedra, shape,
                                                       self.block_size, margin=margin)
+                            index_anchor = vertices.detach().clone()
+                            index_rebuilds += 1
                         history_tensors.append(objective.detach())
                         if previous_vertices is not None:
                             maximal_deformation = torch.linalg.vector_norm(
@@ -324,6 +327,7 @@ class TorchGEMS:
                             if maximal_deformation == 0 or deformation_stalls >= cost_stop_patience:
                                 break
                         # Update Gaussian parameters after the accepted geometry step.
+                        objective_changed = False
                         if outer_iterations == 1 and em_relative_cost_stop is None and ((step + 1) % deform_em_interval == 0
                                                       or step + 1 == iterations):
                             with torch.no_grad():
@@ -334,13 +338,17 @@ class TorchGEMS:
                                 likelihood = likelihood.reshape(n_classes, -1)
                             if isinstance(optimizer, CachedLBFGS):
                                 optimizer.invalidate_cache()
-                        if relative_cost_stop is not None and step > 0:
-                            previous, current = history_tensors[-2:]
-                            relative_change = ((previous - current).abs() /
-                                               current.abs().clamp_min(1)).item()
+                            objective_changed = True
+                            previous_mesh_cost = None
+                            cost_stalls = 0
+                        if relative_cost_stop is not None and previous_mesh_cost is not None and not objective_changed:
+                            relative_change = ((previous_mesh_cost - objective).abs() /
+                                               objective.abs().clamp_min(1)).item()
                             cost_stalls = cost_stalls + 1 if relative_change < relative_cost_stop else 0
                             if cost_stalls >= cost_stop_patience:
                                 break
+                        if not objective_changed:
+                            previous_mesh_cost = objective.detach()
                     mesh_evaluations += evaluations
                     if isinstance(optimizer, CachedLBFGS):
                         cache_hits += optimizer.cache_hits
