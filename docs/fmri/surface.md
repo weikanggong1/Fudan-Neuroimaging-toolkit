@@ -6,6 +6,8 @@
 
 表面路径包括 FS→fsLR 初始球面、MSMSulc、Workbench ribbon 投影、10 mm 最近邻填补、原生 ROI、ADAP_BARY_AREA 重采样、32k ROI，最后按 NiWorkflows 1.14.4 组装 CIFTI。本轮以固定 fMRIPrep 25.2.4 对照投影和组装；MSM 算法由 main 的 [独立 MSMSulc 子函数](../msm/README.md)实现，其配置与精度单列。运行时使用 FNIT、PyTorch、nibabel 和 Connectome Workbench；原软件用于独立参考对照。
 
+本地 MSMSulc 扩展须与源码同步。拉取包含 C++ 变更的更新后，在已激活的 FNIT 环境、仓库根目录执行 `python -m pip install .` 重新编译；本轮重建与复测记录见验证部分。
+
 ## 输入与资源
 
 先运行当前 `fMRIVolume_pipeline`，保留以下输入：
@@ -273,7 +275,9 @@ sub-0001/func/
 
 [CIFTI 契约测试](../../tests/test_fmri_surface_contracts.py)、[灰坐标顺序测试](../../tests/test_fmri_surface_pipeline.py)、[公开 API 契约测试](../../tests/test_fmri_surface_public_contracts.py)和[共享准备函数测试](../../tests/test_fmri_surface_preparation.py)核对资源完整性、有限值、帧数、TR、来源匹配、实际体素大小、显式变换、错误半球、已有球面、悬空链接与发布回滚。锁定 NiWorkflows 1.14.4 的同输入组装对照中，两帧索引信号的数值、BrainModelAxis、SeriesAxis 和内嵌 metadata 逐项一致；检查范围为文件格式、灰坐标顺序与时间轴。
 
-[合并合同门禁](../../validation/fmri/fmriprep/nonmsm_contract_gate.public.json)通过 **248 项、0 skipped**；随后 T1w 来源路径补丁的[局部门禁](../../validation/fmri/fmriprep/surface_source_path_gate.public.json)通过 **42 项、0 skipped**，包含 8 个新路径用例。两次门禁分别保留测试与源码哈希。[发布源码回溯](../../validation/fmri/fmriprep/publication_runtime_provenance.public.json)记录 surface 实测的 103/106 个模块字节一致；另外三个文件是 main 的包入口与 MSM 内部更新，固定球面实验未运行 MSM 估计。 最新 main 的[接口整合检查](../../validation/fmri/fmriprep/latest_main_integration_gate.public.json)另记首轮 142 passed、10 failed、1 skipped：9 项使用的旧原生扩展缺接口，1 项是既有可选 GEMS 模块的导入规则检查；原始失败结果保留。
+[合并合同门禁](../../validation/fmri/fmriprep/nonmsm_contract_gate.public.json)通过 **248 项、0 skipped**；随后 T1w 来源路径补丁的[局部门禁](../../validation/fmri/fmriprep/surface_source_path_gate.public.json)通过 **42 项、0 skipped**，包含 8 个新路径用例。两次门禁分别保留测试与源码哈希。[发布源码回溯](../../validation/fmri/fmriprep/publication_runtime_provenance.public.json)记录 surface 实测的 103/106 个模块字节一致；另外三个文件是 main 的包入口与 MSM 内部更新，固定球面实验未运行 MSM 估计。
+
+最新 main 的[接口整合检查](../../validation/fmri/fmriprep/latest_main_integration_gate.public.json)另记首轮 142 passed、10 failed、1 skipped：9 项使用的旧原生扩展缺接口，1 项是既有可选 GEMS 模块的导入规则检查；原始失败结果保留。[重编译后复测](../../validation/fmri/fmriprep/latest_main_native_rebuild_gate.public.json)的 10 个节点全部通过（0 failed、0 skipped、17.74 s）：9 个原生接口失败已解决，另一个 CIFTI 节点使用已校验的公开模板通过。既有 GEMS 全包导入扫描失败仍单列，它不属于 fMRI 运行路径。
 
 此前 `c3c921cc`/`bac3c395` 的完整测量与固定投影对照保留在[历史 STC 关闭记录](../../validation/fmri/HISTORY_20261001_STCOFF_PREPROC.md)。
 
