@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -63,6 +63,7 @@ class SubregionContext:
     coarse_segmentation: np.ndarray | None
     cortical_parcellation: np.ndarray | None
     wmparc_proxy: np.ndarray | None
+    metadata: dict[str, object] = field(default_factory=dict)
 
     @classmethod
     def prepare(cls, t1, *, need_coarse: bool, need_parc: bool,
@@ -76,6 +77,11 @@ class SubregionContext:
         coarse = None if coarse_segmentation is None else _native_labels(coarse_segmentation, image, "coarse_segmentation")
         parc = None if cortical_parcellation is None else _native_labels(cortical_parcellation, image, "cortical_parcellation")
         wm = None if wmparc is None else _native_labels(wmparc, image, "wmparc")
+        metadata = {
+            "coarse_source": "provided" if coarse is not None else None,
+            "cortical_parcellation_source": "provided" if parc is not None else None,
+            "model_calls": {"SynthSeg": 0, "SynthSegPlus": 0},
+        }
         use_plus = need_parc and parc is None and wm is None
         if (use_plus or need_coarse and coarse is None) and synthseg_weights is None and synthseg_parc_weights is None:
             from ..weights import (MODEL_FILES, WEIGHT_FILES, cache_dir, configured_dir,
@@ -104,17 +110,22 @@ class SubregionContext:
                     predicted = SynthSegPlus(weights=synthseg_weights,
                                              parc_weights=synthseg_parc_weights,
                                              device=device)(source, keep_geometry=True)
+            metadata["model_calls"]["SynthSegPlus"] += 1
             if coarse is None:
                 coarse = _native_labels(predicted.segmentation, image, "SynthSeg segmentation")
+                metadata["coarse_source"] = "SynthSegPlus"
             if parc is None:
                 parc = _native_labels(predicted.cortical_parcellation, image, "SynthSeg parcellation")
+                metadata["cortical_parcellation_source"] = "SynthSegPlus"
         elif need_coarse and coarse is None:
             from ..synthseg_parc import SynthSeg
             predicted = SynthSeg(weights=synthseg_weights, device=device)(t1, keep_geometry=True)
+            metadata["model_calls"]["SynthSeg"] += 1
             coarse = _native_labels(predicted.segmentation, image, "SynthSeg segmentation")
+            metadata["coarse_source"] = "SynthSeg"
         if need_parc and wm is None:
             if parc is None:
                 raise ValueError("cortical_parcellation is required to build wmparc proxy")
             wm = build_wmparc_proxy(
                 coarse, parc, voxel_sizes=tuple(np.linalg.norm(image.affine[:3, :3], axis=0)))
-        return cls(image, data, coarse, parc, wm)
+        return cls(image, data, coarse, parc, wm, metadata)

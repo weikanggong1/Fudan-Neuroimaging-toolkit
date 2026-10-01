@@ -450,7 +450,11 @@ def segment_subregions(
     detailed: dict[str, TorchGEMSResult] = {}
     reports: dict[str, dict] = {"shared_preprocessing": {
         "seconds": monotonic() - preprocessing_started,
-        "coarse_source": "provided" if coarse_segmentation is not None else "SynthSeg",
+        "coarse_source": context.metadata.get(
+            "coarse_source", "provided" if coarse_segmentation is not None else None),
+        "cortical_parcellation_source": context.metadata.get(
+            "cortical_parcellation_source", "provided" if cortical_parcellation is not None else None),
+        "model_calls": context.metadata.get("model_calls", {"SynthSeg": 0, "SynthSegPlus": 0}),
         "wmparc_source": "provided" if wmparc is not None else
                           "proxy" if context.wmparc_proxy is not None else None,
         "peak_gpu_gib": torch.cuda.max_memory_allocated(device) / 2**30

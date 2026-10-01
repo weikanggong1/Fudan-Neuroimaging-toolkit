@@ -1,6 +1,8 @@
 import numpy as np
 import nibabel as nib
 import torch
+import pytest
+import json
 from types import SimpleNamespace
 
 from fnit.gems.atlas import GEMSAtlas, read_compression_lut
@@ -236,16 +238,38 @@ def test_posterior_soft_volume_uses_working_voxel_volume(tmp_path):
     assert result.soft_volumes_mm3[10] == 4 * 4 * 4 * 0.25 * 0.5**3
 
 
-def test_all_recipes_merge_on_native_grid_with_metadata(tmp_path, monkeypatch):
+@pytest.mark.parametrize("preprocessing", ("provided", "SynthSeg", "SynthSegPlus", "provided-coarse-plus"))
+def test_all_recipes_merge_on_native_grid_with_metadata(tmp_path, monkeypatch, preprocessing):
     from fnit.gems import pipeline
     import fnit.gems.recipes as recipes
     from fnit.gems.recipes.base import RecipeResult
+    import fnit.synthseg_parc as synthseg
 
     image = nib.Nifti1Image(np.ones((5, 5, 5), np.float32),
                             np.diag([-1, 1, 1, 1]))
     atlas_root = tmp_path / "atlases"
     names = ("brainstem", "thalamus", "hippo-amygdala-left", "hippo-amygdala-right")
     atlas_labels = (173, 8109, 238, 7001)
+    calls = {"SynthSeg": 0, "SynthSegPlus": 0}
+    contexts = []
+
+    class FakeSeg:
+        kind = "SynthSeg"
+
+        def __init__(self, **kwargs):
+            pass
+
+        def __call__(self, source, *, keep_geometry):
+            calls[self.kind] += 1
+            return SimpleNamespace(
+                segmentation=nib.Nifti1Image(np.full(image.shape, 2, np.int32), image.affine),
+                cortical_parcellation=nib.Nifti1Image(np.zeros(image.shape, np.int32), image.affine))
+
+    class FakePlus(FakeSeg):
+        kind = "SynthSegPlus"
+
+    monkeypatch.setattr(synthseg, "SynthSeg", FakeSeg)
+    monkeypatch.setattr(synthseg, "SynthSegPlus", FakePlus)
     for name in names:
         folder = atlas_root / name
         folder.mkdir(parents=True)
@@ -264,6 +288,7 @@ def test_all_recipes_merge_on_native_grid_with_metadata(tmp_path, monkeypatch):
             self.directory = atlas_root / name
 
         def run(self, context, device):
+            contexts.append(context)
             index = names.index(self.name)
             label = atlas_labels[index] + (10000 if index == 3 else 0)
             output = np.zeros(image.shape, np.int32)
@@ -276,8 +301,22 @@ def test_all_recipes_merge_on_native_grid_with_metadata(tmp_path, monkeypatch):
     monkeypatch.setattr(pipeline.GEMSAtlas, "from_freesurfer", fake_atlas)
     monkeypatch.setattr(recipes, "make_recipe", lambda name, root: FakeRecipe(name))
     coarse = np.ones(image.shape, np.int32)
-    result = pipeline.segment_subregions(image, atlas_root, coarse_segmentation=coarse,
-                                        wmparc=coarse, device="cpu", output_dir=tmp_path / "output")
+    provided_coarse = preprocessing in ("provided", "provided-coarse-plus")
+    provided_wm = preprocessing in ("provided", "SynthSeg")
+    result = pipeline.segment_subregions(image, atlas_root,
+                                        coarse_segmentation=coarse if provided_coarse else None,
+                                        wmparc=coarse if provided_wm else None,
+                                        synthseg_weights="unused-mocked-weights",
+                                        device="cpu", output_dir=tmp_path / "output")
+    assert len(contexts) == 4 and all(context is contexts[0] for context in contexts)
+    np.testing.assert_array_equal(contexts[0].coarse_segmentation,
+                                  coarse if provided_coarse else np.full(image.shape, 2, np.int32))
+    expected_calls = {"SynthSeg": int(preprocessing == "SynthSeg"),
+                      "SynthSegPlus": int(not provided_wm)}
+    shared = result.initialization["shared_preprocessing"]
+    assert calls == shared["model_calls"] == expected_calls
+    assert shared["coarse_source"] == ("provided" if provided_coarse else preprocessing)
+    assert shared["cortical_parcellation_source"] == (None if provided_wm else "SynthSegPlus")
     assert result.labels.shape == image.shape
     np.testing.assert_array_equal(result.labels.affine, image.affine)
     assert set(result.structure_results) == set(names)
@@ -294,3 +333,5 @@ def test_all_recipes_merge_on_native_grid_with_metadata(tmp_path, monkeypatch):
     assert (tmp_path / "output" / "labels.tsv").is_file()
     assert "17001\tRight-Lateral-nucleus" in (tmp_path / "output" / "volumes.tsv").read_text()
     assert result.timings["compute_seconds"] > 0 and result.timings["save_seconds"] > 0
+    report = json.loads(result.output_files["report"].read_text())
+    assert report["initialization"]["shared_preprocessing"] == shared
