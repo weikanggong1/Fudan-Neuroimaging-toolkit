@@ -27,7 +27,13 @@ for subject in ("sub01", "sub02"):
                              "report_sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
         if pair["old"]["report"]["input_sha256"] != pair["new"]["report"]["input_sha256"]:
             raise RuntimeError("different frozen inputs")
+        def trace(variant):
+            return [{k: row[k] for k in ("index", "stage", "weight", "averages", "dt")}
+                    for row in pair[variant]["report"]["stage"]["updates"]]
+        if trace("old") != trace("new"):
+            raise RuntimeError("different ordered sphere update trace")
         rows.append({"subject": subject, "hemisphere": hemi,
+                     "update_trace_exact": True,
                      "wall_reduction_percent": 100 * (1 - pair["new"]["report"]["seconds"] / pair["old"]["report"]["seconds"]),
                      **pair})
 args.output.write_text(json.dumps({"scope": "same_input_full_stage_including_io_jit_transfer",
