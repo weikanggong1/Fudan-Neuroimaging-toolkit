@@ -31,11 +31,11 @@ FNIT API 含最终保存为 **1318.04 s**，验证进程为 1372.24 s；原连�
 
 ## surface 的现有范围
 
-surface 测于 2026-09-30 `3f8b756`，从该次 volume 派生图和已有皮层几何开始，包含 EPI→T1、MSMSulc、ribbon 投影、fsLR32k 与皮层下组装，不计 recon-all。API 为 905.71 s、验证进程为 912.06 s，CUDA allocated/reserved 0.73/1.26 GB；每侧 490×32,492，CIFTI 490×91,282，时间轴及 BrainModel 轴正确。当前 MSMSulc 与固定 volume 投影单列验证；未重跑完整 surface API 或 MS-HBM，该历史时间不与当前 volume 相加。
+当前 [MSMSulc 验证](../msm/README.md)使用 HCP 四级配置和严格单线程官方 newMSM：本例保存球面逐值一致，固定 clean volume 的全部 490 帧 fsLR32k/91k 时间序列也逐值一致。每侧输出 490×32,492，CIFTI 为 490×91,282，时间轴及 BrainModel 轴相同。
 
-当前 [MSMSulc 验证](../msm/README.md)使用 HCP 四级配置和严格单线程官方 newMSM：本例保存球面逐值一致，固定 clean volume 的全部 490 帧 fsLR32k/91k 时间序列也逐值一致。配准冷/热调用与历史完整 surface API 的耗时分开记录，不能合成新的整链时间。
+FNIT 双侧配准冷/热调用为 **201.99 / 198.08 s**，固定 clean volume 的投影为 **303.77 s**。配准、投影与完整 volume 分别测量；这些阶段时间不能合成一次新的完整 surface API 或 raw BIDS→CIFTI 计时。旧 MSMSulc 实现的完整 API 报告已移除。
 
-固定官方球面时，Workbench 投影对独立命令回放、CIFTI 组装对 niworkflows 源码均逐值一致；[固定球面报告](surface_fixed_sphere.public.json)保留这项独立算子验证。其他处理协议的 [DeepPrep 对照](deepprep/README.md)另列输入与计时范围。
+固定官方球面时，Workbench 投影对独立命令回放、CIFTI 组装对 niworkflows 源码均逐值一致；[固定球面报告](surface_fixed_sphere.public.json)保留这项独立算子验证。其他处理协议的 [DeepPrep 实测](deepprep/README.md)另列输入与计时范围。
 
 [BBR 与 T1 FNIRT 独立冷/热调用](registration_gpu.current.public.json)使用各自注明的 WM、初始化矩阵、仿射和模板，细节见 [BBR](../../docs/fmri/bbr.md)与 [FNIRT](../../docs/fnirt/README.md)。它们不能替代上面的完整 volume 对照。
 

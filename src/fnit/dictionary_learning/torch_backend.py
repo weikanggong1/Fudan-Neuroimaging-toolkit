@@ -27,7 +27,20 @@ except ImportError:
     _dicl_tl = None
     _dicl_libdevice = None
 
-from .pipeline import _device
+GPU_ALGORITHM_VERSION = "rsvd5rowgraph"
+
+
+def _device(device: str) -> torch.device:
+    selected = "cuda" if device == "auto" and torch.cuda.is_available() else device
+    if selected == "auto":
+        selected = "cpu"
+    result = torch.device(selected)
+    if result.type == "cuda" and not torch.cuda.is_available():
+        raise ValueError("CUDA device requested but unavailable")
+    torch.backends.cuda.matmul.allow_tf32 = True
+    torch.backends.cudnn.allow_tf32 = True
+    return result
+
 
 
 def _streaming_numpy_axis0_stats(projected, feature_block: int) -> tuple[np.ndarray, np.ndarray]:

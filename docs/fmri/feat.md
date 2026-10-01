@@ -149,6 +149,25 @@ filtered_path = highpass_nifti(
 
 完整 FEAT 与后续去噪、MNI 输出的当前结果见[全流程对照](../../validation/fmri/matched_native.md)。带 GDC/B0 的共享 warp 路径在本轮未做完整对照；其空间方向与采样合同保持原有实现。
 
+## FEAT 耗时来源
+
+2026-10-01 的[完整 490 帧分段计时](../../validation/fmri/feat_profile.public.json)在共享 H100 上重跑同一真实 BOLD、SBRef 和已有 FNIT EPI 掩膜，实际选中输入重新校验 SHA-256，相关源码与上述冻结版本相同。输出 `filtered_func_data` 的完整 4D 解码值与原 FNIT 结果逐值相同（RMSE 和最大绝对差均为 0）。本次 FEAT 总耗时为 728.28 s，以下项目互不重叠：
+
+| 项目 | 耗时（s） | 包含内容 |
+|---|---:|---|
+| 运动估计、准备与输出类型转换 | 678.37 | 输入读取、参考网格、逐帧优化、参数转换和 int32 截断；占本次总时间 93.1% |
+| 最终运动重采样 | 30.74 | 490 帧样条采样及传回 CPU；占 4.2% |
+| 全局强度缩放 | 1.06 | 掩膜内第 50 百分位及全段乘法 |
+| 高通 | 1.91 | 时间投影、数据传输和返回 float32 |
+| `filtered_func_data.nii.gz` 保存 | 13.51 | NIfTI 写入和 gzip 压缩 |
+| 其他准备、掩膜和小文件输出 | 2.69 | 其余 CPU 操作、均值影像和运动文本等 |
+
+主要瓶颈是运动优化中的反复 cost 计算。三个阶段各拟合 490 帧，共 1470 次帧/阶段拟合、45972 次 cost。cost 累计 625.08 s，已包含在优化器的 652.15 s 内，不能再相加。8 mm 和 4 mm 参考网格分别只有 12844 和 102752 个体素，但每次 cost 仍由 Python 调度坐标生成、八邻点插值、边界权重等多个小 GPU 运算；目前仅末端统计归约经 `torch.compile` 编译。每次 cost 至少读取四个 GPU 标量到 CPU（三个方向判断及最终 cost），Brent 优化据此顺序选择下一点，反复同步限制了 GPU 吞吐。
+
+最终样条也逐帧执行空间轴递推、坐标累加和 64 邻点加权，再逐帧传回 CPU；本次实际占比为 4.2%。当前 motion-only 分支没有使用 `batch_size` 批处理，调大该参数不会改变这一执行方式；估计与最终采样还会分别解码同一完整 BOLD。应先减少 cost 的标量同步并融合 NCC 相关小运算，再缓存上传帧、CoG 和已解码数据；样条融合可随后处理。优化需保留搜索、累加顺序、边界和整数输出转换，并用完整真实数据比较数值与耗时。
+
+本次是对原函数加计时包装的独立重跑，包含分段 CUDA 同步，使用当时的共享 GPU 负载与缓存状态。728.28 s 与原完整 volume 测量中的 973.12 s 分别保留，不以两者差值报告提速，也不逐项相减推造全流程时间。此前固定原软件输出的高通 7.642 s 同样是另一项独立控制。
+
 ## 参考文献与原实现
 
 - Jenkinson et al., *Improved Optimization for the Robust and Accurate Linear Registration and Motion Correction of Brain Images*, NeuroImage 2002，[doi:10.1006/nimg.2002.1132](https://doi.org/10.1006/nimg.2002.1132)。

@@ -6,8 +6,8 @@ import pytest
 import torch
 from sklearn.utils.extmath import randomized_svd
 
-import fnit.bigflica.dicl_torch as dicl
-from fnit.bigflica.dicl_torch import (_preload_standardized_projection,
+import fnit.dictionary_learning.torch_backend as dicl
+from fnit.dictionary_learning.torch_backend import (_preload_standardized_projection,
                                       _randomized_svd_dictionary,
                                       _streaming_numpy_axis0_stats)
 

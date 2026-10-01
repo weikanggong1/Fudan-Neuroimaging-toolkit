@@ -21,7 +21,7 @@
 
 测量结果及输入、输出、代码哈希见[同 warp 对照报告](resampling.public.json)和[FSL 重采样参照](fsl_resampling.public.json)。FSL 6.0.7.22 在同一合成 warp 上处理完整 490 帧：脑掩膜内 r=0.99999999993、MAE=0.001431、RMSE=0.002011、最大绝对差 0.1271。远离边界的 182,718 个体素上 r=0.99999999993，MAE=0.001438。FSL 输出全部有限、网格一致、掩膜外为零、gzip CRC 通过；程序返回 255，因此条件接受该输出作为数值参照，并保留退出码。FSL 进程墙钟为 554.42 s；FNIT 样条为 54.09 s，前者包含进程启动，后者是初始化 CUDA 后的单次 API，二者均含输入解码和输出写盘。共享机器、单例测量，不能外推为稳定加速比。FSL 导出 `OMP_NUM_THREADS=8`，运行中主计算进程约使用一个 CPU 核心；未将其当作 8 线程并行优化后的速度。
 
-完整流程报告另见[volume](fmri_volume.public.json)与[surface](fmri_surface.public.json)。FNIT 使用 ICA-AROMA 清理 BOLD，并按调用参数进行组织、运动或全局信号回归；UKB 发布数据使用 FIX。固定 warp 的对照用于检验坐标合成、插值精度及输出网格，整链报告记录实际去噪配置、耗时和输出统计。
+当前完整 volume 见[整链对照](matched_native.md)，surface 见[MSMSulc 与固定 volume 投影验证](../msm/README.md)。FNIT 使用 ICA-AROMA 清理 BOLD，并按调用参数进行组织、运动或全局信号回归；UKB 发布数据使用 FIX。固定 warp 的对照用于检验坐标合成、插值精度及输出网格，volume 整链报告记录实际去噪配置、耗时和输出统计。
 
 ![同一 BOLD 和 warp 的 temporal SD 对照](../../docs/fmri/figures/fmri_resampling.png)
 

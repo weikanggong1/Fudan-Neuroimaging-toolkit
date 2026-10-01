@@ -46,13 +46,14 @@
 | [TorchMCFLIRT](../docs/mcflirt/README.md) | [当前完整490帧GPU](mcflirt/full490_gpu.public.json)、[CPU估计](mcflirt/full490_cpu.public.json) | motion时间r均值0.999578，GPU pull RMS均值0.00881 mm；双方int32，尚未逐值相同 | CPU只估计387.60 s；GPU未从FEAT973.12 s分离；MNI均值/SD/r对照图 |
 | [MELODIC/PICA](../docs/melodic/README.md) | [固定原490帧输入](fmri/ica_fixed_input.public.json) | 95成分/40步相同；时间/空间配对r中位数0.999999978/0.999999970，阈值Dice中位数0.999562 | GPU拟合与写出117.49 s，原完整命令651.87 s还含HTML；当前IC脑图 |
 | [BIDS→MNI152 2 mm fMRI](../docs/fmri/README.md) | [当前完整 490 帧 FNIRT 对照](fmri/matched_native.md) | motion/pre-ICA 时间 r 均值 0.999578/0.999356；最终 native/MNI 0.940704/0.938768；尚未数值等价 | FNIT API含保存1318.04 s，原连续链2570.47 s；allocated8.316 GB；当前MNI SD/r脑图 |
-| [fsLR32k / 91k surface](../docs/fmri/surface.md) | [当前 MSMSulc](msm/README.md)、[固定球面投影](fmri/surface_fixed_sphere.public.json)、[历史完整 API](fmri/fmri_surface.public.json) | 本例单线程官方注册球面及固定 volume 的全部 490 帧时间序列逐值一致；独立固定球面投影和组装也逐值一致 | 配准冷/热调用与 profile 单列；历史完整 surface API 905.71 s，不含皮层重建，不与当前 volume 相加 |
+| [fsLR32k / 91k surface](../docs/fmri/surface.md) | [当前 MSMSulc](msm/README.md)、[固定球面投影](fmri/surface_fixed_sphere.public.json) | 本例单线程官方注册球面及固定 volume 的全部 490 帧时间序列逐值一致；独立固定球面投影和组装也逐值一致 | 配准冷/热调用 201.99 / 198.08 s，投影 303.77 s，profile 单列；分阶段计时，不含皮层重建 |
 | [MS-HBM 17 网络](../docs/mshbm/README.md) | [真实 fsLR32k 静息态时序](mshbm/report.public.json) | 输入 profile、网络标签和 Dice/ARI 按顶点比较 | 报告含 CBIG/FNIT 的匹配计时与内存；功能页展示网络标签与差异 |
 
 ## Postanalysis
 
 | 功能 | 当前真实数据报告 | 输出一致性结论 | 时间、显存与示意图 |
 |---|---|---|---|
+| [字典学习 / DicL](../docs/dictionary_learning/README.md) | [独立效果与速度报告](dictionary_learning/README.md) | 真实1000人 VBM/FA/MD、同一float64 R500投影；字典与LASSO通过原容差，FA/MD的OMP30重建差2.44%/5.33%，未通过 | GPU完整拟合观测63.65秒、分配显存峰值2.31 GiB；历史CPU103.90秒，计时边界与共享负载不同，不能视为受控加速比 |
 | [BigFLICA](../docs/bigflica/README.md) | [30,000人VBM/FA/MD完整掩膜独立CPU/GPU对比](bigflica/README.md) | mMIGP相对差6.07e-6；DicL匹配后相对差16%–30%；CPU/GPU有效成分仅17/13，均未通过C20验收 | 至失败墙钟153.04/112.55分钟；GPU DicL及FLICA均慢于CPU，VBM重建几乎为零；尚无最终C20 course和脑图一致性结果。 |
 | [SuperBigFLICA](../docs/superbigflica/README.md) | [5,000 名真实 UKB、20 成分 H100 完整流程与 8 人原版连续模型比较](superbigflica/README.md) | 固定参数连续模型前向/损失/梯度通过；1,000 人测试反应时间 MAE 73.50 ms、r=0.1731；高血压 AUC=0.7226、balanced accuracy=0.6716；真实分类基准为二分类 | 50 轮训练，验证选第 5 轮；共享 H100 全流程 1517.16 s，PyTorch 峰值 allocation 1.03 GiB；120 张 NIfTI、冻结推理和五张真实图 |
 

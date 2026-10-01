@@ -12,7 +12,7 @@ from fnit.msm._affine import (
     _local_normals, _tangent_basis, _mean_neighbor_distance,
 )
 from fnit.msm.msmsulc import (
-    _ico, _area_weights, _face_costs, _face_layout, _vertex_area,
+    _ico, _face_costs, _face_layout, _vertex_area,
     _label_samples, _normalize_sphere, _rescaled_labels, _sphere_warp,
     _unfold, _variance_normalize, _native_output_qc, _triplet_data_weights,
     _rotation_matrices, _rotated_label,
@@ -223,7 +223,7 @@ def test_rigid_single_feature_pearson_is_spatially_centered_sign():
     cost=_RigidCost(xyz,faces,source,source,'cpu',simval=3)
     mean=np.add.accumulate(source)[-1]/len(source)
     np.testing.assert_array_equal(cost.centered_source.numpy(),source-mean)
-    assert cost(torch.eye(3,dtype=torch.float64))>10
+    assert cost.evaluate_positions(cost.vertices)>10
 
 
 
@@ -374,7 +374,7 @@ def test_affine_returns_statefully_rotated_mesh_not_one_accumulated_product(monk
     monkeypatch.setattr(implementation,'_RigidCost',KnownCost)
     xyz=np.array([[18.,2.,80.],[-31.,70.,3.],[9.,17.,43.]])
     result=implementation._affine_initialization(xyz,np.empty((0,3)),None,None,'cpu',
-             MSMSulcConfig(iterations=(2,1,1,1)),return_positions=True)
+             MSMSulcConfig(iterations=(2,1,1,1)))
     matrix,_,_,positions=result
     # Source keeps the coordinate rounding of every accepted rotation.
     assert np.any(positions.numpy()!=xyz@matrix)
