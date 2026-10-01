@@ -102,3 +102,26 @@ candidate_offsets, candidate_ids = candidate_index.query(current=vertices)  # �
 真实完整回归与CPU剖析正在执行，报告绑定源码/输入SHA，固定4线程、200步上限。
 未更改默认white：现有Python white只覆盖前缀，无法代替完整四轮优化。
 已有GPU厚度/面积/曲率继续由主runner调用，不重新实现；整例实测另行报告。
+
+
+## 61926c7：同一顶点批量碰撞
+
+当前真实剖析：完整41步含cProfile为1687.49秒，其中异步放置累计1419.07秒，
+最终相交清理140.51秒；桶构造17.57秒。累计时间含子函数，不能再相加。
+这是CPU剖析，不作为无剖析性能值。
+
+新增_vertex_collision_batch把同一顶点关联面一次送入KD查询，再复用原
+_candidate_collision进行编译循环。current不修改，所有面仍按原序；整个
+顶点检查完成后才接受坐标，保持异步顶点顺序。KD显式return_sorted=False，
+半径仍依次加原maximum_radius与1mm，完整候选无上限。存在拒绝试步MHT时
+继续执行原逐面路径，保留其状态、候选重试和清理。没有同时更新顶点或GPU
+近似。内部输入为当前float32(N,3)坐标、int32(F,3)面、有序关联face_ids、
+vertex、float32(3,)终点、当前固定KD树及最大面半径mm；返回bool。
+_incident_face_geometry返回关联面坐标、double中心/半径和float32边界；
+_incident_faces_collide输入这些量及完整候选CSR并返回首次碰撞bool。
+没有独立官方CLI、精度/线程新参数；限制是只用于无拒绝试步状态的顶点。
+
+32项专项测试通过；四半球真实原法向和white/pial坐标下的候选CSR完全相同。
+桶查询约0.016–0.027秒，旧代码0.222–0.369秒，准备成本另列；这是组件计时。
+完整无剖析冷JIT新/旧配对执行中，整例尚未启动，不能据此宣称整例加速。
+第一版只缓存整数索引的完整候选剖析已中止，保留日志，不计入性能结果。
