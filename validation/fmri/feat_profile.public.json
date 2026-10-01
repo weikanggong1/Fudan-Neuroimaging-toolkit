@@ -1,0 +1,154 @@
+{
+  "schema_version": 1,
+  "source_revision": "1eb9c417febebc8bdd450590d4759454e7160141",
+  "profiled_on": "2026-10-01",
+  "subjects": 1,
+  "real_frames": 490,
+  "shape": [
+    88,
+    88,
+    64,
+    490
+  ],
+  "device": "cuda:0",
+  "physical_gpu": 1,
+  "threads": 8,
+  "tf32": true,
+  "float16_enabled": false,
+  "timing_seconds": {
+    "run_feat_core_including_normal_outputs": 728.2829450638965,
+    "nested_counters": {
+      "nifti_save_example_func.nii.gz": 0.059771744068711996,
+      "motion_cost_initialization": 16.423350574914366,
+      "sampling_coordinates": 3.9003105289302766,
+      "sampling_spline_coefficients": 7.310368617065251,
+      "sampling_64neighbour_interpolation": 6.279391749761999,
+      "motion_frame_sampling_without_d2h": 20.59409567154944,
+      "motion_resampling_490frames": 30.744499012362212,
+      "mcflirt_run_including_fit_sampling_cast": 709.1099966061302,
+      "motion_text_output": 1.1057680523954332,
+      "nifti_save_prefiltered_func_data_unwarp_mean.nii.gz": 0.07841544598340988,
+      "grand_mean_scaling": 1.060875777155161,
+      "gaussian_highpass_including_transfers": 1.9112987159751356,
+      "nifti_save_filtered_func_data.nii.gz": 13.512416474055499,
+      "nifti_save_mean_func.nii.gz": 0.028085062745958567
+    },
+    "nonoverlapping_derived_components": {
+      "motion_estimation_preparation_and_output_dtype_cast": 678.3654975937679,
+      "final_motion_resampling": 30.744499012362212,
+      "grand_mean_scaling": 1.060875777155161,
+      "gaussian_highpass": 1.9112987159751356,
+      "filtered_nifti_gzip_save": 13.512416474055499,
+      "remaining_preparation_masks_small_outputs_and_text": 2.688357490580529
+    }
+  },
+  "counter_calls": {
+    "nifti_save_example_func.nii.gz": 1,
+    "motion_cost_initialization": 1470,
+    "sampling_coordinates": 490,
+    "sampling_spline_coefficients": 490,
+    "sampling_64neighbour_interpolation": 490,
+    "motion_frame_sampling_without_d2h": 490,
+    "motion_resampling_490frames": 1,
+    "mcflirt_run_including_fit_sampling_cast": 1,
+    "motion_text_output": 491,
+    "nifti_save_prefiltered_func_data_unwarp_mean.nii.gz": 1,
+    "grand_mean_scaling": 1,
+    "gaussian_highpass_including_transfers": 1,
+    "nifti_save_filtered_func_data.nii.gz": 1,
+    "nifti_save_mean_func.nii.gz": 1
+  },
+  "motion_fit_stages": {
+    "0": {
+      "cost_evaluations": 15402,
+      "cost_wall_seconds": 208.29204945499077,
+      "optimizer_wall_seconds": 217.1511962567456,
+      "frame_stage_fits": 490,
+      "first_cost_seconds": 3.5209618620574474,
+      "reference_shape_zyx": [
+        19,
+        26,
+        26
+      ]
+    },
+    "1": {
+      "cost_evaluations": 14302,
+      "cost_wall_seconds": 197.57706805784255,
+      "optimizer_wall_seconds": 206.13439017534256,
+      "frame_stage_fits": 490,
+      "first_cost_seconds": 1.875423378776759,
+      "reference_shape_zyx": [
+        38,
+        52,
+        52
+      ]
+    },
+    "2": {
+      "cost_evaluations": 16268,
+      "cost_wall_seconds": 219.21489328239113,
+      "optimizer_wall_seconds": 228.8684782194905,
+      "frame_stage_fits": 490,
+      "first_cost_seconds": 0.014175074640661478,
+      "reference_shape_zyx": [
+        38,
+        52,
+        52
+      ]
+    }
+  },
+  "gpu_observed_start": [
+    "0, 100, 69092",
+    "1, 100, 24396"
+  ],
+  "gpu_observed_end": [
+    "0, 100, 69092",
+    "1, 100, 25508"
+  ],
+  "allocated_bytes": 182316544,
+  "reserved_bytes": 337641472,
+  "source_sha256": {
+    "pipeline": "a71a0e0528a72c0de2dd38edbfee6e817dfde80a5640b1f620c120abdbd59311",
+    "spatial": "bd7e3ae1d28202f79925323ea05c7303e07e8b0caa3646e732f64703a00ab134",
+    "motion_core": "f4f18579cb0a7f709f2975c3cef125e6cce392fc1dca3fa413428c365afb56fe",
+    "motion_sampling": "af10cfd4f42f94adff2bb910eafe40834786a3b7646756a3967d5c9fc3aa0b8f",
+    "temporal": "b0a3fc14751a6a7cd9ce7c66ac8fe7b3fc4bea43f4039ef5b03d5af47e3d7b08",
+    "flirt_core": "e6ce6185fafb89666be631069f66e96ce9c6a561ab3d7c7fab4c661d317885c1"
+  },
+  "source_unchanged_during_run": true,
+  "checks": {
+    "shape": [
+      88,
+      88,
+      64,
+      490
+    ],
+    "all_finite": true,
+    "affine_matches_original_frozen_candidate": true,
+    "rmse_vs_previous_frozen_fnit_filtered": 0.0,
+    "max_abs_vs_previous_frozen_fnit_filtered": 0.0,
+    "exact_fraction_vs_previous_frozen_fnit_filtered": 1.0
+  },
+  "input_sha256": {
+    "bold": "67717caaa823141c6e59d46db52e92deb4419d232ba699c399c69eb8888a0e92",
+    "sbref": "ff4e0e49a504527468234456cba6ad367d63c1f3f529d8ff3519bc78e2076323",
+    "brain_mask": "102b4bd98117d72836a13fc75356a659ad5bd3c5334c7e7cd42babb2fd7dc8b8"
+  },
+  "limits": [
+    "One profiling replay on the shared H100; not a controlled speed comparison.",
+    "Counters wrap unchanged functions; per-sampler-component CUDA fences add profiling overhead.",
+    "Nested counters overlap and cannot be summed.",
+    "Same frozen source, full BOLD/SBRef and previously generated FNIT EPI mask; no SynthStrip re-estimation.",
+    "No extra capture and no original FSL commands; ordinary FEAT files are written.",
+    "This report is separate from the original 973.12-second pipeline observation."
+  ],
+  "privacy": "Anonymous scalar aggregates and hashes only; paths, matrices and images remain private.",
+  "actual_selected_bids_inputs_rehashed_after_profile": true,
+  "selected_bold_sbref_hashes_match_frozen_pipeline": true,
+  "source_verification_scope": "Five local FEAT/motion/temporal source files checked before and after measurement; imported FLIRT dependency checked after measurement against frozen source manifest.",
+  "private_profile_script_sha256": "6c085aa963566a435c31ee605ee3ab7fae4784f735b8239ecd69ad9a29262911",
+  "derived_component_definitions": {
+    "motion_estimation_preparation_and_output_dtype_cast": "Outer TorchMCFLIRT.run wall minus nested apply_motion_warp wall; includes load/pyramid/frame preparation, fitting, parameter conversion and int32 output cast; not a pure optimizer timer.",
+    "remaining_preparation_masks_small_outputs_and_text": "FEAT wall minus other listed non-overlapping components; includes unwrapped mask/CPU operations, initialization, small NIfTI saves and matrix text writes."
+  },
+  "counter_nesting": "Optimizer includes cost. Outer MCFLIRT includes final resampling; resampling includes frame sampler; frame sampler includes coordinates/spline-coefficients/cubic interpolation. Nested counters must not be added."
+}
