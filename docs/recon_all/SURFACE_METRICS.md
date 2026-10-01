@@ -40,7 +40,7 @@ mris_place_surface --area-map surf/lh.white surf/lh.area
 mris_place_surface --curv-map surf/lh.white 2 10 surf/lh.curv
 ```
 
-## 当前真实 T1 同输入验证
+## 2026-09-30 两例真实 T1 同输入验证
 
 2026-09-30 使用两例 FNIT `b8cd17b` 从原始 T1 连续重建出的最终网格，分别调用官方 FreeSurfer 8.2、当前 Conda 源码构建程序和已有 PyTorch CUDA 函数。官方程序只用于隔离诊断。CPU/Conda 与官方相同输入的结果完全一致；PyTorch 按现有 morph 门槛检查：面积绝对阈值 0.001 mm²，其余 0.005，加 0.001 相对项。
 
@@ -49,6 +49,39 @@ mris_place_surface --curv-map surf/lh.white 2 10 surf/lh.curv
 两例双侧及 pial 的逐图报告、程序和输入 SHA-256、PyTorch allocated/reserved 见[性能验证目录](../../validation/recon_all/python_gpu_port/performance_20260930/README.md)。完整整例另比较 138 项及最终脑区指标，不用阶段结果宣称整例数值验收通过。
 
 修正调度设备传递的 `279e09f` 另直接调用生产封装，冻结 sub-01 左侧最终 white/pial 并显式启用 TF32：五张图均无超限顶点，厚度 8.39 s、white/pial 面积 0.014/0.010 s、曲率 0.727/0.655 s；PyTorch allocated/reserved 为 482,308,096/517,996,544 字节。该探针启用 CUDA 分配缓存，不代表默认关闭缓存的整例显存。[封装回归报告](../../validation/recon_all/python_gpu_port/performance_20260930/surface_metrics_wiring_tf32_279e09f.json)绑定实际源码和输入 SHA-256。
+
+<a id="curvature-repeatability-20261001"></a>
+
+## 同输入曲率的重复性（2026-10-01）
+
+本次冻结 sub-01 候选 `1b8c36d25a68e253a1e59b6d02114890afa467de` 的右半球最终 pial：104,619 个顶点、209,234 个有序面，surface RAS/mm。用现有三方脚本分别在两个独立进程中运行官方 FreeSurfer 8.2.0-1、FNIT Conda 源码构建程序和 PyTorch。两轮固定同一 gpucw1、物理 GPU UUID `GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba`、四线程及 BLAS/Numba 预算、TF32 和 float32；`PYTORCH_NO_CUDA_MEMORY_CACHING=1`，未使用半精度。
+
+曲率验收仍为既有算子门槛：`abs(candidate-reference) <= 0.005 + 0.001 × abs(reference)`，单位 mm⁻¹。未建立或调整整例指标等效阈值。保存的受控 `e036f57b62b99d2af4cd8853ab2f1e6d2a9f8c68` 与候选 `1b8c36d` 整例 white/pial 坐标及有序面逐值相同，因此下面的整例图配对也可按顶点索引比较。
+
+| 同输入对照 | 非零差顶点数 | 最大绝对差（mm⁻¹） | P99（mm⁻¹） | 越原算子门槛顶点数 |
+| --- | ---: | ---: | ---: | ---: |
+| 官方：第1轮→第2轮 | 0 | 0 | 0 | 0 |
+| Conda：第1轮→第2轮 | 0 | 0 | 0 | 0 |
+| PyTorch：第1轮→第2轮 | 59,663 | 1.0204315×10⁻⁴ | 2.7120113×10⁻⁶ | 0 |
+| 保存整例图：受控 e036→候选 1b | 58,562 | 1.0144711×10⁻⁴ | 2.8014183×10⁻⁶ | 0 |
+
+官方和 Conda 重复输出的文件 SHA-256 也分别相同；两轮中 Conda 对官方均逐值相同。PyTorch 对官方的最大/P99 差异分别为 `1.0776520×10⁻⁴ / 1.7508864×10⁻⁵` 和 `9.8884106×10⁻⁵ / 1.7285347×10⁻⁵` mm⁻¹，两轮越门槛顶点均为 0。已有规则通过不表示逐字节一致，也不表示候选与官方整例网格相同。
+
+实际 e036/1b 的 `surface_curvature_gpu.py` SHA-256 均为 `7af66e0b23dd19cabe8e20e7ea75686531eb87550e599d318f35dc24f7efc8e0`，`surface_area_gpu.py` 均为 `ad60ee9c6b3e45464650ac15f2fce7bc2ea3a6cb519c15f371f4f653f45964a8`。曲率导入的 `surface_thickness_gpu` 模块有更新，但 `_normals` 函数正文相同；按原函数行、LF 换行并保留一个末尾 LF 散列，均为 `36558ee6fd5d3715c1d44ab199f946f54d2829357b9b4f45ca264a0b789dca40`。实际源码、程序、输入和全部保存图的完整哈希见报告。
+
+这次观察到同版 PyTorch 重复尾差与整例配对尾差处于相近量级。源码中的 CUDA `index_add_` 法线累加、局部拟合的矩阵乘法和 SVD 是可能的浮点差异路径，尚未通过逐算子实验定位；重复结果不能单独证明其中哪一步造成差异，也不能解释其他 19 张非零差图。这里保留 GPU/TF32 路径，整体指标等效仍为 `not_assessed`。官方在这个冻结阶段重复一致，不能据此宣布官方完整流程的重复性已经验收。
+
+两轮 PyTorch 同步阶段墙钟为 **5.112 / 6.998 s**，含函数读取、传输、计算和写出，排除脚本导入及 CUDA 上下文初始化。三方比较的完整命令墙钟为 **12.551 / 13.406 s**。共享 GPU 利用率采样范围为 **67–100% / 99–100%**，不能从这两次单阶段时间判断优化的速度因果或整例提速。两轮父子进程合计显存的采样峰值均为 **1,990,197,248 字节**；请求采样间隔 2 s，实际最大间隔为 2.255/2.270 s，非连续峰值。分配缓存关闭时 PyTorch allocated/reserved 为 null。
+
+可复核材料：
+
+- [机器可读汇总及全部图配对](../../validation/recon_all/python_gpu_port/performance_20261001/curvature_repeat_rh_pial_1b/summary.json)，SHA-256 `360ad867b3e1c7bf9aa4a513a719ca9c154205760f0b7a433965774ea96e653e`。
+- [第1轮原报告](../../validation/recon_all/python_gpu_port/performance_20261001/curvature_repeat_rh_pial_1b/round1_retry1/result/report.json)与[第2轮原报告](../../validation/recon_all/python_gpu_port/performance_20261001/curvature_repeat_rh_pial_1b/round2/result/report.json)。
+- [第1轮完整命令和资源采样](../../validation/recon_all/python_gpu_port/performance_20261001/curvature_repeat_rh_pial_1b/round1_retry1/monitor.json)与[第2轮完整命令和资源采样](../../validation/recon_all/python_gpu_port/performance_20261001/curvature_repeat_rh_pial_1b/round2/monitor.json)。
+- [实际 CPU 汇总/复现正文](../../validation/recon_all/python_gpu_port/performance_20261001/curvature_repeat_rh_pial_1b/analysis_source.log)，SHA-256 `3b8d5dfaec0ca11260e9eba60b057dd91c51ea0bcb63eba1716cf6eea2ff5853`；只读取已经保存的图，不重算 GPU。固定输入路径和新摘要输出路径在正文中列出，已有摘要存在时拒绝覆盖。
+- [收回文件清单](../../validation/recon_all/python_gpu_port/performance_20261001/curvature_repeat_rh_pial_1b/local_manifest.json)：仅 JSON/log，未收回影像、表面、标量图、权重或许可证。
+
+首次启动因遗漏 `FS_LICENSE`，官方程序在候选计算前退出；[失败日志](../../validation/recon_all/python_gpu_port/performance_20261001/curvature_repeat_rh_pial_1b/round1_failed/command.log)保留。随后仅传入既有授权许可证路径，在新 `round1_retry1` 目录重试成功，未读取或复制许可证内容。
 
 ## 三方比较脚本
 

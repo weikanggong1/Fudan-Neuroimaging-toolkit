@@ -141,14 +141,14 @@ python validation/recon_all/python_gpu_port/compare_thickness_conda_maps.py \
 
 原生写出文件以日志中的实际路径为准：本轮第二例请求 `sub02.lh.cpp.thickness`，程序实际加了半球前缀，写成 `lh.sub02.lh.cpp.thickness`；右侧相同。不要按请求文件名误判为缺失输出。
 
-`summarize_thickness_indexed.py` 仅整理既有 JSON。`--reports` 指向本性能目录，`--final-source` 只用于散列最终生产源码，`--output` 指定不存在的摘要文件。摘要同时保存实测 `fb3...` 与最终 `c5d...`，不把版本更名后的待测整例冒充八次冻结阶段测试；官方新参考为 `not_run`，整体等效为 `not_assessed`。
+`summarize_thickness_indexed.py` 仅整理既有 JSON。`--reports` 指向本性能目录，`--final-source` 只用于散列指定源码，`--output` 指定不存在的摘要文件。已保存的阶段摘要绑定实测 `fb3...` 与当时生产版本 `c5d...`；下例对当前源码执行会记录后续工作线程修正的 `ab019...`，不能覆盖原摘要或把该源码哈希称为八次阶段测试的计算版本。原阶段摘要的官方新参考为 `not_run`，后续整例官方比较另有报告；整体等效为 `not_assessed`。
 
 ```bash
 python validation/recon_all/python_gpu_port/summarize_thickness_indexed.py \
   --reports validation/recon_all/python_gpu_port/performance_20261001 \
   --final-source src/fnit/recon_all/surface_thickness_gpu.py \
   --output /data/diagnostics/thickness_summary.json
-# reports 读取八轮真实阶段与监控；final-source 散列最终默认函数。
+# reports 读取八轮真实阶段与监控；final-source 散列当前指定函数，不重标既有测试版本。
 # output 是新的机器摘要，不执行 GPU 或影像算法。
 ```
 

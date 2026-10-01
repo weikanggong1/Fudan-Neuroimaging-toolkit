@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
   "created_utc": "2026-10-01T02:55:24.220379+00:00",
-  "scope": "Real same-input stage regression plus completed raw-T1 candidate whole runs, CPU controlled pair and independent official/extended quality diagnostics; GPU controlled pair still running.",
+  "scope": "Real same-input stages, two complete raw-T1 candidate/control runs, independent official metrics and extended quality; GPU curvature repeatability.",
   "generated_from": "JSON reports and SHA-256 verification; no new reconstruction or model execution",
   "versions": {
-    "summary_repository_head": "12a48342d49446a9d88d5ac32c113471e41b9842",
+    "summary_repository_head": "ef09caca4873a81ad9e39d200587773247d1fdde",
     "algorithm_baseline": {
       "commit": "e036f57b62b99d2af4cd8853ab2f1e6d2a9f8c68",
       "stage1_base_src_equals_legacy": true,
@@ -27,7 +27,7 @@
         "path": "source_1b8c36d_manifest.json",
         "sha256": "afb21b5d20bf168737f9556af6617311fef8c7dcb5456671156ff9d38b060f8c"
       },
-      "measurement_scope": "final-default LH thickness, posterior buffers, thread regressions and pending whole runs"
+      "measurement_scope": "final-default LH thickness, posterior buffers, thread regressions and two complete whole runs"
     },
     "post_1b_profiling": {
       "base_commit": "1b8c36d25a68e253a1e59b6d02114890afa467de",
@@ -44,7 +44,7 @@
     "post_1b_metadata_and_workers": {
       "commit": "12a48342d49446a9d88d5ac32c113471e41b9842",
       "thickness_source_sha256": "ab019eb7d413c7b08f01ad6b2e499c406ab513cb531d723142c2db2d6c12e961",
-      "real_gpu_worker_measurement_status": "pending; scheduled after whole runs",
+      "real_gpu_worker_measurement_status": "passed independent frozen sub-01 LH stage; not the calculation version of whole runs",
       "public_wrapper_local_checks": {
         "path": "public_wrapper_failure_tests_local.json",
         "sha256": "39e0808fc176725f6a3fb0eeced2ff305ae992f8145741de11ffecf874e9d592"
@@ -121,7 +121,7 @@
     {
       "item": 2,
       "name": "synchronized profiling and complete public timing",
-      "status": "implemented_stage_measured_full_pending",
+      "status": "implemented_and_measured_frozen_1b_whole; later failure metadata local only",
       "finding": "target device synchronization in profiling only; public wrapper includes validation and reporting; stage writes included",
       "unit_tests": {
         "path": "unit_tests_1b8c36d.json",
@@ -150,7 +150,7 @@
     {
       "item": 3,
       "name": "surface-version cache and batched ROI summaries",
-      "status": "two_subject_stage_passed",
+      "status": "two_subject_stage_and_whole_reported_ROI_regression_passed",
       "finding": "shared geometry/principal curvature reused across atlases; one summary transfer per atlas",
       "acceptance": "Entire generated .stats text must be identical versus frozen FNIT baseline; no numerical tolerance relaxation.",
       "exact_files": 48,
@@ -163,7 +163,7 @@
     {
       "item": 4,
       "name": "reuse existing PyTorch metrics and index thickness candidates",
-      "status": "stage1_two_subject_and_1b_lh_passed_workers_pending",
+      "status": "two_subject_stage_1b_lh_and_post_1b_worker_passed; whole_gates_unchanged",
       "finding": "CUDA already defaulted to own PyTorch metrics; indexed complete candidate radius and compiled reachability replace dense cdist/Python traversal",
       "cpu_default": "Conda source-built native metrics; retained intentionally",
       "stage1_optimization_threshold": {
@@ -175,27 +175,103 @@
         "path": "final_1b8c36d/thickness/report.json",
         "sha256": "77e9743535bff4c2c1e08dc394037d4827a71077dc394f5bfdbb7ed4db8cb4a5"
       },
-      "post_1b_worker_candidate_status": "pending; do not attribute stage1 timings to ab019 or latest default"
+      "post_1b_worker_candidate_status": "real stage passed; see workers_summary.json"
     },
     {
       "item": 5,
       "name": "allocator strategy and posterior buffers",
-      "status": "single_stage_measured_no_default_cache_recommendation",
+      "status": "CLI_API_stage_and_no_cache_whole_measured; cached_whole_not_tested",
       "finding": "posterior buffer reuse preserves same-FP32 outputs; no-cache retained; enabling cache is explicit and accounted for before CUDA init",
       "stored_regression": {
         "path": "final_1b8c36d/buffer_stored_dtype_audit.json",
         "sha256": "633550dfdba10471fe245dabe01097c8cceda848c4d847e738f4cc896fdea170"
       },
       "stage1_cached_peak_exceeded_budget": true,
-      "performance_conclusion": "no demonstrated buffer speedup; CLI and initialized API measurements are not a randomized matched cache crossover"
+      "performance_conclusion": "no demonstrated buffer speedup; CLI and initialized API measurements are not a randomized matched cache crossover",
+      "whole_memory": {
+        "candidate": {
+          "samples": 2316,
+          "failed_app_queries": 0,
+          "failed_whole_gpu_queries": 0,
+          "missing_whole_gpu_values_despite_successful_query": 0,
+          "interval_requested_seconds": 2.0,
+          "query_timeout_seconds": 5.0,
+          "maximum_sampling_gap_seconds": 3.1184225268661976,
+          "peak_sampled_parent_plus_children_bytes": 16118710272,
+          "peak_GB": 16.118710272,
+          "peak_GiB": 15.01171875,
+          "peak_below_20_000_000_000_bytes": true,
+          "one_peak_same_query_record": {
+            "time_utc": "2026-10-01T01:54:31.217617+00:00",
+            "monotonic_seconds": "406.07677606586367",
+            "apps_query_seconds": "0.04610091308131814",
+            "apps_status": "ok",
+            "parent_bytes": "16118710272",
+            "children_bytes": "0",
+            "total_process_bytes": "16118710272",
+            "gpu_query_seconds": "0.08071586908772588",
+            "gpu_status": "ok",
+            "gpu_total_mib": "45679",
+            "gpu_utilization_percent": "100"
+          },
+          "continuous_peak_verified": false,
+          "monitor_thread_finished": true,
+          "whole_gpu_separate_query": {
+            "peak_total_mib": 63439.0,
+            "median_total_mib": 31061.0,
+            "median_utilization_percent": 100.0,
+            "scope": "whole device in separate later queries; includes other jobs; not simultaneous with compute-apps records"
+          },
+          "torch_allocator_stats": "unavailable with allocator cache disabled; never interpret reported zero as zero process memory"
+        },
+        "baseline": {
+          "samples": 2415,
+          "failed_app_queries": 0,
+          "failed_whole_gpu_queries": 0,
+          "missing_whole_gpu_values_despite_successful_query": 0,
+          "interval_requested_seconds": 2.0,
+          "query_timeout_seconds": 5.0,
+          "maximum_sampling_gap_seconds": 3.3721908112056553,
+          "peak_sampled_parent_plus_children_bytes": 12897484800,
+          "peak_GB": 12.8974848,
+          "peak_GiB": 12.01171875,
+          "peak_below_20_000_000_000_bytes": true,
+          "one_peak_same_query_record": {
+            "time_utc": "2026-10-01T03:32:45.840139+00:00",
+            "monotonic_seconds": "366.6584894270636",
+            "apps_query_seconds": "0.043015516828745604",
+            "apps_status": "ok",
+            "parent_bytes": "12897484800",
+            "children_bytes": "0",
+            "total_process_bytes": "12897484800",
+            "gpu_query_seconds": "0.04305044701322913",
+            "gpu_status": "ok",
+            "gpu_total_mib": "36662",
+            "gpu_utilization_percent": "100"
+          },
+          "continuous_peak_verified": false,
+          "monitor_thread_finished": true,
+          "whole_gpu_separate_query": {
+            "peak_total_mib": 45823.0,
+            "median_total_mib": 28215.0,
+            "median_utilization_percent": 100.0,
+            "scope": "whole device in separate later queries; includes other jobs; not simultaneous with compute-apps records"
+          },
+          "torch_allocator_stats": "unavailable with allocator cache disabled; never interpret reported zero as zero process memory"
+        }
+      }
     },
     {
       "item": 6,
       "name": "thread budget, device wiring and hemisphere dependency",
       "status": "thread_regression_passed_no_parallel_speed_claim",
-      "finding": "Torch/Numba scope fixes effective Python thread budget; native subprocess budgets require separate verification",
+      "finding": "Torch/Numba scope fixes effective Python thread budget; native subprocess budgets require separate verification; final EM logs confirm OpenMP and FSRuntime 4, not all OS/library threads",
       "hemispheres": "serial dependency retained: surface.defects.mgz LH initialization then RH merge",
-      "device_migration": "no mechanical CPU-to-CUDA switch or thread-pool parallelization without measured benefit"
+      "device_migration": "no mechanical CPU-to-CUDA switch or thread-pool parallelization without measured benefit",
+      "runtime_logs": {
+        "path": "thread_runtime_logs.json",
+        "sha256": "658041cd85f653d9dd5864e3c71349a7d217a77f365fed9c416ae773c58c187f"
+      }
     }
   ],
   "statistics": {
@@ -2808,9 +2884,9 @@
       "sub02_controlled_baseline": "138/138; parsed geometry/data exactly equal, not all file bytes",
       "official_sub01": "6/138",
       "official_sub02": "2/138",
-      "sub01_controlled_baseline": "pending"
+      "sub01_controlled_baseline": "138/138 unchanged diagnostic gates; 20/174 numeric blocks nonzero, not byte-exact"
     },
-    "optimization_introduced_regression": "None in completed same-input operator tests and CPU whole parsed geometry/labels/region metrics; GPU controlled whole comparison pending. TF32 policy correction changes 148 frozen labels separately.",
+    "optimization_introduced_regression": "No unacceptable changes in checked same-input gates; CPU parsed outputs exact; GPU label/region/ordered geometry exact, 20 map tails within existing gates. Current RH pial GPU repeats show comparable tails; no cause assigned to other maps. TF32 policy correction versus old effective TF32 separately changes 148 frozen labels.",
     "overall_metric_equivalence": "not_assessed",
     "equivalence_thresholds_formally_confirmed": false,
     "current_whole_output_completeness": {
@@ -2823,8 +2899,15 @@
       "connectivity_nonmanifold_sphere": "four candidates connected=1, nonmanifold/vertex-link/duplicate/negative-sphere=0",
       "whole_quality_equivalence": "not_assessed"
     },
-    "whole_pipeline_speedup": null,
-    "whole_pipeline_speedup_status": "GPU matched complete-command pair pending; CPU common postvalidation observation available, external command ratio unavailable due clock boundaries",
+    "whole_pipeline_speedup": {
+      "scope": "same run_monitored perf_counter start before process creation through child exit; includes interpreter/wrapper startup, validation, model loading, transfers, IO and final stdout; excludes monitor thread join/report write after exit",
+      "baseline_seconds": 5173.88692023186,
+      "candidate_seconds": 4972.66683337884,
+      "candidate_minus_baseline_seconds": -201.2200868530199,
+      "baseline_divided_by_candidate": 1.0404652259231078,
+      "time_reduction_fraction": 0.03889147365516881
+    },
+    "whole_pipeline_speedup_status": "GPU matched complete-command observation 3.889% shorter; shared resources, one pair; CPU common postvalidation observation 1.495%, complete outer ratio unavailable",
     "new_runtime_dependencies": [],
     "clean_isolated_deployment": "not_verified",
     "focused_unit_checks": {
@@ -2842,6 +2925,83 @@
       "candidate_minus_baseline_seconds": -80.24852296710014,
       "baseline_divided_by_candidate": 1.0151763472161452,
       "time_reduction_fraction": 0.014949468885639866
+    },
+    "gpu_memory_budget": {
+      "sampled_parent_plus_children": {
+        "candidate": {
+          "samples": 2316,
+          "failed_app_queries": 0,
+          "failed_whole_gpu_queries": 0,
+          "missing_whole_gpu_values_despite_successful_query": 0,
+          "interval_requested_seconds": 2.0,
+          "query_timeout_seconds": 5.0,
+          "maximum_sampling_gap_seconds": 3.1184225268661976,
+          "peak_sampled_parent_plus_children_bytes": 16118710272,
+          "peak_GB": 16.118710272,
+          "peak_GiB": 15.01171875,
+          "peak_below_20_000_000_000_bytes": true,
+          "one_peak_same_query_record": {
+            "time_utc": "2026-10-01T01:54:31.217617+00:00",
+            "monotonic_seconds": "406.07677606586367",
+            "apps_query_seconds": "0.04610091308131814",
+            "apps_status": "ok",
+            "parent_bytes": "16118710272",
+            "children_bytes": "0",
+            "total_process_bytes": "16118710272",
+            "gpu_query_seconds": "0.08071586908772588",
+            "gpu_status": "ok",
+            "gpu_total_mib": "45679",
+            "gpu_utilization_percent": "100"
+          },
+          "continuous_peak_verified": false,
+          "monitor_thread_finished": true,
+          "whole_gpu_separate_query": {
+            "peak_total_mib": 63439.0,
+            "median_total_mib": 31061.0,
+            "median_utilization_percent": 100.0,
+            "scope": "whole device in separate later queries; includes other jobs; not simultaneous with compute-apps records"
+          },
+          "torch_allocator_stats": "unavailable with allocator cache disabled; never interpret reported zero as zero process memory"
+        },
+        "baseline": {
+          "samples": 2415,
+          "failed_app_queries": 0,
+          "failed_whole_gpu_queries": 0,
+          "missing_whole_gpu_values_despite_successful_query": 0,
+          "interval_requested_seconds": 2.0,
+          "query_timeout_seconds": 5.0,
+          "maximum_sampling_gap_seconds": 3.3721908112056553,
+          "peak_sampled_parent_plus_children_bytes": 12897484800,
+          "peak_GB": 12.8974848,
+          "peak_GiB": 12.01171875,
+          "peak_below_20_000_000_000_bytes": true,
+          "one_peak_same_query_record": {
+            "time_utc": "2026-10-01T03:32:45.840139+00:00",
+            "monotonic_seconds": "366.6584894270636",
+            "apps_query_seconds": "0.043015516828745604",
+            "apps_status": "ok",
+            "parent_bytes": "12897484800",
+            "children_bytes": "0",
+            "total_process_bytes": "12897484800",
+            "gpu_query_seconds": "0.04305044701322913",
+            "gpu_status": "ok",
+            "gpu_total_mib": "36662",
+            "gpu_utilization_percent": "100"
+          },
+          "continuous_peak_verified": false,
+          "monitor_thread_finished": true,
+          "whole_gpu_separate_query": {
+            "peak_total_mib": 45823.0,
+            "median_total_mib": 28215.0,
+            "median_utilization_percent": 100.0,
+            "scope": "whole device in separate later queries; includes other jobs; not simultaneous with compute-apps records"
+          },
+          "torch_allocator_stats": "unavailable with allocator cache disabled; never interpret reported zero as zero process memory"
+        }
+      },
+      "continuous_peak_verified": false,
+      "candidate_sampled_peak_higher_than_baseline": true,
+      "default_cache_changed": false
     }
   },
   "whole_runs": {
@@ -2866,10 +3026,19 @@
       "outputs": "138/138"
     },
     "sub01_gpu_controlled_baseline": {
-      "status": "running",
+      "status": "complete",
       "script": "run_gpu_control_direct_20261001.sh",
       "completion_report": "whole/sub01/baseline_run.json",
-      "notes": "Direct new-directory launch after preserved duplicate queue FileExistsError; no completed whole speed ratio yet."
+      "notes": "Original T1, empty output directory; same monitor clock, initialized API, threads and precision.",
+      "performance": {
+        "path": "gpu_control_pair_summary.json",
+        "sha256": "a461b12121782d838837188fcd0751eead640a4b3f4b455c722af4a01151a8ab"
+      },
+      "precision": {
+        "path": "gpu_control_precision_summary.json",
+        "sha256": "571f94c1d2cbfc2ee6cc2381dc05ada2e5113ceb361b15c2482a61fffd65580b"
+      },
+      "command_wall_seconds": 5173.88692023186
     },
     "sub02_cpu_controlled_baseline": {
       "status": "complete",
@@ -2883,7 +3052,7 @@
         "sha256": "e4c6aaccfe803627836af259a8e6ce00dd4b9df31e595cb86090e46cc182771b"
       }
     },
-    "notes": "Do not substitute historical complete-run totals or partial/checkpoint reruns. Parent will update only after completion and comparison.",
+    "notes": "All four actual whole runs completed; no checkpoint reruns substituted. GPU speed and precision use final controlled pair; earlier profile remains immutable.",
     "candidate_profile": {
       "path": "candidate_whole_profile.json",
       "sha256": "8d648a5157e6e741b480f471bd7b825af484674cab0e6a0ad05ef15bf7e2ff4a"
@@ -2937,9 +3106,19 @@
     "official_candidate_metrics_summary.json": "018c40196f689d4c9737a5a024aad8a98937bcbabc2f7263ef6fcb4ab3e31f24",
     "buffer_cached_api_summary.json": "7423052f3a284421c5ce3fef3fab75ea862ec21e9ebea5a1bf441e583a79d31a",
     "workers_summary.json": "5e42d01d250d6dc6c12f2d96a4e08c383c742037df6ed41ca78c8575e6b7dcd3",
-    "gpu_reuse_remaining_audit.json": "2028bf6328f263a643935472d8ec9c7a176fd25cb57257ab273ea9404691ad2d"
+    "gpu_reuse_remaining_audit.json": "2028bf6328f263a643935472d8ec9c7a176fd25cb57257ab273ea9404691ad2d",
+    "gpu_control_pair_summary.json": "a461b12121782d838837188fcd0751eead640a4b3f4b455c722af4a01151a8ab",
+    "gpu_control_precision_summary.json": "571f94c1d2cbfc2ee6cc2381dc05ada2e5113ceb361b15c2482a61fffd65580b",
+    "gpu_control_cortex_label_identity.json": "2e99f0bb021522b0deea6deac1853c88ace9eeafba2e34f6b4587c97601241c0",
+    "thread_runtime_logs.json": "658041cd85f653d9dd5864e3c71349a7d217a77f365fed9c416ae773c58c187f",
+    "curvature_repeat_rh_pial_1b/summary.json": "360ad867b3e1c7bf9aa4a513a719ca9c154205760f0b7a433965774ea96e653e",
+    "curvature_repeat_rh_pial_1b/local_manifest.json": "5346c51a9ec1e4d3118f4176bbd05b07635817d960021b90eae617243ae3546a",
+    "whole/sub01/paired/dice_vs_baseline_semantics_corrected.json": "38dd89f30456ee98ac624f703a3687f742d783fb1069b95807e5e988c75a0e93",
+    "whole/sub01/paired/dice_vs_official_semantics_corrected.json": "d84bd13216b5dedf5caf99d88e6b91beb9cd4ecea089eb85ec561dc1dce56853",
+    "whole/sub02/paired/dice_vs_baseline_semantics_corrected.json": "0b4e8f98d838e68262a15c7e5245a3cb36e9bcdd228c6cd26a46436db5da9e69",
+    "whole/sub02/paired/dice_vs_official_semantics_corrected.json": "039519a59962fc61c9ef7c6253e2b28e19a0a8fe3fd0d3ee71b71dc495e60f1a"
   },
-  "updated_utc": "2026-10-01T04:30:07.840377+00:00",
+  "updated_utc": "2026-10-01T05:34:20.386329+00:00",
   "independent_diagnostics": {
     "official_current_cases": {
       "path": "official_candidate_metrics_summary.json",
@@ -2964,6 +3143,106 @@
     "remaining_gpu_reuse": {
       "path": "gpu_reuse_remaining_audit.json",
       "sha256": "2028bf6328f263a643935472d8ec9c7a176fd25cb57257ab273ea9404691ad2d"
+    },
+    "gpu_curvature_repeatability": {
+      "path": "curvature_repeat_rh_pial_1b/summary.json",
+      "sha256": "360ad867b3e1c7bf9aa4a513a719ca9c154205760f0b7a433965774ea96e653e"
     }
+  },
+  "next_priority_command": {
+    "priority": "受控整例已完成；下一步剖析同输入 LH 注册的 averaging/force/line-search。",
+    "executed": false,
+    "host": "gpucw1，与sub01候选同主机",
+    "entrypoint_source": [
+      {
+        "path": "src/fnit/recon_all/mris_register_run.py",
+        "lines": [
+          50,
+          64
+        ],
+        "sha256": "b478ed6e9109d113a73a18da2a28492837b308a5884abcf76760cce2075421ae"
+      }
+    ],
+    "input_paths_verified_exist_on_head_shared_fs": true,
+    "env": {
+      "PYTHONPATH": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/code_1b8c36d/src",
+      "CUDA_VISIBLE_DEVICES": "",
+      "OMP_NUM_THREADS": "4",
+      "MKL_NUM_THREADS": "4",
+      "OPENBLAS_NUM_THREADS": "4",
+      "NUMEXPR_NUM_THREADS": "4",
+      "NUMBA_NUM_THREADS": "4"
+    },
+    "argv": [
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+      "-m",
+      "cProfile",
+      "-o",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/register_profile_sub01_lh_1b.pstats",
+      "-m",
+      "fnit.recon_all.mris_register_run",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/surf/lh.sphere",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/surf/lh.smoothwm",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/surf/lh.sulc",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/register_profile_sub01_lh_1b.sphere.reg",
+      "--overlap-device",
+      "cpu",
+      "--report",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/register_profile_sub01_lh_1b.json"
+    ],
+    "parameter_comments_cn": {
+      "sphere/smoothwm": "冻结候选自产surface RAS/mm网格，保持有序面。",
+      "sulc/atlas": "对应顶点顺序的现有标量图及声明TIFF图谱，已核实存在。",
+      "output/--report/-o": "新的FIX诊断文件，先确认尚不存在；不覆盖候选或官方结果。",
+      "--overlap-device cpu": "只控制末尾清理；主优化器仍CPU。",
+      "cProfile": "标准库调用剖析，包含额外记录开销；不能直接把被剖析wall当作性能配对。"
+    }
+  },
+  "finalization": {
+    "script_sha256": "6d8a28d0a0aab45a1a0bca14c20da188f65c23d91dc606c4f0adb8d8e996c34c",
+    "inputs": {
+      "gpu_control_pair_summary.json": {
+        "path": "gpu_control_pair_summary.json",
+        "sha256": "a461b12121782d838837188fcd0751eead640a4b3f4b455c722af4a01151a8ab"
+      },
+      "gpu_control_precision_summary.json": {
+        "path": "gpu_control_precision_summary.json",
+        "sha256": "571f94c1d2cbfc2ee6cc2381dc05ada2e5113ceb361b15c2482a61fffd65580b"
+      },
+      "gpu_control_cortex_label_identity.json": {
+        "path": "gpu_control_cortex_label_identity.json",
+        "sha256": "2e99f0bb021522b0deea6deac1853c88ace9eeafba2e34f6b4587c97601241c0"
+      },
+      "thread_runtime_logs.json": {
+        "path": "thread_runtime_logs.json",
+        "sha256": "658041cd85f653d9dd5864e3c71349a7d217a77f365fed9c416ae773c58c187f"
+      },
+      "curvature_repeat_rh_pial_1b/summary.json": {
+        "path": "curvature_repeat_rh_pial_1b/summary.json",
+        "sha256": "360ad867b3e1c7bf9aa4a513a719ca9c154205760f0b7a433965774ea96e653e"
+      },
+      "curvature_repeat_rh_pial_1b/local_manifest.json": {
+        "path": "curvature_repeat_rh_pial_1b/local_manifest.json",
+        "sha256": "5346c51a9ec1e4d3118f4176bbd05b07635817d960021b90eae617243ae3546a"
+      },
+      "whole/sub01/paired/dice_vs_baseline_semantics_corrected.json": {
+        "path": "whole/sub01/paired/dice_vs_baseline_semantics_corrected.json",
+        "sha256": "38dd89f30456ee98ac624f703a3687f742d783fb1069b95807e5e988c75a0e93"
+      },
+      "whole/sub01/paired/dice_vs_official_semantics_corrected.json": {
+        "path": "whole/sub01/paired/dice_vs_official_semantics_corrected.json",
+        "sha256": "d84bd13216b5dedf5caf99d88e6b91beb9cd4ecea089eb85ec561dc1dce56853"
+      },
+      "whole/sub02/paired/dice_vs_baseline_semantics_corrected.json": {
+        "path": "whole/sub02/paired/dice_vs_baseline_semantics_corrected.json",
+        "sha256": "0b4e8f98d838e68262a15c7e5245a3cb36e9bcdd228c6cd26a46436db5da9e69"
+      },
+      "whole/sub02/paired/dice_vs_official_semantics_corrected.json": {
+        "path": "whole/sub02/paired/dice_vs_official_semantics_corrected.json",
+        "sha256": "039519a59962fc61c9ef7c6253e2b28e19a0a8fe3fd0d3ee71b71dc495e60f1a"
+      }
+    },
+    "no_image_calculation_or_threshold_change": true
   }
 }

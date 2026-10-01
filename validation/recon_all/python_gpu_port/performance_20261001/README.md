@@ -1,6 +1,6 @@
 # 2026-10-01 recon-all 性能修复与整例实测
 
-本页汇总真实同输入测试，以及冻结 `1b8c36d` 从原始 T1 连续完成的两例重建：各完成 66 阶段，138 项输出齐全，现有网格检查通过。受控旧版基线和完整指标比较尚在执行，整例提速仍待配对；整体指标等效为 `not_assessed`。没有采用尚未正式确认的整例等效阈值。阶段数值和 SHA-256 见 [stage_summary.json](stage_summary.json)，整例实际范围见 [candidate_whole_profile.json](candidate_whole_profile.json)。
+本页汇总真实同输入测试，以及冻结 `1b8c36d` 从原始 T1 连续完成的两例重建：各完成 66 阶段，138 项输出齐全，现有网格检查通过。两例受控旧版基线也已完成；GPU 同边界完整命令本次缩短 3.889%，CPU 共同校验后范围缩短 1.495%，CPU 完整命令边界不同，不计算其比值。整体指标等效为 `not_assessed`，没有采用尚未正式确认的整例等效阈值。阶段数值和 SHA-256 见 [stage_summary.json](stage_summary.json)，候选完整范围见 [candidate_whole_profile.json](candidate_whole_profile.json)，GPU 实际配对见 [gpu_control_pair_summary.json](gpu_control_pair_summary.json)。
 
 ## 版本和运行范围
 
@@ -56,7 +56,7 @@ GPU 阶段在 gpucw1 的 H100 PCIe（UUID `GPU-e25cac06-0ce8-a833-abf9-09ab18c9c
 
 后续 `ab019eb7…` worker 修正另做一次相同冻结 sub-01 LH GPU 回归：[报告](thickness_workers_ab019/result/report.json)、[独立摘要](workers_summary.json)。同步函数及读写 13.706 s，完整命令 17.961 s，`kdtree_workers=4`；与保存的 1b 图差异数 0、最大/P99 差 0、文件 SHA 相同。与既有同输入 Conda 图最大差 4.77e-07 mm、P99 2.38e-07 mm、越门槛顶点 0，保留原浮点尾差。该进程父子同时显存采样峰值 562,036,736 字节，9 个样本、最大间隔 2.256 s、查询失败 0，allocated/reserved 为 null，连续峰值未验证。全 GPU 同期另有 33,843–46,463 MiB 占用且利用率 100%，不归给本进程；此单次共享设备观察不用于宣布 worker 提速或新源码整例通过，阶段 1 的八轮量值和哈希保持不变。
 
-阶段 1 配对进程采样峰值 1,304,428,544–1,365,245,952 字节，包含 dense 和 indexed；不是两个实现各自独立峰值。函数墙钟包括网格读写、传输及同步，排除脚本导入和 CUDA 上下文初始化；整例提速仍待测。
+阶段 1 配对进程采样峰值 1,304,428,544–1,365,245,952 字节，包含 dense 和 indexed；不是两个实现各自独立峰值。函数墙钟包括网格读写、传输及同步，排除脚本导入和 CUDA 上下文初始化；整例实际收益见后文，不从本段速度比外推。
 
 ## SynthSeg：精度修复、缓冲区和缓存分别评价
 
@@ -74,7 +74,7 @@ GPU 阶段在 gpucw1 的 H100 PCIe（UUID `GPU-e25cac06-0ce8-a833-abf9-09ab18c9c
 
 1b 的三种缓冲区调用与修正 FP32 的原缓冲区结果：标签差 0、所有标签 Dice=1、几何差 0，保存的 MGZ 和 CSV 都逐字节相同。MGZ SHA-256 为 `50f9e58f…`，CSV 为 `aef61247…`，完整摘要见 [只读保存格式审计](final_1b8c36d/buffer_stored_dtype_audit.json)与[缓存 API 补测](buffer_cached_api_summary.json)。旧 probe 的 `same_dtype=False` 比较了保存 MGH 的 `>f4` 与内存 NIfTI 的 int32；不是仅字节序差，也不证明输出文件 dtype 不同。保留原报告，另将保存文件两侧重新读入。
 
-1b 两次实际前向均为 float32、matmul TF32=True、cuDNN TF32=False、autocast 关闭，原图与翻转后验共用缓冲区。当前单次缓冲区计时未比同策略阶段1更快，不能宣布缓冲区加速。阶段1开启缓存采样超过 20,000,000,000 字节；1b 单阶段 cache 的采样值较低，但 CLI/API 和上下文状态不同，未构成配对整例缓存实验。no-cache 的 allocated/reserved 不可用，记为 null，不记 0；1b cache 实测 allocated/reserved 为 15,621,712,896/17,574,133,760 字节。详见 [精度说明](../../../../docs/recon_all/SYNTHSEG_PRECISION.md)。
+1b 两次实际前向均为 float32、matmul TF32=True、cuDNN TF32=False、autocast 关闭，原图与翻转后验共用缓冲区。no-cache 和缓存 CLI 的单次观察未比对应阶段1更快，缓存 API 的单次时间较短；这些时序、上下文及共享负载不同，不能归为缓冲复用的因果加速。阶段1开启缓存采样超过 20,000,000,000 字节；1b 单阶段 cache 的采样值较低，尚未构成配对整例缓存实验。no-cache 的 allocated/reserved 不可用，记为 null，不记 0；1b cache CLI 实测 allocated/reserved 为 15,621,712,896/17,574,133,760 字节，API allocated 为 15,621,713,408 字节。详见 [精度说明](../../../../docs/recon_all/SYNTHSEG_PRECISION.md)及[独立 SynthSeg 子函数说明](../../../../docs/synthseg/README.md#recon-all-集成发现的精度设置覆盖)。
 
 ## 线程预算同输入回归
 
@@ -94,14 +94,24 @@ Torch 两侧均为 4；Numba 初始容量/掩码 192，测试退出恢复 192。
 
 | 原始输入/主机 | 新版 | 同策略旧版 | 整例速度比 |
 |---|---|---|---|
-| sub-01 / gpucw1 | [冻结1b GPU重试](run_gpu_retry1_1b8c36d.sh)：完整命令 4972.667 s，API 4968.545 s | [e036直接控制命令](run_gpu_control_direct_20261001.sh)：运行中 | 待完成 |
+| sub-01 / gpucw1 | [冻结1b GPU重试](run_gpu_retry1_1b8c36d.sh)：完整命令 4972.667 s，API 4968.545 s | [e036受控完整命令](gpu_control_pair_summary.json)：5173.887 s；[复现入口](run_gpu_control_direct_20261001.sh) | 本次降时 3.889%，速度比 1.0405× |
 | sub-02 / nodecw10 | [冻结1b CPU](run_cpu_final_1b8c36d.sh)：完整命令 5295.422 s，API 5292.995 s | [e036受控结果](cpu_control_pair_summary.json)：wrapper 入口全程 5374.315 s，校验后流水线 5367.985 s | 完整命令边界不同，不计算该比值；共同校验后范围本次降时 1.495% |
 
 两例候选的版本、完整原始 JSON、每阶段及子步骤时间均在[整例剖析](candidate_whole_profile.json)。GPU 以初始化 CUDA 的 Python API 调用，CPU 以 CLI 调用；两者输入和主机不同，不能互作速度对照。GPU 主要耗时为双侧表面链 1531.251 s、球面配准 937.128 s、最终 white/pial 与指标链 777.542 s；CPU 对应为 1588.205、898.174、1124.751 s。GPU 66 阶段前后同步合计 0.009036 s，不能将同步当作本次主要瓶颈。
 
-GPU 候选的父子进程同次查询显存峰值为 16,118,710,272 字节（16.12 GB），2316 个样本，查询失败 0，最大间隔 3.118 s。no-cache 的 PyTorch allocated/reserved 不可用，未写成 0；采样值不保证连续峰值。现有网格检查覆盖有序面、有限坐标、Euler/边闭合及 white/pial 各自自相交；扩展质量检查的范围与阳性见下节。
+GPU 候选的父子进程同次查询显存峰值为 16,118,710,272 字节（16.12 GB），基线为 12,897,484,800 字节（12.90 GB）；本次候选采样峰更高，不能从单阶段缓冲复用宣布整例显存下降。候选/基线分别有 2316/2415 个样本，查询失败均为 0，最大间隔 3.118/3.372 s。no-cache 的 PyTorch allocated/reserved 不可用，未写成 0；两个采样值均低于 20,000,000,000 字节，但不保证连续峰值。现有网格检查覆盖有序面、有限坐标、Euler/边闭合及 white/pial 各自自相交；扩展质量检查的范围与阳性见下节。
 
-[CPU 受控精度对照](cpu_control_precision_summary.json)的 138 项全部通过，174 个数值比较块的最大误差均为 0；七张标签图所有标签 Dice=1，68/45/70 区与全局体积指标差为 0，双侧八个表面阶段的有序面和坐标全部相同。这里指解析后的数值及几何，文件字节 SHA 可以不同。CPU 共同校验后流水线为 5367.985→5287.736 s；收益主要来自未替换 C++ 最终表面阶段的本次 152.070 s 墙钟缩短，被表面初始化增加 85.436 s 部分抵消，不能归为新算法因果提速。统计组本身为 14.360→7.417 s。GPU 同监测器完整命令对照尚在执行。
+GPU [完整受控配对](gpu_control_pair_summary.json)的 20 项可比条件全部成立，包括原始 T1 与程序哈希、主机/UUID、实际 Torch/Numba 掩码、FP32 前向、关闭缓存、监测器版本和采样设置。相同完整命令边界缩短 201.220 秒。统计组为 65.964→27.015 秒；注册 996.440→937.128 秒、表面初始化 1557.491→1531.251 秒、最终表面 804.342→777.542 秒。第二次归一化、MNI 等未改计算的阶段本次也变快，不能将整例差值全部归因于新缓存或厚度算法；这是共享硬件各一次整例的观察，未证明稳定因果提速。
+
+[CPU 受控精度对照](cpu_control_precision_summary.json)的 138 项全部通过，174 个数值比较块的最大误差均为 0；七张标签图所有标签 Dice=1，68/45/70 区与全局体积指标差为 0，双侧八个表面阶段的有序面和坐标全部相同。这里指解析后的数值及几何，文件字节 SHA 可以不同。CPU 共同校验后流水线为 5367.985→5287.736 s；收益主要来自未替换 C++ 最终表面阶段的本次 152.070 s 墙钟缩短，被表面初始化增加 85.436 s 部分抵消，不能归为新算法因果提速。统计组本身为 14.360→7.417 s。
+
+[GPU 受控精度对照](gpu_control_precision_summary.json)的 138 项均通过既有诊断门槛，但 174 个数值块中 20 个非零，完整清单保留。最大差为 RH `curv.pial` 的 0.000101447 mm⁻¹，P99 0.0000028014 mm⁻¹；面积和 TH3 顶点体积最大差分别为 9.54e-7 mm²、1.91e-6 mm³。厚度逐值相同，七张标签图零不同体素且所有标签 Dice=1；68/45/70 区与 16 项全局体积统计的已写出数值差为 0。双侧八个阶段有序几何相同；[cortex 索引只读核验](gpu_control_cortex_label_identity.json)也相同，因此扩展质量的控制版/候选穿越结果相同是由相同几何及掩膜推出的结论，不是重新搜索交点的报告。原 label 中重复索引未改。138 项通过不等于逐字节复现，也不代表相对官方整体等效。
+
+### 固定曲率输入的重复性
+
+[两轮 RH pial 曲率补测](curvature_repeat_rh_pial_1b/summary.json)固定本次候选几何、官方/Conda 程序、线程和 GPU UUID。官方两轮、Conda 两轮数值和文件 SHA 均相同；同版 PyTorch 两轮有 59663/104619 个不同值，最大/P99 差为 0.000102043/0.0000027120 mm⁻¹，与上述整例曲率尾差同量级。两轮 PyTorch 相对官方以及自身重复均无超出既有 `.005 + .001 × abs(reference)` 算子容差的顶点。曲率、面积模块和所用 `_normals` 函数段在旧版与 1b 中相同；候选机制包括 GPU 归约和局部线性代数，尚未定位具体算子，不能用这一阶段解释其他 19 张图或历史官方差异。保留 TF32 与当前 GPU 曲率路径。
+
+两次外层命令为 12.551/13.406 s，GPU 函数含同步及读写为 5.112/6.998 s，采样父子峰均 1,990,197,248 B。设备同期共享负载较高，不据此判定速度因果；官方 C++ 此输入观察较快，但单个曲率阶段的观察不触发整条指标路径回退。第一次许可证环境缺失的失败也保留，未计为有效轮次。[复现正文](curvature_repeat_rh_pial_1b/analysis_source.log)、原始报告及监测与[模块说明](../../../../docs/recon_all/SURFACE_METRICS.md#curvature-repeatability-20261001)绑定全部输入和程序哈希。
 
 两侧必须从原始 T1 与空输出目录开始，线程预算 4，GPU no-cache，并对旧版真实 SynthSeg posterior 作用域应用同一 cuDNN FP32 例外。控制仅在 benchmark wrapper 内对齐精度，未改旧算法/缓冲区，也不读官方输出。首次 GPU 尝试在 Talairach 子进程报告 CUDA OOM，exit=1，56.347 s；[失败日志](final_1b8c36d/full_sub01_monitor/command.log)与[监测](final_1b8c36d/full_sub01_monitor/monitor.json)保留，不作为完成或速度结果。
 
@@ -144,6 +154,8 @@ GPU 候选的父子进程同次查询显存峰值为 16,118,710,272 字节（16.
 
 [官方重复性审计](official_repeatability_audit.json)优先复核已有同输入 white、sphere 和 pial 记录，其解析坐标重跑差为 0；部分历史记录缺少完整程序/硬件哈希绑定。本轮没有将旧参考重跑或跨环境差异解释成随机性，SynthSeg 的 148 标签变化来自已核实的 TF32/FP32 设置不同。当前官方整例重复性尚未补测。整体指标等效阈值仍待正式确认，已有局部异常和严格失败完整保留。
 
+本次另修复比较器的 `filled.mgz` 标签名称：默认 255 为左半球、127 为右半球，不使用通用分割 LUT 的同值名称。[metadata-only 修复脚本](../correct_dice_label_metadata.py)生成 sub-01/sub-02 的新 `paired/dice_vs_*_semantics_corrected.json`，原始报告保留；脚本回填名称后断言数值、Dice、dtype、图像路径和原始哈希全部不变。仅修复说明字段，不重算或提高通过率。
+
 ## 复现命令与输入输出
 
 以下为复现入口，不表示本页新增执行。使用同一个声明的 Conda Python、对应冻结源码 PYTHONPATH、已授权的真实数据目录；下列路径按报告设置，不下载影像、权重或许可证。输出独立诊断目录，失败应查看异常与 JSON，不能生成 complete 占位结果。统计/厚度输入采用同一 surface RAS 顶点顺序；SynthSeg 输入为冻结 conformed MRI 网格，输出分割沿用该网格与整数标签语义。整例输出使用原始 T1，新目录不得混入检查点。
@@ -183,4 +195,17 @@ subprocess.run([str(python_executable),
 - [线程脚本](../benchmark_thread_budget.py)：`--subject`（冻结FNIT目录）、`--assets`（GCA资产）、`--output`、`--stage ca` 或 `--stage sphere --hemi lh`、`--masks 128 4`、`--torch-threads 4`、`--code-commit`；输出两套 norm/ctrl 或 sphere 和严格比较 JSON。
 - [当前整例GPU命令](run_gpu_retry1_1b8c36d.sh)、[CPU命令](run_cpu_final_1b8c36d.sh)及[受控旧版wrapper](../run_controlled_legacy.py)包含原始输入、权重、资产、设备、线程和输出路径。[监测器](../run_monitored.py)显式 `--gpu-uuid`、`--interval 2` 和 `--query-timeout 5`，以同次查询合计父子占用，不将不同时刻峰值相加。
 
-真实精度与时间以原始 JSON 为准，表格仅显示三位小数。采样最大间隔约 2.25–2.75 s（首次失败整例 3.85 s），未保证捕获连续峰值；不混用 GB/GiB。无新增运行依赖，现有 Torch/NumPy/SciPy/Numba/nibabel 已在主页 Conda 安装路径；Conda 独立源码构建程序继续保留。
+[索引整理脚本](../finalize_performance_summary.py)只读取本目录原始 JSON 并核验旧 SHA，更新 `stage_summary.json` 的完成状态、时间和新证据绑定；不处理影像，也不修改原始报告或门槛。`--summary-repository-head` 是整理前的提交，实际计算版本仍分别为 e036、阶段1快照、1b 或独立 worker，不将整理提交冒充计算版本。实际执行示例：
+
+```python
+subprocess.run(
+    args=["python3", "validation/recon_all/python_gpu_port/finalize_performance_summary.py",
+          "--report-directory", "validation/recon_all/python_gpu_port/performance_20261001",  # 收回的真实报告目录
+          "--summary-repository-head", "ef09caca4873a81ad9e39d200587773247d1fdde"],  # 整理前实际Git提交
+    check=True,  # 缺失报告或原始SHA不符时停止
+)
+```
+
+metadata-only 名称修复使用 `correct_dice_label_metadata.py --input 原始Dice.json --template 当前官方元数据修正.json --output 新名称修正.json`。三个路径均为显式参数：输入保持原文件，template 提供已核验的 filled 名称，输出须是新文件。脚本失败会抛异常；返回的是同数值结构的 JSON 及修复来源，没有对应官方独立 CLI。
+
+真实精度与时间以原始 JSON 为准，表格仅显示三位小数。完成的 GPU 候选/基线最大采样间隔为 3.118/3.372 s，首次失败整例为 3.845 s；各阶段以对应 monitor 为准，未保证捕获连续峰值。不混用 GB/GiB。无新增运行依赖，现有 Torch/NumPy/SciPy/Numba/nibabel 已在主页 Conda 安装路径；Conda 独立源码构建程序继续保留。

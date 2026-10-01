@@ -12,7 +12,13 @@ CUDA 流程已接入既有第二次归一化、SynthMorph 非线性配准和[厚
 
 此前按真实剖析优化[球面法向的面关联索引](SURFACE_NORMALS.md)，八张真实网格逐元素一致；该版本两例整例的结果在本页历史配对节中保留。
 
-2026-10-01 进一步复用已有厚度和统计函数：[完整空间候选厚度](SURFACE_THICKNESS.md)取消密集全顶点距离及逐顶点 Python 搜索，两例双侧八轮与原函数逐值相同；[多图谱缓存](SURFACE_STATS_CACHE.md)让图谱共享同版本几何基础量，48 份统计文本相同。SynthSeg 在前向作用域应用并记录[实际精度策略](SYNTHSEG_PRECISION.md)，修正构造函数覆盖设置的问题。新增[可选剖析](PROFILING.md)及[Torch/Numba 预算](THREAD_BUDGET.md)。冻结 `1b8c36d` 的两例已从原始 T1 连续完成，完整 GPU/CPU 命令耗时分别为 4972.67/5295.42 秒，各生成 138 项输出并通过现有标准网格检查；GPU 父子同时显存采样峰值 16.12 GB。[CPU 受控精度对照](../../validation/recon_all/python_gpu_port/performance_20261001/cpu_control_precision_summary.json)为 138/138，解析数值、几何及分区指标均零差异；GPU 受控整例仍在运行。当前官方对照为 6/138、2/138，68 区厚度 MAE 为 0.04184/0.02169 mm；[扩展质量补检](../../validation/recon_all/python_gpu_port/performance_20261001/surface_quality_extended_summary.json)发现 white/pial 穿越阳性，原 `passed` 不覆盖这一项。实测和局部异常已纳入[当前说明与脑图](../../validation/recon_all/python_gpu_port/performance_20261001/README.md)，整体指标等效尚未判定。
+2026-10-01 进一步复用已有厚度和统计函数：[完整空间候选厚度](SURFACE_THICKNESS.md)取消密集全顶点距离及逐顶点 Python 搜索，两例双侧八轮与原函数逐值相同；[多图谱缓存](SURFACE_STATS_CACHE.md)让图谱共享同版本几何基础量，48 份统计文本相同。SynthSeg 在前向作用域应用并记录[实际精度策略](SYNTHSEG_PRECISION.md)，修正构造函数覆盖设置的问题；[独立子函数说明](../synthseg/README.md#recon-all-集成发现的精度设置覆盖)也已同步。新增[可选剖析](PROFILING.md)及[Torch/Numba 预算](THREAD_BUDGET.md)。
+
+冻结 `1b8c36d` 的两例从原始 T1 连续完成，各生成 138 项输出并通过现有标准网格检查。GPU [相同完整命令边界对照](../../validation/recon_all/python_gpu_port/performance_20261001/gpu_control_pair_summary.json)为 5173.89→4972.67 秒，本次缩短 3.889%；CPU 完整命令为 5295.42 秒，其共同校验后范围缩短 1.495%，不对不同完整时钟边界计算比值。GPU 父子同时显存采样峰值从 12.90 增至 16.12 GB，连续峰值未验证。
+
+[CPU 优化前后](../../validation/recon_all/python_gpu_port/performance_20261001/cpu_control_precision_summary.json)138/138 诊断通过，解析数值、几何及分区指标均零差异；[GPU 优化前后](../../validation/recon_all/python_gpu_port/performance_20261001/gpu_control_precision_summary.json)也为 138/138，但 20 张顶点图存在容差内尾差，最大曲率差 0.00010145 mm⁻¹。标签、区域统计及有序表面几何仍零差异。[同版曲率重复测试](SURFACE_METRICS.md#curvature-repeatability-20261001)观察到相近量级 GPU 尾差，官方及 Conda 两轮相同；未据此解释全部差异或关闭 TF32。
+
+当前官方对照为 6/138、2/138，68 区厚度 MAE 为 0.04184/0.02169 mm；[扩展质量补检](../../validation/recon_all/python_gpu_port/performance_20261001/surface_quality_extended_summary.json)发现 white/pial 穿越阳性，原 `passed` 不覆盖这一项。实测和局部异常已纳入[当前说明与脑图](../../validation/recon_all/python_gpu_port/performance_20261001/README.md)，整体指标等效尚未判定。
 
 ## 安装
 
@@ -74,7 +80,7 @@ report = run_recon_all_python(
 
 固定单 T1 profile 的全部 138 个相对路径由[清单](../../src/fnit/recon_all/expected_outputs.py)定义。`report["outputs"]` 是实际存在的 `{相对路径: 绝对路径}` 映射；`report["output_validation"]` 给出 138 项存在性检查；`report["mesh_validation"]` 逐侧检查闭合球面拓扑、顶点顺序、有限坐标及 white/pial 自相交；`report["numeric_validation"]` 单独记录参考结果的数值验收，默认是 `not_run`。`report["stages"]` 为按执行顺序排列的阶段名、秒数和可得的 PyTorch GPU 峰值字节数。默认关闭 CUDA 分配缓存时，父进程的 PyTorch 峰值接口不可用，以 `gpu_memory_mode` 说明，整例显存仍需进程级外部采样。`status="complete"` 只表示全部阶段执行、输出存在性和网格质量检查通过，不表示已与官方结果达到数值门槛。运行失败会抛出异常，部分失败信息写在 JSON 中；入口前置校验失败时可能尚未创建 JSON。
 
-批量 Python API `run_recon_all_python_batch(jobs=..., weights_dir=..., assets_dir=..., devices=..., threads=..., native_bin_dir=None)` 中，`jobs` 是按顺序排列的 `{"t1": 路径, "subject_dir": 空目录}` 列表；`devices` 是可用设备列表；其余参数与单被试一致。返回值为同序的报告列表；任一被试失败时抛出 `RuntimeError`。每个设备一次运行一例。
+批量 Python API `run_recon_all_python_batch(jobs=..., weights_dir=..., assets_dir=..., devices=("cuda:0",), threads=4, native_bin_dir=None, profile_stages=False, cuda_allocator_cache="auto")` 中，`jobs` 是按顺序排列的 `{"t1": 路径, "subject_dir": 空目录}` 列表；`devices` 是互不重复的设备列表。`threads` 是每个子进程的预算，多设备并行时总预算随进程数量增加。每个设备一次运行一例，新子进程重新应用 recon-all 精度策略，不继承父进程已经初始化的 CUDA flags 或 allocator；`auto` 按子进程初始化前环境选择。其余参数与单被试一致。返回值为同序的报告列表；任一被试失败时抛出 `RuntimeError`。
 
 ## 历史整例配对：e036f57（2026-09-30）
 

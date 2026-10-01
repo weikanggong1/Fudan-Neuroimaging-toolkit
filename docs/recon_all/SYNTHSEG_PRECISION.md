@@ -244,10 +244,14 @@ affine 和标签值差为 0，且三份 MGH 的 SHA-256 完全相同。标签值
 模型 HDF5 为
 `f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e`。
 
-本页报告本例冻结阶段验证。两例候选原始 T1 整例已执行完成，受控同精度
-基线及官方比较尚未结束，状态见[当前验证目录](../../validation/recon_all/python_gpu_port/performance_20261001/README.md)。
+本页报告本例冻结阶段验证。冻结 `1b8c36d` 的两例候选原始 T1 整例及官方
+比较已完成，CPU 与 GPU 受控同精度整例配对也已完成，状态见
+[当前验证目录](../../validation/recon_all/python_gpu_port/performance_20261001/README.md)。
 第二例完整 SynthSeg 缓冲配对、连续显存峰值和整体指标等效尚未完成；
 本页不从单阶段时间推断整例加速。
+GPU 相同完整命令边界的本次观察为 5173.89→4972.67 秒（缩短 3.889%）；
+整例标签及区域统计零差异，20 张顶点图的容差内尾差另行记录在
+[完整精度配对](../../validation/recon_all/python_gpu_port/performance_20261001/gpu_control_precision_summary.json)。
 计时范围、allocator 和统计可用性见[剖析说明](PROFILING.md)。
 
 源码与参考：[FNIT 实现](../../src/fnit/synthseg_parc/segment.py)、

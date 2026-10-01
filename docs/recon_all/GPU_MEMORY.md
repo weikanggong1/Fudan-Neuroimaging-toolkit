@@ -22,7 +22,9 @@
 
 [缓存 API 原始前向](../../validation/recon_all/python_gpu_port/performance_20261001/final_1b8c36d/buffer_cached_api/actual-forward.json)与[监测](../../validation/recon_all/python_gpu_port/performance_20261001/final_1b8c36d/buffer_cached_api_monitor/monitor.json)记录 24 次采样，请求间隔 2.0 s、最大实际间隔 2.292 s、查询超时 5.0 s、查询失败 0。峰值 18,138,267,648 B 即 18.138 GB / 16.893 GiB，仍不是连续峰值保证；[独立汇总](../../validation/recon_all/python_gpu_port/performance_20261001/buffer_cached_api_summary.json)绑定原始 JSON、探针、输入与模型 SHA-256，并核对保存结果与同 FP32 参考完全相同。
 
-已完成缓存开启的单阶段 API 试验；两例候选完整运行已执行结束，受控基线和官方比较尚未结束，状态见[当前验证目录](../../validation/recon_all/python_gpu_port/performance_20261001/README.md)。完整缓存开启的整例尚未测量，默认低显存措施暂予保留。
+已完成缓存开启的单阶段 CLI/API 试验，以及两例候选、受控基线和官方比较。[GPU 同策略受控整例](../../validation/recon_all/python_gpu_port/performance_20261001/gpu_control_pair_summary.json)均使用 no-cache 和已初始化 CUDA 的 API：旧版父子同时采样峰值为 12,897,484,800 B（12.897 GB / 12.012 GiB），冻结 1b 为 16,118,710,272 B（16.119 GB / 15.012 GiB）。候选采样峰更高，不能宣布整例显存下降。分别有 2415/2316 个样本，查询失败均 0，请求间隔 2 s，最大实际间隔 3.372/3.118 s；连续峰值仍未验证，allocated/reserved 为 null。
+
+完整缓存开启的整例与 GPU CLI 整例尚未测量，默认低显存措施保留。下一次策略对照须继续固定输入、完整时钟边界和父子同时采样；当前单阶段 cache 结果不足以改变默认策略。详情见[当前验证目录](../../validation/recon_all/python_gpu_port/performance_20261001/README.md)。
 
 ## 历史配对与开发记录
 
