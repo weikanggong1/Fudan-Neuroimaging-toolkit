@@ -1,5 +1,7 @@
 # PyTorch DicL 与 MiniBatchDictionaryLearning：真实1000人效果匹配
 
+本页保留首轮精度修复的测量与因果控制。后续调度和字典更新优化见[当前优化报告](dicl_speed_optimization_real1000_20261001.md)；本页的运行时间、缓存版本和源码哈希对应此前的测量。
+
 本轮复用同一份真实1000人的VBM、FA、MD完整掩膜R500投影，逐模态拟合D200字典。CPU参考为服务器实际安装的 **scikit-learn 1.7.1**，GPU使用PyTorch2.5.1。CPU/GPU的字典、原子余弦及LASSO重建已通过本轮预设容差；独立初始化下FA/MD的OMP30重建仍未通过。因此不能称整个 `MiniBatchDictionaryLearning` 的输出已等价。FLICA有效C20和最终脑图属于[此前尚未通过的验收](mmigp500_real1000_20261001.md)，本轮没有继续拟合。
 
 ## 输入、参考代码与验收方法
