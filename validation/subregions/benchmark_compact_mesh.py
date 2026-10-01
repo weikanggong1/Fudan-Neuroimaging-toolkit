@@ -42,7 +42,7 @@ import torch
 
 from fnit.gems.atlas import GEMSAtlas
 from fnit.gems import rasterize as raster_module
-from fnit.gems.deformation import ashburner_prior, prepare_deformation_reference
+from fnit.gems.deformation import ashburner_prior, prepare_current_geometry, prepare_deformation_reference
 from fnit.gems.gaussian import gaussian_log_likelihood, initialise_gaussians
 from fnit.gems.rasterize import BlockIndex, build_block_index, rasterize_priors, rasterize_priors_compact
 from fnit.gems.recipes import HippoAmygdalaRecipe, ThalamusRecipe
@@ -88,6 +88,8 @@ def main():
     parser.add_argument("--memory-fraction", type=float, default=.23, help="CUDA 进程显存比例，默认 0.23")
     parser.add_argument("--repeats", type=int, default=3, help="预热后交替重复次数，至少 3")
     parser.add_argument("--source-commit", help="无 .git 的冻结源码副本所对应提交；源码文件另行 SHA-256 核对")
+    parser.add_argument("--shared-geometry", action="store_true", help="compact 路径共享当前几何")
+    parser.add_argument("--analytic-prior", action="store_true", help="compact 路径使用解析形变先验梯度")
     args = parser.parse_args()
     if args.repeats < 3 or not 0 < args.memory_fraction <= 1:
         parser.error("--repeats 必须至少为 3，--memory-fraction 必须在 (0,1] 内")
@@ -168,6 +170,10 @@ def main():
         vertices = torch.tensor(atlas.vertices, device=device, dtype=torch.float32, requires_grad=True)
         synchronize()
         total_started = monotonic()
+        geometry = None
+        geometry_seconds = 0.
+        if name == "compact" and args.shared_geometry:
+            geometry, geometry_seconds = timed(lambda: prepare_current_geometry(vertices, tetrahedra))
 
         def raster():
             if name == "dense":
@@ -177,18 +183,20 @@ def main():
                 return priors[:, valid], coverage[valid]
             return rasterize_priors_compact(vertices, tetrahedra, alphas, shape, valid_mask=valid,
                                             block_index=indices[name], background_channel=background,
-                                            tolerance=2e-5)
+                                            tolerance=2e-5, current_geometry=geometry)
 
         (selected, coverage), raster_seconds = timed(raster)
         data_cost, data_seconds = timed(lambda: -(selected.clamp_min(torch.finfo(selected.dtype).tiny).log() +
                                                  likelihood).logsumexp(0).sum())
         (deformation_cost, jacobians), deformation_seconds = timed(
             lambda: ashburner_prior(vertices, reference, tetrahedra, atlas.stiffness,
-                                     reference_geometry=reference_geometry))
+                                     reference_geometry=reference_geometry, current_geometry=geometry,
+                                     analytic_gradient=args.analytic_prior and name == "compact"))
         objective = data_cost + deformation_cost
         _, backward_seconds = timed(objective.backward)
         total_seconds = monotonic() - total_started
-        timings = {"raster_and_valid_selection_seconds": raster_seconds, "data_cost_seconds": data_seconds,
+        timings = {"shared_geometry_seconds": geometry_seconds,
+                   "raster_and_valid_selection_seconds": raster_seconds, "data_cost_seconds": data_seconds,
                    "deformation_forward_seconds": deformation_seconds, "backward_seconds": backward_seconds,
                    "forward_backward_seconds": total_seconds}
         snapshot = {"priors": selected.detach().cpu(), "coverage": coverage.detach().cpu(),
@@ -276,6 +284,7 @@ def main():
         "first_call_context": "after shared dense Gaussian initialization; fresh per-path dispatch caches",
         "device": str(device), "dtype": "float32", "tf32": tf32_active, "tf32_requested": args.tf32,
         "threads": torch.get_num_threads(),
+        "shared_geometry": args.shared_geometry, "analytic_prior": args.analytic_prior,
         "memory_fraction": args.memory_fraction if device.type == "cuda" else None,
         "shape": list(shape), "dense_voxels": data.numel(), "valid_voxels": int(valid.sum()),
         "vertices": len(atlas.vertices), "tetrahedra": len(atlas.tetrahedra), "classes": grouped.shape[1],

@@ -13,10 +13,11 @@ import torch
 
 from .._dmri import configure_device
 from .atlas import GEMSAtlas
-from .deformation import (ashburner_prior, prepare_deformation_reference,
+from .deformation import (ashburner_prior, prepare_current_geometry, prepare_deformation_reference,
                           sliding_boundary_projectors)
 from .gaussian import (GaussianParameters, gaussian_log_likelihood,
                        initialise_gaussians, label_posterior, update_gaussians)
+from .optim import CachedLBFGS
 from .rasterize import (BlockIndex, build_block_index, rasterize_priors,
                        rasterize_priors_compact)
 
@@ -35,6 +36,7 @@ class TorchGEMSResult:
     min_jacobian: float
     affine: np.ndarray | None = None
     highres_labels: object | None = None
+    optimization_stats: dict | None = None
 
     def mask(self, label_id: int) -> torch.Tensor:
         return self.labels == int(label_id)
@@ -94,6 +96,12 @@ class TorchGEMS:
         em_relative_cost_stop: float | None = None,
         outer_relative_cost_stop: float | None = None,
         boundary_transform: np.ndarray | torch.Tensor | None = None,
+        compact: bool | None = None,
+        reuse_geometry: bool = True,
+        analytic_prior: bool = True,
+        cache_mesh_evaluations: bool = True,
+        deformation_stop: float = 1e-10,
+        cost_stop_patience: int = 1,
     ) -> TorchGEMSResult:
         image = torch.as_tensor(image, device=self.device, dtype=self.dtype)
         if image.ndim not in (3, 4):
@@ -127,11 +135,16 @@ class TorchGEMS:
             raise ValueError("deform_em_interval must be positive")
         if outer_iterations < 1:
             raise ValueError("outer_iterations must be positive")
+        if not np.isfinite(deformation_stop) or deformation_stop < 0:
+            raise ValueError("deformation_stop must be finite and nonnegative")
+        if not isinstance(cost_stop_patience, int) or cost_stop_patience < 1:
+            raise ValueError("cost_stop_patience must be a positive integer")
         margin = (max(1.0, total_steps * deform_lr) if index_margin is None else
                   float(index_margin))
         index = build_block_index(vertices.detach().cpu().numpy(), self.atlas.tetrahedra,
                                   shape, self.block_size, margin=margin)
         index_anchor = vertices.detach().clone()
+        index_rebuilds = 0
         if mask_to_atlas:
             with torch.no_grad():
                 occupancy = torch.ones((len(vertices), 1), device=self.device, dtype=self.dtype)
@@ -149,16 +162,21 @@ class TorchGEMS:
             image[..., ~working_mask] = 0
         valid = (image.isfinite().all(0) & (image.abs().sum(0) > 0)
                  if image.ndim == 4 else image.isfinite() & (image != 0))
-        compact_em = em_relative_cost_stop is not None and image.ndim == 3
+        # Compact computation is independent of how EM is stopped. In particular,
+        # synthetic-label fits use fixed Gaussians and a sparse valid mask.
+        compact_em = image.ndim == 3 and compact is not False
+        if compact is True and image.ndim != 3:
+            raise ValueError("compact=True requires a single 3-D image")
         em_image = image[valid].reshape(-1, 1, 1) if compact_em else image
 
         def refresh_index(current_vertices):
-            nonlocal index, index_anchor
+            nonlocal index, index_anchor, index_rebuilds
             if adaptive_index and (current_vertices.detach() - index_anchor).abs().amax().item() > margin / 2:
                 index = build_block_index(current_vertices.detach().cpu().numpy(),
                                           self.atlas.tetrahedra, shape,
                                           self.block_size, margin=margin)
                 index_anchor = current_vertices.detach().clone()
+                index_rebuilds += 1
 
         def infer(current_vertices, params=None, n_em=em_iterations):
             refresh_index(current_vertices)
@@ -205,6 +223,7 @@ class TorchGEMS:
             return priors, posterior, params, nll
 
         history_tensors: list[torch.Tensor] = []
+        mesh_evaluations = mesh_steps = cache_hits = 0
         if em_relative_cost_stop is not None:
             class_alphas = stages[0][0]
         em_started = monotonic()
@@ -233,36 +252,44 @@ class TorchGEMS:
                     mesh_started = monotonic()
                     evaluations = 0
                     have_moved = False
+                    cost_stalls = deformation_stalls = 0
                     if deform_optimizer == "adam":
                         optimizer = torch.optim.Adam([vertices], lr=float(deform_lr))
                     elif deform_optimizer == "lbfgs":
-                        optimizer = torch.optim.LBFGS([vertices], lr=float(deform_lr),
+                        optimizer_type = CachedLBFGS if cache_mesh_evaluations else torch.optim.LBFGS
+                        optimizer = optimizer_type([vertices], lr=float(deform_lr),
                                                       max_iter=1, history_size=12,
                                                       tolerance_grad=1e-10, tolerance_change=1e-10,
                                                       line_search_fn="strong_wolfe")
                     else:
                         raise ValueError("deform_optimizer must be adam or lbfgs")
                     for step in range(iterations):
-                        previous_vertices = vertices.detach().clone() if projection is not None else None
+                        previous_vertices = (vertices.detach().clone()
+                                             if projection is not None or deformation_stop > 1e-10 else None)
                         def closure():
                             nonlocal evaluations
                             evaluations += 1
                             refresh_index(vertices)
                             optimizer.zero_grad(set_to_none=True)
+                            geometry = (prepare_current_geometry(vertices, tetra)
+                                        if reuse_geometry else None)
                             if compact_em:
                                 priors, _ = rasterize_priors_compact(
                                     vertices, tetra, class_alphas, shape, valid_mask=valid,
-                                    block_index=index, background_channel=class_background)
+                                    block_index=index, background_channel=class_background,
+                                    current_geometry=geometry)
                                 joint = priors.clamp_min(torch.finfo(priors.dtype).tiny).log() + likelihood
                                 data_cost = -joint.logsumexp(dim=0).sum()
                             else:
                                 priors, _ = rasterize_priors(vertices, tetra, class_alphas, shape,
                                                               block_index=index,
-                                                              background_channel=class_background)
+                                                              background_channel=class_background,
+                                                              current_geometry=geometry)
                                 _, data_cost = label_posterior(
                                     priors, likelihood, class_ids, valid)
                             prior_cost, _ = ashburner_prior(vertices, reference, tetra,
-                                self.atlas.stiffness, reference_geometry=reference_geometry)
+                                self.atlas.stiffness, reference_geometry=reference_geometry,
+                                current_geometry=geometry, analytic_gradient=analytic_prior)
                             objective = data_cost + float(deformation_weight) * prior_cost
                             objective.backward()
                             if vertices.grad is not None:
@@ -276,8 +303,14 @@ class TorchGEMS:
                             objective = closure()
                             optimizer.step()
                         else:
-                            objective = optimizer.step(closure)
+                            if isinstance(optimizer, CachedLBFGS):
+                                objective = optimizer.step(closure, cache_key=(id(index), id(likelihood), id(class_alphas)))
+                                if optimizer.accepted_objective is not None:
+                                    objective = optimizer.accepted_objective
+                            else:
+                                objective = optimizer.step(closure)
                         global_step += 1
+                        mesh_steps += 1
                         if index_refresh_interval and global_step % index_refresh_interval == 0:
                             index = build_block_index(vertices.detach().cpu().numpy(),
                                                       self.atlas.tetrahedra, shape,
@@ -287,7 +320,8 @@ class TorchGEMS:
                             maximal_deformation = torch.linalg.vector_norm(
                                 vertices.detach() - previous_vertices, dim=1).amax().item()
                             have_moved |= maximal_deformation > 0
-                            if maximal_deformation <= 1e-10:
+                            deformation_stalls = deformation_stalls + 1 if maximal_deformation <= deformation_stop else 0
+                            if maximal_deformation == 0 or deformation_stalls >= cost_stop_patience:
                                 break
                         # Update Gaussian parameters after the accepted geometry step.
                         if outer_iterations == 1 and em_relative_cost_stop is None and ((step + 1) % deform_em_interval == 0
@@ -295,13 +329,21 @@ class TorchGEMS:
                             with torch.no_grad():
                                 priors, posterior, params, nll = infer(vertices, params=params,
                                                                        n_em=em_iterations)
-                            likelihood = gaussian_log_likelihood(image, params).detach()
+                            likelihood = gaussian_log_likelihood(em_image, params).detach()
+                            if compact_em:
+                                likelihood = likelihood.reshape(n_classes, -1)
+                            if isinstance(optimizer, CachedLBFGS):
+                                optimizer.invalidate_cache()
                         if relative_cost_stop is not None and step > 0:
                             previous, current = history_tensors[-2:]
                             relative_change = ((previous - current).abs() /
                                                current.abs().clamp_min(1)).item()
-                            if relative_change < relative_cost_stop:
+                            cost_stalls = cost_stalls + 1 if relative_change < relative_cost_stop else 0
+                            if cost_stalls >= cost_stop_patience:
                                 break
+                    mesh_evaluations += evaluations
+                    if isinstance(optimizer, CachedLBFGS):
+                        cache_hits += optimizer.cache_hits
                     if compact_em:
                         logger.info("GEMS outer %d/%d mesh: %.2f s, %d evaluations", outer + 1,
                                     outer_iterations, monotonic() - mesh_started, evaluations)
@@ -310,7 +352,7 @@ class TorchGEMS:
                     if outer_relative_cost_stop is not None and iterations:
                         current_outer_cost = history_tensors[-1]
                         if previous_outer_cost is not None:
-                            relative_change = ((previous_outer_cost - current_outer_cost) /
+                            relative_change = ((previous_outer_cost - current_outer_cost).abs() /
                                                current_outer_cost.abs().clamp_min(1)).item()
                             if relative_change < outer_relative_cost_stop:
                                 break
@@ -332,4 +374,8 @@ class TorchGEMS:
         hard = torch.where(valid, label_ids[posterior.argmax(0)], label_ids[0])
         history = torch.stack(history_tensors).cpu().tolist()
         return TorchGEMSResult(hard, posterior, priors, vertices, params, history,
-                               float(jac.min().detach()) if jac.numel() else float("nan"))
+                               float(jac.min().detach()) if jac.numel() else float("nan"),
+                               optimization_stats={"compact": compact_em,
+                                   "mesh_evaluations": mesh_evaluations, "mesh_steps": mesh_steps,
+                                   "accepted_cache_hits": cache_hits, "index_rebuilds": index_rebuilds,
+                                   "shared_geometry": reuse_geometry, "analytic_prior": analytic_prior})

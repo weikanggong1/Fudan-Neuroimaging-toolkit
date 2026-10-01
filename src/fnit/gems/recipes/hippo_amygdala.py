@@ -29,6 +29,7 @@ class HippoAmygdalaRecipe(GEMSRecipe):
     resolution_mm = 0.33333
     seg_schedule = ((3.0, 300), (2.0, 150))
     image_schedule = ((1.5, 7), (0.75, 5), (0.0, 3))
+    fast_image_schedule = ((1.5, 4), (0.75, 3), (0.0, 2))
 
     def __init__(self, side: str, directory):
         if side not in ("left", "right"):

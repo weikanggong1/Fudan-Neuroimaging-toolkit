@@ -380,10 +380,13 @@ def segment_subregions(
     synthseg_parc_weights: str | Path | None = None,
     auto_initialize: bool = True,
     device: str | torch.device = "cuda:0",
+    optimization: str = "fast",
     em_iterations: int = 8,
     deform_iterations: int = 0,
 ) -> SubregionResult:
     """Segment requested subregions on one raw T1 and merge on its native grid."""
+    if optimization not in ("fast", "balanced"):
+        raise ValueError("optimization must be 'fast' or 'balanced'")
     selected = _expand_structures(structures)
     root = Path(atlas_root) if atlas_root is not None else None
     if root is None:
@@ -435,8 +438,12 @@ def segment_subregions(
         if device.type == "cuda":
             torch.cuda.reset_peak_memory_stats(device)
         recipe = make_recipe(name, root)
+        if hasattr(recipe, "set_optimization_profile"):
+            recipe.set_optimization_profile(optimization)
         logger.info("Starting %s", name)
         outcome = recipe.run(context, device)
+        outcome.report["optimization"] = optimization
+        outcome.report["mesh_solver"] = getattr(outcome.fit, "optimization_stats", None)
         outcome.fit.highres_labels = outcome.highres_labels
         _merge_native(combined, best_conf, outcome.native_labels,
                       outcome.native_confidence, outcome.native_support)

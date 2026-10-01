@@ -111,6 +111,7 @@ def main():
     parser.add_argument("--weights", type=Path, help="verified SynthSeg/SynthSeg+ weight directory")
     parser.add_argument("--structures", default="all")
     parser.add_argument("--device", default="cuda:0")
+    parser.add_argument("--optimization", choices=("fast", "balanced"), default="fast")
     parser.add_argument("--gpu-memory-fraction", type=float, default=0.23)
     parser.add_argument("--output-dir", required=True, type=Path)
     parser.add_argument("--reference-brainstem", type=Path)
@@ -142,7 +143,7 @@ def main():
         args.t1, atlas_root=args.atlas_root, structures=args.structures,
         coarse_segmentation=args.aseg, wmparc=args.wmparc,
         synthseg_weights=args.weights, synthseg_parc_weights=args.weights,
-        device=args.device)
+        device=args.device, optimization=args.optimization)
     if args.device.startswith("cuda"):
         torch.cuda.synchronize(args.device)
     elapsed = monotonic() - started
@@ -190,6 +191,7 @@ def main():
               "input": str(args.t1), "aseg": str(args.aseg) if args.aseg else None,
               "wmparc": str(args.wmparc) if args.wmparc else None,
               "wall_seconds": elapsed,
+              "optimization": args.optimization,
               "peak_gpu_gib": (max(value.get("peak_gpu_gib") or 0
                                     for value in result.initialization.values())
                                if args.device.startswith("cuda") else None),

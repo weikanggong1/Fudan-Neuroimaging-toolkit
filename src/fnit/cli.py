@@ -115,7 +115,8 @@ def _run_subregions(args):
         cortical_parcellation=args.cortical_parcellation, wmparc=args.wmparc,
         synthseg_parc_weights=args.synthseg_parc_weights,
         auto_initialize=not args.no_auto_initialize, device=args.device,
-        em_iterations=args.em_iterations, deform_iterations=args.deform_iterations)
+        em_iterations=args.em_iterations, deform_iterations=args.deform_iterations,
+        optimization=args.optimization)
     Path(args.o).parent.mkdir(parents=True, exist_ok=True)
     result.labels.save(args.o)
     print(args.o)
@@ -694,6 +695,8 @@ def main(argv=None):
     subregions.add_argument('--em-iterations', type=int, default=8)
     subregions.add_argument('--deform-iterations', type=int, default=0)
     subregions.add_argument('--device', default='cuda:0')
+    subregions.add_argument('--optimization', choices=('fast', 'balanced'), default='fast',
+                           help='fast coarse-to-fine fitting or balanced full-resolution schedule')
     sr = commands.add_parser('synthsr', help='synthesize a 1 mm T1-weighted image')
     sr.add_argument('--i', '-i', required=True, help='single input image')
     sr.add_argument('--o', '-o', required=True, help='output image or directory for this image')

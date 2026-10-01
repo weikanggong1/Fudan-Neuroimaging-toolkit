@@ -9,6 +9,7 @@ import numpy as np
 import torch
 
 from ._raster_triton import lookup_candidates
+from .deformation import CurrentGeometry
 
 
 @dataclass(frozen=True)
@@ -167,6 +168,7 @@ def rasterize_priors(
     tolerance: float = 2e-5,
     background_channel: int | None = 0,
     return_assignment: bool = False,
+    current_geometry: CurrentGeometry | None = None,
 ) -> tuple[torch.Tensor, ...]:
     """Rasterize node alphas to a dense ``[K,X,Y,Z]`` prior tensor.
 
@@ -174,6 +176,7 @@ def rasterize_priors(
     inside tests, interpolation and output tensors execute on ``vertices.device``.
     The implementation is differentiable with respect to the selected
     tetrahedron's vertex coordinates, enabling PyTorch mesh optimization.
+    ``current_geometry`` may share this evaluation's solves with the mesh prior.
     """
     if vertices.ndim != 2 or vertices.shape[1] != 3:
         raise ValueError("vertices must be [V,3]")
@@ -199,12 +202,16 @@ def rasterize_priors(
 
     # Each tetrahedron can appear in many blocks. Solve its geometry once;
     # autograd accumulates the block contributions before differentiating it.
-    all_tet = vertices[tetrahedra]
-    all_v0 = all_tet[:, 0]
-    all_matrix = torch.stack((all_tet[:, 1] - all_v0, all_tet[:, 2] - all_v0,
-                              all_tet[:, 3] - all_v0), dim=-1)
-    all_inv, all_info = torch.linalg.inv_ex(all_matrix, check_errors=False)
-    all_singular = (all_info != 0) | (torch.linalg.det(all_matrix).abs() <= 1e-10)
+    if current_geometry is None:
+        all_tet = vertices[tetrahedra]
+        all_v0 = all_tet[:, 0]
+        all_matrix = torch.stack((all_tet[:, 1] - all_v0, all_tet[:, 2] - all_v0,
+                                  all_tet[:, 3] - all_v0), dim=-1)
+        all_inv, all_info = torch.linalg.inv_ex(all_matrix, check_errors=False)
+        all_singular = (all_info != 0) | (torch.linalg.det(all_matrix).abs() <= 1e-10)
+    else:
+        all_v0, all_inv = current_geometry.origins, current_geometry.inverse_edges
+        all_singular = current_geometry.singular
     for points, ids, candidate_mask, batch_ids, (x, y, z) in block_index.device_batches(vertices.device, vertices.dtype):
         # Lookup is discrete. Retaining every candidate's graph consumes GBs
         # although only one tetrahedron per voxel contributes to the gradient.
@@ -251,12 +258,14 @@ def rasterize_priors_compact(
     block_index: BlockIndex,
     tolerance: float = 2e-5,
     background_channel: int | None = 0,
+    current_geometry: CurrentGeometry | None = None,
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """Rasterize only masked voxels, in the order of ``dense[:, valid_mask]``.
 
     Return ``[K,N_valid]`` priors and ``[N_valid]`` coverage. The spatial index
     caches fixed mask coordinates without retaining a mesh's autograd graph;
     replacing the index naturally rebuilds that mapping after mesh movement.
+    ``current_geometry`` may share this evaluation's solves with the mesh prior.
     """
     if vertices.ndim != 2 or vertices.shape[1] != 3:
         raise ValueError("vertices must be [V,3]")
@@ -274,12 +283,16 @@ def rasterize_priors_compact(
         raise ValueError("background_channel is out of range")
     batches, reorder = block_index.device_compact_batches(valid_mask, vertices.device, vertices.dtype)
 
-    all_tet = vertices[tetrahedra]
-    all_v0 = all_tet[:, 0]
-    all_matrix = torch.stack((all_tet[:, 1] - all_v0, all_tet[:, 2] - all_v0,
-                              all_tet[:, 3] - all_v0), dim=-1)
-    all_inv, all_info = torch.linalg.inv_ex(all_matrix, check_errors=False)
-    all_singular = (all_info != 0) | (torch.linalg.det(all_matrix).abs() <= 1e-10)
+    if current_geometry is None:
+        all_tet = vertices[tetrahedra]
+        all_v0 = all_tet[:, 0]
+        all_matrix = torch.stack((all_tet[:, 1] - all_v0, all_tet[:, 2] - all_v0,
+                                  all_tet[:, 3] - all_v0), dim=-1)
+        all_inv, all_info = torch.linalg.inv_ex(all_matrix, check_errors=False)
+        all_singular = (all_info != 0) | (torch.linalg.det(all_matrix).abs() <= 1e-10)
+    else:
+        all_v0, all_inv = current_geometry.origins, current_geometry.inverse_edges
+        all_singular = current_geometry.singular
     selected_parts, point_parts, covered_parts = [], [], []
     for points, ids, candidate_mask, batch_ids, point_rows in batches:
         with torch.no_grad():
