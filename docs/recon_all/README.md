@@ -1,6 +1,8 @@
 # 单幅 T1w 的 recon-all 重建
 
-已完成的热点优化生产代码为 `c248520`，两例已从原始 T1 连续完成66阶段，各138项输出齐全。[当前整例结果](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/WHOLE_RESULTS.md)：GPU完整命令4972.667→4242.884秒，减少14.676%；CPU5295.422→5274.884秒，减少0.388%。相对优化前严格诊断GPU137/138、CPU138/138，分割与主要脑区统计均零差异；GPU唯一表头差异已定位到面积尾差经float32累加和文本舍入放大。GPU采样峰值14.508 GB，连续峰值未验证。官方差异与white/pial穿越仍保留，整体指标等效未判定。热点和具体实现见 [实测与复用](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/README.md)、[原生替代审计](HOTSPOT_ACCELERATION_AUDIT.md)、[CPU 几何](CPU_GEOMETRY_PERFORMANCE.md)及[球面配准](SPHERE_REGISTRATION_PERFORMANCE.md)。
+本轮候选 `61926c7` 已按[五阶段串行优化](SERIAL_OPTIMIZATION.md)完成阶段回归：全部辅助网络GPU、有序归一化内核和标准球面平均已接入；N4拟合与完整GCA保留合适的源码构建实现。Python pial单次同输入配对减少15.17%，与官方完整坐标一致，但仍慢于生产C++，因此保留默认并单列其局部差异。两例原始T1整例与整体等效尚未判定；首个CUDA OOM失败尝试保留日志，新空目录retry1正在运行。报告均绑定实际代码，不将阶段加速当成整例提速。
+
+此前完成的热点优化生产代码为 `c248520`，两例已从原始 T1 连续完成66阶段，各138项输出齐全。[当前整例结果](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/WHOLE_RESULTS.md)：GPU完整命令4972.667→4242.884秒，减少14.676%；CPU5295.422→5274.884秒，减少0.388%。相对优化前严格诊断GPU137/138、CPU138/138，分割与主要脑区统计均零差异；GPU唯一表头差异已定位到面积尾差经float32累加和文本舍入放大。GPU采样峰值14.508 GB，连续峰值未验证。官方差异与white/pial穿越仍保留，整体指标等效未判定。热点和具体实现见 [实测与复用](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/README.md)、[原生替代审计](HOTSPOT_ACCELERATION_AUDIT.md)、[CPU 几何](CPU_GEOMETRY_PERFORMANCE.md)及[球面配准](SPHERE_REGISTRATION_PERFORMANCE.md)。
 
 [返回首页](../../README.md) · [安装与原生程序](CONDA_CPP_BUILD.md) · [阶段与官方命令](CONDA_CPP_STAGES.md) · [验收范围](../../validation/recon_all/python_gpu_port/RELEASE_GATES.md)
 

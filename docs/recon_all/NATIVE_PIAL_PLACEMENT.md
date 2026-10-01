@@ -66,6 +66,20 @@ mris_place_surface --adgws-in surf/autodet.gw.stats.lh.dat \
 
 此前在冻结官方上游的真实左侧输入中，另一版 Conda 源码构建 `mris_place_surface` 相对归档官方 pial 的平均位移为 0.0297 mm、P99 0.2294 mm、最大 1.6693 mm，详见[同输入记录](../../validation/recon_all/python_gpu_port/pial_t1_conda_20260927/official_frozen_lh.json)。[Python 双侧同输入记录](PYTHON_PIAL_PLACEMENT.md)则达到有序坐标和面的逐值一致，但观察耗时约为 1,241 和 1,154 秒。不同日期与共享负载下的单次耗时不能直接作为受控速度比。当前源码构建的完整整例结果另以[发布门槛](../../validation/recon_all/python_gpu_port/RELEASE_GATES.md)为准。
 
+## 2026-10-02：当前同输入三方比较
+
+候选61926c7，gpucw1、4线程，输入为c248520的自产sub01左侧七项前置和aparc，
+每项SHA见[完整报告](../../validation/recon_all/optimizations/20261001_serial/stage5/native_reference.json)。
+官方8.2.0与FNIT Python完整有序坐标/面相同；当前Conda输出与冻结Conda几何
+相同，但相对本次官方均值0.031369mm、P99 0.225255mm、最大1.482209mm。
+程序版本分别为freesurfer 8.2.0和freesurfer gongwk-local，二进制SHA不同。
+这是当前程序产物之间的差异，具体源码/编译原因仍未定位，不能笼统归因于随机性。
+
+Conda176.787秒、官方133.863秒；Python同主机含冷JIT与读写1453.060→1232.634秒，
+单次配对减少15.17%，优化前后文件SHA相同。Python仍明显较慢，生产保留Conda
+路径并单列局部精度问题。此处只有一个半球完整三方测试，不代表双侧或整例
+通过；另四个半球静态索引/法向组件已通过精确回归，整例验证另行记录。
+
 ## 参考文献与原实现
 
 - Fischl B. FreeSurfer. *NeuroImage*. 2012;62(2):774–781. [doi:10.1016/j.neuroimage.2012.01.021](https://doi.org/10.1016/j.neuroimage.2012.01.021)。
