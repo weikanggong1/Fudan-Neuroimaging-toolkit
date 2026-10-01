@@ -29,6 +29,7 @@ def apply_motion_warp(
     interpolation="linear",
     batch_size=16,
     device=None,
+    mcflirt=False,
 ):
     """Apply each FLIRT motion matrix and one shared FSL warp in one sampling.
 
@@ -36,7 +37,9 @@ def apply_motion_warp(
     ``warp`` maps warp source to warp reference; ``postmat`` maps warp reference
     to the final reference. All matrices follow FSL scaled-mm coordinates.
     The returned NIfTI uses the 3D ``reference`` grid and input time axis.
-    ``interpolation="spline"`` uses cubic B-spline image interpolation on CPU.
+    ``mcflirt=True`` selects the MCFLIRT Constant spline and extraslice
+    boundary for motion-only sampling. The shared warp contract otherwise
+    keeps zero padding and uses SciPy for spline sampling.
     """
     image = _load_nifti(input_bold, "input_bold")
     target = _load_nifti(reference, "reference")
@@ -61,6 +64,27 @@ def apply_motion_warp(
     if device.type == "cuda":
         torch.backends.cuda.matmul.allow_tf32 = True
         torch.backends.cudnn.allow_tf32 = True
+    if mcflirt and (warp is not None or postmat is not None):
+        raise ValueError("mcflirt sampling requires motion-only transforms")
+    if mcflirt:
+        from ..mcflirt.sampling import sample_motion_frame
+
+        data = np.asarray(image.dataobj, dtype=np.float32)
+        output = np.empty((*target.shape[:3], image.shape[3]), dtype=np.float32)
+        for frame, matrix in enumerate(matrices):
+            output[..., frame] = sample_motion_frame(
+                data[..., frame], image, target, matrix, device=device,
+                interpolation=interpolation,
+            ).cpu().numpy()
+        header = target.header.copy()
+        header.set_data_dtype(np.float32)
+        result = nib.Nifti1Image(output, target.affine, header)
+        result.header.set_zooms((*target.header.get_zooms()[:3], image.header.get_zooms()[3]))
+        result.header.set_xyzt_units(xyz=target.header.get_xyzt_units()[0],
+                                    t=image.header.get_xyzt_units()[1])
+        result.set_qform(target.affine, code=int(target.header["qform_code"]))
+        result.set_sform(target.affine, code=int(target.header["sform_code"]))
+        return result
     shape = tuple(target.shape[:3])
     output_mm = _spatial_grid(shape, _fsl_voxel_matrix(target), device)
     post_inverse = torch.as_tensor(np.linalg.inv(post), dtype=torch.float64, device=device)
