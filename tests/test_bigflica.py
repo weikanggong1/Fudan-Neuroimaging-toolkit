@@ -97,7 +97,8 @@ def test_bpdn_polish_matches_sklearn_and_reuses_workspaces():
     generator = np.random.default_rng(73)
     dictionary = generator.normal(size=(40, 20))
     dictionary /= np.linalg.norm(dictionary, axis=1, keepdims=True)
-    solver = _SparseCodesBPDN(32, 40, "cuda", torch.float64, alpha=0.4)
+    solver = _SparseCodesBPDN(32, 40, "cuda", torch.float64, alpha=0.4,
+                             compatibility_mode=False)
     dictionary_gpu = torch.as_tensor(dictionary, device="cuda")
     for index in range(7):
         samples = generator.normal(size=(32, 20)) if index < 6 else np.zeros((32, 20))
@@ -118,7 +119,8 @@ def test_bpdn_nonunique_support_restarts_lars():
     dictionary = torch.tensor([[1., 0.], [1., 0.], [0., 1.]], device="cuda")
     samples = torch.tensor([[2., 0.]], device="cuda")
     dictionary = dictionary.double(); samples = samples.double()
-    solver = _SparseCodesBPDN(1, 3, "cuda", torch.float64)
+    solver = _SparseCodesBPDN(1, 3, "cuda", torch.float64,
+                             compatibility_mode=False)
     solver.calls = 4
     actual = solver(samples, dictionary, 1., 120)
     expected = _sparse_codes_lars(samples, dictionary, 1., 120)
