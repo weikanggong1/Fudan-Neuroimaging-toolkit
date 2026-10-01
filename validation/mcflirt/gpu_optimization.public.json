@@ -1,0 +1,233 @@
+{
+  "subjects": 1,
+  "real_input_frames": 490,
+  "candidate_frames": 490,
+  "full_series": true,
+  "source_revision": "7456251842b5b6fac4affc95c83ba61265ad0a0a",
+  "baseline_kind": "frozen_fnit",
+  "baseline_source_revision": "1eb9c417febebc8bdd450590d4759454e7160141",
+  "device": "cuda:0",
+  "threads": 8,
+  "stage_iterations": [
+    1,
+    1,
+    1
+  ],
+  "interpolation": "spline",
+  "tf32": true,
+  "half_precision": false,
+  "tr_seconds": 0.735,
+  "highpass_cutoff_seconds": 100.0,
+  "intensity_factor": 1.4359563469270533,
+  "cost_evaluations": 45972,
+  "sampling_calls": 1,
+  "timings": {
+    "input_headers_mask_and_optional_frame_subset_seconds": 0.0083993268199265,
+    "motion_run_seconds": 159.2749434360303,
+    "motion_resampling_seconds": 24.82989292126149,
+    "motion_run_minus_resampling_seconds": 134.4450505147688,
+    "motion_artifact_writes_seconds": 25.71967999683693,
+    "motion_run_and_artifact_writes_seconds": 184.99505139701068,
+    "feat_mean_mask_prepare_and_writes_seconds": 1.6508929328992963,
+    "feat_grand_mean_scale_seconds": 1.0706626470200717,
+    "feat_highpass_seconds": 1.9345612088218331,
+    "feat_filtered_and_mean_writes_seconds": 13.121583739761263,
+    "feat_fixed_mask_continuation_seconds": 17.91018379572779,
+    "candidate_motion_and_fixed_mask_feat_with_writes_seconds": 202.90524651203305
+  },
+  "motion_comparison": {
+    "compared_frames": 490,
+    "brain_voxels": 99372,
+    "matrix_max_abs": 4.440670053895701e-12,
+    "matrix_rmse": 1.9339707451942663e-13,
+    "matrix_exact_equal": false,
+    "pull_rms_ras_mm": {
+      "count": 490,
+      "mean": 4.804064617441162e-11,
+      "median": 4.9237802604595784e-11,
+      "p05": 2.260327730247927e-11,
+      "p95": 6.951630672463013e-11,
+      "min": 5.01959494662569e-12,
+      "max": 8.287484301451034e-11
+    },
+    "all_brain_points_pull_rms_ras_mm": 5.017969819255393e-11,
+    "worst_frame": 484,
+    "parameters": [
+      {
+        "parameter": "rotation_x_rad",
+        "rmse": 2.5383400214088696e-12,
+        "mae": 1.973863328289876e-12,
+        "max_abs": 4.940662462482592e-12,
+        "pearson_r": 1.0
+      },
+      {
+        "parameter": "rotation_y_rad",
+        "rmse": 2.6569697924239885e-12,
+        "mae": 2.146931391522584e-12,
+        "max_abs": 4.97785081383928e-12,
+        "pearson_r": 1.0
+      },
+      {
+        "parameter": "rotation_z_rad",
+        "rmse": 2.707975169832767e-12,
+        "mae": 2.2160102004620406e-12,
+        "max_abs": 4.995446330896547e-12,
+        "pearson_r": 1.0
+      },
+      {
+        "parameter": "translation_x_mm",
+        "rmse": 1.6916915593593308e-10,
+        "mae": 9.604219102215566e-11,
+        "max_abs": 4.998714497883583e-10,
+        "pearson_r": 0.9999999999999998
+      },
+      {
+        "parameter": "translation_y_mm",
+        "rmse": 2.7960903292271645e-10,
+        "mae": 2.3961117664835706e-10,
+        "max_abs": 4.984880286329485e-10,
+        "pearson_r": 1.0000000000000002
+      },
+      {
+        "parameter": "translation_z_mm",
+        "rmse": 2.629939515566654e-10,
+        "mae": 2.1277962650054727e-10,
+        "max_abs": 4.998303299030837e-10,
+        "pearson_r": 1.0000000000000002
+      }
+    ],
+    "coordinate_definition": "Reference brain voxels pulled into raw BOLD RAS-mm; FSL scaled-mm matrices converted with actual NIfTI geometry.",
+    "written_matrix_text_max_abs": 0.0,
+    "written_matrix_text_exact_equal": true,
+    "written_parameter_text_max_abs": 0.0,
+    "written_parameter_text_exact_equal": true
+  },
+  "peak_cuda_allocated_bytes": 1150304256,
+  "peak_cuda_reserved_bytes": 1371537408,
+  "timing_scope": {
+    "motion_run": "Actual TorchMCFLIRT.run with pre-opened NIfTI headers; full-series mode includes input array read/decompression, preparation, estimation, spline sampling and output dtype cast; excludes writes. First-N mode instead preloads its subset before this timer.",
+    "motion_run_minus_resampling": "Motion run minus the synchronized apply_motion_warp wrapper; includes input array loading, preparation, estimation and output dtype cast, not a pure optimizer timer.",
+    "motion_run_and_artifact_writes": "Motion run plus private NIfTI, full-precision array, MAT text and par text writes.",
+    "feat_continuation": "Supplied fixed brain mask: corrected mean/mask writes, masking, grand-mean scaling, highpass and filtered/mean writes. Brain extraction, BIDS lookup, warp estimation and complete run_feat_core entry point are outside this boundary.",
+    "excluded": "Baseline reads, hashes and numerical comparisons are outside candidate compute/write timings. The one sampler wrapper adds only boundary synchronization and a wall-clock read. First execution may include compilation."
+  },
+  "software": {
+    "python": "3.11.16",
+    "numpy": "1.26.4",
+    "nibabel": "5.4.2",
+    "torch": "2.5.1"
+  },
+  "privacy": "Only anonymous aggregates and hashes are public. Images, per-frame matrices, parameters and framewise metrics remain in the private output directory.",
+  "comparison_note": "Baseline matrix/par text can be rounded relative to its in-memory fit. Frozen FNIT comparison does not establish native-FSL equivalence. A first-N control changes the final coarse-stage initial matrix and cannot validate full-series FEAT filtering.",
+  "cuda_device_name": "NVIDIA H100 PCIe",
+  "within_20_gb_peak_allocated": true,
+  "within_20_gb_peak_reserved": true,
+  "filtered_comparison": {
+    "whole_image": {
+      "samples": 242851840,
+      "rmse": 0.0,
+      "max_abs": 0.0,
+      "exact_fraction": 1.0,
+      "exact_equal": true
+    },
+    "brain": {
+      "samples": 48692280,
+      "rmse": 0.0,
+      "max_abs": 0.0,
+      "exact_fraction": 1.0,
+      "exact_equal": true
+    },
+    "brain_temporal_pearson_r": {
+      "count": 99372,
+      "mean": 1.0,
+      "median": 1.0,
+      "p05": 1.0,
+      "p95": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "dtype": {
+      "candidate": "float32",
+      "baseline": "float32"
+    },
+    "metric_scope": "All frames; image errors cover all voxels and separately the supplied brain mask. Temporal Pearson r excludes constant time series."
+  },
+  "corrected_comparison": {
+    "whole_image": {
+      "samples": 242851840,
+      "rmse": 0.0,
+      "max_abs": 0.0,
+      "exact_fraction": 1.0,
+      "exact_equal": true
+    },
+    "brain": {
+      "samples": 48692280,
+      "rmse": 0.0,
+      "max_abs": 0.0,
+      "exact_fraction": 1.0,
+      "exact_equal": true
+    },
+    "brain_temporal_pearson_r": {
+      "count": 99372,
+      "mean": 1.0,
+      "median": 1.0,
+      "p05": 1.0,
+      "p95": 1.0,
+      "min": 1.0,
+      "max": 1.0
+    },
+    "dtype": {
+      "candidate": "int32",
+      "baseline": "int32"
+    },
+    "metric_scope": "All frames; image errors cover all voxels and separately the supplied brain mask. Temporal Pearson r excludes constant time series."
+  },
+  "comparison_seconds_including_baseline_image_reads": 30.42112079774961,
+  "prior_native_command_observation": {
+    "wall_seconds": 326.096421,
+    "scope": "Historical independent native MCFLIRT command includes estimation, final resampling and writes; server load, cache state and exact output set were not matched by this driver.",
+    "matched_speedup_claim": false
+  },
+  "input_sha256": {
+    "bold": "67717caaa823141c6e59d46db52e92deb4419d232ba699c399c69eb8888a0e92",
+    "reference": "98cb4261e0bcd3b058a989c49e0a8bda66d8ba76be1385a3e23289e9cc9e1162",
+    "brain_mask": "102b4bd98117d72836a13fc75356a659ad5bd3c5334c7e7cd42babb2fd7dc8b8",
+    "baseline_parameters": "0bdeb5a3660aa7dd98dcf32e3f1216ee3bb4a99cad061187b7813b54e983271d",
+    "baseline_filtered": "b5085462ed00dc0be1c4eec46eefc611172c5206fb9cc596f66798b08c1d6e67",
+    "baseline_corrected": "32a77919a3a2ee44b0b476632780bea9a30ae6ee5a638cb250401f0e9dcd555e",
+    "baseline_matrices_frame_order": "c00a7d113694f7845679f7e603407d8dcd1445c2c3392d71440448b3b729ce08"
+  },
+  "candidate_artifact_sha256": {
+    "matrices_array": "39391e01c45a3af73583279ff01f357f7c26e5f4f1b1a18c037a4a17b71b17f4",
+    "parameters_array": "080998e1573f7b67c24acbb74e1c9f7b27dc4c54e15d0e4ec5b0f020b3e6e681",
+    "parameters_text": "0bdeb5a3660aa7dd98dcf32e3f1216ee3bb4a99cad061187b7813b54e983271d",
+    "corrected": "32a77919a3a2ee44b0b476632780bea9a30ae6ee5a638cb250401f0e9dcd555e",
+    "filtered": "b5085462ed00dc0be1c4eec46eefc611172c5206fb9cc596f66798b08c1d6e67",
+    "matrices_text_frame_order": "c00a7d113694f7845679f7e603407d8dcd1445c2c3392d71440448b3b729ce08"
+  },
+  "sources_sha256": {
+    "fnit.applywarp.core": "cf6de438f3ac1551804d38682ce3fbb11b8fb042ad881562ebc93aada80f2df5",
+    "fnit.feat.temporal": "b0a3fc14751a6a7cd9ce7c66ac8fe7b3fc4bea43f4039ef5b03d5af47e3d7b08",
+    "fnit.flirt.__init__": "58b1ae43c50bd2942398f272c013f5bc743ce6a78abdaab7c93eeae1949447af",
+    "fnit.flirt.__main__": "03eb6210ee12d659108106a6126a870a9d5bc89ba95c116cd519e2764b0e092f",
+    "fnit.flirt._batched_cuda": "c6ac99f6b0499c2b081969448dc9492906232daac247477edff0cb00ac43cd74",
+    "fnit.flirt.affine_batch": "8aa427ea1b185deea2ff2295e01c972bb371cb5a4b23504ce13ef79ca1d6155f",
+    "fnit.flirt.batched": "10115b3fd51497162c2ebc1a7ae52999a4c3079810e18906ae9c0c363a457719",
+    "fnit.flirt.cli": "f57d65c320aee278820de2fb31cc764e7bee911e3228d3a904108d2a75e8142e",
+    "fnit.flirt.coordinates": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e",
+    "fnit.flirt.core": "e6ce6185fafb89666be631069f66e96ce9c6a561ab3d7c7fab4c661d317885c1",
+    "fnit.flirt.search": "9b50908c1bead992c55255d2ed3c6cf266135e042c276b9ba8176fef03edae4c",
+    "fnit.flirt.standalone": "a5ffc8e847bfc5219ef8e068a34eb81bab4b6fceb7ea39a497eb573108a8115e",
+    "fnit.flirt.types": "55a3abf2d7ce7889c297df95289890a589d1721b9fe3b157aa90e87819ed8e21",
+    "fnit.fmri.pipeline": "a71a0e0528a72c0de2dd38edbfee6e817dfde80a5640b1f620c120abdbd59311",
+    "fnit.fmri.spatial": "bd7e3ae1d28202f79925323ea05c7303e07e8b0caa3646e732f64703a00ab134",
+    "fnit.mcflirt.__init__": "793c2b2e08ae85bedf341df682225f7bc9eadd44069dbe6fd73356ccb985a1ec",
+    "fnit.mcflirt._cost_cuda": "e005d1553e36c2bdbcc94fd399e697ef3cd445beb78c0dcb87c07100ca0f98fa",
+    "fnit.mcflirt.cli": "855e192b26ced79517250bb7f406468e614c5da30922772c737f0b70062e08a9",
+    "fnit.mcflirt.core": "fa4918d3425f9295159e124ea6d46cc27ab2931789da8d4145c6d46cb0f47436",
+    "fnit.mcflirt.sampling": "af10cfd4f42f94adff2bb910eafe40834786a3b7646756a3967d5c9fc3aa0b8f",
+    "benchmark_driver": "fe308eb64e1df93f58944ffea54be21c50c0cc8044105956857f83b0e255cd56"
+  },
+  "runtime_sources_unchanged": true,
+  "valid_run": true
+}

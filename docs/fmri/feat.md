@@ -145,13 +145,17 @@ filtered_path = highpass_nifti(
 | 固定原运动输出的完整缩放 | 乘数同为 1.4359563469270533，全部解码值相同 | 单步控制，排除运动估计。 |
 | 固定原输入的完整高通 | 时间 r 中位数 0.999999999999144；RMSE 0.000505985 | GPU 调用 7.642 s，含数据传输及返回，排除读取与哈希；共享 GPU。 |
 
-运动参数、样条实现和脑图见 [TorchMCFLIRT 专属页](../mcflirt/README.md)及[完整 GPU 报告](../../validation/mcflirt/full490_gpu.public.json)。固定输入的缩放、高通见[独立控制](../../validation/fmri/matched_highpass_control.public.json)。本轮运动实现替换了旧掩膜 NCC/Adam 路径；相邻帧初始化、原 NCC 的累加行为、8/4/4 mm 网格、Brent 容差和原整数输出转换均按 MCFLIRT 2111.0 处理。float32 累加及成本融合仍会改变平坦最优点附近的矩阵，输出尚未逐体素等价。
+运动参数、样条实现和脑图见 [TorchMCFLIRT 专属页](../mcflirt/README.md)及[冻结 GPU 报告](../../validation/mcflirt/full490_gpu.public.json)。固定输入的缩放、高通见[独立控制](../../validation/fmri/matched_highpass_control.public.json)。运动实现保留相邻帧初始化、原 NCC 累加行为、8/4/4 mm 网格、Brent 容差和原整数转换。相对原 FSL，float32 代价差异仍会影响平坦最优点附近的矩阵；本次融合优化则逐值保留冻结 FNIT 的运动输出。
 
 完整 FEAT 与后续去噪、MNI 输出的当前结果见[全流程对照](../../validation/fmri/matched_native.md)。带 GDC/B0 的共享 warp 路径在本轮未做完整对照；其空间方向与采样合同保持原有实现。
 
 ## FEAT 耗时来源
 
-2026-10-01 的[完整 490 帧分段计时](../../validation/fmri/feat_profile.public.json)在共享 H100 上重跑同一真实 BOLD、SBRef 和已有 FNIT EPI 掩膜，实际选中输入重新校验 SHA-256，相关源码与上述冻结版本相同。输出 `filtered_func_data` 的完整 4D 解码值与原 FNIT 结果逐值相同（RMSE 和最大绝对差均为 0）。本次 FEAT 总耗时为 728.28 s，以下项目互不重叠：
+优化后的独立 [`TorchMCFLIRT`](../mcflirt/README.md) 在完整 490 帧上用时 **159.27 s**，包含输入解压、估计、样条采样和输出类型转换，不含写盘；其中最终样条采样为 24.83 s。写出的矩阵和参数文本、运动校正 int32 图以及给定同一掩膜后的高通 float32 图，均与冻结 FNIT 结果相同。统计和实际源文件哈希见[当前优化报告](../../validation/mcflirt/gpu_optimization.public.json)。该验证由独立运动函数及固定掩膜的后续子函数组成，其 202.91 s 合计还包含额外私有文件写盘，不是完整 `run_feat_core` 的入口计时。
+
+优化复用 TorchFLIRT 的精确 float32 CUDA 运算，将坐标、八邻点采样、边界降权和参考读取合并到一个 kernel。方向判断在 CPU 完成，每次 cost 只读回最终代价。各帧的质心跨三阶段复用，完整 float32 输入在显存预算允许时缓存。NCC 归约、Brent 搜索、相邻帧初值、样条边界和整数截断沿用原有实现。
+
+以下是优化前的[完整 490 帧分段计时](../../validation/fmri/feat_profile.public.json)，用于说明瓶颈来源。它使用同一真实 BOLD、SBRef 和已有 FNIT EPI 掩膜，输出与冻结版本逐值相同。FEAT 总耗时为 728.28 s，以下项目互不重叠：
 
 | 项目 | 耗时（s） | 包含内容 |
 |---|---:|---|
@@ -162,11 +166,11 @@ filtered_path = highpass_nifti(
 | `filtered_func_data.nii.gz` 保存 | 13.51 | NIfTI 写入和 gzip 压缩 |
 | 其他准备、掩膜和小文件输出 | 2.69 | 其余 CPU 操作、均值影像和运动文本等 |
 
-主要瓶颈是运动优化中的反复 cost 计算。三个阶段各拟合 490 帧，共 1470 次帧/阶段拟合、45972 次 cost。cost 累计 625.08 s，已包含在优化器的 652.15 s 内，不能再相加。8 mm 和 4 mm 参考网格分别只有 12844 和 102752 个体素，但每次 cost 仍由 Python 调度坐标生成、八邻点插值、边界权重等多个小 GPU 运算；目前仅末端统计归约经 `torch.compile` 编译。每次 cost 至少读取四个 GPU 标量到 CPU（三个方向判断及最终 cost），Brent 优化据此顺序选择下一点，反复同步限制了 GPU 吞吐。
+旧路径三个阶段各拟合 490 帧，共 1470 次帧/阶段拟合、45972 次 cost。cost 累计 625.08 s，包含在优化器的 652.15 s 内，不能相加。8 mm 和 4 mm 参考网格分别只有 12844 和 102752 个体素，但采样准备由多个小 GPU 运算完成，仅统计归约经 `torch.compile` 编译；每次 cost 至少读回三个方向和最终代价。此次优化减少这部分调度和同步，完整搜索仍调用 45972 次 cost。
 
-最终样条也逐帧执行空间轴递推、坐标累加和 64 邻点加权，再逐帧传回 CPU；本次实际占比为 4.2%。当前 motion-only 分支没有使用 `batch_size` 批处理，调大该参数不会改变这一执行方式；估计与最终采样还会分别解码同一完整 BOLD。应先减少 cost 的标量同步并融合 NCC 相关小运算，再缓存上传帧、CoG 和已解码数据；样条融合可随后处理。优化需保留搜索、累加顺序、边界和整数输出转换，并用完整真实数据比较数值与耗时。
+最终样条继续逐帧执行空间轴递推、坐标累加和 64 邻点加权，再传回 CPU。motion-only 分支不使用 `batch_size`，调大该参数不会改变这一执行方式；估计和最终采样仍分别读取完整 BOLD。它在优化前 profile 中占 4.2%，本次保持该采样实现。
 
-本次是对原函数加计时包装的独立重跑，包含分段 CUDA 同步，使用当时的共享 GPU 负载与缓存状态。728.28 s 与原完整 volume 测量中的 973.12 s 分别保留，不以两者差值报告提速，也不逐项相减推造全流程时间。此前固定原软件输出的高通 7.642 s 同样是另一项独立控制。
+各次测量使用共享 H100，负载、缓存状态和验证输出集合不同。旧 profile 的 728.28 s、冻结 volume 的 973.12 s 和独立优化计时分别记录，不用相减推算全流程时间。复测参考图还须匹配 `pixdim`：FEAT 保存并重读的 `example_func.nii.gz` 可能与原 SBRef 有微小头信息舍入差异，即使像素和 affine 相同。
 
 ## 参考文献与原实现
 

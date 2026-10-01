@@ -44,7 +44,7 @@ result.distance.save(path=out / "subject_sdt.nii.gz")  # 输出路径：有符�
 | `no_csf` | 为 `True` 时使用排除 CSF 的官方权重 |
 | `threads` | 当前进程的 Torch 线程数；`None` 保留当前值 |
 
-模型进入 eval 模式并使用 float32 张量；CUDA 构造默认允许 TF32 matmul 和 cuDNN 内核，不使用 float16 或 bfloat16。重复使用实例可避免重复加载权重。
+模型进入 eval 模式并使用 float32 张量；CUDA 构造默认允许 TF32 matmul 和 cuDNN 内核，不使用 float16 或 bfloat16。卷积使用 `cudnn.benchmark=False` 和 `cudnn.deterministic=True`，固定算法选择；这两项设置以及 TF32 是当前进程的 PyTorch 后端策略。重复使用实例可避免重复加载权重。
 
 ### 单次调用与结果
 
@@ -147,11 +147,21 @@ U-Net、1 mm 最近邻重采样和 SDT 回采样在所选 PyTorch 设备执行�
 
 官方脚本集成参数解析和执行流程；本包将同一网络和影像处理拆成可导入接口。生产运行使用 nibabel、PyTorch 和 SciPy，不调用 FreeSurfer，也不依赖 Surfa。统一 CLI 为 `fnit synthstrip`。
 
-本次在 gpucw1 的 H100 上，以一例真实受试者的原始 SBRef 和存档 T1 作固定输入控制，使用同一官方 `synthstrip.1.pt`。存档 T1 的转换保留体素和 affine，但尚未确认是扫描仪直接输出的原始 T1。候选 `pipeline.py` SHA-256 为 `41304bafc412bcc914d76a6cbbd29550173df4419c1aa3a54d31d95739bda95d`。官方几何参照使用 Surfa 0.6.3；独立脑掩膜参照来自未修改的 FreeSurfer 8.2 `mri_synthstrip`。
+### 跨进程卷积选择修复
+
+完整 fMRI 流程的真实 T1 重复检查发现，旧构造函数同时开启 `cudnn.benchmark=True` 和 `cudnn.deterministic=True`。后者限制卷积算法本身的确定性，前者仍按每次进程的实测速度选择算法；共享 GPU 上的计时变化会使选择不同。此行为与 [PyTorch 2.5.1 的说明](https://github.com/pytorch/pytorch/blob/v2.5.1/docs/source/notes/randomness.rst)一致。
+
+在同一真实 T1、相同模型状态和归一化网络输入哈希的控制中，旧策略的两个新进程有 19 个掩膜边界体素不同，SDT RMSE 为 0.0002128 mm；在原构造后只关闭 `benchmark`，两个新进程的掩膜和 SDT 逐值相同。因此在成熟的 SynthStrip 子函数中将默认 `benchmark` 改为 `False`，保留 `deterministic=True`、默认 TF32、权重、网络和所有影像处理步骤。API 参数和返回结构不变。该检查验证相同环境下的 FNIT 重复性；相对原 FreeSurfer 的精度仍由下方独立对照报告说明。
+
+当前默认策略可用[真实图像跨进程驱动](../../validation/synthstrip/check_repeatability.py)重新核对；掩膜和 SDT 留在私有目录，公开 JSON 仅包含标量及实际输入、权重、模型状态、网络输入/预测、源码的 SHA-256。`--preceding-image` 可重现完整 fMRI 中先处理 EPI、再处理 T1 的调用顺序；`--compare-autotune` 另加旧策略的两个新进程作为诊断。参数和复现命令见[验证说明](../../validation/synthstrip/README.md)。
+
+### 冻结版本的几何与原程序对照
+
+此前在 gpucw1 的 H100 上，以一例真实受试者的原始 SBRef 和存档 T1 作固定输入控制，使用同一官方 `synthstrip.1.pt`。存档 T1 的转换保留体素和 affine，但尚未确认是扫描仪直接输出的原始 T1。候选 `pipeline.py` SHA-256 为 `41304bafc412bcc914d76a6cbbd29550173df4419c1aa3a54d31d95739bda95d`。官方几何参照使用 Surfa 0.6.3；独立脑掩膜参照来自未修改的 FreeSurfer 8.2 `mri_synthstrip`。
 
 修复了通用 `conform` 与官方视野中心定义、NIfTI `pixdim` 网格尺寸以及边界采样的差异。两幅真实输入的 1 mm LIA 数组和网络归一化输入均逐元素相同。
 
-| 当前真实输入控制 | SBRef | T1 |
+| 冻结源码的真实几何控制 | SBRef | T1 |
 |---|---:|---:|
 | 1 mm LIA 数组是否逐元素一致 | 是 | 是 |
 | 1 mm LIA affine 最大差异（mm） | 0 | 0 |
@@ -162,7 +172,7 @@ U-Net、1 mm 最近邻重采样和 SDT 回采样在所选 PyTorch 设备执行�
 | 与原程序独立推理所得 mask 不同体素数 | 1 | 25 |
 | 控制运行时间（s） | 7.61 | 4.83 |
 
-上表时间从模型构造前开始，到网络预测、双实现回采样和 mask 比较后停止；不含 Python 启动、输入 conform/归一化或最终写盘。它是共享 GPU 上的控制计时，不是双方完整 CLI 的速度比较。候选保留默认 TF32；重复控制中 SBRef 有 1–2 个、T1 有 19–25 个阈值附近体素不同。同一次预测的回采样 mask 始终一致，独立 GPU 推理的二值输出仍存在微小数值差异。
+上表时间从模型构造前开始，到网络预测、双实现回采样和 mask 比较后停止；不含 Python 启动、输入 conform/归一化或最终写盘。它是共享 GPU 上的历史控制计时，不是双方完整 CLI 的速度比较。该冻结版本采用旧卷积选择策略并保留默认 TF32；重复控制中 SBRef 有 1–2 个、T1 有 19–25 个阈值附近体素不同。同一次预测的回采样 mask 始终一致。当前跨进程策略已按上节修复，旧报告保留其实际测量源码哈希。
 
 完整输入、权重和源码 SHA-256、环境以及重复结果见 [机器可读报告](../../validation/fmri/synthstrip_geometry_control.public.json)。体积流程的模板空间脑图见 [fMRI 完整对照](../../validation/fmri/matched_native.md)。原始头部图像留在服务器。
 
@@ -201,7 +211,7 @@ PYTHONPATH=src python validation/fmri/render_synthstrip_comparison.py \
 
 ## 测试与复现
 
-几何回归测试覆盖视野中心、原 header 体素尺寸、正值包围盒、奇数裁剪、最近邻半体素及线性采样末端边界。本次以下测试共 28 项通过：
+几何回归测试覆盖视野中心、原 header 体素尺寸、正值包围盒、奇数裁剪、最近邻半体素及线性采样末端边界。后端策略测试模拟此前模型开启 autotune 的环境，核查构造函数关闭 benchmark 并保留 deterministic 和 TF32；测试不加载权重、不下载资源。当前检查命令为：
 
 ```bash
 # 检查 SynthStrip 几何、公开接口和默认 TF32 设置。
@@ -234,6 +244,13 @@ python validation/fmri/compare_synthstrip_geometry.py \
   }
 }
 ```
+
+## 最近版本更新与 benchmark
+
+| 版本与范围 | 更新及真实数据核对 | 耗时边界 |
+|---|---|---|
+| `1db5917` 几何修复，`1eb9c417` 完整流程冻结验收 | 修正官方视野中心、NIfTI `pixdim` 和回采样边界。真实 SBRef/T1 的归一化网络输入与官方实现逐值相同；独立 mask Dice 为 0.999995/0.999991。对应来源以[历史几何报告](../../validation/fmri/synthstrip_geometry_control.public.json)和[冻结脑图报告](../../validation/fmri/synthstrip_figure.public.json)为准。 | SBRef/T1 控制为 7.61/4.83 秒，含模型构造、预测、双实现回采样与比较；不含 Python 启动、输入 conform/归一化和写盘。 |
+| `44364a8` 固定卷积算法选择 | 默认关闭 `cudnn.benchmark`，保留 deterministic、TF32 和原 API。旧策略真实 T1 两个新进程的 19 个边界差异及关闭 benchmark 后的逐值一致控制，保存在[跨进程报告](../../validation/synthstrip/cudnn_repeatability.public.json)的 `original_diagnostic`；报告顶层记录当前源码的新驱动验收及实际输入、模型状态、网络预测哈希。 | 新驱动的调用计时包含记录张量哈希的开销，新进程计时另含启动、模型加载和写盘；各次秒数读取该报告。此项测量限于 SynthStrip，不作为完整 fMRI 流程耗时或等价性结论。 |
 
 ## Reference
 
