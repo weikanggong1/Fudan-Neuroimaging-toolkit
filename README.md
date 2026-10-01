@@ -39,7 +39,7 @@ CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹�
 | [SynthSR](docs/synthsr/README.md) | FreeSurfer `mri_synthsr` | 合成 1 mm T1w 图像。 |
 | [TorchFAST](docs/fast/README.md) | FSL `fast` | 三组织分割、部分体积分数与偏置场。 |
 | [FastVBM](docs/fast_vbm/README.md) | FSL `fslvbm` | 从 T1w 生成标准空间灰质、Jacobian 与调制灰质图；[全流程 benchmark](validation/fast_vbm/README.md)。 |
-| [segment_4_subregions](docs/subregions/README.md) | FreeSurfer `segment_subregions brainstem/thalamus/hippo-amygdala` | 一张 T1 完成脑干、双侧丘脑、海马和杏仁核分割，保存原网格标签、110 项硬/软体积及高分辨率结果；CPU/GPU 均支持。[完整 benchmark](validation/subregions/segment_4_subregions/stability_fix/README.md)：原始 T1 6.85 分钟，同阶段输入 8.90 分钟，同阶段丘脑细核官方加权 Dice 0.9605。 |
+| [segment_4_subregions](docs/subregions/README.md) | FreeSurfer `segment_subregions brainstem/thalamus/hippo-amygdala` | 一张 T1 完成脑干、双侧丘脑、海马和杏仁核分割，保存原网格标签、110 项硬/软体积及高分辨率结果；CPU/GPU 均支持。[完整 benchmark](validation/subregions/segment_4_subregions/raw_precision_analysis/README.md)：原始 T1 7.27 分钟，同阶段 7.89 分钟；原始 T1 丘脑细核官方加权 Dice 0.7758→0.9151，左/右海马 0.6785/0.6344→0.8332/0.7426。 |
 | [run_recon_all_python](docs/recon_all/README.md) | FreeSurfer `recon-all` | 从 T1w 生成脑分割、皮层表面、顶点指标与脑区统计。 |
 
 ### fMRI
@@ -160,9 +160,12 @@ flowchart TD
     T1[一张三维 T1] --> SS[一次共享 SynthSeg+]
     SS --> LABELS[粗结构标签及 DK 68 区皮层分区]
     LABELS --> WM[生成 wmparc 白质代理]
-    WM --> RECIPES[依次拟合脑干、丘脑及左右海马和杏仁核]
-    LABELS --> RECIPES
-    T1 --> RECIPES
+    T1 --> FAST[TorchFAST 校正与白质强度归一]
+    LABELS --> FAST
+    FAST --> GRID[自身头信息建立工作网格]
+    LABELS --> GRID
+    WM --> GRID
+    GRID --> RECIPES[依次拟合脑干、丘脑及左右海马和杏仁核]
     RECIPES --> MERGE[合并到输入 T1 网格]
     MERGE --> SAVE[保存标签、110 项体积及报告]
     RECIPES -. 可选 .-> HIGH[高分辨率标签和后验]

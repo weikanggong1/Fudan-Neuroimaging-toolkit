@@ -115,6 +115,9 @@ class GEMSRecipe:
     def __init__(self, name: str, directory: Path):
         self.name = name
         self.directory = Path(directory)
+        # Fine thalamic and hippocampal boundaries need objective decreases
+        # that survive scalar rounding and bounded, descending mesh steps.
+        self.stable_mesh_fitting = name == "thalamus" or name.startswith("hippo-amygdala-")
 
     def set_optimization_profile(self, profile: str) -> None:
         if profile not in ("fast", "balanced"):
@@ -238,7 +241,7 @@ class GEMSRecipe:
                 # subject affine and the high-resolution working-grid scaling.
                 alphas = smooth_atlas_alphas(smoothing_atlas, classes, sigma, device=device,
                                              cache=smoothing_cache,
-                                             stable_vertex_statistics=self.name == "thalamus")
+                                             stable_vertex_statistics=self.stable_mesh_fitting)
             if not sigma:
                 alphas = np.zeros((len(atlas.vertices), int(classes.max()) + 1), np.float32)
                 for channel, group in enumerate(classes):
@@ -262,13 +265,13 @@ class GEMSRecipe:
                 materialize_outputs=not synthetic and index == len(schedule) - 1,
                 mesh_sampling_stride=self.fast_mesh_sampling_stride if fast and not synthetic and sigma else 1,
                 owner_hint_enabled=fast and not synthetic,
-                # Stabilize thalamic synthetic and intensity fits: ordered gradient
-                # reductions and FP64 scalar optimizer state retain small
-                # Wolfe decreases. Images, vertices and gradients stay FP32.
-                double_data_cost_accumulation=(fast and not synthetic) or self.name == "thalamus",
-                stable_mesh_fitting=self.name == "thalamus",
-                precise_mesh_matrices=self.name == "thalamus",
-                mesh_line_search="backtracking" if self.name == "thalamus" else "strong_wolfe",
+                # Stable synthetic and intensity fits use ordered gradient
+                # reductions and FP64 scalar state to retain small objective
+                # decreases. Images, vertices and gradients stay FP32.
+                double_data_cost_accumulation=(fast and not synthetic) or self.stable_mesh_fitting,
+                stable_mesh_fitting=self.stable_mesh_fitting,
+                precise_mesh_matrices=self.stable_mesh_fitting,
+                mesh_line_search="backtracking" if self.stable_mesh_fitting else "strong_wolfe",
                 **stop_options)
             solver_finished = tick()
             atlas = atlas.with_vertices(result.vertices.detach().cpu().numpy())
@@ -280,6 +283,7 @@ class GEMSRecipe:
                 "block_size": block_size,
                 "resolution_mm": float(np.mean(np.linalg.norm(affine[:3, :3], axis=0))),
                 "alpha_sigma_voxels": sigma,
+                "stable_vertex_statistics": self.stable_mesh_fitting and bool(sigma),
                 "alpha_sigma_mm": sigma * float(np.mean(
                     np.linalg.norm(affine[:3, :3], axis=0))),
                 "outer_iteration_limit": 1 if synthetic else iterations,
@@ -332,12 +336,15 @@ class GEMSRecipe:
         report["mesh_iterations_per_outer"] = mesh_steps
         report["em_iterations_per_outer"] = self.em_iterations
         report["alpha_smoothing"] = "transformed_reference_mesh"
+        report["stable_mesh_fitting"] = self.stable_mesh_fitting
+        report["precise_mesh_matrices"] = self.stable_mesh_fitting
+        report["mesh_line_search"] = "backtracking" if self.stable_mesh_fitting else "strong_wolfe"
         report["mesh_sampling_strides"] = [
             self.fast_mesh_sampling_stride if self.optimization_profile == "fast" and sigma else 1
             for sigma, _ in schedule]
         report["owner_hint_enabled"] = self.optimization_profile == "fast"
         report["data_cost_accumulation"] = (
-            "float64" if self.optimization_profile == "fast" else "float32")
+            "float64" if self.optimization_profile == "fast" or self.stable_mesh_fitting else "float32")
         if self.optimization_profile == "fast":
             report["deformation_stop_voxels"] = 0.005
             report["cost_stop_patience"] = 3

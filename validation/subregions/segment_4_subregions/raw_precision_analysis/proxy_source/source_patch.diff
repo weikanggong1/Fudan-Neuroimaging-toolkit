@@ -1,0 +1,111 @@
+diff --git a/src/fnit/gems/context.py b/src/fnit/gems/context.py
+index 3bd92fb..45b92a7 100644
+--- a/src/fnit/gems/context.py
++++ b/src/fnit/gems/context.py
+@@ -27,21 +27,23 @@ def _native_labels(value, image: nib.spatialimages.SpatialImage, name: str) -> n
+ def build_wmparc_proxy(coarse: np.ndarray, cortical: np.ndarray, *,
+                        voxel_sizes: tuple[float, float, float] = (1, 1, 1),
+                        max_distance_mm: float = 15) -> np.ndarray:
+-    """Assign nearby DKT temporal parcels to white matter within each hemisphere.
++    """Assign nearby DKT cortical parcels to white matter in each hemisphere.
+ 
+     FreeSurfer's hippocampal intensity prior samples WM labels 3006, 3007,
+     3016 and the corresponding right-side 4000-series labels. The other
+-    wmparc labels retain their coarse anatomical identity.
++    same-side parcels compete for the nearest cortex. White matter beyond
++    ``max_distance_mm`` retains its coarse anatomical identity.
+     """
+     coarse = np.asarray(coarse)
+     cortical = np.asarray(cortical)
+     if coarse.ndim != 3 or cortical.shape != coarse.shape:
+         raise ValueError("coarse and cortical labels must share a 3-D grid")
+     proxy = coarse.astype(np.int32, copy=True)
+-    for wm_id, source_ids, offset in ((2, (1006, 1007, 1016), 2000),
+-                                      (41, (2006, 2007, 2016), 2000)):
++    for wm_id, lower, upper in ((2, 1000, 2000), (41, 2000, 3000)):
+         wm = coarse == wm_id
+-        source = np.isin(cortical, source_ids)
++        # Exclude each hemisphere's Unknown label (1000/2000). Restricting
++        # sources to temporal parcels lets them claim nearer non-temporal WM.
++        source = (cortical > lower) & (cortical < upper)
+         if not wm.any() or not source.any():
+             continue
+         low = np.maximum(np.argwhere(wm | source).min(0) - 1, 0)
+@@ -49,7 +51,7 @@ def build_wmparc_proxy(coarse: np.ndarray, cortical: np.ndarray, *,
+         crop = tuple(slice(int(a), int(b)) for a, b in zip(low, high))
+         distance, nearest = ndimage.distance_transform_edt(
+             ~source[crop], sampling=voxel_sizes, return_indices=True)
+-        propagated = cortical[crop][tuple(nearest)] + offset
++        propagated = cortical[crop][tuple(nearest)] + 2000
+         local = proxy[crop]
+         selected = wm[crop] & (distance <= max_distance_mm)
+         local[selected] = propagated[selected]
+diff --git a/src/fnit/gems/recipes/base.py b/src/fnit/gems/recipes/base.py
+index 44e27e0..a3bb5f5 100644
+--- a/src/fnit/gems/recipes/base.py
++++ b/src/fnit/gems/recipes/base.py
+@@ -115,6 +115,9 @@ class GEMSRecipe:
+     def __init__(self, name: str, directory: Path):
+         self.name = name
+         self.directory = Path(directory)
++        # Validation may opt a single recipe into the tested stable path.
++        # Production defaults retain the existing structure-specific behavior.
++        self.stable_mesh_fitting = name == "thalamus"
+ 
+     def set_optimization_profile(self, profile: str) -> None:
+         if profile not in ("fast", "balanced"):
+@@ -238,7 +241,7 @@ class GEMSRecipe:
+                 # subject affine and the high-resolution working-grid scaling.
+                 alphas = smooth_atlas_alphas(smoothing_atlas, classes, sigma, device=device,
+                                              cache=smoothing_cache,
+-                                             stable_vertex_statistics=self.name == "thalamus")
++                                             stable_vertex_statistics=self.stable_mesh_fitting)
+             if not sigma:
+                 alphas = np.zeros((len(atlas.vertices), int(classes.max()) + 1), np.float32)
+                 for channel, group in enumerate(classes):
+@@ -262,13 +265,13 @@ class GEMSRecipe:
+                 materialize_outputs=not synthetic and index == len(schedule) - 1,
+                 mesh_sampling_stride=self.fast_mesh_sampling_stride if fast and not synthetic and sigma else 1,
+                 owner_hint_enabled=fast and not synthetic,
+-                # Stabilize thalamic synthetic and intensity fits: ordered gradient
+-                # reductions and FP64 scalar optimizer state retain small
+-                # Wolfe decreases. Images, vertices and gradients stay FP32.
+-                double_data_cost_accumulation=(fast and not synthetic) or self.name == "thalamus",
+-                stable_mesh_fitting=self.name == "thalamus",
+-                precise_mesh_matrices=self.name == "thalamus",
+-                mesh_line_search="backtracking" if self.name == "thalamus" else "strong_wolfe",
++                # Stable synthetic and intensity fits use ordered gradient
++                # reductions and FP64 scalar state to retain small objective
++                # decreases. Images, vertices and gradients stay FP32.
++                double_data_cost_accumulation=(fast and not synthetic) or self.stable_mesh_fitting,
++                stable_mesh_fitting=self.stable_mesh_fitting,
++                precise_mesh_matrices=self.stable_mesh_fitting,
++                mesh_line_search="backtracking" if self.stable_mesh_fitting else "strong_wolfe",
+                 **stop_options)
+             solver_finished = tick()
+             atlas = atlas.with_vertices(result.vertices.detach().cpu().numpy())
+@@ -280,6 +283,7 @@ class GEMSRecipe:
+                 "block_size": block_size,
+                 "resolution_mm": float(np.mean(np.linalg.norm(affine[:3, :3], axis=0))),
+                 "alpha_sigma_voxels": sigma,
++                "stable_vertex_statistics": self.stable_mesh_fitting and bool(sigma),
+                 "alpha_sigma_mm": sigma * float(np.mean(
+                     np.linalg.norm(affine[:3, :3], axis=0))),
+                 "outer_iteration_limit": 1 if synthetic else iterations,
+@@ -332,12 +336,15 @@ class GEMSRecipe:
+         report["mesh_iterations_per_outer"] = mesh_steps
+         report["em_iterations_per_outer"] = self.em_iterations
+         report["alpha_smoothing"] = "transformed_reference_mesh"
++        report["stable_mesh_fitting"] = self.stable_mesh_fitting
++        report["precise_mesh_matrices"] = self.stable_mesh_fitting
++        report["mesh_line_search"] = "backtracking" if self.stable_mesh_fitting else "strong_wolfe"
+         report["mesh_sampling_strides"] = [
+             self.fast_mesh_sampling_stride if self.optimization_profile == "fast" and sigma else 1
+             for sigma, _ in schedule]
+         report["owner_hint_enabled"] = self.optimization_profile == "fast"
+         report["data_cost_accumulation"] = (
+-            "float64" if self.optimization_profile == "fast" else "float32")
++            "float64" if self.optimization_profile == "fast" or self.stable_mesh_fitting else "float32")
+         if self.optimization_profile == "fast":
+             report["deformation_stop_voxels"] = 0.005
+             report["cost_stop_patience"] = 3

@@ -1,6 +1,6 @@
 # 四类脑亚区分割：`segment_4_subregions`
 
-[返回首页](../../README.md) · [真实数据验证](../../validation/subregions/README.md) · [完整 benchmark](../../validation/subregions/segment_4_subregions/README.md)
+[返回首页](../../README.md) · [真实数据验证](../../validation/subregions/README.md) · [完整 benchmark](../../validation/subregions/segment_4_subregions/raw_precision_analysis/README.md)
 
 输入一张三维 T1，一次完成脑干、双侧丘脑、双侧海马和杏仁核分割。返回与输入 T1 **形状和 affine 相同**的 `int32` 标签图，以及标签表、硬体积、软体积和各结构的高分辨率结果；设置 `output_dir` 后自动保存。默认全部结构共有 **110 项亚区统计**，其中某些小亚区在原始 T1 网格上可能没有硬标签体素。
 
@@ -8,25 +8,25 @@
 
 ## 从一张 T1 到完整结果
 
-默认 `structures="all"` 时，共享一次 SynthSeg+，取得粗结构标签和 Desikan–Killiany（DK）68 区皮层分区。将邻近的颞叶皮层标签限定在同侧白质内传播，生成海马强度模型需要的 `wmparc` 代理。随后依次拟合脑干、丘脑、左侧海马/杏仁核和右侧海马/杏仁核；每项完成后将详细结果移到 CPU，再处理下一项。
+默认 `structures="all"` 时，共享一次 SynthSeg+，取得粗结构标签和 Desikan–Killiany（DK）68 区皮层分区。全部同侧皮层分区在同侧白质内竞争最近邻，生成海马强度模型需要的 `wmparc` 代理。自动粗分割后复用 TorchFAST 校正偏置场，将侵蚀白质的强度中位数归一到 110，并从 T1 自身头信息生成 1 mm 冠状工作网格。随后依次拟合四项结构；每项完成后将详细结果移到 CPU，再处理下一项。
 
 ```mermaid
 flowchart TD
     T1[一张三维 T1] --> SS[一次共享 SynthSeg+]
     SS --> COARSE[粗结构标签]
     SS --> DK[DK 68 区皮层分区]
-    COARSE --> WM[同侧白质内传播：wmparc 代理]
+    COARSE --> WM[全部同侧皮层竞争：wmparc 代理]
     DK --> WM
-    COARSE --> BS[脑干 recipe]
-    COARSE --> TH[双侧丘脑 recipe]
-    COARSE --> HL[左侧海马和杏仁核 recipe]
-    COARSE --> HR[右侧海马和杏仁核 recipe]
-    WM --> HL
-    WM --> HR
-    T1 --> BS
-    T1 --> TH
-    T1 --> HL
-    T1 --> HR
+    T1 --> FAST[TorchFAST 偏置场校正]
+    COARSE --> FAST
+    FAST --> SCALE[侵蚀白质强度中位数归一到 110]
+    SCALE --> GRID[由原始头信息生成 1 mm 工作网格]
+    COARSE --> GRID
+    WM --> GRID
+    GRID --> BS[脑干 recipe]
+    GRID --> TH[双侧丘脑 recipe]
+    GRID --> HL[左侧海马和杏仁核 recipe]
+    GRID --> HR[右侧海马和杏仁核 recipe]
     BS --> MERGE[重采样并按结构合并到输入 T1 网格]
     TH --> MERGE
     HL --> MERGE
@@ -40,9 +40,9 @@ flowchart TD
     HIGH --> SAVE
 ```
 
-丘脑在 0.5 mm、海马/杏仁核在约 0.333 mm 工作网格上拟合。合并前先限制各图谱所属的粗结构范围，仅在支持区域重叠时比较后验置信度；主标签以最近邻重采样回输入 T1 网格。图中四个 recipe 表示数据流，实际依次运行。
+丘脑在 0.5 mm、海马/杏仁核在约 0.333 mm 网格上拟合。各结构先生成处理网格标签并执行支持范围筛选，再将标签、置信度和支持掩膜以最近邻共同映射到原始 T1，按重叠处的置信度合并；硬体积按原始 T1 的体素体积统计。这沿用官方标准标签输出的网格顺序。平均体素间距小于 0.99 mm 的输入保留高分辨率网格；侵蚀白质正样本不足 100 个时保留输入并在报告中记录原因。图中四个 recipe 表示数据流，实际依次运行。
 
-已有同网格的粗标签、皮层分区或 `wmparc` 可直接传入，减少自动预处理。只选脑干或丘脑且未提供粗标签时，使用一次 SynthSeg；提供全部所需标签后不再运行模型。
+已有同网格的粗标签、皮层分区或 `wmparc` 可直接传入。提供 `coarse_segmentation` 时按已准备的 T1 直接拟合，跳过自动强度校正和 1 mm 网格准备；官方同阶段对照传入 `norm/aseg/wmparc`。只选脑干或丘脑且未提供粗标签时，使用一次 SynthSeg；提供全部所需标签后不再运行模型。
 
 ## Python 调用、输入输出与参数
 
@@ -79,8 +79,8 @@ print(native_label_path)
 | `t1` | 必填 | 原始三维 T1 路径或 Nibabel 图像。无需预先执行 `recon-all`。 |
 | `atlas_root` | `None` | 图谱根目录。省略时使用 FNIT 缓存，缺失时按资源清单下载并准备。 |
 | `structures` | `"all"` | 可选 `"brainstem"`、`"thalamus"`、`"hippo-amygdala-left"`、`"hippo-amygdala-right"`，或这些名称的列表；`"hippo-amygdala"` 同时选择左右两侧。默认运行全部四项。 |
-| `coarse_segmentation` | `None` | 同 T1 网格的 `aseg` 或 SynthSeg 粗标签；可为路径、Nibabel 图像或三维数组。省略时自动生成。 |
-| `cortical_parcellation` | `None` | 同 T1 网格的 DK 皮层标签，支持路径、Nibabel 图像或三维数组。白质代理使用左侧 1006、1007、1016 和右侧 2006、2007、2016 编码；省略且需要代理时由 SynthSeg+ 生成。 |
+| `coarse_segmentation` | `None` | 同 T1 网格的 `aseg` 或 SynthSeg 粗标签；可为路径、Nibabel 图像或三维数组。省略时自动生成并执行强度与工作网格准备；提供时直接使用已准备的 T1。 |
+| `cortical_parcellation` | `None` | 同 T1 网格的 DK 皮层标签，支持路径、Nibabel 图像或三维数组。全部同侧 DK 标签竞争生成白质代理；海马强度模型从对应颞叶白质 3006/3007/3016 及右侧 4006/4007/4016 取样。省略且需要代理时由 SynthSeg+ 生成。 |
 | `wmparc` | `None` | 同 T1 网格的白质分区，支持路径、Nibabel 图像或三维数组。提供时海马强度模型直接使用，不再生成白质代理。 |
 | `synthseg_weights` | `None` | SynthSeg 模型权重文件或目录。省略时解析 FNIT 权重配置，并在需要时下载和校验。 |
 | `synthseg_parc_weights` | `None` | SynthSeg+ 皮层分区权重文件或目录；仅在需要自动皮层分区时读取。 |
@@ -97,7 +97,7 @@ print(native_label_path)
 
 `subregion_result.labels` 是原 T1 网格的 Nibabel 标签图。`label_table` 为 `{标签 ID: 名称}`；`label_metadata` 增加所属结构、图谱家族和半球。右侧海马/杏仁核标签采用原 ID 加 10000，避免左右冲突。
 
-`subregion_result.volumes[标签 ID]` 包含 `hard_volume_mm3`（原 T1 网格硬标签体积）和 `soft_volume_mm3`（工作网格后验积分），单位均为 mm³。`confidence` 为原网格所选标签的后验置信度，`structure_results` 保存各结构的高分辨率标签、后验、网格及 affine。`initialization` 记录共享预处理来源、模型调用次数、结构拟合、耗时和 GPU 峰值。
+`subregion_result.volumes[标签 ID]` 包含 `hard_volume_mm3`（原 T1 网格硬标签体积）和 `soft_volume_mm3`（工作网格后验积分），单位均为 mm³。`confidence` 为拟合最大后验插值到处理网格后的置信度，再随标签以最近邻回到原始网格；它用于结构重叠处的选择。`structure_results` 保存各结构的高分辨率标签、后验、网格及 affine。`initialization` 记录共享预处理来源、模型调用次数、偏置与归一化参数、结构拟合、耗时和 GPU 峰值。
 
 设置 `output_dir` 后生成：
 
@@ -120,13 +120,15 @@ sub-01_subregions/
 
 | 配置 | `fast`（默认） | `balanced` |
 |---|---|---|
-| 每轮网格更新上限 | 20 | 30 |
+| 丘脑、海马/杏仁核强度拟合：每个外层迭代的网格更新上限 | 20 | 30 |
 | 丘脑网格数据项 | 非零平滑阶段使用四分之一加权空间采样，最后阶段使用全部有效体素 | 各阶段使用全部有效体素 |
 | 海马/杏仁核网格数据项 | 各阶段使用全部有效体素 | 各阶段使用全部有效体素 |
 | Gaussian EM 与最终标签、后验 | 完整工作网格 | 完整工作网格 |
 | 停止条件 | 速度优先 | 更严格 |
 
 图谱先验平滑、部分容积模拟、Gaussian EM 和网格拟合支持 GPU，默认环境已包含所需依赖。图谱加载、裁剪、三次插值、部分形态学、白质标签传播和最终 Nibabel 重采样仍在 CPU；阶段控制和线搜索也包含 CPU 判断及 GPU 同步。整例时间包含这些步骤。实现与逐组件耗时见 [TorchGEMS](../../src/fnit/gems/core.py)及 [GPU 组件验证](../../validation/subregions/speed_v16/layout_components/README.md)。
+
+合成标签拟合按各结构的阶段预算运行，脑干采用其独立配置；上表的 20/30 上限对应丘脑和海马/杏仁核的强度拟合。
 
 海马部分容积准备修复了 NumPy 组织均值直接赋给 PyTorch 掩膜张量的兼容问题，均值与统计规则保留；测试覆盖薄结构分支。
 
@@ -174,161 +176,135 @@ segment_subregions hippo-amygdala --cross fs_sub01 --sd /absolute/path/subjects 
 
 ## 最新精度、运行时间与脑图
 
-2026-10-01，使用一例公开去面部 T1 验证：共享 H100、4 个 CPU 线程、FP32/TF32、默认 `fast`。整例运行包括全部四项结构及 110 项硬/软体积；相同阶段验证读取官方流程的 `norm/aseg/wmparc`。输入和源码均记录 SHA-256，详细记录见[完整 benchmark](../../validation/subregions/segment_4_subregions/README.md)。
+2026-10-02，使用同一例公开去面部 T1 完成两次四结构整例验收：共享 H100、4 个 CPU 线程、FP32/TF32、默认 `optimization="fast"`。原始输入及五个模型按大小、SHA-256 核验；本进程显存上限为 19,073 MiB。该例来自 OpenNeuro ds000114，许可 CC0，见[数据来源](../../examples/data/SOURCES.json)。
 
-### 指标与计时范围
+**同阶段**输入为保存的官方 `norm/aseg/wmparc`；**原始 T1**由 FNIT 内部完成一次 SynthSeg+、TorchFAST、白质归一化、工作网格准备和全部拟合。两者均使用已保存的 FreeSurfer 8.2 细标签验证。raw 参考从官方标准 1 mm `FSvoxelSpace` 标签以最近邻映射到输入网格。
 
-官方标签先以最近邻重采样到 FNIT 输出网格，再按**细标签 ID**比较。两张图至少一方有体素的非零标签参与硬标签评价；双方均为空的标签不记为通过，仍保留软体积统计。
+### 完整流程耗时
 
-| 指标 | 定义 |
-|---|---|
-| 单标签 Dice | `2 × 交集体素数 / (官方体素数 + FNIT 体素数)`。 |
-| 细标签 Dice 均值 | 各可评估细标签 Dice 的算术平均，每个标签权重相同。 |
-| 官方参考体素加权 Dice | `sum(官方标签体素数 × 标签 Dice) / sum(官方标签体素数)`。大标签权重更高；按六个家族和全部标签分别报告。 |
-| 严格通过数 / 分母 | 分母为可评估细标签数；通过需同时满足 `Dice ≥ 0.95` 和硬体积相对官方误差 `≤ 5%`。官方该标签为空、FNIT 非空时计入分母但不通过。 |
-| 家族前景 Dice | 将某一家族全部细标签合并为一个掩膜后计算，只描述外部轮廓；不用于替代细标签指标。 |
+| 输入 | 计算 | API 含保存 | 进程 wall | PyTorch 峰值 / 本进程显存采样峰值 |
+|---|---:|---:|---:|---:|
+| 原始 T1 | 436.34 s（7.27 min） | 436.87 s | 461.45 s | 15.47 GiB / 16,468 MiB |
+| 同阶段输入 | 473.20 s（7.89 min） | 473.78 s | 515.74 s | 5.01 GiB / 9,728 MiB |
 
-计算时间含读入、共享预处理、拟合和合并；API 时间另含自动保存，进程总墙钟再包括导入、CUDA 初始化与 API 外对照。PyTorch 峰值为分配器统计，本进程显存峰值来自定期采样；共享 GPU 的其他任务记录在负载日志中。主表只采用通过完整原始 T1、同阶段四结构验收的候选结果，局部试验记入下方更新记录。
+计算包括共享预处理、全部拟合和合并；API 另含保存，进程 wall 还含 Python 导入、CUDA 初始化和验证记录。首次资源下载、图谱安装与独立官方程序运行不计入。共享 GPU 负载随记录保存。完整 FNIT CPU 整例及本轮官方 CPU 总流程未重新测量；历史官方细分割合计 30.70 分钟，不含 `recon-all`，见[固定历史记录](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/blob/5250aa540bb6e3b1fda7d7a596c42b39006da14d/validation/subregions/unified.md#L212)。
 
-### 丘脑数值稳定与回溯线搜索
+### 细标签精度：更新前后
 
-入口整合后，同阶段丘脑细核的官方体素加权 Dice 曾从 v16 C6 的 0.964068 降为 0.910995。最早差异出现在 GEMS 合成标签拟合：窄 Gaussian 模型产生较大的总代价，FP32 汇总会舍入微小下降量，使 L-BFGS 线搜索和停止位置对数值扰动敏感。
+Dice 均值按可评价细标签计算；**加权 Dice**以每项官方体素数加权。双方硬标签均空记为 `both_empty`，不计 Dice 1、不计通过。严格通过要求 Dice ≥0.95 且硬体积相对误差 ≤5%。不同输入网格的标签数、参考体素数分别列出。
 
-本次修复同时控制**丘脑合成标签与强度拟合**的数值归约和线搜索：
+**同阶段输入**
 
-- 图谱平滑的顶点统计按固定顺序用 FP64 汇总，再转回 FP32；按参考网格复用归约布局。
-- 数据项和形变先验的总代价用 FP64 汇总；L-BFGS 内部方向、历史和线搜索运算使用 FP64。
-- 融合数据项与网格几何的顶点贡献按固定顺序用 FP64 归约，再写入 FP32 顶点梯度。
-- 在丘脑目标函数与梯度计算期间暂用完整 FP32 矩阵精度，结束或报错后恢复原 TF32 设置。CUDA 小网格契约检查发现，TF32 可使近恒等形变的解析梯度与高精度目标函数导数产生差异；该检查用于核对数学实现，不计作真实数据 benchmark。
-- 原生 Armijo L-BFGS 每个顶点一次最多移动 0.5 个工作体素，以实际 FP32 位移计算下降判据和曲率。不满足下降、非有限代价或梯度、非正 Jacobian 的试探被拒绝，步长减半，最多 20 次；无有效步时恢复接受位置、梯度与缓存。非下降方向清除历史后使用负梯度。
-
-这些修复仅在丘脑拟合中启用；影像、网格顶点和 Gaussian 参数保持 FP32，网络预处理、图谱平滑和其他 recipe 保留默认 TF32。体素采样、owner hint、工作网格、平滑与迭代上限保留，没有新增依赖，`segment_4_subregions` 的参数和输出结构一致。验收依据实际原生 CUDA 融合路径的重复结果及完整流程对照，分别报告重复性与官方细标签指标。
-
-同阶段单丘脑验证覆盖 **44 个细标签、10,123 个官方参考体素**。[回溯修复版两次运行](../../validation/subregions/segment_4_subregions/stability_fix/c6_runs/summary.json)均得到细标签 Dice 均值 **0.910199**、官方参考体素加权 Dice **0.961959**；原网格标签相差 **0 个体素**。六个拟合阶段的先验概率、初始/最终顶点、Gaussian 参数、拓扑与代价历史也逐比特一致。相对入口回退，加权 Dice 提高 **0.050964**；相对 v16 C6 仍低 **0.002109**。该重复结果描述本例丘脑的稳定性，与官方仍有细标签差异。
-
-完整验收使用冻结源码 `source_thalamus_backtracking_final_20261001`，443 个源码文件及实际加载模块均与清单匹配。原网格输出保持输入 shape/affine，标签为 `int32`；四项结构的工作网格、110 项硬/软体积及正 Jacobian 检查均通过。来源和逐标签结果见[最终修复 benchmark](../../validation/subregions/segment_4_subregions/stability_fix/README.md)。
-
-### 完整运行耗时与显存
-
-| 输入范围 | 计算 | API 含保存 | 进程总墙钟 | PyTorch 分配峰值 | 本进程显存采样峰值 |
+| 家族 | 更新前加权 Dice | 最新 Dice 均值 | 最新加权 Dice | 严格通过 / 标签数 | 官方体素数 |
 |---|---:|---:|---:|---:|---:|
-| 官方同阶段输入 | 533.773 s（8.90 min） | 534.373 s | 578.304 s | 4.91 GiB | 9,718 MiB |
-| 原始 T1 全流程 | 410.721 s（6.85 min） | 411.237 s | 435.155 s | 15.47 GiB | 18,930 MiB |
+| 脑干 | 0.991306 | 0.983071 | 0.991383 | 4/4 | 19,808 |
+| 丘脑细核 | 0.960523 | 0.908711 | 0.960579 | 17/44 | 10,123 |
+| 左海马 | 0.870763 | 0.875067 | 0.888019 | 2/19 | 3,067 |
+| 右海马 | 0.813436 | 0.814221 | 0.844525 | 1/19 | 3,058 |
+| 左杏仁核 | 0.941614 | 0.859103 | 0.948179 | 2/9 | 1,371 |
+| 右杏仁核 | 0.917690 | 0.719640 | 0.934494 | 1/9 | 1,285 |
+| 全部细标签 | 0.955452 | 0.867507 | 0.960119 | 27/104 | 38,712 |
 
-两种输入的完整计算、API 与本次进程总墙钟均在 10 分钟内。首次资源下载、图谱安装和独立官方程序运行不计入。完整 FNIT CPU 整例尚未测量；官方完整 CPU 阶段本次尚未重测，目前直接核验的[官方计时证据](../../validation/subregions/segment_4_subregions/stability_fix/official_timing_evidence/audit.json)为脑干 240.10 s，未据此推算整例速度比。
+**原始 T1 全流程**
 
-### 官方细标签精度：同阶段输入
-
-FNIT 读取官方的同一组 `norm/aseg/wmparc`，对应[同阶段完整结果](../../validation/subregions/segment_4_subregions/stability_fix/full_stage/summary.json)。丘脑加权 Dice 从入口整合的 **0.910995** 提高到 **0.960523**，接近 v16 C6 的 **0.964068**；严格通过由 **2/44** 变为 **17/44**，v16 C6 为 **19/44**。全部六族均按细标签 ID 比较：
-
-| 家族 | 参与细标签数 | Dice 均值 | 官方体素加权 Dice | 严格通过数 / 分母 | 官方参考体素数 |
+| 家族 | 更新前加权 Dice | 最新 Dice 均值 | 最新加权 Dice | 严格通过 / 标签数 | 官方体素数 |
 |---|---:|---:|---:|---:|---:|
-| 脑干 | 4 | 0.983000 | 0.991306 | 4/4 | 19,808 |
-| 丘脑细核 | 44 | 0.908637 | 0.960523 | 17/44 | 10,123 |
-| 左海马 | 19 | 0.848035 | 0.870763 | 1/19 | 3,067 |
-| 右海马 | 19 | 0.773765 | 0.813436 | 0/19 | 3,058 |
-| 左杏仁核 | 9 | 0.862876 | 0.941614 | 3/9 | 1,371 |
-| 右杏仁核 | 9 | 0.646729 | 0.917690 | 1/9 | 1,285 |
-| 全部可评估细标签 | 104 | 0.849160 | 0.955452 | 26/104 | 38,712 |
+| 脑干 | 0.924751 | 0.913015 | 0.945839 | 1/4 | 15,305 |
+| 丘脑细核 | 0.775793 | 0.832364 | 0.915134 | 1/44 | 7,793 |
+| 左海马 | 0.678531 | 0.815151 | 0.833178 | 0/19 | 2,362 |
+| 右海马 | 0.634352 | 0.729646 | 0.742617 | 0/19 | 2,363 |
+| 左杏仁核 | 0.790483 | 0.788915 | 0.914368 | 1/9 | 1,052 |
+| 右杏仁核 | 0.760340 | 0.635829 | 0.872840 | 0/9 | 969 |
+| 全部细标签 | 0.833303 | 0.792788 | 0.909335 | 3/104 | 29,844 |
 
-丘脑 50 项软体积中，45 项相对官方误差在 5% 内。上述完整流程的丘脑输出与单丘脑重复结果相差 29 个标签体素；完整流程采用自己的精度指标，不将单丘脑重复一致性扩展为所有结构的逐比特一致性。与官方仍有逐核差异。
+逐标签硬/软体积及空标签记录见[同阶段表](../../validation/subregions/segment_4_subregions/raw_precision_analysis/final_full_stage/comparison.tsv)和[raw 表](../../validation/subregions/segment_4_subregions/raw_precision_analysis/final_full_raw/comparison.tsv)；[完整汇总](../../validation/subregions/segment_4_subregions/raw_precision_analysis/benchmark_summary.json)保留更新前后指标。两次输出与原 T1 的 shape/affine 一致，110 项软体积均有限且非负，硬体积与最终标签计数一致，四个最终最小 Jacobian 均为正。
 
-### 官方细标签精度：原始 T1 全流程
+### 低 Dice 脑区、原因与修复
 
-FNIT 从原始 T1 自动准备粗标签与皮层分区，对应[原始 T1 完整结果](../../validation/subregions/segment_4_subregions/stability_fix/full_raw/summary.json)。它包含 FNIT 自动预处理与官方 `recon-all` 预处理的差异，细标签一致性低于同阶段输入。原始 T1 的丘脑加权 Dice 为 **0.775793**，修复前为 **0.776716**；本次修复主要恢复了同阶段丘脑拟合。
+1. **右 CA3-body、DG-head/body 和 parasubiculum**：差异在官方原始高分辨率网格上仍存在。旧海马拟合在非零梯度时出现零位移与过早停止；将已验证的丘脑稳定拟合复用到双侧海马，保留 FP32 影像与顶点，使用固定顺序归约、FP64 代价/优化器状态、精确小矩阵和有界 Armijo 回溯。
+2. **原始 T1 的丘脑与海马**：仅替换 coarse 或全局缩放收益很小。自动流程增加原生 TorchFAST 偏置校正、侵蚀白质中位数 110 归一化及由自身头信息建立的 1 mm 网格，校准强度与拟合尺度。
+3. **海马白质先验范围**：旧代理只让三个颞叶皮层标签传播，吸收了大量其他区域白质。改为全部同侧 DK 皮层竞争；目标白质掩膜与官方 Dice 从约 0.26 提升到 0.75–0.77。右侧匹配消融显示细分割收益较小，主要修复样本归属。
+4. **小核输出采样**：直接从 HR 回 raw 会改变标准类别图的边界。CPU 核查发现同一份丘脑 HR 标签、六阶段轨迹完全相同，标准 1 mm 导出与直接导出在 raw 上相差 1774 体素。最终保留标准类别图的导出顺序，标签、置信度、支持范围共同最近邻回原图；脑干 HR 标签同步应用连通块、支持范围和正置信度过滤。
+5. **Medial、AAA 等极小标签**：官方 Medial 在 1 mm 上仅有 3 体素，采样会显著影响 Dice。右 AAA 的官方硬标签接近空，但官方与 FNIT 软体积接近；保留硬标签差异及软体积，不人为清零来匹配。
 
-| 家族 | 参与细标签数 | Dice 均值 | 官方体素加权 Dice | 严格通过数 / 分母 | 官方参考体素数 |
-|---|---:|---:|---:|---:|---:|
-| 脑干 | 4 | 0.882705 | 0.924751 | 0/4 | 15,305 |
-| 丘脑细核 | 46 | 0.630122 | 0.775793 | 0/46 | 7,793 |
-| 左海马 | 19 | 0.639700 | 0.678531 | 0/19 | 2,362 |
-| 右海马 | 19 | 0.595625 | 0.634352 | 0/19 | 2,363 |
-| 左杏仁核 | 9 | 0.582631 | 0.790483 | 0/9 | 1,052 |
-| 右杏仁核 | 9 | 0.413409 | 0.760340 | 0/9 | 969 |
-| 全部可评估细标签 | 106 | 0.612754 | 0.833303 | 0/106 | 29,844 |
+在固定官方高分辨率轴向和网格相位的独立对照中，raw 丘脑加权 Dice 从 **0.816515 提升到 0.919802**；左、右海马从 **0.767438 / 0.726164 提升到 0.840265 / 0.771970**。同阶段右海马为 **0.820684→0.868862**。细网格也出现改善，但左 AAA、左 Medial 等标签仍有局部回退；[HR 前后对照](../../validation/subregions/segment_4_subregions/raw_precision_analysis/highres_before_after.json)保留共同分母及逐区结果。
 
-原始 T1 的丘脑实际可评估标签为 **46 个**，与旧结果共同可评估的标签为 45 个；均值与严格通过分母使用当前的 46 个，参考体素为 7,793。丘脑 50 项软体积中，14 项相对官方误差在 5% 内。两种输入分别使用各自输出网格，最近邻重采样后的参考体素数不同。
+下表使用最新**完整同阶段流程**，展示优化前低 Dice 区域：
+
+| 右侧区域 | 官方体素数 | 更新前 Dice | 最新 Dice |
+|---|---:|---:|---:|
+| CA3-body | 81 | 0.51648 | 0.65116 |
+| GC-ML-DG-head | 151 | 0.61745 | 0.68243 |
+| parasubiculum | 35 | 0.59155 | 0.68571 |
+| GC-ML-DG-body | 108 | 0.71681 | 0.75117 |
+| Medial | 3 | 0.00000 | 0.50000 |
+| Cortical | 15 | 0.71429 | 0.70968 |
+
+同一人的单右侧同阶段 `balanced` 试验，海马加权 Dice 为 **0.888699**，计算 175.09 s；该配置改善多个低 Dice 区域，但 raw 上不保证逐区改善。单结构结果与完整流程分别报告，见[消融分析、HR 对照及采样审计](../../validation/subregions/segment_4_subregions/raw_precision_analysis/README.md)。默认配置仍为 `fast`。
 
 ### 软体积与官方对照
 
-软体积为工作网格后验积分。下面按标签报告 `abs(FNIT − 官方) / 官方` 的平均值及误差在 5% 内的项数；即使原网格硬标签为空，仍可评价其软体积。逐标签硬体积、软体积及相对误差见 [同阶段表](../../validation/subregions/segment_4_subregions/stability_fix/full_stage/comparison.tsv)与[原始 T1 表](../../validation/subregions/segment_4_subregions/stability_fix/full_raw/comparison.tsv)。
+软体积为细网格后验积分。下面按每个标签计算绝对相对误差，再取平均；双方硬标签均空的标签仍参与软体积比较。
 
-| 家族 | 同阶段平均绝对相对误差 | 同阶段误差 ≤5% | 原始 T1 平均绝对相对误差 | 原始 T1 误差 ≤5% |
-|---|---:|---:|---:|---:|
-| 脑干 | 1.00% | 4/4 | 6.95% | 2/4 |
-| 丘脑细核 | 2.67% | 45/50 | 11.83% | 14/50 |
-| 左海马 | 3.84% | 14/19 | 7.66% | 9/19 |
-| 右海马 | 4.54% | 10/19 | 6.74% | 6/19 |
-| 左杏仁核 | 2.70% | 8/9 | 18.36% | 3/9 |
-| 右杏仁核 | 4.73% | 6/9 | 14.30% | 2/9 |
+| 家族 | 同阶段平均误差 / ≤5% 项数 | raw 平均误差 / ≤5% 项数 |
+|---|---:|---:|
+| 脑干 | 0.99% / 4/4 | 6.28% / 2/4 |
+| 丘脑细核 | 2.67% / 45/50 | 5.82% / 30/50 |
+| 左海马 | 2.82% / 17/19 | 5.13% / 9/19 |
+| 右海马 | 2.14% / 19/19 | 3.99% / 12/19 |
+| 左杏仁核 | 2.41% / 8/9 | 10.86% / 3/9 |
+| 右杏仁核 | 3.48% / 6/9 | 5.38% / 6/9 |
 
 ### 内部阶段时间
 
-| 内部阶段 | 同阶段输入 | 原始 T1 |
+| 阶段 | 同阶段 | 原始 T1 |
 |---|---:|---:|
-| 脑干 | 33.694 s | 26.406 s |
-| 丘脑 | 138.605 s | 123.094 s |
-| 左海马与杏仁核 | 207.614 s | 109.922 s |
-| 右海马与杏仁核 | 141.733 s | 130.476 s |
-| 结构外读入、共享预处理、合并等 | 12.127 s | 20.823 s |
+| 共享预处理 | 0.729 s | 18.394 s |
+| 脑干 | 33.568 s | 24.388 s |
+| 丘脑 | 136.692 s | 115.426 s |
+| 左海马与杏仁核 | 148.919 s | 132.051 s |
+| 右海马与杏仁核 | 142.226 s | 129.891 s |
 
-每项结构时间包括配准、图像准备、合成标签拟合、强度拟合和后处理。丘脑合成标签拟合分别为 67.650 s / 62.746 s（同阶段 / 原始 T1）；详细步骤见[同阶段计时](../../validation/subregions/segment_4_subregions/stability_fix/full_stage/timing_summary.json)和[原始 T1 计时](../../validation/subregions/segment_4_subregions/stability_fix/full_raw/timing_summary.json)。共享 H100 的这些时间为本次观测值。
+各结构时间含仿射、裁剪、合成标签拟合、强度拟合和后处理；合并、统计及结构外开销另含在总计算时间。
 
-### 官方与 FNIT 的六层轴位脑图
+### 官方对照与低 Dice 区域脑图
 
-下图使用 RAS 轴位显示网格，按实际毫米间距保持横纵比例。官方标签与 FNIT 标签以最近邻采样到同一显示网格，差异行显示原细标签 ID 不同的体素。细核图使用图谱颜色；四结构图按六个家族着色，便于同时观察轮廓与内部标签差异。
+每幅图包含六层 RAS 轴位，标签最近邻显示，保持真实毫米比例；红色表示细标签 ID 差异。显示重采样不改变原网格上的 Dice。低 Dice 图同时显示官方、更新前、最新结果和两版差异。
+
+**同阶段输入：四结构。**
+
+![同阶段输入四结构与官方对照](../../validation/subregions/segment_4_subregions/raw_precision_analysis/final_full_stage/vs_official_axial.png)
 
 **同阶段输入：丘脑细核。**
 
-![同阶段丘脑细核：官方、回溯修复版 FNIT 与细核标签差异](../../validation/subregions/segment_4_subregions/stability_fix/full_stage/thalamus_nuclei_vs_official_axial.png)
+![同阶段输入丘脑细核与官方对照](../../validation/subregions/segment_4_subregions/raw_precision_analysis/final_full_stage/thalamus_nuclei_vs_official_axial.png)
 
-**同阶段输入：脑干、丘脑、双侧海马与杏仁核。**
+**同阶段输入：右侧低 Dice 海马细区，更新前后。**
 
-![同阶段四结构：官方、FNIT 与细标签差异](../../validation/subregions/segment_4_subregions/stability_fix/full_stage/vs_official_axial.png)
+![同阶段输入右侧海马低Dice区域更新前后](../../validation/subregions/segment_4_subregions/raw_precision_analysis/final_full_stage/low_dice_hippocampus_axial.png)
+
+**原始 T1 全流程：四结构。**
+
+![原始 T1 全流程四结构与官方对照](../../validation/subregions/segment_4_subregions/raw_precision_analysis/final_full_raw/vs_official_axial.png)
 
 **原始 T1 全流程：丘脑细核。**
 
-![原始 T1 丘脑细核：官方、FNIT 与细核标签差异](../../validation/subregions/segment_4_subregions/stability_fix/full_raw/thalamus_nuclei_vs_official_axial.png)
+![原始 T1 全流程丘脑细核与官方对照](../../validation/subregions/segment_4_subregions/raw_precision_analysis/final_full_raw/thalamus_nuclei_vs_official_axial.png)
 
-**原始 T1 全流程：脑干、丘脑、双侧海马与杏仁核。**
+**原始 T1 全流程：右侧低 Dice 海马细区，更新前后。**
 
-![原始 T1 四结构：官方、FNIT 与细标签差异](../../validation/subregions/segment_4_subregions/stability_fix/full_raw/vs_official_axial.png)
-
+![原始 T1 全流程右侧海马低Dice区域更新前后](../../validation/subregions/segment_4_subregions/raw_precision_analysis/final_full_raw/low_dice_hippocampus_axial.png)
 
 ## 最近版本 benchmark 记录
 
-以下同阶段记录均使用相同官方参考的 44 个丘脑细标签、10,123 个参考体素。计算时间包含四项结构；单丘脑重复试验的时间不混入此表。失败试验保留用于核查修复过程。
-
-| 记录 | 四结构计算时间 | 丘脑细核官方体素加权 Dice | 结果与用途 |
+| 版本 | 同阶段 / raw 计算 | 同阶段 / raw 丘脑加权 Dice | 更新内容 |
 |---|---:|---:|---|
-| [v16 C6](../../validation/subregions/speed_v16/README.md) | 509.840 s | 0.964068 | 历史基线 |
-| [入口整合](../../validation/subregions/segment_4_subregions/stage/summary.json) | 489.905 s | 0.910995 | 已发布版本，记录本次回退 |
-| [C1 通用标量试验](../../validation/subregions/segment_4_subregions/stability_fix/c1_scope_evaluation/full_stage/summary.json) | 453.047 s | 0.965569 | 丘脑恢复，右海马加权 Dice 降至 0.772371，未采用 |
-| [C2 丘脑标量试验](../../validation/subregions/segment_4_subregions/stability_fix/c2_scope_evaluation/full_stage/summary.json) | 491.286 s | 0.902469 | 丘脑精度未恢复，未采用 |
-| C3 固定顺序归约试验 | — | 0.906687（单丘脑首次） | 合成拟合重复一致，精度未恢复，未采用 |
-| C4 小矩阵精度试验 | — | 0.885167 / 0.958684（单丘脑两次） | 合成轨迹相同，最终结果仍不同，未采用 |
-| [C5 全丘脑数值控制](../../validation/subregions/segment_4_subregions/stability_fix/c5_scope_evaluation/full_stage/summary.json) | 634.443 s | 0.949945 | 单丘脑重复一致；完整同阶段超过 10 分钟，继续优化线搜索 |
-| [回溯修复版](../../validation/subregions/segment_4_subregions/stability_fix/full_stage/summary.json) | 533.773 s | 0.960523 | 完整同阶段低于 10 分钟，近 v16 C6；单丘脑两次加权 Dice 0.961959、0 个体素差异 |
+| [v16 C6](../../validation/subregions/speed_v16/README.md) | 509.84 s / — | 0.964068 / — | 历史算法基线 |
+| [入口整合](../../validation/subregions/segment_4_subregions/README.md) | 489.91 / 425.86 s | 0.910995 / 0.776716 | 统一公开入口后的精度回退 |
+| [丘脑回溯修复](../../validation/subregions/segment_4_subregions/stability_fix/README.md) | 533.77 / 410.72 s | 0.960523 / 0.775793 | 恢复丘脑数值路径 |
+| [本次低 Dice 优化](../../validation/subregions/segment_4_subregions/raw_precision_analysis/README.md) | 473.20 / 436.34 s | 0.960579 / 0.915134 | 双侧海马稳定拟合、原始强度/网格、白质代理与标准导出 |
 
-### 数值修复过程
-
-C1/C2 仅提高数据总代价的汇总精度，完整运行仍有细核回退。C3 加入固定顺序归约，C4 隔离小矩阵 TF32 运算；C4 两次合成拟合轨迹相同，最终细核结果仍不同。C5 将数值控制扩展至全部丘脑拟合，并在非零梯度零步时最多清除一次历史重试；回溯修复版再采用有界 Armijo 线搜索。
-
-C1 的单丘脑两次加权 Dice 为 0.958382 / 0.963259，相互加权 Dice 为 0.989980，相差 129 个标签体素。C5 单丘脑两次加权 Dice 均为 0.951236，但完整同阶段为 0.949945；其中左右海马/杏仁核计算合计约 409 s，丘脑约 170 s。C5 完整原始 T1 计算 552.424 s、丘脑加权 Dice 0.775745，见 [C5 原始 T1 记录](../../validation/subregions/segment_4_subregions/stability_fix/c5_scope_evaluation/full_raw/summary.json)。单结构和完整流程的结果分别保留。
-
-### 已发布版本的完整运行记录（修复前）
-
-| 输入范围 | 计算 | API 含保存 | 监控进程总墙钟 | PyTorch 分配峰值 | 本进程显存采样峰值 |
-|---|---:|---:|---:|---:|---:|
-| 原始 T1 全流程 | 425.862 s（7.10 min） | 426.354 s | 452.074 s | 15.47 GiB | 18,906 MiB |
-| 官方同阶段输入 | 489.905 s（8.17 min） | 490.499 s | 531.436 s | 4.91 GiB | 9,460 MiB |
-
-首次资源下载、图谱安装和独立官方程序运行不计入；完整 CPU 整例尚未测量。官方 CPU 完整阶段本次尚未重测；[固定 Git 历史记录](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/blob/5250aa540bb6e3b1fda7d7a596c42b39006da14d/validation/subregions/unified.md#L212)记载合计 30.70 min，不含 `recon-all`，完整计时来源待复核，未作为当前速度基准。
-
-相对 [v16 C6 基线](../../validation/subregions/speed_v16/README.md)的家族前景 Dice，原始 T1 为 0.9560–0.9995，家族体积变化最大 5.03%；同阶段输入为 0.9851–0.9996 和 0.384%。逐标签软体积变化在 5% 内的项数分别为 84/110、96/110。
-
-修复前，原始 T1 的丘脑官方体素加权 Dice 为 0.7767；同阶段为 0.9110。全部可评估标签的加权 Dice 分别为 0.8337 和 0.9450。当前证据来自一例开发病例；完整逐标签对照、来源差异及脑图见验证页。
-
+本次冻结源码及其大小/SHA 校验见[清单](../../validation/subregions/segment_4_subregions/raw_precision_analysis/export_final_source/source_manifest.json)；[同阶段输出审计](../../validation/subregions/segment_4_subregions/raw_precision_analysis/final_full_stage/actual_source_and_output_audit.json)、[raw 输出审计](../../validation/subregions/segment_4_subregions/raw_precision_analysis/final_full_raw/actual_source_and_output_audit.json)核对实际源码、模型、图谱、几何、体积与显存。本地 [365 项 GEMS 测试](../../validation/subregions/segment_4_subregions/raw_precision_analysis/tests_gems_final.log)和 [50 项公开入口/CLI 测试](../../validation/subregions/segment_4_subregions/raw_precision_analysis/tests_public_cli_final.log)通过。结果来自一例开发病例。
 
 ## Reference
 

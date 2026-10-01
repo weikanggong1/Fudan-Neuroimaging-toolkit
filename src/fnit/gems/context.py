@@ -1,4 +1,4 @@
-"""Shared native-grid inputs for GEMS subregion recipes."""
+"""Shared processing-grid inputs for GEMS subregion recipes."""
 
 from __future__ import annotations
 
@@ -27,21 +27,23 @@ def _native_labels(value, image: nib.spatialimages.SpatialImage, name: str) -> n
 def build_wmparc_proxy(coarse: np.ndarray, cortical: np.ndarray, *,
                        voxel_sizes: tuple[float, float, float] = (1, 1, 1),
                        max_distance_mm: float = 15) -> np.ndarray:
-    """Assign nearby DKT temporal parcels to white matter within each hemisphere.
+    """Assign nearby DKT cortical parcels to white matter in each hemisphere.
 
     FreeSurfer's hippocampal intensity prior samples WM labels 3006, 3007,
     3016 and the corresponding right-side 4000-series labels. The other
-    wmparc labels retain their coarse anatomical identity.
+    same-side parcels compete for the nearest cortex. White matter beyond
+    ``max_distance_mm`` retains its coarse anatomical identity.
     """
     coarse = np.asarray(coarse)
     cortical = np.asarray(cortical)
     if coarse.ndim != 3 or cortical.shape != coarse.shape:
         raise ValueError("coarse and cortical labels must share a 3-D grid")
     proxy = coarse.astype(np.int32, copy=True)
-    for wm_id, source_ids, offset in ((2, (1006, 1007, 1016), 2000),
-                                      (41, (2006, 2007, 2016), 2000)):
+    for wm_id, lower, upper in ((2, 1000, 2000), (41, 2000, 3000)):
         wm = coarse == wm_id
-        source = np.isin(cortical, source_ids)
+        # Exclude each hemisphere's Unknown label (1000/2000). Restricting
+        # sources to temporal parcels lets them claim nearer non-temporal WM.
+        source = (cortical > lower) & (cortical < upper)
         if not wm.any() or not source.any():
             continue
         low = np.maximum(np.argwhere(wm | source).min(0) - 1, 0)
@@ -49,7 +51,7 @@ def build_wmparc_proxy(coarse: np.ndarray, cortical: np.ndarray, *,
         crop = tuple(slice(int(a), int(b)) for a, b in zip(low, high))
         distance, nearest = ndimage.distance_transform_edt(
             ~source[crop], sampling=voxel_sizes, return_indices=True)
-        propagated = cortical[crop][tuple(nearest)] + offset
+        propagated = cortical[crop][tuple(nearest)] + 2000
         local = proxy[crop]
         selected = wm[crop] & (distance <= max_distance_mm)
         local[selected] = propagated[selected]
@@ -64,6 +66,7 @@ class SubregionContext:
     cortical_parcellation: np.ndarray | None
     wmparc_proxy: np.ndarray | None
     metadata: dict[str, object] = field(default_factory=dict)
+    native_image: nib.spatialimages.SpatialImage | None = None
 
     @classmethod
     def prepare(cls, t1, *, need_coarse: bool, need_parc: bool,

@@ -154,7 +154,8 @@ def _fit_brainstem(context, directory: Path, device: torch.device) -> RecipeResu
     posterior = fit.posterior.detach().cpu()
     volumes = {int(label): float(posterior[index].sum() * voxel_volume)
                for index, label in enumerate(atlas.label_ids) if int(label) in _REGIONS}
-    highres = np.where(np.isin(labels, _REGIONS), labels, 0)
+    highres_take = (foreground & (confidence > 0)).detach().cpu().numpy()
+    highres = np.where(highres_take, labels, 0)
     return RecipeResult(fit, nib.Nifti1Image(highres, fit.affine), native,
                         confidence_array, native != 0, volumes, report)
 

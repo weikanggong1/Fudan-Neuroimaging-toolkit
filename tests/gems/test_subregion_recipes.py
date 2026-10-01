@@ -63,6 +63,48 @@ def test_wmparc_proxy_stays_in_own_hemisphere_and_white_matter():
     assert local[5, 0, 0] == 3006 and local[30, 0, 0] == 2
 
 
+def test_wmparc_proxy_all_same_side_parcels_compete_and_unknown_is_excluded():
+    coarse = np.zeros((12, 8, 3), np.int32)
+    coarse[4, 4, 1] = 2
+    coarse[1, 1, 1] = 2
+    coarse[7, 4, 1] = 41
+    cortex = np.zeros_like(coarse)
+    cortex[0, 4, 1] = 1007
+    cortex[4, 6, 1] = 1003
+    cortex[11, 4, 1] = 2007
+    cortex[7, 6, 1] = 2003
+    cortex[4, 4, 2] = 1000
+    cortex[7, 4, 2] = 2000
+    cortex[4, 4, 0] = 2007  # Closer opposite-side cortex cannot label left WM.
+    original = coarse.copy()
+    proxy = build_wmparc_proxy(coarse, cortex)
+    assert proxy[4, 4, 1] == 3003  # Non-temporal cortex is nearer than 1007.
+    assert proxy[1, 1, 1] == 3007
+    assert proxy[7, 4, 1] == 4003
+    assert not np.any(np.isin(proxy, (3000, 4000)))
+    assert np.array_equal(coarse, original)
+    assert np.array_equal(proxy[coarse == 0], coarse[coarse == 0])
+
+
+def test_wmparc_proxy_distance_and_limit_use_physical_spacing():
+    coarse = np.zeros((5, 5, 5), np.int32)
+    coarse[2, 3, 2] = 2
+    cortex = np.zeros_like(coarse)
+    cortex[0, 3, 2] = 1007
+    cortex[2, 0, 2] = 1003
+    assert build_wmparc_proxy(coarse, cortex)[2, 3, 2] == 3007
+    physical = build_wmparc_proxy(coarse, cortex, voxel_sizes=(3, 1, 1), max_distance_mm=4)
+    assert physical[2, 3, 2] == 3003
+    limited = build_wmparc_proxy(coarse, cortex, voxel_sizes=(3, 1, 1), max_distance_mm=2)
+    assert limited[2, 3, 2] == 2
+
+
+def test_wmparc_proxy_without_same_side_cortex_retains_coarse_labels():
+    coarse = np.asarray([[[2, 41, 3]]], dtype=np.int32)
+    cortex = np.asarray([[[0, 0, 1000]]], dtype=np.int32)
+    assert np.array_equal(build_wmparc_proxy(coarse, cortex), coarse)
+
+
 def test_native_geometry_rejects_mismatched_auxiliary_image():
     from fnit.gems.context import _native_labels
     source = nib.Nifti1Image(np.ones((8, 8, 8), np.float32), np.eye(4))

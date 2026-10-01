@@ -1,5 +1,7 @@
 # segment_4_subregions：丘脑精度修复与完整 benchmark
 
+**历史丘脑修复记录；最新双侧海马与 raw 精度优化见[完整 benchmark](../raw_precision_analysis/README.md)。**
+
 [功能、参数与流程图](../../../../docs/subregions/README.md) · [修复前记录](../README.md) · [v16 C6 基线](../../speed_v16/README.md)
 
 2026-10-01，在同一例真实公开 T1 上完成冻结版本 **回溯修复版** 的四类分割复测。官方同阶段输入的丘脑细核加权 Dice 从修复前的 0.910995 恢复至 **0.960523**；C6 基线为 0.964068，当前仍相差约 0.003545。下面同时报告原始 T1 和全部结构的结果。

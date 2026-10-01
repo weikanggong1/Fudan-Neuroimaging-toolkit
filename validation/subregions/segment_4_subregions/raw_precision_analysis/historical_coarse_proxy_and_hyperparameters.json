@@ -1,0 +1,3441 @@
+{
+  "kind": "CPU comparison of historical saved SynthSeg preprocessing maps to official labels; not exact final full_raw intermediate validation",
+  "inputs": {
+    "raw": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/examples/data/sub-01_T1w.nii.gz",
+      "bytes": 3847853,
+      "sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a"
+    },
+    "official_aseg": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_reference_gpucw1/fs_sub01/mri/aseg.mgz",
+      "bytes": 409055,
+      "sha256": "29fbcff5dff5300599ee863e0c7c425867af725134631741685b41ca44639bc2"
+    },
+    "official_wmparc": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_reference_gpucw1/fs_sub01/mri/wmparc.mgz",
+      "bytes": 496253,
+      "sha256": "7cf2c8f0ab1405da795b162ea9d19cf40cb41eedab40d41abb56a6f3baaf9f79"
+    },
+    "official_DKT": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_reference_gpucw1/fs_sub01/mri/aparc.DKTatlas+aseg.mgz",
+      "bytes": 451238,
+      "sha256": "8d3463103797ffab929cdde0d60712ac17fdf7cba3d97185d5b79ca1b596536b"
+    }
+  },
+  "provenance_limit": "Final full_raw did not save its automatic coarse/cortical/proxy arrays. Historical preprocessing reports record T1 path/device but omit input SHA, weights and runtime source SHA. Current input path hash and geometry verified, frozen proxy reconstruction checked; cannot assert these historical arrays equal final run intermediates or infer historical source/weight identity.",
+  "proxy_and_hyperparameter_code": {
+    "src/fnit/gems/context.py": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_thalamus_backtracking_final_20261001/src/fnit/gems/context.py",
+      "bytes": 6834,
+      "sha256": "36feb53a1fef373a6c2ba33cf628f724ffeb94e6e450943758e5438c46de87bc"
+    },
+    "src/fnit/gems/recipes/thalamus.py": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_thalamus_backtracking_final_20261001/src/fnit/gems/recipes/thalamus.py",
+      "bytes": 7417,
+      "sha256": "b1607aa027cdbfc6b5a54707ff6622535e64574a7444b3e3129d87e0ab2a5575"
+    },
+    "src/fnit/synthseg_parc/synthseg_plus.py": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_thalamus_backtracking_final_20261001/src/fnit/synthseg_parc/synthseg_plus.py",
+      "bytes": 7426,
+      "sha256": "b49cfbc26f4733e7b6c8ceffaceb102f0f5a6a57044dfb1a5f4a048b3f14786b"
+    }
+  },
+  "reference_mapping": "official scanner-RAS affine to raw native grid, nearest-neighbour labels; rawavg identity-RAS LTA verified independently",
+  "raw_voxel_volume_mm3": 1.2993759102825926,
+  "cache_comparisons": {
+    "raw_preprocess_cpu": {
+      "files": {
+        "coarse": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/raw_preprocess_cpu/aseg_proxy.nii.gz",
+          "bytes": 576439,
+          "sha256": "2f2559ad4fb138459b8b63a161adcd137e33418fa815b8c17a373896c828f09d"
+        },
+        "cortical": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/raw_preprocess_cpu/cortical_parcellation.nii.gz",
+          "bytes": 451372,
+          "sha256": "6f00f788e65350dbc4f5121815dbdd065702627a6b73c4c6df0f53819b36d3d9"
+        },
+        "wmparc": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/raw_preprocess_cpu/wmparc_proxy.nii.gz",
+          "bytes": 582043,
+          "sha256": "75e119fbf4e0c0267236164807df99d169bfc688467585bab08b07ae9cec6a0f"
+        }
+      },
+      "saved_report": {
+        "t1": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/examples/data/sub-01_T1w.nii.gz",
+        "device": "cpu",
+        "seconds": 124.0829630731605,
+        "shape": [
+          256,
+          156,
+          256
+        ],
+        "wmparc_support_voxels": {
+          "3006": 2604,
+          "3007": 25408,
+          "3016": 5120,
+          "4006": 1574,
+          "4007": 26266,
+          "4016": 4499
+        },
+        "wm_only": true
+      },
+      "same_current_raw_grid": true,
+      "historical_t1_string_same_as_current_raw": true,
+      "same_current_frozen_proxy_algorithm_rebuild_bitwise": true,
+      "proxy_rebuild_changed_voxels": 0,
+      "coarse_vs_official_NN": [
+        {
+          "labels": [
+            2
+          ],
+          "historical_prediction_voxels": 132946,
+          "official_NN_voxels": 139043,
+          "dice": 0.9106324152815004,
+          "prediction_to_official_volume_ratio": 0.9561502556763016,
+          "prediction_centroid_scanner_RAS_mm": [
+            -26.870114447924152,
+            6.34429237110939,
+            -17.952861364291692
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -27.41524965405216,
+            6.454496169337077,
+            -17.729852306994133
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            0.545135206128009,
+            -0.11020379822768689,
+            -0.22300905729755982
+          ],
+          "centroid_distance_mm": 0.599208068821492
+        },
+        {
+          "labels": [
+            41
+          ],
+          "historical_prediction_voxels": 135636,
+          "official_NN_voxels": 138068,
+          "dice": 0.9100122760354251,
+          "prediction_to_official_volume_ratio": 0.9823854912072312,
+          "prediction_centroid_scanner_RAS_mm": [
+            21.80550876484756,
+            13.288652278644733,
+            -14.496929725141626
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            22.120105733514976,
+            14.314318685616698,
+            -14.101370199228569
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -0.3145969686674164,
+            -1.0256664069719648,
+            -0.39555952591305754
+          ],
+          "centroid_distance_mm": 1.1434291275046609
+        },
+        {
+          "labels": [
+            3
+          ],
+          "historical_prediction_voxels": 155990,
+          "official_NN_voxels": 129941,
+          "dice": 0.8268288503170346,
+          "prediction_to_official_volume_ratio": 1.2004679046644247,
+          "prediction_centroid_scanner_RAS_mm": [
+            -30.53766004845889,
+            8.830699758851523,
+            -20.88295759519886
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -30.662522726258885,
+            8.31928894251324,
+            -20.6434287892815
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            0.12486267779999594,
+            0.5114108163382838,
+            -0.23952880591735948
+          ],
+          "centroid_distance_mm": 0.5783647294219898
+        },
+        {
+          "labels": [
+            42
+          ],
+          "historical_prediction_voxels": 158296,
+          "official_NN_voxels": 129439,
+          "dice": 0.8107529497628025,
+          "prediction_to_official_volume_ratio": 1.2229389905669852,
+          "prediction_centroid_scanner_RAS_mm": [
+            25.37102126908411,
+            16.555597933551937,
+            -17.071900781193676
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            25.214032143862624,
+            15.94849564262178,
+            -16.619827891015518
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            0.1569891252214859,
+            0.6071022909301576,
+            -0.4520728901781581
+          ],
+          "centroid_distance_mm": 0.7730385987287349
+        },
+        {
+          "labels": [
+            10
+          ],
+          "historical_prediction_voxels": 4293,
+          "official_NN_voxels": 4289,
+          "dice": 0.9533908179911442,
+          "prediction_to_official_volume_ratio": 1.0009326183259502,
+          "prediction_centroid_scanner_RAS_mm": [
+            -13.396133193764427,
+            13.597311577549902,
+            -25.76486385594893
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -13.43911722798346,
+            13.461675842624189,
+            -25.763699626953127
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            0.04298403421903174,
+            0.1356357349257138,
+            -0.0011642289958047058
+          ],
+          "centroid_distance_mm": 0.14228856319372987
+        },
+        {
+          "labels": [
+            49
+          ],
+          "historical_prediction_voxels": 4199,
+          "official_NN_voxels": 4204,
+          "dice": 0.9544210401047245,
+          "prediction_to_official_volume_ratio": 0.9988106565176023,
+          "prediction_centroid_scanner_RAS_mm": [
+            6.984546909987955,
+            16.57879370265374,
+            -24.12900142110999
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            7.048265234537752,
+            16.582985518046513,
+            -24.27487644041443
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -0.06371832454979653,
+            -0.004191815392772469,
+            0.1458750193044409
+          ],
+          "centroid_distance_mm": 0.15923918317044738
+        },
+        {
+          "labels": [
+            17
+          ],
+          "historical_prediction_voxels": 3020,
+          "official_NN_voxels": 2918,
+          "dice": 0.9285954866958572,
+          "prediction_to_official_volume_ratio": 1.0349554489376285,
+          "prediction_centroid_scanner_RAS_mm": [
+            -24.267926035707347,
+            14.312362753121263,
+            -42.121787756281776
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -24.30443043179966,
+            14.538814154959766,
+            -42.19297155509611
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            0.03650439609231171,
+            -0.22645140183850287,
+            0.07118379881433157
+          ],
+          "centroid_distance_mm": 0.2401664871340852
+        },
+        {
+          "labels": [
+            53
+          ],
+          "historical_prediction_voxels": 3074,
+          "official_NN_voxels": 3012,
+          "dice": 0.9352612553401248,
+          "prediction_to_official_volume_ratio": 1.0205843293492696,
+          "prediction_centroid_scanner_RAS_mm": [
+            20.45120456219402,
+            20.764673505603753,
+            -39.49198948632062
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            20.436923519721205,
+            20.405570037039624,
+            -39.328788794908576
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            0.014281042472816807,
+            0.359103468564129,
+            -0.16320069141204385
+          ],
+          "centroid_distance_mm": 0.39470712558334686
+        },
+        {
+          "labels": [
+            18
+          ],
+          "historical_prediction_voxels": 1145,
+          "official_NN_voxels": 1117,
+          "dice": 0.9071618037135278,
+          "prediction_to_official_volume_ratio": 1.0250671441360788,
+          "prediction_centroid_scanner_RAS_mm": [
+            -25.21817643470233,
+            31.352339344042235,
+            -42.44295460910874
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -25.160473538046546,
+            31.22160341888133,
+            -42.48124941072578
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -0.05770289665578332,
+            0.1307359251609057,
+            0.038294801617041685
+          ],
+          "centroid_distance_mm": 0.14794593012663285
+        },
+        {
+          "labels": [
+            54
+          ],
+          "historical_prediction_voxels": 1170,
+          "official_NN_voxels": 1160,
+          "dice": 0.9261802575107296,
+          "prediction_to_official_volume_ratio": 1.0086206896551724,
+          "prediction_centroid_scanner_RAS_mm": [
+            15.886639122641043,
+            36.5768030226358,
+            -39.86906844640518
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            15.91875157372479,
+            36.620084524813024,
+            -40.17004471125304
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -0.03211245108374783,
+            -0.04328150217722282,
+            0.30097626484786133
+          ],
+          "centroid_distance_mm": 0.30576332341713747
+        },
+        {
+          "labels": [
+            16
+          ],
+          "historical_prediction_voxels": 12941,
+          "official_NN_voxels": 13156,
+          "dice": 0.9566616852511783,
+          "prediction_to_official_volume_ratio": 0.983657646701125,
+          "prediction_centroid_scanner_RAS_mm": [
+            -0.7060478783308639,
+            12.11717280025492,
+            -57.72536166825512
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -0.6112152593076274,
+            12.232822408174485,
+            -57.64125845467305
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -0.09483261902323648,
+            -0.1156496079195648,
+            -0.08410321358206829
+          ],
+          "centroid_distance_mm": 0.17158498762300384
+        },
+        {
+          "labels": [
+            28
+          ],
+          "historical_prediction_voxels": 2522,
+          "official_NN_voxels": 2354,
+          "dice": 0.9126333059885152,
+          "prediction_to_official_volume_ratio": 1.0713678844519967,
+          "prediction_centroid_scanner_RAS_mm": [
+            -12.379035939831027,
+            20.997362151538127,
+            -37.31779862293186
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -12.318324178901548,
+            21.036334431422404,
+            -37.22553814103557
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -0.06071176092947894,
+            -0.03897227988427687,
+            -0.09226048189628955
+          ],
+          "centroid_distance_mm": 0.11711854265773712
+        },
+        {
+          "labels": [
+            60
+          ],
+          "historical_prediction_voxels": 2428,
+          "official_NN_voxels": 2335,
+          "dice": 0.9191685912240185,
+          "prediction_to_official_volume_ratio": 1.03982869379015,
+          "prediction_centroid_scanner_RAS_mm": [
+            6.153177871037002,
+            22.897534518471957,
+            -35.86388931688322
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            6.222545480915244,
+            22.958340639276415,
+            -35.919336240273566
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -0.06936760987824186,
+            -0.060806120804457464,
+            0.05544692339034896
+          ],
+          "centroid_distance_mm": 0.10762718495325174
+        }
+      ],
+      "temporal_cortex_vs_official_DKT_NN": [
+        {
+          "labels": [
+            1006
+          ],
+          "historical_prediction_voxels": 1407,
+          "official_NN_voxels": 868,
+          "dice": 0.6558241758241758,
+          "prediction_to_official_volume_ratio": 1.6209677419354838,
+          "prediction_centroid_scanner_RAS_mm": [
+            -25.49759304679614,
+            32.25607675891143,
+            -53.509256412898
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -25.055127128572423,
+            29.660493959642707,
+            -53.82076844347701
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -0.44246591822371784,
+            2.595582799268726,
+            0.31151203057901
+          ],
+          "centroid_distance_mm": 2.6513894285533937
+        },
+        {
+          "labels": [
+            1007
+          ],
+          "historical_prediction_voxels": 6832,
+          "official_NN_voxels": 4205,
+          "dice": 0.6606867808281236,
+          "prediction_to_official_volume_ratio": 1.6247324613555292,
+          "prediction_centroid_scanner_RAS_mm": [
+            -27.352549875468753,
+            -0.4194441155838149,
+            -51.93466899529605
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -26.069594270331564,
+            -10.177972957918001,
+            -49.890812574985674
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -1.2829556051371895,
+            9.758528842334186,
+            -2.0438564203103766
+          ],
+          "centroid_distance_mm": 10.052472796196222
+        },
+        {
+          "labels": [
+            1016
+          ],
+          "historical_prediction_voxels": 1454,
+          "official_NN_voxels": 1095,
+          "dice": 0.7304825421734014,
+          "prediction_to_official_volume_ratio": 1.3278538812785388,
+          "prediction_centroid_scanner_RAS_mm": [
+            -22.883395562815053,
+            5.77698268000411,
+            -46.01539963054404
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -22.858014402589575,
+            6.980116318503079,
+            -46.41992308514611
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -0.02538116022547854,
+            -1.2031336384989686,
+            0.40452345460207084
+          ],
+          "centroid_distance_mm": 1.2695723613506054
+        },
+        {
+          "labels": [
+            2006
+          ],
+          "historical_prediction_voxels": 1130,
+          "official_NN_voxels": 706,
+          "dice": 0.6633986928104575,
+          "prediction_to_official_volume_ratio": 1.6005665722379603,
+          "prediction_centroid_scanner_RAS_mm": [
+            17.74610594316198,
+            36.24971909775867,
+            -51.23105347921198
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            17.172604698273602,
+            34.356965473243605,
+            -51.722636996348925
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            0.5735012448883765,
+            1.8927536245150662,
+            0.49158351713694515
+          ],
+          "centroid_distance_mm": 2.037909300073035
+        },
+        {
+          "labels": [
+            2007
+          ],
+          "historical_prediction_voxels": 7622,
+          "official_NN_voxels": 4780,
+          "dice": 0.657635865183035,
+          "prediction_to_official_volume_ratio": 1.594560669456067,
+          "prediction_centroid_scanner_RAS_mm": [
+            30.80790552743852,
+            7.696318165711688,
+            -48.8887487273833
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            32.42688338943333,
+            -0.669620368921187,
+            -47.18471748229646
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -1.6189778619948072,
+            8.365938534632875,
+            -1.7040312450868385
+          ],
+          "centroid_distance_mm": 8.689864174261686
+        },
+        {
+          "labels": [
+            2016
+          ],
+          "historical_prediction_voxels": 1377,
+          "official_NN_voxels": 1160,
+          "dice": 0.7528577059519117,
+          "prediction_to_official_volume_ratio": 1.1870689655172413,
+          "prediction_centroid_scanner_RAS_mm": [
+            20.382800828485585,
+            11.38553409869516,
+            -43.289987929199185
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            20.711393083399173,
+            10.75228522575685,
+            -43.075466349163776
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -0.32859225491358757,
+            0.6332488729383101,
+            -0.21452158003540944
+          ],
+          "centroid_distance_mm": 0.7449808812095279
+        }
+      ],
+      "wmparc_proxy_vs_official_NN": [
+        {
+          "labels": [
+            3006
+          ],
+          "historical_prediction_voxels": 2604,
+          "official_NN_voxels": 452,
+          "dice": 0.19109947643979058,
+          "prediction_to_official_volume_ratio": 5.761061946902655,
+          "prediction_centroid_scanner_RAS_mm": [
+            -29.10976650040223,
+            37.18324958880112,
+            -40.80409905976671
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -27.716494100728795,
+            30.884566078852643,
+            -51.161639568478336
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -1.3932723996734353,
+            6.298683509948475,
+            10.357540508711622
+          ],
+          "centroid_distance_mm": 12.202182891916955
+        },
+        {
+          "labels": [
+            3007
+          ],
+          "historical_prediction_voxels": 25408,
+          "official_NN_voxels": 4590,
+          "dice": 0.2676845123008201,
+          "prediction_to_official_volume_ratio": 5.535511982570806,
+          "prediction_centroid_scanner_RAS_mm": [
+            -28.977664970725357,
+            -14.78328655550613,
+            -43.17365426008209
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -29.46207942193422,
+            -6.495156826240404,
+            -46.57098573182216
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            0.4844144512088633,
+            -8.288129729265727,
+            3.397331471740074
+          ],
+          "centroid_distance_mm": 8.970485655668478
+        },
+        {
+          "labels": [
+            3016
+          ],
+          "historical_prediction_voxels": 5120,
+          "official_NN_voxels": 957,
+          "dice": 0.2669080138226098,
+          "prediction_to_official_volume_ratio": 5.350052246603971,
+          "prediction_centroid_scanner_RAS_mm": [
+            -23.11619136856936,
+            1.3186869352735755,
+            -33.250002243083145
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -24.46758237613662,
+            5.628844828811026,
+            -43.195862409180904
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            1.3513910075672584,
+            -4.3101578935374505,
+            9.94586016609776
+          ],
+          "centroid_distance_mm": 10.923545814712684
+        },
+        {
+          "labels": [
+            4006
+          ],
+          "historical_prediction_voxels": 1574,
+          "official_NN_voxels": 297,
+          "dice": 0.15713522180652056,
+          "prediction_to_official_volume_ratio": 5.299663299663299,
+          "prediction_centroid_scanner_RAS_mm": [
+            13.988320067188823,
+            39.72076036674804,
+            -37.294752082141315
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            16.980224528898702,
+            35.531514602089274,
+            -48.80879773210219
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -2.991904461709879,
+            4.189245764658764,
+            11.514045649960877
+          ],
+          "centroid_distance_mm": 12.612474761683128
+        },
+        {
+          "labels": [
+            4007
+          ],
+          "historical_prediction_voxels": 26266,
+          "official_NN_voxels": 4535,
+          "dice": 0.24460244797246844,
+          "prediction_to_official_volume_ratio": 5.791841234840132,
+          "prediction_centroid_scanner_RAS_mm": [
+            33.28468378203732,
+            -2.8187891376389587,
+            -38.854078555313976
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            32.106355628081275,
+            3.824397212670249,
+            -43.98549377675218
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            1.1783281539560448,
+            -6.6431863503092075,
+            5.131415221438203
+          ],
+          "centroid_distance_mm": 8.476544360654742
+        },
+        {
+          "labels": [
+            4016
+          ],
+          "historical_prediction_voxels": 4499,
+          "official_NN_voxels": 1019,
+          "dice": 0.2631388184124683,
+          "prediction_to_official_volume_ratio": 4.415112855740922,
+          "prediction_centroid_scanner_RAS_mm": [
+            19.103904537559515,
+            6.40858632215668,
+            -30.52187417654656
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            23.464741557386873,
+            11.25889815558645,
+            -40.389942858797724
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -4.360837019827358,
+            -4.850311833429771,
+            9.868068682251163
+          ],
+          "centroid_distance_mm": 11.828829355123517
+        },
+        {
+          "labels": [
+            3006,
+            3007,
+            3016
+          ],
+          "historical_prediction_voxels": 33132,
+          "official_NN_voxels": 5999,
+          "dice": 0.26945388566609596,
+          "prediction_to_official_volume_ratio": 5.5229204867477915,
+          "prediction_centroid_scanner_RAS_mm": [
+            -28.08225411536617,
+            -8.210699196078139,
+            -41.45388424714426
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -28.533801669306584,
+            -1.7446476852191921,
+            -46.3784507283884
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            0.451547553940415,
+            -6.4660515108589465,
+            4.924566481244142
+          ],
+          "centroid_distance_mm": 8.140336133277554
+        },
+        {
+          "labels": [
+            4006,
+            4007,
+            4016
+          ],
+          "historical_prediction_voxels": 32339,
+          "official_NN_voxels": 5851,
+          "dice": 0.25959675307672164,
+          "prediction_to_official_volume_ratio": 5.52708938642967,
+          "prediction_centroid_scanner_RAS_mm": [
+            30.3726641676993,
+            0.5354028013055085,
+            -37.61900736050745
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            29.83353633659351,
+            6.728647823760511,
+            -43.60413245208005
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            0.5391278311057874,
+            -6.193245022455002,
+            5.985125091572598
+          ],
+          "centroid_distance_mm": 8.629522877205227
+        }
+      ],
+      "hippo_WM_hyperprior_raw_samples": {
+        "left_historical_proxy_eroded_union": {
+          "n": 18306,
+          "median": 723.0,
+          "MAD": 81.0,
+          "p10": 532.0,
+          "p90": 841.0
+        },
+        "left_official_wmparc_NN_eroded_union": {
+          "n": 2158,
+          "median": 669.5,
+          "MAD": 88.5,
+          "p10": 503.0,
+          "p90": 790.0
+        },
+        "right_historical_proxy_eroded_union": {
+          "n": 17566,
+          "median": 614.0,
+          "MAD": 75.0,
+          "p10": 452.0,
+          "p90": 733.0
+        },
+        "right_official_wmparc_NN_eroded_union": {
+          "n": 1877,
+          "median": 566.0,
+          "MAD": 67.0,
+          "p10": 434.0,
+          "p90": 681.0
+        }
+      }
+    },
+    "raw_preprocess_gpu_v4": {
+      "files": {
+        "coarse": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/raw_preprocess_gpu_v4/aseg_proxy.nii.gz",
+          "bytes": 576467,
+          "sha256": "89d9f434cf88a562fd512875a0e46af086105df04f9183c4dc49d5090a3751be"
+        },
+        "cortical": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/raw_preprocess_gpu_v4/cortical_parcellation.nii.gz",
+          "bytes": 451394,
+          "sha256": "cb4c7458c75e155d6e200a04d03fdbf48096461a61c46eccbdae7f30ca06432c"
+        },
+        "wmparc": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/raw_preprocess_gpu_v4/wmparc_proxy.nii.gz",
+          "bytes": 582083,
+          "sha256": "1eca2c6a6eaa5de3b2c448207a548c4f0408e51c5fff1e60853ee5fabe2d93c9"
+        }
+      },
+      "saved_report": {
+        "t1": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/examples/data/sub-01_T1w.nii.gz",
+        "device": "cuda:0",
+        "seconds": 9.901338932104409,
+        "shape": [
+          256,
+          156,
+          256
+        ],
+        "peak_gpu_gib": 15.471590042114258,
+        "wmparc_support_voxels": {
+          "3006": 2603,
+          "3007": 25366,
+          "3016": 5121,
+          "4006": 1570,
+          "4007": 26267,
+          "4016": 4499
+        },
+        "wm_only": true
+      },
+      "same_current_raw_grid": true,
+      "historical_t1_string_same_as_current_raw": true,
+      "same_current_frozen_proxy_algorithm_rebuild_bitwise": true,
+      "proxy_rebuild_changed_voxels": 0,
+      "coarse_vs_official_NN": [
+        {
+          "labels": [
+            2
+          ],
+          "historical_prediction_voxels": 132950,
+          "official_NN_voxels": 139043,
+          "dice": 0.9106557889357446,
+          "prediction_to_official_volume_ratio": 0.9561790237552412,
+          "prediction_centroid_scanner_RAS_mm": [
+            -26.870013031692466,
+            6.344272277442286,
+            -17.95188960921618
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -27.41524965405216,
+            6.454496169337077,
+            -17.729852306994133
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            0.5452366223596954,
+            -0.11022389189479043,
+            -0.22203730222204854
+          ],
+          "centroid_distance_mm": 0.5989431060498892
+        },
+        {
+          "labels": [
+            41
+          ],
+          "historical_prediction_voxels": 135627,
+          "official_NN_voxels": 138068,
+          "dice": 0.9100129706425035,
+          "prediction_to_official_volume_ratio": 0.9823203059362053,
+          "prediction_centroid_scanner_RAS_mm": [
+            21.80482602710316,
+            13.2904286947863,
+            -14.49636388412091
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            22.120105733514976,
+            14.314318685616698,
+            -14.101370199228569
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -0.3152797064118147,
+            -1.0238899908303978,
+            -0.39499368489234143
+          ],
+          "centroid_distance_mm": 1.14182836613154
+        },
+        {
+          "labels": [
+            3
+          ],
+          "historical_prediction_voxels": 156008,
+          "official_NN_voxels": 129941,
+          "dice": 0.8268327568902147,
+          "prediction_to_official_volume_ratio": 1.2006064290716556,
+          "prediction_centroid_scanner_RAS_mm": [
+            -30.53867118196669,
+            8.829216458240069,
+            -20.883251108646306
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -30.662522726258885,
+            8.31928894251324,
+            -20.6434287892815
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            0.1238515442921937,
+            0.5099275157268295,
+            -0.23982231936480503
+          ],
+          "centroid_distance_mm": 0.5769575557910752
+        },
+        {
+          "labels": [
+            42
+          ],
+          "historical_prediction_voxels": 158323,
+          "official_NN_voxels": 129439,
+          "dice": 0.8107324803135925,
+          "prediction_to_official_volume_ratio": 1.2231475830313894,
+          "prediction_centroid_scanner_RAS_mm": [
+            25.37184016763311,
+            16.553918520220293,
+            -17.07114407609032
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            25.214032143862624,
+            15.94849564262178,
+            -16.619827891015518
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            0.1578080237704853,
+            0.6054228775985138,
+            -0.451316185074802
+          ],
+          "centroid_distance_mm": 0.7714444451783187
+        },
+        {
+          "labels": [
+            10
+          ],
+          "historical_prediction_voxels": 4293,
+          "official_NN_voxels": 4289,
+          "dice": 0.9533908179911442,
+          "prediction_to_official_volume_ratio": 1.0009326183259502,
+          "prediction_centroid_scanner_RAS_mm": [
+            -13.396133193764427,
+            13.597311577549902,
+            -25.76486385594893
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -13.43911722798346,
+            13.461675842624189,
+            -25.763699626953127
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            0.04298403421903174,
+            0.1356357349257138,
+            -0.0011642289958047058
+          ],
+          "centroid_distance_mm": 0.14228856319372987
+        },
+        {
+          "labels": [
+            49
+          ],
+          "historical_prediction_voxels": 4198,
+          "official_NN_voxels": 4204,
+          "dice": 0.9545346346108069,
+          "prediction_to_official_volume_ratio": 0.9985727878211227,
+          "prediction_centroid_scanner_RAS_mm": [
+            6.984115439545661,
+            16.574332016456765,
+            -24.13050701635882
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            7.048265234537752,
+            16.582985518046513,
+            -24.27487644041443
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -0.06414979499209039,
+            -0.008653501589748203,
+            0.14436942405561126
+          ],
+          "centroid_distance_mm": 0.15821697092739423
+        },
+        {
+          "labels": [
+            17
+          ],
+          "historical_prediction_voxels": 3020,
+          "official_NN_voxels": 2918,
+          "dice": 0.9285954866958572,
+          "prediction_to_official_volume_ratio": 1.0349554489376285,
+          "prediction_centroid_scanner_RAS_mm": [
+            -24.267926035707347,
+            14.312362753121263,
+            -42.121787756281776
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -24.30443043179966,
+            14.538814154959766,
+            -42.19297155509611
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            0.03650439609231171,
+            -0.22645140183850287,
+            0.07118379881433157
+          ],
+          "centroid_distance_mm": 0.2401664871340852
+        },
+        {
+          "labels": [
+            53
+          ],
+          "historical_prediction_voxels": 3074,
+          "official_NN_voxels": 3012,
+          "dice": 0.9352612553401248,
+          "prediction_to_official_volume_ratio": 1.0205843293492696,
+          "prediction_centroid_scanner_RAS_mm": [
+            20.45120456219402,
+            20.764673505603753,
+            -39.49198948632062
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            20.436923519721205,
+            20.405570037039624,
+            -39.328788794908576
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            0.014281042472816807,
+            0.359103468564129,
+            -0.16320069141204385
+          ],
+          "centroid_distance_mm": 0.39470712558334686
+        },
+        {
+          "labels": [
+            18
+          ],
+          "historical_prediction_voxels": 1145,
+          "official_NN_voxels": 1117,
+          "dice": 0.9071618037135278,
+          "prediction_to_official_volume_ratio": 1.0250671441360788,
+          "prediction_centroid_scanner_RAS_mm": [
+            -25.21817643470233,
+            31.352339344042235,
+            -42.44295460910874
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -25.160473538046546,
+            31.22160341888133,
+            -42.48124941072578
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -0.05770289665578332,
+            0.1307359251609057,
+            0.038294801617041685
+          ],
+          "centroid_distance_mm": 0.14794593012663285
+        },
+        {
+          "labels": [
+            54
+          ],
+          "historical_prediction_voxels": 1171,
+          "official_NN_voxels": 1160,
+          "dice": 0.9266409266409267,
+          "prediction_to_official_volume_ratio": 1.0094827586206896,
+          "prediction_centroid_scanner_RAS_mm": [
+            15.888934446259356,
+            36.57749292519449,
+            -39.86474865930907
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            15.91875157372479,
+            36.620084524813024,
+            -40.17004471125304
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -0.029817127465435078,
+            -0.04259159961853243,
+            0.30529605194396936
+          ],
+          "centroid_distance_mm": 0.30969143478780653
+        },
+        {
+          "labels": [
+            16
+          ],
+          "historical_prediction_voxels": 12941,
+          "official_NN_voxels": 13156,
+          "dice": 0.9566616852511783,
+          "prediction_to_official_volume_ratio": 0.983657646701125,
+          "prediction_centroid_scanner_RAS_mm": [
+            -0.7060478783308639,
+            12.11717280025492,
+            -57.72536166825512
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -0.6112152593076274,
+            12.232822408174485,
+            -57.64125845467305
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -0.09483261902323648,
+            -0.1156496079195648,
+            -0.08410321358206829
+          ],
+          "centroid_distance_mm": 0.17158498762300384
+        },
+        {
+          "labels": [
+            28
+          ],
+          "historical_prediction_voxels": 2522,
+          "official_NN_voxels": 2354,
+          "dice": 0.9126333059885152,
+          "prediction_to_official_volume_ratio": 1.0713678844519967,
+          "prediction_centroid_scanner_RAS_mm": [
+            -12.379035939831027,
+            20.997362151538127,
+            -37.31779862293186
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -12.318324178901548,
+            21.036334431422404,
+            -37.22553814103557
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -0.06071176092947894,
+            -0.03897227988427687,
+            -0.09226048189628955
+          ],
+          "centroid_distance_mm": 0.11711854265773712
+        },
+        {
+          "labels": [
+            60
+          ],
+          "historical_prediction_voxels": 2429,
+          "official_NN_voxels": 2335,
+          "dice": 0.918975650713686,
+          "prediction_to_official_volume_ratio": 1.0402569593147752,
+          "prediction_centroid_scanner_RAS_mm": [
+            6.153288851486735,
+            22.89509985797926,
+            -35.862152308316894
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            6.222545480915244,
+            22.958340639276415,
+            -35.919336240273566
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -0.06925662942850863,
+            -0.0632407812971536,
+            0.05718393195667204
+          ],
+          "centroid_distance_mm": 0.10984479602101084
+        }
+      ],
+      "temporal_cortex_vs_official_DKT_NN": [
+        {
+          "labels": [
+            1006
+          ],
+          "historical_prediction_voxels": 1404,
+          "official_NN_voxels": 868,
+          "dice": 0.6566901408450704,
+          "prediction_to_official_volume_ratio": 1.6175115207373272,
+          "prediction_centroid_scanner_RAS_mm": [
+            -25.500016779945284,
+            32.244304577607735,
+            -53.494615530447916
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -25.055127128572423,
+            29.660493959642707,
+            -53.82076844347701
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -0.4448896513728613,
+            2.583810617965028,
+            0.326152913029091
+          ],
+          "centroid_distance_mm": 2.6420408464073466
+        },
+        {
+          "labels": [
+            1007
+          ],
+          "historical_prediction_voxels": 6833,
+          "official_NN_voxels": 4205,
+          "dice": 0.6606269251676028,
+          "prediction_to_official_volume_ratio": 1.6249702734839477,
+          "prediction_centroid_scanner_RAS_mm": [
+            -27.352004599555073,
+            -0.42409864451300905,
+            -51.9322072840381
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -26.069594270331564,
+            -10.177972957918001,
+            -49.890812574985674
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -1.2824103292235094,
+            9.753874313404992,
+            -2.041394709052426
+          ],
+          "centroid_distance_mm": 10.047384372678698
+        },
+        {
+          "labels": [
+            1016
+          ],
+          "historical_prediction_voxels": 1454,
+          "official_NN_voxels": 1095,
+          "dice": 0.7304825421734014,
+          "prediction_to_official_volume_ratio": 1.3278538812785388,
+          "prediction_centroid_scanner_RAS_mm": [
+            -22.883395562815053,
+            5.77698268000411,
+            -46.01539963054404
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -22.858014402589575,
+            6.980116318503079,
+            -46.41992308514611
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -0.02538116022547854,
+            -1.2031336384989686,
+            0.40452345460207084
+          ],
+          "centroid_distance_mm": 1.2695723613506054
+        },
+        {
+          "labels": [
+            2006
+          ],
+          "historical_prediction_voxels": 1126,
+          "official_NN_voxels": 706,
+          "dice": 0.6648471615720524,
+          "prediction_to_official_volume_ratio": 1.594900849858357,
+          "prediction_centroid_scanner_RAS_mm": [
+            17.71621536008837,
+            36.26293149029715,
+            -51.24004503265584
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            17.172604698273602,
+            34.356965473243605,
+            -51.722636996348925
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            0.5436106618147676,
+            1.9059660170535437,
+            0.482591963693082
+          ],
+          "centroid_distance_mm": 2.0398808821161065
+        },
+        {
+          "labels": [
+            2007
+          ],
+          "historical_prediction_voxels": 7627,
+          "official_NN_voxels": 4780,
+          "dice": 0.6575320383654388,
+          "prediction_to_official_volume_ratio": 1.5956066945606695,
+          "prediction_centroid_scanner_RAS_mm": [
+            30.80127386354158,
+            7.720994414624656,
+            -48.89180361640729
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            32.42688338943333,
+            -0.669620368921187,
+            -47.18471748229646
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -1.625609525891747,
+            8.390614783545843,
+            -1.707086134110824
+          ],
+          "centroid_distance_mm": 8.715455573049608
+        },
+        {
+          "labels": [
+            2016
+          ],
+          "historical_prediction_voxels": 1378,
+          "official_NN_voxels": 1160,
+          "dice": 0.7533490937746257,
+          "prediction_to_official_volume_ratio": 1.1879310344827587,
+          "prediction_centroid_scanner_RAS_mm": [
+            20.386011502935986,
+            11.398074929844398,
+            -43.294724925309
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            20.711393083399173,
+            10.75228522575685,
+            -43.075466349163776
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -0.325381580463187,
+            0.645789704087548,
+            -0.21925857614522215
+          ],
+          "centroid_distance_mm": 0.7556400188075235
+        }
+      ],
+      "wmparc_proxy_vs_official_NN": [
+        {
+          "labels": [
+            3006
+          ],
+          "historical_prediction_voxels": 2603,
+          "official_NN_voxels": 452,
+          "dice": 0.1911620294599018,
+          "prediction_to_official_volume_ratio": 5.758849557522124,
+          "prediction_centroid_scanner_RAS_mm": [
+            -29.110748403216192,
+            37.182350295772935,
+            -40.80631460572863
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -27.716494100728795,
+            30.884566078852643,
+            -51.161639568478336
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -1.394254302487397,
+            6.2977842169202916,
+            10.355324962749705
+          ],
+          "centroid_distance_mm": 12.199950253465877
+        },
+        {
+          "labels": [
+            3007
+          ],
+          "historical_prediction_voxels": 25366,
+          "official_NN_voxels": 4590,
+          "dice": 0.268059821070904,
+          "prediction_to_official_volume_ratio": 5.52636165577342,
+          "prediction_centroid_scanner_RAS_mm": [
+            -29.003482857816948,
+            -14.72379854090687,
+            -43.178340383634406
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -29.46207942193422,
+            -6.495156826240404,
+            -46.57098573182216
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            0.458596564117272,
+            -8.228641714666466,
+            3.392645348187756
+          ],
+          "centroid_distance_mm": 8.912401345066842
+        },
+        {
+          "labels": [
+            3016
+          ],
+          "historical_prediction_voxels": 5121,
+          "official_NN_voxels": 957,
+          "dice": 0.2671931556433037,
+          "prediction_to_official_volume_ratio": 5.351097178683386,
+          "prediction_centroid_scanner_RAS_mm": [
+            -23.118310952660607,
+            1.3182928862275247,
+            -33.25149993697357
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -24.46758237613662,
+            5.628844828811026,
+            -43.195862409180904
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            1.3492714234760115,
+            -4.310551942583501,
+            9.944362472207331
+          ],
+          "centroid_distance_mm": 10.922075645341634
+        },
+        {
+          "labels": [
+            4006
+          ],
+          "historical_prediction_voxels": 1570,
+          "official_NN_voxels": 297,
+          "dice": 0.15747188002142476,
+          "prediction_to_official_volume_ratio": 5.286195286195286,
+          "prediction_centroid_scanner_RAS_mm": [
+            13.963187648622295,
+            39.73360479742668,
+            -37.27526920928034
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            16.980224528898702,
+            35.531514602089274,
+            -48.80879773210219
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -3.0170368802764074,
+            4.202090195337405,
+            11.533528522821854
+          ],
+          "centroid_distance_mm": 12.640504488881922
+        },
+        {
+          "labels": [
+            4007
+          ],
+          "historical_prediction_voxels": 26267,
+          "official_NN_voxels": 4535,
+          "dice": 0.2447892993961431,
+          "prediction_to_official_volume_ratio": 5.792061742006616,
+          "prediction_centroid_scanner_RAS_mm": [
+            33.284242149955986,
+            -2.81463171384479,
+            -38.854279226299155
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            32.106355628081275,
+            3.824397212670249,
+            -43.98549377675218
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            1.1778865218747114,
+            -6.639028926515039,
+            5.1312145504530235
+          ],
+          "centroid_distance_mm": 8.47310359362485
+        },
+        {
+          "labels": [
+            4016
+          ],
+          "historical_prediction_voxels": 4499,
+          "official_NN_voxels": 1019,
+          "dice": 0.2631388184124683,
+          "prediction_to_official_volume_ratio": 4.415112855740922,
+          "prediction_centroid_scanner_RAS_mm": [
+            19.103904537559515,
+            6.40858632215668,
+            -30.52187417654656
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            23.464741557386873,
+            11.25889815558645,
+            -40.389942858797724
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -4.360837019827358,
+            -4.850311833429771,
+            9.868068682251163
+          ],
+          "centroid_distance_mm": 11.828829355123517
+        },
+        {
+          "labels": [
+            3006,
+            3007,
+            3016
+          ],
+          "historical_prediction_voxels": 33090,
+          "official_NN_voxels": 5999,
+          "dice": 0.2697945713627875,
+          "prediction_to_official_volume_ratio": 5.515919319886648,
+          "prediction_centroid_scanner_RAS_mm": [
+            -28.101133111318546,
+            -8.157970326333498,
+            -41.455471449598775
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -28.533801669306584,
+            -1.7446476852191921,
+            -46.3784507283884
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            0.4326685579880376,
+            -6.413322641114306,
+            4.922979278789626
+          ],
+          "centroid_distance_mm": 8.096519891872855
+        },
+        {
+          "labels": [
+            4006,
+            4007,
+            4016
+          ],
+          "historical_prediction_voxels": 32336,
+          "official_NN_voxels": 5851,
+          "dice": 0.25961714719669,
+          "prediction_to_official_volume_ratio": 5.5265766535634935,
+          "prediction_centroid_scanner_RAS_mm": [
+            30.37320199392971,
+            0.5344525658022548,
+            -37.61830272810653
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            29.83353633659351,
+            6.728647823760511,
+            -43.60413245208005
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            0.5396656573362009,
+            -6.194195257958256,
+            5.985829723973524
+          ],
+          "centroid_distance_mm": 8.630727165182874
+        }
+      ],
+      "hippo_WM_hyperprior_raw_samples": {
+        "left_historical_proxy_eroded_union": {
+          "n": 18273,
+          "median": 722.0,
+          "MAD": 81.0,
+          "p10": 532.0,
+          "p90": 840.0
+        },
+        "left_official_wmparc_NN_eroded_union": {
+          "n": 2158,
+          "median": 669.5,
+          "MAD": 88.5,
+          "p10": 503.0,
+          "p90": 790.0
+        },
+        "right_historical_proxy_eroded_union": {
+          "n": 17564,
+          "median": 614.0,
+          "MAD": 75.0,
+          "p10": 452.3000000000002,
+          "p90": 733.0
+        },
+        "right_official_wmparc_NN_eroded_union": {
+          "n": 1877,
+          "median": 566.0,
+          "MAD": 67.0,
+          "p10": 434.0,
+          "p90": 681.0
+        }
+      }
+    },
+    "raw_preprocess_gpu_default_v4": {
+      "files": {
+        "coarse": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/raw_preprocess_gpu_default_v4/aseg_proxy.nii.gz",
+          "bytes": 576467,
+          "sha256": "89d9f434cf88a562fd512875a0e46af086105df04f9183c4dc49d5090a3751be"
+        },
+        "cortical": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/raw_preprocess_gpu_default_v4/cortical_parcellation.nii.gz",
+          "bytes": 451394,
+          "sha256": "cb4c7458c75e155d6e200a04d03fdbf48096461a61c46eccbdae7f30ca06432c"
+        },
+        "wmparc": {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/raw_preprocess_gpu_default_v4/wmparc_proxy.nii.gz",
+          "bytes": 582083,
+          "sha256": "1eca2c6a6eaa5de3b2c448207a548c4f0408e51c5fff1e60853ee5fabe2d93c9"
+        }
+      },
+      "saved_report": {
+        "t1": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/examples/data/sub-01_T1w.nii.gz",
+        "device": "cuda:0",
+        "seconds": 8.703884955961257,
+        "shape": [
+          256,
+          156,
+          256
+        ],
+        "peak_gpu_gib": 15.474496841430664,
+        "wmparc_support_voxels": {
+          "3006": 2603,
+          "3007": 25366,
+          "3016": 5121,
+          "4006": 1570,
+          "4007": 26267,
+          "4016": 4499
+        },
+        "wm_only": true
+      },
+      "same_current_raw_grid": true,
+      "historical_t1_string_same_as_current_raw": true,
+      "same_current_frozen_proxy_algorithm_rebuild_bitwise": true,
+      "proxy_rebuild_changed_voxels": 0,
+      "coarse_vs_official_NN": [
+        {
+          "labels": [
+            2
+          ],
+          "historical_prediction_voxels": 132950,
+          "official_NN_voxels": 139043,
+          "dice": 0.9106557889357446,
+          "prediction_to_official_volume_ratio": 0.9561790237552412,
+          "prediction_centroid_scanner_RAS_mm": [
+            -26.870013031692466,
+            6.344272277442286,
+            -17.95188960921618
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -27.41524965405216,
+            6.454496169337077,
+            -17.729852306994133
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            0.5452366223596954,
+            -0.11022389189479043,
+            -0.22203730222204854
+          ],
+          "centroid_distance_mm": 0.5989431060498892
+        },
+        {
+          "labels": [
+            41
+          ],
+          "historical_prediction_voxels": 135627,
+          "official_NN_voxels": 138068,
+          "dice": 0.9100129706425035,
+          "prediction_to_official_volume_ratio": 0.9823203059362053,
+          "prediction_centroid_scanner_RAS_mm": [
+            21.80482602710316,
+            13.2904286947863,
+            -14.49636388412091
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            22.120105733514976,
+            14.314318685616698,
+            -14.101370199228569
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -0.3152797064118147,
+            -1.0238899908303978,
+            -0.39499368489234143
+          ],
+          "centroid_distance_mm": 1.14182836613154
+        },
+        {
+          "labels": [
+            3
+          ],
+          "historical_prediction_voxels": 156008,
+          "official_NN_voxels": 129941,
+          "dice": 0.8268327568902147,
+          "prediction_to_official_volume_ratio": 1.2006064290716556,
+          "prediction_centroid_scanner_RAS_mm": [
+            -30.53867118196669,
+            8.829216458240069,
+            -20.883251108646306
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -30.662522726258885,
+            8.31928894251324,
+            -20.6434287892815
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            0.1238515442921937,
+            0.5099275157268295,
+            -0.23982231936480503
+          ],
+          "centroid_distance_mm": 0.5769575557910752
+        },
+        {
+          "labels": [
+            42
+          ],
+          "historical_prediction_voxels": 158323,
+          "official_NN_voxels": 129439,
+          "dice": 0.8107324803135925,
+          "prediction_to_official_volume_ratio": 1.2231475830313894,
+          "prediction_centroid_scanner_RAS_mm": [
+            25.37184016763311,
+            16.553918520220293,
+            -17.07114407609032
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            25.214032143862624,
+            15.94849564262178,
+            -16.619827891015518
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            0.1578080237704853,
+            0.6054228775985138,
+            -0.451316185074802
+          ],
+          "centroid_distance_mm": 0.7714444451783187
+        },
+        {
+          "labels": [
+            10
+          ],
+          "historical_prediction_voxels": 4293,
+          "official_NN_voxels": 4289,
+          "dice": 0.9533908179911442,
+          "prediction_to_official_volume_ratio": 1.0009326183259502,
+          "prediction_centroid_scanner_RAS_mm": [
+            -13.396133193764427,
+            13.597311577549902,
+            -25.76486385594893
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -13.43911722798346,
+            13.461675842624189,
+            -25.763699626953127
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            0.04298403421903174,
+            0.1356357349257138,
+            -0.0011642289958047058
+          ],
+          "centroid_distance_mm": 0.14228856319372987
+        },
+        {
+          "labels": [
+            49
+          ],
+          "historical_prediction_voxels": 4198,
+          "official_NN_voxels": 4204,
+          "dice": 0.9545346346108069,
+          "prediction_to_official_volume_ratio": 0.9985727878211227,
+          "prediction_centroid_scanner_RAS_mm": [
+            6.984115439545661,
+            16.574332016456765,
+            -24.13050701635882
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            7.048265234537752,
+            16.582985518046513,
+            -24.27487644041443
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -0.06414979499209039,
+            -0.008653501589748203,
+            0.14436942405561126
+          ],
+          "centroid_distance_mm": 0.15821697092739423
+        },
+        {
+          "labels": [
+            17
+          ],
+          "historical_prediction_voxels": 3020,
+          "official_NN_voxels": 2918,
+          "dice": 0.9285954866958572,
+          "prediction_to_official_volume_ratio": 1.0349554489376285,
+          "prediction_centroid_scanner_RAS_mm": [
+            -24.267926035707347,
+            14.312362753121263,
+            -42.121787756281776
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -24.30443043179966,
+            14.538814154959766,
+            -42.19297155509611
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            0.03650439609231171,
+            -0.22645140183850287,
+            0.07118379881433157
+          ],
+          "centroid_distance_mm": 0.2401664871340852
+        },
+        {
+          "labels": [
+            53
+          ],
+          "historical_prediction_voxels": 3074,
+          "official_NN_voxels": 3012,
+          "dice": 0.9352612553401248,
+          "prediction_to_official_volume_ratio": 1.0205843293492696,
+          "prediction_centroid_scanner_RAS_mm": [
+            20.45120456219402,
+            20.764673505603753,
+            -39.49198948632062
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            20.436923519721205,
+            20.405570037039624,
+            -39.328788794908576
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            0.014281042472816807,
+            0.359103468564129,
+            -0.16320069141204385
+          ],
+          "centroid_distance_mm": 0.39470712558334686
+        },
+        {
+          "labels": [
+            18
+          ],
+          "historical_prediction_voxels": 1145,
+          "official_NN_voxels": 1117,
+          "dice": 0.9071618037135278,
+          "prediction_to_official_volume_ratio": 1.0250671441360788,
+          "prediction_centroid_scanner_RAS_mm": [
+            -25.21817643470233,
+            31.352339344042235,
+            -42.44295460910874
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -25.160473538046546,
+            31.22160341888133,
+            -42.48124941072578
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -0.05770289665578332,
+            0.1307359251609057,
+            0.038294801617041685
+          ],
+          "centroid_distance_mm": 0.14794593012663285
+        },
+        {
+          "labels": [
+            54
+          ],
+          "historical_prediction_voxels": 1171,
+          "official_NN_voxels": 1160,
+          "dice": 0.9266409266409267,
+          "prediction_to_official_volume_ratio": 1.0094827586206896,
+          "prediction_centroid_scanner_RAS_mm": [
+            15.888934446259356,
+            36.57749292519449,
+            -39.86474865930907
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            15.91875157372479,
+            36.620084524813024,
+            -40.17004471125304
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -0.029817127465435078,
+            -0.04259159961853243,
+            0.30529605194396936
+          ],
+          "centroid_distance_mm": 0.30969143478780653
+        },
+        {
+          "labels": [
+            16
+          ],
+          "historical_prediction_voxels": 12941,
+          "official_NN_voxels": 13156,
+          "dice": 0.9566616852511783,
+          "prediction_to_official_volume_ratio": 0.983657646701125,
+          "prediction_centroid_scanner_RAS_mm": [
+            -0.7060478783308639,
+            12.11717280025492,
+            -57.72536166825512
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -0.6112152593076274,
+            12.232822408174485,
+            -57.64125845467305
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -0.09483261902323648,
+            -0.1156496079195648,
+            -0.08410321358206829
+          ],
+          "centroid_distance_mm": 0.17158498762300384
+        },
+        {
+          "labels": [
+            28
+          ],
+          "historical_prediction_voxels": 2522,
+          "official_NN_voxels": 2354,
+          "dice": 0.9126333059885152,
+          "prediction_to_official_volume_ratio": 1.0713678844519967,
+          "prediction_centroid_scanner_RAS_mm": [
+            -12.379035939831027,
+            20.997362151538127,
+            -37.31779862293186
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -12.318324178901548,
+            21.036334431422404,
+            -37.22553814103557
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -0.06071176092947894,
+            -0.03897227988427687,
+            -0.09226048189628955
+          ],
+          "centroid_distance_mm": 0.11711854265773712
+        },
+        {
+          "labels": [
+            60
+          ],
+          "historical_prediction_voxels": 2429,
+          "official_NN_voxels": 2335,
+          "dice": 0.918975650713686,
+          "prediction_to_official_volume_ratio": 1.0402569593147752,
+          "prediction_centroid_scanner_RAS_mm": [
+            6.153288851486735,
+            22.89509985797926,
+            -35.862152308316894
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            6.222545480915244,
+            22.958340639276415,
+            -35.919336240273566
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -0.06925662942850863,
+            -0.0632407812971536,
+            0.05718393195667204
+          ],
+          "centroid_distance_mm": 0.10984479602101084
+        }
+      ],
+      "temporal_cortex_vs_official_DKT_NN": [
+        {
+          "labels": [
+            1006
+          ],
+          "historical_prediction_voxels": 1404,
+          "official_NN_voxels": 868,
+          "dice": 0.6566901408450704,
+          "prediction_to_official_volume_ratio": 1.6175115207373272,
+          "prediction_centroid_scanner_RAS_mm": [
+            -25.500016779945284,
+            32.244304577607735,
+            -53.494615530447916
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -25.055127128572423,
+            29.660493959642707,
+            -53.82076844347701
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -0.4448896513728613,
+            2.583810617965028,
+            0.326152913029091
+          ],
+          "centroid_distance_mm": 2.6420408464073466
+        },
+        {
+          "labels": [
+            1007
+          ],
+          "historical_prediction_voxels": 6833,
+          "official_NN_voxels": 4205,
+          "dice": 0.6606269251676028,
+          "prediction_to_official_volume_ratio": 1.6249702734839477,
+          "prediction_centroid_scanner_RAS_mm": [
+            -27.352004599555073,
+            -0.42409864451300905,
+            -51.9322072840381
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -26.069594270331564,
+            -10.177972957918001,
+            -49.890812574985674
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -1.2824103292235094,
+            9.753874313404992,
+            -2.041394709052426
+          ],
+          "centroid_distance_mm": 10.047384372678698
+        },
+        {
+          "labels": [
+            1016
+          ],
+          "historical_prediction_voxels": 1454,
+          "official_NN_voxels": 1095,
+          "dice": 0.7304825421734014,
+          "prediction_to_official_volume_ratio": 1.3278538812785388,
+          "prediction_centroid_scanner_RAS_mm": [
+            -22.883395562815053,
+            5.77698268000411,
+            -46.01539963054404
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -22.858014402589575,
+            6.980116318503079,
+            -46.41992308514611
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -0.02538116022547854,
+            -1.2031336384989686,
+            0.40452345460207084
+          ],
+          "centroid_distance_mm": 1.2695723613506054
+        },
+        {
+          "labels": [
+            2006
+          ],
+          "historical_prediction_voxels": 1126,
+          "official_NN_voxels": 706,
+          "dice": 0.6648471615720524,
+          "prediction_to_official_volume_ratio": 1.594900849858357,
+          "prediction_centroid_scanner_RAS_mm": [
+            17.71621536008837,
+            36.26293149029715,
+            -51.24004503265584
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            17.172604698273602,
+            34.356965473243605,
+            -51.722636996348925
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            0.5436106618147676,
+            1.9059660170535437,
+            0.482591963693082
+          ],
+          "centroid_distance_mm": 2.0398808821161065
+        },
+        {
+          "labels": [
+            2007
+          ],
+          "historical_prediction_voxels": 7627,
+          "official_NN_voxels": 4780,
+          "dice": 0.6575320383654388,
+          "prediction_to_official_volume_ratio": 1.5956066945606695,
+          "prediction_centroid_scanner_RAS_mm": [
+            30.80127386354158,
+            7.720994414624656,
+            -48.89180361640729
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            32.42688338943333,
+            -0.669620368921187,
+            -47.18471748229646
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -1.625609525891747,
+            8.390614783545843,
+            -1.707086134110824
+          ],
+          "centroid_distance_mm": 8.715455573049608
+        },
+        {
+          "labels": [
+            2016
+          ],
+          "historical_prediction_voxels": 1378,
+          "official_NN_voxels": 1160,
+          "dice": 0.7533490937746257,
+          "prediction_to_official_volume_ratio": 1.1879310344827587,
+          "prediction_centroid_scanner_RAS_mm": [
+            20.386011502935986,
+            11.398074929844398,
+            -43.294724925309
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            20.711393083399173,
+            10.75228522575685,
+            -43.075466349163776
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -0.325381580463187,
+            0.645789704087548,
+            -0.21925857614522215
+          ],
+          "centroid_distance_mm": 0.7556400188075235
+        }
+      ],
+      "wmparc_proxy_vs_official_NN": [
+        {
+          "labels": [
+            3006
+          ],
+          "historical_prediction_voxels": 2603,
+          "official_NN_voxels": 452,
+          "dice": 0.1911620294599018,
+          "prediction_to_official_volume_ratio": 5.758849557522124,
+          "prediction_centroid_scanner_RAS_mm": [
+            -29.110748403216192,
+            37.182350295772935,
+            -40.80631460572863
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -27.716494100728795,
+            30.884566078852643,
+            -51.161639568478336
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -1.394254302487397,
+            6.2977842169202916,
+            10.355324962749705
+          ],
+          "centroid_distance_mm": 12.199950253465877
+        },
+        {
+          "labels": [
+            3007
+          ],
+          "historical_prediction_voxels": 25366,
+          "official_NN_voxels": 4590,
+          "dice": 0.268059821070904,
+          "prediction_to_official_volume_ratio": 5.52636165577342,
+          "prediction_centroid_scanner_RAS_mm": [
+            -29.003482857816948,
+            -14.72379854090687,
+            -43.178340383634406
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -29.46207942193422,
+            -6.495156826240404,
+            -46.57098573182216
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            0.458596564117272,
+            -8.228641714666466,
+            3.392645348187756
+          ],
+          "centroid_distance_mm": 8.912401345066842
+        },
+        {
+          "labels": [
+            3016
+          ],
+          "historical_prediction_voxels": 5121,
+          "official_NN_voxels": 957,
+          "dice": 0.2671931556433037,
+          "prediction_to_official_volume_ratio": 5.351097178683386,
+          "prediction_centroid_scanner_RAS_mm": [
+            -23.118310952660607,
+            1.3182928862275247,
+            -33.25149993697357
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -24.46758237613662,
+            5.628844828811026,
+            -43.195862409180904
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            1.3492714234760115,
+            -4.310551942583501,
+            9.944362472207331
+          ],
+          "centroid_distance_mm": 10.922075645341634
+        },
+        {
+          "labels": [
+            4006
+          ],
+          "historical_prediction_voxels": 1570,
+          "official_NN_voxels": 297,
+          "dice": 0.15747188002142476,
+          "prediction_to_official_volume_ratio": 5.286195286195286,
+          "prediction_centroid_scanner_RAS_mm": [
+            13.963187648622295,
+            39.73360479742668,
+            -37.27526920928034
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            16.980224528898702,
+            35.531514602089274,
+            -48.80879773210219
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -3.0170368802764074,
+            4.202090195337405,
+            11.533528522821854
+          ],
+          "centroid_distance_mm": 12.640504488881922
+        },
+        {
+          "labels": [
+            4007
+          ],
+          "historical_prediction_voxels": 26267,
+          "official_NN_voxels": 4535,
+          "dice": 0.2447892993961431,
+          "prediction_to_official_volume_ratio": 5.792061742006616,
+          "prediction_centroid_scanner_RAS_mm": [
+            33.284242149955986,
+            -2.81463171384479,
+            -38.854279226299155
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            32.106355628081275,
+            3.824397212670249,
+            -43.98549377675218
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            1.1778865218747114,
+            -6.639028926515039,
+            5.1312145504530235
+          ],
+          "centroid_distance_mm": 8.47310359362485
+        },
+        {
+          "labels": [
+            4016
+          ],
+          "historical_prediction_voxels": 4499,
+          "official_NN_voxels": 1019,
+          "dice": 0.2631388184124683,
+          "prediction_to_official_volume_ratio": 4.415112855740922,
+          "prediction_centroid_scanner_RAS_mm": [
+            19.103904537559515,
+            6.40858632215668,
+            -30.52187417654656
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            23.464741557386873,
+            11.25889815558645,
+            -40.389942858797724
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            -4.360837019827358,
+            -4.850311833429771,
+            9.868068682251163
+          ],
+          "centroid_distance_mm": 11.828829355123517
+        },
+        {
+          "labels": [
+            3006,
+            3007,
+            3016
+          ],
+          "historical_prediction_voxels": 33090,
+          "official_NN_voxels": 5999,
+          "dice": 0.2697945713627875,
+          "prediction_to_official_volume_ratio": 5.515919319886648,
+          "prediction_centroid_scanner_RAS_mm": [
+            -28.101133111318546,
+            -8.157970326333498,
+            -41.455471449598775
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            -28.533801669306584,
+            -1.7446476852191921,
+            -46.3784507283884
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            0.4326685579880376,
+            -6.413322641114306,
+            4.922979278789626
+          ],
+          "centroid_distance_mm": 8.096519891872855
+        },
+        {
+          "labels": [
+            4006,
+            4007,
+            4016
+          ],
+          "historical_prediction_voxels": 32336,
+          "official_NN_voxels": 5851,
+          "dice": 0.25961714719669,
+          "prediction_to_official_volume_ratio": 5.5265766535634935,
+          "prediction_centroid_scanner_RAS_mm": [
+            30.37320199392971,
+            0.5344525658022548,
+            -37.61830272810653
+          ],
+          "official_NN_centroid_scanner_RAS_mm": [
+            29.83353633659351,
+            6.728647823760511,
+            -43.60413245208005
+          ],
+          "centroid_delta_scanner_RAS_mm": [
+            0.5396656573362009,
+            -6.194195257958256,
+            5.985829723973524
+          ],
+          "centroid_distance_mm": 8.630727165182874
+        }
+      ],
+      "hippo_WM_hyperprior_raw_samples": {
+        "left_historical_proxy_eroded_union": {
+          "n": 18273,
+          "median": 722.0,
+          "MAD": 81.0,
+          "p10": 532.0,
+          "p90": 840.0
+        },
+        "left_official_wmparc_NN_eroded_union": {
+          "n": 2158,
+          "median": 669.5,
+          "MAD": 88.5,
+          "p10": 503.0,
+          "p90": 790.0
+        },
+        "right_historical_proxy_eroded_union": {
+          "n": 17564,
+          "median": 614.0,
+          "MAD": 75.0,
+          "p10": 452.3000000000002,
+          "p90": 733.0
+        },
+        "right_official_wmparc_NN_eroded_union": {
+          "n": 1877,
+          "median": 566.0,
+          "MAD": 67.0,
+          "p10": 434.0,
+          "p90": 681.0
+        }
+      }
+    }
+  },
+  "cache_cross_device_comparisons": {
+    "raw_preprocess_cpu__raw_preprocess_gpu_v4": {
+      "coarse": {
+        "array_bitwise_equal": false,
+        "changed_voxels": 113
+      },
+      "cortical": {
+        "array_bitwise_equal": false,
+        "changed_voxels": 194
+      },
+      "wmparc": {
+        "array_bitwise_equal": false,
+        "changed_voxels": 156
+      }
+    },
+    "raw_preprocess_gpu_v4__raw_preprocess_gpu_default_v4": {
+      "coarse": {
+        "array_bitwise_equal": true,
+        "changed_voxels": 0
+      },
+      "cortical": {
+        "array_bitwise_equal": true,
+        "changed_voxels": 0
+      },
+      "wmparc": {
+        "array_bitwise_equal": true,
+        "changed_voxels": 0
+      }
+    }
+  },
+  "thalamic_gaussian_hyperparameter_CPU_only": {
+    "raw_official_aseg_stage0": {
+      "mean_hyper": [
+        483.0,
+        681.0,
+        348.0,
+        351.0,
+        521.0,
+        436.0,
+        115.0,
+        55.0,
+        413.5,
+        531.0,
+        347.0,
+        391.0,
+        509.0,
+        471.0
+      ],
+      "n_hyper": [
+        6696338.5,
+        1771651.875,
+        728263.4375,
+        466641.875,
+        115488.1328125,
+        100404.9765625,
+        1190976.375,
+        10.0,
+        43461.12890625,
+        11829.123046875,
+        3523.512451171875,
+        31891.48828125,
+        10.0,
+        64209.56640625
+      ],
+      "group_label_ids": {
+        "0": [
+          0
+        ],
+        "1": [
+          2,
+          8125,
+          8225
+        ],
+        "2": [
+          3
+        ],
+        "3": [
+          8
+        ],
+        "4": [
+          7
+        ],
+        "5": [
+          16
+        ],
+        "6": [
+          4
+        ],
+        "7": [
+          31
+        ],
+        "8": [
+          12
+        ],
+        "9": [
+          13
+        ],
+        "10": [
+          26
+        ],
+        "11": [
+          11
+        ],
+        "12": [
+          28,
+          60
+        ],
+        "13": [
+          8109,
+          8209,
+          8215,
+          8115,
+          8121,
+          8123,
+          8111,
+          8133,
+          8106,
+          8128,
+          8120,
+          8113,
+          8118,
+          8127,
+          8112,
+          8104,
+          8126,
+          8116,
+          8130,
+          8105,
+          8122,
+          8119,
+          8103,
+          8117,
+          8129,
+          8110,
+          8221,
+          8223,
+          8211,
+          8233,
+          8206,
+          8228,
+          8220,
+          8213,
+          8218,
+          8227,
+          8212,
+          8226,
+          8216,
+          8204,
+          8230,
+          8222,
+          8205,
+          8229,
+          8217,
+          8219,
+          8203,
+          8210,
+          8108,
+          8208
+        ]
+      },
+      "fallback_mean55_groups": [
+        7
+      ],
+      "brain_t1_scale": null
+    },
+    "raw_official_aseg_stage1": {
+      "mean_hyper": [
+        483.0,
+        681.0,
+        348.0,
+        351.0,
+        521.0,
+        436.0,
+        115.0,
+        55.0,
+        413.5,
+        531.0,
+        347.0,
+        391.0,
+        509.0,
+        476.0,
+        466.0
+      ],
+      "n_hyper": [
+        6696338.5,
+        1771651.875,
+        728263.4375,
+        466641.875,
+        115488.1328125,
+        100404.9765625,
+        1190976.375,
+        10.0,
+        43461.12890625,
+        11829.123046875,
+        3523.512451171875,
+        31891.48828125,
+        10.0,
+        25.0,
+        25.0
+      ],
+      "group_label_ids": {
+        "0": [
+          0
+        ],
+        "1": [
+          2,
+          8125,
+          8225
+        ],
+        "2": [
+          3
+        ],
+        "3": [
+          8
+        ],
+        "4": [
+          7
+        ],
+        "5": [
+          16
+        ],
+        "6": [
+          4
+        ],
+        "7": [
+          31
+        ],
+        "8": [
+          12
+        ],
+        "9": [
+          13
+        ],
+        "10": [
+          26
+        ],
+        "11": [
+          11
+        ],
+        "12": [
+          28,
+          60
+        ],
+        "13": [
+          8109,
+          8209,
+          8215,
+          8115,
+          8111,
+          8133,
+          8106,
+          8128,
+          8118,
+          8127,
+          8104,
+          8126,
+          8116,
+          8130,
+          8105,
+          8119,
+          8103,
+          8117,
+          8129,
+          8110,
+          8211,
+          8233,
+          8206,
+          8228,
+          8218,
+          8227,
+          8226,
+          8216,
+          8204,
+          8230,
+          8205,
+          8229,
+          8217,
+          8219,
+          8203,
+          8210,
+          8108,
+          8208
+        ],
+        "14": [
+          8121,
+          8123,
+          8120,
+          8113,
+          8112,
+          8122,
+          8221,
+          8223,
+          8220,
+          8213,
+          8212,
+          8222
+        ]
+      },
+      "fallback_mean55_groups": [
+        7
+      ],
+      "brain_t1_scale": null
+    },
+    "raw_historical_gpu_coarse_stage0": {
+      "mean_hyper": [
+        487.0,
+        683.0,
+        330.0,
+        350.0,
+        521.0,
+        436.0,
+        115.0,
+        55.0,
+        413.0,
+        530.0,
+        346.0,
+        392.0,
+        508.0,
+        471.0
+      ],
+      "n_hyper": [
+        6643594.5,
+        1684042.75,
+        1317234.125,
+        481371.59375,
+        115862.359375,
+        98772.9609375,
+        1255571.0,
+        10.0,
+        45498.55078125,
+        12182.5537109375,
+        3492.327392578125,
+        32650.322265625,
+        10.0,
+        64594.1796875
+      ],
+      "group_label_ids": {
+        "0": [
+          0
+        ],
+        "1": [
+          2,
+          8125,
+          8225
+        ],
+        "2": [
+          3
+        ],
+        "3": [
+          8
+        ],
+        "4": [
+          7
+        ],
+        "5": [
+          16
+        ],
+        "6": [
+          4
+        ],
+        "7": [
+          31
+        ],
+        "8": [
+          12
+        ],
+        "9": [
+          13
+        ],
+        "10": [
+          26
+        ],
+        "11": [
+          11
+        ],
+        "12": [
+          28,
+          60
+        ],
+        "13": [
+          8109,
+          8209,
+          8215,
+          8115,
+          8121,
+          8123,
+          8111,
+          8133,
+          8106,
+          8128,
+          8120,
+          8113,
+          8118,
+          8127,
+          8112,
+          8104,
+          8126,
+          8116,
+          8130,
+          8105,
+          8122,
+          8119,
+          8103,
+          8117,
+          8129,
+          8110,
+          8221,
+          8223,
+          8211,
+          8233,
+          8206,
+          8228,
+          8220,
+          8213,
+          8218,
+          8227,
+          8212,
+          8226,
+          8216,
+          8204,
+          8230,
+          8222,
+          8205,
+          8229,
+          8217,
+          8219,
+          8203,
+          8210,
+          8108,
+          8208
+        ]
+      },
+      "fallback_mean55_groups": [
+        7
+      ],
+      "brain_t1_scale": null
+    },
+    "raw_historical_gpu_coarse_stage1": {
+      "mean_hyper": [
+        487.0,
+        683.0,
+        330.0,
+        350.0,
+        521.0,
+        436.0,
+        115.0,
+        55.0,
+        413.0,
+        530.0,
+        346.0,
+        392.0,
+        508.0,
+        476.0,
+        466.0
+      ],
+      "n_hyper": [
+        6643594.5,
+        1684042.75,
+        1317234.125,
+        481371.59375,
+        115862.359375,
+        98772.9609375,
+        1255571.0,
+        10.0,
+        45498.55078125,
+        12182.5537109375,
+        3492.327392578125,
+        32650.322265625,
+        10.0,
+        25.0,
+        25.0
+      ],
+      "group_label_ids": {
+        "0": [
+          0
+        ],
+        "1": [
+          2,
+          8125,
+          8225
+        ],
+        "2": [
+          3
+        ],
+        "3": [
+          8
+        ],
+        "4": [
+          7
+        ],
+        "5": [
+          16
+        ],
+        "6": [
+          4
+        ],
+        "7": [
+          31
+        ],
+        "8": [
+          12
+        ],
+        "9": [
+          13
+        ],
+        "10": [
+          26
+        ],
+        "11": [
+          11
+        ],
+        "12": [
+          28,
+          60
+        ],
+        "13": [
+          8109,
+          8209,
+          8215,
+          8115,
+          8111,
+          8133,
+          8106,
+          8128,
+          8118,
+          8127,
+          8104,
+          8126,
+          8116,
+          8130,
+          8105,
+          8119,
+          8103,
+          8117,
+          8129,
+          8110,
+          8211,
+          8233,
+          8206,
+          8228,
+          8218,
+          8227,
+          8226,
+          8216,
+          8204,
+          8230,
+          8205,
+          8229,
+          8217,
+          8219,
+          8203,
+          8210,
+          8108,
+          8208
+        ],
+        "14": [
+          8121,
+          8123,
+          8120,
+          8113,
+          8112,
+          8122,
+          8221,
+          8223,
+          8220,
+          8213,
+          8212,
+          8222
+        ]
+      },
+      "fallback_mean55_groups": [
+        7
+      ],
+      "brain_t1_scale": null
+    },
+    "WM110raw_official_aseg_stage0": {
+      "mean_hyper": [
+        83.015625,
+        117.046875,
+        59.8125,
+        60.328125,
+        89.546875,
+        74.9375,
+        19.765625,
+        55.0,
+        71.0703125,
+        91.265625,
+        59.640625,
+        67.203125,
+        87.484375,
+        80.953125
+      ],
+      "n_hyper": [
+        6696338.5,
+        1771651.875,
+        728263.4375,
+        466641.875,
+        115488.1328125,
+        100404.9765625,
+        1190976.375,
+        10.0,
+        43461.12890625,
+        11829.123046875,
+        3523.512451171875,
+        31891.48828125,
+        10.0,
+        64209.56640625
+      ],
+      "group_label_ids": {
+        "0": [
+          0
+        ],
+        "1": [
+          2,
+          8125,
+          8225
+        ],
+        "2": [
+          3
+        ],
+        "3": [
+          8
+        ],
+        "4": [
+          7
+        ],
+        "5": [
+          16
+        ],
+        "6": [
+          4
+        ],
+        "7": [
+          31
+        ],
+        "8": [
+          12
+        ],
+        "9": [
+          13
+        ],
+        "10": [
+          26
+        ],
+        "11": [
+          11
+        ],
+        "12": [
+          28,
+          60
+        ],
+        "13": [
+          8109,
+          8209,
+          8215,
+          8115,
+          8121,
+          8123,
+          8111,
+          8133,
+          8106,
+          8128,
+          8120,
+          8113,
+          8118,
+          8127,
+          8112,
+          8104,
+          8126,
+          8116,
+          8130,
+          8105,
+          8122,
+          8119,
+          8103,
+          8117,
+          8129,
+          8110,
+          8221,
+          8223,
+          8211,
+          8233,
+          8206,
+          8228,
+          8220,
+          8213,
+          8218,
+          8227,
+          8212,
+          8226,
+          8216,
+          8204,
+          8230,
+          8222,
+          8205,
+          8229,
+          8217,
+          8219,
+          8203,
+          8210,
+          8108,
+          8208
+        ]
+      },
+      "fallback_mean55_groups": [
+        7
+      ],
+      "brain_t1_scale": 0.171875
+    },
+    "WM110raw_official_aseg_stage1": {
+      "mean_hyper": [
+        83.015625,
+        117.046875,
+        59.8125,
+        60.328125,
+        89.546875,
+        74.9375,
+        19.765625,
+        55.0,
+        71.0703125,
+        91.265625,
+        59.640625,
+        67.203125,
+        87.484375,
+        85.953125,
+        75.953125
+      ],
+      "n_hyper": [
+        6696338.5,
+        1771651.875,
+        728263.4375,
+        466641.875,
+        115488.1328125,
+        100404.9765625,
+        1190976.375,
+        10.0,
+        43461.12890625,
+        11829.123046875,
+        3523.512451171875,
+        31891.48828125,
+        10.0,
+        25.0,
+        25.0
+      ],
+      "group_label_ids": {
+        "0": [
+          0
+        ],
+        "1": [
+          2,
+          8125,
+          8225
+        ],
+        "2": [
+          3
+        ],
+        "3": [
+          8
+        ],
+        "4": [
+          7
+        ],
+        "5": [
+          16
+        ],
+        "6": [
+          4
+        ],
+        "7": [
+          31
+        ],
+        "8": [
+          12
+        ],
+        "9": [
+          13
+        ],
+        "10": [
+          26
+        ],
+        "11": [
+          11
+        ],
+        "12": [
+          28,
+          60
+        ],
+        "13": [
+          8109,
+          8209,
+          8215,
+          8115,
+          8111,
+          8133,
+          8106,
+          8128,
+          8118,
+          8127,
+          8104,
+          8126,
+          8116,
+          8130,
+          8105,
+          8119,
+          8103,
+          8117,
+          8129,
+          8110,
+          8211,
+          8233,
+          8206,
+          8228,
+          8218,
+          8227,
+          8226,
+          8216,
+          8204,
+          8230,
+          8205,
+          8229,
+          8217,
+          8219,
+          8203,
+          8210,
+          8108,
+          8208
+        ],
+        "14": [
+          8121,
+          8123,
+          8120,
+          8113,
+          8112,
+          8122,
+          8221,
+          8223,
+          8220,
+          8213,
+          8212,
+          8222
+        ]
+      },
+      "fallback_mean55_groups": [
+        7
+      ],
+      "brain_t1_scale": 0.171875
+    },
+    "normmapped_official_aseg_stage0": {
+      "mean_hyper": [
+        10.774148941040039,
+        100.81764221191406,
+        49.27435302734375,
+        49.25830078125,
+        82.22454833984375,
+        72.43840789794922,
+        12.48039436340332,
+        55.0,
+        66.93787384033203,
+        89.07540130615234,
+        56.96327209472656,
+        59.099517822265625,
+        88.34598541259766,
+        77.36454010009766
+      ],
+      "n_hyper": [
+        205945.484375,
+        1771651.875,
+        728263.4375,
+        466641.875,
+        115488.1328125,
+        99708.515625,
+        1139864.125,
+        10.0,
+        43461.12890625,
+        11829.123046875,
+        3523.512451171875,
+        31891.48828125,
+        10.0,
+        64209.56640625
+      ],
+      "group_label_ids": {
+        "0": [
+          0
+        ],
+        "1": [
+          2,
+          8125,
+          8225
+        ],
+        "2": [
+          3
+        ],
+        "3": [
+          8
+        ],
+        "4": [
+          7
+        ],
+        "5": [
+          16
+        ],
+        "6": [
+          4
+        ],
+        "7": [
+          31
+        ],
+        "8": [
+          12
+        ],
+        "9": [
+          13
+        ],
+        "10": [
+          26
+        ],
+        "11": [
+          11
+        ],
+        "12": [
+          28,
+          60
+        ],
+        "13": [
+          8109,
+          8209,
+          8215,
+          8115,
+          8121,
+          8123,
+          8111,
+          8133,
+          8106,
+          8128,
+          8120,
+          8113,
+          8118,
+          8127,
+          8112,
+          8104,
+          8126,
+          8116,
+          8130,
+          8105,
+          8122,
+          8119,
+          8103,
+          8117,
+          8129,
+          8110,
+          8221,
+          8223,
+          8211,
+          8233,
+          8206,
+          8228,
+          8220,
+          8213,
+          8218,
+          8227,
+          8212,
+          8226,
+          8216,
+          8204,
+          8230,
+          8222,
+          8205,
+          8229,
+          8217,
+          8219,
+          8203,
+          8210,
+          8108,
+          8208
+        ]
+      },
+      "fallback_mean55_groups": [
+        7
+      ],
+      "brain_t1_scale": null
+    },
+    "normmapped_official_aseg_stage1": {
+      "mean_hyper": [
+        10.774148941040039,
+        100.81764221191406,
+        49.27435302734375,
+        49.25830078125,
+        82.22454833984375,
+        72.43840789794922,
+        12.48039436340332,
+        55.0,
+        66.93787384033203,
+        89.07540130615234,
+        56.96327209472656,
+        59.099517822265625,
+        88.34598541259766,
+        82.36454010009766,
+        72.36454010009766
+      ],
+      "n_hyper": [
+        205945.484375,
+        1771651.875,
+        728263.4375,
+        466641.875,
+        115488.1328125,
+        99708.515625,
+        1139864.125,
+        10.0,
+        43461.12890625,
+        11829.123046875,
+        3523.512451171875,
+        31891.48828125,
+        10.0,
+        25.0,
+        25.0
+      ],
+      "group_label_ids": {
+        "0": [
+          0
+        ],
+        "1": [
+          2,
+          8125,
+          8225
+        ],
+        "2": [
+          3
+        ],
+        "3": [
+          8
+        ],
+        "4": [
+          7
+        ],
+        "5": [
+          16
+        ],
+        "6": [
+          4
+        ],
+        "7": [
+          31
+        ],
+        "8": [
+          12
+        ],
+        "9": [
+          13
+        ],
+        "10": [
+          26
+        ],
+        "11": [
+          11
+        ],
+        "12": [
+          28,
+          60
+        ],
+        "13": [
+          8109,
+          8209,
+          8215,
+          8115,
+          8111,
+          8133,
+          8106,
+          8128,
+          8118,
+          8127,
+          8104,
+          8126,
+          8116,
+          8130,
+          8105,
+          8119,
+          8103,
+          8117,
+          8129,
+          8110,
+          8211,
+          8233,
+          8206,
+          8228,
+          8218,
+          8227,
+          8226,
+          8216,
+          8204,
+          8230,
+          8205,
+          8229,
+          8217,
+          8219,
+          8203,
+          8210,
+          8108,
+          8208
+        ],
+        "14": [
+          8121,
+          8123,
+          8120,
+          8113,
+          8112,
+          8122,
+          8221,
+          8223,
+          8220,
+          8213,
+          8212,
+          8222
+        ]
+      },
+      "fallback_mean55_groups": [
+        7
+      ],
+      "brain_t1_scale": null
+    }
+  },
+  "WM110_scale_from_official_NN_full_WM_median": 0.171875
+}

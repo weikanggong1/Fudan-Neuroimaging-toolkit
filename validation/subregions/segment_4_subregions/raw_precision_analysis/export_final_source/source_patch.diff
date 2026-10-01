@@ -1,0 +1,231 @@
+diff --git a/src/fnit/gems/context.py b/src/fnit/gems/context.py
+index 3bd92fb..05f7f2d 100644
+--- a/src/fnit/gems/context.py
++++ b/src/fnit/gems/context.py
+@@ -1,4 +1,4 @@
+-"""Shared native-grid inputs for GEMS subregion recipes."""
++"""Shared processing-grid inputs for GEMS subregion recipes."""
+ 
+ from __future__ import annotations
+ 
+@@ -27,21 +27,23 @@ def _native_labels(value, image: nib.spatialimages.SpatialImage, name: str) -> n
+ def build_wmparc_proxy(coarse: np.ndarray, cortical: np.ndarray, *,
+                        voxel_sizes: tuple[float, float, float] = (1, 1, 1),
+                        max_distance_mm: float = 15) -> np.ndarray:
+-    """Assign nearby DKT temporal parcels to white matter within each hemisphere.
++    """Assign nearby DKT cortical parcels to white matter in each hemisphere.
+ 
+     FreeSurfer's hippocampal intensity prior samples WM labels 3006, 3007,
+     3016 and the corresponding right-side 4000-series labels. The other
+-    wmparc labels retain their coarse anatomical identity.
++    same-side parcels compete for the nearest cortex. White matter beyond
++    ``max_distance_mm`` retains its coarse anatomical identity.
+     """
+     coarse = np.asarray(coarse)
+     cortical = np.asarray(cortical)
+     if coarse.ndim != 3 or cortical.shape != coarse.shape:
+         raise ValueError("coarse and cortical labels must share a 3-D grid")
+     proxy = coarse.astype(np.int32, copy=True)
+-    for wm_id, source_ids, offset in ((2, (1006, 1007, 1016), 2000),
+-                                      (41, (2006, 2007, 2016), 2000)):
++    for wm_id, lower, upper in ((2, 1000, 2000), (41, 2000, 3000)):
+         wm = coarse == wm_id
+-        source = np.isin(cortical, source_ids)
++        # Exclude each hemisphere's Unknown label (1000/2000). Restricting
++        # sources to temporal parcels lets them claim nearer non-temporal WM.
++        source = (cortical > lower) & (cortical < upper)
+         if not wm.any() or not source.any():
+             continue
+         low = np.maximum(np.argwhere(wm | source).min(0) - 1, 0)
+@@ -49,7 +51,7 @@ def build_wmparc_proxy(coarse: np.ndarray, cortical: np.ndarray, *,
+         crop = tuple(slice(int(a), int(b)) for a, b in zip(low, high))
+         distance, nearest = ndimage.distance_transform_edt(
+             ~source[crop], sampling=voxel_sizes, return_indices=True)
+-        propagated = cortical[crop][tuple(nearest)] + offset
++        propagated = cortical[crop][tuple(nearest)] + 2000
+         local = proxy[crop]
+         selected = wm[crop] & (distance <= max_distance_mm)
+         local[selected] = propagated[selected]
+@@ -64,6 +66,7 @@ class SubregionContext:
+     cortical_parcellation: np.ndarray | None
+     wmparc_proxy: np.ndarray | None
+     metadata: dict[str, object] = field(default_factory=dict)
++    native_image: nib.spatialimages.SpatialImage | None = None
+ 
+     @classmethod
+     def prepare(cls, t1, *, need_coarse: bool, need_parc: bool,
+diff --git a/src/fnit/gems/pipeline.py b/src/fnit/gems/pipeline.py
+index d318fd7..6e3e929 100644
+--- a/src/fnit/gems/pipeline.py
++++ b/src/fnit/gems/pipeline.py
+@@ -8,6 +8,7 @@ from pathlib import Path
+ from time import monotonic
+ 
+ import nibabel as nib
++from nibabel.processing import resample_from_to
+ import numpy as np
+ import torch
+ 
+@@ -73,6 +74,23 @@ def _merge_native(combined: np.ndarray, best_conf: np.ndarray,
+     best_conf[take] = confidence[take]
+ 
+ 
++def _outcome_on_native_grid(outcome, context, native_image):
++    same_grid = context.image.shape == native_image.shape and np.allclose(
++        context.image.affine, native_image.affine, atol=1e-5, rtol=0)
++    if same_grid:
++        return outcome.native_labels, outcome.native_confidence, outcome.native_support
++    grid = (native_image.shape, native_image.affine)
++    # Preserve each recipe's standard processing-grid winner. Confidence and
++    # support follow the same nearest processing voxel on the original grid.
++    def sample(array, dtype):
++        source = nib.Nifti1Image(np.asarray(array, dtype=dtype), context.image.affine)
++        return np.asarray(resample_from_to(source, grid, order=0).dataobj, dtype=dtype)
++    labels = sample(outcome.native_labels, np.int32)
++    confidence = sample(outcome.native_confidence, np.float32)
++    support = sample(outcome.native_support, np.uint8).astype(bool)
++    return labels, confidence, support
++
++
+ def _expand_structures(structures) -> list[str]:
+     requested = _CANONICAL if structures == "all" else (
+         [structures] if isinstance(structures, str) else list(structures))
+@@ -141,13 +159,19 @@ def segment_4_subregions(
+         coarse_segmentation=coarse_segmentation, cortical_parcellation=cortical_parcellation,
+         wmparc=wmparc, synthseg_weights=synthseg_weights,
+         synthseg_parc_weights=synthseg_parc_weights, device=device)
+-    combined = np.zeros(context.image.shape, np.int32)
+-    best_conf = np.zeros(context.image.shape, np.float32)
++    if coarse_segmentation is None:
++        from .preprocessing import prepare_automatic_raw_input
++        context = prepare_automatic_raw_input(context, device=device, threads=threads)
++    native_image = getattr(context, "native_image", None)
++    if native_image is None:
++        native_image = context.image
++    combined = np.zeros(native_image.shape, np.int32)
++    best_conf = np.zeros(native_image.shape, np.float32)
+     table: dict[int, str] = {0: "Unknown"}
+     metadata: dict[int, SubregionLabel] = {}
+     volumes: dict[int, dict[str, float]] = {}
+     detailed: dict[str, TorchGEMSResult] = {}
+-    reports: dict[str, dict] = {"shared_preprocessing": {
++    reports: dict[str, dict] = {"shared_preprocessing": {**context.metadata,
+         "seconds": monotonic() - preprocessing_started,
+         "coarse_source": context.metadata.get(
+             "coarse_source", "provided" if coarse_segmentation is not None else None),
+@@ -159,7 +183,7 @@ def segment_4_subregions(
+         "peak_gpu_gib": torch.cuda.max_memory_allocated(device) / 2**30
+                         if device.type == "cuda" else None,
+     }}
+-    voxel_volume = abs(np.linalg.det(context.image.affine[:3, :3]))
++    voxel_volume = abs(np.linalg.det(native_image.affine[:3, :3]))
+     for name in selected:
+         if device.type == "cuda":
+             torch.cuda.reset_peak_memory_stats(device)
+@@ -171,8 +195,8 @@ def segment_4_subregions(
+         outcome.report["optimization"] = optimization
+         outcome.report["mesh_solver"] = getattr(outcome.fit, "optimization_stats", None)
+         outcome.fit.highres_labels = outcome.highres_labels
+-        _merge_native(combined, best_conf, outcome.native_labels,
+-                      outcome.native_confidence, outcome.native_support)
++        labels, confidence, support = _outcome_on_native_grid(outcome, context, native_image)
++        _merge_native(combined, best_conf, labels, confidence, support)
+         if device.type == "cuda":
+             fit = outcome.fit
+             fit.labels = fit.labels.detach().cpu()
+@@ -212,9 +236,9 @@ def segment_4_subregions(
+             volumes[identifier] = {"soft_volume_mm3": outcome.soft_volumes_mm3.get(identifier, 0.0)}
+     for identifier in volumes:
+         volumes[identifier]["hard_volume_mm3"] = float(np.count_nonzero(combined == identifier) * voxel_volume)
+-    out = new_image(combined, context.image, affine=context.image.affine)
+-    out.set_qform(context.image.affine, code=0)
+-    out.set_sform(context.image.affine, code=2)
++    out = new_image(combined, native_image, affine=native_image.affine)
++    out.set_qform(native_image.affine, code=0)
++    out.set_sform(native_image.affine, code=2)
+     result = SubregionResult(out, table, detailed, torch.as_tensor(best_conf), reports,
+                             volumes, metadata,
+                             input_source=str(t1) if isinstance(t1, (str, Path)) else None)
+diff --git a/src/fnit/gems/recipes/base.py b/src/fnit/gems/recipes/base.py
+index 44e27e0..df64afa 100644
+--- a/src/fnit/gems/recipes/base.py
++++ b/src/fnit/gems/recipes/base.py
+@@ -115,6 +115,9 @@ class GEMSRecipe:
+     def __init__(self, name: str, directory: Path):
+         self.name = name
+         self.directory = Path(directory)
++        # Fine thalamic and hippocampal boundaries need objective decreases
++        # that survive scalar rounding and bounded, descending mesh steps.
++        self.stable_mesh_fitting = name == "thalamus" or name.startswith("hippo-amygdala-")
+ 
+     def set_optimization_profile(self, profile: str) -> None:
+         if profile not in ("fast", "balanced"):
+@@ -238,7 +241,7 @@ class GEMSRecipe:
+                 # subject affine and the high-resolution working-grid scaling.
+                 alphas = smooth_atlas_alphas(smoothing_atlas, classes, sigma, device=device,
+                                              cache=smoothing_cache,
+-                                             stable_vertex_statistics=self.name == "thalamus")
++                                             stable_vertex_statistics=self.stable_mesh_fitting)
+             if not sigma:
+                 alphas = np.zeros((len(atlas.vertices), int(classes.max()) + 1), np.float32)
+                 for channel, group in enumerate(classes):
+@@ -262,13 +265,13 @@ class GEMSRecipe:
+                 materialize_outputs=not synthetic and index == len(schedule) - 1,
+                 mesh_sampling_stride=self.fast_mesh_sampling_stride if fast and not synthetic and sigma else 1,
+                 owner_hint_enabled=fast and not synthetic,
+-                # Stabilize thalamic synthetic and intensity fits: ordered gradient
+-                # reductions and FP64 scalar optimizer state retain small
+-                # Wolfe decreases. Images, vertices and gradients stay FP32.
+-                double_data_cost_accumulation=(fast and not synthetic) or self.name == "thalamus",
+-                stable_mesh_fitting=self.name == "thalamus",
+-                precise_mesh_matrices=self.name == "thalamus",
+-                mesh_line_search="backtracking" if self.name == "thalamus" else "strong_wolfe",
++                # Stable synthetic and intensity fits use ordered gradient
++                # reductions and FP64 scalar state to retain small objective
++                # decreases. Images, vertices and gradients stay FP32.
++                double_data_cost_accumulation=(fast and not synthetic) or self.stable_mesh_fitting,
++                stable_mesh_fitting=self.stable_mesh_fitting,
++                precise_mesh_matrices=self.stable_mesh_fitting,
++                mesh_line_search="backtracking" if self.stable_mesh_fitting else "strong_wolfe",
+                 **stop_options)
+             solver_finished = tick()
+             atlas = atlas.with_vertices(result.vertices.detach().cpu().numpy())
+@@ -280,6 +283,7 @@ class GEMSRecipe:
+                 "block_size": block_size,
+                 "resolution_mm": float(np.mean(np.linalg.norm(affine[:3, :3], axis=0))),
+                 "alpha_sigma_voxels": sigma,
++                "stable_vertex_statistics": self.stable_mesh_fitting and bool(sigma),
+                 "alpha_sigma_mm": sigma * float(np.mean(
+                     np.linalg.norm(affine[:3, :3], axis=0))),
+                 "outer_iteration_limit": 1 if synthetic else iterations,
+@@ -332,12 +336,15 @@ class GEMSRecipe:
+         report["mesh_iterations_per_outer"] = mesh_steps
+         report["em_iterations_per_outer"] = self.em_iterations
+         report["alpha_smoothing"] = "transformed_reference_mesh"
++        report["stable_mesh_fitting"] = self.stable_mesh_fitting
++        report["precise_mesh_matrices"] = self.stable_mesh_fitting
++        report["mesh_line_search"] = "backtracking" if self.stable_mesh_fitting else "strong_wolfe"
+         report["mesh_sampling_strides"] = [
+             self.fast_mesh_sampling_stride if self.optimization_profile == "fast" and sigma else 1
+             for sigma, _ in schedule]
+         report["owner_hint_enabled"] = self.optimization_profile == "fast"
+         report["data_cost_accumulation"] = (
+-            "float64" if self.optimization_profile == "fast" else "float32")
++            "float64" if self.optimization_profile == "fast" or self.stable_mesh_fitting else "float32")
+         if self.optimization_profile == "fast":
+             report["deformation_stop_voxels"] = 0.005
+             report["cost_stop_patience"] = 3
+diff --git a/src/fnit/gems/recipes/brainstem.py b/src/fnit/gems/recipes/brainstem.py
+index 89dec51..0cc0abc 100644
+--- a/src/fnit/gems/recipes/brainstem.py
++++ b/src/fnit/gems/recipes/brainstem.py
+@@ -154,7 +154,8 @@ def _fit_brainstem(context, directory: Path, device: torch.device) -> RecipeResu
+     posterior = fit.posterior.detach().cpu()
+     volumes = {int(label): float(posterior[index].sum() * voxel_volume)
+                for index, label in enumerate(atlas.label_ids) if int(label) in _REGIONS}
+-    highres = np.where(np.isin(labels, _REGIONS), labels, 0)
++    highres_take = (foreground & (confidence > 0)).detach().cpu().numpy()
++    highres = np.where(highres_take, labels, 0)
+     return RecipeResult(fit, nib.Nifti1Image(highres, fit.affine), native,
+                         confidence_array, native != 0, volumes, report)
+ 

@@ -8,6 +8,7 @@ from pathlib import Path
 from time import monotonic
 
 import nibabel as nib
+from nibabel.processing import resample_from_to
 import numpy as np
 import torch
 
@@ -71,6 +72,23 @@ def _merge_native(combined: np.ndarray, best_conf: np.ndarray,
     take &= (combined == 0) | (confidence > best_conf)
     combined[take] = candidate[take]
     best_conf[take] = confidence[take]
+
+
+def _outcome_on_native_grid(outcome, context, native_image):
+    same_grid = context.image.shape == native_image.shape and np.allclose(
+        context.image.affine, native_image.affine, atol=1e-5, rtol=0)
+    if same_grid:
+        return outcome.native_labels, outcome.native_confidence, outcome.native_support
+    grid = (native_image.shape, native_image.affine)
+    # Preserve each recipe's standard processing-grid winner. Confidence and
+    # support follow the same nearest processing voxel on the original grid.
+    def sample(array, dtype):
+        source = nib.Nifti1Image(np.asarray(array, dtype=dtype), context.image.affine)
+        return np.asarray(resample_from_to(source, grid, order=0).dataobj, dtype=dtype)
+    labels = sample(outcome.native_labels, np.int32)
+    confidence = sample(outcome.native_confidence, np.float32)
+    support = sample(outcome.native_support, np.uint8).astype(bool)
+    return labels, confidence, support
 
 
 def _expand_structures(structures) -> list[str]:
@@ -141,13 +159,19 @@ def segment_4_subregions(
         coarse_segmentation=coarse_segmentation, cortical_parcellation=cortical_parcellation,
         wmparc=wmparc, synthseg_weights=synthseg_weights,
         synthseg_parc_weights=synthseg_parc_weights, device=device)
-    combined = np.zeros(context.image.shape, np.int32)
-    best_conf = np.zeros(context.image.shape, np.float32)
+    if coarse_segmentation is None:
+        from .preprocessing import prepare_automatic_raw_input
+        context = prepare_automatic_raw_input(context, device=device, threads=threads)
+    native_image = getattr(context, "native_image", None)
+    if native_image is None:
+        native_image = context.image
+    combined = np.zeros(native_image.shape, np.int32)
+    best_conf = np.zeros(native_image.shape, np.float32)
     table: dict[int, str] = {0: "Unknown"}
     metadata: dict[int, SubregionLabel] = {}
     volumes: dict[int, dict[str, float]] = {}
     detailed: dict[str, TorchGEMSResult] = {}
-    reports: dict[str, dict] = {"shared_preprocessing": {
+    reports: dict[str, dict] = {"shared_preprocessing": {**context.metadata,
         "seconds": monotonic() - preprocessing_started,
         "coarse_source": context.metadata.get(
             "coarse_source", "provided" if coarse_segmentation is not None else None),
@@ -159,7 +183,7 @@ def segment_4_subregions(
         "peak_gpu_gib": torch.cuda.max_memory_allocated(device) / 2**30
                         if device.type == "cuda" else None,
     }}
-    voxel_volume = abs(np.linalg.det(context.image.affine[:3, :3]))
+    voxel_volume = abs(np.linalg.det(native_image.affine[:3, :3]))
     for name in selected:
         if device.type == "cuda":
             torch.cuda.reset_peak_memory_stats(device)
@@ -171,8 +195,8 @@ def segment_4_subregions(
         outcome.report["optimization"] = optimization
         outcome.report["mesh_solver"] = getattr(outcome.fit, "optimization_stats", None)
         outcome.fit.highres_labels = outcome.highres_labels
-        _merge_native(combined, best_conf, outcome.native_labels,
-                      outcome.native_confidence, outcome.native_support)
+        labels, confidence, support = _outcome_on_native_grid(outcome, context, native_image)
+        _merge_native(combined, best_conf, labels, confidence, support)
         if device.type == "cuda":
             fit = outcome.fit
             fit.labels = fit.labels.detach().cpu()
@@ -212,9 +236,9 @@ def segment_4_subregions(
             volumes[identifier] = {"soft_volume_mm3": outcome.soft_volumes_mm3.get(identifier, 0.0)}
     for identifier in volumes:
         volumes[identifier]["hard_volume_mm3"] = float(np.count_nonzero(combined == identifier) * voxel_volume)
-    out = new_image(combined, context.image, affine=context.image.affine)
-    out.set_qform(context.image.affine, code=0)
-    out.set_sform(context.image.affine, code=2)
+    out = new_image(combined, native_image, affine=native_image.affine)
+    out.set_qform(native_image.affine, code=0)
+    out.set_sform(native_image.affine, code=2)
     result = SubregionResult(out, table, detailed, torch.as_tensor(best_conf), reports,
                             volumes, metadata,
                             input_source=str(t1) if isinstance(t1, (str, Path)) else None)

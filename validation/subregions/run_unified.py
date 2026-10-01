@@ -135,8 +135,7 @@ def main():
         torch.cuda.reset_peak_memory_stats(args.device)
     source_root = Path(fnit.__file__).resolve().parent
     source_hashes = {str(path.relative_to(source_root)): hashlib.sha256(path.read_bytes()).hexdigest()
-                     for package in ("gems", "synthseg_parc")
-                     for path in sorted((source_root / package).rglob("*.py"))
+                     for path in sorted(source_root.rglob("*.py"))
                      if "native_samseg" not in path.parts}
     started = monotonic()
     result = segment_4_subregions(
