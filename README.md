@@ -39,7 +39,7 @@ CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹�
 | [SynthSR](docs/synthsr/README.md) | FreeSurfer `mri_synthsr` | 合成 1 mm T1w 图像。 |
 | [TorchFAST](docs/fast/README.md) | FSL `fast` | 三组织分割、部分体积分数与偏置场。 |
 | [FastVBM](docs/fast_vbm/README.md) | FSL `fslvbm` | 从 T1w 生成标准空间灰质、Jacobian 与调制灰质图；[全流程 benchmark](validation/fast_vbm/README.md)。 |
-| [segment_4_subregions](docs/subregions/README.md) | FreeSurfer `segment_subregions brainstem/thalamus/hippo-amygdala` | 一张 T1 完成脑干、双侧丘脑、海马和杏仁核分割，保存原网格标签、110 项硬/软体积及高分辨率结果；CPU/GPU 均支持。[完整 benchmark](validation/subregions/segment_4_subregions/README.md)：原始 T1 7.10 分钟，相同阶段输入 8.17 分钟。 |
+| [segment_4_subregions](docs/subregions/README.md) | FreeSurfer `segment_subregions brainstem/thalamus/hippo-amygdala` | 一张 T1 完成脑干、双侧丘脑、海马和杏仁核分割，保存原网格标签、110 项硬/软体积及高分辨率结果；CPU/GPU 均支持。[完整 benchmark](validation/subregions/segment_4_subregions/stability_fix/README.md)：原始 T1 6.85 分钟，同阶段输入 8.90 分钟，同阶段丘脑细核官方加权 Dice 0.9605。 |
 | [run_recon_all_python](docs/recon_all/README.md) | FreeSurfer `recon-all` | 从 T1w 生成脑分割、皮层表面、顶点指标与脑区统计。 |
 
 ### fMRI

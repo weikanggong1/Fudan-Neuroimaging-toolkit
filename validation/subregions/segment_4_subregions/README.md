@@ -1,4 +1,6 @@
-# segment_4_subregions：完整真实 T1 benchmark
+# segment_4_subregions：修复前的完整真实 T1 记录
+
+**历史快照，保留原计时和文件身份。当前丘脑数值修复、完整复测指标与细核脑图见[最新 benchmark](stability_fix/README.md)。**
 
 [功能、参数和流程图](../../../docs/subregions/README.md) · [数据与复核方法](../README.md) · [v16 C6 冻结基线](../speed_v16/README.md)
 

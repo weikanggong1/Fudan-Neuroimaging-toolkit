@@ -10,6 +10,7 @@ import torch
 from torch.nn import functional as F
 
 from .atlas import GEMSAtlas
+from .deformation import ordered_vertex_sum, prepare_vertex_reduction
 from .rasterize import rasterize_priors
 
 
@@ -90,6 +91,7 @@ def smooth_atlas_alphas(
     *,
     device: str | torch.device = "cpu",
     cache: dict | None = None,
+    stable_vertex_statistics: bool = False,
 ) -> np.ndarray:
     """Rasterize, smooth and refit grouped alphas on the reference mesh.
 
@@ -136,17 +138,37 @@ def smooth_atlas_alphas(
         target = torch.as_tensor(smoothed[:, covered.numpy()].T.copy())
     del smoothed
     fitted = torch.full_like(alphas, 1.0 / grouped.shape[1])
+    chunk_size = max(1, 131_072 if device.type == "cuda" else len(cells))
+    layouts = None
+    if stable_vertex_statistics:
+        layout_key = (key, len(fitted), chunk_size)
+        saved = None if cache is None else cache.get("stable_vertex_statistics")
+        if saved is not None and saved[0] == layout_key:
+            layouts = saved[1]
+        else:
+            layouts = []
+            for start in range(0, len(cells), chunk_size):
+                local_cells = cells[start:start + chunk_size]
+                # Retain the original corner-then-point accumulation order.
+                ids = local_cells.T.contiguous().reshape(-1)
+                layouts.append((ids, prepare_vertex_reduction(ids, len(fitted))))
+            if cache is not None:
+                cache["stable_vertex_statistics"] = (layout_key, layouts)
     for _ in range(10):
         statistics = torch.zeros_like(fitted)
         # Each point contributes independently; chunk only the temporary Cx4
         # responsibilities, retaining all ten alpha-EM updates.
-        chunk_size = 131_072 if device.type == "cuda" else len(cells)
-        for start in range(0, len(cells), max(1, chunk_size)):
+        for block, start in enumerate(range(0, len(cells), chunk_size)):
             local_cells = cells[start:start + chunk_size]
             contribution = fitted[local_cells] * weights[start:start + chunk_size, ..., None]
             prediction = contribution.sum(1).clamp_min(1e-15)
             contribution = contribution / prediction[:, None] * target[start:start + chunk_size, None]
-            for corner in range(4):
-                statistics.index_add_(0, local_cells[:, corner], contribution[:, corner])
+            if stable_vertex_statistics:
+                ids, layout = layouts[block]
+                values = contribution.permute(1, 0, 2).reshape(-1, contribution.shape[-1])
+                statistics.add_(ordered_vertex_sum(ids, values, len(fitted), layout))
+            else:
+                for corner in range(4):
+                    statistics.index_add_(0, local_cells[:, corner], contribution[:, corner])
         fitted = statistics / statistics.sum(1, keepdim=True).clamp_min(1e-12)
     return fitted.cpu().numpy()

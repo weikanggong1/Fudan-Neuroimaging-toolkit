@@ -2,6 +2,8 @@
 
 import torch
 
+from .deformation import ordered_vertex_sum
+
 try:
     import triton
     import triton.language as tl
@@ -103,7 +105,8 @@ if triton is not None:
                           V0S0: tl.constexpr, V0S1: tl.constexpr,
                           IS0: tl.constexpr, IS1: tl.constexpr, IS2: tl.constexpr,
                           LS0: tl.constexpr, LS1: tl.constexpr,
-                          BACKGROUND: tl.constexpr, BLOCK: tl.constexpr):
+                          BACKGROUND: tl.constexpr, BLOCK: tl.constexpr,
+                          DETERMINISTIC: tl.constexpr):
         row = tl.program_id(0)
         packed = tl.load(Reorder + row)
         present = packed >= 0
@@ -171,27 +174,36 @@ if triton is not None:
         gz = (i02 * q1 + i12 * q2) + i22 * q3
         # Differentiating the barycentric solve gives dL/d(vertex_i)=-w_i*h.
         # No candidate graphs or inverse-matrix backward are retained.
-        tl.atomic_add(Gradient + v0 * 3, -w0 * gx, mask=covered)
-        tl.atomic_add(Gradient + v0 * 3 + 1, -w0 * gy, mask=covered)
-        tl.atomic_add(Gradient + v0 * 3 + 2, -w0 * gz, mask=covered)
-        tl.atomic_add(Gradient + v1 * 3, -w1 * gx, mask=covered)
-        tl.atomic_add(Gradient + v1 * 3 + 1, -w1 * gy, mask=covered)
-        tl.atomic_add(Gradient + v1 * 3 + 2, -w1 * gz, mask=covered)
-        tl.atomic_add(Gradient + v2 * 3, -w2 * gx, mask=covered)
-        tl.atomic_add(Gradient + v2 * 3 + 1, -w2 * gy, mask=covered)
-        tl.atomic_add(Gradient + v2 * 3 + 2, -w2 * gz, mask=covered)
-        tl.atomic_add(Gradient + v3 * 3, -w3 * gx, mask=covered)
-        tl.atomic_add(Gradient + v3 * 3 + 1, -w3 * gy, mask=covered)
-        tl.atomic_add(Gradient + v3 * 3 + 2, -w3 * gz, mask=covered)
+        if DETERMINISTIC:
+            for corner in tl.static_range(4):
+                weight = w0 if corner == 0 else w1 if corner == 1 else w2 if corner == 2 else w3
+                output = Gradient + (packed * 4 + corner) * 3
+                tl.store(output, tl.where(covered, -weight * gx, 0.0), mask=present)
+                tl.store(output + 1, tl.where(covered, -weight * gy, 0.0), mask=present)
+                tl.store(output + 2, tl.where(covered, -weight * gz, 0.0), mask=present)
+        else:
+            tl.atomic_add(Gradient + v0 * 3, -w0 * gx, mask=covered)
+            tl.atomic_add(Gradient + v0 * 3 + 1, -w0 * gy, mask=covered)
+            tl.atomic_add(Gradient + v0 * 3 + 2, -w0 * gz, mask=covered)
+            tl.atomic_add(Gradient + v1 * 3, -w1 * gx, mask=covered)
+            tl.atomic_add(Gradient + v1 * 3 + 1, -w1 * gy, mask=covered)
+            tl.atomic_add(Gradient + v1 * 3 + 2, -w1 * gz, mask=covered)
+            tl.atomic_add(Gradient + v2 * 3, -w2 * gx, mask=covered)
+            tl.atomic_add(Gradient + v2 * 3 + 1, -w2 * gy, mask=covered)
+            tl.atomic_add(Gradient + v2 * 3 + 2, -w2 * gz, mask=covered)
+            tl.atomic_add(Gradient + v3 * 3, -w3 * gx, mask=covered)
+            tl.atomic_add(Gradient + v3 * 3 + 1, -w3 * gy, mask=covered)
+            tl.atomic_add(Gradient + v3 * 3 + 2, -w3 * gz, mask=covered)
 
 
 class _CompactDataCost(torch.autograd.Function):
     @staticmethod
     def forward(ctx, vertices, tetrahedra, alphas, points, selected, covered,
                 reorder, origins, inverse, likelihood, background_channel,
-                double_accumulation):
+                double_accumulation, deterministic_gradient):
         costs = torch.empty(reorder.shape, device=vertices.device, dtype=vertices.dtype)
-        gradient = torch.zeros_like(vertices)
+        gradient = (torch.zeros((selected.numel() * 4, 3), device=vertices.device, dtype=vertices.dtype)
+                    if deterministic_gradient else torch.zeros_like(vertices))
         if reorder.numel():
             _data_cost_kernel[(reorder.numel(),)](
                 points, selected, covered, reorder, tetrahedra, alphas,
@@ -200,14 +212,20 @@ class _CompactDataCost(torch.autograd.Function):
                 *origins.stride(), *inverse.stride(), *likelihood.stride(),
                 -1 if background_channel is None else int(background_channel),
                 triton.next_power_of_2(int(alphas.shape[1])),
+                bool(deterministic_gradient),
                 num_warps=1, enable_fp_fusion=True)
+        if deterministic_gradient:
+            # The packed lookup retains the original batch/block/point order.
+            # Missing-cell rows do not contribute a geometry derivative.
+            vertex_ids = tetrahedra[selected].reshape(-1)
+            gradient = ordered_vertex_sum(vertex_ids, gradient, vertices.shape[0])
         ctx.save_for_backward(gradient)
         return costs.sum(dtype=torch.float64 if double_accumulation else vertices.dtype)
 
     @staticmethod
     def backward(ctx, cost_gradient):
         gradient, = ctx.saved_tensors
-        return gradient * cost_gradient, None, None, None, None, None, None, None, None, None, None, None
+        return gradient * cost_gradient, None, None, None, None, None, None, None, None, None, None, None, None
 
 
 def supports_fused_data_cost(vertices, tetrahedra, alphas, likelihood):
@@ -222,7 +240,7 @@ def supports_fused_data_cost(vertices, tetrahedra, alphas, likelihood):
 
 def fused_data_cost(vertices, tetrahedra, alphas, points, selected, covered,
                     reorder, origins, inverse, likelihood, background_channel,
-                    double_accumulation=False):
+                    double_accumulation=False, deterministic_gradient=False):
     """Fixed-ownership mixture likelihood with an analytic vertex gradient.
 
     The caller performs the same discrete FP32 candidate lookup as ordinary
@@ -232,7 +250,7 @@ def fused_data_cost(vertices, tetrahedra, alphas, points, selected, covered,
     """
     return _CompactDataCost.apply(vertices, tetrahedra, alphas, points, selected,
                                   covered, reorder, origins, inverse, likelihood,
-                                  background_channel, bool(double_accumulation))
+                                  background_channel, bool(double_accumulation), bool(deterministic_gradient))
 
 
 @torch.no_grad()

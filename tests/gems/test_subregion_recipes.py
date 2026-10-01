@@ -183,7 +183,9 @@ def test_recipe_smooths_transformed_mesh_and_ignores_population_cache(tmp_path, 
     (tmp_path / "config.json").write_text(json.dumps({
         "alpha_label_classes": {cached_name: classes.tolist()}}))
     references = []
-    def smooth(current_atlas, current_classes, sigma, *, device, cache=None):
+    def smooth(current_atlas, current_classes, sigma, *, device, cache=None,
+               stable_vertex_statistics=False):
+        assert not stable_vertex_statistics
         references.append(current_atlas.reference_vertices.copy())
         return current_atlas.alphas
     monkeypatch.setattr(smoothing, "smooth_atlas_alphas", smooth)

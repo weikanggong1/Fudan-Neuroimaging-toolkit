@@ -237,7 +237,8 @@ class GEMSRecipe:
                 # A population-grid cache has a different bandwidth after the
                 # subject affine and the high-resolution working-grid scaling.
                 alphas = smooth_atlas_alphas(smoothing_atlas, classes, sigma, device=device,
-                                             cache=smoothing_cache)
+                                             cache=smoothing_cache,
+                                             stable_vertex_statistics=self.name == "thalamus")
             if not sigma:
                 alphas = np.zeros((len(atlas.vertices), int(classes.max()) + 1), np.float32)
                 for channel, group in enumerate(classes):
@@ -261,7 +262,13 @@ class GEMSRecipe:
                 materialize_outputs=not synthetic and index == len(schedule) - 1,
                 mesh_sampling_stride=self.fast_mesh_sampling_stride if fast and not synthetic and sigma else 1,
                 owner_hint_enabled=fast and not synthetic,
-                double_data_cost_accumulation=fast and not synthetic,
+                # Stabilize thalamic synthetic and intensity fits: ordered gradient
+                # reductions and FP64 scalar optimizer state retain small
+                # Wolfe decreases. Images, vertices and gradients stay FP32.
+                double_data_cost_accumulation=(fast and not synthetic) or self.name == "thalamus",
+                stable_mesh_fitting=self.name == "thalamus",
+                precise_mesh_matrices=self.name == "thalamus",
+                mesh_line_search="backtracking" if self.name == "thalamus" else "strong_wolfe",
                 **stop_options)
             solver_finished = tick()
             atlas = atlas.with_vertices(result.vertices.detach().cpu().numpy())

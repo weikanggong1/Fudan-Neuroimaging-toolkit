@@ -405,13 +405,15 @@ def compact_data_cost(vertices, tetrahedra, alphas, shape, *, valid_mask,
                       current_geometry=None, tolerance=2e-5,
                       cache_owner_hints=False, owner_hints=False,
                       hint_tolerance=2e-4, hint_stats=None,
-                      double_accumulation=False):
+                      double_accumulation=False, deterministic_gradient=False):
     """Fused compact mixture cost, or ``None`` for the autograd fallback.
 
     CUDA FP32 evaluates every masked voxel with the same cell ownership as
     compact rasterization. Fixed alphas and Gaussian log likelihood are required;
     an analytic derivative is returned only for the vertex positions. This path
     avoids allocating the interpolated prior and its four-node autograd graph.
+    ``deterministic_gradient`` sums packed-point corner contributions in a fixed
+    vertex order with FP64 accumulation, returning the same FP32 gradient dtype.
     """
     if not supports_fused_data_cost(vertices, tetrahedra, alphas, likelihood):
         return None
@@ -431,7 +433,7 @@ def compact_data_cost(vertices, tetrahedra, alphas, shape, *, valid_mask,
         raise ValueError("likelihood must be [classes, valid voxels]")
     return fused_data_cost(vertices, tetrahedra, alphas, points, selected_ids,
                            covered, reorder, all_v0, all_inv, likelihood,
-                           background_channel, double_accumulation)
+                           background_channel, double_accumulation, deterministic_gradient)
 
 
 def rasterize_priors_compact(

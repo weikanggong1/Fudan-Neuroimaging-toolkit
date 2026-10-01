@@ -1,0 +1,2231 @@
+{
+  "label": "thalamus_backtracking_c6_20261001",
+  "public_function": "segment_4_subregions",
+  "created_utc": "2026-10-01T12:26:04.473701+00:00",
+  "base_commit": "b7690afeaec27ade2cf97eb350f5d7d43a6ff3e6",
+  "working_patch_sha256": "e104d8e3f16c5fc36d835cde259148538ff3d65b7a6f16f2ac7323c4f95a0b22",
+  "candidate": "Thalamus-only native bounded Armijo L-BFGS: FP64 two-loop history and actual FP32 displacements in curvature/descent acceptance; halve step up to 20 trials, reject nonfinite or nonpositive-J meshes; fixed alpha/gradient reductions and FP64 costs/state, precise FP32 closure; other recipes and original grids/schedule/stride/owner unchanged.",
+  "changed_paths_vs_previous": [
+    "src/fnit/gems/core.py",
+    "src/fnit/gems/optim.py",
+    "src/fnit/gems/recipes/base.py",
+    "validation/subregions/thalamus_stability.py"
+  ],
+  "files": [
+    {
+      "path": "MANIFEST.in",
+      "bytes": 2420,
+      "sha256": "ce7efb061901c30d438391161200255e43db4eaf06a02b1f1896855bd3db0150"
+    },
+    {
+      "path": "environment.yml",
+      "bytes": 1485,
+      "sha256": "e43f928d6ab2753f5d0c254be16396497e62898711e4911a27170f8ce9328775"
+    },
+    {
+      "path": "pyproject.toml",
+      "bytes": 3575,
+      "sha256": "e65f2e4746d4605a93694210b0d17a63c85e4942d542e399d1c9a543c4013517"
+    },
+    {
+      "path": "src/fnit/__init__.py",
+      "bytes": 6079,
+      "sha256": "5af956c5e0f9ab716ae3c18a1750f599ee8a9d85101a249cec9fa39335c0bd90"
+    },
+    {
+      "path": "src/fnit/_dmri.py",
+      "bytes": 2523,
+      "sha256": "b6bf837f8b5a0a8f0d910706631e882a9e3f8dfc1f1ef77e1cfac7efe36fafbf"
+    },
+    {
+      "path": "src/fnit/_nib.py",
+      "bytes": 2021,
+      "sha256": "568d113432c1a0c50a3b0b635188173e69be1c7436d851de2568bca9b55ab94e"
+    },
+    {
+      "path": "src/fnit/_transforms.py",
+      "bytes": 12883,
+      "sha256": "be01fa24cd0c17bb1aa8ac7792cdf0b62c657037808c643427a1b11cc4c05340"
+    },
+    {
+      "path": "src/fnit/amico_noddi/__init__.py",
+      "bytes": 201,
+      "sha256": "a3d133bdb2dcb70b9fe20b638f5e347ac97999e0e79868270335af16f9bdc2a7"
+    },
+    {
+      "path": "src/fnit/amico_noddi/__main__.py",
+      "bytes": 30,
+      "sha256": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279"
+    },
+    {
+      "path": "src/fnit/amico_noddi/assets/__init__.py",
+      "bytes": 73,
+      "sha256": "f2db86e31d3612dc342d234ff7491a79bd7a975f08684e69ff661f6098752aba"
+    },
+    {
+      "path": "src/fnit/amico_noddi/classic.py",
+      "bytes": 10127,
+      "sha256": "2d1cd22c73b40edb5aeabe2c3ebf3dd642a3984b5cf037dc058dad778be16ee7"
+    },
+    {
+      "path": "src/fnit/amico_noddi/cli.py",
+      "bytes": 1839,
+      "sha256": "17ff1df0abba58579912c2c961d9726a96cbc52bd61026cbe2e1d0956ff7645a"
+    },
+    {
+      "path": "src/fnit/amico_noddi/core.py",
+      "bytes": 11022,
+      "sha256": "5e79e796e95f9c53429b8cb408d87d9e2455ed101cb7ac7ec00ad9c3f354ae26"
+    },
+    {
+      "path": "src/fnit/amico_noddi/kernels.py",
+      "bytes": 20249,
+      "sha256": "46f1044aa5f1c2dbffd12dd33707c0e192ef1de01dc23157ae03a0977b3d0b59"
+    },
+    {
+      "path": "src/fnit/amico_noddi/solver.py",
+      "bytes": 13892,
+      "sha256": "b86c56d9e3aef90efad74748309c627f4cb013071f3670f74c615f9e27001bf3"
+    },
+    {
+      "path": "src/fnit/applywarp/__init__.py",
+      "bytes": 170,
+      "sha256": "0d193f4216238e40e4f14d86d175806ef016db34ad3b2a6362c4be8e3cde7cfa"
+    },
+    {
+      "path": "src/fnit/applywarp/__main__.py",
+      "bytes": 62,
+      "sha256": "c2ee4ddb093c9af060cafaf68219907f8a6b7b301ed3f8bea75db7555adec987"
+    },
+    {
+      "path": "src/fnit/applywarp/cli.py",
+      "bytes": 279,
+      "sha256": "024de40d9121d2352071cf37f2c47558d97f0630faa1bfc47abcfb4e6e38270e"
+    },
+    {
+      "path": "src/fnit/applywarp/core.py",
+      "bytes": 22380,
+      "sha256": "cf6de438f3ac1551804d38682ce3fbb11b8fb042ad881562ebc93aada80f2df5"
+    },
+    {
+      "path": "src/fnit/bedpostx/__init__.py",
+      "bytes": 190,
+      "sha256": "754af17276afca4df2e1a951ff5350504edd8790cdbe8a8d7a71803d518c7d10"
+    },
+    {
+      "path": "src/fnit/bedpostx/cli.py",
+      "bytes": 1983,
+      "sha256": "2496c3aa656bdffdd2d67b570ba06df49e3aa10625d2ea4282f8a42aeb792a8b"
+    },
+    {
+      "path": "src/fnit/bedpostx/core.py",
+      "bytes": 16517,
+      "sha256": "a1b2f8fd430168149c00788292ae5226bda01854df8065929feb2fd4ab52cc51"
+    },
+    {
+      "path": "src/fnit/bigflica/__init__.py",
+      "bytes": 237,
+      "sha256": "e33767512075911f0eb38053a4afb24c62974a90546656fb4e634648403e4cfe"
+    },
+    {
+      "path": "src/fnit/bigflica/cli.py",
+      "bytes": 3487,
+      "sha256": "59a2e7bf79b0d31e1ff3a37258be089fff75f024462e864043a434ffde0155f1"
+    },
+    {
+      "path": "src/fnit/bigflica/flica_torch.py",
+      "bytes": 25735,
+      "sha256": "e9f29fa96cb9bb8366492b2c395edf2796884812dc1f17ef182f1845c7ffb720"
+    },
+    {
+      "path": "src/fnit/bigflica/flica_vb.py",
+      "bytes": 54769,
+      "sha256": "40802b7db070f3c77170cfa636a3da20382584e9887fd4bbcb5de61b9e40d78a"
+    },
+    {
+      "path": "src/fnit/bigflica/pipeline.py",
+      "bytes": 28186,
+      "sha256": "779d37dc32a74b23728db9ca9de39b246148449518a21938d28bd52666b67b48"
+    },
+    {
+      "path": "src/fnit/bigflica/pipeline_cpu_stream.py",
+      "bytes": 4664,
+      "sha256": "d02a4a975e9f4fe625223c8ddabb5e333ffa4cb9feba19602767e9ee9206dbd2"
+    },
+    {
+      "path": "src/fnit/bigflica/pipeline_gpu.py",
+      "bytes": 13983,
+      "sha256": "a6c423640e39f76d2d522141dfc58174e198f4d47f5af1ed34deba1cd1accb18"
+    },
+    {
+      "path": "src/fnit/bigflica/stats_torch.py",
+      "bytes": 3818,
+      "sha256": "fdb4e76b421a6d4a1489745f41e142146d2c4745340a46db758f264ebe0b50e3"
+    },
+    {
+      "path": "src/fnit/bigflica/streaming.py",
+      "bytes": 18300,
+      "sha256": "1513464c7244d8cc339c6e9745cb022bcaae8b494f0e1155c4bc09e6d2b561ea"
+    },
+    {
+      "path": "src/fnit/bwas/__init__.py",
+      "bytes": 221,
+      "sha256": "31fbc8a4bc2a6e99fe9c2adb28e380835dc1f54fa04cfa4a470516e5723f29a8"
+    },
+    {
+      "path": "src/fnit/bwas/cache.py",
+      "bytes": 2877,
+      "sha256": "7132eb3cefc38ec818692b61c07567b89db69c093ea1a639f7addcee785349f0"
+    },
+    {
+      "path": "src/fnit/bwas/cli.py",
+      "bytes": 2721,
+      "sha256": "c567d5cb6fa28b2de118b204bef505941eef87fded5bd775adff224c639d82e6"
+    },
+    {
+      "path": "src/fnit/bwas/cluster_union.py",
+      "bytes": 2781,
+      "sha256": "75c3b4a566a907298b99520e148dd893206c0d2f97734db491a9f997153af90f"
+    },
+    {
+      "path": "src/fnit/bwas/core.py",
+      "bytes": 37660,
+      "sha256": "b059dbfe84dd916beb1e19fbe81c081daaac7efbd2ddc611c178488dfb45a6b2"
+    },
+    {
+      "path": "src/fnit/bwas/packed_loader.py",
+      "bytes": 8511,
+      "sha256": "54b63c9a5e67fdb17e827e15f7ba3b2602558044be7bf6e33a2b72fe77414352"
+    },
+    {
+      "path": "src/fnit/bwas/visualize.py",
+      "bytes": 25879,
+      "sha256": "0fa5d8ac75c91c2e0ef969265fdc43016fb48fb87fcfdd595bcc7bf25280a032"
+    },
+    {
+      "path": "src/fnit/cli.py",
+      "bytes": 49262,
+      "sha256": "e5e3ec30006a376c839d317b46f274cb6c50c2e222df7afbf0fd1ac4bc11a9c2"
+    },
+    {
+      "path": "src/fnit/connectome/__init__.py",
+      "bytes": 2730,
+      "sha256": "671a4688fc544fde4163869c3abfe3d5ca3bb3415bebceec6d888c10d7f1b526"
+    },
+    {
+      "path": "src/fnit/connectome/anatomy.py",
+      "bytes": 5218,
+      "sha256": "49dcf7dd05bd83d8c83e383c1749a63a0d3f3662ea7658795052b7c1d24aa516"
+    },
+    {
+      "path": "src/fnit/connectome/assets.py",
+      "bytes": 3332,
+      "sha256": "451e5685e1ecda78df7988c1f541f550386e397e118c69a4bf1b08b2e060f160"
+    },
+    {
+      "path": "src/fnit/connectome/assignment.py",
+      "bytes": 8000,
+      "sha256": "d8901752cda4e5b8007f7c318613b343ad3edbd7072d0e0a05539a5d42ac6313"
+    },
+    {
+      "path": "src/fnit/connectome/atlas_builder.py",
+      "bytes": 12158,
+      "sha256": "0e14c434148ac40e60d76b6d7947d9b78f259448da27250c82ab1d04eba5d42c"
+    },
+    {
+      "path": "src/fnit/connectome/atlas_surface.py",
+      "bytes": 7975,
+      "sha256": "1a322452dbc745f9043d07e29fc5822e91405536eb45ebc24abbe40820d481e7"
+    },
+    {
+      "path": "src/fnit/connectome/atlas_tian.py",
+      "bytes": 14110,
+      "sha256": "953813c8f62eef4e0ed1d6b250e710d3f8a02058299b25cf82907bd01d5df9b5"
+    },
+    {
+      "path": "src/fnit/connectome/bet.py",
+      "bytes": 16124,
+      "sha256": "aa42b1ab45321257e56aebf3b3472b283df9b5b6b577fdbee16740834926f6ee"
+    },
+    {
+      "path": "src/fnit/connectome/bids.py",
+      "bytes": 8186,
+      "sha256": "c7105b9369aed9b77b460e80f3189c633f89d68431026413a45f48a87f92fc03"
+    },
+    {
+      "path": "src/fnit/connectome/first_5tt.py",
+      "bytes": 2805,
+      "sha256": "e6def2ce99a9ca2d84595ec2b6ad849127cf1010f208f8f9255a0cee9f701cce"
+    },
+    {
+      "path": "src/fnit/connectome/first_mesh_pve.py",
+      "bytes": 9273,
+      "sha256": "2e3a4ec6c63aed1223a95d93e96263a251f02c64a30b8f3dcb65b2f034eea375"
+    },
+    {
+      "path": "src/fnit/connectome/fod.py",
+      "bytes": 33313,
+      "sha256": "dc3168f90a009da07082c50b283003cf9601610fbf500a00b5be59b76b7e3752"
+    },
+    {
+      "path": "src/fnit/connectome/freesurfer_subject.py",
+      "bytes": 5787,
+      "sha256": "06bd75ae9b5433ecd09f351df3a6d583249e7dbbf5d3db3da06d0d24c570a688"
+    },
+    {
+      "path": "src/fnit/connectome/masks.py",
+      "bytes": 4692,
+      "sha256": "fb8c0a8753e71c342cfb40b19532fb9441f7c13afa230ba153fb6c6b70f1b809"
+    },
+    {
+      "path": "src/fnit/connectome/mtnormalise.py",
+      "bytes": 5361,
+      "sha256": "30be5a75c2a0f5f7e30738099b13150b7c70df6505d444079b90005ffebdaa44"
+    },
+    {
+      "path": "src/fnit/connectome/pipeline.py",
+      "bytes": 26377,
+      "sha256": "d58138a581a21faa43617d36ab8044b939a362c532cbbfdc2669d745341be760"
+    },
+    {
+      "path": "src/fnit/connectome/response.py",
+      "bytes": 34572,
+      "sha256": "258938a5f20ee7a6efc2fc1c50af5c93412030a60b78036438e8473f072e3b91"
+    },
+    {
+      "path": "src/fnit/connectome/sift2.py",
+      "bytes": 4373,
+      "sha256": "8481bc75ac482c99b6768f4adf946df3dcd49bfc4d81e7b45972fb69e1cf06a1"
+    },
+    {
+      "path": "src/fnit/connectome/sift2_fixels.py",
+      "bytes": 14577,
+      "sha256": "c23e376c4c33df2bb49f1af9eece1aea0531ad5f8e66db622e9372f719e0bba4"
+    },
+    {
+      "path": "src/fnit/connectome/sift2_mapping.py",
+      "bytes": 18106,
+      "sha256": "6ffea32b4060f9bff3fe7467e209d7c45a46eb9398351780c15935fe3523f8b3"
+    },
+    {
+      "path": "src/fnit/connectome/sift2_optimizer.py",
+      "bytes": 8863,
+      "sha256": "810615c533141f7ac145f563fa35712705225cc1683de5283b901a6f63c01281"
+    },
+    {
+      "path": "src/fnit/connectome/sift2_proc_mask.py",
+      "bytes": 3698,
+      "sha256": "03f2e6ea47fb42168768c540a9a2bac08b75b4db53a47683fb1eed8e15a28ca1"
+    },
+    {
+      "path": "src/fnit/connectome/tcksample_precise.py",
+      "bytes": 2346,
+      "sha256": "f428520f1f804008007f61ea58f00c47ca05cd01fe915fe6582dfcc3143fa0ee"
+    },
+    {
+      "path": "src/fnit/connectome/tracking.py",
+      "bytes": 41688,
+      "sha256": "d6e24c2cc67a1259903c454036ccfac8ef78d87fa9de1edb26c98b07d2cbbf94"
+    },
+    {
+      "path": "src/fnit/convertwarp/__init__.py",
+      "bytes": 194,
+      "sha256": "ffb6ba321829f59323fef484076ea4fa8cb1d558d544ec00f2da0a4d0bffa425"
+    },
+    {
+      "path": "src/fnit/convertwarp/cli.py",
+      "bytes": 2978,
+      "sha256": "4e2d78717ccb19fe1c05a4f2011fd4f0178ef86c5368cda3c438e66cd6c1ff32"
+    },
+    {
+      "path": "src/fnit/convertwarp/core.py",
+      "bytes": 8417,
+      "sha256": "e30f9110266e115c513bc7995e2c76cdb1f9b8d7d444b8407c98398332b04a40"
+    },
+    {
+      "path": "src/fnit/dictionary_learning/__init__.py",
+      "bytes": 715,
+      "sha256": "59dec9097d54135ba8e08670266dac7a6ba2a9e5b72102047d43f40662772768"
+    },
+    {
+      "path": "src/fnit/dictionary_learning/cpu.py",
+      "bytes": 1471,
+      "sha256": "b6a4cde5d0b51dbb51bc8253cbdf816a3076103eb7c88cf68db53795eff09f97"
+    },
+    {
+      "path": "src/fnit/dictionary_learning/torch_backend.py",
+      "bytes": 60557,
+      "sha256": "6f225f0ac9727934fe6fd2f298d586e7aea178a5e8db756c63e7acc8a8e72a99"
+    },
+    {
+      "path": "src/fnit/dmri_pipeline/__init__.py",
+      "bytes": 238,
+      "sha256": "ebb576959a603e9c9ce7dc6ae052397a5a54b603d7b714deed4b40a6960a82cd"
+    },
+    {
+      "path": "src/fnit/dmri_pipeline/__main__.py",
+      "bytes": 30,
+      "sha256": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279"
+    },
+    {
+      "path": "src/fnit/dmri_pipeline/bids.py",
+      "bytes": 10199,
+      "sha256": "460c430159c3c3efd80a98a931977381959a996c8e7fab43b6f805a15d60afdd"
+    },
+    {
+      "path": "src/fnit/dmri_pipeline/cli.py",
+      "bytes": 3565,
+      "sha256": "7dc040d20c67380face95fcb5f7e47c5edf222d2964aea3f7b85c0883e3d4575"
+    },
+    {
+      "path": "src/fnit/dmri_pipeline/pipeline.py",
+      "bytes": 14633,
+      "sha256": "d117cf636e4dd9c450c4f2de072cd3ea53d32e441f8b8629f55ef848b18a7471"
+    },
+    {
+      "path": "src/fnit/dmri_pipeline/tbss.py",
+      "bytes": 10014,
+      "sha256": "187ac4d39fef4f2d63ca37a6057aedf0aa11320cfbcd07a2a911532339c6ec20"
+    },
+    {
+      "path": "src/fnit/dtifit/__init__.py",
+      "bytes": 178,
+      "sha256": "a38d642b2b5209e1bb10f155d42be85d9798a39db878e8a6f7cfce2d63e22d79"
+    },
+    {
+      "path": "src/fnit/dtifit/__main__.py",
+      "bytes": 30,
+      "sha256": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279"
+    },
+    {
+      "path": "src/fnit/dtifit/cli.py",
+      "bytes": 1571,
+      "sha256": "82f8600caaa4aebba89014c1f4327c320a84791f3d687f0db404ee7143d7cae7"
+    },
+    {
+      "path": "src/fnit/dtifit/core.py",
+      "bytes": 10270,
+      "sha256": "23e0fb554be1e0b309af154f34f5b6f7139db6e06ca8f10b1bd08be09789dc39"
+    },
+    {
+      "path": "src/fnit/eddy/__init__.py",
+      "bytes": 327,
+      "sha256": "e1239c07080954468a0d3060a0385275df55addfa243ac039f4bbcd65cea1908"
+    },
+    {
+      "path": "src/fnit/eddy/__main__.py",
+      "bytes": 30,
+      "sha256": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279"
+    },
+    {
+      "path": "src/fnit/eddy/cli.py",
+      "bytes": 2250,
+      "sha256": "833f4b2838792ba0c45be53b6b34db7b297e42e001f5d86ec3fdfc21b44c0117"
+    },
+    {
+      "path": "src/fnit/eddy/fsl2111_strict/__init__.py",
+      "bytes": 443,
+      "sha256": "82de3ea49caa7ac9460c0172621eef9c76b52074f54f5e9c71fa362178a06b46"
+    },
+    {
+      "path": "src/fnit/eddy/fsl2111_strict/config.py",
+      "bytes": 1532,
+      "sha256": "2440c28354d70fd40317584c2a1ff9d43dcc25d0ec83c173033a2f1f7653600d"
+    },
+    {
+      "path": "src/fnit/eddy/fsl2111_strict/geometry.py",
+      "bytes": 7734,
+      "sha256": "4933be355012c36aa281c5cbb309444f3d0e66a3dd493eaa737c1671384981ae"
+    },
+    {
+      "path": "src/fnit/eddy/fsl2111_strict/gp.py",
+      "bytes": 11627,
+      "sha256": "b046a603152b3d2a1e85d691b91455a765c5acca49e8a43d0c319f188aab7c66"
+    },
+    {
+      "path": "src/fnit/eddy/fsl2111_strict/outlier.py",
+      "bytes": 2853,
+      "sha256": "5b125641eaa882e02fe682a769a66b6ce171139e301f8d301b50834b51fb8d7d"
+    },
+    {
+      "path": "src/fnit/eddy/fsl2111_strict/pipeline.py",
+      "bytes": 20556,
+      "sha256": "72a20be7bd2afc817c38f8306abd416a68448c0a7ef461419cfb502ab2cde569"
+    },
+    {
+      "path": "src/fnit/eddy/fsl2111_strict/registration.py",
+      "bytes": 6017,
+      "sha256": "c803a949a173a09528caa9a97ad3cdfea80aae6097e8f6fc972e91cd525ad563"
+    },
+    {
+      "path": "src/fnit/eddy/fsl2111_strict/shell_alignment.py",
+      "bytes": 6124,
+      "sha256": "477028cecfebf0ba4ff1938f2b2228c0bca690450a5742a89b560ab7cbef1030"
+    },
+    {
+      "path": "src/fnit/eddy/fsl2111_strict/spline.py",
+      "bytes": 8710,
+      "sha256": "b55f7abc9aba63483a0777989cecd5a610db542f41950bf41007507d9f7fbfc8"
+    },
+    {
+      "path": "src/fnit/eddy/fsl2111_strict/warp.py",
+      "bytes": 12006,
+      "sha256": "7c3bed66af25e5e3c49e5a42798d0886bcd7dac008fbbd810a15dd7e58a86d34"
+    },
+    {
+      "path": "src/fnit/eddy/topup_field.py",
+      "bytes": 1799,
+      "sha256": "54d076b5187d70596db7778264326dbd797d9972c28f954aa32e43f6db2c6b74"
+    },
+    {
+      "path": "src/fnit/eddy/ukb.py",
+      "bytes": 3244,
+      "sha256": "50c75303c3aa1f5543d144fc9aad07bc67581c1e47ebab502c964e2281c602c9"
+    },
+    {
+      "path": "src/fnit/fast/__init__.py",
+      "bytes": 268,
+      "sha256": "c0f675872a1523425465d764bf3810358d62fc0ad900ff273089b0a5fe516771"
+    },
+    {
+      "path": "src/fnit/fast/_fsl_scan.py",
+      "bytes": 16071,
+      "sha256": "03add4e07ec955995a833fd8adb8761d8278f3fec43abe3499f30fe4da58a643"
+    },
+    {
+      "path": "src/fnit/fast/algorithm.py",
+      "bytes": 24981,
+      "sha256": "b8eb36e776fe9631e94660a6784b469ddcfdf53753c9a4a75856970c067cedd1"
+    },
+    {
+      "path": "src/fnit/fast/pipeline.py",
+      "bytes": 5386,
+      "sha256": "6fbbdc1f564cc5b700f6e462cc5bb09885ff20c46231d6bf9b8a72be0d0f28f4"
+    },
+    {
+      "path": "src/fnit/fast_vbm/__init__.py",
+      "bytes": 247,
+      "sha256": "e203eab378f3ff8de91bec3a624e1da9d597d72623c65ceff4a549f61b5fa9b8"
+    },
+    {
+      "path": "src/fnit/fast_vbm/pipeline.py",
+      "bytes": 21680,
+      "sha256": "2d0b6a2778f78e53cce5623de9574c9f594a10b854281c2337a0a2fbbba3b10e"
+    },
+    {
+      "path": "src/fnit/fast_vbm/registration.py",
+      "bytes": 26681,
+      "sha256": "2a931f509543429d687792571c162283f67f49643d492b52096d2e1fcddb111b"
+    },
+    {
+      "path": "src/fnit/fast_vbm/synthmorph_backend.py",
+      "bytes": 9483,
+      "sha256": "547de082dc4bb65d630f254d2d4d34c5da81233fb6c91019a337f9f40424b211"
+    },
+    {
+      "path": "src/fnit/feat/__init__.py",
+      "bytes": 335,
+      "sha256": "ca860db873131d98eba9ed245ed9aed7770443e162ad2e43a1cbb688af1a5d84"
+    },
+    {
+      "path": "src/fnit/feat/temporal.py",
+      "bytes": 7410,
+      "sha256": "b0a3fc14751a6a7cd9ce7c66ac8fe7b3fc4bea43f4039ef5b03d5af47e3d7b08"
+    },
+    {
+      "path": "src/fnit/flirt/__init__.py",
+      "bytes": 1191,
+      "sha256": "58b1ae43c50bd2942398f272c013f5bc743ce6a78abdaab7c93eeae1949447af"
+    },
+    {
+      "path": "src/fnit/flirt/__main__.py",
+      "bytes": 76,
+      "sha256": "03eb6210ee12d659108106a6126a870a9d5bc89ba95c116cd519e2764b0e092f"
+    },
+    {
+      "path": "src/fnit/flirt/_batched_cuda.py",
+      "bytes": 7554,
+      "sha256": "c6ac99f6b0499c2b081969448dc9492906232daac247477edff0cb00ac43cd74"
+    },
+    {
+      "path": "src/fnit/flirt/affine_batch.py",
+      "bytes": 4180,
+      "sha256": "8aa427ea1b185deea2ff2295e01c972bb371cb5a4b23504ce13ef79ca1d6155f"
+    },
+    {
+      "path": "src/fnit/flirt/batched.py",
+      "bytes": 20943,
+      "sha256": "10115b3fd51497162c2ebc1a7ae52999a4c3079810e18906ae9c0c363a457719"
+    },
+    {
+      "path": "src/fnit/flirt/cli.py",
+      "bytes": 4305,
+      "sha256": "f57d65c320aee278820de2fb31cc764e7bee911e3228d3a904108d2a75e8142e"
+    },
+    {
+      "path": "src/fnit/flirt/coordinates.py",
+      "bytes": 5019,
+      "sha256": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e"
+    },
+    {
+      "path": "src/fnit/flirt/core.py",
+      "bytes": 83891,
+      "sha256": "e6ce6185fafb89666be631069f66e96ce9c6a561ab3d7c7fab4c661d317885c1"
+    },
+    {
+      "path": "src/fnit/flirt/search.py",
+      "bytes": 6261,
+      "sha256": "9b50908c1bead992c55255d2ed3c6cf266135e042c276b9ba8176fef03edae4c"
+    },
+    {
+      "path": "src/fnit/flirt/standalone.py",
+      "bytes": 6087,
+      "sha256": "a5ffc8e847bfc5219ef8e068a34eb81bab4b6fceb7ea39a497eb573108a8115e"
+    },
+    {
+      "path": "src/fnit/flirt/types.py",
+      "bytes": 1740,
+      "sha256": "55a3abf2d7ce7889c297df95289890a589d1721b9fe3b157aa90e87819ed8e21"
+    },
+    {
+      "path": "src/fnit/fmri/__init__.py",
+      "bytes": 2079,
+      "sha256": "e3f2bb1fe0037087f9b97a246ed92b13d34737e43f9ae5cccd4be824ca1e69aa"
+    },
+    {
+      "path": "src/fnit/fmri/_anatomical.py",
+      "bytes": 10975,
+      "sha256": "00cdbfbc70b2058f3f1627106f3feb97fc83a6bc65a5288a691d4d342b33dac4"
+    },
+    {
+      "path": "src/fnit/fmri/_bbr_cuda.py",
+      "bytes": 3389,
+      "sha256": "c79fdd0c20e68628585a46b946d3ef1f532373aaf8c0371eb5ed0ae25a8a5090"
+    },
+    {
+      "path": "src/fnit/fmri/aroma.py",
+      "bytes": 9582,
+      "sha256": "d7a8d9a8436d2b1d1b4fe4899dd89bbf134ccefa25a66d601db8cc1a9481b28d"
+    },
+    {
+      "path": "src/fnit/fmri/aroma_pipeline.py",
+      "bytes": 5491,
+      "sha256": "a3dac1d8489ae2f28725712e64aeec58f5dba8af67d2e031d22c68e8aecff953"
+    },
+    {
+      "path": "src/fnit/fmri/assets_setup.py",
+      "bytes": 9223,
+      "sha256": "0c2d1452a52203b326fd8b53ee507f46663aef64a420220b68bc681032307fc5"
+    },
+    {
+      "path": "src/fnit/fmri/bbr.py",
+      "bytes": 24678,
+      "sha256": "0ca14f3343d6b5bf09ea93f6ec94de9f2c0cce19fdf8ea005a87ff8e03f48fc2"
+    },
+    {
+      "path": "src/fnit/fmri/bids.py",
+      "bytes": 12432,
+      "sha256": "7fce819c071fbf1ac7c67f32356129d9eda233484f701b5dc6fb113330ab166c"
+    },
+    {
+      "path": "src/fnit/fmri/cli.py",
+      "bytes": 6302,
+      "sha256": "beeed7be2ddeacef39dc5ae0f4a0a47db8ed32f786e91fcfa01d9054d1d8f3ba"
+    },
+    {
+      "path": "src/fnit/fmri/confounds.py",
+      "bytes": 8518,
+      "sha256": "90ca47f85fc51ec89829d7a42df5f9465868e82f48b3330a4b43e2488ab13c0a"
+    },
+    {
+      "path": "src/fnit/fmri/derivatives.py",
+      "bytes": 6398,
+      "sha256": "b7c9e3ed0d8af3fa34a88a640192e0714e6a4895bb43c980a2a4c0db687ff15d"
+    },
+    {
+      "path": "src/fnit/fmri/end_to_end.py",
+      "bytes": 28998,
+      "sha256": "48302dda1b09c271ef3fcd219351a71bcf9a441558626934f94b63285daf7967"
+    },
+    {
+      "path": "src/fnit/fmri/mask.py",
+      "bytes": 1948,
+      "sha256": "c73657b11aebf63242bacfae952e2f18207033dfdd70218e43b3692448a5d2d5"
+    },
+    {
+      "path": "src/fnit/fmri/motion.py",
+      "bytes": 4648,
+      "sha256": "82636e426616f84de8d06cfe2f7645c2a82b14f45c5f1d613c7524d079158204"
+    },
+    {
+      "path": "src/fnit/fmri/normalization.py",
+      "bytes": 20879,
+      "sha256": "268f61b28e2217e3d77a8f74652aac654d6b688673da1281feb5cdb7e5ac3e7f"
+    },
+    {
+      "path": "src/fnit/fmri/pipeline.py",
+      "bytes": 6622,
+      "sha256": "a71a0e0528a72c0de2dd38edbfee6e817dfde80a5640b1f620c120abdbd59311"
+    },
+    {
+      "path": "src/fnit/fmri/sampling_reference.py",
+      "bytes": 2818,
+      "sha256": "250642c2feffcbd1fb49cc2e5a66cd15bd6c6a7b62cd088ccd021886699a9453"
+    },
+    {
+      "path": "src/fnit/fmri/slice_timing.py",
+      "bytes": 5195,
+      "sha256": "74cefa748c1c3239cc64ca73c2691652a511ac6ab004ddfc2404d822b2465e55"
+    },
+    {
+      "path": "src/fnit/fmri/spatial.py",
+      "bytes": 8599,
+      "sha256": "bd7e3ae1d28202f79925323ea05c7303e07e8b0caa3646e732f64703a00ab134"
+    },
+    {
+      "path": "src/fnit/fmri/surface.py",
+      "bytes": 4944,
+      "sha256": "b5b3c9712dcbaa6e63b93ce690374b25a28ad2f70a7ff22d4fbb36e231df70e2"
+    },
+    {
+      "path": "src/fnit/fmri/surface_fmriprep.py",
+      "bytes": 16428,
+      "sha256": "d480deb6bb9a5ef51132bf259d0f57442837c2f61a6f05852d9a5c2711441605"
+    },
+    {
+      "path": "src/fnit/fmri/surface_pipeline.py",
+      "bytes": 26181,
+      "sha256": "374f57711cb5eed941e6b6dd13c288327a530ae0312ed8334ea79f64c5bcf7a9"
+    },
+    {
+      "path": "src/fnit/fmri/surface_prepare.py",
+      "bytes": 10541,
+      "sha256": "d46e3454ca6ae5cda725b2c9fb5bef8e5e44d61e0f533e6239bf8d558e240335"
+    },
+    {
+      "path": "src/fnit/fmri/timing.py",
+      "bytes": 3688,
+      "sha256": "e5b3478d036886decfc942e8a08a97832acfa546a90089be2213d18de96b726a"
+    },
+    {
+      "path": "src/fnit/fnirt/__init__.py",
+      "bytes": 1040,
+      "sha256": "3480673ed6cbbfc38e573ac64bab6d14fabffc46585a29c74a3d916c2739294d"
+    },
+    {
+      "path": "src/fnit/fnirt/__main__.py",
+      "bytes": 80,
+      "sha256": "3d2438ae92f4746e9ffaa1f837b1fe803f6281091d1f31f8c95643716f257d9a"
+    },
+    {
+      "path": "src/fnit/fnirt/_smoothing_triton.py",
+      "bytes": 1969,
+      "sha256": "4b6293eb4210b18a91de647003804cf1aa1f50780449a073e350f9177982227b"
+    },
+    {
+      "path": "src/fnit/fnirt/_topology_triton.py",
+      "bytes": 7134,
+      "sha256": "3f61e452228a9c3dff85caff58ed1103e7b89783c86838bf1e70e322ae3f65f1"
+    },
+    {
+      "path": "src/fnit/fnirt/cli.py",
+      "bytes": 6245,
+      "sha256": "9c143739510dd245f76bd98a80610fdbf6ca65519cd59b41f4a9e233b172e53c"
+    },
+    {
+      "path": "src/fnit/fnirt/io.py",
+      "bytes": 6080,
+      "sha256": "ee79183709258f2e71dcd110f3c922b1cc7d20a979161ae1c86c2c627becf366"
+    },
+    {
+      "path": "src/fnit/fnirt/optimizer.py",
+      "bytes": 8506,
+      "sha256": "903d5031058c96aa9e5fdc29736619fe636b62422cd2646b527df49011d173fd"
+    },
+    {
+      "path": "src/fnit/fnirt/registration.py",
+      "bytes": 82435,
+      "sha256": "9e5747292bb5bf79d1dd77bf2a6b76a94d99d33b5a6453ff79dc1b843bcda991"
+    },
+    {
+      "path": "src/fnit/fnirt/spline.py",
+      "bytes": 17716,
+      "sha256": "79ec750523d69342bf4926adf5e715d91a59749026fc5253ee96d765c0208cad"
+    },
+    {
+      "path": "src/fnit/fnirt/standalone.py",
+      "bytes": 10838,
+      "sha256": "83a51a301e1d9145051a12e3b4f10b452c319d1e7a7962308443a048b723ade6"
+    },
+    {
+      "path": "src/fnit/fnirt/topology.py",
+      "bytes": 9328,
+      "sha256": "150f65a73baf796f98e6304d0c209288816ee75485be5d93032db46edeb52900"
+    },
+    {
+      "path": "src/fnit/fslmaths/__init__.py",
+      "bytes": 128,
+      "sha256": "75f4bb11e916e07c0713511b0a1acaa7ea7ab45334e73f782fd6c8fb6d6ed062"
+    },
+    {
+      "path": "src/fnit/fslmaths/cli.py",
+      "bytes": 1334,
+      "sha256": "3987df199e2530ab3df02353282bdee157fc3cff32694a039251d86a674bf5b0"
+    },
+    {
+      "path": "src/fnit/fslmaths/core.py",
+      "bytes": 19460,
+      "sha256": "8fea8d3fe7d6cd0385b3678f927aaef6704781f5bedb6564418e4b638a601472"
+    },
+    {
+      "path": "src/fnit/gems/__init__.py",
+      "bytes": 1103,
+      "sha256": "028efcf28fa9ef09e74913df677e556aa7d3f358e8ee35ad92636cb485fe68e7"
+    },
+    {
+      "path": "src/fnit/gems/_raster_triton.py",
+      "bytes": 17430,
+      "sha256": "22ce1ca61efa42b5b6d06cacc4f4d859ef2c10ffca26ecf154f3d73361bee5ac"
+    },
+    {
+      "path": "src/fnit/gems/atlas.py",
+      "bytes": 10149,
+      "sha256": "f6415958b02956f50f6efa6043428513610c3d3a00b734ff2aeff353930cf975"
+    },
+    {
+      "path": "src/fnit/gems/brainstem.py",
+      "bytes": 9730,
+      "sha256": "37d3055d4f33812f41c042a179b04291e9f01750578f33615f6f0e539588049d"
+    },
+    {
+      "path": "src/fnit/gems/context.py",
+      "bytes": 6834,
+      "sha256": "36feb53a1fef373a6c2ba33cf628f724ffeb94e6e450943758e5438c46de87bc"
+    },
+    {
+      "path": "src/fnit/gems/core.py",
+      "bytes": 34127,
+      "sha256": "9d32fb189519f095bc8d8d9d849f49bad73ba1a41b73905dce66e1331aca2173"
+    },
+    {
+      "path": "src/fnit/gems/deformation.py",
+      "bytes": 14189,
+      "sha256": "2b29780e6a49bcefb8e39fef94310be59d1e5b043e2740c0ce88528cecd16398"
+    },
+    {
+      "path": "src/fnit/gems/gaussian.py",
+      "bytes": 4737,
+      "sha256": "b0a147a76834e8da9c10592017cd4e800b8675082d25917a50b2507c2f24febc"
+    },
+    {
+      "path": "src/fnit/gems/initialize.py",
+      "bytes": 6457,
+      "sha256": "ab5bc936c751a5b1fa897957d9382343544127eba7afac93d5b761a334dac187"
+    },
+    {
+      "path": "src/fnit/gems/optim.py",
+      "bytes": 15225,
+      "sha256": "f25b7251a6b850dc30716308e2a686399c9339cc39d9324c10f19e3046716c89"
+    },
+    {
+      "path": "src/fnit/gems/output.py",
+      "bytes": 4523,
+      "sha256": "a67e5aeb863ba4a6370ced77110d519b7e6185c34aa2eb72f8659e95866e873c"
+    },
+    {
+      "path": "src/fnit/gems/pipeline.py",
+      "bytes": 10739,
+      "sha256": "6827a7925e7bf8d0945d5249b99eba4b729dc1ab451ab5064a2b2cea6eb1a0a0"
+    },
+    {
+      "path": "src/fnit/gems/rasterize.py",
+      "bytes": 27429,
+      "sha256": "01d9b698655a64e67f16ddcf4e0cd3482b4ca129c0063aa13b4e56c0a2e15348"
+    },
+    {
+      "path": "src/fnit/gems/recipes/__init__.py",
+      "bytes": 626,
+      "sha256": "2109d5d096c7bfbf3533e75009956bfcaf8b4b66326929b47acc9ee91f6f63b9"
+    },
+    {
+      "path": "src/fnit/gems/recipes/base.py",
+      "bytes": 20716,
+      "sha256": "15cdc0a778ccedc87640c1266439679a29a0b5e973036ea2c3226a6d2369aa8f"
+    },
+    {
+      "path": "src/fnit/gems/recipes/brainstem.py",
+      "bytes": 8493,
+      "sha256": "29eb6b5b59993fcbed58824c7f37b63991e52e7342d59656d9edb80048d79d15"
+    },
+    {
+      "path": "src/fnit/gems/recipes/hippo_amygdala.py",
+      "bytes": 11899,
+      "sha256": "96eac5a5ef766c22e9f16e4472bec241e50b129e65e7001af9110c922ed4bf8b"
+    },
+    {
+      "path": "src/fnit/gems/recipes/thalamus.py",
+      "bytes": 7417,
+      "sha256": "b1607aa027cdbfc6b5a54707ff6622535e64574a7444b3e3129d87e0ab2a5575"
+    },
+    {
+      "path": "src/fnit/gems/setup.py",
+      "bytes": 7366,
+      "sha256": "ccd6c6c9952df395c972e3dbc32842c20fb7b666bcc10f8c1afe274753ab561d"
+    },
+    {
+      "path": "src/fnit/gems/smoothing.py",
+      "bytes": 8097,
+      "sha256": "853078d34c9c798395db16b9af503065d88cc68b656615a52826c066bbf45fb5"
+    },
+    {
+      "path": "src/fnit/invwarp/__init__.py",
+      "bytes": 194,
+      "sha256": "079e99cfdf2f38ae30f00de5a5e9c955c92577a238fcfd2353975a884824117f"
+    },
+    {
+      "path": "src/fnit/invwarp/cli.py",
+      "bytes": 1701,
+      "sha256": "97e75c1eeaf59be79d36b1141d6cf469734c1358ab82524b124b30a02e55426b"
+    },
+    {
+      "path": "src/fnit/invwarp/core.py",
+      "bytes": 3926,
+      "sha256": "342d40a16ccbb05d62b449c74f94b18b820d0a01d264bf3bda95402536c6c147"
+    },
+    {
+      "path": "src/fnit/mcflirt/__init__.py",
+      "bytes": 142,
+      "sha256": "793c2b2e08ae85bedf341df682225f7bc9eadd44069dbe6fd73356ccb985a1ec"
+    },
+    {
+      "path": "src/fnit/mcflirt/cli.py",
+      "bytes": 2144,
+      "sha256": "855e192b26ced79517250bb7f406468e614c5da30922772c737f0b70062e08a9"
+    },
+    {
+      "path": "src/fnit/mcflirt/core.py",
+      "bytes": 17089,
+      "sha256": "f4f18579cb0a7f709f2975c3cef125e6cce392fc1dca3fa413428c365afb56fe"
+    },
+    {
+      "path": "src/fnit/mcflirt/sampling.py",
+      "bytes": 5264,
+      "sha256": "af10cfd4f42f94adff2bb910eafe40834786a3b7646756a3967d5c9fc3aa0b8f"
+    },
+    {
+      "path": "src/fnit/melodic/__init__.py",
+      "bytes": 266,
+      "sha256": "030149f321c2b083cca5352cb7ca6076311e085fca6168e1ef2c4e168dc9318d"
+    },
+    {
+      "path": "src/fnit/melodic/bids.py",
+      "bytes": 7237,
+      "sha256": "a272ad75955a6c1c19b5ce0e486f9609b32768d6df28e48760704cf641388aa3"
+    },
+    {
+      "path": "src/fnit/melodic/ica.py",
+      "bytes": 23833,
+      "sha256": "66b8cfeb887fbebb64cc37565141bf2009a8bbb089228774b8093086195fb228"
+    },
+    {
+      "path": "src/fnit/mmorf/__init__.py",
+      "bytes": 286,
+      "sha256": "be0bc4e09746ed7decc532fd553a8964823ce5733b327a107c00b63cb67dd774"
+    },
+    {
+      "path": "src/fnit/mmorf/__main__.py",
+      "bytes": 30,
+      "sha256": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279"
+    },
+    {
+      "path": "src/fnit/mmorf/cli.py",
+      "bytes": 2764,
+      "sha256": "3e9d2d8c2cbeed1121e986545cc0d6d26f4f248937c9ff7423a4ea81e0b61101"
+    },
+    {
+      "path": "src/fnit/mmorf/core.py",
+      "bytes": 62530,
+      "sha256": "49260559dddbf67e227d53c16f01a772f2ceb20cff09c0c3f9117e2633fa9b27"
+    },
+    {
+      "path": "src/fnit/mmorf/standalone.py",
+      "bytes": 2470,
+      "sha256": "cfad1efe8703a620af4b196a98cad2b6b490b7a7d57daf2293e1bd7f0b816326"
+    },
+    {
+      "path": "src/fnit/mshbm/__init__.py",
+      "bytes": 410,
+      "sha256": "9c92d019e9522964b1bfd63aed0392dc55c8f79e8ae39392f710d48a3d6d5e04"
+    },
+    {
+      "path": "src/fnit/mshbm/assets/__init__.py",
+      "bytes": 47,
+      "sha256": "127b51e327bbf7ed5f3b10dbcfb392cc7c7b8e7986a4df393831aca0429aa94f"
+    },
+    {
+      "path": "src/fnit/mshbm/assets_setup.py",
+      "bytes": 3133,
+      "sha256": "2198d6dd82c9a43044da366cb33bd4745510709a43a77c4a8357a49908185a7c"
+    },
+    {
+      "path": "src/fnit/mshbm/cli.py",
+      "bytes": 6408,
+      "sha256": "8c660616381340fcdf23b5dd74a57f2bec470debf11fcf2ce81e105cd858762e"
+    },
+    {
+      "path": "src/fnit/mshbm/core.py",
+      "bytes": 10457,
+      "sha256": "8cd2f6fb706a13c60be5070c575cdb77898e2d309cf3f958c4fdbfee355a27ea"
+    },
+    {
+      "path": "src/fnit/mshbm/output.py",
+      "bytes": 2815,
+      "sha256": "e006bd3d0e42a2cfabeeb5646dba970d46d4eeb3730618e7353e6a7985493feb"
+    },
+    {
+      "path": "src/fnit/mshbm/volume.py",
+      "bytes": 6750,
+      "sha256": "ac7c8de095bbe15f320150efeccb3e160df7ed8e436d6fdd47579037c98062fe"
+    },
+    {
+      "path": "src/fnit/msm/__init__.py",
+      "bytes": 293,
+      "sha256": "ef44375f8c3fa066ca435528e1457b636573f3c789984638edea48caa029c605"
+    },
+    {
+      "path": "src/fnit/msm/_affine.py",
+      "bytes": 10505,
+      "sha256": "fb9268e69482ca9e9b1cd2eaa3a80fdd039822cdcd32940d2131072527219e4e"
+    },
+    {
+      "path": "src/fnit/msm/_sphere_map.py",
+      "bytes": 8905,
+      "sha256": "db87a40e788161c03fe1dd8d67e6b3a77247c3f1e198e964f34e4c2120e9c63a"
+    },
+    {
+      "path": "src/fnit/msm/config.py",
+      "bytes": 6756,
+      "sha256": "20afadd2860c2782fa3983f56d1351e31a56e415f75761798223ad455335e8c9"
+    },
+    {
+      "path": "src/fnit/msm/msmsulc.py",
+      "bytes": 30716,
+      "sha256": "d20b4cd6ff3dbdcf785c593e2460c28bfc3a3ddf6e8608d7dd5260886c4d8abf"
+    },
+    {
+      "path": "src/fnit/msm/prepare.py",
+      "bytes": 4723,
+      "sha256": "30dc5fdb17628b70ec42e87f0d04c3d7e5f7c4faf35292e0a89493536006d675"
+    },
+    {
+      "path": "src/fnit/probtrackx/__init__.py",
+      "bytes": 179,
+      "sha256": "162c3d0d38183f0fd002ee62b1b249e58f8a719c5c15731cf235f19f8e893040"
+    },
+    {
+      "path": "src/fnit/probtrackx/_fast_counts.py",
+      "bytes": 6305,
+      "sha256": "ae45aa58c273e8a5211be8a889d9ee8522f9134237fcdee8ad5a0c0c7883b9e7"
+    },
+    {
+      "path": "src/fnit/probtrackx/_triton.py",
+      "bytes": 7974,
+      "sha256": "10ca096263bfe04d32a1e23acf6eff3876cf317f7955772e7e9d4aeaf220e3af"
+    },
+    {
+      "path": "src/fnit/probtrackx/cli.py",
+      "bytes": 7314,
+      "sha256": "cb9ff06973eb7b85f02895a70e685219c1842a65246100fc9b5266022d9a06e0"
+    },
+    {
+      "path": "src/fnit/probtrackx/matrix_io.py",
+      "bytes": 2111,
+      "sha256": "115a2748068339094bfa2d01c1f2ea0159ad4389ab6b413129a3f146de8e6ed7"
+    },
+    {
+      "path": "src/fnit/probtrackx/mni_masks.py",
+      "bytes": 5846,
+      "sha256": "dad7806306dce1c9af8114e19814f720bc6b35f7af965b1615c50dda32d2c119"
+    },
+    {
+      "path": "src/fnit/probtrackx/pipeline.py",
+      "bytes": 40728,
+      "sha256": "75dd078ec3f627b975b39a7ae9e201c022df12dd131f95fda1bd11459d5b7edd"
+    },
+    {
+      "path": "src/fnit/recon_all/__init__.py",
+      "bytes": 156,
+      "sha256": "d9691fbe92139d94364422748de32dff8cbc7f9d3b8408e4d45dc2abf878108a"
+    },
+    {
+      "path": "src/fnit/recon_all/anatomical_stats_file.py",
+      "bytes": 1991,
+      "sha256": "e81fa78d1ae1a095fba0330cd876f5417812de455fefc02d88f67e57c4df2fe7"
+    },
+    {
+      "path": "src/fnit/recon_all/anatomical_stats_global.py",
+      "bytes": 4599,
+      "sha256": "44b33fccf60d4e20416ca5234ece193a8456efe6872a39d75329a251fb78704e"
+    },
+    {
+      "path": "src/fnit/recon_all/anatomical_stats_rows.py",
+      "bytes": 1769,
+      "sha256": "a38ba5416400b049dd2260554eeafb04690e9df5e94439196f256366874f15f1"
+    },
+    {
+      "path": "src/fnit/recon_all/ants_denoise_core.py",
+      "bytes": 10417,
+      "sha256": "337e72212156908ec82f4e1f43c30577e8481625dc2715b341f727e393863c55"
+    },
+    {
+      "path": "src/fnit/recon_all/ants_denoise_python.py",
+      "bytes": 1610,
+      "sha256": "035fc4800887edcec3b26294a13accf4ff46c06029c8b1faef30a79694cf6bf6"
+    },
+    {
+      "path": "src/fnit/recon_all/assets.py",
+      "bytes": 27515,
+      "sha256": "ee03a40b6d4006b8157e9b84d5cf15ff5ded63bb67f8976e968a95c12f4afa41"
+    },
+    {
+      "path": "src/fnit/recon_all/autodet_gwstats_python.py",
+      "bytes": 7074,
+      "sha256": "7a79579662d6256fd958c5f7e70cbf3f079beda1f9776642dace273438c44c3d"
+    },
+    {
+      "path": "src/fnit/recon_all/aux_seg.py",
+      "bytes": 13669,
+      "sha256": "068dfac527b43fcbd480189aaf7a1dae8b9a9bf413b7d6e7b323b20a5816e79a"
+    },
+    {
+      "path": "src/fnit/recon_all/batch.py",
+      "bytes": 3708,
+      "sha256": "3387ddca2ccd6299d9f38caf8677efac117cb50580d82adb70e31dab07a5cd82"
+    },
+    {
+      "path": "src/fnit/recon_all/brain_volume_stats_python.py",
+      "bytes": 4911,
+      "sha256": "14ba63b62458e828d6a9f329eec2d857100f9a3968908d227ee5df2b9e460058"
+    },
+    {
+      "path": "src/fnit/recon_all/ca_normalize_python.py",
+      "bytes": 22517,
+      "sha256": "abb436826e600101c2c5087e2367e8a36a7c038c99eda10bc4f5be1e7486661a"
+    },
+    {
+      "path": "src/fnit/recon_all/ca_register_inverse.py",
+      "bytes": 8517,
+      "sha256": "4d385a5e7974649c2bae1db426a56a3ce2bf3b9ba6913e9735d284c461195955"
+    },
+    {
+      "path": "src/fnit/recon_all/ca_register_inverse_fill.py",
+      "bytes": 5456,
+      "sha256": "4154457be88a77e1aac4e06d94babcb9716006a3dc704a7bcfe2c6a859dcd395"
+    },
+    {
+      "path": "src/fnit/recon_all/ca_register_inverse_output.py",
+      "bytes": 6578,
+      "sha256": "29d4280a8698631908b38a128ce2945bfcb7002789ed3f569142b9a1518551c2"
+    },
+    {
+      "path": "src/fnit/recon_all/compare_native_free.py",
+      "bytes": 14740,
+      "sha256": "fc905615f526dcd0ba5c4503fbbc7fe14047d4c206d807c1c388cc17f0d64a51"
+    },
+    {
+      "path": "src/fnit/recon_all/compare_subject.py",
+      "bytes": 23964,
+      "sha256": "7381d28a46b5c07efbb4630cdcd26245c02aa24ea613fbac25e3b69dab2e7921"
+    },
+    {
+      "path": "src/fnit/recon_all/conform_gpu.py",
+      "bytes": 10075,
+      "sha256": "a62342b0a42ba51d29e98638fea5352d5dbba3ac7c08b9b0f8aab7f305c1e6b5"
+    },
+    {
+      "path": "src/fnit/recon_all/edit_wm_aseg_core_python.py",
+      "bytes": 25119,
+      "sha256": "87de672b6715985188528e5ef43fce004e5e06a3de56dc2b75561232b8b9177d"
+    },
+    {
+      "path": "src/fnit/recon_all/edit_wm_aseg_late_python.py",
+      "bytes": 4201,
+      "sha256": "40075349415aa1d3285df81669c9bdc886bd3f7afbce28bc40533f2504bc9f08"
+    },
+    {
+      "path": "src/fnit/recon_all/estimated_tiv.py",
+      "bytes": 1729,
+      "sha256": "d60b79daafaa9b85cc0cbd28a3270aae7c4ccc6908c75e13618ca2f29ea66163"
+    },
+    {
+      "path": "src/fnit/recon_all/expected_outputs.py",
+      "bytes": 2576,
+      "sha256": "0b0f4b26dc05895c891a47d33a83312c18e0161bff2c3bdf34aab9ecb948d43a"
+    },
+    {
+      "path": "src/fnit/recon_all/extract_main_component_python.py",
+      "bytes": 6161,
+      "sha256": "5079510475ff74aca6f0823f49ed4514826b2d4080e8bfc37ab523a2eee2f2ea"
+    },
+    {
+      "path": "src/fnit/recon_all/fill_aseg_python.py",
+      "bytes": 10398,
+      "sha256": "2ce765ebd46c7f4b547708ad30f908edf51e45c7da259e11638a29ff966b60d5"
+    },
+    {
+      "path": "src/fnit/recon_all/fill_cutting_plane_python.py",
+      "bytes": 9681,
+      "sha256": "b6c59ad1dd39225540ef04668417c3354feb20b1da05c46dc509dd77c0b5ce44"
+    },
+    {
+      "path": "src/fnit/recon_all/final_white_conda.py",
+      "bytes": 3269,
+      "sha256": "5f9e8eacbdce6d02c7ab2ef522225bc32afa2ec4d4b69ff040edaa9c35b6c2f0"
+    },
+    {
+      "path": "src/fnit/recon_all/finalsurfs_python.py",
+      "bytes": 1979,
+      "sha256": "8ca926f88b439be9a31c617ee08ae2048798b6f48ebd7886b746540deb9d1123"
+    },
+    {
+      "path": "src/fnit/recon_all/gcsa_aseg.py",
+      "bytes": 2224,
+      "sha256": "b5b7e26e28bd912f30f59bc324675c20447fc15ed9a810cdda92da1b53814946"
+    },
+    {
+      "path": "src/fnit/recon_all/gcsa_feature.py",
+      "bytes": 6336,
+      "sha256": "40cbb9931e456c92ef0d361a10dbba14eab2293aab8312e4ddc5d7af2c54540c"
+    },
+    {
+      "path": "src/fnit/recon_all/gcsa_finalize.py",
+      "bytes": 4483,
+      "sha256": "d793b9ac972f3470892b6663cebf79b53c679b1c8893790841e388a5530037e4"
+    },
+    {
+      "path": "src/fnit/recon_all/gcsa_gibbs.py",
+      "bytes": 2984,
+      "sha256": "8924e8fbff3ae15f254629ac66ad33e41c7e5cdfe27e1e6f3a57d03f4617882f"
+    },
+    {
+      "path": "src/fnit/recon_all/gcsa_initial.py",
+      "bytes": 8473,
+      "sha256": "56483f779c7d781931f704975f3a57e5aa0837fd90e174f1c603ab7c18150779"
+    },
+    {
+      "path": "src/fnit/recon_all/gcsa_islands.py",
+      "bytes": 3450,
+      "sha256": "e69ee3ee96c48dce4bc948cfb2df9cd8e6db8789e71a49f79d7a4e45f3355376"
+    },
+    {
+      "path": "src/fnit/recon_all/gcsa_label_python.py",
+      "bytes": 6225,
+      "sha256": "2af06857386ca36f035b98e413a3a304224c43b52807c8844268170c828c3007"
+    },
+    {
+      "path": "src/fnit/recon_all/gcsa_permutation.py",
+      "bytes": 1463,
+      "sha256": "c8ffb051147f163b73960af34451204ed10c92db02a4f1f61285a34127fe625f"
+    },
+    {
+      "path": "src/fnit/recon_all/gcsa_reclassify.py",
+      "bytes": 2113,
+      "sha256": "8eb00ce4b40cc98e9d6a937c4aaf6386e107171e54ccedfb6c8f9bf0918b8678"
+    },
+    {
+      "path": "src/fnit/recon_all/inflate_center_python.py",
+      "bytes": 1883,
+      "sha256": "bbb720cd05f9979da8c6da2f4f6ce797094bb3c01740bd71ea15445b2ddd7428"
+    },
+    {
+      "path": "src/fnit/recon_all/inflate_python.py",
+      "bytes": 12642,
+      "sha256": "304d930dfb6bc206a14a937e42d7987c06caca727bf909d1f90ad1990624d10a"
+    },
+    {
+      "path": "src/fnit/recon_all/initial_surface_chain.py",
+      "bytes": 3867,
+      "sha256": "deebe7beff06b2695a1195413ebcfcb1309e8fd88361505ba87de20953e09a61"
+    },
+    {
+      "path": "src/fnit/recon_all/input_brainmask_chain.py",
+      "bytes": 1480,
+      "sha256": "5b0e23312a95dfa55fbbc670b27acb8b7eecf8335cc4cc10eb7f443db3acd900"
+    },
+    {
+      "path": "src/fnit/recon_all/input_ca_normalize_chain.py",
+      "bytes": 1822,
+      "sha256": "418952b40a8c8126003aec74bfe9b5e1767ded7365ec6ab54e6667ca15c61bbc"
+    },
+    {
+      "path": "src/fnit/recon_all/input_chain.py",
+      "bytes": 2178,
+      "sha256": "50cbb9e5e4331327072e21e75cb46e99593d9f11164fc7ed7218b0148b2de11f"
+    },
+    {
+      "path": "src/fnit/recon_all/input_n4_chain.py",
+      "bytes": 1593,
+      "sha256": "5cbc4ae9622c9501833d7a4b32c28d999413d48c3a069d813f5df892f29b8ead"
+    },
+    {
+      "path": "src/fnit/recon_all/input_talairach_chain.py",
+      "bytes": 5913,
+      "sha256": "cbb5764299846d3d0d4a598b9c2ccc713520266ad8d8bc0b8e5ed89c1e7b3a69"
+    },
+    {
+      "path": "src/fnit/recon_all/label2annot_python.py",
+      "bytes": 3872,
+      "sha256": "1642e2e99a061c64c3732a6d8511f864e1c8bbba9586ba91fa1c334ba9971f59"
+    },
+    {
+      "path": "src/fnit/recon_all/label2label_surface_python.py",
+      "bytes": 3684,
+      "sha256": "65c58d3a90ac83db2e8a715c9709067637068334df667ae0a05b641a059b5c65"
+    },
+    {
+      "path": "src/fnit/recon_all/label_cortex_fix_ga_python.py",
+      "bytes": 3328,
+      "sha256": "2f03da650ddfaedc0c95f86f0419c525d06879066b71f001aa854067dcb3e8fb"
+    },
+    {
+      "path": "src/fnit/recon_all/label_cortex_python.py",
+      "bytes": 7600,
+      "sha256": "68c9cd47ebccc40df9fff015652d14ddad65d4e3d8dba13334082a5d92a17ea9"
+    },
+    {
+      "path": "src/fnit/recon_all/mgh_compat.py",
+      "bytes": 1580,
+      "sha256": "351a7edde1e06c400e9379a2c94d8055396307237b2198cdf8527468d3ac510d"
+    },
+    {
+      "path": "src/fnit/recon_all/mni_aux_chain.py",
+      "bytes": 8214,
+      "sha256": "a9b1b7d5d5686ee9bf07786b63ec3a8268996256c2ee696ef7593665891dd368"
+    },
+    {
+      "path": "src/fnit/recon_all/mni_nonlinear_chain.py",
+      "bytes": 3549,
+      "sha256": "75a55d0189a8639c44cd65a83b78eed37f84ad04f862bddd46f47424370b4898"
+    },
+    {
+      "path": "src/fnit/recon_all/mri_binarize_gpu.py",
+      "bytes": 3883,
+      "sha256": "8c005e06857f28ff6824f79cdc1b35e5f1f698aa5748718a7157aa8ee7ec94a5"
+    },
+    {
+      "path": "src/fnit/recon_all/mri_cc_masks_python.py",
+      "bytes": 5865,
+      "sha256": "a00696098dec83ecdce12a9292690198046a78b3abe0a91c3cbc8d5d33aa01c3"
+    },
+    {
+      "path": "src/fnit/recon_all/mri_cc_plane_python.py",
+      "bytes": 4752,
+      "sha256": "37b73dc8c1799336f810b9e0fb1320f47656ffcafb359a7a4a9fd3d3cf042cba"
+    },
+    {
+      "path": "src/fnit/recon_all/mri_cc_python.py",
+      "bytes": 7192,
+      "sha256": "19600fbb7de784ae5bc715a3347cee40fbfb539fa1fa37cac52a53d48c0c70e8"
+    },
+    {
+      "path": "src/fnit/recon_all/mri_em_register.py",
+      "bytes": 36461,
+      "sha256": "61bb275aab464aabf2684eeab8deda044cdbd893143298513c3e9dc29171d0e3"
+    },
+    {
+      "path": "src/fnit/recon_all/mri_em_register_em_candidate.py",
+      "bytes": 5358,
+      "sha256": "6c902aace8e38e1654d533e303a46d240d1c8110bcd16fd3345c44f0277eb30e"
+    },
+    {
+      "path": "src/fnit/recon_all/mri_em_register_lta.py",
+      "bytes": 2654,
+      "sha256": "f401ba5595a885c9d4e6cdf65ec2832929ebb226a6f55b0737091045e9d33992"
+    },
+    {
+      "path": "src/fnit/recon_all/mri_em_register_optimizer.py",
+      "bytes": 7355,
+      "sha256": "f541af34b01547b87ab9369786c532ce46f4e08cf5230f10b43689506b5be6da"
+    },
+    {
+      "path": "src/fnit/recon_all/mri_em_register_python.py",
+      "bytes": 2982,
+      "sha256": "c6e50107329f7938046cd01c07f8f2e20d5783fe156611a0f2959cb70e0d1e99"
+    },
+    {
+      "path": "src/fnit/recon_all/mri_em_register_search_jit.py",
+      "bytes": 2360,
+      "sha256": "d1fd5cff698a5b0104da87af0be9e11e0d6f50d06eb4b1cde9d0b2a8983664d1"
+    },
+    {
+      "path": "src/fnit/recon_all/mri_em_register_search_source.py",
+      "bytes": 6791,
+      "sha256": "15c8825650220fccda5ce598869bfc9c232105369a1f801eeebc7179844f4ba8"
+    },
+    {
+      "path": "src/fnit/recon_all/mri_em_register_translation_source.py",
+      "bytes": 1864,
+      "sha256": "611bb9228f4b1051c5fe09587bf9ee5b5a88beb7b668de3d8f3dd5fca328d319"
+    },
+    {
+      "path": "src/fnit/recon_all/mri_mask_gpu.py",
+      "bytes": 2976,
+      "sha256": "3b8ff8e069c41a176dfee38e65fcfda214231900db5fd7af535d6842d1e43393"
+    },
+    {
+      "path": "src/fnit/recon_all/mri_segment.py",
+      "bytes": 42509,
+      "sha256": "87ce780003115506d8d563066c8abd000322f75b8589ce0dc7084a9d75e2c65d"
+    },
+    {
+      "path": "src/fnit/recon_all/mris_register_atlas.py",
+      "bytes": 1900,
+      "sha256": "38170e443c7ed83d7c145cf4a9cef3daf34f4da1177363cd7841677b1177ca74"
+    },
+    {
+      "path": "src/fnit/recon_all/mris_register_average_numba.py",
+      "bytes": 1398,
+      "sha256": "668801763b136533ba3f1f06dbe2882b81c57b6cd085cc1f17e3a154c4d78817"
+    },
+    {
+      "path": "src/fnit/recon_all/mris_register_blur.py",
+      "bytes": 1779,
+      "sha256": "3082615bd6d6c0782790eb56e04f2add8de1bbc8d99ddaffa64a85e342209d4f"
+    },
+    {
+      "path": "src/fnit/recon_all/mris_register_kernels.py",
+      "bytes": 3428,
+      "sha256": "f53d3ed3cc63a8af08a1174226f6aaa00cc84f7d8d42176a87d953f0a605378f"
+    },
+    {
+      "path": "src/fnit/recon_all/mris_register_line_search.py",
+      "bytes": 6468,
+      "sha256": "d087c9d4cca2e8eec84cdf17f4e945312522e853db7f7e5f9c2ad8ab15dcda96"
+    },
+    {
+      "path": "src/fnit/recon_all/mris_register_nonlinear.py",
+      "bytes": 24535,
+      "sha256": "f9edc1cd5952ea3223b2ef0c49d1a21d3ed0592523e38961bf93f4f95b78a737"
+    },
+    {
+      "path": "src/fnit/recon_all/mris_register_objective.py",
+      "bytes": 7588,
+      "sha256": "53dc46a81299f4dc7d4997c8356429429b0f9fc42689a23664a1876b737edd0e"
+    },
+    {
+      "path": "src/fnit/recon_all/mris_register_overlap.py",
+      "bytes": 3102,
+      "sha256": "a3a205070387fb9544b686a92e5e08205bb823b5b9f9bc24050d9c57e65e887b"
+    },
+    {
+      "path": "src/fnit/recon_all/mris_register_parameterization.py",
+      "bytes": 2395,
+      "sha256": "83a783effa74d75523a16425ae38384084e82f6546361c3f516f1bd49830a950"
+    },
+    {
+      "path": "src/fnit/recon_all/mris_register_rigid.py",
+      "bytes": 1747,
+      "sha256": "3471d403bc9d4ff7449f15a077f82f5c25bee5b67363e0c76ff6d730404d0ea4"
+    },
+    {
+      "path": "src/fnit/recon_all/mris_register_run.py",
+      "bytes": 2933,
+      "sha256": "b478ed6e9109d113a73a18da2a28492837b308a5884abcf76760cce2075421ae"
+    },
+    {
+      "path": "src/fnit/recon_all/mris_register_schedule.py",
+      "bytes": 2620,
+      "sha256": "0f28d63bdf2fa3305c61cee5f7504eb9e56b7e9af4daf336efc8632c7992456a"
+    },
+    {
+      "path": "src/fnit/recon_all/mris_register_smoothwm.py",
+      "bytes": 4820,
+      "sha256": "b4ef242acdcfd2f237f0496208486ab50f5ce9fa54e4e78d42a5e80e7d5f907d"
+    },
+    {
+      "path": "src/fnit/recon_all/mris_register_smoothwm_run.py",
+      "bytes": 9875,
+      "sha256": "c97a93caa1b5a5210949a81510b39c21f770d60a1163f89f86140f8576660892"
+    },
+    {
+      "path": "src/fnit/recon_all/mris_register_sulc_run.py",
+      "bytes": 7494,
+      "sha256": "5ddb1f8f7e781b4df379f3896656769a9c582e1ee68e860a2236c236d8bfb48f"
+    },
+    {
+      "path": "src/fnit/recon_all/mris_remesh_python.py",
+      "bytes": 16323,
+      "sha256": "1f181e340c6e4eb1bcd7f33d25828d377189b9e0af88a9a310e1f714b18ba761"
+    },
+    {
+      "path": "src/fnit/recon_all/mris_remove_intersection_python.py",
+      "bytes": 6877,
+      "sha256": "e74908d742e4670560d236a77980ee3d5b23068e6f5ec20fa6c6b96c5f66851c"
+    },
+    {
+      "path": "src/fnit/recon_all/n4_gpu.py",
+      "bytes": 4347,
+      "sha256": "408b5b2790040035cc88c9ed9bec32a306842b559f9d2ff7d1617292237b88ee"
+    },
+    {
+      "path": "src/fnit/recon_all/n4_itk.py",
+      "bytes": 2626,
+      "sha256": "b49ae68ab418728af6fa739be40072180ddb69711cffc35d1d4ac61262bf62f1"
+    },
+    {
+      "path": "src/fnit/recon_all/n4_wrapper.py",
+      "bytes": 6394,
+      "sha256": "8b8288a981ee69d9cc6bfe1af6b46463743e83ead2e542f32bc6fd50a810839e"
+    },
+    {
+      "path": "src/fnit/recon_all/native_free.py",
+      "bytes": 44645,
+      "sha256": "ac9eff4ef91442411980b4d2f93f64e5bc4fbd397acbc4d96e08f8280be6108b"
+    },
+    {
+      "path": "src/fnit/recon_all/nifti_import.py",
+      "bytes": 3071,
+      "sha256": "e1ea4764782fbbc5278012cfe1f6f147bca385d165fc7a28b9a8aa8b6f6a24c3"
+    },
+    {
+      "path": "src/fnit/recon_all/normalization/__init__.py",
+      "bytes": 203,
+      "sha256": "a3dbc39eb024387c4a73b687fe59784893b59222c678d82a74576be6fc120ff1"
+    },
+    {
+      "path": "src/fnit/recon_all/normalization/__main__.py",
+      "bytes": 66,
+      "sha256": "9fb9f6e8f2a2f0afa774694ef5495fe43230541b0ff47e8cf3796c3949286d71"
+    },
+    {
+      "path": "src/fnit/recon_all/normalization/aseg_pipeline.py",
+      "bytes": 5624,
+      "sha256": "8060c5b7311433c51f3161269ee7092d2656d8d0ab80e329de081d8cbdece494"
+    },
+    {
+      "path": "src/fnit/recon_all/normalization/normalize_1d_source.py",
+      "bytes": 7332,
+      "sha256": "0e2c0130899d49938e077dd0c8b8d662912099a9b942df8c941dca9b9e96e57d"
+    },
+    {
+      "path": "src/fnit/recon_all/normalization/normalize_3d_controls.py",
+      "bytes": 5989,
+      "sha256": "147e6ecf4375ab5a077535c1f3797809e4ff8ff3be6a297d50bfd7fe71ec4703"
+    },
+    {
+      "path": "src/fnit/recon_all/normalization/normalize_aseg_ridge.py",
+      "bytes": 10806,
+      "sha256": "01eb47a651805bb27c4cd44b72c5db69d094a913161fdb674e89e7bc0af9ff35"
+    },
+    {
+      "path": "src/fnit/recon_all/normalization/normalize_aseg_source.py",
+      "bytes": 3484,
+      "sha256": "18afb533a17aaae08b8b1cbdb0f4b688e14529290e791f89f53d8b8035362c51"
+    },
+    {
+      "path": "src/fnit/recon_all/normalization/normalize_gaussian_source.py",
+      "bytes": 5201,
+      "sha256": "82990481329a3fe9907d659e74e816dbaeb3f8fd6851f9b4ffd46472458ba749"
+    },
+    {
+      "path": "src/fnit/recon_all/normalization/normalize_gentle_source.py",
+      "bytes": 2593,
+      "sha256": "78f4195e40f516383f1b534f964d6a53ad16f59687357a1b37754294aefce7e9"
+    },
+    {
+      "path": "src/fnit/recon_all/normalization/normalize_tissue_peaks.py",
+      "bytes": 3501,
+      "sha256": "c5e0a55d1b8583dbdf4b6b1938b859444655202606a5c374dfe365d1bc898042"
+    },
+    {
+      "path": "src/fnit/recon_all/normalization/normalize_voronoi_source.py",
+      "bytes": 4867,
+      "sha256": "c1f278fd6a57c878cd05a23562a62c7015c896b788817df8857967cb77ac0dc5"
+    },
+    {
+      "path": "src/fnit/recon_all/normalization/pipeline.py",
+      "bytes": 6619,
+      "sha256": "ad9a206a35e6ac2334f1c8006ef3f6245985a14d6169e7c8e308171162e29ec5"
+    },
+    {
+      "path": "src/fnit/recon_all/pial_t1_conda.py",
+      "bytes": 3128,
+      "sha256": "61450061862bf4b77d42b879e59c4f220c45826a1fa806317b16b149d011e1a0"
+    },
+    {
+      "path": "src/fnit/recon_all/place_pial_python.py",
+      "bytes": 10191,
+      "sha256": "bd2a7bb27529e66bb6c9c640e4ab801a44647b1a3961e0e1fcf4dcab4abd6edf"
+    },
+    {
+      "path": "src/fnit/recon_all/place_surface_border.py",
+      "bytes": 11476,
+      "sha256": "07eb6e586dec01add03d6762841a7ef44a65bfa8cca97a2854359d910f93a560"
+    },
+    {
+      "path": "src/fnit/recon_all/place_surface_collision.py",
+      "bytes": 21757,
+      "sha256": "ccf8f330ae48c0e5e371ad7e87d9bb6bc8397ab642b7016ed317edaa56e3852f"
+    },
+    {
+      "path": "src/fnit/recon_all/place_surface_curvature.py",
+      "bytes": 7918,
+      "sha256": "641f3607187aeffd96eb4b84e4413ae7351d0937ec23bfc340ea4501846bdb33"
+    },
+    {
+      "path": "src/fnit/recon_all/place_surface_decision.py",
+      "bytes": 748,
+      "sha256": "fb3bae2275a051b490f1a77ee083493012b40bfb5bd13a3863d4677dd59abfcf"
+    },
+    {
+      "path": "src/fnit/recon_all/place_surface_final_cleanup.py",
+      "bytes": 3492,
+      "sha256": "f749f5c7210a733e3d9bca586980a5f5eda355612d40d3b25ec30810f82495a5"
+    },
+    {
+      "path": "src/fnit/recon_all/place_surface_geometry.py",
+      "bytes": 2238,
+      "sha256": "0df4ebcc4e53d03ed97dabbda6d17d0be5f98001e2528f4ddcd6487079d7082f"
+    },
+    {
+      "path": "src/fnit/recon_all/place_surface_gradient_average.py",
+      "bytes": 2200,
+      "sha256": "4613acd65fb234d6839a84c60b883a43551e51c92717881a606e65ac274f4200"
+    },
+    {
+      "path": "src/fnit/recon_all/place_surface_intensity.py",
+      "bytes": 3159,
+      "sha256": "86f9c7e8b15240f8418ddc444016d6a71bba02f6c35ac94482e0e064a070b7b2"
+    },
+    {
+      "path": "src/fnit/recon_all/place_surface_normals.py",
+      "bytes": 2761,
+      "sha256": "d3be4ce4ae5ff23311a3fe4917e760d8c05b10ed91e1aefa78df33f9ce993909"
+    },
+    {
+      "path": "src/fnit/recon_all/place_surface_objective.py",
+      "bytes": 4963,
+      "sha256": "84a233d7dc32b8d3b130221192212fbddb6cd6c9819ebc4eefc7b6a26b6a630a"
+    },
+    {
+      "path": "src/fnit/recon_all/place_surface_repulsion.py",
+      "bytes": 5503,
+      "sha256": "bb6f05eeaa497f1a1e62ddb68f82cfb249bdc2e56c22e4052957c793efefedf1"
+    },
+    {
+      "path": "src/fnit/recon_all/place_surface_rip.py",
+      "bytes": 9238,
+      "sha256": "d3f7726a5ca09bae60a998303d55f1c130e775775f4a837f2c135dcf34b302b2"
+    },
+    {
+      "path": "src/fnit/recon_all/place_surface_self_repulsion.py",
+      "bytes": 7332,
+      "sha256": "5891a457071c7fdca419fe20677b4c1b8147390451eba9f198a16d34fcf3da94"
+    },
+    {
+      "path": "src/fnit/recon_all/place_surface_smoothing.py",
+      "bytes": 3954,
+      "sha256": "5e413a3df69833020be34fdbf8e4b2b6b80e00ddc6b54ac09717527dbf718d07"
+    },
+    {
+      "path": "src/fnit/recon_all/place_surface_spring.py",
+      "bytes": 3199,
+      "sha256": "8bc6f39231464acb428ee2199f852a2c0a675fc35edafd73ed9f3b24ed7614da"
+    },
+    {
+      "path": "src/fnit/recon_all/place_surface_step.py",
+      "bytes": 2055,
+      "sha256": "f56bec854415954add422dc7a3a9642356aaf9da40f80d208c757d5207c468ee"
+    },
+    {
+      "path": "src/fnit/recon_all/place_surface_volume.py",
+      "bytes": 1833,
+      "sha256": "067006169f1dca0bcfb5c163d0bea678d447b7bc9a98e7a3a91ab7287028f4d4"
+    },
+    {
+      "path": "src/fnit/recon_all/place_white_preaparc_python.py",
+      "bytes": 12521,
+      "sha256": "72e96265d09f4043e1d492f58ee28b58940bf4d7d2f5e1d8464af989a9944ced"
+    },
+    {
+      "path": "src/fnit/recon_all/pretess_python.py",
+      "bytes": 7232,
+      "sha256": "65f9f7497df080682f54131d4f7985ae8e017ef04334b9b764f750b152791d14"
+    },
+    {
+      "path": "src/fnit/recon_all/relabel_hypointensities_python.py",
+      "bytes": 3169,
+      "sha256": "b0a575e4643f908b16a10c3df7f13cb38e3f9dfe62efc510252eab342bb6c02a"
+    },
+    {
+      "path": "src/fnit/recon_all/sclimbic.py",
+      "bytes": 14302,
+      "sha256": "10dfe1904a5d3a4bda2ffad06734480e7e6419073439c35f1633b326a1b02d80"
+    },
+    {
+      "path": "src/fnit/recon_all/segstats_aseg_python.py",
+      "bytes": 6849,
+      "sha256": "b16976a9d9a5b2abfe3bd75fa79c51f5a2afc0573f85581ff5baffe9d54ce5c9"
+    },
+    {
+      "path": "src/fnit/recon_all/segstats_surface_snr_python.py",
+      "bytes": 3833,
+      "sha256": "608c3b4bacf301c136138eb6c06aae7aa12ff9892b40a10f4c773d4cae176204"
+    },
+    {
+      "path": "src/fnit/recon_all/segstats_wmparc_python.py",
+      "bytes": 12480,
+      "sha256": "86422fbb24a997189dc774a942458a3ef8fa8a553841813067fddb50ea9d3751"
+    },
+    {
+      "path": "src/fnit/recon_all/smooth_surface_python.py",
+      "bytes": 3764,
+      "sha256": "7ae11634300dfb8957dc80357642fc6bfe31be7b04f7694bdc5bb51383f447b9"
+    },
+    {
+      "path": "src/fnit/recon_all/spatial_vertex_compare.py",
+      "bytes": 10074,
+      "sha256": "688b0a01d4e872a9a961652b4ca526f3da65958c968c0b8a79b2ad9f6fac0f76"
+    },
+    {
+      "path": "src/fnit/recon_all/sphere_python.py",
+      "bytes": 6695,
+      "sha256": "21172e853cc062b5015cd5bcdf5dcb02bcd2833abe1d1f5afa3a7af3d64e60a6"
+    },
+    {
+      "path": "src/fnit/recon_all/sphere_quick_python.py",
+      "bytes": 14458,
+      "sha256": "27dd13314ce2ad93887f34a9064533ce482c5fb2b97217c24d29c68eca8e94b9"
+    },
+    {
+      "path": "src/fnit/recon_all/sphere_standard_average.py",
+      "bytes": 1265,
+      "sha256": "f79dc72a574d3bef756f06b97ab2546d35662c1d6acbd769e034fa542d84bd78"
+    },
+    {
+      "path": "src/fnit/recon_all/sphere_standard_finish.py",
+      "bytes": 919,
+      "sha256": "9ba0ce2e7dd6ab0a731a45266f3e7fd8e67b48a39ed7117c65d68cc2a74f9825"
+    },
+    {
+      "path": "src/fnit/recon_all/sphere_standard_line_search.py",
+      "bytes": 7770,
+      "sha256": "8777cb96ca93ad0584d34e3f2d2f13827b1302dbaf600fc9454fdd39cd323296"
+    },
+    {
+      "path": "src/fnit/recon_all/sphere_standard_metric.py",
+      "bytes": 11455,
+      "sha256": "dde4f42db3f8f526c2ccb1c1379db4edc5369b0f41cbb72ed8b84dc14030ca92"
+    },
+    {
+      "path": "src/fnit/recon_all/sphere_standard_nonlinear.py",
+      "bytes": 9122,
+      "sha256": "1b24d46d211f165dc137011eca2f4894eb9c66670d336451986e64dbcf65d0b8"
+    },
+    {
+      "path": "src/fnit/recon_all/sphere_standard_python.py",
+      "bytes": 9232,
+      "sha256": "017172cae935775f3e55ec7cdee72c54d6db904021c78896a77d99690a23cc97"
+    },
+    {
+      "path": "src/fnit/recon_all/sphere_standard_run.py",
+      "bytes": 6765,
+      "sha256": "7544ccb77153a7ac242b88d1c9752bdd08ce5765ba483cd644a4075e94e90405"
+    },
+    {
+      "path": "src/fnit/recon_all/sphere_standard_schedule.py",
+      "bytes": 1746,
+      "sha256": "ed0dec3a640506de649c812c29626a88c6eee0eebf6a6101d47a8b6d5c022494"
+    },
+    {
+      "path": "src/fnit/recon_all/sphere_standard_unfold.py",
+      "bytes": 10001,
+      "sha256": "7bcc38e10fd08475d7894fba38ca8e71a67c8590103ca77daf82e9ec53462c4f"
+    },
+    {
+      "path": "src/fnit/recon_all/surf2volseg_cortex_python.py",
+      "bytes": 5435,
+      "sha256": "41d62184103434795117af75b3866aaeffaae34707f807c106a43f1077453a06"
+    },
+    {
+      "path": "src/fnit/recon_all/surf2volseg_fix_python.py",
+      "bytes": 4414,
+      "sha256": "f19e375a47214c38ffd64b6572fd019d18f28426d7952985c4c11aeeab0c08ab"
+    },
+    {
+      "path": "src/fnit/recon_all/surf2volseg_wm_python.py",
+      "bytes": 3922,
+      "sha256": "e2bca0ac14601fa967593e2eeb0a0dedbd8673b146edb913f0d7186009fe53f9"
+    },
+    {
+      "path": "src/fnit/recon_all/surface_area_gpu.py",
+      "bytes": 2305,
+      "sha256": "ad60ee9c6b3e45464650ac15f2fce7bc2ea3a6cb519c15f371f4f653f45964a8"
+    },
+    {
+      "path": "src/fnit/recon_all/surface_curvature_gpu.py",
+      "bytes": 5182,
+      "sha256": "7af66e0b23dd19cabe8e20e7ea75686531eb87550e599d318f35dc24f7efc8e0"
+    },
+    {
+      "path": "src/fnit/recon_all/surface_jacobian_gpu.py",
+      "bytes": 2712,
+      "sha256": "ead0fcb7c0c43e55fbacb17efb170cb93aff7449619e6d9b4d87349caeeccbce"
+    },
+    {
+      "path": "src/fnit/recon_all/surface_roi_curvature_gpu.py",
+      "bytes": 4744,
+      "sha256": "6533eae9fa44d66aa18621bbdc05ffe63c7e9beb6e81d24f21b3ca473c080f73"
+    },
+    {
+      "path": "src/fnit/recon_all/surface_roi_gpu.py",
+      "bytes": 5499,
+      "sha256": "22fe8023612950b7cfcfdfe63837bde01677f574eddbff54570eb46526f402ac"
+    },
+    {
+      "path": "src/fnit/recon_all/surface_thickness_gpu.py",
+      "bytes": 7578,
+      "sha256": "e00dcb26dff747d6f3bc9e51a81ecdfe6254e7984da22cb8308d882505fab90f"
+    },
+    {
+      "path": "src/fnit/recon_all/talairach_synthmorph.py",
+      "bytes": 4613,
+      "sha256": "b7b094bb6ed6db308256a138ae11de53aa49c899ab23bf885f990127ba825363"
+    },
+    {
+      "path": "src/fnit/recon_all/tessellate_gpu.py",
+      "bytes": 7455,
+      "sha256": "1c87b10862bf7ab4d3e648339489762d5798e92a97a6c1ca7195b18368877faf"
+    },
+    {
+      "path": "src/fnit/recon_all/topology_conda_ga.py",
+      "bytes": 3765,
+      "sha256": "285d781f1514c394b8ee9141ffad5775557b407e2753a1a8691ca8668e8463d0"
+    },
+    {
+      "path": "src/fnit/recon_all/topology_curvature_histogram.py",
+      "bytes": 3630,
+      "sha256": "830c88e53d6497375b1207a38f38ecfec14d65d140947c885950df20624550b6"
+    },
+    {
+      "path": "src/fnit/recon_all/topology_defect_mri_match.py",
+      "bytes": 6279,
+      "sha256": "27ebaa65c470f715790e9506246ad420ff118082cb44629560a9a9e48e0556bb"
+    },
+    {
+      "path": "src/fnit/recon_all/topology_defect_smooth.py",
+      "bytes": 5344,
+      "sha256": "95d863b3b725028b458cafe198aecd87f7b5a98b78151f9daaaa307c61fd861b"
+    },
+    {
+      "path": "src/fnit/recon_all/topology_edge_segments.py",
+      "bytes": 4919,
+      "sha256": "16eb5888de68c8664e77e4260f6fff096d25aa550097f45a865174a9b3c52ea1"
+    },
+    {
+      "path": "src/fnit/recon_all/topology_first_candidate.py",
+      "bytes": 1302,
+      "sha256": "8e57e7aa0bb3c41b34f435f011f7957502a6d6f55d82be679bfa9b2cfcb057ff"
+    },
+    {
+      "path": "src/fnit/recon_all/topology_fitness_search.py",
+      "bytes": 2181,
+      "sha256": "cd57434ef55711d04d14f6b501b5c0798942bd6fb04274679a981b214f70206b"
+    },
+    {
+      "path": "src/fnit/recon_all/topology_intensity_histogram.py",
+      "bytes": 4046,
+      "sha256": "eb9ae17b5837880f62e1fd29365ddce6cd6dffc45fbbb95a0c99d045850339c4"
+    },
+    {
+      "path": "src/fnit/recon_all/topology_preflight_python.py",
+      "bytes": 24220,
+      "sha256": "7ae02e2c7e5133a9de544361c95b9e7def7f5d92e35f3bbc27e8ca03f8d5ec00"
+    },
+    {
+      "path": "src/fnit/recon_all/topology_principal_curvature.py",
+      "bytes": 9525,
+      "sha256": "644e722a56452f106bb6a1a3d9dec5c434391fdb34ad1ba19329db54ef9ac47f"
+    },
+    {
+      "path": "src/fnit/recon_all/topology_vnl_svd.py",
+      "bytes": 9509,
+      "sha256": "54474eab97ec17c450a9d51f85c46936e905eeb873e0e1631afad520cef60ff5"
+    },
+    {
+      "path": "src/fnit/recon_all/vol2surf_contrast_python.py",
+      "bytes": 9084,
+      "sha256": "44164662d0b11a3c7f55dbc44c3791c8ff53fa2b5fd172f405c1c9d9fbb6257c"
+    },
+    {
+      "path": "src/fnit/recon_all/volmask_python.py",
+      "bytes": 7256,
+      "sha256": "7641b18f049ba31841a1ba2496a871adbc595285f8c48ef0bdb0c04f4099afca"
+    },
+    {
+      "path": "src/fnit/recon_all/white_preaparc_conda.py",
+      "bytes": 3081,
+      "sha256": "5b7c9ebfcdcc3a800f34577e8316948a4e96a0230b4e3e43e4cb252ce87f130b"
+    },
+    {
+      "path": "src/fnit/recon_all/wm_edits_python.py",
+      "bytes": 2546,
+      "sha256": "c55bbdb2843152409fdaf80ef171448934d1c5244097772276eb134e560053ac"
+    },
+    {
+      "path": "src/fnit/space_assets.py",
+      "bytes": 7747,
+      "sha256": "73c74037e4751d9e79ddde471c5fb57e195cde913ff11d6e3891b2c60d8ae6a0"
+    },
+    {
+      "path": "src/fnit/space_conversion.py",
+      "bytes": 14586,
+      "sha256": "05a1d95712fdf49ae7abb071ad216be1696423746ae3aa9aac5bdf604cf42527"
+    },
+    {
+      "path": "src/fnit/superbigflica/__init__.py",
+      "bytes": 243,
+      "sha256": "4eca0e5fe959bf8636ed00c3cece822e4929537fccbafadf9d5bc4857084aa2c"
+    },
+    {
+      "path": "src/fnit/superbigflica/cli.py",
+      "bytes": 4212,
+      "sha256": "e3f128029106afa21637808a019ee9f973e6aee9dd02333cad3ce6614713822a"
+    },
+    {
+      "path": "src/fnit/superbigflica/data.py",
+      "bytes": 14467,
+      "sha256": "28fe6749ee52ae2f9d0554bb046a5009e9f038dedf2dda03259034e5c760255d"
+    },
+    {
+      "path": "src/fnit/superbigflica/model.py",
+      "bytes": 5932,
+      "sha256": "7906e532d57195ccb526e96573935a16ef97dc9f22a89edba5e650d6a5658364"
+    },
+    {
+      "path": "src/fnit/superbigflica/pipeline.py",
+      "bytes": 26337,
+      "sha256": "a7fc4934ff4103dbfd11e793e367e162c88f4f854cb094a390461bca4870a13b"
+    },
+    {
+      "path": "src/fnit/superbigflica/plotting.py",
+      "bytes": 17135,
+      "sha256": "b5c782a30de663a2d369b45164c25f9aa0dc082fdb6abb1c8593ac3154b3b5bd"
+    },
+    {
+      "path": "src/fnit/synthmorph/__init__.py",
+      "bytes": 301,
+      "sha256": "3dc489987728d070bda07d82b255ca98b96800542dbdd8e48bb110efd7440d94"
+    },
+    {
+      "path": "src/fnit/synthmorph/affine_no_surfa.py",
+      "bytes": 4508,
+      "sha256": "95eeb54d81e2f4c05882546f745cdd435c3519f1179e5eb440879ea2052b83b0"
+    },
+    {
+      "path": "src/fnit/synthmorph/fsl_warp.py",
+      "bytes": 3252,
+      "sha256": "61177712062c536ec31e7e6985d1f7801c8992a1775312a74d058d8dd7124dd4"
+    },
+    {
+      "path": "src/fnit/synthmorph/models.py",
+      "bytes": 13327,
+      "sha256": "a1cab2e98f6972ae053a7df2b30416c0ca069c1a30df562e6005d42d85d34a1b"
+    },
+    {
+      "path": "src/fnit/synthmorph/pipeline.py",
+      "bytes": 13155,
+      "sha256": "81f971dd73f0bed3cd652e97f0627bf54e0b00a8dcf0cb8785c4ee0c696aa538"
+    },
+    {
+      "path": "src/fnit/synthmorph/spatial.py",
+      "bytes": 5964,
+      "sha256": "dab615dcc8a5f332ef2efede1d5e45d04f21c440243650e960d763e35595d861"
+    },
+    {
+      "path": "src/fnit/synthseg_parc/__init__.py",
+      "bytes": 472,
+      "sha256": "2312fbc3ac445bb13774c02246239300ab0517f3a564453644ad7c329f701c3a"
+    },
+    {
+      "path": "src/fnit/synthseg_parc/labels.py",
+      "bytes": 1596,
+      "sha256": "c20f61fc973b34ded1c2d3d0ae451ee48480f2d63626e2e1aa0ca8176581951e"
+    },
+    {
+      "path": "src/fnit/synthseg_parc/model.py",
+      "bytes": 4127,
+      "sha256": "b44be3fe3332a6096141b7f1051370a8beb64d2e46c17b01b20d3942f0139c78"
+    },
+    {
+      "path": "src/fnit/synthseg_parc/pipeline.py",
+      "bytes": 3866,
+      "sha256": "7df985927ae9c01c751346ce5f48904d0dc74d4bedf6397edff483a58f85972b"
+    },
+    {
+      "path": "src/fnit/synthseg_parc/postprocess.py",
+      "bytes": 3753,
+      "sha256": "730cecec349015ea15d5ff6e203e4383b3060103797d1d805846d2bd97870b5e"
+    },
+    {
+      "path": "src/fnit/synthseg_parc/preprocess.py",
+      "bytes": 5959,
+      "sha256": "67159d8d1c646df82d7023c4dd5f4e57222fc94386673987b1c25e110c946d49"
+    },
+    {
+      "path": "src/fnit/synthseg_parc/segment.py",
+      "bytes": 10137,
+      "sha256": "d007f27a5d05eb804fad9a4093ee6ebc0adf781eccebe3c3568c47e49f1da8df"
+    },
+    {
+      "path": "src/fnit/synthseg_parc/synthseg.py",
+      "bytes": 7685,
+      "sha256": "bdfbb91c190c4608d44d9b67890fe82a3a6530948f865dbde2990a1b1c92d33c"
+    },
+    {
+      "path": "src/fnit/synthseg_parc/synthseg_io.py",
+      "bytes": 6503,
+      "sha256": "0aa8f43914d727ef7bbc639e37d23e3e0bc208a09be20725db4038c6cbd8134c"
+    },
+    {
+      "path": "src/fnit/synthseg_parc/synthseg_plus.py",
+      "bytes": 7426,
+      "sha256": "b49cfbc26f4733e7b6c8ceffaceb102f0f5a6a57044dfb1a5f4a048b3f14786b"
+    },
+    {
+      "path": "src/fnit/synthsr/__init__.py",
+      "bytes": 147,
+      "sha256": "6519a5e1986dab5333aff90c8fa6a1e5603d38b8442a84528aabb2742bb80c51"
+    },
+    {
+      "path": "src/fnit/synthsr/model.py",
+      "bytes": 3867,
+      "sha256": "290d0ae911d8c99f4f87c22936ca497ea45bb57b8f50066b822d9cd10c4661b2"
+    },
+    {
+      "path": "src/fnit/synthsr/pipeline.py",
+      "bytes": 4698,
+      "sha256": "c896d8e2e4a1a214546e6674ce3aacdcf84906d1b2010b5397ec1b076f502943"
+    },
+    {
+      "path": "src/fnit/synthsr/spatial.py",
+      "bytes": 4474,
+      "sha256": "962a2f0bd5b97db1f039efb67fa87d2f61aa5d8fc23512689f255b168b42dabe"
+    },
+    {
+      "path": "src/fnit/synthstrip/__init__.py",
+      "bytes": 247,
+      "sha256": "3eac7a2f37a3dd0009e38a7cf74c64aba481fb5638fff8766ce2a0b6322f5d1d"
+    },
+    {
+      "path": "src/fnit/synthstrip/geometry.py",
+      "bytes": 7125,
+      "sha256": "c31febaf93404d1b4b7e39f36bfbacd7adb659ddcf923ae6a0924bc4e0a00dc1"
+    },
+    {
+      "path": "src/fnit/synthstrip/model.py",
+      "bytes": 3886,
+      "sha256": "6afcff10848a8a2a57b9c00d4b637eda90e4c0e21f301d8a8031107d783a5f44"
+    },
+    {
+      "path": "src/fnit/synthstrip/pipeline.py",
+      "bytes": 12987,
+      "sha256": "41304bafc412bcc914d76a6cbbd29550173df4419c1aa3a54d31d95739bda95d"
+    },
+    {
+      "path": "src/fnit/topup/__init__.py",
+      "bytes": 626,
+      "sha256": "e15e503ddf68a59a8e36274ddfd6dc1609c38437885071049b8c9c37d813876d"
+    },
+    {
+      "path": "src/fnit/topup/__main__.py",
+      "bytes": 62,
+      "sha256": "c2ee4ddb093c9af060cafaf68219907f8a6b7b301ed3f8bea75db7555adec987"
+    },
+    {
+      "path": "src/fnit/topup/cli.py",
+      "bytes": 2435,
+      "sha256": "fc5220c7c9de36577f5e116262bb5789733397beff00796059fe07313fba3388"
+    },
+    {
+      "path": "src/fnit/topup/core.py",
+      "bytes": 24482,
+      "sha256": "4746d50f28b8137abf9bf6d8a211c12489bddc6a931bd06e695db1965f14b976"
+    },
+    {
+      "path": "src/fnit/topup/io.py",
+      "bytes": 4968,
+      "sha256": "c87edab5c5369204d1a7ccfd2cb079dfd1a64e68279d8899f51755609038176a"
+    },
+    {
+      "path": "src/fnit/topup/ukb.py",
+      "bytes": 7756,
+      "sha256": "63eb5cc0d9e2f4a4547585af4f041f543dd256a653101ca54ceab235addd0d08"
+    },
+    {
+      "path": "src/fnit/weights.py",
+      "bytes": 14468,
+      "sha256": "81e8d6cce1ed83967573ef92845deef001a8d5d0f0b0d3f474ac0d2022c9dfb1"
+    },
+    {
+      "path": "src/fnit/wmh_synthseg/__init__.py",
+      "bytes": 190,
+      "sha256": "025cb2db3b2a4f006fcc1a687c61a46591c87b08ba56c8c586a72ae6ae17c7a7"
+    },
+    {
+      "path": "src/fnit/wmh_synthseg/model.py",
+      "bytes": 4184,
+      "sha256": "dd95cd0816c308ba5a14de4b5bd8ddbeaf640656515d0713bbeb5df11533bf6c"
+    },
+    {
+      "path": "src/fnit/wmh_synthseg/pipeline.py",
+      "bytes": 6845,
+      "sha256": "465c3a9565e05892ef71e95b938600ee286bcef971237e7dc6077175738ca1e5"
+    },
+    {
+      "path": "src/fnit/wmh_synthseg/spatial.py",
+      "bytes": 4320,
+      "sha256": "d81416104064110511ee0f073998b3e19959748c74ad88675d90488a261db8a6"
+    },
+    {
+      "path": "validation/subregions/align_sensitivity.py",
+      "bytes": 2218,
+      "sha256": "d9724943d517757f677b3f6f23ec812a9a9696a01a8af4a63350f11590bcf903"
+    },
+    {
+      "path": "validation/subregions/benchmark_brainstem.py",
+      "bytes": 1630,
+      "sha256": "2be6662ff3b659d2746df0a39784d75eb6baef6828395cf97c61fb78db742ddf"
+    },
+    {
+      "path": "validation/subregions/benchmark_brainstem_mesh.py",
+      "bytes": 11475,
+      "sha256": "0a2770c565c7ef08d41a72a87cdc278e451c290d4c160ba8b6d6b804f7c67dda"
+    },
+    {
+      "path": "validation/subregions/benchmark_compact_layout.py",
+      "bytes": 11883,
+      "sha256": "258f8d5f856b0a473a2fe6b698fb72373061ce63ae72e8192da9723a6abe3678"
+    },
+    {
+      "path": "validation/subregions/benchmark_compact_mesh.py",
+      "bytes": 19297,
+      "sha256": "2e51ac8c8afbbf74d175086b7b51b0047cd891fecae2becfeca1630f33e0ed12"
+    },
+    {
+      "path": "validation/subregions/benchmark_dense_layout.py",
+      "bytes": 8030,
+      "sha256": "41297c6d848ff705fe962408c08ec6d059bd8e8561dfe2e22bcb2f0c2fcc8546"
+    },
+    {
+      "path": "validation/subregions/benchmark_fused_mesh.py",
+      "bytes": 10152,
+      "sha256": "e59a63d87a59ef571bb53b936e3581307efa2b2c27e59ec5ca26ca7b980d648a"
+    },
+    {
+      "path": "validation/subregions/benchmark_owner_hints.py",
+      "bytes": 12361,
+      "sha256": "f0a43cc5b4d437520955b1e3961ef756d9909c67fc249055570f87c6bbbef7d8"
+    },
+    {
+      "path": "validation/subregions/benchmark_preparation.py",
+      "bytes": 8390,
+      "sha256": "ec1c37a73d7d12da0942dfb708f2c884f802988290058aaac1ebcb77020f3536"
+    },
+    {
+      "path": "validation/subregions/benchmark_speed.py",
+      "bytes": 5892,
+      "sha256": "14d848643325148f6aee3aed2807b02dd965fc289e219b73ab039e1d1dadf2d0"
+    },
+    {
+      "path": "validation/subregions/check_masked_blocks.py",
+      "bytes": 5079,
+      "sha256": "b58bb687672fef08872cab91f917f761282827f4ae9656157489aeb86dbdb4d7"
+    },
+    {
+      "path": "validation/subregions/check_raster_numerics.py",
+      "bytes": 4113,
+      "sha256": "c9fb1ccf65fb6ff619d46b9b45697f4a672320030e05aaefddc6a4b571466fa3"
+    },
+    {
+      "path": "validation/subregions/check_raw_preprocess.py",
+      "bytes": 2747,
+      "sha256": "90567b88e773d30df7b59d0d82b4d009f7dba2fe4fb5c7af459aefcefc8174fb"
+    },
+    {
+      "path": "validation/subregions/check_smoothing_coordinates.py",
+      "bytes": 2575,
+      "sha256": "b371a101c853bcbbd2378b534c4f57de3c79ca909c469654c88bd5c9b9660c20"
+    },
+    {
+      "path": "validation/subregions/check_support.py",
+      "bytes": 1283,
+      "sha256": "5116c0f72800007c5ef9e87b9dcfdc011b89160a0c97be4decadc263169b24f0"
+    },
+    {
+      "path": "validation/subregions/compare_alignment.py",
+      "bytes": 1456,
+      "sha256": "73a5bf23ab7722d37cf2a1523c4a6e89e23b168ea123d977d160009939423bf8"
+    },
+    {
+      "path": "validation/subregions/compare_brainstem.py",
+      "bytes": 2042,
+      "sha256": "af1754123f8fd9b8f4ed070cbea937622d34d474a84b711bd0445551da103841"
+    },
+    {
+      "path": "validation/subregions/compare_nuclei.py",
+      "bytes": 2299,
+      "sha256": "903fc3b60e0177a4d07f99a2cc9fa808e900db25c3268e98b466d3d34814e3db"
+    },
+    {
+      "path": "validation/subregions/compare_nuclei_volumes.py",
+      "bytes": 1705,
+      "sha256": "5767635210961f963c0fc73d22cb4492ea543bd5cde499ca18882e2af8704554"
+    },
+    {
+      "path": "validation/subregions/compare_optimization.py",
+      "bytes": 17697,
+      "sha256": "fb5ddcb98ce106f3b2488032654b43935c51dafdf432bc178cae92129e1f77de"
+    },
+    {
+      "path": "validation/subregions/compare_speed.py",
+      "bytes": 16422,
+      "sha256": "4fa32d1a080c5800f772ba510318cbccf7300d33bf431ea86c33a808cc40f0b4"
+    },
+    {
+      "path": "validation/subregions/compare_working_grid.py",
+      "bytes": 1966,
+      "sha256": "d304d882ea94917ce8612676bcc5e63731444507958d14b0d6188b7056a9753c"
+    },
+    {
+      "path": "validation/subregions/plot_brainstem.py",
+      "bytes": 3076,
+      "sha256": "291ba8139e990c6ec2119cac3da38f10a561a6f621cbc4cef4fdeb9f453689ec"
+    },
+    {
+      "path": "validation/subregions/plot_thalamus_nuclei.py",
+      "bytes": 7418,
+      "sha256": "43b43ce9214c85ba2a270b3876590ad827c4774997fc32f0d962cc4cb2be0541"
+    },
+    {
+      "path": "validation/subregions/plot_unified.py",
+      "bytes": 7252,
+      "sha256": "58fea03caaf708582ebf87636cb2ff66d8839c71957b45a30d4d6a472409ecbd"
+    },
+    {
+      "path": "validation/subregions/run_unified.py",
+      "bytes": 12929,
+      "sha256": "371d54e7e595c62f64fc60e7926c63bec6ef1eb486c1abc88e1cdbaa99e56759"
+    },
+    {
+      "path": "validation/subregions/summarize_run_timing.py",
+      "bytes": 7201,
+      "sha256": "c5a53874103cc350cdbd5f2daad3f5c7c4b62f8710c24e6636f2c0acb114b96a"
+    },
+    {
+      "path": "validation/subregions/thalamus_stability.py",
+      "bytes": 21219,
+      "sha256": "059d53f6b68ace8389c2075e13ab959172cb01281059365112b97ffc2a25bb62"
+    }
+  ]
+}

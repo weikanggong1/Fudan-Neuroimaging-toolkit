@@ -14,10 +14,10 @@ import torch
 from .._dmri import configure_device
 from .atlas import GEMSAtlas
 from .deformation import (ashburner_prior, prepare_current_geometry, prepare_deformation_reference,
-                          sliding_boundary_projectors)
+                          prepare_vertex_reduction, sliding_boundary_projectors)
 from .gaussian import (GaussianParameters, gaussian_log_likelihood,
                        initialise_gaussians, label_posterior, update_gaussians)
-from .optim import CachedLBFGS
+from .optim import CachedLBFGS, PrecisionLBFGS
 from .rasterize import (BlockIndex, build_block_index, compact_data_cost, rasterize_priors,
                        rasterize_priors_compact)
 
@@ -111,6 +111,9 @@ class TorchGEMS:
         owner_hint_refresh_interval: int = 8,
         owner_hint_tolerance: float = 2e-4,
         double_data_cost_accumulation: bool = False,
+        stable_mesh_fitting: bool = False,
+        precise_mesh_matrices: bool = False,
+        mesh_line_search: str = "strong_wolfe",
     ) -> TorchGEMSResult:
         image = torch.as_tensor(image, device=self.device, dtype=self.dtype)
         if image.ndim not in (3, 4):
@@ -154,6 +157,11 @@ class TorchGEMS:
             raise ValueError("owner_hint_refresh_interval must be a positive integer")
         if not np.isfinite(owner_hint_tolerance) or owner_hint_tolerance <= 0:
             raise ValueError("owner_hint_tolerance must be finite and positive")
+        if mesh_line_search not in ("strong_wolfe", "backtracking"):
+            raise ValueError("mesh_line_search must be strong_wolfe or backtracking")
+        if mesh_line_search == "backtracking" and (
+                deform_optimizer != "lbfgs" or not cache_mesh_evaluations or not stable_mesh_fitting):
+            raise ValueError("backtracking requires stable cached L-BFGS mesh fitting")
         margin = (max(1.0, total_steps * deform_lr) if index_margin is None else
                   float(index_margin))
         index = build_block_index(vertices.detach().cpu().numpy(), self.atlas.tetrahedra,
@@ -184,6 +192,11 @@ class TorchGEMS:
             raise ValueError("compact=True requires a single 3-D image")
         if double_data_cost_accumulation and not compact_em:
             raise ValueError("double data cost accumulation requires compact single-image fitting")
+        if stable_mesh_fitting and (not compact_em or not reuse_geometry):
+            raise ValueError("stable mesh fitting requires compact single-image fitting and shared geometry")
+        double_data_cost_accumulation = double_data_cost_accumulation or stable_mesh_fitting
+        vertex_reduction = (prepare_vertex_reduction(tetra.reshape(-1), len(vertices))
+                            if stable_mesh_fitting else None)
         em_image = image[valid].reshape(-1, 1, 1) if compact_em else image
         mesh_valid = valid
         mesh_selection = None
@@ -259,6 +272,7 @@ class TorchGEMS:
 
         history_tensors: list[torch.Tensor] = []
         mesh_evaluations = mesh_steps = cache_hits = fused_evaluations = 0
+        line_search_restarts = line_search_recovered = 0
         owner_hint_evaluations = owner_full_evaluations = owner_hint_points = 0
         owner_hint_reused = []
         if em_relative_cost_stop is not None:
@@ -296,23 +310,31 @@ class TorchGEMS:
                     if deform_optimizer == "adam":
                         optimizer = torch.optim.Adam([vertices], lr=float(deform_lr))
                     elif deform_optimizer == "lbfgs":
-                        optimizer_type = CachedLBFGS if cache_mesh_evaluations else torch.optim.LBFGS
+                        if mesh_line_search == "backtracking":
+                            from .optim import CachedArmijoLBFGS
+                            optimizer_type = CachedArmijoLBFGS
+                        else:
+                            optimizer_type = CachedLBFGS if cache_mesh_evaluations else PrecisionLBFGS
                         optimizer = optimizer_type([vertices], lr=float(deform_lr),
                                                       max_iter=1, history_size=12,
                                                       tolerance_grad=1e-10, tolerance_change=1e-10,
-                                                      line_search_fn="strong_wolfe")
+                                                      line_search_fn="strong_wolfe",
+                                                      double_precision_state=stable_mesh_fitting)
                     else:
                         raise ValueError("deform_optimizer must be adam or lbfgs")
                     for step in range(iterations):
                         previous_vertices = (vertices.detach().clone()
-                                             if projection is not None or deformation_stop > 1e-10 else None)
-                        def closure():
+                                             if stable_mesh_fitting or projection is not None
+                                             or deformation_stop > 1e-10 else None)
+                        def mesh_objective():
                             nonlocal evaluations, fused_evaluations
                             nonlocal owner_hint_evaluations, owner_full_evaluations, owner_hint_points
                             evaluations += 1
                             refresh_index(vertices)
                             optimizer.zero_grad(set_to_none=True)
-                            geometry = (prepare_current_geometry(vertices, tetra)
+                            geometry = (prepare_current_geometry(
+                                        vertices, tetra, deterministic_gradient=stable_mesh_fitting,
+                                        vertex_reduction=vertex_reduction)
                                         if reuse_geometry else None)
                             if compact_em:
                                 hint_stats = {} if owner_hint_enabled else None
@@ -326,7 +348,8 @@ class TorchGEMS:
                                     owner_hints=use_owner_hints,
                                     hint_tolerance=owner_hint_tolerance,
                                     hint_stats=hint_stats,
-                                    double_accumulation=double_data_cost_accumulation)
+                                    double_accumulation=double_data_cost_accumulation,
+                                    deterministic_gradient=stable_mesh_fitting)
                                     if fused_data_cost_enabled else None)
                                 if data_cost is None:
                                     priors, _ = rasterize_priors_compact(
@@ -351,10 +374,17 @@ class TorchGEMS:
                                                               current_geometry=geometry)
                                 _, data_cost = label_posterior(
                                     priors, likelihood, class_ids, valid)
-                            prior_cost, _ = ashburner_prior(vertices, reference, tetra,
+                            prior_cost, jacobian = ashburner_prior(vertices, reference, tetra,
                                 self.atlas.stiffness, reference_geometry=reference_geometry,
-                                current_geometry=geometry, analytic_gradient=analytic_prior)
+                                current_geometry=geometry, analytic_gradient=analytic_prior,
+                                double_accumulation=stable_mesh_fitting)
                             objective = data_cost + float(deformation_weight) * prior_cost
+                            if mesh_line_search == "backtracking":
+                                # Reject inverted trial meshes independently of
+                                # the finite penalty's numerical magnitude.
+                                objective = torch.where(
+                                    torch.isfinite(jacobian).all() & (jacobian > 0).all(),
+                                    objective, objective.new_tensor(float("inf")))
                             objective.backward()
                             if vertices.grad is not None:
                                 if projection is None:
@@ -362,6 +392,19 @@ class TorchGEMS:
                                 else:
                                     vertices.grad.copy_(torch.bmm(projection, vertices.grad[..., None]).squeeze(-1))
                             return objective
+
+                        def closure():
+                            if not precise_mesh_matrices or vertices.device.type != "cuda":
+                                return mesh_objective()
+                            # Tiny geometric products need consistent FP32 cost
+                            # and derivatives. Restore the caller's TF32 policy
+                            # before returning to EM or any other model.
+                            previous_tf32 = torch.backends.cuda.matmul.allow_tf32
+                            try:
+                                torch.backends.cuda.matmul.allow_tf32 = False
+                                return mesh_objective()
+                            finally:
+                                torch.backends.cuda.matmul.allow_tf32 = previous_tf32
 
                         if deform_optimizer == "adam":
                             objective = closure()
@@ -373,6 +416,28 @@ class TorchGEMS:
                                     objective = optimizer.accepted_objective
                             else:
                                 objective = optimizer.step(closure)
+                            if stable_mesh_fitting and mesh_line_search == "strong_wolfe" and previous_vertices is not None:
+                                # A rejected Wolfe direction is not convergence.
+                                # Retry once from the same accepted position with
+                                # a fresh, normalized steepest-descent direction.
+                                stalled = torch.equal(vertices.detach(), previous_vertices)
+                                accepted_gradient = (optimizer._cached[1]
+                                    if isinstance(optimizer, CachedLBFGS) and optimizer._cached is not None
+                                    else optimizer.state[vertices].get("prev_flat_grad"))
+                                if accepted_gradient is None:
+                                    accepted_gradient = optimizer._gather_flat_grad()
+                                if stalled and accepted_gradient.abs().max().item() > 1e-10:
+                                    line_search_restarts += 1
+                                    optimizer.reset_history()
+                                    if isinstance(optimizer, CachedLBFGS):
+                                        objective = optimizer.step(closure, cache_key=(
+                                            index_rebuilds, id(likelihood), id(class_alphas)))
+                                        if optimizer.accepted_objective is not None:
+                                            objective = optimizer.accepted_objective
+                                    else:
+                                        objective = optimizer.step(closure)
+                                    line_search_recovered += int(not torch.equal(
+                                        vertices.detach(), previous_vertices))
                         global_step += 1
                         mesh_steps += 1
                         if index_refresh_interval and global_step % index_refresh_interval == 0:
@@ -452,7 +517,10 @@ class TorchGEMS:
         return TorchGEMSResult(hard, posterior, priors, vertices, params, history,
                                float(jac.min().detach()) if jac.numel() else float("nan"),
                                optimization_stats={"compact": compact_em,
+                                   "objective_history": history,
                                    "mesh_evaluations": mesh_evaluations, "mesh_steps": mesh_steps,
+                                   "line_search_restarts": line_search_restarts,
+                                   "line_search_recovered": line_search_recovered,
                                    "accepted_cache_hits": cache_hits, "index_rebuilds": index_rebuilds,
                                    "shared_geometry": reuse_geometry, "analytic_prior": analytic_prior,
                                    "fused_data_evaluations": fused_evaluations,
@@ -468,4 +536,11 @@ class TorchGEMS:
                                    "owner_hint_reused_points": int(torch.stack(owner_hint_reused).sum())
                                        if owner_hint_reused else 0,
                                    "data_cost_accumulation": "float64" if double_data_cost_accumulation
-                                       else str(self.dtype)})
+                                       else str(self.dtype),
+                                   "stable_mesh_fitting": bool(stable_mesh_fitting),
+                                   "precise_mesh_matrices": bool(precise_mesh_matrices),
+                                   "mesh_line_search": mesh_line_search if deform_optimizer == "lbfgs" else None,
+                                   "prior_cost_accumulation": "float64" if stable_mesh_fitting
+                                       else str(self.dtype),
+                                   "optimizer_state_precision": "float64" if stable_mesh_fitting
+                                       and deform_optimizer == "lbfgs" else str(self.dtype)})
