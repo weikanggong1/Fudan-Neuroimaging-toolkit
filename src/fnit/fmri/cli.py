@@ -29,6 +29,9 @@ def main(argv=None):
     volume.add_argument("--mni-template", required=True)
     volume.add_argument("--mni-brain-mask")
     volume.add_argument("--t1w-image")
+    volume.add_argument("--no-anatomical-cache", action="store_true")
+    volume.add_argument("--bbr-execution", choices=("batched", "reference"), default="batched")
+    volume.add_argument("--fnirt-execution", choices=("optimized", "reference"), default="optimized")
     volume.add_argument("--registration-backend", choices=("synthmorph", "fnirt"), default="synthmorph")
     volume.add_argument("--fnirt-preset", choices=("default", "gm", "t1", "tbss"))
     volume.add_argument("--synthstrip-weights")
@@ -63,6 +66,8 @@ def main(argv=None):
     if args.command == "volume":
         result = fMRIVolume_pipeline(
             **common, mni_template=args.mni_template,
+            reuse_anatomical=not args.no_anatomical_cache,
+            bbr_execution=args.bbr_execution, fnirt_execution=args.fnirt_execution,
             mni_brain_mask=args.mni_brain_mask, t1w_image=args.t1w_image,
             registration_backend=args.registration_backend,
             fnirt_config=args.fnirt_preset,

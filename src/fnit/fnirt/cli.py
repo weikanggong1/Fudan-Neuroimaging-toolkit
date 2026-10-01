@@ -146,6 +146,10 @@ def add_arguments(parser):
         help="PyTorch device, for example cpu, cuda, or cuda:1; default: CUDA when available",
     )
     parser.add_argument(
+        "--execution", choices=("reference", "optimized"), default="optimized",
+        help="dense reference or coefficient-space/fused GPU execution; same schedule and precision",
+    )
+    parser.add_argument(
         "--overwrite",
         action="store_true",
         help="replace existing output files; outputs are otherwise protected",
@@ -167,6 +171,7 @@ def main(argv=None):
             refmask=args.refmask,
             config=_effective_config(args),
             device=args.device,
+            execution=args.execution,
             overwrite=args.overwrite,
         )
     except (FileExistsError, FileNotFoundError, NotImplementedError, TypeError, ValueError) as error:

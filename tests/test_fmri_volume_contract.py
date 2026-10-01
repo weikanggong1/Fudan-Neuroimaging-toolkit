@@ -10,7 +10,7 @@ import nibabel as nib
 import numpy as np
 import pytest
 
-from fnit.fast import FASTConfig
+from fnit.fast import FASTConfig, TorchFAST
 from fnit.fmri import end_to_end, surface_pipeline
 from fnit.fmri.derivatives import fmri_derivative_paths, sidecar
 
@@ -55,7 +55,7 @@ def volume_dependencies(tmp_path, monkeypatch):
 
     class Strip:
         def __init__(self, **kwargs):
-            pass
+            self.model_path = weights
 
         def __call__(self, path):
             image = nib.load(path)
@@ -64,17 +64,20 @@ def volume_dependencies(tmp_path, monkeypatch):
                 mask=ArrayImage(np.ones(image.shape), image.affine),
             )
 
-    class Fast:
-        config = FASTConfig()
-
-        def __init__(self, **kwargs):
-            pass
-
-        def __call__(self, *args, **kwargs):
-            return SimpleNamespace(
-                pve_csf=ArrayImage(np.full((4, 5, 6), state.csf_pve)),
-                pve_wm=ArrayImage(np.full((4, 5, 6), state.wm_pve)),
-            )
+    def anatomical(t1w, mni_template, **kwargs):
+        state.anatomical_kwargs = kwargs
+        output = kwargs["work_dir"] / "anatomical"
+        _save(output / "T1_brain.nii.gz", np.ones((4, 5, 6)))
+        _save(output / "T1_pve_wm.nii.gz", np.full((4, 5, 6), state.wm_pve))
+        _save(output / "T1_pve_csf.nii.gz", np.full((4, 5, 6), state.csf_pve))
+        _save(output / "T1_wmseg.nii.gz", np.full((4, 5, 6), state.wm_pve >= .5))
+        template_image = nib.load(mni_template)
+        _save(output / "MNI_mask.nii.gz", np.ones(template_image.shape), template_image.affine)
+        return SimpleNamespace(
+            path=lambda name: output / name, reused=False, fingerprint=None,
+            timing_seconds={name: 0. for name in ("t1_synthstrip", "template_preparation", "fast", "t1_to_mni_affine", "t1_to_mni_nonlinear", "warp_conversion", "anatomical_cache_lookup")},
+            registration=SimpleNamespace(pull_ras=output / "pull.nii.gz", qc=None),
+        )
 
     def feat(**kwargs):
         output = kwargs["output_dir"]
@@ -88,6 +91,13 @@ def volume_dependencies(tmp_path, monkeypatch):
     def bbr_save(output, omat):
         _save(Path(output), np.ones((4, 5, 6)))
         np.savetxt(omat, np.eye(4))
+
+    def bbr(**kwargs):
+        state.bbr_kwargs = kwargs
+        return SimpleNamespace(
+            moving_to_fixed_world=np.eye(4), save=bbr_save,
+            phase_timings={name: .01 for name in ("initial_flirt", "boundary_preparation", "coarse_bbr", "local_bbr", "final_resampling")},
+        )
 
     def resample(source, reference, matrix, output, **kwargs):
         state.resampled_sources.append(Path(source).name)
@@ -110,12 +120,9 @@ def volume_dependencies(tmp_path, monkeypatch):
 
     monkeypatch.setattr(end_to_end, "locate_bids_inputs", lambda *args, **kwargs: inputs)
     monkeypatch.setattr(end_to_end, "SynthStrip", Strip)
-    monkeypatch.setattr(end_to_end, "TorchFAST", Fast)
+    monkeypatch.setattr(end_to_end, "prepare_anatomical", anatomical)
     monkeypatch.setattr(end_to_end, "run_feat_core", feat)
-    monkeypatch.setattr("fnit.fmri.bbr.register_bbr", lambda **kwargs: SimpleNamespace(
-        moving_to_fixed_world=np.eye(4), save=bbr_save,
-    ))
-    monkeypatch.setattr(end_to_end, "register_t1_to_mni", lambda *args, **kwargs: SimpleNamespace(pull_ras=tmp_path / "pull.nii.gz", qc=None))
+    monkeypatch.setattr("fnit.fmri.bbr.register_bbr", bbr)
     monkeypatch.setattr(end_to_end, "resample_world", resample)
     monkeypatch.setattr(end_to_end, "run_aroma_pipeline", aroma)
     state.inputs = inputs
@@ -176,6 +183,31 @@ def test_volume_metadata_preserves_task_and_execution_settings(volume_dependenci
     assert all(not Path(key).is_absolute() for key in source["SourceSHA256"])
     assert metadata["FNIT"]["Denoising"] == {"Method": "ICA-AROMA", "Mode": "aggr", "Completed": True}
     assert metadata["FNIT"]["Report"]["configuration"] == configuration
+    assert configuration["reuse_anatomical"] is True
+    assert configuration["anatomical_cache"] == {"reused": False, "fingerprint": None}
+    assert configuration["bbr_execution"] == "batched"
+    assert configuration["fnirt_execution"] == "optimized"
+    assert state.anatomical_kwargs["reuse"] is True
+
+
+def test_default_fast_metadata_matches_actual_anatomical_estimator_defaults():
+    assert asdict(FASTConfig()) == asdict(TorchFAST(device="cpu").config)
+
+
+def test_registration_execution_and_cache_options_are_forwarded_and_recorded(volume_dependencies):
+    state = volume_dependencies
+    result = end_to_end.fMRIVolume_pipeline(
+        **state.call, registration_backend="fnirt", fnirt_execution="reference",
+        bbr_execution="reference", reuse_anatomical=False,
+    )
+    configuration = json.loads(result.metadata.read_text())["FNIT"]["Configuration"]
+    assert configuration["reuse_anatomical"] is False
+    assert configuration["fnirt_execution"] == configuration["bbr_execution"] == "reference"
+    assert configuration["fnirt_config"] is not None
+    assert "synthmorph" not in configuration["weights"]
+    assert state.anatomical_kwargs["reuse"] is False
+    assert state.anatomical_kwargs["fnirt_execution"] == "reference"
+    assert state.bbr_kwargs["execution"] == "reference"
 
 
 def _handoff_metadata(inputs, *, legacy=False):

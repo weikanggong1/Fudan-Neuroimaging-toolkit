@@ -89,6 +89,9 @@ result = fMRIVolume_pipeline(
     n_splits=1000,                                    # AROMA 随机抽样次数
     random_state=0,                                   # ICA/AROMA 随机种子
     overwrite=False,                                  # 是否覆盖同名最终结果
+    reuse_anatomical=True,                            # 同一 T1/模板/配置的解剖结果跨 run 复用
+    bbr_execution="batched",                         # batched 批量搜索；reference 串行同算法
+    fnirt_execution="optimized",                     # optimized GPU 算子；reference 保留原执行方式
 )
 print(result.clean_native)  # 个体 EPI 空间清理后 4D BOLD
 print(result.clean_mni)     # MNI152 2 mm 清理后 4D BOLD
@@ -108,11 +111,19 @@ print(result.clean_mni)     # MNI152 2 mm 清理后 4D BOLD
 | `func/sub-0001_task-rest_from-boldref_to-T1w_mode-image_xfm.txt` | BBR FLIRT 4×4 矩阵；surface 流程用它把 EPI BOLD 采样到 T1w。 |
 | `anat/sub-0001_desc-brain_T1w.nii.gz` | SynthStrip 提取的 T1w 脑影像；与源 T1w 同网格。 |
 
-`FMRIVolumeResult` 返回上述五条绝对路径、MNI BOLD 的 JSON 路径及各阶段耗时。已有输出不会自动更新。重跑时用新的 `derivatives_root`，或设置 `overwrite=True`（命令行 `--overwrite`）；新版 MNI BOLD 的 JSON 应包含上述 `MNIInterpolation` 字段。`FNIT.Configuration` 记录本次全部处理参数、FAST 配置、模板与权重位置；`FNIT.Denoising` 记录 ICA-AROMA 模式与完成状态；`FNIT.Source` 记录 Python 源码清单 SHA-256 和 PyTorch、NumPy、nibabel、SciPy 版本。此源码清单不包含权重或模板文件内容，资源哈希由安装器及 benchmark 另行核对。WM/CSF 回归关闭时不生成对应原生掩膜；BBR 所需 T1 白质分割仍会生成。中间的 FEAT、PICA 与 AROMA 文件只在运行时工作目录中存在。表面处理需随后调用 [`fMRISurface_pipeline`](surface.md)。
+`FMRIVolumeResult` 返回上述五条绝对路径、MNI BOLD 的 JSON 路径及各阶段耗时。已有输出不会自动更新。重跑时用新的 `derivatives_root`，或设置 `overwrite=True`（命令行 `--overwrite`）；新版 MNI BOLD 的 JSON 应包含上述 `MNIInterpolation` 字段。`FNIT.Configuration` 记录本次全部处理参数、FAST 配置、模板与权重位置；`FNIT.Denoising` 记录 ICA-AROMA 模式与完成状态；`FNIT.Source` 记录 Python 源码清单 SHA-256 和 PyTorch、NumPy、nibabel、SciPy 版本。此源码清单不包含权重或模板文件内容，资源哈希由安装器及 benchmark 另行核对。WM/CSF 回归关闭时不生成对应原生掩膜；BBR 所需 T1 白质分割仍会生成。
+
+`reuse_anatomical=True` 默认把 T1 SynthStrip、FAST、模板提取与 T1→MNI 结果保存在当前被试/会话 `anat/.fnit_anatomical/` 的内部缓存；BIDS 的公开输出仍采用上表命名。缓存核验输入、模板/掩膜、权重、配置、执行模式、实现源码及计算环境，每个输出再校验 SHA-256；改变其中任意一项会重新计算。缓存不完整或文件损坏时会重建。BBR、EPI 脑提取和 BOLD 处理仍按 run 运行。`reuse_anatomical=False`（命令行 `--no-anatomical-cache`）强制重新计算解剖步骤；`overwrite` 不负责清空缓存。
+
+计时 JSON 分别记录 `bbr_initial_flirt`、`bbr_refinement`、`bbr_final_resampling`、`t1_to_mni_affine`、`t1_to_mni_nonlinear`、`warp_conversion` 和 `mni_resampling`。命中缓存时，已复用的计算阶段记为 0，校验与等待时间记为 `anatomical_cache_lookup`，报告的 `anatomical_cache.reused` 为 true。`total` 是此次调用至生成重采样结果的实际墙钟，包含初始化、校验、导入及加载；末尾最终 BIDS 文件复制和 JSON 写盘在该计时外。FEAT、PICA、AROMA 文件仍使用临时工作目录。表面处理随后调用 [`fMRISurface_pipeline`](surface.md)。
+
+`bbr_execution="reference"` 和 `fnirt_execution="reference"` 用于逐项回归，选择同一算法的串行成本/原张量算子；它们保留本次坐标、边界与优化流程的修正。CLI 对应 `--bbr-execution`、`--fnirt-execution`。后者只在 `registration_backend="fnirt"` 时可切换。
 
 ## 全流程 benchmark
 
-2026-10-01 用 `a7c5a64` 的源码和当前 FLIRT，重新处理一例完整 490 帧 UKB BOLD/SBRef。使用同被试重建存档的 `orig/001.mgz` T1，经 nibabel 逐体素无误差转换；更早的结构预处理未核对。开启 WM、CSF 和 24 项运动回归，默认 SynthMorph 配准、ICA-AROMA 非激进清理。ICA-AROMA 是本流程选定的去噪方法。
+以下完整 volume 测量绑定 `a7c5a64`；新增 BBR/FNIRT 与解剖缓存的独立测量绑定 `8dbeea64` 的实现，各自记录源码哈希。491.36 s 不是合并后代码的整链计时；合并后的完整 volume 尚待重测。独立配准结果见本页后面的表格及[当前配准报告](../../validation/fmri/registration_gpu.current.public.json)。
+
+2026-10-01 用 `a7c5a64` 的源码和当时的 FLIRT，重新处理一例完整 490 帧 UKB BOLD/SBRef。使用同被试重建存档的 `orig/001.mgz` T1，经 nibabel 逐体素无误差转换；更早的结构预处理未核对。开启 WM、CSF 和 24 项运动回归，默认 SynthMorph 配准、ICA-AROMA 非激进清理。ICA-AROMA 是本流程选定的去噪方法。
 
 | 检查 | 结果 |
 |---|---|
@@ -152,6 +163,19 @@ print(result.clean_mni)     # MNI152 2 mm 清理后 4D BOLD
 全部阶段时间与单被试复测命令见[全流程验证页](../../validation/fmri/README.md)，配置、文件与源码哈希见[volume 报告](../../validation/fmri/fmri_volume.public.json)。surface 球面和 MS-HBM 的既有对照注明各自运行日期和源码，本次只重新执行 volume。
 
 官方 DeepPrep 25.1.0 在同一完整 490 帧 BOLD 上的既有实测为 2091.36 s，包含独立结构重建及 QC；计时范围、T1 输入和去噪方法均不同。既有实验见[FNIT / DeepPrep 对照](../../validation/fmri/deepprep/README.md)，它没有随本次 FLIRT 更新重新测量。
+
+## 独立配准与解剖缓存实测
+
+2026-10-01 的 `8dbeea64` 更新另行测量一例真实 UKB BBR、T1 FNIRT 与解剖缓存。下面的函数计时包含输入解压和 CPU 结果转换，排除最终写盘；它们与上面含最终写盘的完整 volume API 计时分别报告。首次调用已完成 CUDA 初始化，未清空 Triton 磁盘缓存；热调用紧接首次调用。共享 GPU 上的这些单次观测不用于计算稳定加速倍数。
+
+| 独立测试范围 | 首次 / 热调用 | 与同输入 FSL 参照的精度 |
+|---|---:|---|
+| BBR，固定官方初始矩阵和白质分割 | 3.581 / 1.409 s | 影像 r 0.99999970；逆变换位移 RMS 0.00260 mm。 |
+| FNIT FAST＋FLIRT＋BBR | 6.932 / 5.072 s | 影像 r 0.9997382；逆变换位移 RMS 0.07203 mm。 |
+| T1 FNIRT，固定官方初始矩阵与模板掩膜 | 32.595 / 30.422 s | warped T1 r 0.99771788；完整 pull 位移中位数 / p95 0.05176 / 0.23294 mm。 |
+| 解剖准备，FNIT FLIRT＋FNIRT，第二次复用全部解剖产物 | 41.118 / 0.0785 s | 两次产物 SHA-256 相同；第二次时间为缓存核验，不重新估计配准。 |
+
+BBR 的官方 CPU 命令观测为 45.093 s，FNIRT 为 217.558 s，均含启动与输入读写，计时边界不同。BBR 固定官方 WM/init 的精度不能代表自产 FAST/init 的完整配准链；FNIRT 表不包含 FLIRT 或最终 BOLD 重采样。当前 optimized FNIRT 与 reference 求和顺序不同，完整误差与逐项消融保留在 [BBR 页](bbr.md#真实-ukb-数据对照)、[T1→MNI 页](normalization.md#当前真实数据-benchmark)和[独立配准报告](../../validation/fmri/registration_gpu.current.public.json)。本轮独立缓存测试使用 FNIRT；上面的 `a7c5a64` 完整 volume 使用 SynthMorph，二者未合并计时。
 
 ## 参考文献与原实现
 

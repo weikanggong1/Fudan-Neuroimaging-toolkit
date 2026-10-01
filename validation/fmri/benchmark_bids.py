@@ -104,6 +104,9 @@ def main():
     parser.add_argument("--mni-template", type=Path)
     parser.add_argument("--mni-brain-mask", type=Path)
     parser.add_argument("--registration-backend", choices=("synthmorph", "fnirt"), default="synthmorph")
+    parser.add_argument("--no-reuse-anatomical", action="store_true")
+    parser.add_argument("--bbr-execution", choices=("reference", "batched"), default="batched")
+    parser.add_argument("--fnirt-execution", choices=("reference", "optimized"), default="optimized")
     parser.add_argument("--synthstrip-weights", type=Path)
     parser.add_argument("--synthmorph-weights", type=Path)
     parser.add_argument("--recon-all", type=Path)
@@ -146,7 +149,7 @@ def main():
 
         capture_root = args.capture_intermediates
         feat_original = end_to_end.run_feat_core
-        registration_original = end_to_end.register_t1_to_mni
+        anatomical_original = end_to_end.prepare_anatomical
         aroma_original = end_to_end.run_aroma_pipeline
 
         def capture_feat(**keywords):
@@ -157,10 +160,16 @@ def main():
                                         for name in names])
             return result
 
-        def capture_registration(*positional, **keywords):
-            result = registration_original(*positional, **keywords)
-            capture_files("bbr_and_t1_to_mni", [(result.affine, capture_root / "reg" / result.affine.name),
-                                               (result.pull_ras, capture_root / "reg" / result.pull_ras.name)])
+        def capture_anatomical(*positional, **keywords):
+            result = anatomical_original(*positional, **keywords)
+            registration = result.registration
+            files = [(registration.affine, capture_root / "reg" / registration.affine.name),
+                     (registration.pull_ras, capture_root / "reg" / registration.pull_ras.name)]
+            for name in ("T1_brain.nii.gz", "T1_pve_wm.nii.gz", "T1_pve_csf.nii.gz", "T1_wmseg.nii.gz"):
+                files.append((result.path(name), capture_root / "masks" / name))
+            # Internal anatomical phase timers have already stopped here. Only
+            # the enclosing API/total timer includes this extra file copying.
+            capture_files("anatomical_capture", files)
             return result
 
         def capture_aroma(**keywords):
@@ -182,7 +191,7 @@ def main():
             return result
 
         end_to_end.run_feat_core = capture_feat
-        end_to_end.register_t1_to_mni = capture_registration
+        end_to_end.prepare_anatomical = capture_anatomical
         end_to_end.run_aroma_pipeline = capture_aroma
     if args.capture_resampling_inputs:
         from fnit.fmri import end_to_end
@@ -213,6 +222,8 @@ def main():
             synthstrip_weights=args.synthstrip_weights,
             synthmorph_weights=args.synthmorph_weights,
             regress_wm=True, regress_csf=True, regress_motion=True,
+            reuse_anatomical=not args.no_reuse_anatomical,
+            bbr_execution=args.bbr_execution, fnirt_execution=args.fnirt_execution,
             device=args.device, batch_size=8, random_state=0,
         )
     else:
@@ -251,6 +262,8 @@ def main():
             "registration_backend", "mni_interpolation", "ica_components", "ica_converged",
             "ica_iterations", "aroma_noise_components", "wm_csf_motion_regression")}
         algorithm["configuration"] = public_configuration(metadata["FNIT"].get("Configuration", {}))
+        algorithm["anatomical_cache"] = pipeline.get("anatomical_cache")
+        algorithm["bbr_phase_timings"] = pipeline.get("bbr_phase_timings")
         limits = ["No GDC or B0 correction in this candidate run.",
                   "ICA-AROMA is the selected denoising method; comparison with official UKB FIX quantifies processing differences, not equivalent denoising."]
     else:
@@ -288,7 +301,8 @@ def main():
         raise ValueError("frame count changed")
     stage_times = dict(result.timing_seconds)
     for stage, seconds in stage_capture_seconds.items():
-        stage_times[stage] -= seconds
+        if stage in stage_times:
+            stage_times[stage] -= seconds
     if "total" in stage_times:
         stage_times["total"] -= capture_seconds[0]
     report = {"schema_version": 1, "source_revision": args.source_revision,
