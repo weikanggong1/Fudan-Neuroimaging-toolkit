@@ -78,26 +78,11 @@ print(result.dtseries)  # 91k CIFTI 时间序列
 
 ## 真实数据 benchmark
 
-本节 surface 测量保留原运行日期和输入；2026-10-01 的 volume 复测见[完整验证页](../../validation/fmri/README.md)，没有与下面旧 surface 时间相加。
+当前球面精度、冷/热配准速度和完整 490 帧逐顶点时间相关见 [MSMSulc 功能页](../msm/README.md)与[配准验证](../../validation/msm/README.md)。对照固定同一 clean volume、几何、ROI 和投影顺序，只改变注册球面；每套球面分别生成自己的 32k 面积表面。
 
-2026-09-30 用 `3f8b756` 的公开 API，在修补 volume 最终 MNI 样条插值后连续运行一例真实 UKB 的完整 490 帧 volume 和 surface。该次 surface 直接使用同日生成的 volume，输出双侧 490×32,492 GIFTI 与 490×91,282 CIFTI，数值、时间轴和 JSON 检查全部通过。
+这项测量覆盖球面估计及其对 fsLR32k 时间序列的影响。完整 volume 的当前测量与之前完整 surface API 的运行范围见[全流程验证](../../validation/fmri/README.md)，两种计时单列。最终输出为左右 32k GIFTI 和 91k CIFTI；相关性按各灰质坐标的全部时间点计算，再平均。
 
-| 测量 | 结果 |
-|---|---|
-| 完整 surface API，含球面估计、写盘和清理 | 905.71 s |
-| 2026-09-30 volume + surface API 合计 | 2624.89 s（43.75 分钟） |
-| surface 峰值 CUDA allocated / reserved | 0.73 / 1.26 GB |
-| 固定 volume，只替换官方 newMSM 球面：左 / 右皮层时间 r 均值 | 0.940496 / 0.941404 |
-| 同一对照的左 / 右皮层 MAE | 18.1565 / 19.7100 |
-| 同一对照的皮层下最大绝对差 | 0 |
-
-参照控制只替换注册球面，投影和组装仍使用同一 FNIT/Workbench 路径，定位的是皮层对应关系差异。完整候选与官方皮层时序尚不等价，本页的球面对照不能替代官方 release 的整链对照。最新 [MS-HBM 下游验证](../../validation/mshbm/processed_release.md)已使用同扫描的 UKB MSMAll 发布 CIFTI，记录网络标签、时序与连接差异。两次 API 的总时间不含既有皮层重建，T1 来自匹配存档的重建输入；更早的结构处理未核对。单次共享 H100 计时不作为稳定加速比。
-
-下图展示标准 fsLR32k 球面上的时间相关及全皮层分布，不导出被试几何。详细计时范围、资源校验、输出合同、复测命令及独立阶段参照见[全流程 benchmark](../../validation/fmri/README.md)、[surface 运行报告](../../validation/fmri/fmri_surface.public.json)和[球面对照](../../validation/fmri/fmri_surface_comparison.public.json)。
-
-同一完整 BOLD 的官方 DeepPrep 25.1.0 fsaverage6 surface 实测为 1969.45 s，包含结构重建、BOLD 预处理与 QC。本页 905.71 s 从已完成的 volume 和既有皮层几何开始，输出为 fsLR32k / 91k；计时起点与空间不同。见[FNIT / DeepPrep 对照](../../validation/fmri/deepprep/README.md)。
-
-![surface 球面对照](figures/fmri_surface_agreement.png)
+固定官方球面时，Workbench 投影和 CIFTI 组装已逐值匹配独立命令对照。UKB MSMAll 发布空间、去噪方法以及从原始数据开始的整条 fMRIPrep 流程属于不同对照；相关结果见 [MS-HBM 验证](../../validation/mshbm/processed_release.md)和 [DeepPrep 对照](../../validation/fmri/deepprep/README.md)。
 
 ## 参考文献与原实现
 

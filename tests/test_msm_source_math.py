@@ -7,9 +7,12 @@ import pytest
 import torch
 
 from fnit.msm import MSMSulcConfig
-from fnit.msm._affine import _euler_matrix, _RigidCost
+from fnit.msm._affine import (
+    _RigidCost, _point_matmul, _source_euler_matrix,
+    _local_normals, _tangent_basis, _mean_neighbor_distance,
+)
 from fnit.msm.msmsulc import (
-    _ico, _area_weights, _face_costs, _face_layout,
+    _ico, _area_weights, _face_costs, _face_layout, _vertex_area,
     _label_samples, _normalize_sphere, _rescaled_labels, _sphere_warp,
     _unfold, _variance_normalize, _native_output_qc, _triplet_data_weights,
 )
@@ -23,6 +26,31 @@ def test_canonical_schedule_has_three_correlation_discrete_levels():
     assert config.control_grid == (6,2,3,4)
     assert config.data_grid == (6,4,5,6)
     assert MSMSulcConfig.ssd_affine().simval == (1,2,2,2)
+
+
+def test_float_options_match_official_parser_before_double_calculation(tmp_path):
+    config=MSMSulcConfig()
+    for name,value in (("affine_step_size",.01),("affine_gradient_spacing",.5),
+                       ("shear_modulus",.4),("bulk_modulus",1.6),
+                       ("strain_exponent",2.),("regularization_exponent",2.)):
+        expected=float(np.float32(value))
+        assert getattr(config,name)==expected
+        assert config.to_dict()[name]==expected
+    path=tmp_path/'options.conf'
+    path.write_text('--stepsize=.013\n--shearmod=.43\n--lambda=0,10.1,7.6,7.6\n'
+                    '--VN\n--rescaleL\n--triclique\n')
+    read=MSMSulcConfig.from_file(path)
+    assert read.affine_step_size==float(np.float32(.013))
+    assert read.shear_modulus==float(np.float32(.43))
+    assert read.regularization==tuple(float(np.float32(v)) for v in (0,10.1,7.6,7.6))
+
+
+@pytest.mark.parametrize('kwargs',[
+    {'shear_modulus':1e300},{'regularization':(0,1e300,7.5,7.5)},
+    {'affine_step_size':1e-100},
+])
+def test_float_options_reject_parser_overflow_or_positive_underflow(kwargs):
+    with pytest.raises(ValueError,match='float32'):MSMSulcConfig(**kwargs)
 
 
 @pytest.mark.parametrize('kwargs',[
@@ -44,10 +72,38 @@ def test_reads_official_config_and_refuses_changed_algorithm(tmp_path):
     with pytest.raises(ValueError,match='unsupported'):MSMSulcConfig.from_file(config)
 
 
+@pytest.mark.parametrize('option',['numthreads','threads'])
+def test_config_accepts_positive_execution_thread_count_only(tmp_path,option):
+    path=tmp_path/'config.conf'
+    flags='--VN\n--rescaleL\n--triclique\n'
+    path.write_text(flags+f'--{option}=8\n')
+    assert MSMSulcConfig.from_file(path)==MSMSulcConfig()
+    for value in ('0','-2','1.5','invalid'):
+        path.write_text(flags+f'--{option}={value}\n')
+        with pytest.raises(ValueError):MSMSulcConfig.from_file(path)
+
+
 def test_variance_normalization_uses_sample_variance():
     actual=_variance_normalize(np.array([0.,2.,5.,8.]))
     np.testing.assert_allclose(actual,(np.array([0.,2.,5.,8.])-3.75)/np.std([0.,2.,5.,8.],ddof=1),rtol=1e-15)
     np.testing.assert_array_equal(_variance_normalize(np.ones(3)),np.zeros(3))
+
+
+def test_icosphere_retains_constructor_areas_before_midpoint_normalization():
+    xyz,faces,cached=_ico(1,cached_area=True)
+    # Every planar quarter of the original regular icosahedron face has the
+    # same constructor area. Projecting midpoints onto the sphere afterwards
+    # makes corner/central faces different; source get_area retains the former.
+    tau,one=.8506508084,.5257311121
+    triangle=np.array([[-one,0,tau],[one,0,tau],[0,tau,one]])
+    cross=np.cross(triangle[2]-triangle[0],triangle[1]-triangle[0])
+    expected=.5*np.sqrt((cross[0]**2+cross[1]**2)+cross[2]**2)/4
+    # The upstream decimal golden-ratio constants make nominally congruent
+    # parent faces differ by up to 3.4e-12 in this quarter-area calculation.
+    np.testing.assert_allclose(cached,np.full(len(xyz),expected),rtol=0,atol=4e-12)
+    fresh=_vertex_area(xyz/100,faces)
+    assert np.ptp(fresh)>1e-3
+    assert np.max(np.abs(fresh-cached))>1e-3
 
 
 def test_radial_metric_weights_and_unprojected_likelihood_are_distinct():
@@ -154,7 +210,7 @@ def test_sphere_origin_and_radius_follow_four_point_estimate():
 def test_warp_keeps_coordinate_direction_and_native_order():
     xyz,faces=_ico(2)
     angles=torch.tensor([.03,-.02,.01],dtype=torch.float64)
-    rotation=_euler_matrix(angles)
+    rotation=_source_euler_matrix(angles,'cpu')
     points=torch.tensor(xyz[[8,2,72,1]])
     moved=_sphere_warp(points,xyz,faces,torch.tensor(xyz)@rotation,'cpu')
     np.testing.assert_allclose(moved.numpy(),(points@rotation).numpy(),atol=6e-13)
@@ -164,8 +220,135 @@ def test_rigid_single_feature_pearson_is_spatially_centered_sign():
     xyz,faces=_ico(1)
     source=xyz[:,0]+.31*xyz[:,1]
     cost=_RigidCost(xyz,faces,source,source,'cpu',simval=3)
-    np.testing.assert_allclose(cost.centered_source.numpy(),source-source.mean(),atol=0)
+    mean=np.add.accumulate(source)[-1]/len(source)
+    np.testing.assert_array_equal(cost.centered_source.numpy(),source-mean)
     assert cost(torch.eye(3,dtype=torch.float64))>10
+
+
+
+@pytest.mark.parametrize('device',['cpu','cuda'])
+@pytest.mark.parametrize('simval',[1,3])
+def test_rigid_cost_uses_one_packed_source_wls_boundary(device,simval):
+    import math
+    if device=='cuda' and not torch.cuda.is_available():pytest.skip('CUDA unavailable')
+    xyz,faces=_ico(1)
+    source=xyz[:,0]+.31*xyz[:,1]
+    reference=xyz[:,1]-.23*xyz[:,2]
+    cost=_RigidCost(xyz,faces,source,reference,device,simval=simval)
+    positions=_point_matmul(cost.vertices,_source_euler_matrix((.01,-.02,.03),device))
+    native=cost.wls_cost;captured=[]
+    def observe(payload,rows,width,sigma):
+        assert payload.dtype==np.float64 and payload.flags.c_contiguous
+        assert payload.shape==(rows,width,3)
+        captured.append(payload.copy())
+        return native(payload,rows,width,sigma)
+    cost.wls_cost=observe
+    actual=cost.evaluate_positions(positions)
+    assert len(captured)==1
+    payload=captured[0]
+    _,_,assigned=cost.mapper.weights(positions)
+    ids=cost.ids[assigned].cpu().numpy()
+    expected_valid=cost.valid[assigned].cpu().numpy()
+    np.testing.assert_array_equal(payload[...,2],expected_valid.astype(np.float64))
+    if simval==1:expected_similarity=-np.abs(reference[ids]-source[:,None])
+    else:
+        mean_source=np.add.accumulate(source)[-1]/len(source)
+        mean_reference=np.add.accumulate(reference)[-1]/len(reference)
+        expected_similarity=np.sign((reference[ids]-mean_reference)*(source[:,None]-mean_source))
+    expected_similarity[ids==0]=0.
+    np.testing.assert_array_equal(payload[...,1],expected_similarity)
+    # Independent scalar libm/reduction oracle. GPU/CPU geometry may choose
+    # different boundary faces; each uses the same source WLS definition.
+    total=0.
+    for row in payload:
+        weight_sum=value_sum=0.
+        for distance,similarity,valid in row:
+            if valid and distance>0:
+                weight=math.exp(-float(distance)/((2*cost.sigma)*cost.sigma))
+                weight_sum+=weight;value_sum+=float(similarity)*weight
+        total+=value_sum/weight_sum if weight_sum else value_sum
+    assert np.float64(actual).view(np.uint64)==np.float64(total).view(np.uint64)
+
+
+def test_rigid_local_normals_and_tangent_basis_follow_scalar_source_order():
+    import math
+    def cross(a,b):return np.array([a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]])
+    def dot(a,b):return (a[0]*b[0]+a[1]*b[1])+a[2]*b[2]
+    def normalize(a):
+        norm=math.sqrt(dot(a,a))
+        return a/norm if norm>1e-8 else a
+    xyz,faces=_ico(1)
+    normal=[];first=[];second=[]
+    for vertex in range(len(xyz)):
+        total=np.zeros(3)
+        for triangle in faces:
+            if vertex in triangle:
+                a,b,c=xyz[triangle]
+                total+=normalize(cross(c-a,b-a))
+        n=normalize(total)
+        if dot(n,xyz[vertex])<0:n=-n
+        normal.append(n)
+        x,y,z=n
+        if abs(x)>=abs(y) and abs(x)>=abs(z):
+            magnitude=math.sqrt(z*z+y*y)
+            e1=np.array([0,-z/magnitude,y/magnitude]) if magnitude else np.array([0,0,1.])
+        elif abs(y)>=abs(x) and abs(y)>=abs(z):
+            magnitude=math.sqrt(z*z+x*x)
+            e1=np.array([-z/magnitude,0,x/magnitude]) if magnitude else np.array([0,0,1.])
+        else:
+            magnitude=math.sqrt(y*y+x*x)
+            e1=np.array([-y/magnitude,x/magnitude,0]) if magnitude else np.array([1.,0,0])
+        first.append(e1);second.append(normalize(cross(n,e1)))
+    actual=_local_normals(torch.tensor(xyz),torch.tensor(faces))
+    actual_first,actual_second=_tangent_basis(actual)
+    np.testing.assert_array_equal(actual.numpy(),np.asarray(normal))
+    np.testing.assert_array_equal(actual_first.numpy(),np.asarray(first))
+    np.testing.assert_array_equal(actual_second.numpy(),np.asarray(second))
+
+
+def test_rigid_mean_distance_keeps_directed_edge_insertion_order():
+    import math
+    xyz,faces=_ico(1)
+    neighbors=[[] for _ in xyz]
+    for a,b,c in faces:
+        for vertex,others in ((a,(b,c)),(b,(a,c)),(c,(a,b))):
+            for other in others:
+                if other not in neighbors[vertex]:neighbors[vertex].append(other)
+    total=0.;count=0
+    for vertex,items in enumerate(neighbors):
+        for other in items:
+            x,y,z=xyz[other]-xyz[vertex]
+            total+=math.sqrt((x*x+y*y)+z*z);count+=1
+    assert _mean_neighbor_distance(xyz,faces)==total/count
+
+
+def test_affine_point_product_preserves_source_three_term_order():
+    points=torch.tensor([[1e16,-1e16,1.]],dtype=torch.float64)
+    matrix=torch.ones((3,3),dtype=torch.float64)
+    torch.testing.assert_close(_point_matmul(points,matrix),torch.ones((1,3),dtype=torch.float64),rtol=0,atol=0)
+    angles=np.array([.013,-.02,.04])
+    a,b,c=angles;ca,cb,cc=np.cos(angles);sa,sb,sc=np.sin(angles)
+    rx=np.array([[1.,0.,0.],[0.,ca,-sa],[0.,sa,ca]])
+    ry=np.array([[cb,0.,sb],[0.,1.,0.],[-sb,0.,cb]])
+    rz=np.array([[cc,-sc,0.],[sc,cc,0.],[0.,0.,1.]])
+    np.testing.assert_allclose(_source_euler_matrix(angles,'cpu').numpy(),
+                               rz@ry@rx,rtol=0,atol=2e-16)
+
+
+def test_affine_returns_statefully_rotated_mesh_not_one_accumulated_product(monkeypatch):
+    from fnit.msm import _affine as implementation
+    class KnownCost:
+        def __init__(self,vertices,*args):self.vertices=torch.tensor(vertices,dtype=torch.float64)
+        def evaluate_positions(self,positions):
+            return float((positions[:,0]+.3*positions[:,1]-.2*positions[:,2]).sum())
+    monkeypatch.setattr(implementation,'_RigidCost',KnownCost)
+    xyz=np.array([[18.,2.,80.],[-31.,70.,3.],[9.,17.,43.]])
+    result=implementation._affine_initialization(xyz,np.empty((0,3)),None,None,'cpu',
+             MSMSulcConfig(iterations=(2,1,1,1)),return_positions=True)
+    matrix,_,_,positions=result
+    # Source keeps the coordinate rounding of every accepted rotation.
+    assert np.any(positions.numpy()!=xyz@matrix)
+    np.testing.assert_allclose(positions.numpy(),xyz@matrix,atol=3e-14,rtol=0)
 
 
 def test_unfold_keeps_regular_mesh_unchanged():
@@ -224,5 +407,51 @@ def test_complete_small_mesh_execution_paths_match(tmp_path):
         for hemisphere in 'LR':
             np.testing.assert_array_equal(nib.load(str(optimized[hemisphere])).darrays[0].data,
                                            nib.load(str(reference[hemisphere])).darrays[0].data)
+    finally:
+        torch.set_num_threads(previous)
+
+
+def test_final_native_output_preserves_source_transform_and_reports_fold(tmp_path,monkeypatch):
+    # Mathematical workflow gate, not a real-data benchmark: a controlled
+    # terminal native deformation verifies direct source-compatible output.
+    import json
+    import nibabel as nib
+    from fnit.msm import MSMSulcInputs,run_msmsulc
+    from fnit.msm import msmsulc as implementation
+    previous=torch.get_num_threads()
+    torch.set_num_threads(1)
+    try:
+        xyz,faces=_ico(2)
+        mesh=tmp_path/'sphere.surf.gii';metric=tmp_path/'sulc.shape.gii'
+        nib.save(nib.GiftiImage(darrays=[
+            nib.gifti.GiftiDataArray(xyz.astype(np.float32),intent=1008),
+            nib.gifti.GiftiDataArray(faces.astype(np.int32),intent=1009)]),str(mesh))
+        nib.save(nib.GiftiImage(darrays=[nib.gifti.GiftiDataArray(
+            (xyz[:,0]+.3*xyz[:,1]).astype(np.float32),intent=2005)]),str(metric))
+        entry=MSMSulcInputs(mesh,mesh,metric,mesh,metric,tmp_path/'unused.mat')
+        config=MSMSulcConfig(iterations=(1,1,1,1),control_grid=(1,1,1,1),
+                             sampling_grid=(1,2,2,2),data_grid=(1,1,1,1))
+        original_warp=implementation._sphere_warp
+        native_calls=0;expected=[]
+        def terminal_warp(points,*args,**kwargs):
+            nonlocal native_calls
+            result=original_warp(points,*args,**kwargs)
+            if len(points)==len(xyz):
+                native_calls+=1
+                if native_calls%4==0:
+                    result=result.clone()
+                    first,second=int(faces[0,1]),int(faces[0,2])
+                    result[[first,second]]=result[[second,first]]
+                    expected.append(result.detach().cpu().numpy().astype(np.float32))
+            return result
+        monkeypatch.setattr(implementation,'_sphere_warp',terminal_warp)
+        outputs=run_msmsulc({'L':entry,'R':entry},tmp_path/'output',device='cpu',config=config)
+        report=json.loads((tmp_path/'output/registration_report.json').read_text())
+        assert len(expected)==2
+        for i,hemisphere in enumerate('LR'):
+            written=nib.load(str(outputs[hemisphere])).darrays[0].data
+            np.testing.assert_array_equal(written,expected[i])
+            assert report[hemisphere]['folded_output_faces']>0
+            assert report[hemisphere]['folded_solver_faces']>0
     finally:
         torch.set_num_threads(previous)

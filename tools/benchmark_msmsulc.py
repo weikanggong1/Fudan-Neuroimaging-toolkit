@@ -163,6 +163,11 @@ class Measure:
             if label == 'face_costs':
                 faces = args[3] if len(args) > 3 else kwargs['faces']
                 self.counts['face_configuration_evaluations'] += len(faces)*(1 if kwargs.get('energy_only') else 8)
+            if label == 'affine_source_wls':
+                # The packed CPU buffer is already transferred by production.
+                # Observing its byte size adds no CUDA operation or transfer.
+                self.counts['affine_wls_host_payload_bytes'] += memoryview(args[0]).nbytes
+                self.counts['affine_wls_query_slots'] += args[1]*args[2]
             if work:
                 self.work_units += 1
                 if self.profiler: self.profiler.step()
@@ -211,8 +216,14 @@ class Measure:
                 self.wrap(getattr(self.msm, class_name), 'weights', class_name.lower()+'_weights')
         affine_module = sys.modules.get(getattr(getattr(self.msm, '_affine_initialization', None), '__module__', ''))
         if affine_module is not None and hasattr(affine_module, '_RigidCost'):
-            self.wrap(affine_module._RigidCost, '__call__', 'rigid_cost_evaluation')
+            rigid_cost = affine_module._RigidCost
+            # Stateful source-compatible initialization evaluates coordinates
+            # directly. Legacy builds expose only the rotation-call interface.
+            # Hook one leaf API so __call__ forwarding does not count twice.
+            evaluator = 'evaluate_positions' if hasattr(rigid_cost, 'evaluate_positions') else '__call__'
+            self.wrap(rigid_cost, evaluator, 'rigid_cost_evaluation')
         self.wrap(self.native, 'optimize', 'hocr_fastpd', work=True)
+        self.wrap(self.native, 'source_wls_cost', 'affine_source_wls')
         if self.full:
             for name in ['__float__', '__int__', '__bool__', 'item', 'cpu', 'numpy']:
                 original = getattr(self.torch.Tensor, name)

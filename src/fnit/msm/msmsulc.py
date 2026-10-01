@@ -16,7 +16,7 @@ from .config import MSMSulcConfig
 from ._sphere_map import RadialSphereMap, _area_weights, _cross, _dot, _normalize
 from .prepare import MSMSulcInputs
 
-def _ico(level):
+def _ico(level,*,cached_area=False):
     a,b=0.8506508084,0.5257311121
     vertices=np.array([(a,b,0),(-a,b,0),(-a,-b,0),(a,-b,0),
                        (b,0,a),(b,0,-a),(-b,0,-a),(-b,0,a),
@@ -26,7 +26,8 @@ def _ico(level):
                     (11,0,8),(1,11,8),(3,10,9),(10,2,9),
                     (0,4,8),(5,0,11),(3,9,4),(10,3,5),
                     (1,8,7),(11,1,6),(9,2,7),(2,10,6)],np.int64)[:,[0,2,1]]
-    for _ in range(level):
+    area=_vertex_area(vertices,faces) if cached_area and level==0 else None
+    for step in range(level):
         points=vertices.tolist();edges={};next_faces=[]
         def midpoint(i,j):
             edge=(min(i,j),max(i,j))
@@ -38,23 +39,28 @@ def _ico(level):
             p0=midpoint(v1,v2);p1=midpoint(v0,v2);p2=midpoint(v0,v1)
             next_faces.extend(((p2,p0,p1),(p1,v0,p2),(p0,v2,p1),(p2,v1,p0)))
         vertices=np.asarray(points,np.float64)
-        vertices/=np.linalg.norm(vertices,axis=1,keepdims=True)
         faces=np.asarray(next_faces,np.int64)
+        # Official Triangle caches its constructor area. retessellate builds
+        # all four planar subtriangles before normalizing their midpoint
+        # vertices; true_rescale later changes coordinates, not cached areas.
+        if cached_area and step==level-1:area=_vertex_area(vertices,faces)
+        vertices/=np.linalg.norm(vertices,axis=1,keepdims=True)
     # make_mesh_from_icosa is followed by true_rescale at every level.
     vertices/=np.linalg.norm(vertices,axis=1,keepdims=True)
-    return vertices*100,faces
+    return (vertices*100,faces,area) if cached_area else (vertices*100,faces)
 
 
 def _vertex_area(vertices,faces):
     triangles=vertices[faces]
-    area=np.linalg.norm(np.cross(triangles[:,1]-triangles[:,0],
-                                 triangles[:,2]-triangles[:,0]),axis=1)*0.5
+    cross=np.cross(triangles[:,2]-triangles[:,0],triangles[:,1]-triangles[:,0])
+    squared=(cross[:,0]*cross[:,0]+cross[:,1]*cross[:,1])+cross[:,2]*cross[:,2]
+    area=np.sqrt(squared)*0.5
     total=np.bincount(faces.ravel(),weights=np.repeat(area,3),minlength=len(vertices))
     counts=np.bincount(faces.ravel(),minlength=len(vertices))
     return total/counts
 
 
-def _adaptive_resample(vertices,faces,values,new_vertices,new_faces,device='cuda:0',execution='optimized'):
+def _adaptive_resample(vertices,faces,values,new_vertices,new_faces,device='cuda:0',execution='optimized',*,old_area=None,new_area=None):
     """Resample a scalar metric using forward and reverse area corrected weights."""
     selected=torch.device(device)
     forward_map=RadialSphereMap(vertices,faces,selected,execution=execution)
@@ -68,8 +74,12 @@ def _adaptive_resample(vertices,faces,values,new_vertices,new_faces,device='cuda
     reverse=sparse.coo_matrix((rw.ravel(),(np.repeat(np.arange(n),3),ri.ravel())),shape=(n,m)).T.tocsr()
     choose=np.diff(reverse.indptr)>np.diff(forward.indptr)
     joined=sparse.diags(choose.astype(np.float64))@reverse + sparse.diags((~choose).astype(np.float64))@forward
-    old_area=_vertex_area(np.asarray(vertices,dtype=np.float64),np.asarray(faces,dtype=np.int64))
-    new_area=_vertex_area(np.asarray(new_vertices,dtype=np.float64),np.asarray(new_faces,dtype=np.int64))
+    old_area=(_vertex_area(np.asarray(vertices,dtype=np.float64),np.asarray(faces,dtype=np.int64))
+              if old_area is None else np.asarray(old_area,dtype=np.float64))
+    new_area=(_vertex_area(np.asarray(new_vertices,dtype=np.float64),np.asarray(new_faces,dtype=np.int64))
+              if new_area is None else np.asarray(new_area,dtype=np.float64))
+    if old_area.shape!=(n,) or new_area.shape!=(m,) or not np.isfinite(old_area).all() or not np.isfinite(new_area).all():
+        raise ValueError("adaptive resampling vertex-area arrays differ from their meshes")
     weighted=sparse.diags(new_area)@joined
     correction=np.asarray(weighted.sum(axis=0)).ravel()
     factors=np.divide(old_area,correction,out=np.zeros_like(old_area),where=correction>0)
@@ -360,7 +370,12 @@ def _unfold(vertices,faces):
 
 
 def _native_output_qc(vertices,faces,original):
-    """Measure native orientation at solver and written GIFTI precision."""
+    """Measure native orientation at solver and written GIFTI precision.
+
+    The official final transform interpolates the native sphere and saves it
+    without another unfolding operation. Preserve those coordinates and report
+    their orientation; DATA/control meshes retain the per-iteration unfolding.
+    """
     points=np.asarray(vertices,dtype=np.float64)
     if not np.isfinite(points).all():raise RuntimeError("output sphere contains nonfinite coordinates")
     faces=np.asarray(faces,dtype=np.int64)
@@ -406,6 +421,9 @@ def run_msmsulc(
         entry=inputs[hemi]
         native,native_faces=_surface(entry.rotated_sphere)
         reference_xyz,reference_faces=_surface(entry.reference_sphere)
+        # File-loaded Triangle areas are cached before recentre/true_rescale.
+        native_area=_vertex_area(native,native_faces)
+        reference_area=_vertex_area(reference_xyz,reference_faces)
         native=_normalize_sphere(native)
         reference_xyz=_normalize_sphere(reference_xyz)
         source_metric=np.asarray(nib.load(str(entry.native_sulc)).darrays[0].data,np.float64)
@@ -414,16 +432,18 @@ def run_msmsulc(
                 or not np.isfinite(source_metric).all() or not np.isfinite(reference_metric).all()):
             raise ValueError(f"{hemi} sphere/metric dimensions differ or metric is not finite")
         affine_started=time.perf_counter()
-        affine_grid,affine_faces=_ico(config.data_grid[0])
+        affine_grid,affine_faces,affine_area=_ico(config.data_grid[0],cached_area=True)
         affine_source=_variance_normalize(_adaptive_resample(native,native_faces,source_metric,
-                                                              affine_grid,affine_faces,device=device,execution=execution))
+                                                              affine_grid,affine_faces,device=device,execution=execution,
+                                                              old_area=native_area,new_area=affine_area))
         affine_target=_variance_normalize(_adaptive_resample(reference_xyz,reference_faces,reference_metric,
-                                                              affine_grid,affine_faces,device=device,execution=execution))
-        affine,angles,affine_report=_affine_initialization(affine_grid,affine_faces,
-                                                          affine_source,affine_target,selected,config,execution=execution)
+                                                              affine_grid,affine_faces,device=device,execution=execution,
+                                                              old_area=reference_area,new_area=affine_area))
+        affine,angles,affine_report,previous_positions=_affine_initialization(affine_grid,affine_faces,
+                                                          affine_source,affine_target,selected,config,execution=execution,
+                                                          return_positions=True)
         previous_grid=affine_grid
         previous_faces=affine_faces
-        previous_positions=torch.as_tensor(affine_grid@affine,dtype=torch.float64,device=selected)
         affine_seconds=time.perf_counter()-affine_started
         stages=[]
         for stage_index in range(1,4):
@@ -432,7 +452,7 @@ def run_msmsulc(
             data_level=config.data_grid[stage_index]
             lam=config.regularization[stage_index]
             regular_np,faces_np=_ico(level)
-            data_np,data_faces=_ico(data_level)
+            data_np,data_faces,data_area=_ico(data_level,cached_area=True)
             label_grid,label_faces=_ico(config.sampling_grid[stage_index])
             regular=torch.as_tensor(regular_np,dtype=torch.float64,device=selected)
             strain_original=torch.as_tensor(data_np[:len(regular_np)],dtype=torch.float64,device=selected)
@@ -446,9 +466,11 @@ def run_msmsulc(
             source_positions,source_unfold=_unfold(source_positions,data_faces)
             cp_positions,control_unfold=_unfold(cp_positions,faces_np)
             src=_variance_normalize(_adaptive_resample(native,native_faces,source_metric,
-                                                        data_np,data_faces,device=device,execution=execution))
+                                                        data_np,data_faces,device=device,execution=execution,
+                                                        old_area=native_area,new_area=data_area))
             tgt=_variance_normalize(_adaptive_resample(reference_xyz,reference_faces,reference_metric,
-                                                        data_np,data_faces,device=device,execution=execution))
+                                                        data_np,data_faces,device=device,execution=execution,
+                                                        old_area=reference_area,new_area=data_area))
             source_values=torch.as_tensor(src,device=selected)
             target_values=torch.as_tensor(tgt,device=selected)
             target_map=RadialSphereMap(data_np,data_faces,selected,execution=execution)
@@ -521,10 +543,11 @@ def run_msmsulc(
         vertices=_sphere_warp(torch.as_tensor(native,device=selected),previous_grid,
                               previous_faces,previous_positions,selected,execution=execution).detach().cpu().numpy()
         output_qc=_native_output_qc(vertices,native_faces,native)
-        if output_qc["folded_solver_faces"] or output_qc["folded_output_faces"]:
-            raise RuntimeError(f"{hemi} output sphere has folded triangles: "
-                               f"solver={output_qc['folded_solver_faces']}, "
-                               f"GIFTI float32={output_qc['folded_output_faces']}")
+        # User-authorized source-compatible output: official transform() saves
+        # this interpolation directly. Its dense native output can contain a
+        # folded face even with unfolded DATA/control grids; the real paired
+        # oracle has confirmed the same face. Keep both actual-precision counts
+        # in the report and do not introduce an additional final deformation.
         path=output/f"{hemi}.sphere.MSMSulc.native.surf.gii"
         nib.save(nib.GiftiImage(darrays=[
             nib.gifti.GiftiDataArray(vertices.astype(np.float32),intent="NIFTI_INTENT_POINTSET"),

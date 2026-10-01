@@ -42,8 +42,8 @@
 
 | 功能 | 当前真实数据报告 | 输出一致性结论 | 时间、显存与示意图 |
 |---|---|---|---|
-| [BIDS→MNI152 2 mm fMRI](../docs/fmri/README.md) | [完整 490 帧 volume](fmri/README.md)、[当前 FEAT 对照](fmri/feat_current.public.json)、[DeepPrep 对照](fmri/deepprep/README.md) | pre-ICA FEAT 4D r=0.996417，时间 r 中位数 0.966798；最终 AROMA 没有同算法 UKB FIX 参照 | 完整 API 含保存 1719.19 s，allocated 13.34 GB；DeepPrep volume 2091.36 s 含结构重建，范围不同；附 MNI 时间标准差及帧图 |
-| [fsLR32k / 91k surface](../docs/fmri/surface.md) | [同次新 volume→surface](fmri/fmri_surface.public.json)、[官方球面控制](fmri/fmri_surface_comparison.public.json)、[DeepPrep 对照](fmri/deepprep/README.md) | 左/右皮层时间 r 均值 0.940496 / 0.941404；固定 volume、只换官方 newMSM 球面，皮层下逐值相同 | 完整 API 905.71 s，volume+surface 合计 2624.89 s，不含既有皮层重建；DeepPrep fsaverage6 1969.45 s 含结构与 BOLD，空间和范围不同；附标准球面相关图 |
+| [BIDS→MNI152 2 mm fMRI](../docs/fmri/README.md) | [完整 490 帧 volume](fmri/README.md)、[当前 FEAT 对照](fmri/feat_current.public.json)、[DeepPrep 对照](fmri/deepprep/README.md) | pre-ICA FEAT 4D r=0.996419，时间 r 中位数 0.966773；最终 AROMA 没有同算法 UKB FIX 参照 | 2026-10-01 完整 API 含保存 551.07 s，allocated 13.30 GB；DeepPrep volume 2091.36 s 含结构重建，范围不同；附 MNI 时间标准差及帧图 |
+| [fsLR32k / 91k surface](../docs/fmri/surface.md) | [当前 MSMSulc](msm/README.md)、[固定球面投影](fmri/surface_fixed_sphere.public.json)、[历史完整 API](fmri/fmri_surface.public.json) | 同输入官方 newMSM 球面与 490 帧逐灰质坐标时间相关见 MSM 专页；固定官方球面投影与组装逐值一致 | 最新配准冷/热调用与 profile 单列；历史完整 surface API 905.71 s，不含皮层重建 |
 | [MS-HBM 17 网络](../docs/mshbm/README.md) | [真实 fsLR32k 静息态时序](mshbm/report.public.json) | 输入 profile、网络标签和 Dice/ARI 按顶点比较 | 报告含 CBIG/FNIT 的匹配计时与内存；功能页展示网络标签与差异 |
 
 ## Postanalysis

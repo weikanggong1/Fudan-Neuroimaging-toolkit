@@ -199,8 +199,67 @@ PyObject* optimize(PyObject*, PyObject* args) {
     return answer;
 }
 
+PyObject* source_wls_cost(PyObject*, PyObject* args) {
+    // Independently written scalar reduction matching MIT-licensed newMSM's
+    // rigid_costfunction.cpp WLS arithmetic (260718953547743c028a45f8c885d163441df87a).
+    // Geometry and pair similarity remain on the GPU. This runs at the
+    // existing optimizer host boundary: one packed buffer, one scalar result.
+    Py_buffer buffer{};
+    Py_ssize_t rows, width;
+    double sigma;
+    if (!PyArg_ParseTuple(args, "y*nnd", &buffer, &rows, &width, &sigma))
+        return nullptr;
+    constexpr Py_ssize_t sample_bytes = 3*sizeof(double);
+    const Py_ssize_t maximum = std::numeric_limits<Py_ssize_t>::max();
+    const double denominator = (2*sigma)*sigma;
+    if (rows < 0 || width <= 0 || width > maximum/sample_bytes ||
+        rows > maximum/(width*sample_bytes) ||
+        buffer.len != rows*width*sample_bytes || !std::isfinite(sigma) ||
+        sigma <= 0.0 || !std::isfinite(denominator) || denominator <= 0.0) {
+        PyBuffer_Release(&buffer);
+        PyErr_SetString(PyExc_ValueError,
+            "expected float64 [rows,width,3] buffer and finite positive sigma");
+        return nullptr;
+    }
+    const char* data = static_cast<const char*>(buffer.buf);
+    double cost = 0.0;
+    for (Py_ssize_t row = 0; row < rows; ++row) {
+        double weight_sum = 0.0, value_sum = 0.0;
+        for (Py_ssize_t column = 0; column < width; ++column) {
+            // A buffer may be a byte-offset memoryview. Avoid undefined
+            // unaligned double loads, and retain the GIL for mutable buffers.
+            double sample[3];
+            std::memcpy(sample, data + (row*width+column)*sample_bytes,
+                        sizeof(sample));
+            const double distance = sample[0], similarity = sample[1];
+            const double valid = sample[2];
+            if (!std::isfinite(distance) || distance < 0.0 ||
+                !std::isfinite(similarity) || (valid != 0.0 && valid != 1.0)) {
+                PyBuffer_Release(&buffer);
+                PyErr_SetString(PyExc_ValueError,
+                    "WLS distance and similarity must be finite; distance nonnegative and valid zero or one");
+                return nullptr;
+            }
+            if (valid == 0.0 || distance == 0.0) continue;
+            const double weight = std::exp(-distance/denominator);
+            weight_sum += weight;
+            value_sum += similarity*weight;
+        }
+        if (weight_sum > 0.0) value_sum /= weight_sum;
+        cost += value_sum;
+    }
+    PyBuffer_Release(&buffer);
+    if (!std::isfinite(cost)) {
+        PyErr_SetString(PyExc_ValueError, "WLS reduction must remain finite");
+        return nullptr;
+    }
+    return PyFloat_FromDouble(cost);
+}
+
 PyMethodDef methods[] = {
     {"optimize", optimize, METH_VARARGS, "HOCR and FastPD fusion for triangle costs."},
+    {"source_wls_cost", source_wls_cost, METH_VARARGS,
+     "Ordered source WLS reduction: float64 distance/similarity/valid buffer, rows, width, sigma."},
     {nullptr, nullptr, 0, nullptr},
 };
 PyModuleDef module = {PyModuleDef_HEAD_INIT, "_fastpd_native", nullptr, -1, methods};

@@ -2,7 +2,7 @@
 
 `fnit.msm` 独立完成双侧脑沟球面配准。先按 newMSM 的有限差分规则估计刚性初始化，再用 162→642→2,562 个控制点优化脑沟相似度和三角形应变；HOCR 降阶与 FastPD 选择联合位移。输出球面保持原生顶点顺序。运行时不调用官方 MSM 或 FreeSurfer；准备阶段使用 Connectome Workbench。当前功能为 **MSMSulc**。
 
-默认使用 HCP/sMRIPrep 的四级配置：`simval=3,2,2,2`，最大迭代数 `50,10,15,15`。官方 newMSM 将历史仿射相似度值 3 转为 Pearson 2；FNIT 保持该行为。几何、相似度和优化标量使用 float64，写出的 GIFTI 顶点为 float32；没有使用 FP16/BF16。默认优化路径缓存固定几何并合并传输，`execution="reference"` 保留逐块检查供回归对照；二者使用相同的算法和停止条件。
+默认使用 HCP/sMRIPrep 的四级配置：`simval=3,2,2,2`，最大迭代数 `50,10,15,15`。官方 newMSM 将历史仿射相似度值 3 转为 Pearson 2；FNIT 保持该行为。几何、相似度和优化标量使用 float64，写出的 GIFTI 顶点为 float32；没有使用 FP16/BF16。刚性坐标与离散成本在 PyTorch 上计算，刚性加权相似度及 HOCR/FastPD 使用包内独立 C++ 算子。默认优化路径缓存固定几何并合并传输，`execution="reference"` 保留逐块检查供回归对照；二者使用相同的算法和停止条件。
 
 ## 输入与调用
 
@@ -41,6 +41,8 @@ print(spheres["R"])  # R.sphere.MSMSulc.native.surf.gii
 
 `registration_report.json` 记录实际配置、仿射角度、逐级能量、更新数量、停止位置、展开操作、耗时、峰值已分配显存和写出折叠数。球面可传给 `fMRISurface_pipeline(registered_spheres=(spheres["L"], spheres["R"]))` 做固定球面投影对照；使用已注册球面时不再指定 `msm_config`。独立配准输出是工作文件，最终 fMRI 时间序列由 surface 流程写成 BIDS Derivatives。
 
+离散迭代中的 DATA 和控制网格保留 newMSM 的展开处理。最后从 DATA 变形到原生球面后，按官方行为写出有限坐标，并分别报告求解坐标和实际 float32 GIFTI 的翻折数、最小方向比及输入退化面数。最终原生球面不再额外优化；使用前应检查这份质控报告。
+
 ### 配置参数
 
 下面的四元组依次对应刚性初始化和三个离散阶段。`config=None` 与 `MSMSulcConfig()` 相同；路径输入通过 `MSMSulcConfig.from_file` 读取受支持的官方选项。解析器拒绝改变为 MSMAll、MCMC 等未实现的流程。
@@ -60,6 +62,10 @@ print(spheres["R"])  # R.sphere.MSMSulc.native.surf.gii
 
 `MSMSulcConfig.ssd_affine()` 只将刚性阶段改为 SSD，即 `(1,2,2,2)`，用于复测采用该配置的参照。比较双方必须使用同一配置。
 
+浮点配置按官方 `Option<float>` 的精度读取，再提升为 double 计算。因此步长 `0.01` 的有效值为 `0.009999999776482582`，shear/bulk 的有效值分别为 `0.4000000059604645` 和 `1.600000023841858`；报告保存这些实际数值。
+
+官方配置的 `--numthreads=N` 是 CPU 执行参数，FNIT 识别该字段并使用所选 PyTorch 设备；旧 `--threads=N` 写法仍可读取。配置文件支持本页的 MSMSulc 选项，不覆盖 newMSM 的其他注册算法。
+
 ## 原版对照命令
 
 以下命令只在独立基准环境中运行；`--conf` 为 HCP 安装包内对应的 MSMSulc 配置文件，按实际路径填写。FNIT 不调用此命令。
@@ -75,18 +81,13 @@ newmsm --inmesh=/absolute/path/work/msm-inputs/L.sphere_rot.surf.gii \
 
 ## 真实数据基准
 
-一例真实 UKB 被试的左右初始球面、sulc 和 HCP 模板相同。官方 newMSM 使用 8 个 CPU 线程；FNIT 在 H100 上运行。球面角差以原生对应顶点计算；时间是单侧配准墙钟时间。两端硬件不同，耗时不构成等精度加速比。
+同一例真实 UKB 的双侧初始球面、sulc、HCP 模板及完整四级配置用于双方。正式精度参照为 `fsl-newmsm 1.0 h442c261_5` 的单线程输出；同输入两次独立运行的左侧球面逐位相同。官方 8 线程耗时单列，其重复球面有差异。FNIT 使用 H100；球面角差按原生对应顶点计算，490 帧时间相关先逐灰质坐标计算 Pearson r，再取均值。
 
-| 对照 | 左侧 | 右侧 |
-|---|---:|---:|
-| FNIT vs 官方注册球面角差中位数 / 第 95 百分位 | 0.383° / 1.060° | 0.407° / 1.018° |
-| FNIT / 官方单侧耗时 | 138.59 / 312.61 秒 | 123.70 / 241.95 秒 |
-| 490 帧 fsLR32k 逐顶点时间相关均值 | 0.9414 | 0.9420 |
-| 490 帧 fsLR32k MAE | 18.20 | 19.71 |
-| FNIT 峰值 PyTorch 已分配显存 | 0.726 GB | 0.727 GB |
-| FNIT 写出球面折叠面片 | 0 | 0 |
+最新球面、fsLR32k 时间序列、冷/热调用及 profile 汇总见 [MSM 验证页](../../validation/msm/README.md)。配准包含读取和球面/报告写盘，不包含 BOLD 投影、Python 导入与 CUDA 上下文初始化。历史完整 surface API 时间见 [全流程报告](../../validation/fmri/README.md)，不能与本次单函数时间混加。
 
-同一组输入连续运行官方 newMSM 两次，其自身球面角差中位数为左 0.394°、右 0.353°，皮层时间相关均值为 0.943、0.954。FNIT 数值尚未与官方逐点一致；主要待对齐的是每片数据项和离散优化轨迹。固定官方球面时，FNIT Workbench 投影和 CIFTI 组装已逐值匹配对照。标量记录见[当前摘要](../../validation/fmri/surface_current.json)。
+本次定位到三个会改变配准轨迹的问题：坐标归一化后重算了官方缓存的三角形面积；官方浮点配置被直接作为 double 使用；刚性 WLS 的 GPU 除法和指数舍入使成本出现 1 ULP 分歧。前两项已在独立 MSM 子函数修复，最后一项用 FNIT 的 C++ 运算保持官方顺序。真实检查点验证了全部 77 次刚性成本及对应逐顶点值；它们的验证范围与最终球面结果分别记录。
+
+固定官方球面时，Workbench 投影与 CIFTI 组装对独立对照逐值一致，见 [固定球面报告](../../validation/fmri/surface_fixed_sphere.public.json)。pipeline 传递注册配置，并将写出球面的质控保留在 BIDS sidecar。
 
 ## 参考文献与原实现
 

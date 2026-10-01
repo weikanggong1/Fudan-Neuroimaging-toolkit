@@ -4,6 +4,22 @@ from dataclasses import dataclass, asdict
 from pathlib import Path
 import math
 from numbers import Integral, Real
+import struct
+
+
+def _source_float(value, name):
+    """Match newMSM's Option<float> followed by its double-valued parameter.
+
+    Coordinates and costs remain float64. This conversion only reproduces
+    the upstream configuration parser, including the default option values.
+    """
+    try:
+        result = struct.unpack("f", struct.pack("f", value))[0]
+    except (OverflowError, struct.error) as exc:
+        raise ValueError(f"{name} is outside the finite float32 option range") from exc
+    if not math.isfinite(result):
+        raise ValueError(f"{name} is outside the finite float32 option range")
+    return result
 
 
 @dataclass(frozen=True)
@@ -15,6 +31,8 @@ class MSMSulcConfig:
     pairwise Pearson term is the sign of globally centered values, followed
     by spatial WLS smoothing. ``ssd_affine`` selects the
     SSD initialization used by some older newMSM benchmark configurations.
+    Floating options use the official float32-parser-to-float64 conversion;
+    ``to_dict`` reports the effective values used in the calculation.
     """
 
     simval: tuple[int, ...] = (3, 2, 2, 2)
@@ -43,6 +61,8 @@ class MSMSulcConfig:
                 object.__setattr__(self,name,tuple(int(v) for v in value))
             elif any(not isinstance(v,Real) or not math.isfinite(v) for v in value):
                 raise ValueError("regularization must contain finite numbers")
+            else:
+                object.__setattr__(self,name,tuple(_source_float(v,name) for v in value))
         if self.simval[0] not in (1, 2, 3) or any(v not in (1, 2) for v in self.simval[1:]):
             raise ValueError("MSMSulc supports affine similarity 1/2/3 and discrete similarity 1/2")
         if any(v <= 0 for v in self.iterations):
@@ -59,6 +79,10 @@ class MSMSulcConfig:
             value=getattr(self,name)
             if not isinstance(value,Real) or not math.isfinite(value) or value <= 0:
                 raise ValueError(f"{name} must be positive")
+            value=_source_float(value,name)
+            if value<=0:
+                raise ValueError(f"{name} must remain positive after float32 option parsing")
+            object.__setattr__(self,name,value)
 
     @classmethod
     def ssd_affine(cls):
@@ -94,7 +118,7 @@ class MSMSulcConfig:
                 pass
             elif key == "opt" and value == "RIGID,DISCRETE,DISCRETE,DISCRETE":
                 pass
-            elif key == "threads" and sep and int(value)>0:
+            elif key in ("numthreads", "threads") and sep and int(value)>0:
                 # Host thread count is an execution option, not a different
                 # scientific schedule. FNIT uses its selected PyTorch device.
                 pass

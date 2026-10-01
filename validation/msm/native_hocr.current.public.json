@@ -1,69 +1,67 @@
 {
   "schema_version": 1,
-  "scope": "generated native unit fixtures; not a real-data precision or speed benchmark",
+  "scope": "generated native operator fixtures, not a real-data benchmark",
   "oracle_repository": "https://github.com/rbesenczi/newMSM",
   "oracle_commit": "260718953547743c028a45f8c885d163441df87a",
-  "oracle_method": "pinned ELC PBF AddUnaryTerm(node,0,0); AddHigherTerm in face order; toQuadratic/convert; same source FastPD with five iterations",
+  "oracle_method": "Original ELC PBF/HOCR -> FastPD five iterations; zero unary for all original nodes before higher terms",
   "random_generator": "NumPy default_rng PCG64",
   "seed": 8117,
   "cases": 13000,
-  "before_mismatched_labelings": 124,
-  "after_mismatched_labelings": 0,
-  "source_sha256": {
-    "src/fnit/msm/_fastpd_src/fastpd_module.cpp": "56279d7e45a584e1a92b5f99e1c22bc5dd79427cb946c80d17bd3611def0a1fc",
-    "src/fnit/msm/_fastpd_src/FastPD.h": "d21f2640701d743b53d83d7ecd119db454bc36bf877c5862846de04254183698",
-    "src/fnit/msm/_fastpd_src/graph.h": "b75781e1719df32a6bc5741cbbd97745568207045e5397897629b00d4ab93fd9",
-    "src/fnit/msm/_fastpd_src/fnit_fastpd_model_stub.h": "a11a81379cef2466b410039956ffbebab4f979abaa94122e761a833dd4b310d5"
-  },
+  "mismatched_labelings": 0,
   "checks": [
     {
-      "fixture": "float",
+      "fixture": "normal_float64",
       "nodes": 4,
       "faces": 4,
       "cases": 3000,
-      "before_mismatched_labelings": 0,
-      "after_mismatched_labelings": 0
+      "mismatched_labelings": 0
     },
     {
-      "fixture": "discrete",
+      "fixture": "integer",
       "nodes": 4,
       "faces": 4,
       "cases": 3000,
-      "before_mismatched_labelings": 0,
-      "after_mismatched_labelings": 0
+      "mismatched_labelings": 0
     },
     {
-      "fixture": "degenerate",
+      "fixture": "near_tie",
       "nodes": 4,
       "faces": 4,
       "cases": 3000,
-      "before_mismatched_labelings": 0,
-      "after_mismatched_labelings": 0
+      "mismatched_labelings": 0
     },
     {
       "fixture": "duplicate",
       "nodes": 4,
       "faces": 8,
       "cases": 3000,
-      "before_mismatched_labelings": 124,
-      "after_mismatched_labelings": 0
+      "mismatched_labelings": 0
     },
     {
-      "fixture": "float32_values_in_float64_table",
+      "fixture": "float32_values",
       "nodes": 10,
       "faces": 100,
       "cases": 500,
-      "before_mismatched_labelings": 0,
-      "after_mismatched_labelings": 0
+      "mismatched_labelings": 0
     },
     {
-      "fixture": "float32_values_in_float64_table",
+      "fixture": "float32_values",
       "nodes": 50,
       "faces": 100,
       "cases": 500,
-      "before_mismatched_labelings": 0,
-      "after_mismatched_labelings": 0
+      "mismatched_labelings": 0
     }
   ],
-  "limitation": "Equal labels for these fixtures do not prove global optimality or equivalence for all newMSM features. No additional upstream source is distributed."
+  "compile_flags": [
+    "-O3",
+    "-std=c++17",
+    "-fno-fast-math",
+    "-ffp-contract=off"
+  ],
+  "source_sha256": {
+    "src/fnit/msm/_fastpd_src/fastpd_module.cpp": "8954b16132c4b2c140a1403e7f4ae26d483ea9004d2910304e26934d960ecae0",
+    "setup.py": "f104f5e6e95720f6f686b3c2879629cddd658404eb0b8d586703d43d56f70c89"
+  },
+  "fixture_generator_sha256": "b422cee257435c6342e58bf67049b39b359b195390c3b2fecba48deabf316216",
+  "limitation": "Equal labels in these fixtures do not prove equivalence for all features or global optimality. No additional original source is redistributed."
 }

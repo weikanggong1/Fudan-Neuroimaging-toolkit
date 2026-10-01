@@ -111,7 +111,8 @@ def test_peak_measurement_retains_values_before_source_resets(tmp_path):
     assert state == {'allocated': 0, 'reserved': 0}
 
 
-def test_measure_finds_affine_cost_module_after_wrapping_initialization(tmp_path, monkeypatch):
+@pytest.mark.parametrize('position_api', [False, True])
+def test_measure_finds_affine_cost_module_after_wrapping_initialization(tmp_path, monkeypatch, position_api):
     from types import ModuleType, SimpleNamespace
     import sys
     benchmark = tool()
@@ -119,9 +120,16 @@ def test_measure_finds_affine_cost_module_after_wrapping_initialization(tmp_path
     class RigidCost:
         def __call__(self, value):
             return value + 1
+    if position_api:
+        class RigidCost(RigidCost):
+            def evaluate_positions(self, value):
+                return super().__call__(value)
+            def __call__(self, value):
+                return self.evaluate_positions(value)
     def initialize():
         cost = affine_module._RigidCost()
-        return cost(1) + cost(2)
+        first = cost.evaluate_positions(1) if position_api else cost(1)
+        return first + cost(2)
     initialize.__module__ = affine_module.__name__
     affine_module._RigidCost = RigidCost
     monkeypatch.setitem(sys.modules, affine_module.__name__, affine_module)
@@ -168,3 +176,23 @@ def test_projection_recomputes_area_surfaces_from_each_registered_sphere(tmp_pat
         assert str(supplied[name].atlas_midthickness) == command[6]
         assert supplied[name].registered_sphere == command[3]
     assert 'official_cifti' not in supplied
+
+
+def test_measure_records_native_wls_payload_once_without_extra_gpu_transfer(tmp_path):
+    from types import SimpleNamespace
+    benchmark = tool()
+    payload = np.zeros((2, 3, 3), np.float64)
+    seen = []
+    def native_cost(buffer, rows, width, sigma):
+        seen.append(buffer)
+        return 4.0
+    native = SimpleNamespace(source_wls_cost=native_cost)
+    fake_torch = SimpleNamespace(cuda=SimpleNamespace(is_available=lambda: False))
+    with benchmark.Measure(fake_torch, SimpleNamespace(), native, tmp_path) as measure:
+        assert native.source_wls_cost(payload, 2, 3, 1.) == 4.
+    assert seen == [payload]
+    assert native.source_wls_cost is native_cost
+    assert measure.counts['affine_source_wls'] == 1
+    assert measure.counts['affine_wls_host_payload_bytes'] == payload.nbytes
+    assert measure.counts['affine_wls_query_slots'] == 6
+    assert measure.times['affine_source_wls']['calls'] == 1

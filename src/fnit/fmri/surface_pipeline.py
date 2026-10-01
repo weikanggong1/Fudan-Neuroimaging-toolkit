@@ -229,6 +229,8 @@ def fMRISurface_pipeline(
                     "Hemispheres": {
                         hemi: {key: report[hemi][key] for key in (
                             "seconds", "peak_allocated_gb", "folded_output_faces",
+                            "folded_solver_faces", "minimum_output_orientation_ratio",
+                            "minimum_solver_orientation_ratio", "degenerate_input_faces",
                         ) if key in report[hemi]} for hemi in ("L", "R")
                     },
                 }
