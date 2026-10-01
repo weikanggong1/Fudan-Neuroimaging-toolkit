@@ -3,6 +3,7 @@ import importlib
 import inspect
 import os
 import re
+from fnmatch import fnmatchcase
 from pathlib import Path
 import subprocess
 import sys
@@ -187,16 +188,29 @@ else:
 
 
 def test_public_feature_sources_do_not_import_banned_packages():
-    root = Path(__file__).resolve().parents[1] / "src" / "fnit"
+    from setuptools.config.pyprojecttoml import read_configuration
+
+    project_root = Path(__file__).resolve().parents[1]
+    root = project_root / "src" / "fnit"
+    distribution_excludes = read_configuration(
+        project_root / "pyproject.toml", expand=False
+    )["tool"]["setuptools"]["packages"]["find"].get("exclude", [])
+    for package in ("fnit.gems.native_samseg", "fnit.gems.native_samseg.subregions"):
+        assert any(fnmatchcase(package, pattern) for pattern in distribution_excludes)
     excluded = {"recon_all", "connectome", "fmri", "_vendor_fsl"}
     banned = {
         "surfa", "dipy", "trx", "nipype", "fmriprep", "smriprep",
         "qsiprep", "qsirecon", "mriqc", "cpac",
     }
     violations = []
+    scanned = []
     for path in root.rglob("*.py"):
+        package = ".".join(("fnit", *path.relative_to(root).parent.parts))
+        if any(fnmatchcase(package, pattern) for pattern in distribution_excludes):
+            continue
         if excluded.intersection(path.relative_to(root).parts):
             continue
+        scanned.append(path)
         source = path.read_text()
         for line_number, line in enumerate(source.splitlines(), start=1):
             stripped = line.strip().lower()
@@ -206,6 +220,8 @@ def test_public_feature_sources_do_not_import_banned_packages():
                     violations.append(
                         f"{path.relative_to(root)}:{line_number}: {line.strip()}"
                     )
+    assert root / "gems" / "nuclei.py" in scanned
+    assert root / "gems" / "output.py" in scanned
     assert not violations, "\n".join(violations)
 
 

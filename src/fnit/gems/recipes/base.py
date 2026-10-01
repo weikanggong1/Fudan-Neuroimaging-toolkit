@@ -83,38 +83,6 @@ def spherical_neighborhood(radius: int) -> np.ndarray:
     return x*x + y*y + z*z <= radius*radius
 
 
-def physical_neighborhood(radius_mm: float, voxel_sizes) -> np.ndarray:
-    """Sample a spherical erosion kernel in millimetres on the current grid."""
-    spacing = np.asarray(voxel_sizes, dtype=float)
-    limits = np.ceil(radius_mm / spacing).astype(int)
-    coordinates = np.meshgrid(*[np.arange(-n, n + 1) for n in limits], indexing="ij")
-    distance_squared = sum((coordinate * step)**2
-                           for coordinate, step in zip(coordinates, spacing))
-    return distance_squared <= radius_mm**2 + 1e-12
-
-
-def coarsen_working_image(image, resolution_mm: float) -> nib.Nifti1Image:
-    """Antialias and resample a prepared ROI, preserving its physical centre."""
-    data = np.asarray(image.dataobj, dtype=np.float32)
-    spacing = np.linalg.norm(image.affine[:3, :3], axis=0)
-    step = resolution_mm / spacing
-    if np.any(step < 1 - 1e-5):
-        raise ValueError("coarse resolution must not be finer than the working image")
-    shape = np.maximum(1, np.ceil(np.asarray(data.shape) / step).astype(int))
-    origin = (np.asarray(data.shape) - 1 - (shape - 1) * step) / 2
-    sigma = 0.5 * np.sqrt(np.maximum(step**2 - 1, 0))
-    smoothed = ndimage.gaussian_filter(data, sigma, mode="nearest")
-    sampled = ndimage.affine_transform(smoothed, np.diag(step), offset=origin,
-                                       output_shape=tuple(shape), order=1, mode="nearest")
-    valid = ndimage.affine_transform((data > 0).astype(np.uint8), np.diag(step),
-                                     offset=origin, output_shape=tuple(shape),
-                                     order=0, mode="nearest")
-    sampled[valid == 0] = 0
-    transform = np.diag([*step, 1.0])
-    transform[:3, 3] = origin
-    return nib.Nifti1Image(sampled.astype(np.float32), image.affine @ transform)
-
-
 def _fit_statistics(stages: list[dict]) -> dict:
     """Accumulate all stage counters; keep per-stage configuration and timing."""
     stats = {"stages": stages}
@@ -138,10 +106,7 @@ class GEMSRecipe:
     mesh_iterations = 30
     em_iterations = 100
     optimization_profile = "balanced"
-    coarse_resolution_mm = 1.0
-    fast_mesh_iterations = 12
-    coarse_outer_iterations = 2
-    coarse_mesh_iterations = 8
+    fast_mesh_iterations = 20
 
     def __init__(self, name: str, directory: Path):
         self.name = name
@@ -190,9 +155,7 @@ class GEMSRecipe:
              classes: np.ndarray, schedule: tuple[tuple[float, int], ...],
              *, synthetic: bool, context: SubregionContext | None = None,
              device: torch.device, stage_offset: int = 0, stage_count: int | None = None,
-             mesh_iterations: int | None = None,
-             working_resolution_mm: float | None = None,
-             warm_start: bool = False) -> tuple[GEMSAtlas, TorchGEMSResult]:
+             mesh_iterations: int | None = None) -> tuple[GEMSAtlas, TorchGEMSResult]:
         """Return an atlas on the input grid and a fit on its cropped grid."""
         def tick():
             if device.type == "cuda":
@@ -202,12 +165,8 @@ class GEMSRecipe:
         mesh_steps = self.mesh_iterations if mesh_iterations is None else mesh_iterations
         fast = self.optimization_profile == "fast"
         stop_options = {"deformation_stop": 0.005, "cost_stop_patience": 3} if fast else {}
-        resolution_scale = (self.resolution_mm / working_resolution_mm
-                            if working_resolution_mm is not None else 1.0)
-        block_size = max(2, int(round(8 * resolution_scale)))
+        block_size = 8
         margin = max(3, int(np.ceil(sum(steps for _, steps in schedule) * 0.05 + 3)))
-        if working_resolution_mm is not None:
-            margin = max(1, int(np.ceil(margin * resolution_scale)))
         low = np.maximum(np.floor(atlas.vertices.min(0)).astype(int) - margin, 0)
         high = np.minimum(np.ceil(atlas.vertices.max(0)).astype(int) + margin + 1, data.shape)
         if np.any(high <= low):
@@ -230,13 +189,10 @@ class GEMSRecipe:
             occupancy = torch.ones((len(vertices), 1), device=device)
             block_index = build_block_index(atlas.vertices, atlas.tetrahedra,
                                              tuple(image.shape), block_size=block_size,
-                                             margin=3 * resolution_scale)
+                                             margin=3)
             _, covered = rasterize_priors(vertices, tetrahedra, occupancy, tuple(image.shape),
                                           block_index=block_index, background_channel=None)
             neighborhood = spherical_neighborhood(3 if synthetic else 5)
-            if working_resolution_mm is not None and not synthetic:
-                neighborhood = physical_neighborhood(
-                    5 * self.resolution_mm, np.linalg.norm(affine[:3, :3], axis=0))
             mask = ndimage.binary_erosion(covered.cpu().numpy(),
                                          structure=neighborhood, border_value=1)
             if not synthetic:
@@ -252,7 +208,7 @@ class GEMSRecipe:
         for index, (sigma, iterations) in enumerate(schedule):
             stage_started = fit_started if index == 0 else tick()
             logger.info("%s %s stage %d/%d: sigma=%g iterations=%d", self.name,
-                        "segmentation" if synthetic else "intensity warm-start" if warm_start else "intensity", index + stage_offset + 1,
+                        "segmentation" if synthetic else "intensity", index + stage_offset + 1,
                         stage_count or len(schedule), sigma, iterations)
             if not synthetic:
                 classes = self.intensity_groups(atlas, index + stage_offset)
@@ -264,15 +220,8 @@ class GEMSRecipe:
             else:
                 fixed = None
                 if previous_classes is None or not np.array_equal(previous_classes, classes):
-                    # Thin-tissue PV estimates stay on the original physical
-                    # sampling scale. Counts then follow the likelihood voxel mass.
-                    hyper_atlas = atlas
-                    if working_resolution_mm is not None:
-                        hyper_atlas = atlas.transformed(
-                            np.diag([1 / resolution_scale] * 3 + [1.0]),
-                            transform_reference=True)
-                    means, counts = self.gaussian_hyperparameters(context, hyper_atlas, classes)
-                    hyper = (means, counts * resolution_scale**3)
+                    means, counts = self.gaussian_hyperparameters(context, atlas, classes)
+                    hyper = (means, counts)
                     previous_params = None
             previous_classes = classes.copy()
             if sigma:
@@ -280,7 +229,7 @@ class GEMSRecipe:
                 # KVL smooths in the transformed reference mesh's coordinates.
                 # A population-grid cache has a different bandwidth after the
                 # subject affine and the high-resolution working-grid scaling.
-                alphas = smooth_atlas_alphas(atlas, classes, sigma * resolution_scale, device=device)
+                alphas = smooth_atlas_alphas(atlas, classes, sigma, device=device)
             if not sigma:
                 alphas = np.zeros((len(atlas.vertices), int(classes.max()) + 1), np.float32)
                 for channel, group in enumerate(classes):
@@ -291,7 +240,7 @@ class GEMSRecipe:
                 background_channel=atlas.label_names.index("Unknown"),
                 deform_lr=1.0, deform_optimizer="lbfgs",
                 deform_em_interval=iterations + 1 if synthetic else mesh_steps + 1,
-                index_margin=3.0 * resolution_scale, adaptive_index=True,
+                index_margin=3.0, adaptive_index=True,
                 boundary_transform=boundary_transform,
                 mean_hyper=(None if synthetic else torch.as_tensor(hyper[0], device=device)),
                 n_hyper=(None if synthetic else torch.as_tensor(hyper[1], device=device)),
@@ -309,10 +258,10 @@ class GEMSRecipe:
             stage_stats.append({
                 **(getattr(result, "optimization_stats", None) or {}),
                 "stage_index": index + stage_offset + 1, "synthetic": synthetic,
-                "warm_start": warm_start, "block_size": block_size,
+                "block_size": block_size,
                 "resolution_mm": float(np.mean(np.linalg.norm(affine[:3, :3], axis=0))),
-                "alpha_sigma_voxels": sigma * resolution_scale,
-                "alpha_sigma_mm": sigma * resolution_scale * float(np.mean(
+                "alpha_sigma_voxels": sigma,
+                "alpha_sigma_mm": sigma * float(np.mean(
                     np.linalg.norm(affine[:3, :3], axis=0))),
                 "outer_iteration_limit": 1 if synthetic else iterations,
                 "mesh_iteration_limit": iterations if synthetic else mesh_steps,
@@ -351,49 +300,15 @@ class GEMSRecipe:
         data = np.asarray(image.dataobj, dtype=np.float32)
         schedule = self.image_schedule
         mesh_steps = self.mesh_iterations
-        coarse_stats = None
         report["optimization_profile"] = self.optimization_profile
         if self.optimization_profile == "fast":
-            schedule = self.fast_image_schedule
             mesh_steps = self.fast_mesh_iterations
-            resampling_started = monotonic()
-            coarse_image = coarsen_working_image(image, self.coarse_resolution_mm)
-            resampling_seconds = monotonic() - resampling_started
-            coarse_atlas = atlas.transformed(np.linalg.inv(coarse_image.affine) @ image.affine,
-                                             transform_reference=True)
-            coarse_atlas, coarse_fit = self._fit(
-                coarse_atlas, np.asarray(coarse_image.dataobj), coarse_image.affine,
-                self.intensity_groups(coarse_atlas, 0), ((schedule[0][0], self.coarse_outer_iterations),),
-                synthetic=False, context=context, device=device, stage_count=len(schedule),
-                mesh_iterations=self.coarse_mesh_iterations,
-                working_resolution_mm=self.coarse_resolution_mm, warm_start=True)
-            coarse_stats = getattr(coarse_fit, "optimization_stats", None)
-            # _fit uncrops the returned atlas; coarse_fit alone keeps crop coordinates.
-            atlas = coarse_atlas.transformed(np.linalg.inv(image.affine) @ coarse_image.affine,
-                                             transform_reference=True)
-            report["coarse_working_image"] = {
-                "resolution_mm": self.coarse_resolution_mm,
-                "working_shape": list(coarse_image.shape),
-                "affine": coarse_image.affine.tolist(),
-                "outer_em_iterations": self.coarse_outer_iterations,
-                "mesh_iterations_per_outer": self.coarse_mesh_iterations,
-                "purpose": "warm_start_before_all_fine_stages",
-                "alpha_sigma_mm": schedule[0][0] * self.resolution_mm,
-                "erosion_radius_mm": 5 * self.resolution_mm,
-                "hyper_count_scale": (self.resolution_mm / self.coarse_resolution_mm)**3,
-                "resampling_seconds": resampling_seconds,
-            }
-            fine_schedule, stage_offset = schedule, 0
-        else:
-            fine_schedule, stage_offset = schedule, 0
+        fine_schedule, stage_offset = schedule, 0
         _, result = self._fit(atlas, data, image.affine,
                              self.intensity_groups(atlas, stage_offset), fine_schedule,
                              synthetic=False, context=context, device=device,
                              stage_offset=stage_offset, stage_count=len(schedule),
                              mesh_iterations=mesh_steps)
-        if coarse_stats is not None:
-            result.optimization_stats = _fit_statistics(
-                coarse_stats["stages"] + result.optimization_stats["stages"])
         report["outer_em_iterations"] = [step for _, step in schedule]
         report["mesh_iterations_per_outer"] = mesh_steps
         report["em_iterations_per_outer"] = self.em_iterations

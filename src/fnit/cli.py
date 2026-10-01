@@ -666,7 +666,7 @@ def main(argv=None):
     subregions.add_argument('--deform-iterations', type=int, default=0)
     subregions.add_argument('--device', default='cuda:0')
     subregions.add_argument('--optimization', choices=('fast', 'balanced'), default='fast',
-                           help='fast coarse-to-fine fitting or balanced full-resolution schedule')
+                           help='fast fine-grid fitting or balanced fitting with a longer mesh budget')
     sr = commands.add_parser('synthsr', help='synthesize a 1 mm T1-weighted image')
     sr.add_argument('--i', '-i', required=True, help='single input image')
     sr.add_argument('--o', '-o', required=True, help='output image or directory for this image')

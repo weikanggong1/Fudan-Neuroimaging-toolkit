@@ -31,7 +31,7 @@ def main(argv=None):
     run.add_argument("--output-dir", required=True)
     run.add_argument("--structure", action="append", choices=tuple(_STRUCTURES),
                      help="可重复；旧 hippo-left/right 自动映射，默认全部四项结构")
-    run.add_argument("--device", default="cuda:0", help="cpu 或 CUDA 设备，默认 cuda:0")
+    run.add_argument("--device", help="cpu 或 CUDA；T1 默认 cuda:0，旧 norm 自动选可用设备")
     run.add_argument("--optimization", choices=("fast", "balanced"), default="fast")
     run.add_argument("--threads", type=int, default=4, help="PyTorch CPU 线程数，必须至少 1")
     args = parser.parse_args(argv)
@@ -43,11 +43,14 @@ def main(argv=None):
     if args.threads < 1:
         parser.error("--threads 必须至少为 1")
     torch.set_num_threads(args.threads)
+    device = args.device
+    if device is None:
+        device = "cuda:0" if args.t1 or torch.cuda.is_available() else "cpu"
     result = segment_subregions(
         args.t1 or args.norm, args.atlas_root,
         coarse_segmentation=args.aseg, wmparc=args.wmparc,
         structures=tuple(_STRUCTURES[name] for name in args.structure) if args.structure else "all",
-        device=args.device, optimization=args.optimization,
+        device=device, optimization=args.optimization,
         output_dir=args.output_dir, save_highres=True,
     )
     print(result.labels.get_filename() or args.output_dir)
