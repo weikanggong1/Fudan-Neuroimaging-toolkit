@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import math
 
 import torch
 
@@ -31,6 +32,7 @@ def preconditioned_conjugate_gradient(
     diagonal: torch.Tensor | None = None,
     tolerance: float = 1e-3,
     max_iterations: int = 500,
+    execution: str = "optimized",
 ):
     """Solve a symmetric positive-definite system using matrix-free PCG.
 
@@ -41,6 +43,8 @@ def preconditioned_conjugate_gradient(
     """
     if tolerance <= 0 or max_iterations < 1:
         raise ValueError("invalid PCG stopping parameters")
+    if execution not in ("reference", "optimized"):
+        raise ValueError("execution must be reference or optimized")
     if rhs.ndim != 1:
         raise ValueError("rhs must be a vector")
     if diagonal is None:
@@ -64,12 +68,28 @@ def preconditioned_conjugate_gradient(
     for iteration in range(1, max_iterations + 1):
         product = matvec(direction)
         denominator = torch.dot(direction, product)
-        if not bool(torch.isfinite(denominator)) or float(denominator) <= 0:
-            return solution, PCGReport(iteration - 1, False, relative)
-        alpha = rz / denominator
-        solution = solution + alpha * direction
-        residual = residual - alpha * product
-        relative = float(torch.linalg.vector_norm(residual) / rhs_norm)
+        if rhs.is_cuda and execution == "optimized":
+            # The denominator and convergence test both need host control.
+            # Speculate the vector update, then transfer their two scalars once.
+            # A failed denominator discards the candidate, exactly as above.
+            alpha = rz / denominator
+            candidate_solution = solution + alpha * direction
+            candidate_residual = residual - alpha * product
+            denominator_value, candidate_relative = torch.stack((
+                denominator,
+                torch.linalg.vector_norm(candidate_residual) / rhs_norm,
+            )).detach().cpu().tolist()
+            if not math.isfinite(denominator_value) or denominator_value <= 0:
+                return solution, PCGReport(iteration - 1, False, relative)
+            solution, residual = candidate_solution, candidate_residual
+            relative = candidate_relative
+        else:
+            if not bool(torch.isfinite(denominator)) or float(denominator) <= 0:
+                return solution, PCGReport(iteration - 1, False, relative)
+            alpha = rz / denominator
+            solution = solution + alpha * direction
+            residual = residual - alpha * product
+            relative = float(torch.linalg.vector_norm(residual) / rhs_norm)
         if relative <= tolerance:
             return solution, PCGReport(iteration, True, relative)
         preconditioned = inverse_diagonal * residual

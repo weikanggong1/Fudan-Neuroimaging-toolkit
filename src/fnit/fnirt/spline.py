@@ -376,11 +376,17 @@ class BendingOperator:
         *,
         device,
         dtype,
+        execution="reference",
     ):
+        if execution not in ("reference", "optimized"):
+            raise ValueError("execution must be reference or optimized")
+        self.execution = execution
         self.shape = tuple(int(value) for value in shape)
         self.knot_spacing = tuple(int(value) for value in knot_spacing)
         self.voxel_sizes = tuple(float(value) for value in voxel_sizes)
         self.control_shape = fsl_control_shape(self.shape, self.knot_spacing)
+        self._diagonal = None
+        self._normal_grams = None
         self.operators = []
         for derivatives, multiplier in _SECOND_DERIVATIVES:
             # basisfield computes regularisation over the complete support of
@@ -423,6 +429,20 @@ class BendingOperator:
         return result
 
     def normal(self, coefficients: torch.Tensor):
+        if self.execution == "optimized":
+            if self._normal_grams is None:
+                # (Bx⊗By⊗Bz).T(Bx⊗By⊗Bz) is the tensor product of
+                # three small Gram matrices. No wide dense derivative fields
+                # are needed by a PCG Hessian-vector product. All remain double.
+                self._normal_grams = tuple(
+                    (tuple(basis.T @ basis for basis in bases), multiplier)
+                    for bases, multiplier in self.operators
+                )
+            result = None
+            for grams, multiplier in self._normal_grams:
+                value = multiplier**2 * expand_coefficients(coefficients, grams)
+                result = value if result is None else result + value
+            return result
         return self.adjoint(self.forward(coefficients))
 
     def energy(self, coefficients: torch.Tensor):
@@ -432,6 +452,10 @@ class BendingOperator:
         )
 
     def diagonal(self):
+        # Geometry is fixed for this level; every LM linearisation uses the
+        # same diagonal. Keep its original contractions and roundings.
+        if self._diagonal is not None:
+            return self._diagonal
         result = None
         ones = torch.ones(
             tuple(basis.shape[0] for basis in self.operators[0][0]),
@@ -441,6 +465,7 @@ class BendingOperator:
         for bases, multiplier in self.operators:
             value = multiplier**2 * design_diagonal(ones, bases)
             result = value if result is None else result + value
+        self._diagonal = result
         return result
 
 

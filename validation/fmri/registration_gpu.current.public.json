@@ -1,0 +1,4113 @@
+{
+  "schema_version": 2,
+  "scope": "real same-input BBR and T1-FNIRT paired offline FSL validation; anonymous aggregate scalars only",
+  "baseline_repository_commit": "7952b33a9a6509183c4fe63ed7ec17bbc8403f90",
+  "precision_policy": "no FP16/BF16; existing reference precision retained; default TF32",
+  "shared_gpu_timing_note": "H100 PCIe 80 GB is shared. nvidia-smi observation includes unrelated processes and is not owned-process utilization. CUDA profiler clocks never enter cold/warm performance tables.",
+  "source_and_input_provenance": {
+    "official_init_is_final_matrix": false,
+    "matched_published_fnirt_input": true,
+    "same_fsl_init_and_wm_for_strict_bbr": true,
+    "fresh_oracles_match_pinned_matrix_voxels_headers": true,
+    "unverified_input_diagnostics_excluded": true
+  },
+  "conditions": {
+    "before_bbr": {
+      "schema_version": 1,
+      "function": "bbr",
+      "source_sha256": {
+        "src/fnit/fnirt/io.py": "ee79183709258f2e71dcd110f3c922b1cc7d20a979161ae1c86c2c627becf366",
+        "src/fnit/fnirt/__main__.py": "3d2438ae92f4746e9ffaa1f837b1fe803f6281091d1f31f8c95643716f257d9a",
+        "src/fnit/fnirt/cli.py": "c3b182b81284f377e44c6041a7d04df7ed54c1e4200b583a2eb06c94a929f822",
+        "src/fnit/fnirt/optimizer.py": "e5d5df0358acbb7c3b23ca5ff6c2e797479e5c7efee8e7fa22fe559e7b3faf6b",
+        "src/fnit/fnirt/registration.py": "d52b4f112dd0f409da96f992a614182ab6184b3559f5eb55ce2b4d61a2ee008c",
+        "src/fnit/fnirt/topology.py": "150f65a73baf796f98e6304d0c209288816ee75485be5d93032db46edeb52900",
+        "src/fnit/fnirt/_topology_triton.py": "3f61e452228a9c3dff85caff58ed1103e7b89783c86838bf1e70e322ae3f65f1",
+        "src/fnit/fnirt/spline.py": "7bb3bf5cd84da8b1c35a3e9ff2ef2d815307770c25b1228adf4e96f1dc4d6659",
+        "src/fnit/fnirt/standalone.py": "3713fcc33a1afe7fe107c8a6b752946273b695a7880d23f6144229b296052429",
+        "src/fnit/fnirt/__init__.py": "3480673ed6cbbfc38e573ac64bab6d14fabffc46585a29c74a3d916c2739294d",
+        "src/fnit/fmri/bbr.py": "a6d7b10fa49ab6ba91c3644192f7479cbf8916e4e761552fba7660b76c1e947e",
+        "src/fnit/fmri/normalization.py": "a1f6f07d3356d40727a2788bd2d54a62b6038fefbc416598463a9f37143ab307",
+        "src/fnit/flirt/search.py": "9b50908c1bead992c55255d2ed3c6cf266135e042c276b9ba8176fef03edae4c",
+        "src/fnit/flirt/batched.py": "10115b3fd51497162c2ebc1a7ae52999a4c3079810e18906ae9c0c363a457719",
+        "src/fnit/flirt/__main__.py": "03eb6210ee12d659108106a6126a870a9d5bc89ba95c116cd519e2764b0e092f",
+        "src/fnit/flirt/cli.py": "f57d65c320aee278820de2fb31cc764e7bee911e3228d3a904108d2a75e8142e",
+        "src/fnit/flirt/types.py": "55a3abf2d7ce7889c297df95289890a589d1721b9fe3b157aa90e87819ed8e21",
+        "src/fnit/flirt/standalone.py": "a5ffc8e847bfc5219ef8e068a34eb81bab4b6fceb7ea39a497eb573108a8115e",
+        "src/fnit/flirt/__init__.py": "58b1ae43c50bd2942398f272c013f5bc743ce6a78abdaab7c93eeae1949447af",
+        "src/fnit/flirt/affine_batch.py": "8aa427ea1b185deea2ff2295e01c972bb371cb5a4b23504ce13ef79ca1d6155f",
+        "src/fnit/flirt/core.py": "21ee44e0ae734d6c90bf78e16e58bd1035634c60d10fc4a4c97529815a283a59",
+        "src/fnit/flirt/coordinates.py": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e",
+        "src/fnit/flirt/_batched_cuda.py": "c6ac99f6b0499c2b081969448dc9492906232daac247477edff0cb00ac43cd74",
+        "src/fnit/_nib.py": "568d113432c1a0c50a3b0b635188173e69be1c7436d851de2568bca9b55ab94e"
+      },
+      "benchmark_tool_sha256": "bcb5edf37ea9e033c1b0f11b4ea8ccbb961372b0094d980822f53d2839ec3d51",
+      "support_tool_sha256": "a20768489533889d50ddfaadead5c32f3569b2198b4032f37e9c6a2e0976f870",
+      "environment": {
+        "torch": "2.5.1",
+        "cuda_runtime": "11.8",
+        "gpu_name": "NVIDIA H100 PCIe"
+      },
+      "timing_scope": "complete function including ArrayProxy reads/decompression and CPU output conversion; excludes output persistence and offline metrics; shared GPU",
+      "scientific_conditions": {
+        "fnirt_config": null,
+        "same_fsl_initial_affine": true,
+        "same_fsl_wmseg": true,
+        "wm_header": "legacy",
+        "affine_geometry": "affine_norm",
+        "fnirt_blur_reference": false,
+        "half_precision": false,
+        "default_tf32": true
+      },
+      "runs": [
+        {
+          "condition": "cold_0",
+          "wall_seconds": 11.155671624001116,
+          "peak_allocated_bytes": 60014592,
+          "peak_reserved_bytes": 79691776,
+          "process_peak_cpu_rss_kb": 985720,
+          "whole_gpu_observation": {
+            "scope": "whole GPU; includes unrelated processes",
+            "sample_interval_seconds": 1.0,
+            "samples": 11,
+            "gpu_utilization_percent": {
+              "mean": 95.45454545454545,
+              "median": 100.0,
+              "p95": 100.0,
+              "minimum": 73.0,
+              "maximum": 100.0
+            },
+            "whole_gpu_used_mib": {
+              "mean": 25211.636363636364,
+              "median": 25240.0,
+              "p95": 25240.0,
+              "minimum": 24928.0,
+              "maximum": 25240.0
+            },
+            "uuid_mapping_available": true
+          },
+          "measurement": {
+            "phase_timings": {
+              "bbr_boundary_preparation": {
+                "calls": 1,
+                "wall_seconds": 0.7057862058281898,
+                "exclusive_wall_seconds": 0.7057862058281898
+              },
+              "bbr_cost_evaluation": {
+                "calls": 1754,
+                "wall_seconds": 9.974987166468054,
+                "exclusive_wall_seconds": 9.974987166468054
+              },
+              "bbr_coarse_search": {
+                "calls": 13,
+                "wall_seconds": 4.134262121282518,
+                "exclusive_wall_seconds": 0.03771787090227008
+              },
+              "bbr_local_step_200": {
+                "calls": 1,
+                "wall_seconds": 3.8231063159182668,
+                "exclusive_wall_seconds": 0.06206141319125891
+              },
+              "bbr_local_step_2": {
+                "calls": 1,
+                "wall_seconds": 2.0518742809072137,
+                "exclusive_wall_seconds": 0.03204214479774237
+              },
+              "bbr_final_resampling": {
+                "calls": 1,
+                "wall_seconds": 0.2927114558406174,
+                "exclusive_wall_seconds": 0.29266949417069554
+              }
+            },
+            "operation_counts": {
+              "bbr_cost_evaluation": 1754,
+              "bbr_local_calls": 2
+            },
+            "cuda_tensor_api_calls": {},
+            "actual_cuda_event_counts": {},
+            "profiled_cuda_device_time_us": {},
+            "profile_windows": 0,
+            "profiler_scope": "not profiled",
+            "phase_timing_scope": "nested CPU wall clocks, no extra GPU fences; dispatched GPU work may finish in subsequent phases",
+            "instrumentation_changes_timing": false
+          },
+          "paired": {
+            "image": {
+              "pearson_r": 0.999668937534145,
+              "mae": 87.09652812950408,
+              "rmse": 167.52919559428238
+            },
+            "inverse_fixed_brain_grid_displacement_mm": {
+              "mean": 0.09056265649246165,
+              "median": 0.09206456188178538,
+              "p95": 0.14116505532355975,
+              "rms": 0.09618731397897122,
+              "maximum": 0.16420011195328513
+            },
+            "fnit_initial_cost": 0.4459139406681061,
+            "fnit_final_cost": 0.33505651354789734,
+            "official_matrix_evaluated_with_fnit_cost": 0.3357319235801697,
+            "grid_checks": {
+              "reference_affine_matches": true,
+              "official_grid_matches": true,
+              "dtype_equal": true
+            },
+            "boundary_points": 287094
+          }
+        },
+        {
+          "condition": "warm_1",
+          "wall_seconds": 10.859863667748868,
+          "peak_allocated_bytes": 60014592,
+          "peak_reserved_bytes": 79691776,
+          "process_peak_cpu_rss_kb": 990084,
+          "whole_gpu_observation": {
+            "scope": "whole GPU; includes unrelated processes",
+            "sample_interval_seconds": 1.0,
+            "samples": 11,
+            "gpu_utilization_percent": {
+              "mean": 97.36363636363636,
+              "median": 100.0,
+              "p95": 100.0,
+              "minimum": 71.0,
+              "maximum": 100.0
+            },
+            "whole_gpu_used_mib": {
+              "mean": 25260.0,
+              "median": 25260.0,
+              "p95": 25260.0,
+              "minimum": 25260.0,
+              "maximum": 25260.0
+            },
+            "uuid_mapping_available": true
+          },
+          "measurement": {
+            "phase_timings": {
+              "bbr_boundary_preparation": {
+                "calls": 1,
+                "wall_seconds": 0.6216445560567081,
+                "exclusive_wall_seconds": 0.6216445560567081
+              },
+              "bbr_cost_evaluation": {
+                "calls": 1754,
+                "wall_seconds": 9.756870990153402,
+                "exclusive_wall_seconds": 9.756870990153402
+              },
+              "bbr_coarse_search": {
+                "calls": 13,
+                "wall_seconds": 4.257697090972215,
+                "exclusive_wall_seconds": 0.03952660644426942
+              },
+              "bbr_local_step_200": {
+                "calls": 1,
+                "wall_seconds": 3.9278846671804786,
+                "exclusive_wall_seconds": 0.05791444703936577
+              },
+              "bbr_local_step_2": {
+                "calls": 1,
+                "wall_seconds": 1.6913223788142204,
+                "exclusive_wall_seconds": 0.030671802815049887
+              },
+              "bbr_final_resampling": {
+                "calls": 1,
+                "wall_seconds": 0.3310005380772054,
+                "exclusive_wall_seconds": 0.33094375720247626
+              }
+            },
+            "operation_counts": {
+              "bbr_cost_evaluation": 1754,
+              "bbr_local_calls": 2
+            },
+            "cuda_tensor_api_calls": {},
+            "actual_cuda_event_counts": {},
+            "profiled_cuda_device_time_us": {},
+            "profile_windows": 0,
+            "profiler_scope": "not profiled",
+            "phase_timing_scope": "nested CPU wall clocks, no extra GPU fences; dispatched GPU work may finish in subsequent phases",
+            "instrumentation_changes_timing": false
+          },
+          "paired": {
+            "image": {
+              "pearson_r": 0.999668937534145,
+              "mae": 87.09652812950408,
+              "rmse": 167.52919559428238
+            },
+            "inverse_fixed_brain_grid_displacement_mm": {
+              "mean": 0.09056265649246165,
+              "median": 0.09206456188178538,
+              "p95": 0.14116505532355975,
+              "rms": 0.09618731397897122,
+              "maximum": 0.16420011195328513
+            },
+            "fnit_initial_cost": 0.4459139406681061,
+            "fnit_final_cost": 0.33505651354789734,
+            "official_matrix_evaluated_with_fnit_cost": 0.3357319235801697,
+            "grid_checks": {
+              "reference_affine_matches": true,
+              "official_grid_matches": true,
+              "dtype_equal": true
+            },
+            "boundary_points": 287094
+          }
+        }
+      ],
+      "profile": {
+        "condition": "profiled",
+        "wall_seconds": 19.532274802215397,
+        "peak_allocated_bytes": 60014592,
+        "peak_reserved_bytes": 79691776,
+        "process_peak_cpu_rss_kb": 1080436,
+        "whole_gpu_observation": {
+          "scope": "whole GPU; includes unrelated processes",
+          "sample_interval_seconds": 1.0,
+          "samples": 18,
+          "gpu_utilization_percent": {
+            "mean": 98.0,
+            "median": 100.0,
+            "p95": 100.0,
+            "minimum": 64.0,
+            "maximum": 100.0
+          },
+          "whole_gpu_used_mib": {
+            "mean": 25260.0,
+            "median": 25260.0,
+            "p95": 25260.0,
+            "minimum": 25260.0,
+            "maximum": 25260.0
+          },
+          "uuid_mapping_available": true
+        },
+        "measurement": {
+          "phase_timings": {
+            "bbr_boundary_preparation": {
+              "calls": 1,
+              "wall_seconds": 0.6570626231841743,
+              "exclusive_wall_seconds": 0.6570626231841743
+            },
+            "bbr_cost_evaluation": {
+              "calls": 1754,
+              "wall_seconds": 12.375303086824715,
+              "exclusive_wall_seconds": 12.375303086824715
+            },
+            "bbr_coarse_search": {
+              "calls": 13,
+              "wall_seconds": 7.263854391872883,
+              "exclusive_wall_seconds": 2.392286299727857
+            },
+            "bbr_local_step_200": {
+              "calls": 1,
+              "wall_seconds": 7.241404626984149,
+              "exclusive_wall_seconds": 2.331755661405623
+            },
+            "bbr_local_step_2": {
+              "calls": 1,
+              "wall_seconds": 3.7957734279334545,
+              "exclusive_wall_seconds": 1.215090713929385
+            },
+            "bbr_final_resampling": {
+              "calls": 1,
+              "wall_seconds": 0.27182475570589304,
+              "exclusive_wall_seconds": 0.27178174164146185
+            }
+          },
+          "operation_counts": {
+            "bbr_cost_evaluation": 1754,
+            "bbr_local_calls": 2
+          },
+          "cuda_tensor_api_calls": {
+            "__float__": 1754,
+            "cpu": 12
+          },
+          "actual_cuda_event_counts": {
+            "cudaMemcpyAsync": 5289,
+            "H2D": 3523,
+            "cudaStreamSynchronize": 5289,
+            "cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags": 1754,
+            "cudaFuncSetAttribute": 1754,
+            "cudaLaunchKernel": 53672,
+            "cudaMemsetAsync": 357,
+            "kernel": 53672,
+            "device_memset": 357,
+            "D2H": 1766,
+            "cudaDeviceSynchronize": 29
+          },
+          "profiled_cuda_device_time_us": {
+            "H2D": 9674.11600000006,
+            "kernel": 174631.95499999274,
+            "device_memset": 378.1889999995001,
+            "D2H": 4487.066999999297
+          },
+          "profile_windows": 28,
+          "profiler_scope": "complete CUDA-only registration; window fences included",
+          "phase_timing_scope": "nested CPU wall clocks, no extra GPU fences; dispatched GPU work may finish in subsequent phases",
+          "instrumentation_changes_timing": true
+        },
+        "paired": {
+          "image": {
+            "pearson_r": 0.999668937534145,
+            "mae": 87.09652812950408,
+            "rmse": 167.52919559428238
+          },
+          "inverse_fixed_brain_grid_displacement_mm": {
+            "mean": 0.09056265649246165,
+            "median": 0.09206456188178538,
+            "p95": 0.14116505532355975,
+            "rms": 0.09618731397897122,
+            "maximum": 0.16420011195328513
+          },
+          "fnit_initial_cost": 0.4459139406681061,
+          "fnit_final_cost": 0.33505651354789734,
+          "official_matrix_evaluated_with_fnit_cost": 0.3357319235801697,
+          "grid_checks": {
+            "reference_affine_matches": true,
+            "official_grid_matches": true,
+            "dtype_equal": true
+          },
+          "boundary_points": 287094
+        }
+      },
+      "source_snapshot_matches_reported_hashes": true,
+      "historical_scope_string_corrected_without_changing_measurement": true
+    },
+    "before_bbr_chain": {
+      "schema_version": 1,
+      "function": "bbr_chain",
+      "source_sha256": {
+        "src/fnit/fnirt/io.py": "ee79183709258f2e71dcd110f3c922b1cc7d20a979161ae1c86c2c627becf366",
+        "src/fnit/fnirt/__main__.py": "3d2438ae92f4746e9ffaa1f837b1fe803f6281091d1f31f8c95643716f257d9a",
+        "src/fnit/fnirt/cli.py": "c3b182b81284f377e44c6041a7d04df7ed54c1e4200b583a2eb06c94a929f822",
+        "src/fnit/fnirt/optimizer.py": "e5d5df0358acbb7c3b23ca5ff6c2e797479e5c7efee8e7fa22fe559e7b3faf6b",
+        "src/fnit/fnirt/registration.py": "d52b4f112dd0f409da96f992a614182ab6184b3559f5eb55ce2b4d61a2ee008c",
+        "src/fnit/fnirt/topology.py": "150f65a73baf796f98e6304d0c209288816ee75485be5d93032db46edeb52900",
+        "src/fnit/fnirt/_topology_triton.py": "3f61e452228a9c3dff85caff58ed1103e7b89783c86838bf1e70e322ae3f65f1",
+        "src/fnit/fnirt/spline.py": "7bb3bf5cd84da8b1c35a3e9ff2ef2d815307770c25b1228adf4e96f1dc4d6659",
+        "src/fnit/fnirt/standalone.py": "3713fcc33a1afe7fe107c8a6b752946273b695a7880d23f6144229b296052429",
+        "src/fnit/fnirt/__init__.py": "3480673ed6cbbfc38e573ac64bab6d14fabffc46585a29c74a3d916c2739294d",
+        "src/fnit/fmri/bbr.py": "a6d7b10fa49ab6ba91c3644192f7479cbf8916e4e761552fba7660b76c1e947e",
+        "src/fnit/fmri/normalization.py": "a1f6f07d3356d40727a2788bd2d54a62b6038fefbc416598463a9f37143ab307",
+        "src/fnit/flirt/search.py": "9b50908c1bead992c55255d2ed3c6cf266135e042c276b9ba8176fef03edae4c",
+        "src/fnit/flirt/batched.py": "10115b3fd51497162c2ebc1a7ae52999a4c3079810e18906ae9c0c363a457719",
+        "src/fnit/flirt/__main__.py": "03eb6210ee12d659108106a6126a870a9d5bc89ba95c116cd519e2764b0e092f",
+        "src/fnit/flirt/cli.py": "f57d65c320aee278820de2fb31cc764e7bee911e3228d3a904108d2a75e8142e",
+        "src/fnit/flirt/types.py": "55a3abf2d7ce7889c297df95289890a589d1721b9fe3b157aa90e87819ed8e21",
+        "src/fnit/flirt/standalone.py": "a5ffc8e847bfc5219ef8e068a34eb81bab4b6fceb7ea39a497eb573108a8115e",
+        "src/fnit/flirt/__init__.py": "58b1ae43c50bd2942398f272c013f5bc743ce6a78abdaab7c93eeae1949447af",
+        "src/fnit/flirt/affine_batch.py": "8aa427ea1b185deea2ff2295e01c972bb371cb5a4b23504ce13ef79ca1d6155f",
+        "src/fnit/flirt/core.py": "21ee44e0ae734d6c90bf78e16e58bd1035634c60d10fc4a4c97529815a283a59",
+        "src/fnit/flirt/coordinates.py": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e",
+        "src/fnit/flirt/_batched_cuda.py": "c6ac99f6b0499c2b081969448dc9492906232daac247477edff0cb00ac43cd74",
+        "src/fnit/_nib.py": "568d113432c1a0c50a3b0b635188173e69be1c7436d851de2568bca9b55ab94e"
+      },
+      "benchmark_tool_sha256": "b84d79550b0d1aa89eda7ebeb478826ef3d626d69af2b9732652ddce4438b587",
+      "support_tool_sha256": "a20768489533889d50ddfaadead5c32f3569b2198b4032f37e9c6a2e0976f870",
+      "environment": {
+        "torch": "2.5.1",
+        "cuda_runtime": "11.8",
+        "gpu_name": "NVIDIA H100 PCIe"
+      },
+      "timing_scope": "complete function including ArrayProxy reads/decompression and CPU output conversion; excludes output persistence and offline metrics; shared GPU",
+      "scientific_conditions": {
+        "fnirt_config": null,
+        "same_fsl_initial_affine": false,
+        "same_fsl_wmseg": false,
+        "half_precision": false,
+        "default_tf32": true
+      },
+      "runs": [
+        {
+          "condition": "cold_0",
+          "wall_seconds": 17.507178626023233,
+          "peak_allocated_bytes": 1325621760,
+          "peak_reserved_bytes": 1904214016,
+          "process_peak_cpu_rss_kb": 1502396,
+          "whole_gpu_observation": {
+            "scope": "whole GPU; includes unrelated processes",
+            "sample_interval_seconds": 1.0,
+            "samples": 17,
+            "gpu_utilization_percent": {
+              "mean": 96.58823529411765,
+              "median": 100.0,
+              "p95": 100.0,
+              "minimum": 71.0,
+              "maximum": 100.0
+            },
+            "whole_gpu_used_mib": {
+              "mean": 26715.41176470588,
+              "median": 26932.0,
+              "p95": 26932.0,
+              "minimum": 24848.0,
+              "maximum": 26932.0
+            },
+            "uuid_mapping_available": true
+          },
+          "measurement": {
+            "phase_timings": {
+              "anatomical_fast": {
+                "calls": 1,
+                "wall_seconds": 2.1777120120823383,
+                "exclusive_wall_seconds": 2.1777120120823383
+              },
+              "bbr_initial_flirt": {
+                "calls": 1,
+                "wall_seconds": 4.240569733083248,
+                "exclusive_wall_seconds": 4.240569733083248
+              },
+              "bbr_boundary_preparation": {
+                "calls": 1,
+                "wall_seconds": 0.5049765221774578,
+                "exclusive_wall_seconds": 0.5049765221774578
+              },
+              "bbr_cost_evaluation": {
+                "calls": 1965,
+                "wall_seconds": 10.111777837853879,
+                "exclusive_wall_seconds": 10.111777837853879
+              },
+              "bbr_coarse_search": {
+                "calls": 13,
+                "wall_seconds": 3.607667994685471,
+                "exclusive_wall_seconds": 0.0383557896129787
+              },
+              "bbr_local_step_200": {
+                "calls": 1,
+                "wall_seconds": 4.957547629252076,
+                "exclusive_wall_seconds": 0.07652474660426378
+              },
+              "bbr_local_step_2": {
+                "calls": 1,
+                "wall_seconds": 1.679790756199509,
+                "exclusive_wall_seconds": 0.03388411924242973
+              },
+              "bbr_final_resampling": {
+                "calls": 1,
+                "wall_seconds": 0.2646392728202045,
+                "exclusive_wall_seconds": 0.26460328744724393
+              },
+              "bbr_refinement": {
+                "calls": 1,
+                "wall_seconds": 11.05666587408632,
+                "exclusive_wall_seconds": 0.026543571148067713
+              }
+            },
+            "operation_counts": {
+              "bbr_cost_evaluation": 1965,
+              "bbr_local_calls": 2
+            },
+            "cuda_tensor_api_calls": {},
+            "actual_cuda_event_counts": {},
+            "profiled_cuda_device_time_us": {},
+            "profile_windows": 0,
+            "profiler_scope": "not profiled",
+            "phase_timing_scope": "nested CPU wall clocks, no extra GPU fences; dispatched GPU work may finish in subsequent phases",
+            "instrumentation_changes_timing": false
+          },
+          "paired": {
+            "image": {
+              "pearson_r": 0.9995740159872644,
+              "mae": 98.21202909300237,
+              "rmse": 190.02579020553497
+            },
+            "inverse_fixed_brain_grid_displacement_mm": {
+              "mean": 0.09994384725107873,
+              "median": 0.10058906874946891,
+              "p95": 0.15916088942555506,
+              "rms": 0.10645282518626595,
+              "maximum": 0.19101460903608414
+            },
+            "fnit_initial_cost": 0.38892996311187744,
+            "fnit_final_cost": 0.341219037771225,
+            "official_matrix_evaluated_with_fnit_cost": 0.34188583493232727,
+            "grid_checks": {
+              "reference_affine_matches": true,
+              "official_grid_matches": true,
+              "dtype_equal": true
+            },
+            "boundary_points": 289842
+          }
+        },
+        {
+          "condition": "warm_1",
+          "wall_seconds": 14.96208668500185,
+          "peak_allocated_bytes": 1359528448,
+          "peak_reserved_bytes": 1904214016,
+          "process_peak_cpu_rss_kb": 1588628,
+          "whole_gpu_observation": {
+            "scope": "whole GPU; includes unrelated processes",
+            "sample_interval_seconds": 1.0,
+            "samples": 14,
+            "gpu_utilization_percent": {
+              "mean": 97.71428571428571,
+              "median": 100.0,
+              "p95": 100.0,
+              "minimum": 68.0,
+              "maximum": 100.0
+            },
+            "whole_gpu_used_mib": {
+              "mean": 26932.0,
+              "median": 26932.0,
+              "p95": 26932.0,
+              "minimum": 26932.0,
+              "maximum": 26932.0
+            },
+            "uuid_mapping_available": true
+          },
+          "measurement": {
+            "phase_timings": {
+              "anatomical_fast": {
+                "calls": 1,
+                "wall_seconds": 1.2720904150046408,
+                "exclusive_wall_seconds": 1.2720904150046408
+              },
+              "bbr_initial_flirt": {
+                "calls": 1,
+                "wall_seconds": 2.752957353834063,
+                "exclusive_wall_seconds": 2.752957353834063
+              },
+              "bbr_boundary_preparation": {
+                "calls": 1,
+                "wall_seconds": 0.5240501402877271,
+                "exclusive_wall_seconds": 0.5240501402877271
+              },
+              "bbr_cost_evaluation": {
+                "calls": 1965,
+                "wall_seconds": 9.950326926074922,
+                "exclusive_wall_seconds": 9.950326926074922
+              },
+              "bbr_coarse_search": {
+                "calls": 13,
+                "wall_seconds": 3.8986698342487216,
+                "exclusive_wall_seconds": 0.03971748612821102
+              },
+              "bbr_local_step_200": {
+                "calls": 1,
+                "wall_seconds": 4.457452909089625,
+                "exclusive_wall_seconds": 0.06950366171076894
+              },
+              "bbr_local_step_2": {
+                "calls": 1,
+                "wall_seconds": 1.7212543790228665,
+                "exclusive_wall_seconds": 0.03176469914615154
+              },
+              "bbr_final_resampling": {
+                "calls": 1,
+                "wall_seconds": 0.2819800260476768,
+                "exclusive_wall_seconds": 0.2819404141046107
+              },
+              "bbr_refinement": {
+                "calls": 1,
+                "wall_seconds": 10.920162692200392,
+                "exclusive_wall_seconds": 0.0228593647480011
+              }
+            },
+            "operation_counts": {
+              "bbr_cost_evaluation": 1965,
+              "bbr_local_calls": 2
+            },
+            "cuda_tensor_api_calls": {},
+            "actual_cuda_event_counts": {},
+            "profiled_cuda_device_time_us": {},
+            "profile_windows": 0,
+            "profiler_scope": "not profiled",
+            "phase_timing_scope": "nested CPU wall clocks, no extra GPU fences; dispatched GPU work may finish in subsequent phases",
+            "instrumentation_changes_timing": false
+          },
+          "paired": {
+            "image": {
+              "pearson_r": 0.9995740159872644,
+              "mae": 98.21202909300237,
+              "rmse": 190.02579020553497
+            },
+            "inverse_fixed_brain_grid_displacement_mm": {
+              "mean": 0.09994384725107873,
+              "median": 0.10058906874946891,
+              "p95": 0.15916088942555506,
+              "rms": 0.10645282518626595,
+              "maximum": 0.19101460903608414
+            },
+            "fnit_initial_cost": 0.38892996311187744,
+            "fnit_final_cost": 0.341219037771225,
+            "official_matrix_evaluated_with_fnit_cost": 0.34188583493232727,
+            "grid_checks": {
+              "reference_affine_matches": true,
+              "official_grid_matches": true,
+              "dtype_equal": true
+            },
+            "boundary_points": 289842
+          }
+        }
+      ],
+      "profile": {
+        "condition": "profiled",
+        "wall_seconds": 29.56585509609431,
+        "peak_allocated_bytes": 1359528448,
+        "peak_reserved_bytes": 1904214016,
+        "process_peak_cpu_rss_kb": 2074196,
+        "whole_gpu_observation": {
+          "scope": "whole GPU; includes unrelated processes",
+          "sample_interval_seconds": 1.0,
+          "samples": 27,
+          "gpu_utilization_percent": {
+            "mean": 96.22222222222223,
+            "median": 100.0,
+            "p95": 100.0,
+            "minimum": 47.0,
+            "maximum": 100.0
+          },
+          "whole_gpu_used_mib": {
+            "mean": 26932.0,
+            "median": 26932.0,
+            "p95": 26932.0,
+            "minimum": 26932.0,
+            "maximum": 26932.0
+          },
+          "uuid_mapping_available": true
+        },
+        "measurement": {
+          "phase_timings": {
+            "anatomical_fast": {
+              "calls": 1,
+              "wall_seconds": 1.3750682026147842,
+              "exclusive_wall_seconds": 1.3750682026147842
+            },
+            "bbr_initial_flirt": {
+              "calls": 1,
+              "wall_seconds": 2.9847941887564957,
+              "exclusive_wall_seconds": 2.9847941887564957
+            },
+            "bbr_boundary_preparation": {
+              "calls": 1,
+              "wall_seconds": 0.4933470799587667,
+              "exclusive_wall_seconds": 0.4933470799587667
+            },
+            "bbr_cost_evaluation": {
+              "calls": 1965,
+              "wall_seconds": 13.145907274447381,
+              "exclusive_wall_seconds": 13.145907274447381
+            },
+            "bbr_coarse_search": {
+              "calls": 13,
+              "wall_seconds": 12.1993307499215,
+              "exclusive_wall_seconds": 6.958277109079063
+            },
+            "bbr_local_step_200": {
+              "calls": 1,
+              "wall_seconds": 8.215930464211851,
+              "exclusive_wall_seconds": 2.7674186839722097
+            },
+            "bbr_local_step_2": {
+              "calls": 1,
+              "wall_seconds": 3.6928265341557562,
+              "exclusive_wall_seconds": 1.2445126646198332
+            },
+            "bbr_final_resampling": {
+              "calls": 1,
+              "wall_seconds": 0.2653263183310628,
+              "exclusive_wall_seconds": 0.26528987335041165
+            },
+            "bbr_refinement": {
+              "calls": 1,
+              "wall_seconds": 24.896670664660633,
+              "exclusive_wall_seconds": 0.0219179792329669
+            }
+          },
+          "operation_counts": {
+            "bbr_cost_evaluation": 1965,
+            "bbr_local_calls": 2
+          },
+          "cuda_tensor_api_calls": {
+            "__bool__": 12,
+            "cpu": 454,
+            "__float__": 1975
+          },
+          "actual_cuda_event_counts": {
+            "cudaMemcpyAsync": 7517,
+            "H2D": 4454,
+            "cudaStreamSynchronize": 6642,
+            "cudaLaunchKernel": 104104,
+            "cudaMemsetAsync": 536,
+            "kernel": 105750,
+            "device_memset": 536,
+            "D2H": 2624,
+            "cudaDeviceGetAttribute": 1239,
+            "cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags": 3671,
+            "cudaPeekAtLastError": 5760,
+            "D2D": 439,
+            "cudaEventRecord": 466,
+            "cudaStreamIsCapturing": 30,
+            "cudaStreamGetPriority": 30,
+            "cudaDeviceGetStreamPriorityRange": 30,
+            "cudaLaunchKernelExC": 30,
+            "cudaFuncGetAttributes": 1,
+            "cudaMemGetInfo": 4,
+            "cudaPointerGetAttributes": 436,
+            "cuLaunchKernel": 1616,
+            "cudaEventQuery": 445,
+            "cudaFuncSetAttribute": 1971,
+            "cudaDeviceSynchronize": 32
+          },
+          "profiled_cuda_device_time_us": {
+            "H2D": 15067.288000003993,
+            "kernel": 861461.8530000269,
+            "device_memset": 559.5850000007008,
+            "D2H": 154677.65199999622,
+            "D2D": 834.2619999938179
+          },
+          "profile_windows": 31,
+          "profiler_scope": "complete CUDA-only registration; window fences included",
+          "phase_timing_scope": "nested CPU wall clocks, no extra GPU fences; dispatched GPU work may finish in subsequent phases",
+          "instrumentation_changes_timing": true
+        },
+        "paired": {
+          "image": {
+            "pearson_r": 0.9995740159872644,
+            "mae": 98.21202909300237,
+            "rmse": 190.02579020553497
+          },
+          "inverse_fixed_brain_grid_displacement_mm": {
+            "mean": 0.09994384725107873,
+            "median": 0.10058906874946891,
+            "p95": 0.15916088942555506,
+            "rms": 0.10645282518626595,
+            "maximum": 0.19101460903608414
+          },
+          "fnit_initial_cost": 0.38892996311187744,
+          "fnit_final_cost": 0.341219037771225,
+          "official_matrix_evaluated_with_fnit_cost": 0.34188583493232727,
+          "grid_checks": {
+            "reference_affine_matches": true,
+            "official_grid_matches": true,
+            "dtype_equal": true
+          },
+          "boundary_points": 289842
+        }
+      },
+      "source_snapshot_matches_reported_hashes": true,
+      "historical_scope_string_corrected_without_changing_measurement": true
+    },
+    "before_fnirt": {
+      "schema_version": 1,
+      "function": "fnirt",
+      "source_sha256": {
+        "src/fnit/fnirt/io.py": "ee79183709258f2e71dcd110f3c922b1cc7d20a979161ae1c86c2c627becf366",
+        "src/fnit/fnirt/__main__.py": "3d2438ae92f4746e9ffaa1f837b1fe803f6281091d1f31f8c95643716f257d9a",
+        "src/fnit/fnirt/cli.py": "c3b182b81284f377e44c6041a7d04df7ed54c1e4200b583a2eb06c94a929f822",
+        "src/fnit/fnirt/optimizer.py": "e5d5df0358acbb7c3b23ca5ff6c2e797479e5c7efee8e7fa22fe559e7b3faf6b",
+        "src/fnit/fnirt/registration.py": "d52b4f112dd0f409da96f992a614182ab6184b3559f5eb55ce2b4d61a2ee008c",
+        "src/fnit/fnirt/topology.py": "150f65a73baf796f98e6304d0c209288816ee75485be5d93032db46edeb52900",
+        "src/fnit/fnirt/_topology_triton.py": "3f61e452228a9c3dff85caff58ed1103e7b89783c86838bf1e70e322ae3f65f1",
+        "src/fnit/fnirt/spline.py": "7bb3bf5cd84da8b1c35a3e9ff2ef2d815307770c25b1228adf4e96f1dc4d6659",
+        "src/fnit/fnirt/standalone.py": "3713fcc33a1afe7fe107c8a6b752946273b695a7880d23f6144229b296052429",
+        "src/fnit/fnirt/__init__.py": "3480673ed6cbbfc38e573ac64bab6d14fabffc46585a29c74a3d916c2739294d",
+        "src/fnit/fmri/bbr.py": "a6d7b10fa49ab6ba91c3644192f7479cbf8916e4e761552fba7660b76c1e947e",
+        "src/fnit/fmri/normalization.py": "a1f6f07d3356d40727a2788bd2d54a62b6038fefbc416598463a9f37143ab307",
+        "src/fnit/flirt/search.py": "9b50908c1bead992c55255d2ed3c6cf266135e042c276b9ba8176fef03edae4c",
+        "src/fnit/flirt/batched.py": "10115b3fd51497162c2ebc1a7ae52999a4c3079810e18906ae9c0c363a457719",
+        "src/fnit/flirt/__main__.py": "03eb6210ee12d659108106a6126a870a9d5bc89ba95c116cd519e2764b0e092f",
+        "src/fnit/flirt/cli.py": "f57d65c320aee278820de2fb31cc764e7bee911e3228d3a904108d2a75e8142e",
+        "src/fnit/flirt/types.py": "55a3abf2d7ce7889c297df95289890a589d1721b9fe3b157aa90e87819ed8e21",
+        "src/fnit/flirt/standalone.py": "a5ffc8e847bfc5219ef8e068a34eb81bab4b6fceb7ea39a497eb573108a8115e",
+        "src/fnit/flirt/__init__.py": "58b1ae43c50bd2942398f272c013f5bc743ce6a78abdaab7c93eeae1949447af",
+        "src/fnit/flirt/affine_batch.py": "8aa427ea1b185deea2ff2295e01c972bb371cb5a4b23504ce13ef79ca1d6155f",
+        "src/fnit/flirt/core.py": "21ee44e0ae734d6c90bf78e16e58bd1035634c60d10fc4a4c97529815a283a59",
+        "src/fnit/flirt/coordinates.py": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e",
+        "src/fnit/flirt/_batched_cuda.py": "c6ac99f6b0499c2b081969448dc9492906232daac247477edff0cb00ac43cd74",
+        "src/fnit/_nib.py": "568d113432c1a0c50a3b0b635188173e69be1c7436d851de2568bca9b55ab94e"
+      },
+      "benchmark_tool_sha256": "bcb5edf37ea9e033c1b0f11b4ea8ccbb961372b0094d980822f53d2839ec3d51",
+      "support_tool_sha256": "a20768489533889d50ddfaadead5c32f3569b2198b4032f37e9c6a2e0976f870",
+      "environment": {
+        "torch": "2.5.1",
+        "cuda_runtime": "11.8",
+        "gpu_name": "NVIDIA H100 PCIe"
+      },
+      "timing_scope": "complete function including ArrayProxy reads/decompression and CPU output conversion; excludes output persistence and offline metrics; shared GPU",
+      "scientific_conditions": {
+        "fnirt_config": "t1",
+        "same_fsl_initial_affine": true,
+        "same_fsl_wmseg": false,
+        "wm_header": "legacy",
+        "affine_geometry": "affine_norm",
+        "fnirt_blur_reference": false,
+        "half_precision": false,
+        "default_tf32": true
+      },
+      "runs": [
+        {
+          "condition": "cold_0",
+          "wall_seconds": 69.35012290114537,
+          "peak_allocated_bytes": 1091028480,
+          "peak_reserved_bytes": 1474297856,
+          "process_peak_cpu_rss_kb": 914608,
+          "whole_gpu_observation": {
+            "scope": "whole GPU; includes unrelated processes",
+            "sample_interval_seconds": 1.0,
+            "samples": 64,
+            "gpu_utilization_percent": {
+              "mean": 98.453125,
+              "median": 100.0,
+              "p95": 100.0,
+              "minimum": 71.0,
+              "maximum": 100.0
+            },
+            "whole_gpu_used_mib": {
+              "mean": 26995.65625,
+              "median": 26704.0,
+              "p95": 27618.0,
+              "minimum": 24928.0,
+              "maximum": 27618.0
+            },
+            "uuid_mapping_available": true
+          },
+          "measurement": {
+            "phase_timings": {
+              "fnirt_smoothing": {
+                "calls": 18,
+                "wall_seconds": 0.10113050229847431,
+                "exclusive_wall_seconds": 0.10113050229847431
+              },
+              "fnirt_expand_coefficients": {
+                "calls": 20546,
+                "wall_seconds": 3.042345432564616,
+                "exclusive_wall_seconds": 3.042345432564616
+              },
+              "fnirt_cost_evaluation": {
+                "calls": 100,
+                "wall_seconds": 1.4321780614554882,
+                "exclusive_wall_seconds": 1.3104933951981366
+              },
+              "fnirt_adjoint_field": {
+                "calls": 20347,
+                "wall_seconds": 2.429991578683257,
+                "exclusive_wall_seconds": 2.429991578683257
+              },
+              "fnirt_design_diagonal": {
+                "calls": 178,
+                "wall_seconds": 0.025018757209181786,
+                "exclusive_wall_seconds": 0.025018757209181786
+              },
+              "fnirt_linearization": {
+                "calls": 47,
+                "wall_seconds": 0.6825948539189994,
+                "exclusive_wall_seconds": 0.14230703422799706
+              },
+              "fnirt_joint_linearization": {
+                "calls": 47,
+                "wall_seconds": 0.8823023959994316,
+                "exclusive_wall_seconds": 0.1751845828257501
+              },
+              "fnirt_pcg_matvec": {
+                "calls": 7175,
+                "wall_seconds": 32.296805816702545,
+                "exclusive_wall_seconds": 27.00851657288149
+              },
+              "fnirt_pcg": {
+                "calls": 47,
+                "wall_seconds": 65.56050844723359,
+                "exclusive_wall_seconds": 33.26370263053104
+              },
+              "fnirt_topology": {
+                "calls": 6,
+                "wall_seconds": 0.037077708169817924,
+                "exclusive_wall_seconds": 0.034017644822597504
+              }
+            },
+            "operation_counts": {
+              "fnirt_cost_evaluation": 100,
+              "fnirt_pcg_matvec": 7175
+            },
+            "cuda_tensor_api_calls": {},
+            "actual_cuda_event_counts": {},
+            "profiled_cuda_device_time_us": {},
+            "profile_windows": 0,
+            "profiler_scope": "not profiled",
+            "phase_timing_scope": "nested CPU wall clocks, no extra GPU fences; dispatched GPU work may finish in subsequent phases",
+            "instrumentation_changes_timing": false
+          },
+          "paired": {
+            "image": {
+              "pearson_r": 0.9978417313178952,
+              "mae": 4.979736334630085,
+              "rmse": 16.371966625125303
+            },
+            "support_dice": 0.9992489878938413,
+            "coefficient_grid_matches": true,
+            "coefficient_intent": 2007,
+            "reference_grid_matches": true,
+            "jacobian": {
+              "minimum": 0.03564012795686722,
+              "maximum": 1.8000693321228027,
+              "nonpositive_fraction": 0.0
+            },
+            "coefficients": {
+              "pearson_r": 0.9977465235928288,
+              "mae": 0.042222388018296246,
+              "rmse": 0.12553438032730063
+            }
+          }
+        },
+        {
+          "condition": "warm_1",
+          "wall_seconds": 71.50077323289588,
+          "peak_allocated_bytes": 1091029504,
+          "peak_reserved_bytes": 1474297856,
+          "process_peak_cpu_rss_kb": 1057800,
+          "whole_gpu_observation": {
+            "scope": "whole GPU; includes unrelated processes",
+            "sample_interval_seconds": 1.0,
+            "samples": 66,
+            "gpu_utilization_percent": {
+              "mean": 98.37878787878788,
+              "median": 100.0,
+              "p95": 100.0,
+              "minimum": 70.0,
+              "maximum": 100.0
+            },
+            "whole_gpu_used_mib": {
+              "mean": 29745.530303030304,
+              "median": 27618.0,
+              "p95": 34385.0,
+              "minimum": 27618.0,
+              "maximum": 34385.0
+            },
+            "uuid_mapping_available": true
+          },
+          "measurement": {
+            "phase_timings": {
+              "fnirt_smoothing": {
+                "calls": 18,
+                "wall_seconds": 0.04352031275629997,
+                "exclusive_wall_seconds": 0.04352031275629997
+              },
+              "fnirt_expand_coefficients": {
+                "calls": 20546,
+                "wall_seconds": 2.943728261627257,
+                "exclusive_wall_seconds": 2.943728261627257
+              },
+              "fnirt_cost_evaluation": {
+                "calls": 100,
+                "wall_seconds": 1.1835726294666529,
+                "exclusive_wall_seconds": 1.1697307536378503
+              },
+              "fnirt_adjoint_field": {
+                "calls": 20347,
+                "wall_seconds": 2.442716222256422,
+                "exclusive_wall_seconds": 2.442716222256422
+              },
+              "fnirt_design_diagonal": {
+                "calls": 178,
+                "wall_seconds": 0.02438409999012947,
+                "exclusive_wall_seconds": 0.02438409999012947
+              },
+              "fnirt_linearization": {
+                "calls": 47,
+                "wall_seconds": 0.7275889003649354,
+                "exclusive_wall_seconds": 0.13935965904965997
+              },
+              "fnirt_joint_linearization": {
+                "calls": 47,
+                "wall_seconds": 0.907531953882426,
+                "exclusive_wall_seconds": 0.15791180171072483
+              },
+              "fnirt_pcg_matvec": {
+                "calls": 7175,
+                "wall_seconds": 32.47694850852713,
+                "exclusive_wall_seconds": 27.1446104333736
+              },
+              "fnirt_pcg": {
+                "calls": 47,
+                "wall_seconds": 68.42973743751645,
+                "exclusive_wall_seconds": 35.95278892898932
+              },
+              "fnirt_topology": {
+                "calls": 6,
+                "wall_seconds": 0.04563287319615483,
+                "exclusive_wall_seconds": 0.0426952731795609
+              }
+            },
+            "operation_counts": {
+              "fnirt_cost_evaluation": 100,
+              "fnirt_pcg_matvec": 7175
+            },
+            "cuda_tensor_api_calls": {},
+            "actual_cuda_event_counts": {},
+            "profiled_cuda_device_time_us": {},
+            "profile_windows": 0,
+            "profiler_scope": "not profiled",
+            "phase_timing_scope": "nested CPU wall clocks, no extra GPU fences; dispatched GPU work may finish in subsequent phases",
+            "instrumentation_changes_timing": false
+          },
+          "paired": {
+            "image": {
+              "pearson_r": 0.9978417313178952,
+              "mae": 4.979736334630085,
+              "rmse": 16.371966625125303
+            },
+            "support_dice": 0.9992489878938413,
+            "coefficient_grid_matches": true,
+            "coefficient_intent": 2007,
+            "reference_grid_matches": true,
+            "jacobian": {
+              "minimum": 0.03564012795686722,
+              "maximum": 1.8000693321228027,
+              "nonpositive_fraction": 0.0
+            },
+            "coefficients": {
+              "pearson_r": 0.9977465235928288,
+              "mae": 0.042222388018296246,
+              "rmse": 0.12553438032730063
+            }
+          }
+        }
+      ],
+      "profile": {
+        "condition": "profiled",
+        "wall_seconds": 301.91673811804503,
+        "peak_allocated_bytes": 1091029504,
+        "peak_reserved_bytes": 1474297856,
+        "process_peak_cpu_rss_kb": 1395348,
+        "whole_gpu_observation": {
+          "scope": "whole GPU; includes unrelated processes",
+          "sample_interval_seconds": 1.0,
+          "samples": 262,
+          "gpu_utilization_percent": {
+            "mean": 98.59160305343511,
+            "median": 100.0,
+            "p95": 100.0,
+            "minimum": 63.0,
+            "maximum": 100.0
+          },
+          "whole_gpu_used_mib": {
+            "mean": 30080.141221374044,
+            "median": 29526.0,
+            "p95": 34385.0,
+            "minimum": 27618.0,
+            "maximum": 34385.0
+          },
+          "uuid_mapping_available": true
+        },
+        "measurement": {
+          "phase_timings": {
+            "fnirt_smoothing": {
+              "calls": 18,
+              "wall_seconds": 0.06241660611703992,
+              "exclusive_wall_seconds": 0.06241660611703992
+            },
+            "fnirt_expand_coefficients": {
+              "calls": 20546,
+              "wall_seconds": 4.082709551323205,
+              "exclusive_wall_seconds": 4.082709551323205
+            },
+            "fnirt_cost_evaluation": {
+              "calls": 100,
+              "wall_seconds": 1.4664847408421338,
+              "exclusive_wall_seconds": 1.44871597411111
+            },
+            "fnirt_adjoint_field": {
+              "calls": 20347,
+              "wall_seconds": 3.215902615804225,
+              "exclusive_wall_seconds": 3.215902615804225
+            },
+            "fnirt_design_diagonal": {
+              "calls": 178,
+              "wall_seconds": 0.03370726201683283,
+              "exclusive_wall_seconds": 0.03370726201683283
+            },
+            "fnirt_linearization": {
+              "calls": 47,
+              "wall_seconds": 0.9232549997977912,
+              "exclusive_wall_seconds": 0.19443883374333382
+            },
+            "fnirt_joint_linearization": {
+              "calls": 47,
+              "wall_seconds": 1.1694358098320663,
+              "exclusive_wall_seconds": 0.21652307687327266
+            },
+            "fnirt_pcg_matvec": {
+              "calls": 7175,
+              "wall_seconds": 44.71238375408575,
+              "exclusive_wall_seconds": 37.485172329004854
+            },
+            "fnirt_pcg": {
+              "calls": 47,
+              "wall_seconds": 297.612328173127,
+              "exclusive_wall_seconds": 252.89994441904128
+            },
+            "fnirt_topology": {
+              "calls": 6,
+              "wall_seconds": 0.06021626619622111,
+              "exclusive_wall_seconds": 0.056471499148756266
+            }
+          },
+          "operation_counts": {
+            "fnirt_cost_evaluation": 100,
+            "fnirt_pcg_matvec": 7175
+          },
+          "cuda_tensor_api_calls": {
+            "__float__": 14765,
+            "__bool__": 7222,
+            "cpu": 5
+          },
+          "actual_cuda_event_counts": {
+            "cudaMemcpyAsync": 22592,
+            "H2D": 21,
+            "cudaStreamSynchronize": 22224,
+            "cudaLaunchKernel": 1841252,
+            "kernel": 2126760,
+            "D2D": 368,
+            "D2H": 22203,
+            "cudaPeekAtLastError": 216,
+            "cudaDeviceGetAttribute": 36,
+            "cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags": 339901,
+            "cudaFuncSetAttribute": 501039,
+            "cudaFuncGetAttributes": 299844,
+            "cudaLaunchKernelExC": 285493,
+            "cudaMemsetAsync": 1295,
+            "device_memset": 1295,
+            "cudaDeviceSynchronize": 114,
+            "cuLaunchKernel": 15
+          },
+          "profiled_cuda_device_time_us": {
+            "H2D": 3495.4279999998835,
+            "kernel": 17204847.526999593,
+            "D2D": 12050.657999999967,
+            "D2H": 40441.531000011215,
+            "device_memset": 1175.278999999944
+          },
+          "profile_windows": 113,
+          "profiler_scope": "complete CUDA-only registration; window fences included",
+          "phase_timing_scope": "nested CPU wall clocks, no extra GPU fences; dispatched GPU work may finish in subsequent phases",
+          "instrumentation_changes_timing": true
+        },
+        "paired": {
+          "image": {
+            "pearson_r": 0.9978417313178952,
+            "mae": 4.979736334630085,
+            "rmse": 16.371966625125303
+          },
+          "support_dice": 0.9992489878938413,
+          "coefficient_grid_matches": true,
+          "coefficient_intent": 2007,
+          "reference_grid_matches": true,
+          "jacobian": {
+            "minimum": 0.03564012795686722,
+            "maximum": 1.8000693321228027,
+            "nonpositive_fraction": 0.0
+          },
+          "coefficients": {
+            "pearson_r": 0.9977465235928288,
+            "mae": 0.042222388018296246,
+            "rmse": 0.12553438032730063
+          }
+        }
+      },
+      "source_snapshot_matches_reported_hashes": true,
+      "historical_scope_string_corrected_without_changing_measurement": true
+    },
+    "bbr_v1_math": {
+      "schema_version": 1,
+      "function": "bbr",
+      "source_sha256": {
+        "src/fnit/fnirt/io.py": "ee79183709258f2e71dcd110f3c922b1cc7d20a979161ae1c86c2c627becf366",
+        "src/fnit/fnirt/__main__.py": "3d2438ae92f4746e9ffaa1f837b1fe803f6281091d1f31f8c95643716f257d9a",
+        "src/fnit/fnirt/cli.py": "c3b182b81284f377e44c6041a7d04df7ed54c1e4200b583a2eb06c94a929f822",
+        "src/fnit/fnirt/optimizer.py": "e5d5df0358acbb7c3b23ca5ff6c2e797479e5c7efee8e7fa22fe559e7b3faf6b",
+        "src/fnit/fnirt/registration.py": "d52b4f112dd0f409da96f992a614182ab6184b3559f5eb55ce2b4d61a2ee008c",
+        "src/fnit/fnirt/topology.py": "150f65a73baf796f98e6304d0c209288816ee75485be5d93032db46edeb52900",
+        "src/fnit/fnirt/_topology_triton.py": "3f61e452228a9c3dff85caff58ed1103e7b89783c86838bf1e70e322ae3f65f1",
+        "src/fnit/fnirt/spline.py": "7bb3bf5cd84da8b1c35a3e9ff2ef2d815307770c25b1228adf4e96f1dc4d6659",
+        "src/fnit/fnirt/standalone.py": "3713fcc33a1afe7fe107c8a6b752946273b695a7880d23f6144229b296052429",
+        "src/fnit/fnirt/__init__.py": "3480673ed6cbbfc38e573ac64bab6d14fabffc46585a29c74a3d916c2739294d",
+        "src/fnit/fmri/bbr.py": "b26fae9c38b1721391cf7b18d7e5e561ac5830e6e8319103b36acd8b5e0bb5f7",
+        "src/fnit/fmri/normalization.py": "a1f6f07d3356d40727a2788bd2d54a62b6038fefbc416598463a9f37143ab307",
+        "src/fnit/flirt/search.py": "9b50908c1bead992c55255d2ed3c6cf266135e042c276b9ba8176fef03edae4c",
+        "src/fnit/flirt/batched.py": "10115b3fd51497162c2ebc1a7ae52999a4c3079810e18906ae9c0c363a457719",
+        "src/fnit/flirt/__main__.py": "03eb6210ee12d659108106a6126a870a9d5bc89ba95c116cd519e2764b0e092f",
+        "src/fnit/flirt/cli.py": "f57d65c320aee278820de2fb31cc764e7bee911e3228d3a904108d2a75e8142e",
+        "src/fnit/flirt/types.py": "55a3abf2d7ce7889c297df95289890a589d1721b9fe3b157aa90e87819ed8e21",
+        "src/fnit/flirt/standalone.py": "a5ffc8e847bfc5219ef8e068a34eb81bab4b6fceb7ea39a497eb573108a8115e",
+        "src/fnit/flirt/__init__.py": "58b1ae43c50bd2942398f272c013f5bc743ce6a78abdaab7c93eeae1949447af",
+        "src/fnit/flirt/affine_batch.py": "8aa427ea1b185deea2ff2295e01c972bb371cb5a4b23504ce13ef79ca1d6155f",
+        "src/fnit/flirt/core.py": "21ee44e0ae734d6c90bf78e16e58bd1035634c60d10fc4a4c97529815a283a59",
+        "src/fnit/flirt/coordinates.py": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e",
+        "src/fnit/flirt/_batched_cuda.py": "c6ac99f6b0499c2b081969448dc9492906232daac247477edff0cb00ac43cd74",
+        "src/fnit/_nib.py": "568d113432c1a0c50a3b0b635188173e69be1c7436d851de2568bca9b55ab94e",
+        "src/fnit/_transforms.py": "be01fa24cd0c17bb1aa8ac7792cdf0b62c657037808c643427a1b11cc4c05340"
+      },
+      "benchmark_tool_sha256": "561bc001dfca57e43dbbe9d1fb1e62257467d90b1eb6f6b3b9366374bf93eaff",
+      "support_tool_sha256": "a20768489533889d50ddfaadead5c32f3569b2198b4032f37e9c6a2e0976f870",
+      "environment": {
+        "torch": "2.5.1",
+        "cuda_runtime": "11.8",
+        "gpu_name": "NVIDIA H100 PCIe"
+      },
+      "timing_scope": "complete function including ArrayProxy reads/decompression and CPU output conversion; excludes output persistence and offline metrics; shared GPU",
+      "scientific_conditions": {
+        "fnirt_config": null,
+        "same_fsl_initial_affine": true,
+        "same_fsl_wmseg": true,
+        "fnirt_execution": "default",
+        "bbr_execution": "batched",
+        "input_arrayproxy_read_included": true,
+        "wm_header": "legacy",
+        "affine_geometry": "affine_norm",
+        "fnirt_blur_reference": false,
+        "half_precision": false,
+        "default_tf32": true
+      },
+      "runs": [
+        {
+          "condition": "cold_0",
+          "wall_seconds": 11.522672973107547,
+          "peak_allocated_bytes": 8004651520,
+          "peak_reserved_bytes": 8824815616,
+          "process_peak_cpu_rss_kb": 1189252,
+          "whole_gpu_observation": {
+            "scope": "whole GPU; includes unrelated processes",
+            "sample_interval_seconds": 1.0,
+            "samples": 11,
+            "gpu_utilization_percent": {
+              "mean": 99.72727272727273,
+              "median": 100.0,
+              "p95": 100.0,
+              "minimum": 97.0,
+              "maximum": 100.0
+            },
+            "whole_gpu_used_mib": {
+              "mean": 28942.545454545456,
+              "median": 25344.0,
+              "p95": 33344.0,
+              "minimum": 24928.0,
+              "maximum": 33344.0
+            },
+            "uuid_mapping_available": true
+          },
+          "measurement": {
+            "phase_timings": {
+              "bbr_boundary_preparation": {
+                "calls": 1,
+                "wall_seconds": 0.40077921701595187,
+                "exclusive_wall_seconds": 0.40077921701595187
+              },
+              "bbr_batched_cost_evaluation": {
+                "calls": 420,
+                "wall_seconds": 9.413961126934737,
+                "exclusive_wall_seconds": 9.413095934316516
+              },
+              "bbr_scalar_cost_api": {
+                "calls": 2,
+                "wall_seconds": 0.06291045108810067,
+                "exclusive_wall_seconds": 0.00455339252948761
+              },
+              "bbr_final_resampling": {
+                "calls": 1,
+                "wall_seconds": 0.2103389031253755,
+                "exclusive_wall_seconds": 0.2103389031253755
+              }
+            },
+            "operation_counts": {
+              "bbr_batched_candidate_evaluations": 2610,
+              "bbr_batched_cost_calls": 420
+            },
+            "cuda_tensor_api_calls": {},
+            "actual_cuda_event_counts": {},
+            "profiled_cuda_device_time_us": {},
+            "profile_windows": 0,
+            "profiler_scope": "not profiled",
+            "phase_timing_scope": "nested CPU wall clocks, no extra GPU fences; dispatched GPU work may finish in subsequent phases",
+            "instrumentation_changes_timing": false
+          },
+          "paired": {
+            "image": {
+              "pearson_r": 0.9999997029967734,
+              "mae": 2.6457342200728156,
+              "rmse": 5.014425733921832
+            },
+            "inverse_fixed_brain_grid_displacement_mm": {
+              "mean": 0.002416275820607648,
+              "median": 0.0023959089224119086,
+              "p95": 0.003999097894292584,
+              "rms": 0.0025997299443355723,
+              "maximum": 0.004663375686951344
+            },
+            "fnit_initial_cost": 0.4562232792377472,
+            "fnit_final_cost": 0.3413587808609009,
+            "official_matrix_evaluated_with_fnit_cost": 0.3413580358028412,
+            "grid_checks": {
+              "reference_affine_matches": true,
+              "official_grid_matches": true,
+              "dtype_equal": true
+            },
+            "boundary_points": 287094
+          },
+          "source_phase_timings": {
+            "initial_flirt": 0.0003500846214592457,
+            "boundary_preparation": 0.49001329904422164,
+            "coarse_bbr": 5.3532238020561635,
+            "local_bbr": 5.4670305722393095,
+            "final_resampling": 0.21072800504043698
+          },
+          "source_cost_evaluations": 2604,
+          "source_phase_cost_evaluations": {
+            "coarse_bbr": 1674,
+            "local_bbr": 928
+          },
+          "actual_cost_evaluations": 2604
+        }
+      ],
+      "source_snapshot_matches_reported_hashes": true,
+      "evaluation_count_source": "BBRResult.cost_evaluations is primary. This frozen tool overcounted each [4,4] scalar input as four candidates; exactly six extra in wrapper counts. API wave and CUPTI counts are unaffected.",
+      "phase_scope_note": "source_phase_timings are source GPU-completed stage walls; external timers are nested CPU dispatch wall. Trivial module min wrappers excluded."
+    },
+    "final_bbr": {
+      "schema_version": 1,
+      "function": "bbr",
+      "source_sha256": {
+        "src/fnit/fnirt/_smoothing_triton.py": "4b6293eb4210b18a91de647003804cf1aa1f50780449a073e350f9177982227b",
+        "src/fnit/fnirt/io.py": "ee79183709258f2e71dcd110f3c922b1cc7d20a979161ae1c86c2c627becf366",
+        "src/fnit/fnirt/__main__.py": "3d2438ae92f4746e9ffaa1f837b1fe803f6281091d1f31f8c95643716f257d9a",
+        "src/fnit/fnirt/cli.py": "9c143739510dd245f76bd98a80610fdbf6ca65519cd59b41f4a9e233b172e53c",
+        "src/fnit/fnirt/optimizer.py": "903d5031058c96aa9e5fdc29736619fe636b62422cd2646b527df49011d173fd",
+        "src/fnit/fnirt/registration.py": "9e5747292bb5bf79d1dd77bf2a6b76a94d99d33b5a6453ff79dc1b843bcda991",
+        "src/fnit/fnirt/topology.py": "150f65a73baf796f98e6304d0c209288816ee75485be5d93032db46edeb52900",
+        "src/fnit/fnirt/_topology_triton.py": "3f61e452228a9c3dff85caff58ed1103e7b89783c86838bf1e70e322ae3f65f1",
+        "src/fnit/fnirt/spline.py": "79ec750523d69342bf4926adf5e715d91a59749026fc5253ee96d765c0208cad",
+        "src/fnit/fnirt/standalone.py": "83a51a301e1d9145051a12e3b4f10b452c319d1e7a7962308443a048b723ade6",
+        "src/fnit/fnirt/__init__.py": "3480673ed6cbbfc38e573ac64bab6d14fabffc46585a29c74a3d916c2739294d",
+        "src/fnit/fmri/bbr.py": "0ca14f3343d6b5bf09ea93f6ec94de9f2c0cce19fdf8ea005a87ff8e03f48fc2",
+        "src/fnit/fmri/normalization.py": "a1f6f07d3356d40727a2788bd2d54a62b6038fefbc416598463a9f37143ab307",
+        "src/fnit/flirt/search.py": "9b50908c1bead992c55255d2ed3c6cf266135e042c276b9ba8176fef03edae4c",
+        "src/fnit/flirt/batched.py": "10115b3fd51497162c2ebc1a7ae52999a4c3079810e18906ae9c0c363a457719",
+        "src/fnit/flirt/__main__.py": "03eb6210ee12d659108106a6126a870a9d5bc89ba95c116cd519e2764b0e092f",
+        "src/fnit/flirt/cli.py": "f57d65c320aee278820de2fb31cc764e7bee911e3228d3a904108d2a75e8142e",
+        "src/fnit/flirt/types.py": "55a3abf2d7ce7889c297df95289890a589d1721b9fe3b157aa90e87819ed8e21",
+        "src/fnit/flirt/standalone.py": "a5ffc8e847bfc5219ef8e068a34eb81bab4b6fceb7ea39a497eb573108a8115e",
+        "src/fnit/flirt/__init__.py": "58b1ae43c50bd2942398f272c013f5bc743ce6a78abdaab7c93eeae1949447af",
+        "src/fnit/flirt/affine_batch.py": "8aa427ea1b185deea2ff2295e01c972bb371cb5a4b23504ce13ef79ca1d6155f",
+        "src/fnit/flirt/core.py": "21ee44e0ae734d6c90bf78e16e58bd1035634c60d10fc4a4c97529815a283a59",
+        "src/fnit/flirt/coordinates.py": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e",
+        "src/fnit/flirt/_batched_cuda.py": "c6ac99f6b0499c2b081969448dc9492906232daac247477edff0cb00ac43cd74",
+        "src/fnit/_nib.py": "568d113432c1a0c50a3b0b635188173e69be1c7436d851de2568bca9b55ab94e",
+        "src/fnit/_transforms.py": "be01fa24cd0c17bb1aa8ac7792cdf0b62c657037808c643427a1b11cc4c05340",
+        "src/fnit/fmri/_bbr_cuda.py": "c79fdd0c20e68628585a46b946d3ef1f532373aaf8c0371eb5ed0ae25a8a5090"
+      },
+      "benchmark_tool_sha256": "0ea32d44b626b210920a211473bfc4803978b89c5434b5d045f8eee5c6fa111f",
+      "support_tool_sha256": "a20768489533889d50ddfaadead5c32f3569b2198b4032f37e9c6a2e0976f870",
+      "environment": {
+        "torch": "2.5.1",
+        "cuda_runtime": "11.8",
+        "gpu_name": "NVIDIA H100 PCIe"
+      },
+      "timing_scope": "complete function including ArrayProxy reads/decompression and CPU output conversion; excludes output persistence and offline metrics; shared GPU",
+      "scientific_conditions": {
+        "fnirt_config": null,
+        "same_fsl_initial_affine": true,
+        "same_fsl_wmseg": true,
+        "fnirt_execution": "default",
+        "bbr_execution": "batched",
+        "input_arrayproxy_read_included": true,
+        "wm_header": "legacy",
+        "affine_geometry": "affine_norm",
+        "fnirt_blur_reference": false,
+        "fnirt_bending_reference": false,
+        "half_precision": false,
+        "default_tf32": true
+      },
+      "runs": [
+        {
+          "condition": "cold_0",
+          "wall_seconds": 3.5813856618478894,
+          "peak_allocated_bytes": 843702784,
+          "peak_reserved_bytes": 1103101952,
+          "process_peak_cpu_rss_kb": 1183132,
+          "whole_gpu_observation": {
+            "scope": "whole GPU; includes unrelated processes",
+            "sample_interval_seconds": 1.0,
+            "samples": 4,
+            "gpu_utilization_percent": {
+              "mean": 100.0,
+              "median": 100.0,
+              "p95": 100.0,
+              "minimum": 100.0,
+              "maximum": 100.0
+            },
+            "whole_gpu_used_mib": {
+              "mean": 27186.5,
+              "median": 27205.0,
+              "p95": 27446.4,
+              "minimum": 26847.0,
+              "maximum": 27489.0
+            },
+            "uuid_mapping_available": true
+          },
+          "measurement": {
+            "phase_timings": {
+              "bbr_boundary_preparation": {
+                "calls": 1,
+                "wall_seconds": 0.5791617222130299,
+                "exclusive_wall_seconds": 0.5791617222130299
+              },
+              "bbr_batched_cost_evaluation": {
+                "calls": 420,
+                "wall_seconds": 0.9972903896123171,
+                "exclusive_wall_seconds": 0.9967415258288383
+              },
+              "bbr_scalar_cost_api": {
+                "calls": 2,
+                "wall_seconds": 0.9077581032179296,
+                "exclusive_wall_seconds": 0.00661754934117198
+              },
+              "bbr_final_resampling": {
+                "calls": 1,
+                "wall_seconds": 0.24458593362942338,
+                "exclusive_wall_seconds": 0.24458593362942338
+              }
+            },
+            "operation_counts": {
+              "bbr_batched_candidate_evaluations": 2610,
+              "bbr_batched_cost_calls": 420
+            },
+            "cuda_tensor_api_calls": {},
+            "actual_cuda_event_counts": {},
+            "profiled_cuda_device_time_us": {},
+            "profile_windows": 0,
+            "profiler_scope": "not profiled",
+            "phase_timing_scope": "nested CPU wall clocks, no extra GPU fences; dispatched GPU work may finish in subsequent phases",
+            "instrumentation_changes_timing": false
+          },
+          "paired": {
+            "image": {
+              "pearson_r": 0.9999997029967734,
+              "mae": 2.6457342200728156,
+              "rmse": 5.014425733921832
+            },
+            "inverse_fixed_brain_grid_displacement_mm": {
+              "mean": 0.002416275820607648,
+              "median": 0.0023959089224119086,
+              "p95": 0.003999097894292584,
+              "rms": 0.0025997299443355723,
+              "maximum": 0.004663375686951344
+            },
+            "fnit_initial_cost": 0.4562232792377472,
+            "fnit_final_cost": 0.3413587808609009,
+            "official_matrix_evaluated_with_fnit_cost": 0.3413580358028412,
+            "grid_checks": {
+              "reference_affine_matches": true,
+              "official_grid_matches": true,
+              "dtype_equal": true
+            },
+            "boundary_points": 287094
+          },
+          "source_phase_timings": {
+            "initial_flirt": 0.00035135820508003235,
+            "boundary_preparation": 1.5489922799170017,
+            "coarse_bbr": 0.9730341248214245,
+            "local_bbr": 0.8132757670246065,
+            "final_resampling": 0.24494772171601653
+          },
+          "source_cost_evaluations": 2604,
+          "source_phase_cost_evaluations": {
+            "coarse_bbr": 1674,
+            "local_bbr": 928
+          },
+          "actual_cost_evaluations": 2604
+        },
+        {
+          "condition": "warm_1",
+          "wall_seconds": 1.4086935389786959,
+          "peak_allocated_bytes": 844002816,
+          "peak_reserved_bytes": 1103101952,
+          "process_peak_cpu_rss_kb": 1205696,
+          "whole_gpu_observation": {
+            "scope": "whole GPU; includes unrelated processes",
+            "sample_interval_seconds": 1.0,
+            "samples": 2,
+            "gpu_utilization_percent": {
+              "mean": 89.0,
+              "median": 89.0,
+              "p95": 98.9,
+              "minimum": 78.0,
+              "maximum": 100.0
+            },
+            "whole_gpu_used_mib": {
+              "mean": 27172.5,
+              "median": 27172.5,
+              "p95": 28013.55,
+              "minimum": 26238.0,
+              "maximum": 28107.0
+            },
+            "uuid_mapping_available": true
+          },
+          "measurement": {
+            "phase_timings": {
+              "bbr_boundary_preparation": {
+                "calls": 1,
+                "wall_seconds": 0.18096344079822302,
+                "exclusive_wall_seconds": 0.18096344079822302
+              },
+              "bbr_batched_cost_evaluation": {
+                "calls": 420,
+                "wall_seconds": 0.08946751616895199,
+                "exclusive_wall_seconds": 0.08892705477774143
+              },
+              "bbr_scalar_cost_api": {
+                "calls": 2,
+                "wall_seconds": 0.002014696132391691,
+                "exclusive_wall_seconds": 0.0013664262369275093
+              },
+              "bbr_final_resampling": {
+                "calls": 1,
+                "wall_seconds": 0.062410867772996426,
+                "exclusive_wall_seconds": 0.062410867772996426
+              }
+            },
+            "operation_counts": {
+              "bbr_batched_candidate_evaluations": 2610,
+              "bbr_batched_cost_calls": 420
+            },
+            "cuda_tensor_api_calls": {},
+            "actual_cuda_event_counts": {},
+            "profiled_cuda_device_time_us": {},
+            "profile_windows": 0,
+            "profiler_scope": "not profiled",
+            "phase_timing_scope": "nested CPU wall clocks, no extra GPU fences; dispatched GPU work may finish in subsequent phases",
+            "instrumentation_changes_timing": false
+          },
+          "paired": {
+            "image": {
+              "pearson_r": 0.9999997029967734,
+              "mae": 2.6457342200728156,
+              "rmse": 5.014425733921832
+            },
+            "inverse_fixed_brain_grid_displacement_mm": {
+              "mean": 0.002416275820607648,
+              "median": 0.0023959089224119086,
+              "p95": 0.003999097894292584,
+              "rms": 0.0025997299443355723,
+              "maximum": 0.004663375686951344
+            },
+            "fnit_initial_cost": 0.4562232792377472,
+            "fnit_final_cost": 0.3413587808609009,
+            "official_matrix_evaluated_with_fnit_cost": 0.3413580358028412,
+            "grid_checks": {
+              "reference_affine_matches": true,
+              "official_grid_matches": true,
+              "dtype_equal": true
+            },
+            "boundary_points": 287094
+          },
+          "source_phase_timings": {
+            "initial_flirt": 0.00014564674347639084,
+            "boundary_preparation": 0.23209176119416952,
+            "coarse_bbr": 0.5808633458800614,
+            "local_bbr": 0.5319056697189808,
+            "final_resampling": 0.06275077676400542
+          },
+          "source_cost_evaluations": 2604,
+          "source_phase_cost_evaluations": {
+            "coarse_bbr": 1674,
+            "local_bbr": 928
+          },
+          "actual_cost_evaluations": 2604
+        }
+      ],
+      "profile": {
+        "condition": "profiled",
+        "wall_seconds": 2.2016279753297567,
+        "peak_allocated_bytes": 844002816,
+        "peak_reserved_bytes": 1103101952,
+        "process_peak_cpu_rss_kb": 1318756,
+        "whole_gpu_observation": {
+          "scope": "whole GPU; includes unrelated processes",
+          "sample_interval_seconds": 1.0,
+          "samples": 2,
+          "gpu_utilization_percent": {
+            "mean": 100.0,
+            "median": 100.0,
+            "p95": 100.0,
+            "minimum": 100.0,
+            "maximum": 100.0
+          },
+          "whole_gpu_used_mib": {
+            "mean": 26238.0,
+            "median": 26238.0,
+            "p95": 26238.0,
+            "minimum": 26238.0,
+            "maximum": 26238.0
+          },
+          "uuid_mapping_available": true
+        },
+        "measurement": {
+          "phase_timings": {
+            "bbr_boundary_preparation": {
+              "calls": 1,
+              "wall_seconds": 0.19921288592740893,
+              "exclusive_wall_seconds": 0.19921288592740893
+            },
+            "bbr_batched_cost_evaluation": {
+              "calls": 420,
+              "wall_seconds": 0.11621386045590043,
+              "exclusive_wall_seconds": 0.11560443229973316
+            },
+            "bbr_scalar_cost_api": {
+              "calls": 2,
+              "wall_seconds": 0.0023417621850967407,
+              "exclusive_wall_seconds": 0.001646377146244049
+            },
+            "bbr_final_resampling": {
+              "calls": 1,
+              "wall_seconds": 0.05749062588438392,
+              "exclusive_wall_seconds": 0.05749062588438392
+            }
+          },
+          "operation_counts": {
+            "bbr_batched_candidate_evaluations": 2610,
+            "bbr_batched_cost_calls": 420
+          },
+          "cuda_tensor_api_calls": {
+            "__bool__": 1,
+            "cpu": 422,
+            "__float__": 2
+          },
+          "actual_cuda_event_counts": {
+            "cudaMemcpyAsync": 1317,
+            "H2D": 473,
+            "cudaStreamSynchronize": 463,
+            "cudaLaunchKernel": 1727,
+            "cudaDeviceGetAttribute": 3,
+            "cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags": 2,
+            "cudaPeekAtLastError": 8,
+            "kernel": 2163,
+            "D2H": 426,
+            "cudaMemsetAsync": 215,
+            "device_memset": 215,
+            "cuLaunchKernel": 436,
+            "D2D": 418,
+            "cudaDeviceSynchronize": 8
+          },
+          "profiled_cuda_device_time_us": {
+            "H2D": 3943.39900000026,
+            "kernel": 53502.0189999992,
+            "D2H": 3157.2140000004892,
+            "device_memset": 190.07500000014852,
+            "D2D": 708.9309999995899
+          },
+          "profile_windows": 7,
+          "profiler_scope": "complete CUDA-only registration; window fences included",
+          "phase_timing_scope": "nested CPU wall clocks, no extra GPU fences; dispatched GPU work may finish in subsequent phases",
+          "instrumentation_changes_timing": true
+        },
+        "paired": {
+          "image": {
+            "pearson_r": 0.9999997029967734,
+            "mae": 2.6457342200728156,
+            "rmse": 5.014425733921832
+          },
+          "inverse_fixed_brain_grid_displacement_mm": {
+            "mean": 0.002416275820607648,
+            "median": 0.0023959089224119086,
+            "p95": 0.003999097894292584,
+            "rms": 0.0025997299443355723,
+            "maximum": 0.004663375686951344
+          },
+          "fnit_initial_cost": 0.4562232792377472,
+          "fnit_final_cost": 0.3413587808609009,
+          "official_matrix_evaluated_with_fnit_cost": 0.3413580358028412,
+          "grid_checks": {
+            "reference_affine_matches": true,
+            "official_grid_matches": true,
+            "dtype_equal": true
+          },
+          "boundary_points": 287094
+        },
+        "source_phase_timings": {
+          "initial_flirt": 0.00019773608073592186,
+          "boundary_preparation": 0.24880081601440907,
+          "coarse_bbr": 0.8261183542199433,
+          "local_bbr": 0.7666502022184432,
+          "final_resampling": 0.057830884121358395
+        },
+        "source_cost_evaluations": 2604,
+        "source_phase_cost_evaluations": {
+          "coarse_bbr": 1674,
+          "local_bbr": 928
+        },
+        "actual_cost_evaluations": 2604
+      },
+      "source_snapshot_matches_reported_hashes": true,
+      "evaluation_count_source": "BBRResult.cost_evaluations is primary. This frozen tool overcounted each [4,4] scalar input as four candidates; exactly six extra in wrapper counts. API wave and CUPTI counts are unaffected.",
+      "phase_scope_note": "source_phase_timings are source GPU-completed stage walls; external timers are nested CPU dispatch wall. Trivial module min wrappers excluded."
+    },
+    "final_bbr_chain": {
+      "schema_version": 1,
+      "function": "bbr_chain",
+      "source_sha256": {
+        "src/fnit/fnirt/_smoothing_triton.py": "4b6293eb4210b18a91de647003804cf1aa1f50780449a073e350f9177982227b",
+        "src/fnit/fnirt/io.py": "ee79183709258f2e71dcd110f3c922b1cc7d20a979161ae1c86c2c627becf366",
+        "src/fnit/fnirt/__main__.py": "3d2438ae92f4746e9ffaa1f837b1fe803f6281091d1f31f8c95643716f257d9a",
+        "src/fnit/fnirt/cli.py": "9c143739510dd245f76bd98a80610fdbf6ca65519cd59b41f4a9e233b172e53c",
+        "src/fnit/fnirt/optimizer.py": "903d5031058c96aa9e5fdc29736619fe636b62422cd2646b527df49011d173fd",
+        "src/fnit/fnirt/registration.py": "9e5747292bb5bf79d1dd77bf2a6b76a94d99d33b5a6453ff79dc1b843bcda991",
+        "src/fnit/fnirt/topology.py": "150f65a73baf796f98e6304d0c209288816ee75485be5d93032db46edeb52900",
+        "src/fnit/fnirt/_topology_triton.py": "3f61e452228a9c3dff85caff58ed1103e7b89783c86838bf1e70e322ae3f65f1",
+        "src/fnit/fnirt/spline.py": "79ec750523d69342bf4926adf5e715d91a59749026fc5253ee96d765c0208cad",
+        "src/fnit/fnirt/standalone.py": "83a51a301e1d9145051a12e3b4f10b452c319d1e7a7962308443a048b723ade6",
+        "src/fnit/fnirt/__init__.py": "3480673ed6cbbfc38e573ac64bab6d14fabffc46585a29c74a3d916c2739294d",
+        "src/fnit/fmri/bbr.py": "0ca14f3343d6b5bf09ea93f6ec94de9f2c0cce19fdf8ea005a87ff8e03f48fc2",
+        "src/fnit/fmri/normalization.py": "a1f6f07d3356d40727a2788bd2d54a62b6038fefbc416598463a9f37143ab307",
+        "src/fnit/flirt/search.py": "9b50908c1bead992c55255d2ed3c6cf266135e042c276b9ba8176fef03edae4c",
+        "src/fnit/flirt/batched.py": "10115b3fd51497162c2ebc1a7ae52999a4c3079810e18906ae9c0c363a457719",
+        "src/fnit/flirt/__main__.py": "03eb6210ee12d659108106a6126a870a9d5bc89ba95c116cd519e2764b0e092f",
+        "src/fnit/flirt/cli.py": "f57d65c320aee278820de2fb31cc764e7bee911e3228d3a904108d2a75e8142e",
+        "src/fnit/flirt/types.py": "55a3abf2d7ce7889c297df95289890a589d1721b9fe3b157aa90e87819ed8e21",
+        "src/fnit/flirt/standalone.py": "a5ffc8e847bfc5219ef8e068a34eb81bab4b6fceb7ea39a497eb573108a8115e",
+        "src/fnit/flirt/__init__.py": "58b1ae43c50bd2942398f272c013f5bc743ce6a78abdaab7c93eeae1949447af",
+        "src/fnit/flirt/affine_batch.py": "8aa427ea1b185deea2ff2295e01c972bb371cb5a4b23504ce13ef79ca1d6155f",
+        "src/fnit/flirt/core.py": "21ee44e0ae734d6c90bf78e16e58bd1035634c60d10fc4a4c97529815a283a59",
+        "src/fnit/flirt/coordinates.py": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e",
+        "src/fnit/flirt/_batched_cuda.py": "c6ac99f6b0499c2b081969448dc9492906232daac247477edff0cb00ac43cd74",
+        "src/fnit/_nib.py": "568d113432c1a0c50a3b0b635188173e69be1c7436d851de2568bca9b55ab94e",
+        "src/fnit/_transforms.py": "be01fa24cd0c17bb1aa8ac7792cdf0b62c657037808c643427a1b11cc4c05340",
+        "src/fnit/fast/algorithm.py": "9ffed0035a618ec4d6dc1eea8deeadaddd071ced9b04b66593cb6bd4d1102638",
+        "src/fnit/fast/pipeline.py": "4f003e47cd33de27fd9c829b05fcef1c83bea1dc3eb522411039331685bf2129",
+        "src/fnit/fast/__init__.py": "c0f675872a1523425465d764bf3810358d62fc0ad900ff273089b0a5fe516771",
+        "src/fnit/fmri/_bbr_cuda.py": "c79fdd0c20e68628585a46b946d3ef1f532373aaf8c0371eb5ed0ae25a8a5090"
+      },
+      "benchmark_tool_sha256": "0ea32d44b626b210920a211473bfc4803978b89c5434b5d045f8eee5c6fa111f",
+      "support_tool_sha256": "a20768489533889d50ddfaadead5c32f3569b2198b4032f37e9c6a2e0976f870",
+      "environment": {
+        "torch": "2.5.1",
+        "cuda_runtime": "11.8",
+        "gpu_name": "NVIDIA H100 PCIe"
+      },
+      "timing_scope": "complete function including ArrayProxy reads/decompression and CPU output conversion; excludes output persistence and offline metrics; shared GPU",
+      "scientific_conditions": {
+        "fnirt_config": null,
+        "same_fsl_initial_affine": false,
+        "same_fsl_wmseg": false,
+        "fnirt_execution": "default",
+        "bbr_execution": "batched",
+        "input_arrayproxy_read_included": true,
+        "wm_header": "reference",
+        "affine_geometry": "affine_norm",
+        "fnirt_blur_reference": false,
+        "fnirt_bending_reference": false,
+        "half_precision": false,
+        "default_tf32": true
+      },
+      "runs": [
+        {
+          "condition": "cold_0",
+          "wall_seconds": 6.931668056175113,
+          "peak_allocated_bytes": 1325621760,
+          "peak_reserved_bytes": 1904214016,
+          "process_peak_cpu_rss_kb": 1456036,
+          "whole_gpu_observation": {
+            "scope": "whole GPU; includes unrelated processes",
+            "sample_interval_seconds": 1.0,
+            "samples": 7,
+            "gpu_utilization_percent": {
+              "mean": 96.57142857142857,
+              "median": 100.0,
+              "p95": 100.0,
+              "minimum": 76.0,
+              "maximum": 100.0
+            },
+            "whole_gpu_used_mib": {
+              "mean": 26486.0,
+              "median": 27012.0,
+              "p95": 27012.0,
+              "minimum": 24928.0,
+              "maximum": 27012.0
+            },
+            "uuid_mapping_available": true
+          },
+          "measurement": {
+            "phase_timings": {
+              "anatomical_fast": {
+                "calls": 1,
+                "wall_seconds": 2.0169221158139408,
+                "exclusive_wall_seconds": 2.0169221158139408
+              },
+              "bbr_initial_flirt": {
+                "calls": 1,
+                "wall_seconds": 3.8316182838752866,
+                "exclusive_wall_seconds": 3.8316182838752866
+              },
+              "bbr_boundary_preparation": {
+                "calls": 1,
+                "wall_seconds": 0.13173872977495193,
+                "exclusive_wall_seconds": 0.13173872977495193
+              },
+              "bbr_batched_cost_evaluation": {
+                "calls": 298,
+                "wall_seconds": 0.11871105991303921,
+                "exclusive_wall_seconds": 0.11831605294719338
+              },
+              "bbr_scalar_cost_api": {
+                "calls": 2,
+                "wall_seconds": 0.048993275966495275,
+                "exclusive_wall_seconds": 0.0009741359390318394
+              },
+              "bbr_final_resampling": {
+                "calls": 1,
+                "wall_seconds": 0.058055002242326736,
+                "exclusive_wall_seconds": 0.058055002242326736
+              },
+              "bbr_refinement": {
+                "calls": 1,
+                "wall_seconds": 1.0711600221693516,
+                "exclusive_wall_seconds": 0.7615918139927089
+              }
+            },
+            "operation_counts": {
+              "bbr_batched_candidate_evaluations": 2488,
+              "bbr_batched_cost_calls": 298
+            },
+            "cuda_tensor_api_calls": {},
+            "actual_cuda_event_counts": {},
+            "profiled_cuda_device_time_us": {},
+            "profile_windows": 0,
+            "profiler_scope": "not profiled",
+            "phase_timing_scope": "nested CPU wall clocks, no extra GPU fences; dispatched GPU work may finish in subsequent phases",
+            "instrumentation_changes_timing": false
+          },
+          "paired": {
+            "image": {
+              "pearson_r": 0.9997381888663976,
+              "mae": 80.0339769996014,
+              "rmse": 148.91365083644953
+            },
+            "inverse_fixed_brain_grid_displacement_mm": {
+              "mean": 0.06746016071429928,
+              "median": 0.06706881631061237,
+              "p95": 0.10897113163266554,
+              "rms": 0.07203410252774732,
+              "maximum": 0.12443039092194455
+            },
+            "fnit_initial_cost": 0.39556217193603516,
+            "fnit_final_cost": 0.34653860330581665,
+            "official_matrix_evaluated_with_fnit_cost": 0.3467597961425781,
+            "grid_checks": {
+              "reference_affine_matches": true,
+              "official_grid_matches": true,
+              "dtype_equal": true
+            },
+            "boundary_points": 289842
+          },
+          "source_phase_timings": {
+            "initial_flirt": 5.541462451219559e-05,
+            "boundary_preparation": 0.22947886073961854,
+            "coarse_bbr": 0.2286108173429966,
+            "local_bbr": 0.5543466028757393,
+            "final_resampling": 0.058362167328596115
+          },
+          "source_cost_evaluations": 2482,
+          "source_phase_cost_evaluations": {
+            "coarse_bbr": 1542,
+            "local_bbr": 938
+          },
+          "actual_cost_evaluations": 2482
+        },
+        {
+          "condition": "warm_1",
+          "wall_seconds": 5.071525175124407,
+          "peak_allocated_bytes": 1359528448,
+          "peak_reserved_bytes": 1904214016,
+          "process_peak_cpu_rss_kb": 1482404,
+          "whole_gpu_observation": {
+            "scope": "whole GPU; includes unrelated processes",
+            "sample_interval_seconds": 1.0,
+            "samples": 5,
+            "gpu_utilization_percent": {
+              "mean": 92.2,
+              "median": 100.0,
+              "p95": 100.0,
+              "minimum": 71.0,
+              "maximum": 100.0
+            },
+            "whole_gpu_used_mib": {
+              "mean": 27012.0,
+              "median": 27012.0,
+              "p95": 27012.0,
+              "minimum": 27012.0,
+              "maximum": 27012.0
+            },
+            "uuid_mapping_available": true
+          },
+          "measurement": {
+            "phase_timings": {
+              "anatomical_fast": {
+                "calls": 1,
+                "wall_seconds": 1.329109889920801,
+                "exclusive_wall_seconds": 1.329109889920801
+              },
+              "bbr_initial_flirt": {
+                "calls": 1,
+                "wall_seconds": 2.7382698571309447,
+                "exclusive_wall_seconds": 2.7382698571309447
+              },
+              "bbr_boundary_preparation": {
+                "calls": 1,
+                "wall_seconds": 0.12824541702866554,
+                "exclusive_wall_seconds": 0.12824541702866554
+              },
+              "bbr_batched_cost_evaluation": {
+                "calls": 298,
+                "wall_seconds": 0.06522911787033081,
+                "exclusive_wall_seconds": 0.06483175093308091
+              },
+              "bbr_scalar_cost_api": {
+                "calls": 2,
+                "wall_seconds": 0.003504307009279728,
+                "exclusive_wall_seconds": 0.002931315917521715
+              },
+              "bbr_final_resampling": {
+                "calls": 1,
+                "wall_seconds": 0.058297895826399326,
+                "exclusive_wall_seconds": 0.058297895826399326
+              },
+              "bbr_refinement": {
+                "calls": 1,
+                "wall_seconds": 0.9985351366922259,
+                "exclusive_wall_seconds": 0.7437446024268866
+              }
+            },
+            "operation_counts": {
+              "bbr_batched_candidate_evaluations": 2488,
+              "bbr_batched_cost_calls": 298
+            },
+            "cuda_tensor_api_calls": {},
+            "actual_cuda_event_counts": {},
+            "profiled_cuda_device_time_us": {},
+            "profile_windows": 0,
+            "profiler_scope": "not profiled",
+            "phase_timing_scope": "nested CPU wall clocks, no extra GPU fences; dispatched GPU work may finish in subsequent phases",
+            "instrumentation_changes_timing": false
+          },
+          "paired": {
+            "image": {
+              "pearson_r": 0.9997381888663976,
+              "mae": 80.0339769996014,
+              "rmse": 148.91365083644953
+            },
+            "inverse_fixed_brain_grid_displacement_mm": {
+              "mean": 0.06746016071429928,
+              "median": 0.06706881631061237,
+              "p95": 0.10897113163266554,
+              "rms": 0.07203410252774732,
+              "maximum": 0.12443039092194455
+            },
+            "fnit_initial_cost": 0.39556217193603516,
+            "fnit_final_cost": 0.34653860330581665,
+            "official_matrix_evaluated_with_fnit_cost": 0.3467597961425781,
+            "grid_checks": {
+              "reference_affine_matches": true,
+              "official_grid_matches": true,
+              "dtype_equal": true
+            },
+            "boundary_points": 289842
+          },
+          "source_phase_timings": {
+            "initial_flirt": 9.603891521692276e-05,
+            "boundary_preparation": 0.17981636710464954,
+            "coarse_bbr": 0.20832068799063563,
+            "local_bbr": 0.5513552781194448,
+            "final_resampling": 0.058596568182110786
+          },
+          "source_cost_evaluations": 2482,
+          "source_phase_cost_evaluations": {
+            "coarse_bbr": 1542,
+            "local_bbr": 938
+          },
+          "actual_cost_evaluations": 2482
+        }
+      ],
+      "profile": {
+        "condition": "profiled",
+        "wall_seconds": 10.261307829990983,
+        "peak_allocated_bytes": 1359528448,
+        "peak_reserved_bytes": 1904214016,
+        "process_peak_cpu_rss_kb": 1969248,
+        "whole_gpu_observation": {
+          "scope": "whole GPU; includes unrelated processes",
+          "sample_interval_seconds": 1.0,
+          "samples": 10,
+          "gpu_utilization_percent": {
+            "mean": 97.9,
+            "median": 100.0,
+            "p95": 100.0,
+            "minimum": 79.0,
+            "maximum": 100.0
+          },
+          "whole_gpu_used_mib": {
+            "mean": 27012.0,
+            "median": 27012.0,
+            "p95": 27012.0,
+            "minimum": 27012.0,
+            "maximum": 27012.0
+          },
+          "uuid_mapping_available": true
+        },
+        "measurement": {
+          "phase_timings": {
+            "anatomical_fast": {
+              "calls": 1,
+              "wall_seconds": 1.3921098508872092,
+              "exclusive_wall_seconds": 1.3921098508872092
+            },
+            "bbr_initial_flirt": {
+              "calls": 1,
+              "wall_seconds": 2.9603614979423583,
+              "exclusive_wall_seconds": 2.9603614979423583
+            },
+            "bbr_boundary_preparation": {
+              "calls": 1,
+              "wall_seconds": 0.13671558303758502,
+              "exclusive_wall_seconds": 0.13671558303758502
+            },
+            "bbr_batched_cost_evaluation": {
+              "calls": 298,
+              "wall_seconds": 0.08357937587425113,
+              "exclusive_wall_seconds": 0.08316015219315886
+            },
+            "bbr_scalar_cost_api": {
+              "calls": 2,
+              "wall_seconds": 0.003499418031424284,
+              "exclusive_wall_seconds": 0.00276664225384593
+            },
+            "bbr_final_resampling": {
+              "calls": 1,
+              "wall_seconds": 0.05792762665078044,
+              "exclusive_wall_seconds": 0.05792762665078044
+            },
+            "bbr_refinement": {
+              "calls": 1,
+              "wall_seconds": 5.7078226949088275,
+              "exclusive_wall_seconds": 5.42674569087103
+            }
+          },
+          "operation_counts": {
+            "bbr_batched_candidate_evaluations": 2488,
+            "bbr_batched_cost_calls": 298
+          },
+          "cuda_tensor_api_calls": {
+            "__bool__": 13,
+            "cpu": 742,
+            "__float__": 12
+          },
+          "actual_cuda_event_counts": {
+            "cudaMemcpyAsync": 2546,
+            "H2D": 860,
+            "cudaStreamSynchronize": 1061,
+            "cudaLaunchKernel": 45348,
+            "cudaMemsetAsync": 366,
+            "kernel": 47308,
+            "device_memset": 366,
+            "D2H": 951,
+            "cudaDeviceGetAttribute": 1242,
+            "cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags": 1714,
+            "cudaPeekAtLastError": 5768,
+            "D2D": 735,
+            "cudaEventRecord": 466,
+            "cudaStreamIsCapturing": 30,
+            "cudaStreamGetPriority": 30,
+            "cudaDeviceGetStreamPriorityRange": 30,
+            "cudaLaunchKernelExC": 30,
+            "cudaFuncGetAttributes": 1,
+            "cudaMemGetInfo": 4,
+            "cudaPointerGetAttributes": 436,
+            "cuLaunchKernel": 1930,
+            "cudaEventQuery": 445,
+            "cudaFuncSetAttribute": 12,
+            "cudaDeviceSynchronize": 6
+          },
+          "profiled_cuda_device_time_us": {
+            "H2D": 11027.864999995272,
+            "kernel": 696522.4859999944,
+            "device_memset": 330.2449999996952,
+            "D2H": 156125.5450000018,
+            "D2D": 1327.365000001134
+          },
+          "profile_windows": 5,
+          "profiler_scope": "complete CUDA-only registration; window fences included",
+          "phase_timing_scope": "nested CPU wall clocks, no extra GPU fences; dispatched GPU work may finish in subsequent phases",
+          "instrumentation_changes_timing": true
+        },
+        "paired": {
+          "image": {
+            "pearson_r": 0.9997381888663976,
+            "mae": 80.0339769996014,
+            "rmse": 148.91365083644953
+          },
+          "inverse_fixed_brain_grid_displacement_mm": {
+            "mean": 0.06746016071429928,
+            "median": 0.06706881631061237,
+            "p95": 0.10897113163266554,
+            "rms": 0.07203410252774732,
+            "maximum": 0.12443039092194455
+          },
+          "fnit_initial_cost": 0.39556217193603516,
+          "fnit_final_cost": 0.34653860330581665,
+          "official_matrix_evaluated_with_fnit_cost": 0.3467597961425781,
+          "grid_checks": {
+            "reference_affine_matches": true,
+            "official_grid_matches": true,
+            "dtype_equal": true
+          },
+          "boundary_points": 289842
+        },
+        "source_phase_timings": {
+          "initial_flirt": 8.98558646440506e-05,
+          "boundary_preparation": 0.1882313103415072,
+          "coarse_bbr": 4.738391995895654,
+          "local_bbr": 0.7224888727068901,
+          "final_resampling": 0.05822179699316621
+        },
+        "source_cost_evaluations": 2482,
+        "source_phase_cost_evaluations": {
+          "coarse_bbr": 1542,
+          "local_bbr": 938
+        },
+        "actual_cost_evaluations": 2482
+      },
+      "source_snapshot_matches_reported_hashes": true,
+      "evaluation_count_source": "BBRResult.cost_evaluations is primary. This frozen tool overcounted each [4,4] scalar input as four candidates; exactly six extra in wrapper counts. API wave and CUPTI counts are unaffected.",
+      "phase_scope_note": "source_phase_timings are source GPU-completed stage walls; external timers are nested CPU dispatch wall. Trivial module min wrappers excluded."
+    },
+    "after_fnirt_reference": {
+      "schema_version": 1,
+      "function": "fnirt",
+      "source_sha256": {
+        "src/fnit/fnirt/_smoothing_triton.py": "4b6293eb4210b18a91de647003804cf1aa1f50780449a073e350f9177982227b",
+        "src/fnit/fnirt/io.py": "ee79183709258f2e71dcd110f3c922b1cc7d20a979161ae1c86c2c627becf366",
+        "src/fnit/fnirt/__main__.py": "3d2438ae92f4746e9ffaa1f837b1fe803f6281091d1f31f8c95643716f257d9a",
+        "src/fnit/fnirt/cli.py": "9c143739510dd245f76bd98a80610fdbf6ca65519cd59b41f4a9e233b172e53c",
+        "src/fnit/fnirt/optimizer.py": "903d5031058c96aa9e5fdc29736619fe636b62422cd2646b527df49011d173fd",
+        "src/fnit/fnirt/registration.py": "9e5747292bb5bf79d1dd77bf2a6b76a94d99d33b5a6453ff79dc1b843bcda991",
+        "src/fnit/fnirt/topology.py": "150f65a73baf796f98e6304d0c209288816ee75485be5d93032db46edeb52900",
+        "src/fnit/fnirt/_topology_triton.py": "3f61e452228a9c3dff85caff58ed1103e7b89783c86838bf1e70e322ae3f65f1",
+        "src/fnit/fnirt/spline.py": "79ec750523d69342bf4926adf5e715d91a59749026fc5253ee96d765c0208cad",
+        "src/fnit/fnirt/standalone.py": "83a51a301e1d9145051a12e3b4f10b452c319d1e7a7962308443a048b723ade6",
+        "src/fnit/fnirt/__init__.py": "3480673ed6cbbfc38e573ac64bab6d14fabffc46585a29c74a3d916c2739294d",
+        "src/fnit/fmri/bbr.py": "c38aa2ba2a89d52dc98dc5fb9865df394b949a6c20695fa7289083d0b9654b30",
+        "src/fnit/fmri/normalization.py": "a1f6f07d3356d40727a2788bd2d54a62b6038fefbc416598463a9f37143ab307",
+        "src/fnit/flirt/search.py": "9b50908c1bead992c55255d2ed3c6cf266135e042c276b9ba8176fef03edae4c",
+        "src/fnit/flirt/batched.py": "10115b3fd51497162c2ebc1a7ae52999a4c3079810e18906ae9c0c363a457719",
+        "src/fnit/flirt/__main__.py": "03eb6210ee12d659108106a6126a870a9d5bc89ba95c116cd519e2764b0e092f",
+        "src/fnit/flirt/cli.py": "f57d65c320aee278820de2fb31cc764e7bee911e3228d3a904108d2a75e8142e",
+        "src/fnit/flirt/types.py": "55a3abf2d7ce7889c297df95289890a589d1721b9fe3b157aa90e87819ed8e21",
+        "src/fnit/flirt/standalone.py": "a5ffc8e847bfc5219ef8e068a34eb81bab4b6fceb7ea39a497eb573108a8115e",
+        "src/fnit/flirt/__init__.py": "58b1ae43c50bd2942398f272c013f5bc743ce6a78abdaab7c93eeae1949447af",
+        "src/fnit/flirt/affine_batch.py": "8aa427ea1b185deea2ff2295e01c972bb371cb5a4b23504ce13ef79ca1d6155f",
+        "src/fnit/flirt/core.py": "21ee44e0ae734d6c90bf78e16e58bd1035634c60d10fc4a4c97529815a283a59",
+        "src/fnit/flirt/coordinates.py": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e",
+        "src/fnit/flirt/_batched_cuda.py": "c6ac99f6b0499c2b081969448dc9492906232daac247477edff0cb00ac43cd74",
+        "src/fnit/_nib.py": "568d113432c1a0c50a3b0b635188173e69be1c7436d851de2568bca9b55ab94e",
+        "src/fnit/_transforms.py": "be01fa24cd0c17bb1aa8ac7792cdf0b62c657037808c643427a1b11cc4c05340",
+        "src/fnit/fmri/_bbr_cuda.py": "c79fdd0c20e68628585a46b946d3ef1f532373aaf8c0371eb5ed0ae25a8a5090"
+      },
+      "benchmark_tool_sha256": "561bc001dfca57e43dbbe9d1fb1e62257467d90b1eb6f6b3b9366374bf93eaff",
+      "support_tool_sha256": "a20768489533889d50ddfaadead5c32f3569b2198b4032f37e9c6a2e0976f870",
+      "environment": {
+        "torch": "2.5.1",
+        "cuda_runtime": "11.8",
+        "gpu_name": "NVIDIA H100 PCIe"
+      },
+      "timing_scope": "complete function including ArrayProxy reads/decompression and CPU output conversion; excludes output persistence and offline metrics; shared GPU",
+      "scientific_conditions": {
+        "fnirt_config": "t1",
+        "same_fsl_initial_affine": true,
+        "same_fsl_wmseg": false,
+        "fnirt_execution": "reference",
+        "bbr_execution": "default",
+        "input_arrayproxy_read_included": true,
+        "wm_header": "legacy",
+        "affine_geometry": "header_pixdim",
+        "fnirt_blur_reference": false,
+        "half_precision": false,
+        "default_tf32": true
+      },
+      "runs": [
+        {
+          "condition": "cold_0",
+          "wall_seconds": 79.00322378007695,
+          "peak_allocated_bytes": 1177767424,
+          "peak_reserved_bytes": 1476395008,
+          "process_peak_cpu_rss_kb": 898808,
+          "whole_gpu_observation": {
+            "scope": "whole GPU; includes unrelated processes",
+            "sample_interval_seconds": 1.0,
+            "samples": 74,
+            "gpu_utilization_percent": {
+              "mean": 99.77027027027027,
+              "median": 100.0,
+              "p95": 100.0,
+              "minimum": 90.0,
+              "maximum": 100.0
+            },
+            "whole_gpu_used_mib": {
+              "mean": 29819.14864864865,
+              "median": 29545.0,
+              "p95": 30455.0,
+              "minimum": 26815.0,
+              "maximum": 30723.0
+            },
+            "uuid_mapping_available": true
+          },
+          "measurement": {
+            "phase_timings": {
+              "fnirt_smoothing_reference": {
+                "calls": 18,
+                "wall_seconds": 0.058495672419667244,
+                "exclusive_wall_seconds": 0.058495672419667244
+              },
+              "fnirt_expand_coefficients": {
+                "calls": 20546,
+                "wall_seconds": 2.9868588377721608,
+                "exclusive_wall_seconds": 2.9868588377721608
+              },
+              "fnirt_bending_energy": {
+                "calls": 200,
+                "wall_seconds": 0.22379790572449565,
+                "exclusive_wall_seconds": 0.22379790572449565
+              },
+              "fnirt_cost_evaluation": {
+                "calls": 100,
+                "wall_seconds": 1.4889650847762823,
+                "exclusive_wall_seconds": 1.3051404561847448
+              },
+              "fnirt_adjoint_field": {
+                "calls": 20347,
+                "wall_seconds": 2.419840565882623,
+                "exclusive_wall_seconds": 2.419840565882623
+              },
+              "fnirt_bending_normal": {
+                "calls": 13803,
+                "wall_seconds": 21.82294356590137,
+                "exclusive_wall_seconds": 21.82294356590137
+              },
+              "fnirt_design_diagonal": {
+                "calls": 178,
+                "wall_seconds": 0.025472035631537437,
+                "exclusive_wall_seconds": 0.025472035631537437
+              },
+              "fnirt_bending_diagonal": {
+                "calls": 84,
+                "wall_seconds": 0.01230304827913642,
+                "exclusive_wall_seconds": 0.01230304827913642
+              },
+              "fnirt_linearization": {
+                "calls": 47,
+                "wall_seconds": 0.823979779612273,
+                "exclusive_wall_seconds": 0.030438375659286976
+              },
+              "fnirt_joint_linearization": {
+                "calls": 47,
+                "wall_seconds": 1.1366545837372541,
+                "exclusive_wall_seconds": 0.17199578788131475
+              },
+              "fnirt_pcg_matvec": {
+                "calls": 7175,
+                "wall_seconds": 32.07289785472676,
+                "exclusive_wall_seconds": 5.1151750581339
+              },
+              "fnirt_pcg": {
+                "calls": 47,
+                "wall_seconds": 74.81942442012951,
+                "exclusive_wall_seconds": 42.746526565402746
+              },
+              "fnirt_topology": {
+                "calls": 6,
+                "wall_seconds": 0.05216532479971647,
+                "exclusive_wall_seconds": 0.04922139132395387
+              }
+            },
+            "operation_counts": {
+              "fnirt_cost_evaluation": 100,
+              "fnirt_pcg_matvec": 7175
+            },
+            "cuda_tensor_api_calls": {},
+            "actual_cuda_event_counts": {},
+            "profiled_cuda_device_time_us": {},
+            "profile_windows": 0,
+            "profiler_scope": "not profiled",
+            "phase_timing_scope": "nested CPU wall clocks, no extra GPU fences; dispatched GPU work may finish in subsequent phases",
+            "instrumentation_changes_timing": false
+          },
+          "paired": {
+            "image": {
+              "pearson_r": 0.9978417313178952,
+              "mae": 4.979736334630085,
+              "rmse": 16.371966625125303
+            },
+            "support_dice": 0.9992489878938413,
+            "coefficient_shape_matches": true,
+            "coefficient_contract_checks": {
+              "shape_equal": true,
+              "pixdim_equal": true,
+              "stored_affine_equal": true,
+              "intent_code_equal": true,
+              "intent_p1_equal": true,
+              "intent_p2_equal": true,
+              "intent_p3_equal": true,
+              "qoffset_x_equal": true,
+              "qoffset_y_equal": true,
+              "qoffset_z_equal": true,
+              "sform_code_equal": true,
+              "qform_code_equal": true
+            },
+            "coefficient_grid_matches": true,
+            "coefficient_intent": 2007,
+            "physical_grid_checks": {
+              "official_warped": {
+                "shape_equal": true,
+                "affine_equal": true,
+                "pixdim_equal": true
+              },
+              "fnit_warped": {
+                "shape_equal": true,
+                "affine_equal": true,
+                "pixdim_equal": true
+              },
+              "reference_mask": {
+                "shape_equal": true,
+                "affine_equal": true,
+                "pixdim_equal": true
+              }
+            },
+            "reference_grid_matches": true,
+            "jacobian": {
+              "minimum": 0.03564012795686722,
+              "maximum": 1.8000693321228027,
+              "nonpositive_fraction": 0.0
+            },
+            "coefficients": {
+              "pearson_r": 0.9977465235928288,
+              "mae": 0.042222388018296246,
+              "rmse": 0.12553438032730063,
+              "metadata_contract_matches": true
+            },
+            "nonlinear_jacobian_paired": {
+              "pearson_r": 0.9980074856160985,
+              "mae": 0.00746379374712585,
+              "rmse": 0.015674587580092086,
+              "official_grid_checks": {
+                "shape_equal": true,
+                "affine_equal": true,
+                "pixdim_equal": true
+              }
+            }
+          }
+        },
+        {
+          "condition": "warm_1",
+          "wall_seconds": 74.54299865011126,
+          "peak_allocated_bytes": 1177856000,
+          "peak_reserved_bytes": 1476395008,
+          "process_peak_cpu_rss_kb": 1042148,
+          "whole_gpu_observation": {
+            "scope": "whole GPU; includes unrelated processes",
+            "sample_interval_seconds": 1.0,
+            "samples": 70,
+            "gpu_utilization_percent": {
+              "mean": 99.74285714285715,
+              "median": 100.0,
+              "p95": 100.0,
+              "minimum": 90.0,
+              "maximum": 100.0
+            },
+            "whole_gpu_used_mib": {
+              "mean": 31361.628571428573,
+              "median": 31296.0,
+              "p95": 31709.0,
+              "minimum": 31009.0,
+              "maximum": 31713.0
+            },
+            "uuid_mapping_available": true
+          },
+          "measurement": {
+            "phase_timings": {
+              "fnirt_smoothing_reference": {
+                "calls": 18,
+                "wall_seconds": 0.0443824240937829,
+                "exclusive_wall_seconds": 0.0443824240937829
+              },
+              "fnirt_expand_coefficients": {
+                "calls": 20546,
+                "wall_seconds": 2.9258432295173407,
+                "exclusive_wall_seconds": 2.9258432295173407
+              },
+              "fnirt_bending_energy": {
+                "calls": 200,
+                "wall_seconds": 0.20565466862171888,
+                "exclusive_wall_seconds": 0.20565466862171888
+              },
+              "fnirt_cost_evaluation": {
+                "calls": 100,
+                "wall_seconds": 1.1016670474782586,
+                "exclusive_wall_seconds": 0.9834222858771682
+              },
+              "fnirt_adjoint_field": {
+                "calls": 20347,
+                "wall_seconds": 2.4285734593868256,
+                "exclusive_wall_seconds": 2.4285734593868256
+              },
+              "fnirt_bending_normal": {
+                "calls": 13803,
+                "wall_seconds": 22.043128069955856,
+                "exclusive_wall_seconds": 22.043128069955856
+              },
+              "fnirt_design_diagonal": {
+                "calls": 178,
+                "wall_seconds": 0.02508861292153597,
+                "exclusive_wall_seconds": 0.02508861292153597
+              },
+              "fnirt_bending_diagonal": {
+                "calls": 84,
+                "wall_seconds": 0.010534420143812895,
+                "exclusive_wall_seconds": 0.010534420143812895
+              },
+              "fnirt_linearization": {
+                "calls": 47,
+                "wall_seconds": 0.6416544378735125,
+                "exclusive_wall_seconds": 0.02976649207994342
+              },
+              "fnirt_joint_linearization": {
+                "calls": 47,
+                "wall_seconds": 0.796583884395659,
+                "exclusive_wall_seconds": 0.02170036267489195
+              },
+              "fnirt_pcg_matvec": {
+                "calls": 7175,
+                "wall_seconds": 32.35186342615634,
+                "exclusive_wall_seconds": 5.144225059077144
+              },
+              "fnirt_pcg": {
+                "calls": 47,
+                "wall_seconds": 71.63081935001537,
+                "exclusive_wall_seconds": 39.27895592385903
+              },
+              "fnirt_topology": {
+                "calls": 6,
+                "wall_seconds": 0.05311569944024086,
+                "exclusive_wall_seconds": 0.04962257016450167
+              }
+            },
+            "operation_counts": {
+              "fnirt_cost_evaluation": 100,
+              "fnirt_pcg_matvec": 7175
+            },
+            "cuda_tensor_api_calls": {},
+            "actual_cuda_event_counts": {},
+            "profiled_cuda_device_time_us": {},
+            "profile_windows": 0,
+            "profiler_scope": "not profiled",
+            "phase_timing_scope": "nested CPU wall clocks, no extra GPU fences; dispatched GPU work may finish in subsequent phases",
+            "instrumentation_changes_timing": false
+          },
+          "paired": {
+            "image": {
+              "pearson_r": 0.9978417313178952,
+              "mae": 4.979736334630085,
+              "rmse": 16.371966625125303
+            },
+            "support_dice": 0.9992489878938413,
+            "coefficient_shape_matches": true,
+            "coefficient_contract_checks": {
+              "shape_equal": true,
+              "pixdim_equal": true,
+              "stored_affine_equal": true,
+              "intent_code_equal": true,
+              "intent_p1_equal": true,
+              "intent_p2_equal": true,
+              "intent_p3_equal": true,
+              "qoffset_x_equal": true,
+              "qoffset_y_equal": true,
+              "qoffset_z_equal": true,
+              "sform_code_equal": true,
+              "qform_code_equal": true
+            },
+            "coefficient_grid_matches": true,
+            "coefficient_intent": 2007,
+            "physical_grid_checks": {
+              "official_warped": {
+                "shape_equal": true,
+                "affine_equal": true,
+                "pixdim_equal": true
+              },
+              "fnit_warped": {
+                "shape_equal": true,
+                "affine_equal": true,
+                "pixdim_equal": true
+              },
+              "reference_mask": {
+                "shape_equal": true,
+                "affine_equal": true,
+                "pixdim_equal": true
+              }
+            },
+            "reference_grid_matches": true,
+            "jacobian": {
+              "minimum": 0.03564012795686722,
+              "maximum": 1.8000693321228027,
+              "nonpositive_fraction": 0.0
+            },
+            "coefficients": {
+              "pearson_r": 0.9977465235928288,
+              "mae": 0.042222388018296246,
+              "rmse": 0.12553438032730063,
+              "metadata_contract_matches": true
+            },
+            "nonlinear_jacobian_paired": {
+              "pearson_r": 0.9980074856160985,
+              "mae": 0.00746379374712585,
+              "rmse": 0.015674587580092086,
+              "official_grid_checks": {
+                "shape_equal": true,
+                "affine_equal": true,
+                "pixdim_equal": true
+              }
+            }
+          }
+        }
+      ],
+      "source_snapshot_matches_reported_hashes": true
+    },
+    "after_fnirt": {
+      "schema_version": 1,
+      "function": "fnirt",
+      "source_sha256": {
+        "src/fnit/fnirt/_smoothing_triton.py": "4b6293eb4210b18a91de647003804cf1aa1f50780449a073e350f9177982227b",
+        "src/fnit/fnirt/io.py": "ee79183709258f2e71dcd110f3c922b1cc7d20a979161ae1c86c2c627becf366",
+        "src/fnit/fnirt/__main__.py": "3d2438ae92f4746e9ffaa1f837b1fe803f6281091d1f31f8c95643716f257d9a",
+        "src/fnit/fnirt/cli.py": "9c143739510dd245f76bd98a80610fdbf6ca65519cd59b41f4a9e233b172e53c",
+        "src/fnit/fnirt/optimizer.py": "903d5031058c96aa9e5fdc29736619fe636b62422cd2646b527df49011d173fd",
+        "src/fnit/fnirt/registration.py": "9e5747292bb5bf79d1dd77bf2a6b76a94d99d33b5a6453ff79dc1b843bcda991",
+        "src/fnit/fnirt/topology.py": "150f65a73baf796f98e6304d0c209288816ee75485be5d93032db46edeb52900",
+        "src/fnit/fnirt/_topology_triton.py": "3f61e452228a9c3dff85caff58ed1103e7b89783c86838bf1e70e322ae3f65f1",
+        "src/fnit/fnirt/spline.py": "79ec750523d69342bf4926adf5e715d91a59749026fc5253ee96d765c0208cad",
+        "src/fnit/fnirt/standalone.py": "83a51a301e1d9145051a12e3b4f10b452c319d1e7a7962308443a048b723ade6",
+        "src/fnit/fnirt/__init__.py": "3480673ed6cbbfc38e573ac64bab6d14fabffc46585a29c74a3d916c2739294d",
+        "src/fnit/fmri/bbr.py": "c38aa2ba2a89d52dc98dc5fb9865df394b949a6c20695fa7289083d0b9654b30",
+        "src/fnit/fmri/normalization.py": "a1f6f07d3356d40727a2788bd2d54a62b6038fefbc416598463a9f37143ab307",
+        "src/fnit/flirt/search.py": "9b50908c1bead992c55255d2ed3c6cf266135e042c276b9ba8176fef03edae4c",
+        "src/fnit/flirt/batched.py": "10115b3fd51497162c2ebc1a7ae52999a4c3079810e18906ae9c0c363a457719",
+        "src/fnit/flirt/__main__.py": "03eb6210ee12d659108106a6126a870a9d5bc89ba95c116cd519e2764b0e092f",
+        "src/fnit/flirt/cli.py": "f57d65c320aee278820de2fb31cc764e7bee911e3228d3a904108d2a75e8142e",
+        "src/fnit/flirt/types.py": "55a3abf2d7ce7889c297df95289890a589d1721b9fe3b157aa90e87819ed8e21",
+        "src/fnit/flirt/standalone.py": "a5ffc8e847bfc5219ef8e068a34eb81bab4b6fceb7ea39a497eb573108a8115e",
+        "src/fnit/flirt/__init__.py": "58b1ae43c50bd2942398f272c013f5bc743ce6a78abdaab7c93eeae1949447af",
+        "src/fnit/flirt/affine_batch.py": "8aa427ea1b185deea2ff2295e01c972bb371cb5a4b23504ce13ef79ca1d6155f",
+        "src/fnit/flirt/core.py": "21ee44e0ae734d6c90bf78e16e58bd1035634c60d10fc4a4c97529815a283a59",
+        "src/fnit/flirt/coordinates.py": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e",
+        "src/fnit/flirt/_batched_cuda.py": "c6ac99f6b0499c2b081969448dc9492906232daac247477edff0cb00ac43cd74",
+        "src/fnit/_nib.py": "568d113432c1a0c50a3b0b635188173e69be1c7436d851de2568bca9b55ab94e",
+        "src/fnit/_transforms.py": "be01fa24cd0c17bb1aa8ac7792cdf0b62c657037808c643427a1b11cc4c05340",
+        "src/fnit/fmri/_bbr_cuda.py": "c79fdd0c20e68628585a46b946d3ef1f532373aaf8c0371eb5ed0ae25a8a5090"
+      },
+      "benchmark_tool_sha256": "561bc001dfca57e43dbbe9d1fb1e62257467d90b1eb6f6b3b9366374bf93eaff",
+      "support_tool_sha256": "a20768489533889d50ddfaadead5c32f3569b2198b4032f37e9c6a2e0976f870",
+      "environment": {
+        "torch": "2.5.1",
+        "cuda_runtime": "11.8",
+        "gpu_name": "NVIDIA H100 PCIe"
+      },
+      "timing_scope": "complete function including ArrayProxy reads/decompression and CPU output conversion; excludes output persistence and offline metrics; shared GPU",
+      "scientific_conditions": {
+        "fnirt_config": "t1",
+        "same_fsl_initial_affine": true,
+        "same_fsl_wmseg": false,
+        "fnirt_execution": "optimized",
+        "bbr_execution": "default",
+        "input_arrayproxy_read_included": true,
+        "wm_header": "legacy",
+        "affine_geometry": "header_pixdim",
+        "fnirt_blur_reference": false,
+        "half_precision": false,
+        "default_tf32": true
+      },
+      "runs": [
+        {
+          "condition": "cold_0",
+          "wall_seconds": 32.59472320089117,
+          "peak_allocated_bytes": 1178372608,
+          "peak_reserved_bytes": 1491075072,
+          "process_peak_cpu_rss_kb": 916200,
+          "whole_gpu_observation": {
+            "scope": "whole GPU; includes unrelated processes",
+            "sample_interval_seconds": 1.0,
+            "samples": 31,
+            "gpu_utilization_percent": {
+              "mean": 98.54838709677419,
+              "median": 100.0,
+              "p95": 100.0,
+              "minimum": 79.0,
+              "maximum": 100.0
+            },
+            "whole_gpu_used_mib": {
+              "mean": 30020.548387096773,
+              "median": 30187.0,
+              "p95": 30557.0,
+              "minimum": 29017.0,
+              "maximum": 30561.0
+            },
+            "uuid_mapping_available": true
+          },
+          "measurement": {
+            "phase_timings": {
+              "fnirt_smoothing": {
+                "calls": 18,
+                "wall_seconds": 1.299343747086823,
+                "exclusive_wall_seconds": 1.2993412339128554
+              },
+              "fnirt_expand_coefficients": {
+                "calls": 20819,
+                "wall_seconds": 3.076275173574686,
+                "exclusive_wall_seconds": 3.076275173574686
+              },
+              "fnirt_bending_energy": {
+                "calls": 200,
+                "wall_seconds": 0.28258957993239164,
+                "exclusive_wall_seconds": 0.28258957993239164
+              },
+              "fnirt_cost_evaluation": {
+                "calls": 100,
+                "wall_seconds": 1.6490523619577289,
+                "exclusive_wall_seconds": 1.4307271409779787
+              },
+              "fnirt_adjoint_field": {
+                "calls": 20620,
+                "wall_seconds": 2.5063256341964006,
+                "exclusive_wall_seconds": 2.5063256341964006
+              },
+              "fnirt_bending_normal": {
+                "calls": 13985,
+                "wall_seconds": 11.0524747883901,
+                "exclusive_wall_seconds": 11.0524747883901
+              },
+              "fnirt_design_diagonal": {
+                "calls": 178,
+                "wall_seconds": 0.025990319438278675,
+                "exclusive_wall_seconds": 0.025990319438278675
+              },
+              "fnirt_bending_diagonal": {
+                "calls": 84,
+                "wall_seconds": 0.012825387995690107,
+                "exclusive_wall_seconds": 0.012825387995690107
+              },
+              "fnirt_linearization": {
+                "calls": 47,
+                "wall_seconds": 0.668376131914556,
+                "exclusive_wall_seconds": 0.03057788498699665
+              },
+              "fnirt_joint_linearization": {
+                "calls": 47,
+                "wall_seconds": 0.8190828142687678,
+                "exclusive_wall_seconds": 0.040144736878573895
+              },
+              "fnirt_pcg_matvec": {
+                "calls": 7266,
+                "wall_seconds": 21.584037403576076,
+                "exclusive_wall_seconds": 5.157080377917737
+              },
+              "fnirt_pcg": {
+                "calls": 47,
+                "wall_seconds": 27.591307176742703,
+                "exclusive_wall_seconds": 6.007269773166627
+              },
+              "fnirt_topology": {
+                "calls": 6,
+                "wall_seconds": 0.03960647853091359,
+                "exclusive_wall_seconds": 0.03656167443841696
+              },
+              "fnirt_smoothing_reference": {
+                "calls": 1,
+                "wall_seconds": 2.5131739675998688e-06,
+                "exclusive_wall_seconds": 2.5131739675998688e-06
+              }
+            },
+            "operation_counts": {
+              "fnirt_cost_evaluation": 100,
+              "fnirt_pcg_matvec": 7266
+            },
+            "cuda_tensor_api_calls": {},
+            "actual_cuda_event_counts": {},
+            "profiled_cuda_device_time_us": {},
+            "profile_windows": 0,
+            "profiler_scope": "not profiled",
+            "phase_timing_scope": "nested CPU wall clocks, no extra GPU fences; dispatched GPU work may finish in subsequent phases",
+            "instrumentation_changes_timing": false
+          },
+          "paired": {
+            "image": {
+              "pearson_r": 0.997717884308342,
+              "mae": 4.871588491441522,
+              "rmse": 16.832178816527826
+            },
+            "support_dice": 0.9992216163781301,
+            "coefficient_shape_matches": true,
+            "coefficient_contract_checks": {
+              "shape_equal": true,
+              "pixdim_equal": true,
+              "stored_affine_equal": true,
+              "intent_code_equal": true,
+              "intent_p1_equal": true,
+              "intent_p2_equal": true,
+              "intent_p3_equal": true,
+              "qoffset_x_equal": true,
+              "qoffset_y_equal": true,
+              "qoffset_z_equal": true,
+              "sform_code_equal": true,
+              "qform_code_equal": true
+            },
+            "coefficient_grid_matches": true,
+            "coefficient_intent": 2007,
+            "physical_grid_checks": {
+              "official_warped": {
+                "shape_equal": true,
+                "affine_equal": true,
+                "pixdim_equal": true
+              },
+              "fnit_warped": {
+                "shape_equal": true,
+                "affine_equal": true,
+                "pixdim_equal": true
+              },
+              "reference_mask": {
+                "shape_equal": true,
+                "affine_equal": true,
+                "pixdim_equal": true
+              }
+            },
+            "reference_grid_matches": true,
+            "jacobian": {
+              "minimum": 0.03243128955364227,
+              "maximum": 1.7838549613952637,
+              "nonpositive_fraction": 0.0
+            },
+            "coefficients": {
+              "pearson_r": 0.997633950699997,
+              "mae": 0.04316046592588299,
+              "rmse": 0.12872140684760583,
+              "metadata_contract_matches": true
+            },
+            "nonlinear_jacobian_paired": {
+              "pearson_r": 0.9981231158138705,
+              "mae": 0.007150188610094327,
+              "rmse": 0.015219036648404478,
+              "official_grid_checks": {
+                "shape_equal": true,
+                "affine_equal": true,
+                "pixdim_equal": true
+              }
+            }
+          }
+        },
+        {
+          "condition": "warm_1",
+          "wall_seconds": 30.421731720212847,
+          "peak_allocated_bytes": 1178094592,
+          "peak_reserved_bytes": 1491075072,
+          "process_peak_cpu_rss_kb": 1063124,
+          "whole_gpu_observation": {
+            "scope": "whole GPU; includes unrelated processes",
+            "sample_interval_seconds": 1.0,
+            "samples": 29,
+            "gpu_utilization_percent": {
+              "mean": 99.06896551724138,
+              "median": 100.0,
+              "p95": 100.0,
+              "minimum": 80.0,
+              "maximum": 100.0
+            },
+            "whole_gpu_used_mib": {
+              "mean": 31257.655172413793,
+              "median": 31311.0,
+              "p95": 31719.0,
+              "minimum": 30473.0,
+              "maximum": 31723.0
+            },
+            "uuid_mapping_available": true
+          },
+          "measurement": {
+            "phase_timings": {
+              "fnirt_smoothing": {
+                "calls": 18,
+                "wall_seconds": 0.12700924510136247,
+                "exclusive_wall_seconds": 0.12700787791982293
+              },
+              "fnirt_expand_coefficients": {
+                "calls": 20819,
+                "wall_seconds": 2.951844833791256,
+                "exclusive_wall_seconds": 2.951844833791256
+              },
+              "fnirt_bending_energy": {
+                "calls": 200,
+                "wall_seconds": 0.2071764669381082,
+                "exclusive_wall_seconds": 0.2071764669381082
+              },
+              "fnirt_cost_evaluation": {
+                "calls": 100,
+                "wall_seconds": 1.0752323772758245,
+                "exclusive_wall_seconds": 0.9567273301072419
+              },
+              "fnirt_adjoint_field": {
+                "calls": 20620,
+                "wall_seconds": 2.4753777072764933,
+                "exclusive_wall_seconds": 2.4753777072764933
+              },
+              "fnirt_bending_normal": {
+                "calls": 13985,
+                "wall_seconds": 10.93923116195947,
+                "exclusive_wall_seconds": 10.93923116195947
+              },
+              "fnirt_design_diagonal": {
+                "calls": 178,
+                "wall_seconds": 0.02496360521763563,
+                "exclusive_wall_seconds": 0.02496360521763563
+              },
+              "fnirt_bending_diagonal": {
+                "calls": 84,
+                "wall_seconds": 0.010410318151116371,
+                "exclusive_wall_seconds": 0.010410318151116371
+              },
+              "fnirt_linearization": {
+                "calls": 47,
+                "wall_seconds": 0.6176438224501908,
+                "exclusive_wall_seconds": 0.029026547446846962
+              },
+              "fnirt_joint_linearization": {
+                "calls": 47,
+                "wall_seconds": 0.7429972817189991,
+                "exclusive_wall_seconds": 0.02152066258713603
+              },
+              "fnirt_pcg_matvec": {
+                "calls": 7266,
+                "wall_seconds": 21.345306267030537,
+                "exclusive_wall_seconds": 5.101517704781145
+              },
+              "fnirt_pcg": {
+                "calls": 47,
+                "wall_seconds": 27.932732838671654,
+                "exclusive_wall_seconds": 6.587426571641117
+              },
+              "fnirt_topology": {
+                "calls": 6,
+                "wall_seconds": 0.038225994911044836,
+                "exclusive_wall_seconds": 0.035270658787339926
+              },
+              "fnirt_smoothing_reference": {
+                "calls": 1,
+                "wall_seconds": 1.3671815395355225e-06,
+                "exclusive_wall_seconds": 1.3671815395355225e-06
+              }
+            },
+            "operation_counts": {
+              "fnirt_cost_evaluation": 100,
+              "fnirt_pcg_matvec": 7266
+            },
+            "cuda_tensor_api_calls": {},
+            "actual_cuda_event_counts": {},
+            "profiled_cuda_device_time_us": {},
+            "profile_windows": 0,
+            "profiler_scope": "not profiled",
+            "phase_timing_scope": "nested CPU wall clocks, no extra GPU fences; dispatched GPU work may finish in subsequent phases",
+            "instrumentation_changes_timing": false
+          },
+          "paired": {
+            "image": {
+              "pearson_r": 0.997717884308342,
+              "mae": 4.871588491441522,
+              "rmse": 16.832178816527826
+            },
+            "support_dice": 0.9992216163781301,
+            "coefficient_shape_matches": true,
+            "coefficient_contract_checks": {
+              "shape_equal": true,
+              "pixdim_equal": true,
+              "stored_affine_equal": true,
+              "intent_code_equal": true,
+              "intent_p1_equal": true,
+              "intent_p2_equal": true,
+              "intent_p3_equal": true,
+              "qoffset_x_equal": true,
+              "qoffset_y_equal": true,
+              "qoffset_z_equal": true,
+              "sform_code_equal": true,
+              "qform_code_equal": true
+            },
+            "coefficient_grid_matches": true,
+            "coefficient_intent": 2007,
+            "physical_grid_checks": {
+              "official_warped": {
+                "shape_equal": true,
+                "affine_equal": true,
+                "pixdim_equal": true
+              },
+              "fnit_warped": {
+                "shape_equal": true,
+                "affine_equal": true,
+                "pixdim_equal": true
+              },
+              "reference_mask": {
+                "shape_equal": true,
+                "affine_equal": true,
+                "pixdim_equal": true
+              }
+            },
+            "reference_grid_matches": true,
+            "jacobian": {
+              "minimum": 0.03243128955364227,
+              "maximum": 1.7838549613952637,
+              "nonpositive_fraction": 0.0
+            },
+            "coefficients": {
+              "pearson_r": 0.997633950699997,
+              "mae": 0.04316046592588299,
+              "rmse": 0.12872140684760583,
+              "metadata_contract_matches": true
+            },
+            "nonlinear_jacobian_paired": {
+              "pearson_r": 0.9981231158138705,
+              "mae": 0.007150188610094327,
+              "rmse": 0.015219036648404478,
+              "official_grid_checks": {
+                "shape_equal": true,
+                "affine_equal": true,
+                "pixdim_equal": true
+              }
+            }
+          }
+        }
+      ],
+      "profile": {
+        "condition": "profiled",
+        "wall_seconds": 192.9400901561603,
+        "peak_allocated_bytes": 1178094592,
+        "peak_reserved_bytes": 1491075072,
+        "process_peak_cpu_rss_kb": 1315376,
+        "whole_gpu_observation": {
+          "scope": "whole GPU; includes unrelated processes",
+          "sample_interval_seconds": 1.0,
+          "samples": 168,
+          "gpu_utilization_percent": {
+            "mean": 98.79166666666667,
+            "median": 100.0,
+            "p95": 100.0,
+            "minimum": 66.0,
+            "maximum": 100.0
+          },
+          "whole_gpu_used_mib": {
+            "mean": 42279.82738095238,
+            "median": 47774.0,
+            "p95": 47805.0,
+            "minimum": 30485.0,
+            "maximum": 47837.0
+          },
+          "uuid_mapping_available": true
+        },
+        "measurement": {
+          "phase_timings": {
+            "fnirt_smoothing": {
+              "calls": 18,
+              "wall_seconds": 0.12222967064008117,
+              "exclusive_wall_seconds": 0.12222800171002746
+            },
+            "fnirt_expand_coefficients": {
+              "calls": 20819,
+              "wall_seconds": 4.211725128814578,
+              "exclusive_wall_seconds": 4.211725128814578
+            },
+            "fnirt_bending_energy": {
+              "calls": 200,
+              "wall_seconds": 0.2926377644762397,
+              "exclusive_wall_seconds": 0.2926377644762397
+            },
+            "fnirt_cost_evaluation": {
+              "calls": 100,
+              "wall_seconds": 1.3001754120923579,
+              "exclusive_wall_seconds": 1.1329298987984657
+            },
+            "fnirt_adjoint_field": {
+              "calls": 20620,
+              "wall_seconds": 3.338682427071035,
+              "exclusive_wall_seconds": 3.338682427071035
+            },
+            "fnirt_bending_normal": {
+              "calls": 13985,
+              "wall_seconds": 15.230265250429511,
+              "exclusive_wall_seconds": 15.230265250429511
+            },
+            "fnirt_design_diagonal": {
+              "calls": 178,
+              "wall_seconds": 0.035163382068276405,
+              "exclusive_wall_seconds": 0.035163382068276405
+            },
+            "fnirt_bending_diagonal": {
+              "calls": 84,
+              "wall_seconds": 0.014051766134798527,
+              "exclusive_wall_seconds": 0.014051766134798527
+            },
+            "fnirt_linearization": {
+              "calls": 47,
+              "wall_seconds": 0.7608899916522205,
+              "exclusive_wall_seconds": 0.04361828090623021
+            },
+            "fnirt_joint_linearization": {
+              "calls": 47,
+              "wall_seconds": 0.935333595611155,
+              "exclusive_wall_seconds": 0.03156745480373502
+            },
+            "fnirt_pcg_matvec": {
+              "calls": 7266,
+              "wall_seconds": 30.546871224883944,
+              "exclusive_wall_seconds": 7.933491517324001
+            },
+            "fnirt_pcg": {
+              "calls": 47,
+              "wall_seconds": 189.26019178330898,
+              "exclusive_wall_seconds": 158.71332055842504
+            },
+            "fnirt_topology": {
+              "calls": 6,
+              "wall_seconds": 0.055668567307293415,
+              "exclusive_wall_seconds": 0.05176743771880865
+            },
+            "fnirt_smoothing_reference": {
+              "calls": 1,
+              "wall_seconds": 1.6689300537109375e-06,
+              "exclusive_wall_seconds": 1.6689300537109375e-06
+            }
+          },
+          "operation_counts": {
+            "fnirt_cost_evaluation": 100,
+            "fnirt_pcg_matvec": 7266
+          },
+          "cuda_tensor_api_calls": {
+            "__float__": 415,
+            "cpu": 7271,
+            "__bool__": 47
+          },
+          "actual_cuda_event_counts": {
+            "cudaMemcpyAsync": 8147,
+            "H2D": 72,
+            "cudaStreamSynchronize": 8016,
+            "cudaLaunchKernel": 1453839,
+            "kernel": 1553433,
+            "D2D": 131,
+            "D2H": 7944,
+            "cuLaunchKernel": 66,
+            "cudaPeekAtLastError": 216,
+            "cudaDeviceGetAttribute": 36,
+            "cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags": 281210,
+            "cudaFuncSetAttribute": 198196,
+            "cudaFuncGetAttributes": 114061,
+            "cudaLaunchKernelExC": 99528,
+            "cudaMemsetAsync": 1295,
+            "device_memset": 1295,
+            "cudaDeviceSynchronize": 115
+          },
+          "profiled_cuda_device_time_us": {
+            "H2D": 4225.483999999968,
+            "kernel": 5774132.902000837,
+            "D2D": 273.41100000012375,
+            "D2H": 14382.31699999882,
+            "device_memset": 1162.9249999999665
+          },
+          "profile_windows": 114,
+          "profiler_scope": "complete CUDA-only registration; window fences included",
+          "phase_timing_scope": "nested CPU wall clocks, no extra GPU fences; dispatched GPU work may finish in subsequent phases",
+          "instrumentation_changes_timing": true
+        },
+        "paired": {
+          "image": {
+            "pearson_r": 0.997717884308342,
+            "mae": 4.871588491441522,
+            "rmse": 16.832178816527826
+          },
+          "support_dice": 0.9992216163781301,
+          "coefficient_shape_matches": true,
+          "coefficient_contract_checks": {
+            "shape_equal": true,
+            "pixdim_equal": true,
+            "stored_affine_equal": true,
+            "intent_code_equal": true,
+            "intent_p1_equal": true,
+            "intent_p2_equal": true,
+            "intent_p3_equal": true,
+            "qoffset_x_equal": true,
+            "qoffset_y_equal": true,
+            "qoffset_z_equal": true,
+            "sform_code_equal": true,
+            "qform_code_equal": true
+          },
+          "coefficient_grid_matches": true,
+          "coefficient_intent": 2007,
+          "physical_grid_checks": {
+            "official_warped": {
+              "shape_equal": true,
+              "affine_equal": true,
+              "pixdim_equal": true
+            },
+            "fnit_warped": {
+              "shape_equal": true,
+              "affine_equal": true,
+              "pixdim_equal": true
+            },
+            "reference_mask": {
+              "shape_equal": true,
+              "affine_equal": true,
+              "pixdim_equal": true
+            }
+          },
+          "reference_grid_matches": true,
+          "jacobian": {
+            "minimum": 0.03243128955364227,
+            "maximum": 1.7838549613952637,
+            "nonpositive_fraction": 0.0
+          },
+          "coefficients": {
+            "pearson_r": 0.997633950699997,
+            "mae": 0.04316046592588299,
+            "rmse": 0.12872140684760583,
+            "metadata_contract_matches": true
+          },
+          "nonlinear_jacobian_paired": {
+            "pearson_r": 0.9981231158138705,
+            "mae": 0.007150188610094327,
+            "rmse": 0.015219036648404478,
+            "official_grid_checks": {
+              "shape_equal": true,
+              "affine_equal": true,
+              "pixdim_equal": true
+            }
+          }
+        }
+      },
+      "source_snapshot_matches_reported_hashes": true
+    },
+    "diagnostic_fnirt_dense": {
+      "schema_version": 1,
+      "function": "fnirt",
+      "source_sha256": {
+        "src/fnit/fnirt/_smoothing_triton.py": "4b6293eb4210b18a91de647003804cf1aa1f50780449a073e350f9177982227b",
+        "src/fnit/fnirt/io.py": "ee79183709258f2e71dcd110f3c922b1cc7d20a979161ae1c86c2c627becf366",
+        "src/fnit/fnirt/__main__.py": "3d2438ae92f4746e9ffaa1f837b1fe803f6281091d1f31f8c95643716f257d9a",
+        "src/fnit/fnirt/cli.py": "9c143739510dd245f76bd98a80610fdbf6ca65519cd59b41f4a9e233b172e53c",
+        "src/fnit/fnirt/optimizer.py": "903d5031058c96aa9e5fdc29736619fe636b62422cd2646b527df49011d173fd",
+        "src/fnit/fnirt/registration.py": "9e5747292bb5bf79d1dd77bf2a6b76a94d99d33b5a6453ff79dc1b843bcda991",
+        "src/fnit/fnirt/topology.py": "150f65a73baf796f98e6304d0c209288816ee75485be5d93032db46edeb52900",
+        "src/fnit/fnirt/_topology_triton.py": "3f61e452228a9c3dff85caff58ed1103e7b89783c86838bf1e70e322ae3f65f1",
+        "src/fnit/fnirt/spline.py": "79ec750523d69342bf4926adf5e715d91a59749026fc5253ee96d765c0208cad",
+        "src/fnit/fnirt/standalone.py": "83a51a301e1d9145051a12e3b4f10b452c319d1e7a7962308443a048b723ade6",
+        "src/fnit/fnirt/__init__.py": "3480673ed6cbbfc38e573ac64bab6d14fabffc46585a29c74a3d916c2739294d",
+        "src/fnit/fmri/bbr.py": "0ca14f3343d6b5bf09ea93f6ec94de9f2c0cce19fdf8ea005a87ff8e03f48fc2",
+        "src/fnit/fmri/normalization.py": "a1f6f07d3356d40727a2788bd2d54a62b6038fefbc416598463a9f37143ab307",
+        "src/fnit/flirt/search.py": "9b50908c1bead992c55255d2ed3c6cf266135e042c276b9ba8176fef03edae4c",
+        "src/fnit/flirt/batched.py": "10115b3fd51497162c2ebc1a7ae52999a4c3079810e18906ae9c0c363a457719",
+        "src/fnit/flirt/__main__.py": "03eb6210ee12d659108106a6126a870a9d5bc89ba95c116cd519e2764b0e092f",
+        "src/fnit/flirt/cli.py": "f57d65c320aee278820de2fb31cc764e7bee911e3228d3a904108d2a75e8142e",
+        "src/fnit/flirt/types.py": "55a3abf2d7ce7889c297df95289890a589d1721b9fe3b157aa90e87819ed8e21",
+        "src/fnit/flirt/standalone.py": "a5ffc8e847bfc5219ef8e068a34eb81bab4b6fceb7ea39a497eb573108a8115e",
+        "src/fnit/flirt/__init__.py": "58b1ae43c50bd2942398f272c013f5bc743ce6a78abdaab7c93eeae1949447af",
+        "src/fnit/flirt/affine_batch.py": "8aa427ea1b185deea2ff2295e01c972bb371cb5a4b23504ce13ef79ca1d6155f",
+        "src/fnit/flirt/core.py": "21ee44e0ae734d6c90bf78e16e58bd1035634c60d10fc4a4c97529815a283a59",
+        "src/fnit/flirt/coordinates.py": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e",
+        "src/fnit/flirt/_batched_cuda.py": "c6ac99f6b0499c2b081969448dc9492906232daac247477edff0cb00ac43cd74",
+        "src/fnit/_nib.py": "568d113432c1a0c50a3b0b635188173e69be1c7436d851de2568bca9b55ab94e",
+        "src/fnit/_transforms.py": "be01fa24cd0c17bb1aa8ac7792cdf0b62c657037808c643427a1b11cc4c05340",
+        "src/fnit/fmri/_bbr_cuda.py": "c79fdd0c20e68628585a46b946d3ef1f532373aaf8c0371eb5ed0ae25a8a5090"
+      },
+      "benchmark_tool_sha256": "0ea32d44b626b210920a211473bfc4803978b89c5434b5d045f8eee5c6fa111f",
+      "support_tool_sha256": "a20768489533889d50ddfaadead5c32f3569b2198b4032f37e9c6a2e0976f870",
+      "environment": {
+        "torch": "2.5.1",
+        "cuda_runtime": "11.8",
+        "gpu_name": "NVIDIA H100 PCIe"
+      },
+      "timing_scope": "complete function including ArrayProxy reads/decompression and CPU output conversion; excludes output persistence and offline metrics; shared GPU",
+      "scientific_conditions": {
+        "fnirt_config": "t1",
+        "same_fsl_initial_affine": true,
+        "same_fsl_wmseg": false,
+        "fnirt_execution": "optimized",
+        "bbr_execution": "default",
+        "input_arrayproxy_read_included": true,
+        "wm_header": "legacy",
+        "affine_geometry": "header_pixdim",
+        "fnirt_blur_reference": false,
+        "fnirt_bending_reference": true,
+        "half_precision": false,
+        "default_tf32": true
+      },
+      "runs": [
+        {
+          "condition": "cold_0",
+          "wall_seconds": 52.4742699386552,
+          "peak_allocated_bytes": 1178222080,
+          "peak_reserved_bytes": 1491075072,
+          "process_peak_cpu_rss_kb": 915828,
+          "whole_gpu_observation": {
+            "scope": "whole GPU; includes unrelated processes",
+            "sample_interval_seconds": 1.0,
+            "samples": 49,
+            "gpu_utilization_percent": {
+              "mean": 98.18367346938776,
+              "median": 100.0,
+              "p95": 100.0,
+              "minimum": 78.0,
+              "maximum": 100.0
+            },
+            "whole_gpu_used_mib": {
+              "mean": 26901.30612244898,
+              "median": 26572.0,
+              "p95": 27634.0,
+              "minimum": 24928.0,
+              "maximum": 27634.0
+            },
+            "uuid_mapping_available": true
+          },
+          "measurement": {
+            "phase_timings": {
+              "fnirt_smoothing": {
+                "calls": 18,
+                "wall_seconds": 1.1833381569013,
+                "exclusive_wall_seconds": 1.183334277011454
+              },
+              "fnirt_expand_coefficients": {
+                "calls": 20546,
+                "wall_seconds": 3.08005722053349,
+                "exclusive_wall_seconds": 3.08005722053349
+              },
+              "fnirt_bending_energy": {
+                "calls": 200,
+                "wall_seconds": 0.21603072993457317,
+                "exclusive_wall_seconds": 0.21603072993457317
+              },
+              "fnirt_cost_evaluation": {
+                "calls": 100,
+                "wall_seconds": 1.2794789392501116,
+                "exclusive_wall_seconds": 1.0165673205628991
+              },
+              "fnirt_adjoint_field": {
+                "calls": 20347,
+                "wall_seconds": 2.436697077937424,
+                "exclusive_wall_seconds": 2.436697077937424
+              },
+              "fnirt_bending_normal": {
+                "calls": 13803,
+                "wall_seconds": 21.82667032396421,
+                "exclusive_wall_seconds": 21.82667032396421
+              },
+              "fnirt_design_diagonal": {
+                "calls": 178,
+                "wall_seconds": 0.024965889751911163,
+                "exclusive_wall_seconds": 0.024965889751911163
+              },
+              "fnirt_bending_diagonal": {
+                "calls": 84,
+                "wall_seconds": 0.01105585228651762,
+                "exclusive_wall_seconds": 0.01105585228651762
+              },
+              "fnirt_linearization": {
+                "calls": 47,
+                "wall_seconds": 0.633897019084543,
+                "exclusive_wall_seconds": 0.02835164638236165
+              },
+              "fnirt_joint_linearization": {
+                "calls": 47,
+                "wall_seconds": 0.802848475985229,
+                "exclusive_wall_seconds": 0.031851360108703375
+              },
+              "fnirt_pcg_matvec": {
+                "calls": 7175,
+                "wall_seconds": 31.991645080968738,
+                "exclusive_wall_seconds": 4.993307386059314
+              },
+              "fnirt_pcg": {
+                "calls": 47,
+                "wall_seconds": 48.08658309932798,
+                "exclusive_wall_seconds": 16.094938018359244
+              },
+              "fnirt_topology": {
+                "calls": 6,
+                "wall_seconds": 0.03930418845266104,
+                "exclusive_wall_seconds": 0.03597113862633705
+              },
+              "fnirt_smoothing_reference": {
+                "calls": 1,
+                "wall_seconds": 3.8798898458480835e-06,
+                "exclusive_wall_seconds": 3.8798898458480835e-06
+              }
+            },
+            "operation_counts": {
+              "fnirt_cost_evaluation": 100,
+              "fnirt_pcg_matvec": 7175
+            },
+            "cuda_tensor_api_calls": {},
+            "actual_cuda_event_counts": {},
+            "profiled_cuda_device_time_us": {},
+            "profile_windows": 0,
+            "profiler_scope": "not profiled",
+            "phase_timing_scope": "nested CPU wall clocks, no extra GPU fences; dispatched GPU work may finish in subsequent phases",
+            "instrumentation_changes_timing": false
+          },
+          "paired": {
+            "image": {
+              "pearson_r": 0.9978417313178952,
+              "mae": 4.979736334630085,
+              "rmse": 16.371966625125303
+            },
+            "support_dice": 0.9992489878938413,
+            "coefficient_shape_matches": true,
+            "coefficient_contract_checks": {
+              "shape_equal": true,
+              "pixdim_equal": true,
+              "stored_affine_equal": true,
+              "intent_code_equal": true,
+              "intent_p1_equal": true,
+              "intent_p2_equal": true,
+              "intent_p3_equal": true,
+              "qoffset_x_equal": true,
+              "qoffset_y_equal": true,
+              "qoffset_z_equal": true,
+              "sform_code_equal": true,
+              "qform_code_equal": true
+            },
+            "coefficient_grid_matches": true,
+            "coefficient_intent": 2007,
+            "physical_grid_checks": {
+              "official_warped": {
+                "shape_equal": true,
+                "affine_equal": true,
+                "pixdim_equal": true
+              },
+              "fnit_warped": {
+                "shape_equal": true,
+                "affine_equal": true,
+                "pixdim_equal": true
+              },
+              "reference_mask": {
+                "shape_equal": true,
+                "affine_equal": true,
+                "pixdim_equal": true
+              }
+            },
+            "reference_grid_matches": true,
+            "jacobian": {
+              "minimum": 0.03564012795686722,
+              "maximum": 1.8000693321228027,
+              "nonpositive_fraction": 0.0
+            },
+            "coefficients": {
+              "pearson_r": 0.9977465235928288,
+              "mae": 0.042222388018296246,
+              "rmse": 0.12553438032730063,
+              "metadata_contract_matches": true
+            },
+            "nonlinear_jacobian_paired": {
+              "pearson_r": 0.9980074856160985,
+              "mae": 0.00746379374712585,
+              "rmse": 0.015674587580092086,
+              "official_grid_checks": {
+                "shape_equal": true,
+                "affine_equal": true,
+                "pixdim_equal": true
+              }
+            }
+          }
+        }
+      ],
+      "source_snapshot_matches_reported_hashes": true
+    }
+  },
+  "official": {
+    "schema_version": 1,
+    "scope": "offline FSL BBR and FNIRT oracles only; FNIT runtime does not call FSL",
+    "official_version": "6.0.7.22",
+    "commands": {
+      "bbr": {
+        "wall_seconds": 45.09320712881163,
+        "wrapper_exit_code": 255,
+        "actual_child_exit_zero": true,
+        "options": "-dof 6 -cost bbr -wmseg SAME -init SAME -schedule bbr.sch; no fieldmap",
+        "timing_scope": "full CPU command with image I/O/startup and exec/exit-only strace; shared CPU"
+      },
+      "fnirt": {
+        "wall_seconds": 217.55802505090833,
+        "wrapper_exit_code": 255,
+        "actual_child_exit_zero": true,
+        "options": "same input/reference/reference-mask/affine; T1_2_MNI152_2mm.cnf six-level config",
+        "timing_scope": "full CPU command with image I/O/startup and exec/exit-only strace; shared CPU"
+      }
+    },
+    "paired_artifact_checks": {
+      "bbr": {
+        "matrix": {
+          "available": true,
+          "matrix_file_bytes_equal_to_pinned": true
+        },
+        "moved": {
+          "available": true,
+          "voxels_bitwise_equal_to_pinned": true,
+          "header_binaryblock_equal_to_pinned": true,
+          "finite": true
+        }
+      },
+      "fnirt": {
+        "coeff": {
+          "available": true,
+          "voxels_bitwise_equal_to_pinned": true,
+          "header_binaryblock_equal_to_pinned": true,
+          "finite": true
+        },
+        "moved": {
+          "available": true,
+          "voxels_bitwise_equal_to_pinned": true,
+          "header_binaryblock_equal_to_pinned": true,
+          "finite": true
+        }
+      }
+    }
+  },
+  "pull_oracle": {
+    "schema_version": 1,
+    "scope": "offline FSL applywarp trilinear source-world coordinate oracle, same fresh FNIRT coefficients; no FNIT runtime official calls",
+    "official_grid_checks": {
+      "x": {
+        "official_child_exit_zero": true,
+        "shape_matches_reference": true,
+        "affine_matches_reference": true,
+        "pixdim_matches_reference": true
+      },
+      "y": {
+        "official_child_exit_zero": true,
+        "shape_matches_reference": true,
+        "affine_matches_reference": true,
+        "pixdim_matches_reference": true
+      },
+      "z": {
+        "official_child_exit_zero": true,
+        "shape_matches_reference": true,
+        "affine_matches_reference": true,
+        "pixdim_matches_reference": true
+      }
+    },
+    "conditions": {
+      "before_fnirt": {
+        "selection": "reference mask and positive support in both warped images",
+        "compared_voxels": 228458,
+        "pull_distance_mm": {
+          "mean": 0.08663177490234375,
+          "median": 0.05322236567735672,
+          "p95": 0.23350882083177565
+        }
+      },
+      "after_fnirt_legacy": {
+        "selection": "reference mask and positive support in both warped images",
+        "compared_voxels": 228457,
+        "pull_distance_mm": {
+          "mean": 0.08635218441486359,
+          "median": 0.05233226716518402,
+          "p95": 0.22290304303169214
+        }
+      },
+      "after_fnirt_reference": {
+        "selection": "reference mask and positive support in both warped images",
+        "compared_voxels": 228458,
+        "pull_distance_mm": {
+          "mean": 0.08663177490234375,
+          "median": 0.05322236567735672,
+          "p95": 0.23350882083177565
+        }
+      },
+      "after_fnirt": {
+        "selection": "reference mask and positive support in both warped images",
+        "compared_voxels": 228458,
+        "pull_distance_mm": {
+          "mean": 0.08642064034938812,
+          "median": 0.05176282301545143,
+          "p95": 0.23293507769703858
+        }
+      }
+    }
+  },
+  "anatomical_cache": {
+    "schema_version": 1,
+    "scope": "real T1 SynthStrip/FAST/T1-MNI subject-level cache; complete call including source/weight/output hash verification; shared GPU",
+    "source_sha256": {
+      "src/fnit/fmri/_anatomical.py": "e5160a0bac0d2b19122bd4a1cbefbe501607b3386c1d3670e0b7d8692e20efe5",
+      "src/fnit/fmri/normalization.py": "7a39b97b3e729af6ad4a688b123a43d9b4087a45af663c64ac9c5affd52104c5",
+      "src/fnit/fmri/end_to_end.py": "bce80a8a61ee92a94497c95db857fcc24de845c4747721c880a89d5a114ebc9d"
+    },
+    "implementation_source_sha256": "bbdbc8f02c56558b7d60778c9082b37c16fe1b60aa83968333a26c80c6d51324",
+    "cache_tool_sha256": "c0ec7e22a2c9132b0ed9f5cf54ab4d04f79ef94874f8bbb17241c7adeed18410",
+    "artifact_hashes_unchanged": true,
+    "first_call_generated": true,
+    "second_call_reused": true,
+    "calls": [
+      {
+        "call": 0,
+        "wall_seconds": 41.118023552931845,
+        "reused": false,
+        "timing_seconds": {
+          "t1_synthstrip": 5.0424727806821465,
+          "template_preparation": 0.08147166389971972,
+          "fast": 1.9571737083606422,
+          "t1_to_mni_affine": 4.330715057905763,
+          "t1_to_mni_nonlinear": 29.04120413819328,
+          "warp_conversion": 0.5022138599306345,
+          "anatomical_cache_lookup": 0.1189962811768055
+        },
+        "peak_allocated_bytes": 4683179520
+      },
+      {
+        "call": 1,
+        "wall_seconds": 0.07847083080559969,
+        "reused": true,
+        "timing_seconds": {
+          "t1_synthstrip": 0.0,
+          "template_preparation": 0.0,
+          "fast": 0.0,
+          "t1_to_mni_affine": 0.0,
+          "t1_to_mni_nonlinear": 0.0,
+          "warp_conversion": 0.0,
+          "anatomical_cache_lookup": 0.07789058890193701
+        },
+        "peak_allocated_bytes": 43829760
+      }
+    ]
+  },
+  "artifact_gates": {
+    "bbr_v1_tensor_vs_final_v4_fused": {
+      ".nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "matrix_file_bytes_equal": true
+    },
+    "before_bbr_cold_vs_warm": {
+      ".nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "matrix_file_bytes_equal": true
+    },
+    "before_bbr_profile_vs_warm": {
+      ".nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "matrix_file_bytes_equal": true
+    },
+    "before_bbr_chain_cold_vs_warm": {
+      ".nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "matrix_file_bytes_equal": true
+    },
+    "before_bbr_chain_profile_vs_warm": {
+      ".nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "matrix_file_bytes_equal": true
+    },
+    "before_fnirt_cold_vs_warm": {
+      ".nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "_coeff.nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "_pull.nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "_jacobian.nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "_nonlinear_jacobian.nii.gz": {
+        "available_in_both": false
+      }
+    },
+    "before_fnirt_profile_vs_warm": {
+      ".nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "_coeff.nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "_pull.nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "_jacobian.nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "_nonlinear_jacobian.nii.gz": {
+        "available_in_both": false
+      }
+    },
+    "final_bbr_cold_vs_warm": {
+      ".nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "matrix_file_bytes_equal": true
+    },
+    "final_bbr_profile_vs_warm": {
+      ".nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "matrix_file_bytes_equal": true
+    },
+    "final_bbr_chain_cold_vs_warm": {
+      ".nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "matrix_file_bytes_equal": true
+    },
+    "final_bbr_chain_profile_vs_warm": {
+      ".nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "matrix_file_bytes_equal": true
+    },
+    "after_fnirt_reference_cold_vs_warm": {
+      ".nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "_coeff.nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "_pull.nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "_jacobian.nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "_nonlinear_jacobian.nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      }
+    },
+    "after_fnirt_cold_vs_warm": {
+      ".nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "_coeff.nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "_pull.nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "_jacobian.nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "_nonlinear_jacobian.nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      }
+    },
+    "after_fnirt_profile_vs_warm": {
+      ".nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "_coeff.nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "_pull.nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "_jacobian.nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "_nonlinear_jacobian.nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      }
+    },
+    "fnirt_before_vs_current_reference": {
+      ".nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "_coeff.nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "_pull.nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "_jacobian.nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "_nonlinear_jacobian.nii.gz": {
+        "available_in_both": false
+      }
+    },
+    "fnirt_current_reference_vs_optimized": {
+      ".nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": false,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 178.82664489746094
+      },
+      "_coeff.nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": false,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 2.284490466117859
+      },
+      "_pull.nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": false,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.6281509399414062
+      },
+      "_jacobian.nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": false,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.09843069314956665
+      },
+      "_nonlinear_jacobian.nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": false,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.09091782569885254
+      }
+    },
+    "fnirt_dense_normal_diagnostic_vs_reference": {
+      ".nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "_coeff.nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "_pull.nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "_jacobian.nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      },
+      "_nonlinear_jacobian.nii.gz": {
+        "shape_equal": true,
+        "dtype_equal": true,
+        "raw_voxels_bitwise_equal": true,
+        "header_binaryblock_equal": true,
+        "affine_equal": true,
+        "proxy_scaling_equal": true,
+        "extensions_equal": true,
+        "maximum_abs_value_difference": 0.0
+      }
+    }
+  },
+  "fnirt_trace_checks": {
+    "before_reference_level_scalars_equal": true,
+    "dense_normal_reference_level_scalars_equal": true,
+    "reference_repeat_level_scalars_equal": true,
+    "optimized_repeat_level_scalars_equal": true,
+    "reference_pcg_total_iterations": 7175,
+    "optimized_pcg_total_iterations": 7266
+  },
+  "release_source_binding": {
+    "delivered_scalar_report_sha256_before_addendum": "c5171098a9a99dd45e1182c55f4d02ce4bf61d624acf412501bc96236832e927",
+    "active_core_matches_release": {
+      "final_bbr": true,
+      "final_bbr_chain": true,
+      "after_fnirt": true,
+      "after_fnirt_reference": true
+    },
+    "anatomical_integration_matches_release": true,
+    "unchanged_measurement_sources": "Original per-condition source hashes remain the actual measured snapshots. Core BBR/FNIRT/FLIRT/FAST dependencies match this release. normalization.py in standalone snapshots is an older imported but unused module; bbr.py in FNIRT snapshots is an older profiling-hook definition, not invoked by FNIRT. Current normalization/end_to_end/_anatomical hashes are bound separately by the real cache test and controlled BIDS integration gate."
+  }
+}

@@ -89,6 +89,9 @@ result = fMRIVolume_pipeline(
     n_splits=1000,                                    # AROMA 随机抽样次数
     random_state=0,                                   # ICA/AROMA 随机种子
     overwrite=False,                                  # 是否覆盖同名最终结果
+    reuse_anatomical=True,                            # 同一 T1/模板/配置的解剖结果跨 run 复用
+    bbr_execution="batched",                         # batched 批量搜索；reference 串行同算法
+    fnirt_execution="optimized",                     # optimized GPU 算子；reference 保留原执行方式
 )
 print(result.clean_native)  # 个体 EPI 空间清理后 4D BOLD
 print(result.clean_mni)     # MNI152 2 mm 清理后 4D BOLD
@@ -108,9 +111,15 @@ print(result.clean_mni)     # MNI152 2 mm 清理后 4D BOLD
 | `func/sub-0001_task-rest_from-boldref_to-T1w_mode-image_xfm.txt` | BBR FLIRT 4×4 矩阵；surface 流程用它把 EPI BOLD 采样到 T1w。 |
 | `anat/sub-0001_desc-brain_T1w.nii.gz` | SynthStrip 提取的 T1w 脑影像；与源 T1w 同网格。 |
 
-`FMRIVolumeResult` 返回上述五条绝对路径、MNI BOLD 的 JSON 路径及各阶段耗时。已有输出不会自动更新。重跑时用新的 `derivatives_root`，或设置 `overwrite=True`（命令行 `--overwrite`）；新版 MNI BOLD 的 JSON 应包含上述 `MNIInterpolation` 字段。中间的 FEAT、PICA 与 AROMA 文件只在运行时工作目录中存在。表面处理需随后调用 [`fMRISurface_pipeline`](surface.md)。
+`FMRIVolumeResult` 返回上述五条绝对路径、MNI BOLD 的 JSON 路径及各阶段耗时。已有输出需设置 `overwrite=True` 才会替换。`reuse_anatomical=True` 默认把 T1 SynthStrip、FAST、模板提取与 T1→MNI 结果保存在当前被试/会话 `anat/.fnit_anatomical/` 的内部缓存；BIDS 的公开输出仍采用上表命名。缓存核验输入、模板/掩膜、权重、配置、执行模式、实现源码及计算环境，每个输出再校验 SHA-256；改变其中任意一项会重新计算。缓存不完整或文件损坏时会重建。BBR、EPI 脑提取和 BOLD 处理仍按 run 运行。`reuse_anatomical=False`（命令行 `--no-anatomical-cache`）强制重新计算解剖步骤；`overwrite` 不负责清空缓存。
+
+计时 JSON 分别记录 `bbr_initial_flirt`、`bbr_refinement`、`bbr_final_resampling`、`t1_to_mni_affine`、`t1_to_mni_nonlinear`、`warp_conversion` 和 `mni_resampling`。命中缓存时，已复用的计算阶段记为 0，校验与等待时间记为 `anatomical_cache_lookup`，报告的 `anatomical_cache.reused` 为 true。`total` 是此次调用至生成重采样结果的实际墙钟，包含初始化、校验、导入及加载；末尾最终 BIDS 文件复制和 JSON 写盘在该计时外。FEAT、PICA、AROMA 文件仍使用临时工作目录。表面处理随后调用 [`fMRISurface_pipeline`](surface.md)。
+
+`bbr_execution="reference"` 和 `fnirt_execution="reference"` 用于逐项回归，选择同一算法的串行成本/原张量算子；它们保留本次坐标、边界与优化流程的修正。CLI 对应 `--bbr-execution`、`--fnirt-execution`。后者只在 `registration_backend="fnirt"` 时可切换。
 
 ## 全流程 benchmark
+
+当前 BBR/FNIRT 修复、冷/热调用与解剖缓存实测见[BBR](bbr.md#真实-ukb-数据对照)、[T1→MNI](normalization.md#当前真实数据-benchmark)和[当前配准报告](../../validation/fmri/registration_gpu.current.public.json)。以下 490 帧测量绑定其注明源码，未把本次配准时间替换成未经重跑的整链时间。
 
 2026-09-30 用 `3f8b756` 的运行源码，使用一例真实 UKB 原始 BOLD/SBRef 和同被试重建存档中的 `orig/001.mgz` T1 输入，完成完整 490 帧 BIDS volume 流程，启用 WM、CSF 和 24 项运动回归，使用默认 SynthMorph 配准。T1 经 nibabel 逐体素无误差转换；它是存档的皮层重建输入，更早的结构预处理未核对。
 

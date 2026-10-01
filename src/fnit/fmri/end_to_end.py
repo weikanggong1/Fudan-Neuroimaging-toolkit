@@ -11,12 +11,12 @@ import nibabel as nib
 import numpy as np
 import torch
 
-from ..fast import TorchFAST
 from ..synthstrip import SynthStrip
 from .aroma_pipeline import run_aroma_pipeline
 from .bids import locate_bids_inputs
 from .derivatives import ensure_derivative_dataset, fmri_derivative_paths, sidecar, write_json
-from .normalization import register_t1_to_mni, resample_world
+from .normalization import resample_world
+from ._anatomical import prepare_anatomical
 from .pipeline import run_feat_core
 
 
@@ -100,6 +100,9 @@ def fMRIVolume_pipeline(
     n_splits=1000,
     random_state=0,
     overwrite=False,
+    reuse_anatomical=True,
+    bbr_execution="batched",
+    fnirt_execution="optimized",
 ):
     """Run motion/FEAT, SynthStrip/FAST, BBR, PICA/AROMA and MNI resampling.
 
@@ -107,11 +110,20 @@ def fMRIVolume_pipeline(
     fieldmaps or GDC warp are available in the specified UKB example. Any
     associated BIDS fieldmaps currently cause an explicit error in FEAT core.
     """
+    pipeline_started = time.perf_counter()
+    if registration_backend not in ("synthmorph", "fnirt"):
+        raise ValueError("registration_backend must be 'synthmorph' or 'fnirt'")
+    if bbr_execution not in ("reference", "batched"):
+        raise ValueError("bbr_execution must be 'reference' or 'batched'")
+    if fnirt_execution not in ("reference", "optimized"):
+        raise ValueError("fnirt_execution must be 'reference' or 'optimized'")
     if registration_backend == "fnirt":
         from ..fnirt import resolve_fnirt_config
         fnirt_config = resolve_fnirt_config(fnirt_config, default="t1")
     elif fnirt_config is not None:
         raise ValueError("fnirt_config requires registration_backend='fnirt'")
+    if registration_backend != "fnirt" and fnirt_execution != "optimized":
+        raise ValueError("fnirt_execution requires registration_backend='fnirt'")
     inputs = locate_bids_inputs(
         bids_root, subject=subject, session=session, task=task, run=run,
         acquisition=acquisition, direction=direction,
@@ -152,32 +164,21 @@ def fMRIVolume_pipeline(
     epi_mask = _save_mask(
         strip(reference).mask.data, reference, mask_dir / "epi_synthstrip.nii.gz"
     )
-    t1_extracted = strip(t1w)
-    t1_brain = output / "T1_brain.nii.gz"
-    t1_mask = mask_dir / "T1_synthstrip.nii.gz"
-    t1_extracted.image.save(t1_brain)
-    _save_mask(t1_extracted.mask.data, t1w, t1_mask)
-    if mni_brain_mask is None:
-        template_extracted = strip(mni_template)
-        template_brain_data = np.asarray(template_extracted.image.data, dtype=np.float32)
-        template_mask = _save_mask(
-            template_extracted.mask.data, mni_template,
-            mask_dir / "MNI152_synthstrip.nii.gz",
-        )
-    else:
-        supplied = nib.load(str(mni_brain_mask))
-        if supplied.shape != template.shape or not np.allclose(supplied.affine, template.affine, atol=1e-4):
-            raise ValueError("mni_brain_mask must match mni_template")
-        template_mask = _save_mask(
-            np.asarray(supplied.dataobj), mni_template,
-            mask_dir / "MNI152_brain_mask.nii.gz",
-        )
-        template_brain_data = np.asarray(template.dataobj, dtype=np.float32) * (
-            np.asarray(supplied.dataobj) > 0
-        )
-    mni_brain = output / "MNI152_2mm_brain.nii.gz"
-    nib.save(nib.Nifti1Image(template_brain_data, template.affine), str(mni_brain))
-    timing["synthstrip"] = time.perf_counter() - started
+    timing["epi_synthstrip"] = time.perf_counter() - started
+    anatomical = prepare_anatomical(
+        t1w, mni_template, template_mask=mni_brain_mask, strip=strip,
+        backend=registration_backend, morph_weights=synthmorph_weights,
+        fnirt_config=fnirt_config, device=selected, work_dir=output,
+        cache_dir=paths.anat_dir / ".fnit_anatomical", reuse=reuse_anatomical,
+        fnirt_execution=fnirt_execution,
+    )
+    timing.update(anatomical.timing_seconds)
+    t1_brain = anatomical.path("T1_brain.nii.gz")
+    template_mask = anatomical.path("MNI_mask.nii.gz")
+    wm_pve = anatomical.path("T1_pve_wm.nii.gz")
+    csf_pve = anatomical.path("T1_pve_csf.nii.gz")
+    wm_seg = anatomical.path("T1_wmseg.nii.gz")
+    t1_to_mni = anatomical.registration
 
     started = time.perf_counter()
     feat = run_feat_core(
@@ -190,22 +191,12 @@ def fMRIVolume_pipeline(
     )
     timing["feat_core"] = time.perf_counter() - started
 
-    started = time.perf_counter()
-    tissues = TorchFAST(device=selected)(t1_brain, mask=t1_mask)
-    wm_pve = mask_dir / "T1_pve_wm.nii.gz"
-    csf_pve = mask_dir / "T1_pve_csf.nii.gz"
-    wm_seg = mask_dir / "T1_wmseg.nii.gz"
-    tissues.pve_wm.save(wm_pve)
-    tissues.pve_csf.save(csf_pve)
-    _save_mask(np.asarray(tissues.pve_wm.data) >= 0.5, t1_brain, wm_seg)
-    timing["fast"] = time.perf_counter() - started
-
-    started = time.perf_counter()
     from .bbr import register_bbr
 
     bbr = register_bbr(
         epi=feat.output_dir / "example_func.nii.gz",
         t1=t1_brain, wmseg=wm_seg, device=selected,
+        execution=bbr_execution,
     )
     reg_dir = output / "reg"
     reg_dir.mkdir(exist_ok=True)
@@ -214,15 +205,12 @@ def fMRIVolume_pipeline(
         output=reg_dir / "example_func2highres.nii.gz",
         omat=bbr_matrix,
     )
-    t1_to_mni = register_t1_to_mni(
-        t1_brain, mni_brain, reg_dir,
-        backend=registration_backend,
-        synthmorph_weights=synthmorph_weights,
-        reference_mask=template_mask,
-        fnirt_config=fnirt_config,
-        device=selected,
-    )
-    timing["bbr_and_t1_to_mni"] = time.perf_counter() - started
+    phases = bbr.phase_timings
+    timing["bbr_initial_flirt"] = phases["initial_flirt"]
+    timing["bbr_refinement"] = sum(phases[name] for name in (
+        "boundary_preparation", "coarse_bbr", "local_bbr",
+    ))
+    timing["bbr_final_resampling"] = phases["final_resampling"]
 
     started = time.perf_counter()
     epi_ref = feat.output_dir / "example_func.nii.gz"
@@ -291,7 +279,7 @@ def fMRIVolume_pipeline(
         batch_size=batch_size, device=selected,
     )
     timing["mni_resampling"] = time.perf_counter() - started
-    timing["total"] = sum(timing.values())
+    timing["total"] = time.perf_counter() - pipeline_started
     report = output / "pipeline_report.json"
     report.write_text(json.dumps({
         "input_bold_shape": list(nib.load(str(inputs.bold)).shape),
@@ -301,6 +289,9 @@ def fMRIVolume_pipeline(
         "registration_backend": registration_backend,
         "mni_interpolation": "cubic-bspline-periodic",
         "t1_to_mni_qc": t1_to_mni.qc,
+        "anatomical_cache": {"reused": anatomical.reused,
+                             "fingerprint": anatomical.fingerprint},
+        "bbr_phase_timings": bbr.phase_timings,
         "ica_components": aroma.ica.n_components,
         "ica_converged": aroma.ica.converged,
         "ica_iterations": aroma.ica.n_iterations,

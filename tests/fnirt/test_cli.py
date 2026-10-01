@@ -72,7 +72,7 @@ def test_run_fnirt_converts_affine_and_writes_atomic_outputs(tmp_path, monkeypat
     captured = {"calls": 0}
 
     class FakeFNIRT:
-        def __init__(self, *, device, config):
+        def __init__(self, *, device, config, execution="optimized"):
             captured["device"] = device
             captured["config"] = config
 
@@ -207,7 +207,7 @@ def test_run_fnirt_selects_t1_config(tmp_path, monkeypatch):
     captured = {}
 
     class FakeFNIRT:
-        def __init__(self, *, device, config):
+        def __init__(self, *, device, config, execution="optimized"):
             captured["config"] = config
 
         def __call__(self, source, target, initial, *, reference_mask):
@@ -245,7 +245,7 @@ def test_run_fnirt_uses_fsl_identity_default_cout_and_auto_device(
     captured = {}
 
     class FakeFNIRT:
-        def __init__(self, *, device, config):
+        def __init__(self, *, device, config, execution="optimized"):
             captured["device"] = device
 
         def __call__(self, moving, fixed, moving_to_fixed, *, reference_mask):
@@ -285,7 +285,7 @@ def test_run_fnirt_resolves_extensionless_outputs(
     moving_path, fixed_path, mask_path, matrix_path, fsl_matrix = _fixture(tmp_path)
 
     class FakeFNIRT:
-        def __init__(self, *, device, config):
+        def __init__(self, *, device, config, execution="optimized"):
             pass
 
         def __call__(self, moving, fixed, moving_to_fixed, *, reference_mask):
@@ -375,7 +375,7 @@ def test_no_clobber_conflict_rolls_back_outputs_created_by_this_run(
     competitor = b"created by another process"
 
     class FakeFNIRT:
-        def __init__(self, *, device, config):
+        def __init__(self, *, device, config, execution="optimized"):
             pass
 
         def __call__(self, moving, fixed, moving_to_fixed, *, reference_mask):
@@ -426,6 +426,7 @@ def test_cli_forwards_fsl_roles_and_rejects_unknown_options(monkeypatch):
         "--refmask", "mask.nii.gz",
         "--config", standalone.SUPPORTED_CONFIG,
         "--device", "cuda:0",
+        "--execution", "reference",
         "--overwrite",
     ]
     assert cli.main(arguments) == 0
@@ -441,6 +442,7 @@ def test_cli_forwards_fsl_roles_and_rejects_unknown_options(monkeypatch):
         "refmask": "mask.nii.gz",
         "config": GMFNIRTConfig(),
         "device": "cuda:0",
+        "execution": "reference",
         "overwrite": True,
     }
     with pytest.raises(SystemExit) as error:
@@ -471,6 +473,7 @@ def test_cli_allows_fsl_default_affine_cout_and_device(monkeypatch):
         "refmask": "mask.nii.gz",
         "config": FNIRTConfig(),
         "device": None,
+        "execution": "optimized",
         "overwrite": False,
     }
 
