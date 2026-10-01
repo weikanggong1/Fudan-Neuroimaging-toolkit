@@ -3,6 +3,9 @@ __version__ = "0.16.0"
 
 
 def __getattr__(name):
+    if name in ('fit_dictionary_learning', 'fit_dictionary_learning_streaming'):
+        from . import dictionary_learning
+        return getattr(dictionary_learning, name)
     if name in ('SynthStrip', 'StripResult'):
         from . import synthstrip
         return getattr(synthstrip, name)

@@ -31,11 +31,11 @@ CPU 使用 sklearn 1.7.1；GPU 调用 FNIT 的生产函数。
 评估 voxel 仍参与全数据规范化/SVD，属于未访问训练批次诊断，不是 heldout 研究。
 
 完整示例（替换中性绝对路径；PYTHONPATH 指向待核验 FNIT 源码）：
-  PYTHONPATH=/absolute/FNIT/src python /absolute/FNIT/validation/bigflica/benchmark_dicl_match.py cpu /absolute/projection - - /absolute/cpu_reference
-  PYTHONPATH=/absolute/FNIT/src python /absolute/FNIT/validation/bigflica/benchmark_dicl_match.py gpu /absolute/projection /absolute/cpu_reference /absolute/gpu_default --device cuda:0
-  PYTHONPATH=/absolute/FNIT/src python /absolute/FNIT/validation/bigflica/benchmark_dicl_match.py eval /absolute/projection /absolute/cpu_reference /absolute/gpu_default /absolute/evaluation_default
-  PYTHONPATH=/absolute/FNIT/src python /absolute/FNIT/validation/bigflica/benchmark_dicl_match.py gpu /absolute/projection /absolute/cpu_reference /absolute/gpu_common_initial --common-cpu-initialization
-  PYTHONPATH=/absolute/FNIT/src python /absolute/FNIT/validation/bigflica/benchmark_dicl_match.py eval /absolute/projection /absolute/cpu_reference /absolute/gpu_common_initial /absolute/evaluation_common_initial --fixed-evaluation /absolute/evaluation_default
+  PYTHONPATH=/absolute/FNIT/src python /absolute/FNIT/validation/dictionary_learning/benchmark_dicl_match.py cpu /absolute/projection - - /absolute/cpu_reference
+  PYTHONPATH=/absolute/FNIT/src python /absolute/FNIT/validation/dictionary_learning/benchmark_dicl_match.py gpu /absolute/projection /absolute/cpu_reference /absolute/gpu_default --device cuda:0
+  PYTHONPATH=/absolute/FNIT/src python /absolute/FNIT/validation/dictionary_learning/benchmark_dicl_match.py eval /absolute/projection /absolute/cpu_reference /absolute/gpu_default /absolute/evaluation_default
+  PYTHONPATH=/absolute/FNIT/src python /absolute/FNIT/validation/dictionary_learning/benchmark_dicl_match.py gpu /absolute/projection /absolute/cpu_reference /absolute/gpu_common_initial --common-cpu-initialization
+  PYTHONPATH=/absolute/FNIT/src python /absolute/FNIT/validation/dictionary_learning/benchmark_dicl_match.py eval /absolute/projection /absolute/cpu_reference /absolute/gpu_common_initial /absolute/evaluation_common_initial --fixed-evaluation /absolute/evaluation_default
 原实现：sklearn MiniBatchDictionaryLearning / sparse_encode；
 https://scikit-learn.org/1.7/modules/generated/sklearn.decomposition.MiniBatchDictionaryLearning.html
 参考：Mairal et al., Online Learning for Matrix Factorization and Sparse Coding, JMLR 2010.
@@ -126,7 +126,7 @@ def main(args):
     import torch
     from sklearn.decomposition import sparse_encode
     from threadpoolctl import threadpool_limits
-    from fnit.bigflica import dicl_torch, pipeline
+    from fnit.dictionary_learning import cpu as dicl_cpu, torch_backend as dicl_torch
     if sklearn.__version__ != '1.7.1':
         raise RuntimeError('Requires the actual sklearn 1.7.1 reference environment')
     os.umask(0o077)
@@ -147,7 +147,7 @@ def main(args):
               'seed': SEED, 'batch_size': BATCH, 'max_epochs': MAX_EPOCHS,
               'alpha': 1., 'gpu_sparse_events': args.events, 'CPU_threads': 8,
               'sklearn_version': sklearn.__version__, 'driver_sha256': sha(__file__),
-              'source_sha256': {'pipeline': sha(pipeline.__file__), 'dicl_torch': sha(dicl_torch.__file__)},
+              'source_sha256': {'dictionary_learning.cpu': sha(dicl_cpu.__file__), 'dictionary_learning.torch_backend': sha(dicl_torch.__file__)},
               'projection_sha256': {}, 'CPU': {}, 'GPU': {}, 'comparisons': {},
               'phase': args.phase,
               'prespecified_acceptance': {'raw_matched_relative_L2_max': 1e-3,
@@ -170,7 +170,7 @@ def main(args):
         report['projection_sha256'][name] = value
     emit(destination / 'report.json', report)
     reference_models, raw, normalized, permutations = {}, {'cpu': {}, 'gpu': {}}, {'cpu': {}, 'gpu': {}}, {'cpu': {}, 'gpu': {}}
-    original = pipeline.MiniBatchDictionaryLearning
+    original = dicl_cpu.MiniBatchDictionaryLearning
     current = {'name': None}
     if args.phase != 'cpu':
         report['CPU'] = copy.deepcopy(cpu_report['CPU'])
@@ -235,7 +235,7 @@ def main(args):
             result = super().fit(samples, y)
             elapsed = time.perf_counter() - began
             name = current['name']
-            # pipeline.fit_dicl subsequently mutates the components_.T view.
+            # dicl_cpu.fit_dicl subsequently mutates the components_.T view.
             raw['cpu'][name] = self.components_.copy()
             reference_models[name] = self
             report['CPU'][name]['transform_model_parameters'] = self.get_params(deep=False)
@@ -245,7 +245,7 @@ def main(args):
 
     with threadpool_limits(limits=8):
         if args.phase == 'cpu':
-            pipeline.MiniBatchDictionaryLearning = ObservedCPU
+            dicl_cpu.MiniBatchDictionaryLearning = ObservedCPU
             try:
                 for name in NAMES:
                     current['name'] = name
@@ -260,7 +260,7 @@ def main(args):
                     np.savez(destination / f'{name}_CPU_normalization.npz', mean=mean, std=std)
                     began = time.perf_counter()
                     with (destination / f'CPU_{name}.log').open('w') as log, contextlib.redirect_stdout(log):
-                        normalized['cpu'][name] = pipeline.fit_dicl({name: matrix}, ATOMS, MAX_EPOCHS, SEED)[name]
+                        normalized['cpu'][name] = dicl_cpu.fit_dicl({name: matrix}, ATOMS, MAX_EPOCHS, SEED)[name]
                     report['CPU'][name]['production_call_seconds'] = time.perf_counter() - began
                     reference_models[name].components_ = raw['cpu'][name].copy()
                     report['CPU'][name]['previous_normalized_check'] = 'not_requested' if previous is None else 'requested'
@@ -280,7 +280,7 @@ def main(args):
                     del matrix
                     gc.collect()
             finally:
-                pipeline.MiniBatchDictionaryLearning = original
+                dicl_cpu.MiniBatchDictionaryLearning = original
 
         if args.phase == 'gpu':
             original_init, original_updater = dicl_torch._randomized_svd_dictionary, dicl_torch._DictionaryUpdater

@@ -6,7 +6,7 @@ import pytest
 import torch
 from sklearn.decomposition import sparse_encode
 
-import fnit.bigflica.dicl_torch as dicl
+import fnit.dictionary_learning.torch_backend as dicl
 
 
 @pytest.mark.parametrize("solver_kind", ["full", "incremental"])

@@ -50,6 +50,7 @@
 
 | 功能 | 当前真实数据报告 | 输出一致性结论 | 时间、显存与示意图 |
 |---|---|---|---|
+| [字典学习 / DicL](../docs/dictionary_learning/README.md) | [独立效果与速度报告](dictionary_learning/README.md) | 真实1000人 VBM/FA/MD、同一float64 R500投影；字典与LASSO通过原容差，FA/MD的OMP30重建差2.44%/5.33%，未通过 | GPU完整拟合观测63.65秒、分配显存峰值2.31 GiB；历史CPU103.90秒，计时边界与共享负载不同，不能视为受控加速比 |
 | [BigFLICA](../docs/bigflica/README.md) | [30,000人VBM/FA/MD完整掩膜独立CPU/GPU对比](bigflica/README.md) | mMIGP相对差6.07e-6；DicL匹配后相对差16%–30%；CPU/GPU有效成分仅17/13，均未通过C20验收 | 至失败墙钟153.04/112.55分钟；GPU DicL及FLICA均慢于CPU，VBM重建几乎为零；尚无最终C20 course和脑图一致性结果。 |
 | [SuperBigFLICA](../docs/superbigflica/README.md) | [5,000 名真实 UKB、20 成分 H100 完整流程与 8 人原版连续模型比较](superbigflica/README.md) | 固定参数连续模型前向/损失/梯度通过；1,000 人测试反应时间 MAE 73.50 ms、r=0.1731；高血压 AUC=0.7226、balanced accuracy=0.6716；真实分类基准为二分类 | 50 轮训练，验证选第 5 轮；共享 H100 全流程 1517.16 s，PyTorch 峰值 allocation 1.03 GiB；120 张 NIfTI、冻结推理和五张真实图 |
 

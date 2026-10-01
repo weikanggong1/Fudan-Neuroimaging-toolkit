@@ -21,7 +21,8 @@ import h5py
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 
-from fnit.bigflica.pipeline import _fit_flica, _spatial_z, fit_dicl
+from fnit.bigflica.pipeline import _fit_flica, _spatial_z
+from fnit.dictionary_learning import fit_dicl
 
 
 MODALITIES = ("vbm", "fa", "md")

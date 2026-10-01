@@ -22,8 +22,9 @@ import numpy as np
 import sklearn
 import torch
 
-import fnit.bigflica.dicl_torch as dicl_module
-from fnit.bigflica.pipeline import _fit_flica, _spatial_z, fit_dicl
+import fnit.dictionary_learning.torch_backend as dicl_module
+from fnit.bigflica.pipeline import _fit_flica, _spatial_z
+from fnit.dictionary_learning import fit_dicl
 
 
 MODALITIES = ('vbm', 'fa', 'md')

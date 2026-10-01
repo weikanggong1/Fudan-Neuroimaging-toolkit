@@ -2,9 +2,9 @@
 
 `run_bigflica` 读取“每名被试一个目录”的 3D NIfTI。每个模态指定相对于被试目录的影像路径和自己的 3D 掩膜。输出被试成分 course、每模态每成分的原网格 z-stat NIfTI、绝对 z 值最高的若干体素的阈值图与 PNG，以及可投影新被试的固定模型。模态间可有不同网格；同一模态的影像必须与其掩膜形状和仿射一致。输入必须已经在所需标准空间；函数不做配准。
 
-**当前 DicL：**已完成敏感行 LARS 回退、兼容求解器分段图调度和字典逐元素融合。真实1000人、完整 VBM/FA/MD 掩膜、R500/D200 的同输入对照中，字典与 LASSO 指标通过本轮容差，FA/MD 的 OMP30 重建差仍为2.44%/5.33%，尚未通过。BigFLICA 训练使用拟合字典，未新增 GPU OMP 接口；阶段耗时与效果范围见[最新优化报告](../../validation/bigflica/dicl_speed_optimization_real1000_20261001.md)。
+**字典学习已独立：**压缩流程调用 `fnit.dictionary_learning`，CPU/GPU 共用独立模块中的对应入口。单独拟合字典的输入、参数、求解方式和真实数据报告见[字典学习功能页](../dictionary_learning/README.md)；此页保留完整 BigFLICA 流程的接口和验收范围。
 
-**验收范围：**上述结论基于保存的同一 float64 R500 投影；公开入口的 float32 投影、默认逐体素标准化和从原始 NIfTI 开始的冷启动全链尚未验收。压缩流程的有效 C20、最终成分脑图和新被试模型也尚未通过。原始体素试验曾保留20个有效成分，旧版30,000人压缩对照仅保留 CPU17/GPU13个；这些不同设置的历史结果与剩余工作见[验证索引](../../validation/bigflica/README.md)。
+**验收范围：**字典阶段已有保存的同一 float64 R500 投影对照；公开入口的 float32 投影、默认逐体素标准化和从原始 NIfTI 开始的冷启动全链尚未验收。压缩流程的有效 C20、最终成分脑图和新被试模型也尚未通过。原始体素试验曾保留20个有效成分，旧版30,000人压缩对照仅保留 CPU17/GPU13个；这些不同设置的历史结果与剩余工作见[验证索引](../../validation/bigflica/README.md)。
 
 默认 `use_mmigp_dicl=True`：逐体素跨被试标准化 → 联合 mMIGP → 每模态 Lasso-LARS 字典学习 → FLICA。CUDA 路径用 PyTorch 执行协方差、特征分解、稀疏编码、字典更新、FLICA、空间回归和 t→z 转换；nibabel/HDF5 负责 CPU 文件读写和分块传输。为复现原 FLICA 的自由度拟合，GPU 特征分解后每模态将少量特征值送给 SciPy 做一次标量优化；这一步属于 CPU 计算。`use_mmigp_dicl=False` 时，标准化后直接把体素送入 FLICA，不建立 mMIGP 或 DicL 模型。此模式保留体素信息，但每轮须读取全部模态矩阵，适合较小训练集；大样本建议开启预处理。`device="cpu"` 保留原 notebook 的 sklearn DicL 对照路径。
 
@@ -32,19 +32,13 @@ flowchart TD
     classDef default fill:#ffffff,stroke:#000000,color:#000000;
 ```
 
-## GPU DicL 求解
+## 调用独立字典学习模块
 
-CUDA DicL 用批量 ADMM 找到稀疏系数的非零位置，每20步用 CUDA Graph 重放，再解活动集方程并检查系数符号、最优性条件和矩阵枢轴。求解器还检查目标 alpha 附近的 LARS 路径节点：sklearn 会直接接受浮点容差内的节点，精确目标解会产生不同的训练轨迹。活动集检查通过时，只把近节点等敏感样本行交给兼容 PyTorch LARS，其余行保留已通过检查的系数。每模态前四批、未归一化初始原子、活动集检查失败或 ADMM 预算用尽时仍整批回退。LARS 保留 sklearn 的节点停止、条件插值和原子退出规则，活动集不加额外 ridge。批次默认32，alpha默认1，稀疏求解预算默认1000，训练停止规则保持不变。
+开启 `use_mmigp_dicl` 时，mMIGP 输出每模态 `[掩膜体素, migp_dim]` 矩阵。CPU 流程调用 `fnit.dictionary_learning.fit_dicl`，CUDA 流程调用 `fnit.dictionary_learning.fit_dicl_gpu_streaming`；两者返回 `[dicl_dim, migp_dim]` 字典，再交给 FLICA。这里保留 `dicl_dim`、`dicl_max_iter`、`dicl_batch_size`、`dicl_sparse_iterations` 等完整流程参数，内部使用同一份成熟字典实现。
 
-兼容 LARS 在批次不超过32、字典原子不超过256时，用两段 CUDA Graph 重放 LU 求解前后的张量运算；LU 分解和求解仍按原 PyTorch eager 路径执行，每四个路径事件读取一次完成状态。其他维度与 CPU 保留原 eager 求解。分段 LARS 图工作区按线程独立缓存，最多保留4项；每次调用重置状态，返回独立的系数副本，并用完成事件保护跨 CUDA stream 的后续复用。字典更新只用 Triton 融合逐元素运算，保留 PyTorch 的矩阵向量乘法、范数归约、原子更新顺序和重采样随机数顺序。CPU 不使用 Triton；Triton 不可用时，GPU 字典更新保留原 PyTorch 算子。项目 Conda 环境已包含 Triton，无需新增依赖。
+GPU 字典缓存版本仍为 `rsvd5rowgraph`。本次提取模块未改变拟合数学和参数，已有通过输入签名检查的标准化、mMIGP 和字典缓存可复用。CLI 和 Python 的 `dicl_sparse_iterations` 默认 1000；显式设置 120 的调用仍按 120 运行。
 
-本次还修复了分段图在 float32、任意 alpha 下可能对停止阈值进行两次舍入的问题：现在先求 `alpha + tolerance`，再一次舍入到输入精度，与原 eager 路径一致。这项边界修复不代表公开 float32 入口的全链验收已完成。
-
-模块内的精确目标 LARS 和增量逆求解器用于解析回归及诊断，默认训练的回退使用节点兼容求解器。退化活动集会明确诊断或排除依赖原子；这不构成所有退化输入与 sklearn 逐位相同的保证。
-
-DicL 内部仍使用 float64，未改用低精度。公开 CUDA 压缩入口的 mMIGP 投影为 float32；GPU DicL 的统计先提升到 float64，再由 CPU 按固定行顺序分块计算两遍均值和中心化方差，参考的是 NumPy 全矩阵 float64 统计。它与 CPU float32 入口标准化的同输入对照尚未验收，已有 float64 投影结果不能代表该入口的效果匹配。兼容随机数生成仍在 CPU 执行，每模态分别重置求解状态。投影适合显存缓存时也逐块读取，避免在主机内存中读入整个模态；矩阵、稀疏求解和字典更新在 GPU 完成。随机 SVD 保留 QR 幂迭代，在 CUDA 上显式使用 `gesvd`。未安装或调用 SPORCO；ADMM 方程参考 [SPORCO BPDN](https://sporco.readthedocs.io/en/latest/modules/sporco.admm.bpdn.html)，本轮阶段实测见[最新优化报告](../../validation/bigflica/dicl_speed_optimization_real1000_20261001.md)。
-
-GPU 字典缓存版本为 `rsvd5rowgraph`。敏感行回退、LARS 图调度和字典更新融合进入新的版本，旧 DicL 缓存不会复用；已有输入标准化和 mMIGP 缓存仍可复用。CLI 和 Python 默认 `dicl_sparse_iterations=1000`，显式设置120的旧调用仍按120运行。独立 CPU/GPU 全链输入差异仍可能经非凸字典学习放大，C20结果须另行验收。
+独立字典阶段的精度、内存、CPU/GPU 运算分工和历史耗时见[功能页](../dictionary_learning/README.md)与[独立验证索引](../../validation/dictionary_learning/README.md)。BigFLICA 的验收继续包括 mMIGP 输入、FLICA 有效成分、最终脑图和新被试投影；字典阶段通过某项指标不能替代这些检查。
 
 ## 安装与输入
 
@@ -97,7 +91,7 @@ fnit-bigflica apply \
   --ridge 1e-6 --device cuda:0 --feature-block 32768
 ```
 
-直接体素模式省略 mMIGP/DicL 维度，另设输出目录以保留两套模型。支持标量 `o` 和逐被试 `R` 噪声精度，输出前执行与压缩流程相同的有效秩和模态重建检查。默认预处理为逐体素标准化，初始化已采用修正后的 MATLAB SVD 尺度；上述整体 RMS 数据控制使用另一种预处理，须与公开默认设置分别验收：
+直接体素模式省略 mMIGP/DicL 维度，另设输出目录以保留两套模型。支持标量 `o` 和逐被试 `R` 噪声精度，输出前执行与压缩流程相同的有效秩和模态重建检查。默认预处理为逐体素标准化，初始化已采用修正后的 MATLAB SVD 尺度；历史整体 RMS 数据控制使用另一种预处理，须与公开默认设置分别验收：
 
 ```bash
 fnit-bigflica fit \
@@ -247,6 +241,6 @@ BigFLICA(
 
 [上游 `BigFLICA_cpu.py`](https://github.com/weikanggong/BigFLICA/blob/master/BigFLICA_cpu.py) 用 SPAMS 字典学习；本功能的压缩模式对照用户 notebook 的 sklearn DicL 变体。原 `sKPCR_regression` 实际计算 t 值却命名为 Z；FNIT 按相同回归和自由度将双侧 t 转为带符号正态 z。mMIGP 特征向量本身有任意正负号；CUDA 实现固定最大绝对载荷为正以便复现，但它不保证与 SciPy 参考的符号一致。字典学习是非凸问题，符号改变会改变固定种子下的拟合轨迹，因此比较压缩模式时必须记录并处理这一差异。`apply_model` 是 FNIT 新增的冻结载荷投影，不等同于原 FLICA 对新被试重新推断后验。
 
-原软件数值核对、当前求解器的同投影控制、缓存输出与留出投影检查，见[必要对照证据](../../validation/bigflica/README.md#当前实现所需的补充证据)。这些小样本及C3检查用于定位和接口核验；30,000人C20结论、阶段时间与剩余工作以本文开头和最新报告为准。
+完整流程的原软件数值核对、缓存输出与留出投影检查，见[必要对照证据](../../validation/bigflica/README.md#当前实现所需的补充证据)；字典的同投影控制已移至[独立验证目录](../../validation/dictionary_learning/README.md)。小样本及 C3 检查用于定位和接口核验；30,000 人 C20 结论、阶段时间与剩余工作见 BigFLICA 验证索引。
 
 参考：Gong W, Beckmann CF, Smith SM. [Phenotype Discovery from Population Brain Imaging](https://www.sciencedirect.com/science/article/pii/S1361841521000967). *Medical Image Analysis*, 2021；[BigFLICA 原仓库](https://github.com/weikanggong/BigFLICA)。

@@ -1,8 +1,10 @@
 # PyTorch DicL 与 MiniBatchDictionaryLearning：真实1000人效果匹配
 
+本页的测量发生于字典学习拆分之前，原源码路径、SHA-256及运行条件保留为历史证据。当前独立入口与拆分检查见[验证索引](README.md)；移动报告不表示重新运行真实数据。
+
 本页保留首轮精度修复的测量与因果控制。后续调度和字典更新优化见[当前优化报告](dicl_speed_optimization_real1000_20261001.md)；本页的运行时间、缓存版本和源码哈希对应此前的测量。
 
-本轮复用同一份真实1000人的VBM、FA、MD完整掩膜R500投影，逐模态拟合D200字典。CPU参考为服务器实际安装的 **scikit-learn 1.7.1**，GPU使用PyTorch2.5.1。CPU/GPU的字典、原子余弦及LASSO重建已通过本轮预设容差；独立初始化下FA/MD的OMP30重建仍未通过。因此不能称整个 `MiniBatchDictionaryLearning` 的输出已等价。FLICA有效C20和最终脑图属于[此前尚未通过的验收](mmigp500_real1000_20261001.md)，本轮没有继续拟合。
+本轮复用同一份真实1000人的VBM、FA、MD完整掩膜R500投影，逐模态拟合D200字典。CPU参考为服务器实际安装的 **scikit-learn 1.7.1**，GPU使用PyTorch2.5.1。CPU/GPU的字典、原子余弦及LASSO重建已通过本轮预设容差；独立初始化下FA/MD的OMP30重建仍未通过。因此不能称整个 `MiniBatchDictionaryLearning` 的输出已等价。FLICA有效C20和最终脑图属于[此前尚未通过的验收](../bigflica/mmigp500_real1000_20261001.md)，本轮没有继续拟合。
 
 ## 输入、参考代码与验收方法
 
@@ -83,13 +85,13 @@ gpu_default_directory=/absolute/private/gpu_default
 evaluation_default_directory=/absolute/private/evaluation_default
 # 使用服务器实测的 sklearn1.7.1；CPU参考只拟合一次。
 OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8 MKL_NUM_THREADS=8 PYTHONPATH=src \
-  python validation/bigflica/benchmark_dicl_match.py cpu \
+  python validation/dictionary_learning/benchmark_dicl_match.py cpu \
   "$projection_directory" - - "$cpu_reference_directory"
 # 固定一个有足够余量的GPU；脚本为其设置18GiB分配器上限。
 CUDA_VISIBLE_DEVICES=GPU-REPLACE-WITH-YOUR-UUID PYTHONPATH=src \
-  python validation/bigflica/benchmark_dicl_match.py gpu \
+  python validation/dictionary_learning/benchmark_dicl_match.py gpu \
   "$projection_directory" "$cpu_reference_directory" "$gpu_default_directory"
-PYTHONPATH=src python validation/bigflica/benchmark_dicl_match.py eval \
+PYTHONPATH=src python validation/dictionary_learning/benchmark_dicl_match.py eval \
   "$projection_directory" "$cpu_reference_directory" \
   "$gpu_default_directory" "$evaluation_default_directory"
 ```
@@ -98,6 +100,6 @@ PYTHONPATH=src python validation/bigflica/benchmark_dicl_match.py eval \
 
 公开脚本在已测试私密控制运行器上仅增加可省略的历史I/O校验及说明；GPU初始化、观察器和指标函数的AST一致，已做语法及三阶段CLI检查。此次真实运行仍使用匿名汇总中记录的私密运行器哈希，不声称公开脚本已从头重新跑过该数据。
 
-对应CPU代码是 [`pipeline.fit_dicl`](../../src/fnit/bigflica/pipeline.py)，核心调用为 `MiniBatchDictionaryLearning(n_components=200, max_iter=1000, batch_size=32, transform_n_nonzero_coefs=30, random_state=0).fit(samples)`；未显式指定的训练算法沿用sklearn LARS/alpha1。GPU实现为 [`fit_dicl_gpu_streaming`](../../src/fnit/bigflica/dicl_torch.py)。BigFLICA后续使用归一化字典；本轮OMP30用于补查参考模型 `.transform()` 的兼容性，FNIT未新增独立OMP30 GPU接口。
+对应CPU代码是 [`fit_dicl`](../../src/fnit/dictionary_learning/cpu.py)，核心调用为 `MiniBatchDictionaryLearning(n_components=200, max_iter=1000, batch_size=32, transform_n_nonzero_coefs=30, random_state=0).fit(samples)`；未显式指定的训练算法沿用sklearn LARS/alpha1。GPU实现为 [`fit_dicl_gpu_streaming`](../../src/fnit/dictionary_learning/torch_backend.py)。BigFLICA后续使用归一化字典；本轮OMP30用于补查参考模型 `.transform()` 的兼容性，FNIT未新增独立OMP30 GPU接口。
 
 算法参考：Mairal J, Bach F, Ponce J, Sapiro G. *Online Dictionary Learning for Sparse Coding*, ICML2009；扩展论文为[Online Learning for Matrix Factorization and Sparse Coding](https://jmlr.org/papers/v11/mairal10a.html), JMLR11:19–60, 2010。参考实现及参数见[sklearn文档](https://scikit-learn.org/1.7/modules/generated/sklearn.decomposition.MiniBatchDictionaryLearning.html)、[1.7.1字典学习源代码](https://github.com/scikit-learn/scikit-learn/blob/1.7.1/sklearn/decomposition/_dict_learning.py)与[LARS源代码](https://github.com/scikit-learn/scikit-learn/blob/1.7.1/sklearn/linear_model/_least_angle.py)。CUDA SVD驱动选择见[PyTorch2.5.1原文档](https://github.com/pytorch/pytorch/blob/v2.5.1/torch/linalg/__init__.py)。本轮还未完成任意退化输入、公开默认全链、FLICA C20及脑图的兼容验收。

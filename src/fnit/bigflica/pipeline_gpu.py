@@ -13,7 +13,7 @@ import h5py
 import numpy as np
 import torch
 
-from .dicl_torch import fit_dicl_gpu_streaming
+from ..dictionary_learning import GPU_ALGORITHM_VERSION, fit_dicl_gpu_streaming
 from .flica_torch import (RawVoxelMatrix, initialize_flica_raw,
                           iterate_flica_torch)
 from .pipeline import (_FLICA_ALGORITHM_VERSION, _NORMALIZATION_VERSION,
@@ -99,9 +99,9 @@ def run_bigflica_gpu(root: Path, specs: Mapping[str, Mapping[str, str]],
         timings["mmigp_s"] = time.perf_counter() - start
     dicl_dir = destination / (
         f"dicl_{migp_dim}_{dicl_dim}_{dicl_max_iter}_{random_state}_"
-        f"{dicl_batch_size}_{dicl_sparse_iterations}_rsvd5rowgraph_cuda")
+        f"{dicl_batch_size}_{dicl_sparse_iterations}_{GPU_ALGORITHM_VERSION}_cuda")
     dicl_sig = _signature([mmigp_sig, dicl_dim, dicl_max_iter, random_state,
-                           dicl_batch_size, dicl_sparse_iterations, "rsvd5rowgraph"])
+                           dicl_batch_size, dicl_sparse_iterations, GPU_ALGORITHM_VERSION])
     dicl_files = [f"{name}_dictionary.npy" for name in names]
     if _valid_cache(dicl_dir, dicl_sig, dicl_files):
         dictionaries = {name: np.load(dicl_dir / f"{name}_dictionary.npy") for name in names}

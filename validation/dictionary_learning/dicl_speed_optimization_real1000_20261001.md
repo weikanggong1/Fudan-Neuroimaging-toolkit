@@ -1,5 +1,7 @@
 # DicL GPU速度优化：真实1000人验收
 
+本页的测量发生于字典学习拆分之前，原源码路径、SHA-256及运行条件保留为历史证据。当前独立入口与拆分检查见[验证索引](README.md)；移动报告不表示重新运行真实数据。
+
 本轮完成敏感行回退、LARS分段CUDA图和顺序字典逐元素融合。最终源码在同一1000人的VBM、FA、MD缓存投影上完成全部DicL拟合，观测耗时 **63.65秒**，分配显存峰值 **2.31 GiB**。字典与LASSO门槛三模态通过，FA/MD的OMP30重建仍未通过。结果说明优化没有损害本次效果，尚不能称整个sklearn字典学习或BigFLICA全流程等价。
 
 ## 1. 输入、参数与比较范围
@@ -119,7 +121,7 @@ GPU完整调用计时包含投影I/O、标准化、SVD初始化和观察器字�
 
 本轮真实运行保留私密运行器SHA-256 `a14c750231828c53736ea58ec03f38c0c6a1415d190cd7a620dadff9cb3b6e71`；公开脚本SHA-256 `004c21644bc30c467cfc0ed8881c6618ed85a10f9689dc5f499d8d4439ba631b`。两者不是同一文件，本轮没有声称公开脚本已在真实数据上从头冷启动重跑。
 
-算法参考：[Mairal等，Online Learning for Matrix Factorization and Sparse Coding，JMLR2010](https://jmlr.org/papers/v11/mairal10a.html)。原软件接口及参数见[sklearn1.7系列MiniBatchDictionaryLearning文档](https://scikit-learn.org/1.7/modules/generated/sklearn.decomposition.MiniBatchDictionaryLearning.html)、[1.7.1字典学习源代码](https://github.com/scikit-learn/scikit-learn/blob/1.7.1/sklearn/decomposition/_dict_learning.py)与[LARS源代码](https://github.com/scikit-learn/scikit-learn/blob/1.7.1/sklearn/linear_model/_least_angle.py)。本项目CPU对应pipeline.fit_dicl，GPU对应[fit_dicl_gpu_streaming](../../src/fnit/bigflica/dicl_torch.py)；不调用原神经影像软件运行时。1.7系列文档页面可能显示后续补丁版本；本次精确1.7.1的依据是实际安装环境和1.7.1源码tag。
+算法参考：[Mairal等，Online Learning for Matrix Factorization and Sparse Coding，JMLR2010](https://jmlr.org/papers/v11/mairal10a.html)。原软件接口及参数见[sklearn1.7系列MiniBatchDictionaryLearning文档](https://scikit-learn.org/1.7/modules/generated/sklearn.decomposition.MiniBatchDictionaryLearning.html)、[1.7.1字典学习源代码](https://github.com/scikit-learn/scikit-learn/blob/1.7.1/sklearn/decomposition/_dict_learning.py)与[LARS源代码](https://github.com/scikit-learn/scikit-learn/blob/1.7.1/sklearn/linear_model/_least_angle.py)。本项目CPU对应[fit_dicl](../../src/fnit/dictionary_learning/cpu.py)，GPU对应[fit_dicl_gpu_streaming](../../src/fnit/dictionary_learning/torch_backend.py)；不调用原神经影像软件运行时。1.7系列文档页面可能显示后续补丁版本；本次精确1.7.1的依据是实际安装环境和1.7.1源码tag。
 
 ## 8. 尚待完成
 
@@ -140,12 +142,12 @@ new_evaluation_directory=/absolute/private/new_evaluation  # 新建对照输出
 
 # 完整三模态GPU DicL：保持默认seed0、D200、batch32、alpha1和预算1000。
 CUDA_VISIBLE_DEVICES=0 OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8 MKL_NUM_THREADS=8 PYTHONPATH=src \
-  python validation/bigflica/benchmark_dicl_match.py gpu \
+  python validation/dictionary_learning/benchmark_dicl_match.py gpu \
   "$projection_directory" "$cpu_reference_directory" "$new_gpu_result_directory"
 
 # 复用CPU参考，检查字典、LASSO与OMP30；每模态默认2000个评估体素。
 OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8 MKL_NUM_THREADS=8 PYTHONPATH=src \
-  python validation/bigflica/benchmark_dicl_match.py eval \
+  python validation/dictionary_learning/benchmark_dicl_match.py eval \
   "$projection_directory" "$cpu_reference_directory" \
   "$new_gpu_result_directory" "$new_evaluation_directory"
 ```
