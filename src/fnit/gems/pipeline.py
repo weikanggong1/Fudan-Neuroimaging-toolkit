@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import json
 import logging
 from pathlib import Path
@@ -36,6 +36,19 @@ class SubregionResult:
     initialization: dict[str, dict]
     volumes: dict[int, dict[str, float]] | None = None
     label_metadata: dict[int, "SubregionLabel"] | None = None
+    input_source: str | None = None
+    output_files: dict[str, Path] = field(default_factory=dict)
+    timings: dict[str, float] = field(default_factory=dict)
+
+    def save(self, output_dir: str | Path, *, save_highres: bool = True,
+             save_posteriors: bool = False) -> dict[str, Path]:
+        """Save native labels, metadata, volumes, report and optional fine grids."""
+        from .output import save_subregion_result
+        started = monotonic()
+        self.output_files = save_subregion_result(
+            self, output_dir, save_highres=save_highres, save_posteriors=save_posteriors)
+        self.timings["save_seconds"] = monotonic() - started
+        return self.output_files
 
     def mask(self, label: int | str) -> np.ndarray:
         if isinstance(label, str):
@@ -359,7 +372,10 @@ def _expand_structures(structures) -> list[str]:
         [structures] if isinstance(structures, str) else list(structures))
     expanded = []
     for name in requested:
-        members = ("hippo-amygdala-left", "hippo-amygdala-right") if name == "hippo-amygdala" else (name,)
+        name = {"hippo-left": "hippo-amygdala-left",
+                "hippo-right": "hippo-amygdala-right"}.get(name, name)
+        members = (_CANONICAL if name == "all" else
+                   ("hippo-amygdala-left", "hippo-amygdala-right") if name == "hippo-amygdala" else (name,))
         for member in members:
             if member not in expanded:
                 expanded.append(member)
@@ -381,10 +397,14 @@ def segment_subregions(
     auto_initialize: bool = True,
     device: str | torch.device = "cuda:0",
     optimization: str = "fast",
+    output_dir: str | Path | None = None,
+    save_highres: bool = True,
+    save_posteriors: bool = False,
     em_iterations: int = 8,
     deform_iterations: int = 0,
 ) -> SubregionResult:
-    """Segment requested subregions on one raw T1 and merge on its native grid."""
+    """Segment one raw T1 end to end; optionally save all outputs in one call."""
+    started = monotonic()
     if optimization not in ("fast", "balanced"):
         raise ValueError("optimization must be 'fast' or 'balanced'")
     selected = _expand_structures(structures)
@@ -398,11 +418,16 @@ def segment_subregions(
             from .setup import prepare_subregion_atlases
             prepare_subregion_atlases(root, device="cpu")
     if any(name not in _CANONICAL for name in selected):
-        return _segment_atlas_packs(
+        result = _segment_atlas_packs(
             t1, root, structures=structures, coarse_segmentation=coarse_segmentation,
             synthseg_weights=synthseg_weights, auto_initialize=auto_initialize,
             device=device, em_iterations=em_iterations,
             deform_iterations=deform_iterations)
+        result.input_source = str(t1) if isinstance(t1, (str, Path)) else None
+        result.timings["compute_seconds"] = monotonic() - started
+        if output_dir is not None:
+            result.save(output_dir, save_highres=save_highres, save_posteriors=save_posteriors)
+        return result
     missing = [name for name in selected if not (root / name / "AtlasMesh.gz").is_file()]
     if missing:
         raise FileNotFoundError(f"Subregion atlas packs not found: {missing}")
@@ -489,5 +514,10 @@ def segment_subregions(
     out = new_image(combined, context.image, affine=context.image.affine)
     out.set_qform(context.image.affine, code=0)
     out.set_sform(context.image.affine, code=2)
-    return SubregionResult(out, table, detailed, torch.as_tensor(best_conf), reports,
-                           volumes, metadata)
+    result = SubregionResult(out, table, detailed, torch.as_tensor(best_conf), reports,
+                            volumes, metadata,
+                            input_source=str(t1) if isinstance(t1, (str, Path)) else None)
+    result.timings["compute_seconds"] = monotonic() - started
+    if output_dir is not None:
+        result.save(output_dir, save_highres=save_highres, save_posteriors=save_posteriors)
+    return result

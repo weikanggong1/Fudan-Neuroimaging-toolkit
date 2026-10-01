@@ -33,7 +33,7 @@ class ThalamusRecipe(GEMSRecipe):
     support_ids = (10, 49)
     seg_schedule = ((3.0, 300), (2.0, 150))
     image_schedule = ((1.5, 7), (1.125, 5), (0.75, 5), (0.0, 3))
-    fast_image_schedule = ((1.5, 4), (1.125, 3), (0.75, 2), (0.0, 2))
+    fast_image_schedule = ((1.5, 3), (1.125, 3), (0.75, 2), (0.0, 2))
 
     def segmentation_groups(self, atlas):
         groups = _BASE + (

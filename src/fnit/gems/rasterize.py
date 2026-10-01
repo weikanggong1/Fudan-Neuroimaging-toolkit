@@ -113,34 +113,58 @@ class BlockIndex:
 def build_block_index(vertices: np.ndarray, tetrahedra: np.ndarray,
                       shape: tuple[int, int, int], block_size: int = 8,
                       margin: float = 1.0) -> BlockIndex:
-    """Build a conservative CPU spatial index from tetrahedron bounding boxes.
-
-    Geometry dispatch is inexpensive and deterministic; barycentric evaluation
-    and alpha interpolation remain on the selected PyTorch device.
-    """
+    """Build a CPU bounding-box index, retaining tetrahedron order in each block."""
     vertices = np.asarray(vertices, dtype=np.float64)
     tetrahedra = np.asarray(tetrahedra, dtype=np.int64)
     nblocks = tuple(int(math.ceil(s / block_size)) for s in shape)
-    lists: list[list[int]] = [[] for _ in range(np.prod(nblocks))]
+    block_count = int(np.prod(nblocks))
     if len(tetrahedra) == 0:
-        return BlockIndex(tuple(shape), int(block_size), tuple(np.asarray(x, dtype=np.int64) for x in lists))
+        return BlockIndex(tuple(shape), int(block_size),
+                          tuple(np.empty(0, dtype=np.int64) for _ in range(block_count)))
     xyz = vertices[tetrahedra]
     lo = np.floor(xyz.min(1) - margin).astype(int)
     hi = np.ceil(xyz.max(1) + margin).astype(int)
     lo = np.maximum(lo, 0)
     hi = np.minimum(hi, np.asarray(shape) - 1)
-    for tid in range(len(tetrahedra)):
-        if np.any(hi[tid] < lo[tid]):
-            continue
-        blo = lo[tid] // block_size
-        bhi = hi[tid] // block_size
-        for bx in range(blo[0], bhi[0] + 1):
-            for by in range(blo[1], bhi[1] + 1):
-                base = (bx * nblocks[1] + by) * nblocks[2]
-                for bz in range(blo[2], bhi[2] + 1):
-                    lists[base + bz].append(tid)
+    blo, bhi = lo // block_size, hi // block_size
+    widths = bhi - blo + 1
+    counts = widths.prod(axis=1, dtype=np.int64)
+    counts[np.any(hi < lo, axis=1)] = 0
+    pair_count = int(counts.sum())
+    if pair_count == 0:
+        return BlockIndex(tuple(shape), int(block_size),
+                          tuple(np.empty(0, dtype=np.int64) for _ in range(block_count)))
+    # Bound the global sorting buffers as well as the coordinate expansion.
+    # Unusually large boxes retain the original low-temporary-memory traversal.
+    if pair_count > 8_388_608:
+        lists: list[list[int]] = [[] for _ in range(block_count)]
+        for tid in range(len(tetrahedra)):
+            if np.any(hi[tid] < lo[tid]):
+                continue
+            for bx in range(blo[tid, 0], bhi[tid, 0] + 1):
+                for by in range(blo[tid, 1], bhi[tid, 1] + 1):
+                    base = (bx * nblocks[1] + by) * nblocks[2]
+                    for bz in range(blo[tid, 2], bhi[tid, 2] + 1):
+                        lists[base + bz].append(tid)
+        return BlockIndex(tuple(shape), int(block_size),
+                          tuple(np.asarray(x, dtype=np.int64) for x in lists))
+
+    tetra_ids = np.repeat(np.arange(len(tetrahedra), dtype=np.int64), counts)
+    starts = np.r_[0, np.cumsum(counts[:-1])]
+    block_ids = np.empty(pair_count, dtype=np.int64)
+    for start in range(0, pair_count, 1_048_576):
+        stop = min(start + 1_048_576, pair_count)
+        tids = tetra_ids[start:stop]
+        offset = np.arange(start, stop, dtype=np.int64) - starts[tids]
+        bx = blo[tids, 0] + offset // (widths[tids, 1] * widths[tids, 2])
+        by = blo[tids, 1] + (offset // widths[tids, 2]) % widths[tids, 1]
+        bz = blo[tids, 2] + offset % widths[tids, 2]
+        block_ids[start:stop] = (bx * nblocks[1] + by) * nblocks[2] + bz
+    order = np.argsort(block_ids, kind="stable")
+    packed = tetra_ids[order]
+    boundaries = np.cumsum(np.bincount(block_ids, minlength=block_count))
     return BlockIndex(tuple(shape), int(block_size),
-                      tuple(np.asarray(x, dtype=np.int64) for x in lists))
+                      tuple(np.split(packed, boundaries[:-1])))
 
 
 def _block_points(block_id: int, index: BlockIndex, device, dtype):

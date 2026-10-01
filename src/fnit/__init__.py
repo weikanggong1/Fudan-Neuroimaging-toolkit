@@ -17,7 +17,7 @@ def __getattr__(name):
         from . import synthseg_parc
         return getattr(synthseg_parc, name)
     if name in ('GEMSAtlas', 'TorchGEMS', 'TorchGEMSResult',
-                'SubregionResult', 'segment_subregions'):
+                'SubregionResult', 'segment_subregions', 'segment_nuclei'):
         from . import gems
         return getattr(gems, name)
     if name in ('SynthSR', 'SynthSRResult', 'SynthSRImage'):

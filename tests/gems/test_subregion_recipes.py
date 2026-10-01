@@ -277,7 +277,7 @@ def test_all_recipes_merge_on_native_grid_with_metadata(tmp_path, monkeypatch):
     monkeypatch.setattr(recipes, "make_recipe", lambda name, root: FakeRecipe(name))
     coarse = np.ones(image.shape, np.int32)
     result = pipeline.segment_subregions(image, atlas_root, coarse_segmentation=coarse,
-                                        wmparc=coarse, device="cpu")
+                                        wmparc=coarse, device="cpu", output_dir=tmp_path / "output")
     assert result.labels.shape == image.shape
     np.testing.assert_array_equal(result.labels.affine, image.affine)
     assert set(result.structure_results) == set(names)
@@ -287,3 +287,10 @@ def test_all_recipes_merge_on_native_grid_with_metadata(tmp_path, monkeypatch):
     assert result.mask("Right-Lateral-nucleus").sum() == 1
     assert result.label_metadata[17001].parent == "amygdala"
     assert result.volumes[17001]["soft_volume_mm3"] == 1.25
+    saved = nib.load(result.output_files["labels"])
+    np.testing.assert_array_equal(saved.dataobj, result.labels.dataobj)
+    np.testing.assert_allclose(saved.affine, image.affine)
+    assert len(result.output_files) == 8
+    assert (tmp_path / "output" / "labels.tsv").is_file()
+    assert "17001\tRight-Lateral-nucleus" in (tmp_path / "output" / "volumes.tsv").read_text()
+    assert result.timings["compute_seconds"] > 0 and result.timings["save_seconds"] > 0

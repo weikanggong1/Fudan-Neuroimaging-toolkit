@@ -143,16 +143,18 @@ def main():
         args.t1, atlas_root=args.atlas_root, structures=args.structures,
         coarse_segmentation=args.aseg, wmparc=args.wmparc,
         synthseg_weights=args.weights, synthseg_parc_weights=args.weights,
-        device=args.device, optimization=args.optimization)
+        device=args.device, optimization=args.optimization,
+        output_dir=args.output_dir, save_highres=True, save_posteriors=False)
     if args.device.startswith("cuda"):
         torch.cuda.synchronize(args.device)
-    elapsed = monotonic() - started
-    native_path = args.output_dir / "subregions_native.nii.gz"
-    nib.save(result.labels, native_path)
-    highres = args.output_dir / "highres"
-    highres.mkdir(exist_ok=True)
-    for name, fit in result.structure_results.items():
-        nib.save(fit.highres_labels, highres / f"{name}.nii.gz")
+    elapsed_including_output = monotonic() - started
+    elapsed = result.timings["compute_seconds"]
+    api_report = args.output_dir / "api_report.json"
+    saved_api_report = json.loads(result.output_files["report"].read_text())
+    saved_api_report["timings"] = result.timings
+    saved_api_report["files"]["report"] = str(api_report)
+    api_report.write_text(json.dumps(saved_api_report, indent=2) + "\n")
+    native_path = result.output_files["labels"]
     output = np.asarray(result.labels.dataobj, dtype=np.int32)
     references = {"brainstem": args.reference_brainstem,
                   "thalamus": args.reference_thalamus,
@@ -191,6 +193,10 @@ def main():
               "input": str(args.t1), "aseg": str(args.aseg) if args.aseg else None,
               "wmparc": str(args.wmparc) if args.wmparc else None,
               "wall_seconds": elapsed,
+              "api_total_seconds": elapsed_including_output,
+              "output_save_seconds": result.timings.get("save_seconds"),
+              "api_report": str(api_report),
+              "fit_min_jacobians": saved_api_report["fit_min_jacobians"],
               "optimization": args.optimization,
               "peak_gpu_gib": (max(value.get("peak_gpu_gib") or 0
                                     for value in result.initialization.values())

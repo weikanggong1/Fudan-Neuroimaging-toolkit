@@ -140,6 +140,8 @@ class GEMSRecipe:
     optimization_profile = "balanced"
     coarse_resolution_mm = 1.0
     fast_mesh_iterations = 12
+    coarse_outer_iterations = 2
+    coarse_mesh_iterations = 8
 
     def __init__(self, name: str, directory: Path):
         self.name = name
@@ -189,7 +191,8 @@ class GEMSRecipe:
              *, synthetic: bool, context: SubregionContext | None = None,
              device: torch.device, stage_offset: int = 0, stage_count: int | None = None,
              mesh_iterations: int | None = None,
-             working_resolution_mm: float | None = None) -> tuple[GEMSAtlas, TorchGEMSResult]:
+             working_resolution_mm: float | None = None,
+             warm_start: bool = False) -> tuple[GEMSAtlas, TorchGEMSResult]:
         """Return an atlas on the input grid and a fit on its cropped grid."""
         def tick():
             if device.type == "cuda":
@@ -201,6 +204,7 @@ class GEMSRecipe:
         stop_options = {"deformation_stop": 0.005, "cost_stop_patience": 3} if fast else {}
         resolution_scale = (self.resolution_mm / working_resolution_mm
                             if working_resolution_mm is not None else 1.0)
+        block_size = max(2, int(round(8 * resolution_scale)))
         margin = max(3, int(np.ceil(sum(steps for _, steps in schedule) * 0.05 + 3)))
         if working_resolution_mm is not None:
             margin = max(1, int(np.ceil(margin * resolution_scale)))
@@ -225,7 +229,8 @@ class GEMSRecipe:
             tetrahedra = torch.as_tensor(atlas.tetrahedra, device=device)
             occupancy = torch.ones((len(vertices), 1), device=device)
             block_index = build_block_index(atlas.vertices, atlas.tetrahedra,
-                                             tuple(image.shape), margin=3 * resolution_scale)
+                                             tuple(image.shape), block_size=block_size,
+                                             margin=3 * resolution_scale)
             _, covered = rasterize_priors(vertices, tetrahedra, occupancy, tuple(image.shape),
                                           block_index=block_index, background_channel=None)
             neighborhood = spherical_neighborhood(3 if synthetic else 5)
@@ -247,7 +252,7 @@ class GEMSRecipe:
         for index, (sigma, iterations) in enumerate(schedule):
             stage_started = fit_started if index == 0 else tick()
             logger.info("%s %s stage %d/%d: sigma=%g iterations=%d", self.name,
-                        "segmentation" if synthetic else "intensity", index + stage_offset + 1,
+                        "segmentation" if synthetic else "intensity warm-start" if warm_start else "intensity", index + stage_offset + 1,
                         stage_count or len(schedule), sigma, iterations)
             if not synthetic:
                 classes = self.intensity_groups(atlas, index + stage_offset)
@@ -281,7 +286,7 @@ class GEMSRecipe:
                 for channel, group in enumerate(classes):
                     alphas[:, group] += atlas.alphas[:, channel]
             solver_started = tick()
-            result = TorchGEMS(atlas, device=device, block_size=8)(
+            result = TorchGEMS(atlas, device=device, block_size=block_size)(
                 image, label_classes=classes, em_iterations=1 if synthetic else self.em_iterations,
                 background_channel=atlas.label_names.index("Unknown"),
                 deform_lr=1.0, deform_optimizer="lbfgs",
@@ -304,6 +309,7 @@ class GEMSRecipe:
             stage_stats.append({
                 **(getattr(result, "optimization_stats", None) or {}),
                 "stage_index": index + stage_offset + 1, "synthetic": synthetic,
+                "warm_start": warm_start, "block_size": block_size,
                 "resolution_mm": float(np.mean(np.linalg.norm(affine[:3, :3], axis=0))),
                 "alpha_sigma_voxels": sigma * resolution_scale,
                 "alpha_sigma_mm": sigma * resolution_scale * float(np.mean(
@@ -357,9 +363,10 @@ class GEMSRecipe:
                                              transform_reference=True)
             coarse_atlas, coarse_fit = self._fit(
                 coarse_atlas, np.asarray(coarse_image.dataobj), coarse_image.affine,
-                self.intensity_groups(coarse_atlas, 0), schedule[:1],
+                self.intensity_groups(coarse_atlas, 0), ((schedule[0][0], self.coarse_outer_iterations),),
                 synthetic=False, context=context, device=device, stage_count=len(schedule),
-                mesh_iterations=mesh_steps, working_resolution_mm=self.coarse_resolution_mm)
+                mesh_iterations=self.coarse_mesh_iterations,
+                working_resolution_mm=self.coarse_resolution_mm, warm_start=True)
             coarse_stats = getattr(coarse_fit, "optimization_stats", None)
             # _fit uncrops the returned atlas; coarse_fit alone keeps crop coordinates.
             atlas = coarse_atlas.transformed(np.linalg.inv(image.affine) @ coarse_image.affine,
@@ -368,13 +375,15 @@ class GEMSRecipe:
                 "resolution_mm": self.coarse_resolution_mm,
                 "working_shape": list(coarse_image.shape),
                 "affine": coarse_image.affine.tolist(),
-                "outer_em_iterations": schedule[0][1],
+                "outer_em_iterations": self.coarse_outer_iterations,
+                "mesh_iterations_per_outer": self.coarse_mesh_iterations,
+                "purpose": "warm_start_before_all_fine_stages",
                 "alpha_sigma_mm": schedule[0][0] * self.resolution_mm,
                 "erosion_radius_mm": 5 * self.resolution_mm,
                 "hyper_count_scale": (self.resolution_mm / self.coarse_resolution_mm)**3,
                 "resampling_seconds": resampling_seconds,
             }
-            fine_schedule, stage_offset = schedule[1:], 1
+            fine_schedule, stage_offset = schedule, 0
         else:
             fine_schedule, stage_offset = schedule, 0
         _, result = self._fit(atlas, data, image.affine,

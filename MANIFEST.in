@@ -1,6 +1,7 @@
-include README.md THIRD_PARTY_NOTICES.md environment.yml environment-gems-native.yml
+include README.md THIRD_PARTY_NOTICES.md environment.yml
 recursive-include licenses *.txt
-recursive-include third_party/samseg_gems *
+prune third_party/samseg_gems
+prune src/fnit/gems/native_samseg
 recursive-include src/fnit/_vendor_fsl * .*
 prune src/fnit/_vendor_fsl/sources/mmorf-0.3.2
 recursive-include src/fnit/connectome/data *.tsv
@@ -9,6 +10,7 @@ recursive-include docs *.md *.json *.png
 recursive-include examples *.md *.json *.py
 include docs/bedpostx/synthetic_example.py
 recursive-include tools *.py
+exclude tools/build_gems_native.py environment-gems-native.yml
 recursive-include tests *.py *.json
 recursive-include validation/applywarp *.json *.py SHA256SUMS
 recursive-include validation/flirt *.json *.md *.py SHA256SUMS

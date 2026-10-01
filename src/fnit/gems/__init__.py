@@ -29,5 +29,4 @@ __all__ = [
     "BlockIndex", "build_block_index", "rasterize_priors",
     "prepare_brainstem_atlas",
     "prepare_subregion_atlases",
-    "prepare_nuclei_atlas", "segment_nuclei",
 ]

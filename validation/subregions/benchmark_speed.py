@@ -55,6 +55,7 @@ def main():
         command += ["--optimization", args.optimization]
     env = dict(os.environ, CUDA_VISIBLE_DEVICES=str(args.physical_gpu),
                OMP_NUM_THREADS=str(args.threads), MKL_NUM_THREADS=str(args.threads),
+               OPENBLAS_NUM_THREADS=str(args.threads), NUMEXPR_NUM_THREADS=str(args.threads),
                PYTHONPATH=str(source / "src"), PYTHONUNBUFFERED="1",
                PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True")
     status_path = root / (args.label + "_status.json")

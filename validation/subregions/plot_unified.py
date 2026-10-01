@@ -1,4 +1,4 @@
-"""Plot six axial slices of a real T1, official labels and unified FNIT labels."""
+"""Plot six axial slices of a real T1 and two subregion segmentations."""
 
 from __future__ import annotations
 
@@ -37,10 +37,14 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--t1", required=True, type=Path)
     parser.add_argument("--candidate", required=True, type=Path)
-    parser.add_argument("--reference", required=True, nargs=4, type=Path,
-                        help="brainstem, thalamus, left hippo/amygdala, right hippo/amygdala")
+    parser.add_argument("--reference", required=True, nargs="+", type=Path,
+                        help="one unified FNIT label image, or four official structure images")
+    parser.add_argument("--reference-name", default="FreeSurfer 8.2")
+    parser.add_argument("--candidate-name", default="FNIT TorchGEMS")
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
+    if len(args.reference) not in (1, 4):
+        parser.error("--reference requires one unified label image or four official structure images")
     image = nib.as_closest_canonical(nib.load(args.t1))
     grid = (image.shape, image.affine)
     data = np.asarray(image.dataobj, dtype=np.float32)
@@ -48,7 +52,7 @@ def main():
     reference = np.zeros(image.shape, np.int32)
     for index, path in enumerate(args.reference):
         labels = np.asarray(resample_from_to(nib.load(path), grid, order=0).dataobj, np.int32)
-        if index == 3:
+        if len(args.reference) == 4 and index == 3:
             labels = np.where(labels != 0, labels + 10000, 0)
         reference[labels != 0] = labels[labels != 0]
     points = np.argwhere((reference != 0) | (candidate != 0))
@@ -71,7 +75,7 @@ def main():
         axes[2, col].imshow(overlay.transpose(1, 0, 2), origin="lower")
         z = (image.affine @ np.array([0, 0, index, 1]))[2]
         axes[0, col].set_title(f"z = {z:.1f} mm", color="white", fontsize=11)
-    for row, name in enumerate(("FreeSurfer 8.2", "FNIT TorchGEMS", "Label differences")):
+    for row, name in enumerate((args.reference_name, args.candidate_name, "Label differences")):
         axes[row, 0].set_ylabel(name, color="white", fontsize=11)
     for axis in axes.flat:
         axis.set_xticks([]); axis.set_yticks([])

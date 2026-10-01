@@ -103,12 +103,11 @@ def _run_synthseg(args):
 
 
 def _run_subregions(args):
-    import json
-    from dataclasses import asdict
-    import nibabel as nib
-    import numpy as np
+    import shutil
     from .gems import segment_subregions
-    selected = "all" if not args.structure or args.structure == ["all"] else args.structure
+    selected = "all" if not args.structure else args.structure
+    save_outputs = (args.output_dir or args.report_json or args.save_highres or args.save_posteriors)
+    output = Path(args.output_dir) if args.output_dir else Path(args.o).parent
     result = segment_subregions(
         args.i, args.atlas_root, structures=selected,
         coarse_segmentation=args.coarse_segmentation, synthseg_weights=args.synthseg_weights,
@@ -116,48 +115,18 @@ def _run_subregions(args):
         synthseg_parc_weights=args.synthseg_parc_weights,
         auto_initialize=not args.no_auto_initialize, device=args.device,
         em_iterations=args.em_iterations, deform_iterations=args.deform_iterations,
-        optimization=args.optimization)
-    Path(args.o).parent.mkdir(parents=True, exist_ok=True)
-    result.labels.save(args.o)
-    print(args.o)
-    output = Path(args.output_dir) if args.output_dir else None
-    if output:
-        output.mkdir(parents=True, exist_ok=True)
-        result.labels.save(output / "subregions_native.nii.gz")
-        metadata = result.label_metadata or {}
-        with (output / "labels.tsv").open("w") as stream:
-            stream.write("label_id\tname\tparent\tfamily\themisphere\tsource\n")
-            for identifier, name in result.label_table.items():
-                if identifier in metadata:
-                    label = metadata[identifier]
-                    stream.write(f"{label.id}\t{label.name}\t{label.parent}\t{label.family}\t{label.hemisphere or ''}\t{label.source}\n")
-                elif identifier:
-                    stream.write(f"{identifier}\t{name}\t\t\t\t\n")
-        with (output / "volumes.tsv").open("w") as stream:
-            stream.write("label_id\tname\tparent\themisphere\thard_volume_mm3\tsoft_volume_mm3\n")
-            for identifier, value in (result.volumes or {}).items():
-                label = metadata[identifier]
-                stream.write(f"{identifier}\t{label.name}\t{label.parent}\t{label.hemisphere or ''}\t"
-                             f"{value['hard_volume_mm3']:.6f}\t{value['soft_volume_mm3']:.6f}\n")
-    if args.save_highres:
-        highres = (output or Path(args.o).parent) / "highres"
-        highres.mkdir(parents=True, exist_ok=True)
-        for name, fit in result.structure_results.items():
-            stem = name.replace('-', '_')
-            labels = fit.highres_labels or nib.Nifti1Image(
-                fit.labels.detach().cpu().numpy().astype(np.int32), fit.affine)
-            nib.save(labels, highres / f"{stem}.nii.gz")
-            posterior = fit.posterior.detach().cpu().numpy().astype(np.float32)
-            nib.save(nib.Nifti1Image(np.moveaxis(posterior, 0, -1), fit.affine),
-                     highres / f"{stem}_posterior.nii.gz")
-    if args.report_json or output:
-        report = Path(args.report_json) if args.report_json else output / "report.json"
+        optimization=args.optimization, output_dir=output if save_outputs else None,
+        save_highres=args.save_highres, save_posteriors=args.save_posteriors)
+    target = Path(args.o)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    if not result.output_files or target.resolve() != result.output_files["labels"]:
+        result.labels.save(target)
+    if args.report_json:
+        report = Path(args.report_json)
         report.parent.mkdir(parents=True, exist_ok=True)
-        report.write_text(json.dumps({"input": str(args.i), "output": str(args.o),
-                                      "structures": list(result.structure_results),
-                                      "labels": {str(k): asdict(v) for k, v in
-                                                 (result.label_metadata or {}).items()},
-                                      "initialization": result.initialization}, indent=2) + "\n")
+        if report.resolve() != result.output_files["report"]:
+            shutil.copyfile(result.output_files["report"], report)
+    print(target)
 
 
 def _synthsr_suffix(path):
@@ -689,7 +658,8 @@ def main(argv=None):
     subregions.add_argument('--synthseg-weights', help='SynthSeg weights for initialization')
     subregions.add_argument('--synthseg-parc-weights', help='SynthSeg+ cortical weights')
     subregions.add_argument('--output-dir', help='labels, volumes and report output directory')
-    subregions.add_argument('--save-highres', action='store_true')
+    subregions.add_argument('--save-highres', action='store_true', help='save fine-grid labels')
+    subregions.add_argument('--save-posteriors', action='store_true', help='save fine-grid posterior channels')
     subregions.add_argument('--report-json', help='machine-readable processing report')
     subregions.add_argument('--no-auto-initialize', action='store_true')
     subregions.add_argument('--em-iterations', type=int, default=8)

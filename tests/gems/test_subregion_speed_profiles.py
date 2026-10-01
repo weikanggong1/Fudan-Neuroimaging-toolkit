@@ -107,9 +107,13 @@ def test_fast_uses_coarse_then_original_grid_and_keeps_thalamic_second_component
     np.testing.assert_allclose(_world(fine[0].reference_vertices, fine[1]),
                                _world(atlas.reference_vertices, image.affine))
     assert list(coarse[2]) == [0, 13, 13]
-    assert list(fine[2]) == [0, 13, 14]
-    assert fine[4]["stage_offset"] == 1
-    assert report["outer_em_iterations"] == [4, 3, 2, 2]
+    assert list(fine[2]) == [0, 13, 13]
+    assert coarse[3] == ((1.5, 2),)
+    assert coarse[4]["mesh_iterations"] == 8
+    assert coarse[4]["warm_start"] is True
+    assert fine[3] == recipe.fast_image_schedule
+    assert fine[4]["stage_offset"] == 0
+    assert report["outer_em_iterations"] == [3, 3, 2, 2]
     assert report["mesh_iterations_per_outer"] == 12
     assert report["coarse_working_image"]["hyper_count_scale"] == .125
     np.testing.assert_array_equal(fine[0].label_ids, atlas.label_ids)
@@ -201,9 +205,11 @@ def test_actual_nonzero_coarse_crop_restores_current_and_reference_world_coordin
     np.testing.assert_allclose(_world(calls[-1][0].reference_vertices, fit.affine),
                                _world(atlas.reference_vertices, affine), atol=1e-12)
     stats = fit.optimization_stats
-    assert stats["mesh_evaluations"] == 10 and stats["mesh_steps"] == 8
-    assert [stage["stage_index"] for stage in stats["stages"]] == [1, 2, 3, 4]
-    assert [stage["resolution_mm"] for stage in stats["stages"]] == [1., .5, .5, .5]
+    assert stats["mesh_evaluations"] == 15 and stats["mesh_steps"] == 10
+    assert [stage["stage_index"] for stage in stats["stages"]] == [1, 1, 2, 3, 4]
+    assert [stage["warm_start"] for stage in stats["stages"]] == [True, False, False, False, False]
+    assert [stage["block_size"] for stage in stats["stages"]] == [4, 8, 8, 8, 8]
+    assert [stage["resolution_mm"] for stage in stats["stages"]] == [1., .5, .5, .5, .5]
     np.testing.assert_allclose(stats["total_seconds"], stats["preparation_seconds"] +
                                stats["gems_fit_seconds"] + stats["post_fit_seconds"])
 
