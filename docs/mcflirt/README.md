@@ -6,6 +6,16 @@
 
 FSL `p_normcorr_smoothed` 的 `num` 和 `numA` 在行、层之间连续累加。FNIT 保留此计数定义及其方差公式；替换成常见的加权 Pearson 会改变优化目标。参考金字塔没有额外 Gaussian 预滤波，最终样条采样也不增加 FLIRT `applyxfm` 的降采样滤波。
 
+## 从 TorchFLIRT 复用的加速
+
+`TorchMCFLIRT` 复用项目中成熟的 `TorchFLIRT` 变换组合、Brent 坐标优化、三线性插值和精确 float32 CUDA 运算。MCFLIRT 的目标函数与 FLIRT 常用的相关比、互信息不同；本模块继续使用上述 NCC 定义，并保留每行有效 x 范围及逐次 float32 加法生成采样坐标的顺序。
+
+CUDA 路径将行范围计算、坐标生成、三线性采样、1 mm 边界降权和参考值读取合并到一个 Triton kernel，复用三个 float32 缓冲区供原 NCC 归约使用。这样减少每次 cost 的 GPU kernel 启动、临时张量和小张量的主机同步。变换仍先在 CPU 以 float64 组合、求逆，再转换为原实现使用的 12 个 float32 系数；融合采样使用逐步舍入的 float32 运算。
+
+同一次调用还复用各帧的强度重心。若完整 float32 BOLD 的大小不超过 4 GiB 且不超过当前空闲显存的四分之一，CUDA 路径会在三个阶段间缓存已上传的帧；更大的输入逐帧上传。缓存保存完整 float32 数据。三阶段的执行顺序、第一阶段的相邻帧初值传递、Brent 求解和 NCC 归约沿用既有实现。
+
+Python、命令行参数及输出结构均无需调整。融合采样需要 Triton；项目 [Conda 环境](../../environment.yml)已包含与 PyTorch 2.5.1 对应的 `triton==3.1.0`。CPU 路径，以及无法导入 Triton 时的 CUDA 采样，使用既有 PyTorch 张量实现。20 项 CUDA [采样合同测试](../../tests/mcflirt/test_fused_cost.py)已通过：融合采样的参考值、moving 值、权重及对应 NCC 与原张量路径逐元素 float32 位模式一致，覆盖正负平移、旋转、FOV 边界、接近零的方向和缓冲区复用。真实 BOLD 的精度与耗时见下文。
+
 ## 输入、参数与输出
 
 `TorchMCFLIRT(device=None).run(...)` 或 `TorchMCFLIRT(...)(...)` 都可调用。
