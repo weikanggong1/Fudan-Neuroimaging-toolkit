@@ -65,6 +65,8 @@ def main():
     started = time.perf_counter()
     common = ["--output-dir", output, "--fsl-root", fsl,
               "--freesurfer-root", case["freesurfer_root"], "--sbref", case["sbref"], "--threads", threads]
+    if case.get("synthstrip_python"):
+        common += ["--synthstrip-python", case["synthstrip_python"]]
     run("anatomy", [sys.executable, directory / "run_native_matched.py", "anatomy", *common,
                     "--t1w", case["t1w"], "--synthstrip-weights", case["synthstrip_weights"]])
     run("feat", [sys.executable, directory / "run_native_matched.py", "feat", *common,

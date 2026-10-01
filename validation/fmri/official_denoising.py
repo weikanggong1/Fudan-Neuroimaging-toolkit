@@ -43,19 +43,21 @@ def write_json(path, value):
 
 def image_check(path, *, reference=None, fourth_dimension=None):
     path = Path(path)
-    if path.name.endswith(".gz"):
-        with gzip.open(path, "rb") as stream:
-            while stream.read(8 * 1024 * 1024):
-                pass
     image = nib.load(str(path))
+    if path.name.endswith(".gz"):
+        # 一次完整解压同时校验 gzip CRC，后续只访问内存；按帧读取 gzip
+        # ArrayProxy 在没有 indexed_gzip 时会反复解压前面的数据。
+        with gzip.open(path, "rb") as stream:
+            uncompressed = stream.read()
+        image = type(image).from_bytes(uncompressed)
     if reference is not None and (image.shape[:3] != reference.shape[:3] or
             not np.allclose(image.affine, reference.affine, rtol=0, atol=1e-4)):
         raise ValueError(f"Unexpected image grid: {path.name}")
     if fourth_dimension is not None and image.shape != (*image.shape[:3], fourth_dimension):
         raise ValueError(f"Unexpected image frame count: {path.name}")
-    for frame in range(image.shape[3] if image.ndim == 4 else 1):
-        values = np.asarray(image.dataobj[..., frame] if image.ndim == 4 else image.dataobj)
-        if not np.isfinite(values).all():
+    values = np.asanyarray(image.dataobj).ravel(order="K")
+    for start in range(0, values.size, 4 * 1024 * 1024):
+        if not np.isfinite(values[start:start + 4 * 1024 * 1024]).all():
             raise ValueError(f"Nonfinite image values: {path.name}")
     return image
 

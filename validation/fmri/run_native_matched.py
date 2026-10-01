@@ -139,11 +139,17 @@ class NativeRun:
         shutil.copyfile(args.sbref, feat / "example_func.nii.gz")
         executable = args.freesurfer_root / "bin/mri_synthstrip"
         self.public["component_sha256"]["mri_synthstrip_source"] = sha256(args.freesurfer_root / "python/scripts/mri_synthstrip")
+        synthstrip_command = ([args.synthstrip_python, args.freesurfer_root / "python/scripts/mri_synthstrip"]
+                              if args.synthstrip_python else [executable])
+        self.public["synthstrip_execution"] = {
+            "device": "cuda", "original_source_unmodified": True,
+            "explicit_gpu_python": args.synthstrip_python is not None,
+        }
         for name, source, brain, mask in (
             ("epi_synthstrip", args.sbref, masks / "epi_brain.nii.gz", masks / "epi_mask.nii.gz"),
             ("t1_synthstrip", args.t1w, anat / "T1_brain.nii.gz", anat / "T1_mask.nii.gz"),
         ):
-            self.command(name, [executable, "-i", source, "-o", brain, "-m", mask,
+            self.command(name, [*synthstrip_command, "-i", source, "-o", brain, "-m", mask,
                                 "--model", args.synthstrip_weights, "-g", "-t", args.threads],
                          brain, reference=source)
             self.public["checks"][name + "_mask"] = image_check(mask, source, binary=True)
@@ -151,7 +157,7 @@ class NativeRun:
         # T1 defaults match FNIT FASTConfig: bias=4, fixed=4, FWHM=20, H=.1/R=.3.
         stem = anat / "T1_fast"
         self.command("fast", [args.fsl_root / "bin/fast", "-t", "1", "-n", "3", "-I", "4",
-                              "-l", "20", "-H", "0.1", "-R", "0.3", "-o", stem,
+                              "-W", "15", "-O", "4", "-f", "0.02", "-l", "20", "-H", "0.1", "-R", "0.3", "-o", stem,
                               "-B", "-b", anat / "T1_brain.nii.gz"],
                      anat / "T1_fast_pve_2.nii.gz", reference=args.t1w)
         for label in ("pve_0", "pve_1", "pve_2", "seg", "restore", "bias"):
@@ -215,6 +221,8 @@ def main():
     parser.add_argument("--sbref", type=Path, required=True)
     parser.add_argument("--t1w", type=Path)
     parser.add_argument("--synthstrip-weights", type=Path)
+    parser.add_argument("--synthstrip-python", type=Path,
+                        help="原 FreeSurfer fspython 没有 CUDA 时，用支持 GPU 的 Python 执行未修改的原脚本")
     parser.add_argument("--tr", type=float, default=0.735)
     parser.add_argument("--highpass-seconds", type=float, default=100.0)
     parser.add_argument("--threads", type=int, default=8)

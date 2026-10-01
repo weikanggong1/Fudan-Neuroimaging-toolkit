@@ -142,12 +142,16 @@ def image_pair(specification, directory):
     if kind not in ("scalar", "bold") or arrays[0].ndim != (4 if kind == "bold" else 3):
         raise ValueError("kind scalar requires 3D; kind bold requires 4D")
     region = np.ones(images[0].shape[:3], dtype=bool)
+    mask_hashes = {}
     for key in ("mask", "candidate_mask", "reference_mask"):
         if key in specification:
-            region &= load_mask(local_path(specification[key], directory), images[0])
+            path = local_path(specification[key], directory)
+            region &= load_mask(path, images[0])
+            mask_hashes[key] = sha256(path)
     if not region.any():
         raise ValueError("Comparison mask intersection is empty")
     result["mask_voxels"] = int(region.sum())
+    result["comparison_mask_sha256"] = mask_hashes
     if kind == "bold":
         tr = [float(image.header.get_zooms()[3]) for image in images]
         if not np.isclose(tr[0], tr[1], rtol=1e-5, atol=1e-6):
@@ -212,7 +216,9 @@ def affine_pair(specification, directory):
     return {"inverse_world_displacement": distances(*mapped),
             "matrix_max_absolute_difference": float(np.abs(raw[0] - raw[1]).max()),
             "convention": specification.get("convention", "fsl"),
-            "sha256": {key: sha256(path) for key, path in zip(("candidate", "reference"), paths)}}
+            "sha256": {key: sha256(path) for key, path in zip(("candidate", "reference"), paths)},
+            "geometry_sha256": {key: sha256(local_path(specification[key], directory))
+                                for key in ("moving", "reference", "mask") if key in specification}}
 
 
 def matrix_files(value, directory):
