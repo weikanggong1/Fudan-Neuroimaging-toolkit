@@ -16,6 +16,9 @@ class SpatialRegression:
         self.df = self.design.shape[0] - self.design.shape[1]
         if self.df < 1:
             raise ValueError("At least one residual degree of freedom is required")
+        if (not bool(torch.isfinite(self.design).all()) or
+                int(torch.linalg.matrix_rank(self.design)) != self.design.shape[1]):
+            raise ValueError("Spatial regression design must be finite and have full column rank")
         self.inverse = torch.linalg.pinv(self.design)
         self.se_multiplier = torch.sqrt(torch.diagonal(
             torch.linalg.pinv(self.design.T @ self.design))[:-1, None])

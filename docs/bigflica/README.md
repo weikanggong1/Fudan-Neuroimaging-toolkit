@@ -2,13 +2,15 @@
 
 `run_bigflica` 读取“每名被试一个目录”的 3D NIfTI。每个模态指定相对于被试目录的影像路径和自己的 3D 掩膜。输出被试成分 course、每模态每成分的原网格 z-stat NIfTI、绝对 z 值最高的若干体素的阈值图与 PNG，以及可投影新被试的固定模型。模态间可有不同网格；同一模态的影像必须与其掩膜形状和仿射一致。输入必须已经在所需标准空间；函数不做配准。
 
-**当前验收状态：**30,000名真实被试的VBM/FA/MD完整掩膜CPU/GPU试验已结束，C20有效秩分别为17/13，均未通过；未生成最终C20成分脑图或新被试模型。mMIGP的CPU/GPU相对差为 `6.07e-6`，DicL字典匹配后的差异为16%–30%，GPU的VBM重建几乎为零。运行至失败分别耗时153.04/112.55分钟，DicL和FLICA的GPU耗时均高于CPU；共享GPU及不同精度下的这些时间不能称为等价全流程加速。[完整报告、复现脚本与剩余工作](../../validation/bigflica/README.md#30000-人独立-cpugpu-对比当前结论)。
+**30,000 人基线：**旧版真实被试的VBM/FA/MD完整掩膜CPU/GPU试验已结束，C20有效秩分别为17/13，均未通过；未生成最终C20成分脑图或新被试模型。mMIGP的CPU/GPU相对差为 `6.07e-6`，DicL字典匹配后的差异为16%–30%，GPU的VBM重建几乎为零。运行至失败分别耗时153.04/112.55分钟，DicL和FLICA的GPU耗时均高于CPU；共享GPU及不同精度下的这些时间不能称为等价全流程加速。[历史报告、复现脚本与剩余工作](../../validation/bigflica/README.md#30000-人独立-cpugpu-对比当前结论)。
 
 默认 `use_mmigp_dicl=True`：逐体素跨被试标准化 → 联合 mMIGP → 每模态 Lasso-LARS 字典学习 → FLICA。CUDA 路径用 PyTorch 执行协方差、特征分解、稀疏编码、字典更新、FLICA、空间回归和 t→z 转换；nibabel/HDF5 负责 CPU 文件读写和分块传输。为复现原 FLICA 的自由度拟合，GPU 特征分解后每模态将少量特征值送给 SciPy 做一次标量优化；这一步属于 CPU 计算。`use_mmigp_dicl=False` 时，标准化后直接把体素送入 FLICA，不建立 mMIGP 或 DicL 模型。此模式保留体素信息，但每轮须读取全部模态矩阵，适合较小训练集；大样本建议开启预处理。`device="cpu"` 保留原 notebook 的 sklearn DicL 对照路径。
 
-**FLICA 数学修复：**自由能求和、分布公式、辅助函数精度、更新次数和历史记录已修复。67 项回归测试通过，包括直接体素 `o/R` 参数传递与输出检查；真实 30,000 人同字典同初始化控制的 CPU/GPU 拟合矩阵相对差不超过 `1.02e-13`，修正后的 1000 项自由能全部有限且逐轮上升。该控制仍只有 17 个有效成分；严格 MATLAB 初始化在字典输入上未改善 C20。[修复与验证记录](../../validation/bigflica/flica_math_fixes_20261001.md)。
+**FLICA 实现修复：**自由能、精度和迭代记录修复之后，默认 PCA 已按 MATLAB SVD 的尺度计算，并为每个模态分别使用 `W ~ N(0, 1/DD[k])`。旧代码在循环中将 W 先验覆盖为最后一个模态的值；旧 MATLAB 也有这一问题。还修复了非零影像正负抵消时被误当作零影像、归一化统计保存精度不一致的问题，并在脑图回归前检查含截距的设计矩阵。相关 BigFLICA/SuperBigFLICA 共137项回归测试通过。[初始化与先验修复、真实数据控制](../../validation/bigflica/flica_initialization_prior_fix_real1000_20261001.md)。较早的自由能修复及30,000人定位结果见[历史记录](../../validation/bigflica/flica_math_fixes_20261001.md)。
 
-**原始体素控制：**固定 1000 人、完整 VBM/FA/MD 掩膜，MATLAB 整体 RMS 预处理和 SVD 初始化；GPU 执行 1000 次更新仍保留 20 个有效成分。CPU/GPU 同初态 100 次参数相对差最大 `1.65e-10`，60 张 z-stat 图与独立 NumPy/SciPy 对照最大差 `1.91e-6`。1000 次 GPU 拟合观测耗时 87.69 秒，来自私密显存缓存运行器，不能当作公开流式 API 或默认预处理的端到端耗时；收敛及压缩模型仍须单独验收。[原始体素完整记录](../../validation/bigflica/raw_flica_real1000_20261001.md)。
+**本轮真实1000人结果：**新先验下原始体素R控制仍为20个成分，归一化投影为19个；同一保存字典的新初始化R控制CPU/GPU均为7，当前拟合函数默认o均为2并拒绝C20输出。这些输入采用整体RMS，未作为公开默认逐体素z-score全链验收。原始GPU1000次拟合观测约91秒，小字典o阶段CPU/GPU约15.47/28.56秒；共享资源和缓存条件下未形成受控加速结论。
+
+**此前原始体素基线：**固定 1000 人、完整 VBM/FA/MD 掩膜，MATLAB 整体 RMS 预处理、SVD 初始化和旧共享 W 先验；GPU 执行 1000 次更新仍保留 20 个有效成分。CPU/GPU 同初态 100 次参数相对差最大 `1.65e-10`，60 张 z-stat 图与独立 NumPy/SciPy 对照最大差 `1.91e-6`。1000 次 GPU 拟合观测耗时 87.69 秒，来自私密显存缓存运行器，不能当作公开流式 API 或默认预处理的端到端耗时；收敛及压缩模型仍须单独验收。[原始体素历史记录](../../validation/bigflica/raw_flica_real1000_20261001.md)。
 
 **随后接入压缩：**同一 1000 人的 mMIGP 原投影及归一化投影分别保留1/19个成分；同投影 CPU/GPU DicL 后均为7，未通过 C20。同一投影的三模态 DicL 观测耗时 CPU193.85秒、GPU92.37秒，但小字典 FLICA 的 GPU 仍慢于 CPU。补充控制中，仅固定原始 DD 恢复到20，但FA/MD拟合仍弱；仅改共享噪声为16。未更换默认参数。压缩改变 DD 与噪声坐标，不能按原体素的成功结果宣称压缩模型等价。[逐段对照和原因分析](../../validation/bigflica/compression_after_raw_real1000_20261001.md)。
 
@@ -40,7 +42,7 @@ CUDA DicL 用批量 ADMM 识别稀疏系数的非零位置，再求解活动集�
 
 DicL内部仍沿用float64，mMIGP投影为float32；均值/方差分块汇总和兼容随机数生成仍在CPU执行。矩阵、稀疏求解和字典更新在GPU完成，只使用项目已有PyTorch依赖，未安装或调用SPORCO。ADMM方程参考 [SPORCO BPDN](https://sporco.readthedocs.io/en/latest/modules/sporco.admm.bpdn.html)；完整阶段实测见[验证记录](../../validation/bigflica/README.md#当前实现所需的补充证据)。
 
-GPU字典缓存版本改为 `rsvd3bpdn`；旧版字典不会自动复用，mMIGP缓存可继续复用。原有CLI和Python参数无需修改。此优化没有消除独立CPU/GPU全链输入差异经非凸字典学习放大的问题，也没有解决20个有效成分的验收。
+GPU字典缓存版本为 `rsvd3bpdn`。本轮归一化版本更新会使旧的归一化、mMIGP和DicL缓存失效；用新输出目录重新拟合可保留历史结果。CLI和Python参数无需修改。此优化没有消除独立CPU/GPU全链输入差异经非凸字典学习放大的问题，C20结果仍须检查。
 
 ## 安装与输入
 
@@ -93,7 +95,7 @@ fnit-bigflica apply \
   --ridge 1e-6 --device cuda:0 --feature-block 32768
 ```
 
-直接体素模式省略 mMIGP/DicL 维度，另设输出目录以保留两套模型。支持标量 `o` 和逐被试 `R` 噪声精度，输出前执行与压缩流程相同的有效秩和模态重建检查。以下展示调用形式；默认预处理仍是逐体素标准化，默认初始化仍沿用原 BigFLICA。上述 MATLAB 整体 RMS/SVD 控制未替换这两个默认设置，也不替代此调用的 C20 验收：
+直接体素模式省略 mMIGP/DicL 维度，另设输出目录以保留两套模型。支持标量 `o` 和逐被试 `R` 噪声精度，输出前执行与压缩流程相同的有效秩和模态重建检查。默认预处理为逐体素标准化，初始化已采用修正后的 MATLAB SVD 尺度；上述整体 RMS 数据控制使用另一种预处理，须与公开默认设置分别验收：
 
 ```bash
 fnit-bigflica fit \
@@ -196,6 +198,10 @@ bigflica_output/
 直接体素模式只有 `normalized/` 和 `components_*/`，不生成 mMIGP/DicL 目录。CPU 压缩模式使用 `normalized/` float64 缓存；被试数不超过 2,048 时保留 SciPy 精确 mMIGP，超过 2,048 时逐被试写入 HDF5、分块计算协方差和投影。大样本随机子空间最多迭代 120 次，float64 的整体及每对特征残差须低于 `1e-8`；float32 须低于 `1e-6` 且至少迭代 90 次。失败时不写成功缓存清单。CPU DicL 用 sklearn `.fit`，每次只读取一个压缩后的 `P × migp_dim` 模态；单模态投影超过 4 GiB 时会报错。原始 `N × P` 模态始终保存在 HDF5。CPU 大样本 mMIGP 缓存版本为 `cpu-stream-v2-adaptive-float64`；GPU 随机子空间为 `cuda-stream-v6-adaptive-float32`，高目标秩完整特征分解为 `cuda-stream-v7-highrank-exact-float32`，旧版本缓存不会复用。
 
 压缩及直接体素模式的 `flica_reconstruction.json` 记录各模态与整体重建范数比、H 的奇异值相对最大奇异值的比例、逐成分范数、有效秩及请求成分数。有效秩以奇异值比例大于 `1e-6` 的个数定义。若出现非有限值、有效秩不足，或某模态重建范数比低于 `1e-6`，会保留诊断并停止输出该模型。该检查不替代收敛、逐模态残差、脑图及留出被试验收。逐被试噪声模式的输出目录为 `components_C_lambda_R/`，标量模式仍为 `components_C/`；已有模型的输入签名或模态不一致时会拒绝覆盖，应使用新输出目录。缓存以被试顺序、影像和掩膜的路径/大小/修改时间及阶段参数核验；若原地改写文件却保留这些属性，须删除相应缓存后重跑。
+
+`model.json` 新增 `flica_algorithm_version`、`normalization_version`、`course_coordinates`、`brainmap_space` 和 `brainmap_df`。当前版本为 `matlab-pca-per-modality-W-v2`、`voxel-zscore-v3-stats64-any-nonzero`；旧算法模型不会被新拟合覆盖，已有固定模型仍可用 `apply_model`。标准化均值和标准差保存为 float64，供训练输出和新被试投影共用。脑图回归要求成分与截距合并后满列秩，否则停止生成统计图。
+
+压缩模式保留原 BigFLICA 的 `U@H` course 回映和 PC 空间回归：`course_coordinates=legacy_spectral_PC_zscore`，`brainmap_space=mMIGP_PC`，自由度为 `migp_dim-C-1`。直接体素模式使用原始被试坐标，自由度为 `N-C-1`。两种模型的坐标、噪声和统计自由度不同，不能把成分数相同视为脑图等价。
 
 | 参数 | 含义 |
 |---|---|

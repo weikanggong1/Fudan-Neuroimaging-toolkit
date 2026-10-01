@@ -24,6 +24,10 @@ from scipy.stats import norm, t as student_t
 from sklearn.decomposition import MiniBatchDictionaryLearning
 
 
+_FLICA_ALGORITHM_VERSION = "matlab-pca-per-modality-W-v2"
+_NORMALIZATION_VERSION = "voxel-zscore-v3-stats64-any-nonzero"
+
+
 def _device(device: str) -> torch.device:
     selected = "cuda" if device == "auto" and torch.cuda.is_available() else device
     if selected == "auto":
@@ -46,13 +50,18 @@ def _flica_directory(destination: Path, n_components: int, lambda_dims: str) -> 
 
 
 def _check_flica_output(directory: Path, signature: str,
-                        modalities: Sequence[str]) -> None:
+                        modalities: Sequence[str],
+                        algorithm_version: str | None = None) -> None:
     model_file = directory / "model.json"
     if model_file.is_file():
         model = json.loads(model_file.read_text(encoding="utf-8"))
         prior_modalities = model.get("source_modalities", model.get("modalities", {}))
         if model.get("input_signature") != signature or list(prior_modalities) != list(modalities):
             raise ValueError("Existing FLICA model has different inputs or modalities; "
+                             "use a fresh output_dir")
+        if (algorithm_version is not None and
+                model.get("flica_algorithm_version") != algorithm_version):
+            raise ValueError("Existing FLICA model uses a different algorithm version; "
                              "use a fresh output_dir")
 
 
@@ -76,8 +85,8 @@ def _valid_cache(directory: Path, signature: str, files: Sequence[str]) -> bool:
 
 
 def _standardize(matrix: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Match upstream nets_zscore, leaving all-zero subject rows at zero."""
-    valid = np.sum(matrix, axis=1) != 0
+    """Voxel z-score with float64 statistics; keep all-zero subject rows zero."""
+    valid = np.any(matrix != 0, axis=1)
     if not np.any(valid):
         raise ValueError("Every subject image is zero in this modality mask")
     mean = matrix[valid].mean(axis=0, dtype=np.float64)
@@ -85,7 +94,7 @@ def _standardize(matrix: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray
     std[std == 0] = 0.1
     normalized = matrix.astype(np.float64, copy=True)
     normalized[valid] = (normalized[valid] - mean) / std
-    return normalized, mean.astype(np.float32), std.astype(np.float32)
+    return normalized, mean, std
 
 
 def _load_mask(path: Path) -> tuple[nib.spatialimages.SpatialImage, np.ndarray]:
@@ -279,6 +288,9 @@ def _spatial_z(h: np.ndarray, projected: np.ndarray) -> np.ndarray:
     df = design.shape[0] - design.shape[1]
     if df < 1:
         raise ValueError("migp_dim must exceed n_components + 1 for spatial z statistics")
+    if (not np.isfinite(design).all() or
+            np.linalg.matrix_rank(design) != design.shape[1]):
+        raise ValueError("Spatial regression design must be finite and have full column rank")
     beta = np.linalg.pinv(design) @ projected.T
     residual = projected.T - design @ beta
     sigma = np.sqrt(np.sum(residual ** 2, axis=0) / df)
@@ -377,10 +389,12 @@ def run_bigflica(subjects_root: str | Path, modalities: Mapping[str, Mapping[str
     image_records = {name: [_file_record(root / subject / specs[name]["image"])
                             for subject in ids] for name in names}
     signature = _signature({"ids": ids, "specs": specs,
+                            "normalization_version": _NORMALIZATION_VERSION,
                             "masks": {name: _file_record(Path(specs[name]["mask"])) for name in names},
                             "images": image_records})
     _check_flica_output(_flica_directory(destination, n_components,
-                                         flica_lambda_dims), signature, names)
+                                         flica_lambda_dims), signature, names,
+                        _FLICA_ALGORITHM_VERSION)
     destination.mkdir(parents=True, exist_ok=True)
     if _device(device).type == "cuda":
         from .pipeline_gpu import run_bigflica_gpu, run_bigflica_raw_gpu
@@ -451,7 +465,7 @@ def run_bigflica(subjects_root: str | Path, modalities: Mapping[str, Mapping[str
         _save_manifest(dicl_dir, {"signature": dicl_sig, "mmigp_signature": mmigp_sig})
         timings["dicl_s"] = time.perf_counter() - start
     result_dir = _flica_directory(destination, n_components, flica_lambda_dims)
-    _check_flica_output(result_dir, signature, names)
+    _check_flica_output(result_dir, signature, names, _FLICA_ALGORITHM_VERSION)
     start = time.perf_counter()
     h_migp, contribution = _fit_flica(dictionaries, n_components,
                                       flica_max_iter, result_dir, "cpu", flica_lambda_dims)
@@ -493,8 +507,13 @@ def run_bigflica(subjects_root: str | Path, modalities: Mapping[str, Mapping[str
              "dicl_dim": dicl_dim, "dicl_max_iter": dicl_max_iter,
              "dicl_batch_size": 32, "dicl_sparse_iterations": None,
              "flica_max_iter": flica_max_iter, "flica_lambda_dims": flica_lambda_dims,
+             "flica_algorithm_version": _FLICA_ALGORITHM_VERSION,
+             "normalization_version": _NORMALIZATION_VERSION,
+             "course_coordinates": "legacy_spectral_PC_zscore",
+             "brainmap_space": "mMIGP_PC",
+             "brainmap_df": int(h_migp.shape[0] - n_components - 1),
              "flica_signature": _signature([dicl_sig, n_components, flica_max_iter,
-                                             flica_lambda_dims]),
+                                             flica_lambda_dims, _FLICA_ALGORITHM_VERSION]),
              "top_voxels": top_voxels,
              "random_state": random_state, "input_signature": signature,
              "device": "cpu", "use_mmigp_dicl": True,

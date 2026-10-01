@@ -1,5 +1,7 @@
 # 原始体素基线之后：mMIGP 与 DicL 的逐段对照
 
+这是 `f12dba7` 版本的基线，严格数值 SVD 初态仍使用旧的共享 W 先验。后续对默认 PCA 和逐模态 W 先验的修复及同输入控制，见[新报告](flica_initialization_prior_fix_real1000_20261001.md)。本页数值对应冻结的历史源码。
+
 ## 固定输入
 
 先完成[原始体素 FLICA](raw_flica_real1000_20261001.md)，再在同一 1000 人、完整 VBM/FA/MD 掩膜上增加压缩。原始 C20 基线使用 MATLAB 整体 RMS 预处理、严格 SVD 初始化、逐被试噪声 `R`，GPU 1000 次更新仍保留 20 个有效成分。
