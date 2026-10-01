@@ -12,7 +12,7 @@ CUDA 流程已接入既有第二次归一化、SynthMorph 非线性配准和[厚
 
 此前按真实剖析优化[球面法向的面关联索引](SURFACE_NORMALS.md)，八张真实网格逐元素一致；该版本两例整例的结果在本页历史配对节中保留。
 
-2026-10-01 进一步复用已有厚度和统计函数：[完整空间候选厚度](SURFACE_THICKNESS.md)取消密集全顶点距离及逐顶点 Python 搜索，两例双侧八轮与原函数逐值相同；[多图谱缓存](SURFACE_STATS_CACHE.md)让图谱共享同版本几何基础量，48 份统计文本相同。SynthSeg 在前向作用域应用并记录[实际精度策略](SYNTHSEG_PRECISION.md)，修正构造函数覆盖设置的问题。新增[可选剖析](PROFILING.md)及[Torch/Numba 预算](THREAD_BUDGET.md)。这些阶段结果与当前整例状态分别报告，未据此宣称整例提速。
+2026-10-01 进一步复用已有厚度和统计函数：[完整空间候选厚度](SURFACE_THICKNESS.md)取消密集全顶点距离及逐顶点 Python 搜索，两例双侧八轮与原函数逐值相同；[多图谱缓存](SURFACE_STATS_CACHE.md)让图谱共享同版本几何基础量，48 份统计文本相同。SynthSeg 在前向作用域应用并记录[实际精度策略](SYNTHSEG_PRECISION.md)，修正构造函数覆盖设置的问题。新增[可选剖析](PROFILING.md)及[Torch/Numba 预算](THREAD_BUDGET.md)。冻结 `1b8c36d` 的两例已从原始 T1 连续完成，完整 GPU/CPU 命令耗时分别为 4972.67/5295.42 秒，各生成 138 项输出并通过现有标准网格检查；GPU 父子同时显存采样峰值 16.12 GB。[CPU 受控精度对照](../../validation/recon_all/python_gpu_port/performance_20261001/cpu_control_precision_summary.json)为 138/138，解析数值、几何及分区指标均零差异；GPU 受控整例仍在运行。当前官方对照为 6/138、2/138，68 区厚度 MAE 为 0.04184/0.02169 mm；[扩展质量补检](../../validation/recon_all/python_gpu_port/performance_20261001/surface_quality_extended_summary.json)发现 white/pial 穿越阳性，原 `passed` 不覆盖这一项。实测和局部异常已纳入[当前说明与脑图](../../validation/recon_all/python_gpu_port/performance_20261001/README.md)，整体指标等效尚未判定。
 
 ## 安装
 

@@ -1,0 +1,1018 @@
+{
+  "schema": "fnit.recon_all.gpu_reuse_remaining_audit.v1",
+  "created_utc": "2026-10-01T04:27:03.111032+00:00",
+  "scope": "只读实际冻结1b源码与本次真实stage/substep报告；未运行新GPU/阶段/基线，未改生产。",
+  "candidate_calculation_commit": "1b8c36d25a68e253a1e59b6d02114890afa467de",
+  "deployment_archive_sha256": "66f1d677d5dc4e5c0fcf9c4be4d5d7a895180dfe8f0c884f5a9511ee254c6143",
+  "timing_report": {
+    "path": "validation/recon_all/python_gpu_port/performance_20261001/candidate_whole_profile.json",
+    "sha256": "8d648a5157e6e741b480f471bd7b825af484674cab0e6a0ad05ef15bf7e2ff4a"
+  },
+  "timing_scope": "outer stage包括调用内加载/传输/读写及显式目标GPU同步；nested子时间不相加，非纯kernel。sub01 gpucw1 CUDA与sub02 nodecw10 CPU不构成设备速度对照。",
+  "source_binding": {
+    "remote_code_directory": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/code_1b8c36d",
+    "remote_sha_equals_git_1b": true,
+    "verified_module_count": 25,
+    "modules": {
+      "src/fnit/recon_all/native_free.py": {
+        "sha256": "df63b3838f356b034fe8efc2a00559d0cf7630d4c5117ca2c011363354c58f64",
+        "lines": 1002
+      },
+      "src/fnit/recon_all/surface_jacobian_gpu.py": {
+        "sha256": "ead0fcb7c0c43e55fbacb17efb170cb93aff7449619e6d9b4d87349caeeccbce",
+        "lines": 62
+      },
+      "src/fnit/recon_all/vol2surf_contrast_python.py": {
+        "sha256": "44164662d0b11a3c7f55dbc44c3791c8ff53fa2b5fd172f405c1c9d9fbb6257c",
+        "lines": 197
+      },
+      "src/fnit/recon_all/sphere_standard_run.py": {
+        "sha256": "7544ccb77153a7ac242b88d1c9752bdd08ce5765ba483cd644a4075e94e90405",
+        "lines": 140
+      },
+      "src/fnit/recon_all/sphere_standard_finish.py": {
+        "sha256": "9ba0ce2e7dd6ab0a731a45266f3e7fd8e67b48a39ed7117c65d68cc2a74f9825",
+        "lines": 22
+      },
+      "src/fnit/recon_all/sphere_standard_nonlinear.py": {
+        "sha256": "1b24d46d211f165dc137011eca2f4894eb9c66670d336451986e64dbcf65d0b8",
+        "lines": 174
+      },
+      "src/fnit/recon_all/sphere_standard_average.py": {
+        "sha256": "f79dc72a574d3bef756f06b97ab2546d35662c1d6acbd769e034fa542d84bd78",
+        "lines": 29
+      },
+      "src/fnit/recon_all/mris_register_run.py": {
+        "sha256": "b478ed6e9109d113a73a18da2a28492837b308a5884abcf76760cce2075421ae",
+        "lines": 67
+      },
+      "src/fnit/recon_all/mris_register_sulc_run.py": {
+        "sha256": "5ddb1f8f7e781b4df379f3896656769a9c582e1ee68e860a2236c236d8bfb48f",
+        "lines": 149
+      },
+      "src/fnit/recon_all/mris_register_smoothwm_run.py": {
+        "sha256": "c97a93caa1b5a5210949a81510b39c21f770d60a1163f89f86140f8576660892",
+        "lines": 185
+      },
+      "src/fnit/recon_all/mris_register_nonlinear.py": {
+        "sha256": "f9edc1cd5952ea3223b2ef0c49d1a21d3ed0592523e38961bf93f4f95b78a737",
+        "lines": 492
+      },
+      "src/fnit/recon_all/mris_register_average_numba.py": {
+        "sha256": "668801763b136533ba3f1f06dbe2882b81c57b6cd085cc1f17e3a154c4d78817",
+        "lines": 34
+      },
+      "src/fnit/recon_all/mris_register_overlap.py": {
+        "sha256": "a3a205070387fb9544b686a92e5e08205bb823b5b9f9bc24050d9c57e65e887b",
+        "lines": 77
+      },
+      "src/fnit/recon_all/sclimbic.py": {
+        "sha256": "10dfe1904a5d3a4bda2ffad06734480e7e6419073439c35f1633b326a1b02d80",
+        "lines": 316
+      },
+      "src/fnit/recon_all/normalization/pipeline.py": {
+        "sha256": "ad9a206a35e6ac2334f1c8006ef3f6245985a14d6169e7c8e308171162e29ec5",
+        "lines": 136
+      },
+      "src/fnit/recon_all/normalization/aseg_pipeline.py": {
+        "sha256": "8060c5b7311433c51f3161269ee7092d2656d8d0ab80e329de081d8cbdece494",
+        "lines": 112
+      },
+      "src/fnit/recon_all/normalization/normalize_voronoi_source.py": {
+        "sha256": "c1f278fd6a57c878cd05a23562a62c7015c896b788817df8857967cb77ac0dc5",
+        "lines": 112
+      },
+      "src/fnit/recon_all/normalization/normalize_gaussian_source.py": {
+        "sha256": "82990481329a3fe9907d659e74e816dbaeb3f8fd6851f9b4ffd46472458ba749",
+        "lines": 130
+      },
+      "src/fnit/recon_all/mni_aux_chain.py": {
+        "sha256": "a9b1b7d5d5686ee9bf07786b63ec3a8268996256c2ee696ef7593665891dd368",
+        "lines": 182
+      },
+      "src/fnit/recon_all/mni_nonlinear_chain.py": {
+        "sha256": "17c781f2216d552a8f9de8d1b3960d336b042d13da91525ba016410afc0139f0",
+        "lines": 103
+      },
+      "src/fnit/recon_all/surface_stats_cache.py": {
+        "sha256": "fd92ec7a92bd0d00bbac72c8d3a16461f8c3df5c8688fd3998c350eab70ce9d8",
+        "lines": 320
+      },
+      "src/fnit/recon_all/input_talairach_chain.py": {
+        "sha256": "cbb5764299846d3d0d4a598b9c2ccc713520266ad8d8bc0b8e5ed89c1e7b3a69",
+        "lines": 133
+      },
+      "src/fnit/recon_all/talairach_synthmorph.py": {
+        "sha256": "8a4d615dff568ed336bc6a6e77bb47a511c08d48e9f70262b05434cc2105e2e2",
+        "lines": 107
+      },
+      "src/fnit/recon_all/surface_area_gpu.py": {
+        "sha256": "ad60ee9c6b3e45464650ac15f2fce7bc2ea3a6cb519c15f371f4f653f45964a8",
+        "lines": 58
+      },
+      "src/fnit/recon_all/surface_curvature_gpu.py": {
+        "sha256": "7af66e0b23dd19cabe8e20e7ea75686531eb87550e599d318f35dc24f7efc8e0",
+        "lines": 118
+      }
+    }
+  },
+  "current_cases": {
+    "sub01": {
+      "host": "gpucw1",
+      "main_device": "cuda:0",
+      "stage_seconds": {
+        "T1_normalize": 185.4260512162,
+        "mri_em_register": 212.34518568310887,
+        "mri_ca_normalize": 27.513060389086604,
+        "brain_second_normalize": 174.51221723295748,
+        "entowm": 7.7979131462052464,
+        "mni_aux": 23.539183574263006,
+        "mni_nonlinear": 284.6094972747378,
+        "brain_finalsurfs": 6.5374605329707265,
+        "surface_lh": 783.2692176410928,
+        "surface_rh": 747.981546272058,
+        "register_lh": 478.8150978158228,
+        "register_rh": 458.3133066268638,
+        "finish_surface_lh": 408.7209242172539,
+        "finish_surface_rh": 368.8210993199609,
+        "jacobian_lh": 0.03569783875718713,
+        "contrast_lh": 1.0291734407655895,
+        "jacobian_rh": 0.02242716494947672,
+        "contrast_rh": 1.0199614870361984
+      },
+      "raw_report_path": "validation/recon_all/python_gpu_port/performance_20261001/whole/sub01/candidate_run.json",
+      "raw_report_sha256": "9b880e1529278705c28168852c3f232b3708a4997606335697f8bdc45b08ccca",
+      "sphere_and_register_substeps": {
+        "lh": {
+          "standard_sphere": {
+            "projection_seconds": 0.5294782309792936,
+            "metric_seconds_including_jit": 25.814932490233332,
+            "finish_seconds": 1.7661496088840067,
+            "total_seconds_including_io": 238.42560185398906
+          },
+          "registration": {
+            "full_stage_seconds": 478.8150978158228,
+            "full_function_including_io_seconds": 478.8137235059403,
+            "sulc": {
+              "rigid_seconds": 49.72895670635626,
+              "setup_seconds": 58.81402163999155,
+              "total_seconds_including_io": 353.1489522950724,
+              "integration_and_write_residual_seconds": 294.3349306550808,
+              "rigid_seconds_is_nested_in_setup": true
+            },
+            "smoothwm": {
+              "setup_seconds_including_raw_fit": 23.392662614118308,
+              "integration_seconds": 100.35588922910392,
+              "repair_seconds": 1.8297959328629076,
+              "total_seconds_including_io": 125.60032160999253
+            },
+            "overlap_device": "cpu"
+          }
+        },
+        "rh": {
+          "standard_sphere": {
+            "projection_seconds": 0.04749812697991729,
+            "metric_seconds_including_jit": 23.13480656966567,
+            "finish_seconds": 1.4536666609346867,
+            "total_seconds_including_io": 176.04607992898673
+          },
+          "registration": {
+            "full_stage_seconds": 458.3133066268638,
+            "full_function_including_io_seconds": 458.31244105799124,
+            "sulc": {
+              "rigid_seconds": 47.92314477311447,
+              "setup_seconds": 56.53164941398427,
+              "total_seconds_including_io": 342.8441453189589,
+              "integration_and_write_residual_seconds": 286.31249590497464,
+              "rigid_seconds_is_nested_in_setup": true
+            },
+            "smoothwm": {
+              "setup_seconds_including_raw_fit": 18.495208324864507,
+              "integration_seconds": 95.34608338493854,
+              "repair_seconds": 1.5434118108823895,
+              "total_seconds_including_io": 115.40665629412979
+            },
+            "overlap_device": "cpu"
+          }
+        }
+      },
+      "surface_stats_cache_counters": {
+        "lh": {
+          "morph_reads": 3,
+          "annotation_reads": 5,
+          "cortex_reads": 1,
+          "global_total_computations": 3,
+          "etiv_computations": 1,
+          "geometry_reads": 2,
+          "vertex_area_computations": 2,
+          "face_area_computations": 2,
+          "no_th3_volume_computations": 1,
+          "roi_summary_transfers": 6,
+          "principal_curvature_computations": 2
+        },
+        "rh": {
+          "morph_reads": 3,
+          "annotation_reads": 5,
+          "cortex_reads": 1,
+          "global_total_computations": 3,
+          "etiv_computations": 1,
+          "geometry_reads": 2,
+          "vertex_area_computations": 2,
+          "face_area_computations": 2,
+          "no_th3_volume_computations": 1,
+          "roi_summary_transfers": 6,
+          "principal_curvature_computations": 2
+        }
+      }
+    },
+    "sub02": {
+      "host": "nodecw10",
+      "main_device": "cpu",
+      "stage_seconds": {
+        "T1_normalize": 72.16737869381905,
+        "mri_em_register": 163.1556385755539,
+        "mri_ca_normalize": 24.108749128878117,
+        "brain_second_normalize": 90.44769471883774,
+        "entowm": 8.908898502588272,
+        "mni_aux": 24.73234547674656,
+        "mni_nonlinear": 305.19814033806324,
+        "brain_finalsurfs": 5.827028870582581,
+        "surface_lh": 842.644104540348,
+        "surface_rh": 745.5609057322145,
+        "register_lh": 482.45292811095715,
+        "register_rh": 415.72080797702074,
+        "finish_surface_lh": 564.2612348422408,
+        "finish_surface_rh": 560.4895186796784,
+        "jacobian_lh": 0.04134111851453781,
+        "contrast_lh": 1.0848747417330742,
+        "jacobian_rh": 0.030292771756649017,
+        "contrast_rh": 0.9981044307351112
+      },
+      "raw_report_path": "validation/recon_all/python_gpu_port/performance_20261001/whole/sub02/candidate_run.json",
+      "raw_report_sha256": "36c4bc93013aff82d8262a8411354d8186c4a1f735533c67fd99e705b84de672",
+      "sphere_and_register_substeps": {
+        "lh": {
+          "standard_sphere": {
+            "projection_seconds": 0.3128155246376991,
+            "metric_seconds_including_jit": 26.213899232447147,
+            "finish_seconds": 0.01709466427564621,
+            "total_seconds_including_io": 156.99002726376057
+          },
+          "registration": {
+            "full_stage_seconds": 482.45292811095715,
+            "full_function_including_io_seconds": 482.4528308659792,
+            "sulc": {
+              "rigid_seconds": 51.12967903167009,
+              "setup_seconds": 61.89359858632088,
+              "total_seconds_including_io": 355.9394012913108,
+              "integration_and_write_residual_seconds": 294.0458027049899,
+              "rigid_seconds_is_nested_in_setup": true
+            },
+            "smoothwm": {
+              "setup_seconds_including_raw_fit": 26.53149326145649,
+              "integration_seconds": 98.16560775786638,
+              "repair_seconds": 1.739667221903801,
+              "total_seconds_including_io": 126.46143764257431
+            },
+            "overlap_device": "cpu"
+          }
+        },
+        "rh": {
+          "standard_sphere": {
+            "projection_seconds": 0.03526204824447632,
+            "metric_seconds_including_jit": 24.225069038569927,
+            "finish_seconds": 1.9248582497239113,
+            "total_seconds_including_io": 141.24143869429827
+          },
+          "registration": {
+            "full_stage_seconds": 415.72080797702074,
+            "full_function_including_io_seconds": 415.72072909772396,
+            "sulc": {
+              "rigid_seconds": 51.54184403270483,
+              "setup_seconds": 61.25761663913727,
+              "total_seconds_including_io": 295.0813962072134,
+              "integration_and_write_residual_seconds": 233.82377956807613,
+              "rigid_seconds_is_nested_in_setup": true
+            },
+            "smoothwm": {
+              "setup_seconds_including_raw_fit": 20.507353760302067,
+              "integration_seconds": 98.42451120913029,
+              "repair_seconds": 1.6197507455945015,
+              "total_seconds_including_io": 120.58255794644356
+            },
+            "overlap_device": "cpu"
+          }
+        }
+      },
+      "surface_stats_cache_counters": {
+        "lh": {
+          "morph_reads": 3,
+          "annotation_reads": 5,
+          "cortex_reads": 1,
+          "global_total_computations": 3,
+          "etiv_computations": 1,
+          "geometry_reads": 2,
+          "vertex_area_computations": 2,
+          "face_area_computations": 2,
+          "no_th3_volume_computations": 1,
+          "roi_summary_transfers": 6,
+          "principal_curvature_computations": 2
+        },
+        "rh": {
+          "morph_reads": 3,
+          "annotation_reads": 5,
+          "cortex_reads": 1,
+          "global_total_computations": 3,
+          "etiv_computations": 1,
+          "geometry_reads": 2,
+          "vertex_area_computations": 2,
+          "face_area_computations": 2,
+          "no_th3_volume_computations": 1,
+          "roi_summary_transfers": 6,
+          "principal_curvature_computations": 2
+        }
+      }
+    }
+  },
+  "remaining_gpu_paths": [
+    {
+      "stage": "jacobian",
+      "source": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "lines": [
+            874,
+            876
+          ],
+          "sha256": "df63b3838f356b034fe8efc2a00559d0cf7630d4c5117ca2c011363354c58f64"
+        },
+        {
+          "path": "src/fnit/recon_all/surface_jacobian_gpu.py",
+          "lines": [
+            24,
+            45
+          ],
+          "sha256": "ead0fcb7c0c43e55fbacb17efb170cb93aff7449619e6d9b4d87349caeeccbce"
+        }
+      ],
+      "implementation": "runner硬编码CPU；面积/归一化为完整device-aware PyTorch，无逐顶点同步。",
+      "GPU_evidence_scope": "历史双侧数值报告缺设备/输入/源码绑定；未找到当前同输入CPU↔CUDA验收。",
+      "next": "先测GPU index_add_累加与搬运，不因整例device=cuda就认定已用GPU；本次双侧约0.06/0.07秒，低优先级。"
+    },
+    {
+      "stage": "contrast",
+      "source": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "lines": [
+            877,
+            878
+          ],
+          "sha256": "df63b3838f356b034fe8efc2a00559d0cf7630d4c5117ca2c011363354c58f64"
+        },
+        {
+          "path": "src/fnit/recon_all/vol2surf_contrast_python.py",
+          "lines": [
+            101,
+            172
+          ],
+          "sha256": "44164662d0b11a3c7f55dbc44c3791c8ff53fa2b5fd172f405c1c9d9fbb6257c"
+        }
+      ],
+      "implementation": "runner固定CPU；已有CUDA三线性采样，corner-normal/坐标变换/百分比仍NumPy。",
+      "GPU_evidence_scope": "完整混合算子；现有CPU厚度传播报告，不是完整CUDA等效。",
+      "next": "同表面版本复用MRI/网格/cortex/corner-normal，合并WM/GM采样；不能替换法线定义。本次双侧约2.05/2.08秒，低优先级。"
+    },
+    {
+      "stage": "standard_sphere",
+      "source": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "lines": [
+            156,
+            169
+          ],
+          "sha256": "df63b3838f356b034fe8efc2a00559d0cf7630d4c5117ca2c011363354c58f64"
+        },
+        {
+          "path": "src/fnit/recon_all/sphere_standard_run.py",
+          "lines": [
+            38,
+            115
+          ],
+          "sha256": "7544ccb77153a7ac242b88d1c9752bdd08ce5765ba483cd644a4075e94e90405"
+        },
+        {
+          "path": "src/fnit/recon_all/sphere_standard_average.py",
+          "lines": [
+            9,
+            29
+          ],
+          "sha256": "f79dc72a574d3bef756f06b97ab2546d35662c1d6acbd769e034fa542d84bd78"
+        },
+        {
+          "path": "src/fnit/recon_all/sphere_standard_finish.py",
+          "lines": [
+            12,
+            22
+          ],
+          "sha256": "9ba0ce2e7dd6ab0a731a45266f3e7fd8e67b48a39ed7117c65d68cc2a74f9825"
+        }
+      ],
+      "implementation": "完整NumPy/Numba CPU优化器；finish_device只控制末尾清理。",
+      "GPU_evidence_scope": "历史双侧完整CPU有序几何通过；CUDA有LH同输入finish局部报告，完整CUDA优化器未找到。",
+      "next": "本次sphere合计414.472/298.231秒，而finish仅3.220/1.942秒。先分解主优化迭代，改finish不能迁移主瓶颈。"
+    },
+    {
+      "stage": "sphere_registration",
+      "source": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "lines": [
+            840,
+            849
+          ],
+          "sha256": "df63b3838f356b034fe8efc2a00559d0cf7630d4c5117ca2c011363354c58f64"
+        },
+        {
+          "path": "src/fnit/recon_all/mris_register_run.py",
+          "lines": [
+            16,
+            46
+          ],
+          "sha256": "b478ed6e9109d113a73a18da2a28492837b308a5884abcf76760cce2075421ae"
+        },
+        {
+          "path": "src/fnit/recon_all/mris_register_sulc_run.py",
+          "lines": [
+            45,
+            114
+          ],
+          "sha256": "5ddb1f8f7e781b4df379f3896656769a9c582e1ee68e860a2236c236d8bfb48f"
+        },
+        {
+          "path": "src/fnit/recon_all/mris_register_smoothwm_run.py",
+          "lines": [
+            49,
+            67
+          ],
+          "sha256": "c97a93caa1b5a5210949a81510b39c21f770d60a1163f89f86140f8576660892"
+        },
+        {
+          "path": "src/fnit/recon_all/mris_register_smoothwm_run.py",
+          "lines": [
+            148,
+            158
+          ],
+          "sha256": "c97a93caa1b5a5210949a81510b39c21f770d60a1163f89f86140f8576660892"
+        },
+        {
+          "path": "src/fnit/recon_all/mris_register_average_numba.py",
+          "lines": [
+            26,
+            34
+          ],
+          "sha256": "668801763b136533ba3f1f06dbe2882b81c57b6cd085cc1f17e3a154c4d78817"
+        },
+        {
+          "path": "src/fnit/recon_all/mris_register_nonlinear.py",
+          "lines": [
+            298,
+            332
+          ],
+          "sha256": "f9edc1cd5952ea3223b2ef0c49d1a21d3ed0592523e38961bf93f4f95b78a737"
+        }
+      ],
+      "implementation": "完整CPU PyTorch/Numba sulc→smoothwm；overlap_device只控制末尾清理。average_gradients_exact_cpu拒绝CUDA；通用PyTorch多轮平均kernel已存在。",
+      "GPU_evidence_scope": "历史完整CPU左右半球同输入几何通过；CUDA仅首轮力与末尾overlap，不能视为完整GPU优化器。",
+      "next": "本次双侧937.128/898.174秒；优先完整同输入CPU内部剖析、共享两轮静态缓存及受控双进程。GPU kernel的多轮Python launch需优化再测，不能机械替换。"
+    },
+    {
+      "stage": "T1_and_second_normalize",
+      "source": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "lines": [
+            752,
+            754
+          ],
+          "sha256": "df63b3838f356b034fe8efc2a00559d0cf7630d4c5117ca2c011363354c58f64"
+        },
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "lines": [
+            791,
+            793
+          ],
+          "sha256": "df63b3838f356b034fe8efc2a00559d0cf7630d4c5117ca2c011363354c58f64"
+        },
+        {
+          "path": "src/fnit/recon_all/normalization/pipeline.py",
+          "lines": [
+            29,
+            114
+          ],
+          "sha256": "ad9a206a35e6ac2334f1c8006ef3f6245985a14d6169e7c8e308171162e29ec5"
+        },
+        {
+          "path": "src/fnit/recon_all/normalization/aseg_pipeline.py",
+          "lines": [
+            25,
+            64
+          ],
+          "sha256": "8060c5b7311433c51f3161269ee7092d2656d8d0ab80e329de081d8cbdece494"
+        },
+        {
+          "path": "src/fnit/recon_all/normalization/aseg_pipeline.py",
+          "lines": [
+            75,
+            90
+          ],
+          "sha256": "8060c5b7311433c51f3161269ee7092d2656d8d0ab80e329de081d8cbdece494"
+        },
+        {
+          "path": "src/fnit/recon_all/normalization/normalize_voronoi_source.py",
+          "lines": [
+            58,
+            94
+          ],
+          "sha256": "c1f278fd6a57c878cd05a23562a62c7015c896b788817df8857967cb77ac0dc5"
+        },
+        {
+          "path": "src/fnit/recon_all/normalization/normalize_gaussian_source.py",
+          "lines": [
+            78,
+            97
+          ],
+          "sha256": "82990481329a3fe9907d659e74e816dbaeb3f8fd6851f9b4ffd46472458ba749"
+        }
+      ],
+      "implementation": "冻结1b已传主device，并非仍固定CPU。PyTorch波前/平滑已接入；controls_3d、SciPy距离变换/排序仍CPU，每轮发生往返。",
+      "GPU_evidence_scope": "完整混合路径已运行本次整例；历史官方体素比较缺设备/当前源码绑定，不证明当前CPU↔CUDA等效。",
+      "next": "sub01两阶段185.426/174.512秒，子kernel未单独记录；先用现有benchmark_second_normalize同输入剖析。不同主机和被试的sub02 CPU72.167/90.448不能拿来宣称GPU更慢。"
+    },
+    {
+      "stage": "EntoWM",
+      "source": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "lines": [
+            794,
+            796
+          ],
+          "sha256": "df63b3838f356b034fe8efc2a00559d0cf7630d4c5117ca2c011363354c58f64"
+        },
+        {
+          "path": "src/fnit/recon_all/sclimbic.py",
+          "lines": [
+            189,
+            239
+          ],
+          "sha256": "10dfe1904a5d3a4bda2ffad06734480e7e6419073439c35f1633b326a1b02d80"
+        },
+        {
+          "path": "src/fnit/recon_all/sclimbic.py",
+          "lines": [
+            247,
+            259
+          ],
+          "sha256": "10dfe1904a5d3a4bda2ffad06734480e7e6419073439c35f1633b326a1b02d80"
+        }
+      ],
+      "implementation": "完整LimbicUNet PyTorch模型支持device；runner固定CPU，CUDA前向代码允许TF32。",
+      "GPU_evidence_scope": "历史完整CPU标签一致；未找到CUDA同输入标签/软体积/实际精度记录。",
+      "next": "本次7.798/8.909秒，不是主要瓶颈；若迁移需验证后续WM、标签和软体积，不擅自改精度。"
+    },
+    {
+      "stage": "MNI_aux_and_finalsurfs",
+      "source": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "lines": [
+            290,
+            310
+          ],
+          "sha256": "df63b3838f356b034fe8efc2a00559d0cf7630d4c5117ca2c011363354c58f64"
+        },
+        {
+          "path": "src/fnit/recon_all/mni_aux_chain.py",
+          "lines": [
+            102,
+            170
+          ],
+          "sha256": "a9b1b7d5d5686ee9bf07786b63ec3a8268996256c2ee696ef7593665891dd368"
+        },
+        {
+          "path": "src/fnit/recon_all/mni_nonlinear_chain.py",
+          "lines": [
+            1,
+            30
+          ],
+          "sha256": "17c781f2216d552a8f9de8d1b3960d336b042d13da91525ba016410afc0139f0"
+        }
+      ],
+      "implementation": "aux/finalsurfs固定CPU；MNI nonlinear已传主device。",
+      "GPU_evidence_scope": "aux模型已有device接口；本次未找到完整CUDA同输入前向/结果报告。",
+      "next": "本次mni_aux23.539/24.732秒、nonlinear284.609/305.198秒；不能混为全部CPU。不同MCA/venous模型不可合并，保留验证过的FP32例外。"
+    }
+  ],
+  "maturity_evidence": [
+    {
+      "path": "validation/recon_all/python_gpu_port/standard_sphere_lh_finish_cuda1_gpucw1.json",
+      "sha256": "44307951e1ba5d4fdb425a1b0c68faff6b910bbdaa0a65f422b70562b39ae5ea",
+      "scope": "历史LH frozen-input CUDA finish；非完整sphere；缺当前源码/硬件绑定。",
+      "historical_timing_not_used_for_priorities": true,
+      "findings": {
+        "device": "cuda:1",
+        "exact_vertices": 106622,
+        "total_vertices": 106622,
+        "max_abs_error": 0.0,
+        "first_count_mismatch": null
+      }
+    },
+    {
+      "path": "validation/recon_all/python_gpu_port/mris_register_lh_overlap_cuda_gpucw1.json",
+      "sha256": "053908f498c42242b29b3e85c21f0e94d8181c0ab14628c57a733123b35dea89",
+      "scope": "历史LH frozen-input CUDA overlap；非完整注册。",
+      "historical_timing_not_used_for_priorities": true,
+      "findings": {
+        "device": "cuda:0",
+        "exact_vertices": 106622,
+        "total_vertices": 106622,
+        "max_abs_error": 0.0,
+        "first_count_mismatch": null
+      }
+    },
+    {
+      "path": "validation/recon_all/python_gpu_port/mris_register_lh_first_force_cpu_cuda0_gpucw1.json",
+      "sha256": "dbe65ea61bb3667348486d13537058b4e63cbb3b3cfc2704a6c5ca9fcb82a5e7",
+      "scope": "历史首轮partial force，非平均/线搜索/完整schedule；未据旧耗时建议GPU默认。",
+      "historical_timing_not_used_for_priorities": true,
+      "findings": {
+        "cuda_device": "cuda:0",
+        "dtype": "float32",
+        "tf32": true,
+        "vertices": 106622,
+        "exact_vertices": 3161,
+        "within_1e-4_vertices": 106622,
+        "max_abs_error": 1.547113060951233e-05
+      }
+    },
+    {
+      "path": "validation/recon_all/python_gpu_port/connected_entowm_cpu_20260926.json",
+      "sha256": "462001b09e16eb4f03ecb50196e2b1adb3a4bc3b95a487787627fead30f701b1",
+      "scope": "历史完整CPU标签与归档参考；软体积和eTIV仍有微小差，非CUDA验证。",
+      "historical_timing_not_used_for_priorities": true,
+      "findings": {
+        "device": "cpu",
+        "voxel_mismatches": 0,
+        "minimum_foreground_dice": 1.0,
+        "eTIV": {
+          "official_mm3": 1310266.552537,
+          "candidate_mm3": 1310267.038702,
+          "absolute_difference_mm3": 0.48616499989293516
+        }
+      }
+    },
+    {
+      "path": "validation/recon_all/python_gpu_port/normalize_second_fs_sub01_report.json",
+      "sha256": "f0ab71949befb315c333a4204d603a2f14385aefee7f86f470d09bfc889a0f37",
+      "scope": "历史完整第二轮归一化体素/header；缺设备/当前源码绑定。",
+      "historical_timing_not_used_for_priorities": true,
+      "findings": {
+        "voxel_mismatches": 0,
+        "maximum_absolute_voxel_error": 0,
+        "mgh_header_equal": true,
+        "voxel_payload_equal": true
+      }
+    },
+    {
+      "path": "validation/recon_all/python_gpu_port/surface_metrics_wiring_20260929.json",
+      "sha256": "27ea585b77b85917ca0a65aa509fdff1098ab33dc525212431d03a6fa11f244f",
+      "scope": "历史双侧jacobian/contrast暖Python数值；未记录设备/输入/源码，不能作为CUDA验收。",
+      "historical_timing_not_used_for_priorities": true,
+      "findings": {}
+    },
+    {
+      "path": "validation/recon_all/python_gpu_port/performance_20260930/sub01/contrast_thickness_swap_279.json",
+      "sha256": "81acabc7cc73ea724600b1513a0f599d7f2112eae6d38b28659a4441265549b4",
+      "scope": "历史CPU4固定MRI/white/cortex、与1b相同contrast源码的厚度传播；非CUDA。",
+      "historical_timing_not_used_for_priorities": true,
+      "findings": {}
+    },
+    {
+      "path": "validation/recon_all/python_gpu_port/mris_register_lh_numba_full_compare_headcw.json",
+      "sha256": "bb6ed62b112acd74578d26c15cd3ed3f445fdaa29897456c00d1a97590994081",
+      "scope": "历史完整CPU注册同输入；非CUDA。",
+      "historical_timing_not_used_for_priorities": true,
+      "findings": {
+        "vertices": 106622,
+        "exact_vertices": 106622,
+        "max_abs_error_mm": 0.0,
+        "ordered_faces_equal": true,
+        "input_hashes_equal": true,
+        "sulc_selected_dt_equal": true,
+        "smoothwm_selected_dt_equal": true
+      }
+    },
+    {
+      "path": "validation/recon_all/python_gpu_port/mris_register_rh_numba_full_compare_headcw.json",
+      "sha256": "a44708294f07f8060d8de1981072531faa15711fb0ef82487775842f8d1cb275",
+      "scope": "历史完整CPU注册同输入；非CUDA。",
+      "historical_timing_not_used_for_priorities": true,
+      "findings": {
+        "vertices": 105541,
+        "exact_vertices": 105541,
+        "max_abs_error_mm": 0.0,
+        "ordered_faces_equal": true,
+        "input_hashes_equal": true,
+        "sulc_selected_dt_equal": true,
+        "smoothwm_selected_dt_equal": true
+      }
+    },
+    {
+      "path": "validation/recon_all/python_gpu_port/performance_20261001/cpu_final_1b8c36d/thread_sphere_sub01_lh/report.json",
+      "sha256": "5eb86d5ed201d899c3507fc1ddc49a944798ceb605acfe73052db017f87ebea0",
+      "scope": "本次1b同输入CPU Numba128→4线程回归，非CUDA或官方重跑。",
+      "comparisons": {
+        "4": {
+          "same_vertex_count": true,
+          "ordered_faces_equal": true,
+          "different_coordinates": 0,
+          "max_coordinate_error_mm": 0.0,
+          "p99_coordinate_error_mm": 0.0,
+          "pass": true
+        }
+      },
+      "historical_timing_not_used_for_priorities": false
+    }
+  ],
+  "repeated_load_audit": {
+    "resolved": [
+      {
+        "item": "多图谱统计",
+        "source": [
+          {
+            "path": "src/fnit/recon_all/native_free.py",
+            "lines": [
+              907,
+              912
+            ],
+            "sha256": "df63b3838f356b034fe8efc2a00559d0cf7630d4c5117ca2c011363354c58f64"
+          },
+          {
+            "path": "src/fnit/recon_all/surface_stats_cache.py",
+            "lines": [
+              1,
+              35
+            ],
+            "sha256": "fd92ec7a92bd0d00bbac72c8d3a16461f8c3df5c8688fd3998c350eab70ce9d8"
+          }
+        ],
+        "finding": "每半球geometry_reads=2，主曲率计算2，no-th3体积基础量1，ROI汇总回传6；white.preaparc/finalwhite/pial版本分开，no-th3不可用TH3顶点体积替代。"
+      },
+      {
+        "item": "SynthSeg两次必要ensemble前向",
+        "source": [
+          {
+            "path": "src/fnit/recon_all/native_free.py",
+            "lines": [
+              758,
+              776
+            ],
+            "sha256": "df63b3838f356b034fe8efc2a00559d0cf7630d4c5117ca2c011363354c58f64"
+          }
+        ],
+        "segment_source_sha256": "5dce81225289fdfb62bfa5a7787e26737caa41ff74c33e0885304b239d732f33",
+        "finding": "单一SynthSeg实例，实际两次前向posterior_buffer_reused=true；精度构造覆盖已修复，不删第二次前向。"
+      },
+      {
+        "item": "注册逐迭代静态量",
+        "source": [
+          {
+            "path": "src/fnit/recon_all/mris_register_nonlinear.py",
+            "lines": [
+              298,
+              310
+            ],
+            "sha256": "f9edc1cd5952ea3223b2ef0c49d1a21d3ed0592523e38961bf93f4f95b78a737"
+          },
+          {
+            "path": "src/fnit/recon_all/mris_register_sulc_run.py",
+            "lines": [
+              64,
+              68
+            ],
+            "sha256": "5ddb1f8f7e781b4df379f3896656769a9c582e1ee68e860a2236c236d8bfb48f"
+          },
+          {
+            "path": "src/fnit/recon_all/mris_register_smoothwm_run.py",
+            "lines": [
+              60,
+              64
+            ],
+            "sha256": "c97a93caa1b5a5210949a81510b39c21f770d60a1163f89f86140f8576660892"
+          }
+        ],
+        "finding": "每pass已准备一次原始距离/面积、有序邻接/incidence，逐迭代拓扑重复计算已缓存。"
+      }
+    ],
+    "remaining": [
+      {
+        "item": "注册两轮间重复读/缓存",
+        "source": [
+          {
+            "path": "src/fnit/recon_all/mris_register_sulc_run.py",
+            "lines": [
+              45,
+              68
+            ],
+            "sha256": "5ddb1f8f7e781b4df379f3896656769a9c582e1ee68e860a2236c236d8bfb48f"
+          },
+          {
+            "path": "src/fnit/recon_all/mris_register_smoothwm_run.py",
+            "lines": [
+              49,
+              67
+            ],
+            "sha256": "c97a93caa1b5a5210949a81510b39c21f770d60a1163f89f86140f8576660892"
+          }
+        ],
+        "finding": "各自读sphere/smoothwm/atlas并重新准备静态cache；临时seed磁盘写读。可测共享不可变基础量；setup含rigid/raw-fit，不全是IO。"
+      },
+      {
+        "item": "metric与统计网格重复读",
+        "source": [
+          {
+            "path": "src/fnit/recon_all/native_free.py",
+            "lines": [
+              190,
+              205
+            ],
+            "sha256": "df63b3838f356b034fe8efc2a00559d0cf7630d4c5117ca2c011363354c58f64"
+          },
+          {
+            "path": "src/fnit/recon_all/surface_area_gpu.py",
+            "lines": [
+              29,
+              33
+            ],
+            "sha256": "ad60ee9c6b3e45464650ac15f2fce7bc2ea3a6cb519c15f371f4f653f45964a8"
+          },
+          {
+            "path": "src/fnit/recon_all/surface_curvature_gpu.py",
+            "lines": [
+              96,
+              105
+            ],
+            "sha256": "7af66e0b23dd19cabe8e20e7ea75686531eb87550e599d318f35dc24f7efc8e0"
+          },
+          {
+            "path": "src/fnit/recon_all/native_free.py",
+            "lines": [
+              907,
+              912
+            ],
+            "sha256": "df63b3838f356b034fe8efc2a00559d0cf7630d4c5117ca2c011363354c58f64"
+          }
+        ],
+        "finding": "area/curv路径各自读white/pial；后续统计cache再次读取。与五套图谱缓存已解决的重复不同；仅复用相同path/version。"
+      },
+      {
+        "item": "contrast重复采样准备",
+        "source": [
+          {
+            "path": "src/fnit/recon_all/vol2surf_contrast_python.py",
+            "lines": [
+              124,
+              172
+            ],
+            "sha256": "44164662d0b11a3c7f55dbc44c3791c8ff53fa2b5fd172f405c1c9d9fbb6257c"
+          }
+        ],
+        "finding": "WM/GM两次读取MRI/网格/cortex并计算相同corner-normal，写出再load头；先合并，保留thickness采样距离和法线定义。"
+      },
+      {
+        "item": "Affine重复加载与隔离边界",
+        "source": [
+          {
+            "path": "src/fnit/recon_all/input_talairach_chain.py",
+            "lines": [
+              93,
+              106
+            ],
+            "sha256": "cbb5764299846d3d0d4a598b9c2ccc713520266ad8d8bc0b8e5ed89c1e7b3a69"
+          },
+          {
+            "path": "src/fnit/recon_all/talairach_synthmorph.py",
+            "lines": [
+              52,
+              67
+            ],
+            "sha256": "8a4d615dff568ed336bc6a6e77bb47a511c08d48e9f70262b05434cc2105e2e2"
+          },
+          {
+            "path": "src/fnit/recon_all/mni_aux_chain.py",
+            "lines": [
+              111,
+              124
+            ],
+            "sha256": "a9b1b7d5d5686ee9bf07786b63ec3a8268996256c2ee696ef7593665891dd368"
+          }
+        ],
+        "finding": "Talairach CUDA隔离子进程加载Affine；随后MNI152构造同类Affine。输入/模板/精度不同，不能缓存计算结果；常驻权重复用先验父子同时显存。EntoWM/MCA/venous不同权重，不应合并模型。"
+      }
+    ]
+  },
+  "parallel_registration_feasibility": {
+    "status": "静态依赖可分离，尚未实测或设默认",
+    "target": "仅双侧run_register_sphere，在两个surface_*结束后",
+    "source": [
+      {
+        "path": "src/fnit/recon_all/mris_register_run.py",
+        "lines": [
+          25,
+          38
+        ],
+        "sha256": "b478ed6e9109d113a73a18da2a28492837b308a5884abcf76760cce2075421ae"
+      },
+      {
+        "path": "src/fnit/recon_all/native_free.py",
+        "lines": [
+          831,
+          849
+        ],
+        "sha256": "df63b3838f356b034fe8efc2a00559d0cf7630d4c5117ca2c011363354c58f64"
+      }
+    ],
+    "files": "sphere/smoothwm/sulc与各侧atlas只读；lh/rh sphere.reg分别写；每调用TemporaryDirectory创建唯一seed并清理。",
+    "budget": "比较serial4与独立spawn/subprocess各2；固定Torch、Numba、OMP、MKL、OPENBLAS、NUMEXPR预算，总逻辑预算4。不把OS线程数当作4。",
+    "CUDA_API": "已初始化CUDA API不得fork继承CUDA；用spawn或独立CPU进程，先保持overlap_device=cpu。",
+    "report": "每子进程独立report；主进程合并，不能并发共享profiler.last_row或写fnit-native-free-run.json。",
+    "blocked_combination": "surface_*不能直接一并并行：RH --defects读取LH写出的surface.defects.mgz再合并。",
+    "shared_defect_source": [
+      {
+        "path": "src/fnit/recon_all/native_free.py",
+        "lines": [
+          268,
+          287
+        ],
+        "sha256": "df63b3838f356b034fe8efc2a00559d0cf7630d4c5117ca2c011363354c58f64"
+      }
+    ],
+    "required_regression": "冻结同输入比较完整有序坐标/面、总wall、线程；计入spawn/JIT/IO竞争，不从历史或串行秒数预测提速。"
+  },
+  "next_priority_command": {
+    "priority": "当前控制整例结束后，优先冻结sub01 LH完整注册CPU调用剖析，定位averaging/force/line-search实际瓶颈。",
+    "executed": false,
+    "host": "gpucw1，与sub01候选同主机",
+    "entrypoint_source": [
+      {
+        "path": "src/fnit/recon_all/mris_register_run.py",
+        "lines": [
+          50,
+          64
+        ],
+        "sha256": "b478ed6e9109d113a73a18da2a28492837b308a5884abcf76760cce2075421ae"
+      }
+    ],
+    "input_paths_verified_exist_on_head_shared_fs": true,
+    "env": {
+      "PYTHONPATH": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/code_1b8c36d/src",
+      "CUDA_VISIBLE_DEVICES": "",
+      "OMP_NUM_THREADS": "4",
+      "MKL_NUM_THREADS": "4",
+      "OPENBLAS_NUM_THREADS": "4",
+      "NUMEXPR_NUM_THREADS": "4",
+      "NUMBA_NUM_THREADS": "4"
+    },
+    "argv": [
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+      "-m",
+      "cProfile",
+      "-o",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/register_profile_sub01_lh_1b.pstats",
+      "-m",
+      "fnit.recon_all.mris_register_run",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/surf/lh.sphere",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/surf/lh.smoothwm",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/surf/lh.sulc",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/register_profile_sub01_lh_1b.sphere.reg",
+      "--overlap-device",
+      "cpu",
+      "--report",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/register_profile_sub01_lh_1b.json"
+    ],
+    "parameter_comments_cn": {
+      "sphere/smoothwm": "冻结候选自产surface RAS/mm网格，保持有序面。",
+      "sulc/atlas": "对应顶点顺序的现有标量图及声明TIFF图谱，已核实存在。",
+      "output/--report/-o": "新的FIX诊断文件，先确认尚不存在；不覆盖候选或官方结果。",
+      "--overlap-device cpu": "只控制末尾清理；主优化器仍CPU。",
+      "cProfile": "标准库调用剖析，包含额外记录开销；不能直接把被剖析wall当作性能配对。"
+    }
+  },
+  "overall_metric_equivalence": "not_assessed",
+  "measured_speedup_from_this_audit": null,
+  "dependencies": "无新增依赖；优先已有PyTorch/Numba/nibabel；不调用系统预装影像软件。"
+}

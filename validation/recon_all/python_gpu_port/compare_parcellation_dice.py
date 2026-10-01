@@ -12,6 +12,30 @@ import numpy as np
 FILES = ("aseg.mgz", "aparc+aseg.mgz", "aparc.a2009s+aseg.mgz",
          "aparc.DKTatlas+aseg.mgz", "wmparc.mgz", "ribbon.mgz", "filled.mgz")
 
+# mri_fill 的默认半球编码，与 aseg 的全局颜色表是不同标签空间。
+FILLED_LABEL_NAMES = {255: "Left-Hemisphere-Fill", 127: "Right-Hemisphere-Fill"}
+
+
+def _label_name(volume_name: str, label: int,
+                label_names: dict[int, str]) -> str | None:
+    """按输出文件的标签空间返回名称，不改变体素计数或 Dice。
+
+    输入 volume_name 为当前标准 profile 的文件名；label 为非负整数标签；
+    label_names 为全局 LUT 的整数→名称字典，三个参数均须显式提供。
+    输出为无单位的名称字符串；未知标签返回 None，不将 filled 的异常编码
+    解释成其他分割脑区。filled 使用默认 255=左半球、127=右半球，其余
+    文件沿用 LUT。它是比较器内部步骤，没有对应的独立官方命令。
+
+    默认编码依据 FreeSurfer 固定源码 d932c45 的 include/mri.h 及
+    mri_fill/mri_fill.cpp；官方 mri_fill 的 -lval/-rval 可改变编码，但
+    本比较器仅覆盖当前未使用这些覆盖选项的标准 profile。
+    例如 _label_name(volume_name="filled.mgz", label=255,
+    label_names={255: "CC_Anterior"}) 返回 "Left-Hemisphere-Fill"。
+    """
+    if volume_name == "filled.mgz":
+        return FILLED_LABEL_NAMES.get(label)
+    return label_names.get(label)
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -50,7 +74,9 @@ def main() -> None:
             first = int(ref[label]) if label < len(ref) else 0
             second = int(got[label]) if label < len(got) else 0
             overlap = int(common[label]) if label < len(common) else 0
-            rows[str(label)] = {"name": names.get(int(label)),
+            rows[str(label)] = {"name": _label_name(volume_name=name,
+                                                   label=int(label),
+                                                   label_names=names),
                                 "reference_voxels": first, "candidate_voxels": second,
                                 "intersection_voxels": overlap,
                                 "dice": 2 * overlap / (first + second)}

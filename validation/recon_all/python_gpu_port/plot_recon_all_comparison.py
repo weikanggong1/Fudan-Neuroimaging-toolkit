@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+import sys
 
 import matplotlib
 matplotlib.use("Agg")
@@ -38,6 +39,30 @@ def _section(vertices: np.ndarray, faces: np.ndarray, axis: int,
 
 
 def main() -> None:
+    """只读现有结果和比较报告，生成三张定位图及哈希记录。
+
+    命令行输入全部必填：``reference``、``candidate`` 是被试目录，
+    各含 conform 网格的 ``mri/orig.mgz``、``aparc.a2009s+aseg.mgz``
+    和双侧 surface RAS（毫米）坐标的 ``surf/*.white``、``*.pial``；
+    ``region_report`` 是现有 68 区面积/体积/厚度比较 JSON，
+    ``dice_report`` 是现有分割 Dice JSON，不在此函数重算指标。
+    ``code_commit`` 标识候选重建代码，绘图代码另用 SHA-256 标识。
+    ``output_dir`` 必须尚不存在，输出三个 160 DPI PNG 和
+    ``provenance.json``（输入/脚本/图像哈希及实际命令）。
+
+    图像切面横纵坐标是 conform 体素索引；面积/体积/厚度图使用
+    已有报告的相对偏差百分比，Dice 无单位。自动预留标题及图例
+    空间并扩展保存边界，不裁切标题。函数成功返回 None；缺失文件、
+    JSON 字段缺失、已有输出目录或网格变换不一致会抛异常，
+    provenance 仅在三个图均写出后生成。此诊断没有独立的官方
+    等价命令，不执行重建，也不设置验收阈值。
+
+    具名调用示例（路径均指现有结果，避免重新计算）：
+    ``python plot_recon_all_comparison.py --reference /bench/ref``
+    ``--candidate /bench/fnit --region-report /bench/region.json``
+    ``--dice-report /bench/dice.json --output-dir /bench/figures_readable``
+    ``--code-commit <候选重建提交>``。
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--reference", type=Path, required=True)
     parser.add_argument("--candidate", type=Path, required=True)
@@ -80,8 +105,10 @@ def main() -> None:
         panel.set_axis_off()
     fig.legend([Line2D([], [], color=color) for color in colors.values()],
                [f"{label} {surface}" for label, surface in colors], loc="lower center", ncol=4)
-    fig.tight_layout(rect=(0, .07, 1, 1))
-    fig.savefig(args.output_dir / "t1_surface_overlay.png", dpi=160)
+    # 为顶端切面标题和底部图例预留空间；保存时包含全部文本边界。
+    fig.tight_layout(rect=(0, .07, 1, .95))
+    fig.savefig(args.output_dir / "t1_surface_overlay.png", dpi=160,
+                bbox_inches="tight", pad_inches=.15)
     plt.close(fig)
 
     report = json.loads(args.region_report.read_text())
@@ -98,7 +125,8 @@ def main() -> None:
         panel.set_title(field)
         panel.set_xlabel("Signed difference from reference (%)")
     fig.tight_layout()
-    fig.savefig(args.output_dir / "region_errors.png", dpi=160)
+    fig.savefig(args.output_dir / "region_errors.png", dpi=160,
+                bbox_inches="tight", pad_inches=.15)
     plt.close(fig)
 
     dice = json.loads(args.dice_report.read_text())
@@ -133,14 +161,24 @@ def main() -> None:
     fig.suptitle(f"{region['name']} ({label}), Dice={region['dice']:.6f}\n"
                  "cyan: reference; red: candidate")
     fig.tight_layout()
-    fig.savefig(args.output_dir / "local_region_boundary.png", dpi=160)
+    fig.savefig(args.output_dir / "local_region_boundary.png", dpi=160,
+                bbox_inches="tight", pad_inches=.15)
     plt.close(fig)
-    provenance = {"code_commit": args.code_commit, "candidate": str(args.candidate),
+    provenance = {"code_commit": args.code_commit,
+                  "candidate_calculation_commit": args.code_commit,
+                  "candidate": str(args.candidate),
                   "reference": str(args.reference), "space": "conform voxel slices",
                   "purpose": "qualitative localization; no equivalence gates applied",
+                  "scope": "render existing results and reports; no metric recomputation",
+                  "command": [sys.executable, *sys.argv],
+                  "rendering": {"dpi": 160, "bbox_inches": "tight", "pad_inches": .15,
+                                "overlay_layout_rect": [0, .07, 1, .95]},
                   "inputs_sha256": {str(path): hashlib.sha256(path.read_bytes()).hexdigest()
                                     for path in files},
-                  "script_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
+                  "script_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+                  "outputs_sha256": {
+                      path.name: hashlib.sha256(path.read_bytes()).hexdigest()
+                      for path in sorted(args.output_dir.glob("*.png"))}}
     (args.output_dir / "provenance.json").write_text(json.dumps(provenance, indent=2) + "\n")
 
 

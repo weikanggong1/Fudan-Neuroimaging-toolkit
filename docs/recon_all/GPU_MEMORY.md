@@ -14,10 +14,15 @@
 | 未复用缓冲区，缓存开启，CLI | 59.37 | 20,352,860,160 B |
 | 复用后验缓冲区，缓存关闭，已初始化 API | 80.79 | 14,508,097,536 B |
 | 复用后验缓冲区，缓存开启，CLI | 64.60 | 18,138,267,648 B |
+| 复用后验缓冲区，缓存开启，已初始化 API | 42.09 | 18,138,267,648 B |
 
-后两组与第一组的落盘分割和体积 CSV 完全相同。单次墙钟受到共享负载和 cuDNN 算法选择影响，这些记录没有显示缓冲复用带来稳定的阶段提速；缓存开启的采样占用有所降低，但尚不足以改变整例默认策略。缓存关闭的 Torch 统计不可用。缓存开启的 allocated/reserved 及两次真实前向设置保留在各份 `actual-forward.json`；不能把上述 NVML 占用当作 Torch allocated。
+后三组与第一组的落盘分割和体积 CSV 完全相同。不同启动方式、运行时刻和负载没有通过交替重复配对控制，因此不把单次墙钟变化归于缓存或缓冲复用。缓存开启的采样占用有所降低，但尚不足以改变整例默认策略。缓存关闭的 Torch 统计不可用，不能把上述 NVML 占用当作 Torch allocated。
 
-已初始化 API 的缓存开启试验和两例完整运行单独执行，状态见[当前验证目录](../../validation/recon_all/python_gpu_port/performance_20261001/README.md)。默认低显存措施暂予保留。
+缓存开启 CLI/API 的源码、输入、权重、GPU UUID、四线程与实际两次前向设置一致：float32、cuDNN TF32=False、matmul TF32=True、autocast 关闭。API 在 CUDA 尚未初始化时选择 enabled，移除继承的 no-cache 环境设置，然后初始化并保留一个 CUDA 标量再调用模型；其 `cuda_initialized_at_entry=False` 描述策略选择时刻，`initialized_api=True` 描述模型前状态。CLI 未预留该标量。两种缓存开启调用的 PyTorch reserved 均为 17,574,133,760 B，allocated 为 CLI 15,621,712,896 B、API 15,621,713,408 B；缓存 API 包含启动和报告的外层墙钟为 50.164 s。
+
+[缓存 API 原始前向](../../validation/recon_all/python_gpu_port/performance_20261001/final_1b8c36d/buffer_cached_api/actual-forward.json)与[监测](../../validation/recon_all/python_gpu_port/performance_20261001/final_1b8c36d/buffer_cached_api_monitor/monitor.json)记录 24 次采样，请求间隔 2.0 s、最大实际间隔 2.292 s、查询超时 5.0 s、查询失败 0。峰值 18,138,267,648 B 即 18.138 GB / 16.893 GiB，仍不是连续峰值保证；[独立汇总](../../validation/recon_all/python_gpu_port/performance_20261001/buffer_cached_api_summary.json)绑定原始 JSON、探针、输入与模型 SHA-256，并核对保存结果与同 FP32 参考完全相同。
+
+已完成缓存开启的单阶段 API 试验；两例候选完整运行已执行结束，受控基线和官方比较尚未结束，状态见[当前验证目录](../../validation/recon_all/python_gpu_port/performance_20261001/README.md)。完整缓存开启的整例尚未测量，默认低显存措施暂予保留。
 
 ## 历史配对与开发记录
 

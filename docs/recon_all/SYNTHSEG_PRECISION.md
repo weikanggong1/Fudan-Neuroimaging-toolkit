@@ -153,6 +153,7 @@ CUDA_VISIBLE_DEVICES='' PYTHONPATH=src python -m unittest discover \
 | 修复为 cuDNN FP32，无缓冲复用，缓存开启 | 阶段 1 快照，CLI | 59.367 | 73.869 | 20,352,860,160 |
 | cuDNN FP32，有缓冲复用，缓存关闭 | 1b8c36d，已初始化 CUDA API | 80.795 | 96.692 | 14,508,097,536 |
 | cuDNN FP32，有缓冲复用，缓存开启 | 1b8c36d，CLI | 64.597 | 71.573 | 18,138,267,648 |
+| cuDNN FP32，有缓冲复用，缓存开启 | 1b8c36d，已初始化 CUDA API | 42.089 | 50.164 | 18,138,267,648 |
 
 阶段 1 快照是 `3d9856c9dc659a50b685dbc8c0b9b6c695461fe7` 上的冻结工作区，
 归档 SHA-256 为
@@ -168,26 +169,40 @@ Dice 为 0.999668325；总颅内软体积从 1,280,259.125 变为
 
 缓冲复用则以相同 cuDNN FP32 策略的阶段 1 结果为参考。
 [缓存关闭 API](../../validation/recon_all/python_gpu_port/performance_20261001/final_1b8c36d/buffer_uncached_api/actual-forward.json)
-和[缓存开启 CLI](../../validation/recon_all/python_gpu_port/performance_20261001/final_1b8c36d/buffer_cached_cli/actual-forward.json)
+、[缓存开启 CLI](../../validation/recon_all/python_gpu_port/performance_20261001/final_1b8c36d/buffer_cached_cli/actual-forward.json)
+和[缓存开启 API](../../validation/recon_all/python_gpu_port/performance_20261001/final_1b8c36d/buffer_cached_api/actual-forward.json)
 均记录 original/flipped 两次真实前向：cuDNN TF32=False、matmul TF32=True，
 输入/权重/输出都是 float32，CPU/CUDA autocast 均关闭；
-`posterior_buffer_reused=True`，集成张量 float32。二者相对 FP32 参考的
+`posterior_buffer_reused=True`，集成张量 float32。三者相对 FP32 参考的
 不同标签体素为 0，所有分区 Dice 为 1，affine 差为 0，体积 CSV 完全相同。
 只读核对还确认分割文件本身逐字节相同。
 
 这些是单次阶段观察，执行方式、时刻和资源占用不完全相同。
-缓冲复用后当前观察的阶段时间没有比相应无复用运行更短；不能凭减少临时
-张量宣称已加速。缓存开启的本次采样峰值约 18.138 GB，阶段 1 曾为
+此前两次缓冲复用观察的阶段时间没有比相应无复用运行更短；新增缓存 API
+观察为 42.089 s。没有相同启动方式和运行顺序的交替重复配对，不能据此
+将耗时变化归于缓存或缓冲复用。缓存开启的本次采样峰值约 18.138 GB，阶段 1 曾为
 20.353 GB，超过 20,000,000,000 字节；缓存关闭的本次峰值约 14.508 GB。
 不能据此将缓存改成默认开启，也不能以孤立 SynthSeg 证明整例满足预算。
 
-两份最终监测的请求间隔都是 2.0 s、查询超时 5.0 s；API 最大实际间隔
-2.751 s，CLI 为 2.307 s，进程查询失败均为 0。它们没有连续峰值证明。
+三份最终监测的请求间隔都是 2.0 s、查询超时 5.0 s；缓存关闭 API、
+缓存开启 CLI/API 的最大实际间隔分别为 2.751/2.307/2.292 s，进程查询
+失败均为 0。它们没有连续峰值证明。
 缓存关闭时 PyTorch allocated/reserved 不可用；缓存开启 CLI 实测
 allocated=15,621,712,896、reserved=17,574,133,760 字节，和进程占用是
 不同统计范围。见
 [API 监测](../../validation/recon_all/python_gpu_port/performance_20261001/final_1b8c36d/buffer_uncached_api_monitor/monitor.json)
 和[CLI 监测](../../validation/recon_all/python_gpu_port/performance_20261001/final_1b8c36d/buffer_cached_cli_monitor/monitor.json)。
+
+缓存开启 API 先调用 allocator 选择，再保留一个 float32 CUDA 标量并同步，
+随后进入 SynthSeg；`allocator.cuda_initialized_at_entry=False` 表示选择策略时
+CUDA 尚未初始化，`initialized_api=True` 表示模型调用前已经初始化，二者
+没有冲突。选择时移除继承的 `PYTORCH_NO_CUDA_MEMORY_CACHING=1`，实际策略
+为 enabled、Torch 统计可用。它与缓存 CLI 的输入、权重、源码、GPU UUID、
+四线程、cuDNN benchmark/deterministic 和实际前向设置完全相同；区别是
+显式初始化及保留标量，运行时刻也不同。API 实测 allocated 为
+15,621,713,408 字节（比 CLI 多 512 字节），reserved 同为
+17,574,133,760 字节；不由这个小差值推断性能原因。
+见[缓存 API 监测](../../validation/recon_all/python_gpu_port/performance_20261001/final_1b8c36d/buffer_cached_api_monitor/monitor.json)。
 
 ### dtype 失败项的只读审计
 
@@ -214,16 +229,25 @@ affine 和标签值差为 0，且三份 MGH 的 SHA-256 完全相同。标签值
 | 后续落盘候选探针 | `5168f615ce8591d5473bed05cfd7f1c159bedd095dfba2503fbd690880c93477` |
 | buffer API actual-forward.json | `70b0a1e1f727ed580aff38ac359e888c7ea0f08afd25f1ec49637a2df815790b` |
 | buffer CLI actual-forward.json | `cb3fe251b82d51b28df8a9fb2f542dbe287930f6b13762c0fca0144f413bf822` |
+| buffer cached API actual-forward.json | `db23fe176d8271429a6cc75c8e58b65f9c3e2c185f8a662dddf5588db4e903c1` |
+| buffer cached API monitor.json | `5a32505e7e559ac5cc661bee543ac716f0d296072dc38d337166f557d7b8d159` |
+
+新增缓存 API 使用后续落盘候选探针，`same_dtype=True`；只读核对其保存 MGH
+也是 `>f4`，与 FP32 参考逐字节相同，SHA-256 沿用表中 `50f9e58f…`；CSV
+也沿用 `aef61247…`。原三份文件审计保持不变，新增证据与 CLI 参数逐项核对
+见[缓存 API 独立汇总](../../validation/recon_all/python_gpu_port/performance_20261001/buffer_cached_api_summary.json)。
 
 最终模型模块 `segment.py` 的 SHA-256 为前述 `5dce8122...d732f33`；
-两份前向报告分别保留其完整值，以及实际 `_dmri.py`、`synthseg.py` 和
+三份前向报告分别保留其完整值，以及实际 `_dmri.py`、`synthseg.py` 和
 权重/标签数组摘要。共同的原始阶段输入 SHA-256 为
 `646cfe39c550fd1626c4a9bfbc3d065a9afdd9cddbd849585465a822b425bc09`，
 模型 HDF5 为
 `f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e`。
 
-目前完成的是本例冻结阶段验证。第二例完整 SynthSeg 缓冲配对、受控同精度
-整例、连续显存峰值和整体指标等效尚未完成；本页不宣称整例完成或加速。
+本页报告本例冻结阶段验证。两例候选原始 T1 整例已执行完成，受控同精度
+基线及官方比较尚未结束，状态见[当前验证目录](../../validation/recon_all/python_gpu_port/performance_20261001/README.md)。
+第二例完整 SynthSeg 缓冲配对、连续显存峰值和整体指标等效尚未完成；
+本页不从单阶段时间推断整例加速。
 计时范围、allocator 和统计可用性见[剖析说明](PROFILING.md)。
 
 源码与参考：[FNIT 实现](../../src/fnit/synthseg_parc/segment.py)、

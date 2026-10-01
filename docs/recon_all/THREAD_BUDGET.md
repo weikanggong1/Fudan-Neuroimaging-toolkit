@@ -105,10 +105,16 @@ subprocess.run(
 `SetGlobalDefaultNumberOfThreads(1)`，N4 是源码明确的单线程例外。
 设置 ITK 环境为 4 不能据此宣称 N4 已使用 4，也没有修改这个默认。
 拓扑 GA 原有 `-threads 1` 和 `OMP_NUM_THREADS=1` 同样须保留。
-本次读取 e036 双例整例原生日志，`mri_em_register` 的 OpenMP 可用数量
-和结束时 `FSRUNTIME` 都明确为 1；不能把 Numba 的 128 掩码归给 EM。
+此前 2026-09-30 的 e036 双例原生日志中，`mri_em_register` 的 OpenMP
+可用数量和结束时 `FSRUNTIME` 都为 1；不能把 Numba 的 128 掩码归给 EM。
 固定源码支持 `-threads`，当前 wrapper 没有传入该选项；WM 编辑日志没有
 实际线程数条目，不能从顶层配置推断。
+
+2026-10-01 的驱动在程序启动前显式设置 OMP/BLAS 预算为 4。两个 1b
+候选和两个 e036 受控基线的 EM 日志均记录 `FSRUNTIME ... 4 threads`，
+与此前历史环境不同。[当前日志条目及来源快照](../../validation/recon_all/python_gpu_port/performance_20261001/thread_runtime_logs_snapshot.json)
+保留字节数、SHA-256 和行号；采集时仍在运行的基线日志明确标为非最终。
+这个记录证明 EM 的实际条目，不能推广到其他原生程序的活跃线程数。
 两个独立进程并行且总预算为 4 时，各进程应分配 2；给每个进程 4 会
 扩大总预算。使用已初始化 CUDA 的 API 时应采用新 exec/spawn 进程，
 不能 fork 继承 CUDA 状态后执行计算。

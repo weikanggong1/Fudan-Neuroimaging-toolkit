@@ -1,0 +1,114 @@
+{
+  "candidate_code_commit": "1b8c36d25a68e253a1e59b6d02114890afa467de",
+  "host": "headcw",
+  "candidate": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub02_1b8c36d",
+  "reference": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official",
+  "candidate_run_report_sha256": "36c4bc93013aff82d8262a8411354d8186c4a1f735533c67fd99e705b84de672",
+  "wrapper_sha256": "a84d8dd4e6bd5523772412a88089b3c4ba12cde7aae13fcb0a1da58fda570947",
+  "scripts_sha256": {
+    "compare_complete_subject.py": "ea8e7faf842c8f4039a50bc3097eb2bd77752b84355f1f76134a6bccdd3a31ba",
+    "compare_region_stats.py": "ff5778ea6f515af70d8dc4ec7343b2eb75fb3826c94b217725d147601fd7d770",
+    "compare_parcellation_dice.py": "8784f7a5d54a43f43e4f47b44ba759c2bba873c5322dcb18e2e05f2024568be5",
+    "compare_surface_chain.py": "fc29bbdb8f236c9c0b5bfcc7dfcb04359047d31e9317cdb63f186795c7e96a16",
+    "plot_recon_all_comparison.py": "590aff3115be2f0b849e380f0de3a1847bc3743786f59fdea222573eee180fdd"
+  },
+  "environment": {
+    "CUDA_VISIBLE_DEVICES": "",
+    "OMP_NUM_THREADS": "4",
+    "MKL_NUM_THREADS": "4",
+    "OPENBLAS_NUM_THREADS": "4",
+    "NUMEXPR_NUM_THREADS": "4",
+    "NUMBA_NUM_THREADS": "4"
+  },
+  "torch_threads": 4,
+  "commands": [
+    [
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/code_1b8c36d/validation/recon_all/python_gpu_port/compare_region_stats.py",
+      "--reference",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official",
+      "--candidate",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub02_1b8c36d",
+      "--code-commit",
+      "1b8c36d25a68e253a1e59b6d02114890afa467de",
+      "--output",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/official_candidate_sub02/region_vs_official.json"
+    ],
+    [
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/code_1b8c36d/validation/recon_all/python_gpu_port/compare_parcellation_dice.py",
+      "--reference",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official",
+      "--candidate",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub02_1b8c36d",
+      "--code-commit",
+      "1b8c36d25a68e253a1e59b6d02114890afa467de",
+      "--output",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/official_candidate_sub02/dice_vs_official.json",
+      "--label-table",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/FreeSurferColorLUT.txt"
+    ],
+    [
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/code_1b8c36d/validation/recon_all/python_gpu_port/compare_surface_chain.py",
+      "--reference",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official",
+      "--candidate",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub02_1b8c36d",
+      "--code-commit",
+      "1b8c36d25a68e253a1e59b6d02114890afa467de",
+      "--output",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/official_candidate_sub02/surface_vs_official.json"
+    ],
+    [
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/code_1b8c36d/validation/recon_all/python_gpu_port/plot_recon_all_comparison.py",
+      "--reference",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official",
+      "--candidate",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub02_1b8c36d",
+      "--code-commit",
+      "1b8c36d25a68e253a1e59b6d02114890afa467de",
+      "--region-report",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/official_candidate_sub02/region_vs_official.json",
+      "--dice-report",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/official_candidate_sub02/dice_vs_official.json",
+      "--output-dir",
+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/official_candidate_sub02/figures"
+    ]
+  ],
+  "status": "complete",
+  "overall_metric_equivalence": "not_assessed; no formally confirmed whole-case thresholds",
+  "steps": {
+    "strict": {
+      "status": "complete",
+      "seconds_including_reads_writes": 49.78130063228309,
+      "passed": 2,
+      "checked": 138,
+      "all_pass": false
+    },
+    "region": {
+      "status": "complete",
+      "seconds_including_reads_writes": 0.20661201793700457
+    },
+    "dice": {
+      "status": "complete",
+      "seconds_including_reads_writes": 10.67632067296654
+    },
+    "surface": {
+      "status": "complete",
+      "seconds_including_reads_writes": 532.8517647320405
+    },
+    "plot": {
+      "status": "complete",
+      "seconds_including_reads_writes": 5.26491784863174
+    }
+  },
+  "paired_wrapper_wall_seconds": 1195.7249356620014,
+  "report_sha256": {
+    "surface_vs_official.json": "9d355ac0dae45a3f8eae3c2ad9c005418d0b04df5cfdb2b852853fb455e2879e",
+    "region_vs_official.json": "e3ada93f75928c37c0c2236c1afeef75ec8064084b04eb90bb47536f401e17d4",
+    "strict_vs_official.json": "3f765d637c5ad74abd9f8bd3d050d9d2c91215838ff8edee7e6d1199db47ad7d",
+    "dice_vs_official.json": "a380f55582a34e443cf65bd6df805350a45a137592efda98b15c7437a64cfe50"
+  }
+}

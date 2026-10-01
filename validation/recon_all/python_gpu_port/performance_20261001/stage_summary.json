@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "created_utc": "2026-10-01T02:55:24.220379+00:00",
-  "scope": "current real frozen-input stage evidence; whole candidate and controlled baseline pending",
+  "scope": "Real same-input stage regression plus completed raw-T1 candidate whole runs, CPU controlled pair and independent official/extended quality diagnostics; GPU controlled pair still running.",
   "generated_from": "JSON reports and SHA-256 verification; no new reconstruction or model execution",
   "versions": {
     "summary_repository_head": "12a48342d49446a9d88d5ac32c113471e41b9842",
@@ -1214,7 +1214,145 @@
       "reference_map_sha256": "b4c2c2031030c4592d82ea86c76d829cc67a6fae699297fe842f927c99d39736",
       "pass": true
     },
-    "official_result_scope": "same-input current Conda source build comparison; no new official installed-program repetition in these stage tests"
+    "official_result_scope": "same-input current Conda source build comparison; no new official installed-program repetition in these stage tests",
+    "post_1b_worker": {
+      "status": "measured; independent subsequent frozen sub-01 LH GPU regression passed",
+      "scope": "sub-01 LH frozen FNIT white/pial; one candidate function call",
+      "code_version": "1b8c36d25a68e253a1e59b6d02114890afa467de+thickness-ab019eb",
+      "source_sha256": {
+        "candidate": "ab019eb7d413c7b08f01ad6b2e499c406ab513cb531d723142c2db2d6c12e961",
+        "script": "2af5cf2cdd1026e9feab6cb4f683208e1547ed8262c5a3cf2b672d59f598685c"
+      },
+      "frozen_source_sha256": "c5d586b58f8b57af1ecc5b61fcf0e33c980ee5eaca681fe7cc6c25be57083f48",
+      "input_sha256": {
+        "white": "bb8f2d21f1da13120769bb1665694421198e74ce03f6c7ece46f8866e06d093a",
+        "pial": "1568e59729914d021574daf12f743deb7599f2ec83049912481467e9ebd90c27"
+      },
+      "frozen_map_sha256": "a21cd84a9dbddd8da4067122c73aa9ced53c8f54854e60d0fa2a4cc64958e5e7",
+      "output_sha256": "a21cd84a9dbddd8da4067122c73aa9ced53c8f54854e60d0fa2a4cc64958e5e7",
+      "conda_map": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/diagnostics/lh.cpp.thickness",
+        "sha256": "b4c2c2031030c4592d82ea86c76d829cc67a6fae699297fe842f927c99d39736"
+      },
+      "conda_program": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/mris_place_surface",
+        "sha256": "44ad3994f8b86809b447919094273d3aa591b49be935ac4e09139e66bdddfe65",
+        "execution": "not run; existing same-input map"
+      },
+      "frozen_pair_report": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/final_1b8c36d/thickness/report.json",
+        "sha256": "77e9743535bff4c2c1e08dc394037d4827a71077dc394f5bfdbb7ed4db8cb4a5",
+        "code_commit": "1b8c36d25a68e253a1e59b6d02114890afa467de",
+        "candidate_source_sha256": "c5d586b58f8b57af1ecc5b61fcf0e33c980ee5eaca681fe7cc6c25be57083f48"
+      },
+      "post_run_remote_hash_verification": {
+        "method": "headcw sha256sum of shared candidate, benchmark/monitor source, white/pial, frozen/Conda/new maps and Conda binary; no image transfer",
+        "all_match_recorded_versions": true,
+        "monitor_source_sha256": "d0760007a9733f63c5aa57de42ec49adf95ccae06d64addc737349e7d57cedb2"
+      },
+      "host": "gpucw1",
+      "device": "cuda:0",
+      "gpu_uuid_requested": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+      "gpu_uuid_from_torch": "e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+      "gpu_name": "NVIDIA H100 PCIe",
+      "torch_version": "2.5.1",
+      "cuda_runtime": "11.8",
+      "threads": 4,
+      "thread_environment": {
+        "OMP_NUM_THREADS": "4",
+        "MKL_NUM_THREADS": "4",
+        "OPENBLAS_NUM_THREADS": "4",
+        "NUMEXPR_NUM_THREADS": "4"
+      },
+      "precision": {
+        "dtype": "float32",
+        "matmul_tf32": true,
+        "cudnn_tf32": true,
+        "float16_or_bfloat16": false
+      },
+      "cuda_allocator_cache_enabled": false,
+      "vertices": 105539,
+      "faces": 211074,
+      "started_utc": "2026-10-01T03:11:17.093573+00:00",
+      "ended_utc": "2026-10-01T03:11:30.799820+00:00",
+      "seconds_including_io": 13.706190661992878,
+      "timing_scope": "synchronized target GPU; function input I/O, transfers, computation, output I/O; excludes imports/CUDA init/diagnostic hashing",
+      "command_wall_seconds": 17.960685943719,
+      "function_report": {
+        "vertices": 105539,
+        "device": "cuda:0",
+        "setup_seconds": 0.713789464905858,
+        "compute_seconds": 12.985073887277395,
+        "total_seconds": 13.705352482851595,
+        "candidate_pairs": 2398404,
+        "peak_candidate_pairs": 42170,
+        "kdtree_workers": 4,
+        "candidate_search": "complete-radius",
+        "radius_guard_mm": 0.0001,
+        "maximum_hops": 20,
+        "maximum_direction_thickness_mm": 5.0
+      },
+      "thresholds": {
+        "optimization": {
+          "absolute_mm": 1e-06,
+          "relative": 0
+        },
+        "existing_reference": {
+          "absolute_mm": 0.005,
+          "relative": 0.001
+        }
+      },
+      "optimization_comparison": {
+        "pass": true,
+        "different_values": 0,
+        "outliers": 0,
+        "max_abs_mm": 0.0,
+        "p99_abs_mm": 0.0,
+        "mae_mm": 0.0
+      },
+      "strict_frozen_reproduction": true,
+      "conda_comparison": {
+        "pass": true,
+        "different_values": 10622,
+        "outliers": 0,
+        "max_abs_mm": 4.76837158203125e-07,
+        "p99_abs_mm": 2.384185791015625e-07,
+        "mae_mm": 1.9714222563929547e-08
+      },
+      "monitor": {
+        "pid": 102059,
+        "sampling_interval_requested_seconds": 2.0,
+        "query_timeout_seconds": 5.0,
+        "samples": 9,
+        "failed_app_queries": 0,
+        "failed_gpu_queries": 0,
+        "maximum_sampling_gap_seconds": 2.255604000762105,
+        "peak_sampled_process_bytes": 562036736,
+        "continuous_peak_verified": false,
+        "gpu_peak_allocated_bytes": null,
+        "gpu_peak_reserved_bytes": null,
+        "whole_gpu_total_mib_min": 33843,
+        "whole_gpu_total_mib_max": 46463,
+        "whole_gpu_utilization_percent_min": 100,
+        "whole_gpu_utilization_percent_max": 100,
+        "scope": "own parent and children within each compute-apps query; whole-GPU query separately timestamped; whole-GPU totals not assigned to this process"
+      },
+      "report": "thickness_workers_ab019/result/report.json",
+      "monitor_report": "thickness_workers_ab019/monitor/monitor.json",
+      "artifact_sha256": {
+        "thickness_workers_ab019/result/report.json": "c3f5d8119ebddfac6fd6d008f43e0633709c82778c41d3e915c149062fafaa0b",
+        "thickness_workers_ab019/monitor/monitor.json": "ff3b95b2a2ded5a8141a925dbaa269a8c39e4adda86ccb2c6fbc3e376cf99b2d",
+        "thickness_workers_ab019/monitor/gpu_samples.csv": "69335aafa80e9af1b2fb2c61065b109be3001a3df9d9e10d22b61de3fb9b5762",
+        "thickness_workers_ab019/monitor/command.log": "d4b38f15bafbb3b1377cac207682eb24c5fb5431bd9f30d1bfe6c0aa4fc8f769",
+        "run_thickness_workers_ab019.sh": "6ff57bf369528ffa8d37c6f049c4b99028d066f28d0545d0755cc21681a8c679"
+      },
+      "stage1_measurements": "unchanged; fb3b6651 snapshot eight rounds remain their original timings/hashes",
+      "worker_performance_inference": "one subsequent observation on busy shared GPU; no paired worker speedup claim",
+      "new_official_validation": "not_run",
+      "whole_pipeline_speedup": "not measured by this standalone regression",
+      "overall_equivalence": "not_assessed",
+      "pass": true
+    }
   },
   "synthseg": {
     "cases": [
@@ -2166,6 +2304,167 @@
           "peak_sampled_process_bytes": 18138267648,
           "continuous_peak_verified": false
         }
+      },
+      {
+        "case": "buffer_cached_api",
+        "report": {
+          "path": "final_1b8c36d/buffer_cached_api/actual-forward.json",
+          "sha256": "db23fe176d8271429a6cc75c8e58b65f9c3e2c185f8a662dddf5588db4e903c1"
+        },
+        "code_version": "1b8c36d25a68e253a1e59b6d02114890afa467de",
+        "input_sha256": "646cfe39c550fd1626c4a9bfbc3d065a9afdd9cddbd849585465a822b425bc09",
+        "weights_sha256": {
+          "synthseg_2.0.h5": "f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e",
+          "synthseg_segmentation_labels_2.0.npy": "5ef25ec33fe917ac99f30b8f2185b2d77121136ee411b9c4970c0b59be615ed8",
+          "synthseg_segmentation_names_2.0.npy": "234eb6d514e10d6ebd748a8b30a1d12d9426fd874c607e37852406fae8f290fc",
+          "synthseg_topological_classes_2.0.npy": "650b4b96834485c1e6d7421de4af74da80d861e6b2a39ef1164389bde3a5e14a"
+        },
+        "source_sha256": {
+          "fnit._dmri": "0862c7cefbd2b2811e9a56e3b617a209968d70c4e5a5b76c557630b1cd2f0117",
+          "fnit.synthseg_parc.segment": "5dce81225289fdfb62bfa5a7787e26737caa41ff74c33e0885304b239d732f33",
+          "fnit.synthseg_parc.synthseg": "5b6fc866076b1311e9960267daecf25084f59dbbea84644a83289853cf4c2601"
+        },
+        "host": "gpucw1",
+        "device": "cuda:0",
+        "device_uuid": "e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+        "threads": 4,
+        "allocator": {
+          "requested": "enabled",
+          "cuda_initialized_at_entry": false,
+          "environment_at_entry": "1",
+          "environment_after_selection": null,
+          "effective": "enabled",
+          "torch_stats_known_valid": true,
+          "torch_stats_known_unavailable": false
+        },
+        "initialized_api": true,
+        "wall_seconds_including_data_io": 42.08897139271721,
+        "stage": {
+          "name": "SynthSeg_with_data_writes",
+          "seconds": 42.08763315575197,
+          "function_seconds": 42.08627040684223,
+          "cuda_pre_sync_seconds": 2.5277957320213318e-05,
+          "cuda_post_sync_seconds": 0.0001325272023677826,
+          "cuda_synchronized": true,
+          "cuda_synchronization_requested": true,
+          "parent_cpu_seconds": 42.53179891,
+          "child_cpu_seconds": 0.0,
+          "torch_memory_stats_status": "available",
+          "gpu_peak_allocated_bytes": 15621713408,
+          "gpu_peak_reserved_bytes": 17574133760,
+          "gpu_peak_scope": "stage"
+        },
+        "actual_forward": {
+          "requested_cudnn_tf32": false,
+          "forwards": [
+            {
+              "pass": "original",
+              "device": "cuda:0",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "input_dtype": "torch.float32",
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "autocast": {
+                "cpu": {
+                  "enabled": false,
+                  "dtype": "torch.bfloat16"
+                },
+                "cuda": {
+                  "enabled": false,
+                  "dtype": "torch.float16"
+                }
+              },
+              "output_dtype": "torch.float32"
+            },
+            {
+              "pass": "flipped",
+              "device": "cuda:0",
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "input_dtype": "torch.float32",
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "autocast": {
+                "cpu": {
+                  "enabled": false,
+                  "dtype": "torch.bfloat16"
+                },
+                "cuda": {
+                  "enabled": false,
+                  "dtype": "torch.float16"
+                }
+              },
+              "output_dtype": "torch.float32"
+            }
+          ],
+          "posterior_buffer_reused": true,
+          "posterior_ensemble_dtype": "torch.float32"
+        },
+        "cudnn_benchmark": true,
+        "cudnn_deterministic": true,
+        "total_intracranial_mm3": 1280294.25,
+        "comparison": {
+          "reference_sha256": "50f9e58f7bcc64a99594f9f81b81c65870ab90c7d5731371344bba6b8daa7230",
+          "same_shape": true,
+          "same_dtype": true,
+          "affine_max_absolute_mm": 0.0,
+          "different_voxels": 0,
+          "dice_by_label": {
+            "0": 1.0,
+            "2": 1.0,
+            "3": 1.0,
+            "4": 1.0,
+            "5": 1.0,
+            "7": 1.0,
+            "8": 1.0,
+            "10": 1.0,
+            "11": 1.0,
+            "12": 1.0,
+            "13": 1.0,
+            "14": 1.0,
+            "15": 1.0,
+            "16": 1.0,
+            "17": 1.0,
+            "18": 1.0,
+            "24": 1.0,
+            "26": 1.0,
+            "28": 1.0,
+            "41": 1.0,
+            "42": 1.0,
+            "43": 1.0,
+            "44": 1.0,
+            "46": 1.0,
+            "47": 1.0,
+            "49": 1.0,
+            "50": 1.0,
+            "51": 1.0,
+            "52": 1.0,
+            "53": 1.0,
+            "54": 1.0,
+            "58": 1.0,
+            "60": 1.0
+          },
+          "minimum_label_dice": 1.0
+        },
+        "monitor": {
+          "report": {
+            "path": "final_1b8c36d/buffer_cached_api_monitor/monitor.json",
+            "sha256": "5a32505e7e559ac5cc661bee543ac716f0d296072dc38d337166f557d7b8d159"
+          },
+          "gpu_uuid": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+          "exit_code": 0,
+          "command_wall_seconds": 50.164489737246186,
+          "sampling_interval_requested_seconds": 2.0,
+          "query_timeout_seconds": 5.0,
+          "samples": 24,
+          "maximum_sampling_gap_seconds": 2.2923985556699336,
+          "failed_app_queries": 0,
+          "peak_sampled_process_bytes": 18138267648,
+          "continuous_peak_verified": false
+        }
       }
     ],
     "stored_dtype_audit": {
@@ -2504,14 +2803,28 @@
     "conclusion": "old delay cause unconfirmed; neither CTAB random colors nor TF32 tail differences establish the cause"
   },
   "validation_status": {
-    "strict_reproduction": "stage-specific comparisons reported; current whole 138-item diagnostic pending",
-    "optimization_introduced_regression": "none in completed same-input stats/thickness/buffer/thread comparisons; TF32 policy correction separately changes 148 voxels",
+    "strict_reproduction": {
+      "same_input_stages": "see unchanged stage-specific gates",
+      "sub02_controlled_baseline": "138/138; parsed geometry/data exactly equal, not all file bytes",
+      "official_sub01": "6/138",
+      "official_sub02": "2/138",
+      "sub01_controlled_baseline": "pending"
+    },
+    "optimization_introduced_regression": "None in completed same-input operator tests and CPU whole parsed geometry/labels/region metrics; GPU controlled whole comparison pending. TF32 policy correction changes 148 frozen labels separately.",
     "overall_metric_equivalence": "not_assessed",
     "equivalence_thresholds_formally_confirmed": false,
-    "current_whole_output_completeness": "pending",
-    "current_whole_mesh_quality": "pending",
+    "current_whole_output_completeness": {
+      "sub01": "138/138",
+      "sub02": "138/138"
+    },
+    "current_whole_mesh_quality": {
+      "standard_gate": "both passed; limited to fields recorded in original reports",
+      "extended_cross_surface": "proper transverse pairs sub01 lh/rh 147/197, sub02 92/119; positives also observed in reference and history, not waived",
+      "connectivity_nonmanifold_sphere": "four candidates connected=1, nonmanifold/vertex-link/duplicate/negative-sphere=0",
+      "whole_quality_equivalence": "not_assessed"
+    },
     "whole_pipeline_speedup": null,
-    "whole_pipeline_speedup_status": "pending controlled matched runs",
+    "whole_pipeline_speedup_status": "GPU matched complete-command pair pending; CPU common postvalidation observation available, external command ratio unavailable due clock boundaries",
     "new_runtime_dependencies": [],
     "clean_isolated_deployment": "not_verified",
     "focused_unit_checks": {
@@ -2521,6 +2834,14 @@
       },
       "result": "43 passed, 19 subtests passed in 3.86s",
       "exit_code": 0
+    },
+    "cpu_common_postvalidation_performance": {
+      "scope": "post-validation standard pipeline through output/mesh checks, before terminal internal report write; excludes initial imports/resource validation and public thread setup/restore",
+      "baseline_seconds": 5367.984881669283,
+      "candidate_seconds": 5287.736358702183,
+      "candidate_minus_baseline_seconds": -80.24852296710014,
+      "baseline_divided_by_candidate": 1.0151763472161452,
+      "time_reduction_fraction": 0.014949468885639866
     }
   },
   "whole_runs": {
@@ -2529,22 +2850,44 @@
     "control_policy": "benchmark-only posterior cuDNN TF32=False scope; old algorithms and buffers untouched; Torch/Numba=4 and no-cache=1",
     "input_scope": "original real T1 into empty subject directories; reference output not candidate input",
     "sub01_gpu_candidate": {
-      "status": "pending",
-      "script": "run_gpu_retry1_1b8c36d.sh"
+      "status": "complete",
+      "script": "run_gpu_retry1_1b8c36d.sh",
+      "command_wall_seconds": 4972.66683337884,
+      "api_total_seconds": 4968.5452927630395,
+      "stages": 66,
+      "outputs": "138/138"
     },
     "sub02_cpu_candidate": {
-      "status": "pending",
-      "script": "run_cpu_final_1b8c36d.sh"
+      "status": "complete",
+      "script": "run_cpu_final_1b8c36d.sh",
+      "command_wall_seconds": 5295.422235943377,
+      "api_total_seconds": 5292.994806945324,
+      "stages": 66,
+      "outputs": "138/138"
     },
     "sub01_gpu_controlled_baseline": {
-      "status": "pending",
-      "script": "run_gpu_control_after_candidate_20261001.sh"
+      "status": "running",
+      "script": "run_gpu_control_direct_20261001.sh",
+      "completion_report": "whole/sub01/baseline_run.json",
+      "notes": "Direct new-directory launch after preserved duplicate queue FileExistsError; no completed whole speed ratio yet."
     },
     "sub02_cpu_controlled_baseline": {
-      "status": "pending",
-      "log": "cpu_control_e036f57.log"
+      "status": "complete",
+      "log": "cpu_control_e036f57.log",
+      "performance": {
+        "path": "cpu_control_pair_summary.json",
+        "sha256": "37b4f8b8e3fa99d9d5b5974dd721c6861f9bdce55344fe3f7a0f6b44b07e5ecc"
+      },
+      "precision": {
+        "path": "cpu_control_precision_summary.json",
+        "sha256": "e4c6aaccfe803627836af259a8e6ce00dd4b9df31e595cb86090e46cc182771b"
+      }
     },
-    "notes": "Do not substitute historical complete-run totals or partial/checkpoint reruns. Parent will update only after completion and comparison."
+    "notes": "Do not substitute historical complete-run totals or partial/checkpoint reruns. Parent will update only after completion and comparison.",
+    "candidate_profile": {
+      "path": "candidate_whole_profile.json",
+      "sha256": "8d648a5157e6e741b480f471bd7b825af484674cab0e6a0ad05ef15bf7e2ff4a"
+    }
   },
   "report_sha256": {
     "diagnostics/stats_summary.json": "309be6451f341bc55328a5f3046fcb5a5be2b34da755ad19d5caed77e7d1b5a5",
@@ -2585,6 +2928,42 @@
     "cpu_final_1b8c36d/thread_ca_sub01/report.json": "73c6074d6fd761f9f9e17a67ac9c2a9d597d88ff280dc0ea5e1f6ee522e30e0d",
     "cpu_final_1b8c36d/thread_ca_sub02/report.json": "f0a5ecd72bf33c9336d45a3377f963b96adbcdb447aab2ffc488092f4a3e778d",
     "cpu_final_1b8c36d/thread_sphere_sub01_lh/report.json": "5eb86d5ed201d899c3507fc1ddc49a944798ceb605acfe73052db017f87ebea0",
-    "final_1b8c36d/full_sub01_monitor/monitor.json": "ef6e6687b9d8c5e485e175f5adb61d4fbfd387e09b418cb6e3db171f995d69cc"
+    "final_1b8c36d/full_sub01_monitor/monitor.json": "ef6e6687b9d8c5e485e175f5adb61d4fbfd387e09b418cb6e3db171f995d69cc",
+    "candidate_whole_profile.json": "8d648a5157e6e741b480f471bd7b825af484674cab0e6a0ad05ef15bf7e2ff4a",
+    "cpu_control_pair_summary.json": "37b4f8b8e3fa99d9d5b5974dd721c6861f9bdce55344fe3f7a0f6b44b07e5ecc",
+    "cpu_control_precision_summary.json": "e4c6aaccfe803627836af259a8e6ce00dd4b9df31e595cb86090e46cc182771b",
+    "surface_quality_extended_summary.json": "342ba15453c988401617b8eca6aa1ef9063111d5818739840e1718b66b6d60bb",
+    "official_repeatability_audit.json": "1c8716023b63d89e2f21012acf3e620450c5f8a637f8bd35fd5f31559cb64102",
+    "official_candidate_metrics_summary.json": "018c40196f689d4c9737a5a024aad8a98937bcbabc2f7263ef6fcb4ab3e31f24",
+    "buffer_cached_api_summary.json": "7423052f3a284421c5ce3fef3fab75ea862ec21e9ebea5a1bf441e583a79d31a",
+    "workers_summary.json": "5e42d01d250d6dc6c12f2d96a4e08c383c742037df6ed41ca78c8575e6b7dcd3",
+    "gpu_reuse_remaining_audit.json": "2028bf6328f263a643935472d8ec9c7a176fd25cb57257ab273ea9404691ad2d"
+  },
+  "updated_utc": "2026-10-01T04:30:07.840377+00:00",
+  "independent_diagnostics": {
+    "official_current_cases": {
+      "path": "official_candidate_metrics_summary.json",
+      "sha256": "018c40196f689d4c9737a5a024aad8a98937bcbabc2f7263ef6fcb4ab3e31f24"
+    },
+    "extended_mesh_quality": {
+      "path": "surface_quality_extended_summary.json",
+      "sha256": "342ba15453c988401617b8eca6aa1ef9063111d5818739840e1718b66b6d60bb"
+    },
+    "official_repeatability_scope": {
+      "path": "official_repeatability_audit.json",
+      "sha256": "1c8716023b63d89e2f21012acf3e620450c5f8a637f8bd35fd5f31559cb64102"
+    },
+    "cached_initialized_api": {
+      "path": "buffer_cached_api_summary.json",
+      "sha256": "7423052f3a284421c5ce3fef3fab75ea862ec21e9ebea5a1bf441e583a79d31a"
+    },
+    "post_1b_worker": {
+      "path": "workers_summary.json",
+      "sha256": "5e42d01d250d6dc6c12f2d96a4e08c383c742037df6ed41ca78c8575e6b7dcd3"
+    },
+    "remaining_gpu_reuse": {
+      "path": "gpu_reuse_remaining_audit.json",
+      "sha256": "2028bf6328f263a643935472d8ec9c7a176fd25cb57257ab273ea9404691ad2d"
+    }
   }
 }

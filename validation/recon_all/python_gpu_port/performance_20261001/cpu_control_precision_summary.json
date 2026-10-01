@@ -1,0 +1,1511 @@
+{
+  "subject": "sub02",
+  "candidate_commit": "1b8c36d25a68e253a1e59b6d02114890afa467de",
+  "baseline_commit": "e036f57b62b99d2af4cd8853ab2f1e6d2a9f8c68",
+  "comparison_kind": "independent raw-T1 whole CPU runs, same nodecw10 hardware and actual Torch/Numba masks 4",
+  "strict_reproduction_vs_controlled_baseline": {
+    "checked": 138,
+    "passed": 138,
+    "all_pass": true,
+    "not_all_serialized_files_byte_identical": true
+  },
+  "optimization_degradation_vs_controlled_baseline": {
+    "status": "no_difference_in_checked_outputs",
+    "scope": "strict 138 checks, 7 same-grid label images, parsed regional/global statistics, bilateral 8-stage triangle geometry",
+    "label_images": {
+      "aseg.mgz": {
+        "different_voxels": 0,
+        "minimum_dice": 1.0,
+        "p05_dice": 1.0,
+        "median_dice": 1.0,
+        "stored_dtypes": [
+          ">f4",
+          ">f4"
+        ]
+      },
+      "aparc+aseg.mgz": {
+        "different_voxels": 0,
+        "minimum_dice": 1.0,
+        "p05_dice": 1.0,
+        "median_dice": 1.0,
+        "stored_dtypes": [
+          ">f4",
+          ">f4"
+        ]
+      },
+      "aparc.a2009s+aseg.mgz": {
+        "different_voxels": 0,
+        "minimum_dice": 1.0,
+        "p05_dice": 1.0,
+        "median_dice": 1.0,
+        "stored_dtypes": [
+          ">f4",
+          ">f4"
+        ]
+      },
+      "aparc.DKTatlas+aseg.mgz": {
+        "different_voxels": 0,
+        "minimum_dice": 1.0,
+        "p05_dice": 1.0,
+        "median_dice": 1.0,
+        "stored_dtypes": [
+          ">f4",
+          ">f4"
+        ]
+      },
+      "wmparc.mgz": {
+        "different_voxels": 0,
+        "minimum_dice": 1.0,
+        "p05_dice": 1.0,
+        "median_dice": 1.0,
+        "stored_dtypes": [
+          ">f4",
+          ">f4"
+        ]
+      },
+      "ribbon.mgz": {
+        "different_voxels": 0,
+        "minimum_dice": 1.0,
+        "p05_dice": 1.0,
+        "median_dice": 1.0,
+        "stored_dtypes": [
+          "uint8",
+          "uint8"
+        ]
+      },
+      "filled.mgz": {
+        "different_voxels": 0,
+        "minimum_dice": 1.0,
+        "p05_dice": 1.0,
+        "median_dice": 1.0,
+        "stored_dtypes": [
+          "uint8",
+          "uint8"
+        ]
+      }
+    },
+    "aparc_68": {
+      "SurfArea": {
+        "matched_regions": 68,
+        "missing_in_candidate": [],
+        "extra_in_candidate": [],
+        "pearson_r": 1.0,
+        "mae": 0.0,
+        "median_absolute_relative_error_percent": 0.0,
+        "p90_absolute_relative_error_percent": 0.0,
+        "maximum_absolute_error": 0.0,
+        "zero_reference_regions": []
+      },
+      "GrayVol": {
+        "matched_regions": 68,
+        "missing_in_candidate": [],
+        "extra_in_candidate": [],
+        "pearson_r": 0.9999999999999998,
+        "mae": 0.0,
+        "median_absolute_relative_error_percent": 0.0,
+        "p90_absolute_relative_error_percent": 0.0,
+        "maximum_absolute_error": 0.0,
+        "zero_reference_regions": []
+      },
+      "ThickAvg": {
+        "matched_regions": 68,
+        "missing_in_candidate": [],
+        "extra_in_candidate": [],
+        "pearson_r": 1.0,
+        "mae": 0.0,
+        "median_absolute_relative_error_percent": 0.0,
+        "p90_absolute_relative_error_percent": 0.0,
+        "maximum_absolute_error": 0.0,
+        "zero_reference_regions": []
+      },
+      "MeanCurv": {
+        "matched_regions": 68,
+        "missing_in_candidate": [],
+        "extra_in_candidate": [],
+        "pearson_r": 1.0,
+        "mae": 0.0,
+        "median_absolute_relative_error_percent": 0.0,
+        "p90_absolute_relative_error_percent": 0.0,
+        "maximum_absolute_error": 0.0,
+        "zero_reference_regions": []
+      }
+    },
+    "aseg": {
+      "matched_regions": 45,
+      "missing_in_candidate": [],
+      "extra_in_candidate": [],
+      "pearson_r": 1.0,
+      "mae": 0.0,
+      "median_absolute_relative_error_percent": 0.0,
+      "p90_absolute_relative_error_percent": 0.0,
+      "maximum_absolute_error": 0.0,
+      "zero_reference_regions": [
+        "5th-Ventricle",
+        "Left-WM-hypointensities",
+        "Left-choroid-plexus",
+        "Left-non-WM-hypointensities",
+        "Left-vessel",
+        "Optic-Chiasm",
+        "Right-WM-hypointensities",
+        "Right-choroid-plexus",
+        "Right-non-WM-hypointensities",
+        "Right-vessel",
+        "non-WM-hypointensities"
+      ]
+    },
+    "wmparc": {
+      "matched_regions": 70,
+      "missing_in_candidate": [],
+      "extra_in_candidate": [],
+      "pearson_r": 1.0,
+      "mae": 0.0,
+      "median_absolute_relative_error_percent": 0.0,
+      "p90_absolute_relative_error_percent": 0.0,
+      "maximum_absolute_error": 0.0,
+      "zero_reference_regions": []
+    },
+    "global_brainvol_measures": {
+      "BrainSegVol": {
+        "reference": 1384130.0,
+        "candidate": 1384130.0,
+        "relative_difference_percent": 0.0
+      },
+      "BrainSegVolNotVent": {
+        "reference": 1036561.0,
+        "candidate": 1036561.0,
+        "relative_difference_percent": 0.0
+      },
+      "BrainSegVolNotVentSurf": {
+        "reference": 1036561.0,
+        "candidate": 1036561.0,
+        "relative_difference_percent": 0.0
+      },
+      "CerebralWhiteMatterVol": {
+        "reference": 448929.0,
+        "candidate": 448929.0,
+        "relative_difference_percent": 0.0
+      },
+      "CortexVol": {
+        "reference": 416754.721803,
+        "candidate": 416754.721803,
+        "relative_difference_percent": 0.0
+      },
+      "MaskVol": {
+        "reference": 1478712.0,
+        "candidate": 1478712.0,
+        "relative_difference_percent": 0.0
+      },
+      "SubCortGrayVol": {
+        "reference": 54960.0,
+        "candidate": 54960.0,
+        "relative_difference_percent": 0.0
+      },
+      "SupraTentorialVol": {
+        "reference": 1250956.0,
+        "candidate": 1250956.0,
+        "relative_difference_percent": 0.0
+      },
+      "SupraTentorialVolNotVent": {
+        "reference": 903387.0,
+        "candidate": 903387.0,
+        "relative_difference_percent": 0.0
+      },
+      "SupraTentorialVolNotVentVox": {
+        "reference": 903387.0,
+        "candidate": 903387.0,
+        "relative_difference_percent": 0.0
+      },
+      "TotalGrayVol": {
+        "reference": 573411.721803,
+        "candidate": 573411.721803,
+        "relative_difference_percent": 0.0
+      },
+      "VentricleChoroidVol": {
+        "reference": 16773.0,
+        "candidate": 16773.0,
+        "relative_difference_percent": 0.0
+      },
+      "lhCerebralWhiteMatterVol": {
+        "reference": 226442.0,
+        "candidate": 226442.0,
+        "relative_difference_percent": 0.0
+      },
+      "lhCortexVol": {
+        "reference": 209171.761657,
+        "candidate": 209171.761657,
+        "relative_difference_percent": 0.0
+      },
+      "rhCerebralWhiteMatterVol": {
+        "reference": 222487.0,
+        "candidate": 222487.0,
+        "relative_difference_percent": 0.0
+      },
+      "rhCortexVol": {
+        "reference": 207582.960145,
+        "candidate": 207582.960145,
+        "relative_difference_percent": 0.0
+      }
+    },
+    "surface_geometry": {
+      "lh": {
+        "orig.nofix": {
+          "identical_indexed_geometry": true,
+          "indexed_vertex_distance": {
+            "mean_mm": 0.0,
+            "p99_mm": 0.0,
+            "max_mm": 0.0,
+            "over_0_1_mm": 0
+          },
+          "candidate_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": 0
+          },
+          "reference_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": 0
+          },
+          "serialized_sha256_equal": true,
+          "bidirectional_point_to_triangle_mm_if_geometry_identical": 0.0,
+          "point_to_triangle_basis": "inferred from identical coordinates and ordered triangle faces; no redundant nearest-surface execution"
+        },
+        "orig.premesh": {
+          "identical_indexed_geometry": true,
+          "indexed_vertex_distance": {
+            "mean_mm": 0.0,
+            "p99_mm": 0.0,
+            "max_mm": 0.0,
+            "over_0_1_mm": 0
+          },
+          "candidate_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": 2
+          },
+          "reference_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": 2
+          },
+          "serialized_sha256_equal": false,
+          "bidirectional_point_to_triangle_mm_if_geometry_identical": 0.0,
+          "point_to_triangle_basis": "inferred from identical coordinates and ordered triangle faces; no redundant nearest-surface execution"
+        },
+        "orig": {
+          "identical_indexed_geometry": true,
+          "indexed_vertex_distance": {
+            "mean_mm": 0.0,
+            "p99_mm": 0.0,
+            "max_mm": 0.0,
+            "over_0_1_mm": 0
+          },
+          "candidate_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": 2
+          },
+          "reference_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": 2
+          },
+          "serialized_sha256_equal": false,
+          "bidirectional_point_to_triangle_mm_if_geometry_identical": 0.0,
+          "point_to_triangle_basis": "inferred from identical coordinates and ordered triangle faces; no redundant nearest-surface execution"
+        },
+        "white.preaparc": {
+          "identical_indexed_geometry": true,
+          "indexed_vertex_distance": {
+            "mean_mm": 0.0,
+            "p99_mm": 0.0,
+            "max_mm": 0.0,
+            "over_0_1_mm": 0
+          },
+          "candidate_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": 2
+          },
+          "reference_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": 2
+          },
+          "serialized_sha256_equal": false,
+          "bidirectional_point_to_triangle_mm_if_geometry_identical": 0.0,
+          "point_to_triangle_basis": "inferred from identical coordinates and ordered triangle faces; no redundant nearest-surface execution"
+        },
+        "white": {
+          "identical_indexed_geometry": true,
+          "indexed_vertex_distance": {
+            "mean_mm": 0.0,
+            "p99_mm": 0.0,
+            "max_mm": 0.0,
+            "over_0_1_mm": 0
+          },
+          "candidate_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": 2
+          },
+          "reference_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": 2
+          },
+          "serialized_sha256_equal": false,
+          "bidirectional_point_to_triangle_mm_if_geometry_identical": 0.0,
+          "point_to_triangle_basis": "inferred from identical coordinates and ordered triangle faces; no redundant nearest-surface execution"
+        },
+        "pial": {
+          "identical_indexed_geometry": true,
+          "indexed_vertex_distance": {
+            "mean_mm": 0.0,
+            "p99_mm": 0.0,
+            "max_mm": 0.0,
+            "over_0_1_mm": 0
+          },
+          "candidate_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": 2
+          },
+          "reference_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": 2
+          },
+          "serialized_sha256_equal": false,
+          "bidirectional_point_to_triangle_mm_if_geometry_identical": 0.0,
+          "point_to_triangle_basis": "inferred from identical coordinates and ordered triangle faces; no redundant nearest-surface execution"
+        },
+        "sphere": {
+          "identical_indexed_geometry": true,
+          "indexed_vertex_distance": {
+            "mean_mm": 0.0,
+            "p99_mm": 0.0,
+            "max_mm": 0.0,
+            "over_0_1_mm": 0
+          },
+          "candidate_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": 2,
+            "inward_or_degenerate_faces": 0
+          },
+          "reference_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": 2,
+            "inward_or_degenerate_faces": 0
+          },
+          "serialized_sha256_equal": false,
+          "bidirectional_point_to_triangle_mm_if_geometry_identical": 0.0,
+          "point_to_triangle_basis": "inferred from identical coordinates and ordered triangle faces; no redundant nearest-surface execution"
+        },
+        "sphere.reg": {
+          "identical_indexed_geometry": true,
+          "indexed_vertex_distance": {
+            "mean_mm": 0.0,
+            "p99_mm": 0.0,
+            "max_mm": 0.0,
+            "over_0_1_mm": 0
+          },
+          "candidate_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": 2,
+            "inward_or_degenerate_faces": 0
+          },
+          "reference_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": 2,
+            "inward_or_degenerate_faces": 0
+          },
+          "serialized_sha256_equal": false,
+          "bidirectional_point_to_triangle_mm_if_geometry_identical": 0.0,
+          "point_to_triangle_basis": "inferred from identical coordinates and ordered triangle faces; no redundant nearest-surface execution"
+        }
+      },
+      "rh": {
+        "orig.nofix": {
+          "identical_indexed_geometry": true,
+          "indexed_vertex_distance": {
+            "mean_mm": 0.0,
+            "p99_mm": 0.0,
+            "max_mm": 0.0,
+            "over_0_1_mm": 0
+          },
+          "candidate_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": -8
+          },
+          "reference_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": -8
+          },
+          "serialized_sha256_equal": true,
+          "bidirectional_point_to_triangle_mm_if_geometry_identical": 0.0,
+          "point_to_triangle_basis": "inferred from identical coordinates and ordered triangle faces; no redundant nearest-surface execution"
+        },
+        "orig.premesh": {
+          "identical_indexed_geometry": true,
+          "indexed_vertex_distance": {
+            "mean_mm": 0.0,
+            "p99_mm": 0.0,
+            "max_mm": 0.0,
+            "over_0_1_mm": 0
+          },
+          "candidate_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": 2
+          },
+          "reference_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": 2
+          },
+          "serialized_sha256_equal": false,
+          "bidirectional_point_to_triangle_mm_if_geometry_identical": 0.0,
+          "point_to_triangle_basis": "inferred from identical coordinates and ordered triangle faces; no redundant nearest-surface execution"
+        },
+        "orig": {
+          "identical_indexed_geometry": true,
+          "indexed_vertex_distance": {
+            "mean_mm": 0.0,
+            "p99_mm": 0.0,
+            "max_mm": 0.0,
+            "over_0_1_mm": 0
+          },
+          "candidate_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": 2
+          },
+          "reference_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": 2
+          },
+          "serialized_sha256_equal": false,
+          "bidirectional_point_to_triangle_mm_if_geometry_identical": 0.0,
+          "point_to_triangle_basis": "inferred from identical coordinates and ordered triangle faces; no redundant nearest-surface execution"
+        },
+        "white.preaparc": {
+          "identical_indexed_geometry": true,
+          "indexed_vertex_distance": {
+            "mean_mm": 0.0,
+            "p99_mm": 0.0,
+            "max_mm": 0.0,
+            "over_0_1_mm": 0
+          },
+          "candidate_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": 2
+          },
+          "reference_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": 2
+          },
+          "serialized_sha256_equal": false,
+          "bidirectional_point_to_triangle_mm_if_geometry_identical": 0.0,
+          "point_to_triangle_basis": "inferred from identical coordinates and ordered triangle faces; no redundant nearest-surface execution"
+        },
+        "white": {
+          "identical_indexed_geometry": true,
+          "indexed_vertex_distance": {
+            "mean_mm": 0.0,
+            "p99_mm": 0.0,
+            "max_mm": 0.0,
+            "over_0_1_mm": 0
+          },
+          "candidate_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": 2
+          },
+          "reference_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": 2
+          },
+          "serialized_sha256_equal": false,
+          "bidirectional_point_to_triangle_mm_if_geometry_identical": 0.0,
+          "point_to_triangle_basis": "inferred from identical coordinates and ordered triangle faces; no redundant nearest-surface execution"
+        },
+        "pial": {
+          "identical_indexed_geometry": true,
+          "indexed_vertex_distance": {
+            "mean_mm": 0.0,
+            "p99_mm": 0.0,
+            "max_mm": 0.0,
+            "over_0_1_mm": 0
+          },
+          "candidate_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": 2
+          },
+          "reference_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": 2
+          },
+          "serialized_sha256_equal": false,
+          "bidirectional_point_to_triangle_mm_if_geometry_identical": 0.0,
+          "point_to_triangle_basis": "inferred from identical coordinates and ordered triangle faces; no redundant nearest-surface execution"
+        },
+        "sphere": {
+          "identical_indexed_geometry": true,
+          "indexed_vertex_distance": {
+            "mean_mm": 0.0,
+            "p99_mm": 0.0,
+            "max_mm": 0.0,
+            "over_0_1_mm": 0
+          },
+          "candidate_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": 2,
+            "inward_or_degenerate_faces": 0
+          },
+          "reference_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": 2,
+            "inward_or_degenerate_faces": 0
+          },
+          "serialized_sha256_equal": false,
+          "bidirectional_point_to_triangle_mm_if_geometry_identical": 0.0,
+          "point_to_triangle_basis": "inferred from identical coordinates and ordered triangle faces; no redundant nearest-surface execution"
+        },
+        "sphere.reg": {
+          "identical_indexed_geometry": true,
+          "indexed_vertex_distance": {
+            "mean_mm": 0.0,
+            "p99_mm": 0.0,
+            "max_mm": 0.0,
+            "over_0_1_mm": 0
+          },
+          "candidate_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": 2,
+            "inward_or_degenerate_faces": 0
+          },
+          "reference_quality": {
+            "components": 1,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0,
+            "euler": 2,
+            "inward_or_degenerate_faces": 0
+          },
+          "serialized_sha256_equal": false,
+          "bidirectional_point_to_triangle_mm_if_geometry_identical": 0.0,
+          "point_to_triangle_basis": "inferred from identical coordinates and ordered triangle faces; no redundant nearest-surface execution"
+        }
+      }
+    },
+    "unmeasured_checks": [
+      "white-pial mutual triangle intersections",
+      "vertex-link manifoldness"
+    ]
+  },
+  "official_reference_differences": {
+    "strict": {
+      "checked": 138,
+      "passed": 2,
+      "all_pass": false
+    },
+    "aparc_68": {
+      "SurfArea": {
+        "matched_regions": 68,
+        "missing_in_candidate": [],
+        "extra_in_candidate": [],
+        "pearson_r": 0.9997589747981719,
+        "mae": 25.691176470588236,
+        "median_absolute_relative_error_percent": 1.060004735209493,
+        "p90_absolute_relative_error_percent": 3.200959488272922,
+        "maximum_absolute_error": 106.0,
+        "zero_reference_regions": []
+      },
+      "GrayVol": {
+        "matched_regions": 68,
+        "missing_in_candidate": [],
+        "extra_in_candidate": [],
+        "pearson_r": 0.9997665986231267,
+        "mae": 75.75,
+        "median_absolute_relative_error_percent": 1.1833515170843336,
+        "p90_absolute_relative_error_percent": 3.263729547557932,
+        "maximum_absolute_error": 518.0,
+        "zero_reference_regions": []
+      },
+      "ThickAvg": {
+        "matched_regions": 68,
+        "missing_in_candidate": [],
+        "extra_in_candidate": [],
+        "pearson_r": 0.9962974675988652,
+        "mae": 0.021691176470588228,
+        "median_absolute_relative_error_percent": 0.6366779463515087,
+        "p90_absolute_relative_error_percent": 1.7920106955781485,
+        "maximum_absolute_error": 0.121,
+        "zero_reference_regions": []
+      },
+      "MeanCurv": {
+        "matched_regions": 68,
+        "missing_in_candidate": [],
+        "extra_in_candidate": [],
+        "pearson_r": 0.992131030871611,
+        "mae": 0.0017352941176470584,
+        "median_absolute_relative_error_percent": 0.8968790218790227,
+        "p90_absolute_relative_error_percent": 3.190918472652222,
+        "maximum_absolute_error": 0.009999999999999995,
+        "zero_reference_regions": []
+      }
+    },
+    "aseg": {
+      "matched_regions": 45,
+      "missing_in_candidate": [],
+      "extra_in_candidate": [],
+      "pearson_r": 0.9999999034294748,
+      "mae": 10.997777777777857,
+      "median_absolute_relative_error_percent": 0.035068469133284146,
+      "p90_absolute_relative_error_percent": 0.1528158789897993,
+      "maximum_absolute_error": 363.70000000001164,
+      "zero_reference_regions": [
+        "5th-Ventricle",
+        "Left-WM-hypointensities",
+        "Left-choroid-plexus",
+        "Left-non-WM-hypointensities",
+        "Left-vessel",
+        "Optic-Chiasm",
+        "Right-WM-hypointensities",
+        "Right-choroid-plexus",
+        "Right-non-WM-hypointensities",
+        "Right-vessel",
+        "non-WM-hypointensities"
+      ]
+    },
+    "wmparc": {
+      "matched_regions": 70,
+      "missing_in_candidate": [],
+      "extra_in_candidate": [],
+      "pearson_r": 0.9998498162837594,
+      "mae": 80.48142857142857,
+      "median_absolute_relative_error_percent": 1.39680138878837,
+      "p90_absolute_relative_error_percent": 4.153825991295,
+      "maximum_absolute_error": 310.8000000000002,
+      "zero_reference_regions": []
+    },
+    "global_brainvol_measures": {
+      "BrainSegVol": {
+        "reference": 1381784.0,
+        "candidate": 1384130.0,
+        "relative_difference_percent": 0.1697805156232812
+      },
+      "BrainSegVolNotVent": {
+        "reference": 1034217.0,
+        "candidate": 1036561.0,
+        "relative_difference_percent": 0.2266448917393545
+      },
+      "BrainSegVolNotVentSurf": {
+        "reference": 1034217.0,
+        "candidate": 1036561.0,
+        "relative_difference_percent": 0.2266448917393545
+      },
+      "CerebralWhiteMatterVol": {
+        "reference": 447899.0,
+        "candidate": 448929.0,
+        "relative_difference_percent": 0.2299625585232385
+      },
+      "CortexVol": {
+        "reference": 414537.40608016425,
+        "candidate": 416754.721803,
+        "relative_difference_percent": 0.5348891777469617
+      },
+      "MaskVol": {
+        "reference": 1478712.0,
+        "candidate": 1478712.0,
+        "relative_difference_percent": 0.0
+      },
+      "SubCortGrayVol": {
+        "reference": 54960.0,
+        "candidate": 54960.0,
+        "relative_difference_percent": 0.0
+      },
+      "SupraTentorialVol": {
+        "reference": 1248513.0,
+        "candidate": 1250956.0,
+        "relative_difference_percent": 0.19567277232996372
+      },
+      "SupraTentorialVolNotVent": {
+        "reference": 900946.0,
+        "candidate": 903387.0,
+        "relative_difference_percent": 0.2709374368719102
+      },
+      "SupraTentorialVolNotVentVox": {
+        "reference": 900946.0,
+        "candidate": 903387.0,
+        "relative_difference_percent": 0.2709374368719102
+      },
+      "TotalGrayVol": {
+        "reference": 571291.4060801642,
+        "candidate": 573411.721803,
+        "relative_difference_percent": 0.3711443407461639
+      },
+      "VentricleChoroidVol": {
+        "reference": 16773.0,
+        "candidate": 16773.0,
+        "relative_difference_percent": 0.0
+      },
+      "lhCerebralWhiteMatterVol": {
+        "reference": 226481.0,
+        "candidate": 226442.0,
+        "relative_difference_percent": -0.017219987548624388
+      },
+      "lhCortexVol": {
+        "reference": 209105.25585891074,
+        "candidate": 209171.761657,
+        "relative_difference_percent": 0.03180493853015972
+      },
+      "rhCerebralWhiteMatterVol": {
+        "reference": 221418.0,
+        "candidate": 222487.0,
+        "relative_difference_percent": 0.48279724322322487
+      },
+      "rhCortexVol": {
+        "reference": 205432.15022125354,
+        "candidate": 207582.960145,
+        "relative_difference_percent": 1.0469685107369968
+      }
+    },
+    "label_images": {
+      "aseg.mgz": {
+        "different_voxels": 14456,
+        "minimum_dice": 0.9804896084591141,
+        "p05_dice": 0.991917397607188,
+        "median_dice": 1.0,
+        "stored_dtypes": [
+          ">i4",
+          ">f4"
+        ]
+      },
+      "aparc+aseg.mgz": {
+        "different_voxels": 23289,
+        "minimum_dice": 0.8733575622029633,
+        "p05_dice": 0.9214534322476561,
+        "median_dice": 0.964190862141076,
+        "stored_dtypes": [
+          ">i4",
+          ">f4"
+        ]
+      },
+      "aparc.a2009s+aseg.mgz": {
+        "different_voxels": 35065,
+        "minimum_dice": 0.737984496124031,
+        "p05_dice": 0.8339077641115396,
+        "median_dice": 0.9351990950465427,
+        "stored_dtypes": [
+          ">i4",
+          ">f4"
+        ]
+      },
+      "aparc.DKTatlas+aseg.mgz": {
+        "different_voxels": 21366,
+        "minimum_dice": 0.9193614408514122,
+        "p05_dice": 0.9348909810143884,
+        "median_dice": 0.9702357279917975,
+        "stored_dtypes": [
+          ">i4",
+          ">f4"
+        ]
+      },
+      "wmparc.mgz": {
+        "different_voxels": 35295,
+        "minimum_dice": 0.8733575622029633,
+        "p05_dice": 0.9097827136648962,
+        "median_dice": 0.9600176133861735,
+        "stored_dtypes": [
+          ">i4",
+          ">f4"
+        ]
+      },
+      "ribbon.mgz": {
+        "different_voxels": 17836,
+        "minimum_dice": 0.9769299153271055,
+        "p05_dice": 0.9774718574419762,
+        "median_dice": 0.9872649351111985,
+        "stored_dtypes": [
+          "uint8",
+          "uint8"
+        ]
+      },
+      "filled.mgz": {
+        "different_voxels": 112,
+        "minimum_dice": 0.9998471224830527,
+        "p05_dice": 0.9998511141024143,
+        "median_dice": 0.9998870386766684,
+        "stored_dtypes": [
+          "uint8",
+          "uint8"
+        ]
+      }
+    },
+    "surface": {
+      "space": "surface RAS mm",
+      "stages": {
+        "lh": {
+          "orig.nofix": {
+            "reference_sha256": "c2286c3d34cd727806cf1d86493fc4d84703bb328338c9ce32efae99ea4ad182",
+            "candidate_sha256": "6323a67d3ead773533fe440d25c49444c93108e79311912d1833667b3ca118e9",
+            "reference_vertices": 114758,
+            "candidate_vertices": 114782,
+            "reference_faces": 229516,
+            "candidate_faces": 229564,
+            "ordered_faces_equal": false,
+            "reference_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": 0
+            },
+            "candidate_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": 0
+            },
+            "indexed_vertex_distance": null,
+            "candidate_to_reference_triangle": {
+              "mean_mm": 0.0007840950671708107,
+              "p99_mm": 0.0,
+              "max_mm": 1.0,
+              "over_0_1_mm": 90
+            },
+            "reference_to_candidate_triangle": {
+              "mean_mm": 0.0005751233029505569,
+              "p99_mm": 0.0,
+              "max_mm": 1.0,
+              "over_0_1_mm": 66
+            }
+          },
+          "orig.premesh": {
+            "reference_sha256": "d299a7d5e42ed98a703b9eb1ee91eba4f1c0754ed331f294656b049122714d69",
+            "candidate_sha256": "019c4166f5248849785d112a543fc0f1b33e58080d0bbc15b12244aabb340bf2",
+            "reference_vertices": 113816,
+            "candidate_vertices": 113828,
+            "reference_faces": 227628,
+            "candidate_faces": 227652,
+            "ordered_faces_equal": false,
+            "reference_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": 2
+            },
+            "candidate_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": 2
+            },
+            "indexed_vertex_distance": null,
+            "candidate_to_reference_triangle": {
+              "mean_mm": 0.005480376567488188,
+              "p99_mm": 0.08372073134659268,
+              "max_mm": 0.8982182930070615,
+              "over_0_1_mm": 846
+            },
+            "reference_to_candidate_triangle": {
+              "mean_mm": 0.005230989560104028,
+              "p99_mm": 0.08051709563065433,
+              "max_mm": 0.9410363931037935,
+              "over_0_1_mm": 758
+            }
+          },
+          "orig": {
+            "reference_sha256": "0dd643a28389e6955df3c80838fc351efafb5a10f51709c3613951a0b768a4f5",
+            "candidate_sha256": "f04a685882ef66bdb90b6428f12f87467206054134984e3008ada7cf731fcb97",
+            "reference_vertices": 119267,
+            "candidate_vertices": 119363,
+            "reference_faces": 238530,
+            "candidate_faces": 238722,
+            "ordered_faces_equal": false,
+            "reference_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": 2
+            },
+            "candidate_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": 2
+            },
+            "indexed_vertex_distance": null,
+            "candidate_to_reference_triangle": {
+              "mean_mm": 0.019109156225138826,
+              "p99_mm": 0.13184898195190023,
+              "max_mm": 0.8766028387519265,
+              "over_0_1_mm": 2503
+            },
+            "reference_to_candidate_triangle": {
+              "mean_mm": 0.019092984098087566,
+              "p99_mm": 0.13422538119601327,
+              "max_mm": 1.0040225819792354,
+              "over_0_1_mm": 2556
+            }
+          },
+          "white.preaparc": {
+            "reference_sha256": "4a4fc5670e650895939f6bcab104f52e2af3cde5fd46e88cb189fdb35120d7ac",
+            "candidate_sha256": "9e884bf31ac70da8ad448aa7b24ae959093d4c8f9c0cc83dd0a3acd92ed50cdc",
+            "reference_vertices": 119267,
+            "candidate_vertices": 119363,
+            "reference_faces": 238530,
+            "candidate_faces": 238722,
+            "ordered_faces_equal": false,
+            "reference_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": 2
+            },
+            "candidate_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": 2
+            },
+            "indexed_vertex_distance": null,
+            "candidate_to_reference_triangle": {
+              "mean_mm": 0.03447679288300198,
+              "p99_mm": 0.21359058367715242,
+              "max_mm": 1.4966275713257737,
+              "over_0_1_mm": 7819
+            },
+            "reference_to_candidate_triangle": {
+              "mean_mm": 0.0341261430649113,
+              "p99_mm": 0.20929170435915292,
+              "max_mm": 3.105894632293128,
+              "over_0_1_mm": 7631
+            }
+          },
+          "white": {
+            "reference_sha256": "c8acf063af2d63bbce514d78589225a6a10a9e5a974d46b692a9871a17cab744",
+            "candidate_sha256": "a5b8c150ed7e3a126df99e7aa70f11eeb9165edf835884a4a5dcda90cc3d4e78",
+            "reference_vertices": 119267,
+            "candidate_vertices": 119363,
+            "reference_faces": 238530,
+            "candidate_faces": 238722,
+            "ordered_faces_equal": false,
+            "reference_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": 2
+            },
+            "candidate_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": 2
+            },
+            "indexed_vertex_distance": null,
+            "candidate_to_reference_triangle": {
+              "mean_mm": 0.035094330994985524,
+              "p99_mm": 0.22089968194568055,
+              "max_mm": 1.4734739868131008,
+              "over_0_1_mm": 8119
+            },
+            "reference_to_candidate_triangle": {
+              "mean_mm": 0.03497152747945961,
+              "p99_mm": 0.21979543859326353,
+              "max_mm": 1.8152540736591927,
+              "over_0_1_mm": 7903
+            }
+          },
+          "pial": {
+            "reference_sha256": "f8b6bcf957b69ef28eef5f69cb0ad99378d9339b46d8b2a86ec1e5cfcdefc47a",
+            "candidate_sha256": "b51ac260a57bc20370374b3e2431dc727e95d86baa962cbe53e3d5a8a86c7a20",
+            "reference_vertices": 119267,
+            "candidate_vertices": 119363,
+            "reference_faces": 238530,
+            "candidate_faces": 238722,
+            "ordered_faces_equal": false,
+            "reference_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": 2
+            },
+            "candidate_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": 2
+            },
+            "indexed_vertex_distance": null,
+            "candidate_to_reference_triangle": {
+              "mean_mm": 0.05984211752939859,
+              "p99_mm": 0.41874724888930676,
+              "max_mm": 2.5924053638388074,
+              "over_0_1_mm": 19238
+            },
+            "reference_to_candidate_triangle": {
+              "mean_mm": 0.05971688139086253,
+              "p99_mm": 0.423822463909043,
+              "max_mm": 2.365825946045559,
+              "over_0_1_mm": 19224
+            }
+          },
+          "sphere": {
+            "reference_sha256": "cff616b5a31ef28759929ee19e5a9de21106400ebb53eed1054105c7414e783a",
+            "candidate_sha256": "beea6c936e42c8e06ca1842c55270625bbdde037c84e0aaa76fdfbc54bbfb56f",
+            "reference_vertices": 119267,
+            "candidate_vertices": 119363,
+            "reference_faces": 238530,
+            "candidate_faces": 238722,
+            "ordered_faces_equal": false,
+            "reference_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": 2,
+              "inward_or_degenerate_faces": 0
+            },
+            "candidate_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": 2,
+              "inward_or_degenerate_faces": 0
+            },
+            "indexed_vertex_distance": null,
+            "candidate_to_reference_triangle": {
+              "mean_mm": 0.0020201130448601157,
+              "p99_mm": 0.0067828446729240885,
+              "max_mm": 0.01864198809655915,
+              "over_0_1_mm": 0
+            },
+            "reference_to_candidate_triangle": {
+              "mean_mm": 0.002001845227062294,
+              "p99_mm": 0.006401869195888455,
+              "max_mm": 0.020778160348585765,
+              "over_0_1_mm": 0
+            }
+          },
+          "sphere.reg": {
+            "reference_sha256": "ef6049fd16237d2d09b0cc903c435092c9d826ae7c577814374ec09f8848376d",
+            "candidate_sha256": "ca2f3964e4bbe1ef06572b931355ef9a0dbf20010dafff1e61571ef567874a0d",
+            "reference_vertices": 119267,
+            "candidate_vertices": 119363,
+            "reference_faces": 238530,
+            "candidate_faces": 238722,
+            "ordered_faces_equal": false,
+            "reference_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": 2,
+              "inward_or_degenerate_faces": 0
+            },
+            "candidate_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": 2,
+              "inward_or_degenerate_faces": 0
+            },
+            "indexed_vertex_distance": null,
+            "candidate_to_reference_triangle": {
+              "mean_mm": 0.0018330827423870915,
+              "p99_mm": 0.005145023521909007,
+              "max_mm": 0.015090758681508883,
+              "over_0_1_mm": 0
+            },
+            "reference_to_candidate_triangle": {
+              "mean_mm": 0.001845296687966016,
+              "p99_mm": 0.005155455378946004,
+              "max_mm": 0.015159210454885665,
+              "over_0_1_mm": 0
+            }
+          }
+        },
+        "rh": {
+          "orig.nofix": {
+            "reference_sha256": "388edf908863baecf4e9ddb48cab6201253c7f20a16d359ba9b708abedb58fdc",
+            "candidate_sha256": "8ad69b84b35373790e90cade0c65c73c029461fa8b5f932ec6ffcc92305768dc",
+            "reference_vertices": 113878,
+            "candidate_vertices": 113882,
+            "reference_faces": 227772,
+            "candidate_faces": 227780,
+            "ordered_faces_equal": false,
+            "reference_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": -8
+            },
+            "candidate_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": -8
+            },
+            "indexed_vertex_distance": null,
+            "candidate_to_reference_triangle": {
+              "mean_mm": 0.000324897701129239,
+              "p99_mm": 0.0,
+              "max_mm": 1.0,
+              "over_0_1_mm": 37
+            },
+            "reference_to_candidate_triangle": {
+              "mean_mm": 0.00028978380371977026,
+              "p99_mm": 0.0,
+              "max_mm": 1.0,
+              "over_0_1_mm": 33
+            }
+          },
+          "orig.premesh": {
+            "reference_sha256": "9ef33a0d85b5d1bc594abb7a83b330bd502c06fecd7ac87b44d1fd8f13c8e503",
+            "candidate_sha256": "a4fb20e9769d3598e0ed44af6a77af2abf05d2821d40a9f412743f710ec5c3fc",
+            "reference_vertices": 112731,
+            "candidate_vertices": 112806,
+            "reference_faces": 225458,
+            "candidate_faces": 225608,
+            "ordered_faces_equal": false,
+            "reference_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": 2
+            },
+            "candidate_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": 2
+            },
+            "indexed_vertex_distance": null,
+            "candidate_to_reference_triangle": {
+              "mean_mm": 0.0048025375354639735,
+              "p99_mm": 0.06867265684688098,
+              "max_mm": 4.236218824279491,
+              "over_0_1_mm": 599
+            },
+            "reference_to_candidate_triangle": {
+              "mean_mm": 0.0042672686333768105,
+              "p99_mm": 0.06779478995422623,
+              "max_mm": 1.1722622428809453,
+              "over_0_1_mm": 540
+            }
+          },
+          "orig": {
+            "reference_sha256": "08c291533582df58149ef21feb54a6d99b76a05eddb4a911d3e0c74f1f47f3d8",
+            "candidate_sha256": "211da3c1a235c01cebf7fd89c28ee2788a347c3a25060ece402efa286aede715",
+            "reference_vertices": 118054,
+            "candidate_vertices": 118303,
+            "reference_faces": 236104,
+            "candidate_faces": 236602,
+            "ordered_faces_equal": false,
+            "reference_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": 2
+            },
+            "candidate_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": 2
+            },
+            "indexed_vertex_distance": null,
+            "candidate_to_reference_triangle": {
+              "mean_mm": 0.024589842601071416,
+              "p99_mm": 0.154698191224716,
+              "max_mm": 5.729785681167558,
+              "over_0_1_mm": 2783
+            },
+            "reference_to_candidate_triangle": {
+              "mean_mm": 0.01941922022825494,
+              "p99_mm": 0.13726417158006748,
+              "max_mm": 1.2689511562868923,
+              "over_0_1_mm": 2491
+            }
+          },
+          "white.preaparc": {
+            "reference_sha256": "a74582847221ce59be2b3d4cd62b487679576fd82d6d307d5a6a15b9be3af5bf",
+            "candidate_sha256": "0698dde25cde8cb27e2b5825527325e9d659736e7c844a32be663df4fad8579b",
+            "reference_vertices": 118054,
+            "candidate_vertices": 118303,
+            "reference_faces": 236104,
+            "candidate_faces": 236602,
+            "ordered_faces_equal": false,
+            "reference_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": 2
+            },
+            "candidate_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": 2
+            },
+            "indexed_vertex_distance": null,
+            "candidate_to_reference_triangle": {
+              "mean_mm": 0.0406156090055901,
+              "p99_mm": 0.266922261835585,
+              "max_mm": 3.965417145152184,
+              "over_0_1_mm": 9693
+            },
+            "reference_to_candidate_triangle": {
+              "mean_mm": 0.03854640631171913,
+              "p99_mm": 0.2368976346688095,
+              "max_mm": 1.4601495107748033,
+              "over_0_1_mm": 9366
+            }
+          },
+          "white": {
+            "reference_sha256": "186397c0e4947bb0e6c24a4f36ef64c70a9cb5ba306a08c741b226c37447d1cb",
+            "candidate_sha256": "4fad4fd4eccd6132263853379348b308238eabc13169ccec43675d6bafda08aa",
+            "reference_vertices": 118054,
+            "candidate_vertices": 118303,
+            "reference_faces": 236104,
+            "candidate_faces": 236602,
+            "ordered_faces_equal": false,
+            "reference_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": 2
+            },
+            "candidate_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": 2
+            },
+            "indexed_vertex_distance": null,
+            "candidate_to_reference_triangle": {
+              "mean_mm": 0.041208988266476926,
+              "p99_mm": 0.2850108278535309,
+              "max_mm": 2.8995140219257842,
+              "over_0_1_mm": 10322
+            },
+            "reference_to_candidate_triangle": {
+              "mean_mm": 0.039417862067261965,
+              "p99_mm": 0.2533343383711768,
+              "max_mm": 1.1854174237228887,
+              "over_0_1_mm": 9989
+            }
+          },
+          "pial": {
+            "reference_sha256": "426c0ede673c3876b7d065e22e7ff4d8787c76542388fd535be7ed30a665e2e8",
+            "candidate_sha256": "f9cbb70bdadb657e991fa57153f5ee11dcd77fbb6b1782cc603a74365d65d6c9",
+            "reference_vertices": 118054,
+            "candidate_vertices": 118303,
+            "reference_faces": 236104,
+            "candidate_faces": 236602,
+            "ordered_faces_equal": false,
+            "reference_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": 2
+            },
+            "candidate_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": 2
+            },
+            "indexed_vertex_distance": null,
+            "candidate_to_reference_triangle": {
+              "mean_mm": 0.07258458551921185,
+              "p99_mm": 0.47739863508440433,
+              "max_mm": 2.6752071754637488,
+              "over_0_1_mm": 25135
+            },
+            "reference_to_candidate_triangle": {
+              "mean_mm": 0.07093798667639269,
+              "p99_mm": 0.46294336268158837,
+              "max_mm": 3.184582520718569,
+              "over_0_1_mm": 24039
+            }
+          },
+          "sphere": {
+            "reference_sha256": "ecb139e6d20a12c098e136f42a1a6c704e8d719f27b5eed213545f85d182e8f8",
+            "candidate_sha256": "4bc36d40a25bfd805f159dfb3c03512352db1395518be3aa8aea350c318410b0",
+            "reference_vertices": 118054,
+            "candidate_vertices": 118303,
+            "reference_faces": 236104,
+            "candidate_faces": 236602,
+            "ordered_faces_equal": false,
+            "reference_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": 2,
+              "inward_or_degenerate_faces": 0
+            },
+            "candidate_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": 2,
+              "inward_or_degenerate_faces": 0
+            },
+            "indexed_vertex_distance": null,
+            "candidate_to_reference_triangle": {
+              "mean_mm": 0.002019109471010344,
+              "p99_mm": 0.006513898837769024,
+              "max_mm": 0.019810435420701197,
+              "over_0_1_mm": 0
+            },
+            "reference_to_candidate_triangle": {
+              "mean_mm": 0.002016622559568599,
+              "p99_mm": 0.006384576612984061,
+              "max_mm": 0.01630655827767821,
+              "over_0_1_mm": 0
+            }
+          },
+          "sphere.reg": {
+            "reference_sha256": "60b53a870375bbe5a753d77a838fd2de52048722e7c0a3f7e73bf39636a8cd4e",
+            "candidate_sha256": "da84adb23a886288c3ba54a8407667f59dd74002a67d6b2ff105f421c84d8bce",
+            "reference_vertices": 118054,
+            "candidate_vertices": 118303,
+            "reference_faces": 236104,
+            "candidate_faces": 236602,
+            "ordered_faces_equal": false,
+            "reference_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": 2,
+              "inward_or_degenerate_faces": 0
+            },
+            "candidate_quality": {
+              "components": 1,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "euler": 2,
+              "inward_or_degenerate_faces": 0
+            },
+            "indexed_vertex_distance": null,
+            "candidate_to_reference_triangle": {
+              "mean_mm": 0.001742753865535474,
+              "p99_mm": 0.005244208242310588,
+              "max_mm": 0.018585496014013554,
+              "over_0_1_mm": 0
+            },
+            "reference_to_candidate_triangle": {
+              "mean_mm": 0.0017378025500607518,
+              "p99_mm": 0.0051135332164105,
+              "max_mm": 0.016033464392805424,
+              "over_0_1_mm": 0
+            }
+          }
+        }
+      }
+    }
+  },
+  "overall_metric_equivalence": {
+    "status": "not_assessed",
+    "reason": "no confirmed prospective whole equivalence thresholds supplied"
+  },
+  "sources": {
+    "strict_vs_baseline.json": {
+      "path": "/mnt/c/Users/admin/Documents/Codex/2026-09-23/new-chat-4/work/Fudan-Neuroimaging-toolkit/validation/recon_all/python_gpu_port/performance_20261001/whole/sub02/paired/strict_vs_baseline.json",
+      "sha256": "48885098d716d1e8bd71fa6497818b59d4832de167861edb6753e50e97f60ef4"
+    },
+    "region_vs_baseline.json": {
+      "path": "/mnt/c/Users/admin/Documents/Codex/2026-09-23/new-chat-4/work/Fudan-Neuroimaging-toolkit/validation/recon_all/python_gpu_port/performance_20261001/whole/sub02/paired/region_vs_baseline.json",
+      "sha256": "c4c1fc6f024af85c20308cb4e710732db293abf7e617b6235e55718ca83b0617"
+    },
+    "dice_vs_baseline.json": {
+      "path": "/mnt/c/Users/admin/Documents/Codex/2026-09-23/new-chat-4/work/Fudan-Neuroimaging-toolkit/validation/recon_all/python_gpu_port/performance_20261001/whole/sub02/paired/dice_vs_baseline.json",
+      "sha256": "5fd1fa68ecdb59fca78f8b5625b834ba23d874ac3a8436390315472bf5eb424f"
+    },
+    "surface_vs_baseline.json": {
+      "path": "/mnt/c/Users/admin/Documents/Codex/2026-09-23/new-chat-4/work/Fudan-Neuroimaging-toolkit/validation/recon_all/python_gpu_port/performance_20261001/whole/sub02/paired/surface_vs_baseline.json",
+      "sha256": "86dc9399fa8248c1882fcbc313e522d21f7fd6902b5de28b2ae0a293b5e7d200"
+    },
+    "strict_vs_official.json": {
+      "path": "/mnt/c/Users/admin/Documents/Codex/2026-09-23/new-chat-4/work/Fudan-Neuroimaging-toolkit/validation/recon_all/python_gpu_port/performance_20261001/whole/sub02/paired/strict_vs_official.json",
+      "sha256": "cf201c84b3de5a46ddaf6febdbc06b97367efd97aaa2069eb9677ef056075c4d"
+    },
+    "region_vs_official.json": {
+      "path": "/mnt/c/Users/admin/Documents/Codex/2026-09-23/new-chat-4/work/Fudan-Neuroimaging-toolkit/validation/recon_all/python_gpu_port/performance_20261001/whole/sub02/paired/region_vs_official.json",
+      "sha256": "e3ada93f75928c37c0c2236c1afeef75ec8064084b04eb90bb47536f401e17d4"
+    },
+    "dice_vs_official.json": {
+      "path": "/mnt/c/Users/admin/Documents/Codex/2026-09-23/new-chat-4/work/Fudan-Neuroimaging-toolkit/validation/recon_all/python_gpu_port/performance_20261001/whole/sub02/paired/dice_vs_official.json",
+      "sha256": "a380f55582a34e443cf65bd6df805350a45a137592efda98b15c7437a64cfe50"
+    },
+    "surface_vs_official.json": {
+      "path": "/mnt/c/Users/admin/Documents/Codex/2026-09-23/new-chat-4/work/Fudan-Neuroimaging-toolkit/validation/recon_all/python_gpu_port/performance_20261001/whole/sub02/paired/surface_vs_official.json",
+      "sha256": "9d355ac0dae45a3f8eae3c2ad9c005418d0b04df5cfdb2b852853fb455e2879e"
+    }
+  },
+  "derived_figures": [
+    {
+      "path": "/mnt/c/Users/admin/Documents/Codex/2026-09-23/new-chat-4/work/Fudan-Neuroimaging-toolkit/validation/recon_all/python_gpu_port/performance_20261001/whole/sub02/paired/figures/local_region_boundary.png",
+      "sha256": "ff96cd0dc3a0b87b3d2b55e7fbccc7d7f28f4d152fde128bbd7b9d09ffc0e951"
+    },
+    {
+      "path": "/mnt/c/Users/admin/Documents/Codex/2026-09-23/new-chat-4/work/Fudan-Neuroimaging-toolkit/validation/recon_all/python_gpu_port/performance_20261001/whole/sub02/paired/figures/provenance.json",
+      "sha256": "7ce739947093ed3f414afc9308315a59e094ea5c754496ab2375ebebea43e5c1"
+    },
+    {
+      "path": "/mnt/c/Users/admin/Documents/Codex/2026-09-23/new-chat-4/work/Fudan-Neuroimaging-toolkit/validation/recon_all/python_gpu_port/performance_20261001/whole/sub02/paired/figures/region_errors.png",
+      "sha256": "c14dc710b26707c20bafd050143d1dc0c52eb3afe800311b2479fa38b57254f2"
+    },
+    {
+      "path": "/mnt/c/Users/admin/Documents/Codex/2026-09-23/new-chat-4/work/Fudan-Neuroimaging-toolkit/validation/recon_all/python_gpu_port/performance_20261001/whole/sub02/paired/figures/t1_surface_overlay.png",
+      "sha256": "02e62be89bb17f304a0e1f6d8091217b615c0480a339c64323a2dbb0f6cbb25d"
+    }
+  ],
+  "summarizer_sha256": "1e48511eaf2be47c96174d5af7874b42970ced68bec4a6e19eb5b257329a8fda"
+}

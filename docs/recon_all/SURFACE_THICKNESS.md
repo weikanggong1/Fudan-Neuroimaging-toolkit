@@ -64,6 +64,38 @@ report = thickness_map(
 
 真实回归通过后，默认函数更名和旧生产代码清理不改上述计算顺序；清理快照 SHA-256 为 `c5d586b58f8b57af1ecc5b61fcf0e33c980ee5eaca681fe7cc6c25be57083f48`。随后修正 KDTree 不遵守单线程预算的问题，源码 SHA-256 为 `ab019eb7d413c7b08f01ad6b2e499c406ab513cb531d723142c2db2d6c12e961`：四线程下仍使用四个查询工作线程，候选规则、批大小与浮点运算顺序未改。新源码的 GPU 同输入复核和原始 T1 整例报告须绑定实际版本；上面八轮数据仍属于 `fb3...` 阶段快照，不能改标为新源码的测试结果。
 
+### 线程预算修正后的独立 GPU 复核
+
+2026-10-01 03:11 UTC，用相同 sub-01 LH 冻结 FNIT white/pial，在同一物理 GPU UUID、四线程、TF32/float32 和关闭分配缓存的环境，只执行一次 `ab019...` 新函数；没有修改冻结 `1b8c36d` 快照或整例目录。[报告](../../validation/recon_all/python_gpu_port/performance_20261001/thickness_workers_ab019/result/report.json)绑定 105,539 个顶点、211,074 个有序面及原输入 SHA-256。
+
+同步函数耗时 **13.706 s**，包括读取、传输、计算和写出；包含脚本启动、校验与报告的完整命令墙钟为 **17.961 s**。返回 `kdtree_workers=4`，双向候选 2,398,404 对、单块最多 42,170 对。新图与保存的 `1b/c5d...` 图数值和文件 SHA-256 都相同，差异顶点、最大/P99 差及越 1e-6 mm 容差顶点均为 0。与既有同输入 Conda 图最大差 4.768e-7 mm、P99 2.384e-7 mm，10,622 个非零尾差、越既有门槛顶点 0；这些尾差与旧图相同。这不是新运行的官方参考。
+
+[单进程监控](../../validation/recon_all/python_gpu_port/performance_20261001/thickness_workers_ab019/monitor/monitor.json)共 9 个样本，同次查询合计父子进程显存最大 **562,036,736 字节**。采样请求间隔 2 s，最大间隔 2.256 s，查询失败 0；allocated/reserved 为 null，连续峰值未验证。独立的全 GPU 查询观察到 33,843–46,463 MiB、利用率均为 100%，不归入本进程占用。该共享设备单次观察不构成 worker 修改的配对提速实验，也不代表 `ab019...` 已运行原始 T1 整例。阶段 1 的八轮量值与哈希保持原归属；本次结果单独保存在 [workers_summary.json](../../validation/recon_all/python_gpu_port/performance_20261001/workers_summary.json)。
+
+`benchmark_thickness_workers.py` 校验候选源码、white/pial、保存的旧图及 Conda 图 SHA-256，并只调用一次新函数。`--pair-report` 指向冻结配对报告及旁边的旧厚度图；`--conda-binary` 仅记录已经生成参考图的源码构建程序哈希，不执行它；`--output` 必须是新目录。输出新厚度图及 JSON；结构、哈希或设备不匹配时抛异常，数值未通过时保存报告并退出 1。该脚本没有独立官方 CLI，对应厚度阶段的命令仍为下文的 `mris_place_surface --thickness`。
+
+```bash
+gpu_uuid=GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba # 与冻结测试相同的物理 GPU
+export CUDA_VISIBLE_DEVICES="$gpu_uuid" PYTORCH_NO_CUDA_MEMORY_CACHING=1 # 初始化前设置
+export OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 NUMEXPR_NUM_THREADS=4 # 线程预算
+python validation/recon_all/python_gpu_port/benchmark_thickness_workers.py \
+  --candidate-source-file /data/diagnostics/ab019/surface_thickness_gpu.py \
+  --expected-source-sha256 ab019eb7d413c7b08f01ad6b2e499c406ab513cb531d723142c2db2d6c12e961 \
+  --pair-report /data/diagnostics/final_1b8c36d/thickness/report.json \
+  --white /data/subjects/sub01/surf/lh.white --pial /data/subjects/sub01/surf/lh.pial \
+  --conda-map /data/diagnostics/lh.cpp.thickness \
+  --conda-binary /opt/conda/envs/fnit/bin/mris_place_surface \
+  --output /data/diagnostics/ab019/new-result \
+  --code-version 1b8c36d25a68e253a1e59b6d02114890afa467de+thickness-ab019eb \
+  --gpu-uuid "$gpu_uuid" --device cuda:0 --threads 4
+# candidate-source-file 与 expected-source-sha256 绑定实际候选源码。
+# pair-report、white、pial 是同一冻结网格；conda-map 为已生成的同输入厚度。
+# conda-binary 只记录版本；output 为新目录，code-version 标识代码来源。
+# gpu-uuid 显式映射到 device；threads 同时约束 Torch 和 KDTree 工作预算。
+```
+
+### 新旧函数配对脚本
+
 `benchmark_thickness_indexed.py` 读取冻结的真实 white/pial、`3d9856c` 原函数源码、新输出目录和代码标识，默认 `cuda:0`、四个 PyTorch 线程、两轮交替先后顺序。输出每轮两张厚度、JSON 差异、同步耗时、输入/源码 SHA-256；显存缓存关闭时 allocated/reserved 为不可用，不能解释为零。可传 `--reference-map` 指定完全相同冻结网格的官方厚度，参考文件仅由独立 benchmark 路径生成。失败仍保存报告并退出 1。
 
 ```bash
@@ -122,7 +154,7 @@ python validation/recon_all/python_gpu_port/summarize_thickness_indexed.py \
 
 2026-10-01 在 headcw 的主页 Conda 环境实际执行六项 CPU 单元检查，全部通过：[报告](../../validation/recon_all/python_gpu_port/thickness_indexed_20261001/unit_checks.json)。覆盖 20/21 跳边界、等距及不连通候选、工作数组复用、超过 256 候选、截断转换和 CPU 旧/新函数回归。报告绑定候选、冻结旧实现、测试和执行脚本的 SHA-256。它们是算法语义检查，不替代上面的真实数据 benchmark，尚未给出整例提速结论。
 
-线程预算修正后，同日同一 CPU 环境执行新增检查及原六项回归，七项全部通过：[新源码报告](../../validation/recon_all/python_gpu_port/thickness_indexed_20261001/unit_checks_workers.json)。真实 KDTree 的线程 1/4 双向候选数组逐值一致；该报告绑定 `ab019...` 源码，原 `c5d...` 六项报告保留版本归属。此次 CPU 检查不代表新源码已运行真实网格或整例。
+线程预算修正后，同日同一 CPU 环境执行新增检查及原六项回归，七项全部通过：[新源码报告](../../validation/recon_all/python_gpu_port/thickness_indexed_20261001/unit_checks_workers.json)。真实 KDTree 的线程 1/4 双向候选数组逐值一致；该报告绑定 `ab019...` 源码，原 `c5d...` 六项报告保留版本归属。CPU 语义检查、上述单半球真实 GPU 复核与原始 T1 整例按各自范围报告。
 
 该 Conda 环境未安装 pytest，`run_thickness_indexed_unit_checks.py` 通过标准库 AST 选取同一测试文件的函数，并用标准库 patch 上下文替代需要 fixture 的检查。线程预算回归使用真实 `cKDTree` 和 400 个非等距候选，包含方向及法向拒绝、超过 256 候选；比较线程 1 与 4 的双向候选偏移、顶点编号、合法标记及距离逐值一致，最后恢复原 PyTorch 设置。当前脚本执行七项检查，四个参数均为显式路径；断言失败抛异常。使用具名参数复现：
 
