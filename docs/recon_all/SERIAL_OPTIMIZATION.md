@@ -84,8 +84,8 @@ mri_synthmorph、mri_entowm_seg、mri_mcadura_seg、mri_vsinus_seg；
 
 ## 本轮验证与更新
 
-候选8302bdc已保存Git快照。本页建立时真实回归执行中，无本轮整例时间、
-整体等效或隔离部署结论。33项专项测试已通过；加入实际设备记录后重新验证。
+候选8302bdc已保存Git快照。两例第一阶段回归已完成，见 stage1_summary.json。
+整例、整体等效和隔离部署仍待验证。33项专项测试通过。
 首次真实基准计算结束但JSON序列化失败，计时作废、保留日志，修复后新空目录重跑。
 
 同GPU旧/新标签及几何预先要求不改变；跨CPU/GPU单列误差与每标签Dice，
@@ -124,3 +124,63 @@ CUDA偏置及一维同设备核，返回同shape偏置；调用方负责控制�
 同输入未修改实现打开缓存时45.758/58.844秒，证明分配策略对当前实现开销很大。
 本次保留低显存策略，通过减少临时张量和CUDA启动消除开销。
 关闭缓存的PyTorch统计标为unavailable，不将零值当零显存；NVML报告另列。
+
+
+## 第三阶段：标准球面
+
+复用已有 RegistrationGradientAverager 的完整邻接有序平均；CUDA 只承担
+这一算子，目标函数与顺序归约继续用 NumPy/Numba。原邻居顺序、所有平均
+轮数、float32 中间值、逐顶点 double 总和、接受规则和末尾清理保留。
+独立顶点行可以四线程计算；总和按原顶点顺序累计。只缓存固定面的 CSR
+和原 smoothwm 的面积，当前坐标与法向每次重新计算。
+
+run_standard_sphere 的完整输入为 inflated、smoothwm、output 三个表面路径；
+finish_device="cpu" 选择末尾清理设备，averaging_device="cpu" 选择平均设备。
+三角面必须有同一有序面与顶点对应关系，坐标采用 surface RAS/mm；sphere
+输出半径100mm的float32(N,3)坐标及原有序面。返回路径、两个设备、初始负面积
+比例、投影/metric/拓扑准备/finish/总秒数、完整 updates 和负面计数的字典。
+3000次更新未收敛抛 RuntimeError；不兼容面、设备或数组抛异常，无CPU静默回退。
+计时包括读取、JIT、搬运和输出写入；CUDA平均回到CPU时已等待结果。
+
+FaceNormalTopology(triangles, nvertices) 保存只读整数有序面及 CSR；
+evaluate(vertices) 接收 float32(N,3) 坐标并返回本轮单位法向，无关联面为零；
+validate(triangles, nvertices) 检查缓存兼容性。不同表面版本分别建缓存，
+非法形状、整数类型或索引抛 ValueError，不复用过期坐标。
+first_epoch_gradient 与 nonlinear_epoch_gradient 新增仅关键字 normal_topology=None、
+original_metric=None；后者为原面绝对面积(F,)mm²及float32总面积mm²，调用者必须
+提供本次smoothwm的量，None仍按原路径计算。它们为内部算子，无独立官方CLI。
+
+~~~python
+from fnit.recon_all.sphere_standard_run import run_standard_sphere
+sphere_report = run_standard_sphere(
+    inflated="/data/self/surf/lh.inflated",  # 自产完整 inflated，surface RAS/mm
+    smoothwm="/data/self/surf/lh.smoothwm",  # 同有序面和顶点，提供距离与原面积
+    output="/data/diagnostic/lh.sphere",  # 已创建的新诊断目录
+    finish_device="cpu",  # 保留当前末尾相交清理
+    averaging_device="cuda:0",  # 显式目标GPU，完整有序平均轮数
+)
+~~~
+
+~~~bash
+# 三个位置参数分别为同序 inflated、smoothwm 和输出；线程预算由调用环境固定。
+python -m fnit.recon_all.sphere_standard_run \
+  /data/self/surf/lh.inflated /data/self/surf/lh.smoothwm /data/diagnostic/lh.sphere \
+  --finish-device cpu --averaging-device cuda:0 --report /data/diagnostic/report.json
+~~~
+
+对应官方独立参考命令 mris_sphere INPUT OUTPUT；原代码、论文与前置要求见
+[网格与球面说明](CPU_GEOMETRY_PERFORMANCE.md)。生产不执行官方命令。
+24项专项测试通过，包括有序SSE与法向缓存更新；真实四侧结果随后列在本页。
+拓扑GA与动态remesh保留已有实现：共享defects文件需按顺序写出，动态缩边后续
+读取前一顶点更新，不能直接替换成同时更新的GPU算法。未声称这两个阶段提速。
+
+四半球同输入实测（74ae022，H100、4线程、分配缓存关闭，含JIT/IO）：
+
+|输入|优化前秒|优化后秒|坐标最大误差mm|
+|---|---:|---:|---:|
+|sub01 lh|245.118|154.903|0|
+|sub01 rh|184.147|137.240|0|
+|sub02 lh|177.995|121.193|0|
+|sub02 rh|162.809|110.374|0|
+
+全部有序面与坐标相同；GPU采样峰值约0.49GB，仅为本阶段，整体等效仍未判定。完整程序/输入/源码哈希与监控边界见 [stage3_summary.json](../../validation/recon_all/optimizations/20261001_serial/stage3_summary.json)。

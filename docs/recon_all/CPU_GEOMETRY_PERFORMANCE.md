@@ -59,22 +59,15 @@ Numba 已在主页 [environment.yml](../../environment.yml) 和
 角点序累加 float32，避免另写相同归约内核。四轮权重、平滑轮数、继承动量、
 步长试探、二次拟合、停止和接受规则保持原值。
 
-### standard sphere：只读审计
+### standard sphere：有序平均与静态拓扑复用
 
-标准 sphere 主体仍是完整 NumPy/Numba CPU 实现；已有 PyTorch finish 内核只
-覆盖相交清理，冻结 1b 的 finish 四侧均低于 2 s。先检查完整阶段中的以下
-位置，不应根据不同目标的 registration GPU 内核直接替换它。标准 sphere
-自身的调度、目标函数和线搜索本轮未修改；它复用的 `initial_vertex_normals`
-已采用共享有序 CSR，四侧整数/法向回归见
-[球面配准说明](SPHERE_REGISTRATION_PERFORMANCE.md)。新提交的完整标准 sphere
-阶段尚未单独重测，旧 1b 耗时不代表此共享索引改动后的时间。
-
-| 位置 | 可检查的开销 | 当前证据 |
-| --- | --- | --- |
-| `sphere_standard_line_search.first_epoch_line_search` | 每次更新的 Python 顺序范数求和、每个 trial 重复转换 float64 基础数组 | 本轮源码审计；尚无新单项剖析 |
-| `_distance_sse` | 每个 trial 遍历抽样邻接并计算球面弧距离，O(M) | 旧 e036 cProfile 供定位；不能作为本轮比例 |
-| `sphere_standard_average` | 多轮顺序邻接梯度平均，O(rounds×(N+E)) | 固定轮数有算法含义，不能跳过 |
-| `sphere_standard_metric._reciprocal_average` | 对每项在线性邻接中查找反向项，O(Σ dᵥdₙ) | 可研究保持遍历/重复平均语义的索引缓存；未修改 |
+后续串行优化已修改 standard sphere，实测版本为 74ae022。
+复用已有 RegistrationGradientAverager，在主设备为 CUDA 时执行完整有序
+Jacobi 梯度平均；目标函数的独立顶点行用 Numba 四线程计算，再按原顶点序
+归约。只缓存固定面 CSR 和原 smoothwm 面积，变化坐标及法向每轮重算。
+不跳过固定平均轮数、线搜索或相交清理，不启用 fastmath。
+最新四半球冻结输入结果与完整接口见[串行优化](SERIAL_OPTIMIZATION.md)。
+本页下面 remesh/quick 的历史实测仍绑定其实际归档，不能改标为本次新结果。
 
 ## Python 接口：输入、输出及失败行为
 
@@ -86,7 +79,7 @@ Numba 已在主页 [environment.yml](../../environment.yml) 和
 | `quick_sphere_from_inflated(vertices, faces, niterations=25)` | (N,3) mm inflated 坐标、有序三角面；每个线搜索阶段最大迭代数 | float32(N,3) radius=100 mm 球面，以及 `(k,averages,mode,dt)` 有序 trace；面及顶点编号不变 |
 | `quick_sphere_from_projected(vertices, faces, original_face_area, original_total_area, niterations=25, initial_momentum=None)` | 已按上游规则投影的 float32(N,3) mm 球面、有序(F,3)面、初始化(F,)mm²面积及总mm²面积；线搜索上限25；可选float32(N,3)继承动量，None表示零 | 同上；此诊断接口要求调用者提供正确上游状态，不能用任意投影替代标准前处理；动量相位仍固定10轮 |
 | `write_quick_sphere(input_path, output_path)` | `inflated.nofix` 三角表面路径和输出路径；固定默认 25 | 写 `qsphere.nofix`，保留原面/几何尾部；返回 None |
-| `run_standard_sphere(inflated, smoothwm, output, finish_device="cpu")` | 同顶点/有序面的 inflated/smoothwm 路径、输出路径；finish_device默认CPU，只控制末尾清理 | 写float32(N,3)半径100mm sphere，并返回下面列出的dict；主体优化仍CPU，面/顶点编号保留 |
+| `run_standard_sphere(inflated, smoothwm, output, finish_device="cpu", averaging_device="cpu")` | 同顶点/有序面的 inflated/smoothwm 路径、输出路径；finish_device默认CPU，只控制末尾清理 | 写float32(N,3)半径100mm sphere，并返回下面列出的dict；目标函数仍CPU；averaging_device控制有序平均，面/顶点编号保留 |
 
 负 remesh 迭代数抛 `ValueError`；无效索引、非流形拓扑和退化法线沿用
 异常/断言，文件读写失败抛异常。quick sphere 的非三角格式、截断文件或
@@ -136,7 +129,8 @@ standard_report = run_standard_sphere(
     inflated="/data/fnit_subject/surf/lh.inflated",     # 真实有序inflated；surface RAS/mm
     smoothwm="/data/fnit_subject/surf/lh.smoothwm",     # 同顶点及面编号，提供metric
     output="/data/validation/sphere_new/lh.sphere",     # 新诊断目录的标准sphere
-    finish_device="cpu",                              # 仅末尾清理；主体优化仍CPU
+    finish_device="cpu",                              # 仅末尾清理
+    averaging_device="cuda:0",                         # 复用已有GPU有序梯度平均器
 )
 ```
 
@@ -167,11 +161,11 @@ python -m fnit.recon_all.sphere_standard_run \
   /data/fnit_subject/surf/lh.smoothwm \
   /data/validation/sphere_new/lh.sphere \
   --finish-device cpu \
+  --averaging-device cuda:0 \
   --report /data/validation/sphere_new/api_report.json
 ```
 
-`--finish-device` 默认cpu，`--report` 可省略，省略时JSON仍写标准输出；主体
-仍CPU。模块 CLI 不管理线程预算，正式配对脚本记录并固定各线程设置。
+`--finish-device` 默认cpu，`--report` 可省略，省略时JSON仍写标准输出；averaging-device默认cpu，选择cuda:0仅迁移有序梯度平均。模块 CLI 不管理线程预算，正式配对脚本记录并固定各线程设置。
 
 ## 官方调用、原代码与文献
 
