@@ -9,23 +9,40 @@ import math
 from collections.abc import Callable
 
 import numpy as np
-from numba import njit
+from numba import njit, prange
 
 from .sphere_standard_unfold import _face_geometry, _sphere_radius_units, _spherical_distance
 
 
-@njit
-def _distance_sse(xyz: np.ndarray, offsets: np.ndarray, neighbors: np.ndarray,
-                  original_distances: np.ndarray, scale: float) -> float:
-    radius, unit = _sphere_radius_units(xyz)
-    total = 0.0
-    for vertex in range(len(xyz)):
+@njit(parallel=True, cache=True)
+def _distance_sse_rows(xyz, radius, unit, offsets, neighbors, original_distances, scale):
+    values = np.empty(len(xyz), np.float64)
+    for vertex in prange(len(xyz)):
         vertex_sse = 0.0
         for p in range(offsets[vertex], offsets[vertex + 1]):
             current = _spherical_distance(xyz, radius, unit, vertex, neighbors[p])
             delta = scale * np.float64(current) - np.float64(original_distances[p])
             vertex_sse += delta * delta
-        total += vertex_sse
+        values[vertex] = vertex_sse
+    return values
+
+
+@njit(cache=True)
+def _distance_sse(xyz: np.ndarray, offsets: np.ndarray, neighbors: np.ndarray,
+                  original_distances: np.ndarray, scale: float) -> float:
+    """按原邻居序计算每顶点float64 SSE，再按顶点序串行合计。
+
+    xyz是float32(N,3)surface RAS/mm，CSR偏移/邻居和原距离同索引，
+    scale为原目标函数比例；返回原定义float64总量。独立行并行，不改变
+    求和顺序、float32球面距离或线搜索规则，无fastmath。
+    属于mris_sphere内部步骤，没有独立CLI。
+    """
+    radius, unit = _sphere_radius_units(xyz)
+    values = _distance_sse_rows(xyz, radius, unit, offsets, neighbors,
+                                original_distances, scale)
+    total = 0.0
+    for vertex in range(len(xyz)):
+        total += values[vertex]
     return total
 
 

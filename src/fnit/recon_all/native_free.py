@@ -154,7 +154,7 @@ def _prepare_native_topology(binary: Path, subject: Path, hemi: str,
 
 
 def _run_accurate_sphere_pair(inflate_binary: Path, subject: Path,
-                              hemi: str, assets: Path) -> tuple[dict, dict]:
+                              hemi: str, assets: Path, *, device: str = "cpu") -> tuple[dict, dict]:
     from .sphere_standard_run import run_standard_sphere
 
     surf = subject / "surf"
@@ -164,7 +164,7 @@ def _run_accurate_sphere_pair(inflate_binary: Path, subject: Path,
         [str(surf / f"{hemi}.smoothwm"), str(inflated)], (inflated, sulc))
     sphere_report = run_standard_sphere(
         inflated, surf / f"{hemi}.smoothwm", surf / f"{hemi}.sphere",
-        finish_device="cpu")
+        finish_device="cpu", averaging_device=device)
     return ({"inflate": inflate_seconds,
              "sphere": sphere_report["total_seconds_including_io"]}, sphere_report)
 
@@ -417,7 +417,7 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
     label_cortex(surf / f"{hemi}.white.preaparc", mri / "aseg.presurf.mgz",
                  labels / f"{hemi}.cortex+hipamyg.label", keep_hip_amyg=True)
     sphere_timings, sphere_report = _run_accurate_sphere_pair(
-        inflate_binary, subject, hemi, assets)
+        inflate_binary, subject, hemi, assets, device=device)
     _write_principal_curvature_maps(surf, hemi, device)
     white, faces = fs.read_geometry(str(surf / f"{hemi}.smoothwm"))
     return {"hemisphere": hemi, "vertices": len(white), "faces": len(faces),

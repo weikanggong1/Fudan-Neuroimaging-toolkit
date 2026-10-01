@@ -81,7 +81,8 @@ def ordered_face_csr(faces: np.ndarray, nvertices: int
     return offsets, np.asarray(order // 3, dtype=np.int64), np.asarray(order % 3, dtype=np.int64)
 
 
-def initial_vertex_normals(vertices: np.ndarray, triangles: np.ndarray) -> np.ndarray:
+def initial_vertex_normals(vertices: np.ndarray, triangles: np.ndarray, *,
+                           topology: FaceNormalTopology | None = None) -> np.ndarray:
     """按原有面顺序计算每顶点单位法向，复用已有单精度数值内核。
 
     vertices 为 (N, 3) 坐标，triangles 为 (F, 3) 有序顶点索引；输入转换为
@@ -90,11 +91,45 @@ def initial_vertex_normals(vertices: np.ndarray, triangles: np.ndarray) -> np.nd
     只构造关联索引，不重排面或更改累计顺序，重复角点保留。
     属于 mris_sphere / mris_place_surface 的内部几何步骤，无独立 CLI。
     非法三角形形状、非整数索引、负值或越界索引抛出 ValueError。
-    vertices 须为 (N, 3) 坐标；真实回归与计时见性能记录。
+    vertices须为(N,3)；topology=None可传本次网格FaceNormalTopology，
+    复用整数CSR，坐标/法向每次重算；不兼容的缓存抛ValueError。
     """
     xyz = np.asarray(vertices, dtype=np.float32)
     if xyz.ndim != 2 or xyz.shape[1] != 3:
         raise ValueError("vertices must have shape (N, 3)")
+    if topology is not None:
+        topology.validate(triangles, len(xyz))
+        return topology.evaluate(xyz)
     offsets, face_ids, corners = ordered_face_csr(triangles, nvertices=len(xyz))
     faces = np.asarray(triangles, dtype=np.int64)
     return _normals(xyz, faces, face_ids, corners, offsets)
+
+
+class FaceNormalTopology:
+    """同一有序面网格的显式法向拓扑缓存；坐标和法向从不缓存。
+
+    triangles为整数(F,3)，nvertices为N；构造时验证索引并复制/冻结面、
+    offsets(N+1)、face_ids/corners(3F)，保留面序/角点序。
+    evaluate(vertices)输入float32(N,3)surface RAS/mm，返回原内核
+    float32单位法向；shape不符抛ValueError。没有全局驻留/坐标近似。
+    换拓扑需新建，white.preaparc/final white/pial可各自持有上下文。
+    """
+    def __init__(self, triangles: np.ndarray, nvertices: int):
+        self.offsets, self.face_ids, self.corners = ordered_face_csr(triangles, nvertices)
+        self.faces = np.array(triangles, dtype=np.int64, copy=True)
+        self.nvertices = nvertices
+        for array in (self.offsets, self.face_ids, self.corners, self.faces):
+            array.flags.writeable = False
+
+    def evaluate(self, vertices: np.ndarray) -> np.ndarray:
+        """仅重算法向：同N有序坐标→(N,3)float32，孤立顶点为零。"""
+        xyz = np.asarray(vertices, np.float32)
+        if xyz.shape != (self.nvertices, 3):
+            raise ValueError("coordinates differ from cached topology shape")
+        return _normals(xyz, self.faces, self.face_ids, self.corners, self.offsets)
+
+    def validate(self, triangles: np.ndarray, nvertices: int) -> None:
+        """验证外部面/顶点数与冻结拓扑一致，防止跨拓扑误用。"""
+        triangles = np.asarray(triangles)
+        if nvertices != self.nvertices or not np.issubdtype(triangles.dtype, np.integer) or not np.array_equal(triangles, self.faces):
+            raise ValueError("cached normals require identical ordered topology")
