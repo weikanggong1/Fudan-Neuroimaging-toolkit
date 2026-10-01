@@ -102,3 +102,65 @@ def test_spline_preserves_mask_and_out_of_field_zeros(tmp_path):
     assert not values[0].any()
     assert not values[:, 0].any()
     np.testing.assert_allclose(values[1:, 1:], 1, atol=2e-6)
+
+
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+@pytest.mark.parametrize("interpolation", ["linear", "nearest", "spline"])
+def test_oblique_identity_preserves_boundary_voxels_and_time_axis(tmp_path, device, interpolation):
+    import torch
+    from scipy.spatial.transform import Rotation
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA unavailable")
+    rng = np.random.default_rng(37)
+    data = rng.normal(size=(13, 15, 11, 2)).astype(np.float32)
+    affine = np.eye(4)
+    affine[:3, :3] = (
+        Rotation.from_euler("xyz", (9, 14, -7), degrees=True).as_matrix()
+        @ np.diag((-2.0, 2.1, 2.2))
+    )
+    affine[:3, 3] = (-92.314, 41.824, -66.392)
+    source = tmp_path / "source.nii.gz"
+    reference = tmp_path / "reference.nii.gz"
+    image = nib.Nifti1Image(data, affine)
+    image.header.set_zooms((2.0, 2.1, 2.2, .735))
+    image.header.set_xyzt_units(xyz="mm", t="sec")
+    nib.save(image, source)
+    nib.save(nib.Nifti1Image(np.zeros(data.shape[:3], dtype=np.float32), affine), reference)
+    path = resample_world(
+        source, reference, np.eye(4), tmp_path / "output.nii.gz",
+        interpolation=interpolation, batch_size=1, device=device,
+    )
+    actual = nib.load(path)
+    # Equality on the entire image covers all six FOV faces, including corners.
+    np.testing.assert_allclose(np.asarray(actual.dataobj), data, atol=2e-5, rtol=2e-5)
+    assert actual.get_data_dtype() == np.dtype(np.float32)
+    assert actual.shape == data.shape
+    np.testing.assert_allclose(actual.affine, nib.load(reference).affine, atol=1e-7)
+    assert actual.header.get_zooms()[3] == pytest.approx(.735)
+    assert actual.header.get_xyzt_units()[1] == "sec"
+
+
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+@pytest.mark.parametrize("interpolation", ["linear", "nearest", "spline"])
+@pytest.mark.parametrize("shift", [-2e-6, -5e-7, 5e-7, 2e-6])
+def test_boundary_roundoff_is_clamped_but_genuine_outside_is_zero(
+    tmp_path, device, interpolation, shift,
+):
+    import torch
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA unavailable")
+    shape = (5, 6, 7)
+    source = tmp_path / "source.nii.gz"
+    reference = tmp_path / "reference.nii.gz"
+    nib.save(nib.Nifti1Image(np.ones(shape, dtype=np.float32), np.eye(4)), source)
+    nib.save(nib.Nifti1Image(np.zeros(shape, dtype=np.float32), np.eye(4)), reference)
+    matrix = np.eye(4)
+    matrix[0, 3] = shift
+    path = resample_world(
+        source, reference, matrix, tmp_path / "output.nii.gz",
+        interpolation=interpolation, device=device,
+    )
+    expected = np.ones(shape, dtype=np.float32)
+    if abs(shift) > 1e-6:
+        expected[0 if shift < 0 else -1] = 0
+    np.testing.assert_allclose(np.asarray(nib.load(path).dataobj), expected, atol=2e-6)

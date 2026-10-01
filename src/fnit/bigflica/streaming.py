@@ -15,7 +15,8 @@ import nibabel as nib
 import numpy as np
 import torch
 
-from .pipeline import _device, _file_record, _load_mask, _read_vector, _signature
+from .pipeline import (_NORMALIZATION_VERSION, _device, _file_record, _load_mask,
+                       _read_vector, _signature)
 
 
 def _eigen_residuals(covariance: torch.Tensor, values: torch.Tensor,
@@ -51,7 +52,7 @@ def prepare_modalities(subjects_root: str | Path,
         raise ValueError("normalized_dtype must be float32 or float64")
     signature = _signature({
         "subjects": list(subjects),
-        "normalized_dtype": f"{normalized_dtype}-v2-stats64",
+        "normalized_dtype": f"{normalized_dtype}-{_NORMALIZATION_VERSION}",
         "modalities": {name: {"image": spec["image"],
                                "mask": _file_record(Path(spec["mask"]))}
                        for name, spec in modalities.items()},
@@ -85,7 +86,7 @@ def prepare_modalities(subjects_root: str | Path,
             for row, subject in enumerate(subjects):
                 vector = _read_vector(root / subject / spec["image"], mask_image, mask)
                 data[row] = vector
-                if np.sum(vector, dtype=np.float64) != 0:
+                if np.any(vector != 0):
                     valid_rows[row] = True
                     n_valid += 1
                     delta = vector.astype(np.float64) - mean
@@ -106,9 +107,11 @@ def prepare_modalities(subjects_root: str | Path,
             file.create_dataset("valid_rows", data=valid_rows)
             file.attrs["signature"] = signature
             file.attrs["normalized_dtype"] = normalized_dtype
+            file.attrs["normalization_version"] = _NORMALIZATION_VERSION
             file.attrs["mask_path"] = str(Path(spec["mask"]).resolve())
     manifest.write_text(json.dumps({"signature": signature,
                                     "normalized_dtype": normalized_dtype,
+                                    "normalization_version": _NORMALIZATION_VERSION,
                                     "subjects": list(subjects),
                                     "modalities": list(modalities)}, indent=2))
     return directory

@@ -1,0 +1,225 @@
+{
+  "schema_version": 1,
+  "source_revision": "1eb9c417febebc8bdd450590d4759454e7160141",
+  "public_source_files": 101,
+  "public_source_mismatches": [],
+  "derivative_provenance": [
+    {
+      "file": "mni",
+      "source_files": 87,
+      "mismatches": [],
+      "manifest_matches": true,
+      "dependencies": {
+        "torch": "2.5.1",
+        "numpy": "1.26.4",
+        "nibabel": "5.4.2",
+        "scipy": "1.17.1"
+      },
+      "dependencies_match_runtime": true
+    },
+    {
+      "file": "native",
+      "source_files": 87,
+      "mismatches": [],
+      "manifest_matches": true,
+      "dependencies": {
+        "torch": "2.5.1",
+        "numpy": "1.26.4",
+        "nibabel": "5.4.2",
+        "scipy": "1.17.1"
+      },
+      "dependencies_match_runtime": true
+    }
+  ],
+  "native_mni_configuration_identical": true,
+  "tissue_interpolation": "flirt-trilinear-prefilter-float32-coordinates",
+  "public_configuration_matches_sanitized_metadata": true,
+  "taskname_matches_raw_metadata": true,
+  "input_hashes_match_runtime_files": {
+    "bold": true,
+    "t1w": true,
+    "mni_template": true,
+    "mni_brain_mask": true,
+    "sbref": true
+  },
+  "anatomical_cache": {
+    "reused": false,
+    "fingerprint": null
+  },
+  "execution": {
+    "registration_backend": "fnirt",
+    "bbr": "batched",
+    "fnirt": "optimized",
+    "fast": "fsl",
+    "motion": "MCFLIRT-2111.0-8/4/4mm-coordinate-Brent",
+    "motion_output": "NEWIMAGE-float32-Constant-spline-source-dtype-cast"
+  },
+  "weight_sizes_match_recorded_configuration": {
+    "synthstrip": true
+  },
+  "checks": {
+    "clean_mni": {
+      "shape": [
+        91,
+        109,
+        91,
+        490
+      ],
+      "dtype": "float32",
+      "all_finite": true,
+      "tr_seconds": 0.7350000143051147,
+      "time_unit": "sec",
+      "reference_shape_matches": true,
+      "reference_affine_matches": true,
+      "frame_count_matches_input": true,
+      "metadata_tr_matches": true,
+      "sha256_matches_report": true,
+      "outside_mask_max_abs": 0.0
+    },
+    "clean_native": {
+      "shape": [
+        88,
+        88,
+        64,
+        490
+      ],
+      "dtype": "float32",
+      "all_finite": true,
+      "tr_seconds": 0.7350000143051147,
+      "time_unit": "sec",
+      "reference_shape_matches": true,
+      "reference_affine_matches": true,
+      "frame_count_matches_input": true,
+      "metadata_tr_matches": true,
+      "sha256_matches_report": true,
+      "outside_mask_max_abs": null
+    }
+  },
+  "mask_check": {
+    "shape": [
+      91,
+      109,
+      91
+    ],
+    "dtype": "uint8",
+    "all_finite": true,
+    "binary": true,
+    "nonempty": true,
+    "voxels": 224882,
+    "reference_shape_matches": true,
+    "reference_affine_matches": true,
+    "sha256_matches_report": true
+  },
+  "native_brain_mask": {
+    "sha256": "102b4bd98117d72836a13fc75356a659ad5bd3c5334c7e7cd42babb2fd7dc8b8",
+    "voxels": 99372,
+    "dtype": "uint8",
+    "all_finite": true,
+    "binary": true,
+    "reference_shape_matches": true,
+    "reference_affine_matches": true
+  },
+  "native_tissue_masks": {
+    "wm_mask": {
+      "shape": [
+        88,
+        88,
+        64
+      ],
+      "dtype": "uint8",
+      "all_finite": true,
+      "binary": true,
+      "voxels": 18398,
+      "inside_native_brain": true,
+      "reference_grid_matches": true,
+      "sha256": "c78d57aaaa2a62cfdc152861a63e72556ab9c50f3b09ce329702ee7c81f7348f"
+    },
+    "regression_csf_mask": {
+      "shape": [
+        88,
+        88,
+        64
+      ],
+      "dtype": "uint8",
+      "all_finite": true,
+      "binary": true,
+      "voxels": 4746,
+      "inside_native_brain": true,
+      "reference_grid_matches": true,
+      "sha256": "4f60f68aac129304e7f6a3971d0b9ae8428b2f18d4d94aabe0774952883adf1d"
+    }
+  },
+  "memory": {
+    "peak_cuda_allocated_bytes": 8315790848,
+    "peak_cuda_reserved_bytes": 9745465344
+  },
+  "environment": {
+    "python": "3.11.16",
+    "torch": "2.5.1",
+    "cuda_runtime": "11.8",
+    "gpu": "NVIDIA H100 PCIe",
+    "cpu_threads": 8,
+    "tf32": true,
+    "low_precision_enabled": false
+  },
+  "timing": {
+    "public_api_including_output_save": 1318.0372764160857,
+    "validation_capture_overhead_excluded": 27.052207542117685,
+    "pipeline_stages": {
+      "epi_synthstrip": 11.393534400034696,
+      "t1_synthstrip": 8.037859328091145,
+      "template_preparation": 0.07623979076743126,
+      "fast": 13.799113559070975,
+      "t1_to_mni_affine": 8.17088463716209,
+      "t1_to_mni_nonlinear": 56.937655963003635,
+      "warp_conversion": 0.5238468027673662,
+      "anatomical_cache_lookup": 0.0,
+      "feat_core": 973.1186932199635,
+      "bbr_initial_flirt": 3.95375620899722,
+      "bbr_refinement": 2.0695873834192753,
+      "bbr_final_resampling": 0.07298832572996616,
+      "aroma_masks": 0.2800401961430907,
+      "pica_aroma_confounds": 182.3695791652426,
+      "mni_resampling": 50.543208865914494,
+      "total": 1314.3514298950322
+    },
+    "private_capture_seconds_by_stage": {
+      "anatomical_capture": 0.11564836511388421,
+      "feat_core": 25.99583427608013,
+      "pica_aroma_confounds": 0.8838871619664133,
+      "mni_resampling": 0.05683773895725608
+    },
+    "pipeline_stages_include_capture_overhead": false
+  },
+  "bbr_phase_timings": {
+    "initial_flirt": 3.95375620899722,
+    "boundary_preparation": 0.8168892990797758,
+    "coarse_bbr": 0.7668466311879456,
+    "local_bbr": 0.48585145315155387,
+    "final_resampling": 0.07298832572996616
+  },
+  "private_minus_public_stage_seconds": {
+    "epi_synthstrip": 0.0,
+    "t1_synthstrip": 0.0,
+    "template_preparation": 0.0,
+    "fast": 0.0,
+    "t1_to_mni_affine": 0.0,
+    "t1_to_mni_nonlinear": 0.0,
+    "warp_conversion": 0.0,
+    "anatomical_cache_lookup": 0.0,
+    "feat_core": 25.99583427608013,
+    "bbr_initial_flirt": 0.0,
+    "bbr_refinement": 0.0,
+    "bbr_final_resampling": 0.0,
+    "aroma_masks": 0.0,
+    "pica_aroma_confounds": 0.8838871619664133,
+    "mni_resampling": 0.05683773895725608,
+    "total": 27.052207542117685
+  },
+  "capture_corrections_match": true,
+  "capture_stage_sum_matches": true,
+  "anatomical_capture_excluded_from_api_and_total_only": true,
+  "raw_api_wall_reconstructed": 1345.0894839582033,
+  "api_minus_net_stages": 3.685846521053463,
+  "privacy": "Full image arrays were inspected on the server. Only anonymous scalar checks, execution settings and source hashes are published."
+}

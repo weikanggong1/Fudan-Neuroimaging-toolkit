@@ -4,9 +4,11 @@ import json
 
 import nibabel as nib
 import numpy as np
+import pytest
 import torch
 
-from fnit.bwas.core import _clusters, _fisher_block, _inputs, run_bwas
+from fnit.bwas.core import _clusters, _fisher_block, _glm_blocks, _inputs, run_bwas
+from fnit.bwas.packed_loader import PackedTileLoader
 
 
 def test_bids_participant_ids_determine_image_order(tmp_path):
@@ -93,6 +95,54 @@ def test_six_dimensional_cluster_excludes_corner_only_neighbors():
     assert [row[1] for row in table] == [2]
 
 
+def test_glm_reduction_order_is_independent_of_io_batch_and_column_interleaving():
+    generator = torch.Generator().manual_seed(32)
+    design = torch.randn((37, 4), generator=generator)
+    observations = [torch.randn((37, 19), generator=generator) for _ in range(2)]
+    expected = []
+    for values in observations:
+        xy, yy = torch.zeros((4, 19)), torch.zeros(19)
+        for start in range(0, 37, 16):
+            part = values[start:start+16]
+            xy.addmm_(design[start:start+len(part)].T, part)
+            yy += (part*part).sum(0)
+        expected.append((xy, yy))
+    for batch in (1, 3, 8, 16, 32):
+        xy = [torch.zeros((4, 19)) for _ in observations]
+        yy = [torch.zeros(19) for _ in observations]
+        blocks = ((column, start, min(start+batch, 37), values[start:start+batch].clone())
+                  for start in range(0, 37, batch)
+                  for column, values in enumerate(observations))
+        for column, start, stop, values in _glm_blocks(blocks, 37):
+            xy[column].addmm_(design[start:stop].T, values)
+            yy[column] += values.square_().sum(0)
+        for column, (reference_xy, reference_yy) in enumerate(expected):
+            torch.testing.assert_close(xy[column], reference_xy, atol=0, rtol=0)
+            torch.testing.assert_close(yy[column], reference_yy, atol=0, rtol=0)
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="requires one CUDA GPU")
+def test_gpu_row_cache_preserves_fisher_values_across_columns_and_rows():
+    generator = np.random.default_rng(27)
+    shards = []
+    for lengths in ((9, 12), (11, 15), (10,)):
+        packed = np.zeros((9, len(lengths), max(lengths)), dtype=np.float32)
+        for subject, length in enumerate(lengths):
+            packed[:, subject, :length] = generator.normal(size=(9, length))
+        shards.append((packed, np.asarray(lengths)))
+    device = torch.device("cuda:0")
+    first = PackedTileLoader(shards, device, async_h2d=True)
+    second = PackedTileLoader(shards, device, async_h2d=True, cache_row=True)
+    for row in (0, 0, 4):
+        for columns in ([(4, 4), (8, 1)], [(8, 1)]):
+            expected = [values.clone() for _, _, _, values in
+                        first.fisher_tiles(row, columns, 4)]
+            actual = [values.clone() for _, _, _, values in
+                      second.fisher_tiles(row, columns, 4)]
+            for a, b in zip(expected, actual):
+                torch.testing.assert_close(a, b, atol=0, rtol=0)
+
+
 def test_prepared_voxel_major_cache_matches_normal_bids_run(tmp_path):
     affine = np.diag([2.0, 2.0, 2.0, 1.0])
     bids = tmp_path / "bids"
@@ -135,3 +185,37 @@ def test_prepared_voxel_major_cache_matches_normal_bids_run(tmp_path):
     assert ordinary.clusters.read_text() == resumed.clusters.read_text()
     np.testing.assert_array_equal(nib.load(ordinary.ma_map).get_fdata(),
                                   nib.load(resumed.ma_map).get_fdata())
+    if torch.cuda.is_available():
+        packed = run_bwas(bids, participants, mask_file, tmp_path / "packed_gpu",
+                          phenotype="case", covariates=(), cdt=0.1,
+                          block_size=4, subject_block_size=2, device="cuda:0",
+                          fwhm=2.0, _prepared_cache_dir=cache)
+        def edge_rows(path):
+            with gzip.open(path, "rt") as stream:
+                return sorted(tuple(row[:6]) + (float(row[6]),)
+                              for row in list(csv.reader(stream, delimiter="\t"))[1:])
+        first = edge_rows(packed.edges)
+        with packed.clusters.open() as stream:
+            sizes = sorted(int(row["edges"]) for row in csv.DictReader(stream, delimiter="\t"))
+        for block, subjects, columns, row_cache in ((3, 2, None, None),
+                (3, 3, None, None), (None, None, None, None), (3, 2, 2, True)):
+            other_block = run_bwas(
+                bids, participants, mask_file,
+                tmp_path / f"other-{block}-{subjects}-{columns}-{row_cache}",
+                phenotype="case", covariates=(), cdt=0.1, block_size=block,
+                subject_block_size=subjects, device="cuda:0", fwhm=2.0,
+                column_tiles=columns, gpu_row_cache=row_cache,
+                _prepared_cache_dir=cache,
+                _prepared_packed_cache_dir=cache / "packed-b2" if subjects == 2 else None)
+            second = edge_rows(other_block.edges)
+            assert [row[:6] for row in first] == [row[:6] for row in second]
+            np.testing.assert_allclose([row[6] for row in first],
+                                       [row[6] for row in second], atol=1e-5, rtol=0)
+            with other_block.clusters.open() as stream:
+                other_sizes = sorted(int(row["edges"]) for row in csv.DictReader(stream, delimiter="\t"))
+            assert sizes == other_sizes
+            np.testing.assert_array_equal(nib.load(packed.ma_map).get_fdata(),
+                                          nib.load(other_block.ma_map).get_fdata())
+            metadata = json.loads(other_block.metadata.read_text())
+            assert metadata["PeakCUDAAllocatedBytes"] < 20_000_000_000
+            assert metadata["PeakCUDAReservedBytes"] < 20_000_000_000

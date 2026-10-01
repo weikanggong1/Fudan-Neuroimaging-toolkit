@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "protocol": "Same original pre-ICA BOLD and EPI mask; independent FNIT ICA fit only.",
+  "input_shape": [
+    88,
+    88,
+    64,
+    490
+  ],
+  "input_sha256": "47897cbd6ccce263e0ff326fd154b3812076127d469c9a1ac9d10f101ca5f6d9",
+  "mask_sha256": "8148636e405a0881d68fa24b5a6a6852e08641ef5b88f400c1e7f5778f54695c",
+  "ica_source_sha256": "66b8cfeb887fbebb64cc37565141bf2009a8bbb089228774b8093086195fb228",
+  "driver_sha256": "86eab10407adbf109d44c303ad96ee0f3348be56e1a771aedc61917c9d1ccfa4",
+  "environment": {
+    "python": "3.11.16",
+    "torch": "2.5.1",
+    "numpy": "1.26.4",
+    "nibabel": "5.4.2",
+    "device": "cuda:1",
+    "cuda": "11.8",
+    "allow_tf32": true
+  },
+  "precision": {
+    "input_storage": "float32",
+    "pca_covariance_whitening_and_fastica": "float64",
+    "output_spatial_maps": "float32",
+    "gamma_histogram_coordinates": "float64",
+    "gamma_scalar_parameters_and_log_likelihood": "float32 as in FSL 2601.1"
+  },
+  "wall_seconds": 117.49368330929428,
+  "peak_cuda_allocated_bytes": 504370688,
+  "components": {
+    "fnit": 95,
+    "native": 95
+  },
+  "iterations": 40,
+  "converged": true,
+  "change": 0.0009761742936057471,
+  "resels": 0.4631415346029702,
+  "variance_explained": 0.6176625957886672,
+  "pairing": {
+    "count": 95,
+    "same_order": false,
+    "all_positive_signs": true
+  },
+  "temporal_abs_pearson": {
+    "mean": 0.9999998835553852,
+    "median": 0.9999999778797175,
+    "p05": 0.9999994811781815,
+    "min": 0.9999983458906198,
+    "max": 0.9999999996530511
+  },
+  "temporal_matched_rmse": 0.0004820932957438404,
+  "temporal_scale": {
+    "mean": 0.9999998835445072,
+    "median": 0.9999999779309315,
+    "p05": 0.9999994811241248,
+    "min": 0.9999983459737158,
+    "max": 0.9999999995372318
+  },
+  "spatial_abs_pearson": {
+    "mean": 0.9999998800394849,
+    "median": 0.9999999695257008,
+    "p05": 0.9999994855783707,
+    "min": 0.9999986518675338,
+    "max": 0.9999999993334139
+  },
+  "spatial_rmse": {
+    "mean": 0.0005972795650312404,
+    "median": 0.0004756085244932657,
+    "p05": 0.00012075412157516626,
+    "min": 5.9981814623666124e-05,
+    "max": 0.0023052940104258015
+  },
+  "threshold_support_dice": {
+    "mean": 0.9988240621911714,
+    "median": 0.9995622355172917,
+    "p05": 0.9955280335157126,
+    "min": 0.99347751458977,
+    "max": 1.0
+  },
+  "frequency_power_matched_relative_l2_error": 0.0004140518656826664,
+  "output_sha256": {
+    "mixing": "e5372bda84cc187774e4d68e0632a2f6e2f8bfc48aaf1f20b7dd086f9a071f03",
+    "frequency_power": "6f0be514f88902e5b553b17c0170fdfd0e20f7bc323c66beea557f842d8f6a5d",
+    "component_maps": "0359eef02d5c78df106929b599bfe59f5ba50b8c2e626c8529a5eecc028652de",
+    "thresholded_maps": "0fc3bbe5ec79eed3bea0acfa42b8b3f9144ae477a23d83aa7f201c993c3798f5",
+    "posterior_maps": "9c58105e9690f88b0643b60701fb1561c0eab3f7c6aa84b4e7ac4caada8607e9"
+  },
+  "limits": [
+    "One real run; component matching removes permutation and sign ambiguity.",
+    "Wall time includes FNIT decomposition and file writing; shared GPU load was not controlled.",
+    "No original FSL invocation is timed by this validator."
+  ],
+  "privacy": "Anonymous summaries and file hashes only; no subject IDs, input paths or voxel data."
+}

@@ -24,6 +24,10 @@ from scipy.stats import norm, t as student_t
 from sklearn.decomposition import MiniBatchDictionaryLearning
 
 
+_FLICA_ALGORITHM_VERSION = "matlab-pca-per-modality-W-v2"
+_NORMALIZATION_VERSION = "voxel-zscore-v3-stats64-any-nonzero"
+
+
 def _device(device: str) -> torch.device:
     selected = "cuda" if device == "auto" and torch.cuda.is_available() else device
     if selected == "auto":
@@ -46,13 +50,18 @@ def _flica_directory(destination: Path, n_components: int, lambda_dims: str) -> 
 
 
 def _check_flica_output(directory: Path, signature: str,
-                        modalities: Sequence[str]) -> None:
+                        modalities: Sequence[str],
+                        algorithm_version: str | None = None) -> None:
     model_file = directory / "model.json"
     if model_file.is_file():
         model = json.loads(model_file.read_text(encoding="utf-8"))
         prior_modalities = model.get("source_modalities", model.get("modalities", {}))
         if model.get("input_signature") != signature or list(prior_modalities) != list(modalities):
             raise ValueError("Existing FLICA model has different inputs or modalities; "
+                             "use a fresh output_dir")
+        if (algorithm_version is not None and
+                model.get("flica_algorithm_version") != algorithm_version):
+            raise ValueError("Existing FLICA model uses a different algorithm version; "
                              "use a fresh output_dir")
 
 
@@ -76,8 +85,8 @@ def _valid_cache(directory: Path, signature: str, files: Sequence[str]) -> bool:
 
 
 def _standardize(matrix: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Match upstream nets_zscore, leaving all-zero subject rows at zero."""
-    valid = np.sum(matrix, axis=1) != 0
+    """Voxel z-score with float64 statistics; keep all-zero subject rows zero."""
+    valid = np.any(matrix != 0, axis=1)
     if not np.any(valid):
         raise ValueError("Every subject image is zero in this modality mask")
     mean = matrix[valid].mean(axis=0, dtype=np.float64)
@@ -85,7 +94,7 @@ def _standardize(matrix: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray
     std[std == 0] = 0.1
     normalized = matrix.astype(np.float64, copy=True)
     normalized[valid] = (normalized[valid] - mean) / std
-    return normalized, mean.astype(np.float32), std.astype(np.float32)
+    return normalized, mean, std
 
 
 def _load_mask(path: Path) -> tuple[nib.spatialimages.SpatialImage, np.ndarray]:
@@ -171,12 +180,77 @@ def fit_dicl(projected: Mapping[str, np.ndarray], dicl_dim: int,
     return result
 
 
+def _validate_flica_iterations(max_iter: int) -> int:
+    if (isinstance(max_iter, (bool, np.bool_)) or
+            not isinstance(max_iter, (int, np.integer)) or max_iter < 1):
+        raise ValueError("flica_max_iter must be a positive integer")
+    return int(max_iter)
+
+
+def _check_flica_fit(fitted: Mapping, names: Sequence[str],
+                     source_norms: Sequence[float], n_components: int,
+                     output_dir: Path, lambda_dims: str) -> np.ndarray:
+    """Check the same component and reconstruction criteria for both workflows.
+
+    Gram matrices give the reconstruction norm without allocating a complete
+    voxel by subject reconstruction for the direct voxel workflow.
+    """
+    h = np.asarray(fitted["H"], dtype=np.float64)
+    if h.ndim != 2 or h.shape[0] != n_components or not np.isfinite(h).all():
+        raise ValueError("FLICA returned invalid subject components")
+    h_gram = h @ h.T
+    strengths = np.zeros(n_components, dtype=np.float64)
+    ratios = {}
+    reconstructed_sq = 0.0
+    input_sq = 0.0
+    for index, name in enumerate(names):
+        source_sq = float(source_norms[index])
+        if not np.isfinite(source_sq) or source_sq <= 0:
+            raise ValueError(f"Invalid FLICA input norm: {name}")
+        spatial = np.asarray(fitted["X"][index], dtype=np.float64)
+        weights = np.asarray(fitted["W"][index], dtype=np.float64).reshape(-1)
+        if (spatial.ndim != 2 or spatial.shape[1] != n_components or
+                weights.size != n_components or not np.isfinite(spatial).all() or
+                not np.isfinite(weights).all()):
+            raise ValueError(f"FLICA returned invalid spatial components: {name}")
+        weighted = spatial * weights
+        terms = (weighted.T @ weighted) * h_gram
+        norm_sq = float(terms.sum())
+        roundoff = 64 * np.finfo(np.float64).eps * float(np.abs(terms).sum())
+        if not np.isfinite(norm_sq) or norm_sq < -roundoff:
+            raise ValueError(f"FLICA returned an invalid reconstruction norm: {name}")
+        norm_sq = max(norm_sq, 0.0)
+        reconstructed_sq += norm_sq
+        input_sq += source_sq
+        ratios[name] = float(np.sqrt(norm_sq / source_sq))
+        strengths += np.square(weighted).sum(axis=0)
+    singular_values = np.linalg.svd(h, compute_uv=False)
+    singular_ratios = (singular_values / singular_values[0] if singular_values[0]
+                       else np.zeros_like(singular_values))
+    rank = int(np.count_nonzero(singular_ratios > 1e-6))
+    output_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / "flica_reconstruction.json").write_text(json.dumps({
+        "flica_lambda_dims": lambda_dims,
+        "per_modality_ratio": ratios,
+        "overall_ratio": float(np.sqrt(reconstructed_sq / input_sq)),
+        "component_rank": rank, "requested_components": n_components,
+        "rank_relative_threshold": 1e-6,
+        "singular_value_ratios": singular_ratios.tolist(),
+        "component_row_norms": np.linalg.norm(h, axis=1).tolist()}, indent=2),
+        encoding="utf-8")
+    if rank < n_components or any(value < 1e-6 for value in ratios.values()):
+        raise ValueError("FLICA collapsed or pruned requested components; "
+                         "inspect flica_reconstruction.json")
+    return strengths
+
+
 def _fit_flica(dictionaries: Mapping[str, np.ndarray], n_components: int,
                max_iter: int, output_dir: Path,
                device: str = "cpu", lambda_dims: str = "o"
                ) -> tuple[np.ndarray, np.ndarray]:
     from . import flica_vb
 
+    max_iter = _validate_flica_iterations(max_iter)
     names = list(dictionaries)
     data = [dictionaries[name] for name in names]
     if not 1 <= n_components < data[0].shape[1] - 1:
@@ -200,37 +274,9 @@ def _fit_flica(dictionaries: Mapping[str, np.ndarray], n_components: int,
                 priors, posteriors, constants = flica_vb.flica_init_params(data, opts)
                 fitted = flica_vb.flica_iterate(data, opts, priors, posteriors, constants)
     h = np.asarray(fitted["H"], dtype=np.float64).T
-    if not np.isfinite(h).all():
-        raise ValueError("FLICA returned nonfinite subject components")
-    strengths = np.zeros(n_components, dtype=np.float64)
-    ratios = {}
-    reconstructed_sq = 0.0
-    input_sq = 0.0
-    for index, spatial in enumerate(fitted["X"]):
-        weights = np.asarray(fitted["W"][index]).reshape(-1)
-        reconstructed = (np.asarray(spatial) * weights) @ h.T
-        reconstructed_sq += float(np.square(reconstructed).sum())
-        input_sq += float(np.square(data[index]).sum())
-        ratio = np.linalg.norm(reconstructed) / np.linalg.norm(data[index])
-        if not np.isfinite(ratio):
-            raise ValueError(f"FLICA returned a nonfinite reconstruction: {names[index]}")
-        ratios[names[index]] = float(ratio)
-        strengths += (np.asarray(spatial) ** 2).sum(axis=0) * weights ** 2
-    singular_values = np.linalg.svd(h, compute_uv=False)
-    singular_ratios = (singular_values / singular_values[0] if singular_values[0]
-                       else np.zeros_like(singular_values))
-    rank = int(np.count_nonzero(singular_ratios > 1e-6))
-    (output_dir / "flica_reconstruction.json").write_text(json.dumps({
-        "flica_lambda_dims": lambda_dims,
-        "per_modality_ratio": ratios,
-        "overall_ratio": float(np.sqrt(reconstructed_sq / input_sq)),
-        "component_rank": rank, "requested_components": n_components,
-        "rank_relative_threshold": 1e-6,
-        "singular_value_ratios": singular_ratios.tolist(),
-        "component_row_norms": np.linalg.norm(h, axis=0).tolist()}, indent=2))
-    if rank < n_components or any(value < 1e-6 for value in ratios.values()):
-        raise ValueError("FLICA collapsed or pruned requested components; "
-                         "inspect flica_reconstruction.json")
+    strengths = _check_flica_fit(fitted, names,
+                                [float(np.square(value).sum()) for value in data],
+                                n_components, output_dir, lambda_dims)
     order = np.argsort(strengths)[::-1]
     contribution = np.asarray(fitted["H_PCs"])[:len(names), order]
     return h[:, order], contribution
@@ -242,6 +288,9 @@ def _spatial_z(h: np.ndarray, projected: np.ndarray) -> np.ndarray:
     df = design.shape[0] - design.shape[1]
     if df < 1:
         raise ValueError("migp_dim must exceed n_components + 1 for spatial z statistics")
+    if (not np.isfinite(design).all() or
+            np.linalg.matrix_rank(design) != design.shape[1]):
+        raise ValueError("Spatial regression design must be finite and have full column rank")
     beta = np.linalg.pinv(design) @ projected.T
     residual = projected.T - design @ beta
     sigma = np.sqrt(np.sum(residual ** 2, axis=0) / df)
@@ -300,10 +349,11 @@ def run_bigflica(subjects_root: str | Path, modalities: Mapping[str, Mapping[str
                  flica_max_iter: int = 1000, top_voxels: int = 1000,
                  random_state: int = 0, max_gpu_gb: float = 19.0,
                  feature_block: int = 2048, dicl_batch_size: int = 32,
-                 dicl_sparse_iterations: int = 120,
+                 dicl_sparse_iterations: int = 1000,
                  use_mmigp_dicl: bool = True,
                  flica_lambda_dims: str = "o") -> Path:
     """Fit BigFLICA from subject directories; return the saved model directory."""
+    flica_max_iter = _validate_flica_iterations(flica_max_iter)
     root, destination = Path(subjects_root), Path(output_dir)
     if not root.is_dir() or not modalities:
         raise ValueError("subjects_root must exist and modalities must be nonempty")
@@ -312,8 +362,6 @@ def run_bigflica(subjects_root: str | Path, modalities: Mapping[str, Mapping[str
         raise ValueError("GPU budget and block/iteration sizes must be positive")
     if flica_lambda_dims not in ("o", "R"):
         raise ValueError("flica_lambda_dims must be 'o' or 'R'")
-    if not use_mmigp_dicl and flica_lambda_dims == "R":
-        raise ValueError("flica_lambda_dims='R' requires the compressed mMIGP+DicL path")
     names = list(modalities)
     if len(set(names)) != len(names) or any(
         re.fullmatch(r"[A-Za-z][A-Za-z0-9_-]*", name) is None for name in names
@@ -341,11 +389,12 @@ def run_bigflica(subjects_root: str | Path, modalities: Mapping[str, Mapping[str
     image_records = {name: [_file_record(root / subject / specs[name]["image"])
                             for subject in ids] for name in names}
     signature = _signature({"ids": ids, "specs": specs,
+                            "normalization_version": _NORMALIZATION_VERSION,
                             "masks": {name: _file_record(Path(specs[name]["mask"])) for name in names},
                             "images": image_records})
-    if use_mmigp_dicl:
-        _check_flica_output(_flica_directory(destination, n_components,
-                                             flica_lambda_dims), signature, names)
+    _check_flica_output(_flica_directory(destination, n_components,
+                                         flica_lambda_dims), signature, names,
+                        _FLICA_ALGORITHM_VERSION)
     destination.mkdir(parents=True, exist_ok=True)
     if _device(device).type == "cuda":
         from .pipeline_gpu import run_bigflica_gpu, run_bigflica_raw_gpu
@@ -353,7 +402,8 @@ def run_bigflica(subjects_root: str | Path, modalities: Mapping[str, Mapping[str
             return run_bigflica_raw_gpu(root, specs, destination, ids, masks,
                                         signature, n_components, flica_max_iter,
                                         top_voxels, random_state, device,
-                                        max_gpu_gb, feature_block)
+                                        max_gpu_gb, feature_block,
+                                        flica_lambda_dims)
         return run_bigflica_gpu(root, specs, destination, ids, masks, signature,
                                 n_components, migp_dim, dicl_dim, dicl_max_iter,
                                 flica_max_iter, top_voxels, random_state, device,
@@ -415,7 +465,7 @@ def run_bigflica(subjects_root: str | Path, modalities: Mapping[str, Mapping[str
         _save_manifest(dicl_dir, {"signature": dicl_sig, "mmigp_signature": mmigp_sig})
         timings["dicl_s"] = time.perf_counter() - start
     result_dir = _flica_directory(destination, n_components, flica_lambda_dims)
-    _check_flica_output(result_dir, signature, names)
+    _check_flica_output(result_dir, signature, names, _FLICA_ALGORITHM_VERSION)
     start = time.perf_counter()
     h_migp, contribution = _fit_flica(dictionaries, n_components,
                                       flica_max_iter, result_dir, "cpu", flica_lambda_dims)
@@ -457,8 +507,13 @@ def run_bigflica(subjects_root: str | Path, modalities: Mapping[str, Mapping[str
              "dicl_dim": dicl_dim, "dicl_max_iter": dicl_max_iter,
              "dicl_batch_size": 32, "dicl_sparse_iterations": None,
              "flica_max_iter": flica_max_iter, "flica_lambda_dims": flica_lambda_dims,
+             "flica_algorithm_version": _FLICA_ALGORITHM_VERSION,
+             "normalization_version": _NORMALIZATION_VERSION,
+             "course_coordinates": "legacy_spectral_PC_zscore",
+             "brainmap_space": "mMIGP_PC",
+             "brainmap_df": int(h_migp.shape[0] - n_components - 1),
              "flica_signature": _signature([dicl_sig, n_components, flica_max_iter,
-                                             flica_lambda_dims]),
+                                             flica_lambda_dims, _FLICA_ALGORITHM_VERSION]),
              "top_voxels": top_voxels,
              "random_state": random_state, "input_signature": signature,
              "device": "cpu", "use_mmigp_dicl": True,

@@ -14,6 +14,7 @@ import numpy as np
 
 from ..flirt.coordinates import flirt_to_world_affine
 from ..msm import prepare_msmsulc_inputs, run_msmsulc
+from ..msm.config import MSMSulcConfig
 from .assets_setup import BASE_URL, MESH
 from .bids import locate_bids_inputs
 from .derivatives import ensure_derivative_dataset, fmri_derivative_paths, sidecar, write_json
@@ -34,6 +35,53 @@ class FMRISurfaceResult:
     timing_seconds: dict[str, float]
 
 
+def _validate_volume_metadata(metadata, inputs, source_t1):
+    """Require the selected run and completed AROMA, without imposing extra regression."""
+    required_sources = {
+        f"bids:raw:{path.relative_to(inputs.bids_root).as_posix()}"
+        for path in (inputs.bold, source_t1)
+    }
+    sources = metadata.get("Sources", [])
+    if not isinstance(sources, list) or not required_sources.issubset(sources):
+        raise ValueError("volume derivative sources do not match the selected BIDS BOLD and T1w")
+    recorded_tr = metadata.get("RepetitionTime")
+    if (isinstance(recorded_tr, bool) or not isinstance(recorded_tr, (int, float))
+            or not np.isfinite(recorded_tr) or not np.isclose(recorded_tr, inputs.tr, rtol=1e-5, atol=1e-6)):
+        raise ValueError("volume derivative RepetitionTime differs from the selected BIDS run")
+    details = metadata.get("FNIT", {})
+    report = details.get("Report", {})
+    denoising = details.get("Denoising")
+    if denoising is None:
+        completed = report.get("aroma_mode") in ("nonaggr", "aggr") and report.get("ica_converged") is True
+    else:
+        completed = (isinstance(denoising, dict) and denoising.get("Method") == "ICA-AROMA"
+                     and denoising.get("Mode") in ("nonaggr", "aggr")
+                     and denoising.get("Completed") is True)
+        if "ica_converged" in report and report["ica_converged"] is not True:
+            completed = False
+    if not completed:
+        raise ValueError("volume derivative lacks completed ICA-AROMA denoising")
+
+
+def _validate_native_bold(image, inputs):
+    raw = nib.load(str(inputs.bold))
+    reference = nib.load(str(inputs.sbref or inputs.bold))
+    if (image.ndim != 4 or image.shape[:3] != reference.shape[:3]
+            or image.shape[3] != raw.shape[3]
+            or not np.allclose(image.affine, reference.affine, rtol=0, atol=1e-4)):
+        raise ValueError("native volume derivative does not match the selected BIDS BOLD reference grid")
+    if not _tr_matches(image, inputs.tr):
+        raise ValueError("native volume derivative TR differs from the selected BIDS run")
+
+
+def _tr_matches(image, tr):
+    unit = image.header.get_xyzt_units()[1]
+    scale = {"sec": 1.0, "msec": 0.001, "usec": 0.000001}.get(unit)
+    return image.ndim == 4 and scale is not None and np.isclose(
+        float(image.header.get_zooms()[3]) * scale, tr, rtol=1e-5, atol=1e-6
+    )
+
+
 def fMRISurface_pipeline(
     bids_root: str | Path,
     derivatives_root: str | Path,
@@ -52,12 +100,28 @@ def fMRISurface_pipeline(
     device: str = "cuda:0",
     overwrite: bool = False,
     registered_spheres: tuple[str | Path, str | Path] | None = None,
+    msm_config: MSMSulcConfig | str | Path | None = None,
+    msm_execution: str = "optimized",
     goodvoxels: str | Path | None = None,
 ) -> FMRISurfaceResult:
     """Project completed volume derivatives using matching T1 recon-all surfaces."""
     started = time.perf_counter()
     if registered_spheres is not None and len(registered_spheres) != 2:
         raise ValueError("registered_spheres must contain left and right paths")
+    if registered_spheres is not None and msm_config is not None:
+        raise ValueError("msm_config cannot be applied to supplied registered_spheres")
+    if msm_execution not in ("optimized", "reference"):
+        raise ValueError("msm_execution must be 'optimized' or 'reference'")
+    if msm_config is None:
+        configuration = MSMSulcConfig()
+    elif isinstance(msm_config, MSMSulcConfig):
+        configuration = msm_config
+    elif isinstance(msm_config, (str, Path)):
+        configuration = MSMSulcConfig.from_file(msm_config)
+    else:
+        raise TypeError("msm_config must be MSMSulcConfig or a config path")
+    registration = {"Method": "provided spheres"}
+    registration_seconds = None
     inputs = locate_bids_inputs(
         bids_root, subject=subject, session=session, task=task, run=run,
         acquisition=acquisition, direction=direction,
@@ -74,18 +138,17 @@ def fMRISurface_pipeline(
     if paths is None:
         raise FileNotFoundError("completed FNIT volume BIDS derivative not found")
     ensure_derivative_dataset(paths.root, inputs.bids_root)
-    for path in (paths.clean_native, paths.clean_mni, paths.t1_brain,
-                 paths.bbr_matrix, mni_sidecar):
-        if not path.is_file():
-            raise FileNotFoundError(path)
+    if not mni_sidecar.is_file():
+        raise FileNotFoundError(mni_sidecar)
     metadata = json.loads(mni_sidecar.read_text(encoding="utf-8"))
     source_t1 = inputs.bids_root / metadata.get("FNIT", {}).get("SourceT1w", "")
     if source_t1.resolve() not in [p.resolve() for p in inputs.t1w_images]:
         raise ValueError("volume derivative T1w does not belong to this BIDS subject")
     paths = fmri_derivative_paths(inputs, source_t1, derivatives_root)
-    if not any(metadata.get("FNIT", {}).get("ConfoundRegression", {}).get(key, False)
-               for key in ("wm", "csf", "motion")):
-        raise ValueError("volume derivative lacks completed WM, CSF or motion regression")
+    for path in (paths.clean_native, paths.clean_mni, paths.t1_brain, paths.bbr_matrix):
+        if not path.is_file():
+            raise FileNotFoundError(path)
+    _validate_volume_metadata(metadata, inputs, source_t1)
     if paths.dtseries.exists() and not overwrite:
         raise FileExistsError(paths.dtseries)
     assets = Path(hcp_assets_dir).expanduser().resolve()
@@ -96,8 +159,11 @@ def fMRISurface_pipeline(
     clean_mni = paths.clean_mni
     t1 = paths.t1_brain
     epi_image = nib.load(str(native))
+    _validate_native_bold(epi_image, inputs)
     t1_image = nib.load(str(t1))
     mni_image = nib.load(str(clean_mni))
+    if not _tr_matches(mni_image, inputs.tr):
+        raise ValueError("MNI volume derivative TR differs from the selected BIDS run")
     label_image = nib.load(str(dseg))
     canonical_mni = nib.as_closest_canonical(mni_image)
     canonical_label = nib.as_closest_canonical(label_image)
@@ -143,14 +209,31 @@ def fMRISurface_pipeline(
                 output_dir=output / "prepared", wb_command=wb_command,
             )
             if registered_spheres is None:
+                registration_started = time.perf_counter()
                 sulc_inputs = prepare_msmsulc_inputs(
                     subject_dir=subject_dir,
                     initial_spheres=prepared.initial_spheres,
                     hcp_assets_dir=assets, output_dir=output / "msmsulc_inputs",
                     wb_command=wb_command,
                 )
-                spheres = run_msmsulc(sulc_inputs, output / "msmsulc", device=device)
+                spheres = run_msmsulc(sulc_inputs, output / "msmsulc", device=device,
+                                     config=configuration, execution=msm_execution)
                 spheres = (spheres["L"], spheres["R"])
+                registration_seconds = time.perf_counter() - registration_started
+                report = json.loads((output / "msmsulc/registration_report.json").read_text(
+                    encoding="utf-8"))
+                registration = {
+                    "Method": "FNIT MSMSulc-HOCR-FastPD",
+                    "Configuration": configuration.to_dict(),
+                    "Execution": msm_execution,
+                    "Hemispheres": {
+                        hemi: {key: report[hemi][key] for key in (
+                            "seconds", "peak_allocated_gb", "folded_output_faces",
+                            "folded_solver_faces", "minimum_output_orientation_ratio",
+                            "minimum_solver_orientation_ratio", "degenerate_input_faces",
+                        ) if key in report[hemi]} for hemi in ("L", "R")
+                    },
+                }
             else:
                 spheres = registered_spheres
             mesh = assets / "global/templates/standard_mesh_atlases"
@@ -192,6 +275,8 @@ def fMRISurface_pipeline(
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(current, destination)
         timing = {**projection.timing_seconds, "total": time.perf_counter() - started}
+        if registration_seconds is not None:
+            timing["msmsulc_preparation_and_registration"] = registration_seconds
         details = {**{key: metadata[key] for key in (
                        "TaskName", "EchoTime", "FlipAngle", "MagneticFieldStrength",
                        "Manufacturer", "PhaseEncodingDirection", "Units",
@@ -202,7 +287,8 @@ def fMRISurface_pipeline(
                    ],
                    "RepetitionTime": inputs.tr,
                    "SkullStripped": True,
-                   "FNIT": {"Registration": "MSMSulc-HOCR-FastPD",
+                   "FNIT": {"Registration": registration["Method"],
+                            "RegistrationDetails": registration,
                             "Projection": "fMRIPrep-style T1w cortex + MNI subcortex",
                             "TimingSeconds": timing,
                             "Coverage": json.loads(projection.coverage_report.read_text(encoding="utf-8"))}}

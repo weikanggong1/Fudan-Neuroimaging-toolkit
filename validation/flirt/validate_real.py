@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+from datetime import date
 import json
 import os
 from pathlib import Path
@@ -34,15 +35,10 @@ def sha256(path):
 
 
 def source_hashes(source_root):
-    names = (
-        "src/fnit/flirt/core.py",
-        "src/fnit/flirt/types.py",
-        "src/fnit/flirt/coordinates.py",
-        "src/fnit/flirt/standalone.py",
-        "src/fnit/flirt/__init__.py",
-        "src/fnit/_nib.py",
-        "src/fnit/_transforms.py",
-    )
+    root = Path(source_root)
+    names = [path.relative_to(root).as_posix()
+             for path in sorted((root / "src/fnit/flirt").glob("*.py"))]
+    names.append("src/fnit/_nib.py")
     return {name: sha256(Path(source_root) / name) for name in names}
 
 
@@ -149,6 +145,7 @@ def worker(args):
         dof=12,
         cost="corratio",
         device=args.device,
+        execution=args.execution,
         overwrite=True,
     )
     if device.type == "cuda":
@@ -208,14 +205,6 @@ def run(args):
         raise ValueError("insufficient caseNN inputs")
     historical = json.loads(Path(args.reference_report).read_text())
     old_records = {item["case"]: item for item in historical["records"]}
-    process_times = {}
-    if args.process_log:
-        for line in Path(args.process_log).read_text().splitlines():
-            parts = line.split()
-            if len(parts) >= 3 and CASE.fullmatch(parts[0]):
-                process_times[parts[0]] = float(parts[2])
-    if args.reuse_existing and len(process_times) != len(cases):
-        raise ValueError("process log does not contain one timing for every case")
     records = []
     for case in cases:
         root = study / "subjects" / case / "T1"
@@ -229,41 +218,36 @@ def run(args):
         candidate_moved = case_output / "candidate.nii.gz"
         candidate_matrix = case_output / "candidate.mat"
         worker_json = case_output / "worker.json"
-        if args.reuse_existing:
-            required = (candidate_moved, candidate_matrix, worker_json)
-            missing = [str(path) for path in required if not path.is_file()]
-            if missing:
-                raise FileNotFoundError(f"missing candidate outputs: {missing}")
-            process_wall = process_times[case]
-        else:
-            command = [
-                sys.executable,
-                str(Path(__file__).resolve()),
-                "worker",
-                "--source-root",
-                str(Path(args.source_root).resolve()),
-                "--input",
-                str(moving),
-                "--reference",
-                str(template),
-                "--output",
-                str(candidate_moved),
-                "--omat",
-                str(candidate_matrix),
-                "--worker-json",
-                str(worker_json),
-                "--device",
-                args.device,
-                "--threads",
-                str(args.threads),
-            ]
-            environment = os.environ.copy()
-            environment["PYTHONPATH"] = str(Path(args.source_root).resolve() / "src")
-            started = time.perf_counter()
-            completed = subprocess.run(command, env=environment, check=False)
-            process_wall = time.perf_counter() - started
-            if completed.returncode:
-                raise RuntimeError(f"candidate failed for {case}: {completed.returncode}")
+        command = [
+            sys.executable,
+            str(Path(__file__).resolve()),
+            "worker",
+            "--source-root",
+            str(Path(args.source_root).resolve()),
+            "--input",
+            str(moving),
+            "--reference",
+            str(template),
+            "--output",
+            str(candidate_moved),
+            "--omat",
+            str(candidate_matrix),
+            "--worker-json",
+            str(worker_json),
+            "--device",
+            args.device,
+            "--execution",
+            args.execution,
+            "--threads",
+            str(args.threads),
+        ]
+        environment = os.environ.copy()
+        environment["PYTHONPATH"] = str(Path(args.source_root).resolve() / "src")
+        started = time.perf_counter()
+        completed = subprocess.run(command, env=environment, check=False)
+        process_wall = time.perf_counter() - started
+        if completed.returncode:
+            raise RuntimeError(f"candidate failed for {case}: {completed.returncode}")
         worker_record = json.loads(worker_json.read_text())
         reference_image = nib.load(str(official_moved))
         candidate_image = nib.load(str(candidate_moved))
@@ -316,6 +300,7 @@ def run(args):
         "candidate": {
             "version": __version__,
             "device": args.device,
+            "execution": worker_record["qc"]["execution"],
             "threads": args.threads,
             "tf32_default": args.device.startswith("cuda"),
             "float16_used": False,
@@ -398,99 +383,6 @@ def run(args):
     return 0
 
 
-def combine(args):
-    cpu = json.loads(Path(args.cpu_report).read_text())
-    gpu = json.loads(Path(args.gpu_report).read_text())
-    if cpu["candidate"]["source_sha256"] != gpu["candidate"]["source_sha256"]:
-        raise ValueError("CPU and GPU reports do not bind the same candidate source")
-    for key in ("template_sha256", "comparison_mask", "subjects"):
-        if cpu["input"][key] != gpu["input"][key]:
-            raise ValueError(f"CPU and GPU reports differ at input.{key}")
-    cpu_records = {item["case_id"]: item for item in cpu["records"]}
-    gpu_records = {item["case_id"]: item for item in gpu["records"]}
-    if cpu_records.keys() != gpu_records.keys():
-        raise ValueError("CPU and GPU case sets differ")
-
-    def run_record(report):
-        return {
-            "version": report["candidate"]["version"],
-            "device": report["candidate"]["device"],
-            "threads": report["candidate"]["threads"],
-            "tf32_default": report["candidate"]["tf32_default"],
-            "float16_used": report["candidate"]["float16_used"],
-            "hardware": report["hardware"]["candidate"],
-            "shared_node": report["hardware"]["shared_node"],
-            "timing_scope": report["candidate"]["timing_scope"],
-            "contract": report["contract"],
-            "summary": report["summary"],
-            "acceptance": report["acceptance"],
-        }
-
-    records = []
-    for case in sorted(cpu_records):
-        c = cpu_records[case]
-        g = gpu_records[case]
-        for key in ("input_sha256", "official_matrix_sha256", "official_moved_sha256"):
-            if c[key] != g[key]:
-                raise ValueError(f"reference mismatch for {case}: {key}")
-        records.append({
-            "case_id": case,
-            "input_sha256": c["input_sha256"],
-            "official_matrix_sha256": c["official_matrix_sha256"],
-            "official_moved_sha256": c["official_moved_sha256"],
-            "reference_full_registration_wall_seconds": c["reference_wall_seconds"],
-            "fresh_applyxfm_wall_seconds": c["fresh_applyxfm_wall_seconds"],
-            "cpu": {
-                "matrix_rmsdiff_mm": c["matrix_rmsdiff_mm"],
-                "moved": c["moved"],
-                "process_wall_seconds": c["candidate_process_wall_seconds"],
-            },
-            "cuda_tf32": {
-                "matrix_rmsdiff_mm": g["matrix_rmsdiff_mm"],
-                "moved": g["moved"],
-                "process_wall_seconds": g["candidate_process_wall_seconds"],
-                "peak_cuda_memory_allocated_bytes": g["candidate_peak_cuda_memory_allocated_bytes"],
-                "peak_cuda_memory_reserved_bytes": g["candidate_peak_cuda_memory_reserved_bytes"],
-            },
-        })
-    reference_median = gpu["summary"]["reference_wall_seconds"]["median"]
-    cpu_median = cpu["summary"]["candidate_process_wall_seconds"]["median"]
-    gpu_median = gpu["summary"]["candidate_process_wall_seconds"]["median"]
-    report = {
-        "schema_version": 3,
-        "date": gpu["date"],
-        "feature": "FNIT TorchFLIRT CPU/GPU versus FSL FLIRT 6.0.7.4",
-        "claim_boundary": (
-            "same-input tolerance comparison for the supported 12-DOF correlation-ratio path; "
-            "not bitwise or complete FSL numerical equivalence"
-        ),
-        "input": gpu["input"],
-        "candidate_source_sha256": gpu["candidate"]["source_sha256"],
-        "reference": gpu["reference"],
-        "runs": {"cpu": run_record(cpu), "cuda_tf32": run_record(gpu)},
-        "timing_comparison": {
-            "fsl_cpu_median_seconds": reference_median,
-            "fnit_cpu_median_seconds": cpu_median,
-            "fnit_cuda_tf32_median_seconds": gpu_median,
-            "valid_for_speedup_claim": False,
-            "interpretation": (
-                "measurements came from different runs on shared nodes; concurrent CPU/GPU jobs "
-                "prevent a hardware-normalized speed ratio"
-            ),
-        },
-        "acceptance": {
-            "matrix_rmsdiff_threshold_mm": 0.05,
-            "cpu_pass_count": cpu["acceptance"]["matrix_pass_count"],
-            "cuda_tf32_pass_count": gpu["acceptance"]["matrix_pass_count"],
-            "case_count": len(records),
-            "numerically_equivalent": False,
-        },
-        "records": records,
-    }
-    Path(args.report).write_text(json.dumps(report, indent=2) + "\n")
-    return 0
-
-
 def parser():
     root = argparse.ArgumentParser(description=__doc__)
     commands = root.add_subparsers(dest="command", required=True)
@@ -499,6 +391,7 @@ def parser():
         worker_parser.add_argument(f"--{name.replace('_', '-')}", required=True)
     worker_parser.add_argument("--device", default="cuda:0")
     worker_parser.add_argument("--threads", type=int, default=4)
+    worker_parser.add_argument("--execution", choices=("auto", "reference", "batched"), default="auto")
     worker_parser.set_defaults(function=worker)
     run_parser = commands.add_parser("run")
     run_parser.add_argument("--study-root", required=True)
@@ -519,26 +412,13 @@ def parser():
     run_parser.add_argument("--case-count", type=int, default=10)
     run_parser.add_argument("--device", default="cuda:0")
     run_parser.add_argument("--threads", type=int, default=4)
-    run_parser.add_argument("--date", default="2026-09-28")
+    run_parser.add_argument("--execution", choices=("auto", "reference", "batched"), default="auto")
+    run_parser.add_argument("--date", default=date.today().isoformat())
     run_parser.add_argument(
         "--candidate-hardware",
         help="de-identified candidate hardware model written to the report",
     )
-    run_parser.add_argument(
-        "--reuse-existing",
-        action="store_true",
-        help="summarize existing caseNN candidate files instead of rerunning",
-    )
-    run_parser.add_argument(
-        "--process-log",
-        help="case log containing: caseNN matrix_rmsdiff process_wall_seconds",
-    )
     run_parser.set_defaults(function=run)
-    combine_parser = commands.add_parser("combine")
-    combine_parser.add_argument("--cpu-report", required=True)
-    combine_parser.add_argument("--gpu-report", required=True)
-    combine_parser.add_argument("--report", required=True)
-    combine_parser.set_defaults(function=combine)
     return root
 
 

@@ -46,7 +46,8 @@ CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹�
 
 | 函数名 | 原软件函数名 | 功能 |
 |---|---|---|
-| [parcellate](docs/mshbm/README.md) | CBIG `CBIG_MSHBM_parcellation_single_subject.m` | 生成个体 fsLR32k 17 网络标签。 |
+| [TorchMCFLIRT](docs/mcflirt/README.md) | FSL `mcflirt` | BOLD 每帧刚体运动估计、FSL 矩阵与六列参数、图像重采样；[真实数据对照](validation/mcflirt/README.md)。 |
+| [parcellate](docs/mshbm/README.md) | CBIG `CBIG_MSHBM_parcellation_single_subject.m` | fsLR32k 或 MNI BOLD 到个体 17 网络标签与连接矩阵。 |
 | [fMRIVolume_pipeline](docs/fmri/README.md) | FSL FEAT、ICA-AROMA | 原始 BIDS 单 run 到 BIDS Derivatives 体积 BOLD；[全流程 benchmark](validation/fmri/README.md)。 |
 | [fMRISurface_pipeline](docs/fmri/surface.md) | fMRIPrep fsLR 重采样、Workbench | 读取已完成的 volume 与 T1 recon-all，写出 fsLR32k GIFTI 和 91k CIFTI；[全流程 benchmark](validation/fmri/README.md)。 |
 | [fnit.msm.run_msmsulc](docs/msm/README.md) | newMSM MSMSulc | 独立的 HOCR/FastPD 脑沟球面配准。 |
@@ -70,11 +71,11 @@ CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹�
 
 | 函数名 | 原软件函数名 | 功能 |
 |---|---|---|
-| [run_bigflica / apply_model](docs/bigflica/README.md) | [BigFLICA](https://github.com/weikanggong/BigFLICA) mMIGP、DicL、FLICA | 从每人一目录的多模态标准空间 NIfTI 提取跨模态成分，输出被试 course、各模态成分 z 图和 top-voxel 脑图；CUDA 路径逐被试建库，分块处理 mMIGP 并用批量 ADMM 与 LARS 回退训练 DicL，可选跳过两者直接拟合体素 FLICA，并投影新被试。 |
+| [run_bigflica / apply_model](docs/bigflica/README.md) | [BigFLICA](https://github.com/weikanggong/BigFLICA) mMIGP、DicL、FLICA | 从每人一目录的多模态标准空间NIfTI提取成分，保存course、各模态z图、阈值图及新被试模型；CUDA逐被试建库、分块mMIGP与DicL，也支持直接体素FLICA。已优化LARS行回退、图调度和字典更新；真实1000人R500/D200首次完整DicL对照的字典与LASSO通过本轮容差，FA/MD的OMP30重建差仍为2.44%/5.33%，见[最新优化报告](validation/bigflica/dicl_speed_optimization_real1000_20261001.md)。压缩流程的有效C20和最终脑图仍待验收。 |
 | [run_superbigflica / apply_model / plot_superbigflica](docs/superbigflica/README.md) | [SuperBigFLICA](https://github.com/weikanggong/SuperBigFLICA) | 沿用 BigFLICA 的多模态影像目录，以被试 ID 匹配独立 CSV；随机初始化监督共享成分，预测连续表型、二分类或多分类；自动绘制成分权重、Top 3 脑图与测试集散点/ROC 图，并保存新被试模型。 |
 | [run_bwas / plot_bwas_connectivity](docs/bwas/README.md) | [weikanggong/BWAS](https://github.com/weikanggong/BWAS) | 对多被试 2 mm BIDS volume BOLD 的逐体素连接做表型 GLM、6D 连接簇校正、MA 图和多视角连接可视化。 |
 
-各功能页说明输入、输出、参数与调用示例，并汇总已有的真实数据验证结果、原软件命令、参考文献和原实现链接。统一入口中的子命令用 `fnit <子命令> --help` 查看；fMRI 使用 `fnit-fmri --help`，MS-HBM 使用 `fnit-mshbm --help`，recon-all 使用 `fnit-recon-all --help`。全部独立入口见 [pyproject.toml](pyproject.toml)。
+各功能页说明输入、输出、参数与调用示例，并汇总已有的真实数据验证结果、原软件命令、参考文献和原实现链接。统一入口中的子命令用 `fnit <子命令> --help` 查看；fMRI 使用 `fnit-fmri --help`，MS-HBM 使用 `fnit-mshbm --help`，recon-all 使用 `fnit-recon-all --help`。全部独立入口见 [pyproject.toml](pyproject.toml)。 MS-HBM 的 HCP_40 prior 随包提供；MNI 体积投影的表面和掩膜按[专属说明](docs/mshbm/README.md#mni-2-mm-体积输入)从固定 CBIG 原站部署。
 
 ## 安装
 
@@ -169,7 +170,7 @@ subregion_result = segment_subregions(
 
 旧 `segment_nuclei` 保留原五参数、三结构默认值及嵌套路径返回形式，内部调用一次统一 PyTorch 分割；`fnit-nuclei` 保留旧命令参数。两者使用主页 Conda 环境，兼容说明与历史验证链接见[核团接口兼容](docs/subregions/nuclei.md)。原脑干图谱命令 `fnit-setup-brainstem-atlas` 仍可运行旧脚本。
 
-API 的显式 `weights=`、CLI 的 `--weights`、`FNIT_WEIGHTS` 环境变量、已保存目录和默认缓存按此顺序解析。TorchFAST、TorchFLIRT、TorchFNIRT、TorchApplyWarp、TorchConvertWarp、TorchInvWarp、TorchTOPUP、TorchEDDY、TorchDTIFIT、TorchAMICONODDI、TorchMMORF、TorchBEDPOSTX、TorchProbtrackX 与 dMRI pipeline 的 TBSS 分支没有预训练权重；从原始 T1w 启动的流程可能仍需 SynthStrip。文件清单、官方 URL、SHA-256、许可和离线部署见[权重说明](docs/WEIGHTS.md)。
+API 的显式 `weights=`、CLI 的 `--weights`、`FNIT_WEIGHTS` 环境变量、已保存目录和默认缓存按此顺序解析。TorchFAST、TorchFLIRT、TorchMCFLIRT、TorchFNIRT、TorchApplyWarp、TorchConvertWarp、TorchInvWarp、TorchTOPUP、TorchEDDY、TorchDTIFIT、TorchAMICONODDI、TorchMMORF、TorchBEDPOSTX、TorchProbtrackX 与 dMRI pipeline 的 TBSS 分支没有预训练权重；从原始 T1w 启动的流程可能仍需 SynthStrip。文件清单、官方 URL、SHA-256、许可和离线部署见[权重说明](docs/WEIGHTS.md)。
 
 ## 验证、样例与许可
 

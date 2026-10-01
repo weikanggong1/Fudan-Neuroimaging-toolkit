@@ -82,8 +82,9 @@ def test_fmri_fnirt_uses_t1_config_and_writes_pull(tmp_path, monkeypatch):
     seen_configs = []
 
     class FakeFNIRT:
-        def __init__(self, *, device, config):
+        def __init__(self, *, device, config, execution="optimized"):
             assert device == "cpu"
+            assert execution == "optimized"
             seen_configs.append(config)
 
         def __call__(self, source, target, initial, *, reference_mask):

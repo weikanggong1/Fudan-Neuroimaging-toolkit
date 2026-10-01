@@ -1,7 +1,8 @@
 """One-run raw BIDS to ICA-AROMA cleaned BOLD on a 2-mm MNI152 grid."""
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
+import hashlib
 import json
 import shutil
 from tempfile import TemporaryDirectory
@@ -9,14 +10,19 @@ import time
 
 import nibabel as nib
 import numpy as np
+import scipy
 import torch
 
-from ..fast import TorchFAST
 from ..synthstrip import SynthStrip
+from ..fast import FASTConfig
+from ..flirt import TorchFLIRT
+from .. import __version__
+from ..weights import resolve_weights
 from .aroma_pipeline import run_aroma_pipeline
 from .bids import locate_bids_inputs
 from .derivatives import ensure_derivative_dataset, fmri_derivative_paths, sidecar, write_json
-from .normalization import register_t1_to_mni, resample_world
+from .normalization import resample_world
+from ._anatomical import prepare_anatomical
 from .pipeline import run_feat_core
 
 
@@ -65,6 +71,38 @@ def _select_t1(inputs, requested):
     return candidates[0]
 
 
+def _source_provenance(registration_backend):
+    """Identify the installed runtime sources without requiring a Git checkout."""
+    package = Path(__file__).resolve().parents[1]
+    directories = (
+        "fmri", "feat", "melodic", "fast", "synthstrip", "flirt", "mcflirt",
+        "applywarp", "eddy", registration_backend,
+    )
+    files = {path for directory in directories
+             for path in (package / directory).rglob("*.py")}
+    files.update(package.glob("*.py"))
+    hashes = {
+        path.relative_to(package).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in sorted(files)
+    }
+    return {
+        "Version": __version__,
+        "SourceSHA256": hashes,
+        "SourceManifestSHA256": hashlib.sha256(
+            json.dumps(hashes, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        ).hexdigest(),
+        "Dependencies": {
+            "torch": str(torch.__version__), "numpy": np.__version__,
+            "nibabel": nib.__version__, "scipy": scipy.__version__,
+        },
+    }
+
+
+def _weight_location(filename, requested):
+    path = Path(resolve_weights(filename, explicit=requested)).expanduser().resolve()
+    return {"Model": filename, "Path": str(path), "SizeBytes": path.stat().st_size}
+
+
 def fMRIVolume_pipeline(
     bids_root,
     derivatives_root,
@@ -95,11 +133,14 @@ def fMRIVolume_pipeline(
     highpass_cutoff_seconds=100.0,
     device=None,
     batch_size=8,
-    motion_iterations=(35, 25, 15),
+    motion_iterations=(1, 1, 1),
     ica_max_iter=500,
     n_splits=1000,
     random_state=0,
     overwrite=False,
+    reuse_anatomical=True,
+    bbr_execution="batched",
+    fnirt_execution="optimized",
 ):
     """Run motion/FEAT, SynthStrip/FAST, BBR, PICA/AROMA and MNI resampling.
 
@@ -107,11 +148,20 @@ def fMRIVolume_pipeline(
     fieldmaps or GDC warp are available in the specified UKB example. Any
     associated BIDS fieldmaps currently cause an explicit error in FEAT core.
     """
+    pipeline_started = time.perf_counter()
+    if registration_backend not in ("synthmorph", "fnirt"):
+        raise ValueError("registration_backend must be 'synthmorph' or 'fnirt'")
+    if bbr_execution not in ("reference", "batched"):
+        raise ValueError("bbr_execution must be 'reference' or 'batched'")
+    if fnirt_execution not in ("reference", "optimized"):
+        raise ValueError("fnirt_execution must be 'reference' or 'optimized'")
     if registration_backend == "fnirt":
         from ..fnirt import resolve_fnirt_config
         fnirt_config = resolve_fnirt_config(fnirt_config, default="t1")
     elif fnirt_config is not None:
         raise ValueError("fnirt_config requires registration_backend='fnirt'")
+    if registration_backend != "fnirt" and fnirt_execution != "optimized":
+        raise ValueError("fnirt_execution requires registration_backend='fnirt'")
     inputs = locate_bids_inputs(
         bids_root, subject=subject, session=session, task=task, run=run,
         acquisition=acquisition, direction=direction,
@@ -152,32 +202,21 @@ def fMRIVolume_pipeline(
     epi_mask = _save_mask(
         strip(reference).mask.data, reference, mask_dir / "epi_synthstrip.nii.gz"
     )
-    t1_extracted = strip(t1w)
-    t1_brain = output / "T1_brain.nii.gz"
-    t1_mask = mask_dir / "T1_synthstrip.nii.gz"
-    t1_extracted.image.save(t1_brain)
-    _save_mask(t1_extracted.mask.data, t1w, t1_mask)
-    if mni_brain_mask is None:
-        template_extracted = strip(mni_template)
-        template_brain_data = np.asarray(template_extracted.image.data, dtype=np.float32)
-        template_mask = _save_mask(
-            template_extracted.mask.data, mni_template,
-            mask_dir / "MNI152_synthstrip.nii.gz",
-        )
-    else:
-        supplied = nib.load(str(mni_brain_mask))
-        if supplied.shape != template.shape or not np.allclose(supplied.affine, template.affine, atol=1e-4):
-            raise ValueError("mni_brain_mask must match mni_template")
-        template_mask = _save_mask(
-            np.asarray(supplied.dataobj), mni_template,
-            mask_dir / "MNI152_brain_mask.nii.gz",
-        )
-        template_brain_data = np.asarray(template.dataobj, dtype=np.float32) * (
-            np.asarray(supplied.dataobj) > 0
-        )
-    mni_brain = output / "MNI152_2mm_brain.nii.gz"
-    nib.save(nib.Nifti1Image(template_brain_data, template.affine), str(mni_brain))
-    timing["synthstrip"] = time.perf_counter() - started
+    timing["epi_synthstrip"] = time.perf_counter() - started
+    anatomical = prepare_anatomical(
+        t1w, mni_template, template_mask=mni_brain_mask, strip=strip,
+        backend=registration_backend, morph_weights=synthmorph_weights,
+        fnirt_config=fnirt_config, device=selected, work_dir=output,
+        cache_dir=paths.anat_dir / ".fnit_anatomical", reuse=reuse_anatomical,
+        fnirt_execution=fnirt_execution,
+    )
+    timing.update(anatomical.timing_seconds)
+    t1_brain = anatomical.path("T1_brain.nii.gz")
+    template_mask = anatomical.path("MNI_mask.nii.gz")
+    wm_pve = anatomical.path("T1_pve_wm.nii.gz")
+    csf_pve = anatomical.path("T1_pve_csf.nii.gz")
+    wm_seg = anatomical.path("T1_wmseg.nii.gz")
+    t1_to_mni = anatomical.registration
 
     started = time.perf_counter()
     feat = run_feat_core(
@@ -190,22 +229,12 @@ def fMRIVolume_pipeline(
     )
     timing["feat_core"] = time.perf_counter() - started
 
-    started = time.perf_counter()
-    tissues = TorchFAST(device=selected)(t1_brain, mask=t1_mask)
-    wm_pve = mask_dir / "T1_pve_wm.nii.gz"
-    csf_pve = mask_dir / "T1_pve_csf.nii.gz"
-    wm_seg = mask_dir / "T1_wmseg.nii.gz"
-    tissues.pve_wm.save(wm_pve)
-    tissues.pve_csf.save(csf_pve)
-    _save_mask(np.asarray(tissues.pve_wm.data) >= 0.5, t1_brain, wm_seg)
-    timing["fast"] = time.perf_counter() - started
-
-    started = time.perf_counter()
     from .bbr import register_bbr
 
     bbr = register_bbr(
         epi=feat.output_dir / "example_func.nii.gz",
         t1=t1_brain, wmseg=wm_seg, device=selected,
+        execution=bbr_execution,
     )
     reg_dir = output / "reg"
     reg_dir.mkdir(exist_ok=True)
@@ -214,31 +243,29 @@ def fMRIVolume_pipeline(
         output=reg_dir / "example_func2highres.nii.gz",
         omat=bbr_matrix,
     )
-    t1_to_mni = register_t1_to_mni(
-        t1_brain, mni_brain, reg_dir,
-        backend=registration_backend,
-        synthmorph_weights=synthmorph_weights,
-        reference_mask=template_mask,
-        fnirt_config=fnirt_config,
-        device=selected,
-    )
-    timing["bbr_and_t1_to_mni"] = time.perf_counter() - started
+    phases = bbr.phase_timings
+    timing["bbr_initial_flirt"] = phases["initial_flirt"]
+    timing["bbr_refinement"] = sum(phases[name] for name in (
+        "boundary_preparation", "coarse_bbr", "local_bbr",
+    ))
+    timing["bbr_final_resampling"] = phases["final_resampling"]
 
     started = time.perf_counter()
     epi_ref = feat.output_dir / "example_func.nii.gz"
-    csf_epi_pve = resample_world(
-        csf_pve, epi_ref, bbr.moving_to_fixed_world,
-        mask_dir / "csf_pve_epi.nii.gz", device=selected,
-    )
-    wm_epi_pve = resample_world(
-        wm_pve, epi_ref, bbr.moving_to_fixed_world,
-        mask_dir / "wm_pve_epi.nii.gz", device=selected,
-    )
     brain = np.asarray(nib.load(str(feat.mask)).dataobj) > 0
-    csf = (np.asarray(nib.load(str(csf_epi_pve)).dataobj) >= 0.8) & brain
-    wm = (np.asarray(nib.load(str(wm_epi_pve)).dataobj) >= 0.8) & brain
-    csf_mask = _save_mask(csf, epi_ref, mask_dir / "csf_epi.nii.gz")
-    wm_mask = _save_mask(wm, epi_ref, mask_dir / "wm_epi.nii.gz")
+    tissue_masks = {}
+    tissue_resampler = TorchFLIRT(device=str(selected))
+    t1_to_epi_matrix = np.linalg.inv(bbr.matrix)
+    for name, enabled, pve in (("csf", regress_csf, csf_pve), ("wm", regress_wm, wm_pve)):
+        if not enabled:
+            continue
+        # FLIRT 在较粗的 EPI 网格采样前预滤波，防止概率图降采样混叠。
+        epi_pve = tissue_resampler.applyxfm(pve, epi_ref, init=t1_to_epi_matrix).moved
+        nib.save(epi_pve, str(mask_dir / f"{name}_pve_epi.nii.gz"))
+        tissue = (np.asarray(epi_pve.dataobj) >= 0.8) & brain
+        if not tissue.any():
+            raise ValueError(f"regress_{name}=True requires a nonempty EPI {name.upper()} mask")
+        tissue_masks[name] = _save_mask(tissue, epi_ref, mask_dir / f"{name}_epi.nii.gz")
     timing["aroma_masks"] = time.perf_counter() - started
 
     started = time.perf_counter()
@@ -260,8 +287,8 @@ def fMRIVolume_pipeline(
         n_splits=n_splits,
         random_state=random_state,
         ica_max_iter=ica_max_iter,
-        wm_mask=wm_mask if regress_wm else None,
-        regression_csf_mask=csf_mask if regress_csf else None,
+        wm_mask=tissue_masks.get("wm"),
+        regression_csf_mask=tissue_masks.get("csf"),
         regress_csf=regress_csf,
         regress_motion=regress_motion,
         motion_model=motion_model,
@@ -291,7 +318,44 @@ def fMRIVolume_pipeline(
         batch_size=batch_size, device=selected,
     )
     timing["mni_resampling"] = time.perf_counter() - started
-    timing["total"] = sum(timing.values())
+    timing["total"] = time.perf_counter() - pipeline_started
+    configuration = {
+        "registration_backend": registration_backend,
+        "fnirt_config": asdict(fnirt_config) if fnirt_config is not None else None,
+        "ica_n_components": ica_n_components,
+        "ica_max_iter": ica_max_iter,
+        "aroma_mode": aroma_mode,
+        "regress_wm": regress_wm, "regress_csf": regress_csf,
+        "regress_motion": regress_motion, "motion_model": motion_model,
+        "bandpass": list(bandpass) if bandpass is not None else None,
+        "global_signal": global_signal,
+        "highpass_cutoff_seconds": highpass_cutoff_seconds,
+        "device": str(selected), "batch_size": batch_size,
+        "motion_iterations": list(motion_iterations),
+        "motion_algorithm": "MCFLIRT-2111.0-8/4/4mm-coordinate-Brent",
+        "motion_output": "NEWIMAGE-float32-Constant-spline-source-dtype-cast",
+        "n_splits": n_splits, "random_state": random_state,
+        "brain_extraction": "synthstrip",
+        "mni_template": str(Path(mni_template).expanduser().resolve()),
+        "mni_brain_mask": (
+            str(Path(mni_brain_mask).expanduser().resolve()) if mni_brain_mask is not None else None
+        ),
+        "fast_config": asdict(FASTConfig(execution="fsl")),
+        "reuse_anatomical": reuse_anatomical,
+        "anatomical_cache": {"reused": anatomical.reused, "fingerprint": anatomical.fingerprint},
+        "bbr_execution": bbr_execution,
+        "fnirt_execution": fnirt_execution,
+        "mni_interpolation": "cubic-bspline-periodic",
+        "matmul_allow_tf32": torch.backends.cuda.matmul.allow_tf32,
+        "cudnn_allow_tf32": torch.backends.cudnn.allow_tf32,
+        "weights": {"synthstrip": _weight_location("synthstrip.1.pt", strip.model_path)},
+    }
+    if registration_backend == "synthmorph":
+        configuration["weights"]["synthmorph"] = _weight_location(
+            "synthmorph.deform.3.h5",
+            synthmorph_weights.get("deform") if isinstance(synthmorph_weights, dict) else synthmorph_weights,
+        )
+    provenance = _source_provenance(registration_backend)
     report = output / "pipeline_report.json"
     report.write_text(json.dumps({
         "input_bold_shape": list(nib.load(str(inputs.bold)).shape),
@@ -301,11 +365,17 @@ def fMRIVolume_pipeline(
         "registration_backend": registration_backend,
         "mni_interpolation": "cubic-bspline-periodic",
         "t1_to_mni_qc": t1_to_mni.qc,
+        "anatomical_cache": {"reused": anatomical.reused,
+                             "fingerprint": anatomical.fingerprint},
+        "bbr_phase_timings": bbr.phase_timings,
         "ica_components": aroma.ica.n_components,
         "ica_converged": aroma.ica.converged,
         "ica_iterations": aroma.ica.n_iterations,
         "aroma_noise_components": len(aroma.noise_components.read_text().split()),
         "aroma_mode": aroma_mode,
+        "aroma_completed": True,
+        "configuration": configuration,
+        "source": provenance,
         "wm_csf_motion_regression": {
             "wm": regress_wm, "csf": regress_csf, "motion": regress_motion,
         },
@@ -340,7 +410,7 @@ def fMRIVolume_pipeline(
             "EchoTime", "FlipAngle", "MagneticFieldStrength", "Manufacturer",
             "PhaseEncodingDirection", "Units",
         ) if key in inputs.bold_metadata},
-        "TaskName": inputs.task, "RepetitionTime": inputs.tr,
+        "TaskName": inputs.bold_metadata["TaskName"], "RepetitionTime": inputs.tr,
         "SkullStripped": True,
         "Sources": [f"bids:raw:{raw_bold}", f"bids:raw:{raw_t1w}"],
         "FNIT": {
@@ -348,7 +418,11 @@ def fMRIVolume_pipeline(
             "ConfoundRegression": {"wm": regress_wm, "csf": regress_csf,
                                   "motion": regress_motion},
             "RegistrationBackend": registration_backend,
+            "Denoising": {"Method": "ICA-AROMA", "Mode": aroma_mode, "Completed": True},
+            "Configuration": configuration,
+            "Source": provenance,
             "MNIInterpolation": "cubic-bspline-periodic",
+            "TissueInterpolation": "flirt-trilinear-prefilter-float32-coordinates",
             "TimingSeconds": timing,
             "Report": json.loads(report.read_text(encoding="utf-8")),
         },

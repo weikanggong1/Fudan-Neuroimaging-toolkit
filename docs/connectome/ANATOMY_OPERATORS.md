@@ -65,7 +65,7 @@ world_dwi_to_t1 = result.moving_to_fixed_world
 fsl_matrix = result.matrix
 ```
 
-**软件命令。** `flirt -in b0_brain.nii.gz -ref t1_brain.nii.gz -cost normmi -dof 6 -omat diff2struct_fsl.txt`。**同输入对照。** 当前实现的粗搜索使用 FSL 默认 CorrRatio，精化使用 normmi。匹配 UKB 的矩阵相对 FSL 的世界空间位移 RMS 为 0.009932 mm（CPU）和 0.009983 mm（H100）；重采样图非零强度 Pearson 分别为 0.9999993 和 0.9999724。FSL 完整 CPU 命令用时 10.02 s；FNIT CPU 从已载入影像的求解及重采样调用用时 45.26 s。当前 H100 被其他任务占满，GPU 时间不用于加速比。详见[匹配 UKB 脱敏报告](../../validation/connectome/ORIGINAL_UKB_FLIRT_STAGE_20260929.md)。
+**软件命令。** `flirt -in b0_brain.nii.gz -ref t1_brain.nii.gz -cost normmi -dof 6 -omat diff2struct_fsl.txt`。粗搜索使用 FSL 默认 CorrRatio，精化使用 normmi。当前修复版的精度、阶段耗时和显存见 [FLIRT 功能页](../flirt/README.md#真实数据测量)。[早期 UKB 同输入报告](../../validation/connectome/ORIGINAL_UKB_FLIRT_STAGE_20260929.md)保留其实际测量源码、mask 和计时范围，不能当作当前版本的复测。
 
 ## `resample_labels_nearest(labels, source_affine, target_shape, target_affine, target_to_source_world)`
 

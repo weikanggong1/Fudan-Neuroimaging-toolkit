@@ -9,7 +9,8 @@ from typing import Mapping, Sequence
 import h5py
 import numpy as np
 
-from .pipeline import (_check_flica_output, _fit_flica, _flica_directory,
+from .pipeline import (_FLICA_ALGORITHM_VERSION,
+                       _check_flica_output, _fit_flica, _flica_directory,
                        _save_manifest, _signature, _valid_cache, fit_dicl)
 from .pipeline_gpu import _save_gpu_results
 from .streaming import fit_mmigp_streaming, prepare_modalities
@@ -68,7 +69,7 @@ def run_bigflica_cpu_stream(root: Path, specs: Mapping[str, Mapping[str, str]],
         timings["dicl_s"] = time.perf_counter() - start
 
     result_dir = _flica_directory(destination, n_components, flica_lambda_dims)
-    _check_flica_output(result_dir, signature, names)
+    _check_flica_output(result_dir, signature, names, _FLICA_ALGORITHM_VERSION)
     start = time.perf_counter()
     h_migp, contribution = _fit_flica(dictionaries, n_components,
                                       flica_max_iter, result_dir, "cpu",
@@ -81,4 +82,5 @@ def run_bigflica_cpu_stream(root: Path, specs: Mapping[str, Mapping[str, str]],
                              mmigp_dir, u, h_migp, contribution, timings,
                              flica_lambda_dims=flica_lambda_dims,
                              flica_signature=_signature([dicl_sig, n_components,
-                                                         flica_max_iter, flica_lambda_dims]))
+                                                         flica_max_iter, flica_lambda_dims,
+                                                         _FLICA_ALGORITHM_VERSION]))

@@ -1,0 +1,845 @@
+{
+  "schema_version": 1,
+  "source_revision": "ec57972ceb7d715dd8b91ba32e3512bc7743b9c5",
+  "estimation_source_revisions": {
+    "native_oracle": "380e23d",
+    "candidate_pve_and_bbr": "86f96b5",
+    "sampling": "ec57972ceb7d715dd8b91ba32e3512bc7743b9c5"
+  },
+  "scope": "Real saved WM/CSF PVE x BBR 2x2 cross-control; no FAST, FLIRT optimization or complete pipeline rerun.",
+  "common_epi_voxels": 96820,
+  "native_epi_voxels": 99372,
+  "candidate_epi_voxels": 97345,
+  "threshold": 0.8,
+  "sampling_methods": {
+    "plain_trilinear": "FNIT resample_world linear with no prefilter",
+    "flirt_applyxfm": "FNIT TorchFLIRT.applyxfm with official default downsampling prefilter and ordered FP32 geometry"
+  },
+  "tissues": {
+    "wm": {
+      "input_pve_common_t1": {
+        "values": 1393862,
+        "pearson_r": 0.9932044417910395,
+        "mae": 0.006989955719804231,
+        "rmse": 0.05109398362509819,
+        "maximum_absolute_difference": 1.0,
+        "mean_signed_difference": 0.00046838915517853234
+      },
+      "existing_fsl_mask_voxels_common": 18370,
+      "variants": {
+        "plain_trilinear": {
+          "native_pve__native_bbr": {
+            "threshold_voxels_common": 26027,
+            "threshold_voxels_native_brain": 26121,
+            "threshold_voxels_candidate_brain": 26029,
+            "mask_vs_existing_fsl": {
+              "candidate_voxels": 26027,
+              "reference_voxels": 18370,
+              "dice": 0.8180282451516995,
+              "gained_voxels": 7868,
+              "lost_voxels": 211
+            },
+            "pve_vs_existing_fsl": {
+              "values": 96820,
+              "pearson_r": 0.9572959185027101,
+              "mae": 0.08654839113588499,
+              "rmse": 0.1297313122933389,
+              "maximum_absolute_difference": 0.7288347631692886,
+              "mean_signed_difference": 0.00012040528601459388
+            },
+            "voxels_near_threshold_0p78_to_0p82": 1169,
+            "sha256": "560ef794dc30e1b411f45a3f87d0e83351563c6c59e2a9fa4fd39511882b35d1",
+            "pve_vs_same_method_native_native": {
+              "values": 96820,
+              "pearson_r": 1.0000000000000002,
+              "mae": 0.0,
+              "rmse": 0.0,
+              "maximum_absolute_difference": 0.0,
+              "mean_signed_difference": 0.0
+            },
+            "mask_vs_same_method_native_native": {
+              "candidate_voxels": 26027,
+              "reference_voxels": 26027,
+              "dice": 1.0,
+              "gained_voxels": 0,
+              "lost_voxels": 0
+            }
+          },
+          "native_pve__candidate_bbr": {
+            "threshold_voxels_common": 26099,
+            "threshold_voxels_native_brain": 26193,
+            "threshold_voxels_candidate_brain": 26101,
+            "mask_vs_existing_fsl": {
+              "candidate_voxels": 26099,
+              "reference_voxels": 18370,
+              "dice": 0.8165688457127437,
+              "gained_voxels": 7943,
+              "lost_voxels": 214
+            },
+            "pve_vs_existing_fsl": {
+              "values": 96820,
+              "pearson_r": 0.9568611246755009,
+              "mae": 0.0868174471599293,
+              "rmse": 0.13020243489097147,
+              "maximum_absolute_difference": 0.752920925617218,
+              "mean_signed_difference": 6.559484948686117e-05
+            },
+            "voxels_near_threshold_0p78_to_0p82": 1197,
+            "sha256": "5edb48e8f44e3fe566620995b167d33aa2d0051b6476bc10090db46327f6aab8",
+            "pve_vs_same_method_native_native": {
+              "values": 96820,
+              "pearson_r": 0.9986507793284702,
+              "mae": 0.009623247273662025,
+              "rmse": 0.021948642838854483,
+              "maximum_absolute_difference": 0.20279818773269653,
+              "mean_signed_difference": -5.481043652773271e-05
+            },
+            "mask_vs_same_method_native_native": {
+              "candidate_voxels": 26099,
+              "reference_voxels": 26027,
+              "dice": 0.9841154126539539,
+              "gained_voxels": 450,
+              "lost_voxels": 378
+            }
+          },
+          "candidate_pve__native_bbr": {
+            "threshold_voxels_common": 25959,
+            "threshold_voxels_native_brain": 26050,
+            "threshold_voxels_candidate_brain": 25961,
+            "mask_vs_existing_fsl": {
+              "candidate_voxels": 25959,
+              "reference_voxels": 18370,
+              "dice": 0.8162602359629136,
+              "gained_voxels": 7867,
+              "lost_voxels": 278
+            },
+            "pve_vs_existing_fsl": {
+              "values": 96820,
+              "pearson_r": 0.9539132190423644,
+              "mae": 0.08837197492137755,
+              "rmse": 0.13305518975901418,
+              "maximum_absolute_difference": 0.755724536255002,
+              "mean_signed_difference": 0.0005259503617224321
+            },
+            "voxels_near_threshold_0p78_to_0p82": 1185,
+            "sha256": "115b41521de829bbee8cedb79e43716b3c363e0a3e5b0f384504a9454701b7f7",
+            "pve_vs_same_method_native_native": {
+              "values": 96820,
+              "pearson_r": 0.9970731378485844,
+              "mae": 0.00707396103256665,
+              "rmse": 0.032309029081396594,
+              "maximum_absolute_difference": 0.7696092128753662,
+              "mean_signed_difference": 0.0004055450757078382
+            },
+            "mask_vs_same_method_native_native": {
+              "candidate_voxels": 25959,
+              "reference_voxels": 26027,
+              "dice": 0.9919593736775285,
+              "gained_voxels": 175,
+              "lost_voxels": 243
+            }
+          },
+          "candidate_pve__candidate_bbr": {
+            "threshold_voxels_common": 26014,
+            "threshold_voxels_native_brain": 26106,
+            "threshold_voxels_candidate_brain": 26016,
+            "mask_vs_existing_fsl": {
+              "candidate_voxels": 26014,
+              "reference_voxels": 18370,
+              "dice": 0.8152036770007209,
+              "gained_voxels": 7923,
+              "lost_voxels": 279
+            },
+            "pve_vs_existing_fsl": {
+              "values": 96820,
+              "pearson_r": 0.9534518842071177,
+              "mae": 0.08863862931567831,
+              "rmse": 0.13355328219197066,
+              "maximum_absolute_difference": 0.820710526779294,
+              "mean_signed_difference": 0.00046053923604171633
+            },
+            "voxels_near_threshold_0p78_to_0p82": 1233,
+            "sha256": "e49ba97c0c3e5b617d3f7246713bb1743ecc84eb632c10a4bb8d4e9e0d383091",
+            "pve_vs_same_method_native_native": {
+              "values": 96820,
+              "pearson_r": 0.9957863448879594,
+              "mae": 0.014729258030211584,
+              "rmse": 0.03875775945935706,
+              "maximum_absolute_difference": 0.8345952033996582,
+              "mean_signed_difference": 0.00034013395002712246
+            },
+            "mask_vs_same_method_native_native": {
+              "candidate_voxels": 26014,
+              "reference_voxels": 26027,
+              "dice": 0.978267135527757,
+              "gained_voxels": 559,
+              "lost_voxels": 572
+            }
+          }
+        },
+        "flirt_applyxfm": {
+          "native_pve__native_bbr": {
+            "threshold_voxels_common": 18370,
+            "threshold_voxels_native_brain": 18393,
+            "threshold_voxels_candidate_brain": 18370,
+            "mask_vs_existing_fsl": {
+              "candidate_voxels": 18370,
+              "reference_voxels": 18370,
+              "dice": 1.0,
+              "gained_voxels": 0,
+              "lost_voxels": 0
+            },
+            "pve_vs_existing_fsl": {
+              "values": 96820,
+              "pearson_r": 0.9999999997277407,
+              "mae": 5.044063827435194e-06,
+              "rmse": 8.424509187484643e-06,
+              "maximum_absolute_difference": 5.53131103515625e-05,
+              "mean_signed_difference": -2.6151451991657604e-07
+            },
+            "voxels_near_threshold_0p78_to_0p82": 1919,
+            "sha256": "c8adc8f6d15d05f35e59b00280e8ef0ff947dcbfbda453cddc32c294d38cd465",
+            "pve_vs_same_method_native_native": {
+              "values": 96820,
+              "pearson_r": 1.0,
+              "mae": 0.0,
+              "rmse": 0.0,
+              "maximum_absolute_difference": 0.0,
+              "mean_signed_difference": 0.0
+            },
+            "mask_vs_same_method_native_native": {
+              "candidate_voxels": 18370,
+              "reference_voxels": 18370,
+              "dice": 1.0,
+              "gained_voxels": 0,
+              "lost_voxels": 0
+            }
+          },
+          "native_pve__candidate_bbr": {
+            "threshold_voxels_common": 18372,
+            "threshold_voxels_native_brain": 18394,
+            "threshold_voxels_candidate_brain": 18372,
+            "mask_vs_existing_fsl": {
+              "candidate_voxels": 18372,
+              "reference_voxels": 18370,
+              "dice": 0.988514506559251,
+              "gained_voxels": 212,
+              "lost_voxels": 210
+            },
+            "pve_vs_existing_fsl": {
+              "values": 96820,
+              "pearson_r": 0.9996228124375555,
+              "mae": 0.00607636097402721,
+              "rmse": 0.00991144971572243,
+              "maximum_absolute_difference": 0.06033933162689209,
+              "mean_signed_difference": -4.1227045551583125e-05
+            },
+            "voxels_near_threshold_0p78_to_0p82": 1923,
+            "sha256": "a45c3070e36f835226b9d83103471acc75afb99d34302e07c709dd9c5121ccdd",
+            "pve_vs_same_method_native_native": {
+              "values": 96820,
+              "pearson_r": 0.9996230034700615,
+              "mae": 0.006075465855580191,
+              "rmse": 0.009908938779173931,
+              "maximum_absolute_difference": 0.06028401851654053,
+              "mean_signed_difference": -4.096553103166655e-05
+            },
+            "mask_vs_same_method_native_native": {
+              "candidate_voxels": 18372,
+              "reference_voxels": 18370,
+              "dice": 0.988514506559251,
+              "gained_voxels": 212,
+              "lost_voxels": 210
+            }
+          },
+          "candidate_pve__native_bbr": {
+            "threshold_voxels_common": 18205,
+            "threshold_voxels_native_brain": 18226,
+            "threshold_voxels_candidate_brain": 18205,
+            "mask_vs_existing_fsl": {
+              "candidate_voxels": 18205,
+              "reference_voxels": 18370,
+              "dice": 0.9920984278879016,
+              "gained_voxels": 62,
+              "lost_voxels": 227
+            },
+            "pve_vs_existing_fsl": {
+              "values": 96820,
+              "pearson_r": 0.9995189796086432,
+              "mae": 0.005621003674163167,
+              "rmse": 0.011390275208004745,
+              "maximum_absolute_difference": 0.15539219602942467,
+              "mean_signed_difference": 0.0003854439263753088
+            },
+            "voxels_near_threshold_0p78_to_0p82": 1888,
+            "sha256": "2d13a25b2ff5dab3a277f11a3d7b5c9605bdcef3e30fc720ffe8a15883daefe0",
+            "pve_vs_same_method_native_native": {
+              "values": 96820,
+              "pearson_r": 0.9995189317754136,
+              "mae": 0.005621194686244129,
+              "rmse": 0.011390833214337403,
+              "maximum_absolute_difference": 0.1553926207125187,
+              "mean_signed_difference": 0.0003857054408952254
+            },
+            "mask_vs_same_method_native_native": {
+              "candidate_voxels": 18205,
+              "reference_voxels": 18370,
+              "dice": 0.9920984278879016,
+              "gained_voxels": 62,
+              "lost_voxels": 227
+            }
+          },
+          "candidate_pve__candidate_bbr": {
+            "threshold_voxels_common": 18197,
+            "threshold_voxels_native_brain": 18219,
+            "threshold_voxels_candidate_brain": 18197,
+            "mask_vs_existing_fsl": {
+              "candidate_voxels": 18197,
+              "reference_voxels": 18370,
+              "dice": 0.9849864632045287,
+              "gained_voxels": 188,
+              "lost_voxels": 361
+            },
+            "pve_vs_existing_fsl": {
+              "values": 96820,
+              "pearson_r": 0.9991428691757861,
+              "mae": 0.009232116971351229,
+              "rmse": 0.01506539064190194,
+              "maximum_absolute_difference": 0.156623687595129,
+              "mean_signed_difference": 0.00034543449985700424
+            },
+            "voxels_near_threshold_0p78_to_0p82": 1917,
+            "sha256": "eb3c5aeab14beb10ad70001a91170d2e1f9ad5e7dd9b9332046f07f0143e4332",
+            "pve_vs_same_method_native_native": {
+              "values": 96820,
+              "pearson_r": 0.9991430141905852,
+              "mae": 0.00923135331908658,
+              "rmse": 0.015064155542855635,
+              "maximum_absolute_difference": 0.15662411227822304,
+              "mean_signed_difference": 0.0003456960143769209
+            },
+            "mask_vs_same_method_native_native": {
+              "candidate_voxels": 18197,
+              "reference_voxels": 18370,
+              "dice": 0.9849864632045287,
+              "gained_voxels": 188,
+              "lost_voxels": 361
+            }
+          }
+        }
+      },
+      "blur_effect": {
+        "native_pve__native_bbr": {
+          "pve_difference": {
+            "values": 96820,
+            "pearson_r": 0.9572959522149705,
+            "mae": 0.08654829830425663,
+            "rmse": 0.12973126382531464,
+            "maximum_absolute_difference": 0.7288323938846588,
+            "mean_signed_difference": -0.00012066680053451047
+          },
+          "mask_difference": {
+            "candidate_voxels": 18370,
+            "reference_voxels": 26027,
+            "dice": 0.8180282451516995,
+            "gained_voxels": 211,
+            "lost_voxels": 7868
+          }
+        },
+        "native_pve__candidate_bbr": {
+          "pve_difference": {
+            "values": 96820,
+            "pearson_r": 0.9573217850920245,
+            "mae": 0.0864924116257296,
+            "rmse": 0.12965520492522897,
+            "maximum_absolute_difference": 0.7513813823461533,
+            "mean_signed_difference": -0.0001068218950384443
+          },
+          "mask_difference": {
+            "candidate_voxels": 18372,
+            "reference_voxels": 26099,
+            "dice": 0.8167120145712936,
+            "gained_voxels": 212,
+            "lost_voxels": 7939
+          }
+        },
+        "candidate_pve__native_bbr": {
+          "pve_difference": {
+            "values": 96820,
+            "pearson_r": 0.9556517770029586,
+            "mae": 0.08868752041270718,
+            "rmse": 0.13179286322259284,
+            "maximum_absolute_difference": 0.7219655215740204,
+            "mean_signed_difference": -0.0001405064353471233
+          },
+          "mask_difference": {
+            "candidate_voxels": 18205,
+            "reference_voxels": 25959,
+            "dice": 0.8126075536636175,
+            "gained_voxels": 261,
+            "lost_voxels": 8015
+          }
+        },
+        "candidate_pve__candidate_bbr": {
+          "pve_difference": {
+            "values": 96820,
+            "pearson_r": 0.9556572526317658,
+            "mae": 0.08862652463586469,
+            "rmse": 0.13175084403032625,
+            "maximum_absolute_difference": 0.7711846455931664,
+            "mean_signed_difference": -0.00011510473618471199
+          },
+          "mask_difference": {
+            "candidate_voxels": 18197,
+            "reference_voxels": 26014,
+            "dice": 0.8114270204247812,
+            "gained_voxels": 260,
+            "lost_voxels": 8077
+          }
+        }
+      },
+      "stored_native_mask_matches_existing_fsl_threshold": true,
+      "stored_candidate_mask_vs_original_plain_sampling": {
+        "candidate_voxels": 26014,
+        "reference_voxels": 26014,
+        "dice": 1.0,
+        "gained_voxels": 0,
+        "lost_voxels": 0
+      }
+    },
+    "csf": {
+      "input_pve_common_t1": {
+        "values": 1393862,
+        "pearson_r": 0.9898944301322817,
+        "mae": 0.008860847041445716,
+        "rmse": 0.05464285250764743,
+        "maximum_absolute_difference": 1.0,
+        "mean_signed_difference": 0.0017875473582220577
+      },
+      "existing_fsl_mask_voxels_common": 4544,
+      "variants": {
+        "plain_trilinear": {
+          "native_pve__native_bbr": {
+            "threshold_voxels_common": 11675,
+            "threshold_voxels_native_brain": 12398,
+            "threshold_voxels_candidate_brain": 11822,
+            "mask_vs_existing_fsl": {
+              "candidate_voxels": 11675,
+              "reference_voxels": 4544,
+              "dice": 0.5574942968123805,
+              "gained_voxels": 7154,
+              "lost_voxels": 23
+            },
+            "pve_vs_existing_fsl": {
+              "values": 96820,
+              "pearson_r": 0.9357001545588575,
+              "mae": 0.08275410272833264,
+              "rmse": 0.12954057680769196,
+              "maximum_absolute_difference": 0.6618977263569832,
+              "mean_signed_difference": 0.0036660692956584726
+            },
+            "voxels_near_threshold_0p78_to_0p82": 834,
+            "sha256": "ed66e55d95b04a3b4ef75dac31fe7f4bd513e3e80ec532addd0e9443712ff507",
+            "pve_vs_same_method_native_native": {
+              "values": 96820,
+              "pearson_r": 0.9999999999999999,
+              "mae": 0.0,
+              "rmse": 0.0,
+              "maximum_absolute_difference": 0.0,
+              "mean_signed_difference": 0.0
+            },
+            "mask_vs_same_method_native_native": {
+              "candidate_voxels": 11675,
+              "reference_voxels": 11675,
+              "dice": 1.0,
+              "gained_voxels": 0,
+              "lost_voxels": 0
+            }
+          },
+          "native_pve__candidate_bbr": {
+            "threshold_voxels_common": 11670,
+            "threshold_voxels_native_brain": 12383,
+            "threshold_voxels_candidate_brain": 11819,
+            "mask_vs_existing_fsl": {
+              "candidate_voxels": 11670,
+              "reference_voxels": 4544,
+              "dice": 0.5574195140002467,
+              "gained_voxels": 7151,
+              "lost_voxels": 25
+            },
+            "pve_vs_existing_fsl": {
+              "values": 96820,
+              "pearson_r": 0.9349245595732422,
+              "mae": 0.08295390057525158,
+              "rmse": 0.12995428734653294,
+              "maximum_absolute_difference": 0.6274662800133228,
+              "mean_signed_difference": 0.0035834230638053144
+            },
+            "voxels_near_threshold_0p78_to_0p82": 825,
+            "sha256": "cf1f1f281d7d3e78f51cba4e1b9a5dafc039fb2286ceffd795e23450c7b98d60",
+            "pve_vs_same_method_native_native": {
+              "values": 96820,
+              "pearson_r": 0.9978104649434837,
+              "mae": 0.00974921460279237,
+              "rmse": 0.02222236005888732,
+              "maximum_absolute_difference": 0.20954126119613647,
+              "mean_signed_difference": -8.264623185315849e-05
+            },
+            "mask_vs_same_method_native_native": {
+              "candidate_voxels": 11670,
+              "reference_voxels": 11675,
+              "dice": 0.967487684729064,
+              "gained_voxels": 377,
+              "lost_voxels": 382
+            }
+          },
+          "candidate_pve__native_bbr": {
+            "threshold_voxels_common": 11836,
+            "threshold_voxels_native_brain": 12487,
+            "threshold_voxels_candidate_brain": 11985,
+            "mask_vs_existing_fsl": {
+              "candidate_voxels": 11836,
+              "reference_voxels": 4544,
+              "dice": 0.5477411477411478,
+              "gained_voxels": 7350,
+              "lost_voxels": 58
+            },
+            "pve_vs_existing_fsl": {
+              "values": 96820,
+              "pearson_r": 0.9295377396467353,
+              "mae": 0.08505289392264638,
+              "rmse": 0.13404953826970853,
+              "maximum_absolute_difference": 0.6879388093948364,
+              "mean_signed_difference": 0.005522638054015489
+            },
+            "voxels_near_threshold_0p78_to_0p82": 842,
+            "sha256": "22a7ce6ac210c23b0b1f5158b3a489e22798cec7157bffc3623f7871ebc7b58e",
+            "pve_vs_same_method_native_native": {
+              "values": 96820,
+              "pearson_r": 0.9942808468270345,
+              "mae": 0.009021663281588349,
+              "rmse": 0.035998573763500914,
+              "maximum_absolute_difference": 0.8730746209621429,
+              "mean_signed_difference": 0.0018565687583570148
+            },
+            "mask_vs_same_method_native_native": {
+              "candidate_voxels": 11836,
+              "reference_voxels": 11675,
+              "dice": 0.9624431117349326,
+              "gained_voxels": 522,
+              "lost_voxels": 361
+            }
+          },
+          "candidate_pve__candidate_bbr": {
+            "threshold_voxels_common": 11821,
+            "threshold_voxels_native_brain": 12465,
+            "threshold_voxels_candidate_brain": 11968,
+            "mask_vs_existing_fsl": {
+              "candidate_voxels": 11821,
+              "reference_voxels": 4544,
+              "dice": 0.5475099297280782,
+              "gained_voxels": 7341,
+              "lost_voxels": 64
+            },
+            "pve_vs_existing_fsl": {
+              "values": 96820,
+              "pearson_r": 0.9286058640135191,
+              "mae": 0.08526400099497002,
+              "rmse": 0.13454068128782926,
+              "maximum_absolute_difference": 0.7094211578369141,
+              "mean_signed_difference": 0.005417540087726167
+            },
+            "voxels_near_threshold_0p78_to_0p82": 892,
+            "sha256": "2a6a8c183ffa29267a6dc7657e2a78339f35bd90c9bb41ce88a6e81250a2c5b6",
+            "pve_vs_same_method_native_native": {
+              "values": 96820,
+              "pearson_r": 0.9920537563908994,
+              "mae": 0.016198140994634343,
+              "rmse": 0.0423992793818443,
+              "maximum_absolute_difference": 0.789721667766571,
+              "mean_signed_difference": 0.0017514707920676946
+            },
+            "mask_vs_same_method_native_native": {
+              "candidate_voxels": 11821,
+              "reference_voxels": 11675,
+              "dice": 0.9403302689819544,
+              "gained_voxels": 774,
+              "lost_voxels": 628
+            }
+          }
+        },
+        "flirt_applyxfm": {
+          "native_pve__native_bbr": {
+            "threshold_voxels_common": 4543,
+            "threshold_voxels_native_brain": 4726,
+            "threshold_voxels_candidate_brain": 4579,
+            "mask_vs_existing_fsl": {
+              "candidate_voxels": 4543,
+              "reference_voxels": 4544,
+              "dice": 0.9998899526796523,
+              "gained_voxels": 0,
+              "lost_voxels": 1
+            },
+            "pve_vs_existing_fsl": {
+              "values": 96820,
+              "pearson_r": 0.9999999995549963,
+              "mae": 4.374341462449901e-06,
+              "rmse": 7.819918599462868e-06,
+              "maximum_absolute_difference": 5.689263343811035e-05,
+              "mean_signed_difference": 1.4434254784083585e-07
+            },
+            "voxels_near_threshold_0p78_to_0p82": 1160,
+            "sha256": "95592ccd4c91d50cfa409855a4d48f1d3a72f59a2b7e570c626897840aabe36d",
+            "pve_vs_same_method_native_native": {
+              "values": 96820,
+              "pearson_r": 0.9999999999999999,
+              "mae": 0.0,
+              "rmse": 0.0,
+              "maximum_absolute_difference": 0.0,
+              "mean_signed_difference": 0.0
+            },
+            "mask_vs_same_method_native_native": {
+              "candidate_voxels": 4543,
+              "reference_voxels": 4543,
+              "dice": 1.0,
+              "gained_voxels": 0,
+              "lost_voxels": 0
+            }
+          },
+          "native_pve__candidate_bbr": {
+            "threshold_voxels_common": 4517,
+            "threshold_voxels_native_brain": 4701,
+            "threshold_voxels_candidate_brain": 4553,
+            "mask_vs_existing_fsl": {
+              "candidate_voxels": 4517,
+              "reference_voxels": 4544,
+              "dice": 0.9681050656660413,
+              "gained_voxels": 131,
+              "lost_voxels": 158
+            },
+            "pve_vs_existing_fsl": {
+              "values": 96820,
+              "pearson_r": 0.9993964469888189,
+              "mae": 0.005351033002433744,
+              "rmse": 0.009104593530756851,
+              "maximum_absolute_difference": 0.058676451444625854,
+              "mean_signed_difference": -8.926881716195846e-05
+            },
+            "voxels_near_threshold_0p78_to_0p82": 1149,
+            "sha256": "5bd444fd0834ac72c6fbc34c971122bcbf126ca873d17868d6b305656d9f6e98",
+            "pve_vs_same_method_native_native": {
+              "values": 96820,
+              "pearson_r": 0.9993968220633208,
+              "mae": 0.005349936307217323,
+              "rmse": 0.00910176702557351,
+              "maximum_absolute_difference": 0.058619558811187744,
+              "mean_signed_difference": -8.94131597097993e-05
+            },
+            "mask_vs_same_method_native_native": {
+              "candidate_voxels": 4517,
+              "reference_voxels": 4543,
+              "dice": 0.9682119205298013,
+              "gained_voxels": 131,
+              "lost_voxels": 157
+            }
+          },
+          "candidate_pve__native_bbr": {
+            "threshold_voxels_common": 4306,
+            "threshold_voxels_native_brain": 4453,
+            "threshold_voxels_candidate_brain": 4338,
+            "mask_vs_existing_fsl": {
+              "candidate_voxels": 4306,
+              "reference_voxels": 4544,
+              "dice": 0.9581920903954803,
+              "gained_voxels": 66,
+              "lost_voxels": 304
+            },
+            "pve_vs_existing_fsl": {
+              "values": 96820,
+              "pearson_r": 0.9988016194615903,
+              "mae": 0.006950875354573412,
+              "rmse": 0.013039106677462551,
+              "maximum_absolute_difference": 0.18359088897705078,
+              "mean_signed_difference": 0.0017959415258528952
+            },
+            "voxels_near_threshold_0p78_to_0p82": 1142,
+            "sha256": "5dd61ec50eb628d6bde19f8dec1a5f2f84e4e2901c69b1418d890bc94d9ac2dd",
+            "pve_vs_same_method_native_native": {
+              "values": 96820,
+              "pearson_r": 0.9988016420260922,
+              "mae": 0.006950791571634294,
+              "rmse": 0.013038969417964862,
+              "maximum_absolute_difference": 0.18358778953552246,
+              "mean_signed_difference": 0.0017957971833050545
+            },
+            "mask_vs_same_method_native_native": {
+              "candidate_voxels": 4306,
+              "reference_voxels": 4543,
+              "dice": 0.9583003729234941,
+              "gained_voxels": 66,
+              "lost_voxels": 303
+            }
+          },
+          "candidate_pve__candidate_bbr": {
+            "threshold_voxels_common": 4300,
+            "threshold_voxels_native_brain": 4448,
+            "threshold_voxels_candidate_brain": 4332,
+            "mask_vs_existing_fsl": {
+              "candidate_voxels": 4300,
+              "reference_voxels": 4544,
+              "dice": 0.9407507914970602,
+              "gained_voxels": 140,
+              "lost_voxels": 384
+            },
+            "pve_vs_existing_fsl": {
+              "values": 96820,
+              "pearson_r": 0.9981123789706022,
+              "mae": 0.009600571924327254,
+              "rmse": 0.016255278040198617,
+              "maximum_absolute_difference": 0.19907301664352417,
+              "mean_signed_difference": 0.0017059587134060305
+            },
+            "voxels_near_threshold_0p78_to_0p82": 1154,
+            "sha256": "c9a7a282b05dd841e3a191b03e456b9da94234843fe53ce0f99a05be1686e3fa",
+            "pve_vs_same_method_native_native": {
+              "values": 96820,
+              "pearson_r": 0.9981127816476754,
+              "mae": 0.009599558938500468,
+              "rmse": 0.01625357492864072,
+              "maximum_absolute_difference": 0.19906991720199585,
+              "mean_signed_difference": 0.0017058143708581898
+            },
+            "mask_vs_same_method_native_native": {
+              "candidate_voxels": 4300,
+              "reference_voxels": 4543,
+              "dice": 0.9408571751667986,
+              "gained_voxels": 140,
+              "lost_voxels": 383
+            }
+          }
+        }
+      },
+      "blur_effect": {
+        "native_pve__native_bbr": {
+          "pve_difference": {
+            "values": 96820,
+            "pearson_r": 0.9356999724148016,
+            "mae": 0.08275420350397214,
+            "rmse": 0.12954069487705416,
+            "maximum_absolute_difference": 0.661897674202919,
+            "mean_signed_difference": -0.0036659249531106317
+          },
+          "mask_difference": {
+            "candidate_voxels": 4543,
+            "reference_voxels": 11675,
+            "dice": 0.5574053520779381,
+            "gained_voxels": 23,
+            "lost_voxels": 7155
+          }
+        },
+        "native_pve__candidate_bbr": {
+          "pve_difference": {
+            "values": 96820,
+            "pearson_r": 0.93559941426092,
+            "mae": 0.08277987116585003,
+            "rmse": 0.12957112541991456,
+            "maximum_absolute_difference": 0.6241242475807667,
+            "mean_signed_difference": -0.0036726918809672723
+          },
+          "mask_difference": {
+            "candidate_voxels": 4517,
+            "reference_voxels": 11670,
+            "dice": 0.5553839500834002,
+            "gained_voxels": 22,
+            "lost_voxels": 7175
+          }
+        },
+        "candidate_pve__native_bbr": {
+          "pve_difference": {
+            "values": 96820,
+            "pearson_r": 0.9330426796385506,
+            "mae": 0.08520619924615697,
+            "rmse": 0.13238767303904403,
+            "maximum_absolute_difference": 0.6589433401823044,
+            "mean_signed_difference": -0.003726696528162592
+          },
+          "mask_difference": {
+            "candidate_voxels": 4306,
+            "reference_voxels": 11836,
+            "dice": 0.5297980423739314,
+            "gained_voxels": 30,
+            "lost_voxels": 7560
+          }
+        },
+        "candidate_pve__candidate_bbr": {
+          "pve_difference": {
+            "values": 96820,
+            "pearson_r": 0.9328845447324345,
+            "mae": 0.08521542579788001,
+            "rmse": 0.1324455092099831,
+            "maximum_absolute_difference": 0.6592630445957184,
+            "mean_signed_difference": -0.003711581374320137
+          },
+          "mask_difference": {
+            "candidate_voxels": 4300,
+            "reference_voxels": 11821,
+            "dice": 0.5301159977668879,
+            "gained_voxels": 27,
+            "lost_voxels": 7548
+          }
+        }
+      },
+      "stored_native_mask_matches_existing_fsl_threshold": true,
+      "stored_candidate_mask_vs_original_plain_sampling": {
+        "candidate_voxels": 11821,
+        "reference_voxels": 11821,
+        "dice": 1.0,
+        "gained_voxels": 0,
+        "lost_voxels": 0
+      }
+    }
+  },
+  "sha256": {
+    "inputs": {
+      "reference": "ff4e0e49a504527468234456cba6ad367d63c1f3f529d8ff3519bc78e2076323",
+      "native_epi_mask": "8148636e405a0881d68fa24b5a6a6852e08641ef5b88f400c1e7f5778f54695c",
+      "candidate_epi_mask": "67ec5fbf51c85eab71332a3a4360b058e3a657d0b8dcd87e8268fa5f9ef2891d",
+      "native_t1_to_epi_fsl": "9dd92e4281be00eaed52464796c183f94bfef964a2ab484f61ac89ed7cea0336",
+      "candidate_t1_to_epi_world": "0074cd8ad4e254eb75e5391a63f53ac9893981f49292174a96d1e8b51e59a592",
+      "native_t1_mask": "e7880c2ac50e4f8b40017418e764492cbd72282b58a5b8c01910ffc6672aa411",
+      "candidate_t1_mask": "b4aa066ff027a3b8b24b132ba3b1880049e97a43e96bfe34f276dcbd192d99c9",
+      "wm_reused_plain_trilinear": "fe16add9e10acb8cdf7752ffb989243e7e21962618efcfa6ddc67160d2e36d67",
+      "wm_reused_flirt_applyxfm": "287bb4a3a3102abfba23db82527e90e014ce5caaeb6790663e0b92e8be3351eb",
+      "wm_native_mask": "38629e6ce17c2596fae0b6b77fe56dc78ed7c7467cd699d5d61b42ea3730ca3d",
+      "wm_candidate_mask": "3313fa404b64f84d99e662648d73d58e6329b4b593eeb3ec056029e40291b7f7",
+      "wm_native_pve": "413952314e99b8527fd0339fa8b363ea5acf591857e4afc3b299972b7d32b474",
+      "wm_candidate_pve": "383a2a60cb0260a752a0851f37866be6d1515ebabe038b4427170ccdf7be20b7",
+      "wm_native_resampled": "ac97287e8771fad83560a531dfbfb84f3091f0420c76e55a689d60f4d6956309",
+      "csf_reused_plain_trilinear": "dbb5f23caaacc48834b21de74211c342363dd7c8c31f061446e4926dc7d90acc",
+      "csf_reused_flirt_applyxfm": "abafa6942347866f545f2e9c4026841ff69bb24d54666b274eadc819b77a9d5e",
+      "csf_native_mask": "ccb625beecbc46e69acec47e096ebaafc43a622684cfa7b8e15e82babadf24fa",
+      "csf_candidate_mask": "fd4a60aed8b2177db74be9b63011df5dead5f5b87ebab4a423a7a772c3520cf7",
+      "csf_native_pve": "e077dd9bd152e29c78c5cb9de6d4ff19d302347caebb18f17dc1af8457ffdc4a",
+      "csf_candidate_pve": "e32bbc641763872dc5448c2c42594a7cfa694a305aba38064a32a42a28ad6f0f",
+      "csf_native_resampled": "e634856056b21ae65a01023cd4b666bfc05b5fa7270751a7c6d9e1fb1ea0f66a"
+    },
+    "common_epi_mask": "afa7f2bf79a9c7c00e41a04f3115adbe426d682b982d47381b71fac216a7e3bd",
+    "script": "5675c55a5510a9bb354d5a2a10611ca59e06add22b88f55f6578c9a278fca2ba",
+    "implementation": {
+      "src/fnit/flirt/core.py": "e6ce6185fafb89666be631069f66e96ce9c6a561ab3d7c7fab4c661d317885c1",
+      "src/fnit/fmri/normalization.py": "314b856e50083d7496c0c541767511437010829e61543f259839d83f00ce29bb"
+    }
+  },
+  "software": {
+    "python": "3.11.16",
+    "numpy": "1.26.4",
+    "nibabel": "5.4.2",
+    "torch": "2.5.1",
+    "device": "cuda:0"
+  },
+  "limits": [
+    "Crosses change one estimator at a time on a common grid/mask; threshold counts are nonlinear and effects are not additive.",
+    "The original-input numerical FSL oracle is verified separately; reused outputs retain their file hashes."
+  ],
+  "privacy": "Anonymous scalar metrics and hashes only; source paths, arrays and commands remain private."
+}

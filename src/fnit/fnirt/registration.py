@@ -14,7 +14,6 @@ from dataclasses import dataclass
 import math
 import warnings
 
-import nibabel as nib
 import numpy as np
 import torch
 
@@ -319,31 +318,44 @@ def spm_like_mean(data):
 
 def _fsl_gaussian_blur(volume, fwhm_mm, voxel_sizes):
     """Separable zero-padded Gaussian used by ``newimage::smooth``."""
-    if fwhm_mm <= 0:
-        return volume
-    result = volume
-    sigma_mm = np.float32(
-        float(fwhm_mm) / math.sqrt(8.0 * math.log(2.0))
-    )
-    for axis, voxel_size in enumerate(voxel_sizes):
+    if volume.is_cuda and volume.dtype == torch.float32 and fwhm_mm > 0:
+        try:
+            from ._smoothing_triton import gaussian_blur_cuda
+        except ImportError:
+            pass
+        else:
+            return gaussian_blur_cuda(volume, _fsl_gaussian_kernels(fwhm_mm, voxel_sizes))
+    return _fsl_gaussian_blur_reference(volume, fwhm_mm, voxel_sizes)
+
+
+def _fsl_gaussian_kernels(fwhm_mm, voxel_sizes):
+    """Generate the float Gaussian entries and double normalisation in FSL."""
+    kernels = []
+    sigma_mm = np.float32(float(fwhm_mm) / math.sqrt(8.0 * math.log(2.0)))
+    for voxel_size in voxel_sizes:
         sigma = np.float32(sigma_mm / np.float32(voxel_size))
         radius = int(np.float32(sigma - np.float32(0.001))) * 2 + 3
         values = []
         total = np.float32(0.0)
         for offset in range(-radius, radius + 1):
-            if sigma > np.float32(1e-6):
-                value = np.float32(
-                    math.exp(
-                        -(offset * offset)
-                        / (2.0 * float(sigma) * float(sigma))
-                    )
-                )
-            else:
-                value = np.float32(1.0 if offset == 0 else 0.0)
+            value = (
+                np.float32(math.exp(-(offset * offset) / (2.0 * float(sigma) * float(sigma))))
+                if sigma > np.float32(1e-6)
+                else np.float32(1.0 if offset == 0 else 0.0)
+            )
             values.append(value)
             total = np.float32(total + value)
-        kernel = tuple(float(value) * (1.0 / float(total)) for value in values)
+        kernels.append(tuple(float(value) * (1.0 / float(total)) for value in values))
+    return tuple(kernels)
 
+
+def _fsl_gaussian_blur_reference(volume, fwhm_mm, voxel_sizes):
+    """Offset-serial implementation, also used without optional Triton."""
+    if fwhm_mm <= 0:
+        return volume
+    result = volume
+    for axis, kernel in enumerate(_fsl_gaussian_kernels(fwhm_mm, voxel_sizes)):
+        radius = len(kernel) // 2
         convolved = torch.zeros_like(result)
         dimension = axis + 2
         length = result.shape[dimension]
@@ -367,17 +379,18 @@ def _fsl_gaussian_blur(volume, fwhm_mm, voxel_sizes):
     return result
 
 
-def _fsl_masked_gaussian_blur(volume, fwhm_mm, voxel_sizes, mask):
+def _fsl_masked_gaussian_blur(volume, fwhm_mm, voxel_sizes, mask, *, execution="optimized"):
     """FSL ``fnirt_CF::masked_smoothing`` for an input image."""
+    blur = _fsl_gaussian_blur if execution == "optimized" else _fsl_gaussian_blur_reference
     if fwhm_mm <= 0 or mask is None:
-        return _fsl_gaussian_blur(volume, fwhm_mm, voxel_sizes)
+        return blur(volume, fwhm_mm, voxel_sizes)
     if volume.ndim != 5 or mask.ndim != 3 or volume.shape[2:] != mask.shape:
         raise ValueError("masked smoothing expects [N,C,X,Y,Z] and [X,Y,Z]")
     mask_image = mask.to(dtype=volume.dtype)[None, None]
-    numerator = _fsl_gaussian_blur(
+    numerator = blur(
         volume * mask_image, fwhm_mm, voxel_sizes
     )
-    denominator = _fsl_gaussian_blur(mask_image, fwhm_mm, voxel_sizes)
+    denominator = blur(mask_image, fwhm_mm, voxel_sizes)
     return torch.where(
         mask_image > 0,
         numerator / denominator.clamp_min(torch.finfo(volume.dtype).tiny),
@@ -566,14 +579,17 @@ def _fsl_affine_grid(affine, shape):
     return torch.stack(rows)
 
 
-def _fsl_displacement_coordinates(field, coordinate_affine, mm_to_voxel):
+def _fsl_displacement_coordinates(field, coordinate_affine, mm_to_voxel, *, affine_grid=None):
     """Coordinates from ``warpfns::displacements_no_iT``.
 
     ``coordinate_affine`` is ``inverse(FLIRT) @ target.sampling_mat`` in
     double precision.  warpfns casts its entries and those of
     ``source.sampling_mat().i()`` to float before evaluating the expressions.
     """
-    source_mm = _fsl_affine_grid(coordinate_affine, field.shape[1:])
+    source_mm = (
+        _fsl_affine_grid(coordinate_affine, field.shape[1:])
+        if affine_grid is None else affine_grid
+    )
     source_mm = torch.stack(
         tuple(source_mm[axis] + field[axis] for axis in range(3))
     )
@@ -792,6 +808,10 @@ class _LevelSystem:
         self.regularization = float(regularization)
         self.ssd_weighted_lambda = bool(ssd_weighted_lambda)
         self.estimate_scale = bool(estimate_scale)
+        self.affine_grid = (
+            None if coordinate_affine is None
+            else _fsl_affine_grid(coordinate_affine, fixed.shape)
+        )
 
     def evaluate(self, coefficients, scale, *, derivatives=False):
         # basisfield coefficients and spline arithmetic are double precision;
@@ -815,7 +835,8 @@ class _LevelSystem:
             )
         else:
             source_voxels = _fsl_displacement_coordinates(
-                field, self.coordinate_affine, self.moving_fsl2vox
+                field, self.coordinate_affine, self.moving_fsl2vox,
+                affine_grid=self.affine_grid,
             )
         warped, valid, gradient_voxels = _trilinear_sample(
             self.moving, source_voxels
@@ -934,14 +955,14 @@ class _LevelSystem:
         # same float Hadamard products here; composing forward/adjoint in
         # double would silently use different weights after the first warp.
         spatial_weights = tuple(
-            tuple(mask * gradient_fsl[row] * gradient_fsl[column] for column in range(3))
+            tuple((mask * gradient_fsl[row] * gradient_fsl[column]).to(coefficients.dtype) for column in range(3))
             for row in range(3)
         )
         cross_weights = None
         scale_weight = None
         if self.estimate_scale:
             cross_weights = tuple(
-                -(mask * gradient_fsl[axis] * self.fixed) for axis in range(3)
+                (-(mask * gradient_fsl[axis] * self.fixed)).to(coefficients.dtype) for axis in range(3)
             )
             scale_weight = (mask * self.fixed * self.fixed).sum(
                 dtype=coefficients.dtype
@@ -955,21 +976,16 @@ class _LevelSystem:
             dense = torch.zeros_like(delta_field)
             for row in range(3):
                 for column in range(3):
-                    dense[row] = dense[row] + spatial_weights[row][column].to(
-                        coefficients.dtype
-                    ) * delta_field[column]
+                    dense[row] = dense[row] + spatial_weights[row][column] * delta_field[column]
                 if delta_scale is not None:
-                    dense[row] = dense[row] + cross_weights[row].to(
-                        coefficients.dtype
-                    ) * delta_scale
+                    dense[row] = dense[row] + cross_weights[row] * delta_scale
             coefficient_result = adjoint_field(dense / count, self.bases)
             scale_result = None
             if delta_scale is not None:
                 scale_result = scale_weight * delta_scale
                 for column in range(3):
                     scale_result = scale_result + (
-                        cross_weights[column].to(coefficients.dtype)
-                        * delta_field[column]
+                        cross_weights[column] * delta_field[column]
                     ).sum() / count
             return _pack(coefficient_result, scale_result)
 
@@ -1156,7 +1172,11 @@ class TorchFNIRT:
         cost_tolerance=1e-8,
         initial_lm_lambda=0.1,
         strict_topology=False,
+        execution="optimized",
     ):
+        if execution not in ("reference", "optimized"):
+            raise ValueError("execution must be reference or optimized")
+        self.execution = execution
         self.device = torch.device(device)
         if self.device.type == "cuda" and not torch.cuda.is_available():
             raise RuntimeError("CUDA was requested but is not available")
@@ -1200,6 +1220,10 @@ class TorchFNIRT:
             mask_data = np.asanyarray(selected_mask.dataobj).squeeze() > 0.5
 
         device = self.device
+        # newimage reads sampling_mat and physical resolutions from pixdim;
+        # a sheared sform's column norms are a different quantity.
+        moving_voxel_sizes = tuple(float(value) for value in moving.header.get_zooms()[:3])
+        fixed_voxel_sizes = tuple(float(value) for value in fixed.header.get_zooms()[:3])
         image_dtype = torch.float32
         dtype = torch.float64
         moving_raw = torch.from_numpy(moving_data.copy()).to(device)
@@ -1234,10 +1258,10 @@ class TorchFNIRT:
         )
 
         moving_fsl_array = voxel_to_fsl_scaled_mm(
-            moving.affine, moving_data.shape, nib.affines.voxel_sizes(moving.affine)
+            moving.affine, moving_data.shape, moving_voxel_sizes
         )
         fixed_fsl_array = voxel_to_fsl_scaled_mm(
-            fixed.affine, fixed_data.shape, nib.affines.voxel_sizes(fixed.affine)
+            fixed.affine, fixed_data.shape, fixed_voxel_sizes
         )
         forward_array = world_to_flirt_affine(
             initial,
@@ -1245,8 +1269,8 @@ class TorchFNIRT:
             fixed.affine,
             moving_data.shape,
             fixed_data.shape,
-            nib.affines.voxel_sizes(moving.affine),
-            nib.affines.voxel_sizes(fixed.affine),
+            moving_voxel_sizes,
+            fixed_voxel_sizes,
         )
         moving_fsl_exact = torch.as_tensor(
             moving_fsl_array, device=device, dtype=dtype
@@ -1263,8 +1287,6 @@ class TorchFNIRT:
         stage_forward_array = np.asarray(forward_array, dtype=np.float64)
 
         fixed_shape = tuple(int(value) for value in fixed_data.shape)
-        fixed_voxel_sizes = tuple(float(value) for value in nib.affines.voxel_sizes(fixed.affine))
-        moving_voxel_sizes = tuple(float(value) for value in nib.affines.voxel_sizes(moving.affine))
         resolution_schedule = self.config.warp_resolution_schedule_mm
         if resolution_schedule is None:
             resolution_schedule = (self.config.warp_resolution_mm,) * len(
@@ -1437,6 +1459,7 @@ class TorchFNIRT:
                 bias_bending = BendingOperator(
                     level_shape, t1_bias_spacing, level_voxel_sizes,
                     device=device, dtype=dtype,
+                    execution=self.execution,
                 )
 
             moving_level = _fsl_masked_gaussian_blur(
@@ -1444,8 +1467,10 @@ class TorchFNIRT:
                 input_fwhm,
                 moving_voxel_sizes,
                 implicit_input_mask,
+                execution=self.execution,
             )[0, 0]
-            fixed_smoothed = _fsl_gaussian_blur(
+            blur = _fsl_gaussian_blur if self.execution == "optimized" else _fsl_gaussian_blur_reference
+            fixed_smoothed = blur(
                 fixed_tensor[None, None], reference_fwhm, fixed_voxel_sizes
             )[0, 0]
             fixed_level = _take_integer_grid(fixed_smoothed, full_positions)
@@ -1478,6 +1503,7 @@ class TorchFNIRT:
                 level_voxel_sizes,
                 device=device,
                 dtype=dtype,
+                execution=self.execution,
             )
             system = _LevelSystem(
                 moving_level,
@@ -1604,6 +1630,7 @@ class TorchFNIRT:
                         diagonal=(1 + lm_lambda) * damping_diagonal,
                         tolerance=self.pcg_tolerance,
                         max_iterations=self.pcg_max_iterations,
+                        execution=self.execution,
                     )
                     pcg_reports.append(
                         {
@@ -1841,6 +1868,7 @@ class TorchFNIRT:
         pull_transform = DenseWarp(
             displacement_array, source=moving, target=fixed
         )
+        pull_transform.header["pixdim"][1:4] = fixed_voxel_sizes
         full_world, _, affine_pull_determinant = _pull_jacobian_determinants(
             displacement_array,
             fixed.affine,
@@ -1850,8 +1878,8 @@ class TorchFNIRT:
                 fixed.affine,
                 moving_data.shape,
                 fixed_data.shape,
-                nib.affines.voxel_sizes(moving.affine),
-                nib.affines.voxel_sizes(fixed.affine),
+                moving_voxel_sizes,
+                fixed_voxel_sizes,
             ),
             device=device,
         )
@@ -1873,6 +1901,8 @@ class TorchFNIRT:
         )
         qc = {
             "backend": "pytorch-fnirt",
+            "execution": self.execution,
+            "bending_normal": "coefficient-space Gram" if self.execution == "optimized" else "dense forward-adjoint",
             "device": str(self.device),
             "tf32": {
                 "matmul": bool(torch.backends.cuda.matmul.allow_tf32),
@@ -1932,12 +1962,17 @@ class TorchFNIRT:
             "full_pull_jacobian_min": float(full_world.min()),
             "full_pull_jacobian_max": float(full_world.max()),
         }
+        def output_image(array):
+            image = new_image(array, fixed)
+            image.header["pixdim"][1:4] = fixed_voxel_sizes
+            return image
+
         return TorchFNIRTResult(
-            moved=new_image(moved_array, fixed),
+            moved=output_image(moved_array),
             pull_transform=pull_transform,
-            full_pull_jacobian=new_image(full_array, fixed),
-            nonlinear_jacobian=new_image(nonlinear_array, fixed),
-            modulated_gm=new_image(moved_array * nonlinear_array, fixed),
+            full_pull_jacobian=output_image(full_array),
+            nonlinear_jacobian=output_image(nonlinear_array),
+            modulated_gm=output_image(moved_array * nonlinear_array),
             affine_pull_determinant=float(affine_pull_determinant),
             coefficients=coefficient_array,
             coefficient_image=coefficient_image,

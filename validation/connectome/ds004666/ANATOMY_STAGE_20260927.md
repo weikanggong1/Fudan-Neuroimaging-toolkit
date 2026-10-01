@@ -36,12 +36,13 @@ PyTorch 与软件参考共用这些文件。仓库脚本均有 `--help`，给出
 python tools/benchmark_connectome_anatomy.py --aparc-aseg aparc+aseg.mgz \
   --reference-5tt reference_5tt_t1.nii.gz \
   --reference-gmwmi reference_gmwmi_t1.nii.gz --device cuda:0 --output 5tt.json
-python tools/benchmark_connectome_registration.py --b0 b0_brain.nii.gz \
-  --t1 t1_brain.nii.gz --fsl-matrix diff2struct_fsl.txt \
-  --device cuda:0 --output registration.json
-python tools/benchmark_connectome_registration_resample.py --b0 b0_brain.nii.gz \
-  --t1 t1_brain.nii.gz --fsl-matrix diff2struct_fsl.txt \
-  --scratch scratch --device cuda:0 --output resample.json
+# 先保存官方矩阵对应的直接重采样图，再由 FNIT 读取这份 oracle。
+flirt -in b0_brain.nii.gz -ref t1_brain.nii.gz -applyxfm \
+  -init diff2struct_fsl.txt -out b0_in_t1_fsl.nii.gz
+python tools/benchmark_flirt_gpu.py --moving b0_brain.nii.gz \
+  --reference t1_brain.nii.gz --fsl-matrix diff2struct_fsl.txt \
+  --fsl-moved b0_in_t1_fsl.nii.gz --dof 6 --cost normmi \
+  --device cuda:0 --execution batched --output-dir registration_benchmark
 python tools/benchmark_connectome_atlas.py --atlas-t1 aparc+aseg.mgz \
   --dwi-reference b0_brain.nii.gz --fsl-matrix diff2struct_fsl.txt \
   --mrtrix-atlas-dwi reference_aparc_dwi.nii.gz \

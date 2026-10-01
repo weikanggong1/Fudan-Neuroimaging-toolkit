@@ -1,0 +1,95 @@
+{
+  "source_revision": "86f96b59aef1a5d8d1ab865c32723ff1a72eb451",
+  "scope": "Complete real 490-frame original MCFLIRT output and original SynthStrip EPI mask, held fixed; production FNIT scaling/highpass against original fslmaths. No new motion/registration/ICA or full pipeline.",
+  "input_sha256": {
+    "corrected": "1dc77bf11be1517c4583c0635d4299006db12625adc89dd2ce2b12f7761aea13",
+    "mask": "8148636e405a0881d68fa24b5a6a6852e08641ef5b88f400c1e7f5778f54695c",
+    "native_scaled": "2fdfab628af59431377c9a9d50daa3f8a7f0e94e731287826bbd969071912bd9",
+    "native_filtered": "47897cbd6ccce263e0ff326fd154b3812076127d469c9a1ac9d10f101ca5f6d9"
+  },
+  "source_sha256": {
+    "fnit_temporal": "b0a3fc14751a6a7cd9ce7c66ac8fe7b3fc4bea43f4039ef5b03d5af47e3d7b08",
+    "private_diagnostic_script": "832d2a8d8aa330701ca9f3aa3639e23649a1b027909fba3ccd85aeedaf4b4a59"
+  },
+  "data": {
+    "anonymous_id": "real_run_01",
+    "shape": [
+      88,
+      88,
+      64,
+      490
+    ],
+    "brain_mask_voxels": 99372,
+    "tr_seconds": 0.735
+  },
+  "parameters": {
+    "target_median": 10000.0,
+    "highpass_cutoff_seconds": 100.0,
+    "sigma_volumes": 68.02721088435375,
+    "preserve_mean": true,
+    "additional_temporal_filtering": false
+  },
+  "scaling_factor": {
+    "native": 1.4359563469270533,
+    "fnit_derived": 1.4359563469270533,
+    "exactly_equal": true
+  },
+  "scaling_only": {
+    "brain_voxels": 99372,
+    "evaluated_values": 48692280,
+    "mae": 0.0,
+    "rmse": 0.0,
+    "max_absolute_difference": 0.0,
+    "pooled_pearson_r": 1.0,
+    "valid_voxel_temporal_r": 99372,
+    "mean_voxel_temporal_r": 1.0,
+    "median_voxel_temporal_r": 1.0,
+    "p05_voxel_temporal_r": 1.0,
+    "pooled_time_demeaned_r": 1.0,
+    "per_voxel_temporal_rms_threshold": 1e-06
+  },
+  "timing_seconds": {
+    "production_scaling_call": 2.0028104200027883,
+    "production_scaling_fixed_factor_highpass_call": 7.828989292029291,
+    "production_highpass_only_call": 7.642449378967285
+  },
+  "software": {
+    "python_torch": "2.5.1",
+    "torch_cuda": "11.8",
+    "device": "cuda:0"
+  },
+  "privacy": "Anonymous scalars and hashes only. Inputs and diagnostic script remain private.",
+  "scaling_fixed_native_factor_plus_highpass": {
+    "brain_voxels": 99372,
+    "evaluated_values": 48692280,
+    "mae": 0.00022376315040150815,
+    "rmse": 0.0005059851870563233,
+    "max_absolute_difference": 0.00390625,
+    "pooled_pearson_r": 0.9999999999999957,
+    "valid_voxel_temporal_r": 99372,
+    "mean_voxel_temporal_r": 0.9999999999986106,
+    "median_voxel_temporal_r": 0.9999999999991442,
+    "p05_voxel_temporal_r": 0.9999999999961944,
+    "pooled_time_demeaned_r": 0.9999999999991681,
+    "per_voxel_temporal_rms_threshold": 1e-06
+  },
+  "outside_brain_mask_max_abs": 0.0,
+  "highpass_only_fixed_native_scaled_input": {
+    "brain_voxels": 99372,
+    "evaluated_values": 48692280,
+    "mae": 0.00022376315040150815,
+    "rmse": 0.0005059851870563233,
+    "max_absolute_difference": 0.00390625,
+    "pooled_pearson_r": 0.9999999999999957,
+    "valid_voxel_temporal_r": 99372,
+    "mean_voxel_temporal_r": 0.9999999999986106,
+    "median_voxel_temporal_r": 0.9999999999991442,
+    "p05_voxel_temporal_r": 0.9999999999961944,
+    "pooled_time_demeaned_r": 0.9999999999991681,
+    "per_voxel_temporal_rms_threshold": 1e-06
+  },
+  "cuda_peak_allocated_bytes": 163991552,
+  "cuda_peak_reserved_bytes": 190840832,
+  "native_fslmaths_binary_sha256": "81898048ff97fccd67ef0231b419359f82597e5c592427a10fe10333e7f40e12",
+  "timing_scope": "Production calls include host/device transfers and returned float32 output. Image loading, hashing and comparison excluded; shared GPU observation, not controlled full-pipeline speedup."
+}

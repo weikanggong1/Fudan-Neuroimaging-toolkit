@@ -1,7 +1,8 @@
 """T1-to-MNI registration and one-pass BOLD resampling in world coordinates."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
+import time
 
 import nibabel as nib
 import numpy as np
@@ -20,6 +21,14 @@ class T1MNIResult:
     backend: str
     moving_to_fixed_world: np.ndarray
     qc: dict | None = None
+    timing_seconds: dict[str, float] = field(default_factory=dict)
+
+
+def _completed_time(device):
+    """Finish GPU work only at a reported phase boundary."""
+    if torch.device(device).type == "cuda":
+        torch.cuda.synchronize(device)
+    return time.perf_counter()
 
 
 def register_t1_to_mni(
@@ -31,6 +40,7 @@ def register_t1_to_mni(
     synthmorph_weights=None,
     reference_mask=None,
     fnirt_config=None,
+    fnirt_execution="optimized",
     device=None,
 ):
     """Register one T1 brain to a 2-mm MNI brain with an existing FNIT backend.
@@ -41,32 +51,44 @@ def register_t1_to_mni(
     """
     if backend not in ("synthmorph", "fnirt"):
         raise ValueError("backend must be 'synthmorph' or 'fnirt'")
+    if fnirt_execution not in ("reference", "optimized"):
+        raise ValueError("fnirt_execution must be 'reference' or 'optimized'")
     if backend != "fnirt" and fnirt_config is not None:
         raise ValueError("fnirt_config requires backend='fnirt'")
+    if backend != "fnirt" and fnirt_execution != "optimized":
+        raise ValueError("fnirt_execution requires backend='fnirt'")
     selected = device or ("cuda" if torch.cuda.is_available() else "cpu")
     moving = nib.load(str(t1_brain))
     fixed = nib.load(str(mni_brain))
     if len(moving.shape) != 3 or len(fixed.shape) != 3:
         raise ValueError("T1 and MNI template must each be 3D")
+    timing = {}
+    started = _completed_time(selected)
     linear = TorchFLIRT(device=selected)(moving, fixed)
+    finished = _completed_time(selected)
+    timing["t1_to_mni_affine"] = finished - started
     initial = np.asarray(linear.moving_to_fixed_world, dtype=np.float64)
+    started = finished
     if backend == "synthmorph":
         from ..synthmorph import SynthMorph
 
         model = SynthMorph(
             weights=synthmorph_weights, device=selected, model="deform"
         )
-        pull = model(moving, fixed, init=initial).transform
+        nonlinear = model(moving, fixed, init=initial)
         qc = None
     else:
         from ..fnirt import TorchFNIRT, resolve_fnirt_config
 
         config = resolve_fnirt_config(fnirt_config, default="t1")
-        nonlinear = TorchFNIRT(device=selected, config=config)(
+        nonlinear = TorchFNIRT(device=selected, config=config, execution=fnirt_execution)(
             moving, fixed, initial, reference_mask=reference_mask
         )
-        pull = nonlinear.pull_transform
         qc = getattr(nonlinear, "qc", None)
+    finished = _completed_time(selected)
+    timing["t1_to_mni_nonlinear"] = finished - started
+    started = finished
+    pull = nonlinear.transform if backend == "synthmorph" else nonlinear.pull_transform
     field = np.asarray(pull.dataobj, dtype=np.float32)
     if field.shape != (*fixed.shape[:3], 3) or not np.isfinite(field).all():
         raise ValueError("registration produced an invalid MNI-to-T1 pull field")
@@ -75,15 +97,20 @@ def register_t1_to_mni(
     affine_path = output / "T1_to_MNI152_2mm_affine.mat"
     field_path = output / "MNI152_2mm_to_T1_pull_ras.nii.gz"
     np.savetxt(affine_path, np.asarray(linear.matrix), fmt="%.12g")
-    image = nib.Nifti1Image(field, fixed.affine)
+    header = fixed.header.copy()
+    header.set_data_dtype(np.float32)
+    header.set_slope_inter(1, 0)
+    image = nib.Nifti1Image(field, fixed.affine, header)
     image.header.set_intent("vector")
     nib.save(image, str(field_path))
+    timing["warp_conversion"] = _completed_time(selected) - started
     return T1MNIResult(
         affine=affine_path,
         pull_ras=field_path,
         backend=backend,
         moving_to_fixed_world=np.asarray(linear.moving_to_fixed_world),
         qc=qc,
+        timing_seconds=timing,
     )
 
 
@@ -162,6 +189,14 @@ def resample_world(
         dtype=torch.float64, device=selected,
     )
     coords = transform[:3, :3] @ world + transform[:3, 3:4]
+    # Inverse-affine roundoff can put an exact edge voxel slightly outside
+    # its grid. Correct only these sub-microvoxel excursions before sampling.
+    valid = torch.ones(coords.shape[1], dtype=torch.bool, device=selected)
+    for axis in range(3):
+        upper = image.shape[axis] - 1
+        within = (coords[axis] >= -1e-6) & (coords[axis] <= upper + 1e-6)
+        coords[axis] = torch.where(within, coords[axis].clamp(0, upper), coords[axis])
+        valid &= within
     if interpolation == "spline":
         from ..eddy.fsl2111_strict.spline import sample_cubic_periodic_fast
         spline_coords = coords.reshape(1, 3, *shape).float()
@@ -169,9 +204,6 @@ def resample_world(
         [2 * coords[axis] / max(image.shape[axis] - 1, 1) - 1
          for axis in (2, 1, 0)], dim=-1,
     ).reshape(1, *shape, 3).float()
-    valid = torch.ones(coords.shape[1], dtype=torch.bool, device=selected)
-    for axis in range(3):
-        valid &= (coords[axis] >= 0) & (coords[axis] <= image.shape[axis] - 1)
     valid = valid.reshape(1, *shape)
     if output_mask is not None:
         mask_image = nib.load(str(output_mask))

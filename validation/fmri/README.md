@@ -1,119 +1,71 @@
-# fMRI volume 与 surface 全流程 benchmark
+# fMRI volume 与 surface 验证
 
-[volume 用法](../../docs/fmri/README.md) · [surface 用法](../../docs/fmri/surface.md) · [单被试测量脚本](benchmark_bids.py)
+[volume 用法](../../docs/fmri/README.md) · [surface 用法](../../docs/fmri/surface.md) · [单 run 测量脚本](benchmark_bids.py)
 
-2026-09-30 在 gpucw1 上用 `3f8b756` 的运行源码，连续运行同一例真实 UKB 的完整 490 帧 BIDS volume 和 surface 接口。BOLD 为 88×88×64×490，TR 0.735 s，使用同次 SBRef。T1 取自同被试 FreeSurfer 存档的 `orig/001.mgz`，以 nibabel 转成 NIfTI，逐体素差为 0；它是存档的重建输入，更早的结构预处理未核对。surface 使用同一存档的既有皮层几何，不运行或计时 recon-all。
+## 当前完整 volume
 
-权重大小和 SHA-256、HCP v4.7.0 模板与许可证、TemplateFlow HCP 标签图均按项目清单校验，见[输入及资源记录](assets_input_preflight.public.json)。FNIT 候选不调用 FSL、FreeSurfer、fMRIPrep 或 NiWorkflows；surface 的准备、投影和组装使用 Connectome Workbench，球面配准使用 FNIT HOCR/FastPD。
+2026-10-01，冻结源码 `1eb9c417` 从一例真实 UKB BOLD/SBRef 和匹配的存档 T1，完整运行 FNIRT 分支，与原 SynthStrip/FSL/ICA-AROMA 按相同步骤比较。全部 490 帧，TR 0.735 秒；100 秒高通、non-aggressive AROMA、WM/CSF/Friston-24，不使用 GDC/B0、FIX 或空间平滑。
 
-本页是在修补最终 MNI BOLD 插值后重新执行的完整 490 帧流程。每份报告记录实际运行提交与源码哈希；更新后的代码、示例图及数值采用本次结果。[FastVBM 源码继承记录](../pipeline_source_equivalence.public.json)只适用于 FastVBM，不用于替代这次 fMRI 运行。
+| 逐体素 490 帧时间 Pearson r | 均值 | 中位数 |
+|---|---:|---:|
+| 运动校正 BOLD | **0.999578** | 0.999834 |
+| pre-ICA BOLD | **0.999356** | 0.999770 |
+| 原生最终 clean BOLD | **0.940704** | 0.951029 |
+| MNI 最终 clean BOLD | **0.938768** | 0.947436 |
 
-## 当前公开 API 的完整运行
+FNIT API 含最终保存为 **1318.04 s**，验证进程为 1372.24 s；原连续链为 **2570.47 s**，验证进程为 2601.72 s。双方不复用解剖缓存。共享 H100/8 线程，原 SynthStrip 用 GPU，原 FSL 用 CPU；FNIT allocated/reserved 为 8.316/9.745 GB。FNIT 已扣除中间捕获复制 27.05 s，原链仍包含阶段验证及 MELODIC HTML，计时边界不同。
 
-| 项目 | volume | surface |
+[完整报告与原命令](matched_native.md) · [数值比较](matched_pipeline.public.json) · [FNIT 调用](matched_fnirt_volume.public.json) · [输入/输出及源码核对](matched_fnirt_contract.public.json) · [原连续链](matched_native_pipeline.public.json)。当前结果尚未逐体素等价；固定同一 warp 的清理图 r 均值约 0.9449，固定同一数据仅换 warp 约 0.9935，固定原场 sampler 为 0.999999999921。
+
+![完整490帧当前volume对照](../../docs/fmri/figures/fmri_matched_native.png)
+
+## 子函数专项控制
+
+| 功能 | 固定输入真实控制 | 输入范围与时间 |
 |---|---|---|
-| 起点 | 原始 BOLD/SBRef、存档 T1 重建输入 | 本次新生成的 volume 派生文件、匹配的既有 T1 表面 |
-| 处理 | SynthStrip、FEAT、FAST、BBR、SynthMorph、PICA/AROMA、WM/CSF/24 项运动回归、MNI 重采样 | EPI→T1w、表面准备、双侧 MSMSulc、ribbon 投影、fsLR32k 重采样、皮层下组装 |
-| 输出 | 原生 88×88×64×490、MNI 91×109×91×490 | 两侧各 490 帧×32,492 顶点；CIFTI 490×91,282 |
-| API 墙钟，含最终写盘和临时文件清理 | **1719.19 s** | **905.71 s** |
-| 完整验证进程墙钟 | 1745.33 s | 912.06 s |
-| CUDA allocated / reserved，十进制 GB | 13.34 / 16.96 | 0.73 / 1.26 |
-| 输出检查 | float32、全部有限、TR 与网格一致、MNI 掩膜外为零 | GIFTI/CIFTI 全部有限、JSON 齐全、TR 一致、90,572 个非常数灰质坐标 |
-| 报告 | [volume JSON](fmri_volume.public.json) | [surface JSON](fmri_surface.public.json) |
+| [SynthStrip](../../docs/synthstrip/README.md) | 原 1 mm LIA/网络输入逐元素相同，同预测回采样 mask 相同；独立 GPU 推断有少量边界差异 | SBRef/T1，控制 7.61/4.83 s，排除 conform 与写盘；另有模板脑图。 |
+| [TorchMCFLIRT](../../docs/mcflirt/README.md) | 完整 490 帧 GPU motion r 均值 0.999578；pull RMS 均值 0.00881 mm | CPU 490 帧只估计 387.60 s；GPU 运动未从 FEAT 973.12 s 单独分离；有原/本包均值、SD、r 脑图。 |
+| [TorchFAST](../../docs/fast/README.md) | 三张 PVE r≥0.999999991，三张分类图逐体素相同 | 同一原 T1_brain；GPU 八图调用 10.95 s，排除读取和 gzip 写盘；有 MNI GM 图。 |
+| [MELODIC](../../docs/melodic/README.md) | 95 成分/40 步；时间/空间配对 r 中位数 0.999999978/0.999999970 | 同一原 filtered/mask；拟合与写出 117.49 s；有原/本包 IC 图。 |
+| ICA-AROMA | 固定新 ICA、原 motion/BBR/FNIRT，95 个信号/噪声标签全匹配 | [控制报告](aroma_corrected_ica_control.public.json)，与各自输入的完整链分类分开。 |
 
-两个 API 相加为 **2624.89 s，43.75 分钟**，边界是本次 BOLD 输入到 volume 和 surface 输出，外加已提供的 T1 与皮层几何。未计入皮层重建、数据下载或更早的结构预处理。验证进程计时另包含导入、输入哈希及事后检查；API 计时排除这些步骤和 CUDA 上下文初始化，包含首次权重加载。它们是共享 H100 上各一次冷调用，使用 8 个 CPU 线程、float32/TF32，不能外推到其他负载或被试。
+## surface 的现有范围
 
-volume 的 ICA 自动得到 95 个成分，在 115 次迭代后收敛，AROMA 识别 55 个噪声成分；WM、CSF、运动回归均开启。候选输入和输出 SHA、全部相关运行源码 SHA、阶段时间、环境和显存见 JSON。当前算法文件已与这些测量哈希核对。验证脚本为保存实际 warp 额外复制矩阵和位移场，用时 0.052 s；API 墙钟已扣除这一开销，阶段时间仍包含该开销。
+surface 测于 2026-09-30 `3f8b756`，从该次 volume 派生图和已有皮层几何开始，包含 EPI→T1、MSMSulc、ribbon 投影、fsLR32k 与皮层下组装，不计 recon-all。API 为 905.71 s、验证进程为 912.06 s，CUDA allocated/reserved 0.73/1.26 GB；每侧 490×32,492，CIFTI 490×91,282，时间轴及 BrainModel 轴正确。当前 MSMSulc 与固定 volume 投影单列验证；未重跑完整 surface API 或 MS-HBM，该历史时间不与当前 volume 相加。
 
-| volume 阶段 | 秒 |
-|---|---:|
-| SynthStrip | 13.05 |
-| FEAT 核心 | 298.92 |
-| TorchFAST | 3.30 |
-| BBR 与 T1→MNI | 1186.44 |
-| 混杂掩膜准备 | 0.21 |
-| PICA、AROMA 与混杂回归 | 163.35 |
-| MNI 重采样 | 48.44 |
+当前 [MSMSulc 验证](../msm/README.md)使用 HCP 四级配置和严格单线程官方 newMSM：本例保存球面逐值一致，固定 clean volume 的全部 490 帧 fsLR32k/91k 时间序列也逐值一致。配准冷/热调用与历史完整 surface API 的耗时分开记录，不能合成新的整链时间。
 
-最终 MNI BOLD 使用 `cubic-bspline-periodic`，保持一次空间插值。固定同一真实 BOLD 与本次 warp 的对照中，采样位置对 SD 的影响斜率降低 38.4%；FSL `applywarp --interp=spline` 490 帧参照与 FNIT 脑内 r=0.99999999993。定义、残留格纹和插值耗时见[专门验证页](resampling.md)。
+固定官方球面时，Workbench 投影对独立命令回放、CIFTI 组装对 niworkflows 源码均逐值一致；[固定球面报告](surface_fixed_sphere.public.json)保留这项独立算子验证。其他处理协议的 [DeepPrep 对照](deepprep/README.md)另列输入与计时范围。
 
-配准阶段是本例主要耗时。surface 报告逐项列出左右 ribbon mapping、膨胀、掩膜、重采样及 CIFTI 的 Workbench 命令时间；这些命令的和不包含全部 EPI→T1w、几何准备和球面估计，应以 API 总时间作为完整 surface 耗时。
+[BBR 与 T1 FNIRT 独立冷/热调用](registration_gpu.current.public.json)使用各自注明的 WM、初始化矩阵、仿射和模板，细节见 [BBR](../../docs/fmri/bbr.md)与 [FNIRT](../../docs/fnirt/README.md)。它们不能替代上面的完整 volume 对照。
 
-## 当前 FEAT 与 FSL 的同输入精度
+## 单被试复测
 
-候选取自上面这次完整 volume 的 pre-ICA 输出，而非旧缓存。参照是同一原始 BOLD/SBRef 的 FSL 6.0.7.22 逐条原版程序输出。两侧均未估计或应用 GDC/B0 校正。比较掩膜是两个最终 EPI 掩膜的交集；4D r 保留时间均值，时间 r 在每个体素的 490 帧内计算。
-
-| 指标 | 结果 |
-|---|---:|
-| FNIT / FSL / 交集掩膜体素 | 97,347 / 113,881 / 96,776 |
-| 掩膜 Dice | 0.916318 |
-| filtered 4D Pearson r | 0.996417 |
-| MAE / RMSE，归一化强度单位 | 423.501 / 556.959 |
-| 去掉逐体素时间均值后的 pooled r | 0.944905 |
-| 逐体素时间 r 中位数 / 均值 | 0.966798 / 0.951027 |
-
-shape、affine 和全体素有限值检查通过。[当前标量](feat_current.public.json)和[独立比较脚本](compare_feat.py)记录完整定义。该参照保留 MCFLIRT `-spline_final`、BET/阈值掩膜、grand-mean 缩放及 100 s 高通；原 FSF 没有 slice timing、空间平滑或低通。FNIT 使用 SynthStrip 掩膜和自身运动求解器，两个步骤存在差异。
-
-原 `feat` 启动器在该环境返回 255，正式参照按 `featlib.tcl` 逐条执行 MCFLIRT、BET、fslstats 和 fslmaths，并检查输出完整性。[参照脚本](official_feat_no_gdc.sh)保留命令；独立验证环境才需要 FSL。既有 FSL 计时中 MCFLIRT 为 397.54 s，其余已计时影像命令为 428.12 s，两次 fslstats 未单独计时；825.66 s 是分步耗时下界，不是完整 FSL/UKB fMRI 总时间。不能把它与 1719.19 s 的完整 FNIT volume 时间相除。
-
-最终去噪使用 ICA-AROMA 加混杂回归，UKB 使用 FIX；没有相同算法的最终官方清理图。因此这里验证了全流程可执行和输出合同，并对 pre-ICA FEAT 做数值对照，**没有证明最终 MNI 或 CIFTI 与 UKB FIX 数值等价**。
-
-## 固定 volume 的 surface 球面对照
-
-用本次新生成的 clean BOLD、同一 T1 皮层几何和 HCP 资源，再运行一次 surface API；只把 FNIT 估计的球面替换为既有官方 newMSM 球面。参照球面来自 HCP v4.7.0 MSMSulc 配置，首层 `simval=1`，其余为 2，8 线程。这样可定位球面对应关系造成的差异；投影和 CIFTI 组装仍是相同 FNIT/Workbench 路径，未独立重跑完整 fMRIPrep。
-
-| 结构 | 灰质坐标数 / 有效时间 r 数 | 时间 r 均值 | 中位数 | 第 5 百分位 | MAE | 最大绝对差 |
-|---|---:|---:|---:|---:|---:|---:|
-| 左皮层 | 29,696 / 29,695 | 0.940496 | 0.971542 | 0.770144 | 18.1565 | 868.3127 |
-| 右皮层 | 29,716 / 29,689 | 0.941404 | 0.968101 | 0.792942 | 19.7100 | 636.2633 |
-| 皮层下 | 31,870 / 31,188 | 1.000000 | 1.000000 | 1.000000 | 0 | 0 |
-
-两份 CIFTI 的时间轴和 BrainModel 轴完全相同；常数时序不计算 r。皮层仍有明显差异，皮层下逐值相同，符合本对照仅改变皮层球面的边界。固定官方球面的 API 为 697.45 s，验证进程为 703.76 s；它跳过球面估计，不能当作官方完整 surface 耗时。见[数值报告](fmri_surface_comparison.public.json)、[官方球面控制运行](fmri_surface_official_spheres.public.json)与[比较脚本](compare_cifti.py)。
-
-## 示例图
-
-图的三行依次是 MNI 解剖模板、FNIT 清理后 BOLD 时间标准差、一个清理后的时间点。回归去掉截距后时间均值接近零；模板用于定位，不是官方清理后 BOLD。每行共用色阶，切面为同一模板网格的中间位置。
-
-![当前 490 帧 volume 示例](../../docs/fmri/figures/fmri_volume.png)
-
-下图把逐顶点时间 r 映射到公开标准 fsLR32k 球面，展示 +x 半球视图；右侧直方图包含双侧全部有效皮层坐标。灰色为内侧壁或常数信号，球面不是被试解剖表面。
-
-![当前 surface 球面对照](../../docs/fmri/figures/fmri_surface_agreement.png)
-
-## 单被试如何复测
-
-先安装主页 Conda 环境、部署权重，并准备实际 BIDS、MNI 模板、HCP 表面资源和匹配的重建存档。以下命令先生成完整 volume，再让 surface 读取刚生成的派生数据；每次使用新输出目录。
+安装主页 Conda 环境和权重，准备真实 BIDS、MNI 模板及脑掩膜。以下命令完整处理一个 run，关闭解剖缓存，保存匿名 benchmark 报告；含路径的派生 JSON/日志应留本地。
 
 ```bash
 python validation/fmri/benchmark_bids.py volume \
-  --bids-root /data/bids --derivatives-root /results/fnit \
+  --bids-root /data/bids --derivatives-root /results/fnit-new \
   --subject 0001 --mni-template /templates/MNI152_T1_2mm.nii.gz \
   --mni-brain-mask /templates/MNI152_T1_2mm_brain_mask.nii.gz \
   --synthstrip-weights /models/synthstrip.1.pt \
-  --synthmorph-weights /models/synthmorph.deform.3.h5 \
+  --registration-backend fnirt --no-reuse-anatomical \
   --device cuda:0 --threads 8 \
-  --source-root /path/to/Fudan-Neuroimaging-toolkit \
-  --source-revision YOUR_COMMIT \
-  --report-out /results/volume.private.json
-
-python validation/fmri/benchmark_bids.py surface \
-  --bids-root /data/bids --derivatives-root /results/fnit --subject 0001 \
-  --recon-all /data/matching-reconstruction \
-  --hcp-assets-dir /templates/hcp --wb-command wb_command \
-  --device cuda:0 --threads 8 \
-  --source-root /path/to/Fudan-Neuroimaging-toolkit \
-  --source-revision YOUR_COMMIT \
-  --report-out /results/surface.private.json
+  --source-root /path/to/Fudan-Neuroimaging-toolkit --source-revision YOUR_COMMIT \
+  --report-out /results/volume.public.json
 ```
 
-`YOUR_COMMIT` 填写实际运行代码的 Git 提交号。脚本调用公开单被试 Python API，记录 API 时间、GPU 峰值和输出检查；不会调度其他被试。volume 示例启用三类混杂回归、默认 SynthMorph；`--registration-backend fnirt` 选择 T1 FNIRT 配置，本页新的完整链计时只覆盖 SynthMorph。surface 示例估计 FNIT 球面；`--registered-spheres LEFT RIGHT` 是固定球面控制，跳过 MSMSulc 估计，不应当作默认 surface 时间。
+`YOUR_COMMIT` 填真实源码提交号；每次使用新输出目录。原软件使用[独立连续驱动](run_native_matched_pipeline.py)，完整参数和比较方法见[对照报告](matched_native.md)。处理第二个被试时由调用者自行再次调用单被试接口。
 
-两份同轴 CIFTI 可用 `compare_cifti.py --candidate ... --reference ... --report-out ...` 比较；`render_surface.py` 接收这两份文件和公开标准双侧 fsLR32k 球面，生成上图。
+surface 读取已完成的 volume，并需要匹配的重建与 HCP 表面资源。下面的命令包含表面估计和重采样；recon-all 不在其计时中：
 
-volume 图示可用 `render_volume.py --bold ... --mask ... --template ... --figure-out ...` 生成。FEAT 中间结果只在公开 volume API 的临时目录存活；`compare_feat.py` 接收事先保存的候选与官方 FEAT 目录，不把最终清理图误当成 pre-ICA 图。官方和 FNIT 都应使用同一 raw BOLD/SBRef 和校正配置。
+```bash
+python validation/fmri/benchmark_bids.py surface \
+  --bids-root /data/bids --derivatives-root /results/fnit-new --subject 0001 \
+  --recon-all /data/matching-reconstruction --hcp-assets-dir /templates/hcp \
+  --wb-command wb_command --device cuda:0 --threads 8 \
+  --source-root /path/to/Fudan-Neuroimaging-toolkit --source-revision YOUR_COMMIT \
+  --report-out /results/surface.public.json
+```
 
-## 其他阶段参照
-
-[BBR](bbr_summary.json)、[PICA](pica_summary.json)、[T1 FNIRT](t1_fnirt_20260929.public.json)、[固定运动矩阵的插值](motion_spline_summary.json)与[MCFLIRT 求解差异](mcflirt_difference.public.json)采用各自注明的固定输入和参数；它们不是本次整链最终输出的一致性指标。原先 64 帧 volume 入口和接入旧 volume 的 surface 入口记录已被本次连续 490 帧测量替代。
-
-经数据持有者确认发布权限，仅公开匿名标量、代码及文件哈希和去标识化的 PNG。原始 NIfTI、MGZ、皮层几何、逐体素时序及含私有路径的日志不进入仓库。
+`--registered-spheres LEFT RIGHT` 用于固定球面控制，跳过 MSMSulc，不能称默认完整 surface 耗时。原影像、时序、被试几何和私有路径不进入仓库；公开内容是匿名统计、SHA-256 和获授权的模板空间 PNG。

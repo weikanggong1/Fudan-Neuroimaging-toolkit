@@ -24,16 +24,16 @@ def test_feat_core_writes_named_prefixed_outputs(tmp_path):
     base = np.exp(-sum((axis - 5.5) ** 2 for axis in xyz) / 18).astype(np.float32) * 1000
     rng = np.random.default_rng(4)
     data = np.stack([base * (1 + 0.01 * rng.normal()) for _ in range(8)], axis=-1)
-    bold = nib.Nifti1Image(data, np.eye(4))
-    bold.header.set_zooms((1, 1, 1, 1.0))
+    bold = nib.Nifti1Image(data, np.diag((2.0, 2.0, 2.0, 1.0)))
+    bold.header.set_zooms((2, 2, 2, 1.0))
     bold.header.set_xyzt_units(t="unknown")
     stem = "sub-01_task-rest"
     nib.save(bold, func / f"{stem}_bold.nii.gz")
     (func / f"{stem}_bold.json").write_text(
         json.dumps({"TaskName": "rest", "RepetitionTime": 0.8})
     )
-    nib.save(nib.Nifti1Image(base, np.eye(4)), func / f"{stem}_sbref.nii.gz")
-    nib.save(nib.Nifti1Image(base, np.eye(4)), anat / "sub-01_T1w.nii.gz")
+    nib.save(nib.Nifti1Image(base, np.diag((2.0, 2.0, 2.0, 1.0))), func / f"{stem}_sbref.nii.gz")
+    nib.save(nib.Nifti1Image(base, np.diag((2.0, 2.0, 2.0, 1.0))), anat / "sub-01_T1w.nii.gz")
     result = run_feat_core(
         bids_root=root, output_dir=tmp_path / "result", subject="01",
         device="cpu", batch_size=4, motion_iterations=(2, 2, 2),

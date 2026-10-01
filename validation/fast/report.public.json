@@ -1,870 +1,357 @@
 {
-  "schema": "fnit_current_source_real_validation/v2",
-  "feature": "torchfast",
-  "run_date": "2026-09-27",
-  "candidate_source": {
-    "base_git_commit": "9146b0004468ffc2a30cacad0ab4fa7b6fdb3b48",
-    "working_tree_state": "uncommitted current source",
-    "files": {
-      "fnit/_dmri.py": "b6bf837f8b5a0a8f0d910706631e882a9e3f8dfc1f1ef77e1cfac7efe36fafbf",
-      "fnit/_nib.py": "bffd56aeaca423b2448432ba318212e83549e9e31aa27af6bf20a60888218586",
-      "fnit/weights.py": "9d275a1bd4064ff9bd1eb8aaef589ce7804258e7f6c39cd127deae2623d6eb9a",
-      "fnit/fast/__init__.py": "c0f675872a1523425465d764bf3810358d62fc0ad900ff273089b0a5fe516771",
-      "fnit/fast/algorithm.py": "9ffed0035a618ec4d6dc1eea8deeadaddd071ced9b04b66593cb6bd4d1102638",
-      "fnit/fast/pipeline.py": "4f003e47cd33de27fd9c829b05fcef1c83bea1dc3eb522411039331685bf2129"
-    },
-    "tree_sha256": "433723da856c798faca9a66ea95784bdbb5ad5b13f66f451ce32e7030559943b"
+  "scope": "One real brain-extracted T1; identical native FAST input, without priors; three classes, T1 defaults",
+  "original_command": "fast -t 1 -n 3 -I 4 -W 15 -O 4 -f 0.02 -l 20 -H 0.1 -R 0.3 -B -b -o OUTPUT INPUT",
+  "native_wall_seconds": 149.99806854408234,
+  "native_exit_code": 255,
+  "native_outputs_validated_after_abnormal_exit": true,
+  "native_software": {
+    "fsl_installation": "6.0.7.22",
+    "fast4": "2111.3 / h8c873e0_9",
+    "threads": 8
   },
-  "environment": {
-    "gpu_host": "gpucw1",
-    "gpu": "NVIDIA H100 PCIe 80 GB",
-    "cpu_host": "headcw",
-    "cpu": "Intel Xeon Gold 6418H",
-    "python": "3.11",
-    "pytorch": "2.5.1+cu118",
-    "cuda_runtime": "11.8",
-    "nibabel": "5.4.2",
-    "numpy": "1.26.4"
+  "timing_boundary": "FNIT: loaded image to all output images returned, includes model construction, H2D, computation and D2H; excludes process startup, input file read, gzip output writes and comparisons; first run includes any Triton compilation",
+  "runtime_original_calls": false,
+  "input_sha256": "542f7a92bda1cf1c419b7178a157b11acfc568689b4b6772ac0fe7c5a67dffe4",
+  "native_output_sha256": {
+    "pve_0": "e077dd9bd152e29c78c5cb9de6d4ff19d302347caebb18f17dc1af8457ffdc4a",
+    "pve_1": "3612e2889dec4120bb52a3a7c0363d59f8e85f5ea61eba64ff53e9291e679244",
+    "pve_2": "413952314e99b8527fd0339fa8b363ea5acf591857e4afc3b299972b7d32b474",
+    "seg": "ec2c6f2d36aa632ab186a5c5759800f92204d10ee0b40f4677d54ef5d4fcca63",
+    "pveseg": "d0b31829815ac1c1d8da901deda39092c016cd42104adbeaea7c23cdd4abc700",
+    "mixeltype": "68dde5327b41f789ab9f20eb297ccd32cfb70b05afecd089f007c488206de3d5",
+    "bias": "3aeab40e729d967710ff59dd01d02d0c50147c8ca3de8efe8f1f155f634cfc75",
+    "restore": "29c5bfcca3eecc1c7503a2711449d27cdf1d5d133f39ba3bca6e58419058e20a"
   },
-  "inputs": {
-    "current_private_regression_n": 1,
-    "kind": "real brain-only T1w",
-    "case_ids_anonymized": true,
-    "public_figure_n": 1,
-    "public_figure_input": "repository sub-02 after published reference SynthStrip"
+  "source_sha256": {
+    "src/fnit/fast/algorithm.py": "b8eb36e776fe9631e94660a6784b469ddcfdf53753c9a4a75856970c067cedd1",
+    "src/fnit/fast/pipeline.py": "6fbbdc1f564cc5b700f6e462cc5bb09885ff20c46231d6bf9b8a72be0d0f28f4",
+    "src/fnit/fast/_fsl_scan.py": "03add4e07ec955995a833fd8adb8761d8278f3fec43abe3499f30fe4da58a643"
   },
-  "reference": {
-    "software": "FSL 6.0.7.4 FAST4 2111.3",
-    "status": "stored seven-file FSL -b output for the identical brain-only T1w",
-    "candidate_runtime_called_reference": false,
-    "timing_use": "Same-case FSL command that produced the numerical reference; reference and current candidate ran in different time windows, so no stable speed ratio is claimed.",
-    "output_manifest": [
-      {
-        "file": "T1_brain_pve_0.nii.gz",
-        "shape": [
-          208,
-          253,
-          226
-        ],
-        "dtype": "float32",
-        "affine": [
-          [
-            0.7998199462890625,
-            -0.0013855691067874432,
-            -0.0167226679623127,
-            -80.9625244140625
-          ],
-          [
-            0.0013852593256160617,
-            0.7999988198280334,
-            -2.8963180739083327e-05,
-            -136.61834716796875
-          ],
-          [
-            0.016722608357667923,
-            1.216608064291691e-10,
-            0.7998251914978027,
-            -61.795101165771484
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ],
-        "qform_code": 1,
-        "sform_code": 1,
-        "sha256": "b8888a3736773c311302a3f7dc74fe24b6e4682bc5c6a6362210deaec6d1e22e"
-      },
-      {
-        "file": "T1_brain_pve_1.nii.gz",
-        "shape": [
-          208,
-          253,
-          226
-        ],
-        "dtype": "float32",
-        "affine": [
-          [
-            0.7998199462890625,
-            -0.0013855691067874432,
-            -0.0167226679623127,
-            -80.9625244140625
-          ],
-          [
-            0.0013852593256160617,
-            0.7999988198280334,
-            -2.8963180739083327e-05,
-            -136.61834716796875
-          ],
-          [
-            0.016722608357667923,
-            1.216608064291691e-10,
-            0.7998251914978027,
-            -61.795101165771484
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ],
-        "qform_code": 1,
-        "sform_code": 1,
-        "sha256": "c148d724f75cc5f66b4084c772f29bcb23f2dae6b30d259e278376f3e68c4715"
-      },
-      {
-        "file": "T1_brain_pve_2.nii.gz",
-        "shape": [
-          208,
-          253,
-          226
-        ],
-        "dtype": "float32",
-        "affine": [
-          [
-            0.7998199462890625,
-            -0.0013855691067874432,
-            -0.0167226679623127,
-            -80.9625244140625
-          ],
-          [
-            0.0013852593256160617,
-            0.7999988198280334,
-            -2.8963180739083327e-05,
-            -136.61834716796875
-          ],
-          [
-            0.016722608357667923,
-            1.216608064291691e-10,
-            0.7998251914978027,
-            -61.795101165771484
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ],
-        "qform_code": 1,
-        "sform_code": 1,
-        "sha256": "cef81c4e553cdd73af9636f21bb73e6eb1b0e23259928d02276373dcb5265bd7"
-      },
-      {
-        "file": "T1_brain_seg.nii.gz",
-        "shape": [
-          208,
-          253,
-          226
-        ],
-        "dtype": "int32",
-        "affine": [
-          [
-            0.7998199462890625,
-            -0.0013855691067874432,
-            -0.0167226679623127,
-            -80.9625244140625
-          ],
-          [
-            0.0013852593256160617,
-            0.7999988198280334,
-            -2.8963180739083327e-05,
-            -136.61834716796875
-          ],
-          [
-            0.016722608357667923,
-            1.216608064291691e-10,
-            0.7998251914978027,
-            -61.795101165771484
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ],
-        "qform_code": 1,
-        "sform_code": 1,
-        "sha256": "88b349da4ade755321959f4094ec49b84d6466147b696200c355765381d54e9b"
-      },
-      {
-        "file": "T1_brain_pveseg.nii.gz",
-        "shape": [
-          208,
-          253,
-          226
-        ],
-        "dtype": "int32",
-        "affine": [
-          [
-            0.7998199462890625,
-            -0.0013855691067874432,
-            -0.0167226679623127,
-            -80.9625244140625
-          ],
-          [
-            0.0013852593256160617,
-            0.7999988198280334,
-            -2.8963180739083327e-05,
-            -136.61834716796875
-          ],
-          [
-            0.016722608357667923,
-            1.216608064291691e-10,
-            0.7998251914978027,
-            -61.795101165771484
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ],
-        "qform_code": 1,
-        "sform_code": 1,
-        "sha256": "b82814ac6d4c9120546cf381f5c538c48024d3130b1966d117f137df067f697c"
-      },
-      {
-        "file": "T1_brain_mixeltype.nii.gz",
-        "shape": [
-          208,
-          253,
-          226
-        ],
-        "dtype": "int32",
-        "affine": [
-          [
-            0.7998199462890625,
-            -0.0013855691067874432,
-            -0.0167226679623127,
-            -80.9625244140625
-          ],
-          [
-            0.0013852593256160617,
-            0.7999988198280334,
-            -2.8963180739083327e-05,
-            -136.61834716796875
-          ],
-          [
-            0.016722608357667923,
-            1.216608064291691e-10,
-            0.7998251914978027,
-            -61.795101165771484
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ],
-        "qform_code": 1,
-        "sform_code": 1,
-        "sha256": "6754e9ea24ead1449468c94bc382c05613c539ad048998b2e9dd88cdcfbeceb9"
-      },
-      {
-        "file": "T1_brain_bias.nii.gz",
-        "shape": [
-          208,
-          253,
-          226
-        ],
-        "dtype": "float32",
-        "affine": [
-          [
-            0.7998199462890625,
-            -0.0013855691067874432,
-            -0.0167226679623127,
-            -80.9625244140625
-          ],
-          [
-            0.0013852593256160617,
-            0.7999988198280334,
-            -2.8963180739083327e-05,
-            -136.61834716796875
-          ],
-          [
-            0.016722608357667923,
-            1.216608064291691e-10,
-            0.7998251914978027,
-            -61.795101165771484
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ],
-        "qform_code": 1,
-        "sform_code": 1,
-        "sha256": "24d18dea6885d208c098b81c88737e126776377e37a59f77dd08ab2da8684a4f"
-      }
-    ],
-    "same_case_reference_complete_seconds": 305.4594074941706
-  },
-  "candidate_gpu": {
-    "device": "H100 GPU; default TF32 enabled",
-    "comparison_to_fsl": {
-      "input_sha256": "f1b6f58edb3ac9996282d3fcbadcb94626785347481f27cf5a3b9419bf640c12",
-      "reference": "stored FSL FAST 6.0.7.4 outputs, same brain-only input",
-      "pve": {
-        "csf": {
-          "shape": [
-            208,
-            253,
-            226
-          ],
-          "shape_match": true,
-          "reference_dtype": "float32",
-          "candidate_dtype": "float32",
-          "affine_max_abs": 0.0,
-          "reference_qform_code": 1,
-          "candidate_qform_code": 1,
-          "reference_sform_code": 1,
-          "candidate_sform_code": 1,
-          "pearson": 0.9885555879634779,
-          "mae": 0.008463598912820806,
-          "rmse": 0.05361706615163506,
-          "max_abs": 1.0,
-          "dice_at_0_5": 0.9876399315218567,
-          "volume_ratio": 1.0139001607894897
-        },
-        "gm": {
-          "shape": [
-            208,
-            253,
-            226
-          ],
-          "shape_match": true,
-          "reference_dtype": "float32",
-          "candidate_dtype": "float32",
-          "affine_max_abs": 0.0,
-          "reference_qform_code": 1,
-          "candidate_qform_code": 1,
-          "reference_sform_code": 1,
-          "candidate_sform_code": 1,
-          "pearson": 0.9846274787653718,
-          "mae": 0.015410705408567867,
-          "rmse": 0.07390405747152083,
-          "max_abs": 1.0,
-          "dice_at_0_5": 0.9923275828910614,
-          "volume_ratio": 0.9899535775184631
-        },
-        "wm": {
-          "shape": [
-            208,
-            253,
-            226
-          ],
-          "shape_match": true,
-          "reference_dtype": "float32",
-          "candidate_dtype": "float32",
-          "affine_max_abs": 0.0,
-          "reference_qform_code": 1,
-          "candidate_qform_code": 1,
-          "reference_sform_code": 1,
-          "candidate_sform_code": 1,
-          "pearson": 0.9937313660894089,
-          "mae": 0.007022312184941949,
-          "rmse": 0.049226973899859784,
-          "max_abs": 1.0,
-          "dice_at_0_5": 0.9970314399988279,
-          "volume_ratio": 1.0049289464950562
-        }
-      },
-      "labels": {
-        "hard_segmentation": {
-          "shape": [
-            208,
-            253,
-            226
-          ],
-          "shape_match": true,
-          "reference_dtype": "int32",
-          "candidate_dtype": "int32",
-          "affine_max_abs": 0.0,
-          "reference_qform_code": 1,
-          "candidate_qform_code": 1,
-          "reference_sform_code": 1,
-          "candidate_sform_code": 1,
-          "voxel_agreement": 0.9998987030671382,
-          "disagreeing_voxels": 305
-        },
-        "pve_segmentation": {
-          "shape": [
-            208,
-            253,
-            226
-          ],
-          "shape_match": true,
-          "reference_dtype": "int32",
-          "candidate_dtype": "int32",
-          "affine_max_abs": 0.0,
-          "reference_qform_code": 1,
-          "candidate_qform_code": 1,
-          "reference_sform_code": 1,
-          "candidate_sform_code": 1,
-          "voxel_agreement": 0.9903492253275544,
-          "disagreeing_voxels": 29058
-        },
-        "mixel_type": {
-          "shape": [
-            208,
-            253,
-            226
-          ],
-          "shape_match": true,
-          "reference_dtype": "int32",
-          "candidate_dtype": "int32",
-          "affine_max_abs": 0.0,
-          "reference_qform_code": 1,
-          "candidate_qform_code": 1,
-          "reference_sform_code": 1,
-          "candidate_sform_code": 1,
-          "voxel_agreement": 0.9390312027765323,
-          "disagreeing_voxels": 183574
-        }
-      },
-      "bias_log": {
-        "shape": [
-          208,
-          253,
-          226
-        ],
-        "shape_match": true,
-        "reference_dtype": "float32",
-        "candidate_dtype": "float32",
-        "affine_max_abs": 0.0,
-        "reference_qform_code": 1,
-        "candidate_qform_code": 1,
-        "reference_sform_code": 1,
-        "candidate_sform_code": 1,
-        "pearson": 0.9999999993609636,
-        "mae": 2.8539477994839694e-06,
-        "rmse": 3.8103380596606894e-06,
-        "max_abs": 1.7731291800493487e-05
-      }
-    },
-    "full_profile_process_seconds": 12.55
-  },
-  "candidate_cpu_single_case": {
-    "n": 1,
-    "complete_cli_seconds": 36.24,
-    "max_rss_kib": 2850528,
-    "comparison_to_fsl": {
-      "pve": {
-        "csf": {
-          "pearson": 0.988555606760191,
-          "mae": 0.008463539131113544,
-          "dice_at_0_5": 0.9876381356741203
-        },
-        "gm": {
-          "pearson": 0.9846271796398598,
-          "mae": 0.015410751905983585,
-          "dice_at_0_5": 0.992326137000299
-        },
-        "wm": {
-          "pearson": 0.993731077794622,
-          "mae": 0.007022418463748193,
-          "dice_at_0_5": 0.9970309835296273
-        }
-      },
-      "raw_bias": {
-        "pearson": 0.9999999995018728,
-        "mae": 2.6171941343387406e-06
-      }
-    }
-  },
-  "single_case_gpu_profile": {
-    "schema": "fnit_model_io_single_case/v1",
-    "feature": "fast",
-    "case_id": "case01",
-    "input_sha256": "f1b6f58edb3ac9996282d3fcbadcb94626785347481f27cf5a3b9419bf640c12",
-    "source": {
-      "files": {
-        "fnit/_dmri.py": "b6bf837f8b5a0a8f0d910706631e882a9e3f8dfc1f1ef77e1cfac7efe36fafbf",
-        "fnit/_nib.py": "bffd56aeaca423b2448432ba318212e83549e9e31aa27af6bf20a60888218586",
-        "fnit/weights.py": "9d275a1bd4064ff9bd1eb8aaef589ce7804258e7f6c39cd127deae2623d6eb9a",
-        "fnit/fast/__init__.py": "c0f675872a1523425465d764bf3810358d62fc0ad900ff273089b0a5fe516771",
-        "fnit/fast/algorithm.py": "9ffed0035a618ec4d6dc1eea8deeadaddd071ced9b04b66593cb6bd4d1102638",
-        "fnit/fast/pipeline.py": "4f003e47cd33de27fd9c829b05fcef1c83bea1dc3eb522411039331685bf2129"
-      },
-      "tree_sha256": "433723da856c798faca9a66ea95784bdbb5ad5b13f66f451ce32e7030559943b"
-    },
-    "runtime": {
-      "device": "cuda:0",
-      "threads": 8,
-      "torch": "2.5.1",
-      "cuda": "11.8",
-      "gpu": "NVIDIA H100 PCIe",
-      "tf32_matmul": true,
-      "tf32_cudnn": true
-    },
-    "seconds": {
-      "model_load": 0.5167326661758125,
-      "inference": 2.4475849587470293,
-      "save": 4.364569521974772,
-      "python_api_total": 7.328887146897614
-    },
-    "cuda_peak_mib": {
-      "allocated": 2351.6884765625,
-      "reserved": 3444.0
-    },
-    "outputs": [
-      {
-        "file": "pve_csf.nii.gz",
-        "shape": [
-          208,
-          253,
-          226
-        ],
-        "dtype": "float32",
-        "affine": [
-          [
-            0.7998199462890625,
-            -0.0013855691067874432,
-            -0.0167226679623127,
-            -80.9625244140625
-          ],
-          [
-            0.0013852593256160617,
-            0.7999988198280334,
-            -2.8963180739083327e-05,
-            -136.61834716796875
-          ],
-          [
-            0.016722608357667923,
-            1.216608064291691e-10,
-            0.7998251914978027,
-            -61.795101165771484
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ],
-        "finite": true,
-        "sha256": "ae44edf4a44a4cc5f8f4e413d0d6404da443596de5085362511d2b949fea8d0d"
-      },
-      {
-        "file": "pve_gm.nii.gz",
-        "shape": [
-          208,
-          253,
-          226
-        ],
-        "dtype": "float32",
-        "affine": [
-          [
-            0.7998199462890625,
-            -0.0013855691067874432,
-            -0.0167226679623127,
-            -80.9625244140625
-          ],
-          [
-            0.0013852593256160617,
-            0.7999988198280334,
-            -2.8963180739083327e-05,
-            -136.61834716796875
-          ],
-          [
-            0.016722608357667923,
-            1.216608064291691e-10,
-            0.7998251914978027,
-            -61.795101165771484
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ],
-        "finite": true,
-        "sha256": "1365c833560308d23a461d639c8d83bff5b85ef023042f80a660dff452f62144"
-      },
-      {
-        "file": "pve_wm.nii.gz",
-        "shape": [
-          208,
-          253,
-          226
-        ],
-        "dtype": "float32",
-        "affine": [
-          [
-            0.7998199462890625,
-            -0.0013855691067874432,
-            -0.0167226679623127,
-            -80.9625244140625
-          ],
-          [
-            0.0013852593256160617,
-            0.7999988198280334,
-            -2.8963180739083327e-05,
-            -136.61834716796875
-          ],
-          [
-            0.016722608357667923,
-            1.216608064291691e-10,
-            0.7998251914978027,
-            -61.795101165771484
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ],
-        "finite": true,
-        "sha256": "b42d1793dbd64c7d81f911c6880e8efd2014dd832832b466adf964d6e1d95e4a"
-      },
-      {
-        "file": "hard_segmentation.nii.gz",
-        "shape": [
-          208,
-          253,
-          226
-        ],
-        "dtype": "int32",
-        "affine": [
-          [
-            0.7998199462890625,
-            -0.0013855691067874432,
-            -0.0167226679623127,
-            -80.9625244140625
-          ],
-          [
-            0.0013852593256160617,
-            0.7999988198280334,
-            -2.8963180739083327e-05,
-            -136.61834716796875
-          ],
-          [
-            0.016722608357667923,
-            1.216608064291691e-10,
-            0.7998251914978027,
-            -61.795101165771484
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ],
-        "finite": true,
-        "sha256": "3e5124e86500f52c6c43810bed16017e488e2561002e14ae2833c09235db9dc1"
-      },
-      {
-        "file": "pve_segmentation.nii.gz",
-        "shape": [
-          208,
-          253,
-          226
-        ],
-        "dtype": "int32",
-        "affine": [
-          [
-            0.7998199462890625,
-            -0.0013855691067874432,
-            -0.0167226679623127,
-            -80.9625244140625
-          ],
-          [
-            0.0013852593256160617,
-            0.7999988198280334,
-            -2.8963180739083327e-05,
-            -136.61834716796875
-          ],
-          [
-            0.016722608357667923,
-            1.216608064291691e-10,
-            0.7998251914978027,
-            -61.795101165771484
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ],
-        "finite": true,
-        "sha256": "6d31d4396a002db84c31f4678c7d71e68170ac3bc68758e3cf9444f4f87fca81"
-      },
-      {
-        "file": "mixel_type.nii.gz",
-        "shape": [
-          208,
-          253,
-          226
-        ],
-        "dtype": "int32",
-        "affine": [
-          [
-            0.7998199462890625,
-            -0.0013855691067874432,
-            -0.0167226679623127,
-            -80.9625244140625
-          ],
-          [
-            0.0013852593256160617,
-            0.7999988198280334,
-            -2.8963180739083327e-05,
-            -136.61834716796875
-          ],
-          [
-            0.016722608357667923,
-            1.216608064291691e-10,
-            0.7998251914978027,
-            -61.795101165771484
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ],
-        "finite": true,
-        "sha256": "3d32d2ed2aa8d5d3ec0821826be3825e54960573ae9520dd21b52d5f13c3d504"
-      },
-      {
-        "file": "bias_field.nii.gz",
-        "shape": [
-          208,
-          253,
-          226
-        ],
-        "dtype": "float32",
-        "affine": [
-          [
-            0.7998199462890625,
-            -0.0013855691067874432,
-            -0.0167226679623127,
-            -80.9625244140625
-          ],
-          [
-            0.0013852593256160617,
-            0.7999988198280334,
-            -2.8963180739083327e-05,
-            -136.61834716796875
-          ],
-          [
-            0.016722608357667923,
-            1.216608064291691e-10,
-            0.7998251914978027,
-            -61.795101165771484
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ],
-        "finite": true,
-        "sha256": "940e08149b75954dcce1fddcdb70f73c782b5b9c7465a72957c3a89561910c6c"
-      },
-      {
-        "file": "restored.nii.gz",
-        "shape": [
-          208,
-          253,
-          226
-        ],
-        "dtype": "float32",
-        "affine": [
-          [
-            0.7998199462890625,
-            -0.0013855691067874432,
-            -0.0167226679623127,
-            -80.9625244140625
-          ],
-          [
-            0.0013852593256160617,
-            0.7999988198280334,
-            -2.8963180739083327e-05,
-            -136.61834716796875
-          ],
-          [
-            0.016722608357667923,
-            1.216608064291691e-10,
-            0.7998251914978027,
-            -61.795101165771484
-          ],
-          [
-            0.0,
-            0.0,
-            0.0,
-            1.0
-          ]
-        ],
-        "finite": true,
-        "sha256": "70a06571061d5a4938d46e57f93e3c2623d5d188a402ccacdd6e04d84ecebd50"
-      }
-    ],
-    "external_process_wall_seconds": 12.55
-  },
-  "output_contract": {
-    "pve_0_1_2": {
-      "dtype": "float32",
-      "order": [
-        "CSF",
-        "GM",
-        "WM"
-      ],
-      "shape_and_affine": "identical to input"
-    },
-    "seg_pveseg_mixeltype": {
-      "dtype": "int32",
-      "shape_and_affine": "identical to input"
-    },
-    "bias_and_restore": {
-      "dtype": "float32",
-      "shape_and_affine": "identical to input"
-    }
-  },
-  "figure": {
-    "path": "validation/fast/figures/fast_comparison.png",
-    "sha256": "1a96adab5fe284b74aaf76af9d3f4a5a1ecb06a30ecb42e999eb871f9ad5fba0",
-    "metrics_path": "validation/fast/figures/metrics.json",
-    "metrics_sha256": "d330db69c23811dcf57aa24e6fed25c1ce6ab0943262c5418b393a5312852134",
-    "metrics": {
-      "input": "examples/data/sub-02_T1w.nii.gz after the published reference SynthStrip output",
-      "mask_voxels": 1144672,
-      "gm_pearson": 0.9781718143530315,
-      "gm_mae": 0.01755298152162175,
-      "gm_dice_at_0_5": 0.987419737237692,
-      "gm_volume_ratio_torch_over_fsl": 0.99350111498656,
-      "figure_slices_canonical_voxel": {
-        "axial": 143,
-        "coronal": 125
-      }
-    },
-    "candidate": "current source, default TF32"
-  },
-  "candidate_runtime_dependency_boundary": "FNIT candidate runs imported only FNIT, PyTorch, Nibabel, NumPy and SciPy; FreeSurfer/FSL executables were not called by the candidate.",
-  "timing_scope": "Full CLI wall time includes a fresh Python process, input and weight loading where applicable, inference, postprocessing, and compressed NIfTI/CSV writes.",
-  "release_status": "current_source_validated_functional_reproduction",
-  "limitations": [
-    "One private real brain-only T1w is the current full-I/O numerical regression; the public figure is a second qualitative case.",
-    "FSL and candidate use different HMRF update orders and are not voxel-identical.",
-    "The stored FSL timing and current candidate timing were recorded in different windows."
+  "driver_sha256": "64362149140cc1c0195a6234135c0d5130154971b136b78b3f8a976d8bc61bef",
+  "shape": [
+    162,
+    215,
+    180
   ],
-  "measurement": {
-    "script": "validation/model_io_current/measure_peak.py",
-    "script_sha256": "e4f0aa1209d0376c7df7d73c033db8277074b6ab8a4b0f311b421604a7fe56f9",
-    "single_case_schema": "fnit_model_io_single_case/v1"
-  }
+  "header_pixdim_mm": [
+    0.9999997615814209,
+    1.0,
+    1.0
+  ],
+  "positive_mask_voxels": 1397628,
+  "software": {
+    "torch": "2.5.1",
+    "nibabel": "5.4.2",
+    "numpy": "1.26.4",
+    "cuda": "11.8"
+  },
+  "device": "cuda:1",
+  "tf32": {
+    "matmul": true,
+    "cudnn": true
+  },
+  "execution": {
+    "fsl": {
+      "wall_seconds": 10.95347026688978,
+      "outputs": {
+        "pve_0": {
+          "pearson": 0.9999999932376445,
+          "rmse": 4.475926623496542e-05,
+          "mae": 2.003393118135758e-07,
+          "max_abs": 0.01000000536441803,
+          "changed_voxels": 28,
+          "dice_0.5": 1.0,
+          "dice_0.8": 1.0,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "ab175f72bbb6c31de216296358f836cf26535fbb46e33725e115a26ed9413de1"
+        },
+        "pve_1": {
+          "pearson": 0.9999999918252443,
+          "rmse": 5.3497546639804134e-05,
+          "mae": 2.861989692794359e-07,
+          "max_abs": 0.010000050067901611,
+          "changed_voxels": 40,
+          "dice_0.5": 1.0,
+          "dice_0.8": 0.9999973621457362,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "5138b3470c9fc768b9317c90e641019140e00eb36f4541e21be87ca3843b33d5"
+        },
+        "pve_2": {
+          "pearson": 0.9999999977641788,
+          "rmse": 2.930180760789992e-05,
+          "mae": 8.585967479120483e-08,
+          "max_abs": 0.009999990463256836,
+          "changed_voxels": 12,
+          "dice_0.5": 1.0,
+          "dice_0.8": 0.9999986699952252,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "9631340efb0f0701cf254f8f5d15e4f0c65552bf278395db75a9c88d02d5a393"
+        },
+        "seg": {
+          "pearson": 1.0,
+          "rmse": 0.0,
+          "mae": 0.0,
+          "max_abs": 0.0,
+          "changed_voxels": 0,
+          "agreement_fraction": 1.0,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "117baf4ad045edb401b6086245502ca3e77cf90e9471d7c9583bb5dfe1781d18"
+        },
+        "pveseg": {
+          "pearson": 0.9999999999999999,
+          "rmse": 0.0,
+          "mae": 0.0,
+          "max_abs": 0.0,
+          "changed_voxels": 0,
+          "agreement_fraction": 1.0,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "7bbf0f353c717b24cd2b80c7b2ef1c977310027c75258ddf2e3a5e9daf085a95"
+        },
+        "mixeltype": {
+          "pearson": 1.0,
+          "rmse": 0.0,
+          "mae": 0.0,
+          "max_abs": 0.0,
+          "changed_voxels": 0,
+          "agreement_fraction": 1.0,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "f2296e4ef1015a989edba809eb2e854b1092454d20e57259fdacd062d6cf4d20"
+        },
+        "bias": {
+          "pearson": 0.9999999999943789,
+          "rmse": 5.3511438854387505e-08,
+          "mae": 2.4183963634611703e-08,
+          "max_abs": 1.1920928955078125e-07,
+          "changed_voxels": 287368,
+          "dice_0.5": 1.0,
+          "dice_0.8": 1.0,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "8dea50e6e7ca55ec30c1167b047738b853fc7b2ec11bcd911ec0e7c9e5c83dd2"
+        },
+        "restore": {
+          "pearson": 0.9999999999999827,
+          "rmse": 5.580313310461398e-05,
+          "mae": 2.5555481340109144e-05,
+          "max_abs": 0.000244140625,
+          "changed_voxels": 334254,
+          "dice_0.5": 1.0,
+          "dice_0.8": 1.0,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "5c7b6d90138d3a6a4ab88a5eb17c6c5d9beb617a7d17f7780ed69fbead942914"
+        }
+      },
+      "config": {
+        "init_iterations": 15,
+        "bias_iterations": 4,
+        "fixed_iterations": 4,
+        "bias_fwhm_mm": 20.0,
+        "init_mrf": 0.02,
+        "mrf": 0.1,
+        "mixel_mrf": 0.3,
+        "pve_steps": 100,
+        "mean_field_iterations": 5,
+        "pve_chunk_size": 8,
+        "variance_floor_fraction": 1e-06,
+        "execution": "fsl"
+      },
+      "tissue_means": [
+        689.237548828125,
+        1093.495849609375,
+        1387.796875
+      ],
+      "tissue_variances": [
+        46461.1640625,
+        10368.01171875,
+        3655.864013671875
+      ],
+      "peak_torch_allocated_bytes": 914855936
+    },
+    "tensor": {
+      "wall_seconds": 2.0056461999192834,
+      "outputs": {
+        "pve_0": {
+          "pearson": 0.9901548166429323,
+          "rmse": 0.05405625357644191,
+          "mae": 0.008312547326832153,
+          "max_abs": 1.0,
+          "changed_voxels": 250441,
+          "dice_0.5": 0.987655059034524,
+          "dice_0.8": 0.9716808585375307,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "d3f9472ecfc5a6f2a5b047eec9e9dd9b3c757f02373add1e35d727eb39edbd9a"
+        },
+        "pve_1": {
+          "pearson": 0.9829821527989272,
+          "rmse": 0.07704208868224668,
+          "mae": 0.015030660816109724,
+          "max_abs": 1.0,
+          "changed_voxels": 443010,
+          "dice_0.5": 0.9897468195411573,
+          "dice_0.8": 0.957340283848169,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "4f770f11a984e5f6f5a65ae82d42c52ad781d9f9698438844ed69f0f2b387db5"
+        },
+        "pve_2": {
+          "pearson": 0.9932173285513595,
+          "rmse": 0.051024218540005016,
+          "mae": 0.006859696481009365,
+          "max_abs": 1.0,
+          "changed_voxels": 201738,
+          "dice_0.5": 0.9953386769585962,
+          "dice_0.8": 0.9904545708278287,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "4f64d295b3d5855d0e073a9bab4193893500e47be621bd48f4d3a66806f54698"
+        },
+        "seg": {
+          "pearson": 0.9998751010188442,
+          "rmse": 0.011992293042951713,
+          "mae": 0.00014238409648347056,
+          "max_abs": 2.0,
+          "changed_voxels": 198,
+          "agreement_fraction": 0.9998583314014888,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "fa9ecf82f8b572dc443043f728d381874a8c84a3d5f440542f2bd5c933b23996"
+        },
+        "pveseg": {
+          "pearson": 0.9897755602494407,
+          "rmse": 0.10726232980055134,
+          "mae": 0.011437950584848042,
+          "max_abs": 2.0,
+          "changed_voxels": 15939,
+          "agreement_fraction": 0.988595677819849,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "20977d5649a509a5d71fee3f5c1b6834d2ca3a14a2a6dca9fec139912d9d989b"
+        },
+        "mixeltype": {
+          "pearson": 0.8970859645272398,
+          "rmse": 0.7146930333591494,
+          "mae": 0.16408157249282357,
+          "max_abs": 5.0,
+          "changed_voxels": 79392,
+          "agreement_fraction": 0.9431951849848458,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "91080a6de41ebe8ef7619834f3ceb544b87e8b92e27d4d523a28795317b22620"
+        },
+        "bias": {
+          "pearson": 0.9999997269410585,
+          "rmse": 1.5087299124528439e-05,
+          "mae": 1.2389627828445913e-05,
+          "max_abs": 5.239248275756836e-05,
+          "changed_voxels": 1394475,
+          "dice_0.5": 1.0,
+          "dice_0.8": 1.0,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "ebd15a47e33d4b6a61e0f3e742fd41399476e08d8e30ab09ce05b43599e9007b"
+        },
+        "restore": {
+          "pearson": 0.9999999987886125,
+          "rmse": 0.01649393493284737,
+          "mae": 0.013126066833067598,
+          "max_abs": 0.0631103515625,
+          "changed_voxels": 1394549,
+          "dice_0.5": 1.0,
+          "dice_0.8": 1.0,
+          "shape_equal": true,
+          "affine_max_abs": 0.0,
+          "dtype_equal": true,
+          "qform_code_equal": true,
+          "sform_code_equal": true,
+          "output_sha256": "5c7efe7690ed503ea707d366a46f95c78c16c981fe3738acaf7b4575d9208516"
+        }
+      },
+      "config": {
+        "init_iterations": 15,
+        "bias_iterations": 4,
+        "fixed_iterations": 4,
+        "bias_fwhm_mm": 20.0,
+        "init_mrf": 0.02,
+        "mrf": 0.1,
+        "mixel_mrf": 0.3,
+        "pve_steps": 100,
+        "mean_field_iterations": 5,
+        "pve_chunk_size": 8,
+        "variance_floor_fraction": 1e-06,
+        "execution": "tensor"
+      },
+      "tissue_means": [
+        689.2933959960938,
+        1093.550537109375,
+        1387.844482421875
+      ],
+      "tissue_variances": [
+        46472.10546875,
+        10370.22265625,
+        3652.496826171875
+      ],
+      "peak_torch_allocated_bytes": 1325642240
+    }
+  },
+  "gpu": "NVIDIA H100 PCIe",
+  "validated_on": "2026-10-01",
+  "notes": [
+    "Archived native FAST exited 255; the original matched pipeline checked all eight outputs for presence, grid and finite values.",
+    "FNIT timings exclude input disk reads and gzip writes; Triton compilation cache was populated and GPU load was shared.",
+    "The PVE minimum is chosen on a discrete float32 grid; 28/40/12 brain voxels differ by at most one 0.01 step.",
+    "Three label maps agree exactly in this case; floating maps are not claimed bitwise identical."
+  ]
 }

@@ -1,0 +1,119 @@
+{
+  "subjects": 1,
+  "real_frames": 490,
+  "compared_frames": 490,
+  "device": "cpu",
+  "threads": 4,
+  "stage_iterations": [
+    1,
+    1,
+    1
+  ],
+  "stages": 3,
+  "resample": false,
+  "wall_seconds": 387.5982518447563,
+  "timing_scope": "API path input decompression + reference loading + pyramid + estimation; no resampling or output writes. Hashing and comparison are outside this time.",
+  "cost_evaluations": 45794,
+  "brain_voxels": 99372,
+  "pull_rms_mm": {
+    "mean": 0.009060235566702882,
+    "median": 0.00863884649314045,
+    "p95": 0.01698914098701152,
+    "max": 0.026031630212008633,
+    "min": 0.00048539389922474174
+  },
+  "pull_p95_mm": {
+    "mean": 0.013569414523177588,
+    "median": 0.012939148486614675,
+    "p95": 0.025764851510082426,
+    "max": 0.041226913003012934,
+    "min": 0.0005460201597424819
+  },
+  "relative_translation_mm": {
+    "mean": 0.022656260489138776,
+    "median": 0.020539845294072993,
+    "p95": 0.047758210297810945,
+    "max": 0.08560267338597231,
+    "min": 0.00047953671598621836
+  },
+  "relative_rotation_degrees": {
+    "mean": 0.008720870669565343,
+    "median": 0.0081474882285814,
+    "p95": 0.01796451037448223,
+    "max": 0.030077991143136255,
+    "min": 9.877980295034042e-05
+  },
+  "worst_frame": 413,
+  "worst_frame_pull_p95_mm": 0.041226913003012934,
+  "parameters": [
+    {
+      "parameter": "rotation_x_rad",
+      "pearson_r": 0.9996421729958278,
+      "rmse": 7.87224355917679e-05,
+      "mae": 4.913769586880708e-05,
+      "max_abs": 0.0003549534659588339
+    },
+    {
+      "parameter": "rotation_y_rad",
+      "pearson_r": 0.9962690154801074,
+      "rmse": 0.00010707229619603228,
+      "mae": 7.721649414662522e-05,
+      "max_abs": 0.00038029170868754403
+    },
+    {
+      "parameter": "rotation_z_rad",
+      "pearson_r": 0.9911506713744015,
+      "rmse": 0.00011819423715961644,
+      "mae": 8.558462800301476e-05,
+      "max_abs": 0.00040108990080833427
+    },
+    {
+      "parameter": "translation_x_mm",
+      "pearson_r": 0.9990874957134126,
+      "rmse": 0.0031092053525723297,
+      "mae": 0.0020465400037472108,
+      "max_abs": 0.011850905866135871
+    },
+    {
+      "parameter": "translation_y_mm",
+      "pearson_r": 0.9997726964256013,
+      "rmse": 0.003576425602040422,
+      "mae": 0.0024226399362991457,
+      "max_abs": 0.014447650939843959
+    },
+    {
+      "parameter": "translation_z_mm",
+      "pearson_r": 0.9997266681471955,
+      "rmse": 0.0031224213293429646,
+      "mae": 0.002033428304057504,
+      "max_abs": 0.011272234626359429
+    }
+  ],
+  "input_sha256": {
+    "bold": "67717caaa823141c6e59d46db52e92deb4419d232ba699c399c69eb8888a0e92",
+    "sbref": "ff4e0e49a504527468234456cba6ad367d63c1f3f529d8ff3519bc78e2076323",
+    "brain_mask": "8148636e405a0881d68fa24b5a6a6852e08641ef5b88f400c1e7f5778f54695c"
+  },
+  "original_sha256": {
+    "matrices_concat_frame_order": "eac7774d3e023909f931a81eab02d64f2389e201d920e89666d4e3362cbb6c58",
+    "parameters": "6e3a867d03fd92a1a3fa92feaf3ad37247e87b258c0f4549358c9eb128ae1f91"
+  },
+  "candidate_sha256": {
+    "matrices_npy": "5ce98f8561d51a4d8ce7a66486cd15943301e2be932559d1f8cf549217d5979b",
+    "parameters_npy": "77cb6d7a10e8fd84d062626b3cdd13476d858c4844a3dc0a625eb89b933a2ede"
+  },
+  "sources": {
+    "fnit.mcflirt.core": "f4f18579cb0a7f709f2975c3cef125e6cce392fc1dca3fa413428c365afb56fe",
+    "fnit.flirt.core": "e6ce6185fafb89666be631069f66e96ce9c6a561ab3d7c7fab4c661d317885c1"
+  },
+  "source_unchanged_during_run": true,
+  "software": {
+    "python": "3.11.16",
+    "torch": "2.5.1",
+    "numpy": "1.26.4",
+    "nibabel": "5.4.2"
+  },
+  "note": "Same complete 490-frame BOLD/SBRef as original MCFLIRT. Original matrices and par are saved text; their serialization precision contributes to reported differences. Framewise matrices, parameters, and distances remain private. Rotation summary uses SO(3) projection; comparison report is a derivative and does not overwrite the first private control report.",
+  "relative_rotation_definition": "Relative 3x3 transform projected to proper SO(3) by SVD before arccos(trace); removes orthogonality errors in original text and float32 rotation entries."
+}
+

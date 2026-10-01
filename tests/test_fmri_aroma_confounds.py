@@ -3,6 +3,7 @@ from __future__ import annotations
 import nibabel as nib
 import numpy as np
 import pytest
+import torch
 
 from fnit.fmri.aroma import (
     classify_components,
@@ -139,3 +140,117 @@ def test_confounds_reads_nifti_time_units(tmp_path, time_unit, header_tr):
     inferred = clean_confounds(source, tmp_path / "inferred.nii.gz", bandpass=(0.01, 0.1), device="cpu")
     explicit = clean_confounds(source, tmp_path / "explicit.nii.gz", bandpass=(0.01, 0.1), tr=0.735, device="cpu")
     np.testing.assert_allclose(nib.load(inferred).get_fdata(), nib.load(explicit).get_fdata(), atol=1e-5)
+
+
+def _motion_tissue_fixture(tmp_path):
+    random_generator = np.random.default_rng(412)
+    frame_count = 160
+    motion = random_generator.normal(size=(frame_count, 6))
+    motion[:, :3] *= 0.003  # radians; squared rotations are much smaller than tissue baselines
+    motion[:, 3:] *= 0.03
+    data = np.empty((3, 1, 1, frame_count), dtype=np.float32)
+    data[0, 0, 0] = (
+        1000 + random_generator.normal(size=frame_count)
+        + 10 * (motion[:, 0] / 0.003) ** 2
+    )
+    # Integer tissue signals remain exactly representable after affine scaling.
+    data[1, 0, 0] = 10000 + 128 * random_generator.integers(-3, 4, size=frame_count)
+    data[2, 0, 0] = 20000 + 256 * random_generator.integers(-3, 4, size=frame_count)
+    wm_mask = np.zeros((3, 1, 1)); wm_mask[1, 0, 0] = 1
+    csf_mask = np.zeros((3, 1, 1)); csf_mask[2, 0, 0] = 1
+    return (
+        _nifti(tmp_path / "motion_tissue_bold.nii.gz", data), data, motion,
+        _nifti(tmp_path / "wm_motion.nii.gz", wm_mask),
+        _nifti(tmp_path / "csf_motion.nii.gz", csf_mask),
+    )
+
+
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+@pytest.mark.parametrize("bandpass", [None, (0.02, 0.2)])
+def test_confounds_motion_unit_invariance(tmp_path, device, bandpass):
+    if device == "cuda" and not torch.cuda.is_available():
+        pytest.skip("CUDA is not available")
+    source, _, motion_radians, wm_mask, csf_mask = _motion_tissue_fixture(tmp_path)
+    motion_degrees = motion_radians.copy()
+    motion_degrees[:, :3] *= 180 / np.pi
+    radians_output = clean_confounds(
+        source, tmp_path / "radians.nii.gz", wm_mask=wm_mask, csf_mask=csf_mask,
+        motion=motion_radians, bandpass=bandpass, tr=1.0, device=device,
+    )
+    degrees_output = clean_confounds(
+        source, tmp_path / "degrees.nii.gz", wm_mask=wm_mask, csf_mask=csf_mask,
+        motion=motion_degrees, bandpass=bandpass, tr=1.0, device=device,
+    )
+    # Regression depends on a column's direction, not its radian/degree units.
+    np.testing.assert_allclose(
+        nib.load(radians_output).get_fdata(), nib.load(degrees_output).get_fdata(),
+        atol=2e-5, rtol=1e-6,
+    )
+
+
+def test_confounds_tissue_baseline_and_scale_invariance(tmp_path):
+    source, data, motion, wm_mask, csf_mask = _motion_tissue_fixture(tmp_path)
+    changed_data = data.copy()
+    changed_data[1, 0, 0] = data[1, 0, 0] * 8 + 10000000
+    changed_data[2, 0, 0] = data[2, 0, 0] * 4 + 5000000
+    changed_source = _nifti(tmp_path / "changed_tissue_baselines.nii.gz", changed_data)
+    original_output = clean_confounds(
+        source, tmp_path / "original_baselines.nii.gz", wm_mask=wm_mask,
+        csf_mask=csf_mask, motion=motion, device="cpu",
+    )
+    changed_output = clean_confounds(
+        changed_source, tmp_path / "changed_baselines.nii.gz", wm_mask=wm_mask,
+        csf_mask=csf_mask, motion=motion, device="cpu",
+    )
+    np.testing.assert_allclose(
+        nib.load(original_output).get_fdata()[0, 0, 0],
+        nib.load(changed_output).get_fdata()[0, 0, 0], atol=2e-5, rtol=1e-6,
+    )
+
+
+def test_confounds_duplicate_and_zero_columns_match_independent_projection(tmp_path):
+    random_generator = np.random.default_rng(55)
+    frame_count = 120
+    nuisance = random_generator.integers(-3, 4, size=frame_count).astype(float)
+    data = np.empty((3, 1, 1, frame_count), dtype=np.float32)
+    data[0, 0, 0] = 500 + 3 * nuisance + random_generator.normal(size=frame_count)
+    data[1, 0, 0] = 10000 + nuisance
+    data[2, 0, 0] = 20000 + 2 * nuisance  # same nuisance direction, different scale and baseline
+    wm_mask = np.zeros((3, 1, 1)); wm_mask[1, 0, 0] = 1
+    csf_mask = np.zeros((3, 1, 1)); csf_mask[2, 0, 0] = 1
+    output = clean_confounds(
+        _nifti(tmp_path / "duplicate_bold.nii.gz", data), tmp_path / "duplicate_clean.nii.gz",
+        wm_mask=_nifti(tmp_path / "duplicate_wm.nii.gz", wm_mask),
+        csf_mask=_nifti(tmp_path / "duplicate_csf.nii.gz", csf_mask),
+        motion=np.zeros((frame_count, 6)), device="cpu",
+    )
+    time = np.linspace(-1.0, 1.0, frame_count)
+    independent_design = np.column_stack((np.ones(frame_count), time, time**2, nuisance))
+    series = data[0, 0, 0].astype(float)
+    expected = series - independent_design @ np.linalg.lstsq(independent_design, series, rcond=None)[0]
+    result = nib.load(output).get_fdata()
+    assert np.isfinite(result).all()
+    np.testing.assert_allclose(result[0, 0, 0], expected, atol=2e-5, rtol=1e-6)
+
+
+def test_confounds_drops_stopband_roundoff_instead_of_fitting_it(tmp_path):
+    frame_count = 128
+    time = np.arange(frame_count)
+    signal = np.cos(2 * np.pi * 10 * time / frame_count) + np.sin(2 * np.pi * 9 * time / frame_count)
+    source = _nifti(tmp_path / "stopband_bold.nii.gz", (100 + signal).reshape(1, 1, 1, -1))
+    motion = np.zeros((frame_count, 6))
+    motion[:, 3] = np.sin(2 * np.pi * 40 * time / frame_count)
+    baseline = clean_confounds(
+        source, tmp_path / "bandpass_baseline.nii.gz", bandpass=(0.04, 0.1),
+        tr=1.0, device="cpu",
+    )
+    with_motion = clean_confounds(
+        source, tmp_path / "bandpass_stopband_motion.nii.gz", motion=motion, motion_model=6,
+        bandpass=(0.04, 0.1), tr=1.0, device="cpu",
+    )
+    baseline_data = nib.load(baseline).get_fdata()[0, 0, 0]
+    result = nib.load(with_motion).get_fdata()[0, 0, 0]
+    np.testing.assert_allclose(result, baseline_data, atol=2e-5, rtol=1e-6)
+    frequencies = np.fft.rfftfreq(frame_count, 1.0)
+    stopband = (frequencies < 0.04) | (frequencies > 0.1)
+    assert np.max(np.abs(np.fft.rfft(result)[stopband])) < 1e-5

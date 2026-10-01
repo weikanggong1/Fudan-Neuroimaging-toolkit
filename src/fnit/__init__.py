@@ -39,6 +39,9 @@ def __getattr__(name):
         from importlib import import_module
         module = import_module('.invwarp', __name__)
         return getattr(module, name)
+    if name in ('TorchMCFLIRT', 'MCFLIRTResult'):
+        from importlib import import_module
+        return getattr(import_module('.mcflirt', __name__), name)
     if name in ('FLIRTResult', 'TorchFLIRT',
                 'flirt_to_world_affine', 'flirt_to_world_pull',
                 'voxel_to_fsl_scaled_mm', 'world_to_flirt_affine'):
@@ -109,7 +112,7 @@ def __getattr__(name):
                 'clean_confounds', 'motion_regressors',
                 'SurfaceHemisphere', 'SurfaceProjectionResult',
                 'create_fmriprep_cifti', 'run_fmriprep_surface_projection',
-                'MSMSulcInputs', 'prepare_msmsulc_inputs', 'run_msmsulc',
+                'MSMSulcConfig', 'MSMSulcInputs', 'prepare_msmsulc_inputs', 'run_msmsulc',
                 'FMRISurfaceResult', 'fMRISurface_pipeline',
                 'T1SurfacePair', 'T1SurfaceGeometry', 'T1SurfacePreparation',
                 'prepare_fmriprep_surface_inputs', 'prepare_t1w_surface_geometry'):
