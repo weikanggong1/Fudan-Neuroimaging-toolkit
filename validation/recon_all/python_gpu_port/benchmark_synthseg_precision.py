@@ -87,7 +87,8 @@ def main():
         report["source_sha256"][module.__name__] = digest(module.__file__)
     if args.baseline_seg:
         reference = nib.load(str(args.baseline_seg))
-        candidate = result.segmentation
+        # 比较落盘数据；内存 Volume 的 dtype 与 MGH 的存储 dtype 可不同。
+        candidate = nib.load(str(args.output / "segmentation.mgz"))
         left = np.asanyarray(reference.dataobj)
         right = np.asanyarray(candidate.dataobj)
         comparison = {"reference_sha256": digest(args.baseline_seg),

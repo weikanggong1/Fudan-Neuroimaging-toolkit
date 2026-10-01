@@ -4,13 +4,15 @@
 
 `fnit-recon-all` 从一幅 T1w 生成体积分割、双侧皮层表面、顶点指标、脑区标注和统计。标准路径依次执行[MNI152 非线性变换](MNI_NONLINEAR_CHAIN.md)、拓扑修复、`white.preaparc`、球面生成与配准、最终 white、[Conda 源码构建的四轮 pial 放置](NATIVE_PIAL_PLACEMENT.md)和后处理。必要程序或资产缺失时，入口在运行前报错；阶段失败时抛出异常并保存报告。当前支持单幅 T1w；多 T1、T2/FLAIR 和纵向重建不在此接口的范围内。
 
-本页描述当前源码的调用方式。[真实数据报告](../../validation/recon_all/python_gpu_port/current_full_runs_20260930.json)分别记录执行完成、138 项完整性、网格质量、严格复现诊断与优化前后指标。整体指标等效阈值尚未正式确认，当前为 `not_assessed`；严格逐文件比较保留用于排错，不作为 GPU 性能优化的唯一阻断条件。具体口径见[比较方法](BENCHMARK_METHODS.md)与[验收说明](../../validation/recon_all/python_gpu_port/RELEASE_GATES.md)。
+本页描述当前源码的调用方式。[2026-10-01 修复与实测](../../validation/recon_all/python_gpu_port/performance_20261001/README.md)绑定本次实际计算提交；[此前完成的整例](../../validation/recon_all/python_gpu_port/current_full_runs_20260930.json)继续作为配对基线，不能代替新版本结果。执行完成、138 项完整性、网格质量、严格复现诊断与优化前后指标分别记录。整体指标等效阈值尚未正式确认，当前为 `not_assessed`；严格逐文件比较保留用于排错。具体口径见[比较方法](BENCHMARK_METHODS.md)与[验收说明](../../validation/recon_all/python_gpu_port/RELEASE_GATES.md)。
 
 本轮先修正 conform 单精度矩阵求逆的乘法顺序，再用同一原始 T1 连续验证前段；未增加体素或被试特例。[前段逐阶段报告](VOLUME_PREFIX_PARITY_20260930.md)保留修复前后体素、N4 浮点首差、四组 EM 交叉输入及资源记录。历史精度问题与性能优化新增差异分别记录。
 
 CUDA 流程已接入既有第二次归一化、SynthMorph 非线性配准和[厚度、面积、曲率](SURFACE_METRICS.md)函数；SynthMorph 跳过无人使用的两幅重采样图，MNI 保留已验证的 FP32 例外。两例归一化同输入体素一致；20 张表面指标图全部通过已有算子容差。warp 的 CPU/CUDA 浮点尾差及检查图差异完整保留，阶段加速不当作整例提速。实测见[性能记录](../../validation/recon_all/python_gpu_port/performance_20260930/README.md)。
 
-随后按真实剖析优化[球面法向的面关联索引](SURFACE_NORMALS.md)，复用已有单精度内核，保持面、角点与累加顺序。八张真实网格逐元素一致，冻结左半球球面阶段观察耗时减少 46.64%；两例从原始 T1 再跑整例，结果如下。
+此前按真实剖析优化[球面法向的面关联索引](SURFACE_NORMALS.md)，八张真实网格逐元素一致；该版本两例整例的结果在本页历史配对节中保留。
+
+2026-10-01 进一步复用已有厚度和统计函数：[完整空间候选厚度](SURFACE_THICKNESS.md)取消密集全顶点距离及逐顶点 Python 搜索，两例双侧八轮与原函数逐值相同；[多图谱缓存](SURFACE_STATS_CACHE.md)让图谱共享同版本几何基础量，48 份统计文本相同。SynthSeg 在前向作用域应用并记录[实际精度策略](SYNTHSEG_PRECISION.md)，修正构造函数覆盖设置的问题。新增[可选剖析](PROFILING.md)及[Torch/Numba 预算](THREAD_BUDGET.md)。这些阶段结果与当前整例状态分别报告，未据此宣称整例提速。
 
 ## 安装
 
@@ -49,8 +51,10 @@ report = run_recon_all_python(
     weights_dir="/data/fnit-weights",  # 已校验的模型权重目录
     assets_dir="/data/fnit-assets",  # 已校验的模板和图谱目录
     device="cuda:0",  # PyTorch 阶段的设备；无 GPU 时为 "cpu"
-    threads=4,  # PyTorch 与支持该选项的原生程序；不全局限制 Numba/BLAS/OpenMP
+    threads=4,  # Torch intraop 与当前调用线程的 Numba 掩码；不代表进程总线程数
     native_bin_dir=None,  # None 表示使用当前 Conda 环境的 bin/
+    profile_stages=False,  # 生产默认不增加阶段 CUDA 同步；True 记录同步等待
+    cuda_allocator_cache="auto",  # 首次 CUDA 默认关闭缓存；已初始化 API 保留实际策略
 )
 # report 是运行报告字典；仅在全部阶段与文件完整性检查通过后返回。
 ```
@@ -72,7 +76,9 @@ report = run_recon_all_python(
 
 批量 Python API `run_recon_all_python_batch(jobs=..., weights_dir=..., assets_dir=..., devices=..., threads=..., native_bin_dir=None)` 中，`jobs` 是按顺序排列的 `{"t1": 路径, "subject_dir": 空目录}` 列表；`devices` 是可用设备列表；其余参数与单被试一致。返回值为同序的报告列表；任一被试失败时抛出 `RuntimeError`。每个设备一次运行一例。
 
-## 真实 T1 benchmark（2026-09-30）
+## 历史整例配对：e036f57（2026-09-30）
+
+本节结果仅属于 `e036f57` 法向优化版本。2026-10-01 的代码、阶段回归、资源记录和新整例状态见[当前验证目录](../../validation/recon_all/python_gpu_port/performance_20261001/README.md)。
 
 本轮候选计算源码固定为 `e036f57b62b99d2af4cd8853ab2f1e6d2a9f8c68`，直接基线为 `279e09f0d2a166237871b3d683a6be75bd5e99b4`。两例均从原始 T1 和新空目录连续运行，使用相同主页 Conda 安装产物；两幅输入、11 项权重、102 项已安装资产、14 个 Conda 程序与 6 个参考程序重新核验，哈希变化数为 0。源码归档及逐报告 SHA-256 见[机器可读整例记录](../../validation/recon_all/python_gpu_port/current_full_runs_20260930.json)。GPU 例验证预初始化 CUDA 的 Python API，CUDA 可见设备与 NVML 采样均固定到 GPU 1 的 UUID；CPU 例验证 CLI。两者的 PyTorch/支持该选项的原生程序均设置 4 线程；Numba 默认分别为 128/192，没有全局限制 BLAS/OpenMP。
 

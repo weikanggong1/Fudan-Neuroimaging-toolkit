@@ -1,0 +1,63 @@
+{
+  "scope": "read_only_stored_dtype_and_buffer_regression_audit;not-new-model-run",
+  "audit_host": "headcw",
+  "calculation_commit": "1b8c36d25a68e253a1e59b6d02114890afa467de",
+  "reference": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/diagnostics/corrected_uncached_api/segmentation.mgz",
+  "reference_sha256": "50f9e58f7bcc64a99594f9f81b81c65870ab90c7d5731371344bba6b8daa7230",
+  "reference_header_dtype": ">f4",
+  "reference_array_dtype": ">f4",
+  "reference_array_dtype_string": ">f4",
+  "comparisons": {
+    "buffer_uncached_api": {
+      "candidate": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/final_1b8c36d/buffer_uncached_api/segmentation.mgz",
+      "candidate_sha256": "50f9e58f7bcc64a99594f9f81b81c65870ab90c7d5731371344bba6b8daa7230",
+      "header_dtype": ">f4",
+      "array_dtype": ">f4",
+      "array_dtype_string": ">f4",
+      "same_shape": true,
+      "stored_header_dtype_equal": true,
+      "stored_array_dtype_equal": true,
+      "affine_max_absolute_mm": 0,
+      "different_voxels": 0,
+      "volume_csv_equal": true,
+      "reference_csv_sha256": "aef612478a7e908c4f0aaa29a52db31806520e12a5c8e53637df3816b2f3b3da",
+      "candidate_csv_sha256": "aef612478a7e908c4f0aaa29a52db31806520e12a5c8e53637df3816b2f3b3da",
+      "original_actual_forward_sha256": "70b0a1e1f727ed580aff38ac359e888c7ea0f08afd25f1ec49637a2df815790b"
+    },
+    "buffer_cached_cli": {
+      "candidate": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/final_1b8c36d/buffer_cached_cli/segmentation.mgz",
+      "candidate_sha256": "50f9e58f7bcc64a99594f9f81b81c65870ab90c7d5731371344bba6b8daa7230",
+      "header_dtype": ">f4",
+      "array_dtype": ">f4",
+      "array_dtype_string": ">f4",
+      "same_shape": true,
+      "stored_header_dtype_equal": true,
+      "stored_array_dtype_equal": true,
+      "affine_max_absolute_mm": 0,
+      "different_voxels": 0,
+      "volume_csv_equal": true,
+      "reference_csv_sha256": "aef612478a7e908c4f0aaa29a52db31806520e12a5c8e53637df3816b2f3b3da",
+      "candidate_csv_sha256": "aef612478a7e908c4f0aaa29a52db31806520e12a5c8e53637df3816b2f3b3da",
+      "original_actual_forward_sha256": "cb3fe251b82d51b28df8a9fb2f542dbe287930f6b13762c0fca0144f413bf822"
+    }
+  },
+  "source_scripts": {
+    "code_1b8c36d/validation/recon_all/python_gpu_port/benchmark_synthseg_precision.py": {
+      "sha256": "35458da8d4264ad10ae055ecc18a81cf4feb91c2d2965eeb1b5fa125e1ca7de9",
+      "uses_in_memory_candidate": true,
+      "uses_stored_candidate": false
+    },
+    "benchmark_synthseg_precision_stored_20261001.py": {
+      "sha256": "5168f615ce8591d5473bed05cfd7f1c159bedd095dfba2503fbd690880c93477",
+      "uses_in_memory_candidate": false,
+      "uses_stored_candidate": true
+    }
+  },
+  "audit_notes": {
+    "old_probe_same_dtype_false": "Old probe compared a serialized MGH float32 reference with the in-memory int32 NIfTI result; these are different representations. Original report retained unchanged.",
+    "stored_probe": "Later CLI probe reloads saved MGH for both sides.",
+    "stored_recheck": "Both buffer outputs and the same-policy pre-buffer reference are identical MGH bytes and have stored >f4 dtype. Volume CSV files are also byte-identical.",
+    "official_equivalence": "not_assessed",
+    "performance_scope": "No new model execution in this read-only audit."
+  }
+}

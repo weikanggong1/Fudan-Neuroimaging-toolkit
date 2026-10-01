@@ -1,0 +1,140 @@
+{
+  "scope": "frozen_same_input_precision_and_allocator_diagnostic",
+  "code_version": "1b8c36d25a68e253a1e59b6d02114890afa467de",
+  "host": "gpucw1",
+  "device": "cuda:0",
+  "device_uuid": "e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+  "threads": 4,
+  "cudnn_benchmark": true,
+  "cudnn_deterministic": true,
+  "allocator": {
+    "requested": "disabled",
+    "cuda_initialized_at_entry": false,
+    "environment_at_entry": "1",
+    "environment_after_selection": "1",
+    "effective": "disabled",
+    "torch_stats_known_valid": false,
+    "torch_stats_known_unavailable": true
+  },
+  "initialized_api": true,
+  "wall_seconds_including_data_io": 80.79480794817209,
+  "stage": {
+    "name": "SynthSeg_with_data_writes",
+    "seconds": 80.79377905512229,
+    "function_seconds": 80.79358078213409,
+    "cuda_pre_sync_seconds": 9.908806532621384e-06,
+    "cuda_post_sync_seconds": 0.00011766329407691956,
+    "cuda_synchronized": true,
+    "cuda_synchronization_requested": true,
+    "parent_cpu_seconds": 72.620683532,
+    "child_cpu_seconds": 0.0,
+    "torch_memory_stats_status": "unavailable"
+  },
+  "actual_forward": {
+    "requested_cudnn_tf32": false,
+    "forwards": [
+      {
+        "pass": "original",
+        "device": "cuda:0",
+        "matmul_tf32": true,
+        "cudnn_tf32": false,
+        "input_dtype": "torch.float32",
+        "model_dtypes": [
+          "torch.float32"
+        ],
+        "autocast": {
+          "cpu": {
+            "enabled": false,
+            "dtype": "torch.bfloat16"
+          },
+          "cuda": {
+            "enabled": false,
+            "dtype": "torch.float16"
+          }
+        },
+        "output_dtype": "torch.float32"
+      },
+      {
+        "pass": "flipped",
+        "device": "cuda:0",
+        "matmul_tf32": true,
+        "cudnn_tf32": false,
+        "input_dtype": "torch.float32",
+        "model_dtypes": [
+          "torch.float32"
+        ],
+        "autocast": {
+          "cpu": {
+            "enabled": false,
+            "dtype": "torch.bfloat16"
+          },
+          "cuda": {
+            "enabled": false,
+            "dtype": "torch.float16"
+          }
+        },
+        "output_dtype": "torch.float32"
+      }
+    ],
+    "posterior_buffer_reused": true,
+    "posterior_ensemble_dtype": "torch.float32"
+  },
+  "input_sha256": "646cfe39c550fd1626c4a9bfbc3d065a9afdd9cddbd849585465a822b425bc09",
+  "weights_sha256": {
+    "synthseg_2.0.h5": "f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e",
+    "synthseg_segmentation_labels_2.0.npy": "5ef25ec33fe917ac99f30b8f2185b2d77121136ee411b9c4970c0b59be615ed8",
+    "synthseg_segmentation_names_2.0.npy": "234eb6d514e10d6ebd748a8b30a1d12d9426fd874c607e37852406fae8f290fc",
+    "synthseg_topological_classes_2.0.npy": "650b4b96834485c1e6d7421de4af74da80d861e6b2a39ef1164389bde3a5e14a"
+  },
+  "source_sha256": {
+    "fnit._dmri": "0862c7cefbd2b2811e9a56e3b617a209968d70c4e5a5b76c557630b1cd2f0117",
+    "fnit.synthseg_parc.segment": "5dce81225289fdfb62bfa5a7787e26737caa41ff74c33e0885304b239d732f33",
+    "fnit.synthseg_parc.synthseg": "5b6fc866076b1311e9960267daecf25084f59dbbea84644a83289853cf4c2601"
+  },
+  "torch_version": "2.5.1",
+  "CUDA_VISIBLE_DEVICES": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+  "total_intracranial_mm3": 1280294.25,
+  "baseline_comparison": {
+    "reference_sha256": "50f9e58f7bcc64a99594f9f81b81c65870ab90c7d5731371344bba6b8daa7230",
+    "same_shape": true,
+    "same_dtype": false,
+    "affine_max_absolute_mm": 0.0,
+    "different_voxels": 0,
+    "dice_by_label": {
+      "0": 1.0,
+      "2": 1.0,
+      "3": 1.0,
+      "4": 1.0,
+      "5": 1.0,
+      "7": 1.0,
+      "8": 1.0,
+      "10": 1.0,
+      "11": 1.0,
+      "12": 1.0,
+      "13": 1.0,
+      "14": 1.0,
+      "15": 1.0,
+      "16": 1.0,
+      "17": 1.0,
+      "18": 1.0,
+      "24": 1.0,
+      "26": 1.0,
+      "28": 1.0,
+      "41": 1.0,
+      "42": 1.0,
+      "43": 1.0,
+      "44": 1.0,
+      "46": 1.0,
+      "47": 1.0,
+      "49": 1.0,
+      "50": 1.0,
+      "51": 1.0,
+      "52": 1.0,
+      "53": 1.0,
+      "54": 1.0,
+      "58": 1.0,
+      "60": 1.0
+    }
+  },
+  "buffer_regression_csv_equal": true
+}
