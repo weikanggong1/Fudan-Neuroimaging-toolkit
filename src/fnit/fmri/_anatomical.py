@@ -186,7 +186,7 @@ def _produce(directory, t1w, template_path, template_mask_path, strip, backend,
     finished = _completed_time(device)
     timing["template_preparation"] = finished - started
     started = finished
-    tissues = TorchFAST(device=device)(directory / "T1_brain.nii.gz", mask=directory / "T1_mask.nii.gz")
+    tissues = TorchFAST(device=device, execution="fsl")(directory / "T1_brain.nii.gz", mask=directory / "T1_mask.nii.gz")
     tissues.pve_wm.save(directory / "T1_pve_wm.nii.gz")
     tissues.pve_csf.save(directory / "T1_pve_csf.nii.gz")
     wm = np.asarray(tissues.pve_wm.data) >= .5

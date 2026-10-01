@@ -340,7 +340,7 @@ def fMRIVolume_pipeline(
         "mni_brain_mask": (
             str(Path(mni_brain_mask).expanduser().resolve()) if mni_brain_mask is not None else None
         ),
-        "fast_config": asdict(FASTConfig()),
+        "fast_config": asdict(FASTConfig(execution="fsl")),
         "reuse_anatomical": reuse_anatomical,
         "anatomical_cache": {"reused": anatomical.reused, "fingerprint": anatomical.fingerprint},
         "bbr_execution": bbr_execution,
