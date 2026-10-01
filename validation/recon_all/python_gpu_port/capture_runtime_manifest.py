@@ -1,7 +1,8 @@
 """复核本次已声明输入、资源及程序，记录计算主机和环境版本。
 
 --runtime-root 为已有 Conda/weights/assets 根目录；--expected-manifest 为
-已声明的 JSON；--build-manifest 为14程序独立源码构建记录；--code-commit
+已声明的 JSON；--build-manifest 为14程序独立源码构建记录或带programs列表的清单；
+--native-bin-dir 显式指定独立源码构建程序目录，默认环境bin；--code-commit
 标记实际计算提交；--output 必须不存在。--reference-bin-dir 仅在独立
 benchmark 中核验官方程序，不执行程序或读官方影像；未提供则不核验。
 --subject 可记录本用户对应运行进程的 /proc 线程和白名单环境。
@@ -39,6 +40,7 @@ def main():
     parser.add_argument("--runtime-root", type=Path, required=True)
     parser.add_argument("--expected-manifest", type=Path, required=True)
     parser.add_argument("--build-manifest", type=Path, required=True)
+    parser.add_argument("--native-bin-dir", type=Path)
     parser.add_argument("--code-commit", required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--reference-bin-dir", type=Path)
@@ -88,12 +90,17 @@ def main():
         report["expected_manifest_sha256"] = fingerprint(args.expected_manifest)["sha256"]
         report["build_manifest_sha256"] = fingerprint(args.build_manifest)["sha256"]
         folders = {"weights": args.runtime_root / "weights", "assets": args.runtime_root / "assets",
-                   "binaries": args.runtime_root / "fnit_main_env/bin"}
+                   "binaries": args.native_bin_dir or args.runtime_root / "fnit_main_env/bin"}
         if args.reference_bin_dir:
             folders["reference_binaries"] = args.reference_bin_dir
         for group, folder in folders.items():
-            entries = expected[group] if group != "binaries" else {
-                name: {"sha256": value} for name, value in build["installed_program_sha256"].items()}
+            if group == "binaries":
+                program_hashes = build.get("installed_program_sha256")
+                if program_hashes is None:
+                    program_hashes = {row["name"]: row["sha256"] for row in build["programs"]}
+                entries = {name: {"sha256": value} for name, value in program_hashes.items()}
+            else:
+                entries = expected[group]
             report[group] = {}
             for name, previous in entries.items():
                 actual = fingerprint(folder / name)

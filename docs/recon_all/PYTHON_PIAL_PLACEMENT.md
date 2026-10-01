@@ -99,7 +99,7 @@ candidate_index = OriginalVertexBuckets(original=vertices, ripped=ripped)  # 本
 candidate_offsets, candidate_ids = candidate_index.query(current=vertices)  # 下一轮传其真实当前坐标
 ~~~
 
-真实完整回归与CPU剖析正在执行，报告绑定源码/输入SHA，固定4线程、200步上限。
+真实完整回归已执行sub01左侧41步，报告绑定源码/输入SHA，固定4线程、200步上限。
 未更改默认white：现有Python white只覆盖前缀，无法代替完整四轮优化。
 已有GPU厚度/面积/曲率继续由主runner调用，不重新实现；整例实测另行报告。
 
@@ -123,5 +123,5 @@ _incident_faces_collide输入这些量及完整候选CSR并返回首次碰撞boo
 
 32项专项测试通过；四半球真实原法向和white/pial坐标下的候选CSR完全相同。
 桶查询约0.016–0.027秒，旧代码0.222–0.369秒，准备成本另列；这是组件计时。
-完整无剖析冷JIT新/旧配对执行中，整例尚未启动，不能据此宣称整例加速。
+候选完整无剖析冷JIT耗时1232.634秒，41步、四轮结束26/32/36/41及清理2→6→0均与优化前相同；有序面、全部坐标和文件SHA完全一致。无剖析旧版配对计时与官方/Conda/Python同输入比较尚未结束；不能将1232.634与含剖析的1687.49相除声称提速。生产仍保留完整Conda white/pial，整例提速单独测量。
 第一版只缓存整数索引的完整候选剖析已中止，保留日志，不计入性能结果。

@@ -201,3 +201,58 @@ python -m fnit.recon_all.sphere_standard_run \
 生产保留1线程；GCA现有Python只有第一EM方向，保留成熟Conda完整优化器。
 修复主页构建时间戳循环，记录编译器、源文件、ITKConfig和二进制SHA。
 这阶段没有宣称提速，整例记录实际N4子段，旧程序能力缺失时明确标记。
+
+## 第五阶段：white/pial
+
+完整pial的CPU剖析定位到逐顶点异步更新及其碰撞查询：约2463万次候选判定，
+不是原始white桶构造占主要时间。61926c7复用静态CSR及原始坐标桶索引，将
+同一顶点关联面的KD查询和碰撞计算批量化；整个顶点仍按原顺序接受更新。
+拒绝试步产生的旧MHT状态、完整候选扩展、边界强度、四轮和最终清理均保留。
+接口、具名示例和全部内部量见[Python pial说明](PYTHON_PIAL_PLACEMENT.md)。
+
+32项专项测试通过，四半球真实法向和候选CSR完全一致。sub01左侧完整41步
+新旧有序坐标及保存SHA相同，候选含冷JIT/加载/写出1232.634秒；无剖析旧版
+配对仍在执行，不能与1687.49秒的cProfile运行直接计算提速。官方、Conda、
+Python三方同输入运行在隔离目录；已有1.482mm局部差异单列，不归因于随机性。
+Python仍需证明相对生产C++的收益，当前保留Conda完整white/pial。
+
+## 整例复现与只读比较
+
+候选61926c7从原始T1与新空目录运行。sub01使用已初始化CUDA的Python API；
+sub02使用CLI，优化前后均为同一H100 UUID、4线程和关闭分配缓存。sub01基线
+复用c248520的已有GPU完整记录：其src树与本轮起点0c8ab32均为
+7304eef4cf14d79baa87f49c98dc8a3b7c06181d。它是已有记录复用，不是本轮重跑，
+共享负载及加载缓存可能不同；sub02另测当前GPU基线，不能拿旧CPU耗时配对。
+
+capture_runtime_manifest.py接收runtime-root、已声明expected-manifest、
+build-manifest、code-commit和新的output路径；native-bin-dir可显式选择本轮
+独立程序束，默认环境bin。程序束只连接源码构建产物，N4使用新构建、其余13项
+保留已核对的Conda产物。脚本重新核对两例输入、权重、资产及程序大小/SHA，
+输出JSON包含主机/CPU/GPU/库版本及不符列表；文件缺失或不符即失败。
+不读取或复制许可证内容；硬件快照和哈希核验不等于干净隔离部署通过。
+
+collect_hotspot_whole_comparison.py的config含hot、comparison_root、python、
+label_table、code_commit及两例cases。每例指定candidate、baseline、official、
+launch；只读已成功完成的subject与completion.json，不写回生产。
+可选scripts_dir固定比较器目录、code_root固定其导入的FNIT版本，默认兼容
+历史c248520布局；additional_quality可含baseline、official，为各自另写质量报告。
+JSON/CSV和脑图位于comparison_root；线程固定4，质量检查的180秒/2000万候选
+预算不足会明确记录incomplete，不作为通过。输出已有、执行失败、缺失输入或
+比较异常会抛错并保留日志。两脚本属于独立benchmark，没有官方独立等价CLI。
+
+~~~bash
+# 三项配置分别声明解释器、原始T1、新空目录、GPU、线程、代码归档和独立程序束。
+python validation/recon_all/python_gpu_port/run_full_hotspots_launcher.py \
+  --config /bench/whole_sub01_candidate.json  # 预初始化CUDA API
+python validation/recon_all/python_gpu_port/run_full_hotspots_launcher.py \
+  --config /bench/whole_sub02_baseline.json  # 同GPU的旧版CLI
+python validation/recon_all/python_gpu_port/run_full_hotspots_launcher.py \
+  --config /bench/whole_sub02_candidate.json  # 同GPU的候选CLI
+python validation/recon_all/python_gpu_port/collect_hotspot_whole_comparison.py \
+  --config /bench/whole_comparison_config.json  # 三次整例结束后串行只读比较
+~~~
+
+整例墙钟采用相同monitor命令边界，包含导入、校验、加载、传输与读写。
+分别报告执行、138项输出完整性、严格复现、优化是否引入退化和整体指标。
+整体等效未批准阈值，保持not_assessed；保留逐标签Dice、厚度/面积/体积偏差、
+双向点到三角面距离及局部穿越/球面翻折。所有计时与统计以完成后实际报告为准。
