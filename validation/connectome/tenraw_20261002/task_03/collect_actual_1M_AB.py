@@ -16,6 +16,8 @@ def sha(path):
 def collect(root, subjects):
     evidence={'scope':'Actual listed pilot1M A/B capacity+bitwise equality; not ABBA or stable1M speedup',
               'collector_source_sha256':sha(Path(__file__)),
+              'memory_condition_scope':'Original component budget_pass tests three recorded peaks below20e9 only; not a continuous-time bound or formal full rawcase gate with monitoringerror0/maxgap<=5s',
+              'formal_full_rawcase_memory_gate':'not_assessed_by_component',
               'baseline_commit':'f436de588647a0de80735e4a98d53df5d88e502d',
               'candidate_commit':'c4811b4b192014cd59e1031385e359cd992ef9e5',
               'not_executed_planned_arms':['B2','A2'],'pilots':{}}
@@ -44,16 +46,23 @@ def collect(root, subjects):
             for name in ['points','offsets','endpoints','lengths_mm','accepted_seeds']:
                 p=output/(name+'.npy');a=np.load(p,mmap_mode='r',allow_pickle=False);assert np.isfinite(a).all()
                 arrays[name]={'sha256':sha(p),'dtype':str(a.dtype),'shape':list(a.shape),'bytes':p.stat().st_size}
-            pilot['runs'][label]={'report':report,'report_sha256':sha(output/'report.json'),'arrays':arrays}
+            pilot['runs'][label]={'report':report,'report_sha256':sha(output/'report.json'),'arrays':arrays,
+                'observed_three_peak_conditions_pass':True,
+                'sampling_quality_gap5s_zero_failed_samples':report['nvml_failed_samples']==0 and report['nvml_max_gap_seconds']<=5,
+                'formal_full_rawcase_memory_gate':'not_assessed_by_component'}
         pilot['accepted_equal']=pilot['runs']['A1']['report']['accepted']==pilot['runs']['B1']['report']['accepted']
         assert pilot['accepted_equal']
+        pilot['all_five_binary_array_sha256_equal']=all(
+            pilot['runs']['A1']['arrays'][name]['sha256']==pilot['runs']['B1']['arrays'][name]['sha256']
+            for name in pilot['runs']['A1']['arrays'])
+        assert pilot['all_five_binary_array_sha256_equal']
         evidence['pilots'][subject]=pilot
     evidence['completed_pilots']=subjects
-    evidence['all_requested_pilot_strict_and_memory_pass']=True
-    evidence['all_two_pilot_strict_and_memory_pass']=set(subjects)=={'CON03','CON01'}
+    evidence['all_requested_pilot_bitwise_and_observed_peak_conditions_pass']=True
+    evidence['all_two_pilot_bitwise_and_observed_peak_conditions_pass']=set(subjects)=={'CON03','CON01'}
     return evidence
 
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--results-root',type=Path,required=True);parser.add_argument('--output',type=Path,required=True)
-    parser.add_argument('--subjects',nargs='+',choices=['CON03','CON01'],default=['CON03','CON01']);args=parser.parse_args();result=collect(args.results_root,args.subjects);args.output.write_text(json.dumps(result,indent=2)+'\n');print('Actual completed pilots strict+memory all pass:',args.subjects)
+    parser.add_argument('--subjects',nargs='+',choices=['CON03','CON01'],default=['CON03','CON01']);args=parser.parse_args();result=collect(args.results_root,args.subjects);args.output.write_text(json.dumps(result,indent=2)+'\n');print('Actual completed pilots bitwise+observed peak conditions pass:',args.subjects)

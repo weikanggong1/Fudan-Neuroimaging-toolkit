@@ -157,14 +157,16 @@ CON03 候选实现的实际随机重复均采用100000个seeds、原PT、batch81
 
 五次源码和PT/manifest SHA一致；除seed外追踪参数相同，TF32开启、compile_arc=False。数组shape/dtype、有限值、offsets和路径首尾端点一致性审计全部通过。allocated峰值889,601,536–891,229,184 bytes，reserved均903,872,512 bytes，进程采样NVML峰值均2,801,795,072 bytes，均符合20,000,000,000 bytes预算。共享负载下耗时变化较大，表中数值是随机重复运行记录，不用于推导加速比。此处仅确认真实跟踪输出可供后续SIFT2/矩阵分析，原软件5×5矩阵精度评估由总控另行完成。[完整五次报告、数组哈希与审计](../../validation/connectome/tenraw_20261002/task_03/actual_tracking_five_seed_audit.json)及[producer控制器](../../validation/connectome/tenraw_20261002/task_03/actual_tracking_five_seed_controller.json)。
 
-CON03实际1M A/B已完成，两轮均接受116285条、4021637点；五类数组的shape、dtype、全部值逐位一致，neq/max/P99/RMSE=0。原PT、seed0、batch8192、全部追踪参数及TF32保持相同，compile_arc=False。原始A1直接复用，未重跑。
+两例实际1M A/B已完成。CON03两轮均接受116285条、4021637点，CON01两轮均接受144343条、4936207点；五类数组的shape、dtype、全部值逐位一致，neq/max/P99/RMSE=0。原PT、seed0、batch8192、全部追踪参数及TF32保持相同，compile_arc=False。原始A1直接复用，未重跑。
 
 | 1M轮次 | tracking同步wall/秒 | allocated峰值/bytes | reserved峰值/bytes | 进程采样NVML峰值/bytes |
 | --- | ---: | ---: | ---: | ---: |
 | CON03 A1基线 | 2250.341 | 3091213312 | 3120562176 | 5018484736 |
 | CON03 B1候选 | 5220.029 | 3091222528 | 3122659328 | 5020581888 |
+| CON01 A1基线 | 2073.123 | 3110962176 | 3128950784 | 5026873344 |
+| CON01 B1候选 | 1901.716 | 3110971392 | 3128950784 | 5026873344 |
 
-两轮路径逻辑数据均48,259,644 bytes，实际去重storage均2,419,304,628 bytes；95615条路径引用比自身更大的storage。三种显存记录均低于20,000,000,000 bytes。NVML最大采样间隔A1/B1为4.246/8.709秒，表中NVML数值是观测采样峰值。A/B在不同共享负载时段执行，保留全部耗时，未推导稳定1M加速结论。本轮1M用于容量与逐位输出检查，只执行A/B，旧B2/A2计划保留为未执行。CON01 A1/B1仍在进行，整例峰值由正式raw10另测。[CON03实际1M A/B完整报告与数组SHA](../../validation/connectome/tenraw_20261002/task_03/actual_tracking_1M_AB_CON03.json)。
+CON03两轮路径逻辑数据均48,259,644 bytes，实际去重storage均2,419,304,628 bytes；95615条路径引用比自身更大的storage。CON01两轮逻辑数据均59,234,484 bytes，实际去重storage均2,434,681,212 bytes；117593条路径引用比自身更大的storage。四轮三种观测显存峰值均低于20,000,000,000 bytes；原组件worker的`budget_pass=True`只检查这三项峰值条件。NVML最大采样间隔CON03 A1/B1为4.246/8.709秒、CON01 A1/B1为4.200/4.890秒，四轮NVML失败采样数均为0。CON03 B1最大间隔8.709秒超过正式rawcase的≤5秒要求；组件检查不覆盖完整rawcase流程，也不构成全程连续低于20GB的证明。表中NVML数值是观测采样峰值。A/B在不同共享负载时段执行，保留全部耗时，未推导稳定1M加速结论。本轮1M用于容量与逐位输出检查，只执行A/B，旧B2/A2计划保留为未执行。两例全部五类二进制数组SHA也相同，输入、源码、参数、设备核对通过，三种观测峰值条件满足；这是输入驻留的tracking组件容量记录。正式rawcase完整显存gate另要求监测error=0、最大间隔≤5秒并覆盖整例，由总控独立验收。[两例实际1M A/B完整报告、控制器与数组SHA](../../validation/connectome/tenraw_20261002/task_03/actual_tracking_1M_AB_two_pilot.json)。
 
 ![本轮真实CON03轨迹比较](../../validation/connectome/tenraw_20261002/task_03/tracking_real_abba_CON03.png)
 
@@ -178,8 +180,8 @@ CON03实际1M A/B已完成，两轮均接受116285条、4021637点；五类数�
 
 | 版本/日期 | 更新与证据 |
 | --- | --- |
-| 随机重复证据/2026-10-03 | CON03实际seed0–4完成，输入、源码、参数与输出结构审计通过，三类显存峰值均符合预算。只增加独立重复/审计工具与报告，生产算法仍为c4811b4；CON03 1M A/B严格与预算通过；CON01 1M及原软件矩阵评估由当前任务/总控继续验收。 |
-| 本轮候选/2026-10-02 | SH同阶分组写回；FOD调用内上下文；5TT轴索引/权重复用。只减少重复准备，保留求和、ACT、RNG和路径视图。CON03真实100k同PT ABBA逐位一致，共享负载下观测耗时下降18.75%；1M/多seed/整例仍待完成。 |
+| 随机重复证据/2026-10-03 | CON03实际seed0–4完成，输入、源码、参数与输出结构审计通过，三类显存峰值均符合预算。只增加独立重复/审计工具与报告，生产算法仍为c4811b4；两例1M A/B的五类二进制数组SHA相同，三种观测峰值均<20GB；CON03 B1采样最大间隔8.709秒，组件结果不作为正式rawcase完整显存gate通过证据；原软件矩阵和整例验收由总控完成。 |
+| 本轮候选/2026-10-02 | SH同阶分组写回；FOD调用内上下文；5TT轴索引/权重复用。只减少重复准备，保留求和、ACT、RNG和路径视图。两例真实100k同PT ABBA逐位一致，CON03共享负载下观测耗时下降18.75%；五seed跟踪和两例1M A/B容量检查已完成，整例由总控验收。 |
 | f436de5/2026-10-02 | 本轮冻结基线；既有路径收集合同由`test_tracking_collection.py`保护。 |
 | 2026-09-29 | [旧100k三种子官方对照](../../validation/connectome/ds004666/tracking_100k_three_seed_20260929.md)，绑定原报告版本。 |
 | 2026-09-29 | [旧SH单弧官方对照](../../validation/connectome/ds004666/ifod2_single_arc_20260929.md)；对应真实回归fixture保留。 |
