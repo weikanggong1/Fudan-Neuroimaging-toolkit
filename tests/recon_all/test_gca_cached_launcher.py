@@ -14,13 +14,13 @@ def run_case(write_output):
         text='#!'+sys.executable+'''\nimport json,os,sys
 from pathlib import Path
 if os.environ.get('FNIT_GCA_QUERY_CAPABILITIES')=='1':
- print(json.dumps({'fnit_gca_cached_search':True}));sys.exit(0)
-Path('environment_seen.json').write_text(json.dumps({'query':os.environ.get('FNIT_GCA_QUERY_CAPABILITIES'),'scorer':os.environ.get('FNIT_GCA_SCORER')}))
+ print(json.dumps({'fnit_gca_cached_search':True,'full_native_em':True,'version':2,'reduction':'upstream_ROMP_partials'}));sys.exit(0)
+Path('environment_seen.json').write_text(json.dumps({'query':os.environ.get('FNIT_GCA_QUERY_CAPABILITIES'),'scorer':os.environ.get('FNIT_GCA_SCORER'),'omp':os.environ.get('OMP_NUM_THREADS')}))
 '''
         if write_output:text+="Path(sys.argv[-1]).write_text('1 4 4\\n1 0 0 0\\n0 1 0 0\\n0 0 1 0\\n0 0 0 1\\n')\n"
         binary.write_text(text);binary.chmod(0o755)
         digest=hashlib.sha256(binary.read_bytes()).hexdigest()
-        with patch.dict(os.environ,{'OMP_NUM_THREADS':'4','FNIT_GCA_QUERY_CAPABILITIES':'1'}):
+        with patch.dict(os.environ,{'OMP_NUM_THREADS':'8','FNIT_GCA_QUERY_CAPABILITIES':'1'}):
             if write_output:
                 assert run_cached_em_register(binary,mri,root/'atlas.gca',root,binary_sha256=digest)==output
                 assert output.read_text().startswith('1 4 4')
@@ -29,9 +29,16 @@ Path('environment_seen.json').write_text(json.dumps({'query':os.environ.get('FNI
                 except FileNotFoundError:pass
                 else:raise AssertionError('zero exit with no new output was accepted')
                 assert output.read_text()=='old LTA'
+            assert os.environ['OMP_NUM_THREADS']=='8'
         seen=json.loads((mri/'environment_seen.json').read_text())
-        assert seen=={'query':None,'scorer':'cpu_cached'}
+        assert seen=={'query':None,'scorer':'cpu_cached','omp':'4'}
         assert not list((mri/'transforms').glob('.fnit-cached-em-*'))
+
+def test_polluted_environment_generates_fresh_output():
+    run_case(True)
+
+def test_zero_exit_without_new_output_preserves_old_lta():
+    run_case(False)
 
 if __name__=='__main__':
     run_case(True);run_case(False)

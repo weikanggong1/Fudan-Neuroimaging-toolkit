@@ -79,8 +79,29 @@ def _folding_atlas(assets: Path, hemi: str) -> Path:
 
 
 def _run_native_em_register(binary: Path, mri: Path, atlas: Path,
-                            assets: Path) -> None:
-    env = dict(os.environ, FREESURFER_HOME=str(assets))
+                            assets: Path, *, backend: str = "original",
+                            binary_sha256: str | None = None, threads: int = 4) -> None:
+    """运行完整原生注册；缓存后端只改变已验证的搜索密度复用。
+
+    binary为独立Conda程序；mri含自产conformed nu/brainmask和transforms。
+    atlas/assets为已校验GCA和资产路径。backend默认original；cpu_cached
+    验证binary_sha256及能力2，threads默认4控制新子进程，保持父环境。
+    输出talairach.lta包含4×4 voxel空间变换与两侧几何，返回None。
+    原生执行/输入/输出/能力失败抛异常；完整参数见GCA及性能接入说明。
+    """
+    if backend == "cpu_cached":
+        from .mri_em_register_cached_conda import run_cached_em_register
+        run_cached_em_register(binary=binary, mri=mri, atlas=atlas, assets=assets,
+                               binary_sha256=binary_sha256 or hashlib.sha256(binary.read_bytes()).hexdigest(),
+                               threads=threads)
+        return
+    if backend != "original":
+        raise ValueError("invalid native GCA backend")
+    from .thread_budget import native_thread_environment
+    env, _ = native_thread_environment(threads=threads)
+    env["FREESURFER_HOME"] = str(assets)
+    env.pop("FNIT_GCA_QUERY_CAPABILITIES", None)
+    env["FNIT_GCA_SCORER"] = "original"
     subprocess.run([str(binary), "-uns", "3", "-mask", "brainmask.mgz",
                     "nu.mgz", str(atlas), "transforms/talairach.lta"],
                    cwd=mri, env=env, check=True)
@@ -437,11 +458,19 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
 
 def _finish_cortical_surface(subject: Path, hemi: str, binary: Path,
                              assets: Path, *, device: str, threads: int,
-                             defer_metrics: bool = False) -> dict:
-    """球面配准和注释完成后，依次放置最终 white、pial 并计算顶点图。"""
+                             defer_metrics: bool = False,
+                             white_binary: Path | None = None) -> dict:
+    """球面配准和注释完成后，依次放置最终white、pial并计算顶点图。
+
+    subject为自产被试目录，hemi为lh/rh；binary是pial及CPU顶点图程序，
+    white_binary可单独指定white专用程序，默认复用binary。device/threads
+    控制已有GPU顶点图和原生线程，defer_metrics默认False，供并行屏障。
+    写出surface RAS/mm的white、pial.T1/pial和所需顶点图，返回各阶段路径/
+    秒数/待办状态。输入、网格或执行失败传播异常；不读取官方结果。
+    """
     from .final_white_conda import run_final_white
     surf = subject / "surf"
-    white_report = run_final_white(subject, hemi, binary, assets, threads=threads)
+    white_report = run_final_white(subject, hemi, white_binary or binary, assets, threads=threads)
     pial_report = _run_native_pial(binary, subject, hemi, assets, threads)
     shutil.copyfile(surf / f"{hemi}.pial.T1", surf / f"{hemi}.pial")
     result = {"final_white_report": white_report, "pial_report": pial_report,
@@ -611,7 +640,7 @@ def _hemisphere_operation(subject, hemi, device, threads, operation, *, assets,
                      mri / 'filled.mgz', mri / 'norm.mgz', device=device,
                      threads=threads, topology_binary=binaries['topology'],
                      inflate_binary=binaries['inflate'], intersection_binary=binaries['intersection'],
-                     place_binary=binaries['metrics'], defect_binary=binaries['defect'],
+                     place_binary=binaries.get('white', binaries['metrics']), defect_binary=binaries['defect'],
                      assets=assets, defer_defects=True)
     elif operation == 'register':
         from .mris_register_run import run_register_sphere
@@ -632,7 +661,8 @@ def _hemisphere_operation(subject, hemi, device, threads, operation, *, assets,
                   labels / f'{hemi}.{atlas}.annot', device=device)
     elif operation == 'finish_surface':
         value = step(f'finish_surface_{hemi}', _finish_cortical_surface, subject,
-                     hemi, binaries['metrics'], assets, device=device, threads=threads, defer_metrics=True)
+                     hemi, binaries['metrics'], assets, device=device, threads=threads, defer_metrics=True,
+                     white_binary=binaries.get('white'))
     else:
         raise ValueError(f'unknown hemisphere operation: {operation}')
     return {'result': value, 'stages': steps}
@@ -644,12 +674,15 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          native_bin_dir: str | Path | None = None,
                          profile_stages: bool = False,
                          cuda_allocator_cache: str = "auto",
-                         hemisphere_workers: int = 1) -> dict:
+                         hemisphere_workers: int = 1,
+                         native_optimizations: str = "auto") -> dict:
     """从单幅原始 T1 连续生成 conform 体积、双侧表面和脑区统计。
 
     t1、subject_dir、weights_dir、assets_dir 是输入影像、空输出目录、
     已校验权重和资产的路径；native_bin_dir=None 时使用当前 Conda bin。
     device 默认 cuda:0，threads 默认 4；不自动使用 FP16/BF16。
+    native_optimizations=auto 查询独立构建产物能力，4线程完整 GCA 使用
+    已验证缓存，white 使用专用快速程序，pial保留原程序；original用于控制。
     hemisphere_workers 默认1保持串行，2用独立 exec 半球进程；总 threads
     在双侧之间平分（奇数向下取整），父进程保留依赖屏障和共享发布。
     profile_stages=False 不增加阶段 CUDA 同步；True 分别记录前同步、函数、
@@ -702,6 +735,10 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     n4_binary = _native_binary(native_bin_dir, "fnit_n4_itk")
     topology_binary = _native_topology_binary(native_bin_dir)
     metrics_binary = _native_surface_metrics_binary(native_bin_dir)
+    from .native_runtime_selection import select_native_optimizations
+    native_selection = select_native_optimizations(native_bin_dir, threads=threads,
+                                                   mode=native_optimizations)
+    white_binary = _native_binary(native_bin_dir, Path(native_selection["white_binary"]).name)
     inflate_binary = _native_inflate_binary(native_bin_dir)
     intersection_binary = _native_binary(native_bin_dir, "mris_remove_intersection")
     paint_binary = _native_binary(native_bin_dir, "mrisp_paint")
@@ -742,7 +779,9 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                     "stages": [], "status": "running"}
     report["hemisphere_scheduling"] = {"workers": hemisphere_workers, "total_thread_budget": threads, "groups": [], "mode": "serial" if hemisphere_workers == 1 else "independent-exec-private-subjects"}
     report["gca_registration"] = {"implementation": "native-c++",
-                                  "binary": str(native_em[0]), "sha256": native_em[1]}
+                                  "binary": str(native_em[0]), "sha256": native_em[1],
+                                  "backend": native_selection["em_backend"]}
+    report["native_optimizations"] = native_selection
     report["topology_repair"] = {
         "implementation": "native-c++", "binary": str(topology_binary[0]),
         "sha256": topology_binary[1],
@@ -755,7 +794,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         "mri_edit_wm_with_aseg_sha256": wm_edit_binary[1]}
     report["white_preaparc"] = {
         "implementation": "Python MNI/aux/finalsurfs + Conda C++ placement",
-        "binary": str(metrics_binary[0]), "sha256": metrics_binary[1],
+        "binary": str(white_binary[0]), "sha256": white_binary[1],
         "final_smoothwm": "Python 3 passes on CPU",
         "final_white_pial": "Conda source-built C++ white and pial after annotation"}
     report["surface_metrics"] = {
@@ -862,7 +901,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     report["precision"]["SynthSeg_actual_forward"] = result.precision
     lta = mri / "transforms/talairach.lta"
     gca = assets / "average/RB_all_2020-01-02.gca"
-    stage("mri_em_register", _run_native_em_register, native_em[0], mri, gca, assets)
+    stage("mri_em_register", _run_native_em_register, native_em[0], mri, gca, assets,
+          backend=native_selection["em_backend"], binary_sha256=native_em[1], threads=threads)
     stage("mri_ca_normalize", run_ca_normalize, mri / "nu.mgz",
           mri / "brainmask.mgz", gca,
           lta, mri / "norm.mgz", mri / "ctrl_pts.mgz")
@@ -873,6 +913,14 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     from .pretess_python import pretess_mgh
     from .sclimbic import mri_entowm_seg
     from .wm_edits_python import fix_ento_wm
+    wm_edit_function = fix_ento_wm
+    wm_edit_device = {}
+    if torch.device(device).type == "cuda":
+        from .wm_edits_gpu import fix_ento_wm_gpu
+        wm_edit_function = fix_ento_wm_gpu
+        wm_edit_device = {"device": device}
+    report["white_matter_chain"]["post_edit_implementation"] = (
+        "FNIT PyTorch CUDA" if wm_edit_device else "FNIT Python/Numba CPU")
 
     stage("brain_second_normalize", normalize_t1_aseg,
           mri / "norm.mgz", mri / "aseg.presurf.mgz",
@@ -892,12 +940,12 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
           wm_edit_binary[0], mri, assets)
     stage("wm_pretess", pretess_mgh, mri / "wm.asegedit.mgz", "wm",
           mri / "norm.mgz", mri / "wm.mgz")
-    stage("wm_fix_ento", fix_ento_wm, mri / "wm.mgz",
+    stage("wm_fix_ento", wm_edit_function, mri / "wm.mgz",
           mri / "entowm.mgz", mri / "wm.mgz", level=3,
-          left_value=255, right_value=255)
-    stage("wm_fix_acj", fix_ento_wm, mri / "wm.mgz",
+          left_value=255, right_value=255, **wm_edit_device)
+    stage("wm_fix_acj", wm_edit_function, mri / "wm.mgz",
           mri / "aseg.presurf.mgz", mri / "wm.mgz", level=3,
-          left_value=255, right_value=255, acj=True)
+          left_value=255, right_value=255, acj=True, **wm_edit_device)
     stage("mri_fill", fill_mgz, mri / "wm.mgz",
           mri / "aseg.presurf.mgz", lta,
           assets / "SubCorticalMassLUT.txt", mri / "filled.mgz",
@@ -921,6 +969,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                   'binaries': {name: str(value) for name, value in (
                       ('topology', topology_binary[0]), ('inflate', inflate_binary[0]),
                       ('intersection', intersection_binary[0]), ('metrics', metrics_binary[0]),
+                      ('white', white_binary[0]),
                       ('defect', defect_binary[0]), ('paint', paint_binary[0]))},
                   'registration_atlases': {hemi: str(path) for hemi, path in registration_atlases.items()}}
         for operation in ('surface', 'register', 'annotation', 'finish_surface'):
@@ -968,7 +1017,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                            topology_binary=topology_binary[0],
                            inflate_binary=inflate_binary[0],
                            intersection_binary=intersection_binary[0],
-                           place_binary=metrics_binary[0],
+                           place_binary=white_binary[0],
                            defect_binary=defect_binary[0], assets=assets)
             report.setdefault("surfaces", {})[hemi] = result
             (subject / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
@@ -1000,7 +1049,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         for hemi in ("lh", "rh"):
             result = stage(f"finish_surface_{hemi}", _finish_cortical_surface,
                            subject, hemi, metrics_binary[0], assets,
-                           device=device, threads=threads)
+                           device=device, threads=threads, white_binary=white_binary[0])
             report["surfaces"][hemi].update(result)
             (subject / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
     stage("exvivo_annotations", _project_exvivo_annotations, subject, assets)
@@ -1082,7 +1131,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          native_bin_dir: str | Path | None = None,
                          profile_stages: bool = False,
                          cuda_allocator_cache: str = "auto",
-                         hemisphere_workers: int = 1) -> dict:
+                         hemisphere_workers: int = 1,
+                         native_optimizations: str = "auto") -> dict:
     """从原始单 T1 连续重建；输入、输出及坐标定义见 recon-all 中文说明。
 
     t1 为原始影像；subject_dir 须为空；weights_dir/assets_dir 为已校验资源；
@@ -1091,6 +1141,9 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     hemisphere_workers=1保持串行，2启用私有被试目录的双侧 exec 进程，
     总 threads 平分，须至少2；返回 hemisphere_scheduling 组墙钟/worker报告，
     所有共享发布失败均传播到主报告。并行要求 caller autocast 关闭。
+    native_optimizations=auto 仅按已验证的原生能力选择 GCA 缓存和 white
+    快速程序；original固定原始原生实现。CUDA WM 后编辑使用已有 GPU
+    函数；完整 EM/WM 核心及pial不被不完整Python算法替代。
     profile_stages=False 不插入阶段同步；True 分列 CUDA 等待与父子 CPU 秒数。
     球面配准在 device 上执行完整有序 float32 梯度平均，其余目标函数、
     步长决策及末尾清理保持 CPU；不自动启用半精度，计时包含往返传输。
@@ -1144,7 +1197,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                     t1=t1, subject_dir=subject_dir, weights_dir=weights_dir, assets_dir=assets_dir,
                     device=device, threads=threads, native_bin_dir=native_bin_dir,
                     profile_stages=profile_stages, cuda_allocator_cache=cuda_allocator_cache,
-                    **({"hemisphere_workers": hemisphere_workers} if hemisphere_workers != 1 else {}))
+                    **({"hemisphere_workers": hemisphere_workers} if hemisphere_workers != 1 else {}),
+                    **({"native_optimizations": native_optimizations} if native_optimizations != "auto" else {}))
             except Exception as error:
                 pipeline_error = error
                 raise
@@ -1189,6 +1243,8 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--native-bin-dir", type=Path)
     parser.add_argument("--hemisphere-workers", type=int, choices=(1, 2), default=1,
                         help="independent hemisphere processes; total threads split across two workers")
+    parser.add_argument("--native-optimizations", choices=("auto", "original"), default="auto",
+                        help="validated Conda native hotspot selection; original is the paired control")
     parser.add_argument("--profile-stages", action="store_true",
                         help="record CUDA synchronization and parent/child CPU time")
     parser.add_argument("--cuda-allocator-cache", choices=("auto", "enabled", "disabled"),
@@ -1200,7 +1256,8 @@ def main(argv: list[str] | None = None) -> None:
                                   native_bin_dir=args.native_bin_dir,
                                   profile_stages=args.profile_stages,
                                   cuda_allocator_cache=args.cuda_allocator_cache,
-                                  hemisphere_workers=args.hemisphere_workers)
+                                  hemisphere_workers=args.hemisphere_workers,
+                                  native_optimizations=args.native_optimizations)
     print(json.dumps(report, indent=2))
 
 

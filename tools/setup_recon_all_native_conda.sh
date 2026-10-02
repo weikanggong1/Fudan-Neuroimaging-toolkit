@@ -2,6 +2,9 @@
 # Install FNIT's pinned source-built recon-all programs into the active Conda env.
 set -euo pipefail
 : "${CONDA_PREFIX:?activate the FNIT Conda environment first}"
+for tool in python patchelf; do
+  test -x "$CONDA_PREFIX/bin/$tool" || { echo "missing Conda tool: $tool" >&2; exit 2; }
+done
 repo_root=$(cd "$(dirname "$0")/.." && pwd)
 source_dir=${FNIT_RECON_ALL_SOURCE:-$CONDA_PREFIX/share/fnit/recon_all_fs_source_d932c45_full}
 build_dir="$CONDA_PREFIX/share/fnit/recon_all_native_full"
@@ -36,12 +39,35 @@ bash "$repo_root/tools/build_recon_all_fs_cpp_conda.sh" "$source_dir" "$build_di
 for source in "$build_dir"/bin/*; do
   name=${source##*/}
   install -m 755 "$source" "$CONDA_PREFIX/bin/$name"
-  patchelf --set-rpath '$ORIGIN/../lib' "$CONDA_PREFIX/bin/$name"
+  "$CONDA_PREFIX/bin/patchelf" --set-rpath '$ORIGIN/../lib' "$CONDA_PREFIX/bin/$name"
   if ldd "$CONDA_PREFIX/bin/$name" | grep -E 'not found|/Freesurfer/|/freesurfer/'; then
     echo "unexpected dynamic dependency in $name" >&2
     exit 1
   fi
 done
-sha256sum "$CONDA_PREFIX"/bin/{fnit_n4_itk,mri_em_register,mri_segment,mri_edit_wm_with_aseg,mris_fix_topology_fnit,mris_remove_intersection,mris_inflate,mris_place_surface,mrisp_paint,mris_curvature_stats,mri_label2vol,mri_warp_convert,mri_ca_register,mri_convert} \
+sha256sum "$CONDA_PREFIX"/bin/{fnit_n4_itk,mri_em_register,mri_segment,mri_edit_wm_with_aseg,mris_fix_topology_fnit,mris_remove_intersection,mris_inflate,mris_place_surface,mris_place_surface_white_fast,mrisp_paint,mris_curvature_stats,mri_label2vol,mri_warp_convert,mri_ca_register,mri_convert} \
   > "$build_dir/installed-bin.sha256"
+"$CONDA_PREFIX/bin/python" - "$build_dir" "$CONDA_PREFIX" <<'PYTHON'
+import hashlib, json, os, subprocess, sys
+from pathlib import Path
+build, prefix = map(Path, sys.argv[1:])
+manifest = json.loads((build / "native-optimizations.json").read_text())
+for name, item in manifest["programs"].items():
+    binary = prefix / "bin" / name
+    item["build_binary_sha256"] = item["sha256"]
+    item["path"] = str(binary)
+    item["sha256"] = hashlib.sha256(binary.read_bytes()).hexdigest()
+    if name == "mri_em_register":
+        env = dict(os.environ, FNIT_GCA_QUERY_CAPABILITIES="1")
+        actual = json.loads(subprocess.check_output([str(binary)], env=env, text=True, timeout=15))
+    elif name == "mris_place_surface_white_fast":
+        actual = json.loads(subprocess.check_output(
+            [str(binary), "--fnit-placement-capabilities"], text=True, timeout=15))
+    else:
+        continue
+    if actual != item["capabilities"]:
+        raise ValueError("installed capability differs: " + name)
+manifest["installed_conda_prefix"] = str(prefix)
+(build / "installed-native-optimizations.json").write_text(json.dumps(manifest, indent=2) + "\n")
+PYTHON
 printf 'Installed FNIT recon-all native stages in %s/bin\n' "$CONDA_PREFIX"

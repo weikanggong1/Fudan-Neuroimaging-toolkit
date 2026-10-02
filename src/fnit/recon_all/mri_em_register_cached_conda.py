@@ -9,7 +9,7 @@ import math
 
 def run_cached_em_register(binary: str | Path, mri: str | Path,
                             atlas: str | Path, assets: str | Path, *,
-                            binary_sha256: str) -> Path:
+                            binary_sha256: str, threads: int = 4) -> Path:
     """完整EM入口；仅搜索似然采用缓存CPU热点，梯度/优化/终止均为原生实现。
 
     binary为独立Conda固定源码构建产物，binary_sha256为已验证manifest中的
@@ -19,23 +19,31 @@ def run_cached_em_register(binary: str | Path, mri: str | Path,
     FS_LICENSE从已授权进程环境继承；不复制或保存许可证。
     输入缺失、程序哈希不符、非正4线程预算、程序失败或本次未生成有效LTA明确抛异常。
     能力查询环境仅用于独立探测；实际执行清除该键。输出经独占临时文件核验后原子发布，失败保留已有LTA。
-    总线程由调用者设置OMP_NUM_THREADS=4；没有GPU或低精度选项。
+    threads默认4，当前配对验收仅覆盖4线程；其他预算明确拒绝。
+    复用FNIT线程环境函数为子进程设置预算，不修改Python调用方的全局环境。
+    没有GPU或低精度选项。
     """
     binary=Path(binary).resolve();mri=Path(mri).resolve()
     if not binary.is_file() or not os.access(binary,os.X_OK):
         raise FileNotFoundError(binary)
     if len(binary_sha256)!=64 or hashlib.sha256(binary.read_bytes()).hexdigest()!=binary_sha256:
         raise ValueError('unverified native cached executable SHA-256')
-    capabilities=subprocess.run([str(binary)],env=dict(os.environ,FNIT_GCA_QUERY_CAPABILITIES='1'),capture_output=True,text=True,check=True)
+    from .thread_budget import native_thread_environment
+    if threads != 4:
+        raise ValueError('cached EM acceptance currently requires threads=4')
+    child_environment, _ = native_thread_environment(threads=threads)
+    capabilities=subprocess.run([str(binary)],env=dict(child_environment,FNIT_GCA_QUERY_CAPABILITIES='1'),capture_output=True,text=True,check=True)
     import json
-    if not json.loads(capabilities.stdout).get('fnit_gca_cached_search'):
-        raise ValueError('native cached search capability missing')
+    capability = json.loads(capabilities.stdout)
+    if (not isinstance(capability, dict) or capability.get('version') != 2
+            or capability.get('fnit_gca_cached_search') is not True
+            or capability.get('full_native_em') is not True
+            or capability.get('reduction') != 'upstream_ROMP_partials'):
+        raise ValueError('native cached search capability version/reduction mismatch')
     for path in (mri/'nu.mgz',mri/'brainmask.mgz',Path(atlas)):
         if not path.is_file():raise FileNotFoundError(path)
-    if os.environ.get('OMP_NUM_THREADS')!='4':
-        raise ValueError('declare OMP_NUM_THREADS=4 before the full cached EM call')
     (mri/'transforms').mkdir(exist_ok=True)
-    env=dict(os.environ,FREESURFER_HOME=str(Path(assets).resolve()),FNIT_GCA_SCORER='cpu_cached')
+    env=dict(child_environment,FREESURFER_HOME=str(Path(assets).resolve()),FNIT_GCA_SCORER='cpu_cached')
     env.pop('FNIT_GCA_QUERY_CAPABILITIES',None)
     output=mri/'transforms/talairach.lta'
     # A successful exit alone must not reuse a stale LTA. Only this call's
