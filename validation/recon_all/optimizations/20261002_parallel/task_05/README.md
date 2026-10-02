@@ -41,7 +41,7 @@ CUDA 完整中心/边缘控制点单元回归与成熟 CPU 参考逐元素一致
 
 [benchmark.py](benchmark.py)接受 JSON：`cases`（各含 `id`,`subject`）、`assets`,`native_bin`,`official_bin`,`output`,`code_commit`，mode 为 operators / inverse / reference / all。[stage_benchmark.py](stage_benchmark.py)另需 `weights`，mode 为 stage / stage-conda / baseline，output 必须是新目录。`stage` 与 `stage-conda` 都只复制 orig/crop/aff，重新运行完整两次网络前向和各自完整后处理，可做完整阶段对照；`baseline` 是冻结 deform/LTA 的隔离原生后处理计时，范围不同。完整阶段还记录自产 deform 与冻结 deform 数值差、资源 SHA、实际 Torch/interop 线程和 CPU affinity。文件系统与 JIT 缓存没有清空，不宣称无缓存冷启动。
 
-所有性能命令须在同一共用本地文件锁内顺序执行，进程启动前绑定物理 GPU UUID，OMP/BLAS/Numba/Torch 总线程预算 4。用项目已有 [run_monitored.py](../../../python_gpu_port/run_monitored.py) 包装记录过程树显存。环境为 Torch 2.5.1 / CUDA 11.8 / Triton 3.1.0；冷启动诊断先建立同设备单元素 CUDA 上下文，不隐藏失败、自动重试或改变精度。[bootstrap.json](bootstrap.json)保留实际诊断结果；既有 CPU JIT 后首次 CUDA 分配失败原因未确认。
+所有性能命令须在同一共用本地文件锁内顺序执行，进程启动前绑定物理 GPU UUID，OMP/BLAS/Numba/Torch 总线程预算 4。用项目已有 [run_monitored.py](../../../python_gpu_port/run_monitored.py) 包装记录过程树显存。环境为 Torch 2.5.1 / CUDA 11.8 / Triton 3.1.0；冷启动诊断先建立同设备单元素 CUDA 上下文，不隐藏失败、自动重试或改变精度。[bootstrap.json](bootstrap.json)保留实际诊断结果；[早期 CPU JIT 后首次 CUDA 分配失败原始日志](unit_cold_failure.log)保留 2 failed / 3 passed，失败发生在首次 GPU 张量建立处；原因未确认，未计入速度测量。原 GPFS 锁返回 ENOLCK 的尝试未执行被测命令；后续统一使用共用本地文件锁。
 
 [visualize.py](visualize.py)提供三平面检查图与全域位移误差图，固定中间切片、误差色限 1e-4 mm；只输出用户指定私有目录，影像不进入公开仓库。真实最终脑图待连续链结果产生。
 
