@@ -168,19 +168,9 @@ def main():
         feat_original = end_to_end.run_feat_core
         anatomical_original = end_to_end.prepare_anatomical
         aroma_original = end_to_end.run_aroma_pipeline
-        motion_resample_original = pipeline.apply_motion_warp
+        # The public volume API always obtains its corrected BOLD here.
+        # It does not supply the standalone FEAT spatial_warp/postmat options.
         mcflirt_original = pipeline.TorchMCFLIRT.run
-
-        def capture_motion_resample(*positional, **keywords):
-            result = motion_resample_original(*positional, **keywords)
-            started = time.perf_counter()
-            destination = capture_root / "feat/prefiltered_func_data_mcf.nii.gz"
-            destination.parent.mkdir(parents=True, exist_ok=True)
-            nib.save(result, str(destination))
-            seconds = time.perf_counter() - started
-            capture_seconds[0] += seconds
-            stage_capture_seconds["feat_core"] = stage_capture_seconds.get("feat_core", 0.0) + seconds
-            return result
 
         def capture_mcflirt(instance, *positional, **keywords):
             result = mcflirt_original(instance, *positional, **keywords)
@@ -238,7 +228,6 @@ def main():
         end_to_end.run_feat_core = capture_feat
         end_to_end.prepare_anatomical = capture_anatomical
         end_to_end.run_aroma_pipeline = capture_aroma
-        pipeline.apply_motion_warp = capture_motion_resample
         pipeline.TorchMCFLIRT.run = capture_mcflirt
     if args.capture_resampling_inputs:
         from fnit.fmri import end_to_end

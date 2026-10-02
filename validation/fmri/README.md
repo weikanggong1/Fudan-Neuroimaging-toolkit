@@ -6,7 +6,7 @@
 
 | 当前证据 | 用途 |
 |---|---|
-| [发布清单](e2e_latest/publication.public.json) | 绑定本次发布的报告、图示、脚本和计算代码；列出合并后测试、121项运行时源码身份与39项完整输出核验。 |
+| [发布清单](e2e_latest/publication.public.json) | 绑定本次发布的报告、图示、脚本和计算代码；列出合并后测试、121项源码身份（119项字节相同、2项清理AST核验一致）与39项完整输出核验。 |
 | [完整 FNIT 执行](e2e_latest/fnit_public_warp.public.json) | 两个公开入口连续运行的实际墙钟、捕获开销、细分阶段、全部输出检查及源码/输入/输出 SHA。 |
 | [MSM 扩展构建](e2e_latest/fnit_public_warp_build.public.json) | 实际加载的本包 FastPD 扩展、构建源码与 flags；构建不计入调用耗时。 |
 | [进程完成状态](e2e_latest/fnit_public_warp_process.public.json) | 本次成功运行的退出码。 |
@@ -54,3 +54,24 @@
 更早的 [clean](HISTORY_20261001_clean.md)、[STC 开启](HISTORY_20261001_STCON_PREPROC.md)、[STC 关闭](HISTORY_20261001_STCOFF_PREPROC.md)与 [2026-09-30](HISTORY_20260930.md)是固定旧源码记录，不代表当前精度。DeepPrep 的单独参考在[对应页面](deepprep/README.md)，其输入与输出范围不同。
 
 公开内容限于匿名聚合、文件哈希和经用户授权的标准空间/表面 PNG。原始影像、个体标签、完整四维影像、表面坐标及逐体素统计图留在服务器。
+
+清理改动与尚未数值等价的原算子门禁见[最新清理记录](cleanup_20261002/README.md)和[重采样审计](resampling_audit_20261002/README.md)。
+
+<a id="尚未关闭的官方对照"></a>
+
+## 尚未关闭的官方对照
+
+| 项目 | 已记录结果与结论 | 证据 |
+|---|---|---|
+| clean FSL 样条机制 | FNIT Periodic 与 FSL Constant/extraslice 不同；最近邻 World 舍入也不同。固定 warp 高相关不能证明机制相同 | [重采样审计](resampling_audit_20261002/README.md)、[历史固定采样](resampling.md) |
+| 官方实际 MNI preproc 节点 | 固定实际变换的完整 490 帧，T1w 门通过；MNI 12 帧无法由同输入串行源码回放复现，实际产物门仍失败，原因未确定 | [实际节点](fmriprep/actual_node_interpolation_full490.public.json)、[失败诊断](fmriprep/actual_node_mni_replay_failure.public.json) |
+| 独立官方 surface | CIFTI 时间 r 均值 0.977911、relative RMSE 2.2418%；球面 L/R mean 角差 0.221050° / 0.319595°；19 个皮层下结构逐值相同 | [独立完整 surface](surface_gpu_parallel/parallel_vs_official_strict1.public.json) |
+| 显式开启 STC | 真实 490 帧 max 0.021484375，高于原门槛 0.01；默认关闭 STC 的测量不包含此项 | [真实 STC 控制](fmriprep/stc_real_full490.public.json) |
+| 独立 raw-BIDS volume | 两方独立 HMC、BBR、解剖及 MNI 估计仍产生非零差异；FNIT SynthMorph 与官方 ANTs 的变换不同 | [历史独立 MNI](fmriprep/independent_mni_stcoff_50eb098.public.json) |
+
+
+<a id="原实现命令与文献"></a>
+
+## 原实现、命令与文献
+
+原命令、源码和文献集中见[volume](../../docs/fmri/README.md#原软件调用)、[surface](../../docs/fmri/surface.md#原软件调用)、[FEAT](../../docs/fmri/feat.md#原软件调用)、[normalization](../../docs/fmri/normalization.md#参考文献与原实现)及[重采样审计](resampling_audit_20261002/README.md)。

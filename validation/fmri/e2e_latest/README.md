@@ -67,6 +67,8 @@ H100、CPU 8 线程、TF32，未使用半精度，CUDA 额度20 GB，完整进�
 
 [本次完整执行](fnit_public_warp.public.json)与[完成状态](fnit_public_warp_process.public.json)绑定81f实际源文件；MSM复用经源码、flags与二进制SHA验证的本包构建，未重新编译，也未复用解剖或配准结果。
 
+最后合并的e217清理仅调整两个模块的说明、未使用的私有别名和导入位置。121项清单中119项字节相同，另2项完整模块AST按明确清理规则核验一致；[清理证明](postmeasurement_cleanup.public.json)保留源字节身份。本轮计时仍对应81f实际执行，没有将清理提交标为新GPU测量。
+
 ## 最近三次连续测量
 
 | 冻结源码 | raw→volume→CIFTI实际 / 捕获扣除估计，秒 | volume实际 / 估计，秒 | surface实际 / 估计，秒 |

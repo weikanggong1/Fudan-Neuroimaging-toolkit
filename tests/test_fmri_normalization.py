@@ -83,7 +83,7 @@ def test_fmriprep_precision_composes_hmc_in_voxel_space(tmp_path):
 def test_fmriprep_dense_field_preserves_deformation_grid_precision():
     import torch
     from scipy.ndimage import map_coordinates
-    from fnit.fmri.normalization import _fmriprep_dense_world
+    from fnit._world_resampling import _fmriprep_dense_world
     shape = (5, 6, 7)
     affine = np.array([[1.23121, .021, 0, -84.3927], [0, 1.34003, .014, 31.6473],
                        [.002, 0, 1.47021, -53.4321], [0, 0, 0, 1]], dtype=np.float64)

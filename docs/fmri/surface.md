@@ -311,6 +311,8 @@ fmriprep "$original_bids_root" "$reference_derivatives_root" participant \
 
 ### 最新连续 raw BIDS → volume → surface：`81f1bb3`
 
+最后合并的e217清理仅调整两个模块的说明、未使用的私有别名和导入位置。121项清单中119项字节相同，另2项完整模块AST按明确清理规则核验一致；[清理证明](../../validation/fmri/e2e_latest/postmeasurement_cleanup.public.json)保留源字节身份。本轮计时仍对应81f实际执行，没有将清理提交标为新GPU测量。
+
 2026-10-02，在 `gpucw1` 用新进程、新目录运行冻结的 `81f1bb3`，从同一例原始 BOLD、SBRef、匹配存档 T1w 和同源已有 FreeSurfer 7 重建开始，连续调用 volume 与默认 surface。本版将 volume 最终重采样接入公开的 `WorldTransformChain`，surface 调用方式保持相同。T1w 来自已有重建存档，本轮未核验为扫描仪原始 T1。输入为 **490 帧、TR 0.735 s**；关闭 STC、SDC，开启 TF32，没有使用半精度。surface 为 `signal="preproc"`、`registered_spheres=None`、完整四级 MSMSulc、双侧并行；clean volume 是另一个输出分支。
 
 | 连续运行边界 | FNIT 实测墙钟 |

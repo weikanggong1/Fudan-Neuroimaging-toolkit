@@ -9,6 +9,7 @@ import numpy as np
 import torch
 
 from ..flirt import TorchFLIRT
+from .._world_resampling import resample_world_image
 
 
 @dataclass(frozen=True)
@@ -111,13 +112,6 @@ def register_t1_to_mni(
         qc=qc,
         timing_seconds=timing,
     )
-
-
-# Keep existing helper imports available for downstream numerical controls.
-from .._world_resampling import (
-    _periodic_cubic_coefficients, _grid_constant_cubic_coefficients,
-    _mirror_cubic_coefficients, _fmriprep_dense_world, resample_world_image,
-)
 
 
 def resample_world(
