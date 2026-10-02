@@ -18,7 +18,7 @@ flowchart LR
   I --> J[pial.T1 与逐步诊断]
 ```
 
-GPU 后端属于专项候选。普通 Torch 批处理的真实首轮测试比 CPU 慢，不能因为使用 GPU 就启用；融合 Triton 后端另测。单个算子的加速不能代表完整表面阶段或 recon-all 提速。
+GPU 后端属于专项候选。普通 Torch 批处理的真实首轮测试比 CPU 慢，不能因为使用 GPU 就启用；融合 Triton 后端已通过两例四半球真实算子回归。单个算子的加速不能代表完整表面阶段或 recon-all 提速。
 
 ## 2. Python 调用、输入输出和参数
 
@@ -117,7 +117,7 @@ mris_place_surface --pial --lh --i "$SUBJECT_DIR/surf/lh.white" \
 
 ## 5. 精度、运行时间与脑图
 
-最新实测和失败尝试在 `validation/recon_all/optimizations/20261002_parallel/task_02/`，每份报告绑定实际运行源码 hash。首轮两例四半球已测：Torch GPU 梯度逐元素一致，但比 CPU 慢约2–3倍；Numba 子空间分配逐元素一致，原0.39–0.44秒/次降至约0.0017–0.0020秒/次。融合 Triton 与完整四轮回归以专项最终报告为准。尚未执行的官方/Conda/完整自有 white 三方、第二半球与第二例完整 pial、连续链、两例空目录整例、138严格诊断和逐区统计不得视为完成；总体指标等效保持 not_assessed。
+最新实测和失败尝试在 `validation/recon_all/optimizations/20261002_parallel/task_02/`，每份报告绑定实际运行源码 hash。首轮两例四半球已测：Torch GPU 梯度逐元素一致，但比 CPU 慢约2–3倍；Numba 子空间分配逐元素一致，原0.39–0.45秒/次降至约0.0017–0.0021秒/次。融合 Triton 在同一四半球上采样、梯度逐元素一致，暖梯度中位数为0.0030–0.0049秒，CPU为0.2966–0.3321秒；仅这一算子为61–109倍。进程树同瞬间GPU峰值为507,510,784字节；142次外部采样，最大间隔1.73秒。测量源码为4674cc2，11项专项测试通过。完整四轮回归仍以其实际运行报告为准。尚未执行的官方/Conda/完整自有 white 三方、第二半球与第二例完整 pial、连续链、两例空目录整例、138严格诊断和逐区统计不得视为完成；总体指标等效保持 not_assessed。
 
 只发布统计和许可允许的脑图，真实影像/表面留在授权服务器。若完整轨迹逐元素相同，脑图使用公开的差异统计图展示最大误差与逐轮状态；不能用首轮图证明完整 white/pial 几何等效。
 
@@ -135,3 +135,5 @@ mris_place_surface --pial --lh --i "$SUBJECT_DIR/surf/lh.white" \
 - FreeSurfer固定源：d932c45b7941662ea380a05efef580568b98d41a；[mris_place_surface](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/mris_make_surfaces/mris_place_surface.cpp)、[强度梯度](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/utils/mrisurf_compute_dxyz.cpp)、[有序时间步](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/utils/mrisurf_timeStep.cpp)。
 - Fischl B, Dale AM. Measuring the thickness of the human cerebral cortex from magnetic resonance images. PNAS97:11050–11055 (2000). [doi:10.1073/pnas.200033797](https://doi.org/10.1073/pnas.200033797)。
 - [Triton JIT官方说明](https://triton-lang.org/main/python-api/generated/triton.jit.html)。
+
+2026-10-02接口修复：GPU入口拥有连续布局副本，支持Fortran数组及反向切片；直接传负步长NumPy数组给PyTorch的错误已修复。最新布局与梯度fallback回归另排入独占GPU测试窗口，不把旧源码的通过结果改标到新提交。原生control/candidate已完成隔离编译，候选能力查询实际通过；完整三阶段精度和耗时仍待锁内实测。

@@ -1,0 +1,31 @@
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8)
+tar: src/fnit/recon_all/place_surface_sampling_triton.py: time stamp 2026-10-02 14:54:23 is 4.012294047 s in the future
+/bin/sh: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8)
+loc("/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_02/source/src/fnit/recon_all/place_surface_sampling_triton.py":33:53): error: 'tt.load' op operand #1 must be 1-bit signless integer or ranked tensor of 1-bit signless integer values, but got 'tensor<128xi8>'
+Traceback (most recent call last):
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_02/source/validation/recon_all/optimizations/20261002_parallel/task_02/benchmark_sampling.py", line 38, in <module>
+    reference,gradient_cpu_cold=measure(intensity_gradient,placement,*args[:5],affine,args[5]);candidate,gradient_gpu_cold=measure(context.gradient,*args)
+                                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_02/source/validation/recon_all/optimizations/20261002_parallel/task_02/benchmark_sampling.py", line 17, in measure
+    torch.cuda.synchronize(a.device);t=time.perf_counter();r=fn(*args,**kwargs);torch.cuda.synchronize(a.device);return r,time.perf_counter()-t
+                                                             ^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_02/source/src/fnit/recon_all/place_surface_sampling.py", line 129, in gradient
+    gradient_kernel[((len(xyz)+127)//128,)](self.volume, self.affine,
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/site-packages/triton/runtime/jit.py", line 345, in <lambda>
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/site-packages/triton/runtime/jit.py", line 662, in run
+    kernel = self.compile(
+             ^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/site-packages/triton/compiler/compiler.py", line 282, in compile
+    next_module = compile_ir(module, metadata)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/site-packages/triton/backends/nvidia/compiler.py", line 316, in <lambda>
+    stages["ttir"] = lambda src, metadata: self.make_ttir(src, metadata, options)
+                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/site-packages/triton/backends/nvidia/compiler.py", line 149, in make_ttir
+    pm.run(mod)
+RuntimeError: PassManager::run failed

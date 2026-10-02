@@ -1,0 +1,61 @@
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8)
+triton.compiler.errors.CompilationError: def _sample(V, A, x, y, z, mask, W: tl.constexpr, H: tl.constexpr, D: tl.constexpr):
+    x32, y32, z32 = x.to(tl.float32), y.to(tl.float32), z.to(tl.float32)
+    coordinates = ()
+    for row in tl.static_range(3):
+        value = tl.full(x.shape, 0, tl.float32)
+        value = value + tl.load(A + 4*row) * x32
+        value = value + tl.load(A + 4*row+1) * y32
+        value = value + tl.load(A + 4*row+2) * z32
+        value = value + tl.load(A + 4*row+3)
+        coordinates += (value.to(tl.float64),)
+    vx, vy, vz = coordinates
+    inside = mask & (vx >= -0.5) & (vy >= -0.5) & (vz >= -0.5) & (vx < W-0.5) & (vy < H-0.5) & (vz < D-0.5)
+    vx, vy, vz = tl.minimum(tl.maximum(vx, 0), W-1), tl.minimum(tl.maximum(vy, 0), H-1), tl.minimum(tl.maximum(vz, 0), D-1)
+    ix, iy, iz = vx.to(tl.int32), vy.to(tl.int32), vz.to(tl.int32)
+    fx, fy, fz = vx-ix, vy-iy, vz-iz
+    result = tl.full(x.shape, 0, tl.float64)
+    for bx in tl.static_range(2):
+        for by in tl.static_range(2):
+            for bz in tl.static_range(2):
+                cx, cy, cz = tl.minimum(ix+bx, W-1), tl.minimum(iy+by, H-1), tl.minimum(iz+bz, D-1)
+                wx, wy, wz = fx if bx else 1-fx, fy if by else 1-fy, fz if bz else 1-fz
+                result = result + wx*wy*wz * tl.load(V + (cx*H+cy)*D+cz, mask=inside, other=0).to(tl.float64)
+    return tl.where(inside, result, 0)
+
+NameError('coordinates is not defined')
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_02/source/validation/recon_all/optimizations/20261002_parallel/task_02/benchmark_sampling.py", line 34, in <module>
+    cpu,cold_cpu=measure(cpu_samples,placement,current,affine);gpu,cold_gpu=measure(context.sample,current)
+                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_02/source/validation/recon_all/optimizations/20261002_parallel/task_02/benchmark_sampling.py", line 17, in measure
+    torch.cuda.synchronize(a.device);t=time.perf_counter();r=fn(*args,**kwargs);torch.cuda.synchronize(a.device);return r,time.perf_counter()-t
+                                                             ^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_02/source/src/fnit/recon_all/place_surface_sampling.py", line 86, in sample
+    sample_kernel[((len(xyz)+127)//128,)](self.volume, self.affine, points, result,
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/site-packages/triton/runtime/jit.py", line 345, in <lambda>
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/site-packages/triton/runtime/jit.py", line 662, in run
+    kernel = self.compile(
+             ^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/site-packages/triton/compiler/compiler.py", line 276, in compile
+    module = src.make_ir(options, codegen_fns, context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/site-packages/triton/compiler/compiler.py", line 113, in make_ir
+    return ast_to_ttir(self.fn, self, context=context, options=options, codegen_fns=codegen_fns)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+triton.compiler.errors.CompilationError: at 6:11:
+def sample_kernel(V,A,X,O,N:tl.constexpr,W:tl.constexpr,H:tl.constexpr,D:tl.constexpr,B:tl.constexpr):
+    i=tl.program_id(0)*B+tl.arange(0,B);mask=i<N
+    x=tl.load(X+3*i,mask=mask,other=0).to(tl.float64)
+    y=tl.load(X+3*i+1,mask=mask,other=0).to(tl.float64)
+    z=tl.load(X+3*i+2,mask=mask,other=0).to(tl.float64)
+    result=_sample(V,A,x,y,z,mask,W,H,D)
+           ^

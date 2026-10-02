@@ -1,0 +1,15 @@
+/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_02/native_build_v2/control/mris_place_surface_fnit_hotspot
+Traceback (most recent call last):
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_02/build_native_v2.py", line 97, in <module>
+    if __name__=='__main__':main()
+                            ^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_02/build_native_v2.py", line 96, in main
+    for patched,name in [(False,'control'),(True,'candidate')]:print(build_one(build,source,output/name,commands,patched),flush=True)
+                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_02/build_native_v2.py", line 62, in build_one
+    candidate=remove_unused_face_hash(content,(source/'utils/mrisurf_compute_dxyz.cpp').read_text()) if patched else content
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_02/build_native_v2.py", line 29, in remove_unused_face_hash
+    if body.count('mht_faces')!=1:raise ValueError('repulsive face parameter now consumed; refuse optimization')
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: repulsive face parameter now consumed; refuse optimization
