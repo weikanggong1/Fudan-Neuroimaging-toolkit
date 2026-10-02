@@ -29,7 +29,7 @@ def main():
     if a.stage=='remesh':cmd=[str(binary),'--remesh','--iters','3','--input',str(surf/(h+'.orig.premesh')),'--output',str(output)];inputs={'premesh':surf/(h+'.orig.premesh')}
     elif a.stage=='sphere':cmd=[str(binary),'-threads','4',str(surf/(h+'.inflated')),str(output)];inputs={k:surf/(h+'.'+k) for k in ('inflated','smoothwm')}
     else:cmd=[str(binary),'-threads','4',str(surf/(h+'.sphere')),str(atlas),str(output)];inputs={k:surf/(h+'.'+k) for k in ('sphere','smoothwm','sulc')};inputs['atlas']=atlas
-    report={'kind':'isolated_official_same_input','stage':a.stage,'hemisphere':h,'command':cmd,'program_sha256':sha(binary),'input_sha256':{k:sha(v) for k,v in inputs.items()},'source_checkpoint_untouched':True,'load_before':os.getloadavg(),'thread_budget':4,'context_copy_boundary':'private copy preparation precedes measured official command; official wall includes complete command IO; report separate preparation'}
+    report={'benchmark_script_sha256':sha(__file__),'kind':'isolated_official_same_input','stage':a.stage,'hemisphere':h,'command':cmd,'program_sha256':sha(binary),'input_sha256':{k:sha(v) for k,v in inputs.items()},'source_checkpoint_untouched':True,'load_before':os.getloadavg(),'thread_budget':4,'context_copy_boundary':'private copy preparation precedes measured official command; official wall includes complete command IO; report separate preparation'}
     env=dict(os.environ,FREESURFER_HOME=str(a.reference_home),SUBJECTS_DIR=str(context.parent),OMP_NUM_THREADS='4',OPENBLAS_NUM_THREADS='4',MKL_NUM_THREADS='4')
     t0=time.perf_counter()
     with (a.output_root/'command.log').open('w') as stream:
