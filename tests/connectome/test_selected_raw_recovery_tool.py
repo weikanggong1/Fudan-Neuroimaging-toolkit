@@ -363,7 +363,8 @@ class FrozenActualAPIs(unittest.TestCase):
             atomic_json=driver.atomic))
         original_loader=module.load_recon_for_gpu;original_subject=module.gpu_anatomy_subject
         def loader(*args):calls.append('loader');return {'anatomy':anatomy}
-        def subject_loader(*args):calls.append('subject');return subject
+        # Real recovery loader returns a string; frozen worker later calls resolve().
+        def subject_loader(*args):calls.append('subject');return str(subject)
         payload={'config':config,'case':case,'action':'gpu','version':'baseline'}
         result=driver.matured_worker_compat(module,payload,loader,subject_loader,())
         self.assertEqual(result['status'],'completed',result)

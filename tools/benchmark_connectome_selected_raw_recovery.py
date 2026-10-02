@@ -320,7 +320,9 @@ def matured_worker_compat(cohort, payload, loader, subject_loader, extra_argumen
     # Each _worker is a clean single-case process. Only these orchestration
     # globals are temporarily rebound; original source files stay untouched.
     try:
-        cohort.load_recon_for_gpu=loader; cohort.gpu_anatomy_subject=subject_loader
+        cohort.load_recon_for_gpu=loader
+        # The actual legacy worker calls subject.resolve() after science.
+        cohort.gpu_anatomy_subject=lambda *args: Path(subject_loader(*args))
         return cohort.worker(payload)
     finally:
         cohort.load_recon_for_gpu=old_loader; cohort.gpu_anatomy_subject=old_subject
