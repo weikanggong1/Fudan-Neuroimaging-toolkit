@@ -1,0 +1,16 @@
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8)
+Traceback (most recent call last):
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_02/source/validation/recon_all/optimizations/20261002_parallel/task_02/benchmark_sampling.py", line 33, in <module>
+    context,load_seconds=measure(PlacementSampling,placement,affine,device=a.device)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_02/source/validation/recon_all/optimizations/20261002_parallel/task_02/benchmark_sampling.py", line 17, in measure
+    torch.cuda.synchronize(a.device);t=time.perf_counter();r=fn(*args,**kwargs);torch.cuda.synchronize(a.device);return r,time.perf_counter()-t
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/site-packages/torch/cuda/__init__.py", line 954, in synchronize
+    return torch._C._cuda_synchronize()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: CUDA error: out of memory
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+

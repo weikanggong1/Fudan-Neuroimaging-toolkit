@@ -1,0 +1,30 @@
+--- a/tools/build_recon_all_fs_cpp_conda.sh
++++ b/tools/build_recon_all_fs_cpp_conda.sh
+@@ -131,6 +131,27 @@
+     exit 1
+   fi
+ done
++# FNIT placement hotspot: apply after same-input native regression passes.
++# Keep original mris_place_surface for controlled benchmark and compatibility.
++"$CONDA_PREFIX/bin/python" "$(dirname "$0")/place_surface_hotspots/build_native.py" \
++  --build "$build_dir" --source "$build_source" \
++  --output "$output_dir/placement-hotspot-build" \
++  --ninja "$CONDA_PREFIX/bin/ninja"
++"$output_dir/placement-hotspot-build/candidate/mris_place_surface_fnit_hotspot" \
++  --fnit-placement-capabilities > "$output_dir/mris_place_surface_fnit_hotspot.capabilities.json"
++"$CONDA_PREFIX/bin/python" -c 'import json,sys; c=json.load(open(sys.argv[1])); assert c["schema_version"]==1 and "skip-unconsumed-repulse-face-table" in c["features"] and c["upstream_commit"]=="d932c45b7941662ea380a05efef580568b98d41a"' "$output_dir/mris_place_surface_fnit_hotspot.capabilities.json"
++install -m 755 "$output_dir/placement-hotspot-build/candidate/mris_place_surface_fnit_hotspot" \
++  "$output_dir/bin/mris_place_surface_fnit_hotspot"
++ldd "$output_dir/bin/mris_place_surface_fnit_hotspot" > "$output_dir/mris_place_surface_fnit_hotspot.ldd"
++if grep -E '/public/software/apps/Freesurfer|/tmp/fs_itk_build' "$output_dir/mris_place_surface_fnit_hotspot.ldd"; then
++  echo "placement hotspot links an external FS/ITK installation" >&2
++  exit 1
++fi
++timeout 15s "$output_dir/bin/mris_place_surface_fnit_hotspot" --help > "$output_dir/mris_place_surface_fnit_hotspot.launch.log" 2>&1 || true
++if grep -Eq 'GLIBC_[0-9.]+.*not found|error while loading shared libraries' "$output_dir/mris_place_surface_fnit_hotspot.launch.log"; then
++  echo "placement hotspot cannot start on this host" >&2
++  exit 1
++fi
+ # Build the topology variant that consumes the Python exact-centered sphere and
+ # pins the older FreeSurfer double-tanh and double-sqrt behavior. Keep the unmodified binary
+ # above for diagnostic comparisons only.
