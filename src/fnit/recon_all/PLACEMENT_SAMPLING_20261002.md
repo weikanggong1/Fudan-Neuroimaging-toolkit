@@ -136,4 +136,4 @@ mris_place_surface --pial --lh --i "$SUBJECT_DIR/surf/lh.white" \
 - Fischl B, Dale AM. Measuring the thickness of the human cerebral cortex from magnetic resonance images. PNAS97:11050–11055 (2000). [doi:10.1073/pnas.200033797](https://doi.org/10.1073/pnas.200033797)。
 - [Triton JIT官方说明](https://triton-lang.org/main/python-api/generated/triton.jit.html)。
 
-2026-10-02接口修复：GPU入口拥有连续布局副本，支持Fortran数组及反向切片；直接传负步长NumPy数组给PyTorch的错误已修复。最新布局与梯度fallback回归另排入独占GPU测试窗口，不把旧源码的通过结果改标到新提交。原生control/candidate已完成隔离编译，候选能力查询实际通过；完整三阶段精度和耗时仍待锁内实测。
+2026-10-02接口修复：GPU入口拥有连续布局副本，支持Fortran数组及反向切片；直接传负步长NumPy数组给PyTorch的错误已修复。最新布局与梯度fallback回归已在独占GPU窗口执行，fd1cd18的6项测试于14.51秒内全部通过；不把旧源码的通过结果改标到新提交。原生control/candidate已完成隔离编译，候选能力查询实际通过；完整三阶段精度和耗时仍待锁内实测。
