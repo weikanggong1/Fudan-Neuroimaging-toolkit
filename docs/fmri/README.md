@@ -348,7 +348,7 @@ fmriprep "$original_bids_root" "$reference_derivatives_root" participant \
 
 另与冻结 FNIT `1eb9c417` 比较，**运动校正的全部 242,851,840 个解码值逐值相同**。独立完整运行的 EPI 脑掩膜相差 1 个边界体素，pre-ICA 仅该体素的 490 个值不同；完整 MNI clean 时间 r 均值为 **0.992649**、RMSE **21.194244**，后续 AROMA/clean 并非逐值一致。固定掩膜控制与独立整链分别报告，见[冻结 FNIT 回归](../../validation/fmri/mcflirt_optimization_comparison.public.json)。
 
-独立 MCFLIRT 使用固定保存后的 FEAT 参考时，最新共享物理 GPU 0 观测 **278.454 s**，其中最终采样 32.010 s；此前共享物理 GPU 1 观测 **159.275 s**，采样 24.830 s。两次均为 45,972 次 cost，运动 MAT/par 和解码图对冻结 FNIT 一致。这是两次独立运动测试，各自 GPU 负载和边界保留，不能把完整 FEAT 177.787 s 当作独立 MCFLIRT 计时。见[MCFLIRT 功能页](../mcflirt/README.md)。
+独立 MCFLIRT 已在 `8a3f227` 加入精确矩阵缓存及 CUDA graph。2026-10-02 的同卡交替测试中，完整 490 帧调用从 **86.37 / 109.46 s** 降至 **52.47 / 63.48 s**，两版均为 45,972 次 cost；未舍入矩阵、参数和全部校正值逐 bit 一致。完整未截断样条值及相同 TR、脑掩膜下的高通结果也与冻结版本一致。该更新由 volume pipeline 直接复用；本节 **707.287 s** 是 `cfb7beee` 的完整流程实测，尚未重测本轮整链。最新运动精度、步骤耗时和共享 GPU 负载见[MCFLIRT 功能页](../mcflirt/README.md)及[配对报告](../../validation/mcflirt/paired_exact_latest.public.json)。
 
 下图展示最新 FNIT 与原同步骤 clean 参照的 MNI 时间标准差及完整 490 帧时间 r；切面、共同统计域、色阶和 PNG SHA-256 见[新图来源](../../validation/fmri/mcflirt_optimization_figure.public.json)。未追加空间平滑。
 

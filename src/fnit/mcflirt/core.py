@@ -10,9 +10,11 @@ import torch
 
 from ..flirt.core import (
     _BASE_TOLERANCE, _centre_of_gravity, _flip_to_radiological,
-    _fsl_pull_coefficients, _manual_trilinear, fsl_affine_from_parameters,
+    _manual_trilinear,
     fsl_coordinate_optimize, fsl_parameters_from_affine,
 )
+
+from ._rigid import FSLPullCoefficients, RigidAffineComposer
 
 MCFLIRT_SOURCE_VERSION = "2111.0"
 MCFLIRT_SOURCE_URL = "https://git.fmrib.ox.ac.uk/fsl/mcflirt/-/blob/2111.0/mcflirt.cc"
@@ -98,11 +100,13 @@ def _normcorr_reduce(reference, values, weights):
 class FSLMotionNormCorr:
     """MCFLIRT 的 1 mm 边界降权 NCC；全部 moving 体素参与，不使用脑掩膜。"""
 
-    def __init__(self, reference, moving, reference_sizes, moving_sizes, *, centre=None):
+    def __init__(self, reference, moving, reference_sizes, moving_sizes, *, centre=None,
+                 workspace=None):
         self.reference = reference.permute(2, 1, 0).contiguous()
         self.moving = moving.contiguous()
         self.reference_sizes = reference_sizes
         self.moving_sizes = moving_sizes
+        self.pull_coefficients = FSLPullCoefficients(moving_sizes, reference_sizes)
         self.device = moving.device
         z, y = torch.meshgrid(
             torch.arange(reference.shape[2], device=self.device, dtype=torch.float32),
@@ -118,26 +122,28 @@ class FSLMotionNormCorr:
         self.reducer = _normcorr_reduce
         self.sampler = None
         if self.device.type == "cuda":
-            # The fixed small reference grid lets Inductor fuse row-wise
-            # scalar accumulation without changing float32 arithmetic.
-            self.reducer = torch.compile(_normcorr_reduce, fullgraph=True)
-            try:
-                from ._cost_cuda import FusedMotionSampler
-            except ImportError:
-                # The tensor path remains available without optional Triton.
-                pass
+            if workspace is not None:
+                workspace.set_moving(self.moving)
+                self.reference = workspace.sampler.reference
+                self.sampler = workspace.sampler
+                self.reducer = workspace.reduce
             else:
-                self.sampler = FusedMotionSampler(self.reference, self.moving, moving_sizes)
+                # Standalone costs retain the original compiled reduction.
+                self.reducer = torch.compile(_normcorr_reduce, fullgraph=True)
+                try:
+                    from ._cost_cuda import FusedMotionSampler
+                except ImportError:
+                    pass
+                else:
+                    self.sampler = FusedMotionSampler(self.reference, self.moving, moving_sizes)
 
     def __call__(self, matrix):
         if self.sampler is not None:
-            coefficients = _fsl_pull_coefficients(
-                matrix, self.moving_sizes, self.reference_sizes, device="cpu").numpy()
+            coefficients = self.pull_coefficients(matrix)
             reference, values, weights = self.sampler.prepare(coefficients)
             self.cost_evaluations += 1
             return float(self.reducer(reference, values, weights))
-        coefficients = _fsl_pull_coefficients(matrix, self.moving_sizes,
-                                             self.reference_sizes, device=self.device)
+        coefficients = torch.as_tensor(self.pull_coefficients(matrix), device=self.device)
         # NEWIMAGE starts each row at xmin and then updates coordinates by
         # repeated float32 addition. Derive xmin first, then preserve that
         # addition order instead of a TF32 affine matrix multiplication.
@@ -265,6 +271,9 @@ class TorchMCFLIRT:
         if self.device.type == "cuda":
             free_bytes, _ = torch.cuda.mem_get_info(self.device)
             cache_frames = data.nbytes <= min(4 * 1024 ** 3, free_bytes // 4)
+        # Workspaces belong to this call: each reference scale reuses its
+        # sampling buffers and the unchanged compiled NCC reduction graph.
+        cost_workspaces = {}
         cost_evaluations = 0
         for stage, (scale, tolerance_multiplier) in enumerate(((8.0, .8), (4.0, .8), (4.0, .1))):
             if stage >= stages or not stage_iterations[stage]:
@@ -278,19 +287,27 @@ class TorchMCFLIRT:
                                              device=self.device)
                     if cache_frames:
                         frame_cache[frame] = moving
-                cost = FSLMotionNormCorr(references[scale], moving, (scale,) * 3, sizes,
-                                         centre=centre_cache.get(frame))
+                if self.device.type == "cuda" and scale not in cost_workspaces:
+                    try:
+                        from ._cuda_executor import CudaMotionCostExecutor
+                    except ImportError:
+                        cost_workspaces[scale] = None
+                    else:
+                        cost_workspaces[scale] = CudaMotionCostExecutor(
+                            references[scale].permute(2, 1, 0).contiguous(), moving.contiguous(), sizes,
+                            torch.compile(_normcorr_reduce, fullgraph=True))
+                cost = FSLMotionNormCorr(
+                    references[scale], moving, (scale,) * 3, sizes,
+                    centre=centre_cache.get(frame), workspace=cost_workspaces.get(scale))
                 centre_cache[frame] = cost.centre
+                composer = RigidAffineComposer(cost.centre)
                 parameters = fsl_parameters_from_affine(initial[frame], cost.centre)
                 def objective(values):
-                    matrix = fsl_affine_from_parameters(torch.as_tensor(values, dtype=torch.float64),
-                                                        cost.centre, 6).numpy()
-                    return cost(matrix)
+                    return cost(composer(values).numpy())
                 fitted, _ = fsl_coordinate_optimize(
                     parameters, _BASE_TOLERANCE * tolerance_multiplier, objective,
                     maximum_iterations=int(stage_iterations[stage]), numopt=6, bound_guess=(10.0, 1.0))
-                previous[frame] = fsl_affine_from_parameters(torch.as_tensor(fitted, dtype=torch.float64),
-                                                           cost.centre, 6).numpy()
+                previous[frame] = composer(fitted).numpy()
                 cost_evaluations += cost.cost_evaluations
                 next_frame = frame + (1 if frame > reference_index else -1)
                 # Match source's strict i < no_volumes-1 condition. In the
@@ -331,15 +348,16 @@ class TorchMCFLIRT:
                 linear = difference[:3, :3]
                 translation = difference[:3, 3] + linear @ sphere_centre
                 return np.float32(np.sqrt(translation @ translation + 80.0**2 / 5 * np.trace(linear.T @ linear)))
-            for enabled, name, values in (
-                (rmsrel, "relative", [rms_deviation(matrices[t - 1], matrices[t]) for t in range(1, frame_count)]),
-                (rmsabs, "absolute", [rms_deviation(np.eye(4), matrix) for matrix in matrices]),
-            ):
-                if enabled:
-                    values = np.asarray(values, dtype=np.float32)
-                    mean = np.float32(np.add.accumulate(values, dtype=np.float32)[-1] / len(values)) if len(values) else np.float32(0)
-                    np.savetxt(output_paths["rms_" + name], values, fmt="%.9g")
-                    np.savetxt(output_paths["rms_" + name + "_mean"], [mean], fmt="%.9g")
+            for enabled, name in ((rmsrel, "relative"), (rmsabs, "absolute")):
+                if not enabled:
+                    continue
+                values = ([rms_deviation(matrices[t - 1], matrices[t])
+                           for t in range(1, frame_count)] if name == "relative" else
+                          [rms_deviation(np.eye(4), matrix) for matrix in matrices])
+                values = np.asarray(values, dtype=np.float32)
+                mean = np.float32(np.add.accumulate(values, dtype=np.float32)[-1] / len(values)) if len(values) else np.float32(0)
+                np.savetxt(output_paths["rms_" + name], values, fmt="%.9g")
+                np.savetxt(output_paths["rms_" + name + "_mean"], [mean], fmt="%.9g")
         return MCFLIRTResult(matrices, parameters, target, cost_evaluations, corrected, output_paths)
 
     __call__ = run

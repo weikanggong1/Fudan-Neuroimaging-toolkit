@@ -2,6 +2,8 @@
 
 2026-10-01，冻结源码 `cfb7beee202f7e89072faf1a8e69b78d143e451f` 在同一例真实 UKB 数据上完成全部 490 帧的公开 `fMRIVolume_pipeline`。API 同时生成 **preproc 与 clean**，含最终保存为 **707.287 s**。运动校正解码图与冻结 FNIT `1eb9c417` 逐值相同；重新运行完整流程后，MNI clean 与冻结 FNIT 的逐体素时间 r 均值为 **0.992649**，与原 SynthStrip/FSL/ICA-AROMA 同步骤参照为 **0.939162**。
 
+2026-10-02，独立 [TorchMCFLIRT](../../docs/mcflirt/README.md) 在 `8a3f227` 更新矩阵缓存及 CUDA graph；同卡完整 490 帧配对调用从 86.37 / 109.46 s 降至 52.47 / 63.48 s，运动输出逐 bit 保持。本页继续记录上述冻结源码的整链测试，707.287 s 未包含本轮优化。
+
 ## 输入、输出和本次配置
 
 输入为同一原始 BOLD/SBRef、匹配的存档 T1、MNI 模板与脑掩膜，以及官方 SynthStrip 权重。BOLD 为 `88×88×64×490`，TR `0.735 s`；T1 为 `162×215×180`，经 nibabel 转换保持体素与 affine。原始影像、逐体素时序、完整日志和路径留在服务器，公开 JSON 仅含聚合指标与 SHA-256。

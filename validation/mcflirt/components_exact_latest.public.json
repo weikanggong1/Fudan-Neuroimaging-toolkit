@@ -1,0 +1,2243 @@
+{
+  "source_revision": "8a3f2276c3e990bb60971ab38b1a93c6d7cb0ba8",
+  "source_sha256": {
+    "fnit.mcflirt.__init__": "793c2b2e08ae85bedf341df682225f7bc9eadd44069dbe6fd73356ccb985a1ec",
+    "fnit.mcflirt._cost_cuda": "e005d1553e36c2bdbcc94fd399e697ef3cd445beb78c0dcb87c07100ca0f98fa",
+    "fnit.mcflirt._cuda_executor": "a02430aa2001f13dcf463329dae5aecfb5fbd9064de146c9b2e6c0a8dcbba73b",
+    "fnit.mcflirt._rigid": "ea6ca9d4aa6f87d8b353cecdfdd1650a99f4e3dcd558290815a4004935c2158e",
+    "fnit.mcflirt._sampling_cuda": "a660736802d68e8e1cd29beeceedf70c5fb6f3062a14ff8e5d37f2d41320cada",
+    "fnit.mcflirt.cli": "855e192b26ced79517250bb7f406468e614c5da30922772c737f0b70062e08a9",
+    "fnit.mcflirt.core": "2b344c34ecbc96d14a07132f6c5731a87ebe13178ab5fa1452222ed2299bae78",
+    "fnit.mcflirt.sampling": "af10cfd4f42f94adff2bb910eafe40834786a3b7646756a3967d5c9fc3aa0b8f",
+    "fnit.flirt.core": "e6ce6185fafb89666be631069f66e96ce9c6a561ab3d7c7fab4c661d317885c1",
+    "fnit.flirt._batched_cuda": "c6ac99f6b0499c2b081969448dc9492906232daac247477edff0cb00ac43cd74",
+    "profile_driver": "18c1f70dcd4ee209f52331bd198ebd081521a793b94c5d0c40db17a8b9ffa323"
+  },
+  "input_sha256": {
+    "bold": "67717caaa823141c6e59d46db52e92deb4419d232ba699c399c69eb8888a0e92",
+    "reference": "98cb4261e0bcd3b058a989c49e0a8bda66d8ba76be1385a3e23289e9cc9e1162",
+    "selected_matrices": "39391e01c45a3af73583279ff01f357f7c26e5f4f1b1a18c037a4a17b71b17f4"
+  },
+  "input_shape": [
+    88,
+    88,
+    64,
+    490
+  ],
+  "moving_frame": 0,
+  "matrix_frames": [
+    0,
+    100,
+    489
+  ],
+  "calls_per_round": 100,
+  "rounds": 2,
+  "warmup_calls": 5,
+  "cpu_threads": 8,
+  "device": "cuda:0",
+  "cuda_visible_devices": "1",
+  "gpu_name": "NVIDIA H100 PCIe",
+  "torch_version": "2.5.1",
+  "reference_pixdim_float32_bits": [
+    1075362351,
+    1075362351,
+    1075419544
+  ],
+  "scope": "Fixed real-image NCC and fixed CPU parameter evaluations only; no motion estimation, final sampling or I/O timing.",
+  "comparison": "Shared CPU rigid composer and coefficients versus cached CPU helpers; original compiled NCC reduction versus replay of that exact same compiled reducer, with one workspace per scale.",
+  "timing_note": "Components run independently in rotated and reversed order after warmup. Their timings are not additive and do not estimate the API wall time. Serial wall timing includes host work and synchronization; event intervals can include idle gaps from host submission and shared-GPU scheduling.",
+  "fixed_parameter_note": "The CPU composer repeatedly receives the same fixed parameters, so its rotation cache can stay fully warm. This does not measure Brent's actual rotation-cache hit rate or imply a whole-optimizer speedup.",
+  "original_cost_definition": "Unchanged fused sampler, shared _fsl_pull_coefficients and original compiled _normcorr_reduce.",
+  "workspace_cost_definition": "The same sampling algorithm, cached FSLPullCoefficients and CudaMotionCostExecutor graph replay of the very same original compiled reducer object.",
+  "privacy": "Only anonymous scalar aggregates, source/input hashes and GPU utilization are public.",
+  "gpu_load_before": {
+    "available": true,
+    "gpus": [
+      {
+        "index": 0.0,
+        "utilization.gpu": 19.0,
+        "utilization.memory": 2.0,
+        "memory.used": 41966.0,
+        "memory.total": 81559.0,
+        "power.draw": 141.82,
+        "clocks.sm": 1680.0
+      },
+      {
+        "index": 1.0,
+        "utilization.gpu": 72.0,
+        "utilization.memory": 15.0,
+        "memory.used": 23377.0,
+        "memory.total": 81559.0,
+        "power.draw": 144.9,
+        "clocks.sm": 1755.0
+      }
+    ]
+  },
+  "scales": [
+    {
+      "scale_mm": 8.0,
+      "workspace_creation_seconds": 0.0023269671946763992,
+      "first_graph_cost_including_capture_seconds": 0.23219576990231872,
+      "workspace_instances": 1,
+      "graph_captured": true
+    },
+    {
+      "scale_mm": 4.0,
+      "workspace_creation_seconds": 0.001055816188454628,
+      "first_graph_cost_including_capture_seconds": 0.27895944518968463,
+      "workspace_instances": 1,
+      "graph_captured": true
+    }
+  ],
+  "cases": [
+    {
+      "scale_mm": 8.0,
+      "matrix_frame": 0,
+      "reference_shape_xyz": [
+        26,
+        26,
+        19
+      ],
+      "fixed_cost_float32_bits": 1016419168,
+      "graph_cost_float32_bits": 1016419168,
+      "cost_bits_equal": true,
+      "prepared_bits_equal": true,
+      "rigid_matrix_float64_bits_equal": true,
+      "pull_coefficients_float32_bits_equal": true,
+      "same_compiled_reducer_object": true,
+      "components": {
+        "cpu_rigid_matrix_original": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 461.0334802418947,
+              "cuda_event_microseconds_per_call": null
+            },
+            {
+              "wall_microseconds_per_call": 383.09746887534857,
+              "cuda_event_microseconds_per_call": null
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 422.06547455862164,
+            "median": 422.06547455862164,
+            "min": 383.09746887534857,
+            "max": 461.0334802418947
+          }
+        },
+        "cpu_rigid_matrix_cached": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 21.474240347743034,
+              "cuda_event_microseconds_per_call": null
+            },
+            {
+              "wall_microseconds_per_call": 22.930973209440708,
+              "cuda_event_microseconds_per_call": null
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 22.20260677859187,
+            "median": 22.20260677859187,
+            "min": 21.474240347743034,
+            "max": 22.930973209440708
+          }
+        },
+        "cpu_pull_coefficients_original": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 19.174767658114433,
+              "cuda_event_microseconds_per_call": null
+            },
+            {
+              "wall_microseconds_per_call": 19.219578243792057,
+              "cuda_event_microseconds_per_call": null
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 19.197172950953245,
+            "median": 19.197172950953245,
+            "min": 19.174767658114433,
+            "max": 19.219578243792057
+          }
+        },
+        "cpu_pull_coefficients_cached": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 7.672165520489216,
+              "cuda_event_microseconds_per_call": null
+            },
+            {
+              "wall_microseconds_per_call": 8.573168888688087,
+              "cuda_event_microseconds_per_call": null
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 8.122667204588652,
+            "median": 8.122667204588652,
+            "min": 7.672165520489216,
+            "max": 8.573168888688087
+          }
+        },
+        "prepare_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 490.7395411282778,
+              "cuda_event_microseconds_per_call": 490.65696716308594
+            },
+            {
+              "wall_microseconds_per_call": 508.60943272709846,
+              "cuda_event_microseconds_per_call": 508.52832794189453
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 499.6744869276881,
+            "median": 499.6744869276881,
+            "min": 490.7395411282778,
+            "max": 508.60943272709846
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 499.59264755249023,
+            "median": 499.59264755249023,
+            "min": 490.65696716308594,
+            "max": 508.52832794189453
+          }
+        },
+        "reducer_original_to_float_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 491.1596793681383,
+              "cuda_event_microseconds_per_call": 486.8940734863281
+            },
+            {
+              "wall_microseconds_per_call": 527.7911992743611,
+              "cuda_event_microseconds_per_call": 527.4950408935547
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 509.4754393212497,
+            "median": 509.4754393212497,
+            "min": 491.1596793681383,
+            "max": 527.7911992743611
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 507.1945571899414,
+            "median": 507.1945571899414,
+            "min": 486.8940734863281,
+            "max": 527.4950408935547
+          }
+        },
+        "reducer_graph_to_float_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 485.7114562764764,
+              "cuda_event_microseconds_per_call": 485.4025650024414
+            },
+            {
+              "wall_microseconds_per_call": 478.6551743745804,
+              "cuda_event_microseconds_per_call": 478.3804702758789
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 482.1833153255284,
+            "median": 482.1833153255284,
+            "min": 478.6551743745804,
+            "max": 485.7114562764764
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 481.89151763916016,
+            "median": 481.89151763916016,
+            "min": 478.3804702758789,
+            "max": 485.4025650024414
+          }
+        },
+        "prepared_cost_original_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 499.9614926055074,
+              "cuda_event_microseconds_per_call": 499.5868682861328
+            },
+            {
+              "wall_microseconds_per_call": 404.8758000135422,
+              "cuda_event_microseconds_per_call": 404.57984924316406
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 452.4186463095248,
+            "median": 452.4186463095248,
+            "min": 404.8758000135422,
+            "max": 499.9614926055074
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 452.08335876464844,
+            "median": 452.08335876464844,
+            "min": 404.57984924316406,
+            "max": 499.5868682861328
+          }
+        },
+        "prepared_cost_graph_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 437.6510810106993,
+              "cuda_event_microseconds_per_call": 437.32608795166016
+            },
+            {
+              "wall_microseconds_per_call": 396.80487010627985,
+              "cuda_event_microseconds_per_call": 396.49024963378906
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 417.22797555848956,
+            "median": 417.22797555848956,
+            "min": 396.80487010627985,
+            "max": 437.6510810106993
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 416.9081687927246,
+            "median": 416.9081687927246,
+            "min": 396.49024963378906,
+            "max": 437.32608795166016
+          }
+        },
+        "full_cost_original_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 237.22076788544655,
+              "cuda_event_microseconds_per_call": 236.90624237060547
+            },
+            {
+              "wall_microseconds_per_call": 427.21827048808336,
+              "cuda_event_microseconds_per_call": 426.92577362060547
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 332.21951918676496,
+            "median": 332.21951918676496,
+            "min": 237.22076788544655,
+            "max": 427.21827048808336
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 331.91600799560547,
+            "median": 331.91600799560547,
+            "min": 236.90624237060547,
+            "max": 426.92577362060547
+          }
+        },
+        "full_cost_graph_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 178.93908079713583,
+              "cuda_event_microseconds_per_call": 178.6774444580078
+            },
+            {
+              "wall_microseconds_per_call": 397.1100691705942,
+              "cuda_event_microseconds_per_call": 394.50462341308594
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 288.024574983865,
+            "median": 288.024574983865,
+            "min": 178.93908079713583,
+            "max": 397.1100691705942
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 286.5910339355469,
+            "median": 286.5910339355469,
+            "min": 178.6774444580078,
+            "max": 394.50462341308594
+          }
+        },
+        "prepare_queued": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 35.238550044596195,
+              "cuda_event_microseconds_per_call": 35.16736030578613
+            },
+            {
+              "wall_microseconds_per_call": 36.13391891121864,
+              "cuda_event_microseconds_per_call": 36.0700798034668
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 35.68623447790742,
+            "median": 35.68623447790742,
+            "min": 35.238550044596195,
+            "max": 36.13391891121864
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 35.618720054626465,
+            "median": 35.618720054626465,
+            "min": 35.16736030578613,
+            "max": 36.0700798034668
+          }
+        },
+        "reducer_original_queued": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 109.9671283736825,
+              "cuda_event_microseconds_per_call": 106.75071716308594
+            },
+            {
+              "wall_microseconds_per_call": 125.83557981997728,
+              "cuda_event_microseconds_per_call": 125.73535919189453
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 117.90135409682989,
+            "median": 117.90135409682989,
+            "min": 109.9671283736825,
+            "max": 125.83557981997728
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 116.24303817749023,
+            "median": 116.24303817749023,
+            "min": 106.75071716308594,
+            "max": 125.73535919189453
+          }
+        },
+        "reducer_graph_queued": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 20.6415681168437,
+              "cuda_event_microseconds_per_call": 20.57152032852173
+            },
+            {
+              "wall_microseconds_per_call": 19.148848950862885,
+              "cuda_event_microseconds_per_call": 19.046720266342163
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 19.895208533853292,
+            "median": 19.895208533853292,
+            "min": 19.148848950862885,
+            "max": 20.6415681168437
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 19.809120297431946,
+            "median": 19.809120297431946,
+            "min": 19.046720266342163,
+            "max": 20.57152032852173
+          }
+        }
+      }
+    },
+    {
+      "scale_mm": 8.0,
+      "matrix_frame": 100,
+      "reference_shape_xyz": [
+        26,
+        26,
+        19
+      ],
+      "fixed_cost_float32_bits": 1016926016,
+      "graph_cost_float32_bits": 1016926016,
+      "cost_bits_equal": true,
+      "prepared_bits_equal": true,
+      "rigid_matrix_float64_bits_equal": true,
+      "pull_coefficients_float32_bits_equal": true,
+      "same_compiled_reducer_object": true,
+      "components": {
+        "cpu_rigid_matrix_original": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 380.8775683864951,
+              "cuda_event_microseconds_per_call": null
+            },
+            {
+              "wall_microseconds_per_call": 386.2848039716482,
+              "cuda_event_microseconds_per_call": null
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 383.58118617907166,
+            "median": 383.58118617907166,
+            "min": 380.8775683864951,
+            "max": 386.2848039716482
+          }
+        },
+        "cpu_rigid_matrix_cached": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 21.040108986198902,
+              "cuda_event_microseconds_per_call": null
+            },
+            {
+              "wall_microseconds_per_call": 22.890488617122173,
+              "cuda_event_microseconds_per_call": null
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 21.965298801660538,
+            "median": 21.965298801660538,
+            "min": 21.040108986198902,
+            "max": 22.890488617122173
+          }
+        },
+        "cpu_pull_coefficients_original": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 18.776580691337585,
+              "cuda_event_microseconds_per_call": null
+            },
+            {
+              "wall_microseconds_per_call": 18.82075797766447,
+              "cuda_event_microseconds_per_call": null
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 18.798669334501028,
+            "median": 18.798669334501028,
+            "min": 18.776580691337585,
+            "max": 18.82075797766447
+          }
+        },
+        "cpu_pull_coefficients_cached": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 7.6094502583146095,
+              "cuda_event_microseconds_per_call": null
+            },
+            {
+              "wall_microseconds_per_call": 8.416520431637764,
+              "cuda_event_microseconds_per_call": null
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 8.012985344976187,
+            "median": 8.012985344976187,
+            "min": 7.6094502583146095,
+            "max": 8.416520431637764
+          }
+        },
+        "prepare_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 515.1198990643024,
+              "cuda_event_microseconds_per_call": 515.0320053100586
+            },
+            {
+              "wall_microseconds_per_call": 508.4447003901005,
+              "cuda_event_microseconds_per_call": 508.37696075439453
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 511.78229972720146,
+            "median": 511.78229972720146,
+            "min": 508.4447003901005,
+            "max": 515.1198990643024
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 511.70448303222656,
+            "median": 511.70448303222656,
+            "min": 508.37696075439453,
+            "max": 515.0320053100586
+          }
+        },
+        "reducer_original_to_float_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 534.3524878844619,
+              "cuda_event_microseconds_per_call": 529.6652984619141
+            },
+            {
+              "wall_microseconds_per_call": 526.6740592196584,
+              "cuda_event_microseconds_per_call": 526.495361328125
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 530.5132735520601,
+            "median": 530.5132735520601,
+            "min": 526.6740592196584,
+            "max": 534.3524878844619
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 528.0803298950195,
+            "median": 528.0803298950195,
+            "min": 526.495361328125,
+            "max": 529.6652984619141
+          }
+        },
+        "reducer_graph_to_float_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 531.086903065443,
+              "cuda_event_microseconds_per_call": 530.8265686035156
+            },
+            {
+              "wall_microseconds_per_call": 525.4497891291976,
+              "cuda_event_microseconds_per_call": 525.3449630737305
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 528.2683460973203,
+            "median": 528.2683460973203,
+            "min": 525.4497891291976,
+            "max": 531.086903065443
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 528.085765838623,
+            "median": 528.085765838623,
+            "min": 525.3449630737305,
+            "max": 530.8265686035156
+          }
+        },
+        "prepared_cost_original_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 551.8028698861599,
+              "cuda_event_microseconds_per_call": 551.4751815795898
+            },
+            {
+              "wall_microseconds_per_call": 538.1600884720683,
+              "cuda_event_microseconds_per_call": 537.9296112060547
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 544.9814791791141,
+            "median": 544.9814791791141,
+            "min": 538.1600884720683,
+            "max": 551.8028698861599
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 544.7023963928223,
+            "median": 544.7023963928223,
+            "min": 537.9296112060547,
+            "max": 551.4751815795898
+          }
+        },
+        "prepared_cost_graph_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 539.7504987195134,
+              "cuda_event_microseconds_per_call": 539.4892883300781
+            },
+            {
+              "wall_microseconds_per_call": 536.0264796763659,
+              "cuda_event_microseconds_per_call": 535.8700942993164
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 537.8884891979396,
+            "median": 537.8884891979396,
+            "min": 536.0264796763659,
+            "max": 539.7504987195134
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 537.6796913146973,
+            "median": 537.6796913146973,
+            "min": 535.8700942993164,
+            "max": 539.4892883300781
+          }
+        },
+        "full_cost_original_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 545.1094824820757,
+              "cuda_event_microseconds_per_call": 544.8422241210938
+            },
+            {
+              "wall_microseconds_per_call": 538.4792992845178,
+              "cuda_event_microseconds_per_call": 538.2508850097656
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 541.7943908832967,
+            "median": 541.7943908832967,
+            "min": 538.4792992845178,
+            "max": 545.1094824820757
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 541.5465545654297,
+            "median": 541.5465545654297,
+            "min": 538.2508850097656,
+            "max": 544.8422241210938
+          }
+        },
+        "full_cost_graph_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 541.3732212036848,
+              "cuda_event_microseconds_per_call": 541.0598373413086
+            },
+            {
+              "wall_microseconds_per_call": 540.278060361743,
+              "cuda_event_microseconds_per_call": 534.5401763916016
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 540.8256407827139,
+            "median": 540.8256407827139,
+            "min": 540.278060361743,
+            "max": 541.3732212036848
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 537.8000068664551,
+            "median": 537.8000068664551,
+            "min": 534.5401763916016,
+            "max": 541.0598373413086
+          }
+        },
+        "prepare_queued": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 33.86331722140312,
+              "cuda_event_microseconds_per_call": 33.79456043243408
+            },
+            {
+              "wall_microseconds_per_call": 38.126581348478794,
+              "cuda_event_microseconds_per_call": 38.04512023925781
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 35.99494928494096,
+            "median": 35.99494928494096,
+            "min": 33.86331722140312,
+            "max": 38.126581348478794
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 35.91984033584595,
+            "median": 35.91984033584595,
+            "min": 33.79456043243408,
+            "max": 38.04512023925781
+          }
+        },
+        "reducer_original_queued": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 128.780547529459,
+              "cuda_event_microseconds_per_call": 122.56640434265137
+            },
+            {
+              "wall_microseconds_per_call": 105.30177969485521,
+              "cuda_event_microseconds_per_call": 105.22208213806152
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 117.0411636121571,
+            "median": 117.0411636121571,
+            "min": 105.30177969485521,
+            "max": 128.780547529459
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 113.89424324035645,
+            "median": 113.89424324035645,
+            "min": 105.22208213806152,
+            "max": 122.56640434265137
+          }
+        },
+        "reducer_graph_queued": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 20.8125077188015,
+              "cuda_event_microseconds_per_call": 20.750720500946045
+            },
+            {
+              "wall_microseconds_per_call": 19.174576736986637,
+              "cuda_event_microseconds_per_call": 19.10688042640686
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 19.993542227894068,
+            "median": 19.993542227894068,
+            "min": 19.174576736986637,
+            "max": 20.8125077188015
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 19.928800463676453,
+            "median": 19.928800463676453,
+            "min": 19.10688042640686,
+            "max": 20.750720500946045
+          }
+        }
+      }
+    },
+    {
+      "scale_mm": 8.0,
+      "matrix_frame": 489,
+      "reference_shape_xyz": [
+        26,
+        26,
+        19
+      ],
+      "fixed_cost_float32_bits": 1017895840,
+      "graph_cost_float32_bits": 1017895840,
+      "cost_bits_equal": true,
+      "prepared_bits_equal": true,
+      "rigid_matrix_float64_bits_equal": true,
+      "pull_coefficients_float32_bits_equal": true,
+      "same_compiled_reducer_object": true,
+      "components": {
+        "cpu_rigid_matrix_original": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 360.44516135007143,
+              "cuda_event_microseconds_per_call": null
+            },
+            {
+              "wall_microseconds_per_call": 363.3741196244955,
+              "cuda_event_microseconds_per_call": null
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 361.90964048728347,
+            "median": 361.90964048728347,
+            "min": 360.44516135007143,
+            "max": 363.3741196244955
+          }
+        },
+        "cpu_rigid_matrix_cached": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 21.036840043962002,
+              "cuda_event_microseconds_per_call": null
+            },
+            {
+              "wall_microseconds_per_call": 22.926549427211285,
+              "cuda_event_microseconds_per_call": null
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 21.981694735586643,
+            "median": 21.981694735586643,
+            "min": 21.036840043962002,
+            "max": 22.926549427211285
+          }
+        },
+        "cpu_pull_coefficients_original": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 18.772403709590435,
+              "cuda_event_microseconds_per_call": null
+            },
+            {
+              "wall_microseconds_per_call": 18.86592246592045,
+              "cuda_event_microseconds_per_call": null
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 18.81916308775544,
+            "median": 18.81916308775544,
+            "min": 18.772403709590435,
+            "max": 18.86592246592045
+          }
+        },
+        "cpu_pull_coefficients_cached": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 7.7453488484025,
+              "cuda_event_microseconds_per_call": null
+            },
+            {
+              "wall_microseconds_per_call": 8.47534742206335,
+              "cuda_event_microseconds_per_call": null
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 8.110348135232925,
+            "median": 8.110348135232925,
+            "min": 7.7453488484025,
+            "max": 8.47534742206335
+          }
+        },
+        "prepare_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 514.5152471959591,
+              "cuda_event_microseconds_per_call": 514.4604873657227
+            },
+            {
+              "wall_microseconds_per_call": 515.7195823267102,
+              "cuda_event_microseconds_per_call": 515.6540679931641
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 515.1174147613347,
+            "median": 515.1174147613347,
+            "min": 514.5152471959591,
+            "max": 515.7195823267102
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 515.0572776794434,
+            "median": 515.0572776794434,
+            "min": 514.4604873657227,
+            "max": 515.6540679931641
+          }
+        },
+        "reducer_original_to_float_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 513.6326095089316,
+              "cuda_event_microseconds_per_call": 508.6732864379883
+            },
+            {
+              "wall_microseconds_per_call": 523.2983687892556,
+              "cuda_event_microseconds_per_call": 523.1340789794922
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 518.4654891490936,
+            "median": 518.4654891490936,
+            "min": 513.6326095089316,
+            "max": 523.2983687892556
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 515.9036827087402,
+            "median": 515.9036827087402,
+            "min": 508.6732864379883,
+            "max": 523.1340789794922
+          }
+        },
+        "reducer_graph_to_float_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 520.280166529119,
+              "cuda_event_microseconds_per_call": 520.1808166503906
+            },
+            {
+              "wall_microseconds_per_call": 510.1847508922219,
+              "cuda_event_microseconds_per_call": 510.0873565673828
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 515.2324587106705,
+            "median": 515.2324587106705,
+            "min": 510.1847508922219,
+            "max": 520.280166529119
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 515.1340866088867,
+            "median": 515.1340866088867,
+            "min": 510.0873565673828,
+            "max": 520.1808166503906
+          }
+        },
+        "prepared_cost_original_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 544.5877183228731,
+              "cuda_event_microseconds_per_call": 544.3875122070312
+            },
+            {
+              "wall_microseconds_per_call": 519.0536193549633,
+              "cuda_event_microseconds_per_call": 518.8943862915039
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 531.8206688389182,
+            "median": 531.8206688389182,
+            "min": 519.0536193549633,
+            "max": 544.5877183228731
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 531.6409492492676,
+            "median": 531.6409492492676,
+            "min": 518.8943862915039,
+            "max": 544.3875122070312
+          }
+        },
+        "prepared_cost_graph_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 534.9523667246103,
+              "cuda_event_microseconds_per_call": 534.8179244995117
+            },
+            {
+              "wall_microseconds_per_call": 531.6736595705152,
+              "cuda_event_microseconds_per_call": 531.5468978881836
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 533.3130131475627,
+            "median": 533.3130131475627,
+            "min": 531.6736595705152,
+            "max": 534.9523667246103
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 533.1824111938477,
+            "median": 533.1824111938477,
+            "min": 531.5468978881836,
+            "max": 534.8179244995117
+          }
+        },
+        "full_cost_original_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 559.7592098638415,
+              "cuda_event_microseconds_per_call": 559.5110321044922
+            },
+            {
+              "wall_microseconds_per_call": 535.363438539207,
+              "cuda_event_microseconds_per_call": 535.1724624633789
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 547.5613242015243,
+            "median": 547.5613242015243,
+            "min": 535.363438539207,
+            "max": 559.7592098638415
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 547.3417472839355,
+            "median": 547.3417472839355,
+            "min": 535.1724624633789,
+            "max": 559.5110321044922
+          }
+        },
+        "full_cost_graph_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 552.2939329966903,
+              "cuda_event_microseconds_per_call": 552.1161651611328
+            },
+            {
+              "wall_microseconds_per_call": 536.6515507921576,
+              "cuda_event_microseconds_per_call": 530.6006240844727
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 544.472741894424,
+            "median": 544.472741894424,
+            "min": 536.6515507921576,
+            "max": 552.2939329966903
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 541.3583946228027,
+            "median": 541.3583946228027,
+            "min": 530.6006240844727,
+            "max": 552.1161651611328
+          }
+        },
+        "prepare_queued": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 36.02397162467241,
+              "cuda_event_microseconds_per_call": 35.95616102218628
+            },
+            {
+              "wall_microseconds_per_call": 35.02086270600557,
+              "cuda_event_microseconds_per_call": 34.95327949523926
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 35.52241716533899,
+            "median": 35.52241716533899,
+            "min": 35.02086270600557,
+            "max": 36.02397162467241
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 35.45472025871277,
+            "median": 35.45472025871277,
+            "min": 34.95327949523926,
+            "max": 35.95616102218628
+          }
+        },
+        "reducer_original_queued": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 109.35574769973755,
+              "cuda_event_microseconds_per_call": 103.62496376037598
+            },
+            {
+              "wall_microseconds_per_call": 105.97727261483669,
+              "cuda_event_microseconds_per_call": 105.90271949768066
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 107.66651015728712,
+            "median": 107.66651015728712,
+            "min": 105.97727261483669,
+            "max": 109.35574769973755
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 104.76384162902832,
+            "median": 104.76384162902832,
+            "min": 103.62496376037598,
+            "max": 105.90271949768066
+          }
+        },
+        "reducer_graph_queued": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 20.7633338868618,
+              "cuda_event_microseconds_per_call": 20.69983959197998
+            },
+            {
+              "wall_microseconds_per_call": 19.0852303057909,
+              "cuda_event_microseconds_per_call": 19.019839763641357
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 19.92428209632635,
+            "median": 19.92428209632635,
+            "min": 19.0852303057909,
+            "max": 20.7633338868618
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 19.85983967781067,
+            "median": 19.85983967781067,
+            "min": 19.019839763641357,
+            "max": 20.69983959197998
+          }
+        }
+      }
+    },
+    {
+      "scale_mm": 4.0,
+      "matrix_frame": 0,
+      "reference_shape_xyz": [
+        52,
+        52,
+        38
+      ],
+      "fixed_cost_float32_bits": 1016284832,
+      "graph_cost_float32_bits": 1016284832,
+      "cost_bits_equal": true,
+      "prepared_bits_equal": true,
+      "rigid_matrix_float64_bits_equal": true,
+      "pull_coefficients_float32_bits_equal": true,
+      "same_compiled_reducer_object": true,
+      "components": {
+        "cpu_rigid_matrix_original": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 360.2337883785367,
+              "cuda_event_microseconds_per_call": null
+            },
+            {
+              "wall_microseconds_per_call": 379.91541903465986,
+              "cuda_event_microseconds_per_call": null
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 370.0746037065983,
+            "median": 370.0746037065983,
+            "min": 360.2337883785367,
+            "max": 379.91541903465986
+          }
+        },
+        "cpu_rigid_matrix_cached": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 21.129832603037357,
+              "cuda_event_microseconds_per_call": null
+            },
+            {
+              "wall_microseconds_per_call": 23.27512949705124,
+              "cuda_event_microseconds_per_call": null
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 22.202481050044298,
+            "median": 22.202481050044298,
+            "min": 21.129832603037357,
+            "max": 23.27512949705124
+          }
+        },
+        "cpu_pull_coefficients_original": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 19.847960211336613,
+              "cuda_event_microseconds_per_call": null
+            },
+            {
+              "wall_microseconds_per_call": 19.02300864458084,
+              "cuda_event_microseconds_per_call": null
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 19.435484427958727,
+            "median": 19.435484427958727,
+            "min": 19.02300864458084,
+            "max": 19.847960211336613
+          }
+        },
+        "cpu_pull_coefficients_cached": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 7.76560977101326,
+              "cuda_event_microseconds_per_call": null
+            },
+            {
+              "wall_microseconds_per_call": 8.870870806276798,
+              "cuda_event_microseconds_per_call": null
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 8.318240288645029,
+            "median": 8.318240288645029,
+            "min": 7.76560977101326,
+            "max": 8.870870806276798
+          }
+        },
+        "prepare_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 517.2176007181406,
+              "cuda_event_microseconds_per_call": 517.1587371826172
+            },
+            {
+              "wall_microseconds_per_call": 525.4661478102207,
+              "cuda_event_microseconds_per_call": 525.3996658325195
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 521.3418742641807,
+            "median": 521.3418742641807,
+            "min": 517.2176007181406,
+            "max": 525.4661478102207
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 521.2792015075684,
+            "median": 521.2792015075684,
+            "min": 517.1587371826172,
+            "max": 525.3996658325195
+          }
+        },
+        "reducer_original_to_float_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 559.8285235464573,
+              "cuda_event_microseconds_per_call": 555.6364822387695
+            },
+            {
+              "wall_microseconds_per_call": 546.6518783941865,
+              "cuda_event_microseconds_per_call": 546.4495849609375
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 553.2402009703219,
+            "median": 553.2402009703219,
+            "min": 546.6518783941865,
+            "max": 559.8285235464573
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 551.0430335998535,
+            "median": 551.0430335998535,
+            "min": 546.4495849609375,
+            "max": 555.6364822387695
+          }
+        },
+        "reducer_graph_to_float_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 560.3028973564506,
+              "cuda_event_microseconds_per_call": 560.1968002319336
+            },
+            {
+              "wall_microseconds_per_call": 557.3601089417934,
+              "cuda_event_microseconds_per_call": 557.2515106201172
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 558.831503149122,
+            "median": 558.831503149122,
+            "min": 557.3601089417934,
+            "max": 560.3028973564506
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 558.7241554260254,
+            "median": 558.7241554260254,
+            "min": 557.2515106201172,
+            "max": 560.1968002319336
+          }
+        },
+        "prepared_cost_original_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 584.7245827317238,
+              "cuda_event_microseconds_per_call": 584.4339370727539
+            },
+            {
+              "wall_microseconds_per_call": 584.3891762197018,
+              "cuda_event_microseconds_per_call": 584.0822219848633
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 584.5568794757128,
+            "median": 584.5568794757128,
+            "min": 584.3891762197018,
+            "max": 584.7245827317238
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 584.2580795288086,
+            "median": 584.2580795288086,
+            "min": 584.0822219848633,
+            "max": 584.4339370727539
+          }
+        },
+        "prepared_cost_graph_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 580.2720598876476,
+              "cuda_event_microseconds_per_call": 580.0940704345703
+            },
+            {
+              "wall_microseconds_per_call": 583.5537984967232,
+              "cuda_event_microseconds_per_call": 583.3472061157227
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 581.9129291921854,
+            "median": 581.9129291921854,
+            "min": 580.2720598876476,
+            "max": 583.5537984967232
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 581.7206382751465,
+            "median": 581.7206382751465,
+            "min": 580.0940704345703,
+            "max": 583.3472061157227
+          }
+        },
+        "full_cost_original_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 569.6531012654305,
+              "cuda_event_microseconds_per_call": 569.3116760253906
+            },
+            {
+              "wall_microseconds_per_call": 592.2665633261204,
+              "cuda_event_microseconds_per_call": 591.899528503418
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 580.9598322957754,
+            "median": 580.9598322957754,
+            "min": 569.6531012654305,
+            "max": 592.2665633261204
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 580.6056022644043,
+            "median": 580.6056022644043,
+            "min": 569.3116760253906,
+            "max": 591.899528503418
+          }
+        },
+        "full_cost_graph_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 573.2116987928748,
+              "cuda_event_microseconds_per_call": 572.949104309082
+            },
+            {
+              "wall_microseconds_per_call": 586.7084627971053,
+              "cuda_event_microseconds_per_call": 579.2720031738281
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 579.9600807949901,
+            "median": 579.9600807949901,
+            "min": 573.2116987928748,
+            "max": 586.7084627971053
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 576.1105537414551,
+            "median": 576.1105537414551,
+            "min": 572.949104309082,
+            "max": 579.2720031738281
+          }
+        },
+        "prepare_queued": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 33.701867796480656,
+              "cuda_event_microseconds_per_call": 33.62623929977417
+            },
+            {
+              "wall_microseconds_per_call": 66.00482854992151,
+              "cuda_event_microseconds_per_call": 65.70144176483154
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 49.853348173201084,
+            "median": 49.853348173201084,
+            "min": 33.701867796480656,
+            "max": 66.00482854992151
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 49.663840532302856,
+            "median": 49.663840532302856,
+            "min": 33.62623929977417,
+            "max": 65.70144176483154
+          }
+        },
+        "reducer_original_queued": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 106.16742074489594,
+              "cuda_event_microseconds_per_call": 97.33663558959961
+            },
+            {
+              "wall_microseconds_per_call": 113.741559907794,
+              "cuda_event_microseconds_per_call": 113.6467170715332
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 109.95449032634497,
+            "median": 109.95449032634497,
+            "min": 106.16742074489594,
+            "max": 113.741559907794
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 105.4916763305664,
+            "median": 105.4916763305664,
+            "min": 97.33663558959961,
+            "max": 113.6467170715332
+          }
+        },
+        "reducer_graph_queued": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 64.8787198588252,
+              "cuda_event_microseconds_per_call": 64.77727890014648
+            },
+            {
+              "wall_microseconds_per_call": 53.95208019763231,
+              "cuda_event_microseconds_per_call": 53.893117904663086
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 59.41540002822876,
+            "median": 59.41540002822876,
+            "min": 53.95208019763231,
+            "max": 64.8787198588252
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 59.335198402404785,
+            "median": 59.335198402404785,
+            "min": 53.893117904663086,
+            "max": 64.77727890014648
+          }
+        }
+      }
+    },
+    {
+      "scale_mm": 4.0,
+      "matrix_frame": 100,
+      "reference_shape_xyz": [
+        52,
+        52,
+        38
+      ],
+      "fixed_cost_float32_bits": 1016716512,
+      "graph_cost_float32_bits": 1016716512,
+      "cost_bits_equal": true,
+      "prepared_bits_equal": true,
+      "rigid_matrix_float64_bits_equal": true,
+      "pull_coefficients_float32_bits_equal": true,
+      "same_compiled_reducer_object": true,
+      "components": {
+        "cpu_rigid_matrix_original": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 354.3841512873769,
+              "cuda_event_microseconds_per_call": null
+            },
+            {
+              "wall_microseconds_per_call": 360.10054871439934,
+              "cuda_event_microseconds_per_call": null
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 357.2423500008881,
+            "median": 357.2423500008881,
+            "min": 354.3841512873769,
+            "max": 360.10054871439934
+          }
+        },
+        "cpu_rigid_matrix_cached": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 20.999317057430744,
+              "cuda_event_microseconds_per_call": null
+            },
+            {
+              "wall_microseconds_per_call": 23.039341904222965,
+              "cuda_event_microseconds_per_call": null
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 22.019329480826855,
+            "median": 22.019329480826855,
+            "min": 20.999317057430744,
+            "max": 23.039341904222965
+          }
+        },
+        "cpu_pull_coefficients_original": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 19.609578885138035,
+              "cuda_event_microseconds_per_call": null
+            },
+            {
+              "wall_microseconds_per_call": 19.527971744537354,
+              "cuda_event_microseconds_per_call": null
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 19.568775314837694,
+            "median": 19.568775314837694,
+            "min": 19.527971744537354,
+            "max": 19.609578885138035
+          }
+        },
+        "cpu_pull_coefficients_cached": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 7.6674809679389,
+              "cuda_event_microseconds_per_call": null
+            },
+            {
+              "wall_microseconds_per_call": 8.928929455578327,
+              "cuda_event_microseconds_per_call": null
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 8.298205211758614,
+            "median": 8.298205211758614,
+            "min": 7.6674809679389,
+            "max": 8.928929455578327
+          }
+        },
+        "prepare_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 523.5668085515499,
+              "cuda_event_microseconds_per_call": 523.5023880004883
+            },
+            {
+              "wall_microseconds_per_call": 482.78179951012135,
+              "cuda_event_microseconds_per_call": 482.7119827270508
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 503.17430403083563,
+            "median": 503.17430403083563,
+            "min": 482.78179951012135,
+            "max": 523.5668085515499
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 503.10718536376953,
+            "median": 503.10718536376953,
+            "min": 482.7119827270508,
+            "max": 523.5023880004883
+          }
+        },
+        "reducer_original_to_float_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 487.8561198711395,
+              "cuda_event_microseconds_per_call": 483.2908630371094
+            },
+            {
+              "wall_microseconds_per_call": 531.040970236063,
+              "cuda_event_microseconds_per_call": 530.8364868164062
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 509.44854505360126,
+            "median": 509.44854505360126,
+            "min": 487.8561198711395,
+            "max": 531.040970236063
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 507.0636749267578,
+            "median": 507.0636749267578,
+            "min": 483.2908630371094,
+            "max": 530.8364868164062
+          }
+        },
+        "reducer_graph_to_float_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 562.404110096395,
+              "cuda_event_microseconds_per_call": 562.3129653930664
+            },
+            {
+              "wall_microseconds_per_call": 508.6522130295634,
+              "cuda_event_microseconds_per_call": 508.4463882446289
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 535.5281615629792,
+            "median": 535.5281615629792,
+            "min": 508.6522130295634,
+            "max": 562.404110096395
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 535.3796768188477,
+            "median": 535.3796768188477,
+            "min": 508.4463882446289,
+            "max": 562.3129653930664
+          }
+        },
+        "prepared_cost_original_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 522.2948081791401,
+              "cuda_event_microseconds_per_call": 522.0499038696289
+            },
+            {
+              "wall_microseconds_per_call": 543.011212721467,
+              "cuda_event_microseconds_per_call": 542.6598358154297
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 532.6530104503036,
+            "median": 532.6530104503036,
+            "min": 522.2948081791401,
+            "max": 543.011212721467
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 532.3548698425293,
+            "median": 532.3548698425293,
+            "min": 522.0499038696289,
+            "max": 542.6598358154297
+          }
+        },
+        "prepared_cost_graph_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 558.3573924377561,
+              "cuda_event_microseconds_per_call": 558.1801605224609
+            },
+            {
+              "wall_microseconds_per_call": 552.6895308867097,
+              "cuda_event_microseconds_per_call": 551.3897705078125
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 555.5234616622329,
+            "median": 555.5234616622329,
+            "min": 552.6895308867097,
+            "max": 558.3573924377561
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 554.7849655151367,
+            "median": 554.7849655151367,
+            "min": 551.3897705078125,
+            "max": 558.1801605224609
+          }
+        },
+        "full_cost_original_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 594.1773718222976,
+              "cuda_event_microseconds_per_call": 593.8307189941406
+            },
+            {
+              "wall_microseconds_per_call": 507.9411715269089,
+              "cuda_event_microseconds_per_call": 507.5929641723633
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 551.0592716746032,
+            "median": 551.0592716746032,
+            "min": 507.9411715269089,
+            "max": 594.1773718222976
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 550.711841583252,
+            "median": 550.711841583252,
+            "min": 507.5929641723633,
+            "max": 593.8307189941406
+          }
+        },
+        "full_cost_graph_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 543.3591175824404,
+              "cuda_event_microseconds_per_call": 543.0899047851562
+            },
+            {
+              "wall_microseconds_per_call": 570.8046304062009,
+              "cuda_event_microseconds_per_call": 565.8560180664062
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 557.0818739943206,
+            "median": 557.0818739943206,
+            "min": 543.3591175824404,
+            "max": 570.8046304062009
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 554.4729614257812,
+            "median": 554.4729614257812,
+            "min": 543.0899047851562,
+            "max": 565.8560180664062
+          }
+        },
+        "prepare_queued": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 41.07800778001547,
+              "cuda_event_microseconds_per_call": 41.00128173828125
+            },
+            {
+              "wall_microseconds_per_call": 39.0089675784111,
+              "cuda_event_microseconds_per_call": 38.93376111984253
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 40.043487679213285,
+            "median": 40.043487679213285,
+            "min": 39.0089675784111,
+            "max": 41.07800778001547
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 39.96752142906189,
+            "median": 39.96752142906189,
+            "min": 38.93376111984253,
+            "max": 41.00128173828125
+          }
+        },
+        "reducer_original_queued": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 108.83363895118237,
+              "cuda_event_microseconds_per_call": 103.12576293945312
+            },
+            {
+              "wall_microseconds_per_call": 112.14130092412233,
+              "cuda_event_microseconds_per_call": 112.03712463378906
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 110.48746993765235,
+            "median": 110.48746993765235,
+            "min": 108.83363895118237,
+            "max": 112.14130092412233
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 107.5814437866211,
+            "median": 107.5814437866211,
+            "min": 103.12576293945312,
+            "max": 112.03712463378906
+          }
+        },
+        "reducer_graph_queued": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 51.32841877639294,
+              "cuda_event_microseconds_per_call": 51.25504016876221
+            },
+            {
+              "wall_microseconds_per_call": 60.266442596912384,
+              "cuda_event_microseconds_per_call": 60.19392013549805
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 55.79743068665266,
+            "median": 55.79743068665266,
+            "min": 51.32841877639294,
+            "max": 60.266442596912384
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 55.72448015213013,
+            "median": 55.72448015213013,
+            "min": 51.25504016876221,
+            "max": 60.19392013549805
+          }
+        }
+      }
+    },
+    {
+      "scale_mm": 4.0,
+      "matrix_frame": 489,
+      "reference_shape_xyz": [
+        52,
+        52,
+        38
+      ],
+      "fixed_cost_float32_bits": 1017760832,
+      "graph_cost_float32_bits": 1017760832,
+      "cost_bits_equal": true,
+      "prepared_bits_equal": true,
+      "rigid_matrix_float64_bits_equal": true,
+      "pull_coefficients_float32_bits_equal": true,
+      "same_compiled_reducer_object": true,
+      "components": {
+        "cpu_rigid_matrix_original": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 358.126200735569,
+              "cuda_event_microseconds_per_call": null
+            },
+            {
+              "wall_microseconds_per_call": 358.71710162609816,
+              "cuda_event_microseconds_per_call": null
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 358.4216511808336,
+            "median": 358.4216511808336,
+            "min": 358.126200735569,
+            "max": 358.71710162609816
+          }
+        },
+        "cpu_rigid_matrix_cached": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 20.98171040415764,
+              "cuda_event_microseconds_per_call": null
+            },
+            {
+              "wall_microseconds_per_call": 23.798267357051373,
+              "cuda_event_microseconds_per_call": null
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 22.389988880604506,
+            "median": 22.389988880604506,
+            "min": 20.98171040415764,
+            "max": 23.798267357051373
+          }
+        },
+        "cpu_pull_coefficients_original": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 19.559869542717934,
+              "cuda_event_microseconds_per_call": null
+            },
+            {
+              "wall_microseconds_per_call": 19.508330151438713,
+              "cuda_event_microseconds_per_call": null
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 19.534099847078323,
+            "median": 19.534099847078323,
+            "min": 19.508330151438713,
+            "max": 19.559869542717934
+          }
+        },
+        "cpu_pull_coefficients_cached": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 7.693911902606487,
+              "cuda_event_microseconds_per_call": null
+            },
+            {
+              "wall_microseconds_per_call": 9.78225376456976,
+              "cuda_event_microseconds_per_call": null
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 8.738082833588123,
+            "median": 8.738082833588123,
+            "min": 7.693911902606487,
+            "max": 9.78225376456976
+          }
+        },
+        "prepare_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 821.6116111725569,
+              "cuda_event_microseconds_per_call": 821.4927673339844
+            },
+            {
+              "wall_microseconds_per_call": 488.0386497825384,
+              "cuda_event_microseconds_per_call": 487.97183990478516
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 654.8251304775476,
+            "median": 654.8251304775476,
+            "min": 488.0386497825384,
+            "max": 821.6116111725569
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 654.7323036193848,
+            "median": 654.7323036193848,
+            "min": 487.97183990478516,
+            "max": 821.4927673339844
+          }
+        },
+        "reducer_original_to_float_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 517.7854793146253,
+              "cuda_event_microseconds_per_call": 513.6249542236328
+            },
+            {
+              "wall_microseconds_per_call": 507.0821102708578,
+              "cuda_event_microseconds_per_call": 506.7824172973633
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 512.4337947927415,
+            "median": 512.4337947927415,
+            "min": 507.0821102708578,
+            "max": 517.7854793146253
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 510.20368576049805,
+            "median": 510.20368576049805,
+            "min": 506.7824172973633,
+            "max": 513.6249542236328
+          }
+        },
+        "reducer_graph_to_float_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 535.0808426737785,
+              "cuda_event_microseconds_per_call": 534.9619293212891
+            },
+            {
+              "wall_microseconds_per_call": 514.273839071393,
+              "cuda_event_microseconds_per_call": 514.1392135620117
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 524.6773408725858,
+            "median": 524.6773408725858,
+            "min": 514.273839071393,
+            "max": 535.0808426737785
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 524.5505714416504,
+            "median": 524.5505714416504,
+            "min": 514.1392135620117,
+            "max": 534.9619293212891
+          }
+        },
+        "prepared_cost_original_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 519.108260050416,
+              "cuda_event_microseconds_per_call": 518.8652801513672
+            },
+            {
+              "wall_microseconds_per_call": 546.2550092488527,
+              "cuda_event_microseconds_per_call": 545.9721755981445
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 532.6816346496344,
+            "median": 532.6816346496344,
+            "min": 519.108260050416,
+            "max": 546.2550092488527
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 532.4187278747559,
+            "median": 532.4187278747559,
+            "min": 518.8652801513672,
+            "max": 545.9721755981445
+          }
+        },
+        "prepared_cost_graph_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 533.6259678006172,
+              "cuda_event_microseconds_per_call": 533.4799957275391
+            },
+            {
+              "wall_microseconds_per_call": 540.0826595723629,
+              "cuda_event_microseconds_per_call": 539.8867034912109
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 536.8543136864901,
+            "median": 536.8543136864901,
+            "min": 533.6259678006172,
+            "max": 540.0826595723629
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 536.683349609375,
+            "median": 536.683349609375,
+            "min": 533.4799957275391,
+            "max": 539.8867034912109
+          }
+        },
+        "full_cost_original_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 559.5387099310756,
+              "cuda_event_microseconds_per_call": 559.2435073852539
+            },
+            {
+              "wall_microseconds_per_call": 535.4735814034939,
+              "cuda_event_microseconds_per_call": 535.1366424560547
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 547.5061456672847,
+            "median": 547.5061456672847,
+            "min": 535.4735814034939,
+            "max": 559.5387099310756
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 547.1900749206543,
+            "median": 547.1900749206543,
+            "min": 535.1366424560547,
+            "max": 559.2435073852539
+          }
+        },
+        "full_cost_graph_sync": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 520.7540513947606,
+              "cuda_event_microseconds_per_call": 520.5526351928711
+            },
+            {
+              "wall_microseconds_per_call": 549.6006086468697,
+              "cuda_event_microseconds_per_call": 545.1430511474609
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 535.1773300208151,
+            "median": 535.1773300208151,
+            "min": 520.7540513947606,
+            "max": 549.6006086468697
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 532.847843170166,
+            "median": 532.847843170166,
+            "min": 520.5526351928711,
+            "max": 545.1430511474609
+          }
+        },
+        "prepare_queued": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 34.3781802803278,
+              "cuda_event_microseconds_per_call": 34.30560111999512
+            },
+            {
+              "wall_microseconds_per_call": 39.764679968357086,
+              "cuda_event_microseconds_per_call": 39.695680141448975
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 37.07143012434244,
+            "median": 37.07143012434244,
+            "min": 34.3781802803278,
+            "max": 39.764679968357086
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 37.000640630722046,
+            "median": 37.000640630722046,
+            "min": 34.30560111999512,
+            "max": 39.695680141448975
+          }
+        },
+        "reducer_original_queued": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 108.16338006407022,
+              "cuda_event_microseconds_per_call": 102.61311531066895
+            },
+            {
+              "wall_microseconds_per_call": 110.45780032873154,
+              "cuda_event_microseconds_per_call": 110.3660774230957
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 109.31059019640088,
+            "median": 109.31059019640088,
+            "min": 108.16338006407022,
+            "max": 110.45780032873154
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 106.48959636688232,
+            "median": 106.48959636688232,
+            "min": 102.61311531066895,
+            "max": 110.3660774230957
+          }
+        },
+        "reducer_graph_queued": {
+          "round_measurements": [
+            {
+              "wall_microseconds_per_call": 58.63836966454983,
+              "cuda_event_microseconds_per_call": 58.498239517211914
+            },
+            {
+              "wall_microseconds_per_call": 60.53874734789133,
+              "cuda_event_microseconds_per_call": 60.482239723205566
+            }
+          ],
+          "wall_microseconds_per_call": {
+            "count": 2,
+            "mean": 59.58855850622058,
+            "median": 59.58855850622058,
+            "min": 58.63836966454983,
+            "max": 60.53874734789133
+          },
+          "cuda_event_microseconds_per_call": {
+            "count": 2,
+            "mean": 59.49023962020874,
+            "median": 59.49023962020874,
+            "min": 58.498239517211914,
+            "max": 60.482239723205566
+          }
+        }
+      }
+    }
+  ],
+  "gpu_load_after": {
+    "available": true,
+    "gpus": [
+      {
+        "index": 0.0,
+        "utilization.gpu": 76.0,
+        "utilization.memory": 26.0,
+        "memory.used": 41966.0,
+        "memory.total": 81559.0,
+        "power.draw": 202.8,
+        "clocks.sm": 1740.0
+      },
+      {
+        "index": 1.0,
+        "utilization.gpu": 99.0,
+        "utilization.memory": 3.0,
+        "memory.used": 24441.0,
+        "memory.total": 81559.0,
+        "power.draw": 107.04,
+        "clocks.sm": 1755.0
+      }
+    ]
+  },
+  "runtime_sources_unchanged": true,
+  "valid_run": true
+}

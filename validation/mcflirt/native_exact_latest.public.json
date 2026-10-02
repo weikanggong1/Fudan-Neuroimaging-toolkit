@@ -1,0 +1,140 @@
+{
+  "status": "complete",
+  "native_tool": "FSL MCFLIRT",
+  "package_metadata": [
+    {
+      "name": "fsl-mcflirt",
+      "version": "2111.0",
+      "build": "h465c9ab_11",
+      "sha256": "dadac722951f869e918513807a189d243fb4b1faa8c63f382530cf35c72926d8"
+    }
+  ],
+  "fsl_version": "6.0.7.22",
+  "native_executable_sha256": "e5fbe9be9dbd4f1ae027a9e8fd38ea41e8507e45fbc1aedb36550c11fb5302cb",
+  "native_executable_unchanged": true,
+  "launcher_sha256": "7493a307090a96aa2b254a61b73186013db4378c36bf7443b1ea3acc18d00fd0",
+  "input_sha256": {
+    "bold": "67717caaa823141c6e59d46db52e92deb4419d232ba699c399c69eb8888a0e92",
+    "reference": "98cb4261e0bcd3b058a989c49e0a8bda66d8ba76be1385a3e23289e9cc9e1162"
+  },
+  "real_input_shape": [
+    88,
+    88,
+    64,
+    490
+  ],
+  "input_dtype": "uint16",
+  "reference_pixdim_float32_bits": [
+    1075362351,
+    1075362351,
+    1075419544
+  ],
+  "stages": 3,
+  "interpolation": "spline_final",
+  "cost": "normcorr",
+  "dof": 6,
+  "threads_environment": {
+    "OMP_NUM_THREADS": 8,
+    "OPENBLAS_NUM_THREADS": 8,
+    "MKL_NUM_THREADS": 8
+  },
+  "gpu_used": false,
+  "exit_code": 255,
+  "wall_seconds": 331.53501696605235,
+  "timing_scope": "Independent native subprocess: startup, input read/decompression, reference preparation, all three optimization stages, final spline sampling, MAT/par serialization, int32 cast and corrected NIfTI write. Pre-run hashes and post-run integrity checks are excluded.",
+  "markers_elapsed_seconds": {
+    "reading_time_series": 0.09797728201374412,
+    "first_stage_8mm": 5.873787839896977,
+    "second_stage_4mm": 10.370756213087589,
+    "third_stage_4mm": 34.99000706197694,
+    "saving_corrected_time_series": 185.570326148998
+  },
+  "steps_seconds_observed_from_report_messages": {
+    "startup_before_read_message": 0.09797728201374412,
+    "input_read_and_initial_matrices": 5.775810557883233,
+    "first_stage_reference_prepare_and_estimation": 4.496968373190612,
+    "second_stage_reference_prepare_and_estimation": 24.61925084888935,
+    "third_stage_estimation_final_sampling_and_mat_par_writes": 150.58031908702105,
+    "final_display_range_dtype_nifti_write_and_exit": 145.96469081705436
+  },
+  "step_timing_note": "Stage boundaries are timestamped when unbuffered stderr report messages reach the pipe. They are observational intervals. Stage 3, final sampling and MAT/par serialization have no separating message and remain one combined interval; no pure native optimizer or sampler timing is inferred.",
+  "reporting_flags": [
+    "-report",
+    "-verbose",
+    "1"
+  ],
+  "corrected_output": {
+    "exists": true,
+    "shape": [
+      88,
+      88,
+      64,
+      490
+    ],
+    "dtype": "int32",
+    "finite": true,
+    "grid_matches_reference": true,
+    "sha256": "210cf3f0bbf7d643e90bb482ce12adce4f2b6a430ec0024e8dfe97d23960285a",
+    "gzip_crc_and_size_validated": true
+  },
+  "matrices": {
+    "files": 490,
+    "complete": true,
+    "finite": true,
+    "sha256_frame_order": "fc4456eedc8927cd58565cb5ddcb14d6dcd707bb8f4e1f90d9d2cf4427f15730"
+  },
+  "parameters": {
+    "shape": [
+      490,
+      6
+    ],
+    "finite_full490": true,
+    "sha256": "1e9adb9030233af58261a87c19f121bf3c20d64125fda559a14e3a196a2036c6"
+  },
+  "privacy": "All images, matrices, parameters and timestamped stdout remain private on the server; this report contains anonymous scalar aggregates and hashes only.",
+  "valid_run": false,
+  "completed_outputs": true,
+  "command_exit_ok": false,
+  "usable_for_numerical_comparison": true,
+  "wrapper_exit_diagnostic": {
+    "diagnostic_scope": "One real raw BOLD frame, one optimization stage; exit-code diagnosis only, not performance benchmark",
+    "outer_exit_code": 255,
+    "corrected_exists": true,
+    "stdout_contains_error": false,
+    "embedded_payload_offset": 8407,
+    "embedded_payload_sha256": "75a193562149cdb9e5b552e37738f0c07b0f907fd9261fb9b49ca5d0a9756ffe",
+    "cpp_child_exit_code_observed": 0,
+    "first_wait_child_exit_code": 0,
+    "second_wait_error": "ECHILD",
+    "outer_wrapper_exit_argument": -1,
+    "diagnostic_trace_sha256": "37383942e56bd9abdc005667d42dd85e4b16fbc7740b8487e447e799d0b35801"
+  },
+  "wrapper_exit_note": "The installed ELF wrapper embeds the C++ executable. A separate real-frame diagnostic observes the child exit status, then a repeated wait4 returning ECHILD followed by wrapper exit(-1). Full-run child exit status was not traced; original full-run exit255 and valid_run=false are retained.",
+  "linked_fsl_package_metadata": [
+    {
+      "name": "fsl-newimage",
+      "version": "2601.0",
+      "build": "h541c7df_0",
+      "sha256": "7e27e07cc37de25b435458a3232e0759dfb92ac67c55fa1388bc0171f4ac3c99"
+    },
+    {
+      "name": "fsl-miscmaths",
+      "version": "2412.6",
+      "build": "hd7ab901_3",
+      "sha256": "36b7a485161d1e436d31cf99afabb6eef008815f325d31ccf9f75637f5f6f449"
+    },
+    {
+      "name": "fsl-utils",
+      "version": "2412.6",
+      "build": "hdf63e7b_1",
+      "sha256": "b6616878217f97dc07aa1358e7282b66e1b18c1236725ca0afe264d01c93b9e0"
+    }
+  ],
+  "thread_observation_note": "OMP/OpenBLAS/MKL env were set to 8. The sampled PID was the one-thread outer ELF wrapper; the actual C++ child thread peak was not captured.",
+  "native_source_provenance": {
+    "installed_mcflirt_source_sha256": "29200cd7e178a4a7a3e54088d59121f80d29d04dc14909ee27ec9d913c25d479",
+    "build_git_commit": "fa24cb88fba970fb9adc959713fee57bf3706d3e",
+    "source_tag": "2111.0",
+    "embedded_cpp_payload_sha256": "75a193562149cdb9e5b552e37738f0c07b0f907fd9261fb9b49ca5d0a9756ffe"
+  }
+}

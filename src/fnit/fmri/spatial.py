@@ -71,11 +71,20 @@ def apply_motion_warp(
 
         data = np.asarray(image.dataobj, dtype=np.float32)
         output = np.empty((*target.shape[:3], image.shape[3]), dtype=np.float32)
+        frame_sampler = None
+        if device.type == "cuda" and interpolation == "spline":
+            from ..mcflirt._sampling_cuda import CudaMotionFrameSampler
+
+            frame_sampler = CudaMotionFrameSampler(
+                image, target, device=device, interpolation=interpolation)
         for frame, matrix in enumerate(matrices):
-            output[..., frame] = sample_motion_frame(
-                data[..., frame], image, target, matrix, device=device,
-                interpolation=interpolation,
-            ).cpu().numpy()
+            if frame_sampler is not None:
+                output[..., frame] = frame_sampler.sample_numpy(data[..., frame], matrix)
+            else:
+                output[..., frame] = sample_motion_frame(
+                    data[..., frame], image, target, matrix, device=device,
+                    interpolation=interpolation,
+                ).cpu().numpy()
         header = target.header.copy()
         header.set_data_dtype(np.float32)
         result = nib.Nifti1Image(output, target.affine, header)
