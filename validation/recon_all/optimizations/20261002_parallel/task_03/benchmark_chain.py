@@ -20,7 +20,7 @@ from fnit.recon_all.wm_edits_gpu import fix_ento_wm_gpu
 from fnit.recon_all.wm_edits_python import fix_ento_wm as fix_ento_wm_cpu
 
 def sha(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest()
-def geometry(image):return {'shape':list(image.shape),'affine':image.affine.tolist(),'dtype':str(image.get_data_dtype())}
+def geometry(image):return {'shape':[int(value) for value in image.shape],'affine':image.affine.tolist(),'dtype':str(image.get_data_dtype())}
 def compare_volume(actual,reference,labels=False):
  x,y=nib.load(str(actual)),nib.load(str(reference));a,b=np.asarray(x.dataobj),np.asarray(y.dataobj)
  same=a.shape==b.shape and np.array_equal(x.affine,y.affine)
@@ -39,7 +39,10 @@ reference=args.root/'serial_20261001'/args.case/'mri';assets=args.root/'assets';
 snapshot=Path(__file__).resolve().parents[5]/'source_commit.txt'
 actual_commit=snapshot.read_text().strip() if snapshot.exists() else args.commit
 report={'commit':actual_commit,'dispatch_commit':args.commit,'case':args.case,'host':platform.node(),'pid':os.getpid(),'scope':'FNIT_frozen_prefix_continuous_GCA_to_filled_not_raw_T1_whole','overall_equivalence':'not_assessed','tolerance_declared':0,'gpu_uuid':os.environ['CUDA_VISIBLE_DEVICES'],'threads':{k:os.environ.get(k) for k in ('OMP_NUM_THREADS','MKL_NUM_THREADS','OPENBLAS_NUM_THREADS','NUMBA_NUM_THREADS')},'cpu_affinity':sorted(os.sched_getaffinity(0)),'torch_version':torch.__version__,'input_sha256':{},'resource_sha256':{},'binary_sha256':{},'stages':[],'gpu_samples':[],'comparison':{},'execution_complete':False}
-def save(): (args.output/'report.json').write_text(json.dumps(report,indent=2)+'\n')
+def json_scalar(value):
+ if isinstance(value,np.generic):return value.item()
+ raise TypeError('unsupported report value: '+type(value).__name__)
+def save(): (args.output/'report.json').write_text(json.dumps(report,indent=2,default=json_scalar)+'\n')
 # Frozen side inputs are all previously self-produced; no intermediate result is copied.
 for name in ('nu.mgz','brainmask.mgz','synthseg.rca.mgz','transforms/talairach.xfm.lta'):
  source=reference/name;report['input_sha256'][name]=sha(source);shutil.copyfile(source,mri/name)
