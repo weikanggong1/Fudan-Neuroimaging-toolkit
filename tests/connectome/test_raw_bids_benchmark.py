@@ -220,7 +220,7 @@ def test_checkpoints_stream_real_paths_and_preserve_dtype_affine(tmp_path):
 
 
 @pytest.mark.parametrize("mode", ("wall", "diagnostic"))
-def test_tracking_checkpoint_uses_actual_bound_inputs_after_stage(tmp_path, monkeypatch, mode):
+def test_tracking_checkpoint_uses_actual_bound_inputs_before_stage(tmp_path, monkeypatch, mode):
     module = tool()
     bids, pipeline, _ = fake_modules()
     returned = SimpleNamespace(actual="original tracking result")
@@ -231,6 +231,8 @@ def test_tracking_checkpoint_uses_actual_bound_inputs_after_stage(tmp_path, monk
                  seed=0, batch_size=8192, arc_proposals=16, max_length_mm=250.,
                  min_length_mm=None, step_mm=None, max_angle_degrees=45.,
                  cutoff=0.1, power=0.5, compile_arc=False):
+        assert (tmp_path / "checkpoints" / "tracking_inputs.pt").exists() == (mode == "diagnostic")
+        assert not (tmp_path / "checkpoints" / "tracking_inputs.pt.tmp").exists()
         calls.append(n_seeds)
         return returned
 
@@ -246,8 +248,8 @@ def test_tracking_checkpoint_uses_actual_bound_inputs_after_stage(tmp_path, monk
     spacing = tuple(np.float32(value) for value in (0.9, 1.1, 1.3))
     checkpoint_dir = tmp_path / "checkpoints"
     extra = ("--checkpoint-dir", str(checkpoint_dir)) if mode == "diagnostic" else ()
-    # Four clocks: stage start/stop, then checkpoint start/stop.
-    clocks = iter((10., 12., 20., 25.))
+    # Checkpoint first, then stage start/stop: exporting is not tracking time.
+    clocks = iter((20., 25., 10., 12.))
     monkeypatch.setattr(module, "time", SimpleNamespace(perf_counter=lambda: next(clocks)))
     with module.Measure(SimpleNamespace(cuda=CUDA()), bids, pipeline,
                         options(module, tmp_path, mode=mode, extra=extra)) as measure:

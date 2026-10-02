@@ -4,6 +4,8 @@
 
 `TorchFLIRT` 在 FNIT 内实现单被试线性配准和已知线性变换的重采样。运行时主要依赖 PyTorch、NumPy 和 nibabel，CUDA 批量 NMI 另需 Conda 环境已包含的 Triton；不调用 FSL。FSL 只用于离线对照；本次 GPU 优化重新核验的官方版本为 6.0.7.22，较早对照使用的版本保留在各自报告中。
 
+2026-10-02 的公开 raw connectome 评测发现：直接读取官方 `recon-all` 的 `brain.mgz` 时，旧输出函数调用了 MGH 不存在的 NIfTI qform/sform 接口，配准求解完成后报错。现将 MGH 的 scanner RAS affine 写入输出 NIfTI 的 qform/sform（code 1），保留参考体素尺寸。搜索、代价函数、矩阵和重采样计算不变，原 NIfTI 头规则保留。真实输入验证记录待本轮实验完成后补齐。
+
 当前公开接口支持以下模式：
 
 - `dof=12, cost="corratio"`：12 自由度仿射配准，对应 FSL `flirt -dof 12 -cost corratio`；

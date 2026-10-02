@@ -391,7 +391,9 @@ class Checkpoints:
             }
             payload["explicit_arguments"] = explicit
             path = self.directory / "tracking_inputs.pt"
-            torch.save(payload, path)
+            temporary = path.with_suffix(".pt.tmp")
+            torch.save(payload, temporary)
+            temporary.replace(path)
             self.paths.append(path)
         self._write(write)
 
@@ -452,9 +454,11 @@ class Measure:
         if self.device.startswith("cuda") and self.torch.cuda.is_initialized():
             self.torch.cuda.synchronize(self.device)
 
-    def timed(self, name, function, after=None):
+    def timed(self, name, function, after=None, before=None):
         @functools.wraps(function)
         def measured(*args, **kwargs):
+            if before is not None:
+                before(args, kwargs)
             self.synchronize()
             started = time.perf_counter()
             status = "completed"
@@ -498,8 +502,6 @@ class Measure:
         elif name == "normalise_mrtrix_three_tissue":
             bound = inspect.signature(function).bind_partial(*args, **kwargs).arguments
             cp.image("normalise_mask.nii.gz", bound["mask"])
-        elif name == "probabilistic_tractography":
-            cp.tracking_inputs(function, args, kwargs)
 
     def __enter__(self):
         try:
@@ -559,7 +561,12 @@ class Measure:
                 continue  # The same tool can measure older and newer FNIT checkouts.
             original = getattr(self.pipeline, name)
             after = functools.partial(self._after_stage, name, original)
-            self.stack.enter_context(patch.object(self.pipeline, name, self.timed(name, original, after)))
+            before = None
+            if name == "probabilistic_tractography" and self.checkpoints.directory is not None:
+                def before(args, kwargs, function=original):
+                    self.checkpoints.tracking_inputs(function, args, kwargs)
+            self.stack.enter_context(patch.object(self.pipeline, name,
+                self.timed(name, original, after, before)))
         original_core = self.pipeline.UKBConnectome_pipeline.__call__
         def core_after(result, args, kwargs):
             self.checkpoints.core(result)
