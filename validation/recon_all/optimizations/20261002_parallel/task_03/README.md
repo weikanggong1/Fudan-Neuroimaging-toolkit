@@ -51,7 +51,7 @@ edited_voxel_count = fix_ento_wm_gpu(
 
 缓存对应单一 source/sample 快照；任一变化必须重建 scorer。固定评分只支持当前 2 voxel prior 间距的单通道 T1；其他图谱间距或多输入不支持。方差、先验必须为正，坐标/密度有限且非空；候选必须为有限非奇异 affine。CPU 工作区为 `candidate_chunk × N × 8` 字节，GPU 主要工作区按两维分块控制。空间重采样不属于此接口。
 
-WM 输入与标签必须同一 3D 网格，affine 差异不超过既有 1e-4 mm 门槛；缺文件、网格错误、CUDA 故障直接报错。`amygdala_cortex_junction_gpu` 输入 3D 整数 CUDA 张量，返回同设备、同网格 int32 的 7030/7031 标签。WM 文件入口返回实际指定覆盖的体素数，读写使用 nibabel。
+MGH 多字节存储在上传前转换为本机字节序，数值与输出 dtype 不变；已完成 WM v2 实测为 uint8。WM 输入与标签必须同一 3D 网格，affine 差异不超过既有 1e-4 mm 门槛；缺文件、网格错误、CUDA 故障直接报错。`amygdala_cortex_junction_gpu` 输入 3D 整数 CUDA 张量，返回同设备、同网格 int32 的 7030/7031 标签。WM 文件入口返回实际指定覆盖的体素数，读写使用 nibabel。
 
 ## 命令行与原软件
 

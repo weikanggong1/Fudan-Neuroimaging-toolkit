@@ -29,16 +29,19 @@ try:
    if mode=='candidate':env['FNIT_GCA_SCORER']='cpu_cached'
    with (a.output/(case+'_'+mode+'.log')).open('w') as log:
     tick=time.perf_counter();process=subprocess.Popen(command,env=env,stdout=log,stderr=subprocess.STDOUT)
-    samples=[]
+    samples=[];runtime_libraries=[]
     while process.poll() is None:
      try:
       status=Path('/proc')/str(process.pid)/'status'
+      if not runtime_libraries:
+       lines=(Path('/proc')/str(process.pid)/'maps').read_text().splitlines()
+       runtime_libraries=sorted({line.split()[-1] for line in lines if any(key in line for key in ('libomp','libgomp','libblas','libopenblas','libitkvnl'))})
       values={key:value.strip() for line in status.read_text().splitlines() if ':' in line for key,value in [line.split(':',1)]}
       samples.append({'time':time.time(),'threads':int(values['Threads']),'rss_kib':int(values['VmRSS'].split()[0])})
      except (FileNotFoundError,KeyError):pass
      time.sleep(.5)
     returncode=process.wait()
-   row['runs'].append({'backend':mode,'seconds_including_io':time.perf_counter()-tick,'returncode':returncode,'native_pid':process.pid,'thread_rss_samples':samples,'environment_threads':{key:env.get(key) for key in ('OMP_NUM_THREADS','MKL_NUM_THREADS','OPENBLAS_NUM_THREADS','NUMBA_NUM_THREADS')},'output_sha256':sha(output) if output.exists() else None})
+   row['runs'].append({'backend':mode,'seconds_including_io':time.perf_counter()-tick,'returncode':returncode,'native_pid':process.pid,'mapped_runtime_libraries':runtime_libraries,'thread_rss_samples':samples,'environment_threads':{key:env.get(key) for key in ('OMP_NUM_THREADS','MKL_NUM_THREADS','OPENBLAS_NUM_THREADS','NUMBA_NUM_THREADS')},'output_sha256':sha(output) if output.exists() else None})
    if returncode:raise RuntimeError('native stage failed; inspect task log')
    (a.output/'report.json').write_text(json.dumps(report,indent=2)+'\n')
   before=lta(a.output/(case+'_baseline.lta'));after=lta(a.output/(case+'_candidate.lta'))

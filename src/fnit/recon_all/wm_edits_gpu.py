@@ -66,7 +66,10 @@ def fix_ento_wm_gpu(input_file: str | Path, label_file: str | Path,
     if (image.shape!=labels.shape or len(image.shape)!=3 or
         not np.allclose(image.affine,labels.affine,rtol=0,atol=1e-4)):
         raise ValueError('Input and label volumes must share a 3D grid')
-    voxels=torch.tensor(np.asarray(image.dataobj),device=device)
+    # MGH multi-byte storage is big-endian; torch requires native byte order.
+    source=np.asarray(image.dataobj)
+    source=source.astype(source.dtype.newbyteorder('='),copy=False)
+    voxels=torch.tensor(source,device=device)
     segmentation=torch.tensor(np.asarray(labels.dataobj).astype(np.int32),device=device)
     if acj: segmentation=amygdala_cortex_junction_gpu(segmentation)
     left=torch.zeros(image.shape,dtype=torch.bool,device=device)
