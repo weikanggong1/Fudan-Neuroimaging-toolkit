@@ -122,7 +122,8 @@ python validation/recon_all/optimizations/20261002_parallel/validate_installatio
 
 `run_installed_candidate.py` 只用于本轮验证。它等待私有原生安装的
 `status.json=passed`，逐项检查15个程序的路径与SHA；13个复用程序必须与
-基线相同，GCA与white快速程序绑定实际重编和安装后的SHA。最终wheel的171个
+基线相同，GCA绑定实际重新编译后的SHA；white快速程序复用任务2已验证的独立源码构建
+产物，记录重定位前后SHA。最终wheel的171个
 recon-all Python文件必须已逐SHA匹配冻结源码；运行入口指向安装目标目录。
 随后在同一个主机锁内验证实际能力选择和输入、权重、资产，并复用整例队列。
 
@@ -150,7 +151,7 @@ API/CLI调用方式、精度和执行状态；不符合时明确失败。输出�
 候选私有拷贝、发布、依赖串行收尾也计入对应范围。worker耗时不重复求和。
 
 ```bash
-# 两例完整命令与阶段报告均已回收；输出目录必须不存在。
+# 两例baseline与candidate完成并回收后执行；输出目录必须不存在。
 python validation/recon_all/optimizations/20261002_parallel/summarize_performance.py \
   --reports validation/recon_all/optimizations/20261002_parallel/whole \
   --output validation/recon_all/optimizations/20261002_parallel/whole/performance

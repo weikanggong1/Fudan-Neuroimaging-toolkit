@@ -1,7 +1,7 @@
 # recon-all 性能候选的生产接入
 
 本轮整例接口继续读取一份原始 T1，在空被试目录生成标准 MRI、双侧表面、
-顶点图、注释和统计。五个专属分支已合并，候选 Python wheel 已在主页 Conda 环境安装并核对171个
+顶点图、注释和统计。五个专属分支已合并，候选 Python wheel 复用主页 Conda 依赖，安装到私有target目录，已核对171个
 recon-all源码文件。原始 T1 整例总提速尚未测出；冻结阶段或 MRI 前缀表面链
 不能代替整例。
 
@@ -15,7 +15,7 @@ report = run_recon_all_python(
     subject_dir="/data/fnit/sub-01",  # 新空输出目录；失败保留已产生的诊断
     weights_dir="/data/fnit_weights",  # 已按资源清单验证大小和SHA-256的权重
     assets_dir="/data/fnit_assets",  # GCA、表面图谱和模板，保持授权来源
-    native_bin_dir=None,  # 自动发现当前Conda的独立源码构建程序
+    native_bin_dir="/data/fnit-native/bin",  # 本轮用已核验的私有native bundle；正常安装可用None自动发现
     device="cuda:0",  # 明确目标设备；不自动启用FP16/BF16
     threads=4,  # 总线程预算；双半球各2线程
     hemisphere_workers=2,  # 独立exec和私有目录，保留共享文件发布顺序
@@ -60,7 +60,7 @@ python -m fnit.recon_all.native_free /data/sub-01_T1w.nii.gz /data/fnit/sub-01 \
 完整流程参考为 `recon-all -s SUBJECT -i T1 -all`。优化只是对应完整
 `mri_em_register` 和 `mris_place_surface --white` 内部的重复工作消除，
 没有独立等价的官方GPU命令；pial的完整命令参数见
-[原生pial说明](NATIVE_PIAL_PLACEMENT.md)。官方程序仅在benchmark路径运行。
+[原生pial说明](NATIVE_PIAL_PLACEMENT.md)。系统官方参考程序仅在benchmark路径运行；生产使用FNIT独立源码构建程序。
 
 ## 当前已测范围与剩余验证
 
