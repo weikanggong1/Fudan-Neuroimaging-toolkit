@@ -29,7 +29,7 @@ white 程序在原完整构建之后，只重编 `mrisurf_mri.cpp` 和带能力�
 
 本轮另修复成熟 white 构建 helper 的实际输出副作用：旧 helper 保留 `-Wl,-Map,ld_map.txt`，在原构建目录执行链接时会覆盖那里已有的诊断 map。现在先解析 `build/source/output` 的绝对路径，再把 map 写到该候选的 `output/ld_map.txt`。函数参数、编译和链接标志、输入对象与运行算法保持兼容；改变的是诊断文件地址。协调者已通过一项逐文件检查原 build 未改变的副作用 mock 回归；它不代替实际 C++ 编译或影像 benchmark。
 
-服务器已部署的 `1dd6df8` 仍使用旧 helper。本轮私有安装验证在调用它时，将实际链接 argv 中的唯一 map 输出改为 `private_install_v1/white_build/ld_map.txt`，并保留原 helper SHA 和实际命令，见 [安装验证报告](../../validation/recon_all/optimizations/20261002_parallel/root_install/REPORT.md)。
+服务器已部署的 `1dd6df8` 仍使用旧 helper。最初私有 white 重编计划将 map 重定向到 `private_install_v1/white_build/ld_map.txt`；该阶段等待锁期间尚未启动计算，随后被已授权的自建产物复用替代，记录为 `superseded_not_run`。实际 bundle 复用 task02 已通过真实阶段回归的独立 Conda 构建，不再执行 white 编译或链接；原 helper、固定源码、原链接 archive、完整编译/链接 argv 和程序 SHA 均重新核验，见 [安装验证报告](../../validation/recon_all/optimizations/20261002_parallel/root_install/REPORT.md)。
 
 ## 2. 主页 Conda 安装调用
 
@@ -125,6 +125,10 @@ GCA 返回 `version=2`、`full_native_em=true`、`reduction=upstream_ROMP_partia
 | pial 使用同一热点 | 当前/候选 181.396/188.863 秒，慢 4.1%，完整产物精确。 | 保留原 pial 程序；不将 white 收益外推到 pial。 |
 
 2026-10-02 安装补丁版本：`native-hotspots-20261002-v1`，包含 `gca-cachev3-capability2` 和 `white-unused-face-mht-v1`。此前 GCA v1/v2 的普通规约候选不启用。上述结果绑定各自原始报告，不改标成这份安装器的新构建结果；当前安装构建、两例原始 T1 整例和 138 项严格诊断须由协调者另行验收，阶段收益不能相加。
+
+当前安装验收已在 gpucw1 完成最终 `8d750e2` 的 wheel 构建、私有 target 安装、CLI 和七项 API 导入；171 个安装后的 recon-all Python 文件与冻结源码 SHA 完全相同，GCA helper/header 和实际 FastPD 扩展随 wheel 安装。固定 FreeSurfer archive/tree 也已实核 SHA。私有原生 bundle 于 UTC 2026-10-02 16:21:18 实际通过：本轮重编 GCA，复用 task02 独立固定源码 white 候选，另外 13 个程序复用原独立 Conda 构建且 SHA 不变；pial 保留原程序。能力查询、私有 RPATH、缺库检查和 15 项安装 SHA 均通过；详见 [安装验证报告](../../validation/recon_all/optimizations/20261002_parallel/root_install/REPORT.md)。
+
+white 原二进制 SHA 为 `88b09e3cff560e2ef09cddf16213a34540b09f72c7b66723da0de1fa5c9ab1db`，调整 RPATH 后安装 SHA 为 `c99fd5ffdaa6c65219272cd94211fd45c59fafc19b8750917e53bae29a7d6e02`。实际原链接输入来自 `$CONDA_PREFIX/share/fnit/recon_all_native_full/build/utils/libutils.a`，SHA 为 `e682f769892616f4cdbe35168017808bad4eb7b2aab8c802c120eca87184d8ad`；它与另一个 codeload-probe 构建 archive 不同，清单保留各自实际来源。`rebuilt=false`、`reused_kind=task02_independent_fixed_source_conda`、`rpath_adjusted=true` 明确记录本次操作。完整新 Conda 环境、全部原生组件正向 setup 和无预装软件的物理隔离尚未验收；这些安装检查不代替影像精度和整例性能验收。
 
 ## 6. 原软件调用、许可证与参考
 
