@@ -1,0 +1,3370 @@
+{
+  "dataset": "OpenNeuro ds001226 frozen fb4d0fda44f2ab7a732fb4ab6cd62add09dc1cd7; new-download pilot CON03",
+  "contract_status": "passed",
+  "scientific_parity": "not_assessed_by_contract_audit",
+  "scope": "CPU read-only existing artifacts; no official command or GPU operation; no geometry/scientific tolerance added",
+  "manifest_path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_repeats_CON03_v2/reference_manifest.json",
+  "manifest_sha256": "2fd3b5aaba70c460cff0eaa33d23fb580c5136deda0865696d3ffa3c3076fdfb",
+  "tracking_input_sha256": "35fc586482c2366ae4cbf0b4360356fbc0e255e221b8def92d9555960275f07b",
+  "parameters": {
+    "n_seed_attempts": 100000,
+    "step_mm": 1.2500000175865187,
+    "min_length_mm": 5.000000070346075,
+    "max_length_mm": 250.0,
+    "max_angle_degrees": 45.0,
+    "cutoff": 0.1,
+    "power": 0.5,
+    "samples": 3,
+    "tracking_threads": 0,
+    "fnit_batch_size": 8192,
+    "fnit_compile_arc": false,
+    "fnit_seed": 0,
+    "fnit_tracking_kwargs": {
+      "n_seeds": 100000,
+      "lmax": 8,
+      "five_tissue_spacing_mm": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "seed": 0,
+      "batch_size": 8192,
+      "arc_proposals": 16,
+      "max_length_mm": 250.0,
+      "min_length_mm": null,
+      "step_mm": null,
+      "max_angle_degrees": 45.0,
+      "cutoff": 0.1,
+      "power": 0.5,
+      "compile_arc": false
+    },
+    "rng_policy": "MRTRIX_RNG_SEED controls official RNG; equal integer seeds do not imply equal PyTorch random streams",
+    "unchanged_mrtrix_defaults": {
+      "trials": 1000,
+      "max_attempts_per_seed": 1000,
+      "downsample": 2
+    },
+    "act_options": "no backtrack, crop_at_gmwmi, mask or additional stop constraints"
+  },
+  "mrtrix_version": "== tckgen 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): J-Donald Tournier (jdtournier@gmail.com) and Robert E. Smith (robert.smith@florey.edu.au)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.",
+  "program_sha256_verified": true,
+  "programs": {
+    "mrinfo": {
+      "path": "/public/software/apps/MRtrix3/3.0.3/bin/mrinfo",
+      "invoked_path": "/public/software/apps/MRtrix3/3.0.3/bin/mrinfo",
+      "sha256": "c8b583a5791bb9e4aefaba85ac19df30fd1b77ae37dee842c0b1a8195e037e53"
+    },
+    "tckgen": {
+      "path": "/public/software/apps/MRtrix3/3.0.3/bin/tckgen",
+      "invoked_path": "/public/software/apps/MRtrix3/3.0.3/bin/tckgen",
+      "sha256": "4c0230d1277290faf0920c4aff000fecbaab82f85980be887bfc8ee8f41e3602"
+    },
+    "tckinfo": {
+      "path": "/public/software/apps/MRtrix3/3.0.3/bin/tckinfo",
+      "invoked_path": "/public/software/apps/MRtrix3/3.0.3/bin/tckinfo",
+      "sha256": "f6e3d4ae493c51259f4f6ae40f2fff7d0ee9d2b851b5b76ce2b012dc83ae44d9"
+    },
+    "tcksift2": {
+      "path": "/public/software/apps/MRtrix3/3.0.3/bin/tcksift2",
+      "invoked_path": "/public/software/apps/MRtrix3/3.0.3/bin/tcksift2",
+      "sha256": "a9c3a3046cea1daa13dd12268aeaa6b78a51debd1a8c9838c2d2413b29ae3f0e"
+    },
+    "tckstats": {
+      "path": "/public/software/apps/MRtrix3/3.0.3/bin/tckstats",
+      "invoked_path": "/public/software/apps/MRtrix3/3.0.3/bin/tckstats",
+      "sha256": "be9da2c627cf75c118952971dd3f558797b10dedc0c5bb52d9b5fc6cd5f4cd96"
+    },
+    "tcksample": {
+      "path": "/public/software/apps/MRtrix3/3.0.3/bin/tcksample",
+      "invoked_path": "/public/software/apps/MRtrix3/3.0.3/bin/tcksample",
+      "sha256": "1e1ef42b4763a54079339b72115bcff85947676b5793462572af48a4490f5f5f"
+    },
+    "tck2connectome": {
+      "path": "/public/software/apps/MRtrix3/3.0.3/bin/tck2connectome",
+      "invoked_path": "/public/software/apps/MRtrix3/3.0.3/bin/tck2connectome",
+      "sha256": "58761cbb76619a70e6c31fefc35df5557967a2acd8a989e06884b6334249d2c8"
+    }
+  },
+  "reference_script_sha256_verified": true,
+  "reference_helper_sha256_verified": true,
+  "planned_commands": 198,
+  "completed_commands": 198,
+  "all_exit_zero": true,
+  "command_stages": {
+    "input_readback": 13,
+    "tracking": 5,
+    "track_count": 5,
+    "sift2": 5,
+    "length": 5,
+    "fa": 5,
+    "matrix_count": 40,
+    "matrix_sift2_fbc": 40,
+    "matrix_mean_length": 40,
+    "matrix_mean_fa": 40
+  },
+  "input_contracts": {
+    "wm_fod": {
+      "voxel_bits_equal": true,
+      "sform_3x4_bits_equal": true,
+      "source_affine_serialization": {
+        "source_dtype": "float64",
+        "source_bottom_row": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "implicit_file_bottom_row": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "bottom_row_max_abs_difference": 0.0,
+        "machine_epsilon": 2.220446049250313e-16,
+        "machine_bound_gamma4": 8.88178419700126e-16,
+        "policy": "first 3x4 stored exactly in Float64 sform; bottom row implicit [0,0,0,1]; only dtype gamma_4 roundoff accepted"
+      },
+      "nonfinite_count": 0,
+      "readback_status": "header_source_shape_dtype_scaling_verified_geometry_recorded",
+      "reader_corner_difference_from_source_mm": 3.5753787487377407e-13,
+      "reader_corner_difference_from_fnit_operator_mm": 3.5753787487377407e-13,
+      "geometry_scope": "descriptive actual reader result; JSON numbers are serialized, not a bit-exact affine claim or a new scientific gate",
+      "source_voxel_to_world_affine": [
+        [
+          -2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          120.45989990234375
+        ],
+        [
+          -0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.40888977050781
+        ],
+        [
+          0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -64.85044860839844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "file_voxel_to_world_affine": [
+        [
+          -2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          120.45989990234375
+        ],
+        [
+          -0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.40888977050781
+        ],
+        [
+          0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -64.85044860839844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "fnit_effective_voxel_to_world_affine": [
+        [
+          -2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          120.45989990234375
+        ],
+        [
+          -0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.40888977050781
+        ],
+        [
+          0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -64.85044860839844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "decoded_voxel_to_world_affine": [
+        [
+          2.4994916915893524,
+          -1.204592194881113e-07,
+          0.050410829484462814,
+          -116.991810798645
+        ],
+        [
+          0.004988736938685171,
+          2.4877288341522195,
+          -0.24734780192375208,
+          -94.8828197796829
+        ],
+        [
+          -0.05016337707638723,
+          0.24739809334278068,
+          2.487222909927369,
+          -60.0849277861416
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "expected_reader_affine": [
+        [
+          2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          -116.99181079864502
+        ],
+        [
+          0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.8828197796829
+        ],
+        [
+          -0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -60.084927786141634
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "axis_mapping_to_source": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          95.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "mrinfo_json": {
+        "datatype": "Float32LE",
+        "format": "NIfTI-2 (GZip compressed)",
+        "intensity_offset": 0.0,
+        "intensity_scale": 1.0,
+        "keyval": null,
+        "name": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_repeats_CON03_v2/inputs/wm_fod.nii.gz",
+        "size": [
+          96,
+          96,
+          60,
+          45
+        ],
+        "spacing": [
+          2.49999999364403,
+          2.5000001137724,
+          2.49999999810268,
+          1.0
+        ],
+        "strides": [
+          -1,
+          2,
+          3,
+          4
+        ],
+        "transform": [
+          [
+            0.999796679177612,
+            -4.81836856024551e-08,
+            0.0201643318090884,
+            -116.991810798645
+          ],
+          [
+            0.00199549478054739,
+            0.995091488375309,
+            -0.0989391208445885,
+            -94.8828197796829
+          ],
+          [
+            -0.0200653508815688,
+            0.0989592328335805,
+            0.994889164725997,
+            -60.0849277861416
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "mrinfo_json_sha256": "8b65e22daff1593a1b98eafcd1af7e0bb6bbde7d847c3116bc3e553f9b819e5c"
+    },
+    "five_tissue_act": {
+      "voxel_bits_equal": true,
+      "sform_3x4_bits_equal": true,
+      "source_affine_serialization": {
+        "source_dtype": "float64",
+        "source_bottom_row": [
+          5.287035638734274e-19,
+          4.686440799766144e-18,
+          -4.6324608323135705e-19,
+          0.9999999999999994
+        ],
+        "implicit_file_bottom_row": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "bottom_row_max_abs_difference": 5.551115123125783e-16,
+        "machine_epsilon": 2.220446049250313e-16,
+        "machine_bound_gamma4": 8.88178419700126e-16,
+        "policy": "first 3x4 stored exactly in Float64 sform; bottom row implicit [0,0,0,1]; only dtype gamma_4 roundoff accepted"
+      },
+      "nonfinite_count": 0,
+      "readback_status": "header_source_shape_dtype_scaling_verified_geometry_recorded",
+      "reader_corner_difference_from_source_mm": 8.09116486489843e-06,
+      "reader_corner_difference_from_fnit_operator_mm": 3.8025655613465836e-13,
+      "geometry_scope": "descriptive actual reader result; JSON numbers are serialized, not a bit-exact affine claim or a new scientific gate",
+      "source_voxel_to_world_affine": [
+        [
+          -0.9998153783125217,
+          -0.01771516635583306,
+          -0.0074429692462565965,
+          131.148547630511
+        ],
+        [
+          -0.007100106100417342,
+          -0.01933907665654457,
+          0.9997877651189861,
+          -104.15260463472109
+        ],
+        [
+          0.017855348121046142,
+          -0.9996559972936799,
+          -0.01920973109309226,
+          118.68158247231464
+        ],
+        [
+          5.287035638734274e-19,
+          4.686440799766144e-18,
+          -4.6324608323135705e-19,
+          0.9999999999999994
+        ]
+      ],
+      "file_voxel_to_world_affine": [
+        [
+          -0.9998153783125217,
+          -0.01771516635583306,
+          -0.0074429692462565965,
+          131.148547630511
+        ],
+        [
+          -0.007100106100417342,
+          -0.01933907665654457,
+          0.9997877651189861,
+          -104.15260463472109
+        ],
+        [
+          0.017855348121046142,
+          -0.9996559972936799,
+          -0.01920973109309226,
+          118.68158247231464
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "fnit_effective_voxel_to_world_affine": [
+        [
+          -0.9998153704772829,
+          -0.01771516688790665,
+          -0.007442969295225802,
+          131.148547630511
+        ],
+        [
+          -0.007100106044776042,
+          -0.019339077237392175,
+          0.9997877716968465,
+          -104.15260463472109
+        ],
+        [
+          0.01785534798111939,
+          -0.9996560273182671,
+          -0.019209731219478013,
+          118.68158247231464
+        ],
+        [
+          5.287035638734274e-19,
+          4.686440799766144e-18,
+          -4.6324608323135705e-19,
+          0.9999999999999994
+        ]
+      ],
+      "decoded_voxel_to_world_affine": [
+        [
+          0.999815370477283,
+          -0.0074429692952258,
+          0.0177151668879066,
+          -128.321739397612
+        ],
+        [
+          0.00710010604477604,
+          0.999787771696847,
+          0.0193390772373922,
+          -110.894596371674
+        ],
+        [
+          -0.0178553479811194,
+          -0.019209731219478,
+          0.999656027318267,
+          -131.677590758658
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "expected_reader_affine": [
+        [
+          0.9998153704772829,
+          -0.007442969295225802,
+          0.01771516688790665,
+          -128.32173939761233
+        ],
+        [
+          0.007100106044776042,
+          0.9997877716968465,
+          0.019339077237392175,
+          -110.89459637167398
+        ],
+        [
+          -0.01785534798111939,
+          -0.019209731219478013,
+          0.9996560273182671,
+          -131.67759075865803
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "axis_mapping_to_source": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          255.0
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0,
+          255.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "mrinfo_json": {
+        "datatype": "Float32LE",
+        "format": "NIfTI-2 (GZip compressed)",
+        "intensity_offset": 0.0,
+        "intensity_scale": 1.0,
+        "keyval": null,
+        "name": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_repeats_CON03_v2/inputs/five_tissue_act.nii.gz",
+        "size": [
+          256,
+          256,
+          256,
+          5
+        ],
+        "spacing": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "strides": [
+          -1,
+          3,
+          -2,
+          4
+        ],
+        "transform": [
+          [
+            0.999815370477283,
+            -0.0074429692952258,
+            0.0177151668879066,
+            -128.321739397612
+          ],
+          [
+            0.00710010604477604,
+            0.999787771696847,
+            0.0193390772373922,
+            -110.894596371674
+          ],
+          [
+            -0.0178553479811194,
+            -0.019209731219478,
+            0.999656027318267,
+            -131.677590758658
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "mrinfo_json_sha256": "130546de4a89d745e7a874805de514f7b768df98f3b459ec2ba7fd4ae81d37ea"
+    },
+    "five_tissue_sift2": {
+      "voxel_bits_equal": true,
+      "sform_3x4_bits_equal": true,
+      "source_affine_serialization": {
+        "source_dtype": "float64",
+        "source_bottom_row": [
+          5.287035638734274e-19,
+          4.686440799766144e-18,
+          -4.6324608323135705e-19,
+          0.9999999999999994
+        ],
+        "implicit_file_bottom_row": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "bottom_row_max_abs_difference": 5.551115123125783e-16,
+        "machine_epsilon": 2.220446049250313e-16,
+        "machine_bound_gamma4": 8.88178419700126e-16,
+        "policy": "first 3x4 stored exactly in Float64 sform; bottom row implicit [0,0,0,1]; only dtype gamma_4 roundoff accepted"
+      },
+      "nonfinite_count": 0,
+      "readback_status": "header_source_shape_dtype_scaling_verified_geometry_recorded",
+      "reader_corner_difference_from_source_mm": 1.6967546294608042e-12,
+      "reader_corner_difference_from_fnit_operator_mm": 1.6967546294608042e-12,
+      "geometry_scope": "descriptive actual reader result; JSON numbers are serialized, not a bit-exact affine claim or a new scientific gate",
+      "source_voxel_to_world_affine": [
+        [
+          -0.9998153783125217,
+          -0.01771516635583306,
+          -0.0074429692462565965,
+          131.148547630511
+        ],
+        [
+          -0.007100106100417342,
+          -0.01933907665654457,
+          0.9997877651189861,
+          -104.15260463472109
+        ],
+        [
+          0.017855348121046142,
+          -0.9996559972936799,
+          -0.01920973109309226,
+          118.68158247231464
+        ],
+        [
+          5.287035638734274e-19,
+          4.686440799766144e-18,
+          -4.6324608323135705e-19,
+          0.9999999999999994
+        ]
+      ],
+      "file_voxel_to_world_affine": [
+        [
+          -0.9998153783125217,
+          -0.01771516635583306,
+          -0.0074429692462565965,
+          131.148547630511
+        ],
+        [
+          -0.007100106100417342,
+          -0.01933907665654457,
+          0.9997877651189861,
+          -104.15260463472109
+        ],
+        [
+          0.017855348121046142,
+          -0.9996559972936799,
+          -0.01920973109309226,
+          118.68158247231464
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "fnit_effective_voxel_to_world_affine": [
+        [
+          -0.9998153783125217,
+          -0.01771516635583306,
+          -0.0074429692462565965,
+          131.148547630511
+        ],
+        [
+          -0.007100106100417342,
+          -0.01933907665654457,
+          0.9997877651189861,
+          -104.15260463472109
+        ],
+        [
+          0.017855348121046142,
+          -0.9996559972936799,
+          -0.01920973109309226,
+          118.68158247231464
+        ],
+        [
+          5.287035638734274e-19,
+          4.686440799766144e-18,
+          -4.6324608323135705e-19,
+          0.9999999999999994
+        ]
+      ],
+      "decoded_voxel_to_world_affine": [
+        [
+          0.9998153783125261,
+          -0.007442969246256592,
+          0.017715166355833017,
+          -128.321741259919
+        ],
+        [
+          0.00710010610041737,
+          0.9997877651189863,
+          0.0193390766565446,
+          -110.894596237746
+        ],
+        [
+          -0.01785534812104623,
+          -0.01920973109309224,
+          0.9996559972936802,
+          -131.677583066707
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "expected_reader_affine": [
+        [
+          0.9998153783125217,
+          -0.0074429692462565965,
+          0.01771516635583306,
+          -128.3217412599195
+        ],
+        [
+          0.007100106100417342,
+          0.9997877651189861,
+          0.01933907665654457,
+          -110.89459623774637
+        ],
+        [
+          -0.017855348121046142,
+          -0.01920973109309226,
+          0.9996559972936799,
+          -131.67758306670697
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "axis_mapping_to_source": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          255.0
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0,
+          255.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "mrinfo_json": {
+        "datatype": "Float32LE",
+        "format": "NIfTI-2 (GZip compressed)",
+        "intensity_offset": 0.0,
+        "intensity_scale": 1.0,
+        "keyval": null,
+        "name": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_repeats_CON03_v2/inputs/five_tissue_sift2.nii.gz",
+        "size": [
+          256,
+          256,
+          256,
+          5
+        ],
+        "spacing": [
+          1.00000000783669,
+          0.999999993420743,
+          0.999999969965082,
+          1.0
+        ],
+        "strides": [
+          -1,
+          3,
+          -2,
+          4
+        ],
+        "transform": [
+          [
+            0.999815370477283,
+            -0.0074429692952258,
+            0.0177151668879066,
+            -128.321741259919
+          ],
+          [
+            0.00710010604477604,
+            0.999787771696847,
+            0.0193390772373922,
+            -110.894596237746
+          ],
+          [
+            -0.0178553479811194,
+            -0.019209731219478,
+            0.999656027318267,
+            -131.677583066707
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "mrinfo_json_sha256": "a75f57b7898628316c9f9ad6782bd4c6642aab6c88c615e8e75e2a86906b9562"
+    },
+    "gmwmi": {
+      "voxel_bits_equal": true,
+      "sform_3x4_bits_equal": true,
+      "source_affine_serialization": {
+        "source_dtype": "float64",
+        "source_bottom_row": [
+          5.287035638734274e-19,
+          4.686440799766144e-18,
+          -4.6324608323135705e-19,
+          0.9999999999999994
+        ],
+        "implicit_file_bottom_row": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "bottom_row_max_abs_difference": 5.551115123125783e-16,
+        "machine_epsilon": 2.220446049250313e-16,
+        "machine_bound_gamma4": 8.88178419700126e-16,
+        "policy": "first 3x4 stored exactly in Float64 sform; bottom row implicit [0,0,0,1]; only dtype gamma_4 roundoff accepted"
+      },
+      "nonfinite_count": 0,
+      "readback_status": "header_source_shape_dtype_scaling_verified_geometry_recorded",
+      "reader_corner_difference_from_source_mm": 1.6967546294608042e-12,
+      "reader_corner_difference_from_fnit_operator_mm": 1.6967546294608042e-12,
+      "geometry_scope": "descriptive actual reader result; JSON numbers are serialized, not a bit-exact affine claim or a new scientific gate",
+      "source_voxel_to_world_affine": [
+        [
+          -0.9998153783125217,
+          -0.01771516635583306,
+          -0.0074429692462565965,
+          131.148547630511
+        ],
+        [
+          -0.007100106100417342,
+          -0.01933907665654457,
+          0.9997877651189861,
+          -104.15260463472109
+        ],
+        [
+          0.017855348121046142,
+          -0.9996559972936799,
+          -0.01920973109309226,
+          118.68158247231464
+        ],
+        [
+          5.287035638734274e-19,
+          4.686440799766144e-18,
+          -4.6324608323135705e-19,
+          0.9999999999999994
+        ]
+      ],
+      "file_voxel_to_world_affine": [
+        [
+          -0.9998153783125217,
+          -0.01771516635583306,
+          -0.0074429692462565965,
+          131.148547630511
+        ],
+        [
+          -0.007100106100417342,
+          -0.01933907665654457,
+          0.9997877651189861,
+          -104.15260463472109
+        ],
+        [
+          0.017855348121046142,
+          -0.9996559972936799,
+          -0.01920973109309226,
+          118.68158247231464
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "fnit_effective_voxel_to_world_affine": [
+        [
+          -0.9998153783125217,
+          -0.01771516635583306,
+          -0.0074429692462565965,
+          131.148547630511
+        ],
+        [
+          -0.007100106100417342,
+          -0.01933907665654457,
+          0.9997877651189861,
+          -104.15260463472109
+        ],
+        [
+          0.017855348121046142,
+          -0.9996559972936799,
+          -0.01920973109309226,
+          118.68158247231464
+        ],
+        [
+          5.287035638734274e-19,
+          4.686440799766144e-18,
+          -4.6324608323135705e-19,
+          0.9999999999999994
+        ]
+      ],
+      "decoded_voxel_to_world_affine": [
+        [
+          0.9998153783125261,
+          -0.007442969246256592,
+          0.017715166355833017,
+          -128.321741259919
+        ],
+        [
+          0.00710010610041737,
+          0.9997877651189863,
+          0.0193390766565446,
+          -110.894596237746
+        ],
+        [
+          -0.01785534812104623,
+          -0.01920973109309224,
+          0.9996559972936802,
+          -131.677583066707
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "expected_reader_affine": [
+        [
+          0.9998153783125217,
+          -0.0074429692462565965,
+          0.01771516635583306,
+          -128.3217412599195
+        ],
+        [
+          0.007100106100417342,
+          0.9997877651189861,
+          0.01933907665654457,
+          -110.89459623774637
+        ],
+        [
+          -0.017855348121046142,
+          -0.01920973109309226,
+          0.9996559972936799,
+          -131.67758306670697
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "axis_mapping_to_source": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          255.0
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0,
+          255.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "mrinfo_json": {
+        "datatype": "Float32LE",
+        "format": "NIfTI-2 (GZip compressed)",
+        "intensity_offset": 0.0,
+        "intensity_scale": 1.0,
+        "keyval": null,
+        "name": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_repeats_CON03_v2/inputs/gmwmi.nii.gz",
+        "size": [
+          256,
+          256,
+          256
+        ],
+        "spacing": [
+          1.00000000783669,
+          0.999999993420743,
+          0.999999969965082
+        ],
+        "strides": [
+          -1,
+          3,
+          -2
+        ],
+        "transform": [
+          [
+            0.999815370477283,
+            -0.0074429692952258,
+            0.0177151668879066,
+            -128.321741259919
+          ],
+          [
+            0.00710010604477604,
+            0.999787771696847,
+            0.0193390772373922,
+            -110.894596237746
+          ],
+          [
+            -0.0178553479811194,
+            -0.019209731219478,
+            0.999656027318267,
+            -131.677583066707
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "mrinfo_json_sha256": "554ea038e103f3eeba10c955fa9e51bb13c14f0e6a62748f5fc3e951a5c03d3e"
+    },
+    "fa": {
+      "voxel_bits_equal": true,
+      "sform_3x4_bits_equal": true,
+      "source_affine_serialization": {
+        "source_dtype": "float64",
+        "source_bottom_row": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "implicit_file_bottom_row": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "bottom_row_max_abs_difference": 0.0,
+        "machine_epsilon": 2.220446049250313e-16,
+        "machine_bound_gamma4": 8.88178419700126e-16,
+        "policy": "first 3x4 stored exactly in Float64 sform; bottom row implicit [0,0,0,1]; only dtype gamma_4 roundoff accepted"
+      },
+      "nonfinite_count": 1,
+      "readback_status": "header_source_shape_dtype_scaling_verified_geometry_recorded",
+      "reader_corner_difference_from_source_mm": 3.5753787487377407e-13,
+      "reader_corner_difference_from_fnit_operator_mm": 3.5753787487377407e-13,
+      "geometry_scope": "descriptive actual reader result; JSON numbers are serialized, not a bit-exact affine claim or a new scientific gate",
+      "source_voxel_to_world_affine": [
+        [
+          -2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          120.45989990234375
+        ],
+        [
+          -0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.40888977050781
+        ],
+        [
+          0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -64.85044860839844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "file_voxel_to_world_affine": [
+        [
+          -2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          120.45989990234375
+        ],
+        [
+          -0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.40888977050781
+        ],
+        [
+          0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -64.85044860839844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "fnit_effective_voxel_to_world_affine": [
+        [
+          -2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          120.45989990234375
+        ],
+        [
+          -0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.40888977050781
+        ],
+        [
+          0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -64.85044860839844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "decoded_voxel_to_world_affine": [
+        [
+          2.4994916915893524,
+          -1.204592194881113e-07,
+          0.050410829484462814,
+          -116.991810798645
+        ],
+        [
+          0.004988736938685171,
+          2.4877288341522195,
+          -0.24734780192375208,
+          -94.8828197796829
+        ],
+        [
+          -0.05016337707638723,
+          0.24739809334278068,
+          2.487222909927369,
+          -60.0849277861416
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "expected_reader_affine": [
+        [
+          2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          -116.99181079864502
+        ],
+        [
+          0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.8828197796829
+        ],
+        [
+          -0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -60.084927786141634
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "axis_mapping_to_source": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          95.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "mrinfo_json": {
+        "datatype": "Float32LE",
+        "format": "NIfTI-2 (GZip compressed)",
+        "intensity_offset": 0.0,
+        "intensity_scale": 1.0,
+        "keyval": null,
+        "name": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_repeats_CON03_v2/inputs/fa.nii.gz",
+        "size": [
+          96,
+          96,
+          60
+        ],
+        "spacing": [
+          2.49999999364403,
+          2.5000001137724,
+          2.49999999810268
+        ],
+        "strides": [
+          -1,
+          2,
+          3
+        ],
+        "transform": [
+          [
+            0.999796679177612,
+            -4.81836856024551e-08,
+            0.0201643318090884,
+            -116.991810798645
+          ],
+          [
+            0.00199549478054739,
+            0.995091488375309,
+            -0.0989391208445885,
+            -94.8828197796829
+          ],
+          [
+            -0.0200653508815688,
+            0.0989592328335805,
+            0.994889164725997,
+            -60.0849277861416
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "mrinfo_json_sha256": "2eb4b3b15f8e941abab38496011802b5ab56139ca911e93721bb4c70684ce7ac"
+    },
+    "atlas:aparc+tian-s1": {
+      "voxel_bits_equal": true,
+      "sform_3x4_bits_equal": true,
+      "source_affine_serialization": {
+        "source_dtype": "float64",
+        "source_bottom_row": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "implicit_file_bottom_row": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "bottom_row_max_abs_difference": 0.0,
+        "machine_epsilon": 2.220446049250313e-16,
+        "machine_bound_gamma4": 8.88178419700126e-16,
+        "policy": "first 3x4 stored exactly in Float64 sform; bottom row implicit [0,0,0,1]; only dtype gamma_4 roundoff accepted"
+      },
+      "nonfinite_count": 0,
+      "readback_status": "header_source_shape_dtype_scaling_verified_geometry_recorded",
+      "reader_corner_difference_from_source_mm": 3.5753787487377407e-13,
+      "reader_corner_difference_from_fnit_operator_mm": 3.5753787487377407e-13,
+      "geometry_scope": "descriptive actual reader result; JSON numbers are serialized, not a bit-exact affine claim or a new scientific gate",
+      "source_voxel_to_world_affine": [
+        [
+          -2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          120.45989990234375
+        ],
+        [
+          -0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.40888977050781
+        ],
+        [
+          0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -64.85044860839844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "file_voxel_to_world_affine": [
+        [
+          -2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          120.45989990234375
+        ],
+        [
+          -0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.40888977050781
+        ],
+        [
+          0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -64.85044860839844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "fnit_effective_voxel_to_world_affine": [
+        [
+          -2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          120.45989990234375
+        ],
+        [
+          -0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.40888977050781
+        ],
+        [
+          0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -64.85044860839844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "decoded_voxel_to_world_affine": [
+        [
+          2.4994916915893524,
+          -1.204592194881113e-07,
+          0.050410829484462814,
+          -116.991810798645
+        ],
+        [
+          0.004988736938685171,
+          2.4877288341522195,
+          -0.24734780192375208,
+          -94.8828197796829
+        ],
+        [
+          -0.05016337707638723,
+          0.24739809334278068,
+          2.487222909927369,
+          -60.0849277861416
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "expected_reader_affine": [
+        [
+          2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          -116.99181079864502
+        ],
+        [
+          0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.8828197796829
+        ],
+        [
+          -0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -60.084927786141634
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "axis_mapping_to_source": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          95.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "mrinfo_json": {
+        "datatype": "Int32LE",
+        "format": "NIfTI-2 (GZip compressed)",
+        "intensity_offset": 0.0,
+        "intensity_scale": 1.0,
+        "keyval": null,
+        "name": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_repeats_CON03_v2/inputs/atlases/aparc+tian-s1/atlas_dwi.nii.gz",
+        "size": [
+          96,
+          96,
+          60
+        ],
+        "spacing": [
+          2.49999999364403,
+          2.5000001137724,
+          2.49999999810268
+        ],
+        "strides": [
+          -1,
+          2,
+          3
+        ],
+        "transform": [
+          [
+            0.999796679177612,
+            -4.81836856024551e-08,
+            0.0201643318090884,
+            -116.991810798645
+          ],
+          [
+            0.00199549478054739,
+            0.995091488375309,
+            -0.0989391208445885,
+            -94.8828197796829
+          ],
+          [
+            -0.0200653508815688,
+            0.0989592328335805,
+            0.994889164725997,
+            -60.0849277861416
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "mrinfo_json_sha256": "385574276f0154a41acdefb876221fb6a064f5f60951ec571b0459e8055bc6f3"
+    },
+    "atlas:aparc.a2009s+tian-s1": {
+      "voxel_bits_equal": true,
+      "sform_3x4_bits_equal": true,
+      "source_affine_serialization": {
+        "source_dtype": "float64",
+        "source_bottom_row": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "implicit_file_bottom_row": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "bottom_row_max_abs_difference": 0.0,
+        "machine_epsilon": 2.220446049250313e-16,
+        "machine_bound_gamma4": 8.88178419700126e-16,
+        "policy": "first 3x4 stored exactly in Float64 sform; bottom row implicit [0,0,0,1]; only dtype gamma_4 roundoff accepted"
+      },
+      "nonfinite_count": 0,
+      "readback_status": "header_source_shape_dtype_scaling_verified_geometry_recorded",
+      "reader_corner_difference_from_source_mm": 3.5753787487377407e-13,
+      "reader_corner_difference_from_fnit_operator_mm": 3.5753787487377407e-13,
+      "geometry_scope": "descriptive actual reader result; JSON numbers are serialized, not a bit-exact affine claim or a new scientific gate",
+      "source_voxel_to_world_affine": [
+        [
+          -2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          120.45989990234375
+        ],
+        [
+          -0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.40888977050781
+        ],
+        [
+          0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -64.85044860839844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "file_voxel_to_world_affine": [
+        [
+          -2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          120.45989990234375
+        ],
+        [
+          -0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.40888977050781
+        ],
+        [
+          0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -64.85044860839844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "fnit_effective_voxel_to_world_affine": [
+        [
+          -2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          120.45989990234375
+        ],
+        [
+          -0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.40888977050781
+        ],
+        [
+          0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -64.85044860839844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "decoded_voxel_to_world_affine": [
+        [
+          2.4994916915893524,
+          -1.204592194881113e-07,
+          0.050410829484462814,
+          -116.991810798645
+        ],
+        [
+          0.004988736938685171,
+          2.4877288341522195,
+          -0.24734780192375208,
+          -94.8828197796829
+        ],
+        [
+          -0.05016337707638723,
+          0.24739809334278068,
+          2.487222909927369,
+          -60.0849277861416
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "expected_reader_affine": [
+        [
+          2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          -116.99181079864502
+        ],
+        [
+          0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.8828197796829
+        ],
+        [
+          -0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -60.084927786141634
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "axis_mapping_to_source": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          95.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "mrinfo_json": {
+        "datatype": "Int32LE",
+        "format": "NIfTI-2 (GZip compressed)",
+        "intensity_offset": 0.0,
+        "intensity_scale": 1.0,
+        "keyval": null,
+        "name": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_repeats_CON03_v2/inputs/atlases/aparc.a2009s+tian-s1/atlas_dwi.nii.gz",
+        "size": [
+          96,
+          96,
+          60
+        ],
+        "spacing": [
+          2.49999999364403,
+          2.5000001137724,
+          2.49999999810268
+        ],
+        "strides": [
+          -1,
+          2,
+          3
+        ],
+        "transform": [
+          [
+            0.999796679177612,
+            -4.81836856024551e-08,
+            0.0201643318090884,
+            -116.991810798645
+          ],
+          [
+            0.00199549478054739,
+            0.995091488375309,
+            -0.0989391208445885,
+            -94.8828197796829
+          ],
+          [
+            -0.0200653508815688,
+            0.0989592328335805,
+            0.994889164725997,
+            -60.0849277861416
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "mrinfo_json_sha256": "98f50e85548ba1250aacabb97b8c14c9723c73f18a62345f458bb4ee39d637f4"
+    },
+    "atlas:fs-aparc": {
+      "voxel_bits_equal": true,
+      "sform_3x4_bits_equal": true,
+      "source_affine_serialization": {
+        "source_dtype": "float64",
+        "source_bottom_row": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "implicit_file_bottom_row": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "bottom_row_max_abs_difference": 0.0,
+        "machine_epsilon": 2.220446049250313e-16,
+        "machine_bound_gamma4": 8.88178419700126e-16,
+        "policy": "first 3x4 stored exactly in Float64 sform; bottom row implicit [0,0,0,1]; only dtype gamma_4 roundoff accepted"
+      },
+      "nonfinite_count": 0,
+      "readback_status": "header_source_shape_dtype_scaling_verified_geometry_recorded",
+      "reader_corner_difference_from_source_mm": 3.5753787487377407e-13,
+      "reader_corner_difference_from_fnit_operator_mm": 3.5753787487377407e-13,
+      "geometry_scope": "descriptive actual reader result; JSON numbers are serialized, not a bit-exact affine claim or a new scientific gate",
+      "source_voxel_to_world_affine": [
+        [
+          -2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          120.45989990234375
+        ],
+        [
+          -0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.40888977050781
+        ],
+        [
+          0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -64.85044860839844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "file_voxel_to_world_affine": [
+        [
+          -2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          120.45989990234375
+        ],
+        [
+          -0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.40888977050781
+        ],
+        [
+          0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -64.85044860839844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "fnit_effective_voxel_to_world_affine": [
+        [
+          -2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          120.45989990234375
+        ],
+        [
+          -0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.40888977050781
+        ],
+        [
+          0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -64.85044860839844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "decoded_voxel_to_world_affine": [
+        [
+          2.4994916915893524,
+          -1.204592194881113e-07,
+          0.050410829484462814,
+          -116.991810798645
+        ],
+        [
+          0.004988736938685171,
+          2.4877288341522195,
+          -0.24734780192375208,
+          -94.8828197796829
+        ],
+        [
+          -0.05016337707638723,
+          0.24739809334278068,
+          2.487222909927369,
+          -60.0849277861416
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "expected_reader_affine": [
+        [
+          2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          -116.99181079864502
+        ],
+        [
+          0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.8828197796829
+        ],
+        [
+          -0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -60.084927786141634
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "axis_mapping_to_source": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          95.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "mrinfo_json": {
+        "datatype": "Int32LE",
+        "format": "NIfTI-2 (GZip compressed)",
+        "intensity_offset": 0.0,
+        "intensity_scale": 1.0,
+        "keyval": null,
+        "name": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_repeats_CON03_v2/inputs/atlases/fs-aparc/atlas_dwi.nii.gz",
+        "size": [
+          96,
+          96,
+          60
+        ],
+        "spacing": [
+          2.49999999364403,
+          2.5000001137724,
+          2.49999999810268
+        ],
+        "strides": [
+          -1,
+          2,
+          3
+        ],
+        "transform": [
+          [
+            0.999796679177612,
+            -4.81836856024551e-08,
+            0.0201643318090884,
+            -116.991810798645
+          ],
+          [
+            0.00199549478054739,
+            0.995091488375309,
+            -0.0989391208445885,
+            -94.8828197796829
+          ],
+          [
+            -0.0200653508815688,
+            0.0989592328335805,
+            0.994889164725997,
+            -60.0849277861416
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "mrinfo_json_sha256": "8d798728932aa0973424aae0d2233545a871f011b225ee9e2ad153fb02ebd68d"
+    },
+    "atlas:glasser+tian-s1": {
+      "voxel_bits_equal": true,
+      "sform_3x4_bits_equal": true,
+      "source_affine_serialization": {
+        "source_dtype": "float64",
+        "source_bottom_row": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "implicit_file_bottom_row": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "bottom_row_max_abs_difference": 0.0,
+        "machine_epsilon": 2.220446049250313e-16,
+        "machine_bound_gamma4": 8.88178419700126e-16,
+        "policy": "first 3x4 stored exactly in Float64 sform; bottom row implicit [0,0,0,1]; only dtype gamma_4 roundoff accepted"
+      },
+      "nonfinite_count": 0,
+      "readback_status": "header_source_shape_dtype_scaling_verified_geometry_recorded",
+      "reader_corner_difference_from_source_mm": 3.5753787487377407e-13,
+      "reader_corner_difference_from_fnit_operator_mm": 3.5753787487377407e-13,
+      "geometry_scope": "descriptive actual reader result; JSON numbers are serialized, not a bit-exact affine claim or a new scientific gate",
+      "source_voxel_to_world_affine": [
+        [
+          -2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          120.45989990234375
+        ],
+        [
+          -0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.40888977050781
+        ],
+        [
+          0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -64.85044860839844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "file_voxel_to_world_affine": [
+        [
+          -2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          120.45989990234375
+        ],
+        [
+          -0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.40888977050781
+        ],
+        [
+          0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -64.85044860839844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "fnit_effective_voxel_to_world_affine": [
+        [
+          -2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          120.45989990234375
+        ],
+        [
+          -0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.40888977050781
+        ],
+        [
+          0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -64.85044860839844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "decoded_voxel_to_world_affine": [
+        [
+          2.4994916915893524,
+          -1.204592194881113e-07,
+          0.050410829484462814,
+          -116.991810798645
+        ],
+        [
+          0.004988736938685171,
+          2.4877288341522195,
+          -0.24734780192375208,
+          -94.8828197796829
+        ],
+        [
+          -0.05016337707638723,
+          0.24739809334278068,
+          2.487222909927369,
+          -60.0849277861416
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "expected_reader_affine": [
+        [
+          2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          -116.99181079864502
+        ],
+        [
+          0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.8828197796829
+        ],
+        [
+          -0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -60.084927786141634
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "axis_mapping_to_source": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          95.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "mrinfo_json": {
+        "datatype": "Int32LE",
+        "format": "NIfTI-2 (GZip compressed)",
+        "intensity_offset": 0.0,
+        "intensity_scale": 1.0,
+        "keyval": null,
+        "name": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_repeats_CON03_v2/inputs/atlases/glasser+tian-s1/atlas_dwi.nii.gz",
+        "size": [
+          96,
+          96,
+          60
+        ],
+        "spacing": [
+          2.49999999364403,
+          2.5000001137724,
+          2.49999999810268
+        ],
+        "strides": [
+          -1,
+          2,
+          3
+        ],
+        "transform": [
+          [
+            0.999796679177612,
+            -4.81836856024551e-08,
+            0.0201643318090884,
+            -116.991810798645
+          ],
+          [
+            0.00199549478054739,
+            0.995091488375309,
+            -0.0989391208445885,
+            -94.8828197796829
+          ],
+          [
+            -0.0200653508815688,
+            0.0989592328335805,
+            0.994889164725997,
+            -60.0849277861416
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "mrinfo_json_sha256": "a207c6b5c6076ded3450c704f6460ba9ba0c96a0cfe31429a09189285dc7ddb8"
+    },
+    "atlas:glasser+tian-s4": {
+      "voxel_bits_equal": true,
+      "sform_3x4_bits_equal": true,
+      "source_affine_serialization": {
+        "source_dtype": "float64",
+        "source_bottom_row": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "implicit_file_bottom_row": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "bottom_row_max_abs_difference": 0.0,
+        "machine_epsilon": 2.220446049250313e-16,
+        "machine_bound_gamma4": 8.88178419700126e-16,
+        "policy": "first 3x4 stored exactly in Float64 sform; bottom row implicit [0,0,0,1]; only dtype gamma_4 roundoff accepted"
+      },
+      "nonfinite_count": 0,
+      "readback_status": "header_source_shape_dtype_scaling_verified_geometry_recorded",
+      "reader_corner_difference_from_source_mm": 3.5753787487377407e-13,
+      "reader_corner_difference_from_fnit_operator_mm": 3.5753787487377407e-13,
+      "geometry_scope": "descriptive actual reader result; JSON numbers are serialized, not a bit-exact affine claim or a new scientific gate",
+      "source_voxel_to_world_affine": [
+        [
+          -2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          120.45989990234375
+        ],
+        [
+          -0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.40888977050781
+        ],
+        [
+          0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -64.85044860839844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "file_voxel_to_world_affine": [
+        [
+          -2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          120.45989990234375
+        ],
+        [
+          -0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.40888977050781
+        ],
+        [
+          0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -64.85044860839844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "fnit_effective_voxel_to_world_affine": [
+        [
+          -2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          120.45989990234375
+        ],
+        [
+          -0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.40888977050781
+        ],
+        [
+          0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -64.85044860839844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "decoded_voxel_to_world_affine": [
+        [
+          2.4994916915893524,
+          -1.204592194881113e-07,
+          0.050410829484462814,
+          -116.991810798645
+        ],
+        [
+          0.004988736938685171,
+          2.4877288341522195,
+          -0.24734780192375208,
+          -94.8828197796829
+        ],
+        [
+          -0.05016337707638723,
+          0.24739809334278068,
+          2.487222909927369,
+          -60.0849277861416
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "expected_reader_affine": [
+        [
+          2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          -116.99181079864502
+        ],
+        [
+          0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.8828197796829
+        ],
+        [
+          -0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -60.084927786141634
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "axis_mapping_to_source": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          95.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "mrinfo_json": {
+        "datatype": "Int32LE",
+        "format": "NIfTI-2 (GZip compressed)",
+        "intensity_offset": 0.0,
+        "intensity_scale": 1.0,
+        "keyval": null,
+        "name": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_repeats_CON03_v2/inputs/atlases/glasser+tian-s4/atlas_dwi.nii.gz",
+        "size": [
+          96,
+          96,
+          60
+        ],
+        "spacing": [
+          2.49999999364403,
+          2.5000001137724,
+          2.49999999810268
+        ],
+        "strides": [
+          -1,
+          2,
+          3
+        ],
+        "transform": [
+          [
+            0.999796679177612,
+            -4.81836856024551e-08,
+            0.0201643318090884,
+            -116.991810798645
+          ],
+          [
+            0.00199549478054739,
+            0.995091488375309,
+            -0.0989391208445885,
+            -94.8828197796829
+          ],
+          [
+            -0.0200653508815688,
+            0.0989592328335805,
+            0.994889164725997,
+            -60.0849277861416
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "mrinfo_json_sha256": "aae6cca61845234fe65cb12a48b47ed1ea6920aab6a3de38aa3123d09c4b0a68"
+    },
+    "atlas:schaefer1000+tian-s4": {
+      "voxel_bits_equal": true,
+      "sform_3x4_bits_equal": true,
+      "source_affine_serialization": {
+        "source_dtype": "float64",
+        "source_bottom_row": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "implicit_file_bottom_row": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "bottom_row_max_abs_difference": 0.0,
+        "machine_epsilon": 2.220446049250313e-16,
+        "machine_bound_gamma4": 8.88178419700126e-16,
+        "policy": "first 3x4 stored exactly in Float64 sform; bottom row implicit [0,0,0,1]; only dtype gamma_4 roundoff accepted"
+      },
+      "nonfinite_count": 0,
+      "readback_status": "header_source_shape_dtype_scaling_verified_geometry_recorded",
+      "reader_corner_difference_from_source_mm": 3.5753787487377407e-13,
+      "reader_corner_difference_from_fnit_operator_mm": 3.5753787487377407e-13,
+      "geometry_scope": "descriptive actual reader result; JSON numbers are serialized, not a bit-exact affine claim or a new scientific gate",
+      "source_voxel_to_world_affine": [
+        [
+          -2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          120.45989990234375
+        ],
+        [
+          -0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.40888977050781
+        ],
+        [
+          0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -64.85044860839844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "file_voxel_to_world_affine": [
+        [
+          -2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          120.45989990234375
+        ],
+        [
+          -0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.40888977050781
+        ],
+        [
+          0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -64.85044860839844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "fnit_effective_voxel_to_world_affine": [
+        [
+          -2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          120.45989990234375
+        ],
+        [
+          -0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.40888977050781
+        ],
+        [
+          0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -64.85044860839844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "decoded_voxel_to_world_affine": [
+        [
+          2.4994916915893524,
+          -1.204592194881113e-07,
+          0.050410829484462814,
+          -116.991810798645
+        ],
+        [
+          0.004988736938685171,
+          2.4877288341522195,
+          -0.24734780192375208,
+          -94.8828197796829
+        ],
+        [
+          -0.05016337707638723,
+          0.24739809334278068,
+          2.487222909927369,
+          -60.0849277861416
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "expected_reader_affine": [
+        [
+          2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          -116.99181079864502
+        ],
+        [
+          0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.8828197796829
+        ],
+        [
+          -0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -60.084927786141634
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "axis_mapping_to_source": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          95.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "mrinfo_json": {
+        "datatype": "Int32LE",
+        "format": "NIfTI-2 (GZip compressed)",
+        "intensity_offset": 0.0,
+        "intensity_scale": 1.0,
+        "keyval": null,
+        "name": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_repeats_CON03_v2/inputs/atlases/schaefer1000+tian-s4/atlas_dwi.nii.gz",
+        "size": [
+          96,
+          96,
+          60
+        ],
+        "spacing": [
+          2.49999999364403,
+          2.5000001137724,
+          2.49999999810268
+        ],
+        "strides": [
+          -1,
+          2,
+          3
+        ],
+        "transform": [
+          [
+            0.999796679177612,
+            -4.81836856024551e-08,
+            0.0201643318090884,
+            -116.991810798645
+          ],
+          [
+            0.00199549478054739,
+            0.995091488375309,
+            -0.0989391208445885,
+            -94.8828197796829
+          ],
+          [
+            -0.0200653508815688,
+            0.0989592328335805,
+            0.994889164725997,
+            -60.0849277861416
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "mrinfo_json_sha256": "cbf543560dd93f13997594d62846a2b34679e51924c8fb2e4087e443df25917e"
+    },
+    "atlas:schaefer200+tian-s1": {
+      "voxel_bits_equal": true,
+      "sform_3x4_bits_equal": true,
+      "source_affine_serialization": {
+        "source_dtype": "float64",
+        "source_bottom_row": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "implicit_file_bottom_row": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "bottom_row_max_abs_difference": 0.0,
+        "machine_epsilon": 2.220446049250313e-16,
+        "machine_bound_gamma4": 8.88178419700126e-16,
+        "policy": "first 3x4 stored exactly in Float64 sform; bottom row implicit [0,0,0,1]; only dtype gamma_4 roundoff accepted"
+      },
+      "nonfinite_count": 0,
+      "readback_status": "header_source_shape_dtype_scaling_verified_geometry_recorded",
+      "reader_corner_difference_from_source_mm": 3.5753787487377407e-13,
+      "reader_corner_difference_from_fnit_operator_mm": 3.5753787487377407e-13,
+      "geometry_scope": "descriptive actual reader result; JSON numbers are serialized, not a bit-exact affine claim or a new scientific gate",
+      "source_voxel_to_world_affine": [
+        [
+          -2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          120.45989990234375
+        ],
+        [
+          -0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.40888977050781
+        ],
+        [
+          0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -64.85044860839844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "file_voxel_to_world_affine": [
+        [
+          -2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          120.45989990234375
+        ],
+        [
+          -0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.40888977050781
+        ],
+        [
+          0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -64.85044860839844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "fnit_effective_voxel_to_world_affine": [
+        [
+          -2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          120.45989990234375
+        ],
+        [
+          -0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.40888977050781
+        ],
+        [
+          0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -64.85044860839844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "decoded_voxel_to_world_affine": [
+        [
+          2.4994916915893524,
+          -1.204592194881113e-07,
+          0.050410829484462814,
+          -116.991810798645
+        ],
+        [
+          0.004988736938685171,
+          2.4877288341522195,
+          -0.24734780192375208,
+          -94.8828197796829
+        ],
+        [
+          -0.05016337707638723,
+          0.24739809334278068,
+          2.487222909927369,
+          -60.0849277861416
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "expected_reader_affine": [
+        [
+          2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          -116.99181079864502
+        ],
+        [
+          0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.8828197796829
+        ],
+        [
+          -0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -60.084927786141634
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "axis_mapping_to_source": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          95.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "mrinfo_json": {
+        "datatype": "Int32LE",
+        "format": "NIfTI-2 (GZip compressed)",
+        "intensity_offset": 0.0,
+        "intensity_scale": 1.0,
+        "keyval": null,
+        "name": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_repeats_CON03_v2/inputs/atlases/schaefer200+tian-s1/atlas_dwi.nii.gz",
+        "size": [
+          96,
+          96,
+          60
+        ],
+        "spacing": [
+          2.49999999364403,
+          2.5000001137724,
+          2.49999999810268
+        ],
+        "strides": [
+          -1,
+          2,
+          3
+        ],
+        "transform": [
+          [
+            0.999796679177612,
+            -4.81836856024551e-08,
+            0.0201643318090884,
+            -116.991810798645
+          ],
+          [
+            0.00199549478054739,
+            0.995091488375309,
+            -0.0989391208445885,
+            -94.8828197796829
+          ],
+          [
+            -0.0200653508815688,
+            0.0989592328335805,
+            0.994889164725997,
+            -60.0849277861416
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "mrinfo_json_sha256": "de9ec0c55fbc0b31eae9af56714844b9f61914cc790d1a2de0fa1c25bed7f8a8"
+    },
+    "atlas:schaefer500+tian-s4": {
+      "voxel_bits_equal": true,
+      "sform_3x4_bits_equal": true,
+      "source_affine_serialization": {
+        "source_dtype": "float64",
+        "source_bottom_row": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "implicit_file_bottom_row": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "bottom_row_max_abs_difference": 0.0,
+        "machine_epsilon": 2.220446049250313e-16,
+        "machine_bound_gamma4": 8.88178419700126e-16,
+        "policy": "first 3x4 stored exactly in Float64 sform; bottom row implicit [0,0,0,1]; only dtype gamma_4 roundoff accepted"
+      },
+      "nonfinite_count": 0,
+      "readback_status": "header_source_shape_dtype_scaling_verified_geometry_recorded",
+      "reader_corner_difference_from_source_mm": 3.5753787487377407e-13,
+      "reader_corner_difference_from_fnit_operator_mm": 3.5753787487377407e-13,
+      "geometry_scope": "descriptive actual reader result; JSON numbers are serialized, not a bit-exact affine claim or a new scientific gate",
+      "source_voxel_to_world_affine": [
+        [
+          -2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          120.45989990234375
+        ],
+        [
+          -0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.40888977050781
+        ],
+        [
+          0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -64.85044860839844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "file_voxel_to_world_affine": [
+        [
+          -2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          120.45989990234375
+        ],
+        [
+          -0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.40888977050781
+        ],
+        [
+          0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -64.85044860839844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "fnit_effective_voxel_to_world_affine": [
+        [
+          -2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          120.45989990234375
+        ],
+        [
+          -0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.40888977050781
+        ],
+        [
+          0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -64.85044860839844
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "decoded_voxel_to_world_affine": [
+        [
+          2.4994916915893524,
+          -1.204592194881113e-07,
+          0.050410829484462814,
+          -116.991810798645
+        ],
+        [
+          0.004988736938685171,
+          2.4877288341522195,
+          -0.24734780192375208,
+          -94.8828197796829
+        ],
+        [
+          -0.05016337707638723,
+          0.24739809334278068,
+          2.487222909927369,
+          -60.0849277861416
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "expected_reader_affine": [
+        [
+          2.4994916915893555,
+          -1.2045921948811156e-07,
+          0.05041082948446274,
+          -116.99181079864502
+        ],
+        [
+          0.004988736938685179,
+          2.4877288341522217,
+          -0.24734780192375183,
+          -94.8828197796829
+        ],
+        [
+          -0.050163377076387405,
+          0.24739809334278107,
+          2.487222909927368,
+          -60.084927786141634
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "axis_mapping_to_source": [
+        [
+          -1.0,
+          0.0,
+          0.0,
+          95.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "mrinfo_json": {
+        "datatype": "Int32LE",
+        "format": "NIfTI-2 (GZip compressed)",
+        "intensity_offset": 0.0,
+        "intensity_scale": 1.0,
+        "keyval": null,
+        "name": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/official_repeats_CON03_v2/inputs/atlases/schaefer500+tian-s4/atlas_dwi.nii.gz",
+        "size": [
+          96,
+          96,
+          60
+        ],
+        "spacing": [
+          2.49999999364403,
+          2.5000001137724,
+          2.49999999810268
+        ],
+        "strides": [
+          -1,
+          2,
+          3
+        ],
+        "transform": [
+          [
+            0.999796679177612,
+            -4.81836856024551e-08,
+            0.0201643318090884,
+            -116.991810798645
+          ],
+          [
+            0.00199549478054739,
+            0.995091488375309,
+            -0.0989391208445885,
+            -94.8828197796829
+          ],
+          [
+            -0.0200653508815688,
+            0.0989592328335805,
+            0.994889164725997,
+            -60.0849277861416
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "mrinfo_json_sha256": "d82e1d7f32cefb8c2f2b4703c419671e2b9c020262f67a99f5feb9d1a38c1554"
+    }
+  },
+  "official_runs": {
+    "0": {
+      "commands": 37,
+      "all_exit_zero": true,
+      "accepted_tracks": 11843,
+      "attempted_seeds": 100000,
+      "accepted_fraction": 0.11843,
+      "vectors": {
+        "sift2_weights.txt": {
+          "shape": [
+            11843
+          ],
+          "nonfinite_count": 0
+        },
+        "lengths.txt": {
+          "shape": [
+            11843
+          ],
+          "nonfinite_count": 0
+        },
+        "mean_fa.txt": {
+          "shape": [
+            11843
+          ],
+          "nonfinite_count": 0
+        }
+      },
+      "stage_seconds_inclusive": {
+        "fa": 0.04395865648984909,
+        "length": 0.04759630560874939,
+        "matrix_count": 0.806875191628933,
+        "matrix_mean_fa": 1.005229577422142,
+        "matrix_mean_length": 0.9993933290243149,
+        "matrix_sift2_fbc": 0.9041798263788223,
+        "sift2": 10.650651432573795,
+        "track_count": 0.022095635533332825,
+        "tracking": 63.30863235145807
+      },
+      "track_sha256": "f72ae340a177e5b49818beed095f6b3eb64d9e4596413c027eb6ed396a45da15"
+    },
+    "1": {
+      "commands": 37,
+      "all_exit_zero": true,
+      "accepted_tracks": 11775,
+      "attempted_seeds": 100000,
+      "accepted_fraction": 0.11775,
+      "vectors": {
+        "sift2_weights.txt": {
+          "shape": [
+            11775
+          ],
+          "nonfinite_count": 0
+        },
+        "lengths.txt": {
+          "shape": [
+            11775
+          ],
+          "nonfinite_count": 0
+        },
+        "mean_fa.txt": {
+          "shape": [
+            11775
+          ],
+          "nonfinite_count": 0
+        }
+      },
+      "stage_seconds_inclusive": {
+        "fa": 0.045530907809734344,
+        "length": 0.02701704204082489,
+        "matrix_count": 0.8263809457421303,
+        "matrix_mean_fa": 1.0356085672974586,
+        "matrix_mean_length": 1.0079297423362732,
+        "matrix_sift2_fbc": 0.9176512733101845,
+        "sift2": 10.504109062254429,
+        "track_count": 0.020916536450386047,
+        "tracking": 63.0850243717432
+      },
+      "track_sha256": "e9c4d6aa54f650832357f586075b4babc210c1f92830754f33d2274b4273322d"
+    },
+    "2": {
+      "commands": 37,
+      "all_exit_zero": true,
+      "accepted_tracks": 11689,
+      "attempted_seeds": 100000,
+      "accepted_fraction": 0.11689,
+      "vectors": {
+        "sift2_weights.txt": {
+          "shape": [
+            11689
+          ],
+          "nonfinite_count": 0
+        },
+        "lengths.txt": {
+          "shape": [
+            11689
+          ],
+          "nonfinite_count": 0
+        },
+        "mean_fa.txt": {
+          "shape": [
+            11689
+          ],
+          "nonfinite_count": 0
+        }
+      },
+      "stage_seconds_inclusive": {
+        "fa": 0.045073747634887695,
+        "length": 0.02790863811969757,
+        "matrix_count": 0.8093553110957146,
+        "matrix_mean_fa": 0.986571416258812,
+        "matrix_mean_length": 0.9946984499692917,
+        "matrix_sift2_fbc": 0.900255836546421,
+        "sift2": 10.482392974197865,
+        "track_count": 0.02051873505115509,
+        "tracking": 62.83005465567112
+      },
+      "track_sha256": "99c49d6f590b7c8aa7e16ae218faf658ece05b760cbaebc6b403c2439ebeffe9"
+    },
+    "3": {
+      "commands": 37,
+      "all_exit_zero": true,
+      "accepted_tracks": 11475,
+      "attempted_seeds": 100000,
+      "accepted_fraction": 0.11475,
+      "vectors": {
+        "sift2_weights.txt": {
+          "shape": [
+            11475
+          ],
+          "nonfinite_count": 0
+        },
+        "lengths.txt": {
+          "shape": [
+            11475
+          ],
+          "nonfinite_count": 0
+        },
+        "mean_fa.txt": {
+          "shape": [
+            11475
+          ],
+          "nonfinite_count": 0
+        }
+      },
+      "stage_seconds_inclusive": {
+        "fa": 0.04361329227685928,
+        "length": 0.027263790369033813,
+        "matrix_count": 0.8149737939238548,
+        "matrix_mean_fa": 0.9873110428452492,
+        "matrix_mean_length": 0.9954974800348282,
+        "matrix_sift2_fbc": 0.9049326330423355,
+        "sift2": 10.470665723085403,
+        "track_count": 0.019938483834266663,
+        "tracking": 62.61335479468107
+      },
+      "track_sha256": "c93b34ea1d503724e7878374c642f4869a58365bfb6f0b03cad14d49c94b6a95"
+    },
+    "4": {
+      "commands": 37,
+      "all_exit_zero": true,
+      "accepted_tracks": 11820,
+      "attempted_seeds": 100000,
+      "accepted_fraction": 0.1182,
+      "vectors": {
+        "sift2_weights.txt": {
+          "shape": [
+            11820
+          ],
+          "nonfinite_count": 0
+        },
+        "lengths.txt": {
+          "shape": [
+            11820
+          ],
+          "nonfinite_count": 0
+        },
+        "mean_fa.txt": {
+          "shape": [
+            11820
+          ],
+          "nonfinite_count": 0
+        }
+      },
+      "stage_seconds_inclusive": {
+        "fa": 0.0456271693110466,
+        "length": 0.02792041003704071,
+        "matrix_count": 0.8094343096017838,
+        "matrix_mean_fa": 0.9938830211758614,
+        "matrix_mean_length": 1.0069169625639915,
+        "matrix_sift2_fbc": 0.904944971203804,
+        "sift2": 10.453158386051655,
+        "track_count": 0.020930111408233643,
+        "tracking": 63.675744257867336
+      },
+      "track_sha256": "1c888f9d0db9422ea300373c8cee95b875499bc548f0959c5549a308eb6a9dd3"
+    }
+  },
+  "execution_wall_seconds": 407.3265551403165,
+  "preflight_seconds": 1.1911233440041542,
+  "total_wall_seconds": 408.51768135279417,
+  "timing_scope": "main entry through output/input validation; Python import/startup excluded",
+  "original_host": "nodecw10",
+  "audit_environment": {
+    "host": "gpucw1",
+    "python": "3.11.16",
+    "numpy": "1.26.4",
+    "nibabel": "5.4.2",
+    "torch": "2.5.1",
+    "cuda_visible_devices": ""
+  },
+  "audit_script_sha256": "0eeb27d81208fbde189b6a7cbb8d162c69efab8ee66775ef60d0df54819d5ec7",
+  "cpu_readonly_audit_seconds": 11.948135486338288
+}

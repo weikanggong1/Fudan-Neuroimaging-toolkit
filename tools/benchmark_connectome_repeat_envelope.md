@@ -2,7 +2,7 @@
 
 ## 1. 功能和策略
 
-本工具读取已有四矩阵，比较官方 MRtrix 自身重复与 FNIT—MRtrix 差异。至少提供三次官方重复，本轮计划使用五次，即种子 `0..4`、每次 **100000 次播种尝试**。`-select 0` 不固定接受轨迹数。
+本工具读取已有四矩阵及 TCK，比较官方 MRtrix 自身重复与 FNIT—MRtrix 差异。另提供 CPU 只读合同审计，核对已完成命令、输入影像和文件摘要。至少提供三次官方重复，本轮计划使用五次，即种子 `0..4`、每次 **100000 次播种尝试**。`-select 0` 不固定接受轨迹数。
 
 ```mermaid
 flowchart LR
@@ -53,6 +53,26 @@ repeat_report = compare(
 
 输出 JSON 包括：`dataset`、种子、四矩阵摘要、节点/atlas 来源、`pairwise`、`ranges` 和 `matrix_envelope_status`。`ranges` 同时保留 `official_min_max`、`official_values`、`fnit_vs_official`、`inside_count`（描述原双侧范围）、`comparison_accepted`（真正的单侧验收）。对角线单独报告；主要边集为严格上三角。count/FBC 使用全部非对角边；FA/长度主要误差只使用两份 count 均非零的边。原工具的归一化定义保留，单 atlas 的全上三角 FA/长度 L1 另外作为包含支持集差异的指标记录。
 
+### 已有轨迹和执行合同
+
+```python
+from tools.benchmark_connectome_tracking_population import compare as compare_population
+
+# 五份官方 TCK 和一或多份 FNIT TCK，全部处于同一世界坐标系。
+population_report = compare_population(
+    [directory / "tracks.tck" for directory in official_repeat_directories],
+    [Path("fnit_checkpoints/tracks.tck")],
+    grid=Path("reference/inputs/wm_fod.nii.gz"),  # 完整公共 FOD 网格
+    dataset="OpenNeuro ds001226 CON03",
+    n_seeds=100000, official_seeds=[0, 1, 2, 3, 4], fnit_seeds=[0],
+    return_data=False,  # True 时另外返回绘图使用的长度/端点/点访问计数数组
+)
+```
+
+population 输出每轮接受数和接受率、完整长度分位数、全部官方/跨软件/FNIT 内部 pair、完整范围与单侧判断。接受率差使用绝对差，分母是 `n_seeds` 播种尝试数，不能使用 TCK 的 `total_count` 代替。长度为已保存 polyline 的长度，使用原有双样本 KS；端点为世界坐标中 8 mm 共同直方图。轨迹密度诊断继续使用保存点逐点 `np.rint` 访问计数，**不是 MRtrix `tckmap` 的流线/线段密度**。粗网格仍按原来 4×4×4 体素求和，实际毫米尺寸另记录；CON03 的 2.5 mm 体素对应约 10 mm。空集/常量相关性为 `null/not_assessed`。没有减少体素或变更生产追踪。
+
+`tools/reference/audit_connectome_repeats.py` 读取已完成 `reference_manifest.json`、同轮 `checkpoint-dir` 和 FNIT CLI 输出；检查计划/实际 argv、exit code、源 PT/core/程序/官方输出 SHA，逐份复核 NIfTI-2 体素位、sform 3×4 位、真实 MRtrix header 记录和节点/atlas 身份。`--reference-script` 可选，用于核对执行时冻结的工具源码摘要。输出 `contract_status` 只说明输入/执行合同，不代替随机追踪或全流程科学验收；不调用官方程序或 GPU。
+
 ## 3. 命令行
 
 ```bash
@@ -65,6 +85,26 @@ python tools/benchmark_connectome_seven_atlas_envelope.py \
 ```
 
 单 atlas 使用 `benchmark_connectome_tracking_100k_envelope.py`，将路径指向对应模板目录。多 atlas 可加 `--atlas fs-aparc aparc+tian-s1` 明确选择子集。`--figure` 为可选的矩阵/误差图，不是新的脑影像 benchmark；标题和点数随实际数据、节点数和重复次数变化。`--official-seeds`、`--fnit-seeds` 可省略，此时只标记运行序号，不猜测种子。
+
+```bash
+# population 的 --official/--fnit 可以接多个 TCK；--fnit-repeat 兼容旧调用。
+python tools/benchmark_connectome_tracking_population.py \
+  --official reference/seed-0/tracks.tck reference/seed-1/tracks.tck \
+             reference/seed-2/tracks.tck reference/seed-3/tracks.tck reference/seed-4/tracks.tck \
+  --fnit fnit_checkpoints/tracks.tck --grid reference/inputs/wm_fod.nii.gz \
+  --dataset 'OpenNeuro ds001226 CON03' --n-seeds 100000 \
+  --official-seeds 0 1 2 3 4 --fnit-seeds 0 \
+  --output population_envelope.json --figure tractogram_population.png
+
+# 对已经完成的真实输出做 CPU 只读审计，所有参数均为实际路径。
+CUDA_VISIBLE_DEVICES='' python tools/reference/audit_connectome_repeats.py \
+  --manifest reference/reference_manifest.json \
+  --checkpoint-dir fnit_checkpoints --fnit-dir fnit_connectome \
+  --reference-script frozen_tools/tools/reference/benchmark_connectome_repeats_official.py \
+  --output contract_audit.json
+```
+
+`--grid` 为公共 NIfTI 网格；`--dataset` 为真实数据标签；`--n-seeds` 为每轮尝试数（默认 100000）；两个 `--*-seeds` 为可选运行种子标签。`--output` 必需，`--figure` 可选；绘图只依赖项目已声明的 matplotlib，数值分析不需导入它。CPU 工具不重新运行追踪、SIFT2 或矩阵构造。
 
 本轮 CON03 的独立参考计划（执行前需确认真实检查点已生成）：
 
@@ -140,11 +180,20 @@ ACT 5TT 保留原 header spacing；SIFT2 5TT 和 GMWMI 的可表示 sform 保留
 
 修正末行序列化契约后，对真实 `root_diagnostic_CON03_v2` 的 13 份输入（FOD、ACT 5TT、SIFT2 5TT、GMWMI、FA、8 套 atlas）在 CPU 完整重验：**13/13 体素位一致、13/13 前 3×4 sform 位一致**。源 5TT 仿射末行最大残差 `5.551115123125783e-16`，小于固定 Float64 γ4 界限 `8.88178419700126e-16`；原 FA 的 1 个 NaN 保留。原 PT 和失败 v1 manifest 摘要不变，未执行任何官方命令或 GPU。核验记录位于本轮 `root_repeat_input_export_CON03_v2/export_verification.json`，这只证明实际输入序列化契约，不是随机追踪通过结果。新增舍入边界、projective 拒绝和 sform 一位变化拒绝的 CPU 回归后，**25 passed、1 skipped，2.70 秒**。
 
+### CON03 v2 最新真实结果
+
+2026-10-03，官方 nodecw10 已完成种子 0..4 的 **198/198 条命令，全部 exit0**；输入合同审计通过（13/13 数据位及 sform 3×4 位、节点/atlas 来源与摘要一致，原 FA 的 1 个 NaN 保留）。FNIT 当前完整种子 0 的接受率为 **11.606%**，官方为 **11.475–11.843%**。但长度 KS、端点直方图和部分 point-visit 密度比较越界，`population_envelope_status=failed`。
+
+八套模板的预先定义六指标共 240 个跨比较，**233 通过、7 越界**；fs-aparc、aparc+Tian S1、Glasser+Tian S1、Schaefer200+Tian S1 全部通过，其余四套有 count 相关性、支持 Dice 或 Glasser+Tian S4 平均 FA 误差越界，`matrix_envelope_status=failed`。只有一份 FNIT 完整结果，`fnit_reproducibility_status=not_assessed`。未按观察结果放宽门槛，也不能用此组件对照宣布十例 raw pipeline 已通过。
+
+完整逐项数值、真实脑图、CPU 只读复现命令和分阶段官方耗时见 [CON03 五次官方参考报告](../validation/connectome/tenraw_20261002/task_04_repeat_reference/README.md)。新工具回归与原矩阵比较测试 **29 passed、1 skipped，3.96 秒**（gpucw1 CPU、CUDA 不可见；唯一跳过项为专用环境中缺少可选 matplotlib）。绘图实际使用已有 base Python 的 matplotlib，不修改正在运行正式任务的 Conda 环境。
+
 ## 6. 更新记录
 
 - 2026-10-02：三次固定输入改为至少三次、默认计划五次；支持任意 FNIT 重复和当前 CLI 多 atlas CSV；去掉旧数据/20 节点硬编码；修正单侧验收，新增空值和对角报告；独立官方参考共用每次追踪的后处理，保留精确检查点几何和完整来源。
 - 2026-10-03：核对实际 tracking 默认值和加权均值公式；补上同轮 core 输出就绪检查；直接 NIfTI-2 参考输入、追踪前官方 header readback、保留原 NaN；CON03 计划路径更新为 v2。没有据此宣称随机追踪或十例流程已经通过。
 - 2026-10-03：真实参考 v1 在 NIfTI-2 导出时误把齐次末行机器残差判为数据变化，尚未执行任何参考命令。改为严格校验可表示的 3×4 sform 和体素位，按固定 dtype γ4 界限检查原末行，完整记录源/文件/FNIT 算子几何。原失败目录保留，不改原 Tensor、ACT spacing 或科学门槛。
+- 2026-10-03：泛化人口分布工具为任意 ≥3 官方/≥1 FNIT；保留 KS/端点/点访问计数定义，修正四体素块的物理尺寸标签；新增 CPU 只读完成/输入合同审计，发布真实 CON03 五轮完整失败/通过指标，不改生产数值或科学门槛。
 - 旧报告继续绑定旧代码/数据，历史 `inside_count` 仍表示双侧观察范围；新版 `comparison_accepted` 才用于本轮验收。没有重新运行旧结果或改写旧结论。
 
 ## 7. 参考和源码

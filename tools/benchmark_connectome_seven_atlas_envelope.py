@@ -82,22 +82,35 @@ def figure(path: Path, report: dict) -> None:
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
+    import textwrap
+
     profiles = list(report["profiles"])
-    shown = ("count_relative_l1", "sift2_fbc_relative_l1", "mean_fa_common_normalized_mae")
-    fig, axes = plt.subplots(1, 3, figsize=(13, max(5, len(profiles) * .45)), constrained_layout=True)
-    for ax, field in zip(axes, shown):
+    shown = (("count_relative_l1", "Count relative L1"),
+             ("sift2_fbc_relative_l1", "SIFT2 FBC relative L1"),
+             ("count_pearson", "Count Pearson correlation"),
+             ("count_support_dice", "Count support Dice"),
+             ("mean_length_common_normalized_mae", "Common count edges:\nmean length normalized MAE"),
+             ("mean_fa_common_normalized_mae", "Common count edges:\nmean FA normalized MAE"))
+    fig, axes = plt.subplots(2, 3, figsize=(15, max(9, len(profiles) * .85)),
+                             sharey=True, constrained_layout=True)
+    for ax, (field, title) in zip(axes.ravel(), shown):
         for row, profile in enumerate(profiles):
             values = report["profiles"][profile]["ranges"][field]
             if values["official_min_max"] is not None:
                 low, high = values["official_min_max"]
                 ax.plot((low, high), (row, row), color="#2374ab", linewidth=4)
-            cross = [value for value in values["fnit_vs_official"] if value is not None]
-            if cross:
-                ax.scatter(cross, row + np.linspace(-.12, .12, len(cross)), color="#d55e00", s=25)
-        ax.set(title=field.replace("_", " "), yticks=range(len(profiles)),
-               yticklabels=profiles, xlabel="error")
+            offsets = np.linspace(-.12, .12, len(values["fnit_vs_official"]))
+            for value, accepted, offset in zip(values["fnit_vs_official"],
+                                               values["comparison_accepted"], offsets):
+                if value is not None:
+                    ax.scatter(value, row + offset,
+                               color="#d62728" if accepted is False else "#d55e00", s=25)
+        ax.set(title=title, yticks=range(len(profiles)), yticklabels=profiles,
+               xlabel="similarity" if field in ("count_support_dice", "count_pearson") else "normalized error")
+        ax.tick_params(axis="y", labelsize=9)
         ax.grid(axis="x", alpha=.2)
-    fig.suptitle(f"{report['dataset']} · {report['n_seed_attempts']:,} attempts · MRtrix observed range (blue), FNIT (orange)")
+    fig.suptitle(textwrap.fill(f"{report['dataset']} · {report['n_seed_attempts']:,} attempts", 110) +
+                 "\nBlue: official observed range; orange: accepted cross comparison; red: outside predeclared gate", fontsize=11)
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, dpi=180)
     plt.close(fig)

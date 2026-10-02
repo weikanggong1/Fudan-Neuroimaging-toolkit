@@ -423,3 +423,56 @@ def test_absent_trailing_nodes_align_by_zero_without_changing_raw_official_csv(t
     assert metadata["canonical_matrix_alignment"]["original_nodes"] == 3
     with pytest.raises(ValueError, match="truncates present"):
         module.align_official_matrices(directory, canonical_nodes=4, maximum_present_label=4)
+
+
+def test_population_five_official_one_fnit_preserves_point_visit_definition(tmp_path):
+    from tools import benchmark_connectome_tracking_population as population
+    affine = np.diag([2.5, 2.5, 2.5, 1.])
+    grid = tmp_path / 'grid.nii.gz'
+    nib.save(nib.Nifti2Image(np.zeros((8, 8, 8), dtype=np.float32), affine), grid)
+    tracks = [np.array([[0., 0., 0.], [2.5, 0., 0.], [2.5, 0., 0.]], dtype=np.float32),
+              np.array([[5., 5., 5.], [7.5, 5., 5.]], dtype=np.float32)]
+    paths = []
+    for index in range(6):
+        path = tmp_path / f'tracks_{index}.tck'
+        nib.streamlines.save(nib.streamlines.Tractogram(tracks, affine_to_rasmm=np.eye(4)), path)
+        paths.append(path)
+    report, data = population.compare(paths[:5], paths[5:], grid, dataset='tool fixture only',
+                                      n_seeds=10, official_seeds=list(range(5)), fnit_seeds=[0],
+                                      return_data=True)
+    assert report['comparison_counts'] == {'official': 10, 'fnit': 0, 'cross': 5}
+    assert report['fnit_reproducibility_status'] == 'not_assessed'
+    assert report['four_voxel_block_axes_mm'] == [10., 10., 10.]
+    assert report['accepted_fractions']['fnit_0'] == .2
+    assert len(report['pairs']) == 15
+    assert data['fnit_0'][2].sum() == 5
+    assert data['fnit_0'][2][1, 0, 0] == 2  # repeated stored points count twice
+    assert report['ranges']['length_ks']['comparison_accepted'] == [True] * 5
+    assert 'tdi_8mm_block_pearson' not in report['ranges']
+    json.dumps(report, allow_nan=False)
+    with pytest.raises(ValueError, match='duplicate resolved'):
+        population.compare(paths[:5], [paths[0]], grid)
+    with pytest.raises(ValueError, match='duplicate seed'):
+        population.compare(paths[:5], paths[5:], grid, official_seeds=[0] * 5)
+
+
+def test_population_undefined_correlation_is_not_a_pass():
+    from tools import benchmark_connectome_tracking_population as population
+    assert population._correlation(np.zeros(4), np.zeros(4)) is None
+    assert population._correlation(np.ones(4), np.ones(4)) is None
+    result = envelope([None] * 10, [None] * 5, similarity=True)
+    assert result['status'] == 'not_assessed'
+    assert result['comparison_accepted'] == [None] * 5
+
+
+@pytest.mark.parametrize('completed', [[], [{'stage': 'tracking', 'argv': ['tckgen'], 'returncode': 1}]])
+def test_readonly_official_audit_rejects_incomplete_or_failed_commands(tmp_path, completed):
+    path = Path(__file__).parents[2] / 'tools/reference/audit_connectome_repeats.py'
+    spec = importlib.util.spec_from_file_location('readonly_audit_fixture', path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    manifest = tmp_path / 'manifest.json'
+    manifest.write_text(json.dumps({'execution_completed': True, 'seeds': [0, 1, 2],
+        'commands': [{'stage': 'tracking', 'argv': ['tckgen']}], 'completed_commands': completed}))
+    with pytest.raises(ValueError, match='command'):
+        module.audit(manifest, tmp_path / 'missing_core', tmp_path / 'missing_fnit')
