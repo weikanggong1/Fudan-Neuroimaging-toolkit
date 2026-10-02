@@ -15,6 +15,7 @@ def run_recon_all_python_batch(
     *, devices: tuple[str, ...] = ("cuda:0",), threads: int = 4,
     native_bin_dir: str | Path | None = None,
     profile_stages: bool = False, cuda_allocator_cache: str = "auto",
+    hemisphere_workers: int = 1,
 ) -> list[dict]:
     """每设备独立子进程执行单 T1，按 jobs 顺序返回完整报告列表。
 
@@ -25,8 +26,11 @@ def run_recon_all_python_batch(
     延续低显存默认，也可在子进程初始化前选择 enabled/disabled。
     输出体积为 conform 网格，表面为 surface RAS/mm；输出/错误语义同
     单例入口。输入非法抛 ValueError/FileNotFoundError，任务失败汇总为
-    RuntimeError。每设备仅执行一个被试，不在本函数内并行双侧表面。
+    RuntimeError。每设备仅执行一个被试；hemisphere_workers 默认1，设2时被试内部
+    独立进程并行双侧，threads 在双侧之间分配（总预算不翻倍）。
     """
+    from .hemisphere_parallel import validate_hemisphere_workers
+    validate_hemisphere_workers(hemisphere_workers, threads)
     if not devices or len(set(devices)) != len(devices) or any(
         device != "cpu" and re.fullmatch(r"cuda:\d+", device) is None for device in devices
     ):
@@ -59,6 +63,8 @@ def run_recon_all_python_batch(
                        str(t1), str(subject), "--weights-dir", str(weights),
                        "--assets-dir", str(assets), "--device", device,
                        "--threads", str(threads), "--cuda-allocator-cache", cuda_allocator_cache]
+            if hemisphere_workers != 1:
+                command += ["--hemisphere-workers", str(hemisphere_workers)]
             if profile_stages:
                 command.append("--profile-stages")
             if native_bin_dir is not None:
