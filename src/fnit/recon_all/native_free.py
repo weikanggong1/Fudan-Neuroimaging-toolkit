@@ -388,7 +388,7 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
                   *, device: str, threads: int, topology_binary: Path,
                   inflate_binary: Path, intersection_binary: Path,
                   place_binary: Path, defect_binary: Path,
-                  assets: Path) -> dict:
+                  assets: Path, defer_defects: bool = False) -> dict:
     """从 filled 生成已修复 orig、预白质表面及标准球面。"""
     from .extract_main_component_python import extract_main_component
     from .label_cortex_fix_ga_python import label_cortex_fix_ga
@@ -410,7 +410,8 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
     topology_python_seconds, topology_native_seconds, pre_sphere_seconds, remesh_seconds, intersection_seconds = (
         _prepare_native_topology(topology_binary, subject, hemi, assets,
                                  device, inflate_binary, intersection_binary))
-    _run_defects_volume(defect_binary, subject, hemi, assets)
+    if not defer_defects:
+        _run_defects_volume(defect_binary, subject, hemi, assets)
     preaparc = _place_preaparc_and_smooth(subject, hemi, place_binary,
                                          assets, threads)
     base, ga = label_cortex_fix_ga(
@@ -435,27 +436,36 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
 
 
 def _finish_cortical_surface(subject: Path, hemi: str, binary: Path,
-                             assets: Path, *, device: str, threads: int) -> dict:
+                             assets: Path, *, device: str, threads: int,
+                             defer_metrics: bool = False) -> dict:
     """球面配准和注释完成后，依次放置最终 white、pial 并计算顶点图。"""
     from .final_white_conda import run_final_white
-    from .surface_area_gpu import mid_area_map
-    from .surface_roi_gpu import vertex_volume_map
-
-    surf, labels = subject / "surf", subject / "label"
+    surf = subject / "surf"
     white_report = run_final_white(subject, hemi, binary, assets, threads=threads)
     pial_report = _run_native_pial(binary, subject, hemi, assets, threads)
     shutil.copyfile(surf / f"{hemi}.pial.T1", surf / f"{hemi}.pial")
+    result = {"final_white_report": white_report, "pial_report": pial_report,
+              "placement_pending": False, "metrics_pending": defer_metrics}
+    if not defer_metrics:
+        result.update(_finish_cortical_metrics(subject, hemi, binary, assets, device=device))
+    return result
+
+
+def _finish_cortical_metrics(subject: Path, hemi: str, binary: Path,
+                            assets: Path, *, device: str) -> dict:
+    """完成已放置white/pial的指标；真实短配对显示GPU指标串行更快。"""
+    from .surface_area_gpu import mid_area_map
+    from .surface_roi_gpu import vertex_volume_map
+    surf, labels = subject / 'surf', subject / 'label'
     metric_seconds = _run_surface_metrics(binary, subject, hemi, assets, device=device)
     mid_area_map(surf / f"{hemi}.area", surf / f"{hemi}.area.pial",
                  surf / f"{hemi}.area.mid", device=device)
     vertex_volume_map(surf / f"{hemi}.white", surf / f"{hemi}.pial",
                       labels / f"{hemi}.cortex.label",
                       surf / f"{hemi}.volume", device=device)
-    return {"final_white_report": white_report, "pial_report": pial_report,
-            "metric_seconds": metric_seconds,
+    return {"metric_seconds": metric_seconds,
             "mean_thickness_mm": float(np.mean(fs.read_morph_data(
-                str(surf / f"{hemi}.thickness")))),
-            "placement_pending": False}
+                str(surf / f"{hemi}.thickness")))), "metrics_pending": False}
 
 
 def _project_parcels(subject: Path) -> None:
@@ -580,17 +590,68 @@ def _write_hemisphere_stats(subject: Path, hemi: str, volumes: dict, cache,
               device=device, cache=cache)
 
 
+
+def _hemisphere_operation(subject, hemi, device, threads, operation, *, assets,
+                          binaries=None, registration_atlases=None):
+    """可 exec 的半球阶段入口；维持现有子函数接口与依赖屏障。"""
+    from .profiling import StageProfiler, configure_cuda_allocator
+    subject, assets = Path(subject), Path(assets)
+    binaries = {name: Path(value) for name, value in (binaries or {}).items()}
+    profiler = StageProfiler(device=device, synchronize=False,
+                             allocator=configure_cuda_allocator(device))
+    steps = []
+    def step(name, function, *args, **kwargs):
+        try:
+            return profiler.run(name, function, *args, **kwargs)
+        finally:
+            steps.append(dict(profiler.last_row))
+    surf, mri, labels = (subject / name for name in ('surf', 'mri', 'label'))
+    if operation == 'surface':
+        value = step(f'surface_{hemi}', _surface_pair, subject, hemi,
+                     mri / 'filled.mgz', mri / 'norm.mgz', device=device,
+                     threads=threads, topology_binary=binaries['topology'],
+                     inflate_binary=binaries['inflate'], intersection_binary=binaries['intersection'],
+                     place_binary=binaries['metrics'], defect_binary=binaries['defect'],
+                     assets=assets, defer_defects=True)
+    elif operation == 'register':
+        from .mris_register_run import run_register_sphere
+        value = step(f'register_{hemi}', run_register_sphere,
+                     surf / f'{hemi}.sphere', surf / f'{hemi}.smoothwm',
+                     surf / f'{hemi}.sulc', Path(registration_atlases[hemi]),
+                     surf / f'{hemi}.sphere.reg', overlap_device='cpu', averaging_device=device)
+        step(f'avg_curv_{hemi}', _run_avg_curv, binaries['paint'], subject, hemi,
+             Path(registration_atlases[hemi]), assets)
+    elif operation == 'annotation':
+        from .gcsa_label_python import label_surface
+        value = {}
+        for atlas, prefix in (('aparc', 'DKaparc'), ('aparc.a2009s', 'CDaparc'),
+                              ('aparc.DKTatlas', 'DKTaparc')):
+            atlas_file = assets / 'average' / f'{hemi}.{prefix}.atlas.acfb40.noaparc.i12.2016-08-02.gcs'
+            value[atlas] = step(f'annot_{hemi}_{atlas}', label_surface, subject, hemi,
+                  atlas_file, assets / 'lib/bem/ic4.tri', assets / 'lib/bem/ic7.tri',
+                  labels / f'{hemi}.{atlas}.annot', device=device)
+    elif operation == 'finish_surface':
+        value = step(f'finish_surface_{hemi}', _finish_cortical_surface, subject,
+                     hemi, binaries['metrics'], assets, device=device, threads=threads, defer_metrics=True)
+    else:
+        raise ValueError(f'unknown hemisphere operation: {operation}')
+    return {'result': value, 'stages': steps}
+
+
 def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          weights_dir: str | Path, assets_dir: str | Path,
                          *, device: str = "cuda:0", threads: int = 4,
                          native_bin_dir: str | Path | None = None,
                          profile_stages: bool = False,
-                         cuda_allocator_cache: str = "auto") -> dict:
+                         cuda_allocator_cache: str = "auto",
+                         hemisphere_workers: int = 1) -> dict:
     """从单幅原始 T1 连续生成 conform 体积、双侧表面和脑区统计。
 
     t1、subject_dir、weights_dir、assets_dir 是输入影像、空输出目录、
     已校验权重和资产的路径；native_bin_dir=None 时使用当前 Conda bin。
     device 默认 cuda:0，threads 默认 4；不自动使用 FP16/BF16。
+    hemisphere_workers 默认1保持串行，2用独立 exec 半球进程；总 threads
+    在双侧之间平分（奇数向下取整），父进程保留依赖屏障和共享发布。
     profile_stages=False 不增加阶段 CUDA 同步；True 分别记录前同步、函数、
     后同步和父子 CPU 秒数。cuda_allocator_cache=auto 延续首次 CUDA 调用
     关闭缓存的策略，并保留已初始化 API 的 allocator；enabled/disabled
@@ -601,6 +662,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     输出结构、限制、官方命令和真实数据见 docs/recon_all/README.md。
     """
     started = time.perf_counter()
+    from .hemisphere_parallel import validate_hemisphere_workers
+    validate_hemisphere_workers(hemisphere_workers, threads)
     from .profiling import StageProfiler, configure_cuda_allocator, autocast_state
     from fnit.synthseg_parc import SynthSeg
     from .brain_volume_stats_python import compute_brain_volume_stats
@@ -615,6 +678,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
 
     if threads < 1:
         raise ValueError("threads must be positive")
+    if hemisphere_workers == 2 and any(autocast_state(kind)["enabled"] for kind in ("cpu", "cuda")):
+        raise ValueError("parallel hemispheres require caller autocast disabled; FP16/BF16 is not authorized")
     allocator = configure_cuda_allocator(device, cuda_allocator_cache)
     t1, subject = Path(t1).resolve(), Path(subject_dir).resolve()
     weights, assets = Path(weights_dir).resolve(), Path(assets_dir).resolve()
@@ -675,6 +740,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                                "total_scope": "API entry through validation, loading, transfers and output writes",
                                "validation_seconds": validation_seconds},
                     "stages": [], "status": "running"}
+    report["hemisphere_scheduling"] = {"workers": hemisphere_workers, "total_thread_budget": threads, "groups": [], "mode": "serial" if hemisphere_workers == 1 else "independent-exec-private-subjects"}
     report["gca_registration"] = {"implementation": "native-c++",
                                   "binary": str(native_em[0]), "sha256": native_em[1]}
     report["topology_repair"] = {
@@ -703,7 +769,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         "finish_device": "cpu", "upstream": "repaired topology"}
     registration_device = torch.device(device)
     if registration_device.type == "cuda" and registration_device.index is None:
-        registration_device = torch.device("cuda", torch.cuda.current_device())
+        registration_device = torch.device("cuda", torch.cuda.current_device() if torch.cuda.is_initialized() else 0)
     report["sphere_registration"] = {
         "implementation": "Python/Numba + ordered CUDA averaging" if registration_device.type == "cuda" else "Python/Numba",
         "averaging_device": str(registration_device), "overlap_device": "cpu",
@@ -731,7 +797,10 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
             report.update(status="failed", failed_stage=name, error=repr(error),
                           total_seconds=time.perf_counter() - started)
             subject.mkdir(parents=True, exist_ok=True)
-            (subject / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
+            try:
+                (subject / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
+            except Exception as metadata_error:
+                error.add_note(f"Stage failure metadata could not be saved: {metadata_error!r}")
             raise
         row = profiler.last_row
         if isinstance(value, dict) and value.get("actual_forwards"):
@@ -846,48 +915,94 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                           error=f"{type(error).__name__}: {error}")
             (subject / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
         raise
-    for hemi in ("lh", "rh"):
-        result = stage(f"surface_{hemi}", _surface_pair, subject, hemi,
-                       mri / "filled.mgz", mri / "norm.mgz",
-                       device=device, threads=threads,
-                       topology_binary=topology_binary[0],
-                       inflate_binary=inflate_binary[0],
-                       intersection_binary=intersection_binary[0],
-                       place_binary=metrics_binary[0],
-                       defect_binary=defect_binary[0], assets=assets)
-        report.setdefault("surfaces", {})[hemi] = result
-        (subject / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
+    if hemisphere_workers == 2:
+        from .hemisphere_parallel import run_hemisphere_group, HemisphereGroupError
+        common = {'assets': str(assets),
+                  'binaries': {name: str(value) for name, value in (
+                      ('topology', topology_binary[0]), ('inflate', inflate_binary[0]),
+                      ('intersection', intersection_binary[0]), ('metrics', metrics_binary[0]),
+                      ('defect', defect_binary[0]), ('paint', paint_binary[0]))},
+                  'registration_atlases': {hemi: str(path) for hemi, path in registration_atlases.items()}}
+        for operation in ('surface', 'register', 'annotation', 'finish_surface'):
+            try:
+                group = stage(f'{operation}_hemisphere_group', run_hemisphere_group,
+                              subject, operation, device=str(registration_device), threads=threads,
+                              workers=hemisphere_workers, profile_stages=profile_stages, kwargs=common)
+            except HemisphereGroupError as error:
+                report['hemisphere_scheduling']['groups'].append(error.report)
+                try:
+                    (subject / 'fnit-native-free-run.json').write_text(json.dumps(report, indent=2))
+                except Exception as metadata_error:
+                    error.add_note(f"Group failure metadata could not be saved: {metadata_error!r}")
+                raise
+            report['hemisphere_scheduling']['groups'].append(group)
+            for hemi in ('lh', 'rh'):
+                value = group['values'][hemi]
+                # Worker 步骤用于诊断，不加到父组墙钟形成重复计时。
+                result = value['result']
+                if operation == 'surface':
+                    report.setdefault('surfaces', {})[hemi] = result
+                elif operation == 'register':
+                    report['sphere_registration']['hemisphere_seconds'][hemi] = result['total_seconds_including_io']
+                    report['sphere_registration']['reports'][hemi] = result
+                elif operation == 'finish_surface':
+                    report['surfaces'][hemi].update(result)
+            if operation == 'finish_surface':
+                # 实测GPU顶点指标独立exec并行更慢；放置并行、指标串行。
+                for hemi in ('lh', 'rh'):
+                    metrics_result = stage(f'finish_metrics_{hemi}', _finish_cortical_metrics,
+                          subject, hemi, metrics_binary[0], assets, device=device)
+                    report['surfaces'][hemi].update(metrics_result)
+            if operation == 'surface':
+                # 此诊断无下游计算依赖，但左右累计有先后依赖。
+                for hemi in ('lh', 'rh'):
+                    stage(f'defects_{hemi}', _run_defects_volume,
+                          defect_binary[0], subject, hemi, assets)
+            (subject / 'fnit-native-free-run.json').write_text(json.dumps(report, indent=2))
+        surf = subject / 'surf'
+    else:
+        for hemi in ("lh", "rh"):
+            result = stage(f"surface_{hemi}", _surface_pair, subject, hemi,
+                           mri / "filled.mgz", mri / "norm.mgz",
+                           device=device, threads=threads,
+                           topology_binary=topology_binary[0],
+                           inflate_binary=inflate_binary[0],
+                           intersection_binary=intersection_binary[0],
+                           place_binary=metrics_binary[0],
+                           defect_binary=defect_binary[0], assets=assets)
+            report.setdefault("surfaces", {})[hemi] = result
+            (subject / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
 
-    from .mris_register_run import run_register_sphere
-    for hemi in ("lh", "rh"):
-        surf = subject / "surf"
-        result = stage(f"register_{hemi}", run_register_sphere,
-                       surf / f"{hemi}.sphere", surf / f"{hemi}.smoothwm",
-                       surf / f"{hemi}.sulc", registration_atlases[hemi],
-                       surf / f"{hemi}.sphere.reg", overlap_device="cpu",
-                       averaging_device=str(registration_device))
-        report["sphere_registration"]["hemisphere_seconds"][hemi] = result[
-            "total_seconds_including_io"]
-        report["sphere_registration"]["reports"][hemi] = result
-        stage(f"avg_curv_{hemi}", _run_avg_curv, paint_binary[0], subject,
-              hemi, registration_atlases[hemi], assets)
+        from .mris_register_run import run_register_sphere
+        for hemi in ("lh", "rh"):
+            surf = subject / "surf"
+            result = stage(f"register_{hemi}", run_register_sphere,
+                           surf / f"{hemi}.sphere", surf / f"{hemi}.smoothwm",
+                           surf / f"{hemi}.sulc", registration_atlases[hemi],
+                           surf / f"{hemi}.sphere.reg", overlap_device="cpu",
+                           averaging_device=str(registration_device))
+            report["sphere_registration"]["hemisphere_seconds"][hemi] = result[
+                "total_seconds_including_io"]
+            report["sphere_registration"]["reports"][hemi] = result
+            stage(f"avg_curv_{hemi}", _run_avg_curv, paint_binary[0], subject,
+                  hemi, registration_atlases[hemi], assets)
 
-    for hemi in ("lh", "rh"):
-        for atlas, prefix in (("aparc", "DKaparc"),
-                              ("aparc.a2009s", "CDaparc"),
-                              ("aparc.DKTatlas", "DKTaparc")):
-            atlas_file = assets / "average" / (
-                f"{hemi}.{prefix}.atlas.acfb40.noaparc.i12.2016-08-02.gcs")
-            stage(f"annot_{hemi}_{atlas}", label_surface, subject, hemi,
-                  atlas_file, assets / "lib/bem/ic4.tri",
-                  assets / "lib/bem/ic7.tri",
-                  labels / f"{hemi}.{atlas}.annot", device=device)
-    for hemi in ("lh", "rh"):
-        result = stage(f"finish_surface_{hemi}", _finish_cortical_surface,
-                       subject, hemi, metrics_binary[0], assets,
-                       device=device, threads=threads)
-        report["surfaces"][hemi].update(result)
-        (subject / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
+        for hemi in ("lh", "rh"):
+            for atlas, prefix in (("aparc", "DKaparc"),
+                                  ("aparc.a2009s", "CDaparc"),
+                                  ("aparc.DKTatlas", "DKTaparc")):
+                atlas_file = assets / "average" / (
+                    f"{hemi}.{prefix}.atlas.acfb40.noaparc.i12.2016-08-02.gcs")
+                stage(f"annot_{hemi}_{atlas}", label_surface, subject, hemi,
+                      atlas_file, assets / "lib/bem/ic4.tri",
+                      assets / "lib/bem/ic7.tri",
+                      labels / f"{hemi}.{atlas}.annot", device=device)
+        for hemi in ("lh", "rh"):
+            result = stage(f"finish_surface_{hemi}", _finish_cortical_surface,
+                           subject, hemi, metrics_binary[0], assets,
+                           device=device, threads=threads)
+            report["surfaces"][hemi].update(result)
+            (subject / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
     stage("exvivo_annotations", _project_exvivo_annotations, subject, assets)
     from .surface_jacobian_gpu import jacobian_map
     from .vol2surf_contrast_python import write_contrast_percentage
@@ -966,12 +1081,16 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          *, device: str = "cuda:0", threads: int = 4,
                          native_bin_dir: str | Path | None = None,
                          profile_stages: bool = False,
-                         cuda_allocator_cache: str = "auto") -> dict:
+                         cuda_allocator_cache: str = "auto",
+                         hemisphere_workers: int = 1) -> dict:
     """从原始单 T1 连续重建；输入、输出及坐标定义见 recon-all 中文说明。
 
     t1 为原始影像；subject_dir 须为空；weights_dir/assets_dir 为已校验资源；
     native_bin_dir=None 使用当前 Conda bin。device 默认 cuda:0，threads=4
     约束 Torch intraop 和调用线程的 Numba 掩码，退出时恢复调用方设置。
+    hemisphere_workers=1保持串行，2启用私有被试目录的双侧 exec 进程，
+    总 threads 平分，须至少2；返回 hemisphere_scheduling 组墙钟/worker报告，
+    所有共享发布失败均传播到主报告。并行要求 caller autocast 关闭。
     profile_stages=False 不插入阶段同步；True 分列 CUDA 等待与父子 CPU 秒数。
     球面配准在 device 上执行完整有序 float32 梯度平均，其余目标函数、
     步长决策及末尾清理保持 CPU；不自动启用半精度，计时包含往返传输。
@@ -1024,7 +1143,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                 report = _run_recon_all_python(
                     t1=t1, subject_dir=subject_dir, weights_dir=weights_dir, assets_dir=assets_dir,
                     device=device, threads=threads, native_bin_dir=native_bin_dir,
-                    profile_stages=profile_stages, cuda_allocator_cache=cuda_allocator_cache)
+                    profile_stages=profile_stages, cuda_allocator_cache=cuda_allocator_cache,
+                    **({"hemisphere_workers": hemisphere_workers} if hemisphere_workers != 1 else {}))
             except Exception as error:
                 pipeline_error = error
                 raise
@@ -1067,6 +1187,8 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--threads", type=int, default=4)
     parser.add_argument("--native-bin-dir", type=Path)
+    parser.add_argument("--hemisphere-workers", type=int, choices=(1, 2), default=1,
+                        help="independent hemisphere processes; total threads split across two workers")
     parser.add_argument("--profile-stages", action="store_true",
                         help="record CUDA synchronization and parent/child CPU time")
     parser.add_argument("--cuda-allocator-cache", choices=("auto", "enabled", "disabled"),
@@ -1077,7 +1199,8 @@ def main(argv: list[str] | None = None) -> None:
                                   threads=args.threads,
                                   native_bin_dir=args.native_bin_dir,
                                   profile_stages=args.profile_stages,
-                                  cuda_allocator_cache=args.cuda_allocator_cache)
+                                  cuda_allocator_cache=args.cuda_allocator_cache,
+                                  hemisphere_workers=args.hemisphere_workers)
     print(json.dumps(report, indent=2))
 
 

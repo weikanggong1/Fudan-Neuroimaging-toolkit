@@ -1,0 +1,173 @@
+{
+  "operation": "metrics",
+  "workers_requested": 2,
+  "total_thread_budget": 4,
+  "worker_threads": 2,
+  "status": "failed",
+  "workers": {
+    "lh": {
+      "status": "failed",
+      "pid": 111140,
+      "started_monotonic": 2745664.611816218,
+      "stage": {
+        "name": "metrics",
+        "seconds": 2.2447305349633098,
+        "function_seconds": 2.2446227218024433,
+        "cuda_pre_sync_seconds": 0.0,
+        "cuda_post_sync_seconds": 0.0,
+        "cuda_synchronized": false,
+        "cuda_synchronization_requested": true,
+        "parent_cpu_seconds": 2.010309796,
+        "child_cpu_seconds": 0.050922,
+        "torch_memory_stats_status": "unavailable",
+        "error": "RuntimeError('CUDA error: out of memory\\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\\n')"
+      },
+      "thread_budget": {
+        "requested_threads": 2,
+        "scope": "Torch process intraop and current caller Numba thread mask",
+        "torch": {
+          "before": 2,
+          "effective": 2,
+          "interop_unchanged": 1,
+          "restored": 2
+        },
+        "numba": {
+          "before": 2,
+          "effective": 2,
+          "initial_capacity": 2,
+          "mask_only": true,
+          "threading_layer": "tbb",
+          "restored": 2
+        },
+        "environment_modified": false,
+        "restoration_complete": true
+      },
+      "error": "RuntimeError('CUDA error: out of memory\\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\\n')",
+      "traceback": "Traceback (most recent call last):\n  File \"/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_01/source/src/fnit/recon_all/hemisphere_worker.py\", line 32, in main\n    report['value'] = profiler.run(request['operation'], function,\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_01/source/src/fnit/recon_all/profiling.py\", line 134, in run\n    value = function(*args, **kwargs)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_01/source/validation/recon_all/optimizations/20261002_parallel/task_01/benchmark_hemi.py\", line 28, in metrics\n    result = _run_surface_metrics(Path(binaries['metrics']), subject, hemi, Path(assets), device=device)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_01/source/src/fnit/recon_all/native_free.py\", line 201, in _run_surface_metrics\n    torch.cuda.synchronize(device)\n  File \"/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/site-packages/torch/cuda/__init__.py\", line 954, in synchronize\n    return torch._C._cuda_synchronize()\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: CUDA error: out of memory\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n\n",
+      "finished_monotonic": 2745668.851524438,
+      "total_seconds": 4.239708219654858
+    }
+  },
+  "values": {},
+  "published": [],
+  "private_copy_seconds": 4.396453803870827,
+  "error": "RuntimeError('hemisphere worker failed; sibling cancelled')",
+  "device_process_tree": {
+    "status": "available",
+    "target_gpu_uuid": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+    "sampling_interval_seconds": 0.5,
+    "max_observed_interval_seconds": 4.660146266222,
+    "failed_samples": [
+      {
+        "monotonic": 2745667.202400788,
+        "error": "TimeoutExpired(['nvidia-smi', '--query-compute-apps=pid,gpu_uuid,used_gpu_memory', '--format=csv,noheader,nounits'], 3)"
+      }
+    ],
+    "samples": [
+      {
+        "monotonic": 2745664.538516204,
+        "processes": [
+          {
+            "pid": 105739,
+            "bytes": 1937768448
+          }
+        ],
+        "tree_total_bytes": 1937768448,
+        "external_processes": [
+          {
+            "pid": 31685,
+            "bytes": 843055104
+          }
+        ]
+      },
+      {
+        "monotonic": 2745665.082384535,
+        "processes": [
+          {
+            "pid": 105739,
+            "bytes": 1937768448
+          }
+        ],
+        "tree_total_bytes": 1937768448,
+        "external_processes": [
+          {
+            "pid": 31685,
+            "bytes": 843055104
+          }
+        ]
+      },
+      {
+        "monotonic": 2745665.587521438,
+        "processes": [
+          {
+            "pid": 105739,
+            "bytes": 1937768448
+          }
+        ],
+        "tree_total_bytes": 1937768448,
+        "external_processes": [
+          {
+            "pid": 31685,
+            "bytes": 843055104
+          }
+        ]
+      },
+      {
+        "monotonic": 2745666.134446921,
+        "processes": [
+          {
+            "pid": 105739,
+            "bytes": 1937768448
+          }
+        ],
+        "tree_total_bytes": 1937768448,
+        "external_processes": [
+          {
+            "pid": 31685,
+            "bytes": 843055104
+          }
+        ]
+      },
+      {
+        "monotonic": 2745666.655529719,
+        "processes": [
+          {
+            "pid": 105739,
+            "bytes": 1937768448
+          }
+        ],
+        "tree_total_bytes": 1937768448,
+        "external_processes": [
+          {
+            "pid": 31685,
+            "bytes": 843055104
+          }
+        ]
+      },
+      {
+        "monotonic": 2745671.315675985,
+        "processes": [
+          {
+            "pid": 105739,
+            "bytes": 1937768448
+          }
+        ],
+        "tree_total_bytes": 1937768448,
+        "external_processes": [
+          {
+            "pid": 31685,
+            "bytes": 843055104
+          }
+        ]
+      }
+    ],
+    "peak_tree_total_bytes": 1937768448,
+    "scope": "simultaneous parent and all live descendants on target GPU; external load separate",
+    "worker_pids": [
+      111140,
+      111141
+    ]
+  },
+  "cleanup_seconds": 1.5280921822413802,
+  "group_wall_seconds": 12.885014865081757
+}

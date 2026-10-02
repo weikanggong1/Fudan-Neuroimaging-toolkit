@@ -1,0 +1,18 @@
+bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8)
+Traceback (most recent call last):
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_01/source/src/fnit/recon_all/hemisphere_parallel.py", line 145, in run_hemisphere_group
+    raise RuntimeError('hemisphere worker failed; sibling cancelled')
+RuntimeError: hemisphere worker failed; sibling cancelled
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_01/source/validation/recon_all/optimizations/20261002_parallel/task_01/benchmark_hemi.py", line 180, in <module>
+    if __name__=='__main__':main()
+                            ^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_01/source/validation/recon_all/optimizations/20261002_parallel/task_01/benchmark_hemi.py", line 155, in main
+    result=run_hemisphere_group(subject,args.operation,device=args.device,threads=4,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_01/source/src/fnit/recon_all/hemisphere_parallel.py", line 192, in run_hemisphere_group
+    raise HemisphereGroupError(f'{operation} hemisphere group failed: {error}', report) from error
+fnit.recon_all.hemisphere_parallel.HemisphereGroupError: metrics hemisphere group failed: hemisphere worker failed; sibling cancelled
