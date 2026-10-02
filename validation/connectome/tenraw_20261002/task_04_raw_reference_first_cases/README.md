@@ -2,7 +2,7 @@
 
 ## 最新实物状态
 
-2026-10-02 23:27 UTC 实际读取：CON01/03/04/05/06/07 共六例参考与只读审计已完成；CON08/09 正在各自原控制器中运行，CON10 等待真实上游。CON11 将在新 producer 就绪后明确交接，当前没有新结果路径或完成声明。
+2026-10-02 23:37 UTC 实际读取：CON01/03/04/05/06/07/08/09 共八例参考与只读审计已完成，CON10 等待真实上游。CON11 将在新 producer 就绪后明确交接，当前没有新结果路径或完成声明。
 
 | 病例 | 五轮接受轨迹数（每轮尝试 100000） | 追踪每轮 s | SIFT2 每轮 s | 五轮组件 wall s |
 |---|---|---:|---:|---:|
@@ -12,10 +12,18 @@
 | CON05 | 19601 / 19720 / 19912 / 19687 / 19729 | 68.56–69.59 | 11.78–11.83 | 444.36 |
 | CON06 | 18783 / 18817 / 18795 / 18829 / 19024 | 64.75–66.46 | 11.54–11.93 | 441.68 |
 | CON07 | 15321 / 15645 / 15516 / 15471 / 15500 | 68.05–70.33 | 11.62–11.69 | 441.18 |
+| CON08 | 17711 / 17605 / 17447 / 17499 / 17497 | 63.63–65.88 | 10.85–10.93 | 416.06 |
+| CON09 | 13607 / 13546 / 13498 / 13643 / 13484 | 63.03–64.55 | 12.72–12.89 | 419.80 |
 
-各例均 198 条命令全部 exit0，[六例组件汇总](six_case_component_summary.json) 保存原审计与完成 manifest 的 SHA。时间仅为官方五轮 tracking/downstream，CPU EDDY、FS、建模等分别记录；不是全 raw 冷调用 pipeline 总时间。
+各例均 198 条命令全部 exit0，[八例组件汇总](eight_case_component_summary.json) 保存原审计与完成 manifest 的 SHA。时间仅为官方五轮 tracking/downstream，CPU EDDY、FS、建模等分别记录；不是全 raw 冷调用 pipeline 总时间。
 
-新的[逐病例来源快照](explicit_case_source_handoff_snapshot.json) 在 nodecw10 只读验证六例各 372 个实际文件，3.881 s；原六例 manifest SHA 未变。来源表直接指向旧九例的真实原 producer/产物；CON11 仅 `pending_configuration`。14 项本地和 14 项实际 node CPU 来源协议测试通过，测试不作为科学 benchmark。工具与冻结配置详见 [逐病例交接说明](../../../../tools/reference/benchmark_connectome_raw_official.md#逐病例新来源交接)。所有 cross 与 FNIT 自身重复仍为 `not_assessed`，等待总控交付最新正式 FNIT 输出。
+新的[八例来源快照](eight_case_source_handoff_snapshot.json) 在 nodecw10 只读验证八例各 372 个实际文件，4.069 s；原六例 manifest SHA 未变。此前[六例快照](explicit_case_source_handoff_snapshot.json) 原样保留。来源表直接指向旧九例的真实原 producer/产物；CON11 仅 `pending_configuration`。14 项本地和 14 项实际 node CPU 来源协议测试通过，测试不作为科学 benchmark。工具与冻结配置详见 [逐病例交接说明](../../../../tools/reference/benchmark_connectome_raw_official.md#逐病例新来源交接)。所有 cross 与 FNIT 自身重复仍为 `not_assessed`，等待总控交付最新正式 FNIT 输出。
+
+新增实物：[CON08 原样审计](sub-CON08_official_repeat_audit.json)、[CON09 原样审计](sub-CON09_official_repeat_audit.json)。CON09 的 `aparc.a2009s+tian-s1` 有 166 个节点，CON08 为 164；按各例实际 `nodes.tsv`，不跨病例套用同一维度。
+
+![独立官方 CON08/CON09 的真实脑图和既有 seed0 count](CON08_CON09/official_raw_brain_and_matrix.png)
+
+这两例图同样只做轴置换/翻转后的原扫描平面切片显示，不插值；全部八个展示数组逐位重放相同。记录见 [展示来源](CON08_CON09/display_source.json)、[逐位重放](CON08_CON09/extraction_replay_bits.json)、[图像 SHA](CON08_CON09/artifact_identity.json)。图与官方自身范围不代表 FNIT 匹配。
 
 ## 1. 原首两例实物快照
 
