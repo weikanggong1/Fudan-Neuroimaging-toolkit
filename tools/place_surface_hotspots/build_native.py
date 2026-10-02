@@ -21,8 +21,8 @@ CAPABILITIES={'schema_version':1,'program':'mris_place_surface_fnit_hotspot',
  'upstream_commit':'d932c45b7941662ea380a05efef580568b98d41a','uses_cuda':False}
 def sha(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 def remove_unused_face_hash(content,repulsive_source):
- start=repulsive_source.index('int mrisComputeRepulsiveTerm(')
- end=repulsive_source.index('int mrisComputeRepulsiveRatioTerm(',start)
+ start=repulsive_source.index('\nint mrisComputeRepulsiveTerm(')
+ end=repulsive_source.index('\nint mrisComputeRepulsiveRatioTerm(',start)
  body=repulsive_source[start:end]
  # Only the declaration may mention this argument. Reject any source drift
  # or future implementation that consumes the face table.
