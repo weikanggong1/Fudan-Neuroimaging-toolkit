@@ -178,6 +178,10 @@ def main():
                                      workers=2,profile_stages=True,kwargs=common)
                             result['published'].extend(group['published'])
                         result['groups'].append(group)
+                        report['results'][mode]=result
+                        report['current_stage']=operation
+                        report['execution_status']='running'
+                        (args.output/'result.json').write_text(json.dumps(report,indent=2))
                         if operation=='finish_surface':
                             from fnit.recon_all.native_free import _finish_cortical_metrics
                             tick=time.monotonic()
@@ -221,6 +225,7 @@ def main():
     paths=report['results']['parallel'].get('published',[])
     report['output_differences']=compare(args.output/'serial/subject',args.output/'parallel/subject',paths)
     report['strict_reproduction']='passed' if all(row.get('bytes_equal',False) for row in report['output_differences'] if row.get('kind')!='execution_log') else 'failed'
+    report['execution_status']='complete'
     report['speedup']=report['results']['serial']['command_wall_seconds']/report['results']['parallel']['command_wall_seconds']
     if args.operation in ('surface','finish_surface','chain'):
         from fnit.recon_all.native_free import _validate_meshes
