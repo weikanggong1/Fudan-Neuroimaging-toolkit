@@ -112,8 +112,46 @@ python validation/recon_all/optimizations/20261002_parallel/validate_installatio
 [recon-all 说明](../../../../docs/recon_all/README.md)及其 `recon-all -s SUBJECT -i T1 -all`
 参考；参考程序仅在 benchmark 环境运行。生产仍使用 FNIT 自产结果和声明资源。
 
-本轮新增入口尚待实际安装与整例运行；最新既有整例证据保留其原提交、时间和范围，
+本轮安装产物与原始T1整例按实际状态记录，最终结果在整例和质量比较完成后发布；最新既有整例证据保留其原提交、时间和范围，
 见[前轮结果](../20261001_serial/FINAL_RESULTS.md)。本轮完成后以实际提交发布新结果，
 不把历史报告重标为本轮。原实现：[FNIT](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit)、
 [FreeSurfer](https://github.com/freesurfer/freesurfer)。参考：Fischl B. FreeSurfer.
 *NeuroImage*. 2012;62:774–781，doi:10.1016/j.neuroimage.2012.01.021。
+
+## 安装完成后的自动接续
+
+`run_installed_candidate.py` 只用于本轮验证。它等待私有原生安装的
+`status.json=passed`，逐项检查15个程序的路径与SHA；13个复用程序必须与
+基线相同，GCA与white快速程序绑定实际重编和安装后的SHA。最终wheel的171个
+recon-all Python文件必须已逐SHA匹配冻结源码；运行入口指向安装目标目录。
+随后在同一个主机锁内验证实际能力选择和输入、权重、资产，并复用整例队列。
+
+`--round` 是本轮服务器目录；`--python` 是主页Conda Python；
+`--lock` 是共同主机锁；`--resource-script` 是已有的
+`../20261001_serial/capture_serial_resources.py`。该脚本不读取官方被试数据，
+不修改精度和算法。安装失败、能力不符或SHA变化时停止；依赖等待最多6小时。
+等待与资源审计不计入整例墙钟。
+
+```bash
+# 私有安装完成后自动核验资源，顺序执行API与CLI两份完整配置。
+python validation/recon_all/optimizations/20261002_parallel/run_installed_candidate.py \
+  --round /data/benchmark/parallel_20261002 \
+  --python /opt/conda/envs/fnit/bin/python \
+  --lock /tmp/fnit-recon-benchmark.lock \
+  --resource-script /code/validation/recon_all/optimizations/20261001_serial/capture_serial_resources.py
+```
+
+## 完整耗时汇总
+
+`summarize_performance.py` 只读已回收的两例原始JSON，复用前轮`pair`、
+`binding` 和半球内部报告提取。检查输入、主机、设备UUID、4线程预算、
+API/CLI调用方式、精度和执行状态；不符合时明确失败。输出完整JSON及每例阶段CSV。
+表面、球面配准、注释和最终放置按基线串行父阶段之和与候选父组墙钟比较；
+候选私有拷贝、发布、依赖串行收尾也计入对应范围。worker耗时不重复求和。
+
+```bash
+# 两例完整命令与阶段报告均已回收；输出目录必须不存在。
+python validation/recon_all/optimizations/20261002_parallel/summarize_performance.py \
+  --reports validation/recon_all/optimizations/20261002_parallel/whole \
+  --output validation/recon_all/optimizations/20261002_parallel/whole/performance
+```
