@@ -119,3 +119,38 @@ def test_readonly_program_loader_failure_is_recorded_not_ready(tmp_path):
     assert result['returncode'] == 9
     assert result['actual_version_output'] == 'fixture-loader-unavailable'
     assert result['readonly_invocation_ready'] is False
+
+
+def test_actual_five_tissue_undefined_channel_spacing_is_metadata_only(tmp_path):
+    tool = raw_tool()
+    path = tmp_path / 'actual_five_tissue_protocol_fixture.nii.gz'
+    values = np.zeros((4, 4, 4, 5), dtype=np.float32)
+    values[1, 2, 3, 0] = np.nan
+    image = nib.Nifti1Image(values, np.eye(4))
+    image.header['pixdim'][4] = np.nan
+    nib.save(image, path)
+    original_sha = sha256(path)
+    _, read_image, source = tool.image_record(file_record(path), '5TT')
+    assert source['spacing'] == [1., 1., 1., None]
+    assert source['undefined_nonspatial_spacing'][0]['axis'] == 3
+    assert source['nonfinite_count'] == 1
+    assert np.isnan(np.asarray(read_image.dataobj)[1, 2, 3, 0])
+    json.dumps(source, allow_nan=False)
+    reader = tmp_path / 'mrinfo.json'
+    actual = {'name': str(path), 'datatype': 'Float32LE', 'strides': [1, 2, 3, 4],
+              'size': [4, 4, 4, 5], 'spacing': [1., 1., 1., float('nan')],
+              'transform': np.eye(4).tolist(), 'intensity_offset': 0., 'intensity_scale': 1.}
+    reader.write_text(json.dumps(actual))
+    reader_bytes = reader.read_bytes()
+    readback = tool.native_readback({'json': str(reader)}, source)
+    json.dumps(readback, allow_nan=False)
+    assert readback['mrinfo_json']['spacing'][3] is None
+    assert readback['undefined_nonspatial_spacing'][0]['source_value'] == 'NaN'
+    assert reader.read_bytes() == reader_bytes and sha256(path) == original_sha
+
+
+@pytest.mark.parametrize('spacing', [[float('nan'), 1., 1., 1.], [1., 0., 1.],
+                                    [1., 1., 1., float('inf')], [1., 1., 1., -1.]])
+def test_nonspatial_metadata_fix_does_not_relax_spatial_geometry_or_invalid_values(spacing):
+    with pytest.raises(ValueError, match='spacing'):
+        raw_tool().spacing_metadata(spacing)

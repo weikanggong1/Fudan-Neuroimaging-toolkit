@@ -47,6 +47,19 @@ def record_file(record, label):
     return path.resolve()
 
 
+def spacing_metadata(values):
+    """Keep spatial geometry strict; an undefined channel-axis spacing is metadata only."""
+    spacing = np.asarray(values, dtype=np.float64)
+    require(spacing.ndim == 1 and len(spacing) >= 3 and np.isfinite(spacing[:3]).all() and
+            (spacing[:3] > 0).all(), 'invalid actual three-dimensional spatial spacing')
+    require(np.all(np.isnan(spacing[3:]) | (np.isfinite(spacing[3:]) & (spacing[3:] > 0))),
+            'invalid nonspatial spacing; only undefined NaN or positive finite values allowed')
+    undefined = [{'axis': int(axis), 'source_value': 'NaN',
+                  'meaning': 'undefined nonspatial channel-axis spacing; original file retained'}
+                 for axis in np.flatnonzero(np.isnan(spacing))]
+    return [None if np.isnan(value) else float(value) for value in spacing], undefined
+
+
 def image_record(record, label):
     path = record_file(record, label)
     image = nib.load(path)
@@ -59,9 +72,11 @@ def image_record(record, label):
     if 'affine' in declared:
         require(np.array_equal(np.asarray(declared['affine'], dtype=np.float64), image.affine),
                 f'{label}: producer affine differs from actual file')
+    spacing, undefined_spacing = spacing_metadata(image.header.get_zooms())
     return path, image, {'path': str(path), 'size_bytes': path.stat().st_size, 'sha256': record['sha256'],
         'shape': list(map(int, image.shape)), 'affine': image.affine.tolist(),
-        'spacing': list(map(float, image.header.get_zooms())), 'storage_dtype': str(image.get_data_dtype()),
+        'spacing': spacing, 'undefined_nonspatial_spacing': undefined_spacing,
+        'storage_dtype': str(image.get_data_dtype()),
         'nonfinite_count': int((~np.isfinite(values)).sum()),
         'source_policy': 'unmodified official producer image; nonfinite values retained and reported'}
 
@@ -152,16 +167,20 @@ def native_readback(record, source):
     size = np.asarray(actual['size'])
     axes = np.abs(strides[:3]) - 1
     spacing = np.asarray(actual['spacing'], dtype=np.float64)
+    serialized_spacing, undefined_spacing = spacing_metadata(spacing)
     transform = np.asarray(actual['transform'], dtype=np.float64)
     require(size.shape == shape.shape and sorted(axes.tolist()) == [0, 1, 2] and
             np.array_equal(size[:3], shape[axes]) and np.array_equal(size[3:], shape[3:]),
             'official native reader shape/axis mapping differs')
-    require(spacing.shape == shape.shape and np.isfinite(spacing).all() and (spacing > 0).all() and
+    require(spacing.shape == shape.shape and
             transform.shape == (4, 4) and np.isfinite(transform).all() and
             np.array_equal(transform[3], [0., 0., 0., 1.]) and
             float(actual['intensity_offset']) == 0 and float(actual['intensity_scale']) == 1,
             'official native reader invalid geometry/intensity scaling')
+    # The original mrinfo JSON is not rewritten; its SHA binds NaN/null metadata.
+    actual = {**actual, 'spacing': serialized_spacing}
     return {'status': 'native_source_header_verified_reader_geometry_recorded', 'mrinfo_json': actual,
+            'undefined_nonspatial_spacing': undefined_spacing,
             'mrinfo_json_sha256': sha256(Path(record['json'])), 'source': source,
             'scope': 'original official file semantics; not a fixed FNIT affine bit identity claim'}
 

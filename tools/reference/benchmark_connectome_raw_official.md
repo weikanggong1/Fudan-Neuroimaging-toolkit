@@ -48,7 +48,7 @@ comparison_report = compare(
 - **官方解剖 consumer contract**：`scope=official_self_produced_fresh_fs_anatomy_and_raw_dwi_atlases`，同 case、`state=completed`。提供 `five_tissue_dwi_world`、`gmwmi_dwi_world`、八 atlas 的 NIfTI 与 nodes.tsv，并绑定原始 T1、真实 fresh FS、prepared/complete 报告及所消费 DWI 合同 SHA。
 - **已经审计的固定输入官方 manifest**：只用于核对本轮 MRtrix 二进制及命令规划器身份；其中的 FNIT 图像不作为新官方链输入。
 
-5TT 是自身 native 结构格点上的五通道 NIfTI，GMWMI 保持其格点；world affine 映射到 DWI 世界坐标。FOD 为 `[X,Y,Z,45]`、lmax8；FA 为三维标量图；atlas 为三维非负整数标签，节点连续编号 1…K，由 `nodes.tsv` 的 index/original_label/hemisphere/name 四列定义。工具记录原始非有限值，完整消费原文件。
+5TT 是自身 native 结构格点上的五通道 NIfTI，GMWMI 保持其格点；world affine 映射到 DWI 世界坐标。FOD 为 `[X,Y,Z,45]`、lmax8；FA 为三维标量图；atlas 为三维非负整数标签，节点连续编号 1…K，由 `nodes.tsv` 的 index/original_label/hemisphere/name 四列定义。工具记录原始非有限值，完整消费原文件。5TT 的第四轴是组织通道，部分官方文件将该非空间轴的 spacing 写为 NaN。报告仅把这一未定义 metadata 写为 `null`，另列轴号和原 NaN 标记并绑定原文件/原 mrinfo JSON SHA；三空间轴仍要求有限正值，图像数据、affine 和官方命令不变。
 
 输出：
 
