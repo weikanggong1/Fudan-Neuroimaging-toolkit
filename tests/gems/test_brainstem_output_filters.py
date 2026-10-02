@@ -10,9 +10,27 @@ from fnit.gems.context import SubregionContext
 from fnit.gems.recipes import brainstem
 
 
+@pytest.mark.parametrize("stable_mesh_fitting", (False, True))
+def test_brainstem_recipe_forwards_stability_without_changing_configuration(
+        tmp_path, monkeypatch, stable_mesh_fitting):
+    observed = []
+
+    def observed_fit(context, directory, device, **options):
+        observed.append((context, directory, device, options))
+        return "observed recipe result"
+
+    monkeypatch.setattr(brainstem, "_fit_brainstem", observed_fit)
+    recipe = brainstem.BrainstemRecipe(tmp_path, stable_mesh_fitting=stable_mesh_fitting)
+    context, device = object(), torch.device("cpu")
+    assert recipe.run(context, device) == "observed recipe result"
+    assert observed == [(context, tmp_path, device, {"stable_mesh_fitting": stable_mesh_fitting})]
+    assert brainstem.BrainstemRecipe(tmp_path).stable_mesh_fitting is True
+
+
 @pytest.mark.parametrize("resolution", (None, 1.0))
+@pytest.mark.parametrize("stable_mesh_fitting", (False, True))
 def test_brainstem_highres_labels_obey_component_support_and_positive_confidence(
-        tmp_path, monkeypatch, resolution):
+        tmp_path, monkeypatch, resolution, stable_mesh_fitting):
     shape = (8, 8, 8)
     data = np.ones(shape, np.float32)
     image = nib.Nifti1Image(data, np.eye(4))
@@ -53,10 +71,16 @@ def test_brainstem_highres_labels_obey_component_support_and_positive_confidence
             assert current is atlas and kwargs["device"] == torch.device("cpu")
         def __call__(self, target, **kwargs):
             assert tuple(target.shape) == shape
+            assert kwargs["stable_mesh_fitting"] is stable_mesh_fitting
+            assert kwargs["double_data_cost_accumulation"] is stable_mesh_fitting
+            assert kwargs["precise_mesh_matrices"] is stable_mesh_fitting
+            assert kwargs["deform_optimizer"] == "adam"
+            assert kwargs["mesh_line_search"] == "strong_wolfe"
             return SimpleNamespace(labels=torch.as_tensor(labels), posterior=posterior)
 
     monkeypatch.setattr(brainstem, "TorchGEMS", Engine)
-    outcome = brainstem._fit_brainstem(context, tmp_path, torch.device("cpu"))
+    outcome = brainstem._fit_brainstem(context, tmp_path, torch.device("cpu"),
+                                     stable_mesh_fitting=stable_mesh_fitting)
     expected = labels.copy()
     expected[6, 6, 6] = expected[2, 1, 1] = expected[1, 2, 1] = 0
     np.testing.assert_array_equal(outcome.highres_labels.dataobj, expected)

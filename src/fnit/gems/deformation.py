@@ -37,6 +37,7 @@ class CurrentGeometry:
     inverse_edges: torch.Tensor
     determinants: torch.Tensor
     singular: torch.Tensor
+    deterministic_gradient: bool = False
 
 
 @dataclass(frozen=True)
@@ -93,6 +94,49 @@ def ordered_vertex_sum(vertex_ids: torch.Tensor, contributions: torch.Tensor,
     summed = torch.segment_reduce(contributions[reduction.order].to(torch.float64), "sum",
                                   offsets=reduction.offsets, axis=0, unsafe=True)
     return summed.to(contributions.dtype)
+
+
+class _OrderedRowGather(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, values, row_ids, reduction):
+        ctx.save_for_backward(row_ids)
+        ctx.reduction = reduction
+        ctx.values_shape = tuple(values.shape)
+        return values[row_ids]
+
+    @staticmethod
+    def backward(ctx, gradient):
+        row_ids, = ctx.saved_tensors
+        channels = 1
+        for width in ctx.values_shape[1:]:
+            channels *= width
+        if row_ids.numel() == 0 or channels == 0:
+            result = gradient.new_zeros(ctx.values_shape)
+        else:
+            result = ordered_vertex_sum(
+                row_ids.reshape(-1), gradient.reshape(row_ids.numel(), channels),
+                ctx.values_shape[0], ctx.reduction).reshape(ctx.values_shape)
+        return result, None, None
+
+
+def ordered_row_gather(values: torch.Tensor, row_ids: torch.Tensor,
+                       reduction: VertexReduction | None = None) -> torch.Tensor:
+    """Gather first-axis rows with a fixed, FP64 backward accumulation.
+
+    The forward is the same as ``values[row_ids]``. Repeated valid nonnegative
+    row IDs accumulate gradients in their input order, using the existing
+    ordered segment sum, and return ``values``' original gradient dtype.
+    ``row_ids`` can have any shape; all its entries must be valid row indices.
+    A layout can be shared by gathers using the same unchanged ID tensor.
+    No global deterministic setting or cuBLAS workspace is required.
+    """
+    if values.ndim < 1 or row_ids.dtype != torch.long or values.device != row_ids.device:
+        raise ValueError("row gather requires values and long row IDs on the same device")
+    if not torch.is_grad_enabled() or not values.requires_grad:
+        return values[row_ids]
+    if reduction is None:
+        reduction = prepare_vertex_reduction(row_ids.reshape(-1), len(values))
+    return _OrderedRowGather.apply(values, row_ids, reduction)
 
 
 class _OrderedVertexGather(torch.autograd.Function):
@@ -166,7 +210,8 @@ def prepare_current_geometry(vertices: torch.Tensor,
     inverse, info = _InverseEdges.apply(edges)
     determinants = _Determinant.apply(edges)
     singular = (info != 0) | (determinants.abs() <= 1e-10)
-    return CurrentGeometry(origins, edges, inverse, determinants, singular)
+    return CurrentGeometry(origins, edges, inverse, determinants, singular,
+                           deterministic_gradient=bool(deterministic_gradient))
 
 
 @torch.no_grad()

@@ -1,0 +1,1983 @@
+{
+  "scope": "Read-only implementation and publication review; no source mutation, GPU job, file migration or server deletion performed.",
+  "created_utc": "2026-10-02T03:00:59.381620+00:00",
+  "publication_head": "edea6a5e0ceac92070e7fee346f9f33513f944f9",
+  "six_production_sources": [
+    {
+      "path": "src/fnit/gems/brainstem.py",
+      "bytes": 12940,
+      "sha256": "23fa1286c627e16c974ec17f96b2481d434c81b253e379111e2b6390a4574b3e"
+    },
+    {
+      "path": "src/fnit/gems/deformation.py",
+      "bytes": 16246,
+      "sha256": "d0a69c20047cc669f9460a886c9755477f099f095abd59ab7ed7e10a49e662fd"
+    },
+    {
+      "path": "src/fnit/gems/rasterize.py",
+      "bytes": 28226,
+      "sha256": "78eea996f24faf7351b77c0b4b4bbfc162c8a13f4d6e5ad64f9358cf481d3a86"
+    },
+    {
+      "path": "src/fnit/gems/recipes/brainstem.py",
+      "bytes": 9414,
+      "sha256": "3054bc95ba0700a19256ca0419ecd1d62093817e9e4cbf97e00b703281bd86bb"
+    },
+    {
+      "path": "src/fnit/gems/recipes/hippo_amygdala.py",
+      "bytes": 13232,
+      "sha256": "385e3cf19cbe3ba6e7985b36a525664d46a037e4b80ee298b82916bbd99e710e"
+    },
+    {
+      "path": "src/fnit/gems/recipes/thalamus.py",
+      "bytes": 7662,
+      "sha256": "76dcdc24afc90765d766ca228f64a937d437fdbd1f96a466e244161e11c63941"
+    }
+  ],
+  "dependencies": {
+    "new_dependencies": [],
+    "changed_dependencies": [],
+    "existing_nonstdlib": "PyTorch, NumPy, SciPy and nibabel already declared in environment.yml/pyproject.toml; Triton raster backend reused unchanged"
+  },
+  "runtime_external_software_calls": [],
+  "runtime_notes": "GEMSAtlas.from_freesurfer parses atlas files in Python; it does not launch FreeSurfer. All changed algorithms use existing Torch/SciPy math.",
+  "production_source_equal_to_frozen_all6": true,
+  "tests": {
+    "path": "validation/subregions/reproducibility_20261002/release_tests/final_full.log",
+    "bytes": 581,
+    "sha256": "72a24c01c5e43c2ccb1fd91316b43486f0fc11500c50ba100ac3439037ec1d26"
+  },
+  "test_result": "439 passed in54.27s; public API/CLI after fastforward is recorded separately by root",
+  "git_candidate_file_audit": {
+    "staged_count_at_review_start": 0,
+    "untracked_count_at_review_start": 409,
+    "visible_bytes_at_review_start": 104921612,
+    "forbidden_image_weight_atlas_license_payloads": [],
+    "symlinks": [],
+    "strong_credential_pattern_paths": []
+  },
+  "internal_helper_domain_limit": {
+    "file": "src/fnit/gems/deformation.py",
+    "function": "ordered_row_gather",
+    "observed": "Noncontiguous multidimensional long row_ids whose reshape(-1) copies storage fail backward reduction-layout identity validation. CPU example: torch.tensor([[0,1,2],[3,4,0]]).T, shape(3,2),stride(1,3).",
+    "error": "ValueError: vertex reduction changed; rebuild it for the current vertex IDs",
+    "production_impact": "None in current raster path: _compact_lookup returns torch.cat-produced contiguous1D selected_ids and shares that tensor for both gathers. No code or source fingerprint changed.",
+    "future_scope": "General noncontiguous-index support requires explicit normalization and a focused gradient gate; not part of this frozen release."
+  },
+  "packaging_snapshot_risk": {
+    "observed": "setuptools FileList applied current recursive-include validation/subregions selects426 files from the ignored local frozen snapshot:424.py+2.json. .gitignore does not exclude sdist file collection.",
+    "resolution_authorized_by_root": "Move snapshot directory and original tar outside repository before publication; do not put ignored archival data back below validation. No production-source change needed."
+  },
+  "recommended_publication_files_relative_to_evidence": [
+    "README.md",
+    "analyze_final_full_pipeline.py",
+    "analyze_hippo_topology_cache.py",
+    "analyze_repeatability.py",
+    "atlas_identity_comparison.json",
+    "audit_official_source.py",
+    "brainstem_v3_repeatability.json",
+    "brainstem_v3_repeatability_fetch_identity.json",
+    "compact_final_evidence.py",
+    "complete_final_timing_v2.py",
+    "export_final_source.py",
+    "extract_final_step_timing_v2.py",
+    "fetch_final_analysis_evidence.py",
+    "fetch_final_precision_brain_figures.py",
+    "final_all_analysis/README.md",
+    "final_all_analysis/before_reproducibility_compact.json",
+    "final_all_analysis/before_roi_metrics.tsv",
+    "final_all_analysis/final_reproducibility_compact.json",
+    "final_all_analysis/final_roi_metrics.tsv",
+    "final_all_analysis/final_source_numerical_audit.json",
+    "final_all_analysis/final_steps.json",
+    "final_all_analysis/final_steps.tsv",
+    "final_all_analysis/publication_artifacts.json",
+    "final_all_release_queue.json",
+    "final_all_runs/final_all_release_raw_r1/context_identity.json",
+    "final_all_runs/final_all_release_raw_r1/driver.log",
+    "final_all_runs/final_all_release_raw_r1/gpu_load.jsonl",
+    "final_all_runs/final_all_release_raw_r2/context_identity.json",
+    "final_all_runs/final_all_release_raw_r2/driver.log",
+    "final_all_runs/final_all_release_raw_r2/gpu_load.jsonl",
+    "final_all_runs/final_all_release_raw_r3/context_identity.json",
+    "final_all_runs/final_all_release_raw_r3/driver.log",
+    "final_all_runs/final_all_release_raw_r3/gpu_load.jsonl",
+    "final_all_runs/final_all_release_stage_r1/context_identity.json",
+    "final_all_runs/final_all_release_stage_r1/driver.log",
+    "final_all_runs/final_all_release_stage_r1/gpu_load.jsonl",
+    "final_all_runs/final_all_release_stage_r2/context_identity.json",
+    "final_all_runs/final_all_release_stage_r2/driver.log",
+    "final_all_runs/final_all_release_stage_r2/gpu_load.jsonl",
+    "final_all_runs/final_all_release_stage_r3/context_identity.json",
+    "final_all_runs/final_all_release_stage_r3/driver.log",
+    "final_all_runs/final_all_release_stage_r3/gpu_load.jsonl",
+    "final_analysis_helper_transfer.json",
+    "final_brain_figures/raw/amygdala_AAA_Medial.json",
+    "final_brain_figures/raw/amygdala_AAA_Medial.png",
+    "final_brain_figures/raw/brainstem_low_regions.json",
+    "final_brain_figures/raw/brainstem_low_regions.png",
+    "final_brain_figures/raw/figures_manifest.json",
+    "final_brain_figures/raw/hippocampus_low_regions.json",
+    "final_brain_figures/raw/hippocampus_low_regions.png",
+    "final_brain_figures/raw/raw_display_window_revision.json",
+    "final_brain_figures/raw/thalamus_low_nuclei.json",
+    "final_brain_figures/raw/thalamus_low_nuclei.png",
+    "final_brain_figures/stage/amygdala_AAA_Medial.json",
+    "final_brain_figures/stage/amygdala_AAA_Medial.png",
+    "final_brain_figures/stage/brainstem_low_regions.json",
+    "final_brain_figures/stage/brainstem_low_regions.png",
+    "final_brain_figures/stage/figures_manifest.json",
+    "final_brain_figures/stage/hippocampus_low_regions.json",
+    "final_brain_figures/stage/hippocampus_low_regions.png",
+    "final_brain_figures/stage/thalamus_low_nuclei.json",
+    "final_brain_figures/stage/thalamus_low_nuclei.png",
+    "final_cpu_analysis_launch.json",
+    "final_expected_source_manifest.json",
+    "final_figures_fetch_manifest.json",
+    "final_figures_renderer_upload.json",
+    "final_figures_review.json",
+    "final_raw_window_launch.json",
+    "final_raw_window_promote.json",
+    "final_runner_preparation.json",
+    "final_validation_protocol.md",
+    "hippo_raw_preprocessing_scope_audit.json",
+    "hippo_topology_summary.json",
+    "hippo_topology_summary.md",
+    "low_region_algorithm_audit.md",
+    "mixed_scope_diagnostic.json",
+    "observe_final_context.py",
+    "official_explicit_step_timers.json",
+    "official_r1/queue.json",
+    "official_r2/queue.json",
+    "official_r3/queue.json",
+    "official_source_audit.json",
+    "official_source_review.md",
+    "old_vs_fresh_reference_audit.json",
+    "old_vs_fresh_reference_audit.md",
+    "plot_low_regions_latest.py",
+    "publication_scope_review.json",
+    "publication_scope_review.md",
+    "reconall_historical_lineage_audit.json",
+    "registration_source_identity.json",
+    "release_tests/brainstem_stability.log",
+    "release_tests/brainstem_stability_manifest.json",
+    "release_tests/context_observer_contract.json",
+    "release_tests/final_analysis_contract.json",
+    "release_tests/final_full.log",
+    "release_tests/final_tests.json",
+    "release_tests/hippo_closing_selection.log",
+    "release_tests/hippo_closing_selection_manifest.json",
+    "release_tests/postmerge_public.log",
+    "release_tests/postmerge_source_audit.json",
+    "render_final_precision_brain_figures.py",
+    "run_final_all_reproducibility.py",
+    "run_official_repeats.py",
+    "source_final/freeze_identity.json",
+    "source_final/transfer_identity.json",
+    "test_final_analysis_contract.py",
+    "upload_final_source.py",
+    "upstream_source_identity.json",
+    "write_final_analysis_summary.py"
+  ],
+  "required_future_compact_outputs": [
+    "final_all_analysis/final_reproducibility_compact.json",
+    "final_all_analysis/final_source_numerical_audit.json",
+    "final_all_analysis/final_roi_metrics.tsv",
+    "final_all_analysis/final_steps.json",
+    "final_all_analysis/final_steps.tsv",
+    "final_all_analysis/publication_artifacts.json",
+    "final_all_analysis/README.md",
+    "final_all_analysis/before_reproducibility_compact.json",
+    "final_all_analysis/before_roi_metrics.tsv"
+  ],
+  "archive_destination": "/mnt/c/users/admin/documents/codex/2026-09-29/new-chat/work/fnit-subregions-20261002-local-archive",
+  "archive_only_after_final_compact_verified": true,
+  "archive_visible_filelist": [
+    {
+      "path": "validation/subregions/reproducibility_20261002/.gitattributes",
+      "bytes": 157,
+      "sha256": "b3fef3d55be260855085a1b33deb57975480f1f1454c64603705b31ac54a539e"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/aaa_and_mesh_budget_review.md",
+      "bytes": 4318,
+      "sha256": "d0c1addce1a484be1353dd872d69fae65f5aec3d3f73d54fba40f9d7adf97fac"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/aaa_stage_trace_analysis.json",
+      "bytes": 7920,
+      "sha256": "177132681720197a1922458951255facf766b51e7721c2c63545c2c5d8320f9f"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/analyze_final_first_run.py",
+      "bytes": 9976,
+      "sha256": "53cd4e69c614f134348c9ec0f5c55a7c4a195924836d74cadbba399c2ce121c6"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/analyze_followup_candidate.py",
+      "bytes": 18246,
+      "sha256": "a2c80d4c84575effc8430820456384d94e295a4c89084666b59c94198851a35e"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/analyze_hippo_mask_diagnostics.py",
+      "bytes": 5486,
+      "sha256": "68bd031b1e6cddd681f521a2e04114d39c65f18e934e81ee75d7caa5cc889c1c"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/analyze_hippo_topology_diagnostics.py",
+      "bytes": 3450,
+      "sha256": "00d9823f03953757d4b102c875ac03503dacd6ba5dbed42f285fca7cc06e7b87"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/analyze_production_candidate.py",
+      "bytes": 24814,
+      "sha256": "3bd77f16453bd8435127c75fef400fc9b9d36a8005000075cc07d0b259039500"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/audit_production_numeric.py",
+      "bytes": 7220,
+      "sha256": "84483ef1a40f1d5451ed324cd54102f56d86f26540bdcda56f740a92ce757206"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/brain_figures/raw/amygdala_AAA_Medial.json",
+      "bytes": 5152,
+      "sha256": "0ef329daf573b7c594805ceb7e7ece443cbd4f2fc98ef7d2855c0da185186b37"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/brain_figures/raw/amygdala_AAA_Medial.png",
+      "bytes": 101713,
+      "sha256": "0b12873f9d0fe7a6a4d81e82c330ab9ca06bd5a9970d45b67fdd6b63a4863cb4"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/brain_figures/raw/figures_manifest.json",
+      "bytes": 2008,
+      "sha256": "67698510a79ddd576262c83709d0dfac42c34199bb207fffbe436700c1aecd0e"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/brain_figures/raw/hippocampus_low_regions.json",
+      "bytes": 5223,
+      "sha256": "adacffb018d17f8714f84f46e3cafe8c751beaf4c9b5ed185393fc5eb2f0d78e"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/brain_figures/raw/hippocampus_low_regions.png",
+      "bytes": 153065,
+      "sha256": "f754c1013f3065c6ee812ad5f5e7fa3b967c98e1d0e71eddba97c23c26690bb3"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/brain_figures/raw/thalamus_low_nuclei.json",
+      "bytes": 5211,
+      "sha256": "9a82e0e98e96b4d5ec79ff2fd1de37a5f7bf712b06e07d303ceafa133cd3864f"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/brain_figures/raw/thalamus_low_nuclei.png",
+      "bytes": 133467,
+      "sha256": "318fe73ae405e021a8ba1feedb055193503cb0f6d1e720690c53d3a76db9130c"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/brain_figures/stage/amygdala_AAA_Medial.json",
+      "bytes": 5297,
+      "sha256": "4691bcebe51854066293b2a1eafd510bf363366180305815a3a3e494d0d73186"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/brain_figures/stage/amygdala_AAA_Medial.png",
+      "bytes": 125700,
+      "sha256": "24e62f9d6cea07c460f0369e8571ab0680feb948ff7fd958de4331dcac8c057d"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/brain_figures/stage/figures_manifest.json",
+      "bytes": 2024,
+      "sha256": "0836a05b469642dfa89660c273ccf65668ff74521678d31940370a1acbea3d66"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/brain_figures/stage/hippocampus_low_regions.json",
+      "bytes": 5366,
+      "sha256": "64db5fc6ccda356afa447a0ba61551bce93f82165ee1cd5c217b2a81f95b5016"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/brain_figures/stage/hippocampus_low_regions.png",
+      "bytes": 183811,
+      "sha256": "2986cc0a5249cae545fd5e7f6bbc9cd1f519a57ff6610467fe9e87af11c756a4"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/brain_figures/stage/thalamus_low_nuclei.json",
+      "bytes": 5359,
+      "sha256": "d7ebc71e227e090f1e3126ab41827a98e0cb1afeebb0584815c7acda766b1eb2"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/brain_figures/stage/thalamus_low_nuclei.png",
+      "bytes": 175685,
+      "sha256": "00548b6109588c16500ad894c89478419f3694394043db834f9ceed597c12112"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/brainstem_stability_proposed.json",
+      "bytes": 1803,
+      "sha256": "8398f05c17b95c997678a1bd082b29a0197bbbf9d22c7f7bf2ca2236428d1fd8"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/brainstem_stability_proposed.patch",
+      "bytes": 9481,
+      "sha256": "b79f171d7aeef46b141ce3b83bc66dbf691bd0be34c73c2e4c76af65ecf09832"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/build_repeatability_manifest.py",
+      "bytes": 11994,
+      "sha256": "87c911c00aa8c86f743f47aff726972fe0562107296ecbcbeeaf5326abd7dc2c"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/compare_brainstem_v3_repeats.py",
+      "bytes": 5293,
+      "sha256": "f65aa5643b582a3cedff3ee71515498796076bea169d803928000f9a070d98fd"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/compare_probes_to_fresh_official.py",
+      "bytes": 10613,
+      "sha256": "ea1fa76ce6ebeb33bf6b0411ae078e79765cad9080dfe50cf0bcd9c821f4133f"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/diagnose_hippo_output_masks.py",
+      "bytes": 16787,
+      "sha256": "adeb148c4752e708ad462256383bf65a2e0887951ca853134382af147fe9bda8"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/diagnostics_vs_fresh_official_summary.json",
+      "bytes": 401276,
+      "sha256": "ec735f8679d545e00e705c56562cae95218a07f40616f509b4f2da890927c40f"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/extract_final_step_timing.py",
+      "bytes": 9969,
+      "sha256": "622c9798252bd1047e2099e8c96e153c92f3bcf53d4dfd2107ed0f1dd3e93700"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/fetch_hippo_mask_diagnostics.py",
+      "bytes": 4372,
+      "sha256": "3184ebb35665603eb74a3860533b1d7c2a5943f5814d29abc2b03b46c4703505"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/fetch_hippo_topology_diagnostics.py",
+      "bytes": 4232,
+      "sha256": "2f305cf7d85643d10fb963e921d14e203a33d0fcaa50cd71ac647151f5ba1e24"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/fetch_manifest.json",
+      "bytes": 12281,
+      "sha256": "8abb0647e75d3c81cfbfda7312ca9dfb7e8a8af3726db35a79a5f7543f143ab0"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/fetch_production_evidence.py",
+      "bytes": 5287,
+      "sha256": "ba0cdfe0ecd6929bf75a26087ee281a79f68eb535fa61fcf51b097e1548195ba"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_analysis/cpu_manager.json",
+      "bytes": 12783,
+      "sha256": "2b88bc3c62ad1cc7960b4a4041ec741958965101d8f81ca45526edaeb969aff6"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_analysis/final.log",
+      "bytes": 1076,
+      "sha256": "019c883668c691f31779b96186e7042dfd12985cdfae0c0c1859785e2414d677"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_analysis/final_doc_summary.json",
+      "bytes": 322128,
+      "sha256": "d25356b6935c86f9e8e576fd7a19027185c8c10dd050913ad0c55fba384a4215"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_analysis/final_full_analysis_status.json",
+      "bytes": 1017,
+      "sha256": "9e6cc8a73385c93ae03c7c6bac84a456108758b8e645f81f6b5fff67805d2ed4"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_analysis/final_full_repeatability.json",
+      "bytes": 30176981,
+      "sha256": "8f3f6d0712a1c5de31079eb6010ee67291ddecc32c89a0a8bf14fb6ad06b59ab"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_analysis/final_full_repeatability.tsv",
+      "bytes": 99372,
+      "sha256": "8a3438d36a0b903895ff91727a21bb1993d091e4f11f5fc196a688a8acd23c3e"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_analysis/final_full_repeatability_manifest.json",
+      "bytes": 17529729,
+      "sha256": "bf24dfcdf2258271517a657a07b7851bf08fc2d0e81afdfa582bbcda48c637b1"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_analysis/final_full_repeatability_summary.json",
+      "bytes": 2733233,
+      "sha256": "8d4bebc79fc30ad079ffbe7a361b038e0b47a5cedfcb6fef93910d01af9b4c72"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_analysis/final_step_main_table.md",
+      "bytes": 1025,
+      "sha256": "f3d1602cdf440d15f6b358f25fa24b72a545b4d43608d7232c0cf69b82d6a664"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_analysis/final_step_timing.json",
+      "bytes": 148395,
+      "sha256": "9cded66cde0630fe17a4ecdedd54944d4380c16eb49d9cce44448dad6e4823dc"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_analysis/final_step_timing.tsv",
+      "bytes": 89301,
+      "sha256": "5dc1dacf28a9d564531e2ad327f53b381c5c9fbc7048b012681986d3dc3d5997"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_analysis/first_raw.log",
+      "bytes": 587,
+      "sha256": "f894fc572cdcdf0818bc0c2b35a81af8fdadc637ccbabee83d9a2e04bc3dcc5c"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_analysis/first_raw_r1_cross.json",
+      "bytes": 7147849,
+      "sha256": "7dd9bbd332291f3e2666adfc67347731e704ad6d84e85d134f33adf4e280ddf3"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_analysis/first_raw_r1_status.json",
+      "bytes": 621,
+      "sha256": "08cd5c9be3f14f7caca95c4ab3fe1348261c16a3f25e38f9958212adc4a91894"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_analysis/first_raw_r1_summary.json",
+      "bytes": 19153,
+      "sha256": "545be4f1839ad01a7334dd4e2d40a7c62b5ea72234636e5501b2dd940148d51b"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_analysis/first_stage.log",
+      "bytes": 591,
+      "sha256": "e461d8dba9a6b86028b07f88ec9e74faa93490ab9352a72fb193d96a254ec371"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_analysis/first_stage_r1_cross.json",
+      "bytes": 7172242,
+      "sha256": "ad175afaa0d7175049d0a7d7a5631ee5d5114ebe3eb0f9c436c389a028b42df8"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_analysis/first_stage_r1_status.json",
+      "bytes": 625,
+      "sha256": "36328a4aaa20d7fc301b82cee459eaae9bf6dcd4f4d7ac9d2395379e1521a03f"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_analysis/first_stage_r1_summary.json",
+      "bytes": 5358,
+      "sha256": "7cc81df40ab81b563050ff7dc1dfcd70d9cef18653c436c00049784992093c84"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_analysis/preliminary_first_step_timing.json",
+      "bytes": 75391,
+      "sha256": "a84fb84480c15028485d039cb21a6871f26d42228882cb449f796ec7801145fe"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_analysis/step_timing.log",
+      "bytes": 121,
+      "sha256": "dfde9e5cef1b2cd347e6cd3d17f0ec1dc569b77cc5b6ef7486e0f5b1e8e1c9a5"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_analysis/timing_complete/final_step_timing.json",
+      "bytes": 494859,
+      "sha256": "56d71db1730d24a48a0adc2b57f509c5d13f7b09a6ced144a73ada34d4f2e002"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_analysis/timing_complete/final_step_timing.tsv",
+      "bytes": 319137,
+      "sha256": "ba40b2c4bf4ac42959535afe330492df773193f04be8276da6a4ef60736d46d4"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_analysis/timing_complete/v2_status.json",
+      "bytes": 682,
+      "sha256": "1114d4537ece004af71a4f52ad3b2e3245c93ea3520e3ceee088ec7f1837cf75"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_release_artifacts.json",
+      "bytes": 10925,
+      "sha256": "c0df2c74ab32758cd9e35bf03815a6233efc88fdb0a2a84d126377c469e8bc8a"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_runs/final_all_release_raw_r1/api_report.json",
+      "bytes": 169933,
+      "sha256": "6be56931a9ccb47ddbe5108da7abac667adc5659b0590758d2c54e8418be43fd"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_runs/final_all_release_raw_r1/comparison.tsv",
+      "bytes": 18732,
+      "sha256": "96e67c88540e2dad17c67f9cb9f2801d0473165d07f0a345405e0bf277f0b2a1"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_runs/final_all_release_raw_r1/report.json",
+      "bytes": 378418,
+      "sha256": "a9a905c63569ad32ef422b9738c64eb3ed496e0dafa9af45857a2a3290332d5d"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_runs/final_all_release_raw_r2/api_report.json",
+      "bytes": 169914,
+      "sha256": "54c29454711e5e30da43e0bfc0a2bc2326deba44b0e7700ff45f45099cd88436"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_runs/final_all_release_raw_r2/comparison.tsv",
+      "bytes": 18732,
+      "sha256": "96e67c88540e2dad17c67f9cb9f2801d0473165d07f0a345405e0bf277f0b2a1"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_runs/final_all_release_raw_r2/report.json",
+      "bytes": 378399,
+      "sha256": "fdba2bfd21bdb3f37e311bb9007fed1bfc1eaf61fdeffe6915ac40104f5e5844"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_runs/final_all_release_raw_r3/api_report.json",
+      "bytes": 169924,
+      "sha256": "abcdcfd025d93c815ea3139d16de113cc8debc00945bc43aac119d3f4d41734f"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_runs/final_all_release_raw_r3/comparison.tsv",
+      "bytes": 18732,
+      "sha256": "96e67c88540e2dad17c67f9cb9f2801d0473165d07f0a345405e0bf277f0b2a1"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_runs/final_all_release_raw_r3/report.json",
+      "bytes": 378408,
+      "sha256": "0d78b958cc9b77ebf3018f8b58a0cd55a7e3e8d5355d4589c3b08fa2069884c2"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_runs/final_all_release_stage_r1/api_report.json",
+      "bytes": 166419,
+      "sha256": "98dd41a01c4b093bb49b7caed6acc3ba22f2cb25c27b647412e85920dc3a4ecd"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_runs/final_all_release_stage_r1/comparison.tsv",
+      "bytes": 18875,
+      "sha256": "e61c4c41a7880fce930a8e1af36e8a6d1e27180865161d093cf0e5d7d86d7706"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_runs/final_all_release_stage_r1/report.json",
+      "bytes": 375845,
+      "sha256": "1ebedd4d5e5b8be484457eade870d6ff21ae1278e366e29a48aad0f7e27ffcc2"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_runs/final_all_release_stage_r2/api_report.json",
+      "bytes": 166420,
+      "sha256": "56a5f28154ce227f3b5c6a933433baef0587879f6811987b396d93bf38ec76fd"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_runs/final_all_release_stage_r2/comparison.tsv",
+      "bytes": 18875,
+      "sha256": "e61c4c41a7880fce930a8e1af36e8a6d1e27180865161d093cf0e5d7d86d7706"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_runs/final_all_release_stage_r2/report.json",
+      "bytes": 375847,
+      "sha256": "b34a664fd74402bf1839751fc7a3ac957367b620ac6d0d27c042bf9cd4f7f333"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_runs/final_all_release_stage_r3/api_report.json",
+      "bytes": 166422,
+      "sha256": "0f70bc3a70167a6bf1329d43331a318c722a9f89c6be69efcb43f270c44e286d"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_runs/final_all_release_stage_r3/comparison.tsv",
+      "bytes": 18875,
+      "sha256": "e61c4c41a7880fce930a8e1af36e8a6d1e27180865161d093cf0e5d7d86d7706"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_all_runs/final_all_release_stage_r3/report.json",
+      "bytes": 375848,
+      "sha256": "b5f3f09c16354c937486bc72f8482699ba724e710968a9d896846d17a3a27cb7"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_complete_fetch_manifest.json",
+      "bytes": 11319,
+      "sha256": "fa6a8e7c89c8578d4f5b6e374db854d64e5c49f764429a840ad0f1f9ef5fa10a"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_figures_raw_launch.json",
+      "bytes": 1315,
+      "sha256": "27eef7089d57247d0307b6089eadc36abe93fc77151af8863a166cdbaf67fb47"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_figures_stage_launch.json",
+      "bytes": 1322,
+      "sha256": "953e2e74728ad85c0272e9741874fa39e1c67f1d3ccacb17460a4b535bd99402"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_first_raw_fetch_manifest.json",
+      "bytes": 2671,
+      "sha256": "45527fa5b76b8a2c34436b680d8dea0c5d1ba755aa165c33fd2601c1b1b2196b"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_first_stage_fetch_manifest.json",
+      "bytes": 2691,
+      "sha256": "3665d2d308e19d253fc12c81ada39a88d94b54175acd0d521047fb28b43f273a"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/final_timing_v2_launch.json",
+      "bytes": 647,
+      "sha256": "8d9287df8aa5ce2675e21b799c6a7889e0263f18bdcc899eb65a8427cc66ed02"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/finalize.log",
+      "bytes": 832,
+      "sha256": "27abadba1936dc71ddcb431eda0097d76f5807fd1aa5d6cb09d1e59e263a65f9"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/finalize_launch.json",
+      "bytes": 1079,
+      "sha256": "d1d0941473203bccd988baf2e94524456d9c28c9b00b5b013098492349802438"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/finalize_reproducibility.py",
+      "bytes": 13441,
+      "sha256": "a9b57fc414d326052c861cf90fb91abd9ceb6ffd726c7f86ae974fcbd1739f39"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/finalize_status.json",
+      "bytes": 1095,
+      "sha256": "c96f130958ae72554e5852afdc1cc53e4f6ee819103347a4f26324d739422f42"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/fnit_queue.json",
+      "bytes": 4876,
+      "sha256": "8fcbdedd313894f39d620fb3c09325273f24c0a2fc09c434a5a1c01122b3dcbe"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/fnit_runs/raw_r1/api_report.json",
+      "bytes": 162346,
+      "sha256": "c4cce3f111e443d7abbd7c7d57341568724a45f8df439491709bb835a15fe0f9"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/fnit_runs/raw_r1/gpu_load.jsonl",
+      "bytes": 12678,
+      "sha256": "ff7802d73c0d24dc992d3eeaa63d85686a043180594ddcffb6d305c107d9cf32"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/fnit_runs/raw_r1/report.json",
+      "bytes": 369872,
+      "sha256": "004a45c04f4f42c9fdb3ba01c410bdf71b9767cef77c08e6702bf8c13dadc7a3"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/fnit_runs/raw_r1/status.json",
+      "bytes": 2129,
+      "sha256": "3e89b41dcc14b3ec56a964f51a2a047a6e238d43f1c669e3e321c03efdaeb5d7"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/fnit_runs/raw_r2/api_report.json",
+      "bytes": 162103,
+      "sha256": "7c2a0f4244bcd68b6fc87d89975984fda99cb4ea263c500098a1187f00ab7c41"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/fnit_runs/raw_r2/gpu_load.jsonl",
+      "bytes": 7487,
+      "sha256": "4d2790b647d681e30e3371b029c6dc3f03ab1e120951afc6fa0a00754129a9e8"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/fnit_runs/raw_r2/report.json",
+      "bytes": 369833,
+      "sha256": "14e81a3a61cd93952f827eaf0926e8903061316539b71e61f54158a892603c6e"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/fnit_runs/raw_r2/status.json",
+      "bytes": 2103,
+      "sha256": "dbab09bbcd4a9422082a0b65aefc040bb07448df4473ec4b766accd8ebe141d9"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/fnit_runs/raw_r3/api_report.json",
+      "bytes": 162102,
+      "sha256": "08fdf7aa1b1c717498db5834c275a9dc450cddab6deb37f1d0875ba4c3492b84"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/fnit_runs/raw_r3/gpu_load.jsonl",
+      "bytes": 7537,
+      "sha256": "2958c2f625c45ea4e899d38364da26a2330b39ec8138a8692c641d3998723390"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/fnit_runs/raw_r3/report.json",
+      "bytes": 369818,
+      "sha256": "247a55cd036e42c7acbef5c237d885eed41b85073df3f41fcfeb3b2abc0d6a71"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/fnit_runs/raw_r3/status.json",
+      "bytes": 2101,
+      "sha256": "dda57d066ec85c2311af96912768ed7880e42e688cdc9445bd695f9994e730a3"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/fnit_runs/stage_r1/api_report.json",
+      "bytes": 158771,
+      "sha256": "b38d93f7313947d2e5cc21fd99e53cd55730af1916d133f7ff2901ffab442125"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/fnit_runs/stage_r1/gpu_load.jsonl",
+      "bytes": 14073,
+      "sha256": "ce06cbf156ac6c6ec437520f854f69e480c1c87c3f472eacfd226a54ab5c80f2"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/fnit_runs/stage_r1/report.json",
+      "bytes": 367264,
+      "sha256": "fecdab0bbb735ae1854e3746b06feae0350e1704be0ccd27ecdc6e412a621ab2"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/fnit_runs/stage_r1/status.json",
+      "bytes": 2288,
+      "sha256": "0b8394fa555adf8e41cfea4dcdf221ffae91daac1ae40eb34762e0c378874c49"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/fnit_runs/stage_r2/api_report.json",
+      "bytes": 158532,
+      "sha256": "b71e9bc414694099fde1121a1294656387e182afb1c18d8acd1016491500b05c"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/fnit_runs/stage_r2/gpu_load.jsonl",
+      "bytes": 9287,
+      "sha256": "c30d46b9a866939955bec166b7fd9ea10f66aaa0c1bbe8c70ecea1bda25b7628"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/fnit_runs/stage_r2/report.json",
+      "bytes": 367214,
+      "sha256": "4d68512ee369cb713cc721cece230bbf2d584f739b9ecc65ffe0692ce1737e9e"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/fnit_runs/stage_r2/status.json",
+      "bytes": 2259,
+      "sha256": "7e480f224571cf099dae5ecd3b8221d7724b8a659e3bee32b7fb7f7e46cd28f6"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/fnit_runs/stage_r3/api_report.json",
+      "bytes": 158520,
+      "sha256": "d6df3f689e2ab07558e1a10b5bf7f60b3102790a5c4725f5372393e722a5b3d5"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/fnit_runs/stage_r3/gpu_load.jsonl",
+      "bytes": 8734,
+      "sha256": "c939ade106bb79e56f4faa9a0698a48a7d759f2ecb4cc09d192ee785d5be24c4"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/fnit_runs/stage_r3/report.json",
+      "bytes": 367215,
+      "sha256": "56ccbe4f02cd017720e4f74a6a3e8a462cb0ebd1fcd4cfb2e4bba4d3a5bdeebf"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/fnit_runs/stage_r3/status.json",
+      "bytes": 2261,
+      "sha256": "651f7a1563c92d23834e95db6a6939f3f7ed9b6def3d363c0fdd9209ea18000c"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/followup_cross.json",
+      "bytes": 10354250,
+      "sha256": "c66b2dd20364e91c9cbc69ae03a029853e8e3a7ac89832e560f6a5af68bcc312"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/followup_cross.tsv",
+      "bytes": 58667,
+      "sha256": "5700f68893666ab9176afa3b44d23462b24730dd78855e75e7b23e0735a2d229"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/followup_cross_manifest.json",
+      "bytes": 4106982,
+      "sha256": "b02eb94417b7d73f66a9dff62857ad60de5891ab05b47a43f1f5936974bb9cd6"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/followup_cross_summary.json",
+      "bytes": 1476800,
+      "sha256": "78e10ac320041d251a0e18244de8335012e8312a14ce38f9d9a90d3c00e67d96"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/followup_fetch_manifest.json",
+      "bytes": 21497,
+      "sha256": "e4c0ed68d15506727229116a34273b0fac8865b519d39d5572d6bc34d4de34ca"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/followup_runs/probe_raw_hippo-amygdala-left_synthetic-and-final-mesh-30/api_report.json",
+      "bytes": 53325,
+      "sha256": "4a1058ca757c65e21948241f4c395f3ccdf1b9f3d7db5628d8ae0ff15e82cc5d"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/followup_runs/probe_raw_hippo-amygdala-left_synthetic-and-final-mesh-30/gpu_load.jsonl",
+      "bytes": 2987,
+      "sha256": "99c234ffeec98675c8930ca911c4007eaa40fef9bdca4e73af8126050c53187f"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/followup_runs/probe_raw_hippo-amygdala-left_synthetic-and-final-mesh-30/precision_policy.json",
+      "bytes": 31764,
+      "sha256": "a1630b95f6edf342c4cf0cfa5a9fde97ad357dceb520e7b5180fff156add3ff9"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/followup_runs/probe_raw_hippo-amygdala-left_synthetic-and-final-mesh-30/report.json",
+      "bytes": 94297,
+      "sha256": "b68476ddbdaab72397751e432cb4db7379eef2713fbd5d2cb24e4b41d7516ed7"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/followup_runs/probe_raw_hippo-amygdala-right_synthetic-and-final-mesh-30/api_report.json",
+      "bytes": 53543,
+      "sha256": "d74ace555b7e0e1b194af3946edf6dd9a245cfff0bfea6115d66d66724b29fca"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/followup_runs/probe_raw_hippo-amygdala-right_synthetic-and-final-mesh-30/gpu_load.jsonl",
+      "bytes": 2793,
+      "sha256": "b32a06295aadfef8064f5f782394617128a95bc0c2fac633bd3c60c8a89aa282"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/followup_runs/probe_raw_hippo-amygdala-right_synthetic-and-final-mesh-30/precision_policy.json",
+      "bytes": 31775,
+      "sha256": "1a5a6683dfe897130c499be086ec633ab12ab271371afa645cb4468aad2eebd3"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/followup_runs/probe_raw_hippo-amygdala-right_synthetic-and-final-mesh-30/report.json",
+      "bytes": 138047,
+      "sha256": "3d483dfaac0c1fd7152776a4a17df5b2b841f2bc02002c61c1e212bb7aef40c7"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/followup_runs/probe_stage_brainstem_stable-brainstem-r1/api_report.json",
+      "bytes": 8521,
+      "sha256": "3facd389476482b74da81f0d4f53fabb2a864ece0fec3f3b47bb57dd910cb4b0"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/followup_runs/probe_stage_brainstem_stable-brainstem-r1/gpu_load.jsonl",
+      "bytes": 1219,
+      "sha256": "cecdb668423528b98fc7193ddc0da179562c02d5eef6b7f74b2583cb8d099e35"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/followup_runs/probe_stage_brainstem_stable-brainstem-r1/precision_policy.json",
+      "bytes": 6301,
+      "sha256": "4cf8cb809d8774b57bcbc101ff8c44b7a98c898424378a2d1d10b602a1c3663b"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/followup_runs/probe_stage_brainstem_stable-brainstem-r1/report.json",
+      "bytes": 56750,
+      "sha256": "fefbeb17926ec524c3aef3f9be43391635d57d8112913ebcba7dcba2032f6a75"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/followup_runs/probe_stage_brainstem_stable-brainstem-r2/api_report.json",
+      "bytes": 8524,
+      "sha256": "958a89c9ab396a5de7f8c6dc11a9bdb8f8a837945506df92e61b3f318e33f05b"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/followup_runs/probe_stage_brainstem_stable-brainstem-r2/gpu_load.jsonl",
+      "bytes": 1213,
+      "sha256": "71d16850208a6e158dda91f191196bc560ce380a99c62dae2f81ffb2305d2602"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/followup_runs/probe_stage_brainstem_stable-brainstem-r2/precision_policy.json",
+      "bytes": 6300,
+      "sha256": "acb85d019cbc430cf75e342bee311d6662effb9d8877539101a81f7d4a39aef7"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/followup_runs/probe_stage_brainstem_stable-brainstem-r2/report.json",
+      "bytes": 56752,
+      "sha256": "1ece9dcbe038e0f184240615ef1cd398eeef1a18ad61ed0716bfda72b3f6336c"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/followup_runs/probe_stage_hippo-amygdala-left_synthetic-and-final-mesh-30/api_report.json",
+      "bytes": 49341,
+      "sha256": "b63dc84bd65f1f67543e8c79cefa41994ee0a601737e5f85a0da000ff734d6f9"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/followup_runs/probe_stage_hippo-amygdala-left_synthetic-and-final-mesh-30/gpu_load.jsonl",
+      "bytes": 2526,
+      "sha256": "f6b3cde65096a56d8fb6d7ec3be3490c885a23765e4ca10f71c7a444cfe4edb2"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/followup_runs/probe_stage_hippo-amygdala-left_synthetic-and-final-mesh-30/precision_policy.json",
+      "bytes": 30958,
+      "sha256": "8c3156407e7dc0be0de0668074fb65306faa4c46f4a06a36eb7a600ed9f4da9a"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/followup_runs/probe_stage_hippo-amygdala-left_synthetic-and-final-mesh-30/report.json",
+      "bytes": 90894,
+      "sha256": "588c5bb6af0ae6245b78816e28f2f9b25a73e2bccd2f179b787c641edd052bdd"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/followup_runs/probe_stage_hippo-amygdala-right_synthetic-and-final-mesh-30_attempt2/api_report.json",
+      "bytes": 50739,
+      "sha256": "91a4c1535a2f1dc6172e888600f99afb3e7b5c4d9ec2fbc3f44186bdf9c14c46"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/followup_runs/probe_stage_hippo-amygdala-right_synthetic-and-final-mesh-30_attempt2/gpu_load.jsonl",
+      "bytes": 2777,
+      "sha256": "d3b6cc022293664139aa70e5d8c3c9b6a5d1f9593b5482a2976fc2ab7c1e905b"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/followup_runs/probe_stage_hippo-amygdala-right_synthetic-and-final-mesh-30_attempt2/precision_policy.json",
+      "bytes": 31965,
+      "sha256": "e22f48e33d47efab07294c79ea2450d33aca3bb6090dc2cfc75b8a6eafc191a1"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/followup_runs/probe_stage_hippo-amygdala-right_synthetic-and-final-mesh-30_attempt2/report.json",
+      "bytes": 135936,
+      "sha256": "de7859d169a85c97c815ee059aeeb7a5eb3e06bdd56bc527850d0575037a6281"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/frozen_source_manifest.json",
+      "bytes": 77725,
+      "sha256": "a9d126e084d34c29cb95b3484b957ac53f34eb3e6915f486942ade6cf3291676"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_component_proposed.json",
+      "bytes": 678,
+      "sha256": "bc1c085f14b1d26dcf9b68a0d8dcf6943b6a52d46cf13f7dddeaec4393228e51"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_component_proposed.patch",
+      "bytes": 6968,
+      "sha256": "081e14a519a88f34146f90c2ac28cb363a8756ed6a5f89a6e6d7900573248dbf"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_algorithm_review.md",
+      "bytes": 7119,
+      "sha256": "f3919a409c2e201b284d09fec4023a33772b42434d067f0e829897c8969e506f"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_diagnostic_artifacts.json",
+      "bytes": 14874,
+      "sha256": "42423dee44238303aa17d76055b208f282e19f3d7b32b71bdd6017788d07014c"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_diagnostic_counter_check.json",
+      "bytes": 289,
+      "sha256": "16eafe7159b057255e37959581ae47c31b3fb4648360d5d72861874c7742c3df"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_diagnostic_counter_check_v2.json",
+      "bytes": 336,
+      "sha256": "70ae4864bbe815fd2cc662e81d80334034aa7dd79b0b63b6abe37a899f6b7327"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_diagnostic_fetch_manifest.json",
+      "bytes": 27784,
+      "sha256": "c75a42cca1a05b1c7abb96b6c174ac111e46137bafc5fa34d06c8a535c1db433"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_diagnostic_forward_check.json",
+      "bytes": 289,
+      "sha256": "d1d94739338e7897626d45d72d78dda8fabc18964190b25f29bb281af548b6c9"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_diagnostic_launch.json",
+      "bytes": 1460,
+      "sha256": "37e72ee82c2f8e1776755359b2f6df19b1a6f362bc36963e6bb2d060182b8512"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_diagnostic_queue.json",
+      "bytes": 27351,
+      "sha256": "3f1f7256ca09083d2c1c39752c971ad798ef7e368b0dff2bbf8a5e759b4cf639"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_diagnostic_queue_before_v2_resume.json",
+      "bytes": 6355,
+      "sha256": "cbffe48b15995d63a5d5a5bee00b5c332e52fa7d1761608847fc06bf5e7411d5"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_diagnostic_resume_v2_launch.json",
+      "bytes": 1379,
+      "sha256": "f51e7de85259b26e0c30682c4d4287c1bad371e19ad2e700171ecdab5f7eebfd"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_diagnostic_summary.json",
+      "bytes": 68013,
+      "sha256": "c9bb7a9ff831cb79c64dccdfbc069c77068218b354725143516c992b439f3c8f"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_diagnostic_summary.md",
+      "bytes": 802,
+      "sha256": "8ec859bf460c3e367745fa5b37cbce2531e8f41be9d27b9a1ea62ce090b7ce8b"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_review_identity.json",
+      "bytes": 1453,
+      "sha256": "b0ac42c8c40e77f33fff334c0151f38bd7591264f9834060d7a4c20b7ea14067"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/brainstem_v3_raw_r1/api_report.json",
+      "bytes": 11307,
+      "sha256": "ed23e5246029486331d1f6f65e99050f2e1ff45fcd04dfd1f5bc52d49939cd9d"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/brainstem_v3_raw_r1/comparison.tsv",
+      "bytes": 856,
+      "sha256": "aef2732257ef37319aeb85f635ba6e3ad009c0d6fe53450e8af8c0ad4134037c"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/brainstem_v3_raw_r1/driver.log",
+      "bytes": 3863,
+      "sha256": "57a37924b7af63973e500aaa6f08c0592d122582859f972b2df9707c2c96f393"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/brainstem_v3_raw_r1/gpu_load.jsonl",
+      "bytes": 1060,
+      "sha256": "3a566c9c25182e538d70e3e77a8084f0282ded75e6b167a540db2e2dc7c045fe"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/brainstem_v3_raw_r1/precision_policy.json",
+      "bytes": 6107,
+      "sha256": "63b547b4003994fdf459dd74b882161a4b3cabe46889af13285a56bce78f854f"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/brainstem_v3_raw_r1/report.json",
+      "bytes": 59082,
+      "sha256": "1e90842124da49a9426b3b2b381942924c12be7a2d82e1be6d5cb7d5f8548a31"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/brainstem_v3_raw_r2/driver.log",
+      "bytes": 1565,
+      "sha256": "66358633758df8db09683277167a1c5559a4ee70548860ec7b2043071708e467"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/brainstem_v3_raw_r2/gpu_load.jsonl",
+      "bytes": 256,
+      "sha256": "a1869e90edc4655892785ec197a4f353e04c0f667c257706ffc39bdf055ea2f9"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/brainstem_v3_raw_r2/precision_policy.json",
+      "bytes": 1685,
+      "sha256": "7898b6687ab9c4166f67fe2212e6968466c1b0b59e21ac6ffeb0e9cf1c43ebbf"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/brainstem_v3_raw_r2_attempt2/api_report.json",
+      "bytes": 11366,
+      "sha256": "090a0baf070d02159a313ca1b7852fdf3d6866db287e168b18a48022ddeb2fd2"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/brainstem_v3_raw_r2_attempt2/comparison.tsv",
+      "bytes": 856,
+      "sha256": "aef2732257ef37319aeb85f635ba6e3ad009c0d6fe53450e8af8c0ad4134037c"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/brainstem_v3_raw_r2_attempt2/driver.log",
+      "bytes": 3868,
+      "sha256": "0eb34ac664d40bfa28dbd2762e83977bc1946d3c585bfac80a8455ca7bdb72d6"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/brainstem_v3_raw_r2_attempt2/gpu_load.jsonl",
+      "bytes": 1065,
+      "sha256": "b999edabf726d0c5e01e8dcf95cde4d1e75b0029fd5792997358a7074eb2b29a"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/brainstem_v3_raw_r2_attempt2/precision_policy.json",
+      "bytes": 6115,
+      "sha256": "aebab42620a421b1529b73a4780571d9e8128336ba50ed2c2b1ce5d6958f911d"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/brainstem_v3_raw_r2_attempt2/report.json",
+      "bytes": 59106,
+      "sha256": "b4857f8459f265bedaa2f13c6f0a6f9515f4aae36a6a8075d205cab8e6c8ecd5"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/brainstem_v3_stage_r1/api_report.json",
+      "bytes": 8408,
+      "sha256": "905d629493183039be6bedc2e8a4718122e03ee7e0d0486c33996854b11dbbbb"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/brainstem_v3_stage_r1/comparison.tsv",
+      "bytes": 856,
+      "sha256": "4fdfcf890b775800d0eea5e1f074dcdfe6739f3f95e0e04052f122a613c1d3e9"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/brainstem_v3_stage_r1/driver.log",
+      "bytes": 3909,
+      "sha256": "b706d09627837db2d979b16889031d15426cab21a56bafe26b007ec6e466680f"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/brainstem_v3_stage_r1/gpu_load.jsonl",
+      "bytes": 1054,
+      "sha256": "4a88c93425d5ea7c07615f046c6072a6fea7f42d0084368c5744e2d26aac90b2"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/brainstem_v3_stage_r1/precision_policy.json",
+      "bytes": 6269,
+      "sha256": "aeaffa83991e022c43d198a78471ac7ab2004dd470680b91b1390cdcd65f4a79"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/brainstem_v3_stage_r1/report.json",
+      "bytes": 56767,
+      "sha256": "7ecb1e9f37765cee6bb9483c15f3a589dae41ebdbd3c0c8d3f28b0ab852dabcd"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/brainstem_v3_stage_r2/api_report.json",
+      "bytes": 8404,
+      "sha256": "05143e976b1a8837cf7d84d527b28da5f9ec873fe3497ebd37eca13af585d7b6"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/brainstem_v3_stage_r2/comparison.tsv",
+      "bytes": 856,
+      "sha256": "4fdfcf890b775800d0eea5e1f074dcdfe6739f3f95e0e04052f122a613c1d3e9"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/brainstem_v3_stage_r2/driver.log",
+      "bytes": 3906,
+      "sha256": "26c371896a6e422cb6640522575304228c1f6da3c1c51b8c9bc358564c330c71"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/brainstem_v3_stage_r2/gpu_load.jsonl",
+      "bytes": 1192,
+      "sha256": "e5e6a77e5c130593e43825d9e1df6e5c1f44f30cd66bc0f1dadc90ea4005bbc3"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/brainstem_v3_stage_r2/precision_policy.json",
+      "bytes": 6269,
+      "sha256": "f8d6a1cbda4a89eba59bd3d12ef33b6e78cc93e256eb02d02dfa59c3fccdaa7d"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/brainstem_v3_stage_r2/report.json",
+      "bytes": 56764,
+      "sha256": "40213974106e05225e9b9e00d5a839f3e8e208956a4f7b5d0aba8d37a3781d09"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/hippo_mask_stage_right_balanced/api_report.json",
+      "bytes": 54356,
+      "sha256": "6e666169754169770e93030eaf4906b9a818e483abf9fc3894bb74f167fd033e"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/hippo_mask_stage_right_balanced/comparison.tsv",
+      "bytes": 5298,
+      "sha256": "690d6edabeb2ccff9669658d6260822acd92851e070dde27c3e1464851b55797"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/hippo_mask_stage_right_balanced/driver.log",
+      "bytes": 28777,
+      "sha256": "5aa88f434075372fc357a47198970f8ba242f6ecaf54d6fb6344683fbb1a99b5"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/hippo_mask_stage_right_balanced/gpu_load.jsonl",
+      "bytes": 3410,
+      "sha256": "a1a925be217bd7cf24dd14209ce9ecf42a46d694f7b4177ee7163754dc6a750e"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/hippo_mask_stage_right_balanced/hippo_mask_diagnostic.json",
+      "bytes": 153298,
+      "sha256": "347655cfc309cee819d301b537a3af34a99c6eba60e11025144454ce12df38d4"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/hippo_mask_stage_right_balanced/report.json",
+      "bytes": 139721,
+      "sha256": "fc090feaf9acc7f57a39058efbbb285b7488c28182a3a3e3c3d5b2c6381b6005"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/hippo_mask_stage_right_baseline_fast/driver.log",
+      "bytes": 8612,
+      "sha256": "7e3da1beda81428be784009213524d9406c47bcc0fa06b0511a5a448935c8764"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/hippo_mask_stage_right_baseline_fast/gpu_load.jsonl",
+      "bytes": 2681,
+      "sha256": "6a4da661751739b5d041231909277f068a1061900ffe2f6f1c3ed22b0b0b03ad"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/hippo_mask_stage_right_baseline_fast/hippo_mask_diagnostic.json",
+      "bytes": 74956,
+      "sha256": "d2cd8b11cf4376bc94d4884ec10acdaf62ce8dd9f7e0cfe06a1cfc3569ee984e"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/hippo_mask_stage_right_baseline_fast_attempt2/api_report.json",
+      "bytes": 48644,
+      "sha256": "6d9c89158ffa77b7540e238ad979f71b53257fc16504a00b5a495713fbc27b4b"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/hippo_mask_stage_right_baseline_fast_attempt2/comparison.tsv",
+      "bytes": 5367,
+      "sha256": "7c2ffeec1ad76697c30113f7bd2713a40069c34884b5350b8b120b19308365c5"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/hippo_mask_stage_right_baseline_fast_attempt2/driver.log",
+      "bytes": 25471,
+      "sha256": "3e0e98ddf23976d786dbe27dc07ab46b67630fa7576ceba6031f3854c7daf7de"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/hippo_mask_stage_right_baseline_fast_attempt2/gpu_load.jsonl",
+      "bytes": 3349,
+      "sha256": "900e4ecd38ecd46caca60c529ebd24b8247b2f62bab21fe8ea5d0280589d0cf8"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/hippo_mask_stage_right_baseline_fast_attempt2/hippo_mask_diagnostic.json",
+      "bytes": 152379,
+      "sha256": "690ddd9c87c7d0aec9dc0660db1c34ae3132e45117eec4994e8e5ed0b23925ab"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/hippo_mask_stage_right_baseline_fast_attempt2/report.json",
+      "bytes": 134091,
+      "sha256": "ca600dcd243c35cbb7377e61adafeaa22f718920dbedb451d9530c73b699ba9c"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/hippo_mask_stage_right_joint_fast/api_report.json",
+      "bytes": 50524,
+      "sha256": "0f69e84f31ebbf1d01608f7f5786e1f7bef9798c4b3ba996704d5039b4aa876c"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/hippo_mask_stage_right_joint_fast/comparison.tsv",
+      "bytes": 5247,
+      "sha256": "75784a279442984c76726ad9b810ab6c573cab03f2d399f3991d9bfcf47c441a"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/hippo_mask_stage_right_joint_fast/driver.log",
+      "bytes": 26574,
+      "sha256": "c523b827b7c36dabeda34b688d123090f0b6238a108a54fb4dea73357f9d979a"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/hippo_mask_stage_right_joint_fast/gpu_load.jsonl",
+      "bytes": 3056,
+      "sha256": "06304acd757be900058b38e6df807506b63a0f73791689cedd7eef6512d75e08"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/hippo_mask_stage_right_joint_fast/hippo_mask_diagnostic.json",
+      "bytes": 153540,
+      "sha256": "fa76a919e955040b27b9fc277d17ff72e5b88c2f8213e2d7af8fe27f5a9961fc"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/hippo_mask_stage_right_joint_fast/precision_policy.json",
+      "bytes": 31945,
+      "sha256": "0b58d9d941c3420eecdd7c726e8349c912e4a9501a1153d55ab27d68865d794c"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_mask_runs/hippo_mask_stage_right_joint_fast/report.json",
+      "bytes": 135776,
+      "sha256": "53ea0024da88da04b39247b75ab1901881343bf50f2403a7238b2d6babffe568"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_fetch_manifest.json",
+      "bytes": 20419,
+      "sha256": "dd8f449efd9e90777c92c5c8b55c3aabec77dd016b1a2443540073a7211e917f"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_launch.json",
+      "bytes": 1636,
+      "sha256": "1e5508975b86c6ca56f4b3c4cfb61dc20861d6f2dc04b71623566a83aaf3567c"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_queue.json",
+      "bytes": 18370,
+      "sha256": "136ea7d957a9552901a3086890020f29d5531b4c7c8051d9d4e7dd1a4eabd9c4"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_region_comparison.tsv",
+      "bytes": 57466,
+      "sha256": "0d4226e012642eb49d2ea2aeba64f778da6d17674a0e849b2a80dfa5079028cf"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_review.md",
+      "bytes": 4309,
+      "sha256": "6564fd31cc431d0737a1557b550164940014056f7598e53af766380c085ca52d"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_raw_left_balanced/api_report.json",
+      "bytes": 57030,
+      "sha256": "c633fceb0b93fe06a7d9958dca769d7c51b640042ef5b262f74fb3e455bbbfb9"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_raw_left_balanced/comparison.tsv",
+      "bytes": 5163,
+      "sha256": "a65b8875731c25e8b999fed3cd1fbb6e712609a18e0ba75faa10580b96a77673"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_raw_left_balanced/driver.log",
+      "bytes": 29215,
+      "sha256": "d30c63dda8a1ba58654801435212e754b8dcaf65eea3cd35850abbdbabba9d79"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_raw_left_balanced/gpu_load.jsonl",
+      "bytes": 4617,
+      "sha256": "3a7e219bd2668819762b2d829eacdc2d914eab3cb2a1c0e5f1cf7b4815068229"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_raw_left_balanced/hippo_mask_diagnostic.json",
+      "bytes": 153457,
+      "sha256": "5d734cc24f44ab6eeb1602e45af6c4178bbe022a4523487cc482ce815506f8cd"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_raw_left_balanced/hippo_topology.json",
+      "bytes": 52715,
+      "sha256": "5db3358d2dc29c824b150c956ea32fa937bb2e5c315f1e3ba6fa6b187bca7648"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_raw_left_balanced/report.json",
+      "bytes": 141363,
+      "sha256": "a82d4b17d0c173f6a398d03b4efcbbf4aeb70dd11a20f526fac200594fea3174"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_stage_left_balanced/api_report.json",
+      "bytes": 54105,
+      "sha256": "f1d3ad08bfe3e2bf993d10c3ee661bc6dd3d5c4085c6e69447e3195446b8b95d"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_stage_left_balanced/comparison.tsv",
+      "bytes": 5176,
+      "sha256": "8dc5655fea5d5d81b1bbd47e292ccaae04d1a18de2e2144d173927e02a47ce7f"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_stage_left_balanced/driver.log",
+      "bytes": 29248,
+      "sha256": "aa0cf6e065cc27b1e8ab82c8104b4e99b554d94c67be51a813ca5c385a856522"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_stage_left_balanced/gpu_load.jsonl",
+      "bytes": 3773,
+      "sha256": "37281a81196301929aebea9de6d93e13378c634d0b6c9cac85eb3586d4312e9d"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_stage_left_balanced/hippo_mask_diagnostic.json",
+      "bytes": 153828,
+      "sha256": "19d2ab140bb00a15d2d442a2fbda2a44955edf406ce8c1636d2be6a50a2ec331"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_stage_left_balanced/hippo_topology.json",
+      "bytes": 51394,
+      "sha256": "67291fc88e12270aa51df2e6fd935fd6573ef1f902d52d9be4751e465132ad65"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_stage_left_balanced/report.json",
+      "bytes": 139070,
+      "sha256": "d374a45a4b0b57b40b776b8312b4b4ed5f94a690c6cce558acb80d04e7b22542"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_stage_right_balanced/api_report.json",
+      "bytes": 54372,
+      "sha256": "204e980b2cfadc323a47115f441bddee21dac475a14570c870d370a3884780c0"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_stage_right_balanced/comparison.tsv",
+      "bytes": 5298,
+      "sha256": "690d6edabeb2ccff9669658d6260822acd92851e070dde27c3e1464851b55797"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_stage_right_balanced/driver.log",
+      "bytes": 29311,
+      "sha256": "eb7a024502b6b1cd1f8ff1eba308f275ce862d76cb1b65bc0fe3ce52114e5163"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_stage_right_balanced/gpu_load.jsonl",
+      "bytes": 3776,
+      "sha256": "38653a19d7ccef187e00d483aff658e0fc1b193761a36d4d66e00710df6fd5f4"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_stage_right_balanced/hippo_mask_diagnostic.json",
+      "bytes": 153989,
+      "sha256": "94cb4836eb3af9c07c613fc79f12482125713c304933be4f665733ef523b2fef"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_stage_right_balanced/hippo_topology.json",
+      "bytes": 55379,
+      "sha256": "b16b77050a9c22c582c533e10581653a5f66d2c388884d0545cc516ea8f7410a"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_stage_right_balanced/report.json",
+      "bytes": 139721,
+      "sha256": "2b6a43d768fb40808d5d79cffc48830353121bcd4b0bed73e1f42c35e38a5102"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_stage_right_baseline_fast/api_report.json",
+      "bytes": 48612,
+      "sha256": "0c3f26aa1ac3ef8fdd6896d3d3792292fd8c92ce84c6df8fa9d773ac63f3231d"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_stage_right_baseline_fast/comparison.tsv",
+      "bytes": 5367,
+      "sha256": "7c2ffeec1ad76697c30113f7bd2713a40069c34884b5350b8b120b19308365c5"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_stage_right_baseline_fast/driver.log",
+      "bytes": 26008,
+      "sha256": "fc0130fd3b8f2fa333a002aa04ccaca737da8e78ad85205f4051a2ad5be087ec"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_stage_right_baseline_fast/gpu_load.jsonl",
+      "bytes": 3358,
+      "sha256": "62d9b88ee7176e87d0fb3ef6a91e05fa1062d9ab5ebd2aee261d7dbf114178bc"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_stage_right_baseline_fast/hippo_mask_diagnostic.json",
+      "bytes": 153067,
+      "sha256": "d1f41989d4dc77797f3bd91af28ccb6d4ce3cc37e7ec4f9a3130d34fe49d3a1a"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_stage_right_baseline_fast/hippo_topology.json",
+      "bytes": 52685,
+      "sha256": "e0c1c01ed406dccb8c8596df0274030595d0c5518ca6354823ae69ae3c949d07"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_stage_right_baseline_fast/report.json",
+      "bytes": 134078,
+      "sha256": "1659c75d4df5d57c8bb596f92d38121142237e308723b1fd1f5a21bd343503ab"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_stage_right_joint_fast/api_report.json",
+      "bytes": 50550,
+      "sha256": "0d932689b817a1ce4627346c81eeaa742c0400bf233ab65d1c8127ca2f15f454"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_stage_right_joint_fast/comparison.tsv",
+      "bytes": 5247,
+      "sha256": "75784a279442984c76726ad9b810ab6c573cab03f2d399f3991d9bfcf47c441a"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_stage_right_joint_fast/driver.log",
+      "bytes": 27118,
+      "sha256": "5b0edba6241837dc137bd84b80f24aac7263a4931bcc21700b65ea314a1702fa"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_stage_right_joint_fast/gpu_load.jsonl",
+      "bytes": 3790,
+      "sha256": "a9d186530a663c95b986e37ad75aa8de9a3bc98ed0f479d3f614c35e7323e86d"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_stage_right_joint_fast/hippo_mask_diagnostic.json",
+      "bytes": 154233,
+      "sha256": "27b337aa94640b893f5d58bf542cff9f6a0a316d230806d2cc803ee30e8ae5f3"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_stage_right_joint_fast/hippo_topology.json",
+      "bytes": 54769,
+      "sha256": "7fc690ca85be70121543c308f0d21f5a1f5d3a925f779bcb95ef9ddd845d9441"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_stage_right_joint_fast/precision_policy.json",
+      "bytes": 31949,
+      "sha256": "510479b60f43418313969b570c73196563e577e71cf6ddfaa041307a05c2fa4b"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_runs/hippo_topology_stage_right_joint_fast/report.json",
+      "bytes": 135787,
+      "sha256": "0f0ae4c7bf45b23e59d9869244deee038496cb2bec4babbb9ca836b7ee38cf76"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_topology_start_gate.json",
+      "bytes": 156,
+      "sha256": "7762ca5ffc1b518cfafab433ee6bb416beabfb4023f7150d00d88ec3c9d765f7"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/hippo_working_grid_audit.json",
+      "bytes": 3381,
+      "sha256": "af778940552eb8299c0c8b1045e948ea705aad2df1c87e5c69e89017a67274b9"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/low_region_reproducibility_summary.json",
+      "bytes": 22095,
+      "sha256": "b0c87450d4c5d52f7c14e6c357accf73c1159ea717699117ca60b3e327591d31"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/plot_low_regions_crop_window.py",
+      "bytes": 8774,
+      "sha256": "39f1553cb648299ac5f995c5b2935a39aabde849ad12f6a8e08aec87cc23dbda"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/precision_followup_queue.json",
+      "bytes": 15106,
+      "sha256": "573c098e6c45ad73437327d1f32dd17b4f6c025f7b51c92c7c068bd950613a93"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/precision_probe_queue.json",
+      "bytes": 14717,
+      "sha256": "0dcda0c9a16f05a41c5b6f27c8bae81d05ffa4246c74a91c7b1f6105e24c580f"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/probe_precision_causes.py",
+      "bytes": 14821,
+      "sha256": "253a6b78726b3b21f8814de5a4dcb027dee1a6536df1f90ae466b6997c380e0e"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/probe_runs/probe_raw_hippo-amygdala-right_balanced/api_report.json",
+      "bytes": 57309,
+      "sha256": "6a2d27bb0a6820d60238592e2ac07042364f6152ec16d435a24d96841ca5d4cf"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/probe_runs/probe_raw_hippo-amygdala-right_balanced/gpu_load.jsonl",
+      "bytes": 2893,
+      "sha256": "75035476fe99b3c1b9356eedb1b756d1aecfa2c0724f1673caa7e2ac9206fbd9"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/probe_runs/probe_raw_hippo-amygdala-right_balanced/report.json",
+      "bytes": 142072,
+      "sha256": "c1aaf28276f5d7f4c7900bbaaf0d53267e884c7f5eee3c2c3bf878a01610fc16"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/probe_runs/probe_stage_hippo-amygdala-right_em-fp64-statistics_attempt2/api_report.json",
+      "bytes": 48755,
+      "sha256": "795c532dd93560fb4aff22080b4d05f1ee4038863c4ee4f70c059d7da276d5f9"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/probe_runs/probe_stage_hippo-amygdala-right_em-fp64-statistics_attempt2/gpu_load.jsonl",
+      "bytes": 2926,
+      "sha256": "2425911a4b17c6919d4ad5ab2d507eb19b6b8b3625b03151ba934d2a90c05cb5"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/probe_runs/probe_stage_hippo-amygdala-right_em-fp64-statistics_attempt2/precision_policy.json",
+      "bytes": 29405,
+      "sha256": "90dd2821c5fbf76fd28a8361cf41efcf31194ebf465d0c57d991e0379f0266fe"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/probe_runs/probe_stage_hippo-amygdala-right_em-fp64-statistics_attempt2/report.json",
+      "bytes": 134057,
+      "sha256": "62c433b193b56a8c805377e210d74e3fcffb34c277f4b4e4393fb22ccc43930b"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/probe_runs/probe_stage_hippo-amygdala-right_final-mesh-30/api_report.json",
+      "bytes": 49642,
+      "sha256": "3a397260049e67ca47db2816a0e76707ead6234c076117854844e39a27beaff3"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/probe_runs/probe_stage_hippo-amygdala-right_final-mesh-30/gpu_load.jsonl",
+      "bytes": 2783,
+      "sha256": "c25efe669fcf98aa6562cefec5874bd8cf97e0b1f89d8101cf55dc30681170a4"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/probe_runs/probe_stage_hippo-amygdala-right_final-mesh-30/precision_policy.json",
+      "bytes": 30271,
+      "sha256": "95d81871746aa46133897cca9c4bae7d68a94d59b833356c462e4257b1fedc96"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/probe_runs/probe_stage_hippo-amygdala-right_final-mesh-30/report.json",
+      "bytes": 134915,
+      "sha256": "f55d751707824f9101735b73e31483a61b41903311e6a10c4a35d6d126a5a306"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/probe_runs/probe_stage_hippo-amygdala-right_synthetic-stop/api_report.json",
+      "bytes": 49585,
+      "sha256": "d7eb4f45a12c914f7c60e35bcd8798779f2bcd0e8e86a9dc8a8801b73114b55e"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/probe_runs/probe_stage_hippo-amygdala-right_synthetic-stop/gpu_load.jsonl",
+      "bytes": 3051,
+      "sha256": "2c86b5e4144a18af8b2fc29d197e9593235cab9ba9a9b1a4733a9b5a1bdc6024"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/probe_runs/probe_stage_hippo-amygdala-right_synthetic-stop/precision_policy.json",
+      "bytes": 30612,
+      "sha256": "9fc158ff194d29674ca92d850d21c145518330bfbb0800098580a1cf4bb2e9a8"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/probe_runs/probe_stage_hippo-amygdala-right_synthetic-stop/report.json",
+      "bytes": 134936,
+      "sha256": "ac15354cf6bb0469ec696598b8b2d0f204897366ccc7bb7e3526008e7ee076d7"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/probe_runs/probe_stage_thalamus_em-fp64-statistics/api_report.json",
+      "bytes": 60656,
+      "sha256": "b3503196b21c646bdb4ef859b3b0b2913623faa3493d9630ffc5072c61a8a8a9"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/probe_runs/probe_stage_thalamus_em-fp64-statistics/gpu_load.jsonl",
+      "bytes": 2928,
+      "sha256": "ab3ced199e5d7d827947f626e01f6f3c7fc871ffc2d1b358cb8f1f2fa01579a0"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/probe_runs/probe_stage_thalamus_em-fp64-statistics/precision_policy.json",
+      "bytes": 34775,
+      "sha256": "d3e1a670665679ee56ea171dde2d347589080debb327f9f458581bbabda67dfc"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/probe_runs/probe_stage_thalamus_em-fp64-statistics/report.json",
+      "bytes": 176126,
+      "sha256": "ee0c17d6c9ff2f3b7016c05a8c325fd1b7b0ac380b1e4e2db12c54e3a219b2d8"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/probe_runs/probe_stage_thalamus_full-mesh-integral/api_report.json",
+      "bytes": 60642,
+      "sha256": "3922034f01156beaea9cb04962251ddef3c29fbcf1570ed6aa7ff2d309652384"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/probe_runs/probe_stage_thalamus_full-mesh-integral/gpu_load.jsonl",
+      "bytes": 2946,
+      "sha256": "16c22d10366f3afe5e441132b6f37de817ae45c5e274babfad62cdb26dfcda7d"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/probe_runs/probe_stage_thalamus_full-mesh-integral/precision_policy.json",
+      "bytes": 35073,
+      "sha256": "d875a9ed11780e8e6b87cac76444036335c625e7c4883e9362d33135c3d8f6e3"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/probe_runs/probe_stage_thalamus_full-mesh-integral/report.json",
+      "bytes": 175900,
+      "sha256": "35de56e12f8ae451c6134799ebb75990b21302373151d6ba1a6703fed0b12873"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/probes_vs_fresh_official.json",
+      "bytes": 3981134,
+      "sha256": "0c134eec20dedb02c73f765ff085b0b7e68735223af05a160333887adcd2cb62"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/probes_vs_fresh_official.log",
+      "bytes": 1268,
+      "sha256": "19d947fea55fc82b4101a24579b1990916b9a0dfb527355339f5d52c2f38a6f1"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/probes_vs_fresh_official.tsv",
+      "bytes": 68423,
+      "sha256": "a324662c73ebaab40c128b41082924b0e3934adb0f22422673d4178977728ba4"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/probes_vs_fresh_official_launch.json",
+      "bytes": 561,
+      "sha256": "1ceb040b9394befce39b7b0cf1a995651d4dfd761e98034eaa85263ae245621b"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/probes_vs_fresh_official_manifest.json",
+      "bytes": 349472,
+      "sha256": "14b938e6c0a0b328447663676bf76b15cf878a49fd81aaf498f93fb17d0d7061"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/probes_vs_fresh_official_summary.json",
+      "bytes": 615714,
+      "sha256": "9a45489047454f095341ec0442e28fb8ff336bd253fa54a2488dbc503e71ca9d"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_analysis.log",
+      "bytes": 1239,
+      "sha256": "60a01654ad14e36426c3589c524ee4aafeae6c32d727b54cc2d0d0b5db7b2e2a"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_analysis_deployment.json",
+      "bytes": 630,
+      "sha256": "cd99869d27e86529b4b0dd10260afbdf7ad320024c0cfeea42c5abb88b8de9b8"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_analysis_launch.json",
+      "bytes": 1035,
+      "sha256": "4dec87d911591f5bd08d539d0591ffe0d413a9d2dda736d00853d0e4fd33ce04"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_analysis_status.json",
+      "bytes": 981,
+      "sha256": "05f3639f38316ccc4668006cf361eb0ecf1574efa4e8e08314acabd75bf12e6a"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_candidate.json",
+      "bytes": 17485943,
+      "sha256": "5d574723a8b342a2896f59d3c8b463c44f29b0426941268e7d7afa14f7488609"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_candidate.tsv",
+      "bytes": 148033,
+      "sha256": "3023310573a792ecff7b551bba166d892a6fd8621ec52d587e1bcaf1969f044d"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_candidate_launch.json",
+      "bytes": 385,
+      "sha256": "ee9a911eedaf044ae58ad3dcf57627dc747f18d3f6a0982ede9726bb9dd230b9"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_candidate_manifest.json",
+      "bytes": 6313039,
+      "sha256": "39f48dd42d6342255623491da1a061e3758690fd92a940868dfd5a0a413acd1a"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_candidate_queue.json",
+      "bytes": 12318,
+      "sha256": "87e9dbcff8bc469419e5fd34cccfb77cd3d6c0a41f8d4c04285332fe491cced8"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_candidate_summary.json",
+      "bytes": 1132909,
+      "sha256": "47fc7ae7f1b48adf2e64249d7bf28de442dab4b40402e99e5043cd664520a04b"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_expected_source_manifest.json",
+      "bytes": 77042,
+      "sha256": "3e9f49acf065c3b039125b3ef8844bf21afcfc6e5668299a80bc4ae34ea6bce4"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_fetch_manifest.json",
+      "bytes": 6775,
+      "sha256": "a5542c69138f7d6da8c84b6a4c4e44e1ab686ae43350634fa3cff84a656048e1"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_full_pipeline_cross.json",
+      "bytes": 5331908,
+      "sha256": "706c0d1971590ac373a6a4b7d88847860e6f116659667e2621c3039d21cafc35"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_full_pipeline_cross.tsv",
+      "bytes": 153752,
+      "sha256": "162939ffffeb215a5637737eb167ab5aefa68785ed2170c71772f73d0d6bfc21"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_full_pipeline_cross_manifest.json",
+      "bytes": 1753167,
+      "sha256": "a51c903a49f2f81ef006c08b61add3719c8f53ce583da0b54b19ff5864cc158d"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_full_pipeline_cross_summary.json",
+      "bytes": 757890,
+      "sha256": "4b25c589f218180da0c906e4ffd86db4c8ce0947016faba402795ad62c03d925"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_numeric_audit.json",
+      "bytes": 45654,
+      "sha256": "0a2de937e1cfe64f57f169b25ab1f2009edab335bf175c5ff229fabf6ae01bfc"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_numeric_audit_deployment.json",
+      "bytes": 258,
+      "sha256": "a285cc5be4547a538f8db0383408a0074246cef419f9796542cdc483d6708066"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_numeric_audit_deployment_attempt2.json",
+      "bytes": 481,
+      "sha256": "4fca2365d35ac1862076e0d8e866408866fbd5fccbf6de03be2105a82e213c37"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_numeric_audit_launch.json",
+      "bytes": 174,
+      "sha256": "9053935b9669ac628df7929ed35e16915120520f259ee57d43459c457e6c98ee"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_runs/final_raw_r1/api_report.json",
+      "bytes": 162184,
+      "sha256": "6efa17a59d483556bd3821456d25941c19d3e51cdb1fd4cc6881e1fcda5a5368"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_runs/final_raw_r1/gpu_load.jsonl",
+      "bytes": 8095,
+      "sha256": "2ac8738357f5479ffcd73bc95f4d4bb573534dd3665de8bd0148f71cc52028cf"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_runs/final_raw_r1/report.json",
+      "bytes": 369910,
+      "sha256": "a47962fd7c8247fc5a89a18aed956abccb110a26001a1b7a73b42bc9ea03155f"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_runs/final_raw_r2/api_report.json",
+      "bytes": 63355,
+      "sha256": "c80ad75411a25bce8b8092594066fd0ed45d078cd7dbe4f7a3088c07feb54bea"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_runs/final_raw_r2/gpu_load.jsonl",
+      "bytes": 2788,
+      "sha256": "10e0e6286c7cd3c6673d7fa639411019b71a69f1b11d1605a189eeea083696f8"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_runs/final_raw_r2/report.json",
+      "bytes": 178178,
+      "sha256": "3d2d4790c437c9188e7e3f5b4d1b9fce594d463421f578369ae598ca0d56627a"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_runs/final_raw_r3/api_report.json",
+      "bytes": 63355,
+      "sha256": "0bc322cf5930b2aacb561e36174860d9a42943df8d1b12d67fb10aa92320abd7"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_runs/final_raw_r3/gpu_load.jsonl",
+      "bytes": 2958,
+      "sha256": "f7cd07adb446ea0af837483afc1d8ae3f8a0b50c5886f8aee06ae73ec46761e7"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_runs/final_raw_r3/report.json",
+      "bytes": 178178,
+      "sha256": "6a040161fbcea27c0f48720b5e1394ec7c2300a8a55592ca8eca166f844564a1"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_runs/final_stage_r1/api_report.json",
+      "bytes": 158648,
+      "sha256": "a06a5688e96187416521048a659c17d6359d92da209061da0a1902178b6e4fdc"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_runs/final_stage_r1/gpu_load.jsonl",
+      "bytes": 9459,
+      "sha256": "2ca02f5ca8cdd3f1e491976bfeee24766b6f5337de56d4bf2993363855253259"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_runs/final_stage_r1/report.json",
+      "bytes": 367312,
+      "sha256": "b3ab3fbafad9445fd4b73c21ce3139ec3eeee168582ddde9af65f05fc9503ef2"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_runs/final_stage_r2/api_report.json",
+      "bytes": 60490,
+      "sha256": "847f62ada49e16dfde89adf5446267d42745187db0e6e41590e7952425b6a41f"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_runs/final_stage_r2/gpu_load.jsonl",
+      "bytes": 2897,
+      "sha256": "c4a7430390e9557eeb6651a4d2a7dbab74890e5a96d73626f6bf8dbee86dfcb3"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_runs/final_stage_r2/report.json",
+      "bytes": 175961,
+      "sha256": "7e4a2719a1c22e75f182493bb783c894ef5d1ca517cb8caebf41b38ba4a932f4"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_runs/final_stage_r3/api_report.json",
+      "bytes": 60492,
+      "sha256": "88d848eb77e3b205f89070fab0269d1bf3411e65aaf182fe0e9ff09bac69afec"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_runs/final_stage_r3/gpu_load.jsonl",
+      "bytes": 2902,
+      "sha256": "2b5c7722123abfcb517a272562f49a74a372d765feee7a2e65e010ba7e7b5b37"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_runs/final_stage_r3/report.json",
+      "bytes": 175962,
+      "sha256": "5a471da593a1101dcfaef590af23923acb09d3407877a125556f6cd10a52c76e"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_scope_native_merge_audit.json",
+      "bytes": 19426,
+      "sha256": "5064a9be1e810b3706310fc81b3c4a425628f5ef025cdf37da36b2771f7d04b7"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_scope_native_merge_fetch.json",
+      "bytes": 155,
+      "sha256": "2a487fa97e5f8a9b714d72f550fb3600d5d4af728b46d5d9a198c7a4bc7312e8"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_scope_reclassification_deployment.json",
+      "bytes": 261,
+      "sha256": "db38f491a8fe7f8d2e44d6a8611184b1f084509d079e69ae9cd227b99d716733"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_scope_table_draft.md",
+      "bytes": 5603,
+      "sha256": "95fa66cdba4ee61e99af176198764571a4bc73abcc4b82b8fa71daf2adaca779"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_source/remote_verification.json",
+      "bytes": 287,
+      "sha256": "a2272fb95877a21178aaf8aadb5a96e4b9c5a1850ba1c0c757a1c842142a2749"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_source/source_manifest.json",
+      "bytes": 77042,
+      "sha256": "3e9f49acf065c3b039125b3ef8844bf21afcfc6e5668299a80bc4ae34ea6bce4"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_source/source_patch.diff",
+      "bytes": 5730,
+      "sha256": "41fa44032d3422d25fc4f14c4b5d28793108466af9ddb370581da9c8ccb23661"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_thalamus_only_repeats.json",
+      "bytes": 2828220,
+      "sha256": "95aa47b888f7e011edc4b6c3716d251b2fd08da0cfdd2bdf4eb3576cc871c50e"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_thalamus_only_repeats.tsv",
+      "bytes": 76381,
+      "sha256": "0fdeeab0a37d4f2a4b941c55f5367c516535a04680444ea2b367f76d550337db"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_thalamus_only_repeats_manifest.json",
+      "bytes": 681094,
+      "sha256": "c68b690bdb61ec8ef3637b95f6fcd81a19c29cf5cf604f2a16cb1109d4ee4050"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/production_thalamus_only_repeats_summary.json",
+      "bytes": 464132,
+      "sha256": "7b6501ee3124f756e0254110a1c64d792d08bfc283f69beeb653ee7488165cc1"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/promote_raw_display_window.py",
+      "bytes": 4363,
+      "sha256": "cc453154be5da4236f0a1b6dcc6793d2fa902f1f10bbab238b833017a8f9903c"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/queue.json",
+      "bytes": 24697,
+      "sha256": "0d5bca8f544d485d88aff8e0d0c98fd6f45a501c7392cb8b6be481ebc7448a20"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/release_tests/bs_merged_full.log",
+      "bytes": 581,
+      "sha256": "bce928afabdb3aa4a1bed5a9fe5450bfa35e9b4e66c822d3f1c90c22690a43a1"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/release_tests/gems_full.log",
+      "bytes": 501,
+      "sha256": "3f45ec9132b695520dce41e7afc4c7bdc0817f7ffb4d5a27d04cd2207610c889"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/release_tests/manifest.json",
+      "bytes": 1392,
+      "sha256": "ead036cd8b3672610cb6db1baaed5480173f31a1459a83118a3da40c9bf656b4"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/release_tests/public_cli.log",
+      "bytes": 100,
+      "sha256": "440067336f35c45bfebaf9d0681da60766016435edf424a6f2b3d8b0950aa82e"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/release_tests/wheel_verification.json",
+      "bytes": 578,
+      "sha256": "c04fe81c3499644606d828a2fa3238b9ab31e09c5901f2b001ebf538398d1570"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/render_precision_brain_figures.py",
+      "bytes": 6440,
+      "sha256": "12c981078ae404cd53b2a984ce498c3413619dd8cc2dcc2d1714f55de06ac422"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/repeatability.json",
+      "bytes": 10277941,
+      "sha256": "e5b35a5742e3630f55a8c671597c8b7e9c8df662ed9dce1ccb75d6fe3aa5649e"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/repeatability.tsv",
+      "bytes": 63414,
+      "sha256": "65ffea314698bee3c17e0ee1a73abca43bacd64526feac92310a99dd23e15294"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/repeatability_manifest.json",
+      "bytes": 3826645,
+      "sha256": "c9f548995df4456570436e7ca476038a8ccc1c7c51f9ae26aa0ae0e9eec24f54"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/repeatability_summary.json",
+      "bytes": 171703,
+      "sha256": "6ad430f194f30437aa3be2ecaab708aac821c3af73bf7d2a2f667bee6c0d69ec"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/run_final_cpu_analysis.py",
+      "bytes": 4707,
+      "sha256": "6baed57efb37cadc3ca6bcac9356124a62bf4d462a27c849aaa21c14f827500f"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/run_fnit_repeats.py",
+      "bytes": 3393,
+      "sha256": "9e27170f8fcc151349977441abde02ab094b5d2512f6670b82c11fdb99cbf0b3"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/run_hippo_mask_diagnostics.py",
+      "bytes": 14747,
+      "sha256": "5474f061d277311f04511abb31d495869dbd5b80bde0b88a151eb6fc65816692"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/run_hippo_topology_diagnostics.py",
+      "bytes": 9813,
+      "sha256": "43e58498991f4d23a6862f99f5a30f54ac0d94efbe5c55873fdb3ae5b14650cb"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/run_precision_probes.py",
+      "bytes": 8264,
+      "sha256": "1db97aa7b0f2bd6ed24d30ec4c33eb730adb2504bf3a4f35973d68edcd0abfdd"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/run_verified_candidate.py",
+      "bytes": 8138,
+      "sha256": "80e9156ef5eba46251a2e30cd391c2adf001f56c3782324c7a0d702a5b70d9b6"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/separate_production_scopes.py",
+      "bytes": 13786,
+      "sha256": "c900a42451a33e3d7676f0b18209ebb06dd9ef2cdb0f7889ef54a362e7273773"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/source_final/.gitignore",
+      "bytes": 196,
+      "sha256": "6c0da52d167647f6c91991f3f02c342b52f6b6707e9b77d82897627d72e7e939"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/source_final/export_plan.json",
+      "bytes": 78111,
+      "sha256": "04f952cfc43d7c75458b8e71cd87ae18d8ce049bb51c52580d9fd62caf6db254"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/source_final/source_manifest.json",
+      "bytes": 78111,
+      "sha256": "04f952cfc43d7c75458b8e71cd87ae18d8ce049bb51c52580d9fd62caf6db254"
+    },
+    {
+      "path": "validation/subregions/reproducibility_20261002/source_final/working_runtime.diff",
+      "bytes": 18411,
+      "sha256": "008aa49bb8f1346e934f1ea0fe8b265cfbe5e6c8ca6675c70cb0becbeefd4239"
+    }
+  ],
+  "archive_ignored_snapshot_and_tar": [
+    "validation/subregions/reproducibility_20261002/source_final/source_precision_reproducibility_final_all_20261002",
+    "validation/subregions/reproducibility_20261002/source_final/source_precision_reproducibility_final_all_20261002.tar.gz"
+  ],
+  "must_not_delete_server_evidence": true,
+  "documentation_gate_before_migration": "Top evidence README and old scope draft links need archive labeling or replacement links to final/before compact. final_validation_protocol link to V1 timer should point to retained V2 timer. Compact records must preserve server path/size/SHA of expanded original files and failed attempts."
+}

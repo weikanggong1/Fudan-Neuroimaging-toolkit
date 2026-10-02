@@ -23,7 +23,8 @@ from ..initialize import estimate_mask_affine
 _REGIONS = (173, 174, 175, 178)
 
 
-def _fit_brainstem(context, directory: Path, device: torch.device) -> RecipeResult:
+def _fit_brainstem(context, directory: Path, device: torch.device, *,
+                   stable_mesh_fitting: bool = False) -> RecipeResult:
     """Run the BrainstemSS schedule without a generic atlas-pack pipeline."""
     image, coarse = context.image, context.coarse_segmentation
     def tick():
@@ -57,7 +58,8 @@ def _fit_brainstem(context, directory: Path, device: torch.device) -> RecipeResu
         iterations=int(config.get("segmentation_fit_iterations", 40)),
         fit_alphas=(np.load(directory / config["segmentation_alpha_file"])
                     if config.get("segmentation_alpha_file") else None),
-        optimizer_name=str(config.get("segmentation_fit_optimizer", "adam")))
+        optimizer_name=str(config.get("segmentation_fit_optimizer", "adam")),
+        stable_mesh_fitting=stable_mesh_fitting)
     segmentation_fitted = tick()
     resolution = config.get("working_resolution_mm")
     working_image, working_coarse = image, coarse
@@ -101,7 +103,14 @@ def _fit_brainstem(context, directory: Path, device: torch.device) -> RecipeResu
         deform_em_interval=int(config.get("deform_em_interval", 1)),
         deformation_weight=float(config.get("deformation_weight", 1)),
         mean_hyper=mean_hyper, n_hyper=n_hyper,
-        mask_to_atlas=bool(config.get("mask_to_atlas", False)), fit_alpha_stages=fit_stages)
+        mask_to_atlas=bool(config.get("mask_to_atlas", False)), fit_alpha_stages=fit_stages,
+        stable_mesh_fitting=stable_mesh_fitting,
+        double_data_cost_accumulation=stable_mesh_fitting,
+        precise_mesh_matrices=stable_mesh_fitting,
+        mesh_line_search=("backtracking" if stable_mesh_fitting and
+                          str(config.get("deform_optimizer", "adam")) == "lbfgs" else "strong_wolfe"))
+    report["intensity_mesh_solver"] = getattr(fit, "optimization_stats", None)
+    report["stable_mesh_fitting"] = stable_mesh_fitting
     crop_to_work = np.eye(4)
     crop_to_work[:3, 3] = low
     fit.affine = working_image.affine @ crop_to_work
@@ -163,8 +172,12 @@ def _fit_brainstem(context, directory: Path, device: torch.device) -> RecipeResu
 class BrainstemRecipe:
     name = "brainstem"
 
-    def __init__(self, directory: Path):
+    def __init__(self, directory: Path, *, stable_mesh_fitting: bool = True):
+        if not isinstance(stable_mesh_fitting, bool):
+            raise ValueError("stable_mesh_fitting must be a bool")
         self.directory = Path(directory)
+        self.stable_mesh_fitting = stable_mesh_fitting
 
     def run(self, context, device):
-        return _fit_brainstem(context, self.directory, device)
+        return _fit_brainstem(context, self.directory, device,
+                              stable_mesh_fitting=self.stable_mesh_fitting)

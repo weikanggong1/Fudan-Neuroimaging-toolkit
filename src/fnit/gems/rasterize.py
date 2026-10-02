@@ -10,7 +10,8 @@ import torch
 
 from ._raster_triton import (fused_data_cost, lookup_candidates,
                             supports_fused_data_cost)
-from .deformation import CurrentGeometry
+from .deformation import (CurrentGeometry, ordered_row_gather,
+                          prepare_vertex_reduction)
 
 
 def _packed_device_buffer(parts, dtype, device):
@@ -473,8 +474,18 @@ def rasterize_priors_compact(
         vertices, tetrahedra, valid_mask, block_index, current_geometry, tolerance)
     if selected_ids.numel():
         selected_cells = tetrahedra[selected_ids]
-        selected_rel = selected_points - all_v0[selected_ids]
-        selected_w123 = torch.einsum("pij,pj->pi", all_inv[selected_ids], selected_rel)
+        if (current_geometry is not None and current_geometry.deterministic_gradient
+                and torch.is_grad_enabled() and (all_v0.requires_grad or all_inv.requires_grad)):
+            # A tetrahedron owns many masked voxels. Reduce their backward
+            # contributions in the same fixed point order before the existing
+            # ordered tetrahedron-to-vertex reduction.
+            point_reduction = prepare_vertex_reduction(selected_ids, len(all_v0))
+            selected_v0 = ordered_row_gather(all_v0, selected_ids, point_reduction)
+            selected_inv = ordered_row_gather(all_inv, selected_ids, point_reduction)
+        else:
+            selected_v0, selected_inv = all_v0[selected_ids], all_inv[selected_ids]
+        selected_rel = selected_points - selected_v0
+        selected_w123 = torch.einsum("pij,pj->pi", selected_inv, selected_rel)
         selected_weights = torch.cat((1.0 - selected_w123.sum(-1, keepdim=True), selected_w123), dim=-1)
         values = (alphas[selected_cells] * selected_weights[..., None]).sum(dim=1)
         values = values.clamp_min(0)

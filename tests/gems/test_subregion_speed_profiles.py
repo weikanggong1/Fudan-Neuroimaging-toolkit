@@ -51,6 +51,7 @@ def test_fast_retains_fine_input_mesh_and_all_thalamic_groups(tmp_path):
     assert schedule == recipe.image_schedule == ((1.5, 7), (1.125, 5), (.75, 5), (0., 3))
     assert options["stage_offset"] == 0 and options["mesh_iterations"] == 20
     assert report["outer_em_iterations"] == [7, 5, 5, 3]
+    assert report["mesh_sampling_strides"] == [1, 1, 1, 1]
     assert "coarse_working_image" not in report
 
 
@@ -109,7 +110,9 @@ def test_real_crop_keeps_world_geometry_hyperprior_and_stage_statistics(tmp_path
     assert all(call[2]["fit_alpha_stages"][0][1] == 20 for call in calls)
     assert all(call[2]["deformation_stop"] == .005 and call[2]["cost_stop_patience"] == 3 for call in calls)
     assert [call[2]["materialize_outputs"] for call in calls] == [False, False, True]
-    assert [call[2]["mesh_sampling_stride"] for call in calls] == ([4, 4, 1] if recipe_type is ThalamusRecipe else [1, 1, 1])
+    # Both fine-label recipes integrate the complete valid voxel set in
+    # smoothed and final stages, while retaining the fast mesh budget.
+    assert [call[2]["mesh_sampling_stride"] for call in calls] == [1, 1, 1]
     assert all(call[2]["owner_hint_enabled"] for call in calls)
     assert all(call[2]["double_data_cost_accumulation"] for call in calls)
     stats = fit.optimization_stats

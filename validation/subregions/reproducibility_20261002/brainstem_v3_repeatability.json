@@ -1,0 +1,646 @@
+{
+  "scope": "saved real outputs on CPU; no fitting or image transfer",
+  "queue_identity": {
+    "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/reproducibility_20261002/hippo_mask_diagnostic_queue.json",
+    "bytes": 27351,
+    "sha256": "3f1f7256ca09083d2c1c39752c971ad798ef7e368b0dff2bbf8a5e759b4cf639"
+  },
+  "global_determinism_and_cublas_env": "V3 did not enable global determinism; queue removed cuBLAS workspace env",
+  "failed_attempts_excluded": [
+    {
+      "case": "brainstem_v3_raw_r2",
+      "attempt": 1,
+      "mode": "raw",
+      "structure": "brainstem",
+      "optimization": "fast",
+      "precision_variant": "stable-brainstem",
+      "gpu_memory_fraction": 0.23,
+      "free_memory_guard_mib": 22000,
+      "cublas_workspace_config": null,
+      "global_deterministic_setting": "unchanged; V3 does not set global torch determinism",
+      "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/reproducibility_20261002/brainstem_v3_raw_r2",
+      "command": [
+        "/home1/gongwk/anaconda3/bin/python",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/reproducibility_20261002/probe_precision_causes_v3.py",
+        "--run-driver",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_precision_reproducibility_20261002/validation/subregions/run_unified.py",
+        "--variant",
+        "stable-brainstem",
+        "--atlas-root",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/atlases",
+        "--structures",
+        "brainstem",
+        "--optimization",
+        "fast",
+        "--device",
+        "cuda:0",
+        "--gpu-memory-fraction",
+        ".23",
+        "--output-dir",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/reproducibility_20261002/brainstem_v3_raw_r2",
+        "--t1",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/examples/data/sub-01_T1w.nii.gz",
+        "--weights",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/weights",
+        "--reference-brainstem",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/reproducibility_20261002/official_r1/brainstem/brainstemSsLabels.FSvoxelSpace.mgz"
+      ],
+      "started_unix": 1790904531.97809,
+      "sampled_peak_own_memory_mib": 0,
+      "gpu_free_mib_before_launch": 79651,
+      "pid": 47405,
+      "exit_code": 1,
+      "finished_unix": 1790904540.2885897,
+      "failure_scope": "CUDA initialization before fitting",
+      "retry_reason": "only pre-fit CUDA initialization OOM; failed attempt preserved"
+    }
+  ],
+  "pairs": [
+    {
+      "mode": "stage",
+      "scope": "same-config partial brainstem; separate from full/all pipeline",
+      "input_sha256_equal": true,
+      "source_sha256_equal": true,
+      "policy_sha256": "253a6b78726b3b21f8814de5a4dcb027dee1a6536df1f90ae466b6997c380e0e",
+      "grids": {
+        "native": {
+          "geometry_bitwise_equal": true,
+          "shape": [
+            256,
+            256,
+            256
+          ],
+          "changed_voxels": 0,
+          "labels_identical": true,
+          "r1_identity": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/reproducibility_20261002/brainstem_v3_stage_r1/subregions_native.nii.gz",
+            "bytes": 302758,
+            "sha256": "986e76dd494368cffbcf4cb8a5b2f0d97595a8e03e6ae6072f07c189b5432f9f"
+          },
+          "r2_identity": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/reproducibility_20261002/brainstem_v3_stage_r2/subregions_native.nii.gz",
+            "bytes": 302758,
+            "sha256": "986e76dd494368cffbcf4cb8a5b2f0d97595a8e03e6ae6072f07c189b5432f9f"
+          },
+          "labels": [
+            {
+              "label_id": 173,
+              "voxels_r1": 4854,
+              "voxels_r2": 4854,
+              "changed_label_voxels": 0,
+              "dice": 1.0,
+              "both_empty": false
+            },
+            {
+              "label_id": 174,
+              "voxels_r1": 10951,
+              "voxels_r2": 10951,
+              "changed_label_voxels": 0,
+              "dice": 1.0,
+              "both_empty": false
+            },
+            {
+              "label_id": 175,
+              "voxels_r1": 3698,
+              "voxels_r2": 3698,
+              "changed_label_voxels": 0,
+              "dice": 1.0,
+              "both_empty": false
+            },
+            {
+              "label_id": 178,
+              "voxels_r1": 162,
+              "voxels_r2": 162,
+              "changed_label_voxels": 0,
+              "dice": 1.0,
+              "both_empty": false
+            }
+          ]
+        },
+        "highres": {
+          "geometry_bitwise_equal": true,
+          "shape": [
+            158,
+            198,
+            135
+          ],
+          "changed_voxels": 0,
+          "labels_identical": true,
+          "r1_identity": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/reproducibility_20261002/brainstem_v3_stage_r1/highres/brainstem.nii.gz",
+            "bytes": 115384,
+            "sha256": "bdd966c189aa779c7779c269fdf4ab339485d8d7abf2cdf28b93cbe7590bac1e"
+          },
+          "r2_identity": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/reproducibility_20261002/brainstem_v3_stage_r2/highres/brainstem.nii.gz",
+            "bytes": 115384,
+            "sha256": "bdd966c189aa779c7779c269fdf4ab339485d8d7abf2cdf28b93cbe7590bac1e"
+          },
+          "labels": [
+            {
+              "label_id": 173,
+              "voxels_r1": 38874,
+              "voxels_r2": 38874,
+              "changed_label_voxels": 0,
+              "dice": 1.0,
+              "both_empty": false
+            },
+            {
+              "label_id": 174,
+              "voxels_r1": 87656,
+              "voxels_r2": 87656,
+              "changed_label_voxels": 0,
+              "dice": 1.0,
+              "both_empty": false
+            },
+            {
+              "label_id": 175,
+              "voxels_r1": 29580,
+              "voxels_r2": 29580,
+              "changed_label_voxels": 0,
+              "dice": 1.0,
+              "both_empty": false
+            },
+            {
+              "label_id": 178,
+              "voxels_r1": 1296,
+              "voxels_r2": 1296,
+              "changed_label_voxels": 0,
+              "dice": 1.0,
+              "both_empty": false
+            }
+          ]
+        }
+      },
+      "official_accuracy": [
+        {
+          "case": "brainstem_v3_stage_r1",
+          "weighted_dice": 0.9917396939790651,
+          "wall_seconds": 27.820527696982026,
+          "regions": [
+            {
+              "label": 173,
+              "reference_voxels": 4876,
+              "fnit_voxels": 4854,
+              "reference_hard_volume_mm3": 4875.998837471096,
+              "fnit_hard_volume_mm3": 4853.998842716303,
+              "dice": 0.9907502569373073,
+              "hard_volume_difference": 0.004511894995898278,
+              "accepted": true,
+              "id": 173,
+              "name": "Midbrain",
+              "parent": "brainstem",
+              "family": "BrainstemSS",
+              "hemisphere": null,
+              "source": "brainstem",
+              "hard_evaluation_status": "evaluated",
+              "reference_soft_volume_mm3": 4863.65539,
+              "fnit_soft_volume_mm3": 4833.4501953125,
+              "soft_volume_difference": 0.006210389566169469
+            },
+            {
+              "label": 174,
+              "reference_voxels": 11031,
+              "fnit_voxels": 10951,
+              "reference_hard_volume_mm3": 11030.99737000485,
+              "fnit_hard_volume_mm3": 10950.997389078337,
+              "dice": 0.9936311527613502,
+              "hard_volume_difference": 0.007252289003716798,
+              "accepted": true,
+              "id": 174,
+              "name": "Pons",
+              "parent": "brainstem",
+              "family": "BrainstemSS",
+              "hemisphere": null,
+              "source": "brainstem",
+              "hard_evaluation_status": "evaluated",
+              "reference_soft_volume_mm3": 11025.232511,
+              "fnit_soft_volume_mm3": 10950.560546875,
+              "soft_volume_difference": 0.006772824432545898
+            },
+            {
+              "label": 175,
+              "reference_voxels": 3739,
+              "fnit_voxels": 3698,
+              "reference_hard_volume_mm3": 3738.9991085529996,
+              "fnit_hard_volume_mm3": 3697.9991183281604,
+              "dice": 0.9888395858545113,
+              "hard_volume_difference": 0.010965498796469644,
+              "accepted": true,
+              "id": 175,
+              "name": "Medulla",
+              "parent": "brainstem",
+              "family": "BrainstemSS",
+              "hemisphere": null,
+              "source": "brainstem",
+              "hard_evaluation_status": "evaluated",
+              "reference_soft_volume_mm3": 3775.915484,
+              "fnit_soft_volume_mm3": 3715.74072265625,
+              "soft_volume_difference": 0.015936469340676086
+            },
+            {
+              "label": 178,
+              "reference_voxels": 165,
+              "fnit_voxels": 162,
+              "reference_hard_volume_mm3": 164.9999606609374,
+              "fnit_hard_volume_mm3": 161.99996137619308,
+              "dice": 0.9602446483180428,
+              "hard_volume_difference": 0.01818181818181818,
+              "accepted": true,
+              "id": 178,
+              "name": "SCP",
+              "parent": "brainstem",
+              "family": "BrainstemSS",
+              "hemisphere": null,
+              "source": "brainstem",
+              "hard_evaluation_status": "evaluated",
+              "reference_soft_volume_mm3": 179.025069,
+              "fnit_soft_volume_mm3": 181.080810546875,
+              "soft_volume_difference": 0.011482981452586387
+            }
+          ]
+        },
+        {
+          "case": "brainstem_v3_stage_r2",
+          "weighted_dice": 0.9917396939790651,
+          "wall_seconds": 32.12001932878047,
+          "regions": [
+            {
+              "label": 173,
+              "reference_voxels": 4876,
+              "fnit_voxels": 4854,
+              "reference_hard_volume_mm3": 4875.998837471096,
+              "fnit_hard_volume_mm3": 4853.998842716303,
+              "dice": 0.9907502569373073,
+              "hard_volume_difference": 0.004511894995898278,
+              "accepted": true,
+              "id": 173,
+              "name": "Midbrain",
+              "parent": "brainstem",
+              "family": "BrainstemSS",
+              "hemisphere": null,
+              "source": "brainstem",
+              "hard_evaluation_status": "evaluated",
+              "reference_soft_volume_mm3": 4863.65539,
+              "fnit_soft_volume_mm3": 4833.4501953125,
+              "soft_volume_difference": 0.006210389566169469
+            },
+            {
+              "label": 174,
+              "reference_voxels": 11031,
+              "fnit_voxels": 10951,
+              "reference_hard_volume_mm3": 11030.99737000485,
+              "fnit_hard_volume_mm3": 10950.997389078337,
+              "dice": 0.9936311527613502,
+              "hard_volume_difference": 0.007252289003716798,
+              "accepted": true,
+              "id": 174,
+              "name": "Pons",
+              "parent": "brainstem",
+              "family": "BrainstemSS",
+              "hemisphere": null,
+              "source": "brainstem",
+              "hard_evaluation_status": "evaluated",
+              "reference_soft_volume_mm3": 11025.232511,
+              "fnit_soft_volume_mm3": 10950.560546875,
+              "soft_volume_difference": 0.006772824432545898
+            },
+            {
+              "label": 175,
+              "reference_voxels": 3739,
+              "fnit_voxels": 3698,
+              "reference_hard_volume_mm3": 3738.9991085529996,
+              "fnit_hard_volume_mm3": 3697.9991183281604,
+              "dice": 0.9888395858545113,
+              "hard_volume_difference": 0.010965498796469644,
+              "accepted": true,
+              "id": 175,
+              "name": "Medulla",
+              "parent": "brainstem",
+              "family": "BrainstemSS",
+              "hemisphere": null,
+              "source": "brainstem",
+              "hard_evaluation_status": "evaluated",
+              "reference_soft_volume_mm3": 3775.915484,
+              "fnit_soft_volume_mm3": 3715.74072265625,
+              "soft_volume_difference": 0.015936469340676086
+            },
+            {
+              "label": 178,
+              "reference_voxels": 165,
+              "fnit_voxels": 162,
+              "reference_hard_volume_mm3": 164.9999606609374,
+              "fnit_hard_volume_mm3": 161.99996137619308,
+              "dice": 0.9602446483180428,
+              "hard_volume_difference": 0.01818181818181818,
+              "accepted": true,
+              "id": 178,
+              "name": "SCP",
+              "parent": "brainstem",
+              "family": "BrainstemSS",
+              "hemisphere": null,
+              "source": "brainstem",
+              "hard_evaluation_status": "evaluated",
+              "reference_soft_volume_mm3": 179.025069,
+              "fnit_soft_volume_mm3": 181.080810546875,
+              "soft_volume_difference": 0.011482981452586387
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "raw",
+      "scope": "same-config partial brainstem; separate from full/all pipeline",
+      "input_sha256_equal": true,
+      "source_sha256_equal": true,
+      "policy_sha256": "253a6b78726b3b21f8814de5a4dcb027dee1a6536df1f90ae466b6997c380e0e",
+      "grids": {
+        "native": {
+          "geometry_bitwise_equal": true,
+          "shape": [
+            256,
+            156,
+            256
+          ],
+          "changed_voxels": 0,
+          "labels_identical": true,
+          "r1_identity": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/reproducibility_20261002/brainstem_v3_raw_r1/subregions_native.nii.gz",
+            "bytes": 186556,
+            "sha256": "ba958ac349a2e09dccc1adb14639ffecebc7c77562f93cf3d79fa162edb9d2e5"
+          },
+          "r2_identity": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/reproducibility_20261002/brainstem_v3_raw_r2_attempt2/subregions_native.nii.gz",
+            "bytes": 186556,
+            "sha256": "ba958ac349a2e09dccc1adb14639ffecebc7c77562f93cf3d79fa162edb9d2e5"
+          },
+          "labels": [
+            {
+              "label_id": 173,
+              "voxels_r1": 3881,
+              "voxels_r2": 3881,
+              "changed_label_voxels": 0,
+              "dice": 1.0,
+              "both_empty": false
+            },
+            {
+              "label_id": 174,
+              "voxels_r1": 8280,
+              "voxels_r2": 8280,
+              "changed_label_voxels": 0,
+              "dice": 1.0,
+              "both_empty": false
+            },
+            {
+              "label_id": 175,
+              "voxels_r1": 3106,
+              "voxels_r2": 3106,
+              "changed_label_voxels": 0,
+              "dice": 1.0,
+              "both_empty": false
+            },
+            {
+              "label_id": 178,
+              "voxels_r1": 110,
+              "voxels_r2": 110,
+              "changed_label_voxels": 0,
+              "dice": 1.0,
+              "both_empty": false
+            }
+          ]
+        },
+        "highres": {
+          "geometry_bitwise_equal": true,
+          "shape": [
+            158,
+            196,
+            135
+          ],
+          "changed_voxels": 0,
+          "labels_identical": true,
+          "r1_identity": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/reproducibility_20261002/brainstem_v3_raw_r1/highres/brainstem.nii.gz",
+            "bytes": 115043,
+            "sha256": "d844192f9649d80c916b8d4b5eb37dd793b3b84cea13269fb8d749c7ba63a155"
+          },
+          "r2_identity": {
+            "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/reproducibility_20261002/brainstem_v3_raw_r2_attempt2/highres/brainstem.nii.gz",
+            "bytes": 115043,
+            "sha256": "d844192f9649d80c916b8d4b5eb37dd793b3b84cea13269fb8d749c7ba63a155"
+          },
+          "labels": [
+            {
+              "label_id": 173,
+              "voxels_r1": 40175,
+              "voxels_r2": 40175,
+              "changed_label_voxels": 0,
+              "dice": 1.0,
+              "both_empty": false
+            },
+            {
+              "label_id": 174,
+              "voxels_r1": 85714,
+              "voxels_r2": 85714,
+              "changed_label_voxels": 0,
+              "dice": 1.0,
+              "both_empty": false
+            },
+            {
+              "label_id": 175,
+              "voxels_r1": 32097,
+              "voxels_r2": 32097,
+              "changed_label_voxels": 0,
+              "dice": 1.0,
+              "both_empty": false
+            },
+            {
+              "label_id": 178,
+              "voxels_r1": 1108,
+              "voxels_r2": 1108,
+              "changed_label_voxels": 0,
+              "dice": 1.0,
+              "both_empty": false
+            }
+          ]
+        }
+      },
+      "official_accuracy": [
+        {
+          "case": "brainstem_v3_raw_r1",
+          "weighted_dice": 0.9455046649109795,
+          "wall_seconds": 33.40429926896468,
+          "regions": [
+            {
+              "label": 173,
+              "reference_voxels": 3744,
+              "fnit_voxels": 3881,
+              "reference_hard_volume_mm3": 4864.863408098026,
+              "fnit_hard_volume_mm3": 5042.877907806742,
+              "dice": 0.891016393442623,
+              "hard_volume_difference": 0.036591880341880344,
+              "accepted": false,
+              "id": 173,
+              "name": "Midbrain",
+              "parent": "brainstem",
+              "family": "BrainstemSS",
+              "hemisphere": null,
+              "source": "brainstem",
+              "hard_evaluation_status": "evaluated",
+              "reference_soft_volume_mm3": 4863.65539,
+              "fnit_soft_volume_mm3": 4995.23681640625,
+              "soft_volume_difference": 0.027054019221178848
+            },
+            {
+              "label": 174,
+              "reference_voxels": 8534,
+              "fnit_voxels": 8280,
+              "reference_hard_volume_mm3": 11088.874018351646,
+              "fnit_hard_volume_mm3": 10758.832537139866,
+              "dice": 0.9728797430712501,
+              "hard_volume_difference": 0.02976329974220764,
+              "accepted": true,
+              "id": 174,
+              "name": "Pons",
+              "parent": "brainstem",
+              "family": "BrainstemSS",
+              "hemisphere": null,
+              "source": "brainstem",
+              "hard_evaluation_status": "evaluated",
+              "reference_soft_volume_mm3": 11025.232511,
+              "fnit_soft_volume_mm3": 10691.826171875,
+              "soft_volume_difference": 0.030240300038330878
+            },
+            {
+              "label": 175,
+              "reference_voxels": 2902,
+              "fnit_voxels": 3106,
+              "reference_hard_volume_mm3": 3770.788891640084,
+              "fnit_hard_volume_mm3": 4035.8615773377323,
+              "dice": 0.9397470039946738,
+              "hard_volume_difference": 0.07029634734665748,
+              "accepted": false,
+              "id": 175,
+              "name": "Medulla",
+              "parent": "brainstem",
+              "family": "BrainstemSS",
+              "hemisphere": null,
+              "source": "brainstem",
+              "hard_evaluation_status": "evaluated",
+              "reference_soft_volume_mm3": 3775.915484,
+              "fnit_soft_volume_mm3": 4028.55322265625,
+              "soft_volume_difference": 0.06690767834364215
+            },
+            {
+              "label": 178,
+              "reference_voxels": 127,
+              "fnit_voxels": 110,
+              "reference_hard_volume_mm3": 165.02074060588924,
+              "fnit_hard_volume_mm3": 142.9313501310852,
+              "dice": 0.8438818565400844,
+              "hard_volume_difference": 0.13385826771653545,
+              "accepted": false,
+              "id": 178,
+              "name": "SCP",
+              "parent": "brainstem",
+              "family": "BrainstemSS",
+              "hemisphere": null,
+              "source": "brainstem",
+              "hard_evaluation_status": "evaluated",
+              "reference_soft_volume_mm3": 179.025069,
+              "fnit_soft_volume_mm3": 155.9772491455078,
+              "soft_volume_difference": 0.12874073996023533
+            }
+          ]
+        },
+        {
+          "case": "brainstem_v3_raw_r2",
+          "weighted_dice": 0.9455046649109795,
+          "wall_seconds": 29.940307448152453,
+          "regions": [
+            {
+              "label": 173,
+              "reference_voxels": 3744,
+              "fnit_voxels": 3881,
+              "reference_hard_volume_mm3": 4864.863408098026,
+              "fnit_hard_volume_mm3": 5042.877907806742,
+              "dice": 0.891016393442623,
+              "hard_volume_difference": 0.036591880341880344,
+              "accepted": false,
+              "id": 173,
+              "name": "Midbrain",
+              "parent": "brainstem",
+              "family": "BrainstemSS",
+              "hemisphere": null,
+              "source": "brainstem",
+              "hard_evaluation_status": "evaluated",
+              "reference_soft_volume_mm3": 4863.65539,
+              "fnit_soft_volume_mm3": 4995.23681640625,
+              "soft_volume_difference": 0.027054019221178848
+            },
+            {
+              "label": 174,
+              "reference_voxels": 8534,
+              "fnit_voxels": 8280,
+              "reference_hard_volume_mm3": 11088.874018351646,
+              "fnit_hard_volume_mm3": 10758.832537139866,
+              "dice": 0.9728797430712501,
+              "hard_volume_difference": 0.02976329974220764,
+              "accepted": true,
+              "id": 174,
+              "name": "Pons",
+              "parent": "brainstem",
+              "family": "BrainstemSS",
+              "hemisphere": null,
+              "source": "brainstem",
+              "hard_evaluation_status": "evaluated",
+              "reference_soft_volume_mm3": 11025.232511,
+              "fnit_soft_volume_mm3": 10691.826171875,
+              "soft_volume_difference": 0.030240300038330878
+            },
+            {
+              "label": 175,
+              "reference_voxels": 2902,
+              "fnit_voxels": 3106,
+              "reference_hard_volume_mm3": 3770.788891640084,
+              "fnit_hard_volume_mm3": 4035.8615773377323,
+              "dice": 0.9397470039946738,
+              "hard_volume_difference": 0.07029634734665748,
+              "accepted": false,
+              "id": 175,
+              "name": "Medulla",
+              "parent": "brainstem",
+              "family": "BrainstemSS",
+              "hemisphere": null,
+              "source": "brainstem",
+              "hard_evaluation_status": "evaluated",
+              "reference_soft_volume_mm3": 3775.915484,
+              "fnit_soft_volume_mm3": 4028.55322265625,
+              "soft_volume_difference": 0.06690767834364215
+            },
+            {
+              "label": 178,
+              "reference_voxels": 127,
+              "fnit_voxels": 110,
+              "reference_hard_volume_mm3": 165.02074060588924,
+              "fnit_hard_volume_mm3": 142.9313501310852,
+              "dice": 0.8438818565400844,
+              "hard_volume_difference": 0.13385826771653545,
+              "accepted": false,
+              "id": 178,
+              "name": "SCP",
+              "parent": "brainstem",
+              "family": "BrainstemSS",
+              "hemisphere": null,
+              "source": "brainstem",
+              "hard_evaluation_status": "evaluated",
+              "reference_soft_volume_mm3": 179.025069,
+              "fnit_soft_volume_mm3": 155.9772491455078,
+              "soft_volume_difference": 0.12874073996023533
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

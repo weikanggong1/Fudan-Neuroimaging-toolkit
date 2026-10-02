@@ -213,8 +213,15 @@ class HippoAmygdalaRecipe(GEMSRecipe):
 
     def postprocess(self, fit, context, atlas):
         raw = fit.labels.detach().cpu().numpy().astype(np.int32)
-        mask = np.isin(raw, list(self.foreground_ids(atlas)))
-        components, count = ndimage.label(mask)
+        allowed = self.foreground_ids(atlas)
+        foreground = np.isin(raw, list(allowed))
+        # A one-voxel interruption can detach a complete fine nucleus. Closing
+        # only selects the component; its bridge voxels never enter the labels.
+        ball = ndimage.generate_binary_structure(3, 1)
+        selection_mask = foreground | ndimage.binary_closing(
+            foreground, structure=ball, iterations=1)
+        components, count = ndimage.label(selection_mask, structure=ball)
+        mask = foreground.copy()
         if count:
             sizes = np.bincount(components.ravel())
             sizes[0] = 0
@@ -232,5 +239,20 @@ class HippoAmygdalaRecipe(GEMSRecipe):
         volumes = {int(label) + offset: float(posterior[index].sum() * voxel_volume)
                    for index, label in enumerate(atlas.label_ids)
                    if int(label) in self.foreground_ids(atlas)}
+        component_report = {
+            "rule": "closing_ball1_selection_lcc6_intersect_original_foreground",
+            "radius_working_voxels": 1,
+            "working_voxel_sizes_mm": np.linalg.norm(fit.affine[:3, :3], axis=0).tolist(),
+            "selection_component_count": int(count),
+            "input_foreground_voxels": int(np.count_nonzero(foreground)),
+            "retained_original_foreground_voxels": int(np.count_nonzero(mask)),
+            "input_label_counts": {str(label): int(np.count_nonzero(raw == label))
+                                   for label in sorted(allowed)},
+            "retained_label_counts": {str(label): int(np.count_nonzero(mask & (raw == label)))
+                                      for label in sorted(allowed)},
+            "new_labeled_voxels": 0,
+            "changed_label_ids": 0,
+        }
         return RecipeResult(fit, nib.Nifti1Image(labels, fit.affine), native,
-                            native_conf, support, volumes, {})
+                            native_conf, support, volumes,
+                            {"component_selection": component_report})
