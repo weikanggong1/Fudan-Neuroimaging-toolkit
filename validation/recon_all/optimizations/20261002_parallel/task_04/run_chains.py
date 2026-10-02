@@ -22,7 +22,10 @@ def main():
             report_path = sphere_dir/'report.json'
             if not report_path.exists():
                 continue
-            sphere_report = json.loads(report_path.read_text())
+            try:
+                sphere_report = json.loads(report_path.read_text())
+            except (OSError, json.JSONDecodeError):
+                continue
             if sphere_report['status'] != 'complete':
                 raise RuntimeError(f'Upstream sphere failed: {report_path}')
             if sphere_report['args']['commit'] != commit:

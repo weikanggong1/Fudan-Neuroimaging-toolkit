@@ -9,7 +9,11 @@ def wait_reports(paths):
             if not path.exists():
                 missing += 1
                 continue
-            report = json.loads(path.read_text())
+            try:
+                report = json.loads(path.read_text())
+            except (OSError, json.JSONDecodeError):
+                missing += 1
+                continue
             if report['status'] == 'failed':
                 raise RuntimeError(f'Benchmark failed: {path}')
             if report['status'] != 'complete':
