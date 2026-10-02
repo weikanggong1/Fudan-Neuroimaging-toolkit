@@ -12,6 +12,7 @@ import shutil
 import sys
 import time
 import traceback
+from uuid import UUID
 
 LIMIT_BYTES = 20_000_000_000
 ARRAY_NAMES = ('points', 'offsets', 'endpoints', 'lengths_mm', 'accepted_seeds')
@@ -63,6 +64,24 @@ def verify_source(config):
             'declared_equivalent_local_commit': config['equivalent_local_commit'],
             'remote_git_commit': None, 'files': config['source_files'],
             'monitor_sha256': config['monitor_sha256']}
+
+
+def canonical_gpu_uuid(value):
+    """Normalize documented CUDA/NVML UUID representations, preserving all 128 identity bits."""
+    if isinstance(value, UUID):
+        parsed = value
+    elif isinstance(value, (bytes, bytearray)):
+        raw = bytes(value)
+        parsed = UUID(bytes=raw) if len(raw) == 16 else UUID(raw.decode('ascii').removeprefix('GPU-'))
+    elif type(value).__module__ == 'torch._C' and type(value).__name__ == '_CUuuid':
+        # PyTorch 2.5.1 exposes CUuuid as a uint8 vector, unlike its str type stub.
+        raw = bytes(value.bytes)
+        require(len(raw) == 16, 'actual torch CUuuid is not 128 bits')
+        parsed = UUID(bytes=raw)
+    else:
+        require(isinstance(value, str), 'unsupported actual CUDA UUID representation')
+        parsed = UUID(value.removeprefix('GPU-'))
+    return 'GPU-' + str(parsed)
 
 
 def memory_gate(peaks, failed_samples):
@@ -176,8 +195,12 @@ def gpu_postprocess(config, torch, np, payload, arrays, fa_array, atlas_arrays, 
     try:
         stage = time.perf_counter()
         torch.cuda.init()
-        uuid = torch.cuda.get_device_properties(0).uuid
-        uuid = uuid.decode() if isinstance(uuid, bytes) else str(uuid)
+        raw_uuid = torch.cuda.get_device_properties(0).uuid
+        report['device_identity'] = {'logical_device': 'cuda:0', 'torch_uuid_type': type(raw_uuid).__name__,
+            'torch_uuid_repr': repr(raw_uuid), 'torch_uuid_str': str(raw_uuid), 'expected_uuid': config['gpu_uuid'],
+            'cuda_visible_devices': os.environ.get('CUDA_VISIBLE_DEVICES')}
+        uuid = canonical_gpu_uuid(raw_uuid)
+        report['device_identity']['canonical_uuid'] = uuid
         require(uuid == config['gpu_uuid'], 'actual CUDA GPU differs from fixed UUID')
         torch.backends.cuda.matmul.allow_tf32 = True
         torch.backends.cudnn.allow_tf32 = True

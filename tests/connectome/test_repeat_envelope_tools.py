@@ -528,3 +528,19 @@ def test_existing_track_post_source_binding_rejects_runtime_resource_change(tmp_
     (root / paths[1]).write_bytes(b'changed resource')
     with pytest.raises(ValueError, match='resource changed'):
         tool.verify_source(config)
+
+
+def test_actual_cuda_uuid_representations_preserve_fixed_physical_identity():
+    from uuid import UUID
+    tool = fnit_post_tool()
+    bare = '26e41f63-1a65-6b3e-5370-fa9a2934ca8e'
+    expected = 'GPU-' + bare
+    for value in (bare, expected, bare.encode('ascii'), expected.encode('ascii'),
+                  UUID(bare), UUID(bare).bytes, bytearray(UUID(bare).bytes)):
+        assert tool.canonical_gpu_uuid(value) == expected
+    # Actual installed 2.5.1 metadata: torch._C._CUuuid.bytes is a vector<uint8_t>.
+    cuuuid = type('_CUuuid', (), {'__module__': 'torch._C', 'bytes': list(UUID(bare).bytes)})()
+    assert tool.canonical_gpu_uuid(cuuuid) == expected
+    assert tool.canonical_gpu_uuid('26e41f63-1a65-6b3e-5370-fa9a2934ca8f') != expected
+    with pytest.raises(ValueError):
+        tool.canonical_gpu_uuid('invalid-device-id')

@@ -94,12 +94,19 @@ CON03 使用本轮新下载 OpenNeuro `ds001226` 的真实 T1/DWI 和真实追�
 
 - 官方 198/198 个实际命令 exit0，全部输入序列化与来源审计通过。
 - 八 atlas 主矩阵门槛 233/240 个比较通过、7 个未通过；接受率、长度、端点和点访问直方图共 10/25 通过、15 个未通过。
-- FNIT 自身重复当时只有一个种子，状态为 `not_assessed`。五份 FNIT 后处理实际完成后才进行完整 25 个跨软件及 10 个自身组合比较。
+- FNIT 自身重复当时只有一个种子，状态为 `not_assessed`。当前五份真实轨迹已通过 CPU TCK 坐标位读回；完整人口分布为跨软件72/125通过、自身47/50通过，均failed。五种子GPU后处理已全部真实完成并通过显存门槛；完整矩阵cross1091/1200、自身412/480通过，整体failed。
 
 [已有机器报告与真实图](../../validation/connectome/tenraw_20261002/task_04_repeat_reference/README.md)。该结果不能表述为已经匹配官方。有限五次重复范围是观测 envelope，不是总体置信区间；错误不超过官方最大错误，相似性不低于官方最小相似性，门槛不会随真实结果调整。
 
+[最新五种子人口分布、真实图与分箱来源说明](../../validation/connectome/tenraw_20261002/task_04_repeat_fivefnit_reference/README.md)。`prepare_connectome_existing_tracks_population.py` 仅在CPU复用真实合同，独立保存实际轨迹TCK并验证float32 bits；不初始化CUDA、不算SIFT2、不生成矩阵。
+
+GPU身份检查严格比较128位UUID与固定expected、实际logical cuda:0和同PID NVIDIA物理设备。PyTorch2.5.1现场返回`torch._C._CUuuid`及16uint8 bytes，[官方Module.cpp](https://github.com/pytorch/pytorch/blob/v2.5.1/torch/csrc/cuda/Module.cpp#L905)说明该表示；工具仅做表示归一化，不以环境变量或物理index推断设备。旧失败发生在SIFT2之前且保留，新运行仍使用原冻结baseline科学函数。
+
+真实独立审计 `audit_connectome_fnit_repeats.py --config/--config-sha256/--output-root/--cpu-preparation-root/--output` 核对全部源、五份已完成输出、三种显存峰值与原seed0格式重放；CUDA必须隐藏。旧seed0的32份最终dtype矩阵bits相同，原CLI格式重放也逐字节相同；Float64权重末位差另记录，无新容差。完整参数、实际耗时与source/config/identity证据见上面的单一最新报告。
+
 ## 6. 更新与 benchmark 记录
 
+- 2026-10-03：完成五种子GPU后处理与25cross/10self矩阵gate；allocated2.16GB/reserved2.54GB/本进程采样4.44GB；整体科学gate失败如上，生产科学数值未更改。
 - 2026-10-03：增加冻结已有轨迹 GPU 后处理与五种子控制器；31 个 CPU 工具契约回归通过、1 个可选绘图依赖跳过。CON03 seed0 实际 CPU 预检通过，GPU worker 按统一锁排队。该条不代表五种子已完成。
 - 2026-10-03：提交实际 CON03 官方五重复审计及 FNIT seed0 科学失败报告，保留先前失败目录。
 - 先前：支持任意重复数、当前 CLI CSV、完整节点元数据、单侧经验门槛及独立 FNIT 自身重复状态。
