@@ -73,6 +73,9 @@ def compare(a, b, paths):
                                per_label_dice={str(code): float(2*np.count_nonzero((ai==code)&(bi==code))/
                                   (np.count_nonzero(ai==code)+np.count_nonzero(bi==code)))
                                   for code in np.union1d(ai,bi)})
+                elif name.endswith('.label'):
+                    ai, av = fs.read_label(left,read_scalars=True); bi, bv = fs.read_label(right,read_scalars=True)
+                    row.update(compare_array(ai,bi), scalar_differences=compare_array(av,bv),kind='label')
                 else:
                     try:
                         ai, af = fs.read_geometry(left); bi, bf = fs.read_geometry(right)
@@ -98,9 +101,10 @@ def main():
     parser.add_argument('--assets', type=Path, required=True)
     parser.add_argument('--binaries', type=Path, required=True)
     parser.add_argument('--device', default='cuda:0')
-    parser.add_argument('--operation', choices=('metrics','annotation','register','surface','finish_surface'), default='metrics')
+    parser.add_argument('--operation', choices=('metrics','annotation','register','surface','finish_surface','chain'), default='metrics')
     parser.add_argument('--order', choices=('AB','BA'), default='AB')
     parser.add_argument('--commit', required=True)
+    parser.add_argument('--resources-manifest', type=Path)
     args = parser.parse_args()
     args.output.mkdir(parents=True,exist_ok=True)
     # 严格复现门槛预先声明为0；沿用项目正式数值容差，不修改整体等效门槛。
@@ -114,6 +118,20 @@ def main():
                  for folder in ('mri','surf','label') for p in (args.checkpoint/folder).rglob('*') if p.is_file()},
               'binary_sha256': {p.name:sha(p) for p in args.binaries.iterdir() if p.is_file()},
               'results': {}}
+    if args.resources_manifest:
+        expected=json.loads(args.resources_manifest.read_text())
+        audit={}
+        for category, entries in expected.items():
+            audit[category]={}
+            for name, fingerprint in entries.items():
+                if not isinstance(fingerprint,dict) or 'resolved_path' not in fingerprint:continue
+                resource=Path(fingerprint['resolved_path'])
+                size=resource.stat().st_size
+                digest=sha(resource)
+                matched=size==fingerprint['size_bytes'] and digest==fingerprint['sha256']
+                audit[category][name]={'size_bytes':size,'sha256':digest,'matched':matched}
+                if not matched:raise ValueError(f'resource drift: {category}/{name}')
+        report['resources']=audit
     # 素材授权及实际 SHA 在独立审计报告记录；仅使用既有文件，不下载。
     binaries = {k: str(args.binaries/name) for k,name in
         (('metrics','mris_place_surface'),('topology','mris_fix_topology_fnit'),
@@ -133,6 +151,10 @@ def main():
             subject = args.output/mode/'subject'
             subject.parent.mkdir(exist_ok=True)
             shutil.copytree(args.checkpoint,subject)
+            if args.operation == 'chain':
+                # 从冻结的共有MRI前缀自产完整受影响表面链，不读取历史表面。
+                for folder in ('surf','label','stats'):
+                    shutil.rmtree(subject/folder); (subject/folder).mkdir()
             sampler = ProcessTreeDeviceSampler(device=args.device,parent_pid=os.getpid())
             stop = threading.Event()
             def sample():
@@ -143,7 +165,32 @@ def main():
             monitor.start()
             started = time.monotonic()
             try:
-                if mode == 'serial':
+                if args.operation == 'chain':
+                    result={'groups':[], 'published':[]}
+                    for operation in ('surface','register','annotation','finish_surface'):
+                        if mode == 'serial':
+                            tick=time.monotonic()
+                            values={h:_hemisphere_operation(subject=str(subject),hemi=h,device=args.device,
+                                    threads=4,operation=operation,**common) for h in ('lh','rh')}
+                            group={'operation':operation,'values':values,'group_wall_seconds':time.monotonic()-tick}
+                        else:
+                            group=run_hemisphere_group(subject,operation,device=args.device,threads=4,
+                                     workers=2,profile_stages=True,kwargs=common)
+                            result['published'].extend(group['published'])
+                        result['groups'].append(group)
+                        if operation=='finish_surface':
+                            from fnit.recon_all.native_free import _finish_cortical_metrics
+                            tick=time.monotonic()
+                            for h in ('lh','rh'):_finish_cortical_metrics(subject,h,Path(binaries['metrics']),args.assets,device=args.device)
+                            result['serial_metrics_seconds']=time.monotonic()-tick
+                            result['published'].extend(f'surf/{h}.{m}' for h in ('lh','rh')
+                                for m in ('thickness','area','area.pial','area.mid','curv','curv.pial','volume'))
+                        if operation=='surface':
+                            from fnit.recon_all.native_free import _run_defects_volume
+                            for h in ('lh','rh'):_run_defects_volume(Path(binaries['defect']),subject,h,args.assets)
+                            result['published'].append('mri/surface.defects.mgz')
+                    result['group_wall_seconds']=time.monotonic()-started
+                elif mode == 'serial':
                     values={}
                     for hemi in ('lh','rh'):
                         function=metrics if args.operation=='metrics' else _hemisphere_operation
@@ -157,6 +204,12 @@ def main():
                             callable_path='benchmark_hemi:metrics' if args.operation=='metrics'
                               else 'fnit.recon_all.native_free:_hemisphere_operation')
                 result['command_wall_seconds']=time.monotonic()-started
+                if args.operation=='finish_surface':
+                    from fnit.recon_all.native_free import _finish_cortical_metrics
+                    for h in ('lh','rh'):_finish_cortical_metrics(subject,h,Path(binaries['metrics']),args.assets,device=args.device)
+                    result['command_wall_seconds']=time.monotonic()-started
+                    result.setdefault('published',[]).extend(f'surf/{h}.{m}' for h in ('lh','rh')
+                        for m in ('thickness','area','area.pial','area.mid','curv','curv.pial','volume'))
                 if args.operation=='surface':
                     from fnit.recon_all.native_free import _run_defects_volume
                     for h in ('lh','rh'):_run_defects_volume(Path(binaries['defect']),subject,h,args.assets)
@@ -169,6 +222,9 @@ def main():
     report['output_differences']=compare(args.output/'serial/subject',args.output/'parallel/subject',paths)
     report['strict_reproduction']='passed' if all(row.get('bytes_equal',False) for row in report['output_differences'] if row.get('kind')!='execution_log') else 'failed'
     report['speedup']=report['results']['serial']['command_wall_seconds']/report['results']['parallel']['command_wall_seconds']
+    if args.operation in ('surface','finish_surface','chain'):
+        from fnit.recon_all.native_free import _validate_meshes
+        report['mesh_validation']={mode:_validate_meshes(args.output/mode/'subject') for mode in ('serial','parallel')}
     report['checkpoint_unchanged']=all(sha(args.checkpoint/p)==value for p,value in report['input_sha256'].items())
     (args.output/'result.json').write_text(json.dumps(report,indent=2))
     with (args.output/'differences.csv').open('w') as stream:

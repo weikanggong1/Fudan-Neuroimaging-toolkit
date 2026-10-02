@@ -436,27 +436,36 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
 
 
 def _finish_cortical_surface(subject: Path, hemi: str, binary: Path,
-                             assets: Path, *, device: str, threads: int) -> dict:
+                             assets: Path, *, device: str, threads: int,
+                             defer_metrics: bool = False) -> dict:
     """球面配准和注释完成后，依次放置最终 white、pial 并计算顶点图。"""
     from .final_white_conda import run_final_white
-    from .surface_area_gpu import mid_area_map
-    from .surface_roi_gpu import vertex_volume_map
-
-    surf, labels = subject / "surf", subject / "label"
+    surf = subject / "surf"
     white_report = run_final_white(subject, hemi, binary, assets, threads=threads)
     pial_report = _run_native_pial(binary, subject, hemi, assets, threads)
     shutil.copyfile(surf / f"{hemi}.pial.T1", surf / f"{hemi}.pial")
+    result = {"final_white_report": white_report, "pial_report": pial_report,
+              "placement_pending": False, "metrics_pending": defer_metrics}
+    if not defer_metrics:
+        result.update(_finish_cortical_metrics(subject, hemi, binary, assets, device=device))
+    return result
+
+
+def _finish_cortical_metrics(subject: Path, hemi: str, binary: Path,
+                            assets: Path, *, device: str) -> dict:
+    """完成已放置white/pial的指标；真实短配对显示GPU指标串行更快。"""
+    from .surface_area_gpu import mid_area_map
+    from .surface_roi_gpu import vertex_volume_map
+    surf, labels = subject / 'surf', subject / 'label'
     metric_seconds = _run_surface_metrics(binary, subject, hemi, assets, device=device)
     mid_area_map(surf / f"{hemi}.area", surf / f"{hemi}.area.pial",
                  surf / f"{hemi}.area.mid", device=device)
     vertex_volume_map(surf / f"{hemi}.white", surf / f"{hemi}.pial",
                       labels / f"{hemi}.cortex.label",
                       surf / f"{hemi}.volume", device=device)
-    return {"final_white_report": white_report, "pial_report": pial_report,
-            "metric_seconds": metric_seconds,
+    return {"metric_seconds": metric_seconds,
             "mean_thickness_mm": float(np.mean(fs.read_morph_data(
-                str(surf / f"{hemi}.thickness")))),
-            "placement_pending": False}
+                str(surf / f"{hemi}.thickness")))), "metrics_pending": False}
 
 
 def _project_parcels(subject: Path) -> None:
@@ -623,7 +632,7 @@ def _hemisphere_operation(subject, hemi, device, threads, operation, *, assets,
                   labels / f'{hemi}.{atlas}.annot', device=device)
     elif operation == 'finish_surface':
         value = step(f'finish_surface_{hemi}', _finish_cortical_surface, subject,
-                     hemi, binaries['metrics'], assets, device=device, threads=threads)
+                     hemi, binaries['metrics'], assets, device=device, threads=threads, defer_metrics=True)
     else:
         raise ValueError(f'unknown hemisphere operation: {operation}')
     return {'result': value, 'stages': steps}
@@ -932,6 +941,12 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                     report['sphere_registration']['reports'][hemi] = result
                 elif operation == 'finish_surface':
                     report['surfaces'][hemi].update(result)
+            if operation == 'finish_surface':
+                # 实测GPU顶点指标独立exec并行更慢；放置并行、指标串行。
+                for hemi in ('lh', 'rh'):
+                    metrics_result = stage(f'finish_metrics_{hemi}', _finish_cortical_metrics,
+                          subject, hemi, metrics_binary[0], assets, device=device)
+                    report['surfaces'][hemi].update(metrics_result)
             if operation == 'surface':
                 # 此诊断无下游计算依赖，但左右累计有先后依赖。
                 for hemi in ('lh', 'rh'):

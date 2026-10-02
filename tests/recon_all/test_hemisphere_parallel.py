@@ -12,7 +12,7 @@ from fnit.recon_all.hemisphere_parallel import (
     HemisphereGroupError, run_hemisphere_group, validate_hemisphere_workers,
 )
 from fnit.recon_all.profiling import parallel_intervals
-from fnit.recon_all.native_free import main
+from fnit.recon_all.native_free import main, _finish_cortical_surface
 
 TARGET = '''
 def execute(subject, hemi, device, threads, operation):
@@ -78,6 +78,7 @@ class HemisphereParallelTests(unittest.TestCase):
         report = json.loads((self.subject / 'scripts/failure.hemisphere-group.json').read_text())
         self.assertEqual(report['status'], 'failed')
         self.assertIn('intentional worker error', report['workers']['lh']['error'])
+        self.assertIn('intentional worker error', (self.subject / 'scripts/failure.lh.worker.log').read_text())
         for pid in report['device_process_tree']['worker_pids']:
             self.assertFalse(Path(f'/proc/{pid}').exists())
 
@@ -94,7 +95,7 @@ class HemisphereParallelTests(unittest.TestCase):
         self.assertEqual(report['values']['rh']['numba_threads'], 4)
 
     def test_invalid_resource_budget(self):
-        for workers, threads in ((2, 1), (3, 4), (True, 4), (2, True), (2, 2.5)):
+        for workers, threads in ((2, 1), (3, 4), (True, 4), (2, True), (2, 2.5), (2.0, 4)):
             with self.assertRaises(ValueError):
                 validate_hemisphere_workers(workers, threads)
 
@@ -104,6 +105,17 @@ class HemisphereParallelTests(unittest.TestCase):
         self.assertEqual(report['worker_sum_seconds'], 10.)
         self.assertEqual(report['worker_span_seconds'], 7.)
         self.assertEqual(report['overlap_seconds'], 3.)
+
+    def test_parallel_final_placement_defers_gpu_maps(self):
+        with patch('fnit.recon_all.final_white_conda.run_final_white', return_value={'output':'white'}), \
+             patch('fnit.recon_all.native_free._run_native_pial', return_value={'output':'pial'}), \
+             patch('fnit.recon_all.native_free.shutil.copyfile'), \
+             patch('fnit.recon_all.native_free._finish_cortical_metrics') as metrics:
+            result = _finish_cortical_surface(self.subject,'lh',Path('/bin/native'),
+                    Path('/assets'),device='cuda:0',threads=2,defer_metrics=True)
+        self.assertTrue(result['metrics_pending'])
+        self.assertFalse(result['placement_pending'])
+        metrics.assert_not_called()
 
     def test_cli_opt_in(self):
         with patch('fnit.recon_all.native_free.run_recon_all_python', return_value={'status':'complete'}) as run:

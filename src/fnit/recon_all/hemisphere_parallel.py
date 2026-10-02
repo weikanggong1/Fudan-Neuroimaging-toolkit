@@ -1,6 +1,7 @@
 """双侧 exec 进程、私有文件和阶段屏障；父进程确定性发布输出。"""
 from __future__ import annotations
 import json
+from numbers import Integral
 import os
 from pathlib import Path
 import shutil
@@ -22,9 +23,9 @@ class HemisphereGroupError(RuntimeError):
 
 
 def validate_hemisphere_workers(workers, threads):
-    if isinstance(workers, bool) or workers not in (1, 2):
+    if isinstance(workers, bool) or not isinstance(workers, Integral) or workers not in (1, 2):
         raise ValueError('hemisphere_workers must be 1 or 2')
-    if isinstance(threads, bool) or not isinstance(threads, int) or threads < workers:
+    if isinstance(threads, bool) or not isinstance(threads, Integral) or threads < workers:
         raise ValueError('threads must be an integer >= hemisphere_workers')
 
 

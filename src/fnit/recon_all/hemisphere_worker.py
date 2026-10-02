@@ -51,6 +51,7 @@ def main():
         report['precision'] = request['precision']
     except BaseException as error:
         report.update(status='failed', error=repr(error), traceback=traceback.format_exc())
+        print(report['traceback'], file=sys.stderr, flush=True)
     report['finished_monotonic'] = time.monotonic()
     report['total_seconds'] = report['finished_monotonic'] - started
     temporary = report_path.with_suffix('.tmp')
