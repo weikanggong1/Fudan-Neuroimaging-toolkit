@@ -44,10 +44,10 @@ def main():
     pair = json.loads((summary/'comparison.json').read_text())
     chain = json.loads((summary/'chains.json').read_text())
     official = json.loads((summary/'official.json').read_text())
-    checks = {'paired_count':len(pair['rows']), 'chain_count':len(chain['rows']), 'official_count':len(official['rows']), 'all_paired_exact':all(row['strict_stage_reproduction'] for row in pair['rows']), 'all_chains_propagated':all(row['strict_chain_propagation'] for row in chain['rows']), 'overall_equivalence':'not_assessed'}
+    checks = {'paired_count':len(pair['rows']), 'chain_count':len(chain['rows']), 'official_count':len(official['rows']), 'all_paired_exact':all(row['strict_stage_reproduction'] for row in pair['rows']), 'all_chains_propagated':all(row['strict_chain_propagation'] for row in chain['rows']), 'all_official_same_input':all(row['same_input_sha256'] for row in official['rows']), 'overall_equivalence':'not_assessed'}
     checks['metadata_sha256']={str(path.relative_to(task)):hashlib.sha256(path.read_bytes()).hexdigest() for path in paired+reference+chains}
     (summary/'completion.json').write_text(json.dumps(checks,indent=2)+'\n')
-    if (checks['paired_count'],checks['chain_count'],checks['official_count']) != (12,4,12) or not checks['all_paired_exact'] or not checks['all_chains_propagated']:
+    if (checks['paired_count'],checks['chain_count'],checks['official_count']) != (12,4,12) or not checks['all_paired_exact'] or not checks['all_chains_propagated'] or not checks['all_official_same_input']:
         raise RuntimeError('Required measured acceptance incomplete or failed')
     print(json.dumps(checks,indent=2),flush=True)
 
