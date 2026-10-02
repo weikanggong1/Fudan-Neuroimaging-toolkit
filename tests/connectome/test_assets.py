@@ -13,6 +13,9 @@ def test_selected_atlas_installation_and_tamper_detection(tmp_path, monkeypatch)
     downloads = []
 
     def open_asset(url, *, timeout):
+        assert url.startswith(("https://raw.githubusercontent.com/yetianmed/subcortex/",
+                               "https://raw.githubusercontent.com/ThomasYeoLab/CBIG/",
+                               "https://raw.githubusercontent.com/weikanggong1/Fudan-Neuroimaging-toolkit/f436de588647a0de80735e4a98d53df5d88e502d/"))
         name = url.rsplit("/", 1)[-1]
         downloads.append(name)
         return BytesIO((source / name).read_bytes())

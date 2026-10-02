@@ -1,0 +1,104 @@
+{
+  "baseline_commit": "f436de588647a0de80735e4a98d53df5d88e502d",
+  "completed_evidence_commit": "c5af6a0c461f834be20308e96b15bc759d69913e",
+  "scope": "task05 component validation and atlas source audit only; root formal ten-raw ongoing",
+  "actually_adopted_task05_files_in_root_integration_verified": [],
+  "adoption_not_assumed": true,
+  "recommended_asset_fix_files": [
+    "src/fnit/connectome/assets.py",
+    "src/fnit/connectome/atlas_manifest.json",
+    "tests/connectome/test_assets.py"
+  ],
+  "recommended_asset_fix_patch": "asset_source_fix.patch",
+  "asset_fix_reason": "Replace mutable FNIT main URL with per-file pinned original author/frozen licensed URLs; sizes and SHA unchanged; no redistribution or new dependencies. Not a speed optimization.",
+  "unadopted_source_files": [
+    "src/fnit/connectome/assignment.py",
+    "src/fnit/connectome/atlas_tian.py",
+    "tests/connectome/test_atlas_cache.py"
+  ],
+  "archive_patch": "unadopted_cache_candidate.patch",
+  "archive_warning": "Do not apply archive patch to production or cherry-pick the entire original cache commit. Optional APIs remain only in task05 research checkout so tools can reproduce candidate comparisons. SynthMorph transform_only flags were never added to production source.",
+  "baseline_and_candidate_sha256": {
+    "src/fnit/connectome/assets.py": {
+      "baseline_sha256": "451e5685e1ecda78df7988c1f541f550386e397e118c69a4bf1b08b2e060f160",
+      "candidate_sha256": "3c23238e438539f9ca4bf9495926ca88540cc9e8f8c2364239f415e6563a6a54"
+    },
+    "src/fnit/connectome/atlas_manifest.json": {
+      "baseline_sha256": "098a4c1a6f4502829f29e89d2e3703847e4ae53b95c81116229d435c8910b9c5",
+      "candidate_sha256": "b115919c1b67f7da611c234e1770eeac18b3097d4fd73ee28f407211fb8b97cf"
+    },
+    "tests/connectome/test_assets.py": {
+      "baseline_sha256": "d3f55bc6891d145048d52fa157e81158e74fbe91d46791579c8686c7050115f6",
+      "candidate_sha256": "cf728943f975bb699e505989294e66467ca21df6fe8ebb8b02b47c1234f7726f"
+    },
+    "src/fnit/connectome/assignment.py": {
+      "baseline_sha256": "d8901752cda4e5b8007f7c318613b343ad3edbd7072d0e0a05539a5d42ac6313",
+      "candidate_sha256": "8e7eab076b0793f361d7e7e4f83c51c71930df26e04921bb37378cab01edc525"
+    },
+    "src/fnit/connectome/atlas_tian.py": {
+      "baseline_sha256": "953813c8f62eef4e0ed1d6b250e710d3f8a02058299b25cf82907bd01d5df9b5",
+      "candidate_sha256": "48118735b4146af2777616dc7f6dcdbf35d9afdd498d8ee415c363d776eb87fb"
+    },
+    "tests/connectome/test_atlas_cache.py": {
+      "baseline_sha256": null,
+      "candidate_sha256": "468fd2d2c26b74fea8b6db4931369a0a9856484053f7ab589ec30028a7033ea1"
+    },
+    "tools/benchmark_connectome_assignment_cache.py": {
+      "baseline_sha256": null,
+      "candidate_sha256": "64f9c324e289fa5209a9bc775c985f477ea6bfe4317cf0770af3b904c6a18756"
+    },
+    "tools/benchmark_connectome_synthmorph_outputs.py": {
+      "baseline_sha256": null,
+      "candidate_sha256": "f67f677cd6a48c585fe2f47b22fb97f9ce78a80b611b20cf5375da07d74659d4"
+    },
+    "tools/benchmark_connectome_tian_nn_device.py": {
+      "baseline_sha256": null,
+      "candidate_sha256": "a442e551aa639bedf5238cdbbde406c4a4ca54224c52afe0ba1fb34bc21daee7"
+    },
+    "tools/compare_connectome_nn_allocator.py": {
+      "baseline_sha256": null,
+      "candidate_sha256": "f5d0d0d9bb9e26eb62a49c386ff6c328fd4d68537b05234238f7c7baba9b483b"
+    },
+    "tools/launch_connectome_assignment_checkpoint.py": {
+      "baseline_sha256": null,
+      "candidate_sha256": "0817401aa2b162f9b88e2d87532760ce8a5d4a0fec48f980bb272cacc23c5aa5"
+    },
+    "tools/plot_connectome_tian_nn.py": {
+      "baseline_sha256": null,
+      "candidate_sha256": "29f6b20779763f86758ae9e98505224477913cbbd3d3793c56ea7ae54f5ff8f9"
+    },
+    "tools/verify_connectome_synthmorph_bits.py": {
+      "baseline_sha256": null,
+      "candidate_sha256": "24f86a171aeab1cae32d7103190b069ddceb414fcbfe62a2249560b5b8743d5d"
+    }
+  },
+  "patch_sha256": {
+    "asset_source_fix.patch": "f3b0bf2da8e840026773a6763b06ef086a566382866e653c135d3e27242dade7",
+    "unadopted_cache_candidate.patch": "31dbac68393af0a74b69965d4f766146a84ae1fef5500b6137f1b52813643f64"
+  },
+  "benchmark_conclusions": {
+    "NN_CPU_to_CUDA": "Exact CON01 S1/S4, no speed benefit, preserve CPU",
+    "allocator": "CON01 uncached same complete warp/labels exact; NVML 11.002 GB vs cached 21.544 GB; component only, Torch statistics invalid uncached",
+    "synthmorph_round1": "All forward/labels/metadata and bit comparisons exact; own NVML 11.031-11.291 GB; pairwise speed condition fails and shared timing gate fails; no adoption",
+    "synthmorph_round2": "All forward/labels/metadata and bit comparisons exact; own NVML 11.031 GB all arms; 5.02 percent model+registration speedup observed, both order pairs faster, shared timing gate fails; final candidate closed, no further trials",
+    "endpoint_geometry": "11,606 actual tracks, eight atlases, 96 exact matrix comparisons; 2.015 GB peak. Both total pairs faster but image decoding/H2D and outlier stages dominate, isolated geometry compute not timed; no attributable stable speed or full pipeline benefit proven, no integration recommended",
+    "FNIRT_inverse_cache": "No new real coefficient benchmark; archive only"
+  },
+  "reports": {
+    "CON03_synthmorph_unused_outputs_ABBA.json": "79fd8dbf871e75c7905dc741ed38946675c3ac12aaef5cc32accadcd9597ab03",
+    "CON03_assignment_geometry_ABBA_GPU0_v1.json": "ef2c56340d1ea0390588631901c3494d77987b7c348c6d7b82d87c737063a27c",
+    "CON03_synthmorph_repeat_GPU0_bits.json": "6cba6e20eb572fcd935c0093feed1cec02403577b2a5f7a70b22e3eb69bdadd2",
+    "newraw_CON01_NN_allocator_disabled.json": "5f4c608e7d22069fa368da0e0f51bf2fc070bb198da1c8aac2f85110ccbee52e",
+    "CON03_assignment_geometry_assessment.json": "453b67b309b6460185af7189c1cdfc5c21f025ffb84d25b06a4f3ded5782a0dd",
+    "CON03_synthmorph_unused_outputs_ABBA_repeat_GPU0_v1.json": "d7471c0300f4b0118cf5edf61de4df0d938bd7166757df0ccec36e3aeee37292",
+    "NN_allocator_exact_comparison.json": "2b0707b90d332abd15dd5a4706136f709c0b8852d348dd8734aaf77e4cb6114d",
+    "newraw_CON01_NN.json": "e025eb989e81845aae088ef7460db68fad338a7bfab900e84dbaf9d83b70d6a6",
+    "CON03_synthmorph_ABBA_bits.json": "467e8175f2c840ecc402f1b70839cc175ca602e0d294c7939e5700f836b07634"
+  },
+  "unchanged_production": [
+    "SynthMorph mature models/pipeline",
+    "CPU NN default",
+    "UKBConnectome_pipeline public CLI; task05 never edited"
+  ],
+  "no_more_exploratory_GPU_variants": true
+}

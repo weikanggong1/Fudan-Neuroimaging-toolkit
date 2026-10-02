@@ -1,0 +1,264 @@
+diff --git a/src/fnit/connectome/assignment.py b/src/fnit/connectome/assignment.py
+index 9526c979..8908bbe1 100644
+--- a/src/fnit/connectome/assignment.py
++++ b/src/fnit/connectome/assignment.py
+@@ -12,6 +12,46 @@ import math
+ import torch
+ 
+ 
++class EndpointSearchGeometry:
++    """显式复用同网格 atlas 的 4 mm 端点搜索几何，不缓存 atlas 标签。
++
++    ``affine`` 是 [4,4] voxel→world mm，``radius`` 为严格距离上界，
++    ``device`` 为实际端点设备。内部复制 affine，避免调用者修改后缓存失效。
++    保留原 offset 排列、float32 运算与同距选择规则，不改变批大小和求和。
++    """
++
++    def __init__(self, affine, *, radius=4.0, device="cpu"):
++        if not math.isfinite(radius) or radius <= 0:
++            raise ValueError("radius must be positive and finite")
++        affine = torch.as_tensor(affine, dtype=torch.float32, device=device).clone()
++        if affine.shape != (4, 4):
++            raise ValueError("affine must have shape [4, 4]")
++        self.affine = affine
++        self.radius = radius
++        linear = affine[:3, :3]
++        inverse = torch.linalg.inv(linear)
++        # If a point lies within radius of a voxel centre, its voxel displacement
++        # from round(point in voxel coordinates) is at most radius*||inverse row||
++        # plus half a voxel. This bound also covers rotated and sheared affines.
++        extent = [math.ceil(radius * inverse[i].norm().item() + 0.5) for i in range(3)]
++        axes = [torch.arange(-e, e + 1, device=device) for e in extent]
++        offsets = torch.stack(torch.meshgrid(*axes, indexing="ij"), dim=-1).reshape(-1, 3)
++        # A rounded voxel centre differs from the endpoint by at most half a voxel
++        # on each axis. Discard offsets whose centres cannot reach the search ball.
++        half_voxel_bound = (0.5 * linear.abs().sum(dim=1)).norm()
++        offset_world = (offsets[:, 0:1] * linear[:, 0]
++                        + offsets[:, 1:2] * linear[:, 1]
++                        + offsets[:, 2:3] * linear[:, 2])
++        offsets = offsets[offset_world.norm(dim=1) <= radius + half_voxel_bound]
++        self.inverse = inverse
++        self.offsets = offsets
++
++    def validate(self, affine, radius):
++        if (affine.device != self.affine.device or radius != self.radius
++                or not torch.equal(affine, self.affine)):
++            raise ValueError("search_geometry must match affine, radius and endpoint device")
++
++
+ def build_connectomes(
+     endpoints: torch.Tensor,
+     atlas: torch.Tensor,
+@@ -23,6 +63,7 @@ def build_connectomes(
+     radius: float = 4.0,
+     batch_size: int = 1024,
+     node_count: int | None = None,
++    search_geometry: EndpointSearchGeometry | None = None,
+ ) -> dict[str, torch.Tensor]:
+     """Assign endpoints to nearest labelled voxel centres and form matrices.
+ 
+@@ -31,7 +72,8 @@ def build_connectomes(
+     absent labels below the maximum retain zero rows/columns. The optional
+     length and FA vectors are per streamline, not per endpoint. Their edge
+     means are SIFT2-weighted when ``weights`` is supplied, otherwise ordinary
+-    means. Unassigned streamlines are dropped; self-connections are retained.
++    means. ``search_geometry`` 可在同 affine/radius/device 的多 atlas 间复用；
++    默认 None 在本次调用内计算。Unassigned streamlines are dropped; self-connections are retained.
+ 
+     Computation runs on ``endpoints.device``. Float32 is used for coordinates
+     and metrics; sums use float64 and the streamline count matrix uses int64.
+@@ -79,21 +121,11 @@ def build_connectomes(
+     lengths = metric_vector(lengths, "lengths")
+     fa = metric_vector(fa, "fa")
+ 
++    geometry = (EndpointSearchGeometry(affine, radius=radius, device=device)
++                if search_geometry is None else search_geometry)
++    geometry.validate(affine, radius)
+     linear = affine[:3, :3]
+-    inverse = torch.linalg.inv(linear)
+-    # If a point lies within radius of a voxel centre, its voxel displacement
+-    # from round(point in voxel coordinates) is at most radius*||inverse row||
+-    # plus half a voxel. This bound also covers rotated and sheared affines.
+-    extent = [math.ceil(radius * inverse[i].norm().item() + 0.5) for i in range(3)]
+-    axes = [torch.arange(-e, e + 1, device=device) for e in extent]
+-    offsets = torch.stack(torch.meshgrid(*axes, indexing="ij"), dim=-1).reshape(-1, 3)
+-    # A rounded voxel centre differs from the endpoint by at most half a voxel
+-    # on each axis. Discard offsets whose centres cannot reach the search ball.
+-    half_voxel_bound = (0.5 * linear.abs().sum(dim=1)).norm()
+-    offset_world = (offsets[:, 0:1] * linear[:, 0]
+-                    + offsets[:, 1:2] * linear[:, 1]
+-                    + offsets[:, 2:3] * linear[:, 2])
+-    offsets = offsets[offset_world.norm(dim=1) <= radius + half_voxel_bound]
++    inverse, offsets = geometry.inverse, geometry.offsets
+     # Bound the temporary [endpoints x candidate voxels x 3] arrays.
+     batch_size = min(batch_size, max(1, 500_000 // offsets.shape[0]))
+     shape = atlas.shape
+diff --git a/src/fnit/connectome/atlas_tian.py b/src/fnit/connectome/atlas_tian.py
+index a30fad5e..be7e2452 100644
+--- a/src/fnit/connectome/atlas_tian.py
++++ b/src/fnit/connectome/atlas_tian.py
+@@ -1,5 +1,6 @@
+ """Invert an FSL FNIRT cubic warp on the reference grid with PyTorch."""
+ 
++import hashlib
+ from pathlib import Path
+ 
+ import nibabel as nib
+@@ -13,6 +14,46 @@ from fnit.applywarp.core import (
+ )
+ 
+ 
++class FNIRTInverseCache:
++    """调用范围内复用一个 FNIRT 逆场；不写磁盘，不跨运行跳过步骤。
++
++    key 包括系数体素内容、header/affine、目标 header/affine/shape 和设备。
++    目标强度不参与求逆，因此不计入 key。只保留最近一个结果；失败不入缓存。
++    实例应在一次受试者 atlas 构建前创建，结束后丢弃；不用于线程共享。
++    """
++
++    def __init__(self):
++        self._key = None
++        self._inverse = None
++
++    def clear(self):
++        """释放当前 CPU 逆场引用。"""
++        self._key = self._inverse = None
++
++    def get(self, coefficients, reference, *, device):
++        digest = hashlib.sha256()
++        for image in (coefficients, reference):
++            digest.update(type(image.header).__name__.encode())
++            digest.update(image.header.binaryblock)
++            digest.update(np.asarray(image.affine, dtype=np.float64).tobytes())
++            digest.update(str(image.shape).encode())
++            for extension in getattr(image.header, "extensions", ()):
++                digest.update(str(extension.get_code()).encode())
++                digest.update(extension.content)
++        data = np.ascontiguousarray(np.asanyarray(coefficients.dataobj))
++        digest.update(data.dtype.str.encode())
++        digest.update(memoryview(data).cast("B"))
++        digest.update(str(torch.device(device)).encode())
++        key = digest.digest()
++        if key != self._key:
++            inverse = invert_fnirt_t1_warp(coefficients, reference, device=device)
++            # Publish only after successful inversion; preserve the previous entry on failure.
++            self._key, self._inverse = key, inverse
++        # Caller-owned copy prevents accidental mutation from poisoning the cache.
++        return nib.Nifti1Image(np.array(self._inverse.dataobj, copy=True),
++                               self._inverse.affine.copy(), self._inverse.header.copy())
++
++
+ def synthmorph_tian_to_t1(
+     t1_brain: str | Path | nib.spatialimages.SpatialImage,
+     mni_template: str | Path | nib.spatialimages.SpatialImage,
+@@ -60,6 +101,7 @@ def fnirt_tian_to_t1(
+     forward_coefficients: str | Path | nib.Nifti1Image,
+     *,
+     device: str = "cuda:0",
++    inverse_cache: FNIRTInverseCache | None = None,
+ ) -> nib.Nifti1Image:
+     """用已给定的 FSL FNIRT 前向 coefficient 生成原生 T1 Tian 标签。
+ 
+@@ -69,13 +111,18 @@ def fnirt_tian_to_t1(
+     PyTorch 设备。返回 T1 网格 int32 NIfTI。对应原流程的
+     ``invwarp --ref=T1 --warp=coeff --out=inverse``，再执行
+     ``applywarp --ref=T1 --in=Tian --warp=inverse --interp=nn``。
+-    这里只读取 coefficient，不调用 FSL 程序。
++    这里只读取 coefficient，不调用 FSL 程序。可传入同一次构建共享的
++    ``inverse_cache``，S1/S4 复用逆场；默认 None 保留每次求逆行为。
+     """
+     from fnit.applywarp import TorchApplyWarp
+ 
+     t1 = nib.load(str(t1_brain)) if isinstance(t1_brain, (str, Path)) else t1_brain
+     reference = nib.Nifti1Image(np.asarray(t1.dataobj), t1.affine)
+-    inverse = invert_fnirt_t1_warp(forward_coefficients, reference, device=device)
++    coefficients = (nib.load(str(forward_coefficients)) if isinstance(
++        forward_coefficients, (str, Path)) else forward_coefficients)
++    inverse = (invert_fnirt_t1_warp(coefficients, reference, device=device)
++               if inverse_cache is None else inverse_cache.get(
++                   coefficients, reference, device=device))
+     atlas = TorchApplyWarp(device=device)(
+         tian_mni, reference, warp=inverse, interpolation="nearest",
+     ).image
+diff --git a/tests/connectome/test_atlas_cache.py b/tests/connectome/test_atlas_cache.py
+new file mode 100644
+index 00000000..cb6204c3
+--- /dev/null
++++ b/tests/connectome/test_atlas_cache.py
+@@ -0,0 +1,76 @@
++"""Invalidation, partial failures and unchanged endpoint geometry semantics."""
++from pathlib import Path
++
++import nibabel as nib
++import numpy as np
++import pytest
++import torch
++
++import fnit.connectome.atlas_tian as tian
++from fnit.connectome.assignment import EndpointSearchGeometry, build_connectomes
++
++
++def test_inverse_content_grid_invalidation_and_caller_mutation(monkeypatch):
++    calls = []
++    def invert(coefficients, reference, *, device):
++        calls.append(device)
++        return nib.Nifti1Image(np.ones((*reference.shape, 3), np.float32), reference.affine)
++    monkeypatch.setattr(tian, "invert_fnirt_t1_warp", invert)
++    coefficients = nib.Nifti1Image(np.zeros((2, 2, 2, 3), np.float32), np.eye(4))
++    reference = nib.Nifti1Image(np.zeros((3, 3, 3)), np.eye(4))
++    cache = tian.FNIRTInverseCache()
++    first = cache.get(coefficients, reference, device="cpu")
++    np.asarray(first.dataobj)[:] = 99
++    assert np.all(np.asarray(cache.get(coefficients, reference, device="cpu").dataobj) == 1)
++    assert len(calls) == 1
++    # Reference intensities do not affect the inverse; geometry and coefficients do.
++    np.asarray(reference.dataobj)[:] = 42
++    cache.get(coefficients, reference, device="cpu")
++    assert len(calls) == 1
++    np.asarray(coefficients.dataobj)[0, 0, 0, 0] = 1
++    cache.get(coefficients, reference, device="cpu")
++    assert len(calls) == 2
++    changed = nib.Nifti1Image(np.zeros(reference.shape), np.diag([2., 1., 1., 1.]))
++    cache.get(coefficients, changed, device="cpu")
++    assert len(calls) == 3
++    cache.clear()
++    cache.get(coefficients, changed, device="cpu")
++    assert len(calls) == 4
++
++
++def test_failed_inverse_not_cached(monkeypatch):
++    def fail(*args, **kwargs):
++        raise RuntimeError("incomplete")
++    monkeypatch.setattr(tian, "invert_fnirt_t1_warp", fail)
++    image = nib.Nifti1Image(np.zeros((2, 2, 2)), np.eye(4))
++    cache = tian.FNIRTInverseCache()
++    with pytest.raises(RuntimeError):
++        cache.get(image, image, device="cpu")
++    assert cache._key is None
++
++
++@pytest.mark.parametrize("device", ["cpu", "cuda"] if torch.cuda.is_available() else ["cpu"])
++def test_cached_search_preserves_ties_shear_strict_radius_and_metrics(device):
++    affine = torch.tensor([[1., .3, 0., 10.], [0., 2., .2, 20.],
++                           [0., 0., 1., 30.], [0., 0., 0., 1.]], device=device)
++    voxels = torch.tensor([[[1., 1., 1.], [3., 1., 1.]],
++                           [[2., 1., 1.], [3., 1., 1.]],
++                           [[-10., 1., 1.], [3., 1., 1.]]], device=device)
++    endpoints = voxels @ affine[:3, :3].T + affine[:3, 3]
++    atlas = torch.zeros((5, 3, 3), dtype=torch.int32, device=device)
++    atlas[1, 1, 1], atlas[3, 1, 1] = 1, 3
++    geometry = EndpointSearchGeometry(affine, radius=1., device=device)
++    kwargs = dict(weights=torch.tensor([.1, 2., 3.], device=device),
++                  lengths=torch.tensor([1., 2., 3.], device=device),
++                  fa=torch.tensor([.1, .2, .3], device=device), radius=1., batch_size=2)
++    for labels in (atlas, atlas.flip(0)):
++        expected = build_connectomes(endpoints, labels, affine, **kwargs)
++        actual = build_connectomes(endpoints, labels, affine, search_geometry=geometry, **kwargs)
++        for name in expected:
++            assert torch.equal(expected[name], actual[name])
++    with pytest.raises(ValueError, match="search_geometry"):
++        build_connectomes(endpoints, atlas, affine, radius=2., search_geometry=geometry)
++    changed = affine.clone(); changed[0, 3] += 1
++    with pytest.raises(ValueError, match="search_geometry"):
++        build_connectomes(endpoints, atlas, changed, radius=1., search_geometry=geometry)
++
