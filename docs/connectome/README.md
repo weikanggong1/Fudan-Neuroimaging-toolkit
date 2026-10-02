@@ -250,11 +250,22 @@ tck2connectome tracks.tck atlas.mif fbc.csv -symmetric -assignment_radial_search
 
 ## 5. 精度、运行时间与脑图
 
-本轮新下载的 ds001226 十例评测单列在[原始数据来源与预处理](../../validation/connectome/tenraw_20261002/task_01/README.md)、[两例同输入建模优化](../../validation/connectome/tenraw_20261002/task_02/README.md)和[十例正式评测协议](raw_cohort_benchmark.md)。两例组件 ABBA 不替代十例整链结果；正式整链、分步骤诊断和 GPU 排队分别报告。下面的 ds004666/UKB 数值继续作为历史结果。
+本轮重新下载 ds001226 的十例原始配对数据：CON01、CON03、CON04–CON11，快照 `fb4d0fda44f2ab7a732fb4ab6cd62add09dc1cd7`，许可 CC0。逐文件来源、大小和 SHA 见[原始数据来源与预处理](../../validation/connectome/tenraw_20261002/task_01/README.md)。解剖从这些新下载 T1 独立执行官方 `recon-all`；DWI 从原始 AP/PA 开始校正。正式十例使用每例 100,000 次尝试播种、八套 atlas、32 张矩阵。原始 DWI 运行、官方重建、分步骤诊断和 GPU 排队时间分别记录，协议见[十例正式评测](raw_cohort_benchmark.md)。
+
+已完成的本轮组件证据如下；十例端到端对照仍在执行，不能用这些组件结果代替。
+
+| 本轮真实输入 | 已完成的比较 | 证据 |
+|---|---|---|
+| CON01/CON03，同输入 CSD | 12 组实际中间张量、30 项数组比较逐位一致；观测耗时分别下降约 6.92%/3.45%，CON03 第二轮负载不稳定 | [建模优化与时间边界](../../validation/connectome/tenraw_20261002/task_02/README.md) |
+| CON01/CON03，同输入 100k tracking | 全部轨迹点、offsets、端点、长度和接受种子逐位一致；CON03 ABBA 197.785→160.700 s，观测下降 18.75%。CON01 最后一轮基线受到共享负载影响，不能用其均值差宣称稳定提速 | [追踪调用、完整参数与脑图](TRACKING_OPERATORS.md) |
+| CON03，独立官方五种子，固定相同 FOD/5TT/atlas | 接受数量进入官方范围；单个 FNIT 种子的 240 项矩阵比较有 7 项未进入官方自身重复范围，25 项轨迹群体比较有 15 项未进入 | [官方重复性审计与真实脑图](../../validation/connectome/tenraw_20261002/task_04_repeat_reference/README.md) |
+| CON03，独立官方结构像步骤 | 官方 SynthMorph、FreeSurfer/MRtrix 与原 UKB atlas 脚本已真实执行，生成 27 项结构像输出。报告保留成功阶段恢复的时间与来源，尚不等于完整官方 raw-DWI 链验证 | [结构像实际报告与脑图](raw_official_anatomy_reference.md) |
+
+下表是既有 ds004666/UKB 结果，保留对应版本与输入范围。
 
 | 真实输入对照 | 已观察结果 | 证据 |
 |---|---|---|
-| 最新无损组件优化，真实 ds004666 | 2,000 次播种两版路径及相关量逐值相同；轨迹整理 313.93→4.69 ms。三 atlas 构建/矩阵阶段 10.07→5.63 s；固定真实 TCK 七套四矩阵全部逐值相同 | [范围、profile、时间和显存](../../validation/connectome/ds004666/lossless_20261002/README.md) |
+| 既有无损组件优化，真实 ds004666 | 2,000 次播种两版路径及相关量逐值相同；轨迹整理 313.93→4.69 ms。三 atlas 构建/矩阵阶段 10.07→5.63 s；固定真实 TCK 七套四矩阵全部逐值相同 | [范围、profile、时间和显存](../../validation/connectome/ds004666/lossless_20261002/README.md) |
 | 原始 UKB AP/PA BIDS 全链 | 100 次播种的流程检查成功；84 节点四矩阵完整，3,570 s、PyTorch 峰值 4.542 GiB；同输入重跑 4.06 s 且矩阵哈希不变 | [私有输入的公开汇总](../../validation/connectome/ukb_bids_e2e_20260930.md) |
 | 校正 UKB DWI + 两套原生 FreeSurfer atlas | 一次运行得到 84/164 节点各四矩阵，6,159 s、PyTorch 峰值 2.687 GiB；续跑 3 s 且八矩阵哈希不变。独立重算的配准变换和首次运行不同，矩阵未逐值一致 | [同一受试者的公开汇总](../../validation/connectome/ukb_bids_e2e_20260930.md) |
 | AP/PA TOPUP | UKB 一例校正 4D r=0.9944；未逐体素等价 | [TOPUP 报告](../../validation/topup/report.public.json) |
@@ -262,7 +273,7 @@ tck2connectome tracks.tck atlas.mif fbc.csv -symmetric -assignment_radial_search
 | 固定同一 100k TCK/权重/atlas | 七套 count 逐元素相同；FBC 最大绝对误差 ≤5.07e-5 | [七 atlas 矩阵和脑图](../../validation/connectome/ds004666/seven_atlas_100k_20260929.md) |
 | 独立 100k 追踪 | 部分 count/support 落入 MRtrix 自身三次重复范围；长度、8 mm 端点和 TDI 未全面进入 | [三次对照和脑图](../../validation/connectome/ds004666/tracking_100k_three_seed_20260929.md) |
 
-最终随机追踪验收采用**MRtrix 自身重复范围**：双方固定同一输入，各运行多个种子，比较接受率、长度分布、端点、TDI 及每套 atlas 的四张矩阵；FNIT 落入参考范围即可，无需比官方自身更稳定。固定轨迹矩阵精度已高，独立追踪仍有指标未达成；BIDS 编排的加入不等于原 UKB 全链数值一致。100 万及 1,000 万播种仍需实测性能。
+最终随机追踪验收采用**MRtrix 自身重复范围**：双方固定同一输入，各运行多个种子，比较接受率、长度分布、端点、TDI 及每套 atlas 的四张矩阵；误差不高于官方重复最大值、相似度不低于官方重复最小值即通过，优于该范围也通过。未定义的相关性保留为空值。固定轨迹矩阵精度已高，独立追踪仍有指标未达成；BIDS 编排的加入不等于原 UKB 全链数值一致。CON03 已实际运行 100 万种子的基线追踪；候选配对轮次、第二例与整链峰值仍待完成，1,000 万播种尚无实测。
 
 历史 ds004666 组件优化保持原数值与 RNG 操作；其 Torch 已分配/预留峰值 2.544/2.938 GB 仅对应固定已有配准的组件范围，不能作为新的原始 BIDS 整链峰值。完整精确 FA 只从 109.81 降至 106.82 ms，收益很小；追踪的 SH、组织采样与圆弧概率仍是后续主要优化对象。
 
