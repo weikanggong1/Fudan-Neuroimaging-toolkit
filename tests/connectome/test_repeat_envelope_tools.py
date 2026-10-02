@@ -476,3 +476,55 @@ def test_readonly_official_audit_rejects_incomplete_or_failed_commands(tmp_path,
         'commands': [{'stage': 'tracking', 'argv': ['tckgen']}], 'completed_commands': completed}))
     with pytest.raises(ValueError, match='command'):
         module.audit(manifest, tmp_path / 'missing_core', tmp_path / 'missing_fnit')
+
+
+def fnit_post_tool():
+    path = Path(__file__).parents[2] / 'tools/reference/benchmark_connectome_fnit_repeats.py'
+    spec = importlib.util.spec_from_file_location('fnit_gpu_post_contract_fixture', path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_existing_track_gpu_post_contract_preserves_original_endpoints_and_lengths():
+    tool = fnit_post_tool()
+    points = np.array([[0, 0, 0], [1, 2, 3], [4, 5, 6], [7, 8, 9]], dtype=np.float32)
+    arrays = {'points': points, 'offsets': np.array([0, 2, 4], dtype=np.int64),
+              'endpoints': points.reshape(2, 2, 3).copy(),
+              'lengths_mm': np.array([3.8, 5.2], dtype=np.float32),
+              'accepted_seeds': points[[0, 2]].copy()}
+    assert tool.array_contract(arrays, np) == 2
+    arrays['endpoints'] = np.asfortranarray(arrays['endpoints'])
+    assert tool.array_contract(arrays, np) == 2
+    # Signed zero has the same value but different bits: reject changed input.
+    arrays['endpoints'][0, 0, 0] = -0.
+    with pytest.raises(ValueError, match='bits'):
+        tool.array_contract(arrays, np)
+    assert tool.memory_gate([19_999_999_999] * 3, 0) == 'passed'
+    assert tool.memory_gate([20_000_000_000] * 3, 0) == 'not_passed'
+    assert tool.memory_gate([1, 1, None], 0) == 'not_passed'
+    assert tool.memory_gate([1, 1, 1], 1) == 'not_passed'
+
+
+def test_existing_track_post_source_binding_rejects_runtime_resource_change(tmp_path):
+    tool = fnit_post_tool()
+    root = tmp_path / 'baseline'
+    (root / 'src/fnit/connectome/data').mkdir(parents=True)
+    paths = ['src/fnit/connectome/assignment.py', 'src/fnit/connectome/data/sphere.npz']
+    for name in paths:
+        (root / name).write_bytes(b'fixture only; no scientific input')
+    controls = {}
+    for name in ['archive', 'identity', 'monitor', 'official']:
+        path = tmp_path / name
+        path.write_bytes(b'fixture')
+        controls[name] = path
+    config = {'source_root': str(root), 'source_files': {name: tool.sha256(root / name) for name in paths},
+              'source_archive': str(controls['archive']), 'source_archive_sha256': tool.sha256(controls['archive']),
+              'source_identity': str(controls['identity']), 'source_identity_sha256': tool.sha256(controls['identity']),
+              'monitor_script': str(controls['monitor']), 'monitor_sha256': tool.sha256(controls['monitor']),
+              'official_manifest': str(controls['official']), 'official_manifest_sha256': tool.sha256(controls['official']),
+              'equivalent_local_commit': 'fixture_only'}
+    assert tool.verify_source(config)['remote_git_commit'] is None
+    (root / paths[1]).write_bytes(b'changed resource')
+    with pytest.raises(ValueError, match='resource changed'):
+        tool.verify_source(config)
