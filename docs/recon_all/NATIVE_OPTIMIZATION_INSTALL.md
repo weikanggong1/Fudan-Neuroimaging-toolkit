@@ -124,7 +124,7 @@ GCA 返回 `version=2`、`full_native_em=true`、`reduction=upstream_ROMP_partia
 | white 未消费面 MHT | white.preaparc 当前/候选 215.676/187.169 秒，下降 13.2%；final white 193.708/171.721 秒，下降 11.4%；control/candidate 完整产物精确。 | 单个真实冻结左半球，每个程序完整阶段一次；见 [任务2摘要](../../validation/recon_all/optimizations/20261002_parallel/task_02/native_three_stage_v1/summary.json)。 |
 | pial 使用同一热点 | 当前/候选 181.396/188.863 秒，慢 4.1%，完整产物精确。 | 保留原 pial 程序；不将 white 收益外推到 pial。 |
 
-2026-10-02 安装补丁版本：`native-hotspots-20261002-v1`，包含 `gca-cachev3-capability2` 和 `white-unused-face-mht-v1`。此前 GCA v1/v2 的普通规约候选不启用。上述结果绑定各自原始报告，不改标成这份安装器的新构建结果；当前安装构建、两例原始 T1 整例和 138 项严格诊断须由协调者另行验收，阶段收益不能相加。
+2026-10-02 安装补丁版本：`native-hotspots-20261002-v1`，包含 `gca-cachev3-capability2` 和 `white-unused-face-mht-v1`。此前 GCA v1/v2 的普通规约候选不启用。上述结果绑定各自原始报告，不改标成这份安装器的新构建结果；私有 wheel 和部分原生 bundle 已通过安装检查，见下段；完整新 Conda 创建、全部组件正向 setup、物理隔离部署和整例影像比较分别验收。阶段收益不能相加。
 
 当前安装验收已在 gpucw1 完成最终 `8d750e2` 的 wheel 构建、私有 target 安装、CLI 和七项 API 导入；171 个安装后的 recon-all Python 文件与冻结源码 SHA 完全相同，GCA helper/header 和实际 FastPD 扩展随 wheel 安装。固定 FreeSurfer archive/tree 也已实核 SHA。私有原生 bundle 于 UTC 2026-10-02 16:21:18 实际通过：本轮重编 GCA，复用 task02 独立固定源码 white 候选，另外 13 个程序复用原独立 Conda 构建且 SHA 不变；pial 保留原程序。能力查询、私有 RPATH、缺库检查和 15 项安装 SHA 均通过；详见 [安装验证报告](../../validation/recon_all/optimizations/20261002_parallel/root_install/REPORT.md)。
 

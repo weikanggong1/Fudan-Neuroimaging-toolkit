@@ -16,7 +16,7 @@ CUDA 流程复用仓库已有的 `thickness_map`、`area_map` 和 `curvature_map
 | `H.area`、`H.area.pial` | 每个相邻三角形面积的三分之一，mm² |
 | `H.curv`、`H.curv.pial` | 二阶邻域曲面拟合后的平均曲率，10 次邻域平均，mm⁻¹ |
 
-输入缺失、white/pial 不对应、原生程序失败或输出缺失时抛异常。CUDA 路径需要可用的 CUDA 设备，不会自动切换到低精度或放宽验收标准。厚度的空间邻点计算和法向计算使用 PyTorch；图上的可达性检查仍使用 CPU。这些指标不适用于没有顶点对应关系的两张表面。
+输入缺失、white/pial 不对应、原生程序失败或输出缺失时抛异常。CUDA 路径需要可用的 CUDA 设备，不会自动切换到低精度或放宽验收标准。厚度在 CPU 上构建和查询 cKDTree 空间索引，在 GPU 上批量计算候选距离、法向及筛选；图上的可达性检查和裁剪使用 CPU Numba。逐图墙钟包含这些 CPU 步骤、数据传输及读写。这些指标不适用于没有顶点对应关系的两张表面。
 
 ```python
 from pathlib import Path

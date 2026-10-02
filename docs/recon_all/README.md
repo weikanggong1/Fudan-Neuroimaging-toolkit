@@ -10,7 +10,7 @@
 
 执行完成、138 项输出完整性、网格质量、严格复现和整体指标等效分别记录。138 项逐文件比较用于诊断；整体指标等效阈值尚未正式确认，结果保持 `not_assessed`。优化前后还检查离散分区 Dice、双向点到三角面距离、厚度/面积/体积偏差和局部异常。具体口径见[比较方法](BENCHMARK_METHODS.md)与[验收说明](../../validation/recon_all/python_gpu_port/RELEASE_GATES.md)。
 
-CUDA 默认允许 TF32，不自动使用 FP16/BF16。SynthStrip、SynthSeg、辅助网络的卷积及 Talairach/MNI 仿射矩阵乘法保留同输入验证后的局部 FP32 例外；作用域结束后恢复设置，其他 GPU 阶段继续允许 TF32。构造和前向实际设置见[SynthSeg 精度](SYNTHSEG_PRECISION.md)与[辅助 Synth 精度](SYNTH_AUX_PRECISION.md)。
+CUDA 默认允许 TF32，不自动使用 FP16/BF16。SynthStrip、SynthSeg、辅助网络的卷积及 Talairach/MNI 仿射矩阵乘法保留同输入验证后的局部 FP32 例外；MNI deform 的 CUDA 路径也保留矩阵乘法与 cuDNN 的 FP32 例外；作用域结束后恢复设置，其他 GPU 阶段继续允许 TF32。构造和前向实际设置见[SynthSeg 精度](SYNTHSEG_PRECISION.md)与[辅助 Synth 精度](SYNTH_AUX_PRECISION.md)。
 
 本轮复用并优化已有[有序归一化](NORMALIZATION.md)、[球面几何](CPU_GEOMETRY_PERFORMANCE.md)及[PyTorch 指标函数](SURFACE_METRICS.md)。多图谱共享[同版本几何缓存](SURFACE_STATS_CACHE.md)，厚度使用[完整空间候选](SURFACE_THICKNESS.md)。完整 Python pial 已做同输入回归，但仍比当前 C++ 慢，生产路径保留 Conda 源码构建实现。不得将冻结同输入加速写成整例提速。
 
