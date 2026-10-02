@@ -78,7 +78,7 @@ intensity_displacement = sampling_context.gradient(
 )                                         # 输出 (N,3) float32 位移/mm
 ```
 
-内部将 MRI、affine 与内核输入规范为 C 连续存储，Fortran/切片输入不改变空间坐标含义。MRI 与 affine 变化时必须重建上下文；动态坐标和法向不缓存。无 CUDA、非显式设备、不支持的后端、非法形状、非有限坐标/参数会报错，不静默回退。活动顶点非正 sigma 会报错，避免原 CPU 源码负 sigma 的非终止循环。Torch 后端按 chunk_size 返回完整结果；Triton 不裁剪采样候选、sigma 范围或顶点数。坐标矩阵乘法保留逐项 FP32 舍入，插值/指数/距离累加沿用原 FP64，结果写回 FP32；禁用 Triton 乘加融合，不使用 FP16/BF16，不改变全局 TF32/autocast。
+内部将 MRI、affine 与内核输入规范为 C 连续存储，Fortran/切片输入不改变空间坐标含义。MRI 与 affine 变化时必须重建上下文；动态坐标和法向不缓存。无 CUDA、非显式设备、不支持的后端、非法形状、非有限坐标/参数会报错，不静默回退。活动顶点非正 sigma 会报错；GPU积分要求实际放置所用的正空间尺度。Torch 后端按 chunk_size 返回完整结果；Triton 不裁剪采样候选、sigma 范围或顶点数。坐标矩阵乘法保留逐项 FP32 舍入，插值/指数/距离累加沿用原 FP64，结果写回 FP32；禁用 Triton 乘加融合，不使用 FP16/BF16，不改变全局 TF32/autocast。
 
 `candidate_backend="snapshot"` 在每次首轮试步按完整候选构建 CSR，并在 Numba 中依原顶点序逐个更新。动态面几何仍来自当时已接受的坐标；每面保留原查询半径过滤和相交谓词。候选球以本试步最大位移的两倍加0.01mm作为保护界，中心变化不超过界、半径变化不超过两倍界，因此原球扩展三倍界覆盖全部动态查询。投影终点超过界时抛 ValueError，不裁剪候选。拒绝试步有 retained-MHT 状态及 slow 诊断仍走原 tree 路径；不跨试步或动态坐标版本复用候选。此选择与 sampling_backend 独立，默认 tree。
 

@@ -120,7 +120,7 @@ class PlacementSampling:
             raise ValueError("voxel sizes must be positive; global sigma must be finite")
         sigmas[np.abs(sigmas) < 1e-10] = sigma_global
         sigmas[np.abs(sigmas) < 1e-10] = 0.25
-        # A negative active sigma gives a nonterminating loop in the CPU source.
+        # GPU integration requires positive active spatial scales.
         if not np.isfinite(values).all() or not np.isfinite(weight):
             raise ValueError("target values and weight must be finite")
         if np.any(sigmas[~skip] <= 0):
