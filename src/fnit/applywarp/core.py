@@ -9,6 +9,8 @@ millimetres along the FSL scaled-mm axes. Dense fields and FNIRT cubic
 B-spline coefficient files are supported.
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 import os
 from pathlib import Path
@@ -18,6 +20,8 @@ import nibabel as nib
 import numpy as np
 import torch
 import torch.nn.functional as F
+
+from .._sampling_plan import SamplingGeometry
 
 
 FSL_FNIRT_DISPLACEMENT_FIELD = 2006
@@ -362,6 +366,79 @@ class ApplyWarpResult:
         return self
 
 
+@dataclass(frozen=True)
+class ApplyWarpPlan:
+    """A reusable transform snapshot, restricted to one exact image grid."""
+
+    device: torch.device
+    input_geometry: SamplingGeometry
+    reference_geometry: SamplingGeometry
+    interpolation: str
+    _reference: object
+    _coordinates: torch.Tensor
+    _grid: torch.Tensor | None
+    _valid: torch.Tensor
+    _valid_mask: np.ndarray
+    _valid_fraction: float
+    _warp_representation: str
+    _intent: int | None
+    _convention: str | None
+    _convention_source: str | None
+
+    def apply(self, input, *, reference=None, output_dtype=None):
+        """Sample another 3D/4D image on the captured source grid."""
+        input_image = _load_nifti(input, "input")
+        reference_image = self._reference if reference is None else _load_nifti(reference, "reference")
+        self.input_geometry.require(input_image, "input")
+        self.reference_geometry.require(reference_image, "reference")
+        return self._apply_loaded(input_image, _input_data(input_image), reference_image, output_dtype)
+
+    def _apply_loaded(self, input_image, input_data, reference_image, output_dtype):
+        frames = torch.as_tensor(
+            np.moveaxis(input_data, -1, 0).copy(),
+            dtype=torch.float32,
+            device=self.device,
+        )
+        if self.interpolation == "trilinear":
+            sampled = F.grid_sample(
+                frames[None], self._grid, mode="bilinear",
+                padding_mode="border", align_corners=True,
+            )[0]
+        else:
+            sampled, _ = _sample_nearest(frames, self._coordinates)
+        sampled = sampled * self._valid.to(sampled.dtype)[None]
+        result = np.moveaxis(sampled.detach().cpu().numpy(), 0, -1)
+        if input_image.ndim == 3:
+            result = result[..., 0]
+        dtype = _resolve_dtype(input_image, result, output_dtype)
+        output = _output_image(reference_image, input_image, result, dtype)
+        qc = {
+            "device": str(self.device),
+            "tf32": {
+                "matmul": bool(torch.backends.cuda.matmul.allow_tf32),
+                "cudnn": bool(torch.backends.cudnn.allow_tf32),
+                "reduced_precision_tensor_dtype": False,
+            },
+            "output_grid": "reference",
+            "matrix_coordinate_system": "FSL scaled-mm",
+            "transform_order": "premat then warp then postmat",
+            "warp_representation": self._warp_representation,
+            "warp_intent_code": self._intent,
+            "warp_convention": self._convention,
+            "warp_convention_source": self._convention_source,
+            "interpolation": self.interpolation,
+            "valid_fraction": self._valid_fraction,
+            "output_dtype": dtype.name,
+            "supports_fnirt_cubic_coefficients": True,
+            "supports_fnirt_dct_or_quadratic_coefficients": False,
+            "covered_fsl_applywarp_subset": (
+                "dense relative/absolute field or FNIRT cubic coefficients, "
+                "one premat, one postmat, trilinear/nearest, reference-grid output"
+            ),
+        }
+        return ApplyWarpResult(image=output, valid_mask=self._valid_mask.copy(), qc=qc)
+
+
 class TorchApplyWarp:
     """Apply FSL pull fields on CPU or CUDA.
 
@@ -398,8 +475,28 @@ class TorchApplyWarp:
         output_dtype=None,
     ):
         input_image = _load_nifti(input, "input")
-        reference_image = _load_nifti(reference, "reference")
         input_data = _input_data(input_image)
+        plan = self.prepare(
+            input_image, reference, warp=warp, premat=premat, postmat=postmat,
+            interpolation=interpolation, warp_convention=warp_convention,
+        )
+        return plan._apply_loaded(input_image, input_data, plan._reference, output_dtype)
+
+    def prepare(
+        self, input, reference, *, warp=None, premat=None, postmat=None,
+        interpolation="trilinear", warp_convention="auto",
+    ):
+        """Snapshot one transform and its exact source/reference geometry.
+
+        Reuse ``plan.apply(image)`` only for images on the captured native grid.
+        Coordinates retain float64; each image still uses its own float32
+        sampling call, dtype selection and reference-header output path.
+        Transform values are captured here; changed warps require a new plan.
+        """
+        input_image = _load_nifti(input, "input")
+        reference_image = _load_nifti(reference, "reference")
+        if input_image.ndim not in (3, 4):
+            raise ValueError("input must be a 3D image or a 4D series")
         if interpolation in ("nn", "nearest-neighbour", "nearest_neighbor"):
             interpolation = "nearest"
         if interpolation not in ("trilinear", "nearest"):
@@ -496,50 +593,27 @@ class TorchApplyWarp:
             + input_world_to_voxel[:3, 3:4]
         ).reshape(3, *reference_shape)
 
-        frames = torch.as_tensor(
-            np.moveaxis(input_data, -1, 0).copy(),
-            dtype=torch.float32,
-            device=self.device,
-        )
-        if interpolation == "trilinear":
-            sampled, input_valid = _sample_linear(frames, input_voxels)
-        else:
-            sampled, input_valid = _sample_nearest(frames, input_voxels)
+        input_valid = _inside(input_voxels, input_image.shape[:3])
         valid = warp_valid & input_valid
-        sampled = sampled * valid.to(sampled.dtype)[None]
-        result = np.moveaxis(sampled.detach().cpu().numpy(), 0, -1)
-        if input_image.ndim == 3:
-            result = result[..., 0]
-        dtype = _resolve_dtype(input_image, result, output_dtype)
-        output = _output_image(reference_image, input_image, result, dtype)
-        qc = {
-            "device": str(self.device),
-            "tf32": {
-                "matmul": bool(torch.backends.cuda.matmul.allow_tf32),
-                "cudnn": bool(torch.backends.cudnn.allow_tf32),
-                "reduced_precision_tensor_dtype": False,
-            },
-            "output_grid": "reference",
-            "matrix_coordinate_system": "FSL scaled-mm",
-            "transform_order": "premat then warp then postmat",
-            "warp_representation": warp_representation,
-            "warp_intent_code": intent,
-            "warp_convention": convention,
-            "warp_convention_source": convention_source,
-            "interpolation": interpolation,
-            "valid_fraction": float(valid.float().mean().cpu()),
-            "output_dtype": dtype.name,
-            "supports_fnirt_cubic_coefficients": True,
-            "supports_fnirt_dct_or_quadratic_coefficients": False,
-            "covered_fsl_applywarp_subset": (
-                "dense relative/absolute field or FNIRT cubic coefficients, "
-                "one premat, one postmat, trilinear/nearest, reference-grid output"
-            ),
-        }
-        return ApplyWarpResult(
-            image=output,
-            valid_mask=valid.detach().cpu().numpy(),
-            qc=qc,
+        grid = (
+            _to_grid(input_voxels, input_image.shape[:3]).to(torch.float32)
+            if interpolation == "trilinear" else None
+        )
+        return ApplyWarpPlan(
+            device=self.device,
+            input_geometry=SamplingGeometry.capture(input_image),
+            reference_geometry=SamplingGeometry.capture(reference_image, output_header=True),
+            interpolation=interpolation,
+            _reference=reference_image,
+            _coordinates=input_voxels,
+            _grid=grid,
+            _valid=valid,
+            _valid_mask=valid.detach().cpu().numpy(),
+            _valid_fraction=float(valid.float().mean().cpu()),
+            _warp_representation=warp_representation,
+            _intent=intent,
+            _convention=convention,
+            _convention_source=convention_source,
         )
 
     def run(self, input, reference, output, **kwargs):
@@ -555,6 +629,7 @@ def applywarp(input, reference, **kwargs):
 
 __all__ = [
     "ApplyWarpResult",
+    "ApplyWarpPlan",
     "FSL_COEFFICIENT_INTENTS",
     "FSL_CUBIC_SPLINE_COEFFICIENTS",
     "FSL_DCT_COEFFICIENTS",

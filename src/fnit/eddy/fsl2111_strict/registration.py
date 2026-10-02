@@ -5,7 +5,7 @@ import torch
 
 from .geometry import identity_grid, quadratic_ec_basis
 from .warp import model_to_scan, sample_linear_mask
-from .spline import fsl_cubic_coefficients
+from .spline import fsl_cubic_coefficients, _pad_cubic_coefficients
 
 
 # FSL derivative scales are implementation-specific; these starting steps are
@@ -60,10 +60,12 @@ def parameter_update(pred_model: torch.Tensor, observed_scan: torch.Tensor,
                      params16: torch.Tensor, susceptibility: torch.Tensor,
                      pe_vector: torch.Tensor, readout: torch.Tensor,
                      voxel_sizes, fwhm_mm: float, base_mask: torch.Tensor,
-                     precision: float = 1e-8, active_indices=None):
+                     precision: float = 1e-8, active_indices=None, *,
+                     grid=None, basis=None, pe_axis=None,
+                     susc_coeff=None, susc_padded_coeff=None):
     """One FSL-2111-style all-parameter Gauss-Newton update for one volume.
 
-    Image derivatives are central numerical derivatives of the exact same
+    Image derivatives are one-sided numerical derivatives of the exact same
     transform. This preserves the official normal equation/update-rejection
     semantics while keeping all large tensors on CUDA.
     """
@@ -71,16 +73,26 @@ def parameter_update(pred_model: torch.Tensor, observed_scan: torch.Tensor,
     if active_indices is None:
         active_indices = list(range(16))
     active_indices = list(active_indices)
-    grid=identity_grid(pred_model.shape,pred_model.device,pred_model.dtype)
-    basis=quadratic_ec_basis(pred_model.shape,voxel_sizes,pred_model.device,pred_model.dtype)
+    if grid is None:
+        grid=identity_grid(pred_model.shape,pred_model.device,pred_model.dtype)
+    if basis is None:
+        basis=quadratic_ec_basis(pred_model.shape,voxel_sizes,pred_model.device,pred_model.dtype)
     pred_coeff=fsl_cubic_coefficients(pred_model,precision)
-    susc_coeff=fsl_cubic_coefficients(susceptibility,precision)
+    if susc_coeff is None:
+        susc_coeff=fsl_cubic_coefficients(susceptibility,precision)
+    # Prediction coefficients belong only to this update. Susceptibility and
+    # its mirror pad may be shared by the run, including after slice replacement.
+    pred_padded_coeff=_pad_cubic_coefficients(pred_coeff[None], 'periodic')
+    if susc_padded_coeff is None:
+        susc_padded_coeff=_pad_cubic_coefficients(susc_coeff[None], 'mirror')
     def render(p, inverse_template=None, masked_jacobian=True):
         out, vm, _, coords, inverse, inverse_mask = model_to_scan(pred_model, p[:6], p[6:], susceptibility,
                                       pe_vector, readout, voxel_sizes, precision, True,
                                       pred_coeff, susc_coeff, inverse_template,
                                       return_inverse=True,
-                                      masked_jacobian=masked_jacobian,grid=grid,basis=basis)
+                                      masked_jacobian=masked_jacobian,grid=grid,basis=basis,
+                                      pe_axis=pe_axis,pred_padded_coeff=pred_padded_coeff,
+                                      susc_padded_coeff=susc_padded_coeff)
         return out, vm & sample_linear_mask(base_mask,coords), (inverse,inverse_mask)
     base, vm, inverse_template = render(params16)
     mask = vm

@@ -2,6 +2,14 @@
 
 [功能和调用方式](../../docs/dmri_pipeline/README.md) · [既有 UKB TBSS 对照报告](tbss_e2e.real.current.json) · [经典 NODDI 接入报告](pipeline_classic_real.public.json) · [九图比较脚本](compare_current_eddy_pipeline.py) · [官方 TBSS 参考脚本](run_official_tbss.sh)
 
+## 最新组件优化：2026-10-02
+
+[详细报告](lossless_20261002.md)与[机器报告](report.lossless_20261002.public.json)记录相对冻结 FNIT `954ad19` 的真实同输入验收。完整八轮 EDDY、两种全脑 NODDI、固定 warp 的 TBSS/MMORF 九图及参考索引复用全部保持逐值、几何、header 与模型 QC 一致。EDDY 一次配对计时 484.75→404.31 s；固定 warp 的热调用九图传播约 2.02/1.91 倍。NODDI 尚无稳定速度收益，经典模式整体中位数变慢。
+
+本次未重跑最新源码的完整 raw-to-MNI，未据阶段计时推算整链耗时。下表和后文保留历史整链及原软件对照的具体输入边界。
+
+## 既有整链与原软件对照
+
 | 验证边界 | 结果 | 证据 |
 |---|---|---|
 | 原始 BIDS、无 T1w、TBSS 完整命令 | 九张 native、standard、skeleton 图均通过输出检查 | [当前整链](bids_tbss.real.current.json) |

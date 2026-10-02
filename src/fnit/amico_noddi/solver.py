@@ -69,7 +69,8 @@ def _masked_solve(gram, rhs, mask, *, ridge=0.0, tolerance=1e-13):
     compact_rhs = flat_rhs.gather(-1, order) * occupied
     factor, info = torch.linalg.cholesky_ex(block, check_errors=False)
     failed = info != 0
-    if bool(failed.any()):
+    has_failed = bool(failed.any())
+    if has_failed:
         identity = torch.eye(width, dtype=block.dtype, device=block.device)
         block[failed] = identity
         compact_rhs[failed] = 0
@@ -77,7 +78,7 @@ def _masked_solve(gram, rhs, mask, *, ridge=0.0, tolerance=1e-13):
     compact = torch.cholesky_solve(compact_rhs[..., None], factor).squeeze(-1)
     result = torch.zeros_like(flat_rhs)
     result.scatter_(-1, order, compact * occupied)
-    if bool(failed.any()):
+    if has_failed:
         if gram.ndim == 2:
             result[failed] = _masked_cg(
                 gram,
@@ -160,15 +161,26 @@ def nonnegative_quadratic(
     kkt_tolerance=1e-11,
     cg_tolerance=1e-13,
     maximum_active_steps=40,
+    _quadratic_terms=None,
 ):
     """Solve batched non-negative quadratic problems with an active set.
 
     ``design`` may be a shared ``(M, C)`` matrix or one matrix per direction,
     ``(G, M, C)``. In the latter case ``signal`` is ``(G, V, M)`` and all
     directions in the current memory-bounded LUT batch share one launch sequence.
+
+    ``_quadratic_terms`` is an internal full-shape ``(gram, linear)`` pair.
+    ``linear=None`` recomputes the original signal product and ``l1`` subtraction
+    for this solve, so only the shared Gram stays live between NNLS stages.
+    Passive sets and all convergence decisions are always new.
     """
-    gram = design.transpose(-2, -1) @ design
-    linear = torch.matmul(signal, design) - float(l1)
+    if _quadratic_terms is None:
+        gram = design.transpose(-2, -1) @ design
+        linear = torch.matmul(signal, design) - float(l1)
+    else:
+        gram, linear = _quadratic_terms
+        if linear is None:
+            linear = torch.matmul(signal, design) - float(l1)
     columns = linear.shape[-1]
     x = torch.zeros_like(linear)
     passive = torch.zeros_like(linear, dtype=torch.bool)
@@ -255,6 +267,7 @@ def _fit_lut_batch(
     kkt_tolerance,
     cg_tolerance,
     maximum_active_steps,
+    _reuse_gram=True,
 ):
     wm = kernels["wm"]
     iso = kernels["iso"]
@@ -277,6 +290,16 @@ def _fit_lut_batch(
     y = torch.as_tensor(grouped_signal, dtype=torch.float64, device=device)
     valid_t = torch.as_tensor(valid, dtype=torch.bool, device=device)
     allowed_all = valid_t[..., None].expand(*valid_t.shape, design.shape[-1])
+    # Stages one and three share the full dictionary Gram. Recompute linear
+    # inside each solve: retaining that larger tensor through the tissue stage
+    # increased peak memory and did not improve real whole-brain timings.
+    # The tissue stage has a different design and computes its own products.
+    gram_terms = None
+    if _reuse_gram:
+        gram_terms = (
+            design.transpose(-2, -1) @ design,
+            None,
+        )
     first, _, _ = nonnegative_quadratic(
         design,
         y,
@@ -284,6 +307,7 @@ def _fit_lut_batch(
         kkt_tolerance=kkt_tolerance,
         cg_tolerance=cg_tolerance,
         maximum_active_steps=maximum_active_steps,
+        _quadratic_terms=gram_terms,
     )
     tissue_design = torch.as_tensor(
         design_np[:, ~b0, :-1] * norms[None],
@@ -312,6 +336,7 @@ def _fit_lut_batch(
         kkt_tolerance=kkt_tolerance,
         cg_tolerance=cg_tolerance,
         maximum_active_steps=maximum_active_steps,
+        _quadratic_terms=gram_terms,
     )
     total = coefficients.sum(-1) + 1e-16
     tissue_fraction = coefficients[..., :-1].sum(-1) / total + 1e-16

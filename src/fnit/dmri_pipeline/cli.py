@@ -27,6 +27,7 @@ def _arguments(parser):
     parser.add_argument("--dti-tolerance", type=float, default=100)
     parser.add_argument("--bvec-source", choices=("rotated", "raw"), default="rotated")
     parser.add_argument("--noddi-fit-method", choices=("amico", "classic"), default="amico")
+    parser.add_argument("--eddy-gp-seed", type=int, help="fixed EDDY GP sampling seed, 1 to 2**32-1; default time-based seed")
     parser.add_argument("--device")
     parser.add_argument("--overwrite", action="store_true")
 
@@ -43,6 +44,7 @@ def run(args):
         dti_tolerance=args.dti_tolerance,
         bvec_source=args.bvec_source,
         noddi_fit_method=args.noddi_fit_method,
+        eddy_gp_seed=args.eddy_gp_seed,
     )
     options = {
         "fa_template": args.fa_template,
