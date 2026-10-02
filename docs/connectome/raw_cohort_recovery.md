@@ -1,5 +1,7 @@
 # 已完成官方 reconstruction 的同轮验证修复
 
+2026-10-02 后续状态：首次 recovery controller 已暂停新 GPU 派发。CON01/CON03 的真实 raw wall 失败是未配置 `FNIT_WEIGHTS`，尚未进入 TOPUP/EDDY；跨主机时间比较又掩盖了这个错误。已有失败和输出保留。下一次完整原始 DWI 使用[新的受控执行工具](raw_cohort_controlled_rerun.md)、新输出目录、明确权重与共同的 MGH 图像头兼容 source。本页记录第一次 anatomy JSON 修复的范围和证据。
+
 ## 1. 功能与适用范围
 
 `tools/benchmark_connectome_raw_recovery.py` 是独立 benchmark 工具，只处理一个已定位的问题：官方 `recon-all` 已从本轮原始 T1w 完成并退出 0，随后 anatomy 验证子进程把 MGZ 的 `numpy.int32` 图像维度写入 JSON 时失败。修复将维度转换为 Python `int`，不会改变影像、坐标、分割或表面。
@@ -98,6 +100,8 @@ recon-all -sd THIS_ROUND_CASE/freesurfer -s SUBJECT_NAME \
 | `recovered_full_elapsed_utc_excluding_gpu_queue_seconds` | 上述完整 UTC 区间仅减去两项实测 GPU 队列；修复间隔仍保留 |
 
 跨进程恢复无法延续旧 driver 的 monotonic timer，因此不把恢复区间命名为 pristine `parent_full_wall_seconds`，也不通过阶段中位数相加生成整例用时。精度和提速结论由总控制结合实际重复性、baseline/candidate 结果与不同计时范围另行分析。
+
+重建命令的 monotonic 时间仅与同一 CPU worker 的 start/end UTC 及 worker monotonic 比较；head start 与 CPU end 不用于核验 reconstruction 计时。原始 UTC 不平移，真实 GPU 失败和独立 `timing_error` 均保存。
 
 ## 5. 测试、真实读取和更新记录
 

@@ -255,7 +255,8 @@ def load_revalidated_recon(config, case, version, job, original):
 
 
 def recovery_timing(original_start_utc, original_end_utc, repaired_start_utc, repaired_end_utc,
-                    gpu_end_utc, recon_seconds, gpu_driver_queue, gpu_lock_queue):
+                    gpu_end_utc, recon_seconds, gpu_driver_queue, gpu_lock_queue,
+                    *, original_recon_start_utc=None, original_recon_worker_wall_seconds=None):
     times = [timestamp(value) for value in (original_start_utc, original_end_utc, repaired_start_utc, repaired_end_utc, gpu_end_utc)]
     if any(right < left for left, right in zip(times, times[1:])):
         raise ValueError("recovery timestamp order is invalid")
@@ -264,13 +265,21 @@ def recovery_timing(original_start_utc, original_end_utc, repaired_start_utc, re
         raise ValueError("recovery durations must be finite and nonnegative")
     full = times[-1] - times[0]
     queue = gpu_driver_queue + gpu_lock_queue
-    if recon_seconds > times[1] - times[0] + .001:
+    # Command and worker timers belong to the CPU host. A head-driver UTC
+    # start is not comparable with a CPU-host UTC end when clocks differ.
+    cpu_start = timestamp(original_recon_start_utc) if original_recon_start_utc else times[0]
+    cpu_wall = times[1] - cpu_start
+    if recon_seconds > cpu_wall + .001:
         raise ValueError("official reconstruction timer exceeds its original wall interval")
+    if original_recon_worker_wall_seconds is not None and recon_seconds > original_recon_worker_wall_seconds + .001:
+        raise ValueError("official reconstruction timer exceeds its same-host worker monotonic interval")
     if queue > times[4] - times[3] + .001:
         raise ValueError("GPU queue exceeds the post-revalidation GPU elapsed interval")
     return {"recovered_full_elapsed_utc_seconds": full,
             "recovered_full_elapsed_utc_excluding_gpu_queue_seconds": max(0., full - queue),
             "original_recon_command_seconds": recon_seconds,
+            "original_recon_same_host_wall_utc_seconds": cpu_wall,
+            "cpu_worker_start_minus_head_driver_start_utc_seconds": cpu_start - times[0],
             "original_failure_to_revalidation_gap_utc_seconds": times[2] - times[1],
             "revalidation_elapsed_utc_seconds": times[3] - times[2],
             "post_revalidation_through_gpu_completion_utc_seconds": times[4] - times[3],
@@ -367,6 +376,7 @@ def run_recovery(options):
                 record.update(original_driver_start_utc=original_driver_case.get("start_utc", original["start_utc"]),
                               original_recon_start_utc=original["start_utc"], original_recon_end_utc=original.get("end_utc"),
                               original_recon_command_seconds=original.get("recon_command_seconds"),
+                              original_recon_worker_wall_seconds=original.get("worker_wall_seconds"),
                               original_report={"path": str(path), "sha256": cohort.sha256(path)}, original_failure=original.get("error"))
                 try:
                     validate_original_recon(config, case, "baseline", job, original)
@@ -395,13 +405,20 @@ def run_recovery(options):
                 try:
                     gpu, queue, finished_utc = future.result()
                     repair = record["revalidation_report"]
-                    record.update(status=gpu["status"], gpu_report=gpu, end_utc=finished_utc,
-                                  timing=recovery_timing(record["original_driver_start_utc"], record["original_recon_end_utc"],
-                                                         repair["start_utc"], repair["end_utc"], finished_utc,
-                                                         record["original_recon_command_seconds"], queue, gpu.get("gpu_lock_queue_seconds", 0.)))
+                    # Save the scientific execution result before validating
+                    # reporting timers; a timer error must never mask it.
+                    record.update(status=gpu["status"], gpu_report=gpu, end_utc=finished_utc)
                     if gpu.get("error"):
                         record["error"] = gpu["error"]
-                    print(json.dumps({"case": key, "status": record["status"], "timing": record["timing"]}), flush=True)
+                    try:
+                        record["timing"] = recovery_timing(record["original_driver_start_utc"], record["original_recon_end_utc"],
+                                                         repair["start_utc"], repair["end_utc"], finished_utc,
+                                                         record["original_recon_command_seconds"], queue, gpu.get("gpu_lock_queue_seconds", 0.),
+                                                         original_recon_start_utc=record["original_recon_start_utc"],
+                                                         original_recon_worker_wall_seconds=record.get("original_recon_worker_wall_seconds"))
+                    except Exception as timer_error:
+                        record["timing_error"] = {"type": type(timer_error).__name__, "message": str(timer_error)}
+                    print(json.dumps({"case": key, "status": record["status"], "timing": record.get("timing"), "timing_error": record.get("timing_error")}), flush=True)
                 except Exception as error:
                     record.update(status="failed", error={"type": type(error).__name__, "message": str(error)})
                 del gpu_futures[future]

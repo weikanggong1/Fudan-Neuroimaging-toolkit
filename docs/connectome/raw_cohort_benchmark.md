@@ -1,5 +1,7 @@
 # 原始公开 DWI/T1w 十例整例评测编排
 
+正常版本使用下面的 fresh cohort。针对本轮已记录的工具验证或资源配置失败，独立的[受控重新执行工具](raw_cohort_controlled_rerun.md)绑定本轮官方解剖结果、重新执行所有原始 DWI 阶段并完整保留旧失败；该计时不能当成连续 cold benchmark。
+
 ## 1. 功能和流程
 
 `tools/benchmark_connectome_raw_cohort.py` 从**本轮新下载的公开原始 BIDS 数据**启动评测。在 CPU 主机运行官方 FreeSurfer `recon-all`，随后在 GPU 主机运行真实 `UKBConnectome_pipeline` 原始 DWI 入口。两台主机需能读取同一共享存储目录。驱动和 CPU/GPU worker 均使用 Python 3.10 或更新版本；系统 Python 3.6 不能运行本工具。此工具只编排执行、核对产物和记录计时，不实现 MRI 数值计算。
@@ -201,6 +203,8 @@ python tools/benchmark_connectome_raw_cohort.py status \
 | `--gpu-uuid` | 可选实际物理 GPU UUID；建议填写本轮核对值，供进程树显存监测 |
 | `--cuda-visible-devices` | 可选 GPU 可见设备映射；记录实际传入值 |
 | `--gpu-path-prefix` | 可重复指定绝对目录，在 GPU worker 的 PATH 前加入；Glasser 所需 `wb_command` 目录须明确传入。记录实际 PATH 和 executable SHA-256 |
+| `--fnit-weights` | 可选本地 checkpoint 目录，显式写入 GPU worker `FNIT_WEIGHTS`；完整 raw DWI 使用 SynthStrip，必须确认其权重能实际解析 |
+| `--cuda-alloc-conf` | 可选 `expandable_segments:True`，显式写入 GPU 环境并记录；baseline 和 candidate 保持相同配置 |
 | `--device` | 默认 `cuda:0`；本工具正式评测只接受 CUDA |
 | `--n-seeds` | 默认 100000；正式运行不少于该数，较小计数只允许 `--pilot`；不减少体素或连接计算 |
 | `--seed` | 默认 0；tracking seed |

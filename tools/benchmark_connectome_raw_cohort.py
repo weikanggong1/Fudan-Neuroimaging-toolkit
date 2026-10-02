@@ -346,7 +346,7 @@ def recon_environment(config, subject):
 
 
 def cli_command(config, case, job):
-    _, _, anatomy = recon_command(config, case, job)
+    anatomy = gpu_anatomy_subject(config, case, job)
     arguments = ["UKBConnectome_pipeline", "--bids-root", case["bids_root"], "--subject", case["subject"],
                  "--freesurfer-subject-dir", str(anatomy), "--output-dir", str(Path(job) / "connectome"),
                  "--device", config["device"], "--n-seeds", str(config["n_seeds"]), "--seed", str(config["seed"])]
@@ -355,6 +355,17 @@ def cli_command(config, case, job):
             arguments += ["--" + name, case[name]]
     arguments += ["--atlas", *config["atlases"], *config["atlas_options"]]
     return arguments
+
+
+def gpu_anatomy_subject(config, case, job):
+    """Normal runs use their new reconstruction; private reruns bind its origin."""
+    if config.get("recovery_mode") == "same_round_common_compatibility_raw_dwi_rerun":
+        if __package__:
+            from . import benchmark_connectome_raw_rerun as rerun
+        else:
+            import benchmark_connectome_raw_rerun as rerun
+        return rerun.original_paths(config, case)[2]
+    return recon_command(config, case, job)[2]
 
 
 def ssh_command(host, port, control_path, command):
@@ -384,6 +395,12 @@ def load_recon_for_gpu(config, case, version, job):
     its helper verifies the original failure and this run's unchanged anatomy.
     """
     job = Path(job)
+    if config.get("recovery_mode") == "same_round_common_compatibility_raw_dwi_rerun":
+        if __package__:
+            from . import benchmark_connectome_raw_rerun as rerun
+        else:
+            import benchmark_connectome_raw_rerun as rerun
+        return rerun.load_anatomy(config, case, version, job)
     path = job / "recon_report.json"
     original = json.loads(path.read_text())
     declared = config.get("revalidated_recon_reports", {})
@@ -475,6 +492,9 @@ def worker(payload):
                 raise RuntimeError("raw T1 changed during official reconstruction")
         elif action == "gpu":
             recon = load_recon_for_gpu(config, case, version, job)
+            if recon.get("rerun"):
+                report["rerun"] = recon["rerun"]
+                report["execution_scope"] = "new raw-DWI namespace with this round's original raw-T1 reconstruction and declared common compatibility source; prior failures preserved"
             if recon.get("recovery"):
                 report["recovery"] = recon["recovery"]
                 report["execution_scope"] = "same-run raw reconstruction with separately recorded tool-validation recovery; not a pristine cold benchmark"
@@ -493,7 +513,7 @@ def worker(payload):
                 if sha256(config["wall_script"]) != config["wall_script_sha256"]:
                     raise RuntimeError("raw-DWI wall script changed after cohort start")
                 report["source_before"] = source
-                _, _, subject = recon_command(config, case, job)
+                subject = gpu_anatomy_subject(config, case, job)
                 report["anatomy"] = check_anatomy(subject, config["atlases"])
                 if report["anatomy"] != recon["anatomy"]:
                     raise RuntimeError("official anatomy changed after reconstruction")
@@ -505,6 +525,10 @@ def worker(payload):
                 command += ["--", *cli_command(config, case, job)]
                 environment = os.environ.copy()
                 environment["PYTHONPATH"] = str(Path(config["sources"][version]) / "src")
+                if config.get("fnit_weights"):
+                    environment["FNIT_WEIGHTS"] = config["fnit_weights"]
+                if config.get("cuda_alloc_conf"):
+                    environment["PYTORCH_CUDA_ALLOC_CONF"] = config["cuda_alloc_conf"]
                 for key in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS", "NUMEXPR_NUM_THREADS"):
                     environment[key] = str(config["gpu_cpu_threads"])
                 if config.get("cuda_visible_devices") is not None:
@@ -521,6 +545,10 @@ def worker(payload):
                     report["workbench_program"] = {"path": workbench, "sha256": sha256(workbench)}
                 if "CUDA_VISIBLE_DEVICES" in environment:
                     report["environment"]["CUDA_VISIBLE_DEVICES"] = environment["CUDA_VISIBLE_DEVICES"]
+                if "FNIT_WEIGHTS" in environment:
+                    report["environment"]["FNIT_WEIGHTS"] = environment["FNIT_WEIGHTS"]
+                if "PYTORCH_CUDA_ALLOC_CONF" in environment:
+                    report["environment"]["PYTORCH_CUDA_ALLOC_CONF"] = environment["PYTORCH_CUDA_ALLOC_CONF"]
                 atomic_json(report_path, report)
                 with (job / "raw_bids_wall.log").open("w") as log:
                     command_started = time.perf_counter()
@@ -528,6 +556,11 @@ def worker(payload):
                 report["gpu_command_wall_seconds"] = time.perf_counter() - command_started
                 report["exit_code"] = result.returncode
                 if result.returncode:
+                    failed_wall_path = job / "raw_bids_wall.json"
+                    if failed_wall_path.is_file():
+                        failed_wall = json.loads(failed_wall_path.read_text())
+                        report["wall_exception"] = failed_wall.get("exception")
+                        report["wall_preprocessing"] = failed_wall.get("preprocessing")
                     raise RuntimeError(f"raw-BIDS runner exited {result.returncode}; see {job}/raw_bids_wall.log")
                 wall = json.loads((job / "raw_bids_wall.json").read_text())
                 check_wall_report(wall, config, case)
@@ -548,6 +581,8 @@ def worker(payload):
                     # remain unchanged throughout the actual GPU calculation.
                     if load_recon_for_gpu(config, case, version, job).get("recovery") != recon["recovery"]:
                         raise RuntimeError("separate revalidation report changed during the actual GPU execution")
+                if recon.get("rerun") and load_recon_for_gpu(config, case, version, job).get("rerun") != recon["rerun"]:
+                    raise RuntimeError("original anatomy binding changed during actual GPU execution")
                 report["wall_report"] = str(job / "raw_bids_wall.json")
                 report["raw_dwi_cli_total_runtime_seconds"] = wall["total_runtime_seconds"]
                 report["gpu_memory"] = {"process": wall.get("gpu_process_memory"), "allocator": wall.get("cuda_allocator")}
@@ -798,6 +833,8 @@ def parse_options(argv=None):
     run.add_argument("--gpu-uuid")
     run.add_argument("--cuda-visible-devices")
     run.add_argument("--gpu-path-prefix", action="append", default=[], help="absolute executable directory prepended on GPU worker PATH; repeat if needed")
+    run.add_argument("--fnit-weights", help="explicit local weight directory; supplied as FNIT_WEIGHTS to raw-DWI worker")
+    run.add_argument("--cuda-alloc-conf", choices=("expandable_segments:True",), help="explicit CUDA allocator setting; keep identical across benchmark versions")
     run.add_argument("--device", default="cuda:0")
     run.add_argument("--n-seeds", type=int, default=100000)
     run.add_argument("--seed", type=int, default=0)
@@ -863,6 +900,8 @@ def main(argv=None):
         absolute_path(source, "source directory")
     if config.get("fs_license"):
         absolute_path(config["fs_license"], "FreeSurfer license path")
+    if config.get("fnit_weights"):
+        absolute_path(config["fnit_weights"], "FNIT weight directory")
     if not Path(config["recon_all"]).is_relative_to(Path(config["freesurfer_home"])):
         raise ValueError("official recon-all must be inside the declared FreeSurfer installation")
     config["worker_script_sha256"] = sha256(Path(__file__))
