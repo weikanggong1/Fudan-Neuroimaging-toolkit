@@ -42,8 +42,8 @@
     "shared_host_local_flock": "verified; previous GPFS ENOLCK retained as failed attempt"
   },
   "implementation_validation": "all five task branches merged; final native link-map side-effect fix passed local regression",
-  "whole_validation": "baseline sub01 initialized-CUDA API running; latest snapshot 22 stages complete; sub02 CLI scheduled; candidate configs prepared but installation and raw runs pending",
-  "main_push": "not_started; installation and two paired raw whole runs pending",
+  "whole_validation": "baseline sub01 initialized-CUDA API complete with 138/138 outputs; sub02 CLI running; candidate raw whole runs pending native bundle",
+  "main_push": "not_started; two paired raw whole runs and final quality comparisons pending",
   "resource_fingerprints": {
     "status": "passed",
     "measured_utc": "2026-10-02T07:42:42.921207+00:00",
@@ -56,7 +56,7 @@
     "isolation": "not_verified"
   },
   "integration_preserves_main": "f436de588647a0de80735e4a98d53df5d88e502d",
-  "updated_utc": "2026-10-02T13:43:18.359754+00:00",
+  "updated_utc": "2026-10-02T14:13:29.908891+00:00",
   "integration_source_commit_before_mni_wiring": "24390dc",
   "baseline_queue": {
     "supervisor_pid": 128920,
@@ -85,7 +85,24 @@
     "file_sha256_checks": 1487,
     "raw_T1_weights_or_private_license_transferred": false
   },
-  "installation_validation": "1dd6 partial native and wheel queued; final 8d750 wheel/target queued independently; no fresh Conda or physical isolation claim",
+  "installation_validation": "final 8d750 wheel build/target install and all 171 recon Python SHA checks passed; private native installation source check passed, GCA/white queued; no fresh Conda or physical isolation claim",
   "strict_reproduction": "stage-dependent; task01 strict failed, retained; integrated whole not_assessed",
-  "new_degradation": "integrated whole not_assessed; same-input geometry/MNI/GCA exact, task01 curvature tails retained"
+  "new_degradation": "integrated whole not_assessed; same-input geometry/MNI/GCA exact, task01 curvature tails retained",
+  "baseline_sub01_actual": {
+    "execution": "complete",
+    "output_count": 138,
+    "whole_command_seconds": 3440.429358624853,
+    "pipeline_seconds": 3433.3323643011972,
+    "peak_sampled_simultaneous_process_bytes": 12027166720,
+    "continuous_peak_verified": false,
+    "finished_utc": "2026-10-02T13:51:24.461563+00:00",
+    "report": "whole/baseline_sub01/monitor.json"
+  },
+  "final_wheel": {
+    "code_commit": "8d750e25d4d067a43edb788a96b2086a1c031ba0",
+    "status": "passed",
+    "wheel_sha256": "a8297b9b8168ac496b3c9708e16109b3951681e08aa3f87794794481287b474d",
+    "installed_recon_py_sha_checks": 171,
+    "runtime_source": "wheel target install; runtime/src resolves to installed"
+  }
 }
