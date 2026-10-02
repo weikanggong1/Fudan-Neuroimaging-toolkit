@@ -50,7 +50,7 @@ def sample_kernel(V,A,X,O,N:tl.constexpr,W:tl.constexpr,H:tl.constexpr,D:tl.cons
 def gradient_kernel(V,A,X,NORMAL,VALUES,SIGMAS,SKIP,O,N:tl.constexpr,W:tl.constexpr,H:tl.constexpr,D:tl.constexpr,VOXSTEP:tl.constexpr,WEIGHT:tl.constexpr,GLOBAL:tl.constexpr,B:tl.constexpr):
     i=tl.program_id(0)*B+tl.arange(0,B);mask=i<N
     value=tl.load(VALUES+i,mask=mask,other=-1).to(tl.float64)
-    active=mask & ~tl.load(SKIP+i,mask=mask,other=1) & (value>=0)
+    active=mask & (tl.load(SKIP+i,mask=mask,other=1)==0) & (value>=0)
     x=tl.load(X+3*i,mask=mask,other=0).to(tl.float64)
     y=tl.load(X+3*i+1,mask=mask,other=0).to(tl.float64)
     z=tl.load(X+3*i+2,mask=mask,other=0).to(tl.float64)
