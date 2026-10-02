@@ -1,0 +1,188 @@
+{
+  "baseline_commit": "f436de588647a0de80735e4a98d53df5d88e502d",
+  "scope": "fixed-TCK component run; not raw end-to-end",
+  "inputs": {
+    "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/root_diagnostic_CON03_v2/checkpoints/tracks.tck": "8c488fc7b6a01fbb4bea04cfe3dc6535037b2b2cc2fab9c19353bdffaf37f9ca",
+    "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/root_diagnostic_CON03_v2/checkpoints/wm_fod_normalized.nii.gz": "c3e302a48baf3f6e1f1a4473b29da4f0369c644b0f497597ae45e089034e1d8f",
+    "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/root_diagnostic_CON03_v2/checkpoints/five_tissue.nii.gz": "a0dc3e86f9751fc625c694bd814dce1ed91f05a54bc0e25601ea95dc26abd003",
+    "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/root_diagnostic_CON03_v2/checkpoints/fa.nii.gz": "2f217e45d80a691ebe173a61dd020c6d42109d17ce1c4f08461be9df85e9e5de",
+    "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/root_diagnostic_CON03_v2/checkpoints/geometry.npz": "3355f983b842a69d8787f11f6f3b9c2644b147d8f67ecc447e282c4f716f260f",
+    "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/root_diagnostic_CON03_v2/checkpoints/tracking_inputs.pt": "35fc586482c2366ae4cbf0b4360356fbc0e255e221b8def92d9555960275f07b"
+  },
+  "source_sha": {
+    "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/work/baseline_optimizer.py": "810615c533141f7ac145f563fa35712705225cc1683de5283b901a6f63c01281",
+    "candidate_optimizer": "043c701f971b586462c57ef514d623667dd509f45a5dbae474f3c59e128caadd"
+  },
+  "device": "cuda:0",
+  "actual_gpu_uuids_seen": [
+    "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e"
+  ],
+  "cuda_visible_devices": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
+  "cuda_allocator_config": "expandable_segments:True",
+  "gpu_lock": "/tmp/fnit-connectome-tenraw-gongwk.gpu0.lock",
+  "shared_gpu_load_start": {
+    "gpu_csv": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 3, 1516, 81559",
+    "process_csv": [
+      "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804",
+      "11502, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 698"
+    ],
+    "scope": "Target GPU load snapshot only; external work between snapshots remains possible"
+  },
+  "shared_gpu_load_end": {
+    "gpu_csv": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 36, 5762, 81559",
+    "process_csv": [
+      "31669, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 804",
+      "11502, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 698",
+      "43243, GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e, 4240"
+    ],
+    "scope": "Target GPU load snapshot only; external work between snapshots remains possible"
+  },
+  "torch": "2.5.1",
+  "tf32": true,
+  "matmul_allow_tf32": true,
+  "cudnn_allow_tf32": true,
+  "tracks": 11606,
+  "accepted_tracks": 11606,
+  "tracking_n_seeds": 100000,
+  "sparse_records": 283935,
+  "affine_source": "raw diagnostic PT verified bitwise against geometry.npz; original float64 matrices",
+  "five_tissue_spacing_mm": [
+    1.0,
+    1.0,
+    1.0
+  ],
+  "geometry_keys": {
+    "FOD": "dwi_affine",
+    "FA": "dwi_affine",
+    "5TT": "five_tissue_affine",
+    "atlas": "dwi_affine (not consumed by this component runner)"
+  },
+  "optimizer_hoisted_record_bytes": 27257760,
+  "optimizer_new_persistent_gather_bytes": 11357400,
+  "optimizer_gradient_hessian_buffer_bytes": 185696,
+  "peak_scope": "Fixed-TCK component only: input paths/FOD/5TT/FA, FMLS and sparse map resident; excludes production tracking padded buffers and is NOT a full-chain upper bound",
+  "lock_wait_s": 570.3699091789313,
+  "wall_before_report_write_s": 18.525156761985272,
+  "nested_stage_s": {
+    "read": 4.3083446198143065,
+    "H2D": 0.44383623311296105,
+    "processing_mask": 0.30193023616448045,
+    "FMLS": 11.71851229807362,
+    "mapping": 0.11561873089522123,
+    "optimizer_A1": 0.1012297160923481,
+    "optimizer_B1": 0.08307493105530739,
+    "optimizer_B2": 0.079578195232898,
+    "optimizer_A2": 0.10065257409587502,
+    "FA_precise": 0.12453144695609808,
+    "D2H_FA": 8.76421108841896e-05
+  },
+  "allocated_peak_bytes": 2165230592,
+  "reserved_peak_bytes": 2545942528,
+  "nvml_process_sampled_peak_rounded_up_bytes": 4447010816,
+  "nvml_peak_scope": "Maximum observed process sample with MiB rounding; sampling can miss transient peaks, not a continuous-time upper bound",
+  "nvml_sampling_resolution": "MiB, each observed row rounded up by one MiB",
+  "nvml_failed_samples": 0,
+  "nvml_max_sampling_interval_s": 1.1723300721496344,
+  "comparisons": {
+    "A1_B1": {
+      "weights": {
+        "neq": 4268,
+        "nonfinite_mismatch": 0,
+        "max": 8.881784197001252e-16,
+        "p99": 2.220446049250313e-16,
+        "rmse": 7.463263149634182e-17
+      },
+      "density": {
+        "neq": 17534,
+        "nonfinite_mismatch": 0,
+        "max": 1.4210854715202004e-14,
+        "p99": 3.552713678800501e-15,
+        "rmse": 7.502825709286642e-16
+      },
+      "excluded_equal": true,
+      "iterations_equal": true,
+      "mu_equal": true
+    },
+    "A2_B2": {
+      "weights": {
+        "neq": 4262,
+        "nonfinite_mismatch": 0,
+        "max": 8.881784197001252e-16,
+        "p99": 2.220446049250313e-16,
+        "rmse": 7.60619694280404e-17
+      },
+      "density": {
+        "neq": 17223,
+        "nonfinite_mismatch": 0,
+        "max": 1.4210854715202004e-14,
+        "p99": 3.552713678800501e-15,
+        "rmse": 7.424495813982865e-16
+      },
+      "excluded_equal": true,
+      "iterations_equal": true,
+      "mu_equal": true
+    },
+    "A1_A2": {
+      "weights": {
+        "neq": 4394,
+        "nonfinite_mismatch": 0,
+        "max": 1.3322676295501878e-15,
+        "p99": 2.220446049250313e-16,
+        "rmse": 7.919239807362761e-17
+      },
+      "density": {
+        "neq": 17345,
+        "nonfinite_mismatch": 0,
+        "max": 1.0658141036401503e-14,
+        "p99": 3.552713678800501e-15,
+        "rmse": 7.175342414352374e-16
+      },
+      "excluded_equal": true,
+      "iterations_equal": true,
+      "mu_equal": true
+    },
+    "B1_B2": {
+      "weights": {
+        "neq": 4216,
+        "nonfinite_mismatch": 0,
+        "max": 8.881784197001252e-16,
+        "p99": 2.220446049250313e-16,
+        "rmse": 7.359281341871789e-17
+      },
+      "density": {
+        "neq": 16922,
+        "nonfinite_mismatch": 0,
+        "max": 1.4210854715202004e-14,
+        "p99": 3.552713678800501e-15,
+        "rmse": 7.248889837462153e-16
+      },
+      "excluded_equal": true,
+      "iterations_equal": true,
+      "mu_equal": true
+    }
+  },
+  "same_map_optimizer_equality_pass": false,
+  "optimizer_gain": {
+    "scope": "Optimizer only, same sparse map; not end-to-end pipeline",
+    "baseline_ABBA_mean_wall_s": 0.10094114509411156,
+    "candidate_ABBA_mean_wall_s": 0.08132656314410269,
+    "saved_wall_s": 0.01961458195000887,
+    "wall_reduction_percent": 19.431701445155383,
+    "speedup": 1.2411829689059128,
+    "A1_B1_saved_wall_s": 0.01815478503704071,
+    "A2_B2_saved_wall_s": 0.021074378862977028,
+    "positive_mean_gain": true,
+    "eligible_same_map_candidate": false,
+    "whole_chain_memory_and_wall_assessed": false
+  },
+  "memory_budget_scope": "Observed fixed-TCK component NVML samples and exact PyTorch allocator peaks; excludes production padded backing and does not prove a continuous-time NVML upper bound",
+  "memory_budget_pass": true,
+  "reloaded_TCK_path_storage": {
+    "points": 399022,
+    "logical_bytes": 4788264,
+    "unique_storage_bytes": 4788264,
+    "original_production_padded_backing": "not retained/recreated by this component loader"
+  },
+  "report_write_s": 0.002159956842660904,
+  "wall_through_first_report_write_s": 18.688351497985423
+}

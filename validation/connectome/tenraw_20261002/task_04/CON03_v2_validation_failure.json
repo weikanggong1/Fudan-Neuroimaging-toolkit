@@ -1,0 +1,17 @@
+{
+  "observed_utc": "2026-10-02T16:32:44.531637+00:00",
+  "scope": "Root pre-core compatibility validation; not SIFT2 benchmark",
+  "job_report": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/root_diagnostic_CON03_v2/job.json",
+  "log": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/root_diagnostic_CON03_v2/job.log",
+  "state": "compatibility_validation_failed",
+  "exit_code": 1,
+  "gpu_queue_seconds": 2328.680844783783,
+  "exception": "nibabel.spatialimages.HeaderDataError: data dtype bool not supported",
+  "source": "diagnostic_harness_v3/validate_flirt_mgz_CON03.py:19",
+  "validation_input": "BET bool mask directly passed to Nifti1Image",
+  "production_input": "src/fnit/connectome/pipeline.py:403-404 uses mean_b0 * mask then _registration",
+  "suggested_validation_correction": "Use b0 * brain mask as moving image, matching actual production intensity input",
+  "task04_changed_shared_source": false,
+  "full_core_executed": false,
+  "SIFT2_real_benchmark_available": false
+}
