@@ -98,6 +98,7 @@ def run_hemisphere_group(subject, operation, *, device, threads, workers=2,
                  'cudnn_tf32': bool(torch.backends.cudnn.allow_tf32)}
     processes, streams, private_roots, snapshots, pending = [], [], {}, {}, []
     sampler = ProcessTreeDeviceSampler(device=device, parent_pid=os.getpid())
+    failure = None
     try:
         preparation_tick = time.monotonic()
         for hemi in HEMISPHERES:
@@ -190,18 +191,59 @@ def run_hemisphere_group(subject, operation, *, device, threads, workers=2,
             if path.is_file():
                 report['workers'][hemi] = json.loads(path.read_text())
         report.update(status='failed', error=repr(error))
-        raise HemisphereGroupError(f'{operation} hemisphere group failed: {error}', report) from error
+        failure = HemisphereGroupError(f'{operation} hemisphere group failed: {error}', report)
+        raise failure from error
     finally:
-        _cancel(processes)
+        final_errors = []
+        try:
+            _cancel(processes)
+        except BaseException as error:
+            final_errors.append(('process_reaping', error))
         for stream in streams:
-            stream.close()
-        sampler.sample_if_due(force=True)
-        report['device_process_tree'] = sampler.report()
-        # 私有影像不进入交付，成功/失败均删除；日志和 JSON 保留。
+            try:
+                stream.close()
+            except BaseException as error:
+                final_errors.append(('worker_log_close', error))
+        try:
+            sampler.sample_if_due(force=True)
+            report['device_process_tree'] = sampler.report()
+        except BaseException as error:
+            final_errors.append(('device_sampling_finalization', error))
+        # 私有影像不进入交付；清理失败也属于当前组失败，不保留complete。
         cleanup_tick = time.monotonic()
-        shutil.rmtree(root)
+        try:
+            shutil.rmtree(root)
+        except BaseException as error:
+            final_errors.append(('private_directory_cleanup', error))
+            report['private_directory_retained'] = str(root)
         report['cleanup_seconds'] = time.monotonic() - cleanup_tick
         report['group_wall_seconds'] = time.monotonic() - group_tick
+        if final_errors:
+            report['finalization_errors'] = [{'phase': phase, 'error': repr(error)}
+                                             for phase, error in final_errors]
+            report['status'] = 'failed'
+            report.setdefault('error', repr(final_errors[0][1]))
+            report['failed_finalization_phase'] = final_errors[0][0]
         path = subject / 'scripts' / f'{operation}.hemisphere-group.json'
-        path.write_text(json.dumps(report, indent=2))
+        try:
+            # 先写临时元数据再替换，避免留下截断的成功JSON。
+            temporary_report = path.with_suffix('.json.tmp')
+            temporary_report.write_text(json.dumps(report, indent=2))
+            temporary_report.replace(path)
+        except BaseException as error:
+            try:
+                temporary_report.unlink(missing_ok=True)
+            except OSError as temporary_error:
+                error.add_note(f'Incomplete metadata temporary cleanup failed: {temporary_error!r}')
+            final_errors.append(('group_report_publication', error))
+            report.update(status='failed', failed_finalization_phase='group_report_publication')
+            report.setdefault('error', repr(error))
+            report.setdefault('finalization_errors', []).append(
+                {'phase': 'group_report_publication', 'error': repr(error)})
+        if final_errors:
+            message = '; '.join(f'{phase}: {error!r}' for phase, error in final_errors)
+            if failure is not None:
+                failure.add_note('Hemisphere group finalization also failed: ' + message)
+            else:
+                raise HemisphereGroupError(f'{operation} hemisphere finalization failed: {message}', report) from final_errors[0][1]
     return report

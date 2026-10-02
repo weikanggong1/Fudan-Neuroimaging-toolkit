@@ -797,7 +797,10 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
             report.update(status="failed", failed_stage=name, error=repr(error),
                           total_seconds=time.perf_counter() - started)
             subject.mkdir(parents=True, exist_ok=True)
-            (subject / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
+            try:
+                (subject / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
+            except Exception as metadata_error:
+                error.add_note(f"Stage failure metadata could not be saved: {metadata_error!r}")
             raise
         row = profiler.last_row
         if isinstance(value, dict) and value.get("actual_forwards"):
@@ -927,7 +930,10 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                               workers=hemisphere_workers, profile_stages=profile_stages, kwargs=common)
             except HemisphereGroupError as error:
                 report['hemisphere_scheduling']['groups'].append(error.report)
-                (subject / 'fnit-native-free-run.json').write_text(json.dumps(report, indent=2))
+                try:
+                    (subject / 'fnit-native-free-run.json').write_text(json.dumps(report, indent=2))
+                except Exception as metadata_error:
+                    error.add_note(f"Group failure metadata could not be saved: {metadata_error!r}")
                 raise
             report['hemisphere_scheduling']['groups'].append(group)
             for hemi in ('lh', 'rh'):

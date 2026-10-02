@@ -88,6 +88,35 @@ class HemisphereParallelTests(unittest.TestCase):
         self.assertEqual((self.subject / 'mri/shared-input.mgz').read_bytes(), b'original')
         self.assertFalse((self.subject / 'surf/lh.white').exists())
 
+    def test_cleanup_failure_cannot_remain_complete(self):
+        with patch('fnit.recon_all.hemisphere_parallel.shutil.rmtree', side_effect=OSError('cleanup failed')):
+            with self.assertRaises(HemisphereGroupError) as caught:
+                self.run_group()
+        self.assertEqual(caught.exception.report['status'], 'failed')
+        report = json.loads((self.subject / 'scripts/test.hemisphere-group.json').read_text())
+        self.assertEqual(report['status'], 'failed')
+        self.assertEqual(report['failed_finalization_phase'], 'private_directory_cleanup')
+
+    def test_cleanup_error_preserves_original_worker_failure(self):
+        with patch('fnit.recon_all.hemisphere_parallel.shutil.rmtree', side_effect=OSError('cleanup failed')):
+            with self.assertRaisesRegex(HemisphereGroupError, 'worker failed') as caught:
+                self.run_group('failure')
+        self.assertEqual(caught.exception.report['workers']['lh']['status'], 'failed')
+        self.assertIn('cleanup failed', ' '.join(caught.exception.__notes__))
+
+    def test_metadata_publication_failure_marks_report_failed(self):
+        original = Path.replace
+        def replace(path, target):
+            if path.name == 'test.hemisphere-group.json.tmp':
+                raise OSError('report replace failed')
+            return original(path,target)
+        with patch.object(Path,'replace',replace):
+            with self.assertRaises(HemisphereGroupError) as caught:
+                self.run_group()
+        self.assertEqual(caught.exception.report['status'], 'failed')
+        self.assertEqual(caught.exception.report['failed_finalization_phase'], 'group_report_publication')
+        self.assertFalse((self.subject/'scripts/test.hemisphere-group.json.tmp').exists())
+
     def test_serial_exec_uses_four_threads_and_no_overlap(self):
         report = self.run_group(workers=1)
         self.assertEqual(report['overlap_seconds'], 0.)
