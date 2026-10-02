@@ -260,6 +260,15 @@ v4已完成5ttgen 10.701秒、GMWMI 1.559秒、fs-aparc84 labelconvert 1.181秒�
 
 布局及恢复入口的28项focused测试在实际CPU服务器通过（0.80秒），覆盖真实模板strides argv、全部整数voxel逆排序、真实位移/ROI改变拒绝、错误例号和损坏原报告拒绝。对CON01/03原报告、六命令、source/program/artifact/合同SHA的实际恢复只读核验也通过；此核验没有重新执行FLIRT或NN。
 
+**CON01/03官方DWI空间解剖与八atlas完成**：新冻结提交`cb06c0ca`、namespace `official_anatomy_raw10_CPU_budget_v4`。两例实际complete exit0，各20个输出重新核SHA、八atlas为官方DWI的96×96×60完整网格，生成真实consumer合同。参照工具仍只占CPU8×最多两例；十例T1结构准备不重算。见[两例实际完成摘要](../../validation/connectome/raw10_official_anatomy_DWI_20261003/two_case_completion.public.json)。
+
+| 真实例 | 原六条成功命令秒 | 单独官方strides格式化秒 | 新恢复entry wall秒 | 新七条NN命令合计秒 | 完成输出数 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| CON01 | 17.375 | 0.198 | 13.807 | 1.794 | 20 |
+| CON03 | 14.039 | 0.049 | 13.912 | 1.755 | 20 |
+
+原六命令含FLIRT及native world变换，新七命令仅续其余atlas NN；entry wall另含真实输入核验、复制、读回和哈希，不能把各列拼成连续冷调用。原闲等driver在核对精确argv/start_ticks/source、确认无child及替代两例实际完成后退休，原报告字节保留。此时其余八例等待各自真实官方DWI建模合同；独立追踪与最终矩阵由另一工具继续执行，两例解剖完成不是十例最终connectome匹配结论。
+
 ## 6. 更新记录
 
 - 2026-10-03：新增prepare/complete独立官方解剖参照和可审核契约；禁止覆盖原输出，锁定fresh T1/FS，逐例隔离public_0路径，保留官方world-geometry变换与NN atlas定义。
