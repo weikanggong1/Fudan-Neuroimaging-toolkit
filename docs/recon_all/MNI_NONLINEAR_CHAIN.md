@@ -2,7 +2,7 @@
 
 [返回 recon-all](README.md) · [真实 T1 配对结果](../../validation/recon_all/python_gpu_port/mni_nonlinear_real_20260929.json)
 
-标准单 T1 流程先以 PyTorch SynthMorph affine 生成个体 `aff.lta`，再用 PyTorch 的 deform 模型优化同一裁剪 T1 到 MNI152 的非线性变换。这里只需模型产生的变换，已跳过没有后续消费者的 `moved` 和 `fixed_moved` 两张重采样图。Conda 中从固定 FreeSurfer 源码编译的 `mri_warp_convert`、`mri_ca_register` 和 `mri_convert` 将位移转为 FreeSurfer warp、求逆，并写出最近邻重采样检查图。它们不从系统 FreeSurfer 安装目录调用。新增 `postprocess_backend="gpu"` 候选使用 FNIT 自有完整转换、求逆与检查图算子；默认仍为 `conda`。最新参数与真实验证范围见 [GPU 后处理说明](MNI_WARP_GPU.md)。
+标准单 T1 流程先以 PyTorch SynthMorph affine 生成个体 `aff.lta`，再用 PyTorch 的 deform 模型优化同一裁剪 T1 到 MNI152 的非线性变换。这里只需模型产生的变换，已跳过没有后续消费者的 `moved` 和 `fixed_moved` 两张重采样图。当前CUDA recon-all显式使用 `postprocess_backend="gpu"`，调用FNIT已有的完整转换、求逆与检查图算子；CPU recon-all和独立函数的兼容默认值仍为 `conda`。Conda路径使用固定FreeSurfer源码独立编译的 `mri_warp_convert`、`mri_ca_register` 和 `mri_convert`，不调用系统安装程序。最新参数与真实验证范围见 [GPU 后处理说明](MNI_WARP_GPU.md)和[两例原始T1整例结果](../../validation/recon_all/optimizations/20261002_parallel/FINAL_RESULTS.md)。
 
 ```mermaid
 flowchart LR
@@ -29,7 +29,7 @@ nonlinear_outputs = run_mni_nonlinear_chain(
     mri_convert="/data/conda/envs/fnit/bin/mri_convert",  # 生成最近邻检查图
     device="cuda:0",  # GPU 模型使用 FP32 例外；无 GPU 时为 cpu
     threads=4,  # CPU 算子线程数
-    postprocess_backend="conda",  # 完整阶段默认后端；gpu 候选实测范围见专项报告
+    postprocess_backend="gpu",  # 与当前CUDA recon-all相同；独立API省略时仍默认conda
     chunk_slices=16,  # GPU 转换和检查图的 X 轴分块大小
 )
 print(nonlinear_outputs["forward"])  # 目标 MNI152 网格上的前向变换绝对路径
@@ -53,6 +53,8 @@ CUDA FP32 的第一例独立链用时 161.73 秒，CPU 为 339.99 秒，进程�
 
 串行候选省去未消费的网络逆向积分/合成，反对称velocity两次前向及原生数值求逆保留。两例固定自产输入的forward、inverse、check与旧GPU路径SHA-256完全相同；阶段136.720→123.601秒、121.549→129.343秒，尚未证明稳定整阶段加速。实际前向与复现见[串行说明](SERIAL_OPTIMIZATION.md)。
 
-2026-10-02 新增 GPU 后处理候选；成熟散射最后半体素的 native rint 兼容修复、向量编码和 scanner RAS 校验详见 [专项说明](MNI_WARP_GPU.md)。本页上述历史性能与精度记录仍绑定各自原版本；本轮结果只以 [task_05 报告](../../validation/recon_all/optimizations/20261002_parallel/task_05/README.md)为准。
+2026-10-02 新增GPU后处理并接入CUDA recon-all；成熟散射最后半体素的native rint兼容修复、向量编码和scanner RAS校验详见 [专项说明](MNI_WARP_GPU.md)。本页上述历史性能与精度记录仍绑定各自原版本；当前同输入阶段见 [task_05 报告](../../validation/recon_all/optimizations/20261002_parallel/task_05/README.md)，当前整例见 [五任务结果](../../validation/recon_all/optimizations/20261002_parallel/FINAL_RESULTS.md)。
 
 最新 GPU 后处理的两例、两轮完整自产 MNI 阶段实测为 36.173–38.675 秒，新运行 Conda 对照为 122.813–130.526 秒，四个配对加速 3.247×–3.608×，直接输出比较数值零差异；过程采样峰值 13.103 GB。完整分步、缓存范围及整例验收边界见上述 task_05 报告。
+
+运行源码 `8d750e2` 的原始T1整例中，完整MNI阶段sub01为126.497→46.024秒，sub02为129.062→58.258秒。该时间包含模型加载、传输和读写，不能与冻结输入阶段的秒数互换。sub01与基线的三个正式输出体素、dtype和空间矩阵相同，NIfTI生产者描述、四元数负零和scalar图未使用的 `pixdim[4]` 仍在严格文件诊断中报告；没有伪造FreeSurfer描述以提高文件通过数。两例最终比较详情见五任务结果。

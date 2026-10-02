@@ -15,13 +15,13 @@
 | 预白质与最终白质表面 | `H.orig`、MRI、皮层标签/注释 → `H.white.preaparc`、`H.smoothwm`、`H.white` | `mris_place_surface --white ...` | [预白质](WHITE_PREAPARC_CONDA_CHAIN.md)、[最终 white](FINAL_WHITE_CONDA.md) |
 | quick/standard sphere、配准 | `H.inflated.nofix`、`H.inflated`、`H.smoothwm`、folding atlas → `H.qsphere.nofix`、`H.sphere`、`H.sphere.reg` | `mris_sphere -q ...`、`mris_sphere ...`、`mris_register ...` | [标准球面](../../validation/recon_all/python_gpu_port/SPHERE_STANDARD_STATUS.md)、[配准](../../validation/recon_all/python_gpu_port/MRIS_REGISTER_STATUS.md) |
 | pial 与主要顶点图 | `H.white`、`brain.finalsurfs.mgz`、MRI/标签 → `H.pial.T1`、`H.pial`、厚度、面积、体积、曲率 | `mris_place_surface --pial ...`、`mris_place_surface --thickness/--area-map/--curv-map ...` | [标准四轮 pial](NATIVE_PIAL_PLACEMENT.md)、[Python 单阶段 pial](PYTHON_PIAL_PLACEMENT.md)、[CUDA 厚度、面积和曲率](SURFACE_METRICS.md) |
-| 图谱曲率与统计 | `H.sphere.reg`、folding atlas、`H.smoothwm`、`H.curv`、`H.sulc` → `H.avg_curv`、`H.smoothwm.*.crv`、`stats/H.curv.stats` | `mrisp_paint -a 5 folding-atlas.tif#6 H.sphere.reg H.avg_curv`；`mris_curvature_stats -m --writeCurvatureFiles -G -o stats/H.curv.stats -F smoothwm subject H curv sulc` | [输入输出与真实 T1 同输入结果](CURVATURE_OUTPUTS.md)；现版整例待验证 |
+| 图谱曲率与统计 | `H.sphere.reg`、folding atlas、`H.smoothwm`、`H.curv`、`H.sulc` → `H.avg_curv`、`H.smoothwm.*.crv`、`stats/H.curv.stats` | `mrisp_paint -a 5 folding-atlas.tif#6 H.sphere.reg H.avg_curv`；`mris_curvature_stats -m --writeCurvatureFiles -G -o stats/H.curv.stats -F smoothwm subject H curv sulc` | [输入输出与真实T1同输入结果](CURVATURE_OUTPUTS.md)；[当前两例整例与三方比较](../../validation/recon_all/optimizations/20261002_parallel/FINAL_RESULTS.md) |
 | Jacobian、灰白对比与 SNR | `H.white.preaparc`、`H.sphere.reg`、`rawavg.mgz`、最终 white/厚度/注释 → `H.jacobian_white`、`H.w-g.pct.mgh`、`stats/H.w-g.pct.stats` | `mris_jacobian`；`pctsurfcon` 中的 `mri_vol2surf`/`mri_concat`；`mri_segstats --snr` | [输入输出与双侧真实 T1 同输入结果](SURFACE_EXTRA_METRICS.md) |
 | 脑区、ribbon 与统计 | 已放置表面、aseg、注释图谱 → `label/H.*.annot`、`mri/ribbon.mgz`、`mri/aparc+aseg.mgz`、`stats/*.stats` | `mris_ca_label`、`mri_surf2volseg`、`mri_segstats` 的对应阶段 | [后处理同输入结果](../../validation/recon_all/python_gpu_port/ASEG_RIBBON_RUNNER_20260928.md)、[皮层体积映射](../../validation/recon_all/python_gpu_port/ATLAS_VOLUME_RUNNER_20260928.md)、[BA/VPnl 接线实测](../../validation/recon_all/python_gpu_port/exvivo_wiring_20260929.json) |
 
 阶段证据分三级：**同输入**把官方冻结上游交给两种实现，验证单个算子；**连续链**使用 FNIT 自产上游，检查误差传播；**整例**从真实原始 T1 开始检查全部 138 个文件、顶点指标、脑区值、耗时及资源。表中的历史同输入结果只证明各自阶段，不能替代现版整例。
 
-每个函数的精确参数、坐标空间、返回字典和具名参数示例以所链接的阶段文档及源码 docstring 为准。非零相交输入已修复到零，但未取得官方同输入输出；图谱曲率的 FNIT 自产上游整例尚未验收。
+每个函数的精确参数、坐标空间、返回字典和具名参数示例以所链接的阶段文档及源码docstring为准。非零相交输入已修复到零，但未取得官方同输入输出。运行源码8d750e2已从两例原始T1连续生成138项输出，生产基本网格检查通过；严格数值、white/pial穿越与sphere/reg局部质量和脑区指标单列在[当前结果](../../validation/recon_all/optimizations/20261002_parallel/FINAL_RESULTS.md)。输出存在和执行完成不代表整体指标等效已通过。
 
 ## 参考文献与原实现
 

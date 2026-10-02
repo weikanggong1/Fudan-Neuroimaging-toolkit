@@ -1,8 +1,10 @@
 # 单幅 T1w 的 recon-all 重建
 
-本轮两例整例从 4242.9→3453.9 秒、4043.6→3712.6 秒，墙钟分别减少 18.59% 和 8.19%；父子进程同时显存采样峰值为 10.92 GB 和 10.89 GB。两例均输出 138/138 项；相对优化前标签和68区主要统计量不变，MNI变换链仍有差异。
+2026-10-02 两例原始 T1 整例从 **3440.4→2248.7 秒、3669.0→2322.5 秒**，墙钟分别减少 **34.64% 和36.70%**；候选父子进程同期显存采样峰值 **8.75 GB、10.90 GB**。两例各输出138/138项，生产网格检查通过；严格复现与整体指标等效单独报告，不由输出数量推断。
 
-本轮完成五阶段串行优化，并修复辅助 Synth 网络构造时覆盖精度设置的问题。整例实际测试源码固定为 `ff372d73f106e850b999fbc95ae0b324cd315cbf`；两例原始 T1 整例及优化前后、独立官方参考的比较按该源码归档绑定。[本轮结果与复现](../../validation/recon_all/optimizations/20261001_serial/FINAL_RESULTS.md)汇总完整命令耗时、显存、分区 Dice、表面距离、脑区统计和局部异常。[优化实现](SERIAL_OPTIMIZATION.md)说明哪些阶段使用自有 PyTorch/Numba，哪些保留 Conda 源码构建程序。 main 合并后的两例相关注册回归逐位相同；最终补充前向后端日志字段通过100项相关测试，并修复自产LTA多空格读取兼容性，版本及范围见[绑定记录](../../validation/recon_all/optimizations/20261001_serial/whole/integrated_main/source_after_main_merge.json)。
+五任务已完成接入，实际测试源码固定为 `8d750e25d4d067a43edb788a96b2086a1c031ba0`，配对基线为 `6f67cc0`。两例使用同一H100、线程预算4和相同权重/资产，显式启用2个半球worker。[本轮结果与复现](../../validation/recon_all/optimizations/20261002_parallel/FINAL_RESULTS.md)汇总端到端与分阶段时间、实现归属、显存、误差及验证范围；[生产接入](PERFORMANCE_INTEGRATION.md)说明参数、设备和原生程序选择。138项诊断及脑区/表面/扩展质量的三方比较另存版本绑定报告。
+
+两例三方比较已经完成：相对优化前基线，最终white/pial、7类分割和脑区统计一致，部分顶点图浮点差通过既有门槛；严格135/138，3项仅为MNI输出头字节差。相对官方的严格结果为6/138、2/138，厚度MAE为0.04184、0.02169 mm。已有局部低Dice、非零white/pial穿越及双向距离极值均保留，整体指标等效尚未判定，详见本轮结果及脑图。
 
 [返回首页](../../README.md) · [安装与原生程序](CONDA_CPP_BUILD.md) · [阶段与官方命令](CONDA_CPP_STAGES.md) · [验收范围](../../validation/recon_all/python_gpu_port/RELEASE_GATES.md)
 
@@ -14,10 +16,7 @@ CUDA 默认允许 TF32，不自动使用 FP16/BF16。SynthStrip、SynthSeg、辅
 
 本轮复用并优化已有[有序归一化](NORMALIZATION.md)、[球面几何](CPU_GEOMETRY_PERFORMANCE.md)及[PyTorch 指标函数](SURFACE_METRICS.md)。多图谱共享[同版本几何缓存](SURFACE_STATS_CACHE.md)，厚度使用[完整空间候选](SURFACE_THICKNESS.md)。完整 Python pial 已做同输入回归，但仍比当前 C++ 慢，生产路径保留 Conda 源码构建实现。不得将冻结同输入加速写成整例提速。
 
-2026-10-02 工作分支正在接入五任务候选，见[生产接入与当前实测范围](PERFORMANCE_INTEGRATION.md)。
-半球并行、GCA缓存、white热点、网格/球面及MNI GPU后处理的阶段报告分别保留
-源码版本和同输入比较。两例原始T1的新整例对照正在执行；目前没有合并版本的
-整例提速结论，main发布和整体指标等效仍待验证。
+本轮复用已有PyTorch WM后编辑与MNI完整warp求逆，优化已有Numba有序网格/球面实现，接入半球独立进程和私有发布；GCA和white保留完整Conda源码构建流程并消除重复工作。默认半球worker仍为1，本页示例显式使用2；Python pial尚无生产速度优势，保留原生pial。
 
 ## 流程策略
 
@@ -112,10 +111,11 @@ report = run_recon_all_python(
 
 | 版本 | 记录与用途 |
 | --- | --- |
-| `ff372d7`，2026-10-02 整合版本 | [本轮完整结果](../../validation/recon_all/optimizations/20261001_serial/FINAL_RESULTS.md)：两例原始 T1、完整耗时及最终指标；报告保留实际计算提交。 |
+| `8d750e2`，2026-10-02 五任务整合 | [当前完整结果](../../validation/recon_all/optimizations/20261002_parallel/FINAL_RESULTS.md)：两例原始T1空目录、CLI与已初始化CUDA API；保留成功重跑、首次CUDA失败和正式三方比较。 |
+| `ff372d7`，2026-10-01 串行整合版本 | [前轮完整结果](../../validation/recon_all/optimizations/20261001_serial/FINAL_RESULTS.md)：两例原始 T1、完整耗时及最终指标；报告保留实际计算提交。 |
 | `3faa938`，辅助网络卷积精度修复 | [中间版原始报告](../../validation/recon_all/optimizations/20261001_serial/whole/precision_policy/whole_reports/)：两例完成，各 138 项齐全，相对优化前严格诊断均为 135/138；MNI 仿射矩阵乘法误差随后另行定位。 |
 | `61926c7`，五阶段首次整合 | [历史整例与原因定位](../../validation/recon_all/optimizations/20261001_serial/WHOLE_RESULTS.md)：保留 MRI/WM 输入变化导致表面变化的四组控制，不能代替当前版结果。 |
-| `c248520`，上一直接性能基线 | [整例热点优化](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/WHOLE_RESULTS.md)：sub-01 当前配对继续复用其完整 GPU API 记录，生产源码与 `0c8ab32` 相同。 |
+| `c248520`，上一直接性能基线 | [整例热点优化](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/WHOLE_RESULTS.md)：20261001_serial轮次的sub-01配对复用其完整GPU API记录，生产源码与 `0c8ab32` 相同。 |
 | `1b8c36d`，指标与缓存接入 | [精度与时间记录](../../validation/recon_all/python_gpu_port/performance_20261001/README.md)：厚度、统计缓存、实际前向精度与剖析接口。 |
 | `e036f57`，法向优化 | [绑定该版的两例结果](../../validation/recon_all/python_gpu_port/current_full_runs_20260930.json)及[最终指标](../../validation/recon_all/python_gpu_port/final_metric_consistency_20260930.json)。历史 CPU/GPU 时间不与当前整例混算。 |
 

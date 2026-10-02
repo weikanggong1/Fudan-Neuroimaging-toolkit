@@ -59,7 +59,7 @@ print(warp_outputs["forward"])  # 完整目标网格上的 pull 位移路径
 
 两个 warp 使用 NIfTI displacement-vector intent，并带 FS ecode 14 的 source/target 几何、位移解释、节点间距及零标签扩展；逆场交换 source/target。NIfTI source 几何沿用原生 sform 列归一化和普通 FP32 `MatrixMultiply` 的中心累加顺序，再恢复 voxel-to-RAS 矩阵。转换采样范围为 crop 网格 `[0,size)`，最后一个单元内复制最后邻点，真正越界时把**绝对源体素坐标**置零，随后转换为位移。检查图在双精度上执行 native `nint`（半整数远离零）；先按 `rint` 检查边界，再夹到合法体素索引，保留 `GCAMmorphToAtlas` 的源坐标域检查，真正越界填零。坐标先提升为双精度再加 0.5，避免 FP32 加法把邻近半整数的值提前舍入。输入必须是单向量帧 `(X,Y,Z,1,3)`、NIfTI intent 1006、FS `DISP_RAS` 编码且 spacing=1；其他编码不会被当成毫米位移。检查图还要求原图 scanner RAS affine 与 source 几何在 1e-4 容差内相符，不能只比较 shape。MGZ 大端多字节数据转成本机字节序后传入 Torch，保留 nibabel 已应用的 scale/intercept 和输出 dtype。缺失文件、非有限值、空控制点、不支持的扩展/几何或运行失败均明确报错，不静默回退 CPU。
 
-现有 `run_mni_nonlinear_chain` 新增 `postprocess_backend="conda" | "gpu"` 和 `chunk_slices=16`。默认保留 Conda 路径；GPU 选项调用上述三个算子。模型、文件名、原有计时键和其余参数保持兼容。调度由任务 1/协调者接入，本任务不修改 `native_free.py`、batch 或全局精度策略。
+现有 `run_mni_nonlinear_chain` 提供 `postprocess_backend="conda" | "gpu"` 和 `chunk_slices=16`。独立函数的兼容默认值保留Conda路径；当前 `native_free.py` 已让CUDA recon-all显式选择GPU，CPU运行选择Conda。GPU选项调用上述三个算子。模型、文件名、原有计时键和其余参数保持兼容，已有FP32例外仍记录实际设置。
 
 ## 命令行
 
@@ -102,6 +102,8 @@ mri_convert -rt nearest orig.mgz -at forward.nii.gz test.nii.gz
 
 2026-10-02 两例、两轮自产完整阶段 GPU 为 36.173–38.675 秒，Conda 对照为 122.813–130.526 秒，四个配对的本次观察加速 3.247×–3.608×；两例新模型的 deform、前向场、完整逆向场和检查图直接数值零差异，几何及类型一致。14 项单元回归通过；最新四个完整阶段均直接观测到两次内部 FP32 前向、TF32 与 autocast 关闭。进程树采样峰值 13.103 GB，Torch 全命令累计 allocated / reserved 峰值 9.269 / 12.273 GB，缓存未清空。最新专项证据见 [任务 5 报告](../../validation/recon_all/optimizations/20261002_parallel/task_05/README.md)。算子和完整阶段同输入回归已通过；阶段结果不替代整例验收。两个完整原始 T1 整例与 138 项严格诊断由协调者执行。
 
-版本记录：2026-10-02 增加独立 GPU 后处理候选；之前版本继续使用固定源码 Conda 转换/求逆/检查图，其真实阶段记录见 [现有 MNI 链说明](MNI_NONLINEAR_CHAIN.md)。候选严格复现、新增退化、整体指标等效分别报告，整体无正式阈值时为 `not_assessed`。
+运行源码 `8d750e2` 的两例原始T1整例中，完整MNI链为126.497→46.024秒、129.062→58.258秒；阶段及整例时间分别保存。[当前整例结果](../../validation/recon_all/optimizations/20261002_parallel/FINAL_RESULTS.md)保留文件头差异、体素比较、实际同期显存及官方对照。
+
+版本记录：2026-10-02 增加GPU后处理并接入CUDA recon-all；独立函数默认Conda保持兼容。之前版本使用固定源码Conda转换/求逆/检查图，其真实阶段记录见 [现有MNI链说明](MNI_NONLINEAR_CHAIN.md)。严格复现、新增退化、整体指标等效分别报告，整体无正式阈值时为 `not_assessed`。
 
 参考文献：Hoffmann M, et al. SynthMorph: learning contrast-invariant registration without acquired images. *IEEE Transactions on Medical Imaging*. 2022;41:543–558. [DOI](https://doi.org/10.1109/TMI.2021.3116879)；[FreeSurfer 源码库](https://github.com/freesurfer/freesurfer)。

@@ -42,8 +42,13 @@
     "shared_host_local_flock": "verified; previous GPFS ENOLCK retained as failed attempt"
   },
   "implementation_validation": "all five task branches merged; final native link-map side-effect fix passed local regression",
-  "whole_validation": "both baselines and candidate sub01 complete; same8d original-T1 empty-directory sub02 retry_v3 running; both surface workers passed actual first CUDA allocation and generated own meshes",
-  "main_push": "not_started; second successful paired whole and three-way numerical/quality comparison pending",
+  "whole_validation": "both original-T1 empty-directory baselines and candidates complete; 138/138 each; same host GPU and operation thread budget; three-way strict/ROI/Dice/surface/quality/figures complete",
+  "main_push": {
+    "authorization": "user explicitly requested completed validation then main push",
+    "policy": "normal fast-forward only; preserve existing main and original dirty worktree",
+    "release_preparation_utc": "2026-10-02T22:46:37.351939+00:00",
+    "final_remote_verification": "external coordinator main_push_receipt.json records exact final commit after normal push"
+  },
   "resource_fingerprints": {
     "status": "passed",
     "measured_utc": "2026-10-02T07:42:42.921207+00:00",
@@ -56,7 +61,7 @@
     "isolation": "not_verified"
   },
   "integration_preserves_main": "a0ad59f",
-  "updated_utc": "2026-10-02T19:44:37.238753+00:00",
+  "updated_utc": "2026-10-02T22:46:37.351939+00:00",
   "integration_source_commit_before_mni_wiring": "24390dc",
   "baseline_queue": {
     "supervisor_pid": 128920,
@@ -86,8 +91,21 @@
     "raw_T1_weights_or_private_license_transferred": false
   },
   "installation_validation": "final 8d wheel target install and private native bundle passed; installed 171 recon Python SHA exact; GCA recompiled, white reused verified task02 independent fixed-source artifact; full fresh Conda/physical isolation unverified",
-  "strict_reproduction": "stage-dependent; task01 strict failed, retained; integrated whole not_assessed",
-  "new_degradation": "integrated whole not_assessed; same-input geometry/MNI/GCA exact, task01 curvature tails retained",
+  "strict_reproduction": {
+    "sub01": {
+      "candidate_vs_baseline": "135/138; three MNI header-only failures",
+      "candidate_vs_official": "6/138",
+      "baseline_vs_official": "6/138"
+    },
+    "sub02": {
+      "candidate_vs_baseline": "135/138; three MNI header-only failures",
+      "candidate_vs_official": "2/138",
+      "baseline_vs_official": "2/138"
+    },
+    "report": "whole_comparison/results_retry_v5",
+    "original_gates_changed": false
+  },
+  "new_degradation": "not_assessed; no unified prospective gates; observed ROI, label Dice and extended quality count changes zero, final white/pial geometry unchanged; morph tails pass existing gates",
   "baseline_sub01_actual": {
     "execution": "complete",
     "output_count": 138,
@@ -144,7 +162,7 @@
     "scope": "replaced only idle waiters before any candidate output or comparison execution; old launch evidence retained",
     "comparison_output": "whole_comparison_8d750e2_v2"
   },
-  "candidate_whole_validation": "both baselines and candidate sub01 complete; same8d original-T1 empty-directory sub02 retry_v3 running; both surface workers passed actual first CUDA allocation and generated own meshes",
+  "candidate_whole_validation": "both original-T1 empty-directory baselines and candidates complete; 138/138 each; same host GPU and operation thread budget; three-way strict/ROI/Dice/surface/quality/figures complete",
   "candidate_sub01_actual": {
     "execution": "complete",
     "code_commit": "8d750e25d4d067a43edb788a96b2086a1c031ba0",
@@ -155,7 +173,7 @@
     "continuous_peak_verified": false,
     "finished_utc": "2026-10-02T17:35:21.006159+00:00",
     "report": "whole/candidate_sub01/monitor.json",
-    "numeric_comparison": "not_run; all four raw runs required by comparison queue"
+    "numeric_comparison": "complete; see strict_reproduction and final report"
   },
   "candidate_sub02_failed_v1": {
     "execution": "failed",
@@ -181,20 +199,26 @@
     "driver_sha256": "0aadbce9cf9937bf7ed8d1df1f2816105d81ee23dca5825791eaa82848f6fb29"
   },
   "candidate_sub02_retry_v3": {
-    "status": "running",
+    "status": "complete",
     "config": "whole/configs/candidate_sub02_retry_v3.json",
     "config_sha256": "fac6fd6dffd6a74b2d925b3a190df2c7517c857a613f385e3e2aba5c657066d9",
     "runtime_commit": "8d750e25d4d067a43edb788a96b2086a1c031ba0",
     "original_T1_empty_directory": true,
     "started_utc": "2026-10-02T19:21:07.053454+00:00",
-    "actual_queue": "coordinator/candidate_retry_queue_v2"
+    "actual_queue": "coordinator/candidate_retry_queue_v2",
+    "report": "whole/candidate_sub02/completion.json",
+    "whole_command_seconds": 2322.500014901161
   },
   "comparison_retry_v4": {
-    "status": "waiting_for_successful_whole_terminal",
+    "status": "failed_report_serialization; whole_runs_unaffected",
     "config": "whole_comparison/config_retry_v4.json",
     "config_sha256": "2b79fabcb630305c91d5ec856a39c03130952425e215be52528f99aefc6241c8",
     "output": "whole_comparison_8d750e2_retry_v4",
-    "driver_sha256": "0aadbce9cf9937bf7ed8d1df1f2816105d81ee23dca5825791eaa82848f6fb29"
+    "driver_sha256": "0aadbce9cf9937bf7ed8d1df1f2816105d81ee23dca5825791eaa82848f6fb29",
+    "finished_utc": "2026-10-02T20:53:13.123895+00:00",
+    "error_type": "TypeError",
+    "error": "Object of type int32 is not JSON serializable",
+    "failure_receipt": "whole_comparison/collected_failed_retry_v4.json"
   },
   "cuda_bootstrap_diagnosis": {
     "first": "single_pass_pair_fail; import_context_not_identical_to_worker",
@@ -202,5 +226,38 @@
     "production_policy_change": false,
     "cause": "not_determined",
     "report": "whole/bootstrap_pairs_v2/cuda_bootstrap_pairs_v2/summary.json"
+  },
+  "candidate_sub02_actual": {
+    "execution": "complete",
+    "code_commit": "8d750e25d4d067a43edb788a96b2086a1c031ba0",
+    "output_count": 138,
+    "whole_command_seconds": 2322.500014901161,
+    "pipeline_seconds": 2318.6166742518544,
+    "peak_sampled_simultaneous_process_bytes": 10896801792,
+    "continuous_peak_verified": false,
+    "finished_utc": "2026-10-02T19:59:49.444757+00:00",
+    "report": "whole/candidate_sub02/monitor.json",
+    "successful_attempt": "retry_v3",
+    "numeric_comparison": "complete; see strict_reproduction and final report"
+  },
+  "comparison_retry_v5": {
+    "status": "complete",
+    "pid": 123032,
+    "started_utc": "2026-10-02T21:23:09.402944+00:00",
+    "config": "whole_comparison/config_retry_v5.json",
+    "config_sha256": "2b79fabcb630305c91d5ec856a39c03130952425e215be52528f99aefc6241c8",
+    "output": "whole_comparison_8d750e2_retry_v5",
+    "driver_sha256": "b26c747c8fd8fa87825f09ffe947b3472cb8d48a8080770f73bf212ece593448",
+    "geometry_regression": "whole_comparison/geometry_regression_receipt.json",
+    "completed": [
+      "sub01",
+      "sub02"
+    ],
+    "finished_utc": "2026-10-02T22:32:12.384418+00:00",
+    "collection_receipt": "whole_comparison/collected_comparison_v2.json",
+    "comparison_seconds_excluding_lock_wait": {
+      "sub01": 1354.50842383923,
+      "sub02": 1389.8294466980733
+    }
   }
 }

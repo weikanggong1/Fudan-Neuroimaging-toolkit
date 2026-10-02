@@ -128,7 +128,7 @@ GCA 返回 `version=2`、`full_native_em=true`、`reduction=upstream_ROMP_partia
 
 当前安装验收已在 gpucw1 完成最终 `8d750e2` 的 wheel 构建、私有 target 安装、CLI 和七项 API 导入；171 个安装后的 recon-all Python 文件与冻结源码 SHA 完全相同，GCA helper/header 和实际 FastPD 扩展随 wheel 安装。固定 FreeSurfer archive/tree 也已实核 SHA。私有原生 bundle 于 UTC 2026-10-02 16:21:18 实际通过：本轮重编 GCA，复用 task02 独立固定源码 white 候选，另外 13 个程序复用原独立 Conda 构建且 SHA 不变；pial 保留原程序。能力查询、私有 RPATH、缺库检查和 15 项安装 SHA 均通过；详见 [安装验证报告](../../validation/recon_all/optimizations/20261002_parallel/root_install/REPORT.md)。
 
-white 原二进制 SHA 为 `88b09e3cff560e2ef09cddf16213a34540b09f72c7b66723da0de1fa5c9ab1db`，调整 RPATH 后安装 SHA 为 `c99fd5ffdaa6c65219272cd94211fd45c59fafc19b8750917e53bae29a7d6e02`。实际原链接输入来自 `$CONDA_PREFIX/share/fnit/recon_all_native_full/build/utils/libutils.a`，SHA 为 `e682f769892616f4cdbe35168017808bad4eb7b2aab8c802c120eca87184d8ad`；它与另一个 codeload-probe 构建 archive 不同，清单保留各自实际来源。`rebuilt=false`、`reused_kind=task02_independent_fixed_source_conda`、`rpath_adjusted=true` 明确记录本次操作。完整新 Conda 环境、全部原生组件正向 setup 和无预装软件的物理隔离尚未验收；这些安装检查不代替影像精度和整例性能验收。
+white 原二进制 SHA 为 `88b09e3cff560e2ef09cddf16213a34540b09f72c7b66723da0de1fa5c9ab1db`，调整 RPATH 后安装 SHA 为 `c99fd5ffdaa6c65219272cd94211fd45c59fafc19b8750917e53bae29a7d6e02`。实际原链接输入来自 `$CONDA_PREFIX/share/fnit/recon_all_native_full/build/utils/libutils.a`，SHA 为 `e682f769892616f4cdbe35168017808bad4eb7b2aab8c802c120eca87184d8ad`；它与另一个 codeload-probe 构建 archive 不同，清单保留各自实际来源。`rebuilt=false`、`reused_kind=task02_independent_fixed_source_conda`、`rpath_adjusted=true` 明确记录本次操作。完整新 Conda 环境、全部原生组件正向 setup 和无预装软件的物理隔离尚未验收；这些安装检查不代替影像精度和整例性能验收；实际安装产物的两例原始T1完整运行及误差范围另见[当前结果](../../validation/recon_all/optimizations/20261002_parallel/FINAL_RESULTS.md)。
 
 ## 6. 原软件调用、许可证与参考
 
