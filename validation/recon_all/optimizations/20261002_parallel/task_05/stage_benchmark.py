@@ -22,17 +22,19 @@ def main():
     p.add_argument('--mode',choices=['stage','stage-conda','baseline'],required=True)
     a=p.parse_args();cfg=json.loads(a.config.read_text())
     out=Path(cfg['output']);out.mkdir(parents=True,exist_ok=False)
-    torch.set_num_threads(4)
+    torch.set_num_threads(4);torch.set_num_interop_threads(4)
     # 建立CUDA上下文后才允许CPU Numba编译；不更改模型精度或自动重试。
     prime=torch.empty(1,device='cuda:0');torch.cuda.synchronize();del prime
     src=Path(__file__).resolve().parents[5]/'src/fnit/recon_all'
     report={'mode':a.mode,'code_commit':cfg['code_commit'],'script_sha256':sha(__file__),
       'source_sha256':{f.name:sha(f) for f in src.glob('*.py') if f.name.startswith('mni_') or f.name.startswith('ca_register_inverse')},
-      'threads':4,'torch_threads_actual':torch.get_num_threads(),'cpu_affinity':sorted(os.sched_getaffinity(0)),
+      'threads':4,'torch_threads_actual':torch.get_num_threads(),'torch_interop_threads_actual':torch.get_num_interop_threads(),'cpu_affinity':sorted(os.sched_getaffinity(0)),
       'thread_environment':{key:os.environ.get(key) for key in ['CUDA_VISIBLE_DEVICES','OMP_NUM_THREADS','MKL_NUM_THREADS','OPENBLAS_NUM_THREADS','NUMBA_NUM_THREADS','PYTORCH_NO_CUDA_MEMORY_CACHING']},
       'resource_sha256':{str(f):sha(f) for f in [Path(cfg['weights'])/'synthmorph.deform.3.h5',Path(cfg['assets'])/TEMPLATE_DIR/'mni152.1.0mm.cropped.nii.gz',Path(cfg['assets'])/TEMPLATE_DIR/'mni152.1.0mm.nii.gz']},
       'pid':os.getpid(),'torch':torch.__version__,'cpu_load_before':os.getloadavg(),
       'overall_equivalence':'not_assessed','strict_138':'unchanged; not rerun in this stage',
+      'cache_scope':'new model per case; explicit one-element CUDA bootstrap; filesystem/Numba/Triton caches not cleared; not an uncached cold claim',
+      'model_transform_source_sha256':{str(f.relative_to(src.parent)):sha(f) for f in src.parent.rglob('*.py') if 'synthmorph' in str(f) or f.name=='_transforms.py'},
       'cases':{}}
     rows=[]
     for case in cfg['cases']:
@@ -74,6 +76,9 @@ def main():
         for name,path in targets.items():item['comparisons'][name+'_vs_frozen']=image_comparison(path,frozen[name])
         item['residual']=residual(targets['forward'],targets['inverse'],mri/'brainmask.mgz')
         item['cpu_load_after']=os.getloadavg()
+        item['torch_memory_status']='unavailable_disabled_allocator' if os.environ.get('PYTORCH_NO_CUDA_MEMORY_CACHING') is not None else 'available'
+        item['torch_peak_allocated']=None if item['torch_memory_status']!='available' else torch.cuda.max_memory_allocated()
+        item['torch_peak_reserved']=None if item['torch_memory_status']!='available' else torch.cuda.max_memory_reserved()
         rows.extend([ident,step,seconds] for step,seconds in item['timings'].items())
         (out/'report.json').write_text(json.dumps(report,indent=2)+'\n')
         print(ident,json.dumps(item),flush=True)
