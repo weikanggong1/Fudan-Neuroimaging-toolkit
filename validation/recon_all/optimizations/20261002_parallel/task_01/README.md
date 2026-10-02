@@ -45,20 +45,20 @@ reconstruction_report = run_recon_all_python(
 | t1 | 必填，单幅原始3D结构像；生产不读取官方参考结果 |
 | subject_dir | 必填，空目录；成功或失败报告写在此目录 |
 | weights_dir / assets_dir | 必填，既有SHA-256/大小校验的资源；无明确再分发许可者仅从作者源获取 |
-| device | cuda:0；显式CPU接口用于兼容诊断；生产GPU运行不静默回退CPU |
+| device | cuda:0；无索引cuda在已初始化API取当前索引、冷进程取0后显式prime；worker使用固定索引；显式CPU接口用于兼容诊断；生产GPU运行不静默回退CPU |
 | threads | 4；正整数，半球workers=2时至少2，奇数每侧向下取整 |
 | native_bin_dir | None，当前Conda bin或FNIT_RECON_ALL_BIN_DIR；禁止系统预装脑影像程序 |
 | profile_stages | False，生产不额外插入每子步骤同步；进程生命周期终点必须等待完成 |
-| cuda_allocator_cache | auto；enabled/disabled只能在CUDA初始化前选择 |
+| cuda_allocator_cache | auto；enabled/disabled只能在CUDA初始化前选择；worker按新进程环境明确选择enabled/disabled，已初始化父进程的实际缓存状态可为unknown |
 | hemisphere_workers | 1或2，默认1；2要求调用者CPU/CUDA autocast均关闭，不启用FP16/BF16 |
 
 输出结构保持既有138项清单：mri为1 mm conform网格，surf为surface RAS/mm，label为有对应顶点的标签/注释，stats为脑区统计。厚度单位mm，面积mm²，体积mm³，曲率mm⁻¹。半球共享的 `mrisps.wpa.mgz`、`mrisps.white.mgz` 最终保留右侧诊断；surface.defects按左侧生成、右侧累计。
 
-主报告 `fnit-native-free-run.json` 新增 `hemisphere_scheduling`：workers、总预算、四个groups；每组包含values（双侧原函数结果）、workers（双侧独立报告）、group_wall_seconds、private_copy_seconds、publish_seconds、cleanup_seconds、worker_span_seconds、worker_sum_seconds、overlap_seconds，以及device_process_tree同期显存采样。所有秒数为墙钟或明确标注的CPU秒数，显存为字节。GPU UUID、最大采样间隔、失败采样及外部进程另列；unavailable不能当作零显存。
+主报告 `fnit-native-free-run.json` 新增 `hemisphere_scheduling`：workers、总预算、四个groups；每组包含values（双侧原函数结果）、workers（双侧独立报告）、group_wall_seconds、private_copy_seconds、publish_seconds、cleanup_seconds、worker_span_seconds、worker_sum_seconds、overlap_seconds，以及device_process_tree同期显存采样。所有秒数为墙钟或明确标注的CPU秒数，显存为字节。GPU UUID、最大采样间隔、失败采样及外部进程另列；短UUID通过已有context实际设备或唯一完整UUID匹配，歧义时unavailable；unavailable不能当作零显存。
 
-每组独立报告位于 scripts/OPERATION.hemisphere-group.json，完整worker stdout/stderr位于 scripts/OPERATION.H.worker.log；原生其他日志加阶段及半球前缀，保留固定文件名的来源。私有影像正常成功/失败均删除，不进入报告交付；清理自身失败则组状态failed并记录残留私有路径。最终报告采用临时元数据+replace；写出失败仍在内存主报告中标failed，保留原始worker异常与收尾错误，不产生成功的临时JSON。
+每组独立报告位于 scripts/OPERATION.hemisphere-group.json，完整worker stdout/stderr位于 scripts/OPERATION.H.worker.log；原生其他日志加阶段及半球前缀，返回metadata映射到真实发布路径，保留固定文件名的来源。私有影像正常成功/失败均删除，不进入报告交付；清理自身失败则组状态failed并记录残留私有路径。最终报告采用临时元数据+replace；写出失败仍在内存主报告中标failed，保留原始worker异常与收尾错误，不产生成功的临时JSON。
 
-失败行为：worker异常、未知共享写入、输入删除或不完整报告均失败，取消同组进程树，不发布该组计算结果。逐文件发布遇到I/O错误则主报告明确failed并保留已发布路径，没有跨文件事务回滚。输入/资源/线程/allocator错误继续沿用原接口异常。默认串行接口兼容；并行调度要求Linux的/proc与POSIX进程组，Windows通过WSL或Linux服务器运行；完整整例只由协调者统一验证。
+失败行为：worker异常、未知共享写入、输入删除或不完整报告均失败，取消同组进程树，leader退出后仍对自有PGID中活跃的孙进程TERM、宽限3秒后KILL，不发布该组计算结果。逐文件发布遇到I/O错误则主报告明确failed并保留已发布路径，没有跨文件事务回滚。输入/资源/线程/allocator错误继续沿用原接口异常。默认串行接口兼容；并行调度要求Linux的/proc与POSIX进程组，Windows通过WSL或Linux服务器运行；完整整例只由协调者统一验证。
 
 batch接口 `run_recon_all_python_batch(..., hemisphere_workers=2, threads=4)` 向每个设备独立被试进程传递相同参数。每设备同一时刻一个被试；threads是每被试总预算，多GPU的全机预算由调用者另行安排。
 
@@ -96,6 +96,7 @@ fnit-recon-all /data/sub-01_T1w.nii.gz /results/sub-01 \
 - c457eae：固定worker候选源码路径，首次CUDA用显式FP32单元素分配再同步；AB/BA测试均完成，保留此前首同步失败。
 - f9f570a：基于metrics真实配对，将指标从final放置worker移到父进程串行；接口兼容回归43项及14子测试通过。
 - 42589db：清理、日志关闭、设备采样收尾、最终元数据失败保护；故障注入与回归46项及14子测试通过。成功路径计算算法未改，新增失败路径测试使用独立源码快照。
+- a3681e0：无索引CUDA解析、leader退出后孙进程取消、日志发布路径、worker缓存继承、短GPU UUID采样边界修复；50项及14子测试通过，含真实自有孤儿孙进程取消与无关进程保留。
 - 测量期间worker导入路径固定补丁见 measured_source_delta.patch；报告绑定基线commit与每个实际Python源码SHA-256，不能标为无改动e44451a运行。
 
 ## 7. 原实现和参考文献
