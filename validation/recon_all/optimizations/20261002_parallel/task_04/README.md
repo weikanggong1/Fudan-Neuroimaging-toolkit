@@ -80,46 +80,95 @@ python -m fnit.recon_all.mris_register_run output/lh.sphere subject/surf/lh.smoo
 
 ```bash
 mris_remesh --remesh --iters 3 --input subject/surf/lh.orig.premesh --output reference/lh.orig
-mris_sphere subject/surf/lh.inflated reference/lh.sphere
-mris_register reference/lh.sphere assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif reference/lh.sphere.reg
+mris_sphere -threads 4 subject/surf/lh.inflated reference/lh.sphere
+mris_register -threads 4 subject/surf/lh.sphere assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif reference/lh.sphere.reg
 ```
 
 生产调用 FNIT 自有阶段；保留完整Conda源码构建拓扑GA与相交修复。官方程序只用于隔离对照。
 
 ## 真实数据精度、耗时与记录
 
-本轮测量起点 `f07cf59c7f51ae1393e2578f141b4d130ed7801a`，生产源码候选 `9f7bb7a5af72e7572fcb8de617575645f29f51d7`。冻结两例FNIT自产检查点仅作为同输入来源。配对结果写入 `comparison.json` 和 `timings.csv`；每条原始 `report.json` 包含源码/输入/图谱哈希、实际commit、线程/TF32/精度、同步结束、负载和分步轨迹。`run_stage.py`、`compare_stages.py` 是复现入口。
+冻结基线 `f07cf59c7f51ae1393e2578f141b4d130ed7801a`，候选生产源码 `9f7bb7a5af72e7572fcb8de617575645f29f51d7`。两例真实FNIT自产检查点、四个半球完成24条配对阶段命令、12条隔离官方参考命令和4条自产sphere→register连续链。阶段输入SHA相同；完整迭代、精度、tie-break、停止条件、两pass注册及翻折清理保持原设置。全部计时在共用flock下，目标GPU UUID在Python导入前指定，总线程4。
 
-初始探索cProfile未经后来统一的共用锁，只用于定位：单例remesh约189秒（含剖析开销），20次初始边拓扑构建约66.6秒累计，17次rebuild约87秒累计，13次面法向约20.2秒累计；嵌套时间不相加。正式计时另列。GPFS旧锁返回ENOLCK的首轮没有执行，失败日志保留。官方首次remesh因对照脚本工作目录切换后的相对路径失败，已统一绝对路径并重跑；0.0128秒失败不纳入耗时比较。修复后全部CPU/GPU计时使用远端本地共用flock。
+结果索引：`measured/completed_summary/completion.json`；完整几何及轨迹：`comparison.json`；官方原始误差：`official.json`；连续输入传递：`chains.json`；计时：`timings.csv`。`source_manifest_verification.json`确认24次配对执行和4次链内注册记录的生产Python文件SHA逐一对应冻结Git提交，线程4、TF32开启且无autocast；没有生产源码漂移。每次执行的源码、脚本、输入、图谱、官方程序哈希、实际负载、同步结束和轨迹保存在 `measured/cold_pairs`、`measured/reference`、`measured/chains`。`metadata_manifest.json`逐文件记录原始JSON/CSV大小和SHA-256，不含影像、表面、许可证或编译缓存。
 
-65项CPU专项测试通过；真实lh sphere面几何与顶点法向逐元素一致，非恒定目标的缓存刚体分数/角度/评估次数精确一致。批处理刚体候选曾产生约8.8×10⁻⁶分数差，超过预声明1e-9容差，已撤回并保留诊断；现版采用不改逐候选运算的缓存。
+### 最新阶段冷启动配对
 
-当前已完成的真实计时分开记录，均不代表全流程加速：
+下表为完整Python进程时间，包含导入、空Numba缓存JIT、校验、完整阶段及IO；每次执行各用独立空缓存。AB顺序用于lh，BA用于rh，单次观察列出外部负载，不解释为统计置信区间或整例加速。12组坐标float32存储位、有序面、几何尾部及相应sphere/register轨迹全部精确一致。
 
-| 输入与测量边界 | 候选源码 | 基线秒 | 候选秒 | 加速比 | 几何回归 |
-| --- | --- | ---: | ---: | ---: | --- |
-| sub01/lh remesh，早期混合缓存 | 7d5f69f | 120.283 | 94.204 | 1.277 | 坐标和有序面精确一致 |
-| sub01/lh remesh，独立空Numba缓存、包含导入/JIT/校验/IO | 9f7bb7a | 130.530 | 89.434 | 1.460 | 坐标、float32位、有序面、几何尾部精确一致 |
-| sub01/lh sphere，同一冷启动边界 | 9f7bb7a | 150.162 | 134.810 | 1.114 | 坐标、float32位、有序面、尾部及203次更新轨迹精确一致 |
-| sub01/lh register，完整两pass和清理，同一冷启动边界 | 9f7bb7a | 146.708 | 131.655 | 1.114 | 坐标位/尾部、刚体搜索、两pass停止轨迹及清理计数精确一致 |
+| 输入 | 阶段 | 基线秒 | 候选秒 | 基线/候选 |
+| --- | --- | ---: | ---: | ---: |
+| sub01/lh | remesh | 130.530 | 89.434 | 1.460 |
+| sub01/lh | sphere | 150.162 | 134.810 | 1.114 |
+| sub01/lh | register | 146.708 | 131.655 | 1.114 |
+| sub01/rh | remesh | 119.352 | 89.716 | 1.330 |
+| sub01/rh | sphere | 115.599 | 105.948 | 1.091 |
+| sub01/rh | register | 124.488 | 114.174 | 1.090 |
+| sub02/lh | remesh | 134.908 | 102.895 | 1.311 |
+| sub02/lh | sphere | 126.402 | 115.349 | 1.096 |
+| sub02/lh | register | 153.352 | 138.777 | 1.105 |
+| sub02/rh | remesh | 135.877 | 120.315 | 1.129 |
+| sub02/rh | sphere | 116.284 | 105.624 | 1.101 |
+| sub02/rh | register | 150.938 | 132.491 | 1.139 |
 
-remesh与sphere拓扑均为105598顶点、211192面、Euler=2、一个连通分量，边界/非流形边/重复面/索引退化面均为0；FNIT现有相交检查标记面/顶点均为0。105598个顶点link检查中，非单环、度数异常、不连通环和孤立点均为0。早期内置采样存在49.7秒间隔，不能证明连续显存峰值；现版采用进程外采样，本例最大间隔1.97秒、无查询失败、该CPU阶段自身采样GPU内存为0。sphere自身采样GPU峰值为492830720字节（约0.493GB），候选最大采样间隔4.20秒、无查询失败；该采样不构成连续峰值证明。输出sphere翻折/零面积面/自相交均为0，半径最大偏差5.60×10⁻⁶mm。
+`complete_step_timings.csv`列出API总时间、sphere投影/度量/JIT/拓扑及GPU准备/更新/清理、注册两pass内各原始计时字段和逐轮更新时间之和。嵌套耗时不能相加；remesh正式测量只含完整API时间，初始cProfile用于定位子步骤，不冒充最终分步benchmark。
 
-sub01/lh非计时轨迹回归已完成：每次完整拆边pass、缩边pass及每轮平滑的float64坐标和有序面哈希全部一致，最终float32坐标也一致，见 `trace/`。记录的是每个完整pass后的状态，未记录每条边操作的瞬时状态。
+### 四半球几何检查
 
-第一例双半球6组冷启动配对、6个官方同输入阶段和2条自产sphere→register连续链已完成。第二例对应结果仍在共用锁队列中，完整验收需要12组配对、12个官方阶段和4条连续链。首条自产连续链已实际完成两pass注册（54和51次更新），完整进程133.691秒、消费sphere的SHA核验通过；与冻结同输入注册基线的早期差分已通过：输入SHA、坐标位、尾部、两pass轨迹、刚体分数/角度/评估次数及清理计数全部一致。该链候选先于基线执行，仍另跑AB阶段配对现已完成并独立记录，不将早期链时间替代正式配对。连续链由 `run_chains.py` 校验新sphere生产报告及SHA，再复制到独立输入目录执行完整两pass注册；公开报告保留来源哈希，表面数据仅在私有目录。
+| 输入 | 顶点 | 面 | Euler | 连通分量 | 自相交标记面（remesh/sphere/register） | 翻折面（sphere/register） |
+| --- | ---: | ---: | ---: | ---: | --- | --- |
+| sub01/lh | 105598 | 211192 | 2 | 1 | 0/0/0 | 0/0 |
+| sub01/rh | 104619 | 209234 | 2 | 1 | 0/0/0 | 0/0 |
+| sub02/lh | 119363 | 238722 | 2 | 1 | 0/0/0 | 0/0 |
+| sub02/rh | 118303 | 236602 | 2 | 1 | 0/0/0 | 0/0 |
 
-首个官方remesh在同一真实premesh输入上用时20.423秒，候选FNIT API完整阶段用时86.312秒、完整Python进程89.434秒；有序面与顶点坐标/float32存储位均精确一致，见 `first_official_remesh_comparison.json`。官方CLI与FNIT API/完整进程的边界分列，不将单阶段时间比外推到整例。
+全部阶段边界、非流形边、重复面、索引退化面和逐顶点link异常为0；sphere/register零面积面为0、半径最大偏差不超过5.68×10⁻⁶mm。自相交沿用FNIT检查规则，排除共享顶点的面、平面容差1e-6。坐标及拓扑精确相同时复用同一质量检查，并在JSON注明理由。最终float32表面检查和清理过程中的负面计数分别保留，不互相替代。
 
-官方sphere同输入命令耗时157.435秒，FNIT候选API耗时131.044秒、完整进程134.810秒；有序面对应，但同索引顶点位移均值3.104mm、P99=8.934mm、最大12.154mm。候选与冻结FNIT基线逐位一致，因此本轮优化未改变这组已有差异；与官方sphere的等效为 `not_assessed`，不以本轮FNIT基线回归替代官方精度结论。原始报告见 `two_official_stage_comparison.json`。另做无缩放/无平移的纯旋转诊断，旋转后均值2.994mm、P99=8.257mm、最大10.847mm，差异不只是整体朝向；该诊断不替代原始比较或验收。
+sub01/lh的remesh额外记录24个完整拆边pass、缩边pass和平滑后的float64坐标/有序面哈希，全部一致，最终float32一致，见 `trace/`；没有每条边操作的瞬时跟踪，该轨迹检查不计时。真实脑图例子保存于远端受控任务目录，公开仓库仅存图像及输入SHA元数据 `private_figure_metadata.json`；显示每12个面取一个，全部几何指标使用所有顶点和面。
 
-官方完整register同输入命令耗时187.436秒，已实际完成的FNIT自产链注册API耗时130.261秒、完整进程133.691秒。有序面、顶点坐标及float32存储位与官方结果精确一致（最大位移0mm），见 `three_official_stage_comparison.json`；该候选来源明确标为连续链，正式AB配对已完成，结果见 `first_hemisphere_comparison.json`。
+### 官方同输入阶段
 
-首条自产链与正式同输入候选的完整注册比较也通过，输入sphere生产/消费哈希和输出坐标位、尾部、刚体/两pass/清理轨迹全部一致，见 `first_chain_formal_comparison.json`。第一例双半球2/4条自产链已与正式同输入候选逐位核对通过，见 `first_subject_summary/chains.json`；第二例双半球待实际执行。
+官方使用安装版FreeSurfer 8.2.0-1，仅在隔离benchmark运行；生产仍使用FNIT及既有固定源码Conda组件。以下分别列原程序CLI、FNIT API（完整阶段含IO）和FNIT完整Python进程，三种计时边界保持分开。距离单位为surface RAS mm，有序面对应后按同顶点索引比较；所有候选仍与冻结FNIT基线逐位一致。
 
-第一例右半球独立冷启动配对：remesh 119.352→89.716秒（1.330倍），sphere 115.599→105.948秒（1.091倍），register 124.488→114.174秒（1.090倍），三者输入SHA、有序面、坐标位、几何尾部和相应轨迹精确一致。右半球拓扑104619顶点、209234面、Euler=2、一个连通分量，边界/非流形/重复/索引退化面均为0。全量拓扑、顶点link、相交和翻折检查见 `first_subject_summary/comparison.json`。官方右半球remesh 18.940秒、register 175.816秒，坐标与候选精确一致；sphere 167.468秒，同索引位移均值2.621mm、P99=4.691mm、最大13.323mm。该sphere差异同样已存在于冻结FNIT基线；原始比较见 `first_subject_summary/official.json`。
+| 输入/阶段 | 官方CLI秒 | FNIT API秒 | FNIT进程秒 | 位移均值/P99/最大mm |
+| --- | ---: | ---: | ---: | --- |
+| sub01/lh/remesh | 20.423 | 86.312 | 89.434 | 0.000/0.000/0.000 |
+| sub01/lh/sphere | 157.435 | 131.044 | 134.810 | 3.104/8.934/12.154 |
+| sub01/lh/register | 187.436 | 128.120 | 131.655 | 0.000/0.000/0.000 |
+| sub01/rh/remesh | 18.940 | 86.168 | 89.716 | 0.000/0.000/0.000 |
+| sub01/rh/sphere | 167.468 | 102.978 | 105.948 | 2.621/4.691/13.323 |
+| sub01/rh/register | 175.816 | 111.188 | 114.174 | 0.000/0.000/0.000 |
+| sub02/lh/remesh | 24.186 | 99.649 | 102.895 | 0.000/0.000/0.000 |
+| sub02/lh/sphere | 164.699 | 111.674 | 115.349 | 1.272/3.534/6.360 |
+| sub02/lh/register | 228.375 | 135.653 | 138.777 | 0.389/1.098/1.492 |
+| sub02/rh/remesh | 21.859 | 117.377 | 120.315 | 0.000/0.000/0.000 |
+| sub02/rh/sphere | 88.001 | 102.574 | 105.624 | 2.241/6.050/8.338 |
+| sub02/rh/register | 198.701 | 129.296 | 132.491 | 0.000/0.000/0.000 |
 
-本任务验收分列：同输入阶段、自产受影响连续链、协调者两例原T1空目录整例。保留138项严格诊断；整体指标等效为 `not_assessed`，最终逐区厚度/面积/体积及whole指标由协调者验收。真实脑图只保存为受控验证资产，不向公开仓库发布影像或表面数据。
+四组remesh和三组register与官方有序面和float32坐标位精确一致；sub02/lh register位移均值0.389mm、P99=1.098mm、最大1.492mm。四组sphere和这组register差异均已存在于冻结FNIT基线，本轮优化未改变对应坐标；与原软件的整体等效为 `not_assessed`。原始差异不做后验阈值判定。sub01/lh附无平移/无缩放纯旋转诊断：原始均值3.104mm，旋转后2.994mm，说明差异不只是整体朝向；此诊断不替代原始比较或验收。官方内部子步骤没有统一API边界，本轮对照按上述三个完整CLI阶段测量，不将FNIT内部剖析时间与官方总时间混比。
+
+### 自产连续链与整例边界
+
+四条链均实际消费本候选新生成sphere，生产输出SHA=复制后的sphere SHA=register实际输入SHA；完整两pass注册和清理与正式同输入候选的坐标位、尾部、刚体分数/角度/评估次数及停止/清理轨迹一致。
+
+| 输入 | 链内register完整进程秒 | sphere来源SHA与实际输入 | 输出/完整轨迹 |
+| --- | ---: | --- | --- |
+| sub01/lh | 133.691 | 一致 | 精确一致 |
+| sub01/rh | 113.066 | 一致 | 精确一致 |
+| sub02/lh | 133.424 | 一致 | 精确一致 |
+| sub02/rh | 129.460 | 一致 | 精确一致 |
+
+链内register时间另列，包含完整注册进程；已生成sphere的时间在阶段表中，输入复制和排队等待不纳入该列，不把它标为两阶段连续墙钟耗时，也不替代AB/BA配对计时。候选自身进程树GPU采样峰值492830720字节（约0.493GB），候选最大采样间隔4.203秒。外部GPU采样保留峰值、失败次数和最大间隔；它不构成连续显存峰值证明。Torch自身峰值另存各执行原始报告，运行精度保持原float32/float64及TF32，没有改float16。
+
+65项CPU专项测试通过，日志 `final_cpu_tests.log`。真实lh sphere面几何/法向及非恒定目标刚体缓存分数、角度和评估次数精确一致。共享法向接口版本1和失效规则保留，white/pial完整消费回归归任务2。
+
+本任务完成同输入阶段和受影响连续链验收。协调者负责两例原始T1从空输出目录运行的整例、138项严格诊断、逐区厚度/面积/体积和whole指标；整体等效仍为 `not_assessed`，没有将单阶段比值外推到整例。
+
+### 最近版本与验证历史
+
+早期 `7d5f69f` 混合缓存remesh 120.283→94.204秒，几何一致；该记录单独绑定旧源码，不改标为 `9f7bb7a`。初始无统一锁cProfile约189秒，初始拓扑20次66.6秒、rebuild17次87秒、面法向13次20.2秒为嵌套累计，只用于定位。
+
+验证故障保留：GPFS旧锁ENOLCK时未执行；别名导入污染Numba缓存导致首轮sphere导入失败，改为每次空缓存后重跑；官方首轮remesh相对路径因cwd切换失败，改绝对路径后重跑，失败0.0128秒不纳入计时。刚体批处理试验曾产生约8.8×10⁻⁶分数差，超过预声明1e-9容差，已撤回；最终源码采用保持逐候选运算的缓存。早期内置GPU采样间隔49.7秒为已记录限制，正式测量改进程外采样，仍不声称连续峰值。历史部分报告留作版本与测量边界证据，现版结果以 `measured/completed_summary` 为准。
 
 ## 原生组件核查
 
