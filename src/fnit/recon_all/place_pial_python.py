@@ -57,6 +57,7 @@ def place_pial_t1(
     *,
     max_steps: int = 200,
     sampling_backend: str = "cpu",
+    candidate_backend: str = "tree",
     device: str | None = None,
     trace_callback=None,
 ) -> dict:
@@ -72,6 +73,8 @@ def place_pial_t1(
     optional read-only diagnostic sink called after every accepted step.
     ``max_steps`` guards against non-convergence; hitting it raises an error.
     """
+    if candidate_backend not in ("tree", "snapshot"):
+        raise ValueError("candidate_backend must be tree or snapshot")
     if sampling_backend not in ("cpu", "torch", "triton"):
         raise ValueError("sampling_backend must be cpu, torch or triton")
     if sampling_backend != "cpu" and device is None:
@@ -192,7 +195,8 @@ def place_pial_t1(
             candidate, _ = asynchronous_first_step(
                 current, faces, proposal, ripped, fast=True,
                 offsets=displacement, accepted_offsets=momentum,
-                stale_mht_trial=stale_trial, ordered_neighbors=ordered)
+                stale_mht_trial=stale_trial, ordered_neighbors=ordered,
+                candidate_backend=candidate_backend)
             blocked = np.any(proposal != current, axis=1) & np.all(
                 candidate == current, axis=1)
             trial_cropped = np.where(
@@ -243,4 +247,5 @@ def place_pial_t1(
     return {"output": str(output), "hemisphere": hemi, "steps": step,
             "pass_ends": pass_ends, "cleanup": cleanup,
             "sampling_backend": sampling_backend, "device": device,
+            "candidate_backend": candidate_backend,
             "seconds": time.perf_counter() - started}

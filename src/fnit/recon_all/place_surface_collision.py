@@ -463,6 +463,7 @@ def asynchronous_first_step(
     stale_mht_trial: np.ndarray | None = None,
     ordered_neighbors: tuple[np.ndarray, np.ndarray] | None = None,
     min_neighbor_mm: float = 0.01,
+    candidate_backend: str = "tree",
 ) -> tuple[np.ndarray, np.ndarray]:
     """Replay sorted subvolumes with dynamic triangle collision tests.
 
@@ -470,7 +471,12 @@ def asynchronous_first_step(
     retain its unrounded float32 displacement for close-neighbor projection.
     The initial cKDTree is widened by 1 mm to cover all 0.3 mm moves.
     `stale_mht_trial` reproduces face-bucket retention after a rejected trial.
+    `candidate_backend="snapshot"` uses a trial-local conservative CSR and
+    compiled ordered updates for the first fast trial; retained-MHT retries and
+    slow diagnostics use the original tree path. Default remains tree.
     """
+    if candidate_backend not in ("tree", "snapshot"):
+        raise ValueError("candidate_backend must be tree or snapshot")
     xyz = np.asarray(vertices, dtype=np.float32)
     if stale_mht_trial is not None and not fast:
         raise ValueError("retained MHT replay requires fast collision mode")
@@ -507,6 +513,13 @@ def asynchronous_first_step(
     incident_offsets = np.zeros(len(xyz) + 1, dtype=np.int64)
     incident_offsets[1:] = np.cumsum(np.bincount(flat, minlength=len(xyz)))
     maximum_radius = float(initial_radii.max())
+    if candidate_backend == "snapshot" and fast and trial is None:
+        from .place_surface_snapshot import snapshot_ordered_step
+        result = snapshot_ordered_step(xyz, triangles, next_xyz, order, incident, incident_offsets,
+            neighbor_indices if offsets is not None else None,
+            neighbor_valid if offsets is not None else None, offsets, accepted_offsets,
+            geometry, vertex_svi, min_neighbor_mm, tree, initial_centers, initial_radii, maximum_radius)
+        return result, order
     for vertex in order:
         if np.array_equal(next_xyz[vertex], xyz[vertex]):
             continue

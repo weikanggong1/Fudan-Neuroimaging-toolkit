@@ -31,6 +31,7 @@ placement_result = place_pial_t1(
     output="/results/lh.pial.T1",      # 独立结果路径；None 默认写回被试 surf 目录
     max_steps=200,                     # 总接受步数上限，必须为正；未完成四轮时报错
     sampling_backend="triton",        # cpu（默认）、torch 或 triton
+    candidate_backend="snapshot",     # tree（默认）或试步内快照CSR+Numba有序更新
     device="cuda:0",                  # GPU 后端必须显式给出逻辑设备编号
     trace_callback=None,              # 可选诊断回调；默认不保存每步网格
 )
@@ -46,7 +47,7 @@ placement_result = place_pial_t1(
 - `mri/wm.mgz`：自产 WM，用于构造放置强度。
 - `mri/aseg.presurf.mgz`：自产解剖分割标签，用于边界限制。
 
-输出为 `H.pial.T1`，有序面、顶点数、volume geometry 与额外 footer 保持输入表面结构。返回字典包含 output、hemisphere、steps、pass_ends（四轮结束步）、cleanup（相交前后与清理次数）、sampling_backend、device、seconds。trace_callback 接收 `(step, pass_index, coordinates_copy, diagnostics)`；其中 pass_index 从 0 开始，coordinates_copy 是 `(N,3)` float32 的独立拷贝，diagnostics 含 sse、rms、dt、reductions、stop，回调异常向外传播。回调仅用于诊断，不进入接受决策。
+输出为 `H.pial.T1`，有序面、顶点数、volume geometry 与额外 footer 保持输入表面结构。返回字典包含 output、hemisphere、steps、pass_ends（四轮结束步）、cleanup（相交前后与清理次数）、sampling_backend、candidate_backend、device、seconds。trace_callback 接收 `(step, pass_index, coordinates_copy, diagnostics)`；其中 pass_index 从 0 开始，coordinates_copy 是 `(N,3)` float32 的独立拷贝，diagnostics 含 sse、rms、dt、reductions、stop，回调异常向外传播。回调仅用于诊断，不进入接受决策。
 
 GPU 底层可独立调用：
 
@@ -78,6 +79,8 @@ intensity_displacement = sampling_context.gradient(
 ```
 
 MRI 与 affine 变化时必须重建上下文；动态坐标和法向不缓存。无 CUDA、非显式设备、不支持的后端、非法形状、非有限坐标/参数会报错，不静默回退。活动顶点非正 sigma 会报错，避免原 CPU 源码负 sigma 的非终止循环。Torch 后端按 chunk_size 返回完整结果；Triton 不裁剪采样候选、sigma 范围或顶点数。坐标矩阵乘法保留逐项 FP32 舍入，插值/指数/距离累加沿用原 FP64，结果写回 FP32；禁用 Triton 乘加融合，不使用 FP16/BF16，不改变全局 TF32/autocast。
+
+`candidate_backend="snapshot"` 在每次首轮试步按完整候选构建 CSR，并在 Numba 中依原顶点序逐个更新。动态面几何仍来自当时已接受的坐标；每面保留原查询半径过滤和相交谓词。候选球以本试步最大位移的两倍加0.01mm作为保护界，中心变化不超过界、半径变化不超过两倍界，因此原球扩展三倍界覆盖全部动态查询。投影终点超过界时抛 ValueError，不裁剪候选。拒绝试步有 retained-MHT 状态及 slow 诊断仍走原 tree 路径；不跨试步或动态坐标版本复用候选。此选择与 sampling_backend 独立，默认 tree。
 
 子空间 `_assign_vertices(face_svi, incident, offsets, ripped)` 是内部函数：输入分别是每面 int32 子空间、原序关联面 CSR 编号、长度 N+1 的 int64 偏移及 N 个 bool。输出 N 个 int32 编号；无关联面/已 ripped 为 -1，不同关联面空间为 64，同空间保留原编号。它不读写坐标，不做接受更新，无动态索引缓存；对外 `subvolume_assignment` 和 `asynchronous_first_step` 接口保持不变。
 
@@ -122,7 +125,7 @@ mris_place_surface --pial --lh --i "$SUBJECT_DIR/surf/lh.white" \
 
 - 本轮冻结起点：f07cf59c7f51ae1393e2578f141b4d130ed7801a，包含协作规则；原生产 main 基线6f67cc06。
 - 2026-10-02 第一轮：Torch 首轮四半球数值exact；性能无收益。首次 CUDA 初始化 OOM 与报告 UUID 序列化失败保留，未标成成功完整报告。
-- 2026-10-02 本更新：Numba 顶点子空间分配；显式 Torch/Triton MRI 快照；完整 pial opt-in 后端与每接受步诊断接口。最终 commit 和实际收益由专项报告记录。
+- 2026-10-02 本更新：Numba 顶点子空间分配；显式 Torch/Triton MRI 快照；试步内完整候选 CSR 与编译有序更新；完整 pial opt-in 后端与每接受步诊断接口。最终 commit 和实际收益由专项报告记录。
 - 旧 native CUDA intensity pilot 与20261001完整Python pial记录保留原版本和范围，不改标为本轮结果。
 
 ## 7. 安装、资源、原实现与参考文献
