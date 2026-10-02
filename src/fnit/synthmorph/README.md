@@ -1,6 +1,6 @@
 # SynthMorph 源码目录
 
-本目录实现 FreeSurfer 8.2 `mri_synthmorph` 对应的 PyTorch 配准路径。`models.py` 定义网络并读取官方 HDF5 权重，`spatial.py` 实现采样、积分和变换组合，`pipeline.py` 提供 `SynthMorph`、`RegistrationResult` 和 `apply_transform`，`fsl_warp.py` 将联合/非线性模型的 RAS warp 转为 FSL relative warp。运行时不调用 FreeSurfer、TensorFlow、VoxelMorph 或 Neurite。
+输入输出、Python/命令行参数、原软件调用、最新真实数据精度与耗时、脑图及更新记录统一维护在[功能说明](../../../docs/synthmorph/README.md)。
 
 ## Python 单被试示例
 
@@ -76,3 +76,4 @@ mri_synthmorph register -m joint \
 第一个位置参数是 moving，第二个是 fixed；`-o` 保存 fixed 网格上的 moving，`-t` 保存 moving→fixed 变换，`--fsl-warp` 保存可由 `applywarp` 读取的 fixed 网格位移场。完整参数、双向输出、apply 命令、源码对应、当前 benchmark 和示意图见[功能说明](../../../docs/synthmorph/README.md)。
 
 0.14 的 12 例真实 T1w 报告由 `pipeline.py` `e680d3…`、`spatial.py` `9c629a…` 生成。当前两文件的 `70e97c…`、`dab615…` 保留 registration linear 路径，关系见[源码等价证明](../../../validation/runtime_dependencies/synthmorph_linear_source_equivalence.public.json)；12 例没有重跑新增的 FSL warp 输出。该旧对照中，GPU moved Pearson 最低 `0.994337`，位移向量平均误差均值 `0.079139 mm`，FNIT/FreeSurfer 完整命令中位数为 `15.780/116.594 s`，FNIT 峰值 CUDA allocation 为 `13.426 GB`；CPU moved Pearson 最低 `0.994810`。新增转换在一对公开真实 T1w 上与 FSL applywarp 对照，Pearson 为 `0.999999999967`，Torch/FSL 含读写时间为 `2.795/40.892 s`。计时设备分别是 GPU/CPU；具体输出、精度、图片和边界见[功能说明](../../../docs/synthmorph/README.md)。
+本目录提供 PyTorch 实现，运行时不调用原软件。[本轮 FNIRT 与完整 4D 重采样验收](../../../validation/registration_lossless_20261002/README.md)记录冻结基线、逐位比较和三个 pipeline 的端到端测试。

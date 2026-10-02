@@ -39,7 +39,7 @@ CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹�
 | [SynthSR](docs/synthsr/README.md) | FreeSurfer `mri_synthsr` | 合成 1 mm T1w 图像。 |
 | [TorchFAST](docs/fast/README.md) | FSL `fast` | 三组织分割、部分体积分数与偏置场。 |
 | [FastVBM](docs/fast_vbm/README.md) | FSL `fslvbm` | 从 T1w 生成标准空间灰质、Jacobian 与调制灰质图；[全流程 benchmark](validation/fast_vbm/README.md)。 |
-| [segment_4_subregions](docs/subregions/README.md) | FreeSurfer `segment_subregions brainstem/thalamus/hippo-amygdala` | 一张 T1 完成脑干、双侧丘脑、海马和杏仁核分割，保存原网格标签、110 项硬/软体积及高分辨率结果；CPU/GPU 均支持。[完整 benchmark](validation/subregions/segment_4_subregions/raw_precision_analysis/README.md)：原始 T1 7.27 分钟，同阶段 7.89 分钟；原始 T1 丘脑细核官方加权 Dice 0.7758→0.9151，左/右海马 0.6785/0.6344→0.8332/0.7426。 |
+| [segment_4_subregions](docs/subregions/README.md) | FreeSurfer `segment_subregions brainstem/thalamus/hippo-amygdala` | 一张 T1 完成脑干、双侧丘脑、海马和杏仁核分割，保存原网格标签、110 项硬/软体积及高分辨率结果；CPU/GPU 均支持。[全流程 benchmark 与官方重复性](validation/subregions/reproducibility_20261002/README.md)：原始 T1 计算 4.33–5.80 分钟；两类输入各三次完整运行，全部细标签重复零差异；同阶段丘脑细核官方加权 Dice 0.9531→0.9708。 |
 | [run_recon_all_python](docs/recon_all/README.md) | FreeSurfer `recon-all` | 从 T1w 生成脑分割、皮层表面、顶点指标与脑区统计。 |
 
 ### fMRI
@@ -65,7 +65,7 @@ CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹�
 | [TorchMMORF](docs/mmorf/README.md) | FSL `MMORF` | 多标量与扩散张量联合配准，自动估计线性初始化。 |
 | [TorchBEDPOSTX](docs/bedpostx/README.md) | FSL `bedpostx` | 纤维方向、体积分数与后验不确定性。 |
 | [TorchProbtrackX](docs/probtrackx/README.md) | FSL `probtrackx2` | 概率纤维追踪、路径密度和连接矩阵。 |
-| [DMRIPipeline](docs/dmri_pipeline/README.md) | UK Biobank dMRI pipeline（FSL `topup`、`eddy`、`dtifit`、TBSS） | 读取单被试原始 BIDS 或 UKB 格式 DWI；无 T1w 用 TBSS，有 T1w 可选 MMORF；生成九张标准空间扩散参数图。[最新组件优化](validation/dmri_pipeline/lossless_20261002.md)保持原 FNIT 输出逐值一致：EDDY 一次配对 484.75→404.31 s，固定 warp 九图传播约 2 倍；经典 NODDI 尚无整体提速。 |
+| [DMRIPipeline](docs/dmri_pipeline/README.md) | UK Biobank dMRI pipeline（FSL `topup`、`eddy`、`dtifit`、TBSS） | 原始 AP/PA 或 BIDS DWI → 九张 native/标准参数图；无 T1w 用 TBSS，有 T1w 可选 MMORF。[最新同 raw 整链](validation/dmri_pipeline/end_to_end_20261002.md)：TBSS＋AMICO 两轮 FNIT 7.58–8.45 分钟、独立 FSL＋AMICO 33.24–36.12 分钟；标准九图固定 ROI r=0.419–0.810，尚未数值等价。 |
 | [UKBConnectome_pipeline](docs/connectome/README.md) | BIDS DWI/T1 结构连接组网 | 从原始 BIDS 自动执行 TOPUP、EDDY、必要时的官方 recon-all，并从一次追踪输出单套或多套 atlas 矩阵；[真实数据对照](validation/connectome/ds004666/README.md)。 |
 
 ### 后续分析（Post analysis）

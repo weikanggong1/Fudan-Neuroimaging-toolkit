@@ -2,11 +2,11 @@
 
 [返回首页](../../README.md) · [源码目录](../../src/fnit/fast_vbm/) · [TorchFAST](../fast/README.md) · [TorchFNIRT](../fnirt/README.md) · [权重](../WEIGHTS.md) · [验证状态](../../validation/fast_vbm/README.md)
 
+## 1. 功能简介与流程
+
 `FastVBM` 接收一幅原始 3D T1w 和一幅 GM 模板，输出输入空间的脑提取及三组织分割结果，以及模板空间的 warped GM、nonlinear-only Jacobian 和 modulated GM。它是单被试接口，不负责批量调度。
 
 流程在 Python 进程内运行，不启动 FreeSurfer 或 FSL 可执行文件。CUDA 默认允许 TF32 matmul 和 cuDNN 内核；输入、模型权重、主要图像张量和 NIfTI 输出仍为 float32，不启用 float16 或 bfloat16。实际开关写入 `fast_vbm_report.json`。
-
-## 流程策略
 
 ```mermaid
 flowchart TD
@@ -34,7 +34,9 @@ flowchart TD
     classDef default fill:#ffffff,stroke:#000000,color:#000000;
 ```
 
-## 输入
+## 2. Python 调用、输入与输出
+
+### 输入
 
 | 输入 | 类型 | 约束 | 用途 |
 |---|---|---|---|
@@ -46,7 +48,7 @@ flowchart TD
 
 省略 `reference_mask` 时，FastVBM 从 `template > 0` 构造显式 mask，并在 QC 中标记为派生 mask。复现某次 FSL/UKB 运行时，应传入该运行实际使用的 reference mask；任意 mask 或派生 mask 都不能作为与 FSL 数值等价的证据。
 
-## 单被试 Python 调用
+### 单被试 Python 调用
 
 先安装 SynthStrip 和 SynthMorph 官方权重：
 
@@ -140,7 +142,7 @@ result.jacobian.save(path="jacobian_nonlinear.nii.gz")  # 输出路径：非线�
 result.modulated_gm.save(path="modulated_gm.nii.gz")  # 输出路径：调制 GM
 ```
 
-### 构造参数
+#### 构造参数
 
 ```text
 FastVBM(
@@ -168,7 +170,9 @@ FastVBM(
 | `synthmorph_weights` | SynthMorph deform checkpoint 或目录；仅 SynthMorph 分支读取 |
 | `bias_correction` | 是否让 TorchFAST 估计平滑乘性 bias field，默认开启 |
 | `registration_backend` | `"synthmorph"` 或 `"fnirt"` |
-| `synthmorph_*` | SynthMorph 网络空间、正则化超参数和 velocity integration steps |
+| `synthmorph_extent` | 网络输入立方网格边长，默认 256；仅 SynthMorph 分支使用 |
+| `synthmorph_hyper` | 网络正则化超参数，默认 0.5；仅 SynthMorph 分支使用 |
+| `synthmorph_steps` | stationary velocity 的积分步数，默认 7；仅 SynthMorph 分支使用 |
 | `fnirt_strides` | FNIRT 四层 reference-grid 下采样因子 |
 | `fnirt_steps` | FNIRT 四层最大迭代数 |
 | `fnirt_input_fwhm_mm` | moving GM 的四层 Gaussian FWHM |
@@ -178,7 +182,93 @@ FastVBM(
 
 公开 `FastVBM` 始终运行本包 `TorchFLIRT`，不接受外部 affine。固定 affine 仅用于仓库内部诊断，不属于公开 API。
 
-## 单被试命令行
+### 两个非线性后端
+
+两个后端共用同一份 TorchFAST GM、TorchFLIRT 结果、template grid、FSL 坐标转换、TorchApplyWarp、dense-field Jacobian 和 modulation。它们只在 nonlinear pull field 的估计方法上不同。
+
+| 项目 | `registration_backend="synthmorph"` | `registration_backend="fnirt"` |
+|---|---|---|
+| 实现 | `fnit.synthmorph.SynthMorph(model="deform")` | `fnit.fnirt.TorchFNIRT` |
+| 初始化 | TorchFLIRT affine，`mid_space=False` | TorchFLIRT input → reference FSL scaled-mm affine |
+| 形变模型 | 官方 SynthMorph deform 网络和 stationary velocity integration | fixed-grid cubic B-spline residual displacement |
+| 目标和优化 | checkpoint 定义的学习型配准 | 强度尺度 + SSD、bending energy、LM 与 matrix-free PCG |
+| 输出 pull | fixed-grid target → source world-RAS displacement | 内部 FSL scaled-mm residual，随后转为相同 world-RAS pull |
+| mask | 网络没有 reference-mask 输入 | GM 配准关闭 implicit masks，按 schedule 使用显式 reference mask |
+| checkpoint | `synthmorph.deform.3.h5` | 无 |
+
+#### FNIRT GM 掩膜
+
+FastVBM 的默认 GM 配准参数与 `GMFNIRTConfig()` 一致，按 FSL
+`GM_2_MNI152GM_2mm.cnf` 设置 `--imprefm=0 --impinm=0`。输入 GM 和模板中的零值
+不会因隐式掩膜而自动排除；显式 `reference_mask` 按 GM schedule 在最后一级启用。
+省略显式 mask 时，FastVBM 使用 `template > 0` 派生 mask。复现 FSL 运行应提供
+当时实际使用的 mask。直接 `TorchFNIRT()` 则使用 FSL 无配置文件的默认预设，
+SynthMorph 网络不消费 reference mask。
+
+### 返回值和文件输出
+
+`FastVBM.run()` 返回 `FastVBMResult`，同时保存结果。`FastVBM(...)()` 只返回内存结果。
+
+| Python 属性 | 内容 |
+|---|---|
+| `brain`、`brain_mask` | 输入 T1 网格的脑图和二值 mask |
+| `fast` | `FASTResult`；含三类 PVE、分割、mixel、bias 和 restored T1 |
+| `registration` | `VBMRegistrationResult`；含模板空间结果和配准 QC |
+| `pve_gm` | `fast.pve_gm` 的便利属性 |
+| `warped_gm` | affine 与所选 nonlinear backend 共同重采样后的 GM |
+| `jacobian` | nonlinear-only pull Jacobian，不含 FLIRT affine determinant |
+| `modulated_gm` | `warped_gm * jacobian` |
+| `settings` | 设备、TF32、mask 来源、后端和实际参数 |
+| `timing_sec` | 脑提取、FAST、配准/Jacobian/modulation 和总墙钟时间 |
+
+`timing_sec` 包含读取和输出转回 CPU，不包含 `FastVBMResult.save()` 的 NIfTI 写盘。首次调用可能包含 SynthStrip 或 SynthMorph checkpoint 延迟加载。
+
+两个后端保存相同的 13 幅 NIfTI：
+
+| Python 键 | 文件名 | 网格 | 含义 |
+|---|---|---|---|
+| `brain` | `T1_brain.nii.gz` | 输入 T1 | mask 外清零的 T1 |
+| `brain_mask` | `brain_mask.nii.gz` | 输入 T1 | 二值脑 mask |
+| `pve_csf` | `T1_brain_pve_0.nii.gz` | 输入 T1 | CSF PVE |
+| `pve_gm` | `T1_brain_pve_1.nii.gz` | 输入 T1 | GM PVE，配准 moving image |
+| `pve_wm` | `T1_brain_pve_2.nii.gz` | 输入 T1 | WM PVE |
+| `hard_segmentation` | `T1_brain_seg.nii.gz` | 输入 T1 | PVE 前硬分类 |
+| `pve_segmentation` | `T1_brain_pveseg.nii.gz` | 输入 T1 | 最大 PVE 分类 |
+| `mixel_type` | `T1_brain_mixeltype.nii.gz` | 输入 T1 | pure/mixed tissue 类型 |
+| `bias_field` | `T1_brain_bias.nii.gz` | 输入 T1 | 乘性 bias field，脑外为 1 |
+| `restored` | `T1_brain_restore.nii.gz` | 输入 T1 | bias-corrected T1，脑外为 0 |
+| `warped_gm` | `T1_GM_to_template_GM.nii.gz` | GM template | affine + nonlinear warped GM |
+| `jacobian` | `T1_GM_JAC_nl.nii.gz` | GM template | 仅非线性 pull 变换的行列式 |
+| `modulated_gm` | `T1_GM_to_template_GM_mod.nii.gz` | GM template | warped GM × Jacobian |
+
+另写 `fast_vbm_report.json`，记录参数、分阶段时间、FAST 摘要、配准 QC 和输出文件名。报告不保存原始输入路径。
+
+### 坐标、warp 和 Jacobian
+
+- FLIRT `.mat` 把 input FSL scaled-mm 映射到 reference FSL scaled-mm；它不是 NIfTI world affine。
+- FastVBM 内部 affine forward 为 moving-world → fixed-world RAS，重采样使用 fixed-world → moving-world pull。
+- 两个 nonlinear estimator 最终都提供 fixed/template grid 上的 target → source world-RAS pull。
+- FastVBM 将 pull 转为相对于同一 FLIRT affine 的 FSL scaled-mm nonlinear residual，再构造 full relative field 交给 `TorchApplyWarp`。
+- `jacobian` 是 `det(I + du/dq)`，其中 `u` 是 nonlinear residual；不包含 affine determinant。
+- FastVBM 不单独写 warp/coefficient 文件。需要 FSL intent-2007 coefficient 时，使用独立 [`TorchFNIRT`](../fnirt/README.md) 接口。
+
+因此，Surfa world-RAS displacement、FSL dense relative warp 和 FSL coefficient NIfTI 不能逐数组元素互换。详见 [`TorchApplyWarp`](../applywarp/README.md) 和 [`TorchFNIRT`](../fnirt/README.md)。
+
+### 权重和模板
+
+| 场景 | 所需 checkpoint |
+|---|---|
+| SynthMorph 分支，从 raw T1w 开始 | `synthstrip.1.pt` + `synthmorph.deform.3.h5` |
+| FNIRT 分支，从 raw T1w 开始 | `synthstrip.1.pt` |
+| 提供显式脑 mask | SynthMorph 分支只需 deform；FNIRT 分支无需 checkpoint |
+
+```bash
+python tools/setup_weights.py --model fast-vbm
+```
+
+该命令安装两后端的权重超集。GM template 和 reference mask 是运行输入，不是模型权重，也不由该脚本下载。下载公开 UKB 模板的方法见 [UKB/FSL 专页](../ukb_vbm/README.md)。
+
+## 3. 命令行调用
 
 SynthMorph 后端：
 
@@ -222,7 +312,9 @@ fnit fast-vbm \
 | `--reference-mask MASK` | 指定 template-grid reference mask |
 | `--synthstrip-weights PATH` | 显式指定 SynthStrip checkpoint 或目录 |
 | `--synthmorph-weights PATH` | 显式指定 SynthMorph deform checkpoint 或目录 |
-| `--synthmorph-extent / --synthmorph-hyper / --synthmorph-steps` | SynthMorph 参数 |
+| `--synthmorph-extent` | 网络输入网格边长，默认 256 |
+| `--synthmorph-hyper` | 网络正则化超参数，默认 0.5 |
+| `--synthmorph-steps` | velocity 积分步数，默认 7 |
 | `--fnirt-strides / --fnirt-steps` | FNIRT 四层下采样和迭代参数 |
 | `--fnirt-input-fwhm-mm / --fnirt-reference-fwhm-mm` | FNIRT 四层平滑参数 |
 | `--fnirt-warp-resolution-mm` | FNIRT B-spline 控制点目标间距 |
@@ -232,79 +324,9 @@ fnit fast-vbm \
 
 完整参数以 `fnit fast-vbm --help` 为准。
 
-## 两个非线性后端
+## 4. 原软件调用
 
-两个后端共用同一份 TorchFAST GM、TorchFLIRT 结果、template grid、FSL 坐标转换、TorchApplyWarp、dense-field Jacobian 和 modulation。它们只在 nonlinear pull field 的估计方法上不同。
-
-| 项目 | `registration_backend="synthmorph"` | `registration_backend="fnirt"` |
-|---|---|---|
-| 实现 | `fnit.synthmorph.SynthMorph(model="deform")` | `fnit.fnirt.TorchFNIRT` |
-| 初始化 | TorchFLIRT affine，`mid_space=False` | TorchFLIRT input → reference FSL scaled-mm affine |
-| 形变模型 | 官方 SynthMorph deform 网络和 stationary velocity integration | fixed-grid cubic B-spline residual displacement |
-| 目标和优化 | checkpoint 定义的学习型配准 | 强度尺度 + SSD、bending energy、LM 与 matrix-free PCG |
-| 输出 pull | fixed-grid target → source world-RAS displacement | 内部 FSL scaled-mm residual，随后转为相同 world-RAS pull |
-| mask | 网络没有 reference-mask 输入 | GM 配准关闭 implicit masks，按 schedule 使用显式 reference mask |
-| checkpoint | `synthmorph.deform.3.h5` | 无 |
-
-### FNIRT GM 掩膜
-
-FastVBM 的默认 GM 配准参数与 `GMFNIRTConfig()` 一致，按 FSL
-`GM_2_MNI152GM_2mm.cnf` 设置 `--imprefm=0 --impinm=0`。输入 GM 和模板中的零值
-不会因隐式掩膜而自动排除；显式 `reference_mask` 按 GM schedule 在最后一级启用。
-省略显式 mask 时，FastVBM 使用 `template > 0` 派生 mask。复现 FSL 运行应提供
-当时实际使用的 mask。直接 `TorchFNIRT()` 则使用 FSL 无配置文件的默认预设，
-SynthMorph 网络不消费 reference mask。
-
-## 返回值和文件输出
-
-`FastVBM.run()` 返回 `FastVBMResult`，同时保存结果。`FastVBM(...)()` 只返回内存结果。
-
-| Python 属性 | 内容 |
-|---|---|
-| `brain`、`brain_mask` | 输入 T1 网格的脑图和二值 mask |
-| `fast` | `FASTResult`；含三类 PVE、分割、mixel、bias 和 restored T1 |
-| `registration` | `VBMRegistrationResult`；含模板空间结果和配准 QC |
-| `pve_gm` | `fast.pve_gm` 的便利属性 |
-| `warped_gm` | affine 与所选 nonlinear backend 共同重采样后的 GM |
-| `jacobian` | nonlinear-only pull Jacobian，不含 FLIRT affine determinant |
-| `modulated_gm` | `warped_gm * jacobian` |
-| `settings` | 设备、TF32、mask 来源、后端和实际参数 |
-| `timing_sec` | 脑提取、FAST、配准/Jacobian/modulation 和总墙钟时间 |
-
-`timing_sec` 包含读取和输出转回 CPU，不包含 `FastVBMResult.save()` 的 NIfTI 写盘。首次调用可能包含 SynthStrip 或 SynthMorph checkpoint 延迟加载。
-
-两个后端保存相同的 13 幅 NIfTI：
-
-| Python 键 | 文件名 | 网格 | 含义 |
-|---|---|---|---|
-| `brain` | `T1_brain.nii.gz` | 输入 T1 | mask 外清零的 T1 |
-| `brain_mask` | `brain_mask.nii.gz` | 输入 T1 | 二值脑 mask |
-| `pve_csf` | `T1_brain_pve_0.nii.gz` | 输入 T1 | CSF PVE |
-| `pve_gm` | `T1_brain_pve_1.nii.gz` | 输入 T1 | GM PVE，配准 moving image |
-| `pve_wm` | `T1_brain_pve_2.nii.gz` | 输入 T1 | WM PVE |
-| `hard_segmentation` | `T1_brain_seg.nii.gz` | 输入 T1 | PVE 前硬分类 |
-| `pve_segmentation` | `T1_brain_pveseg.nii.gz` | 输入 T1 | 最大 PVE 分类 |
-| `mixel_type` | `T1_brain_mixeltype.nii.gz` | 输入 T1 | pure/mixed tissue 类型 |
-| `bias_field` | `T1_brain_bias.nii.gz` | 输入 T1 | 乘性 bias field，脑外为 1 |
-| `restored` | `T1_brain_restore.nii.gz` | 输入 T1 | bias-corrected T1，脑外为 0 |
-| `warped_gm` | `T1_GM_to_template_GM.nii.gz` | GM template | affine + nonlinear warped GM |
-| `jacobian` | `T1_GM_JAC_nl.nii.gz` | GM template | 仅非线性 pull 变换的行列式 |
-| `modulated_gm` | `T1_GM_to_template_GM_mod.nii.gz` | GM template | warped GM × Jacobian |
-
-另写 `fast_vbm_report.json`，记录参数、分阶段时间、FAST 摘要、配准 QC 和输出文件名。报告不保存原始输入路径。
-
-## 坐标、warp 和 Jacobian
-
-- FLIRT `.mat` 把 input FSL scaled-mm 映射到 reference FSL scaled-mm；它不是 NIfTI world affine。
-- FastVBM 内部 affine forward 为 moving-world → fixed-world RAS，重采样使用 fixed-world → moving-world pull。
-- 两个 nonlinear estimator 最终都提供 fixed/template grid 上的 target → source world-RAS pull。
-- FastVBM 将 pull 转为相对于同一 FLIRT affine 的 FSL scaled-mm nonlinear residual，再构造 full relative field 交给 `TorchApplyWarp`。
-- `jacobian` 是 `det(I + du/dq)`，其中 `u` 是 nonlinear residual；不包含 affine determinant。
-- FastVBM 不单独写 warp/coefficient 文件。需要 FSL intent-2007 coefficient 时，使用独立 [`TorchFNIRT`](../fnirt/README.md) 接口。
-
-因此，Surfa world-RAS displacement、FSL dense relative warp 和 FSL coefficient NIfTI 不能逐数组元素互换。详见 [`TorchApplyWarp`](../applywarp/README.md) 和 [`TorchFNIRT`](../fnirt/README.md)。
-
-## 与 UKB v1.5 / FSL VBM 的对应关系
+### 与 UKB v1.5 / FSL VBM 的对应关系
 
 UK Biobank `bb_vbm` 对已生成的 FAST GM PVE 执行：
 
@@ -317,17 +339,7 @@ fslmaths T1_GM_to_template_GM -mul T1_GM_JAC_nl \
   T1_GM_to_template_GM_mod -odt float
 ```
 
-第一条命令让 `fsl_reg` 完成 GM affine + FNIRT 配准，并输出 warped GM 和 nonlinear-only Jacobian；第二条命令把二者逐体素相乘，得到 modulated GM。FastVBM 的对应单被试命令是：
-
-```bash
-fnit fast-vbm \
-  -i subject_T1w.nii.gz \
-  --template template_GM.nii.gz \
-  -o results/sub-01-fnirt \
-  --registration-backend fnirt \
-  --reference-mask MNI152_T1_2mm_brain_mask_dil.nii.gz \
-  --device cuda:0
-```
+第一条命令让 `fsl_reg` 完成 GM affine + FNIRT 配准，并输出 warped GM 和 nonlinear-only Jacobian；第二条命令把二者逐体素相乘，得到 modulated GM。FastVBM 的完整单被试入口见[命令行调用](#3-命令行调用)。
 
 两者起点不同：UKB 这段 `bb_vbm` 以已有 FSL FAST GM 为输入；FastVBM 从 raw T1w 开始，先运行 SynthStrip/TorchFAST。文件角色、后三幅图的 template grid 和 modulation 公式对应，脑提取、GM estimation、affine optimizer 和 nonlinear optimizer 并非同一数值实现。
 
@@ -343,21 +355,27 @@ fnit fast-vbm \
 
 FastVBM 在 modulated GM 结束，不包含 UKB gradient distortion correction、群体平滑、统计模型或结构 IDP。官方流程和模板来源见 [UKB/FSL 专页](../ukb_vbm/README.md)。
 
-## 权重和模板
+<a id="全流程-benchmark"></a>
 
-| 场景 | 所需 checkpoint |
-|---|---|
-| SynthMorph 分支，从 raw T1w 开始 | `synthstrip.1.pt` + `synthmorph.deform.3.h5` |
-| FNIRT 分支，从 raw T1w 开始 | `synthstrip.1.pt` |
-| 提供显式脑 mask | SynthMorph 分支只需 deform；FNIRT 分支无需 checkpoint |
+## 5. 精度、运行时间与脑图
 
-```bash
-python tools/setup_weights.py --model fast-vbm
-```
+### 本轮 FNIRT 完整端到端验证
 
-该命令安装两后端的权重超集。GM template 和 reference mask 是运行输入，不是模型权重，也不由该脚本下载。下载公开 UKB 模板的方法见 [UKB/FSL 专页](../ukb_vbm/README.md)。
+本轮从真实原始 T1w 开始，完整执行脑提取、FAST、FLIRT、FNIRT、重采样、Jacobian 与调制，并保存 13 幅影像；与冻结 `7473452` 的 FNIT 基线逐位比较科学输出、网格和 FNIRT solver trace。本轮 13 幅最终影像与 5 幅 FNIRT 捕获影像全部逐位相同，科学 header、affine 和完整科学求解记录也相同；仅将 QC 中执行耗时分开统计。进程内含保存的 API 为 212.67→204.58 s，当前进程峰值 allocated 6.50 GB。共享 H100 的一次完整配对观测不代表稳定加速比；阶段时间、输入/源码哈希与脑图见[本轮验证](../../validation/registration_lossless_20261002/README.md)。
 
-## 全流程 benchmark
+本轮输出另与既有同 raw T1w、同 GM 模板的独立 FSL 保存结果重新比较，区域为模板脑掩膜的全部 292,019 个体素：
+
+| 本轮图像 | 与 FSL 的脑内 r | MAE | RMSE |
+|---|---:|---:|---:|
+| warped GM | 0.89136 | 0.08853 | 0.18137 |
+| nonlinear-only Jacobian | 0.89016 | 0.10328 | 0.16509 |
+| modulated GM | 0.86629 | 0.11079 | 0.23773 |
+
+FSL 完整命令计时 3195.14 s 来自 2026-09-30，本轮没有重测原软件时间。未固定 FSL 分割或初始仿射；本轮相对 FNIT 基线的无损优化保留现有跨软件差异。全部指标、网格和参照边界见[本轮 FSL 比较](../../validation/registration_lossless_20261002/vbm_official.public.json)。
+
+![本轮完整 T1 到 warped GM 的模板脑内 FSL/FNIT 比较](../../validation/registration_lossless_20261002/figures/vbm_official_001.png)
+
+### 2026-09-30：原始 T1w 到调制 GM 的 FSL 对照
 
 一例真实原始 T1w 已在 `f958121` 的运行源码上完成两个分支的全流程复测，并检查全部 13 幅输出。与同输入 FSL VBM 比较：
 
@@ -370,7 +388,16 @@ python tools/setup_weights.py --model fast-vbm
 
 ![FNIRT 完整流程与 FSL 的模板空间对照](figures/fast_vbm_fnirt.png)
 
-## Reference
+## 6. 最近版本与 benchmark 记录
+
+| 版本或日期 | 更新与验证范围 |
+|---|---|
+| 本轮 FNIRT 优化 | 跳过未使用的采样梯度，复用 T1 intensity mapping 与原始 float64 deformation field；真实 FastVBM 完整端到端 18 幅影像及科学 QC 逐位通过，含保存 API 212.67→204.58 s，见[统一验证页](../../validation/registration_lossless_20261002/README.md)。 |
+| 2026-09-30，`f958121` | 两个后端从 raw T1w 到全部 13 幅输出；FNIRT / SynthMorph 进程内含保存为 901.93 / 607.16 s。对 FSL 调制 GM 的 r 为 0.865489 / 0.616679，未达到数值等价；见[当次报告](../../validation/fast_vbm/e2e.public.json)。 |
+
+每条记录保留其测量源码、输入和计时边界；本轮与冻结 FNIT 的无损检查及既有 FSL 精度分别报告。
+
+## 7. 参考文献与原实现
 
 - 参考文献：Ashburner & Friston, *Voxel-Based Morphometry—The Methods*, NeuroImage (2000), [doi:10.1006/nimg.2000.0582](https://doi.org/10.1006/nimg.2000.0582)。
 - 参考文献：Smith et al., *Advances in functional and structural MR image analysis and implementation as FSL*, NeuroImage (2004), [doi:10.1016/j.neuroimage.2004.07.051](https://doi.org/10.1016/j.neuroimage.2004.07.051)。

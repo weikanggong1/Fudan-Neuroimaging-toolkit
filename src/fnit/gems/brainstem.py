@@ -12,7 +12,7 @@ import torch
 
 from .atlas import GEMSAtlas
 from .deformation import (ashburner_prior, prepare_current_geometry,
-                          prepare_deformation_reference)
+                          prepare_deformation_reference, prepare_vertex_reduction)
 from .optim import CachedLBFGS
 from .rasterize import (build_block_index, rasterize_priors,
                        rasterize_priors_compact)
@@ -100,13 +100,44 @@ def fit_brainstem_segmentation(
     iterations: int = 40,
     fit_alphas: np.ndarray | None = None,
     optimizer_name: str = "adam",
+    stable_mesh_fitting: bool = False,
 ) -> tuple[GEMSAtlas, dict]:
     """Fit the reference mesh to coarse brainstem and surrounding labels.
 
     The first class joins brainstem, ventral diencephalon, cerebellum and fourth
     ventricle, as in the reference synthetic-image stage. The target labels
     come from an existing coarse segmentation on the T1 voxel grid.
+
+    Stable fitting fixes the shared gradient reduction order and promotes only
+    scalar objective sums and optional L-BFGS state to FP64. Image values,
+    vertices, priors and Adam state stay FP32. Accurate geometric products are
+    local to this synthetic stage; the caller's TF32 policy is restored.
     """
+    if not isinstance(stable_mesh_fitting, bool):
+        raise ValueError("stable_mesh_fitting must be a bool")
+    arguments = dict(device=device, iterations=iterations, fit_alphas=fit_alphas,
+                     optimizer_name=optimizer_name, stable_mesh_fitting=stable_mesh_fitting)
+    if not stable_mesh_fitting or torch.device(device).type != "cuda":
+        return _fit_brainstem_segmentation(atlas, coarse_labels, **arguments)
+    previous_tf32 = torch.backends.cuda.matmul.allow_tf32
+    try:
+        torch.backends.cuda.matmul.allow_tf32 = False
+        return _fit_brainstem_segmentation(atlas, coarse_labels, **arguments)
+    finally:
+        torch.backends.cuda.matmul.allow_tf32 = previous_tf32
+
+
+def _fit_brainstem_segmentation(
+    atlas: GEMSAtlas,
+    coarse_labels: np.ndarray,
+    *,
+    device: str | torch.device,
+    iterations: int,
+    fit_alphas: np.ndarray | None,
+    optimizer_name: str,
+    stable_mesh_fitting: bool,
+) -> tuple[GEMSAtlas, dict]:
+    """Execute the unchanged configured synthetic objective and step schedule."""
     start = monotonic()
     atlas = replace(atlas, vertices=atlas.reference_vertices.copy(), stiffness=0.05)
     low = np.maximum(np.floor(atlas.vertices.min(0)).astype(int) - 8, 0)
@@ -141,13 +172,16 @@ def fit_brainstem_segmentation(
     # full crop for every trial in the line search.
     expected = target[mask]
     reference_geometry = prepare_deformation_reference(reference, tetrahedra)
+    vertex_reduction = (prepare_vertex_reduction(tetrahedra.reshape(-1), len(vertices))
+                        if stable_mesh_fitting else None)
     movable = torch.as_tensor(local.can_move, device=device)
     mesh_evaluations = 0
     if optimizer_name == "adam":
         optimizer = torch.optim.Adam([vertices], lr=0.1)
     elif optimizer_name == "lbfgs":
+        state_options = {"double_precision_state": True} if stable_mesh_fitting else {}
         optimizer = CachedLBFGS([vertices], lr=0.8, max_iter=1,
-                                history_size=12, line_search_fn="strong_wolfe")
+                                history_size=12, line_search_fn="strong_wolfe", **state_options)
     else:
         raise ValueError("optimizer_name must be adam or lbfgs")
     for _ in range(int(iterations)):
@@ -155,16 +189,19 @@ def fit_brainstem_segmentation(
             nonlocal mesh_evaluations
             mesh_evaluations += 1
             optimizer.zero_grad(set_to_none=True)
-            geometry = prepare_current_geometry(vertices, tetrahedra)
+            geometry = prepare_current_geometry(
+                vertices, tetrahedra, deterministic_gradient=stable_mesh_fitting,
+                vertex_reduction=vertex_reduction)
             priors, _ = rasterize_priors_compact(
                 vertices, tetrahedra, alphas, shape, valid_mask=mask,
                 block_index=index, background_channel=1, current_geometry=geometry)
             p = priors[0].clamp(1e-5, 1 - 1e-5)
-            data_cost = -torch.where(expected, torch.log(p), torch.log1p(-p)).sum()
+            selected = torch.where(expected, torch.log(p), torch.log1p(-p))
+            data_cost = -selected.sum(dtype=torch.float64 if stable_mesh_fitting else selected.dtype)
             regularizer, _ = ashburner_prior(
                 vertices, reference, tetrahedra, atlas.stiffness,
                 reference_geometry=reference_geometry, current_geometry=geometry,
-                analytic_gradient=True)
+                analytic_gradient=True, double_accumulation=stable_mesh_fitting)
             objective = data_cost + regularizer
             objective.backward()
             vertices.grad.mul_(movable)
@@ -192,6 +229,20 @@ def fit_brainstem_segmentation(
                     "max_displacement_voxels": float(displacement), "seconds": monotonic() - start,
                     "mesh_solver": {"compact": True, "shared_geometry": True,
                                     "analytic_prior": True,
+                                    "stable_mesh_fitting": stable_mesh_fitting,
+                                    "ordered_shared_vertex_gradient": stable_mesh_fitting,
+                                    "ordered_point_to_tetrahedron_gradient": stable_mesh_fitting,
+                                    "data_cost_accumulation": "float64" if stable_mesh_fitting else "float32",
+                                    "prior_cost_accumulation": "float64" if stable_mesh_fitting else "float32",
+                                    "precise_mesh_matrices": stable_mesh_fitting,
+                                    "matrix_precision_scope": "custom synthetic stage; caller TF32 restored",
+                                    "optimizer_state_precision": "float64" if stable_mesh_fitting
+                                    and optimizer_name == "lbfgs" else "float32",
+                                    "optimizer": optimizer_name,
+                                    "line_search": "strong_wolfe" if optimizer_name == "lbfgs" else None,
+                                    "alpha_policy": "fixed configured arrays",
+                                    "global_deterministic_algorithms_changed": False,
+                                    "cublas_workspace_config_required": False,
                                     "mesh_evaluations": mesh_evaluations,
                                     "mesh_steps": int(iterations),
                                     "accepted_cache_hits": getattr(optimizer, "cache_hits", 0),

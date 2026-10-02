@@ -22,7 +22,9 @@ from .._transforms import (
     voxel_displacement_to_ras,
 )
 from ..weights import resolve_weights
-from .spatial import compose, surfa_nearest, transform
+from .spatial import (
+    _prepare_transform, _sample_prepared, compose, surfa_nearest, transform,
+)
 
 
 @dataclass
@@ -58,13 +60,13 @@ def network_space(image, shape, center=None):
     return network_to_image, image_to_network
 
 
-def _load(image, single_frame=True):
+def _load(image, single_frame=True, check_finite=True):
     out = load_image(image, "input")
     if len(out.shape) not in (3, 4):
         raise ValueError("input must be a 3D volume with optional frames")
     if single_frame and len(out.shape) != 3:
         raise ValueError("registration inputs must be single-frame 3D volumes")
-    if not np.isfinite(np.asanyarray(out.dataobj)).all():
+    if check_finite and not np.isfinite(np.asanyarray(out.dataobj)).all():
         raise ValueError("input contains NaN or infinity")
     return out
 
@@ -113,10 +115,11 @@ def _affine_input(value, moving, fixed):
     ).convert(space="voxel")
 
 
-def _header_transform(image, transformation):
+def _header_transform(image, transformation, data=None):
     world = transformation.convert(space="world", source=image).matrix
     return new_image(
-        np.array(image.dataobj, copy=True), image, affine=world @ image.affine
+        np.array(image.dataobj if data is None else data, copy=True),
+        image, affine=world @ image.affine,
     )
 
 
@@ -147,6 +150,94 @@ def _resampled_image(
             fill_value=fill,
         )
     return new_image(_tensor_data(moved), image, affine=image_geometry(target).affine)
+
+
+def _resampled_frames(image, data, pull, target, device, *, method, fill, frame_chunk_size):
+    """Decode once and sample frames with one reusable coordinate plan.
+
+    Default CPU chunks contain at most 32 frames. CUDA chooses changing
+    frame buffers below 8 GiB and the remaining 20 GB allocation budget,
+    measured after coordinate transfer with 512 MiB held in reserve.
+    """
+    device = torch.device(device)
+    geometry = image_geometry(target)
+    frames = data[None] if data.ndim == 3 else np.moveaxis(data, -1, 0)
+    count = frames.shape[0]
+    if frame_chunk_size is not None and (
+        isinstance(frame_chunk_size, (bool, np.bool_))
+        or not isinstance(frame_chunk_size, (int, np.integer))
+        or frame_chunk_size < 1
+    ):
+        raise ValueError("frame_chunk_size must be a positive integer or None")
+
+    plan = _prepare_transform(
+        pull, data.shape[:3], device="cpu", dtype=torch.float32,
+        shape=geometry.shape, method=method, fill_value=fill,
+        surfa_nearest_rule=True,
+    )
+    # Independent apply keeps the original CPU float32 coordinate arithmetic.
+    # Transferring a prepared plan avoids TF32 affine-coordinate drift while
+    # GPU interpolation still processes every frame on the selected device.
+    if device.type != "cpu":
+        plan = plan.to(device)
+    if device.type == "cuda":
+        # Include the prepared coordinates and existing device allocations.
+        # Reserve 512 MiB below 20 GB for sampler/runtime working storage.
+        available = (
+            20_000_000_000 - torch.cuda.memory_allocated(device) - 512 * 1024 ** 2
+        )
+        frame_bytes = 4 * (
+            int(np.prod(data.shape[:3])) + 2 * int(np.prod(geometry.shape))
+        )
+        if available < frame_bytes:
+            raise RuntimeError(
+                "CUDA frame buffers cannot fit one frame within the 20 GB "
+                f"memory budget: {frame_bytes} bytes needed, {available} available"
+            )
+        if frame_chunk_size is None:
+            buffer_budget = min(8 * 1024 ** 3, available)
+            if buffer_budget < frame_bytes:
+                raise RuntimeError(
+                    "automatic CUDA frame buffer budget cannot fit one frame: "
+                    f"{frame_bytes} bytes needed, {buffer_budget} available"
+                )
+            frame_chunk_size = min(count, buffer_budget // frame_bytes)
+        else:
+            frame_chunk_size = min(count, frame_chunk_size)
+            if frame_chunk_size * frame_bytes > available:
+                raise RuntimeError(
+                    "frame_chunk_size exceeds the CUDA 20 GB memory budget: "
+                    f"{frame_chunk_size * frame_bytes} bytes needed, {available} available"
+                )
+    else:
+        frame_chunk_size = (
+            min(count, 32) if frame_chunk_size is None else min(count, frame_chunk_size)
+        )
+    # Keep the returned array on the host while only a bounded frame chunk is
+    # resident on the GPU. Moving frames does not change interpolation math.
+    output = None
+    for start in range(0, count, frame_chunk_size):
+        stop = min(start + frame_chunk_size, count)
+        chunk = np.asarray(frames[start:stop], dtype=np.float32)
+        # The sampler only reads its input. Reuse writable float32 decoded
+        # storage, but copy arrays that torch cannot safely expose as a view.
+        if not chunk.flags.writeable or any(stride < 0 for stride in chunk.strides):
+            chunk = np.array(chunk, copy=True)
+        tensor = torch.as_tensor(chunk, device=device)[None]
+        moved = _sample_prepared(tensor, plan, fill)
+        sampled = moved[0].cpu().numpy()
+        if start == 0 and stop == count:
+            # Preserve the one-shot CPU path's zero-copy tensor result view.
+            output = sampled
+        else:
+            if output is None:
+                output = np.empty((count, *geometry.shape), dtype=np.float32)
+            output[start:stop] = sampled
+        del tensor, moved
+    # Retain a singleton frame axis for a 4D input. Registration's separate
+    # single-frame 3D path intentionally continues to return a 3D volume.
+    output = output[0] if data.ndim == 3 else np.moveaxis(output, 0, -1)
+    return new_image(output, image, affine=geometry.affine)
 
 
 class SynthMorph:
@@ -352,9 +443,29 @@ def apply_transform(
     fill=0,
     dtype="float32",
     header_only=False,
+    *,
+    device="cpu",
+    frame_chunk_size=None,
 ):
-    """Apply an FNIT LTA affine or target-grid RAS displacement field."""
-    image = _load(image, single_frame=False)
+    """Apply an LTA affine or target-grid RAS displacement to 3D/4D data.
+
+    ``device='cpu'`` preserves the original default sampler. CUDA is opt-in;
+    floating-point interpolation can differ from CPU by rounding. A positive
+    ``frame_chunk_size`` bounds frame buffers and reuses the same coordinates.
+    None selects at most 32 frames on CPU. CUDA uses at most 8 GiB of changing
+    frame buffers within 20 GB minus current allocated memory and 512 MiB.
+    The budget counts one input and two float32 output buffers per frame;
+    it is checked after the coordinate plan is resident on CUDA. Explicit
+    CUDA chunks use the same remaining 20 GB budget. A one-shot CPU result
+    retains its zero-copy output view (by default when there are <=32 frames).
+    Coordinates use the original CPU float32 arithmetic and are transferred
+    once for CUDA sampling. Image decoding and NIfTI I/O remain on the CPU.
+    """
+    image = _load(image, single_frame=False, check_finite=False)
+    # Materialise an ArrayProxy only once (especially important for .nii.gz).
+    data = np.asanyarray(image.dataobj)
+    if not np.isfinite(data).all():
+        raise ValueError("input contains NaN or infinity")
     if isinstance(transformation, (str, Path)):
         path = Path(transformation)
         transformation = (
@@ -374,7 +485,7 @@ def apply_transform(
     if header_only:
         if not isinstance(transformation, AffineTransform):
             raise ValueError("header_only requires an affine")
-        result = _header_transform(image, transformation)
+        result = _header_transform(image, transformation, data=data)
     elif isinstance(transformation, AffineTransform):
         world = transformation.convert(space="world").matrix
         target = transformation.target
@@ -383,14 +494,15 @@ def apply_transform(
             @ np.linalg.inv(world)
             @ target.affine
         )
-        result = _resampled_image(
+        result = _resampled_frames(
             image,
+            data,
             pull,
             target,
-            "cpu",
+            device,
             method=method,
             fill=fill,
-            surfa_nearest_rule=True,
+            frame_chunk_size=frame_chunk_size,
         )
     elif isinstance(transformation, DenseWarp):
         if not same_geometry(image, transformation.source):
@@ -399,14 +511,15 @@ def apply_transform(
             np.asanyarray(transformation.dataobj), image, transformation.target
         )
         pull = torch.as_tensor(pull).permute(3, 0, 1, 2)[None]
-        result = _resampled_image(
+        result = _resampled_frames(
             image,
+            data,
             pull,
             transformation.target,
-            "cpu",
+            device,
             method=method,
             fill=fill,
-            surfa_nearest_rule=True,
+            frame_chunk_size=frame_chunk_size,
         )
     else:
         raise TypeError("transformation must be an LTA affine or dense warp")

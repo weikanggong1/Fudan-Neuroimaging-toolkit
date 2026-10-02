@@ -28,6 +28,11 @@ _BASE = (
 
 
 class ThalamusRecipe(GEMSRecipe):
+    # Fixed sparse quadrature displaced fine nuclei on repeated real stage
+    # inputs. Keep every valid voxel in the mesh data integral at all levels,
+    # including the smoothed stages of the fast profile.
+    fast_mesh_sampling_stride = 1
+
     resolution_mm = 0.5
     alignment_ids = (10, 49, 28, 60)
     support_ids = (10, 49)

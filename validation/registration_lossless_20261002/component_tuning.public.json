@@ -1,0 +1,976 @@
+{
+  "schema_version": 1,
+  "stage": "component_tuning_stage1",
+  "status": "complete",
+  "legacy_commit": "747345223710e704f94ba850f58504fe2bac4f8e",
+  "source_sha256": {
+    "candidate_applywarp": "4c5f64f527751890bef5901ec8eec3da53ae77c37f37b946f2928fce515e0451",
+    "candidate_synthmorph": "f3ca45240a284b4f230356d31ee74a026fff295c0c7cdaabffb42b5c6c106c00",
+    "candidate_spatial": "2e5e6560d58afbc551b2bf88cfc994bebceb7dd5ae7b1fd55078047aa8aa4fe2",
+    "legacy_applywarp": "57031bdc2120d10116593c987b9598e3ee695545daa34736395b4b5a4187c560",
+    "legacy_synthmorph": "81f971dd73f0bed3cd652e97f0627bf54e0b00a8dcf0cb8785c4ee0c696aa538",
+    "legacy_spatial": "dab615dcc8a5f332ef2efede1d5e45d04f21c440243650e960d763e35595d861",
+    "benchmark": "d9110f8ddcc1fa07a394ba8d017b891a7a2be3532606fab946d5429692567490"
+  },
+  "full_report": "components_tuning.public.json",
+  "full_report_sha256": "20b05353babb3008f11fa4520e619dcf2b7ca232adea37e3b486d4564b11d60d",
+  "environment": {
+    "python": "3.11.16",
+    "torch": "2.5.1",
+    "threads": 8
+  },
+  "default_policy_at_measurement": {
+    "applywarp": {
+      "cpu": "all_channels",
+      "cuda": "up_to_64_frames; frame working estimate up to 1 GiB; resident allocations considered within 20 GB minus 512 MiB"
+    },
+    "synthmorph": {
+      "cpu": "all_channels",
+      "cuda": "256 MiB frame-buffer policy"
+    },
+    "is_final_release_default_validation": false
+  },
+  "timing_scope": {
+    "materialized_api": "Full input already decoded; synchronized API wall includes transform preparation, frame sampling and D2H; excludes file loading/saving/validation.",
+    "input_path_api": "Full input path API includes input decoding; reference and warp already materialized; excludes saving/validation.",
+    "save": "One current_auto warmup gzip save per device; separate single measurement, not appended to formal API distributions.",
+    "formal_output_validation": "Formal timing outputs were not individually checked; each exact configuration points to its complete warmup gate."
+  },
+  "interpretation": [
+    "All original voxels and frames are retained. Explicit 32/128 and auto stage1 policies are included below.",
+    "Stage1 SynthMorph CPU all-channel and CUDA 256 MiB defaults are tuning candidates, not the final default policy.",
+    "SynthMorph CPU compares with frozen CPU; CUDA chunks compare with the current full-channel CUDA oracle. CPU versus CUDA rounding differences are reported separately.",
+    "Only completed warmup configurations have strict output gates. Saving/reloading is performed on current_auto and explicitly referenced by other outputs.",
+    "Shared-server observations and two materialized timing repeats per group do not establish a stable universal speedup."
+  ],
+  "all_required_lossless_gates_passed": true,
+  "cases": [
+    {
+      "case": "case_001",
+      "backend": "applywarp",
+      "scope": "full_4d",
+      "shape": [
+        104,
+        104,
+        72,
+        105
+      ],
+      "reference_shape": [
+        91,
+        109,
+        91
+      ],
+      "interpolation": "trilinear",
+      "input_sha256": {
+        "input": "91cd5ececc502dd15d62ed88f8d8d451ce52875a12e606544777a3cc41ce78c0",
+        "reference": "0585cd056bf5ccfb8bf97a5f6a66082d4e7caad525718fc11e40d80a827fcb92",
+        "warp": "3e7084b2e239df0164fb37243a8a48714053dc176c97d9614546072e11c3bf4b"
+      },
+      "load_seconds": {
+        "input": 3.1944672660902143,
+        "reference": 0.5330908899195492,
+        "warp": 0.12930099898949265
+      },
+      "groups": [
+        {
+          "comparison_device": "cuda:0",
+          "device": "cuda:0",
+          "variant": "current_auto",
+          "input_mode": "input_path_reference_and_warp_materialized",
+          "frame_chunk_size": null,
+          "api_seconds": {
+            "samples": 1,
+            "minimum": 3.798823395743966,
+            "median": 3.798823395743966,
+            "maximum": 3.798823395743966
+          },
+          "formal_peak_allocated_bytes": 500996608,
+          "formal_peak_reserved_bytes": 1186988032,
+          "complete_warmup_checks": 1,
+          "all_warmup_gates_passed": true,
+          "lossless_reference": "legacy_all_channels",
+          "roundtrip_validation": "current_auto_same_serializer_reference",
+          "roundtrip_validation_reference": {
+            "input_mode": "materialized",
+            "variant": "current_auto",
+            "comparison_device": "cuda:0",
+            "repeat": 0
+          },
+          "warmup_validation_seconds": 0.3459698660299182,
+          "warmup_save_seconds": null
+        },
+        {
+          "comparison_device": "cuda:0",
+          "device": "cuda:0",
+          "variant": "current_auto",
+          "input_mode": "materialized",
+          "frame_chunk_size": null,
+          "api_seconds": {
+            "samples": 2,
+            "minimum": 0.9809668501839042,
+            "median": 0.9984642141498625,
+            "maximum": 1.0159615781158209
+          },
+          "formal_peak_allocated_bytes": 500996608,
+          "formal_peak_reserved_bytes": 1186988032,
+          "complete_warmup_checks": 1,
+          "all_warmup_gates_passed": true,
+          "lossless_reference": "legacy_all_channels",
+          "roundtrip_validation": "this_output",
+          "roundtrip_validation_reference": null,
+          "warmup_validation_seconds": 4.3481294750235975,
+          "warmup_save_seconds": 9.828899720683694
+        },
+        {
+          "comparison_device": "cuda:0",
+          "device": "cuda:0",
+          "variant": "current_chunk_128",
+          "input_mode": "materialized",
+          "frame_chunk_size": 128,
+          "api_seconds": {
+            "samples": 2,
+            "minimum": 0.7460962128825486,
+            "median": 0.7984139889013022,
+            "maximum": 0.8507317649200559
+          },
+          "formal_peak_allocated_bytes": 777303040,
+          "formal_peak_reserved_bytes": 1459617792,
+          "complete_warmup_checks": 1,
+          "all_warmup_gates_passed": true,
+          "lossless_reference": "legacy_all_channels",
+          "roundtrip_validation": "current_auto_same_serializer_reference",
+          "roundtrip_validation_reference": {
+            "input_mode": "materialized",
+            "variant": "current_auto",
+            "comparison_device": "cuda:0",
+            "repeat": 0
+          },
+          "warmup_validation_seconds": 0.30850809905678034,
+          "warmup_save_seconds": null
+        },
+        {
+          "comparison_device": "cuda:0",
+          "device": "cuda:0",
+          "variant": "current_chunk_32",
+          "input_mode": "materialized",
+          "frame_chunk_size": 32,
+          "api_seconds": {
+            "samples": 2,
+            "minimum": 0.7440000921487808,
+            "median": 0.8063522840384394,
+            "maximum": 0.868704475928098
+          },
+          "formal_peak_allocated_bytes": 456423936,
+          "formal_peak_reserved_bytes": 752877568,
+          "complete_warmup_checks": 1,
+          "all_warmup_gates_passed": true,
+          "lossless_reference": "legacy_all_channels",
+          "roundtrip_validation": "current_auto_same_serializer_reference",
+          "roundtrip_validation_reference": {
+            "input_mode": "materialized",
+            "variant": "current_auto",
+            "comparison_device": "cuda:0",
+            "repeat": 0
+          },
+          "warmup_validation_seconds": 0.3169540613889694,
+          "warmup_save_seconds": null
+        },
+        {
+          "comparison_device": "cuda:0",
+          "device": "cuda:0",
+          "variant": "legacy_all_channels",
+          "input_mode": "input_path_reference_and_warp_materialized",
+          "frame_chunk_size": null,
+          "api_seconds": {
+            "samples": 1,
+            "minimum": 3.8551880889572203,
+            "median": 3.8551880889572203,
+            "maximum": 3.8551880889572203
+          },
+          "formal_peak_allocated_bytes": 1156887552,
+          "formal_peak_reserved_bytes": 1839202304,
+          "complete_warmup_checks": 1,
+          "all_warmup_gates_passed": true,
+          "lossless_reference": "legacy_all_channels",
+          "roundtrip_validation": "current_auto_same_serializer_reference",
+          "roundtrip_validation_reference": {
+            "input_mode": "materialized",
+            "variant": "current_auto",
+            "comparison_device": "cuda:0",
+            "repeat": 0
+          },
+          "warmup_validation_seconds": 0.3945062211714685,
+          "warmup_save_seconds": null
+        },
+        {
+          "comparison_device": "cuda:0",
+          "device": "cuda:0",
+          "variant": "legacy_all_channels",
+          "input_mode": "materialized",
+          "frame_chunk_size": null,
+          "api_seconds": {
+            "samples": 2,
+            "minimum": 0.8080487358383834,
+            "median": 0.8255944242700934,
+            "maximum": 0.8431401127018034
+          },
+          "formal_peak_allocated_bytes": 1156887552,
+          "formal_peak_reserved_bytes": 1839202304,
+          "complete_warmup_checks": 1,
+          "all_warmup_gates_passed": true,
+          "lossless_reference": "legacy_all_channels",
+          "roundtrip_validation": "current_auto_same_serializer_reference",
+          "roundtrip_validation_reference": {
+            "input_mode": "materialized",
+            "variant": "current_auto",
+            "comparison_device": "cuda:0",
+            "repeat": 0
+          },
+          "warmup_validation_seconds": 0.40577968396246433,
+          "warmup_save_seconds": null
+        }
+      ],
+      "required_warmup_checks": 6,
+      "all_required_warmup_checks_passed": true,
+      "complete_warmup_gate_summary": {
+        "voxel_bits_exact": {
+          "checks": 6,
+          "passed": 6
+        },
+        "negative_zero_exact": {
+          "checks": 6,
+          "passed": 6
+        },
+        "shape_exact": {
+          "checks": 6,
+          "passed": 6
+        },
+        "dtype_exact": {
+          "checks": 6,
+          "passed": 6
+        },
+        "header_exact": {
+          "checks": 6,
+          "passed": 6
+        },
+        "affine_exact": {
+          "checks": 6,
+          "passed": 6
+        },
+        "tr_exact": {
+          "checks": 6,
+          "passed": 6
+        },
+        "time_units_exact": {
+          "checks": 6,
+          "passed": 6
+        },
+        "valid_mask_exact": {
+          "checks": 6,
+          "passed": 6
+        },
+        "save_reload_voxel_bits_exact": {
+          "checks": 1,
+          "passed": 1
+        },
+        "saved_header_exact": {
+          "checks": 1,
+          "passed": 1
+        },
+        "saved_affine_exact": {
+          "checks": 1,
+          "passed": 1
+        }
+      }
+    },
+    {
+      "case": "case_002",
+      "backend": "synthmorph",
+      "scope": "full_4d",
+      "shape": [
+        88,
+        88,
+        64,
+        490
+      ],
+      "reference_shape": [
+        91,
+        109,
+        91
+      ],
+      "interpolation": "linear",
+      "input_sha256": {
+        "input": "67717caaa823141c6e59d46db52e92deb4419d232ba699c399c69eb8888a0e92",
+        "reference": "0585cd056bf5ccfb8bf97a5f6a66082d4e7caad525718fc11e40d80a827fcb92",
+        "warp": "cc8927e113db095de93c779470e222b094992c2f22b941ca5cdb4236bc0e4191"
+      },
+      "load_seconds": {
+        "input": 4.698195946868509,
+        "reference": 0.047131764236837626,
+        "warp": 0.09466208005324006
+      },
+      "groups": [
+        {
+          "comparison_device": "cpu",
+          "device": "cpu",
+          "variant": "current_auto",
+          "input_mode": "input_path_reference_and_warp_materialized",
+          "frame_chunk_size": null,
+          "api_seconds": {
+            "samples": 1,
+            "minimum": 32.3389091338031,
+            "median": 32.3389091338031,
+            "maximum": 32.3389091338031
+          },
+          "formal_peak_allocated_bytes": null,
+          "formal_peak_reserved_bytes": null,
+          "complete_warmup_checks": 1,
+          "all_warmup_gates_passed": true,
+          "lossless_reference": "legacy_all_channels",
+          "roundtrip_validation": "current_auto_same_serializer_reference",
+          "roundtrip_validation_reference": {
+            "input_mode": "materialized",
+            "variant": "current_auto",
+            "comparison_device": "cpu",
+            "repeat": 0
+          },
+          "warmup_validation_seconds": 1.8052518269978464,
+          "warmup_save_seconds": null
+        },
+        {
+          "comparison_device": "cpu",
+          "device": "cpu",
+          "variant": "current_auto",
+          "input_mode": "materialized",
+          "frame_chunk_size": null,
+          "api_seconds": {
+            "samples": 2,
+            "minimum": 27.679533201269805,
+            "median": 27.689853203250095,
+            "maximum": 27.700173205230385
+          },
+          "formal_peak_allocated_bytes": null,
+          "formal_peak_reserved_bytes": null,
+          "complete_warmup_checks": 1,
+          "all_warmup_gates_passed": true,
+          "lossless_reference": "legacy_all_channels",
+          "roundtrip_validation": "this_output",
+          "roundtrip_validation_reference": null,
+          "warmup_validation_seconds": 24.969051233958453,
+          "warmup_save_seconds": 71.63392302766442
+        },
+        {
+          "comparison_device": "cpu",
+          "device": "cpu",
+          "variant": "current_chunk_128",
+          "input_mode": "materialized",
+          "frame_chunk_size": 128,
+          "api_seconds": {
+            "samples": 2,
+            "minimum": 19.69902728078887,
+            "median": 20.77690434223041,
+            "maximum": 21.85478140367195
+          },
+          "formal_peak_allocated_bytes": null,
+          "formal_peak_reserved_bytes": null,
+          "complete_warmup_checks": 1,
+          "all_warmup_gates_passed": true,
+          "lossless_reference": "legacy_all_channels",
+          "roundtrip_validation": "current_auto_same_serializer_reference",
+          "roundtrip_validation_reference": {
+            "input_mode": "materialized",
+            "variant": "current_auto",
+            "comparison_device": "cpu",
+            "repeat": 0
+          },
+          "warmup_validation_seconds": 1.63898119982332,
+          "warmup_save_seconds": null
+        },
+        {
+          "comparison_device": "cpu",
+          "device": "cpu",
+          "variant": "current_chunk_32",
+          "input_mode": "materialized",
+          "frame_chunk_size": 32,
+          "api_seconds": {
+            "samples": 2,
+            "minimum": 14.308471356052905,
+            "median": 14.386951602995396,
+            "maximum": 14.465431849937886
+          },
+          "formal_peak_allocated_bytes": null,
+          "formal_peak_reserved_bytes": null,
+          "complete_warmup_checks": 1,
+          "all_warmup_gates_passed": true,
+          "lossless_reference": "legacy_all_channels",
+          "roundtrip_validation": "current_auto_same_serializer_reference",
+          "roundtrip_validation_reference": {
+            "input_mode": "materialized",
+            "variant": "current_auto",
+            "comparison_device": "cpu",
+            "repeat": 0
+          },
+          "warmup_validation_seconds": 1.8266660417430103,
+          "warmup_save_seconds": null
+        },
+        {
+          "comparison_device": "cpu",
+          "device": "cpu",
+          "variant": "legacy_all_channels",
+          "input_mode": "input_path_reference_and_warp_materialized",
+          "frame_chunk_size": null,
+          "api_seconds": {
+            "samples": 1,
+            "minimum": 39.33794271200895,
+            "median": 39.33794271200895,
+            "maximum": 39.33794271200895
+          },
+          "formal_peak_allocated_bytes": null,
+          "formal_peak_reserved_bytes": null,
+          "complete_warmup_checks": 1,
+          "all_warmup_gates_passed": true,
+          "lossless_reference": "legacy_all_channels",
+          "roundtrip_validation": "current_auto_same_serializer_reference",
+          "roundtrip_validation_reference": {
+            "input_mode": "materialized",
+            "variant": "current_auto",
+            "comparison_device": "cpu",
+            "repeat": 0
+          },
+          "warmup_validation_seconds": 1.6705090296454728,
+          "warmup_save_seconds": null
+        },
+        {
+          "comparison_device": "cpu",
+          "device": "cpu",
+          "variant": "legacy_all_channels",
+          "input_mode": "materialized",
+          "frame_chunk_size": null,
+          "api_seconds": {
+            "samples": 2,
+            "minimum": 27.553329561837018,
+            "median": 27.67566356691532,
+            "maximum": 27.79799757199362
+          },
+          "formal_peak_allocated_bytes": null,
+          "formal_peak_reserved_bytes": null,
+          "complete_warmup_checks": 1,
+          "all_warmup_gates_passed": true,
+          "lossless_reference": "legacy_all_channels",
+          "roundtrip_validation": "current_auto_same_serializer_reference",
+          "roundtrip_validation_reference": {
+            "input_mode": "materialized",
+            "variant": "current_auto",
+            "comparison_device": "cpu",
+            "repeat": 0
+          },
+          "warmup_validation_seconds": 1.774644817225635,
+          "warmup_save_seconds": null
+        },
+        {
+          "comparison_device": "cuda:0",
+          "device": "cpu",
+          "variant": "legacy_all_channels",
+          "input_mode": "input_path_reference_and_warp_materialized",
+          "frame_chunk_size": null,
+          "api_seconds": {
+            "samples": 1,
+            "minimum": 44.13858318282291,
+            "median": 44.13858318282291,
+            "maximum": 44.13858318282291
+          },
+          "formal_peak_allocated_bytes": null,
+          "formal_peak_reserved_bytes": null,
+          "complete_warmup_checks": 1,
+          "all_warmup_gates_passed": true,
+          "lossless_reference": "legacy_all_channels",
+          "roundtrip_validation": "current_auto_same_serializer_reference",
+          "roundtrip_validation_reference": {
+            "input_mode": "materialized",
+            "variant": "current_auto",
+            "comparison_device": "cuda:0",
+            "repeat": 0
+          },
+          "warmup_validation_seconds": 1.8013810962438583,
+          "warmup_save_seconds": null
+        },
+        {
+          "comparison_device": "cuda:0",
+          "device": "cpu",
+          "variant": "legacy_all_channels",
+          "input_mode": "materialized",
+          "frame_chunk_size": null,
+          "api_seconds": {
+            "samples": 2,
+            "minimum": 28.735220525879413,
+            "median": 28.78459099191241,
+            "maximum": 28.833961457945406
+          },
+          "formal_peak_allocated_bytes": null,
+          "formal_peak_reserved_bytes": null,
+          "complete_warmup_checks": 1,
+          "all_warmup_gates_passed": true,
+          "lossless_reference": "legacy_all_channels",
+          "roundtrip_validation": "current_auto_same_serializer_reference",
+          "roundtrip_validation_reference": {
+            "input_mode": "materialized",
+            "variant": "current_auto",
+            "comparison_device": "cuda:0",
+            "repeat": 0
+          },
+          "warmup_validation_seconds": 1.8523920769803226,
+          "warmup_save_seconds": null
+        },
+        {
+          "comparison_device": "cuda:0",
+          "device": "cuda:0",
+          "variant": "current_all_channels",
+          "input_mode": "materialized",
+          "frame_chunk_size": 490,
+          "api_seconds": {
+            "samples": 2,
+            "minimum": 2.4807751467451453,
+            "median": 2.501259225187823,
+            "maximum": 2.521743303630501
+          },
+          "formal_peak_allocated_bytes": 4556689408,
+          "formal_peak_reserved_bytes": 4561305600,
+          "complete_warmup_checks": 1,
+          "all_warmup_gates_passed": true,
+          "lossless_reference": "current_cuda_all_channels",
+          "roundtrip_validation": "current_auto_same_serializer_reference",
+          "roundtrip_validation_reference": {
+            "input_mode": "materialized",
+            "variant": "current_auto",
+            "comparison_device": "cuda:0",
+            "repeat": 0
+          },
+          "warmup_validation_seconds": 18.58747912105173,
+          "warmup_save_seconds": null
+        },
+        {
+          "comparison_device": "cuda:0",
+          "device": "cuda:0",
+          "variant": "current_auto",
+          "input_mode": "input_path_reference_and_warp_materialized",
+          "frame_chunk_size": null,
+          "api_seconds": {
+            "samples": 1,
+            "minimum": 9.454527575057,
+            "median": 9.454527575057,
+            "maximum": 9.454527575057
+          },
+          "formal_peak_allocated_bytes": 312496128,
+          "formal_peak_reserved_bytes": 316669952,
+          "complete_warmup_checks": 1,
+          "all_warmup_gates_passed": true,
+          "lossless_reference": "current_cuda_all_channels",
+          "roundtrip_validation": "current_auto_same_serializer_reference",
+          "roundtrip_validation_reference": {
+            "input_mode": "materialized",
+            "variant": "current_auto",
+            "comparison_device": "cuda:0",
+            "repeat": 0
+          },
+          "warmup_validation_seconds": 19.208473172038794,
+          "warmup_save_seconds": null
+        },
+        {
+          "comparison_device": "cuda:0",
+          "device": "cuda:0",
+          "variant": "current_auto",
+          "input_mode": "materialized",
+          "frame_chunk_size": null,
+          "api_seconds": {
+            "samples": 2,
+            "minimum": 3.493132579140365,
+            "median": 3.5531706335023046,
+            "maximum": 3.613208687864244
+          },
+          "formal_peak_allocated_bytes": 312496128,
+          "formal_peak_reserved_bytes": 316669952,
+          "complete_warmup_checks": 1,
+          "all_warmup_gates_passed": true,
+          "lossless_reference": "current_cuda_all_channels",
+          "roundtrip_validation": "this_output",
+          "roundtrip_validation_reference": null,
+          "warmup_validation_seconds": 41.661225222051144,
+          "warmup_save_seconds": 72.66031962586567,
+          "legacy_cpu_comparison_not_a_lossless_gate": {
+            "voxel_bits_exact": false,
+            "negative_zero_exact": true,
+            "changed_values": 111117665,
+            "values": 442288210,
+            "maximum_absolute_difference": 0.005859375,
+            "mae": 5.450777358613789e-05,
+            "rmse": 0.0001980113463156765
+          }
+        },
+        {
+          "comparison_device": "cuda:0",
+          "device": "cuda:0",
+          "variant": "current_chunk_128",
+          "input_mode": "materialized",
+          "frame_chunk_size": 128,
+          "api_seconds": {
+            "samples": 2,
+            "minimum": 3.7109054210595787,
+            "median": 3.737169266678393,
+            "maximum": 3.763433112297207
+          },
+          "formal_peak_allocated_bytes": 1223336960,
+          "formal_peak_reserved_bytes": 1228931072,
+          "complete_warmup_checks": 1,
+          "all_warmup_gates_passed": true,
+          "lossless_reference": "current_cuda_all_channels",
+          "roundtrip_validation": "current_auto_same_serializer_reference",
+          "roundtrip_validation_reference": {
+            "input_mode": "materialized",
+            "variant": "current_auto",
+            "comparison_device": "cuda:0",
+            "repeat": 0
+          },
+          "warmup_validation_seconds": 17.305446674115956,
+          "warmup_save_seconds": null
+        },
+        {
+          "comparison_device": "cuda:0",
+          "device": "cuda:0",
+          "variant": "current_chunk_32",
+          "input_mode": "materialized",
+          "frame_chunk_size": 32,
+          "api_seconds": {
+            "samples": 2,
+            "minimum": 3.4485498326830566,
+            "median": 3.501068909885362,
+            "maximum": 3.553587987087667
+          },
+          "formal_peak_allocated_bytes": 339802112,
+          "formal_peak_reserved_bytes": 348127232,
+          "complete_warmup_checks": 1,
+          "all_warmup_gates_passed": true,
+          "lossless_reference": "current_cuda_all_channels",
+          "roundtrip_validation": "current_auto_same_serializer_reference",
+          "roundtrip_validation_reference": {
+            "input_mode": "materialized",
+            "variant": "current_auto",
+            "comparison_device": "cuda:0",
+            "repeat": 0
+          },
+          "warmup_validation_seconds": 18.021787646692246,
+          "warmup_save_seconds": null
+        }
+      ],
+      "required_warmup_checks": 13,
+      "all_required_warmup_checks_passed": true,
+      "complete_warmup_gate_summary": {
+        "voxel_bits_exact": {
+          "checks": 13,
+          "passed": 13
+        },
+        "negative_zero_exact": {
+          "checks": 13,
+          "passed": 13
+        },
+        "shape_exact": {
+          "checks": 13,
+          "passed": 13
+        },
+        "dtype_exact": {
+          "checks": 13,
+          "passed": 13
+        },
+        "header_exact": {
+          "checks": 13,
+          "passed": 13
+        },
+        "affine_exact": {
+          "checks": 13,
+          "passed": 13
+        },
+        "tr_exact": {
+          "checks": 13,
+          "passed": 13
+        },
+        "time_units_exact": {
+          "checks": 13,
+          "passed": 13
+        },
+        "valid_mask_exact": {
+          "checks": 0,
+          "passed": 0
+        },
+        "save_reload_voxel_bits_exact": {
+          "checks": 2,
+          "passed": 2
+        },
+        "saved_header_exact": {
+          "checks": 2,
+          "passed": 2
+        },
+        "saved_affine_exact": {
+          "checks": 2,
+          "passed": 2
+        }
+      }
+    },
+    {
+      "case": "case_003",
+      "backend": "applywarp",
+      "scope": "separate_fixed_3d_case",
+      "shape": [
+        104,
+        104,
+        72
+      ],
+      "reference_shape": [
+        182,
+        218,
+        182
+      ],
+      "interpolation": "trilinear",
+      "input_sha256": {
+        "input": "bf774599e7f6ff5b567c15e79c539dadeb03dc7110a589e29070a8e065e42cf0",
+        "reference": "1268fd84b658451c9a85799a636688bc1f6947fdf8de2d9cf7f62320de1b3837",
+        "warp": "3e7084b2e239df0164fb37243a8a48714053dc176c97d9614546072e11c3bf4b",
+        "official_output": "95f14648c1bdbec304becf1b5b131b35825cac00ac4139f2225f2ffb6d4ecb23"
+      },
+      "load_seconds": {
+        "input": 0.017709271982312202,
+        "reference": 0.6598135959357023,
+        "warp": 0.09895552415400743,
+        "official_output": 0.13601858913898468
+      },
+      "groups": [
+        {
+          "comparison_device": "cuda:0",
+          "device": "cuda:0",
+          "variant": "current_auto",
+          "input_mode": "input_path_reference_and_warp_materialized",
+          "frame_chunk_size": null,
+          "api_seconds": {
+            "samples": 1,
+            "minimum": 0.07251366740092635,
+            "median": 0.07251366740092635,
+            "maximum": 0.07251366740092635
+          },
+          "formal_peak_allocated_bytes": 1969162240,
+          "formal_peak_reserved_bytes": 2040528896,
+          "complete_warmup_checks": 1,
+          "all_warmup_gates_passed": true,
+          "lossless_reference": "legacy_all_channels",
+          "roundtrip_validation": "current_auto_same_serializer_reference",
+          "roundtrip_validation_reference": {
+            "input_mode": "materialized",
+            "variant": "current_auto",
+            "comparison_device": "cuda:0",
+            "repeat": 0
+          },
+          "warmup_validation_seconds": 0.07265737699344754,
+          "warmup_save_seconds": null
+        },
+        {
+          "comparison_device": "cuda:0",
+          "device": "cuda:0",
+          "variant": "current_auto",
+          "input_mode": "materialized",
+          "frame_chunk_size": null,
+          "api_seconds": {
+            "samples": 2,
+            "minimum": 0.05536063574254513,
+            "median": 0.05732150189578533,
+            "maximum": 0.059282368049025536
+          },
+          "formal_peak_allocated_bytes": 1969162240,
+          "formal_peak_reserved_bytes": 2040528896,
+          "complete_warmup_checks": 1,
+          "all_warmup_gates_passed": true,
+          "lossless_reference": "legacy_all_channels",
+          "roundtrip_validation": "this_output",
+          "roundtrip_validation_reference": null,
+          "warmup_validation_seconds": 1.0959752229973674,
+          "warmup_save_seconds": 0.34943617414683104,
+          "fixed_official_output_comparison_whole_grid": {
+            "voxel_bits_exact": false,
+            "negative_zero_exact": true,
+            "shape_exact": true,
+            "dtype_exact": true,
+            "header_exact": false,
+            "affine_exact": true,
+            "tr_exact": true,
+            "time_units_exact": true,
+            "changed_values": 1461082,
+            "values": 7221032,
+            "maximum_absolute_difference": 1.1831521987915039e-05,
+            "mae": 7.605501461502884e-08,
+            "rmse": 2.7190805617910225e-07
+          }
+        },
+        {
+          "comparison_device": "cuda:0",
+          "device": "cuda:0",
+          "variant": "current_chunk_128",
+          "input_mode": "materialized",
+          "frame_chunk_size": 128,
+          "api_seconds": {
+            "samples": 2,
+            "minimum": 0.06466093799099326,
+            "median": 0.11953374464064837,
+            "maximum": 0.17440655129030347
+          },
+          "formal_peak_allocated_bytes": 1969162240,
+          "formal_peak_reserved_bytes": 2040528896,
+          "complete_warmup_checks": 1,
+          "all_warmup_gates_passed": true,
+          "lossless_reference": "legacy_all_channels",
+          "roundtrip_validation": "current_auto_same_serializer_reference",
+          "roundtrip_validation_reference": {
+            "input_mode": "materialized",
+            "variant": "current_auto",
+            "comparison_device": "cuda:0",
+            "repeat": 0
+          },
+          "warmup_validation_seconds": 0.07135938061401248,
+          "warmup_save_seconds": null
+        },
+        {
+          "comparison_device": "cuda:0",
+          "device": "cuda:0",
+          "variant": "current_chunk_32",
+          "input_mode": "materialized",
+          "frame_chunk_size": 32,
+          "api_seconds": {
+            "samples": 2,
+            "minimum": 0.04794223885983229,
+            "median": 0.11312710400670767,
+            "maximum": 0.17831196915358305
+          },
+          "formal_peak_allocated_bytes": 1969162240,
+          "formal_peak_reserved_bytes": 2040528896,
+          "complete_warmup_checks": 1,
+          "all_warmup_gates_passed": true,
+          "lossless_reference": "legacy_all_channels",
+          "roundtrip_validation": "current_auto_same_serializer_reference",
+          "roundtrip_validation_reference": {
+            "input_mode": "materialized",
+            "variant": "current_auto",
+            "comparison_device": "cuda:0",
+            "repeat": 0
+          },
+          "warmup_validation_seconds": 0.07482809433713555,
+          "warmup_save_seconds": null
+        },
+        {
+          "comparison_device": "cuda:0",
+          "device": "cuda:0",
+          "variant": "legacy_all_channels",
+          "input_mode": "input_path_reference_and_warp_materialized",
+          "frame_chunk_size": null,
+          "api_seconds": {
+            "samples": 1,
+            "minimum": 0.20623042760416865,
+            "median": 0.20623042760416865,
+            "maximum": 0.20623042760416865
+          },
+          "formal_peak_allocated_bytes": 1969162240,
+          "formal_peak_reserved_bytes": 2040528896,
+          "complete_warmup_checks": 1,
+          "all_warmup_gates_passed": true,
+          "lossless_reference": "legacy_all_channels",
+          "roundtrip_validation": "current_auto_same_serializer_reference",
+          "roundtrip_validation_reference": {
+            "input_mode": "materialized",
+            "variant": "current_auto",
+            "comparison_device": "cuda:0",
+            "repeat": 0
+          },
+          "warmup_validation_seconds": 0.08465564390644431,
+          "warmup_save_seconds": null
+        },
+        {
+          "comparison_device": "cuda:0",
+          "device": "cuda:0",
+          "variant": "legacy_all_channels",
+          "input_mode": "materialized",
+          "frame_chunk_size": null,
+          "api_seconds": {
+            "samples": 2,
+            "minimum": 0.08934830594807863,
+            "median": 0.14611117984168231,
+            "maximum": 0.202874053735286
+          },
+          "formal_peak_allocated_bytes": 1969162240,
+          "formal_peak_reserved_bytes": 2040528896,
+          "complete_warmup_checks": 1,
+          "all_warmup_gates_passed": true,
+          "lossless_reference": "legacy_all_channels",
+          "roundtrip_validation": "current_auto_same_serializer_reference",
+          "roundtrip_validation_reference": {
+            "input_mode": "materialized",
+            "variant": "current_auto",
+            "comparison_device": "cuda:0",
+            "repeat": 0
+          },
+          "warmup_validation_seconds": 0.1924012373201549,
+          "warmup_save_seconds": null
+        }
+      ],
+      "required_warmup_checks": 6,
+      "all_required_warmup_checks_passed": true,
+      "complete_warmup_gate_summary": {
+        "voxel_bits_exact": {
+          "checks": 6,
+          "passed": 6
+        },
+        "negative_zero_exact": {
+          "checks": 6,
+          "passed": 6
+        },
+        "shape_exact": {
+          "checks": 6,
+          "passed": 6
+        },
+        "dtype_exact": {
+          "checks": 6,
+          "passed": 6
+        },
+        "header_exact": {
+          "checks": 6,
+          "passed": 6
+        },
+        "affine_exact": {
+          "checks": 6,
+          "passed": 6
+        },
+        "tr_exact": {
+          "checks": 6,
+          "passed": 6
+        },
+        "time_units_exact": {
+          "checks": 6,
+          "passed": 6
+        },
+        "valid_mask_exact": {
+          "checks": 6,
+          "passed": 6
+        },
+        "save_reload_voxel_bits_exact": {
+          "checks": 1,
+          "passed": 1
+        },
+        "saved_header_exact": {
+          "checks": 1,
+          "passed": 1
+        },
+        "saved_affine_exact": {
+          "checks": 1,
+          "passed": 1
+        }
+      }
+    }
+  ],
+  "complete_warmup_checks": 25,
+  "owned_gzip_roundtrip_checks": 4,
+  "all_observed_api_peak_allocated_bytes": 4556689408,
+  "all_observed_api_peak_reserved_bytes": 4561305600
+}

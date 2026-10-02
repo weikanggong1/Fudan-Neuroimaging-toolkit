@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import os
+import operator
 from pathlib import Path
 import uuid
 
@@ -40,6 +41,23 @@ _DTYPES = {
     "float": np.dtype("float32"),
     "double": np.dtype("float64"),
 }
+_CUDA_MEMORY_LIMIT_BYTES = 20_000_000_000
+_CUDA_MEMORY_HEADROOM_BYTES = 512 * 1024 * 1024
+_FRAME_BUFFER_BUDGET_BYTES = 8 * 1024 * 1024 * 1024
+
+
+def _check_frame_chunk_size(value):
+    if value is None:
+        return None
+    if isinstance(value, (bool, np.bool_)):
+        raise ValueError("frame_chunk_size must be a positive integer or None")
+    try:
+        value = operator.index(value)
+    except TypeError as error:
+        raise ValueError("frame_chunk_size must be a positive integer or None") from error
+    if value < 1:
+        raise ValueError("frame_chunk_size must be a positive integer or None")
+    return value
 
 
 def _load_nifti(value, name):
@@ -145,15 +163,20 @@ def _sample_linear(data, coordinates):
 
 def _sample_nearest(data, coordinates):
     shape = tuple(int(size) for size in data.shape[1:])
+    flat = _nearest_indices(coordinates, shape)
+    sampled = data.reshape(data.shape[0], -1)[:, flat]
+    sampled = sampled.reshape(data.shape[0], *coordinates.shape[1:])
+    return sampled, _inside(coordinates, shape)
+
+
+def _nearest_indices(coordinates, shape):
     # FSL's MISCMATHS::round rounds positive half-integers upward. PyTorch's
     # nearest grid sampler does not promise that tie rule, so gather directly.
     indices = torch.floor(coordinates + 0.5).to(torch.long)
     for axis, size in enumerate(shape):
         indices[axis].clamp_(0, size - 1)
     flat = indices[0] * (shape[1] * shape[2]) + indices[1] * shape[2] + indices[2]
-    sampled = data.reshape(data.shape[0], -1)[:, flat.reshape(-1)]
-    sampled = sampled.reshape(data.shape[0], *coordinates.shape[1:])
-    return sampled, _inside(coordinates, shape)
+    return flat.reshape(-1)
 
 
 def _normalise_convention(value):
@@ -384,30 +407,105 @@ class ApplyWarpPlan:
     _intent: int | None
     _convention: str | None
     _convention_source: str | None
+    frame_chunk_size: int | None = None
+    _nearest_flat: torch.Tensor | None = None
 
-    def apply(self, input, *, reference=None, output_dtype=None):
-        """Sample another 3D/4D image on the captured source grid."""
+    def apply(self, input, *, reference=None, output_dtype=None, frame_chunk_size=None):
+        """Sample another 3D/4D image on the captured source grid.
+
+        A positive ``frame_chunk_size`` overrides the captured frame policy.
+        ``None`` uses that policy: CPU samples all frames, while CUDA limits
+        working buffers to 8 GiB and a 20 GB allocation budget with 512 MiB
+        reserved for other temporary allocations. All frames use one call
+        when their conservative buffer estimate fits these budgets.
+        """
         input_image = _load_nifti(input, "input")
         reference_image = self._reference if reference is None else _load_nifti(reference, "reference")
         self.input_geometry.require(input_image, "input")
         self.reference_geometry.require(reference_image, "reference")
-        return self._apply_loaded(input_image, _input_data(input_image), reference_image, output_dtype)
-
-    def _apply_loaded(self, input_image, input_data, reference_image, output_dtype):
-        frames = torch.as_tensor(
-            np.moveaxis(input_data, -1, 0).copy(),
-            dtype=torch.float32,
-            device=self.device,
+        return self._apply_loaded(
+            input_image, _input_data(input_image), reference_image, output_dtype,
+            frame_chunk_size=frame_chunk_size,
         )
+
+    def _frame_chunk(self, frame_count, input_shape, requested):
+        requested = _check_frame_chunk_size(requested)
+        requested = self.frame_chunk_size if requested is None else requested
+        if self.device.type != "cuda":
+            return frame_count if requested is None else min(frame_count, requested)
+        # Count the reusable input and conservatively two output buffers. The
+        # prepared geometry is already included in memory_allocated(). This
+        # policy deliberately does not vary with other jobs' free GPU memory.
+        bytes_per_frame = 4 * (
+            int(np.prod(input_shape)) + 2 * int(np.prod(self.reference_geometry.shape))
+        )
+        allocated = torch.cuda.memory_allocated(self.device)
+        available = (
+            _CUDA_MEMORY_LIMIT_BYTES - allocated - _CUDA_MEMORY_HEADROOM_BYTES
+        )
+        if requested is None:
+            chunk = min(
+                frame_count,
+                min(_FRAME_BUFFER_BUDGET_BYTES, available) // bytes_per_frame,
+            )
+        else:
+            chunk = min(frame_count, requested)
+        if chunk < 1 or chunk * bytes_per_frame > available:
+            raise RuntimeError(
+                "frame sampling exceeds the 20 GB CUDA allocation budget; "
+                "use a smaller frame_chunk_size or release other tensors"
+            )
+        return chunk
+
+    def _sample_frames(self, frames, valid_weights):
         if self.interpolation == "trilinear":
             sampled = F.grid_sample(
                 frames[None], self._grid, mode="bilinear",
                 padding_mode="border", align_corners=True,
             )[0]
         else:
-            sampled, _ = _sample_nearest(frames, self._coordinates)
-        sampled = sampled * self._valid.to(sampled.dtype)[None]
-        result = np.moveaxis(sampled.detach().cpu().numpy(), 0, -1)
+            sampled = frames.reshape(frames.shape[0], -1)[:, self._nearest_flat]
+            sampled = sampled.reshape(frames.shape[0], *self.reference_geometry.shape)
+        # Retain multiplication rather than zero filling: negative samples
+        # outside the valid mask retain the original negative-zero bits.
+        sampled.mul_(valid_weights[None])
+        return sampled
+
+    def _apply_loaded(
+        self, input_image, input_data, reference_image, output_dtype,
+        *, frame_chunk_size=None,
+    ):
+        frame_count = input_data.shape[-1]
+        chunk_size = self._frame_chunk(frame_count, input_data.shape[:3], frame_chunk_size)
+        valid_weights = self._valid.to(torch.float32)
+        if chunk_size == frame_count:
+            frames = torch.as_tensor(
+                np.ascontiguousarray(np.moveaxis(input_data, -1, 0)),
+                dtype=torch.float32, device=self.device,
+            )
+            result_frames = self._sample_frames(frames, valid_weights).detach().cpu().numpy()
+        else:
+            result_frames = np.empty(
+                (frame_count, *self.reference_geometry.shape), dtype=np.float32,
+            )
+            output_tensor = torch.from_numpy(result_frames)
+            frame_buffer = torch.empty(
+                (chunk_size, *input_data.shape[:3]),
+                dtype=torch.float32, device=self.device,
+            )
+            for start in range(0, frame_count, chunk_size):
+                end = min(start + chunk_size, frame_count)
+                host_frames = np.ascontiguousarray(
+                    np.moveaxis(input_data[..., start:end], -1, 0), dtype=np.float32,
+                )
+                frames = frame_buffer[:end - start]
+                frames.copy_(torch.from_numpy(host_frames))
+                sampled = self._sample_frames(frames, valid_weights)
+                # Copy directly into the final CPU array instead of allocating
+                # another CPU result and copying it into the output afterwards.
+                output_tensor[start:end].copy_(sampled.detach())
+                del sampled
+        result = np.moveaxis(result_frames, 0, -1)
         if input_image.ndim == 3:
             result = result[..., 0]
         dtype = _resolve_dtype(input_image, result, output_dtype)
@@ -452,10 +550,11 @@ class TorchApplyWarp:
     padding, and stacked per-frame matrices are never silently approximated.
     """
 
-    def __init__(self, device=None):
+    def __init__(self, device=None, *, frame_chunk_size=None):
         if device is None:
             device = "cuda" if torch.cuda.is_available() else "cpu"
         self.device = torch.device(device)
+        self.frame_chunk_size = _check_frame_chunk_size(frame_chunk_size)
         if self.device.type == "cuda" and not torch.cuda.is_available():
             raise RuntimeError("CUDA was requested but is not available")
         if self.device.type == "cuda":
@@ -614,6 +713,11 @@ class TorchApplyWarp:
             _intent=intent,
             _convention=convention,
             _convention_source=convention_source,
+            frame_chunk_size=self.frame_chunk_size,
+            _nearest_flat=(
+                _nearest_indices(input_voxels, input_image.shape[:3])
+                if interpolation == "nearest" else None
+            ),
         )
 
     def run(self, input, reference, output, **kwargs):
@@ -624,7 +728,8 @@ class TorchApplyWarp:
 def applywarp(input, reference, **kwargs):
     """Functional interface for :class:`TorchApplyWarp`."""
     device = kwargs.pop("device", None)
-    return TorchApplyWarp(device=device)(input, reference, **kwargs)
+    frame_chunk_size = kwargs.pop("frame_chunk_size", None)
+    return TorchApplyWarp(device=device, frame_chunk_size=frame_chunk_size)(input, reference, **kwargs)
 
 
 __all__ = [

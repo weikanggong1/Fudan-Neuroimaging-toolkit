@@ -4,6 +4,8 @@ Tensor spatial axes are i,j,k; vector channels are di,dj,dk. PyTorch sampling
 grids reverse this order. Out-of-domain image samples are filled completely,
 whereas displacement fields use border extension, as in Neurite interpn.
 """
+from dataclasses import dataclass
+
 import torch
 import torch.nn.functional as F
 
@@ -22,13 +24,18 @@ def square(matrix):
 
 def dense(matrix, shape, warp_right=None):
     coords = grid(shape, matrix.device, matrix.dtype)
+    return _dense_from_grid(matrix, coords, warp_right)
+
+
+def _dense_from_grid(matrix, coords, warp_right=None):
     loc = coords if warp_right is None else coords + warp_right
     return torch.einsum('ij,bjxyz->bixyz', matrix[:3, :3], loc) + matrix[:3, 3][None, :, None, None, None] - coords
 
 
-def _dense_affine_nearest(matrix, shape):
+def _dense_affine_nearest(matrix, shape, coords=None):
     """Build an affine shift without TF32 changing half-voxel ties."""
-    coords = grid(shape, matrix.device, matrix.dtype)
+    if coords is None:
+        coords = grid(shape, matrix.device, matrix.dtype)
     mapped = torch.stack([
         matrix[row, 0] * coords[:, 0]
         + matrix[row, 1] * coords[:, 1]
@@ -39,80 +46,129 @@ def _dense_affine_nearest(matrix, shape):
     return mapped - coords
 
 
+@dataclass(frozen=True)
+class _SamplingPlan:
+    """Coordinates shared by every frame of one image pull operation."""
+
+    shape: tuple
+    sample_grid: torch.Tensor | None
+    flat_indices: torch.Tensor | None
+    valid: torch.Tensor | None
+
+    def to(self, device):
+        """Move prepared coordinates without recomputing their arithmetic."""
+        return _SamplingPlan(
+            self.shape,
+            None if self.sample_grid is None else self.sample_grid.to(device),
+            None if self.flat_indices is None else self.flat_indices.to(device),
+            None if self.valid is None else self.valid.to(device),
+        )
+
+
+def _prepare_transform(
+    trans, source_shape, *, device, dtype, shape=None, method='linear',
+    fill_value=0, surfa_nearest_rule=False,
+):
+    """Prepare the existing sampler's coordinates without sampling frames.
+
+    Keep the affine/displacement arithmetic and nearest tie rules unchanged.
+    A plan can be reused for channel chunks without recreating voxel grids.
+    """
+    if method not in ('linear', 'nearest'):
+        raise ValueError('method must be linear or nearest')
+    use_surfa = method == 'nearest' and surfa_nearest_rule
+    trans = torch.as_tensor(
+        trans, dtype=torch.float32 if use_surfa else dtype, device=device
+    )
+    if trans.ndim == 2:
+        shape = source_shape if shape is None else tuple(shape)
+        if use_surfa:
+            coords = grid(shape, device, torch.float32)
+            loc = torch.stack([
+                trans[row, 0] * coords[:, 0]
+                + trans[row, 1] * coords[:, 1]
+                + trans[row, 2] * coords[:, 2]
+                + trans[row, 3]
+                for row in range(3)
+            ], dim=1)
+        else:
+            # Match Neurite's affine -> displacement -> coordinates path.
+            # Avoid TF32 GEMM for exact nearest half-voxel ties.
+            coords = grid(shape, device, dtype)
+            shift = (
+                _dense_affine_nearest(trans, shape, coords=coords)
+                if method == 'nearest'
+                else _dense_from_grid(trans, coords)
+            )
+            loc = coords + shift
+    else:
+        loc = grid(
+            trans.shape[2:], device, torch.float32 if use_surfa else dtype
+        ) + trans
+    valid = None
+    if fill_value is not None:
+        valid = torch.ones_like(loc[:, :1], dtype=torch.bool)
+        for dimension, size in enumerate(source_shape):
+            valid &= loc[:, dimension:dimension + 1] >= 0
+            valid &= (
+                loc[:, dimension:dimension + 1] < size
+                if use_surfa else loc[:, dimension:dimension + 1] <= size - 1
+            )
+    if method == 'nearest':
+        idx = [
+            (torch.floor(loc[:, d] + 0.5) if use_surfa else loc[:, d].round())
+            .long().clamp(0, n - 1)
+            for d, n in enumerate(source_shape)
+        ]
+        flat = (idx[0] * source_shape[1] + idx[1]) * source_shape[2] + idx[2]
+        return _SamplingPlan(tuple(loc.shape[2:]), None, flat, valid)
+    norm = [loc[:, d] * (2 / (n - 1)) - 1 if n > 1 else torch.zeros_like(loc[:, d])
+            for d, n in enumerate(source_shape)]
+    sample_grid = torch.stack(norm[::-1], dim=-1)
+    return _SamplingPlan(tuple(loc.shape[2:]), sample_grid, None, valid)
+
+
+def _sample_prepared(volume, plan, fill_value=0):
+    """Sample a channel chunk using a precomputed pull grid or indices."""
+    if plan.flat_indices is not None:
+        out = torch.gather(
+            volume.flatten(2), 2,
+            plan.flat_indices.flatten(1)[:, None].expand(
+                volume.shape[0], volume.shape[1], -1
+            ),
+        )
+        out = out.reshape(volume.shape[0], volume.shape[1], *plan.shape)
+    else:
+        sample_grid = plan.sample_grid.expand(volume.shape[0], -1, -1, -1, -1)
+        out = F.grid_sample(
+            volume, sample_grid, mode='bilinear', padding_mode='border',
+            align_corners=True,
+        )
+    if fill_value is not None:
+        out = torch.where(
+            plan.valid, out,
+            torch.as_tensor(fill_value, dtype=out.dtype, device=out.device),
+        )
+    return out
+
+
 def surfa_nearest(volume, trans, shape=None, fill_value=0):
     """Resample with the nearest-neighbour rules used by Surfa 0.6.3."""
-    trans = torch.as_tensor(trans, dtype=torch.float32, device=volume.device)
-    if trans.ndim == 2:
-        shape = volume.shape[2:] if shape is None else tuple(shape)
-        coords = grid(shape, volume.device, torch.float32)
-        loc = torch.stack([
-            trans[row, 0] * coords[:, 0]
-            + trans[row, 1] * coords[:, 1]
-            + trans[row, 2] * coords[:, 2]
-            + trans[row, 3]
-            for row in range(3)
-        ], dim=1)
-    else:
-        loc = grid(trans.shape[2:], volume.device, torch.float32) + trans
-
-    valid = torch.ones_like(loc[:, :1], dtype=torch.bool)
-    indices = []
-    for dimension, size in enumerate(volume.shape[2:]):
-        valid &= (loc[:, dimension:dimension + 1] >= 0)
-        valid &= (loc[:, dimension:dimension + 1] < size)
-        index = torch.floor(loc[:, dimension] + 0.5).long()
-        indices.append(index.clamp(0, size - 1))
-
-    flat = (
-        indices[0] * volume.shape[3] + indices[1]
-    ) * volume.shape[4] + indices[2]
-    out = torch.gather(
-        volume.flatten(2),
-        2,
-        flat.flatten(1)[:, None].expand(
-            volume.shape[0], volume.shape[1], -1
-        ),
+    plan = _prepare_transform(
+        trans, volume.shape[2:], device=volume.device, dtype=volume.dtype,
+        shape=shape, method='nearest', fill_value=fill_value,
+        surfa_nearest_rule=True,
     )
-    out = out.reshape(volume.shape[0], volume.shape[1], *loc.shape[2:])
-    if fill_value is not None:
-        fill = torch.as_tensor(fill_value, dtype=out.dtype, device=out.device)
-        out = torch.where(valid, out, fill)
-    return out
+    return _sample_prepared(volume, plan, fill_value)
 
 
 def transform(volume, trans, shape=None, fill_value=0, method='linear'):
     """Resample N,C,I,J,K data with a matrix or N,3,I,J,K displacement."""
-    trans = torch.as_tensor(trans, dtype=volume.dtype, device=volume.device)
-    if method not in ('linear', 'nearest'):
-        raise ValueError('method must be linear or nearest')
-    if trans.ndim == 2:
-        shape = volume.shape[2:] if shape is None else tuple(shape)
-        # Match Neurite's affine -> displacement -> coordinates path. The
-        # nearest branch avoids TF32 GEMM so exact half-voxel ties remain ties.
-        shift = (
-            _dense_affine_nearest(trans, shape)
-            if method == 'nearest'
-            else dense(trans, shape)
-        )
-        loc = grid(shape, volume.device, volume.dtype) + shift
-    else:
-        loc = grid(trans.shape[2:], volume.device, volume.dtype) + trans
-    if method == 'nearest':
-        idx = [loc[:, d].round().long().clamp(0, n - 1) for d, n in enumerate(volume.shape[2:])]
-        flat = (idx[0] * volume.shape[3] + idx[1]) * volume.shape[4] + idx[2]
-        out = torch.gather(volume.flatten(2), 2, flat.flatten(1)[:, None].expand(volume.shape[0], volume.shape[1], -1))
-        out = out.reshape(volume.shape[0], volume.shape[1], *loc.shape[2:])
-    else:
-        norm = [loc[:, d] * (2 / (n - 1)) - 1 if n > 1 else torch.zeros_like(loc[:, d])
-                for d, n in enumerate(volume.shape[2:])]
-        sample_grid = torch.stack(norm[::-1], dim=-1).expand(volume.shape[0], -1, -1, -1, -1)
-        out = F.grid_sample(volume, sample_grid, mode='bilinear', padding_mode='border', align_corners=True)
-    if fill_value is not None:
-        valid = torch.ones_like(loc[:, :1], dtype=torch.bool)
-        for d, n in enumerate(volume.shape[2:]):
-            valid &= (loc[:, d:d+1] >= 0) & (loc[:, d:d+1] <= n - 1)
-        out = torch.where(valid, out, torch.as_tensor(fill_value, dtype=out.dtype, device=out.device))
-    return out
+    plan = _prepare_transform(
+        trans, volume.shape[2:], device=volume.device, dtype=volume.dtype,
+        shape=shape, method=method, fill_value=fill_value,
+    )
+    return _sample_prepared(volume, plan, fill_value)
 
 
 def compose(transforms, shape=None):
