@@ -236,3 +236,29 @@ python diagnose_cuda_bootstrap_pairs.py \
 本次v1实际为single通过、第一批parallel两个进程均失败；失败前/后NVML
 可用显存分别70119/69382MiB，不能据此归因于容量耗尽。它不证明根因，也不
 证明Numba是否参与；后续配对测试的完整原字节报告单独保留。
+
+
+### 当前采用的第二例空目录尝试
+
+完整v2初始化对照八批、16个fresh进程全部初始化成功，包括原并发顺序。
+这次未分辨出更可靠策略，因此未将串行ACK候选或缓存开启改为生产默认；
+运行源码仍为`8d750e2`。`run_candidate_retry_v3.py`复用v2的全部输入/输出/失败
+规则，前提改为pairs_v2的八批全部`both_initialized=true`。此前v2监督在启动前
+停止，未创建整例输出。本次配置为`whole/configs/candidate_sub02_retry_v3.json`，
+其SHA为`fac6fd6dffd6a74b2d925b3a190df2c7517c857a613f385e3e2aba5c657066d9`；
+仅改变两个输出路径，输入、版本、GPU、线程、精度与第一候选一致。
+
+```bash
+# 读取既有pairs_v2完整终态；再次核验安装171源码与15程序SHA。
+python run_candidate_retry_v3.py \
+  --round /data/benchmark/parallel_20261002 \
+  --python /opt/conda/envs/fnit/bin/python \
+  --lock /tmp/fnit-recon-benchmark.lock
+```
+
+服务器实际监督UTC19:09:10启动（PID33588），脚本SHA
+`b9781f3f6fa6c96dfc9524282015c8928cde2fe265b74d1b59ff5a770ad129c0`。
+它实际复用尚未创建过的`candidate_retry_queue_v2`目录及同名日志；这是监督
+输出名，不能据名字判断整例尝试版本。真实整例目录带`retry_v3`，各launch和
+monitor记录实际argv/配置SHA。后续三方比较使用`config_retry_v4.json`与新诊断
+目录，只读两份候选均成功完成的输出；执行终态与资源/数值判定仍分列。
