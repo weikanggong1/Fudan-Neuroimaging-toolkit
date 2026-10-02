@@ -33,7 +33,7 @@ ATLAS_NAMES = ("fs-aparc", "fs-aparc-a2009s", "aparc+tian-s1", "aparc.a2009s+tia
                "glasser+tian-s1", "glasser+tian-s4", "schaefer200+tian-s1",
                "schaefer500+tian-s4", "schaefer1000+tian-s4")
 RESOURCE_OPTIONS = ("--atlas-templates-dir", "--fsaverage-dir", "--mni-template",
-                    "--synthmorph-weights", "--tian-fnirt-coeff")
+                    "--synthmorph-weights", "--tian-fnirt-coeff", "--workbench-command")
 LABEL = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
 SHA = re.compile(r"^[0-9a-fA-F]{64}$")
 
@@ -154,9 +154,9 @@ def source_manifest(source):
     def git(*arguments):
         result = subprocess.run(["git", "-C", str(source), *arguments], capture_output=True, text=True)
         return result.stdout.strip() if result.returncode == 0 else None
-    suffixes = {".py", ".pyi", ".c", ".cc", ".cpp", ".cu", ".cuh", ".h", ".hpp", ".json", ".toml", ".yaml", ".yml", ".txt", ".sh"}
     files = sorted(path for path in (source / "src/fnit").rglob("*")
-                   if path.is_file() and path.suffix in suffixes and "__pycache__" not in path.parts)
+                   if path.is_file() and path.suffix not in {".pyc", ".pyo"}
+                   and "__pycache__" not in path.parts)
     files += [path for path in (source / "pyproject.toml", source / "environment.yml") if path.is_file()]
     hashes = {str(path.relative_to(source)): sha256(path) for path in files}
     identity = hashlib.sha256(json.dumps(hashes, sort_keys=True).encode()).hexdigest()
@@ -324,6 +324,19 @@ def recon_command(config, case, job):
     return command, launch, subjects / name
 
 
+def recon_environment(config, subject):
+    """Set the official installation before its setup script is sourced."""
+    environment = os.environ.copy()
+    for key in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS", "NUMEXPR_NUM_THREADS"):
+        environment[key] = str(config["cpu_threads"])
+    environment["FREESURFER_HOME"] = config["freesurfer_home"]
+    environment["SUBJECTS_DIR"] = str(subject.parent)
+    environment["CUDA_VISIBLE_DEVICES"] = ""
+    if config.get("fs_license"):
+        environment["FS_LICENSE"] = config["fs_license"]
+    return environment
+
+
 def cli_command(config, case, job):
     _, _, anatomy = recon_command(config, case, job)
     arguments = ["UKBConnectome_pipeline", "--bids-root", case["bids_root"], "--subject", case["subject"],
@@ -387,13 +400,7 @@ def worker(payload):
             command, launch, subject = recon_command(config, case, job)
             if subject.exists() or (job / "connectome").exists():
                 raise FileExistsError(f"preexisting anatomy/downstream output: {job}")
-            environment = os.environ.copy()
-            for key in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS", "NUMEXPR_NUM_THREADS"):
-                environment[key] = str(config["cpu_threads"])
-            environment["SUBJECTS_DIR"] = str(subject.parent)
-            environment["CUDA_VISIBLE_DEVICES"] = ""
-            if config.get("fs_license"):
-                environment["FS_LICENSE"] = config["fs_license"]
+            environment = recon_environment(config, subject)
             license_path = Path(environment.get("FS_LICENSE", str(Path(config["freesurfer_home"]) / "license.txt")))
             with license_path.open("rb") as stream:
                 stream.read(1)
@@ -402,7 +409,7 @@ def worker(payload):
             subject.parent.mkdir()
             report.update(command=command, launch_arguments=launch, cpu_threads=config["cpu_threads"],
                           executable_sha256=sha256(command[0]), setup_script_sha256=sha256(Path(config["freesurfer_home"]) / "SetUpFreeSurfer.sh"),
-                          environment={key: environment[key] for key in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS", "NUMEXPR_NUM_THREADS", "SUBJECTS_DIR", "CUDA_VISIBLE_DEVICES")})
+                          environment={key: environment[key] for key in ("FREESURFER_HOME", "OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS", "NUMEXPR_NUM_THREADS", "SUBJECTS_DIR", "CUDA_VISIBLE_DEVICES")})
             version_launch = [*launch[:6], "-version"]
             # launch[:6] includes setup/home/executable, but no reconstruction flags.
             version_result = subprocess.run(version_launch, env=environment, capture_output=True, text=True)
@@ -563,13 +570,26 @@ def memory_budget(wall):
         if key in allocator:
             measurements[key] = allocator[key]
     values = [value for value in measurements.values() if isinstance(value, (float, int)) and math.isfinite(value) and value >= 0]
+    monitor_issues = []
+    for key in ("failed_samples", "unresolved_device_samples"):
+        if process.get(key, 0):
+            monitor_issues.append(key)
+    if process.get("errors"):
+        monitor_issues.append("errors")
+    interval = process.get("sample_interval_seconds")
+    gap = process.get("max_observed_interval_seconds")
+    if isinstance(interval, (float, int)) and isinstance(gap, (float, int)) and gap > max(5., 4 * interval):
+        monitor_issues.append("sampling_gap")
+    if any(item.get("error") for item in allocator.get("intervals", [])):
+        monitor_issues.append("allocator_errors")
     if any(value >= 20_000_000_000 for value in values):
         status = "exceeded"
-    elif measurements["process_tree"] is None or len(values) < 3:
+    elif measurements["process_tree"] is None or len(values) < 3 or monitor_issues:
         status = "not_fully_measured"
     else:
         status = "observed_below_budget"
     return {"limit_bytes": 20_000_000_000, "measurements": measurements, "status": status,
+            "monitor_issues": monitor_issues,
             "scope": "sampled process-tree maximum plus allocator ledger; not a mathematically continuous bound"}
 
 

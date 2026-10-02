@@ -93,6 +93,30 @@ class ManifestTests(unittest.TestCase):
 
 
 class CommandAndFreshnessTests(unittest.TestCase):
+    def test_official_environment_does_not_inherit_another_installation(self):
+        cfg = config()
+        with patch.dict(cohort.os.environ, {"FREESURFER_HOME": "/other/install", "CUDA_VISIBLE_DEVICES": "1"}):
+            env = cohort.recon_environment(cfg, Path("/shared/new/subjects/sub-S00"))
+        self.assertEqual(env["FREESURFER_HOME"], cfg["freesurfer_home"])
+        self.assertEqual(env["SUBJECTS_DIR"], "/shared/new/subjects")
+        self.assertEqual(env["CUDA_VISIBLE_DEVICES"], "")
+        self.assertEqual(env["OMP_NUM_THREADS"], "8")
+
+    def test_source_freeze_includes_scientific_binary_and_label_resources(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory)
+            package = source / "src/fnit"
+            package.mkdir(parents=True)
+            (package / "cli.py").write_text("# source identity fixture\n")
+            (package / "nodes.tsv").write_text("index\tlabel\n1\t1001\n")
+            resource = package / "sphere.npz"
+            resource.write_bytes(b"resource identity fixture")
+            before = cohort.source_manifest(source)
+            self.assertIn("src/fnit/nodes.tsv", before["source_sha256"])
+            self.assertIn("src/fnit/sphere.npz", before["source_sha256"])
+            resource.write_bytes(b"changed")
+            self.assertNotEqual(before["source_fingerprint"], cohort.source_manifest(source)["source_fingerprint"])
+
     def test_safe_ssh_argument_roundtrip(self):
         adversarial = "space ' quote; $(touch /tmp/do-not-run) `uname` $SECRET"
         command = ["/shared/python", "worker.py", adversarial]
@@ -198,6 +222,14 @@ class EntryGateTests(unittest.TestCase):
 
 
 class ReportTests(unittest.TestCase):
+    def test_incomplete_memory_sampling_cannot_pass_budget(self):
+        for fields in ({"failed_samples": 1}, {"errors": ["query failed"]},
+                       {"unresolved_device_samples": 2},
+                       {"sample_interval_seconds": .5, "max_observed_interval_seconds": 9.}):
+            report = wall_report()
+            report["gpu_process_memory"].update(fields)
+            self.assertEqual(cohort.memory_budget(report)["status"], "not_fully_measured")
+
     def test_fresh_seeded_wall_report_is_accepted(self):
         cohort.check_wall_report(wall_report(), config(), manifest()["cases"][0])
 
