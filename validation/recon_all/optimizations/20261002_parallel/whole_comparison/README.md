@@ -101,7 +101,9 @@ driver自己取得共同锁，启动命令不要再外包同文件flock，以免
 
 这是离线比较器，没有对应的官方生成命令；官方参考来自已归档的`recon-all -all -parallel -openmp 4 -itkthreads 1`。生产FNIT不调用官方程序。
 
-2026-10-02 baseline sub01已完成：pipeline **3433.332秒**、entry **3440.348秒**，138/138输出存在；绑定`6f67cc06ee8c5108ef3640cbfc289f3e5a742f65`。这只是该例执行与完整性记录，尚无本轮candidate比较结果。baseline sub02及candidate两例状态以协调者真实completion为准；本driver开发时未执行正式数值比较。
+官方sub01为2026-09-24的gpucw1归档，6790秒；sub02为2026-09-30的**nodecw10**归档，4143秒，与本轮FNIT的gpucw1跨主机。官方Synth在CPU，左右半球`openmp 4`并行可能总8线程，而本轮FNIT总预算4。官方时间用于归档上下文，不作本轮同资源配对提速；`execution_binding.json`完整保留逐例官方metadata与限制。
+
+2026-10-02 baseline两例已完成：sub01 pipeline **3433.332秒**、entry **3440.348秒**；sub02 pipeline **3665.545秒**、entry **3668.889秒**，均138/138输出存在，绑定`6f67cc06ee8c5108ef3640cbfc289f3e5a742f65`。这只是baseline执行与完整性记录，尚无本轮candidate比较结果。candidate两例状态以协调者真实completion为准；本driver开发与诊断复审未执行正式数值比较。
 
 时间安排依据旧两例的质量报告：每套双半球24–31秒，六套约2.5–3分钟，不包含导入、全网格双向距离和绘图。双向距离受网格差异影响，尚无本driver整套实测，先为两例预留10–40分钟；这不是性能结果或硬上界。穿越的每半球180秒限额只限制该步骤，不能作为整份比较的完成保证。
 
@@ -109,6 +111,7 @@ driver自己取得共同锁，启动命令不要再外包同文件flock，以免
 
 - 2026-10-02：新增三方整例driver；保留138项诊断，补显式空间/索引门控和成熟no-th3派生比较，复用质量与脑图工具；正式比较尚未执行。
 - 同日编排回归：7项标准库控制测试覆盖锁互斥、失败记录、一次interop配置、失败completion、源码变化、partial质量及精确数组缓存；无MRI或GPU计算。重复数组距离缓存只改变比较driver耗时，不作为生产提速结果。
+- 同日诊断复审：register scope纳入基线avg_curv，与实际worker一致；显存缺测/零记录不判预算通过，allocator分量峰值与同期进程树峰值分列；补监督失败归档、冻结安装入口断言和报告SHA。新监督检查须由新版进程执行，旧进程不会自动加载。正式候选结果仍以实际completion为准。
 - 2026-10-01：既有`compare_performance_pair.py`与`collect_hotspot_whole_comparison.py`提供两方向整例报告；旧结果绑定各自源码，不重标为本轮实测。
 - 基础实现：本仓库`compare_subject.py`、`surface_stats_cache.py`及上述六个比较脚本；无新增依赖。
 - 原实现：[FreeSurfer d932c45](https://github.com/freesurfer/freesurfer/tree/d932c45)，[mris_anatomical_stats](https://github.com/freesurfer/freesurfer/blob/d932c45/mris_anatomical_stats/mris_anatomical_stats.cpp)。参考：Dale et al., NeuroImage 1999；Fischl et al., NeuroImage 1999；Fischl & Dale, PNAS 2000；Desikan et al., NeuroImage 2006。

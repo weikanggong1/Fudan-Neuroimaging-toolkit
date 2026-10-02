@@ -19,6 +19,9 @@ from pathlib import Path
 import subprocess
 import time
 
+CANDIDATE = "8d750e25d4d067a43edb788a96b2086a1c031ba0"
+ARCHIVE = "45cb2a8260883f58c5640af82b0903ed9d6f3339936730385dc198434d7e88c9"
+
 def sha(path):
     h = hashlib.sha256()
     with Path(path).open("rb") as f:
@@ -26,18 +29,28 @@ def sha(path):
             h.update(block)
     return h.hexdigest()
 
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--round", type=Path, required=True)
-    parser.add_argument("--python", type=Path, required=True)
-    parser.add_argument("--lock", type=Path, required=True)
-    parser.add_argument("--resource-script", type=Path, required=True)
-    args = parser.parse_args()
+def validate_installed_entry(root, python, final_check):
+    """验证队列实际src入口和冻结安装产物；不改变runtime或配置。"""
+    installed = (root / "candidate_install_8d750e2/installed").resolve()
+    if (final_check["status"] != "passed" or final_check["code_commit"] != CANDIDATE or
+            final_check["compared_recon_all_py_files"] != 171 or final_check["mismatches"] or
+            Path(final_check["installed_import_root"]).resolve() != installed):
+        raise ValueError("final installed wheel/source checks failed")
+    entries = {}
+    for case in ("sub01", "sub02"):
+        path = root / "coordinator" / f"candidate_{case}_8d750e2.json"
+        config = json.loads(path.read_text())
+        entry = (Path(config["code_root"]) / "src").resolve()
+        if (entry != installed or config["code_commit"] != CANDIDATE or
+                config["source_archive_sha256"] != ARCHIVE or
+                Path(config["python"]).resolve() != python.resolve()):
+            raise ValueError("candidate queue does not use declared frozen installation " + case)
+        entries[case] = {"config_sha256": sha(path), "import_root": str(entry)}
+    return entries
+
+def run(args, report, ready_path):
     root = args.round.resolve()
     coordinator = root / "coordinator"
-    ready_path = coordinator / "candidate_ready_validation.json"
-    if ready_path.exists():
-        raise FileExistsError(ready_path)
     tick = time.monotonic()
     installation = root / "private_install_v1"
     while True:
@@ -52,11 +65,10 @@ def main():
         if time.monotonic() - tick > 6*3600:
             raise TimeoutError("native dependency unavailable after six hours")
         time.sleep(20)
+    report["phase"] = "native_manifest_checks"
     manifest_path = installation / "installed-native-optimizations.json"
     manifest = json.loads(manifest_path.read_text())
     final_check = json.loads((root / "candidate_install_8d750e2/installed-source-check.json").read_text())
-    if final_check["status"] != "passed" or final_check["compared_recon_all_py_files"] != 171:
-        raise ValueError("final installed wheel/source checks failed")
     native = installation / "native_bundle/bin"
     expected = json.loads((coordinator / "expected_resources.json").read_text())
     native_expected = {}
@@ -75,27 +87,30 @@ def main():
     expected_path.write_text(json.dumps(expected, indent=2) + "\n")
     config = json.loads((coordinator / "capture_baseline_resources.json").read_text())
     config.update(expected_manifest=str(expected_path),
-                  code_commit="8d750e25d4d067a43edb788a96b2086a1c031ba0",
-                  source_archive_sha256="45cb2a8260883f58c5640af82b0903ed9d6f3339936730385dc198434d7e88c9")
+                  code_commit=CANDIDATE, source_archive_sha256=ARCHIVE)
     config["roots"]["binaries"] = str(native)
     config_path = coordinator / "capture_candidate_resources.json"
     config_path.write_text(json.dumps(config, indent=2) + "\n")
-    report = {
+    report.update({
         "status": "validating", "dependency_wait_seconds": time.monotonic() - tick,
-        "started_utc": datetime.now(timezone.utc).isoformat(),
+        "phase": "resource_and_installed_entry_checks",
         "script_sha256": sha(__file__),
         "installed_manifest_sha256": sha(manifest_path),
         "wheel_sha256": final_check["wheel_sha256"],
         "installed_recon_source_matches": 171,
         "native_binaries": native_expected,
         "isolation": "not_verified",
-    }
+    })
     ready_path.write_text(json.dumps(report, indent=2) + "\n")
     env = dict(os.environ)
     for name in ["OMP_NUM_THREADS","NUMBA_NUM_THREADS","MKL_NUM_THREADS","OPENBLAS_NUM_THREADS"]:
         env[name] = "4"
+    report["phase"] = "waiting_for_common_lock"
+    ready_path.write_text(json.dumps(report, indent=2) + "\n")
     with args.lock.open("a") as stream:
         fcntl.flock(stream.fileno(), fcntl.LOCK_EX)
+        report["phase"] = "resource_and_installed_entry_checks"
+        report["queue_import_binding"] = validate_installed_entry(root, args.python, final_check)
         env["PYTHONPATH"] = str(root / "candidate_install_8d750e2/installed")
         verify = ("from fnit.recon_all.native_runtime_selection import select_native_optimizations;"
                   "import json; r=select_native_optimizations(" + repr(str(native)) + ",threads=4);"
@@ -110,7 +125,9 @@ def main():
                         "--output", str(coordinator / "candidate_resources.json")],
                        env=env, check=True)
     report["status"] = "passed"
-    report["finished_utc"] = datetime.now(timezone.utc).isoformat()
+    report["phase"] = "whole_queue"
+    report["ready_validation_status"] = "passed"
+    report["ready_validation_finished_utc"] = datetime.now(timezone.utc).isoformat()
     ready_path.write_text(json.dumps(report, indent=2) + "\n")
     queue = [str(args.python), str(coordinator / "run_whole_queue.py"), "--configs",
              str(coordinator / "candidate_sub01_8d750e2.json"),
@@ -120,6 +137,29 @@ def main():
              "--launcher", str(coordinator / "execute_whole_case.py")]
     print(json.dumps({"ready": True, "queue": queue}), flush=True)
     subprocess.run(queue, env=env, check=True)
+    report["phase"] = "whole_queue_complete"
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--round", type=Path, required=True)
+    parser.add_argument("--python", type=Path, required=True)
+    parser.add_argument("--lock", type=Path, required=True)
+    parser.add_argument("--resource-script", type=Path, required=True)
+    args = parser.parse_args()
+    ready_path = args.round.resolve() / "coordinator/candidate_ready_validation.json"
+    report = {"status": "waiting", "phase": "native_installation",
+              "started_utc": datetime.now(timezone.utc).isoformat(), "script_sha256": sha(__file__)}
+    # 独占创建防止重启覆盖旧结果；旧监督进程不自动获得新检查。
+    with ready_path.open("x") as stream:
+        stream.write(json.dumps(report, indent=2) + "\n")
+    try:
+        run(args, report, ready_path)
+    except BaseException as error:
+        report.update(status="failed", error_type=type(error).__name__, error=str(error))
+        raise
+    finally:
+        report["finished_utc"] = datetime.now(timezone.utc).isoformat()
+        ready_path.write_text(json.dumps(report, indent=2) + "\n")
 
 if __name__ == "__main__":
     main()

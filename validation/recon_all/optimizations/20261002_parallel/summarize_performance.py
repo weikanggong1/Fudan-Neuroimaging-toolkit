@@ -28,18 +28,58 @@ CANDIDATE = "8d750e25d4d067a43edb788a96b2086a1c031ba0"
 def read(path):
     return json.loads(path.read_text())
 
+def memory_record(run, monitor):
+    """保留原始显存值；缺测不计零，allocator分量峰值不作同期总峰值。"""
+    peak = monitor["peak_sampled_process_bytes"]
+    samples, failed = monitor["samples"], monitor["failed_app_queries"]
+    measured = (isinstance(peak, (int, float)) and not isinstance(peak, bool)
+                and peak > 0 and samples > failed >= 0)
+    allocator = run["cuda_allocator"]
+    components = []
+    for row in run["stages"]:
+        if "gpu_peak_allocated_bytes" in row or "gpu_peak_reserved_bytes" in row:
+            components.append({"stage": row["name"], "process": "pipeline parent",
+                               "scope": row.get("gpu_peak_scope"),
+                               "status": row.get("torch_memory_stats_status")})
+        if row.get("talairach_child_gpu"):
+            components.append({"stage": row["name"], "process": "Talairach child",
+                               "scope": "child allocator peak; not simultaneous process-tree total"})
+    return {**monitor, "peak_GB": peak / 1e9 if measured else None,
+            "peak_GiB": peak / 2**30 if measured else None,
+            "sampling_status": ("partially_measured" if failed or not monitor.get("monitor_thread_finished", True)
+                                else "sampled") if measured else "unavailable_or_no_nonzero_process_sample",
+            "under_requested_budget_at_samples": peak < 20_000_000_000 if measured else None,
+            "allocator": allocator,
+            "allocated": run.get("gpu_peak_allocated_bytes"),
+            "reserved": run.get("gpu_peak_reserved_bytes"),
+            "allocator_peak_scope": "raw maximum of reported parent stages and Talairach child; never their sum or simultaneous tree peak",
+            "parent_allocator_stats_known_valid": allocator["torch_stats_known_valid"],
+            "parent_allocator_stats_known_unavailable": allocator["torch_stats_known_unavailable"],
+            "allocator_components": components}
+
 def summarize_case(root, case):
     files = {kind: {name: root / f"{kind}_{case}" / (name + ".json")
                     for name in ("run", "launch", "completion", "monitor")}
              for kind in ("baseline", "candidate")}
     data = {kind: {name: read(path) for name, path in paths.items()}
             for kind, paths in files.items()}
+    for kind in files:
+        files[kind]["gpu_samples"] = root / f"{kind}_{case}/gpu_samples.csv"
     before, after = data["baseline"], data["candidate"]
     checks = {
-        "same_raw_input": before["launch"]["input"] == after["launch"]["input"],
+        "same_raw_input": before["run"]["input"] == before["launch"]["input"]
+                          == after["run"]["input"] == after["launch"]["input"],
         "same_host": before["launch"]["host"] == after["launch"]["host"],
-        "same_threads": before["run"]["threads"] == after["run"]["threads"] == 4,
-        "same_device": before["run"]["device"] == after["run"]["device"],
+        "same_threads": before["run"]["threads"] == before["launch"]["threads"]
+                        == after["run"]["threads"] == after["launch"]["threads"] == 4,
+        "same_device": before["run"]["device"] == before["launch"]["device"]
+                       == after["run"]["device"] == after["launch"]["device"],
+        "run_subject_binding": all(v["run"]["subject_dir"] == v["launch"]["output"] for v in (before, after)),
+        "archive_binding": all(bool(v["launch"]["source_archive_sha256"]) and
+                               v["launch"]["source_archive_sha256"] == v["completion"]["source_archive_sha256"]
+                               for v in (before, after)),
+        "pipeline_timing_binding": all(v["run"]["total_seconds"] == v["completion"]["pipeline_total_seconds"]
+                                       for v in (before, after)),
         "same_gpu_uuid": before["monitor"]["gpu_uuid"] == after["monitor"]["gpu_uuid"]
                          == before["launch"]["gpu_uuid"] == after["launch"]["gpu_uuid"],
         "same_invocation": before["launch"]["invocation"] == after["launch"]["invocation"],
@@ -85,9 +125,9 @@ def summarize_case(root, case):
     groups = {
         "surface": ([f"surface_{h}" for h in ("lh", "rh")],
                     ["surface_hemisphere_group", "defects_lh", "defects_rh"]),
-        "register": ([f"register_{h}" for h in ("lh", "rh")],
+        "register": ([f"{name}_{h}" for h in ("lh", "rh") for name in ("register", "avg_curv")],
                      ["register_hemisphere_group"]),
-        "annotation": ([n for n in b if n.startswith(("annot_", "avg_curv_"))],
+        "annotation": ([n for n in b if n.startswith("annot_")],
                        ["annotation_hemisphere_group"]),
         "finish_surface": ([f"finish_surface_{h}" for h in ("lh", "rh")],
                            ["finish_surface_hemisphere_group", "finish_metrics_lh", "finish_metrics_rh"]),
@@ -114,20 +154,16 @@ def summarize_case(root, case):
                 raise ValueError("stage implementation unclassified: " + n)
             rows.append({"name": n, **previous.pair(b[n]["seconds"], c[n]["seconds"]),
                          **info, "implementation": overrides.get(n, info["implementation"])})
-    memory = {}
-    for kind, value in data.items():
-        m = value["monitor"]
-        p = m["peak_sampled_process_bytes"]
-        memory[kind] = {**m, "peak_GB": p / 1e9, "peak_GiB": p / 2**30,
-                        "under_requested_budget_at_samples": p < 20_000_000_000,
-                        "allocator": value["run"]["cuda_allocator"],
-                        "allocated": value["run"].get("gpu_peak_allocated_bytes"),
-                        "reserved": value["run"].get("gpu_peak_reserved_bytes")}
+    memory = {kind: memory_record(value["run"], value["monitor"]) for kind, value in data.items()}
     return {
         "checks": checks, "source_versions": {"baseline": BASELINE, "candidate": CANDIDATE},
+        "source_archive_sha256": {kind: value["launch"]["source_archive_sha256"] for kind, value in data.items()},
         "command_timing": previous.pair(before["monitor"]["command_wall_seconds"],
                                         after["monitor"]["command_wall_seconds"]),
         "pipeline_timing": previous.pair(before["run"]["total_seconds"], after["run"]["total_seconds"]),
+        "unpartitioned_pipeline_seconds": {kind: value["run"]["total_seconds"] -
+            sum(row["seconds"] for row in value["run"]["stages"]) for kind, value in data.items()},
+        "unpartitioned_timing_scope": "validation/thread context/report IO and other work outside measured parent stages; not another stage speedup",
         "timing_scope": "validation/import/model load/transfers/compute/file IO; queue wait excluded; paired single observations",
         "stages": rows, "memory": memory,
         "precision": after["run"]["precision"],
@@ -155,6 +191,7 @@ def main():
         "schema": "fnit_parallel_whole_timing_v1", "cases": cases,
         "script_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "reused_summary_sha256": hashlib.sha256(previous_path.read_bytes()).hexdigest(),
+        "stage_implementations_sha256": hashlib.sha256((HERE.parent / "20261001_serial/stage_implementations.json").read_bytes()).hexdigest(),
         "isolation": "not_verified", "continuous_gpu_peak": "not_verified",
         "overall_metric_equivalence": "not_assessed",
     }

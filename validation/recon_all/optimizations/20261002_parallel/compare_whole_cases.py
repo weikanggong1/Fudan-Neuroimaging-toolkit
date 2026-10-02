@@ -455,9 +455,10 @@ def compare_case(case: dict, config: dict, folder: Path) -> dict:
         if official["subject"] != case["official"]:
             raise ValueError("archived official provenance subject differs")
         info["official"].update(archived_wall_seconds=official["whole_wall_seconds"],
+            archived_metadata=official,
             provenance_sha256=digest(provenance_path), log_sha256=official["log_sha256"],
             done_sha256=official["done_sha256"], archived_stage_rows=official["command_wall_rows"],
-            timing_restriction="archived reference; nested and concurrent command times are not additive whole wall")
+            timing_restriction="archived reference, not current paired resources/speedup; sub02 nodecw10 differs from FNIT gpucw1; official bilateral openmp 4 may total 8 versus FNIT total 4; nested/concurrent command times are not additive")
     write(folder / "execution_binding.json", info)
     subjects = {kind: Path(info[kind]["subject"]) for kind in ("baseline", "candidate", "official")}
     derived = {str(subject): no_th3_subject(subject) for subject in subjects.values()}
