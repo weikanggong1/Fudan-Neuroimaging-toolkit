@@ -87,7 +87,7 @@ TBSS 分支需要 FMRIB58_FA_1mm 和 FMRIB58_FA-skeleton_1mm。MMORF 分支还�
 from fnit import DMRIPipeline
 
 result = DMRIPipeline(
-    device="cuda:0",  # 所有计算使用这一 GPU；默认允许 TF32
+    device="cuda:0",  # PyTorch 计算设备；默认允许 TF32，读写和形态学掩膜使用 CPU
     registration_backend="tbss",  # 不依赖 T1w，使用 FA 的 FLIRT/FNIRT 配准
     fnirt_config="tbss",  # UKB Oxford 三阶段配置
     synthstrip_weights=None,  # TBSS 不使用 T1 脑提取
@@ -119,7 +119,7 @@ result = DMRIPipeline(
 from fnit import DMRIPipeline
 
 result = DMRIPipeline(
-    device="cuda:0",  # 所有计算使用这一 GPU；默认允许 TF32
+    device="cuda:0",  # PyTorch 计算设备；默认允许 TF32，读写和形态学掩膜使用 CPU
     registration_backend="mmorf",  # 使用 T1w 与 DTI tensor 联合估计形变
     fnirt_config=None,  # MMORF 不使用 FNIRT
     synthstrip_weights="/weights/synthstrip.1.pt",  # 官方 SynthStrip 权重文件
@@ -340,7 +340,23 @@ MMORF 分支和 TBSS 分支共用 TOPUP、EDDY、DTIFIT、NODDI、九图命名�
 
 ## 真实数据验证与原软件对照
 
-### 2026-10-02：保持已有 FNIT 输出的优化
+### 2026-10-02：同 raw 的完整 TBSS＋AMICO 原软件复测
+
+同一例真实 104×104×72×105 AP/PA，从 b0 选择、TOPUP、EDDY 开始分别独立运行 FNIT 与 FSL 6.0.7.4＋官方 Python AMICO 2.0.3，保存九张 native、standard 和 skeleton 共 27 图；每套流程完整重复两次。数值源码固定为 `7473452`，没有复用历史阶段输出。
+
+| 处理时间 | FNIT | 独立 FSL＋AMICO |
+|---|---:|---:|
+| 两轮 / 秒 | 507.22、455.06 | 2166.99、1994.29 |
+| 中位数 / 分钟 | 8.02 | 34.68 |
+| 范围 / 分钟 | 7.58–8.45 | 33.24–36.12 |
+
+本例观察到时间比 4.32；输出有明显差异，尚未证明数值等价加速。27 对图 shape、affine 和有限值检查通过；脑 mask Dice 为 0.888，标准空间九图在固定模板脑区内 r=0.419–0.810，骨架图 r=0.197–0.710。两次 FNIT 内部、两次参考内部各 27 张解码数组和 header binary block 分别完全相同。
+
+参考从同一 raw 自行生成 mask、校正图、native 和配准；无 T1 mask 改用独立 BET，MCR-AMICO 改用官方 Python，后续用各自 rotated bvec，因此是按本例适配的完整原软件链。分步骤时间、逐图 MAE/RMSE、上游校正、共同区域及脑图见[完整报告](../../validation/dmri_pipeline/end_to_end_20261002.md)。本次没有更新 MMORF/经典 NODDI 的完整参考对照。
+
+![真实 FA、MD、OD 模板脑内对照](../../validation/dmri_pipeline/figures/end_to_end_20261002.png)
+
+### 2026-10-02：保持已有 FNIT 输出的组件优化
 
 本版复用 TOPUP 已选 AP 参考索引、EDDY 不可变几何、NODDI Gram 和固定 warp 的九图采样计划。完整 EDDY、两种全脑 NODDI 与真实九图传播在同输入下均与冻结基线逐值相同，完整 header、affine、sidecar 和模型 QC 也一致；新增 `eddy_gp_seed` 便于配对复现。
 
@@ -351,7 +367,7 @@ MMORF 分支和 TBSS 分支共用 TOPUP、EDDY、DTIFIT、NODDI、九图命名�
 | TBSS / MMORF 固定 warp 九图传播 | warm 中位数 0.366→0.181 / 0.517→0.270 s | 约 2.02 / 1.91 倍，不包括配准估计或文件读写 |
 | 全脑 AMICO / 经典 NODDI，含读写 | 两次中位数 30.77→27.45 / 68.15→79.81 s | 共享 GPU 波动较大；AMICO 稳定收益未确定，经典模式整体未提速 |
 
-详细输入、逐次时间、显存、验收和未采用的缓存方案见[本版报告](../../validation/dmri_pipeline/lossless_20261002.md)。本次未重跑最新源码的完整 raw-to-MNI，也未更新下方原软件误差；两类对照分别保留。
+详细输入、逐次时间、显存、验收和未采用的缓存方案见[本版报告](../../validation/dmri_pipeline/lossless_20261002.md)。该组件报告以冻结 FNIT 为对照；随后完成的同 raw 原软件整链结果见上一节，下方历史对照继续保留原输入和时间边界。
 
 ### 既有整链与原软件对照
 
@@ -371,7 +387,8 @@ MMORF 分支和 TBSS 分支共用 TOPUP、EDDY、DTIFIT、NODDI、九图命名�
 
 | 日期 | 更新与验收 |
 |---|---|
-| 2026-10-02 | 固定 GP seed、参考索引复用、EDDY/NODDI 不可变缓存、按几何分组的九图采样计划；完整组件和固定 warp 的真实逐值对照通过，[报告](../../validation/dmri_pipeline/lossless_20261002.md) |
+| 2026-10-02，完整复测 | 同 raw 的 FNIT/独立 FSL＋AMICO 各两轮，27 图、上游、误差、重复性与脑图完成，[整链报告](../../validation/dmri_pipeline/end_to_end_20261002.md) |
+| 2026-10-02，组件优化 | 固定 GP seed、参考索引复用、EDDY/NODDI 不可变缓存、按几何分组的九图采样计划；完整组件和固定 warp 的真实逐值对照通过，[报告](../../validation/dmri_pipeline/lossless_20261002.md) |
 | 2026-09-29 至 10-01 | BIDS 入口、TOPUP/EDDY 和 TBSS/MMORF 整链记录、经典 NODDI 接入；对应精度和时间继续见[验证索引](../../validation/dmri_pipeline/README.md) |
 
 ## 参考文献与原实现

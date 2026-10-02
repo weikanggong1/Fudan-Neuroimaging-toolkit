@@ -2,11 +2,17 @@
 
 [功能和调用方式](../../docs/dmri_pipeline/README.md) · [既有 UKB TBSS 对照报告](tbss_e2e.real.current.json) · [经典 NODDI 接入报告](pipeline_classic_real.public.json) · [九图比较脚本](compare_current_eddy_pipeline.py) · [官方 TBSS 参考脚本](run_official_tbss.sh)
 
-## 最新组件优化：2026-10-02
+## 最新：2026-10-02 同 raw 完整 TBSS＋AMICO
+
+[完整报告与脑图](end_to_end_20261002.md)、[逐次时间与源码](report.end_to_end_20261002.public.json)、[27 图比较](comparison.end_to_end_20261002.public.json)、[上游比较](upstream.end_to_end_20261002.public.json)记录真实原始 AP/PA 的两次 FNIT 和两次独立 FSL＋AMICO 整链；各阶段从零生成，共 27 张最终图。
+
+处理时间中位数为 FNIT **481.14 s / 8.02 分钟**、参考 **2080.64 s / 34.68 分钟**。标准九图固定模板 ROI r=0.419–0.810、骨架 r=0.197–0.710，脑 mask Dice=0.888，尚未数值等价；4.32 是本例不同输出流程的观察时间比。shape/affine/有限值检查通过，各实现内部两次 27 张解码图及 header binary block 分别精确相同。原软件参考使用独立 BET 和官方 Python AMICO 等本例适配，细节在报告中；不称为未修改的 UKB v1.5。
+
+## 2026-10-02：保持已有 FNIT 输出的组件优化
 
 [详细报告](lossless_20261002.md)与[机器报告](report.lossless_20261002.public.json)记录相对冻结 FNIT `954ad19` 的真实同输入验收。完整八轮 EDDY、两种全脑 NODDI、固定 warp 的 TBSS/MMORF 九图及参考索引复用全部保持逐值、几何、header 与模型 QC 一致。EDDY 一次配对计时 484.75→404.31 s；固定 warp 的热调用九图传播约 2.02/1.91 倍。NODDI 尚无稳定速度收益，经典模式整体中位数变慢。
 
-本次未重跑最新源码的完整 raw-to-MNI，未据阶段计时推算整链耗时。下表和后文保留历史整链及原软件对照的具体输入边界。
+该组件报告未运行整链；随后的最新同 raw 完整复测已完成，见上一节。下表和后文保留历史整链及原软件对照的具体输入边界。
 
 ## 既有整链与原软件对照
 
@@ -41,6 +47,8 @@
 TBSS 的第一个参考固定 TOPUP 系数、掩膜和其余输入，改用 FSL `eddy_cuda10.2` 校正图，再由相同 FNIT DTIFIT、NODDI、TBSS 代码生成九图；该配对比较隔离 EDDY 输入的影响。九张 native 图 r 为 0.978640–0.999882，standard 图 r 为 0.940917–0.988332，skeleton 图 r 为 0.949470–0.991235。shape 和 affine 全部匹配。
 
 第二个参考由先前准备的官方 UKB native 参数图开始，经 FSL 6.0.7.4 weighted FLIRT、三阶段 FNIRT 和 applywarp 生成 standard/skeleton 图。其输入边界与本次 raw-to-standard 流程不同：standard 九图 r 为 0.358268–0.699381，skeleton 九图 r 为 0.098878–0.651267。这些差异不能单独定位到 EDDY 或 FNIRT，也不能将 FSL 的配准计时与完整 FNIT 计时相除。各图 MAE、RMSE 和有效体素数见[机器报告](tbss_e2e.real.current.json)。
+
+2026-10-02 对照脚本按官方 `bb_tbss_3_postreg` 补上 FA 的 `applywarp --rel`，覆盖三阶段 FNIRT 的 `--iout`；本节历史数值来自补齐前的命令和既有官方 native 图，最新从相同 raw AP/PA 起步的官方整链已使用补齐后的命令，见[完整复测](end_to_end_20261002.md)。
 
 | 参数图 | 匹配 FSL EDDY：native r | 匹配 FSL EDDY：standard r | 原版 FSL TBSS：standard r | 匹配 FSL EDDY：skeleton r | 原版 FSL TBSS：skeleton r |
 |---|---:|---:|---:|---:|---:|
