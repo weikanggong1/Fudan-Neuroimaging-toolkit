@@ -24,7 +24,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from connectome_repeat_common import NAMES, load_metadata, load_profiles, sha256, validate_matrices
 
 
-PROGRAMS = ("mrconvert", "mrinfo", "tckgen", "tckinfo", "tcksift2", "tckstats",
+PROGRAMS = ("mrinfo", "tckgen", "tckinfo", "tcksift2", "tckstats",
             "tcksample", "tck2connectome")
 
 
@@ -53,8 +53,10 @@ def effective_parameters(payload: dict, n_seeds: int) -> dict:
                                              "downsample": 2},
               "act_options": "no backtrack, crop_at_gmwmi, mask or additional stop constraints"}
     if not all(np.isfinite(params[key]) and params[key] > 0 for key in (
-            "step_mm", "max_length_mm", "max_angle_degrees", "cutoff", "power")) or minimum < 0:
+            "step_mm", "max_length_mm", "max_angle_degrees", "cutoff", "power")) or not np.isfinite(minimum) or minimum < 0:
         raise ValueError("invalid actual tracking parameters")
+    if params["max_length_mm"] <= step or minimum > params["max_length_mm"]:
+        raise ValueError("actual step/minimum exceed maximum tracking length")
     return params
 
 
@@ -63,31 +65,47 @@ def command_plan(mrtrix_bin: Path, output: Path, profiles: dict, seeds: list[int
     """只构造 argv；同一重复的 SIFT2、FA 和长度各计算一次供所有 atlas 使用。"""
     images = output / "inputs"
     records = []
-    for name in ("wm_fod", "five_tissue_act", "five_tissue_sift2", "gmwmi", "fa"):
-        records.append({"stage": "prepare_mif", "argv": [str(mrtrix_bin / "mrconvert"),
-            str(images / f"{name}.nii.gz"), str(images / f"{name}.mif"), "-nthreads", str(threads)],
-            "log": str(images / f"{name}.convert.log")})
+    # Read NIfTI-2 directly: MRtrix's MIF writer rounds the vox field before
+    # writing full-precision transform vectors. That avoidable conversion
+    # changes the effective affine even when the data array is identical.
+    readers = [("wm_fod", images / "wm_fod.nii.gz"),
+               ("five_tissue_act", images / "five_tissue_act.nii.gz"),
+               ("five_tissue_sift2", images / "five_tissue_sift2.nii.gz"),
+               ("gmwmi", images / "gmwmi.nii.gz"), ("fa", images / "fa.nii.gz")]
+    readers += [(f"atlas:{name}", images / "atlases" / name / "atlas_dwi.nii.gz")
+                for name in profiles]
+    reader_options = ["-config", "NIfTIUseSform", "1"]
+    for name, path in readers:
+        records.append({"stage": "input_readback", "input": name,
+                        "json": str(path.with_name(path.name + ".mrinfo.json")),
+                        "argv": [str(mrtrix_bin / "mrinfo"), str(path), "-json_all",
+                                 str(path.with_name(path.name + ".mrinfo.json")),
+                                 *reader_options, "-nthreads", str(threads)],
+                        "log": str(path.with_name(path.name + ".mrinfo.log"))})
     for seed in seeds:
         root = output / f"seed-{seed}"
         tracks = root / "tracks.tck"
         common = ["-nthreads", str(threads)]
         records.append({"stage": "tracking", "seed": seed, "argv": [str(mrtrix_bin / "tckgen"),
-            "-algorithm", "iFOD2", "-seed_gmwmi", str(images / "gmwmi.mif"),
-            "-act", str(images / "five_tissue_act.mif"), "-seeds", str(params["n_seed_attempts"]),
+            "-algorithm", "iFOD2", "-seed_gmwmi", str(images / "gmwmi.nii.gz"),
+            "-act", str(images / "five_tissue_act.nii.gz"), "-seeds", str(params["n_seed_attempts"]),
             "-select", "0", "-maxlength", str(params["max_length_mm"]),
             "-minlength", str(params["min_length_mm"]), "-step", str(params["step_mm"]),
             "-angle", str(params["max_angle_degrees"]), "-cutoff", str(params["cutoff"]),
-            "-samples", str(params["samples"]), "-power", str(params["power"]), "-nthreads", "0",
-            str(images / "wm_fod.mif"), str(tracks)], "log": str(root / "tckgen.log")})
+            "-samples", str(params["samples"]), "-power", str(params["power"]),
+            "-trials", "1000", "-max_attempts_per_seed", "1000", "-downsample", "2",
+            "-nthreads", "0", *reader_options,
+            str(images / "wm_fod.nii.gz"), str(tracks)], "log": str(root / "tckgen.log")})
         records.append({"stage": "track_count", "seed": seed,
                         "argv": [str(mrtrix_bin / "tckinfo"), "-count", str(tracks)],
                         "log": str(root / "tckinfo.txt")})
         for stage, argv in (
-            ("sift2", ["tcksift2", str(tracks), str(images / "wm_fod.mif"), str(root / "sift2_weights.txt"),
-                       "-act", str(images / "five_tissue_sift2.mif"), "-csv", str(root / "sift2_stats.csv")]),
+            ("sift2", ["tcksift2", str(tracks), str(images / "wm_fod.nii.gz"), str(root / "sift2_weights.txt"),
+                       "-act", str(images / "five_tissue_sift2.nii.gz"), "-csv", str(root / "sift2_stats.csv"),
+                       *reader_options]),
             ("length", ["tckstats", "-dump", str(root / "lengths.txt"), str(tracks)]),
             ("fa", ["tcksample", "-precise", "-stat_tck", "mean", str(tracks),
-                    str(images / "fa.mif"), str(root / "mean_fa.txt")]),
+                    str(images / "fa.nii.gz"), str(root / "mean_fa.txt"), *reader_options]),
         ):
             records.append({"stage": stage, "seed": seed,
                             "argv": [str(mrtrix_bin / argv[0]), *argv[1:], *common],
@@ -104,7 +122,7 @@ def command_plan(mrtrix_bin: Path, output: Path, profiles: dict, seeds: list[int
                     options += ["-scale_file", str(root / scalar), "-stat_edge", "mean"]
                 records.append({"stage": f"matrix_{name}", "seed": seed, "atlas": profile,
                     "argv": [str(mrtrix_bin / "tck2connectome"), *options, str(tracks), str(atlas),
-                             str(target / f"{name}.csv"), *common],
+                             str(target / f"{name}.csv"), *common, *reader_options],
                     "log": str(target / f"{name}.log")})
     return records
 
@@ -113,16 +131,136 @@ def _save_image(path: Path, values, affine, spacing=None) -> dict:
     values = values.detach().cpu().numpy() if isinstance(values, torch.Tensor) else np.asarray(values)
     affine = affine.detach().cpu().numpy() if isinstance(affine, torch.Tensor) else np.asarray(affine)
     path.parent.mkdir(parents=True, exist_ok=True)
-    image = nib.Nifti2Image(values, affine)
+    image = nib.Nifti2Image(values, affine, dtype=values.dtype)
     if spacing is not None:
         image.header.set_zooms((*spacing, *image.header.get_zooms()[3:]))
     nib.save(image, path)
     check = nib.load(path)
-    if not np.array_equal(check.affine, affine) or not np.array_equal(np.asarray(check.dataobj), values):
+    # Preserve NaN payloads too: array_equal without equal_nan rejects an
+    # unchanged NaN, while equal_nan alone does not check its stored bits.
+    native_dtype = values.dtype.newbyteorder("=")
+    original_bits = np.ascontiguousarray(values, dtype=native_dtype).view(np.uint8)
+    decoded_bits = np.ascontiguousarray(np.asarray(check.dataobj), dtype=native_dtype).view(np.uint8)
+    decoded_dtype = np.dtype(check.get_data_dtype())
+    if (decoded_dtype.kind != values.dtype.kind or decoded_dtype.itemsize != values.dtype.itemsize
+            or not np.array_equal(check.affine, affine) or not np.array_equal(decoded_bits, original_bits)):
         raise ValueError(f"{path}: NIfTI-2 export changed voxel values or affine")
+    nonfinite = ~np.isfinite(values)
+    nonfinite_count = int(nonfinite.sum())
+    # The limit bounds metadata size only; the full array is exported intact.
+    nonfinite_coordinates = []
+    if nonfinite_count:
+        flat_indices = np.flatnonzero(nonfinite.ravel())[:100]
+        nonfinite_coordinates = np.array(np.unravel_index(flat_indices, values.shape)).T.tolist()
     return {"path": str(path), "sha256": sha256(path), "dtype": str(values.dtype),
             "shape": list(values.shape), "affine": affine.tolist(),
-            "header_spacing": list(check.header.get_zooms()[:3])}
+            "header_spacing": list(check.header.get_zooms()[:3]),
+            "voxel_bits_verified_equal": True,
+            "nonfinite_count": nonfinite_count,
+            "nonfinite_coordinates": nonfinite_coordinates,
+            "nonfinite_coordinates_complete": nonfinite_count <= 100}
+
+
+def source_readiness(checkpoint: Path, payload: dict) -> dict:
+    """要求同一实际 core 的后处理输入齐备；不代替整例显存/科学验收。"""
+    required = ("geometry.npz", "fa.nii.gz", "tracks.tck", "track_metrics.npz")
+    for name in required:
+        path = checkpoint / name
+        if not path.is_file() or path.stat().st_size == 0:
+            raise FileNotFoundError(f"actual core outputs not ready: {path}")
+    with np.load(checkpoint / "geometry.npz", allow_pickle=False) as geometry:
+        for name, key in (("dwi_affine", "fod_affine"), ("five_tissue_affine", "five_tissue_affine")):
+            if not np.array_equal(geometry[name], payload[key].numpy()):
+                raise ValueError(f"{name}: completed core geometry differs from actual tracking snapshot")
+    fa = nib.load(checkpoint / "fa.nii.gz")
+    if fa.shape != tuple(payload["wm_sh"].shape[:3]):
+        raise ValueError("completed core FA shape differs from actual FOD snapshot")
+    # NIfTI-1 checkpoint geometry is rounded; export_inputs uses the PT affine.
+    if float(np.abs(fa.affine - payload["fod_affine"].numpy()).max()) > 1e-3:
+        raise ValueError("completed core FA header is not on the tracking FOD grid")
+    tracks = nib.streamlines.load(checkpoint / "tracks.tck", lazy_load=True)
+    # TCK stores the literal `count`; the standardized NB_STREAMLINES key is
+    # used by TRK and is not present in nibabel's lazy TCK header.
+    count = int(tracks.header["count"])
+    if count < 1:
+        raise ValueError("actual core has no completed accepted streamlines")
+    with np.load(checkpoint / "track_metrics.npz", allow_pickle=False) as metrics:
+        for name in ("weights", "lengths", "mean_fa"):
+            if metrics[name].shape != (count,):
+                raise ValueError(f"{name}: completed metrics differ from actual TCK track count")
+        if metrics["endpoints"].shape != (count, 2, 3):
+            raise ValueError("completed endpoints differ from actual TCK track count")
+    return {"status": "computed_outputs_ready", "accepted_tracks": count,
+            "file_sha256": {name: sha256(checkpoint / name) for name in required},
+            "fa_dtype": str(fa.get_data_dtype()), "fa_shape": list(fa.shape),
+            "scope": "actual core artifacts and source geometry only; not an end-to-end memory or scientific parity pass"}
+
+
+def input_readback(record: dict, exported: dict) -> dict:
+    """核对实际 MRtrix header 契约，记录 reader 几何；不新增误差容差。"""
+    actual = json.loads(Path(record["json"]).read_text())
+    if Path(actual["name"]).resolve() != Path(exported["path"]).resolve() or not actual["format"].startswith("NIfTI-2"):
+        raise ValueError("official reader did not inspect the actual exported NIfTI-2")
+    dtype = np.dtype(exported["dtype"])
+    datatype = {"f": "Float", "i": "Int", "u": "UInt"}.get(dtype.kind, "") + str(dtype.itemsize * 8)
+    if not datatype or not actual["datatype"].startswith(datatype):
+        raise ValueError("official reader datatype differs from exported voxel dtype")
+    shape = np.asarray(exported["shape"], dtype=np.int64)
+    size = np.asarray(actual["size"], dtype=np.int64)
+    strides = np.asarray(actual["strides"], dtype=np.int64)
+    spacing = np.asarray(actual["spacing"], dtype=np.float64)
+    transform = np.asarray(actual["transform"], dtype=np.float64)
+    if size.shape != shape.shape or spacing.shape != shape.shape or strides.shape != shape.shape:
+        raise ValueError("official reader changed image dimensionality")
+    # NIfTI spatial dimensions have strides 1,2,3 before MRtrix realignment.
+    axes = np.abs(strides[:3]) - 1
+    if sorted(axes.tolist()) != [0, 1, 2] or not np.array_equal(size[:3], shape[axes]) or not np.array_equal(size[3:], shape[3:]):
+        raise ValueError("official reader shape/axis mapping differs from exported NIfTI-2")
+    if (transform.shape != (4, 4) or not np.isfinite(transform).all()
+            or not np.isfinite(spacing).all() or (spacing <= 0).any()
+            or not np.array_equal(transform[3], [0., 0., 0., 1.])
+            or np.linalg.det(transform[:3, :3]) == 0
+            or float(actual["intensity_offset"]) != 0 or float(actual["intensity_scale"]) != 1):
+        raise ValueError("official reader returned invalid geometry or altered intensity scaling")
+    mapping = np.eye(4)
+    mapping[:3, :3] = 0
+    for axis, original_axis in enumerate(axes):
+        sign = 1 if strides[axis] > 0 else -1
+        mapping[original_axis, axis] = sign
+        if sign < 0:
+            mapping[original_axis, 3] = shape[original_axis] - 1
+    source_affine = np.asarray(exported["affine"], dtype=np.float64)
+    source_spacing = np.asarray(exported["header_spacing"], dtype=np.float64)
+    lengths = np.linalg.norm(source_affine[:3, :3], axis=0)
+    # This 1e-5 is the pre-existing official NIfTI reader rule, not a parity
+    # acceptance tolerance. A larger pixdim/sform discrepancy makes MRtrix
+    # use sform column norms; otherwise it uses the exported pixdim values.
+    rescaled = bool((np.abs(source_spacing / lengths - 1) > 1e-5).any())
+    selected_spacing = lengths if rescaled else source_spacing
+    reader_affine = source_affine.copy()
+    reader_affine[:3, :3] *= selected_spacing / lengths
+    expected = reader_affine @ mapping
+    decoded = transform.copy()
+    decoded[:3, :3] *= spacing[:3]
+    corners = np.array(np.meshgrid(*[(0, int(value) - 1) for value in size[:3]], indexing="ij")).reshape(3, -1).T
+    displacement = np.linalg.norm(nib.affines.apply_affine(decoded, corners) -
+                                  nib.affines.apply_affine(expected, corners), axis=1)
+    source_displacement = np.linalg.norm(nib.affines.apply_affine(decoded, corners) -
+                                         nib.affines.apply_affine(source_affine @ mapping, corners), axis=1)
+    fnit_affine = np.asarray(exported.get("fnit_effective_affine", exported["affine"]), dtype=np.float64)
+    fnit_displacement = np.linalg.norm(nib.affines.apply_affine(decoded, corners) -
+                                      nib.affines.apply_affine(fnit_affine @ mapping, corners), axis=1)
+    return {"status": "header_source_shape_dtype_scaling_verified_geometry_recorded", "mrinfo_json": actual,
+            "mrinfo_json_sha256": sha256(Path(record["json"])),
+            "axis_mapping_to_source": mapping.tolist(),
+            "decoded_voxel_to_world_affine": decoded.tolist(),
+            "official_nifti_sform_pixdim_rule_rescaled": rescaled,
+            "expected_reader_affine": expected.tolist(),
+            "maximum_corner_difference_from_reader_rule_mm": float(displacement.max()),
+            "maximum_corner_difference_from_source_affine_mm": float(source_displacement.max()),
+            "maximum_corner_difference_from_fnit_operator_affine_mm": float(fnit_displacement.max()),
+            "geometry_assessment": "descriptive actual reader result; JSON numbers are serialized, not a bit-exact affine claim or a new scientific gate",
+            "voxel_validation_scope": "source NIfTI-2 bits verified on export; mrinfo checks header/shape/scaling, not full decoded image values"}
 
 
 def export_inputs(output: Path, payload: dict, checkpoint: Path, profiles: dict) -> dict:
@@ -136,6 +274,11 @@ def export_inputs(output: Path, payload: dict, checkpoint: Path, profiles: dict)
         "five_tissue_sift2": _save_image(images / "five_tissue_sift2.nii.gz", payload["five_tissue"], five_affine),
         "gmwmi": _save_image(images / "gmwmi.nii.gz", payload["gmwmi"], five_affine),
     }
+    spacing = payload["five_tissue_spacing_mm"]
+    act_affine = five_affine.to(dtype=torch.float64).clone()
+    if spacing is not None:
+        act_affine[:3, :3] *= torch.as_tensor(spacing, dtype=torch.float64) / torch.linalg.vector_norm(act_affine[:3, :3], dim=0)
+    exports["five_tissue_act"]["fnit_effective_affine"] = act_affine.tolist()
     fa = payload.get("fa")
     if fa is None:
         fa_image = nib.load(checkpoint / "fa.nii.gz")
@@ -238,6 +381,7 @@ def main(argv=None) -> None:
     tracking_path = args.tracking_inputs or args.checkpoint_dir / "tracking_inputs.pt"
     payload = torch.load(tracking_path, map_location="cpu", weights_only=True)
     params = effective_parameters(payload, args.n_seeds)
+    readiness = source_readiness(args.checkpoint_dir, payload)
     profiles = load_profiles(args.fnit_dir)
     if args.atlas:
         if len(set(args.atlas)) != len(args.atlas) or not set(args.atlas).issubset(profiles):
@@ -256,12 +400,20 @@ def main(argv=None) -> None:
                           "sha256": sha256(executable)}
     plan = command_plan(args.mrtrix_bin, args.output_dir, profiles, args.seeds, params, args.downstream_threads)
     manifest = {"dataset": args.dataset, "parameters": params,
+                "source_readiness": readiness,
                 "tracking_input_sha256": sha256(tracking_path), "programs": programs,
                 "source_profile_metadata": {name: metadata for name, (_, metadata) in profiles.items()},
                 "source_fa_checkpoint_sha256": (sha256(args.checkpoint_dir / "fa.nii.gz")
                                                if payload.get("fa") is None else None),
                 "seeds": args.seeds, "downstream_threads": args.downstream_threads,
                 "commands": plan, "completed_commands": [], "execution_completed": False,
+                "input_readbacks": {},
+                "input_format_policy": "original voxel bits and Float64 geometry exported as NIfTI-2; official programs read these directly; actual reader geometry recorded before tracking",
+                "matrix_definitions": {"count": "number of assigned tracks",
+                                       "sift2_fbc": "sum(w)",
+                                       "mean_length": "sum(w * length) / sum(w)",
+                                       "mean_fa": "sum(w * precise_streamline_mean_fa) / sum(w)",
+                                       "unassigned": "dropped", "self_connections": "retained"},
                 "scientific_parity": "not_assessed", "script_sha256": sha256(Path(__file__)),
                 "helper_sha256": sha256(Path(__file__).resolve().parents[1] / "connectome_repeat_common.py"),
                 "environment": {"host": platform.node(), "python_executable": sys.executable,
@@ -294,21 +446,20 @@ def main(argv=None) -> None:
                     manifest["input_exports"]["atlases"][profile], indent=2) + "\n")
         for record in plan:
             if record["stage"] == "tracking":
+                if len(manifest["input_readbacks"]) != 5 + len(profiles):
+                    raise RuntimeError("official image readback contract must complete before tracking")
                 (args.output_dir / f"seed-{record['seed']}").mkdir(exist_ok=True)
             run_environment = {**environment, "MRTRIX_RNG_SEED": str(record.get("seed", 0))}
             manifest["completed_commands"].append(_run(record, run_environment))
             report_path.write_text(json.dumps(manifest, indent=2, allow_nan=False) + "\n")
             if manifest["completed_commands"][-1]["returncode"]:
                 raise RuntimeError(f"official command failed: {record['log']}")
-        for name in ("wm_fod", "five_tissue_act", "five_tissue_sift2", "gmwmi", "fa"):
-            image_path = args.output_dir / "inputs" / f"{name}.mif"
-            transform = subprocess.run([str(args.mrtrix_bin / "mrinfo"), str(image_path), "-transform"],
-                                      check=True, capture_output=True, text=True, env=environment).stdout
-            spacing = subprocess.run([str(args.mrtrix_bin / "mrinfo"), str(image_path), "-spacing"],
-                                    check=True, capture_output=True, text=True, env=environment).stdout
-            manifest["input_exports"][name]["mif_transform_text"] = transform.strip()
-            manifest["input_exports"][name]["mif_spacing_text"] = spacing.strip()
-            manifest["input_exports"][name]["mif_sha256"] = sha256(image_path)
+            if record["stage"] == "input_readback":
+                name = record["input"]
+                exported = (manifest["input_exports"]["atlases"][name.removeprefix("atlas:")]
+                            if name.startswith("atlas:") else manifest["input_exports"][name])
+                manifest["input_readbacks"][name] = input_readback(record, exported)
+                report_path.write_text(json.dumps(manifest, indent=2, allow_nan=False) + "\n")
         manifest["outputs"] = {}
         for seed in args.seeds:
             for name, (_, metadata) in profiles.items():
@@ -327,6 +478,9 @@ def main(argv=None) -> None:
             }
         if sha256(tracking_path) != manifest["tracking_input_sha256"]:
             raise ValueError("tracking checkpoint changed during official reference run")
+        if any(sha256(args.checkpoint_dir / name) != digest
+               for name, digest in readiness["file_sha256"].items()):
+            raise ValueError("completed core checkpoint changed during official reference run")
         if manifest["source_fa_checkpoint_sha256"] is not None and sha256(args.checkpoint_dir / "fa.nii.gz") != manifest["source_fa_checkpoint_sha256"]:
             raise ValueError("FA checkpoint changed during official reference run")
         current_profiles = load_profiles(args.fnit_dir)

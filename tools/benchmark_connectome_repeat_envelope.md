@@ -73,9 +73,9 @@ fnit_repository_dir=/path/to/Fudan-Neuroimaging-toolkit  # 本轮实际代码检
 benchmark_root=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002
 benchmark_python=/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/bin/python
 mrtrix_binary_directory=/public/software/apps/MRtrix3/3.0.3/bin
-checkpoint_directory="$benchmark_root/root_diagnostic_CON03_v1/checkpoints"
-fnit_output_directory="$benchmark_root/root_diagnostic_CON03_v1/connectome"
-official_output_directory="$benchmark_root/reference_CON03_five_repeats_v1"  # 必须是新目录
+checkpoint_directory="$benchmark_root/root_diagnostic_CON03_v2/checkpoints"
+fnit_output_directory="$benchmark_root/root_diagnostic_CON03_v2/connectome"
+official_output_directory="$benchmark_root/reference_CON03_five_repeats_v2"  # 必须是新目录
 
 # 在 nodecw10 使用独立官方软件；默认 dry-run 不运行命令、不创建输出。
 "$benchmark_python" "$fnit_repository_dir/tools/reference/benchmark_connectome_repeats_official.py" \
@@ -93,19 +93,22 @@ official_output_directory="$benchmark_root/reference_CON03_five_repeats_v1"  # �
 
 参考工具只允许新输出目录；失败留下明确日志和失败命令。参数 `--tracking-inputs` 可覆盖默认 `checkpoint-dir/tracking_inputs.pt`；`--seeds` 默认 `0..4`、至少三次且不能重复；`--downstream-threads` 默认 8；`--atlas` 默认全部 CLI 模板。实际绑定的 `tracking_kwargs` 决定步长、最小/最大长度、转角、cutoff、power，并验证 `n_seeds` 与检查点一致。保存版本、可执行文件和输入 SHA、逐命令 argv、时间/RSS 和输出检查。主入口时间包含检查与导出，不包含 Python 导入启动。
 
+`tracking_inputs.pt` 在追踪调用前原子写出，单独出现不表示追踪结束。参考执行前还要求同轮 `geometry.npz`、`fa.nii.gz`、非空 `tracks.tck`、`track_metrics.npz` 和所选模板的完整输出齐备，并检查实际仿射、轨迹数和后处理向量维度。该状态为 `computed_outputs_ready`，只说明组件输入完成；不代替端到端状态或 `<20 GB` 显存门槛。保留并记录原 FA 的非有限值及坐标，不过滤、裁剪或改成零。最终四矩阵仍须满足既有有限数值契约。
+
 ## 4. 对应官方命令和几何
 
 实际 nodecw10 参考程序为 MRtrix **`3.0.3-103-g026e850d`**；每次运行仍重新记录 `tckgen -version` 和程序 SHA。本轮 FOD 体素为 2.5 mm、默认步长 1.25 mm、ACT 默认最小长度 5 mm；脚本从实际 PT 仿射计算有效值，不把这些数值写死。
 
 ```bash
 MRTRIX_RNG_SEED=0 tckgen -algorithm iFOD2 \
-  -seed_gmwmi gmwmi.mif -act five_tissue_act.mif \
+  -seed_gmwmi gmwmi.nii.gz -act five_tissue_act.nii.gz \
   -seeds 100000 -select 0 -maxlength 250 -minlength 5 -step 1.25 \
-  -angle 45 -cutoff 0.1 -samples 3 -power 0.5 -nthreads 0 \
-  wm_fod.mif tracks.tck
-tcksift2 tracks.tck wm_fod.mif weights.txt -act five_tissue_sift2.mif -nthreads 8
+  -angle 45 -cutoff 0.1 -samples 3 -power 0.5 \
+  -trials 1000 -max_attempts_per_seed 1000 -downsample 2 -nthreads 0 \
+  -config NIfTIUseSform 1 wm_fod.nii.gz tracks.tck
+tcksift2 tracks.tck wm_fod.nii.gz weights.txt -act five_tissue_sift2.nii.gz -nthreads 8
 tckstats -dump lengths.txt tracks.tck -nthreads 8
-tcksample -precise -stat_tck mean tracks.tck fa.mif mean_fa.txt -nthreads 8
+tcksample -precise -stat_tck mean tracks.tck fa.nii.gz mean_fa.txt -nthreads 8
 tck2connectome -symmetric -assignment_radial_search 4 tracks.tck atlas.nii.gz count.csv -nthreads 8
 tck2connectome -symmetric -assignment_radial_search 4 -tck_weights_in weights.txt \
   tracks.tck atlas.nii.gz sift2_fbc.csv -nthreads 8
@@ -117,7 +120,11 @@ tck2connectome -symmetric -assignment_radial_search 4 -tck_weights_in weights.tx
 
 保留最大 1000 次方向尝试与 rejection trials；`samples=3` 对应 downsample factor 2。显式 `cutoff=.1`、`power=.5` 覆盖 ACT/算法默认值，不额外乘 0.5。不添加 backtrack、crop-at-GMWMI、mask 或 `zero_diagonal`。追踪 `-nthreads 0` 保留参考 RNG 的禁多线程语义，下游 8 线程不影响播种顺序。相同整数种子不能产生与 PyTorch 逐条相同的轨迹。
 
-精确输入来自 `tracking_inputs.pt`，不用将诊断 NIfTI-1 的舍入仿射说成精确内部几何。参考工具导出 NIfTI-2，逐值验证 FOD/5TT/GMWMI 数组和 Float64 仿射。ACT 5TT 保留原 header spacing；SIFT2 5TT 和 GMWMI 保留调用时原始仿射。FA 用检查点数组和实际 FOD 几何，atlas 用 CLI 标签数组和同一 DWI 几何。原 CLI atlas 摘要标识源文件；导出文件摘要/仿射差异单独记录。MRtrix 转换后的 transform/spacing 同样留在报告，因此不会把来源相同误称为参考文件逐字节相同。
+四矩阵的统计量为：count 是已分配轨迹数，FBC 是 `Σw`，平均长度是 `Σ(w × length) / Σw`，平均 FA 是 `Σ(w × precise_streamline_mean_fa) / Σw`。MRtrix `-tck_weights_in ... -scale_file ... -stat_edge mean` 的分母累加权重，符合 FNIT 的 SIFT2 加权均值；不按轨迹数归一。未分配轨迹丢弃，自连接保留。
+
+精确输入来自 `tracking_inputs.pt`，不用将诊断 NIfTI-1 的舍入仿射说成精确内部几何。参考工具导出 NIfTI-2，检查数组的原始位（包括 NaN payload）和 Float64 仿射。ACT 5TT 保留原 header spacing；SIFT2 5TT 和 GMWMI 保留调用时原始仿射。FA 用检查点数组和实际 FOD 几何，atlas 用 CLI 标签数组和同一 DWI 几何。原 CLI atlas 摘要标识源文件；导出文件摘要/仿射差异单独记录。
+
+官方程序直接读取这些 NIfTI-2，避免额外 MIF 中转。追踪前对 5 份公共影像及每套 atlas 执行实际 `mrinfo -json_all`，检查读入文件、shape、轴变换、dtype 和强度缩放，记录完整 transform/spacing 及与原仿射、FNIT 算子几何的角点差异。官方 NIfTI reader 将 sform 列方向归一，并按原有 pixdim/sform 规则选 spacing；这些读入语义单独记录，不改 FNIT 实际追踪输入，也不新增观察结果之后选择的精度容差。JSON 中的几何数值经过文本序列化，不能声称与内部浮点数逐 bit 一致。
 
 ## 5. 验证和实测状态
 
@@ -125,9 +132,14 @@ tck2connectome -symmetric -assignment_radial_search 4 -tck_weights_in weights.tx
 
 2026-10-02 在实际 nodecw10 只读执行 `tckgen -version/-help`，确认上述参考版本、步长、ACT 最小长度、samples/power/trials/downsample 和 `-nthreads 0` 参数语义。CPU 工具回归与原矩阵比较测试 **19 passed、1 skipped，3.17 秒**；跳过项是可选绘图，需要项目已声明的 matplotlib。本轮共享测试环境尚缺此依赖，不改动正在运行整例所用的环境。以上耗时是工具测试时间，不是追踪或 pipeline benchmark。
 
+2026-10-03 在 nodecw10 对本轮公开 CON03 的已有真实 FOD 和原生 recon-all segmentation 做 CPU header/readback 检查。这是读取算子检查，未运行 CON03_v2 追踪，也不是完整流程 benchmark。实测额外 `mrconvert → MIF` 将 FOD spacing 的细小浮点尾数写成 `2.5`，角点变化 `1.08258e-5 mm`；直接读 NIfTI-2 的 `mrinfo -json_all` 保留了原 spacing 尾数，FOD 角点差 `3.57538e-13 mm`，原生分割角点差 `6.56166e-13 mm`。已查对应 MIF writer：`vox` 使用普通流精度，transform 才使用 FullPrecision，因此去掉本工具中不必要的 MIF 中转；不修改 FNIT、FOD 数组或验收门槛。真实 CON03_v2 的读入几何和五次追踪结果仍由实际执行记录确认。
+
+最新 CPU 工具回归与原矩阵比较测试 **22 passed、1 skipped，2.61 秒**；跳过原因仍为可选 matplotlib 绘图。同一官方版本的小输入命令契约回归确认 `-stat_edge mean` 的加权均值分母为 `Σw`，自连接保留；这是参数/命令语义测试，不作为真实数据 benchmark。
+
 ## 6. 更新记录
 
 - 2026-10-02：三次固定输入改为至少三次、默认计划五次；支持任意 FNIT 重复和当前 CLI 多 atlas CSV；去掉旧数据/20 节点硬编码；修正单侧验收，新增空值和对角报告；独立官方参考共用每次追踪的后处理，保留精确检查点几何和完整来源。
+- 2026-10-03：核对实际 tracking 默认值和加权均值公式；补上同轮 core 输出就绪检查；直接 NIfTI-2 参考输入、追踪前官方 header readback、保留原 NaN；CON03 计划路径更新为 v2。没有据此宣称随机追踪或十例流程已经通过。
 - 旧报告继续绑定旧代码/数据，历史 `inside_count` 仍表示双侧观察范围；新版 `comparison_accepted` 才用于本轮验收。没有重新运行旧结果或改写旧结论。
 
 ## 7. 参考和源码

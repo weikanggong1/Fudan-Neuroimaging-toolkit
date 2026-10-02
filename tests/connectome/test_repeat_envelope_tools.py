@@ -195,6 +195,11 @@ def test_actual_checkpoint_defaults_and_attempt_count_guard():
     assert result["samples"] == 3 and result["power"] == .5 and result["cutoff"] == .1
     with pytest.raises(ValueError, match="differs"):
         module.effective_parameters(payload(), 1000000)
+    for key, invalid in (("min_length_mm", 251.), ("step_mm", 250.), ("min_length_mm", float("nan"))):
+        values = payload()
+        values["tracking_kwargs"][key] = invalid
+        with pytest.raises(ValueError, match="actual"):
+            module.effective_parameters(values, 100000)
 
 
 def test_official_plan_reuses_sift2_preserves_definition_and_thread_modes(tmp_path):
@@ -202,14 +207,18 @@ def test_official_plan_reuses_sift2_preserves_definition_and_thread_modes(tmp_pa
     profiles = {f"atlas{i}": {} for i in range(8)}
     plan = module.command_plan(tmp_path / "bin", tmp_path / "results", profiles, list(range(5)),
                                module.effective_parameters(payload(), 100000), 8)
-    assert len(plan) == 190
+    assert len(plan) == 198  # 13 header readbacks + five sets of 37 actual analysis commands
+    assert all(item["stage"] == "input_readback" for item in plan[:13])
+    assert not any(".mif" in argument for item in plan for argument in item["argv"])
     assert sum(item["stage"] == "sift2" for item in plan) == 5
     assert sum(item["stage"] == "matrix_count" for item in plan) == 40
     for record in plan:
         argv = record["argv"]
         if record["stage"] == "tracking":
             for option, value in (("-nthreads", "0"), ("-seeds", "100000"), ("-select", "0"),
-                                  ("-samples", "3"), ("-step", "1.25"), ("-minlength", "5.0")):
+                                  ("-samples", "3"), ("-step", "1.25"), ("-minlength", "5.0"),
+                                  ("-trials", "1000"), ("-max_attempts_per_seed", "1000"),
+                                  ("-downsample", "2")):
                 assert argv[argv.index(option) + 1] == value
         elif record["stage"].startswith("matrix_"):
             assert argv[argv.index("-nthreads") + 1] == "8"
@@ -249,7 +258,13 @@ def reference_cli_fixture(module, tmp_path):
     binary.mkdir()
     values = payload()
     torch.save(values, checkpoint / "tracking_inputs.pt")
+    np.savez(checkpoint / "geometry.npz", dwi_affine=values["fod_affine"].numpy(),
+             five_tissue_affine=values["five_tissue_affine"].numpy())
     nib.save(nib.Nifti1Image(np.ones((4, 4, 4), np.float32), values["fod_affine"].numpy()), checkpoint / "fa.nii.gz")
+    tracks = nib.streamlines.Tractogram([np.array([[0., 0., 0.], [1., 1., 1.]], np.float32)], affine_to_rasmm=np.eye(4))
+    nib.streamlines.save(tracks, checkpoint / "tracks.tck")
+    np.savez(checkpoint / "track_metrics.npz", weights=np.ones(1), lengths=np.ones(1),
+             mean_fa=np.ones(1), endpoints=np.ones((1, 2, 3)))
     profile = native / "atlases/fs-aparc"
     write_csv(profile, metadata=True)
     nib.save(nib.Nifti1Image(np.tile(np.arange(1, 5, dtype=np.int32), (4, 4, 1)),
@@ -271,7 +286,57 @@ def test_reference_dry_run_does_not_create_outputs_or_execute(tmp_path, monkeypa
     result = json.loads(capsys.readouterr().out)
     assert result["seeds"] == [0, 1, 2, 3, 4]
     assert result["execution_completed"] is False
+    assert result["source_readiness"]["status"] == "computed_outputs_ready"
     assert not (tmp_path / "reference").exists()
+
+
+def test_pretracking_snapshot_alone_is_not_completed_core_and_geometry_must_match(tmp_path):
+    module = reference_tool()
+    arguments = reference_cli_fixture(module, tmp_path)
+    checkpoint = tmp_path / "checkpoints"
+    source = module.source_readiness(checkpoint, payload())
+    assert source["accepted_tracks"] == 1
+    np.savez(checkpoint / "geometry.npz", dwi_affine=np.eye(4),
+             five_tissue_affine=payload()["five_tissue_affine"].numpy())
+    with pytest.raises(ValueError, match="completed core geometry differs"):
+        module.source_readiness(checkpoint, payload())
+    (checkpoint / "tracks.tck").unlink()
+    with pytest.raises(FileNotFoundError, match="not ready"):
+        module.main([*arguments, "--dry-run"])
+
+
+def test_nifti2_preserves_original_nan_payload_without_finite_filter(tmp_path):
+    module = reference_tool()
+    values = np.array([0x7FC00042], dtype=np.uint32).view(np.float32).reshape(1, 1, 1)
+    result = module._save_image(tmp_path / "nan_fa.nii.gz", values, np.eye(4))
+    assert result["voxel_bits_verified_equal"]
+    assert result["nonfinite_count"] == 1 and result["nonfinite_coordinates"] == [[0, 0, 0]]
+    decoded = np.asarray(nib.load(result["path"]).dataobj)
+    assert np.array_equal(decoded.view(np.uint32), values.view(np.uint32))
+
+
+def test_actual_mrinfo_contract_records_geometry_without_posthoc_tolerance(tmp_path):
+    module = reference_tool()
+    path = tmp_path / "image.nii.gz"
+    affine = np.diag([-2.5, 2.5, 2.5, 1.])
+    exported = module._save_image(path, np.ones((4, 5, 6), np.float32), affine)
+    decoded_affine = np.diag([2.5, 2.5, 2.5, 1.])
+    decoded_affine[0, 3] = -7.5
+    transform = decoded_affine.copy()
+    transform[:3, :3] /= 2.5
+    actual = {"name": str(path), "format": "NIfTI-2 (GZip compressed)", "datatype": "Float32LE",
+              "size": [4, 5, 6], "strides": [-1, 2, 3], "spacing": [2.5, 2.5, 2.5],
+              "transform": transform.tolist(), "intensity_offset": 0, "intensity_scale": 1}
+    record = {"json": str(tmp_path / "mrinfo.json")}
+    Path(record["json"]).write_text(json.dumps(actual))
+    result = module.input_readback(record, exported)
+    assert result["maximum_corner_difference_from_source_affine_mm"] == 0
+    assert result["axis_mapping_to_source"][0] == [-1, 0, 0, 3]
+    assert "tolerance" not in result and "scientific_parity" not in result
+    actual["intensity_scale"] = 2
+    Path(record["json"]).write_text(json.dumps(actual))
+    with pytest.raises(ValueError, match="altered intensity scaling"):
+        module.input_readback(record, exported)
 
 
 def test_reference_failure_persists_failed_command_and_leaves_parity_unassessed(tmp_path, monkeypatch):
