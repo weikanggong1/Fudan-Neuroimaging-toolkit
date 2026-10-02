@@ -9,6 +9,7 @@ def _arguments(parser):
     parser.add_argument("--raw-dir")
     parser.add_argument("--topup-dir")
     parser.add_argument("--output-dir")
+    parser.add_argument("--synthstrip-weights", help="UKB mode: standard synthstrip.1.pt file/directory; default FNIT local resolver")
     parser.add_argument("--imain")
     parser.add_argument("--mask")
     parser.add_argument("--acqp")
@@ -33,6 +34,7 @@ def run(args):
             args.output_dir,
             device=args.device,
             overwrite=args.overwrite,
+            synthstrip_weights=args.synthstrip_weights,
         )
     else:
         required = (

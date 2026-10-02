@@ -368,11 +368,13 @@ def test_mmorf_branch_calls_public_mmorf_function(monkeypatch, tmp_path, bvec_so
         paths[name] = tmp_path / f"{name}.nii.gz"
         nib.save(image, paths[name])
 
-    monkeypatch.setattr(
-        pipeline_module,
-        "_prepare_ap_only",
-        lambda *args, **kwargs: {"mask": paths["mask"]},
-    )
+    def fake_prepare(raw_dir, output_dir, **kwargs):
+        output_dir.mkdir(parents=True, exist_ok=True)
+        (output_dir / "nodif_brain_mask_report.json").write_text(
+            json.dumps({"algorithm": "fnit.synthstrip.SynthStrip"})
+        )
+        return {"mask": paths["mask"]}
+    monkeypatch.setattr(pipeline_module, "_prepare_ap_only", fake_prepare)
 
     class FakeEDDY:
         def __init__(self, device=None):
@@ -426,7 +428,8 @@ def test_mmorf_branch_calls_public_mmorf_function(monkeypatch, tmp_path, bvec_so
     monkeypatch.setattr(pipeline_module, "TorchEDDY", FakeEDDY)
     monkeypatch.setattr(pipeline_module, "TorchDTIFIT", FakeDTIFIT)
     monkeypatch.setattr(pipeline_module, "TorchAMICONODDI", FakeNODDI)
-    monkeypatch.setattr(pipeline_module, "SynthStrip", FakeSynthStrip)
+    monkeypatch.setattr(pipeline_module, "_get_synthstrip",
+                        lambda *args: (FakeSynthStrip(), {"verified": True}, True))
     monkeypatch.setattr(pipeline_module, "TorchFLIRT", FakeFLIRT)
     def fake_select_shell(*args, **kwargs):
         captured["shell_bvecs"] = args[2]
@@ -484,6 +487,8 @@ def test_mmorf_branch_calls_public_mmorf_function(monkeypatch, tmp_path, bvec_so
     assert captured["shell_bvecs"] == expected_bvecs
     assert captured["noddi_bvecs"] == expected_bvecs
     assert result.qc["bvec_source"] == bvec_source
+    assert result.qc["brain_mask"]["algorithm"] == "fnit.synthstrip.SynthStrip"
+    assert result.qc["registration"]["synthstrip"]["model_reused"] is True
     assert captured["gp_seed"] == result.qc["eddy_gp_seed"] == 12345
     assert captured["noddi_fit_method"] == (
         "classic" if bvec_source == "raw" else "amico"

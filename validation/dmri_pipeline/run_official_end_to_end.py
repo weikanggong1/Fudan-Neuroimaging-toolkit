@@ -1,7 +1,7 @@
 """Independent FSL/AMICO raw AP/PA benchmark; never imported by FNIT runtime.
 
 Run in the official Python AMICO environment. This reference deliberately uses
-its own TOPUP field, BET mask, EDDY output, fits and registration. It adapts the
+its own TOPUP field, brain mask, EDDY output, fits and registration. It adapts the
 UKB v1.5 command rules to a no-T1, rotated-gradient, Python-AMICO comparison.
 Actual commands and program output are stored only in private_logs/; the report
 contains role names, hashes and numeric summaries, not private absolute paths.
@@ -241,6 +241,14 @@ def parser():
     result.add_argument("--seed", type=int, default=12345)
     result.add_argument("--threads", type=int, default=8)
     result.add_argument("--bet-fraction", type=float, default=0.2)
+    result.add_argument("--brain-extractor", choices=("bet", "synthstrip"), default="bet",
+                        help="independent official extractor on this reference's TOPUP mean")
+    result.add_argument("--synthstrip-command", type=Path,
+                        help="official mri_synthstrip executable; required for synthstrip")
+    result.add_argument("--synthstrip-weights", type=Path,
+                        help="verified official synthstrip.1.pt; required for synthstrip")
+    result.add_argument("--synthstrip-gpu", action="store_true",
+                        help="pass -g to the official SynthStrip reference")
     return result
 
 
@@ -255,6 +263,11 @@ def main(argv=None):
     for field in ("raw_dir", "output_dir", "fsl_dir", "topup_config", "fa_reference",
                   "fa_skeleton", "config_prefix", "amico_runner", "tbss_runner", "report"):
         setattr(arguments, field, getattr(arguments, field).expanduser().resolve())
+    if arguments.brain_extractor == "synthstrip":
+        if arguments.synthstrip_command is None or arguments.synthstrip_weights is None:
+            raise ValueError("SynthStrip reference needs its official command and verified weights")
+        for field in ("synthstrip_command", "synthstrip_weights"):
+            setattr(arguments, field, getattr(arguments, field).expanduser().resolve())
     if arguments.output_dir.exists() or arguments.report.exists():
         raise FileExistsError("output root and report must both be new")
     fsl_bin = arguments.fsl_dir / "bin"
@@ -276,6 +289,8 @@ def main(argv=None):
     oxford = {f"oxford_{stage}.cnf": Path(f"{arguments.config_prefix}_{stage}.cnf")
               for stage in ("s1", "s2", "s3")}
     required += list(oxford.values())
+    if arguments.brain_extractor == "synthstrip":
+        required += [arguments.synthstrip_command, arguments.synthstrip_weights]
     if any(not path.is_file() for path in required):
         raise FileNotFoundError("a required raw input, binary, runner, template or configuration is absent")
     version = (arguments.fsl_dir / "etc/fslversion").read_text().strip()
@@ -290,6 +305,11 @@ def main(argv=None):
                   "NUMEXPR_NUM_THREADS"):
         environment[field] = str(arguments.threads)
     environment["PATH"] = str(fsl_bin) + os.pathsep + environment.get("PATH", "")
+    if arguments.brain_extractor == "synthstrip":
+        # The installed official wrapper invokes this distribution's fspython.
+        fs_root = arguments.synthstrip_command.parent.parent
+        if (fs_root / "bin/fspython").is_file():
+            environment["FREESURFER_HOME"] = str(fs_root)
     arguments.output_dir.mkdir(parents=True, exist_ok=False)
     for name in ("topup", "eddy", "native"):
         (arguments.output_dir / name).mkdir()
@@ -299,7 +319,7 @@ def main(argv=None):
         "unmodified_UKB_v1_5": False, "official_equivalence_claim": False,
         "UKB_command_source_commit": UKB_COMMIT,
         "historical_UKB_adaptations": [
-            "T1-derived mask replaced by independent BET of this reference TOPUP iout mean",
+            f"T1-derived mask replaced by independent official {arguments.brain_extractor} of this reference TOPUP iout mean",
             "compiled MCR AMICO replaced by official Python AMICO 2.0.3",
             "raw downstream gradients replaced by this reference EDDY rotated gradients",
             "fixed EDDY initrand for reproducible comparison; historical wrap used time initialization",
@@ -319,6 +339,7 @@ def main(argv=None):
                        "eddy_flm": "quadratic", "eddy_resamp": "jac", "eddy_slm": "linear",
                        "eddy_ff": 10, "eddy_nvoxhp": 1000, "eddy_repol": True,
                        "eddy_sep_offs_move": True, "bet_fraction": arguments.bet_fraction,
+                       "brain_extractor": arguments.brain_extractor,
                        "dti_shell": 1000, "dti_tolerance": 100,
                        "bvec_source": "own EDDY rotated", "noddi_fit_method": "AMICO",
                        "skeleton_threshold": 2000},
@@ -334,6 +355,16 @@ def main(argv=None):
         "timing_scope": "processing starts at raw image/JSON preparation; ends after all native/standard/skeleton saves; report hashes/summaries and cross-pipeline comparisons are outside",
         "process_wall_note": "measure whole launcher separately to include Python imports, preflight, executable hashing and final report generation",
     }
+    if arguments.brain_extractor == "synthstrip":
+        report["SynthStrip"] = {
+            "command": file_record(arguments.synthstrip_command),
+            "weights": file_record(arguments.synthstrip_weights),
+            "input": "own TOPUP iout arithmetic mean; original signal units",
+            "border_mm": 1, "no_csf": False, "gpu": arguments.synthstrip_gpu,
+        }
+        official_script = arguments.synthstrip_command.parent.parent / "python/scripts/mri_synthstrip"
+        if official_script.is_file():
+            report["SynthStrip"]["python_script"] = file_record(official_script)
     for stem in ("AP", "PA"):
         for extension in ("nii.gz", "bval", "bvec", "json"):
             path = arguments.raw_dir / f"{stem}.{extension}"
@@ -390,19 +421,30 @@ def main(argv=None):
                      f"--fout={arguments.output_dir / 'topup/fieldmap_fout'}",
                      f"--iout={arguments.output_dir / 'topup/fieldmap_iout'}",
                      f"--jacout={arguments.output_dir / 'topup/fieldmap_jacout'}"], name="topup")
-        with run.stage("independent_BET_mask"):
+        mask_stage = ("independent_SynthStrip_mask" if arguments.brain_extractor == "synthstrip"
+                      else "independent_BET_mask")
+        with run.stage(mask_stage):
             mean_b0 = arguments.output_dir / "topup/fieldmap_iout_mean.nii.gz"
             brain_prefix = arguments.output_dir / "eddy/nodif_brain"
             run.run([fsl_bin / "fslmaths", arguments.output_dir / "topup/fieldmap_iout.nii.gz",
                      "-Tmean", mean_b0], name="topup_iout_mean")
-            run.run([fsl_bin / "bet", mean_b0, brain_prefix, "-m", "-f", str(arguments.bet_fraction)],
-                    name="independent_bet")
             mask = arguments.output_dir / "eddy/nodif_brain_mask.nii.gz"
+            if arguments.brain_extractor == "synthstrip":
+                command = [arguments.synthstrip_command, "-i", mean_b0,
+                           "-m", mask,
+                           "--model", arguments.synthstrip_weights, "-b", "1",
+                           "-t", str(arguments.threads)]
+                if arguments.synthstrip_gpu:
+                    command.append("-g")
+                run.run(command, name="independent_official_synthstrip")
+            else:
+                run.run([fsl_bin / "bet", mean_b0, brain_prefix, "-m", "-f", str(arguments.bet_fraction)],
+                        name="independent_bet")
             mask_image = nib.load(str(mask))
             if (mask_image.shape[:3] != ap.shape[:3]
                     or not np.allclose(mask_image.affine, ap.affine, atol=5e-4, rtol=0)
                     or not np.any(np.asanyarray(mask_image.dataobj) > 0)):
-                raise ValueError("BET mask is empty or has different DWI geometry")
+                raise ValueError("brain mask is empty or has different DWI geometry")
         with run.stage("eddy"):
             eddy_prefix = arguments.output_dir / "eddy/data"
             run.run([fsl_bin / "eddy_cuda10.2", f"--imain={arguments.raw_dir / 'AP.nii.gz'}",

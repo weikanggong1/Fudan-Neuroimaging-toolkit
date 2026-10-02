@@ -19,7 +19,7 @@ from fnit.topup.core import (
     _gaussian_blur,
     _grid,
     _sample,
-    _sample_cubic,
+    _sample_cubic_with_derivatives,
 )
 
 
@@ -138,9 +138,9 @@ def test_gaussian_blur_preserves_non_cubic_shape():
 
 
 def test_cubic_sampler_reconstructs_integer_grid():
-    volume = torch.arange(6 * 8 * 10, dtype=torch.float32).reshape(6, 8, 10)
+    volume = torch.arange(18 * 20 * 22, dtype=torch.float32).reshape(18, 20, 22) / (18 * 20 * 22)
     coefficients = _cubic_spline_coefficients(volume[None])[0]
-    sampled, valid = _sample_cubic(
+    sampled, _, valid = _sample_cubic_with_derivatives(
         coefficients,
         _grid(volume.shape, device=volume.device, dtype=volume.dtype),
         phase_encode_axis=1,

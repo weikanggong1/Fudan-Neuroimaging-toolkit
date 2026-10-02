@@ -1,0 +1,356 @@
+{
+  "schema_version": 1,
+  "subjects": 1,
+  "scope": "completed candidate and official estimate outputs; CPU output-support diagnosis; no model render/fitting",
+  "input_shape": [
+    104,
+    104,
+    72,
+    2
+  ],
+  "canonical_x_flip": false,
+  "fixed_official_brain_voxels": 271080,
+  "decoded_dtype": "float32",
+  "support_rule": "decoded output value !=0, evaluated separately by scan and by any/all scans; not geometry",
+  "jacobian_orientation": "canonical FSL Analyze storage; raw/brain ROIs flipped in x only when input affine det>0",
+  "geometry": {
+    "status": "not_available",
+    "reason": "explicit geometric masks not supplied; nonzero signal is not geometric validity"
+  },
+  "nonzero_supports": {
+    "nonzero_any_scan": {
+      "full_fov": {
+        "region_voxels": 778752,
+        "candidate": 739322,
+        "reference": 739315,
+        "intersection": 739315,
+        "union": 739322,
+        "candidate_only": 7,
+        "reference_only": 0,
+        "xor": 7,
+        "neither": 39430
+      },
+      "fixed_official_brain": {
+        "region_voxels": 271080,
+        "candidate": 271080,
+        "reference": 271080,
+        "intersection": 271080,
+        "union": 271080,
+        "candidate_only": 0,
+        "reference_only": 0,
+        "xor": 0,
+        "neither": 0
+      }
+    },
+    "nonzero_all_scans": {
+      "full_fov": {
+        "region_voxels": 778752,
+        "candidate": 739322,
+        "reference": 739315,
+        "intersection": 739315,
+        "union": 739322,
+        "candidate_only": 7,
+        "reference_only": 0,
+        "xor": 7,
+        "neither": 39430
+      },
+      "fixed_official_brain": {
+        "region_voxels": 271080,
+        "candidate": 271080,
+        "reference": 271080,
+        "intersection": 271080,
+        "union": 271080,
+        "candidate_only": 0,
+        "reference_only": 0,
+        "xor": 0,
+        "neither": 0
+      }
+    },
+    "per_scan_nonzero": [
+      {
+        "scan_index": 0,
+        "full_fov": {
+          "region_voxels": 778752,
+          "candidate": 739322,
+          "reference": 739315,
+          "intersection": 739315,
+          "union": 739322,
+          "candidate_only": 7,
+          "reference_only": 0,
+          "xor": 7,
+          "neither": 39430
+        },
+        "fixed_official_brain": {
+          "region_voxels": 271080,
+          "candidate": 271080,
+          "reference": 271080,
+          "intersection": 271080,
+          "union": 271080,
+          "candidate_only": 0,
+          "reference_only": 0,
+          "xor": 0,
+          "neither": 0
+        }
+      },
+      {
+        "scan_index": 1,
+        "full_fov": {
+          "region_voxels": 778752,
+          "candidate": 739322,
+          "reference": 739315,
+          "intersection": 739315,
+          "union": 739322,
+          "candidate_only": 7,
+          "reference_only": 0,
+          "xor": 7,
+          "neither": 39430
+        },
+        "fixed_official_brain": {
+          "region_voxels": 271080,
+          "candidate": 271080,
+          "reference": 271080,
+          "intersection": 271080,
+          "union": 271080,
+          "candidate_only": 0,
+          "reference_only": 0,
+          "xor": 0,
+          "neither": 0
+        }
+      }
+    ]
+  },
+  "iout_errors": [
+    {
+      "scan_index": 0,
+      "regions": {
+        "fixed_official_brain": {
+          "spatial_voxels": 271080,
+          "scalar_values": 271080,
+          "compared": true,
+          "exact": false,
+          "different_scalar_values": 271018,
+          "pearson_r": 0.9999959200338286,
+          "mae": 2.7102973151144525,
+          "rmse": 14.14252255210553,
+          "p95_absdiff": 8.363330078124989,
+          "percentile_sampling": false,
+          "max_absdiff": 1037.2578125,
+          "sum_absdiff": 734707.3961812258,
+          "sum_squared_diff": 54218966.73660742
+        },
+        "brain_common_nonzero": {
+          "spatial_voxels": 271080,
+          "scalar_values": 271080,
+          "compared": true,
+          "exact": false,
+          "different_scalar_values": 271018,
+          "pearson_r": 0.9999959200338286,
+          "mae": 2.7102973151144525,
+          "rmse": 14.14252255210553,
+          "p95_absdiff": 8.363330078124989,
+          "percentile_sampling": false,
+          "max_absdiff": 1037.2578125,
+          "sum_absdiff": 734707.3961812258,
+          "sum_squared_diff": 54218966.73660742
+        },
+        "brain_candidate_only_nonzero": {
+          "spatial_voxels": 0,
+          "scalar_values": 0,
+          "compared": false,
+          "reason": "empty region"
+        },
+        "brain_reference_only_nonzero": {
+          "spatial_voxels": 0,
+          "scalar_values": 0,
+          "compared": false,
+          "reason": "empty region"
+        },
+        "brain_neither_nonzero": {
+          "spatial_voxels": 0,
+          "scalar_values": 0,
+          "compared": false,
+          "reason": "empty region"
+        }
+      },
+      "nonzero_support_mismatch_squared_error_fraction": 0.0
+    },
+    {
+      "scan_index": 1,
+      "regions": {
+        "fixed_official_brain": {
+          "spatial_voxels": 271080,
+          "scalar_values": 271080,
+          "compared": true,
+          "exact": false,
+          "different_scalar_values": 271026,
+          "pearson_r": 0.9999972311783125,
+          "mae": 2.6958141008924357,
+          "rmse": 11.410425680229089,
+          "p95_absdiff": 8.814453125,
+          "percentile_sampling": false,
+          "max_absdiff": 835.0234375,
+          "sum_absdiff": 730781.2864699215,
+          "sum_squared_diff": 35294023.47442885
+        },
+        "brain_common_nonzero": {
+          "spatial_voxels": 271080,
+          "scalar_values": 271080,
+          "compared": true,
+          "exact": false,
+          "different_scalar_values": 271026,
+          "pearson_r": 0.9999972311783125,
+          "mae": 2.6958141008924357,
+          "rmse": 11.410425680229089,
+          "p95_absdiff": 8.814453125,
+          "percentile_sampling": false,
+          "max_absdiff": 835.0234375,
+          "sum_absdiff": 730781.2864699215,
+          "sum_squared_diff": 35294023.47442885
+        },
+        "brain_candidate_only_nonzero": {
+          "spatial_voxels": 0,
+          "scalar_values": 0,
+          "compared": false,
+          "reason": "empty region"
+        },
+        "brain_reference_only_nonzero": {
+          "spatial_voxels": 0,
+          "scalar_values": 0,
+          "compared": false,
+          "reason": "empty region"
+        },
+        "brain_neither_nonzero": {
+          "spatial_voxels": 0,
+          "scalar_values": 0,
+          "compared": false,
+          "reason": "empty region"
+        }
+      },
+      "nonzero_support_mismatch_squared_error_fraction": 0.0
+    }
+  ],
+  "iout_pooled_errors": {
+    "fixed_official_brain": {
+      "spatial_voxels": 271080,
+      "scalar_values": 542160,
+      "compared": true,
+      "exact": false,
+      "different_scalar_values": 542044,
+      "pearson_r": 0.9999965618169396,
+      "mae": 2.7030557080034443,
+      "rmse": 12.84929489000943,
+      "p95_absdiff": 8.593798828124989,
+      "percentile_sampling": false,
+      "max_absdiff": 1037.2578125,
+      "sum_absdiff": 1465488.6826511472,
+      "sum_squared_diff": 89512990.21103625
+    },
+    "brain_common_nonzero_all_scans": {
+      "spatial_voxels": 271080,
+      "scalar_values": 542160,
+      "compared": true,
+      "exact": false,
+      "different_scalar_values": 542044,
+      "pearson_r": 0.9999965618169396,
+      "mae": 2.7030557080034443,
+      "rmse": 12.84929489000943,
+      "p95_absdiff": 8.593798828124989,
+      "percentile_sampling": false,
+      "max_absdiff": 1037.2578125,
+      "sum_absdiff": 1465488.6826511472,
+      "sum_squared_diff": 89512990.21103625
+    }
+  },
+  "brain_nonzero_support_mismatch_squared_error_fraction": 0.0,
+  "jacobian_errors": {
+    "0": {
+      "status": "compared",
+      "roi_x_flip": false,
+      "regions": {
+        "full_fov": {
+          "spatial_voxels": 778752,
+          "scalar_values": 778752,
+          "compared": true,
+          "exact": false,
+          "different_scalar_values": 777595,
+          "pearson_r": 0.9999986972746183,
+          "mae": 0.00013054750680289225,
+          "rmse": 0.0002972979042688427,
+          "p95_absdiff": 0.000513759255409238,
+          "percentile_sampling": false,
+          "max_absdiff": 0.014417707920074463,
+          "sum_absdiff": 101.66413201776595,
+          "sum_squared_diff": 0.06883080844569832
+        },
+        "fixed_official_brain": {
+          "spatial_voxels": 271080,
+          "scalar_values": 271080,
+          "compared": true,
+          "exact": false,
+          "different_scalar_values": 271021,
+          "pearson_r": 0.9999965294759625,
+          "mae": 0.0002231644638024531,
+          "rmse": 0.0004066543656880134,
+          "p95_absdiff": 0.0006871223449707031,
+          "percentile_sampling": false,
+          "max_absdiff": 0.014417707920074463,
+          "sum_absdiff": 60.49542284756899,
+          "sum_squared_diff": 0.044827895940926316
+        }
+      }
+    },
+    "1": {
+      "status": "compared",
+      "roi_x_flip": false,
+      "regions": {
+        "full_fov": {
+          "spatial_voxels": 778752,
+          "scalar_values": 778752,
+          "compared": true,
+          "exact": false,
+          "different_scalar_values": 777482,
+          "pearson_r": 0.999998697274994,
+          "mae": 0.0001305475335423906,
+          "rmse": 0.0002972978539271604,
+          "p95_absdiff": 0.0005137324333190918,
+          "percentile_sampling": false,
+          "max_absdiff": 0.014417767524719238,
+          "sum_absdiff": 101.66415284120376,
+          "sum_squared_diff": 0.06883078513535304
+        },
+        "fixed_official_brain": {
+          "spatial_voxels": 271080,
+          "scalar_values": 271080,
+          "compared": true,
+          "exact": false,
+          "different_scalar_values": 271015,
+          "pearson_r": 0.9999965294786323,
+          "mae": 0.00022316442713171263,
+          "rmse": 0.0004066541693495283,
+          "p95_absdiff": 0.0006871223449707031,
+          "percentile_sampling": false,
+          "max_absdiff": 0.014417767524719238,
+          "sum_absdiff": 60.49541290686466,
+          "sum_squared_diff": 0.04482785265385112
+        }
+      }
+    }
+  },
+  "input_sha256": {
+    "selected_b0_pair": "f701b4ef97e39f3e821030d8c630f575a1410ec380627f26f11312005968c774",
+    "fixed_official_brain_mask": "a58a5544fd6202b7d4771d35a39d2aba07f89a83a2ed121f12b3fad0d4e9870b",
+    "candidate_iout": "faa9690033867652e456a8d5722dd1ca4b4c9cfba700547f0ea450f9768a12c9",
+    "reference_iout": "49a35fbbb4ae6f11e8f6b84403c6234814d87177111b7cecd0154699a2b53bf6",
+    "candidate_jacobian_0": "cd5fedd7509c90ed95f83600d7e5232c7d50493661588ab06d1f1038b6b1c791",
+    "reference_jacobian_0": "ac8440c6db16854d1afed02148a4a837bb45750962fcd4df82ef3f4158617662",
+    "candidate_jacobian_1": "ca24df8c3512cddabe9604c83063cbc002924539b1b80f979cefaf5ef54176c5",
+    "reference_jacobian_1": "c9c0954bd2e74c017e8dbb083f3e775f858c32cc98d8a72241d6e8f57cfdacb8"
+  },
+  "versions": {
+    "python": "3.11.16",
+    "numpy": "1.26.4",
+    "nibabel": "5.4.2"
+  },
+  "source_sha256": "a171932b70f8331a8bb3e0b5ab67190d962d94ce8d75779c19a9f84af1bad626",
+  "diagnostic_elapsed_seconds": 0.6716838316060603
+}
