@@ -64,3 +64,11 @@ GCA 71,651,552 字节，SHA-256 `2fcd276a39800f01f93a4c8828ae6d0a8cea3d8b8b9fe15
 原生对照脚本新增 `--same-build --case whole_sub01_candidate_retry1`；两种后端使用同一候选二进制，只有激活环境不同。`benchmark_chain.py --root ... --output ... --case ... --commit ...` 要求新的空专属输出目录；任一步失败记录错误并退出，未生成 filled 不标成功。
 
 当前 v5 进程显存与采样统计见 `gca_v5_gpu_summary.json`；这里只归属实际 PID 的同期观测，不把外部进程或别的阶段峰值加到本任务。
+
+## chain v2 首例当前验收
+
+`chain_v2_sub01.json` 绑定当前快照 `fa98477ee2d83fbcf4dacbe670a62ba0e0643963`，在新空目录实际使用完整原生 v3 缓存程序，连续计算到 filled，`execution_complete=true`。整体 467.592 秒包含导入、校验、拷贝、自产 CPU WM 点对照和全部输出比较；不是原始 T1 整例，不能与旧整例总耗时直接比较。GCA 为 180.509 秒，两次 GPU WM 编辑为 1.200／1.275 秒，CPU 点对照为 4.450 秒。
+
+自产 pretess 输入的 GPU／成熟 CPU WM 编辑体素与文件 SHA 完全相同。LTA 矩阵、空间信息及最终 filled 体素零差异，filled 的 0／127／255 标签 Dice 均为 1。norm、ctrl_pts、aseg.presurf、brain、antsdn.brain、wm.seg 也逐体素相同。EntoWM 相对冻结参考有 1 个标签体素不同（最大标签差 4201，4201 标签 Dice 0.996678）；wm.asegedit／wm 各有 1 个体素不同、最大强度差 5。完整原生 WM 编辑读取 EntoWM，该差异已出现在 GPU 后编辑之前；不能据此宣称所有中间结果一致，也不把它归因于新的 GPU 后编辑。尚未单独确定 EntoWM 标签变化的机制。
+
+EntoWM 实际在 CUDA 使用 FP32 参数与输入，autocast 关闭、cuDNN TF32 关闭，其他默认 TF32 保留。同期本进程树最大采样显存为 4,659,871,744 字节，低于 20 GB；请求间隔 0.5 秒、实际最大间隔 18.979 秒、采样失败 0，因此它是采样峰值，不是连续瞬时峰值保证。第二例连续链和第二例 v3 原生配对仍在共享锁队列，生产默认仍不激活缓存。
