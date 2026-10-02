@@ -132,6 +132,12 @@ def summarize_case(root, case):
         "finish_surface": ([f"finish_surface_{h}" for h in ("lh", "rh")],
                            ["finish_surface_hemisphere_group", "finish_metrics_lh", "finish_metrics_rh"]),
     }
+    group_implementations = {
+        "surface": "FNIT NumPy/Numba CPU remesh/sphere；PyTorch/Triton GPU有序平均及特征；固定FS源码Conda C++ CPU拓扑/white.preaparc/inflate/相交/defects",
+        "register": "FNIT Python/Numba CPU目标函数和线搜索；PyTorch/Triton GPU有序梯度平均；固定FS源码Conda C++ CPU avg_curv绘制",
+        "annotation": "FNIT FS-GCSA移植，PyTorch GPU特征与CPU分类/Gibbs；三图谱仅在各半球内部顺序执行",
+        "finish_surface": "固定FS源码Conda C++ CPU最终white/pial；FNIT PyTorch GPU厚度/面积/曲率及中层面积/TH3顶点体积",
+    }
     for operation, (baseline_names, candidate_names) in groups.items():
         if not all(n in b for n in baseline_names) or not all(n in c for n in candidate_names):
             raise ValueError("missing grouped stage " + operation)
@@ -140,7 +146,8 @@ def summarize_case(root, case):
         rows.append({"name": operation + "_bilateral_scope",
                      **previous.pair(sum(b[n]["seconds"] for n in baseline_names),
                                      sum(c[n]["seconds"] for n in candidate_names)),
-                     "implementation": "见完整组与半球内部报告；CPU原生/Numba，最终指标PyTorch GPU",
+                     "implementation": group_implementations[operation],
+                     "baseline_implementation_details": {n: implementations[n] for n in baseline_names},
                      "baseline_stage_names": baseline_names,
                      "candidate_stage_names": candidate_names,
                      "timing_scope": "baseline sequential parents versus candidate group wall including private copies/publication and required serial follow-up"})
