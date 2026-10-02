@@ -345,8 +345,8 @@ def recon_environment(config, subject):
     return environment
 
 
-def cli_command(config, case, job):
-    anatomy = gpu_anatomy_subject(config, case, job)
+def cli_command(config, case, job, *, anatomy_subject=None):
+    anatomy = anatomy_subject if anatomy_subject is not None else gpu_anatomy_subject(config, case, job)
     arguments = ["UKBConnectome_pipeline", "--bids-root", case["bids_root"], "--subject", case["subject"],
                  "--freesurfer-subject-dir", str(anatomy), "--output-dir", str(Path(job) / "connectome"),
                  "--device", config["device"], "--n-seeds", str(config["n_seeds"]), "--seed", str(config["seed"])]
@@ -418,7 +418,12 @@ def load_recon_for_gpu(config, case, version, job):
     return original
 
 
-def worker(payload):
+def worker(payload, *, anatomy_loader=None, anatomy_subject=None, extra_cli_arguments=()):
+    """Execute a cohort stage; private staged drivers may bind verified anatomy.
+
+    The default path remains fresh official reconstruction in this cohort.
+    Callbacks belong to the benchmark driver, never to the FNIT runtime.
+    """
     config, action = payload["config"], payload["action"]
     if sha256(Path(__file__)) != config["worker_script_sha256"]:
         raise RuntimeError("worker script differs from the coordinator frozen script")
@@ -491,7 +496,11 @@ def worker(payload):
             if report["raw_t1_sha256_after"].lower() != expected_t1.lower():
                 raise RuntimeError("raw T1 changed during official reconstruction")
         elif action == "gpu":
-            recon = load_recon_for_gpu(config, case, version, job)
+            loader = anatomy_loader or load_recon_for_gpu
+            recon = loader(config, case, version, job)
+            if recon.get("staged_anatomy"):
+                report["staged_anatomy"] = recon["staged_anatomy"]
+                report["execution_scope"] = "staged end-to-end: this round's separately prepared fresh raw-T1 official anatomy, later frozen candidate source, new full raw-DWI output; not continuous cold pipeline"
             if recon.get("rerun"):
                 report["rerun"] = recon["rerun"]
                 report["execution_scope"] = "new raw-DWI namespace with this round's original raw-T1 reconstruction and declared common compatibility source; prior failures preserved"
@@ -513,7 +522,7 @@ def worker(payload):
                 if sha256(config["wall_script"]) != config["wall_script_sha256"]:
                     raise RuntimeError("raw-DWI wall script changed after cohort start")
                 report["source_before"] = source
-                subject = gpu_anatomy_subject(config, case, job)
+                subject = Path(anatomy_subject(config, case, job)) if anatomy_subject is not None else gpu_anatomy_subject(config, case, job)
                 report["anatomy"] = check_anatomy(subject, config["atlases"])
                 if report["anatomy"] != recon["anatomy"]:
                     raise RuntimeError("official anatomy changed after reconstruction")
@@ -522,7 +531,7 @@ def worker(payload):
                            "--report", str(job / "raw_bids_wall.json")]
                 if config.get("gpu_uuid"):
                     command += ["--gpu-uuid", config["gpu_uuid"]]
-                command += ["--", *cli_command(config, case, job)]
+                command += ["--", *cli_command(config, case, job, anatomy_subject=subject), *extra_cli_arguments]
                 environment = os.environ.copy()
                 environment["PYTHONPATH"] = str(Path(config["sources"][version]) / "src")
                 if config.get("fnit_weights"):
@@ -583,6 +592,8 @@ def worker(payload):
                         raise RuntimeError("separate revalidation report changed during the actual GPU execution")
                 if recon.get("rerun") and load_recon_for_gpu(config, case, version, job).get("rerun") != recon["rerun"]:
                     raise RuntimeError("original anatomy binding changed during actual GPU execution")
+                if recon.get("staged_anatomy") and loader(config, case, version, job).get("staged_anatomy") != recon["staged_anatomy"]:
+                    raise RuntimeError("staged anatomy binding changed during actual GPU execution")
                 report["wall_report"] = str(job / "raw_bids_wall.json")
                 report["raw_dwi_cli_total_runtime_seconds"] = wall["total_runtime_seconds"]
                 report["gpu_memory"] = {"process": wall.get("gpu_process_memory"), "allocator": wall.get("cuda_allocator")}

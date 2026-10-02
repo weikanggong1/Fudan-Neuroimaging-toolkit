@@ -139,9 +139,9 @@ def required_resource_paths(config):
     return files
 
 
-def known_resource_identities(config):
+def known_resource_identities(config, *, source_version="baseline"):
     """Read pinned project identities as data without importing production."""
-    source = Path(config["sources"]["baseline"])
+    source = Path(config["sources"][source_version])
     tree = ast.parse((source / "src/fnit/weights.py").read_text())
     weights = next(ast.literal_eval(node.value) for node in tree.body if isinstance(node, ast.Assign)
                    and any(isinstance(target, ast.Name) and target.id == "WEIGHT_FILES" for target in node.targets))
@@ -150,8 +150,8 @@ def known_resource_identities(config):
     return weights, atlas
 
 
-def build_resources(config):
-    weights, atlases = known_resource_identities(config)
+def build_resources(config, *, source_version="baseline"):
+    weights, atlases = known_resource_identities(config, source_version=source_version)
     files = []
     for role, path in required_resource_paths(config):
         if not path.is_file() or path.stat().st_size == 0:
