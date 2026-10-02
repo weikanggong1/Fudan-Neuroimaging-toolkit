@@ -1,6 +1,6 @@
 # 任务 5：MNI warp GPU 后处理验证
 
-最新两例自产连续 MNI 阶段已完成：GPU 与重新运行的 Conda 的变形场、前向场、逆向场和检查图全部数值零差异，空间及类型一致；本次完整阶段观察加速为 3.294× / 3.247×。默认后端仍为 `conda`；不得把本页阶段结果解释为整例成功或整体等效。
+最新两例自产连续 MNI 阶段已完成：GPU 与重新运行的 Conda 的变形场、前向场、逆向场和检查图全部数值零差异，空间及类型一致；两轮四个配对完整阶段观察加速为 3.247×–3.608×。默认后端仍为 `conda`；不得把本页阶段结果解释为整例成功或整体等效。
 
 ## 实现与输入
 
@@ -26,7 +26,27 @@
 
 [最新算子](operators_v12.json) / [CSV](operators_v12.csv)：两例转换和同冻结 forward 检查图均数值零差异、几何完全一致，消除了 v4 sub01 的 1.525879e-5 mm 差异；转换 4.574612 / 4.274279 s，检查图 1.311324 / 1.329956 s。[初始化记录](context_bootstrap_v12.json)通过单次分阶段启动，无模型自动重试。
 
-[全命令显存监测](context_v12_monitor.json) / [逐次采样](context_v12_gpu_samples.csv)：440.407633 s 包括测试、算子、四次完整阶段及验证，不能作为一次阶段耗时；1,120 样本，查询失败 0，最大间隔 3.192424 s。父子进程合计采样峰值 13,103,005,696 字节（13.103 GB / 12.203 GiB）。Torch 的全命令累计 allocated / reserved 峰值分别 9,268,777,984 / 12,272,533,504 字节；每阶段报告的是到该时刻的累计值，未重置成独立阶段峰值。本轮观测在 20 GB 预算内，NVML 采样不证明连续峰值上界。allocator 显式开启，文件系统及 Numba/Triton 缓存未清空，模型每次重建，阶段前 empty_cache；不称无缓存冷启动。内部两次反对称前向的直接观测和重复完整阶段另由 v13 执行。
+[全命令显存监测](context_v12_monitor.json) / [逐次采样](context_v12_gpu_samples.csv)：440.407633 s 包括测试、算子、四次完整阶段及验证，不能作为一次阶段耗时；1,120 样本，查询失败 0，最大间隔 3.192424 s。父子进程合计采样峰值 13,103,005,696 字节（13.103 GB / 12.203 GiB）。Torch 的全命令累计 allocated / reserved 峰值分别 9,268,777,984 / 12,272,533,504 字节；每阶段报告的是到该时刻的累计值，未重置成独立阶段峰值。本轮观测在 20 GB 预算内，NVML 采样不证明连续峰值上界。allocator 显式开启，文件系统及 Numba/Triton 缓存未清空，模型每次重建，阶段前 empty_cache；不称无缓存冷启动。内部两次反对称前向的直接观测和重复完整阶段见下列已完成 v13。
+
+## v13 重复完整阶段与内部前向观测：已执行
+
+[直接配对 JSON](stage_comparison_v13.json)、[完整四次记录](stage_pairs_v13.json)绑定 `d327ee9`；数值代码与 v12 相同，只增加验证脚本的只读内部前向 hook。sub01 仍为 GPU→Conda、sub02 为 Conda→GPU。四个完整阶段各实际观测到 **2 次 DeformNetwork 前向**：输入与模型参数都是 torch.float32，matmul/cuDNN TF32 关闭，autocast 关闭，未使用 FP16/BF16；未减少反对称前向次数。[单元日志](unit_v13.log)记录 14 项通过（4.16 s）。
+
+| 完整阶段 | sub01 GPU | sub01 Conda | sub02 GPU | sub02 Conda |
+| --- | ---: | ---: | ---: | ---: |
+| 模型与 deform 保存 | 11.053944 s | 10.699308 s | 10.523662 s | 10.933107 s |
+| 前向转换 | 4.230324 s | 16.467348 s | 4.312768 s | 23.352675 s |
+| 完整求逆 | 19.121627 s | 90.794612 s | 21.724507 s | 82.382624 s |
+| 最近邻检查图 | 1.294258 s | 11.995045 s | 1.390161 s | 10.633789 s |
+| 完整函数墙钟 | 36.173323 s | 130.526444 s | 38.674507 s | 127.852261 s |
+
+对应分步 [sub01 GPU JSON](stage_v13_sub01_gpu.json) / [CSV](stage_v13_sub01_gpu.csv)、[sub01 Conda JSON](stage_v13_sub01_conda.json) / [CSV](stage_v13_sub01_conda.csv)、[sub02 GPU JSON](stage_v13_sub02_gpu.json) / [CSV](stage_v13_sub02_gpu.csv)、[sub02 Conda JSON](stage_v13_sub02_conda.json) / [CSV](stage_v13_sub02_conda.csv)。本轮观察加速 3.608× / 3.306×；连同 v12 四个配对为 3.247×–3.608×。只有两例、两轮，且共享服务器缓存未清空，不能外推为任意数据或整例稳定倍数。
+
+自产 deform / forward / inverse / check 新 GPU 与新 Conda直接比较全部数值零差异、affine 差为 0、dtype/intent/单位一致，各自与冻结结果也零差异；组成残差与 v6/v12相同，未排除任何全域节点。[最新算子 JSON](operators_v13.json) / [CSV](operators_v13.csv)再次通过两例前向/检查图严格门槛。[原生三个程序执行前哈希](native_programs_v13_pre.json)与[执行后哈希](native_programs_v13_post.json)相同。权重、模板和逐文件数值源码 SHA 在每个完整阶段报告中保留。
+
+[过程监测](context_v13_monitor.json) / [采样 CSV](context_v13_gpu_samples.csv)记录 443.640291 s，含整命令验证而非一次阶段；1,169 样本、失败 0、最大间隔 2.318978 s。进程树采样峰值仍为 13,103,005,696 字节；Torch 全命令累计 allocated / reserved 峰值仍为 9,268,777,984 / 12,272,533,504 字节。采样不证明连续峰值上界。[单次初始化](context_bootstrap_v13.json)通过，没有模型自动重试；此前失败日志保留，原因未确认。
+
+真实最终三平面图已从 v13 新 GPU 与新 Conda 输出生成，采用 canonical RAS 的矢状/冠状/轴位，展示两条检查图、不同体素及全域 RAS 误差，不使用掩膜。影像只存于用户私有输出目录，不进入 Git；生成脚本为 [visualize.py](visualize.py)，`--reference-label` / `--candidate-label` 只改变图注。旧 v4 脑图属于旧版本，最终脑图用于最新连续链。
 
 ## 历史已执行证据：v4
 
@@ -76,12 +96,12 @@ CUDA 完整中心/边缘控制点单元回归与成熟 CPU 参考逐元素一致
 
 [v6 前置单元](unit_v6.log) 7 项通过。v7 几何修正与 v11 完整阶段的两个尝试分别在首次 CUDA 分配失败，见 [v7 日志](unit_v7_bootstrap_failure.log) / [v11 日志](unit_v11_bootstrap_failure.log)：pytest/model 未开始，没有该次速度或数值结果。随后[allocator 关闭](bootstrap_uncached_staged.json)和[allocator 开启](bootstrap_cached_staged.json)的分阶段诊断均通过 init / set-device / properties / memory-info / 4 字节分配 / synchronize；[两次状态](bootstrap_pair_status.json)记录返回码均为 0。此前失败原因尚未确认。v12 在相同已初始化进程内执行完整回归，不做模型自动重试。
 
-## 待执行与门槛
+## 验证状态与协调者接入
 
 1. v6 同 forward 完整 GPU / Conda / 官方求逆、全域/脑内排错已完成。
 2. v12 最新前向/检查图真实回归、完整自产 GPU/Conda AB/BA、实际显存与 I/O 分步秒数已完成。
-3. v13 补充直接内部双前向观测与完整阶段重复测量。
-4. 原始 T1 空目录两例整例、138 项严格诊断、安装与共享调度接入由协调者执行。本任务未改变 138 门槛，整体等效为 `not_assessed`。
+3. v13 直接内部双前向观测、完整阶段重复测量和私有脑图已完成。
+4. 原始 T1 空目录两例整例、138 项严格诊断、主页安装与共享调度接入由协调者执行。本任务未改变 138 门槛，整体等效为 `not_assessed`。
 
 本轮完整 MNI 阶段有直接配对测量；原始 T1 整例尚无本任务的新测结果，不能从 MNI 局部秒数推算整例提速。
 
@@ -93,7 +113,7 @@ CUDA 完整中心/边缘控制点单元回归与成熟 CPU 参考逐元素一致
 
 所有性能命令须在同一共用本地文件锁内顺序执行，进程启动前绑定物理 GPU UUID，OMP/BLAS/Numba/Torch 总线程预算 4。用项目已有 [run_monitored.py](../../../python_gpu_port/run_monitored.py) 包装记录过程树显存。环境为 Torch 2.5.1 / CUDA 11.8 / Triton 3.1.0；冷启动诊断先建立同设备单元素 CUDA 上下文，不隐藏失败、自动重试或改变精度。[bootstrap.json](bootstrap.json)保留实际诊断结果；[早期 CPU JIT 后首次 CUDA 分配失败原始日志](unit_cold_failure.log)保留 2 failed / 3 passed，失败发生在首次 GPU 张量建立处；原因未确认，未计入速度测量。原 GPFS 锁返回 ENOLCK 的尝试未执行被测命令；后续统一使用共用本地文件锁。
 
-[visualize.py](visualize.py)提供三平面检查图与全域位移误差图，固定中间切片、误差色限 1e-4 mm；只输出用户指定私有目录，影像不进入公开仓库。真实最终脑图待连续链结果产生。
+[visualize.py](visualize.py)提供三平面检查图与全域位移误差图，固定中间切片、误差色限 1e-4 mm；只输出用户指定私有目录，影像不进入公开仓库。真实最终脑图已从 v13 连续链结果产生并保存在用户私有输出目录。
 
 ## 版本记录
 
