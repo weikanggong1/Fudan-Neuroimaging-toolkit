@@ -254,9 +254,38 @@ print(qc_differences(baseline_result.qc, candidate_result.qc))  # 模型和结�
 
 | 更新日期 | 内容与验收记录 |
 |---|---|
-| 2026-10-02 | 完整 Gram+linear 候选未获耗时收益且增加显存，最终只复用 Gram 并保留 Cholesky 检查复用与 classic 设备整数 QC 计数。同一真实全脑五图、文件、header、affine 和结果 QC 完全相同；AMICO 中位 `30.76993`→`27.45137 s`，classic `68.15137`→`79.80968 s`，共享 GPU 下未建立稳定提速。见[本次报告](../../validation/dmri_pipeline/lossless_20261002.md)。 |
+| 2026-10-02（临时显存） | 公开十人 `case02` 的 20 GB 失败定位到填充行 Cholesky 分配。改为非空行求解、约 128 MiB 临时分块、按原方向广播 CG Gram；16 项小矩阵内存/数值差分测试通过，结合既有 AMICO/lossless 共 41 项通过。真实组件检查已完成：`case01` 五图解码值与 shape/affine 与旧版逐值相同；原版失败的 `case02` 在 20 GB 上限内完成五张有限值图。组件 allocated 峰值分别为 3,674,249,216 和 5,391,976,448 bytes；两个分支共 20 个 FNIT 完整流程将统一重跑，整链对照尚待完成。 |
+| 2026-10-02（计算复用） | 完整 Gram+linear 候选未获耗时收益且增加显存，最终只复用 Gram 并保留 Cholesky 检查复用与 classic 设备整数 QC 计数。同一真实全脑五图、文件、header、affine 和结果 QC 完全相同；AMICO 中位 `30.76993`→`27.45137 s`，classic `68.15137`→`79.80968 s`，共享 GPU 下未建立稳定提速。见[本次报告](../../validation/dmri_pipeline/lossless_20261002.md)。 |
 | 2026-09-30 | 经典模式与 MATLAB NODDI 1.05 的固定 24 个真实脑体素比较，见上列 `classic_original_real_24.public.json`。 |
 | 2026-09-29 | LUT 批量 100→400 的真实全脑输出比较和共享 GPU 耗时观察，见上列 `classic_whole_brain.public.json`；该批量设置在本次更新中保留。 |
+
+## 2026-10-02：LUT 填充行与临时求解矩阵的显存修复
+
+公开十人双分支测试中，`case02` 的 AMICO 阶段触发了 20,000,000,000 bytes 的进程分配上限。错误位置是 `_masked_solve`：它按所有 LUT 方向的最大 voxel 数补齐批次，再为每一个填充行分配 passive-set Cholesky 矩阵。即使该行的 passive mask 全为零，也占用同样的临时矩阵空间；方向上的体素分布越不均匀，这部分浪费越大。该次矩阵分配请求约 `2.96 GiB`，当时本进程已有 allocated 约 `12.41 GiB`，另有约 `3.58 GiB` reserved 未分配缓存。整张卡仍有超过 `60 GiB` 可用，不应把这次失败解释为服务器显卡总显存耗尽。
+
+本次只调整内部求解的内存调度：
+
+- passive count 为零的行直接保留精确零输出，仅对 count 大于零的行建立 Cholesky 矩阵。
+- 每行保留原来的全局 compact width 和 `topk(sorted=False)`；压缩后的行仍按原始 `flat_row // slots` 选择所属方向的 Gram，避免把后一个方向的体素配到前一个方向。
+- Cholesky 按约 **128 MiB 的临时工作集估计**分块，下一块开始前释放上一块矩阵及其 diagonal view；这不限制输出、LUT、信号等持续存活张量，也不代替 PyTorch/cuSOLVER 自身的 workspace。
+- 奇异系统继续使用原 CG。每个失败方向只广播一份 `(1,C,C)` Gram 到 `(F,1,C)` rhs/mask，并另按 full-column 向量工作集分块，避免为每个失败体素复制完整 Gram。
+
+`float64` solver、字典、LUT 批量 400、正则、KKT/CG 阈值、迭代上限与输出文件契约均保持原设置；不修改 TF32 开关，不降低数值精度，API 与 CLI 无新增参数。约 128 MiB 是内部临时分块目标，不是完整 NODDI 拟合只使用这点显存的承诺。
+
+[差分测试](../../tests/amico_noddi/test_solver_memory.py)以小尺寸旧 `_masked_solve` 为独立数值 oracle，覆盖共享与分方向 Gram、全部/部分填充行、不同 passive width、强制跨方向分块、正则和奇异 CG 回退，以及完整活动集的值、支撑集和停止轮数。CPU 测试中的小矩阵用于检查算法与索引，不能代替真实影像 benchmark。
+
+随后使用真实 pipeline 已保存的 EDDY 校正 DWI、脑掩膜、旋转梯度和原 bval，运行[独立 NODDI 组件检查](../../validation/dmri_pipeline/public10_20261002/check_noddi_memoryfix.py)。它重新拟合并保存五张 NODDI 图，不重跑 TOPUP、EDDY 或配准，显存上限固定为 **20,000,000,000 bytes**。
+
+| 真实输入 | 输出检查 | PyTorch peak allocated（bytes） | PyTorch peak reserved（bytes） |
+|---|---|---:|---:|
+| `case01` | 五张图的全部解码值、shape 与 affine 均与旧版逐值相同 | 3,674,249,216 | 3,829,399,552 |
+| `case02` | 旧版在 20 GB 上限内失败；修复后完成五张图，全部为有限值；没有旧版完整输出作逐值对照 | 5,391,976,448 | 6,490,685,440 |
+
+两例组件运行均在指定上限内完成。`reserved` 是 allocator 向 CUDA 保留的显存，包含 `allocated`；两列不能相加。这些数值是独立 NODDI 组件进程的 allocator 峰值，不是整个 pipeline 的峰值，也不包含 CUDA context 或其他进程的显存。
+
+检查绑定修复提交 `bf339a0368a7711d2c6ca3477c8d7dc1fc17e75a`，其中 `solver.py` 的 SHA-256 为 `1d4887270f267a83967ee4cc9336b306110bf838dde78b6a00ea16e204a1f74e`；solver float64、TF32 设置与参数保持原样。本记录更新时修复提交仍在本地，尚未推送 main。后续十人两个分支共 **20 个 FNIT 完整流程**将统一使用修复源码重跑，旧版首人整链结果保留为历史记录。
+
+本次组件检查支持 `case01` 没有输出数值回归，并确认 `case02` 的分配失败已解除；`case02` 与原软件的精度仍由独立整链比较验收。十人端到端对照尚未完成，不把组件耗时写成 end-to-end 时间，也不以两例组件成功宣称十人通过。此前本页的单被试耗时来自不同修订，保留其历史范围。
 
 ## Reference
 

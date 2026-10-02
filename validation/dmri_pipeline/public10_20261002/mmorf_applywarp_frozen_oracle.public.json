@@ -1,0 +1,53 @@
+{
+  "scope": "frozen real MMORF 0.3.2 one-level debug scalar oracle; identical original T1 and FLIRT matrix, native FSL applywarp spline relative field",
+  "shape_match": true,
+  "affine_maxabs": 0.0,
+  "brain_voxels": 1827095,
+  "pearson": 0.9999971592391108,
+  "mae": 0.5323531940427971,
+  "rmse": 0.7476628528683986,
+  "p95": 1.4901123046875,
+  "max_abs": 18.1151123046875,
+  "reference_mean": 1007.0777772991245,
+  "warp_sha256": "84977f19139af58b94196a670964207a00c5dd9659c24449ac2933f0526a8168",
+  "oracle_sha256": "66f3074176fae4b2ccce595f235cd367aa027162fa44012240aabede79292d7d",
+  "file_records": {
+    "original_moving_T1": {
+      "bytes": 4727963,
+      "sha256": "cd3a39993a22f4de5465960655f37e614e43d0297867327ab9036f01c6e494c5"
+    },
+    "original_FLIRT_matrix": {
+      "bytes": 190,
+      "sha256": "3a03f62d6155673e0a26cd6ebb807cee4d43c772c7d291c78dbd364a82ce11b6"
+    },
+    "reference_T1": {
+      "bytes": 3219212,
+      "sha256": "32d5be33460f995a5d305507053c8862c823d9ca6bfb543381308df14590f212"
+    },
+    "applywarp_binary": {
+      "bytes": 331296,
+      "sha256": "40721907ce0c2f0d05636e88cbe4ac7729bd09e0ff58c4407614653c8e853fdd"
+    },
+    "MMORF_source_RegistrationCoordinatorMultimodal.cu": {
+      "bytes": 70799,
+      "sha256": "8de928e0bcc9a113fc010eec326523b6ea073a148715a64837a0d546170421a0"
+    }
+  },
+  "native_command": "applywarp --in=original_brain_T1 --ref=MNI152_T1_1mm_brain --warp=official_debug_warp --premat=original_T1_FLIRT --rel --interp=spline --out=scalar",
+  "reference_scope": "Original MMORF0.3.2 debug volume save_warped_volumes, one 32mm level/one LM update; this checks warp direction/units/composition and original sampler agreement, not ten-subject pipeline accuracy",
+  "source_evidence": {
+    "MMORF_source_commit": "1c1c13b8368f05e1a79a6dafe919d6b61df36bd6",
+    "save_warp_field_lines": [
+      412,
+      433
+    ],
+    "save_warped_volumes_lines": [
+      452,
+      466
+    ],
+    "saved_field": "world displacement rotated to reference image axes in mm",
+    "composition": "apply_warp_then_affine"
+  },
+  "FNIT_runtime_or_sampler_used": false,
+  "native_samplers_bitwise_equivalent": false
+}
