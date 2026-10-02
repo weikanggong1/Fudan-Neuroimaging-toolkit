@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "generated_at_utc": "2026-10-02T00:37:19.480857+00:00",
+  "scope": "Fresh-process CUDA startup diagnostics only; not an algorithm accuracy or performance benchmark.",
+  "software": {
+    "pytorch": "2.5.1",
+    "pytorch_cuda_runtime": "11.8",
+    "standalone_cuda_runtime_library": "11.8.89",
+    "nvidia_driver": "535.216.03"
+  },
+  "hardware": {
+    "card": "NVIDIA H100 PCIe",
+    "physical_gpu_index": 1,
+    "visible_gpu_count": 1,
+    "logical_gpu_index": 0,
+    "physical_pci_bus": "0000:58:00.0",
+    "total_memory_bytes_from_driver": 84942979072,
+    "mig": "Disabled",
+    "compute_mode": "Default"
+  },
+  "observations": [
+    {
+      "label": "raw_cuda_driver",
+      "visibility": "physical GPU 1 only",
+      "calls": {
+        "cuInit": 0,
+        "cuDeviceGetCount": 0,
+        "cuDeviceGetPCIBusId": 0,
+        "cuDevicePrimaryCtxRetain": 0,
+        "cuCtxSetCurrent": 0,
+        "cuMemGetInfo_v2": 0,
+        "cuDevicePrimaryCtxRelease": 0
+      },
+      "cuda_result": "CUDA_SUCCESS",
+      "free_memory_bytes": 83042828288,
+      "total_memory_bytes": 84942979072
+    },
+    {
+      "label": "fresh_pytorch_startup",
+      "module_loading_launch_environment": null,
+      "cuda_init_succeeded": true,
+      "failure_stage": "first torch.cuda.mem_get_info(0)",
+      "exception_type": "RuntimeError",
+      "exception_message": "CUDA error: out of memory",
+      "memory_fraction_cap_reached": false,
+      "tensor_allocation_reached": false,
+      "pipeline_api_reached": false,
+      "native_or_registration_math_reached": false
+    },
+    {
+      "label": "raw_cuda_runtime",
+      "calls": {
+        "cudaGetDeviceCount": 0,
+        "cudaSetDevice": 0,
+        "cudaFreeNull": 0,
+        "cudaMemGetInfo": 0
+      },
+      "result_description": "no error",
+      "free_memory_bytes": 75902484480,
+      "total_memory_bytes": 84942979072
+    },
+    {
+      "label": "explicit_lazy_tiny_control",
+      "module_loading_launch_environment": "LAZY",
+      "cuda_init_succeeded": true,
+      "memory_query_succeeded": true,
+      "free_memory_bytes": 75902484480,
+      "total_memory_bytes": 84942979072,
+      "memory_fraction_cap_bytes": 20000000000,
+      "memory_fraction_cap_succeeded": true,
+      "tensor": {
+        "elements": 1,
+        "dtype": "float32"
+      },
+      "synchronize_succeeded": true,
+      "pytorch_allocated_bytes": 512
+    },
+    {
+      "label": "subsequent_tiny_control",
+      "module_flag_explicitly_assigned_in_launch_command": false,
+      "module_loading_pre_init_environment": "not captured",
+      "module_loading_post_init_environment": "LAZY",
+      "success": true,
+      "free_memory_bytes": 73059205120,
+      "total_memory_bytes": 84942979072,
+      "memory_fraction_cap_bytes": 20000000000,
+      "pytorch_allocated_bytes": 512
+    }
+  ],
+  "resource_snapshots": {
+    "gpu_initial_nvml_mib": {
+      "total": 81559,
+      "used": 1740,
+      "free": 79267,
+      "utilization_percent": 0
+    },
+    "gpu_later_nvml_mib": {
+      "used": 8232,
+      "free": 72775,
+      "bar1_used": 8,
+      "bar1_free": 131064
+    },
+    "host_memory_kib": {
+      "available": 976979208,
+      "free": 19266484,
+      "cached": 937999732,
+      "commit_limit": 528126836,
+      "committed_as": 115909300
+    },
+    "shared_memory_free_gib_approximate": 502,
+    "cgroup_memory_limit": "unlimited",
+    "user_threads_observed": 160,
+    "user_process_thread_soft_limit": 4096,
+    "memlock_limit_bytes": 65536,
+    "gpu_ecc_errors_observed": 0,
+    "gpu_remapped_rows_observed": 0,
+    "normal_zone_buddy_orders_5_and_above": "zero in both NUMA nodes at one observation; this alone does not establish a cause"
+  },
+  "environment_at_failure_control": {
+    "CUDA_VISIBLE_DEVICES": "1",
+    "OMP_NUM_THREADS": "8",
+    "CUDA_DEVICE_ORDER": null,
+    "CUDA_MODULE_LOADING": null,
+    "PYTORCH_CUDA_ALLOC_CONF": null,
+    "LD_PRELOAD": null,
+    "LD_LIBRARY_PATH": null,
+    "CUDA_MPS_PIPE_DIRECTORY": null,
+    "CUDA_MPS_ACTIVE_THREAD_PERCENTAGE": null,
+    "CUDA_MPS_PINNED_DEVICE_MEM_LIMIT": null
+  },
+  "interpretation": {
+    "algorithm_memory_exhaustion_established": false,
+    "total_device_or_host_memory_exhaustion_established": false,
+    "root_cause": "not established",
+    "lazy_loading_causally_proven_to_resolve_failure": false,
+    "note": "The failing call preceded the memory cap and any pipeline computation. Raw APIs and explicit LAZY tiny control succeeded; a later control also succeeded. These changing-time observations do not isolate a single cause."
+  },
+  "actions": {
+    "source_changed": false,
+    "global_environment_changed": false,
+    "other_processes_killed": false,
+    "gpu_or_driver_reset": false,
+    "driver_context_references_created_by_probe_released": true,
+    "full_pipeline_rerun_by_this_diagnostic": false
+  },
+  "privacy": {
+    "contains_individual_data": false,
+    "contains_private_data_paths": false,
+    "contains_credentials_or_license_contents": false
+  }
+}

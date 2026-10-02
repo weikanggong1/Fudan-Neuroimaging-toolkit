@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "successful_runs": {
+    "baseline": {
+      "api_report_sha256": "a13b180778c8b2f5b5666a2dd5e197f83087aaaf189b380fc48ab6e071c8e6cb",
+      "source_revision": "954ad19e29ddde8617eddf58ebafc3a4f72b8951",
+      "cuda_visible_devices_at_launch": "1",
+      "physical_gpu_index": 1,
+      "logical_device": "cuda:0",
+      "exit_code": 0,
+      "launcher_source_sha256": "7d946db34d5a0f64291e29698b011eea41e9fe096af53f0ec48fa59fc58a806c"
+    },
+    "serial": {
+      "api_report_sha256": "188004018efc1282f6b43c73de348d2671532be01dd7bfe9d4c7d1264afc10d9",
+      "source_revision": "9f9f63e95b4ee702e4c3024407496df47a851631",
+      "cuda_visible_devices_at_launch": "1",
+      "physical_gpu_index": 1,
+      "logical_device": "cuda:0",
+      "exit_code": 0,
+      "launcher_source_sha256": "ae0f2e0bfb7ec4ee1f8a41c17c76c911b208651c2065b2fdf0b252d51cfc7857"
+    },
+    "parallel": {
+      "api_report_sha256": "b9c70a3bc6f9ab342b941ba1db59ab5953341a76072c6977f23e8d944ed4f5a0",
+      "source_revision": "9f9f63e95b4ee702e4c3024407496df47a851631",
+      "cuda_visible_devices_at_launch": "0",
+      "physical_gpu_index": 0,
+      "logical_device": "cuda:0",
+      "exit_code": 0,
+      "launcher_source_sha256": "7d946db34d5a0f64291e29698b011eea41e9fe096af53f0ec48fa59fc58a806c"
+    }
+  },
+  "basis": "Actual launch environments recorded by the validation orchestration; successful process exit and original API report SHA are bound here. Original API report bytes are preserved.",
+  "budget": {
+    "cpu_threads_total": 8,
+    "gpu_allocator_limit_bytes": 20000000000,
+    "tf32": true,
+    "low_precision_enabled": false
+  },
+  "failed_attempt": {
+    "physical_gpu_index": 1,
+    "stage": "CUDA allocator limit initialization before public surface API",
+    "exit_code": 1,
+    "no_pipeline_timer_result": true,
+    "error": "CUDA out of memory",
+    "root_cause": "undetermined",
+    "log_sha256": "9150c252d82985ed8fa802bc6dfc4a995c09443f19e01a0825bd1f1132a80c5e"
+  },
+  "limits": [
+    "Baseline and new serial used physical GPU1; new parallel used physical GPU0 after startup failure. Shared GPU/CPU load varies; observations do not establish a stable speedup factor.",
+    "Torch startup diagnostic probes are separate from the full surface API benchmark."
+  ],
+  "privacy": "Only launch mapping, anonymous status, code/report hashes and resource settings. Private plans/logs and data remain on the server."
+}

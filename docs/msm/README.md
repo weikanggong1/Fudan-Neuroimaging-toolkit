@@ -1,6 +1,6 @@
 # FNIT MSM：MSMSulc 与 MSMAll
 
-2026-10-01 完整 surface 另以 `7102c187` 和独立原版输入准备重测：球面角差均值左 **0.221050°**、右 **0.319595°**；CIFTI 时间 r 均值 **0.977911**。初始化/旋转球面、脑沟标量和科学配置一致，当前这次完整链尚未逐值匹配。见[最新完整 surface 报告](../../validation/fmri/surface_e2e/README.md)；本页 `4f7bd9f2` 的固定输入专项结果保留其原实测范围。
+2026-10-02 的 `9f9f63e` 完整 surface 复测中，新版串行与旧版 `954ad19`、新版并行与新版串行的球面和全部 490 帧时序逐值相同。对独立官方单线程完整链，球面角差均值仍为左 **0.221050°**、右 **0.319595°**，CIFTI 时间 r 均值 **0.977911**。执行优化保持 FNIT 已有结果；这次独立完整链仍未逐值匹配官方。见[最新完整复测](../../validation/fmri/surface_gpu_parallel/README.md)；本页 `4f7bd9f2` 的固定输入专项结果保留其原实测范围。
 
 `fnit.msm` 提供独立的 MSMSulc、[MSMAll 多特征配准](msmall.md)和 [VN、DR/WRN 与特征准备](features.md)。本页介绍 MSMSulc：先按 newMSM 的有限差分规则估计刚性初始化，再用 162→642→2,562 个控制点优化脑沟相似度和三角形应变；HOCR 降阶与 FastPD 选择联合位移。输出球面保持原生顶点顺序。运行时不调用官方 MSM 或 FreeSurfer；准备阶段使用 Connectome Workbench。MSMAll 使用独立的 `MSMAllConfig` 与 `run_msmall`，默认 MSMSulc 调用保持原接口。
 
@@ -71,6 +71,8 @@ CUDA 并行时，左右模型和数组独立，各用一个 stream；所有 work
 
 CPU 运算保留在影响离散解的严格标量边界和文件处理处。GPU 最近邻与有序稀疏路径的实际收益按完整双侧复测记录，不从单个算子或启动两个 worker 推断整链加速。
 
+本轮还修复了两个共享子函数问题。`run_msmsulc` 和 MSMAll 原来逐侧重置全设备显存峰值，使调用方完整 API 统计失去前序峰值；当前统一保留调用方计数并写明 `peak_scope`。`_label_samples` 在没有非零位移标签时原返回形状 `(0,)`，后续拼接失败；现在空结果为 `(0,3)`，正常配置的标签数量、顺序与数值不变。空标签、CPU/GPU 和双侧执行控制已覆盖这些情况，真实完整复测记录见[本轮验证页](../../validation/fmri/surface_gpu_parallel/README.md)。
+
 离散迭代中的 DATA 和控制网格保留 newMSM 的展开处理。最后从 DATA 变形到原生球面后，按官方行为写出有限坐标，并分别报告求解坐标和实际 float32 GIFTI 的翻折数、最小方向比及输入退化面数。最终原生球面不再额外优化；使用前应检查这份质控报告。
 
 ### 配置参数
@@ -128,6 +130,25 @@ newmsm --inmesh=/absolute/path/work/msm-inputs/L.sphere_rot.surf.gii \
 
 ## 真实数据基准
 
+### 本轮完整 surface 内调用
+
+同一例已有 volume 和 recon-all/graymid、490 帧、TR 0.735 s、STC 关闭，三次均重新准备输入并估计双侧 MSMSulc。表中 MSM 时间**包含准备与配准**，完整 API 另含投影、CIFTI、QC 和最终保存；不包含前序 volume、recon-all、编译、包导入或 CUDA 初始化。
+
+| 同一真实输入 | 旧版 `954ad19` 串行 | 新版 `9f9f63e` 串行 | 新版 `9f9f63e` 并行 |
+|---|---:|---:|---:|
+| MSM 准备＋双侧配准 | 202.029 s | 116.361 s | **94.773 s** |
+| 完整 surface API，扣除捕获 | 436.245 s | 343.056 s | **243.695 s** |
+| 物理 H100 | 1 | 1 | 0 |
+| 完整 API 峰值 allocated，十进制 GB | 0.344 | 0.644 | 1.049 |
+
+局部 CPU 总预算为 8，并行时左右各 4；CUDA 上限 20 GB、TF32 开启。注册球面、左右 GIFTI 与 CIFTI 的全部数值，及有效科学配置和 21 结构轴/metadata，旧→新版串行、串行→并行均严格相同。卡号和共享负载不同，耗时是各一次完整观测。新版初次在 GPU 1 初始化失败，未进入 API；表中并行为 GPU 0 新目录的成功运行。实际报告、严格 native 编译 SHA、逐侧执行计数及官方差异见[完整验证页](../../validation/fmri/surface_gpu_parallel/README.md)，实测/发布的全部 116 个 runtime 文件另由[源码回溯](../../validation/fmri/surface_gpu_parallel/publication_runtime.public.json)逐项核验。
+
+### 共享 MSMAll 真实回归
+
+共享 MSMAll 另用同一真实 C 特征复测：旧版串行→新版并行，coarse 一级 **23.237→11.430 s**，refine 三级 **181.790→90.796 s**，两侧注册坐标/拓扑/GIFTI metadata 严格相同。四次均为 GPU 0、CPU 总预算 8，新版 allocated 峰值 **0.2194 / 1.4662 GB**；计时包含既有特征读取、配准和写盘，不含特征估计或 BOLD 投影。历史保存的单线程官方球面坐标/拓扑也相同，metadata 不同，且缺历史逐输入 SHA，仅作为保存结果回归。详细边界见[真实 MSMAll 配对](../../validation/fmri/surface_gpu_parallel/msmall_paired.public.json)。
+
+### 固定输入专项历史：`4f7bd9f2`
+
 同一例真实 UKB 的双侧初始球面、sulc、HCP 模板及完整四级配置用于双方。正式精度参照为 `fsl-newmsm 1.0 h442c261_5` 的单线程输出；同输入两次独立运行的左侧球面逐位相同。官方 8 线程耗时单列，其重复球面有差异。FNIT 使用 H100；球面角差按原生对应顶点计算，490 帧时间相关先逐灰质坐标计算 Pearson r，再取均值。
 
 最新球面、fsLR32k 时间序列、冷/热调用及 profile 汇总见 [MSM 验证页](../../validation/msm/README.md)。配准包含读取和球面/报告写盘，不包含 BOLD 投影、Python 导入与 CUDA 上下文初始化。volume 与 surface 的测量范围见 [验证汇总](../../validation/fmri/README.md)，各阶段时间单独记录。
@@ -153,8 +174,9 @@ newmsm --inmesh=/absolute/path/work/msm-inputs/L.sphere_rot.surf.gii \
 
 | 实测或更新 | 范围与记录 |
 |---|---|
+| `9f9f63e` GPU 重采样与双侧并行 | 严格最近邻证明、有序 GPU CSR、独立 stream 与原生 GIL 释放；完整 surface 的球面/490 帧时序保持旧版数值。MSM 准备＋配准串行/并行为 **116.361 / 94.773 s**，完整 API 为 **343.056 / 243.695 s**；两次物理 GPU 不同。修复调用方峰值统计和空标签形状，见[最新完整复测](../../validation/fmri/surface_gpu_parallel/README.md)。 |
 | `4f7bd9f2` 独立 MSMSulc | 修复缓存面积、浮点配置、刚性 WLS 和 Rodrigues 顺序；本例保存球面及固定 clean 时序逐值相同，见上表和[专项报告](../../validation/msm/current.public.json)。 |
-| `7102c187` 完整 surface | 重新准备几何、估计球面并投影 preproc；CIFTI 时间 r 均值 0.977911，范围包含完整 surface，见[最新完整报告](../../validation/fmri/surface_e2e/README.md)。 |
+| `7102c187` 完整 surface 历史 | 重新准备几何、估计球面并投影 preproc；CIFTI 时间 r 均值 0.977911，范围包含完整 surface，见[历史完整报告](../../validation/fmri/surface_e2e/README.md)。 |
 | 2026-10 MSMAll 扩展 | 新增独立 MSMAll、VN/DR/WRN 与 C/CA/CAT 特征准备；共享应变成本保留既有 MSMSulc 运算顺序。MSMAll 的真实 C 模式结果单独记录，以上测量保留原源码快照。 |
 
 ## 参考文献与原实现

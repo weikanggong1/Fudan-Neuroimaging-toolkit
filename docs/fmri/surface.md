@@ -205,6 +205,8 @@ MSMAll 模式另记录 `msmall_registration_and_native_composition` 耗时、实
 
 本轮评估了 GPU 最近邻与有序稀疏重采样，并保留严格标量和图优化边界。ribbon 的几何体素权重、测地最近邻填补及面积校正重采样仍使用 Workbench；新实现的完整耗时和精度由同输入 490 帧复测确定。
 
+开发并行入口时修复了成熟配准子函数的两项问题：逐侧重置 CUDA 统计会破坏完整 API 峰值，当前改为调用方统一统计；空位移标签原形状 `(0,)` 会使拼接失败，当前保留 `(0,3)`，默认标签及优化计算不变。修复说明同步到 [MSMSulc 子函数](../msm/README.md#左右并行与资源预算)，完整旧版/新版串行/新版并行记录见[本轮验证页](../../validation/fmri/surface_gpu_parallel/README.md)。
+
 默认球面遵循 HCP/sMRIPrep 的 `simval=3,2,2,2`、最大迭代数 `50,10,15,15`。`msm_config` 仅在估计球面时使用，不能与 `registered_spheres` 同时指定。独立用法及各配置参数见 [MSMSulc](../msm/README.md)。命令行可加 `--msm-config /absolute/path/MSMSulcStrainFinalconf` 和 `--msm-execution reference` 复测相同科学配置的执行路径。
 
 ### 可选 MSMAll 接续
@@ -305,37 +307,30 @@ fmriprep "$original_bids_root" "$reference_derivatives_root" participant \
 
 <a id="surface-e2e-latest"></a>
 
-### 优化前完整 surface：`7102c187` 历史基准
+### 当前完整 surface：GPU 重采样与双侧并行
 
-2026-10-01，冻结源码 `7102c187`，使用 `cfb7beee` 完整 volume 的 **490 帧 preproc**、TR 0.735 s，以及同源已有 FreeSurfer 7 重建和 graymid。FNIT 与原版从相同 T1w/MNI BOLD 开始，分别准备几何、皮层 ROI、FS→fsLR 初始化球面和 MSM 输入；各自重新估计双侧四级 MSMSulc，再生成对应面积表面、投影、CIFTI、QC 和最终文件。原版没有使用 FNIT 捕获的几何或球面。
+2026-10-02，冻结旧版 `954ad19` 和新版 `9f9f63e`，用同一例 `cfb7beee` 完整 volume 的 **490 帧 preproc**、TR 0.735 s、STC 关闭，以及同源已有 FreeSurfer 7 重建和 graymid，分别运行旧版串行、新版串行和新版并行。三次均使用新进程、新输出目录，`registered_spheres=None`、`signal="preproc"`、`msm_execution="optimized"`，完整重新准备几何/ROI、估计双侧四级 MSMSulc、生成面积表面，再投影、组装、检查和保存。
 
-计时从 surface 入口开始，包含身份核验、准备、双侧 MSM、全部 490 帧投影、组装和最终保存；**不含 recon-all、前序 volume、安装/编译、包导入和 CUDA 初始化**。FNIT 两次均为新进程、新输出目录，`registered_spheres=None`、`signal="preproc"`、`msm_execution="optimized"`。8 个 CPU 线程、共享 H100、TF32；没有启用 float16/bfloat16。
+外层 API 包含身份核验及最终文件保存，**不含前序 volume、recon-all、部署/编译、包导入和 CUDA 初始化**。局部 CPU 总预算 8、CUDA allocator 上限 20 GB、TF32 开启；没有使用 float16/bfloat16。
 
-| 连续完整链 | 实测墙钟 |
-|---|---:|
-| FNIT 第一次完整 API，含捕获及最终输出保存 | **443.929 s（7 分 23.93 秒）** |
-| FNIT 第二次完整 API，含捕获及最终输出保存 | **441.334 s（7 分 21.33 秒）** |
-| 验证捕获开销，第一次 / 第二次 | 0.03594 / 0.03738 s |
-| 扣除捕获的完整 API，第一次 / 第二次 | 443.893 / 441.297 s |
-| 原版完整链，MSM 严格单线程精度参照 | **2825.612 s（47 分 5.61 秒）** |
-| 原版完整链，MSM 8 线程速度观察 | **846.768 s（14 分 6.77 秒）** |
-| FNIT 峰值 CUDA allocated / reserved，十进制 GB | **0.344 / 0.426** |
+| 同一 490 帧输入 | 旧版 `954ad19` 串行 | 新版 `9f9f63e` 串行 | 新版 `9f9f63e` 并行 |
+|---|---:|---:|---:|
+| 物理 H100 | 1 | 1 | 0 |
+| 完整 API，含捕获及最终保存 | 436.282 s | 343.093 s | 243.729 s |
+| 验证输入捕获 | 0.03790 s | 0.03743 s | 0.03424 s |
+| 扣除捕获的完整 API | **436.245 s** | **343.056 s** | **243.695 s** |
+| MSM 准备＋双侧配准 | 202.029 s | 116.361 s | 94.773 s |
+| 双侧投影外层墙钟 | 原驱动未单列 | 190.136 s | 116.029 s |
+| CIFTI 组装 | 24.722 s | 21.935 s | 22.953 s |
+| 峰值 allocated / reserved，十进制 GB | 0.344 / 0.426 | 0.644 / 1.059 | 1.049 / 1.449 |
 
-原版的几何、投影和 CIFTI 使用 8 个 CPU 线程；上表的 1/8 线程仅改变 newMSM。严格精度使用单线程，8 线程结果仅列时间。原版连续 worker 时间包含其输入/输出检查和哈希；容器启动另为 2838.953 / 860.102 s，详见原始报告。共享 GPU 和并发 CPU 任务的负载已记录，不将这些观测推广为固定加速比。
+新版串行对旧版、并行对新版串行的七项门禁全部通过：注册球面、独立准备的几何/ROI、左右 `490×32,492` GIFTI 和完整 `490×91,282` CIFTI 解码数值逐值相同，最大绝对误差与 RMSE 均为 0。全部 11 个最终输出、float32/有限值、TR、时间轴、21 结构、内嵌 metadata 与有效科学配置通过检查。GIFTI 的临时来源 metadata 可以不同，文件 SHA 与数据精度分别记录。
 
-| 第一次 FNIT 内部阶段 | 秒 |
-|---|---:|
-| MSM 输入准备＋双侧配准 | 205.609 |
-| 左 / 右 ribbon 投影 | 28.665 / 28.581 |
-| 左 / 右 10 mm dilate | 36.877 / 37.069 |
-| 左 / 右 native mask | 17.850 / 18.140 |
-| 左 / 右 ADAP_BARY_AREA | 10.373 / 10.574 |
-| 左 / 右 atlas mask | 4.647 / 4.659 |
-| CIFTI 组装 | 25.263 |
-
-内部阶段是嵌套计时，最终 JSON 和发布边界不同；完整耗时取外层 API 墙钟，不能用各行相加替代。两次最终 GIFTI 解码时序、CIFTI 和注册球面逐值相同；GIFTI XML 的临时路径来源不同，文件 SHA 不同。全部 11 个持久输出通过检查：每侧 490×32,492、CIFTI 490×91,282，float32、全部有限、TR 0.735 s。
+内部阶段是嵌套计时，不能相加替代完整 API；MSM 行包含准备，不能当作独立配准函数计时。新版并行最初在 GPU 1 的 CUDA 初始化阶段失败，尚未进入 API；表中为 GPU 0 新目录的成功运行。三次共享负载和物理卡不同，耗时仅为各一次完整观测。详见[本轮完整验证、源码与编译证明](../../validation/fmri/surface_gpu_parallel/README.md)、[旧版 API](../../validation/fmri/surface_gpu_parallel/baseline.public.json)、[新版串行 API](../../validation/fmri/surface_gpu_parallel/serial.public.json)、[新版并行 API](../../validation/fmri/surface_gpu_parallel/parallel.public.json)、[串行对基线](../../validation/fmri/surface_gpu_parallel/serial_vs_baseline.public.json)和[并行对串行](../../validation/fmri/surface_gpu_parallel/parallel_vs_serial.public.json)。[发布回溯](../../validation/fmri/surface_gpu_parallel/publication_runtime.public.json)另核对全部 116 个实测 runtime 文件和驱动与发布工作树一致。
 
 ### 独立完整 surface 的全帧精度
+
+新版并行对照已有的 **fMRIPrep 25.2.4 / sMRIPrep 0.19.2 / newMSM 严格单线程**完整 surface 输出；双方从相同 T1w/MNI BOLD 和重建开始，分别准备几何、皮层 ROI、FS→fsLR 初始化球面及 MSM 输入，再独立估计球面并投影。官方没有使用 FNIT 捕获的几何或球面，本轮核对并复用其已完成输出，不重新运行官方。
 
 不拟合强度尺度、偏移或追加平滑，比较全部数值；时间 r 在每个非恒定灰坐标内用全部 490 帧计算。CIFTI 的 91,282 个灰坐标中，双方各有 1 条相同的恒定时序，91,281 对参与 r；恒定时序仍参与逐值误差。GIFTI r 排除 medial wall 的零序列，所有 32,492 顶点仍参与误差。
 
@@ -353,9 +348,13 @@ fmriprep "$original_bids_root" "$reference_derivatives_root" participant \
 | 顶点弦差 mean / max，mm | 0.385805 / 1.660517 | 0.557797 / 2.494671 |
 | 保存球面翻折面数，FNIT / 原版 | 2 / 4 | 2 / 2 |
 
-双方原生拓扑、初始化/旋转球面、native sulc、参考球面/参考 sulc 数值、ROI 和有效四级配置相同。native sulc 的 GIFTI intent 为 2005/11，保存方式不同，标量值完全一致。独立 white/pial/midthickness scanner-RAS 转换最大坐标差为 **8.53e-6 mm**；经各自注册球面生成的 32k 面积表面最大顶点差为左 2.694、右 2.823 mm。当前运行定位到球面估计及其下游皮层差异，尚未确定配准差异的内部原因；不能用历史固定输入的零误差替代本轮结果。
+双方原生拓扑、初始化/旋转球面、native sulc、参考球面/参考 sulc 数值、ROI 和有效四级配置相同。native sulc 的 GIFTI intent 为 2005/11，保存方式不同，标量值完全一致。独立 white/pial/midthickness scanner-RAS 转换最大坐标差为 **8.53e-6 mm**；经各自注册球面生成的 32k 面积表面最大顶点差为左 2.694、右 2.823 mm。新执行路径保持 FNIT 旧结果，独立官方的球面及皮层差异仍保留；本轮没有更改这项差异的算法。
 
-[完整复测说明与命令](../../validation/fmri/surface_e2e/README.md) · [全帧精度及 21 结构统计](../../validation/fmri/surface_e2e/precision.public.json) · [第一次 API](../../validation/fmri/surface_e2e/fnit_run1.public.json) · [第二次 API](../../validation/fmri/surface_e2e/fnit_run2.public.json) · [原版单线程参照](../../validation/fmri/surface_e2e/reference_strict1.public.json) · [原版 8 线程时间](../../validation/fmri/surface_e2e/reference_speed8.public.json) · [重复运行检查](../../validation/fmri/surface_e2e/repeatability.public.json)。公开源码哈希与实际编译器/扩展 SHA 保存在这些报告及[编译记录](../../validation/fmri/surface_e2e/build_provenance.public.json)，本次没有修改 FNIT 运行算法。
+[本次新版对官方的全帧聚合](../../validation/fmri/surface_gpu_parallel/parallel_vs_official_strict1.public.json)记录全部数值、21 结构、球面角差和独立准备产物。官方原始连续 worker 为 **2825.612 s**，其几何/投影/CIFTI 使用 8 线程、newMSM 使用单线程，包含输入/输出检查和哈希；容器启动另计。该已完成测量保留原边界，不合成原始 BIDS→CIFTI 时间，见[官方严格参照](../../validation/fmri/surface_e2e/reference_strict1.public.json)。
+
+### 优化前完整 surface：`7102c187` 历史基准
+
+2026-10-01 的两次完整 API 为 **443.929 / 441.334 s**（含捕获与最终保存），峰值 allocated/reserved 为 **0.344 / 0.426 GB**；使用相同 `cfb7beee` volume、已有重建和完整四级配置，两次解码球面/GIFTI/CIFTI 相同。独立官方完整链的 CIFTI 时间 r 均值为 **0.977911**；官方严格单线程/8 线程 worker 耗时为 **2825.612 / 846.768 s**，8 线程仅用于时间观察。各阶段及来源保留在[历史完整复测](../../validation/fmri/surface_e2e/README.md)、[历史全帧精度](../../validation/fmri/surface_e2e/precision.public.json)和[重复运行检查](../../validation/fmri/surface_e2e/repeatability.public.json)。
 
 ### 已公开的 `7102c187` 全帧脑图
 
@@ -416,6 +415,8 @@ fmriprep "$original_bids_root" "$reference_derivatives_root" participant \
 
 ### 可选 MSMAll：真实连接特征与固定投影
 
+本轮共享核心用相同真实 C 特征复测旧版串行与新版并行：MSMAll coarse 一级为 **23.237→11.430 s**，refine 三级为 **181.790→90.796 s**；两侧球面坐标、拓扑和 GIFTI metadata 严格相同。四次均为 GPU 0/CPU 总预算 8，新版 allocated 峰值为 **0.2194 / 1.4662 GB**，计时仅含既有特征读取、配准与写盘。对历史保存的官方球面，坐标/拓扑相同、metadata 不同；历史输入 SHA 未逐项保存，仅作保存结果回归。来源与准确边界见[共享 MSMAll 配对](../../validation/fmri/surface_gpu_parallel/msmall_paired.public.json)。以下保留独立 MSMAll 功能的原版验收范围。
+
 本次用真实已清理 CIFTI 生成双侧各 33 列 WRN `C` 特征，分别验收固定 HCP 一级 coarse 与三级 refine 配置。同一 source/reference 球面、特征、权重与初始变形下，双方保存的左右球面逐值相同，角差和弦长差均为 0，实际 float32 球面均无翻折。FNIT H100 冷/热双侧配准为 **20.31/20.39 s**、**167.72/166.63 s**，官方单 CPU 线程分别为 **105.02 s**、**2,155.63 s**；峰值 allocated 为 **0.095/1.213 GB**。这两项是独立配置测量，不是 HCP `CA_CAT` 的外层全流程。
 
 各套 32k 变形合成到同一原生 MSMSulc 球面，分别建立面积表面，再将相同固定 BOLD 投影为 490×91,282 CIFTI。两配置全部值的 MAE 和最大差均为 **0**；左、右及全部有效灰质点的跨时间 Pearson 均值均为 **1**，时间轴与 BrainModel 轴相同。FNIT 球面投影为 **345.12/344.73 s**，官方球面投影为 **346.39/340.31 s**，均使用相同 Workbench。配准时间排除投影，投影排除几何与 volume 准备；本次未重新执行 raw BIDS 到 CIFTI 的整条 pipeline。完整覆盖、各级时间及来源哈希见 [MSMAll 匿名汇总](../../validation/msm/msmall.current.public.json)与[功能页](../msm/msmall.md)。
@@ -439,12 +440,13 @@ fmriprep "$original_bids_root" "$reference_derivatives_root" participant \
 
 ![已公开历史FNIT clean与UKB FIX MSMAll release的MS-HBM17网络对照](../mshbm/figures/mshbm_surface_release.png)
 
-图的公开来源与 SHA-256 见[脑图清单](../../validation/fmri/fmriprep/published_comparison_figures.public.json)。历史图保持原协议；最新完整 surface 脑图见本节开头。
+图的公开来源与 SHA-256 见[脑图清单](../../validation/fmri/fmriprep/published_comparison_figures.public.json)。历史图保持原协议；已公开的 `7102c187` 完整 surface 脑图见本节前文。本轮 GPU/并行复测只发布聚合指标和验证报告。
 
 ## 最近版本与 benchmark 记录
 
 | 源码 / 报告快照 | 变化、实际测量与记录 |
 |---|---|
+| `9f9f63e` GPU 重采样与左右并行 | 严格最近邻证明、有序 CSR 与独立双侧 stream；旧版串行/新版串行/新版并行完整 API 为 **436.245 / 343.056 / 243.695 s**（扣除捕获），球面和全部 490 帧时序严格相同。保留严格 CPU 标量与 Workbench 投影，修复共享峰值计数及空标签形状；不同物理卡、各一次观测，见[本轮验证](../../validation/fmri/surface_gpu_parallel/README.md)。 |
 | `3940a72` | STC 开启的 volume 与固定输入投影，见[ON 历史](../../validation/fmri/HISTORY_20261001_STCON_PREPROC.md)。 |
 | `c3c921cc` / `bac3c395` | NFS 暂存 CIFTI 的 mapping 导致清理 `EBUSY`，改为非映射读取并关闭句柄后通过完整 API；数值定义保持，见[OFF 历史](../../validation/fmri/HISTORY_20261001_STCOFF_PREPROC.md)。 |
 | `50eb098` / `ca3df003` | volume 增加 preproc；surface 修复外部 BIDS T1w 符号链接来源路径。完整 surface API **234.313 s**，固定实际输入投影逐值同；未估计 MSM。见[API 报告](../../validation/fmri/fmriprep/surface_stcoff_ca3df003.public.json)。 |

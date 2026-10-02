@@ -1,0 +1,1948 @@
+{
+  "schema_version": 1,
+  "validation_complete": true,
+  "scope": "Independent surface end-to-end chains from identical completed T1w/MNI preproc BOLD and existing recon-all. Includes independent geometry/ROI preparation, fresh full-schedule MSMSulc, registered area surfaces, cortical projection, subcortical resampling and CIFTI assembly; excludes recon-all and all volume processing.",
+  "comparison_script_sha256": "4baa56932f049cee9df50b352a0cb1655353dda0d580708d26eeba41778fdb92",
+  "frames": 490,
+  "tr_seconds": 0.735,
+  "comparison_support_sha256": {
+    "run_projection_candidate.py": "52c3fdc8d8cd97ee5cfb635a27d60cb63bca5e28741c607b46a32e43c1cab195",
+    "benchmark_msmsulc.py": "ebefb788bf7e7ffb72f3c4678d99c478fa4e8a3264855bf858bc4ec6e494d033",
+    "msm_config.py": "20afadd2860c2782fa3983f56d1351e31a56e415f75761798223ad455335e8c9"
+  },
+  "candidate_source_revision": "9f9f63e95b4ee702e4c3024407496df47a851631",
+  "startpoints": {
+    "t1w_preproc": {
+      "sha256": "25237075304f996aa7ac3700df68158240edbc5086b951f64a228f93ae0ca7b8",
+      "exact": true,
+      "shape": [
+        59,
+        75,
+        64,
+        490
+      ]
+    },
+    "mni_preproc": {
+      "sha256": "864a6ab19814789216a0cea99786accb012996184a72081aaa7975985a5f33af",
+      "exact": true,
+      "shape": [
+        91,
+        109,
+        91,
+        490
+      ]
+    }
+  },
+  "registration_configuration": {
+    "effective_scientific_schedule_equal": true,
+    "effective_configuration": {
+      "affine_gradient_spacing": 0.5,
+      "affine_step_size": 0.009999999776482582,
+      "bulk_modulus": 1.600000023841858,
+      "control_grid": [
+        6,
+        2,
+        3,
+        4
+      ],
+      "data_grid": [
+        6,
+        4,
+        5,
+        6
+      ],
+      "iterations": [
+        50,
+        10,
+        15,
+        15
+      ],
+      "regularization": [
+        0.0,
+        10.0,
+        7.5,
+        7.5
+      ],
+      "regularization_exponent": 2.0,
+      "sampling_grid": [
+        6,
+        4,
+        5,
+        6
+      ],
+      "shear_modulus": 0.4000000059604645,
+      "simval": [
+        3,
+        2,
+        2,
+        2
+      ],
+      "strain_exponent": 2.0
+    },
+    "reference_kind": "independently executed FNIT chain",
+    "effective_configuration_canonical_sha256": "4d4e5ede7d1c4a759b3ae6b10851964563399332cd5f14cb7975386d7b967c14",
+    "threads_are_execution_setting": true
+  },
+  "temporal_correlation_definition": "Pearson r across all 490 frames separately for each grayordinate; summarize finite nonconstant pairs. Exact identical varying series are set to r=1; constant-series r is undefined and excluded.",
+  "geometry_preparation": {
+    "white": {
+      "L": {
+        "candidate_sha256": "133abc3d4bef4f79ebe452412de74c5e2662910f6210fc2b045f8c9e94ced839",
+        "reference_sha256": "133abc3d4bef4f79ebe452412de74c5e2662910f6210fc2b045f8c9e94ced839",
+        "independent_prepared_file_paths": true,
+        "independent_prepared_inodes": true,
+        "image_metadata_equal": true,
+        "array_intents_equal": true,
+        "array_shapes_equal": true,
+        "arrays": [
+          {
+            "intent": 1008,
+            "reference_intent": 1008,
+            "shape": [
+              120035,
+              3
+            ],
+            "values": 360105,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "coordinate_system_equal": true,
+            "coordinate_difference_mm": {
+              "mean": 0.0,
+              "maximum": 0.0
+            }
+          },
+          {
+            "intent": 1009,
+            "reference_intent": 1009,
+            "shape": [
+              240066,
+              3
+            ],
+            "values": 720198,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "triangles_exact": true
+          }
+        ],
+        "scalar_metric_intent_difference_allowed": false,
+        "decoded_arrays_exact": true
+      },
+      "R": {
+        "candidate_sha256": "0f7c94c2e7c754e5980d1d6a2512ae61c722e077539c70d1b2edc0cb931441a9",
+        "reference_sha256": "0f7c94c2e7c754e5980d1d6a2512ae61c722e077539c70d1b2edc0cb931441a9",
+        "independent_prepared_file_paths": true,
+        "independent_prepared_inodes": true,
+        "image_metadata_equal": true,
+        "array_intents_equal": true,
+        "array_shapes_equal": true,
+        "arrays": [
+          {
+            "intent": 1008,
+            "reference_intent": 1008,
+            "shape": [
+              122950,
+              3
+            ],
+            "values": 368850,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "coordinate_system_equal": true,
+            "coordinate_difference_mm": {
+              "mean": 0.0,
+              "maximum": 0.0
+            }
+          },
+          {
+            "intent": 1009,
+            "reference_intent": 1009,
+            "shape": [
+              245896,
+              3
+            ],
+            "values": 737688,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "triangles_exact": true
+          }
+        ],
+        "scalar_metric_intent_difference_allowed": false,
+        "decoded_arrays_exact": true
+      }
+    },
+    "pial": {
+      "L": {
+        "candidate_sha256": "6e341fe093ec93cc9b87112939c4cf6f5b4129f98068b9a0be1cf1555db5054f",
+        "reference_sha256": "6e341fe093ec93cc9b87112939c4cf6f5b4129f98068b9a0be1cf1555db5054f",
+        "independent_prepared_file_paths": true,
+        "independent_prepared_inodes": true,
+        "image_metadata_equal": true,
+        "array_intents_equal": true,
+        "array_shapes_equal": true,
+        "arrays": [
+          {
+            "intent": 1008,
+            "reference_intent": 1008,
+            "shape": [
+              120035,
+              3
+            ],
+            "values": 360105,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "coordinate_system_equal": true,
+            "coordinate_difference_mm": {
+              "mean": 0.0,
+              "maximum": 0.0
+            }
+          },
+          {
+            "intent": 1009,
+            "reference_intent": 1009,
+            "shape": [
+              240066,
+              3
+            ],
+            "values": 720198,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "triangles_exact": true
+          }
+        ],
+        "scalar_metric_intent_difference_allowed": false,
+        "decoded_arrays_exact": true
+      },
+      "R": {
+        "candidate_sha256": "cbce8a2eb6aac463b21265fa816170b199e94c77fcda41fb7459dbd767ede196",
+        "reference_sha256": "cbce8a2eb6aac463b21265fa816170b199e94c77fcda41fb7459dbd767ede196",
+        "independent_prepared_file_paths": true,
+        "independent_prepared_inodes": true,
+        "image_metadata_equal": true,
+        "array_intents_equal": true,
+        "array_shapes_equal": true,
+        "arrays": [
+          {
+            "intent": 1008,
+            "reference_intent": 1008,
+            "shape": [
+              122950,
+              3
+            ],
+            "values": 368850,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "coordinate_system_equal": true,
+            "coordinate_difference_mm": {
+              "mean": 0.0,
+              "maximum": 0.0
+            }
+          },
+          {
+            "intent": 1009,
+            "reference_intent": 1009,
+            "shape": [
+              245896,
+              3
+            ],
+            "values": 737688,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "triangles_exact": true
+          }
+        ],
+        "scalar_metric_intent_difference_allowed": false,
+        "decoded_arrays_exact": true
+      }
+    },
+    "midthickness": {
+      "L": {
+        "candidate_sha256": "5d707bc85fb608961ae45e22d409039ba94e2bed1a9f3188ccd58a6aec3d35f1",
+        "reference_sha256": "5d707bc85fb608961ae45e22d409039ba94e2bed1a9f3188ccd58a6aec3d35f1",
+        "independent_prepared_file_paths": true,
+        "independent_prepared_inodes": true,
+        "image_metadata_equal": true,
+        "array_intents_equal": true,
+        "array_shapes_equal": true,
+        "arrays": [
+          {
+            "intent": 1008,
+            "reference_intent": 1008,
+            "shape": [
+              120035,
+              3
+            ],
+            "values": 360105,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "coordinate_system_equal": true,
+            "coordinate_difference_mm": {
+              "mean": 0.0,
+              "maximum": 0.0
+            }
+          },
+          {
+            "intent": 1009,
+            "reference_intent": 1009,
+            "shape": [
+              240066,
+              3
+            ],
+            "values": 720198,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "triangles_exact": true
+          }
+        ],
+        "scalar_metric_intent_difference_allowed": false,
+        "decoded_arrays_exact": true
+      },
+      "R": {
+        "candidate_sha256": "433c416714c454ee292c59cc16b6bfdab7ecc5e8df4e7cf05a37960892d2112a",
+        "reference_sha256": "433c416714c454ee292c59cc16b6bfdab7ecc5e8df4e7cf05a37960892d2112a",
+        "independent_prepared_file_paths": true,
+        "independent_prepared_inodes": true,
+        "image_metadata_equal": true,
+        "array_intents_equal": true,
+        "array_shapes_equal": true,
+        "arrays": [
+          {
+            "intent": 1008,
+            "reference_intent": 1008,
+            "shape": [
+              122950,
+              3
+            ],
+            "values": 368850,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "coordinate_system_equal": true,
+            "coordinate_difference_mm": {
+              "mean": 0.0,
+              "maximum": 0.0
+            }
+          },
+          {
+            "intent": 1009,
+            "reference_intent": 1009,
+            "shape": [
+              245896,
+              3
+            ],
+            "values": 737688,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "triangles_exact": true
+          }
+        ],
+        "scalar_metric_intent_difference_allowed": false,
+        "decoded_arrays_exact": true
+      }
+    },
+    "native_rois": {
+      "L": {
+        "candidate_sha256": "60b1aa016fc436524bd4b2e9b05d5dccf213cee50b725fcdebaccf6156d82679",
+        "reference_sha256": "42c30809914919a2ee9e00556325977752dabf77844b035e69eaa987f65d3b15",
+        "independent_prepared_file_paths": true,
+        "independent_prepared_inodes": true,
+        "image_metadata_equal": false,
+        "array_intents_equal": true,
+        "array_shapes_equal": true,
+        "arrays": [
+          {
+            "intent": 11,
+            "reference_intent": 11,
+            "shape": [
+              120035
+            ],
+            "values": 120035,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true
+          }
+        ],
+        "scalar_metric_intent_difference_allowed": false,
+        "decoded_arrays_exact": true
+      },
+      "R": {
+        "candidate_sha256": "406037b8c8bb20af12e11a67405e40f41170f81bb3e96894c03cb809167943d2",
+        "reference_sha256": "c73ece03dc21900c1746dea114b93321ff22a2ccc35e8a79b637b84ba0a5770f",
+        "independent_prepared_file_paths": true,
+        "independent_prepared_inodes": true,
+        "image_metadata_equal": false,
+        "array_intents_equal": true,
+        "array_shapes_equal": true,
+        "arrays": [
+          {
+            "intent": 11,
+            "reference_intent": 11,
+            "shape": [
+              122950
+            ],
+            "values": 122950,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true
+          }
+        ],
+        "scalar_metric_intent_difference_allowed": false,
+        "decoded_arrays_exact": true
+      }
+    },
+    "initial_spheres": {
+      "L": {
+        "candidate_sha256": "9f6a559982f421da91fa3baa3d749ef3e843266c7a8eacb620fb1a322e4cd657",
+        "reference_sha256": "1733bb7fd19fb0b0f67ba05464ee1d0d792762a8b5056b68e266cbf403e702db",
+        "independent_prepared_file_paths": true,
+        "independent_prepared_inodes": true,
+        "image_metadata_equal": false,
+        "array_intents_equal": true,
+        "array_shapes_equal": true,
+        "arrays": [
+          {
+            "intent": 1008,
+            "reference_intent": 1008,
+            "shape": [
+              120035,
+              3
+            ],
+            "values": 360105,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "coordinate_system_equal": true,
+            "coordinate_difference_mm": {
+              "mean": 0.0,
+              "maximum": 0.0
+            }
+          },
+          {
+            "intent": 1009,
+            "reference_intent": 1009,
+            "shape": [
+              240066,
+              3
+            ],
+            "values": 720198,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "triangles_exact": true
+          }
+        ],
+        "scalar_metric_intent_difference_allowed": false,
+        "decoded_arrays_exact": true
+      },
+      "R": {
+        "candidate_sha256": "9342779015caafce6430908b8be7fcaacf8ff6bc068f8746b1d6dfeb094d26b3",
+        "reference_sha256": "aa6b25b1a5b5c2c6abbedb85db8f87f35b901ba2aaaa85960026ddc7c3e5ec3d",
+        "independent_prepared_file_paths": true,
+        "independent_prepared_inodes": true,
+        "image_metadata_equal": false,
+        "array_intents_equal": true,
+        "array_shapes_equal": true,
+        "arrays": [
+          {
+            "intent": 1008,
+            "reference_intent": 1008,
+            "shape": [
+              122950,
+              3
+            ],
+            "values": 368850,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "coordinate_system_equal": true,
+            "coordinate_difference_mm": {
+              "mean": 0.0,
+              "maximum": 0.0
+            }
+          },
+          {
+            "intent": 1009,
+            "reference_intent": 1009,
+            "shape": [
+              245896,
+              3
+            ],
+            "values": 737688,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "triangles_exact": true
+          }
+        ],
+        "scalar_metric_intent_difference_allowed": false,
+        "decoded_arrays_exact": true
+      }
+    },
+    "area_native": {
+      "L": {
+        "candidate_sha256": "5d707bc85fb608961ae45e22d409039ba94e2bed1a9f3188ccd58a6aec3d35f1",
+        "reference_sha256": "5d707bc85fb608961ae45e22d409039ba94e2bed1a9f3188ccd58a6aec3d35f1",
+        "independent_prepared_file_paths": true,
+        "independent_prepared_inodes": true,
+        "image_metadata_equal": true,
+        "array_intents_equal": true,
+        "array_shapes_equal": true,
+        "arrays": [
+          {
+            "intent": 1008,
+            "reference_intent": 1008,
+            "shape": [
+              120035,
+              3
+            ],
+            "values": 360105,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "coordinate_system_equal": true,
+            "coordinate_difference_mm": {
+              "mean": 0.0,
+              "maximum": 0.0
+            }
+          },
+          {
+            "intent": 1009,
+            "reference_intent": 1009,
+            "shape": [
+              240066,
+              3
+            ],
+            "values": 720198,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "triangles_exact": true
+          }
+        ],
+        "scalar_metric_intent_difference_allowed": false,
+        "decoded_arrays_exact": true
+      },
+      "R": {
+        "candidate_sha256": "433c416714c454ee292c59cc16b6bfdab7ecc5e8df4e7cf05a37960892d2112a",
+        "reference_sha256": "433c416714c454ee292c59cc16b6bfdab7ecc5e8df4e7cf05a37960892d2112a",
+        "independent_prepared_file_paths": true,
+        "independent_prepared_inodes": true,
+        "image_metadata_equal": true,
+        "array_intents_equal": true,
+        "array_shapes_equal": true,
+        "arrays": [
+          {
+            "intent": 1008,
+            "reference_intent": 1008,
+            "shape": [
+              122950,
+              3
+            ],
+            "values": 368850,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "coordinate_system_equal": true,
+            "coordinate_difference_mm": {
+              "mean": 0.0,
+              "maximum": 0.0
+            }
+          },
+          {
+            "intent": 1009,
+            "reference_intent": 1009,
+            "shape": [
+              245896,
+              3
+            ],
+            "values": 737688,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "triangles_exact": true
+          }
+        ],
+        "scalar_metric_intent_difference_allowed": false,
+        "decoded_arrays_exact": true
+      }
+    },
+    "area_fsLR": {
+      "L": {
+        "candidate_sha256": "b555e87316782dec836e71893bce4df52689b2bd318b1e600eaa594df47cf05d",
+        "reference_sha256": "22862ab4d6c224ba21fced43b47e0e9ea819b6cf5d62d70ce673eacf8c6e2549",
+        "independent_prepared_file_paths": true,
+        "independent_prepared_inodes": true,
+        "image_metadata_equal": false,
+        "array_intents_equal": true,
+        "array_shapes_equal": true,
+        "arrays": [
+          {
+            "intent": 1008,
+            "reference_intent": 1008,
+            "shape": [
+              32492,
+              3
+            ],
+            "values": 97476,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "coordinate_system_equal": true,
+            "coordinate_difference_mm": {
+              "mean": 0.0,
+              "maximum": 0.0
+            }
+          },
+          {
+            "intent": 1009,
+            "reference_intent": 1009,
+            "shape": [
+              64980,
+              3
+            ],
+            "values": 194940,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "triangles_exact": true
+          }
+        ],
+        "scalar_metric_intent_difference_allowed": false,
+        "decoded_arrays_exact": true
+      },
+      "R": {
+        "candidate_sha256": "2bc7018e2aef59e2ffa35e7849f2c8a5f8154278f494aa06c5ac083a3b3593d1",
+        "reference_sha256": "ceb034cba808b89da7a36fce7c57a273ba95eae7ff63b787945ad25044aebfba",
+        "independent_prepared_file_paths": true,
+        "independent_prepared_inodes": true,
+        "image_metadata_equal": false,
+        "array_intents_equal": true,
+        "array_shapes_equal": true,
+        "arrays": [
+          {
+            "intent": 1008,
+            "reference_intent": 1008,
+            "shape": [
+              32492,
+              3
+            ],
+            "values": 97476,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "coordinate_system_equal": true,
+            "coordinate_difference_mm": {
+              "mean": 0.0,
+              "maximum": 0.0
+            }
+          },
+          {
+            "intent": 1009,
+            "reference_intent": 1009,
+            "shape": [
+              64980,
+              3
+            ],
+            "values": 194940,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "triangles_exact": true
+          }
+        ],
+        "scalar_metric_intent_difference_allowed": false,
+        "decoded_arrays_exact": true
+      }
+    }
+  },
+  "registered_spheres": {
+    "L": {
+      "native_topology_exact": true,
+      "vertices": 120035,
+      "faces": 240066,
+      "sphere_angle_deg": {
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "maximum": 0.0
+      },
+      "chord_difference_mm": {
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "maximum": 0.0
+      },
+      "radius_mm": {
+        "mean": 100.00000000432775,
+        "median": 100.00000000025561,
+        "p95": 100.00000315517259,
+        "maximum": 100.00000528673654
+      },
+      "fnit_folded_faces": 2,
+      "official_folded_faces": 2,
+      "decoded_coordinates": {
+        "candidate_sha256": "9c100ba2897aff5d4c4b9047e2347c165cfe344c9b79e497d9efe30a627c20b0",
+        "reference_sha256": "9c100ba2897aff5d4c4b9047e2347c165cfe344c9b79e497d9efe30a627c20b0",
+        "independent_prepared_file_paths": true,
+        "independent_prepared_inodes": true,
+        "image_metadata_equal": true,
+        "array_intents_equal": true,
+        "array_shapes_equal": true,
+        "arrays": [
+          {
+            "intent": 1008,
+            "reference_intent": 1008,
+            "shape": [
+              120035,
+              3
+            ],
+            "values": 360105,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "coordinate_system_equal": true,
+            "coordinate_difference_mm": {
+              "mean": 0.0,
+              "maximum": 0.0
+            }
+          },
+          {
+            "intent": 1009,
+            "reference_intent": 1009,
+            "shape": [
+              240066,
+              3
+            ],
+            "values": 720198,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "triangles_exact": true
+          }
+        ],
+        "scalar_metric_intent_difference_allowed": false,
+        "decoded_arrays_exact": true
+      }
+    },
+    "R": {
+      "native_topology_exact": true,
+      "vertices": 122950,
+      "faces": 245896,
+      "sphere_angle_deg": {
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "maximum": 0.0
+      },
+      "chord_difference_mm": {
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "maximum": 0.0
+      },
+      "radius_mm": {
+        "mean": 100.00000000492045,
+        "median": 100.00000000743279,
+        "p95": 100.00000316585525,
+        "maximum": 100.00000529908337
+      },
+      "fnit_folded_faces": 2,
+      "official_folded_faces": 2,
+      "decoded_coordinates": {
+        "candidate_sha256": "d984302ad57b66b769cf3ec1ccfffa3d67b76eb7676b0b552d7e1db10357cac5",
+        "reference_sha256": "d984302ad57b66b769cf3ec1ccfffa3d67b76eb7676b0b552d7e1db10357cac5",
+        "independent_prepared_file_paths": true,
+        "independent_prepared_inodes": true,
+        "image_metadata_equal": true,
+        "array_intents_equal": true,
+        "array_shapes_equal": true,
+        "arrays": [
+          {
+            "intent": 1008,
+            "reference_intent": 1008,
+            "shape": [
+              122950,
+              3
+            ],
+            "values": 368850,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "coordinate_system_equal": true,
+            "coordinate_difference_mm": {
+              "mean": 0.0,
+              "maximum": 0.0
+            }
+          },
+          {
+            "intent": 1009,
+            "reference_intent": 1009,
+            "shape": [
+              245896,
+              3
+            ],
+            "values": 737688,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "triangles_exact": true
+          }
+        ],
+        "scalar_metric_intent_difference_allowed": false,
+        "decoded_arrays_exact": true
+      }
+    }
+  },
+  "outputs": {
+    "L": {
+      "candidate_sha256": "0510a1dbab73ac98653f1883dbebe8d148bb867c36d2d9193baf5459740eff12",
+      "reference_sha256": "72268414eebb7af0aac4094a905143397cac7cf21bb47c5e51b75d70247b3dbb",
+      "shape": [
+        490,
+        32492
+      ],
+      "values": 15921080,
+      "nonfinite_values": 0,
+      "values_exact": true,
+      "differing_values": 0,
+      "maximum_absolute_error": 0.0,
+      "mean_absolute_error": 0.0,
+      "rmse": 0.0,
+      "relative_rmse": 0.0,
+      "pearson_r": 1.0,
+      "temporal": {
+        "valid_nonconstant_pairs": 29695,
+        "candidate_constant_timeseries": 2797,
+        "reference_constant_timeseries": 2797,
+        "both_constant_timeseries": 2797,
+        "one_side_constant_timeseries": 0,
+        "mean_temporal_r": 1.0,
+        "median_temporal_r": 1.0,
+        "p95_temporal_r": 1.0,
+        "minimum_temporal_r": 1.0,
+        "vertices": 32492,
+        "sample_space": "all 32,492 vertices, including medial-wall zero series"
+      }
+    },
+    "R": {
+      "candidate_sha256": "9a7af5ac3dd40f25475b519849dc1a306ca6253f4bbe5678ea30608580418e42",
+      "reference_sha256": "1741f50c77a1cf04a97e4d8dc6088990f0e5b3cad8aaca376fd4268f7bbfe6e8",
+      "shape": [
+        490,
+        32492
+      ],
+      "values": 15921080,
+      "nonfinite_values": 0,
+      "values_exact": true,
+      "differing_values": 0,
+      "maximum_absolute_error": 0.0,
+      "mean_absolute_error": 0.0,
+      "rmse": 0.0,
+      "relative_rmse": 0.0,
+      "pearson_r": 1.0,
+      "temporal": {
+        "valid_nonconstant_pairs": 29716,
+        "candidate_constant_timeseries": 2776,
+        "reference_constant_timeseries": 2776,
+        "both_constant_timeseries": 2776,
+        "one_side_constant_timeseries": 0,
+        "mean_temporal_r": 1.0,
+        "median_temporal_r": 1.0,
+        "p95_temporal_r": 1.0,
+        "minimum_temporal_r": 1.0,
+        "vertices": 32492,
+        "sample_space": "all 32,492 vertices, including medial-wall zero series"
+      }
+    },
+    "CIFTI": {
+      "candidate_sha256": "ab088021becdd5ffad524202b336d19036b44e6f81ebdf11a84940e1ebbfed2b",
+      "reference_sha256": "ab088021becdd5ffad524202b336d19036b44e6f81ebdf11a84940e1ebbfed2b",
+      "shape": [
+        490,
+        91282
+      ],
+      "time_axis_equal": true,
+      "brain_model_axis_equal": true,
+      "embedded_metadata_equal": true,
+      "start_seconds": 0.0,
+      "tr_seconds": 0.735,
+      "candidate_varying_grayordinates": 91281,
+      "reference_varying_grayordinates": 91281,
+      "values": 44728180,
+      "nonfinite_values": 0,
+      "values_exact": true,
+      "differing_values": 0,
+      "maximum_absolute_error": 0.0,
+      "mean_absolute_error": 0.0,
+      "rmse": 0.0,
+      "relative_rmse": 0.0,
+      "pearson_r": 1.0,
+      "per_structure": {
+        "CIFTI_STRUCTURE_CORTEX_LEFT": {
+          "grayordinates": 29696,
+          "values": 14551040,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_CORTEX_RIGHT": {
+          "grayordinates": 29716,
+          "values": 14560840,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_ACCUMBENS_LEFT": {
+          "grayordinates": 135,
+          "values": 66150,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_ACCUMBENS_RIGHT": {
+          "grayordinates": 140,
+          "values": 68600,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_AMYGDALA_LEFT": {
+          "grayordinates": 315,
+          "values": 154350,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_AMYGDALA_RIGHT": {
+          "grayordinates": 332,
+          "values": 162680,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_BRAIN_STEM": {
+          "grayordinates": 3472,
+          "values": 1701280,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_CAUDATE_LEFT": {
+          "grayordinates": 728,
+          "values": 356720,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_CAUDATE_RIGHT": {
+          "grayordinates": 755,
+          "values": 369950,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_CEREBELLUM_LEFT": {
+          "grayordinates": 8709,
+          "values": 4267410,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_CEREBELLUM_RIGHT": {
+          "grayordinates": 9144,
+          "values": 4480560,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_DIENCEPHALON_VENTRAL_LEFT": {
+          "grayordinates": 706,
+          "values": 345940,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_DIENCEPHALON_VENTRAL_RIGHT": {
+          "grayordinates": 712,
+          "values": 348880,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_HIPPOCAMPUS_LEFT": {
+          "grayordinates": 764,
+          "values": 374360,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_HIPPOCAMPUS_RIGHT": {
+          "grayordinates": 795,
+          "values": 389550,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_PALLIDUM_LEFT": {
+          "grayordinates": 297,
+          "values": 145530,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_PALLIDUM_RIGHT": {
+          "grayordinates": 260,
+          "values": 127400,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_PUTAMEN_LEFT": {
+          "grayordinates": 1060,
+          "values": 519400,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_PUTAMEN_RIGHT": {
+          "grayordinates": 1010,
+          "values": 494900,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_THALAMUS_LEFT": {
+          "grayordinates": 1288,
+          "values": 631120,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        },
+        "CIFTI_STRUCTURE_THALAMUS_RIGHT": {
+          "grayordinates": 1248,
+          "values": 611520,
+          "nonfinite_values": 0,
+          "values_exact": true,
+          "differing_values": 0,
+          "maximum_absolute_error": 0.0,
+          "mean_absolute_error": 0.0,
+          "rmse": 0.0,
+          "relative_rmse": 0.0,
+          "pearson_r": 1.0
+        }
+      },
+      "temporal": {
+        "grayordinates": 91282,
+        "valid_nonconstant_pairs": 91281,
+        "candidate_constant_timeseries": 1,
+        "reference_constant_timeseries": 1,
+        "both_constant_timeseries": 1,
+        "one_side_constant_timeseries": 0,
+        "mean_temporal_r": 1.0,
+        "median_temporal_r": 1.0,
+        "p95_temporal_r": 1.0,
+        "minimum_temporal_r": 1.0,
+        "per_structure": {
+          "CIFTI_STRUCTURE_CORTEX_LEFT": {
+            "grayordinates": 29696,
+            "valid_nonconstant_pairs": 29695,
+            "candidate_constant_timeseries": 1,
+            "reference_constant_timeseries": 1,
+            "both_constant_timeseries": 1,
+            "one_side_constant_timeseries": 0,
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "p95_temporal_r": 1.0,
+            "minimum_temporal_r": 1.0
+          },
+          "CIFTI_STRUCTURE_CORTEX_RIGHT": {
+            "grayordinates": 29716,
+            "valid_nonconstant_pairs": 29716,
+            "candidate_constant_timeseries": 0,
+            "reference_constant_timeseries": 0,
+            "both_constant_timeseries": 0,
+            "one_side_constant_timeseries": 0,
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "p95_temporal_r": 1.0,
+            "minimum_temporal_r": 1.0
+          },
+          "CIFTI_STRUCTURE_ACCUMBENS_LEFT": {
+            "grayordinates": 135,
+            "valid_nonconstant_pairs": 135,
+            "candidate_constant_timeseries": 0,
+            "reference_constant_timeseries": 0,
+            "both_constant_timeseries": 0,
+            "one_side_constant_timeseries": 0,
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "p95_temporal_r": 1.0,
+            "minimum_temporal_r": 1.0
+          },
+          "CIFTI_STRUCTURE_ACCUMBENS_RIGHT": {
+            "grayordinates": 140,
+            "valid_nonconstant_pairs": 140,
+            "candidate_constant_timeseries": 0,
+            "reference_constant_timeseries": 0,
+            "both_constant_timeseries": 0,
+            "one_side_constant_timeseries": 0,
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "p95_temporal_r": 1.0,
+            "minimum_temporal_r": 1.0
+          },
+          "CIFTI_STRUCTURE_AMYGDALA_LEFT": {
+            "grayordinates": 315,
+            "valid_nonconstant_pairs": 315,
+            "candidate_constant_timeseries": 0,
+            "reference_constant_timeseries": 0,
+            "both_constant_timeseries": 0,
+            "one_side_constant_timeseries": 0,
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "p95_temporal_r": 1.0,
+            "minimum_temporal_r": 1.0
+          },
+          "CIFTI_STRUCTURE_AMYGDALA_RIGHT": {
+            "grayordinates": 332,
+            "valid_nonconstant_pairs": 332,
+            "candidate_constant_timeseries": 0,
+            "reference_constant_timeseries": 0,
+            "both_constant_timeseries": 0,
+            "one_side_constant_timeseries": 0,
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "p95_temporal_r": 1.0,
+            "minimum_temporal_r": 1.0
+          },
+          "CIFTI_STRUCTURE_BRAIN_STEM": {
+            "grayordinates": 3472,
+            "valid_nonconstant_pairs": 3472,
+            "candidate_constant_timeseries": 0,
+            "reference_constant_timeseries": 0,
+            "both_constant_timeseries": 0,
+            "one_side_constant_timeseries": 0,
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "p95_temporal_r": 1.0,
+            "minimum_temporal_r": 1.0
+          },
+          "CIFTI_STRUCTURE_CAUDATE_LEFT": {
+            "grayordinates": 728,
+            "valid_nonconstant_pairs": 728,
+            "candidate_constant_timeseries": 0,
+            "reference_constant_timeseries": 0,
+            "both_constant_timeseries": 0,
+            "one_side_constant_timeseries": 0,
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "p95_temporal_r": 1.0,
+            "minimum_temporal_r": 1.0
+          },
+          "CIFTI_STRUCTURE_CAUDATE_RIGHT": {
+            "grayordinates": 755,
+            "valid_nonconstant_pairs": 755,
+            "candidate_constant_timeseries": 0,
+            "reference_constant_timeseries": 0,
+            "both_constant_timeseries": 0,
+            "one_side_constant_timeseries": 0,
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "p95_temporal_r": 1.0,
+            "minimum_temporal_r": 1.0
+          },
+          "CIFTI_STRUCTURE_CEREBELLUM_LEFT": {
+            "grayordinates": 8709,
+            "valid_nonconstant_pairs": 8709,
+            "candidate_constant_timeseries": 0,
+            "reference_constant_timeseries": 0,
+            "both_constant_timeseries": 0,
+            "one_side_constant_timeseries": 0,
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "p95_temporal_r": 1.0,
+            "minimum_temporal_r": 1.0
+          },
+          "CIFTI_STRUCTURE_CEREBELLUM_RIGHT": {
+            "grayordinates": 9144,
+            "valid_nonconstant_pairs": 9144,
+            "candidate_constant_timeseries": 0,
+            "reference_constant_timeseries": 0,
+            "both_constant_timeseries": 0,
+            "one_side_constant_timeseries": 0,
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "p95_temporal_r": 1.0,
+            "minimum_temporal_r": 1.0
+          },
+          "CIFTI_STRUCTURE_DIENCEPHALON_VENTRAL_LEFT": {
+            "grayordinates": 706,
+            "valid_nonconstant_pairs": 706,
+            "candidate_constant_timeseries": 0,
+            "reference_constant_timeseries": 0,
+            "both_constant_timeseries": 0,
+            "one_side_constant_timeseries": 0,
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "p95_temporal_r": 1.0,
+            "minimum_temporal_r": 1.0
+          },
+          "CIFTI_STRUCTURE_DIENCEPHALON_VENTRAL_RIGHT": {
+            "grayordinates": 712,
+            "valid_nonconstant_pairs": 712,
+            "candidate_constant_timeseries": 0,
+            "reference_constant_timeseries": 0,
+            "both_constant_timeseries": 0,
+            "one_side_constant_timeseries": 0,
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "p95_temporal_r": 1.0,
+            "minimum_temporal_r": 1.0
+          },
+          "CIFTI_STRUCTURE_HIPPOCAMPUS_LEFT": {
+            "grayordinates": 764,
+            "valid_nonconstant_pairs": 764,
+            "candidate_constant_timeseries": 0,
+            "reference_constant_timeseries": 0,
+            "both_constant_timeseries": 0,
+            "one_side_constant_timeseries": 0,
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "p95_temporal_r": 1.0,
+            "minimum_temporal_r": 1.0
+          },
+          "CIFTI_STRUCTURE_HIPPOCAMPUS_RIGHT": {
+            "grayordinates": 795,
+            "valid_nonconstant_pairs": 795,
+            "candidate_constant_timeseries": 0,
+            "reference_constant_timeseries": 0,
+            "both_constant_timeseries": 0,
+            "one_side_constant_timeseries": 0,
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "p95_temporal_r": 1.0,
+            "minimum_temporal_r": 1.0
+          },
+          "CIFTI_STRUCTURE_PALLIDUM_LEFT": {
+            "grayordinates": 297,
+            "valid_nonconstant_pairs": 297,
+            "candidate_constant_timeseries": 0,
+            "reference_constant_timeseries": 0,
+            "both_constant_timeseries": 0,
+            "one_side_constant_timeseries": 0,
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "p95_temporal_r": 1.0,
+            "minimum_temporal_r": 1.0
+          },
+          "CIFTI_STRUCTURE_PALLIDUM_RIGHT": {
+            "grayordinates": 260,
+            "valid_nonconstant_pairs": 260,
+            "candidate_constant_timeseries": 0,
+            "reference_constant_timeseries": 0,
+            "both_constant_timeseries": 0,
+            "one_side_constant_timeseries": 0,
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "p95_temporal_r": 1.0,
+            "minimum_temporal_r": 1.0
+          },
+          "CIFTI_STRUCTURE_PUTAMEN_LEFT": {
+            "grayordinates": 1060,
+            "valid_nonconstant_pairs": 1060,
+            "candidate_constant_timeseries": 0,
+            "reference_constant_timeseries": 0,
+            "both_constant_timeseries": 0,
+            "one_side_constant_timeseries": 0,
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "p95_temporal_r": 1.0,
+            "minimum_temporal_r": 1.0
+          },
+          "CIFTI_STRUCTURE_PUTAMEN_RIGHT": {
+            "grayordinates": 1010,
+            "valid_nonconstant_pairs": 1010,
+            "candidate_constant_timeseries": 0,
+            "reference_constant_timeseries": 0,
+            "both_constant_timeseries": 0,
+            "one_side_constant_timeseries": 0,
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "p95_temporal_r": 1.0,
+            "minimum_temporal_r": 1.0
+          },
+          "CIFTI_STRUCTURE_THALAMUS_LEFT": {
+            "grayordinates": 1288,
+            "valid_nonconstant_pairs": 1288,
+            "candidate_constant_timeseries": 0,
+            "reference_constant_timeseries": 0,
+            "both_constant_timeseries": 0,
+            "one_side_constant_timeseries": 0,
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "p95_temporal_r": 1.0,
+            "minimum_temporal_r": 1.0
+          },
+          "CIFTI_STRUCTURE_THALAMUS_RIGHT": {
+            "grayordinates": 1248,
+            "valid_nonconstant_pairs": 1248,
+            "candidate_constant_timeseries": 0,
+            "reference_constant_timeseries": 0,
+            "both_constant_timeseries": 0,
+            "one_side_constant_timeseries": 0,
+            "mean_temporal_r": 1.0,
+            "median_temporal_r": 1.0,
+            "p95_temporal_r": 1.0,
+            "minimum_temporal_r": 1.0
+          }
+        },
+        "cortical_structures": 2,
+        "subcortical_structures": 19
+      }
+    }
+  },
+  "msm_actual_inputs": {
+    "L": {
+      "rotated_sphere": {
+        "candidate_sha256": "d9b18321ddb49fa277de59aa422ab5df1571d42427723925551cd26090cb5147",
+        "reference_sha256": "99b7f7dbabeecf0c6a48bae2ea80a9ac828d0d5122949795523da8f79870135b",
+        "independent_prepared_file_paths": true,
+        "independent_prepared_inodes": true,
+        "image_metadata_equal": false,
+        "array_intents_equal": true,
+        "array_shapes_equal": true,
+        "arrays": [
+          {
+            "intent": 1008,
+            "reference_intent": 1008,
+            "shape": [
+              120035,
+              3
+            ],
+            "values": 360105,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "coordinate_system_equal": true,
+            "coordinate_difference_mm": {
+              "mean": 0.0,
+              "maximum": 0.0
+            }
+          },
+          {
+            "intent": 1009,
+            "reference_intent": 1009,
+            "shape": [
+              240066,
+              3
+            ],
+            "values": 720198,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "triangles_exact": true
+          }
+        ],
+        "scalar_metric_intent_difference_allowed": false,
+        "decoded_arrays_exact": true
+      },
+      "native_sulc": {
+        "candidate_sha256": "bfa6be80c75035e09d5bb0ae571061cc8ccd5049acc11663e2a5bae5d6703056",
+        "reference_sha256": "bfa6be80c75035e09d5bb0ae571061cc8ccd5049acc11663e2a5bae5d6703056",
+        "independent_prepared_file_paths": true,
+        "independent_prepared_inodes": true,
+        "image_metadata_equal": true,
+        "array_intents_equal": true,
+        "array_shapes_equal": true,
+        "arrays": [
+          {
+            "intent": 2005,
+            "reference_intent": 2005,
+            "shape": [
+              120035
+            ],
+            "values": 120035,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true
+          }
+        ],
+        "scalar_metric_intent_difference_allowed": true,
+        "decoded_arrays_exact": true
+      },
+      "reference_sphere": {
+        "candidate_sha256": "6968ef7d9638de54ade78cdbb7f0c6f25025c60477f72456ab2fb77c53a85cfa",
+        "reference_sha256": "6968ef7d9638de54ade78cdbb7f0c6f25025c60477f72456ab2fb77c53a85cfa",
+        "independent_prepared_file_paths": true,
+        "independent_prepared_inodes": false,
+        "image_metadata_equal": true,
+        "array_intents_equal": true,
+        "array_shapes_equal": true,
+        "arrays": [
+          {
+            "intent": 1008,
+            "reference_intent": 1008,
+            "shape": [
+              163842,
+              3
+            ],
+            "values": 491526,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "coordinate_system_equal": true,
+            "coordinate_difference_mm": {
+              "mean": 0.0,
+              "maximum": 0.0
+            }
+          },
+          {
+            "intent": 1009,
+            "reference_intent": 1009,
+            "shape": [
+              327680,
+              3
+            ],
+            "values": 983040,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "triangles_exact": true
+          }
+        ],
+        "scalar_metric_intent_difference_allowed": false,
+        "decoded_arrays_exact": true
+      },
+      "reference_sulc": {
+        "candidate_sha256": "10f5e3fd775bb2f77278b0b69126f6f67abefb3c76de6f1233128d9914ddcb5c",
+        "reference_sha256": "10f5e3fd775bb2f77278b0b69126f6f67abefb3c76de6f1233128d9914ddcb5c",
+        "independent_prepared_file_paths": true,
+        "independent_prepared_inodes": false,
+        "image_metadata_equal": true,
+        "array_intents_equal": true,
+        "array_shapes_equal": true,
+        "arrays": [
+          {
+            "intent": 11,
+            "reference_intent": 11,
+            "shape": [
+              163842
+            ],
+            "values": 163842,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true
+          }
+        ],
+        "scalar_metric_intent_difference_allowed": true,
+        "decoded_arrays_exact": true
+      }
+    },
+    "R": {
+      "rotated_sphere": {
+        "candidate_sha256": "ca3f512bfef4d48adfef35d9d21868b6a8fc07640f5151a387b16bac1d553915",
+        "reference_sha256": "88ea2631f20031d037f8b5c7c58eaed7b5feef61bb5b53fe69e09fe4fc10c166",
+        "independent_prepared_file_paths": true,
+        "independent_prepared_inodes": true,
+        "image_metadata_equal": false,
+        "array_intents_equal": true,
+        "array_shapes_equal": true,
+        "arrays": [
+          {
+            "intent": 1008,
+            "reference_intent": 1008,
+            "shape": [
+              122950,
+              3
+            ],
+            "values": 368850,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "coordinate_system_equal": true,
+            "coordinate_difference_mm": {
+              "mean": 0.0,
+              "maximum": 0.0
+            }
+          },
+          {
+            "intent": 1009,
+            "reference_intent": 1009,
+            "shape": [
+              245896,
+              3
+            ],
+            "values": 737688,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "triangles_exact": true
+          }
+        ],
+        "scalar_metric_intent_difference_allowed": false,
+        "decoded_arrays_exact": true
+      },
+      "native_sulc": {
+        "candidate_sha256": "3578305638120c888756212ff261a3c6ac244e841390086db9dc06bc8bcf4eb4",
+        "reference_sha256": "3578305638120c888756212ff261a3c6ac244e841390086db9dc06bc8bcf4eb4",
+        "independent_prepared_file_paths": true,
+        "independent_prepared_inodes": true,
+        "image_metadata_equal": true,
+        "array_intents_equal": true,
+        "array_shapes_equal": true,
+        "arrays": [
+          {
+            "intent": 2005,
+            "reference_intent": 2005,
+            "shape": [
+              122950
+            ],
+            "values": 122950,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true
+          }
+        ],
+        "scalar_metric_intent_difference_allowed": true,
+        "decoded_arrays_exact": true
+      },
+      "reference_sphere": {
+        "candidate_sha256": "85e718e424a1d87521fb0f3942538db16d8c745fe5b9ee20405baac2aff1dbb1",
+        "reference_sha256": "85e718e424a1d87521fb0f3942538db16d8c745fe5b9ee20405baac2aff1dbb1",
+        "independent_prepared_file_paths": true,
+        "independent_prepared_inodes": false,
+        "image_metadata_equal": true,
+        "array_intents_equal": true,
+        "array_shapes_equal": true,
+        "arrays": [
+          {
+            "intent": 1008,
+            "reference_intent": 1008,
+            "shape": [
+              163842,
+              3
+            ],
+            "values": 491526,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "coordinate_system_equal": true,
+            "coordinate_difference_mm": {
+              "mean": 0.0,
+              "maximum": 0.0
+            }
+          },
+          {
+            "intent": 1009,
+            "reference_intent": 1009,
+            "shape": [
+              327680,
+              3
+            ],
+            "values": 983040,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true,
+            "triangles_exact": true
+          }
+        ],
+        "scalar_metric_intent_difference_allowed": false,
+        "decoded_arrays_exact": true
+      },
+      "reference_sulc": {
+        "candidate_sha256": "4eefc7807cdd9076cfc9ffc933da3d0c100a4770d5359c3e5f4fb37d71097520",
+        "reference_sha256": "4eefc7807cdd9076cfc9ffc933da3d0c100a4770d5359c3e5f4fb37d71097520",
+        "independent_prepared_file_paths": true,
+        "independent_prepared_inodes": false,
+        "image_metadata_equal": true,
+        "array_intents_equal": true,
+        "array_shapes_equal": true,
+        "arrays": [
+          {
+            "intent": 11,
+            "reference_intent": 11,
+            "shape": [
+              163842
+            ],
+            "values": 163842,
+            "nonfinite_values": 0,
+            "values_exact": true,
+            "differing_values": 0,
+            "maximum_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "rmse": 0.0,
+            "relative_rmse": 0.0,
+            "pearson_r": 1.0,
+            "metadata_equal": true
+          }
+        ],
+        "scalar_metric_intent_difference_allowed": true,
+        "decoded_arrays_exact": true
+      }
+    }
+  },
+  "checks": {
+    "independent_prepared_geometry": true,
+    "all_frames_and_tr_preserved": true,
+    "all_output_values_finite": true,
+    "cifti_time_brain_model_axes_and_embedded_metadata_equal": true,
+    "left_right_and_cifti_values_exact": true,
+    "registered_spheres_coordinates_exact": true,
+    "same_scientific_msm_schedule": true
+  }
+}

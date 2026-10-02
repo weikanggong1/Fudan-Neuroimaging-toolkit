@@ -1,0 +1,2270 @@
+{
+  "schema_version": 1,
+  "scope": "fresh same-current-input baseline954 serial versus candidate9f parallel full scientific coarse/refine MSMAll API; saved official spheres secondary only; no new feature estimation, BOLD projection, HCP outer iteration or original-software execution",
+  "source_revisions": {
+    "baseline": "954ad19e29ddde8617eddf58ebafc3a4f72b8951",
+    "candidate": "9f9f63e95b4ee702e4c3024407496df47a851631"
+  },
+  "runner_sha256": "89f13c42722d5a1bb3f5e033522973c72acfa160d7e42d5028e348c1494e2221",
+  "queue_sha256": "c7aec8abc568041887edffa82b3c193fcebc524836ad0f6ce25fad9b4e2e73a7",
+  "physical_gpu_index": 0,
+  "max_gpu_bytes": 20000000000,
+  "CUDA_MODULE_LOADING": "LAZY",
+  "configurations": {
+    "coarse": {
+      "runs": {
+        "baseline": {
+          "schema_version": 1,
+          "function": "run_msmall",
+          "schedule": "coarse",
+          "condition": "baseline",
+          "source_revision": "954ad19e29ddde8617eddf58ebafc3a4f72b8951",
+          "source_sha256": {
+            "src/fnit/msm/__init__.py": "773c12c8aebc9c8084ac3ac18e6095be9ef31c3d01720634c27cb0cd23954067",
+            "src/fnit/msm/_affine.py": "fb9268e69482ca9e9b1cd2eaa3a80fdd039822cdcd32940d2131072527219e4e",
+            "src/fnit/msm/_fastpd_native.cpython-311-x86_64-linux-gnu.so": "1fd35ea562f3438b0dd7bdc83b8beffc95af29301c5eba70eaa2865982f9efa2",
+            "src/fnit/msm/_fastpd_src/FastPD.h": "d21f2640701d743b53d83d7ecd119db454bc36bf877c5862846de04254183698",
+            "src/fnit/msm/_fastpd_src/block.h": "9aafefcf97a94e55027baae2d518cff2bc0739024b1f017747da6d310426cddb",
+            "src/fnit/msm/_fastpd_src/fastpd_module.cpp": "ccb48d830a075564f18ed2eca2b7de8ae3e5cd0e22045088ebac4af374b45411",
+            "src/fnit/msm/_fastpd_src/fnit_fastpd_model_stub.h": "a11a81379cef2466b410039956ffbebab4f979abaa94122e761a833dd4b310d5",
+            "src/fnit/msm/_fastpd_src/graph.h": "b75781e1719df32a6bc5741cbbd97745568207045e5397897629b00d4ab93fd9",
+            "src/fnit/msm/_sphere_map.py": "0b54a766f316ef3532cb75a121c6a770e1958138d25a241b3e7bcb81c7d707f9",
+            "src/fnit/msm/cli.py": "53c5c662fc453f19842cb07bf5ee354b21414ecb1439fbde00550f28cfb610ed",
+            "src/fnit/msm/config.py": "20afadd2860c2782fa3983f56d1351e31a56e415f75761798223ad455335e8c9",
+            "src/fnit/msm/config_msmall.py": "63e21ca7114a4a415408cd52bd9b88d5eeadf5fd394be995105ac0906bddb467",
+            "src/fnit/msm/feature_cli.py": "c65838b9136ebe26d29cfd320e155a246bd88c5a6ce2e3ffcf662a9909a11586",
+            "src/fnit/msm/features.py": "7e598efeeab5665ca05957d06d0867edea8b4714292bcb1b8b41be76f57fb6b2",
+            "src/fnit/msm/msmall.py": "249919f2fb544584987e57a038fb1c6e0b1d9b8bb537c81f7b0aa702ca0a1cd5",
+            "src/fnit/msm/msmsulc.py": "5433eeef19c17001a0514af7d5d4801eee226c69a3d2de3be56c00cb078a87fc",
+            "src/fnit/msm/prepare.py": "30dc5fdb17628b70ec42e87f0d04c3d7e5f7c4faf35292e0a89493536006d675",
+            "src/fnit/__init__.py": "fd7a74d6bfbd4d5829d22d23618b419b200b11673df8f11f628d2d499007a0d4",
+            "setup.py": "f104f5e6e95720f6f686b3c2879629cddd658404eb0b8d586703d43d56f70c89"
+          },
+          "native_extension_sha256": "1fd35ea562f3438b0dd7bdc83b8beffc95af29301c5eba70eaa2865982f9efa2",
+          "input_sha256": {
+            "L": {
+              "source_sphere": "1846b053f870405466776d004d714cc1da0cec7361761c65a864782dd09f30a8",
+              "source_features": "1c81fa7646553e0ff0be34517b58e4ac90721ae3ae41c1e23fadc50cc312611a",
+              "reference_sphere": "1846b053f870405466776d004d714cc1da0cec7361761c65a864782dd09f30a8",
+              "reference_features": "85ed32511d9157cd1d7ebc478fc683b80c7cc6400d010856ac567e32b44d5c7d",
+              "initial_sphere": "1846b053f870405466776d004d714cc1da0cec7361761c65a864782dd09f30a8",
+              "source_weights": "017fcc53c0353677b40ca97f43f05a7f6582dfce5f95a3ee7771641c2f94313f",
+              "reference_weights": "017fcc53c0353677b40ca97f43f05a7f6582dfce5f95a3ee7771641c2f94313f"
+            },
+            "R": {
+              "source_sphere": "1a898433a9f1070e4e0435d4db966776ecc3291bfcd444efc7910aeffb91561c",
+              "source_features": "4346e73e4791e561db07ac1a2bbffccaba6a14bcdf9ac88965326936e043f826",
+              "reference_sphere": "1a898433a9f1070e4e0435d4db966776ecc3291bfcd444efc7910aeffb91561c",
+              "reference_features": "30c0bafc1cad6184e2623cfdb84ab1771bade522e39cf781fdf2555f0aca3d29",
+              "initial_sphere": "1a898433a9f1070e4e0435d4db966776ecc3291bfcd444efc7910aeffb91561c",
+              "source_weights": "054148d2db61e5964681d023fad3378657e53b73a2cfebbe443d93c9b62a8fd6",
+              "reference_weights": "054148d2db61e5964681d023fad3378657e53b73a2cfebbe443d93c9b62a8fd6"
+            }
+          },
+          "config_file_sha256": "ec9348a2bd2aea5ce2bf1a7387997dabb3443784c15a017faa4871e4ea38cc2e",
+          "configuration": {
+            "simval": [
+              2
+            ],
+            "iterations": [
+              10
+            ],
+            "control_grid": [
+              2
+            ],
+            "sampling_grid": [
+              4
+            ],
+            "data_grid": [
+              4
+            ],
+            "regularization": [
+              9.999999747378752e-06
+            ],
+            "shear_modulus": 0.4000000059604645,
+            "bulk_modulus": 1.600000023841858,
+            "strain_exponent": 2.0,
+            "regularization_exponent": 2.0
+          },
+          "installation_performed": false,
+          "import_seconds": 2.0938764940947294,
+          "cuda_startup_seconds": 0.5364129710942507,
+          "api_wall_seconds": 23.237483543809503,
+          "timing_scope": "full configured bilateral MSMAll API including surface/feature input reads, registration and sphere/report writes; excludes Python imports, CUDA initialization, initial hashes, post-run checks and BOLD projection",
+          "cold_definition": "first registration API call after imports and CUDA initialization in a fresh process; no filesystem cache clearing",
+          "parallel": false,
+          "cpu_threads": 8,
+          "max_gpu_bytes": 20000000000,
+          "cuda_allocator_fraction": 0.23545206700423646,
+          "device_total_memory_bytes": 84942979072,
+          "physical_gpu_index": 0,
+          "gpu_name": "NVIDIA H100 PCIe",
+          "torch": "2.5.1",
+          "cuda_runtime": "11.8",
+          "CUDA_MODULE_LOADING": "LAZY",
+          "TF32_matmul": true,
+          "TF32_cudnn": true,
+          "peak_allocated_bytes": 94729728,
+          "peak_allocated_gb": 0.094729728,
+          "peak_below_20GB": true,
+          "peak_scope": "combined API maximum; captures baseline per-hemisphere reset before executing original reset",
+          "inputs_unchanged": true,
+          "source_unchanged": true,
+          "spheres": {
+            "L": {
+              "file_sha256": "1c48567bdfd9f91ca2de0b1144293d979fecdad8095405e6185833b17a9bec0f",
+              "decoded_coordinates_sha256": "bffb18bc5fafc9075bd90619b9d78f237a5b65b0ad3ed4778590e7638c16cde3",
+              "decoded_faces_sha256": "deed589d455f57561f56f699dd6c999a06692738bd08f719d1607efab63606df",
+              "vertices": 32492,
+              "faces": 64980,
+              "finite": true,
+              "coordinate_dtype": "float32",
+              "face_dtype": "int32"
+            },
+            "R": {
+              "file_sha256": "0c24685684c75b8a0c7d875ce926eab20c92d3349d4614752831e8592296e105",
+              "decoded_coordinates_sha256": "8c593520c36ee53a894863e663661867b6526da2d07348a2a028e54d0cce75ed",
+              "decoded_faces_sha256": "eee7534ea37abf18abb7f0b60acbfdbf70ef554e8ff155681df0bb36c783c213",
+              "vertices": 32492,
+              "faces": 64980,
+              "finite": true,
+              "coordinate_dtype": "float32",
+              "face_dtype": "int32"
+            }
+          },
+          "registration": {
+            "L": {
+              "seconds": 12.998161226976663,
+              "feature_count": 33,
+              "weighted_cost": true,
+              "config": {
+                "simval": [
+                  2
+                ],
+                "iterations": [
+                  10
+                ],
+                "control_grid": [
+                  2
+                ],
+                "sampling_grid": [
+                  4
+                ],
+                "data_grid": [
+                  4
+                ],
+                "regularization": [
+                  9.999999747378752e-06
+                ],
+                "shear_modulus": 0.4000000059604645,
+                "bulk_modulus": 1.600000023841858,
+                "strain_exponent": 2.0,
+                "regularization_exponent": 2.0
+              },
+              "execution": "optimized",
+              "folded_output_faces": 0,
+              "folded_solver_faces": 0,
+              "minimum_output_orientation_ratio": 0.18406892754706589,
+              "minimum_solver_orientation_ratio": 0.18406903872382813,
+              "degenerate_input_faces": 0,
+              "stages": [
+                {
+                  "control_points": 162,
+                  "data_points": 2562,
+                  "labels": 19,
+                  "similarity": 2,
+                  "maximum_iterations": 10,
+                  "converged": false,
+                  "source_unfold_updates": 0,
+                  "control_unfold_updates": 0,
+                  "iterations": [
+                    {
+                      "changed": 169,
+                      "energy": 98.80763097016937,
+                      "applied": true,
+                      "seconds": 1.1576981213875115
+                    },
+                    {
+                      "changed": 66,
+                      "energy": 97.90432235227357,
+                      "applied": true,
+                      "seconds": 1.0736752706579864
+                    },
+                    {
+                      "changed": 58,
+                      "energy": 97.26098229591942,
+                      "applied": true,
+                      "seconds": 1.0324837337248027
+                    },
+                    {
+                      "changed": 52,
+                      "energy": 97.15215531308414,
+                      "applied": true,
+                      "seconds": 1.109830437693745
+                    },
+                    {
+                      "changed": 69,
+                      "energy": 97.14183992692575,
+                      "applied": true,
+                      "seconds": 1.1055463938973844
+                    },
+                    {
+                      "changed": 74,
+                      "energy": 97.00935452730863,
+                      "applied": true,
+                      "seconds": 1.1289077969267964
+                    },
+                    {
+                      "changed": 86,
+                      "energy": 97.09905470540077,
+                      "applied": true,
+                      "seconds": 1.1044335761107504
+                    },
+                    {
+                      "changed": 0,
+                      "energy": 97.02243206228047,
+                      "applied": true,
+                      "seconds": 1.1244139270856977
+                    },
+                    {
+                      "changed": 8,
+                      "energy": 97.0322549526056,
+                      "applied": true,
+                      "seconds": 1.139562247786671
+                    },
+                    {
+                      "changed": 2,
+                      "energy": 96.9889610922558,
+                      "applied": true,
+                      "seconds": 1.160627564880997
+                    }
+                  ],
+                  "seconds": 12.607268400955945
+                }
+              ],
+              "peak_allocated_gb": 0.094729728
+            },
+            "R": {
+              "seconds": 10.225453259889036,
+              "feature_count": 33,
+              "weighted_cost": true,
+              "config": {
+                "simval": [
+                  2
+                ],
+                "iterations": [
+                  10
+                ],
+                "control_grid": [
+                  2
+                ],
+                "sampling_grid": [
+                  4
+                ],
+                "data_grid": [
+                  4
+                ],
+                "regularization": [
+                  9.999999747378752e-06
+                ],
+                "shear_modulus": 0.4000000059604645,
+                "bulk_modulus": 1.600000023841858,
+                "strain_exponent": 2.0,
+                "regularization_exponent": 2.0
+              },
+              "execution": "optimized",
+              "folded_output_faces": 0,
+              "folded_solver_faces": 0,
+              "minimum_output_orientation_ratio": 0.08430761648420351,
+              "minimum_solver_orientation_ratio": 0.08430769283683094,
+              "degenerate_input_faces": 0,
+              "stages": [
+                {
+                  "control_points": 162,
+                  "data_points": 2562,
+                  "labels": 19,
+                  "similarity": 2,
+                  "maximum_iterations": 10,
+                  "converged": true,
+                  "source_unfold_updates": 0,
+                  "control_unfold_updates": 0,
+                  "iterations": [
+                    {
+                      "changed": 176,
+                      "energy": 97.67925617650565,
+                      "applied": true,
+                      "seconds": 2.0179965188726783
+                    },
+                    {
+                      "changed": 53,
+                      "energy": 96.62114272317493,
+                      "applied": true,
+                      "seconds": 2.283483532257378
+                    },
+                    {
+                      "changed": 57,
+                      "energy": 96.60658585494511,
+                      "applied": true,
+                      "seconds": 1.201260769739747
+                    },
+                    {
+                      "changed": 60,
+                      "energy": 96.40225950087472,
+                      "applied": true,
+                      "seconds": 1.3011345867998898
+                    },
+                    {
+                      "changed": 61,
+                      "energy": 96.26140861316588,
+                      "applied": true,
+                      "seconds": 1.0222129388712347
+                    },
+                    {
+                      "changed": 67,
+                      "energy": 96.29106218860025,
+                      "applied": false,
+                      "seconds": 1.0719005023129284
+                    }
+                  ],
+                  "seconds": 9.850093062967062
+                }
+              ],
+              "peak_allocated_gb": 0.094729728
+            }
+          }
+        },
+        "candidate": {
+          "schema_version": 1,
+          "function": "run_msmall",
+          "schedule": "coarse",
+          "condition": "candidate",
+          "source_revision": "9f9f63e95b4ee702e4c3024407496df47a851631",
+          "source_sha256": {
+            "src/fnit/msm/__init__.py": "773c12c8aebc9c8084ac3ac18e6095be9ef31c3d01720634c27cb0cd23954067",
+            "src/fnit/msm/_affine.py": "fb9268e69482ca9e9b1cd2eaa3a80fdd039822cdcd32940d2131072527219e4e",
+            "src/fnit/msm/_execution.py": "e67d43b972dd690c9ec86081c6d3e4fb783935def4bec8f264ab7d232916beae",
+            "src/fnit/msm/_fastpd_native.cpython-311-x86_64-linux-gnu.so": "69fda883c5022d412172eba2de164b79726d18c068b7c421a200b331b6502ad8",
+            "src/fnit/msm/_fastpd_src/FastPD.h": "d21f2640701d743b53d83d7ecd119db454bc36bf877c5862846de04254183698",
+            "src/fnit/msm/_fastpd_src/block.h": "9aafefcf97a94e55027baae2d518cff2bc0739024b1f017747da6d310426cddb",
+            "src/fnit/msm/_fastpd_src/fastpd_module.cpp": "380204e7c5823d59a63c8cc2c7f03a389271e6b006e5c2f0453b69bbe5a79729",
+            "src/fnit/msm/_fastpd_src/fnit_fastpd_model_stub.h": "a11a81379cef2466b410039956ffbebab4f979abaa94122e761a833dd4b310d5",
+            "src/fnit/msm/_fastpd_src/graph.h": "b75781e1719df32a6bc5741cbbd97745568207045e5397897629b00d4ab93fd9",
+            "src/fnit/msm/_ordered_sparse.py": "440ffd8f634fa42736aa0ea5b5f41de114e685a033146492d1e1f9e7a5364f11",
+            "src/fnit/msm/_spatial.py": "c7319ae9a616dbc2d741a8e8ecb0543cec6ffb7f54914f672f7b6947e6359204",
+            "src/fnit/msm/_sphere_map.py": "51bd19d1c12ef8be3427d4f9ef642dae5591ae8b0e0638b426d89e12173751be",
+            "src/fnit/msm/cli.py": "7f9b9d2df7619818eaff9e4bfac29f239c17cbddc3575968dbacada7f387fe8d",
+            "src/fnit/msm/config.py": "20afadd2860c2782fa3983f56d1351e31a56e415f75761798223ad455335e8c9",
+            "src/fnit/msm/config_msmall.py": "63e21ca7114a4a415408cd52bd9b88d5eeadf5fd394be995105ac0906bddb467",
+            "src/fnit/msm/feature_cli.py": "c65838b9136ebe26d29cfd320e155a246bd88c5a6ce2e3ffcf662a9909a11586",
+            "src/fnit/msm/features.py": "7e598efeeab5665ca05957d06d0867edea8b4714292bcb1b8b41be76f57fb6b2",
+            "src/fnit/msm/msmall.py": "2629205b3ba4e10999dc7af92f679f5f8c487b13ed8ca28719e6e68776ec116b",
+            "src/fnit/msm/msmsulc.py": "a4ff7112888d645497ddbcc003059a810231d60a60dd9f06602fa7a94601f924",
+            "src/fnit/msm/prepare.py": "a8f6ca261378768e38a13c53d85d58702a2f4e7f30928e6e2b6b6e1665fd9b11",
+            "src/fnit/__init__.py": "fd7a74d6bfbd4d5829d22d23618b419b200b11673df8f11f628d2d499007a0d4",
+            "src/fnit/_hemisphere_parallel.py": "2bca5a145a335dbcfd81f5af13f2cb1db7c5f639f250caf456a143023c64a6d7",
+            "setup.py": "f104f5e6e95720f6f686b3c2879629cddd658404eb0b8d586703d43d56f70c89"
+          },
+          "native_extension_sha256": "69fda883c5022d412172eba2de164b79726d18c068b7c421a200b331b6502ad8",
+          "input_sha256": {
+            "L": {
+              "source_sphere": "1846b053f870405466776d004d714cc1da0cec7361761c65a864782dd09f30a8",
+              "source_features": "1c81fa7646553e0ff0be34517b58e4ac90721ae3ae41c1e23fadc50cc312611a",
+              "reference_sphere": "1846b053f870405466776d004d714cc1da0cec7361761c65a864782dd09f30a8",
+              "reference_features": "85ed32511d9157cd1d7ebc478fc683b80c7cc6400d010856ac567e32b44d5c7d",
+              "initial_sphere": "1846b053f870405466776d004d714cc1da0cec7361761c65a864782dd09f30a8",
+              "source_weights": "017fcc53c0353677b40ca97f43f05a7f6582dfce5f95a3ee7771641c2f94313f",
+              "reference_weights": "017fcc53c0353677b40ca97f43f05a7f6582dfce5f95a3ee7771641c2f94313f"
+            },
+            "R": {
+              "source_sphere": "1a898433a9f1070e4e0435d4db966776ecc3291bfcd444efc7910aeffb91561c",
+              "source_features": "4346e73e4791e561db07ac1a2bbffccaba6a14bcdf9ac88965326936e043f826",
+              "reference_sphere": "1a898433a9f1070e4e0435d4db966776ecc3291bfcd444efc7910aeffb91561c",
+              "reference_features": "30c0bafc1cad6184e2623cfdb84ab1771bade522e39cf781fdf2555f0aca3d29",
+              "initial_sphere": "1a898433a9f1070e4e0435d4db966776ecc3291bfcd444efc7910aeffb91561c",
+              "source_weights": "054148d2db61e5964681d023fad3378657e53b73a2cfebbe443d93c9b62a8fd6",
+              "reference_weights": "054148d2db61e5964681d023fad3378657e53b73a2cfebbe443d93c9b62a8fd6"
+            }
+          },
+          "config_file_sha256": "ec9348a2bd2aea5ce2bf1a7387997dabb3443784c15a017faa4871e4ea38cc2e",
+          "configuration": {
+            "simval": [
+              2
+            ],
+            "iterations": [
+              10
+            ],
+            "control_grid": [
+              2
+            ],
+            "sampling_grid": [
+              4
+            ],
+            "data_grid": [
+              4
+            ],
+            "regularization": [
+              9.999999747378752e-06
+            ],
+            "shear_modulus": 0.4000000059604645,
+            "bulk_modulus": 1.600000023841858,
+            "strain_exponent": 2.0,
+            "regularization_exponent": 2.0
+          },
+          "installation_performed": false,
+          "import_seconds": 1.9198780581355095,
+          "cuda_startup_seconds": 0.6436034231446683,
+          "api_wall_seconds": 11.429805804044008,
+          "timing_scope": "full configured bilateral MSMAll API including surface/feature input reads, registration and sphere/report writes; excludes Python imports, CUDA initialization, initial hashes, post-run checks and BOLD projection",
+          "cold_definition": "first registration API call after imports and CUDA initialization in a fresh process; no filesystem cache clearing",
+          "parallel": true,
+          "cpu_threads": 8,
+          "max_gpu_bytes": 20000000000,
+          "cuda_allocator_fraction": 0.23545206700423646,
+          "device_total_memory_bytes": 84942979072,
+          "physical_gpu_index": 0,
+          "gpu_name": "NVIDIA H100 PCIe",
+          "torch": "2.5.1",
+          "cuda_runtime": "11.8",
+          "CUDA_MODULE_LOADING": "LAZY",
+          "TF32_matmul": true,
+          "TF32_cudnn": true,
+          "peak_allocated_bytes": 219422720,
+          "peak_allocated_gb": 0.21942272,
+          "peak_below_20GB": true,
+          "peak_scope": "combined API maximum; captures baseline per-hemisphere reset before executing original reset",
+          "inputs_unchanged": true,
+          "source_unchanged": true,
+          "spheres": {
+            "L": {
+              "file_sha256": "1c48567bdfd9f91ca2de0b1144293d979fecdad8095405e6185833b17a9bec0f",
+              "decoded_coordinates_sha256": "bffb18bc5fafc9075bd90619b9d78f237a5b65b0ad3ed4778590e7638c16cde3",
+              "decoded_faces_sha256": "deed589d455f57561f56f699dd6c999a06692738bd08f719d1607efab63606df",
+              "vertices": 32492,
+              "faces": 64980,
+              "finite": true,
+              "coordinate_dtype": "float32",
+              "face_dtype": "int32"
+            },
+            "R": {
+              "file_sha256": "0c24685684c75b8a0c7d875ce926eab20c92d3349d4614752831e8592296e105",
+              "decoded_coordinates_sha256": "8c593520c36ee53a894863e663661867b6526da2d07348a2a028e54d0cce75ed",
+              "decoded_faces_sha256": "eee7534ea37abf18abb7f0b60acbfdbf70ef554e8ff155681df0bb36c783c213",
+              "vertices": 32492,
+              "faces": 64980,
+              "finite": true,
+              "coordinate_dtype": "float32",
+              "face_dtype": "int32"
+            }
+          },
+          "registration": {
+            "L": {
+              "seconds": 11.404841967392713,
+              "feature_count": 33,
+              "weighted_cost": true,
+              "config": {
+                "simval": [
+                  2
+                ],
+                "iterations": [
+                  10
+                ],
+                "control_grid": [
+                  2
+                ],
+                "sampling_grid": [
+                  4
+                ],
+                "data_grid": [
+                  4
+                ],
+                "regularization": [
+                  9.999999747378752e-06
+                ],
+                "shear_modulus": 0.4000000059604645,
+                "bulk_modulus": 1.600000023841858,
+                "strain_exponent": 2.0,
+                "regularization_exponent": 2.0
+              },
+              "execution": "optimized",
+              "folded_output_faces": 0,
+              "folded_solver_faces": 0,
+              "minimum_output_orientation_ratio": 0.18406892754706589,
+              "minimum_solver_orientation_ratio": 0.18406903872382813,
+              "degenerate_input_faces": 0,
+              "stages": [
+                {
+                  "control_points": 162,
+                  "data_points": 2562,
+                  "labels": 19,
+                  "similarity": 2,
+                  "maximum_iterations": 10,
+                  "converged": false,
+                  "source_unfold_updates": 0,
+                  "control_unfold_updates": 0,
+                  "iterations": [
+                    {
+                      "changed": 169,
+                      "energy": 98.80763097016937,
+                      "applied": true,
+                      "seconds": 0.9926768029108644
+                    },
+                    {
+                      "changed": 66,
+                      "energy": 97.90432235227357,
+                      "applied": true,
+                      "seconds": 0.8560732109472156
+                    },
+                    {
+                      "changed": 58,
+                      "energy": 97.26098229591942,
+                      "applied": true,
+                      "seconds": 0.8732891730032861
+                    },
+                    {
+                      "changed": 52,
+                      "energy": 97.15215531308414,
+                      "applied": true,
+                      "seconds": 0.9753310126252472
+                    },
+                    {
+                      "changed": 69,
+                      "energy": 97.14183992692575,
+                      "applied": true,
+                      "seconds": 0.8794620288535953
+                    },
+                    {
+                      "changed": 74,
+                      "energy": 97.00935452730863,
+                      "applied": true,
+                      "seconds": 0.9608480860479176
+                    },
+                    {
+                      "changed": 86,
+                      "energy": 97.09905470540077,
+                      "applied": true,
+                      "seconds": 0.716100487858057
+                    },
+                    {
+                      "changed": 0,
+                      "energy": 97.02243206228047,
+                      "applied": true,
+                      "seconds": 0.6547587770037353
+                    },
+                    {
+                      "changed": 8,
+                      "energy": 97.0322549526056,
+                      "applied": true,
+                      "seconds": 0.6909675160422921
+                    },
+                    {
+                      "changed": 2,
+                      "energy": 96.9889610922558,
+                      "applied": true,
+                      "seconds": 0.6897944323718548
+                    }
+                  ],
+                  "seconds": 10.836512682028115
+                }
+              ],
+              "peak_allocated_gb": 0.21942272,
+              "cpu_threads": 4,
+              "execution_counts": {
+                "cuda_nearest_queries": 7828812,
+                "cuda_nearest_proved_queries": 7828223,
+                "tree_nearest_queries": 589,
+                "nearest_tie_fallback_queries": 589,
+                "cuda_adaptive_resampling_calls": 22,
+                "tree_expanded_face_queries": 1809,
+                "adaptive_cpu_layout_fallback_calls": 0
+              },
+              "peak_scope": "caller CUDA allocator since its last external reset; shared by both hemispheres"
+            },
+            "R": {
+              "seconds": 8.575330309104174,
+              "feature_count": 33,
+              "weighted_cost": true,
+              "config": {
+                "simval": [
+                  2
+                ],
+                "iterations": [
+                  10
+                ],
+                "control_grid": [
+                  2
+                ],
+                "sampling_grid": [
+                  4
+                ],
+                "data_grid": [
+                  4
+                ],
+                "regularization": [
+                  9.999999747378752e-06
+                ],
+                "shear_modulus": 0.4000000059604645,
+                "bulk_modulus": 1.600000023841858,
+                "strain_exponent": 2.0,
+                "regularization_exponent": 2.0
+              },
+              "execution": "optimized",
+              "folded_output_faces": 0,
+              "folded_solver_faces": 0,
+              "minimum_output_orientation_ratio": 0.08430761648420351,
+              "minimum_solver_orientation_ratio": 0.08430769283683094,
+              "degenerate_input_faces": 0,
+              "stages": [
+                {
+                  "control_points": 162,
+                  "data_points": 2562,
+                  "labels": 19,
+                  "similarity": 2,
+                  "maximum_iterations": 10,
+                  "converged": true,
+                  "source_unfold_updates": 0,
+                  "control_unfold_updates": 0,
+                  "iterations": [
+                    {
+                      "changed": 176,
+                      "energy": 97.67925617650565,
+                      "applied": true,
+                      "seconds": 0.9815402580425143
+                    },
+                    {
+                      "changed": 53,
+                      "energy": 96.62114272317493,
+                      "applied": true,
+                      "seconds": 0.895775340963155
+                    },
+                    {
+                      "changed": 57,
+                      "energy": 96.60658585494511,
+                      "applied": true,
+                      "seconds": 0.8733438639901578
+                    },
+                    {
+                      "changed": 60,
+                      "energy": 96.40225950087472,
+                      "applied": true,
+                      "seconds": 0.9833388510160148
+                    },
+                    {
+                      "changed": 61,
+                      "energy": 96.26140861316588,
+                      "applied": true,
+                      "seconds": 0.8804474328644574
+                    },
+                    {
+                      "changed": 67,
+                      "energy": 96.29106218860025,
+                      "applied": false,
+                      "seconds": 0.8879689397290349
+                    }
+                  ],
+                  "seconds": 8.113927014172077
+                }
+              ],
+              "peak_allocated_gb": 0.21942272,
+              "cpu_threads": 4,
+              "execution_counts": {
+                "cuda_nearest_queries": 4751202,
+                "cuda_nearest_proved_queries": 4750604,
+                "tree_nearest_queries": 598,
+                "nearest_tie_fallback_queries": 598,
+                "cuda_adaptive_resampling_calls": 14,
+                "tree_expanded_face_queries": 705,
+                "adaptive_cpu_layout_fallback_calls": 0
+              },
+              "peak_scope": "caller CUDA allocator since its last external reset; shared by both hemispheres"
+            },
+            "execution": {
+              "parallel_requested": true,
+              "hemispheres_parallel": true,
+              "cpu_threads": 8,
+              "cuda_streams": 2,
+              "native_graph_execution": "independent ordered CPU HOCR/FastPD",
+              "peak_allocated_gb": 0.21942272,
+              "peak_scope": "caller CUDA allocator since its last external reset; shared by both hemispheres"
+            }
+          }
+        }
+      },
+      "wrapper_wall_seconds": {
+        "baseline": 26.636591917835176,
+        "candidate": 14.716612049844116
+      },
+      "same_current_input_sha256": true,
+      "science_configuration_exact": true,
+      "candidate_vs_fresh_baseline": {
+        "L": {
+          "vertices": 32492,
+          "faces": 64980,
+          "decoded_coordinate_exact": true,
+          "decoded_faces_exact": true,
+          "gifti_metadata_exact": true,
+          "max_abs_coordinate_difference_mm": 0.0,
+          "coordinate_rmse_mm": 0.0,
+          "angle_deg": {
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "maximum": 0.0
+          },
+          "all_arrays_finite": true
+        },
+        "R": {
+          "vertices": 32492,
+          "faces": 64980,
+          "decoded_coordinate_exact": true,
+          "decoded_faces_exact": true,
+          "gifti_metadata_exact": true,
+          "max_abs_coordinate_difference_mm": 0.0,
+          "coordinate_rmse_mm": 0.0,
+          "angle_deg": {
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "maximum": 0.0
+          },
+          "all_arrays_finite": true
+        }
+      },
+      "candidate_vs_saved_official": {
+        "L": {
+          "vertices": 32492,
+          "faces": 64980,
+          "decoded_coordinate_exact": true,
+          "decoded_faces_exact": true,
+          "gifti_metadata_exact": false,
+          "max_abs_coordinate_difference_mm": 0.0,
+          "coordinate_rmse_mm": 0.0,
+          "angle_deg": {
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "maximum": 0.0
+          },
+          "all_arrays_finite": true
+        },
+        "R": {
+          "vertices": 32492,
+          "faces": 64980,
+          "decoded_coordinate_exact": true,
+          "decoded_faces_exact": true,
+          "gifti_metadata_exact": false,
+          "max_abs_coordinate_difference_mm": 0.0,
+          "coordinate_rmse_mm": 0.0,
+          "angle_deg": {
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "maximum": 0.0
+          },
+          "all_arrays_finite": true
+        }
+      },
+      "saved_official_scope": "previously saved strict single-CPU-thread newMSM reference; historical per-input file hashes were not recorded, so this is a saved-result regression control and not a new official same-input run",
+      "all_current_input_files_unchanged": true,
+      "all_frozen_source_files_unchanged": true,
+      "checked_current_artifacts": {
+        "file_count": 15,
+        "all_verified_against_preflight_sha256_before_and_after_each_run": true,
+        "file_size_and_sha256": [
+          {
+            "bytes": 46170,
+            "sha256": "017fcc53c0353677b40ca97f43f05a7f6582dfce5f95a3ee7771641c2f94313f"
+          },
+          {
+            "bytes": 46170,
+            "sha256": "017fcc53c0353677b40ca97f43f05a7f6582dfce5f95a3ee7771641c2f94313f"
+          },
+          {
+            "bytes": 47242,
+            "sha256": "054148d2db61e5964681d023fad3378657e53b73a2cfebbe443d93c9b62a8fd6"
+          },
+          {
+            "bytes": 47242,
+            "sha256": "054148d2db61e5964681d023fad3378657e53b73a2cfebbe443d93c9b62a8fd6"
+          },
+          {
+            "bytes": 716079,
+            "sha256": "11621f7349f04547d559131d6da28a769b10818b2e8b9cf2bc073cfc2c3fcfb3"
+          },
+          {
+            "bytes": 562891,
+            "sha256": "1846b053f870405466776d004d714cc1da0cec7361761c65a864782dd09f30a8"
+          },
+          {
+            "bytes": 553052,
+            "sha256": "1a898433a9f1070e4e0435d4db966776ecc3291bfcd444efc7910aeffb91561c"
+          },
+          {
+            "bytes": 4745718,
+            "sha256": "1c81fa7646553e0ff0be34517b58e4ac90721ae3ae41c1e23fadc50cc312611a"
+          },
+          {
+            "bytes": 4746494,
+            "sha256": "30c0bafc1cad6184e2623cfdb84ab1771bade522e39cf781fdf2555f0aca3d29"
+          },
+          {
+            "bytes": 4746734,
+            "sha256": "4346e73e4791e561db07ac1a2bbffccaba6a14bcdf9ac88965326936e043f826"
+          },
+          {
+            "bytes": 3018873,
+            "sha256": "77b2d199c9e0b95d688277008e5764ad566ec17adc0cb0da3a0541c11f738b4b"
+          },
+          {
+            "bytes": 4741054,
+            "sha256": "85ed32511d9157cd1d7ebc478fc683b80c7cc6400d010856ac567e32b44d5c7d"
+          },
+          {
+            "bytes": 703431,
+            "sha256": "ae5959f6b2176207cb216a99e3a76e02b3d00ce9117274e647669b46fdc6c353"
+          },
+          {
+            "bytes": 2957596,
+            "sha256": "b429048eb5e23701bce22c0fe897cdbd0dde9728773db91c3ef3d143b510d79f"
+          },
+          {
+            "bytes": 223,
+            "sha256": "ec9348a2bd2aea5ce2bf1a7387997dabb3443784c15a017faa4871e4ea38cc2e"
+          }
+        ]
+      },
+      "saved_official_sphere_sha256": {
+        "L": "11621f7349f04547d559131d6da28a769b10818b2e8b9cf2bc073cfc2c3fcfb3",
+        "R": "ae5959f6b2176207cb216a99e3a76e02b3d00ce9117274e647669b46fdc6c353"
+      },
+      "configuration_text": "--simval=2\n--sigma_in=0\n--sigma_ref=0\n--lambda=0.00001\n--it=10\n--opt=DISCRETE\n--CPgrid=2\n--SGgrid=4\n--datagrid=4\n--regoption=3\n--regexp=2\n--dopt=HOCR\n--VN\n--rescaleL\n--triclique\n--k_exponent=2\n--bulkmod=1.6\n--shearmod=0.4\n\n",
+      "observed_baseline_to_candidate_api_time_ratio": 2.03306022361183
+    },
+    "refine": {
+      "runs": {
+        "baseline": {
+          "schema_version": 1,
+          "function": "run_msmall",
+          "schedule": "refine",
+          "condition": "baseline",
+          "source_revision": "954ad19e29ddde8617eddf58ebafc3a4f72b8951",
+          "source_sha256": {
+            "src/fnit/msm/__init__.py": "773c12c8aebc9c8084ac3ac18e6095be9ef31c3d01720634c27cb0cd23954067",
+            "src/fnit/msm/_affine.py": "fb9268e69482ca9e9b1cd2eaa3a80fdd039822cdcd32940d2131072527219e4e",
+            "src/fnit/msm/_fastpd_native.cpython-311-x86_64-linux-gnu.so": "1fd35ea562f3438b0dd7bdc83b8beffc95af29301c5eba70eaa2865982f9efa2",
+            "src/fnit/msm/_fastpd_src/FastPD.h": "d21f2640701d743b53d83d7ecd119db454bc36bf877c5862846de04254183698",
+            "src/fnit/msm/_fastpd_src/block.h": "9aafefcf97a94e55027baae2d518cff2bc0739024b1f017747da6d310426cddb",
+            "src/fnit/msm/_fastpd_src/fastpd_module.cpp": "ccb48d830a075564f18ed2eca2b7de8ae3e5cd0e22045088ebac4af374b45411",
+            "src/fnit/msm/_fastpd_src/fnit_fastpd_model_stub.h": "a11a81379cef2466b410039956ffbebab4f979abaa94122e761a833dd4b310d5",
+            "src/fnit/msm/_fastpd_src/graph.h": "b75781e1719df32a6bc5741cbbd97745568207045e5397897629b00d4ab93fd9",
+            "src/fnit/msm/_sphere_map.py": "0b54a766f316ef3532cb75a121c6a770e1958138d25a241b3e7bcb81c7d707f9",
+            "src/fnit/msm/cli.py": "53c5c662fc453f19842cb07bf5ee354b21414ecb1439fbde00550f28cfb610ed",
+            "src/fnit/msm/config.py": "20afadd2860c2782fa3983f56d1351e31a56e415f75761798223ad455335e8c9",
+            "src/fnit/msm/config_msmall.py": "63e21ca7114a4a415408cd52bd9b88d5eeadf5fd394be995105ac0906bddb467",
+            "src/fnit/msm/feature_cli.py": "c65838b9136ebe26d29cfd320e155a246bd88c5a6ce2e3ffcf662a9909a11586",
+            "src/fnit/msm/features.py": "7e598efeeab5665ca05957d06d0867edea8b4714292bcb1b8b41be76f57fb6b2",
+            "src/fnit/msm/msmall.py": "249919f2fb544584987e57a038fb1c6e0b1d9b8bb537c81f7b0aa702ca0a1cd5",
+            "src/fnit/msm/msmsulc.py": "5433eeef19c17001a0514af7d5d4801eee226c69a3d2de3be56c00cb078a87fc",
+            "src/fnit/msm/prepare.py": "30dc5fdb17628b70ec42e87f0d04c3d7e5f7c4faf35292e0a89493536006d675",
+            "src/fnit/__init__.py": "fd7a74d6bfbd4d5829d22d23618b419b200b11673df8f11f628d2d499007a0d4",
+            "setup.py": "f104f5e6e95720f6f686b3c2879629cddd658404eb0b8d586703d43d56f70c89"
+          },
+          "native_extension_sha256": "1fd35ea562f3438b0dd7bdc83b8beffc95af29301c5eba70eaa2865982f9efa2",
+          "input_sha256": {
+            "L": {
+              "source_sphere": "1846b053f870405466776d004d714cc1da0cec7361761c65a864782dd09f30a8",
+              "source_features": "1c81fa7646553e0ff0be34517b58e4ac90721ae3ae41c1e23fadc50cc312611a",
+              "reference_sphere": "1846b053f870405466776d004d714cc1da0cec7361761c65a864782dd09f30a8",
+              "reference_features": "85ed32511d9157cd1d7ebc478fc683b80c7cc6400d010856ac567e32b44d5c7d",
+              "initial_sphere": "1846b053f870405466776d004d714cc1da0cec7361761c65a864782dd09f30a8",
+              "source_weights": "017fcc53c0353677b40ca97f43f05a7f6582dfce5f95a3ee7771641c2f94313f",
+              "reference_weights": "017fcc53c0353677b40ca97f43f05a7f6582dfce5f95a3ee7771641c2f94313f"
+            },
+            "R": {
+              "source_sphere": "1a898433a9f1070e4e0435d4db966776ecc3291bfcd444efc7910aeffb91561c",
+              "source_features": "4346e73e4791e561db07ac1a2bbffccaba6a14bcdf9ac88965326936e043f826",
+              "reference_sphere": "1a898433a9f1070e4e0435d4db966776ecc3291bfcd444efc7910aeffb91561c",
+              "reference_features": "30c0bafc1cad6184e2623cfdb84ab1771bade522e39cf781fdf2555f0aca3d29",
+              "initial_sphere": "1a898433a9f1070e4e0435d4db966776ecc3291bfcd444efc7910aeffb91561c",
+              "source_weights": "054148d2db61e5964681d023fad3378657e53b73a2cfebbe443d93c9b62a8fd6",
+              "reference_weights": "054148d2db61e5964681d023fad3378657e53b73a2cfebbe443d93c9b62a8fd6"
+            }
+          },
+          "config_file_sha256": "646f100e7826d0c285f379f2a9121f0c0c8cd61a3d2d200cc241c416617b8555",
+          "configuration": {
+            "simval": [
+              2,
+              2,
+              2
+            ],
+            "iterations": [
+              10,
+              15,
+              15
+            ],
+            "control_grid": [
+              2,
+              3,
+              4
+            ],
+            "sampling_grid": [
+              4,
+              5,
+              6
+            ],
+            "data_grid": [
+              4,
+              5,
+              6
+            ],
+            "regularization": [
+              9.999999747378752e-06,
+              0.007499999832361937,
+              0.009999999776482582
+            ],
+            "shear_modulus": 0.4000000059604645,
+            "bulk_modulus": 1.600000023841858,
+            "strain_exponent": 2.0,
+            "regularization_exponent": 2.0
+          },
+          "installation_performed": false,
+          "import_seconds": 1.8882622397504747,
+          "cuda_startup_seconds": 0.7746808608062565,
+          "api_wall_seconds": 181.7896623299457,
+          "timing_scope": "full configured bilateral MSMAll API including surface/feature input reads, registration and sphere/report writes; excludes Python imports, CUDA initialization, initial hashes, post-run checks and BOLD projection",
+          "cold_definition": "first registration API call after imports and CUDA initialization in a fresh process; no filesystem cache clearing",
+          "parallel": false,
+          "cpu_threads": 8,
+          "max_gpu_bytes": 20000000000,
+          "cuda_allocator_fraction": 0.23545206700423646,
+          "device_total_memory_bytes": 84942979072,
+          "physical_gpu_index": 0,
+          "gpu_name": "NVIDIA H100 PCIe",
+          "torch": "2.5.1",
+          "cuda_runtime": "11.8",
+          "CUDA_MODULE_LOADING": "LAZY",
+          "TF32_matmul": true,
+          "TF32_cudnn": true,
+          "peak_allocated_bytes": 1212606464,
+          "peak_allocated_gb": 1.212606464,
+          "peak_below_20GB": true,
+          "peak_scope": "combined API maximum; captures baseline per-hemisphere reset before executing original reset",
+          "inputs_unchanged": true,
+          "source_unchanged": true,
+          "spheres": {
+            "L": {
+              "file_sha256": "c8b9fe43bb3e09d00f9759337714edd7accd8d3cbc2988dfcd05e473c4681aa4",
+              "decoded_coordinates_sha256": "3cd1d5d04fda883177a0d23e8c6032619dd38493575460ed5129f07a5034d43a",
+              "decoded_faces_sha256": "deed589d455f57561f56f699dd6c999a06692738bd08f719d1607efab63606df",
+              "vertices": 32492,
+              "faces": 64980,
+              "finite": true,
+              "coordinate_dtype": "float32",
+              "face_dtype": "int32"
+            },
+            "R": {
+              "file_sha256": "76390139528627816a2244580435d5a783ae024bfb55dadaf0726722a09f0771",
+              "decoded_coordinates_sha256": "4fca9f5f4d9fa579ba408987691b57a9f7f698ef4161ce2ad0b665cb5c979472",
+              "decoded_faces_sha256": "eee7534ea37abf18abb7f0b60acbfdbf70ef554e8ff155681df0bb36c783c213",
+              "vertices": 32492,
+              "faces": 64980,
+              "finite": true,
+              "coordinate_dtype": "float32",
+              "face_dtype": "int32"
+            }
+          },
+          "registration": {
+            "L": {
+              "seconds": 82.00716021191329,
+              "feature_count": 33,
+              "weighted_cost": true,
+              "config": {
+                "simval": [
+                  2,
+                  2,
+                  2
+                ],
+                "iterations": [
+                  10,
+                  15,
+                  15
+                ],
+                "control_grid": [
+                  2,
+                  3,
+                  4
+                ],
+                "sampling_grid": [
+                  4,
+                  5,
+                  6
+                ],
+                "data_grid": [
+                  4,
+                  5,
+                  6
+                ],
+                "regularization": [
+                  9.999999747378752e-06,
+                  0.007499999832361937,
+                  0.009999999776482582
+                ],
+                "shear_modulus": 0.4000000059604645,
+                "bulk_modulus": 1.600000023841858,
+                "strain_exponent": 2.0,
+                "regularization_exponent": 2.0
+              },
+              "execution": "optimized",
+              "folded_output_faces": 0,
+              "folded_solver_faces": 0,
+              "minimum_output_orientation_ratio": 0.4458976642123139,
+              "minimum_solver_orientation_ratio": 0.4458972430475598,
+              "degenerate_input_faces": 0,
+              "stages": [
+                {
+                  "control_points": 162,
+                  "data_points": 2562,
+                  "labels": 19,
+                  "similarity": 2,
+                  "maximum_iterations": 10,
+                  "converged": false,
+                  "source_unfold_updates": 0,
+                  "control_unfold_updates": 0,
+                  "iterations": [
+                    {
+                      "changed": 169,
+                      "energy": 98.80763097016937,
+                      "applied": true,
+                      "seconds": 1.1421687412075698
+                    },
+                    {
+                      "changed": 66,
+                      "energy": 97.90432235227357,
+                      "applied": true,
+                      "seconds": 1.0076439143158495
+                    },
+                    {
+                      "changed": 58,
+                      "energy": 97.26098229591942,
+                      "applied": true,
+                      "seconds": 1.0357463252730668
+                    },
+                    {
+                      "changed": 52,
+                      "energy": 97.15215531308414,
+                      "applied": true,
+                      "seconds": 1.03628912800923
+                    },
+                    {
+                      "changed": 69,
+                      "energy": 97.14183992692575,
+                      "applied": true,
+                      "seconds": 1.0090997037477791
+                    },
+                    {
+                      "changed": 74,
+                      "energy": 97.00935452730863,
+                      "applied": true,
+                      "seconds": 1.1062671351246536
+                    },
+                    {
+                      "changed": 86,
+                      "energy": 97.09905470540077,
+                      "applied": true,
+                      "seconds": 1.043351111933589
+                    },
+                    {
+                      "changed": 0,
+                      "energy": 97.02243206228047,
+                      "applied": true,
+                      "seconds": 1.0257259048521519
+                    },
+                    {
+                      "changed": 8,
+                      "energy": 97.0322549526056,
+                      "applied": true,
+                      "seconds": 1.0434678178280592
+                    },
+                    {
+                      "changed": 2,
+                      "energy": 96.9889610922558,
+                      "applied": true,
+                      "seconds": 1.0289026577956975
+                    }
+                  ],
+                  "seconds": 11.956485407892615
+                },
+                {
+                  "control_points": 642,
+                  "data_points": 10242,
+                  "labels": 19,
+                  "similarity": 2,
+                  "maximum_iterations": 15,
+                  "converged": true,
+                  "source_unfold_updates": 0,
+                  "control_unfold_updates": 0,
+                  "iterations": [
+                    {
+                      "changed": 711,
+                      "energy": 440.13757021136615,
+                      "applied": true,
+                      "seconds": 3.011090429034084
+                    },
+                    {
+                      "changed": 377,
+                      "energy": 438.0479438744226,
+                      "applied": true,
+                      "seconds": 2.752966621890664
+                    },
+                    {
+                      "changed": 328,
+                      "energy": 436.41786745761016,
+                      "applied": true,
+                      "seconds": 2.7105106562376022
+                    },
+                    {
+                      "changed": 334,
+                      "energy": 436.27211750974794,
+                      "applied": true,
+                      "seconds": 2.612329425290227
+                    },
+                    {
+                      "changed": 402,
+                      "energy": 435.77139948574455,
+                      "applied": true,
+                      "seconds": 2.644399461802095
+                    },
+                    {
+                      "changed": 348,
+                      "energy": 434.9744626642527,
+                      "applied": true,
+                      "seconds": 2.5264911190606654
+                    },
+                    {
+                      "changed": 346,
+                      "energy": 434.87514018986263,
+                      "applied": true,
+                      "seconds": 2.6447983821853995
+                    },
+                    {
+                      "changed": 0,
+                      "energy": 435.13406735859223,
+                      "applied": false,
+                      "seconds": 2.5604330617934465
+                    }
+                  ],
+                  "seconds": 22.797943661920726
+                },
+                {
+                  "control_points": 2562,
+                  "data_points": 40962,
+                  "labels": 19,
+                  "similarity": 2,
+                  "maximum_iterations": 15,
+                  "converged": true,
+                  "source_unfold_updates": 0,
+                  "control_unfold_updates": 0,
+                  "iterations": [
+                    {
+                      "changed": 1190,
+                      "energy": 1821.6870233612462,
+                      "applied": true,
+                      "seconds": 7.248171789571643
+                    },
+                    {
+                      "changed": 1057,
+                      "energy": 1823.7026025171338,
+                      "applied": true,
+                      "seconds": 7.323764952365309
+                    },
+                    {
+                      "changed": 1476,
+                      "energy": 1820.8503395551536,
+                      "applied": true,
+                      "seconds": 7.398452338762581
+                    },
+                    {
+                      "changed": 1416,
+                      "energy": 1819.2831532620496,
+                      "applied": true,
+                      "seconds": 6.931598263792694
+                    },
+                    {
+                      "changed": 1546,
+                      "energy": 1816.890106295695,
+                      "applied": true,
+                      "seconds": 7.322111904155463
+                    },
+                    {
+                      "changed": 1599,
+                      "energy": 1816.9284078961218,
+                      "applied": false,
+                      "seconds": 7.227643435820937
+                    }
+                  ],
+                  "seconds": 46.729248927906156
+                }
+              ],
+              "peak_allocated_gb": 1.212606464
+            },
+            "R": {
+              "seconds": 99.75500066485256,
+              "feature_count": 33,
+              "weighted_cost": true,
+              "config": {
+                "simval": [
+                  2,
+                  2,
+                  2
+                ],
+                "iterations": [
+                  10,
+                  15,
+                  15
+                ],
+                "control_grid": [
+                  2,
+                  3,
+                  4
+                ],
+                "sampling_grid": [
+                  4,
+                  5,
+                  6
+                ],
+                "data_grid": [
+                  4,
+                  5,
+                  6
+                ],
+                "regularization": [
+                  9.999999747378752e-06,
+                  0.007499999832361937,
+                  0.009999999776482582
+                ],
+                "shear_modulus": 0.4000000059604645,
+                "bulk_modulus": 1.600000023841858,
+                "strain_exponent": 2.0,
+                "regularization_exponent": 2.0
+              },
+              "execution": "optimized",
+              "folded_output_faces": 0,
+              "folded_solver_faces": 0,
+              "minimum_output_orientation_ratio": 0.3254942635495554,
+              "minimum_solver_orientation_ratio": 0.32549318147521206,
+              "degenerate_input_faces": 0,
+              "stages": [
+                {
+                  "control_points": 162,
+                  "data_points": 2562,
+                  "labels": 19,
+                  "similarity": 2,
+                  "maximum_iterations": 10,
+                  "converged": true,
+                  "source_unfold_updates": 0,
+                  "control_unfold_updates": 0,
+                  "iterations": [
+                    {
+                      "changed": 176,
+                      "energy": 97.67925617650565,
+                      "applied": true,
+                      "seconds": 1.0662649436853826
+                    },
+                    {
+                      "changed": 53,
+                      "energy": 96.62114272317493,
+                      "applied": true,
+                      "seconds": 1.1175786503590643
+                    },
+                    {
+                      "changed": 57,
+                      "energy": 96.60658585494511,
+                      "applied": true,
+                      "seconds": 1.060507298912853
+                    },
+                    {
+                      "changed": 60,
+                      "energy": 96.40225950087472,
+                      "applied": true,
+                      "seconds": 1.1409107856452465
+                    },
+                    {
+                      "changed": 61,
+                      "energy": 96.26140861316588,
+                      "applied": true,
+                      "seconds": 1.027172626927495
+                    },
+                    {
+                      "changed": 67,
+                      "energy": 96.29106218860025,
+                      "applied": false,
+                      "seconds": 1.1272426890209317
+                    }
+                  ],
+                  "seconds": 7.379347964189947
+                },
+                {
+                  "control_points": 642,
+                  "data_points": 10242,
+                  "labels": 19,
+                  "similarity": 2,
+                  "maximum_iterations": 15,
+                  "converged": true,
+                  "source_unfold_updates": 0,
+                  "control_unfold_updates": 0,
+                  "iterations": [
+                    {
+                      "changed": 675,
+                      "energy": 440.5110403577506,
+                      "applied": true,
+                      "seconds": 2.67997041111812
+                    },
+                    {
+                      "changed": 405,
+                      "energy": 437.2333029714414,
+                      "applied": true,
+                      "seconds": 2.6803187183104455
+                    },
+                    {
+                      "changed": 398,
+                      "energy": 436.84733989449546,
+                      "applied": true,
+                      "seconds": 2.6853477908298373
+                    },
+                    {
+                      "changed": 356,
+                      "energy": 435.2965767570196,
+                      "applied": true,
+                      "seconds": 2.607873325701803
+                    },
+                    {
+                      "changed": 426,
+                      "energy": 436.13722563605876,
+                      "applied": true,
+                      "seconds": 2.56976388534531
+                    },
+                    {
+                      "changed": 358,
+                      "energy": 435.1362184833278,
+                      "applied": true,
+                      "seconds": 2.7247067051939666
+                    },
+                    {
+                      "changed": 379,
+                      "energy": 434.7878923739279,
+                      "applied": true,
+                      "seconds": 3.0052595380693674
+                    },
+                    {
+                      "changed": 0,
+                      "energy": 434.61736693354663,
+                      "applied": true,
+                      "seconds": 2.914433336816728
+                    },
+                    {
+                      "changed": 1,
+                      "energy": 434.5372613858577,
+                      "applied": true,
+                      "seconds": 2.990527756046504
+                    },
+                    {
+                      "changed": 2,
+                      "energy": 434.5570763576638,
+                      "applied": false,
+                      "seconds": 2.980633477214724
+                    }
+                  ],
+                  "seconds": 29.131047329865396
+                },
+                {
+                  "control_points": 2562,
+                  "data_points": 40962,
+                  "labels": 19,
+                  "similarity": 2,
+                  "maximum_iterations": 15,
+                  "converged": true,
+                  "source_unfold_updates": 0,
+                  "control_unfold_updates": 0,
+                  "iterations": [
+                    {
+                      "changed": 1072,
+                      "energy": 1824.1911808037594,
+                      "applied": true,
+                      "seconds": 7.757519760169089
+                    },
+                    {
+                      "changed": 1131,
+                      "energy": 1821.9641827134815,
+                      "applied": true,
+                      "seconds": 7.789288085885346
+                    },
+                    {
+                      "changed": 1379,
+                      "energy": 1820.0438142225732,
+                      "applied": true,
+                      "seconds": 7.610992643982172
+                    },
+                    {
+                      "changed": 1541,
+                      "energy": 1817.7456329876718,
+                      "applied": true,
+                      "seconds": 7.433632443193346
+                    },
+                    {
+                      "changed": 1624,
+                      "energy": 1816.8520364470112,
+                      "applied": true,
+                      "seconds": 7.471482709981501
+                    },
+                    {
+                      "changed": 1707,
+                      "energy": 1816.203860690977,
+                      "applied": true,
+                      "seconds": 7.133735457900912
+                    },
+                    {
+                      "changed": 1825,
+                      "energy": 1814.5760642249847,
+                      "applied": true,
+                      "seconds": 7.063036980107427
+                    },
+                    {
+                      "changed": 0,
+                      "energy": 1815.263150989521,
+                      "applied": false,
+                      "seconds": 7.283991777338088
+                    }
+                  ],
+                  "seconds": 62.77574299927801
+                }
+              ],
+              "peak_allocated_gb": 1.212606464
+            }
+          }
+        },
+        "candidate": {
+          "schema_version": 1,
+          "function": "run_msmall",
+          "schedule": "refine",
+          "condition": "candidate",
+          "source_revision": "9f9f63e95b4ee702e4c3024407496df47a851631",
+          "source_sha256": {
+            "src/fnit/msm/__init__.py": "773c12c8aebc9c8084ac3ac18e6095be9ef31c3d01720634c27cb0cd23954067",
+            "src/fnit/msm/_affine.py": "fb9268e69482ca9e9b1cd2eaa3a80fdd039822cdcd32940d2131072527219e4e",
+            "src/fnit/msm/_execution.py": "e67d43b972dd690c9ec86081c6d3e4fb783935def4bec8f264ab7d232916beae",
+            "src/fnit/msm/_fastpd_native.cpython-311-x86_64-linux-gnu.so": "69fda883c5022d412172eba2de164b79726d18c068b7c421a200b331b6502ad8",
+            "src/fnit/msm/_fastpd_src/FastPD.h": "d21f2640701d743b53d83d7ecd119db454bc36bf877c5862846de04254183698",
+            "src/fnit/msm/_fastpd_src/block.h": "9aafefcf97a94e55027baae2d518cff2bc0739024b1f017747da6d310426cddb",
+            "src/fnit/msm/_fastpd_src/fastpd_module.cpp": "380204e7c5823d59a63c8cc2c7f03a389271e6b006e5c2f0453b69bbe5a79729",
+            "src/fnit/msm/_fastpd_src/fnit_fastpd_model_stub.h": "a11a81379cef2466b410039956ffbebab4f979abaa94122e761a833dd4b310d5",
+            "src/fnit/msm/_fastpd_src/graph.h": "b75781e1719df32a6bc5741cbbd97745568207045e5397897629b00d4ab93fd9",
+            "src/fnit/msm/_ordered_sparse.py": "440ffd8f634fa42736aa0ea5b5f41de114e685a033146492d1e1f9e7a5364f11",
+            "src/fnit/msm/_spatial.py": "c7319ae9a616dbc2d741a8e8ecb0543cec6ffb7f54914f672f7b6947e6359204",
+            "src/fnit/msm/_sphere_map.py": "51bd19d1c12ef8be3427d4f9ef642dae5591ae8b0e0638b426d89e12173751be",
+            "src/fnit/msm/cli.py": "7f9b9d2df7619818eaff9e4bfac29f239c17cbddc3575968dbacada7f387fe8d",
+            "src/fnit/msm/config.py": "20afadd2860c2782fa3983f56d1351e31a56e415f75761798223ad455335e8c9",
+            "src/fnit/msm/config_msmall.py": "63e21ca7114a4a415408cd52bd9b88d5eeadf5fd394be995105ac0906bddb467",
+            "src/fnit/msm/feature_cli.py": "c65838b9136ebe26d29cfd320e155a246bd88c5a6ce2e3ffcf662a9909a11586",
+            "src/fnit/msm/features.py": "7e598efeeab5665ca05957d06d0867edea8b4714292bcb1b8b41be76f57fb6b2",
+            "src/fnit/msm/msmall.py": "2629205b3ba4e10999dc7af92f679f5f8c487b13ed8ca28719e6e68776ec116b",
+            "src/fnit/msm/msmsulc.py": "a4ff7112888d645497ddbcc003059a810231d60a60dd9f06602fa7a94601f924",
+            "src/fnit/msm/prepare.py": "a8f6ca261378768e38a13c53d85d58702a2f4e7f30928e6e2b6b6e1665fd9b11",
+            "src/fnit/__init__.py": "fd7a74d6bfbd4d5829d22d23618b419b200b11673df8f11f628d2d499007a0d4",
+            "src/fnit/_hemisphere_parallel.py": "2bca5a145a335dbcfd81f5af13f2cb1db7c5f639f250caf456a143023c64a6d7",
+            "setup.py": "f104f5e6e95720f6f686b3c2879629cddd658404eb0b8d586703d43d56f70c89"
+          },
+          "native_extension_sha256": "69fda883c5022d412172eba2de164b79726d18c068b7c421a200b331b6502ad8",
+          "input_sha256": {
+            "L": {
+              "source_sphere": "1846b053f870405466776d004d714cc1da0cec7361761c65a864782dd09f30a8",
+              "source_features": "1c81fa7646553e0ff0be34517b58e4ac90721ae3ae41c1e23fadc50cc312611a",
+              "reference_sphere": "1846b053f870405466776d004d714cc1da0cec7361761c65a864782dd09f30a8",
+              "reference_features": "85ed32511d9157cd1d7ebc478fc683b80c7cc6400d010856ac567e32b44d5c7d",
+              "initial_sphere": "1846b053f870405466776d004d714cc1da0cec7361761c65a864782dd09f30a8",
+              "source_weights": "017fcc53c0353677b40ca97f43f05a7f6582dfce5f95a3ee7771641c2f94313f",
+              "reference_weights": "017fcc53c0353677b40ca97f43f05a7f6582dfce5f95a3ee7771641c2f94313f"
+            },
+            "R": {
+              "source_sphere": "1a898433a9f1070e4e0435d4db966776ecc3291bfcd444efc7910aeffb91561c",
+              "source_features": "4346e73e4791e561db07ac1a2bbffccaba6a14bcdf9ac88965326936e043f826",
+              "reference_sphere": "1a898433a9f1070e4e0435d4db966776ecc3291bfcd444efc7910aeffb91561c",
+              "reference_features": "30c0bafc1cad6184e2623cfdb84ab1771bade522e39cf781fdf2555f0aca3d29",
+              "initial_sphere": "1a898433a9f1070e4e0435d4db966776ecc3291bfcd444efc7910aeffb91561c",
+              "source_weights": "054148d2db61e5964681d023fad3378657e53b73a2cfebbe443d93c9b62a8fd6",
+              "reference_weights": "054148d2db61e5964681d023fad3378657e53b73a2cfebbe443d93c9b62a8fd6"
+            }
+          },
+          "config_file_sha256": "646f100e7826d0c285f379f2a9121f0c0c8cd61a3d2d200cc241c416617b8555",
+          "configuration": {
+            "simval": [
+              2,
+              2,
+              2
+            ],
+            "iterations": [
+              10,
+              15,
+              15
+            ],
+            "control_grid": [
+              2,
+              3,
+              4
+            ],
+            "sampling_grid": [
+              4,
+              5,
+              6
+            ],
+            "data_grid": [
+              4,
+              5,
+              6
+            ],
+            "regularization": [
+              9.999999747378752e-06,
+              0.007499999832361937,
+              0.009999999776482582
+            ],
+            "shear_modulus": 0.4000000059604645,
+            "bulk_modulus": 1.600000023841858,
+            "strain_exponent": 2.0,
+            "regularization_exponent": 2.0
+          },
+          "installation_performed": false,
+          "import_seconds": 2.0770358121953905,
+          "cuda_startup_seconds": 0.5839334670454264,
+          "api_wall_seconds": 90.79584784898907,
+          "timing_scope": "full configured bilateral MSMAll API including surface/feature input reads, registration and sphere/report writes; excludes Python imports, CUDA initialization, initial hashes, post-run checks and BOLD projection",
+          "cold_definition": "first registration API call after imports and CUDA initialization in a fresh process; no filesystem cache clearing",
+          "parallel": true,
+          "cpu_threads": 8,
+          "max_gpu_bytes": 20000000000,
+          "cuda_allocator_fraction": 0.23545206700423646,
+          "device_total_memory_bytes": 84942979072,
+          "physical_gpu_index": 0,
+          "gpu_name": "NVIDIA H100 PCIe",
+          "torch": "2.5.1",
+          "cuda_runtime": "11.8",
+          "CUDA_MODULE_LOADING": "LAZY",
+          "TF32_matmul": true,
+          "TF32_cudnn": true,
+          "peak_allocated_bytes": 1466194944,
+          "peak_allocated_gb": 1.466194944,
+          "peak_below_20GB": true,
+          "peak_scope": "combined API maximum; captures baseline per-hemisphere reset before executing original reset",
+          "inputs_unchanged": true,
+          "source_unchanged": true,
+          "spheres": {
+            "L": {
+              "file_sha256": "c8b9fe43bb3e09d00f9759337714edd7accd8d3cbc2988dfcd05e473c4681aa4",
+              "decoded_coordinates_sha256": "3cd1d5d04fda883177a0d23e8c6032619dd38493575460ed5129f07a5034d43a",
+              "decoded_faces_sha256": "deed589d455f57561f56f699dd6c999a06692738bd08f719d1607efab63606df",
+              "vertices": 32492,
+              "faces": 64980,
+              "finite": true,
+              "coordinate_dtype": "float32",
+              "face_dtype": "int32"
+            },
+            "R": {
+              "file_sha256": "76390139528627816a2244580435d5a783ae024bfb55dadaf0726722a09f0771",
+              "decoded_coordinates_sha256": "4fca9f5f4d9fa579ba408987691b57a9f7f698ef4161ce2ad0b665cb5c979472",
+              "decoded_faces_sha256": "eee7534ea37abf18abb7f0b60acbfdbf70ef554e8ff155681df0bb36c783c213",
+              "vertices": 32492,
+              "faces": 64980,
+              "finite": true,
+              "coordinate_dtype": "float32",
+              "face_dtype": "int32"
+            }
+          },
+          "registration": {
+            "L": {
+              "seconds": 79.39919886505231,
+              "feature_count": 33,
+              "weighted_cost": true,
+              "config": {
+                "simval": [
+                  2,
+                  2,
+                  2
+                ],
+                "iterations": [
+                  10,
+                  15,
+                  15
+                ],
+                "control_grid": [
+                  2,
+                  3,
+                  4
+                ],
+                "sampling_grid": [
+                  4,
+                  5,
+                  6
+                ],
+                "data_grid": [
+                  4,
+                  5,
+                  6
+                ],
+                "regularization": [
+                  9.999999747378752e-06,
+                  0.007499999832361937,
+                  0.009999999776482582
+                ],
+                "shear_modulus": 0.4000000059604645,
+                "bulk_modulus": 1.600000023841858,
+                "strain_exponent": 2.0,
+                "regularization_exponent": 2.0
+              },
+              "execution": "optimized",
+              "folded_output_faces": 0,
+              "folded_solver_faces": 0,
+              "minimum_output_orientation_ratio": 0.4458976642123139,
+              "minimum_solver_orientation_ratio": 0.4458972430475598,
+              "degenerate_input_faces": 0,
+              "stages": [
+                {
+                  "control_points": 162,
+                  "data_points": 2562,
+                  "labels": 19,
+                  "similarity": 2,
+                  "maximum_iterations": 10,
+                  "converged": false,
+                  "source_unfold_updates": 0,
+                  "control_unfold_updates": 0,
+                  "iterations": [
+                    {
+                      "changed": 169,
+                      "energy": 98.80763097016937,
+                      "applied": true,
+                      "seconds": 1.047956233844161
+                    },
+                    {
+                      "changed": 66,
+                      "energy": 97.90432235227357,
+                      "applied": true,
+                      "seconds": 0.8760503148660064
+                    },
+                    {
+                      "changed": 58,
+                      "energy": 97.26098229591942,
+                      "applied": true,
+                      "seconds": 0.8652621521614492
+                    },
+                    {
+                      "changed": 52,
+                      "energy": 97.15215531308414,
+                      "applied": true,
+                      "seconds": 0.9266284578479826
+                    },
+                    {
+                      "changed": 69,
+                      "energy": 97.14183992692575,
+                      "applied": true,
+                      "seconds": 1.0552202058024704
+                    },
+                    {
+                      "changed": 74,
+                      "energy": 97.00935452730863,
+                      "applied": true,
+                      "seconds": 1.1057723797857761
+                    },
+                    {
+                      "changed": 86,
+                      "energy": 97.09905470540077,
+                      "applied": true,
+                      "seconds": 2.2499207500368357
+                    },
+                    {
+                      "changed": 0,
+                      "energy": 97.02243206228047,
+                      "applied": true,
+                      "seconds": 0.8472549538128078
+                    },
+                    {
+                      "changed": 8,
+                      "energy": 97.0322549526056,
+                      "applied": true,
+                      "seconds": 0.9129296368919313
+                    },
+                    {
+                      "changed": 2,
+                      "energy": 96.9889610922558,
+                      "applied": true,
+                      "seconds": 0.8994659460149705
+                    }
+                  ],
+                  "seconds": 13.407507707830518
+                },
+                {
+                  "control_points": 642,
+                  "data_points": 10242,
+                  "labels": 19,
+                  "similarity": 2,
+                  "maximum_iterations": 15,
+                  "converged": true,
+                  "source_unfold_updates": 0,
+                  "control_unfold_updates": 0,
+                  "iterations": [
+                    {
+                      "changed": 711,
+                      "energy": 440.13757021136615,
+                      "applied": true,
+                      "seconds": 2.252066374756396
+                    },
+                    {
+                      "changed": 377,
+                      "energy": 438.0479438744226,
+                      "applied": true,
+                      "seconds": 2.0139343719929457
+                    },
+                    {
+                      "changed": 328,
+                      "energy": 436.41786745761016,
+                      "applied": true,
+                      "seconds": 2.266436112113297
+                    },
+                    {
+                      "changed": 334,
+                      "energy": 436.27211750974794,
+                      "applied": true,
+                      "seconds": 2.0433228071779013
+                    },
+                    {
+                      "changed": 402,
+                      "energy": 435.77139948574455,
+                      "applied": true,
+                      "seconds": 2.0658725509420037
+                    },
+                    {
+                      "changed": 348,
+                      "energy": 434.9744626642527,
+                      "applied": true,
+                      "seconds": 2.202777434140444
+                    },
+                    {
+                      "changed": 346,
+                      "energy": 434.87514018986263,
+                      "applied": true,
+                      "seconds": 2.0033853608183563
+                    },
+                    {
+                      "changed": 0,
+                      "energy": 435.13406735859223,
+                      "applied": false,
+                      "seconds": 1.9863643539138138
+                    }
+                  ],
+                  "seconds": 18.192328528035432
+                },
+                {
+                  "control_points": 2562,
+                  "data_points": 40962,
+                  "labels": 19,
+                  "similarity": 2,
+                  "maximum_iterations": 15,
+                  "converged": true,
+                  "source_unfold_updates": 0,
+                  "control_unfold_updates": 0,
+                  "iterations": [
+                    {
+                      "changed": 1190,
+                      "energy": 1821.6870233612462,
+                      "applied": true,
+                      "seconds": 9.949729134794325
+                    },
+                    {
+                      "changed": 1057,
+                      "energy": 1823.7026025171338,
+                      "applied": true,
+                      "seconds": 6.918301688041538
+                    },
+                    {
+                      "changed": 1476,
+                      "energy": 1820.8503395551536,
+                      "applied": true,
+                      "seconds": 6.762541416101158
+                    },
+                    {
+                      "changed": 1416,
+                      "energy": 1819.2831532620496,
+                      "applied": true,
+                      "seconds": 6.710269580129534
+                    },
+                    {
+                      "changed": 1546,
+                      "energy": 1816.890106295695,
+                      "applied": true,
+                      "seconds": 6.699970985297114
+                    },
+                    {
+                      "changed": 1599,
+                      "energy": 1816.9284078961218,
+                      "applied": false,
+                      "seconds": 6.819357266183943
+                    }
+                  ],
+                  "seconds": 47.13336420990527
+                }
+              ],
+              "peak_allocated_gb": 1.466194944,
+              "cpu_threads": 4,
+              "execution_counts": {
+                "cuda_nearest_queries": 107138172,
+                "cuda_nearest_proved_queries": 107136064,
+                "tree_nearest_queries": 2108,
+                "nearest_tie_fallback_queries": 2108,
+                "cuda_adaptive_resampling_calls": 54,
+                "tree_expanded_face_queries": 10315,
+                "adaptive_cpu_layout_fallback_calls": 0
+              },
+              "peak_scope": "caller CUDA allocator since its last external reset; shared by both hemispheres"
+            },
+            "R": {
+              "seconds": 90.76501094922423,
+              "feature_count": 33,
+              "weighted_cost": true,
+              "config": {
+                "simval": [
+                  2,
+                  2,
+                  2
+                ],
+                "iterations": [
+                  10,
+                  15,
+                  15
+                ],
+                "control_grid": [
+                  2,
+                  3,
+                  4
+                ],
+                "sampling_grid": [
+                  4,
+                  5,
+                  6
+                ],
+                "data_grid": [
+                  4,
+                  5,
+                  6
+                ],
+                "regularization": [
+                  9.999999747378752e-06,
+                  0.007499999832361937,
+                  0.009999999776482582
+                ],
+                "shear_modulus": 0.4000000059604645,
+                "bulk_modulus": 1.600000023841858,
+                "strain_exponent": 2.0,
+                "regularization_exponent": 2.0
+              },
+              "execution": "optimized",
+              "folded_output_faces": 0,
+              "folded_solver_faces": 0,
+              "minimum_output_orientation_ratio": 0.3254942635495554,
+              "minimum_solver_orientation_ratio": 0.32549318147521206,
+              "degenerate_input_faces": 0,
+              "stages": [
+                {
+                  "control_points": 162,
+                  "data_points": 2562,
+                  "labels": 19,
+                  "similarity": 2,
+                  "maximum_iterations": 10,
+                  "converged": true,
+                  "source_unfold_updates": 0,
+                  "control_unfold_updates": 0,
+                  "iterations": [
+                    {
+                      "changed": 176,
+                      "energy": 97.67925617650565,
+                      "applied": true,
+                      "seconds": 1.1624960862100124
+                    },
+                    {
+                      "changed": 53,
+                      "energy": 96.62114272317493,
+                      "applied": true,
+                      "seconds": 0.9041340909898281
+                    },
+                    {
+                      "changed": 57,
+                      "energy": 96.60658585494511,
+                      "applied": true,
+                      "seconds": 0.9229593141935766
+                    },
+                    {
+                      "changed": 60,
+                      "energy": 96.40225950087472,
+                      "applied": true,
+                      "seconds": 0.9742350317537785
+                    },
+                    {
+                      "changed": 61,
+                      "energy": 96.26140861316588,
+                      "applied": true,
+                      "seconds": 1.0149717759341002
+                    },
+                    {
+                      "changed": 67,
+                      "energy": 96.29106218860025,
+                      "applied": false,
+                      "seconds": 0.8820695537142456
+                    }
+                  ],
+                  "seconds": 8.384256108663976
+                },
+                {
+                  "control_points": 642,
+                  "data_points": 10242,
+                  "labels": 19,
+                  "similarity": 2,
+                  "maximum_iterations": 15,
+                  "converged": true,
+                  "source_unfold_updates": 0,
+                  "control_unfold_updates": 0,
+                  "iterations": [
+                    {
+                      "changed": 675,
+                      "energy": 440.5110403577506,
+                      "applied": true,
+                      "seconds": 2.0732683949172497
+                    },
+                    {
+                      "changed": 405,
+                      "energy": 437.2333029714414,
+                      "applied": true,
+                      "seconds": 3.5899910582229495
+                    },
+                    {
+                      "changed": 398,
+                      "energy": 436.84733989449546,
+                      "applied": true,
+                      "seconds": 2.1653536069206893
+                    },
+                    {
+                      "changed": 356,
+                      "energy": 435.2965767570196,
+                      "applied": true,
+                      "seconds": 1.9644247717224061
+                    },
+                    {
+                      "changed": 426,
+                      "energy": 436.13722563605876,
+                      "applied": true,
+                      "seconds": 2.3181134201586246
+                    },
+                    {
+                      "changed": 358,
+                      "energy": 435.1362184833278,
+                      "applied": true,
+                      "seconds": 2.038693212904036
+                    },
+                    {
+                      "changed": 379,
+                      "energy": 434.7878923739279,
+                      "applied": true,
+                      "seconds": 2.0145385460928082
+                    },
+                    {
+                      "changed": 0,
+                      "energy": 434.61736693354663,
+                      "applied": true,
+                      "seconds": 2.0968897906132042
+                    },
+                    {
+                      "changed": 1,
+                      "energy": 434.5372613858577,
+                      "applied": true,
+                      "seconds": 2.2056559352204204
+                    },
+                    {
+                      "changed": 2,
+                      "energy": 434.5570763576638,
+                      "applied": false,
+                      "seconds": 5.136805086396635
+                    }
+                  ],
+                  "seconds": 27.26720005273819
+                },
+                {
+                  "control_points": 2562,
+                  "data_points": 40962,
+                  "labels": 19,
+                  "similarity": 2,
+                  "maximum_iterations": 15,
+                  "converged": true,
+                  "source_unfold_updates": 0,
+                  "control_unfold_updates": 0,
+                  "iterations": [
+                    {
+                      "changed": 1072,
+                      "energy": 1824.1911808037594,
+                      "applied": true,
+                      "seconds": 7.076706043910235
+                    },
+                    {
+                      "changed": 1131,
+                      "energy": 1821.9641827134815,
+                      "applied": true,
+                      "seconds": 6.894500317983329
+                    },
+                    {
+                      "changed": 1379,
+                      "energy": 1820.0438142225732,
+                      "applied": true,
+                      "seconds": 6.782698350027204
+                    },
+                    {
+                      "changed": 1541,
+                      "energy": 1817.7456329876718,
+                      "applied": true,
+                      "seconds": 6.650874864310026
+                    },
+                    {
+                      "changed": 1624,
+                      "energy": 1816.8520364470112,
+                      "applied": true,
+                      "seconds": 6.888989091850817
+                    },
+                    {
+                      "changed": 1707,
+                      "energy": 1816.203860690977,
+                      "applied": true,
+                      "seconds": 6.518397626001388
+                    },
+                    {
+                      "changed": 1825,
+                      "energy": 1814.5760642249847,
+                      "applied": true,
+                      "seconds": 5.171005507931113
+                    },
+                    {
+                      "changed": 0,
+                      "energy": 1815.263150989521,
+                      "applied": false,
+                      "seconds": 5.270185248926282
+                    }
+                  ],
+                  "seconds": 54.51215008273721
+                }
+              ],
+              "peak_allocated_gb": 1.466194944,
+              "cpu_threads": 4,
+              "execution_counts": {
+                "cuda_nearest_queries": 134666490,
+                "cuda_nearest_proved_queries": 134664373,
+                "tree_nearest_queries": 2117,
+                "nearest_tie_fallback_queries": 2117,
+                "cuda_adaptive_resampling_calls": 54,
+                "tree_expanded_face_queries": 11649,
+                "adaptive_cpu_layout_fallback_calls": 0
+              },
+              "peak_scope": "caller CUDA allocator since its last external reset; shared by both hemispheres"
+            },
+            "execution": {
+              "parallel_requested": true,
+              "hemispheres_parallel": true,
+              "cpu_threads": 8,
+              "cuda_streams": 2,
+              "native_graph_execution": "independent ordered CPU HOCR/FastPD",
+              "peak_allocated_gb": 1.466194944,
+              "peak_scope": "caller CUDA allocator since its last external reset; shared by both hemispheres"
+            }
+          }
+        }
+      },
+      "wrapper_wall_seconds": {
+        "baseline": 185.22271962696686,
+        "candidate": 94.33446894073859
+      },
+      "same_current_input_sha256": true,
+      "science_configuration_exact": true,
+      "candidate_vs_fresh_baseline": {
+        "L": {
+          "vertices": 32492,
+          "faces": 64980,
+          "decoded_coordinate_exact": true,
+          "decoded_faces_exact": true,
+          "gifti_metadata_exact": true,
+          "max_abs_coordinate_difference_mm": 0.0,
+          "coordinate_rmse_mm": 0.0,
+          "angle_deg": {
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "maximum": 0.0
+          },
+          "all_arrays_finite": true
+        },
+        "R": {
+          "vertices": 32492,
+          "faces": 64980,
+          "decoded_coordinate_exact": true,
+          "decoded_faces_exact": true,
+          "gifti_metadata_exact": true,
+          "max_abs_coordinate_difference_mm": 0.0,
+          "coordinate_rmse_mm": 0.0,
+          "angle_deg": {
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "maximum": 0.0
+          },
+          "all_arrays_finite": true
+        }
+      },
+      "candidate_vs_saved_official": {
+        "L": {
+          "vertices": 32492,
+          "faces": 64980,
+          "decoded_coordinate_exact": true,
+          "decoded_faces_exact": true,
+          "gifti_metadata_exact": false,
+          "max_abs_coordinate_difference_mm": 0.0,
+          "coordinate_rmse_mm": 0.0,
+          "angle_deg": {
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "maximum": 0.0
+          },
+          "all_arrays_finite": true
+        },
+        "R": {
+          "vertices": 32492,
+          "faces": 64980,
+          "decoded_coordinate_exact": true,
+          "decoded_faces_exact": true,
+          "gifti_metadata_exact": false,
+          "max_abs_coordinate_difference_mm": 0.0,
+          "coordinate_rmse_mm": 0.0,
+          "angle_deg": {
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "maximum": 0.0
+          },
+          "all_arrays_finite": true
+        }
+      },
+      "saved_official_scope": "previously saved strict single-CPU-thread newMSM reference; historical per-input file hashes were not recorded, so this is a saved-result regression control and not a new official same-input run",
+      "all_current_input_files_unchanged": true,
+      "all_frozen_source_files_unchanged": true,
+      "checked_current_artifacts": {
+        "file_count": 15,
+        "all_verified_against_preflight_sha256_before_and_after_each_run": true,
+        "file_size_and_sha256": [
+          {
+            "bytes": 46170,
+            "sha256": "017fcc53c0353677b40ca97f43f05a7f6582dfce5f95a3ee7771641c2f94313f"
+          },
+          {
+            "bytes": 46170,
+            "sha256": "017fcc53c0353677b40ca97f43f05a7f6582dfce5f95a3ee7771641c2f94313f"
+          },
+          {
+            "bytes": 47242,
+            "sha256": "054148d2db61e5964681d023fad3378657e53b73a2cfebbe443d93c9b62a8fd6"
+          },
+          {
+            "bytes": 47242,
+            "sha256": "054148d2db61e5964681d023fad3378657e53b73a2cfebbe443d93c9b62a8fd6"
+          },
+          {
+            "bytes": 562891,
+            "sha256": "1846b053f870405466776d004d714cc1da0cec7361761c65a864782dd09f30a8"
+          },
+          {
+            "bytes": 553052,
+            "sha256": "1a898433a9f1070e4e0435d4db966776ecc3291bfcd444efc7910aeffb91561c"
+          },
+          {
+            "bytes": 4745718,
+            "sha256": "1c81fa7646553e0ff0be34517b58e4ac90721ae3ae41c1e23fadc50cc312611a"
+          },
+          {
+            "bytes": 4746494,
+            "sha256": "30c0bafc1cad6184e2623cfdb84ab1771bade522e39cf781fdf2555f0aca3d29"
+          },
+          {
+            "bytes": 4746734,
+            "sha256": "4346e73e4791e561db07ac1a2bbffccaba6a14bcdf9ac88965326936e043f826"
+          },
+          {
+            "bytes": 716079,
+            "sha256": "4f5abf87e9109e0cc50c5a7ff85fb9929c7124ec9c9c998f98b441addea02d84"
+          },
+          {
+            "bytes": 703407,
+            "sha256": "54e0595fc7b8fc711c4e4b0daa96ccf1fd1e145846e125a9210c0fae8364cbf5"
+          },
+          {
+            "bytes": 283,
+            "sha256": "646f100e7826d0c285f379f2a9121f0c0c8cd61a3d2d200cc241c416617b8555"
+          },
+          {
+            "bytes": 3018873,
+            "sha256": "77b2d199c9e0b95d688277008e5764ad566ec17adc0cb0da3a0541c11f738b4b"
+          },
+          {
+            "bytes": 4741054,
+            "sha256": "85ed32511d9157cd1d7ebc478fc683b80c7cc6400d010856ac567e32b44d5c7d"
+          },
+          {
+            "bytes": 2957596,
+            "sha256": "b429048eb5e23701bce22c0fe897cdbd0dde9728773db91c3ef3d143b510d79f"
+          }
+        ]
+      },
+      "saved_official_sphere_sha256": {
+        "L": "4f5abf87e9109e0cc50c5a7ff85fb9929c7124ec9c9c998f98b441addea02d84",
+        "R": "54e0595fc7b8fc711c4e4b0daa96ccf1fd1e145846e125a9210c0fae8364cbf5"
+      },
+      "configuration_text": "--simval=2,2,2\n--sigma_in=0,0,0\n--sigma_ref=0,0,0\n--lambda=0.00001,0.0075,0.01\n--it=10,15,15\n--opt=DISCRETE,DISCRETE,DISCRETE\n--CPgrid=2,3,4\n--SGgrid=4,5,6\n--datagrid=4,5,6\n--regoption=3\n--regexp=2\n--dopt=HOCR\n--VN\n--rescaleL\n--triclique\n--k_exponent=2\n--bulkmod=1.6\n--shearmod=0.4\n\n",
+      "observed_baseline_to_candidate_api_time_ratio": 2.0021803489549086
+    }
+  },
+  "validation_complete": true,
+  "total_queue_wall_seconds": 321.4090828979388,
+  "passed": true,
+  "source_commit_audit": {
+    "baseline": {
+      "tracked_source_files_bound_to_commit": 18,
+      "remote_native_sha256": "1fd35ea562f3438b0dd7bdc83b8beffc95af29301c5eba70eaa2865982f9efa2"
+    },
+    "candidate": {
+      "tracked_source_files_bound_to_commit": 22,
+      "remote_native_sha256": "69fda883c5022d412172eba2de164b79726d18c068b7c421a200b331b6502ad8"
+    }
+  },
+  "privacy": {
+    "contains_subject_identifiers": false,
+    "contains_absolute_input_paths": false,
+    "contains_image_or_feature_arrays": false,
+    "public_content": "aggregate metrics, scientific configuration, relative source paths, file sizes and SHA-256 only; raw case manifests and output arrays remain private"
+  },
+  "timing_interpretation": "Each condition was observed once in a fresh process on the same H100. API time excludes imports, CUDA startup and SHA checks. Sequential baseline and parallel candidate were run in order; these observations are not a repeated timing distribution.",
+  "validation_counts": {
+    "configured_runs": 4,
+    "new_vs_fresh_baseline_hemisphere_comparisons": 4,
+    "vertices_per_hemisphere": 32492,
+    "faces_per_hemisphere": 64980,
+    "current_checked_files_per_configuration": 15,
+    "saved_official_hemisphere_comparisons": 4
+  },
+  "compiler_options": {
+    "native_strict_flags": [
+      "-O3",
+      "-std=c++17",
+      "-fno-fast-math",
+      "-ffp-contract=off"
+    ],
+    "native_math_changed": false,
+    "optimized_gpu_scope": "exact cell-search where nearest neighbor can be proved; ordered adaptive-area CSR arithmetic; parallel independent hemisphere streams and released native GIL",
+    "retained_cpu_math": "ordered WLS/libm, source rotation matrices, HOCR/FastPD graph optimization"
+  }
+}

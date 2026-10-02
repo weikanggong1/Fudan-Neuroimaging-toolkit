@@ -4,11 +4,13 @@
 
 当前最新完整 volume 为 `cfb7beee` 的 FNIRT preproc＋clean，公开 API **707.287 s**；运动校正与冻结 FNIT 逐值相同，完整 MNI clean 对原同步骤软件的时间 r 均值 **0.939162**。下文保留此前固定 fMRIPrep 25.2.4 的 preproc/surface 控制：原始强度 `preproc`、单次插值、真实 midthickness/graymid、fsLR32k 投影及 91k CIFTI。`clean` 继续提供 ICA-AROMA、混杂回归和时间滤波；最新默认 surface 已从这份 volume 和已有 recon-all 独立重测，完整包含双侧 MSM、投影和保存；历史 MSM 与共同球面控制保留各自来源。
 
-## 最新完整默认 surface（`7102c187`）
+## 最新完整默认 surface：GPU 重采样与双侧并行（`9f9f63e`）
 
-复用 `cfb7beee` 的完整 490 帧 T1w/MNI preproc，双方从同源已有 recon-all 独立准备几何和 ROI，重新估计双侧默认 MSMSulc，再投影、组装、QC 和保存。FNIT 两个新进程/新输出目录的完整 API 为 **443.929 / 441.334 s**，不含 recon-all 和 volume；峰值 allocated/reserved **0.344 / 0.426 GB**。原版连续链严格单线程 MSM 为 **2825.612 s**，8 线程 MSM 的时间观察为 **846.768 s**。
+复用同一例 `cfb7beee` 的完整 **490 帧、TR 0.735 s、STC 关闭** T1w/MNI preproc 和同源已有 recon-all/graymid。旧版 `954ad19` 串行、新版串行与新版并行均独立准备几何/ROI、重新估计双侧默认 MSMSulc，再投影、组装、QC 和保存 11 个最终文件；完整 API 扣除捕获分别为 **436.245 / 343.056 / 243.695 s**，不含前序 volume、recon-all、编译、包导入或 CUDA 初始化。峰值 allocated 分别为 **0.344 / 0.644 / 1.049 GB**，20 GB 上限、CPU 总预算 8、TF32 开启。旧/新串行使用物理 H100 1，新并行因该卡启动失败而用物理 H100 0 完成，共享负载不同，均为各一次完整观测。
 
-完整 CIFTI **44,728,180** 个值对独立原版单线程参照的时间 r 均值/中位数为 **0.977911 / 0.997039**；左、右皮层均值 **0.979065 / 0.953067**，全部 19 个皮层下结构逐值同。双方有效 MSM 输入标量、旋转球面和科学配置一致，新估计的球面角差均值左 **0.221050°**、右 **0.319595°**，当前完整 surface 未达到逐值一致。两次 FNIT 输出解码数组逐值相同。完整范围、逐结构指标、编译来源、启动失败记录、真实脑图及复现命令见[新报告](surface_e2e/README.md)。
+新版串行对旧版、并行对新版串行均通过七项门禁：注册球面、左右 GIFTI 与 **44,728,180** 个完整 CIFTI 数值严格相同；全部 21 结构轴、内嵌 metadata、帧/TR、有效科学配置和准备产物通过。对已有独立官方严格单线程完整链，CIFTI 时间 r 均值/中位数仍为 **0.977911 / 0.997039**、relative RMSE **0.022418**，全部 19 个皮层下结构逐值同；球面角差均值左 **0.221050°**、右 **0.319595°**，球面及皮层差异保留。完整范围、计数、native 编译、物理卡映射、116 文件源码回溯和复现命令见[本轮聚合验证](surface_gpu_parallel/README.md)。本轮不新增个体脑图。
+
+共享 MSMAll 同输入 coarse/refine 配准另做新进程真实回归，旧版串行→新版并行 **23.237→11.430 s / 181.790→90.796 s**，球面坐标、拓扑和 metadata 严格相同；不含特征估计、BOLD 投影或 HCP 外层迭代，见[配对报告](surface_gpu_parallel/msmall_paired.public.json)。优化前 `7102c187` 的 **443.929 / 441.334 s**、原版单线程完整链 **2825.612 s**及已公开脑图保留为[历史完整基准](surface_e2e/README.md)，官方没有在本轮重新运行。
 
 ## 2026-10-01 代码与文档整理检查
 
@@ -20,7 +22,8 @@ volume、surface 和 FEAT 文档按七项结构组织，参数与当前公共 AP
 
 | 检查 | 输入与参照 | 结论的范围 |
 |---|---|---|
-| 最新默认完整 surface | 相同已完成 T1w/MNI preproc 和同源已有 recon-all；独立原版几何、单线程 newMSM、投影及 CIFTI | [完整 surface 报告](surface_e2e/README.md)；CIFTI 时间 r 均值 0.977911，皮层下逐值同，皮层和注册球面尚未逐值同 |
+| 最新 surface 执行优化 | 同一完整 490 帧 T1w/MNI preproc 和同源已有重建；冻结旧版/新版串行/新版并行各自完整调用 | [新完整报告](surface_gpu_parallel/README.md)；旧→新串行、串行→并行的球面、全部时序与科学配置严格相同 |
+| 独立官方完整 surface | 相同已完成 T1w/MNI preproc 和同源已有 recon-all；独立原版几何、单线程 newMSM、投影及 CIFTI | [新版对官方聚合](surface_gpu_parallel/parallel_vs_official_strict1.public.json)；CIFTI 时间 r 均值 0.977911，皮层下逐值同，皮层和注册球面尚未逐值同 |
 | 最新完整 FNIRT volume | 同一真实 490 帧 BOLD/SBRef/T1；原同步骤 clean 链与冻结 FNIT | [完整 API、精度和边界](mcflirt_optimization.md)；运动对冻结 FNIT 逐值同，独立完整 clean 并非逐值同 |
 | 单次空间插值 | 固定仿射、逐帧运动和空间变化的 pull；SciPy 三次 B 样条 `grid-constant` | 插值坐标合成与边界条件；CPU/GPU 最大误差低于 1e-6 的数值控制 |
 | T1w 原生 BOLD 分辨率网格 | 三种轴方向与斜切网格；固定 Nilearn 0.11.1 的参考网格 | 数组逐值一致，保存 affine 误差不超过 7.6e-7 mm |
