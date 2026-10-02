@@ -77,7 +77,7 @@ fnit-recon-all /data/sub-01_T1w.nii.gz /results/sub-01 \
 
 ## 5. 实测和精度
 
-专项CPU测试与真实配对结果在本目录保存。真实测试脚本 benchmark_hemi.py 接收 --checkpoint（冻结自产被试）、--output（新目录）、--assets、--binaries、--device、--operation、--order=AB/BA、--commit。输入、源码、程序SHA-256写入JSON；严格零差异及正式数值容差在测量前记录。父CUDA先初始化，验证Python API已初始化时仍能exec worker。
+专项CPU测试与真实配对结果在本目录保存。真实测试脚本 benchmark_hemi.py 接收 --checkpoint（冻结自产被试）、--output（新目录）、--assets、--binaries、--device、--operation、--order=AB/BA、--commit。输入、源码、程序SHA-256写入JSON；analyze_metrics.py通过--pair-ab/--pair-ba/--output复现14张图容差控制、串行重复及真实脑图；analyze_chain.py接收配对根目录，追加连通/闭合/自相交/球面翻折、全量cortex white/pial相交对和逐区no-th3体积诊断；严格零差异及正式数值容差在测量前记录。父CUDA先初始化，验证Python API已初始化时仍能exec worker。
 
 冻结同输入阶段仅说明调度回归，不是原始T1整例验收。复制检查点中未重算的文件不得作为新版本成果。总体指标等效保持not_assessed；138项严格诊断与局部网格/脑区统计由相应专项和最终整例报告分别陈述。本目录已提供真实pial曲率差异脑图；两例空目录整例与最终端到端速度由协调者统一交付。
 
