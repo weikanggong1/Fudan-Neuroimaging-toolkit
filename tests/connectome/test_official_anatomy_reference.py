@@ -1,6 +1,7 @@
 """Official reference provenance, atlas precedence and real SynthMorph argv gates."""
 import importlib.util
 import json
+import math
 from pathlib import Path
 import tempfile
 import unittest
@@ -15,6 +16,54 @@ SPEC.loader.exec_module(MODULE)
 
 
 class OfficialAnatomyContracts(unittest.TestCase):
+    def official_dwi_fixture(self, root):
+        files = {}
+        for name in ("corrected_dwi", "mean_b0", "mean_b0_brain", "brain_mask"):
+            shape = (2, 3, 4, 5) if name == "corrected_dwi" else (2, 3, 4)
+            path = root / f"{name}.nii.gz"
+            nib.save(nib.Nifti1Image(np.ones(shape, np.float32), np.eye(4)), path)
+            files[name] = MODULE.file_record(path)
+        # Mirrors the actual CON01 contract shape: an unused MRtrix vector axis
+        # has no physical fourth spacing. This is a provenance fixture, not MRI
+        # performance or scientific-equivalence evidence.
+        files["principal_direction"] = {"grid": {"spacing": [2.5, 2.5, 2.5, float("nan")]}}
+        upstream = root / "rawprep_report.json"
+        upstream.write_text(json.dumps({"state": "completed", "commands": [
+            {"stage": "eddy_CPU", "returncode": 0}]}))
+        contract = root / "consumer_contract.json"
+        contract.write_text(json.dumps({"schema_version": 1, "case_id": "sub-CON01",
+            "scope": "official_self_produced_raw_dwi_chain", "state": "completed",
+            "upstream_report": MODULE.file_record(upstream), "files": files}))
+        return contract
+
+    def test_consumed_provenance_does_not_copy_unused_nan_metadata(self):
+        with tempfile.TemporaryDirectory() as directory:
+            contract_path = self.official_dwi_fixture(Path(directory))
+            original = MODULE.file_record(contract_path)
+            contract, paths = MODULE.verify_dwi_contract(original, "sub-CON01")
+            origin = MODULE.dwi_consumption_origin(original, contract)
+            json.dumps(origin, allow_nan=False)
+            self.assertEqual(origin["contract"], original)
+            self.assertEqual(set(origin["binding"]["files"]), set(paths))
+            self.assertNotIn("principal_direction", origin["binding"]["files"])
+            self.assertTrue(math.isnan(contract["files"]["principal_direction"]["grid"]["spacing"][3]))
+            self.assertEqual(MODULE.file_record(contract_path), original)
+            self.assertEqual(origin["upstream_execution_proof"]["actual_recorded_commands"], 1)
+            self.assertTrue(origin["upstream_execution_proof"]["all_recorded_returncodes_zero"])
+
+    def test_unused_metadata_filter_keeps_missing_and_bad_sha_gates(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = self.official_dwi_fixture(Path(directory))
+            body = json.loads(path.read_text())
+            record = body["files"].pop("mean_b0")
+            path.write_text(json.dumps(body))
+            with self.assertRaises(KeyError):
+                MODULE.verify_dwi_contract(MODULE.file_record(path), "sub-CON01")
+            body["files"]["mean_b0"] = {**record, "sha256": "0" * 64}
+            path.write_text(json.dumps(body))
+            with self.assertRaisesRegex(ValueError, "changed"):
+                MODULE.verify_dwi_contract(MODULE.file_record(path), "sub-CON01")
+
     def test_unknown_zero_adapter_preserves_positive_labels_and_source(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

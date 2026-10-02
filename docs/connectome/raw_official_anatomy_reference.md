@@ -74,6 +74,8 @@ main(["complete", "--config", official_reference_config,
 
 `complete` 消费以下上游JSON：`schema_version=1`、`case_id`相同、`scope="official_self_produced_raw_dwi_chain"`、`state="completed"`、`upstream_report={path,sha256,size_bytes}`；`files` 含 `corrected_dwi`、`mean_b0`、`mean_b0_brain`、`brain_mask` 四个文件记录。上游报告必须完成且有真实官方命令；每个文件必须SHA一致，后三者为与4D DWI同空间的3D影像。该契约不将同输入隔离算子对照升级成独立原始链；上游真实命令/自产来源须由上游工具及审核证据支持。
 
+解剖报告的`official_dwi_origin`保存完整上游合同的原路径、大小和SHA，以及实际消费的四个文件身份和已验证的官方执行状态/命令数。上游未消费的其他影像metadata不复制进该报告；原合同仍完整保留，不能修改其非空间向量轴间距或MRI数值。这一记录方式也避免MRtrix向量影像第四轴`spacing=NaN`使严格JSON报告写出失败。缺失必需文件、错误SHA、未完成状态和错误网格仍按原检查拒绝。
+
 输出结构：
 
 ```text
@@ -190,7 +192,7 @@ FS `mri_surf2surf`、Workbench `-label-resample BARYCENTRIC` 和原UKB投影脚�
 
 这些是官方**结构准备阶段**的实际时间，不包含recon-all、DWI预处理、追踪或矩阵构造，也不与重建时间相加称连续冷调用。CON03/08/09明确复用此前成功阶段，原失败和新恢复目录均保留。CON11的实际recon-all exit0，但原报告在int32序列化时失败；只读重验证真实14个FS文件后完成prepare，没有再次运行recon-all。各例实际工具来源保留其原提交：常规prepare为`b9e48ef4`，CON03恢复为`608a68d8`，CON08/09恢复为`636b73c5`。
 
-此时官方原始DWI链的新输入冻结仍待上游完成核验，因此十例尚未产生官方FLIRT/DWI atlas、独立追踪和最终矩阵对照。结构准备全部完成不等于十例raw end-to-end完成；下面保留CON03及两例背景恢复的具体过程。
+此结构摘要生成时，官方原始DWI链的新输入冻结仍待上游完成核验，未产生官方FLIRT/DWI atlas、独立追踪和最终矩阵对照；后续真实DWI完成另由新合同记录。结构准备全部完成不等于十例raw end-to-end完成；下面保留CON03及两例背景恢复的具体过程。
 
 2026-10-03：已实际核对FS8.2 `register/apply --help`及两h5完整大小/SHA；CPU仅用8线程，GPU未使用。官方原生Python3.8.13，TensorFlow2.13.1、surfa0.6.3、voxelmorph0.2、neurite0.2、numpy1.24.3；版本由官方fspython实际读回，无新增安装。
 
@@ -232,9 +234,12 @@ v4已完成5ttgen 10.701秒、GMWMI 1.559秒、fs-aparc84 labelconvert 1.181秒�
 
 以上已完成结构准备与图示；FNIT相对独立官方DWI、FLIRT和最终矩阵的精度/时间对照仍待实际完整上游结果，不填入旧ds004666数据。现有CON03 fixed-FNIT-input官方追踪参照属于另外的验证层级。
 
+首例实际官方CPU原始DWI/建模合同到达后，`official_anatomy_raw10_CPU_budget_v2`的CON01 complete遇到报告写出错误：完整上游合同未消费的`principal_direction.grid.spacing[3]`为NaN。原mri_convert日志及0.35秒time文件已保留；随后complete子进程exit1，尚未运行FLIRT。只在确认该调度无MRI child、argv/start_ticks/源SHA一致后退休其闲等进程，原目录及报告不改。新版本选择性记录实际消费的四个文件并保留完整合同原SHA，不改变任何MRI、配准或重采样。24项focused测试在实际CPU服务器通过（1.60秒），包含同结构的NaN附加metadata、缺失文件和错误SHA；实际CON01原合同SHA`36b56d7d8e218464e4440c99a75a3fe12a7d71f984912f743fa343e42d57a07b`的只读核验及严格JSON写出也通过，原合同SHA不变。这是报告交接修复的验证，完整FLIRT/八atlas结果另按实际运行报告记录。
+
 ## 6. 更新记录
 
 - 2026-10-03：新增prepare/complete独立官方解剖参照和可审核契约；禁止覆盖原输出，锁定fresh T1/FS，逐例隔离public_0路径，保留官方world-geometry变换与NN atlas定义。
+- 2026-10-03：十例官方结构准备实际完成，发布逐例来源、节点表与分阶段耗时；修复首例DWI交接报告复制未消费NaN向量metadata的问题，保留原合同SHA及原缺失/损坏/网格检查。
 - 2026-10-03：真实CON03预检发现官方`lh.pial`为标准`lh.pial.T1`链接；统一比较resolve路径并仍校验目标字节SHA，保留原预检失败，无MRI重算。
 - 2026-10-03：真实官方warp头为`0x301`，改用安装内官方Surfa只读读回，并增加明确来源/耗时的分阶段恢复入口；生产配准与重采样代码不变。
 - 2026-10-03：新增CPU十例解剖/atlas调度，使用baseline fresh FS与各自官方raw-DWI完成合同；绑定既有运行时并预检官方二进制，禁止把组件对照、旧pilot或FNIT产物称为十例全官方原始链。

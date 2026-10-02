@@ -173,6 +173,36 @@ def verify_dwi_contract(record, case_id):
     return contract, paths
 
 
+def dwi_consumption_origin(record, contract):
+    """Bind the complete source bytes and only the four images this tool consumes.
+
+    MRtrix vector images can declare NaN spacing for their nonspatial component
+    axis. Such unused metadata belongs to the original bound contract; copying
+    it into this tool's strict JSON report is unnecessary and prevents saving.
+    No source metadata or MRI is changed by this selective provenance record.
+    """
+    report = read_bound_json(contract["upstream_report"])
+    commands = report.get("commands") or report.get("completed_commands")
+    files = {}
+    for name in ("corrected_dwi", "mean_b0", "mean_b0_brain", "brain_mask"):
+        source = contract["files"][name]
+        files[name] = {"path": source["path"], "sha256": source["sha256"],
+                       "size_bytes": source.get("size_bytes", Path(source["path"]).stat().st_size)}
+    return {
+        "contract": record,
+        "binding": {key: contract[key] for key in ("schema_version", "case_id", "scope", "state")}
+            | {"upstream_report": contract["upstream_report"], "files": files},
+        "upstream_execution_proof": {
+            "report": contract["upstream_report"], "state": report.get("state"),
+            "status": report.get("status"), "execution_completed": report.get("execution_completed"),
+            "completed_by_verified_contract_rule": True,
+            "actual_recorded_commands": len(commands),
+            "all_recorded_returncodes_zero": all(item.get("returncode") == 0 for item in commands)},
+        "recording_scope": "actual consumed image identities and verified source execution proof only; "
+            "the unchanged complete upstream contract, including unused metadata, is bound by its original bytes SHA"
+    }
+
+
 def write_nodes(path, rows):
     if [int(row["index"]) for row in rows] != list(range(1, len(rows) + 1)):
         raise ValueError("node indices must be contiguous")
@@ -696,7 +726,7 @@ def complete(runner, prepared_record, dwi_record):
         verify_file(record)
     contract, paths = verify_dwi_contract(dwi_record, c["case_id"])
     runner.report["prepared_origin"] = prepared_record
-    runner.report["official_dwi_origin"] = {"contract": dwi_record, "binding": contract}
+    runner.report["official_dwi_origin"] = dwi_consumption_origin(dwi_record, contract)
     mr, fs = Path(c["mrtrix_bin"]), Path(c["freesurfer_home"])
     subject = Path(c["subject_dir"])
     runner.run("brain_to_nifti", [fs / "bin/mri_convert", subject / "mri/brain.mgz", out / "brain.nii.gz"])
