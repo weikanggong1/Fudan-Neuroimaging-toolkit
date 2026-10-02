@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "scope": "Same real native BOLD frames and exact composed EPI-to-MNI warp.",
+  "frames": 490,
+  "fsl_version": "6.0.7.22",
+  "fsl_exit_code": 255,
+  "fsl_command": "applywarp --in=source_frames --ref=MNI --warp=composed_fsl --mask=MNI_mask --rel --interp=spline --out=reference",
+  "checks": {
+    "gzip_crc_passed": true,
+    "grid_matches": true,
+    "all_finite": true,
+    "shape": [
+      91,
+      109,
+      91,
+      490
+    ],
+    "interior_voxels": 182718,
+    "outside_mask_max_abs": 0.0
+  },
+  "same_mask": {
+    "values": 108348310,
+    "pearson_r": 0.9999999999294198,
+    "mae": 0.00143122309959946,
+    "rmse": 0.0020110454672845448,
+    "maximum_absolute_difference": 0.1270751953125
+  },
+  "interior": {
+    "values": 89531820,
+    "pearson_r": 0.9999999999280209,
+    "mae": 0.0014382930617545086,
+    "rmse": 0.0020059070616314473,
+    "maximum_absolute_difference": 0.1270751953125
+  },
+  "timing_seconds": {
+    "fsl_process_including_io": 554.4233528496698
+  },
+  "sha256": {
+    "fsl_executable": "fe05b2ec68cbd876c85872e5e71281180885ebbd3d44ef98d048e982ceab88bb",
+    "native": "b1a82928a8fecee3e3f401f767b4d1ee3c86ede3d5de5fb98cfd6a6a1eada8f0",
+    "candidate": "33acd8ffd80d4dc396611ca14d6a3581c32fe4b0544a75fff35ade842a8adcdb",
+    "reference": "0585cd056bf5ccfb8bf97a5f6a66082d4e7caad525718fc11e40d80a827fcb92",
+    "pull": "00b1fc011e3bcf02fbcd12a2fe4c7190a780b3d44c3e6cac56a4ace8f752746f",
+    "matrix": "3dc5670da6b9b5707632ab64e93d0dd27f3b64d1fbc9278d7df53b20ed6e61de",
+    "composed_fsl_field": "2e98a7f0f01f95378d228f4767fcbf1e3adfb2983acaeca8823658f745a268c2",
+    "fsl_output": "7abc6bf2cbae3c4554b0c33a5787dc57c9c312aefde697d345da341b186b11f8"
+  },
+  "limits": [
+    "Fixed-warp real-frame comparison tests interpolation, not nonlinear registration or the complete UKB pipeline.",
+    "FNIT uses periodic spline boundaries; FSL applywarp uses its own source-edge policy.",
+    "Timing is comparable only for equal frame counts and the same input/warp, with different process/import boundaries noted."
+  ],
+  "privacy": "Anonymous scalar metrics and hashes; images and logs remain private.",
+  "source_revision": "3f8b756def9a76d8fe4a842db8d7543ec4e7b91d",
+  "comparison_script_sha256": "f849faa1808b0f674748150aadcbf440f0f752aaf7ac61c728fc3c65b3c45456",
+  "environment": {
+    "host": "gpucw1",
+    "OMP_NUM_THREADS": "8",
+    "observed_main_compute_process_cpu_percent": "approximately 100",
+    "tf32_candidate": true,
+    "candidate_low_precision_enabled": false
+  }
+}

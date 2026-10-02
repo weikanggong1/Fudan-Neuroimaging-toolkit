@@ -61,11 +61,11 @@
       "applywarp": "src/fnit/applywarp/core.py",
       "fnirt_method": "PyTorch port of the FSL FNIRT 2203.0 UKB GM path with basisfield 2203.1, miscmaths 2203.2, newimage 2203.11 and warpfns 2203.0 source references",
       "source_provenance_manifest": "src/fnit/_vendor_fsl/manifest.json",
-      "fsl_flirt_equivalence_status": "6-DOF/normmi \u7684\u4e00\u4f8b\u771f\u5b9e UKB b0\u2192T1 \u540c\u8f93\u5165\u6bd4\u8f83\u4e2d\uff0c\u5f53\u524d\u6e90\u7801\u76f8\u5bf9 FSL \u77e9\u9635\u7684\u4e16\u754c\u4f4d\u79fb RMS \u4e3a CPU 0.009932 mm\u3001H100 TF32 0.009983 mm\uff1b12-DOF/corratio \u771f\u5b9e GM \u5bf9\u7167 CPU 9/10 \u4f8b\u3001H100 \u5df2\u5b8c\u6210 4/4 \u4f8b\u6ee1\u8db3 0.05 mm \u95e8\u9650\u3002\u516c\u5f00 T1w \u793a\u4f8b\u4f7f\u7528\u6700\u7ec8\u6e90\u7801\uff1b\u4ecd\u4e0d\u6784\u6210\u9010\u77e9\u9635\u6216\u9010\u4f53\u7d20\u7b49\u4ef7\u3002",
-      "fsl_fnirt_equivalence_status": "\u5f53\u524d 1 \u4f8b\u771f\u5b9e FA matched-input \u5bf9\u7167\u56fa\u5b9a\u76f8\u540c input\u3001FMRIB58_FA_1mm\u3001FSL affine \u4e0e Oxford \u4e09\u9636\u6bb5\u914d\u7f6e\u3002coefficient\u3001warped FA\u3001nonlinear Jacobian\u3001\u542b affine Jacobian \u7684 r \u5206\u522b\u4e3a 0.999893\u30010.999203\u30010.999064\u30010.994737\uff1bshape\u3001affine\u3001dtype \u4e0e intent \u5408\u540c\u901a\u8fc7\uff0c\u4f46\u5dee\u5f02\u8d85\u8fc7\u6d6e\u70b9\u8bef\u5dee\uff0cfsl_fnirt_numerically_equivalent \u4ecd\u4e3a false\u3002\u8be6\u89c1 validation/fnirt/report.real.current.json\u3002",
-      "fast_vbm_validation_status": "FastVBM GM \u914d\u51c6\u5df2\u6309 FSL GM \u914d\u7f6e\u5173\u95ed implicit reference/input mask\u3002\u5355\u4f8b\u56fa\u5b9a FSL GM \u8f93\u5165\u7684\u8bca\u65ad\u4e09\u9879 Pearson r \u4e3a 0.996/0.997/0.996\uff1b\u672c\u7248\u539f\u59cb T1w \u5b8c\u6574\u94fe\u590d\u6d4b\u4e3a 0.783/0.733/0.726\uff0ccompute 110.72 s\uff0c\u5cf0\u503c CUDA allocated 12.97 GB\u3002FSL \u7f3a\u5c11\u540c\u8fb9\u754c\u5b8c\u6574\u94fe\u8ba1\u65f6\uff0c\u5c1a\u672a\u5b8c\u6210\u591a\u4f8b\u590d\u6d4b\uff1b\u8be6\u89c1 validation/fast_vbm/README.md\u3002",
+      "fsl_flirt_equivalence_status": "当前修复版在真实 b0→T1、T1→MNI152 和公开 T1w→T1w 上完成同输入 FSL 对照及未融合→融合 gate。b0 对本轮两种 CPU 环境的 FSL RMS 为 0.00216 / 0.18629 mm；T1→MNI RMS 0.12624 mm、Pearson 0.9999838；公开 T1w RMS 0.01355 mm、Pearson 0.9999965。保存矩阵、体素、header、cost 和求值次数的执行 gate 通过；T1→MNI 矩阵 RMS 较旧版增加 0.00355 mm，报告保留这项小幅退化。GM CPU 10 例及原串行 H100 4 例按实际历史测量源码保留。详见 validation/flirt/gpu_batch.current.public.json；没有建立与 FSL 逐矩阵或逐体素等价。",
+      "fsl_fnirt_equivalence_status": "当前 1 例真实 FA matched-input 对照固定相同 input、FMRIB58_FA_1mm、FSL affine 与 Oxford 三阶段配置。coefficient、warped FA、nonlinear Jacobian、含 affine Jacobian 的 r 分别为 0.999893、0.999203、0.999064、0.994737；shape、affine、dtype 与 intent 合同通过，但差异超过浮点误差，fsl_fnirt_numerically_equivalent 仍为 false。详见 validation/fnirt/report.real.current.json。",
+      "fast_vbm_validation_status": "FastVBM GM 配准已按 FSL GM 配置关闭 implicit reference/input mask。单例固定 FSL GM 输入的诊断三项 Pearson r 为 0.996/0.997/0.996；本版原始 T1w 完整链复测为 0.783/0.733/0.726，compute 110.72 s，峰值 CUDA allocated 12.97 GB。FSL 缺少同边界完整链计时，尚未完成多例复测；详见 validation/fast_vbm/README.md。",
       "current_fnirt_matched_validation": "validation/fnirt/report.real.current.json",
-      "current_flirt_validation": "validation/flirt/report.public.json"
+      "current_flirt_validation": "validation/flirt/gpu_batch.current.public.json"
     },
     "upstream_license": "Apache-2.0",
     "upstream_copyright": "Copyright 2021 University of Oxford, Oxford, UK",
@@ -377,7 +377,7 @@
     "warp_contract": "reference-grid relative pull displacement in millimetres along the reference image axes",
     "validation_report": "validation/mmorf/report.public.json",
     "validation_figure": "docs/mmorf/figures/mmorf_fsl_comparison.png",
-    "validation_status": "1 \u4f8b\u771f\u5b9e T1w + FA \u53cc\u6807\u91cf\u548c DTI tensor\uff0c\u56fa\u5b9a\u76f8\u540c affine \u4e0e sampler\uff1awarp r=0.978064\u3001Jacobian r=0.970834\u3001warped T1 r=0.958732\u3001warped FA r=0.983303\u3002\u9ed8\u8ba4 TF32 GPU \u5cf0\u503c 14.30 GB\uff1b\u672a\u8fbe\u5230\u9010\u4f53\u7d20\u6570\u503c\u7b49\u4ef7\u3002",
+    "validation_status": "1 例真实 T1w + FA 双标量和 DTI tensor，固定相同 affine 与 sampler：warp r=0.978064、Jacobian r=0.970834、warped T1 r=0.958732、warped FA r=0.983303。默认 TF32 GPU 峰值 14.30 GB；未达到逐体素数值等价。",
     "numerically_equivalent": false
   },
   "dmri_pipeline_reference": {
@@ -405,5 +405,130 @@
     "current_mmorf_pipeline_validation": "validation/dmri_pipeline/bids_mmorf_2mm.real.current.json",
     "raw_to_standard_fresh_benchmark_available": true,
     "registration_numerically_equivalent": false
+  },
+  "superbigflica_reference": {
+    "repository": "https://github.com/weikanggong/SuperBigFLICA",
+    "inspected_commit": "6695b638802aab50f43f889e97af223f8191018e",
+    "paper_doi": "10.1109/TMI.2022.3218720",
+    "implementation": "Independent PyTorch implementation of the published supervised linked-component method",
+    "source_redistribution": "No upstream code distributed; inspected repository has no explicit software license",
+    "package_feature": "src/fnit/superbigflica/",
+    "extensions": [
+      "BigFLICA-format NIfTI inputs",
+      "CSV subject-ID matching",
+      "categorical cross-entropy heads",
+      "training-only normalization",
+      "observed-label averaging",
+      "validation supervised-loss model selection",
+      "per-modality spatial regression with signed t-to-z conversion",
+      "training-only balanced class weights",
+      "explicit binary and multiclass target modes",
+      "random initialization without PCA",
+      "training-selected component maps and held-out prediction figures"
+    ]
+  },
+  "fmri_registration_gpu": {
+    "date": "2026-10-01",
+    "baseline_commit": "7952b33a9a6509183c4fe63ed7ec17bbc8403f90",
+    "runtime": "FNIT PyTorch/Triton/nibabel only; official FSL binaries used offline for paired validation",
+    "source_manifest": "src/fnit/_vendor_fsl/manifest.json",
+    "license_file": "licenses/FSL-6.0.txt",
+    "current_report": "validation/fmri/registration_gpu.current.public.json",
+    "source_sha256": {
+      "src/fnit/fnirt/_smoothing_triton.py": "4b6293eb4210b18a91de647003804cf1aa1f50780449a073e350f9177982227b",
+      "src/fnit/fnirt/io.py": "ee79183709258f2e71dcd110f3c922b1cc7d20a979161ae1c86c2c627becf366",
+      "src/fnit/fnirt/__main__.py": "3d2438ae92f4746e9ffaa1f837b1fe803f6281091d1f31f8c95643716f257d9a",
+      "src/fnit/fnirt/cli.py": "9c143739510dd245f76bd98a80610fdbf6ca65519cd59b41f4a9e233b172e53c",
+      "src/fnit/fnirt/optimizer.py": "903d5031058c96aa9e5fdc29736619fe636b62422cd2646b527df49011d173fd",
+      "src/fnit/fnirt/registration.py": "9e5747292bb5bf79d1dd77bf2a6b76a94d99d33b5a6453ff79dc1b843bcda991",
+      "src/fnit/fnirt/topology.py": "150f65a73baf796f98e6304d0c209288816ee75485be5d93032db46edeb52900",
+      "src/fnit/fnirt/_topology_triton.py": "3f61e452228a9c3dff85caff58ed1103e7b89783c86838bf1e70e322ae3f65f1",
+      "src/fnit/fnirt/spline.py": "79ec750523d69342bf4926adf5e715d91a59749026fc5253ee96d765c0208cad",
+      "src/fnit/fnirt/standalone.py": "83a51a301e1d9145051a12e3b4f10b452c319d1e7a7962308443a048b723ade6",
+      "src/fnit/fnirt/__init__.py": "3480673ed6cbbfc38e573ac64bab6d14fabffc46585a29c74a3d916c2739294d",
+      "src/fnit/fmri/bbr.py": "0ca14f3343d6b5bf09ea93f6ec94de9f2c0cce19fdf8ea005a87ff8e03f48fc2",
+      "src/fnit/fmri/normalization.py": "7a39b97b3e729af6ad4a688b123a43d9b4087a45af663c64ac9c5affd52104c5",
+      "src/fnit/fmri/_bbr_cuda.py": "c79fdd0c20e68628585a46b946d3ef1f532373aaf8c0371eb5ed0ae25a8a5090",
+      "src/fnit/fmri/_anatomical.py": "e5160a0bac0d2b19122bd4a1cbefbe501607b3386c1d3670e0b7d8692e20efe5",
+      "src/fnit/fmri/end_to_end.py": "bce80a8a61ee92a94497c95db857fcc24de845c4747721c880a89d5a114ebc9d"
+    },
+    "bbr_method": "NEWIMAGE radiological x-fast boundary, zero-padded source smoothing, 27-point gradient; full bbr.sch and MISCMATHS Brent/Powell; batched candidate sampling with explicit rounding",
+    "fnirt_method": "Same T1 six-level schedule, cubic spline/SSD/bending/polynomial/bias/LM/PCG/Jacobian; stored header pixdim; cached invariants, offset-ordered Triton smoothing, one host scalar transfer per PCG iteration, coefficient-space FP64 Gram normal",
+    "execution_gate": "Corrected BBR tensor/fused artifacts bitwise equal on this real case. FNIRT dense-normal diagnostic with otherwise optimized execution reproduces current reference five artifacts and PCG level scalars bitwise.",
+    "fsl_equivalence_status": "Not established. BBR current RMS 0.002600 mm, r 0.999999703. FNIRT optimized r 0.997717884, Dice 0.999221616, pull median/p95 0.051763/0.232935 mm. Gram changes FP64 summation and optimizer trajectory; slight image/coefficient regressions are retained in report.",
+    "tests": "194 scoped registration/pipeline tests and 3 benchmark contract/instrumentation tests passed; fixtures do not replace the real-data report",
+    "anatomical_cache": "Content/implementation/environment-keyed subject/session cache; verified outputs, lock and manifest-last. Real cold/hit 41.118/0.07847 s, all artifact hashes unchanged.",
+    "benchmark_limitations": "One real processed T1/EPI case, shared H100/CPU, no B0/GDC; cold/warm function timings separated from full CUDA profile and output persistence. Not a new 490-frame full-pipeline or FA/GM validation."
+  },
+  "fmri_surface_reference": {
+    "reference_pipeline": {
+      "repository": "https://github.com/nipreps/fmriprep",
+      "tag": "25.2.4",
+      "pinned_image_record": "validation/fmri/fmriprep/reference_image.public.json",
+      "runtime_dependency": false
+    },
+    "cifti_assembly": {
+      "implementation": "src/fnit/fmri/surface_fmriprep.py",
+      "source": "https://github.com/nipreps/niworkflows/blob/1.14.4/niworkflows/interfaces/cifti.py",
+      "version": "1.14.4",
+      "copyright": "Copyright 2021 The NiPreps Developers",
+      "implementation_type": "Modified direct nibabel/NumPy adaptation of the 91k assembly and metadata rules with additional validation and atomic outputs",
+      "license": "Apache-2.0",
+      "license_file": "licenses/Apache-2.0.txt",
+      "upstream_source_files_distributed": false,
+      "runtime_dependency": false
+    },
+    "timing_metadata": {
+      "implementation": "src/fnit/fmri/timing.py",
+      "source": "https://github.com/nipreps/fmriprep/blob/25.2.4/fmriprep/workflows/bold/outputs.py",
+      "function": "prepare_timing_parameters",
+      "copyright": "Copyright The NiPreps Developers",
+      "implementation_type": "Modified adaptation with explicit output-specific correction status and timing validation",
+      "license": "Apache-2.0",
+      "license_file": "licenses/Apache-2.0.txt",
+      "upstream_source_files_distributed": false
+    },
+    "sampling_reference": {
+      "implementation": "src/fnit/fmri/sampling_reference.py",
+      "implementation_type": "Modified nibabel/NumPy adaptation informed by NiWorkflows and Nilearn grid and header semantics",
+      "sources": [
+        {
+          "url": "https://github.com/nipreps/niworkflows/blob/1.14.4/niworkflows/interfaces/nibabel.py",
+          "version": "1.14.4",
+          "routines": [
+            "GenerateSamplingReference",
+            "_gen_reference"
+          ],
+          "copyright": "The NiPreps Developers",
+          "license": "Apache-2.0",
+          "license_file": "licenses/Apache-2.0.txt"
+        },
+        {
+          "url": "https://github.com/nilearn/nilearn/blob/0.11.1/nilearn/image/resampling.py",
+          "version": "0.11.1",
+          "routines": [
+            "resample_img"
+          ],
+          "copyright": "Copyright (c) The nilearn developers",
+          "license": "BSD-3-Clause",
+          "license_file": "licenses/Nilearn-BSD-3-Clause.txt",
+          "license_sha256": "03ae849df6d8e68eb5074444ff0fab34e8370bdbedf7cabc9f5b5a30c4a8787c"
+        }
+      ],
+      "upstream_source_files_distributed": false,
+      "runtime_dependencies_added": []
+    },
+    "template_distribution": {
+      "hcp_assets_manifest": "src/fnit/fmri/assets_setup.py",
+      "templateflow_files": [
+        "tpl-MNI152NLin6Asym_res-02_T1w.nii.gz",
+        "tpl-MNI152NLin6Asym_res-02_desc-brain_mask.nii.gz",
+        "tpl-MNI152NLin6Asym_res-02_atlas-HCP_dseg.nii.gz"
+      ],
+      "templateflow_download_base": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/",
+      "templateflow_mirrored_in_fnit_release": false,
+      "templateflow_files_in_repository_or_wheel": false,
+      "templateflow_download_validation": "Per-file byte count and SHA-256 in assets_setup.py"
+    }
   }
 }

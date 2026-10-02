@@ -102,16 +102,30 @@ def _run_synthseg(args):
     print(target)
 
 
-def _run_subregions(args):
-    from .gems import segment_subregions
-    result = segment_subregions(
-        args.i, args.atlas_root, structures="all" if not args.structure else args.structure,
+def _run_segment_4_subregions(args):
+    import shutil
+    from .gems import segment_4_subregions
+    selected = "all" if not args.structure else args.structure
+    save_outputs = (args.output_dir or args.report_json or args.save_highres or args.save_posteriors)
+    output = Path(args.output_dir) if args.output_dir else Path(args.o).parent
+    result = segment_4_subregions(
+        args.i, args.atlas_root, structures=selected,
         coarse_segmentation=args.coarse_segmentation, synthseg_weights=args.synthseg_weights,
-        auto_initialize=not args.no_auto_initialize, device=args.device,
-        em_iterations=args.em_iterations, deform_iterations=args.deform_iterations)
-    Path(args.o).parent.mkdir(parents=True, exist_ok=True)
-    result.labels.save(args.o)
-    print(args.o)
+        cortical_parcellation=args.cortical_parcellation, wmparc=args.wmparc,
+        synthseg_parc_weights=args.synthseg_parc_weights,
+        device=args.device, threads=args.threads,
+        optimization=args.optimization, output_dir=output if save_outputs else None,
+        save_highres=args.save_highres, save_posteriors=args.save_posteriors)
+    target = Path(args.o)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    if not result.output_files or target.resolve() != result.output_files["labels"]:
+        result.labels.save(target)
+    if args.report_json:
+        report = Path(args.report_json)
+        report.parent.mkdir(parents=True, exist_ok=True)
+        if report.resolve() != result.output_files["report"]:
+            shutil.copyfile(result.output_files["report"], report)
+    print(target)
 
 
 def _synthsr_suffix(path):
@@ -157,6 +171,7 @@ def _run_fast(args):
         mrf=args.mrf,
         mixel_mrf=args.mixel_mrf,
         pve_steps=args.pve_steps,
+        execution=args.execution,
     )
     prefix = Path(args.output_prefix)
     prefix.parent.mkdir(parents=True, exist_ok=True)
@@ -186,21 +201,10 @@ def _run_flirt(args):
     import torch
 
     from .flirt import run_flirt
+    from .flirt.cli import run_from_args
 
     torch.set_num_threads(args.threads)
-    return run_flirt(
-        args.input,
-        args.reference,
-        output=args.output,
-        omat=args.omat,
-        init=args.init,
-        inweight=args.inweight,
-        refweight=args.refweight,
-        dof=args.dof,
-        cost=args.cost,
-        device=args.device,
-        overwrite=args.overwrite,
-    )
+    return run_from_args(args, run_flirt)
 
 
 def _run_fnirt(args):
@@ -632,17 +636,27 @@ def main(argv=None):
     synthseg.add_argument('--parc', action='store_true', help='SynthSeg 2.0 cortical parcellation')
     synthseg.add_argument('--parc-weights', help='official synthseg_parc_2.0.h5 or directory')
     synthseg.add_argument('--parc-out', help='optional cortex-only parcel image')
-    subregions = commands.add_parser('subregions', help='experimental PyTorch GEMS subregions')
+    subregions = commands.add_parser('segment-4-subregions', help='end-to-end native T1 brainstem, thalamus, hippocampus and amygdala segmentation')
     subregions.add_argument('--i', '-i', required=True, help='native 3-D T1 image')
     subregions.add_argument('--o', '-o', required=True, help='native-grid labels')
-    subregions.add_argument('--atlas-root', required=True, help='directory of GEMS atlas packs')
-    subregions.add_argument('--structure', action='append', help='atlas-pack name; repeat for several')
+    subregions.add_argument('--atlas-root', help='prepared atlas cache; default is FNIT cache')
+    subregions.add_argument('--structure', action='append',
+                            choices=('all', 'brainstem', 'thalamus', 'hippo-amygdala-left',
+                                     'hippo-amygdala-right', 'hippo-amygdala'),
+                            help='select structures; default is all four recipes')
     subregions.add_argument('--coarse-segmentation', help='native-grid coarse labels')
+    subregions.add_argument('--cortical-parcellation', help='native-grid DK68 cortical labels')
+    subregions.add_argument('--wmparc', help='native-grid white matter parcellation')
     subregions.add_argument('--synthseg-weights', help='SynthSeg weights for initialization')
-    subregions.add_argument('--no-auto-initialize', action='store_true')
-    subregions.add_argument('--em-iterations', type=int, default=8)
-    subregions.add_argument('--deform-iterations', type=int, default=0)
+    subregions.add_argument('--synthseg-parc-weights', help='SynthSeg+ cortical weights')
+    subregions.add_argument('--output-dir', help='labels, volumes and report output directory')
+    subregions.add_argument('--save-highres', action='store_true', help='save fine-grid labels')
+    subregions.add_argument('--save-posteriors', action='store_true', help='save fine-grid posterior channels')
+    subregions.add_argument('--report-json', help='machine-readable processing report')
     subregions.add_argument('--device', default='cuda:0')
+    subregions.add_argument('--threads', type=int, default=4, help='positive CPU thread count')
+    subregions.add_argument('--optimization', choices=('fast', 'balanced'), default='fast',
+                           help='fast fine-grid fitting or balanced fitting with a longer mesh budget')
     sr = commands.add_parser('synthsr', help='synthesize a 1 mm T1-weighted image')
     sr.add_argument('--i', '-i', required=True, help='single input image')
     sr.add_argument('--o', '-o', required=True, help='output image or directory for this image')
@@ -672,31 +686,25 @@ def main(argv=None):
     fast.add_argument('-H', '--mrf', type=float, default=0.1)
     fast.add_argument('-R', '--mixel-mrf', type=float, default=0.3)
     fast.add_argument('--pve-steps', type=int, default=100)
+    fast.add_argument('--execution', choices=('tensor', 'fsl'), default='tensor',
+                      help='tensor 同步更新；fsl 保留原 FAST 顺序更新')
     fast.add_argument('-N', '--no-bias', action='store_true')
     fast.add_argument('-b', '--save-bias', action='store_true')
     fast.add_argument('-B', '--save-restored', action='store_true')
     fast.add_argument('--overwrite', action='store_true')
+    from .flirt.cli import add_arguments as add_flirt_arguments
     flirt = commands.add_parser(
         'flirt',
         help=(
-            'Source-derived PyTorch implementation of the supported FLIRT '
-            '12-DOF correlation-ratio or 6-DOF normmi path'
+            'Source-derived PyTorch FLIRT registration or known-transform resampling'
         ),
         allow_abbrev=False)
-    flirt.add_argument('-in', '--in', dest='input', required=True,
-                       help='moving/input image')
-    flirt.add_argument('-ref', '--ref', dest='reference', required=True,
-                       help='fixed/reference image defining the output grid')
-    flirt.add_argument('-out', '--out', dest='output')
-    flirt.add_argument('-omat', '--omat')
-    flirt.add_argument('-init', '--init')
-    flirt.add_argument('-inweight', '--inweight')
-    flirt.add_argument('-refweight', '--refweight')
-    flirt.add_argument('-dof', type=int, choices=(6, 12), default=12)
-    flirt.add_argument('-cost', choices=('corratio', 'normmi'), default='corratio')
-    flirt.add_argument('--device')
+    add_flirt_arguments(flirt)
     flirt.add_argument('--threads', type=int, default=1)
-    flirt.add_argument('--overwrite', action='store_true')
+    from .mcflirt.cli import add_arguments as add_mcflirt_arguments
+    mcflirt = commands.add_parser(
+        'mcflirt', help='单被试 BOLD 三阶段刚体运动校正', allow_abbrev=False)
+    add_mcflirt_arguments(mcflirt)
     from .fnirt.cli import add_arguments as add_fnirt_arguments
     fnirt = commands.add_parser(
         'fnirt', help='PyTorch FNIRT default, GM, T1 or TBSS registration',
@@ -840,8 +848,12 @@ def main(argv=None):
     if selected and selected[0] == "synthseg":
         _run_synthseg(parser.parse_args(selected))
         return
-    if selected and selected[0] == "subregions":
-        _run_subregions(parser.parse_args(selected))
+    if selected and selected[0] == "segment-4-subregions":
+        _run_segment_4_subregions(parser.parse_args(selected))
+        return
+    if selected and selected[0] == "mcflirt":
+        from .mcflirt.cli import run_from_args
+        run_from_args(parser.parse_args(selected))
         return
     if selected and selected[0] == "flirt":
         _run_flirt(parser.parse_args(selected))
@@ -899,8 +911,8 @@ def main(argv=None):
     if args.command == 'synthseg':
         _run_synthseg(args)
         return
-    if args.command == 'subregions':
-        _run_subregions(args)
+    if args.command == 'segment-4-subregions':
+        _run_segment_4_subregions(args)
         return
     if args.command == 'fnirt':
         _run_fnirt(args)

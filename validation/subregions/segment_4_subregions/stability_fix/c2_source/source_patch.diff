@@ -1,0 +1,17 @@
+diff --git a/src/fnit/gems/recipes/base.py b/src/fnit/gems/recipes/base.py
+index 0547610..e66a30a 100644
+--- a/src/fnit/gems/recipes/base.py
++++ b/src/fnit/gems/recipes/base.py
+@@ -261,7 +261,11 @@ class GEMSRecipe:
+                 materialize_outputs=not synthetic and index == len(schedule) - 1,
+                 mesh_sampling_stride=self.fast_mesh_sampling_stride if fast and not synthetic and sigma else 1,
+                 owner_hint_enabled=fast and not synthetic,
+-                double_data_cost_accumulation=fast and not synthetic,
++                # Thalamic synthetic fits lose small Wolfe decreases in a
++                # large FP32 sum. Retain their scalar costs in FP64 while
++                # preserving FP32 geometry/gradients and other recipes.
++                double_data_cost_accumulation=(fast and not synthetic) or (
++                    synthetic and self.name == "thalamus"),
+                 **stop_options)
+             solver_finished = tick()
+             atlas = atlas.with_vertices(result.vertices.detach().cpu().numpy())

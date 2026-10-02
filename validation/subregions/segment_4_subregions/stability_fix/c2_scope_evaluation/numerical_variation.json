@@ -1,0 +1,125 @@
+{
+  "scope": "read-only completed C2 precision-failure localization versus C1 and earlier repeats; no new solver or official run",
+  "identities": {
+    "c1_stage": {
+      "path": "validation/subregions/segment_4_subregions/stability_fix/c1_scope_evaluation/full_stage/report.json",
+      "bytes": 239516,
+      "sha256": "cae83b4583023c3047bf44ce15bfd50f2c286c7b9bd69145d112d6d45dcc4d72"
+    },
+    "c2_stage": {
+      "path": "validation/subregions/segment_4_subregions/stability_fix/c2_scope_evaluation/full_stage/report.json",
+      "bytes": 239325,
+      "sha256": "e0d41716363c6967a4e49c6170acaaa91b3264f5ce456ce533f157299b9a1491"
+    }
+  },
+  "checks": {
+    "same_three_input_SHA": true,
+    "same_atlas_affine_exact": true,
+    "same_alignment_soft_Dice": true,
+    "core_modules_SHA_equal": true,
+    "both_thalamus_synthetic_cost_float64": true,
+    "same_working_grid_and_model_options": true
+  },
+  "core_source_hash_checks": {
+    "gems/core.py": true,
+    "gems/deformation.py": true,
+    "gems/gaussian.py": true,
+    "gems/initialize.py": true,
+    "gems/optim.py": true,
+    "gems/rasterize.py": true,
+    "gems/_raster_triton.py": true,
+    "gems/recipes/thalamus.py": true,
+    "gems/smoothing.py": true
+  },
+  "full_stage_costs_saved": false,
+  "full_stage_objective_histories_saved": false,
+  "fit_metrics": {
+    "c1_stage": {
+      "min_jacobian": 0.17289207875728607,
+      "mean_displacement_voxels": 0.01181425061278087,
+      "p95_displacement_voxels": 0.03491833862907748,
+      "seconds": 15.98613211279735,
+      "stages": [
+        {
+          "alpha_sigma_voxels": 3.0,
+          "mesh_steps": 25,
+          "mesh_evaluations": 90,
+          "data_cost_accumulation": "float64",
+          "mesh_sampling_stride": 1,
+          "owner_hint_enabled": false
+        },
+        {
+          "alpha_sigma_voxels": 2.0,
+          "mesh_steps": 6,
+          "mesh_evaluations": 12,
+          "data_cost_accumulation": "float64",
+          "mesh_sampling_stride": 1,
+          "owner_hint_enabled": false
+        }
+      ]
+    },
+    "c2_stage": {
+      "min_jacobian": 0.031029896810650826,
+      "mean_displacement_voxels": 0.019834233803497726,
+      "p95_displacement_voxels": 0.05814907564308277,
+      "seconds": 20.947032699827105,
+      "stages": [
+        {
+          "alpha_sigma_voxels": 3.0,
+          "mesh_steps": 27,
+          "mesh_evaluations": 81,
+          "data_cost_accumulation": "float64",
+          "mesh_sampling_stride": 1,
+          "owner_hint_enabled": false
+        },
+        {
+          "alpha_sigma_voxels": 2.0,
+          "mesh_steps": 27,
+          "mesh_evaluations": 66,
+          "data_cost_accumulation": "float64",
+          "mesh_sampling_stride": 1,
+          "owner_hint_enabled": false
+        }
+      ]
+    }
+  },
+  "single_thalamus_trace_metrics": {
+    "r1": [
+      {
+        "fit": 0,
+        "initial_NLL": 306235.09375,
+        "final_saved_objective": -25161.332240104675,
+        "min_J": 0.5960392951965332,
+        "steps": 5,
+        "evals": 13
+      },
+      {
+        "fit": 1,
+        "initial_NLL": 306426.5,
+        "final_saved_objective": -4001.0381222963333,
+        "min_J": 0.013750655576586723,
+        "steps": 7,
+        "evals": 27
+      }
+    ],
+    "r2": [
+      {
+        "fit": 0,
+        "initial_NLL": 306235.09375,
+        "final_saved_objective": -25948.95442456007,
+        "min_J": 0.032224141061306,
+        "steps": 15,
+        "evals": 58
+      },
+      {
+        "fit": 1,
+        "initial_NLL": 306587.34375,
+        "final_saved_objective": -8979.256474971771,
+        "min_J": 0.023208310827612877,
+        "steps": 43,
+        "evals": 129
+      }
+    ]
+  },
+  "inference": "Identical thalamus-effective options and core code still followed distinct synthetic paths. FP32 atomic vertex-gradient reduction is a candidate mechanism; these reports do not isolate it as sole cause. FP64 scalar cost alone did not reliably recover the official score."
+}

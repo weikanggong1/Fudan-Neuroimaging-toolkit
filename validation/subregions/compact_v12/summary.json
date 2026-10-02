@@ -1,0 +1,639 @@
+{
+  "mode": "saved_real_data_mesh_component_summary",
+  "date": "2026-10-01",
+  "scope": "legacy FNIT native saved-stage components only; excludes complete T1 runs",
+  "source_git_commit": "64250aa52d99925762927a576e7306fa9d6f2377",
+  "source_files": {
+    "src/fnit/gems/_raster_triton.py": {
+      "bytes": 5200,
+      "sha256": "6977c0dbd870b63779c7cb6bef621631d5dda934a647f71a96224ac10c6b4f03"
+    },
+    "src/fnit/gems/rasterize.py": {
+      "bytes": 17134,
+      "sha256": "eeebd1349e0e684af37e15ef724f2edb1d814c2545d7ef6a14b0abcc4c3cedde"
+    },
+    "src/fnit/gems/deformation.py": {
+      "bytes": 4024,
+      "sha256": "a93db7dd2e2f1c89e51a88614f207b6d37d931b2c8ea6f38a6a419d91f0162bc"
+    },
+    "src/fnit/gems/core.py": {
+      "bytes": 19008,
+      "sha256": "d629ab05f3ba75fdc4be2396590d8f0ebdcbb5ea249f897498e79eb3b7215760"
+    },
+    "validation/subregions/benchmark_compact_mesh.py": {
+      "bytes": 18514,
+      "sha256": "5a9a2ff910e8a91afca740f126f776ae004ce42ed8db227c92956d0b550453fe"
+    },
+    "src/fnit/gems/gaussian.py": {
+      "bytes": 4737,
+      "sha256": "b0a147a76834e8da9c10592017cd4e800b8675082d25917a50b2507c2f24febc"
+    },
+    "src/fnit/gems/atlas.py": {
+      "bytes": 10149,
+      "sha256": "f6415958b02956f50f6efa6043428513610c3d3a00b734ff2aeff353930cf975"
+    },
+    "src/fnit/gems/recipes/thalamus.py": {
+      "bytes": 7417,
+      "sha256": "b1607aa027cdbfc6b5a54707ff6622535e64574a7444b3e3129d87e0ab2a5575"
+    },
+    "src/fnit/gems/recipes/hippo_amygdala.py": {
+      "bytes": 11102,
+      "sha256": "1211a0950041ff1b65f72dc347f31c23dd8674071ed85a27aed92b0fd18b8a5a"
+    }
+  },
+  "source_verification": "report hashes plus read-only SHA256 of frozen source_v12 kernel/core/raster/deformation",
+  "settings": {
+    "dtype": "float32",
+    "physical_gpu_index": 0,
+    "threads": 4,
+    "memory_fraction": 0.14,
+    "warm_repeats": 3,
+    "first_call_context": "after shared dense Gaussian initialization; fresh per-path dispatch caches",
+    "environment": {
+      "python": "3.11.7",
+      "platform": "Linux-3.10.0-1160.119.1.el7.x86_64-x86_64-with-glibc2.17",
+      "torch": "2.5.1",
+      "cuda": "11.8",
+      "cudnn": 90100,
+      "nibabel": "5.4.0",
+      "numpy": "1.26.4",
+      "gpu": "NVIDIA H100 PCIe",
+      "CUDA_VISIBLE_DEVICES": "0",
+      "OMP_NUM_THREADS": "4"
+    }
+  },
+  "inputs": {
+    "thalamus": {
+      "stage_directory": "port_thalamus_debug",
+      "shape": [
+        148,
+        101,
+        114
+      ],
+      "dense_voxels": 1704072,
+      "valid_voxels": 717531,
+      "files": [
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_thalamus_debug/processedImageMasked.mgz",
+          "bytes": 2478761,
+          "sha256": "0dc40a0f1bef990ec32ec91d7100ee883c0bff6900523843e26da2d5853a3a6b"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_thalamus_debug/alignedAtlasImage.mgz",
+          "bytes": 857890,
+          "sha256": "4899f59a91315e81eadcc2a671ad67dab9231b459a3dd73581e222d2eea63d9e"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_thalamus_debug/warpedOriginalMesh.txt.gz",
+          "bytes": 6147061,
+          "sha256": "d876f463c49346c04a2afb1bba3f9c5e9596523caec657fbee9133d9f5821ee4"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/atlases/thalamus/compressionLookupTable.txt",
+          "bytes": 2130,
+          "sha256": "9f480319b803a2c44606c6595c46a26fbb74726bdc800e88b443011fedb175ff"
+        }
+      ],
+      "mesh_to_image_transform": [
+        [
+          -0.9064788819236469,
+          0.12349737293489545,
+          0.08625262318768277,
+          126.4449042432409
+        ],
+        [
+          -0.06302597380062738,
+          0.0981241909201381,
+          -0.9619948862401635,
+          89.49048960494545
+        ],
+        [
+          0.10480212937868319,
+          0.9517018791440622,
+          0.01044519988473603,
+          0.577781393213165
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "hippo-amygdala-left": {
+      "stage_directory": "port_hippo_integrated_fullfix_left_tmp",
+      "shape": [
+        156,
+        156,
+        197
+      ],
+      "dense_voxels": 4794192,
+      "valid_voxels": 526626,
+      "files": [
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_hippo_integrated_fullfix_left_tmp/processedImageMasked.mgz",
+          "bytes": 1942883,
+          "sha256": "6df365922c33c112663630e51c268afcf3a847413ca33f54a8242dfb9dcd014c"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_hippo_integrated_fullfix_left_tmp/alignedAtlasImage.mgz",
+          "bytes": 406538,
+          "sha256": "bb4be281d6bbdda3bd754ea5656c7fde3e34dccbe7eca939c54ea57371c45c3e"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_hippo_integrated_fullfix_left_tmp/warpedOriginalMesh.txt.gz",
+          "bytes": 5682313,
+          "sha256": "ae705020dc4a819df465408a59e7a662b652a094a1e78d7390036663e7a83c19"
+        },
+        {
+          "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/atlases/hippo-amygdala-left/compressionLookupTable.txt",
+          "bytes": 2595,
+          "sha256": "5962518cb188de252a03796cf04ea8991cd444907b7733b14fc501cd898da362"
+        }
+      ],
+      "mesh_to_image_transform": [
+        [
+          -0.8796210573412415,
+          0.1285446187200038,
+          0.09287259918379222,
+          114.9156508271639
+        ],
+        [
+          -0.06679978074961905,
+          0.2699695207744901,
+          -0.8318859380325422,
+          89.95404553747886
+        ],
+        [
+          0.12014430080565039,
+          0.6927477768825111,
+          0.14030405316006583,
+          0.21507640253809512
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "cases": [
+    {
+      "structure": "thalamus",
+      "precision": "fp32",
+      "report": "compact_thalamus_fp32_v12.json",
+      "report_sha256": "6f8b76c6268c6bb4b014894299089f6c3816d08116f7a914a9f2a3485270e8d0",
+      "first_forward_backward_seconds": {
+        "dense": 13.63474318664521,
+        "compact": 2.9816467300988734
+      },
+      "warm_median_seconds": {
+        "dense": {
+          "raster_and_valid_selection_seconds": 1.0841207415796816,
+          "data_cost_seconds": 0.002959751058369875,
+          "deformation_forward_seconds": 0.008872847072780132,
+          "backward_seconds": 0.41346609871834517,
+          "forward_backward_seconds": 1.5115345236845315
+        },
+        "compact": {
+          "raster_and_valid_selection_seconds": 0.09324155375361443,
+          "data_cost_seconds": 0.005057143978774548,
+          "deformation_forward_seconds": 0.01038461597636342,
+          "backward_seconds": 0.032933698035776615,
+          "forward_backward_seconds": 0.1469922848045826
+        }
+      },
+      "pytorch_peak_allocated_gib": {
+        "dense": 1.4552640914916992,
+        "compact": 0.6587710380554199
+      },
+      "reference_cache_setup_seconds": 0.011427740100771189,
+      "counts": {
+        "grid_blocks": 3705,
+        "dense_active_blocks": 3141,
+        "dense_batches": 264,
+        "dense_rasterized_points": 1531920,
+        "compact_active_blocks": 1824,
+        "compact_batches": 179,
+        "compact_rasterized_points": 777647,
+        "compact_valid_points": 717531,
+        "compact_padding_points": 60116,
+        "valid_points_without_candidates": 0
+      },
+      "compact_lookup_calls": {
+        "triton": 895,
+        "torch_fallback": 0
+      },
+      "numerical_gate": {
+        "enforced": true,
+        "thresholds": {
+          "prior_max_abs_difference": 1e-05,
+          "gradient_relative_l2_difference": 0.0001,
+          "objective_relative_difference": 1e-06
+        },
+        "worst": {
+          "prior_max_abs_difference": 0.0,
+          "gradient_relative_l2_difference": 2.3926242835711352e-08,
+          "objective_relative_difference": 0.0
+        },
+        "thresholds_met": true,
+        "interpretation": "strict FP32 thresholds apply to all first/warm comparisons"
+      },
+      "max_coverage_disagreement_voxels": 0,
+      "gpu_load": {
+        "log": "compact_thalamus_fp32_v12_gpu_load.jsonl",
+        "log_sha256": "45bc59e151c86ad980f7ef6846a122a8b8bc730c9869254a572893f8561ceaa0",
+        "samples": 6,
+        "first_sample_unix": 1790790993.4330618,
+        "last_sample_unix": 1790791043.8978832,
+        "max_sampling_gap_seconds": 10.098486423492432,
+        "median_sampling_gap_seconds": 10.09230899810791,
+        "gaps_above_20_seconds": 0,
+        "max_sampled_own_process_memory_mib": 2472,
+        "gpus": {
+          "0": {
+            "used_memory_mib": {
+              "min": 65552,
+              "max": 68023,
+              "median": 66722.0
+            },
+            "free_memory_mib": {
+              "min": 12984,
+              "max": 15455,
+              "median": 14285.0
+            },
+            "utilization_percent": {
+              "min": 100,
+              "max": 100,
+              "median": 100.0
+            }
+          },
+          "1": {
+            "used_memory_mib": {
+              "min": 24396,
+              "max": 26360,
+              "median": 25378.0
+            },
+            "free_memory_mib": {
+              "min": 54647,
+              "max": 56611,
+              "median": 55629.0
+            },
+            "utilization_percent": {
+              "min": 69,
+              "max": 100,
+              "median": 100.0
+            }
+          }
+        }
+      }
+    },
+    {
+      "structure": "thalamus",
+      "precision": "tf32",
+      "report": "compact_thalamus_tf32_v12.json",
+      "report_sha256": "53c84bcefeb68347a314fc30bcba10c1ebfdcdfd694f345fae081ae03757c64f",
+      "first_forward_backward_seconds": {
+        "dense": 14.090660345274955,
+        "compact": 2.885226191021502
+      },
+      "warm_median_seconds": {
+        "dense": {
+          "raster_and_valid_selection_seconds": 1.0962090739049017,
+          "data_cost_seconds": 0.005020373035222292,
+          "deformation_forward_seconds": 0.009939926210790873,
+          "backward_seconds": 0.39216453069821,
+          "forward_backward_seconds": 1.524498414248228
+        },
+        "compact": {
+          "raster_and_valid_selection_seconds": 0.09099185094237328,
+          "data_cost_seconds": 0.005083984695374966,
+          "deformation_forward_seconds": 0.010414451826363802,
+          "backward_seconds": 0.03317098692059517,
+          "forward_backward_seconds": 0.14389465795829892
+        }
+      },
+      "pytorch_peak_allocated_gib": {
+        "dense": 1.4552640914916992,
+        "compact": 0.6587710380554199
+      },
+      "reference_cache_setup_seconds": 0.01235267287120223,
+      "counts": {
+        "grid_blocks": 3705,
+        "dense_active_blocks": 3141,
+        "dense_batches": 264,
+        "dense_rasterized_points": 1531920,
+        "compact_active_blocks": 1824,
+        "compact_batches": 179,
+        "compact_rasterized_points": 777647,
+        "compact_valid_points": 717531,
+        "compact_padding_points": 60116,
+        "valid_points_without_candidates": 0
+      },
+      "compact_lookup_calls": {
+        "triton": 895,
+        "torch_fallback": 0
+      },
+      "numerical_gate": {
+        "enforced": false,
+        "thresholds": {
+          "prior_max_abs_difference": 1e-05,
+          "gradient_relative_l2_difference": 0.0001,
+          "objective_relative_difference": 1e-06
+        },
+        "worst": {
+          "prior_max_abs_difference": 0.0,
+          "gradient_relative_l2_difference": 2.3494342395759864e-08,
+          "objective_relative_difference": 0.0
+        },
+        "thresholds_met": true,
+        "interpretation": "TF32 records observed differences; strict FP32 parity is not claimed"
+      },
+      "max_coverage_disagreement_voxels": 0,
+      "gpu_load": {
+        "log": "compact_thalamus_tf32_v12_gpu_load.jsonl",
+        "log_sha256": "08f7bd651faabf2535673deaa205d1c0e3c9ca2e0e008a13a501bce9974f733e",
+        "samples": 6,
+        "first_sample_unix": 1790791050.005,
+        "last_sample_unix": 1790791100.4422543,
+        "max_sampling_gap_seconds": 10.09731936454773,
+        "median_sampling_gap_seconds": 10.086892366409302,
+        "gaps_above_20_seconds": 0,
+        "max_sampled_own_process_memory_mib": 2818,
+        "gpus": {
+          "0": {
+            "used_memory_mib": {
+              "min": 65552,
+              "max": 68375,
+              "median": 66603.0
+            },
+            "free_memory_mib": {
+              "min": 12632,
+              "max": 15455,
+              "median": 14404.0
+            },
+            "utilization_percent": {
+              "min": 98,
+              "max": 100,
+              "median": 100.0
+            }
+          },
+          "1": {
+            "used_memory_mib": {
+              "min": 24396,
+              "max": 24396,
+              "median": 24396.0
+            },
+            "free_memory_mib": {
+              "min": 56611,
+              "max": 56611,
+              "median": 56611.0
+            },
+            "utilization_percent": {
+              "min": 71,
+              "max": 100,
+              "median": 100.0
+            }
+          }
+        }
+      }
+    },
+    {
+      "structure": "hippo-amygdala-left",
+      "precision": "fp32",
+      "report": "compact_hippo-amygdala-left_fp32_v12.json",
+      "report_sha256": "291e0620366984a3cbb69c0a2d39ec35cfd9142ddb9c6254a45ea8da600010ea",
+      "first_forward_backward_seconds": {
+        "dense": 21.994032471906394,
+        "compact": 2.5425414540804923
+      },
+      "warm_median_seconds": {
+        "dense": {
+          "raster_and_valid_selection_seconds": 1.3499445710331202,
+          "data_cost_seconds": 0.004953733179718256,
+          "deformation_forward_seconds": 0.015446561854332685,
+          "backward_seconds": 0.8998573930002749,
+          "forward_backward_seconds": 2.2356158290058374
+        },
+        "compact": {
+          "raster_and_valid_selection_seconds": 0.06513441493734717,
+          "data_cost_seconds": 0.004888050723820925,
+          "deformation_forward_seconds": 0.010319879278540611,
+          "backward_seconds": 0.02590091386809945,
+          "forward_backward_seconds": 0.11109523102641106
+        }
+      },
+      "pytorch_peak_allocated_gib": {
+        "dense": 2.1415176391601562,
+        "compact": 0.49370622634887695
+      },
+      "reference_cache_setup_seconds": 0.016256635077297688,
+      "counts": {
+        "grid_blocks": 10000,
+        "dense_active_blocks": 5702,
+        "dense_batches": 389,
+        "dense_rasterized_points": 2869952,
+        "compact_active_blocks": 1458,
+        "compact_batches": 128,
+        "compact_rasterized_points": 577834,
+        "compact_valid_points": 526626,
+        "compact_padding_points": 51208,
+        "valid_points_without_candidates": 0
+      },
+      "compact_lookup_calls": {
+        "triton": 640,
+        "torch_fallback": 0
+      },
+      "numerical_gate": {
+        "enforced": true,
+        "thresholds": {
+          "prior_max_abs_difference": 1e-05,
+          "gradient_relative_l2_difference": 0.0001,
+          "objective_relative_difference": 1e-06
+        },
+        "worst": {
+          "prior_max_abs_difference": 0.0,
+          "gradient_relative_l2_difference": 8.827710592213757e-09,
+          "objective_relative_difference": 0.0
+        },
+        "thresholds_met": true,
+        "interpretation": "strict FP32 thresholds apply to all first/warm comparisons"
+      },
+      "max_coverage_disagreement_voxels": 0,
+      "gpu_load": {
+        "log": "compact_hippo-amygdala-left_fp32_v12_gpu_load.jsonl",
+        "log_sha256": "82444c021d753426e4885a47011c15eb29ad83e8a18d300e068508b6b2bfe220",
+        "samples": 9,
+        "first_sample_unix": 1790791104.007963,
+        "last_sample_unix": 1790791184.6994896,
+        "max_sampling_gap_seconds": 10.09268856048584,
+        "median_sampling_gap_seconds": 10.090107917785645,
+        "gaps_above_20_seconds": 0,
+        "max_sampled_own_process_memory_mib": 3520,
+        "gpus": {
+          "0": {
+            "used_memory_mib": {
+              "min": 65552,
+              "max": 69077,
+              "median": 66801
+            },
+            "free_memory_mib": {
+              "min": 11930,
+              "max": 15455,
+              "median": 14206
+            },
+            "utilization_percent": {
+              "min": 77,
+              "max": 100,
+              "median": 100
+            }
+          },
+          "1": {
+            "used_memory_mib": {
+              "min": 24396,
+              "max": 24396,
+              "median": 24396
+            },
+            "free_memory_mib": {
+              "min": 56611,
+              "max": 56611,
+              "median": 56611
+            },
+            "utilization_percent": {
+              "min": 89,
+              "max": 100,
+              "median": 100
+            }
+          }
+        }
+      }
+    },
+    {
+      "structure": "hippo-amygdala-left",
+      "precision": "tf32",
+      "report": "compact_hippo-amygdala-left_tf32_v12.json",
+      "report_sha256": "6ae049e735945b3551d59eb21703559c058f68923318eec45a668e9e236a5963",
+      "first_forward_backward_seconds": {
+        "dense": 20.488430932164192,
+        "compact": 2.361885789781809
+      },
+      "warm_median_seconds": {
+        "dense": {
+          "raster_and_valid_selection_seconds": 1.2109393887221813,
+          "data_cost_seconds": 0.004967380780726671,
+          "deformation_forward_seconds": 0.015501685906201601,
+          "backward_seconds": 0.842979655135423,
+          "forward_backward_seconds": 2.0831467863172293
+        },
+        "compact": {
+          "raster_and_valid_selection_seconds": 0.05888292985036969,
+          "data_cost_seconds": 0.0048877471126616,
+          "deformation_forward_seconds": 0.010284952819347382,
+          "backward_seconds": 0.02614180976524949,
+          "forward_backward_seconds": 0.10579333500936627
+        }
+      },
+      "pytorch_peak_allocated_gib": {
+        "dense": 2.1415176391601562,
+        "compact": 0.49370622634887695
+      },
+      "reference_cache_setup_seconds": 0.017436326015740633,
+      "counts": {
+        "grid_blocks": 10000,
+        "dense_active_blocks": 5702,
+        "dense_batches": 389,
+        "dense_rasterized_points": 2869952,
+        "compact_active_blocks": 1458,
+        "compact_batches": 128,
+        "compact_rasterized_points": 577834,
+        "compact_valid_points": 526626,
+        "compact_padding_points": 51208,
+        "valid_points_without_candidates": 0
+      },
+      "compact_lookup_calls": {
+        "triton": 640,
+        "torch_fallback": 0
+      },
+      "numerical_gate": {
+        "enforced": false,
+        "thresholds": {
+          "prior_max_abs_difference": 1e-05,
+          "gradient_relative_l2_difference": 0.0001,
+          "objective_relative_difference": 1e-06
+        },
+        "worst": {
+          "prior_max_abs_difference": 0.0,
+          "gradient_relative_l2_difference": 7.2267451653317685e-09,
+          "objective_relative_difference": 0.0
+        },
+        "thresholds_met": true,
+        "interpretation": "TF32 records observed differences; strict FP32 parity is not claimed"
+      },
+      "max_coverage_disagreement_voxels": 0,
+      "gpu_load": {
+        "log": "compact_hippo-amygdala-left_tf32_v12_gpu_load.jsonl",
+        "log_sha256": "55f4fdde6fe585dbcae8424764c45d5f9e8210c978b43886612a59d1b1a68abd",
+        "samples": 8,
+        "first_sample_unix": 1790791184.842225,
+        "last_sample_unix": 1790791255.4250584,
+        "max_sampling_gap_seconds": 10.087608098983765,
+        "median_sampling_gap_seconds": 10.083797931671143,
+        "gaps_above_20_seconds": 0,
+        "max_sampled_own_process_memory_mib": 3604,
+        "gpus": {
+          "0": {
+            "used_memory_mib": {
+              "min": 65552,
+              "max": 69161,
+              "median": 66820.0
+            },
+            "free_memory_mib": {
+              "min": 11846,
+              "max": 15455,
+              "median": 14187.0
+            },
+            "utilization_percent": {
+              "min": 92,
+              "max": 100,
+              "median": 100.0
+            }
+          },
+          "1": {
+            "used_memory_mib": {
+              "min": 24396,
+              "max": 24396,
+              "median": 24396.0
+            },
+            "free_memory_mib": {
+              "min": 56611,
+              "max": 56611,
+              "median": 56611.0
+            },
+            "utilization_percent": {
+              "min": 73,
+              "max": 100,
+              "median": 100.0
+            }
+          }
+        }
+      }
+    }
+  ],
+  "tests": {
+    "log": "tests_compact_v12.log",
+    "log_sha256": "f9b40b194a2e14bc403a8d038fef1afdc552d1b15f154428c54506a1dad5c80e",
+    "passed": 138,
+    "seconds": 22.14,
+    "scope": [
+      "tests/gems",
+      "tests/synthseg_parc",
+      "tests/test_setup_weights.py"
+    ],
+    "frozen_source_has_native_samseg": false,
+    "frozen_source_has_vendor_fsl": false
+  },
+  "interpretation": "component observations on a shared GPU; allocator peaks and sampled process memory are distinct; no whole-T1 speedup is inferred"
+}

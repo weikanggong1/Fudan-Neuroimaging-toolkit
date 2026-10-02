@@ -2,12 +2,14 @@
 
 from dataclasses import dataclass
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import nibabel as nib
 import nibabel.freesurfer.io as fsio
 import numpy as np
 
 from ..msm.prepare import _write_gifti
+from .._hemisphere_parallel import map_hemispheres, resolve_cpu_threads, workbench_environment
 
 
 @dataclass(frozen=True)
@@ -16,6 +18,7 @@ class T1SurfacePair:
     pial: Path
     midthickness: Path
     vertex_count: int
+    midthickness_source: Path | None = None
 
 
 @dataclass(frozen=True)
@@ -28,113 +31,103 @@ def _apply_affine(points, matrix):
     return points @ matrix[:3, :3].T + matrix[:3, 3]
 
 
-def invert_mni_to_t1_pull(
-    t1_world_points: np.ndarray,
-    pull_ras: str | Path,
-    initial_t1_to_mni_world: np.ndarray,
-    *,
-    device: str = "cpu",
-    tolerance_mm: float = 0.05,
-    max_iterations: int = 80,
-    chunk_size: int = 32768,
-) -> tuple[np.ndarray, float]:
-    """Solve ``mni_world + pull(mni_world) == t1_world`` for each point.
-
-    ``pull`` is the 3-component RAS displacement on the MNI grid produced by
-    ``register_t1_to_mni``. The affine only initializes the fixed-point solve;
-    success requires every final nonlinear residual to meet ``tolerance_mm``.
-    Out-of-field and nonconvergent vertices fail rather than receiving an
-    affine-only coordinate.
-    """
-    points = np.asarray(t1_world_points, dtype=np.float64)
-    initial = np.asarray(initial_t1_to_mni_world, dtype=np.float64)
-    if points.ndim != 2 or points.shape[1] != 3 or not len(points) or not np.isfinite(points).all():
-        raise ValueError("t1_world_points must be finite [N,3]")
-    if initial.shape != (4, 4) or not np.isfinite(initial).all():
-        raise ValueError("initial_t1_to_mni_world must be a finite 4x4 affine")
-    if tolerance_mm <= 0 or max_iterations < 1 or chunk_size < 1:
-        raise ValueError("tolerance_mm, max_iterations and chunk_size must be positive")
-    image = nib.load(str(pull_ras))
-    if not isinstance(image, nib.Nifti1Image) or image.ndim != 4 or image.shape[3] != 3:
-        raise ValueError("pull_ras must be a 4D MNI-grid NIfTI with 3 RAS components")
-    field = np.asarray(image.dataobj, dtype=np.float32)
-    if not np.isfinite(field).all():
-        raise ValueError("pull_ras contains nonfinite values")
-    selected = torch.device(device)
-    if selected.type == "cuda":
-        torch.backends.cuda.matmul.allow_tf32 = True
-        torch.backends.cudnn.allow_tf32 = True
-    volume = torch.from_numpy(field.transpose(3, 2, 1, 0).copy())[None].to(selected)
-    world_to_voxel = torch.as_tensor(np.linalg.inv(image.affine), dtype=torch.float64, device=selected)
-    shape = image.shape[:3]
-    output = np.empty_like(points)
-    maximum = 0.0
-
-    def sample(world):
-        voxel = world @ world_to_voxel[:3, :3].T + world_to_voxel[:3, 3]
-        valid = torch.ones(len(world), dtype=torch.bool, device=selected)
-        for axis, length in enumerate(shape):
-            valid &= (voxel[:, axis] >= 0) & (voxel[:, axis] <= length - 1)
-        if not bool(valid.all()):
-            raise ValueError("surface vertex lies outside the MNI pull-field grid")
-        grid = torch.stack(tuple(
-            2 * voxel[:, axis] / (shape[axis] - 1) - 1 for axis in (0, 1, 2)
-        ), dim=-1).float().reshape(1, len(world), 1, 1, 3)
-        # The tensor dimensions are [Z,Y,X]; grid_sample expects [X,Y,Z].
-        return F.grid_sample(volume, grid, mode="bilinear", padding_mode="border",
-                             align_corners=True)[0, :, :, 0, 0].T.to(torch.float64)
-
-    for start in range(0, len(points), chunk_size):
-        stop = min(start + chunk_size, len(points))
-        target = torch.as_tensor(points[start:stop], dtype=torch.float64, device=selected)
-        estimate = torch.as_tensor(_apply_affine(points[start:stop], initial),
-                                   dtype=torch.float64, device=selected)
-        for _ in range(max_iterations):
-            residual = estimate + sample(estimate) - target
-            if float(torch.linalg.vector_norm(residual, dim=1).max()) <= tolerance_mm:
-                break
-            estimate = estimate - 0.75 * residual
-        residual = estimate + sample(estimate) - target
-        largest = float(torch.linalg.vector_norm(residual, dim=1).max())
-        if not np.isfinite(largest) or largest > tolerance_mm:
-            raise RuntimeError(f"MNI pull inverse did not converge: max residual {largest:.4f} mm")
-        output[start:stop] = estimate.cpu().numpy()
-        maximum = max(maximum, largest)
-    return output, maximum
+def load_fsnative_to_t1w(value):
+    """Read a forward fsnative scanner-RAS to T1w scanner-RAS affine."""
+    from ..flirt.coordinates import _numpy_affine
+    if value is None:
+        return np.eye(4, dtype=np.float64)
+    if isinstance(value, (str, Path)):
+        value = np.loadtxt(value)
+    return _numpy_affine(value, "fsnative_to_t1w")
 
 
 def prepare_t1w_surface_geometry(subject_dir: str | Path, output_dir: str | Path,
-                                 *, overwrite: bool = False) -> T1SurfaceGeometry:
+                                 *, fsnative_to_t1w=None,
+                                 overwrite: bool = False,
+                                 parallel: bool = True,
+                                 cpu_threads: int | None = None) -> T1SurfaceGeometry:
     """Convert recon-all white/pial meshes from tkRAS to scanner T1w RAS.
 
     The returned pairs have native FreeSurfer vertex order. This only reads
-    recon-all files with nibabel; no FreeSurfer executable is invoked.
+    recon-all files with nibabel; no FreeSurfer executable is invoked. Both
+    hemispheres are validated before any final file is written; failed
+    publication restores previous outputs. ``parallel=False`` selects the
+    serial control; ``cpu_threads`` supplies the total hemisphere budget.
     """
+    from .surface_fmriprep import _publish_projection
+
     subject = Path(subject_dir).expanduser().resolve()
+    output = Path(output_dir).expanduser().resolve()
+    budget = resolve_cpu_threads(cpu_threads)
+    destinations = {
+        hemi: {name: output / f"{hemi}.{name}.T1w.native.surf.gii"
+               for name in ("white", "pial", "midthickness")}
+        for hemi in ("lh", "rh")
+    }
+    for paths in destinations.values():
+        for path in paths.values():
+            if path.is_dir():
+                raise ValueError(f"output file is a directory: {path}")
+            if (path.exists() or path.is_symlink()) and not overwrite:
+                raise FileExistsError(path)
     orig = nib.load(str(subject / "mri/orig.mgz"))
     if not isinstance(orig, nib.MGHImage):
         raise ValueError("mri/orig.mgz must be an MGH image")
-    transform = orig.affine @ np.linalg.inv(orig.header.get_vox2ras_tkr())
-    output = Path(output_dir).expanduser().resolve()
-    output.mkdir(parents=True, exist_ok=True)
-    result = {}
-    for hemi in ("lh", "rh"):
-        paths = {name: output / f"{hemi}.{name}.T1w.native.surf.gii"
-                 for name in ("white", "pial", "midthickness")}
-        if any(path.exists() for path in paths.values()) and not overwrite:
-            raise FileExistsError(paths["white"])
+    transform = (load_fsnative_to_t1w(fsnative_to_t1w) @ orig.affine
+                 @ np.linalg.inv(orig.header.get_vox2ras_tkr()))
+    if not np.isfinite(transform).all() or abs(np.linalg.det(transform[:3, :3])) < 1e-10:
+        raise ValueError("orig.mgz and fsnative_to_t1w must define an invertible finite world affine")
+    def convert(hemisphere, threads):
+        hemi = "lh" if hemisphere == "L" else "rh"
+        paths = destinations[hemi]
         white, faces = fsio.read_geometry(str(subject / "surf" / f"{hemi}.white"))
         pial, pial_faces = fsio.read_geometry(str(subject / "surf" / f"{hemi}.pial"))
+        if (white.ndim != 2 or white.shape[1] != 3 or not len(white)
+                or faces.ndim != 2 or faces.shape[1] != 3 or not len(faces)
+                or not np.issubdtype(faces.dtype, np.integer)
+                or faces.min() < 0 or faces.max() >= len(white)):
+            raise ValueError(f"{hemi} white has invalid vertices or triangle indices")
         if not np.array_equal(faces, pial_faces):
             raise ValueError(f"{hemi} white and pial topology differ")
+        mid_path = next((subject / "surf" / f"{hemi}.{name}"
+                         for name in ("midthickness", "graymid")
+                         if (subject / "surf" / f"{hemi}.{name}").is_file()), None)
+        if mid_path is None:
+            raise FileNotFoundError(
+                f"{hemi}.midthickness or {hemi}.graymid is required in recon-all surf/; "
+                "provide the existing sMRIPrep/FreeSurfer surface with the recon-all inputs"
+            )
+        mid, mid_faces = fsio.read_geometry(str(mid_path))
+        if not np.array_equal(faces, mid_faces):
+            raise ValueError(f"{hemi} midthickness topology differs from white/pial")
+        for name, values in (("white", white), ("pial", pial), ("midthickness", mid)):
+            if values.shape != white.shape or not np.isfinite(values).all():
+                raise ValueError(f"{hemi} {name} has invalid vertices")
         white = _apply_affine(white, transform)
         pial = _apply_affine(pial, transform)
-        for name, vertices in (("white", white), ("pial", pial),
-                               ("midthickness", (white + pial) / 2)):
-            _write_gifti(paths[name], vertices, faces, hemi)
-        result[hemi] = T1SurfacePair(paths["white"], paths["pial"],
-                                      paths["midthickness"], len(white))
-    return T1SurfaceGeometry(result["lh"], result["rh"])
+        mid = _apply_affine(mid, transform)
+        vertices = {"white": white, "pial": pial, "midthickness": mid}
+        pair = T1SurfacePair(paths["white"], paths["pial"],
+                             paths["midthickness"], len(white), mid_path)
+        return hemi, vertices, faces, pair
+
+    converted = map_hemispheres(convert, parallel=parallel, cpu_threads=budget)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with TemporaryDirectory(prefix=".fnit-t1-surfaces-", dir=output.parent) as directory:
+        staging = Path(directory)
+        def serialize(hemisphere, threads):
+            hemi, vertices, faces, _ = converted[0 if hemisphere == "L" else 1]
+            names = []
+            for name, values in vertices.items():
+                destination = destinations[hemi][name]
+                _write_gifti(staging / destination.name, values, faces, hemi)
+                names.append(destination.name)
+            return names
+
+        names = tuple(name for entries in map_hemispheres(
+            serialize, parallel=parallel, cpu_threads=budget) for name in entries)
+        _publish_projection(staging, output, tuple(names), overwrite)
+    return T1SurfaceGeometry(converted[0][3], converted[1][3])
 
 
 @dataclass(frozen=True)
@@ -144,65 +137,105 @@ class T1SurfacePreparation:
     individual_rois: tuple[Path, Path]
 
 
+def _preparation_names():
+    return tuple(f"native/{hemi}.{name}.T1w.native.surf.gii"
+                 for hemi in ("lh", "rh") for name in ("white", "pial", "midthickness")) + tuple(
+        f"{hemi}.{name}" for hemi in ("L", "R") for name in (
+            "sphere.FS.native.surf.gii", "sphere.FS_to_fsLR.native.surf.gii",
+            "roi.thickness.native.shape.gii", "roi.filled.native.shape.gii",
+            "roi.individual.native.shape.gii",
+        )
+    )
+
+
 def prepare_fmriprep_surface_inputs(
     subject_dir: str | Path, hcp_assets_dir: str | Path, output_dir: str | Path,
-    *, wb_command: str | Path = "wb_command", overwrite: bool = False,
+    *, wb_command: str | Path = "wb_command", fsnative_to_t1w=None,
+    overwrite: bool = False,
+    parallel: bool = True, cpu_threads: int | None = None,
 ) -> T1SurfacePreparation:
     """Prepare T1w native meshes, FS-to-fsLR spheres and cortex ROIs.
 
-    Requires existing recon-all ``orig.mgz``, white/pial, sphere.reg and
-    thickness files. Does not create MNI surfaces or resample wmparc.
+    Requires existing recon-all ``orig.mgz``, white/pial, midthickness or
+    graymid, sphere.reg and thickness files. All 16 generated files are
+    protected by ``overwrite`` and staged together before publication.
+    ``parallel`` runs independent L/R branches; ``cpu_threads`` is their
+    shared total budget, split between Workbench child processes. A budget
+    of one uses the serial path. Does not create MNI surfaces or resample
+    wmparc.
     """
     import shutil
     import subprocess
+    from .surface_fmriprep import _publish_projection
 
     subject = Path(subject_dir).expanduser().resolve()
     output = Path(output_dir).expanduser().resolve()
+    budget = resolve_cpu_threads(cpu_threads)
+    names = _preparation_names()
+    for name in names:
+        path = output / name
+        if path.is_dir():
+            raise ValueError(f"output file is a directory: {path}")
+        if (path.exists() or path.is_symlink()) and not overwrite:
+            raise FileExistsError(path)
     mesh = Path(hcp_assets_dir).expanduser().resolve() / "global/templates/standard_mesh_atlases"
     executable = shutil.which(str(wb_command))
     if executable is None:
         raise FileNotFoundError(wb_command)
-    geometry = prepare_t1w_surface_geometry(
-        subject, output / "native", overwrite=overwrite,
-    )
-
-    def command(destination, *args):
+    def command(destination, environment, *args):
         subprocess.run([executable, *map(str, args)], check=True,
-                       capture_output=True, text=True)
+                       capture_output=True, text=True, env=environment)
         if not destination.is_file():
             raise RuntimeError(f"Workbench did not create {destination}")
 
-    spheres = []
-    rois = []
-    for hemi, fs_hemi, pair in (("L", "lh", geometry.left),
-                                ("R", "rh", geometry.right)):
-        vertices, faces = fsio.read_geometry(str(subject / "surf" / f"{fs_hemi}.sphere.reg"))
-        native_faces = np.asarray(nib.load(str(pair.white)).darrays[1].data)
-        if len(vertices) != pair.vertex_count or not np.array_equal(faces, native_faces):
-            raise ValueError(f"{fs_hemi}.sphere.reg topology differs from white/pial")
-        sphere = output / f"{hemi}.sphere.FS.native.surf.gii"
-        _write_gifti(sphere, vertices, faces, fs_hemi)
-        average = mesh / f"fs_{hemi}/fsaverage.{hemi}.sphere.164k_fs_{hemi}.surf.gii"
-        transform = mesh / (
-            f"fs_{hemi}/fs_{hemi}-to-fs_LR_fsaverage.{hemi}_LR."
-            f"spherical_std.164k_fs_{hemi}.surf.gii"
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with TemporaryDirectory(prefix=".fnit-surface-preparation-", dir=output.parent) as directory:
+        staging = Path(directory)
+        geometry = prepare_t1w_surface_geometry(
+            subject, staging / "native", fsnative_to_t1w=fsnative_to_t1w,
+            parallel=parallel, cpu_threads=budget,
         )
-        registered = output / f"{hemi}.sphere.FS_to_fsLR.native.surf.gii"
-        command(registered, "-surface-sphere-project-unproject", sphere,
-                average, transform, registered)
-        thickness = np.asarray(fsio.read_morph_data(
-            str(subject / "surf" / f"{fs_hemi}.thickness")), dtype=np.float32)
-        if len(thickness) != pair.vertex_count or not np.isfinite(thickness).all():
-            raise ValueError(f"{fs_hemi}.thickness is invalid")
-        raw = output / f"{hemi}.roi.thickness.native.shape.gii"
-        filled = output / f"{hemi}.roi.filled.native.shape.gii"
-        individual = output / f"{hemi}.roi.individual.native.shape.gii"
-        nib.save(nib.GiftiImage(darrays=[nib.gifti.GiftiDataArray(
-            (np.abs(thickness) > 0).astype(np.float32), intent="NIFTI_INTENT_SHAPE"
-        )]), str(raw))
-        command(filled, "-metric-fill-holes", pair.midthickness, raw, filled)
-        command(individual, "-metric-remove-islands", pair.midthickness,
-                filled, individual)
-        spheres.append(registered)
-        rois.append(individual)
-    return T1SurfacePreparation(geometry, tuple(spheres), tuple(rois))
+        def prepare(hemi, threads):
+            fs_hemi, pair = ("lh", geometry.left) if hemi == "L" else ("rh", geometry.right)
+            environment = workbench_environment(threads)
+            vertices, faces = fsio.read_geometry(str(subject / "surf" / f"{fs_hemi}.sphere.reg"))
+            native_faces = np.asarray(nib.load(str(pair.white)).darrays[1].data)
+            if (vertices.shape != (pair.vertex_count, 3) or not np.isfinite(vertices).all()
+                    or not np.array_equal(faces, native_faces)):
+                raise ValueError(f"{fs_hemi}.sphere.reg topology differs from white/pial or has invalid vertices")
+            sphere = staging / f"{hemi}.sphere.FS.native.surf.gii"
+            _write_gifti(sphere, vertices, faces, fs_hemi)
+            average = mesh / f"fs_{hemi}/fsaverage.{hemi}.sphere.164k_fs_{hemi}.surf.gii"
+            transform = mesh / (
+                f"fs_{hemi}/fs_{hemi}-to-fs_LR_fsaverage.{hemi}_LR."
+                f"spherical_std.164k_fs_{hemi}.surf.gii"
+            )
+            registered = staging / f"{hemi}.sphere.FS_to_fsLR.native.surf.gii"
+            command(registered, environment, "-surface-sphere-project-unproject", sphere,
+                    average, transform, registered)
+            thickness = np.asarray(fsio.read_morph_data(
+                str(subject / "surf" / f"{fs_hemi}.thickness")), dtype=np.float32)
+            if len(thickness) != pair.vertex_count or not np.isfinite(thickness).all():
+                raise ValueError(f"{fs_hemi}.thickness is invalid")
+            raw = staging / f"{hemi}.roi.thickness.native.shape.gii"
+            filled = staging / f"{hemi}.roi.filled.native.shape.gii"
+            individual = staging / f"{hemi}.roi.individual.native.shape.gii"
+            nib.save(nib.GiftiImage(darrays=[nib.gifti.GiftiDataArray(
+                (np.abs(thickness) > 0).astype(np.float32), intent="NIFTI_INTENT_SHAPE"
+            )]), str(raw))
+            command(filled, environment, "-metric-fill-holes", pair.midthickness, raw, filled)
+            command(individual, environment, "-metric-remove-islands", pair.midthickness,
+                    filled, individual)
+        map_hemispheres(prepare, parallel=parallel, cpu_threads=budget)
+        _publish_projection(staging, output, names, overwrite)
+
+    def published_pair(pair):
+        return T1SurfacePair(*(output / "native" / path.name for path in (
+            pair.white, pair.pial, pair.midthickness)), pair.vertex_count, pair.midthickness_source)
+
+    published = T1SurfaceGeometry(published_pair(geometry.left), published_pair(geometry.right))
+    return T1SurfacePreparation(
+        published,
+        tuple(output / f"{hemi}.sphere.FS_to_fsLR.native.surf.gii" for hemi in ("L", "R")),
+        tuple(output / f"{hemi}.roi.individual.native.shape.gii" for hemi in ("L", "R")),
+    )

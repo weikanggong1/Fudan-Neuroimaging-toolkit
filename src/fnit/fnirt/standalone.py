@@ -251,6 +251,7 @@ def run_fnirt(
     refmask=None,
     config=None,
     device=None,
+    execution="optimized",
     overwrite=False,
 ):
     """Run a supported FNIRT preset and write requested outputs.
@@ -286,8 +287,8 @@ def run_fnirt(
         fixed.affine,
         moving.shape[:3],
         fixed.shape[:3],
-        nib.affines.voxel_sizes(moving.affine),
-        nib.affines.voxel_sizes(fixed.affine),
+        moving.header.get_zooms()[:3],
+        fixed.header.get_zooms()[:3],
     )
     moving_to_fixed = AffineTransform(
         forward_world, source=moving, target=fixed, space="world"
@@ -295,6 +296,7 @@ def run_fnirt(
     result = TorchFNIRT(
         device=_default_device() if device is None else device,
         config=selected_config,
+        execution=execution,
     )(
         moving,
         fixed,

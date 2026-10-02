@@ -1,0 +1,1038 @@
+{
+  "schema_version": 1,
+  "scope": "one real C-only WRN connectivity case; two canonical fixed-feature solver configurations, not full default CA_CAT HCP equivalence",
+  "official_solver_source_commit": "260718953547743c028a45f8c885d163441df87a",
+  "hcp_config_source_commit": "f8cac6892f88bdf889d644711ff038198eb81533",
+  "frames": 490,
+  "solver_feature_columns": 33,
+  "feature_grayordinates": 90568,
+  "projection_grayordinates": 91282,
+  "fnit_cpu_threads": 4,
+  "official_cpu_threads": 1,
+  "precision": "float64 registration and costs; float32 GIFTI/CIFTI; no FP16/BF16",
+  "correlation_definition": "Pearson across time separately per nonconstant grayordinate, then arithmetic mean; all outputs compared by absolute error",
+  "timing_scope": "same configured bilateral registration with reads/writes; excludes imports, CUDA init, offline quality metrics and BOLD projection",
+  "cold_definition": "first registration call after imports and CUDA initialization",
+  "final_source_sha256": {
+    "src/fnit/msm/msmall.py": "249919f2fb544584987e57a038fb1c6e0b1d9b8bb537c81f7b0aa702ca0a1cd5",
+    "src/fnit/msm/msmsulc.py": "5433eeef19c17001a0514af7d5d4801eee226c69a3d2de3be56c00cb078a87fc",
+    "src/fnit/msm/features.py": "7e598efeeab5665ca05957d06d0867edea8b4714292bcb1b8b41be76f57fb6b2",
+    "src/fnit/msm/config_msmall.py": "63e21ca7114a4a415408cd52bd9b88d5eeadf5fd394be995105ac0906bddb467",
+    "src/fnit/msm/_sphere_map.py": "0b54a766f316ef3532cb75a121c6a770e1958138d25a241b3e7bcb81c7d707f9",
+    "src/fnit/msm/_fastpd_src/fastpd_module.cpp": "ccb48d830a075564f18ed2eca2b7de8ae3e5cd0e22045088ebac4af374b45411",
+    "src/fnit/fmri/surface_fmriprep.py": "d480deb6bb9a5ef51132bf259d0f57442837c2f61a6f05852d9a5c2711441605",
+    "src/fnit/fmri/normalization.py": "8bd3526743dd110e0291ddf64022d10b92d7d241948bdb96ad122370a7cf8527",
+    "tools/benchmark_msmall.py": "68ed2870c16bddd4d96e307d3cf80b4269c6af53a009cd8bd7e5305ed9aaa218",
+    "tools/benchmark_msmsulc.py": "ebefb788bf7e7ffb72f3c4678d99c478fa4e8a3264855bf858bc4ec6e494d033"
+  },
+  "configurations": {
+    "coarse": {
+      "configuration": {
+        "simval": [
+          2
+        ],
+        "iterations": [
+          10
+        ],
+        "control_grid": [
+          2
+        ],
+        "sampling_grid": [
+          4
+        ],
+        "data_grid": [
+          4
+        ],
+        "regularization": [
+          9.999999747378752e-06
+        ],
+        "shear_modulus": 0.4000000059604645,
+        "bulk_modulus": 1.600000023841858,
+        "strain_exponent": 2.0,
+        "regularization_exponent": 2.0
+      },
+      "official": {
+        "binary_sha256": "af5c04246cfeea19233232168acbc1f31266f28b1a7cb6779b8f1bfa32eb9615",
+        "config_sha256": "ec9348a2bd2aea5ce2bf1a7387997dabb3443784c15a017faa4871e4ea38cc2e",
+        "threads": 1,
+        "hemispheres": {
+          "L": {
+            "wall_seconds": 64.65999210579321,
+            "exit_code": 0,
+            "point_count": 32492
+          },
+          "R": {
+            "wall_seconds": 40.361853329930454,
+            "exit_code": 0,
+            "point_count": 32492
+          }
+        }
+      },
+      "official_bilateral_wall_seconds": 105.02184543572366,
+      "native_extension_sha256": "1fd35ea562f3438b0dd7bdc83b8beffc95af29301c5eba70eaa2865982f9efa2",
+      "gpu": "NVIDIA H100 PCIe",
+      "torch": "2.5.1",
+      "cuda_runtime": "11.8",
+      "runs": [
+        {
+          "wall_seconds": 20.312283162027597,
+          "peak_allocated_gb": 0.094729728,
+          "condition": "cold_0",
+          "sphere_paired": {
+            "L": {
+              "native_topology_exact": true,
+              "vertices": 32492,
+              "faces": 64980,
+              "fnit_folded_faces": 0,
+              "official_folded_faces": 0,
+              "sphere_angle_deg": {
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "maximum": 0.0
+              },
+              "chord_difference_mm": {
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "maximum": 0.0
+              }
+            },
+            "R": {
+              "native_topology_exact": true,
+              "vertices": 32492,
+              "faces": 64980,
+              "fnit_folded_faces": 0,
+              "official_folded_faces": 0,
+              "sphere_angle_deg": {
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "maximum": 0.0
+              },
+              "chord_difference_mm": {
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "maximum": 0.0
+              }
+            }
+          },
+          "speedup_vs_official_single_thread": 5.170361430961868,
+          "whole_gpu_observation": {
+            "includes_other_processes": true,
+            "samples": 19,
+            "sample_interval_seconds": 1.0,
+            "uuid_mapping_available": true,
+            "gpu_utilization_percent": {
+              "mean": 6.7894736842105265,
+              "median": 7.0,
+              "p95": 9.0,
+              "minimum": 0.0,
+              "maximum": 9.0
+            },
+            "whole_gpu_used_mib": {
+              "mean": 1445.6842105263158,
+              "median": 1456.0,
+              "p95": 1456.0,
+              "minimum": 1266.0,
+              "maximum": 1456.0
+            }
+          },
+          "stages": {
+            "L": [
+              {
+                "control_points": 162,
+                "data_points": 2562,
+                "labels": 19,
+                "maximum_iterations": 10,
+                "converged": false,
+                "source_unfold_updates": 0,
+                "control_unfold_updates": 0,
+                "seconds": 12.001966731157154,
+                "executed_iterations": 10,
+                "total_changed_labels": 584
+              }
+            ],
+            "R": [
+              {
+                "control_points": 162,
+                "data_points": 2562,
+                "labels": 19,
+                "maximum_iterations": 10,
+                "converged": true,
+                "source_unfold_updates": 0,
+                "control_unfold_updates": 0,
+                "seconds": 7.517019865103066,
+                "executed_iterations": 6,
+                "total_changed_labels": 474
+              }
+            ]
+          }
+        },
+        {
+          "wall_seconds": 20.38921172125265,
+          "peak_allocated_gb": 0.094729728,
+          "condition": "warm_1",
+          "sphere_paired": {
+            "L": {
+              "native_topology_exact": true,
+              "vertices": 32492,
+              "faces": 64980,
+              "fnit_folded_faces": 0,
+              "official_folded_faces": 0,
+              "sphere_angle_deg": {
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "maximum": 0.0
+              },
+              "chord_difference_mm": {
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "maximum": 0.0
+              }
+            },
+            "R": {
+              "native_topology_exact": true,
+              "vertices": 32492,
+              "faces": 64980,
+              "fnit_folded_faces": 0,
+              "official_folded_faces": 0,
+              "sphere_angle_deg": {
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "maximum": 0.0
+              },
+              "chord_difference_mm": {
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "maximum": 0.0
+              }
+            }
+          },
+          "speedup_vs_official_single_thread": 5.1508536412054795,
+          "whole_gpu_observation": {
+            "includes_other_processes": true,
+            "samples": 19,
+            "sample_interval_seconds": 1.0,
+            "uuid_mapping_available": true,
+            "gpu_utilization_percent": {
+              "mean": 7.368421052631579,
+              "median": 8.0,
+              "p95": 11.0,
+              "minimum": 0.0,
+              "maximum": 11.0
+            },
+            "whole_gpu_used_mib": {
+              "mean": 1456.0,
+              "median": 1456.0,
+              "p95": 1456.0,
+              "minimum": 1456.0,
+              "maximum": 1456.0
+            }
+          },
+          "stages": {
+            "L": [
+              {
+                "control_points": 162,
+                "data_points": 2562,
+                "labels": 19,
+                "maximum_iterations": 10,
+                "converged": false,
+                "source_unfold_updates": 0,
+                "control_unfold_updates": 0,
+                "seconds": 12.038922548294067,
+                "executed_iterations": 10,
+                "total_changed_labels": 584
+              }
+            ],
+            "R": [
+              {
+                "control_points": 162,
+                "data_points": 2562,
+                "labels": 19,
+                "maximum_iterations": 10,
+                "converged": true,
+                "source_unfold_updates": 0,
+                "control_unfold_updates": 0,
+                "seconds": 7.588084043003619,
+                "executed_iterations": 6,
+                "total_changed_labels": 474
+              }
+            ]
+          }
+        }
+      ],
+      "projection": {
+        "official_projection_seconds": 346.3879220401868,
+        "fnit_projection_seconds": 345.1248413021676,
+        "official_stages_seconds": {
+          "L_ribbon": 80.7450758870691,
+          "L_dilate": 49.62552885804325,
+          "L_native_mask": 17.493482903577387,
+          "L_resample": 10.750395837239921,
+          "L_atlas_mask": 4.530917814932764,
+          "R_ribbon": 75.84224678529426,
+          "R_dilate": 50.223652934189886,
+          "R_native_mask": 17.509814207907766,
+          "R_resample": 9.996677048970014,
+          "R_atlas_mask": 4.497489581350237,
+          "cifti": 17.74142769817263
+        },
+        "fnit_stages_seconds": {
+          "L_ribbon": 79.00740262120962,
+          "L_dilate": 49.275540293194354,
+          "L_native_mask": 18.11509043117985,
+          "L_resample": 10.902739495970309,
+          "L_atlas_mask": 4.4767931289970875,
+          "R_ribbon": 76.49734352808446,
+          "R_dilate": 49.00070311035961,
+          "R_native_mask": 18.85538616590202,
+          "R_resample": 10.679422590881586,
+          "R_atlas_mask": 4.779032391961664,
+          "cifti": 16.999787244014442
+        },
+        "metrics": {
+          "frames": 490,
+          "grayordinates": 91282,
+          "time_axis_exact": true,
+          "brain_model_axis_exact": true,
+          "structures": {
+            "CIFTI_STRUCTURE_CORTEX_LEFT": {
+              "grayordinates": 29696,
+              "valid_nonconstant_grayordinates": 29696,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_CORTEX_RIGHT": {
+              "grayordinates": 29716,
+              "valid_nonconstant_grayordinates": 29710,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_ACCUMBENS_LEFT": {
+              "grayordinates": 135,
+              "valid_nonconstant_grayordinates": 135,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_ACCUMBENS_RIGHT": {
+              "grayordinates": 140,
+              "valid_nonconstant_grayordinates": 140,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_AMYGDALA_LEFT": {
+              "grayordinates": 315,
+              "valid_nonconstant_grayordinates": 315,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_AMYGDALA_RIGHT": {
+              "grayordinates": 332,
+              "valid_nonconstant_grayordinates": 332,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_BRAIN_STEM": {
+              "grayordinates": 3472,
+              "valid_nonconstant_grayordinates": 3442,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_CAUDATE_LEFT": {
+              "grayordinates": 728,
+              "valid_nonconstant_grayordinates": 728,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_CAUDATE_RIGHT": {
+              "grayordinates": 755,
+              "valid_nonconstant_grayordinates": 754,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_CEREBELLUM_LEFT": {
+              "grayordinates": 8709,
+              "valid_nonconstant_grayordinates": 8277,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_CEREBELLUM_RIGHT": {
+              "grayordinates": 9144,
+              "valid_nonconstant_grayordinates": 8925,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_DIENCEPHALON_VENTRAL_LEFT": {
+              "grayordinates": 706,
+              "valid_nonconstant_grayordinates": 706,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_DIENCEPHALON_VENTRAL_RIGHT": {
+              "grayordinates": 712,
+              "valid_nonconstant_grayordinates": 712,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_HIPPOCAMPUS_LEFT": {
+              "grayordinates": 764,
+              "valid_nonconstant_grayordinates": 764,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_HIPPOCAMPUS_RIGHT": {
+              "grayordinates": 795,
+              "valid_nonconstant_grayordinates": 795,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_PALLIDUM_LEFT": {
+              "grayordinates": 297,
+              "valid_nonconstant_grayordinates": 297,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_PALLIDUM_RIGHT": {
+              "grayordinates": 260,
+              "valid_nonconstant_grayordinates": 260,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_PUTAMEN_LEFT": {
+              "grayordinates": 1060,
+              "valid_nonconstant_grayordinates": 1060,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_PUTAMEN_RIGHT": {
+              "grayordinates": 1010,
+              "valid_nonconstant_grayordinates": 1010,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_THALAMUS_LEFT": {
+              "grayordinates": 1288,
+              "valid_nonconstant_grayordinates": 1288,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_THALAMUS_RIGHT": {
+              "grayordinates": 1248,
+              "valid_nonconstant_grayordinates": 1248,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            }
+          }
+        },
+        "final_spheres_bitexact_to_projection_inputs": true,
+        "registration_initialization_only_patch_does_not_change_projection": true
+      }
+    },
+    "refine": {
+      "configuration": {
+        "simval": [
+          2,
+          2,
+          2
+        ],
+        "iterations": [
+          10,
+          15,
+          15
+        ],
+        "control_grid": [
+          2,
+          3,
+          4
+        ],
+        "sampling_grid": [
+          4,
+          5,
+          6
+        ],
+        "data_grid": [
+          4,
+          5,
+          6
+        ],
+        "regularization": [
+          9.999999747378752e-06,
+          0.007499999832361937,
+          0.009999999776482582
+        ],
+        "shear_modulus": 0.4000000059604645,
+        "bulk_modulus": 1.600000023841858,
+        "strain_exponent": 2.0,
+        "regularization_exponent": 2.0
+      },
+      "official": {
+        "binary_sha256": "af5c04246cfeea19233232168acbc1f31266f28b1a7cb6779b8f1bfa32eb9615",
+        "config_sha256": "646f100e7826d0c285f379f2a9121f0c0c8cd61a3d2d200cc241c416617b8555",
+        "threads": 1,
+        "hemispheres": {
+          "L": {
+            "wall_seconds": 952.5597992669791,
+            "exit_code": 0,
+            "point_count": 32492
+          },
+          "R": {
+            "wall_seconds": 1203.0663515240885,
+            "exit_code": 0,
+            "point_count": 32492
+          }
+        }
+      },
+      "official_bilateral_wall_seconds": 2155.6261507910676,
+      "native_extension_sha256": "1fd35ea562f3438b0dd7bdc83b8beffc95af29301c5eba70eaa2865982f9efa2",
+      "gpu": "NVIDIA H100 PCIe",
+      "torch": "2.5.1",
+      "cuda_runtime": "11.8",
+      "runs": [
+        {
+          "wall_seconds": 167.72064603399485,
+          "peak_allocated_gb": 1.212606464,
+          "condition": "cold_0",
+          "sphere_paired": {
+            "L": {
+              "native_topology_exact": true,
+              "vertices": 32492,
+              "faces": 64980,
+              "fnit_folded_faces": 0,
+              "official_folded_faces": 0,
+              "sphere_angle_deg": {
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "maximum": 0.0
+              },
+              "chord_difference_mm": {
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "maximum": 0.0
+              }
+            },
+            "R": {
+              "native_topology_exact": true,
+              "vertices": 32492,
+              "faces": 64980,
+              "fnit_folded_faces": 0,
+              "official_folded_faces": 0,
+              "sphere_angle_deg": {
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "maximum": 0.0
+              },
+              "chord_difference_mm": {
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "maximum": 0.0
+              }
+            }
+          },
+          "speedup_vs_official_single_thread": 12.852479416005526,
+          "whole_gpu_observation": {
+            "includes_other_processes": true,
+            "samples": 145,
+            "sample_interval_seconds": 1.0,
+            "uuid_mapping_available": true,
+            "gpu_utilization_percent": {
+              "mean": 9.627586206896552,
+              "median": 10.0,
+              "p95": 19.0,
+              "minimum": 0.0,
+              "maximum": 19.0
+            },
+            "whole_gpu_used_mib": {
+              "mean": 2609.8206896551724,
+              "median": 2906.0,
+              "p95": 2906.0,
+              "minimum": 1266.0,
+              "maximum": 2906.0
+            }
+          },
+          "stages": {
+            "L": [
+              {
+                "control_points": 162,
+                "data_points": 2562,
+                "labels": 19,
+                "maximum_iterations": 10,
+                "converged": false,
+                "source_unfold_updates": 0,
+                "control_unfold_updates": 0,
+                "seconds": 12.269174435175955,
+                "executed_iterations": 10,
+                "total_changed_labels": 584
+              },
+              {
+                "control_points": 642,
+                "data_points": 10242,
+                "labels": 19,
+                "maximum_iterations": 15,
+                "converged": true,
+                "source_unfold_updates": 0,
+                "control_unfold_updates": 0,
+                "seconds": 21.97843262506649,
+                "executed_iterations": 8,
+                "total_changed_labels": 2846
+              },
+              {
+                "control_points": 2562,
+                "data_points": 40962,
+                "labels": 19,
+                "maximum_iterations": 15,
+                "converged": true,
+                "source_unfold_updates": 0,
+                "control_unfold_updates": 0,
+                "seconds": 42.8568873857148,
+                "executed_iterations": 6,
+                "total_changed_labels": 8284
+              }
+            ],
+            "R": [
+              {
+                "control_points": 162,
+                "data_points": 2562,
+                "labels": 19,
+                "maximum_iterations": 10,
+                "converged": true,
+                "source_unfold_updates": 0,
+                "control_unfold_updates": 0,
+                "seconds": 7.290250693913549,
+                "executed_iterations": 6,
+                "total_changed_labels": 474
+              },
+              {
+                "control_points": 642,
+                "data_points": 10242,
+                "labels": 19,
+                "maximum_iterations": 15,
+                "converged": true,
+                "source_unfold_updates": 0,
+                "control_unfold_updates": 0,
+                "seconds": 27.154484276194125,
+                "executed_iterations": 10,
+                "total_changed_labels": 3000
+              },
+              {
+                "control_points": 2562,
+                "data_points": 40962,
+                "labels": 19,
+                "maximum_iterations": 15,
+                "converged": true,
+                "source_unfold_updates": 0,
+                "control_unfold_updates": 0,
+                "seconds": 55.12142857303843,
+                "executed_iterations": 8,
+                "total_changed_labels": 10279
+              }
+            ]
+          }
+        },
+        {
+          "wall_seconds": 166.62641407502815,
+          "peak_allocated_gb": 1.212606464,
+          "condition": "warm_1",
+          "sphere_paired": {
+            "L": {
+              "native_topology_exact": true,
+              "vertices": 32492,
+              "faces": 64980,
+              "fnit_folded_faces": 0,
+              "official_folded_faces": 0,
+              "sphere_angle_deg": {
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "maximum": 0.0
+              },
+              "chord_difference_mm": {
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "maximum": 0.0
+              }
+            },
+            "R": {
+              "native_topology_exact": true,
+              "vertices": 32492,
+              "faces": 64980,
+              "fnit_folded_faces": 0,
+              "official_folded_faces": 0,
+              "sphere_angle_deg": {
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "maximum": 0.0
+              },
+              "chord_difference_mm": {
+                "mean": 0.0,
+                "median": 0.0,
+                "p95": 0.0,
+                "maximum": 0.0
+              }
+            }
+          },
+          "speedup_vs_official_single_thread": 12.936881362761833,
+          "whole_gpu_observation": {
+            "includes_other_processes": true,
+            "samples": 138,
+            "sample_interval_seconds": 1.0,
+            "uuid_mapping_available": true,
+            "gpu_utilization_percent": {
+              "mean": 9.108695652173912,
+              "median": 10.0,
+              "p95": 15.0,
+              "minimum": 0.0,
+              "maximum": 19.0
+            },
+            "whole_gpu_used_mib": {
+              "mean": 2906.0,
+              "median": 2906.0,
+              "p95": 2906.0,
+              "minimum": 2906.0,
+              "maximum": 2906.0
+            }
+          },
+          "stages": {
+            "L": [
+              {
+                "control_points": 162,
+                "data_points": 2562,
+                "labels": 19,
+                "maximum_iterations": 10,
+                "converged": false,
+                "source_unfold_updates": 0,
+                "control_unfold_updates": 0,
+                "seconds": 11.53853147290647,
+                "executed_iterations": 10,
+                "total_changed_labels": 584
+              },
+              {
+                "control_points": 642,
+                "data_points": 10242,
+                "labels": 19,
+                "maximum_iterations": 15,
+                "converged": true,
+                "source_unfold_updates": 0,
+                "control_unfold_updates": 0,
+                "seconds": 21.41708060214296,
+                "executed_iterations": 8,
+                "total_changed_labels": 2846
+              },
+              {
+                "control_points": 2562,
+                "data_points": 40962,
+                "labels": 19,
+                "maximum_iterations": 15,
+                "converged": true,
+                "source_unfold_updates": 0,
+                "control_unfold_updates": 0,
+                "seconds": 41.97897105431184,
+                "executed_iterations": 6,
+                "total_changed_labels": 8284
+              }
+            ],
+            "R": [
+              {
+                "control_points": 162,
+                "data_points": 2562,
+                "labels": 19,
+                "maximum_iterations": 10,
+                "converged": true,
+                "source_unfold_updates": 0,
+                "control_unfold_updates": 0,
+                "seconds": 7.422866736073047,
+                "executed_iterations": 6,
+                "total_changed_labels": 474
+              },
+              {
+                "control_points": 642,
+                "data_points": 10242,
+                "labels": 19,
+                "maximum_iterations": 15,
+                "converged": true,
+                "source_unfold_updates": 0,
+                "control_unfold_updates": 0,
+                "seconds": 27.87683714926243,
+                "executed_iterations": 10,
+                "total_changed_labels": 3000
+              },
+              {
+                "control_points": 2562,
+                "data_points": 40962,
+                "labels": 19,
+                "maximum_iterations": 15,
+                "converged": true,
+                "source_unfold_updates": 0,
+                "control_unfold_updates": 0,
+                "seconds": 55.4012309582904,
+                "executed_iterations": 8,
+                "total_changed_labels": 10279
+              }
+            ]
+          }
+        }
+      ],
+      "projection": {
+        "official_projection_seconds": 340.31433633714914,
+        "fnit_projection_seconds": 344.72885551676154,
+        "official_stages_seconds": {
+          "L_ribbon": 76.66886899806559,
+          "L_dilate": 51.77466955082491,
+          "L_native_mask": 17.225395345129073,
+          "L_resample": 10.41588041279465,
+          "L_atlas_mask": 4.523671912960708,
+          "R_ribbon": 73.98702038638294,
+          "R_dilate": 49.12516828579828,
+          "R_native_mask": 17.660305874887854,
+          "R_resample": 10.93729755980894,
+          "R_atlas_mask": 4.545383649878204,
+          "cifti": 16.71287437994033
+        },
+        "fnit_stages_seconds": {
+          "L_ribbon": 77.74803083064035,
+          "L_dilate": 49.115297191310674,
+          "L_native_mask": 17.077189856674522,
+          "L_resample": 10.523859441746026,
+          "L_atlas_mask": 4.5897724949754775,
+          "R_ribbon": 79.1448668227531,
+          "R_dilate": 49.65314133791253,
+          "R_native_mask": 17.85098254168406,
+          "R_resample": 10.67516217706725,
+          "R_atlas_mask": 4.630382443778217,
+          "cifti": 16.974806701298803
+        },
+        "metrics": {
+          "frames": 490,
+          "grayordinates": 91282,
+          "time_axis_exact": true,
+          "brain_model_axis_exact": true,
+          "structures": {
+            "CIFTI_STRUCTURE_CORTEX_LEFT": {
+              "grayordinates": 29696,
+              "valid_nonconstant_grayordinates": 29696,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_CORTEX_RIGHT": {
+              "grayordinates": 29716,
+              "valid_nonconstant_grayordinates": 29686,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_ACCUMBENS_LEFT": {
+              "grayordinates": 135,
+              "valid_nonconstant_grayordinates": 135,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_ACCUMBENS_RIGHT": {
+              "grayordinates": 140,
+              "valid_nonconstant_grayordinates": 140,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_AMYGDALA_LEFT": {
+              "grayordinates": 315,
+              "valid_nonconstant_grayordinates": 315,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_AMYGDALA_RIGHT": {
+              "grayordinates": 332,
+              "valid_nonconstant_grayordinates": 332,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_BRAIN_STEM": {
+              "grayordinates": 3472,
+              "valid_nonconstant_grayordinates": 3442,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_CAUDATE_LEFT": {
+              "grayordinates": 728,
+              "valid_nonconstant_grayordinates": 728,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_CAUDATE_RIGHT": {
+              "grayordinates": 755,
+              "valid_nonconstant_grayordinates": 754,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_CEREBELLUM_LEFT": {
+              "grayordinates": 8709,
+              "valid_nonconstant_grayordinates": 8277,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_CEREBELLUM_RIGHT": {
+              "grayordinates": 9144,
+              "valid_nonconstant_grayordinates": 8925,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_DIENCEPHALON_VENTRAL_LEFT": {
+              "grayordinates": 706,
+              "valid_nonconstant_grayordinates": 706,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_DIENCEPHALON_VENTRAL_RIGHT": {
+              "grayordinates": 712,
+              "valid_nonconstant_grayordinates": 712,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_HIPPOCAMPUS_LEFT": {
+              "grayordinates": 764,
+              "valid_nonconstant_grayordinates": 764,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_HIPPOCAMPUS_RIGHT": {
+              "grayordinates": 795,
+              "valid_nonconstant_grayordinates": 795,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_PALLIDUM_LEFT": {
+              "grayordinates": 297,
+              "valid_nonconstant_grayordinates": 297,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_PALLIDUM_RIGHT": {
+              "grayordinates": 260,
+              "valid_nonconstant_grayordinates": 260,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_PUTAMEN_LEFT": {
+              "grayordinates": 1060,
+              "valid_nonconstant_grayordinates": 1060,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_PUTAMEN_RIGHT": {
+              "grayordinates": 1010,
+              "valid_nonconstant_grayordinates": 1010,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_THALAMUS_LEFT": {
+              "grayordinates": 1288,
+              "valid_nonconstant_grayordinates": 1288,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            },
+            "CIFTI_STRUCTURE_THALAMUS_RIGHT": {
+              "grayordinates": 1248,
+              "valid_nonconstant_grayordinates": 1248,
+              "mean_temporal_r": 1.0,
+              "median_temporal_r": 1.0,
+              "mean_absolute_difference": 0.0,
+              "maximum_absolute_difference": 0.0
+            }
+          }
+        },
+        "final_spheres_bitexact_to_projection_inputs": true,
+        "registration_initialization_only_patch_does_not_change_projection": true
+      }
+    }
+  }
+}

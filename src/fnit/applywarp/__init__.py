@@ -1,5 +1,5 @@
 """PyTorch application of FSL warp fields."""
 
-from .core import ApplyWarpResult, TorchApplyWarp, applywarp
+from .core import ApplyWarpPlan, ApplyWarpResult, TorchApplyWarp, applywarp
 
-__all__ = ["ApplyWarpResult", "TorchApplyWarp", "applywarp"]
+__all__ = ["ApplyWarpPlan", "ApplyWarpResult", "TorchApplyWarp", "applywarp"]

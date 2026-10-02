@@ -1,0 +1,363 @@
+{
+  "schema_version": 1,
+  "scope": "Official FSL registration after independent native SynthStrip/FAST/FEAT preparation; matched FNIT FNIRT branch.",
+  "source_revision": "380e23dbedcc36d1e34bd7eed414196089d6fe67",
+  "fsl_version": "6.0.7.22",
+  "registration_backend": "fnirt",
+  "stages": {
+    "t1_affine": {
+      "executable": "flirt",
+      "wall_seconds_including_io": 16.784695087000728,
+      "launcher_exit_code": 255,
+      "traced_exit_group_codes": [
+        0,
+        -1
+      ],
+      "actual_child_exit_code": 0,
+      "outputs": {
+        "matrix": {
+          "shape": [
+            4,
+            4
+          ],
+          "all_finite": true,
+          "determinant": 1.3913801647164314
+        },
+        "image": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "all_finite": true,
+          "gzip_crc_passed": true,
+          "intent_code": 0
+        }
+      },
+      "acceptance": "Outputs verified; original exit codes retained."
+    },
+    "t1_nonlinear": {
+      "executable": "fnirt",
+      "wall_seconds_including_io": 219.90950817102566,
+      "launcher_exit_code": 255,
+      "traced_exit_group_codes": [
+        0,
+        -1
+      ],
+      "actual_child_exit_code": 0,
+      "outputs": {
+        "coefficients": {
+          "shape": [
+            21,
+            24,
+            21,
+            3
+          ],
+          "dtype": "float32",
+          "all_finite": true,
+          "gzip_crc_passed": true,
+          "intent_code": 2007
+        },
+        "field": {
+          "shape": [
+            91,
+            109,
+            91,
+            3
+          ],
+          "dtype": "float32",
+          "all_finite": true,
+          "gzip_crc_passed": true,
+          "intent_code": 2006
+        },
+        "image": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "float32",
+          "all_finite": true,
+          "gzip_crc_passed": true,
+          "intent_code": 0
+        }
+      },
+      "acceptance": "Outputs verified; original exit codes retained."
+    },
+    "epi_affine": {
+      "executable": "flirt",
+      "wall_seconds_including_io": 7.21752149797976,
+      "launcher_exit_code": 255,
+      "traced_exit_group_codes": [
+        0,
+        -1
+      ],
+      "actual_child_exit_code": 0,
+      "outputs": {
+        "matrix": {
+          "shape": [
+            4,
+            4
+          ],
+          "all_finite": true,
+          "determinant": 1.000000017469064
+        }
+      },
+      "acceptance": "Outputs verified; original exit codes retained."
+    },
+    "epi_bbr": {
+      "executable": "flirt",
+      "wall_seconds_including_io": 44.53503679484129,
+      "launcher_exit_code": 255,
+      "traced_exit_group_codes": [
+        0,
+        -1
+      ],
+      "actual_child_exit_code": 0,
+      "outputs": {
+        "matrix": {
+          "shape": [
+            4,
+            4
+          ],
+          "all_finite": true,
+          "determinant": 0.9999998912377392
+        },
+        "image": {
+          "shape": [
+            162,
+            215,
+            180
+          ],
+          "dtype": "int32",
+          "all_finite": true,
+          "gzip_crc_passed": true,
+          "intent_code": 0
+        }
+      },
+      "acceptance": "Outputs verified; original exit codes retained."
+    },
+    "t1_dense_warp": {
+      "executable": "convertwarp",
+      "wall_seconds_including_io": 1.4653196521103382,
+      "launcher_exit_code": 255,
+      "traced_exit_group_codes": [
+        0,
+        -1
+      ],
+      "actual_child_exit_code": 0,
+      "outputs": {
+        "warp": {
+          "shape": [
+            91,
+            109,
+            91,
+            3
+          ],
+          "dtype": "float32",
+          "all_finite": true,
+          "gzip_crc_passed": true,
+          "intent_code": 0
+        }
+      },
+      "acceptance": "Outputs verified; original exit codes retained."
+    },
+    "compose_epi_mni": {
+      "executable": "convertwarp",
+      "wall_seconds_including_io": 1.834067600313574,
+      "launcher_exit_code": 255,
+      "traced_exit_group_codes": [
+        0,
+        -1
+      ],
+      "actual_child_exit_code": 0,
+      "outputs": {
+        "warp": {
+          "shape": [
+            91,
+            109,
+            91,
+            3
+          ],
+          "dtype": "float32",
+          "all_finite": true,
+          "gzip_crc_passed": true,
+          "intent_code": 0
+        }
+      },
+      "acceptance": "Outputs verified; original exit codes retained."
+    },
+    "inverse_bbr": {
+      "executable": "convert_xfm",
+      "wall_seconds_including_io": 0.0961195551790297,
+      "launcher_exit_code": 255,
+      "traced_exit_group_codes": [
+        0,
+        -1
+      ],
+      "actual_child_exit_code": 0,
+      "outputs": {
+        "matrix": {
+          "shape": [
+            4,
+            4
+          ],
+          "all_finite": true,
+          "determinant": 1.000000108703716
+        }
+      },
+      "acceptance": "Outputs verified; original exit codes retained."
+    },
+    "wm_pve_to_epi": {
+      "executable": "flirt",
+      "wall_seconds_including_io": 1.0688239629380405,
+      "launcher_exit_code": 255,
+      "traced_exit_group_codes": [
+        0,
+        -1
+      ],
+      "actual_child_exit_code": 0,
+      "outputs": {
+        "image": {
+          "shape": [
+            88,
+            88,
+            64
+          ],
+          "dtype": "float32",
+          "all_finite": true,
+          "gzip_crc_passed": true,
+          "intent_code": 0
+        }
+      },
+      "acceptance": "Outputs verified; original exit codes retained."
+    },
+    "csf_pve_to_epi": {
+      "executable": "flirt",
+      "wall_seconds_including_io": 1.103935721796006,
+      "launcher_exit_code": 255,
+      "traced_exit_group_codes": [
+        0,
+        -1
+      ],
+      "actual_child_exit_code": 0,
+      "outputs": {
+        "image": {
+          "shape": [
+            88,
+            88,
+            64
+          ],
+          "dtype": "float32",
+          "all_finite": true,
+          "gzip_crc_passed": true,
+          "intent_code": 0
+        }
+      },
+      "acceptance": "Outputs verified; original exit codes retained."
+    },
+    "epi_mask_to_mni": {
+      "executable": "applywarp",
+      "wall_seconds_including_io": 0.5266780876554549,
+      "launcher_exit_code": 255,
+      "traced_exit_group_codes": [
+        0,
+        -1
+      ],
+      "actual_child_exit_code": 0,
+      "outputs": {
+        "image": {
+          "shape": [
+            91,
+            109,
+            91
+          ],
+          "dtype": "uint8",
+          "all_finite": true,
+          "gzip_crc_passed": true,
+          "intent_code": 0
+        }
+      },
+      "acceptance": "Outputs verified; original exit codes retained."
+    }
+  },
+  "timing_seconds": {
+    "primary_process_seconds": 294.5417061308399,
+    "validation_process_seconds": 0
+  },
+  "timing_scope": "Sum of individual native command walls including I/O and exec/exit tracing; NumPy conversion, file hashing, waiting and upstream preprocessing are not included. Nonlinear invwarp runs only with --inverse-diagnostic and is excluded from primary timing.",
+  "inverse_diagnostic_enabled": false,
+  "template_preparation": "Full MNI152 2mm template multiplied by the supplied mask, preserving full-template header.",
+  "mask_rules": {
+    "wm_boundary": "Native FAST WM PVE >= 0.5",
+    "tissues_epi": "Linear-resampled native FAST WM/CSF PVE >= 0.8 intersected with native EPI brain mask",
+    "brain_mni": "Nearest EPI brain mask through composed warp intersected with supplied template mask"
+  },
+  "composition_control_mm": {
+    "mean": 6.660552813451034e-06,
+    "median": 6.077826907579732e-06,
+    "p95": 1.3393420033086214e-05,
+    "rms": 7.518069980766858e-06,
+    "maximum": 2.8377716433601446e-05
+  },
+  "mask_voxels": {
+    "wm_boundary": 490196,
+    "epi_brain": 99372,
+    "mni_brain": 224952
+  },
+  "sha256": {
+    "inputs": {
+      "t1_brain": "542f7a92bda1cf1c419b7178a157b11acfc568689b4b6772ac0fe7c5a67dffe4",
+      "wm_pve": "413952314e99b8527fd0339fa8b363ea5acf591857e4afc3b299972b7d32b474",
+      "csf_pve": "e077dd9bd152e29c78c5cb9de6d4ff19d302347caebb18f17dc1af8457ffdc4a",
+      "epi_reference": "ff4e0e49a504527468234456cba6ad367d63c1f3f529d8ff3519bc78e2076323",
+      "epi_mask": "8148636e405a0881d68fa24b5a6a6852e08641ef5b88f400c1e7f5778f54695c",
+      "mni_template": "0585cd056bf5ccfb8bf97a5f6a66082d4e7caad525718fc11e40d80a827fcb92",
+      "mni_mask": "b71a9f2015bd10262c37e51b4d17a655d0eb0a0dec4ba48322fb5af55c86b97c"
+    },
+    "outputs": {
+      "MNI_brain.nii.gz": "7570451af5189a7e70c7a8514ff3d861bd9a19edba5f2a77f1b75ee26974d0e0",
+      "MNI_mask.nii.gz": "85f8a9921324192f9712c7c35dfe1bc593e4c14247108aafb5c48ba86fe4f199",
+      "T1_wmseg.nii.gz": "f1b51b881d7c209f6808c64c3079789f39044bf918898dc93226a6f025159cf0",
+      "T1_to_MNI152_2mm_affine.mat": "4b764e712e63849da7a56c6163863f3522d326ea6e7205f8b40bd920f5ecf32b",
+      "T1_affine_in_MNI.nii.gz": "4e43b50b3ede3dbfd68af1a00efeb90621794920ad9665e46f7fad076c33f98e",
+      "T1_to_MNI_coeff.nii.gz": "a983de1a6a533d7f054ddc1dcb982a8e02b868a58a0a1d0f83b6dd581be76039",
+      "T1_to_MNI_fnirt_field.nii.gz": "91fe61e556e8661e28facb87415c18442de6fdab00e14a30bacaa18a227e4022",
+      "T1_in_MNI.nii.gz": "b276c8fb5047063e44a42bd40619189e96d061ac5ba2e5e30444b1b4821cdd58",
+      "T1_to_MNI_fsl_relative.nii.gz": "d782a56aea44d9ccbd7b7d2e735f794eb9ca8eb3047857ebc9e59a86b3f78d15",
+      "MNI152_2mm_to_T1_pull_ras.nii.gz": "63424d9d53351516db8f07b222b5833bbd647f880884fbbe84e2ea2c2d57dd43",
+      "example_func2highres_init.mat": "d855f95dc566a699a22dd19155c55ef4ba8995748d84db084a317f6553eae609",
+      "example_func2highres.mat": "ec95b8c7da929e90dd1b6f45801434e616914c6cf0b3ce4d2b0ad31570972fdc",
+      "example_func2highres.nii.gz": "a62858e015183b31e3f0c9c3286bc2d95dbb9aead9939237692d8b695ff541b3",
+      "highres2example_func.mat": "9dd92e4281be00eaed52464796c183f94bfef964a2ab484f61ac89ed7cea0336",
+      "reference_to_source_world.txt": "2165f6d818dbcb9c3bdf90599d3a8f56826b9b0745fb9788af7ce8e5ec91bf3d",
+      "EPI_to_MNI_fsl_relative.nii.gz": "1c0c778292a93733e239861299822df654ee2b1f90d2ea4dab76c15f731f5c85",
+      "MNI_to_EPI_pull_ras.nii.gz": "7160cfc2e07b9fe8f29782e2a64838fd417c1d6e7d4eecb8c770b7198c8540cb",
+      "brain_MNI_raw.nii.gz": "893eb94f31f94b5cb8f830910b95f598bc528c19bf39e2d2aaf3b4ec34327b34",
+      "brain_MNI152_2mm.nii.gz": "bdf21fccf6c888018599cfae38a4f2d6f19f2d7acc082adce29f8e5993a70773",
+      "wm_pve_epi.nii.gz": "ac97287e8771fad83560a531dfbfb84f3091f0420c76e55a689d60f4d6956309",
+      "csf_pve_epi.nii.gz": "e634856056b21ae65a01023cd4b666bfc05b5fa7270751a7c6d9e1fb1ea0f66a",
+      "wm_epi.nii.gz": "38629e6ce17c2596fae0b6b77fe56dc78ed7c7467cd699d5d61b42ea3730ca3d",
+      "csf_epi.nii.gz": "ccb625beecbc46e69acec47e096ebaafc43a622684cfa7b8e15e82babadf24fa"
+    },
+    "script": "f28f2ac1078cb73660c26ef0cc476fd44e6c60511bdbcb9c65826e7378a56c94",
+    "fnirt_config": "49df13ca10b8f95700fedb100d0abacf5ff98f1cbfc10cdbcb4bbb4c8d155acd",
+    "bbr_schedule": "c594b45e992b50d61d006b385854052b8ff133a93eeab942da46c8db663e8cab",
+    "executables": {
+      "flirt": "5cffd6bd209f8cb0045fe477815efb71ffbd01f2a529666fc4c1ff30896e54c7",
+      "fnirt": "e543523c3b894560c6be9309364cbe5a0e4c9164152cd56a2cccb49c71834dd0",
+      "convertwarp": "92d755a3091b65d83a000c479a1a2060d1823fb3bbde914605876747ab3c5baf",
+      "invwarp": "82d71a7d5fcec68f8ae10bba45629896a6b5caec2dcd774eda1edd36d347a1da",
+      "convert_xfm": "4aad8060f1aeb6ca672f72a290387e681a7dc3b126ba4eeb146d27b999853021",
+      "applywarp": "fe05b2ec68cbd876c85872e5e71281180885ebbd3d44ef98d048e982ceab88bb"
+    }
+  },
+  "warp_contract": "MNI-grid RAS displacement d(p) gives T1 world p+d(p); complete affine and nonlinear are already included. EPI sample world is inverse(EPI_to_T1_world)*(p+d(p)). FSL relative fields use scaled-mm coordinates and are converted with both source/reference headers.",
+  "limits": [
+    "This run matches FNIT brain-only FNIRT inputs; it is not the UKB whole-head FNIRT protocol.",
+    "Synthetic controls are not substituted for real registration benchmarks.",
+    "Launcher and traced child exits are retained; geometry/header/CRC/finite checks alone do not assert registration equivalence."
+  ],
+  "privacy": "Anonymous checks, scalar metrics and SHA-256 only; raw data, paths and program logs remain private."
+}

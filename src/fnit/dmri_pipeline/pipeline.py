@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import json
+from numbers import Integral
 import os
 from pathlib import Path
 import time
@@ -13,13 +14,14 @@ import numpy as np
 import torch
 
 from .._dmri import configure_device, image_like, load_bvals
+from .._sampling_plan import SamplingGeometry
 from ..amico_noddi import TorchAMICONODDI
 from ..dtifit import TorchDTIFIT, select_shell
 from ..eddy import TorchEDDY
 from ..eddy.ukb import _brain_mask, prepare_ukb_eddy
 from ..flirt import TorchFLIRT
 from ..fnirt import resolve_fnirt_config
-from ..mmorf import apply_mmorf_warp, run_mmorf
+from ..mmorf import prepare_mmorf_warp, run_mmorf
 from ..synthstrip import SynthStrip
 from ..topup import run_ukb_topup
 from ..topup.ukb import _metadata
@@ -110,6 +112,7 @@ class DMRIPipeline:
         dti_tolerance=100,
         bvec_source="rotated",
         noddi_fit_method="amico",
+        eddy_gp_seed=None,
     ):
         if registration_backend not in ("tbss", "mmorf"):
             raise ValueError("registration_backend must be 'tbss' or 'mmorf'")
@@ -119,6 +122,12 @@ class DMRIPipeline:
             raise ValueError("bvec_source must be 'rotated' or 'raw'")
         if noddi_fit_method not in ("amico", "classic"):
             raise ValueError("noddi_fit_method must be 'amico' or 'classic'")
+        if eddy_gp_seed is not None and (
+            isinstance(eddy_gp_seed, bool)
+            or not isinstance(eddy_gp_seed, Integral)
+            or not 1 <= eddy_gp_seed <= 2**32 - 1
+        ):
+            raise ValueError("eddy_gp_seed must be None or an integer in [1, 2**32-1]")
         self.device = configure_device(device)
         self.registration_backend = registration_backend
         self.fnirt_config = (
@@ -130,6 +139,7 @@ class DMRIPipeline:
         self.dti_tolerance = float(dti_tolerance)
         self.bvec_source = bvec_source
         self.noddi_fit_method = noddi_fit_method
+        self.eddy_gp_seed = None if eddy_gp_seed is None else int(eddy_gp_seed)
 
     def run(
         self,
@@ -183,7 +193,7 @@ class DMRIPipeline:
         has_pa = all(pa_present)
         started = time.perf_counter()
         if has_pa:
-            run_ukb_topup(
+            _, topup_prepared = run_ukb_topup(
                 raw_dir, topup_dir, device=self.device, overwrite=overwrite
             )
             eddy_inputs = prepare_ukb_eddy(
@@ -192,6 +202,7 @@ class DMRIPipeline:
                 output_dir / "eddy",
                 device=self.device,
                 overwrite=overwrite,
+                ref_scan_no=topup_prepared["ap_index"],
             )
         else:
             eddy_inputs = _prepare_ap_only(
@@ -202,7 +213,8 @@ class DMRIPipeline:
         started = time.perf_counter()
         eddy_root = output_dir / "eddy" / "data"
         eddy = TorchEDDY(device=self.device).run(
-            **eddy_inputs, out=eddy_root, overwrite=overwrite
+            **eddy_inputs, out=eddy_root, overwrite=overwrite,
+            gp_seed=self.eddy_gp_seed,
         )
         timings["eddy"] = time.perf_counter() - started
         corrected = eddy_root.with_name(eddy_root.name + ".nii.gz")
@@ -300,14 +312,15 @@ class DMRIPipeline:
             standard_dir = registration_dir / "standard"
             standard_dir.mkdir(parents=True, exist_ok=True)
             standard_maps = {}
+            sampling_plans = {}
             for name, image in native_maps.items():
-                warped = apply_mmorf_warp(
-                    image,
-                    t1_template,
-                    mmorf.warp,
-                    affine=tensor_affine.matrix,
-                    device=self.device,
-                )
+                geometry = SamplingGeometry.capture(image)
+                if geometry not in sampling_plans:
+                    sampling_plans[geometry] = prepare_mmorf_warp(
+                        image, t1_template, mmorf.warp,
+                        affine=tensor_affine.matrix, device=self.device,
+                    )
+                warped = sampling_plans[geometry].apply(image, reference=t1_template)
                 nib.save(warped, str(standard_dir / f"{name}.nii.gz"))
                 standard_maps[name] = warped
             registration_qc = {
@@ -329,6 +342,7 @@ class DMRIPipeline:
             "dti_tolerance": self.dti_tolerance,
             "bvec_source": self.bvec_source,
             "noddi_fit_method": self.noddi_fit_method,
+            "eddy_gp_seed": self.eddy_gp_seed,
             "timings_seconds": timings,
             "elapsed_seconds": time.perf_counter() - total_started,
             "eddy": eddy.qc,

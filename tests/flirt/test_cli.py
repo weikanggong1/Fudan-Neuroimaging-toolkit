@@ -19,7 +19,8 @@ class _Moved:
 
 def _fake_model(captured):
     class Model:
-        def __init__(self, *, device, dof, cost):
+        def __init__(self, *, device, dof, cost, execution,
+                     candidate_batch_size, memory_budget_gb):
             captured["device"] = device
             captured["profile"] = (dof, cost)
 
@@ -217,11 +218,12 @@ def test_cli_applyxfm_usesqform(tmp_path):
     assert output.is_file()
 
 
-def test_applyxfm_downsampling_preserves_boundary_and_input_dtype():
+def test_applyxfm_downsampling_preserves_constant_boundary():
     moving = nib.Nifti1Image(np.full((5, 5, 5), 100, dtype=np.int16), np.eye(4))
     fixed = nib.Nifti1Image(np.zeros((3, 3, 3), dtype=np.float32), np.diag([2, 2, 2, 1]))
     result = TorchFLIRT(device="cpu").applyxfm(moving, fixed, usesqform=True)
-    assert result.moved.get_data_dtype() == np.dtype("int16")
+    # Official FLIRT promotes integer output with range < 1.5 to float.
+    assert result.moved.get_data_dtype() == np.dtype("float32")
     np.testing.assert_array_equal(np.asarray(result.moved.dataobj), 100)
 
 

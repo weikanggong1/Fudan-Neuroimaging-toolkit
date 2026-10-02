@@ -1,0 +1,125 @@
+{
+  "schema_version": 1,
+  "scope": "one real fixed-coverage connectivity C case; HCP source-formula operator comparison; no MATLAB binary parity claim",
+  "frames": 490,
+  "original_grayordinates": 91282,
+  "valid_grayordinates": 90568,
+  "excluded_exact_constant_grayordinates": 714,
+  "excluded_cortical_grayordinates": 32,
+  "cortical_grayordinates": 59380,
+  "modalities": "C",
+  "regression": "WRN",
+  "solver_feature_columns": 33,
+  "myelin_used": false,
+  "new_FIX_classification_or_cleanup": false,
+  "official_MATLAB_binary_run": false,
+  "cpu_threads": 8,
+  "precision": "float64 regression / float32 CIFTI",
+  "fnit_preparation": {
+    "VN": {
+      "hcp_commit": "f8cac6892f88bdf889d644711ff038198eb81533",
+      "method": "ComputeVN",
+      "ica_classification_supplied": true,
+      "classification_performed": false,
+      "noise_cleanup_performed": false,
+      "bias_field_reverted": false,
+      "signal_component_count": 22,
+      "noise_component_count": 84,
+      "standard_deviation_correction": 1,
+      "minimum_vn": 0.001,
+      "seconds": 1.4359847460873425,
+      "device": "cpu"
+    },
+    "WRN": {
+      "method": "WRN",
+      "hcp_commit": "f8cac6892f88bdf889d644711ff038198eb81533",
+      "variance_normalization_supplied": true,
+      "variance_normalization_inferred": false,
+      "precision": "float64 regression / float32 CIFTI",
+      "low_dimensional_reference_count": 15,
+      "wrn_smoothing_sigma_mm": 14,
+      "matlab_leading_zero_correlation_columns": 3,
+      "selected_component_count": 32,
+      "finite_outputs": true,
+      "seconds": 26.705126635730267,
+      "device": "cpu",
+      "spatial_weight_min": 0.0,
+      "spatial_weight_max": 3.405507353905767
+    },
+    "hemispheres": {
+      "L": {
+        "input_vertices": 32492,
+        "cortical_vertices": 29695,
+        "feature_columns": 33
+      },
+      "R": {
+        "input_vertices": 32492,
+        "cortical_vertices": 29685,
+        "feature_columns": 33
+      }
+    },
+    "feature_prep_seconds": 47.49831978324801,
+    "low_dimensional_template_sizes_sha256_verified": 15,
+    "brainmodel_explicit_alignment": true,
+    "reference_column_reordering_count": 0
+  },
+  "independent_NumPy_source_formula": {
+    "schema_version": 1,
+    "scope": "real ComputeVN/WRN independent NumPy HCP source-formula comparison; MATLAB binary unavailable, not binary parity",
+    "frames": 490,
+    "grayordinates": 90568,
+    "cortical_grayordinates": 59380,
+    "reference_maps": 40,
+    "low_dimensional_templates": 15,
+    "precision": "float64 regression / float32 CIFTI",
+    "cpu_threads": 8,
+    "numpy": "1.26.4",
+    "blas_contract": "NumPy LAPACK SVD and double matrix products; tolerance max(shape)*eps*Smax; PyTorch CPU float64 counterpart",
+    "ComputeVN": {
+      "wall_seconds": 1.3113625501282513,
+      "pearson_across_rows_mean": 1.0,
+      "valid_columns": 1,
+      "mae": 0.0,
+      "max_absolute_difference": 0.0,
+      "values": 90568
+    },
+    "WRN": {
+      "wall_seconds": 34.199348447378725,
+      "maps": {
+        "pearson_across_rows_mean": 0.9999999999999991,
+        "valid_columns": 40,
+        "mae": 0.0,
+        "max_absolute_difference": 0.0,
+        "values": 3622720
+      },
+      "node_timeseries": {
+        "pearson_across_rows_mean": 1.0,
+        "valid_columns": 40,
+        "mae": 2.6107606989663115e-15,
+        "max_absolute_difference": 1.9817480989559044e-14,
+        "values": 19600
+      }
+    },
+    "variance_normalization_fixed_for_WRN": true,
+    "official_matlab_binary_run": false
+  },
+  "source_sha256": {
+    "measured_feature_preparation": "47c3b354a2729f563097419195c83bf5b799da7acdcacee7b289504d065dabf2",
+    "current_features": "7e598efeeab5665ca05957d06d0867edea8b4714292bcb1b8b41be76f57fb6b2"
+  },
+  "numerical_helper_AST_equal": {
+    "_demean": true,
+    "_pinv": true,
+    "_node_timeseries": true,
+    "_spatial_maps": true,
+    "_regression": true,
+    "_source_stdev": true
+  },
+  "latest_real_input_validation": {
+    "source_series_axis_valid": true,
+    "frames": 490,
+    "current_cortical_area_axis_guard_pass": true,
+    "current_reference_axis_guard_pass": true,
+    "current_all_low_dimensional_axes_guard_pass": true
+  }
+}

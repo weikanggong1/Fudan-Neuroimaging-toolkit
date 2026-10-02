@@ -1,0 +1,1840 @@
+{
+  "status": "complete",
+  "comparison": "Frozen FNIT CPU / frozen FNIT eager CUDA preparation / candidate fused CUDA; no native FSL execution",
+  "frozen_revision": null,
+  "candidate_revision": "fd84d94",
+  "hashes": {
+    "raw_bold": "67717caaa823141c6e59d46db52e92deb4419d232ba699c399c69eb8888a0e92",
+    "reference": "98cb4261e0bcd3b058a989c49e0a8bda66d8ba76be1385a3e23289e9cc9e1162",
+    "selected_baseline_matrices": "38556a0ddec3e55b6c6d08c5d2214811d0d11225a3d8403f1aa8d187e9edad80",
+    "frozen_mcflirt_core": "f4f18579cb0a7f709f2975c3cef125e6cce392fc1dca3fa413428c365afb56fe",
+    "candidate_mcflirt_core": "fa4918d3425f9295159e124ea6d46cc27ab2931789da8d4145c6d46cb0f47436",
+    "candidate_mcflirt_cost_cuda": "e005d1553e36c2bdbcc94fd399e697ef3cd445beb78c0dcb87c07100ca0f98fa",
+    "shared_current_flirt_core": "e6ce6185fafb89666be631069f66e96ce9c6a561ab3d7c7fab4c661d317885c1",
+    "shared_current_flirt_batched_cuda": "c6ac99f6b0499c2b081969448dc9492906232daac247477edff0cb00ac43cd74",
+    "frozen_flirt_core": "e6ce6185fafb89666be631069f66e96ce9c6a561ab3d7c7fab4c661d317885c1",
+    "benchmark_script": "6979627f87da090c46d504e4ba498101f28635fc7ca3628d06cf6b38c1138762"
+  },
+  "hardware": {
+    "cuda_device_name": "NVIDIA H100 PCIe",
+    "cuda_total_memory_bytes": 84942979072,
+    "cuda_multiprocessors": 114,
+    "cuda_compute_capability_major": 9,
+    "cuda_compute_capability_minor": 0,
+    "cuda_visible_devices": "0",
+    "cpu_threads": 8,
+    "torch_version": "2.5.1"
+  },
+  "real_input_shape": [
+    88,
+    88,
+    64,
+    490
+  ],
+  "moving_frame": 0,
+  "sampled_fitted_matrix_frames": [
+    0,
+    100,
+    489
+  ],
+  "scope": "Cost-only, fixed previously fitted matrices; full motion optimization and I/O excluded",
+  "shared_gpu_load": true,
+  "timing_control": "Within-process alternating CUDA AB/BA chunks, CPU chunks alternate placement; all kernels/reducer warmed",
+  "preparation_timing_control": "Reducer replaced with allocation-free capture; each CUDA preparation call synchronized",
+  "reducer_control": "Both CUDA classes use the same frozen torch.compile reducer object; CPU uses frozen eager reducer",
+  "reference_control": "8 mm/4 mm reference made once on CUDA with current isotropic helper; CPU receives byte-identical copy",
+  "gpu_load_before": {
+    "available": true,
+    "gpus": [
+      {
+        "index": 0.0,
+        "utilization.gpu": 100.0,
+        "utilization.memory": 48.0,
+        "memory.used": 70845.0,
+        "memory.total": 81559.0,
+        "power.draw": 327.3,
+        "clocks.sm": 1710.0
+      },
+      {
+        "index": 1.0,
+        "utilization.gpu": 81.0,
+        "utilization.memory": 53.0,
+        "memory.used": 31067.0,
+        "memory.total": 81559.0,
+        "power.draw": 336.13,
+        "clocks.sm": 1350.0
+      }
+    ]
+  },
+  "cases": [
+    {
+      "scale_mm": 8.0,
+      "fitted_matrix_frame": 0,
+      "reference_xyz_shape": [
+        26,
+        26,
+        19
+      ],
+      "reference_voxels": 12844,
+      "warmup_seconds_for_scale": 4.023220902308822,
+      "prepared_cuda": {
+        "reference": {
+          "bit_exact_equal": true,
+          "unequal_bits": 0,
+          "max_abs": 0.0,
+          "finite_left": true,
+          "finite_right": true
+        },
+        "moving": {
+          "bit_exact_equal": true,
+          "unequal_bits": 0,
+          "max_abs": 0.0,
+          "finite_left": true,
+          "finite_right": true
+        },
+        "weights": {
+          "bit_exact_equal": true,
+          "unequal_bits": 0,
+          "max_abs": 0.0,
+          "finite_left": true,
+          "finite_right": true
+        }
+      },
+      "fixed_cost": {
+        "frozen_cpu": 0.018228113651275635,
+        "frozen_eager_cuda": 0.018228232860565186,
+        "candidate_fused_cuda": 0.018228232860565186
+      },
+      "cost_cuda_bit_exact_equal": true,
+      "cost_cpu_vs_frozen_cuda_abs": 1.1920928955078125e-07,
+      "full_cost_timings": [
+        {
+          "frozen_cpu": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              0.2937190574593842,
+              0.29186794348061085
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 2927.9350046999753,
+              "median": 2927.9350046999753,
+              "min": 2918.6794348061085,
+              "max": 2937.190574593842
+            },
+            "last_cost": 0.018228113651275635
+          },
+          "frozen_eager_cuda": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              2.715751265641302,
+              2.548282236792147
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 26320.167512167245,
+              "median": 26320.167512167245,
+              "min": 25482.82236792147,
+              "max": 27157.51265641302
+            },
+            "last_cost": 0.018228232860565186
+          },
+          "candidate_fused_cuda": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              0.47521376982331276,
+              0.47664031898602843
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 4759.270444046706,
+              "median": 4759.270444046706,
+              "min": 4752.137698233128,
+              "max": 4766.403189860284
+            },
+            "last_cost": 0.018228232860565186
+          },
+          "calls_per_round": 100
+        },
+        {
+          "frozen_cpu": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              0.771863566711545,
+              0.8134999326430261
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 2642.272498924285,
+              "median": 2642.272498924285,
+              "min": 2572.87855570515,
+              "max": 2711.66644214342
+            },
+            "last_cost": 0.018228113651275635
+          },
+          "frozen_eager_cuda": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              7.668922807555646,
+              8.419226800091565
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 26813.582679412015,
+              "median": 26813.582679412015,
+              "min": 25563.076025185484,
+              "max": 28064.08933363855
+            },
+            "last_cost": 0.018228232860565186
+          },
+          "candidate_fused_cuda": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              1.265322565101087,
+              1.3944438337348402
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 4432.943998059878,
+              "median": 4432.943998059878,
+              "min": 4217.74188367029,
+              "max": 4648.146112449467
+            },
+            "last_cost": 0.018228232860565186
+          },
+          "calls_per_round": 300
+        }
+      ],
+      "preparation_timings": [
+        {
+          "frozen_cpu": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              0.2052776152268052,
+              0.23206630954518914
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 2186.7196238599718,
+              "median": 2186.7196238599718,
+              "min": 2052.776152268052,
+              "max": 2320.6630954518914
+            }
+          },
+          "frozen_eager_cuda": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              2.7421171497553587,
+              2.850694334600121
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 27964.057421777397,
+              "median": 27964.057421777397,
+              "min": 27421.171497553587,
+              "max": 28506.943346001208
+            }
+          },
+          "candidate_fused_cuda": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              0.4168031052686274,
+              0.4450913514010608
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 4309.472283348441,
+              "median": 4309.472283348441,
+              "min": 4168.031052686274,
+              "max": 4450.913514010608
+            }
+          },
+          "calls_per_round": 100
+        },
+        {
+          "frozen_cpu": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              0.6666194014251232,
+              0.5839467570185661
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 2084.2769307394824,
+              "median": 2084.2769307394824,
+              "min": 1946.489190061887,
+              "max": 2222.0646714170775
+            }
+          },
+          "frozen_eager_cuda": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              8.143487935885787,
+              8.090625798795372
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 27056.856224468596,
+              "median": 27056.856224468596,
+              "min": 26968.75266265124,
+              "max": 27144.959786285955
+            }
+          },
+          "candidate_fused_cuda": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              1.2664868305437267,
+              1.2869457621127367
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 4255.720987760773,
+              "median": 4255.720987760773,
+              "min": 4221.622768479089,
+              "max": 4289.819207042456
+            }
+          },
+          "calls_per_round": 300
+        }
+      ],
+      "gpu_load_before_case": {
+        "available": true,
+        "gpus": [
+          {
+            "index": 0.0,
+            "utilization.gpu": 100.0,
+            "utilization.memory": 48.0,
+            "memory.used": 71217.0,
+            "memory.total": 81559.0,
+            "power.draw": 326.03,
+            "clocks.sm": 1725.0
+          },
+          {
+            "index": 1.0,
+            "utilization.gpu": 100.0,
+            "utilization.memory": 62.0,
+            "memory.used": 31149.0,
+            "memory.total": 81559.0,
+            "power.draw": 331.51,
+            "clocks.sm": 1440.0
+          }
+        ]
+      },
+      "gpu_load_after_case": {
+        "available": true,
+        "gpus": [
+          {
+            "index": 0.0,
+            "utilization.gpu": 100.0,
+            "utilization.memory": 50.0,
+            "memory.used": 71217.0,
+            "memory.total": 81559.0,
+            "power.draw": 325.9,
+            "clocks.sm": 1305.0
+          },
+          {
+            "index": 1.0,
+            "utilization.gpu": 100.0,
+            "utilization.memory": 56.0,
+            "memory.used": 27894.0,
+            "memory.total": 81559.0,
+            "power.draw": 331.05,
+            "clocks.sm": 712.0
+          }
+        ]
+      }
+    },
+    {
+      "scale_mm": 8.0,
+      "fitted_matrix_frame": 100,
+      "reference_xyz_shape": [
+        26,
+        26,
+        19
+      ],
+      "reference_voxels": 12844,
+      "warmup_seconds_for_scale": 4.023220902308822,
+      "prepared_cuda": {
+        "reference": {
+          "bit_exact_equal": true,
+          "unequal_bits": 0,
+          "max_abs": 0.0,
+          "finite_left": true,
+          "finite_right": true
+        },
+        "moving": {
+          "bit_exact_equal": true,
+          "unequal_bits": 0,
+          "max_abs": 0.0,
+          "finite_left": true,
+          "finite_right": true
+        },
+        "weights": {
+          "bit_exact_equal": true,
+          "unequal_bits": 0,
+          "max_abs": 0.0,
+          "finite_left": true,
+          "finite_right": true
+        }
+      },
+      "fixed_cost": {
+        "frozen_cpu": 0.019172310829162598,
+        "frozen_eager_cuda": 0.019172310829162598,
+        "candidate_fused_cuda": 0.019172310829162598
+      },
+      "cost_cuda_bit_exact_equal": true,
+      "cost_cpu_vs_frozen_cuda_abs": 0.0,
+      "full_cost_timings": [
+        {
+          "frozen_cpu": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              0.2817975622601807,
+              0.27234992012381554
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 2770.7374119199812,
+              "median": 2770.7374119199812,
+              "min": 2723.4992012381554,
+              "max": 2817.975622601807
+            },
+            "last_cost": 0.019172310829162598
+          },
+          "frozen_eager_cuda": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              2.704603440593928,
+              2.9069323376752436
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 28057.67889134586,
+              "median": 28057.67889134586,
+              "min": 27046.03440593928,
+              "max": 29069.323376752436
+            },
+            "last_cost": 0.019172310829162598
+          },
+          "candidate_fused_cuda": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              0.4727325071580708,
+              0.4319466957822442
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 4523.396014701575,
+              "median": 4523.396014701575,
+              "min": 4319.466957822442,
+              "max": 4727.325071580708
+            },
+            "last_cost": 0.019172310829162598
+          },
+          "calls_per_round": 100
+        },
+        {
+          "frozen_cpu": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              0.8923349827528,
+              0.8808652521111071
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 2955.3337247731783,
+              "median": 2955.3337247731783,
+              "min": 2936.2175070370236,
+              "max": 2974.449942509333
+            },
+            "last_cost": 0.019172310829162598
+          },
+          "frozen_eager_cuda": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              8.073293160181493,
+              8.359753515105695
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 27388.411125478648,
+              "median": 27388.411125478648,
+              "min": 26910.977200604975,
+              "max": 27865.845050352316
+            },
+            "last_cost": 0.019172310829162598
+          },
+          "candidate_fused_cuda": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              1.3166796080768108,
+              1.339879851322621
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 4427.599098999053,
+              "median": 4427.599098999053,
+              "min": 4388.932026922703,
+              "max": 4466.266171075404
+            },
+            "last_cost": 0.019172310829162598
+          },
+          "calls_per_round": 300
+        }
+      ],
+      "preparation_timings": [
+        {
+          "frozen_cpu": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              0.1924569047987461,
+              0.2275500218383968
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 2100.0346331857145,
+              "median": 2100.0346331857145,
+              "min": 1924.569047987461,
+              "max": 2275.500218383968
+            }
+          },
+          "frozen_eager_cuda": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              2.761108986567706,
+              2.363347601611167
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 25622.282940894365,
+              "median": 25622.282940894365,
+              "min": 23633.476016111672,
+              "max": 27611.08986567706
+            }
+          },
+          "candidate_fused_cuda": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              0.4515920444391668,
+              0.3744697319343686
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 4130.308881867677,
+              "median": 4130.308881867677,
+              "min": 3744.697319343686,
+              "max": 4515.920444391668
+            }
+          },
+          "calls_per_round": 100
+        },
+        {
+          "frozen_cpu": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              0.6653057713992894,
+              0.6906611118465662
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 2259.9448054097593,
+              "median": 2259.9448054097593,
+              "min": 2217.685904664298,
+              "max": 2302.2037061552205
+            }
+          },
+          "frozen_eager_cuda": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              8.161410310771316,
+              8.148669539485127
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 27183.466417094074,
+              "median": 27183.466417094074,
+              "min": 27162.231798283756,
+              "max": 27204.70103590439
+            }
+          },
+          "candidate_fused_cuda": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              1.393596027046442,
+              1.4028334715403616
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 4660.715830978006,
+              "median": 4660.715830978006,
+              "min": 4645.320090154807,
+              "max": 4676.111571801205
+            }
+          },
+          "calls_per_round": 300
+        }
+      ],
+      "gpu_load_before_case": {
+        "available": true,
+        "gpus": [
+          {
+            "index": 0.0,
+            "utilization.gpu": 100.0,
+            "utilization.memory": 51.0,
+            "memory.used": 71217.0,
+            "memory.total": 81559.0,
+            "power.draw": 323.33,
+            "clocks.sm": 787.0
+          },
+          {
+            "index": 1.0,
+            "utilization.gpu": 100.0,
+            "utilization.memory": 63.0,
+            "memory.used": 27894.0,
+            "memory.total": 81559.0,
+            "power.draw": 337.32,
+            "clocks.sm": 1560.0
+          }
+        ]
+      },
+      "gpu_load_after_case": {
+        "available": true,
+        "gpus": [
+          {
+            "index": 0.0,
+            "utilization.gpu": 100.0,
+            "utilization.memory": 50.0,
+            "memory.used": 71217.0,
+            "memory.total": 81559.0,
+            "power.draw": 325.52,
+            "clocks.sm": 1710.0
+          },
+          {
+            "index": 1.0,
+            "utilization.gpu": 0.0,
+            "utilization.memory": 0.0,
+            "memory.used": 3898.0,
+            "memory.total": 81559.0,
+            "power.draw": 101.56,
+            "clocks.sm": 1755.0
+          }
+        ]
+      }
+    },
+    {
+      "scale_mm": 8.0,
+      "fitted_matrix_frame": 489,
+      "reference_xyz_shape": [
+        26,
+        26,
+        19
+      ],
+      "reference_voxels": 12844,
+      "warmup_seconds_for_scale": 4.023220902308822,
+      "prepared_cuda": {
+        "reference": {
+          "bit_exact_equal": true,
+          "unequal_bits": 0,
+          "max_abs": 0.0,
+          "finite_left": true,
+          "finite_right": true
+        },
+        "moving": {
+          "bit_exact_equal": true,
+          "unequal_bits": 0,
+          "max_abs": 0.0,
+          "finite_left": true,
+          "finite_right": true
+        },
+        "weights": {
+          "bit_exact_equal": true,
+          "unequal_bits": 0,
+          "max_abs": 0.0,
+          "finite_left": true,
+          "finite_right": true
+        }
+      },
+      "fixed_cost": {
+        "frozen_cpu": 0.020978808403015137,
+        "frozen_eager_cuda": 0.02097874879837036,
+        "candidate_fused_cuda": 0.02097874879837036
+      },
+      "cost_cuda_bit_exact_equal": true,
+      "cost_cpu_vs_frozen_cuda_abs": 5.960464477539063e-08,
+      "full_cost_timings": [
+        {
+          "frozen_cpu": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              0.2938474649563432,
+              0.292086202185601
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 2929.668335709721,
+              "median": 2929.668335709721,
+              "min": 2920.86202185601,
+              "max": 2938.4746495634317
+            },
+            "last_cost": 0.020978808403015137
+          },
+          "frozen_eager_cuda": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              2.831342395860702,
+              2.7904459005221725
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 28108.94148191437,
+              "median": 28108.94148191437,
+              "min": 27904.459005221725,
+              "max": 28313.423958607018
+            },
+            "last_cost": 0.02097874879837036
+          },
+          "candidate_fused_cuda": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              0.47466584108769894,
+              0.44366426579654217
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 4591.6505344212055,
+              "median": 4591.6505344212055,
+              "min": 4436.642657965422,
+              "max": 4746.658410876989
+            },
+            "last_cost": 0.02097874879837036
+          },
+          "calls_per_round": 100
+        },
+        {
+          "frozen_cpu": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              0.8447294668294489,
+              0.7987269884906709
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 2739.0940922002,
+              "median": 2739.0940922002,
+              "min": 2662.423294968903,
+              "max": 2815.7648894314966
+            },
+            "last_cost": 0.020978808403015137
+          },
+          "frozen_eager_cuda": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              8.492498219013214,
+              8.12350546522066
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 27693.33947372312,
+              "median": 27693.33947372312,
+              "min": 27078.351550735533,
+              "max": 28308.327396710712
+            },
+            "last_cost": 0.02097874879837036
+          },
+          "candidate_fused_cuda": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              1.2258116602897644,
+              1.349228069651872
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 4291.732883236061,
+              "median": 4291.732883236061,
+              "min": 4086.038867632548,
+              "max": 4497.426898839573
+            },
+            "last_cost": 0.02097874879837036
+          },
+          "calls_per_round": 300
+        }
+      ],
+      "preparation_timings": [
+        {
+          "frozen_cpu": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              0.22014526883140206,
+              0.22855412401258945
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 2243.4969642199576,
+              "median": 2243.4969642199576,
+              "min": 2201.4526883140206,
+              "max": 2285.5412401258945
+            }
+          },
+          "frozen_eager_cuda": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              2.743383053224534,
+              2.875221279449761
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 28093.021663371474,
+              "median": 28093.021663371474,
+              "min": 27433.830532245338,
+              "max": 28752.21279449761
+            }
+          },
+          "candidate_fused_cuda": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              0.4245695541612804,
+              0.40808492759242654
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 4163.272408768535,
+              "median": 4163.272408768535,
+              "min": 4080.8492759242654,
+              "max": 4245.695541612804
+            }
+          },
+          "calls_per_round": 100
+        },
+        {
+          "frozen_cpu": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              0.6167781888507307,
+              0.6853263196535408
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 2170.174180840452,
+              "median": 2170.174180840452,
+              "min": 2055.927296169102,
+              "max": 2284.4210655118027
+            }
+          },
+          "frozen_eager_cuda": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              8.0840002046898,
+              8.3207694333978
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 27341.282730146,
+              "median": 27341.282730146,
+              "min": 26946.667348966002,
+              "max": 27735.898111325998
+            }
+          },
+          "candidate_fused_cuda": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              1.3702265615575016,
+              1.390442370902747
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 4601.114887433748,
+              "median": 4601.114887433748,
+              "min": 4567.421871858339,
+              "max": 4634.807903009157
+            }
+          },
+          "calls_per_round": 300
+        }
+      ],
+      "gpu_load_before_case": {
+        "available": true,
+        "gpus": [
+          {
+            "index": 0.0,
+            "utilization.gpu": 100.0,
+            "utilization.memory": 53.0,
+            "memory.used": 71217.0,
+            "memory.total": 81559.0,
+            "power.draw": 329.21,
+            "clocks.sm": 1455.0
+          },
+          {
+            "index": 1.0,
+            "utilization.gpu": 0.0,
+            "utilization.memory": 0.0,
+            "memory.used": 3898.0,
+            "memory.total": 81559.0,
+            "power.draw": 101.44,
+            "clocks.sm": 1755.0
+          }
+        ]
+      },
+      "gpu_load_after_case": {
+        "available": true,
+        "gpus": [
+          {
+            "index": 0.0,
+            "utilization.gpu": 100.0,
+            "utilization.memory": 50.0,
+            "memory.used": 71217.0,
+            "memory.total": 81559.0,
+            "power.draw": 323.99,
+            "clocks.sm": 1620.0
+          },
+          {
+            "index": 1.0,
+            "utilization.gpu": 10.0,
+            "utilization.memory": 0.0,
+            "memory.used": 10004.0,
+            "memory.total": 81559.0,
+            "power.draw": 99.65,
+            "clocks.sm": 1755.0
+          }
+        ]
+      }
+    },
+    {
+      "scale_mm": 4.0,
+      "fitted_matrix_frame": 0,
+      "reference_xyz_shape": [
+        52,
+        52,
+        38
+      ],
+      "reference_voxels": 102752,
+      "warmup_seconds_for_scale": 2.1043121879920363,
+      "prepared_cuda": {
+        "reference": {
+          "bit_exact_equal": true,
+          "unequal_bits": 0,
+          "max_abs": 0.0,
+          "finite_left": true,
+          "finite_right": true
+        },
+        "moving": {
+          "bit_exact_equal": true,
+          "unequal_bits": 0,
+          "max_abs": 0.0,
+          "finite_left": true,
+          "finite_right": true
+        },
+        "weights": {
+          "bit_exact_equal": true,
+          "unequal_bits": 0,
+          "max_abs": 0.0,
+          "finite_left": true,
+          "finite_right": true
+        }
+      },
+      "fixed_cost": {
+        "frozen_cpu": 0.017978191375732422,
+        "frozen_eager_cuda": 0.017978012561798096,
+        "candidate_fused_cuda": 0.017978012561798096
+      },
+      "cost_cuda_bit_exact_equal": true,
+      "cost_cpu_vs_frozen_cuda_abs": 1.7881393432617188e-07,
+      "full_cost_timings": [
+        {
+          "frozen_cpu": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              0.7176167634315789,
+              0.6719281375408173
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 6947.724504861981,
+              "median": 6947.724504861981,
+              "min": 6719.281375408173,
+              "max": 7176.167634315789
+            },
+            "last_cost": 0.017978191375732422
+          },
+          "frozen_eager_cuda": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              2.4292301987297833,
+              2.8555975197814405
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 26424.13859255612,
+              "median": 26424.13859255612,
+              "min": 24292.301987297833,
+              "max": 28555.975197814405
+            },
+            "last_cost": 0.017978012561798096
+          },
+          "candidate_fused_cuda": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              0.4774606297723949,
+              0.4224156658165157
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 4499.381477944553,
+              "median": 4499.381477944553,
+              "min": 4224.156658165157,
+              "max": 4774.606297723949
+            },
+            "last_cost": 0.017978012561798096
+          },
+          "calls_per_round": 100
+        },
+        {
+          "frozen_cpu": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              2.0240785875357687,
+              1.9066446935757995
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 6551.20546851928,
+              "median": 6551.20546851928,
+              "min": 6355.482311919332,
+              "max": 6746.928625119229
+            },
+            "last_cost": 0.017978191375732422
+          },
+          "frozen_eager_cuda": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              7.8413651012815535,
+              7.85787548776716
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 26165.400981747855,
+              "median": 26165.400981747855,
+              "min": 26137.88367093851,
+              "max": 26192.9182925572
+            },
+            "last_cost": 0.017978012561798096
+          },
+          "candidate_fused_cuda": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              1.4318966618739069,
+              1.3462050426751375
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 4630.169507581741,
+              "median": 4630.169507581741,
+              "min": 4487.350142250459,
+              "max": 4772.9888729130225
+            },
+            "last_cost": 0.017978012561798096
+          },
+          "calls_per_round": 300
+        }
+      ],
+      "preparation_timings": [
+        {
+          "frozen_cpu": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              0.4316476406529546,
+              0.4582531591877341
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 4449.5039992034435,
+              "median": 4449.5039992034435,
+              "min": 4316.476406529546,
+              "max": 4582.531591877341
+            }
+          },
+          "frozen_eager_cuda": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              2.7177742305211723,
+              2.8065763567574322
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 27621.752936393023,
+              "median": 27621.752936393023,
+              "min": 27177.742305211723,
+              "max": 28065.763567574322
+            }
+          },
+          "candidate_fused_cuda": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              0.47354338970035315,
+              0.47333775367587805
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 4734.405716881156,
+              "median": 4734.405716881156,
+              "min": 4733.3775367587805,
+              "max": 4735.4338970035315
+            }
+          },
+          "calls_per_round": 100
+        },
+        {
+          "frozen_cpu": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              1.3166173226200044,
+              1.3116572117432952
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 4380.457557272166,
+              "median": 4380.457557272166,
+              "min": 4372.190705810984,
+              "max": 4388.724408733348
+            }
+          },
+          "frozen_eager_cuda": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              8.35548837389797,
+              8.376698466017842
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 27886.978066526353,
+              "median": 27886.978066526353,
+              "min": 27851.627912993234,
+              "max": 27922.328220059473
+            }
+          },
+          "candidate_fused_cuda": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              1.422776450868696,
+              1.2001692773774266
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 4371.576213743538,
+              "median": 4371.576213743538,
+              "min": 4000.5642579247556,
+              "max": 4742.58816956232
+            }
+          },
+          "calls_per_round": 300
+        }
+      ],
+      "gpu_load_before_case": {
+        "available": true,
+        "gpus": [
+          {
+            "index": 0.0,
+            "utilization.gpu": 100.0,
+            "utilization.memory": 45.0,
+            "memory.used": 71225.0,
+            "memory.total": 81559.0,
+            "power.draw": 328.72,
+            "clocks.sm": 1665.0
+          },
+          {
+            "index": 1.0,
+            "utilization.gpu": 58.0,
+            "utilization.memory": 1.0,
+            "memory.used": 12686.0,
+            "memory.total": 81559.0,
+            "power.draw": 116.17,
+            "clocks.sm": 1755.0
+          }
+        ]
+      },
+      "gpu_load_after_case": {
+        "available": true,
+        "gpus": [
+          {
+            "index": 0.0,
+            "utilization.gpu": 100.0,
+            "utilization.memory": 53.0,
+            "memory.used": 71227.0,
+            "memory.total": 81559.0,
+            "power.draw": 325.46,
+            "clocks.sm": 1680.0
+          },
+          {
+            "index": 1.0,
+            "utilization.gpu": 100.0,
+            "utilization.memory": 35.0,
+            "memory.used": 29398.0,
+            "memory.total": 81559.0,
+            "power.draw": 328.22,
+            "clocks.sm": 1680.0
+          }
+        ]
+      }
+    },
+    {
+      "scale_mm": 4.0,
+      "fitted_matrix_frame": 100,
+      "reference_xyz_shape": [
+        52,
+        52,
+        38
+      ],
+      "reference_voxels": 102752,
+      "warmup_seconds_for_scale": 2.1043121879920363,
+      "prepared_cuda": {
+        "reference": {
+          "bit_exact_equal": true,
+          "unequal_bits": 0,
+          "max_abs": 0.0,
+          "finite_left": true,
+          "finite_right": true
+        },
+        "moving": {
+          "bit_exact_equal": true,
+          "unequal_bits": 0,
+          "max_abs": 0.0,
+          "finite_left": true,
+          "finite_right": true
+        },
+        "weights": {
+          "bit_exact_equal": true,
+          "unequal_bits": 0,
+          "max_abs": 0.0,
+          "finite_left": true,
+          "finite_right": true
+        }
+      },
+      "fixed_cost": {
+        "frozen_cpu": 0.018782198429107666,
+        "frozen_eager_cuda": 0.018782079219818115,
+        "candidate_fused_cuda": 0.018782079219818115
+      },
+      "cost_cuda_bit_exact_equal": true,
+      "cost_cpu_vs_frozen_cuda_abs": 1.1920928955078125e-07,
+      "full_cost_timings": [
+        {
+          "frozen_cpu": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              0.7206457876600325,
+              0.7494054287672043
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 7350.256082136184,
+              "median": 7350.256082136184,
+              "min": 7206.457876600325,
+              "max": 7494.054287672043
+            },
+            "last_cost": 0.018782198429107666
+          },
+          "frozen_eager_cuda": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              2.780086257494986,
+              2.9470233586616814
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 28635.548080783337,
+              "median": 28635.548080783337,
+              "min": 27800.86257494986,
+              "max": 29470.233586616814
+            },
+            "last_cost": 0.018782079219818115
+          },
+          "candidate_fused_cuda": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              0.4773730025626719,
+              0.4516358240507543
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 4645.044133067131,
+              "median": 4645.044133067131,
+              "min": 4516.358240507543,
+              "max": 4773.730025626719
+            },
+            "last_cost": 0.018782079219818115
+          },
+          "calls_per_round": 100
+        },
+        {
+          "frozen_cpu": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              1.8588507273234427,
+              1.9642363521270454
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 6371.811799084147,
+              "median": 6371.811799084147,
+              "min": 6196.169091078143,
+              "max": 6547.454507090151
+            },
+            "last_cost": 0.018782198429107666
+          },
+          "frozen_eager_cuda": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              8.344339503906667,
+              8.681330860126764
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 28376.117273389053,
+              "median": 28376.117273389053,
+              "min": 27814.465013022225,
+              "max": 28937.76953375588
+            },
+            "last_cost": 0.018782079219818115
+          },
+          "candidate_fused_cuda": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              1.3294835011474788,
+              1.373150549363345
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 4504.390084184706,
+              "median": 4504.390084184706,
+              "min": 4431.611670491596,
+              "max": 4577.168497877817
+            },
+            "last_cost": 0.018782079219818115
+          },
+          "calls_per_round": 300
+        }
+      ],
+      "preparation_timings": [
+        {
+          "frozen_cpu": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              0.43758458783850074,
+              0.4676583823747933
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 4526.21485106647,
+              "median": 4526.21485106647,
+              "min": 4375.845878385007,
+              "max": 4676.583823747933
+            }
+          },
+          "frozen_eager_cuda": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              2.6378292362205684,
+              2.7779962345957756
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 27079.12735408172,
+              "median": 27079.12735408172,
+              "min": 26378.292362205684,
+              "max": 27779.962345957756
+            }
+          },
+          "candidate_fused_cuda": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              0.4449028526432812,
+              0.43851096043363214
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 4417.069065384567,
+              "median": 4417.069065384567,
+              "min": 4385.109604336321,
+              "max": 4449.028526432812
+            }
+          },
+          "calls_per_round": 100
+        },
+        {
+          "frozen_cpu": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              1.3790161265060306,
+              1.338157719001174
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 4528.62307584534,
+              "median": 4528.62307584534,
+              "min": 4460.525730003913,
+              "max": 4596.7204216867685
+            }
+          },
+          "frozen_eager_cuda": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              8.119086701888591,
+              7.620096834842116
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 26231.972561217844,
+              "median": 26231.972561217844,
+              "min": 25400.322782807052,
+              "max": 27063.622339628637
+            }
+          },
+          "candidate_fused_cuda": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              1.1661284728907049,
+              1.3844152218662202
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 4250.906157928209,
+              "median": 4250.906157928209,
+              "min": 3887.094909635683,
+              "max": 4614.717406220734
+            }
+          },
+          "calls_per_round": 300
+        }
+      ],
+      "gpu_load_before_case": {
+        "available": true,
+        "gpus": [
+          {
+            "index": 0.0,
+            "utilization.gpu": 100.0,
+            "utilization.memory": 50.0,
+            "memory.used": 71227.0,
+            "memory.total": 81559.0,
+            "power.draw": 330.33,
+            "clocks.sm": 1395.0
+          },
+          {
+            "index": 1.0,
+            "utilization.gpu": 100.0,
+            "utilization.memory": 39.0,
+            "memory.used": 29398.0,
+            "memory.total": 81559.0,
+            "power.draw": 330.76,
+            "clocks.sm": 1095.0
+          }
+        ]
+      },
+      "gpu_load_after_case": {
+        "available": true,
+        "gpus": [
+          {
+            "index": 0.0,
+            "utilization.gpu": 100.0,
+            "utilization.memory": 51.0,
+            "memory.used": 71227.0,
+            "memory.total": 81559.0,
+            "power.draw": 328.73,
+            "clocks.sm": 1620.0
+          },
+          {
+            "index": 1.0,
+            "utilization.gpu": 100.0,
+            "utilization.memory": 38.0,
+            "memory.used": 28370.0,
+            "memory.total": 81559.0,
+            "power.draw": 335.97,
+            "clocks.sm": 1620.0
+          }
+        ]
+      }
+    },
+    {
+      "scale_mm": 4.0,
+      "fitted_matrix_frame": 489,
+      "reference_xyz_shape": [
+        52,
+        52,
+        38
+      ],
+      "reference_voxels": 102752,
+      "warmup_seconds_for_scale": 2.1043121879920363,
+      "prepared_cuda": {
+        "reference": {
+          "bit_exact_equal": true,
+          "unequal_bits": 0,
+          "max_abs": 0.0,
+          "finite_left": true,
+          "finite_right": true
+        },
+        "moving": {
+          "bit_exact_equal": true,
+          "unequal_bits": 0,
+          "max_abs": 0.0,
+          "finite_left": true,
+          "finite_right": true
+        },
+        "weights": {
+          "bit_exact_equal": true,
+          "unequal_bits": 0,
+          "max_abs": 0.0,
+          "finite_left": true,
+          "finite_right": true
+        }
+      },
+      "fixed_cost": {
+        "frozen_cpu": 0.020727455615997314,
+        "frozen_eager_cuda": 0.02072727680206299,
+        "candidate_fused_cuda": 0.02072727680206299
+      },
+      "cost_cuda_bit_exact_equal": true,
+      "cost_cpu_vs_frozen_cuda_abs": 1.7881393432617188e-07,
+      "full_cost_timings": [
+        {
+          "frozen_cpu": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              0.6696255030110478,
+              0.6378090153448284
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 6537.172591779381,
+              "median": 6537.172591779381,
+              "min": 6378.090153448284,
+              "max": 6696.255030110478
+            },
+            "last_cost": 0.020727455615997314
+          },
+          "frozen_eager_cuda": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              2.867081922478974,
+              2.7474808329716325
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 28072.81377725303,
+              "median": 28072.81377725303,
+              "min": 27474.808329716325,
+              "max": 28670.81922478974
+            },
+            "last_cost": 0.02072727680206299
+          },
+          "candidate_fused_cuda": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              0.40228067990392447,
+              0.4794530840590596
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 4408.66881981492,
+              "median": 4408.66881981492,
+              "min": 4022.8067990392447,
+              "max": 4794.530840590596
+            },
+            "last_cost": 0.02072727680206299
+          },
+          "calls_per_round": 100
+        },
+        {
+          "frozen_cpu": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              1.8516112784855068,
+              1.8614157256670296
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 6188.378340254227,
+              "median": 6188.378340254227,
+              "min": 6172.037594951689,
+              "max": 6204.719085556765
+            },
+            "last_cost": 0.020727455615997314
+          },
+          "frozen_eager_cuda": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              8.593820036854595,
+              8.41232982603833
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 28343.58310482154,
+              "median": 28343.58310482154,
+              "min": 28041.099420127768,
+              "max": 28646.066789515316
+            },
+            "last_cost": 0.02072727680206299
+          },
+          "candidate_fused_cuda": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              1.356860258616507,
+              1.2015514858067036
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 4264.019574038684,
+              "median": 4264.019574038684,
+              "min": 4005.1716193556786,
+              "max": 4522.86752872169
+            },
+            "last_cost": 0.02072727680206299
+          },
+          "calls_per_round": 300
+        }
+      ],
+      "preparation_timings": [
+        {
+          "frozen_cpu": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              0.4268608405254781,
+              0.4500631890259683
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 4384.620147757232,
+              "median": 4384.620147757232,
+              "min": 4268.608405254781,
+              "max": 4500.631890259683
+            }
+          },
+          "frozen_eager_cuda": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              2.7376637952402234,
+              2.6619401364587247
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 26998.01965849474,
+              "median": 26998.01965849474,
+              "min": 26619.401364587247,
+              "max": 27376.637952402234
+            }
+          },
+          "candidate_fused_cuda": {
+            "calls_per_round": 100,
+            "rounds": 2,
+            "elapsed_seconds": [
+              0.47399357659742236,
+              0.4720442579127848
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 4730.189172551036,
+              "median": 4730.189172551036,
+              "min": 4720.442579127848,
+              "max": 4739.935765974224
+            }
+          },
+          "calls_per_round": 100
+        },
+        {
+          "frozen_cpu": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              1.3159435875713825,
+              1.2898008949123323
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 4342.907470806191,
+              "median": 4342.907470806191,
+              "min": 4299.336316374441,
+              "max": 4386.478625237942
+            }
+          },
+          "frozen_eager_cuda": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              7.188025059644133,
+              8.243770786561072
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 25719.659743675344,
+              "median": 25719.659743675344,
+              "min": 23960.08353214711,
+              "max": 27479.235955203574
+            }
+          },
+          "candidate_fused_cuda": {
+            "calls_per_round": 300,
+            "rounds": 2,
+            "elapsed_seconds": [
+              1.2146591860800982,
+              1.4071230185218155
+            ],
+            "microseconds_per_call": {
+              "count": 2,
+              "mean": 4369.637007669856,
+              "median": 4369.637007669856,
+              "min": 4048.863953600327,
+              "max": 4690.410061739385
+            }
+          },
+          "calls_per_round": 300
+        }
+      ],
+      "gpu_load_before_case": {
+        "available": true,
+        "gpus": [
+          {
+            "index": 0.0,
+            "utilization.gpu": 100.0,
+            "utilization.memory": 50.0,
+            "memory.used": 71227.0,
+            "memory.total": 81559.0,
+            "power.draw": 330.02,
+            "clocks.sm": 1530.0
+          },
+          {
+            "index": 1.0,
+            "utilization.gpu": 100.0,
+            "utilization.memory": 51.0,
+            "memory.used": 28370.0,
+            "memory.total": 81559.0,
+            "power.draw": 336.09,
+            "clocks.sm": 1725.0
+          }
+        ]
+      },
+      "gpu_load_after_case": {
+        "available": true,
+        "gpus": [
+          {
+            "index": 0.0,
+            "utilization.gpu": 100.0,
+            "utilization.memory": 47.0,
+            "memory.used": 71227.0,
+            "memory.total": 81559.0,
+            "power.draw": 323.68,
+            "clocks.sm": 1680.0
+          },
+          {
+            "index": 1.0,
+            "utilization.gpu": 100.0,
+            "utilization.memory": 34.0,
+            "memory.used": 29813.0,
+            "memory.total": 81559.0,
+            "power.draw": 333.59,
+            "clocks.sm": 1245.0
+          }
+        ]
+      }
+    }
+  ],
+  "all_prepared_cuda_bit_exact_equal": true,
+  "all_cost_cuda_bit_exact_equal": true,
+  "cuda_peak_allocated_bytes": 60528640,
+  "cuda_peak_reserved_bytes": 69206016,
+  "gpu_load_after": {
+    "available": true,
+    "gpus": [
+      {
+        "index": 0.0,
+        "utilization.gpu": 100.0,
+        "utilization.memory": 47.0,
+        "memory.used": 71227.0,
+        "memory.total": 81559.0,
+        "power.draw": 324.65,
+        "clocks.sm": 1500.0
+      },
+      {
+        "index": 1.0,
+        "utilization.gpu": 100.0,
+        "utilization.memory": 40.0,
+        "memory.used": 29813.0,
+        "memory.total": 81559.0,
+        "power.draw": 334.46,
+        "clocks.sm": 1185.0
+      }
+    ]
+  },
+  "frozen_revision_identification": {
+    "verified_git_revision": "1eb9c417febebc8bdd450590d4759454e7160141",
+    "method": "Snapshot had no .git metadata; frozen runtime hashes were independently matched to Git blobs after the measurement. Timing values and measured driver SHA are unchanged.",
+    "verified_git_blob_sha256": {
+      "src/fnit/mcflirt/core.py": "f4f18579cb0a7f709f2975c3cef125e6cce392fc1dca3fa413428c365afb56fe",
+      "src/fnit/flirt/core.py": "e6ce6185fafb89666be631069f66e96ce9c6a561ab3d7c7fab4c661d317885c1"
+    }
+  }
+}

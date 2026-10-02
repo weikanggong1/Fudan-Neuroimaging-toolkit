@@ -22,14 +22,15 @@ def main() -> None:
                      help="fit FLICA directly to disk-backed standardized voxels")
     fit.add_argument("--dicl-max-iter", type=int, default=1000)
     fit.add_argument("--flica-max-iter", type=int, default=1000)
+    fit.add_argument("--flica-lambda-dims", choices=("o", "R"), default="o")
     fit.add_argument("--top-voxels", type=int, default=1000)
     fit.add_argument("--random-state", type=int, default=0)
     fit.add_argument("--device", default="auto")
-    fit.add_argument("--max-gpu-gb", type=float, default=28.0)
+    fit.add_argument("--max-gpu-gb", type=float, default=19.0)
     fit.add_argument("--feature-block", type=int, default=2048)
     fit.add_argument("--dicl-batch-size", type=int, default=32)
-    fit.add_argument("--dicl-sparse-iterations", type=int, default=120,
-                     help="maximum LARS path events per voxel")
+    fit.add_argument("--dicl-sparse-iterations", type=int, default=1000,
+                     help="sparse solve budget for ADMM and fallback LARS")
     apply = commands.add_parser("apply", help="project one unseen subject")
     apply.add_argument("--model-dir", required=True)
     apply.add_argument("--subject-dir", required=True)
@@ -49,6 +50,7 @@ def main() -> None:
             args.n_components, args.migp_dim, args.dicl_dim,
             subjects=subjects, device=args.device,
             dicl_max_iter=args.dicl_max_iter, flica_max_iter=args.flica_max_iter,
+            flica_lambda_dims=args.flica_lambda_dims,
             top_voxels=args.top_voxels, random_state=args.random_state,
             max_gpu_gb=args.max_gpu_gb, feature_block=args.feature_block,
             dicl_batch_size=args.dicl_batch_size,

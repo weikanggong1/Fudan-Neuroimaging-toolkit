@@ -1,4 +1,4 @@
-"""CUDA tensor updates for the single-group, scalar-noise FLICA model."""
+"""CUDA tensor updates for the single-group FLICA model."""
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ import h5py
 import numpy as np
 import torch
 
+from .flica_vb import fit_eigenspectrum
 from .pipeline import _device
 
 
@@ -38,13 +39,22 @@ def _tensor(value: object, device: torch.device) -> torch.Tensor:
                            dtype=torch.float64, device=device)
 
 
-def _scaled_inverse(matrix: torch.Tensor) -> torch.Tensor:
+def _scaled_inverse(matrix: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
     scale = torch.rsqrt(torch.diagonal(matrix))
-    return scale[:, None] * torch.linalg.inv(scale[:, None] * matrix * scale[None, :]) * scale[None, :]
+    inverse, info = torch.linalg.inv_ex(
+        scale[:, None] * matrix * scale[None, :], check_errors=False)
+    return scale[:, None] * inverse * scale[None, :], info
+
+
+def _scaled_inverse_batch(matrix: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+    scale = torch.rsqrt(torch.diagonal(matrix, dim1=-2, dim2=-1))
+    inverse, info = torch.linalg.inv_ex(
+        scale[:, :, None] * matrix * scale[:, None, :], check_errors=False)
+    return scale[:, :, None] * inverse * scale[:, None, :], info
 
 
 def _estimate_dd_gpu(data: torch.Tensor) -> torch.Tensor:
-    """Match the two-point Marchenko–Pastur eigenspectrum DOF estimate on CUDA."""
+    """Compute the spectrum on CUDA and source-compatible scalar DOF on CPU."""
     n_voxels, n_reduced = data.shape
     eigenvalues = torch.linalg.eigvalsh(data.T @ data).flip(0).clamp_min(0)
     return _estimate_dd_eigenvalues(eigenvalues, n_voxels, n_reduced)
@@ -52,50 +62,23 @@ def _estimate_dd_gpu(data: torch.Tensor) -> torch.Tensor:
 
 def _estimate_dd_eigenvalues(eigenvalues: torch.Tensor, n_voxels: int,
                              n_reduced: int) -> torch.Tensor:
+    """The small CPU fmin step preserves the original FLICA stopping point."""
     if n_reduced >= n_voxels:
         return eigenvalues.new_tensor(1.0)
     indices = (int(np.ceil(n_reduced * 0.25) - 1),
                int(np.floor(n_reduced * 0.75) - 1))
-    observed = eigenvalues[list(indices)]
-    quantiles = eigenvalues.new_tensor([1 - index / (n_reduced - 1) for index in indices])
-
-    def score(gamma: torch.Tensor) -> torch.Tensor:
-        root = torch.sqrt(gamma)[:, None]
-        lower = (1 - root) ** 2
-        upper = (1 + root) ** 2
-        positions = torch.linspace(0, 1, 4096, device=eigenvalues.device,
-                                   dtype=torch.float64)[None, :]
-        grid = lower + (upper - lower) * positions
-        density = (torch.sqrt(((grid - lower) * (upper - grid)).clamp_min(0)) /
-                   (2 * torch.pi * gamma[:, None] * grid))
-        step = (upper - lower) / 4095
-        cdf = torch.cumsum(density, dim=1) * step
-        cdf[:, -1] = 1
-        positions = torch.searchsorted(cdf.contiguous(), quantiles.expand(len(gamma), -1).contiguous())
-        positions = positions.clamp(1, 4095)
-        before = positions - 1
-        low_cdf = torch.gather(cdf, 1, before)
-        high_cdf = torch.gather(cdf, 1, positions)
-        low_grid = torch.gather(grid, 1, before)
-        high_grid = torch.gather(grid, 1, positions)
-        estimate = low_grid + (high_grid - low_grid) * (
-            (quantiles[None, :] - low_cdf) / (high_cdf - low_cdf).clamp_min(1e-12)
-        )
-        scale = (estimate * observed[None, :]).sum(dim=1) / estimate.square().sum(dim=1)
-        error = ((estimate * scale[:, None] - observed[None, :]) ** 2).sum(dim=1)
-        return error
-
-    coarse = torch.linspace(0.001, 0.999, 1000, device=eigenvalues.device, dtype=torch.float64)
-    best = coarse[torch.argmin(score(coarse))]
-    fine = torch.linspace(-0.01, 0.01, 1000, device=eigenvalues.device, dtype=torch.float64)
-    candidates = (best + fine).clamp(0.001, 0.999)
-    gamma = candidates[torch.argmin(score(candidates))]
-    return n_reduced / (gamma * n_voxels)
+    spectrum = np.full(n_reduced, np.nan, dtype=np.float64)
+    values = eigenvalues.detach().cpu().numpy()
+    spectrum[list(indices)] = values[list(indices)]
+    gamma = fit_eigenspectrum(spectrum)[0]
+    return eigenvalues.new_tensor(n_reduced / (gamma * n_voxels))
 
 
 def initialize_flica_torch(y_arrays: Sequence[np.ndarray], n_components: int,
-                           *, device: str = "cuda:0") -> tuple[dict, dict, dict]:
-    """Initialize the original scalar-noise FLICA model using CUDA tensors."""
+                           *, device: str = "cuda:0", lambda_dims: str = "o",
+                           init_h: np.ndarray | torch.Tensor | None = None
+                           ) -> tuple[dict, dict, dict]:
+    """Initialize FLICA; numeric init_h uses the source's pre-scaled H convention."""
     backend = _device(device)
     if backend.type != "cuda":
         raise ValueError("CUDA device required for FLICA GPU initialization")
@@ -103,20 +86,32 @@ def initialize_flica_torch(y_arrays: Sequence[np.ndarray], n_components: int,
     n_modalities, n_reduced = len(y), y[0].shape[1]
     if not 1 <= n_components < n_reduced:
         raise ValueError("Invalid FLICA component count")
+    if lambda_dims not in ("o", "R"):
+        raise ValueError("lambda_dims must be 'o' or 'R'")
     dd = torch.stack([_estimate_dd_gpu(value) for value in y])
-    covariance = sum(dd[k] * (value.T @ value) for k, value in enumerate(y))
-    eigenvalues, eigenvectors = torch.linalg.eigh(covariance)
-    dominant = eigenvalues[-n_components:].flip(0)
-    h = dominant[:, None] * eigenvectors[:, -n_components:].flip(1).T
-    x = [((torch.linalg.pinv(h @ h.T) @ h) @ (value.T * torch.sqrt(dd[k]))).T
-         for k, value in enumerate(y)]
+    if init_h is None:
+        covariance = sum(dd[k] * (value.T @ value) for k, value in enumerate(y))
+        eigenvalues, eigenvectors = torch.linalg.eigh(covariance)
+        dominant = eigenvalues[-n_components:].flip(0)
+        h_pre = (dominant.clamp_min(0).sqrt()[:, None] *
+                 eigenvectors[:, -n_components:].flip(1).T /
+                 np.sqrt(sum(value.shape[0] for value in y)))
+    else:
+        h_pre = _tensor(init_h, backend)
+        if h_pre.shape != (n_components, n_reduced):
+            raise ValueError("init_h must have shape (n_components, n_reduced)")
+    h = h_pre / torch.sqrt(dd.mean())
+    projector = torch.linalg.pinv(h_pre)
+    x = [(value * torch.sqrt(dd[k])) @ projector for k, value in enumerate(y)]
     return _initial_state(h, x, dd, [value.shape[0] for value in y],
-                          [value.square().mean() for value in y], backend)
+                          [value.square().mean(dim=0 if lambda_dims == "R" else None)
+                           for value in y], backend, lambda_dims)
 
 
 def _initial_state(h: torch.Tensor, x: list[torch.Tensor], dd: torch.Tensor,
                    n_voxels: Sequence[int], mean_squares: Sequence[torch.Tensor],
-                   backend: torch.device) -> tuple[dict, dict, dict]:
+                   backend: torch.device, lambda_dims: str = "o"
+                   ) -> tuple[dict, dict, dict]:
     n_modalities, n_components, n_reduced = len(x), h.shape[0], h.shape[1]
     unit = torch.eye(n_components, device=backend, dtype=torch.float64)
     mean_dd = dd.mean()
@@ -140,7 +135,7 @@ def _initial_state(h: torch.Tensor, x: list[torch.Tensor], dd: torch.Tensor,
     prior_lambda_c = [h.new_tensor(1e-12) for _ in range(n_modalities)]
     lam = [torch.reciprocal(mean_squares[k]) for k in range(n_modalities)]
     priors = {"prior_pi_weights": prior_pi, "prior_beta_b": prior_beta_b,
-              "prior_beta_c": prior_beta_c, "prior_W_var": 1 / dd[-1],
+              "prior_beta_c": prior_beta_c, "prior_W_var": 1 / dd,
               "prior_mu_var": h.new_tensor(1e4),
               "prior_eta_b": h.new_tensor(1e6),
               "prior_eta_c": h.new_tensor(1e-3),
@@ -165,12 +160,14 @@ def _initial_state(h: torch.Tensor, x: list[torch.Tensor], dd: torch.Tensor,
                   "pi_log": [torch.full((3, n_components), -np.log(3),
                                           device=backend, dtype=torch.float64) for _ in range(n_modalities)]}
     constants = {"K": n_modalities, "L": n_components, "R": n_reduced,
-                 "DD": dd}
+                 "DD": dd, "lambda_dims": lambda_dims}
     return priors, posteriors, constants
 
 
 def initialize_flica_raw(y: Sequence[RawVoxelMatrix], n_components: int,
-                         *, device: str = "cuda:0", max_gpu_gb: float = 28.0
+                         *, device: str = "cuda:0", max_gpu_gb: float = 28.0,
+                         lambda_dims: str = "o",
+                         init_h: np.ndarray | torch.Tensor | None = None
                          ) -> tuple[dict, dict, dict]:
     """Initialize direct-voxel FLICA without holding any modality matrix in RAM."""
     backend = _device(device)
@@ -179,6 +176,8 @@ def initialize_flica_raw(y: Sequence[RawVoxelMatrix], n_components: int,
     n_subjects = y[0].shape[1]
     if not 1 <= n_components < n_subjects or any(value.shape[1] != n_subjects for value in y):
         raise ValueError("Invalid raw FLICA dimensions")
+    if lambda_dims not in ("o", "R"):
+        raise ValueError("lambda_dims must be 'o' or 'R'")
     dtype = torch.float64
     matrix_bytes = n_subjects ** 2 * 8
     spatial_bytes = (sum(value.shape[0] for value in y) * n_components * 32 +
@@ -192,13 +191,23 @@ def initialize_flica_raw(y: Sequence[RawVoxelMatrix], n_components: int,
     for value in y:
         covariance = torch.zeros_like(total_covariance)
         total_squares = 0.0
+        if lambda_dims == "R":
+            subject_squares = torch.zeros(n_subjects, device=backend, dtype=dtype)
         for _, block in value.blocks(backend):
             covariance.addmm_(block.T, block)
-            total_squares += float(block.square().sum())
+            if lambda_dims == "R":
+                squares = block.square().sum(dim=0)
+                subject_squares += squares
+                total_squares += float(squares.sum())
+            else:
+                total_squares += float(block.square().sum())
         value.squared_sum = total_squares
-        mean_squares.append(torch.as_tensor(
-            total_squares / (value.shape[0] * n_subjects),
-            device=backend, dtype=torch.float64))
+        if lambda_dims == "R":
+            mean_squares.append(subject_squares / value.shape[0])
+        else:
+            mean_squares.append(torch.as_tensor(
+                total_squares / (value.shape[0] * n_subjects),
+                device=backend, dtype=torch.float64))
         if n_subjects <= 2048:
             spectrum = torch.linalg.eigvalsh(covariance).flip(0).clamp_min(0)
             dd = _estimate_dd_eigenvalues(spectrum, *value.shape)
@@ -208,59 +217,66 @@ def initialize_flica_raw(y: Sequence[RawVoxelMatrix], n_components: int,
         dd_values.append(dd.to(torch.float64))
         total_covariance += covariance * dd.to(dtype)
     dd = torch.stack(dd_values)
-    if n_subjects <= 2048:
-        eigenvalues, eigenvectors = torch.linalg.eigh(total_covariance)
-        eigenvalues = eigenvalues[-n_components:].flip(0)
-        eigenvectors = eigenvectors[:, -n_components:].flip(1)
+    if init_h is None:
+        if n_subjects <= 2048:
+            eigenvalues, eigenvectors = torch.linalg.eigh(total_covariance)
+            eigenvalues = eigenvalues[-n_components:].flip(0)
+            eigenvectors = eigenvectors[:, -n_components:].flip(1)
+        else:
+            rank = min(n_subjects, n_components + 32)
+            generator = torch.Generator(device=backend).manual_seed(0)
+            basis = torch.randn((n_subjects, rank), device=backend,
+                                dtype=dtype, generator=generator)
+            for iteration in range(30):
+                basis, _ = torch.linalg.qr(total_covariance @ basis, mode="reduced")
+                if iteration >= 5 and iteration % 3 == 2:
+                    reduced = basis.T @ total_covariance @ basis
+                    values, vectors = torch.linalg.eigh(reduced)
+                    trial_values = values[-n_components:].flip(0)
+                    trial_vectors = basis @ vectors[:, -n_components:].flip(1)
+                    residual = torch.linalg.vector_norm(
+                        total_covariance @ trial_vectors - trial_vectors * trial_values)
+                    if residual / torch.linalg.vector_norm(trial_vectors * trial_values) < 1e-8:
+                        break
+            reduced = basis.T @ total_covariance @ basis
+            values, vectors = torch.linalg.eigh(reduced)
+            eigenvalues = values[-n_components:].flip(0)
+            eigenvectors = basis @ vectors[:, -n_components:].flip(1)
+        h_pre = (eigenvalues.clamp_min(0).sqrt()[:, None] * eigenvectors.T /
+                 np.sqrt(sum(value.shape[0] for value in y)))
     else:
-        rank = min(n_subjects, n_components + 32)
-        generator = torch.Generator(device=backend).manual_seed(0)
-        basis = torch.randn((n_subjects, rank), device=backend,
-                            dtype=dtype, generator=generator)
-        for iteration in range(30):
-            basis, _ = torch.linalg.qr(total_covariance @ basis, mode="reduced")
-            if iteration >= 5 and iteration % 3 == 2:
-                reduced = basis.T @ total_covariance @ basis
-                values, vectors = torch.linalg.eigh(reduced)
-                trial_values = values[-n_components:].flip(0)
-                trial_vectors = basis @ vectors[:, -n_components:].flip(1)
-                residual = torch.linalg.vector_norm(
-                    total_covariance @ trial_vectors - trial_vectors * trial_values)
-                if residual / torch.linalg.vector_norm(trial_vectors * trial_values) < 1e-8:
-                    break
-        reduced = basis.T @ total_covariance @ basis
-        values, vectors = torch.linalg.eigh(reduced)
-        eigenvalues = values[-n_components:].flip(0)
-        eigenvectors = basis @ vectors[:, -n_components:].flip(1)
-    h = (eigenvalues[:, None] * eigenvectors.T).to(torch.float64)
+        h_pre = _tensor(init_h, backend)
+        if h_pre.shape != (n_components, n_subjects):
+            raise ValueError("init_h must have shape (n_components, n_reduced)")
+    h = h_pre / torch.sqrt(dd.mean())
+    projector = torch.linalg.pinv(h_pre)
     del covariance, total_covariance
-    projector = torch.linalg.pinv(h @ h.T) @ h
     spatial = []
     for k, value in enumerate(y):
         x = torch.empty((value.shape[0], n_components), device=backend,
                         dtype=torch.float64)
         for start, block in value.blocks(backend):
             x[start:start + block.shape[0]] = (
-                block @ projector.T) * torch.sqrt(dd[k])
+                block * torch.sqrt(dd[k])) @ projector
         spatial.append(x)
     return _initial_state(h, spatial, dd, [value.shape[0] for value in y],
-                          mean_squares, backend)
+                          mean_squares, backend, lambda_dims)
 
 
 def iterate_flica_torch(y_arrays: Sequence[np.ndarray | RawVoxelMatrix], priors: dict,
                         posteriors: dict, constants: dict, max_iter: int,
                         *, device: str = "cuda:0") -> dict[str, object]:
-    """Run original FLICA coordinate updates with the compressed arrays on GPU.
-
-    Initial state uses the source-compatible FLICA initializer; this function
-    supports the BigFLICA option ``lambda_dims='o'`` only.
-    """
+    """Run single-group FLICA coordinate updates with scalar or subjectwise noise."""
     backend = _device(device)
     if backend.type != "cuda":
         raise ValueError("CUDA device required for FLICA GPU iteration")
-    if max_iter < 0:
-        raise ValueError("max_iter must be nonnegative")
+    if max_iter < 1:
+        raise ValueError("max_iter must be positive")
     n_modalities, n_components, n_reduced = (int(constants[key]) for key in ("K", "L", "R"))
+    lambda_dims = constants.get("lambda_dims", "o")
+    if lambda_dims not in ("o", "R"):
+        raise ValueError("lambda_dims must be 'o' or 'R'")
+    subjectwise = lambda_dims == "R"
     y = [value if isinstance(value, RawVoxelMatrix) else _tensor(value, backend)
          for value in y_arrays]
 
@@ -284,8 +300,15 @@ def iterate_flica_torch(y_arrays: Sequence[np.ndarray | RawVoxelMatrix], priors:
 
     def squared_sum(index: int) -> torch.Tensor:
         if isinstance(y[index], RawVoxelMatrix):
+            if subjectwise:
+                result = torch.zeros(n_reduced, device=backend, dtype=torch.float64)
+                for _, block in y[index].blocks(backend):
+                    result += block.square().sum(dim=0)
+                return result
             return torch.as_tensor(y[index].squared_sum, device=backend,
                                    dtype=torch.float64)
+        if subjectwise:
+            return y[index].square().sum(dim=0)
         return y[index].square().sum()
     dd = _tensor(constants["DD"], backend)
     h = _tensor(posteriors["H"], backend)
@@ -298,7 +321,11 @@ def iterate_flica_torch(y_arrays: Sequence[np.ndarray | RawVoxelMatrix], priors:
     w_cov = [_tensor(value, backend) for value in posteriors["W_rowcov"]]
     wtw = [_tensor(value, backend) for value in posteriors["WtW"]]
     xtdx = [_tensor(value, backend) for value in posteriors["XtDX"]]
-    lam = [_tensor(value, backend).reshape(-1)[0] for value in posteriors["Lambda"]]
+    lam = [(_tensor(value, backend).reshape(-1) if subjectwise else
+            _tensor(value, backend).reshape(-1)[0])
+           for value in posteriors["Lambda"]]
+    if subjectwise and any(value.numel() != n_reduced for value in lam):
+        raise ValueError("Subjectwise Lambda must have one value per reduced subject")
     mu = [_tensor(value, backend) for value in posteriors["mu"]]
     mu2 = [_tensor(value, backend) for value in posteriors["mu2"]]
     beta = [_tensor(value, backend) for value in posteriors["beta"]]
@@ -309,7 +336,13 @@ def iterate_flica_torch(y_arrays: Sequence[np.ndarray | RawVoxelMatrix], priors:
     prior_pi = [_tensor(value, backend) for value in priors["prior_pi_weights"]]
     prior_beta_b = [_tensor(value, backend) for value in priors["prior_beta_b"]]
     prior_beta_c = [_tensor(value, backend) for value in priors["prior_beta_c"]]
-    prior_w_var = _tensor(priors["prior_W_var"], backend).reshape(-1)[0]
+    prior_w_var = _tensor(priors["prior_W_var"], backend).reshape(-1)
+    if prior_w_var.numel() == 1:
+        prior_w_var = prior_w_var.expand(n_modalities)
+    elif prior_w_var.numel() != n_modalities:
+        raise ValueError("prior_W_var must be scalar or have one value per modality")
+    if not bool(torch.all(torch.isfinite(prior_w_var) & (prior_w_var > 0))):
+        raise ValueError("prior_W_var must contain finite positive variances")
     prior_mu_var = _tensor(priors["prior_mu_var"], backend).reshape(-1)[0]
     prior_eta_b = _tensor(priors["prior_eta_b"], backend).reshape(-1)[0]
     prior_eta_c = _tensor(priors["prior_eta_c"], backend).reshape(-1)[0]
@@ -322,36 +355,56 @@ def iterate_flica_torch(y_arrays: Sequence[np.ndarray | RawVoxelMatrix], priors:
                         dtype=torch.float64)
     sum_y2 = [squared_sum(index) for index in range(n_modalities)]
 
-    # Upstream indexes from zero and exits after maxits + 1 updates.
-    for _ in range(max(2, max_iter + 1)):
+    # Run the requested number of complete coordinate updates.
+    for _ in range(max_iter):
         eta_c = prior_eta_c + n_reduced / 2
         eta_binv = 1 / prior_eta_b + h2 / 2
         eta = eta_c / eta_binv
 
-        precision = torch.diag(eta)
+        precision = (torch.diag(eta)[None].expand(n_reduced, -1, -1).clone()
+                     if subjectwise else torch.diag(eta))
         mean_term = torch.zeros((n_components, n_reduced), device=backend,
                                 dtype=torch.float64)
         old_cross = [cross(k, x[k]) for k in range(n_modalities)]
         for k in range(n_modalities):
-            precision += lam[k] * (wtw[k] * xtdx[k].T)
-            mean_term += dd[k] * lam[k] * (w[k][:, None] * old_cross[k])
-            h_pcs[k] = torch.diagonal(wtw[k]) * torch.diagonal(xtdx[k]) * lam[k]
-        h_cov = _scaled_inverse(precision)
-        h = h_cov @ mean_term
-        h2 = h.square().sum(dim=1) + n_reduced * torch.diagonal(h_cov)
+            if subjectwise:
+                precision += lam[k][:, None, None] * (wtw[k] * xtdx[k].T)[None]
+                mean_term += dd[k] * (w[k][:, None] * old_cross[k]) * lam[k][None, :]
+                h_pcs[k] = torch.diagonal(wtw[k]) * torch.diagonal(xtdx[k]) * lam[k].mean()
+            else:
+                precision += lam[k] * (wtw[k] * xtdx[k].T)
+                mean_term += dd[k] * lam[k] * (w[k][:, None] * old_cross[k])
+                h_pcs[k] = torch.diagonal(wtw[k]) * torch.diagonal(xtdx[k]) * lam[k]
+        h_cov, h_inverse_info = (_scaled_inverse_batch(precision) if subjectwise
+                                 else _scaled_inverse(precision))
+        inverse_info = [h_inverse_info]
+        if subjectwise:
+            h = (h_cov @ mean_term.T[:, :, None]).squeeze(-1).T
+            h2 = h.square().sum(dim=1) + torch.diagonal(h_cov, dim1=-2, dim2=-1).sum(dim=0)
+        else:
+            h = h_cov @ mean_term
+            h2 = h.square().sum(dim=1) + n_reduced * torch.diagonal(h_cov)
         h_pcs[-1] = eta
 
         hlambda = []
         for k in range(n_modalities):
-            weighted_h = lam[k] * (h @ h.T + n_reduced * h_cov)
+            weighted_h = ((h * lam[k][None, :]) @ h.T +
+                          torch.einsum("r,rij->ij", lam[k], h_cov)) if subjectwise else (
+                          lam[k] * (h @ h.T + n_reduced * h_cov))
             hlambda.append(weighted_h)
-            w_cov[k] = _scaled_inverse(xtdx[k] * weighted_h + unit / prior_w_var)
-            target = dd[k] * lam[k] * torch.diagonal(old_cross[k] @ h.T)
+            w_cov[k], w_inverse_info = _scaled_inverse(
+                xtdx[k] * weighted_h + unit / prior_w_var[k])
+            inverse_info.append(w_inverse_info)
+            target = (dd[k] * torch.diagonal((old_cross[k] * lam[k][None, :]) @ h.T)
+                      if subjectwise else
+                      dd[k] * lam[k] * torch.diagonal(old_cross[k] @ h.T))
             w[k] = target @ w_cov[k]
             wtw[k] = torch.outer(w[k], w[k]) + w_cov[k]
 
         for k in range(n_modalities):
-            projected_values = projected(k, h.T * (lam[k] * w[k])[None, :])
+            projected_values = (projected(k, h.T * lam[k][:, None] * w[k][None, :])
+                                if subjectwise else
+                                projected(k, h.T * (lam[k] * w[k])[None, :]))
             sum_q = torch.zeros((3, n_components), device=backend, dtype=torch.float64)
             sum_qx = torch.zeros_like(sum_q)
             sum_qx2 = torch.zeros_like(sum_q)
@@ -394,19 +447,32 @@ def iterate_flica_torch(y_arrays: Sequence[np.ndarray | RawVoxelMatrix], priors:
         for k in range(n_modalities):
             covariance_weight = wtw[k] * xtdx[k]
             diagonal_term = (h * (covariance_weight @ h)).sum(dim=0)
-            diagonal_term = diagonal_term + (covariance_weight * h_cov).sum()
+            diagonal_term = (diagonal_term +
+                             torch.einsum("ij,rij->r", covariance_weight, h_cov)
+                             if subjectwise else
+                             diagonal_term + (covariance_weight * h_cov).sum())
             new_cross = cross(k, x[k])
             fitted = ((new_cross * h) * w[k][:, None]).sum(dim=0) * dd[k]
-            residual_sum = dd[k] * sum_y2[k] / 2 - fitted.sum() + diagonal_term.sum() / 2
-            shape = dd[k] * y[k].shape[0] * n_reduced / 2 + prior_lambda_c[k]
-            rate = residual_sum + 1 / prior_lambda_b[k]
+            if subjectwise:
+                shape = dd[k] * y[k].shape[0] / 2 + prior_lambda_c[k]
+                rate = (dd[k] * sum_y2[k] / 2 - fitted + diagonal_term / 2 +
+                        1 / prior_lambda_b[k])
+            else:
+                residual_sum = dd[k] * sum_y2[k] / 2 - fitted.sum() + diagonal_term.sum() / 2
+                shape = dd[k] * y[k].shape[0] * n_reduced / 2 + prior_lambda_c[k]
+                rate = residual_sum + 1 / prior_lambda_b[k]
             lam[k] = shape / rate
-            if not torch.isfinite(lam[k]) or lam[k] <= 0:
-                raise ValueError("GPU FLICA noise precision diverged")
+        noise_precision = torch.stack(lam)
+        inverse_ok = (torch.all(torch.cat([value.reshape(-1) for value in inverse_info]) == 0)
+                      if subjectwise else torch.all(torch.stack(inverse_info) == 0))
+        if not bool(inverse_ok &
+                    torch.all(torch.isfinite(noise_precision) & (noise_precision > 0))):
+            raise ValueError("GPU FLICA covariance or noise precision diverged")
 
     result = {"H": h.cpu().numpy(), "H_PCs": h_pcs.cpu().numpy(),
               "W": [value.cpu().numpy() for value in w],
               "X": [value.cpu().numpy() for value in x],
-              "lambda": np.asarray([value.item() for value in lam]),
+              "lambda": (noise_precision.cpu().numpy() if subjectwise else
+                         np.asarray([value.item() for value in lam])),
               "DD": dd.cpu().numpy()}
     return result

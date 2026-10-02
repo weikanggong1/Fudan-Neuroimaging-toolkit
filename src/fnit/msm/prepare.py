@@ -9,6 +9,8 @@ import nibabel as nib
 import nibabel.freesurfer.io as fsio
 import numpy as np
 
+from .._hemisphere_parallel import map_hemispheres, workbench_environment
+
 
 
 def _write_gifti(path, points, faces, hemi):
@@ -43,6 +45,7 @@ def prepare_msmsulc_inputs(
     output_dir: str | Path,
     *,
     wb_command: str | Path = "wb_command",
+    parallel: bool = True, cpu_threads: int | None = None,
 ) -> dict[str, MSMSulcInputs]:
     """Prepare HCP MSMSulc inputs for both hemispheres without running MSM.
 
@@ -60,8 +63,10 @@ def prepare_msmsulc_inputs(
     if len(initial_spheres) != 2:
         raise ValueError("initial_spheres must contain left and right paths")
     output.mkdir(parents=True, exist_ok=True)
-    prepared = {}
-    for hemi, fs_hemi, initial in zip(("L", "R"), ("lh", "rh"), initial_spheres):
+    def prepare(hemi, threads):
+        fs_hemi = "lh" if hemi == "L" else "rh"
+        initial = initial_spheres[0 if hemi == "L" else 1]
+        environment = workbench_environment(threads)
         sphere_file = subject / "surf" / f"{fs_hemi}.sphere"
         sulc_file = subject / "surf" / f"{fs_hemi}.sulc"
         reference_sphere = assets / "global/templates/standard_mesh_atlases" / (
@@ -101,8 +106,9 @@ def prepare_msmsulc_inputs(
             ("-surface-apply-affine", native_sphere, affine, unscaled),
             ("-surface-modify-sphere", unscaled, 100, rotated),
         ):
-            subprocess.run([executable, *map(str, args)], check=True, capture_output=True, text=True)
-        prepared[hemi] = MSMSulcInputs(
+            subprocess.run([executable, *map(str, args)], check=True, capture_output=True, text=True, env=environment)
+        return MSMSulcInputs(
             native_sphere, rotated, native_sulc, reference_sphere, reference_sulc, affine
         )
-    return prepared
+    results = map_hemispheres(prepare, parallel=parallel, cpu_threads=cpu_threads)
+    return dict(zip(("L", "R"), results))

@@ -1,0 +1,344 @@
+{
+  "schema_version": 1,
+  "scope": "Complete independent surface-only chain from existing same-source recon-all geometry and complete T1w/MNI preproc BOLD: official FreeSurfer/sMRIPrep conversion, cortical ROI, FS-to-fsLR sphere initialization, spherical affine preparation, official newMSM, sphere-specific 32k area surfaces, installed fMRIPrep projection and CIFTI, output QC and final data/report saving. Excludes recon-all reconstruction, all prerequisite volume processing, container verification/startup and package imports.",
+  "validation_complete": true,
+  "packages": {
+    "fmriprep": "25.2.4",
+    "smriprep": "0.19.2",
+    "niworkflows": "1.14.4",
+    "nibabel": "5.3.2",
+    "templateflow": "25.0.4",
+    "nipype": "1.10.0",
+    "numpy": "2.2.6"
+  },
+  "installed_source_sha256": {
+    "fmriprep/workflows/bold/resampling.py": "aa7c6f3b7da700ce745504dd8402805a8970f26fde7c43fff2936d8bf3a0db03",
+    "niworkflows/interfaces/cifti.py": "1c243989bdb1ff9ffdc040b48932dfe408cd23427681a79fb004fc9ccec162b1"
+  },
+  "reference_workbench": {
+    "sha256": "e5e34c7f44fd057d9bb38592a0c173887bbaf0058040fc9cfaa92b69fe01fe52",
+    "version": "Connectome Workbench\nType: Command Line Application\nVersion: 2.0.1\nQt Compiled Version: 6.8.2\nQt Runtime Version: 6.8.3\nCommit: 77852c0c616b467915b06330c94db3238214c406\nCommit Date: 2025-03-10 11:51:55 -0400\nCompiler: x86_64-conda-linux-gnu-c++ (/home/conda/feedstock_root/build_artifacts/connectome-workbench-split_1741622047586/_build_env/bin)\nCompiler Version: 13.3.0\nCompiled Debug: NO\nOperating System: Linux\nCompiled with OpenMP: YES"
+  },
+  "reference_script_sha256": "6ae91bfd7dadd3fc0668bf171586b6e096932c9e4b7cd3606a55c4185e9bc8c9",
+  "signal": "preproc",
+  "sphere_kind": "estimated_msmsulc",
+  "registration_estimated_here": true,
+  "projection_inputs_sha256": {
+    "bold_file": "25237075304f996aa7ac3700df68158240edbc5086b951f64a228f93ae0ca7b8",
+    "bold_std": "864a6ab19814789216a0cea99786accb012996184a72081aaa7975985a5f33af",
+    "volume_roi": null,
+    "white": [
+      "daf4189affd3c12e6a101cb320bcb93a9b7ece5a738a54324d55e234d0de65f3",
+      "9f8256123555714d3d286dd8589143f850bc46cb75ae9352c192e03f33bba897"
+    ],
+    "pial": [
+      "e2726b631df3fe24fa601c789eb02ba72b59fe71273c94dcd1d244de2b59fd5a",
+      "205684a3b385ed0823aa3604607d14e1364f99a2e1e11962e78d86c38ba7e08a"
+    ],
+    "midthickness": [
+      "7f7995ba3b1e91b9dfe605745f97bff3a267864cde8de4501e55284d23c8730d",
+      "71b8356e0ea527d8f49fe2ca7a123d40cff748f634c2872d0b170a78f0fc130d"
+    ],
+    "midthickness_fsLR": [
+      "b6d375cbb18b5889b2dd011f9727b0451d5cecbb2a3d0a809757f7edce3ccd20",
+      "72c928c0cae640f6f701f751de86e4a3adc4eac6a3bd4af0ce5382b2c7d18c8b"
+    ],
+    "sphere_reg_fsLR": [
+      "33d136648ebcd77247978156f3f2f13e6956504cc9d43ed75fb8fb04908bff85",
+      "182c7d2481e4d784df61b6a9f33a8e22d7bf7f552997bd62415b340cde5dfdf0"
+    ],
+    "cortex_mask": [
+      "724c835ad94c4f2ff8def85e0882358ca88bea72524fe57f538fcd1e3029a8d1",
+      "4f477976d9f2106620b33cab009724b97ec9c9b84366c734e6903886a0da6708"
+    ]
+  },
+  "geometry": {
+    "L": {
+      "native_vertices": 120035,
+      "native_faces": 240066,
+      "fsLR_vertices": 32492,
+      "fsLR_faces": 64980
+    },
+    "R": {
+      "native_vertices": 122950,
+      "native_faces": 245896,
+      "fsLR_vertices": 32492,
+      "fsLR_faces": 64980
+    }
+  },
+  "volume_inputs": {
+    "T1w": {
+      "shape": [
+        59,
+        75,
+        64,
+        490
+      ],
+      "affine": [
+        [
+          2.385999917984009,
+          0.0,
+          0.0,
+          -65.26929473876953
+        ],
+        [
+          0.0,
+          2.385999917984009,
+          0.0,
+          -107.59297180175781
+        ],
+        [
+          0.0,
+          0.0,
+          2.4000000953674316,
+          -100.79496002197266
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "MNI": {
+      "shape": [
+        91,
+        109,
+        91,
+        490
+      ],
+      "affine": [
+        [
+          -2.0,
+          0.0,
+          0.0,
+          90.0
+        ],
+        [
+          0.0,
+          2.0,
+          0.0,
+          -126.0
+        ],
+        [
+          0.0,
+          0.0,
+          2.0,
+          -72.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "actual_template_resources": {
+    "surface_spheres": [
+      {
+        "name": "tpl-fsLR_hemi-L_den-32k_sphere.surf.gii",
+        "sha256": "1846b053f870405466776d004d714cc1da0cec7361761c65a864782dd09f30a8"
+      },
+      {
+        "name": "tpl-fsLR_hemi-R_den-32k_sphere.surf.gii",
+        "sha256": "1a898433a9f1070e4e0435d4db966776ecc3291bfcd444efc7910aeffb91561c"
+      }
+    ],
+    "surface_rois": [
+      {
+        "name": "L.atlasroi.32k_fs_LR.shape.gii",
+        "sha256": "4ac9199dab151ccdc2a35bdddb5bac4f4907da7dfebd90807c09b82e2eb9d512"
+      },
+      {
+        "name": "R.atlasroi.32k_fs_LR.shape.gii",
+        "sha256": "698f46b399f5a89829f83cc697e32dc8841031fbf31ffef75aaaa0c4a16c3015"
+      }
+    ],
+    "cifti_surface_labels": [
+      {
+        "name": "tpl-fsLR_hemi-L_den-32k_desc-nomedialwall_dparc.label.gii",
+        "sha256": "4ac9199dab151ccdc2a35bdddb5bac4f4907da7dfebd90807c09b82e2eb9d512"
+      },
+      {
+        "name": "tpl-fsLR_hemi-R_den-32k_desc-nomedialwall_dparc.label.gii",
+        "sha256": "698f46b399f5a89829f83cc697e32dc8841031fbf31ffef75aaaa0c4a16c3015"
+      }
+    ],
+    "cifti_volume_dseg": [
+      {
+        "name": "tpl-MNI152NLin6Asym_res-02_atlas-HCP_dseg.nii.gz",
+        "sha256": "9c25e63edec37b3876756b749a3f0127511c6b63bf2855060a44007bb479b987"
+      }
+    ]
+  },
+  "templates_unchanged": true,
+  "input_files_unchanged": true,
+  "workflow_wall_seconds": 219.88773095188662,
+  "threads": 8,
+  "execution_plugin": "Linear",
+  "uses_gpu": false,
+  "projection_output_checks": {
+    "L": {
+      "shape": [
+        490,
+        32492
+      ],
+      "all_finite": true,
+      "sha256": "84b7df6c3922d89564399bec6c860cf9db42c5340873bf2e763dd71de4ce4196"
+    },
+    "R": {
+      "shape": [
+        490,
+        32492
+      ],
+      "all_finite": true,
+      "sha256": "a58ffb5729335d211ef8506b86c9fd696c8209d5468336ae1e8bd4d346c16410"
+    }
+  },
+  "cifti_output_checks": {
+    "shape": [
+      490,
+      91282
+    ],
+    "all_finite": true,
+    "brain_models": {
+      "CIFTI_STRUCTURE_CORTEX_LEFT": 29696,
+      "CIFTI_STRUCTURE_CORTEX_RIGHT": 29716,
+      "CIFTI_STRUCTURE_ACCUMBENS_LEFT": 135,
+      "CIFTI_STRUCTURE_ACCUMBENS_RIGHT": 140,
+      "CIFTI_STRUCTURE_AMYGDALA_LEFT": 315,
+      "CIFTI_STRUCTURE_AMYGDALA_RIGHT": 332,
+      "CIFTI_STRUCTURE_BRAIN_STEM": 3472,
+      "CIFTI_STRUCTURE_CAUDATE_LEFT": 728,
+      "CIFTI_STRUCTURE_CAUDATE_RIGHT": 755,
+      "CIFTI_STRUCTURE_CEREBELLUM_LEFT": 8709,
+      "CIFTI_STRUCTURE_CEREBELLUM_RIGHT": 9144,
+      "CIFTI_STRUCTURE_DIENCEPHALON_VENTRAL_LEFT": 706,
+      "CIFTI_STRUCTURE_DIENCEPHALON_VENTRAL_RIGHT": 712,
+      "CIFTI_STRUCTURE_HIPPOCAMPUS_LEFT": 764,
+      "CIFTI_STRUCTURE_HIPPOCAMPUS_RIGHT": 795,
+      "CIFTI_STRUCTURE_PALLIDUM_LEFT": 297,
+      "CIFTI_STRUCTURE_PALLIDUM_RIGHT": 260,
+      "CIFTI_STRUCTURE_PUTAMEN_LEFT": 1060,
+      "CIFTI_STRUCTURE_PUTAMEN_RIGHT": 1010,
+      "CIFTI_STRUCTURE_THALAMUS_LEFT": 1288,
+      "CIFTI_STRUCTURE_THALAMUS_RIGHT": 1248
+    },
+    "start_seconds": 0.0,
+    "tr_seconds": 0.735,
+    "sha256": "98d25f6cd20734855ff99398e486d7172aea7204dc00350118fd25996c5f92ea"
+  },
+  "cifti_metadata": {
+    "Density": "91,282 grayordinates corresponding to all of the grey matter sampled at a 2mm average vertex spacing on the surface and as 2mm voxels subcortically",
+    "SpatialReference": {
+      "VolumeReference": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-02_T1w.nii.gz",
+      "CIFTI_STRUCTURE_LEFT_CORTEX": "https://templateflow.s3.amazonaws.com/tpl-fsLR/tpl-fsLR_den-32k_hemi-L_midthickness.surf.gii",
+      "CIFTI_STRUCTURE_RIGHT_CORTEX": "https://templateflow.s3.amazonaws.com/tpl-fsLR/tpl-fsLR_den-32k_hemi-R_midthickness.surf.gii"
+    }
+  },
+  "reference_msm_threads": 8,
+  "strict_singlethread_accuracy_reference": false,
+  "reference_newmsm_sha256": "af5c04246cfeea19233232168acbc1f31266f28b1a7cb6779b8f1bfa32eb9615",
+  "hcp_config_source_sha256": "46b250404cb2570b4f645d8e53c30fabde799663d61761d61cf54ff110318203",
+  "reference_freesurfer_conversion_version": "freesurfer-linux-ubuntu22_x86_64-7.3.2-20220804-6354275",
+  "effective_msm_config_sha256": "cd3c2453fde7dde61fea937a15021513fa3c429ead4d0a873fc1d98f68b8bb2c",
+  "surface_only_script_sha256": "ef21ffb0bd9f97300a9aa79d9f6547865c5cbe647385ed477f9df500fb857bcf",
+  "recon_geometry_sources": {
+    "L": {
+      "white": {
+        "name": "lh.white",
+        "sha256": "e92211a71ea20a7223c305a7626f1df37cc7565744d0f7b16a5f28942b723d54"
+      },
+      "pial": {
+        "name": "lh.pial",
+        "sha256": "a94b3ccb1780f1529585cf1092e7a38075dda9a3b37fd58334eee3ee5bcde37b"
+      },
+      "midthickness": {
+        "name": "lh.graymid",
+        "sha256": "9b24dc610a81e677ec11ffb370588ca932c0e0180ffaa1a0820d0c00711d46ce"
+      },
+      "sphere": {
+        "name": "lh.sphere",
+        "sha256": "4ecca8a559ae0ce40f404f09f70baf462e1a7e9fca3b64688b047ea57934e6ea"
+      },
+      "sphere.reg": {
+        "name": "lh.sphere.reg",
+        "sha256": "594ff8864b6ee2af5a523781bf7de1ee271667e82bfceaf6e8a4a7cdb24e9e0e"
+      },
+      "thickness": {
+        "name": "lh.thickness",
+        "sha256": "4fdbf8b604123abc6a40da6445e7b63961ff3de2a645be8aadd6a6b8a133310c"
+      },
+      "sulc": {
+        "name": "lh.sulc",
+        "sha256": "42bc73666017f5230368dc9bbc5c816a07e795615f454d34af15a7f0c28fda6a"
+      }
+    },
+    "R": {
+      "white": {
+        "name": "rh.white",
+        "sha256": "8938a50a0b3242fd60e33f1ad6ecced9970623479b698b2814c855507bb56b3d"
+      },
+      "pial": {
+        "name": "rh.pial",
+        "sha256": "cfd22b13d31dd4ab3451ffdfe97f46fd39c5787a87e92b563785281243c342e4"
+      },
+      "midthickness": {
+        "name": "rh.graymid",
+        "sha256": "5ecf82f3555fa241d352520873e589914593c7cebead1135fd1642a21938c6aa"
+      },
+      "sphere": {
+        "name": "rh.sphere",
+        "sha256": "5716910a250c68d1b6456fb1e2694d813db1aeba025db8b2d9d31c2f9eca75e6"
+      },
+      "sphere.reg": {
+        "name": "rh.sphere.reg",
+        "sha256": "270b0262b9748922c97552e6022aa1f9b4901dfb32ed9993bc09b741d5c7d16a"
+      },
+      "thickness": {
+        "name": "rh.thickness",
+        "sha256": "3449a60f30740c32da9c0de29cb23451f9103ea6ed3db7cbd3aa87c29dce5515"
+      },
+      "sulc": {
+        "name": "rh.sulc",
+        "sha256": "540cccc5abd24821649c9a62050efd55699e1d9aa8740835bdfc74fb07f9bab4"
+      }
+    }
+  },
+  "msm_prepared_inputs_sha256": {
+    "L": {
+      "rotated_sphere": "84b5a7c5eec8a8c32f9884e09f83fead075fd202bdc25a18174ac373d3672299",
+      "native_sulc": "e3441cf256b4d42429ba462db2f8301db5d05a85aea78b10109bbceea1e1e48d",
+      "reference_sphere": "6968ef7d9638de54ade78cdbb7f0c6f25025c60477f72456ab2fb77c53a85cfa",
+      "reference_sulc": "10f5e3fd775bb2f77278b0b69126f6f67abefb3c76de6f1233128d9914ddcb5c"
+    },
+    "R": {
+      "rotated_sphere": "a9fad7f70add19ed442ecf8f8d1cc6f70ccbd8cee45f73975e1b4d1b640b8d00",
+      "native_sulc": "622e20e6765fc3d72b10ca549ba19010870398b158a05bf6b8f4781b1979244d",
+      "reference_sphere": "85e718e424a1d87521fb0f3942538db16d8c745fe5b9ee20405baac2aff1dbb1",
+      "reference_sulc": "4eefc7807cdd9076cfc9ffc933da3d0c100a4770d5359c3e5f4fb37d71097520"
+    }
+  },
+  "registered_spheres_sha256": {
+    "L": "33d136648ebcd77247978156f3f2f13e6956504cc9d43ed75fb8fb04908bff85",
+    "R": "182c7d2481e4d784df61b6a9f33a8e22d7bf7f552997bd62415b340cde5dfdf0"
+  },
+  "fsnative_to_t1w": null,
+  "stage_seconds": {
+    "L_geometry_roi_sphere_preparation": 12.13158764783293,
+    "R_geometry_roi_sphere_preparation": 11.453644366003573,
+    "L_official_msmsulc": 266.49836936127394,
+    "L_area_surface": 0.6527747521176934,
+    "R_official_msmsulc": 264.8135792580433,
+    "R_area_surface": 0.6999872578307986,
+    "official_projection_cifti_qc_and_staging": 289.61990915285423,
+    "final_publication_and_report_save": 0.8920100522227585
+  },
+  "surface_only_wall_seconds_including_output_save": 846.7677664090879,
+  "timing_endpoint": "all final data, spheres and complete QC report saved; adding this duration excluded",
+  "sif_sha256": "8e32238619053c1f9d1739b26f4afd72df809d914f5a5771707bf5da4b1d0f39",
+  "container_wall_seconds": 860.1015862869099
+}

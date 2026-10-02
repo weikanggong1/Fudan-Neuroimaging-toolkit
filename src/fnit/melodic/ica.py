@@ -18,7 +18,7 @@ class ICAResult:
     ``component_maps`` are null-standardised spatial scores. ``posterior_maps``
     contains the fitted signal-class probability; ``thresholded_maps`` keeps
     scores where that probability reaches ``mm_threshold``. ``mixing`` is T×K
-    and ``frequency_power`` is floor(T/2)×K.
+    and ``frequency_power`` is ceil(T/2)×K, with odd time series zero-padded.
     """
 
     component_maps: Path
@@ -39,6 +39,57 @@ class ICAResult:
 def _symmetric_decorrelation(matrix: torch.Tensor) -> torch.Tensor:
     values, vectors = torch.linalg.eigh(matrix @ matrix.T)
     return (vectors * values.clamp_min(1e-12).rsqrt()) @ vectors.T @ matrix
+
+
+def _fsl_uniform(rows: int, columns: int, seed: int) -> np.ndarray:
+    """Linux FSL ``srand``/``unifrnd`` sequence without changing process RNGs.
+
+    FSL consumes glibc's additive random generator in column order. A seed of
+    zero is treated as one by glibc. Keeping this stream in Python also makes
+    CPU and GPU initialisations identical, independently of PyTorch's RNG.
+    """
+    initial = int(seed) & 0xFFFFFFFF
+    initial = initial or 1
+    state = [initial]
+    previous = initial if initial < 0x80000000 else initial - 0x100000000
+    for _ in range(1, 31):
+        previous = (16807 * previous) % 2147483647
+        state.append(previous)
+    state.extend(state[:3])
+    for index in range(34, 344):
+        state.append((state[index - 31] + state[index - 3]) & 0xFFFFFFFF)
+    values = np.empty(rows * columns, dtype=np.float64)
+    for position in range(len(values)):
+        index = len(state)
+        value = (state[index - 31] + state[index - 3]) & 0xFFFFFFFF
+        state.append(value)
+        values[position] = ((value >> 1) + 1) / 2147483649.0
+    return values.reshape(columns, rows).T.copy()
+
+
+def _circle_law(dimension: int, samples: int) -> np.ndarray:
+    """Discrete Marchenko-Pastur inversion used by FSL's PPCA estimator."""
+    aspect = np.float32(dimension / samples)
+    lower = np.float32((1 - math.sqrt(float(aspect))) ** 2)
+    upper = np.float32((1 + math.sqrt(float(aspect))) ** 2)
+    start, end = np.float32(0.9 * lower), np.float32(1.1 * upper)
+    interval = np.float32((end - start) / (30 * dimension))
+    grid = (start + interval * np.arange(1, 30 * dimension + 1, dtype=np.float32)).astype(np.float64)
+    step = np.float32((upper - lower) / (10 * dimension))
+    offsets = (step * np.arange(1, 10 * dimension + 1, dtype=np.float32)).astype(np.float64)
+    density = np.sqrt(np.maximum(offsets * (float(upper - lower) - offsets), 0))
+    density /= 2 * math.pi * float(aspect) * (offsets + float(lower))
+    positions = offsets + float(lower)
+    partial = np.r_[0.0, np.cumsum(density)]
+    integral = partial[np.searchsorted(positions, grid, side="left")]
+    counts = np.maximum(dimension * (1 - float(step) * integral), 0)
+    result = np.zeros(dimension, dtype=np.float64)
+    falling = np.flatnonzero(np.floor(counts[:-1]) > np.floor(counts[1:]))
+    for index in falling:
+        order = int(math.floor(counts[index]))
+        if 1 <= order <= dimension:
+            result[order - 1] = grid[index]
+    return result.clip(min=5e-9)
 
 
 def _device(device: str | torch.device | None) -> torch.device:
@@ -80,31 +131,29 @@ def _estimate_resels(data: np.ndarray, mask: np.ndarray, batch_size: int) -> flo
 
 
 def _ppca_order(eigenvalues: torch.Tensor, n_voxels: int, resels: float) -> int:
-    """MELODIC-style Laplace PPCA order after a Marchenko-Pastur correction."""
+    """FSL Laplace PPCA order with its discrete spectrum and tail indexing."""
     values = eigenvalues.detach().cpu().double().numpy()[2:][::-1].copy()
     values = np.maximum(values, max(values[0], 1.0) * 1e-12)
     dimension = len(values)
     if dimension < 4:
         raise ValueError("at least six time points are required for automatic model order")
-    samples = max(int(n_voxels / (2.5 * resels)), dimension + 1)
-    aspect = min(dimension / samples, 0.99)
-    low, high = (1 - math.sqrt(aspect)) ** 2, (1 + math.sqrt(aspect)) ** 2
-    grid = np.linspace(low, high, max(4096, 16 * dimension))
-    density = np.sqrt(np.maximum((high - grid) * (grid - low), 0)) / (2 * math.pi * aspect * grid)
-    cdf = np.cumsum((density[1:] + density[:-1]) * np.diff(grid) * 0.5)
-    cdf = np.r_[0.0, cdf / cdf[-1]]
-    expected = np.interp(1 - (np.arange(dimension) + 0.5) / dimension, cdf, grid)
+    samples = max(int(n_voxels / (2.5 * np.float32(resels))), dimension + 1)
+    expected = _circle_law(dimension, samples)
     adjusted = np.sort(values / expected)[::-1]
     cumulative = np.cumsum(values) / values.sum()
-    cap = max(3, int(np.searchsorted(cumulative, 0.98)))
+    cap = int(np.searchsorted(cumulative, 0.98))
+    if cap < 3:
+        cap = dimension // 2
     cap = min(cap, dimension - 2)
     spectrum = np.maximum(adjusted[:cap], adjusted[0] * 1e-12)
-    suffix_mean = np.cumsum(spectrum[::-1])[::-1] / np.arange(cap, 0, -1)
+    suffix_sum = np.cumsum(spectrum[::-1])[::-1]
+    remainder = np.r_[suffix_sum[1:], 0.95 * spectrum[-1]]
+    tail_mean = (remainder / np.maximum(cap - np.arange(1, cap + 1), 1)).clip(min=0.01)
     row_hessian = np.zeros(cap)
     for i in range(cap - 1):
         differences = spectrum[i] - spectrum[i + 1:]
         differences = np.where(differences > 0, differences, 1.0)
-        inverse = 1 / suffix_mean[i + 1:] - 1 / spectrum[i]
+        inverse = 1 / tail_mean[i + 1:] - 1 / spectrum[i]
         inverse = np.where(inverse > 0, inverse, 1.0)
         row_hessian[i] = np.log(differences).sum() + np.log(inverse).sum()
     cumulative_hessian = np.cumsum(row_hessian)
@@ -114,10 +163,10 @@ def _ppca_order(eigenvalues: torch.Tensor, n_voxels: int, resels: float) -> int:
     for count in range(1, cap - 1):
         log_volume += (-math.log(2) + math.lgamma((cap - count + 1) / 2)
                        - 0.5 * math.log(math.pi) * (cap - count + 1))
-        noise = suffix_mean[count]
+        noise = tail_mean[count - 1]
         m = cap * count - count * (count + 1) / 2
-        score = (log_volume - 0.5 * samples * cumulative_log[count - 1]
-                 - 0.5 * samples * (cap - count) * math.log(max(noise, 1e-12))
+        score = (log_volume - (samples // 2) * cumulative_log[count - 1]
+                 - (samples // 2) * (cap - count) * math.log(max(noise, 1e-12))
                  + cumulative_hessian[count - 1]
                  + 0.5 * math.log(2 * math.pi) * (m + count)
                  - 0.5 * math.log(samples) * count)
@@ -128,29 +177,38 @@ def _ppca_order(eigenvalues: torch.Tensor, n_voxels: int, resels: float) -> int:
 
 
 def _gamma_pdf(x: torch.Tensor, mean: torch.Tensor, variance: torch.Tensor) -> torch.Tensor:
-    positive = x.clamp_min(1e-7)
-    shape = mean.square() / variance
-    scale = variance / mean
-    log_pdf = ((shape - 1) * positive.log() - positive / scale
-               - torch.lgamma(shape) - shape * scale.log())
-    return torch.where(x > 0, log_pdf.clamp(-80, 50).exp(), torch.zeros_like(x))
+    # FSL's scalar Gamma parameters and log normaliser are floats, while the
+    # histogram coordinates and density calculation use doubles.
+    mean32, variance32 = mean.float(), variance.float()
+    shape = (mean32.double().square() / variance32.double()).float()
+    rate = mean32 / variance32
+    normaliser = torch.lgamma(shape.double()).float()
+    log_pdf = ((shape * rate.log()).double()
+               + (shape - 1).double() * x.clamp_min(1e-6).log()
+               - rate.double() * x - normaliser.double())
+    valid = (x > 1e-6) & (mean32 > 0) & (variance32 > 1e-5) & (normaliser.abs() < 150)
+    return torch.where(valid, log_pdf.exp(), torch.zeros_like(x))
 
 
 def _normal_pdf(x: torch.Tensor, mean: torch.Tensor, variance: torch.Tensor) -> torch.Tensor:
+    mean, variance = mean.float().double(), variance.float().double()
     return torch.exp(-0.5 * (x - mean).square() / variance) / torch.sqrt(2 * math.pi * variance)
 
 
 def _mixture_posterior(z: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
     """Fit Gaussian null and positive/negative Gamma alternatives by EM."""
-    x = (z.double() - z.double().mean()) / z.double().std(unbiased=False).clamp_min(1e-6)
-    means = torch.tensor([0.0, 2.0, -2.0], dtype=x.dtype, device=x.device)
-    variances = torch.ones(3, dtype=x.dtype, device=x.device)
+    x = (z.double() - z.double().mean()) / z.double().std(correction=1).clamp_min(1e-6)
+    variance = x.square().mean()
+    means = torch.stack((-2 * x.mean(), x.mean() + 2 * variance.sqrt(), x.mean() - 2 * variance.sqrt()))
+    variances = variance.expand(3).clone()
     weights = torch.full((3,), 1 / 3, dtype=x.dtype, device=x.device)
-    previous = -float("inf")
-    for iteration in range(300):
+    previous = 1.0
+    likelihoods = None
+    for iteration in range(1, 501):
+        variances.clamp_(min=1e-4)
         noise_width = variances[0].sqrt()
-        positive_floor = (2.6 - weights[0]) * noise_width + means[0]
-        negative_floor = (2.6 - weights[0]) * noise_width - means[0]
+        positive_floor = ((2.6 - weights[0]) * noise_width + means[0]).float().double()
+        negative_floor = ((2.6 - weights[0]) * noise_width - means[0]).float().double()
         positive_floor = 0.5 * (positive_floor + torch.sqrt(positive_floor.square() + 4 * variances[1]))
         negative_floor = 0.5 * (negative_floor + torch.sqrt(negative_floor.square() + 4 * variances[2]))
         means[1] = torch.maximum(means[1], positive_floor.clamp_min(1e-3))
@@ -161,23 +219,30 @@ def _mixture_posterior(z: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         positive = _gamma_pdf(x, means[1].clamp_min(1e-3), variances[1].clamp_min(1e-4))
         negative = _gamma_pdf(-x, (-means[2]).clamp_min(1e-3), variances[2].clamp_min(1e-4))
         likelihoods = torch.stack((null, positive, negative)) * weights[:, None]
-        total = likelihoods.sum(dim=0).clamp_min(1e-12)
+        # Unmodelled extreme voxels have a fixed 1e-4 likelihood in FSL.
+        # Consequently responsibilities need not sum to one there, and the
+        # component masses are not renormalised on each EM step.
+        total = likelihoods.sum(dim=0).clamp_min(1e-4)
         responsibilities = likelihoods / total
-        score = total.log().sum().item()
+        score = total.log().sum().float().item()
+        change = abs(score - previous)
+        previous = score
+        update = iteration < 30 or (change > 1e-6 and iteration < 300)
+        if not update:
+            break
         masses = responsibilities.sum(dim=1).clamp_min(1e-7)
+        for component in range(3):
+            if masses[component] < 1e-4 * len(x):
+                masses += 1e-4
         new_means = (responsibilities @ x) / masses
         new_variances = (responsibilities * (x[None, :] - new_means[:, None]).square()).sum(dim=1) / masses
         means = new_means
         variances = new_variances.clamp_min(1e-4)
-        weights = masses / masses.sum()
-        if iteration >= 30 and abs(score - previous) < 1e-6:
-            break
-        previous = score
-    null = _normal_pdf(x, means[0], variances[0]) * weights[0]
-    positive = _gamma_pdf(x, means[1], variances[1]) * weights[1]
-    negative = _gamma_pdf(-x, -means[2], variances[2]) * weights[2]
+        weights = masses / len(x)
+    null, positive, negative = likelihoods.unbind(0)
     adjusted = (x - means[0]) / variances[0].sqrt()
-    posterior = ((positive + negative) / (null + positive + negative).clamp_min(1e-12)).clamp(0, 1)
+    posterior = ((positive + negative) /
+                 (null + positive + negative).clamp_min(torch.finfo(x.dtype).tiny)).clamp(0, 1)
     return adjusted.float(), posterior.float()
 
 
@@ -231,12 +296,15 @@ def decompose_spatial_ica(
 
     # First PCA estimates residual variance rather than dividing by the raw
     # voxelwise standard deviation. Its covariance centers across voxels.
-    covariance = torch.zeros((nt, nt), dtype=torch.float32, device=selected)
-    sum_time = torch.zeros(nt, dtype=torch.float32, device=selected)
+    # MELODIC's matrix arithmetic is double precision. These PCA/ICA tensors
+    # are small relative to the input 4D image, and avoid TF32-dependent source
+    # changes while leaving the package's global TF32 setting enabled.
+    covariance = torch.zeros((nt, nt), dtype=torch.float64, device=selected)
+    sum_time = torch.zeros(nt, dtype=torch.float64, device=selected)
     accepted: list[np.ndarray] = []
     for start in range(0, len(indices), voxel_batch_size):
         batch_indices = indices[start:start + voxel_batch_size]
-        series = torch.as_tensor(data[batch_indices].copy(), device=selected)
+        series = torch.as_tensor(data[batch_indices].copy(), dtype=torch.float64, device=selected)
         series -= series.mean(dim=1, keepdim=True)
         valid = torch.isfinite(series).all(dim=1) & (series.square().mean(dim=1) > 1e-12)
         batch_indices = batch_indices[valid.cpu().numpy()]
@@ -266,7 +334,7 @@ def decompose_spatial_ica(
     scales: list[np.ndarray] = []
     for start in range(0, len(indices), voxel_batch_size):
         batch_indices = indices[start:start + voxel_batch_size]
-        series = torch.as_tensor(data[batch_indices].copy(), device=selected)
+        series = torch.as_tensor(data[batch_indices].copy(), dtype=torch.float64, device=selected)
         series -= series.mean(dim=1, keepdim=True)
         scores = (series @ first_vectors) / first_scale
         scores *= (scores.abs() >= 2.3)
@@ -300,16 +368,17 @@ def decompose_spatial_ica(
         raise ValueError("n_components exceeds the numerical rank of the BOLD data")
     variance_explained = (eigenvalues.sum() / covariance.diagonal().sum()).item()
 
-    whitened = torch.empty((n_voxels, n_components), dtype=torch.float32, device=selected)
+    whitened = torch.empty((n_voxels, n_components), dtype=torch.float64, device=selected)
     for start in range(0, n_voxels, voxel_batch_size):
         stop = min(start + voxel_batch_size, n_voxels)
-        series = torch.as_tensor(data[indices[start:stop]].copy(), device=selected)
+        series = torch.as_tensor(data[indices[start:stop]].copy(), dtype=torch.float64, device=selected)
         series -= series.mean(dim=1, keepdim=True)
         scale = torch.as_tensor(scales_np[start:stop], device=selected)
-        whitened[start:stop] = ((series / scale[:, None] - spatial_mean) @ eigenvectors) / eigenvalues.sqrt()
+        # Spatial centering belongs to the PCA covariance, not to the input
+        # used by spatial FastICA. The global time course remains in Data.
+        whitened[start:stop] = ((series / scale[:, None]) @ eigenvectors) / eigenvalues.sqrt()
 
-    generator = torch.Generator(device=selected).manual_seed(random_state)
-    initial_time = torch.rand((nt, n_components), generator=generator, device=selected)
+    initial_time = torch.as_tensor(_fsl_uniform(nt, n_components, random_state), device=selected)
     unmixing = _symmetric_decorrelation(
         (initial_time.T @ eigenvectors) / eigenvalues.sqrt()
     )
@@ -328,9 +397,17 @@ def decompose_spatial_ica(
 
     maps = whitened @ unmixing.T
     mixing = (eigenvectors * eigenvalues.sqrt()) @ unmixing.T
+    temporal_scale = mixing.std(dim=0, correction=1)
+    mixing /= temporal_scale
+    maps *= temporal_scale
+    unmixing *= temporal_scale[:, None]
     signs = torch.sign(maps[maps.abs().argmax(dim=0), torch.arange(n_components, device=selected)])
     maps *= signs
     mixing *= signs
+    order = maps.std(dim=0, correction=1).argsort(descending=True)
+    maps = maps[:, order]
+    mixing = mixing[:, order]
+    unmixing = unmixing[order]
     mixing_np = mixing.cpu().numpy()
     # PICA divides spatial sources by the voxelwise residual-noise standard
     # deviation and by the norm of the full temporal unmixing row.
@@ -341,10 +418,10 @@ def decompose_spatial_ica(
     degree_factor = math.sqrt((nt - n_components) / (nt - 1))
     for start in range(0, n_voxels, voxel_batch_size):
         stop = min(start + voxel_batch_size, n_voxels)
-        series = torch.as_tensor(data[indices[start:stop]].copy(), device=selected)
+        series = torch.as_tensor(data[indices[start:stop]].copy(), dtype=torch.float64, device=selected)
         series -= series.mean(dim=1, keepdim=True)
         scale = torch.as_tensor(scales_np[start:stop], device=selected)
-        normalized = series / scale[:, None] - spatial_mean
+        normalized = series / scale[:, None]
         residual = normalized - maps[start:stop] @ mixing.T
         noise = residual.std(dim=1, correction=1)
         noise = torch.where(noise >= 0.05, noise, torch.ones_like(noise))
@@ -380,7 +457,7 @@ def decompose_spatial_ica(
     nib.save(nib.Nifti1Image(thresholded, image.affine, header), str(thresholded_maps))
     nib.save(nib.Nifti1Image(all_posteriors, image.affine, header), str(posterior_maps))
     np.savetxt(mixing_path, mixing_np, fmt="%.9g", delimiter="\t")
-    np.savetxt(spectrum_path, np.abs(np.fft.rfft(mixing_np, axis=0)[1:]) ** 2,
+    np.savetxt(spectrum_path, np.abs(np.fft.rfft(mixing_np, n=nt + nt % 2, axis=0)[1:]) ** 2,
                fmt="%.9g", delimiter="\t")
     return ICAResult(
         component_maps=component_maps,

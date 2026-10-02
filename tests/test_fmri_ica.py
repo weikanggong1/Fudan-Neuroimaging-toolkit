@@ -6,14 +6,14 @@ import nibabel as nib
 import numpy as np
 import pytest
 
-from fnit.melodic.ica import decompose_spatial_ica
+from fnit.melodic.ica import decompose_spatial_ica, _fsl_uniform
 from fnit.melodic import run_melodic_bids
 
 
-def test_two_skewed_components_recover_temporal_modes(tmp_path):
+@pytest.mark.parametrize("nt", [119, 120])
+def test_two_skewed_components_recover_temporal_modes(tmp_path, nt):
     rng = np.random.default_rng(9)
     shape = (12, 10, 8)
-    nt = 120
     nvox = np.prod(shape)
     # Skewed spatial sources are identifiable by MELODIC's pow3 contrast.
     sources = rng.exponential(size=(nvox, 2))
@@ -23,7 +23,7 @@ def test_two_skewed_components_recover_temporal_modes(tmp_path):
         np.sin(2 * np.pi * 3 * time / nt),
         np.cos(2 * np.pi * 11 * time / nt),
     ))
-    bold = (100 + sources @ mixing.T + rng.normal(0, 0.01, (nvox, nt))).reshape(*shape, nt)
+    bold = (100 + sources @ mixing.T + rng.normal(0, 0.05, (nvox, nt))).reshape(*shape, nt)
     affine = np.diag((2, 2, 2, 1))
     input_path = tmp_path / "bold.nii.gz"
     mask_path = tmp_path / "mask.nii.gz"
@@ -46,8 +46,11 @@ def test_two_skewed_components_recover_temporal_modes(tmp_path):
     assert (correlation.max(axis=1) > 0.9).all()
     assert (correlation.max(axis=0) > 0.9).all()
     assert estimated.shape == (nt, 2)
-    assert spectral.shape == (nt // 2, 2)
-    np.testing.assert_allclose(spectral, np.abs(np.fft.rfft(estimated, axis=0)[1:]) ** 2, rtol=1e-6, atol=1e-5)
+    np.testing.assert_allclose(estimated.std(axis=0, ddof=1), 1, rtol=1e-7)
+    # Original MELODIC zero-pads odd frame counts before its real FFT.
+    fourier_size = nt + nt % 2
+    assert spectral.shape == (fourier_size // 2, 2)
+    np.testing.assert_allclose(spectral, np.abs(np.fft.rfft(estimated, n=fourier_size, axis=0)[1:]) ** 2, rtol=1e-6, atol=1e-5)
     assert result.converged
     assert result.final_decorrelation_change < 1e-3
     assert result.pca_variance_explained > 0.98
@@ -56,6 +59,25 @@ def test_two_skewed_components_recover_temporal_modes(tmp_path):
     assert probabilities.min() >= 0 and probabilities.max() <= 1
     assert result.model_order_method == "fixed"
     assert result.estimated_resels is None
+
+
+def test_fsl_seed_initialisation_matches_linux_rand_column_order():
+    # First glibc rand() values for srand(0); FSL unifrnd traverses columns.
+    reference = np.array([1804289383, 846930886, 1681692777,
+                          1714636915, 1957747793, 424238335])
+    expected = ((reference + 1) / 2147483649.0).reshape(2, 3).T
+    np.testing.assert_array_equal(_fsl_uniform(3, 2, 0), expected)
+    np.testing.assert_array_equal(_fsl_uniform(3, 2, 1), expected)
+
+
+def test_mixture_preserves_high_probability_in_extreme_gamma_tail():
+    import torch
+    from fnit.melodic.ica import _mixture_posterior
+
+    rng = np.random.default_rng(1)
+    data = np.r_[rng.normal(size=9000), rng.gamma(3, 1, 1000), 100.0]
+    _, posterior = _mixture_posterior(torch.tensor(data))
+    assert posterior[-1] > 0.99
 
 
 def test_component_count_requires_temporal_rank_and_aligned_mask(tmp_path):

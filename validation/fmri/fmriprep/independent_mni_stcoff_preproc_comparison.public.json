@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "scope": "Independent successful raw-BIDS preproc outputs after each implementation estimated its own HMC, EPI/T1 BBR and T1/MNI transformation. MNI grid and raw BOLD/T1 identity match. No transforms or anatomy estimates are held common; these errors cannot be attributed to the sampler alone. The supplied-sphere projection control is a separate experiment.",
+  "signal": "preproc",
+  "STC": false,
+  "SDC": false,
+  "frames": 490,
+  "shape": [
+    91,
+    109,
+    91,
+    490
+  ],
+  "candidate_source_revision": "c3c921cc4928c2c01fe4429ebc5da91546a6849b",
+  "reference_fmriprep_version": "25.2.4",
+  "input_sha256": {
+    "raw_bold": "67717caaa823141c6e59d46db52e92deb4419d232ba699c399c69eb8888a0e92",
+    "raw_t1": "762cb85469a27f8c64555252f97130d2ecb964f8c0d8f67e6c245ca7d9aa17f3"
+  },
+  "output_sha256": {
+    "candidate_preproc": "d5b71bf9005cdda0c66a71c931447cebe7097abe3ce463a7d97f0d5d780f4919",
+    "reference_preproc": "f9bc8f86e210dd41add23cd53cbd72ab551817f585bd854a7fb49e2c9049df76",
+    "candidate_mask": "dd9e1ef7124f6b9baaf7a0363f823acaad0c6dd4a06c4531678c6a6b07ba0cd1",
+    "reference_mask": "59d1ae0f4fefbca8ba3ac82383e9e7410f1b96d397c1cdc07fe84751fa23f4ae"
+  },
+  "mask": {
+    "kind": "intersection of independently produced MNI functional brain masks",
+    "candidate_voxels": 221058,
+    "reference_voxels": 250625,
+    "intersection_voxels": 218795,
+    "union_voxels": 252888,
+    "dice": 0.9277205241655943,
+    "intersection_sha256": "31251289a4eefb9f7d0ca063785a2af530c7576117256fd99200b72301291bc4"
+  },
+  "comparison": {
+    "full_grid": {
+      "values": 442288210,
+      "all_finite": true,
+      "time_varying_in_both_voxels": 902629,
+      "constant_in_either_voxels": 0,
+      "constant_threshold_std": 1e-06,
+      "temporal_pearson_r_mean": 0.3160295630152301,
+      "temporal_pearson_r_median": 0.3031306216867567,
+      "temporal_pearson_r_percentiles": {
+        "5": -0.4151968640702526,
+        "25": 0.026431103128412004,
+        "75": 0.6770630051321346,
+        "95": 0.9217086376630429
+      },
+      "maximum_absolute_error": 25606.2177734375,
+      "rmse": 939.1790525131444,
+      "relative_rmse": 0.2153035636161546
+    },
+    "common_brain": {
+      "values": 107209550,
+      "all_finite": true,
+      "time_varying_in_both_voxels": 218795,
+      "constant_in_either_voxels": 0,
+      "constant_threshold_std": 1e-06,
+      "temporal_pearson_r_mean": 0.63486885750305,
+      "temporal_pearson_r_median": 0.7438925806716877,
+      "temporal_pearson_r_percentiles": {
+        "5": -0.05175452432775063,
+        "25": 0.48202538308308107,
+        "75": 0.88244827197597,
+        "95": 0.9625685778944932
+      },
+      "maximum_absolute_error": 21021.880111694336,
+      "rmse": 1146.609833969253,
+      "relative_rmse": 0.14025669934337578
+    }
+  },
+  "intensity_comparison": "Original float32 output intensities; no scale normalization, regression fit, smoothing or intensity offset adjustment is applied.",
+  "sidecar_flags": {
+    "candidate_preproc": {
+      "SkullStripped": false,
+      "SliceTimingCorrected": false,
+      "RepetitionTime": 0.735
+    },
+    "reference_preproc": {
+      "SkullStripped": false,
+      "SliceTimingCorrected": false,
+      "RepetitionTime": 0.735
+    }
+  },
+  "time_axis": {
+    "matched_frames": true,
+    "expected_TR_seconds": 0.735,
+    "discarded_frames": 0
+  },
+  "limits": [
+    "One real run; no accuracy or speed claim over other subjects.",
+    "Masks and anatomical normalization estimates are independent: FNIT SynthMorph versus official ANTs; HMC and BBR are separately estimated.",
+    "Skull stripping and other processing flags are reported from actual output sidecars.",
+    "T1 native-resolution grids differ and are not directly compared.",
+    "No denoised clean BOLD is compared with reference preproc.",
+    "FreeSurfer 7 reference upgrade inherited autorecon1; structural timing is reported separately."
+  ],
+  "source_sha256": {
+    "observer": "e75d1010b5cd9e122c18ba379de1424ac250a38314d7d207f637533f12566df2",
+    "candidate_report": "6f7a63dce645cf1218cd1c72f8820477de042408a2ea4974ebb7ba4b8ddb4064",
+    "reference_report": "14caad7a85ea3863393adbb5cef62d0122bdfa731fea9611aeff3063b3d64f12"
+  },
+  "observer_wall_seconds": 101.20247559063137,
+  "privacy": "Only aggregate statistics, shapes and SHA-256; no images, voxel values, private paths or identifiers."
+}

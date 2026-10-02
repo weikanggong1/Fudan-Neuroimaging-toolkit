@@ -52,7 +52,7 @@ python tools/setup_weights.py --all --verify-only
 
 `--verify-only` 只检查当前权重目录，不下载或修改配置。已从联网机器复制了权重时，运行 `python tools/setup_weights.py --all --dest /path/to/copied/models`：现有文件校验成功后直接保存目录，无需重新下载。安装 wheel 后也可使用相同选项的 `fnit-setup-weights` 命令。
 
-可选模型名：`synthstrip`、`synthstrip-nocsf`、`synthmorph-rigid`、`synthmorph-affine`、`synthmorph-deform`、`synthmorph-joint`、`synthseg`、`synthseg-plus`、`wmh-synthseg`、`recon-all`、`synthsr`、`synthsr-lowfield`、`synthsr-v1`、`fast-vbm` 和 `fmri`。`recon-all` 包含 SynthStrip、SynthMorph affine 和 33 类 SynthSeg 的六个文件，重复选择时只下载一次。`fast-vbm` 和 `fmri` 都是 `synthstrip.1.pt` 与 `synthmorph.deform.3.h5` 的依赖别名。端到端 fMRI 选择 `registration_backend="fnirt"` 时只需 `--model synthstrip`；仅单独调用 `register_t1_to_mni`、并已备妥去颅骨 T1 与 MNI 模板时不需要 checkpoint。`--model` 可重复；不写 `--model` 时等同 `--all`。显式 API/CLI 权重路径优先，其次是 `FNIT_WEIGHTS` 环境变量，再次是脚本保存的目录，然后是默认缓存；若设置了 `FREESURFER_HOME`，最后还会检查其 `models` 目录，独立安装不依赖该环境变量。`XDG_CACHE_HOME` 可改变缓存根目录。模型推理不会联网，只有运行配置脚本才会下载。
+可选模型名：`synthstrip`、`synthstrip-nocsf`、`synthmorph-rigid`、`synthmorph-affine`、`synthmorph-deform`、`synthmorph-joint`、`synthseg`、`synthseg-plus`、`wmh-synthseg`、`recon-all`、`synthsr`、`synthsr-lowfield`、`synthsr-v1`、`fast-vbm` 和 `fmri`。`recon-all` 包含 SynthStrip、SynthMorph affine 和 33 类 SynthSeg 的六个文件，重复选择时只下载一次。`fast-vbm` 和 `fmri` 都是 `synthstrip.1.pt` 与 `synthmorph.deform.3.h5` 的依赖别名。端到端 fMRI 选择 `registration_backend="fnirt"` 时只需 `--model synthstrip`；仅单独调用 `register_t1_to_mni`、并已备妥去颅骨 T1 与 MNI 模板时不需要 checkpoint。`--model` 可重复；不写 `--model` 时等同 `--all`。显式 API/CLI 权重路径优先，其次是 `FNIT_WEIGHTS` 环境变量，再次是脚本保存的目录，然后是默认缓存。`XDG_CACHE_HOME` 可改变缓存根目录。单独的模型推理不联网；统一 `segment_4_subregions` 首次运行会下载并校验缺失的 SynthSeg/SynthSeg+ 权重。离线运行前应使用配置脚本备妥权重及图谱。
 
 官方文件于 **2026-09-23 至 2026-09-29** 从 FreeSurfer 官方源码、git-annex 或已安装的官方发行版核对大小和 SHA-256；Release 保留原始字节，不改变权重格式。SynthStrip/SynthMorph 的 SHA-256 来自本包已完成数值验证的权重，并与 FreeSurfer 官方仓库的 git-annex 指针一致；WMH-SynthSeg 和 SynthSR v1 的 SHA-256 来自官方文件的完整下载校验。SynthSR v2 两份文件的大小和 SHA-256 与 FreeSurfer git-annex 对象名一致；配置脚本下载后还会逐字节校验。此处的版本号固定，不会自动跟随上游替换为新模型。
 
@@ -146,7 +146,27 @@ TorchFNIRT、TorchApplyWarp、Jacobian 和 modulation 都不读取 checkpoint。
 
 `python tools/setup_weights.py --model fast-vbm` 配置 SynthStrip 和 deform 两个文件，
 是两个后端的权重超集；只运行 TorchFNIRT 分支可改为 `--model synthstrip`。GM
-template 是独立输入，不是模型权重，也不由本仓库或配置脚本下载。fMRI 同理：`fnit-setup-weights --model fmri` 安装默认链的两份权重；MNI152 T1 2 mm 模板和可选脑掩膜由用户提供绝对路径。
+template 是独立输入，不是模型权重，也不由本仓库或配置脚本下载。`fnit-setup-weights --model fmri` 只安装默认 fMRI 链的两份权重；其 TemplateFlow MNI152NLin6Asym 2 mm 模板、脑掩膜和 HCP dseg 由独立资源安装器按下节下载，运行时显式提供路径。
+
+## fMRI TemplateFlow 原站模板
+
+体积与 91k 表面流程使用以下固定 TemplateFlow 文件。未逐文件确认其再分发权利，因此仅从原站下载，**不上传 FNIT Release，也不随 Git/wheel 分发**。安装器检查下载文件和已有文件的字节数与 SHA-256，再原子保存；模型推理不会自动下载这些资源。
+
+```bash
+fnit-setup-fmri-surface-assets \
+  --output-dir /absolute/path/hcp_surface_assets \
+  --fmriprep
+```
+
+文件保存在 `hcp_surface_assets/fmriprep/`：
+
+| 原站文件 | 字节数 | SHA-256 |
+|---|---:|---|
+| [tpl-MNI152NLin6Asym_res-02_T1w.nii.gz](https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-02_T1w.nii.gz) | 1,412,252 | `2a814da50173599a857d96246dc057d548072bd6dffa499f75724dbad20792b1` |
+| [tpl-MNI152NLin6Asym_res-02_desc-brain_mask.nii.gz](https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-02_desc-brain_mask.nii.gz) | 28,557 | `e4e2b284170271afdafe26ac0997b2af5a0f5ddac35e28a7e796b52e8bc5adb1` |
+| [tpl-MNI152NLin6Asym_res-02_atlas-HCP_dseg.nii.gz](https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-02_atlas-HCP_dseg.nii.gz) | 25,762 | `9c25e63edec37b3876756b749a3f0127511c6b63bf2855060a44007bb479b987` |
+
+大小/SHA-256 清单位于[资源安装器](../src/fnit/fmri/assets_setup.py)。T1w 和 brain mask 用于体积配准，HCP dseg 用于 91k CIFTI 的全部 19 个皮层下结构。volume 还核对规范 RAS 的模板网格、仿射与体素内容身份，仅接受固定 MNI152NLin6Asym res-02 完整模板或其固定脑掩膜版本；相同网格的其他模板不会被标为该标准空间。离线部署可复制安装器已校验的资源目录，再在 Python/CLI 中传绝对路径。完整用法见[fMRI 体积流程](fmri/README.md)与[表面流程](fmri/surface.md)。
 
 ## 权重许可与归属
 
@@ -162,8 +182,8 @@ Release 中这五个权重选用 CC BY 4.0，保留原作者、原始模型名�
 
 [FNIT `assets-v1` Release](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1)保存本页 20 个权重文件。每个附件的原始 URL、字节数、SHA-256 和许可记录在 Release 附带的 `asset-manifest.json`。`synthmorph.deform.3.h5` 拆成两个小于 2 GiB 的附件；安装器在本地合并，并核对上表中的完整 SHA-256。下载器不会调用 FreeSurfer 程序。
 
-Release 同时保存 [HCPpipelines v4.7.0 固定提交](https://github.com/Washington-University/HCPpipelines/tree/f8cac6892f88bdf889d644711ff038198eb81533)中的 29 个公开 fMRI 表面模板及配置文件，另附原仓库的 `LICENSE.md`。`fnit-setup-fmri-surface-assets` 优先下载这些附件，失败后回退 HCP 原站；`--fmriprep` 指定的 TemplateFlow HCP dseg 继续从 [TemplateFlow 原站](https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/)下载。
+Release 同时保存 [HCPpipelines v4.7.0 固定提交](https://github.com/Washington-University/HCPpipelines/tree/f8cac6892f88bdf889d644711ff038198eb81533)中的 29 个公开 fMRI 表面模板及配置文件，另附原仓库的 `LICENSE.md`。`fnit-setup-fmri-surface-assets` 优先下载这些附件，失败后回退 HCP 原站；`--fmriprep` 的三个 TemplateFlow 文件只使用[上述原站模板清单](#fmri-templateflow-原站模板)，不尝试 Release 镜像。
 
-FreeSurfer recon-all 的外置图谱和模板仍由 `fnit-setup-recon-all-assets` 从 FreeSurfer 原站获取。该组中含 MNI 和其他第三方来源的数据，尚未逐一确认其再分发权利，因此不进入 Release。fMRI 体积流程的 FSL MNI152 T1 与脑掩膜仍按[功能说明](fmri/README.md)从 FSL 官方数据包获取；Tian atlas 仍由用户按其来源条款提供。
+FreeSurfer recon-all 的外置图谱和模板仍由 `fnit-setup-recon-all-assets` 从 FreeSurfer 原站获取。该组中含 MNI 和其他第三方来源的数据，尚未逐一确认其再分发权利，因此不进入 Release。fMRI 体积流程使用上述从 TemplateFlow 原站获取的固定 T1w 与脑掩膜；Tian atlas 仍由用户按其来源条款提供。
 
 权重与 HCP 模板均保留原作者归属。SynthStrip 和 SynthMorph 的五个模型在 Release 中选用 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)；其余 FreeSurfer 权重依 [FreeSurfer Software License](https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferSoftwareLicense)再分发，Release 附完整许可文本。HCP 模板依[HCPpipelines 原仓库许可](https://github.com/Washington-University/HCPpipelines/blob/f8cac6892f88bdf889d644711ff038198eb81533/LICENSE.md)再分发，许可文本也作为附件提供。具体模型论文和原实现链接见各功能说明。

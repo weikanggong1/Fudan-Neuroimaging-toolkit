@@ -125,9 +125,9 @@ FNIT 的一次 `TorchAMICONODDI.run(..., naming="amico")` 对应上述全部步�
 
 所有输出为 float32 NIfTI，mask 外为零。当前真实数据检查确认五张图的 shape、dtype 和 affine；逐图数值结果见下文。
 
-## AMICO 路径逐体素验证
+## 优化前 AMICO 路径逐体素验证
 
-用一例真实 UKB 格式、官方 FSL EDDY 校正后的 `104×104×72×105` DWI 和完整的 `242,261` 体素脑掩膜运行当前默认 AMICO 模式。将五张输出图与同输入的官方 AMICO 2.0.3 逐体素比较。数据包含 5 个 b0、50 个 b≈1000 和 50 个 b≈2000；两边使用相同 DWI、mask、bval 与旋转后的 bvec。
+此前实现使用一例真实 UKB 格式、官方 FSL EDDY 校正后的 `104×104×72×105` DWI 和完整的 `242,261` 体素脑掩膜完成默认 AMICO 模式验证，将五张输出图与同输入的官方 AMICO 2.0.3 逐体素比较。数据包含 5 个 b0、50 个 b≈1000 和 50 个 b≈2000；两边使用相同 DWI、mask、bval 与旋转后的 bvec。下面是优化前、由报告中源码 SHA-256 标识的原软件对照；2026-10-02 更新与旧 FNIT 的真实差分和计时见[本次验收报告](../../validation/dmri_pipeline/lossless_20261002.md)。
 
 | 输出 | 全脑 MAE | 最大绝对误差 | Pearson r |
 |---|---:|---:|---:|
@@ -136,7 +136,7 @@ FNIT 的一次 `TorchAMICONODDI.run(..., naming="amico")` 对应上述全部步�
 | FWF | `3.15e-6` | `0.06689` | `0.9999998` |
 | normalized RMSE | `7.78e-9` | `0.000354` | `≈1` |
 
-主方向的轴向等价角差中位数为 `0°`，99 百分位为 `1.21e-6°`。五张图均为有限值、float32、与输入同网格，mask 外为零。H100 PCIe 上设置进程显存分配上限 20%，默认 LUT 批量 400；本次含读写耗时 `81.79 s`，其中 solver `71.20 s`，PyTorch 峰值 allocation `9.95 GB`。测试前后 GPU 有其他作业、利用率为 99–100%。此前同例官方 AMICO CPU 运行耗时 `29.24 s`，与当前 GPU 运行不在同一时间窗，不能计算可靠加速比。逐图误差、输入/输出和源码 SHA-256、GPU 负载及计时见[当前全脑报告](../../validation/amico_noddi/report.public.json)。
+主方向的轴向等价角差中位数为 `0°`，99 百分位为 `1.21e-6°`。五张图均为有限值、float32、与输入同网格，mask 外为零。H100 PCIe 上设置进程显存分配上限 20%，LUT 批量 400；该次含读写耗时 `81.79 s`，其中 solver `71.20 s`，PyTorch 峰值 allocation `9.95 GB`。测试前后 GPU 有其他作业、利用率为 99–100%。此前同例官方 AMICO CPU 运行耗时 `29.24 s`，与该次 GPU 运行不在同一时间窗，不能计算可靠加速比。逐图误差、输入/输出和源码 SHA-256、GPU 负载及计时见[优化前全脑报告](../../validation/amico_noddi/report.public.json)。
 
 ![AMICO 2.0.3 与当前 FNIT 的真实全脑 NDI、ODI、FWF 和逐体素绝对误差](figures/amico_noddi_comparison.png)
 
@@ -211,7 +211,52 @@ FNIT 保留 AMICO 起点；原版 Toolbox 使用网格搜索和 MATLAB `fmincon`
 
 轴向等价的主方向角差中位数为 `0.013°`，90 百分位为 `3.28°`。这是 24 个固定真实体素的数值一致性检查；输入与原版 Toolbox 的 SHA-256、运行环境和实测耗时见 [`classic_original_real_24.public.json`](../../validation/amico_noddi/classic_original_real_24.public.json)。
 
-同一病例的全脑 `242,261` 个 mask 体素也完成了当前默认经典模式的一次运行：H100 PCIe 上设置进程显存分配上限 20%，包含读写耗时 `209.55 s`，其中 AMICO 初始化 `84.63 s`、连续拟合 `118.09 s`；PyTorch 峰值 allocation `9.95 GB`。此前 LUT 批量 100 的单次运行耗时 `340.86 s`、峰值 allocation `2.30 GB`；改为 400 后，五张全脑图与旧图最大逐值差异为 `5.4e-7`。这两次测试均为共享 GPU，当前测试前后利用率为 99–100%；计时不能解释为隔离条件下的加速比。五张结果图全部为有限值、mask 外为零；归一化 RMSE 的中位数 `0.0362`、99 百分位 `0.1025`，另有 19 个体素超过 1。全脑输入、输出哈希和逐图检查见 [`classic_whole_brain.public.json`](../../validation/amico_noddi/classic_whole_brain.public.json)。
+同一病例的全脑 `242,261` 个 mask 体素也完成了优化前经典模式的一次运行：H100 PCIe 上设置进程显存分配上限 20%，包含读写耗时 `209.55 s`，其中 AMICO 初始化 `84.63 s`、连续拟合 `118.09 s`；PyTorch 峰值 allocation `9.95 GB`。此前 LUT 批量 100 的单次运行耗时 `340.86 s`、峰值 allocation `2.30 GB`；改为 400 后，五张全脑图与旧图最大逐值差异为 `5.4e-7`。这两次测试均为共享 GPU，该次测试前后利用率为 99–100%；计时不能解释为隔离条件下的加速比。五张结果图全部为有限值、mask 外为零；归一化 RMSE 的中位数 `0.0362`、99 百分位 `0.1025`，另有 19 个体素超过 1。优化前的全脑输入、输出哈希和逐图检查见 [`classic_whole_brain.public.json`](../../validation/amico_noddi/classic_whole_brain.public.json)。
+
+## 计算复用更新与差分验收
+
+2026-10-02 更新在第一阶段 NNLS 与第三阶段 debias 之间复用同一 LUT 批次的完整 dictionary Gram `AᵀA`；`yA` 和原 `lambda1` 减法在每次求解中按原 float64 形状与顺序重新计算，各阶段重新建立活动集。中间的组织 dictionary 和信号不同，仍独立计算。Cholesky 是否失败的布尔结果也只读取一次，保留原 CG 回退。经典模式将接受更新数保存在设备端 int64 标量，全部体素完成后读取一次；计数只用于 `accepted_updates` QC，不参与候选接受或停止。LUT 批量仍为 400，经典体素批量、迭代数、KKT/CG 阈值、精度和输出文件都使用原设置。
+
+最初同时保留 Gram 和 linear 的候选在同一真实全脑输入上产生完全相同的五张图，但未获得耗时收益，且增加峰值显存；因此当前默认只保留 Gram，移除了跨组织求解存活的大 linear 张量。内部差分测试检查完整 Gram 形状、各求解独立生成 linear、两次 NNLS 与独立组织求解、相同输出/支撑集和精确 QC 计数。
+
+最终版本在同一份 `104×104×72×105` 真实 EDDY 校正 DWI、`242,261` 个 mask 体素上，与旧 FNIT 进行 H100 的 ABBA 串行比较，进程显存上限为 20 GB。计时从 CUDA 初始化完成后的 `run()` 调用开始，到五张图写出并同步完成，包含影像读写。每条路径各运行两次，原始 wall time 如下：
+
+| 拟合方式 | 旧 FNIT 两次耗时（s） | 最终版本两次耗时（s） | 中位数：旧→新（s） |
+|---|---|---|---|
+| AMICO | `27.740670`、`33.799191` | `22.144909`、`32.757829` | `30.76993`→`27.45137` |
+| classic | `74.303144`、`61.999586` | `69.524937`、`90.094424` | `68.15137`→`79.80968` |
+
+两种拟合的五张输出图均与旧 FNIT 完全相同：未舍入的解码数组 SHA-256、保存文件、header、affine 和结果 QC 全部一致；性能字段另行比较。classic 的 `accepted_updates` 均为 `3,710,053`。PyTorch allocated 峰值由 `9.95255 GB` 小幅增加到 `10.02013 GB`。AMICO 中位耗时较低，classic 整体未提速；共享 GPU 上两次运行的波动较大，本轮未建立稳定的耗时收益。保留 Gram 复用和设备端 QC 计数的依据是本例没有数值回归、显存增量较小；精度结论限于该真实输入，不等同于与原软件逐值等价。
+
+另用固定、未舍入的 AMICO 初始化，在同一真实全脑上单独比较 classic 的 QC 读取位置，按主机→设备→设备→主机顺序运行。该计时只含连续拟合，不含影像 I/O 或 AMICO 初始化；主机逐轮读取为 `38.649866`、`58.084653 s`，设备端累计为 `38.488963`、`38.694473 s`，输出与 QC 均完全相同。这验证了消除逐轮主机读取没有数值回归；末次主机计时明显较高，原因未隔离；共享 GPU 上不能据此声称大的加速。源码、输入绑定、逐图检查和计时记录见[本次验收报告](../../validation/dmri_pipeline/lossless_20261002.md)。
+
+开发者可在仓库中使用内部 [A/B hook](../../validation/amico_noddi/lossless_hooks.py)，对同一份真实 EDDY 校正输入切换矩阵复用和 QC 读取；这些开关不属于用户配置或命令行接口：
+
+```python
+from fnit import TorchAMICONODDI
+from validation.amico_noddi.lossless_hooks import noddi_work_reuse, qc_differences
+
+noddi_inputs = {
+    "data": "eddy/data.nii.gz",  # 同一真实 EDDY 校正四维 DWI
+    "mask": "eddy/nodif_brain_mask.nii.gz",  # 同一三维二值脑 mask
+    "bvecs": "eddy/data.eddy_rotated_bvecs",  # 固定的校正后梯度方向
+    "bvals": "AP.bval",  # 固定且与 DWI 第四维对应的 b-value
+}
+noddi_model = TorchAMICONODDI(device="cuda:0", fit_method="classic")
+with noddi_work_reuse(reuse_gram=False, defer_classic_qc=False):
+    baseline_result = noddi_model(**noddi_inputs)  # 两次 NNLS 都重算 Gram、每次迭代读取 QC
+with noddi_work_reuse(reuse_gram=True, defer_classic_qc=True):
+    candidate_result = noddi_model(**noddi_inputs)  # 仅复用完整 Gram、设备端精确计数
+print(qc_differences(baseline_result.qc, candidate_result.qc))  # 模型和结果 QC 应相同
+```
+
+上述上下文临时替换本进程中的内部函数，应串行使用。五张图要比较全部输出值、dtype、shape、affine、mask 外零值及方向定义；`support_size_min/median/max`、`accepted_updates`、`rician_sigma_median`、LUT 数量和批量大小要逐项一致。计时、峰值显存另做性能比较，记录共享 GPU 负载和冷/热缓存。完整旧提交与新源码的对照仍是最终验收依据。
+
+| 更新日期 | 内容与验收记录 |
+|---|---|
+| 2026-10-02 | 完整 Gram+linear 候选未获耗时收益且增加显存，最终只复用 Gram 并保留 Cholesky 检查复用与 classic 设备整数 QC 计数。同一真实全脑五图、文件、header、affine 和结果 QC 完全相同；AMICO 中位 `30.76993`→`27.45137 s`，classic `68.15137`→`79.80968 s`，共享 GPU 下未建立稳定提速。见[本次报告](../../validation/dmri_pipeline/lossless_20261002.md)。 |
+| 2026-09-30 | 经典模式与 MATLAB NODDI 1.05 的固定 24 个真实脑体素比较，见上列 `classic_original_real_24.public.json`。 |
+| 2026-09-29 | LUT 批量 100→400 的真实全脑输出比较和共享 GPU 耗时观察，见上列 `classic_whole_brain.public.json`；该批量设置在本次更新中保留。 |
 
 ## Reference
 

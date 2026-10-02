@@ -1,0 +1,1350 @@
+{
+  "kind": "completed_real_raw_T1_v16_c3_candidate_vs_v15",
+  "state": "completed_but_runtime_target_not_met",
+  "comparison_scope": "same real T1, same raw end-to-end pipeline and saved official reference inputs; shared GPU observation, not controlled causal speed ratio",
+  "input_sha256": {
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/examples/data/sub-01_T1w.nii.gz": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a"
+  },
+  "compute_seconds": 1118.3589471979067,
+  "compute_minutes": 18.639315786631776,
+  "api_including_output_seconds": 1118.8475500759669,
+  "output_save_seconds": 0.45562615199014544,
+  "target_seconds": 600,
+  "target_passed": false,
+  "performance": {
+    "api_wall_seconds": {
+      "old": 1293.6531797181815,
+      "new": 1118.3589471979067,
+      "signed_difference": -175.29423252027482,
+      "relative_abs_difference": 0.13550326723462477
+    },
+    "observed_wall_ratio_old_over_new": 1.1567423705595432,
+    "pytorch_peak_gpu_gib": {
+      "old": 15.471590042114258,
+      "new": 15.471590042114258,
+      "signed_difference": 0.0,
+      "relative_abs_difference": 0.0
+    },
+    "scope": "Python API including preprocessing, fitting and merging; excludes output saving/comparison",
+    "interpretation": "shared-GPU observation; differing load histories do not establish causal speedup"
+  },
+  "checks": {
+    "input_sha256_equal": true,
+    "validation_mode_equal": true,
+    "both_full_runs": true,
+    "label_metadata_equal": true,
+    "both_have_110_labels": true,
+    "brainstem_has_four_expected_labels": true,
+    "official_rows_cover_all_labels": true,
+    "official_reference_paths_equal": true,
+    "soft_volumes_cover_all_labels": true,
+    "native_both_3d": true,
+    "native_same_geometry": true,
+    "native_both_int32": true,
+    "native_labels_in_table": true,
+    "brainstem_highres_3d_int32": true,
+    "brainstem_highres_spacing_correct": true,
+    "brainstem_highres_labels_in_table": true,
+    "thalamus_highres_3d_int32": true,
+    "thalamus_highres_spacing_correct": true,
+    "thalamus_highres_labels_in_table": true,
+    "hippo-amygdala-left_highres_3d_int32": true,
+    "hippo-amygdala-left_highres_spacing_correct": true,
+    "hippo-amygdala-left_highres_labels_in_table": true,
+    "hippo-amygdala-right_highres_3d_int32": true,
+    "hippo-amygdala-right_highres_spacing_correct": true,
+    "hippo-amygdala-right_highres_labels_in_table": true,
+    "old_manifest_source_hashes_match": true,
+    "old_monitor_completed": true,
+    "new_manifest_source_hashes_match": true,
+    "new_monitor_completed": true
+  },
+  "checks_passed": true,
+  "geometry": {
+    "native": {
+      "old_shape": [
+        256,
+        156,
+        256
+      ],
+      "new_shape": [
+        256,
+        156,
+        256
+      ],
+      "both_3d": true,
+      "shape_equal": true,
+      "affine_max_abs_difference": 0.0,
+      "same_geometry": true,
+      "old_affine": [
+        [
+          0.9991319179534912,
+          -0.05162918195128441,
+          0.01251270156353712,
+          -125.26386260986328
+        ],
+        [
+          0.040772195905447006,
+          1.2920204401016235,
+          -0.09811791777610779,
+          -73.13301086425781
+        ],
+        [
+          -0.00854506902396679,
+          0.12804429233074188,
+          0.9950961470603943,
+          -177.55429077148438
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "new_affine": [
+        [
+          0.9991319179534912,
+          -0.05162918195128441,
+          0.01251270156353712,
+          -125.26386260986328
+        ],
+        [
+          0.040772195905447006,
+          1.2920204401016235,
+          -0.09811791777610779,
+          -73.13301086425781
+        ],
+        [
+          -0.00854506902396679,
+          0.12804429233074188,
+          0.9950961470603943,
+          -177.55429077148438
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "old_spacing_mm": [
+        1.0,
+        1.2993758916854858,
+        1.0
+      ],
+      "new_spacing_mm": [
+        1.0,
+        1.2993758916854858,
+        1.0
+      ],
+      "old_dtype": "int32",
+      "new_dtype": "int32",
+      "both_int32": true,
+      "labels_outside_table": {
+        "old": [],
+        "new": []
+      }
+    },
+    "highres": {
+      "brainstem": {
+        "old_shape": [
+          155,
+          153,
+          188
+        ],
+        "new_shape": [
+          155,
+          153,
+          188
+        ],
+        "both_3d": true,
+        "shape_equal": true,
+        "affine_max_abs_difference": 0.0,
+        "same_geometry": true,
+        "old_affine": [
+          [
+            0.4995659589767456,
+            -0.01986691541969776,
+            0.00625635078176856,
+            -38.39200973510742
+          ],
+          [
+            0.020386097952723503,
+            0.4971696138381958,
+            -0.049058958888053894,
+            -17.58704948425293
+          ],
+          [
+            -0.004272534511983395,
+            0.04927146062254906,
+            0.49754807353019714,
+            -111.8692855834961
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "new_affine": [
+          [
+            0.4995659589767456,
+            -0.01986691541969776,
+            0.00625635078176856,
+            -38.39200973510742
+          ],
+          [
+            0.020386097952723503,
+            0.4971696138381958,
+            -0.049058958888053894,
+            -17.58704948425293
+          ],
+          [
+            -0.004272534511983395,
+            0.04927146062254906,
+            0.49754807353019714,
+            -111.8692855834961
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "old_spacing_mm": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "new_spacing_mm": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "old_dtype": "int32",
+        "new_dtype": "int32",
+        "both_int32": true,
+        "labels_outside_table": {
+          "old": [],
+          "new": []
+        }
+      },
+      "thalamus": {
+        "old_shape": [
+          152,
+          126,
+          112
+        ],
+        "new_shape": [
+          152,
+          126,
+          112
+        ],
+        "both_3d": true,
+        "shape_equal": true,
+        "affine_max_abs_difference": 0.0,
+        "same_geometry": true,
+        "old_affine": [
+          [
+            0.4995659589767456,
+            -0.01986691541969776,
+            0.00625635078176856,
+            -39.56661605834961
+          ],
+          [
+            0.020386097952723503,
+            0.4971696138381958,
+            -0.049058958888053894,
+            -14.14791488647461
+          ],
+          [
+            -0.004272534511983395,
+            0.04927146062254906,
+            0.49754807353019714,
+            -57.24929428100586
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "new_affine": [
+          [
+            0.4995659589767456,
+            -0.01986691541969776,
+            0.00625635078176856,
+            -39.56661605834961
+          ],
+          [
+            0.020386097952723503,
+            0.4971696138381958,
+            -0.049058958888053894,
+            -14.14791488647461
+          ],
+          [
+            -0.004272534511983395,
+            0.04927146062254906,
+            0.49754807353019714,
+            -57.24929428100586
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "old_spacing_mm": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "new_spacing_mm": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "old_dtype": "int32",
+        "new_dtype": "int32",
+        "both_int32": true,
+        "labels_outside_table": {
+          "old": [],
+          "new": []
+        }
+      },
+      "hippo-amygdala-left": {
+        "old_shape": [
+          153,
+          208,
+          169
+        ],
+        "new_shape": [
+          153,
+          208,
+          169
+        ],
+        "both_3d": true,
+        "shape_equal": true,
+        "affine_max_abs_difference": 0.0,
+        "same_geometry": true,
+        "old_affine": [
+          [
+            0.33304065465927124,
+            -0.013244478031992912,
+            0.004170858766883612,
+            -47.62856674194336
+          ],
+          [
+            0.013590596616268158,
+            0.33144310116767883,
+            -0.0327056460082531,
+            -19.748517990112305
+          ],
+          [
+            -0.0028483278583735228,
+            0.03284731134772301,
+            0.33169540762901306,
+            -70.93140411376953
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "new_affine": [
+          [
+            0.33304065465927124,
+            -0.013244478031992912,
+            0.004170858766883612,
+            -47.62856674194336
+          ],
+          [
+            0.013590596616268158,
+            0.33144310116767883,
+            -0.0327056460082531,
+            -19.748517990112305
+          ],
+          [
+            -0.0028483278583735228,
+            0.03284731134772301,
+            0.33169540762901306,
+            -70.93140411376953
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "old_spacing_mm": [
+          0.3333300054073334,
+          0.3333300054073334,
+          0.3333300054073334
+        ],
+        "new_spacing_mm": [
+          0.3333300054073334,
+          0.3333300054073334,
+          0.3333300054073334
+        ],
+        "old_dtype": "int32",
+        "new_dtype": "int32",
+        "both_int32": true,
+        "labels_outside_table": {
+          "old": [],
+          "new": []
+        }
+      },
+      "hippo-amygdala-right": {
+        "old_shape": [
+          146,
+          215,
+          166
+        ],
+        "new_shape": [
+          146,
+          215,
+          166
+        ],
+        "both_3d": true,
+        "shape_equal": true,
+        "affine_max_abs_difference": 0.0,
+        "same_geometry": true,
+        "old_affine": [
+          [
+            0.33304065465927124,
+            -0.013244478031992912,
+            0.004170858766883612,
+            -4.096627712249756
+          ],
+          [
+            0.013590596616268158,
+            0.33144310116767883,
+            -0.0327056460082531,
+            -14.900464057922363
+          ],
+          [
+            -0.0028483278583735228,
+            0.03284731134772301,
+            0.33169540762901306,
+            -67.98606872558594
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "new_affine": [
+          [
+            0.33304065465927124,
+            -0.013244478031992912,
+            0.004170858766883612,
+            -4.096627712249756
+          ],
+          [
+            0.013590596616268158,
+            0.33144310116767883,
+            -0.0327056460082531,
+            -14.900464057922363
+          ],
+          [
+            -0.0028483278583735228,
+            0.03284731134772301,
+            0.33169540762901306,
+            -67.98606872558594
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "old_spacing_mm": [
+          0.3333300054073334,
+          0.3333300054073334,
+          0.3333300054073334
+        ],
+        "new_spacing_mm": [
+          0.3333300054073334,
+          0.3333300054073334,
+          0.3333300054073334
+        ],
+        "old_dtype": "int32",
+        "new_dtype": "int32",
+        "both_int32": true,
+        "labels_outside_table": {
+          "old": [],
+          "new": []
+        }
+      }
+    }
+  },
+  "labels": 110,
+  "soft_volumes": {
+    "count": 110,
+    "all_finite_nonnegative": true,
+    "old_new_relative_difference_at_most_5_percent_count": 105,
+    "largest_absolute_change": {
+      "id": 17001,
+      "name": "Right-Lateral-nucleus",
+      "old_mm3": 628.5045166015625,
+      "new_mm3": 608.0087890625,
+      "signed_difference_mm3": -20.4957275390625,
+      "absolute_difference_mm3": 20.4957275390625,
+      "relative_absolute_difference": 0.03261031066234273
+    },
+    "largest_relative_change": {
+      "id": 8111,
+      "name": "Left-L-Sg",
+      "old_mm3": 15.083843231201172,
+      "new_mm3": 13.402470588684082,
+      "signed_difference_mm3": -1.6813726425170898,
+      "absolute_difference_mm3": 1.6813726425170898,
+      "relative_absolute_difference": 0.11146845115965827
+    },
+    "rows_above_5_percent": [
+      {
+        "id": 8111,
+        "name": "Left-L-Sg",
+        "old_mm3": 15.083843231201172,
+        "new_mm3": 13.402470588684082,
+        "signed_difference_mm3": -1.6813726425170898,
+        "absolute_difference_mm3": 1.6813726425170898,
+        "relative_absolute_difference": 0.11146845115965827
+      },
+      {
+        "id": 8211,
+        "name": "Right-L-Sg",
+        "old_mm3": 13.128498077392578,
+        "new_mm3": 12.255526542663574,
+        "signed_difference_mm3": -0.8729715347290039,
+        "absolute_difference_mm3": 0.8729715347290039,
+        "relative_absolute_difference": 0.06649439483350124
+      },
+      {
+        "id": 8108,
+        "name": "Left-LD",
+        "old_mm3": 33.91434097290039,
+        "new_mm3": 35.71141052246094,
+        "signed_difference_mm3": 1.7970695495605469,
+        "absolute_difference_mm3": 1.7970695495605469,
+        "relative_absolute_difference": 0.05298848504815453
+      },
+      {
+        "id": 10212,
+        "name": "Right-fimbria",
+        "old_mm3": 68.74932098388672,
+        "new_mm3": 65.17859649658203,
+        "signed_difference_mm3": -3.5707244873046875,
+        "absolute_difference_mm3": 3.5707244873046875,
+        "relative_absolute_difference": 0.05193832369837637
+      },
+      {
+        "id": 17009,
+        "name": "Right-Corticoamygdaloid-transitio",
+        "old_mm3": 150.51573181152344,
+        "new_mm3": 158.1642608642578,
+        "signed_difference_mm3": 7.648529052734375,
+        "absolute_difference_mm3": 7.648529052734375,
+        "relative_absolute_difference": 0.05081547929031034
+      }
+    ]
+  },
+  "fit_min_jacobians": {
+    "brainstem": 0.25323301553726196,
+    "thalamus": 0.19439731538295746,
+    "hippo-amygdala-left": 0.16190283000469208,
+    "hippo-amygdala-right": 0.24851833283901215
+  },
+  "all_jacobians_positive": true,
+  "foreground": {
+    "old_foreground_voxels": 29934,
+    "new_foreground_voxels": 29838,
+    "both_empty": false,
+    "foreground_union_voxels": 30065,
+    "old_new_foreground_dice": 0.9940105735126815,
+    "hard_volume_mm3": {
+      "old": 38895.51849839913,
+      "new": 38770.778411012,
+      "signed_difference": -124.74008738713019,
+      "relative_abs_difference": 0.0032070555221487607,
+      "signed_change_percent": -0.32070555221487607
+    },
+    "centroid_world_mm": {
+      "old": [
+        -1.703465899197326,
+        15.860132243020189,
+        -43.11485331040598
+      ],
+      "new": [
+        -1.7489078369943485,
+        15.857275661903458,
+        -43.16100459585084
+      ]
+    },
+    "centroid_shift_mm": 0.06483109527563351,
+    "label_different_voxels_in_union": 814,
+    "label_difference_percent_union": 2.707467154498586,
+    "foreground_boundary_changed_voxels": 358,
+    "foreground_internal_label_switched_voxels": 456
+  },
+  "families": {
+    "brainstem": {
+      "old_new_foreground_dice": 0.9987613542526838,
+      "hard_volume_signed_change_percent": -0.06878998417829714,
+      "soft_volume_signed_change_percent": -0.03376728378571286,
+      "centroid_shift_mm": 0.005930203800369337,
+      "official_foreground_dice_v15": 0.9357951879900811,
+      "official_foreground_dice_c3": 0.9361759184768035,
+      "official_dice_signed_difference": 0.0003807304867223804
+    },
+    "thalamus": {
+      "old_new_foreground_dice": 0.9926283987915407,
+      "hard_volume_signed_change_percent": -0.5783829377033438,
+      "soft_volume_signed_change_percent": -0.34942261292412163,
+      "centroid_shift_mm": 0.0317224539520054,
+      "official_foreground_dice_v15": 0.9111359681829481,
+      "official_foreground_dice_c3": 0.9106207928197457,
+      "official_dice_signed_difference": -0.0005151753632023359
+    },
+    "hippocampus-left": {
+      "old_new_foreground_dice": 0.9945878434637802,
+      "hard_volume_signed_change_percent": 0.08329862557267892,
+      "soft_volume_signed_change_percent": 0.1840468171782552,
+      "centroid_shift_mm": 0.051735281107611365,
+      "official_foreground_dice_v15": 0.8969137098467352,
+      "official_foreground_dice_c3": 0.8977964323189926,
+      "official_dice_signed_difference": 0.0008827224722574023
+    },
+    "amygdala-left": {
+      "old_new_foreground_dice": 0.9957264957264957,
+      "hard_volume_signed_change_percent": 0.5141388174807252,
+      "soft_volume_signed_change_percent": 0.16141858826777322,
+      "centroid_shift_mm": 0.03279145500204819,
+      "official_foreground_dice_v15": 0.8868859846777828,
+      "official_foreground_dice_c3": 0.8862921348314606,
+      "official_dice_signed_difference": -0.0005938498463221586
+    },
+    "hippocampus-right": {
+      "old_new_foreground_dice": 0.9768881551795295,
+      "hard_volume_signed_change_percent": -0.6581653640477094,
+      "soft_volume_signed_change_percent": -0.9917326989501709,
+      "centroid_shift_mm": 0.20215219124927608,
+      "official_foreground_dice_v15": 0.8865248226950354,
+      "official_foreground_dice_c3": 0.8874005860192549,
+      "official_dice_signed_difference": 0.0008757633242194585
+    },
+    "amygdala-right": {
+      "old_new_foreground_dice": 0.9704797047970479,
+      "hard_volume_signed_change_percent": -2.7297543221110225,
+      "soft_volume_signed_change_percent": -0.4284911663424696,
+      "centroid_shift_mm": 0.21326011151786692,
+      "official_foreground_dice_v15": 0.8607350096711799,
+      "official_foreground_dice_c3": 0.8783120706575074,
+      "official_dice_signed_difference": 0.017577060986327497
+    }
+  },
+  "family_comparison_thresholds": {
+    "scope": "development candidate consistency against v15; not a clinical or official-equivalence criterion",
+    "minimum_foreground_dice": 0.97,
+    "maximum_absolute_hard_and_soft_volume_change_percent": 5,
+    "all_family_foreground_dice_at_least_0_97": true,
+    "all_family_hard_soft_volume_changes_within_5_percent": true
+  },
+  "official_joint_acceptance": {
+    "labels": 110,
+    "old_evaluated_labels": 105,
+    "new_evaluated_labels": 105,
+    "old_accepted": 0,
+    "new_accepted": 0,
+    "accepted_count_change": 0,
+    "newly_accepted_labels": [],
+    "lost_accepted_labels": [],
+    "old_both_empty_labels": [
+      8117,
+      8119,
+      8130,
+      8219,
+      8230
+    ],
+    "new_both_empty_labels": [
+      8117,
+      8119,
+      8130,
+      8219,
+      17010
+    ]
+  },
+  "memory": {
+    "pytorch_peak_allocated_gib": 15.471590042114258,
+    "max_sampled_own_process_mib": 18926,
+    "own_process_limit_mib": 19073,
+    "scope": "PyTorch allocated CUDA tensor peak and approximately 5-second nvidia-smi own-process samples are separate measures"
+  },
+  "environment": {
+    "physical_gpu_index": 1,
+    "allocator_fraction": 0.23,
+    "monitor_state": "completed",
+    "monitor_exit_code": 0,
+    "load": {
+      "file": {
+        "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/full_raw_v16_c3_20261001_gpu_load.jsonl",
+        "bytes": 31444,
+        "sha256": "cd683e33005e98367144e77613676ac25bff6a68294b4eb6ff7f15fbf9941da4"
+      },
+      "samples": 222,
+      "first_sample_utc": "2026-10-01T05:34:37.530622+00:00",
+      "last_sample_utc": "2026-10-01T05:53:40.214483+00:00",
+      "sample_span_seconds": 1142.6838612556458,
+      "max_sampling_gap_seconds": 8.493878602981567,
+      "median_sampling_gap_seconds": 5.115890979766846,
+      "gaps_above_20_seconds": 0,
+      "own_process_memory_mib": {
+        "min": 0.0,
+        "max": 18926.0,
+        "median": 4175.0
+      },
+      "max_sampled_own_process_memory_mib": 18926,
+      "gpus": {
+        "0": {
+          "used_memory_mib": {
+            "min": 69052.0,
+            "max": 70412.0,
+            "median": 69052.0
+          },
+          "free_memory_mib": {
+            "min": 10595.0,
+            "max": 11955.0,
+            "median": 11955.0
+          },
+          "utilization_percent": {
+            "min": 79.0,
+            "max": 100.0,
+            "median": 100.0
+          }
+        },
+        "1": {
+          "used_memory_mib": {
+            "min": 28018.0,
+            "max": 76302.0,
+            "median": 33627.0
+          },
+          "free_memory_mib": {
+            "min": 4705.0,
+            "max": 52989.0,
+            "median": 47380.0
+          },
+          "utilization_percent": {
+            "min": 64.0,
+            "max": 100.0,
+            "median": 100.0
+          }
+        }
+      },
+      "scope": "complete supplied log interval; sampled maxima are not continuous process memory peaks"
+    }
+  },
+  "timings_by_structure": {
+    "brainstem": {
+      "seconds": 47.611239538062364,
+      "working_image": {
+        "resolution_mm": 0.5,
+        "crop_start_native": [
+          87,
+          45,
+          61
+        ],
+        "crop_stop_native": [
+          166,
+          107,
+          155
+        ],
+        "grid_origin_native_voxel": [
+          86.99999959783071,
+          44.83119043257285,
+          61.000000831514086
+        ],
+        "working_shape": [
+          158,
+          162,
+          188
+        ]
+      },
+      "mesh_solver": {
+        "compact": true,
+        "mesh_evaluations": 60,
+        "mesh_steps": 60,
+        "accepted_cache_hits": 0,
+        "index_rebuilds": 0,
+        "shared_geometry": true,
+        "analytic_prior": true,
+        "fused_data_evaluations": 60,
+        "materialized_outputs": true,
+        "mesh_sampling_stride": 1,
+        "mesh_sampling_scale": 1.0,
+        "owner_hint_enabled": false,
+        "owner_hint_refresh_interval": 8,
+        "owner_hint_tolerance": 0.0002,
+        "owner_hint_evaluations": 0,
+        "owner_full_evaluations": 0,
+        "owner_hint_evaluated_points": 0,
+        "owner_hint_reused_points": 0,
+        "data_cost_accumulation": "torch.float32"
+      }
+    },
+    "thalamus": {
+      "seconds": 393.59459884511307,
+      "working_image": {
+        "resolution_mm": 0.5,
+        "crop_start_native": [
+          87,
+          49,
+          108
+        ],
+        "crop_stop_native": [
+          166,
+          107,
+          171
+        ],
+        "working_shape": [
+          158,
+          151,
+          126
+        ],
+        "working_image_preparation_seconds": 2.4422403941862285,
+        "optimization_profile": "fast",
+        "outer_em_iterations": [
+          7,
+          5,
+          5,
+          3
+        ],
+        "mesh_iterations_per_outer": 20,
+        "em_iterations_per_outer": 100,
+        "alpha_smoothing": "transformed_reference_mesh",
+        "mesh_sampling_strides": [
+          4,
+          4,
+          4,
+          1
+        ],
+        "owner_hint_enabled": true,
+        "data_cost_accumulation": "float64",
+        "deformation_stop_voxels": 0.005,
+        "cost_stop_patience": 3,
+        "outer_relative_cost_stop": 1e-05
+      },
+      "mesh_solver": {
+        "stages": [
+          {
+            "compact": true,
+            "mesh_evaluations": 368,
+            "mesh_steps": 127,
+            "accepted_cache_hits": 57,
+            "index_rebuilds": 124,
+            "shared_geometry": true,
+            "analytic_prior": true,
+            "fused_data_evaluations": 368,
+            "materialized_outputs": false,
+            "mesh_sampling_stride": 4,
+            "mesh_sampling_scale": 4.000242252063272,
+            "owner_hint_enabled": true,
+            "owner_hint_refresh_interval": 8,
+            "owner_hint_tolerance": 0.0002,
+            "owner_hint_evaluations": 319,
+            "owner_full_evaluations": 49,
+            "owner_hint_evaluated_points": 66839472,
+            "owner_hint_reused_points": 37642608,
+            "data_cost_accumulation": "float64",
+            "stage_index": 1,
+            "synthetic": false,
+            "block_size": 8,
+            "resolution_mm": 0.5,
+            "alpha_sigma_voxels": 1.5,
+            "alpha_sigma_mm": 0.75,
+            "outer_iteration_limit": 7,
+            "mesh_iteration_limit": 20,
+            "preparation_seconds": 39.98983880504966,
+            "gems_fit_seconds": 254.11538143502548,
+            "post_fit_seconds": 0.00982698006555438,
+            "total_seconds": 294.1150472201407
+          },
+          {
+            "compact": true,
+            "mesh_evaluations": 161,
+            "mesh_steps": 85,
+            "accepted_cache_hits": 77,
+            "index_rebuilds": 3,
+            "shared_geometry": true,
+            "analytic_prior": true,
+            "fused_data_evaluations": 161,
+            "materialized_outputs": false,
+            "mesh_sampling_stride": 4,
+            "mesh_sampling_scale": 4.000242252063272,
+            "owner_hint_enabled": true,
+            "owner_hint_refresh_interval": 8,
+            "owner_hint_tolerance": 0.0002,
+            "owner_hint_evaluations": 139,
+            "owner_full_evaluations": 22,
+            "owner_hint_evaluated_points": 29242269,
+            "owner_hint_reused_points": 24076907,
+            "data_cost_accumulation": "float64",
+            "stage_index": 2,
+            "synthetic": false,
+            "block_size": 8,
+            "resolution_mm": 0.5,
+            "alpha_sigma_voxels": 1.125,
+            "alpha_sigma_mm": 0.5625,
+            "outer_iteration_limit": 5,
+            "mesh_iteration_limit": 20,
+            "preparation_seconds": 14.152046830859035,
+            "gems_fit_seconds": 25.58133189100772,
+            "post_fit_seconds": 0.005630407948046923,
+            "total_seconds": 39.739009129814804
+          },
+          {
+            "compact": true,
+            "mesh_evaluations": 123,
+            "mesh_steps": 100,
+            "accepted_cache_hits": 93,
+            "index_rebuilds": 2,
+            "shared_geometry": true,
+            "analytic_prior": true,
+            "fused_data_evaluations": 123,
+            "materialized_outputs": false,
+            "mesh_sampling_stride": 4,
+            "mesh_sampling_scale": 4.000242252063272,
+            "owner_hint_enabled": true,
+            "owner_hint_refresh_interval": 8,
+            "owner_hint_tolerance": 0.0002,
+            "owner_hint_evaluations": 107,
+            "owner_full_evaluations": 16,
+            "owner_hint_evaluated_points": 22340367,
+            "owner_hint_reused_points": 18854119,
+            "data_cost_accumulation": "float64",
+            "stage_index": 3,
+            "synthetic": false,
+            "block_size": 8,
+            "resolution_mm": 0.5,
+            "alpha_sigma_voxels": 0.75,
+            "alpha_sigma_mm": 0.375,
+            "outer_iteration_limit": 5,
+            "mesh_iteration_limit": 20,
+            "preparation_seconds": 0.11001406516879797,
+            "gems_fit_seconds": 18.791467420756817,
+            "post_fit_seconds": 0.004909454844892025,
+            "total_seconds": 18.906390940770507
+          },
+          {
+            "compact": true,
+            "mesh_evaluations": 58,
+            "mesh_steps": 43,
+            "accepted_cache_hits": 40,
+            "index_rebuilds": 0,
+            "shared_geometry": true,
+            "analytic_prior": true,
+            "fused_data_evaluations": 58,
+            "materialized_outputs": true,
+            "mesh_sampling_stride": 1,
+            "mesh_sampling_scale": 1.0,
+            "owner_hint_enabled": true,
+            "owner_hint_refresh_interval": 8,
+            "owner_hint_tolerance": 0.0002,
+            "owner_hint_evaluations": 50,
+            "owner_full_evaluations": 8,
+            "owner_hint_evaluated_points": 42140480,
+            "owner_hint_reused_points": 36036483,
+            "data_cost_accumulation": "float64",
+            "stage_index": 4,
+            "synthetic": false,
+            "block_size": 8,
+            "resolution_mm": 0.5,
+            "alpha_sigma_voxels": 0.0,
+            "alpha_sigma_mm": 0.0,
+            "outer_iteration_limit": 3,
+            "mesh_iteration_limit": 20,
+            "preparation_seconds": 0.010580460075289011,
+            "gems_fit_seconds": 16.78612427972257,
+            "post_fit_seconds": 0.010291969869285822,
+            "total_seconds": 16.806996709667146
+          }
+        ],
+        "mesh_evaluations": 710,
+        "mesh_steps": 355,
+        "accepted_cache_hits": 267,
+        "index_rebuilds": 129,
+        "fused_data_evaluations": 710,
+        "owner_hint_evaluations": 615,
+        "owner_full_evaluations": 95,
+        "owner_hint_evaluated_points": 160562588,
+        "owner_hint_reused_points": 116610117,
+        "preparation_seconds": 54.26248016115278,
+        "gems_fit_seconds": 315.2743050265126,
+        "post_fit_seconds": 0.03065881272777915,
+        "total_seconds": 369.56744400039315,
+        "compact": true,
+        "shared_geometry": true,
+        "analytic_prior": true
+      }
+    },
+    "hippo-amygdala-left": {
+      "seconds": 346.8394230203703,
+      "working_image": {
+        "resolution_mm": 0.33333,
+        "crop_start_native": [
+          78,
+          44,
+          102
+        ],
+        "crop_stop_native": [
+          131,
+          103,
+          158
+        ],
+        "working_shape": [
+          160,
+          230,
+          169
+        ],
+        "working_image_preparation_seconds": 4.218593075871468,
+        "optimization_profile": "fast",
+        "outer_em_iterations": [
+          7,
+          5,
+          3
+        ],
+        "mesh_iterations_per_outer": 20,
+        "em_iterations_per_outer": 100,
+        "alpha_smoothing": "transformed_reference_mesh",
+        "mesh_sampling_strides": [
+          4,
+          4,
+          1
+        ],
+        "owner_hint_enabled": true,
+        "data_cost_accumulation": "float64",
+        "deformation_stop_voxels": 0.005,
+        "cost_stop_patience": 3,
+        "outer_relative_cost_stop": 1e-05
+      },
+      "mesh_solver": {
+        "stages": [
+          {
+            "compact": true,
+            "mesh_evaluations": 299,
+            "mesh_steps": 88,
+            "accepted_cache_hits": 30,
+            "index_rebuilds": 105,
+            "shared_geometry": true,
+            "analytic_prior": true,
+            "fused_data_evaluations": 299,
+            "materialized_outputs": false,
+            "mesh_sampling_stride": 4,
+            "mesh_sampling_scale": 3.9996580739154997,
+            "owner_hint_enabled": true,
+            "owner_hint_refresh_interval": 8,
+            "owner_hint_tolerance": 0.0002,
+            "owner_hint_evaluations": 259,
+            "owner_full_evaluations": 40,
+            "owner_hint_evaluated_points": 40225068,
+            "owner_hint_reused_points": 21625656,
+            "data_cost_accumulation": "float64",
+            "stage_index": 1,
+            "synthetic": false,
+            "block_size": 8,
+            "resolution_mm": 0.33333,
+            "alpha_sigma_voxels": 1.5,
+            "alpha_sigma_mm": 0.499995,
+            "outer_iteration_limit": 7,
+            "mesh_iteration_limit": 20,
+            "preparation_seconds": 51.31770577514544,
+            "gems_fit_seconds": 150.44755683094263,
+            "post_fit_seconds": 0.003299528732895851,
+            "total_seconds": 201.76856213482097
+          },
+          {
+            "compact": true,
+            "mesh_evaluations": 222,
+            "mesh_steps": 83,
+            "accepted_cache_hits": 55,
+            "index_rebuilds": 41,
+            "shared_geometry": true,
+            "analytic_prior": true,
+            "fused_data_evaluations": 222,
+            "materialized_outputs": false,
+            "mesh_sampling_stride": 4,
+            "mesh_sampling_scale": 3.9996580739154997,
+            "owner_hint_enabled": true,
+            "owner_hint_refresh_interval": 8,
+            "owner_hint_tolerance": 0.0002,
+            "owner_hint_evaluations": 192,
+            "owner_full_evaluations": 30,
+            "owner_hint_evaluated_points": 29866104,
+            "owner_hint_reused_points": 20523930,
+            "data_cost_accumulation": "float64",
+            "stage_index": 2,
+            "synthetic": false,
+            "block_size": 8,
+            "resolution_mm": 0.33333,
+            "alpha_sigma_voxels": 0.75,
+            "alpha_sigma_mm": 0.2499975,
+            "outer_iteration_limit": 5,
+            "mesh_iteration_limit": 20,
+            "preparation_seconds": 0.13576494390144944,
+            "gems_fit_seconds": 70.42865734035149,
+            "post_fit_seconds": 0.0033876257948577404,
+            "total_seconds": 70.5678099100478
+          },
+          {
+            "compact": true,
+            "mesh_evaluations": 133,
+            "mesh_steps": 60,
+            "accepted_cache_hits": 53,
+            "index_rebuilds": 5,
+            "shared_geometry": true,
+            "analytic_prior": true,
+            "fused_data_evaluations": 133,
+            "materialized_outputs": true,
+            "mesh_sampling_stride": 1,
+            "mesh_sampling_scale": 1.0,
+            "owner_hint_enabled": true,
+            "owner_hint_refresh_interval": 8,
+            "owner_hint_tolerance": 0.0002,
+            "owner_hint_evaluations": 115,
+            "owner_full_evaluations": 18,
+            "owner_hint_evaluated_points": 71564906,
+            "owner_hint_reused_points": 57871216,
+            "data_cost_accumulation": "float64",
+            "stage_index": 3,
+            "synthetic": false,
+            "block_size": 8,
+            "resolution_mm": 0.33333,
+            "alpha_sigma_voxels": 0.0,
+            "alpha_sigma_mm": 0.0,
+            "outer_iteration_limit": 3,
+            "mesh_iteration_limit": 20,
+            "preparation_seconds": 0.004333741031587124,
+            "gems_fit_seconds": 32.64076018426567,
+            "post_fit_seconds": 0.003672831691801548,
+            "total_seconds": 32.64876675698906
+          }
+        ],
+        "mesh_evaluations": 654,
+        "mesh_steps": 231,
+        "accepted_cache_hits": 138,
+        "index_rebuilds": 151,
+        "fused_data_evaluations": 654,
+        "owner_hint_evaluations": 566,
+        "owner_full_evaluations": 88,
+        "owner_hint_evaluated_points": 141656078,
+        "owner_hint_reused_points": 100020802,
+        "preparation_seconds": 51.45780446007848,
+        "gems_fit_seconds": 253.5169743555598,
+        "post_fit_seconds": 0.01035998621955514,
+        "total_seconds": 304.98513880185783,
+        "compact": true,
+        "shared_geometry": true,
+        "analytic_prior": true
+      }
+    },
+    "hippo-amygdala-right": {
+      "seconds": 304.622729617171,
+      "working_image": {
+        "resolution_mm": 0.33333,
+        "crop_start_native": [
+          120,
+          48,
+          104
+        ],
+        "crop_stop_native": [
+          174,
+          106,
+          160
+        ],
+        "working_shape": [
+          163,
+          227,
+          169
+        ],
+        "working_image_preparation_seconds": 4.188495931215584,
+        "optimization_profile": "fast",
+        "outer_em_iterations": [
+          7,
+          5,
+          3
+        ],
+        "mesh_iterations_per_outer": 20,
+        "em_iterations_per_outer": 100,
+        "alpha_smoothing": "transformed_reference_mesh",
+        "mesh_sampling_strides": [
+          4,
+          4,
+          1
+        ],
+        "owner_hint_enabled": true,
+        "data_cost_accumulation": "float64",
+        "deformation_stop_voxels": 0.005,
+        "cost_stop_patience": 3,
+        "outer_relative_cost_stop": 1e-05
+      },
+      "mesh_solver": {
+        "stages": [
+          {
+            "compact": true,
+            "mesh_evaluations": 349,
+            "mesh_steps": 130,
+            "accepted_cache_hits": 80,
+            "index_rebuilds": 80,
+            "shared_geometry": true,
+            "analytic_prior": true,
+            "fused_data_evaluations": 349,
+            "materialized_outputs": false,
+            "mesh_sampling_stride": 4,
+            "mesh_sampling_scale": 3.999783601468525,
+            "owner_hint_enabled": true,
+            "owner_hint_refresh_interval": 8,
+            "owner_hint_tolerance": 0.0002,
+            "owner_hint_evaluations": 302,
+            "owner_full_evaluations": 47,
+            "owner_hint_evaluated_points": 46770188,
+            "owner_hint_reused_points": 29677871,
+            "data_cost_accumulation": "float64",
+            "stage_index": 1,
+            "synthetic": false,
+            "block_size": 8,
+            "resolution_mm": 0.33333,
+            "alpha_sigma_voxels": 1.5,
+            "alpha_sigma_mm": 0.499995,
+            "outer_iteration_limit": 7,
+            "mesh_iteration_limit": 20,
+            "preparation_seconds": 78.68659214302897,
+            "gems_fit_seconds": 149.5294379889965,
+            "post_fit_seconds": 0.0033852881751954556,
+            "total_seconds": 228.21941542020068
+          },
+          {
+            "compact": true,
+            "mesh_evaluations": 156,
+            "mesh_steps": 95,
+            "accepted_cache_hits": 86,
+            "index_rebuilds": 4,
+            "shared_geometry": true,
+            "analytic_prior": true,
+            "fused_data_evaluations": 156,
+            "materialized_outputs": false,
+            "mesh_sampling_stride": 4,
+            "mesh_sampling_scale": 3.999783601468525,
+            "owner_hint_enabled": true,
+            "owner_hint_refresh_interval": 8,
+            "owner_hint_tolerance": 0.0002,
+            "owner_hint_evaluations": 135,
+            "owner_full_evaluations": 21,
+            "owner_hint_evaluated_points": 20905872,
+            "owner_hint_reused_points": 17098975,
+            "data_cost_accumulation": "float64",
+            "stage_index": 2,
+            "synthetic": false,
+            "block_size": 8,
+            "resolution_mm": 0.33333,
+            "alpha_sigma_voxels": 0.75,
+            "alpha_sigma_mm": 0.2499975,
+            "outer_iteration_limit": 5,
+            "mesh_iteration_limit": 20,
+            "preparation_seconds": 0.13517884211614728,
+            "gems_fit_seconds": 19.043778055813164,
+            "post_fit_seconds": 0.0025478312745690346,
+            "total_seconds": 19.18150472920388
+          },
+          {
+            "compact": true,
+            "mesh_evaluations": 72,
+            "mesh_steps": 60,
+            "accepted_cache_hits": 56,
+            "index_rebuilds": 1,
+            "shared_geometry": true,
+            "analytic_prior": true,
+            "fused_data_evaluations": 72,
+            "materialized_outputs": true,
+            "mesh_sampling_stride": 1,
+            "mesh_sampling_scale": 1.0,
+            "owner_hint_enabled": true,
+            "owner_hint_refresh_interval": 8,
+            "owner_hint_tolerance": 0.0002,
+            "owner_hint_evaluations": 62,
+            "owner_full_evaluations": 10,
+            "owner_hint_evaluated_points": 38593368,
+            "owner_hint_reused_points": 32355067,
+            "data_cost_accumulation": "float64",
+            "stage_index": 3,
+            "synthetic": false,
+            "block_size": 8,
+            "resolution_mm": 0.33333,
+            "alpha_sigma_voxels": 0.0,
+            "alpha_sigma_mm": 0.0,
+            "outer_iteration_limit": 3,
+            "mesh_iteration_limit": 20,
+            "preparation_seconds": 0.004436949267983437,
+            "gems_fit_seconds": 21.637568290811032,
+            "post_fit_seconds": 0.005008078180253506,
+            "total_seconds": 21.64701331825927
+          }
+        ],
+        "mesh_evaluations": 577,
+        "mesh_steps": 285,
+        "accepted_cache_hits": 222,
+        "index_rebuilds": 85,
+        "fused_data_evaluations": 577,
+        "owner_hint_evaluations": 499,
+        "owner_full_evaluations": 78,
+        "owner_hint_evaluated_points": 106269428,
+        "owner_hint_reused_points": 79131913,
+        "preparation_seconds": 78.8262079344131,
+        "gems_fit_seconds": 190.2107843356207,
+        "post_fit_seconds": 0.010941197630017996,
+        "total_seconds": 269.0479334676638,
+        "compact": true,
+        "shared_geometry": true,
+        "analytic_prior": true
+      }
+    }
+  },
+  "shared_preprocessing": {
+    "seconds": 14.009337025228888,
+    "coarse_source": "SynthSegPlus",
+    "cortical_parcellation_source": "SynthSegPlus",
+    "model_calls": {
+      "SynthSeg": 0,
+      "SynthSegPlus": 1
+    },
+    "wmparc_source": "proxy",
+    "peak_gpu_gib": 15.471590042114258
+  },
+  "provenance": {
+    "base_commit": "d90020e12b08ffd28a872f82dd6885a748cd9587",
+    "working_patch_sha256": "b3ed5e5812d2f2c1dae86d05fc21935530691deb52bbe905708e6fdfacd631c7",
+    "reported_source_file_counts": {
+      "old": 32,
+      "new": 32
+    },
+    "reported_source_sha256_match_all": true,
+    "actual_frozen_source_file_count": 431,
+    "actual_frozen_source_all_size_sha256_match": true,
+    "all_8_actual_output_files_exist": true
+  },
+  "artifacts": {
+    "comparison": "full_raw_v16_c3_vs_v15_20261001.json",
+    "comparison_table": "full_raw_v16_c3_vs_v15_20261001.tsv",
+    "archive_manifest": "archive_manifest.json",
+    "actual_source_and_output_audit": "actual_source_and_output_audit.json"
+  }
+}

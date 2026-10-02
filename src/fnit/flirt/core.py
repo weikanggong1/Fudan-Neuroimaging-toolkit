@@ -10,9 +10,12 @@ FSL stores affine matrices in scaled-mm coordinates.  All matrices used by the
 optimizer below are in that coordinate system and map input to reference.
 """
 
+from contextlib import contextmanager
 from dataclasses import dataclass
+from importlib.util import find_spec
 import math
 import os
+import time
 from pathlib import Path
 
 import nibabel as nib
@@ -509,9 +512,11 @@ class FSLCorrelationRatio:
         ref_max = self.reference_values.max()
         if float(ref_max - ref_min) == 0:
             ref_max = ref_max + 1
+        ref_range = ref_max - ref_min
+        bin_factor = self.bins / ref_range
+        bin_offset = (-ref_min * self.bins) / ref_range
         bin_index = torch.trunc(
-            self.reference_values * (self.bins / (ref_max - ref_min))
-            - ref_min * (self.bins / (ref_max - ref_min))
+            self.reference_values * bin_factor + bin_offset
         ).to(torch.long)
         self.bin_index = bin_index.clamp(0, self.bins - 1)
         self.bin_sort_order = torch.argsort(self.bin_index, stable=True)
@@ -585,7 +590,7 @@ class FSLCorrelationRatio:
             sorted_weights * sorted_values, "sum", lengths=lengths, initial=0
         )
         sums2 = torch.segment_reduce(
-            sorted_weights * sorted_values.square(),
+            (sorted_weights * sorted_values) * sorted_values,
             "sum",
             lengths=lengths,
             initial=0,
@@ -608,7 +613,9 @@ class FSLCorrelationRatio:
         if float(total_variance) <= 0:
             return 1.0
         cost = (within * n).sum() / total_n / total_variance
-        return float(cost)
+        # NEWIMAGE returns float(1-r) from p_corr_ratio_smoothed, then
+        # float(1-p) from Costfn::cost.  Preserve both float32 roundings.
+        return float(1.0 - (1.0 - cost))
 
 
 
@@ -622,6 +629,7 @@ class FSLNormalizedMutualInformation(FSLCorrelationRatio):
         if float(test_range) == 0:
             test_range = test_range + 1
         self.test_factor = self.bins / test_range
+        self.test_offset = (-self.test_min * self.bins) / test_range
 
     def __call__(self, moving_to_reference):
         coefficients = _fsl_pull_coefficients(
@@ -649,11 +657,12 @@ class FSLNormalizedMutualInformation(FSLCorrelationRatio):
                         (upper - coordinates) / smooth, 1.0),
         ).prod(dim=0).clamp_min_(0)
         weight = edge_weight * valid
-        bin_float = (values - self.test_min) * self.test_factor
+        bin_float = values * self.test_factor + self.test_offset
         truncated = torch.trunc(bin_float)
-        centre = truncated.long().clamp(0, self.bins - 1)
-        minus = (centre - 1).clamp_min(0)
-        plus = (centre + 1).clamp_max(self.bins - 1)
+        raw_centre = truncated.long()
+        minus = (raw_centre - 1).clamp_min(0)
+        plus = (raw_centre + 1).clamp_max(self.bins - 1)
+        centre = raw_centre.clamp(0, self.bins - 1)
         fractional = (bin_float - truncated).abs()
         centre_weight = torch.where(
             fractional < 0.5, 0.5 + fractional,
@@ -673,7 +682,8 @@ class FSLNormalizedMutualInformation(FSLCorrelationRatio):
         first = joint.sum(1)
         second = joint.sum(0)
         total = second.sum()
-        if float(total) <= 0:
+        total_value = float(total)
+        if not math.isfinite(total_value) or total_value <= 0:
             return -1.0
 
         def entropy(histogram):
@@ -682,8 +692,8 @@ class FSLNormalizedMutualInformation(FSLCorrelationRatio):
             return -(probabilities[selected] * probabilities[selected].log()).sum()
 
         joint_entropy = entropy(joint)
-        if float(joint_entropy) <= 0:
-            return -1.0
+        if abs(float(joint_entropy)) < 1e-9:
+            return 0.0
         return float(-(entropy(first) + entropy(second)) / joint_entropy)
 
 
@@ -789,7 +799,7 @@ def _optimize_one_dimension(
     x1, middle, x2, y1, y_middle, y2 = _initial_bound(
         x1, middle, y1, y_middle, function, unit, point
     )
-    minimum_distance = f32(f32(0.1) * unit_tolerance)
+    minimum_distance = f32(0.1 * float(unit_tolerance))
     iteration = 0
     while (
         iteration < maximum_iterations
@@ -849,7 +859,9 @@ def fsl_coordinate_optimize(
             point, value = _optimize_one_dimension(
                 point, direction, tolerance, function, 100, value, guess
             )
-        average_tolerance = np.abs((initial - point) * inverse_tolerance).sum()
+        average_tolerance = np.float32(
+            np.abs((initial - point) * inverse_tolerance).sum()
+        )
         if average_tolerance < 1.0:
             break
     return point, float(value)
@@ -912,11 +924,24 @@ def _rms_deviation(first, second, radius=80.0):
     linear = difference[:3, :3]
     translation = difference[:3, 3]
     return float(
-        np.sqrt(
+        np.float32(np.sqrt(
             translation @ translation
             + (float(radius) ** 2 / 5.0) * np.trace(linear.T @ linear)
-        )
+        ))
     )
+
+
+def _search_cost_threshold(costs):
+    """FLIRT search_cost's float threshold, including its strict tie boundary."""
+    minimum, maximum = np.float32(costs.min()), np.float32(costs.max())
+    threshold = np.float32(min(
+        np.float32(minimum + np.float32(np.float32(0.2) * np.float32(maximum - minimum))),
+        _newimage_percentile(costs, 0.2),
+    ))
+    if threshold <= minimum:
+        threshold = np.float32(max(float(minimum) * 1.0001,
+                                   float(minimum) * 0.9999))
+    return threshold
 
 
 def _find_cost_minima(costs):
@@ -956,7 +981,6 @@ class _Level:
     reference: torch.Tensor
     moving: torch.Tensor
     reference_sizes: tuple
-    moving_sizes: tuple
     cost: FSLCorrelationRatio
     centre: np.ndarray
 
@@ -996,8 +1020,21 @@ class _DefaultFLIRTEngine:
         initial_matrix=None,
         moving_weight=None,
         reference_weight=None,
+        execution="reference",
+        candidate_batch_size=128,
+        memory_budget_gb=20.0,
     ):
         self.device = torch.device(device)
+        self.execution = execution
+        self.candidate_batch_size = candidate_batch_size
+        self.memory_budget_gb = memory_budget_gb
+        self.host_result_transfers = 0
+        self.batch_evaluations = 0
+        self.phase_timings = {}
+        self.phase_cost_evaluations = {}
+        self._active_phase = "preparation"
+        self._batch_source = None
+        self._batch_evaluator = None
         moving = _flip_to_radiological(
             _clamp_like_fsl(moving), moving_vox2world
         )
@@ -1050,8 +1087,9 @@ class _DefaultFLIRTEngine:
         self.level = None
         self.cost_evaluations = 0
         self._cache = {}
-        self._prepare_reference_pyramid()
-        self.set_scale(8.0, force=True)
+        with self.phase("preparation"):
+            self._prepare_reference_pyramid()
+            self.set_scale(8.0, force=True)
 
     def _prepare_reference_pyramid(self):
         def resample(value):
@@ -1139,16 +1177,69 @@ class _DefaultFLIRTEngine:
         sampling = np.diag([*self.moving_sizes, 1.0])
         centre = _centre_of_gravity(moving, sampling)
         self.level = _Level(
-            reference, moving, reference_sizes, self.moving_sizes, cost, centre
+            reference, moving, reference_sizes, cost, centre
         )
         self._cache.clear()
 
+    @contextmanager
+    def phase(self, name):
+        previous = self._active_phase
+        self._active_phase = name
+        start = time.perf_counter()
+        with torch.profiler.record_function("flirt." + name):
+            try:
+                yield
+            finally:
+                self.phase_timings[name] = (
+                    self.phase_timings.get(name, 0.0) + time.perf_counter() - start
+                )
+                self._active_phase = previous
+
+    def cost_many(self, affines):
+        """Evaluate independent matrices in order, sharing one host result copy."""
+        affines = [np.asarray(affine, dtype=np.float64) for affine in affines]
+        keys = [affine.tobytes(order="C") for affine in affines]
+        missing = {}
+        for key, affine in zip(keys, affines):
+            if key not in self._cache:
+                missing.setdefault(key, affine)
+        if missing:
+            from .batched import BatchedAffineCost
+
+            source = (id(self.level.cost), id(self.level.cost.moving),
+                      self.level.cost.smooth_size)
+            if source != self._batch_source:
+                self._batch_evaluator = BatchedAffineCost(
+                    self.level.cost,
+                    max_batch_size=self.candidate_batch_size,
+                    memory_budget_gb=self.memory_budget_gb,
+                )
+                self._batch_source = source
+            matrices = np.stack(list(missing.values())) @ self.initial_matrix
+            values = self._batch_evaluator(matrices).detach().cpu().numpy()
+            self.host_result_transfers += 1
+            self.batch_evaluations += 1
+            self.cost_evaluations += len(missing)
+            name = self._active_phase
+            self.phase_cost_evaluations[name] = (
+                self.phase_cost_evaluations.get(name, 0) + len(missing)
+            )
+            self._cache.update(zip(missing, (float(value) for value in values)))
+        return [self._cache[key] for key in keys]
+
     def cost(self, affine):
+        if getattr(self, "execution", "reference") == "batched":
+            return self.cost_many([affine])[0]
         affine = np.asarray(affine, dtype=np.float64)
         key = affine.tobytes(order="C")
         if key not in self._cache:
             self._cache[key] = self.level.cost(affine @ self.initial_matrix)
             self.cost_evaluations += 1
+            if hasattr(self, "phase_cost_evaluations"):
+                name = self._active_phase
+                self.phase_cost_evaluations[name] = (
+                    self.phase_cost_evaluations.get(name, 0) + 1
+                )
         return self._cache[key]
 
     def _parameters_to_matrix(self, parameters, dof):
@@ -1157,6 +1248,18 @@ class _DefaultFLIRTEngine:
             torch.as_tensor(self.level.centre, dtype=torch.float64),
             dof,
         ).numpy()
+
+    def _parameter_matrices(self, parameters, dof):
+        if not len(parameters):
+            return np.empty((0, 4, 4), dtype=np.float64)
+        if self.execution == "batched":
+            from .affine_batch import fsl_affine_from_parameters_batch
+
+            return fsl_affine_from_parameters_batch(
+                np.asarray(parameters, dtype=np.float64), self.level.centre, dof
+            ).numpy()
+        return np.stack([self._parameters_to_matrix(values, dof)
+                         for values in parameters])
 
     def optimize_matrix(self, matrix, dof, maximum_iterations=4):
         parameters = fsl_parameters_from_affine(matrix, self.level.centre)
@@ -1195,6 +1298,31 @@ class _DefaultFLIRTEngine:
         )
         parameters = reference_parameters + basis @ fitted
         return parameters, value
+
+    def _optimize_search_many(self, reference_parameters, maximum_iterations=4):
+        from .search import coordinate_trials, evaluate_trials, map_trials
+
+        basis = np.zeros((12, 4), dtype=np.float64)
+        basis[6:9, 0] = 1
+        basis[3, 1] = basis[4, 2] = basis[5, 3] = 1
+        tolerance = np.linalg.pinv(basis) @ (
+            _BASE_TOLERANCE * self.requested_scale
+        )
+        searches = []
+        for reference in reference_parameters:
+            trials = coordinate_trials(
+                np.zeros(4), tolerance,
+                maximum_iterations=maximum_iterations,
+                bound_guess=self.bound_guess,
+            )
+            searches.append(map_trials(
+                trials, lambda values, reference=reference: reference + basis @ values,
+            ))
+        fitted = evaluate_trials(
+            searches, lambda values: self.cost_many(self._parameter_matrices(values, 12))
+        )
+        return [(reference + basis @ values, cost)
+                for reference, (values, cost) in zip(reference_parameters, fitted)]
 
     @staticmethod
     def _angles(lower=-math.pi / 2, upper=math.pi / 2, delta=math.pi / 3):
@@ -1249,15 +1377,23 @@ class _DefaultFLIRTEngine:
         )
         initial_moving_centre = self.initial_matrix @ np.r_[moving_centre, 1.0]
         translation = reference_centre - initial_moving_centre[:3]
-        for ix, rx in enumerate(coarse):
-            for iy, ry in enumerate(coarse):
-                for iz, rz in enumerate(coarse):
+        coarse_parameters = []
+        for rx in coarse:
+            for ry in coarse:
+                for rz in coarse:
                     parameters = _IDENTITY_PARAMETERS.copy()
                     parameters[:3] = (rx, ry, rz)
                     parameters[3:6] = translation
-                    fitted, _ = self._optimize_search_subset(parameters)
-                    tx[ix, iy, iz], ty[ix, iy, iz], tz[ix, iy, iz] = fitted[3:6]
-                    scales[ix, iy, iz] = fitted[6]
+                    coarse_parameters.append(parameters)
+        with self.phase("angular_coarse"):
+            if self.execution == "batched":
+                fitted_coarse = self._optimize_search_many(coarse_parameters)
+            else:
+                fitted_coarse = [self._optimize_search_subset(parameters)
+                                 for parameters in coarse_parameters]
+        for index, (fitted, _) in zip(np.ndindex(shape), fitted_coarse):
+            tx[index], ty[index], tz[index] = fitted[3:6]
+            scales[index] = fitted[6]
         # NEWIMAGE's volume percentile is an order statistic at floor(N*p),
         # rather than NumPy's interpolated percentile.
         median_scale = _newimage_percentile(scales, 0.5)
@@ -1281,32 +1417,56 @@ class _DefaultFLIRTEngine:
                         scale = 1.0
                     parameters[6:9] = scale
                     fine_parameters[(ix, iy, iz)] = parameters
-                    costs[ix, iy, iz] = self.cost(
-                        self._parameters_to_matrix(parameters, 12)
-                    )
+        with self.phase("angular_fine_measure"):
+            matrices = self._parameter_matrices(list(fine_parameters.values()), 12)
+            if self.execution == "batched":
+                values = self.cost_many(matrices)
+            else:
+                values = [self.cost(matrix) for matrix in matrices]
+            costs[:] = np.asarray(values, dtype=np.float32).reshape(costs.shape)
 
-        minimum, maximum = float(costs.min()), float(costs.max())
-        threshold = min(
-            minimum + 0.2 * (maximum - minimum),
-            _newimage_percentile(costs, 0.2),
-        )
-        if threshold <= minimum:
-            threshold = max(minimum * 1.0001, minimum * 0.9999)
-        for index in np.ndindex(costs.shape):
-            if costs[index] < threshold:
-                _, value = self._optimize_search_subset(fine_parameters[index])
-                costs[index] = value
+        threshold = _search_cost_threshold(costs)
+        selected = [index for index in np.ndindex(costs.shape)
+                    if costs[index] < threshold]
+        with self.phase("angular_fine_refinement"):
+            if self.execution == "batched":
+                fitted_fine = self._optimize_search_many(
+                    [fine_parameters[index] for index in selected]
+                )
+            else:
+                fitted_fine = [self._optimize_search_subset(fine_parameters[index])
+                               for index in selected]
+        for index, (_, value) in zip(selected, fitted_fine):
+            costs[index] = value
 
         candidates = [fine_parameters[index] for index in _find_cost_minima(costs)]
 
         pairs = []
         free_dof = min(dof, 7)
         rms_minimum = min(self.level.reference_sizes)
-        for parameters in candidates:
-            matrix = self._parameters_to_matrix(parameters, free_dof)
-            preoptimized = (self.cost(matrix), matrix.copy())
-            optimized_matrix, value = self.optimize_matrix(matrix, free_dof)
-            candidate = ((value, optimized_matrix), preoptimized)
+        if self.execution == "batched":
+            matrices = self._parameter_matrices(candidates, free_dof)
+            with self.phase("angular_candidate_refinement"):
+                preoptimized_candidates = self._measure(
+                    [(0.0, matrix) for matrix in matrices]
+                )
+                optimized_candidates = self._optimize(
+                    preoptimized_candidates, free_dof, 4
+                )
+        else:
+            preoptimized_candidates = []
+            optimized_candidates = []
+            with self.phase("angular_candidate_refinement"):
+                for parameters in candidates:
+                    matrix = self._parameters_to_matrix(parameters, free_dof)
+                    preoptimized_candidates.append((self.cost(matrix), matrix.copy()))
+                    optimized_matrix, value = self.optimize_matrix(matrix, free_dof)
+                    optimized_candidates.append((value, optimized_matrix))
+        for optimized, preoptimized in zip(
+            optimized_candidates, preoptimized_candidates
+        ):
+            value, optimized_matrix = optimized
+            candidate = (optimized, preoptimized)
             discard = False
             for index, current in enumerate(pairs):
                 if _rms_deviation(optimized_matrix, current[0][1]) < rms_minimum:
@@ -1329,9 +1489,65 @@ class _DefaultFLIRTEngine:
         return sorted(candidates, key=lambda item: item[0])
 
     def _measure(self, candidates):
+        if self.execution == "batched":
+            values = self.cost_many([matrix for _, matrix in candidates])
+            return [(value, matrix.copy())
+                    for value, (_, matrix) in zip(values, candidates)]
         return [(self.cost(matrix), matrix.copy()) for _, matrix in candidates]
 
+    def _schedule_measure(self, candidates):
+        # FLIRT usrmeasurecost decomposes/recomposes even a zero perturbation.
+        parameters = [fsl_parameters_from_affine(matrix, self.level.centre) + np.zeros(12)
+                      for _, matrix in candidates]
+        matrices = self._parameter_matrices(parameters, 12)
+        return self._measure([(0.0, matrix) for matrix in matrices])
+
+    def _schedule_optimize(self, candidates, dof, maximum_iterations):
+        # usroptimise's zero perturbation precedes optimise_strategy1's decomposition.
+        return self._optimize(candidates, dof, maximum_iterations, np.zeros(12))
+
+    def _schedule_perturbations(self):
+        fine = (self._angles(delta=math.pi / 10) if self.angular_search
+                else np.array([0.0]))
+        angle = float(np.float32(
+            0.5 * (float(fine[1]) - float(fine[0])) if len(fine) > 1
+            else 3.0 * _BASE_TOLERANCE[0] * self.requested_scale
+        ))
+        perturbations = []
+        for axis in range(3):
+            for sign in (1, -1):
+                value = np.zeros(12)
+                value[axis] = sign * angle
+                perturbations.append(value)
+        # The default schedule specifies absolute scale perturbations, including
+        # with -dof 6; the following six-DOF composition drops those scales.
+        for scale in (0.1, -0.1, 0.2, -0.2):
+            value = np.zeros(12)
+            value[6] = scale
+            perturbations.append(value)
+        return perturbations
+
     def _optimize(self, candidates, dof, maximum_iterations, perturbation=None):
+        if self.execution == "batched":
+            from .search import coordinate_trials, evaluate_trials
+
+            trials = []
+            for _, matrix in candidates:
+                if perturbation is not None:
+                    parameters = fsl_parameters_from_affine(matrix, self.level.centre)
+                    parameters += perturbation
+                    matrix = self._parameters_to_matrix(parameters, 12)
+                trials.append(coordinate_trials(
+                    fsl_parameters_from_affine(matrix, self.level.centre),
+                    _BASE_TOLERANCE * self.requested_scale,
+                    maximum_iterations=maximum_iterations,
+                    bound_guess=self.bound_guess, numopt=dof,
+                ))
+            fitted = evaluate_trials(
+                trials, lambda values: self.cost_many(self._parameter_matrices(values, dof))
+            )
+            matrices = self._parameter_matrices([parameters for parameters, _ in fitted], dof)
+            return [(value, matrix) for (_, value), matrix in zip(fitted, matrices)]
         output = []
         for _, matrix in candidates:
             if perturbation is not None:
@@ -1346,49 +1562,60 @@ class _DefaultFLIRTEngine:
         qsform_matrix = np.asarray(qsform_matrix) @ np.linalg.inv(
             self.initial_matrix
         )
-        self.set_scale(8)
+        with self.phase("level_8mm"):
+            self.set_scale(8)
         search, presearch = self.angular_candidates(dof)
 
-        self.set_scale(4)
-        search_costs = self._measure(search)
-        presearch_costs = self._measure(presearch)
+        with self.phase("level_4mm"):
+            self.set_scale(4)
+        with self.phase("measure_4mm"):
+            search_costs = self._schedule_measure(search)
+            presearch_costs = self._schedule_measure(presearch)
         paired = sorted(zip(search_costs, presearch_costs), key=lambda item: item[0][0])
         search_costs = [item[0] for item in paired]
         presearch_costs = [item[1] for item in paired]
-        candidates = []
-        candidates += self._optimize(search_costs[:3], min(dof, 7), 4)
-        candidates += self._optimize(presearch_costs[:3], min(dof, 7), 4)
-        candidates += self._optimize([(0.0, np.eye(4))], min(dof, 7), 4)
+        with self.phase("local_4mm_initial"):
+            candidates = self._schedule_optimize(
+                search_costs[:3] + presearch_costs[:3] + [(0.0, np.eye(4))],
+                min(dof, 7), 4,
+            )
         best = self._sort(candidates)
         candidates = best[:4]
-        fine_step = math.pi / 10
-        perturbations = []
-        for axis in range(3):
-            for sign in (1, -1):
-                value = np.zeros(12)
-                value[axis] = sign * fine_step / 2
-                perturbations.append(value)
-        for scale in (0.1, -0.1, 0.2, -0.2):
-            value = np.zeros(12)
-            value[6] = scale if dof >= 7 else 0.0
-            perturbations.append(value)
-        for perturbation in perturbations:
-            candidates += self._optimize(best[:4], min(dof, 7), 4, perturbation)
+        perturbations = self._schedule_perturbations()
+        with self.phase("local_4mm_perturbations"):
+            if self.execution == "batched":
+                perturbed_parameters = []
+                for perturbation in perturbations:
+                    for _, matrix in best[:4]:
+                        parameters = fsl_parameters_from_affine(matrix, self.level.centre)
+                        parameters += perturbation
+                        perturbed_parameters.append(parameters)
+                perturbed = [(0.0, matrix) for matrix in
+                             self._parameter_matrices(perturbed_parameters, 12)]
+                candidates += self._optimize(perturbed, min(dof, 7), 4)
+            else:
+                for perturbation in perturbations:
+                    candidates += self._optimize(best[:4], min(dof, 7), 4, perturbation)
         best = self._sort(candidates)
 
-        self.set_scale(2)
-        measured = self._sort(self._measure(best))
-        best = self._optimize(measured[:1], min(dof, 7), 4)
-        self.bound_guess = (1.0,)
-        if dof > 7:
-            best = self._optimize(best[:1], 9, 1)
-        if dof > 9:
-            best = self._optimize(best[:1], 12, 2)
+        with self.phase("level_2mm"):
+            self.set_scale(2)
+        with self.phase("measure_2mm"):
+            measured = self._sort(self._schedule_measure(best))
+        with self.phase("local_2mm"):
+            best = self._schedule_optimize(measured[:1], min(dof, 7), 4)
+            self.bound_guess = (1.0,)
+            if dof > 7:
+                best = self._schedule_optimize(best[:1], 9, 1)
+            if dof > 9:
+                best = self._schedule_optimize(best[:1], 12, 2)
         best = self._sort(best)
 
-        self.set_scale(1)
-        final = self._optimize((best + [(0.0, qsform_matrix)])[:2], dof, 1)
-        final.append((self.cost(qsform_matrix), qsform_matrix.copy()))
+        with self.phase("level_1mm"):
+            self.set_scale(1)
+        with self.phase("local_1mm"):
+            final = self._schedule_optimize((best + [(0.0, qsform_matrix)])[:2], dof, 1)
+            final += self._schedule_measure([(0.0, qsform_matrix)])
         cost, residual = self._sort(final)[0]
         return cost, residual @ self.initial_matrix
 
@@ -1433,16 +1660,63 @@ def _resample_output(
     moving = _blur(moving, min(fixed_voxel_sizes), moving_voxel_sizes,
                    boundary=blur_boundary)
     grid = _voxel_grid(fixed_shape, device=device)
-    moving_fsl = torch.as_tensor(moving_fsl, dtype=torch.float32, device=device)
-    fixed_fsl = torch.as_tensor(fixed_fsl, dtype=torch.float32, device=device)
-    matrix = torch.as_tensor(matrix, dtype=torch.float32, device=device)
-    pull = torch.linalg.inv(moving_fsl) @ torch.linalg.inv(matrix) @ fixed_fsl
-    coordinates = pull[:3, :3] @ grid + pull[:3, 3:4]
+    # NEWMAT inverts/composes in double, then NEWIMAGE narrows its twelve
+    # sampling coefficients to float. These small matrices are already on CPU.
+    pull = np.linalg.inv(moving_fsl) @ np.linalg.inv(matrix) @ fixed_fsl
+    pull = torch.as_tensor(pull, dtype=torch.float32, device=device)
+    coordinates = _coordinates_from_fsl_coefficients(pull[:3, :], grid)
     upper = torch.tensor(moving.shape, device=device)[:, None] - 1
     valid = ((coordinates >= 0) & (coordinates <= upper)).all(0)
-    output = torch.zeros(grid.shape[1], dtype=torch.float32, device=device)
-    output[valid] = _manual_trilinear(moving, coordinates[:, valid])
+    # Avoid CUDA nonzero/dynamic-size indexing and its host synchronization.
+    output = torch.where(valid, _manual_trilinear(moving, coordinates),
+                         _edge_background(moving))
     return output.reshape(fixed_shape)
+
+
+def _edge_background(data):
+    """NEWIMAGE's sorted 10th percentile of the two-voxel edge shell."""
+    nx, ny, nz = data.shape
+    ex, ey, ez = min(2, nx - 1), min(2, ny - 1), min(2, nz - 1)
+    # Use the same face partition; tiny images can have overlapping faces.
+    faces = (
+        data[ex:nx-ex, ey:ny-ey, :ez],
+        data[ex:nx-ex, ey:ny-ey, nz-ez:],
+        data[ex:nx-ex, :ey, :], data[ex:nx-ex, ny-ey:, :],
+        data[:ex, :, :], data[nx-ex:, :, :],
+    )
+    values = torch.cat([face.reshape(-1) for face in faces])
+    if values.numel() == 0:
+        return data.new_zeros(())
+    return values.kthvalue(values.numel() // 10 + 1).values
+
+
+def _output_image(data, moving, fixed, pull_voxel, *, applyxfm=False):
+    """Preserve FSL's output dtype and reference qform/sform rules."""
+    dtype = moving.get_data_dtype()
+    if not np.issubdtype(dtype, np.floating) and np.ptp(data) < 1.5:
+        dtype = np.dtype("float32")  # Preserve fractional resampled masks.
+    image = new_image(data.astype(dtype, copy=False), fixed)
+    qform, qcode = fixed.get_qform(), int(fixed.header["qform_code"])
+    sform, scode = fixed.get_sform(), int(fixed.header["sform_code"])
+    if not applyxfm and not qcode and scode:
+        qform, qcode = sform, scode
+    if not applyxfm and not scode and qcode:
+        sform, scode = qform, qcode
+    if not applyxfm and not qcode and not scode:
+        source, code = moving.get_sform(coded=True)
+        if not code:
+            source, code = moving.get_qform(coded=True)
+        if code:
+            qform = sform = source @ pull_voxel
+            qcode = scode = code
+    image.set_qform(qform, int(qcode))
+    image.set_sform(sform, int(scode))
+    # NEWIMAGE retains reference pixdim even when the qform copied from a
+    # sheared sform requires an orthogonal approximation. nibabel's set_qform
+    # recomputes zooms from that matrix, so restore the independent header data.
+    image.header.set_zooms(fixed.header.get_zooms()[:3])
+    image.header["cal_min"] = image.header["cal_max"] = 0
+    return image
 
 
 def _load_fsl_matrix(init):
@@ -1468,7 +1742,10 @@ class TorchFLIRT:
     never treated as a per-input comparison with FSL.
     """
 
-    def __init__(self, device=None, *, angular_search=True, dof=12, cost="corratio"):
+    def __init__(
+        self, device=None, *, angular_search=True, dof=12, cost="corratio",
+        execution="auto", candidate_batch_size=128, memory_budget_gb=20.0,
+    ):
         if (dof, cost) not in ((12, "corratio"), (6, "normmi")):
             raise ValueError("supported FLIRT profiles are 12/corratio and 6/normmi")
         self.dof = dof
@@ -1481,6 +1758,26 @@ class TorchFLIRT:
         if self.device.type == "cuda":
             torch.backends.cuda.matmul.allow_tf32 = True
             torch.backends.cudnn.allow_tf32 = True
+        if execution not in ("auto", "reference", "batched"):
+            raise ValueError("execution must be 'auto', 'reference', or 'batched'")
+        if not isinstance(candidate_batch_size, int) or candidate_batch_size < 1:
+            raise ValueError("candidate_batch_size must be a positive integer")
+        if not math.isfinite(memory_budget_gb) or memory_budget_gb <= 0:
+            raise ValueError("memory_budget_gb must be finite and positive")
+        self.execution = (
+            "batched" if self.device.type == "cuda" else "reference"
+        ) if execution == "auto" else execution
+        if (self.execution == "batched" and self.device.type == "cuda"
+                and cost == "normmi" and find_spec("triton") is None):
+            if execution == "auto":
+                self.execution = "reference"
+            else:
+                raise ImportError(
+                    "CUDA batched normmi requires Triton from FNIT's Conda "
+                    "environment; alternatively use execution='reference'"
+                )
+        self.candidate_batch_size = candidate_batch_size
+        self.memory_budget_gb = float(memory_budget_gb)
         self.angular_search = bool(angular_search)
 
     def __call__(self, moving, fixed, *, init=None, inweight=None, refweight=None):
@@ -1492,8 +1789,8 @@ class TorchFLIRT:
         fixed_data = _single_frame(fixed, "fixed")
         moving_world = np.asarray(moving.affine, dtype=np.float64)
         fixed_world = np.asarray(fixed.affine, dtype=np.float64)
-        moving_sizes = tuple(float(value) for value in nib.affines.voxel_sizes(moving.affine))
-        fixed_sizes = tuple(float(value) for value in nib.affines.voxel_sizes(fixed.affine))
+        moving_sizes = tuple(float(value) for value in moving.header.get_zooms()[:3])
+        fixed_sizes = tuple(float(value) for value in fixed.header.get_zooms()[:3])
 
         def load_weight(value, image, data, name):
             if value is None:
@@ -1544,19 +1841,24 @@ class TorchFLIRT:
             initial_matrix=initial_matrix,
             moving_weight=moving_weight,
             reference_weight=reference_weight,
+            execution=self.execution,
+            candidate_batch_size=self.candidate_batch_size,
+            memory_budget_gb=self.memory_budget_gb,
         )
         cost, matrix = engine.run(qsform, dof=self.dof)
-        moved_data = _resample_output(
-            moving_data,
-            fixed_data.shape,
-            moving_fsl,
-            fixed_fsl,
-            matrix,
-            moving_sizes,
-            fixed_sizes,
-            self.device,
-        ).cpu().numpy()
-        moved = new_image(moved_data.astype(np.float32, copy=False), fixed)
+        with engine.phase("output_resampling"):
+            moved_data = _resample_output(
+                moving_data,
+                fixed_data.shape,
+                moving_fsl,
+                fixed_fsl,
+                matrix,
+                moving_sizes,
+                fixed_sizes,
+                self.device,
+            ).cpu().numpy()
+        pull_voxel = np.linalg.inv(moving_fsl) @ np.linalg.inv(matrix) @ fixed_fsl
+        moved = _output_image(moved_data, moving, fixed, pull_voxel)
         forward_world = flirt_to_world_affine(
             matrix,
             moving_world,
@@ -1584,6 +1886,17 @@ class TorchFLIRT:
             "angular_search": self.angular_search,
             "cost_value": float(cost),
             "cost_evaluations": engine.cost_evaluations,
+            "execution": self.execution,
+            "candidate_batch_size": self.candidate_batch_size,
+            "memory_budget_gb": self.memory_budget_gb,
+            "phase_timings_seconds": engine.phase_timings,
+            "phase_timing_scope": (
+                "host wall scopes; asynchronous CUDA work can complete in the "
+                "next scope; optimization scopes include host cost-result waits"
+            ),
+            "phase_cost_evaluations": engine.phase_cost_evaluations,
+            "batched_cost_calls": engine.batch_evaluations,
+            "batched_host_result_transfers": engine.host_result_transfers,
             "matrix_coordinate_system": "FSL scaled-mm",
             "matrix_direction": "moving/input-to-fixed/reference",
             "source_versions": {
@@ -1595,7 +1908,7 @@ class TorchFLIRT:
             "initial_matrix_used": init is not None,
             "input_weight_used": inweight is not None,
             "reference_weight_used": refweight is not None,
-            "reference_validation_report": "validation/flirt/report.public.json",
+            "reference_validation_report": "validation/flirt/gpu_batch.current.public.json",
             "current_input_compared_with_fsl": False,
             "validated_fsl_equivalent": False,
             "validation_scope": (
@@ -1641,7 +1954,7 @@ class TorchFLIRT:
             moving_data, fixed_data.shape, moving_fsl, fixed_fsl, matrix,
             moving_sizes, fixed_sizes, self.device, blur_boundary="replicate",
         ).cpu().numpy()
-        moved_data = moved_data.astype(moving.get_data_dtype(), copy=False)
+        pull_voxel = np.linalg.inv(moving_fsl) @ np.linalg.inv(matrix) @ fixed_fsl
         forward_world = flirt_to_world_affine(
             matrix, moving_world, fixed_world,
             moving_data.shape, fixed_data.shape, moving_sizes, fixed_sizes,
@@ -1649,7 +1962,7 @@ class TorchFLIRT:
         pull_world = np.linalg.inv(forward_world)
         pull_world[3] = (0, 0, 0, 1)
         return FLIRTResult(
-            moved=new_image(moved_data, fixed),
+            moved=_output_image(moved_data, moving, fixed, pull_voxel, applyxfm=True),
             matrix=matrix,
             moving_to_fixed_world=forward_world,
             fixed_to_moving_world=pull_world,

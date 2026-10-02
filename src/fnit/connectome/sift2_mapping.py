@@ -60,10 +60,14 @@ def _upsample_tracks(paths: Sequence[torch.Tensor], ratio: int) -> tuple[torch.T
     device = paths[0].device
     lengths = torch.tensor([len(path) for path in paths], device=device, dtype=torch.long)
     old_starts = torch.cat((lengths.new_zeros(1), lengths.cumsum(0)[:-1]))
+    points = torch.cat(paths)
+    point_track = torch.repeat_interleave(torch.arange(len(paths), device=device), lengths)
+    if ratio == 1:
+        # Precise FA sampling uses the original points. Avoid constructing
+        # Hermite neighbours and another copy when no upsampling is requested.
+        return points, point_track, old_starts
     new_lengths = (lengths - 1) * ratio + 1
     new_starts = torch.cat((lengths.new_zeros(1), new_lengths.cumsum(0)[:-1]))
-    point_track = torch.repeat_interleave(torch.arange(len(paths), device=device), lengths)
-    points = torch.cat(paths)
     seg = torch.arange(len(points) - 1, device=device)
     seg = seg[point_track[:-1] == point_track[1:]]
     seg_track = point_track[seg]

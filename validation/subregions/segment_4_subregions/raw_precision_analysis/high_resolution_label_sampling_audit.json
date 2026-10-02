@@ -1,0 +1,1373 @@
+{
+  "kind": "CPU_only_public_example_high_resolution_sampling_audit",
+  "public_example": {
+    "dataset": "OpenNeuro ds000114",
+    "license": "CC0",
+    "defaced_published_example_sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
+    "published_bytes_verified": 3847853
+  },
+  "run": "segment4_backtracking_final_full_stage_20261001",
+  "analysis_script_sha256": "c9e936ec4f21b360919fb60da9f52ead066b4c6aec84c16d2bcf521ba9de4b77",
+  "method": {
+    "labels": "Existing saved high-resolution hard labels; no fitting or GPU execution.",
+    "geometry": "Scanner-RAS voxel-to-world affine; nearest neighbor, order=0, constant background.",
+    "common_highres": "Official high-resolution orientation/spacing, integer-expanded union FOV of both inputs; no clipping to official ROI.",
+    "native_grid": "The exact official FSvoxelSpace grid, preserved for both methods.",
+    "roundtrip": "Highres hard labels -> official 1mm grid -> same common highres grid; self Dice measures information lost by hard downsampling.",
+    "phase_probe": "All 27 fixed 1mm grid phases from {-0.25,0,+0.25} voxel per axis, sampled equally for both inputs; not a registration search or new benchmark."
+  },
+  "families": {
+    "thalamus": {
+      "official_original_highres_exists": true,
+      "official_highres_shape": [
+        148,
+        101,
+        114
+      ],
+      "official_spacing_mm": [
+        0.4999999403953552,
+        0.4999999403953553,
+        0.4999999403953552
+      ],
+      "fnit_highres_shape": [
+        156,
+        109,
+        122
+      ],
+      "fnit_spacing_mm": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "comparison_union_highres_shape": [
+        158,
+        111,
+        123
+      ],
+      "input_sha256_by_role": {
+        "official_highres": "a5a4a5e8ef663b892f68e4d26a8f00b471dea5ce7389683970700bc407d7c81d",
+        "official_native": "48b9be6fecdee60c9d62450446596d4002246afffcbc882859a32cd3770e0142",
+        "fnit_highres": "f010587793c6a0338ec9027df31803ed226a5ae915805ff5ebdba810f95ef901"
+      },
+      "highres_mean_dice": 0.880901904346051,
+      "highres_reference_voxel_weighted_dice": 0.9628825085772572,
+      "saved_1mm_mean_dice": 0.908637285010271,
+      "saved_1mm_reference_voxel_weighted_dice": 0.9605227557909656,
+      "official_highres_to_1mm_consistency_mean_dice": 1.0,
+      "official_highres_to_1mm_consistency_weighted_dice": 1.0,
+      "fnit_highres_to_saved_1mm_consistency_weighted_dice": 0.9975221069015839,
+      "label_metrics": [
+        {
+          "label": 8105,
+          "output_label": 8105,
+          "name": "Left-CL",
+          "parent": "thalamus",
+          "highres_reference_voxels": 40,
+          "highres_prediction_voxels": 41,
+          "highres_reference_hard_mm3": 4.999998211860871,
+          "highres_prediction_hard_mm3": 5.1249981671573925,
+          "highres_hard_volume_fraction_difference": 0.025,
+          "highres_dice": 0.8641975308641975,
+          "official_1mm_reference_voxels": 3,
+          "saved_1mm_prediction_voxels": 4,
+          "saved_1mm_dice": 0.8571428571428571,
+          "both_highres_to_1mm_dice": 0.8571428571428571,
+          "official_self_1mm_roundtrip_dice": 0.1875,
+          "fnit_self_1mm_roundtrip_dice": 0.1917808219178082,
+          "centroid_distance_mm": 0.5909756527147687,
+          "fixed_phase_dice_min": 0.0,
+          "fixed_phase_dice_median": 0.15384615384615385,
+          "fixed_phase_dice_max": 1.0,
+          "phase_count": 27,
+          "official_soft_mm3": 22.83991,
+          "fnit_soft_mm3": 23.27109146118164,
+          "soft_volume_fraction_difference": 0.0188784220770415
+        },
+        {
+          "label": 8108,
+          "output_label": 8108,
+          "name": "Left-LD",
+          "parent": "thalamus",
+          "highres_reference_voxels": 229,
+          "highres_prediction_voxels": 232,
+          "highres_reference_hard_mm3": 28.624989762903486,
+          "highres_prediction_hard_mm3": 28.999989628793053,
+          "highres_hard_volume_fraction_difference": 0.013100436681222707,
+          "highres_dice": 0.8893709327548807,
+          "official_1mm_reference_voxels": 30,
+          "saved_1mm_prediction_voxels": 30,
+          "saved_1mm_dice": 0.8666666666666667,
+          "both_highres_to_1mm_dice": 0.8666666666666667,
+          "official_self_1mm_roundtrip_dice": 0.5245202558635395,
+          "fnit_self_1mm_roundtrip_dice": 0.5550847457627118,
+          "centroid_distance_mm": 0.22302809816469982,
+          "fixed_phase_dice_min": 0.2807017543859649,
+          "fixed_phase_dice_median": 0.43333333333333335,
+          "fixed_phase_dice_max": 0.9310344827586207,
+          "phase_count": 27,
+          "official_soft_mm3": 29.144947,
+          "fnit_soft_mm3": 29.38475799560547,
+          "soft_volume_fraction_difference": 0.008228218620725931
+        },
+        {
+          "label": 8111,
+          "output_label": 8111,
+          "name": "Left-L-Sg",
+          "parent": "thalamus",
+          "highres_reference_voxels": 82,
+          "highres_prediction_voxels": 53,
+          "highres_reference_hard_mm3": 10.249996334314785,
+          "highres_prediction_hard_mm3": 6.624997630715654,
+          "highres_hard_volume_fraction_difference": -0.35365853658536583,
+          "highres_dice": 0.6666666666666666,
+          "official_1mm_reference_voxels": 10,
+          "saved_1mm_prediction_voxels": 5,
+          "saved_1mm_dice": 0.5333333333333333,
+          "both_highres_to_1mm_dice": 0.5333333333333333,
+          "official_self_1mm_roundtrip_dice": 0.5555555555555556,
+          "fnit_self_1mm_roundtrip_dice": 0.4731182795698925,
+          "centroid_distance_mm": 0.8404345656459555,
+          "fixed_phase_dice_min": 0.46153846153846156,
+          "fixed_phase_dice_median": 0.5714285714285714,
+          "fixed_phase_dice_max": 0.75,
+          "phase_count": 27,
+          "official_soft_mm3": 14.455076,
+          "fnit_soft_mm3": 11.38160514831543,
+          "soft_volume_fraction_difference": -0.21262225474875196
+        },
+        {
+          "label": 8116,
+          "output_label": 8116,
+          "name": "Left-MV(Re)",
+          "parent": "thalamus",
+          "highres_reference_voxels": 70,
+          "highres_prediction_voxels": 66,
+          "highres_reference_hard_mm3": 8.749996870756524,
+          "highres_prediction_hard_mm3": 8.249997049570437,
+          "highres_hard_volume_fraction_difference": -0.05714285714285714,
+          "highres_dice": 0.7794117647058824,
+          "official_1mm_reference_voxels": 8,
+          "saved_1mm_prediction_voxels": 6,
+          "saved_1mm_dice": 0.7142857142857143,
+          "both_highres_to_1mm_dice": 0.7142857142857143,
+          "official_self_1mm_roundtrip_dice": 0.5223880597014925,
+          "fnit_self_1mm_roundtrip_dice": 0.6491228070175439,
+          "centroid_distance_mm": 0.2903192595307047,
+          "fixed_phase_dice_min": 0.4444444444444444,
+          "fixed_phase_dice_median": 0.7,
+          "fixed_phase_dice_max": 0.9473684210526315,
+          "phase_count": 27,
+          "official_soft_mm3": 10.805117,
+          "fnit_soft_mm3": 11.25355339050293,
+          "soft_volume_fraction_difference": 0.04150222440931741
+        },
+        {
+          "label": 8117,
+          "output_label": 8117,
+          "name": "Left-Pc",
+          "parent": "thalamus",
+          "highres_reference_voxels": 0,
+          "highres_prediction_voxels": 0,
+          "highres_reference_hard_mm3": 0.0,
+          "highres_prediction_hard_mm3": 0.0,
+          "highres_hard_volume_fraction_difference": null,
+          "highres_dice": null,
+          "official_1mm_reference_voxels": 0,
+          "saved_1mm_prediction_voxels": 0,
+          "saved_1mm_dice": null,
+          "both_highres_to_1mm_dice": null,
+          "official_self_1mm_roundtrip_dice": null,
+          "fnit_self_1mm_roundtrip_dice": null,
+          "centroid_distance_mm": null,
+          "fixed_phase_dice_min": null,
+          "fixed_phase_dice_median": null,
+          "fixed_phase_dice_max": null,
+          "phase_count": 0,
+          "official_soft_mm3": null,
+          "fnit_soft_mm3": null,
+          "soft_volume_fraction_difference": null
+        },
+        {
+          "label": 8118,
+          "output_label": 8118,
+          "name": "Left-Pf",
+          "parent": "thalamus",
+          "highres_reference_voxels": 290,
+          "highres_prediction_voxels": 276,
+          "highres_reference_hard_mm3": 36.24998703599132,
+          "highres_prediction_hard_mm3": 34.49998766184001,
+          "highres_hard_volume_fraction_difference": -0.04827586206896552,
+          "highres_dice": 0.7632508833922261,
+          "official_1mm_reference_voxels": 32,
+          "saved_1mm_prediction_voxels": 32,
+          "saved_1mm_dice": 0.75,
+          "both_highres_to_1mm_dice": 0.75,
+          "official_self_1mm_roundtrip_dice": 0.717948717948718,
+          "fnit_self_1mm_roundtrip_dice": 0.6917293233082706,
+          "centroid_distance_mm": 0.2853193147710807,
+          "fixed_phase_dice_min": 0.6857142857142857,
+          "fixed_phase_dice_median": 0.7352941176470589,
+          "fixed_phase_dice_max": 0.8285714285714286,
+          "phase_count": 27,
+          "official_soft_mm3": 43.693309,
+          "fnit_soft_mm3": 41.931148529052734,
+          "soft_volume_fraction_difference": -0.04033021328156366
+        },
+        {
+          "label": 8119,
+          "output_label": 8119,
+          "name": "Left-Pt",
+          "parent": "thalamus",
+          "highres_reference_voxels": 2,
+          "highres_prediction_voxels": 3,
+          "highres_reference_hard_mm3": 0.24999991059304355,
+          "highres_prediction_hard_mm3": 0.37499986588956535,
+          "highres_hard_volume_fraction_difference": 0.5,
+          "highres_dice": 0.8,
+          "official_1mm_reference_voxels": 0,
+          "saved_1mm_prediction_voxels": 0,
+          "saved_1mm_dice": null,
+          "both_highres_to_1mm_dice": null,
+          "official_self_1mm_roundtrip_dice": 0.0,
+          "fnit_self_1mm_roundtrip_dice": 0.0,
+          "centroid_distance_mm": 0.24999997019767764,
+          "fixed_phase_dice_min": 0.0,
+          "fixed_phase_dice_median": 0.0,
+          "fixed_phase_dice_max": 0.0,
+          "phase_count": 12,
+          "official_soft_mm3": null,
+          "fnit_soft_mm3": null,
+          "soft_volume_fraction_difference": null
+        },
+        {
+          "label": 8122,
+          "output_label": 8122,
+          "name": "Left-PuL",
+          "parent": "thalamus",
+          "highres_reference_voxels": 1007,
+          "highres_prediction_voxels": 979,
+          "highres_reference_hard_mm3": 125.87495498359743,
+          "highres_prediction_hard_mm3": 122.37495623529482,
+          "highres_hard_volume_fraction_difference": -0.027805362462760674,
+          "highres_dice": 0.8882175226586103,
+          "official_1mm_reference_voxels": 127,
+          "saved_1mm_prediction_voxels": 121,
+          "saved_1mm_dice": 0.8629032258064516,
+          "both_highres_to_1mm_dice": 0.8629032258064516,
+          "official_self_1mm_roundtrip_dice": 0.7770637666831438,
+          "fnit_self_1mm_roundtrip_dice": 0.7889060092449923,
+          "centroid_distance_mm": 0.19126711862731438,
+          "fixed_phase_dice_min": 0.753968253968254,
+          "fixed_phase_dice_median": 0.7951807228915663,
+          "fixed_phase_dice_max": 0.897119341563786,
+          "phase_count": 27,
+          "official_soft_mm3": 143.575172,
+          "fnit_soft_mm3": 140.6088409423828,
+          "soft_volume_fraction_difference": -0.020660473648028758
+        },
+        {
+          "label": 8127,
+          "output_label": 8127,
+          "name": "Left-VAmc",
+          "parent": "thalamus",
+          "highres_reference_voxels": 39,
+          "highres_prediction_voxels": 45,
+          "highres_reference_hard_mm3": 4.874998256564349,
+          "highres_prediction_hard_mm3": 5.6249979883434795,
+          "highres_hard_volume_fraction_difference": 0.15384615384615385,
+          "highres_dice": 0.8809523809523809,
+          "official_1mm_reference_voxels": 5,
+          "saved_1mm_prediction_voxels": 6,
+          "saved_1mm_dice": 0.7272727272727273,
+          "both_highres_to_1mm_dice": 0.7272727272727273,
+          "official_self_1mm_roundtrip_dice": 0.5569620253164557,
+          "fnit_self_1mm_roundtrip_dice": 0.4946236559139785,
+          "centroid_distance_mm": 0.04009812890728341,
+          "fixed_phase_dice_min": 0.6,
+          "fixed_phase_dice_median": 0.7272727272727273,
+          "fixed_phase_dice_max": 0.9230769230769231,
+          "phase_count": 27,
+          "official_soft_mm3": 25.358167,
+          "fnit_soft_mm3": 25.565174102783203,
+          "soft_volume_fraction_difference": 0.00816333068487172
+        },
+        {
+          "label": 8130,
+          "output_label": 8130,
+          "name": "Left-VM",
+          "parent": "thalamus",
+          "highres_reference_voxels": 1,
+          "highres_prediction_voxels": 0,
+          "highres_reference_hard_mm3": 0.12499995529652178,
+          "highres_prediction_hard_mm3": 0.0,
+          "highres_hard_volume_fraction_difference": -1.0,
+          "highres_dice": 0.0,
+          "official_1mm_reference_voxels": 0,
+          "saved_1mm_prediction_voxels": 0,
+          "saved_1mm_dice": null,
+          "both_highres_to_1mm_dice": null,
+          "official_self_1mm_roundtrip_dice": 0.0,
+          "fnit_self_1mm_roundtrip_dice": null,
+          "centroid_distance_mm": null,
+          "fixed_phase_dice_min": 0.0,
+          "fixed_phase_dice_median": 0.0,
+          "fixed_phase_dice_max": 0.0,
+          "phase_count": 2,
+          "official_soft_mm3": null,
+          "fnit_soft_mm3": null,
+          "soft_volume_fraction_difference": null
+        },
+        {
+          "label": 8211,
+          "output_label": 8211,
+          "name": "Right-L-Sg",
+          "parent": "thalamus",
+          "highres_reference_voxels": 51,
+          "highres_prediction_voxels": 39,
+          "highres_reference_hard_mm3": 6.374997720122611,
+          "highres_prediction_hard_mm3": 4.874998256564349,
+          "highres_hard_volume_fraction_difference": -0.23529411764705882,
+          "highres_dice": 0.7555555555555555,
+          "official_1mm_reference_voxels": 7,
+          "saved_1mm_prediction_voxels": 7,
+          "saved_1mm_dice": 0.7142857142857143,
+          "both_highres_to_1mm_dice": 0.7142857142857143,
+          "official_self_1mm_roundtrip_dice": 0.5233644859813084,
+          "fnit_self_1mm_roundtrip_dice": 0.4631578947368421,
+          "centroid_distance_mm": 0.33036232699296375,
+          "fixed_phase_dice_min": 0.26666666666666666,
+          "fixed_phase_dice_median": 0.5454545454545454,
+          "fixed_phase_dice_max": 0.8,
+          "phase_count": 27,
+          "official_soft_mm3": 13.252665,
+          "fnit_soft_mm3": 11.579341888427734,
+          "soft_volume_fraction_difference": -0.1262631411547991
+        },
+        {
+          "label": 8217,
+          "output_label": 8217,
+          "name": "Right-Pc",
+          "parent": "thalamus",
+          "highres_reference_voxels": 3,
+          "highres_prediction_voxels": 2,
+          "highres_reference_hard_mm3": 0.37499986588956535,
+          "highres_prediction_hard_mm3": 0.24999991059304355,
+          "highres_hard_volume_fraction_difference": -0.3333333333333333,
+          "highres_dice": 0.4,
+          "official_1mm_reference_voxels": 0,
+          "saved_1mm_prediction_voxels": 0,
+          "saved_1mm_dice": null,
+          "both_highres_to_1mm_dice": null,
+          "official_self_1mm_roundtrip_dice": 0.0,
+          "fnit_self_1mm_roundtrip_dice": 0.0,
+          "centroid_distance_mm": 0.3535533484464253,
+          "fixed_phase_dice_min": 0.0,
+          "fixed_phase_dice_median": 0.0,
+          "fixed_phase_dice_max": 1.0,
+          "phase_count": 8,
+          "official_soft_mm3": null,
+          "fnit_soft_mm3": null,
+          "soft_volume_fraction_difference": null
+        },
+        {
+          "label": 8218,
+          "output_label": 8218,
+          "name": "Right-Pf",
+          "parent": "thalamus",
+          "highres_reference_voxels": 339,
+          "highres_prediction_voxels": 321,
+          "highres_reference_hard_mm3": 42.374984845520885,
+          "highres_prediction_hard_mm3": 40.12498565018349,
+          "highres_hard_volume_fraction_difference": -0.05309734513274336,
+          "highres_dice": 0.8090909090909091,
+          "official_1mm_reference_voxels": 46,
+          "saved_1mm_prediction_voxels": 40,
+          "saved_1mm_dice": 0.813953488372093,
+          "both_highres_to_1mm_dice": 0.8275862068965517,
+          "official_self_1mm_roundtrip_dice": 0.6562942008486563,
+          "fnit_self_1mm_roundtrip_dice": 0.6409861325115562,
+          "centroid_distance_mm": 0.3071379832986707,
+          "fixed_phase_dice_min": 0.5393258426966292,
+          "fixed_phase_dice_median": 0.6265060240963856,
+          "fixed_phase_dice_max": 0.8275862068965517,
+          "phase_count": 27,
+          "official_soft_mm3": 49.22146,
+          "fnit_soft_mm3": 46.0624885559082,
+          "soft_volume_fraction_difference": -0.06417874325734745
+        },
+        {
+          "label": 8219,
+          "output_label": 8219,
+          "name": "Right-Pt",
+          "parent": "thalamus",
+          "highres_reference_voxels": 0,
+          "highres_prediction_voxels": 0,
+          "highres_reference_hard_mm3": 0.0,
+          "highres_prediction_hard_mm3": 0.0,
+          "highres_hard_volume_fraction_difference": null,
+          "highres_dice": null,
+          "official_1mm_reference_voxels": 0,
+          "saved_1mm_prediction_voxels": 0,
+          "saved_1mm_dice": null,
+          "both_highres_to_1mm_dice": null,
+          "official_self_1mm_roundtrip_dice": null,
+          "fnit_self_1mm_roundtrip_dice": null,
+          "centroid_distance_mm": null,
+          "fixed_phase_dice_min": null,
+          "fixed_phase_dice_median": null,
+          "fixed_phase_dice_max": null,
+          "phase_count": 0,
+          "official_soft_mm3": null,
+          "fnit_soft_mm3": null,
+          "soft_volume_fraction_difference": null
+        },
+        {
+          "label": 8221,
+          "output_label": 8221,
+          "name": "Right-PuI",
+          "parent": "thalamus",
+          "highres_reference_voxels": 964,
+          "highres_prediction_voxels": 950,
+          "highres_reference_hard_mm3": 120.49995690584699,
+          "highres_prediction_hard_mm3": 118.74995753169569,
+          "highres_hard_volume_fraction_difference": -0.014522821576763486,
+          "highres_dice": 0.8975966562173459,
+          "official_1mm_reference_voxels": 118,
+          "saved_1mm_prediction_voxels": 110,
+          "saved_1mm_dice": 0.8859649122807017,
+          "both_highres_to_1mm_dice": 0.8908296943231441,
+          "official_self_1mm_roundtrip_dice": 0.7431865828092243,
+          "fnit_self_1mm_roundtrip_dice": 0.7236126224156693,
+          "centroid_distance_mm": 0.16985680413926735,
+          "fixed_phase_dice_min": 0.7510204081632653,
+          "fixed_phase_dice_median": 0.8063241106719368,
+          "fixed_phase_dice_max": 0.8995983935742972,
+          "phase_count": 27,
+          "official_soft_mm3": 144.641644,
+          "fnit_soft_mm3": 146.46505737304688,
+          "soft_volume_fraction_difference": 0.012606420409926074
+        },
+        {
+          "label": 8227,
+          "output_label": 8227,
+          "name": "Right-VAmc",
+          "parent": "thalamus",
+          "highres_reference_voxels": 45,
+          "highres_prediction_voxels": 41,
+          "highres_reference_hard_mm3": 5.6249979883434795,
+          "highres_prediction_hard_mm3": 5.1249981671573925,
+          "highres_hard_volume_fraction_difference": -0.08888888888888889,
+          "highres_dice": 0.8837209302325582,
+          "official_1mm_reference_voxels": 4,
+          "saved_1mm_prediction_voxels": 3,
+          "saved_1mm_dice": 0.8571428571428571,
+          "both_highres_to_1mm_dice": 0.8571428571428571,
+          "official_self_1mm_roundtrip_dice": 0.36363636363636365,
+          "fnit_self_1mm_roundtrip_dice": 0.27692307692307694,
+          "centroid_distance_mm": 0.2112211629692991,
+          "fixed_phase_dice_min": 0.0,
+          "fixed_phase_dice_median": 0.3333333333333333,
+          "fixed_phase_dice_max": 0.8571428571428571,
+          "phase_count": 27,
+          "official_soft_mm3": 23.064193,
+          "fnit_soft_mm3": 23.056577682495117,
+          "soft_volume_fraction_difference": -0.0003301792308485414
+        },
+        {
+          "label": 8230,
+          "output_label": 8230,
+          "name": "Right-VM",
+          "parent": "thalamus",
+          "highres_reference_voxels": 0,
+          "highres_prediction_voxels": 0,
+          "highres_reference_hard_mm3": 0.0,
+          "highres_prediction_hard_mm3": 0.0,
+          "highres_hard_volume_fraction_difference": null,
+          "highres_dice": null,
+          "official_1mm_reference_voxels": 0,
+          "saved_1mm_prediction_voxels": 0,
+          "saved_1mm_dice": null,
+          "both_highres_to_1mm_dice": null,
+          "official_self_1mm_roundtrip_dice": null,
+          "fnit_self_1mm_roundtrip_dice": null,
+          "centroid_distance_mm": null,
+          "fixed_phase_dice_min": null,
+          "fixed_phase_dice_median": null,
+          "fixed_phase_dice_max": null,
+          "phase_count": 0,
+          "official_soft_mm3": null,
+          "fnit_soft_mm3": null,
+          "soft_volume_fraction_difference": null
+        }
+      ],
+      "native_sampling_consistency_diagnostic": {
+        "reconstructed_runtime_grid_contract": "Original working/crop geometry and integer fit crop inferred from highres header, max difference checked <1e-4mm",
+        "max_affine_rounding_mm": 4.427274546969784e-07,
+        "metrics": {
+          "reloaded_NIfTI_affine": {
+            "family_label_changed_voxels_before_support": 51,
+            "family_label_changed_voxels_after_support": 29,
+            "support_removed_family_voxels": 22,
+            "target_labels": [
+              {
+                "label": 8110,
+                "unmasked": 102,
+                "support_masked": 102,
+                "saved_native": 102
+              },
+              {
+                "label": 8130,
+                "unmasked": 0,
+                "support_masked": 0,
+                "saved_native": 0
+              }
+            ]
+          },
+          "reconstructed_runtime_float64_affine": {
+            "family_label_changed_voxels_before_support": 51,
+            "family_label_changed_voxels_after_support": 29,
+            "support_removed_family_voxels": 22,
+            "target_labels": [
+              {
+                "label": 8110,
+                "unmasked": 102,
+                "support_masked": 102,
+                "saved_native": 102
+              },
+              {
+                "label": 8130,
+                "unmasked": 0,
+                "support_masked": 0,
+                "saved_native": 0
+              }
+            ]
+          }
+        }
+      },
+      "highres_evaluated_labels": 47,
+      "saved_1mm_evaluated_labels": 44,
+      "aggregates_by_parent": {
+        "thalamus": {
+          "highres_all_evaluable": {
+            "evaluated_labels": 47,
+            "reference_voxels": 81129,
+            "mean_dice": 0.8809019043460512,
+            "reference_voxel_weighted_dice": 0.9628825085772572
+          },
+          "saved_1mm_all_evaluable": {
+            "evaluated_labels": 44,
+            "reference_voxels": 10123,
+            "mean_dice": 0.9086372850102709,
+            "reference_voxel_weighted_dice": 0.9605227557909656
+          },
+          "matched_evaluation_set": {
+            "label_count": 44,
+            "highres": {
+              "evaluated_labels": 44,
+              "reference_voxels": 81123,
+              "mean_dice": 0.9136906705514636,
+              "reference_voxel_weighted_dice": 0.9629192095751427
+            },
+            "saved_1mm": {
+              "evaluated_labels": 44,
+              "reference_voxels": 10123,
+              "mean_dice": 0.9086372850102709,
+              "reference_voxel_weighted_dice": 0.9605227557909656
+            }
+          }
+        }
+      },
+      "label_metrics_selection": "Requested small hippo/amyg labels; thalamus native Dice<0.9 or absent. Aggregates include all evaluable labels."
+    },
+    "hippo-amygdala-left": {
+      "official_original_highres_exists": true,
+      "official_highres_shape": [
+        156,
+        156,
+        197
+      ],
+      "official_spacing_mm": [
+        0.3333299458026886,
+        0.333329975605011,
+        0.3333299458026886
+      ],
+      "fnit_highres_shape": [
+        161,
+        160,
+        207
+      ],
+      "fnit_spacing_mm": [
+        0.3333300054073334,
+        0.3333300054073334,
+        0.3333300054073334
+      ],
+      "comparison_union_highres_shape": [
+        163,
+        162,
+        208
+      ],
+      "input_sha256_by_role": {
+        "official_highres": "93e04b34d92998b4d68cb2a352999b0e9819da3402583df13fa9b92af4d4e066",
+        "official_native": "39bf9894201be402fda3384da3276867746984fa1c26cf8e05426e50aa0abf65",
+        "fnit_highres": "5106a701d60d7c11a47a48cedc738716c15ebe438cb49c905e46f781d6feca73"
+      },
+      "highres_mean_dice": 0.8652076306133428,
+      "highres_reference_voxel_weighted_dice": 0.9042943257498891,
+      "saved_1mm_mean_dice": 0.8528050831264657,
+      "saved_1mm_reference_voxel_weighted_dice": 0.8926503189864594,
+      "official_highres_to_1mm_consistency_mean_dice": 0.9894760235390374,
+      "official_highres_to_1mm_consistency_weighted_dice": 0.993122711535182,
+      "fnit_highres_to_saved_1mm_consistency_weighted_dice": 0.9790959622334513,
+      "label_metrics": [
+        {
+          "label": 203,
+          "output_label": 203,
+          "name": "Left-parasubiculum",
+          "parent": "hippocampus",
+          "highres_reference_voxels": 1064,
+          "highres_prediction_voxels": 1069,
+          "highres_reference_hard_mm3": 39.40620949864033,
+          "highres_prediction_hard_mm3": 39.59138905455499,
+          "highres_hard_volume_fraction_difference": 0.004699248120300752,
+          "highres_dice": 0.5625879043600562,
+          "official_1mm_reference_voxels": 41,
+          "saved_1mm_prediction_voxels": 38,
+          "saved_1mm_dice": 0.6075949367088608,
+          "both_highres_to_1mm_dice": 0.6075949367088608,
+          "official_self_1mm_roundtrip_dice": 0.7010594196222939,
+          "fnit_self_1mm_roundtrip_dice": 0.6558472553699284,
+          "centroid_distance_mm": 1.076748736137527,
+          "fixed_phase_dice_min": 0.5066666666666667,
+          "fixed_phase_dice_median": 0.6075949367088608,
+          "fixed_phase_dice_max": 0.6578947368421053,
+          "phase_count": 27,
+          "official_soft_mm3": 46.009698,
+          "fnit_soft_mm3": 44.01955032348633,
+          "soft_volume_fraction_difference": -0.04325496065011494
+        },
+        {
+          "label": 240,
+          "output_label": 240,
+          "name": "Left-CA3-body",
+          "parent": "hippocampus",
+          "highres_reference_voxels": 1881,
+          "highres_prediction_voxels": 2123,
+          "highres_reference_hard_mm3": 69.66454893509629,
+          "highres_prediction_hard_mm3": 78.62723944136599,
+          "highres_hard_volume_fraction_difference": 0.1286549707602339,
+          "highres_dice": 0.7522477522477522,
+          "official_1mm_reference_voxels": 61,
+          "saved_1mm_prediction_voxels": 66,
+          "saved_1mm_dice": 0.7401574803149606,
+          "both_highres_to_1mm_dice": 0.7076923076923077,
+          "official_self_1mm_roundtrip_dice": 0.5795940170940171,
+          "fnit_self_1mm_roundtrip_dice": 0.6198052719069105,
+          "centroid_distance_mm": 0.2192144724509607,
+          "fixed_phase_dice_min": 0.6074074074074074,
+          "fixed_phase_dice_median": 0.7194244604316546,
+          "fixed_phase_dice_max": 0.7922077922077922,
+          "phase_count": 27,
+          "official_soft_mm3": 72.547913,
+          "fnit_soft_mm3": 82.04540252685547,
+          "soft_volume_fraction_difference": 0.13091333897993007
+        },
+        {
+          "label": 243,
+          "output_label": 243,
+          "name": "Left-GC-ML-DG-head",
+          "parent": "hippocampus",
+          "highres_reference_voxels": 4121,
+          "highres_prediction_voxels": 4021,
+          "highres_reference_hard_mm3": 152.6249899848654,
+          "highres_prediction_hard_mm3": 148.92139886657213,
+          "highres_hard_volume_fraction_difference": -0.02426595486532395,
+          "highres_dice": 0.7983296487349546,
+          "official_1mm_reference_voxels": 147,
+          "saved_1mm_prediction_voxels": 128,
+          "saved_1mm_dice": 0.7272727272727273,
+          "both_highres_to_1mm_dice": 0.7311827956989247,
+          "official_self_1mm_roundtrip_dice": 0.5854430379746836,
+          "fnit_self_1mm_roundtrip_dice": 0.5707553344678623,
+          "centroid_distance_mm": 0.15149616687759887,
+          "fixed_phase_dice_min": 0.6988847583643123,
+          "fixed_phase_dice_median": 0.7661016949152543,
+          "fixed_phase_dice_max": 0.8461538461538461,
+          "phase_count": 27,
+          "official_soft_mm3": 150.033613,
+          "fnit_soft_mm3": 144.55506896972656,
+          "soft_volume_fraction_difference": -0.03651544424430704
+        },
+        {
+          "label": 244,
+          "output_label": 244,
+          "name": "Left-GC-ML-DG-body",
+          "parent": "hippocampus",
+          "highres_reference_voxels": 2977,
+          "highres_prediction_voxels": 2883,
+          "highres_reference_hard_mm3": 110.25590759159047,
+          "highres_prediction_hard_mm3": 106.7745319403948,
+          "highres_hard_volume_fraction_difference": -0.031575411488075245,
+          "highres_dice": 0.8665529010238908,
+          "official_1mm_reference_voxels": 99,
+          "saved_1mm_prediction_voxels": 101,
+          "saved_1mm_dice": 0.86,
+          "both_highres_to_1mm_dice": 0.79,
+          "official_self_1mm_roundtrip_dice": 0.5207335205683132,
+          "fnit_self_1mm_roundtrip_dice": 0.505091649694501,
+          "centroid_distance_mm": 0.08576127910905557,
+          "fixed_phase_dice_min": 0.7663551401869159,
+          "fixed_phase_dice_median": 0.8627450980392157,
+          "fixed_phase_dice_max": 0.8959276018099548,
+          "phase_count": 27,
+          "official_soft_mm3": 113.16057,
+          "fnit_soft_mm3": 110.6275634765625,
+          "soft_volume_fraction_difference": -0.022384179608122393
+        },
+        {
+          "label": 7006,
+          "output_label": 7006,
+          "name": "Left-Medial-nucleus",
+          "parent": "amygdala",
+          "highres_reference_voxels": 81,
+          "highres_prediction_voxels": 72,
+          "highres_reference_hard_mm3": 2.999908805817544,
+          "highres_prediction_hard_mm3": 2.66658560517115,
+          "highres_hard_volume_fraction_difference": -0.1111111111111111,
+          "highres_dice": 0.8235294117647058,
+          "official_1mm_reference_voxels": 3,
+          "saved_1mm_prediction_voxels": 3,
+          "saved_1mm_dice": 1.0,
+          "both_highres_to_1mm_dice": 1.0,
+          "official_self_1mm_roundtrip_dice": 0.48677248677248675,
+          "fnit_self_1mm_roundtrip_dice": 0.5,
+          "centroid_distance_mm": 0.41759524271535675,
+          "fixed_phase_dice_min": 0.5714285714285714,
+          "fixed_phase_dice_median": 1.0,
+          "fixed_phase_dice_max": 1.0,
+          "phase_count": 27,
+          "official_soft_mm3": 11.927982,
+          "fnit_soft_mm3": 10.899885177612305,
+          "soft_volume_fraction_difference": -0.08619201658651861
+        },
+        {
+          "label": 7007,
+          "output_label": 7007,
+          "name": "Left-Cortical-nucleus",
+          "parent": "amygdala",
+          "highres_reference_voxels": 353,
+          "highres_prediction_voxels": 353,
+          "highres_reference_hard_mm3": 13.07367664757522,
+          "highres_prediction_hard_mm3": 13.07367664757522,
+          "highres_hard_volume_fraction_difference": 0.0,
+          "highres_dice": 0.8073654390934845,
+          "official_1mm_reference_voxels": 11,
+          "saved_1mm_prediction_voxels": 9,
+          "saved_1mm_dice": 0.8,
+          "both_highres_to_1mm_dice": 0.8421052631578947,
+          "official_self_1mm_roundtrip_dice": 0.4523076923076923,
+          "fnit_self_1mm_roundtrip_dice": 0.5031645569620253,
+          "centroid_distance_mm": 0.06548957390636012,
+          "fixed_phase_dice_min": 0.7272727272727273,
+          "fixed_phase_dice_median": 0.8148148148148148,
+          "fixed_phase_dice_max": 0.8666666666666667,
+          "phase_count": 27,
+          "official_soft_mm3": 17.781869,
+          "fnit_soft_mm3": 17.4356632232666,
+          "soft_volume_fraction_difference": -0.019469594379162212
+        },
+        {
+          "label": 7010,
+          "output_label": 7010,
+          "name": "Left-Anterior-amygdaloid-area-AAA",
+          "parent": "amygdala",
+          "highres_reference_voxels": 758,
+          "highres_prediction_voxels": 754,
+          "highres_reference_hard_mm3": 28.07322067666294,
+          "highres_prediction_hard_mm3": 27.92507703193121,
+          "highres_hard_volume_fraction_difference": -0.005277044854881266,
+          "highres_dice": 0.8955026455026455,
+          "official_1mm_reference_voxels": 23,
+          "saved_1mm_prediction_voxels": 22,
+          "saved_1mm_dice": 0.8,
+          "both_highres_to_1mm_dice": 0.8076923076923077,
+          "official_self_1mm_roundtrip_dice": 0.7311095983662356,
+          "fnit_self_1mm_roundtrip_dice": 0.7068223724646588,
+          "centroid_distance_mm": 0.2061902584445306,
+          "fixed_phase_dice_min": 0.8076923076923077,
+          "fixed_phase_dice_median": 0.8846153846153846,
+          "fixed_phase_dice_max": 0.9818181818181818,
+          "phase_count": 27,
+          "official_soft_mm3": 44.846954,
+          "fnit_soft_mm3": 45.43966293334961,
+          "soft_volume_fraction_difference": 0.013216258418567575
+        }
+      ],
+      "native_sampling_consistency_diagnostic": {
+        "reconstructed_runtime_grid_contract": "Original working/crop geometry and integer fit crop inferred from highres header, max difference checked <1e-4mm",
+        "max_affine_rounding_mm": 4.5166737727697637e-07,
+        "metrics": {
+          "reloaded_NIfTI_affine": {
+            "family_label_changed_voxels_before_support": 128,
+            "family_label_changed_voxels_after_support": 121,
+            "support_removed_family_voxels": 7,
+            "target_labels": [
+              {
+                "label": 7006,
+                "unmasked": 3,
+                "support_masked": 3,
+                "saved_native": 3
+              },
+              {
+                "label": 7010,
+                "unmasked": 29,
+                "support_masked": 23,
+                "saved_native": 22
+              },
+              {
+                "label": 7007,
+                "unmasked": 9,
+                "support_masked": 9,
+                "saved_native": 9
+              },
+              {
+                "label": 203,
+                "unmasked": 38,
+                "support_masked": 38,
+                "saved_native": 38
+              },
+              {
+                "label": 240,
+                "unmasked": 69,
+                "support_masked": 69,
+                "saved_native": 66
+              },
+              {
+                "label": 243,
+                "unmasked": 131,
+                "support_masked": 131,
+                "saved_native": 128
+              },
+              {
+                "label": 244,
+                "unmasked": 100,
+                "support_masked": 100,
+                "saved_native": 101
+              }
+            ]
+          },
+          "reconstructed_runtime_float64_affine": {
+            "family_label_changed_voxels_before_support": 15,
+            "family_label_changed_voxels_after_support": 7,
+            "support_removed_family_voxels": 8,
+            "target_labels": [
+              {
+                "label": 7006,
+                "unmasked": 3,
+                "support_masked": 3,
+                "saved_native": 3
+              },
+              {
+                "label": 7010,
+                "unmasked": 29,
+                "support_masked": 22,
+                "saved_native": 22
+              },
+              {
+                "label": 7007,
+                "unmasked": 9,
+                "support_masked": 9,
+                "saved_native": 9
+              },
+              {
+                "label": 203,
+                "unmasked": 38,
+                "support_masked": 38,
+                "saved_native": 38
+              },
+              {
+                "label": 240,
+                "unmasked": 66,
+                "support_masked": 66,
+                "saved_native": 66
+              },
+              {
+                "label": 243,
+                "unmasked": 133,
+                "support_masked": 133,
+                "saved_native": 128
+              },
+              {
+                "label": 244,
+                "unmasked": 103,
+                "support_masked": 103,
+                "saved_native": 101
+              }
+            ]
+          }
+        }
+      },
+      "highres_evaluated_labels": 28,
+      "saved_1mm_evaluated_labels": 28,
+      "aggregates_by_parent": {
+        "amygdala": {
+          "highres_all_evaluable": {
+            "evaluated_labels": 9,
+            "reference_voxels": 39354,
+            "mean_dice": 0.8751882083165757,
+            "reference_voxel_weighted_dice": 0.9490164629321824
+          },
+          "saved_1mm_all_evaluable": {
+            "evaluated_labels": 9,
+            "reference_voxels": 1371,
+            "mean_dice": 0.8628762195515566,
+            "reference_voxel_weighted_dice": 0.9416136630621825
+          },
+          "matched_evaluation_set": {
+            "label_count": 9,
+            "highres": {
+              "evaluated_labels": 9,
+              "reference_voxels": 39354,
+              "mean_dice": 0.8751882083165757,
+              "reference_voxel_weighted_dice": 0.9490164629321824
+            },
+            "saved_1mm": {
+              "evaluated_labels": 9,
+              "reference_voxels": 1371,
+              "mean_dice": 0.8628762195515566,
+              "reference_voxel_weighted_dice": 0.9416136630621825
+            }
+          }
+        },
+        "hippocampus": {
+          "highres_all_evaluable": {
+            "evaluated_labels": 19,
+            "reference_voxels": 86914,
+            "mean_dice": 0.8604799885433905,
+            "reference_voxel_weighted_dice": 0.8840444812291908
+          },
+          "saved_1mm_all_evaluable": {
+            "evaluated_labels": 19,
+            "reference_voxels": 3067,
+            "mean_dice": 0.8480345448198436,
+            "reference_voxel_weighted_dice": 0.8707628899914099
+          },
+          "matched_evaluation_set": {
+            "label_count": 19,
+            "highres": {
+              "evaluated_labels": 19,
+              "reference_voxels": 86914,
+              "mean_dice": 0.8604799885433905,
+              "reference_voxel_weighted_dice": 0.8840444812291908
+            },
+            "saved_1mm": {
+              "evaluated_labels": 19,
+              "reference_voxels": 3067,
+              "mean_dice": 0.8480345448198436,
+              "reference_voxel_weighted_dice": 0.8707628899914099
+            }
+          }
+        }
+      },
+      "label_metrics_selection": "Requested small hippo/amyg labels; thalamus native Dice<0.9 or absent. Aggregates include all evaluable labels."
+    },
+    "hippo-amygdala-right": {
+      "official_original_highres_exists": true,
+      "official_highres_shape": [
+        148,
+        153,
+        207
+      ],
+      "official_spacing_mm": [
+        0.3333299458026886,
+        0.333329975605011,
+        0.3333299458026886
+      ],
+      "fnit_highres_shape": [
+        153,
+        155,
+        214
+      ],
+      "fnit_spacing_mm": [
+        0.3333300054073334,
+        0.3333300054073334,
+        0.3333300054073334
+      ],
+      "comparison_union_highres_shape": [
+        154,
+        157,
+        215
+      ],
+      "input_sha256_by_role": {
+        "official_highres": "333763d92208d2d8ac258168687f06e15c5bff4cd895bc29868ef2305579a21d",
+        "official_native": "f861b15f67e184c6e9aaae3bc269460f33040d6bcae2b0ac2d7fa6cd2cbb22d2",
+        "fnit_highres": "3e21aa5ff31e7359b9e5c7dd83f1472e880268f98bdebc380dd0750c234edfd1"
+      },
+      "highres_mean_dice": 0.7562882631550405,
+      "highres_reference_voxel_weighted_dice": 0.8522327746344712,
+      "saved_1mm_mean_dice": 0.7329321636930146,
+      "saved_1mm_reference_voxel_weighted_dice": 0.8442827503136835,
+      "official_highres_to_1mm_consistency_mean_dice": 0.9668870734636682,
+      "official_highres_to_1mm_consistency_weighted_dice": 0.9749135645604041,
+      "fnit_highres_to_saved_1mm_consistency_weighted_dice": 0.9692395852032742,
+      "label_metrics": [
+        {
+          "label": 203,
+          "output_label": 10203,
+          "name": "Right-parasubiculum",
+          "parent": "hippocampus",
+          "highres_reference_voxels": 1033,
+          "highres_prediction_voxels": 997,
+          "highres_reference_hard_mm3": 38.25809625196941,
+          "highres_prediction_hard_mm3": 36.924803449383845,
+          "highres_hard_volume_fraction_difference": -0.03484995159728945,
+          "highres_dice": 0.6689655172413793,
+          "official_1mm_reference_voxels": 35,
+          "saved_1mm_prediction_voxels": 36,
+          "saved_1mm_dice": 0.5915492957746479,
+          "both_highres_to_1mm_dice": 0.5915492957746479,
+          "official_self_1mm_roundtrip_dice": 0.6653185035389282,
+          "fnit_self_1mm_roundtrip_dice": 0.6561706449974607,
+          "centroid_distance_mm": 0.7990051175241956,
+          "fixed_phase_dice_min": 0.5915492957746479,
+          "fixed_phase_dice_median": 0.625,
+          "fixed_phase_dice_max": 0.7222222222222222,
+          "phase_count": 27,
+          "official_soft_mm3": 46.423494,
+          "fnit_soft_mm3": 43.761741638183594,
+          "soft_volume_fraction_difference": -0.05733632116997493
+        },
+        {
+          "label": 240,
+          "output_label": 10240,
+          "name": "Right-CA3-body",
+          "parent": "hippocampus",
+          "highres_reference_voxels": 2647,
+          "highres_prediction_voxels": 2790,
+          "highres_reference_hard_mm3": 98.0340569012227,
+          "highres_prediction_hard_mm3": 103.33019220038206,
+          "highres_hard_volume_fraction_difference": 0.05402342274272762,
+          "highres_dice": 0.5812028692293544,
+          "official_1mm_reference_voxels": 81,
+          "saved_1mm_prediction_voxels": 101,
+          "saved_1mm_dice": 0.5164835164835165,
+          "both_highres_to_1mm_dice": 0.5729166666666666,
+          "official_self_1mm_roundtrip_dice": 0.6454336147352264,
+          "fnit_self_1mm_roundtrip_dice": 0.6878306878306878,
+          "centroid_distance_mm": 0.501377375087096,
+          "fixed_phase_dice_min": 0.5492227979274611,
+          "fixed_phase_dice_median": 0.5771144278606966,
+          "fixed_phase_dice_max": 0.6372549019607843,
+          "phase_count": 27,
+          "official_soft_mm3": 96.091122,
+          "fnit_soft_mm3": 99.31440734863281,
+          "soft_volume_fraction_difference": 0.033544049455815635
+        },
+        {
+          "label": 243,
+          "output_label": 10243,
+          "name": "Right-GC-ML-DG-head",
+          "parent": "hippocampus",
+          "highres_reference_voxels": 3941,
+          "highres_prediction_voxels": 4046,
+          "highres_reference_hard_mm3": 145.95852597193752,
+          "highres_prediction_hard_mm3": 149.84729664614545,
+          "highres_hard_volume_fraction_difference": 0.02664298401420959,
+          "highres_dice": 0.6185050707399524,
+          "official_1mm_reference_voxels": 151,
+          "saved_1mm_prediction_voxels": 147,
+          "saved_1mm_dice": 0.6174496644295302,
+          "both_highres_to_1mm_dice": 0.5918367346938775,
+          "official_self_1mm_roundtrip_dice": 0.5754060324825986,
+          "fnit_self_1mm_roundtrip_dice": 0.581574372982369,
+          "centroid_distance_mm": 0.22072653439190995,
+          "fixed_phase_dice_min": 0.5743243243243243,
+          "fixed_phase_dice_median": 0.6158940397350994,
+          "fixed_phase_dice_max": 0.6576271186440678,
+          "phase_count": 27,
+          "official_soft_mm3": 148.83509,
+          "fnit_soft_mm3": 152.17953491210938,
+          "soft_volume_fraction_difference": 0.022470809216491666
+        },
+        {
+          "label": 244,
+          "output_label": 10244,
+          "name": "Right-GC-ML-DG-body",
+          "parent": "hippocampus",
+          "highres_reference_voxels": 3155,
+          "highres_prediction_voxels": 3494,
+          "highres_reference_hard_mm3": 116.84829978215248,
+          "highres_prediction_hard_mm3": 129.40347367316664,
+          "highres_hard_volume_fraction_difference": 0.1074484944532488,
+          "highres_dice": 0.6990524890961046,
+          "official_1mm_reference_voxels": 108,
+          "saved_1mm_prediction_voxels": 118,
+          "saved_1mm_dice": 0.7168141592920354,
+          "both_highres_to_1mm_dice": 0.64,
+          "official_self_1mm_roundtrip_dice": 0.525,
+          "fnit_self_1mm_roundtrip_dice": 0.5571913929784824,
+          "centroid_distance_mm": 0.20758067501672597,
+          "fixed_phase_dice_min": 0.586046511627907,
+          "fixed_phase_dice_median": 0.6857142857142857,
+          "fixed_phase_dice_max": 0.7368421052631579,
+          "phase_count": 27,
+          "official_soft_mm3": 122.926626,
+          "fnit_soft_mm3": 134.12232971191406,
+          "soft_volume_fraction_difference": 0.09107631174969419
+        },
+        {
+          "label": 7006,
+          "output_label": 17006,
+          "name": "Right-Medial-nucleus",
+          "parent": "amygdala",
+          "highres_reference_voxels": 76,
+          "highres_prediction_voxels": 41,
+          "highres_reference_hard_mm3": 2.8147292499028804,
+          "highres_prediction_hard_mm3": 1.5184723585002382,
+          "highres_hard_volume_fraction_difference": -0.4605263157894737,
+          "highres_dice": 0.3247863247863248,
+          "official_1mm_reference_voxels": 3,
+          "saved_1mm_prediction_voxels": 0,
+          "saved_1mm_dice": 0.0,
+          "both_highres_to_1mm_dice": 0.5,
+          "official_self_1mm_roundtrip_dice": 0.25477707006369427,
+          "fnit_self_1mm_roundtrip_dice": 0.17647058823529413,
+          "centroid_distance_mm": 1.4876965433306677,
+          "fixed_phase_dice_min": 0.0,
+          "fixed_phase_dice_median": 0.3333333333333333,
+          "fixed_phase_dice_max": 0.8,
+          "phase_count": 27,
+          "official_soft_mm3": 12.98364,
+          "fnit_soft_mm3": 11.743184089660645,
+          "soft_volume_fraction_difference": -0.09553991872382128
+        },
+        {
+          "label": 7007,
+          "output_label": 17007,
+          "name": "Right-Cortical-nucleus",
+          "parent": "amygdala",
+          "highres_reference_voxels": 432,
+          "highres_prediction_voxels": 362,
+          "highres_reference_hard_mm3": 15.9995136310269,
+          "highres_prediction_hard_mm3": 13.406999848221615,
+          "highres_hard_volume_fraction_difference": -0.16203703703703703,
+          "highres_dice": 0.6347607052896725,
+          "official_1mm_reference_voxels": 15,
+          "saved_1mm_prediction_voxels": 13,
+          "saved_1mm_dice": 0.7142857142857143,
+          "both_highres_to_1mm_dice": 0.7142857142857143,
+          "official_self_1mm_roundtrip_dice": 0.6045400238948626,
+          "fnit_self_1mm_roundtrip_dice": 0.6002805049088359,
+          "centroid_distance_mm": 0.42459887762971743,
+          "fixed_phase_dice_min": 0.46153846153846156,
+          "fixed_phase_dice_median": 0.6428571428571429,
+          "fixed_phase_dice_max": 0.7142857142857143,
+          "phase_count": 27,
+          "official_soft_mm3": 19.110707,
+          "fnit_soft_mm3": 17.06328773498535,
+          "soft_volume_fraction_difference": -0.10713466880187372
+        },
+        {
+          "label": 7010,
+          "output_label": 17010,
+          "name": "Right-Anterior-amygdaloid-area-AAA",
+          "parent": "amygdala",
+          "highres_reference_voxels": 1,
+          "highres_prediction_voxels": 621,
+          "highres_reference_hard_mm3": 0.03703591118293264,
+          "highres_prediction_hard_mm3": 22.99930084460117,
+          "highres_hard_volume_fraction_difference": 620.0,
+          "highres_dice": 0.0,
+          "official_1mm_reference_voxels": 0,
+          "saved_1mm_prediction_voxels": 22,
+          "saved_1mm_dice": 0.0,
+          "both_highres_to_1mm_dice": 0.0,
+          "official_self_1mm_roundtrip_dice": 0.0,
+          "fnit_self_1mm_roundtrip_dice": 0.6869633099141296,
+          "centroid_distance_mm": 2.093355118947123,
+          "fixed_phase_dice_min": 0.0,
+          "fixed_phase_dice_median": 0.0,
+          "fixed_phase_dice_max": 0.0,
+          "phase_count": 27,
+          "official_soft_mm3": 45.250801,
+          "fnit_soft_mm3": 44.51537322998047,
+          "soft_volume_fraction_difference": -0.01625225971181226
+        }
+      ],
+      "native_sampling_consistency_diagnostic": {
+        "reconstructed_runtime_grid_contract": "Original working/crop geometry and integer fit crop inferred from highres header, max difference checked <1e-4mm",
+        "max_affine_rounding_mm": 1.0150125362429208e-06,
+        "metrics": {
+          "reloaded_NIfTI_affine": {
+            "family_label_changed_voxels_before_support": 181,
+            "family_label_changed_voxels_after_support": 179,
+            "support_removed_family_voxels": 2,
+            "target_labels": [
+              {
+                "label": 17006,
+                "unmasked": 1,
+                "support_masked": 0,
+                "saved_native": 0
+              },
+              {
+                "label": 17010,
+                "unmasked": 22,
+                "support_masked": 22,
+                "saved_native": 22
+              },
+              {
+                "label": 17007,
+                "unmasked": 13,
+                "support_masked": 13,
+                "saved_native": 13
+              },
+              {
+                "label": 10203,
+                "unmasked": 36,
+                "support_masked": 36,
+                "saved_native": 36
+              },
+              {
+                "label": 10240,
+                "unmasked": 102,
+                "support_masked": 102,
+                "saved_native": 101
+              },
+              {
+                "label": 10243,
+                "unmasked": 143,
+                "support_masked": 143,
+                "saved_native": 147
+              },
+              {
+                "label": 10244,
+                "unmasked": 120,
+                "support_masked": 120,
+                "saved_native": 118
+              }
+            ]
+          },
+          "reconstructed_runtime_float64_affine": {
+            "family_label_changed_voxels_before_support": 16,
+            "family_label_changed_voxels_after_support": 14,
+            "support_removed_family_voxels": 2,
+            "target_labels": [
+              {
+                "label": 17006,
+                "unmasked": 1,
+                "support_masked": 0,
+                "saved_native": 0
+              },
+              {
+                "label": 17010,
+                "unmasked": 22,
+                "support_masked": 22,
+                "saved_native": 22
+              },
+              {
+                "label": 17007,
+                "unmasked": 13,
+                "support_masked": 13,
+                "saved_native": 13
+              },
+              {
+                "label": 10203,
+                "unmasked": 36,
+                "support_masked": 36,
+                "saved_native": 36
+              },
+              {
+                "label": 10240,
+                "unmasked": 101,
+                "support_masked": 101,
+                "saved_native": 101
+              },
+              {
+                "label": 10243,
+                "unmasked": 150,
+                "support_masked": 150,
+                "saved_native": 147
+              },
+              {
+                "label": 10244,
+                "unmasked": 118,
+                "support_masked": 118,
+                "saved_native": 118
+              }
+            ]
+          }
+        }
+      },
+      "highres_evaluated_labels": 28,
+      "saved_1mm_evaluated_labels": 28,
+      "aggregates_by_parent": {
+        "amygdala": {
+          "highres_all_evaluable": {
+            "evaluated_labels": 9,
+            "reference_voxels": 37057,
+            "mean_dice": 0.6760440387834794,
+            "reference_voxel_weighted_dice": 0.9261386193353459
+          },
+          "saved_1mm_all_evaluable": {
+            "evaluated_labels": 9,
+            "reference_voxels": 1285,
+            "mean_dice": 0.6467288258645455,
+            "reference_voxel_weighted_dice": 0.9176896591560026
+          },
+          "matched_evaluation_set": {
+            "label_count": 9,
+            "highres": {
+              "evaluated_labels": 9,
+              "reference_voxels": 37057,
+              "mean_dice": 0.6760440387834794,
+              "reference_voxel_weighted_dice": 0.9261386193353459
+            },
+            "saved_1mm": {
+              "evaluated_labels": 9,
+              "reference_voxels": 1285,
+              "mean_dice": 0.6467288258645455,
+              "reference_voxel_weighted_dice": 0.9176896591560026
+            }
+          }
+        },
+        "hippocampus": {
+          "highres_all_evaluable": {
+            "evaluated_labels": 19,
+            "reference_voxels": 86809,
+            "mean_dice": 0.7942986852257798,
+            "reference_voxel_weighted_dice": 0.8206838697158527
+          },
+          "saved_1mm_all_evaluable": {
+            "evaluated_labels": 19,
+            "reference_voxels": 3058,
+            "mean_dice": 0.7737653237170261,
+            "reference_voxel_weighted_dice": 0.813436485479681
+          },
+          "matched_evaluation_set": {
+            "label_count": 19,
+            "highres": {
+              "evaluated_labels": 19,
+              "reference_voxels": 86809,
+              "mean_dice": 0.7942986852257798,
+              "reference_voxel_weighted_dice": 0.8206838697158527
+            },
+            "saved_1mm": {
+              "evaluated_labels": 19,
+              "reference_voxels": 3058,
+              "mean_dice": 0.7737653237170261,
+              "reference_voxel_weighted_dice": 0.813436485479681
+            }
+          }
+        }
+      },
+      "label_metrics_selection": "Requested small hippo/amyg labels; thalamus native Dice<0.9 or absent. Aggregates include all evaluable labels."
+    }
+  },
+  "limitations": [
+    "Highres hard labels are not posterior volumes.",
+    "Highres/native Dice changes and self roundtrip loss do not establish that remaining deformation differences are correct.",
+    "Only one existing public example and the frozen full_stage run are evaluated.",
+    "Mean Dice denominators differ when labels vanish at 1mm. Matched-evaluation aggregates are reported separately.",
+    "Finite-precision saved NIfTI affine headers can alter nearest-neighbor ties during highres-to-native resampling; runtime-geometry reconstruction is a diagnostic.",
+    "Right AAA has one official highres hard voxel and no native voxels, despite nonzero official soft volume; hard and soft agreement remain separate."
+  ]
+}

@@ -1,0 +1,961 @@
+diff --git a/src/fnit/gems/_raster_triton.py b/src/fnit/gems/_raster_triton.py
+index 6fa3278..b5974e5 100644
+--- a/src/fnit/gems/_raster_triton.py
++++ b/src/fnit/gems/_raster_triton.py
+@@ -2,6 +2,8 @@
+ 
+ import torch
+ 
++from .deformation import ordered_vertex_sum
++
+ try:
+     import triton
+     import triton.language as tl
+@@ -103,7 +105,8 @@ if triton is not None:
+                           V0S0: tl.constexpr, V0S1: tl.constexpr,
+                           IS0: tl.constexpr, IS1: tl.constexpr, IS2: tl.constexpr,
+                           LS0: tl.constexpr, LS1: tl.constexpr,
+-                          BACKGROUND: tl.constexpr, BLOCK: tl.constexpr):
++                          BACKGROUND: tl.constexpr, BLOCK: tl.constexpr,
++                          DETERMINISTIC: tl.constexpr):
+         row = tl.program_id(0)
+         packed = tl.load(Reorder + row)
+         present = packed >= 0
+@@ -171,27 +174,36 @@ if triton is not None:
+         gz = (i02 * q1 + i12 * q2) + i22 * q3
+         # Differentiating the barycentric solve gives dL/d(vertex_i)=-w_i*h.
+         # No candidate graphs or inverse-matrix backward are retained.
+-        tl.atomic_add(Gradient + v0 * 3, -w0 * gx, mask=covered)
+-        tl.atomic_add(Gradient + v0 * 3 + 1, -w0 * gy, mask=covered)
+-        tl.atomic_add(Gradient + v0 * 3 + 2, -w0 * gz, mask=covered)
+-        tl.atomic_add(Gradient + v1 * 3, -w1 * gx, mask=covered)
+-        tl.atomic_add(Gradient + v1 * 3 + 1, -w1 * gy, mask=covered)
+-        tl.atomic_add(Gradient + v1 * 3 + 2, -w1 * gz, mask=covered)
+-        tl.atomic_add(Gradient + v2 * 3, -w2 * gx, mask=covered)
+-        tl.atomic_add(Gradient + v2 * 3 + 1, -w2 * gy, mask=covered)
+-        tl.atomic_add(Gradient + v2 * 3 + 2, -w2 * gz, mask=covered)
+-        tl.atomic_add(Gradient + v3 * 3, -w3 * gx, mask=covered)
+-        tl.atomic_add(Gradient + v3 * 3 + 1, -w3 * gy, mask=covered)
+-        tl.atomic_add(Gradient + v3 * 3 + 2, -w3 * gz, mask=covered)
++        if DETERMINISTIC:
++            for corner in tl.static_range(4):
++                weight = w0 if corner == 0 else w1 if corner == 1 else w2 if corner == 2 else w3
++                output = Gradient + (packed * 4 + corner) * 3
++                tl.store(output, tl.where(covered, -weight * gx, 0.0), mask=present)
++                tl.store(output + 1, tl.where(covered, -weight * gy, 0.0), mask=present)
++                tl.store(output + 2, tl.where(covered, -weight * gz, 0.0), mask=present)
++        else:
++            tl.atomic_add(Gradient + v0 * 3, -w0 * gx, mask=covered)
++            tl.atomic_add(Gradient + v0 * 3 + 1, -w0 * gy, mask=covered)
++            tl.atomic_add(Gradient + v0 * 3 + 2, -w0 * gz, mask=covered)
++            tl.atomic_add(Gradient + v1 * 3, -w1 * gx, mask=covered)
++            tl.atomic_add(Gradient + v1 * 3 + 1, -w1 * gy, mask=covered)
++            tl.atomic_add(Gradient + v1 * 3 + 2, -w1 * gz, mask=covered)
++            tl.atomic_add(Gradient + v2 * 3, -w2 * gx, mask=covered)
++            tl.atomic_add(Gradient + v2 * 3 + 1, -w2 * gy, mask=covered)
++            tl.atomic_add(Gradient + v2 * 3 + 2, -w2 * gz, mask=covered)
++            tl.atomic_add(Gradient + v3 * 3, -w3 * gx, mask=covered)
++            tl.atomic_add(Gradient + v3 * 3 + 1, -w3 * gy, mask=covered)
++            tl.atomic_add(Gradient + v3 * 3 + 2, -w3 * gz, mask=covered)
+ 
+ 
+ class _CompactDataCost(torch.autograd.Function):
+     @staticmethod
+     def forward(ctx, vertices, tetrahedra, alphas, points, selected, covered,
+                 reorder, origins, inverse, likelihood, background_channel,
+-                double_accumulation):
++                double_accumulation, deterministic_gradient):
+         costs = torch.empty(reorder.shape, device=vertices.device, dtype=vertices.dtype)
+-        gradient = torch.zeros_like(vertices)
++        gradient = (torch.zeros((selected.numel() * 4, 3), device=vertices.device, dtype=vertices.dtype)
++                    if deterministic_gradient else torch.zeros_like(vertices))
+         if reorder.numel():
+             _data_cost_kernel[(reorder.numel(),)](
+                 points, selected, covered, reorder, tetrahedra, alphas,
+@@ -200,14 +212,20 @@ class _CompactDataCost(torch.autograd.Function):
+                 *origins.stride(), *inverse.stride(), *likelihood.stride(),
+                 -1 if background_channel is None else int(background_channel),
+                 triton.next_power_of_2(int(alphas.shape[1])),
++                bool(deterministic_gradient),
+                 num_warps=1, enable_fp_fusion=True)
++        if deterministic_gradient:
++            # The packed lookup retains the original batch/block/point order.
++            # Missing-cell rows do not contribute a geometry derivative.
++            vertex_ids = tetrahedra[selected].reshape(-1)
++            gradient = ordered_vertex_sum(vertex_ids, gradient, vertices.shape[0])
+         ctx.save_for_backward(gradient)
+         return costs.sum(dtype=torch.float64 if double_accumulation else vertices.dtype)
+ 
+     @staticmethod
+     def backward(ctx, cost_gradient):
+         gradient, = ctx.saved_tensors
+-        return gradient * cost_gradient, None, None, None, None, None, None, None, None, None, None, None
++        return gradient * cost_gradient, None, None, None, None, None, None, None, None, None, None, None, None
+ 
+ 
+ def supports_fused_data_cost(vertices, tetrahedra, alphas, likelihood):
+@@ -222,7 +240,7 @@ def supports_fused_data_cost(vertices, tetrahedra, alphas, likelihood):
+ 
+ def fused_data_cost(vertices, tetrahedra, alphas, points, selected, covered,
+                     reorder, origins, inverse, likelihood, background_channel,
+-                    double_accumulation=False):
++                    double_accumulation=False, deterministic_gradient=False):
+     """Fixed-ownership mixture likelihood with an analytic vertex gradient.
+ 
+     The caller performs the same discrete FP32 candidate lookup as ordinary
+@@ -232,7 +250,7 @@ def fused_data_cost(vertices, tetrahedra, alphas, points, selected, covered,
+     """
+     return _CompactDataCost.apply(vertices, tetrahedra, alphas, points, selected,
+                                   covered, reorder, origins, inverse, likelihood,
+-                                  background_channel, bool(double_accumulation))
++                                  background_channel, bool(double_accumulation), bool(deterministic_gradient))
+ 
+ 
+ @torch.no_grad()
+diff --git a/src/fnit/gems/core.py b/src/fnit/gems/core.py
+index f16be6d..b052224 100644
+--- a/src/fnit/gems/core.py
++++ b/src/fnit/gems/core.py
+@@ -14,10 +14,10 @@ import torch
+ from .._dmri import configure_device
+ from .atlas import GEMSAtlas
+ from .deformation import (ashburner_prior, prepare_current_geometry, prepare_deformation_reference,
+-                          sliding_boundary_projectors)
++                          prepare_vertex_reduction, sliding_boundary_projectors)
+ from .gaussian import (GaussianParameters, gaussian_log_likelihood,
+                        initialise_gaussians, label_posterior, update_gaussians)
+-from .optim import CachedLBFGS
++from .optim import CachedLBFGS, PrecisionLBFGS
+ from .rasterize import (BlockIndex, build_block_index, compact_data_cost, rasterize_priors,
+                        rasterize_priors_compact)
+ 
+@@ -111,6 +111,9 @@ class TorchGEMS:
+         owner_hint_refresh_interval: int = 8,
+         owner_hint_tolerance: float = 2e-4,
+         double_data_cost_accumulation: bool = False,
++        stable_mesh_fitting: bool = False,
++        precise_mesh_matrices: bool = False,
++        mesh_line_search: str = "strong_wolfe",
+     ) -> TorchGEMSResult:
+         image = torch.as_tensor(image, device=self.device, dtype=self.dtype)
+         if image.ndim not in (3, 4):
+@@ -154,6 +157,11 @@ class TorchGEMS:
+             raise ValueError("owner_hint_refresh_interval must be a positive integer")
+         if not np.isfinite(owner_hint_tolerance) or owner_hint_tolerance <= 0:
+             raise ValueError("owner_hint_tolerance must be finite and positive")
++        if mesh_line_search not in ("strong_wolfe", "backtracking"):
++            raise ValueError("mesh_line_search must be strong_wolfe or backtracking")
++        if mesh_line_search == "backtracking" and (
++                deform_optimizer != "lbfgs" or not cache_mesh_evaluations or not stable_mesh_fitting):
++            raise ValueError("backtracking requires stable cached L-BFGS mesh fitting")
+         margin = (max(1.0, total_steps * deform_lr) if index_margin is None else
+                   float(index_margin))
+         index = build_block_index(vertices.detach().cpu().numpy(), self.atlas.tetrahedra,
+@@ -184,6 +192,11 @@ class TorchGEMS:
+             raise ValueError("compact=True requires a single 3-D image")
+         if double_data_cost_accumulation and not compact_em:
+             raise ValueError("double data cost accumulation requires compact single-image fitting")
++        if stable_mesh_fitting and (not compact_em or not reuse_geometry):
++            raise ValueError("stable mesh fitting requires compact single-image fitting and shared geometry")
++        double_data_cost_accumulation = double_data_cost_accumulation or stable_mesh_fitting
++        vertex_reduction = (prepare_vertex_reduction(tetra.reshape(-1), len(vertices))
++                            if stable_mesh_fitting else None)
+         em_image = image[valid].reshape(-1, 1, 1) if compact_em else image
+         mesh_valid = valid
+         mesh_selection = None
+@@ -259,6 +272,7 @@ class TorchGEMS:
+ 
+         history_tensors: list[torch.Tensor] = []
+         mesh_evaluations = mesh_steps = cache_hits = fused_evaluations = 0
++        line_search_restarts = line_search_recovered = 0
+         owner_hint_evaluations = owner_full_evaluations = owner_hint_points = 0
+         owner_hint_reused = []
+         if em_relative_cost_stop is not None:
+@@ -296,23 +310,31 @@ class TorchGEMS:
+                     if deform_optimizer == "adam":
+                         optimizer = torch.optim.Adam([vertices], lr=float(deform_lr))
+                     elif deform_optimizer == "lbfgs":
+-                        optimizer_type = CachedLBFGS if cache_mesh_evaluations else torch.optim.LBFGS
++                        if mesh_line_search == "backtracking":
++                            from .optim import CachedArmijoLBFGS
++                            optimizer_type = CachedArmijoLBFGS
++                        else:
++                            optimizer_type = CachedLBFGS if cache_mesh_evaluations else PrecisionLBFGS
+                         optimizer = optimizer_type([vertices], lr=float(deform_lr),
+                                                       max_iter=1, history_size=12,
+                                                       tolerance_grad=1e-10, tolerance_change=1e-10,
+-                                                      line_search_fn="strong_wolfe")
++                                                      line_search_fn="strong_wolfe",
++                                                      double_precision_state=stable_mesh_fitting)
+                     else:
+                         raise ValueError("deform_optimizer must be adam or lbfgs")
+                     for step in range(iterations):
+                         previous_vertices = (vertices.detach().clone()
+-                                             if projection is not None or deformation_stop > 1e-10 else None)
+-                        def closure():
++                                             if stable_mesh_fitting or projection is not None
++                                             or deformation_stop > 1e-10 else None)
++                        def mesh_objective():
+                             nonlocal evaluations, fused_evaluations
+                             nonlocal owner_hint_evaluations, owner_full_evaluations, owner_hint_points
+                             evaluations += 1
+                             refresh_index(vertices)
+                             optimizer.zero_grad(set_to_none=True)
+-                            geometry = (prepare_current_geometry(vertices, tetra)
++                            geometry = (prepare_current_geometry(
++                                        vertices, tetra, deterministic_gradient=stable_mesh_fitting,
++                                        vertex_reduction=vertex_reduction)
+                                         if reuse_geometry else None)
+                             if compact_em:
+                                 hint_stats = {} if owner_hint_enabled else None
+@@ -326,7 +348,8 @@ class TorchGEMS:
+                                     owner_hints=use_owner_hints,
+                                     hint_tolerance=owner_hint_tolerance,
+                                     hint_stats=hint_stats,
+-                                    double_accumulation=double_data_cost_accumulation)
++                                    double_accumulation=double_data_cost_accumulation,
++                                    deterministic_gradient=stable_mesh_fitting)
+                                     if fused_data_cost_enabled else None)
+                                 if data_cost is None:
+                                     priors, _ = rasterize_priors_compact(
+@@ -351,10 +374,17 @@ class TorchGEMS:
+                                                               current_geometry=geometry)
+                                 _, data_cost = label_posterior(
+                                     priors, likelihood, class_ids, valid)
+-                            prior_cost, _ = ashburner_prior(vertices, reference, tetra,
++                            prior_cost, jacobian = ashburner_prior(vertices, reference, tetra,
+                                 self.atlas.stiffness, reference_geometry=reference_geometry,
+-                                current_geometry=geometry, analytic_gradient=analytic_prior)
++                                current_geometry=geometry, analytic_gradient=analytic_prior,
++                                double_accumulation=stable_mesh_fitting)
+                             objective = data_cost + float(deformation_weight) * prior_cost
++                            if mesh_line_search == "backtracking":
++                                # Reject inverted trial meshes independently of
++                                # the finite penalty's numerical magnitude.
++                                objective = torch.where(
++                                    torch.isfinite(jacobian).all() & (jacobian > 0).all(),
++                                    objective, objective.new_tensor(float("inf")))
+                             objective.backward()
+                             if vertices.grad is not None:
+                                 if projection is None:
+@@ -363,6 +393,19 @@ class TorchGEMS:
+                                     vertices.grad.copy_(torch.bmm(projection, vertices.grad[..., None]).squeeze(-1))
+                             return objective
+ 
++                        def closure():
++                            if not precise_mesh_matrices or vertices.device.type != "cuda":
++                                return mesh_objective()
++                            # Tiny geometric products need consistent FP32 cost
++                            # and derivatives. Restore the caller's TF32 policy
++                            # before returning to EM or any other model.
++                            previous_tf32 = torch.backends.cuda.matmul.allow_tf32
++                            try:
++                                torch.backends.cuda.matmul.allow_tf32 = False
++                                return mesh_objective()
++                            finally:
++                                torch.backends.cuda.matmul.allow_tf32 = previous_tf32
++
+                         if deform_optimizer == "adam":
+                             objective = closure()
+                             optimizer.step()
+@@ -373,6 +416,28 @@ class TorchGEMS:
+                                     objective = optimizer.accepted_objective
+                             else:
+                                 objective = optimizer.step(closure)
++                            if stable_mesh_fitting and mesh_line_search == "strong_wolfe" and previous_vertices is not None:
++                                # A rejected Wolfe direction is not convergence.
++                                # Retry once from the same accepted position with
++                                # a fresh, normalized steepest-descent direction.
++                                stalled = torch.equal(vertices.detach(), previous_vertices)
++                                accepted_gradient = (optimizer._cached[1]
++                                    if isinstance(optimizer, CachedLBFGS) and optimizer._cached is not None
++                                    else optimizer.state[vertices].get("prev_flat_grad"))
++                                if accepted_gradient is None:
++                                    accepted_gradient = optimizer._gather_flat_grad()
++                                if stalled and accepted_gradient.abs().max().item() > 1e-10:
++                                    line_search_restarts += 1
++                                    optimizer.reset_history()
++                                    if isinstance(optimizer, CachedLBFGS):
++                                        objective = optimizer.step(closure, cache_key=(
++                                            index_rebuilds, id(likelihood), id(class_alphas)))
++                                        if optimizer.accepted_objective is not None:
++                                            objective = optimizer.accepted_objective
++                                    else:
++                                        objective = optimizer.step(closure)
++                                    line_search_recovered += int(not torch.equal(
++                                        vertices.detach(), previous_vertices))
+                         global_step += 1
+                         mesh_steps += 1
+                         if index_refresh_interval and global_step % index_refresh_interval == 0:
+@@ -452,7 +517,10 @@ class TorchGEMS:
+         return TorchGEMSResult(hard, posterior, priors, vertices, params, history,
+                                float(jac.min().detach()) if jac.numel() else float("nan"),
+                                optimization_stats={"compact": compact_em,
++                                   "objective_history": history,
+                                    "mesh_evaluations": mesh_evaluations, "mesh_steps": mesh_steps,
++                                   "line_search_restarts": line_search_restarts,
++                                   "line_search_recovered": line_search_recovered,
+                                    "accepted_cache_hits": cache_hits, "index_rebuilds": index_rebuilds,
+                                    "shared_geometry": reuse_geometry, "analytic_prior": analytic_prior,
+                                    "fused_data_evaluations": fused_evaluations,
+@@ -468,4 +536,11 @@ class TorchGEMS:
+                                    "owner_hint_reused_points": int(torch.stack(owner_hint_reused).sum())
+                                        if owner_hint_reused else 0,
+                                    "data_cost_accumulation": "float64" if double_data_cost_accumulation
+-                                       else str(self.dtype)})
++                                       else str(self.dtype),
++                                   "stable_mesh_fitting": bool(stable_mesh_fitting),
++                                   "precise_mesh_matrices": bool(precise_mesh_matrices),
++                                   "mesh_line_search": mesh_line_search,
++                                   "prior_cost_accumulation": "float64" if stable_mesh_fitting
++                                       else str(self.dtype),
++                                   "optimizer_state_precision": "float64" if stable_mesh_fitting
++                                       and deform_optimizer == "lbfgs" else str(self.dtype)})
+diff --git a/src/fnit/gems/deformation.py b/src/fnit/gems/deformation.py
+index b855864..ab2effa 100644
+--- a/src/fnit/gems/deformation.py
++++ b/src/fnit/gems/deformation.py
+@@ -39,6 +39,78 @@ class CurrentGeometry:
+     singular: torch.Tensor
+ 
+ 
++@dataclass(frozen=True)
++class VertexReduction:
++    """Fixed corner ordering for a shared-vertex gradient reduction.
++
++    Rebuild after changing the vertex IDs, their ordering, or the vertex count.
++    The source tensor is retained so in-place changes cannot reuse stale offsets.
++    """
++    order: torch.Tensor
++    offsets: torch.Tensor
++    vertex_count: int
++    source_ids: torch.Tensor
++    source_version: int
++
++
++@torch.no_grad()
++def prepare_vertex_reduction(vertex_ids: torch.Tensor, vertex_count: int) -> VertexReduction:
++    """Sort valid, nonnegative vertex IDs stably, entirely on their device."""
++    ids = vertex_ids.reshape(-1)
++    if ids.dtype != torch.long:
++        raise ValueError("vertex IDs must have torch.long dtype")
++    if not isinstance(vertex_count, int) or isinstance(vertex_count, bool) or vertex_count < 0:
++        raise ValueError("vertex_count must be a nonnegative integer")
++    order = torch.argsort(ids, stable=True)
++    boundaries = torch.arange(vertex_count + 1, device=ids.device, dtype=torch.long)
++    offsets = torch.searchsorted(ids[order], boundaries)
++    return VertexReduction(order, offsets, vertex_count, ids, ids._version)
++
++
++def ordered_vertex_sum(vertex_ids: torch.Tensor, contributions: torch.Tensor,
++                       vertex_count: int, reduction: VertexReduction | None = None) -> torch.Tensor:
++    """Sum corner contributions stably in FP64, then restore their dtype.
++
++    ``contributions`` is [number of IDs, channels]. Stable sorting preserves the input
++    corner order within each vertex. The segment sum assigns a separate
++    output element to each (vertex, channel), including zeros for isolated vertices.
++    FP64 accumulation reduces cancellation error. Vertex gradients retain the
++    contributions' original dtype and no tensor is copied to the host.
++    """
++    ids = vertex_ids.reshape(-1)
++    if (contributions.ndim != 2 or contributions.shape[0] != ids.numel()
++            or contributions.shape[1] < 1 or contributions.device != ids.device):
++        raise ValueError("contributions must be [number of vertex IDs, channels] on the IDs device")
++    if reduction is None:
++        reduction = prepare_vertex_reduction(ids, vertex_count)
++    elif (reduction.vertex_count != vertex_count or reduction.source_ids.device != ids.device
++          or reduction.source_ids.shape != ids.shape or reduction.source_ids.stride() != ids.stride()
++          or reduction.source_ids.data_ptr() != ids.data_ptr()
++          or reduction.source_ids._version != reduction.source_version):
++        raise ValueError("vertex reduction changed; rebuild it for the current vertex IDs")
++    # The IDs originate from a validated tetrahedral mesh. Their stable sorted
++    # offsets partition all rows, so the segment operator needs no host checks.
++    summed = torch.segment_reduce(contributions[reduction.order].to(torch.float64), "sum",
++                                  offsets=reduction.offsets, axis=0, unsafe=True)
++    return summed.to(contributions.dtype)
++
++
++class _OrderedVertexGather(torch.autograd.Function):
++    @staticmethod
++    def forward(ctx, vertices, tetrahedra, reduction):
++        ctx.save_for_backward(tetrahedra)
++        ctx.reduction = reduction
++        ctx.vertex_count = vertices.shape[0]
++        return vertices[tetrahedra]
++
++    @staticmethod
++    def backward(ctx, gradient):
++        tetrahedra, = ctx.saved_tensors
++        result = ordered_vertex_sum(tetrahedra.reshape(-1), gradient.reshape(-1, 3),
++                                    ctx.vertex_count, ctx.reduction)
++        return result, None, None
++
++
+ class _InverseEdges(torch.autograd.Function):
+     @staticmethod
+     def forward(ctx, edges):
+@@ -70,13 +142,24 @@ class _Determinant(torch.autograd.Function):
+ 
+ 
+ def prepare_current_geometry(vertices: torch.Tensor,
+-                             tetrahedra: torch.Tensor) -> CurrentGeometry:
++                             tetrahedra: torch.Tensor, *,
++                             deterministic_gradient: bool = False,
++                             vertex_reduction: VertexReduction | None = None) -> CurrentGeometry:
+     """Share differentiable current geometry within one mesh evaluation.
+ 
+     Rebuild after every vertex change. The object retains this evaluation's
+     autograd graph and must not be cached across optimizer steps.
++    ``deterministic_gradient`` replaces the shared-vertex scatter backward with
++    a fixed tetrahedron/corner reduction. Its layout may be reused while the
++    tetrahedra remain unchanged; FP64 accumulation returns the original dtype.
+     """
+-    cells = vertices[tetrahedra.long()]
++    cells_index = tetrahedra.long()
++    if deterministic_gradient:
++        if vertex_reduction is None:
++            vertex_reduction = prepare_vertex_reduction(cells_index.reshape(-1), vertices.shape[0])
++        cells = _OrderedVertexGather.apply(vertices, cells_index, vertex_reduction)
++    else:
++        cells = vertices[cells_index]
+     origins = cells[:, 0]
+     edges = torch.stack((cells[:, 1]-origins, cells[:, 2]-origins,
+                          cells[:, 3]-origins), -1)
+@@ -110,7 +193,7 @@ def _cofactor(matrix):
+ class _AnalyticPrior(torch.autograd.Function):
+     @staticmethod
+     def forward(ctx, edges, inverse_reference, reference_edges, inverse_edges,
+-                volumes, stiffness, invalid_penalty):
++                volumes, stiffness, invalid_penalty, double_accumulation):
+         j = edges @ inverse_reference
+         detj = torch.linalg.det(j)
+         invj = reference_edges @ inverse_edges
+@@ -120,7 +203,8 @@ class _AnalyticPrior(torch.autograd.Function):
+         distortion = j.square().sum((-2, -1)) + invj.square().sum((-2, -1)) - 6
+         scale = float(stiffness) * volumes
+         energy = scale * (1 + safe_det) * distortion
+-        cost = torch.where(detj > 0, energy, float(invalid_penalty) * (1 - detj)).sum()
++        cost = torch.where(detj > 0, energy, float(invalid_penalty) * (1 - detj)).sum(
++            dtype=torch.float64 if double_accumulation else edges.dtype)
+         ctx.save_for_backward(j, invj, detj, distortion, scale, inverse_reference)
+         ctx.invalid_penalty = float(invalid_penalty)
+         return cost, detj
+@@ -143,7 +227,7 @@ class _AnalyticPrior(torch.autograd.Function):
+             gradient = torch.zeros_like(gradient)
+         if jacobian_gradient is not None:
+             gradient = gradient + jacobian_gradient[:, None, None] * cofactor
+-        return gradient @ inverse_reference.transpose(-1, -2), None, None, None, None, None, None
++        return gradient @ inverse_reference.transpose(-1, -2), None, None, None, None, None, None, None
+ 
+ 
+ def ashburner_prior(
+@@ -156,6 +240,7 @@ def ashburner_prior(
+     reference_geometry: ReferenceGeometry | None = None,
+     current_geometry: CurrentGeometry | None = None,
+     analytic_gradient: bool = False,
++    double_accumulation: bool = False,
+ ) -> tuple[torch.Tensor, torch.Tensor]:
+     """Return the KVL GEMS tetrahedral deformation-prior cost and Jacobians.
+ 
+@@ -172,9 +257,11 @@ def ashburner_prior(
+     ``current_geometry`` shares edges and their inverse with rasterization.
+     ``analytic_gradient`` differentiates current edges directly while treating
+     the reference mesh as fixed; it supports the same Jacobian barrier and clamp.
++    ``double_accumulation`` only promotes the final scalar sum; per-tetrahedron
++    arithmetic, geometry, Jacobians and vertex gradients retain their dtype.
+     """
+     if tetrahedra.numel() == 0:
+-        zero = vertices.sum() * 0
++        zero = vertices.sum(dtype=torch.float64 if double_accumulation else vertices.dtype) * 0
+         return zero, torch.empty((0,), device=vertices.device, dtype=vertices.dtype)
+     cells = tetrahedra.long()
+     if current_geometry is None and analytic_gradient:
+@@ -200,7 +287,7 @@ def ashburner_prior(
+     if analytic_gradient:
+         return _AnalyticPrior.apply(ds, inverse_reference.detach(), dm.detach(),
+                                     current_geometry.inverse_edges.detach(), ref_volume.detach(),
+-                                    float(stiffness), float(invalid_penalty))
++                                    float(stiffness), float(invalid_penalty), bool(double_accumulation))
+     j = ds @ inverse_reference
+     detj = (torch.linalg.det(j) if current_geometry is None else _Determinant.apply(j))
+     safe_det = detj.clamp_min(torch.finfo(vertices.dtype).eps)
+@@ -215,4 +302,4 @@ def ashburner_prior(
+     per_tet = float(stiffness) * ref_volume * (1.0 + safe_det) * (frob + inv_frob - 6.0)
+     per_tet = torch.where(detj > 0, per_tet,
+                           per_tet.detach() * 0 + float(invalid_penalty) + (-detj) * float(invalid_penalty))
+-    return per_tet.sum(), detj
++    return per_tet.sum(dtype=torch.float64 if double_accumulation else vertices.dtype), detj
+diff --git a/src/fnit/gems/optim.py b/src/fnit/gems/optim.py
+index c2cd8d1..98ed4bc 100644
+--- a/src/fnit/gems/optim.py
++++ b/src/fnit/gems/optim.py
+@@ -3,9 +3,43 @@
+ from __future__ import annotations
+ 
+ import torch
++from math import isfinite
+ 
+ 
+-class CachedLBFGS(torch.optim.LBFGS):
++class PrecisionLBFGS(torch.optim.LBFGS):
++    """L-BFGS with optional FP64 arithmetic for its internal optimization state.
++
++    ``double_precision_state`` promotes the flattened working gradient, so the
++    inherited curvature products, search direction and Wolfe scalar arithmetic
++    retain cost differences without changing parameter or parameter-grad dtype.
++    The default follows PyTorch's parameter precision.
++    """
++
++    def __init__(self, params, *, double_precision_state: bool = False, **kwargs):
++        if not isinstance(double_precision_state, bool):
++            raise ValueError("double_precision_state must be a bool")
++        self.double_precision_state = double_precision_state
++        super().__init__(params, **kwargs)
++
++    def _gather_flat_grad(self):
++        gradient = super()._gather_flat_grad()
++        return gradient.to(torch.float64) if self.double_precision_state else gradient
++
++    def reset_history(self):
++        """Restart the next step from normalized steepest descent.
++
++        Keep parameters, their gradients and accumulated evaluation counts.
++        A subclass's accepted cost/gradient cache remains available subject to
++        its usual parameter-version and objective-key checks.
++        """
++        state = self.state.get(self._params[0])
++        if state is not None:
++            evaluations = state.get("func_evals", 0)
++            state.clear()
++            state["func_evals"] = evaluations
++
++
++class CachedLBFGS(PrecisionLBFGS):
+     """PyTorch strong-Wolfe L-BFGS with one iteration per ``step``.
+ 
+     The accepted objective and closure-supplied gradient (including any boundary
+@@ -71,7 +105,8 @@ class CachedLBFGS(torch.optim.LBFGS):
+                 offset = 0
+                 for parameter in self._params:
+                     count = parameter.numel()
+-                    parameter.grad = gradient[offset:offset + count].view_as(parameter).clone()
++                    parameter.grad = (gradient[offset:offset + count].view_as(parameter)
++                                      .to(dtype=parameter.dtype).clone())
+                     offset += count
+                 initial = self._cached
+                 self.cache_hits += 1
+@@ -103,3 +138,190 @@ class CachedLBFGS(torch.optim.LBFGS):
+             self.last_step_evaluations = self.closure_evaluations - before
+             self._trials = {}
+             self._last_objective = None
++
++
++class CachedArmijoLBFGS(CachedLBFGS):
++    """Bounded L-BFGS updates with FP64 state and accepted-point caching.
++
++    The standard two-loop recursion uses at most ``history_size`` curvature
++    pairs (12 by default). Each trial is written to the native parameter dtype;
++    its actual displacement supplies both the Armijo directional product and
++    the accepted curvature pair. Backtracking accepts only finite cost/gradient
++    evaluations with strict cost decrease and sufficient Armijo decrease.
++
++    ``max_vertex_displacement`` bounds the Euclidean displacement of each row
++    for a single N-by-3 mesh parameter. Other parameter shapes use a component
++    bound. This class retains ``CachedLBFGS``'s cache/counter API, while its
++    ``step`` implements Armijo search rather than the inherited Wolfe search.
++    """
++
++    def __init__(self, params, *, max_vertex_displacement: float = .5,
++                 max_backtracking_steps: int = 20, armijo_constant: float = 1e-4,
++                 **kwargs):
++        if (not isfinite(max_vertex_displacement)
++                or max_vertex_displacement <= 0):
++            raise ValueError("max_vertex_displacement must be positive and finite")
++        if (isinstance(max_backtracking_steps, bool)
++                or not isinstance(max_backtracking_steps, int)
++                or max_backtracking_steps < 1):
++            raise ValueError("max_backtracking_steps must be a positive integer")
++        if not isfinite(armijo_constant) or not 0 < armijo_constant < 1:
++            raise ValueError("armijo_constant must be between zero and one")
++        if not kwargs.get("double_precision_state", True):
++            raise ValueError("CachedArmijoLBFGS requires double_precision_state=True")
++        kwargs["double_precision_state"] = True
++        kwargs.setdefault("history_size", 12)
++        super().__init__(params, **kwargs)
++        self.max_vertex_displacement = float(max_vertex_displacement)
++        self.max_backtracking_steps = max_backtracking_steps
++        self.armijo_constant = float(armijo_constant)
++
++    def invalidate_cache(self):
++        # Curvature from a different likelihood or externally changed position
++        # does not describe the next objective.
++        super().invalidate_cache()
++        self.reset_history()
++
++    def _flat_parameters(self):
++        return torch.cat([parameter.detach().reshape(-1).double()
++                          for parameter in self._params])
++
++    def _write_parameters(self, position):
++        offset = 0
++        for parameter in self._params:
++            count = parameter.numel()
++            parameter.copy_(position[offset:offset + count].view_as(parameter))
++            offset += count
++
++    def _write_gradient(self, gradient):
++        offset = 0
++        for parameter in self._params:
++            count = parameter.numel()
++            parameter.grad = (gradient[offset:offset + count].view_as(parameter)
++                              .to(dtype=parameter.dtype).clone())
++            offset += count
++
++    def _max_displacement(self, displacement):
++        if (len(self._params) == 1 and self._params[0].ndim == 2
++                and self._params[0].shape[1] == 3):
++            return displacement.view(-1, 3).norm(dim=1).amax()
++        return displacement.abs().amax()
++
++    @torch.no_grad()
++    def step(self, closure, *, cache_key=None):
++        versions = tuple(parameter._version for parameter in self._params)
++        if cache_key != self._cache_key or versions != self._versions:
++            self.invalidate_cache()
++        self._cache_key = cache_key
++        before = self.closure_evaluations
++        state = self.state[self._params[0]]
++        initial_position = self._flat_parameters()
++        initial = self._cached
++        closure = torch.enable_grad()(closure)
++
++        def evaluate():
++            self.closure_evaluations += 1
++            state["func_evals"] = state.get("func_evals", 0) + 1
++            objective = closure().detach().double().clone()
++            gradient = self._gather_flat_grad().detach().clone()
++            return objective, gradient
++
++        def retain(position, evaluation):
++            self._write_parameters(position)
++            self._write_gradient(evaluation[1])
++            self._cached = evaluation
++            self.accepted_objective = evaluation[0]
++            self._versions = tuple(parameter._version for parameter in self._params)
++
++        try:
++            if initial is None:
++                initial = evaluate()
++            else:
++                self.cache_hits += 1
++                state["func_evals"] = state.get("func_evals", 0) + 1
++                self._write_gradient(initial[1])
++            objective, gradient = initial
++            state["n_iter"] = state.get("n_iter", 0) + 1
++            state["prev_flat_grad"] = gradient.clone()
++            state["prev_loss"] = float(objective)
++            state["t"] = 0.
++            if not bool(torch.isfinite(objective) & torch.isfinite(gradient).all()):
++                self.invalidate_cache()
++                return objective
++
++            displacements = state.setdefault("old_stps", [])
++            gradient_changes = state.setdefault("old_dirs", [])
++            inverse_curvatures = state.setdefault("ro", [])
++            working = gradient.clone()
++            coefficients = []
++            for s, y, rho in zip(reversed(displacements), reversed(gradient_changes),
++                                 reversed(inverse_curvatures)):
++                coefficient = rho * s.dot(working)
++                coefficients.append(coefficient)
++                working.sub_(coefficient * y)
++            direction = working * state.get("H_diag", 1.)
++            for s, y, rho, coefficient in zip(displacements, gradient_changes,
++                                              inverse_curvatures, reversed(coefficients)):
++                direction.add_(s * (coefficient - rho * y.dot(direction)))
++            direction.neg_()
++            if not bool(torch.isfinite(direction).all() & (gradient.dot(direction) < 0)):
++                displacements.clear()
++                gradient_changes.clear()
++                inverse_curvatures.clear()
++                state["H_diag"] = 1.
++                direction = -gradient
++            state["d"] = direction.clone()
++            if gradient.abs().max() <= self.param_groups[0]["tolerance_grad"]:
++                retain(initial_position, initial)
++                return objective
++
++            largest = float(self._max_displacement(direction))
++            trial_step = min(float(self.param_groups[0]["lr"]),
++                             self.max_vertex_displacement / largest)
++            for _ in range(self.max_backtracking_steps):
++                self._write_parameters(initial_position + trial_step * direction)
++                actual_delta = self._flat_parameters() - initial_position
++                directional_change = gradient.dot(actual_delta)
++                if not bool(directional_change < 0):
++                    break
++                if self._max_displacement(actual_delta) > self.max_vertex_displacement:
++                    trial_step *= .5
++                    continue
++                trial = evaluate()
++                trial_cost, trial_gradient = trial
++                acceptable = (torch.isfinite(trial_cost) & torch.isfinite(trial_gradient).all()
++                              & (trial_cost < objective)
++                              & (trial_cost <= objective
++                                 + self.armijo_constant * directional_change))
++                if bool(acceptable):
++                    gradient_change = trial_gradient - gradient
++                    curvature = actual_delta.dot(gradient_change)
++                    if curvature > 1e-12 * actual_delta.norm() * gradient_change.norm():
++                        displacements.append(actual_delta.clone())
++                        gradient_changes.append(gradient_change.clone())
++                        inverse_curvatures.append(curvature.reciprocal())
++                        if len(displacements) > self.param_groups[0]["history_size"]:
++                            displacements.pop(0)
++                            gradient_changes.pop(0)
++                            inverse_curvatures.pop(0)
++                        state["H_diag"] = curvature / gradient_change.dot(gradient_change)
++                    state["t"] = trial_step
++                    # Do not rewrite an accepted point: cache versions describe
++                    # exactly the native-dtype parameters just evaluated.
++                    self._write_gradient(trial_gradient)
++                    self._cached = trial
++                    self.accepted_objective = trial_cost
++                    self._versions = tuple(parameter._version for parameter in self._params)
++                    return objective
++                trial_step *= .5
++            retain(initial_position, initial)
++            return objective
++        except BaseException:
++            self._write_parameters(initial_position)
++            if initial is not None:
++                retain(initial_position, initial)
++            else:
++                self.invalidate_cache()
++            raise
++        finally:
++            self.last_step_evaluations = self.closure_evaluations - before
+diff --git a/src/fnit/gems/rasterize.py b/src/fnit/gems/rasterize.py
+index 581f52d..67a8105 100644
+--- a/src/fnit/gems/rasterize.py
++++ b/src/fnit/gems/rasterize.py
+@@ -405,13 +405,15 @@ def compact_data_cost(vertices, tetrahedra, alphas, shape, *, valid_mask,
+                       current_geometry=None, tolerance=2e-5,
+                       cache_owner_hints=False, owner_hints=False,
+                       hint_tolerance=2e-4, hint_stats=None,
+-                      double_accumulation=False):
++                      double_accumulation=False, deterministic_gradient=False):
+     """Fused compact mixture cost, or ``None`` for the autograd fallback.
+ 
+     CUDA FP32 evaluates every masked voxel with the same cell ownership as
+     compact rasterization. Fixed alphas and Gaussian log likelihood are required;
+     an analytic derivative is returned only for the vertex positions. This path
+     avoids allocating the interpolated prior and its four-node autograd graph.
++    ``deterministic_gradient`` sums packed-point corner contributions in a fixed
++    vertex order with FP64 accumulation, returning the same FP32 gradient dtype.
+     """
+     if not supports_fused_data_cost(vertices, tetrahedra, alphas, likelihood):
+         return None
+@@ -431,7 +433,7 @@ def compact_data_cost(vertices, tetrahedra, alphas, shape, *, valid_mask,
+         raise ValueError("likelihood must be [classes, valid voxels]")
+     return fused_data_cost(vertices, tetrahedra, alphas, points, selected_ids,
+                            covered, reorder, all_v0, all_inv, likelihood,
+-                           background_channel, double_accumulation)
++                           background_channel, double_accumulation, deterministic_gradient)
+ 
+ 
+ def rasterize_priors_compact(
+diff --git a/src/fnit/gems/recipes/base.py b/src/fnit/gems/recipes/base.py
+index 0547610..44e27e0 100644
+--- a/src/fnit/gems/recipes/base.py
++++ b/src/fnit/gems/recipes/base.py
+@@ -237,7 +237,8 @@ class GEMSRecipe:
+                 # A population-grid cache has a different bandwidth after the
+                 # subject affine and the high-resolution working-grid scaling.
+                 alphas = smooth_atlas_alphas(smoothing_atlas, classes, sigma, device=device,
+-                                             cache=smoothing_cache)
++                                             cache=smoothing_cache,
++                                             stable_vertex_statistics=self.name == "thalamus")
+             if not sigma:
+                 alphas = np.zeros((len(atlas.vertices), int(classes.max()) + 1), np.float32)
+                 for channel, group in enumerate(classes):
+@@ -261,7 +262,13 @@ class GEMSRecipe:
+                 materialize_outputs=not synthetic and index == len(schedule) - 1,
+                 mesh_sampling_stride=self.fast_mesh_sampling_stride if fast and not synthetic and sigma else 1,
+                 owner_hint_enabled=fast and not synthetic,
+-                double_data_cost_accumulation=fast and not synthetic,
++                # Stabilize thalamic synthetic and intensity fits: ordered gradient
++                # reductions and FP64 scalar optimizer state retain small
++                # Wolfe decreases. Images, vertices and gradients stay FP32.
++                double_data_cost_accumulation=(fast and not synthetic) or self.name == "thalamus",
++                stable_mesh_fitting=self.name == "thalamus",
++                precise_mesh_matrices=self.name == "thalamus",
++                mesh_line_search="backtracking" if self.name == "thalamus" else "strong_wolfe",
+                 **stop_options)
+             solver_finished = tick()
+             atlas = atlas.with_vertices(result.vertices.detach().cpu().numpy())
+diff --git a/src/fnit/gems/smoothing.py b/src/fnit/gems/smoothing.py
+index 6c5bdd5..77cb333 100644
+--- a/src/fnit/gems/smoothing.py
++++ b/src/fnit/gems/smoothing.py
+@@ -10,6 +10,7 @@ import torch
+ from torch.nn import functional as F
+ 
+ from .atlas import GEMSAtlas
++from .deformation import ordered_vertex_sum, prepare_vertex_reduction
+ from .rasterize import rasterize_priors
+ 
+ 
+@@ -90,6 +91,7 @@ def smooth_atlas_alphas(
+     *,
+     device: str | torch.device = "cpu",
+     cache: dict | None = None,
++    stable_vertex_statistics: bool = False,
+ ) -> np.ndarray:
+     """Rasterize, smooth and refit grouped alphas on the reference mesh.
+ 
+@@ -136,17 +138,37 @@ def smooth_atlas_alphas(
+         target = torch.as_tensor(smoothed[:, covered.numpy()].T.copy())
+     del smoothed
+     fitted = torch.full_like(alphas, 1.0 / grouped.shape[1])
++    chunk_size = max(1, 131_072 if device.type == "cuda" else len(cells))
++    layouts = None
++    if stable_vertex_statistics:
++        layout_key = (key, len(fitted), chunk_size)
++        saved = None if cache is None else cache.get("stable_vertex_statistics")
++        if saved is not None and saved[0] == layout_key:
++            layouts = saved[1]
++        else:
++            layouts = []
++            for start in range(0, len(cells), chunk_size):
++                local_cells = cells[start:start + chunk_size]
++                # Retain the original corner-then-point accumulation order.
++                ids = local_cells.T.contiguous().reshape(-1)
++                layouts.append((ids, prepare_vertex_reduction(ids, len(fitted))))
++            if cache is not None:
++                cache["stable_vertex_statistics"] = (layout_key, layouts)
+     for _ in range(10):
+         statistics = torch.zeros_like(fitted)
+         # Each point contributes independently; chunk only the temporary Cx4
+         # responsibilities, retaining all ten alpha-EM updates.
+-        chunk_size = 131_072 if device.type == "cuda" else len(cells)
+-        for start in range(0, len(cells), max(1, chunk_size)):
++        for block, start in enumerate(range(0, len(cells), chunk_size)):
+             local_cells = cells[start:start + chunk_size]
+             contribution = fitted[local_cells] * weights[start:start + chunk_size, ..., None]
+             prediction = contribution.sum(1).clamp_min(1e-15)
+             contribution = contribution / prediction[:, None] * target[start:start + chunk_size, None]
+-            for corner in range(4):
+-                statistics.index_add_(0, local_cells[:, corner], contribution[:, corner])
++            if stable_vertex_statistics:
++                ids, layout = layouts[block]
++                values = contribution.permute(1, 0, 2).reshape(-1, contribution.shape[-1])
++                statistics.add_(ordered_vertex_sum(ids, values, len(fitted), layout))
++            else:
++                for corner in range(4):
++                    statistics.index_add_(0, local_cells[:, corner], contribution[:, corner])
+         fitted = statistics / statistics.sum(1, keepdim=True).clamp_min(1e-12)
+     return fitted.cpu().numpy()
+diff --git a/validation/subregions/plot_unified.py b/validation/subregions/plot_unified.py
+index 451b391..a474941 100644
+--- a/validation/subregions/plot_unified.py
++++ b/validation/subregions/plot_unified.py
+@@ -3,6 +3,8 @@
+ from __future__ import annotations
+ 
+ import argparse
++import hashlib
++import json
+ from pathlib import Path
+ 
+ import matplotlib
+@@ -10,7 +12,7 @@ matplotlib.use("Agg")
+ import matplotlib.pyplot as plt
+ from matplotlib.patches import Patch
+ import nibabel as nib
+-from nibabel.processing import resample_from_to
++from nibabel.processing import resample_from_to, resample_to_output
+ import numpy as np
+ 
+ 
+@@ -41,11 +43,22 @@ def main():
+                         help="one unified FNIT label image, or four official structure images")
+     parser.add_argument("--reference-name", default="FreeSurfer 8.2")
+     parser.add_argument("--candidate-name", default="FNIT TorchGEMS")
++    parser.add_argument("--input-scope", choices=("stage", "raw"), default="stage",
++                        help="Input scope recorded in plot metadata; metrics remain on the original input grid")
+     parser.add_argument("--output", required=True, type=Path)
+     args = parser.parse_args()
+     if len(args.reference) not in (1, 4):
+         parser.error("--reference requires one unified label image or four official structure images")
+-    image = nib.as_closest_canonical(nib.load(args.t1))
++    original_image = nib.load(args.t1)
++    canonical_image = nib.as_closest_canonical(original_image)
++    canonical_linear = canonical_image.affine[:3, :3]
++    # Reordering voxel axes retains acquisition obliquity. A constant voxel
++    # slice is therefore not a RAS axial plane until the display grid is aligned.
++    oblique = not np.allclose(canonical_linear, np.diag(np.diag(canonical_linear)),
++                              rtol=0, atol=1e-5)
++    image = (resample_to_output(canonical_image,
++                               voxel_sizes=np.linalg.norm(canonical_linear, axis=0),
++                               order=1) if oblique else canonical_image)
+     grid = (image.shape, image.affine)
+     data = np.asarray(image.dataobj, dtype=np.float32)
+     candidate = np.asarray(resample_from_to(nib.load(args.candidate), grid, order=0).dataobj, np.int32)
+@@ -59,7 +72,8 @@ def main():
+     lo = np.maximum(points.min(0) - 8, 0)
+     hi = np.minimum(points.max(0) + 9, image.shape)
+     crop = (slice(lo[0], hi[0]), slice(lo[1], hi[1]))
+-    indices = np.linspace(points[:, 2].min(), points[:, 2].max(), 8).round().astype(int)[1:-1]
++    reference_points = np.argwhere(reference != 0)
++    indices = np.linspace(reference_points[:, 2].min(), reference_points[:, 2].max(), 8).round().astype(int)[1:-1]
+     fig, axes = plt.subplots(3, 6, figsize=(15, 7.2), facecolor="black")
+     vmax = np.percentile(data[data > 0], 99)
+     for col, index in enumerate(indices):
+@@ -77,7 +91,10 @@ def main():
+         axes[0, col].set_title(f"z = {z:.1f} mm", color="white", fontsize=11)
+     for row, name in enumerate((args.reference_name, args.candidate_name, "Label differences")):
+         axes[row, 0].set_ylabel(name, color="white", fontsize=11)
++    display_spacing = np.linalg.norm(image.affine[:3, :3], axis=0)
++    pixel_aspect = float(display_spacing[1] / display_spacing[0])
+     for axis in axes.flat:
++        axis.set_aspect(pixel_aspect)
+         axis.set_xticks([]); axis.set_yticks([])
+     fig.legend(handles=[Patch(color=rgb, label=name) for name, rgb in FAMILIES],
+                loc="lower center", ncol=3, labelcolor="white", facecolor="black", edgecolor="none")
+@@ -85,6 +102,35 @@ def main():
+     args.output.parent.mkdir(parents=True, exist_ok=True)
+     fig.savefig(args.output, dpi=160, facecolor="black")
+     plt.close(fig)
++    def geometry(source):
++        return {"shape": [int(value) for value in source.shape], "affine": source.affine.tolist(),
++                "spacing_mm": np.linalg.norm(source.affine[:3, :3], axis=0).tolist()}
++
++    def identity(path):
++        content = path.read_bytes()
++        return {"path": str(path), "bytes": len(content),
++                "sha256": hashlib.sha256(content).hexdigest()}
++
++    metadata = {
++        "kind": "saved real T1 six family overlays on RAS axial display planes",
++        "input_scope": args.input_scope,
++        "inputs": {"t1": identity(args.t1), "candidate": identity(args.candidate),
++                   "references": [identity(path) for path in args.reference]},
++        "plot_driver": identity(Path(__file__)), "output": identity(args.output),
++        "original_grid": geometry(original_image),
++        "canonical_grid": geometry(canonical_image),
++        "display_grid": geometry(image), "oblique_display_resampled": oblique,
++        "display_pixel_aspect_y_over_x": pixel_aspect,
++        "interpolation": {"T1": "linear if oblique; unchanged otherwise",
++                          "labels": "nearest neighbour to the shared display grid"},
++        "slices_display_indices": [int(index) for index in indices],
++        "slices_RAS_z_mm": [float((image.affine @ np.array([0, 0, index, 1]))[2])
++                            for index in indices],
++        "slice_selection": "six interior evenly spaced planes within saved reference foreground z extent",
++        "difference": "red pixels mark any differing complete subregion label ID",
++        "metric_scope": "official Dice and volume metrics are computed on the original input grid; display resampling does not alter those metrics",
++    }
++    args.output.with_suffix(".json").write_text(json.dumps(metadata, indent=2) + "\n")
+ 
+ 
+ if __name__ == "__main__":

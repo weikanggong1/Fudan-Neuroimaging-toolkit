@@ -10,7 +10,7 @@ import torch
 from ..feat.temporal import gaussian_highpass, grand_mean_scale
 from .bids import locate_bids_inputs
 from .mask import epi_brain_mask
-from .motion import estimate_motion, matrices_to_mcflirt_parameters
+from ..mcflirt import TorchMCFLIRT
 from .spatial import apply_motion_warp
 
 
@@ -57,7 +57,7 @@ def run_feat_core(
     highpass_cutoff_seconds=100.0,
     device=None,
     batch_size=32,
-    motion_iterations=(35, 25, 15),
+    motion_iterations=(1, 1, 1),
     overwrite=False,
 ):
     """Run pre-ICA volumetric FEAT core on one BIDS BOLD run.
@@ -66,7 +66,9 @@ def run_feat_core(
     field or FNIRT cubic coefficient image, and ``postmat`` is an optional
     warp-reference-to-BOLD FLIRT matrix. If neither is given, this stage
     performs motion-only resampling. It never manufactures a missing B0
-    fieldmap or GDC warp. The optional `brain_mask` must already be in the
+    fieldmap or GDC warp. ``motion_iterations`` counts coordinate-optimizer
+    sweeps at 8/4/4 mm, one per stage as in MCFLIRT; it no longer counts
+    the removed Adam steps. The optional `brain_mask` must already be in the
     reference grid. Without one, SynthStrip extracts the corrected EPI mean
     by default; ``brain_extraction='otsu'`` selects the older independent mask.
     """
@@ -102,16 +104,23 @@ def run_feat_core(
     _save(np.asarray(reference.dataobj), reference, example_path)
     reference = nib.load(str(example_path))
     selected_device = device or ("cuda" if torch.cuda.is_available() else "cpu")
-    fit = estimate_motion(
-        raw, reference, mask=brain_mask, device=selected_device, batch_size=batch_size,
-        iterations=motion_iterations, resample=False,
+    motion_only = spatial_warp is None and postmat is None
+    fit = TorchMCFLIRT(device=selected_device).run(
+        raw, reference, stage_iterations=motion_iterations,
+        resample=motion_only, interpolation="spline",
     )
-    matrices = fit.fsl_matrices
+    matrices = fit.matrices
+    if overwrite:
+        # A shorter rerun must not retain matrices from the previous frames.
+        for previous in matrices_dir.glob("MAT_*"):
+            frame_number = previous.name[4:]
+            if frame_number.isascii() and frame_number.isdigit() and previous.is_file():
+                previous.unlink()
     for frame, matrix in enumerate(matrices):
         np.savetxt(matrices_dir / f"MAT_{frame:04d}", matrix, fmt="%.12g")
     par_path = mc_dir / "prefiltered_func_data_mcf.par"
-    np.savetxt(par_path, matrices_to_mcflirt_parameters(matrices, reference), fmt="%.9g")
-    corrected = apply_motion_warp(
+    np.savetxt(par_path, fit.parameters, fmt="%.9g")
+    corrected = fit.corrected if motion_only else apply_motion_warp(
         raw, reference, matrices, warp=spatial_warp, postmat=postmat,
         interpolation="spline", batch_size=batch_size, device=selected_device,
     )

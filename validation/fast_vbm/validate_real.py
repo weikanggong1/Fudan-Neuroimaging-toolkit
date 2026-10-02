@@ -18,6 +18,7 @@ from PIL import Image, ImageDraw
 import torch
 
 from fnit.fast_vbm import FastVBM
+from fnit.fast_vbm.pipeline import OUTPUT_FILENAMES
 
 
 SOURCE_FILES = (
@@ -77,6 +78,40 @@ def _contract(candidate: nib.spatialimages.SpatialImage, reference: nib.spatiali
     }
 
 
+def check_outputs(output_dir: Path, image_path: Path, template_path: Path) -> dict:
+    """Check all saved images, PVE normalization and the modulation formula."""
+    native = nib.load(image_path)
+    template = nib.load(template_path)
+    arrays = {}
+    contracts = {}
+    for name, filename in OUTPUT_FILENAMES.items():
+        image = nib.load(output_dir / filename)
+        reference = template if name in MAPS else native
+        contract = _contract(image, reference)
+        data = np.asanyarray(image.dataobj)
+        if not contract["same_shape"] or not contract["same_affine"] or not np.isfinite(data).all():
+            raise ValueError(f"invalid saved output: {name}")
+        arrays[name] = data
+        contracts[name] = {**contract, "all_finite": True}
+    brain_mask = arrays["brain_mask"] > 0
+    mask = brain_mask & (arrays["brain"] > 0)
+    pves = np.stack([arrays[f"pve_{tissue}"] for tissue in ("csf", "gm", "wm")])[:, mask]
+    if not mask.any() or np.min(pves) < 0 or np.max(pves) > 1:
+        raise ValueError("empty brain mask or PVE outside [0, 1]")
+    pve_error = float(np.max(np.abs(pves.sum(axis=0) - 1)))
+    modulation_error = float(np.max(np.abs(arrays["modulated_gm"] -
+                                           arrays["warped_gm"] * arrays["jacobian"])))
+    if pve_error > 1e-5 or modulation_error > 1e-6:
+        raise ValueError("PVE sum or modulation identity failed")
+    return {"images": contracts, "pve_sum_max_absolute_error": pve_error,
+            "pve_support_definition": "brain_mask > 0 and brain intensity > 0, as used by TorchFAST",
+            "pve_support_voxels": int(mask.sum()),
+            "brain_mask_nonpositive_intensity_voxels": int(np.count_nonzero(brain_mask & ~mask)),
+            "modulation_max_absolute_error": modulation_error,
+            "nonpositive_jacobian_voxels": int(np.count_nonzero(arrays["jacobian"] <= 0)),
+            "jacobian_range": [float(arrays["jacobian"].min()), float(arrays["jacobian"].max())]}
+
+
 def _render_row(reference: np.ndarray, candidate: np.ndarray, title: str) -> Image.Image:
     difference = np.abs(candidate - reference)
     z = reference.shape[2] // 2
@@ -96,7 +131,7 @@ def _render_row(reference: np.ndarray, candidate: np.ndarray, title: str) -> Ima
         panels.append(Image.fromarray(rgb).resize((320, 300), Image.Resampling.BILINEAR))
     row = Image.new("RGB", (960, 330), "white")
     draw = ImageDraw.Draw(row)
-    draw.text((8, 6), title, fill="black")
+    draw.text((8, 6), f"{title}; FSL/FNIT: 0..{vmax:.3g}; absolute difference: 0..{dmax:.3g}", fill="black")
     for column, panel in enumerate(panels):
         row.paste(panel, (column * 320, 30))
     return row
@@ -110,7 +145,7 @@ def _plot(candidate_dir: Path, references: dict[str, np.ndarray], output: Path, 
     for row, name in enumerate(MAPS):
         candidate = np.asanyarray(nib.load(candidate_dir / MAPS[name]).dataobj, dtype=np.float32)
         rendered = _render_row(references[name], candidate, name)
-        canvas.paste(rendered.crop((0, 25, 960, 330)), (0, 25 + row * 330))
+        canvas.paste(rendered, (0, 25 + row * 330))
     output.parent.mkdir(parents=True, exist_ok=True)
     canvas.save(output)
 
@@ -189,6 +224,8 @@ def main(argv: list[str] | None = None) -> None:
         else 0
     )
 
+    output_checks = check_outputs(output_dir, image_path, template_path)
+
     accuracy = {}
     contracts = {}
     output_hashes = {}
@@ -197,8 +234,11 @@ def main(argv: list[str] | None = None) -> None:
         candidate_image = nib.load(candidate_path)
         candidate_data = np.asanyarray(candidate_image.dataobj, dtype=np.float32)
         reference_image = official_images.get(name, official_images["warped_gm"])
+        contract = _contract(candidate_image, reference_image)
+        if not contract["same_shape"] or not contract["same_affine"]:
+            raise ValueError(f"candidate and FSL grids differ: {name}")
         accuracy[name] = _metrics(candidate_data, official_data[name], accuracy_mask)
-        contracts[name] = _contract(candidate_image, reference_image)
+        contracts[name] = contract
         output_hashes[name] = _sha256(candidate_path)
 
     upstream = {}
@@ -276,6 +316,7 @@ def main(argv: list[str] | None = None) -> None:
             "voxels": int(np.count_nonzero(accuracy_mask)),
         },
         "contracts": contracts,
+        "output_checks": output_checks,
         "accuracy": accuracy,
         "upstream_diagnosis": upstream,
         "timing_seconds": {

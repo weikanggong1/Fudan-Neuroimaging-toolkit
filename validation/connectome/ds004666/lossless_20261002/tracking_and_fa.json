@@ -1,0 +1,169 @@
+{
+  "dataset": "OpenNeuro ds004666 sub-01/ses-2mm",
+  "baseline_commit": "954ad19e29ddde8617eddf58ebafc3a4f72b8951",
+  "source_sha256": {
+    "baseline_tracking": "d6e24c2cc67a1259903c454036ccfac8ef78d87fa9de1edb26c98b07d2cbbf94",
+    "tracking": "a7f6e032eeccf77f290174e39a348dcde652ebdc130e011697e4f131db45ead5",
+    "baseline_mapping": "6ffea32b4060f9bff3fe7467e209d7c45a46eb9398351780c15935fe3523f8b3",
+    "mapping": "64ed607d612dc157c1f91006f511ee73c07a1afd0f2ad53913828bcfca48d826"
+  },
+  "input_sha256": {
+    "fod": "18addc15596dadf7fb60727ae9af8d1cbd98c139964712454a33a718c5f4e7c1",
+    "five_tissue": "704539238d29c10eeaf4fab31831bc3ced9648ce6a59f4e9bd75c7b7d6d03fbf",
+    "gmwmi": "06243e393410bad709c2569e68d5eeed49d5f28500e607890a06e217a19a9823",
+    "fa": "0899aa207d22fb700d00a1ae0625d77275df84e3f7a547039bc602b0da8a8692",
+    "tracks": "acef5c754c30b037873bfb3aab31c8479af738a051c5dbe9f60e2b41364088cd"
+  },
+  "device": "cuda:0",
+  "gpu": "NVIDIA H100 PCIe",
+  "tf32": true,
+  "n_seeds": 2000,
+  "batch_size": 1000,
+  "accepted_streamlines": 528,
+  "tracking_profile_seconds": 69.28600654099137,
+  "candidate_tracking_seconds": 58.130543269217014,
+  "profile_note": "Inclusive CUDA events overlap; instrumented vs uninstrumented total is not a speedup comparison.",
+  "profile": {
+    "_five_tissue_mrtrix": {
+      "calls": 4997,
+      "cuda_seconds_inclusive": 9.751323039770126
+    },
+    "_sample": {
+      "calls": 6396,
+      "cuda_seconds_inclusive": 7.5387460157126185
+    },
+    "tracking_sh_precomputed": {
+      "calls": 6520,
+      "cuda_seconds_inclusive": 13.025627040982247
+    },
+    "_act_seed_direction": {
+      "calls": 2,
+      "cuda_seconds_inclusive": 0.019475935459136964
+    },
+    "_ifod2_arc_probability": {
+      "calls": 3195,
+      "cuda_seconds_inclusive": 28.65415972709656
+    },
+    "_act_structural_step": {
+      "calls": 1604,
+      "cuda_seconds_inclusive": 0.6690083843320608
+    },
+    "_grow": {
+      "calls": 4,
+      "cuda_seconds_inclusive": 62.55533984375
+    }
+  },
+  "tracking_paths_and_metrics_bitwise_equal": true,
+  "collection": {
+    "baseline": {
+      "seconds": [
+        0.3139305762015283,
+        0.31702140299603343,
+        0.30856961011886597,
+        0.3137877178378403,
+        0.3156983479857445
+      ],
+      "median_seconds": 0.3139305762015283
+    },
+    "optimized": {
+      "seconds": [
+        0.004546688869595528,
+        0.004860417917370796,
+        0.004507866222411394,
+        0.004795727785676718,
+        0.004689789842814207
+      ],
+      "median_seconds": 0.004689789842814207
+    }
+  },
+  "collection_cpu_scalar_calls": {
+    "baseline": 1163,
+    "optimized": 0
+  },
+  "fixed_tck_streamlines": 27401,
+  "fixed_tck_points": 1117273,
+  "packing": {
+    "baseline": {
+      "seconds": [
+        0.025946454145014286,
+        0.02651611901819706,
+        0.02745767869055271,
+        0.025602566078305244,
+        0.024835817981511354
+      ],
+      "median_seconds": 0.025946454145014286
+    },
+    "optimized": {
+      "seconds": [
+        0.02507477020844817,
+        0.023075421806424856,
+        0.022604003082960844,
+        0.02247500605881214,
+        0.02241857396438718
+      ],
+      "median_seconds": 0.022604003082960844
+    }
+  },
+  "precise_fa": {
+    "baseline": {
+      "seconds": [
+        0.10378105519339442,
+        0.11034364998340607,
+        0.1098055187612772,
+        0.09823172073811293,
+        0.11247817520052195
+      ],
+      "median_seconds": 0.1098055187612772
+    },
+    "optimized": {
+      "seconds": [
+        0.11055459128692746,
+        0.09598151687532663,
+        0.10888103814795613,
+        0.10682125296443701,
+        0.10113338613882661
+      ],
+      "median_seconds": 0.10682125296443701
+    }
+  },
+  "packing_and_precise_fa_bitwise_equal": true,
+  "matrices": {
+    "aparc+tian-s1": {
+      "nodes": 84,
+      "all_four_bitwise_equal": true,
+      "atlas_sha256": "021d8e31bc587a1f3e0bb510db7e078010f3fe6d6f640f8329bf58b4f1d8c514"
+    },
+    "aparc.a2009s+tian-s1": {
+      "nodes": 164,
+      "all_four_bitwise_equal": true,
+      "atlas_sha256": "8adfe2ed8397206b17753dfd5ca99c29d42b5d875766d2e56338071bc085ac65"
+    },
+    "glasser+tian-s1": {
+      "nodes": 376,
+      "all_four_bitwise_equal": true,
+      "atlas_sha256": "18d6d3567175595650ec63689b29c63cabb0bada91d85fe506073caba9097a0f"
+    },
+    "glasser+tian-s4": {
+      "nodes": 414,
+      "all_four_bitwise_equal": true,
+      "atlas_sha256": "5983da21ca627e70e7709424cf2696218bf9c21b8ef940b89ce473d9a72319d0"
+    },
+    "schaefer200+tian-s1": {
+      "nodes": 216,
+      "all_four_bitwise_equal": true,
+      "atlas_sha256": "a75e5accc1dcdd7c2f6e9e23be0f9670a1f3cb38257bd95fc5b2248aac3dafe2"
+    },
+    "schaefer500+tian-s4": {
+      "nodes": 554,
+      "all_four_bitwise_equal": true,
+      "atlas_sha256": "22bfcbcddbc2be012f1dbc25c1e426be709dfd7d6b3edac651f2151fbd9ddf51"
+    },
+    "schaefer1000+tian-s4": {
+      "nodes": 1054,
+      "all_four_bitwise_equal": true,
+      "atlas_sha256": "00d299f582c1e2a7b25b3d72ed277f1ad97cda9f46b590f30b0c67592a4a583d"
+    }
+  },
+  "peak_cuda_allocated_bytes": 1196130304,
+  "peak_cuda_reserved_bytes": 1272971264
+}

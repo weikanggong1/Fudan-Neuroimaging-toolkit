@@ -60,11 +60,57 @@ MSMALL_ASSETS = (
     ("global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d40_ROW_vn/melodic_oIC.dscalar.nii", "399f299bdde45720a37e650bf1306a771ffe179a8cdb914fdd297d28a16e9805"),
 )
 
+# WRN d7–d21 templates are not in the frozen FNIT assets-v1 release.
+# Install from the pinned HCP source, with both size and SHA-256 validation.
+MSMALL_LOW_DIM_ASSETS = (
+    ('global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d7_ROW_vn/melodic_oIC.dscalar.nii', '88f0946d04f342949a266ce89fbb8fc7b7a207711cd9dc4ae7c1fe2e279845fc'),
+    ('global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d8_ROW_vn/melodic_oIC.dscalar.nii', '7ef81675028dc5560417dafbdb3bb40981d2e51a114ce7652159c5ab2c5bef1e'),
+    ('global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d9_ROW_vn/melodic_oIC.dscalar.nii', '0b17e79a43049ed6fd53ebd51efa322594b26a0aed5d89e2d77d6b67a1970ecf'),
+    ('global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d10_ROW_vn/melodic_oIC.dscalar.nii', '21a165ed5b219dfda48106c7a6ecf120005edbb4bd6ca1193deae9d1d493517d'),
+    ('global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d11_ROW_vn/melodic_oIC.dscalar.nii', 'e687af2c083832ec7848d3d83196bf2982053ba4d7a6b2837fbccac0c8c8e6c0'),
+    ('global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d12_ROW_vn/melodic_oIC.dscalar.nii', 'cad9cd746992aed8ca192db5a0aa82b1111493f400ab43b1a50ead383255235a'),
+    ('global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d13_ROW_vn/melodic_oIC.dscalar.nii', '7d07bb29d5a3ec76573d7122a3e39d70b86073b344f2f8173b0e0db14ecd00b9'),
+    ('global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d14_ROW_vn/melodic_oIC.dscalar.nii', '39188afcd2f6de9fae3ee24280fc11d5585a6ac6ea0b2dfaad6c5c29d9e69b70'),
+    ('global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d15_ROW_vn/melodic_oIC.dscalar.nii', '8ef883e13738f8c82dc22527d8bcddb0979fbe13e848f67a5b4b8d36c4ae2586'),
+    ('global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d16_ROW_vn/melodic_oIC.dscalar.nii', '8ec9f179c4eeda3ed2b62eaf7e87794431624e6f03a429c592ef0dbb05a2ac83'),
+    ('global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d17_ROW_vn/melodic_oIC.dscalar.nii', '2b87765b5003c745b8cd90e10df08b70c178f056158ed349ca7c6d24864aff37'),
+    ('global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d18_ROW_vn/melodic_oIC.dscalar.nii', '50b136fba119b350d181149014da266cbf491a6853291272708673a4e4a78d16'),
+    ('global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d19_ROW_vn/melodic_oIC.dscalar.nii', 'f35bb7e4497862f20417fcba6469a18b76d6d09de348099a8c3107a2751ee3e3'),
+    ('global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d20_ROW_vn/melodic_oIC.dscalar.nii', 'b04e465588523c1763d04c775a8a6595b29eb8b8366ef37c9fb98ffa71f8a3c3'),
+    ('global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d21_ROW_vn/melodic_oIC.dscalar.nii', '1b232a7a3caec5a9444d250525590d48056abce778f71be7e8a12f2ae088d4df'),
+)
+ASSET_SIZES = {
+    'global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d7_ROW_vn/melodic_oIC.dscalar.nii': 3188808,
+    'global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d8_ROW_vn/melodic_oIC.dscalar.nii': 3554032,
+    'global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d9_ROW_vn/melodic_oIC.dscalar.nii': 3919240,
+    'global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d10_ROW_vn/melodic_oIC.dscalar.nii': 4284480,
+    'global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d11_ROW_vn/melodic_oIC.dscalar.nii': 4649688,
+    'global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d12_ROW_vn/melodic_oIC.dscalar.nii': 5014912,
+    'global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d13_ROW_vn/melodic_oIC.dscalar.nii': 5380136,
+    'global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d14_ROW_vn/melodic_oIC.dscalar.nii': 5745360,
+    'global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d15_ROW_vn/melodic_oIC.dscalar.nii': 6110584,
+    'global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d16_ROW_vn/melodic_oIC.dscalar.nii': 6475808,
+    'global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d17_ROW_vn/melodic_oIC.dscalar.nii': 6841016,
+    'global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d18_ROW_vn/melodic_oIC.dscalar.nii': 7206240,
+    'global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d19_ROW_vn/melodic_oIC.dscalar.nii': 7571464,
+    'global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d20_ROW_vn/melodic_oIC.dscalar.nii': 7936688,
+    'global/templates/MSMAll/rfMRI_REST_Atlas_MSMAll_2_d41_WRN_DeDrift_hp2000_clean_PCA.ica_d21_ROW_vn/melodic_oIC.dscalar.nii': 8301912,
+}
+
 FMRIPREP_ASSETS = (
     ("fmriprep/tpl-MNI152NLin6Asym_res-02_atlas-HCP_dseg.nii.gz",
      "9c25e63edec37b3876756b749a3f0127511c6b63bf2855060a44007bb479b987"),
+    ("fmriprep/tpl-MNI152NLin6Asym_res-02_T1w.nii.gz",
+     "2a814da50173599a857d96246dc057d548072bd6dffa499f75724dbad20792b1"),
+    ("fmriprep/tpl-MNI152NLin6Asym_res-02_desc-brain_mask.nii.gz",
+     "e4e2b284170271afdafe26ac0997b2af5a0f5ddac35e28a7e796b52e8bc5adb1"),
 )
 FMRIPREP_BASE = "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/"
+FMRIPREP_SIZES = {
+    "fmriprep/tpl-MNI152NLin6Asym_res-02_atlas-HCP_dseg.nii.gz": 25762,
+    "fmriprep/tpl-MNI152NLin6Asym_res-02_T1w.nii.gz": 1412252,
+    "fmriprep/tpl-MNI152NLin6Asym_res-02_desc-brain_mask.nii.gz": 28557,
+}
 RELEASE_CHECKSUMS = dict(ASSETS + MSMALL_ASSETS)
 
 
@@ -79,7 +125,10 @@ def _sha256(path: Path) -> str:
 def _install_one(output_dir: Path, relative_path: str, expected_sha256: str,
                  opener=urlopen, base_urls=(RELEASE_BASE, BASE_URL, FALLBACK_URL)) -> Path:
     destination = output_dir / relative_path
+    expected_size = {**FMRIPREP_SIZES, **ASSET_SIZES}.get(relative_path)
     if destination.exists():
+        if expected_size is not None and destination.stat().st_size != expected_size:
+            raise ValueError(f"size mismatch in existing file: {destination}")
         if _sha256(destination) != expected_sha256:
             raise ValueError(f"SHA-256 mismatch in existing file: {destination}")
         return destination
@@ -102,6 +151,8 @@ def _install_one(output_dir: Path, relative_path: str, expected_sha256: str,
                     temporary = Path(target.name)
                     for chunk in iter(lambda: source.read(1024 * 1024), b""):
                         target.write(chunk)
+            if expected_size is not None and temporary.stat().st_size != expected_size:
+                raise ValueError(f"size mismatch in download: {relative_path}")
             if _sha256(temporary) != expected_sha256:
                 raise ValueError(f"SHA-256 mismatch in download: {relative_path}")
             os.replace(temporary, destination)
@@ -117,12 +168,12 @@ def _install_one(output_dir: Path, relative_path: str, expected_sha256: str,
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, required=True, help="Absolute destination directory")
-    parser.add_argument("--msmall", action="store_true", help="Install public MSMAll d40 templates and MSM configuration")
-    parser.add_argument("--fmriprep", action="store_true", help="Install the TemplateFlow HCP dseg for 91k CIFTI")
+    parser.add_argument("--msmall", action="store_true", help="Install MSMAll d40/d7–d21 templates, reference maps and configuration")
+    parser.add_argument("--fmriprep", action="store_true", help="Install original TemplateFlow MNI6 T1w, mask and HCP dseg")
     args = parser.parse_args(argv)
     if not args.output_dir.is_absolute():
         parser.error("--output-dir must be an absolute path")
-    for relative_path, digest in ASSETS + (MSMALL_ASSETS if args.msmall else ()):
+    for relative_path, digest in ASSETS + (MSMALL_ASSETS + MSMALL_LOW_DIM_ASSETS if args.msmall else ()):
         path = _install_one(args.output_dir, relative_path, digest)
         print(path)
     if args.fmriprep:

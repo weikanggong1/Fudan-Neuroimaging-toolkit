@@ -1,0 +1,52 @@
+{
+  "kind": "local focused unit validation; not neuroimaging benchmark",
+  "python": "/tmp/fnit_bwas_final311/bin/python",
+  "torch": "2.5.1",
+  "cuda_runtime": "11.8",
+  "gpu": "NVIDIA GeForce RTX 3060",
+  "shared_load_observed": {
+    "memory_used_mib": 3555,
+    "memory_free_mib": 8561,
+    "gpu_utilization_percent": 8
+  },
+  "command": "PYTHONPATH=src /tmp/fnit_bwas_final311/bin/python -m pytest tests/gems/test_stable_gradients.py tests/gems/test_stable_fused_cuda.py tests/gems/test_fused_data_cost.py tests/gems/test_shared_geometry.py tests/gems/test_deformation_cache.py -q -x",
+  "stdout": "101 passed in 16.03s",
+  "cpu_first_regression": {
+    "stdout": "41 passed, 37 skipped in 11.48s",
+    "cuda_visible_devices": ""
+  },
+  "test_scope": [
+    "8 repeated bitwise cost and gradient identities",
+    "TF32 on and off",
+    "3 and 19 Gaussian classes",
+    "FP64 autograd gradient oracle; TF32 difference bounded by original FP32 oracle",
+    "sparse mask non-power-of-two lookup padding and missing-cell rows",
+    "FP64 prior scalar accumulation; FP32 Jacobian and vertex gradient",
+    "inverted determinant barrier and empty prior",
+    "fixed-order FP64 accumulation for 1/7/19 alpha-statistic channels",
+    "topology mutation and same-pointer/different-stride cache rejection",
+    "existing atomic fused/shared geometry/reference cache regression"
+  ],
+  "files": {
+    "src/fnit/gems/deformation.py": {
+      "bytes": 14189,
+      "sha256": "2b29780e6a49bcefb8e39fef94310be59d1e5b043e2740c0ce88528cecd16398"
+    },
+    "src/fnit/gems/_raster_triton.py": {
+      "bytes": 17430,
+      "sha256": "22ce1ca61efa42b5b6d06cacc4f4d859ef2c10ffca26ecf154f3d73361bee5ac"
+    },
+    "src/fnit/gems/rasterize.py": {
+      "bytes": 27429,
+      "sha256": "01d9b698655a64e67f16ddcf4e0cd3482b4ca129c0063aa13b4e56c0a2e15348"
+    },
+    "tests/gems/test_stable_gradients.py": {
+      "bytes": 7102,
+      "sha256": "59e5ac3f25b329f6f598e995b04e12888a9e56daba72dfcdb97db9a3a25e64aa"
+    },
+    "tests/gems/test_stable_fused_cuda.py": {
+      "bytes": 6724,
+      "sha256": "c943d27a7c04b173f020d102caa3678f575543a462af27f4379f9fc827c26544"
+    }
+  }
+}

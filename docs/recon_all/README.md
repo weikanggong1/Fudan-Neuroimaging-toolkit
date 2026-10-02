@@ -26,6 +26,29 @@ CUDA 流程已接入既有第二次归一化、SynthMorph 非线性配准和[厚
 
 本轮已改为[五阶段串行优化](SERIAL_OPTIMIZATION.md)，新候选与上述完整整例分开记录。
 
+## 流程策略
+
+```mermaid
+flowchart TD
+    T1["单幅原始 T1w NIfTI"] --> CHECK["检查 Conda 原生程序、权重、图谱与许可证"]
+    ASSET["固定权重与 recon-all 资产"] --> CHECK
+    CHECK --> INIT["conform 到 1 mm 网格；Talairach 与 SynthStrip"]
+    INIT --> NORM["N4、强度归一化与脑掩膜"]
+    NORM --> SEG["SynthSeg、GCA 配准、aseg 与胼胝体分割"]
+    SEG --> WM["白质分割、修补与 filled.mgz"]
+    WM --> AUX["MNI 辅助变换与非线性变换"]
+    AUX --> SURF["双侧拓扑修复、white.preaparc 与球面生成"]
+    SURF --> REG["双侧球面配准、aparc 等注释"]
+    REG --> FINAL["最终 white、四轮 pial 放置与顶点指标"]
+    FINAL --> VOL["ribbon、aseg、aparc+aseg 与 wmparc"]
+    VOL --> STATS["体积及双侧皮层统计"]
+    STATS --> QC["检查 138 项输出、网格质量并写运行报告"]
+    QC --> OUT["mri/、surf/、label/、stats/ 与 JSON"]
+    classDef default fill:#ffffff,stroke:#000000,color:#000000;
+```
+
+图中的原生阶段使用当前 Conda 环境内从固定源码构建的程序；图末的完整性检查不代表已通过与官方结果的数值验收。
+
 ## 安装
 
 在仓库根目录创建[主页 Conda 环境](../../environment.yml)，然后运行[原生程序安装脚本](../../tools/setup_recon_all_native_conda.sh)。脚本从固定 FreeSurfer 源码提交编译所需程序并安装至当前 Conda 环境；不会调用系统安装的 FreeSurfer。模型、模板及个人许可证单独提供。

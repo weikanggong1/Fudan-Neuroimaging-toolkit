@@ -14,9 +14,11 @@ from .config import FSL2111Config, FSL_EDDY_COMMIT, FSL_EDDY_VERSION
 from .geometry import (
     apply_slm_linear,
     fsl_rotation_matrix,
+    identity_grid,
     load_topup_movpar,
     matrix_to_movepar,
     movepar_to_matrix,
+    quadratic_ec_basis,
     rereference_movement,
     separate_offset_from_movement,
 )
@@ -24,6 +26,7 @@ from .gp import NewSphericalGP, _shell_groups
 from .outlier import detect_slice_outliers
 from .registration import parameter_update
 from .shell_alignment import register_shell_mean, update_shell_movements
+from .spline import fsl_cubic_coefficients, _pad_cubic_coefficients
 from .warp import model_to_scan, sample_linear_mask, unwarp_scan_to_model
 
 # Reuse only the already validated FNIT TOPUP coefficient decoder and gradient IO.
@@ -94,11 +97,20 @@ def _interpolate_b0_movement(movement, b0_global, dwi_global):
     return out
 
 
-def _unwarp_many(work, params, susceptibility, phase, readout, voxel_sizes, precision, indices):
+def _shared_transform_pe_axis(phase_np, validated_axis):
+    """Use a CPU-known axis only when it matches the legacy float32 selector."""
+    active=np.abs(np.asarray(phase_np,dtype=np.float32)) > np.float32(1e-8)
+    matches=active[:,validated_axis] & ~active[:,:validated_axis].any(1)
+    return validated_axis if bool(matches.all()) else None
+
+
+def _unwarp_many(work, params, susceptibility, phase, readout, voxel_sizes, precision, indices, *,
+                 grid=None, basis=None, pe_axis=None):
     imgs=[]; masks=[]
     for gi in indices:
         y,m,_,_=unwarp_scan_to_model(work[gi],params[gi,:6],params[gi,6:],susceptibility,
-                                     phase[gi],readout[gi],voxel_sizes,precision,True)
+                                     phase[gi],readout[gi],voxel_sizes,precision,True,
+                                     grid=grid,basis=basis,pe_axis=pe_axis)
         imgs.append(y); masks.append(m)
     return torch.stack(imgs), torch.stack(masks)
 
@@ -171,6 +183,21 @@ class TorchEDDYFSL2111:
             susceptibility,_,_=_load_topup_field(topup,raw_np.shape[:3],device,pe_axis)
         finally:
             if device.type=='cuda': torch.backends.cuda.matmul.allow_tf32=tf32
+        # These tensors depend only on this run's fixed grid and decoded TOPUP
+        # field. Work images and GP predictions are intentionally not cached.
+        warp_geometry={
+            'grid':identity_grid(raw_np.shape[:3],device,raw.dtype),
+            'basis':quadratic_ec_basis(raw_np.shape[:3],voxel_sizes,device,raw.dtype),
+            # Input validation uses 1e-6, whereas the legacy transform uses
+            # float32 1e-8. Retain its fallback for noncanonical accepted rows.
+            'pe_axis':_shared_transform_pe_axis(phase_np,pe_axis),
+        }
+        susceptibility_coeff=fsl_cubic_coefficients(susceptibility,cfg.spline_precision)
+        model_constants={
+            **warp_geometry,
+            'susc_coeff':susceptibility_coeff,
+            'susc_padded_coeff':_pad_cubic_coefficients(susceptibility_coeff[None],'mirror'),
+        }
         # Match ECScanManager's internal intensity scaling.
         b0_global=np.flatnonzero(bv < cfg.b0_threshold).tolist(); dwi_global=np.flatnonzero(bv >= cfg.b0_threshold).tolist()
         if not b0_global or not dwi_global: raise ValueError('strict eddy path requires both b0 and DWI scans')
@@ -185,13 +212,13 @@ class TorchEDDYFSL2111:
         # FSL DoVolumeToVolumeRegistration runs the complete b0 Register first.
         if len(b0_global)>1:
             for it,fwhm in enumerate(cfg.fwhm_mm):
-                ub0,mb0=_unwarp_many(work,params,susceptibility,phase,readout,voxel_sizes,cfg.spline_precision,b0_global)
+                ub0,mb0=_unwarp_many(work,params,susceptibility,phase,readout,voxel_sizes,cfg.spline_precision,b0_global,**warp_geometry)
                 b0pred=ub0.mean(0)
                 b0_fov=mb0.all(0)
                 b0log=[]
                 for gi in b0_global:
                     pnew,diag=parameter_update(b0pred,work[gi],params[gi],susceptibility,phase[gi],readout[gi],
-                                               voxel_sizes,float(fwhm),b0_fov,cfg.spline_precision,active_indices=range(6))
+                                               voxel_sizes,float(fwhm),b0_fov,cfg.spline_precision,active_indices=range(6),**model_constants)
                     params[gi]=pnew; b0log.append(diag)
                 iter_log.append({'stage':'b0','iteration':it,'fwhm_mm':float(fwhm),
                                  'mean_update_mss':float(np.mean([x['mss'] for x in b0log]))})
@@ -205,7 +232,7 @@ class TorchEDDYFSL2111:
                 params[:,:6]=_interpolate_b0_movement(params[:,:6],b0_global,dwi_global)
         # Complete DWI Register, with one GP/outlier/update cycle per FWHM iteration.
         for it,fwhm in enumerate(cfg.fwhm_mm):
-            udwi,vmasks=_unwarp_many(work,params,susceptibility,phase,readout,voxel_sizes,cfg.spline_precision,dwi_global)
+            udwi,vmasks=_unwarp_many(work,params,susceptibility,phase,readout,voxel_sizes,cfg.spline_precision,dwi_global,**warp_geometry)
             common_fov=vmasks.all(0)
             common_mask=mask_t & common_fov
             # FSL DataSelector calls srand(initrand) on every construction when
@@ -217,7 +244,7 @@ class TorchEDDYFSL2111:
             pred_obs=[]; pred_masks=[]
             for li,gi in enumerate(dwi_global):
                 po,pm,_,coords=model_to_scan(gp.predict(li,False),params[gi,:6],params[gi,6:],susceptibility,
-                                        phase[gi],readout[gi],voxel_sizes,cfg.spline_precision,True)
+                                        phase[gi],readout[gi],voxel_sizes,cfg.spline_precision,True,**model_constants)
                 pred_obs.append(po); pred_masks.append(pm & sample_linear_mask(common_mask,coords))
             ol=detect_slice_outliers(original[dwi_global],torch.stack(pred_obs),torch.stack(pred_masks),old_outliers,
                                      cfg.ol_nstd,cfg.ol_nvox,1,False,False)
@@ -227,11 +254,11 @@ class TorchEDDYFSL2111:
                 for li,gi in enumerate(dwi_global):
                     if not old_outliers[li].any(): continue
                     po,pm,_,coords=model_to_scan(gp.predict(li,True),params[gi,:6],params[gi,6:],susceptibility,
-                                            phase[gi],readout[gi],voxel_sizes,cfg.spline_precision,True)
+                                            phase[gi],readout[gi],voxel_sizes,cfg.spline_precision,True,**model_constants)
                     for z in torch.nonzero(old_outliers[li],as_tuple=False).flatten().tolist():
                         mm=(pm & sample_linear_mask(common_mask,coords,threshold=0.9))[:,:,z]
                         work[gi,:,:,z]=torch.where(mm,po[:,:,z],work[gi,:,:,z])
-                udwi,vmasks=_unwarp_many(work,params,susceptibility,phase,readout,voxel_sizes,cfg.spline_precision,dwi_global)
+                udwi,vmasks=_unwarp_many(work,params,susceptibility,phase,readout,voxel_sizes,cfg.spline_precision,dwi_global,**warp_geometry)
                 common_fov=vmasks.all(0)
                 common_mask=mask_t & common_fov
                 gp=NewSphericalGP(dwi_local_b,dwi_local_g,cfg.shell_tolerance,cfg.ff,cfg.gp_nm_maxiter)
@@ -240,7 +267,7 @@ class TorchEDDYFSL2111:
             # Predictor is held fixed within this official iteration; each scan receives one GN update.
             for li,gi in enumerate(dwi_global):
                 pnew,diag=parameter_update(gp.predict(li,False),work[gi],params[gi],susceptibility,phase[gi],readout[gi],
-                                           voxel_sizes,float(fwhm),common_fov,cfg.spline_precision,active_indices=range(16))
+                                           voxel_sizes,float(fwhm),common_fov,cfg.spline_precision,active_indices=range(16),**model_constants)
                 params[gi]=pnew; update_log.append(diag)
             params[dwi_global,6:]=apply_slm_linear(params[dwi_global,6:],dwi_local_b,dwi_local_g)
             m,e=separate_offset_from_movement(params[dwi_global,:6],params[dwi_global,6:],dwi_local_b,dwi_local_g,
@@ -261,7 +288,7 @@ class TorchEDDYFSL2111:
         if cfg.enable_post_eddy_shell_alignment:
             corrected_pre=[]; valid_pre=[]
             for gi in range(len(bv)):
-                y,m,_,_=unwarp_scan_to_model(work[gi],params[gi,:6],params[gi,6:],susceptibility,phase[gi],readout[gi],voxel_sizes,cfg.spline_precision,True)
+                y,m,_,_=unwarp_scan_to_model(work[gi],params[gi,:6],params[gi,6:],susceptibility,phase[gi],readout[gi],voxel_sizes,cfg.spline_precision,True,**warp_geometry)
                 corrected_pre.append(y); valid_pre.append(m)
             corrected_pre=torch.stack(corrected_pre); valid_pre=torch.stack(valid_pre)
             b0mean=corrected_pre[b0_global].mean(0)
@@ -272,19 +299,19 @@ class TorchEDDYFSL2111:
                      for g in shell_globals]
             params[:,:6]=update_shell_movements(params[:,:6],shell_globals,updates,raw_np.shape[:3],voxel_sizes)
         # eddy.cpp temporarily sets ff=1 for FinalOLCheck, then restores ff.
-        udwi,vmasks=_unwarp_many(work,params,susceptibility,phase,readout,voxel_sizes,cfg.spline_precision,dwi_global)
+        udwi,vmasks=_unwarp_many(work,params,susceptibility,phase,readout,voxel_sizes,cfg.spline_precision,dwi_global,**warp_geometry)
         common_mask=mask_t & vmasks.all(0)
         gp=NewSphericalGP(dwi_local_b,dwi_local_g,cfg.shell_tolerance,1.0,cfg.gp_nm_maxiter)
         gp.fit(udwi,common_mask,cfg.nvoxhp,gp_seed,0.0,voxel_sizes)
         pred_obs=[]; pred_masks=[]
         for li,gi in enumerate(dwi_global):
-            po,pm,_,coords=model_to_scan(gp.predict(li,False),params[gi,:6],params[gi,6:],susceptibility,phase[gi],readout[gi],voxel_sizes,cfg.spline_precision,True)
+            po,pm,_,coords=model_to_scan(gp.predict(li,False),params[gi,:6],params[gi,6:],susceptibility,phase[gi],readout[gi],voxel_sizes,cfg.spline_precision,True,**model_constants)
             pred_obs.append(po); pred_masks.append(pm & sample_linear_mask(common_mask,coords))
         ol=detect_slice_outliers(original[dwi_global],torch.stack(pred_obs),torch.stack(pred_masks),old_outliers,cfg.ol_nstd,cfg.ol_nvox)
         old_outliers=ol.outlier_map; nsv_final=ol.n_stdev; nsq_final=ol.n_sqr_stdev
         for li,gi in enumerate(dwi_global):
             if not old_outliers[li].any(): continue
-            po,pm,_,coords=model_to_scan(gp.predict(li,True),params[gi,:6],params[gi,6:],susceptibility,phase[gi],readout[gi],voxel_sizes,cfg.spline_precision,True)
+            po,pm,_,coords=model_to_scan(gp.predict(li,True),params[gi,:6],params[gi,6:],susceptibility,phase[gi],readout[gi],voxel_sizes,cfg.spline_precision,True,**model_constants)
             for z in torch.nonzero(old_outliers[li],as_tuple=False).flatten().tolist():
                 mm=(pm & sample_linear_mask(common_mask,coords))[:,:,z]
                 work[gi,:,:,z]=torch.where(mm,po[:,:,z],work[gi,:,:,z])
@@ -292,7 +319,7 @@ class TorchEDDYFSL2111:
         outs=[]; oms=[]
         for gi in range(len(bv)):
             y,m,_,_=unwarp_scan_to_model(work[gi],params[gi,:6],params[gi,6:],susceptibility,phase[gi],readout[gi],voxel_sizes,cfg.spline_precision,True,
-                                         pe_extrapolation_valid=True)
+                                         pe_extrapolation_valid=True,**warp_geometry)
             outs.append(y/scale); oms.append(m)
         out=torch.stack(outs); om=torch.stack(oms).all(0); out=out*om
         # Rotated b-vectors use inverse movement rotation.

@@ -1,6 +1,16 @@
 # FNIT MELODIC：单被试空间 PICA
 
-`run_melodic_bids` 对一张已预处理的 4D BOLD 做单被试空间 ICA，从 BIDS Derivatives 读取 BOLD 和同网格脑掩膜，将成分图与时间序列写回 BIDS Derivatives。函数本身不做运动校正、畸变校正或配准。算法先按体素去时间均值，用初始 PCA 的残差估计体素方差，再做时间 PCA 白化和空间对称 FastICA。默认 `n_components=None` 用平滑度修正后的 Laplace PPCA 选阶；空间成分按残差噪声标准化，Gaussian/正负 Gamma 混合模型给每个体素估计“非背景”后验概率，默认保留概率 ≥0.5 的值。volume 流程内部复用 `decompose_spatial_ica` 算法内核。实际处理路径不调用 FSL。
+[返回首页](../../README.md) · [源码目录](../../src/fnit/melodic/) · [固定输入验证](../../validation/fmri/ica_fixed_input.public.json)
+
+`run_melodic_bids` 对一张已预处理的 4D BOLD 做单被试空间 PICA，从 BIDS Derivatives 读取 BOLD 和同网格脑掩膜，将成分图与时间序列写回 BIDS Derivatives。算法内核是 `decompose_spatial_ica`，volume 流程调用同一个内核。数据读写用 nibabel，PCA、ICA 和混合模型用 PyTorch；FNIT 运行时不调用 FSL。
+
+计算顺序对应 FSL MELODIC 2601.1 的单被试 `symm`、`pow3`、`dimest=lap` 分支：
+
+1. 每个体素去时间均值；初始 30 维 PCA 用阈值 2.3 的空间得分估计残差标准差，再除以该标准差进行方差归一化。
+2. 空间去均值只用于计算 PCA 协方差，ICA 的输入保留归一化数据的全脑平均时间过程。自动定阶采用原实现的离散 Marchenko–Pastur 谱修正和 Laplace PPCA，而固定整数 `n_components` 直接选择 K 维。
+3. 用与 Linux FSL `srand`/`unifrnd` 一致的随机序列初始化，对称 FastICA 迭代至 `tolerance` 或 `max_iter`。PCA 协方差、白化和 ICA 采用 float64，避免 TF32 改变分解结果；其他函数的 TF32 设置不变，写出的空间图仍是 float32。
+4. 时间序列按样本标准差归一化为 1，翻转符号使空间图最大绝对值为正，再按空间得分标准差排序。空间成分除以残差噪声及时间解混矩阵的行范数。
+5. 拟合一个 Gaussian 背景及正、负 Gamma 分布，按拟合背景重新标定 Z 分数，保留非背景后验概率达到 `mm_threshold` 的体素。原实现拟合时使用的 `1e-4` 似然下限不会用于最终后验比值，极端信号体素的后验概率因此得到保留。
 
 ## 输入和调用
 
@@ -19,7 +29,7 @@ ica = run_melodic_bids(
     voxel_batch_size=8192,   # 每次处理的脑内体素数
     max_iter=500,             # 对称 FastICA 的最大迭代数
     tolerance=1e-3,           # 正交化变化量停止阈值
-    random_state=0,           # ICA 初始矩阵的随机种子
+    random_state=0,           # Linux FSL 同序随机初始化种子，对应 --seed=0
     mm_threshold=0.5,         # 非背景后验概率阈值
     overwrite=False,          # 是否覆盖同名结果
 )
@@ -46,35 +56,60 @@ print(ica.mixing)             # T×K 成分时间序列
 melodic -i /absolute/path/filtered_func_data.nii.gz \
   -o /absolute/path/melodic_ref -m /absolute/path/mask.nii.gz \
   --nobet --bgthreshold=3 --tr=0.735 -d 0 \
+  --dimest=lap --nl=pow3 --eps=0.001 --maxit=500 --seed=0 \
   --Ostats --mmthresh=0.5
 ```
 
 当只核对 PCA/ICA 而不运行混合模型时，加 `--no_mm`。只核对一张已生成的 IC 图的混合模型时，可按 [MELODIC 官方用法](https://fsl.fmrib.ox.ac.uk/fsl/docs/resting_state/melodic.html)使用 `--ICs=<单张IC图> --mix=<一值文本>`。
 
-## 真实影像核对
+## 固定真实输入与原 MELODIC 对照
 
-使用同一例 UKB 原始 rfMRI（88×88×64×490，TR 0.735 秒）和同一张 113,659 体素掩膜。这里故意让两者读同一输入，避免上游 FEAT 差异混入 PICA 核对；原始影像本身不是建议的最终去噪输入。FSL 参考运行使用 `-d 0 --no_mm`。匹配 IC 时先用匈牙利算法配对，再取空间图和时间序列 Pearson 相关的绝对值，因此消除了 ICA 成分排列、符号的不确定性。
+新版内核在一例完整 490 帧、TR 0.735 秒的 UKB 数据上核对。两边读取完全相同的原软件 FEAT `filtered_func_data.nii.gz` 和 99,372 体素 EPI 掩膜；因此这项测量隔离了 ICA，未把运动校正、脑提取或配准差异混入结果。原参照为 MELODIC 2601.1，显式设置 `--dimest=lap --nl=pow3 --eps=0.001 --maxit=500 --seed=0 --mmthresh=0.5`。
 
-| 检查 | FNIT | FSL 参考 | 对照 |
+时间序列先去均值、L2 归一化，再用匈牙利算法最大化配对后的绝对 Pearson r。空间图也按该配对和符号核对；Dice 计算阈值图非零体素的重合率。
+
+| 指标 | FNIT 当前内核 | 原 MELODIC | 对照结果 |
 | --- | --- | --- | --- |
-| 自动成分数 | 89 | 89 | 一致。 |
-| 平滑度 resels | 0.497094 | `smoothest` 0.4971 | 一致。 |
-| ICA 时间序列 | 90.74 秒，峰值 PyTorch 已分配显存 0.283 GB | 核心文件在 91.73 秒出现，进程退出 255 | 匹配后 r 中位 0.9570、5% 分位 0.4428。 |
-| ICA 空间图 | 89 张 | 89 张 | 匹配后 r 中位 0.9566、5% 分位 0.3791。 |
-| PICA 概率图 | 全部有限，范围 0–1 | 核心对照加了 `--no_mm`，无整例官方概率图 | FNIT 概率 ≥0.5 后保留 357,036 / 10,115,740 个脑内 IC 体素。 |
+| 自动成分数 | 95 | 95 | 相同。 |
+| ICA 迭代 | 40 | 40 | 相同；最终变化量分别为 0.00097617、0.00097589。 |
+| 成分顺序与符号 | 95 张 | 95 张 | 61/62 号成分排序互换，其他顺序相同；配对后符号全部相同。 |
+| 成分时间序列 | T×95，样本标准差为 1 | T×95 | r 中位数 **0.999999978**，5% 分位 0.999999481，最低 0.999998346。 |
+| 背景标准化空间图 | X×Y×Z×95 | X×Y×Z×95 | r 中位数 **0.999999970**；每成分 RMSE 中位数 0.000476。 |
+| 概率阈值图 | 后验 ≥0.5 | `stats/thresh_zstat*` | 非零支持集 Dice 中位数 **0.999562**，最低 0.993478。 |
+| Fourier 功率 | 245×95 | `melodic_FTmix`，245×95 | 配对后相对 L2 差 0.000414。 |
+| FNIT 计算与写出 | 117.49 秒，CUDA 分配峰值 0.504 GB | 此控制不重新计时原命令 | 单次共享 GPU 测量；PCA/ICA 为 float64，全局 TF32 保持开启。 |
 
-上表的 FNIT 运行采用默认 `tolerance=1e-3`、`max_iter=500`，第 89 次迭代收敛，最终正交化变化量为 0.000956。FSL 返回 255，91.73 秒只是核心输出检查点，不能当作成功整例耗时。峰值显存仅统计 PyTorch 已分配张量，并非进程总显存。
+完整标量、输入与代码哈希见[固定输入控制](../../validation/fmri/ica_fixed_input.public.json)。修复前，同样原输入、同样掩膜的 ICA 时间序列 r 中位数为 0.899301，5% 分位为 0.308246，迭代 74 次；见[同输入修复前控制](../../validation/fmri/ica_fixed_input_before.public.json)。新版将错误的额外空间去均值、不同 RNG、TF32 分解、PPCA 尾谱索引以及输出缩放与排序逐项修正。两次控制的计时分别为 74.39 和 117.49 秒，不代表在相同共享 GPU 负载下测得的速度比。
 
-混合模型另用同一张 FSL 第 1 个 IC 图做输入，对照官方 `--ICs` 单图模式：FNIT 与 FSL 后验概率 r=0.9980、MAE=0.0101，0.5 阈值 Dice=0.9533；共同保留体素的 Z 图 r≈1、MAE=0.0758。FNIT 单图 EM 为 0.26 秒，FSL 命令为 1.69 秒；FSL 进程仍退出 255，但概率图和阈值图完整可读。上述只说明该 IC 的混合模型接近，不能外推到所有 89 张图。
+完整原软件 MELODIC 命令的旧连续流水线测量为 651.87 秒，其中还生成 HTML 报告、单成分统计和图片，计时边界不同。流水线原始输入、步骤及完整耗时见[匹配原步骤的端到端比较](../../validation/fmri/matched_native.md)。
 
-独立 BIDS 入口另用同一例真实 BOLD 的前 64 帧、已经完成 volume 混杂回归的 MNI 2 mm 输出检查：固定 10 个成分，CPU 墙钟 19.72 秒；成分图 91×109×91×10、混合矩阵 64×10，结果全部有限且收敛。`dataset_description.json`、来源链接与分解 JSON 均已写出。该运行检查 BIDS 文件写出，不用于和上面的 490 帧 FSL 对照计算速度比；见[标量摘要](../../validation/fmri/melodic_bids_current.json)。
+进一步固定原运动参数、原 BBR/FNIRT 变换和 ICA-AROMA 掩膜，只替换为新版 FNIT 的 ICA 输出，得到 95/95 成分和 50/50 噪声成分；配对后的 95 个噪声/信号标签全部一致，频率特征完全相同。四种特征的误差见[分类控制](../../validation/fmri/aroma_corrected_ica_control.public.json)。
 
-## 仍有差异
+下图展示三个匹配成分通过同一原配准场进入 MNI 2 mm 后的阈值图。每列选择原成分非零体素最多的轴位层；上下两幅使用同一切片、同一色标。第三行为绝对差，色标上限 0.01，超出上限的值显示为最亮色；不额外平滑。图像来源和哈希见[图示记录](../../validation/fmri/ica_figure.public.json)。
 
-FSL 的 PPCA、IC 求解及混合模型含重启、Gaussian 混合模型回退和更多推断分支；此处实现单次对称 ICA 与三类 Gaussian/Gamma 推断，尚未逐项复现所有分支。自动定阶一致、IC 中位相关较高不代表每张 IC 一致；5% 分位数反映仍有明显不同的成分。本次标量和源码哈希见[机器可读汇总](../../validation/fmri/pica_summary.json)。具体源码版本、随机初始化、停止阈值、FSL 异常退出和完整阈值图比较都应随基准记录。ICA-AROMA 的分类结果因此不能直接称为与官方逐成分相同。
+![同原输入的 MELODIC 与 FNIT 空间成分及绝对差](figures/ica_fixed_input.png)
+
+### 复现固定输入核对
+
+先用上面的原 MELODIC 命令生成参照目录，并让两边使用同一份 BOLD 与掩膜。以下脚本只运行 FNIT，读取已有参照文件进行比较；输出目录中的影像和逐成分配对文件用于本地检查，公开摘要仅含匿名统计和哈希。
+
+```bash
+python validation/fmri/compare_ica_fixed_input.py \
+  --input-bold /absolute/path/filtered_func_data.nii.gz \
+  --brain-mask /absolute/path/mask.nii.gz \
+  --reference-dir /absolute/path/melodic_ref \
+  --output-dir /absolute/path/fnit_ica_control \
+  --device cuda:0
+```
+
+[7 项内核与接口测试](../../validation/fmri/ica_tests.public.json)检查相同 Linux RNG、混合矩阵单位样本标准差、奇数帧 FFT 补零、极端 Gamma 后验、NIfTI 网格与头信息，以及 BIDS 文件和来源链接。这些合成单元测试不替代上面的真实影像比较。
+
+### 实现范围
+
+本内核支持单被试对称 `pow3` ICA、Laplace 自动定阶和三类 Gaussian/Gamma 推断。原 MELODIC 的多被试 MIGP/TICA、其他对比函数及 Gaussian 混合模型回退尚未纳入。该真实参照的 95 个成分均使用 Gaussian/Gamma 分支；上述高相关和阈值 Dice 对应该数据与参数，空间得分的小数值差异仍会让少量接近 0.5 的体素改变是否保留。
 
 ## 参考文献与原实现
 
 - Beckmann 与 Smith，*Probabilistic Independent Component Analysis for Functional Magnetic Resonance Imaging*，IEEE TMI，2004，[DOI](https://doi.org/10.1109/TMI.2003.822821)。
-- 原实现：[FSL MELODIC 文档](https://fsl.fmrib.ox.ac.uk/fsl/docs/resting_state/melodic.html)、[PCA 源码](https://git.fmrib.ox.ac.uk/fsl/melodic/-/blob/master/melpca.cc)、[ICA 源码](https://git.fmrib.ox.ac.uk/fsl/melodic/-/blob/master/melica.cc)、[混合模型源码](https://git.fmrib.ox.ac.uk/fsl/melodic/-/blob/master/melgmix.cc)。
+- 原实现：[FSL MELODIC 文档](https://fsl.fmrib.ox.ac.uk/fsl/docs/resting_state/melodic.html)、[PCA 源码](https://git.fmrib.ox.ac.uk/fsl/melodic/-/blob/2601.1/melpca.cc)、[ICA 源码](https://git.fmrib.ox.ac.uk/fsl/melodic/-/blob/2601.1/melica.cc)、[混合模型源码](https://git.fmrib.ox.ac.uk/fsl/melodic/-/blob/2601.1/melgmix.cc)。
 - 输出命名参照 [BIDS 功能导数中的时空分解格式](https://bids-specification.readthedocs.io/en/bep012/derivatives/functional-derivatives.html)。

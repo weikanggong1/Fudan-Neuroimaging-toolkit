@@ -14,6 +14,7 @@ import torch
 from scipy.ndimage import binary_dilation, binary_erosion
 
 from .._dmri import configure_device
+from .._sampling_plan import SamplingGeometry
 from ..applywarp import TorchApplyWarp
 from ..flirt import TorchFLIRT
 from ..fnirt import FNIRTConfig, TBSSFNIRTConfig, TorchFNIRT
@@ -149,15 +150,17 @@ class TorchTBSS:
         )
         apply = TorchApplyWarp(device=self.device)
         standard = {}
+        sampling_plans = {}
         for name, image in maps.items():
             source = preprocessed if name == "FA" else image
-            warped = apply(
-                source,
-                reference,
-                warp=nonlinear.coefficient_image,
-                interpolation="trilinear",
-                warp_convention="relative",
-            ).image
+            source = nib.load(os.fspath(source)) if isinstance(source, (str, os.PathLike)) else source
+            geometry = SamplingGeometry.capture(source)
+            if geometry not in sampling_plans:
+                sampling_plans[geometry] = apply.prepare(
+                    source, reference, warp=nonlinear.coefficient_image,
+                    interpolation="trilinear", warp_convention="relative",
+                )
+            warped = sampling_plans[geometry].apply(source, reference=reference).image
             values = np.asarray(warped.dataobj, dtype=np.float32)
             if values.ndim == 4 and values.shape[3] == 1:
                 values = values[..., 0]

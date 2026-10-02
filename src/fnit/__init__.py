@@ -3,6 +3,9 @@ __version__ = "0.16.0"
 
 
 def __getattr__(name):
+    if name in ('fit_dictionary_learning', 'fit_dictionary_learning_streaming'):
+        from . import dictionary_learning
+        return getattr(dictionary_learning, name)
     if name in ('SynthStrip', 'StripResult'):
         from . import synthstrip
         return getattr(synthstrip, name)
@@ -17,7 +20,7 @@ def __getattr__(name):
         from . import synthseg_parc
         return getattr(synthseg_parc, name)
     if name in ('GEMSAtlas', 'TorchGEMS', 'TorchGEMSResult',
-                'SubregionResult', 'segment_subregions'):
+                'SubregionResult', 'segment_4_subregions'):
         from . import gems
         return getattr(gems, name)
     if name in ('SynthSR', 'SynthSRResult', 'SynthSRImage'):
@@ -39,6 +42,9 @@ def __getattr__(name):
         from importlib import import_module
         module = import_module('.invwarp', __name__)
         return getattr(module, name)
+    if name in ('TorchMCFLIRT', 'MCFLIRTResult'):
+        from importlib import import_module
+        return getattr(import_module('.mcflirt', __name__), name)
     if name in ('FLIRTResult', 'TorchFLIRT',
                 'flirt_to_world_affine', 'flirt_to_world_pull',
                 'voxel_to_fsl_scaled_mm', 'world_to_flirt_affine'):
@@ -90,10 +96,21 @@ def __getattr__(name):
     if name == 'convert_space':
         from .space_conversion import convert_space
         return convert_space
+    if name == 'run_superbigflica':
+        from .superbigflica import run_superbigflica
+        return run_superbigflica
+    if name in ('run_bwas', 'BWASResult'):
+        from . import bwas
+        return getattr(bwas, name)
     if name in ('FastVBM', 'FastVBMResult',
                 'VBMRegistrationResult'):
         from . import fast_vbm
         return getattr(fast_vbm, name)
+    if name in ('MSMAllConfig', 'MSMAllInputs', 'run_msmall',
+                'MSMAllRegressionResult', 'run_msmall_regression', 'prepare_msmall_inputs',
+                'compute_msmall_variance_normalization'):
+        from . import msm
+        return getattr(msm, name)
     if name in ('FeatCoreResult', 'run_feat_core', 'BIDSInputs', 'locate_bids_inputs',
                 'BBRResult', 'register_bbr',
                 'FMRIVolumeResult', 'fMRIVolume_pipeline', 'T1MNIResult',
@@ -103,7 +120,7 @@ def __getattr__(name):
                 'clean_confounds', 'motion_regressors',
                 'SurfaceHemisphere', 'SurfaceProjectionResult',
                 'create_fmriprep_cifti', 'run_fmriprep_surface_projection',
-                'MSMSulcInputs', 'prepare_msmsulc_inputs', 'run_msmsulc',
+                'MSMSulcConfig', 'MSMSulcInputs', 'prepare_msmsulc_inputs', 'run_msmsulc',
                 'FMRISurfaceResult', 'fMRISurface_pipeline',
                 'T1SurfacePair', 'T1SurfaceGeometry', 'T1SurfacePreparation',
                 'prepare_fmriprep_surface_inputs', 'prepare_t1w_surface_geometry'):

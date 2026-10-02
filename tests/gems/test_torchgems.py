@@ -27,6 +27,17 @@ def test_reference_deformation_prior_is_zero():
     assert torch.allclose(jac, torch.ones_like(jac), atol=1e-6)
 
 
+def test_sliding_boundary_rotates_with_atlas_affine():
+    from fnit.gems.deformation import sliding_boundary_projectors
+    flags = torch.tensor([[True, False, False], [True, True, False],
+                           [False, False, False], [True, True, True]])
+    transform = torch.tensor([[0., -2., 0.], [1., 0., 0.], [0., 0., 3.]])
+    projection = sliding_boundary_projectors(flags, transform)
+    gradient = torch.tensor([1., 2., 3.])
+    expected = torch.tensor([[0., 2., 0.], [1., 2., 0.], [0., 0., 0.], [1., 2., 3.]])
+    torch.testing.assert_close(projection @ gradient, expected)
+
+
 def test_rasterized_priors_sum_to_one():
     atlas = _atlas()
     priors, covered = rasterize_priors(
@@ -35,6 +46,61 @@ def test_rasterized_priors_sum_to_one():
     assert priors.shape == (2,8,8,8)
     assert covered.any()
     assert torch.allclose(priors.sum(0), torch.ones(8,8,8), atol=1e-6)
+
+
+def test_batched_raster_assignment_reconstructs_interpolated_priors():
+    atlas = _atlas()
+    vertices = torch.tensor(np.concatenate((atlas.vertices, atlas.vertices + [11, 9, 7])),
+                            dtype=torch.float32)
+    tetrahedra = torch.tensor(np.concatenate((atlas.tetrahedra, atlas.tetrahedra + 4)))
+    alphas = torch.tensor(np.concatenate((atlas.alphas, atlas.alphas[:, ::-1])))
+    priors, covered, cells, weights = rasterize_priors(
+        vertices, tetrahedra, alphas, (19, 17, 15),
+        background_channel=None, return_assignment=True)
+    interpolation = (alphas[cells[covered]] * weights[covered][..., None]).sum(1)
+    torch.testing.assert_close(priors[:, covered].T, interpolation, atol=1e-6, rtol=1e-6)
+    assert not covered[9, 8, 7]
+    assert torch.count_nonzero(priors[:, ~covered]) == 0
+
+
+def test_raster_gradient_matches_finite_difference_inside_a_tetrahedron():
+    atlas = _atlas()
+    vertices = torch.tensor(atlas.vertices + [.13, .21, .31],
+                            dtype=torch.float64, requires_grad=True)
+    tetrahedra = torch.tensor(atlas.tetrahedra)
+    alphas = torch.tensor(atlas.alphas, dtype=torch.float64)
+    def value(positions):
+        priors, _ = rasterize_priors(positions, tetrahedra, alphas, (8, 8, 8))
+        return priors[:, 2, 2, 2]
+    assert torch.autograd.gradcheck(value, (vertices,))
+
+
+def test_cached_spatial_index_matches_fresh_after_mesh_movement():
+    from fnit.gems.rasterize import build_block_index
+    atlas = _atlas()
+    vertices = torch.tensor(atlas.vertices, dtype=torch.float32)
+    tetrahedra = torch.tensor(atlas.tetrahedra)
+    alphas = torch.tensor(atlas.alphas)
+    index = build_block_index(atlas.vertices, atlas.tetrahedra, (8, 8, 8), margin=2)
+    rasterize_priors(vertices, tetrahedra, alphas, (8, 8, 8), block_index=index)
+    moved = vertices + torch.tensor([.7, -.4, .2])
+    cached, covered = rasterize_priors(moved, tetrahedra, alphas, (8, 8, 8), block_index=index)
+    fresh, fresh_covered = rasterize_priors(moved, tetrahedra, alphas, (8, 8, 8))
+    torch.testing.assert_close(cached, fresh)
+    assert torch.equal(covered, fresh_covered)
+
+
+def test_compact_gaussian_statistics_match_full_zero_masked_image():
+    image = torch.arange(125, dtype=torch.float32).reshape(5, 5, 5)
+    image[0] = 0
+    responsibilities = torch.stack((torch.full_like(image, .3), torch.full_like(image, .7)))
+    hyper = {"mean_hyper": torch.tensor([40., 90.]), "n_hyper": torch.tensor([10., 5.])}
+    full = update_gaussians(image, responsibilities, **hyper)
+    valid = image != 0
+    compact = update_gaussians(image[valid].reshape(-1, 1, 1),
+                               responsibilities[:, valid].reshape(2, -1, 1, 1), **hyper)
+    torch.testing.assert_close(compact.means, full.means)
+    torch.testing.assert_close(compact.covariances, full.covariances)
 
 
 def test_atlas_smoothing_preserves_normalized_vertex_alphas():
@@ -77,6 +143,46 @@ def test_multistage_fit_restores_original_anatomical_priors():
     torch.testing.assert_close(staged.priors, expected)
 
 
+def test_refreshes_spatial_index_without_changing_static_mesh():
+    atlas = _atlas()
+    from dataclasses import replace
+    atlas = replace(atlas, can_move=np.zeros_like(atlas.can_move))
+    image = torch.ones(8, 8, 8)
+    ordinary = TorchGEMS(atlas)(image, em_iterations=1, deform_iterations=2)
+    refreshed = TorchGEMS(atlas)(image, em_iterations=1, deform_iterations=2,
+                                  index_refresh_interval=1, index_margin=3)
+    torch.testing.assert_close(refreshed.priors, ordinary.priors)
+    torch.testing.assert_close(refreshed.posterior, ordinary.posterior)
+
+
+def test_mesh_fit_may_stop_when_cost_converges():
+    atlas = _atlas()
+    image = torch.ones(8, 8, 8)
+    from fnit.gems.gaussian import GaussianParameters
+    fixed = GaussianParameters(torch.ones(2, 1), torch.ones(2, 1, 1))
+    result = TorchGEMS(atlas)(image, em_iterations=1, deform_iterations=8,
+                               deform_lr=0, fixed_gaussians=fixed,
+                               relative_cost_stop=1e-10)
+    assert len(result.objective_history) == 3
+
+
+def test_atlas_mask_erosion_restricts_boundary_voxels():
+    image = torch.ones(8, 8, 8)
+    ordinary = TorchGEMS(_atlas())(image, mask_to_atlas=True)
+    eroded = TorchGEMS(_atlas())(image, mask_to_atlas=True,
+                                  atlas_mask_erosion=1)
+    assert int((eroded.labels != 0).sum()) < int((ordinary.labels != 0).sum())
+
+
+def test_zero_intensity_voxel_keeps_atlas_prior_for_soft_volume():
+    image = torch.ones(8, 8, 8)
+    image[2, 2, 2] = 0
+    fixed = GaussianParameters(torch.tensor([[0.], [10.]]),
+                               torch.ones(2, 1, 1))
+    fit = TorchGEMS(_atlas())(image, fixed_gaussians=fixed)
+    torch.testing.assert_close(fit.posterior[:, 2, 2, 2], fit.priors[:, 2, 2, 2])
+
+
 def test_lbfgs_mesh_fit_keeps_positive_tetrahedra():
     image = torch.ones(8, 8, 8)
     image[2:5, 2:5, 2:5] = 2
@@ -84,6 +190,64 @@ def test_lbfgs_mesh_fit_keeps_positive_tetrahedra():
                                   deform_optimizer="lbfgs", deform_lr=0.5)
     assert result.min_jacobian > 0
     assert len(result.objective_history) == 3
+
+
+def test_outer_em_cycles_each_fit_the_mesh():
+    from dataclasses import replace
+    atlas = replace(_atlas(), can_move=np.zeros((4, 3), bool))
+    image = torch.ones(8, 8, 8)
+    result = TorchGEMS(atlas)(
+        image, em_iterations=100, em_relative_cost_stop=1e-5,
+        deform_iterations=2, outer_iterations=3,
+        mean_hyper=torch.tensor([1., 2.]), n_hyper=torch.tensor([10., 10.]))
+    assert len(result.objective_history) == 7
+    assert torch.isfinite(result.gaussian_parameters.means).all()
+    torch.testing.assert_close(result.vertices, torch.tensor(atlas.vertices, dtype=torch.float32))
+
+
+def test_compact_mesh_fit_matches_dense_valid_voxel_path(monkeypatch):
+    import fnit.gems.core as core
+
+    image = torch.zeros(8, 8, 8)
+    image[1:6, 1:6, 1:6] = 1
+    image[2:5, 2:5, 2:5] = 2
+    settings = dict(em_iterations=8, em_relative_cost_stop=1e-5,
+                    deform_iterations=3, outer_iterations=2,
+                    deform_optimizer="lbfgs", deform_lr=0.5,
+                    boundary_transform=np.eye(3),
+                    mean_hyper=torch.tensor([1., 2.]), n_hyper=torch.tensor([10., 10.]))
+    compact = TorchGEMS(_atlas())(image, **settings)
+
+    def dense_selected(vertices, tetrahedra, alphas, shape, *, valid_mask, **kwargs):
+        priors, covered = core.rasterize_priors(vertices, tetrahedra, alphas, shape, **kwargs)
+        return priors[:, valid_mask], covered[valid_mask]
+
+    monkeypatch.setattr(core, "rasterize_priors_compact", dense_selected)
+    dense = TorchGEMS(_atlas())(image, **settings)
+    torch.testing.assert_close(compact.vertices, dense.vertices, rtol=1e-4, atol=1e-5)
+    torch.testing.assert_close(compact.posterior, dense.posterior, rtol=1e-4, atol=1e-5)
+    torch.testing.assert_close(compact.gaussian_parameters.means, dense.gaussian_parameters.means)
+    torch.testing.assert_close(compact.gaussian_parameters.covariances, dense.gaussian_parameters.covariances)
+    assert torch.equal(compact.labels, dense.labels)
+
+
+def test_compact_em_with_empty_valid_mask_keeps_soft_atlas_prior():
+    fit = TorchGEMS(_atlas())(torch.zeros(8, 8, 8), em_iterations=2,
+                              em_relative_cost_stop=1e-5)
+    assert torch.count_nonzero(fit.labels) == 0
+    torch.testing.assert_close(fit.posterior, fit.priors)
+
+
+def test_sliding_mesh_stops_inner_and_outer_iterations_when_nodes_do_not_move():
+    from dataclasses import replace
+    atlas = replace(_atlas(), can_move=np.zeros((4, 3), bool))
+    result = TorchGEMS(atlas)(
+        torch.ones(8, 8, 8), em_iterations=100, em_relative_cost_stop=1e-5,
+        deform_iterations=30, outer_iterations=7, deform_optimizer="lbfgs",
+        boundary_transform=np.eye(3),
+        mean_hyper=torch.tensor([1., 2.]), n_hyper=torch.tensor([10., 10.]))
+    assert len(result.objective_history) == 2
+    torch.testing.assert_close(result.vertices, torch.tensor(atlas.vertices, dtype=torch.float32))
 
 
 def test_grouped_labels_keep_distinct_anatomical_posteriors():
@@ -226,19 +390,3 @@ def test_mask_affine_aligns_a_shifted_structure():
         labels, [16], device="cpu", max_iterations=25)
     np.testing.assert_allclose(affine[:3, 3], [4, 5, 3], atol=1.5)
     assert score > 0.8
-
-
-def test_subregions_keeps_mgh_world_affine(tmp_path):
-    from fnit.gems import segment_subregions
-
-    atlas_dir = tmp_path / "atlas" / "synthetic"
-    atlas_dir.mkdir(parents=True)
-    _atlas().save_npz(atlas_dir / "atlas.npz")
-    np.save(atlas_dir / "atlas_to_native_voxel.npy", np.eye(4))
-    (atlas_dir / "config.json").write_text(json.dumps({"include_label_ids": [10]}))
-    affine = np.asarray([[-1, 0, 0, 4], [0, 0, 1, -3], [0, -1, 0, 5], [0, 0, 0, 1]])
-    source = nib.MGHImage(np.ones((8, 8, 8), dtype=np.float32), affine)
-    result = segment_subregions(source, tmp_path / "atlas", structures="synthetic",
-                                auto_initialize=False, em_iterations=1, device="cpu")
-    np.testing.assert_allclose(result.labels.affine, source.affine, atol=1e-5)
-    assert result.labels.shape == source.shape

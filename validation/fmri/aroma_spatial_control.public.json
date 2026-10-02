@@ -1,0 +1,38 @@
+{
+  "control": "Fixed native 95-component maps, original warp and BBR, original classification masks; no refit ICA",
+  "components": 95,
+  "dtype": "float32",
+  "source_code_sha256": {
+    "aroma.py": "d7a8d9a8436d2b1d1b4fe4899dd89bbf134ccefa25a66d601db8cc1a9481b28d",
+    "normalization.py": "314b856e50083d7496c0c541767511437010829e61543f259839d83f00ce29bb"
+  },
+  "input_sha256": {
+    "native_thresholded_maps": "748277a25e96226dd388c9ac20a95aa814112cbf50bb68a8094142e2650c4f82",
+    "native_maps_MNI": "734952c6d472f92d08101716f814dc3053d48efb297058a5df954f4b561dd1ea",
+    "csf_mask": "fd11a92641beeee9094eb8c3094c8e133ecc181f4fab4ee4f54fab99ca98bf8c",
+    "edge_mask": "1a91ca44717c968e98fa8b2208d426e67aa5e558c9cd3bb86371c8bd681f5aed",
+    "outside_mask": "3d5d987918e877a9fa515b70d8a0f580ff62947bbaf8f2d6a3fcbeb721f743b0"
+  },
+  "same_MNI_maps_spatial_features": {
+    "edge_fraction_max_abs": 1.0057852481981655e-06,
+    "csf_fraction_max_abs": 1.0580856210640199e-07,
+    "noise_labels_equal": true,
+    "noise_components": 50
+  },
+  "fnit_sampler_vs_original_applywarp": {
+    "whole_maps_rmse": 3.219015162778802e-06,
+    "whole_maps_max_abs": 0.001117706298828125,
+    "map_pearson_mean": 0.999999999932145,
+    "map_pearson_min": 0.999999999834698,
+    "edge_fraction_max_abs": 1.1788811046242742e-06,
+    "csf_fraction_max_abs": 1.6753962359117303e-07,
+    "noise_labels_equal": true,
+    "noise_components": 50,
+    "sampler_wall_seconds": 7.986890080850571
+  },
+  "notes": [
+    "Original feature_spatial computes sums from FSL fslstats printed mean values times nonzero voxel counts; FNIT accumulates float64 sums directly.",
+    "This fixed-map control does not assess differences in independently estimated motion, brain masks, PCA/ICA or nonlinear registration.",
+    "Shared H100 host; timing is a single observation, not a performance benchmark."
+  ]
+}

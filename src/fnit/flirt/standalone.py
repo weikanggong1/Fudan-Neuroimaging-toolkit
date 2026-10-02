@@ -141,6 +141,9 @@ def run_flirt(
     applyxfm=False,
     usesqform=False,
     device=None,
+    execution="auto",
+    candidate_batch_size=128,
+    memory_budget_gb=20.0,
     overwrite=False,
 ):
     """Run the supported default FLIRT path and atomically write outputs.
@@ -163,7 +166,9 @@ def run_flirt(
     if applyxfm and (inweight is not None or refweight is not None or (dof, cost) != (12, "corratio")):
         raise ValueError("applyxfm does not accept registration weights, dof, or cost")
     model = TorchFLIRT(
-        device=_default_device() if device is None else device, dof=dof, cost=cost
+        device=_default_device() if device is None else device, dof=dof, cost=cost,
+        execution=execution, candidate_batch_size=candidate_batch_size,
+        memory_budget_gb=memory_budget_gb,
     )
     if applyxfm:
         result = model.applyxfm(input, reference, init=init, usesqform=usesqform)

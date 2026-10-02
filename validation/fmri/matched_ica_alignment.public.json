@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "source_revision": "1eb9c417febebc8bdd450590d4759454e7160141",
+  "reference_source_revision": "380e23dbedcc36d1e34bd7eed414196089d6fe67",
+  "validated_on": "2026-10-01",
+  "scope": "Independent alignment of existing real ICA mixing matrices and AROMA noise labels; no new ICA or full-pipeline execution.",
+  "data": {
+    "anonymous_id": "real_run_01",
+    "time_points": 490,
+    "candidate_components": 95,
+    "reference_components": 95,
+    "candidate_noise_components": 47,
+    "reference_noise_components": 50
+  },
+  "input_sha256": {
+    "candidate_mixing": "c5db75e26e3a303006aa0420cf2fbd705522e8bdc4d3594c60c23ccdf4aa8a63",
+    "reference_mixing": "67b9796ff9defced3a5b1944784f7d24dac612bbe51841fa4fb51e53fc670316",
+    "candidate_noise": "8921fcbc5dbc3222927c104603ea7d76a30b105fb95adb619841ebac07476d70",
+    "reference_noise": "7a07746a26f59d2b6e13c355bdd51d5e3c7755b038d7b2b9d3495027d0f20691"
+  },
+  "alignment": {
+    "method": "Float64 column centering/L2 normalization; Hungarian maximum sum of absolute Pearson correlations. Each component is used at most once; sign is ignored.",
+    "matched_pairs": 95,
+    "candidate_unmatched_components": 0,
+    "reference_unmatched_components": 0,
+    "matched_absolute_pearson_r": {
+      "count": 95,
+      "mean": 0.755510352010743,
+      "median": 0.8557019857371353,
+      "p05": 0.3551163720272986,
+      "minimum": 0.19789843217709752,
+      "maximum": 0.9983014429197182
+    },
+    "noise_labels_on_matched_pairs": {
+      "matched_pairs": 95,
+      "agreement_rate": 0.8631578947368421,
+      "noise_jaccard": 0.7636363636363637,
+      "both_noise": 42,
+      "candidate_noise_reference_signal": 5,
+      "candidate_signal_reference_noise": 8,
+      "both_signal": 40
+    },
+    "noise_labels_conditioned_on_minimum_absolute_r": {
+      "0.5": {
+        "matched_pairs": 73,
+        "agreement_rate": 0.9315068493150684,
+        "noise_jaccard": 0.8809523809523809,
+        "both_noise": 37,
+        "candidate_noise_reference_signal": 0,
+        "candidate_signal_reference_noise": 5,
+        "both_signal": 31
+      },
+      "0.8": {
+        "matched_pairs": 52,
+        "agreement_rate": 0.9807692307692307,
+        "noise_jaccard": 0.9696969696969697,
+        "both_noise": 32,
+        "candidate_noise_reference_signal": 0,
+        "candidate_signal_reference_noise": 1,
+        "both_signal": 19
+      },
+      "0.9": {
+        "matched_pairs": 45,
+        "agreement_rate": 0.9777777777777777,
+        "noise_jaccard": 0.9655172413793104,
+        "both_noise": 28,
+        "candidate_noise_reference_signal": 0,
+        "candidate_signal_reference_noise": 1,
+        "both_signal": 16
+      }
+    }
+  },
+  "subspace": {
+    "method": "Float64 SVD orthonormal bases of centered/L2-normalized mixing; singular values of Q_candidate.T @ Q_reference are principal cosines.",
+    "rank_rcond": 1e-08,
+    "candidate_rank": 95,
+    "reference_rank": 95,
+    "all_component_principal_cosine": {
+      "count": 95,
+      "mean": 0.9929073893462576,
+      "median": 0.9999868915395467,
+      "p05": 0.9656079130384836,
+      "minimum": 0.7625379996939602,
+      "maximum": 0.9999998907713074
+    },
+    "candidate_noise_rank": 47,
+    "reference_noise_rank": 50,
+    "noise_component_principal_cosine": {
+      "count": 47,
+      "mean": 0.8867917230805811,
+      "median": 0.9919128502685616,
+      "p05": 0.3523569367598686,
+      "minimum": 0.09332043031944182,
+      "maximum": 0.9999869965350484
+    }
+  },
+  "software": {
+    "numpy": "1.26.4",
+    "scipy": "1.17.1",
+    "driver_sha256": "fa217fba7af2ceb2a9abc9a5cfa9b8ae3694c94a396b7f9765185133d8c4a7ee"
+  },
+  "wall_seconds_including_read_and_comparison": 1.6680727559141815,
+  "limits": [
+    "Separate pre-ICA BOLD/masks/motion and separate decompositions may differ; this is not an isolated same-input ICA-equivalence test.",
+    "A matched low-correlation pair is an optimum of the global assignment, not proof that its components have the same physiological interpretation.",
+    "Label agreement is between two automatic classifications, not accuracy against ground-truth noise."
+  ],
+  "privacy": "Anonymous summaries and hashes only; no subject IDs, private paths or voxel data.",
+  "spatial_alignment": {
+    "method": "Existing spatial maps paired by the temporal Hungarian assignment; candidate maps multiplied by temporal sign; threshold support is nonzero regardless of sign",
+    "shape": [
+      88,
+      88,
+      64
+    ],
+    "same_grid": true,
+    "all_values_finite": true,
+    "map_kind": "thresholded components",
+    "comparison_mask_voxels": 99371,
+    "matched_pairs": 95,
+    "input_sha256": {
+      "candidate_thresholded": "1b687e3d47f225ba1e74a32823257dadaa89e3b921aebe077deb5e7e045321f0",
+      "reference_thresholded": "748277a25e96226dd388c9ac20a95aa814112cbf50bb68a8094142e2650c4f82",
+      "comparison_mask": "cfc8251552e49b7f93c72a47a43080f9f34974c01211899a034ca44637c05f16"
+    },
+    "sign_aligned_map_pearson_r": {
+      "count": 95,
+      "mean": 0.6026384663373188,
+      "median": 0.6385846883384017,
+      "p05": 0.10571280415299361,
+      "minimum": -0.03478585986536583,
+      "maximum": 0.9876866228869567
+    },
+    "map_rmse": {
+      "count": 95,
+      "mean": 0.646494154115909,
+      "median": 0.6612277196849368,
+      "p05": 0.283213491161274,
+      "minimum": 0.2389401953978925,
+      "maximum": 1.2364325332552766
+    },
+    "constant_map_pairs": 0,
+    "nonzero_threshold_support_dice": {
+      "count": 95,
+      "mean": 0.5248945721308527,
+      "median": 0.4988962472406181,
+      "p05": 0.13130465284656348,
+      "minimum": 0.10019992943666942,
+      "maximum": 0.9403172608763939
+    }
+  }
+}

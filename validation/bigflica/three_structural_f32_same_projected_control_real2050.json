@@ -1,0 +1,130 @@
+{
+  "dataset": "2050 real subjects; full-mask VBM/FA/MD; task excluded",
+  "control": "CPU sklearn and GPU DicL consume identical GPU mMIGP float32 HDF5; CPU casts persisted values to float64, matching GPU DicL arithmetic",
+  "parameters": {
+    "migp_dim": 100,
+    "dicl_dim": 200,
+    "dicl_max_iter": 1000,
+    "batch_size": 32,
+    "random_state": 0,
+    "flica_components": 3,
+    "flica_iterations": 100,
+    "flica_lambda_dims": "R"
+  },
+  "projected_h5_sha256": {
+    "vbm": "ec2fe20a81e2cb7dc37e143dec31b5bb62b25880d3a73435904159485d42f329",
+    "fa": "e733913ff4d3bd90e121220c7e62bddd09f5b61007f42b5844c3b96ee6faf75b",
+    "md": "fb67cf795b095de137abe0397624f4125319a017c0eb20fc821b4971ea797b4d"
+  },
+  "gpu_dictionary_sha256": {
+    "vbm": "82d4e0f8505dc088910981ab5ea73f401891497a62d3897cc2df57a1eac13eec",
+    "fa": "c17e9b352ea06830176369174e18a3bdf7bb03ef914df74aada55fb872bc08de",
+    "md": "4ae6168602d73d304dcbc2818cda8c361a6e1d8a7403dde492cd139b07d665bf"
+  },
+  "cpu_dictionary_sha256": {
+    "vbm": "db33df1d9f937ab685d1fb9b2e03fb4d1f2d603c1bba80211547480dfa527b73",
+    "fa": "78e09a0a62188d336e03a6c9df62e3b9a252f4873580ef18f50f0eced3ec0866",
+    "md": "d314424284eb7f13174b0cb6db5c2c36935ec4d668c10f78558c495ccc084431"
+  },
+  "dicl": {
+    "vbm": {
+      "voxels": 157901,
+      "fit_wall_s": 137.27903353096917,
+      "shape": [
+        200,
+        100
+      ],
+      "relative_frobenius_error": 1.0537643072409506e-05,
+      "max_absolute_error": 0.0003253788388169476,
+      "same_index_abs_cosine_min": 0.9999999951319716,
+      "same_index_abs_cosine_median": 0.9999999999958252,
+      "hungarian_abs_cosine_min": 0.9999999951319716,
+      "hungarian_abs_cosine_median": 0.9999999999958252,
+      "hungarian_relative_error": 1.0537643072409506e-05
+    },
+    "fa": {
+      "voxels": 222257,
+      "fit_wall_s": 12.701770504936576,
+      "shape": [
+        200,
+        100
+      ],
+      "relative_frobenius_error": 1.5475258898743654e-06,
+      "max_absolute_error": 1.4314677478699522e-05,
+      "same_index_abs_cosine_min": 0.9999999999900399,
+      "same_index_abs_cosine_median": 0.9999999999992772,
+      "hungarian_abs_cosine_min": 0.9999999999900399,
+      "hungarian_abs_cosine_median": 0.9999999999992772,
+      "hungarian_relative_error": 1.5475258898743654e-06
+    },
+    "md": {
+      "voxels": 222261,
+      "fit_wall_s": 13.38690865272656,
+      "shape": [
+        200,
+        100
+      ],
+      "relative_frobenius_error": 6.561774675107258e-05,
+      "max_absolute_error": 0.0005696280560876232,
+      "same_index_abs_cosine_min": 0.9999999827175744,
+      "same_index_abs_cosine_median": 0.9999999985972581,
+      "hungarian_abs_cosine_min": 0.9999999827175744,
+      "hungarian_abs_cosine_median": 0.9999999985972581,
+      "hungarian_relative_error": 6.561774675107258e-05
+    }
+  },
+  "peak_process_rss_gib": 1.7818756103515625,
+  "status": "complete",
+  "cpu_flica_fit_wall_s": 0.9953897469677031,
+  "course": {
+    "shape": [
+      2050,
+      3
+    ],
+    "hungarian_gpu_component_indices_zero_based": [
+      0,
+      1,
+      2
+    ],
+    "aligned_correlations": [
+      0.999999998448797,
+      0.999999999644091,
+      0.9999999999985619
+    ]
+  },
+  "zstat": {
+    "vbm": {
+      "shape": [
+        157901,
+        3
+      ],
+      "aligned_correlations": [
+        0.9999999994737866,
+        0.9999999989455426,
+        0.999999999999496
+      ]
+    },
+    "fa": {
+      "shape": [
+        222257,
+        3
+      ],
+      "aligned_correlations": [
+        0.9999999996126953,
+        0.9999999984611369,
+        0.9999999999992331
+      ]
+    },
+    "md": {
+      "shape": [
+        222261,
+        3
+      ],
+      "aligned_correlations": [
+        0.9999999992796869,
+        0.9999999988509487,
+        0.9999999999994573
+      ]
+    }
+  }
+}

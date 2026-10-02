@@ -154,20 +154,22 @@ def unwarp_scan_to_model(scan: torch.Tensor, mp: torch.Tensor, ec_params: torch.
                          susceptibility: torch.Tensor, pe_vector: torch.Tensor,
                          readout: torch.Tensor, voxel_sizes, precision=1e-8,
                          jacobian_modulate: bool = True,
-                         pe_extrapolation_valid: bool = False):
+                         pe_extrapolation_valid: bool = False, *,
+                         grid=None, basis=None, pe_axis=None):
     """Volumetric eddy scan->model transform for the pinned 2111 path."""
     shape = scan.shape
     device, dtype = scan.device, scan.dtype
-    grid = identity_grid(shape, device, dtype)
+    if grid is None: grid = identity_grid(shape, device, dtype)
     # FSL general_transform(ima, InverseMovementMatrix, field, I) internally
     # applies (InverseMovementMatrix)^-1, i.e. the forward movement, to model-grid targets.
     rigid = _rigid_forward_grid(grid, mp, voxel_sizes)
-    basis = quadratic_ec_basis(shape, voxel_sizes, device, dtype)
+    if basis is None: basis = quadratic_ec_basis(shape, voxel_sizes, device, dtype)
     ec_scan = ec_field(ec_params, basis)
     # FSL transforms EC field with inverse movement into model space, then adds susc.
     ec_model = _sample_scalar(ec_scan, rigid[None], precision)
     total = susceptibility + ec_model
-    pe_axis = int(torch.nonzero(pe_vector.abs() > 1e-8, as_tuple=False)[0])
+    if pe_axis is None:
+        pe_axis = int(torch.nonzero(pe_vector.abs() > 1e-8, as_tuple=False)[0])
     disp = total * readout * pe_vector[pe_axis]
     coords = rigid.clone()
     coords[pe_axis] = coords[pe_axis] + disp
@@ -189,7 +191,8 @@ def model_to_scan(pred: torch.Tensor, mp: torch.Tensor, ec_params: torch.Tensor,
                   readout: torch.Tensor, voxel_sizes, precision=1e-8,
                   jacobian_modulate: bool = True, pred_coeff=None, susc_coeff=None,
                   inverse_template=None, return_inverse=False,
-                  masked_jacobian=False, grid=None, basis=None):
+                  masked_jacobian=False, grid=None, basis=None, *, pe_axis=None,
+                  pred_padded_coeff=None, susc_padded_coeff=None):
     """Volumetric model->scan transform used for parameter updates/outliers.
 
     Implements the 2111 sequence: EC in scan space + susceptibility transformed
@@ -207,9 +210,11 @@ def model_to_scan(pred: torch.Tensor, mp: torch.Tensor, ec_params: torch.Tensor,
         susc_coeff = fsl_cubic_coefficients(susceptibility, precision)
     # EddyUtils::SetSplineInterp sets the TOPUP susceptibility volume to mirror
     # extrapolation; its CUDA coefficient prefilter remains periodic.
-    susc_scan = sample_cubic_periodic_fast(susc_coeff, susc_coords[None],boundary='mirror')[0]
+    susc_scan = sample_cubic_periodic_fast(susc_coeff, susc_coords[None],boundary='mirror',
+                                         padded_coeff=susc_padded_coeff)[0]
     total = ec_scan + susc_scan
-    pe_axis = int(torch.nonzero(pe_vector.abs() > 1e-8, as_tuple=False)[0])
+    if pe_axis is None:
+        pe_axis = int(torch.nonzero(pe_vector.abs() > 1e-8, as_tuple=False)[0])
     d = total * readout * pe_vector[pe_axis]
     if inverse_template is None:
         invd, inverse_mask = _inverse_1d_displacement(d, pe_axis, valid_mask(susc_coords[None],shape)[0],
@@ -223,7 +228,8 @@ def model_to_scan(pred: torch.Tensor, mp: torch.Tensor, ec_params: torch.Tensor,
     coords = _rigid_inverse_grid(displaced, mp, voxel_sizes)
     if pred_coeff is None:
         pred_coeff = fsl_cubic_coefficients(pred, precision)
-    out = sample_cubic_periodic_fast(pred_coeff[None], coords[None])[0]
+    out = sample_cubic_periodic_fast(pred_coeff[None], coords[None],
+                                   padded_coeff=pred_padded_coeff)[0]
     vm = valid_mask(coords[None], shape)[0] & inverse_mask
     if masked_jacobian:
         jac = _masked_inverse_jacobian(invd, inverse_mask, pe_axis)

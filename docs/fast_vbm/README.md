@@ -6,22 +6,32 @@
 
 流程在 Python 进程内运行，不启动 FreeSurfer 或 FSL 可执行文件。CUDA 默认允许 TF32 matmul 和 cuDNN 内核；输入、模型权重、主要图像张量和 NIfTI 输出仍为 float32，不启用 float16 或 bfloat16。实际开关写入 `fast_vbm_report.json`。
 
+## 流程策略
+
 ```mermaid
-flowchart LR
-  A[raw T1w] --> B[SynthStrip 或显式脑 mask]
-  B --> C[TorchFAST<br/>CSF / GM / WM PVE + bias]
-  C --> D[GM PVE]
-  D --> E[TorchFLIRT<br/>12-DOF correlation ratio]
-  E --> F1[PyTorch SynthMorph deform]
-  E --> F2[PyTorch TorchFNIRT GM config]
-  F1 --> G[统一转换为 FSL relative pull field]
-  F2 --> G
-  G --> H[GPU TorchApplyWarp]
-  G --> I[nonlinear-only Jacobian]
-  H --> J[warped GM]
-  I --> K[warped GM × Jacobian]
-  J --> K
-  K --> L[modulated GM]
+flowchart TD
+    T1["单幅原始 T1w"] --> MASK{"已提供脑掩膜？"}
+    MASK -- 是 --> BRAIN["使用显式脑掩膜"]
+    MASK -- 否 --> STRIP["FNIT SynthStrip 脑提取"] --> BRAIN
+    BRAIN --> FAST["TorchFAST：CSF、GM、WM 分割与偏置校正"]
+    FAST --> NATIVE["输入空间脑图、分割与 GM PVE"]
+    FAST --> FLIRT["TorchFLIRT：GM 到模板的 12 自由度仿射"]
+    TPL["GM 模板与可选参考掩膜"] --> FLIRT
+    FLIRT --> BACK{"非线性配准后端？"}
+    BACK -- SynthMorph --> SM["PyTorch SynthMorph deform"]
+    BACK -- FNIRT --> FN["TorchFNIRT GM 配置"]
+    TPL --> SM
+    TPL --> FN
+    SM --> FIELD["转换为统一的 relative pull field"]
+    FN --> FIELD
+    NATIVE --> APPLY["TorchApplyWarp：GM 重采样到模板网格"]
+    FIELD --> APPLY
+    FIELD --> JAC["计算 nonlinear-only Jacobian"]
+    APPLY --> WARPED["warped GM"]
+    WARPED --> MOD["warped GM × Jacobian"]
+    JAC --> MOD
+    MOD --> OUT["modulated GM 与阶段报告"]
+    classDef default fill:#ffffff,stroke:#000000,color:#000000;
 ```
 
 ## 输入
@@ -347,9 +357,18 @@ python tools/setup_weights.py --model fast-vbm
 
 该命令安装两后端的权重超集。GM template 和 reference mask 是运行输入，不是模型权重，也不由该脚本下载。下载公开 UKB 模板的方法见 [UKB/FSL 专页](../ukb_vbm/README.md)。
 
-## 当前验证状态
+## 全流程 benchmark
 
-单例真实数据的固定 FSL GM 和仿射输入对照将此前 FNIRT 低相关性主要定位到隐式零值掩膜。关闭两个掩膜后，warped GM、Jacobian、modulated GM 与 FSL 的 Pearson r 分别为 0.996、0.997、0.996。本版从原始 T1w 完整链复测的三项相关性分别为 0.783、0.733、0.726；FNIT compute 为 110.72 s、写盘 7.56 s、峰值 CUDA allocated 12.97 GB。FSL 缺少相同边界的完整链计时，不能计算加速比。上游脑提取、裁剪、偏置校正和 GM 分割仍需分阶段核对；单例结果不能声明多例或逐体素等价。指标、对照边界见[验证页](../../validation/fast_vbm/README.md)。
+一例真实原始 T1w 已在 `f958121` 的运行源码上完成两个分支的全流程复测，并检查全部 13 幅输出。与同输入 FSL VBM 比较：
+
+| 分支 | warped GM r | Jacobian r | modulated GM r | 进程内总耗时，含写盘 | 峰值 CUDA allocated |
+|---|---:|---:|---:|---:|---:|
+| FNIRT | 0.8910 | 0.8858 | 0.8655 | 901.93 s | 12.97 GB |
+| SynthMorph | 0.6837 | 0.2927 | 0.6167 | 607.16 s | 15.49 GB |
+
+这是 raw T1 到调制 GM 的比较，未固定 FSL GM 或仿射矩阵。全部输出网格和有限值检查通过，PVE 和、调制公式检查通过；两分支都未达到 FSL 数值等价。FSL 既有完整链的命令计时合计 3195.14 s，来自不同运行与处理边界，不能据此计算加速比。阶段耗时、MAE/RMSE/Dice、参照边界与复现命令见[全流程验证页](../../validation/fast_vbm/README.md)，匿名标量及源码哈希见[JSON](../../validation/fast_vbm/e2e.public.json)。对照图和输入/输出哈希见同一验证页。
+
+![FNIRT 完整流程与 FSL 的模板空间对照](figures/fast_vbm_fnirt.png)
 
 ## Reference
 
