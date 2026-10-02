@@ -1,8 +1,23 @@
 # ICA-AROMA 分类、成分回归与可选混杂回归
 
+## 功能简介与流程图
+
 `run_aroma_pipeline` 读取已经高通的原生 EPI BOLD、脑掩膜和 T×6 运动参数，调用本包单被试 [PICA](../melodic/README.md)，再按 ICA-AROMA 的运动相关、边缘比例、高频比例和 CSF 比例选择噪声成分。给定 MNI 模板、T1→MNI pull 和 EPI→T1 BBR 时，它先把阈值 IC 图映射到 MNI152 2 mm，再用官方三张标准掩膜分类；[整链入口](README.md)默认走这一路径。分类后在原生 EPI 空间回归噪声 IC；WM/CSF/motion、带通和全脑信号回归可选。独立调用时不提供配准参数，也可用与 BOLD 同网格的三张掩膜分类。
 
-## 单被试 Python 调用
+```mermaid
+flowchart LR
+    BOLD["完整高通 BOLD、脑掩膜、运动参数"] --> ICA["FNIT PICA：空间图、mixing 与频谱"]
+    ICA --> MAP{"提供完整 MNI 配准参数？"}
+    MAP -- 是 --> MNI["linear world 重采样阈值 IC 图"]
+    MAP -- 否 --> NATIVE["原生 EPI 同网格阈值 IC 图"]
+    MNI --> CLASS["四项 AROMA 特征与噪声判定"]
+    NATIVE --> CLASS
+    CLASS --> DENOISE["原生 EPI：nonaggr 或 aggr 成分回归"]
+    DENOISE --> CONF["可选 WM、CSF、运动、带通和全脑信号"]
+    CONF --> OUT["分类 TSV、噪声编号、4D 去噪 BOLD"]
+```
+
+## Python 调用、输入输出与参数
 
 此函数处理一份 4D BOLD（T 个时间点），内部 ICA 与回归联合使用全部 T 帧。`brain_mask` 必须与 BOLD 同网格；分类用的 `csf_mask`、`edge_mask` 和 `outside_mask` 必须与阈值 IC 图的分类网格一致。给定 `mni_template`、`mni_pull_ras`、`epi_to_t1_world` 时，分类网格为 MNI152 2 mm；三者均不提供时为 BOLD 原网格。`regression_csf_mask` 单独指定原生 EPI 网格的完整 CSF 组织掩膜供可选信号回归；在 MNI 分类模式启用 `regress_csf=True` 时必须填写，不能把 MNI 分类掩膜用于原生 EPI 信号回归。
 
@@ -19,7 +34,7 @@ aroma = run_aroma_pipeline(
     output_dir="/absolute/path/aroma",                                   # PICA、分类、清理结果目录
     n_components=None,                                                   # PICA 自动定阶；整数为固定 IC 数
     tr=0.735,                                                            # TR，秒；None 时读 NIfTI header
-    mode="nonaggr",                                                      # 非积极回归；aggr 为积极回归
+    mode="nonaggr",                                                      # 非激进回归；aggr 为激进回归
     device="cuda:0",                                                     # PyTorch 设备；None 自动选择
     n_splits=1000,                                                        # 运动相关特征的 90% 时间点重复抽样次数
     random_state=0,                                                       # PICA 初始化与抽样随机种子
@@ -44,7 +59,7 @@ print(aroma.confounds_cleaned_bold)                                      # 可�
 
 `ica/` 目录包含 X×Y×Z×K 成分图、阈值图、T×K mixing、频谱功率和定阶/收敛信息，文件名见 [PICA 输出](../melodic/README.md)。提供三项 MNI 配准参数时，另输出 `ica_thresholded_MNI152_2mm.nii.gz`，形状为 91×109×91×K，float32；其中每个 MNI 体素从原生 EPI 阈值图取值。`aroma_features.tsv` 有 K 行、5 列：从 1 开始的成分编号与四项特征。`aroma_noise_components.txt` 每行一个从 1 开始的编号。两份清理影像均为 BOLD 原网格、原 TR、float32。混杂回归的输出只在启用 WM、CSF、运动、带通或全脑信号至少一项时写入。
 
-## 独立子函数
+### 独立子函数
 
 若已有 PICA mixing 与阈值图，可独立执行分类与清理；不必再次估计 ICA。官方阈值图和官方三张 MNI 掩膜同输入对照时，应使用 MNI 网格，且 mixing 与运动参数必须来自相同 T 帧。
 
@@ -98,7 +113,11 @@ cleaned_path = clean_confounds(
 
 `clean_confounds` 先构造截距、一次/二次趋势及选择的信号列。截距保留，其余列去掉常数列后中心化，并按 L2 范数归一化，避免组织信号的大基线或运动参数单位影响数值秩。启用 `bandpass` 时，BOLD 和设计矩阵使用同一个频段；带通后删除只剩 FFT 舍入误差的列，重新归一化有效列，再以 float64 求投影。带通与混杂回归仍是同一个联合投影。`bandpass=None` 时只做混杂和趋势回归，FEAT 阶段的高通另行完成。
 
-## 原软件运行方式与实测
+## 命令行调用
+
+本页函数的独立入口为上面的 Python 调用。完整 BIDS→preproc/clean 使用 [`fnit-fmri volume`](README.md#命令行调用)，用 `--aroma-mode`、`--ica-n-components`、`--regress-wm`、`--regress-csf`、`--regress-motion`、`--motion-model`、`--bandpass` 与 `--global-signal` 选择相应参数；函数本身没有独立 AROMA CLI。
+
+## 原软件调用
 
 官方 [ICA-AROMA 脚本](https://github.com/maartenmennes/ICA-AROMA/blob/master/ICA_AROMA.py) 的 generic 模式要求 BOLD、运动参数及输出目录；给定 FEAT 仿射和 T1→MNI warp 后，脚本把阈值 IC 图配准到标准空间作空间分类。下面的官方命令只用于独立基准；`-warp` 必须是 FSL warp，而不是本包 RAS pull NIfTI。
 
@@ -113,15 +132,17 @@ fsl_regfilt -i filtered_func_data.nii.gz -d melodic_mix \
 
 `fsl_regfilt -f` 用从 1 开始的 IC 编号。可选 WM/CSF/motion 与带通的参考脚本为用户指定的 [MATLAB 实现](https://github.com/weikanggong/Resting-state-fMRI-preprocessing/blob/master/g_regressWmCsf_and_filter.m)；本包联合投影还可与 AFNI `3dTproject -ort confounds.1D -polort 2 -passband 0.01 0.1` 作独立方法比较，但当前服务器没有 AFNI 实测输出。
 
+## 最新真实数据精度、耗时与脑图
+
 | 真实数据同输入项目 | FNIT | 原软件或独立参考 | 差异 |
 |---|---:|---:|---|
 | 490×106 的官方 MELODIC mixing，运动相关 1000 次抽样 | 6.28 秒 | 官方 ICA-AROMA 函数 6.17 秒 | MAE 4.67×10⁻¹⁷；高频比例逐项一致。 |
 | 官方 106 张阈值 IC 图与官方 MNI 2 mm 三张掩膜 | 空间特征 2.33 秒 | 官方 201.02 秒 | edge fraction MAE 3.51×10⁻⁷、CSF fraction MAE 2.32×10⁻⁸；106/106 个噪声判定一致。固定官方 IC 输入，不代表本包自产成分身份相同。 |
 | 真实 BOLD 20³×490 裁剪、官方 106 列 mixing，示例噪声 IC 1–3 | CUDA 含 I/O：nonaggr 2.83 秒、aggr 1.27 秒 | FSL `fsl_regfilt`：2.02 / 1.85 秒 | 两种输出逐体素 float32 相同；噪声索引用于算法测试，非真实分类结果。 |
 
-上述测量固定了官方 MELODIC IC 和官方掩膜，检验分类特征和 IC 回归。当前自产 PICA、配准、AROMA 及最终影像的整链结果与耗时见 [2026-10-01 整链验证](../../validation/fmri/volume_fixed.md)。
+上述测量固定了官方 MELODIC IC 和官方掩膜，检验分类特征和 IC 回归。自产 PICA、配准、AROMA 及最终影像的当前整链时间和保留的原软件差异见[volume 最新实测](README.md#latest-real-benchmark)；这里的固定 IC 控制不能替代整链成分身份比较。
 
-## 当前混杂回归的真实数据验证
+### 混杂回归的真实数据验证
 
 2026-10-01 用合并后源码 `3b9b0f8` 重跑整链，使用一例真实 UKB BOLD，共 490 帧。独立 NumPy float64 SVD 参考读取该次捕获的 AROMA 输出、WM/CSF 掩膜和运动参数，检查全部 97,345 个脑体素，共 47,699,050 个值。WM/CSF 掩膜均为 88×88×64，分别含 25,995 和 11,947 个体素，与原生 BOLD 对齐且位于脑掩膜内。
 
@@ -135,3 +156,21 @@ fsl_regfilt -i filtered_func_data.nii.gz -d melodic_mix \
 | 最终 native BOLD 在脑掩膜外的最大绝对值 | 0 |
 
 单位与基线控制固定同一份真实 AROMA 数据，只改变设计矩阵的表达方式。它们验证当前投影的单位与基线不变性；实际输出与独立参考的差值处于 float32 数值误差量级。复现方法见 [整链验证中的回归检查](../../validation/fmri/volume_fixed.md)，逐项定义、输入哈希和源码标记见 [匿名回归报告](../../validation/fmri/volume_fixed_confounds.public.json)。
+
+
+完整流程脑图见[volume](README.md#latest-real-benchmark)，其差异包含上游估计与配准，不单独归因于 AROMA。MNI 分类图仍通过公开兼容 `resample_world` 的 linear/grid-constant 分支映射；它实际在用，本次保留，并不把最终公共采样节点的无损验证冒充该中间图的新官方验收。
+
+## 最近版本与 benchmark 记录
+
+| 版本/记录 | 变化与保留范围 |
+|---|---|
+| 2026-10-02 文档整理 | 按当前输入/输出与七节结构统一说明，保留原生/MNI 分类、可选回归和真实误差；不改变重采样或统计定义。 |
+| `81f1bb3` 完整 volume | 两后端全部 490 帧对同后端旧 FNIT 逐位相同；PICA/AROMA 阶段 **80.72 / 62.67 s**。该范围见[完整报告](../../validation/fmri/public_resamplers_20261002/README.md)。 |
+| `3b9b0f8` 混杂回归 | 设计列中心化/L2 标准化与 float64 投影，真实全部 490 帧及单位/基线控制见[回归报告](../../validation/fmri/volume_fixed_confounds.public.json)。 |
+| 固定原 IC 分类与回归 | 官方 106 个 IC 的特征/噪声决策及 20³×490 回归控制保留上表；完整原软件与自产 PICA 差异从[验证索引](../../validation/fmri/README.md)进入。 |
+
+## 参考文献与原实现
+
+- Pruim 等，*ICA-AROMA: A robust ICA-based strategy for removing motion artifacts from fMRI data*，NeuroImage 2015，[DOI](https://doi.org/10.1016/j.neuroimage.2015.02.064)。
+- [ICA-AROMA 原代码](https://github.com/maartenmennes/ICA-AROMA)、[FSL MELODIC](https://git.fmrib.ox.ac.uk/fsl/melodic)、[本包 PICA 参数与原实现参考](../melodic/README.md)。
+- 用户指定的[WM/CSF 与滤波参考](https://github.com/weikanggong/Resting-state-fMRI-preprocessing/blob/master/g_regressWmCsf_and_filter.m)，当前验证使用独立 NumPy float64 SVD，不称为 MATLAB 或 AFNI 实测。

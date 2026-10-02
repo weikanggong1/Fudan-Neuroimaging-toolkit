@@ -48,7 +48,7 @@ surface QC 出现同一上游 `qc_bold_create_report` tuple 声明警告 5 次�
 
 ## 部署与复测
 
-DeepPrep 是独立参照容器，不进入 FNIT 运行依赖。FNIT 安装及输入参数见[volume 文档](../../../docs/fmri/README.md)、[surface 文档](../../../docs/fmri/surface.md)和[FNIT 复测命令](../README.md#单被试如何复测)。在有网机器按[官方安装说明](https://deepprep.readthedocs.io/en/25.1.0/installation.html)取得镜像，在 GPU 机器用 Singularity 运行，并自行取得合法 FreeSurfer license。
+DeepPrep 是独立参照容器，不进入 FNIT 运行依赖。FNIT 安装及输入参数见[volume 文档](../../../docs/fmri/README.md)、[surface 文档](../../../docs/fmri/surface.md)和[FNIT 复测命令](../README.md#复测)。在有网机器按[官方安装说明](https://deepprep.readthedocs.io/en/25.1.0/installation.html)取得镜像，在 GPU 机器用 Singularity 运行，并自行取得合法 FreeSurfer license。
 
 ```bash
 # 原作者发布的 25.1.0 镜像；生成的 SIF 需记录自己的 SHA-256。

@@ -352,113 +352,35 @@ fmriprep "$original_bids_root" "$reference_derivatives_root" participant \
 
 [本次新版对官方的全帧聚合](../../validation/fmri/surface_gpu_parallel/parallel_vs_official_strict1.public.json)记录全部数值、21 结构、球面角差和独立准备产物。官方原始连续 worker 为 **2825.612 s**，其几何/投影/CIFTI 使用 8 线程、newMSM 使用单线程，包含输入/输出检查和哈希；容器启动另计。该已完成测量保留原边界，不合成原始 BIDS→CIFTI 时间，见[官方严格参照](../../validation/fmri/surface_e2e/reference_strict1.public.json)。
 
-### 优化前完整 surface：`7102c187` 历史基准
+### 固定全部投影输入与可选 MSMAll
 
-2026-10-01 的两次完整 API 为 **443.929 / 441.334 s**（含捕获与最终保存），峰值 allocated/reserved 为 **0.344 / 0.426 GB**；使用相同 `cfb7beee` volume、已有重建和完整四级配置，两次解码球面/GIFTI/CIFTI 相同。独立官方完整链的 CIFTI 时间 r 均值为 **0.977911**；官方严格单线程/8 线程 worker 耗时为 **2825.612 / 846.768 s**，8 线程仅用于时间观察。各阶段及来源保留在[历史完整复测](../../validation/fmri/surface_e2e/README.md)、[历史全帧精度](../../validation/fmri/surface_e2e/precision.public.json)和[重复运行检查](../../validation/fmri/surface_e2e/repeatability.public.json)。
+完整 **490 帧**共同输入控制中，将相同 volume、几何、注册球面、ROI 与面积面分别交给 FNIT 和固定 fMRIPrep fsLR/grayords 工作流：左右各 15,921,080 个 GIFTI 值及全部 **44,728,180** 个 CIFTI 值误差为 0，轴顺序、TR 与内嵌 metadata 相同。它证明固定输入投影/组装一致，不替代上表独立 MSM 估计的误差；原报告见[固定投影](../../validation/fmri/fmriprep/surface_stcoff_ca3df003_projection_paired.public.json)。
 
-### 已公开的 `7102c187` 全帧脑图
+可选 MSMAll 仍接受显式 C/CA/CAT 特征。真实 C 特征 coarse/refine 串行→并行为 **23.237→11.430 / 181.790→90.796 s**，两侧球面数值/拓扑/metadata 相同；仅含既有特征读取、配准与保存。独立官方固定 C 特征控制的球面与全部 490 帧投影逐值相同，但不是 raw BIDS→CIFTI 或完整 HCP CA_CAT 验收。范围、特征准备和独立配置 benchmark 集中在 [MSMAll 功能页](../msm/msmall.md)、[当前报告](../../validation/msm/msmall.current.public.json)和[共享核心配对](../../validation/fmri/surface_gpu_parallel/msmall_paired.public.json)。
 
-上下行为左右半球，三列为 FNIT 时间标准差、独立原版时间标准差和逐顶点时间 r。两套标准差共用完整数据的色阶，r 色阶为 −1 到 1；灰色表示恒定时序的未定义 r。图使用原版独立准备的 32k 中层面，不追加平滑；PNG SHA-256 绑定[本轮精度报告](../../validation/fmri/surface_e2e/precision.public.json)。
+### 脑图与尚未对齐的机制
+
+下图绑定 `7102c187` 完整 surface：上下行为左右半球，三列为双方时间标准差与逐顶点时间 r，使用原版独立准备的 32k 中层面、不追加平滑。当前执行优化保持该 FNIT 数值，图与完整输入/色阶/SHA 见[原精度报告](../../validation/fmri/surface_e2e/precision.public.json)。
 
 ![7102c187 完整490帧默认surface与独立原版单线程参照](figures/fmri_surface_e2e.png)
 
-### 历史：提供初始化球面的公开 API 与原 fMRIPrep 投影
-
-源码 `ca3df003` 读取 `50eb098` 保存的完整 490 帧 preproc，STC 关闭、TR 为 0.735 s，输入 SHA-256 与 volume 报告一致。显式提供 FS→fsLR 初始化球面；API 执行同源 T1 身份核验、已有中层面与 ROI 准备、投影、CIFTI 组装、QC 和发布，成功保存全部 11 个持久输出并清理 NFS 临时目录。
-
-| 检查或测量范围 | 结果 |
-|---|---:|
-| 公开 API 墙钟，含输出写盘和清理，扣除验证捕获复制 | **234.313 s** |
-| 额外验证输入捕获复制，单独记录 | **3.656 s** |
-| 外层验证进程墙钟，含导入、捕获、哈希和输出检查 | **245.27 s** |
-| 外层进程最大 RSS | 4,156,108 KiB |
-| 左、右 GIFTI | 各 490×32,492，全部有限 float32 |
-| CIFTI | 490×91,282，全部有限；TR 0.735 s |
-| CIFTI 结构 | 2 个皮层与 19 个皮层下结构 |
-| 实际信号覆盖 | 91,251 个随时间变化的灰坐标，31 个恒定坐标 |
-| 注册球面 | `EstimatedHere=False`，`MSM=None` |
-| PyTorch CUDA allocated / reserved | **0 / 0 GB** |
-
-计时起点为完成的 volume 和已有 recon-all 几何，包含本页准备与发布步骤。Workbench 2.1.0 使用 8 个 CPU 线程；球面由调用方提供，本次不估计 MSM。几何来自同源存档重建及官方 FreeSurfer 7 生成的已有 graymid，投影双方共同使用。一次观测的耗时不用于推断稳定加速比。完整输出、来源、配置和源码哈希见[公开 API 报告](../../validation/fmri/fmriprep/surface_stcoff_ca3df003.public.json)；实际投影输入逐文件保存在[输入哈希清单](../../validation/fmri/fmriprep/surface_stcoff_ca3df003_actual_inputs.public.json)。
-
-### 历史：相同实际输入的官方投影对照
-
-将上述成功 API 保留的 14 个 volume、几何、ROI 与面积文件原样交给 fMRIPrep 25.2.4 的 fsLR 重采样和 grayords 工作流。两边逐文件 SHA-256 一致，官方工作流使用 NiWorkflows 1.14.4、Workbench 2.0.1 和 8 个 CPU 线程。
-
-| 全部 490 帧数值对照 | 数值个数 | 不同值个数 | 最大绝对误差 / RMSE / relative RMSE |
-|---|---:|---:|---:|
-| 左 fsLR32k GIFTI，490×32,492 | 15,921,080 | 0 | 0 / 0 / 0 |
-| 右 fsLR32k GIFTI，490×32,492 | 15,921,080 | 0 | 0 / 0 / 0 |
-| 91k CIFTI，490×91,282 | 44,728,180 | 0 | 0 / 0 / 0 |
-
-两侧 GIFTI 和 CIFTI 的 Pearson r 均为 1；全部有限。21 个结构、时间轴、灰坐标顺序与内嵌 metadata 相同，起点 0 s、TR 0.735 s；两边均为 91,251 个变化坐标与 31 个恒定坐标。官方投影和组装工作流耗时 **183.835 s**，从已准备输入开始。
-
-该对照核验固定输入下的投影和 CIFTI 组装。FNIT 的 234.313 s 还包含几何准备与最终发布，两个计时范围不同。完整逐值结果见[配对报告](../../validation/fmri/fmriprep/surface_stcoff_ca3df003_projection_paired.public.json)，官方执行、资源与输入校验见[参考报告](../../validation/fmri/fmriprep/reference_projection_stcoff_ca3df003_actual_api.public.json)。配对使用同一套已准备几何与球面；独立原始 BIDS volume 的差异另见[完整 MNI 对照](../../validation/fmri/fmriprep/independent_mni_stcoff_50eb098.public.json)。
-
-### 历史：MSMSulc 子函数与固定 clean 的真实对照
-
-[当前 MSM 报告](../../validation/msm/current.public.json)绑定实测快照 `4f7bd9f2` 及逐文件 SHA；后续清理保留数值实现和报告，没有重命名为新的整链运行。真实同一 run 的几何、sulc、HCP 模板与四级配置用于双方。精度参照固定到可重复的官方 newMSM 单线程输出；该次官方 8 线程重复球面有差异，仅列耗时。
-
-| 独立测量 | FNIT | 原软件 / 固定参照 |
-|---|---:|---:|
-| 双侧球面配准，冷 / 紧接热调用 | **201.99 / 198.08 s** | 单线程 **1587.70 s**；8 线程 **378.03 s** |
-| 保存球面的角差，左右 mean/median/p95/max | 全部 **0°** | 同原生顶点与拓扑，float32 保存球面逐值一致 |
-| 固定 clean volume，490 帧全部 21 个结构的逐点时间 r | 全部 **1** | MAE、最大绝对差均为 **0**；时间轴与 BrainModelAxis 相同 |
-| 固定 clean 投影，含各球面重新生成的 32k 面积表面 | **303.77 s** | 复用官方固定球面已完成投影，另一次观测 **315.41 s** |
-| 默认配准峰值 CUDA allocated | **0.344 GB** | FNIT 使用共享 H100；四个 CPU 线程 |
-
-配准计时含双侧输入读取和球面/报告保存，排除投影及事后比较；“冷”是在导入和 CUDA 初始化后的首次完整调用。投影排除 T1w volume 准备与球面估计，两次不能相加为新的完整 surface API。最终 float32 球面翻折数左 1、右 0，与参照相同并保存在 QC。配准分步时间为嵌套主机钟，详见[MSM 分步表](../../validation/msm/README.md#阶段耗时与-profile)。
-
-这两项控制分别验证球面估计及固定输入下的投影/组装。最新默认 `registered_spheres=None` 的完整 surface 已在上述 `cfb7beee` volume 上重测；其结果与这份历史控制分别报告。原始 BIDS 独立估计的历史 volume 对照见[独立 MNI 差异](../../validation/fmri/fmriprep/independent_mni_stcoff_50eb098.public.json)。
-
-官方 DeepPrep 25.1.0 的 fsaverage6 为 **1969.45 s**，从完整 T1w＋BOLD 开始，包含结构重建、预处理及 QC；其顶点数、起点和输出空间与上述 FNIT 控制不同，见 [DeepPrep 参照](../../validation/fmri/deepprep/README.md)。
-
-### 可选 MSMAll：真实连接特征与固定投影
-
-本轮共享核心用相同真实 C 特征复测旧版串行与新版并行：MSMAll coarse 一级为 **23.237→11.430 s**，refine 三级为 **181.790→90.796 s**；两侧球面坐标、拓扑和 GIFTI metadata 严格相同。四次均为 GPU 0/CPU 总预算 8，新版 allocated 峰值为 **0.2194 / 1.4662 GB**，计时仅含既有特征读取、配准与写盘。对历史保存的官方球面，坐标/拓扑相同、metadata 不同；历史输入 SHA 未逐项保存，仅作保存结果回归。来源与准确边界见[共享 MSMAll 配对](../../validation/fmri/surface_gpu_parallel/msmall_paired.public.json)。以下保留独立 MSMAll 功能的原版验收范围。
-
-本次用真实已清理 CIFTI 生成双侧各 33 列 WRN `C` 特征，分别验收固定 HCP 一级 coarse 与三级 refine 配置。同一 source/reference 球面、特征、权重与初始变形下，双方保存的左右球面逐值相同，角差和弦长差均为 0，实际 float32 球面均无翻折。FNIT H100 冷/热双侧配准为 **20.31/20.39 s**、**167.72/166.63 s**，官方单 CPU 线程分别为 **105.02 s**、**2,155.63 s**；峰值 allocated 为 **0.095/1.213 GB**。这两项是独立配置测量，不是 HCP `CA_CAT` 的外层全流程。
-
-各套 32k 变形合成到同一原生 MSMSulc 球面，分别建立面积表面，再将相同固定 BOLD 投影为 490×91,282 CIFTI。两配置全部值的 MAE 和最大差均为 **0**；左、右及全部有效灰质点的跨时间 Pearson 均值均为 **1**，时间轴与 BrainModel 轴相同。FNIT 球面投影为 **345.12/344.73 s**，官方球面投影为 **346.39/340.31 s**，均使用相同 Workbench。配准时间排除投影，投影排除几何与 volume 准备；本次未重新执行 raw BIDS 到 CIFTI 的整条 pipeline。完整覆盖、各级时间及来源哈希见 [MSMAll 匿名汇总](../../validation/msm/msmall.current.public.json)与[功能页](../msm/msmall.md)。
-
-特征准备耗时 **47.498 s**，VN/WRN 保存地图对独立源码公式逐值一致；未运行 MATLAB 二进制，也没有个体髓鞘、DeDrift 或重复 FIX 清理。注册特征来自 clean CIFTI，最终 surface API 输出仍由 `signal="preproc"` 或显式 `signal="clean"` 选择；默认 MSMSulc 完整链及历史 release 图保留各自的原测量范围。
+默认 preproc 的 ribbon→10 mm nearest dilate→native mask→ADAP_BARY_AREA→atlas mask 顺序与固定 fMRIPrep 对照一致。独立 MSM 球面及其生成的个体面积面仍有上表差异；当前 **clean** 通过 `resample_world` 用 linear/grid-constant 映射到 T1 brain 网格，该有效分支保留，尚未做新的官方固定输入验收。当前只输出 fsLR32k/91k，不把 fsaverage 的六点厚度采样列为已实现；已有 `midthickness/graymid` 仍为必需输入。详见[机制审计](../../validation/fmri/resampling_audit_20261002/README.md)。本次仅清理旧说明，未改变采样或球面优化算法。
 
 <a id="已公开脑图历史-ukb-release-的下游网络对照"></a>
 
-### 脑图示例：已公开的历史下游网络
-
-现有公开 surface 脑图来自上游 `3f8b756`、MS-HBM 推断 `09a0313` 的历史实验：分别给 FNIT clean CIFTI 与同一扫描的 UKB 官方 **FIX/MSMAll release** 运行相同 HCP_40 17-network MS-HBM。图的上下行为左右半球，三列依次为 FNIT 网络标签、官方 release 网络标签、标签不同的位置（红色）。这是下游网络图，不是本次 `ca3df003` 与 fMRIPrep 的 preproc 投影图。
-
-| 图对应的历史指标 | 结果 |
-|---|---:|
-| 完整皮层顶点数 | 59,412 |
-| 网络标签一致率 / 平均 Dice | 0.724365 / 0.717516 |
-| 原时序逐顶点 r 均值 / 中位数 | 0.269508 / 0.246646 |
-| 固定官方标签的 17-network FC 上三角 r | 0.818932 |
-
-官方 release 含 FIX、GDC/B0、MSMAll 和表面 2 mm 平滑；历史 FNIT 用 ICA-AROMA/混杂回归、无 GDC/B0、MSMSulc。图和这些指标衡量处理协议差异后的网络结果，不表示当前固定投影的误差，也不将差异归因到单个步骤。来源和定义见[历史下游报告](../../validation/mshbm/processed_release.md)与[surface 聚合指标](../../validation/mshbm/surface_release_comparison.public.json)。
-
-![已公开历史FNIT clean与UKB FIX MSMAll release的MS-HBM17网络对照](../mshbm/figures/mshbm_surface_release.png)
-
-图的公开来源与 SHA-256 见[脑图清单](../../validation/fmri/fmriprep/published_comparison_figures.public.json)。历史图保持原协议；已公开的 `7102c187` 完整 surface 脑图见本节前文。本轮 GPU/并行复测只发布聚合指标和验证报告。
+历史 UKB FIX/MSMAll release 的下游网络图来自不同处理协议，不是当前 preproc 投影误差，保留在 [MS-HBM 下游报告](../../validation/mshbm/processed_release.md)及[脑图来源](../../validation/fmri/fmriprep/published_comparison_figures.public.json)。
 
 ## 最近版本与 benchmark 记录
 
-| 源码 / 报告快照 | 变化、实际测量与记录 |
+| 版本/记录 | 变化与可复核范围 |
 |---|---|
-| `9f9f63e` GPU 重采样与左右并行 | 严格最近邻证明、有序 CSR 与独立双侧 stream；旧版串行/新版串行/新版并行完整 API 为 **436.245 / 343.056 / 243.695 s**（扣除捕获），球面和全部 490 帧时序严格相同。保留严格 CPU 标量与 Workbench 投影，修复共享峰值计数及空标签形状；不同物理卡、各一次观测，见[本轮验证](../../validation/fmri/surface_gpu_parallel/README.md)。 |
-| `3940a72` | STC 开启的 volume 与固定输入投影，见[ON 历史](../../validation/fmri/HISTORY_20261001_STCON_PREPROC.md)。 |
-| `c3c921cc` / `bac3c395` | NFS 暂存 CIFTI 的 mapping 导致清理 `EBUSY`，改为非映射读取并关闭句柄后通过完整 API；数值定义保持，见[OFF 历史](../../validation/fmri/HISTORY_20261001_STCOFF_PREPROC.md)。 |
-| `50eb098` / `ca3df003` | volume 增加 preproc；surface 修复外部 BIDS T1w 符号链接来源路径。完整 surface API **234.313 s**，固定实际输入投影逐值同；未估计 MSM。见[API 报告](../../validation/fmri/fmriprep/surface_stcoff_ca3df003.public.json)。 |
-| MSM 实测 `4f7bd9f2` | 修复子函数的缓存面积、浮点配置、刚性 WLS 和 Rodrigues 旋转规则；保存球面与固定 clean CIFTI 逐值同，冷/热双侧 **201.99 / 198.08 s**。见[当前 MSM 报告](../../validation/msm/current.public.json)。 |
-| volume `cfb7beee` | 新完整 FNIRT preproc＋clean **707.287 s**；该 volume 记录当时未重测 surface；随后独立 surface 复测见下一行，仍不合成 raw BIDS→CIFTI 时间。见[volume 复测](../../validation/fmri/mcflirt_optimization.md)。 |
-| `7102c187` 完整默认 surface | 从 `cfb7beee` volume 和已有 recon-all 开始，两次完整 API **443.929 / 441.334 s**；独立原版严格参照 CIFTI 时间 r 均值 **0.977911**，未逐值相同。见[新复测](../../validation/fmri/surface_e2e/README.md)。 |
-| 2026-10 MSMAll 扩展 | 新增独立多特征配准、VN/DR/WRN 与 C/CA/CAT 特征准备；surface 可显式接入，保留默认 MSMSulc 和既有信号/几何合同。真实 C 特征完整准备 47.498 s；完整一级/三级球面及 490 帧固定投影逐值匹配官方。三级冷/热 167.72/166.63 s，官方单线程 2,155.63 s。修正三角形最近角点、Mesh 拷贝面积与共享入口首次 CUDA 统计初始化。详见[功能页](../msm/msmall.md)。 |
-| 2026-10-01 代码与文档整理 | 按七项结构统一参数、输出、CLI、原软件命令与版本记录；surface 算法保持当前实现，CIFTI 公共模板合同及输入/发布测试通过。见[本次 85 项检查与真实覆盖验证](../../validation/fmri/organization_20261001.public.json)。 |
+| 2026-10-02 文档整理 | 保留默认/clean、外部球面、reference/CPU、MSMAll 与所有公开参数；长历史测量集中于验证索引，数值算法不变。 |
+| `9f9f63e` GPU 采样与双侧并行 | 旧版串行/新版串行/新版并行完整 API **436.245 / 343.056 / 243.695 s**（扣捕获），全部 490 帧时序及球面相同；独立官方差异见上表与[报告](../../validation/fmri/surface_gpu_parallel/README.md)。 |
+| `7102c187` 默认独立 surface | 当时两次 API **443.929 / 441.334 s**；CIFTI 对原版时间 r mean **0.977911**，未逐值一致；见[完整复测](../../validation/fmri/surface_e2e/README.md)。 |
+| MSMAll 接续 | 显式多特征与变形合成、固定 C 特征官方控制，见[独立功能](../msm/msmall.md)。 |
+| `ca3df003` 固定球面投影及早期 STC | 固定 490 帧投影误差为 0；当时 API **234.313 s**未估计 MSM；更早 STC/clean 和 NFS 暂存清理修复见[验证索引](../../validation/fmri/README.md)。 |
 
-共享准备函数对六个几何或 16 个完整准备产物统一预检、暂存和发布，保护悬空链接并回滚失败；低层投影与完整入口共用覆盖保护。具体检查由[CIFTI 合同](../../tests/test_fmri_surface_contracts.py)、[公开 surface API 合同](../../tests/test_fmri_surface_public_contracts.py)和[准备函数](../../tests/test_fmri_surface_preparation.py)覆盖。
-
-实测源码与发布源码的逐文件差异、248 项合同门禁、42 项路径复测、原生扩展重建及 47 项公共 API 刷新分别保留在[验证索引](../../validation/fmri/README.md)和[源码回溯](../../validation/fmri/fmriprep/publication_runtime_provenance.public.json)。旧 MSM 完整 API 测量已移除；历史图保留其原协议和来源。
+独立组件旧快照、官方重复性、全帧精度和源文件 SHA 保留各自版本。表面准备的整批覆盖/回滚合同见[准备测试](../../tests/test_fmri_surface_preparation.py)及[公开 API 测试](../../tests/test_fmri_surface_public_contracts.py)。当前 volume 与 surface 各自的 benchmark 不合成为一次原始 BIDS→CIFTI 整链计时。
 
 ## 参考文献与原实现
 

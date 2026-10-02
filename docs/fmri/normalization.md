@@ -240,85 +240,40 @@ SynthMorph 使用学习得到的 deform 网络。PyTorch FNIRT 复用 FNIT 的 B
 
 ## 最新真实数据精度、耗时与脑图
 
-### 2026-10-02：本轮公共组件接入
+### 当前公共入口与完整 volume
 
-本轮将 volume 的四个最终节点接入公共 warp 入口，并将旧 world 数值体抽取到共同模块。新固定输入逐位/header 门禁、两个后端完整 volume 的精度、阶段耗时、显存和示例图记录于 [public resamplers 验证](../../validation/fmri/public_resamplers_20261002/README.md)。复现与路由检查使用 [validate_fmri_resampler_routing.py](../../tools/validate_fmri_resampler_routing.py)。完整真实 490 帧同后端新旧对照已完成：FNIRT 12 幅影像、SynthMorph 7 幅影像均逐位相同，包括正负零、完整 header 与 extensions；BBR/逐帧运动及实际变换链也相同。整链 API 含保存分别为 511.09→542.12 s、499.55→461.54 s，allocated 峰值为 6.50 / 13.31 GB，reserved 为 10.78 / 15.06 GB。617 项相关 GPU 测试通过、12 项跳过。共享服务器单轮观测不证明稳定提速。以下报告保留各自冻结版本及输入范围。
+`81f1bb3` 的 FNIRT/SynthMorph 四个最终节点实际路由、完整 **490 帧**新旧 FNIT 逐位精度、分步骤时间和 allocated/reserved 均已验证，集中见[volume 当前实测](README.md#latest-real-benchmark)与[独立报告](../../validation/fmri/public_resamplers_20261002/README.md)。FNIRT API 含保存为 **542.12 s**，SynthMorph 为 **461.54 s**；峰值 allocated 为 **6.50 / 13.31 GB**。此入口重构保留原有机制，不新增官方等价结论。
 
-### 2026-10-02 上一轮：FNIRT 性能与完整 volume
+![当前 FNIRT volume 公共入口：首帧与零差](../../validation/fmri/public_resamplers_20261002/figures/volume_fnirt.png)
 
-2026-10-02 上一轮的 FNIRT 固定输入比较与完整 volume API 复测见[该轮统一报告](../../validation/registration_lossless_20261002/README.md)。三条完整 pipeline 均实际执行 FNIRT；volume 关闭解剖缓存复用，不用缓存命中替代非线性配准。
+### 官方配准与固定变换采样
 
-### 2026-10-01 固定 T1 历史对照
+| 验证范围 | 指标与计时 | 报告 |
+|---|---|---|
+| 2026-10-01，同一真实已处理 T1、FSL 初始 affine 和 mask，仅六级 FNIRT | 当时 optimized 首次/热调用 **32.595 / 30.422 s**；FSL CPU **217.558 s**。warped T1 r **0.99771788**、RMSE **16.83218**；pull median/p95 **0.05176 / 0.23294 mm**，脑支持 Dice **0.99922162**。 | [配准报告](../../validation/fmri/registration_gpu.current.public.json)、[FNIRT 独立页](../fnirt/README.md#t1w-专用预设当前-gpu-修复版) |
+| 2026-10-02，FNIRT 无损算子优化 | 三条完整 pipeline 实际执行 FNIRT；完整 volume 对此前候选和集成版科学输出逐位相同。 | [版本绑定的完整报告](../../validation/registration_lossless_20261002/README.md) |
+| 固定 FNIT 变换与目标网格，490 帧 preproc 对官方串行函数 | T1w **37.97 s**、MNI **99.19 s**（含读写）；两者最大差 **0.00048828125**，原数值门通过。 | [全帧控制](../../validation/fmri/fmriprep/native_float32_resampler_invariance_full490.public.json) |
+| 固定官方实际目标与变换，490 帧 preproc | T1w **32.96 s**，max **0.0009765625**，通过；MNI **107.94 s**，RMSE **33.6142**、max **22930.4144**，未通过。 | [实际节点报告](../../validation/fmri/fmriprep/actual_node_interpolation_full490.public.json) |
 
-固定一例真实已处理、去颅骨 T1 与 MNI152 2 mm 脑模板，使用完全相同的 FSL 初始矩阵和模板掩膜，2026-10-01 重跑官方 FSL 6.0.7.22 与 FNIT T1 六级非线性阶段。该 T1 的更早处理来源未知，不能视为扫描仪原始 T1。
+FNIRT CPU 命令包括启动和读写；FNIT 函数计时排除最终写盘；共享资源与计时范围不同。固定 T1 的更早处理来源未知，也不等于扫描仪原始 T1。最新 FNIRT 性能与 profile 应读取版本绑定的独立功能页，不用旧单函数时间代替完整 pipeline。
 
-| 指标 | 历史修改前 | 2026-10-01 optimized |
-|---|---:|---:|
-| FNIRT 首次 / 热调用 | 69.350 / 71.501 s | 32.595 / 30.422 s |
-| 与 FSL warped T1 的 Pearson r | 0.99784173 | 0.99771788 |
-| MAE / RMSE，原强度单位 | 4.97974 / 16.37197 | 4.87159 / 16.83218 |
-| 脑支持 Dice | 0.99924899 | 0.99922162 |
-| 完整 MNI→T1 pull median / p95 | 0.05322 / 0.23351 mm | 0.05176 / 0.23294 mm |
-| 热调用峰值 allocated / reserved | 1.091 / 1.474 GB | 1.178 / 1.491 GB |
+官方实际 MNI 产物有 **12/490 帧**不等于同输入串行源码回放，原因仍未确定；FNIT 对串行回放最大差 **0.000244140625**。保留实际产物未通过的门，见[失败诊断](../../validation/fmri/fmriprep/actual_node_mni_replay_failure.public.json)。
 
-此表隔离 FNIRT，不包含 FLIRT 初始化或最终 4D BOLD 重采样。FSL CPU 命令观测为 217.558 s，实际子进程退出 0、输出与固定参照逐位一致；包装器 255 单独记录。FNIT 在共享 H100 上运行，函数钟包括输入解压和 CPU 输出转换，排除写盘/事后比较，不能与 CPU 命令直接计算稳定加速倍数。
+当前 clean 的周期系数边界、World 最近邻半整数取偶与 FSL 对应规则不同；SynthMorph World 样条也不是官方默认线性 apply。固定 warp 的历史高度相关结果不能关闭这些机制差异，详见[重采样审计](../../validation/fmri/resampling_audit_20261002/README.md)。本次整理保持原算法。
 
-该历史版本的 `reference` 在本例复现修改前的图像、系数、pull 和完整 Jacobian；默认 optimized 的 Gram 弯曲算子改变 FP64 求和顺序。图像 r/Dice 略降、RMSE 略增，MAE、pull median/p95 和 nonlinear Jacobian 改善，保留完整精度表及仅换回 dense 算子的逐位消融。需要原优化轨迹可设置 `fnirt_execution="reference"`。指标定义、系数/header 契约、profile 与局限见 [FNIRT 功能页](../fnirt/README.md#t1w-专用预设当前-gpu-修复版)及 [当前配准报告](../../validation/fmri/registration_gpu.current.public.json)。
-
-### 既有跨 BOLD run 解剖缓存测试
-
-完整 `fMRIVolume_pipeline` 默认缓存当前被试/会话的 T1 SynthStrip、FAST、模板准备与 T1→MNI。真实 T1 的首次解剖调用为 41.118 s，第二次完整输入/权重/输出哈希核验为 0.0785 s；所有产物 SHA-256 相同，命中后上述计算阶段均为 0。首次分段为 T1 提取 5.042 s、模板准备 0.081 s、FAST 1.957 s、T1→MNI affine 4.331 s、FNIRT 29.041 s、warp 转换/保存 0.502 s；峰值分配 4.683 GB。
-
-该缓存测试包含 FNIT 自身的 FLIRT 初始化，因此不是上面固定 FSL affine 的同输入 FNIRT 比较。BBR 按 BOLD run 单独计算。缓存位置、失效条件与 `reuse_anatomical=False` 见[volume 输入输出](README.md#输出)。本节独立 FNIRT 与缓存测试未测量 SynthMorph；此前 SynthMorph 完整 volume 的重跑结果见[全流程 benchmark](README.md#全流程-benchmark)，两者分别计时。
-
-### 2026-10-01：固定变换的完整 490 帧对照
-
-2026-10-01，固定默认关闭 STC 的真实 run 全部 490 帧、FNIT 已估计的 HMC/BBR/MNI 变换与目标网格，比较更新后的 GPU 单次插值和用户提供的 fMRIPrep 25.2.4 镜像内串行 `resample_image`。输入为原始 BOLD，未重建 STC 文件。两个阶段同时逐值复现 `c3c921cc` 已完成的 `preproc`，最大绝对差均为 0。
-
-| 目标网格 | 完整样本数 | Pearson r | RMSE，原强度单位 | 最大绝对差 | FNIT 耗时，含读写 | PyTorch 峰值 allocation | 官方函数线程 |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| T1w，59×74×64×490 | 136,917,760 | ≈1.0 | 4.80×10⁻⁸ | 0.00048828125 | 37.97 s | 0.922 GB | 1 |
-| MNI 2 mm，91×109×91×490 | 442,288,210 | ≈1.0 | 5.51×10⁻⁸ | 0.00048828125 | 99.19 s | 1.062 GB | 1 |
-
-两张输出均通过完整帧数、目标 shape/affine、float32、有限值和原 BIDS TR 0.735 s 检查；预设门禁为最大绝对差 ≤0.01、相对 RMSE ≤10⁻⁶、r ≥0.999999。候选使用共享 H100 PCIe、8 CPU 线程、TF32 和 20 GB allocator 上限。此表绑定更新后的 `normalization` SHA `268f61b2`；原完整 API 的 697.313 s 绑定 `c3c921cc`。逐文件 SHA、坐标模式和各空间指标见[默认关闭 STC 的聚合报告](../../validation/fmri/fmriprep/native_float32_resampler_invariance_full490.public.json)。
-
-另从真正完成的官方流程读取两个保留的 `resample` 节点，固定其输入、目标网格、变换文件及逆向参数。官方 `in_file` 与原始 BOLD 的完整有序 float32 数组 SHA 相同，490 帧逐值一致、affine 相同。导出的 float64 场在整个目标网格恢复有效 float32 world 坐标和源体素坐标的误差均为 0。该控制使用官方 T1w 目标 57×73×60，与上表 FNIT 的 T1w 网格不同。
-
-| 固定官方目标及变换 | FNIT 对实际保存节点的 r | RMSE | 最大绝对差 | 原预设数值门禁 | FNIT 耗时，含读写 |
-|---|---:|---:|---:|---|---:|
-| T1w，57×73×60×490 | 1.0 | 8.86×10⁻⁸ | 0.0009765625 | 通过 | 32.96 s |
-| MNI 2 mm，91×109×91×490 | 0.999958709 | 33.6142 | 22930.4144 | 未通过 | 107.94 s |
-
-T1w 的独立串行源码回放与实际节点 8 线程输出逐值一致。MNI 的实际输出有 12/490 帧无法由相同保留输入和源码严格复现；这些帧均有限且不为空，没有排除任何帧。最差帧索引 22（从 0 计）在 BLAS 1/8 线程的直接函数控制中均逐值复现串行回放，有限空间采样未检出精确换帧，原因尚未确定。FNIT 对独立串行 MNI 回放的 r=1、RMSE=1.46×10⁻⁸、最大绝对差 0.000244140625；对实际保存节点的验收仍记为未通过。
-
-[实际节点完整报告](../../validation/fmri/fmriprep/actual_node_interpolation_full490.public.json)分开记录两个空间的门禁；[MNI 失败诊断](../../validation/fmri/fmriprep/actual_node_mni_replay_failure.public.json)保留全部输入与变换哈希、12 帧质量统计和有限控制。上述测试固定变换，仅检验组合与插值。早期显式开启 STC 的控制及其参考可重复性记录见[历史报告](../../validation/fmri/fmriprep/held_interpolation_full490.public.json)。
-
-### 上一轮脑图示例
-
-下图为上一轮完整 volume 的基线/候选首帧与绝对差，像素限制在模板脑 mask。完整 490 帧统计见其 [独立报告](../../validation/registration_lossless_20261002/README.md)，此图不表示本轮公共入口已完成的新测量。
-
-![上一轮 volume 基线与候选：模板脑 mask 内首帧](../../validation/registration_lossless_20261002/figures/pipeline_volume.png)
+跨 run 解剖缓存的真实测试：首次 **41.118 s**，哈希核验命中 **0.0785 s**，产物 SHA 相同。缓存包括本包 FLIRT 初始化，不是固定 FSL affine 的 FNIRT 控制；范围与失效条件见[volume 输出](README.md#输出结构与来源)。
 
 ## 最近版本与 benchmark 记录
 
-| 日期/版本 | 更新与验证范围 |
+| 版本/日期 | 更新与保留证据 |
 |---|---|
-| 2026-10-02，本轮公共入口 | FNIRT 用 `TorchApplyWarp.run_world`，SynthMorph 用 `apply_transform(WorldTransformChain)`；四个终节点共用原 world sampler。新结果集中于 [public resamplers](../../validation/fmri/public_resamplers_20261002/README.md)。 |
-| 2026-10-02，上一轮 | FNIRT 固定输入优化、真实完整 volume 和相同科学输出比较，见 [registration lossless](../../validation/registration_lossless_20261002/README.md)。 |
-| 2026-10-01，`268f61b2` / `c3c921cc` | 原生 float32 场保持不变、完整 490 帧固定插值；这些是当时 normalization 文件的 SHA 前缀，见下列既有修正与报告。 |
-| 2026-10-01，`3b9b0f8` | 历史 clean 周期边界、8 帧固定 FSL 插值比较，未当作完整 490 帧 benchmark。 |
+| 2026-10-02 文档整理 | 统一当前公共入口及参数说明；历史表转专属报告，算法不变。 |
+| `81f1bb3` | FNIRT 用 `TorchApplyWarp.run_world`，SynthMorph 用 `apply_transform(WorldTransformChain)`；四个最终节点与原 FNIT 完整输出逐位相同。 |
+| 2026-10-02 FNIRT 优化 | 固定输入及真实 volume/fastvbm/dMRI 连续调用验收，见[统一报告](../../validation/registration_lossless_20261002/README.md)。 |
+| 2026-10-01 共享采样子函数修正 | 保留 RAS mm 单位、外部 float64 场精度及长度 1/2 的镜像/周期短轴支持；原生 float32 场的完整 490 帧输出不变。见[全帧报告](../../validation/fmri/fmriprep/native_float32_resampler_invariance_full490.public.json)、[短轴控制](../../tests/test_spline_small_axes.py)。 |
+| `3b9b0f8` clean 固定变换 | 8 帧对 FSL max 0.05496，未逐值一致；[原报告](../../validation/fmri/volume_fixed_resampling.public.json)保留输入哈希、退出码和验收条件。 |
 
-### 成熟子函数的既有修正
-
-以下记录属于抽取前的已验证实现；本轮复用其数值规则。
-
-MSMAll 整链验证发现，共享 `resample_world` 在生成的目标网格未填写空间单位时会丢失源影像明确的毫米单位，导致后续 surface 输入检查报错。现已修复：此 API 的变换使用 RAS 毫米；目标单位为 `unknown`、源单位明确为 `mm` 时，输出保留 `mm`。目标已有单位时仍采用目标单位，两者均未知时不猜测。修复只改变 header 单位标记，3D/4D 身份重采样测试验证影像值、affine 和 4D TR 不变。历史文件仍须先核实其毫米网格来源，不能直接修改未知单位。
-
-共享子函数 `sample_cubic_periodic_fast` 原先在长度为 1/2 的镜像轴、长度为 1 的周期轴上会因两体素 padding 报错；长度为 1 的镜像坐标还会产生零周期。现在这些短轴使用显式反射/环绕索引，单体素镜像轴保持常数。常规尺寸仍执行原来的 `F.pad`，FSL 负坐标索引规则保持原实现定义。三个短轴网格和一个常规网格、两种边界共 8 项独立 SciPy 系数查询对照通过；另有 2 项仿射/HMC 与形变网格精度控制通过。该修复同时作用于复用这个子函数的 EDDY 与 fMRI 路径。
-
-`resample_world` 读入外部位移场时曾一律转 float32，丢失 float64 场的坐标精度；现在保留原值后进入既有 float64 坐标张量。内部生成的 float32 场仍取完全相同的数值。对默认关闭 STC 的真实 490 帧完整流程，使用同一原始 BOLD、HMC、BBR 和 MNI 场，仅重跑修改后的两个 `preproc` 插值阶段：T1w 的 136,917,760 个样本与 MNI 的 442,288,210 个样本均逐值复现已完成输出，RMSE 和最大绝对差均为 0。两个阶段另与镜像内串行 `resample_image` 比较，最大绝对差均为 0.00048828125。输入、源码 SHA 和完整指标见[float32 原生场不变性报告](../../validation/fmri/fmriprep/native_float32_resampler_invariance_full490.public.json)。
-
-2026-10-01 复核了历史 clean 整链 `3b9b0f8` 的实际输出（`boundary="periodic"`）：取前 8 个真实 BOLD 时间点，固定该版本估计的 BBR、非线性位移场及目标脑掩膜，与原 FSL `applywarp --rel --interp=spline` 比较。脑掩膜内 r=0.999999999929，MAE=0.001461、RMSE=0.002063，最大绝对差 0.05496；输出网格、float32、TR 0.735 s、有限值及掩膜外零值均通过检查。对应的[8 帧报告](../../validation/fmri/volume_fixed_resampling.public.json)记录输入和源码哈希、FSL 耗时及退出码。该报告验证固定变换下的插值；当前 BBR/FNIRT 执行优化与解剖缓存的测量见[当前配准报告](../../validation/fmri/registration_gpu.current.public.json)。
+历史 STC、实际官方节点与 clean 完整对照从[验证索引](../../validation/fmri/README.md)进入；时间和精度均保持实际版本，不改标为本次新实测。
 
 ## 参考文献与原实现
 
