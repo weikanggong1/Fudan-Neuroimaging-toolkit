@@ -58,4 +58,6 @@ GCA 71,651,552 字节，SHA-256 `2fcd276a39800f01f93a4c8828ae6d0a8cea3d8b8b9fe15
 - 原生缓存 v1：两例完整 LTA 矩阵相同，但约 1.76 倍慢，拒绝默认启用。
 - 原生缓存 v2：只补能力查询和构建输入哈希，单例同构建控制排队。
 
-全部复现参数、输入输出和接口说明见 `README.md`。运行统一在持久 SSH 会话所指的 Conda 环境，以共享 `flock` 保护每个配对或单例链。原生对照脚本新增 `--same-build --case whole_sub01_candidate_retry1`；两种后端使用同一候选二进制，只有激活环境不同。`benchmark_chain.py --root ... --output ... --case ... --commit ...` 要求新的空专属输出目录；任一步失败记录错误并退出，未生成 filled 不标成功。
+全部复现参数、输入输出和接口说明见 `README.md`。运行统一在持久 SSH 会话所指的 Conda 环境，以共享 `flock` 保护每个配对或单例链。可选原生 launcher 的污染能力查询环境＋已有 LTA 回归两项通过：执行清除查询键，本次独占临时文件经核验后发布；零退出但未生成新输出明确失败且保留旧 LTA。
+
+原生对照脚本新增 `--same-build --case whole_sub01_candidate_retry1`；两种后端使用同一候选二进制，只有激活环境不同。`benchmark_chain.py --root ... --output ... --case ... --commit ...` 要求新的空专属输出目录；任一步失败记录错误并退出，未生成 filled 不标成功。

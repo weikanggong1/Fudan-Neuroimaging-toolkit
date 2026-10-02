@@ -53,6 +53,7 @@ for name in (ENTOWM_MODEL,ENTOWM_CTAB):
 for name in ('mri_em_register','mri_segment','mri_edit_wm_with_aseg'):report['binary_sha256'][name]=sha(binaries/name)
 # Baseline native default is kept; the slower optional cache is not enabled.
 os.environ.pop('FNIT_GCA_SCORER',None)
+os.environ.pop('FNIT_GCA_QUERY_CAPABILITIES',None)
 torch.set_num_threads(4);torch.set_num_interop_threads(1)
 torch.backends.cuda.matmul.allow_tf32=True;torch.backends.cudnn.allow_tf32=True
 report['precision']={'default_matmul_tf32':True,'default_cudnn_tf32':True,'autocast':False,'EntoWM_actual_forwards':[]}

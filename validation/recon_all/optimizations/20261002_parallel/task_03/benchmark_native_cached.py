@@ -27,7 +27,7 @@ try:
   order=('baseline','candidate') if index==0 else ('candidate','baseline')
   for mode in order:
    output=a.output/(case+'_'+mode+'.lta');command=[str(baseline if mode=='baseline' else a.candidate),'-uns','3','-mask',str(mri/'brainmask.mgz'),str(mri/'nu.mgz'),str(atlas),str(output.resolve())]
-   env=dict(os.environ,FREESURFER_HOME=str(a.root/'assets'));env.pop('FNIT_GCA_SCORER',None)
+   env=dict(os.environ,FREESURFER_HOME=str(a.root/'assets'));env.pop('FNIT_GCA_SCORER',None);env.pop('FNIT_GCA_QUERY_CAPABILITIES',None)
    if mode=='candidate':env['FNIT_GCA_SCORER']='cpu_cached'
    with (a.output/(case+'_'+mode+'.log')).open('w') as log:
     tick=time.perf_counter();process=subprocess.Popen(command,env=env,stdout=log,stderr=subprocess.STDOUT)
