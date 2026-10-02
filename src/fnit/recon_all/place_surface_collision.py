@@ -195,6 +195,23 @@ def _assign_faces(bounds: np.ndarray, faces: np.ndarray, geometry: np.ndarray) -
     return result
 
 
+@njit(cache=True)
+def _assign_vertices(face_svi, incident, offsets, ripped):
+    """Assign independent vertices using the same complete incident-face order."""
+    result = np.full(len(ripped), -1, dtype=np.int32)
+    for vertex in range(len(ripped)):
+        start, end = offsets[vertex], offsets[vertex + 1]
+        if ripped[vertex] or start == end:
+            continue
+        region = face_svi[incident[start]]
+        for slot in range(start + 1, end):
+            if face_svi[incident[slot]] != region:
+                region = 64
+                break
+        result[vertex] = region
+    return result
+
+
 def subvolume_assignment(
     vertices: np.ndarray, faces: np.ndarray, proposed: np.ndarray, ripped: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -213,12 +230,7 @@ def subvolume_assignment(
     order = np.argsort(flat, kind="stable") // 3
     offsets = np.zeros(len(xyz) + 1, dtype=np.int64)
     offsets[1:] = np.cumsum(np.bincount(flat, minlength=len(xyz)))
-    vertex_svi = np.full(len(xyz), -1, dtype=np.int32)
-    for vertex in range(len(xyz)):
-        if ripped[vertex] or offsets[vertex] == offsets[vertex + 1]:
-            continue
-        adjacent = face_svi[order[offsets[vertex]:offsets[vertex + 1]]]
-        vertex_svi[vertex] = int(adjacent[0]) if np.all(adjacent == adjacent[0]) else 64
+    vertex_svi = _assign_vertices(face_svi, order, offsets, ripped)
     return geometry, face_svi, vertex_svi
 
 
