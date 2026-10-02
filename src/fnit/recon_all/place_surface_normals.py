@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
-from numba import njit
+from numba import njit, prange
 
 
 @njit(cache=True)
@@ -17,10 +17,10 @@ def _unit(vector: np.ndarray) -> None:
         vector[2] = np.float32(vector[2] / length)
 
 
-@njit(cache=True)
+@njit(parallel=True, cache=True, fastmath=False)
 def _normals(xyz: np.ndarray, faces: np.ndarray, face_ids: np.ndarray, corners: np.ndarray, offsets: np.ndarray) -> np.ndarray:
     result = np.zeros_like(xyz)
-    for vertex in range(len(xyz)):
+    for vertex in prange(len(xyz)):
         normal = np.zeros(3, dtype=np.float32)
         for entry in range(offsets[vertex], offsets[vertex + 1]):
             face = faces[face_ids[entry]]
@@ -103,6 +103,9 @@ def initial_vertex_normals(vertices: np.ndarray, triangles: np.ndarray, *,
     offsets, face_ids, corners = ordered_face_csr(triangles, nvertices=len(xyz))
     faces = np.asarray(triangles, dtype=np.int64)
     return _normals(xyz, faces, face_ids, corners, offsets)
+
+
+NORMAL_TOPOLOGY_API_VERSION = 1
 
 
 class FaceNormalTopology:
