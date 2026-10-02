@@ -237,8 +237,9 @@ def synthmorph_commands(config, directory):
 def verified_synthmorph_recovery(report_record, config, identity):
     """Bind successful official commands without rewriting their failed report."""
     prior = read_bound_json(report_record)
-    prior_identity = {k: v for k, v in prior.get("preflight", {}).items() if k != "runtime_libraries"}
-    expected_identity = {k: v for k, v in identity.items() if k != "runtime_libraries"}
+    supplemental = {"runtime_libraries", "official_auxiliary_files"}
+    prior_identity = {k: v for k, v in prior.get("preflight", {}).items() if k not in supplemental}
+    expected_identity = {k: v for k, v in identity.items() if k not in supplemental}
     if (prior.get("case_id") != config["case_id"] or prior.get("mode") != "prepare"
             or prior.get("state") != "failed" or prior.get("execution_completed") is not False
             or prior_identity != expected_identity):
@@ -268,6 +269,7 @@ def verified_synthmorph_recovery(report_record, config, identity):
             "original_failed_state": prior["state"], "files": files,
             "runtime_libraries_for_continuation": identity.get("runtime_libraries", []),
             "prior_runtime_libraries": prior.get("preflight", {}).get("runtime_libraries", []),
+            "continuation_auxiliary_inputs": identity.get("official_auxiliary_files", {}),
             "warp_sha_observation_scope": "first bound at recovery entry; prior three official commands exited zero",
             "original_command_seconds": sum(row["seconds_inclusive"] for row in commands)}
 
@@ -405,7 +407,11 @@ def preflight(config):
             raise FileNotFoundError(program)
     verify_canonical_lut(read_nodes(config["canonical_nodes84"]), fs / "FreeSurferColorLUT.txt",
                          Path(config["mrtrix_bin"]).parent / "share/mrtrix3/labelconvert/fs_default.txt")
+    auxiliary = [fs / "FreeSurferColorLUT.txt", Path(config["mrtrix_bin"]).parent / "share/mrtrix3/labelconvert/fs_default.txt",
+                 Path(config["mrtrix_bin"]).parent / "lib/libmrtrix.so"]
+    auxiliary += [Path(config["fsaverage_dir"]) / f"surf/{h}.orig" for h in ("lh", "rh")]
     return {"anatomy": anatomy, "assets": assets, "upstream_scripts": scripts,
+            "official_auxiliary_files": {str(p.resolve()): file_record(p) for p in auxiliary},
             "runtime_libraries": runtime_libraries,
             "freesurfer_build_stamp": file_record(fs / "build-stamp.txt"),
             "freesurfer_version": (fs / "build-stamp.txt").read_text().strip(),

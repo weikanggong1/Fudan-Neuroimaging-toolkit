@@ -66,6 +66,8 @@ main(["complete", "--config", official_reference_config,
 
 官方两份SynthMorph原始h5必须与FNIT固定资源身份一致：affine2为51,455,312字节、SHA `1ac5304b683036e5177f5b4ad38fa09fcbbe7883e742d6fa5bdaedd0e619ced6`；deform3为3,508,630,424字节、SHA `95b367cd30788cc647e4704b650642fc1d70d7e419c20c04f1ba1b2902bc6536`。
 
+额外固定实际官方命令消费的fsaverage双半球`orig`、FreeSurfer/MRtrix LUT及`libmrtrix.so`，保存于preflight的`official_auxiliary_files`，前后校验字节身份。原v2成功SynthMorph命令不使用这些后续表面/LUT资源，恢复入口将续跑资源的首次观测单独记录。
+
 `complete` 消费以下上游JSON：`schema_version=1`、`case_id`相同、`scope="official_self_produced_raw_dwi_chain"`、`state="completed"`、`upstream_report={path,sha256,size_bytes}`；`files` 含 `corrected_dwi`、`mean_b0`、`mean_b0_brain`、`brain_mask` 四个文件记录。上游报告必须完成且有真实官方命令；每个文件必须SHA一致，后三者为与4D DWI同空间的3D影像。该契约不将同输入隔离算子对照升级成独立原始链；上游真实命令/自产来源须由上游工具及审核证据支持。
 
 输出结构：
@@ -160,6 +162,21 @@ CON03新鲜FS输入的官方CPU命令已真实完成：joint register 385.7606�
 分阶段v3续跑的官方Surfa metadata命令完成12.9788秒；5ttgen随后因系统旧libstdc++缺少GLIBCXX_3.4.20/21/22启动失败，未产生5TT。原failed目录保留；既有Conda lib下实际`mrconvert -version`成功，识别3.0.3-103-g026e850d，后续新namespace显式绑定此运行时。参照程序字节与解剖输入不变。
 
 v4已完成5ttgen 10.701秒、GMWMI 1.559秒、fs-aparc84 labelconvert 1.181秒，随后原UKB脚本因指定环境缺pandas启动失败。保持原源码；使用服务器已存在的项目Python环境（pandas2.2.3/nibabel5.4.0/scipy1.11.4/numpy1.26.4）续新的独立namespace，不向正在运行的FNIT Conda环境安装或替换依赖。新增prepare Python import预检，避免运行配准后才发现此问题。
+
+**CON03 v5结构准备已完成**：31条新官方命令全部exit0，27个输出完成SHA和几何读回。新续跑entry wall为161.363秒，命令合计119.949秒；此前成功的SynthMorph register/apply三命令为403.782秒，单独报告，不能相加声称连续冷调用。尚未衔接官方DWI/追踪，故不是完整connectome或十例精度结论。
+
+| T1 atlas | 节点K | 实际存在节点 | 网格 |
+| --- | ---: | ---: | --- |
+| fs-aparc | 84 | 84 | 256×256×256 |
+| aparc+tian-s1 | 84 | 84 | 同上 |
+| aparc.a2009s+tian-s1 | 164 | 164 | 同上 |
+| glasser+tian-s1 | 376 | 376 | 同上 |
+| glasser+tian-s4 | 414 | 414 | 同上 |
+| schaefer200+tian-s1 | 216 | 216 | 同上 |
+| schaefer500+tian-s4 | 554 | 554 | 同上 |
+| schaefer1000+tian-s4 | 1054 | 1054 | 同上 |
+
+`render_connectome_official_anatomy.py --reference-report COMPLETED_REPORT --output FRESH.png`读取实际已绑定结果，绘制brain、5TT、GMWMI与八套atlas，并写图像metadata/SHA；仅作轴排列显示，不重采样，图示本身不构成FNIT与官方匹配结论。
 
 本轮CON03 prepare实际CPU试跑及complete结果将以新报告补充。没有完成报告时，5TT、配准、8atlas精度/时间、脑图均记待评估；不填入旧ds004666结果。现有CON03 fixed-FNIT-input官方追踪参照仍属于另外的验证层级。
 
