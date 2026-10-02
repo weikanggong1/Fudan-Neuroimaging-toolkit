@@ -17,6 +17,6 @@ def main():
         mri=Path(case['subject'])/'mri';path=mri/'brainmask.mgz';image=nib.load(path);original=nib.load(mri/'orig.mgz')
         error=float(np.abs(image.affine-original.affine).max())
         if image.shape!=original.shape or error>1e-4:raise ValueError('brainmask/orig grids differ')
-        report['cases'][case['id']]={'brainmask_sha256':sha(path),'bytes':path.stat().st_size,'shape':image.shape,'affine':image.affine.tolist(),'affine_maximum_vs_orig':error,'brain_nodes':int(np.count_nonzero(np.asarray(image.dataobj)>0))}
+        report['cases'][case['id']]={'brainmask_sha256':sha(path),'bytes':path.stat().st_size,'shape':list(map(int,image.shape)),'affine':image.affine.tolist(),'affine_maximum_vs_orig':error,'brain_nodes':int(np.count_nonzero(np.asarray(image.dataobj)>0))}
     a.output.write_text(json.dumps(report,indent=2)+'\n')
 if __name__=='__main__':main()
