@@ -80,6 +80,22 @@ def _tracking_sh_table(lmax: int, device: torch.device) -> torch.Tensor:
     return table
 
 
+
+@lru_cache(maxsize=8)
+def _tracking_sh_indices(lmax: int, device: torch.device):
+    """Cache coefficient columns without changing SH recurrence or ordering."""
+    centres = torch.tensor([l * (l - 1) // 2 + l
+                            for l in range(0, lmax + 1, 2)],
+                           dtype=torch.long, device=device)
+    orders = []
+    for m in range(1, lmax + 1):
+        positive = torch.tensor([l * (l - 1) // 2 + l + m
+                                 for l in range(m + (m & 1), lmax + 1, 2)],
+                                dtype=torch.long, device=device)
+        orders.append((positive, positive - 2 * m))
+    return centres, tuple(orders)
+
+
 def tracking_sh_precomputed(directions: torch.Tensor, lmax: int = 8) -> torch.Tensor:
     """Evaluate tracking SH via MRtrix iFOD2's 512-elevation lookup rule.
 
@@ -106,18 +122,16 @@ def tracking_sh_precomputed(directions: torch.Tensor, lmax: int = 8) -> torch.Te
     cosine = torch.where(radius > 0, unit[:, 0] / radius.clamp_min(1e-20), 1)
     sine = torch.where(radius > 0, unit[:, 1] / radius.clamp_min(1e-20), 0)
     output = torch.zeros_like(basis)
-    for l in range(0, lmax + 1, 2):
-        index = l * (l - 1) // 2 + l
-        output[:, index] = basis[:, index]
+    centres, orders = _tracking_sh_indices(lmax, unit.device)
+    output.index_copy_(1, centres, basis.index_select(1, centres))
     cos_m = torch.ones_like(cosine)
     sin_m = torch.zeros_like(sine)
-    for m in range(1, lmax + 1):
+    for positive, negative in orders:
         next_cos = cos_m * cosine - sin_m * sine
         next_sin = sin_m * cosine + cos_m * sine
-        for l in range(m + (m & 1), lmax + 1, 2):
-            index = l * (l - 1) // 2 + l + m
-            output[:, index] = basis[:, index] * next_cos
-            output[:, index - 2 * m] = basis[:, index] * next_sin
+        values = basis.index_select(1, positive)
+        output.index_copy_(1, positive, values * next_cos[:, None])
+        output.index_copy_(1, negative, values * next_sin[:, None])
         cos_m, sin_m = next_cos, next_sin
     return output.reshape(*shape, -1)
 
