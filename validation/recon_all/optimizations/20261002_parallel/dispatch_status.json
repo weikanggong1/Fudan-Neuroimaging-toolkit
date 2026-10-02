@@ -4,31 +4,31 @@
   "sessions": [
     {
       "task": 1,
-      "title": "左右半球并行调度与共享输出安全",
+      "title": "\u5de6\u53f3\u534a\u7403\u5e76\u884c\u8c03\u5ea6\u4e0e\u5171\u4eab\u8f93\u51fa\u5b89\u5168",
       "thread_id": "01a0fb53-3b14-7483-b5f6-d199cddf5ab8",
       "branch": "recon-perf/20261002-01-hemi"
     },
     {
       "task": 2,
-      "title": "white.preaparc、最终 white 与 pial 热点的 GPU 友好加速",
+      "title": "white.preaparc\u3001\u6700\u7ec8 white \u4e0e pial \u70ed\u70b9\u7684 GPU \u53cb\u597d\u52a0\u901f",
       "thread_id": "01a0fb54-b325-7180-be63-80fbc862311b",
       "branch": "recon-perf/20261002-02-placement"
     },
     {
       "task": 3,
-      "title": "GCA 注册与 WM 链的 GPU 友好实现；N4 次级剖析",
+      "title": "GCA \u6ce8\u518c\u4e0e WM \u94fe\u7684 GPU \u53cb\u597d\u5b9e\u73b0\uff1bN4 \u6b21\u7ea7\u5256\u6790",
       "thread_id": "01a0fb55-4fdc-70a0-9ed9-e3bdbf704b72",
       "branch": "recon-perf/20261002-03-volume"
     },
     {
       "task": 4,
-      "title": "remesh、标准球面、配准与拓扑热点优化",
+      "title": "remesh\u3001\u6807\u51c6\u7403\u9762\u3001\u914d\u51c6\u4e0e\u62d3\u6251\u70ed\u70b9\u4f18\u5316",
       "thread_id": "01a0fb55-eb13-7881-9178-4b55f436665e",
       "branch": "recon-perf/20261002-04-geometry"
     },
     {
       "task": 5,
-      "title": "MNI 非线性链的 warp 转换、求逆与重采样 GPU 化",
+      "title": "MNI \u975e\u7ebf\u6027\u94fe\u7684 warp \u8f6c\u6362\u3001\u6c42\u9006\u4e0e\u91cd\u91c7\u6837 GPU \u5316",
       "thread_id": "01a0fb56-8465-7462-937a-b759070cb879",
       "branch": "recon-perf/20261002-05-warp"
     }
@@ -42,8 +42,8 @@
     "shared_host_local_flock": "verified; previous GPFS ENOLCK retained as failed attempt"
   },
   "implementation_validation": "all five task branches merged; final native link-map side-effect fix passed local regression",
-  "whole_validation": "both baseline and candidate sub01 raw original-T1 complete with 138/138 outputs; candidate sub02 waiting for common resource lock",
-  "main_push": "not_started; two paired raw whole runs and final quality comparisons pending",
+  "whole_validation": "both baselines and candidate sub01 complete; candidate sub02 failed at fresh CUDA bootstrap, published=[]; same8d empty-directory retry awaiting diagnostic and lock",
+  "main_push": "not_started; second successful paired whole and three-way numerical/quality comparison pending",
   "resource_fingerprints": {
     "status": "passed",
     "measured_utc": "2026-10-02T07:42:42.921207+00:00",
@@ -56,7 +56,7 @@
     "isolation": "not_verified"
   },
   "integration_preserves_main": "a0ad59f",
-  "updated_utc": "2026-10-02T17:39:08.817645+00:00",
+  "updated_utc": "2026-10-02T18:38:13.159975+00:00",
   "integration_source_commit_before_mni_wiring": "24390dc",
   "baseline_queue": {
     "supervisor_pid": 128920,
@@ -144,7 +144,7 @@
     "scope": "replaced only idle waiters before any candidate output or comparison execution; old launch evidence retained",
     "comparison_output": "whole_comparison_8d750e2_v2"
   },
-  "candidate_whole_validation": "installed entry/capabilities/resources passed; candidate sub01 started after resource-lock acquisition, no terminal result yet",
+  "candidate_whole_validation": "both baselines and candidate sub01 complete; candidate sub02 failed at fresh CUDA bootstrap, published=[]; same8d empty-directory retry awaiting diagnostic and lock",
   "candidate_sub01_actual": {
     "execution": "complete",
     "code_commit": "8d750e25d4d067a43edb788a96b2086a1c031ba0",
@@ -156,5 +156,27 @@
     "finished_utc": "2026-10-02T17:35:21.006159+00:00",
     "report": "whole/candidate_sub01/monitor.json",
     "numeric_comparison": "not_run; all four raw runs required by comparison queue"
+  },
+  "candidate_sub02_failed_v1": {
+    "execution": "failed",
+    "report": "whole/candidate_sub02_failed_v1/completion.json",
+    "reason": "RH first CUDA allocation OOM before surface algorithm; LH canceled; published=[]",
+    "cause": "not_determined",
+    "finished_utc": "2026-10-02T18:19:08.354796+00:00"
+  },
+  "candidate_sub02_retry_v2": {
+    "status": "waiting_for_cuda_diagnostic",
+    "config": "whole/configs/candidate_sub02_retry_v2.json",
+    "config_sha256": "4a41f40c88c7c9e2a65816e4323d9c03aed777acc349f96b0550227bef3fd26c",
+    "runtime_commit": "8d750e25d4d067a43edb788a96b2086a1c031ba0",
+    "original_T1_empty_directory": true,
+    "supervisor_pid": 65309
+  },
+  "comparison_retry_v3": {
+    "status": "waiting_for_successful_whole_terminal",
+    "pid": 60772,
+    "config": "whole_comparison/config_retry_v3.json",
+    "output": "whole_comparison_8d750e2_retry_v3",
+    "driver_sha256": "0aadbce9cf9937bf7ed8d1df1f2816105d81ee23dca5825791eaa82848f6fb29"
   }
 }
