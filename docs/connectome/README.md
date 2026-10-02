@@ -262,7 +262,7 @@ tck2connectome tracks.tck atlas.mif fbc.csv -symmetric -assignment_radial_search
 | CON01/CON03，原始 AP/PA 整例两版本 | 两例完整校正 DWI、梯度、变换、标签和共 64 矩阵逐值一致；wall 分别 641.205→1972.731、632.674→886.139 s，共享 GPU 条件下没有观测到整链加速。其余八例的正式比较尚未收齐；监测不完整的运行使用新输出目录重算，原报告保留 | [真实输出比较与时间范围](actual_cohort_comparison.md) |
 | CON01/CON03，独立官方 raw 预处理 | 自产 TOPUP→SynthStrip→CPU8 EDDY 已完成；脑内 DWI RMSE 1.0830/0.8836，梯度 RMS 0.0886°/0.0566°。CPU EDDY 2550.451/2550.927 s，未判等价或据不同计时边界算提速 | [完整原始链输入、参数、脑图和时间](../../validation/connectome/tenraw_20261002/task_01/official_rawprep_v1/README.md) |
 | CON01/CON03，固定 TCK 的 SIFT2 候选 | 两例严格逐值门槛均未通过，未采用优化器缓存。保留全部配对、原软件耗时及逐值误差 | [SIFT2/精确 FA 组件说明](SIFT2_SAMEINPUT_OPTIMIZATION.md) |
-| CON03，同输入 100 万播种的追踪组件 | 接受 116,285 条流线，五类数组逐位一致；基线 2250.341 s、候选 5220.029 s，未观测到该规模的加速。三种观测显存峰值约 3.1/3.1/5.0 GB；候选进程监测最大间隔 8.709 s，不作为正式整链显存验收 | [完整参数、耗时及容量记录](TRACKING_OPERATORS.md) |
+| CON01/CON03，同输入 100 万播种的追踪组件 | 分别接受 144,343/116,285 条流线，五类数组 SHA 全相同；耗时 CON01 2073.123→1901.716 s、CON03 2250.341→5220.029 s，未宣称稳定提速。三种观测显存峰值均低于 5.027 GB；CON03 候选最大采样间隔 8.709 s，组件观测不替代正式整链显存验收 | [完整参数、耗时及容量记录](TRACKING_OPERATORS.md) |
 | 十例，独立官方结构像准备 | 官方 SynthMorph、FreeSurfer/MRtrix 与原 UKB atlas 脚本已生成每例 27 项准备输出，全部真实核验；恢复来源与时间分列。DWI 配准和最终 connectome 仍由后续独立链完成 | [结构像实际报告与脑图](raw_official_anatomy_reference.md) |
 
 下表是既有 ds004666/UKB 结果，保留对应版本与输入范围。
@@ -277,7 +277,7 @@ tck2connectome tracks.tck atlas.mif fbc.csv -symmetric -assignment_radial_search
 | 固定同一 100k TCK/权重/atlas | 七套 count 逐元素相同；FBC 最大绝对误差 ≤5.07e-5 | [七 atlas 矩阵和脑图](../../validation/connectome/ds004666/seven_atlas_100k_20260929.md) |
 | 独立 100k 追踪 | 部分 count/support 落入 MRtrix 自身三次重复范围；长度、8 mm 端点和 TDI 未全面进入 | [三次对照和脑图](../../validation/connectome/ds004666/tracking_100k_three_seed_20260929.md) |
 
-最终随机追踪验收采用**MRtrix 自身重复范围**：双方固定同一输入，各运行多个种子，比较接受率、长度分布、端点、TDI 及每套 atlas 的四张矩阵；误差不高于官方重复最大值、相似度不低于官方重复最小值即通过，优于该范围也通过。未定义的相关性保留为空值。固定轨迹矩阵精度已高，独立追踪仍有指标未达成；BIDS 编排的加入不等于原 UKB 全链数值一致。现有五种子结论与实际失败项见[重复性结论](REPEATABILITY_CONCLUSIONS.md)。CON03 的 100 万播种 A/B 已完成逐位核对；CON01 配对与正式十例整链验收尚未收齐，1,000 万播种尚无实测。
+最终随机追踪验收采用**MRtrix 自身重复范围**：双方固定同一输入，各运行多个种子，比较接受率、长度分布、端点、TDI 及每套 atlas 的四张矩阵；误差不高于官方重复最大值、相似度不低于官方重复最小值即通过，优于该范围也通过。未定义的相关性保留为空值。固定轨迹矩阵精度已高，独立追踪仍有指标未达成；BIDS 编排的加入不等于原 UKB 全链数值一致。现有五种子结论与实际失败项见[重复性结论](REPEATABILITY_CONCLUSIONS.md)。两例 100 万播种 A/B 已完成逐位核对；正式十例整链验收尚未收齐，1,000 万播种尚无实测。
 
 历史 ds004666 组件优化保持原数值与 RNG 操作；其 Torch 已分配/预留峰值 2.544/2.938 GB 仅对应固定已有配准的组件范围，不能作为新的原始 BIDS 整链峰值。完整精确 FA 只从 109.81 降至 106.82 ms，收益很小；追踪的 SH、组织采样与圆弧概率仍是后续主要优化对象。
 
