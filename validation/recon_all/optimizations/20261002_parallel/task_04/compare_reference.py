@@ -14,11 +14,14 @@ def main():
   if not (c/'report.json').exists():continue
   ref=json.loads(source.read_text());cand=json.loads((c/'report.json').read_text())
   if ref['status']!='complete' or cand['status']!='complete':continue
+  monitor_path=c/'monitor/monitor.json'
+  inner_command_seconds=cand['command_wall_seconds']
+  if monitor_path.exists():cand['command_wall_seconds']=json.loads(monitor_path.read_text())['command_wall_seconds']
   rv,rf=fsio.read_geometry(str(source.parent/(hemi+'.'+stage)));cv,cf=fsio.read_geometry(str(c/(hemi+'.'+stage)))
   same=rv.shape==cv.shape and np.array_equal(rf,cf)
-  row={'subject':subject,'hemisphere':hemi,'stage':stage,'official_program_sha256':ref['program_sha256'],'candidate_commit':cand['args']['commit'],'same_input_sha256':ref['input_sha256']==cand['input_sha256'],'ordered_faces_equal':bool(same),'official_command_seconds':ref['command_wall_seconds'],'candidate_api_seconds':cand['stage']['total_seconds_including_io'],'candidate_command_seconds':cand['command_wall_seconds'],'reference_topology':_topology(rv,rf),'candidate_topology':_topology(cv,cf),'unit':'surface RAS mm','official_equivalence':'not_assessed','tolerance_policy':'raw max/P99 metrics; no post-hoc pass threshold; existing 138 diagnostics handled by whole acceptance'}
+  row={'subject':subject,'hemisphere':hemi,'stage':stage,'official_program_sha256':ref['program_sha256'],'candidate_commit':cand['args']['commit'],'same_input_sha256':ref['input_sha256']==cand['input_sha256'],'ordered_faces_equal':bool(same),'official_command_seconds':ref['command_wall_seconds'],'candidate_api_seconds':cand['stage']['total_seconds_including_io'],'candidate_command_seconds':cand['command_wall_seconds'],'candidate_inner_report_seconds':inner_command_seconds,'reference_topology':_topology(rv,rf),'candidate_topology':_topology(cv,cf),'unit':'surface RAS mm','official_equivalence':'not_assessed','tolerance_policy':'raw max/P99 metrics; no post-hoc pass threshold; existing 138 diagnostics handled by whole acceptance'}
   if same:
-   d=np.linalg.norm(rv-cv,axis=1);row['indexed_displacement_mm']=helper._summary(d);row['different_vertices']=int(np.count_nonzero(d));row['strict_official_coordinates']=bool(np.array_equal(rv,cv))
+   d=np.linalg.norm(rv-cv,axis=1);row['indexed_displacement_mm']=helper._summary(d);row['different_vertices']=int(np.count_nonzero(d));row['strict_official_coordinates']=bool(np.array_equal(rv,cv));row['strict_official_coordinate_bits']=rv.astype('>f4').tobytes()==cv.astype('>f4').tobytes()
   else:
    row['candidate_to_official_triangle_mm']=helper._summary(helper._point_to_mesh(cv,rv,rf));row['official_to_candidate_triangle_mm']=helper._summary(helper._point_to_mesh(rv,cv,cf));row['strict_official_coordinates']=False
   if (baseline/'report.json').exists():
