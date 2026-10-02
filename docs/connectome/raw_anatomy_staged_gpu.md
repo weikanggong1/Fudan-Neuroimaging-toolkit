@@ -84,11 +84,10 @@ return_code = main([
 ```bash
 benchmark_root=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002
 benchmark_python=/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/bin/python
-benchmark_harness="$benchmark_root/formal_harness_staged_gpu_v1"
+benchmark_harness="$benchmark_root/formal_harness_staged_gpu_v2"
 
 "$benchmark_python" "$benchmark_harness/benchmark_connectome_staged_gpu.py" \
-  --prep-config "$benchmark_root/formal_candidate_raw_anatomy_prep_v1/anatomy_prep_config.json" \
-  --prep-driver-report-dir "$benchmark_root/formal_candidate_raw_anatomy_prep_v1_driver" \
+  --prep-bindings "$benchmark_harness/candidate_prep_bindings.json" \
   --gpu-config "$benchmark_root/candidate_gpu_config.json" \
   --run-root "$benchmark_root/formal_candidate_raw_staged_v1" \
   --report-dir "$benchmark_root/formal_candidate_raw_staged_v1_driver"
@@ -119,7 +118,7 @@ benchmark_harness="$benchmark_root/formal_harness_staged_gpu_v1"
 }
 ```
 
-命令只需把单来源的 `--prep-config` 和 `--prep-driver-report-dir` 替换为 `--prep-bindings /shared/candidate_prep_bindings.json`。每份原配置逐字节保存，原 helper 分别导入，CLI 实际使用各 case 自己来源中的 FreeSurfer 目录。重复/缺例、不同原始输入、伪装官方身份、超出原明确准备子集和映射文件变更全部拒绝。GPU 输出依旧使用一个全新的 namespace。
+上述命令使用实际 A2/B4/C4 映射。若十例确实来自同一份完整准备，才改用互斥的 `--prep-config 原配置` 和 `--prep-driver-report-dir 原 driver 目录`。每份原配置逐字节保存，原 helper 分别导入，CLI 实际使用各 case 自己来源中的 FreeSurfer 目录。重复/缺例、不同原始输入、伪装官方身份、超出原明确准备子集和映射文件变更全部拒绝。GPU 输出依旧使用一个全新的 namespace。
 
 各例的准备计时来自各自原控制器和实际主机，等待间隔保留原始 UTC 观察值；多批准备不被伪装成一次连续冷十例评测。
 
@@ -146,6 +145,8 @@ python benchmark_connectome_raw_bids.py --mode wall --eddy-gp-seed 12345 \
 ```
 
 `topup` 和 `eddy` 必须实际 `completed`；解剖 `supplied`，且 CLI 选择的 subject、原始 DWI、元数据和解剖目录全部核对。GPU 下游使用 FNIT 现有实现；本工具不改变科学计算定义。
+
+冻结共享 benchmark 目录时需一起保存 `benchmark_connectome_raw_cohort.py`、`benchmark_connectome_raw_recovery.py`、`benchmark_connectome_raw_rerun.py`、`benchmark_connectome_staged_gpu.py` 和共同 wall 工具。资源 helper 的原模块导入 recovery helper；即使 staged 路径没有执行 recovery，缺这个文件仍会导致启动失败。
 
 ## 5. 计时、显存与比较范围
 

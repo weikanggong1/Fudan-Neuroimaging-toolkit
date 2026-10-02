@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-03",
+  "scope": "Frozen benchmark helper and original preparation runtime/config identity validation; no MRI/GPU benchmark",
+  "helper_namespace": "formal_harness_staged_gpu_v2",
+  "helper_sha256": {
+    "benchmark_connectome_raw_cohort.py": "79ebfa58fb40ab9e069a7615fb10700fbdda586120e8be0e59a26112c449c3e1",
+    "benchmark_connectome_raw_recovery.py": "e1582d0810132ee98c3b68e416675dd4de7f5488b2c64f313278371efe3b0eba",
+    "benchmark_connectome_raw_rerun.py": "2e1dd502e4000b6cb6686152f9b4a6068130aa534185cca7c0e5394c0162979f",
+    "benchmark_connectome_staged_gpu.py": "018a997f52d2824565427746da119fb0e4ef6d524c4f989c66c5587eb633314a",
+    "benchmark_connectome_raw_bids.py": "a34f8ee9866ff825b4ca3e3d523597cdd1d08274da8f2a92cc40f846b8ee71f8"
+  },
+  "case_mapping_sha256": "cb38e972a7ce671ef3a768b5dec6408a6aa0b217bd7ecfea841da8f2f34eafe6",
+  "canonical_case_count": 10,
+  "case_origin_index": {
+    "sub-CON01": 0,
+    "sub-CON03": 0,
+    "sub-CON04": 1,
+    "sub-CON05": 1,
+    "sub-CON06": 1,
+    "sub-CON07": 1,
+    "sub-CON08": 2,
+    "sub-CON09": 2,
+    "sub-CON10": 2,
+    "sub-CON11": 2
+  },
+  "original_preparation_config_sha256": [
+    "b2e6f34affedd07c35a0ab0e7d58361395d3df7794fad2188c63114dfd05b66e",
+    "4d23ca7c1f27306828d68498ce4fe6978084d33bacbd7e9476b9caa2cda428d0",
+    "86c6072b35447382c263932fa3031825e3c1584365b350f3e941483a02f82f3e"
+  ],
+  "actual_runtime_check": {
+    "status": "three_original_frozen_helpers_verified_in_clean_children",
+    "case_count": 10,
+    "checks": [
+      {
+        "status": "original_preparation_runtime_verified",
+        "prep_config_sha256": "b2e6f34affedd07c35a0ab0e7d58361395d3df7794fad2188c63114dfd05b66e",
+        "seconds": 1.8631869796663523
+      },
+      {
+        "status": "original_preparation_runtime_verified",
+        "prep_config_sha256": "4d23ca7c1f27306828d68498ce4fe6978084d33bacbd7e9476b9caa2cda428d0",
+        "seconds": 0.22140992898494005
+      },
+      {
+        "status": "original_preparation_runtime_verified",
+        "prep_config_sha256": "86c6072b35447382c263932fa3031825e3c1584365b350f3e941483a02f82f3e",
+        "seconds": 0.26029924768954515
+      }
+    ],
+    "scope": "real runtime/config identity reads only; fresh official FS still running; not image/GPU benchmark"
+  },
+  "isolated_bundle_import_test": {
+    "tests": 12,
+    "seconds": 1.21,
+    "status": "passed"
+  },
+  "incomplete_first_deployment": {
+    "namespace": "formal_harness_staged_gpu_v1",
+    "failure": "Missing benchmark_connectome_raw_recovery.py import dependency",
+    "overwritten": false,
+    "GPU_started": false
+  },
+  "candidate_source": "not_supplied",
+  "candidate_GPU_started": false,
+  "scientific_parity": "not_assessed",
+  "speedup": "not_assessed",
+  "full_protocol_regression": {
+    "tests": 232,
+    "seconds": 27.271,
+    "status": "passed",
+    "MRI_or_GPU_benchmark_simulated": false
+  }
+}

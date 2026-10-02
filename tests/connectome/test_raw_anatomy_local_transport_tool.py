@@ -1,6 +1,10 @@
 """CPU-local transport protocol checks; no official/MRI/GPU execution."""
 import json
 from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tempfile
 from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
@@ -12,6 +16,18 @@ from tools import benchmark_connectome_staged_gpu as staged
 
 
 class LocalTransportTests(PreparationFixture):
+    def test_frozen_staged_bundle_imports_in_an_isolated_directory(self):
+        scripts = Path(staged.__file__).parent
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = Path(directory)
+            for name in ("benchmark_connectome_raw_cohort.py","benchmark_connectome_raw_recovery.py",
+                         "benchmark_connectome_raw_rerun.py","benchmark_connectome_staged_gpu.py"):
+                shutil.copyfile(scripts / name,bundle / name)
+            result = subprocess.run([sys.executable,str(bundle / "benchmark_connectome_staged_gpu.py"),"--help"],
+                                    capture_output=True,text=True)
+            self.assertEqual(result.returncode,0,result.stderr)
+            self.assertIn("--prep-bindings",result.stdout)
+
     def local(self):
         self.config["cpu_transport"] = "local"
         return self.config
