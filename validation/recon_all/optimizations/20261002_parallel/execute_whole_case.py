@@ -52,6 +52,18 @@ def main():
         threads = int(config["threads"])
         if threads != 4:
             raise ValueError("paired protocol freezes total CPU budget at 4")
+        overrides = config.get("pipeline_kwargs", {})
+        protected = {"t1", "subject_dir", "weights_dir", "assets_dir", "native_bin_dir",
+                     "device", "threads", "profile_stages", "cuda_allocator_cache"}
+        if not isinstance(overrides, dict) or protected.intersection(overrides):
+            raise ValueError("pipeline_kwargs cannot override declared inputs/resources/timing")
+        extras = config.get("pipeline_cli_args", [])
+        protected_cli = {"--weights-dir", "--assets-dir", "--native-bin-dir", "--device",
+                         "--threads", "--profile-stages", "--cuda-allocator-cache"}
+        if not isinstance(extras, list) or not all(isinstance(item, str) for item in extras):
+            raise ValueError("pipeline_cli_args must contain strings")
+        if any(item.split("=", 1)[0] in protected_cli for item in extras):
+            raise ValueError("pipeline_cli_args cannot override declared resources/timing")
         env = dict(os.environ)
         for name in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS",
                      "NUMBA_NUM_THREADS", "NUMEXPR_NUM_THREADS"):
@@ -64,7 +76,7 @@ def main():
                 config["output"], "--weights-dir", config["weights"],
                 "--assets-dir", config["assets"], "--native-bin-dir", config["native_bin_dir"],
                 "--device", config["device"], "--threads", str(threads), "--profile-stages",
-                "--cuda-allocator-cache", "disabled", *config.get("pipeline_cli_args", [])]
+                "--cuda-allocator-cache", "disabled", *extras]
         if config["invocation"] == "initialized_cuda_api":
             argv = [config["python"], str(Path(__file__).resolve()), "--api-child",
                     str(args.config.resolve())]
@@ -82,17 +94,20 @@ def main():
         (root / "launch.json").write_text(json.dumps(launch, indent=2) + "\n")
         with (root / "command.log").open("w") as stream:
             code = subprocess.call(argv, env=env, stdout=stream, stderr=subprocess.STDOUT)
-        completion["exit_code"] = code
-        completion["execution_status"] = "complete" if code == 0 else "failed"
+        completion["child_exit_code"] = code
         if code:
             raise RuntimeError("whole-case child returned " + str(code))
         report_path = output / "fnit-native-free-run.json"
         report = json.loads(report_path.read_text())
         completion["pipeline_status"] = report.get("status")
+        if report.get("status") != "complete":
+            raise RuntimeError("pipeline did not record execution complete")
         completion["output_validation"] = report.get("output_validation")
         completion["pipeline_total_seconds"] = report.get("total_seconds")
+        completion.update(exit_code=0, execution_status="complete")
     except BaseException as error:
-        completion.setdefault("exit_code", 1)
+        completion.update(execution_status="failed",
+                          exit_code=completion.get("child_exit_code") or 1)
         completion["error"] = repr(error)
         raise
     finally:
