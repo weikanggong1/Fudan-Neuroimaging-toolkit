@@ -1,0 +1,485 @@
+{
+  "schema_version": 1,
+  "scope": "Complete independent surface-only chain from existing same-source recon-all geometry and complete T1w/MNI preproc BOLD: official FreeSurfer/sMRIPrep conversion, cortical ROI, FS-to-fsLR sphere initialization, spherical affine preparation, official newMSM, sphere-specific 32k area surfaces, installed fMRIPrep projection and CIFTI, output QC and final data/report saving. Excludes recon-all reconstruction, all prerequisite volume processing, container verification/startup and package imports.",
+  "validation_complete": true,
+  "packages": {
+    "fmriprep": "25.2.4",
+    "smriprep": "0.19.2",
+    "niworkflows": "1.14.4",
+    "nibabel": "5.3.2",
+    "templateflow": "25.0.4",
+    "nipype": "1.10.0",
+    "numpy": "2.2.6"
+  },
+  "installed_source_sha256": {
+    "fmriprep/workflows/bold/resampling.py": "aa7c6f3b7da700ce745504dd8402805a8970f26fde7c43fff2936d8bf3a0db03",
+    "niworkflows/interfaces/cifti.py": "1c243989bdb1ff9ffdc040b48932dfe408cd23427681a79fb004fc9ccec162b1"
+  },
+  "reference_workbench": {
+    "sha256": "e5e34c7f44fd057d9bb38592a0c173887bbaf0058040fc9cfaa92b69fe01fe52",
+    "version": {
+      "Version": "2.0.1",
+      "Qt Compiled Version": "6.8.2",
+      "Qt Runtime Version": "6.8.3",
+      "Commit": "77852c0c616b467915b06330c94db3238214c406",
+      "Commit Date": "2025-03-10 11:51:55 -0400",
+      "Compiled Debug": "NO",
+      "Operating System": "Linux",
+      "Compiled with OpenMP": "YES"
+    }
+  },
+  "reference_script_sha256": "a725d5a489cacd677c4c13fbdd48a79ac3b1a4a14167b2bb6733ee55efc47ad9",
+  "signal": "preproc",
+  "sphere_kind": "estimated_msmsulc",
+  "registration_estimated_here": true,
+  "projection_inputs_sha256": {
+    "bold_file": "529a20ee6da97665d13cca696a136a719c730b46558940f00dec3045082716d2",
+    "bold_std": "6fdf5f0d003e15ff7b11b78e2e5105185ece2e106444b302088f84b1cf91d18d",
+    "volume_roi": null,
+    "white": [
+      "7173a892bf1479e0f28a3ee62423af0828aa5b3d35254692b79a30dfbeae6a91",
+      "2bb98b0caf03925cea6e43a26e171f3989d5d27c59e18c121b2bf4660adb0efc"
+    ],
+    "pial": [
+      "a95f09e5bbdd8ead7b4cf8195785193560f2c4a6abf13cf4b77db48ba2a448e2",
+      "06cce9d1d478e4409577eb2d1e7cbe7583f952d2a0387dd9bea2818b90a9e5a7"
+    ],
+    "midthickness": [
+      "bd53a227e99084e0fa62fe96f600e3cc7daac9d20e37f5634a09ca1a846fa2b2",
+      "4743567c20acaf0f4e0b61b46e7d5bb6611934c6b9259ee59fae4bc1a340cf3b"
+    ],
+    "midthickness_fsLR": [
+      "a8901fd0af51c1d5754b962567eda5e8c936b41bb118d7e3f454a2e60a471301",
+      "72c928c0cae640f6f701f751de86e4a3adc4eac6a3bd4af0ce5382b2c7d18c8b"
+    ],
+    "sphere_reg_fsLR": [
+      "3232ba0c8af7682e4ef394af890af07d3aa3fd5f8a62d09dcedacff0c26e2385",
+      "182c7d2481e4d784df61b6a9f33a8e22d7bf7f552997bd62415b340cde5dfdf0"
+    ],
+    "cortex_mask": [
+      "724c835ad94c4f2ff8def85e0882358ca88bea72524fe57f538fcd1e3029a8d1",
+      "4f477976d9f2106620b33cab009724b97ec9c9b84366c734e6903886a0da6708"
+    ]
+  },
+  "geometry": {
+    "L": {
+      "native_vertices": 120035,
+      "native_faces": 240066,
+      "fsLR_vertices": 32492,
+      "fsLR_faces": 64980
+    },
+    "R": {
+      "native_vertices": 122950,
+      "native_faces": 245896,
+      "fsLR_vertices": 32492,
+      "fsLR_faces": 64980
+    }
+  },
+  "volume_inputs": {
+    "T1w": {
+      "shape": [
+        59,
+        75,
+        64,
+        490
+      ],
+      "affine": [
+        [
+          2.385999917984009,
+          0.0,
+          0.0,
+          -65.26929473876953
+        ],
+        [
+          0.0,
+          2.385999917984009,
+          0.0,
+          -107.59297180175781
+        ],
+        [
+          0.0,
+          0.0,
+          2.4000000953674316,
+          -100.79496002197266
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "MNI": {
+      "shape": [
+        91,
+        109,
+        91,
+        490
+      ],
+      "affine": [
+        [
+          -2.0,
+          0.0,
+          0.0,
+          90.0
+        ],
+        [
+          0.0,
+          2.0,
+          0.0,
+          -126.0
+        ],
+        [
+          0.0,
+          0.0,
+          2.0,
+          -72.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "actual_template_resources": {
+    "surface_spheres": [
+      {
+        "name": "tpl-fsLR_hemi-L_den-32k_sphere.surf.gii",
+        "sha256": "1846b053f870405466776d004d714cc1da0cec7361761c65a864782dd09f30a8"
+      },
+      {
+        "name": "tpl-fsLR_hemi-R_den-32k_sphere.surf.gii",
+        "sha256": "1a898433a9f1070e4e0435d4db966776ecc3291bfcd444efc7910aeffb91561c"
+      }
+    ],
+    "surface_rois": [
+      {
+        "name": "L.atlasroi.32k_fs_LR.shape.gii",
+        "sha256": "4ac9199dab151ccdc2a35bdddb5bac4f4907da7dfebd90807c09b82e2eb9d512"
+      },
+      {
+        "name": "R.atlasroi.32k_fs_LR.shape.gii",
+        "sha256": "698f46b399f5a89829f83cc697e32dc8841031fbf31ffef75aaaa0c4a16c3015"
+      }
+    ],
+    "cifti_surface_labels": [
+      {
+        "name": "tpl-fsLR_hemi-L_den-32k_desc-nomedialwall_dparc.label.gii",
+        "sha256": "4ac9199dab151ccdc2a35bdddb5bac4f4907da7dfebd90807c09b82e2eb9d512"
+      },
+      {
+        "name": "tpl-fsLR_hemi-R_den-32k_desc-nomedialwall_dparc.label.gii",
+        "sha256": "698f46b399f5a89829f83cc697e32dc8841031fbf31ffef75aaaa0c4a16c3015"
+      }
+    ],
+    "cifti_volume_dseg": [
+      {
+        "name": "tpl-MNI152NLin6Asym_res-02_atlas-HCP_dseg.nii.gz",
+        "sha256": "9c25e63edec37b3876756b749a3f0127511c6b63bf2855060a44007bb479b987"
+      }
+    ]
+  },
+  "templates_unchanged": true,
+  "input_files_unchanged": true,
+  "workflow_wall_seconds": 211.5394266033545,
+  "completed_interface_timing_seconds": [
+    {
+      "node": "fixed_surface_projection_reference.bold_fsLR_resampling_wf.joinnode",
+      "interface": "IdentityInterface",
+      "duration_seconds": [
+        0.000375
+      ]
+    },
+    {
+      "node": "fixed_surface_projection_reference.bold_fsLR_resampling_wf.mask_fsLR",
+      "interface": "MetricMask",
+      "duration_seconds": [
+        4.379757
+      ]
+    },
+    {
+      "node": "fixed_surface_projection_reference.bold_fsLR_resampling_wf.mask_fsLR",
+      "interface": "MetricMask",
+      "duration_seconds": [
+        4.518471
+      ]
+    },
+    {
+      "node": "fixed_surface_projection_reference.bold_fsLR_resampling_wf.mask_native",
+      "interface": "MetricMask",
+      "duration_seconds": [
+        17.096883
+      ]
+    },
+    {
+      "node": "fixed_surface_projection_reference.bold_fsLR_resampling_wf.mask_native",
+      "interface": "MetricMask",
+      "duration_seconds": [
+        17.602231
+      ]
+    },
+    {
+      "node": "fixed_surface_projection_reference.bold_fsLR_resampling_wf.metric_dilate",
+      "interface": "MetricDilate",
+      "duration_seconds": [
+        37.292765
+      ]
+    },
+    {
+      "node": "fixed_surface_projection_reference.bold_fsLR_resampling_wf.metric_dilate",
+      "interface": "MetricDilate",
+      "duration_seconds": [
+        35.586971
+      ]
+    },
+    {
+      "node": "fixed_surface_projection_reference.bold_fsLR_resampling_wf.resample_to_fsLR",
+      "interface": "MetricResample",
+      "duration_seconds": [
+        10.469141
+      ]
+    },
+    {
+      "node": "fixed_surface_projection_reference.bold_fsLR_resampling_wf.resample_to_fsLR",
+      "interface": "MetricResample",
+      "duration_seconds": [
+        10.665084
+      ]
+    },
+    {
+      "node": "fixed_surface_projection_reference.bold_fsLR_resampling_wf.select_surfaces",
+      "interface": "KeySelect",
+      "duration_seconds": [
+        0.000305
+      ]
+    },
+    {
+      "node": "fixed_surface_projection_reference.bold_fsLR_resampling_wf.select_surfaces",
+      "interface": "KeySelect",
+      "duration_seconds": [
+        0.000257
+      ]
+    },
+    {
+      "node": "fixed_surface_projection_reference.bold_fsLR_resampling_wf.volume_to_surface",
+      "interface": "VolumeToSurfaceMapping",
+      "duration_seconds": [
+        26.41342
+      ]
+    },
+    {
+      "node": "fixed_surface_projection_reference.bold_fsLR_resampling_wf.volume_to_surface",
+      "interface": "VolumeToSurfaceMapping",
+      "duration_seconds": [
+        26.661736
+      ]
+    },
+    {
+      "node": "fixed_surface_projection_reference.bold_grayords_wf.gen_cifti",
+      "interface": "GenerateCifti",
+      "duration_seconds": [
+        17.603781
+      ]
+    }
+  ],
+  "interface_timing_boundary": "Native interface runtime duration; nested inside workflow wall time. MapNode durations are per completed execution and must not be added to workflow wall time.",
+  "threads": 8,
+  "execution_plugin": "Linear",
+  "uses_gpu": false,
+  "projection_output_checks": {
+    "L": {
+      "shape": [
+        490,
+        32492
+      ],
+      "all_finite": true,
+      "sha256": "69ed5696a86b775ba07f8a17d8d58faf8ccc4cca507e7ca3d3f55a5e9ecf6d9a"
+    },
+    "R": {
+      "shape": [
+        490,
+        32492
+      ],
+      "all_finite": true,
+      "sha256": "6745cad694f9121aa8f90c5081367ec3bc3a758c094be1351baba67970a93574"
+    }
+  },
+  "cifti_output_checks": {
+    "shape": [
+      490,
+      91282
+    ],
+    "all_finite": true,
+    "brain_models": {
+      "CIFTI_STRUCTURE_CORTEX_LEFT": 29696,
+      "CIFTI_STRUCTURE_CORTEX_RIGHT": 29716,
+      "CIFTI_STRUCTURE_ACCUMBENS_LEFT": 135,
+      "CIFTI_STRUCTURE_ACCUMBENS_RIGHT": 140,
+      "CIFTI_STRUCTURE_AMYGDALA_LEFT": 315,
+      "CIFTI_STRUCTURE_AMYGDALA_RIGHT": 332,
+      "CIFTI_STRUCTURE_BRAIN_STEM": 3472,
+      "CIFTI_STRUCTURE_CAUDATE_LEFT": 728,
+      "CIFTI_STRUCTURE_CAUDATE_RIGHT": 755,
+      "CIFTI_STRUCTURE_CEREBELLUM_LEFT": 8709,
+      "CIFTI_STRUCTURE_CEREBELLUM_RIGHT": 9144,
+      "CIFTI_STRUCTURE_DIENCEPHALON_VENTRAL_LEFT": 706,
+      "CIFTI_STRUCTURE_DIENCEPHALON_VENTRAL_RIGHT": 712,
+      "CIFTI_STRUCTURE_HIPPOCAMPUS_LEFT": 764,
+      "CIFTI_STRUCTURE_HIPPOCAMPUS_RIGHT": 795,
+      "CIFTI_STRUCTURE_PALLIDUM_LEFT": 297,
+      "CIFTI_STRUCTURE_PALLIDUM_RIGHT": 260,
+      "CIFTI_STRUCTURE_PUTAMEN_LEFT": 1060,
+      "CIFTI_STRUCTURE_PUTAMEN_RIGHT": 1010,
+      "CIFTI_STRUCTURE_THALAMUS_LEFT": 1288,
+      "CIFTI_STRUCTURE_THALAMUS_RIGHT": 1248
+    },
+    "start_seconds": 0.0,
+    "tr_seconds": 0.735,
+    "sha256": "e9949d3dbe931c57217a8e7a92824fcf3c20d230a2df80f20df815e636202223"
+  },
+  "cifti_metadata": {
+    "Density": "91,282 grayordinates corresponding to all of the grey matter sampled at a 2mm average vertex spacing on the surface and as 2mm voxels subcortically",
+    "SpatialReference": {
+      "VolumeReference": "https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-02_T1w.nii.gz",
+      "CIFTI_STRUCTURE_LEFT_CORTEX": "https://templateflow.s3.amazonaws.com/tpl-fsLR/tpl-fsLR_den-32k_hemi-L_midthickness.surf.gii",
+      "CIFTI_STRUCTURE_RIGHT_CORTEX": "https://templateflow.s3.amazonaws.com/tpl-fsLR/tpl-fsLR_den-32k_hemi-R_midthickness.surf.gii"
+    }
+  },
+  "registration_reuse": null,
+  "reference_msm_threads": 1,
+  "strict_singlethread_accuracy_reference": true,
+  "parallel_msm_hemispheres": true,
+  "msm_parallelism_boundary": "Independent L/R official processes, separate output prefixes, each with the stated fixed thread count. L/R runtimes overlap when parallel; use both-hemisphere wall time.",
+  "reference_newmsm_sha256": "af5c04246cfeea19233232168acbc1f31266f28b1a7cb6779b8f1bfa32eb9615",
+  "hcp_config_source_sha256": "46b250404cb2570b4f645d8e53c30fabde799663d61761d61cf54ff110318203",
+  "reference_freesurfer_conversion_version": "freesurfer-linux-ubuntu22_x86_64-7.3.2-20220804-6354275",
+  "effective_msm_config_sha256": "17c473d3090b10349909a374efb182a020a06bc6908a284a3f3fe4424252716e",
+  "surface_only_script_sha256": "3372f0e58a0c3e60f7e76610a7af864724758765252d13797530d11bf4def451",
+  "recon_geometry_sources": {
+    "L": {
+      "white": {
+        "name": "lh.white",
+        "sha256": "e92211a71ea20a7223c305a7626f1df37cc7565744d0f7b16a5f28942b723d54"
+      },
+      "pial": {
+        "name": "lh.pial",
+        "sha256": "a94b3ccb1780f1529585cf1092e7a38075dda9a3b37fd58334eee3ee5bcde37b"
+      },
+      "midthickness": {
+        "name": "lh.graymid",
+        "sha256": "9b24dc610a81e677ec11ffb370588ca932c0e0180ffaa1a0820d0c00711d46ce"
+      },
+      "sphere": {
+        "name": "lh.sphere",
+        "sha256": "4ecca8a559ae0ce40f404f09f70baf462e1a7e9fca3b64688b047ea57934e6ea"
+      },
+      "sphere.reg": {
+        "name": "lh.sphere.reg",
+        "sha256": "594ff8864b6ee2af5a523781bf7de1ee271667e82bfceaf6e8a4a7cdb24e9e0e"
+      },
+      "thickness": {
+        "name": "lh.thickness",
+        "sha256": "4fdbf8b604123abc6a40da6445e7b63961ff3de2a645be8aadd6a6b8a133310c"
+      },
+      "sulc": {
+        "name": "lh.sulc",
+        "sha256": "42bc73666017f5230368dc9bbc5c816a07e795615f454d34af15a7f0c28fda6a"
+      }
+    },
+    "R": {
+      "white": {
+        "name": "rh.white",
+        "sha256": "8938a50a0b3242fd60e33f1ad6ecced9970623479b698b2814c855507bb56b3d"
+      },
+      "pial": {
+        "name": "rh.pial",
+        "sha256": "cfd22b13d31dd4ab3451ffdfe97f46fd39c5787a87e92b563785281243c342e4"
+      },
+      "midthickness": {
+        "name": "rh.graymid",
+        "sha256": "5ecf82f3555fa241d352520873e589914593c7cebead1135fd1642a21938c6aa"
+      },
+      "sphere": {
+        "name": "rh.sphere",
+        "sha256": "5716910a250c68d1b6456fb1e2694d813db1aeba025db8b2d9d31c2f9eca75e6"
+      },
+      "sphere.reg": {
+        "name": "rh.sphere.reg",
+        "sha256": "270b0262b9748922c97552e6022aa1f9b4901dfb32ed9993bc09b741d5c7d16a"
+      },
+      "thickness": {
+        "name": "rh.thickness",
+        "sha256": "3449a60f30740c32da9c0de29cb23451f9103ea6ed3db7cbd3aa87c29dce5515"
+      },
+      "sulc": {
+        "name": "rh.sulc",
+        "sha256": "540cccc5abd24821649c9a62050efd55699e1d9aa8740835bdfc74fb07f9bab4"
+      }
+    }
+  },
+  "msm_prepared_inputs_sha256": {
+    "L": {
+      "rotated_sphere": "10fc9e8e1855fa4ab5ce70562d1b89a96580e073c4c825957642b5e2ffa7c37a",
+      "native_sulc": "e3441cf256b4d42429ba462db2f8301db5d05a85aea78b10109bbceea1e1e48d",
+      "reference_sphere": "6968ef7d9638de54ade78cdbb7f0c6f25025c60477f72456ab2fb77c53a85cfa",
+      "reference_sulc": "10f5e3fd775bb2f77278b0b69126f6f67abefb3c76de6f1233128d9914ddcb5c"
+    },
+    "R": {
+      "rotated_sphere": "e81932ecce4006fe6d93cb3073ae43a0d85676e5a0e472b5271aa7df1b55da9b",
+      "native_sulc": "622e20e6765fc3d72b10ca549ba19010870398b158a05bf6b8f4781b1979244d",
+      "reference_sphere": "85e718e424a1d87521fb0f3942538db16d8c745fe5b9ee20405baac2aff1dbb1",
+      "reference_sulc": "4eefc7807cdd9076cfc9ffc933da3d0c100a4770d5359c3e5f4fb37d71097520"
+    }
+  },
+  "registered_spheres_sha256": {
+    "L": "3232ba0c8af7682e4ef394af890af07d3aa3fd5f8a62d09dcedacff0c26e2385",
+    "R": "182c7d2481e4d784df61b6a9f33a8e22d7bf7f552997bd62415b340cde5dfdf0"
+  },
+  "fsnative_to_t1w": null,
+  "stage_seconds": {
+    "L_geometry_roi_sphere_preparation": 11.949132140725851,
+    "R_geometry_roi_sphere_preparation": 11.232974496204406,
+    "official_msmsulc_both_hemispheres_wall": 1271.7606434621848,
+    "L_official_msmsulc": 1271.7597264880314,
+    "L_area_surface": 0.7496666079387069,
+    "R_official_msmsulc": 1258.157813492231,
+    "R_area_surface": 0.7027714736759663,
+    "official_projection_cifti_qc_and_staging": 275.9679528651759,
+    "final_publication_and_report_save": 0.22627852484583855
+  },
+  "surface_only_wall_seconds_including_output_save": 1572.5930278915912,
+  "timing_endpoint": "all final data, spheres and complete QC report saved; adding this duration excluded",
+  "sif_sha256": "8e32238619053c1f9d1739b26f4afd72df809d914f5a5771707bf5da4b1d0f39",
+  "container_wall_seconds": 1587.689944529906,
+  "host_publication_seconds": 2.5048563848249614,
+  "host_publication_method": "verified cross-filesystem copy followed by atomic destination rename",
+  "host_publication_in_worker_wall": false,
+  "original_scientific_worker_exit_code": 0,
+  "original_container_exit_code": 0,
+  "original_controller_exit_code": 1,
+  "post_validation_publication_recovery": true,
+  "scientific_worker_rerun": false,
+  "original_cross_filesystem_publication_failed": true,
+  "all_publication_output_sha256_unchanged": true,
+  "published_output_sha256": {
+    "hemi-R_space-fsLR_den-32k_bold.func.gii": "6745cad694f9121aa8f90c5081367ec3bc3a758c094be1351baba67970a93574",
+    "space-fsLR_den-91k_bold.json": "f880d05e19cd7719efc472a81a802cae3e5f05ab1a899579a0d7aac5c57240f7",
+    "run.public.json": "7286e9db93afde856c914efb17bc4ca2902df37679d3866af5684bcd69a7e11d",
+    "hemi-L_sphere.MSMSulc.surf.gii": "3232ba0c8af7682e4ef394af890af07d3aa3fd5f8a62d09dcedacff0c26e2385",
+    "hemi-L_space-fsLR_den-32k_bold.func.gii": "69ed5696a86b775ba07f8a17d8d58faf8ccc4cca507e7ca3d3f55a5e9ecf6d9a",
+    "hemi-R_sphere.MSMSulc.surf.gii": "182c7d2481e4d784df61b6a9f33a8e22d7bf7f552997bd62415b340cde5dfdf0",
+    "space-fsLR_den-91k_bold.dtseries.nii": "e9949d3dbe931c57217a8e7a92824fcf3c20d230a2df80f20df815e636202223"
+  },
+  "recovery_helper_sha256": "699718142cddfa6388fda794ed3720aa2e3c8ab5ee64ba8bfeac8acffa0e8635",
+  "raw_to_cifti_continuous_wall_measured": false,
+  "public_projection": {
+    "original_server_report_sha256": "32dd6f68634ffd5e113b39f5af8396f6b61428621cbffb5f1c70897d4325957c",
+    "derivation": "Public software identity keeps version/build/commit fields. Complete upstream version stdout remains in the original server record; compiler build paths are omitted. Scientific fields and original process exits are preserved.",
+    "full_workbench_version_stdout_sha256": "0e1ec90b09f88a8aaa363d60cc08bb06cfa02a053629db6d3057c87642649542",
+    "software_version_is_structured_public_projection": true
+  }
+}

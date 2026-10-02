@@ -68,7 +68,7 @@ fnit-setup-fmri-surface-assets \
 | `tpl-MNI152NLin6Asym_res-02_desc-brain_mask.nii.gz` | 28,557 | `mni_brain_mask`：与模板同网格的脑掩膜。 |
 | `tpl-MNI152NLin6Asym_res-02_atlas-HCP_dseg.nii.gz` | 25,762 | 后续 surface 的 91k CIFTI 皮层下分区。 |
 
-`mni_template` 必须通过 **规范 RAS 网格、仿射与体素内容身份** 检查：接受固定 TemplateFlow MNI152NLin6Asym res-02 的完整 T1w，或其固定脑掩膜版本。其他模板即使具有相同 2 mm 网格也会拒绝，避免把别的标准空间标为 MNI152NLin6Asym。模板的原文件 SHA-256 和身份写入 JSON。`mni_brain_mask=None` 时使用 SynthStrip 提取模板脑掩膜；提供掩膜时需与模板同网格。
+`mni_template` 必须通过 **无损轴重排后的 RAS 网格、仿射与体素内容身份** 检查：接受固定 TemplateFlow MNI152NLin6Asym res-02 的完整 T1w，或其固定脑掩膜版本。其他模板即使具有相同 2 mm 网格也会拒绝，避免把别的标准空间标为 MNI152NLin6Asym。模板的原文件 SHA-256 和身份写入 JSON。`mni_brain_mask=None` 时使用 SynthStrip 提取模板脑掩膜；提供掩膜时需与模板同网格。
 
 原始 BIDS 至少包含以下数据；多 run、echo 或 T1w 候选需明确选择。
 
@@ -273,7 +273,7 @@ CLI 默认关闭 STC；`--slice-timing` 显式开启，`--ignore-slice-timing` �
 
 原软件在独立参照环境运行。preproc 与 clean 有不同的参照协议：preproc 对照固定 fMRIPrep 25.2.4 的运动/配准/单次插值，clean 对照原 SynthStrip、FSL 和作者 ICA-AROMA 的同步骤连续链。
 
-### preproc：原 fMRIPrep volume-only
+### preproc：原 fMRIPrep volume-only（历史控制）
 
 以下示例使用已准备好的同源 FreeSurfer subjects，关闭 STC/SDC，保留全部帧，显式关闭 MSM 和 CIFTI。镜像、实际配置与完成记录见[固定参考](../../validation/fmri/fmriprep/reference_image.public.json)和[官方 volume-only 报告](../../validation/fmri/fmriprep/reference_volume_stcoff_no_msm.public.json)。
 
@@ -294,6 +294,8 @@ fmriprep "$original_bids_root" "$reference_derivatives_root" participant \
   --work-dir "$reference_work_root"
 ```
 
+当前本轮的完整原软件参考还开启`--msm --cifti-output 91k`，并显式选择固定官方newMSM，每侧线程数仅写入配置；镜像内完整volume和surface一次运行。实际命令、原始输入SHA及完整产物检查见[本轮端到端报告](../../validation/fmri/e2e_latest/README.md)。另有从原始BOLD组合运动、BBR和FNIRT、单次`applywarp`生成preproc的同步骤原FSL参照，不能与此volume-only历史控制混称。
+
 ### clean：原 SynthStrip/FSL/ICA-AROMA 同步骤
 
 | 阶段 | FNIT 对应步骤 | 对应原命令/操作 |
@@ -302,7 +304,7 @@ fmriprep "$original_bids_root" "$reference_derivatives_root" participant \
 | T1 组织/bias | `TorchFAST(execution="fsl")`，三类 T1，无先验 | `fast -t 1 -n 3 -I 4 -W 15 -O 4 -f 0.02 -l 20 -H 0.1 -R 0.3 -b -B` |
 | 运动 | 直接 `TorchMCFLIRT.run`；8/4/4 mm、原 NCC、Brent、相邻帧初值、Constant 样条 | `mcflirt -in BOLD -reffile SBREF -mats -plots -rmsrel -rmsabs -spline_final` |
 | 强度缩放/高通 | `grand_mean_scale`、`gaussian_highpass` | mask 内 p50 缩放至 10000；`fslmaths -bptf 68.0272108844 -1 -add temporal_mean` |
-| T1→MNI | 本包 FLIRT、T1 preset FNIRT | FLIRT 12 DOF normmi；FNIRT `T1_2_MNI152_2mm.cnf` |
+| T1→MNI | 本包 FLIRT、T1 preset FNIRT | FLIRT 12 DOF corratio；FNIRT `T1_2_MNI152_2mm.cnf` |
 | EPI→T1 BBR | 本包 normmi FLIRT 初值、WM PVE≥0.5、BBR | `flirt -dof 6 -cost bbr -wmseg ... -init ... -schedule bbr.sch` |
 | EPI WM/CSF | 本包 `TorchFLIRT.applyxfm`，逆 BBR、默认降采样预滤波，PVE≥0.8 | `flirt -applyxfm -init T1_to_EPI.mat -interp trilinear`，阈值并交 EPI mask |
 | PICA | 本包 `decompose_spatial_ica`，Laplace/pow3、seed=0 | `melodic --nobet -m MASK -d 0 --dimest=lap --nl=pow3 --eps=0.001 --seed=0 --maxit=500 --Ostats --mmthresh=0.5` |
@@ -310,7 +312,7 @@ fmriprep "$original_bids_root" "$reference_derivatives_root" participant \
 | 联合混杂回归 | 截距、线性/二次趋势、WM/CSF 和 Friston-24，29 列 | 独立 NumPy 去均值/L2 归一化、rank rcond=1e-8 的 SVD 投影 |
 | MNI 最终重采样 | 本包周期边界三次 B 样条 | `applywarp --in=CLEAN --ref=MNI --premat=BBR --warp=FNIRT --interp=spline` |
 
-表中参数对应真实 490 帧、TR 0.735 s、100 秒高通、nonaggr AROMA、WM/CSF/Friston-24 联合回归。完整输入变量、原软件版本、退出码与连续驱动见[原命令和数据协议](../../validation/fmri/matched_native.md#数据协议与原命令)；复测最新候选见[最新 volume 复测](../../validation/fmri/mcflirt_optimization.md#完整参数复测)。联合回归是独立 NumPy SVD 参照，不能将这套 clean 链称为完整原 fMRIPrep 或 UKB FIX。
+表中参数对应真实 490 帧、TR 0.735 s、100 秒高通、nonaggr AROMA、WM/CSF/Friston-24 联合回归。完整输入变量、原软件版本、退出码与连续驱动见[原命令和数据协议](../../validation/fmri/matched_native.md#数据协议与原命令)；复测当前候选见[本轮端到端方法](../../validation/fmri/e2e_latest/README.md)。联合回归是独立 NumPy SVD 参照，不能将这套 clean 链称为完整原 fMRIPrep 或 UKB FIX。
 
 <a id="全流程-benchmark"></a>
 
@@ -318,43 +320,78 @@ fmriprep "$original_bids_root" "$reference_derivatives_root" participant \
 
 ## 最新真实数据精度、耗时与脑图
 
-### 最新完整 volume 实测（`cfb7beee`，FNIRT、STC 关闭）
+### 当前完整运行（`6f67cc0`，2026-10-02）
 
-2026-10-01，在同一例真实 UKB `88×88×64×490` BOLD、SBRef 和匹配存档 T1 上，冻结源码 `cfb7beee202f7e89072faf1a8e69b78d143e451f` 完成公开 API，同时保存 **preproc 与 clean**。T1→MNI 使用 optimized FNIRT，BBR 使用 batched；MCFLIRT 保持 8/4/4 mm、NCC/Brent 和 `(1,1,1)`，复用成熟 FLIRT 的 float32 算子融合 cost 输入准备。clean 为 100 秒高通、nonaggr AROMA、WM/CSF 与 24 项运动回归；STC、SDC/GDC、全脑信号及额外带通关闭。
+在同一例真实 UKB `88×88×64×490` 原始 BOLD、SBRef 和匹配存档 T1 上，冻结源码 `6f67cc06ee8c5108ef3640cbfc289f3e5a742f65`，连续调用公开 volume 和默认 preproc surface 两个入口。T1→MNI 使用 optimized FNIRT，BBR 使用 batched；MCFLIRT 为 8/4/4 mm、NCC/Brent、`(1,1,1)`。clean 为 100 秒高通、nonaggr AROMA、WM/CSF 与 Friston-24 联合回归。STC、SDC/GDC、全脑信号及额外带通关闭。
 
-| 本次完整 490 帧测量 | 实测 |
-|---|---:|
-| **公开 volume API，含最终输出保存** | **707.287 s** |
-| FEAT：运动、采样、掩膜准备、缩放、高通与阶段输出 | 177.787 s |
-| PICA＋ICA-AROMA＋混杂回归 | 163.092 s |
-| clean MNI 重采样 | 50.424 s |
-| T1w＋MNI preproc 单次插值与该阶段输出 | 251.851 s |
-| 验证捕获复制，已从 API 与阶段时间扣除 | 26.658 s |
-| 当前进程 CUDA allocated / reserved，十进制 GB | **6.503 / 10.775** |
-| ICA 成分 / 迭代 / AROMA 噪声成分 | 95 / 43 / 47 |
-
-四份 BOLD 均为有限 float32，保留 490 帧和 TR 0.735 s；T1w preproc 为 `59×75×64×490`，MNI preproc/clean 为 `91×109×91×490`，原生 clean 为 `88×88×64×490`。MNI clean 掩膜外为零。环境为共享 H100 PCIe、8 个 CPU 线程、TF32，未使用半精度，20 GB CUDA 额度；新 derivatives 目录的解剖缓存未命中。API 不含输入哈希与事后比较，内部 `total` 为 694.390 s，最终 BIDS 发布边界与 API 不同。见[最新配置、计时和输出检查](../../validation/fmri/mcflirt_optimization_api.public.json)。
-
-与原 SynthStrip/FSL/作者 ICA-AROMA 同步骤 **clean** 参照比较，按各阶段共同脑区逐体素计算全部 490 帧的时间 Pearson r；RMSE 使用保存的实际强度，不另拟合尺度、偏移或追加平滑。
-
-| 最新与原同步骤 clean 链 | 时间 r 均值 / 中位数 | RMSE |
+| 本次全部 490 帧 | 实际墙钟 | 扣除验证捕获后的估计 |
 |---|---:|---:|
-| 运动校正 | **0.999578 / 0.999834** | 8.211 |
-| 高通后的 pre-ICA | 0.999356 / 0.999770 | 11.745 |
-| 原生最终 clean | 0.941029 / 0.951576 | 78.031 |
-| MNI 最终 clean | **0.939162 / 0.947900** | 62.025 |
+| **raw→volume→91k CIFTI 连续运行，含最终保存** | **915.876 s** | **883.340 s** |
+| volume：同时保存 preproc 与 clean | 649.045 s | **616.561 s** |
+| surface：自行估计双侧 MSM，投影并保存 | 266.814 s | **266.777 s** |
 
-最新 MNI 比较共同域为 224,707 体素，时间 r 排除去均值 RMS≤1e-6 的时序。原连续链观测 **2570.468 s**，包含阶段检查与 MELODIC HTML，仅生成 clean；FNIT 707.287 s 还生成 T1w/MNI preproc。输出范围、计时边界与共享负载不同，不直接据此计算加速比。此参照不是 fMRIPrep preproc 或 UKB FIX release。完整聚合结果见[最新原软件比较](../../validation/fmri/mcflirt_optimization_native.public.json)。
+验证捕获共 32.536 s，用于保留中间结果。右列由同一次观测扣除这部分时间，不是另一轮关闭捕获的实测。输入哈希、事后质量检查和绘图不在调用时间内；源码运行前后逐项相同。已有匹配 recon-all 作为 surface 输入，其此前重建时间不计入本轮。
 
-另与冻结 FNIT `1eb9c417` 比较，**运动校正的全部 242,851,840 个解码值逐值相同**。独立完整运行的 EPI 脑掩膜相差 1 个边界体素，pre-ICA 仅该体素的 490 个值不同；完整 MNI clean 时间 r 均值为 **0.992649**、RMSE **21.194244**，后续 AROMA/clean 并非逐值一致。固定掩膜控制与独立整链分别报告，见[冻结 FNIT 回归](../../validation/fmri/mcflirt_optimization_comparison.public.json)。
+| volume 阶段 | 扣除对应捕获后，秒 |
+|---|---:|
+| 完整解剖准备：T1 脑提取、FAST、仿射、FNIRT、转换 | 47.428 |
+| FEAT：运动、采样、掩膜准备、缩放、高通及阶段保存 | 122.610 |
+| 其中完整 MCFLIRT / 最终运动采样 | 104.058 / 20.185 |
+| BBR 完整调用 | 3.171 |
+| PICA＋ICA-AROMA＋混杂回归 | 130.437 |
+| clean MNI 重采样阶段 | 45.711 |
+| T1w＋MNI preproc 一次插值及阶段读写 | 247.099 |
 
-独立 MCFLIRT 已在 `8a3f227` 加入精确矩阵缓存及 CUDA graph。2026-10-02 的同卡交替测试中，完整 490 帧调用从 **86.37 / 109.46 s** 降至 **52.47 / 63.48 s**，两版均为 45,972 次 cost；未舍入矩阵、参数和全部校正值逐 bit 一致。完整未截断样条值及相同 TR、脑掩膜下的高通结果也与冻结版本一致。该更新由 volume pipeline 直接复用；本节 **707.287 s** 是 `cfb7beee` 的完整流程实测，尚未重测本轮整链。最新运动精度、步骤耗时和共享 GPU 负载见[MCFLIRT 功能页](../mcflirt/README.md)及[配对报告](../../validation/mcflirt/paired_exact_latest.public.json)。
+表中 MCFLIRT 和运动采样属于 FEAT，不能再次相加。单次 preproc 阶段包含源数据准备、读写与输出转换，其内部 T1w/MNI 采样分别为 33.305/94.766 s。完整 surface 包含几何准备约 4.961 s、MSM 准备与估计 112.108 s、双侧投影外层墙钟 119.214 s，以及 CIFTI 组装 24.135 s；左右半球重叠执行，单侧时间不能相加为外层时间。
 
-下图展示最新 FNIT 与原同步骤 clean 参照的 MNI 时间标准差及完整 490 帧时间 r；切面、共同统计域、色阶和 PNG SHA-256 见[新图来源](../../validation/fmri/mcflirt_optimization_figure.public.json)。未追加空间平滑。
+四份 BOLD 均为有限 float32、490 帧、TR 0.735 s：T1w preproc 为 `59×75×64×490`，MNI preproc/clean 为 `91×109×91×490`，原生 clean 为 `88×88×64×490`。MNI clean 掩膜外为零。CIFTI 为 `490×91282`，含双侧皮层和 19 个皮层下结构。ICA 为 95 个成分、43 次迭代、47 个 AROMA 噪声成分。
 
-![cfb7beee 完整490帧 FNIRT clean 与原同步骤软件对照](figures/fmri_mcflirt_optimized.png)
+共享 H100、8 个 CPU 线程、TF32，未使用半精度，20 GB CUDA 额度。完整进程峰值 allocated/reserved 为 **6.503/10.775 GB**；这是全链累计峰值。解剖缓存未命中。匹配 T1 来自该数据的已有存档重建，不能将这次输入表述为已验证的扫描仪原始 T1。
 
-[完整参数复测、版本记录和报告索引](../../validation/fmri/mcflirt_optimization.md)。随后用上述 `cfb7beee` 的完整 preproc 独立重测默认 surface：两次完整 API **443.929 / 441.334 s**，排除 recon-all 和 volume；全 490 帧 CIFTI 对独立原版的时间 r 均值 **0.977911**。见[surface 最新精度、耗时和脑图](surface.md#surface-e2e-latest)。两个入口分别测量，不合成为 raw BIDS→CIFTI 的一次整链耗时。
+[完整运行报告](../../validation/fmri/e2e_latest/fnit_main.public.json)记录配置、源码、资源与输出哈希、精细步骤耗时、显存和质量检查；[本轮端到端及原指令对照](../../validation/fmri/e2e_latest/README.md)集中列出原软件范围、精度、图例和复测方法。surface 的输入、命令和独立比较见 [surface 功能页](surface.md#surface-e2e-latest)。
+
+### 相同步骤原 FSL / FreeSurfer：当前精度
+
+原SynthStrip/FSL/作者AROMA整条clean从相同原始BOLD、SBRef、T1连续计算，实际 **2,666.886 s**，全部产物完整。原preproc单次采样另测 **786.867 s**，采用本轮原流程新估计的运动、BBR和FNIRT；后续原surface再独立估计MSM。它们是各自的实际阶段记录，没有测得可由这些数字相加的连续raw→CIFTI墙钟。
+
+| 当前main对本轮同步骤原影像，全部490帧 | 逐体素时间r均值 / 中位数 | RMSE |
+|---|---:|---:|
+| 运动校正 | 0.999578 / 0.999834 | 8.2109 |
+| 高通后、ICA前 | 0.999356 / 0.999770 | 11.7454 |
+| AROMA nonaggr | 0.925408 / 0.938254 | 96.8245 |
+| 原生最终clean | 0.931266 / 0.945058 | 88.4248 |
+| MNI最终clean | **0.930242 / 0.945156** | 68.7387 |
+| T1w preproc | **0.999438 / 0.999781** | 8.4097 |
+| MNI preproc | **0.991850 / 0.998977** | 133.4783 |
+
+T1w preproc用原独立参考的102,293体素脑域；MNI preproc用固定模板脑域228,483体素；clean MNI用双方共同脑域224,782体素。常数时序不计入r，仍纳入误差，不拟合强度、追加平滑或临时配准。逐阶段影像与对应执行SHA见[正式比较](../../validation/fmri/e2e_latest/native_matched_main.public.json)和[身份检查](../../validation/fmri/e2e_latest/native_matched_identity.public.json)。
+
+EPI/T1脑图和mask像素完全相同；FAST GM PVE空间r为0.999999991。BBR最终RAS矩阵脑区RMS差0.000330 mm，T1仿射0.021918 mm，非线性pull 0.219834 mm。较大的时间相关性下降出现在ICA/AROMA：自动定阶双方95成分，噪声分类FNIT47个、原作者链49个。结果尚未数值等价；preproc不经过该去噪分支，不能用clean相关性代替preproc精度。原命令、全部阶段时间、软件版本、图例与独立完整原流程见[本轮详细报告](../../validation/fmri/e2e_latest/README.md)。
+
+![当前main与相同步骤原FSL的MNI preproc时间标准差与时间r](../../validation/fmri/e2e_latest/figures/preproc_mni_fnit_original.png)
+
+![当前main与相同步骤原FSL和作者AROMA的MNI clean](../../validation/fmri/e2e_latest/figures/clean_mni_fnit_original.png)
+
+### 独立完整原 fMRIPrep：不同方法的整链对照
+
+同一原始BOLD/SBRef/T1及相同初始FreeSurfer重建副本，固定fMRIPrep25.2.4与官方newMSM，整条原指令退出0，全部490帧、T1w/MNI和91k产物完整；实际raw→volume→CIFTI **6,087.099 s**。原流程实际还执行N4、额外FreeSurfer处理、两套ANTs归一化、fsnative/confounds/QC，FNIT本轮915.876 s的处理和输出范围不同。
+
+| 对完整原流程、全部490帧 | 逐体素/灰坐标时间r均值 | RMSE |
+|---|---:|---:|
+| 固定MNI模板脑域preproc，228,483体素 | **0.441356** | **1,337.3998** |
+| 完整91k CIFTI，91,252非恒定灰坐标 | **0.798662** | **502.687** |
+
+两套MNI2mm的存储方向分别为LAS/RAS，比较只做无损索引翻转、严格验证同物理格，不增加插值。原T1wpreproc采样网格`57×73×60`不同于FNIT`59×75×64`，没有额外重采样以凑出直接比较。原私有FreeSurfer副本的white/thickness确有更新，与FNIT仅共享初始几何；原件保持未变。这些结果说明目前不与完整fMRIPrep数值等价。两套原软件本身的直接控制：原FSL/FNIRT preproc对完整fMRIPrep的MNI时间r均值也为0.442061，原两套CIFTI为0.820252；这表明不同原流程选择已带来较大差异，并非全部出自FNIT实现。相同步骤FSL的0.991850和这里0.441356各自保留，原始输出、逐阶段时间、流程参数和来源详见[整链报告](../../validation/fmri/e2e_latest/README.md)。
+
+![完整原fMRIPrep与FNIT的MNI preproc均值、SD和时间r](../../validation/fmri/e2e_latest/figures/preproc_mni_fnit_fmriprep.png)
+
+### 独立的默认clean配置：FNIRT完整volume无损验收
+
+本轮从相同 BIDS T1、SBRef 和全部 490 帧 BOLD 开始，冻结 `7473452`，以全新 derivatives 目录关闭解剖缓存复用，实际运行 T1 FNIRT。比较优化前后的最终 preproc/clean、T1、pull field、科学 header、全部时间帧和 FNIRT 求解轨迹；完整参数、逐阶段耗时、显存和位模式比较见[本轮统一报告](../../validation/registration_lossless_20261002/README.md)。
+
+这项配套验收使用公开 API 的默认 clean 选项，WM/CSF 与额外运动回归关闭；上面的同步骤整链测量开启了这些回归，不能把两次总时间之差归给本轮改动。
+
+三条完整流程的FNIRT数值链验收均通过。volume基线→本轮FNIRT候选 API含保存为539.48→522.01 s，12幅影像、保存矩阵和完整科学FNIRT QC相同。当前main集成版（同时包含上游MCFLIRT精确缓存/CUDA graph）API为462.43 s；其与522.01 s候选的完整科学输出也逐位相同，峰值 allocated 6.503 GB。该整链观测包含其他步骤与共享资源波动，FNIRT单独的固定输入结果见统一报告。
 
 ### preproc、STC 与子函数的独立控制
 
@@ -375,10 +412,12 @@ fmriprep "$original_bids_root" "$reference_derivatives_root" participant \
 | `50eb098` / `ca3df003` | 增加并验证单次插值 preproc、fMRIPrep 接口和 surface 来源路径；完整 SynthMorph preproc＋clean 1225.840 s，固定输入 surface 投影逐值一致。 |
 | `7456251` | 融合运动 cost 输入准备并复用帧/COG；共享物理 GPU 1 的独立 MCFLIRT 159.275 s、45,972 次 cost，对冻结运动与固定掩膜 FEAT 逐值一致。 |
 | `44364a8` | 早期 clean-only 执行快照 API 464.118 s，未生成新增 preproc；保留[原报告](../../validation/fmri/mcflirt_optimization_clean_only_44364a8.public.json)。 |
-| `cfb7beee` | 最新完整 FNIRT preproc＋clean API **707.287 s**，MNI 时间 r 对原同步骤 clean 链 **0.939162**；独立 MCFLIRT **278.454 s** 为另一共享物理 GPU 0 上的观测。 |
+| `cfb7beee` | 上一轮完整 FNIRT preproc＋clean API **707.287 s**，MNI 时间 r 对原同步骤 clean 链 **0.939162**；独立 MCFLIRT **278.454 s** 为另一共享物理 GPU 0 上的观测。 |
+| `6f67cc0` / 2026-10-02 | 当前连续 raw→volume→surface：915.876 s，扣除捕获估计883.340 s；对ac692bb的39项完整科学输出逐bit一致，见[最新记录](../../validation/fmri/e2e_latest/README.md)。 |
+| `ac692bb` / 2026-10-02 | 更新前连续运行832.586 s，扣除捕获估计793.314 s；保留原冻结[运行报告](../../validation/fmri/e2e_latest/fnit_combined.public.json)。 |
 | 2026-10-01 代码与文档整理 | 统一两个入口、CLI 与模块职责说明，修复 FEAT 覆盖短 run 的旧运动矩阵残留；85 项合同及真实 8→2 帧覆盖检查通过。完整计时保留上述冻结源码，见[本次验证](../../validation/fmri/organization_20261001.public.json)。 |
 
-版本记录按各自实际输出和冻结源码解释，不用一次共享 GPU 的时间计算固定加速比。完整报告与复测命令见[最新 volume 验证](../../validation/fmri/mcflirt_optimization.md)。
+版本记录按各自实际输出和冻结源码解释，不用一次共享 GPU 的时间计算固定加速比。完整报告与复测命令见[当前整链验证](../../validation/fmri/e2e_latest/README.md)；[此前 volume 记录](../../validation/fmri/mcflirt_optimization.md)保留各自冻结版本。
 
 | 其他历史测量 | 范围与报告 |
 |---|---|

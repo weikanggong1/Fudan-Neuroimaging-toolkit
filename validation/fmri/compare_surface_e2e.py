@@ -56,7 +56,7 @@ def read_json(path):
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
-def read_manifest(path):
+def read_manifest(path, *, allow_reused_reference=False):
     manifest = read_json(path)
     projection = read_json(manifest["projection_inputs_json"])
     for field in ("native_rois", "initial_spheres", "area_surfaces"):
@@ -66,12 +66,34 @@ def read_manifest(path):
     projection.setdefault("area_surfaces", {
         "native": projection["midthickness"], "fsLR": projection["midthickness_fsLR"],
     })
+    reused = allow_reused_reference and projection.get("sphere_kind") == "provided_registration"
+    if reused and (manifest.get("registration_estimated_here") is not False
+                   or not isinstance(manifest.get("registration_reuse"), dict)
+                   or not manifest["registration_reuse"]):
+        raise ValueError("reused reference registration requires an explicit execution/hash provenance")
     if (projection.get("signal") != "preproc"
-            or projection.get("sphere_kind") != "estimated_msmsulc"
+            or not (projection.get("sphere_kind") == "estimated_msmsulc" or reused)
             or projection.get("geometry_space") != "T1w world RAS"
             or projection.get("expected_frames") != 490):
         raise ValueError("both runs must independently estimate MSMSulc and retain all 490 preproc frames")
     return manifest, projection
+
+
+def reference_geometry_processing(manifest):
+    """Bind private-copy updates to a successfully completed original job."""
+    provenance = manifest.get("geometry_processing_provenance")
+    if provenance is None:
+        return None
+    if (not isinstance(provenance, dict)
+            or provenance.get("original_command_exit_code") != 0
+            or provenance.get("original_validation_complete") is not True
+            or provenance.get("shared_initial_geometry_equal") is not True
+            or provenance.get("shared_original_geometry_unchanged") is not True
+            or provenance.get("private_geometry_processing_in_whole_wall") is not True
+            or not isinstance(provenance.get("original_execution_report_sha256"), str)
+            or len(provenance["original_execution_report_sha256"]) != 64):
+        raise ValueError("original private geometry processing needs a completed raw-run provenance")
+    return provenance
 
 
 def temporal_statistics(x, y):
@@ -182,18 +204,79 @@ def compare_geometry(candidate_path, reference_path, projection, *, scalar_metri
     return result
 
 
-def verify_startpoints(candidate, reference, candidate_inputs, reference_inputs):
+def verify_startpoints(candidate, reference, candidate_inputs, reference_inputs,
+                       *, independent_volume=False, allow_reference_mni_reorientation=False):
+    if allow_reference_mni_reorientation and not independent_volume:
+        raise ValueError("lossless MNI reorientation requires the explicit independent-volume mode")
     result = {}
     for name, field in (("t1w_preproc", "bold_file"), ("mni_preproc", "bold_std")):
         actual = sha256(candidate_inputs[field])
         official = sha256(reference_inputs[field])
-        if (actual != official or candidate["startpoint_sha256"].get(name) != actual
+        if (candidate["startpoint_sha256"].get(name) != actual
                 or reference["startpoint_sha256"].get(name) != official):
+            raise ValueError("completed volume checksum differs from its execution manifest")
+        if actual != official and not independent_volume:
             raise ValueError("candidate and reference must use byte-identical original completed volume inputs")
-        image = nib.load(candidate_inputs[field])
-        if image.ndim != 4 or image.shape[3] != 490:
+        image, reference_image = (nib.load(inputs[field]) for inputs in
+                                  (candidate_inputs, reference_inputs))
+        if any(item.ndim != 4 or item.shape[3] != 490 for item in (image, reference_image)):
             raise ValueError("completed volume startpoint must retain all 490 frames")
-        result[name] = {"sha256": actual, "exact": True, "shape": list(image.shape)}
+        same_grid = image.shape == reference_image.shape and np.allclose(
+            image.affine, reference_image.affine, rtol=0, atol=1e-4)
+        reorientation = None
+        if not same_grid and name == "mni_preproc" and allow_reference_mni_reorientation:
+            orientation = nib.orientations.ornt_transform(
+                nib.orientations.io_orientation(reference_image.affine),
+                nib.orientations.io_orientation(image.affine))
+            index_map = nib.orientations.inv_ornt_aff(orientation, reference_image.shape[:3])
+            transformed_shape = tuple(reference_image.shape[int(axis)]
+                                      for axis in np.argsort(orientation[:, 0]))
+            if (transformed_shape == image.shape[:3]
+                    and np.allclose(reference_image.affine @ index_map, image.affine, rtol=0, atol=1e-4)):
+                reorientation = {
+                    "reference_index_from_candidate_index": index_map.tolist(),
+                    "reference_axis_codes": list(nib.aff2axcodes(reference_image.affine)),
+                    "candidate_axis_codes": list(nib.aff2axcodes(image.affine)),
+                    "physical_voxel_lattice_equal": True,
+                    "interpolation_performed": False,
+                    "definition": "Explicit signed-axis permutation/flip inspection only; original input files and hashes are preserved. Surface and CIFTI values are compared directly on their strict output axes."}
+        if not same_grid and reorientation is None and not (independent_volume and name == "t1w_preproc"):
+            raise ValueError("completed volume startpoints must share the same spatial grid")
+        time_metadata = {}
+        for label, item, inputs in (("candidate", image, candidate_inputs),
+                                    ("reference", reference_image, reference_inputs)):
+            unit = item.header.get_xyzt_units()[1]
+            scale = {"sec": 1., "msec": .001, "usec": .000001}.get(
+                unit)
+            authority = None
+            if scale is None and label == "reference" and independent_volume:
+                provenance = reference_geometry_processing(reference)
+                recorded = reference.get("original_intermediate_time_authority")
+                if (unit == "unknown" and provenance is not None and isinstance(recorded, dict)
+                        and recorded.get("whole_execution_report_sha256")
+                        == provenance["original_execution_report_sha256"]
+                        and recorded.get("raw_bids_repetition_time_seconds") == inputs["repetition_time"]
+                        and recorded.get("actual_intermediate_time_units", {}).get(field) == unit):
+                    axis = nib.load(reference["dtseries"]).header.get_axis(0)
+                    if (axis.size == 490 and axis.start == 0 and axis.unit == "SECOND"
+                            and axis.step == inputs["repetition_time"]):
+                        scale, authority = 1., "Original raw-BIDS RepetitionTime and actual CIFTI SeriesAxis; intermediate header has unknown time units and is preserved."
+            if scale is None or not np.isclose(float(item.header.get_zooms()[3]) * scale,
+                                               inputs["repetition_time"], rtol=1e-6, atol=1e-7):
+                raise ValueError("completed volume TR differs from its execution manifest")
+            time_metadata[label] = {"stored_time_unit": unit,
+                                    "stored_fourth_zoom": float(item.header.get_zooms()[3]),
+                                    "seconds_authority": authority or "NIfTI time unit and fourth zoom"}
+        result[name] = {"candidate_sha256": actual, "reference_sha256": official,
+                        "sha256": actual if actual == official else None,
+                        "exact": actual == official, "shape": list(image.shape),
+                        "reference_shape": list(reference_image.shape),
+                        "time_metadata": time_metadata,
+                        "lossless_grid_reorientation": reorientation,
+                        "spatial_grid_equal": bool(same_grid),
+                        "different_native_t1w_grid_allowed": bool(independent_volume and name == "t1w_preproc"),
+                        "maximum_affine_difference_mm": float(np.max(np.abs(
+                            image.affine - reference_image.affine)))}
     return result
 
 
@@ -229,6 +312,61 @@ def configuration_comparison(candidate, reference, config_module):
             "reference_effective_config_sha256": oracle["effective_sha256"],
             "reference_numthreads": oracle["numthreads"],
             "threads_are_execution_setting": True}
+
+
+def sphere_orientation_qc(registered_path, registration_input_path, native_roi_path):
+    """Report saved-sphere orientation, area and cortical ROI involvement.
+
+    Ratios use the same signed triple product as the solver QC. Triangle area
+    is the unsigned Euclidean chord area; it is not a Jacobian on the cortex.
+    No coordinates, vertex IDs or individual face IDs enter the public report.
+    """
+    def mesh(path):
+        image = nib.load(str(path))
+        points = np.asarray(image.get_arrays_from_intent(1008)[0].data, np.float64)
+        faces = np.asarray(image.get_arrays_from_intent(1009)[0].data, np.int64)
+        return points, faces
+    points, faces = mesh(registered_path)
+    before, original_faces = mesh(registration_input_path)
+    if points.shape != before.shape or not np.array_equal(faces, original_faces):
+        raise ValueError("sphere orientation QC requires identical native topology")
+    roi_image = nib.load(str(native_roi_path))
+    roi = np.asarray(roi_image.darrays[0].data).reshape(-1) > 0
+    if roi.shape != (points.shape[0],) or not np.isfinite(points).all():
+        raise ValueError("sphere ROI/coordinates do not match the native mesh")
+    def signed_and_area(vertices):
+        triangles = vertices[faces]
+        cross = np.cross(triangles[:, 1] - triangles[:, 0], triangles[:, 2] - triangles[:, 0])
+        return np.einsum("ij,ij->i", cross, triangles[:, 0]), .5 * np.linalg.norm(cross, axis=1)
+    initial_sign, initial_area = signed_and_area(before)
+    sign, area = signed_and_area(points)
+    usable = initial_sign != 0
+    orientation = np.divide(sign, initial_sign, out=np.full_like(sign, np.nan), where=usable)
+    folded = usable & (orientation <= 0)
+    roi_corners = roi[faces].sum(axis=1)
+    area_usable = initial_area > 0
+    area_ratio = area[area_usable] / initial_area[area_usable]
+    return {
+        "definition": "Saved GIFTI float32 coordinates decoded to float64; signed triple-product "
+                      "ratio relative to that run's actual rotated native input sphere supplied to MSM. "
+                      "Area is unsigned Euclidean chord-triangle area in mm2.",
+        "faces": int(faces.shape[0]), "native_vertices": int(points.shape[0]),
+        "native_roi_vertices": int(roi.sum()),
+        "degenerate_registration_input_faces": int((~usable).sum()),
+        "folded_or_zero_orientation_faces": int(folded.sum()),
+        "minimum_orientation_ratio": float(orientation[usable].min()) if usable.any() else None,
+        "folded_faces_all_three_vertices_inside_native_roi": int(np.count_nonzero(folded & (roi_corners == 3))),
+        "folded_faces_partly_inside_native_roi": int(np.count_nonzero(folded & (roi_corners > 0) & (roi_corners < 3))),
+        "folded_faces_outside_native_roi": int(np.count_nonzero(folded & (roi_corners == 0))),
+        "roi_vertices_incident_to_folded_faces": int(roi[np.unique(faces[folded])].sum()),
+        "zero_output_triangle_area_faces": int(np.count_nonzero(area == 0)),
+        "output_triangle_area_mm2": {"minimum": float(area.min()), "median": float(np.median(area)),
+                                     "maximum": float(area.max()), "total": float(area.sum())},
+        "output_to_registration_input_chord_area_ratio": {
+            "minimum": float(area_ratio.min()), "p01": float(np.percentile(area_ratio, 1)),
+            "median": float(np.median(area_ratio)), "p99": float(np.percentile(area_ratio, 99)),
+            "maximum": float(area_ratio.max())},
+    }
 
 
 def draw_figure(candidate, reference, reference_inputs, path):
@@ -282,16 +420,41 @@ def main():
     parser.add_argument("--reference-manifest", type=Path, required=True)
     parser.add_argument("--report-out", type=Path, required=True)
     parser.add_argument("--figure-out", type=Path)
+    parser.add_argument("--independent-volume-startpoints", action="store_true",
+                        help="Compare independently preprocessed branches on a common MNI grid; "
+                             "native T1w sampling grids may differ and are recorded. "
+                             "raw-input provenance and continuous timing must be supplied separately")
+    parser.add_argument("--reused-reference-registration", action="store_true",
+                        help="Explicit reference-only control: independent original preparation and "
+                             "projection with supplied official spheres and recorded reuse provenance")
+    parser.add_argument("--allow-reference-mni-reorientation", action="store_true",
+                        help="For independent original branches, explicitly verify a lossless signed-axis "
+                             "permutation/flip of the same MNI voxel lattice; never interpolate or edit files")
     args = parser.parse_args()
     projection, msm, config_module = support_modules()
     candidate, candidate_inputs = read_manifest(args.candidate_manifest)
-    reference, reference_inputs = read_manifest(args.reference_manifest)
+    reference, reference_inputs = read_manifest(
+        args.reference_manifest, allow_reused_reference=args.reused_reference_registration)
+    reference_geometry = reference_geometry_processing(reference)
     tr = float(candidate_inputs["repetition_time"])
     if not np.isfinite(tr) or tr <= 0 or tr != float(reference_inputs["repetition_time"]):
         raise ValueError("paired runs must preserve the same positive original TR")
     report = {
         "schema_version": 1, "validation_complete": False,
-        "scope": "Independent surface end-to-end chains from identical completed T1w/MNI preproc BOLD and existing recon-all. Includes independent geometry/ROI preparation, fresh full-schedule MSMSulc, registered area surfaces, cortical projection, subcortical resampling and CIFTI assembly; excludes recon-all and all volume processing.",
+        "scope": (
+            "Surface outputs after independently executed volume branches on the same MNI grid; "
+            "native T1w sampling grids may differ and are recorded separately. "
+            "Includes independent geometry/ROI preparation, fresh full-schedule MSMSulc, registered "
+            "area surfaces, cortical projection, subcortical resampling and CIFTI assembly. This "
+            "comparison alone does not establish matching raw-input provenance or continuous "
+            "raw-to-CIFTI timing; those are bound by the separate end-to-end execution reports. "
+            "Existing recon-all is shared and its reconstruction is excluded."
+            if args.independent_volume_startpoints else
+            "Independent surface end-to-end chains from identical completed T1w/MNI preproc BOLD and "
+            "existing recon-all. Includes independent geometry/ROI preparation, fresh full-schedule "
+            "MSMSulc, registered area surfaces, cortical projection, subcortical resampling and CIFTI "
+            "assembly; excludes recon-all and all volume processing."
+        ),
         "comparison_script_sha256": sha256(__file__), "frames": 490, "tr_seconds": tr,
         "comparison_support_sha256": {
             "run_projection_candidate.py": sha256(projection.__file__),
@@ -299,11 +462,38 @@ def main():
             "msm_config.py": sha256(config_module.__file__),
         },
         "candidate_source_revision": candidate.get("source_revision"),
-        "startpoints": verify_startpoints(candidate, reference, candidate_inputs, reference_inputs),
+        "independent_volume_startpoints": args.independent_volume_startpoints,
+        "reference_mni_reorientation_permitted": args.allow_reference_mni_reorientation,
+        "reference_registration_reused": args.reused_reference_registration,
+        "reference_registration_reuse_provenance": reference.get("registration_reuse")
+            if args.reused_reference_registration else None,
+        "reference_geometry_processing_provenance": reference_geometry,
+        "startpoints": verify_startpoints(candidate, reference, candidate_inputs, reference_inputs,
+                                           independent_volume=args.independent_volume_startpoints,
+                                           allow_reference_mni_reorientation=args.allow_reference_mni_reorientation),
         "registration_configuration": configuration_comparison(candidate, reference, config_module),
         "temporal_correlation_definition": "Pearson r across all 490 frames separately for each grayordinate; summarize finite nonconstant pairs. Exact identical varying series are set to r=1; constant-series r is undefined and excluded.",
         "geometry_preparation": {}, "registered_spheres": {}, "outputs": {},
     }
+    if reference_geometry is not None:
+        report["scope"] += (
+            " The original complete workflow processed its own private copy of the shared initial "
+            "reconstruction; that work is included in the separately recorded continuous original "
+            "wall. Shared source files remained unchanged. Final original and candidate geometry "
+            "need not be identical; actual differences are reported here."
+        )
+        report["scope"] = report["scope"].replace(
+            "Existing recon-all is shared and its reconstruction is excluded.",
+            "The earlier completed recon-all reconstruction is a shared initial input; the original "
+            "workflow's additional private-copy processing is included in its whole-job wall.")
+    if args.reused_reference_registration:
+        report["scope"] = (
+            "Candidate complete surface output compared with independent original geometry/ROI, "
+            "area-surface preparation and full-frame projection/CIFTI using explicitly reused "
+            "official registered spheres. Original MSM estimation is outside this reference "
+            "projection run and its provenance is recorded. Independent volume branches, when "
+            "enabled, require separately bound raw-input and continuous end-to-end reports."
+        )
     geometry_fields = ("white", "pial", "midthickness", "native_rois", "initial_spheres")
     for field in geometry_fields:
         report["geometry_preparation"][field] = {
@@ -326,6 +516,14 @@ def main():
                                     reference_inputs["initial_spheres"][index])
         result["decoded_coordinates"] = compare_geometry(candidate["registered_spheres"][index],
                                                          reference["registered_spheres"][index], projection)
+        result["legacy_fold_count_baseline"] = (
+            "FS-to-fsLR initial sphere; its local orientations may differ from the actual rotated "
+            "MSM input. Use orientation_and_area_qc for solver-consistent QC.")
+        result["orientation_and_area_qc"] = {
+            label: sphere_orientation_qc(manifest["registered_spheres"][index],
+                                         msm_inputs[hemi]["rotated_sphere"], inputs["native_rois"][index])
+            for label, manifest, inputs, msm_inputs in (("candidate", candidate, candidate_inputs, candidate_msm),
+                                                        ("reference", reference, reference_inputs, reference_msm))}
         report["registered_spheres"][hemi] = result
     for hemi, field in (("L", "left"), ("R", "right")):
         for manifest in (candidate, reference):
