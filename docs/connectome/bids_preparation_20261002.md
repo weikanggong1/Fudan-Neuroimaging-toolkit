@@ -18,7 +18,7 @@ prepared_inputs = prepare_bids_connectome(
 ```
 原始 DWI 为四维 NIfTI，bval 每帧一个值，bvec 为 3×N；JSON 必须提供相位编码与 readout。T1w 为三维 NIfTI。`subject` 必填；`session/run/acquisition/direction` 默认 None，用于消除选择歧义。`t1` 可显式指定 T1；`freesurfer_subject_dir` 是完整外部 FreeSurfer subject，与 `t1` 互斥。`corrected_dwi` 和 `rotated_bvecs` 必须同时提供。`device` 默认 cuda:0，`overwrite` 默认 False，`eddy_gp_seed` 默认 None，显式种子取 1…2³²−1。
 返回 `BIDSConnectomeInputs`：`dwi` 是校正 NIfTI 路径，`bvals` 是原始选定 bval，`bvecs` 是旋转后梯度路径，`freesurfer_subject_dir` 是解剖目录，`stages` 记录 completed/skipped/supplied/no_reverse_pe。
-自动 recon 缓存按 T1 路径、大小与修改时间匹配。已存在 orig 而指纹不匹配时明确报错，使用新输出目录或显式传入外部解剖；不会删除旧产物。
+自动 recon 缓存按 T1 路径、大小、修改时间与内容 SHA-256 匹配。已存在 orig 而指纹不匹配时明确报错，使用新输出目录或显式传入外部解剖；不会删除旧产物。
 
 ## 3. 命令行调用
 此准备函数没有独立 CLI；pipeline 命令入口由总任务统一接入固定 GP seed。Python 接口可直接调用。

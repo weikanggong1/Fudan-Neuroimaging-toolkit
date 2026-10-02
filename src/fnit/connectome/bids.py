@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import json
+import hashlib
 from numbers import Integral
 from pathlib import Path
 import shutil
@@ -130,7 +131,8 @@ def prepare_bids_connectome(
             topup_state = topup_dir / "state.json"
             topup_key = _fingerprint((raw / "AP.nii.gz", raw / "AP.bval",
                                       raw / "AP.json", raw / "PA.nii.gz",
-                                      raw / "PA.bval", raw / "PA.json"), {})
+                                      raw / "PA.bval", raw / "PA.json"),
+                                     {"pair_geometry": "fslmerge-first"})
             topup_outputs = (topup_dir / "fieldmap_out_fieldcoef.nii.gz",
                              topup_dir / "fieldmap_iout.nii.gz",
                              topup_dir / "acqparams.txt")
@@ -138,7 +140,8 @@ def prepare_bids_connectome(
                 stages["topup"] = "skipped"
             else:
                 _, topup_prepared = run_ukb_topup(
-                    raw, topup_dir, device=device, overwrite=True)
+                    raw, topup_dir, device=device, overwrite=True,
+                    pair_geometry="fslmerge-first")
                 _record(topup_state, topup_key)
                 stages["topup"] = "completed"
         else:
@@ -184,7 +187,10 @@ def prepare_bids_connectome(
         subjects_dir = root / "freesurfer"
         fs_subject = subjects_dir / name
         recon_state = fs_subject / "scripts/fnit_input_state.json"
-        recon_key = _fingerprint((selected.t1w,), {"command": "recon-all -all"})
+        recon_key = _fingerprint((selected.t1w,), {
+            "command": "recon-all -all",
+            "t1_sha256": hashlib.sha256(selected.t1w.read_bytes()).hexdigest(),
+        })
         recon_outputs = (fs_subject / "scripts/recon-all.done",)
         has_orig = (fs_subject / "mri/orig/001.mgz").is_file()
         if has_orig and (not recon_state.is_file() or
@@ -200,11 +206,16 @@ def prepare_bids_connectome(
             command = [executable, "-sd", str(subjects_dir), "-s", name]
             if not (fs_subject / "mri/orig/001.mgz").is_file():
                 command += ["-i", str(selected.t1w)]
+            recon_state.parent.mkdir(parents=True, exist_ok=True)
+            _record(recon_state, recon_key)
+            _record(fs_subject / "scripts/fnit_recon_program.json", {
+                "executable": executable,
+                "sha256": (hashlib.sha256(Path(executable).read_bytes()).hexdigest()
+                           if Path(executable).is_file() else None),
+            })
             subprocess.run([*command, "-all"], check=True)
             if not _recon_complete(fs_subject):
                 raise RuntimeError(f"recon-all did not produce complete anatomy: {fs_subject}")
-            recon_state.parent.mkdir(parents=True, exist_ok=True)
-            _record(recon_state, recon_key)
             stages["recon_all"] = "completed"
     FreeSurferSubject(fs_subject)
     return BIDSConnectomeInputs(dwi, selected.bval, bvecs, fs_subject, stages)

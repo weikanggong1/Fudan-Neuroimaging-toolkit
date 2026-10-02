@@ -201,3 +201,29 @@ def test_topup_selected_b0_is_reused_by_eddy(tmp_path, monkeypatch):
     monkeypatch.setattr(module, "TorchEDDY", Eddy)
     module.prepare_bids_connectome(image.parents[2], tmp_path / 'out', subject='01', freesurfer_subject_dir=subject)
     assert refs == [0]
+
+
+def test_recon_partial_failure_resumes_only_same_t1(tmp_path, monkeypatch):
+    import fnit.connectome.bids as module
+    image, _ = _inputs(tmp_path / 'bids')
+    anatomy=image.parents[1]/'anat'; anatomy.mkdir()
+    t1=anatomy/'sub-01_T1w.nii.gz'
+    nib.save(nib.Nifti1Image(np.ones((6,6,6),np.float32),np.eye(4)),t1)
+    rotated=tmp_path/'rotated.bvec';rotated.write_text('0 1\n0 0\n0 0\n')
+    commands=[]
+    monkeypatch.setattr(module.shutil,'which',lambda cmd:'/fake/recon-all')
+    subject=tmp_path/'out/freesurfer/sub-01'
+    def run(command, *, check):
+        commands.append(command)
+        orig=subject/'mri/orig/001.mgz';orig.parent.mkdir(parents=True,exist_ok=True);orig.write_bytes(b'orig')
+        if len(commands)==1:raise module.subprocess.CalledProcessError(1,command)
+        _subject(subject);(subject/'scripts/recon-all.done').write_text('done')
+    monkeypatch.setattr(module.subprocess,'run',run)
+    options=dict(subject='01',corrected_dwi=image,rotated_bvecs=rotated)
+    with pytest.raises(module.subprocess.CalledProcessError):
+        prepare_bids_connectome(image.parents[2],tmp_path/'out',**options)
+    state=json.loads((subject/'scripts/fnit_input_state.json').read_text())
+    assert len(state['options']['t1_sha256'])==64
+    result=prepare_bids_connectome(image.parents[2],tmp_path/'out',**options)
+    assert result.stages['recon_all']=='completed'
+    assert '-i' in commands[0] and '-i' not in commands[1]

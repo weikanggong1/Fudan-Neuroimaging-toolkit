@@ -117,8 +117,11 @@ def _metadata(raw_dir, stem, shape):
     return _PE_VECTORS[direction], readout
 
 
-def prepare_ukb_topup(raw_dir, output_dir, *, device=None, overwrite=False):
+def prepare_ukb_topup(raw_dir, output_dir, *, device=None, overwrite=False,
+                      pair_geometry="strict"):
     """Create ``B0_AP_PA.nii.gz`` and ``acqparams.txt`` from UKB raw dMRI."""
+    if pair_geometry not in ("strict", "fslmerge-first"):
+        raise ValueError("pair_geometry must be strict or fslmerge-first")
     raw_dir = Path(raw_dir)
     output_dir = Path(output_dir)
     required = [raw_dir / f"{stem}.{suffix}" for stem in ("AP", "PA")
@@ -130,7 +133,10 @@ def prepare_ukb_topup(raw_dir, output_dir, *, device=None, overwrite=False):
     pa_image, pa_candidates, pa_indices = _load_b0_candidates(raw_dir, "PA")
     if ap_candidates.shape[:3] != pa_candidates.shape[:3]:
         raise ValueError("AP and PA images must have the same matrix size")
-    if not np.allclose(ap_image.affine, pa_image.affine, atol=5e-4, rtol=0):
+    if not np.allclose(ap_image.header.get_zooms()[:3],
+                       pa_image.header.get_zooms()[:3], atol=5e-4, rtol=0):
+        raise ValueError("AP and PA images must have the same voxel spacing")
+    if pair_geometry == "strict" and not np.allclose(ap_image.affine, pa_image.affine, atol=5e-4, rtol=0):
         raise ValueError("AP and PA images must use the same voxel-to-world geometry")
     if device is None:
         device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -168,6 +174,17 @@ def prepare_ukb_topup(raw_dir, output_dir, *, device=None, overwrite=False):
     header.set_data_dtype(np.float32)
     nib.save(nib.Nifti1Image(selected.astype(np.float32), ap_image.affine, header), image_path)
     np.savetxt(acquisition_path, acquisition, fmt=("%g", "%g", "%g", "%.7g"))
+    geometry_report = {
+        "policy": pair_geometry,
+        "resampled": False,
+        "AP": {"affine": ap_image.affine.tolist(),
+               "header_binary_hex": ap_image.header.binaryblock.hex()},
+        "PA": {"affine": pa_image.affine.tolist(),
+               "header_binary_hex": pa_image.header.binaryblock.hex()},
+        "packed_header_source": "AP",
+    }
+    (output_dir / "pair_geometry.json").write_text(
+        json.dumps(geometry_report, indent=2) + "\n")
     return {
         "imain": image_path,
         "datain": acquisition_path,
@@ -184,11 +201,13 @@ def run_ukb_topup(
     *,
     device=None,
     overwrite=False,
+    pair_geometry="strict",
 ):
     """Prepare and run one UKB-format AP/PA acquisition."""
     output_dir = Path(output_dir)
     prepared = prepare_ukb_topup(
-        raw_dir, output_dir, device=device, overwrite=overwrite
+        raw_dir, output_dir, device=device, overwrite=overwrite,
+        pair_geometry=pair_geometry,
     )
     result = TorchTOPUP(device=device).run(
         prepared["imain"],
