@@ -636,7 +636,9 @@ def source_provenance(torch):
                     **{name: os.environ.get(name) for name in (
                         "OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS", "NUMBA_NUM_THREADS")}},
         "cuda_environment": {name: os.environ.get(name) for name in
-                             ("CUDA_VISIBLE_DEVICES", "CUDA_DEVICE_ORDER")},
+                             ("CUDA_VISIBLE_DEVICES", "CUDA_DEVICE_ORDER",
+                              "PYTORCH_CUDA_ALLOC_CONF", "PYTORCH_ALLOC_CONF",
+                              "PYTORCH_NO_CUDA_MEMORY_CACHING")},
         "precision_at_exit": {"matmul_tf32": torch.backends.cuda.matmul.allow_tf32,
                               "cudnn_tf32": torch.backends.cudnn.allow_tf32,
                               "default_dtype": str(torch.get_default_dtype()),
@@ -835,17 +837,28 @@ def run(options):
         except Exception as error:
             report["output_inspection_error"] = f"{type(error).__name__}: {error}"
     report["hash_timing_scope"] = "source/input/output/checkpoint hashing and output inspections happen after the recorded runtime; the external cohort manifest must freeze source inputs before execution"
-    allocated = report.get("cuda_allocator", {}).get("allocated_bytes")
-    sampled = report["gpu_process_memory"].get("peak_process_tree_bytes")
-    report["memory_budget"] = {
-        "limit_bytes": 20_000_000_000, "criterion": "strictly_less",
-        "allocator_observed_below_limit": allocated < 20_000_000_000 if allocated is not None else None,
-        "process_tree_sampled_below_limit": sampled < 20_000_000_000 if sampled is not None else None,
+    report["memory_budget"] = memory_budget_summary(
+        report.get("cuda_allocator", {}), report["gpu_process_memory"])
+    atomic_json(options.report, report)
+    return exit_code
+
+
+def memory_budget_summary(allocator, process_memory):
+    """Judge live allocations, cached reservations and sampled driver memory."""
+    limit = 20_000_000_000
+    def below(value):
+        return value < limit if value is not None else None
+    flags = [below(allocator.get(key)) for key in ("allocated_bytes", "reserved_bytes")]
+    combined = False if False in flags else (True if all(v is True for v in flags) else None)
+    return {
+        "limit_bytes": limit, "criterion": "strictly_less",
+        "allocated_observed_below_limit": flags[0],
+        "reserved_observed_below_limit": flags[1],
+        "allocator_observed_below_limit": combined,
+        "process_tree_sampled_below_limit": below(process_memory.get("peak_process_tree_bytes")),
         "continuous_process_tree_bound_verified": False,
         "note": "allocator and sampled driver peaks have distinct scopes; missing samples or gaps do not prove a strict continuous whole-pipeline memory bound",
     }
-    atomic_json(options.report, report)
-    return exit_code
 
 
 def main(argv=None):

@@ -19,6 +19,23 @@ def tool():
     return module
 
 
+@pytest.mark.parametrize("allocated,reserved,expected", (
+    (1_000_000_000, 23_000_000_000, False),
+    (1_000_000_000, 20_000_000_000, False),
+    (1_000_000_000, 19_999_999_999, True),
+    (None, 23_000_000_000, False),
+    (1_000_000_000, None, None),
+    (None, None, None),
+))
+def test_memory_budget_counts_reserved_peak_and_missing_evidence(allocated, reserved, expected):
+    summary = tool().memory_budget_summary(
+        {"allocated_bytes": allocated, "reserved_bytes": reserved},
+        {"peak_process_tree_bytes": 20_000_000_000})
+    assert summary["allocator_observed_below_limit"] is expected
+    assert summary["process_tree_sampled_below_limit"] is False
+    assert summary["continuous_process_tree_bound_verified"] is False
+
+
 def options(module, tmp_path, mode="wall", device="cpu", extra=()):
     return module.parse_options([
         "--mode", mode, "--report", str(tmp_path / "report.json"), *extra,
