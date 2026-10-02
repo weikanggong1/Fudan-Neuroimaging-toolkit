@@ -15,6 +15,101 @@ SPEC.loader.exec_module(MODULE)
 
 
 class OfficialAnatomyContracts(unittest.TestCase):
+    def test_unknown_zero_adapter_preserves_positive_labels_and_source(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source.annot"
+            labels = np.array([-1, 0, 1, 2, 1], np.int32)
+            ctab = np.array([[25, 5, 25, 0], [2, 10, 40, 0], [40, 2, 10, 0]], np.int32)
+            names = [b"unknown", b"ROI-A", b"ROI-B"]
+            nib.freesurfer.write_annot(source, labels, ctab, names)
+            before = MODULE.file_record(source)
+            original = nib.freesurfer.read_annot(source)
+            target, report = MODULE.annotation_background_input(source, root / "private.annot")
+            actual = nib.freesurfer.read_annot(target)
+            np.testing.assert_array_equal(actual[0], [-1, -1, 1, 2, 1])
+            np.testing.assert_array_equal(actual[1], original[1])
+            self.assertEqual(actual[2], original[2])
+            self.assertEqual(report["unknown_zero_vertices"], 1)
+            self.assertTrue(report["positive_indices_equal"])
+            self.assertTrue(report["background_vertex_mask_equal"])
+            self.assertEqual(MODULE.file_record(source), before)
+            with self.assertRaisesRegex(ValueError, "new private"):
+                MODULE.annotation_background_input(source, target)
+
+    def test_zero_that_is_a_region_cannot_be_normalized(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source.annot"
+            nib.freesurfer.write_annot(source, np.array([0, 1]),
+                np.array([[25, 5, 25, 0], [2, 10, 40, 0]]), [b"actual-ROI", b"other-ROI"])
+            with self.assertRaisesRegex(ValueError, "not the declared unknown"):
+                MODULE.annotation_background_input(source, root / "private.annot")
+            self.assertFalse((root / "private.annot").exists())
+
+    def test_annotation_without_unknown_zero_is_used_byte_for_byte(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source.annot"
+            nib.freesurfer.write_annot(source, np.array([-1, 1]),
+                np.array([[25, 5, 25, 0], [2, 10, 40, 0]]), [b"unknown", b"ROI"])
+            supplied, report = MODULE.annotation_background_input(source, root / "private.annot")
+            self.assertEqual(supplied, source)
+            self.assertFalse(report["applied"])
+            self.assertFalse((root / "private.annot").exists())
+
+    def test_atlas_recovery_checks_actual_prefix_and_preserved_failure(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            prior = root / "prior"
+            prior.mkdir()
+            nodes = root / "nodes.tsv"
+            MODULE.write_nodes(nodes, [dict(index=1, original_label=1001, hemisphere="L", name="roi")])
+            config = {"case_id": "sub-01", "python": str(root / "python"), "threads": 8,
+                "freesurfer_home": str(root / "official/fs"), "mrtrix_bin": str(root / "official/mr/bin"),
+                "subject_dir": str(root / "fresh/sub-01"), "upstream_root": "/source",
+                "mni_template": "/mni.nii.gz", "canonical_nodes84": str(nodes)}
+            commands = []
+            for stage, argv in MODULE.prepare_prefix_commands(config, prior):
+                program = Path(argv[0])
+                program.parent.mkdir(parents=True, exist_ok=True)
+                program.write_bytes(b"actual executable")
+                commands.append({"stage": stage, "argv": list(map(str, argv)), "returncode": 0,
+                    "program": MODULE.file_record(program), "seconds_inclusive": 1.0})
+            native = prior / "original_wrapper/data/temporary/subjects/public_0/atlases"
+            failed_log = prior / "failed.log"
+            failed_log.write_text("Traceback\nKeyError: 0\n")
+            commands.append({"stage": "aparc_convert", "returncode": 1, "seconds_inclusive": 0.25,
+                "log": str(failed_log), "program": MODULE.file_record(config["python"]),
+                "argv": [config["python"], str(prior / "original_wrapper/scripts/python/convert_native_annot.py"),
+                         str(Path(config["subject_dir"]) / "label/lh.aparc.annot"),
+                         str(Path(config["subject_dir"]) / "label/rh.aparc.annot"),
+                         str(native / "lh.native.aparc.annot"), str(native / "rh.native.aparc.annot")]})
+            outputs = {}
+            for index, name in enumerate(("tian_s1_t1", "tian_s4_t1", "mni_to_t1", "five_tissue_t1", "gmwmi_t1", "atlas:fs-aparc")):
+                path = prior / f"image{index}"
+                path.write_bytes(b"bound official image")
+                outputs[name] = MODULE.file_record(path)
+            (prior / "atlases/fs-aparc").mkdir(parents=True)
+            (prior / "atlases/fs-aparc/nodes.tsv").write_bytes(nodes.read_bytes())
+            report = prior / "reference_anatomy.json"
+            body = {"case_id": "sub-01", "mode": "prepare", "state": "failed", "execution_completed": False,
+                "preflight": {"raw": "exact"}, "source_commit": "frozen", "script_sha256": "oldscript",
+                "commands": commands, "outputs": outputs}
+            report.write_text(json.dumps(body))
+            result = MODULE.verified_atlas_recovery(MODULE.file_record(report), config, {"raw": "exact"})
+            self.assertEqual(result["original_successful_command_seconds"], 9)
+            self.assertEqual(result["original_failed_command_seconds"], 0.25)
+            with self.assertRaisesRegex(ValueError, "same-input"):
+                MODULE.verified_atlas_recovery(MODULE.file_record(report), config, {"raw": "different"})
+            failed_log.write_text("another original failure")
+            with self.assertRaisesRegex(ValueError, "unknown index 0"):
+                MODULE.verified_atlas_recovery(MODULE.file_record(report), config, {"raw": "exact"})
+            failed_log.write_text("KeyError: 0")
+            Path(outputs["five_tissue_t1"]["path"]).write_bytes(b"changed image")
+            with self.assertRaisesRegex(ValueError, "changed"):
+                MODULE.verified_atlas_recovery(MODULE.file_record(report), config, {"raw": "exact"})
+
     def test_recovery_binds_old_successful_commands_and_detects_output_change(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

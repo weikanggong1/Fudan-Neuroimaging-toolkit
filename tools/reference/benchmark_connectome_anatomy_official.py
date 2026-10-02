@@ -2,6 +2,7 @@
 
 prepare: 本轮 fresh recon-all → 官方 5TT/GMWMI 与八套 T1 atlas。
 recover-prepare: 只读验证旧失败报告中已成功的官方 SynthMorph 三命令，续未运行步骤。
+recover-atlas: 绑定 unknown=0 导致的原脚本失败，复用成功前缀并续 atlas。
 complete: 已验证 prepare + 官方自产 DWI contract → FLIRT 与 DWI atlas。
 仅 CPU；官方 GPU SynthMorph 必须另行实现受授权的设备/锁/显存监测。
 """
@@ -36,6 +37,12 @@ WEIGHTS = {
     "synthmorph.deform.3.h5": (3508630424, "95b367cd30788cc647e4704b650642fc1d70d7e419c20c04f1ba1b2902bc6536"),
 }
 FIELDS = ("index", "original_label", "hemisphere", "name")
+REFERENCE_PYTHON_PROBE = (
+    "import sys,json,nibabel,numpy,scipy,pandas; "
+    "print(json.dumps({'python':sys.version,'executable':sys.executable,"
+    "'nibabel':nibabel.__version__,'numpy':numpy.__version__,"
+    "'scipy':scipy.__version__,'pandas':pandas.__version__}))"
+)
 
 # Official SynthMorph writes an MGH warp intent (version 0x301).  nibabel's
 # regular MGH image reader correctly refuses it; read with the installed
@@ -232,6 +239,115 @@ def synthmorph_commands(config, directory):
         "-m", "nearest", "-t", "int16", str(warp),
         str(atlas / f"Tian_Subcortex_S{scale}_3T.nii.gz"),
         str(directory / f"tian_s{scale}_t1.nii.gz")]) for scale in (1, 4)]]
+
+
+def annotation_background_input(source, target):
+    """A private input copy fixes the original converter's missing unknown=0 key.
+
+    The original annotation, color table, names and positive ROI indices remain
+    unchanged. Only vertices whose label is the proven unknown index 0 become
+    the existing background -1. Actual readback and source SHA prove that scope.
+    """
+    started = time.perf_counter()
+    original_record = file_record(source)
+    labels, ctab, names = nib.freesurfer.read_annot(str(source))
+    count = int(np.count_nonzero(labels == 0))
+    result = {"source": original_record, "vertices": int(labels.size),
+              "unknown_zero_vertices": count, "negative_background_vertices": int((labels == -1).sum()),
+              "unknown_name": names[0].decode("utf-8"), "unknown_ctab": ctab[0].tolist(),
+              "positive_indices": np.unique(labels[labels > 0]).astype(int).tolist(),
+              "applied": count > 0, "rule": "proven unknown index 0 -> existing background -1"}
+    if not count:
+        result.update(output=original_record, seconds=time.perf_counter() - started)
+        return Path(source), result
+    if names[0].decode("utf-8").lower() != "unknown":
+        raise ValueError("annotation index 0 is not the declared unknown background")
+    if (labels < -1).any() or (labels >= len(names)).any():
+        raise ValueError("annotation contains an invalid source index")
+    target = Path(target)
+    if target.exists() or target.resolve() == Path(source).resolve():
+        raise ValueError("background adapter requires a new private annotation")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    adapted = labels.copy()
+    adapted[labels == 0] = -1
+    nib.freesurfer.write_annot(str(target), adapted, ctab.copy(), names, fill_ctab=False)
+    read_labels, read_ctab, read_names = nib.freesurfer.read_annot(str(target))
+    if (not np.array_equal(read_labels, adapted) or not np.array_equal(read_ctab, ctab)
+            or read_names != names or not np.array_equal(read_labels[labels > 0], labels[labels > 0])
+            or not np.array_equal(read_labels < 1, labels < 1)):
+        raise ValueError("annotation background adapter changed a positive ROI, color table or names")
+    verify_file(original_record)
+    result.update(output=file_record(target), ctab_names_equal=True, positive_indices_equal=True,
+                  background_vertex_mask_equal=True, surface_files_changed=False,
+                  seconds=time.perf_counter() - started)
+    return target, result
+
+
+def prepare_prefix_commands(config, output):
+    """The successful official prefix before the native annotation converter."""
+    fs, mr, subject = (Path(config[key]) for key in ("freesurfer_home", "mrtrix_bin", "subject_dir"))
+    sm = output / "synthmorph"
+    fs_default = mr.parent / "share/mrtrix3/labelconvert/fs_default.txt"
+    return [
+        ("reference_python_runtime", [config["python"], "-c", REFERENCE_PYTHON_PROBE]),
+        ("mrtrix_runtime_version", [mr / "mrconvert", "-version"]),
+        *synthmorph_commands(config, sm),
+        ("official_warp_readback", [fs / "bin/fspython", "-c", WARP_READBACK,
+                                  sm / "mni_to_t1.mgz", sm / "warp_metadata.json"]),
+        ("5ttgen", [mr / "5ttgen", "freesurfer", subject / "mri/aparc+aseg.mgz", output / "five_tissue_t1.nii.gz",
+                    "-nocrop", "-sgm_amyg_hipp", "-nthreads", "8"]),
+        ("5tt2gmwmi", [mr / "5tt2gmwmi", output / "five_tissue_t1.nii.gz", output / "gmwmi_t1.nii.gz", "-nthreads", "8"]),
+        ("fs_aparc_labelconvert", [mr / "labelconvert", subject / "mri/aparc+aseg.mgz", fs / "FreeSurferColorLUT.txt",
+            fs_default, output / "atlases/fs-aparc/atlas_t1.nii.gz", "-nthreads", "8"]),
+    ]
+
+
+def verified_atlas_recovery(report_record, config, identity):
+    """Reuse only the measured successful prefix of the original unknown=0 failure."""
+    prior = read_bound_json(report_record)
+    if (prior.get("case_id") != config["case_id"] or prior.get("mode") != "prepare"
+            or prior.get("state") != "failed" or prior.get("execution_completed") is not False
+            or prior.get("preflight") != identity):
+        raise ValueError("same-input failed official prepare required for atlas recovery")
+    root = Path(report_record["path"]).resolve().parent
+    expected = prepare_prefix_commands(config, root)
+    commands = prior.get("commands", [])
+    if len(commands) != len(expected) + 1:
+        raise ValueError("atlas recovery requires exactly the successful official prefix and its failed converter")
+    for actual, (stage, argv) in zip(commands[:-1], expected):
+        if (actual.get("stage") != stage or actual.get("returncode") != 0
+                or actual.get("argv") != list(map(str, argv))):
+            raise ValueError("prior official prefix argv or successful status differs")
+        verify_file(actual["program"])
+    last = commands[-1]
+    subject = Path(config["subject_dir"])
+    converter = root / "original_wrapper/scripts/python/convert_native_annot.py"
+    native = root / "original_wrapper/data/temporary/subjects/public_0/atlases"
+    argv = [config["python"], converter, subject / "label/lh.aparc.annot", subject / "label/rh.aparc.annot",
+            native / "lh.native.aparc.annot", native / "rh.native.aparc.annot"]
+    if (last.get("stage") != "aparc_convert" or last.get("returncode") == 0
+            or last.get("argv") != list(map(str, argv))):
+        raise ValueError("atlas recovery is limited to the measured original native aparc converter failure")
+    verify_file(last["program"])
+    failure_log = file_record(last["log"])
+    if "KeyError: 0" not in Path(last["log"]).read_text():
+        raise ValueError("original converter did not fail on the unknown index 0")
+    files = {name: prior["outputs"][name] for name in
+             ("tian_s1_t1", "tian_s4_t1", "mni_to_t1", "five_tissue_t1", "gmwmi_t1", "atlas:fs-aparc")}
+    for record in files.values():
+        verify_file(record)
+        if record.get("metadata_sidecar"):
+            verify_file(record["metadata_sidecar"])
+    nodes_path = root / "atlases/fs-aparc/nodes.tsv"
+    if read_nodes(nodes_path) != read_nodes(config["canonical_nodes84"]):
+        raise ValueError("prior fs-aparc nodes differ from canonical nodes")
+    return {"report": report_record, "original_source_commit": prior["source_commit"],
+            "original_script_sha256": prior["script_sha256"], "original_successful_commands": commands[:-1],
+            "original_failed_command": last, "original_failure_log": failure_log,
+            "failure_log_sha_observation_scope": "first recorded at recovery entry; original failed log preserved",
+            "original_successful_command_seconds": sum(row["seconds_inclusive"] for row in commands[:-1]),
+            "original_failed_command_seconds": last["seconds_inclusive"], "files": files,
+            "nodes84": file_record(nodes_path), "nodes_sha_observation_scope": "first bound at recovery entry; canonical rows verified"}
 
 
 def verified_synthmorph_recovery(report_record, config, identity):
@@ -440,15 +556,11 @@ def cortex_nodes(converted_left, converted_right, subject, name):
     return rows
 
 
-def prepare(runner, recovered_synthmorph=None):
+def prepare(runner, recovered_synthmorph=None, recovered_prefix=None):
     c, out = runner.config, runner.output
     fs, mr, upstream = Path(c["freesurfer_home"]), Path(c["mrtrix_bin"]), Path(c["upstream_root"])
     subject = Path(c["subject_dir"])
-    runner.run("reference_python_runtime", [c["python"], "-c",
-        "import sys,json,nibabel,numpy,scipy,pandas; "
-        "print(json.dumps({'python':sys.version,'executable':sys.executable,"
-        "'nibabel':nibabel.__version__,'numpy':numpy.__version__,"
-        "'scipy':scipy.__version__,'pandas':pandas.__version__}))"])
+    runner.run("reference_python_runtime", [c["python"], "-c", REFERENCE_PYTHON_PROBE])
     # Fail on a missing host runtime before doing a several-minute registration.
     runner.run("mrtrix_runtime_version", [mr / "mrconvert", "-version"])
     private = out / "original_wrapper"
@@ -464,7 +576,18 @@ def prepare(runner, recovered_synthmorph=None):
     native = private / "data/temporary/subjects/public_0/atlases"
     sm = out / "synthmorph"
     sm.mkdir()
-    if recovered_synthmorph is None:
+    if recovered_prefix is not None:
+        runner.report["reused_official_prefix_origin"] = recovered_prefix
+        runner.report["timing_scope"] += "; staged atlas recovery reuses separately timed successful official prefix; includes private background adapter; not continuous cold"
+        for source_name, target_name in (("tian_s1_t1", "tian_s1_t1.nii.gz"), ("tian_s4_t1", "tian_s4_t1.nii.gz"),
+                                          ("mni_to_t1", "mni_to_t1.mgz")):
+            record = recovered_prefix["files"][source_name]
+            shutil.copyfile(verify_file(record), sm / target_name)
+            verify_file(record)
+            if sha256(sm / target_name) != record["sha256"]:
+                raise ValueError("recovered official prefix output changed while copying")
+        runner.save()
+    elif recovered_synthmorph is None:
         for name, argv in synthmorph_commands(c, sm):
             runner.run(name, argv)
     else:
@@ -480,8 +603,15 @@ def prepare(runner, recovered_synthmorph=None):
     for scale in (1, 4):
         runner.output_image(f"tian_s{scale}_t1", sm / f"tian_s{scale}_t1.nii.gz", labels=True)
     runner.output_warp("mni_to_t1", sm / "mni_to_t1.mgz")
-    runner.run("5ttgen", [mr / "5ttgen", "freesurfer", subject / "mri/aparc+aseg.mgz", out / "five_tissue_t1.nii.gz", "-nocrop", "-sgm_amyg_hipp", "-nthreads", "8"])
-    runner.run("5tt2gmwmi", [mr / "5tt2gmwmi", out / "five_tissue_t1.nii.gz", out / "gmwmi_t1.nii.gz", "-nthreads", "8"])
+    if recovered_prefix is None:
+        runner.run("5ttgen", [mr / "5ttgen", "freesurfer", subject / "mri/aparc+aseg.mgz", out / "five_tissue_t1.nii.gz", "-nocrop", "-sgm_amyg_hipp", "-nthreads", "8"])
+        runner.run("5tt2gmwmi", [mr / "5tt2gmwmi", out / "five_tissue_t1.nii.gz", out / "gmwmi_t1.nii.gz", "-nthreads", "8"])
+    else:
+        for name in ("five_tissue_t1", "gmwmi_t1"):
+            record = recovered_prefix["files"][name]
+            shutil.copyfile(verify_file(record), out / f"{name}.nii.gz")
+            if sha256(out / f"{name}.nii.gz") != record["sha256"]:
+                raise ValueError("recovered official tissue output changed while copying")
     for name in ("five_tissue_t1", "gmwmi_t1"):
         runner.output_image(name, out / f"{name}.nii.gz")
     fs_default = mr.parent / "share/mrtrix3/labelconvert/fs_default.txt"
@@ -490,7 +620,13 @@ def prepare(runner, recovered_synthmorph=None):
     atlas_root.mkdir()
     target = atlas_root / "fs-aparc"
     target.mkdir()
-    runner.run("fs_aparc_labelconvert", [mr / "labelconvert", subject / "mri/aparc+aseg.mgz", fs / "FreeSurferColorLUT.txt", fs_default, target / "atlas_t1.nii.gz", "-nthreads", "8"])
+    if recovered_prefix is None:
+        runner.run("fs_aparc_labelconvert", [mr / "labelconvert", subject / "mri/aparc+aseg.mgz", fs / "FreeSurferColorLUT.txt", fs_default, target / "atlas_t1.nii.gz", "-nthreads", "8"])
+    else:
+        record = recovered_prefix["files"]["atlas:fs-aparc"]
+        shutil.copyfile(verify_file(record), target / "atlas_t1.nii.gz")
+        if sha256(target / "atlas_t1.nii.gz") != record["sha256"]:
+            raise ValueError("recovered official native atlas changed while copying")
     rows84 = read_nodes(c["canonical_nodes84"])
     if len(rows84) != 84:
         raise ValueError("canonical fs-aparc nodes must have 84 rows")
@@ -501,7 +637,14 @@ def prepare(runner, recovered_synthmorph=None):
         left, right = (native / f"{h}.native.{name}.annot" for h in ("lh", "rh"))
         script = private / "scripts/python"
         if name in ("aparc", "aparc.a2009s"):
-            runner.run(f"{name}_convert", [c["python"], script / "convert_native_annot.py", subject / f"label/lh.{name}.annot", subject / f"label/rh.{name}.annot", left, right])
+            inputs = []
+            for h in ("lh", "rh"):
+                source = subject / f"label/{h}.{name}.annot"
+                supplied, binding = annotation_background_input(source, out / "annotation_background_inputs" / f"{h}.{name}.annot")
+                runner.report.setdefault("annotation_background_compatibility", {})[f"{h}.{name}"] = binding
+                inputs.append(supplied)
+            runner.save()
+            runner.run(f"{name}_convert", [c["python"], script / "convert_native_annot.py", *inputs, left, right])
         else:
             scratch = out / name
             scratch.mkdir()
@@ -535,6 +678,11 @@ def prepare(runner, recovered_synthmorph=None):
     runner.report["state"] = "official_structural_reference_completed"
     runner.report["execution_completed"] = True
     runner.report["full_raw_connectome"] = False
+    if recovered_prefix is not None:
+        verify_file(recovered_prefix["report"])
+        verify_file(recovered_prefix["original_failure_log"])
+        for record in recovered_prefix["files"].values():
+            verify_file(record)
 
 
 def complete(runner, prepared_record, dwi_record):
@@ -587,23 +735,29 @@ def complete(runner, prepared_record, dwi_record):
 def main(argv=None):
     started = time.perf_counter()
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=("prepare", "recover-prepare", "complete"))
+    parser.add_argument("mode", choices=("prepare", "recover-prepare", "recover-atlas", "complete"))
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True, help="fresh directory; failures remain intact")
     parser.add_argument("--prepared-report", type=Path)
     parser.add_argument("--official-dwi-contract", type=Path)
     parser.add_argument("--successful-synthmorph-report", type=Path,
                         help="recover-prepare only: preserved failed prepare after three successful official SynthMorph commands")
+    parser.add_argument("--failed-atlas-report", type=Path,
+                        help="recover-atlas only: preserved original native annotation unknown index 0 failure")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args(argv)
     if (args.output.exists() or (args.mode == "complete" and (not args.prepared_report or not args.official_dwi_contract))
             or (args.mode == "recover-prepare" and not args.successful_synthmorph_report)
-            or (args.mode != "recover-prepare" and args.successful_synthmorph_report)):
+            or (args.mode != "recover-prepare" and args.successful_synthmorph_report)
+            or (args.mode == "recover-atlas" and not args.failed_atlas_report)
+            or (args.mode != "recover-atlas" and args.failed_atlas_report)):
         parser.error("fresh output required; complete needs both contracts; recovery needs its explicit preserved report")
     config = json.loads(args.config.read_text())
     identity = preflight(config)
     recovery = (verified_synthmorph_recovery(file_record(args.successful_synthmorph_report), config, identity)
                 if args.mode == "recover-prepare" else None)
+    atlas_recovery = (verified_atlas_recovery(file_record(args.failed_atlas_report), config, identity)
+                      if args.mode == "recover-atlas" else None)
     if args.dry_run:
         print(json.dumps({"dry_run": True, "preflight": identity,
                           "synthmorph_commands": synthmorph_commands(config, args.output / "synthmorph")}, default=str, indent=2))
@@ -615,8 +769,8 @@ def main(argv=None):
     runner.report["config_sha256"] = sha256(args.config)
     runner.save()
     try:
-        if args.mode in ("prepare", "recover-prepare"):
-            prepare(runner, recovery)
+        if args.mode in ("prepare", "recover-prepare", "recover-atlas"):
+            prepare(runner, recovery, atlas_recovery)
         else:
             complete(runner, file_record(args.prepared_report), file_record(args.official_dwi_contract))
         # Detect any input/source/asset change rather than blessing an old hash.

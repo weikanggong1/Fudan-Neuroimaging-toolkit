@@ -23,6 +23,10 @@ flowchart TD
 
 `recover-prepare` 只用于已经保留的特定读回失败：旧 `prepare` 的官方 register、Tian S1 apply、Tian S4 apply 均真实 exit0，随后普通影像读回器拒绝官方 warp 专用 MGZ。它先校验同例、同输入/资源/源码身份、三条真实 argv 与程序 SHA、原 Tian 输出 SHA，复制到新目录并用官方 Surfa 读回 warp，然后继续此前未执行的5TT与atlas步骤。旧失败报告不改写；复用命令耗时与新续跑耗时分别报告，不能称重新执行或连续冷调用。
 
+原 UKB `convert_native_annot.py` 只为 `-1` 建立背景映射，而官方 FreeSurfer annotation 还可能以索引 `0` 表示名称为 `unknown` 的背景。2026-10-03 实际 CON08/09 左 aparc 分别有 1/2 个这样的顶点，原脚本真实报 `KeyError: 0`。新版隔离参照为该输入生成私有 annotation 副本，仅将经名称核验的 `unknown=0` 改为既定背景 `-1`；读回逐值验证正 ROI 索引、完整颜色表、名称和背景顶点集合不变，前后校验原文件 SHA。没有 `0` 的输入直接使用原字节；`0` 不是 `unknown` 时拒绝适配。原 UKB 脚本、fresh FS 目录、表面坐标和生产 FNIT 均不修改。因此含适配的结果称为**原脚本背景兼容参照**，不称原脚本未经适配的原始流程。
+
+`recover-atlas` 只接受这一已记录的特定失败：同源 `prepare` 的九条官方前缀命令真实 exit0，随后 aparc converter 失败日志明确含 `KeyError: 0`。核对输入、argv、程序及既有输出 SHA后，在新目录复用 SynthMorph、5TT、GMWMI 和 fs-aparc 的结果，再生成背景兼容输入并续其余 atlas。原成功命令、原失败命令和新续跑/适配读写分别计时；首次观测的原失败日志及 nodes SHA也明确标注，不倒填旧报告。
+
 ## 2. Python、输入格式和输出
 
 ```python
@@ -80,6 +84,7 @@ prepare_output/
   gmwmi_t1.nii.gz              # [X,Y,Z] native T1网格
   synthmorph/                 # 一个MNI→T1 warp和Tian S1/S4
   original_wrapper/           # 本例private temporary；脚本和模板只读链接
+  annotation_background_inputs/ # 仅需要 unknown=0 适配时创建私有副本
   atlases/<name>/atlas_t1.nii.gz
   atlases/<name>/nodes.tsv     # index original_label hemisphere name
 complete_output/
@@ -114,6 +119,17 @@ python tools/reference/benchmark_connectome_anatomy_official.py complete \
 
 特定失败恢复使用 `recover-prepare --successful-synthmorph-report /preserved/failed/reference_anatomy.json`，同时给出`--config`与不存在的`--output`。仅接受同源报告中已成功的三条官方命令；恢复时首次记录warp SHA，明确不会倒填到原失败报告。
 
+原脚本背景失败恢复：
+
+```bash
+python tools/reference/benchmark_connectome_anatomy_official.py recover-atlas \
+  --config /verified/raw10/sub-CON08/config.json \
+  --failed-atlas-report /preserved/raw10/sub-CON08/prepare/reference_anatomy.json \
+  --output /new/raw10/sub-CON08/prepare_background_compatible
+```
+
+此模式不复用任何失败 atlas 输出；完整报告保留 `reused_official_prefix_origin` 与 `annotation_background_compatibility`，其中有原输入和适配输出SHA、受影响顶点数、实际读回核验以及适配wall时间。
+
 十例调度使用独立工具，最多两例、每例CPU8，不占GPU：
 
 ```bash
@@ -121,7 +137,7 @@ python tools/reference/benchmark_connectome_official_anatomy_cohort.py \
   --config-template /shared/raw10/reference_CON03.json \
   --baseline-root /shared/raw10/formal_baseline_raw_v2/baseline \
   --raw-root /shared/raw10/raw \
-  --official-dwi-root /shared/raw10/task_02/official_modeling_raw10_v1 \
+  --official-dwi-root /shared/raw10/task_02/official_modeling_raw10_v2 \
   --validation-script /frozen/tools/benchmark_connectome_raw_cohort.py \
   --tool-commit ACTUAL_FROZEN_REFERENCE_COMMIT \
   --prepared-case-report sub-CON03=/verified/pilot/reference_anatomy.json \
@@ -165,6 +181,8 @@ v4已完成5ttgen 10.701秒、GMWMI 1.559秒、fs-aparc84 labelconvert 1.181秒�
 
 **CON03 v5结构准备已完成**：31条新官方命令全部exit0，27个输出完成SHA和几何读回。新续跑entry wall为161.363秒，命令合计119.949秒；此前成功的SynthMorph register/apply三命令为403.782秒，单独报告，不能相加声称连续冷调用。尚未衔接官方DWI/追踪，故不是完整connectome或十例精度结论。
 
+背景兼容修复的真实输入验证：CON08/09 双半球 aparc、a2009s 共八个 annotation 均完成实际读回；只有左 aparc 的1/2个unknown顶点需要适配，其余六个文件直接使用原字节。适配文件颜色表/名称/正ROI索引与原文件逐值一致，原背景顶点集合不变，完整结构像与资源前后SHA一致；此前九条成功官方命令分别合计224.273/272.558秒。22项focused契约/背景读回测试在实际服务器CPU环境通过（0.78秒）。这些核验不代表两例atlas续跑或官方DWI/矩阵已经完成。
+
 | T1 atlas | 节点K | 实际存在节点 | 网格 |
 | --- | ---: | ---: | --- |
 | fs-aparc | 84 | 84 | 256×256×256 |
@@ -191,6 +209,7 @@ v4已完成5ttgen 10.701秒、GMWMI 1.559秒、fs-aparc84 labelconvert 1.181秒�
 - 2026-10-03：真实官方warp头为`0x301`，改用安装内官方Surfa只读读回，并增加明确来源/耗时的分阶段恢复入口；生产配准与重采样代码不变。
 - 2026-10-03：新增CPU十例解剖/atlas调度，使用baseline fresh FS与各自官方raw-DWI完成合同；绑定既有运行时并预检官方二进制，禁止把组件对照、旧pilot或FNIT产物称为十例全官方原始链。
 - 2026-10-03：核对SynthMorph真正CLI；现有shell wrapper命令原本正确，仅补说明与回归，未修改生产重采样。
+- 2026-10-03：真实 CON08/09 触发原 UKB native annotation 背景索引0缺键；增加私有输入背景适配及严格绑定成功前缀的 `recover-atlas`，保留原failed结果。FNIT成熟reader已将−1/0留背景，不改生产实现或统计定义。
 
 ## 7. 原实现与参考
 
