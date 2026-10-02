@@ -1,116 +1,130 @@
-"""七套真实 atlas：三次 MRtrix 互比与一份 FNIT 独立 100k 追踪矩阵比较。"""
-
+"""任意多 atlas：至少三次 MRtrix 互比与 FNIT 已有四矩阵的随机重复性比较。"""
+from __future__ import annotations
 import argparse
-import hashlib
-import itertools
 import json
 from pathlib import Path
-
 import numpy as np
+try:
+    from .connectome_repeat_common import (
+        METRIC_POLICY, check_metadata, envelope, load_profiles, overall_status,
+        fnit_repeat_envelope, pairwise, profile_metrics, seed_labels,
+    )
+except ImportError:
+    from connectome_repeat_common import (
+        METRIC_POLICY, check_metadata, envelope, load_profiles, overall_status,
+        fnit_repeat_envelope, pairwise, profile_metrics, seed_labels,
+    )
 
-from connectome_benchmark_common import NAMES
-
-
-def _sha(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
-
-
-def _metrics(first: dict[str, np.ndarray], second: dict[str, np.ndarray]) -> dict:
-    upper = np.triu_indices(first["count"].shape[0], k=1)
-    count_a, count_b = first["count"][upper], second["count"][upper]
-    support_a, support_b = count_a > 0, count_b > 0
-    common = support_a & support_b
-    result = {
-        "count_support_dice": float(2 * common.sum() / (support_a.sum() + support_b.sum())),
-        "count_pearson": float(np.corrcoef(count_a, count_b)[0, 1]),
-        "common_edges": int(common.sum()),
-    }
-    for name in ("count", "sift2_fbc"):
-        a, b = first[name][upper], second[name][upper]
-        result[f"{name}_relative_l1"] = float(np.abs(a - b).sum() / np.abs(a).sum())
-    for name in ("mean_length", "mean_fa"):
-        a, b = first[name][upper][common], second[name][upper][common]
-        result[f"{name}_common_normalized_mae"] = (
-            float(np.abs(a - b).mean() / np.abs(a).mean()) if len(a) and np.abs(a).sum()
-            else None
-        )
-    return result
+_metrics = profile_metrics  # retain the existing tool's metric definitions
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--official", type=Path, nargs=3, required=True)
-    parser.add_argument("--fnit", type=Path, required=True)
-    parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--figure", type=Path)
-    args = parser.parse_args()
-    native_report = json.loads((args.fnit / "report.json").read_text())
+def compare(official_dirs, fnit_dirs, *, dataset="unspecified", n_seeds=100000,
+            official_seeds=None, fnit_seeds=None, atlases=None) -> dict:
+    official = [load_profiles(path) for path in official_dirs]
+    fnit = [load_profiles(path) for path in fnit_dirs]
+    if len(official) < 3 or not fnit:
+        raise ValueError("at least three official repeats and one FNIT run are required")
+    names = list(atlases) if atlases else list(fnit[0])
+    if not names or len(set(names)) != len(names):
+        raise ValueError("atlas names must be nonempty and unique")
+    for item in (*official, *fnit):
+        if (set(item) != set(names) if not atlases else not set(names).issubset(item)):
+            raise ValueError("atlas profiles differ between runs; use --atlas only for an explicit subset")
     report = {
-        "dataset": "OpenNeuro ds004666 sub-01/ses-2mm, same FOD/5TT/FA and seven atlas volumes",
-        "design": "three independent MRtrix 100k seed runs, one FNIT 100k run",
+        "dataset": dataset, "n_seed_attempts": n_seeds,
+        "design": f"{len(official)} supplied official repeats and {len(fnit)} FNIT runs; no matrix recomputation",
+        "official_seeds": seed_labels(official_seeds, len(official), "official"),
+        "fnit_seeds": seed_labels(fnit_seeds, len(fnit), "fnit"),
+        "metric_policy": {**METRIC_POLICY,
+                          "relative_l1": "sum absolute error / sum absolute first matrix upper-triangle values",
+                          "common_normalized_mae": "MAE on common count edges / mean absolute first matrix value on those edges"},
         "profiles": {},
     }
-    fields = ("count_relative_l1", "sift2_fbc_relative_l1",
-              "count_support_dice", "mean_length_common_normalized_mae",
-              "mean_fa_common_normalized_mae")
-    for profile, info in native_report["profiles"].items():
-        official = []
-        official_hashes = []
-        for root in args.official:
-            paths = {name: root / profile / f"{name}.csv" for name in NAMES}
-            official.append({name: np.loadtxt(path, delimiter=",") for name, path in paths.items()})
-            official_hashes.append({name: _sha(path) for name, path in paths.items()})
-        with np.load(args.fnit / f"{profile}.npz") as archive:
-            fnit = {name: archive[name] for name in NAMES}
-        expected_shape = (info["nodes"], info["nodes"])
-        for matrices in (*official, fnit):
-            for matrix in matrices.values():
-                if matrix.shape != expected_shape or not np.isfinite(matrix).all():
-                    raise ValueError(f"{profile}: invalid matrix shape or values")
-        within = [_metrics(official[i], official[j])
-                  for i, j in itertools.combinations(range(3), 2)]
-        cross = [_metrics(matrices, fnit) for matrices in official]
+    fields = ("count_relative_l1", "sift2_fbc_relative_l1", "count_support_dice", "count_pearson",
+              "mean_length_common_normalized_mae", "mean_fa_common_normalized_mae")
+    for profile in names:
+        loaded = [item[profile] for item in (*official, *fnit)]
+        identity = check_metadata(loaded, profile)
+        pairs = pairwise([item[profile][0] for item in official],
+                         [item[profile][0] for item in fnit], profile_metrics)
         ranges = {
-            field: {
-                "official_min_max": [float(min(item[field] for item in within)),
-                                     float(max(item[field] for item in within))],
-                "fnit_vs_official": [float(item[field]) for item in cross],
-                "inside_count": sum(min(item[field] for item in within) <= value[field] <=
-                                    max(item[field] for item in within) for value in cross),
-            } for field in fields
-        }
+            field: envelope([item["metrics"][field] for item in pairs["official"]],
+                            [item["metrics"][field] for item in pairs["cross"]],
+                            similarity=field in ("count_support_dice", "count_pearson"))
+            for field in fields}
+        fnit_ranges = {
+            field: fnit_repeat_envelope([item["metrics"][field] for item in pairs["official"]],
+                                        [item["metrics"][field] for item in pairs["fnit"]],
+                                        similarity=field in ("count_support_dice", "count_pearson"))
+            for field in fields}
+        fnit_metadata = [item[profile][1] for item in fnit]
         report["profiles"][profile] = {
-            "nodes": info["nodes"], "atlas_sha256": info["atlas_sha256"],
-            "official_matrix_sha256": official_hashes,
-            "fnit_matrix_npz_sha256": _sha(args.fnit / f"{profile}.npz"),
-            "ranges": ranges,
+            "nodes": loaded[0][1]["nodes"], "atlas_sha256": fnit_metadata[0]["atlas_sha256"],
+            "official_matrix_sha256": [item[profile][1].get("matrix_sha256") for item in official],
+            "fnit_matrix_npz_sha256": fnit_metadata[0].get("matrix_npz_sha256"),
+            "provenance": {"official": [item[profile][1] for item in official], "fnit": fnit_metadata},
+            "input_identity": identity, "pairwise": pairs, "ranges": ranges,
+            "comparison_counts": {name: len(values) for name, values in pairs.items()},
+            "matrix_envelope_status": overall_status(list(ranges.values())),
+            "fnit_reproducibility_ranges": fnit_ranges,
+            "fnit_reproducibility_status": overall_status(list(fnit_ranges.values())),
         }
-        print(f"{profile}: count L1 {ranges['count_relative_l1']}", flush=True)
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(report, indent=2) + "\n")
-    if args.figure:
-        import matplotlib
-        matplotlib.use("Agg")
-        import matplotlib.pyplot as plt
+    statuses = [item["matrix_envelope_status"] for item in report["profiles"].values()]
+    report["matrix_envelope_status"] = ("failed" if "failed" in statuses else
+                                         "passed" if all(item == "passed" for item in statuses) else "not_assessed")
+    self_statuses = [item["fnit_reproducibility_status"] for item in report["profiles"].values()]
+    report["fnit_reproducibility_status"] = ("failed" if "failed" in self_statuses else
+                                             "passed" if all(item == "passed" for item in self_statuses) else "not_assessed")
+    return report
 
-        profiles = list(report["profiles"])
-        shown = ("count_relative_l1", "sift2_fbc_relative_l1",
-                 "mean_fa_common_normalized_mae")
-        fig, axes = plt.subplots(1, 3, figsize=(13, 5), constrained_layout=True)
-        for ax, field in zip(axes, shown):
-            for row, profile in enumerate(profiles):
-                values = report["profiles"][profile]["ranges"][field]
+
+def figure(path: Path, report: dict) -> None:
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    profiles = list(report["profiles"])
+    shown = ("count_relative_l1", "sift2_fbc_relative_l1", "mean_fa_common_normalized_mae")
+    fig, axes = plt.subplots(1, 3, figsize=(13, max(5, len(profiles) * .45)), constrained_layout=True)
+    for ax, field in zip(axes, shown):
+        for row, profile in enumerate(profiles):
+            values = report["profiles"][profile]["ranges"][field]
+            if values["official_min_max"] is not None:
                 low, high = values["official_min_max"]
                 ax.plot((low, high), (row, row), color="#2374ab", linewidth=4)
-                ax.scatter(values["fnit_vs_official"], [row - .12, row, row + .12],
-                           color="#d55e00", s=25)
-            ax.set(title=field.replace("_", " "), yticks=range(len(profiles)),
-                   yticklabels=profiles, xlabel="error")
-            ax.grid(axis="x", alpha=.2)
-        fig.suptitle("ds004666, 100k attempts · MRtrix self range (blue) vs FNIT (orange)")
-        args.figure.parent.mkdir(parents=True, exist_ok=True)
-        fig.savefig(args.figure, dpi=180)
-        plt.close(fig)
+            cross = [value for value in values["fnit_vs_official"] if value is not None]
+            if cross:
+                ax.scatter(cross, row + np.linspace(-.12, .12, len(cross)), color="#d55e00", s=25)
+        ax.set(title=field.replace("_", " "), yticks=range(len(profiles)),
+               yticklabels=profiles, xlabel="error")
+        ax.grid(axis="x", alpha=.2)
+    fig.suptitle(f"{report['dataset']} · {report['n_seed_attempts']:,} attempts · MRtrix observed range (blue), FNIT (orange)")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(path, dpi=180)
+    plt.close(fig)
+
+
+def main(argv=None) -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--official", type=Path, nargs="+", required=True)
+    parser.add_argument("--fnit", type=Path, nargs="+", required=True)
+    parser.add_argument("--dataset", default="unspecified (provide --dataset)")
+    parser.add_argument("--n-seeds", type=int, default=100000)
+    parser.add_argument("--official-seeds", type=int, nargs="+")
+    parser.add_argument("--fnit-seeds", type=int, nargs="+")
+    parser.add_argument("--atlas", nargs="+", help="explicit profile subset; default checks every output atlas")
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--figure", type=Path)
+    args = parser.parse_args(argv)
+    if len(args.official) < 3 or args.n_seeds < 1:
+        parser.error("at least three official repeats and positive --n-seeds are required")
+    report = compare(args.official, args.fnit, dataset=args.dataset, n_seeds=args.n_seeds,
+                     official_seeds=args.official_seeds, fnit_seeds=args.fnit_seeds, atlases=args.atlas)
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n")
+    if args.figure:
+        figure(args.figure, report)
+    print(json.dumps({"matrix_envelope_status": report["matrix_envelope_status"],
+                      "profiles": {name: item["matrix_envelope_status"] for name, item in report["profiles"].items()}}, allow_nan=False))
 
 
 if __name__ == "__main__":
