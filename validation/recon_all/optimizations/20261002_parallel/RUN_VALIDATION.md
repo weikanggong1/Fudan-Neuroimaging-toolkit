@@ -246,7 +246,7 @@ python diagnose_cuda_bootstrap_pairs.py \
 规则，前提改为pairs_v2的八批全部`both_initialized=true`。此前v2监督在启动前
 停止，未创建整例输出。本次配置为`whole/configs/candidate_sub02_retry_v3.json`，
 其SHA为`fac6fd6dffd6a74b2d925b3a190df2c7517c857a613f385e3e2aba5c657066d9`；
-仅改变两个输出路径，输入、版本、GPU、线程、精度与第一候选一致。
+仅改变两个输出路径，输入、版本、GPU、线程、精度与该例首次候选一致。
 
 ```bash
 # 读取既有pairs_v2完整终态；再次核验安装171源码与15程序SHA。
