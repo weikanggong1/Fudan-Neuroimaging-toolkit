@@ -267,7 +267,16 @@ v4已完成5ttgen 10.701秒、GMWMI 1.559秒、fs-aparc84 labelconvert 1.181秒�
 | CON01 | 17.375 | 0.198 | 13.807 | 1.794 | 20 |
 | CON03 | 14.039 | 0.049 | 13.912 | 1.755 | 20 |
 
-原六命令含FLIRT及native world变换，新七命令仅续其余atlas NN；entry wall另含真实输入核验、复制、读回和哈希，不能把各列拼成连续冷调用。原闲等driver在核对精确argv/start_ticks/source、确认无child及替代两例实际完成后退休，原报告字节保留。此时其余八例等待各自真实官方DWI建模合同；独立追踪与最终矩阵由另一工具继续执行，两例解剖完成不是十例最终connectome匹配结论。
+原六命令含FLIRT及native world变换，新七命令仅续其余atlas NN；entry wall另含真实输入核验、复制、读回和哈希，不能把各列拼成连续冷调用。原闲等driver在核对精确argv/start_ticks/source、确认无child及替代两例实际完成后退休，原报告字节保留。这个两例快照保留当时状态；独立追踪与最终矩阵由另一工具继续执行。
+
+**最新实际核验为4/10例DWI空间解剖完成**（2026-10-02 22:20 UTC）：CON04/05各自消费同例官方CPU原始DWI建模合同，首次执行官方FLIRT、native world变换和八atlas NN共13条命令，全部exit0。四例各20个输出重新核SHA、八atlas完整DWI网格和节点范围通过，见[四例实际完成摘要](../../validation/connectome/raw10_official_anatomy_DWI_20261003/four_case_completion.public.json)。冻结数值工具仍为`cb06c0ca`，不重跑十例T1结构准备。
+
+| 新完成例 | 方式 | 新命令数 | 本次entry wall秒 | 新命令合计秒 | 已核输出数 |
+| --- | --- | ---: | ---: | ---: | ---: |
+| CON04 | complete | 13 | 26.534 | 15.282 | 20 |
+| CON05 | complete | 13 | 27.207 | 14.693 | 20 |
+
+此时CON06–11等待真实上游合同。这些时间只属于解剖与DWI atlas衔接；四例解剖完成不代表十例最终connectome匹配。CON01/03的分阶段恢复时间与CON04/05的首次complete时间分别保留。
 
 ## 6. 更新记录
 
