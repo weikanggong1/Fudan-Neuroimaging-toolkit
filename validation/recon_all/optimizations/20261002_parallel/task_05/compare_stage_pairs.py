@@ -6,7 +6,9 @@ SHA 分开记录；将新 GPU 与新 Conda 直接比较，不以冻结结果间�
 """
 import argparse,hashlib,json
 from pathlib import Path
-from benchmark import image_comparison
+import nibabel as nib
+import numpy as np
+from benchmark import image_comparison,sha
 
 
 def main():
@@ -31,7 +33,18 @@ def main():
             row['comparisons'][name]=image_comparison(gpu['result'][name],cpu['result'][name])
         def deform(item):
             return Path(item['result']['forward']).parent/'tmp/deform.mgz'
-        row['comparisons']['self_deform']=image_comparison(deform(gpu),deform(cpu))
+        left,right=deform(gpu),deform(cpu)
+        x,y=nib.load(str(left)),nib.load(str(right))
+        xd,yd=np.asarray(x.dataobj),np.asarray(y.dataobj)
+        if xd.shape!=yd.shape:raise ValueError('self-produced deform shapes differ')
+        diff=np.abs(xd.astype(np.float64)-yd.astype(np.float64))
+        row['comparisons']['self_deform']={'shape':list(xd.shape),'elements':int(diff.size),
+          'different_elements':int(np.count_nonzero(diff)),'maximum':float(diff.max()),'p99':float(np.quantile(diff,.99)),
+          'affine_maximum':float(np.abs(x.affine-y.affine).max()),'dtype_left':str(xd.dtype),'dtype_right':str(yd.dtype),
+          'intent_left':None,'intent_right':None,'units_left':None,'units_right':None,
+          'intent_units_scope':'not applicable to MGH header; scanner RAS transform uses mm',
+          'sha256_left':sha(left),'sha256_right':sha(right)}
+        del xd,yd,diff,x,y
         row['strict_numeric_passed']=all(c['different_elements']==0 for c in row['comparisons'].values())
         row['strict_geometry_passed']=all(c['affine_maximum']==0 for c in row['comparisons'].values())
         row['dtype_intent_units_passed']=all(c['dtype_left']==c['dtype_right'] and c['intent_left']==c['intent_right'] and c['units_left']==c['units_right'] for c in row['comparisons'].values())
