@@ -55,6 +55,7 @@ main(["complete", "--config", official_reference_config,
 | `raw_t1w` | 原始T1w `{path,sha256,size_bytes}`，对应原recon命令。 |
 | `freesurfer_home`、`fs_license` | 官方FS8.2安装目录、已有许可证路径。只检查许可证路径存在，不读取或记录其正文/哈希。 |
 | `mrtrix_bin`、`fsl_bin`、`workbench_command` | 官方MRtrix/FSL目录及Workbench可执行文件；只用于隔离参照。 |
+| `runtime_library_dirs`、`runtime_libraries` | 隔离参照的已有Conda运行时目录及其`libstdc++.so.6`文件记录，绑定大小/SHA后加入LD_LIBRARY_PATH；先实际`mrconvert -version`，避免系统旧GLIBCXX使官方二进制无法启动。无需安装新软件。 |
 | `python` | 运行原UKB Python脚本的既有Conda Python；项目已有nibabel/numpy/scipy/pandas依赖，无新增安装。 |
 | `upstream_root` | 已核对的原UKB脚本和`data/templates`资源目录；不写入此目录。 |
 | `upstream_scripts` | 四个原Python脚本名对应的 `{path,sha256,size_bytes}`：convert_native_annot、convert_schaefer_annot、convert_labels_gii_to_annot、map_surface_label_to_volume。固定实际源码字节，不发布复制的原软件源码。 |
@@ -111,6 +112,25 @@ python tools/reference/benchmark_connectome_anatomy_official.py complete \
 
 特定失败恢复使用 `recover-prepare --successful-synthmorph-report /preserved/failed/reference_anatomy.json`，同时给出`--config`与不存在的`--output`。仅接受同源报告中已成功的三条官方命令；恢复时首次记录warp SHA，明确不会倒填到原失败报告。
 
+十例调度使用独立工具，最多两例、每例CPU8，不占GPU：
+
+```bash
+python tools/reference/benchmark_connectome_official_anatomy_cohort.py \
+  --config-template /shared/raw10/reference_CON03.json \
+  --baseline-root /shared/raw10/formal_baseline_raw_v2/baseline \
+  --raw-root /shared/raw10/raw \
+  --official-dwi-root /shared/raw10/task_02/official_modeling_raw10_v1 \
+  --validation-script /frozen/tools/benchmark_connectome_raw_cohort.py \
+  --tool-commit ACTUAL_FROZEN_REFERENCE_COMMIT \
+  --prepared-case-report sub-CON03=/verified/pilot/reference_anatomy.json \
+  --workers 2 --poll-seconds 30 --wait-timeout-seconds 21600 \
+  --output /shared/raw10/official_anatomy_raw10_v1
+```
+
+默认十例CON01、CON03、CON04–CON11；`--case-ids`可显式选例。`--prepared-case-report CASE=REPORT`可重复，用于已经完成且SHA不变的同例官方pilot，原报告与时间独立保留，不重算；没有完成report时不能使用此参数。`--validation-script`绑定项目现有实际MGZ/surface/annotation读回工具，只有baseline本轮recon exit0且特定int32报告序列化失败时，才在新目录生成只读revalidation sidecar，保留原failed报告。其他失败不升级为成功，不使用candidate FS。
+
+调度在新输出目录写`cohort_reference.json`及`sub-CONxx/{config.json,prepare/,complete/,consumer_contract.json}`。FS仍运行时等待，官方DWI合同未完成时等待，准备与完成各占一个CPU槽，等待不阻塞其余例的prepare。`consumer_contract`的scope为`official_self_produced_fresh_fs_anatomy_and_raw_dwi_atlases`，含真实T1/FS、prepare/complete/DWI上游报告SHA、5TT/GMWMI world影像、4×4变换、八套atlas影像及nodes/K；明确`tractography_completed=false`、`connectome_completed=false`。后续追踪只能消费该合同和官方建模合同。整个driver wall包含等待，不能替代各例实际官方命令耗时。
+
 ## 4. 官方命令及实际CLI
 
 ```bash
@@ -137,6 +157,8 @@ FS `mri_surf2surf`、Workbench `-label-resample BARYCENTRIC` 和原UKB投影脚�
 
 CON03新鲜FS输入的官方CPU命令已真实完成：joint register 385.7606秒，Tian S1 NN apply 12.0240秒，Tian S4 NN apply 5.9971秒。之后普通nibabel影像读回器拒绝warp头，原v2目录保留为failed；独立官方Surfa只读验证该实际warp成功：float32、`[256,256,256,3]`、format3、非有限值0、MNI source与FS target几何吻合。这些是已完成的官方组件证据，**不是十例端到端benchmark**。
 
+分阶段v3续跑的官方Surfa metadata命令完成12.9788秒；5ttgen随后因系统旧libstdc++缺少GLIBCXX_3.4.20/21/22启动失败，未产生5TT。原failed目录保留；既有Conda lib下实际`mrconvert -version`成功，识别3.0.3-103-g026e850d，后续新namespace显式绑定此运行时。参照程序字节与解剖输入不变。
+
 本轮CON03 prepare实际CPU试跑及complete结果将以新报告补充。没有完成报告时，5TT、配准、8atlas精度/时间、脑图均记待评估；不填入旧ds004666结果。现有CON03 fixed-FNIT-input官方追踪参照仍属于另外的验证层级。
 
 ## 6. 更新记录
@@ -144,6 +166,7 @@ CON03新鲜FS输入的官方CPU命令已真实完成：joint register 385.7606�
 - 2026-10-03：新增prepare/complete独立官方解剖参照和可审核契约；禁止覆盖原输出，锁定fresh T1/FS，逐例隔离public_0路径，保留官方world-geometry变换与NN atlas定义。
 - 2026-10-03：真实CON03预检发现官方`lh.pial`为标准`lh.pial.T1`链接；统一比较resolve路径并仍校验目标字节SHA，保留原预检失败，无MRI重算。
 - 2026-10-03：真实官方warp头为`0x301`，改用安装内官方Surfa只读读回，并增加明确来源/耗时的分阶段恢复入口；生产配准与重采样代码不变。
+- 2026-10-03：新增CPU十例解剖/atlas调度，使用baseline fresh FS与各自官方raw-DWI完成合同；绑定既有运行时并预检官方二进制，禁止把组件对照、旧pilot或FNIT产物称为十例全官方原始链。
 - 2026-10-03：核对SynthMorph真正CLI；现有shell wrapper命令原本正确，仅补说明与回归，未修改生产重采样。
 
 ## 7. 原实现与参考

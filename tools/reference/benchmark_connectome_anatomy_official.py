@@ -100,6 +100,8 @@ def image_record(path, *, labels=False):
               "foreground_voxels": int(np.count_nonzero(data))}
     if not np.isfinite(image.affine).all():
         raise ValueError(f"nonfinite affine: {path}")
+    if result["nonfinite_count"]:
+        raise ValueError(f"nonfinite image values: {path}")
     if labels:
         if not np.isfinite(data).all() or (data < 0).any() or not np.equal(data, np.round(data)).all():
             raise ValueError(f"invalid labels: {path}")
@@ -235,9 +237,11 @@ def synthmorph_commands(config, directory):
 def verified_synthmorph_recovery(report_record, config, identity):
     """Bind successful official commands without rewriting their failed report."""
     prior = read_bound_json(report_record)
+    prior_identity = {k: v for k, v in prior.get("preflight", {}).items() if k != "runtime_libraries"}
+    expected_identity = {k: v for k, v in identity.items() if k != "runtime_libraries"}
     if (prior.get("case_id") != config["case_id"] or prior.get("mode") != "prepare"
             or prior.get("state") != "failed" or prior.get("execution_completed") is not False
-            or prior.get("preflight") != identity):
+            or prior_identity != expected_identity):
         raise ValueError("same-input failed official prepare required for staged recovery")
     if prior.get("error", {}).get("type") != "HeaderDataError":
         raise ValueError("recovery only accepts the documented warp image-readback failure")
@@ -262,6 +266,8 @@ def verified_synthmorph_recovery(report_record, config, identity):
     return {"report": report_record, "original_source_commit": prior["source_commit"],
             "original_script_sha256": prior["script_sha256"], "original_commands": commands,
             "original_failed_state": prior["state"], "files": files,
+            "runtime_libraries_for_continuation": identity.get("runtime_libraries", []),
+            "prior_runtime_libraries": prior.get("preflight", {}).get("runtime_libraries", []),
             "warp_sha_observation_scope": "first bound at recovery entry; prior three official commands exited zero",
             "original_command_seconds": sum(row["seconds_inclusive"] for row in commands)}
 
@@ -276,6 +282,10 @@ class Runner:
             "SUBJECTS_DIR": str(output / "subjects"), "PYTHONNOUSERSITE": "1"}
         self.environment["PATH"] = os.pathsep.join([str(Path(config["python"]).parent),
             config["mrtrix_bin"], config["fsl_bin"], str(fs / "bin"), self.environment.get("PATH", "")])
+        directories = config.get("runtime_library_dirs", [])
+        if directories:
+            self.environment["LD_LIBRARY_PATH"] = os.pathsep.join([*directories,
+                *[x for x in self.environment.get("LD_LIBRARY_PATH", "").split(os.pathsep) if x]])
         for name in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS", "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS"):
             self.environment[name] = str(config["threads"])
         self.report = {"schema_version": 1, "case_id": config["case_id"],
@@ -287,6 +297,7 @@ class Runner:
             "precision": "installed official implementations and default joint extent256/steps7; no -g",
             "gpu": {"used": False, "allocated": None, "reserved": None},
             "timing_scope": "tool entry, verification, official commands, native combination/readback/output hashing; Python import/startup excluded; no recon-all rerun"}
+        self.report["runtime_library_dirs"] = directories
 
     def save(self):
         temporary = self.output / "reference_anatomy.json.tmp"
@@ -367,6 +378,18 @@ def preflight(config):
         asset = assets[str((fs / "models" / name).resolve())]
         if asset["sha256"] != expected or asset["size_bytes"] != size:
             raise ValueError("official weights differ from fixed FNIT resource identity")
+    runtime_libraries = []
+    for directory in config.get("runtime_library_dirs", []):
+        directory = Path(directory).resolve()
+        if not directory.is_dir():
+            raise FileNotFoundError(directory)
+        library = directory / "libstdc++.so.6"
+        record = next((r for r in config.get("runtime_libraries", [])
+                       if Path(r["path"]).resolve() == library.resolve()), None)
+        if record is None:
+            raise ValueError("explicit runtime library directory requires bound libstdc++.so.6 SHA")
+        verify_file(record)
+        runtime_libraries.append(record)
     scripts = {}
     for name in ("convert_native_annot.py", "convert_schaefer_annot.py", "convert_labels_gii_to_annot.py", "map_surface_label_to_volume.py"):
         record = config["upstream_scripts"][name]
@@ -383,6 +406,7 @@ def preflight(config):
     verify_canonical_lut(read_nodes(config["canonical_nodes84"]), fs / "FreeSurferColorLUT.txt",
                          Path(config["mrtrix_bin"]).parent / "share/mrtrix3/labelconvert/fs_default.txt")
     return {"anatomy": anatomy, "assets": assets, "upstream_scripts": scripts,
+            "runtime_libraries": runtime_libraries,
             "freesurfer_build_stamp": file_record(fs / "build-stamp.txt"),
             "freesurfer_version": (fs / "build-stamp.txt").read_text().strip(),
             "official_synthmorph_source": file_record(fs / "python/scripts/mri_synthmorph"),
@@ -414,6 +438,8 @@ def prepare(runner, recovered_synthmorph=None):
     c, out = runner.config, runner.output
     fs, mr, upstream = Path(c["freesurfer_home"]), Path(c["mrtrix_bin"]), Path(c["upstream_root"])
     subject = Path(c["subject_dir"])
+    # Fail on a missing host runtime before doing a several-minute registration.
+    runner.run("mrtrix_runtime_version", [mr / "mrconvert", "-version"])
     private = out / "original_wrapper"
     (private / "data/temporary/subjects/public_0/atlases").mkdir(parents=True)
     (private / "reference_subjects/public_0").mkdir(parents=True)
@@ -530,12 +556,18 @@ def complete(runner, prepared_record, dwi_record):
         shutil.copyfile(prepared["outputs"][f"nodes:{profile}"]["path"], target / "nodes.tsv")
         rows = read_nodes(target / "nodes.tsv")
         record = image_record(target / "atlas_dwi.nii.gz", labels=True)
-        if record["shape"] != list(nib.load(str(paths["mean_b0"])).shape) or max(record["labels"]) > len(rows):
-            raise ValueError("official atlas output shape/labels inconsistent")
+        reference = nib.load(str(paths["mean_b0"]))
+        if (record["shape"] != list(reference.shape) or max(record["labels"]) > len(rows)
+                or not np.allclose(record["affine"], reference.affine, atol=1e-5, rtol=0)):
+            raise ValueError("official atlas output grid/labels inconsistent")
         runner.report["outputs"][f"atlas:{profile}"] = record
         runner.report["outputs"][f"nodes:{profile}"] = file_record(target / "nodes.tsv")
     for name in ("dwi_to_t1_fsl", "dwi_to_t1_mrtrix"):
         runner.report["outputs"][name] = file_record(out / f"{name}.txt")
+    verify_file(prepared_record)
+    for record in prepared["outputs"].values():
+        verify_file(record)
+    verify_dwi_contract(dwi_record, c["case_id"])
     runner.report["state"] = "official_anatomy_and_dwi_atlas_completed"
     runner.report["execution_completed"] = True
     runner.report["full_raw_connectome"] = False
