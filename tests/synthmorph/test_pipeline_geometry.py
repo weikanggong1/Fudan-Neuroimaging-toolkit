@@ -440,3 +440,25 @@ def test_apply_cuda_auto_rejects_single_frame_above_8_gib(mocked_cuda_frame_samp
             method="linear", fill=0, frame_chunk_size=None,
         )
     assert state["chunks"] == []
+
+@pytest.mark.parametrize("spacing", ["   ", "\t"])
+def test_lta_geometry_accepts_native_writer_field_spacing(tmp_path, spacing):
+    source = _image()
+    target = _image((7, 8, 9))
+    transform = AffineTransform(np.eye(4), source=source, target=target, space="voxel")
+    path = tmp_path / "spaced.lta"
+    transform.save(path)
+    text = path.read_text()
+    for key in ("xras", "yras", "zras", "cras", "voxelsize", "volume"):
+        text = text.replace(f"{key} =", f"{key}{spacing}=")
+    path.write_text(text)
+    loaded = load_lta(path)
+    np.testing.assert_array_equal(loaded.matrix, transform.matrix)
+    np.testing.assert_array_equal(loaded.source.affine, transform.source.affine)
+    np.testing.assert_array_equal(loaded.target.affine, transform.target.affine)
+
+
+def test_lta_geometry_does_not_accept_field_name_prefix():
+    from fnit._transforms import _lta_value
+    with pytest.raises(ValueError, match="missing xras"):
+        _lta_value(["src volume info", "xras_extra = 1 0 0", "dst volume info"], 0, "xras")
