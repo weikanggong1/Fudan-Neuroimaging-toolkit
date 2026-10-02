@@ -156,3 +156,53 @@ python validation/recon_all/optimizations/20261002_parallel/summarize_performanc
   --reports validation/recon_all/optimizations/20261002_parallel/whole \
   --output validation/recon_all/optimizations/20261002_parallel/whole/performance
 ```
+
+## CUDA 首次初始化失败的独立诊断与空目录复测
+
+第二例首次候选整例的失败终态保存在 `whole/candidate_sub02_failed_v1/`，
+它不能当作完整运行。RH 在首次 CUDA 张量分配时 OOM，LH 被取消，表面组
+`published=[]`。4 字节是张量有效大小，不能代表首次初始化的全部资源开销。
+外部负载和同期显存样本已保留；当前未确定根因，未修改精度或分配器。
+
+`diagnose_cuda_bootstrap.py` 使用失败整例的 JSON 配置，冻结安装入口、GPU UUID
+和 disabled allocator，运行 single、双进程、分阶段 single、双进程四批冷启动。
+每个进程只使用2个CPU线程，同时最多两个；与生产 worker 的首次分配顺序一致。
+分阶段探针额外分列 init、set_device、properties、memory_info、allocation、
+synchronize。原顺序探针在首次分配前不查询 CUDA memory_info。诊断不读取 T1、
+官方输出或模型，不改变生产实现；观察成功不构成可靠性保证。
+
+```bash
+# --config：失败整例的冻结配置；--output：必须不存在的诊断目录。
+# --lock：与整例相同的主机本地锁，避免与已声明验证任务争用。
+python diagnose_cuda_bootstrap.py \
+  --config /data/benchmark/coordinator/candidate_sub02_8d750e2.json \
+  --output /data/benchmark/cuda_bootstrap_diagnostic_v1 \
+  --lock /tmp/fnit-recon-benchmark.lock
+```
+
+主入口默认不是 child/staged 模式；内部 `--child` 只运行一次探针，
+`--staged` 只为该探针增加分阶段初始化。每个 JSON 记录 PID、UTC、线程、
+明确环境、PyTorch版本、失败phase和traceback；总报告还保存同期 NVML GPU/
+进程快照与脚本/配置SHA。任何探针失败均非零退出，不静默重试。
+
+`run_candidate_retry_v2.py` 的全部参数为必需的 `--round`（本轮目录）、
+`--python`（同一Conda Python）、`--lock`（共同主机锁）。它最多等待诊断8小时；
+诊断失败即停止。通过后逐SHA复核171个安装源码和15个原生程序，确认新配置
+仅改变 output/diagnostic_root，再调用既有队列，从原始T1和新空目录执行一次。
+旧失败目录不恢复、不复制为生产输入。输出 coordinator 的 retry 状态/队列，
+整例入口及 monitor 仍分别输出 launch/completion/run/显存CSV。等待和诊断不计入
+重建墙钟；任何重建失败均明确保存，不能拼接失败前缀。
+
+```bash
+# --round：含冻结配置、已安装wheel与私有native bundle的本轮目录。
+# --python：实际安装验证通过的Python；--lock：同一主机资源锁。
+python run_candidate_retry_v2.py \
+  --round /data/benchmark/parallel_20261002 \
+  --python /opt/conda/envs/fnit/bin/python \
+  --lock /tmp/fnit-recon-benchmark.lock
+```
+
+这是执行和故障诊断包装器，没有独立 FreeSurfer 等价科学计算命令；完整流程
+语义仍为 `recon-all -s SUBJECT -i T1 -all`。实际执行SHA、失败尝试和成功尝试分别
+保留；本节不能替代实际终态或新的官方重复性结果。两脚本只用Python标准库和
+主页已声明PyTorch，未新增依赖。
