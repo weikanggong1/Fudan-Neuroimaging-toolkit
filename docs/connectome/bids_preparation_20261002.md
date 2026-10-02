@@ -27,7 +27,7 @@ prepared_inputs = prepare_bids_connectome(
 参考工具的 TOPUP/EDDY 输入由真实 JSON 和梯度生成，不能猜 readout。官方解剖命令为 `recon-all -sd SUBJECTS_DIR -s SUBJECT -i T1w.nii.gz -all`。本轮独立官方组件队列额外使用 `-parallel -openmp 8`，其耗时不能视为整条 pipeline 耗时。TOPUP/EDDY 官方命令仅用于隔离 reference。
 
 ## 5. 最新精度与运行时间比较
-入口测试验证 seed 透传、seed 改变时缓存失效、设备透传、T1 变化防护与 TOPUP 已选 AP b0 复用。十例新下载 ds001226 的真实 benchmark 正在执行，尚无完整 pipeline 耗时和脑图；不以单元测试替代实测。
+入口测试验证 seed 透传、seed 改变时缓存失效、设备透传、T1 变化防护与 TOPUP 已选 AP b0 复用。十例新下载 ds001226 raw 已核验：CON01、CON03–CON11，同 session DWI/T1w 配对。CON02 的 PA JSON 为 i-，与 AP j- 的 world 方向近乎正交，已排除并以新下载 CON11 补足。33 个 NIfTI（包括排除例）均与冻结 Git annex 的大小、MD5 内容匹配，并保存 SHA-256、S3 ETag/LastModified 及原始 JSON 来源。CON03 真实 TOPUP/EDDY 组件已完成，详见[几何修复和实测](topup_pair_geometry_20261002.md)。官方 recon 与正式完整 pipeline 仍运行，尚无完整端到端耗时。
 
 ## 6. 更新记录与 benchmark 记录
 2026-10-02：修复成熟入口 AP-only 漏传 device；新增兼容可选 `eddy_gp_seed`，默认随机行为保持原值；同次 TOPUP/EDDY 复用最佳 b0 编号，省去重复选择；自动 recon 跳过增加 T1 指纹。无精度、迭代、分辨率和算法调整。基线 f436de588647a0de80735e4a98d53df5d88e502d；真实数据清单和运行记录位于本轮 task_01 服务器目录。

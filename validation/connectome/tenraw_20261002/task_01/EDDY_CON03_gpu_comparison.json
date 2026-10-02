@@ -1,0 +1,250 @@
+{
+  "reference": {
+    "subject": "CON03",
+    "kind": "gpu",
+    "command": [
+      "/public/software/apps/FSL/6.0.7.4/bin/eddy_cuda10.2",
+      "--imain=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/raw/AP.nii.gz",
+      "--mask=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/eddy/nodif_brain_mask.nii.gz",
+      "--acqp=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/topup/acqparams.txt",
+      "--index=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/eddy/eddy_index.txt",
+      "--bvecs=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/raw/AP.bvec",
+      "--bvals=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/raw/AP.bval",
+      "--topup=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/topup/fieldmap_out",
+      "--out=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/reference_eddy_gpu_CON03/data",
+      "--flm=quadratic",
+      "--resamp=jac",
+      "--slm=linear",
+      "--niter=8",
+      "--fwhm=10,8,4,2,0,0,0,0",
+      "--ff=10",
+      "--sep_offs_move",
+      "--nvoxhp=1000",
+      "--repol",
+      "--rms",
+      "--initrand=12345",
+      "--ref_scan_no=0"
+    ],
+    "lock_wait_seconds": 7037.7961510200985,
+    "program_sha256": "c6dcf94c9c8826c74039885b579ef7117996a52ae3efb01ed91308d4b910d591",
+    "gp_seed": 12345,
+    "ref_scan_no": 0,
+    "scope": "isolated official same input EDDY reference",
+    "input_sha256": {
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/raw/AP.nii.gz": "508abf39e1595475a8e87edd64d5a70a56676f937d0af9017bdeea9f0bc62647",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/eddy/nodif_brain_mask.nii.gz": "95601b23e321af4999060e0e1a0d3209f8ab823ddcda5a8336618b807d8e3ff2",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/topup/acqparams.txt": "8b52ac3e7bb343a36a07e304920767837843466d364e54705fd6ccc5e2301002",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/eddy/eddy_index.txt": "e7c3bd72554da85a9838a3d2a16a0cc6266d4bacf96f363dca782e3e78155e0e",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/raw/AP.bvec": "d980d7634e25ae4ac859c9886ab87ee69fb5f4f00b5f4d7b92a38bf5471efccc",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/raw/AP.bval": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/topup/fieldmap_out_fieldcoef.nii.gz": "5624788ae71ab83e1a34648dbb2c4f9829b8be20a4e100b87bd411174716236a",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/topup/fieldmap_out_movpar.txt": "a19557da5ca00f6e4bb3930be00466abc762e94c1237f83192899a98da305b94"
+    },
+    "returncode": 0,
+    "wall_seconds": 804.1733855111524,
+    "gpu_process_peak_bytes": 1168113664.0,
+    "budget_exceeded": false
+  },
+  "scope": "same real raw DWI, FNIT TOPUP/mask/reference index and GP seed; descriptive official comparison, not whole pipeline",
+  "equivalence_assessed": false,
+  "speedup_claim": null,
+  "image_geometry": {
+    "FNIT_shape": [
+      96,
+      96,
+      60,
+      102
+    ],
+    "FSL_shape": [
+      96,
+      96,
+      60,
+      102
+    ],
+    "affine_max_abs": 0.0
+  },
+  "image_full": {
+    "neq": 53188796,
+    "max_abs": 191.6227569580078,
+    "p99_abs": 10.07298300266271,
+    "rmse": 2.498828204040235
+  },
+  "image_masked": {
+    "neq": 9050948,
+    "max_abs": 121.51659393310547,
+    "p99_abs": 13.539359016418459,
+    "rmse": 3.5881097848024925
+  },
+  "image_masked_correlation": 0.999068460669577,
+  "numeric_sidecars": {
+    "eddy_rotated_bvecs": {
+      "neq": 288,
+      "max_abs": 0.0091323492,
+      "p99_abs": 0.008876516800000001,
+      "rmse": 0.003059553818119848
+    },
+    "eddy_parameters": {
+      "neq": 1566,
+      "max_abs": 0.7096954478,
+      "p99_abs": 0.7079216416110999,
+      "rmse": 0.1317236707924814
+    },
+    "eddy_movement_rms": {
+      "neq": 202,
+      "max_abs": 0.8027128570000001,
+      "p99_abs": 0.6981104874740001,
+      "rmse": 0.3078929324395039
+    },
+    "eddy_restricted_movement_rms": {
+      "neq": 202,
+      "max_abs": 0.89290295833,
+      "p99_abs": 0.6523980654210001,
+      "rmse": 0.2815364311351384
+    },
+    "eddy_outlier_map": {
+      "neq": 4,
+      "max_abs": 1.0,
+      "p99_abs": 0.0,
+      "rmse": 0.02556549962824568
+    },
+    "eddy_outlier_n_stdev_map": {
+      "neq": 5760,
+      "max_abs": 8.027229309,
+      "p99_abs": 1.338845730650012,
+      "rmse": 0.31221365048507355
+    },
+    "eddy_outlier_n_sqr_stdev_map": {
+      "neq": 5760,
+      "max_abs": 15.60007763,
+      "p99_abs": 0.6762275577000053,
+      "rmse": 0.339361862049687
+    }
+  },
+  "completed": true,
+  "gradient_angle_degrees": {
+    "dwi_frames": 96,
+    "max": 0.5302836780506891,
+    "p99": 0.5283364129419376,
+    "rms": 0.31297312347693856,
+    "mean": 0.23145004895765162,
+    "b0_excluded": true
+  },
+  "FNIT_wall_seconds": 297.9168142527342,
+  "parameter_columns": {
+    "0": {
+      "label": "translation_x_mm",
+      "max_abs": 0.7096954478,
+      "p99_abs": 0.7091373219445001,
+      "rmse": 0.49502450916789437,
+      "neq": 101
+    },
+    "1": {
+      "label": "translation_y_mm",
+      "max_abs": 0.257745389,
+      "p99_abs": 0.254103416412,
+      "rmse": 0.17639564217714834,
+      "neq": 101
+    },
+    "2": {
+      "label": "translation_z_mm",
+      "max_abs": 0.06686560200000002,
+      "p99_abs": 0.05920214245700002,
+      "rmse": 0.03604008866392853,
+      "neq": 101
+    },
+    "3": {
+      "label": "rotation_x_rad",
+      "max_abs": 0.003392660990000001,
+      "p99_abs": 0.0011687088648809998,
+      "rmse": 0.0007364207766968182,
+      "neq": 101
+    },
+    "4": {
+      "label": "rotation_y_rad",
+      "max_abs": 0.00042952527300000004,
+      "p99_abs": 0.0004199700546613,
+      "rmse": 0.0003030748510034676,
+      "neq": 101
+    },
+    "5": {
+      "label": "rotation_z_rad",
+      "max_abs": 0.009301963495,
+      "p99_abs": 0.00928676921217,
+      "rmse": 0.006432595923365962,
+      "neq": 101
+    },
+    "6": {
+      "label": "EC_coefficient_official_column_6",
+      "max_abs": 0.0003558857289999999,
+      "p99_abs": 0.0003511602541099988,
+      "rmse": 0.00015554320197803248,
+      "neq": 96
+    },
+    "7": {
+      "label": "EC_coefficient_official_column_7",
+      "max_abs": 0.00016561530200000056,
+      "p99_abs": 0.00016279977978000008,
+      "rmse": 7.186707738550196e-05,
+      "neq": 96
+    },
+    "8": {
+      "label": "EC_coefficient_official_column_8",
+      "max_abs": 0.0003446142800000024,
+      "p99_abs": 0.0003439155459000027,
+      "rmse": 0.000149997297893391,
+      "neq": 96
+    },
+    "9": {
+      "label": "EC_coefficient_official_column_9",
+      "max_abs": 2.21245829e-05,
+      "p99_abs": 2.16007358688e-05,
+      "rmse": 9.616149470995945e-06,
+      "neq": 96
+    },
+    "10": {
+      "label": "EC_coefficient_official_column_10",
+      "max_abs": 3.608447340000007e-06,
+      "p99_abs": 3.5756475294000004e-06,
+      "rmse": 1.574515740462051e-06,
+      "neq": 96
+    },
+    "11": {
+      "label": "EC_coefficient_official_column_11",
+      "max_abs": 1.680923769999999e-05,
+      "p99_abs": 1.652762823079996e-05,
+      "rmse": 7.290373668714598e-06,
+      "neq": 96
+    },
+    "12": {
+      "label": "EC_coefficient_official_column_12",
+      "max_abs": 7.624154399999967e-06,
+      "p99_abs": 7.550738907999985e-06,
+      "rmse": 3.3370722829207496e-06,
+      "neq": 96
+    },
+    "13": {
+      "label": "EC_coefficient_official_column_13",
+      "max_abs": 6.127599999999965e-06,
+      "p99_abs": 5.964900114000055e-06,
+      "rmse": 2.657301214220644e-06,
+      "neq": 96
+    },
+    "14": {
+      "label": "EC_coefficient_official_column_14",
+      "max_abs": 1.792978899999996e-05,
+      "p99_abs": 1.789110875000001e-05,
+      "rmse": 7.864901145479678e-06,
+      "neq": 96
+    },
+    "15": {
+      "label": "EC_coefficient_official_column_15",
+      "max_abs": 0.02431240209999999,
+      "p99_abs": 0.024220750505000017,
+      "rmse": 0.010600347149193098,
+      "neq": 96
+    }
+  },
+  "CPU_GPU_same_input_SHA_and_seed": true,
+  "GPU_UUID_runtime_capture": "not recorded in this historical run; no retrospective inference from current profiler snapshot",
+  "shared_GPU_load_runtime_capture": "not recorded; own-process sampled peak only"
+}

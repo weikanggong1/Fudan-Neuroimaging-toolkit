@@ -1,0 +1,248 @@
+{
+  "reference": {
+    "subject": "CON03",
+    "kind": "cpu",
+    "command": [
+      "/public/software/apps/FSL/6.0.7.4/bin/eddy_cpu",
+      "--imain=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/raw/AP.nii.gz",
+      "--mask=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/eddy/nodif_brain_mask.nii.gz",
+      "--acqp=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/topup/acqparams.txt",
+      "--index=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/eddy/eddy_index.txt",
+      "--bvecs=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/raw/AP.bvec",
+      "--bvals=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/raw/AP.bval",
+      "--topup=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/topup/fieldmap_out",
+      "--out=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/reference_eddy_cpu_CON03/data",
+      "--flm=quadratic",
+      "--resamp=jac",
+      "--slm=linear",
+      "--niter=8",
+      "--fwhm=10,8,4,2,0,0,0,0",
+      "--ff=10",
+      "--sep_offs_move",
+      "--nvoxhp=1000",
+      "--repol",
+      "--rms",
+      "--initrand=12345",
+      "--ref_scan_no=0"
+    ],
+    "lock_wait_seconds": 0,
+    "program_sha256": "a5cf07367c42a6215ede24705ee8e10c6e76df8b170ac67fb8cb25f0c3d30f1f",
+    "gp_seed": 12345,
+    "ref_scan_no": 0,
+    "scope": "isolated official same input EDDY reference",
+    "input_sha256": {
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/raw/AP.nii.gz": "508abf39e1595475a8e87edd64d5a70a56676f937d0af9017bdeea9f0bc62647",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/eddy/nodif_brain_mask.nii.gz": "95601b23e321af4999060e0e1a0d3209f8ab823ddcda5a8336618b807d8e3ff2",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/topup/acqparams.txt": "8b52ac3e7bb343a36a07e304920767837843466d364e54705fd6ccc5e2301002",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/eddy/eddy_index.txt": "e7c3bd72554da85a9838a3d2a16a0cc6266d4bacf96f363dca782e3e78155e0e",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/raw/AP.bvec": "d980d7634e25ae4ac859c9886ab87ee69fb5f4f00b5f4d7b92a38bf5471efccc",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/raw/AP.bval": "a678931600142ebf20236adba60c52b41e85b9aa241b78dc69c6385c089576c2",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/topup/fieldmap_out_fieldcoef.nii.gz": "5624788ae71ab83e1a34648dbb2c4f9829b8be20a4e100b87bd411174716236a",
+      "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/pilot_components_v2/sub-CON03/topup/fieldmap_out_movpar.txt": "a19557da5ca00f6e4bb3930be00466abc762e94c1237f83192899a98da305b94"
+    },
+    "returncode": 0,
+    "wall_seconds": 3015.365433856845,
+    "gpu_process_peak_bytes": null,
+    "budget_exceeded": false
+  },
+  "scope": "same real raw DWI, FNIT TOPUP/mask/reference index and GP seed; descriptive official comparison, not whole pipeline",
+  "equivalence_assessed": false,
+  "speedup_claim": null,
+  "image_geometry": {
+    "FNIT_shape": [
+      96,
+      96,
+      60,
+      102
+    ],
+    "FSL_shape": [
+      96,
+      96,
+      60,
+      102
+    ],
+    "affine_max_abs": 0.0
+  },
+  "image_full": {
+    "neq": 53283393,
+    "max_abs": 118.4751205444336,
+    "p99_abs": 10.273734683990483,
+    "rmse": 2.476667190886269
+  },
+  "image_masked": {
+    "neq": 9050915,
+    "max_abs": 118.4751205444336,
+    "p99_abs": 13.465143737792971,
+    "rmse": 3.547079136101471
+  },
+  "image_masked_correlation": 0.9990897028489409,
+  "numeric_sidecars": {
+    "eddy_rotated_bvecs": {
+      "neq": 288,
+      "max_abs": 0.010455322000000003,
+      "p99_abs": 0.010002813535000007,
+      "rmse": 0.0034664323288360346
+    },
+    "eddy_parameters": {
+      "neq": 1566,
+      "max_abs": 0.6582896637,
+      "p99_abs": 0.6483357163568,
+      "rmse": 0.12188118737749803
+    },
+    "eddy_movement_rms": {
+      "neq": 202,
+      "max_abs": 0.8399571519,
+      "p99_abs": 0.655365088246,
+      "rmse": 0.30468497993627963
+    },
+    "eddy_restricted_movement_rms": {
+      "neq": 202,
+      "max_abs": 0.8234549881,
+      "p99_abs": 0.656885256691,
+      "rmse": 0.2745444414294762
+    },
+    "eddy_outlier_map": {
+      "neq": 5,
+      "max_abs": 1.0,
+      "p99_abs": 0.0,
+      "rmse": 0.028583097523751475
+    },
+    "eddy_outlier_n_stdev_map": {
+      "neq": 5760,
+      "max_abs": 8.027229309,
+      "p99_abs": 1.338845730650012,
+      "rmse": 0.3134143317921417
+    },
+    "eddy_outlier_n_sqr_stdev_map": {
+      "neq": 5760,
+      "max_abs": 15.60007763,
+      "p99_abs": 0.7801448926870049,
+      "rmse": 0.3445210133508122
+    }
+  },
+  "completed": true,
+  "gradient_angle_degrees": {
+    "dwi_frames": 96,
+    "max": 0.6027594323960451,
+    "p99": 0.6009460904425278,
+    "rms": 0.35459449980427504,
+    "mean": 0.27224174915948124,
+    "b0_excluded": true
+  },
+  "FNIT_wall_seconds": 297.9168142527342,
+  "parameter_columns": {
+    "0": {
+      "label": "translation_x_mm",
+      "max_abs": 0.6582896637,
+      "p99_abs": 0.653829665073,
+      "rmse": 0.45209711740277986,
+      "neq": 101
+    },
+    "1": {
+      "label": "translation_y_mm",
+      "max_abs": 0.31119520617,
+      "p99_abs": 0.29914672464829994,
+      "rmse": 0.17060758511806245,
+      "neq": 101
+    },
+    "2": {
+      "label": "translation_z_mm",
+      "max_abs": 0.06507090040000002,
+      "p99_abs": 0.05963157389409994,
+      "rmse": 0.02889824845826603,
+      "neq": 101
+    },
+    "3": {
+      "label": "rotation_x_rad",
+      "max_abs": 0.0036164317299999995,
+      "p99_abs": 0.0009035231947199994,
+      "rmse": 0.0004811218986396179,
+      "neq": 101
+    },
+    "4": {
+      "label": "rotation_y_rad",
+      "max_abs": 0.0009331451147,
+      "p99_abs": 0.00069698276332,
+      "rmse": 0.00046562825750719975,
+      "neq": 101
+    },
+    "5": {
+      "label": "rotation_z_rad",
+      "max_abs": 0.010710671544,
+      "p99_abs": 0.010664465652639999,
+      "rmse": 0.007318413029923259,
+      "neq": 101
+    },
+    "6": {
+      "label": "EC_coefficient_official_column_6",
+      "max_abs": 0.0015756558700000048,
+      "p99_abs": 0.0015187411904999996,
+      "rmse": 0.000681867799317215,
+      "neq": 96
+    },
+    "7": {
+      "label": "EC_coefficient_official_column_7",
+      "max_abs": 0.0012048848799999998,
+      "p99_abs": 0.001166256420181,
+      "rmse": 0.0005206530532135542,
+      "neq": 96
+    },
+    "8": {
+      "label": "EC_coefficient_official_column_8",
+      "max_abs": 0.004528786799999997,
+      "p99_abs": 0.004524617031199998,
+      "rmse": 0.0019780275935696798,
+      "neq": 96
+    },
+    "9": {
+      "label": "EC_coefficient_official_column_9",
+      "max_abs": 4.4548271200000006e-05,
+      "p99_abs": 4.3382808148e-05,
+      "rmse": 1.9270076089879013e-05,
+      "neq": 96
+    },
+    "10": {
+      "label": "EC_coefficient_official_column_10",
+      "max_abs": 6.035225751e-05,
+      "p99_abs": 5.774001196174601e-05,
+      "rmse": 2.602747460980943e-05,
+      "neq": 96
+    },
+    "11": {
+      "label": "EC_coefficient_official_column_11",
+      "max_abs": 0.00010972498889999993,
+      "p99_abs": 0.00010695365136399996,
+      "rmse": 4.7468715881461804e-05,
+      "neq": 96
+    },
+    "12": {
+      "label": "EC_coefficient_official_column_12",
+      "max_abs": 6.210840979999999e-05,
+      "p99_abs": 6.1016811075999975e-05,
+      "rmse": 2.6901710112372294e-05,
+      "neq": 96
+    },
+    "13": {
+      "label": "EC_coefficient_official_column_13",
+      "max_abs": 3.70897719e-05,
+      "p99_abs": 3.6001298509999986e-05,
+      "rmse": 1.608127509059811e-05,
+      "neq": 96
+    },
+    "14": {
+      "label": "EC_coefficient_official_column_14",
+      "max_abs": 5.061150339999998e-05,
+      "p99_abs": 4.97804217957e-05,
+      "rmse": 2.208923848202636e-05,
+      "neq": 96
+    },
+    "15": {
+      "label": "EC_coefficient_official_column_15",
+      "max_abs": 0.13141494199999992,
+      "p99_abs": 0.1290217652499999,
+      "rmse": 0.05733986493815901,
+      "neq": 96
+    }
+  },
+  "CPU_GPU_same_input_SHA_and_seed": true
+}
