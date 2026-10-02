@@ -166,7 +166,7 @@ python validation/recon_all/optimizations/20261002_parallel/summarize_performanc
 
 `diagnose_cuda_bootstrap.py` 使用失败整例的 JSON 配置，冻结安装入口、GPU UUID
 和 disabled allocator，运行 single、双进程、分阶段 single、双进程四批冷启动。
-每个进程只使用2个CPU线程，同时最多两个；与生产 worker 的首次分配顺序一致。
+每个进程只使用2个CPU线程，同时最多两个；复刻首次分配顺序，但v1未导入生产worker的thread_budget（其顶层导入Numba），因此不是完整导入顺序对照。
 分阶段探针额外分列 init、set_device、properties、memory_info、allocation、
 synchronize。原顺序探针在首次分配前不查询 CUDA memory_info。诊断不读取 T1、
 官方输出或模型，不改变生产实现；观察成功不构成可靠性保证。
@@ -206,3 +206,33 @@ python run_candidate_retry_v2.py \
 语义仍为 `recon-all -s SUBJECT -i T1 -all`。实际执行SHA、失败尝试和成功尝试分别
 保留；本节不能替代实际终态或新的官方重复性结果。两脚本只用Python标准库和
 主页已声明PyTorch，未新增依赖。
+
+
+### 含生产导入顺序的配对初始化诊断
+
+`diagnose_cuda_bootstrap_pairs.py` 的外部参数仍为必需 `--config`、`--output`、
+`--lock`；输入格式及秒/字节单位同上。输出八批独立probe报告、ready ACK、
+release gate、NVML快照和总summary。各新进程在首次CUDA前导入实际worker的
+`thread_budget`（含Numba），不进入表面算法。
+
+前四批按parallel、serial、serial、parallel执行，均保留disabled cache；
+serial先等LH实际分配及同步ACK，保持该进程/context存活，再启动RH，
+两侧均ready后统一放行。另两批测试分阶段初始化、两批测试enabled cache；
+enabled通过删除环境变量启用，只用于诊断。所有批次失败或取消仍保存，
+不根据成功选择性删除失败记录，也不构成生产自动重试。内部 `--child`、
+`--staged` 默认关闭，`--allocator` 默认disabled，`--ack`、`--gate`为本批独立
+文件；等待ACK/gate上限90秒。总summary的complete仅表示诊断批次执行完毕，
+`both_initialized`和各probe status才是实际初始化结果。
+
+```bash
+# --config：原失败整例的冻结入口；--output：另一新目录，保留前次失败诊断。
+# --lock：继续使用共同主机资源锁，诊断耗时不计入整例。
+python diagnose_cuda_bootstrap_pairs.py \
+  --config /data/benchmark/coordinator/candidate_sub02_8d750e2.json \
+  --output /data/benchmark/cuda_bootstrap_pairs_v2 \
+  --lock /tmp/fnit-recon-benchmark.lock
+```
+
+本次v1实际为single通过、第一批parallel两个进程均失败；失败前/后NVML
+可用显存分别70119/69382MiB，不能据此归因于容量耗尽。它不证明根因，也不
+证明Numba是否参与；后续配对测试的完整原字节报告单独保留。
