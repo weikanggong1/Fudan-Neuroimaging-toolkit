@@ -178,6 +178,10 @@ v4已完成5ttgen 10.701秒、GMWMI 1.559秒、fs-aparc84 labelconvert 1.181秒�
 
 `render_connectome_official_anatomy.py --reference-report COMPLETED_REPORT --output FRESH.png`读取实际已绑定结果，绘制brain、5TT、GMWMI与八套atlas，并写图像metadata/SHA；仅作轴排列显示，不重采样，图示本身不构成FNIT与官方匹配结论。
 
+真实CON03实例与[公开结果摘要](../../validation/connectome/raw10_official_anatomy_CON03_20261003/con03_official_anatomy.public.json)；图像SHA与[绘图来源记录](../../validation/connectome/raw10_official_anatomy_CON03_20261003/official_con03_anatomy.json)已核验。此图仅展示官方结构准备输出，DWI/追踪/矩阵对照尚待完成。
+
+![CON03官方freshFS生成5TT、GMWMI与八套native atlas](../../validation/connectome/raw10_official_anatomy_CON03_20261003/official_con03_anatomy.png)
+
 本轮CON03 prepare实际CPU试跑及complete结果将以新报告补充。没有完成报告时，5TT、配准、8atlas精度/时间、脑图均记待评估；不填入旧ds004666结果。现有CON03 fixed-FNIT-input官方追踪参照仍属于另外的验证层级。
 
 ## 6. 更新记录
