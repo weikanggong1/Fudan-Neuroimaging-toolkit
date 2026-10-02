@@ -12,7 +12,10 @@ def main():
         p.add_argument('--'+name,type=pathlib.Path,required=True)
     p.add_argument('--hemisphere',choices=('lh','rh'),required=True)
     p.add_argument('--stage',choices=('remesh','sphere','register'),required=True)
-    a=p.parse_args();h=a.hemisphere;a.output_root.mkdir(parents=True,exist_ok=True)
+    a=p.parse_args()
+    for name in ('checkpoint','reference_home','assets','output_root'):
+        setattr(a,name,getattr(a,name).resolve())
+    h=a.hemisphere;a.output_root.mkdir(parents=True,exist_ok=True)
     context=a.output_root/'subject';surf=context/'surf';surf.mkdir(parents=True,exist_ok=True)
     # 真正复制受控输入，官方程序即使写同名辅助文件也不能修改冻结来源。
     for item in (a.checkpoint/'surf').glob(h+'.*'):

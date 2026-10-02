@@ -90,7 +90,7 @@ mris_register reference/lh.sphere assets/average/lh.folding.atlas.acfb40.noaparc
 
 本轮测量起点 `f07cf59c7f51ae1393e2578f141b4d130ed7801a`，生产源码候选 `9f7bb7a5af72e7572fcb8de617575645f29f51d7`。冻结两例FNIT自产检查点仅作为同输入来源。配对结果写入 `comparison.json` 和 `timings.csv`；每条原始 `report.json` 包含源码/输入/图谱哈希、实际commit、线程/TF32/精度、同步结束、负载和分步轨迹。`run_stage.py`、`compare_stages.py` 是复现入口。
 
-初始探索cProfile未经后来统一的共用锁，只用于定位：单例remesh约189秒（含剖析开销），20次初始边拓扑构建约66.6秒累计，17次rebuild约87秒累计，13次面法向约20.2秒累计；嵌套时间不相加。正式计时另列。GPFS旧锁返回ENOLCK的首轮没有执行，失败日志保留。修复后全部CPU/GPU计时使用远端本地共用flock。
+初始探索cProfile未经后来统一的共用锁，只用于定位：单例remesh约189秒（含剖析开销），20次初始边拓扑构建约66.6秒累计，17次rebuild约87秒累计，13次面法向约20.2秒累计；嵌套时间不相加。正式计时另列。GPFS旧锁返回ENOLCK的首轮没有执行，失败日志保留。官方首次remesh因对照脚本工作目录切换后的相对路径失败，已统一绝对路径并重跑；0.0128秒失败不纳入耗时比较。修复后全部CPU/GPU计时使用远端本地共用flock。
 
 65项CPU专项测试通过；真实lh sphere面几何与顶点法向逐元素一致，非恒定目标的缓存刚体分数/角度/评估次数精确一致。批处理刚体候选曾产生约8.8×10⁻⁶分数差，超过预声明1e-9容差，已撤回并保留诊断；现版采用不改逐候选运算的缓存。
 
