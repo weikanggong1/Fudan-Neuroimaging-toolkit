@@ -1,0 +1,1948 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-02",
+  "function": "fixed_input_t1_fnirt",
+  "baseline_commit": "747345223710e704f94ba850f58504fe2bac4f8e",
+  "validation_only_no_registration_rerun": true,
+  "baseline_and_candidate_scientific_conditions_equal": true,
+  "lossless_gate_passed": true,
+  "scope": {
+    "same_input_and_initial_affine": true,
+    "image_pairs": 20,
+    "qc_pairs": 4,
+    "all_voxels_and_signed_zero_compared": true,
+    "scientific_headers_affines_shapes_dtypes_extensions_compared": true,
+    "qc_exclusions": {
+      "top_level_keys": [
+        "execution"
+      ],
+      "recursive_exact_keys": [
+        "elapsed_seconds"
+      ]
+    },
+    "all_other_qc_and_solver_fields_compared": true,
+    "fsl_numerical_equivalence_claimed": false
+  },
+  "timing_notes": {
+    "formal_runs": "Cold/warm complete FNIRT function includes reads/decompression and CPU output conversion; excludes output persistence/offline comparison; light Python phase/count wrappers remain included; shared H100.",
+    "profile": "Diagnostic only: CUDA profiler window fences/instrumentation change wall time; excluded from speed summary.",
+    "phase_seconds": "Nested asynchronous CPU wall clocks are not additive or exclusive CUDA kernel times.",
+    "memory": "Current process Torch CUDA allocated/reserved, decimal GB; whole GPU observations are separately reported.",
+    "warm_sample_count_per_variant": 2
+  },
+  "verification_environment": {
+    "torch": "2.5.1",
+    "numpy": "1.26.4",
+    "nibabel": "5.4.2"
+  },
+  "comparison_tool_sha256": "3b55efabfe3b77d66d10334c2f5c44a5f3aa1c02d071a0e214ea8052d252ded2",
+  "comparison_helper_sha256": "06190a96b7e771be2a721edeb68a81a5b40bb3bfc2703841b13ebd3f91f6465a",
+  "variants": {
+    "baseline": {
+      "recorded_environment": {
+        "torch": "2.5.1",
+        "cuda_runtime": "11.8",
+        "gpu_name": "NVIDIA H100 PCIe"
+      },
+      "scientific_conditions": {
+        "fnirt_config": "t1",
+        "same_fsl_initial_affine": true,
+        "same_fsl_wmseg": false,
+        "fnirt_execution": "optimized",
+        "bbr_execution": "default",
+        "input_arrayproxy_read_included": true,
+        "wm_header": "legacy",
+        "affine_geometry": "header_pixdim",
+        "fnirt_blur_reference": false,
+        "fnirt_bending_reference": false,
+        "half_precision": false,
+        "default_tf32": true
+      },
+      "timing_scope": "complete function including ArrayProxy reads/decompression and CPU output conversion; excludes output persistence and offline metrics; shared GPU",
+      "source_sha256": {
+        "src/fnit/fnirt/_smoothing_triton.py": "4b6293eb4210b18a91de647003804cf1aa1f50780449a073e350f9177982227b",
+        "src/fnit/fnirt/io.py": "ee79183709258f2e71dcd110f3c922b1cc7d20a979161ae1c86c2c627becf366",
+        "src/fnit/fnirt/__main__.py": "3d2438ae92f4746e9ffaa1f837b1fe803f6281091d1f31f8c95643716f257d9a",
+        "src/fnit/fnirt/cli.py": "9c143739510dd245f76bd98a80610fdbf6ca65519cd59b41f4a9e233b172e53c",
+        "src/fnit/fnirt/optimizer.py": "903d5031058c96aa9e5fdc29736619fe636b62422cd2646b527df49011d173fd",
+        "src/fnit/fnirt/registration.py": "9e5747292bb5bf79d1dd77bf2a6b76a94d99d33b5a6453ff79dc1b843bcda991",
+        "src/fnit/fnirt/topology.py": "150f65a73baf796f98e6304d0c209288816ee75485be5d93032db46edeb52900",
+        "src/fnit/fnirt/_topology_triton.py": "3f61e452228a9c3dff85caff58ed1103e7b89783c86838bf1e70e322ae3f65f1",
+        "src/fnit/fnirt/spline.py": "79ec750523d69342bf4926adf5e715d91a59749026fc5253ee96d765c0208cad",
+        "src/fnit/fnirt/standalone.py": "83a51a301e1d9145051a12e3b4f10b452c319d1e7a7962308443a048b723ade6",
+        "src/fnit/fnirt/__init__.py": "3480673ed6cbbfc38e573ac64bab6d14fabffc46585a29c74a3d916c2739294d",
+        "src/fnit/fmri/bbr.py": "0ca14f3343d6b5bf09ea93f6ec94de9f2c0cce19fdf8ea005a87ff8e03f48fc2",
+        "src/fnit/fmri/normalization.py": "8bd3526743dd110e0291ddf64022d10b92d7d241948bdb96ad122370a7cf8527",
+        "src/fnit/flirt/search.py": "9b50908c1bead992c55255d2ed3c6cf266135e042c276b9ba8176fef03edae4c",
+        "src/fnit/flirt/batched.py": "10115b3fd51497162c2ebc1a7ae52999a4c3079810e18906ae9c0c363a457719",
+        "src/fnit/flirt/__main__.py": "03eb6210ee12d659108106a6126a870a9d5bc89ba95c116cd519e2764b0e092f",
+        "src/fnit/flirt/cli.py": "f57d65c320aee278820de2fb31cc764e7bee911e3228d3a904108d2a75e8142e",
+        "src/fnit/flirt/types.py": "55a3abf2d7ce7889c297df95289890a589d1721b9fe3b157aa90e87819ed8e21",
+        "src/fnit/flirt/standalone.py": "a5ffc8e847bfc5219ef8e068a34eb81bab4b6fceb7ea39a497eb573108a8115e",
+        "src/fnit/flirt/__init__.py": "58b1ae43c50bd2942398f272c013f5bc743ce6a78abdaab7c93eeae1949447af",
+        "src/fnit/flirt/affine_batch.py": "8aa427ea1b185deea2ff2295e01c972bb371cb5a4b23504ce13ef79ca1d6155f",
+        "src/fnit/flirt/core.py": "e6ce6185fafb89666be631069f66e96ce9c6a561ab3d7c7fab4c661d317885c1",
+        "src/fnit/flirt/coordinates.py": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e",
+        "src/fnit/flirt/_batched_cuda.py": "c6ac99f6b0499c2b081969448dc9492906232daac247477edff0cb00ac43cd74",
+        "src/fnit/_nib.py": "568d113432c1a0c50a3b0b635188173e69be1c7436d851de2568bca9b55ab94e",
+        "src/fnit/_transforms.py": "be01fa24cd0c17bb1aa8ac7792cdf0b62c657037808c643427a1b11cc4c05340",
+        "src/fnit/fmri/_bbr_cuda.py": "c79fdd0c20e68628585a46b946d3ef1f532373aaf8c0371eb5ed0ae25a8a5090"
+      },
+      "benchmark_tool_sha256": "7f7aca365b599ac078ae637968821f7ee4d9e0c5bc9c6a27a4625de0bdf57aa6",
+      "support_tool_sha256": "a20768489533889d50ddfaadead5c32f3569b2198b4032f37e9c6a2e0976f870",
+      "original_report_sha256": "a44c0d4a5e3e5a1b0b17f80ccf76b41f915b4125872c3bf10628d7c63a41eb4c",
+      "formal_runs": [
+        {
+          "condition": "cold_0",
+          "wall_seconds": 27.100790205877274,
+          "peak_cuda_allocated_bytes": 1178372608,
+          "peak_cuda_reserved_bytes": 1491075072,
+          "peak_cuda_allocated_gb_decimal": 1.178372608,
+          "peak_cuda_reserved_gb_decimal": 1.491075072,
+          "process_peak_cpu_rss_kb": 970816,
+          "usable_for_formal_speed_summary": true,
+          "profile_instrumentation_changes_timing": false,
+          "phase_timing_scope": "nested CPU wall clocks, no extra GPU fences; dispatched GPU work may finish in subsequent phases",
+          "phase_timings": {
+            "fnirt_smoothing": {
+              "calls": 18,
+              "wall_seconds": 1.0316019752062857,
+              "exclusive_wall_seconds": 1.0315995370037854
+            },
+            "fnirt_expand_coefficients": {
+              "calls": 20819,
+              "wall_seconds": 3.2593760448507965,
+              "exclusive_wall_seconds": 3.2593760448507965
+            },
+            "fnirt_bending_energy": {
+              "calls": 200,
+              "wall_seconds": 0.22734777303412557,
+              "exclusive_wall_seconds": 0.22734777303412557
+            },
+            "fnirt_cost_evaluation": {
+              "calls": 100,
+              "wall_seconds": 0.8622254780493677,
+              "exclusive_wall_seconds": 0.5979198641143739
+            },
+            "fnirt_adjoint_field": {
+              "calls": 20620,
+              "wall_seconds": 2.5945587339811027,
+              "exclusive_wall_seconds": 2.5945587339811027
+            },
+            "fnirt_bending_normal": {
+              "calls": 13985,
+              "wall_seconds": 11.353494219481945,
+              "exclusive_wall_seconds": 11.353494219481945
+            },
+            "fnirt_design_diagonal": {
+              "calls": 178,
+              "wall_seconds": 0.02801672602072358,
+              "exclusive_wall_seconds": 0.02801672602072358
+            },
+            "fnirt_bending_diagonal": {
+              "calls": 84,
+              "wall_seconds": 0.012622877024114132,
+              "exclusive_wall_seconds": 0.012622877024114132
+            },
+            "fnirt_linearization": {
+              "calls": 47,
+              "wall_seconds": 0.4846986993215978,
+              "exclusive_wall_seconds": 0.03383434796705842
+            },
+            "fnirt_joint_linearization": {
+              "calls": 47,
+              "wall_seconds": 0.7701288419775665,
+              "exclusive_wall_seconds": 0.1673338832333684
+            },
+            "fnirt_pcg_matvec": {
+              "calls": 7266,
+              "wall_seconds": 22.31093653384596,
+              "exclusive_wall_seconds": 5.393422339577228
+            },
+            "fnirt_pcg": {
+              "calls": 47,
+              "wall_seconds": 23.755311220884323,
+              "exclusive_wall_seconds": 1.444374687038362
+            },
+            "fnirt_topology": {
+              "calls": 6,
+              "wall_seconds": 0.022591562010347843,
+              "exclusive_wall_seconds": 0.01950083812698722
+            },
+            "fnirt_smoothing_reference": {
+              "calls": 1,
+              "wall_seconds": 2.4382025003433228e-06,
+              "exclusive_wall_seconds": 2.4382025003433228e-06
+            }
+          },
+          "operation_counts": {
+            "fnirt_cost_evaluation": 100,
+            "fnirt_pcg_matvec": 7266
+          },
+          "cuda_tensor_api_calls": {},
+          "actual_cuda_event_counts": {},
+          "profiled_cuda_device_time_us": {},
+          "profile_windows": 0,
+          "profiler_scope": "not profiled",
+          "whole_gpu_observation": {
+            "scope": "whole GPU; includes unrelated processes",
+            "sample_interval_seconds": 1.0,
+            "samples": 25,
+            "gpu_utilization_percent": {
+              "mean": 27.28,
+              "median": 26.0,
+              "p95": 43.599999999999994,
+              "minimum": 0.0,
+              "maximum": 48.0
+            },
+            "whole_gpu_used_mib": {
+              "mean": 5046.96,
+              "median": 4850.0,
+              "p95": 5914.0,
+              "minimum": 3130.0,
+              "maximum": 5914.0
+            },
+            "uuid_mapping_available": true
+          }
+        },
+        {
+          "condition": "warm_1",
+          "wall_seconds": 24.80240187421441,
+          "peak_cuda_allocated_bytes": 1178094592,
+          "peak_cuda_reserved_bytes": 1491075072,
+          "peak_cuda_allocated_gb_decimal": 1.178094592,
+          "peak_cuda_reserved_gb_decimal": 1.491075072,
+          "process_peak_cpu_rss_kb": 1075428,
+          "usable_for_formal_speed_summary": true,
+          "profile_instrumentation_changes_timing": false,
+          "phase_timing_scope": "nested CPU wall clocks, no extra GPU fences; dispatched GPU work may finish in subsequent phases",
+          "phase_timings": {
+            "fnirt_smoothing": {
+              "calls": 18,
+              "wall_seconds": 0.007130375597625971,
+              "exclusive_wall_seconds": 0.00712892971932888
+            },
+            "fnirt_expand_coefficients": {
+              "calls": 20819,
+              "wall_seconds": 3.054789968300611,
+              "exclusive_wall_seconds": 3.054789968300611
+            },
+            "fnirt_bending_energy": {
+              "calls": 200,
+              "wall_seconds": 0.21484188083559275,
+              "exclusive_wall_seconds": 0.21484188083559275
+            },
+            "fnirt_cost_evaluation": {
+              "calls": 100,
+              "wall_seconds": 0.5927566685713828,
+              "exclusive_wall_seconds": 0.46972272591665387
+            },
+            "fnirt_adjoint_field": {
+              "calls": 20620,
+              "wall_seconds": 2.5580524848774076,
+              "exclusive_wall_seconds": 2.5580524848774076
+            },
+            "fnirt_bending_normal": {
+              "calls": 13985,
+              "wall_seconds": 11.249552549794316,
+              "exclusive_wall_seconds": 11.249552549794316
+            },
+            "fnirt_design_diagonal": {
+              "calls": 178,
+              "wall_seconds": 0.025973258074373007,
+              "exclusive_wall_seconds": 0.025973258074373007
+            },
+            "fnirt_bending_diagonal": {
+              "calls": 84,
+              "wall_seconds": 0.010682804975658655,
+              "exclusive_wall_seconds": 0.010682804975658655
+            },
+            "fnirt_linearization": {
+              "calls": 47,
+              "wall_seconds": 0.38121497817337513,
+              "exclusive_wall_seconds": 0.03068032441660762
+            },
+            "fnirt_joint_linearization": {
+              "calls": 47,
+              "wall_seconds": 0.5110772768966854,
+              "exclusive_wall_seconds": 0.02270515402778983
+            },
+            "fnirt_pcg_matvec": {
+              "calls": 7266,
+              "wall_seconds": 22.09944145847112,
+              "exclusive_wall_seconds": 5.364056225400418
+            },
+            "fnirt_pcg": {
+              "calls": 47,
+              "wall_seconds": 23.4446259168908,
+              "exclusive_wall_seconds": 1.3451844584196806
+            },
+            "fnirt_topology": {
+              "calls": 6,
+              "wall_seconds": 0.02336621005088091,
+              "exclusive_wall_seconds": 0.02011571265757084
+            },
+            "fnirt_smoothing_reference": {
+              "calls": 1,
+              "wall_seconds": 1.4458782970905304e-06,
+              "exclusive_wall_seconds": 1.4458782970905304e-06
+            }
+          },
+          "operation_counts": {
+            "fnirt_cost_evaluation": 100,
+            "fnirt_pcg_matvec": 7266
+          },
+          "cuda_tensor_api_calls": {},
+          "actual_cuda_event_counts": {},
+          "profiled_cuda_device_time_us": {},
+          "profile_windows": 0,
+          "profiler_scope": "not profiled",
+          "whole_gpu_observation": {
+            "scope": "whole GPU; includes unrelated processes",
+            "sample_interval_seconds": 1.0,
+            "samples": 23,
+            "gpu_utilization_percent": {
+              "mean": 29.52173913043478,
+              "median": 27.0,
+              "p95": 40.9,
+              "minimum": 0.0,
+              "maximum": 50.0
+            },
+            "whole_gpu_used_mib": {
+              "mean": 5914.0,
+              "median": 5914.0,
+              "p95": 5914.0,
+              "minimum": 5914.0,
+              "maximum": 5914.0
+            },
+            "uuid_mapping_available": true
+          }
+        },
+        {
+          "condition": "warm_2",
+          "wall_seconds": 24.82336819684133,
+          "peak_cuda_allocated_bytes": 1178094592,
+          "peak_cuda_reserved_bytes": 1491075072,
+          "peak_cuda_allocated_gb_decimal": 1.178094592,
+          "peak_cuda_reserved_gb_decimal": 1.491075072,
+          "process_peak_cpu_rss_kb": 1075700,
+          "usable_for_formal_speed_summary": true,
+          "profile_instrumentation_changes_timing": false,
+          "phase_timing_scope": "nested CPU wall clocks, no extra GPU fences; dispatched GPU work may finish in subsequent phases",
+          "phase_timings": {
+            "fnirt_smoothing": {
+              "calls": 18,
+              "wall_seconds": 0.006878767628222704,
+              "exclusive_wall_seconds": 0.00687737250700593
+            },
+            "fnirt_expand_coefficients": {
+              "calls": 20819,
+              "wall_seconds": 3.054228709079325,
+              "exclusive_wall_seconds": 3.054228709079325
+            },
+            "fnirt_bending_energy": {
+              "calls": 200,
+              "wall_seconds": 0.21818408276885748,
+              "exclusive_wall_seconds": 0.21818408276885748
+            },
+            "fnirt_cost_evaluation": {
+              "calls": 100,
+              "wall_seconds": 0.6015629838220775,
+              "exclusive_wall_seconds": 0.4767554961144924
+            },
+            "fnirt_adjoint_field": {
+              "calls": 20620,
+              "wall_seconds": 2.5617381841875613,
+              "exclusive_wall_seconds": 2.5617381841875613
+            },
+            "fnirt_bending_normal": {
+              "calls": 13985,
+              "wall_seconds": 11.23946453537792,
+              "exclusive_wall_seconds": 11.23946453537792
+            },
+            "fnirt_design_diagonal": {
+              "calls": 178,
+              "wall_seconds": 0.026530202943831682,
+              "exclusive_wall_seconds": 0.026530202943831682
+            },
+            "fnirt_bending_diagonal": {
+              "calls": 84,
+              "wall_seconds": 0.01067892275750637,
+              "exclusive_wall_seconds": 0.01067892275750637
+            },
+            "fnirt_linearization": {
+              "calls": 47,
+              "wall_seconds": 0.39283001190051436,
+              "exclusive_wall_seconds": 0.031172424089163542
+            },
+            "fnirt_joint_linearization": {
+              "calls": 47,
+              "wall_seconds": 0.5270017553120852,
+              "exclusive_wall_seconds": 0.02312892721965909
+            },
+            "fnirt_pcg_matvec": {
+              "calls": 7266,
+              "wall_seconds": 22.090455007273704,
+              "exclusive_wall_seconds": 5.365067386534065
+            },
+            "fnirt_pcg": {
+              "calls": 47,
+              "wall_seconds": 23.437079622410238,
+              "exclusive_wall_seconds": 1.346624615136534
+            },
+            "fnirt_topology": {
+              "calls": 6,
+              "wall_seconds": 0.022574528120458126,
+              "exclusive_wall_seconds": 0.0195271959528327
+            },
+            "fnirt_smoothing_reference": {
+              "calls": 1,
+              "wall_seconds": 1.3951212167739868e-06,
+              "exclusive_wall_seconds": 1.3951212167739868e-06
+            }
+          },
+          "operation_counts": {
+            "fnirt_cost_evaluation": 100,
+            "fnirt_pcg_matvec": 7266
+          },
+          "cuda_tensor_api_calls": {},
+          "actual_cuda_event_counts": {},
+          "profiled_cuda_device_time_us": {},
+          "profile_windows": 0,
+          "profiler_scope": "not profiled",
+          "whole_gpu_observation": {
+            "scope": "whole GPU; includes unrelated processes",
+            "sample_interval_seconds": 1.0,
+            "samples": 21,
+            "gpu_utilization_percent": {
+              "mean": 30.38095238095238,
+              "median": 27.0,
+              "p95": 44.0,
+              "minimum": 0.0,
+              "maximum": 51.0
+            },
+            "whole_gpu_used_mib": {
+              "mean": 5914.0,
+              "median": 5914.0,
+              "p95": 5914.0,
+              "minimum": 5914.0,
+              "maximum": 5914.0
+            },
+            "uuid_mapping_available": true
+          }
+        }
+      ],
+      "profile": {
+        "condition": "profiled",
+        "wall_seconds": 186.97785340389237,
+        "peak_cuda_allocated_bytes": 1178094592,
+        "peak_cuda_reserved_bytes": 1491075072,
+        "peak_cuda_allocated_gb_decimal": 1.178094592,
+        "peak_cuda_reserved_gb_decimal": 1.491075072,
+        "process_peak_cpu_rss_kb": 1331780,
+        "usable_for_formal_speed_summary": false,
+        "profile_instrumentation_changes_timing": true,
+        "phase_timing_scope": "nested CPU wall clocks, no extra GPU fences; dispatched GPU work may finish in subsequent phases",
+        "phase_timings": {
+          "fnirt_smoothing": {
+            "calls": 18,
+            "wall_seconds": 0.011013342533260584,
+            "exclusive_wall_seconds": 0.011012096423655748
+          },
+          "fnirt_expand_coefficients": {
+            "calls": 20819,
+            "wall_seconds": 4.374216713011265,
+            "exclusive_wall_seconds": 4.374216713011265
+          },
+          "fnirt_bending_energy": {
+            "calls": 200,
+            "wall_seconds": 0.3038674802519381,
+            "exclusive_wall_seconds": 0.3038674802519381
+          },
+          "fnirt_cost_evaluation": {
+            "calls": 100,
+            "wall_seconds": 0.9176761861890554,
+            "exclusive_wall_seconds": 0.7439370858483016
+          },
+          "fnirt_adjoint_field": {
+            "calls": 20620,
+            "wall_seconds": 3.510325093753636,
+            "exclusive_wall_seconds": 3.510325093753636
+          },
+          "fnirt_bending_normal": {
+            "calls": 13985,
+            "wall_seconds": 15.674760869238526,
+            "exclusive_wall_seconds": 15.674760869238526
+          },
+          "fnirt_design_diagonal": {
+            "calls": 178,
+            "wall_seconds": 0.03682398470118642,
+            "exclusive_wall_seconds": 0.03682398470118642
+          },
+          "fnirt_bending_diagonal": {
+            "calls": 84,
+            "wall_seconds": 0.01479289960116148,
+            "exclusive_wall_seconds": 0.01479289960116148
+          },
+          "fnirt_linearization": {
+            "calls": 47,
+            "wall_seconds": 0.5765368109568954,
+            "exclusive_wall_seconds": 0.045610010623931885
+          },
+          "fnirt_joint_linearization": {
+            "calls": 47,
+            "wall_seconds": 0.7601672746241093,
+            "exclusive_wall_seconds": 0.033736060839146376
+          },
+          "fnirt_pcg_matvec": {
+            "calls": 7266,
+            "wall_seconds": 31.630930156912655,
+            "exclusive_wall_seconds": 8.24538205889985
+          },
+          "fnirt_pcg": {
+            "calls": 47,
+            "wall_seconds": 183.9110144432634,
+            "exclusive_wall_seconds": 152.28008428635076
+          },
+          "fnirt_topology": {
+            "calls": 6,
+            "wall_seconds": 0.03393025416880846,
+            "exclusive_wall_seconds": 0.029897365253418684
+          },
+          "fnirt_smoothing_reference": {
+            "calls": 1,
+            "wall_seconds": 1.2461096048355103e-06,
+            "exclusive_wall_seconds": 1.2461096048355103e-06
+          }
+        },
+        "operation_counts": {
+          "fnirt_cost_evaluation": 100,
+          "fnirt_pcg_matvec": 7266
+        },
+        "cuda_tensor_api_calls": {
+          "__float__": 415,
+          "cpu": 7271,
+          "__bool__": 47
+        },
+        "actual_cuda_event_counts": {
+          "cudaMemcpyAsync": 8147,
+          "H2D": 72,
+          "cudaStreamSynchronize": 8016,
+          "cudaLaunchKernel": 1453839,
+          "kernel": 1553433,
+          "D2D": 131,
+          "D2H": 7944,
+          "cuLaunchKernel": 66,
+          "cudaPeekAtLastError": 216,
+          "cudaDeviceGetAttribute": 36,
+          "cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags": 281210,
+          "cudaFuncSetAttribute": 198196,
+          "cudaFuncGetAttributes": 114061,
+          "cudaLaunchKernelExC": 99528,
+          "cudaMemsetAsync": 1295,
+          "device_memset": 1295,
+          "cudaDeviceSynchronize": 115
+        },
+        "profiled_cuda_device_time_us": {
+          "H2D": 3936.0229999998846,
+          "kernel": 5413139.364998229,
+          "D2D": 256.8009999997412,
+          "D2H": 14879.25599999803,
+          "device_memset": 1112.5319999995954
+        },
+        "profile_windows": 114,
+        "profiler_scope": "complete CUDA-only registration; window fences included",
+        "whole_gpu_observation": {
+          "scope": "whole GPU; includes unrelated processes",
+          "sample_interval_seconds": 1.0,
+          "samples": 161,
+          "gpu_utilization_percent": {
+            "mean": 11.788819875776397,
+            "median": 3.0,
+            "p95": 65.0,
+            "minimum": 0.0,
+            "maximum": 100.0
+          },
+          "whole_gpu_used_mib": {
+            "mean": 6318.422360248447,
+            "median": 5940.0,
+            "p95": 6765.0,
+            "minimum": 5914.0,
+            "maximum": 7055.0
+          },
+          "uuid_mapping_available": true
+        }
+      }
+    },
+    "candidate": {
+      "recorded_environment": {
+        "torch": "2.5.1",
+        "cuda_runtime": "11.8",
+        "gpu_name": "NVIDIA H100 PCIe"
+      },
+      "scientific_conditions": {
+        "fnirt_config": "t1",
+        "same_fsl_initial_affine": true,
+        "same_fsl_wmseg": false,
+        "fnirt_execution": "optimized",
+        "bbr_execution": "default",
+        "input_arrayproxy_read_included": true,
+        "wm_header": "legacy",
+        "affine_geometry": "header_pixdim",
+        "fnirt_blur_reference": false,
+        "fnirt_bending_reference": false,
+        "half_precision": false,
+        "default_tf32": true
+      },
+      "timing_scope": "complete function including ArrayProxy reads/decompression and CPU output conversion; excludes output persistence and offline metrics; shared GPU",
+      "source_sha256": {
+        "src/fnit/fnirt/_smoothing_triton.py": "4b6293eb4210b18a91de647003804cf1aa1f50780449a073e350f9177982227b",
+        "src/fnit/fnirt/io.py": "ee79183709258f2e71dcd110f3c922b1cc7d20a979161ae1c86c2c627becf366",
+        "src/fnit/fnirt/__main__.py": "3d2438ae92f4746e9ffaa1f837b1fe803f6281091d1f31f8c95643716f257d9a",
+        "src/fnit/fnirt/cli.py": "9c143739510dd245f76bd98a80610fdbf6ca65519cd59b41f4a9e233b172e53c",
+        "src/fnit/fnirt/optimizer.py": "903d5031058c96aa9e5fdc29736619fe636b62422cd2646b527df49011d173fd",
+        "src/fnit/fnirt/registration.py": "e67c71a6d01b1e8b7b0de842680e9f3012cb5cb492e13e927b32b976f3320d6d",
+        "src/fnit/fnirt/topology.py": "150f65a73baf796f98e6304d0c209288816ee75485be5d93032db46edeb52900",
+        "src/fnit/fnirt/_topology_triton.py": "3f61e452228a9c3dff85caff58ed1103e7b89783c86838bf1e70e322ae3f65f1",
+        "src/fnit/fnirt/spline.py": "79ec750523d69342bf4926adf5e715d91a59749026fc5253ee96d765c0208cad",
+        "src/fnit/fnirt/standalone.py": "83a51a301e1d9145051a12e3b4f10b452c319d1e7a7962308443a048b723ade6",
+        "src/fnit/fnirt/__init__.py": "3480673ed6cbbfc38e573ac64bab6d14fabffc46585a29c74a3d916c2739294d",
+        "src/fnit/fmri/bbr.py": "0ca14f3343d6b5bf09ea93f6ec94de9f2c0cce19fdf8ea005a87ff8e03f48fc2",
+        "src/fnit/fmri/normalization.py": "8bd3526743dd110e0291ddf64022d10b92d7d241948bdb96ad122370a7cf8527",
+        "src/fnit/flirt/search.py": "9b50908c1bead992c55255d2ed3c6cf266135e042c276b9ba8176fef03edae4c",
+        "src/fnit/flirt/batched.py": "10115b3fd51497162c2ebc1a7ae52999a4c3079810e18906ae9c0c363a457719",
+        "src/fnit/flirt/__main__.py": "03eb6210ee12d659108106a6126a870a9d5bc89ba95c116cd519e2764b0e092f",
+        "src/fnit/flirt/cli.py": "f57d65c320aee278820de2fb31cc764e7bee911e3228d3a904108d2a75e8142e",
+        "src/fnit/flirt/types.py": "55a3abf2d7ce7889c297df95289890a589d1721b9fe3b157aa90e87819ed8e21",
+        "src/fnit/flirt/standalone.py": "a5ffc8e847bfc5219ef8e068a34eb81bab4b6fceb7ea39a497eb573108a8115e",
+        "src/fnit/flirt/__init__.py": "58b1ae43c50bd2942398f272c013f5bc743ce6a78abdaab7c93eeae1949447af",
+        "src/fnit/flirt/affine_batch.py": "8aa427ea1b185deea2ff2295e01c972bb371cb5a4b23504ce13ef79ca1d6155f",
+        "src/fnit/flirt/core.py": "e6ce6185fafb89666be631069f66e96ce9c6a561ab3d7c7fab4c661d317885c1",
+        "src/fnit/flirt/coordinates.py": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e",
+        "src/fnit/flirt/_batched_cuda.py": "c6ac99f6b0499c2b081969448dc9492906232daac247477edff0cb00ac43cd74",
+        "src/fnit/_nib.py": "568d113432c1a0c50a3b0b635188173e69be1c7436d851de2568bca9b55ab94e",
+        "src/fnit/_transforms.py": "be01fa24cd0c17bb1aa8ac7792cdf0b62c657037808c643427a1b11cc4c05340",
+        "src/fnit/fmri/_bbr_cuda.py": "c79fdd0c20e68628585a46b946d3ef1f532373aaf8c0371eb5ed0ae25a8a5090"
+      },
+      "benchmark_tool_sha256": "7f7aca365b599ac078ae637968821f7ee4d9e0c5bc9c6a27a4625de0bdf57aa6",
+      "support_tool_sha256": "a20768489533889d50ddfaadead5c32f3569b2198b4032f37e9c6a2e0976f870",
+      "original_report_sha256": "914072efd0b33648fc47eb4370a0fbeaebfba2a0288922ec8c1f5758f7bacc96",
+      "formal_runs": [
+        {
+          "condition": "cold_0",
+          "wall_seconds": 26.516078191809356,
+          "peak_cuda_allocated_bytes": 1182537216,
+          "peak_cuda_reserved_bytes": 1457520640,
+          "peak_cuda_allocated_gb_decimal": 1.182537216,
+          "peak_cuda_reserved_gb_decimal": 1.45752064,
+          "process_peak_cpu_rss_kb": 970152,
+          "usable_for_formal_speed_summary": true,
+          "profile_instrumentation_changes_timing": false,
+          "phase_timing_scope": "nested CPU wall clocks, no extra GPU fences; dispatched GPU work may finish in subsequent phases",
+          "phase_timings": {
+            "fnirt_smoothing": {
+              "calls": 18,
+              "wall_seconds": 1.1642801030538976,
+              "exclusive_wall_seconds": 1.164274699985981
+            },
+            "fnirt_expand_coefficients": {
+              "calls": 14147,
+              "wall_seconds": 2.1398677276447415,
+              "exclusive_wall_seconds": 2.1398677276447415
+            },
+            "fnirt_bending_energy": {
+              "calls": 200,
+              "wall_seconds": 0.235033402685076,
+              "exclusive_wall_seconds": 0.235033402685076
+            },
+            "fnirt_cost_evaluation": {
+              "calls": 100,
+              "wall_seconds": 0.8815093720331788,
+              "exclusive_wall_seconds": 0.7444176264107227
+            },
+            "fnirt_adjoint_field": {
+              "calls": 20620,
+              "wall_seconds": 2.616126605309546,
+              "exclusive_wall_seconds": 2.616126605309546
+            },
+            "fnirt_bending_normal": {
+              "calls": 13985,
+              "wall_seconds": 11.35107863182202,
+              "exclusive_wall_seconds": 11.35107863182202
+            },
+            "fnirt_design_diagonal": {
+              "calls": 178,
+              "wall_seconds": 0.02662798436358571,
+              "exclusive_wall_seconds": 0.02662798436358571
+            },
+            "fnirt_bending_diagonal": {
+              "calls": 84,
+              "wall_seconds": 0.011736034881323576,
+              "exclusive_wall_seconds": 0.011736034881323576
+            },
+            "fnirt_linearization": {
+              "calls": 47,
+              "wall_seconds": 0.39911605697125196,
+              "exclusive_wall_seconds": 0.0315008326433599
+            },
+            "fnirt_joint_linearization": {
+              "calls": 47,
+              "wall_seconds": 0.535214152187109,
+              "exclusive_wall_seconds": 0.03225881792604923
+            },
+            "fnirt_pcg_matvec": {
+              "calls": 7266,
+              "wall_seconds": 21.201483158860356,
+              "exclusive_wall_seconds": 5.2348025711253285
+            },
+            "fnirt_pcg": {
+              "calls": 47,
+              "wall_seconds": 23.080986723769456,
+              "exclusive_wall_seconds": 1.8795035649091005
+            },
+            "fnirt_topology": {
+              "calls": 6,
+              "wall_seconds": 0.023897881619632244,
+              "exclusive_wall_seconds": 0.020710994489490986
+            },
+            "fnirt_smoothing_reference": {
+              "calls": 1,
+              "wall_seconds": 5.403067916631699e-06,
+              "exclusive_wall_seconds": 5.403067916631699e-06
+            }
+          },
+          "operation_counts": {
+            "fnirt_cost_evaluation": 100,
+            "fnirt_pcg_matvec": 7266
+          },
+          "cuda_tensor_api_calls": {},
+          "actual_cuda_event_counts": {},
+          "profiled_cuda_device_time_us": {},
+          "profile_windows": 0,
+          "profiler_scope": "not profiled",
+          "whole_gpu_observation": {
+            "scope": "whole GPU; includes unrelated processes",
+            "sample_interval_seconds": 1.0,
+            "samples": 25,
+            "gpu_utilization_percent": {
+              "mean": 55.52,
+              "median": 58.0,
+              "p95": 78.6,
+              "minimum": 1.0,
+              "maximum": 86.0
+            },
+            "whole_gpu_used_mib": {
+              "mean": 5912.36,
+              "median": 5693.0,
+              "p95": 6721.0,
+              "minimum": 3849.0,
+              "maximum": 6729.0
+            },
+            "uuid_mapping_available": true
+          }
+        },
+        {
+          "condition": "warm_1",
+          "wall_seconds": 24.047236693557352,
+          "peak_cuda_allocated_bytes": 1182068224,
+          "peak_cuda_reserved_bytes": 1457520640,
+          "peak_cuda_allocated_gb_decimal": 1.182068224,
+          "peak_cuda_reserved_gb_decimal": 1.45752064,
+          "process_peak_cpu_rss_kb": 1074736,
+          "usable_for_formal_speed_summary": true,
+          "profile_instrumentation_changes_timing": false,
+          "phase_timing_scope": "nested CPU wall clocks, no extra GPU fences; dispatched GPU work may finish in subsequent phases",
+          "phase_timings": {
+            "fnirt_smoothing": {
+              "calls": 18,
+              "wall_seconds": 0.01411479851230979,
+              "exclusive_wall_seconds": 0.014112233184278011
+            },
+            "fnirt_expand_coefficients": {
+              "calls": 14147,
+              "wall_seconds": 2.083609296940267,
+              "exclusive_wall_seconds": 2.083609296940267
+            },
+            "fnirt_bending_energy": {
+              "calls": 200,
+              "wall_seconds": 0.21279568877071142,
+              "exclusive_wall_seconds": 0.21279568877071142
+            },
+            "fnirt_cost_evaluation": {
+              "calls": 100,
+              "wall_seconds": 0.5709915272891521,
+              "exclusive_wall_seconds": 0.4485880509018898
+            },
+            "fnirt_adjoint_field": {
+              "calls": 20620,
+              "wall_seconds": 2.5471450840122998,
+              "exclusive_wall_seconds": 2.5471450840122998
+            },
+            "fnirt_bending_normal": {
+              "calls": 13985,
+              "wall_seconds": 11.166636710520834,
+              "exclusive_wall_seconds": 11.166636710520834
+            },
+            "fnirt_design_diagonal": {
+              "calls": 178,
+              "wall_seconds": 0.02561377128586173,
+              "exclusive_wall_seconds": 0.02561377128586173
+            },
+            "fnirt_bending_diagonal": {
+              "calls": 84,
+              "wall_seconds": 0.010558704379945993,
+              "exclusive_wall_seconds": 0.010558704379945993
+            },
+            "fnirt_linearization": {
+              "calls": 47,
+              "wall_seconds": 0.37858000583946705,
+              "exclusive_wall_seconds": 0.030264663510024548
+            },
+            "fnirt_joint_linearization": {
+              "calls": 47,
+              "wall_seconds": 0.5016453471034765,
+              "exclusive_wall_seconds": 0.022395800799131393
+            },
+            "fnirt_pcg_matvec": {
+              "calls": 7266,
+              "wall_seconds": 20.85950096230954,
+              "exclusive_wall_seconds": 5.18225226085633
+            },
+            "fnirt_pcg": {
+              "calls": 47,
+              "wall_seconds": 22.675719540100545,
+              "exclusive_wall_seconds": 1.8162185777910054
+            },
+            "fnirt_topology": {
+              "calls": 6,
+              "wall_seconds": 0.02295200200751424,
+              "exclusive_wall_seconds": 0.020002192817628384
+            },
+            "fnirt_smoothing_reference": {
+              "calls": 1,
+              "wall_seconds": 2.5653280317783356e-06,
+              "exclusive_wall_seconds": 2.5653280317783356e-06
+            }
+          },
+          "operation_counts": {
+            "fnirt_cost_evaluation": 100,
+            "fnirt_pcg_matvec": 7266
+          },
+          "cuda_tensor_api_calls": {},
+          "actual_cuda_event_counts": {},
+          "profiled_cuda_device_time_us": {},
+          "profile_windows": 0,
+          "profiler_scope": "not profiled",
+          "whole_gpu_observation": {
+            "scope": "whole GPU; includes unrelated processes",
+            "sample_interval_seconds": 1.0,
+            "samples": 23,
+            "gpu_utilization_percent": {
+              "mean": 56.78260869565217,
+              "median": 54.0,
+              "p95": 83.99999999999999,
+              "minimum": 22.0,
+              "maximum": 87.0
+            },
+            "whole_gpu_used_mib": {
+              "mean": 6702.478260869565,
+              "median": 6709.0,
+              "p95": 6728.4,
+              "minimum": 6675.0,
+              "maximum": 6729.0
+            },
+            "uuid_mapping_available": true
+          }
+        },
+        {
+          "condition": "warm_2",
+          "wall_seconds": 24.120411046314985,
+          "peak_cuda_allocated_bytes": 1182068224,
+          "peak_cuda_reserved_bytes": 1457520640,
+          "peak_cuda_allocated_gb_decimal": 1.182068224,
+          "peak_cuda_reserved_gb_decimal": 1.45752064,
+          "process_peak_cpu_rss_kb": 1074956,
+          "usable_for_formal_speed_summary": true,
+          "profile_instrumentation_changes_timing": false,
+          "phase_timing_scope": "nested CPU wall clocks, no extra GPU fences; dispatched GPU work may finish in subsequent phases",
+          "phase_timings": {
+            "fnirt_smoothing": {
+              "calls": 18,
+              "wall_seconds": 0.014954677782952785,
+              "exclusive_wall_seconds": 0.014951643999665976
+            },
+            "fnirt_expand_coefficients": {
+              "calls": 14147,
+              "wall_seconds": 2.0876723481342196,
+              "exclusive_wall_seconds": 2.0876723481342196
+            },
+            "fnirt_bending_energy": {
+              "calls": 200,
+              "wall_seconds": 0.21165048005059361,
+              "exclusive_wall_seconds": 0.21165048005059361
+            },
+            "fnirt_cost_evaluation": {
+              "calls": 100,
+              "wall_seconds": 0.5715564009733498,
+              "exclusive_wall_seconds": 0.45003215596079826
+            },
+            "fnirt_adjoint_field": {
+              "calls": 20620,
+              "wall_seconds": 2.5424908390268683,
+              "exclusive_wall_seconds": 2.5424908390268683
+            },
+            "fnirt_bending_normal": {
+              "calls": 13985,
+              "wall_seconds": 11.170956803951412,
+              "exclusive_wall_seconds": 11.170956803951412
+            },
+            "fnirt_design_diagonal": {
+              "calls": 178,
+              "wall_seconds": 0.02551674610003829,
+              "exclusive_wall_seconds": 0.02551674610003829
+            },
+            "fnirt_bending_diagonal": {
+              "calls": 84,
+              "wall_seconds": 0.01052481820806861,
+              "exclusive_wall_seconds": 0.01052481820806861
+            },
+            "fnirt_linearization": {
+              "calls": 47,
+              "wall_seconds": 0.3775035054422915,
+              "exclusive_wall_seconds": 0.029778367839753628
+            },
+            "fnirt_joint_linearization": {
+              "calls": 47,
+              "wall_seconds": 0.496828131377697,
+              "exclusive_wall_seconds": 0.019348307978361845
+            },
+            "fnirt_pcg_matvec": {
+              "calls": 7266,
+              "wall_seconds": 20.862931084353477,
+              "exclusive_wall_seconds": 5.18093077512458
+            },
+            "fnirt_pcg": {
+              "calls": 47,
+              "wall_seconds": 22.769964140374213,
+              "exclusive_wall_seconds": 1.9070330560207367
+            },
+            "fnirt_topology": {
+              "calls": 6,
+              "wall_seconds": 0.023896814789623022,
+              "exclusive_wall_seconds": 0.02099389908835292
+            },
+            "fnirt_smoothing_reference": {
+              "calls": 1,
+              "wall_seconds": 3.0337832868099213e-06,
+              "exclusive_wall_seconds": 3.0337832868099213e-06
+            }
+          },
+          "operation_counts": {
+            "fnirt_cost_evaluation": 100,
+            "fnirt_pcg_matvec": 7266
+          },
+          "cuda_tensor_api_calls": {},
+          "actual_cuda_event_counts": {},
+          "profiled_cuda_device_time_us": {},
+          "profile_windows": 0,
+          "profiler_scope": "not profiled",
+          "whole_gpu_observation": {
+            "scope": "whole GPU; includes unrelated processes",
+            "sample_interval_seconds": 1.0,
+            "samples": 23,
+            "gpu_utilization_percent": {
+              "mean": 64.3913043478261,
+              "median": 63.0,
+              "p95": 96.9,
+              "minimum": 20.0,
+              "maximum": 98.0
+            },
+            "whole_gpu_used_mib": {
+              "mean": 6701.260869565217,
+              "median": 6709.0,
+              "p95": 6722.8,
+              "minimum": 6677.0,
+              "maximum": 6729.0
+            },
+            "uuid_mapping_available": true
+          }
+        }
+      ],
+      "profile": {
+        "condition": "profiled",
+        "wall_seconds": 178.4561827960424,
+        "peak_cuda_allocated_bytes": 1182068224,
+        "peak_cuda_reserved_bytes": 1457520640,
+        "peak_cuda_allocated_gb_decimal": 1.182068224,
+        "peak_cuda_reserved_gb_decimal": 1.45752064,
+        "process_peak_cpu_rss_kb": 1322972,
+        "usable_for_formal_speed_summary": false,
+        "profile_instrumentation_changes_timing": true,
+        "phase_timing_scope": "nested CPU wall clocks, no extra GPU fences; dispatched GPU work may finish in subsequent phases",
+        "phase_timings": {
+          "fnirt_smoothing": {
+            "calls": 18,
+            "wall_seconds": 0.010122671723365784,
+            "exclusive_wall_seconds": 0.010121132712811232
+          },
+          "fnirt_expand_coefficients": {
+            "calls": 14147,
+            "wall_seconds": 3.0186156812123954,
+            "exclusive_wall_seconds": 3.0186156812123954
+          },
+          "fnirt_bending_energy": {
+            "calls": 200,
+            "wall_seconds": 0.3030036720447242,
+            "exclusive_wall_seconds": 0.3030036720447242
+          },
+          "fnirt_cost_evaluation": {
+            "calls": 100,
+            "wall_seconds": 0.8727187919430435,
+            "exclusive_wall_seconds": 0.7013787277974188
+          },
+          "fnirt_adjoint_field": {
+            "calls": 20620,
+            "wall_seconds": 3.466197344008833,
+            "exclusive_wall_seconds": 3.466197344008833
+          },
+          "fnirt_bending_normal": {
+            "calls": 13985,
+            "wall_seconds": 15.385214381385595,
+            "exclusive_wall_seconds": 15.385214381385595
+          },
+          "fnirt_design_diagonal": {
+            "calls": 178,
+            "wall_seconds": 0.03456591349095106,
+            "exclusive_wall_seconds": 0.03456591349095106
+          },
+          "fnirt_bending_diagonal": {
+            "calls": 84,
+            "wall_seconds": 0.01435383828356862,
+            "exclusive_wall_seconds": 0.01435383828356862
+          },
+          "fnirt_linearization": {
+            "calls": 47,
+            "wall_seconds": 0.5606121299788356,
+            "exclusive_wall_seconds": 0.04446268593892455
+          },
+          "fnirt_joint_linearization": {
+            "calls": 47,
+            "wall_seconds": 0.7297143861651421,
+            "exclusive_wall_seconds": 0.028171058744192123
+          },
+          "fnirt_pcg_matvec": {
+            "calls": 7266,
+            "wall_seconds": 29.668099137488753,
+            "exclusive_wall_seconds": 7.964614032302052
+          },
+          "fnirt_pcg": {
+            "calls": 47,
+            "wall_seconds": 175.85071647260338,
+            "exclusive_wall_seconds": 146.18261733511463
+          },
+          "fnirt_topology": {
+            "calls": 6,
+            "wall_seconds": 0.03317394061014056,
+            "exclusive_wall_seconds": 0.02926822565495968
+          },
+          "fnirt_smoothing_reference": {
+            "calls": 1,
+            "wall_seconds": 1.5390105545520782e-06,
+            "exclusive_wall_seconds": 1.5390105545520782e-06
+          }
+        },
+        "operation_counts": {
+          "fnirt_cost_evaluation": 100,
+          "fnirt_pcg_matvec": 7266
+        },
+        "cuda_tensor_api_calls": {
+          "__float__": 415,
+          "cpu": 7271,
+          "__bool__": 47
+        },
+        "actual_cuda_event_counts": {
+          "cudaMemcpyAsync": 8147,
+          "H2D": 72,
+          "cudaStreamSynchronize": 8016,
+          "cudaLaunchKernel": 1421611,
+          "kernel": 1509022,
+          "D2D": 131,
+          "D2H": 7944,
+          "cuLaunchKernel": 66,
+          "cudaPeekAtLastError": 216,
+          "cudaDeviceGetAttribute": 36,
+          "cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags": 273377,
+          "cudaFuncSetAttribute": 165997,
+          "cudaFuncGetAttributes": 101878,
+          "cudaLaunchKernelExC": 87345,
+          "cudaMemsetAsync": 1295,
+          "device_memset": 1295,
+          "cudaDeviceSynchronize": 115
+        },
+        "profiled_cuda_device_time_us": {
+          "H2D": 4195.0309999999445,
+          "kernel": 5274612.974999673,
+          "D2D": 257.0500000002503,
+          "D2H": 14328.870999999632,
+          "device_memset": 1121.8679999995693
+        },
+        "profile_windows": 114,
+        "profiler_scope": "complete CUDA-only registration; window fences included",
+        "whole_gpu_observation": {
+          "scope": "whole GPU; includes unrelated processes",
+          "sample_interval_seconds": 1.0,
+          "samples": 153,
+          "gpu_utilization_percent": {
+            "mean": 17.535947712418302,
+            "median": 10.0,
+            "p95": 65.0,
+            "minimum": 0.0,
+            "maximum": 100.0
+          },
+          "whole_gpu_used_mib": {
+            "mean": 6683.980392156863,
+            "median": 6681.0,
+            "p95": 6825.000000000002,
+            "minimum": 6589.0,
+            "maximum": 7013.0
+          },
+          "uuid_mapping_available": true
+        }
+      }
+    }
+  },
+  "paired_checks": {
+    "cold_0": {
+      "all_scientific_outputs_equal": true,
+      "images": {
+        "warped_image": {
+          "lossless_gate_passed": true,
+          "comparison": {
+            "shape_equal": true,
+            "dtype_equal": true,
+            "affine_equal": true,
+            "full_header_bytes_equal_diagnostic": true,
+            "scientific_header_equal": true,
+            "extensions_equal": true,
+            "bitwise_equal": true,
+            "changed_values_including_signed_zero": 0,
+            "maximum_absolute_error": 0.0
+          },
+          "baseline": {
+            "shape": [
+              91,
+              109,
+              91
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "a7a394b65795a0706a7559a6da3694951587729bdfbf35f472d6445353d3d4a9",
+            "size_bytes": 991037
+          },
+          "candidate": {
+            "shape": [
+              91,
+              109,
+              91
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "a7a394b65795a0706a7559a6da3694951587729bdfbf35f472d6445353d3d4a9",
+            "size_bytes": 991037
+          }
+        },
+        "coefficients": {
+          "lossless_gate_passed": true,
+          "comparison": {
+            "shape_equal": true,
+            "dtype_equal": true,
+            "affine_equal": true,
+            "full_header_bytes_equal_diagnostic": true,
+            "scientific_header_equal": true,
+            "extensions_equal": true,
+            "bitwise_equal": true,
+            "changed_values_including_signed_zero": 0,
+            "maximum_absolute_error": 0.0
+          },
+          "baseline": {
+            "shape": [
+              21,
+              24,
+              21,
+              3
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "19cb4c9aab63455dcb67637870efcd946479fe2da70610ed942ff82532dcd1ad",
+            "size_bytes": 119692
+          },
+          "candidate": {
+            "shape": [
+              21,
+              24,
+              21,
+              3
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "19cb4c9aab63455dcb67637870efcd946479fe2da70610ed942ff82532dcd1ad",
+            "size_bytes": 119692
+          }
+        },
+        "pull_transform": {
+          "lossless_gate_passed": true,
+          "comparison": {
+            "shape_equal": true,
+            "dtype_equal": true,
+            "affine_equal": true,
+            "full_header_bytes_equal_diagnostic": true,
+            "scientific_header_equal": true,
+            "extensions_equal": true,
+            "bitwise_equal": true,
+            "changed_values_including_signed_zero": 0,
+            "maximum_absolute_error": 0.0
+          },
+          "baseline": {
+            "shape": [
+              91,
+              109,
+              91,
+              3
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "bb6211138f5d7795ed12a7956f747f94c83da32a82ad77d3f2157ee11668900a",
+            "size_bytes": 9075979
+          },
+          "candidate": {
+            "shape": [
+              91,
+              109,
+              91,
+              3
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "bb6211138f5d7795ed12a7956f747f94c83da32a82ad77d3f2157ee11668900a",
+            "size_bytes": 9075979
+          }
+        },
+        "full_pull_jacobian": {
+          "lossless_gate_passed": true,
+          "comparison": {
+            "shape_equal": true,
+            "dtype_equal": true,
+            "affine_equal": true,
+            "full_header_bytes_equal_diagnostic": true,
+            "scientific_header_equal": true,
+            "extensions_equal": true,
+            "bitwise_equal": true,
+            "changed_values_including_signed_zero": 0,
+            "maximum_absolute_error": 0.0
+          },
+          "baseline": {
+            "shape": [
+              91,
+              109,
+              91
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "1a8527ea6e83a610e9e12b4ea78addd43d026115baa40434a7892693e328fefc",
+            "size_bytes": 2994941
+          },
+          "candidate": {
+            "shape": [
+              91,
+              109,
+              91
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "1a8527ea6e83a610e9e12b4ea78addd43d026115baa40434a7892693e328fefc",
+            "size_bytes": 2994941
+          }
+        },
+        "nonlinear_jacobian": {
+          "lossless_gate_passed": true,
+          "comparison": {
+            "shape_equal": true,
+            "dtype_equal": true,
+            "affine_equal": true,
+            "full_header_bytes_equal_diagnostic": true,
+            "scientific_header_equal": true,
+            "extensions_equal": true,
+            "bitwise_equal": true,
+            "changed_values_including_signed_zero": 0,
+            "maximum_absolute_error": 0.0
+          },
+          "baseline": {
+            "shape": [
+              91,
+              109,
+              91
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "5465e28939e611dc6d5fa46937bda0b037a3214daaf9594fac53c9dd22acc72e",
+            "size_bytes": 3011837
+          },
+          "candidate": {
+            "shape": [
+              91,
+              109,
+              91
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "5465e28939e611dc6d5fa46937bda0b037a3214daaf9594fac53c9dd22acc72e",
+            "size_bytes": 3011837
+          }
+        }
+      },
+      "complete_scientific_qc_equal": true,
+      "qc": {
+        "level_counts": [
+          6,
+          6
+        ],
+        "baseline_file_sha256": "ae07720edb41b7d7d33908ad7fc95e822d446dbdf029351d335b5fe75391af90",
+        "candidate_file_sha256": "ae07720edb41b7d7d33908ad7fc95e822d446dbdf029351d335b5fe75391af90",
+        "baseline_scientific_qc_sha256": "4a955d5b3d59992fe11b7cba44d311feb8f82a0fbf16a2593d250ff5ba87f425",
+        "candidate_scientific_qc_sha256": "4a955d5b3d59992fe11b7cba44d311feb8f82a0fbf16a2593d250ff5ba87f425",
+        "raw_differing_field_paths": [],
+        "scientific_differing_field_paths": []
+      }
+    },
+    "warm_1": {
+      "all_scientific_outputs_equal": true,
+      "images": {
+        "warped_image": {
+          "lossless_gate_passed": true,
+          "comparison": {
+            "shape_equal": true,
+            "dtype_equal": true,
+            "affine_equal": true,
+            "full_header_bytes_equal_diagnostic": true,
+            "scientific_header_equal": true,
+            "extensions_equal": true,
+            "bitwise_equal": true,
+            "changed_values_including_signed_zero": 0,
+            "maximum_absolute_error": 0.0
+          },
+          "baseline": {
+            "shape": [
+              91,
+              109,
+              91
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "a7a394b65795a0706a7559a6da3694951587729bdfbf35f472d6445353d3d4a9",
+            "size_bytes": 991037
+          },
+          "candidate": {
+            "shape": [
+              91,
+              109,
+              91
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "a7a394b65795a0706a7559a6da3694951587729bdfbf35f472d6445353d3d4a9",
+            "size_bytes": 991037
+          }
+        },
+        "coefficients": {
+          "lossless_gate_passed": true,
+          "comparison": {
+            "shape_equal": true,
+            "dtype_equal": true,
+            "affine_equal": true,
+            "full_header_bytes_equal_diagnostic": true,
+            "scientific_header_equal": true,
+            "extensions_equal": true,
+            "bitwise_equal": true,
+            "changed_values_including_signed_zero": 0,
+            "maximum_absolute_error": 0.0
+          },
+          "baseline": {
+            "shape": [
+              21,
+              24,
+              21,
+              3
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "19cb4c9aab63455dcb67637870efcd946479fe2da70610ed942ff82532dcd1ad",
+            "size_bytes": 119692
+          },
+          "candidate": {
+            "shape": [
+              21,
+              24,
+              21,
+              3
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "19cb4c9aab63455dcb67637870efcd946479fe2da70610ed942ff82532dcd1ad",
+            "size_bytes": 119692
+          }
+        },
+        "pull_transform": {
+          "lossless_gate_passed": true,
+          "comparison": {
+            "shape_equal": true,
+            "dtype_equal": true,
+            "affine_equal": true,
+            "full_header_bytes_equal_diagnostic": true,
+            "scientific_header_equal": true,
+            "extensions_equal": true,
+            "bitwise_equal": true,
+            "changed_values_including_signed_zero": 0,
+            "maximum_absolute_error": 0.0
+          },
+          "baseline": {
+            "shape": [
+              91,
+              109,
+              91,
+              3
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "bb6211138f5d7795ed12a7956f747f94c83da32a82ad77d3f2157ee11668900a",
+            "size_bytes": 9075979
+          },
+          "candidate": {
+            "shape": [
+              91,
+              109,
+              91,
+              3
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "bb6211138f5d7795ed12a7956f747f94c83da32a82ad77d3f2157ee11668900a",
+            "size_bytes": 9075979
+          }
+        },
+        "full_pull_jacobian": {
+          "lossless_gate_passed": true,
+          "comparison": {
+            "shape_equal": true,
+            "dtype_equal": true,
+            "affine_equal": true,
+            "full_header_bytes_equal_diagnostic": true,
+            "scientific_header_equal": true,
+            "extensions_equal": true,
+            "bitwise_equal": true,
+            "changed_values_including_signed_zero": 0,
+            "maximum_absolute_error": 0.0
+          },
+          "baseline": {
+            "shape": [
+              91,
+              109,
+              91
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "1a8527ea6e83a610e9e12b4ea78addd43d026115baa40434a7892693e328fefc",
+            "size_bytes": 2994941
+          },
+          "candidate": {
+            "shape": [
+              91,
+              109,
+              91
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "1a8527ea6e83a610e9e12b4ea78addd43d026115baa40434a7892693e328fefc",
+            "size_bytes": 2994941
+          }
+        },
+        "nonlinear_jacobian": {
+          "lossless_gate_passed": true,
+          "comparison": {
+            "shape_equal": true,
+            "dtype_equal": true,
+            "affine_equal": true,
+            "full_header_bytes_equal_diagnostic": true,
+            "scientific_header_equal": true,
+            "extensions_equal": true,
+            "bitwise_equal": true,
+            "changed_values_including_signed_zero": 0,
+            "maximum_absolute_error": 0.0
+          },
+          "baseline": {
+            "shape": [
+              91,
+              109,
+              91
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "5465e28939e611dc6d5fa46937bda0b037a3214daaf9594fac53c9dd22acc72e",
+            "size_bytes": 3011837
+          },
+          "candidate": {
+            "shape": [
+              91,
+              109,
+              91
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "5465e28939e611dc6d5fa46937bda0b037a3214daaf9594fac53c9dd22acc72e",
+            "size_bytes": 3011837
+          }
+        }
+      },
+      "complete_scientific_qc_equal": true,
+      "qc": {
+        "level_counts": [
+          6,
+          6
+        ],
+        "baseline_file_sha256": "ae07720edb41b7d7d33908ad7fc95e822d446dbdf029351d335b5fe75391af90",
+        "candidate_file_sha256": "ae07720edb41b7d7d33908ad7fc95e822d446dbdf029351d335b5fe75391af90",
+        "baseline_scientific_qc_sha256": "4a955d5b3d59992fe11b7cba44d311feb8f82a0fbf16a2593d250ff5ba87f425",
+        "candidate_scientific_qc_sha256": "4a955d5b3d59992fe11b7cba44d311feb8f82a0fbf16a2593d250ff5ba87f425",
+        "raw_differing_field_paths": [],
+        "scientific_differing_field_paths": []
+      }
+    },
+    "warm_2": {
+      "all_scientific_outputs_equal": true,
+      "images": {
+        "warped_image": {
+          "lossless_gate_passed": true,
+          "comparison": {
+            "shape_equal": true,
+            "dtype_equal": true,
+            "affine_equal": true,
+            "full_header_bytes_equal_diagnostic": true,
+            "scientific_header_equal": true,
+            "extensions_equal": true,
+            "bitwise_equal": true,
+            "changed_values_including_signed_zero": 0,
+            "maximum_absolute_error": 0.0
+          },
+          "baseline": {
+            "shape": [
+              91,
+              109,
+              91
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "a7a394b65795a0706a7559a6da3694951587729bdfbf35f472d6445353d3d4a9",
+            "size_bytes": 991037
+          },
+          "candidate": {
+            "shape": [
+              91,
+              109,
+              91
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "a7a394b65795a0706a7559a6da3694951587729bdfbf35f472d6445353d3d4a9",
+            "size_bytes": 991037
+          }
+        },
+        "coefficients": {
+          "lossless_gate_passed": true,
+          "comparison": {
+            "shape_equal": true,
+            "dtype_equal": true,
+            "affine_equal": true,
+            "full_header_bytes_equal_diagnostic": true,
+            "scientific_header_equal": true,
+            "extensions_equal": true,
+            "bitwise_equal": true,
+            "changed_values_including_signed_zero": 0,
+            "maximum_absolute_error": 0.0
+          },
+          "baseline": {
+            "shape": [
+              21,
+              24,
+              21,
+              3
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "19cb4c9aab63455dcb67637870efcd946479fe2da70610ed942ff82532dcd1ad",
+            "size_bytes": 119692
+          },
+          "candidate": {
+            "shape": [
+              21,
+              24,
+              21,
+              3
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "19cb4c9aab63455dcb67637870efcd946479fe2da70610ed942ff82532dcd1ad",
+            "size_bytes": 119692
+          }
+        },
+        "pull_transform": {
+          "lossless_gate_passed": true,
+          "comparison": {
+            "shape_equal": true,
+            "dtype_equal": true,
+            "affine_equal": true,
+            "full_header_bytes_equal_diagnostic": true,
+            "scientific_header_equal": true,
+            "extensions_equal": true,
+            "bitwise_equal": true,
+            "changed_values_including_signed_zero": 0,
+            "maximum_absolute_error": 0.0
+          },
+          "baseline": {
+            "shape": [
+              91,
+              109,
+              91,
+              3
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "bb6211138f5d7795ed12a7956f747f94c83da32a82ad77d3f2157ee11668900a",
+            "size_bytes": 9075979
+          },
+          "candidate": {
+            "shape": [
+              91,
+              109,
+              91,
+              3
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "bb6211138f5d7795ed12a7956f747f94c83da32a82ad77d3f2157ee11668900a",
+            "size_bytes": 9075979
+          }
+        },
+        "full_pull_jacobian": {
+          "lossless_gate_passed": true,
+          "comparison": {
+            "shape_equal": true,
+            "dtype_equal": true,
+            "affine_equal": true,
+            "full_header_bytes_equal_diagnostic": true,
+            "scientific_header_equal": true,
+            "extensions_equal": true,
+            "bitwise_equal": true,
+            "changed_values_including_signed_zero": 0,
+            "maximum_absolute_error": 0.0
+          },
+          "baseline": {
+            "shape": [
+              91,
+              109,
+              91
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "1a8527ea6e83a610e9e12b4ea78addd43d026115baa40434a7892693e328fefc",
+            "size_bytes": 2994941
+          },
+          "candidate": {
+            "shape": [
+              91,
+              109,
+              91
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "1a8527ea6e83a610e9e12b4ea78addd43d026115baa40434a7892693e328fefc",
+            "size_bytes": 2994941
+          }
+        },
+        "nonlinear_jacobian": {
+          "lossless_gate_passed": true,
+          "comparison": {
+            "shape_equal": true,
+            "dtype_equal": true,
+            "affine_equal": true,
+            "full_header_bytes_equal_diagnostic": true,
+            "scientific_header_equal": true,
+            "extensions_equal": true,
+            "bitwise_equal": true,
+            "changed_values_including_signed_zero": 0,
+            "maximum_absolute_error": 0.0
+          },
+          "baseline": {
+            "shape": [
+              91,
+              109,
+              91
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "5465e28939e611dc6d5fa46937bda0b037a3214daaf9594fac53c9dd22acc72e",
+            "size_bytes": 3011837
+          },
+          "candidate": {
+            "shape": [
+              91,
+              109,
+              91
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "5465e28939e611dc6d5fa46937bda0b037a3214daaf9594fac53c9dd22acc72e",
+            "size_bytes": 3011837
+          }
+        }
+      },
+      "complete_scientific_qc_equal": true,
+      "qc": {
+        "level_counts": [
+          6,
+          6
+        ],
+        "baseline_file_sha256": "ae07720edb41b7d7d33908ad7fc95e822d446dbdf029351d335b5fe75391af90",
+        "candidate_file_sha256": "ae07720edb41b7d7d33908ad7fc95e822d446dbdf029351d335b5fe75391af90",
+        "baseline_scientific_qc_sha256": "4a955d5b3d59992fe11b7cba44d311feb8f82a0fbf16a2593d250ff5ba87f425",
+        "candidate_scientific_qc_sha256": "4a955d5b3d59992fe11b7cba44d311feb8f82a0fbf16a2593d250ff5ba87f425",
+        "raw_differing_field_paths": [],
+        "scientific_differing_field_paths": []
+      }
+    },
+    "profiled": {
+      "all_scientific_outputs_equal": true,
+      "images": {
+        "warped_image": {
+          "lossless_gate_passed": true,
+          "comparison": {
+            "shape_equal": true,
+            "dtype_equal": true,
+            "affine_equal": true,
+            "full_header_bytes_equal_diagnostic": true,
+            "scientific_header_equal": true,
+            "extensions_equal": true,
+            "bitwise_equal": true,
+            "changed_values_including_signed_zero": 0,
+            "maximum_absolute_error": 0.0
+          },
+          "baseline": {
+            "shape": [
+              91,
+              109,
+              91
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "a7a394b65795a0706a7559a6da3694951587729bdfbf35f472d6445353d3d4a9",
+            "size_bytes": 991037
+          },
+          "candidate": {
+            "shape": [
+              91,
+              109,
+              91
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "a7a394b65795a0706a7559a6da3694951587729bdfbf35f472d6445353d3d4a9",
+            "size_bytes": 991037
+          }
+        },
+        "coefficients": {
+          "lossless_gate_passed": true,
+          "comparison": {
+            "shape_equal": true,
+            "dtype_equal": true,
+            "affine_equal": true,
+            "full_header_bytes_equal_diagnostic": true,
+            "scientific_header_equal": true,
+            "extensions_equal": true,
+            "bitwise_equal": true,
+            "changed_values_including_signed_zero": 0,
+            "maximum_absolute_error": 0.0
+          },
+          "baseline": {
+            "shape": [
+              21,
+              24,
+              21,
+              3
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "19cb4c9aab63455dcb67637870efcd946479fe2da70610ed942ff82532dcd1ad",
+            "size_bytes": 119692
+          },
+          "candidate": {
+            "shape": [
+              21,
+              24,
+              21,
+              3
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "19cb4c9aab63455dcb67637870efcd946479fe2da70610ed942ff82532dcd1ad",
+            "size_bytes": 119692
+          }
+        },
+        "pull_transform": {
+          "lossless_gate_passed": true,
+          "comparison": {
+            "shape_equal": true,
+            "dtype_equal": true,
+            "affine_equal": true,
+            "full_header_bytes_equal_diagnostic": true,
+            "scientific_header_equal": true,
+            "extensions_equal": true,
+            "bitwise_equal": true,
+            "changed_values_including_signed_zero": 0,
+            "maximum_absolute_error": 0.0
+          },
+          "baseline": {
+            "shape": [
+              91,
+              109,
+              91,
+              3
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "bb6211138f5d7795ed12a7956f747f94c83da32a82ad77d3f2157ee11668900a",
+            "size_bytes": 9075979
+          },
+          "candidate": {
+            "shape": [
+              91,
+              109,
+              91,
+              3
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "bb6211138f5d7795ed12a7956f747f94c83da32a82ad77d3f2157ee11668900a",
+            "size_bytes": 9075979
+          }
+        },
+        "full_pull_jacobian": {
+          "lossless_gate_passed": true,
+          "comparison": {
+            "shape_equal": true,
+            "dtype_equal": true,
+            "affine_equal": true,
+            "full_header_bytes_equal_diagnostic": true,
+            "scientific_header_equal": true,
+            "extensions_equal": true,
+            "bitwise_equal": true,
+            "changed_values_including_signed_zero": 0,
+            "maximum_absolute_error": 0.0
+          },
+          "baseline": {
+            "shape": [
+              91,
+              109,
+              91
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "1a8527ea6e83a610e9e12b4ea78addd43d026115baa40434a7892693e328fefc",
+            "size_bytes": 2994941
+          },
+          "candidate": {
+            "shape": [
+              91,
+              109,
+              91
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "1a8527ea6e83a610e9e12b4ea78addd43d026115baa40434a7892693e328fefc",
+            "size_bytes": 2994941
+          }
+        },
+        "nonlinear_jacobian": {
+          "lossless_gate_passed": true,
+          "comparison": {
+            "shape_equal": true,
+            "dtype_equal": true,
+            "affine_equal": true,
+            "full_header_bytes_equal_diagnostic": true,
+            "scientific_header_equal": true,
+            "extensions_equal": true,
+            "bitwise_equal": true,
+            "changed_values_including_signed_zero": 0,
+            "maximum_absolute_error": 0.0
+          },
+          "baseline": {
+            "shape": [
+              91,
+              109,
+              91
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "5465e28939e611dc6d5fa46937bda0b037a3214daaf9594fac53c9dd22acc72e",
+            "size_bytes": 3011837
+          },
+          "candidate": {
+            "shape": [
+              91,
+              109,
+              91
+            ],
+            "dtype": "float32",
+            "all_finite": true,
+            "sha256": "5465e28939e611dc6d5fa46937bda0b037a3214daaf9594fac53c9dd22acc72e",
+            "size_bytes": 3011837
+          }
+        }
+      },
+      "complete_scientific_qc_equal": true,
+      "qc": {
+        "level_counts": [
+          6,
+          6
+        ],
+        "baseline_file_sha256": "ae07720edb41b7d7d33908ad7fc95e822d446dbdf029351d335b5fe75391af90",
+        "candidate_file_sha256": "ae07720edb41b7d7d33908ad7fc95e822d446dbdf029351d335b5fe75391af90",
+        "baseline_scientific_qc_sha256": "4a955d5b3d59992fe11b7cba44d311feb8f82a0fbf16a2593d250ff5ba87f425",
+        "candidate_scientific_qc_sha256": "4a955d5b3d59992fe11b7cba44d311feb8f82a0fbf16a2593d250ff5ba87f425",
+        "raw_differing_field_paths": [],
+        "scientific_differing_field_paths": []
+      }
+    }
+  },
+  "formal_summary": {
+    "baseline": {
+      "cold_seconds": 27.100790205877274,
+      "warm_seconds": [
+        24.80240187421441,
+        24.82336819684133
+      ],
+      "warm_median_seconds": 24.81288503552787,
+      "formal_peak_cuda_allocated_gb_decimal": 1.178372608,
+      "formal_peak_cuda_reserved_gb_decimal": 1.491075072
+    },
+    "candidate": {
+      "cold_seconds": 26.516078191809356,
+      "warm_seconds": [
+        24.047236693557352,
+        24.120411046314985
+      ],
+      "warm_median_seconds": 24.083823869936168,
+      "formal_peak_cuda_allocated_gb_decimal": 1.182537216,
+      "formal_peak_cuda_reserved_gb_decimal": 1.45752064
+    },
+    "cold_runtime_reduction_fraction": 0.021575459963566468,
+    "warm_runtime_reduction_fraction": 0.02938236180709375
+  }
+}

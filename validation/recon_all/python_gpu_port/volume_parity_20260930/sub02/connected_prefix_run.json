@@ -1,0 +1,100 @@
+{
+  "code_commit": "b8cd17bb441307d88dda78ba8f56e77695b595a8",
+  "script_sha256": "13498e2f2ee3203dbd001e36145963de66f85ff8c48297d1adfd091689ecb7c3",
+  "host": "nodecw10",
+  "cpu": "x86_64",
+  "input_sha256": "326d1e0a948b76344150c28bbcf0299b58040092c2f037f09c754103d32f747d",
+  "device": "cpu",
+  "threads": 4,
+  "precision": {
+    "tf32_default": true,
+    "fp32_exceptions": [
+      "SynthStrip",
+      "SynthSeg",
+      "Talairach affine"
+    ]
+  },
+  "gpu_name": null,
+  "binaries": {
+    "fnit_n4_itk": "60f5f5d7ede7fbce6aecfe47021e6299e3fa55309e0820ffd05eb6057a68523f",
+    "mri_em_register": "ffe027090e80379d32093be5d25eb41064eb79b49b75c924e7edb4b7d160964f",
+    "mri_segment": "3fa5b05e61229e39dfa83773bfe84614fd8a868bea2e91968abc076bf1a13af6",
+    "mri_edit_wm_with_aseg": "b38f118c8f30bd49f95853c5c427ff8b98d667559cdc08a68a0405425fe88563"
+  },
+  "stages": [
+    {
+      "name": "input_talairach",
+      "seconds": 26.82322108745575
+    },
+    {
+      "name": "n4",
+      "seconds": 109.67662104964256
+    },
+    {
+      "name": "nu",
+      "seconds": 1.252603404223919
+    },
+    {
+      "name": "T1_normalize",
+      "seconds": 68.32480748742819
+    },
+    {
+      "name": "brainmask",
+      "seconds": 0.901493601500988
+    },
+    {
+      "name": "SynthSeg",
+      "seconds": 350.02332354336977
+    },
+    {
+      "name": "mri_em_register",
+      "seconds": 164.86193781346083
+    },
+    {
+      "name": "mri_ca_normalize",
+      "seconds": 20.92504684627056
+    },
+    {
+      "name": "mri_cc",
+      "seconds": 10.85768149793148
+    },
+    {
+      "name": "brain_second_normalize",
+      "seconds": 85.80085907131433
+    },
+    {
+      "name": "entowm",
+      "seconds": 8.421068608760834
+    },
+    {
+      "name": "ants_denoise",
+      "seconds": 15.28227099776268
+    },
+    {
+      "name": "mri_segment",
+      "seconds": 48.054211638867855
+    },
+    {
+      "name": "mri_edit_wm_with_aseg",
+      "seconds": 23.636354967951775
+    },
+    {
+      "name": "wm_pretess",
+      "seconds": 4.420844882726669
+    },
+    {
+      "name": "wm_fix_ento",
+      "seconds": 1.4238811284303665
+    },
+    {
+      "name": "wm_fix_acj",
+      "seconds": 2.3365216329693794
+    },
+    {
+      "name": "mri_fill",
+      "seconds": 49.87406764924526
+    }
+  ],
+  "status": "complete",
+  "total_seconds": 993.2812729850411
+}

@@ -22,15 +22,17 @@ from .._transforms import (
     voxel_displacement_to_ras,
 )
 from ..weights import resolve_weights
-from .spatial import compose, surfa_nearest, transform
+from .spatial import (
+    _prepare_transform, _sample_prepared, compose, surfa_nearest, transform,
+)
 
 
 @dataclass
 class RegistrationResult:
-    moved: FNITNifti1Image
-    fixed_moved: FNITNifti1Image
+    moved: FNITNifti1Image | None
+    fixed_moved: FNITNifti1Image | None
     transform: AffineTransform | DenseWarp
-    inverse: AffineTransform | DenseWarp
+    inverse: AffineTransform | DenseWarp | None
 
 
 def network_space(image, shape, center=None):
@@ -58,13 +60,13 @@ def network_space(image, shape, center=None):
     return network_to_image, image_to_network
 
 
-def _load(image, single_frame=True):
+def _load(image, single_frame=True, check_finite=True):
     out = load_image(image, "input")
     if len(out.shape) not in (3, 4):
         raise ValueError("input must be a 3D volume with optional frames")
     if single_frame and len(out.shape) != 3:
         raise ValueError("registration inputs must be single-frame 3D volumes")
-    if not np.isfinite(np.asanyarray(out.dataobj)).all():
+    if check_finite and not np.isfinite(np.asanyarray(out.dataobj)).all():
         raise ValueError("input contains NaN or infinity")
     return out
 
@@ -113,10 +115,11 @@ def _affine_input(value, moving, fixed):
     ).convert(space="voxel")
 
 
-def _header_transform(image, transformation):
+def _header_transform(image, transformation, data=None):
     world = transformation.convert(space="world", source=image).matrix
     return new_image(
-        np.array(image.dataobj, copy=True), image, affine=world @ image.affine
+        np.array(image.dataobj if data is None else data, copy=True),
+        image, affine=world @ image.affine,
     )
 
 
@@ -149,8 +152,100 @@ def _resampled_image(
     return new_image(_tensor_data(moved), image, affine=image_geometry(target).affine)
 
 
+def _resampled_frames(image, data, pull, target, device, *, method, fill, frame_chunk_size):
+    """Decode once and sample frames with one reusable coordinate plan.
+
+    Default CPU chunks contain at most 32 frames. CUDA chooses changing
+    frame buffers below 8 GiB and the remaining 20 GB allocation budget,
+    measured after coordinate transfer with 512 MiB held in reserve.
+    """
+    device = torch.device(device)
+    geometry = image_geometry(target)
+    frames = data[None] if data.ndim == 3 else np.moveaxis(data, -1, 0)
+    count = frames.shape[0]
+    if frame_chunk_size is not None and (
+        isinstance(frame_chunk_size, (bool, np.bool_))
+        or not isinstance(frame_chunk_size, (int, np.integer))
+        or frame_chunk_size < 1
+    ):
+        raise ValueError("frame_chunk_size must be a positive integer or None")
+
+    plan = _prepare_transform(
+        pull, data.shape[:3], device="cpu", dtype=torch.float32,
+        shape=geometry.shape, method=method, fill_value=fill,
+        surfa_nearest_rule=True,
+    )
+    # Independent apply keeps the original CPU float32 coordinate arithmetic.
+    # Transferring a prepared plan avoids TF32 affine-coordinate drift while
+    # GPU interpolation still processes every frame on the selected device.
+    if device.type != "cpu":
+        plan = plan.to(device)
+    if device.type == "cuda":
+        # Include the prepared coordinates and existing device allocations.
+        # Reserve 512 MiB below 20 GB for sampler/runtime working storage.
+        available = (
+            20_000_000_000 - torch.cuda.memory_allocated(device) - 512 * 1024 ** 2
+        )
+        frame_bytes = 4 * (
+            int(np.prod(data.shape[:3])) + 2 * int(np.prod(geometry.shape))
+        )
+        if available < frame_bytes:
+            raise RuntimeError(
+                "CUDA frame buffers cannot fit one frame within the 20 GB "
+                f"memory budget: {frame_bytes} bytes needed, {available} available"
+            )
+        if frame_chunk_size is None:
+            buffer_budget = min(8 * 1024 ** 3, available)
+            if buffer_budget < frame_bytes:
+                raise RuntimeError(
+                    "automatic CUDA frame buffer budget cannot fit one frame: "
+                    f"{frame_bytes} bytes needed, {buffer_budget} available"
+                )
+            frame_chunk_size = min(count, buffer_budget // frame_bytes)
+        else:
+            frame_chunk_size = min(count, frame_chunk_size)
+            if frame_chunk_size * frame_bytes > available:
+                raise RuntimeError(
+                    "frame_chunk_size exceeds the CUDA 20 GB memory budget: "
+                    f"{frame_chunk_size * frame_bytes} bytes needed, {available} available"
+                )
+    else:
+        frame_chunk_size = (
+            min(count, 32) if frame_chunk_size is None else min(count, frame_chunk_size)
+        )
+    # Keep the returned array on the host while only a bounded frame chunk is
+    # resident on the GPU. Moving frames does not change interpolation math.
+    output = None
+    for start in range(0, count, frame_chunk_size):
+        stop = min(start + frame_chunk_size, count)
+        chunk = np.asarray(frames[start:stop], dtype=np.float32)
+        # The sampler only reads its input. Reuse writable float32 decoded
+        # storage, but copy arrays that torch cannot safely expose as a view.
+        if not chunk.flags.writeable or any(stride < 0 for stride in chunk.strides):
+            chunk = np.array(chunk, copy=True)
+        tensor = torch.as_tensor(chunk, device=device)[None]
+        moved = _sample_prepared(tensor, plan, fill)
+        sampled = moved[0].cpu().numpy()
+        if start == 0 and stop == count:
+            # Preserve the one-shot CPU path's zero-copy tensor result view.
+            output = sampled
+        else:
+            if output is None:
+                output = np.empty((count, *geometry.shape), dtype=np.float32)
+            output[start:stop] = sampled
+        del tensor, moved
+    # Retain a singleton frame axis for a 4D input. Registration's separate
+    # single-frame 3D path intentionally continues to return a 3D volume.
+    output = output[0] if data.ndim == 3 else np.moveaxis(output, 0, -1)
+    return new_image(output, image, affine=geometry.affine)
+
+
 class SynthMorph:
-    """Reusable rigid, affine, deformable or joint registration model."""
+    """复用刚体、仿射和非线性模型；configure_precision=False保留调用方TF32策略。
+
+    configure_precision默认True，与既有独立接口一致；不会启用半精度。
+    recon-all构造后单独应用并记录已验证的FP32例外。
+    """
 
     def __init__(
         self,
@@ -160,6 +255,7 @@ class SynthMorph:
         extent=256,
         hyper=0.5,
         steps=7,
+        configure_precision=True,
     ):
         from .models import SynthMorphNetwork
 
@@ -184,8 +280,9 @@ class SynthMorph:
         self.device = torch.device(device)
         self.model = model
         self.extent = extent
-        torch.backends.cuda.matmul.allow_tf32 = True
-        torch.backends.cudnn.allow_tf32 = True
+        if configure_precision:
+            torch.backends.cuda.matmul.allow_tf32 = True
+            torch.backends.cudnn.allow_tf32 = True
         self.network = SynthMorphNetwork(
             weights=paths,
             model=model,
@@ -203,11 +300,31 @@ class SynthMorph:
         mid_space=False,
         header_only=False,
         output_dir=None,
+        transform_only=False,
+        compute_inverse=True,
+        precision_report=None,
     ):
+        """计算 moving 到 fixed 的配准，返回带图像几何的变换。
+
+        compute_inverse默认True保留双向输出；False仅用于非线性transform_only、
+        无调试目录时，省去未消费的负velocity积分，inverse返回None。
+        两次反对称网络前向保持不变。precision_report可收集实际前向精度。
+
+        moving/fixed 是单帧 3D 图像或路径；init 是匹配这两幅图几何的
+        LTA 或 4×4 世界坐标仿射。mid_space 默认关闭；header_only 默认
+        关闭且仅适用于 affine/rigid；output_dir 默认不写调试图。
+        transform_only 默认关闭；开启后 moved/fixed_moved 为 None，
+        transform/inverse 仍保留原坐标空间和单位，省去两幅重采样图。
+        无效参数或输入几何不符时抛出异常。
+        """
         mov, fix = _load(moving), _load(fixed)
         is_matrix = self.model in ("affine", "rigid")
         if header_only and not is_matrix:
             raise ValueError("header_only requires affine or rigid model")
+        if transform_only and header_only:
+            raise ValueError("transform_only and header_only cannot be combined")
+        if not compute_inverse and (is_matrix or not transform_only or output_dir):
+            raise ValueError("compute_inverse=False requires nonlinear transform_only without debug output")
         if mid_space and init is None:
             raise ValueError("mid_space initialization requires init")
 
@@ -240,13 +357,20 @@ class SynthMorph:
                 raise ValueError("input has no intensity variation in network space")
             inputs.append(normalized / maximum)
 
-        forward_network, backward_network = self.network(*inputs)
+        if precision_report is not None:
+            from fnit.recon_all.profiling import record_network_forward
+            record_network_forward(self.network, inputs[0], precision_report,
+                                   model=self.model, compute_inverse=bool(compute_inverse))
+        if compute_inverse:
+            forward_network, backward_network = self.network(*inputs)
+        else:
+            forward_network, backward_network = self.network(*inputs, compute_inverse=False)
         forward_pull = compose(
             (net_to_mov, forward_network, fix_to_net), shape=fix.shape
         )
-        inverse_pull = compose(
+        inverse_pull = (compose(
             (net_to_fix, backward_network, mov_to_net), shape=mov.shape
-        )
+        ) if compute_inverse else None)
 
         if is_matrix:
             forward_voxel = _numpy(inverse_pull)
@@ -261,7 +385,9 @@ class SynthMorph:
             inverse = AffineTransform(
                 inverse_voxel, source=fix, target=mov, space="voxel"
             ).convert(space="world")
-            if header_only:
+            if transform_only:
+                moved = fixed_moved = None
+            elif header_only:
                 moved = _header_transform(mov, forward)
                 fixed_moved = _header_transform(fix, inverse)
             else:
@@ -277,15 +403,18 @@ class SynthMorph:
                 source=mov,
                 target=fix,
             )
-            inverse = DenseWarp(
+            inverse = (DenseWarp(
                 voxel_displacement_to_ras(_numpy(inverse_pull), fix, mov),
                 source=fix,
                 target=mov,
-            )
-            moved = _resampled_image(mov, forward_pull, fix, self.device, fill=0)
-            fixed_moved = _resampled_image(
-                fix, inverse_pull, mov, self.device, fill=0
-            )
+            ) if compute_inverse else None)
+            if transform_only:
+                moved = fixed_moved = None
+            else:
+                moved = _resampled_image(mov, forward_pull, fix, self.device, fill=0)
+                fixed_moved = _resampled_image(
+                    fix, inverse_pull, mov, self.device, fill=0
+                )
 
         if output_dir:
             root = Path(output_dir)
@@ -314,9 +443,29 @@ def apply_transform(
     fill=0,
     dtype="float32",
     header_only=False,
+    *,
+    device="cpu",
+    frame_chunk_size=None,
 ):
-    """Apply an FNIT LTA affine or target-grid RAS displacement field."""
-    image = _load(image, single_frame=False)
+    """Apply an LTA affine or target-grid RAS displacement to 3D/4D data.
+
+    ``device='cpu'`` preserves the original default sampler. CUDA is opt-in;
+    floating-point interpolation can differ from CPU by rounding. A positive
+    ``frame_chunk_size`` bounds frame buffers and reuses the same coordinates.
+    None selects at most 32 frames on CPU. CUDA uses at most 8 GiB of changing
+    frame buffers within 20 GB minus current allocated memory and 512 MiB.
+    The budget counts one input and two float32 output buffers per frame;
+    it is checked after the coordinate plan is resident on CUDA. Explicit
+    CUDA chunks use the same remaining 20 GB budget. A one-shot CPU result
+    retains its zero-copy output view (by default when there are <=32 frames).
+    Coordinates use the original CPU float32 arithmetic and are transferred
+    once for CUDA sampling. Image decoding and NIfTI I/O remain on the CPU.
+    """
+    image = _load(image, single_frame=False, check_finite=False)
+    # Materialise an ArrayProxy only once (especially important for .nii.gz).
+    data = np.asanyarray(image.dataobj)
+    if not np.isfinite(data).all():
+        raise ValueError("input contains NaN or infinity")
     if isinstance(transformation, (str, Path)):
         path = Path(transformation)
         transformation = (
@@ -336,7 +485,7 @@ def apply_transform(
     if header_only:
         if not isinstance(transformation, AffineTransform):
             raise ValueError("header_only requires an affine")
-        result = _header_transform(image, transformation)
+        result = _header_transform(image, transformation, data=data)
     elif isinstance(transformation, AffineTransform):
         world = transformation.convert(space="world").matrix
         target = transformation.target
@@ -345,14 +494,15 @@ def apply_transform(
             @ np.linalg.inv(world)
             @ target.affine
         )
-        result = _resampled_image(
+        result = _resampled_frames(
             image,
+            data,
             pull,
             target,
-            "cpu",
+            device,
             method=method,
             fill=fill,
-            surfa_nearest_rule=True,
+            frame_chunk_size=frame_chunk_size,
         )
     elif isinstance(transformation, DenseWarp):
         if not same_geometry(image, transformation.source):
@@ -361,14 +511,15 @@ def apply_transform(
             np.asanyarray(transformation.dataobj), image, transformation.target
         )
         pull = torch.as_tensor(pull).permute(3, 0, 1, 2)[None]
-        result = _resampled_image(
+        result = _resampled_frames(
             image,
+            data,
             pull,
             transformation.target,
-            "cpu",
+            device,
             method=method,
             fill=fill,
-            surfa_nearest_rule=True,
+            frame_chunk_size=frame_chunk_size,
         )
     else:
         raise TypeError("transformation must be an LTA affine or dense warp")

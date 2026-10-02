@@ -1,0 +1,270 @@
+{
+  "schema_version": 1,
+  "source_sha256": {
+    "src/fnit/__init__.py": "fd7a74d6bfbd4d5829d22d23618b419b200b11673df8f11f628d2d499007a0d4",
+    "src/fnit/cli.py": "911400d12e18b50633e348115ca731d0da155e71da731df6a64e7d0c02dcc501",
+    "src/fnit/_nib.py": "568d113432c1a0c50a3b0b635188173e69be1c7436d851de2568bca9b55ab94e",
+    "src/fnit/_sampling_plan.py": "a44a7fedd476be3f41cd3d9426790eadfabef08eb72f45dba14db1ebd2a8d3c3",
+    "src/fnit/_transforms.py": "be01fa24cd0c17bb1aa8ac7792cdf0b62c657037808c643427a1b11cc4c05340",
+    "src/fnit/applywarp/core.py": "c5ac65cf3fe2e810e4bff7fa0ce11d07f34e9dc2b7ced761ff7c42c283ebe514",
+    "src/fnit/synthmorph/pipeline.py": "f98f9a122814d3534362e0d40b4dcd44812e7df4ad0e00bab2beaef2b5b4eba9",
+    "src/fnit/synthmorph/spatial.py": "2e5e6560d58afbc551b2bf88cfc994bebceb7dd5ae7b1fd55078047aa8aa4fe2",
+    "tools/validate_fnirt_pipeline_lossless.py": "06190a96b7e771be2a721edeb68a81a5b40bb3bfc2703841b13ebd3f91f6465a",
+    "tools/benchmark_warp_cli_lossless.py": "42dfbe5569b719ba6e13848cf93169b5837f8d48bddfb0902dfd1f4780fdedfe"
+  },
+  "scope": "complete saved images; all frames and voxels; fixed transforms; no original software",
+  "timing_boundary": "parent perf_counter immediately before child process creation until process exit; includes fresh interpreter/imports, CLI input decoding, preparation, computation, compressed output writing and process teardown",
+  "validation_boundary": "complete saved-output comparison, hashing and metadata checks occur after the measured child exits and are separately timed",
+  "cache_policy": "no cache flush; one fresh process per configured device, no warmup; storage cache state is uncontrolled and case/device run order is retained",
+  "memory_policy": "CUDA allocator capped at min(19e9 bytes, device memory); report allocated/reserved peaks, not untracked driver/library allocations",
+  "threads": 8,
+  "runs_per_device": 1,
+  "all_required_gates_passed": true,
+  "cases": [
+    {
+      "case": "case_001",
+      "backend": "applywarp",
+      "runs": [
+        {
+          "device": "cuda:0",
+          "run_order": 1,
+          "effective_parameters": {
+            "command": "applywarp",
+            "interpolation": "trilinear",
+            "warp_convention": "auto",
+            "output_dtype": "float32",
+            "reference_argument": true,
+            "premat": false,
+            "postmat": false,
+            "device": "cuda:0",
+            "frame_chunk_size_argument": null,
+            "frame_chunk_policy": "automatic",
+            "header_only": false,
+            "threads": 8,
+            "tf32": true,
+            "float16": false,
+            "output_compression": "nii.gz"
+          },
+          "lossless_gate_passed": true,
+          "memory_gate_passed": true,
+          "expected_baseline_role": "validated_same_device_baseline",
+          "process_wall_seconds": 18.426340075209737,
+          "process_returncode": 0,
+          "child_metrics_marker_found": true,
+          "child_metrics": {
+            "allocator_cap_effective_bytes": 19000000000,
+            "allocator_cap_requested_bytes": 19000000000,
+            "cli_main_seconds": 15.247091080993414,
+            "device": "cuda:0",
+            "float16": false,
+            "output_dtype": "float32",
+            "peak_cuda_allocated_bytes": 777303040,
+            "peak_cuda_reserved_bytes": 1459617792,
+            "python": "3.11.16",
+            "tf32": true,
+            "threads": 8,
+            "torch": "2.5.1"
+          },
+          "shape": [
+            91,
+            109,
+            91,
+            105
+          ],
+          "dtype": "float32",
+          "input_shape": [
+            104,
+            104,
+            72,
+            105
+          ],
+          "input_frames": 105,
+          "output_frames": 105,
+          "strict_compare_images": {
+            "shape_equal": true,
+            "dtype_equal": true,
+            "affine_equal": true,
+            "full_header_bytes_equal_diagnostic": true,
+            "scientific_header_equal": true,
+            "extensions_equal": true,
+            "bitwise_equal": true,
+            "changed_values_including_signed_zero": 0,
+            "maximum_absolute_error": 0.0,
+            "all_frames_preserved": true,
+            "float32_output": true,
+            "tr_preserved_from_input": true,
+            "maximum_error_finite": true
+          },
+          "expected_output_sha256": "60f35aecbb785427f84e2dae6f181993aa4109e635fd53d9677fe06ca0e485a0",
+          "output_sha256": "d861f4ffd2723bb5dc2176651ae1588cf6b6dcf6c8b6e0f8a2b795363badb971",
+          "output_size_bytes": 195047286,
+          "validation_seconds": 6.625783469993621
+        }
+      ],
+      "input_sha256": {
+        "input": "91cd5ececc502dd15d62ed88f8d8d451ce52875a12e606544777a3cc41ce78c0",
+        "warp": "3e7084b2e239df0164fb37243a8a48714053dc176c97d9614546072e11c3bf4b",
+        "reference": "0585cd056bf5ccfb8bf97a5f6a66082d4e7caad525718fc11e40d80a827fcb92"
+      }
+    },
+    {
+      "case": "case_002",
+      "backend": "synthmorph",
+      "runs": [
+        {
+          "device": "cpu",
+          "run_order": 2,
+          "effective_parameters": {
+            "command": "apply",
+            "interpolation": "linear",
+            "fill": 0.0,
+            "output_dtype": "float32",
+            "reference_argument": false,
+            "output_grid": "RAS_warp_file_geometry",
+            "device": "cpu",
+            "frame_chunk_size_argument": null,
+            "frame_chunk_policy": "automatic",
+            "header_only": false,
+            "threads": 8,
+            "tf32": true,
+            "float16": false,
+            "output_compression": "nii.gz"
+          },
+          "lossless_gate_passed": true,
+          "memory_gate_passed": true,
+          "expected_baseline_role": "validated_same_device_baseline",
+          "process_wall_seconds": 94.23262174706906,
+          "process_returncode": 0,
+          "child_metrics_marker_found": true,
+          "child_metrics": {
+            "allocator_cap_effective_bytes": null,
+            "allocator_cap_requested_bytes": null,
+            "cli_main_seconds": 92.21214522933587,
+            "device": "cpu",
+            "float16": false,
+            "output_dtype": "float32",
+            "peak_cuda_allocated_bytes": 0,
+            "peak_cuda_reserved_bytes": 0,
+            "python": "3.11.16",
+            "tf32": true,
+            "threads": 8,
+            "torch": "2.5.1"
+          },
+          "shape": [
+            91,
+            109,
+            91,
+            490
+          ],
+          "dtype": "float32",
+          "input_shape": [
+            88,
+            88,
+            64,
+            490
+          ],
+          "input_frames": 490,
+          "output_frames": 490,
+          "strict_compare_images": {
+            "shape_equal": true,
+            "dtype_equal": true,
+            "affine_equal": true,
+            "full_header_bytes_equal_diagnostic": true,
+            "scientific_header_equal": true,
+            "extensions_equal": true,
+            "bitwise_equal": true,
+            "changed_values_including_signed_zero": 0,
+            "maximum_absolute_error": 0.0,
+            "all_frames_preserved": true,
+            "float32_output": true,
+            "tr_preserved_from_input": true,
+            "maximum_error_finite": true
+          },
+          "expected_output_sha256": "7be92867da2d8e14ca7c6215b9e585b4a07d4f9a558e58cd95c7f2913f76b6fa",
+          "output_sha256": "4f4291c9e2b51623912128e58f959d91eb89a0e7385d74813ecc3e8102c54ef7",
+          "output_size_bytes": 1481245366,
+          "validation_seconds": 33.71038710325956
+        },
+        {
+          "device": "cuda:0",
+          "run_order": 3,
+          "effective_parameters": {
+            "command": "apply",
+            "interpolation": "linear",
+            "fill": 0.0,
+            "output_dtype": "float32",
+            "reference_argument": false,
+            "output_grid": "RAS_warp_file_geometry",
+            "device": "cuda:0",
+            "frame_chunk_size_argument": null,
+            "frame_chunk_policy": "automatic",
+            "header_only": false,
+            "threads": 8,
+            "tf32": true,
+            "float16": false,
+            "output_compression": "nii.gz"
+          },
+          "lossless_gate_passed": true,
+          "memory_gate_passed": true,
+          "expected_baseline_role": "full_channel_cuda_oracle",
+          "process_wall_seconds": 86.90496967779472,
+          "process_returncode": 0,
+          "child_metrics_marker_found": true,
+          "child_metrics": {
+            "allocator_cap_effective_bytes": 19000000000,
+            "allocator_cap_requested_bytes": 19000000000,
+            "cli_main_seconds": 80.45086133899167,
+            "device": "cuda:0",
+            "float16": false,
+            "output_dtype": "float32",
+            "peak_cuda_allocated_bytes": 4523134976,
+            "peak_cuda_reserved_bytes": 4527751168,
+            "python": "3.11.16",
+            "tf32": true,
+            "threads": 8,
+            "torch": "2.5.1"
+          },
+          "shape": [
+            91,
+            109,
+            91,
+            490
+          ],
+          "dtype": "float32",
+          "input_shape": [
+            88,
+            88,
+            64,
+            490
+          ],
+          "input_frames": 490,
+          "output_frames": 490,
+          "strict_compare_images": {
+            "shape_equal": true,
+            "dtype_equal": true,
+            "affine_equal": true,
+            "full_header_bytes_equal_diagnostic": true,
+            "scientific_header_equal": true,
+            "extensions_equal": true,
+            "bitwise_equal": true,
+            "changed_values_including_signed_zero": 0,
+            "maximum_absolute_error": 0.0,
+            "all_frames_preserved": true,
+            "float32_output": true,
+            "tr_preserved_from_input": true,
+            "maximum_error_finite": true
+          },
+          "expected_output_sha256": "3933f9e01819d1a7f19274c41fc3c5a23702b58f35166c40e384e535804c2b15",
+          "output_sha256": "72f8c6307a4be6af72ed765e7508bc96adc3bd5ee47f8066e05ef0fb0de68846",
+          "output_size_bytes": 1481465777,
+          "validation_seconds": 33.287864077836275
+        }
+      ],
+      "input_sha256": {
+        "input": "67717caaa823141c6e59d46db52e92deb4419d232ba699c399c69eb8888a0e92",
+        "warp": "cc8927e113db095de93c779470e222b094992c2f22b941ca5cdb4236bc0e4191",
+        "reference": "0585cd056bf5ccfb8bf97a5f6a66082d4e7caad525718fc11e40d80a827fcb92"
+      }
+    }
+  ]
+}

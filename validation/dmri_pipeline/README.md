@@ -1,8 +1,14 @@
 # dMRI 参数图流程验证
 
+2026-10-02 的最新 FNIRT 完整 FastVBM、volume、dMRI 验收与完整 4D 重采样统一见[本轮报告](../registration_lossless_20261002/README.md)。以下记录按各自日期和源码保留。
+
 [功能和调用方式](../../docs/dmri_pipeline/README.md) · [既有 UKB TBSS 对照报告](tbss_e2e.real.current.json) · [经典 NODDI 接入报告](pipeline_classic_real.public.json) · [九图比较脚本](compare_current_eddy_pipeline.py) · [官方 TBSS 参考脚本](run_official_tbss.sh)
 
-## 最新：2026-10-02 同 raw 完整 TBSS＋AMICO
+## 最新：2026-10-02，SynthStrip＋源码对应 TOPUP 整链
+
+当前 b0 掩膜使用 FNIT PyTorch SynthStrip；TOPUP 补齐默认 regrid 和源码对应的场/运动优化、周期平滑、样条采样。真实 raw AP/PA 的 FNIT 与独立官方 SynthStrip 参考链生成全部 27 张参数图。最新计时、精度、显存、源码、两种参考协议及脑图见[完整报告](end_to_end_synthstrip_topup_20261002.md)、[运行 JSON](report.synthstrip_topup_20261002.public.json)、[官方 SynthStrip 对照](comparison.synthstrip_topup_20261002.public.json)、[历史 BET 对照](comparison.historical_bet_20261002.public.json)与[上游检查](upstream.synthstrip_topup_20261002.public.json)。TOPUP 独立同输入验收见[分功能报告](../topup/README.md)。输出仍非逐值相等。
+
+## 历史：2026-10-02，阈值 mask 与旧 TOPUP 的同 raw 完整 TBSS＋AMICO
 
 [完整报告与脑图](end_to_end_20261002.md)、[逐次时间与源码](report.end_to_end_20261002.public.json)、[27 图比较](comparison.end_to_end_20261002.public.json)、[上游比较](upstream.end_to_end_20261002.public.json)记录真实原始 AP/PA 的两次 FNIT 和两次独立 FSL＋AMICO 整链；各阶段从零生成，共 27 张最终图。
 
@@ -12,7 +18,7 @@
 
 [详细报告](lossless_20261002.md)与[机器报告](report.lossless_20261002.public.json)记录相对冻结 FNIT `954ad19` 的真实同输入验收。完整八轮 EDDY、两种全脑 NODDI、固定 warp 的 TBSS/MMORF 九图及参考索引复用全部保持逐值、几何、header 与模型 QC 一致。EDDY 一次配对计时 484.75→404.31 s；固定 warp 的热调用九图传播约 2.02/1.91 倍。NODDI 尚无稳定速度收益，经典模式整体中位数变慢。
 
-该组件报告未运行整链；随后的最新同 raw 完整复测已完成，见上一节。下表和后文保留历史整链及原软件对照的具体输入边界。
+该组件报告未运行整链；随后完成的同 raw 整链复测按其实际源码分别记录，见上方当前与历史两节。下表和后文保留历史整链及原软件对照的具体输入边界。
 
 ## 既有整链与原软件对照
 

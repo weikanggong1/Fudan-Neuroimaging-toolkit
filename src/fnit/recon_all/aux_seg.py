@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import argparse
 import os
-import tempfile
+import hashlib
 from pathlib import Path
 
 import nibabel as nib
@@ -16,7 +16,7 @@ import numpy as np
 import torch
 from torch.nn import functional as F
 
-from .sclimbic import _etiv_from_lta, mri_sclimbic_seg
+from .sclimbic import _etiv_from_lta, LimbicUNet, segment_sclimbic_image
 
 
 MCA_MODEL = "mca-dura.both-lh.nstd21.fhs.h5"
@@ -120,19 +120,29 @@ def _paste(output: np.ndarray, crop: np.ndarray, start: np.ndarray) -> None:
 
 def _infer_crop(crop: np.ndarray, native: nib.spatialimages.SpatialImage,
                 start: np.ndarray, model: Path, rows: tuple[tuple[int, str], ...],
-                fov: int, device: str) -> np.ndarray:
+                fov: int, device: str, *, model_cache: dict | None = None,
+                precision_report: list | None = None) -> np.ndarray:
+    """复用同次调用的权重/设备模型，在内存MGH上执行原裁剪推理。
+
+    crop为float32三维强度，start为原网格起点（体素），native提供affine。
+    rows、fov和device与sclimbic相同；局部model_cache以权重SHA、设备及实际cuDNN TF32策略为键，
+    仅跨MCA双侧复用，不持久驻留。返回crop原网格int32标签。
+    不创建临时MGZ或ctab；权重、几何及推理错误向上传递。
+    """
     affine = native.affine.copy()
     affine[:3, 3] += affine[:3, :3] @ start
-    with tempfile.TemporaryDirectory(prefix="fs_torch_aux_") as directory:
-        folder = Path(directory)
-        input_path = folder / "crop.mgz"
-        output_path = folder / "seg.mgz"
-        ctab_path = folder / "labels.ctab"
-        nib.save(nib.MGHImage(np.ascontiguousarray(crop), affine), str(input_path))
-        ctab_path.write_text("".join(f"{label} {name} 0 0 0 0\n" for label, name in rows))
-        mri_sclimbic_seg(input_path, output_path, model_path=model,
-                         ctab_path=ctab_path, fov=fov, device=device)
-        return np.asarray(nib.load(str(output_path)).dataobj).astype(np.int32)
+    source = nib.MGHImage(np.ascontiguousarray(crop), affine)
+    digest = hashlib.sha256(model.read_bytes()).hexdigest()
+    key = (digest, str(torch.device(device)), bool(torch.backends.cudnn.allow_tf32))
+    loaded = None if model_cache is None else model_cache.get(key)
+    if loaded is None:
+        loaded = LimbicUNet.from_h5(model).to(device).eval()
+        if model_cache is not None:
+            model_cache[key] = loaded
+    result = segment_sclimbic_image(
+        source, model_path=model, rows=rows, fov=fov, device=device,
+        model=loaded, precision_report=precision_report)
+    return np.asarray(result.dataobj).astype(np.int32)
 
 
 def _save_labels(path: str | Path, labels: np.ndarray,
@@ -148,13 +158,15 @@ def _save_labels(path: str | Path, labels: np.ndarray,
 
 def mri_mcadura_seg(input_path: str | Path, output_path: str | Path,
                     synthmorphdir: str | Path, assets: str | Path, *,
-                    device: str = "cpu", weights_dir: str | Path | None = None) -> Path:
+                    device: str = "cpu", weights_dir: str | Path | None = None,
+                    precision_report: list | None = None) -> Path:
     """Segment bilateral MCA-associated dura on an existing 1 mm recon-all MRI."""
     root = _assets_root(assets)
     native = nib.load(str(input_path))
     image = np.asarray(native.dataobj).astype(np.float32)
     lta = _lta_matrix(Path(synthmorphdir) / "reg.targ_to_invol.lta")
     output = np.zeros(native.shape[:3], dtype=np.int32)
+    model_cache = {}
     for hemi, label in (("lh", 6101), ("rh", 6102)):
         prior = nib.load(str(root / "average" /
                              f"mca-dura.prior.warp.mni152.1.0mm.{hemi}.nii.gz"))
@@ -164,7 +176,8 @@ def mri_mcadura_seg(input_path: str | Path, output_path: str | Path,
             crop = crop[::-1].copy()
         models = Path(weights_dir) if weights_dir is not None else _models_root(root)
         seg = _infer_crop(crop, native, start, models / MCA_MODEL,
-                          ((0, "Unknown"), (6101, "Left-Dura-MCA")), 72, device)
+                          ((0, "Unknown"), (6101, "Left-Dura-MCA")), 72, device,
+                          model_cache=model_cache, precision_report=precision_report)
         if hemi == "rh":
             seg = seg[::-1].copy()
             seg[seg == 6101] = 6102
@@ -202,7 +215,8 @@ def mri_vsinus_seg(input_path: str | Path, output_path: str | Path,
                    stats_path: str | Path | None = None,
                    talairach_lta: str | Path | None = None,
                    device: str = "cpu",
-                   weights_dir: str | Path | None = None) -> Path:
+                   weights_dir: str | Path | None = None,
+                   precision_report: list | None = None) -> Path:
     """Segment venous sinuses and optionally suppress cortical overlap."""
     root = _assets_root(assets)
     native = nib.load(str(input_path))
@@ -213,7 +227,7 @@ def mri_vsinus_seg(input_path: str | Path, output_path: str | Path,
     crop = _extract(image, start, 144)
     models = Path(weights_dir) if weights_dir is not None else _models_root(root)
     seg = _infer_crop(crop, native, start, models / VSINUS_MODEL,
-                      VSINUS_ROWS, 144, device)
+                      VSINUS_ROWS, 144, device, precision_report=precision_report)
     output = np.zeros(native.shape[:3], dtype=np.int32)
     _paste(output, seg, start)
     if ctxseg_path is not None:

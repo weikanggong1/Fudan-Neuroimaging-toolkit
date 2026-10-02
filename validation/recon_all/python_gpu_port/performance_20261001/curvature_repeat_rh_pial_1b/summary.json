@@ -1,0 +1,891 @@
+{
+  "status": "complete",
+  "benchmark_only": true,
+  "created_utc": "2026-10-01T05:18:04Z",
+  "scope": "sub-01 RH pial frozen ordered mesh; two independent benchmark processes, then CPU comparison of saved maps",
+  "candidate_calculation_commit": "1b8c36d25a68e253a1e59b6d02114890afa467de",
+  "controlled_calculation_commit": "e036f57b62b99d2af4cd8853ab2f1e6d2a9f8c68",
+  "hostname": "gpucw1",
+  "machine": "x86_64",
+  "python_version": "3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]",
+  "numpy_version": "1.26.4",
+  "analysis_source_sha256": "3b8d5dfaec0ca11260e9eba60b057dd91c51ea0bcb63eba1716cf6eea2ff5853",
+  "threshold": {
+    "absolute": 0.005,
+    "relative": 0.001,
+    "formula": "abs(candidate-reference) <= .005 + .001*abs(reference)",
+    "origin": "unchanged existing curvature operator tolerance; no new overall equivalence threshold"
+  },
+  "units": "mm^-1",
+  "surface_space": "individual surface RAS, mm; original ordered vertex indices",
+  "map_files": {
+    "whole_controlled_e036": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_e036f57_threads4_fp32_control/surf/rh.curv.pial",
+      "sha256": "f7042cf3409524f2c084c7972870a17cb099447ecd94c292651c1a965717ffd7",
+      "shape": [
+        104619
+      ],
+      "dtype_after_read": "float32",
+      "finite_values": 104619
+    },
+    "whole_candidate_1b": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/surf/rh.curv.pial",
+      "sha256": "09df3acc8ab38a7f6f574d4be473b5d35231ad0628fd42a2192acb52dded4fd1",
+      "shape": [
+        104619
+      ],
+      "dtype_after_read": "float32",
+      "finite_values": 104619
+    },
+    "round1_retry1_reference": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/curvature_repeat_rh_pial_1b_round1_retry1/result/rh.reference",
+      "sha256": "393dcae6b09c2ca6d1ef29abaaa77a0356508a17966b243569364f22bb75e1cc",
+      "shape": [
+        104619
+      ],
+      "dtype_after_read": "float32",
+      "finite_values": 104619
+    },
+    "round1_retry1_conda": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/curvature_repeat_rh_pial_1b_round1_retry1/result/rh.conda",
+      "sha256": "393dcae6b09c2ca6d1ef29abaaa77a0356508a17966b243569364f22bb75e1cc",
+      "shape": [
+        104619
+      ],
+      "dtype_after_read": "float32",
+      "finite_values": 104619
+    },
+    "round1_retry1_pytorch": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/curvature_repeat_rh_pial_1b_round1_retry1/result/rh.pytorch",
+      "sha256": "b84e0cda52434c4a776d7ae76d20d6d9efe61b5508c936ceda8ef8695329fc4f",
+      "shape": [
+        104619
+      ],
+      "dtype_after_read": "float32",
+      "finite_values": 104619
+    },
+    "round2_reference": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/curvature_repeat_rh_pial_1b_round2/result/rh.reference",
+      "sha256": "393dcae6b09c2ca6d1ef29abaaa77a0356508a17966b243569364f22bb75e1cc",
+      "shape": [
+        104619
+      ],
+      "dtype_after_read": "float32",
+      "finite_values": 104619
+    },
+    "round2_conda": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/curvature_repeat_rh_pial_1b_round2/result/rh.conda",
+      "sha256": "393dcae6b09c2ca6d1ef29abaaa77a0356508a17966b243569364f22bb75e1cc",
+      "shape": [
+        104619
+      ],
+      "dtype_after_read": "float32",
+      "finite_values": 104619
+    },
+    "round2_pytorch": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/curvature_repeat_rh_pial_1b_round2/result/rh.pytorch",
+      "sha256": "aa868d394edb45606909f79f34e06a1aab1c02c723f71b99e166be1b1fb2d79f",
+      "shape": [
+        104619
+      ],
+      "dtype_after_read": "float32",
+      "finite_values": 104619
+    }
+  },
+  "geometry": {
+    "white": {
+      "controlled_file": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_e036f57_threads4_fp32_control/surf/rh.white",
+      "candidate_file": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/surf/rh.white",
+      "controlled_sha256": "524ba340c6c7fa87e632ebc4699e0c3925206e54a9b4b0ac959883a588d70ec1",
+      "candidate_sha256": "f4f68d023b70c1812ebb0533bebd0297b3bd4c951497f3a3cf970166b774617d",
+      "coordinate_values": 313857,
+      "face_indices": 627702,
+      "different_coordinate_values": 0,
+      "different_face_indices": 0,
+      "ordered_geometry_identical": true
+    },
+    "pial": {
+      "controlled_file": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_e036f57_threads4_fp32_control/surf/rh.pial",
+      "candidate_file": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/surf/rh.pial",
+      "controlled_sha256": "91e10316f19eb6261abe95a0e9088222e57bb1d6eee4cb41253155cc9c5828bf",
+      "candidate_sha256": "c095857f96f1825b59bebc30b5a8dc719bf0b79ae3fd085853da1c505da8590a",
+      "coordinate_values": 313857,
+      "face_indices": 627702,
+      "different_coordinate_values": 0,
+      "different_face_indices": 0,
+      "ordered_geometry_identical": true
+    }
+  },
+  "actual_sources": {
+    "surface_curvature_gpu.py": {
+      "e036_actual_source": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/performance_e036f57_code/src/fnit/recon_all/surface_curvature_gpu.py",
+      "e036_actual_sha256": "7af66e0b23dd19cabe8e20e7ea75686531eb87550e599d318f35dc24f7efc8e0",
+      "1b_actual_source": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/code_1b8c36d/src/fnit/recon_all/surface_curvature_gpu.py",
+      "1b_actual_sha256": "7af66e0b23dd19cabe8e20e7ea75686531eb87550e599d318f35dc24f7efc8e0"
+    },
+    "surface_area_gpu.py": {
+      "e036_actual_source": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/performance_e036f57_code/src/fnit/recon_all/surface_area_gpu.py",
+      "e036_actual_sha256": "ad60ee9c6b3e45464650ac15f2fce7bc2ea3a6cb519c15f371f4f653f45964a8",
+      "1b_actual_source": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/code_1b8c36d/src/fnit/recon_all/surface_area_gpu.py",
+      "1b_actual_sha256": "ad60ee9c6b3e45464650ac15f2fce7bc2ea3a6cb519c15f371f4f653f45964a8"
+    },
+    "surface_thickness_gpu.py": {
+      "e036_actual_source": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/performance_e036f57_code/src/fnit/recon_all/surface_thickness_gpu.py",
+      "e036_actual_sha256": "e00dcb26dff747d6f3bc9e51a81ecdfe6254e7984da22cb8308d882505fab90f",
+      "1b_actual_source": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/code_1b8c36d/src/fnit/recon_all/surface_thickness_gpu.py",
+      "1b_actual_sha256": "c5d586b58f8b57af1ecc5b61fcf0e33c980ee5eaca681fe7cc6c25be57083f48"
+    },
+    "_normals_function": {
+      "e036": {
+        "start_line": 16,
+        "end_line": 26,
+        "excerpt_sha256": "36558ee6fd5d3715c1d44ab199f946f54d2829357b9b4f45ca264a0b789dca40",
+        "canonicalization": "UTF-8 original function lines joined with LF; one trailing LF"
+      },
+      "1b": {
+        "start_line": 17,
+        "end_line": 27,
+        "excerpt_sha256": "36558ee6fd5d3715c1d44ab199f946f54d2829357b9b4f45ca264a0b789dca40",
+        "canonicalization": "UTF-8 original function lines joined with LF; one trailing LF"
+      }
+    }
+  },
+  "raw_reports": {
+    "round1_retry1/monitor.json": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/curvature_repeat_rh_pial_1b_round1_retry1/monitor.json",
+      "sha256": "bd71ec0d169176fb976203ad366fae470d697b5316780ff92b43fbb8e531fd1a",
+      "report": {
+        "command": [
+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/code_1b8c36d/validation/recon_all/python_gpu_port/benchmark_surface_metrics.py",
+          "--subject",
+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1",
+          "--hemi",
+          "rh",
+          "--metric",
+          "curv",
+          "--surface",
+          "pial",
+          "--native-binary",
+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/mris_place_surface",
+          "--reference-binary",
+          "/public/software/apps/Freesurfer/8.2.0-1/bin/mris_place_surface",
+          "--assets",
+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets",
+          "--output",
+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/curvature_repeat_rh_pial_1b_round1_retry1/result",
+          "--device",
+          "cuda:0",
+          "--threads",
+          "4",
+          "--code-commit",
+          "1b8c36d25a68e253a1e59b6d02114890afa467de"
+        ],
+        "pid": 34326,
+        "gpu_uuid": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+        "exit_code": 0,
+        "command_wall_seconds": 12.550670912954956,
+        "sampling_interval_requested_seconds": 2.0,
+        "query_timeout_seconds": 5.0,
+        "samples": 6,
+        "failed_app_queries": 0,
+        "maximum_sampling_gap_seconds": 2.254699901212007,
+        "peak_sampled_process_bytes": 1990197248,
+        "continuous_peak_verified": false,
+        "monitor_thread_finished": true,
+        "script_sha256": "d0760007a9733f63c5aa57de42ec49adf95ccae06d64addc737349e7d57cedb2"
+      }
+    },
+    "round1_retry1/result/report.json": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/curvature_repeat_rh_pial_1b_round1_retry1/result/report.json",
+      "sha256": "54386e08ece2174245a707c71e0759f01a06881bef6425e01055acf42ed31ffe",
+      "report": {
+        "code_commit": "1b8c36d25a68e253a1e59b6d02114890afa467de",
+        "metric": "curv",
+        "surface": "pial",
+        "subject": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1",
+        "hemi": "rh",
+        "device": "cuda:0",
+        "threads": 4,
+        "matmul_tf32": true,
+        "cudnn_tf32": true,
+        "vertices": 104619,
+        "faces": 209234,
+        "input_sha256": {
+          "white": "f4f68d023b70c1812ebb0533bebd0297b3bd4c951497f3a3cf970166b774617d",
+          "pial": "c095857f96f1825b59bebc30b5a8dc719bf0b79ae3fd085853da1c505da8590a"
+        },
+        "program_sha256": {
+          "reference": "67139c3590f961f879a4214cd01f173b42986c7b178d1851dfa3f08e8acf12aa",
+          "conda": "44ad3994f8b86809b447919094273d3aa591b49be935ac4e09139e66bdddfe65"
+        },
+        "script_sha256": "651f1f698a0eeca14f3a691b33f66a7edb560d9c321e7be831cd33ed9ea769a7",
+        "seconds_including_io": {
+          "reference": 1.675009133759886,
+          "conda": 1.3461654027923942,
+          "pytorch": 5.111730698961765
+        },
+        "comparisons": {
+          "conda": {
+            "pass": true,
+            "different_values": 0,
+            "outliers": 0,
+            "max_abs": 0.0,
+            "p99_abs": 0.0,
+            "mae": 0.0
+          },
+          "pytorch": {
+            "pass": true,
+            "different_values": 92564,
+            "outliers": 0,
+            "max_abs": 0.00010776519775390625,
+            "p99_abs": 1.7508864402770996e-05,
+            "mae": 1.003251736580304e-06
+          }
+        },
+        "threshold": {
+          "absolute": 0.005,
+          "relative": 0.001
+        },
+        "gpu_peak_allocated_bytes": null,
+        "gpu_peak_reserved_bytes": null,
+        "timing_scope": "同步 GPU；包含函数/子进程读写，排除脚本导入和 CUDA 上下文初始化"
+      }
+    },
+    "round2/monitor.json": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/curvature_repeat_rh_pial_1b_round2/monitor.json",
+      "sha256": "ee31318cb9fea64aa1b6134fd1db181418b0067c00e10ff48ec9d3397a3e3036",
+      "report": {
+        "command": [
+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/code_1b8c36d/validation/recon_all/python_gpu_port/benchmark_surface_metrics.py",
+          "--subject",
+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1",
+          "--hemi",
+          "rh",
+          "--metric",
+          "curv",
+          "--surface",
+          "pial",
+          "--native-binary",
+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/mris_place_surface",
+          "--reference-binary",
+          "/public/software/apps/Freesurfer/8.2.0-1/bin/mris_place_surface",
+          "--assets",
+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets",
+          "--output",
+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/curvature_repeat_rh_pial_1b_round2/result",
+          "--device",
+          "cuda:0",
+          "--threads",
+          "4",
+          "--code-commit",
+          "1b8c36d25a68e253a1e59b6d02114890afa467de"
+        ],
+        "pid": 34898,
+        "gpu_uuid": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+        "exit_code": 0,
+        "command_wall_seconds": 13.406167996581644,
+        "sampling_interval_requested_seconds": 2.0,
+        "query_timeout_seconds": 5.0,
+        "samples": 7,
+        "failed_app_queries": 0,
+        "maximum_sampling_gap_seconds": 2.269879634026438,
+        "peak_sampled_process_bytes": 1990197248,
+        "continuous_peak_verified": false,
+        "monitor_thread_finished": true,
+        "script_sha256": "d0760007a9733f63c5aa57de42ec49adf95ccae06d64addc737349e7d57cedb2"
+      }
+    },
+    "round2/result/report.json": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/curvature_repeat_rh_pial_1b_round2/result/report.json",
+      "sha256": "f12c76d72b6952871a588700474369203ce12aa4444d8953d2539226470d7319",
+      "report": {
+        "code_commit": "1b8c36d25a68e253a1e59b6d02114890afa467de",
+        "metric": "curv",
+        "surface": "pial",
+        "subject": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1",
+        "hemi": "rh",
+        "device": "cuda:0",
+        "threads": 4,
+        "matmul_tf32": true,
+        "cudnn_tf32": true,
+        "vertices": 104619,
+        "faces": 209234,
+        "input_sha256": {
+          "white": "f4f68d023b70c1812ebb0533bebd0297b3bd4c951497f3a3cf970166b774617d",
+          "pial": "c095857f96f1825b59bebc30b5a8dc719bf0b79ae3fd085853da1c505da8590a"
+        },
+        "program_sha256": {
+          "reference": "67139c3590f961f879a4214cd01f173b42986c7b178d1851dfa3f08e8acf12aa",
+          "conda": "44ad3994f8b86809b447919094273d3aa591b49be935ac4e09139e66bdddfe65"
+        },
+        "script_sha256": "651f1f698a0eeca14f3a691b33f66a7edb560d9c321e7be831cd33ed9ea769a7",
+        "seconds_including_io": {
+          "reference": 1.3107448890805244,
+          "conda": 1.2770372410304844,
+          "pytorch": 6.9980096952058375
+        },
+        "comparisons": {
+          "conda": {
+            "pass": true,
+            "different_values": 0,
+            "outliers": 0,
+            "max_abs": 0.0,
+            "p99_abs": 0.0,
+            "mae": 0.0
+          },
+          "pytorch": {
+            "pass": true,
+            "different_values": 92633,
+            "outliers": 0,
+            "max_abs": 9.888410568237305e-05,
+            "p99_abs": 1.728534698486328e-05,
+            "mae": 9.971961526451509e-07
+          }
+        },
+        "threshold": {
+          "absolute": 0.005,
+          "relative": 0.001
+        },
+        "gpu_peak_allocated_bytes": null,
+        "gpu_peak_reserved_bytes": null,
+        "timing_scope": "同步 GPU；包含函数/子进程读写，排除脚本导入和 CUDA 上下文初始化"
+      }
+    }
+  },
+  "repeated_runs": {
+    "reference": {
+      "reference": "round1_retry1_reference",
+      "candidate": "round2_reference",
+      "vertices": 104619,
+      "different_values": 0,
+      "nonfinite_values": 0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "mae": 0.0,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": true
+    },
+    "conda": {
+      "reference": "round1_retry1_conda",
+      "candidate": "round2_conda",
+      "vertices": 104619,
+      "different_values": 0,
+      "nonfinite_values": 0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "mae": 0.0,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": true
+    },
+    "pytorch": {
+      "reference": "round1_retry1_pytorch",
+      "candidate": "round2_pytorch",
+      "vertices": 104619,
+      "different_values": 59663,
+      "nonfinite_values": 0,
+      "max_abs": 0.00010204315185546875,
+      "p99_abs": 2.7120113372802734e-06,
+      "mae": 1.848762799131124e-07,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": false
+    }
+  },
+  "whole_pair": {
+    "reference": "whole_controlled_e036",
+    "candidate": "whole_candidate_1b",
+    "vertices": 104619,
+    "different_values": 58562,
+    "nonfinite_values": 0,
+    "max_abs": 0.00010144710540771484,
+    "p99_abs": 2.8014183044433594e-06,
+    "mae": 1.775282767007738e-07,
+    "outliers": 0,
+    "pass_existing_operator_tolerance": true,
+    "file_sha256_equal": false
+  },
+  "all_pairwise_comparisons": [
+    {
+      "reference": "whole_controlled_e036",
+      "candidate": "whole_candidate_1b",
+      "vertices": 104619,
+      "different_values": 58562,
+      "nonfinite_values": 0,
+      "max_abs": 0.00010144710540771484,
+      "p99_abs": 2.8014183044433594e-06,
+      "mae": 1.775282767007738e-07,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": false
+    },
+    {
+      "reference": "whole_controlled_e036",
+      "candidate": "round1_retry1_reference",
+      "vertices": 104619,
+      "different_values": 92596,
+      "nonfinite_values": 0,
+      "max_abs": 9.924173355102539e-05,
+      "p99_abs": 1.7181038856506348e-05,
+      "mae": 9.876527199274833e-07,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": false
+    },
+    {
+      "reference": "whole_controlled_e036",
+      "candidate": "round1_retry1_conda",
+      "vertices": 104619,
+      "different_values": 92596,
+      "nonfinite_values": 0,
+      "max_abs": 9.924173355102539e-05,
+      "p99_abs": 1.7181038856506348e-05,
+      "mae": 9.876527199274833e-07,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": false
+    },
+    {
+      "reference": "whole_controlled_e036",
+      "candidate": "round1_retry1_pytorch",
+      "vertices": 104619,
+      "different_values": 59309,
+      "nonfinite_values": 0,
+      "max_abs": 6.479024887084961e-05,
+      "p99_abs": 2.950429916381836e-06,
+      "mae": 1.5817671366620168e-07,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": false
+    },
+    {
+      "reference": "whole_controlled_e036",
+      "candidate": "round2_reference",
+      "vertices": 104619,
+      "different_values": 92596,
+      "nonfinite_values": 0,
+      "max_abs": 9.924173355102539e-05,
+      "p99_abs": 1.7181038856506348e-05,
+      "mae": 9.876527199274833e-07,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": false
+    },
+    {
+      "reference": "whole_controlled_e036",
+      "candidate": "round2_conda",
+      "vertices": 104619,
+      "different_values": 92596,
+      "nonfinite_values": 0,
+      "max_abs": 9.924173355102539e-05,
+      "p99_abs": 1.7181038856506348e-05,
+      "mae": 9.876527199274833e-07,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": false
+    },
+    {
+      "reference": "whole_controlled_e036",
+      "candidate": "round2_pytorch",
+      "vertices": 104619,
+      "different_values": 59957,
+      "nonfinite_values": 0,
+      "max_abs": 0.00010216236114501953,
+      "p99_abs": 2.6226043701171875e-06,
+      "mae": 1.5794576294181105e-07,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": false
+    },
+    {
+      "reference": "whole_candidate_1b",
+      "candidate": "round1_retry1_reference",
+      "vertices": 104619,
+      "different_values": 92542,
+      "nonfinite_values": 0,
+      "max_abs": 0.0001080632209777832,
+      "p99_abs": 1.7863810062408335e-05,
+      "mae": 1.0199078000819861e-06,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": false
+    },
+    {
+      "reference": "whole_candidate_1b",
+      "candidate": "round1_retry1_conda",
+      "vertices": 104619,
+      "different_values": 92542,
+      "nonfinite_values": 0,
+      "max_abs": 0.0001080632209777832,
+      "p99_abs": 1.7863810062408335e-05,
+      "mae": 1.0199078000819861e-06,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": false
+    },
+    {
+      "reference": "whole_candidate_1b",
+      "candidate": "round1_retry1_pytorch",
+      "vertices": 104619,
+      "different_values": 60351,
+      "nonfinite_values": 0,
+      "max_abs": 0.00010132789611816406,
+      "p99_abs": 3.008693456649724e-06,
+      "mae": 1.8234653606563586e-07,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": false
+    },
+    {
+      "reference": "whole_candidate_1b",
+      "candidate": "round2_reference",
+      "vertices": 104619,
+      "different_values": 92542,
+      "nonfinite_values": 0,
+      "max_abs": 0.0001080632209777832,
+      "p99_abs": 1.7863810062408335e-05,
+      "mae": 1.0199078000819861e-06,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": false
+    },
+    {
+      "reference": "whole_candidate_1b",
+      "candidate": "round2_conda",
+      "vertices": 104619,
+      "different_values": 92542,
+      "nonfinite_values": 0,
+      "max_abs": 0.0001080632209777832,
+      "p99_abs": 1.7863810062408335e-05,
+      "mae": 1.0199078000819861e-06,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": false
+    },
+    {
+      "reference": "whole_candidate_1b",
+      "candidate": "round2_pytorch",
+      "vertices": 104619,
+      "different_values": 59705,
+      "nonfinite_values": 0,
+      "max_abs": 6.502866744995117e-05,
+      "p99_abs": 2.451427280902792e-06,
+      "mae": 1.3712813330964747e-07,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": false
+    },
+    {
+      "reference": "round1_retry1_reference",
+      "candidate": "round1_retry1_conda",
+      "vertices": 104619,
+      "different_values": 0,
+      "nonfinite_values": 0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "mae": 0.0,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": true
+    },
+    {
+      "reference": "round1_retry1_reference",
+      "candidate": "round1_retry1_pytorch",
+      "vertices": 104619,
+      "different_values": 92564,
+      "nonfinite_values": 0,
+      "max_abs": 0.00010776519775390625,
+      "p99_abs": 1.7508864402770996e-05,
+      "mae": 1.003251736580304e-06,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": false
+    },
+    {
+      "reference": "round1_retry1_reference",
+      "candidate": "round2_reference",
+      "vertices": 104619,
+      "different_values": 0,
+      "nonfinite_values": 0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "mae": 0.0,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": true
+    },
+    {
+      "reference": "round1_retry1_reference",
+      "candidate": "round2_conda",
+      "vertices": 104619,
+      "different_values": 0,
+      "nonfinite_values": 0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "mae": 0.0,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": true
+    },
+    {
+      "reference": "round1_retry1_reference",
+      "candidate": "round2_pytorch",
+      "vertices": 104619,
+      "different_values": 92633,
+      "nonfinite_values": 0,
+      "max_abs": 9.888410568237305e-05,
+      "p99_abs": 1.728534698486328e-05,
+      "mae": 9.971961526451509e-07,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": false
+    },
+    {
+      "reference": "round1_retry1_conda",
+      "candidate": "round1_retry1_pytorch",
+      "vertices": 104619,
+      "different_values": 92564,
+      "nonfinite_values": 0,
+      "max_abs": 0.00010776519775390625,
+      "p99_abs": 1.7508864402770996e-05,
+      "mae": 1.003251736580304e-06,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": false
+    },
+    {
+      "reference": "round1_retry1_conda",
+      "candidate": "round2_reference",
+      "vertices": 104619,
+      "different_values": 0,
+      "nonfinite_values": 0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "mae": 0.0,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": true
+    },
+    {
+      "reference": "round1_retry1_conda",
+      "candidate": "round2_conda",
+      "vertices": 104619,
+      "different_values": 0,
+      "nonfinite_values": 0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "mae": 0.0,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": true
+    },
+    {
+      "reference": "round1_retry1_conda",
+      "candidate": "round2_pytorch",
+      "vertices": 104619,
+      "different_values": 92633,
+      "nonfinite_values": 0,
+      "max_abs": 9.888410568237305e-05,
+      "p99_abs": 1.728534698486328e-05,
+      "mae": 9.971961526451509e-07,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": false
+    },
+    {
+      "reference": "round1_retry1_pytorch",
+      "candidate": "round2_reference",
+      "vertices": 104619,
+      "different_values": 92564,
+      "nonfinite_values": 0,
+      "max_abs": 0.00010776519775390625,
+      "p99_abs": 1.7508864402770996e-05,
+      "mae": 1.003251736580304e-06,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": false
+    },
+    {
+      "reference": "round1_retry1_pytorch",
+      "candidate": "round2_conda",
+      "vertices": 104619,
+      "different_values": 92564,
+      "nonfinite_values": 0,
+      "max_abs": 0.00010776519775390625,
+      "p99_abs": 1.7508864402770996e-05,
+      "mae": 1.003251736580304e-06,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": false
+    },
+    {
+      "reference": "round1_retry1_pytorch",
+      "candidate": "round2_pytorch",
+      "vertices": 104619,
+      "different_values": 59663,
+      "nonfinite_values": 0,
+      "max_abs": 0.00010204315185546875,
+      "p99_abs": 2.7120113372802734e-06,
+      "mae": 1.848762799131124e-07,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": false
+    },
+    {
+      "reference": "round2_reference",
+      "candidate": "round2_conda",
+      "vertices": 104619,
+      "different_values": 0,
+      "nonfinite_values": 0,
+      "max_abs": 0.0,
+      "p99_abs": 0.0,
+      "mae": 0.0,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": true
+    },
+    {
+      "reference": "round2_reference",
+      "candidate": "round2_pytorch",
+      "vertices": 104619,
+      "different_values": 92633,
+      "nonfinite_values": 0,
+      "max_abs": 9.888410568237305e-05,
+      "p99_abs": 1.728534698486328e-05,
+      "mae": 9.971961526451509e-07,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": false
+    },
+    {
+      "reference": "round2_conda",
+      "candidate": "round2_pytorch",
+      "vertices": 104619,
+      "different_values": 92633,
+      "nonfinite_values": 0,
+      "max_abs": 9.888410568237305e-05,
+      "p99_abs": 1.728534698486328e-05,
+      "mae": 9.971961526451509e-07,
+      "outliers": 0,
+      "pass_existing_operator_tolerance": true,
+      "file_sha256_equal": false
+    }
+  ],
+  "sampled_load": {
+    "round1_retry1": {
+      "samples": 6,
+      "columns": [
+        "time_utc",
+        "monotonic_seconds",
+        "apps_query_seconds",
+        "apps_status",
+        "parent_bytes",
+        "children_bytes",
+        "total_process_bytes",
+        "gpu_query_seconds",
+        "gpu_status",
+        "gpu_total_mib",
+        "gpu_utilization_percent"
+      ],
+      "total_process_bytes": {
+        "min": 0.0,
+        "max": 1990197248.0,
+        "available_samples": 6
+      },
+      "gpu_utilization_percent": {
+        "min": 67.0,
+        "max": 100.0,
+        "available_samples": 6
+      }
+    },
+    "round2": {
+      "samples": 7,
+      "columns": [
+        "time_utc",
+        "monotonic_seconds",
+        "apps_query_seconds",
+        "apps_status",
+        "parent_bytes",
+        "children_bytes",
+        "total_process_bytes",
+        "gpu_query_seconds",
+        "gpu_status",
+        "gpu_total_mib",
+        "gpu_utilization_percent"
+      ],
+      "total_process_bytes": {
+        "min": 0.0,
+        "max": 1990197248.0,
+        "available_samples": 7
+      },
+      "gpu_utilization_percent": {
+        "min": 99.0,
+        "max": 100.0,
+        "available_samples": 7
+      }
+    }
+  },
+  "original_failed_attempt": {
+    "directory": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/curvature_repeat_rh_pial_1b_round1",
+    "monitor_sha256": "308ca25b4a332bb5036c8275b5943ffc48b10036d2be2224ccde997c6512fc56",
+    "command_log_sha256": "22a8181cbe40f2291a61ae8d8db31d6cd0788e86f1b7cf0a40da1f67c37bd7a6",
+    "reference_log_sha256": "4abad5255cc77e67e528a40bbe652dc8a040dfedbd29a5b8ac1068381b08422a",
+    "monitor": {
+      "command": [
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/code_1b8c36d/validation/recon_all/python_gpu_port/benchmark_surface_metrics.py",
+        "--subject",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1",
+        "--hemi",
+        "rh",
+        "--metric",
+        "curv",
+        "--surface",
+        "pial",
+        "--native-binary",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/mris_place_surface",
+        "--reference-binary",
+        "/public/software/apps/Freesurfer/8.2.0-1/bin/mris_place_surface",
+        "--assets",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets",
+        "--output",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/curvature_repeat_rh_pial_1b_round1/result",
+        "--device",
+        "cuda:0",
+        "--threads",
+        "4",
+        "--code-commit",
+        "1b8c36d25a68e253a1e59b6d02114890afa467de"
+      ],
+      "pid": 24557,
+      "gpu_uuid": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+      "exit_code": 1,
+      "command_wall_seconds": 4.102359344251454,
+      "sampling_interval_requested_seconds": 2.0,
+      "query_timeout_seconds": 5.0,
+      "samples": 2,
+      "failed_app_queries": 0,
+      "maximum_sampling_gap_seconds": 2.0852581039071083,
+      "peak_sampled_process_bytes": 0,
+      "continuous_peak_verified": false,
+      "monitor_thread_finished": true,
+      "script_sha256": "d0760007a9733f63c5aa57de42ec49adf95ccae06d64addc737349e7d57cedb2"
+    },
+    "cause": "official binary exited 255 before candidate execution; FS_LICENSE was absent",
+    "retry": "Existing authorized FS_LICENSE path from existing run scripts passed without reading/copying license contents"
+  },
+  "limitations": [
+    "Only this frozen RH pial and two successful repeats were tested; this is not a new whole recon-all run.",
+    "Observed repeat variability does not by itself prove CUDA index_add_, GEMM, SVD or another operator caused the full whole-map differences.",
+    "Potential numerical paths include identical _normals CUDA index_add_ accumulation and identical local fit/GEMM/SVD; no TF32 or algorithm changes were made.",
+    "Does not attribute the other 19 nonzero whole maps to this experiment.",
+    "GPU shared load and short duration limit timing interpretation; monitoring is sampled, not a continuous peak guarantee.",
+    "Official/Conda repeat equality here does not establish official whole-pipeline repeatability.",
+    "No original maps, input images, surfaces, weights or license files are transferred to the local repository.",
+    "Overall metric equivalence remains not_assessed."
+  ],
+  "analysis_cpu_wall_seconds_including_reads_hashes": 0.19934512302279472
+}

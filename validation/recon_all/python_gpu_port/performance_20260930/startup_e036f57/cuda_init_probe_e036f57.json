@@ -1,0 +1,70 @@
+{
+  "host": "gpucw1",
+  "time_utc": "2026-09-30T11:31:16Z",
+  "physical_gpu": 1,
+  "precision": "float32",
+  "allocator_cache": false,
+  "source_commit": "e036f57b62b99d2af4cd8853ab2f1e6d2a9f8c68",
+  "records": [
+    {
+      "index": 0,
+      "set_threads_before_init": null,
+      "command": "import json,torch; from fnit.recon_all.native_free import run_recon_all_python; torch.cuda.init(); x=torch.ones(1,dtype=torch.float32,device=\"cuda:0\"); torch.cuda.synchronize(\"cuda:0\"); print(json.dumps({\"threads\":torch.get_num_threads(),\"free_total_bytes\":torch.cuda.mem_get_info(0),\"value\":x.item()}))",
+      "seconds": 4.544653201941401,
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nRuntimeError: CUDA error: out of memory\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n\n",
+      "gpu_before": "50360, 30647, 100\n"
+    },
+    {
+      "index": 1,
+      "set_threads_before_init": 4,
+      "command": "import json,torch; from fnit.recon_all.native_free import run_recon_all_python; torch.set_num_threads(4); torch.cuda.init(); x=torch.ones(1,dtype=torch.float32,device=\"cuda:0\"); torch.cuda.synchronize(\"cuda:0\"); print(json.dumps({\"threads\":torch.get_num_threads(),\"free_total_bytes\":torch.cuda.mem_get_info(0),\"value\":x.item()}))",
+      "seconds": 3.8706215140409768,
+      "exit_code": 0,
+      "stdout": "{\"threads\": 4, \"free_total_bytes\": [31578914816, 84942979072], \"value\": 1.0}\n",
+      "stderr": "",
+      "gpu_before": "50360, 30647, 100\n"
+    },
+    {
+      "index": 2,
+      "set_threads_before_init": null,
+      "command": "import json,torch; from fnit.recon_all.native_free import run_recon_all_python; torch.cuda.init(); x=torch.ones(1,dtype=torch.float32,device=\"cuda:0\"); torch.cuda.synchronize(\"cuda:0\"); print(json.dumps({\"threads\":torch.get_num_threads(),\"free_total_bytes\":torch.cuda.mem_get_info(0),\"value\":x.item()}))",
+      "seconds": 2.7139699826948345,
+      "exit_code": 0,
+      "stdout": "{\"threads\": 64, \"free_total_bytes\": [31578914816, 84942979072], \"value\": 1.0}\n",
+      "stderr": "",
+      "gpu_before": "50360, 30647, 100\n"
+    },
+    {
+      "index": 3,
+      "set_threads_before_init": 4,
+      "command": "import json,torch; from fnit.recon_all.native_free import run_recon_all_python; torch.set_num_threads(4); torch.cuda.init(); x=torch.ones(1,dtype=torch.float32,device=\"cuda:0\"); torch.cuda.synchronize(\"cuda:0\"); print(json.dumps({\"threads\":torch.get_num_threads(),\"free_total_bytes\":torch.cuda.mem_get_info(0),\"value\":x.item()}))",
+      "seconds": 2.676953856833279,
+      "exit_code": 0,
+      "stdout": "{\"threads\": 4, \"free_total_bytes\": [31578914816, 84942979072], \"value\": 1.0}\n",
+      "stderr": "",
+      "gpu_before": "50360, 30647, 100\n"
+    },
+    {
+      "index": 4,
+      "set_threads_before_init": null,
+      "command": "import json,torch; from fnit.recon_all.native_free import run_recon_all_python; torch.cuda.init(); x=torch.ones(1,dtype=torch.float32,device=\"cuda:0\"); torch.cuda.synchronize(\"cuda:0\"); print(json.dumps({\"threads\":torch.get_num_threads(),\"free_total_bytes\":torch.cuda.mem_get_info(0),\"value\":x.item()}))",
+      "seconds": 2.605021474417299,
+      "exit_code": 0,
+      "stdout": "{\"threads\": 64, \"free_total_bytes\": [31578914816, 84942979072], \"value\": 1.0}\n",
+      "stderr": "",
+      "gpu_before": "50360, 30647, 100\n"
+    },
+    {
+      "index": 5,
+      "set_threads_before_init": 4,
+      "command": "import json,torch; from fnit.recon_all.native_free import run_recon_all_python; torch.set_num_threads(4); torch.cuda.init(); x=torch.ones(1,dtype=torch.float32,device=\"cuda:0\"); torch.cuda.synchronize(\"cuda:0\"); print(json.dumps({\"threads\":torch.get_num_threads(),\"free_total_bytes\":torch.cuda.mem_get_info(0),\"value\":x.item()}))",
+      "seconds": 2.682522801682353,
+      "exit_code": 0,
+      "stdout": "{\"threads\": 4, \"free_total_bytes\": [31578914816, 84942979072], \"value\": 1.0}\n",
+      "stderr": "",
+      "gpu_before": "50360, 30647, 100\n"
+    }
+  ]
+}

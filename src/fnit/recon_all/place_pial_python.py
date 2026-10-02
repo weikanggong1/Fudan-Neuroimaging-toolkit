@@ -22,12 +22,12 @@ from .place_surface_final_cleanup import pin_medial_wall, repair_intersections
 from .place_surface_geometry import surface_ras_to_voxel
 from .place_surface_gradient_average import average_signed_gradients
 from .place_surface_intensity import intensity_gradient
-from .place_surface_normals import initial_vertex_normals
+from .place_surface_normals import FaceNormalTopology
 from .place_surface_objective import (
     intensity_error, pial_placement_sse, surface_total_area, tangential_spring_energy,
 )
 from .place_surface_repulsion import (
-    original_vertex_normals, surface_repulsion_gradient, vertex_buckets,
+    original_vertex_normals, surface_repulsion_gradient, OriginalVertexBuckets,
 )
 from .place_surface_rip import rip_outside_label
 from .place_surface_smoothing import average_marked_values, _ordered_neighbors
@@ -102,7 +102,9 @@ def place_pial_t1(
     affine = surface_ras_to_voxel(brain.header, metadata)
     thresholds = np.array([float(stats[f"pial_{name}"]) for name in
                            ("inside_hi", "border_hi", "border_low", "outside_low", "outside_hi")])
-    normals = initial_vertex_normals(xyz, faces)
+    normal_topology = FaceNormalTopology(faces, len(xyz))
+    repulsion_index = OriginalVertexBuckets(xyz, ripped)
+    normals = normal_topology.evaluate(xyz)
     border = compute_border_values_first_pass(
         volume, aseg, xyz, normals, xyz, ripped,
         np.full(len(xyz), -1.0, dtype=np.float32), affine, thresholds,
@@ -113,12 +115,12 @@ def place_pial_t1(
     ordered = (neighbor_indices, neighbor_valid)
     two_offsets, two_candidates = two_ring_neighbors(
         faces, len(xyz), ordered_neighbors=ordered)
-    fixed_normals = original_vertex_normals(xyz, faces)
+    fixed_normals = original_vertex_normals(xyz, faces, topology=normal_topology)
     original_area = surface_total_area(xyz, faces)
     sigma, n_averages = 2.0, 16
 
     def objective(current: np.ndarray) -> tuple[float, float]:
-        current_normals = initial_vertex_normals(current, faces)
+        current_normals = normal_topology.evaluate(current)
         intensity_sse, rms, _ = intensity_error(
             placement, current, values, ripped, affine)
         spring = tangential_spring_energy(
@@ -128,12 +130,12 @@ def place_pial_t1(
         return pial_placement_sse(intensity_sse, spring, original_area, area), rms
 
     def gradient(current: np.ndarray, cropped: np.ndarray) -> np.ndarray:
-        current_normals = initial_vertex_normals(current, faces)
+        current_normals = normal_topology.evaluate(current)
         intensity = intensity_gradient(
             placement, current, current_normals, ripped, values, border[5],
             affine, brain.header.get_zooms()[:3], weight=0.2, sigma_global=sigma,
         )
-        offsets, candidates = vertex_buckets(current, xyz, ripped)
+        offsets, candidates = repulsion_index.query(current)
         repulsion = surface_repulsion_gradient(
             current, current_normals, xyz, fixed_normals, ripped,
             offsets, candidates, weight=5.0, cropped=cropped,
@@ -195,7 +197,7 @@ def place_pial_t1(
             outer_pass += 1
             sigma = 2.0 / (1 << outer_pass)
             n_averages = 16 >> outer_pass
-            current_normals = initial_vertex_normals(current, faces)
+            current_normals = normal_topology.evaluate(current)
             border = compute_border_values_first_pass(
                 volume, aseg, current, current_normals, xyz, ripped,
                 values, affine, thresholds, hemisphere=hemi, surface="pial",

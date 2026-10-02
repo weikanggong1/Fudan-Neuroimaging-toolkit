@@ -1,51 +1,950 @@
 {
   "date": "2026-09-30",
-  "scope": "FNIT continuous single-T1 standard recon-all outputs versus independent FreeSurfer 8.2 outputs for two real T1 images",
-  "method": "Match aparc, aseg and wmparc statistics by hemisphere and structure name or SegId; report Pearson correlation across regions, mean absolute error and median absolute relative error. Compare global measures by name. Surface nearest-vertex distances are diagnostic because vertex counts and order differ.",
-  "sub-01": {
-    "input_t1_sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
-    "global_relative_difference_percent": {
-      "synthseg_tiv": -0.002906,
-      "brain_segmentation_volume": 0.3053,
-      "total_cortical_gray_volume": 1.1121,
-      "white_surface_area_lh": 0.1036,
-      "white_surface_area_rh": -0.0744
+  "candidate_code_commit": "e036f57b62b99d2af4cd8853ab2f1e6d2a9f8c68",
+  "overall_metric_equivalence": "not_assessed; no confirmed whole-case gates",
+  "relative_error_policy": "exclude zero reference values; preserve them in per-region reports",
+  "subjects": {
+    "sub-01": {
+      "aparc_68": {
+        "SurfArea": {
+          "matched_regions": 68,
+          "missing_in_candidate": [],
+          "extra_in_candidate": [],
+          "pearson_r": 0.9997340617376201,
+          "mae": 26.58823529411765,
+          "median_absolute_relative_error_percent": 1.4394964676323747,
+          "p90_absolute_relative_error_percent": 3.6310462779377928,
+          "maximum_absolute_error": 126.0,
+          "zero_reference_regions": [],
+          "worst_regions_by_relative_error": [
+            "rh/entorhinal",
+            "lh/rostralanteriorcingulate",
+            "lh/frontalpole",
+            "rh/parsorbitalis",
+            "rh/parstriangularis",
+            "lh/transversetemporal",
+            "rh/temporalpole",
+            "rh/medialorbitofrontal",
+            "lh/insula",
+            "rh/pericalcarine"
+          ]
+        },
+        "GrayVol": {
+          "matched_regions": 68,
+          "missing_in_candidate": [],
+          "extra_in_candidate": [],
+          "pearson_r": 0.9994279357028193,
+          "mae": 107.44117647058823,
+          "median_absolute_relative_error_percent": 1.6581454025912858,
+          "p90_absolute_relative_error_percent": 4.890512569577166,
+          "maximum_absolute_error": 784.0,
+          "zero_reference_regions": [],
+          "worst_regions_by_relative_error": [
+            "lh/rostralanteriorcingulate",
+            "rh/entorhinal",
+            "rh/parstriangularis",
+            "lh/medialorbitofrontal",
+            "lh/posteriorcingulate",
+            "lh/parsopercularis",
+            "rh/temporalpole",
+            "lh/rostralmiddlefrontal",
+            "lh/parstriangularis",
+            "rh/parsorbitalis"
+          ]
+        },
+        "ThickAvg": {
+          "matched_regions": 68,
+          "missing_in_candidate": [],
+          "extra_in_candidate": [],
+          "pearson_r": 0.9925475543461686,
+          "mae": 0.03751470588235295,
+          "median_absolute_relative_error_percent": 1.0751178764547054,
+          "p90_absolute_relative_error_percent": 3.899280957037927,
+          "maximum_absolute_error": 0.15799999999999992,
+          "zero_reference_regions": [],
+          "worst_regions_by_relative_error": [
+            "lh/precentral",
+            "lh/parsopercularis",
+            "rh/temporalpole",
+            "lh/rostralanteriorcingulate",
+            "lh/caudalanteriorcingulate",
+            "lh/transversetemporal",
+            "lh/medialorbitofrontal",
+            "rh/entorhinal",
+            "lh/posteriorcingulate",
+            "lh/fusiform"
+          ]
+        },
+        "MeanCurv": {
+          "matched_regions": 68,
+          "missing_in_candidate": [],
+          "extra_in_candidate": [],
+          "pearson_r": 0.9793076942405007,
+          "mae": 0.0027941176470588237,
+          "median_absolute_relative_error_percent": 1.4184397163120481,
+          "p90_absolute_relative_error_percent": 4.071186440677957,
+          "maximum_absolute_error": 0.028000000000000025,
+          "zero_reference_regions": [],
+          "worst_regions_by_relative_error": [
+            "lh/frontalpole",
+            "rh/temporalpole",
+            "lh/rostralanteriorcingulate",
+            "rh/parahippocampal",
+            "lh/temporalpole",
+            "lh/pericalcarine",
+            "rh/parsopercularis",
+            "lh/entorhinal",
+            "lh/insula",
+            "lh/caudalanteriorcingulate"
+          ]
+        }
+      },
+      "aseg": {
+        "matched_regions": 45,
+        "missing_in_candidate": [],
+        "extra_in_candidate": [],
+        "pearson_r": 0.9999999518852788,
+        "mae": 13.228888888888852,
+        "median_absolute_relative_error_percent": 0.15136558078314935,
+        "p90_absolute_relative_error_percent": 0.526265883571598,
+        "maximum_absolute_error": 455.0,
+        "zero_reference_regions": [
+          "5th-Ventricle",
+          "Left-WM-hypointensities",
+          "Left-choroid-plexus",
+          "Left-non-WM-hypointensities",
+          "Left-vessel",
+          "Optic-Chiasm",
+          "Right-WM-hypointensities",
+          "Right-choroid-plexus",
+          "Right-non-WM-hypointensities",
+          "Right-vessel",
+          "WM-hypointensities",
+          "non-WM-hypointensities"
+        ],
+        "worst_regions_by_relative_error": [
+          "CC_Central",
+          "Right-Amygdala",
+          "CC_Mid_Posterior",
+          "CC_Mid_Anterior",
+          "Right-Accumbens-area",
+          "CC_Anterior",
+          "Right-Inf-Lat-Vent",
+          "Left-Amygdala",
+          "Right-VentralDC",
+          "Right-Hippocampus"
+        ]
+      },
+      "wmparc": {
+        "matched_regions": 70,
+        "missing_in_candidate": [],
+        "extra_in_candidate": [],
+        "pearson_r": 0.9997633967704915,
+        "mae": 75.54142857142853,
+        "median_absolute_relative_error_percent": 1.8935304502204349,
+        "p90_absolute_relative_error_percent": 4.795151677933026,
+        "maximum_absolute_error": 290.7000000000007,
+        "zero_reference_regions": [],
+        "worst_regions_by_relative_error": [
+          "wm-lh-transversetemporal",
+          "wm-rh-entorhinal",
+          "wm-lh-rostralanteriorcingulate",
+          "wm-lh-frontalpole",
+          "wm-lh-medialorbitofrontal",
+          "wm-rh-parsorbitalis",
+          "wm-lh-parahippocampal",
+          "wm-rh-cuneus",
+          "wm-lh-entorhinal",
+          "wm-lh-cuneus"
+        ]
+      },
+      "global_brainvol_measures": {
+        "BrainSegVol": {
+          "reference": 1207086.0,
+          "candidate": 1210474.7114,
+          "relative_difference_percent": 0.2807348772166948
+        },
+        "BrainSegVolNotVent": {
+          "reference": 857925.0,
+          "candidate": 861399.794626,
+          "relative_difference_percent": 0.40502312276714025
+        },
+        "BrainSegVolNotVentSurf": {
+          "reference": 857925.0,
+          "candidate": 861399.794626,
+          "relative_difference_percent": 0.40502312276714025
+        },
+        "CerebralWhiteMatterVol": {
+          "reference": 362498.0,
+          "candidate": 364222.913162,
+          "relative_difference_percent": 0.4758407389833907
+        },
+        "CortexVol": {
+          "reference": 353949.84396814735,
+          "candidate": 357894.933836,
+          "relative_difference_percent": 1.114590085313798
+        },
+        "MaskVol": {
+          "reference": 1269264.0,
+          "candidate": 1269263.697384,
+          "relative_difference_percent": -2.384184849981134e-05
+        },
+        "SubCortGrayVol": {
+          "reference": 46849.0,
+          "candidate": 46852.988829,
+          "relative_difference_percent": 0.008514224423150366
+        },
+        "SupraTentorialVol": {
+          "reference": 1095589.0,
+          "candidate": 1099012.737975,
+          "relative_difference_percent": 0.31250203999857046
+        },
+        "SupraTentorialVolNotVent": {
+          "reference": 746428.0,
+          "candidate": 749937.821201,
+          "relative_difference_percent": 0.4702156404904443
+        },
+        "SupraTentorialVolNotVentVox": {
+          "reference": 746428.0,
+          "candidate": 749938.0,
+          "relative_difference_percent": 0.4702395944417948
+        },
+        "TotalGrayVol": {
+          "reference": 486158.84396814735,
+          "candidate": 490077.902321,
+          "relative_difference_percent": 0.8061271334414767
+        },
+        "VentricleChoroidVol": {
+          "reference": 19095.0,
+          "candidate": 19095.995447,
+          "relative_difference_percent": 0.0052131290913912005
+        },
+        "lhCerebralWhiteMatterVol": {
+          "reference": 181989.5,
+          "candidate": 184017.956127,
+          "relative_difference_percent": 1.114600637399417
+        },
+        "lhCortexVol": {
+          "reference": 179223.21439974185,
+          "candidate": 183254.002726,
+          "relative_difference_percent": 2.249032492670194
+        },
+        "rhCerebralWhiteMatterVol": {
+          "reference": 180508.5,
+          "candidate": 180204.957036,
+          "relative_difference_percent": -0.1681599282028231
+        },
+        "rhCortexVol": {
+          "reference": 174726.6295684055,
+          "candidate": 174640.93111,
+          "relative_difference_percent": -0.04904716505846159
+        }
+      },
+      "dice": {
+        "aseg.mgz": {
+          "different_voxels": 22154,
+          "stored_dtypes": [
+            ">i4",
+            ">f4"
+          ],
+          "minimum_dice": 0.9662961740647321,
+          "p05_dice": 0.9822132464799794,
+          "median_dice": 0.9999422532771265,
+          "worst_labels": [
+            "3",
+            "42",
+            "2",
+            "41",
+            "47",
+            "8",
+            "251",
+            "54",
+            "28",
+            "53"
+          ],
+          "input_sha256": [
+            "29fbcff5dff5300599ee863e0c7c425867af725134631741685b41ca44639bc2",
+            "732807e4706cafc24af76a9ab17dbbc736cece767abaa88bbaa143e5616c974e"
+          ]
+        },
+        "aparc+aseg.mgz": {
+          "different_voxels": 30206,
+          "stored_dtypes": [
+            ">i4",
+            ">f4"
+          ],
+          "minimum_dice": 0.864957264957265,
+          "p05_dice": 0.9098567230026107,
+          "median_dice": 0.949966916068611,
+          "worst_labels": [
+            "1032",
+            "1026",
+            "2032",
+            "2006",
+            "1021",
+            "2010",
+            "1016",
+            "1002",
+            "1033",
+            "2016"
+          ],
+          "input_sha256": [
+            "5df7e9024128a6306866f344aa9d6068658ba4d6d764b294300c5dba5e7e9d0b",
+            "3d40e323c0369878e237ac65f0ad6bafcde23657204510f04770ad14d6367325"
+          ]
+        },
+        "aparc.a2009s+aseg.mgz": {
+          "different_voxels": 42476,
+          "stored_dtypes": [
+            ">i4",
+            ">f4"
+          ],
+          "minimum_dice": 0.07272727272727272,
+          "p05_dice": 0.7671372041445049,
+          "median_dice": 0.9140602986756833,
+          "worst_labels": [
+            "11156",
+            "12163",
+            "12160",
+            "12113",
+            "12171",
+            "12173",
+            "12156",
+            "11163",
+            "11175",
+            "11158"
+          ],
+          "input_sha256": [
+            "bf0284db2ef1d5831ea1c5a08ae0510111def80c7e56fcfa0a0d5fb0748df521",
+            "f4a1feddd1006c0c602e600a6d44282a71e135505fe56a2fd21e2e7a15ef3bdf"
+          ]
+        },
+        "aparc.DKTatlas+aseg.mgz": {
+          "different_voxels": 28873,
+          "stored_dtypes": [
+            ">i4",
+            ">f4"
+          ],
+          "minimum_dice": 0.9094553959238223,
+          "p05_dice": 0.9233208969487534,
+          "median_dice": 0.9532403609515997,
+          "worst_labels": [
+            "1014",
+            "1021",
+            "2010",
+            "2014",
+            "2023",
+            "2006",
+            "2021",
+            "2019",
+            "2016",
+            "2009"
+          ],
+          "input_sha256": [
+            "8d3463103797ffab929cdde0d60712ac17fdf7cba3d97185d5b79ca1b596536b",
+            "a491c2dc5b76e634d3d79becc537ca744035a1881412b30fd2bc8e6febdc0946"
+          ]
+        },
+        "wmparc.mgz": {
+          "different_voxels": 40941,
+          "stored_dtypes": [
+            ">i4",
+            ">f4"
+          ],
+          "minimum_dice": 0.864957264957265,
+          "p05_dice": 0.8964432582184492,
+          "median_dice": 0.9487807475242254,
+          "worst_labels": [
+            "1032",
+            "3034",
+            "4033",
+            "1026",
+            "3032",
+            "3033",
+            "4006",
+            "4032",
+            "4034",
+            "2032"
+          ],
+          "input_sha256": [
+            "7cf2c8f0ab1405da795b162ea9d19cf40cb41eedab40d41abb56a6f3baaf9f79",
+            "a96c9168d465ae089aea319f90c71e57c248a790274ba2090e4ec17e870fab11"
+          ]
+        },
+        "ribbon.mgz": {
+          "different_voxels": 27567,
+          "stored_dtypes": [
+            "uint8",
+            "uint8"
+          ],
+          "minimum_dice": 0.9587965773302178,
+          "p05_dice": 0.9597062710359603,
+          "median_dice": 0.9759154974444474,
+          "worst_labels": [
+            "3",
+            "42",
+            "2",
+            "41"
+          ],
+          "input_sha256": [
+            "4c49b3f248994d876023a86623ae9478d7cff753e2c5a56481dc387988d3e9f8",
+            "b6960ecf75d9ff3f80289a4adba0d4cc73cb40983c306a819c6e49653ab23960"
+          ]
+        },
+        "filled.mgz": {
+          "different_voxels": 4881,
+          "stored_dtypes": [
+            "uint8",
+            "uint8"
+          ],
+          "minimum_dice": 0.9935352669381489,
+          "p05_dice": 0.9935703849134279,
+          "median_dice": 0.9938864466909383,
+          "worst_labels": [
+            "255",
+            "127"
+          ],
+          "input_sha256": [
+            "56caaf1b9c7bec1bc406c1d671f963453994e23438a8e4487d3afc89ab686b43",
+            "41575d213cafa5a016a441af74896f6ad39b759dede5f0e9f3328f8b5b56f82f"
+          ]
+        }
+      },
+      "baseline_aparc_maximum_absolute_change": {
+        "SurfArea": 0.0,
+        "GrayVol": 0.0,
+        "ThickAvg": 0.0,
+        "MeanCurv": 0.0
+      },
+      "baseline_aseg_maximum_absolute_change": 0.0,
+      "baseline_wmparc_maximum_absolute_change": 0.0,
+      "baseline_dice_minimum": {
+        "aseg.mgz": 1.0,
+        "aparc+aseg.mgz": 1.0,
+        "aparc.a2009s+aseg.mgz": 1.0,
+        "aparc.DKTatlas+aseg.mgz": 1.0,
+        "wmparc.mgz": 1.0,
+        "ribbon.mgz": 1.0,
+        "filled.mgz": 1.0
+      },
+      "baseline_surface_distances": {
+        "lh": {
+          "white": {
+            "mean_mm": 0.0,
+            "p99_mm": 0.0,
+            "max_mm": 0.0,
+            "over_0_1_mm": 0
+          },
+          "pial": {
+            "mean_mm": 0.0,
+            "p99_mm": 0.0,
+            "max_mm": 0.0,
+            "over_0_1_mm": 0
+          }
+        },
+        "rh": {
+          "white": {
+            "mean_mm": 0.0,
+            "p99_mm": 0.0,
+            "max_mm": 0.0,
+            "over_0_1_mm": 0
+          },
+          "pial": {
+            "mean_mm": 0.0,
+            "p99_mm": 0.0,
+            "max_mm": 0.0,
+            "over_0_1_mm": 0
+          }
+        }
+      },
+      "complete_reports": "sub01/full_e036f57_pair"
     },
-    "global_mean_thickness_delta_mm": {"lh": 0.02621, "rh": 0.02818},
-    "aparc_68_matched_regions": {
-      "surface_area": {"pearson_r": 0.999813, "mae_mm2": 23.89706, "median_absolute_relative_error_percent": 1.1393, "p90_absolute_relative_error_percent": 4.7705},
-      "gray_volume": {"pearson_r": 0.999751, "mae_mm3": 90.38235, "median_absolute_relative_error_percent": 1.7422, "p90_absolute_relative_error_percent": 4.8948},
-      "mean_thickness": {"pearson_r": 0.9943, "mae_mm": 0.0376, "median_absolute_relative_error_percent": 1.3993, "max_absolute_error_mm": 0.183},
-      "mean_curvature": {"pearson_r": 0.993286, "mae_per_mm": 0.00253}
-    },
-    "aseg_45_matched_regions": {"volume_pearson_r": 0.999999935536446, "volume_mae_mm3": 12.89556, "median_absolute_relative_error_percent": 0.0534},
-    "wmparc_70_matched_regions": {"volume_pearson_r": 0.9998437814038323, "volume_mae_mm3": 63.48571, "median_absolute_relative_error_percent": 1.3939, "p90_absolute_relative_error_percent": 4.8678, "maximum_absolute_relative_error_percent": 12.9987},
-    "destrieux_local_outlier": {"hemisphere": "lh", "region": "S_interm_prim-Jensen", "reference_vertices": 3, "candidate_vertices": 97, "reference_mean_thickness_mm": 1.705, "candidate_mean_thickness_mm": 2.948, "absolute_difference_mm": 1.243}
+    "sub-02": {
+      "aparc_68": {
+        "SurfArea": {
+          "matched_regions": 68,
+          "missing_in_candidate": [],
+          "extra_in_candidate": [],
+          "pearson_r": 0.9997589747981719,
+          "mae": 25.691176470588236,
+          "median_absolute_relative_error_percent": 1.060004735209493,
+          "p90_absolute_relative_error_percent": 3.200959488272922,
+          "maximum_absolute_error": 106.0,
+          "zero_reference_regions": [],
+          "worst_regions_by_relative_error": [
+            "lh/frontalpole",
+            "rh/entorhinal",
+            "lh/medialorbitofrontal",
+            "lh/caudalanteriorcingulate",
+            "lh/temporalpole",
+            "lh/paracentral",
+            "lh/entorhinal",
+            "rh/parsopercularis",
+            "lh/cuneus",
+            "lh/rostralanteriorcingulate"
+          ]
+        },
+        "GrayVol": {
+          "matched_regions": 68,
+          "missing_in_candidate": [],
+          "extra_in_candidate": [],
+          "pearson_r": 0.9997665986231267,
+          "mae": 75.75,
+          "median_absolute_relative_error_percent": 1.1833515170843336,
+          "p90_absolute_relative_error_percent": 3.263729547557932,
+          "maximum_absolute_error": 518.0,
+          "zero_reference_regions": [],
+          "worst_regions_by_relative_error": [
+            "rh/temporalpole",
+            "rh/rostralanteriorcingulate",
+            "lh/caudalanteriorcingulate",
+            "lh/cuneus",
+            "rh/entorhinal",
+            "lh/paracentral",
+            "rh/parstriangularis",
+            "rh/inferiorparietal",
+            "rh/lateralorbitofrontal",
+            "lh/medialorbitofrontal"
+          ]
+        },
+        "ThickAvg": {
+          "matched_regions": 68,
+          "missing_in_candidate": [],
+          "extra_in_candidate": [],
+          "pearson_r": 0.9962974675988652,
+          "mae": 0.021691176470588228,
+          "median_absolute_relative_error_percent": 0.6366779463515087,
+          "p90_absolute_relative_error_percent": 1.7920106955781485,
+          "maximum_absolute_error": 0.121,
+          "zero_reference_regions": [],
+          "worst_regions_by_relative_error": [
+            "rh/rostralanteriorcingulate",
+            "lh/frontalpole",
+            "rh/parsopercularis",
+            "rh/inferiortemporal",
+            "lh/entorhinal",
+            "lh/isthmuscingulate",
+            "rh/bankssts",
+            "lh/transversetemporal",
+            "lh/parstriangularis",
+            "rh/lateralorbitofrontal"
+          ]
+        },
+        "MeanCurv": {
+          "matched_regions": 68,
+          "missing_in_candidate": [],
+          "extra_in_candidate": [],
+          "pearson_r": 0.992131030871611,
+          "mae": 0.0017352941176470584,
+          "median_absolute_relative_error_percent": 0.8968790218790227,
+          "p90_absolute_relative_error_percent": 3.190918472652222,
+          "maximum_absolute_error": 0.009999999999999995,
+          "zero_reference_regions": [],
+          "worst_regions_by_relative_error": [
+            "lh/rostralanteriorcingulate",
+            "rh/temporalpole",
+            "rh/entorhinal",
+            "lh/parahippocampal",
+            "rh/superiortemporal",
+            "rh/insula",
+            "rh/rostralanteriorcingulate",
+            "rh/bankssts",
+            "lh/frontalpole",
+            "lh/parsorbitalis"
+          ]
+        }
+      },
+      "aseg": {
+        "matched_regions": 45,
+        "missing_in_candidate": [],
+        "extra_in_candidate": [],
+        "pearson_r": 0.9999999034294748,
+        "mae": 10.997777777777857,
+        "median_absolute_relative_error_percent": 0.035068469133284146,
+        "p90_absolute_relative_error_percent": 0.1528158789897993,
+        "maximum_absolute_error": 363.70000000001164,
+        "zero_reference_regions": [
+          "5th-Ventricle",
+          "Left-WM-hypointensities",
+          "Left-choroid-plexus",
+          "Left-non-WM-hypointensities",
+          "Left-vessel",
+          "Optic-Chiasm",
+          "Right-WM-hypointensities",
+          "Right-choroid-plexus",
+          "Right-non-WM-hypointensities",
+          "Right-vessel",
+          "non-WM-hypointensities"
+        ],
+        "worst_regions_by_relative_error": [
+          "CC_Anterior",
+          "Right-Amygdala",
+          "CC_Mid_Posterior",
+          "CC_Posterior",
+          "Left-Cerebellum-Cortex",
+          "CSF",
+          "Right-Accumbens-area",
+          "Right-Pallidum",
+          "Right-Cerebellum-Cortex",
+          "Left-Amygdala"
+        ]
+      },
+      "wmparc": {
+        "matched_regions": 70,
+        "missing_in_candidate": [],
+        "extra_in_candidate": [],
+        "pearson_r": 0.9998498162837594,
+        "mae": 80.48142857142857,
+        "median_absolute_relative_error_percent": 1.39680138878837,
+        "p90_absolute_relative_error_percent": 4.153825991295,
+        "maximum_absolute_error": 310.8000000000002,
+        "zero_reference_regions": [],
+        "worst_regions_by_relative_error": [
+          "wm-lh-frontalpole",
+          "wm-rh-frontalpole",
+          "wm-lh-medialorbitofrontal",
+          "wm-lh-paracentral",
+          "wm-lh-transversetemporal",
+          "wm-lh-caudalanteriorcingulate",
+          "wm-lh-temporalpole",
+          "wm-rh-bankssts",
+          "wm-lh-entorhinal",
+          "wm-rh-insula"
+        ]
+      },
+      "global_brainvol_measures": {
+        "BrainSegVol": {
+          "reference": 1381784.0,
+          "candidate": 1384130.0,
+          "relative_difference_percent": 0.1697805156232812
+        },
+        "BrainSegVolNotVent": {
+          "reference": 1034217.0,
+          "candidate": 1036561.0,
+          "relative_difference_percent": 0.2266448917393545
+        },
+        "BrainSegVolNotVentSurf": {
+          "reference": 1034217.0,
+          "candidate": 1036561.0,
+          "relative_difference_percent": 0.2266448917393545
+        },
+        "CerebralWhiteMatterVol": {
+          "reference": 447899.0,
+          "candidate": 448929.0,
+          "relative_difference_percent": 0.2299625585232385
+        },
+        "CortexVol": {
+          "reference": 414537.40608016425,
+          "candidate": 416754.721803,
+          "relative_difference_percent": 0.5348891777469617
+        },
+        "MaskVol": {
+          "reference": 1478712.0,
+          "candidate": 1478712.0,
+          "relative_difference_percent": 0.0
+        },
+        "SubCortGrayVol": {
+          "reference": 54960.0,
+          "candidate": 54960.0,
+          "relative_difference_percent": 0.0
+        },
+        "SupraTentorialVol": {
+          "reference": 1248513.0,
+          "candidate": 1250956.0,
+          "relative_difference_percent": 0.19567277232996372
+        },
+        "SupraTentorialVolNotVent": {
+          "reference": 900946.0,
+          "candidate": 903387.0,
+          "relative_difference_percent": 0.2709374368719102
+        },
+        "SupraTentorialVolNotVentVox": {
+          "reference": 900946.0,
+          "candidate": 903387.0,
+          "relative_difference_percent": 0.2709374368719102
+        },
+        "TotalGrayVol": {
+          "reference": 571291.4060801642,
+          "candidate": 573411.721803,
+          "relative_difference_percent": 0.3711443407461639
+        },
+        "VentricleChoroidVol": {
+          "reference": 16773.0,
+          "candidate": 16773.0,
+          "relative_difference_percent": 0.0
+        },
+        "lhCerebralWhiteMatterVol": {
+          "reference": 226481.0,
+          "candidate": 226442.0,
+          "relative_difference_percent": -0.017219987548624388
+        },
+        "lhCortexVol": {
+          "reference": 209105.25585891074,
+          "candidate": 209171.761657,
+          "relative_difference_percent": 0.03180493853015972
+        },
+        "rhCerebralWhiteMatterVol": {
+          "reference": 221418.0,
+          "candidate": 222487.0,
+          "relative_difference_percent": 0.48279724322322487
+        },
+        "rhCortexVol": {
+          "reference": 205432.15022125354,
+          "candidate": 207582.960145,
+          "relative_difference_percent": 1.0469685107369968
+        }
+      },
+      "dice": {
+        "aseg.mgz": {
+          "different_voxels": 14456,
+          "stored_dtypes": [
+            ">i4",
+            ">f4"
+          ],
+          "minimum_dice": 0.9804896084591141,
+          "p05_dice": 0.991917397607188,
+          "median_dice": 1.0,
+          "worst_labels": [
+            "42",
+            "3",
+            "41",
+            "2",
+            "8",
+            "47",
+            "24",
+            "4",
+            "5",
+            "7"
+          ],
+          "input_sha256": [
+            "bc184546118f7b1cac9992be80150718dd8c3da9d50bdb165958eddb58ca5add",
+            "872efbe028994d7e467c8316f6c19cfc33ef2caad7e9e4465fdb96af6af98885"
+          ]
+        },
+        "aparc+aseg.mgz": {
+          "different_voxels": 23289,
+          "stored_dtypes": [
+            ">i4",
+            ">f4"
+          ],
+          "minimum_dice": 0.8733575622029633,
+          "p05_dice": 0.9214534322476561,
+          "median_dice": 0.964190862141076,
+          "worst_labels": [
+            "2033",
+            "2006",
+            "2032",
+            "1033",
+            "1026",
+            "2001",
+            "1021",
+            "2026",
+            "1006",
+            "1034"
+          ],
+          "input_sha256": [
+            "dace9e367aa8191b74499d2d86e60bb65c10c0da98ec220630134a6454b4edda",
+            "4f65083a41736a22cefb1ce2fe4b793e9cdee8a10e0ec4ab7d2033484b828673"
+          ]
+        },
+        "aparc.a2009s+aseg.mgz": {
+          "different_voxels": 35065,
+          "stored_dtypes": [
+            ">i4",
+            ">f4"
+          ],
+          "minimum_dice": 0.737984496124031,
+          "p05_dice": 0.8339077641115396,
+          "median_dice": 0.9351990950465427,
+          "worst_labels": [
+            "12171",
+            "11140",
+            "11139",
+            "12135",
+            "11171",
+            "12152",
+            "11175",
+            "12173",
+            "12117",
+            "11148"
+          ],
+          "input_sha256": [
+            "b893fccdc7d5ddaa23e08fcf70fde518e91e841392acf723aa3c23e50929ba78",
+            "845905692bf109bfa4b44fc5e09206a5e8b45654db11cdb332d2b44438771acd"
+          ]
+        },
+        "aparc.DKTatlas+aseg.mgz": {
+          "different_voxels": 21366,
+          "stored_dtypes": [
+            ">i4",
+            ">f4"
+          ],
+          "minimum_dice": 0.9193614408514122,
+          "p05_dice": 0.9348909810143884,
+          "median_dice": 0.9702357279917975,
+          "worst_labels": [
+            "2006",
+            "1026",
+            "1021",
+            "1034",
+            "1014",
+            "2021",
+            "2026",
+            "1006",
+            "1019",
+            "1002"
+          ],
+          "input_sha256": [
+            "9dd9243b53affc8ca7e5045e6a4b9e997029098b13b23f757939e2844e41ff3d",
+            "8e649e3b752672281328d5bf95d7bd113289fbc869fb08550613d438e0eeb46b"
+          ]
+        },
+        "wmparc.mgz": {
+          "different_voxels": 35295,
+          "stored_dtypes": [
+            ">i4",
+            ">f4"
+          ],
+          "minimum_dice": 0.8733575622029633,
+          "p05_dice": 0.9097827136648962,
+          "median_dice": 0.9600176133861735,
+          "worst_labels": [
+            "2033",
+            "3032",
+            "2006",
+            "4033",
+            "2032",
+            "4032",
+            "3034",
+            "1033",
+            "3006",
+            "3033"
+          ],
+          "input_sha256": [
+            "a41ddf2defdba3847e8f55021c3c6bda0a2281e59c793f1a92345bd141327f2a",
+            "d9e46f2c73934b786e886d37cd4c30bc15c69ba9779b2ad255eae50ac5c8811b"
+          ]
+        },
+        "ribbon.mgz": {
+          "different_voxels": 17836,
+          "stored_dtypes": [
+            "uint8",
+            "uint8"
+          ],
+          "minimum_dice": 0.9769299153271055,
+          "p05_dice": 0.9774718574419762,
+          "median_dice": 0.9872649351111985,
+          "worst_labels": [
+            "42",
+            "3",
+            "41",
+            "2"
+          ],
+          "input_sha256": [
+            "deec1d8b4b4d1984b5ce7d513029d0b2a8f36d14101cc2f3328ec3d3a824b84a",
+            "9bbddd7172b14a93a677a5f7f21e4c0225c2ac06ee0482379585b6ce30dce4c6"
+          ]
+        },
+        "filled.mgz": {
+          "different_voxels": 112,
+          "stored_dtypes": [
+            "uint8",
+            "uint8"
+          ],
+          "minimum_dice": 0.9998471224830527,
+          "p05_dice": 0.9998511141024143,
+          "median_dice": 0.9998870386766684,
+          "worst_labels": [
+            "255",
+            "127"
+          ],
+          "input_sha256": [
+            "d65907400df1363fcdbed93593a8929e231e1eb5ae4d0ca88d64fe3db9bbd0dd",
+            "28160776dcc1a8266a3301248eb4154b1dc8ef971eb1b4e568c55e4e8673fccb"
+          ]
+        }
+      },
+      "baseline_aparc_maximum_absolute_change": {
+        "SurfArea": 0.0,
+        "GrayVol": 0.0,
+        "ThickAvg": 0.0,
+        "MeanCurv": 0.0
+      },
+      "baseline_aseg_maximum_absolute_change": 0.0,
+      "baseline_wmparc_maximum_absolute_change": 0.0,
+      "baseline_dice_minimum": {
+        "aseg.mgz": 1.0,
+        "aparc+aseg.mgz": 1.0,
+        "aparc.a2009s+aseg.mgz": 1.0,
+        "aparc.DKTatlas+aseg.mgz": 1.0,
+        "wmparc.mgz": 1.0,
+        "ribbon.mgz": 1.0,
+        "filled.mgz": 1.0
+      },
+      "baseline_surface_distances": {
+        "lh": {
+          "white": {
+            "mean_mm": 0.0,
+            "p99_mm": 0.0,
+            "max_mm": 0.0,
+            "over_0_1_mm": 0
+          },
+          "pial": {
+            "mean_mm": 0.0,
+            "p99_mm": 0.0,
+            "max_mm": 0.0,
+            "over_0_1_mm": 0
+          }
+        },
+        "rh": {
+          "white": {
+            "mean_mm": 0.0,
+            "p99_mm": 0.0,
+            "max_mm": 0.0,
+            "over_0_1_mm": 0
+          },
+          "pial": {
+            "mean_mm": 0.0,
+            "p99_mm": 0.0,
+            "max_mm": 0.0,
+            "over_0_1_mm": 0
+          }
+        }
+      },
+      "complete_reports": "sub02/full_e036f57_pair"
+    }
   },
-  "sub-02": {
-    "input_t1_sha256": "326d1e0a948b76344150c28bbcf0299b58040092c2f037f09c754103d32f747d",
-    "global_relative_difference_percent": {
-      "synthseg_tiv": 0.000131,
-      "brain_segmentation_volume": 0.0397,
-      "total_cortical_gray_volume": 0.0942,
-      "white_surface_area_lh": 0.0329,
-      "white_surface_area_rh": 0.3753
-    },
-    "global_mean_thickness_delta_mm": {"lh": -0.02584, "rh": 0.02175},
-    "aparc_68_matched_regions": {
-      "surface_area": {"pearson_r": 0.999663, "mae_mm2": 30.72059, "median_absolute_relative_error_percent": 1.1934, "p90_absolute_relative_error_percent": 3.7045},
-      "gray_volume": {"pearson_r": 0.999622, "mae_mm3": 94.48529, "median_absolute_relative_error_percent": 1.6313, "p90_absolute_relative_error_percent": 3.3661},
-      "mean_thickness": {"pearson_r": 0.988941, "mae_mm": 0.0351, "median_absolute_relative_error_percent": 1.111, "max_absolute_error_mm": 0.161},
-      "mean_curvature": {"pearson_r": 0.987273, "mae_per_mm": 0.00216}
-    },
-    "aseg_45_matched_regions": {"volume_pearson_r": 0.9999999531837012, "volume_mae_mm3": 7.26889, "median_absolute_relative_error_percent": 0.0323},
-    "wmparc_70_matched_regions": {"volume_pearson_r": 0.9997739493141126, "volume_mae_mm3": 99.00286, "median_absolute_relative_error_percent": 1.5584, "p90_absolute_relative_error_percent": 5.5072, "maximum_absolute_relative_error_percent": 9.3313}
-  },
-  "surface_geometry_diagnostic": {
-    "method": "Bidirectional nearest vertex in surface RAS, not a vertex correspondence or surface registration metric",
-    "white_mean_nearest_distance_range_mm": [0.3058, 0.3252],
-    "pial_mean_nearest_distance_range_mm": [0.3447, 0.3611],
-    "maximum_observed_nearest_distance_mm": 5.5135
-  },
-  "interpretation": "Global and major aparc region metrics are close on these two subjects, while cortical thickness and local white-matter/Destrieux parcels have material deviations. Different mesh vertex counts prevent index-wise vertex-map agreement; two subjects do not establish population-level reliability."
+  "consumed_reports_sha256": {
+    "source_e036f57_manifest.json": "518a88bb580ea39c4f68d0d648caa834dbe988ae31b9cb5939c9db98f8d01094",
+    "source_279e09f_manifest.json": "fada25c5ce2015a406f1504d76b03de814f2f1c27793af60aed6b23d94a6f5d4",
+    "runtime_fingerprints_e036f57.json": "971eb2d2176c32540dd058f9b94d3ffdc8ae70428e38cf72075a6aa8b4ef1eea",
+    "sub01/full_e036f57_run.json": "5de820d30872e1e7f15e62ff1f5d96c30036e229b1c0121b1edc65eff6ccc3cf",
+    "sub01/full_279_run.json": "f31874806e31bb93b3150533afa92609a5273eed8a922e459491f61c66f1bf1e",
+    "sub01/full_b8cd_run.json": "d18b4378fb01c49f5102a2b7c284526d181b6f8be086a3126abafecdc48ebfdf",
+    "sub01/full_e036f57_pair/summary.json": "12855a9ba3dbfe9ddae96ada5ec9cb32bb6d5ae4e1d38f2599f576be2108032a",
+    "full_sub01_e036f57_gpu_summary.txt": "01266891a0cc08e2b7f0f68127ad690687a51d46a62e1fbe8a7cbf90723e9799",
+    "sub01/full_e036f57_pair/region_vs_official.json": "bd7993e5827cff52360f323e078aec4f73048bfb8c1604aaa43faa3deda35837",
+    "sub01/full_e036f57_pair/region_vs_baseline.json": "b69af2961bb6189a80a5ad255b513d97cddc7df64b23a2591397d25457820532",
+    "sub01/full_e036f57_pair/dice_vs_official.json": "97a7422a54dba3448bba14427da01f5385f2c822c186a51a2e5cc038aa8cf00e",
+    "sub01/full_e036f57_pair/dice_vs_baseline.json": "557a372a9f489987290456162407d823b26e72b7ef226807947c7a4ab6615473",
+    "sub01/full_e036f57_pair/surface_vs_baseline.json": "02ed09834da718414bae87cfab7435dce23e7859dd580ce310cc5275bebf0724",
+    "sub01/full_e036f57_pair/surface_vs_official.json": "3cbe6b91776e4c2ff4a573ba04137cf83ea73255600fce3ad16b121aaae0acb1",
+    "sub01/full_e036f57_pair/strict_vs_baseline.json": "cad97a7774fbfc25a67a4767af8ca72185a75a0acc19a3dde1ecb585857ed7cc",
+    "hardware_gpucw1_e036f57.json": "b051fe3de606c2cde835c01e6400ac6375819f463fa984fdf650450102e4e35e",
+    "full_sub01_e036f57_gpu_samples.csv": "b7f44c105208cb2e2c568f4a5f3608541f1c6bfc136ff86f3dd083c6bd0a74fc",
+    "sub01/run_api_e036f57.json": "4f4817a61f6b65adf016fcc234b42d4423e2b77adefceb379aadc81ec0baeb8e",
+    "sub02/full_e036f57_run.json": "2218ca910deefb44cf0b21b1a8ab72e3a2bea9d53ae3741f719631c8f1cdaefb",
+    "sub02/full_279_run.json": "9ae6123829971060d37ca9144cee8596fb24e638c3760af2fc1bd45d50c104ca",
+    "sub02/full_b8cd_run.json": "393f6bec52d201bdef17658046ebe9fe71d7a8aa172a911827f198c1b30baec2",
+    "sub02/full_e036f57_pair/summary.json": "68d6d19c1cc5ed18707324d77f2b3650f945cdc9b0ee235d5f448ba65e4e71d3",
+    "full_sub02_e036f57_summary.txt": "7df37f0d24f74d712f0dc8094603fc7f56311b19d8cf2d58d756c2b8a08f9a4f",
+    "sub02/full_e036f57_pair/region_vs_official.json": "ce45f772f0c5a354174cc32d9f8f63554b2c7f49fdca5f7df7b6816fedfaa4de",
+    "sub02/full_e036f57_pair/region_vs_baseline.json": "9ad6a9abbf5dddcfb664fb02b2670a5e878941ce6ac77589e718b679b63bd8fa",
+    "sub02/full_e036f57_pair/dice_vs_official.json": "5a6fb164ef5d86288ec1db7c385e4c60dcd979982d50454a9519e7581332c27f",
+    "sub02/full_e036f57_pair/dice_vs_baseline.json": "858cdb4ebcc84b42653fd1378cde50b686d1d42ce9381965c4dc3d580d692299",
+    "sub02/full_e036f57_pair/surface_vs_baseline.json": "854a03b78a9f153ed254ab8f90cf8401a4751f49b569092e4005c30f0771173a",
+    "sub02/full_e036f57_pair/surface_vs_official.json": "ee697857bbdd2f0a43d67c937b9b77a6ce5deae237c5ff73e449ed805548f419",
+    "sub02/full_e036f57_pair/strict_vs_baseline.json": "e3f1f158f62d9d1949fe14d0b285c1893712b8c72e2d409cf7b2ac8d6bab6663",
+    "hardware_nodecw10_e036f57.json": "fd42d2465cc3b25dfef5a290ff083b8546cdc34b9add25a5220cc534f123e3a4"
+  }
 }

@@ -1,0 +1,58 @@
+gongwk-local
+
+--inras: /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/postmerge_ece5e23_retry1_sub01/mri/transforms/synthmorph.1.0mm.1.0mm/tmp/deform.mgz input RAS warp.
+--insrcgeom: /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/postmerge_ece5e23_retry1_sub01/mri/transforms/synthmorph.1.0mm.1.0mm/invol.crop.nii.gz atlas/source image (used for geometry).
+--outfswarp: /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/postmerge_ece5e23_retry1_sub01/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz output Freesurfer 3D morph.
+Setting vg_isEqual_Threshold to 0.000100
+INFO: using NIfTI-1 sform (sform_code=1)
+Applying LTAs to the GCAM
+GCAMwrite(/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/postmerge_ece5e23_retry1_sub01/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz)
+[INFO] Warpfield::convert(): converting GCAM ...
+[INFO] Warpfield::convert(): gcam       [193 x 229 x 193]
+[INFO] Warpfield::convert(): gcam image [256 x 256 x 256]
+[INFO] Warpfield::convert(): gcam atlas [193 x 229 x 193]
+[INFO] Warpfield::convert(): total out of range voxel count: 0
+[INFO] niiWrite(): MGZ_INTENT_WARPMAP => NIFTI_INTENT_DISPVECT, intent_code = 1006, dimensions = {5, 193, 229, 193, 1, 3, 1, 1}
+[INFO] niiWrite(): convert displacement from 0 to 3
+/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mri_warp_convert successful.
+INFO: using NIfTI-1 sform (sform_code=1)
+Loading gcam
+[INFO] niiRead(): intent_code = 1006, dimensions = {5, 193, 229, 193, 1, 3, 1, 1}
+[DEBUG] Warpfield::read() gcam->status = GCAM_LABELED
+setting orig areas to linear transform determinant scaled 1.00
+Computing inverse of GCAM
+Filling inverse of GCAM
+Allocating inv_gcam...(256, 256, 256)
+Saving inverse to /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/postmerge_ece5e23_retry1_sub01/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.inv.nii.gz
+GCAMwrite(/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/postmerge_ece5e23_retry1_sub01/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.inv.nii.gz)
+[INFO] Warpfield::convert(): converting GCAM ...
+[INFO] Warpfield::convert(): gcam       [256 x 256 x 256]
+[INFO] Warpfield::convert(): gcam image [193 x 229 x 193]
+[INFO] Warpfield::convert(): gcam atlas [256 x 256 x 256]
+[INFO] Warpfield::convert(): total out of range voxel count: 0
+[INFO] niiWrite(): MGZ_INTENT_WARPMAP => NIFTI_INTENT_DISPVECT, intent_code = 1006, dimensions = {5, 256, 256, 256, 1, 3, 1, 1}
+[INFO] niiWrite(): convert displacement from 0 to 3
+/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mri_convert -rt nearest /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/postmerge_ece5e23_retry1_sub01/mri/orig.mgz -at /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/postmerge_ece5e23_retry1_sub01/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/postmerge_ece5e23_retry1_sub01/mri/transforms/synthmorph.1.0mm.1.0mm/test.nii.gz 
+INFO: using NIfTI-1 sform (sform_code=1)
+reading from /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/postmerge_ece5e23_retry1_sub01/mri/orig.mgz...
+TR=9.67, TE=0.00, TI=0.00, flip angle=0.00
+i_ras = (-1, -3.0268e-09, 9.31323e-10)
+j_ras = (-9.31323e-10, 7.45058e-09, -1)
+k_ras = (-1.39698e-09, 1, 7.45058e-09)
+INFO: Reading transformation from file /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/postmerge_ece5e23_retry1_sub01/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz...
+INFO: Applying transformation from file /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/postmerge_ece5e23_retry1_sub01/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz...
+Applying morph_3d ...
+[INFO] niiRead(): intent_code = 1006, dimensions = {5, 193, 229, 193, 1, 3, 1, 1}
+[DEBUG] Warpfield::read() gcam->status = GCAM_LABELED
+setting orig areas to linear transform determinant scaled 1.00
+morphing to atlas with resample type 0
+writing to /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/postmerge_ece5e23_retry1_sub01/mri/transforms/synthmorph.1.0mm.1.0mm/test.nii.gz...
+{"passed": false, "seconds": {"talairach": 4.713076118379831, "mni_affine": 1.7488295170478523, "mni_nonlinear": 127.90756980190054}, "comparisons": {"talairach_affine": {"different_elements": 0, "max_abs_error": 0.0, "p99_abs_error": 0.0, "geometry_equal": true, "dtype_equal": true, "before_sha256": "82ce9e730ede80c9c4803f369f7bcdfeb52ec78712dc5888f1eec351a104b46b", "after_sha256": "82ce9e730ede80c9c4803f369f7bcdfeb52ec78712dc5888f1eec351a104b46b"}, "aff.lta": {"different_elements": 12, "max_abs_error": 3.653449223017802e-05, "p99_abs_error": 3.224323614070544e-05, "geometry_equal": true, "dtype_equal": true, "before_sha256": "035e1c58a299d11299b36f92f96e0a8ef575107620a137e3af59d41a5389e517", "after_sha256": "853b04c593fb1245bed523155d128131a26d07a44949651af5238aa955af3415"}, "reg.targ_to_invol.lta": {"different_elements": 12, "max_abs_error": 3.751298510223933e-05, "p99_abs_error": 3.616183740238199e-05, "geometry_equal": true, "dtype_equal": true, "before_sha256": "30bc015ac33a8c60533182b6df23d13b142adc4ecbd2f2a7cdbd158bd5febc99", "after_sha256": "bad3884aa413992e6d206091921fea64b090cdc22885ac30922fac280a93226c"}, "warp.to.mni152.1.0mm.1.0mm.nii.gz": {"different_elements": 8663184, "max_abs_error": 0.0001983642578125, "p99_abs_error": 4.57763671875e-05, "geometry_equal": true, "dtype_equal": true, "before_sha256": "b9dfca559915d4fb2fe493042802ccb105ee0bb811f8203ff42db41e7e844791", "after_sha256": "58773dd8e4badc41f6389ea7746adc10e4a2ce7d7d29cce681b26aef53d28d46"}, "warp.to.mni152.1.0mm.1.0mm.inv.nii.gz": {"different_elements": 28802068, "max_abs_error": 1.6773529052734375, "p99_abs_error": 0.0001220703125, "geometry_equal": true, "dtype_equal": true, "before_sha256": "0f97e2eecbf251df015dfeb679e5f1c842316fe15596832321bbb0bcf4166bc6", "after_sha256": "6fb3862df09a0c54f557bfa372ddebe89e7454a01849ed5062079530256b34d1"}, "test.nii.gz": {"different_elements": 106, "max_abs_error": 65.0, "p99_abs_error": 0.0, "geometry_equal": true, "dtype_equal": true, "before_sha256": "e4d650965986162b6ad7f0bd249b266c26f9284f62843e2a4ac6790e56c1f068", "after_sha256": "7147e1d707ca135e0485cf68c184416fd4ab666b7a52dfee6f0b8f1e18c7d476"}}}
+Traceback (most recent call last):
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/benchmark_postmerge_synthmorph.py", line 91, in <module>
+    if __name__=="__main__":main()
+                            ^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/benchmark_postmerge_synthmorph.py", line 90, in main
+    if not r["passed"]:raise AssertionError("post-merge regression")
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: post-merge regression

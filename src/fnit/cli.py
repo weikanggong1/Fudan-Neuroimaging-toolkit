@@ -234,7 +234,7 @@ def _run_applywarp(args):
     convention = "absolute" if args.absolute else (
         "relative" if args.relative else "auto"
     )
-    model = TorchApplyWarp(device=args.device)
+    model = TorchApplyWarp(device=args.device, frame_chunk_size=args.frame_chunk_size)
     model.run(
         args.input,
         args.reference,
@@ -613,6 +613,8 @@ def main(argv=None):
     apply.add_argument('-f', '--fill', type=float, default=0)
     apply.add_argument('-t', '--dtype', choices=('uint8', 'uint16', 'int16', 'int32', 'float32'), default='float32')
     apply.add_argument('-H', '--header-only', action='store_true')
+    apply.add_argument('--device', default='cpu', help='CPU or CUDA sampler; coordinates retain CPU rounding')
+    apply.add_argument('--frame-chunk-size', type=int, help='positive frame-buffer limit; auto if omitted')
     wmh = commands.add_parser('wmh-synthseg', help='WMH and anatomy segmentation')
     wmh.add_argument('--i', '-i', required=True, help='single 3D input image')
     wmh.add_argument('--o', '-o', required=True, help='segmentation image')
@@ -732,6 +734,8 @@ def main(argv=None):
     applywarp.add_argument('--datatype',
                            choices=('char', 'short', 'int', 'float', 'double'))
     applywarp.add_argument('--device', default='cpu')
+    applywarp.add_argument('--frame-chunk-size', type=int,
+                           help='positive frame-buffer limit; CUDA auto policy if omitted')
     applywarp.add_argument('--overwrite', action='store_true')
     fast_vbm = commands.add_parser(
         'fast-vbm', help='raw T1 to bias-corrected FAST VBM maps')
@@ -953,6 +957,8 @@ def main(argv=None):
             args.fill,
             args.dtype,
             args.header_only,
+            device=args.device,
+            frame_chunk_size=args.frame_chunk_size,
         )
         outputs = ((result, args.output),)
     for volume, path in outputs:

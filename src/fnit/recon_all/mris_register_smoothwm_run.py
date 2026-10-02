@@ -13,7 +13,7 @@ import numpy as np
 import tifffile
 import torch
 
-from .mris_register_average_numba import average_gradients_exact_cpu
+from .mris_register_average_numba import RegistrationGradientAverager
 from .mris_register_atlas import sample_atlas_on_canonical_sphere
 from .mris_register_blur import blur_atlas_frame
 from .mris_register_kernels import normalize_mean_curvature, project_sphere
@@ -36,12 +36,17 @@ from .sphere_standard_python import write_standard_sphere_surface
 def run_register_smoothwm(sphere: str | Path, smoothwm: str | Path,
                           sulc_seed: str | Path, atlas_file: str | Path,
                           output: str | Path, *, seed_iteration: int,
-                          overlap_device: str = "cpu", max_updates: int = 1024) -> dict:
+                          overlap_device: str = "cpu", max_updates: int = 1024,
+                          averaging_device: str = "cpu") -> dict:
     """Continue an already registered sulc sphere through smoothwm and repair.
 
     The optimizer uses source-order PyTorch/Numba CPU arithmetic. The final
     overlap repair may use CUDA. ``seed_iteration`` is the sulc pass update
     count, needed by the native overlap stopping rule.
+    averaging_device 默认 cpu，显式 cuda:N 只加速有序梯度平均；目标项、
+    步长接受和顺序更新不变。所有输入表面是 surface RAS/mm 的同序网格，
+    atlas_file 是半球图谱 TIFF。max_updates 默认 1024，未收敛直接报错。
+    返回 dict 包含逐轮状态、负面积清理轨迹、输出路径及嵌套耗时。
     """
     started = time.perf_counter()
     sphere, smoothwm = Path(sphere), Path(smoothwm)
@@ -59,6 +64,7 @@ def run_register_smoothwm(sphere: str | Path, smoothwm: str | Path,
     normalized = normalize_mean_curvature(raw)
     cache = prepare_registration_force_cache(vertices, original, triangles)
     neighbors, degrees = cache.neighbors, cache.degrees
+    average = RegistrationGradientAverager(neighbors, degrees, device=averaging_device)
     original_distances, original_areas = cache.original_distances, cache.original_areas
     original_area = cache.orig_area
     total_area = registration_total_area()
@@ -113,7 +119,7 @@ def run_register_smoothwm(sphere: str | Path, smoothwm: str | Path,
         force = correlation_gradient_add(force, projected, curvature, e1, e2,
                                          mean_grid, variance_grid, avg_vertex_dist,
                                          l_corr=l_corr)
-        force = average_gradients_exact_cpu(force, neighbors, degrees, averages)
+        force = average(force, averages)
         force = spring_gradient_add(force, projected, neighbors, degrees,
                                     dist_scale, l_spring)
 
@@ -159,6 +165,7 @@ def run_register_smoothwm(sphere: str | Path, smoothwm: str | Path,
             "sulc_seed": str(sulc_seed), "atlas": str(atlas_file),
             "output": str(output), "seed_iteration": seed_iteration,
             "overlap_device": overlap_device, "setup_seconds_including_raw_fit": setup_seconds,
+            "averaging_device": str(average.device),
             "integration_seconds": integration_seconds, "updates": updates,
             "negative_counts": negative_counts, "repair_seconds": repair_seconds,
             "total_seconds_including_io": time.perf_counter() - started}
@@ -170,11 +177,13 @@ def main(argv: list[str] | None = None) -> None:
         parser.add_argument(name, type=Path)
     parser.add_argument("--seed-iteration", type=int, required=True)
     parser.add_argument("--overlap-device", default="cpu")
+    parser.add_argument("--averaging-device", default="cpu")
     parser.add_argument("--report", type=Path)
     args = parser.parse_args(argv)
     report = run_register_smoothwm(
         args.sphere, args.smoothwm, args.sulc_seed, args.atlas, args.output,
-        seed_iteration=args.seed_iteration, overlap_device=args.overlap_device)
+        seed_iteration=args.seed_iteration, overlap_device=args.overlap_device,
+        averaging_device=args.averaging_device)
     content = json.dumps(report, indent=2) + "\n"
     if args.report:
         args.report.write_text(content)

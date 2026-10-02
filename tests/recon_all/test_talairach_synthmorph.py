@@ -66,7 +66,7 @@ def test_register_talairach_writes_readable_xfm_without_native_program(tmp_path,
                        for line in lines[5:8]])
     np.testing.assert_allclose(parsed, matrix[:3], atol=5e-9, rtol=0)
     assert called == {"weights": "weights", "device": "cpu", "model": "affine",
-                      "extent": 256,
+                      "extent": 256, "configure_precision": False,
                       "input": ("synthstrip.mgz", "mni305.cor.stripped.mgz", True)}
 
 

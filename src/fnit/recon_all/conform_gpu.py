@@ -73,10 +73,11 @@ def _multiply32(left: np.ndarray, right: np.ndarray) -> np.ndarray:
 
 
 def _det3(m: np.ndarray) -> np.float32:
+    """按 VNL 余子式的 float32 求值顺序计算三阶行列式。"""
     a, b, c = m[0]
     d, e, f = m[1]
     g, h, i = m[2]
-    return a * e * i - a * h * f - d * b * i + d * h * c + g * b * f - g * e * c
+    return a * e * i - a * f * h - d * b * i + d * c * h + g * b * f - g * c * e
 
 
 def _inverse32(m: np.ndarray) -> np.ndarray:

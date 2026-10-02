@@ -472,8 +472,12 @@ def _take_integer_grid(volume, positions):
     return output
 
 
-def _trilinear_sample(volume, coordinates):
-    """Trilinear values and exact piecewise voxel-coordinate derivatives."""
+def _trilinear_sample(volume, coordinates, *, derivatives=True):
+    """Trilinear values and optional piecewise voxel-coordinate derivatives.
+
+    Value-only calls retain the interpolation arithmetic and return ``None``
+    for the unused gradient. The default keeps the existing derivative API.
+    """
     if volume.ndim != 3 or coordinates.shape[0] != 3:
         raise ValueError("invalid trilinear input shapes")
     spatial_shape = coordinates.shape[1:]
@@ -528,28 +532,32 @@ def _trilinear_sample(volume, coordinates):
     # The intermediate float roundings affect FNIRT's truncated PCG path.
     one_minus_z = 1.0 - wz
     one_minus_y = 1.0 - wy
-    tmp11 = one_minus_z * v000 + wz * v001
-    tmp12 = one_minus_z * v010 + wz * v011
-    tmp13 = one_minus_z * v100 + wz * v101
-    tmp14 = one_minus_z * v110 + wz * v111
-    derivative_x = one_minus_y * (tmp13 - tmp11) + wy * (tmp14 - tmp12)
-    derivative_y = (1.0 - wx) * (tmp12 - tmp11) + wx * (tmp14 - tmp13)
+    if derivatives:
+        tmp11 = one_minus_z * v000 + wz * v001
+        tmp12 = one_minus_z * v010 + wz * v011
+        tmp13 = one_minus_z * v100 + wz * v101
+        tmp14 = one_minus_z * v110 + wz * v111
+        derivative_x = one_minus_y * (tmp13 - tmp11) + wy * (tmp14 - tmp12)
+        derivative_y = (1.0 - wx) * (tmp12 - tmp11) + wx * (tmp14 - tmp13)
     tmp11 = one_minus_y * v000 + wy * v010
     tmp12 = one_minus_y * v001 + wy * v011
     tmp13 = one_minus_y * v100 + wy * v110
     tmp14 = one_minus_y * v101 + wy * v111
     tmp21 = (1.0 - wx) * tmp11 + wx * tmp13
     tmp22 = (1.0 - wx) * tmp12 + wx * tmp14
-    derivative_z = tmp22 - tmp21
+    if derivatives:
+        derivative_z = tmp22 - tmp21
     sampled = one_minus_z * tmp21 + wz * tmp22
     valid_float = valid.to(volume.dtype)
     sampled = (sampled * valid_float).reshape(spatial_shape)
-    gradient = torch.stack(
-        tuple(
-            (value * valid_float).reshape(spatial_shape)
-            for value in (derivative_x, derivative_y, derivative_z)
+    gradient = None
+    if derivatives:
+        gradient = torch.stack(
+            tuple(
+                (value * valid_float).reshape(spatial_shape)
+                for value in (derivative_x, derivative_y, derivative_z)
+            )
         )
-    )
     return sampled, valid.reshape(spatial_shape), gradient
 
 
@@ -839,12 +847,12 @@ class _LevelSystem:
                 affine_grid=self.affine_grid,
             )
         warped, valid, gradient_voxels = _trilinear_sample(
-            self.moving, source_voxels
+            self.moving, source_voxels, derivatives=derivatives
         )
         mask = valid
         if self.moving_mask is not None:
             warped_mask, _, _ = _trilinear_sample(
-                self.moving_mask, source_voxels
+                self.moving_mask, source_voxels, derivatives=False
             )
             # ``robjmask`` is a ``volume<char>`` upstream. warpfns casts the
             # trilinear value to char while resampling, before ``Mask()``
@@ -968,11 +976,12 @@ class _LevelSystem:
                 dtype=coefficients.dtype
             ) / count
 
-        def data_normal(vector):
+        def data_normal(vector, *, delta_field=None):
             delta_coefficients, delta_scale = _unpack(
                 vector, coefficient_shape, self.estimate_scale
             )
-            delta_field = expand_coefficients(delta_coefficients, self.bases)
+            if delta_field is None:
+                delta_field = expand_coefficients(delta_coefficients, self.bases)
             dense = torch.zeros_like(delta_field)
             for row in range(3):
                 for column in range(3):
@@ -989,8 +998,8 @@ class _LevelSystem:
                     ).sum() / count
             return _pack(coefficient_result, scale_result)
 
-        def matvec(vector):
-            return data_normal(vector) + bend_normal(vector)
+        def matvec(vector, *, delta_field=None):
+            return data_normal(vector, delta_field=delta_field) + bend_normal(vector)
 
         diagonal_parts = []
         for axis in range(3):
@@ -1071,7 +1080,7 @@ class _JointT1System:
         return state
 
     def linearize(self, coefficients, polynomial, bias_coefficients, *, fit_intensity):
-        mapped, _, _ = self._mapping(polynomial, bias_coefficients)
+        mapped, global_map, bias = self._mapping(polynomial, bias_coefficients)
         self.deformation.fixed = mapped
         state, deformation_gradient, deformation_matvec, deformation_diagonal = (
             self.deformation.linearize(coefficients, coefficients.new_ones(()))
@@ -1085,12 +1094,6 @@ class _JointT1System:
         mask = state["mask"].to(self.powers.dtype)
         count = state["count"]
         gradient_fsl = state["gradient_fsl"]
-        global_map = torch.einsum(
-            "ixyz,i->xyz", self.powers, polynomial.to(self.powers.dtype)
-        )
-        bias = expand_coefficients(bias_coefficients, self.bias_bases)[0].to(
-            self.powers.dtype
-        )
         polynomial_images = self.powers * bias[None]
         residual = state["residual"] * mask / count
         bias_factor = self.bias_lambda / count
@@ -1107,16 +1110,19 @@ class _JointT1System:
                 vector, def_shape, bias_shape
             )
             def_part = _pack(def_coefficients)
-            delta_field = expand_coefficients(
+            deformation_field = expand_coefficients(
                 def_coefficients, self.deformation.bases
-            ).to(self.powers.dtype)
+            )
+            # Reuse the original double expansion in the deformation normal
+            # equation. Its float image copy is only for the intensity block.
+            delta_field = deformation_field.to(self.powers.dtype)
             delta_map = (
                 torch.einsum("ixyz,i->xyz", polynomial_images, polynomial_part.to(self.powers.dtype))
                 + global_map * expand_coefficients(bias_part, self.bias_bases)[0].to(self.powers.dtype)
             )
             total = (gradient_fsl * delta_field).sum(0) - delta_map
             weighted = total * mask / count
-            def_result = deformation_matvec(def_part) - _pack(adjoint_field(
+            def_result = deformation_matvec(def_part, delta_field=deformation_field) - _pack(adjoint_field(
                 (gradient_fsl * (delta_map * mask / count)[None]).to(coefficients.dtype),
                 self.deformation.bases,
             ))

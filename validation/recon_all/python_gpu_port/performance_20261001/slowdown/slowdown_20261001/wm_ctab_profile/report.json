@@ -1,0 +1,77 @@
+{
+  "candidate_code_commit": "e036f57b62b99d2af4cd8853ab2f1e6d2a9f8c68",
+  "host": "gpucw1",
+  "device": "CPU; no CUDA context",
+  "scope": "same FNIT input under GDB; includes debugger overhead; not an end-to-end speedup",
+  "command": [
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/mri_edit_wm_with_aseg",
+    "-keep-in",
+    "-fix-ento-wm",
+    "entowm.mgz",
+    "3",
+    "255",
+    "255",
+    "-fix-acj",
+    "aseg.presurf.mgz",
+    "255",
+    "255",
+    "-fill-seg-wm",
+    "-fix-scm-ha",
+    "1",
+    "wm.seg.mgz",
+    "brain.mgz",
+    "aseg.presurf.mgz",
+    "wm.asegedit.mgz"
+  ],
+  "input_sha256": {
+    "entowm.mgz": "da682f2b209bec8243abe2acddc81bcad5f5d1d18c0d1c9ada74c7c8fa66aca9",
+    "aseg.presurf.mgz": "5e7291922611d51269b4f54fa38d1731089fe750dc5ce2f18e44ef9f40cd00de",
+    "wm.seg.mgz": "188d129cd72fd13a562c41780c58a2c58abccaff52556600894dc7ec17adde5f",
+    "brain.mgz": "8ae56c99c6abdda49359b7450151817fde4929952028e23d436ba87dea111ca2"
+  },
+  "binary_sha256": "b38f118c8f30bd49f95853c5c427ff8b98d667559cdc08a68a0405425fe88563",
+  "script_sha256": "4ef8d4862fe0669bc62e4b193172e9130ffb3706a28e52c87eff97a33667ffdf",
+  "gdb_script_sha256": "ff46f7919e11aa9c6304b5c8fea92287900dc36855e3f81b1678beccafd1e618",
+  "runs": [
+    {
+      "seed": 1,
+      "seconds_including_gdb_io": 34.50193488225341,
+      "child_user_seconds": 33.466031,
+      "child_system_seconds": 0.7415879999999999,
+      "ctab_profile": {
+        "inferior_exit_code": 0,
+        "calls": [
+          {
+            "seconds": 0.10079193115234375,
+            "caller": "CTABalloc(int)",
+            "return_value": "None",
+            "repeat_checks": 3
+          }
+        ],
+        "clock": "realtime"
+      },
+      "output_equal_voxels_dtype_affine": true,
+      "output_sha256": "c75c34ca2c9b61689a76a1f35fc477d04110c9a9d561195835882894302d1606"
+    },
+    {
+      "seed": 2,
+      "seconds_including_gdb_io": 33.727961177937686,
+      "child_user_seconds": 33.070072999999994,
+      "child_system_seconds": 0.615745,
+      "ctab_profile": {
+        "inferior_exit_code": 0,
+        "calls": [
+          {
+            "seconds": 0.03267407417297363,
+            "caller": "CTABalloc(int)",
+            "return_value": "None",
+            "repeat_checks": 1
+          }
+        ],
+        "clock": "realtime"
+      },
+      "output_equal_voxels_dtype_affine": true,
+      "output_sha256": "6853d472dfa4a65db0e8b3f5cdafd5ef056714c885aedebba0d4504e44c8e1d7"
+    }
+  ]
+}

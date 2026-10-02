@@ -65,13 +65,21 @@ def image_like(data, reference, *, intent=None):
     return image
 
 
-def configure_device(device=None):
+def configure_device(device=None, *, configure_precision=True):
+    """选择计算设备，可选地设置 CUDA 的默认 TF32 策略。
+
+    device 为设备名、torch.device 或 None；None 自动选择可用 CUDA，否则
+    使用 CPU。configure_precision 默认 True，保持既有 CUDA 调用同时开启
+    matmul/cuDNN TF32 的行为；False 只选择设备，保留调用方精度设置。
+    返回 torch.device，不分配张量。请求不可用 CUDA 时抛 RuntimeError，
+    非法设备名沿用 torch.device 的异常；本辅助函数没有独立原软件命令。
+    """
     if device is None:
         device = "cuda" if torch.cuda.is_available() else "cpu"
     result = torch.device(device)
     if result.type == "cuda" and not torch.cuda.is_available():
         raise RuntimeError("CUDA was requested but is not available")
-    if result.type == "cuda":
+    if result.type == "cuda" and configure_precision:
         torch.backends.cuda.matmul.allow_tf32 = True
         torch.backends.cudnn.allow_tf32 = True
     return result

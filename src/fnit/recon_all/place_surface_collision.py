@@ -7,6 +7,7 @@ static-mesh broadphase is diagnostic; ordered asynchronous updates remain open.
 from __future__ import annotations
 
 import numpy as np
+from itertools import chain
 from numba import njit
 from scipy.spatial import cKDTree
 
@@ -286,6 +287,54 @@ def _candidate_collision(
     return 0
 
 
+@njit(cache=True)
+def _incident_face_geometry(current, triangles, face_ids, vertex, endpoint):
+    """同一顶点试步：逐面复用原几何内核；返回Fv个完整几何，没有并行更新。"""
+    count = len(face_ids)
+    moved = np.empty((count, 3, 3), dtype=np.float32)
+    centers = np.empty((count, 3), dtype=np.float64)
+    radii = np.empty(count, dtype=np.float64)
+    lows = np.empty((count, 3), dtype=np.float32)
+    highs = np.empty((count, 3), dtype=np.float32)
+    for row in range(count):
+        m, center, radius, low, high = _moved_face_geometry(
+            current, triangles, face_ids[row], vertex, endpoint)
+        moved[row], centers[row], radii[row], lows[row], highs[row] = m, center, radius, low, high
+    return moved, centers, radii, lows, highs
+
+
+@njit(cache=True)
+def _incident_faces_collide(current, triangles, face_ids, moved, low, high, offsets, nearby):
+    """同一顶点按原关联面/候选次序碰撞检查，首次命中后停止。"""
+    for row in range(len(face_ids)):
+        if _candidate_collision(current, triangles, moved[row], triangles[face_ids[row]],
+                                low[row], high[row], nearby[offsets[row]:offsets[row+1]]):
+            return True
+    return False
+
+
+def _vertex_collision_batch(current, triangles, face_ids, vertex, endpoint, tree, maximum_radius):
+    """同顶点批量KD查询；current不修改，完整候选无上限，返回是否碰撞。
+
+    current(N,3)float32及(F,3)int32面为surface RAS/mm；face_ids为原序关联面，
+    vertex为顶点编号、endpoint为float32(3,)试步终点；tree和最大半径来自
+    本次固定输入面。radius仍依次加maximum_radius与1mm，未缩小搜索范围。
+    明确return_sorted=False保持单点查询次序；只适用于无拒绝试步MHT状态。
+    不写坐标，无TF32/低精度开关；属于mris_place_surface内部步骤，无独立CLI。
+    """
+    if len(face_ids) == 0:
+        return False
+    moved, centers, radii, lows, highs = _incident_face_geometry(
+        current, triangles, face_ids, vertex, endpoint)
+    lists = tree.query_ball_point(centers, (radii + maximum_radius) + 1.0, return_sorted=False)
+    counts = np.fromiter((len(row) for row in lists), dtype=np.int64, count=len(lists))
+    offsets = np.empty(len(lists) + 1, dtype=np.int64)
+    offsets[0] = 0
+    np.cumsum(counts, out=offsets[1:])
+    nearby = np.fromiter(chain.from_iterable(lists), dtype=np.int32, count=int(offsets[-1]))
+    return _incident_faces_collide(current, triangles, face_ids, moved, lows, highs, offsets, nearby)
+
+
 
 @njit(cache=True)
 def _project_close_neighbors(
@@ -462,7 +511,11 @@ def asynchronous_first_step(
             endpoint = np.float32(xyz[vertex] + projected)
             final_offset = projected
         collision = False
-        for face_id in incident[incident_offsets[vertex]:incident_offsets[vertex + 1]]:
+        incident_faces = incident[incident_offsets[vertex]:incident_offsets[vertex + 1]]
+        if fast and trial is None:
+            collision = _vertex_collision_batch(
+                current, triangles, incident_faces, int(vertex), endpoint, tree, maximum_radius)
+        for face_id in (() if fast and trial is None else incident_faces):
             corners = triangles[face_id]
             if fast:
                 moved, center, radius, low, high = _moved_face_geometry(

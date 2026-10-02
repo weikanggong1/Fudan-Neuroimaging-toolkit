@@ -1,0 +1,853 @@
+{
+  "scope": "frozen same-input CPU incidence and normals; no GPU or whole-pipeline measurement",
+  "candidate_code_commit": "764607c+archiveSHA:098ccb63a3931a4f749710fb76dd9beb4751f7b8b14c0f130fa922f9698b708e",
+  "baseline_code_commit": "764607c+archiveSHA:f7691862c3161c2f4b68f6a667f8feb16ef0bec3f6706ec54974af0253b336de",
+  "host": "gpucw1",
+  "platform": "Linux-3.10.0-1160.119.1.el7.x86_64-x86_64-with-glibc2.17",
+  "threads": 4,
+  "source_paths": {
+    "candidate_normals": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/code_final_candidate/src/fnit/recon_all/place_surface_normals.py",
+    "candidate_registration": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/code_final_candidate/src/fnit/recon_all/mris_register_nonlinear.py",
+    "baseline_normals": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/code_gpu_candidate_764/src/fnit/recon_all/place_surface_normals.py",
+    "baseline_registration": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/code_gpu_candidate_764/src/fnit/recon_all/mris_register_nonlinear.py",
+    "benchmark": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/code_final_candidate/validation/recon_all/python_gpu_port/benchmark_ordered_face_csr.py"
+  },
+  "source_sha256": {
+    "candidate_normals": "ea2c54881ae98e9503e7603983ccb19229b8db5688d5c37367b294ae46d73385",
+    "candidate_registration": "f5d1ba9311cba8ee770023a3e968b67cae901daf5e584ff6f6ad425663a1343b",
+    "baseline_normals": "86d1a29daa8cd291432a5b55016f6975bfed0eda8af3a2357594ff297b32f3b0",
+    "baseline_registration": "ea0ebd87135594e1f4be78562d42fd40e215f707e690b0b4710bd44ebf53f8b1",
+    "benchmark": "daa665f8d0350a6110b5dc935fc7de5fde5f2043423d847967f9f77cb05a132e"
+  },
+  "versions": {
+    "numpy": "1.26.4",
+    "torch": "2.5.1",
+    "numba": "0.67.0",
+    "nibabel": "5.4.2"
+  },
+  "thread_environment": {
+    "OMP_NUM_THREADS": "4",
+    "MKL_NUM_THREADS": "4",
+    "OPENBLAS_NUM_THREADS": "4",
+    "NUMBA_NUM_THREADS": "4"
+  },
+  "jit_policy": "no explicit warmup; first JIT/cache loading included and kernel signatures recorded",
+  "surfaces": [
+    {
+      "surface": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/surf/lh.sphere",
+      "input_file_sha256": "c3e7ce0318b5e7ae902cc85920405a379b35220f591311e13bf8b0c8609a8e80",
+      "vertices": 105598,
+      "faces": 211192,
+      "read_seconds": 0.008089446928352118,
+      "coordinate_array_sha256": "8a312f4b6424e2b91c8768e9c47484e565659dd833de2cde1a8b2d9ed39a4dc3",
+      "face_array_sha256": "95a3133c50eb2d3ea38945418e81279b67ab5b0de1f290a0a4c8bce7d2d5f5cc",
+      "paired_runs": [
+        {
+          "order": [
+            "baseline",
+            "candidate"
+          ],
+          "baseline": {
+            "incidence_seconds": 5.731256453786045,
+            "normals_seconds_including_csr": 2.8171872021630406,
+            "normals_signatures_before": [],
+            "normals_signatures_after": [
+              "(Array(float32, 2, 'C', False, aligned=True), Array(int32, 2, 'C', False, aligned=True), Array(int32, 1, 'C', False, aligned=True), Array(int32, 1, 'C', False, aligned=True), Array(int32, 1, 'C', False, aligned=True))"
+            ]
+          },
+          "candidate": {
+            "incidence_seconds": 0.09833040088415146,
+            "normals_seconds_including_csr": 0.7987152501009405,
+            "normals_signatures_before": [],
+            "normals_signatures_after": [
+              "(Array(float32, 2, 'C', False, aligned=True), Array(int64, 2, 'C', False, aligned=True), Array(int64, 1, 'C', False, aligned=True), Array(int64, 1, 'C', False, aligned=True), Array(int64, 1, 'C', False, aligned=True))"
+            ]
+          },
+          "incidence_comparison": {
+            "face_indices": {
+              "shape": [
+                [
+                  105598,
+                  12
+                ],
+                [
+                  105598,
+                  12
+                ]
+              ],
+              "dtype": [
+                "int64",
+                "int64"
+              ],
+              "sha256": [
+                "7ca082eb502a9d937a30a3649d15b161f148fd9a28244386c23f30c18b9512ef",
+                "7ca082eb502a9d937a30a3649d15b161f148fd9a28244386c23f30c18b9512ef"
+              ],
+              "same_shape": true,
+              "different_values": 0,
+              "maximum_absolute_error": 0,
+              "integer_values_equal": true
+            },
+            "corner_indices": {
+              "shape": [
+                [
+                  105598,
+                  12
+                ],
+                [
+                  105598,
+                  12
+                ]
+              ],
+              "dtype": [
+                "int64",
+                "int64"
+              ],
+              "sha256": [
+                "099e6856440097616c1918e9dff647ad271f67cd07321215406dbbdbfde4566c",
+                "099e6856440097616c1918e9dff647ad271f67cd07321215406dbbdbfde4566c"
+              ],
+              "same_shape": true,
+              "different_values": 0,
+              "maximum_absolute_error": 0,
+              "integer_values_equal": true
+            },
+            "degrees": {
+              "shape": [
+                [
+                  105598
+                ],
+                [
+                  105598
+                ]
+              ],
+              "dtype": [
+                "int64",
+                "int64"
+              ],
+              "sha256": [
+                "cad97989574e486821a7f748e4b27221fde4fba01a3840f516ff4b56370e0865",
+                "cad97989574e486821a7f748e4b27221fde4fba01a3840f516ff4b56370e0865"
+              ],
+              "same_shape": true,
+              "different_values": 0,
+              "maximum_absolute_error": 0,
+              "integer_values_equal": true
+            }
+          },
+          "normals_comparison": {
+            "shape": [
+              [
+                105598,
+                3
+              ],
+              [
+                105598,
+                3
+              ]
+            ],
+            "dtype": [
+              "float32",
+              "float32"
+            ],
+            "sha256": [
+              "0095054088ec10b42c27c4d8ad6e37eeb84f59bf055851c572dc438b87997fec",
+              "0095054088ec10b42c27c4d8ad6e37eeb84f59bf055851c572dc438b87997fec"
+            ],
+            "different_float_elements": 0,
+            "different_vertices": 0,
+            "all_finite": true,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "bit_exact": true
+          },
+          "candidate_csr_seconds": 0.07187908608466387,
+          "csr_comparison": {
+            "offsets": {
+              "shape": [
+                [
+                  105599
+                ],
+                [
+                  105599
+                ]
+              ],
+              "dtype": [
+                "int64",
+                "int64"
+              ],
+              "sha256": [
+                "3d24b906e662932a771138292bc9784f79e1a7e48f55754452690817c4ec6a11",
+                "3d24b906e662932a771138292bc9784f79e1a7e48f55754452690817c4ec6a11"
+              ],
+              "same_shape": true,
+              "different_values": 0,
+              "maximum_absolute_error": 0,
+              "integer_values_equal": true
+            },
+            "face_ids": {
+              "shape": [
+                [
+                  633576
+                ],
+                [
+                  633576
+                ]
+              ],
+              "dtype": [
+                "int64",
+                "int64"
+              ],
+              "sha256": [
+                "72af2d86ad6c5c79d8a8f091194cf0610fadfe851e690890a6eb71fc6e0c67a2",
+                "72af2d86ad6c5c79d8a8f091194cf0610fadfe851e690890a6eb71fc6e0c67a2"
+              ],
+              "same_shape": true,
+              "different_values": 0,
+              "maximum_absolute_error": 0,
+              "integer_values_equal": true
+            },
+            "corners": {
+              "shape": [
+                [
+                  633576
+                ],
+                [
+                  633576
+                ]
+              ],
+              "dtype": [
+                "int64",
+                "int64"
+              ],
+              "sha256": [
+                "0e72e30969be77f573af2ef19e7bdb68f7e9c3fa4be0460461dbefd63fee02a6",
+                "0e72e30969be77f573af2ef19e7bdb68f7e9c3fa4be0460461dbefd63fee02a6"
+              ],
+              "same_shape": true,
+              "different_values": 0,
+              "maximum_absolute_error": 0,
+              "integer_values_equal": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "surface": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/surf/rh.sphere",
+      "input_file_sha256": "ba48d004347af232315722de6f601cbdc8c33faaf495511614f0d9a4fa1b7c16",
+      "vertices": 104619,
+      "faces": 209234,
+      "read_seconds": 0.016377012245357037,
+      "coordinate_array_sha256": "68a40930534e0c8063a1ad845c5cd1458249db99567aafdb48d737118b601b06",
+      "face_array_sha256": "b960d1456c21a8d15419da8d0d3a059cb7278dad4804806aa62888e8196bdb45",
+      "paired_runs": [
+        {
+          "order": [
+            "baseline",
+            "candidate"
+          ],
+          "baseline": {
+            "incidence_seconds": 6.525221160147339,
+            "normals_seconds_including_csr": 0.2227365798316896,
+            "normals_signatures_before": [
+              "(Array(float32, 2, 'C', False, aligned=True), Array(int32, 2, 'C', False, aligned=True), Array(int32, 1, 'C', False, aligned=True), Array(int32, 1, 'C', False, aligned=True), Array(int32, 1, 'C', False, aligned=True))"
+            ],
+            "normals_signatures_after": [
+              "(Array(float32, 2, 'C', False, aligned=True), Array(int32, 2, 'C', False, aligned=True), Array(int32, 1, 'C', False, aligned=True), Array(int32, 1, 'C', False, aligned=True), Array(int32, 1, 'C', False, aligned=True))"
+            ]
+          },
+          "candidate": {
+            "incidence_seconds": 0.08462774520739913,
+            "normals_seconds_including_csr": 0.21371054090559483,
+            "normals_signatures_before": [
+              "(Array(float32, 2, 'C', False, aligned=True), Array(int64, 2, 'C', False, aligned=True), Array(int64, 1, 'C', False, aligned=True), Array(int64, 1, 'C', False, aligned=True), Array(int64, 1, 'C', False, aligned=True))"
+            ],
+            "normals_signatures_after": [
+              "(Array(float32, 2, 'C', False, aligned=True), Array(int64, 2, 'C', False, aligned=True), Array(int64, 1, 'C', False, aligned=True), Array(int64, 1, 'C', False, aligned=True), Array(int64, 1, 'C', False, aligned=True))"
+            ]
+          },
+          "incidence_comparison": {
+            "face_indices": {
+              "shape": [
+                [
+                  104619,
+                  9
+                ],
+                [
+                  104619,
+                  9
+                ]
+              ],
+              "dtype": [
+                "int64",
+                "int64"
+              ],
+              "sha256": [
+                "c965c0ad0d5b23907af361e3b3435df607dc87884db54472bc3a275f89f8ab7e",
+                "c965c0ad0d5b23907af361e3b3435df607dc87884db54472bc3a275f89f8ab7e"
+              ],
+              "same_shape": true,
+              "different_values": 0,
+              "maximum_absolute_error": 0,
+              "integer_values_equal": true
+            },
+            "corner_indices": {
+              "shape": [
+                [
+                  104619,
+                  9
+                ],
+                [
+                  104619,
+                  9
+                ]
+              ],
+              "dtype": [
+                "int64",
+                "int64"
+              ],
+              "sha256": [
+                "31602536c04f7005a8c5a04affe717ac27aacf52023b38bd37f5e15043d764ee",
+                "31602536c04f7005a8c5a04affe717ac27aacf52023b38bd37f5e15043d764ee"
+              ],
+              "same_shape": true,
+              "different_values": 0,
+              "maximum_absolute_error": 0,
+              "integer_values_equal": true
+            },
+            "degrees": {
+              "shape": [
+                [
+                  104619
+                ],
+                [
+                  104619
+                ]
+              ],
+              "dtype": [
+                "int64",
+                "int64"
+              ],
+              "sha256": [
+                "35805646a79b999375219965b206b8cb7abd5af08add5009466f416ddd2427d7",
+                "35805646a79b999375219965b206b8cb7abd5af08add5009466f416ddd2427d7"
+              ],
+              "same_shape": true,
+              "different_values": 0,
+              "maximum_absolute_error": 0,
+              "integer_values_equal": true
+            }
+          },
+          "normals_comparison": {
+            "shape": [
+              [
+                104619,
+                3
+              ],
+              [
+                104619,
+                3
+              ]
+            ],
+            "dtype": [
+              "float32",
+              "float32"
+            ],
+            "sha256": [
+              "3d2302524b249b731935aa19775c55995c008ff6a235cbb6351274f80ff09bef",
+              "3d2302524b249b731935aa19775c55995c008ff6a235cbb6351274f80ff09bef"
+            ],
+            "different_float_elements": 0,
+            "different_vertices": 0,
+            "all_finite": true,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "bit_exact": true
+          },
+          "candidate_csr_seconds": 0.06609612284228206,
+          "csr_comparison": {
+            "offsets": {
+              "shape": [
+                [
+                  104620
+                ],
+                [
+                  104620
+                ]
+              ],
+              "dtype": [
+                "int64",
+                "int64"
+              ],
+              "sha256": [
+                "3f9dcb2e7fa15ad906e3627342d180276cf54d3ae94da6128c6584ee7a06dd2d",
+                "3f9dcb2e7fa15ad906e3627342d180276cf54d3ae94da6128c6584ee7a06dd2d"
+              ],
+              "same_shape": true,
+              "different_values": 0,
+              "maximum_absolute_error": 0,
+              "integer_values_equal": true
+            },
+            "face_ids": {
+              "shape": [
+                [
+                  627702
+                ],
+                [
+                  627702
+                ]
+              ],
+              "dtype": [
+                "int64",
+                "int64"
+              ],
+              "sha256": [
+                "48a37deac3b72eeefb942514ee25ba44388f0134e6df060f4a60db5e275fdb88",
+                "48a37deac3b72eeefb942514ee25ba44388f0134e6df060f4a60db5e275fdb88"
+              ],
+              "same_shape": true,
+              "different_values": 0,
+              "maximum_absolute_error": 0,
+              "integer_values_equal": true
+            },
+            "corners": {
+              "shape": [
+                [
+                  627702
+                ],
+                [
+                  627702
+                ]
+              ],
+              "dtype": [
+                "int64",
+                "int64"
+              ],
+              "sha256": [
+                "78ba6e99cb7d43b4d12806e851acddf555fbd2b9cdd7b076a6f9efe0af42f993",
+                "78ba6e99cb7d43b4d12806e851acddf555fbd2b9cdd7b076a6f9efe0af42f993"
+              ],
+              "same_shape": true,
+              "different_values": 0,
+              "maximum_absolute_error": 0,
+              "integer_values_equal": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "surface": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub02_1b8c36d/surf/lh.sphere",
+      "input_file_sha256": "beea6c936e42c8e06ca1842c55270625bbdde037c84e0aaa76fdfbc54bbfb56f",
+      "vertices": 119363,
+      "faces": 238722,
+      "read_seconds": 0.0029453709721565247,
+      "coordinate_array_sha256": "0062ae60c97f3f2c7eefbf8f653e144f5b51d02f03c8d3ff6d78ef168f368d8d",
+      "face_array_sha256": "53678c9b7fb2631f753c8fbf0d55ae60dfd6f210d810b19d9814dab7e9c1a6c0",
+      "paired_runs": [
+        {
+          "order": [
+            "baseline",
+            "candidate"
+          ],
+          "baseline": {
+            "incidence_seconds": 7.466030464973301,
+            "normals_seconds_including_csr": 0.2744573326781392,
+            "normals_signatures_before": [
+              "(Array(float32, 2, 'C', False, aligned=True), Array(int32, 2, 'C', False, aligned=True), Array(int32, 1, 'C', False, aligned=True), Array(int32, 1, 'C', False, aligned=True), Array(int32, 1, 'C', False, aligned=True))"
+            ],
+            "normals_signatures_after": [
+              "(Array(float32, 2, 'C', False, aligned=True), Array(int32, 2, 'C', False, aligned=True), Array(int32, 1, 'C', False, aligned=True), Array(int32, 1, 'C', False, aligned=True), Array(int32, 1, 'C', False, aligned=True))"
+            ]
+          },
+          "candidate": {
+            "incidence_seconds": 0.0993411741219461,
+            "normals_seconds_including_csr": 0.2519233259372413,
+            "normals_signatures_before": [
+              "(Array(float32, 2, 'C', False, aligned=True), Array(int64, 2, 'C', False, aligned=True), Array(int64, 1, 'C', False, aligned=True), Array(int64, 1, 'C', False, aligned=True), Array(int64, 1, 'C', False, aligned=True))"
+            ],
+            "normals_signatures_after": [
+              "(Array(float32, 2, 'C', False, aligned=True), Array(int64, 2, 'C', False, aligned=True), Array(int64, 1, 'C', False, aligned=True), Array(int64, 1, 'C', False, aligned=True), Array(int64, 1, 'C', False, aligned=True))"
+            ]
+          },
+          "incidence_comparison": {
+            "face_indices": {
+              "shape": [
+                [
+                  119363,
+                  10
+                ],
+                [
+                  119363,
+                  10
+                ]
+              ],
+              "dtype": [
+                "int64",
+                "int64"
+              ],
+              "sha256": [
+                "e100d16971d063908b24d0bc4e713644bb4e34563260a731b28cf11c92d85666",
+                "e100d16971d063908b24d0bc4e713644bb4e34563260a731b28cf11c92d85666"
+              ],
+              "same_shape": true,
+              "different_values": 0,
+              "maximum_absolute_error": 0,
+              "integer_values_equal": true
+            },
+            "corner_indices": {
+              "shape": [
+                [
+                  119363,
+                  10
+                ],
+                [
+                  119363,
+                  10
+                ]
+              ],
+              "dtype": [
+                "int64",
+                "int64"
+              ],
+              "sha256": [
+                "e31799d23244e5272b706bf2d55ff47422adf07e9e39a8f971cbf3eb32e96e3a",
+                "e31799d23244e5272b706bf2d55ff47422adf07e9e39a8f971cbf3eb32e96e3a"
+              ],
+              "same_shape": true,
+              "different_values": 0,
+              "maximum_absolute_error": 0,
+              "integer_values_equal": true
+            },
+            "degrees": {
+              "shape": [
+                [
+                  119363
+                ],
+                [
+                  119363
+                ]
+              ],
+              "dtype": [
+                "int64",
+                "int64"
+              ],
+              "sha256": [
+                "f663707ce65e4a14d4542f070adb5e62c3987c85c413974a2f5b3cd2372ed7ee",
+                "f663707ce65e4a14d4542f070adb5e62c3987c85c413974a2f5b3cd2372ed7ee"
+              ],
+              "same_shape": true,
+              "different_values": 0,
+              "maximum_absolute_error": 0,
+              "integer_values_equal": true
+            }
+          },
+          "normals_comparison": {
+            "shape": [
+              [
+                119363,
+                3
+              ],
+              [
+                119363,
+                3
+              ]
+            ],
+            "dtype": [
+              "float32",
+              "float32"
+            ],
+            "sha256": [
+              "9bf831f9c63490256ee7b4e8e860fdd9c30621c8bb570e048fb8dfc5fef9e819",
+              "9bf831f9c63490256ee7b4e8e860fdd9c30621c8bb570e048fb8dfc5fef9e819"
+            ],
+            "different_float_elements": 0,
+            "different_vertices": 0,
+            "all_finite": true,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "bit_exact": true
+          },
+          "candidate_csr_seconds": 0.07707871310412884,
+          "csr_comparison": {
+            "offsets": {
+              "shape": [
+                [
+                  119364
+                ],
+                [
+                  119364
+                ]
+              ],
+              "dtype": [
+                "int64",
+                "int64"
+              ],
+              "sha256": [
+                "a88fd52de80fd155294c85398d6d8a69566e752565b6e937438f2cf012fa0745",
+                "a88fd52de80fd155294c85398d6d8a69566e752565b6e937438f2cf012fa0745"
+              ],
+              "same_shape": true,
+              "different_values": 0,
+              "maximum_absolute_error": 0,
+              "integer_values_equal": true
+            },
+            "face_ids": {
+              "shape": [
+                [
+                  716166
+                ],
+                [
+                  716166
+                ]
+              ],
+              "dtype": [
+                "int64",
+                "int64"
+              ],
+              "sha256": [
+                "490cc492e1aa66b4798f3afadf18ed7dbbd2f82d2ca3a83cff61db5ac024705c",
+                "490cc492e1aa66b4798f3afadf18ed7dbbd2f82d2ca3a83cff61db5ac024705c"
+              ],
+              "same_shape": true,
+              "different_values": 0,
+              "maximum_absolute_error": 0,
+              "integer_values_equal": true
+            },
+            "corners": {
+              "shape": [
+                [
+                  716166
+                ],
+                [
+                  716166
+                ]
+              ],
+              "dtype": [
+                "int64",
+                "int64"
+              ],
+              "sha256": [
+                "dbb11c8bb59c63fc4e0152ee9cbdd8b6e3a3e69ffee7d1cfafd9acb2bff3a6e3",
+                "dbb11c8bb59c63fc4e0152ee9cbdd8b6e3a3e69ffee7d1cfafd9acb2bff3a6e3"
+              ],
+              "same_shape": true,
+              "different_values": 0,
+              "maximum_absolute_error": 0,
+              "integer_values_equal": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "surface": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub02_1b8c36d/surf/rh.sphere",
+      "input_file_sha256": "4bc36d40a25bfd805f159dfb3c03512352db1395518be3aa8aea350c318410b0",
+      "vertices": 118303,
+      "faces": 236602,
+      "read_seconds": 0.001998527906835079,
+      "coordinate_array_sha256": "0ea38ce6bffd7a20091b3c9ddb20a7e79f86a7468668bb73030417436d731e1c",
+      "face_array_sha256": "308e0c3d2b00058c824d93ece1310ed510c16ba51d48e476c3711203d1f09480",
+      "paired_runs": [
+        {
+          "order": [
+            "baseline",
+            "candidate"
+          ],
+          "baseline": {
+            "incidence_seconds": 7.46491308324039,
+            "normals_seconds_including_csr": 0.2479778090491891,
+            "normals_signatures_before": [
+              "(Array(float32, 2, 'C', False, aligned=True), Array(int32, 2, 'C', False, aligned=True), Array(int32, 1, 'C', False, aligned=True), Array(int32, 1, 'C', False, aligned=True), Array(int32, 1, 'C', False, aligned=True))"
+            ],
+            "normals_signatures_after": [
+              "(Array(float32, 2, 'C', False, aligned=True), Array(int32, 2, 'C', False, aligned=True), Array(int32, 1, 'C', False, aligned=True), Array(int32, 1, 'C', False, aligned=True), Array(int32, 1, 'C', False, aligned=True))"
+            ]
+          },
+          "candidate": {
+            "incidence_seconds": 0.0963809322565794,
+            "normals_seconds_including_csr": 0.2447927286848426,
+            "normals_signatures_before": [
+              "(Array(float32, 2, 'C', False, aligned=True), Array(int64, 2, 'C', False, aligned=True), Array(int64, 1, 'C', False, aligned=True), Array(int64, 1, 'C', False, aligned=True), Array(int64, 1, 'C', False, aligned=True))"
+            ],
+            "normals_signatures_after": [
+              "(Array(float32, 2, 'C', False, aligned=True), Array(int64, 2, 'C', False, aligned=True), Array(int64, 1, 'C', False, aligned=True), Array(int64, 1, 'C', False, aligned=True), Array(int64, 1, 'C', False, aligned=True))"
+            ]
+          },
+          "incidence_comparison": {
+            "face_indices": {
+              "shape": [
+                [
+                  118303,
+                  10
+                ],
+                [
+                  118303,
+                  10
+                ]
+              ],
+              "dtype": [
+                "int64",
+                "int64"
+              ],
+              "sha256": [
+                "b11063f3649e995a786b00afaa81f71f54c0554f869df3df54a6bc61cc4a8796",
+                "b11063f3649e995a786b00afaa81f71f54c0554f869df3df54a6bc61cc4a8796"
+              ],
+              "same_shape": true,
+              "different_values": 0,
+              "maximum_absolute_error": 0,
+              "integer_values_equal": true
+            },
+            "corner_indices": {
+              "shape": [
+                [
+                  118303,
+                  10
+                ],
+                [
+                  118303,
+                  10
+                ]
+              ],
+              "dtype": [
+                "int64",
+                "int64"
+              ],
+              "sha256": [
+                "bb82be5b25d50707b87fd3a33178f5b6008ce9b6bc8ee01dd7ea9a7b2f391812",
+                "bb82be5b25d50707b87fd3a33178f5b6008ce9b6bc8ee01dd7ea9a7b2f391812"
+              ],
+              "same_shape": true,
+              "different_values": 0,
+              "maximum_absolute_error": 0,
+              "integer_values_equal": true
+            },
+            "degrees": {
+              "shape": [
+                [
+                  118303
+                ],
+                [
+                  118303
+                ]
+              ],
+              "dtype": [
+                "int64",
+                "int64"
+              ],
+              "sha256": [
+                "98eea1faa693cc4b2162247eaa20d5612bf9ad70b440677eb8e3c16a1d72b9e5",
+                "98eea1faa693cc4b2162247eaa20d5612bf9ad70b440677eb8e3c16a1d72b9e5"
+              ],
+              "same_shape": true,
+              "different_values": 0,
+              "maximum_absolute_error": 0,
+              "integer_values_equal": true
+            }
+          },
+          "normals_comparison": {
+            "shape": [
+              [
+                118303,
+                3
+              ],
+              [
+                118303,
+                3
+              ]
+            ],
+            "dtype": [
+              "float32",
+              "float32"
+            ],
+            "sha256": [
+              "6ff5d7b44f26dd9791e8df1f405c414425c900fcfcc8678aa97eba7f1d4a3729",
+              "6ff5d7b44f26dd9791e8df1f405c414425c900fcfcc8678aa97eba7f1d4a3729"
+            ],
+            "different_float_elements": 0,
+            "different_vertices": 0,
+            "all_finite": true,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "bit_exact": true
+          },
+          "candidate_csr_seconds": 0.07604792295023799,
+          "csr_comparison": {
+            "offsets": {
+              "shape": [
+                [
+                  118304
+                ],
+                [
+                  118304
+                ]
+              ],
+              "dtype": [
+                "int64",
+                "int64"
+              ],
+              "sha256": [
+                "41ece4328f282ea2efb2d52cd5996ad6443e890885394288739788258f3e04ab",
+                "41ece4328f282ea2efb2d52cd5996ad6443e890885394288739788258f3e04ab"
+              ],
+              "same_shape": true,
+              "different_values": 0,
+              "maximum_absolute_error": 0,
+              "integer_values_equal": true
+            },
+            "face_ids": {
+              "shape": [
+                [
+                  709806
+                ],
+                [
+                  709806
+                ]
+              ],
+              "dtype": [
+                "int64",
+                "int64"
+              ],
+              "sha256": [
+                "8bab66e96d8cfa09b4e5b3077d72b0dcca2c697c7a57cdef07df6a938edd2b58",
+                "8bab66e96d8cfa09b4e5b3077d72b0dcca2c697c7a57cdef07df6a938edd2b58"
+              ],
+              "same_shape": true,
+              "different_values": 0,
+              "maximum_absolute_error": 0,
+              "integer_values_equal": true
+            },
+            "corners": {
+              "shape": [
+                [
+                  709806
+                ],
+                [
+                  709806
+                ]
+              ],
+              "dtype": [
+                "int64",
+                "int64"
+              ],
+              "sha256": [
+                "50433e77fb37b58d0c2843c9900faa068b8055e4dfcdedf8a0815412aa90aab1",
+                "50433e77fb37b58d0c2843c9900faa068b8055e4dfcdedf8a0815412aa90aab1"
+              ],
+              "same_shape": true,
+              "different_values": 0,
+              "maximum_absolute_error": 0,
+              "integer_values_equal": true
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "status": "complete",
+  "whole_pipeline_speedup": null,
+  "indices_and_normals_unchanged": true,
+  "benchmark_wall_seconds_including_io": 33.47635366069153
+}

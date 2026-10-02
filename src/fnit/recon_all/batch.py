@@ -14,12 +14,18 @@ def run_recon_all_python_batch(
     jobs: list[dict], weights_dir: str | Path, assets_dir: str | Path,
     *, devices: tuple[str, ...] = ("cuda:0",), threads: int = 4,
     native_bin_dir: str | Path | None = None,
+    profile_stages: bool = False, cuda_allocator_cache: str = "auto",
 ) -> list[dict]:
-    """Run one subject per device; each reconstruction uses a separate Python process.
+    """每设备独立子进程执行单 T1，按 jobs 顺序返回完整报告列表。
 
-    Each job maps ``t1`` to an image path and ``subject_dir`` to an empty
-    output folder. Return one single-subject run-report dict per input job,
-    preserving job order; failures raise RuntimeError.
+    jobs 每项含 t1 原始影像和 subject_dir 空目录；weights_dir/assets_dir
+    为已校验资源，devices 为互不重复的逻辑 CPU/CUDA 设备，threads 为
+    每个被试线程预算（默认4），native_bin_dir 默认当前 Conda bin。
+    profile_stages=False 不增加阶段同步；cuda_allocator_cache=auto
+    延续低显存默认，也可在子进程初始化前选择 enabled/disabled。
+    输出体积为 conform 网格，表面为 surface RAS/mm；输出/错误语义同
+    单例入口。输入非法抛 ValueError/FileNotFoundError，任务失败汇总为
+    RuntimeError。每设备仅执行一个被试，不在本函数内并行双侧表面。
     """
     if not devices or len(set(devices)) != len(devices) or any(
         device != "cpu" and re.fullmatch(r"cuda:\d+", device) is None for device in devices
@@ -27,6 +33,8 @@ def run_recon_all_python_batch(
         raise ValueError("devices must be distinct CPU/CUDA device names")
     if threads < 1:
         raise ValueError("threads must be positive")
+    if cuda_allocator_cache not in {"auto", "enabled", "disabled"}:
+        raise ValueError("cuda_allocator_cache must be auto, enabled, or disabled")
     weights, assets = Path(weights_dir).resolve(), Path(assets_dir).resolve()
     if not weights.is_dir() or not assets.is_dir():
         raise FileNotFoundError("weights_dir and assets_dir must exist")
@@ -50,7 +58,9 @@ def run_recon_all_python_batch(
             command = [sys.executable, "-m", "fnit.recon_all.native_free",
                        str(t1), str(subject), "--weights-dir", str(weights),
                        "--assets-dir", str(assets), "--device", device,
-                       "--threads", str(threads)]
+                       "--threads", str(threads), "--cuda-allocator-cache", cuda_allocator_cache]
+            if profile_stages:
+                command.append("--profile-stages")
             if native_bin_dir is not None:
                 command += ["--native-bin-dir", str(Path(native_bin_dir).resolve())]
             completed = subprocess.run(command, capture_output=True, text=True)

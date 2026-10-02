@@ -186,12 +186,25 @@ def _cleanup(posterior: torch.Tensor) -> tuple[torch.Tensor, tuple[slice, ...]]:
 
 
 @torch.inference_mode()
-def mri_sclimbic_seg(input_path: str | Path, output_path: str | Path, *,
-                     model_path: str | Path, ctab_path: str | Path, fov: int = 160,
-                     device: str = "cpu", stats_path: str | Path | None = None,
-                     etiv: float | None = None) -> Path:
-    """Run a sclimbic model on an isotropic 1 mm MRI and save native MGZ labels."""
-    source = nib.load(str(input_path))
+def segment_sclimbic_image(source: nib.spatialimages.SpatialImage, *,
+                           model_path: str | Path, rows,
+                           fov: int = 160, device: str = "cpu",
+                           model: torch.nn.Module | None = None,
+                           stats_path: str | Path | None = None,
+                           etiv: float | None = None,
+                           precision_report: list | None = None) -> nib.MGHImage:
+    """在内存中对1 mm图像执行既有sclimbic推理，返回同网格int32标签图。
+
+    source为nibabel影像，rows为(label_id, 中文或原标签名)序列。
+    model_path用于加载HDF5权重；model可传同权重、同device的已加载模型，
+    默认None时加载一次。fov为RAS网络立方边长（体素），默认160；
+    device为显式CPU/CUDA。stats_path可写体积统计，etiv单位mm³。
+    precision_report可传列表记录实际前向dtype、TF32和autocast。
+    cuDNN TF32继承调用者当前设置；本函数不强制开启或关闭，不改全局默认。
+    返回MGHImage，原网格/affine、标签int32；不写影像临时文件。
+    非1 mm输入、标签/模型通道不符或推理失败抛异常。
+    算法对应mri_sclimbic_seg内部推理，没有独立原软件CLI。
+    """
     voxel_size = np.linalg.norm(source.affine[:3, :3], axis=0)
     if not np.allclose(voxel_size, 1, atol=1e-2):
         raise ValueError("This prototype currently requires a 1 mm recon-all input")
@@ -207,11 +220,15 @@ def mri_sclimbic_seg(input_path: str | Path, output_path: str | Path, *,
     ras = _orient(image, to_ras)
     conformed, offset = _fit_shape(ras, fov)
 
-    model = LimbicUNet.from_h5(model_path).to(device).eval()
-    with torch.backends.cudnn.flags(enabled=True, allow_tf32=True):
+    if model is None:
+        model = LimbicUNet.from_h5(model_path).to(device).eval()
+    with torch.backends.cudnn.flags(enabled=True,
+                                    allow_tf32=torch.backends.cudnn.allow_tf32):
+        if precision_report is not None:
+            from .profiling import record_network_forward
+            record_network_forward(model, conformed, precision_report, model=str(model_path))
         posterior = model(conformed[None, None])[0]
     posterior, box = _cleanup(posterior)
-    rows = _ctab_rows(ctab_path)
     labels = torch.tensor([label for label, _ in rows], dtype=torch.int32, device=device)
     if len(labels) != posterior.shape[0]:
         raise ValueError("Color table and model channel count differ")
@@ -235,9 +252,25 @@ def mri_sclimbic_seg(input_path: str | Path, output_path: str | Path, *,
     header = source.header.copy() if isinstance(source, nib.MGHImage) else None
     if header is not None:
         header.set_data_dtype(np.int32)
-    nib.save(nib.MGHImage(np.ascontiguousarray(native),
-                          source.affine if header is None else None,
-                          header=header), str(output_path))
+    return nib.MGHImage(np.ascontiguousarray(native),
+                        source.affine if header is None else None, header=header)
+
+
+@torch.inference_mode()
+def mri_sclimbic_seg(input_path: str | Path, output_path: str | Path, *,
+                     model_path: str | Path, ctab_path: str | Path, fov: int = 160,
+                     device: str = "cpu", stats_path: str | Path | None = None,
+                     etiv: float | None = None, precision_report: list | None = None) -> Path:
+    """读取1 mm影像与ctab，调用同网格内存推理并写出MGZ标签。
+
+    路径、fov、device、stats_path和etiv沿用原接口；precision_report为可选
+    实际前向记录列表。输出Path指向原网格int32标签，失败抛异常。
+    """
+    result = segment_sclimbic_image(
+        nib.load(str(input_path)), model_path=model_path, rows=_ctab_rows(ctab_path),
+        fov=fov, device=device, stats_path=stats_path, etiv=etiv,
+        precision_report=precision_report)
+    nib.save(result, str(output_path))
     return Path(output_path)
 
 ENTOWM_MODEL = "entowm.fsm31.t1.nstd00-30.nstd21-108.h5"
@@ -248,7 +281,8 @@ def mri_entowm_seg(input_path: str | Path, output_path: str | Path,
                    asset_dir: str | Path, *, device: str = "cpu",
                    stats_path: str | Path | None = None,
                    talairach_lta: str | Path | None = None,
-                   talairach_xfm: str | Path | None = None) -> Path:
+                   talairach_xfm: str | Path | None = None,
+                   precision_report: list | None = None) -> Path:
     """Segment entorhinal/ambiens white matter from a 1 mm recon-all T1."""
     assets = Path(asset_dir)
     etiv = (_etiv_from_lta(talairach_lta) if talairach_lta else
@@ -257,7 +291,7 @@ def mri_entowm_seg(input_path: str | Path, output_path: str | Path,
                             model_path=assets / ENTOWM_MODEL,
                             ctab_path=assets / ENTOWM_CTAB,
                             fov=160, device=device, stats_path=stats_path,
-                            etiv=etiv)
+                            etiv=etiv, precision_report=precision_report)
 
 
 def main(argv: list[str] | None = None) -> int:

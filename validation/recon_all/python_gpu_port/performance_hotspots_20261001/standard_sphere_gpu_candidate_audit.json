@@ -1,0 +1,823 @@
+{
+  "schema_version": 1,
+  "status": "current_source_and_cpu_profile_audit; optimization_candidates_not_implemented_or_benchmarked",
+  "created_utc": "2026-10-01T11:06:39.723352+00:00",
+  "audited_git_commit": "c24852054f3321c1142b1ae88fa3d2bf68329bb3",
+  "source_sha256": {
+    "src/fnit/recon_all/sphere_standard_python.py": {
+      "sha256": "017172cae935775f3e55ec7cdee72c54d6db904021c78896a77d99690a23cc97",
+      "matches_head": true
+    },
+    "src/fnit/recon_all/sphere_standard_run.py": {
+      "sha256": "7544ccb77153a7ac242b88d1c9752bdd08ce5765ba483cd644a4075e94e90405",
+      "matches_head": true
+    },
+    "src/fnit/recon_all/sphere_standard_average.py": {
+      "sha256": "f79dc72a574d3bef756f06b97ab2546d35662c1d6acbd769e034fa542d84bd78",
+      "matches_head": true
+    },
+    "src/fnit/recon_all/sphere_standard_finish.py": {
+      "sha256": "9ba0ce2e7dd6ab0a731a45266f3e7fd8e67b48a39ed7117c65d68cc2a74f9825",
+      "matches_head": true
+    },
+    "src/fnit/recon_all/sphere_standard_line_search.py": {
+      "sha256": "8777cb96ca93ad0584d34e3f2d2f13827b1302dbaf600fc9454fdd39cd323296",
+      "matches_head": true
+    },
+    "src/fnit/recon_all/sphere_standard_metric.py": {
+      "sha256": "dde4f42db3f8f526c2ccb1c1379db4edc5369b0f41cbb72ed8b84dc14030ca92",
+      "matches_head": true
+    },
+    "src/fnit/recon_all/sphere_standard_nonlinear.py": {
+      "sha256": "1b24d46d211f165dc137011eca2f4894eb9c66670d336451986e64dbcf65d0b8",
+      "matches_head": true
+    },
+    "src/fnit/recon_all/sphere_standard_unfold.py": {
+      "sha256": "7bcc38e10fd08475d7894fba38ca8e71a67c8590103ca77daf82e9ec53462c4f",
+      "matches_head": true
+    },
+    "src/fnit/recon_all/mris_register_average_gpu.py": {
+      "sha256": "d0e2afb1e37fdfaff7ac80913ada47fed1805ae52ff296fa34050ac0cd7d7b42",
+      "matches_head": true
+    },
+    "src/fnit/recon_all/mris_register_average_numba.py": {
+      "sha256": "7ec07156f787cc674fb4280eac8cb90b48ae49e1467a5820a9736a3abf5e7adb",
+      "matches_head": true
+    },
+    "src/fnit/recon_all/place_surface_normals.py": {
+      "sha256": "ea2c54881ae98e9503e7603983ccb19229b8db5688d5c37367b294ae46d73385",
+      "matches_head": true
+    }
+  },
+  "production_snapshot_binding": {
+    "path": "validation/recon_all/python_gpu_port/performance_hotspots_20261001/tested_commit_binding.json",
+    "sha256": "0f05db8e45d3b3fb056433bcf640c9163c81278f4a560ad831cdd6d1ef422ca9",
+    "tested_production_commit": "c24852054f3321c1142b1ae88fa3d2bf68329bb3",
+    "archive_sha256": "098ccb63a3931a4f749710fb76dd9beb4751f7b8b14c0f130fa922f9698b708e",
+    "source_files_match_commit": true
+  },
+  "actions": {
+    "production_source_modified": false,
+    "existing_scripts_modified": false,
+    "new_gpu_execution": false,
+    "new_standard_sphere_profile": false,
+    "only_new_file": "validation/recon_all/python_gpu_port/performance_hotspots_20261001/standard_sphere_gpu_candidate_audit.json",
+    "current_standard_cpu_profile_artifacts_verified": true,
+    "profile_execution_owner": "root；本子代理只校核收回的 report/profile 与源码"
+  },
+  "runtime_path": {
+    "classification": "固定 FreeSurfer 算法的 FNIT Python/NumPy/Numba 移植；有独立 PyTorch 清理路径，不是整体 GPU 球面优化",
+    "caller": {
+      "path": "src/fnit/recon_all/native_free.py",
+      "lines": [
+        158,
+        167
+      ],
+      "sha256": "8210cbafd48b9fcb62bc651e306eef391846aad24b81a9ea93ed201a8b44261c"
+    },
+    "runner": {
+      "path": "src/fnit/recon_all/sphere_standard_run.py",
+      "lines": [
+        28,
+        119
+      ],
+      "sha256": "7544ccb77153a7ac242b88d1c9752bdd08ce5765ba483cd644a4075e94e90405"
+    },
+    "cleanup": {
+      "path": "src/fnit/recon_all/sphere_standard_finish.py",
+      "lines": [
+        12,
+        22
+      ],
+      "sha256": "9ba0ce2e7dd6ab0a731a45266f3e7fd8e67b48a39ed7117c65d68cc2a74f9825"
+    },
+    "current_default": "主优化循环 CPU；生产 caller 显式 finish_device=cpu。run_standard_sphere 的 finish_device 只控制最终清理",
+    "sphere_standard_python_scope": "该文件只负责投影、写出与单顶点采样辅助；完整标准球面实现分布于 run/unfold/nonlinear/metric/line_search/schedule/finish，不能根据该文件顶部说明认定整阶段未实现"
+  },
+  "average_semantics": {
+    "cpu_reference": {
+      "path": "src/fnit/recon_all/sphere_standard_average.py",
+      "lines": [
+        9,
+        29
+      ],
+      "sha256": "f79dc72a574d3bef756f06b97ab2546d35662c1d6acbd769e034fa542d84bd78"
+    },
+    "gpu_kernel": {
+      "path": "src/fnit/recon_all/mris_register_average_gpu.py",
+      "lines": [
+        8,
+        43
+      ],
+      "sha256": "d0e2afb1e37fdfaff7ac80913ada47fed1805ae52ff296fa34050ac0cd7d7b42"
+    },
+    "reusable_adapter": {
+      "path": "src/fnit/recon_all/mris_register_average_numba.py",
+      "lines": [
+        70,
+        122
+      ],
+      "sha256": "7ec07156f787cc674fb4280eac8cb90b48ae49e1467a5820a9736a3abf5e7adb"
+    },
+    "reuse_judgment": "Jacobi 语义兼容，候选可复用现有内核；标准球面同输入数值与完整阶段性能仍未验证，暂不修改默认",
+    "requirements": [
+      {
+        "item": "邻域",
+        "standard": "local_offsets/local_neighbors 的 one-ring CSR",
+        "gpu": "有序 padded int64 neighbors + int64 degrees",
+        "action": "只将此 CSR 按行顺序转换一次，不用 full sampled metric CSR，不从有序关联面重新推导不同的邻居次序"
+      },
+      {
+        "item": "顺序和重复",
+        "standard": "self 首项，随后 CSR 每个邻点逐项相加；不对传入行去重",
+        "gpu": "self 首项，active column 从 0 到 degree-1 逐项相加",
+        "action": "保留行内顺序、所有输入重复项以及孤立点，不截断最大 degree"
+      },
+      {
+        "item": "轮间更新",
+        "standard": "旧 current 只读、新 next_value 写；prange 轮末屏障后交换",
+        "gpu": "旧 current 只读、新 following 写；同 CUDA stream 的各轮 kernel 顺序后交换",
+        "action": "不能改成原地平均或异步并行多轮"
+      },
+      {
+        "item": "浮点",
+        "standard": "float32 输入，dx/dy/dz 每加一次及最终乘法显式 float32",
+        "gpu": "float32 标量加和乘，enable_fp_fusion=False，无原子归约",
+        "action": "同输入逐位检查，不启用 fastmath/半精度；该内核不做 matmul，不要求全局关闭 TF32"
+      },
+      {
+        "item": "倒数",
+        "standard": "np.float32(1.0) / np.float32(degree+1)",
+        "gpu_adapter": "CPU Torch 1.0 / (degrees.cpu()+1).float()，然后一次搬运",
+        "action": "逐位比较四个真实 local degree 分布的倒数。若相同直接复用 class；若不同，使用 CPU 按 standard 原式生成的 float32 reciprocal 传入现有低层 average_on_cuda，不能静默改配准倒数"
+      },
+      {
+        "item": "0轮与别名",
+        "standard": "返回 gradient.copy()，不修改输入；负轮当前 range 无迭代",
+        "gpu_adapter": "0轮 gradient.clone()；负 iterations 抛 ValueError；低层 0轮返回 current 自身",
+        "action": "候选标准 wrapper 应保留 0轮新数组及生产非负 schedule，不将低层函数直接用于 0轮；不要顺便变更公共负值行为"
+      },
+      {
+        "item": "shape和device",
+        "standard": "生产 float32 (N,3) NumPy；索引 CSR int64 offsets/int32 neighbors",
+        "gpu_adapter": "float32 (N,3) Torch；int64 邻接/degree；显式 CUDA 目标；返回原 gradient.device",
+        "action": "转换为 torch.from_numpy，仅一次上传静态拓扑。每次 gradient CPU→GPU→CPU 属于完整成本；不得在 caller 强制全局精度或隐式选择不同 GPU"
+      }
+    ],
+    "distinct_inplace_operator": {
+      "source": {
+        "path": "src/fnit/recon_all/sphere_standard_metric.py",
+        "lines": [
+          202,
+          215
+        ],
+        "sha256": "dde4f42db3f8f526c2ccb1c1379db4edc5369b0f41cbb72ed8b84dc14030ca92"
+      },
+      "reason": "_reciprocal_average 按 vertex/p/q 查第一个互反项并原地更新两侧 distance；不是 Jacobi，重复样本和写入传播是原规则；不能用 GPU 梯度平均替换"
+    }
+  },
+  "source_hotspot_candidates": [
+    {
+      "priority": 1,
+      "name": "line search 重复距离 SSE",
+      "sources": [
+        {
+          "path": "src/fnit/recon_all/sphere_standard_line_search.py",
+          "lines": [
+            17,
+            29
+          ],
+          "sha256": "8777cb96ca93ad0584d34e3f2d2f13827b1302dbaf600fc9454fdd39cd323296"
+        },
+        {
+          "path": "src/fnit/recon_all/sphere_standard_line_search.py",
+          "lines": [
+            131,
+            166
+          ],
+          "sha256": "8777cb96ca93ad0584d34e3f2d2f13827b1302dbaf600fc9454fdd39cd323296"
+        }
+      ],
+      "mechanism": "每个候选 dt 重走 sampled edges/spherical distance，连续 f64 vertex reduction；原代码 serial Numba",
+      "current_function_seconds": {
+        "distance_sse_self": 64.409817453,
+        "distance_sse_calls": 2103,
+        "line_search_cumulative": 74.723930294,
+        "line_search_calls": 212,
+        "profile": "validation/recon_all/python_gpu_port/performance_hotspots_20261001/standard_sphere_profile.json"
+      },
+      "minimal_patch": "固定 radius/unit 与 scale；prange(vertex)独立计算 float64 row_sse，保留每行p顺序及原_spherical_distance。之后独立串行@njit(fastmath=False,parallel=False)按vertex顺序累加；不采用np.sum/自动parallel reduction/GPU树归约。",
+      "risk": "逐行求和及串行总和需与冻结完整旧SSE逐位对照；完整候选dt、接受/拒绝、后续trajectory仍必须整阶段回归。当前profile支持优先定位，未测实际优化速度。"
+    },
+    {
+      "priority": 2,
+      "name": "反复构建静态关联面索引并计算动态法向",
+      "sources": [
+        {
+          "path": "src/fnit/recon_all/place_surface_normals.py",
+          "lines": [
+            51,
+            100
+          ],
+          "sha256": "ea2c54881ae98e9503e7603983ccb19229b8db5688d5c37367b294ae46d73385"
+        },
+        {
+          "path": "src/fnit/recon_all/sphere_standard_unfold.py",
+          "lines": [
+            193,
+            195
+          ],
+          "sha256": "7bcc38e10fd08475d7894fba38ca8e71a67c8590103ca77daf82e9ec53462c4f"
+        },
+        {
+          "path": "src/fnit/recon_all/sphere_standard_nonlinear.py",
+          "lines": [
+            111,
+            115
+          ],
+          "sha256": "1b24d46d211f165dc137011eca2f4894eb9c66670d336451986e64dbcf65d0b8"
+        }
+      ],
+      "mechanism": "每 update initial_vertex_normals 重建与 coordinates 无关的 bincount/stable argsort CSR；_normals 的 coordinates 每轮变化",
+      "current_function_seconds": {
+        "initial_vertex_normals_cumulative": 22.247567454000002,
+        "ordered_face_csr_cumulative": 9.606099192,
+        "normals_cumulative": 9.884233337000001,
+        "calls": 212,
+        "profile": "validation/recon_all/python_gpu_port/performance_hotspots_20261001/standard_sphere_profile.json"
+      },
+      "minimal_patch": "阶段对象缓存当前 N 和完整有序 faces 对应的 offsets/face_ids/corners，复用现有 ordered_face_csr。每轮仍调用原 _normals；不缓存动态 normals，不跨 white.preaparc/final white/pial/sphere 共用坐标结果",
+      "risk": "当前profile有212次静态CSR重建，9.606099192s累计。initial_vertex_normals整段22.247567454s还含动态_normals9.884233337s与转换等，不能全部算作缓存可省耗时；不可凭此预测实际阶段提速。"
+    },
+    {
+      "priority": 3,
+      "name": "多轮 local 梯度平均",
+      "sources": [
+        {
+          "path": "src/fnit/recon_all/sphere_standard_run.py",
+          "lines": [
+            61,
+            74
+          ],
+          "sha256": "7544ccb77153a7ac242b88d1c9752bdd08ce5765ba483cd644a4075e94e90405"
+        },
+        {
+          "path": "src/fnit/recon_all/sphere_standard_average.py",
+          "lines": [
+            9,
+            29
+          ],
+          "sha256": "f79dc72a574d3bef756f06b97ab2546d35662c1d6acbd769e034fa542d84bd78"
+        }
+      ],
+      "mechanism": "四侧冻结 1b 各执行 15119–23957 个全图 Jacobi 轮，每轮 prange；CUDA 可复用已有 ordered kernel",
+      "current_function_seconds": {
+        "self": 16.288172803000002,
+        "cumulative": 16.288608513,
+        "calls": 212,
+        "profile": "validation/recon_all/python_gpu_port/performance_hotspots_20261001/standard_sphere_profile.json"
+      },
+      "risk": "本次 headcw CPU profile 自耗时约占墙钟10.38%，不是标准 sphere 主瓶颈；CPU 已 parallel=True。配准首轮16384轮速度不能外推此阶段。kernel launch、构造、每 update H2D/D2H仍需独立实测。"
+    },
+    {
+      "priority": 4,
+      "name": "不变 smoothwm 原面积与仅诊断的额外 area-force",
+      "sources": [
+        {
+          "path": "src/fnit/recon_all/sphere_standard_run.py",
+          "lines": [
+            56,
+            58
+          ],
+          "sha256": "7544ccb77153a7ac242b88d1c9752bdd08ce5765ba483cd644a4075e94e90405"
+        },
+        {
+          "path": "src/fnit/recon_all/sphere_standard_unfold.py",
+          "lines": [
+            184,
+            201
+          ],
+          "sha256": "7bcc38e10fd08475d7894fba38ca8e71a67c8590103ca77daf82e9ec53462c4f"
+        },
+        {
+          "path": "src/fnit/recon_all/sphere_standard_nonlinear.py",
+          "lines": [
+            104,
+            107
+          ],
+          "sha256": "1b24d46d211f165dc137011eca2f4894eb9c66670d336451986e64dbcf65d0b8"
+        }
+      ],
+      "mechanism": "runner 已计算 original_area/original_total，但各 update 重算；first_epoch_gradient 为第二返回值 negative_area 执行一次零初值 _area_force，runner 只使用第三返回值 total",
+      "current_function_seconds": null,
+      "minimal_patch": "可选静态 original metric 参数保留旧默认；可选 component diagnostic 保留旧公共返回行为。生产仅省掉独立诊断力计算，不变 total 的按原面序 distance+area 累加",
+      "risk": "不能将 negative_area 向量直接加到 distance 以代替 original total force，浮点顺序会变化；先冻结 first/nonlinear gradient 原输出比较"
+    },
+    {
+      "priority": 5,
+      "name": "Python length 求和和重复 float64 临时副本",
+      "sources": [
+        {
+          "path": "src/fnit/recon_all/sphere_standard_line_search.py",
+          "lines": [
+            117,
+            142
+          ],
+          "sha256": "8777cb96ca93ad0584d34e3f2d2f13827b1302dbaf600fc9454fdd39cd323296"
+        },
+        {
+          "path": "src/fnit/recon_all/sphere_standard_run.py",
+          "lines": [
+            83,
+            84
+          ],
+          "sha256": "7544ccb77153a7ac242b88d1c9752bdd08ce5765ba483cd644a4075e94e90405"
+        }
+      ],
+      "mechanism": "lengths 逐顶点 Python float 累加；同 line search xyz/grad 不变却每个 dt 重新 astype",
+      "current_function_seconds": null,
+      "minimal_patch": "可复用 float64 xyz/grad 每次搜索只建一次；长度和用独立 serial Numba、fastmath=False 保留 vertex 顺序",
+      "risk": "不使用 np.sum 或 GPU tree reduction 代替 vertex 顺序。改动是否值得由当前 profile 决定"
+    }
+  ],
+  "existing_evidence": {
+    "frozen_whole_standard_sphere": [
+      {
+        "subject": "sub01",
+        "hemi": "lh",
+        "report_path": "validation/recon_all/python_gpu_port/performance_20261001/whole/sub01/candidate_run.json",
+        "report_sha256": "9b880e1529278705c28168852c3f232b3708a4997606335697f8bdc45b08ccca",
+        "code_commit": "1b8c36d25a68e253a1e59b6d02114890afa467de",
+        "version_scope": "此前冻结 1b 整例的标准球面阶段，不是本次 c248520 新运行",
+        "input_paths": {
+          "inflated": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/surf/lh.inflated",
+          "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/surf/lh.smoothwm"
+        },
+        "saved_sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/surf/lh.sphere",
+        "finish_device": "cpu",
+        "total_seconds_including_io": 238.42560185398906,
+        "metric_seconds_including_jit": 25.814932490233332,
+        "updates": 212,
+        "sum_update_seconds": 210.0559491557069,
+        "total_average_rounds": 23957,
+        "finish_seconds": 1.7661496088840067
+      },
+      {
+        "subject": "sub01",
+        "hemi": "rh",
+        "report_path": "validation/recon_all/python_gpu_port/performance_20261001/whole/sub01/candidate_run.json",
+        "report_sha256": "9b880e1529278705c28168852c3f232b3708a4997606335697f8bdc45b08ccca",
+        "code_commit": "1b8c36d25a68e253a1e59b6d02114890afa467de",
+        "version_scope": "此前冻结 1b 整例的标准球面阶段，不是本次 c248520 新运行",
+        "input_paths": {
+          "inflated": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/surf/rh.inflated",
+          "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/surf/rh.smoothwm"
+        },
+        "saved_sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/surf/rh.sphere",
+        "finish_device": "cpu",
+        "total_seconds_including_io": 176.04607992898673,
+        "metric_seconds_including_jit": 23.13480656966567,
+        "updates": 188,
+        "sum_update_seconds": 151.26440446358174,
+        "total_average_rounds": 18301,
+        "finish_seconds": 1.4536666609346867
+      },
+      {
+        "subject": "sub02",
+        "hemi": "lh",
+        "report_path": "validation/recon_all/python_gpu_port/performance_20261001/whole/sub02/candidate_run.json",
+        "report_sha256": "36c4bc93013aff82d8262a8411354d8186c4a1f735533c67fd99e705b84de672",
+        "code_commit": "1b8c36d25a68e253a1e59b6d02114890afa467de",
+        "version_scope": "此前冻结 1b 整例的标准球面阶段，不是本次 c248520 新运行",
+        "input_paths": {
+          "inflated": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub02_1b8c36d/surf/lh.inflated",
+          "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub02_1b8c36d/surf/lh.smoothwm"
+        },
+        "saved_sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub02_1b8c36d/surf/lh.sphere",
+        "finish_device": "cpu",
+        "total_seconds_including_io": 156.99002726376057,
+        "metric_seconds_including_jit": 26.213899232447147,
+        "updates": 144,
+        "sum_update_seconds": 130.30366500467062,
+        "total_average_rounds": 16625,
+        "finish_seconds": 0.01709466427564621
+      },
+      {
+        "subject": "sub02",
+        "hemi": "rh",
+        "report_path": "validation/recon_all/python_gpu_port/performance_20261001/whole/sub02/candidate_run.json",
+        "report_sha256": "36c4bc93013aff82d8262a8411354d8186c4a1f735533c67fd99e705b84de672",
+        "code_commit": "1b8c36d25a68e253a1e59b6d02114890afa467de",
+        "version_scope": "此前冻结 1b 整例的标准球面阶段，不是本次 c248520 新运行",
+        "input_paths": {
+          "inflated": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub02_1b8c36d/surf/rh.inflated",
+          "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub02_1b8c36d/surf/rh.smoothwm"
+        },
+        "saved_sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub02_1b8c36d/surf/rh.sphere",
+        "finish_device": "cpu",
+        "total_seconds_including_io": 141.24143869429827,
+        "metric_seconds_including_jit": 24.225069038569927,
+        "updates": 121,
+        "sum_update_seconds": 114.892901904881,
+        "total_average_rounds": 15119,
+        "finish_seconds": 1.9248582497239113
+      }
+    ],
+    "frozen_whole_fingerprint": {
+      "path": "validation/recon_all/python_gpu_port/performance_20261001/whole/candidate_source_fingerprint.json",
+      "sha256": "e8307ab3653e78be6e197c4f33dd7007e9a8e4fd05d3de7a10640d84ff7ae627",
+      "code_commit": "1b8c36d25a68e253a1e59b6d02114890afa467de"
+    },
+    "historical_standard_profile": {
+      "path": "validation/recon_all/python_gpu_port/performance_20260930/sub01/sphere_profile_e036f57/profile.txt",
+      "sha256": "1cb330ec7f8b6a80ab6fa643f4b30836f0c246a8242ff7abb1ddc7143434891f",
+      "version_scope": "2026-09-30 e036f57 的 sub01 LH；含 cProfile/Numba JIT，不是 c248520 profile",
+      "run_standard_sphere_cumulative_seconds": 288.842,
+      "distance_sse": {
+        "calls": 2202,
+        "self_seconds": 98.116,
+        "cumulative_seconds": 98.116
+      },
+      "initial_vertex_normals": {
+        "calls": 224,
+        "self_seconds": 1.649,
+        "cumulative_seconds": 65.929
+      },
+      "normals": {
+        "calls": 224,
+        "self_seconds": 32.298,
+        "cumulative_seconds": 32.3
+      },
+      "line_search": {
+        "calls": 224,
+        "self_seconds": 2.781,
+        "cumulative_seconds": 120.282
+      },
+      "numba_compile_cumulative_seconds": 54.006,
+      "interpretation": "嵌套 cumulative 不能相加；仅作为当前剖析应关注哪些函数的线索"
+    },
+    "reusable_gpu_operator_validation": {
+      "path": "validation/recon_all/python_gpu_port/performance_hotspots_20261001/gpu_average_sub01_lh.json",
+      "sha256": "a550d39f0c98a6ed6fcf7ee4af8c61f0a22e120052f67d1a801e086a7d8e9afc",
+      "scope": "frozen_real_first_sulc_gradient_operator_only",
+      "declared_version": "764607c+archiveSHA:f7691862c3161c2f4b68f6a667f8feb16ef0bec3f6706ec54974af0253b336de",
+      "warm_summary": {
+        "16384": {
+          "calls_per_implementation": 4,
+          "cpu_median_seconds": 39.49555023573339,
+          "gpu_median_seconds_including_transfer": 0.3181104704272002,
+          "ratio_of_medians_cpu_over_gpu": 124.15671254923994,
+          "all_numeric_comparisons_pass": true
+        },
+        "0": {
+          "calls_per_implementation": 4,
+          "cpu_median_seconds": 0.00042934692464768887,
+          "gpu_median_seconds_including_transfer": 0.0001543210819363594,
+          "ratio_of_medians_cpu_over_gpu": 2.782166371959131,
+          "all_numeric_comparisons_pass": true
+        },
+        "1": {
+          "calls_per_implementation": 4,
+          "cpu_median_seconds": 0.003232654184103012,
+          "gpu_median_seconds_including_transfer": 0.0020853800233453512,
+          "ratio_of_medians_cpu_over_gpu": 1.5501511225360316,
+          "all_numeric_comparisons_pass": true
+        },
+        "64": {
+          "calls_per_implementation": 4,
+          "cpu_median_seconds": 0.15529066789895296,
+          "gpu_median_seconds_including_transfer": 0.003149418393149972,
+          "ratio_of_medians_cpu_over_gpu": 49.30772876563885,
+          "all_numeric_comparisons_pass": true
+        }
+      },
+      "capture": {
+        "seconds_including_real_input_io_and_capture": 41.9579300917685,
+        "actual_first_iterations": 16384,
+        "tensors": {
+          "gradient": {
+            "shape": [
+              105598,
+              3
+            ],
+            "dtype": "float32",
+            "device": "cpu",
+            "data_sha256": "3f31743d16777ccda1d6ff95974160f38d00d0ee2b960d53a9c9dcdfa7bfc3be"
+          },
+          "neighbors": {
+            "shape": [
+              105598,
+              12
+            ],
+            "dtype": "int64",
+            "device": "cpu",
+            "data_sha256": "0709ab303c14db7bcd61c21602cbb6f67217170929a4d91136166e7361a93354"
+          },
+          "degrees": {
+            "shape": [
+              105598
+            ],
+            "dtype": "int64",
+            "device": "cpu",
+            "data_sha256": "bcb18c8b92b8ddee2f8e819dbb31768b7842beaee78ef783533f87dd42fa5360"
+          }
+        },
+        "checkpoint_path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/gpu_average_sub01_lh/captured_average_input.pt",
+        "checkpoint_sha256": "4059ccdac5bde19d4a3e3d0d3740bef05780bad15b342995a9bcd734aefa6cfe"
+      },
+      "strict_numeric_reproduction_pass": true,
+      "interpretation": "来自真实 sub01 LH 首次 sulc 配准 gradient，并非标准球面梯度输入；全局算子语义成熟，标准 degree/gradient/rounds 仍需另测"
+    },
+    "complete_registration_validation": {
+      "path": "validation/recon_all/python_gpu_port/performance_hotspots_20261001/register_final_csr_sub01_lh.json",
+      "sha256": "0aee5e878f9a77ea9a2920febf9f158a6bbce45810ad2d2a3edf6f3ea23dbd55",
+      "scope": "saved-FNIT-same-input-register-stage-regression;not-whole",
+      "candidate_version": "764607c+archiveSHA:098ccb63a3931a4f749710fb76dd9beb4751f7b8b14c0f130fa922f9698b708e",
+      "wall_seconds_including_io_jit_sync_init": 150.1714785778895,
+      "api_total_seconds_including_io": 149.23226066771895,
+      "comparison": {
+        "reference": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/surf/lh.sphere.reg",
+        "candidate": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/register_final_csr_sub01_lh/candidate/lh.sphere.reg",
+        "reference_sha256": "7a86c0ba586ea0e182b50e30d5d1e473d7056373c49d1791d4db8e4c68c3ef39",
+        "candidate_sha256": "7a86c0ba586ea0e182b50e30d5d1e473d7056373c49d1791d4db8e4c68c3ef39",
+        "reference_vertices": 105598,
+        "candidate_vertices": 105598,
+        "reference_faces": 211192,
+        "candidate_faces": 211192,
+        "same_vertex_shape": true,
+        "ordered_faces_equal": true,
+        "index_correspondence": true,
+        "coordinates_equal": true,
+        "finite_coordinates": true,
+        "footer_equal": true,
+        "different_coordinates": 0,
+        "max_coordinate_error_mm": 0.0,
+        "p99_coordinate_error_mm": 0.0,
+        "max_vertex_displacement_mm": 0.0,
+        "p99_vertex_displacement_mm": 0.0,
+        "mean_vertex_displacement_mm": 0.0,
+        "strict_reproduction": true,
+        "reported_trajectory_equal": true,
+        "sulc_seed_sha256_equal": true
+      },
+      "strict_reproduction": true,
+      "interpretation": "已含 CSR + GPU 平均的配准阶段结果，仅支持复用模块成熟度；不支持标准球面或整例加速比例"
+    },
+    "current_standard_sphere_profile": {
+      "scope": "same frozen FNIT inputs CPU profile; profile overhead included; saved final file comparator is diagnostic",
+      "code_commit": "c24852054f3321c1142b1ae88fa3d2bf68329bb3",
+      "host": "headcw",
+      "thread_budget": {
+        "torch": 4,
+        "numba": 4
+      },
+      "input_paths": {
+        "inflated": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/surf/lh.inflated",
+        "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/surf/lh.smoothwm",
+        "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/surf/lh.sphere"
+      },
+      "input_sha256": {
+        "inflated": "4b2927c0f4aab9cdec6f572778cef150c9393947ac2914a79cf225d9f73b7436",
+        "smoothwm": "90ef0bae2cfbfa7459878cb538cbc2d5b3ee105607d9e7d54243b756ffc2c95c",
+        "sphere": "c3e7ce0318b5e7ae902cc85920405a379b35220f591311e13bf8b0c8609a8e80"
+      },
+      "script_sha256": "7f641a53e1e8de490022d0c18e36db295904813651ff39266002ec67645c4922",
+      "profile_wall_seconds": 156.91283218748868,
+      "versus_saved_surface": {
+        "same_vertex_shape": true,
+        "ordered_faces_equal": true,
+        "different_coordinates": 0,
+        "max_mm": 0.0,
+        "p99_mm": 0.0
+      },
+      "report_path": "validation/recon_all/python_gpu_port/performance_hotspots_20261001/standard_sphere_profile.json",
+      "report_sha256": "a43c001080e16a3bac628049040e4b0197b18f1cbb9cce577bf91d9d1be78998",
+      "profile_text_path": "validation/recon_all/python_gpu_port/performance_hotspots_20261001/standard_sphere_profile.txt",
+      "profile_text_sha256": "0dd0d61a5c1bc45fa35c5989658808fd847dea2454fc6a98ddb9684186f3aa5d",
+      "functions": [
+        {
+          "file": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/code_final_candidate/src/fnit/recon_all/sphere_standard_run.py",
+          "line": 28,
+          "function": "run_standard_sphere",
+          "calls": 1,
+          "self_seconds": 0.156248761,
+          "cumulative_seconds": 156.911963237
+        },
+        {
+          "file": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/code_final_candidate/src/fnit/recon_all/sphere_standard_line_search.py",
+          "line": 107,
+          "function": "first_epoch_line_search",
+          "calls": 212,
+          "self_seconds": 1.6411014890000002,
+          "cumulative_seconds": 74.723930294
+        },
+        {
+          "file": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/code_final_candidate/src/fnit/recon_all/sphere_standard_line_search.py",
+          "line": 17,
+          "function": "_distance_sse",
+          "calls": 2103,
+          "self_seconds": 64.409817453,
+          "cumulative_seconds": 64.409817453
+        },
+        {
+          "file": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/code_final_candidate/src/fnit/recon_all/place_surface_normals.py",
+          "line": 84,
+          "function": "initial_vertex_normals",
+          "calls": 212,
+          "self_seconds": 0.003439122,
+          "cumulative_seconds": 22.247567454000002
+        },
+        {
+          "file": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/code_final_candidate/src/fnit/recon_all/sphere_standard_average.py",
+          "line": 9,
+          "function": "average_standard_gradient",
+          "calls": 212,
+          "self_seconds": 16.288172803000002,
+          "cumulative_seconds": 16.288608513
+        },
+        {
+          "file": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/code_final_candidate/src/fnit/recon_all/sphere_standard_metric.py",
+          "line": 219,
+          "function": "sample_standard_metric_matrix",
+          "calls": 1,
+          "self_seconds": 0.200727173,
+          "cumulative_seconds": 14.378549483
+        },
+        {
+          "file": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/code_final_candidate/src/fnit/recon_all/place_surface_normals.py",
+          "line": 20,
+          "function": "_normals",
+          "calls": 212,
+          "self_seconds": 9.883655454000001,
+          "cumulative_seconds": 9.884233337000001
+        },
+        {
+          "file": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/code_final_candidate/src/fnit/recon_all/place_surface_normals.py",
+          "line": 51,
+          "function": "ordered_face_csr",
+          "calls": 212,
+          "self_seconds": 1.032924654,
+          "cumulative_seconds": 9.606099192
+        },
+        {
+          "file": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/code_final_candidate/src/fnit/recon_all/sphere_standard_unfold.py",
+          "line": 53,
+          "function": "_distance_force",
+          "calls": 212,
+          "self_seconds": 8.939165957,
+          "cumulative_seconds": 8.939776848000001
+        },
+        {
+          "file": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/code_final_candidate/src/fnit/recon_all/sphere_standard_nonlinear.py",
+          "line": 16,
+          "function": "one_ring_metric",
+          "calls": 1,
+          "self_seconds": 0.204633123,
+          "cumulative_seconds": 3.870442358
+        }
+      ],
+      "source_sha256_matches_current": {
+        "fnit.recon_all.sphere_python": {
+          "actual_report_sha256": "21172e853cc062b5015cd5bcdf5dcb02bcd2833abe1d1f5afa3a7af3d64e60a6",
+          "current_local_sha256": "21172e853cc062b5015cd5bcdf5dcb02bcd2833abe1d1f5afa3a7af3d64e60a6",
+          "matches_current_local": true
+        },
+        "fnit.recon_all.sphere_standard_average": {
+          "actual_report_sha256": "f79dc72a574d3bef756f06b97ab2546d35662c1d6acbd769e034fa542d84bd78",
+          "current_local_sha256": "f79dc72a574d3bef756f06b97ab2546d35662c1d6acbd769e034fa542d84bd78",
+          "matches_current_local": true
+        },
+        "fnit.recon_all.sphere_standard_finish": {
+          "actual_report_sha256": "9ba0ce2e7dd6ab0a731a45266f3e7fd8e67b48a39ed7117c65d68cc2a74f9825",
+          "current_local_sha256": "9ba0ce2e7dd6ab0a731a45266f3e7fd8e67b48a39ed7117c65d68cc2a74f9825",
+          "matches_current_local": true
+        },
+        "fnit.recon_all.sphere_standard_unfold": {
+          "actual_report_sha256": "7bcc38e10fd08475d7894fba38ca8e71a67c8590103ca77daf82e9ec53462c4f",
+          "current_local_sha256": "7bcc38e10fd08475d7894fba38ca8e71a67c8590103ca77daf82e9ec53462c4f",
+          "matches_current_local": true
+        },
+        "fnit.recon_all.sphere_standard_line_search": {
+          "actual_report_sha256": "8777cb96ca93ad0584d34e3f2d2f13827b1302dbaf600fc9454fdd39cd323296",
+          "current_local_sha256": "8777cb96ca93ad0584d34e3f2d2f13827b1302dbaf600fc9454fdd39cd323296",
+          "matches_current_local": true
+        },
+        "fnit.recon_all.sphere_standard_python": {
+          "actual_report_sha256": "017172cae935775f3e55ec7cdee72c54d6db904021c78896a77d99690a23cc97",
+          "current_local_sha256": "017172cae935775f3e55ec7cdee72c54d6db904021c78896a77d99690a23cc97",
+          "matches_current_local": true
+        },
+        "fnit.recon_all.sphere_standard_metric": {
+          "actual_report_sha256": "dde4f42db3f8f526c2ccb1c1379db4edc5369b0f41cbb72ed8b84dc14030ca92",
+          "current_local_sha256": "dde4f42db3f8f526c2ccb1c1379db4edc5369b0f41cbb72ed8b84dc14030ca92",
+          "matches_current_local": true
+        },
+        "fnit.recon_all.sphere_standard_nonlinear": {
+          "actual_report_sha256": "1b24d46d211f165dc137011eca2f4894eb9c66670d336451986e64dbcf65d0b8",
+          "current_local_sha256": "1b24d46d211f165dc137011eca2f4894eb9c66670d336451986e64dbcf65d0b8",
+          "matches_current_local": true
+        },
+        "fnit.recon_all.sphere_standard_schedule": {
+          "actual_report_sha256": "ed0dec3a640506de649c812c29626a88c6eee0eebf6a6101d47a8b6d5c022494",
+          "current_local_sha256": "ed0dec3a640506de649c812c29626a88c6eee0eebf6a6101d47a8b6d5c022494",
+          "matches_current_local": true
+        },
+        "fnit.recon_all.sphere_standard_run": {
+          "actual_report_sha256": "7544ccb77153a7ac242b88d1c9752bdd08ce5765ba483cd644a4075e94e90405",
+          "current_local_sha256": "7544ccb77153a7ac242b88d1c9752bdd08ce5765ba483cd644a4075e94e90405",
+          "matches_current_local": true
+        }
+      },
+      "source_hash_limit": "wrapper 只哈希 fnit.recon_all.sphere* 模块，place_surface_normals 不在嵌入表中；完整依赖另以 immutable production snapshot manifest 绑定",
+      "interpretation": "本次 headcw 4线程、同 frozen 1b sub01 LH 输入、c248520 的 CPU cProfile 实测。坐标与有序面逐位一致；有剖析/JIT开销。不可与 gpucw1 的历史秒数直接算速度比；未测候选优化，也未新增 GPU 标准 sphere 实测",
+      "measured_average_share_of_profile_wall_percent": 10.380395647653556,
+      "sample_metric_scope": "14.378549483s 是 sample_standard_metric_matrix 的 cumulative，不能替代 runner 的完整 metric_seconds_including_jit"
+    }
+  },
+  "minimal_profile": {
+    "reuse_existing_script": "validation/recon_all/python_gpu_port/profile_standard_sphere.py",
+    "script_sha256_at_audit": "7f641a53e1e8de490022d0c18e36db295904813651ff39266002ec67645c4922",
+    "script_is_currently_untracked": true,
+    "script_cli": {
+      "subject": "必需；自产完整 subject 目录，读取 surf/hemi.inflated/smoothwm/sphere",
+      "hemi": "lh/rh，默认 lh",
+      "threads": "正整数，默认4",
+      "code_commit": "必需，作为报告声明；本脚本自身不独立核实 Git commit",
+      "output": "必需且此前不存在"
+    },
+    "command": "PYTHONPATH=\"/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/code_final_candidate/src\" CUDA_VISIBLE_DEVICES=\"\" OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 NUMBA_NUM_THREADS=4 \\\n\"/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python\" \"/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/profile_standard_sphere.py\" \\\n--subject \"/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1\" --hemi lh --threads 4 \\\n--code-commit c24852054f3321c1142b1ae88fa3d2bf68329bb3 --output \"/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/standard_sphere_sub01_lh_c248520_profile\"",
+    "deployment_requirement": "root 已将此已有wrapper以报告所录SHA在headcw执行，本子代理没有运行远端命令。production snapshot保持不变；复现输出目录必须此前不存在且唯一。",
+    "input_scope": "冻结 1b FNIT sub01 LH 自产表面；candidate c248520 按完全相同输入重新 profile，不作为 raw T1 连续整例",
+    "outputs": [
+      "sphere",
+      "stage.json",
+      "report.json",
+      "profile.txt",
+      "profile.pstats"
+    ],
+    "timing_scope": "run_standard_sphere 含 IO 与 JIT + cProfile 开销；不能用 profile 时间宣称加速。非 profile 完整阶段 AB/BA 用同线程/hardware/thread masks 补测",
+    "report_limitations": [
+      "只在顶点 shape 与 ordered faces 相同后做同索引坐标对照；保存 sphere 仅为诊断参考",
+      "wrapper 已记录输入和 sphere模块 source SHA，但未覆盖 place_surface_normals 与 GPU averaging 依赖；应另绑定本次 immutable source manifest",
+      "现有 wrapper 不对比 footer/全部 update dt/negative_counts，候选替换真实回归需另外检查这些阶段输出"
+    ],
+    "command_status": "root 已执行相同wrapper及冻结输入的 CPU profile，实际输出根目录由 root 管理；report_sha绑定见current_standard_sphere_profile。命令用于另一输出目录复现，不应重占现有目录。"
+  },
+  "minimum_risk_patch_proposal": {
+    "recommended_order": [
+      "当前 c248520 CPU profile已证实 distance SSE64.4098s、静态CSR9.6061s为优先候选；不要把GPUaverage称标准主瓶颈",
+      "下轮分别实现保序parallel row SSE/serial total与一次缓存静态face CSR，分别完成同输入回归及四侧完整阶段测试，再比较非profileAB/BA",
+      "GPU average作为独立次级候选；先验证四侧真实degree倒数位模式、0/1/64/1024等轮输入输出，然后计入H2D/D2H的完整标准阶段实测",
+      "生产 c248520本轮已冻结，以上候选未接入，也没有这些候选的整例加速或显存结论"
+    ],
+    "no_new_dependencies": "现有 Triton 3.1.0 已在 environment.yml 声明；标准候选复用已有模块，不需增加新依赖",
+    "static_cache_candidate": "独立第二个补丁只缓存固定 ordered-face CSR/original smoothwm area；与 GPU 平均分开真实回归，避免合并变更无法定位误差",
+    "precision": "保留 float32 gradient、原局部 float64 SSE，不开 FP16/BF16。默认全局 TF32 策略不变，有序加法内核没有 TF32 操作",
+    "metrics_acceptance": "保留既有严格对照诊断与算子门槛；本审计不新增或确认总体等效阈值。未完成标准球面验证，不声明整体等效",
+    "speed_claim": null,
+    "new_standard_gpu_peak_memory_bytes": null,
+    "whole_pipeline_speedup": null
+  },
+  "updated_utc": "2026-10-01T11:11:55.535050+00:00",
+  "minimum_cpu_patch_proposals": [
+    {
+      "name": "逐顶点并行 distance SSE + 有序串行总和",
+      "production_not_changed": true,
+      "source": "src/fnit/recon_all/sphere_standard_line_search.py:17",
+      "native_math_source": "src/fnit/recon_all/sphere_standard_unfold.py:18–50",
+      "definition": "半径/单位方向一次按原函数计算，所有顶点共享只读；每vertex独立按原p顺序计算delta²的float64和。每行写到自己的 float64(N,) row_sse；显式单独串行函数逐vertex累加，保留旧完整和顺序。",
+      "constraints": [
+        "parallel与serial kernel均禁fastmath；不改 _spherical_distance 的f32舍入、0.99 acos/sqrt分支或当前边界行为",
+        "不能将float64尺度改成f32，不改变sampled duplicate条目，不截断行，不合并两侧同一个pair",
+        "serial总和单独parallel=False编译，避免Numba自动识别并重排reduction",
+        "不预先声称4线程线性提速；额外N*sizeof(float64)行缓存与2103次launch/dispatch/分配须计入，必要时阶段复用缓冲区"
+      ],
+      "required_regression": [
+        "同一真实 first/nonlinear checkpoint 比较每行 SSE、完整total、完整trial SSE序列；0行/无邻点/重复样本/非均匀度数单元边界",
+        "四侧实际全标准sphere重新跑，比较坐标/有序面/footer/完整reports的dt/stage/weight/averages/negativecounts",
+        "同一主机线程4做非cProfile的AB/BA两轮，区分冷JIT/热cache，包含输入和输出IO"
+      ]
+    },
+    {
+      "name": "一次构建并缓存静态有序face CSR",
+      "production_not_changed": true,
+      "source": "src/fnit/recon_all/place_surface_normals.py:51–100",
+      "callers": [
+        "src/fnit/recon_all/sphere_standard_unfold.py:193",
+        "src/fnit/recon_all/sphere_standard_nonlinear.py:111"
+      ],
+      "definition": "runner当前ordered faces与N固定时，调用成熟ordered_face_csr一次生成offsets/face_ids/corners；通过stage内部上下文或显式可选参数传给first/nonlinear gradient，每次按原_normals用当前xyz重算法向。",
+      "constraints": [
+        "保留公共initial_vertex_normals默认验证与返回，不改变white/pial调用的缓存",
+        "缓存键包括当前有序face内容与N；不按文件名跨不同拓扑命中，不缓存xyz相关法向",
+        "面/角点重复次序、int64数组、孤立点和非法索引错误保持现有行为",
+        "直接复用现有helper，不再复制一份CSR内核"
+      ],
+      "required_regression": [
+        "已存在test_ordered_face_csr可验证整数和法向语义；新增cache使用边界/拓扑变化隔离的集中检查",
+        "四侧不同sphere checkpoints验证有/无缓存_normals逐位一致，first/nonlinear forces保持原结果",
+        "完整标准阶段AB/BA检查保序mesh/trajectory/negativecounts及含IO/JIT时间；不把9.606s视为未经实测的确定净收益"
+      ]
+    }
+  ]
+}

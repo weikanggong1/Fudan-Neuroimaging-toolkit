@@ -1,0 +1,1011 @@
+{
+  "subject": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1",
+  "code_version": "1b8c36d25a68e253a1e59b6d02114890afa467de",
+  "host": "headcw",
+  "threads": 4,
+  "device": "cpu",
+  "cuda_initialized": false,
+  "script_sha256": "9d27ed19d254d2bf726c37983fcda31e8c98720d72d5d70808a2bf884e34e33e",
+  "candidate_run_sha256": "9b880e1529278705c28168852c3f232b3708a4997606335697f8bdc45b08ccca",
+  "coordinate_space": "surface RAS",
+  "coordinate_unit": "mm",
+  "parameters": {
+    "bbox_guard_mm": 1e-05,
+    "normalized_plane_classifier_tolerance_mm": 1e-06,
+    "intersection_line_overlap_tolerance_mm": 1e-06,
+    "sphere_negative_area_threshold_mm2": 0,
+    "cross_timeout_seconds_per_hemisphere": 180.0,
+    "maximum_bbox_pairs_per_hemisphere": 20000000
+  },
+  "library_versions": {
+    "torch": "2.5.1",
+    "numpy": "1.26.4",
+    "scipy": "1.17.1",
+    "numba": "0.67.0",
+    "nibabel": "5.4.2"
+  },
+  "source_paths": {
+    "fnit.recon_all.compare_subject": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/code_1b8c36d/src/fnit/recon_all/compare_subject.py",
+    "fnit.recon_all.mris_register_nonlinear": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/code_1b8c36d/src/fnit/recon_all/mris_register_nonlinear.py",
+    "fnit.recon_all.place_surface_collision": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/code_1b8c36d/src/fnit/recon_all/place_surface_collision.py"
+  },
+  "source_sha256": {
+    "fnit.recon_all.compare_subject": "7381d28a46b5c07efbb4630cdcd26245c02aa24ea613fbac25e3b69dab2e7921",
+    "fnit.recon_all.mris_register_nonlinear": "f9edc1cd5952ea3223b2ef0c49d1a21d3ed0592523e38961bf93f4f95b78a737",
+    "fnit.recon_all.place_surface_collision": "ccf8f330ae48c0e5e371ad7e87d9bb6bc8397ab642b7016ed317edaa56e3852f"
+  },
+  "semantic_checks": {
+    "tetrahedron_links": "passed",
+    "pinched_vertex_two_cycles": "passed",
+    "transverse_triangle_and_separated_control": "passed",
+    "endpoint_touch_not_transverse": "passed",
+    "scope": "synthetic semantic checks, not real-data benchmark"
+  },
+  "hemispheres": {
+    "lh": {
+      "input_sha256": {
+        "orig": "f569efeec369b3b58b4f162d2604fdaa7723cac476dbaaa123a287b8b84ea8cb",
+        "white": "f1d0ef4b73dbfdafcc3ef7703ab16ed29fc5b2b8d696bd3f7e2b41b041cb02f1",
+        "pial": "29ffbeb30903d43ee29999d77c4e7864b36123ca1cada75e6a0c5a183b1a2d9c",
+        "sphere": "c3e7ce0318b5e7ae902cc85920405a379b35220f591311e13bf8b0c8609a8e80",
+        "sphere.reg": "7a86c0ba586ea0e182b50e30d5d1e473d7056373c49d1791d4db8e4c68c3ef39",
+        "cortex_label": "c536f5610e9cec2865c29b323a5b449205e2ee9014036f94ce8a2297cc46e5cd"
+      },
+      "ordered_faces_and_vertex_counts_preserved": true,
+      "topology": {
+        "vertices": 105598,
+        "faces": 211192,
+        "edges": 316788,
+        "euler": 2,
+        "components": 1,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "degenerate_index_faces": 0,
+        "duplicate_faces": 0,
+        "valid": true
+      },
+      "vertex_links": {
+        "checked_vertices": 105598,
+        "noncycle_links": 0,
+        "degree_not_two": 0,
+        "disconnected_cycles": 0,
+        "isolated_vertices": 0,
+        "anomaly_vertex_ids_first_100": []
+      },
+      "previous_pipeline_mesh_validation": {
+        "vertices": 105598,
+        "faces": 211192,
+        "euler": 2,
+        "unclosed_edges": 0,
+        "ordered_faces_preserved": true,
+        "finite_coordinates": true,
+        "intersecting_faces": {
+          "white": 0,
+          "pial": 0
+        },
+        "status": "passed"
+      },
+      "sphere_orientation": {
+        "sphere": {
+          "negative_faces": 0,
+          "zero_area_faces": 0,
+          "nonfinite_areas": 0,
+          "minimum_signed_area_mm2": 7.46352156966168e-07,
+          "negative_face_ids_first_100": []
+        },
+        "sphere.reg": {
+          "negative_faces": 0,
+          "zero_area_faces": 0,
+          "nonfinite_areas": 0,
+          "minimum_signed_area_mm2": 1.7142942851933185e-06,
+          "negative_face_ids_first_100": []
+        }
+      },
+      "white_pial_crossings": {
+        "status": "complete",
+        "raw_radius_pairs": 42135306,
+        "bbox_pairs": 217573,
+        "proper_transverse_pairs": 147,
+        "native_nonproper_hit_pairs": 168608,
+        "proper_pairs_with_any_cortex_vertex": 147,
+        "proper_pairs_with_both_faces_fully_in_cortex": 124,
+        "proper_pairs_with_no_cortex_vertex": 0,
+        "coincident_same_index_faces": 15009,
+        "white_faces_examined": 211192,
+        "white_faces_total": 211192,
+        "proper_pair_face_ids_first_100": [
+          [
+            1313,
+            5880
+          ],
+          [
+            2131,
+            201465
+          ],
+          [
+            2131,
+            202089
+          ],
+          [
+            4907,
+            165775
+          ],
+          [
+            4907,
+            179601
+          ],
+          [
+            5588,
+            98369
+          ],
+          [
+            5588,
+            124446
+          ],
+          [
+            5588,
+            165775
+          ],
+          [
+            5588,
+            179601
+          ],
+          [
+            7219,
+            124446
+          ],
+          [
+            7739,
+            128794
+          ],
+          [
+            7739,
+            131134
+          ],
+          [
+            9298,
+            165775
+          ],
+          [
+            9298,
+            172899
+          ],
+          [
+            9298,
+            179601
+          ],
+          [
+            9298,
+            185992
+          ],
+          [
+            13825,
+            97403
+          ],
+          [
+            13825,
+            201465
+          ],
+          [
+            13825,
+            202089
+          ],
+          [
+            20708,
+            111619
+          ],
+          [
+            21218,
+            128794
+          ],
+          [
+            21218,
+            131134
+          ],
+          [
+            29362,
+            205175
+          ],
+          [
+            43514,
+            43591
+          ],
+          [
+            43514,
+            111619
+          ],
+          [
+            43541,
+            43591
+          ],
+          [
+            43541,
+            111619
+          ],
+          [
+            43543,
+            43633
+          ],
+          [
+            43543,
+            111619
+          ],
+          [
+            43544,
+            43633
+          ],
+          [
+            43544,
+            111619
+          ],
+          [
+            47425,
+            17154
+          ],
+          [
+            47425,
+            43633
+          ],
+          [
+            47425,
+            43665
+          ],
+          [
+            47425,
+            43666
+          ],
+          [
+            47425,
+            89558
+          ],
+          [
+            47425,
+            107746
+          ],
+          [
+            47425,
+            184664
+          ],
+          [
+            47668,
+            1809
+          ],
+          [
+            47668,
+            97403
+          ],
+          [
+            54558,
+            4066
+          ],
+          [
+            54558,
+            128868
+          ],
+          [
+            54558,
+            200821
+          ],
+          [
+            81546,
+            124446
+          ],
+          [
+            82254,
+            75165
+          ],
+          [
+            82254,
+            209515
+          ],
+          [
+            83856,
+            5880
+          ],
+          [
+            83856,
+            151038
+          ],
+          [
+            88136,
+            124446
+          ],
+          [
+            93221,
+            165775
+          ],
+          [
+            93221,
+            172899
+          ],
+          [
+            93221,
+            179601
+          ],
+          [
+            93221,
+            185992
+          ],
+          [
+            96248,
+            96221
+          ],
+          [
+            100932,
+            127145
+          ],
+          [
+            104559,
+            127145
+          ],
+          [
+            104559,
+            142722
+          ],
+          [
+            104559,
+            183137
+          ],
+          [
+            110668,
+            43633
+          ],
+          [
+            111619,
+            43592
+          ],
+          [
+            111619,
+            43640
+          ],
+          [
+            111619,
+            47365
+          ],
+          [
+            111619,
+            71583
+          ],
+          [
+            111619,
+            200613
+          ],
+          [
+            112851,
+            1809
+          ],
+          [
+            112851,
+            97403
+          ],
+          [
+            112851,
+            201465
+          ],
+          [
+            115972,
+            61814
+          ],
+          [
+            115972,
+            144268
+          ],
+          [
+            115972,
+            194972
+          ],
+          [
+            126515,
+            205175
+          ],
+          [
+            131089,
+            205175
+          ],
+          [
+            131090,
+            205175
+          ],
+          [
+            133748,
+            128868
+          ],
+          [
+            138112,
+            41731
+          ],
+          [
+            138112,
+            41734
+          ],
+          [
+            138112,
+            43592
+          ],
+          [
+            138112,
+            43633
+          ],
+          [
+            138112,
+            89558
+          ],
+          [
+            138112,
+            200613
+          ],
+          [
+            138112,
+            208509
+          ],
+          [
+            142722,
+            127145
+          ],
+          [
+            144268,
+            61814
+          ],
+          [
+            151038,
+            5880
+          ],
+          [
+            151077,
+            43592
+          ],
+          [
+            151077,
+            200613
+          ],
+          [
+            157785,
+            43633
+          ],
+          [
+            159490,
+            205175
+          ],
+          [
+            162339,
+            4066
+          ],
+          [
+            165549,
+            17154
+          ],
+          [
+            165549,
+            35814
+          ],
+          [
+            165549,
+            107746
+          ],
+          [
+            165552,
+            128794
+          ],
+          [
+            165552,
+            131134
+          ],
+          [
+            170811,
+            39048
+          ],
+          [
+            170811,
+            93221
+          ],
+          [
+            170814,
+            39048
+          ],
+          [
+            170814,
+            93221
+          ],
+          [
+            170825,
+            39048
+          ],
+          [
+            170825,
+            93221
+          ]
+        ],
+        "seconds": 7.348558030091226,
+        "scope": "complete bounding sphere/bbox candidates for transverse hits; nonproper hits are native-kernel diagnostic, not exhaustive touch counting; no containment proof"
+      },
+      "seconds_including_io": 8.322699451819062
+    },
+    "rh": {
+      "input_sha256": {
+        "orig": "0e4a2d285c42865e048d2ad0f20774eda81c3f2cc4e06f693d47a01007e1137f",
+        "white": "f4f68d023b70c1812ebb0533bebd0297b3bd4c951497f3a3cf970166b774617d",
+        "pial": "c095857f96f1825b59bebc30b5a8dc719bf0b79ae3fd085853da1c505da8590a",
+        "sphere": "ba48d004347af232315722de6f601cbdc8c33faaf495511614f0d9a4fa1b7c16",
+        "sphere.reg": "c23b0461932b7e0ce14fc53167805f7c39781ec08f2765d8733516a2b6229802",
+        "cortex_label": "3ac915a259f54f113c5acf74068dd99ded039831a76dbf1260885ee02c1122da"
+      },
+      "ordered_faces_and_vertex_counts_preserved": true,
+      "topology": {
+        "vertices": 104619,
+        "faces": 209234,
+        "edges": 313851,
+        "euler": 2,
+        "components": 1,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "degenerate_index_faces": 0,
+        "duplicate_faces": 0,
+        "valid": true
+      },
+      "vertex_links": {
+        "checked_vertices": 104619,
+        "noncycle_links": 0,
+        "degree_not_two": 0,
+        "disconnected_cycles": 0,
+        "isolated_vertices": 0,
+        "anomaly_vertex_ids_first_100": []
+      },
+      "previous_pipeline_mesh_validation": {
+        "vertices": 104619,
+        "faces": 209234,
+        "euler": 2,
+        "unclosed_edges": 0,
+        "ordered_faces_preserved": true,
+        "finite_coordinates": true,
+        "intersecting_faces": {
+          "white": 0,
+          "pial": 0
+        },
+        "status": "passed"
+      },
+      "sphere_orientation": {
+        "sphere": {
+          "negative_faces": 0,
+          "zero_area_faces": 0,
+          "nonfinite_areas": 0,
+          "minimum_signed_area_mm2": 2.8033595299348235e-05,
+          "negative_face_ids_first_100": []
+        },
+        "sphere.reg": {
+          "negative_faces": 0,
+          "zero_area_faces": 0,
+          "nonfinite_areas": 0,
+          "minimum_signed_area_mm2": 0.0004269898927304894,
+          "negative_face_ids_first_100": []
+        }
+      },
+      "white_pial_crossings": {
+        "status": "complete",
+        "raw_radius_pairs": 25690218,
+        "bbox_pairs": 216881,
+        "proper_transverse_pairs": 197,
+        "native_nonproper_hit_pairs": 168688,
+        "proper_pairs_with_any_cortex_vertex": 189,
+        "proper_pairs_with_both_faces_fully_in_cortex": 171,
+        "proper_pairs_with_no_cortex_vertex": 8,
+        "coincident_same_index_faces": 15013,
+        "white_faces_examined": 209234,
+        "white_faces_total": 209234,
+        "proper_pair_face_ids_first_100": [
+          [
+            202,
+            43106
+          ],
+          [
+            202,
+            46838
+          ],
+          [
+            202,
+            134661
+          ],
+          [
+            202,
+            147563
+          ],
+          [
+            14141,
+            111827
+          ],
+          [
+            20325,
+            21933
+          ],
+          [
+            20325,
+            115605
+          ],
+          [
+            20343,
+            2132
+          ],
+          [
+            20343,
+            21933
+          ],
+          [
+            20343,
+            24888
+          ],
+          [
+            20343,
+            24903
+          ],
+          [
+            20343,
+            24905
+          ],
+          [
+            20343,
+            99028
+          ],
+          [
+            20343,
+            112433
+          ],
+          [
+            20343,
+            204549
+          ],
+          [
+            20343,
+            204948
+          ],
+          [
+            21020,
+            133652
+          ],
+          [
+            21934,
+            2132
+          ],
+          [
+            21934,
+            24905
+          ],
+          [
+            21934,
+            204948
+          ],
+          [
+            21977,
+            20343
+          ],
+          [
+            21977,
+            24911
+          ],
+          [
+            21977,
+            118163
+          ],
+          [
+            22002,
+            24911
+          ],
+          [
+            22002,
+            24912
+          ],
+          [
+            22002,
+            118163
+          ],
+          [
+            27181,
+            24905
+          ],
+          [
+            27181,
+            204948
+          ],
+          [
+            31485,
+            66668
+          ],
+          [
+            31485,
+            120534
+          ],
+          [
+            31485,
+            153922
+          ],
+          [
+            39226,
+            38299
+          ],
+          [
+            39226,
+            68460
+          ],
+          [
+            39226,
+            102920
+          ],
+          [
+            39226,
+            116098
+          ],
+          [
+            39226,
+            182309
+          ],
+          [
+            39534,
+            39837
+          ],
+          [
+            39534,
+            68169
+          ],
+          [
+            39534,
+            157193
+          ],
+          [
+            43106,
+            68169
+          ],
+          [
+            43106,
+            69798
+          ],
+          [
+            43106,
+            71490
+          ],
+          [
+            43106,
+            72542
+          ],
+          [
+            43106,
+            96787
+          ],
+          [
+            43106,
+            107073
+          ],
+          [
+            43106,
+            147563
+          ],
+          [
+            43106,
+            180127
+          ],
+          [
+            43106,
+            187443
+          ],
+          [
+            46859,
+            66668
+          ],
+          [
+            46859,
+            101882
+          ],
+          [
+            46859,
+            153922
+          ],
+          [
+            46859,
+            208834
+          ],
+          [
+            47259,
+            24892
+          ],
+          [
+            47259,
+            61763
+          ],
+          [
+            47259,
+            115605
+          ],
+          [
+            47259,
+            138480
+          ],
+          [
+            59976,
+            138860
+          ],
+          [
+            62411,
+            111827
+          ],
+          [
+            66643,
+            56296
+          ],
+          [
+            66643,
+            64852
+          ],
+          [
+            66643,
+            66640
+          ],
+          [
+            66643,
+            68169
+          ],
+          [
+            66643,
+            69796
+          ],
+          [
+            66643,
+            69798
+          ],
+          [
+            66643,
+            71490
+          ],
+          [
+            66643,
+            74930
+          ],
+          [
+            66643,
+            88258
+          ],
+          [
+            66643,
+            97528
+          ],
+          [
+            66643,
+            100508
+          ],
+          [
+            66643,
+            107073
+          ],
+          [
+            66643,
+            132119
+          ],
+          [
+            66666,
+            56296
+          ],
+          [
+            66666,
+            64852
+          ],
+          [
+            66666,
+            66640
+          ],
+          [
+            66666,
+            66642
+          ],
+          [
+            66666,
+            69773
+          ],
+          [
+            66666,
+            69796
+          ],
+          [
+            66666,
+            74930
+          ],
+          [
+            66666,
+            88258
+          ],
+          [
+            66666,
+            97528
+          ],
+          [
+            66666,
+            100508
+          ],
+          [
+            66666,
+            121550
+          ],
+          [
+            66666,
+            132119
+          ],
+          [
+            66668,
+            66642
+          ],
+          [
+            66668,
+            66643
+          ],
+          [
+            66668,
+            66666
+          ],
+          [
+            66668,
+            71490
+          ],
+          [
+            66668,
+            100508
+          ],
+          [
+            66668,
+            138860
+          ],
+          [
+            66668,
+            190649
+          ],
+          [
+            66694,
+            43106
+          ],
+          [
+            66694,
+            66643
+          ],
+          [
+            66694,
+            147563
+          ],
+          [
+            66697,
+            24821
+          ],
+          [
+            66697,
+            205377
+          ],
+          [
+            66698,
+            24821
+          ],
+          [
+            66698,
+            66668
+          ],
+          [
+            66729,
+            40208
+          ],
+          [
+            66729,
+            43106
+          ],
+          [
+            66729,
+            85287
+          ]
+        ],
+        "seconds": 3.9664949821308255,
+        "scope": "complete bounding sphere/bbox candidates for transverse hits; nonproper hits are native-kernel diagnostic, not exhaustive touch counting; no containment proof"
+      },
+      "seconds_including_io": 4.884668114595115
+    }
+  },
+  "predicate_semantics": {
+    "proper_transverse": "native triangle hit AND strict straddling of both normalized planes beyond 1e-6 mm AND intersection-line overlap greater than 1e-6 mm",
+    "endpoint_edge_and_coplanar": "not proper transverse; native nonproper hit counter is diagnostic, not exhaustive contact enumeration; exact same-index coincident faces reported separately",
+    "cortex": "all surface pairs checked first; any-cortex subset means at least one of six triangle corners in cortex label; fully-cortex subset requires all six; neither subset excludes pairs from full-surface results",
+    "sphere_orientation": "FNIT signed_sphere float32 area; outward means triangle cross dot sum of corner positions >=0 about fixed origin, threshold<0; zero/nonfinite areas separate"
+  },
+  "scope": "independent extended diagnostics; original production mesh gate unchanged; no overall-equivalence judgement",
+  "status": "measured",
+  "cuda_initialized_after": false
+}

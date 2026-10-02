@@ -1,10 +1,18 @@
 # 单幅 T1w 的 recon-all 重建
 
+本轮两例整例从 4242.9→3453.9 秒、4043.6→3712.6 秒，墙钟分别减少 18.59% 和 8.19%；父子进程同时显存采样峰值为 10.92 GB 和 10.89 GB。两例均输出 138/138 项；相对优化前标签和68区主要统计量不变，MNI变换链仍有差异。
+
+本轮完成五阶段串行优化，并修复辅助 Synth 网络构造时覆盖精度设置的问题。整例实际测试源码固定为 `ff372d73f106e850b999fbc95ae0b324cd315cbf`；两例原始 T1 整例及优化前后、独立官方参考的比较按该源码归档绑定。[本轮结果与复现](../../validation/recon_all/optimizations/20261001_serial/FINAL_RESULTS.md)汇总完整命令耗时、显存、分区 Dice、表面距离、脑区统计和局部异常。[优化实现](SERIAL_OPTIMIZATION.md)说明哪些阶段使用自有 PyTorch/Numba，哪些保留 Conda 源码构建程序。 main 合并后的两例相关注册回归逐位相同；最终补充前向后端日志字段通过100项相关测试，并修复自产LTA多空格读取兼容性，版本及范围见[绑定记录](../../validation/recon_all/optimizations/20261001_serial/whole/integrated_main/source_after_main_merge.json)。
+
 [返回首页](../../README.md) · [安装与原生程序](CONDA_CPP_BUILD.md) · [阶段与官方命令](CONDA_CPP_STAGES.md) · [验收范围](../../validation/recon_all/python_gpu_port/RELEASE_GATES.md)
 
 `fnit-recon-all` 从一幅 T1w 生成体积分割、双侧皮层表面、顶点指标、脑区标注和统计。标准路径依次执行[MNI152 非线性变换](MNI_NONLINEAR_CHAIN.md)、拓扑修复、`white.preaparc`、球面生成与配准、最终 white、[Conda 源码构建的四轮 pial 放置](NATIVE_PIAL_PLACEMENT.md)和后处理。必要程序或资产缺失时，入口在运行前报错；阶段失败时抛出异常并保存报告。当前支持单幅 T1w；多 T1、T2/FLAIR 和纵向重建不在此接口的范围内。
 
-本页描述当前源码的调用方式。阶段的同输入结果不代表从原始 T1 连续重建已通过验收。现版两例整例的输出完整性、数值比较与资源记录见[当前真实数据报告](../../validation/recon_all/python_gpu_port/current_full_runs_20260930.json)和[验收说明](../../validation/recon_all/python_gpu_port/RELEASE_GATES.md)；严格比较通过 5/138 和 2/138 项，数值验收尚未通过。
+执行完成、138 项输出完整性、网格质量、严格复现和整体指标等效分别记录。138 项逐文件比较用于诊断；整体指标等效阈值尚未正式确认，结果保持 `not_assessed`。优化前后还检查离散分区 Dice、双向点到三角面距离、厚度/面积/体积偏差和局部异常。具体口径见[比较方法](BENCHMARK_METHODS.md)与[验收说明](../../validation/recon_all/python_gpu_port/RELEASE_GATES.md)。
+
+CUDA 默认允许 TF32，不自动使用 FP16/BF16。SynthStrip、SynthSeg、辅助网络的卷积及 Talairach/MNI 仿射矩阵乘法保留同输入验证后的局部 FP32 例外；作用域结束后恢复设置，其他 GPU 阶段继续允许 TF32。构造和前向实际设置见[SynthSeg 精度](SYNTHSEG_PRECISION.md)与[辅助 Synth 精度](SYNTH_AUX_PRECISION.md)。
+
+本轮复用并优化已有[有序归一化](NORMALIZATION.md)、[球面几何](CPU_GEOMETRY_PERFORMANCE.md)及[PyTorch 指标函数](SURFACE_METRICS.md)。多图谱共享[同版本几何缓存](SURFACE_STATS_CACHE.md)，厚度使用[完整空间候选](SURFACE_THICKNESS.md)。完整 Python pial 已做同输入回归，但仍比当前 C++ 慢，生产路径保留 Conda 源码构建实现。不得将冻结同输入加速写成整例提速。
 
 ## 流程策略
 
@@ -66,8 +74,10 @@ report = run_recon_all_python(
     weights_dir="/data/fnit-weights",  # 已校验的模型权重目录
     assets_dir="/data/fnit-assets",  # 已校验的模板和图谱目录
     device="cuda:0",  # PyTorch 阶段的设备；无 GPU 时为 "cpu"
-    threads=4,  # 原生程序与 CPU 算子的线程数
+    threads=4,  # Torch intraop 与当前调用线程的 Numba 掩码；不代表进程总线程数
     native_bin_dir=None,  # None 表示使用当前 Conda 环境的 bin/
+    profile_stages=False,  # 生产默认不增加阶段 CUDA 同步；True 记录同步等待
+    cuda_allocator_cache="auto",  # 首次 CUDA 默认关闭缓存；已初始化 API 保留实际策略
 )
 # report 是运行报告字典；仅在全部阶段与文件完整性检查通过后返回。
 ```
@@ -87,32 +97,20 @@ report = run_recon_all_python(
 
 固定单 T1 profile 的全部 138 个相对路径由[清单](../../src/fnit/recon_all/expected_outputs.py)定义。`report["outputs"]` 是实际存在的 `{相对路径: 绝对路径}` 映射；`report["output_validation"]` 给出 138 项存在性检查；`report["mesh_validation"]` 逐侧检查闭合球面拓扑、顶点顺序、有限坐标及 white/pial 自相交；`report["numeric_validation"]` 单独记录参考结果的数值验收，默认是 `not_run`。`report["stages"]` 为按执行顺序排列的阶段名、秒数和可得的 PyTorch GPU 峰值字节数。默认关闭 CUDA 分配缓存时，父进程的 PyTorch 峰值接口不可用，以 `gpu_memory_mode` 说明，整例显存仍需进程级外部采样。`status="complete"` 只表示全部阶段执行、输出存在性和网格质量检查通过，不表示已与官方结果达到数值门槛。运行失败会抛出异常，部分失败信息写在 JSON 中；入口前置校验失败时可能尚未创建 JSON。
 
-批量 Python API `run_recon_all_python_batch(jobs=..., weights_dir=..., assets_dir=..., devices=..., threads=..., native_bin_dir=None)` 中，`jobs` 是按顺序排列的 `{"t1": 路径, "subject_dir": 空目录}` 列表；`devices` 是可用设备列表；其余参数与单被试一致。返回值为同序的报告列表；任一被试失败时抛出 `RuntimeError`。每个设备一次运行一例。
+批量 Python API `run_recon_all_python_batch(jobs=..., weights_dir=..., assets_dir=..., devices=("cuda:0",), threads=4, native_bin_dir=None, profile_stages=False, cuda_allocator_cache="auto")` 中，`jobs` 是按顺序排列的 `{"t1": 路径, "subject_dir": 空目录}` 列表；`devices` 是互不重复的设备列表。`threads` 是每个子进程的预算，多设备并行时总预算随进程数量增加。每个设备一次运行一例，新子进程重新应用 recon-all 精度策略，不继承父进程已经初始化的 CUDA flags 或 allocator；`auto` 按子进程初始化前环境选择。其余参数与单被试一致。返回值为同序的报告列表；任一被试失败时抛出 `RuntimeError`。
 
-## 真实 T1 benchmark（2026-09-30）
+## 最近版本与 benchmark
 
-两例去标识的真实 T1w 分别从原始影像连续运行 FNIT 标准单 T1 流程，并与单独生成的 FreeSurfer 8.2 结果比较。FNIT 运行使用固定源码 `9ae7939`；`sub-02` 加入了后来在 `b66ff97` 发布的 CPU SynthSeg 修复。官方参考执行 `recon-all -i T1w.nii.gz -s subject -sd subjects -all -parallel -openmp 4 -itkthreads 1`。输入 SHA-256、程序哈希与逐例状态见[整例记录](../../validation/recon_all/python_gpu_port/current_full_runs_20260930.json)。
+| 版本 | 记录与用途 |
+| --- | --- |
+| `ff372d7`，2026-10-02 整合版本 | [本轮完整结果](../../validation/recon_all/optimizations/20261001_serial/FINAL_RESULTS.md)：两例原始 T1、完整耗时及最终指标；报告保留实际计算提交。 |
+| `3faa938`，辅助网络卷积精度修复 | [中间版原始报告](../../validation/recon_all/optimizations/20261001_serial/whole/precision_policy/whole_reports/)：两例完成，各 138 项齐全，相对优化前严格诊断均为 135/138；MNI 仿射矩阵乘法误差随后另行定位。 |
+| `61926c7`，五阶段首次整合 | [历史整例与原因定位](../../validation/recon_all/optimizations/20261001_serial/WHOLE_RESULTS.md)：保留 MRI/WM 输入变化导致表面变化的四组控制，不能代替当前版结果。 |
+| `c248520`，上一直接性能基线 | [整例热点优化](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/WHOLE_RESULTS.md)：sub-01 当前配对继续复用其完整 GPU API 记录，生产源码与 `0c8ab32` 相同。 |
+| `1b8c36d`，指标与缓存接入 | [精度与时间记录](../../validation/recon_all/python_gpu_port/performance_20261001/README.md)：厚度、统计缓存、实际前向精度与剖析接口。 |
+| `e036f57`，法向优化 | [绑定该版的两例结果](../../validation/recon_all/python_gpu_port/current_full_runs_20260930.json)及[最终指标](../../validation/recon_all/python_gpu_port/final_metric_consistency_20260930.json)。历史 CPU/GPU 时间不与当前整例混算。 |
 
-| 真实被试与 FNIT 设备 | FNIT 耗时 | 官方参考耗时 | 输出与网格 | 严格逐文件比较 |
-| --- | ---: | ---: | --- | ---: |
-| `sub-01`，H100 GPU | 6398.6 秒 | 约 6790 秒 | 138/138 项；双侧通过 | 5/138 项 |
-| `sub-02`，CPU | 5622.3 秒 | 约 4144 秒 | 138/138 项；双侧通过 | 2/138 项 |
-
-官方时间取自各被试的 `recon-all.log`。`sub-01` 的 FNIT 与官方参考使用不同设备、日期；`sub-02` 虽在同一 CPU 主机运行，两项任务也有并发负载。这些单次耗时不支持稳定的速度比。`sub-01` 的进程 GPU 占用每 2 秒采样的最大值为 18,452 MiB（约 19.35 GB），采样未保证捕获连续峰值。
-
-按同名脑区配对的[最终指标报告](../../validation/recon_all/python_gpu_port/final_metric_consistency_20260930.json)给出比逐文件通过数更直接的汇总值比较。下表的百分比是相对官方参考的绝对误差中位数；`r` 在同一被试的匹配脑区之间计算。
-
-| 最终指标 | `sub-01` | `sub-02` |
-| --- | ---: | ---: |
-| 颅内容积相对差 | −0.0029% | +0.00013% |
-| 皮层灰质总体积相对差 | +1.112% | +0.094% |
-| aparc 68 区表面积 | `r=0.999813`；中位误差 1.14% | `r=0.999663`；中位误差 1.19% |
-| aparc 68 区灰质体积 | `r=0.999751`；中位误差 1.74% | `r=0.999622`；中位误差 1.63% |
-| aparc 68 区平均厚度 | `r=0.9943`；MAE 0.0376 mm | `r=0.9889`；MAE 0.0351 mm |
-| aseg 45 个结构的体积 | 中位误差 0.053% | 中位误差 0.032% |
-| wmparc 70 个白质分区的体积 | 中位误差 1.39% | 中位误差 1.56% |
-
-主要汇总指标接近，但局部图谱仍有明显差异：白质分区的最大相对误差为 13.0% / 9.3%；`sub-01` 的 Destrieux `S_interm_prim-Jensen` 在官方结果中有 3 个顶点，FNIT 中有 97 个，脑区平均厚度相差 1.243 mm。候选与官方的表面顶点数不同，因此这项脑区统计不能证明逐顶点厚度图一致。当前证据覆盖两例真实 T1，局部标注与顶点指标仍需继续验证。
+当前结果、脑图和最差脑区统一放在本轮结果页。历史记录仅用于复现和原因定位；已替代的“当前仍在运行”等说法不再作为现版结论。
 
 ## 验证与边界
 
@@ -122,7 +120,7 @@ python validation/recon_all/python_gpu_port/compare_complete_subject.py \
   --report /data/sub01-comparison.json
 ```
 
-比较需要单独生成的真实 T1 官方参考目录。[固定 138 项比较器](../../validation/recon_all/python_gpu_port/compare_complete_subject.py)检查体积、表面、顶点图和统计；其中同输入阶段验证、FNIT 自产上游连续链、从原始 T1 开始的整例验证应分别记录。若双侧网格顶点数不同，空间最近点距离只能用于定位差异，不能证明同源顶点一致。资源报告给出 PyTorch allocated/reserved 峰值；进程总 GPU 占用仍需外部采样，GB 与 GiB 均须注明。标准流程默认允许 TF32，SynthStrip、SynthSeg 和 Talairach affine 有经过阶段验证的 FP32 例外；不自动启用 FP16/BF16。
+比较需要单独生成的真实 T1 官方参考目录。[固定 138 项比较器](../../validation/recon_all/python_gpu_port/compare_complete_subject.py)检查体积、表面、顶点图和统计；同输入阶段、自产前段连续链、原始 T1 整例分别记录。整例另外保存各分区 Dice、双向点到三角面距离和逐脑区偏差；顶点数或有序面不同时不进行同索引比较。资源报告与外部进程采样分开，单位为字节并展示 GB/GiB。标准流程默认允许 TF32，SynthStrip、SynthSeg、辅助网络卷积、Talairach/MNI affine 与 MNI 非线性有已验证的 FP32 例外；不自动启用 FP16/BF16。
 
 各阶段的输入、输出、官方命令和真实数据记录见[阶段索引](CONDA_CPP_STAGES.md)。
 

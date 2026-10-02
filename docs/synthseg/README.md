@@ -1,6 +1,6 @@
 # 独立 33 类 SynthSeg
 
-[返回首页](../../README.md) · [源码目录](../../src/fnit/synthseg_parc/) · [权重](../WEIGHTS.md) · [当前验证报告](../../validation/synthseg/report.public.json)
+[返回首页](../../README.md) · [源码目录](../../src/fnit/synthseg_parc/) · [权重](../WEIGHTS.md) · [2026-09-27 独立验证](../../validation/synthseg/report.public.json) · [2026-10-01 集成回归](../recon_all/SYNTHSEG_PRECISION.md)
 
 `SynthSeg` 使用 FreeSurfer 8.2 的非 robust、非 parcellated SynthSeg 2.0 模型，从单幅 T1 生成 33 类结构标签和各结构软体积。它与 WMH-SynthSeg 是不同模型；本入口不输出 WMH 标签，也不生成皮层分区。推理使用 PyTorch，不需要安装 FreeSurfer、FSL 或 TensorFlow。
 
@@ -23,6 +23,7 @@ model = SynthSeg(
     weights=None,  # 权重：按 FNIT 配置顺序查找四个官方模型文件
     device="cuda:0",  # 设备：第一张可见 CUDA GPU
     threads=4,  # CPU 线程：用于预处理和后处理
+    cudnn_tf32=True,  # 独立入口默认开启 GPU 卷积 TF32；recon-all 显式使用 False
 )
 result = model(
     image="sub-01_T1w.nii.gz",  # 输入：单幅 3D T1w
@@ -35,13 +36,24 @@ result.write_volumes_csv(
     path="sub-01_synthseg.vol.csv",  # 输出：软体积 CSV 路径
 )
 print(result.total_intracranial_mm3, result.volumes_mm3)
+print(result.precision)  # 每次真实前向的 TF32、张量 dtype 与 autocast 设置
 ```
 
-`SynthSeg(weights=None, device="cpu", threads=None)` 在构造时加载一次模型；每次调用接收一幅图像。`weights` 可传包含四个文件的目录，或直接传 `synthseg_2.0.h5` 路径；三个 `.npy` 必须与这份 `.h5` 位于同一目录。省略 `weights` 时先查 `FNIT_WEIGHTS`、配置脚本记录的目录，再查默认缓存。输入是单幅 3D `.nii`、`.nii.gz`、`.mgz` T1 路径或 `nibabel.spatialimages.SpatialImage`。
+`SynthSeg(weights=None, device="cpu", threads=None, cudnn_tf32=True)` 在构造时加载一次模型；每次调用接收一幅图像。`weights` 可传包含四个文件的目录，或直接传 `synthseg_2.0.h5` 路径；三个 `.npy` 必须与这份 `.h5` 位于同一目录。省略 `weights` 时先查 `FNIT_WEIGHTS`、配置脚本记录的目录，再查默认缓存。输入是单幅 3D `.nii`、`.nii.gz`、`.mgz` T1 路径或 `nibabel.spatialimages.SpatialImage`。`threads=None` 保留调用方 PyTorch 线程数，负数使用 CPU 核数；非法设备、精度参数、缺失权重或推理失败时抛异常。
 
 `result.segmentation` 是 `FNITNifti1Image`（`nibabel.Nifti1Image` 子类），默认位于 SynthSeg 预处理后的 RAS 方向、约 1 mm 网格。标签编号和存储类型均为 `int32`；NIfTI qform code 为 0，sform code 为 2。`model(image, keep_geometry=True)` 会将标签以最近邻法重采样到输入网格，并保持相同 dtype 与 form-code 契约。`color_lut="/path/to/FreeSurferColorLUT.txt"` 可选地在返回图像的 `extra["color_lut"]` 中记录色表路径；默认不读取 FreeSurfer 文件。
 
 `result.volumes_mm3` 是 `{前景标签编号: 软体积}`，`result.total_intracranial_mm3` 是所有前景软体积之和，后验概率先恢复到输入方向，再按原版 NumPy float32 顺序求和并保留三位小数；`result.label_names` 对应 32 个前景结构名。CSV 列顺序、总量和近似并列标签规则与本仓库 GPU recon-all 的 `mri_synthseg` 入口相同。`result.near_tie_voxels` 记录近似并列规则相对于普通 `argmax` 更改的体素数。
+
+## recon-all 集成发现的精度设置覆盖
+
+原 `SynthSeg` 和 `SynthSegSegmenter` 构造时调用设备助手，会重新开启 cuDNN TF32，覆盖 pipeline 在模型构造前选择的 FP32 卷积策略。本轮修改这两个子函数：构造只选择设备，精度在模型构造后的实际前向作用域应用，正常和异常退出均恢复调用方 matmul/cuDNN 设置。独立接口默认 `cudnn_tf32=True`，保留 GPU 卷积 TF32；`False` 关闭该模型前向的 cuDNN TF32；`None` 沿用调用方 cuDNN 设置。CUDA matmul 在前向内仍开启 TF32。该参数是 Python API 选项，现有独立 CLI 继续使用默认 True。
+
+`result.precision` 是字典，包含 `requested_cudnn_tf32`、`forwards` 列表、后验缓冲复用标记及集成 dtype。每个前向记录 original/flipped、device、matmul/cuDNN TF32、输入/模型/输出 dtype，以及 CPU/CUDA autocast 开关与目标 dtype。不主动开启 FP16/BF16，调用方已有 autocast 如实记录；不能仅凭 `cudnn_tf32=False` 宣称全部计算为 FP32。输入输出网格、标签、软体积定义及写出接口沿用上文。
+
+内部 `SynthSegSegmenter(weights, labels, device="cpu", cudnn_tf32=True)` 读取固定 H5 与标签数组；`posterior(image=..., flip=True, smooth=True)` 接收预处理的三维强度张量，返回设备上的 `(33,D,H,W)` 后验概率。翻转集成复用内部缓冲并保留先相加、再乘 0.5 的顺序；首份后验在第二次 CUDA 前向期间仍暂存 CPU。`flip=True` 要求 `smooth=True`，否则抛 `ValueError`。这里没有独立原软件命令，是下节 `mri_synthseg` 的内部步骤。
+
+本轮冻结 sub-01 的已验证 FP32 同输入回归中，缓冲复用前后保存的 MGZ 与 CSV 逐字节相同。缓存开启的 CLI/API 单阶段完整命令分别为 71.57/50.16 秒，父子合计显存采样峰值均为 18.14 GB；这些单次观测不构成稳定提速或整例缓存验收。修正 TF32→FP32 后与旧 TF32 结果有 148 个标签体素变化，不能把精度策略变化称为浮点尾差或随机性。完整输入、权重、源码、前向记录、计时边界及监测 SHA 见[当前子函数回归](../recon_all/SYNTHSEG_PRECISION.md)；三例独立默认 TF32 的旧报告仅属于下节日期和源码。本轮尚未重跑该三例独立入口，不将旧结果重标为当前版本。
 
 ## 原版命令与参数对应
 
@@ -82,7 +94,7 @@ fnit synthseg --i sub-01_T1w.nii.gz --o sub-01_synthseg.nii.gz \
 
 可选参数为 `--weights /path/to/weights`、`--keep-geometry` 和 `--color-lut /path/to/FreeSurferColorLUT.txt`。命令行和 Python 每次均处理一幅图像。独立入口不依赖 recon-all 的原生运行包或个人 license。
 
-## 与 FreeSurfer 8.2 的当前对照
+## 与 FreeSurfer 8.2 的既有独立对照
 
 2026-09-27 在三幅仓库公开、去面容 T1w 上重跑当前源码和 FreeSurfer 8.2.0-1 `mri_synthseg --noaddctab`。候选推理没有调用 FreeSurfer。该次 33 类推理所用源码树 SHA-256 为 `39fa204aea7674ad7c6e09652d0f8750dd2872b1b78799812ab0d71b5b6c8972`。
 

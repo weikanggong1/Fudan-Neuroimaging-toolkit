@@ -35,7 +35,7 @@ result.distance.save(path=out / "subject_sdt.nii.gz")  # 输出路径：有符�
 
 ### 模型构造
 
-`SynthStrip(weights=None, device="cpu", no_csf=False, threads=None)`：
+`SynthStrip(weights=None, device="cpu", no_csf=False, threads=None, *, configure_precision=True)`：
 
 | 参数 | 含义 |
 |---|---|
@@ -43,6 +43,7 @@ result.distance.save(path=out / "subject_sdt.nii.gz")  # 输出路径：有符�
 | `device` | `"cpu"` 或 `"cuda:N"`；CUDA 编号遵循 `CUDA_VISIBLE_DEVICES` |
 | `no_csf` | 为 `True` 时使用排除 CSF 的官方权重 |
 | `threads` | 当前进程的 Torch 线程数；`None` 保留当前值 |
+| `configure_precision` | 默认 `True` 延续TF32配置；`False` 保留调用方TF32设置，不改变模型和float32输入。recon-all在构造后施加其cuDNN FP32例外。 |
 
 模型进入 eval 模式并使用 float32 张量；CUDA 构造默认允许 TF32 matmul 和 cuDNN 内核，不使用 float16 或 bfloat16。卷积使用 `cudnn.benchmark=False` 和 `cudnn.deterministic=True`，固定算法选择；这两项设置以及 TF32 是当前进程的 PyTorch 后端策略。重复使用实例可避免重复加载权重。
 
@@ -50,18 +51,23 @@ result.distance.save(path=out / "subject_sdt.nii.gz")  # 输出路径：有符�
 
 ### 单次调用与结果
 
-`extract(image, border=1, fill=None) -> StripResult`：
+`extract(image, border=1, fill=None, *, precision_report=None) -> StripResult`：
 
 | 参数或字段 | 含义 |
 |---|---|
 | `image` 输入 | 文件路径或 `nibabel.spatialimages.SpatialImage`；支持 3D 和逐帧处理的 4D |
 | `border` | SDT 阈值，单位 mm，默认 1 |
 | `fill` | 掩膜外的强度；省略时为 `min(image.min(), 0)` |
+| `precision_report` | 默认 `None`；提供列表时，每帧真实前向前追加模型/输入设备与dtype、TF32及autocast状态，不增加CUDA同步。 |
 | `result.image` | 掩膜外已填充的影像，保留原网格和几何 |
 | `result.mask` | 二值脑掩膜 |
 | `result.distance` | 有符号距离场，单位 mm |
 
 三个返回字段均为 `FNITNifti1Image`（`nibabel.Nifti1Image` 子类），可用 `.save(path)` 保存；也可直接传给 `nibabel.save`。调用不会修改输入对象。直接使用 Python 保存时，由调用者准备输出父目录。
+
+2026-10-02的[recon-all串行接入](../recon_all/SERIAL_OPTIMIZATION.md)使用此精度接口，
+记录实际前向并在Talairach子进程启动前释放Strip模型。默认独立调用保持兼容，
+没有开启半精度。输入链当前整例仍在验证，旧功能benchmark不改标为本轮结果。
 
 ## 命令行
 

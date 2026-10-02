@@ -1,0 +1,46 @@
+{
+  "code_commit": "c7f637b84620020e44afac452fa079db4f4c6326-fp32-probe-uncommitted",
+  "host": "gpucw1",
+  "stage_source_sha256": "46c1a33cc9fd1142f61d90a79ec40b8752c23287ad0ae0f996670a9aecb6ceeb",
+  "benchmark_script_sha256": "685645c92675d5e310063513ce9e03da0deabf895027c2ca5d20279fbc789c2d",
+  "device": "cuda:0",
+  "threads": 4,
+  "precision": {
+    "matmul_tf32_after_stage": false,
+    "cudnn_tf32_after_stage": false,
+    "float16_or_bfloat16": false
+  },
+  "input_sha256": {
+    "orig.mgz": "b791ec507bb5ff07a43754441d3ff4778d0665c644ad3facae2057a4cbe5a5fe",
+    "transforms/synthmorph.1.0mm.1.0mm/aff.lta": "c11ee1a065369e5b3e7483db6d6bd5b1cf28741b550926b70ded58b0648ebdb1",
+    "transforms/synthmorph.1.0mm.1.0mm/invol.crop.nii.gz": "be676f9794dead459246e27f1e5834c1b078ebc6c4cfdde9b0db92b79b3fec21"
+  },
+  "native_binary_sha256": {
+    "mri_warp_convert": "527255204f1cb6b71d47ac3f9032af388eae873bd46b7d69d8293b433e001059",
+    "mri_ca_register": "a0f3902b38963cd4b322b94342dde513903cb6455779f2282174c618b4ff0987",
+    "mri_convert": "cca67a9b3ae61632377406724e09cb6c16409d40b8972c6836b9d36a5ced2ebe"
+  },
+  "seconds_including_model_io_conversion": 162.69140968564898,
+  "stage_timings_seconds": {
+    "deform_model_and_save": 25.23183977091685,
+    "warp_convert": 21.860040470957756,
+    "warp_inverse": 106.27086364803836,
+    "resample_check": 8.151490288320929
+  },
+  "outputs": {
+    "forward": {
+      "sha256": "b78c3a24b77bdea1ac236ba7a26979d6dde770af7f7016033fca286101af1c50",
+      "size_bytes": 44284541
+    },
+    "inverse": {
+      "sha256": "46fbaef9806711b4198ac2a1b0e8806db3dfb92ca56fff3f7f79749b9558251f",
+      "size_bytes": 131090110
+    },
+    "check": {
+      "sha256": "2e1f5bda696c47398d1508c8cba10a29bfcddac6f9de7daf493b9909dff45bdf",
+      "size_bytes": 2805380
+    }
+  },
+  "gpu_peak_allocated_bytes": 9268777984,
+  "gpu_peak_reserved_bytes": 12165578752
+}

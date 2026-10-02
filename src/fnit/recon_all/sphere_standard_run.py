@@ -10,8 +10,11 @@ from pathlib import Path
 
 import nibabel.freesurfer.io as fsio
 import numpy as np
+import torch
 
 from .sphere_python import project_radially
+from .place_surface_normals import FaceNormalTopology
+from .mris_register_average_numba import RegistrationGradientAverager
 from .sphere_standard_average import average_standard_gradient
 from .sphere_standard_finish import finish_standard_sphere
 from .sphere_standard_line_search import first_epoch_line_search, first_epoch_sse
@@ -26,9 +29,13 @@ from .sphere_standard_unfold import _face_geometry, first_epoch_gradient
 
 
 def run_standard_sphere(inflated: str | Path, smoothwm: str | Path,
-                        output: str | Path, *, finish_device: str = "cpu") -> dict:
+                        output: str | Path, *, finish_device: str = "cpu",
+                        averaging_device: str = "cpu") -> dict:
     """Read same-face-order inflated/smoothwm meshes and write an ordered sphere.
 
+    averaging_device默认cpu；显式CUDA时复用RegistrationGradientAverager，
+    只迁移有序Jacobi平均，包含必要H2D/D2H，不改TF32或精度。主体SSE仍CPU。
+    缓存本次有序面的整数CSR及原smoothwm面积；坐标、法向每次重算。
     Return paths, device, negative-area fraction, setup/finish/total seconds,
     ordered update dicts (index, stage, weight, averages, dt, seconds), and
     final overlap-repair negative-face counts. Only cleanup uses finish_device.
@@ -57,6 +64,20 @@ def run_standard_sphere(inflated: str | Path, smoothwm: str | Path,
     original_area = np.abs(original_area)
     original_total = np.float32(np.sum(original_area, dtype=np.float64))
     setup_metric_seconds = time.perf_counter() - t0
+    topology_tick = time.perf_counter()
+    normal_topology = FaceNormalTopology(faces, len(xyz))
+    original_metric = (original_area, original_total)
+    average = None
+    if torch.device(averaging_device).type == "cuda":
+        degree = np.diff(local_offsets).astype(np.int64)
+        dense = np.zeros((len(xyz), int(degree.max(initial=0))), np.int64)
+        for vertex in range(len(xyz)):
+            dense[vertex, :degree[vertex]] = local_neighbors[local_offsets[vertex]:local_offsets[vertex+1]]
+        average = RegistrationGradientAverager(torch.from_numpy(dense),
+            torch.from_numpy(degree), device=averaging_device)
+    elif torch.device(averaging_device).type != "cpu":
+        raise ValueError("averaging_device must be cpu or cuda")
+    topology_seconds = time.perf_counter() - topology_tick
     updates = []
     for index in range(3000):
         scale = (stage, weight, averages)
@@ -66,12 +87,17 @@ def run_standard_sphere(inflated: str | Path, smoothwm: str | Path,
         if stage == "nonlinear_repair":
             gradient, _ = nonlinear_epoch_gradient(
                 xyz, faces, metric_input, local_offsets, local_neighbors,
-                local_distances, old_avg, weight)
+                local_distances, old_avg, weight,
+                normal_topology=normal_topology, original_metric=original_metric)
         else:
             _, _, gradient, _ = first_epoch_gradient(
-                xyz, faces, metric_input, offsets, neighbors, distances, weight)
-        gradient = average_standard_gradient(
-            gradient, local_offsets, local_neighbors, averages)
+                xyz, faces, metric_input, offsets, neighbors, distances, weight,
+                normal_topology=normal_topology, original_metric=original_metric)
+        if average is None:
+            gradient = average_standard_gradient(
+                gradient, local_offsets, local_neighbors, averages)
+        else:
+            gradient = average(torch.from_numpy(gradient), averages).numpy()
         if stage == "nonlinear_repair":
             search = nonlinear_epoch_line_search(
                 xyz, gradient, faces, local_offsets, local_neighbors,
@@ -110,10 +136,11 @@ def run_standard_sphere(inflated: str | Path, smoothwm: str | Path,
     finish_seconds = time.perf_counter() - t0
     write_standard_sphere_surface(output, finished, faces, inflated)
     return {"inflated": str(inflated), "smoothwm": str(smoothwm),
-            "output": str(output), "finish_device": finish_device,
+            "output": str(output), "finish_device": finish_device, "averaging_device": averaging_device,
             "initial_negative_area_pct": negative_pct,
             "projection_seconds": setup_projection_seconds,
             "metric_seconds_including_jit": setup_metric_seconds,
+            "topology_and_gpu_prepare_seconds": topology_seconds,
             "updates": updates, "negative_counts": negative_counts,
             "finish_seconds": finish_seconds,
             "total_seconds_including_io": time.perf_counter() - started}
@@ -125,11 +152,12 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("smoothwm", type=Path)
     parser.add_argument("output", type=Path)
     parser.add_argument("--finish-device", default="cpu")
+    parser.add_argument("--averaging-device", default="cpu")
     parser.add_argument("--report", type=Path)
     args = parser.parse_args(argv)
     report = run_standard_sphere(
         args.inflated, args.smoothwm, args.output,
-        finish_device=args.finish_device)
+        finish_device=args.finish_device, averaging_device=args.averaging_device)
     content = json.dumps(report, indent=2) + "\n"
     if args.report:
         args.report.write_text(content)

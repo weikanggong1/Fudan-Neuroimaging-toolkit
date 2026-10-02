@@ -1,0 +1,28 @@
+gongwk-local
+
+--inras: /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/mni_affine_ff372d7_sub01/mri/transforms/synthmorph.1.0mm.1.0mm/tmp/deform.mgz input RAS warp.
+--insrcgeom: /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/mni_affine_ff372d7_sub01/mri/transforms/synthmorph.1.0mm.1.0mm/invol.crop.nii.gz atlas/source image (used for geometry).
+--outfswarp: /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/mni_affine_ff372d7_sub01/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz output Freesurfer 3D morph.
+Setting vg_isEqual_Threshold to 0.000100
+--------------------------------------------------------------------------
+ERROR: FreeSurfer license file /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/.license not found.
+  If you are outside the NMR-Martinos Center,
+  go to http://surfer.nmr.mgh.harvard.edu/registration.html to 
+  get a valid license file (it's free).
+  If you are inside the NMR-Martinos Center,
+  make sure to source the standard environment.
+  A path to an alternative license file can also be
+  specified with the FS_LICENSE environmental variable.
+--------------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/benchmark_mni_affine_precision.py", line 78, in <module>
+    if __name__=="__main__":main()
+                            ^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/benchmark_mni_affine_precision.py", line 56, in main
+    result=run_mni_nonlinear_chain(subject_dir=a.output,weights_dir=a.weights,assets_dir=a.assets,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate_integrated_ff372d7/src/fnit/recon_all/mni_nonlinear_chain.py", line 82, in run_mni_nonlinear_chain
+    subprocess.run([str(warp_convert), "--inras", str(ras_warp),
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mri_warp_convert', '--inras', '/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/mni_affine_ff372d7_sub01/mri/transforms/synthmorph.1.0mm.1.0mm/tmp/deform.mgz', '--insrcgeom', '/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/mni_affine_ff372d7_sub01/mri/transforms/synthmorph.1.0mm.1.0mm/invol.crop.nii.gz', '--outfswarp', '/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/mni_affine_ff372d7_sub01/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz', '--vg-thresh', '1e-4', '--lta1-inv', '/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/mni_affine_ff372d7_sub01/mri/transforms/synthmorph.1.0mm.1.0mm/tmp/reg.crop-to-invol.lta', '--lta2', '/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/mni_affine_ff372d7_sub01/mri/transforms/synthmorph.1.0mm.1.0mm/tmp/reg.crop-to-full.lta']' returned non-zero exit status 255.

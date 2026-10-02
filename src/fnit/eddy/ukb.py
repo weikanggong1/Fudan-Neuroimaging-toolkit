@@ -202,13 +202,14 @@ def prepare_ukb_eddy(raw_dir, topup_dir, output_dir, *, device=None, overwrite=F
 
 
 def run_ukb_eddy(raw_dir, topup_dir, output_dir, *, device=None, overwrite=False,
-                 synthstrip_weights=None):
+                 synthstrip_weights=None, ref_scan_no=None, gp_seed=None):
     inputs = prepare_ukb_eddy(
         raw_dir, topup_dir, output_dir, device=device, overwrite=overwrite,
         synthstrip_weights=synthstrip_weights,
+        ref_scan_no=ref_scan_no,
     )
     result = TorchEDDY(device=device).run(
-        **inputs, out=Path(output_dir) / "data", overwrite=overwrite
+        **inputs, out=Path(output_dir) / "data", overwrite=overwrite, gp_seed=gp_seed
     )
     return result, inputs
 

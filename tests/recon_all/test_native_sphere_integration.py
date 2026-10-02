@@ -57,11 +57,13 @@ class NativeSphereIntegrationTest(unittest.TestCase):
                 quick_calls.append((source, output))
                 Path(output).write_bytes(b"qsphere")
 
-            def fake_standard(inflated, smoothwm, output, *, finish_device):
+            averaging_devices = []
+            def fake_standard(inflated, smoothwm, output, *, finish_device, averaging_device):
                 self.assertEqual((inflated, smoothwm, output),
                                  (surf / "lh.inflated", surf / "lh.smoothwm",
                                   surf / "lh.sphere"))
                 self.assertEqual(finish_device, "cpu")
+                averaging_devices.append(averaging_device)
                 Path(output).write_bytes(b"sphere")
                 return {"total_seconds_including_io": 1.5}
 
@@ -86,6 +88,7 @@ class NativeSphereIntegrationTest(unittest.TestCase):
                     bin_dir / "mris_remove_intersection")
                 times, report = _run_accurate_sphere_pair(
                     resolved, subject, "lh", assets)
+                _run_accurate_sphere_pair(resolved, subject, "lh", assets, device="cuda:0")
             self.assertGreaterEqual(topology_seconds, 0)
             self.assertGreaterEqual(remesh_seconds, 0)
             self.assertGreaterEqual(intersection_seconds, 0)
@@ -96,6 +99,7 @@ class NativeSphereIntegrationTest(unittest.TestCase):
             self.assertEqual(times["sphere"], 1.5)
             self.assertEqual((surf / "lh.sphere").read_bytes(), b"sphere")
             self.assertEqual((surf / "lh.sulc").read_bytes(), b"sulc")
+            self.assertEqual(averaging_devices, ["cpu", "cuda:0"])
 
     def test_missing_inflate_or_sulc_fails(self):
         with tempfile.TemporaryDirectory() as directory:

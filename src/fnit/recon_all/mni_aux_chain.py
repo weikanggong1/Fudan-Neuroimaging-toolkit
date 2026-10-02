@@ -100,12 +100,18 @@ def _crop_nonzero(image: Path, output: Path) -> Path:
 
 def register_mni152_affine(subject_dir: str | Path, weights_dir: str | Path,
                            assets_dir: str | Path, *, device: str = "cpu",
-                           threads: int = 4) -> Path:
-    """Write the full-MNI152-to-native voxel LTA used by auxiliary priors.
+                           threads: int = 4, precision_report: list | None = None) -> Path:
+    """生成完整MNI152体素到被试体素的type-0 LTA，供辅助先验重采样。
 
-    Input: subject/mri/orig.mgz, external affine weight and cropped/full MNI152
-    templates. Output: invol.crop.nii.gz, aff.lta and reg.targ_to_invol.lta in
-    subject/mri/transforms/synthmorph.1.0mm.1.0mm. Returns the final LTA path.
+    subject_dir含自产conform orig.mgz；weights_dir含声明的affine H5权重；
+    assets_dir含cropped/full 1 mm模板。device默认cpu，threads默认4，
+    precision_report默认None，可传列表保存实际前向策略。
+    CUDA仿射调用局部使用FP32 matmul，避免TF32量化几何矩阵；cuDNN策略继承
+    调用方，recon-all另有已验证FP32卷积作用域；返回或失败恢复matmul设置。
+    输出invol.crop.nii.gz（原scanner RAS mm）、aff.lta（world仿射），
+    reg.targ_to_invol.lta（MNI152体素到被试体素）；返回最后一项Path。
+    缺少资源、空orig或推理/写出失败抛异常。对应mri_synthmorph affine及
+    mri_concatenate_lta组合，具体命令、参数和真实回归见MNI_AUX_CHAIN.md。
     """
     subject = Path(subject_dir)
     native = subject / "mri/orig.mgz"
@@ -119,8 +125,14 @@ def register_mni152_affine(subject_dir: str | Path, weights_dir: str | Path,
     transform_dir = subject / "mri/transforms/synthmorph.1.0mm.1.0mm"
     crop = _crop_nonzero(native, transform_dir / "invol.crop.nii.gz")
     torch.set_num_threads(threads)
-    model = SynthMorph(weights=weights_dir, device=device, model="affine", extent=256)
-    world_affine = model(crop, cropped_target, header_only=True).transform
+    model = SynthMorph(weights=weights_dir, device=device, model="affine", extent=256, configure_precision=False)
+    previous_matmul_tf32 = torch.backends.cuda.matmul.allow_tf32
+    try:
+        if torch.device(device).type == "cuda":
+            torch.backends.cuda.matmul.allow_tf32 = False
+        world_affine = model(crop, cropped_target, header_only=True, precision_report=precision_report).transform
+    finally:
+        torch.backends.cuda.matmul.allow_tf32 = previous_matmul_tf32
     world_affine.save(str(transform_dir / "aff.lta"))
     native_image = nib.load(str(native))
     full_image = nib.load(str(full_target))
@@ -135,7 +147,7 @@ def register_mni152_affine(subject_dir: str | Path, weights_dir: str | Path,
 
 def run_mni_aux_chain(subject_dir: str | Path, weights_dir: str | Path,
                       assets_dir: str | Path, *, device: str = "cpu",
-                      threads: int = 4) -> dict[str, Path]:
+                      threads: int = 4) -> dict:
     """Generate the affine LTA and both conformed auxiliary label volumes.
 
     Requires subject/mri/orig.mgz, nu.mgz, synthseg.rca.mgz; external affine,
@@ -151,19 +163,21 @@ def run_mni_aux_chain(subject_dir: str | Path, weights_dir: str | Path,
     for file in (mri / "nu.mgz", mri / "synthseg.rca.mgz"):
         if not file.is_file():
             raise FileNotFoundError(file)
+    forwards = []
     lta = register_mni152_affine(subject, weights, assets,
-                                 device=device, threads=threads)
+                                 device=device, threads=threads, precision_report=forwards)
     torch.set_num_threads(threads)
     directory = lta.parent
     mca_dura = mri_mcadura_seg(mri / "nu.mgz", mri / "mca-dura.mgz",
-                               directory, assets, device=device, weights_dir=weights)
+                               directory, assets, device=device, weights_dir=weights, precision_report=forwards)
     talairach = mri / "transforms/talairach.xfm.lta"
     vsinus = mri_vsinus_seg(mri / "nu.mgz", mri / "vsinus.mgz",
                             directory, assets, ctxseg_path=mri / "synthseg.rca.mgz",
                             stats_path=subject / "stats/vsinus.stats",
                             talairach_lta=talairach if talairach.is_file() else None,
-                            device=device, weights_dir=weights)
-    return {"lta": lta, "mca_dura": mca_dura, "vsinus": vsinus}
+                            device=device, weights_dir=weights, precision_report=forwards)
+    return {"lta": lta, "mca_dura": mca_dura, "vsinus": vsinus,
+            "runtime": {"device": str(device), "auxiliary_forwards": forwards}}
 
 
 def main() -> None:
