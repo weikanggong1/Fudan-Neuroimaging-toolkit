@@ -77,7 +77,7 @@ fnit-recon-all /data/sub-01_T1w.nii.gz /results/sub-01 \
 
 ## 5. 实测和精度
 
-专项CPU测试与真实配对结果在本目录保存。真实测试脚本 benchmark_hemi.py 接收 --checkpoint（冻结自产被试）、--output（新目录）、--assets、--binaries、--device、--operation、--order=AB/BA、--commit。输入、源码、程序SHA-256写入JSON；analyze_metrics.py通过--pair-ab/--pair-ba/--output复现14张图容差控制、串行重复及真实脑图；analyze_chain.py接收配对根目录，追加连通/闭合/自相交/球面翻折、全量cortex white/pial相交对和逐区no-th3体积诊断；严格零差异及正式数值容差在测量前记录。父CUDA先初始化，验证Python API已初始化时仍能exec worker。
+专项CPU测试与真实配对结果在本目录保存。真实测试脚本 benchmark_hemi.py 接收 --checkpoint（冻结自产被试）、--output（新目录）、--assets、--binaries、--device、--operation、--order=AB/BA、--commit。输入、源码、程序SHA-256写入JSON；analyze_metrics.py通过--pair-ab/--pair-ba/--output复现14张图容差控制、串行重复及真实脑图；analyze_chain.py接收配对根目录，追加连通/闭合/自相交/球面翻折、全量cortex white/pial相交对和逐区no-th3体积诊断；严格零差异及冻结清单中的数值容差在测量前记录；white.preaparc.H/K→white.H/K别名缺少测前记录，单列后验诊断not_assessed，不计通过。父CUDA先初始化，验证Python API已初始化时仍能exec worker。
 
 冻结同输入阶段仅说明调度回归，不是原始T1整例验收。chain配对在复制冻结MRI前缀并清空surf/label/stats后开始计时；阶段内双份私有复制、exec启动、发布、清理均计入，配对开始前准备被试目录的复制不计入。它只测受影响表面链，完整原始T1端到端结果由协调者另行计时。复制检查点中未重算的文件不得作为新版本成果。总体指标等效保持not_assessed；138项严格诊断与局部网格/脑区统计由相应专项和最终整例报告分别陈述。本目录已提供真实pial曲率差异脑图；两例空目录整例与最终端到端速度由协调者统一交付。
 
@@ -89,7 +89,7 @@ fnit-recon-all /data/sub-01_T1w.nii.gz /results/sub-01 \
 
 数值控制见 metrics_numeric_control.json，AB/BA完整源文件哈希、同期父子显存及外部负载见 metrics_AB.json / metrics_BA.json，组计时见 metrics_timing.csv。
 
-连续表面链配对已完成：2530.09→1420.96秒，1.781倍；最终几何与278条脑区指标一致，但8项无非零门槛的中间曲率图严格失败。完整检查、97/138阶段范围和共享负载限制见 [RESULTS.md](RESULTS.md)。
+连续表面链配对已完成：2530.09→1420.96秒，1.781倍；最终几何与278条脑区指标一致；文件门槛为79通过、4张preaparc H/K后验同算子容差诊断not_assessed、8项中间曲率图零容差失败。完整检查、97/138阶段范围和共享负载限制见 [RESULTS.md](RESULTS.md)。
 
 ## 6. 版本和benchmark记录
 
@@ -99,6 +99,7 @@ fnit-recon-all /data/sub-01_T1w.nii.gz /results/sub-01 \
 - f9f570a：基于metrics真实配对，将指标从final放置worker移到父进程串行；接口兼容回归43项及14子测试通过。
 - 42589db：清理、日志关闭、设备采样收尾、最终元数据失败保护；故障注入与回归46项及14子测试通过。成功路径计算算法未改，新增失败路径测试使用独立源码快照。
 - a3681e0：无索引CUDA解析、leader退出后孙进程取消、日志发布路径、worker缓存继承、短GPU UUID采样边界修复；50项及14子测试通过，含真实自有孤儿孙进程取消与无关进程保留。
+- 报告分类修订：a2ef51b首次记录的preaparc H/K同算子别名是测后诊断，撤回测前预声明表述；79通过、4后验not_assessed、8零容差失败，原数值/性能不变。
 - 测量期间worker导入路径固定补丁见 measured_source_delta.patch；报告绑定基线commit与每个实际Python源码SHA-256，不能标为无改动e44451a运行。
 
 ## 7. 原实现和参考文献

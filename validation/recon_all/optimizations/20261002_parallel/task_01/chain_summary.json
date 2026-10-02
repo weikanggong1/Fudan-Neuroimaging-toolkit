@@ -142,11 +142,11 @@
     }
   },
   "numeric_check_counts": {
-    "passed_count": 83,
+    "passed_count": 79,
     "failed_count": 8,
     "blocked_count": 0,
     "missing_count": 0,
-    "not_assessed_count": 0
+    "not_assessed_count": 4
   },
   "failed_files": {
     "surf/lh.smoothwm.H.crv": 0.00016307830810546875,
@@ -205,5 +205,38 @@
     }
   },
   "cpu_partial_observations": "chain_cpu_load_summary.json",
-  "precision_scope": "83 passed; 8 intermediate smoothwm curvature maps fail zero tolerance; strict failed; full scientific equivalence not assessed"
+  "precision_scope": "79 passed; 4 posthoc same-operator preaparc H/K diagnostics not_assessed; 8 smoothwm maps fail zero tolerance; strict failed; scientific equivalence not_assessed",
+  "posthoc_diagnostic_files": {
+    "surf/lh.white.preaparc.H": {
+      "diagnostic_status": "passed",
+      "max_abs_error": 2.2172927856445312e-05
+    },
+    "surf/lh.white.preaparc.K": {
+      "diagnostic_status": "passed",
+      "max_abs_error": 3.135204315185547e-05
+    },
+    "surf/rh.white.preaparc.H": {
+      "diagnostic_status": "passed",
+      "max_abs_error": 9.5367431640625e-05
+    },
+    "surf/rh.white.preaparc.K": {
+      "diagnostic_status": "passed",
+      "max_abs_error": 6.461143493652344e-05
+    }
+  },
+  "classification_correction": {
+    "original_report_commit": "891fe9945852874c023da9745aebc3d8ad155a8e",
+    "original_report_sha256": "4550f251f94e263dd9b836b2e29355423c671dd4f7e27e794eb73ac1e944f4bc",
+    "original_executed_analysis_script_sha256": "840a9dab50e4dc1bebd4be551b9c0d0523210a27351d32f56a6df40cefe775b9",
+    "corrected_analysis_script_sha256": "b625d0081e125db0c22556f58411aebea85e682b2de56a1bc48c52b7affcbd76",
+    "method": "classification-only correction of stored metrics; no analysis or performance rerun",
+    "reason": "No frozen pre-run evidence for preaparc H/K to white H/K mapping; retain same-operator diagnostic and exclude from passed gates",
+    "changed_files": [
+      "surf/lh.white.preaparc.H",
+      "surf/lh.white.preaparc.K",
+      "surf/rh.white.preaparc.H",
+      "surf/rh.white.preaparc.K"
+    ],
+    "measurement_run_commit_unchanged": "db7af9b1e1ec67a12e6c6c253b212589c8d0c663"
+  }
 }
