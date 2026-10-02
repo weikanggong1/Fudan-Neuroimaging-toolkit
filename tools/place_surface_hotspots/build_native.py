@@ -57,6 +57,14 @@ def compile_source(build,original,own_source,obj,commands):
  return compiler,command
 
 def build_one(build,source,output,commands,patched):
+ """只读固定构建输入，将源码副本、对象、链接map和程序写入新output目录。
+
+ build/source为固定Conda构建及上游源码路径，output必须不存在；commands
+ 为该构建的Ninja命令，patched决定是否施加有限white热点补丁。返回程序
+ 绝对路径，同时写build.json记录实际argv/SHA。校验或子进程失败抛异常。
+ 属于安装步骤，无影像坐标或独立原软件CLI；不改变算法或编译选项。
+ """
+ build,source,output=Path(build).resolve(),Path(source).resolve(),Path(output).resolve()
  output.mkdir(parents=True,exist_ok=False)
  original=source/'utils/mrisurf_mri.cpp';content=original.read_text()
  candidate=remove_unused_face_hash(content,(source/'utils/mrisurf_compute_dxyz.cpp').read_text()) if patched else content
@@ -67,6 +75,8 @@ def build_one(build,source,output,commands,patched):
  ar=compiler.with_name('x86_64-conda-linux-gnu-ar');ranlib=compiler.with_name('x86_64-conda-linux-gnu-ranlib')
  subprocess.run([str(ar),'r',str(archive),str(obj)],check=True);subprocess.run([str(ranlib),str(archive)],check=True)
  tokens=shlex.split(commands[-1].split('&&')[1].strip());tokens=[str(archive) if x=='utils/libutils.a' else x for x in tokens]
+ # Ninja的相对Map输出会在cwd=build覆盖共享ld_map.txt；诊断输出归本次构建。
+ tokens=[('-Wl,-Map,'+str(output/'ld_map.txt')) if x.startswith('-Wl,-Map,') else x for x in tokens]
  main_command=None
  if patched:
   original_main=source/'mris_make_surfaces/mris_place_surface.cpp';main_content=original_main.read_text();main_candidate=add_capability_query(main_content)

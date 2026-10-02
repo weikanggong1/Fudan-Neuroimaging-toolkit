@@ -27,9 +27,13 @@ flowchart LR
 
 white 程序在原完整构建之后，只重编 `mrisurf_mri.cpp` 和带能力查询的 `mris_place_surface.cpp`，再链接独立的 `libutils.a` 副本。安装器不为此构建 benchmark control。GCA 补丁在安装器的源码副本中应用；源码时间戳为解决 NFS 时钟差异而归一化后，明确移除自有构建目录中的单个 EM utility 对象，保证旧构建不会漏编新补丁。
 
+本轮另修复成熟 white 构建 helper 的实际输出副作用：旧 helper 保留 `-Wl,-Map,ld_map.txt`，在原构建目录执行链接时会覆盖那里已有的诊断 map。现在先解析 `build/source/output` 的绝对路径，再把 map 写到该候选的 `output/ld_map.txt`。函数参数、编译和链接标志、输入对象与运行算法保持兼容；改变的是诊断文件地址。协调者已通过一项逐文件检查原 build 未改变的副作用 mock 回归；它不代替实际 C++ 编译或影像 benchmark。
+
+服务器已部署的 `1dd6df8` 仍使用旧 helper。本轮私有安装验证在调用它时，将实际链接 argv 中的唯一 map 输出改为 `private_install_v1/white_build/ld_map.txt`，并保留原 helper SHA 和实际命令，见 [安装验证报告](../../validation/recon_all/optimizations/20261002_parallel/root_install/REPORT.md)。
+
 ## 2. 主页 Conda 安装调用
 
-在 FNIT 仓库 checkout 中运行。先按主页创建、激活 Conda 环境，并确保该环境包含 C/C++/Fortran 编译器、CMake、Ninja、ITK 和 patchelf。普通 wheel 中的 Python 包不能代替包含 `tools/` 的仓库安装入口。
+在 FNIT 仓库 checkout 中运行。先按主页创建、激活 Conda 环境，并确保该环境包含 C/C++/Fortran 编译器、CMake、Ninja、ITK 和 patchelf。普通 wheel 中的 Python 包不能代替包含 `tools/` 的仓库安装入口。 普通 sdist 当前也未收录 shell 安装器和 N4 CMake/C++ 文件；原生安装请使用完整 Git checkout。
 
 ```bash
 conda activate fnit
