@@ -1,0 +1,351 @@
+{
+  "observed_utc": "2026-10-02T21:42:04.055965+00:00",
+  "original_reports_modified": false,
+  "GPU_used": false,
+  "controls": {
+    "root_actual_cohort_comparison_v2": {
+      "sha256": "61ff73f6b3393ab9a203c4a19756514e250a31e7ee73213aca8ba7d7d6e9800a",
+      "status": "failed_actual_comparison",
+      "completed_cases": 2,
+      "completed_pairs": null,
+      "anatomy_compared_cases": 9,
+      "failed_cases": 1,
+      "failed": [
+        {
+          "case": "sub-CON04",
+          "error": {
+            "type": "ValueError",
+            "message": "actual candidate/sub-CON04 failed: failed_gpu_eligibility; {'type': 'GPUEligibilityError', 'message': 'actual execution completed, but memory measurements or immutable binding validation did not meet the formal gate'}"
+          }
+        }
+      ]
+    },
+    "root_actual_cohort_summary_v2": {
+      "sha256": "0f68b5f3918c501436881b92c41f2e4030bd404771696f0abb2050d1920d4fad",
+      "status": "failed_actual_comparison_tables",
+      "completed_cases": null,
+      "completed_pairs": 2,
+      "anatomy_compared_cases": null,
+      "failed_cases": null,
+      "failed": []
+    }
+  },
+  "runs": [
+    {
+      "arm": "baseline",
+      "case": "CON01",
+      "report_sha256": "45681681b9bd1ba441edaa7efb67a63e291e7dd92f2d1a89fd43b1dd5fbe2d86",
+      "status": "completed",
+      "exit_code": 0,
+      "budget": {
+        "limit_bytes": 20000000000,
+        "measurements": {
+          "process_tree": 19795017728,
+          "allocated_bytes": 14681586176,
+          "reserved_bytes": 17607688192
+        },
+        "status": "observed_below_budget",
+        "monitor_issues": [],
+        "scope": "sampled process-tree maximum plus allocator ledger; not a mathematically continuous bound"
+      },
+      "sampler": {
+        "backend": "nvidia-smi",
+        "samples": 985,
+        "failed_samples": 0,
+        "errors": [],
+        "max_observed_interval_seconds": 1.076250143814832,
+        "sample_interval_seconds": 0.5
+      },
+      "CLI_seconds": 641.2045834190212
+    },
+    {
+      "arm": "baseline",
+      "case": "CON03",
+      "report_sha256": "cab653f16dabc795c5573305a0a6ef366f6ffab5a98053f10f254b9c2ba7a597",
+      "status": "completed",
+      "exit_code": 0,
+      "budget": {
+        "limit_bytes": 20000000000,
+        "measurements": {
+          "process_tree": 19795017728,
+          "allocated_bytes": 14679787008,
+          "reserved_bytes": 17607688192
+        },
+        "status": "observed_below_budget",
+        "monitor_issues": [],
+        "scope": "sampled process-tree maximum plus allocator ledger; not a mathematically continuous bound"
+      },
+      "sampler": {
+        "backend": "nvidia-smi",
+        "samples": 963,
+        "failed_samples": 0,
+        "errors": [],
+        "max_observed_interval_seconds": 1.0059899911284447,
+        "sample_interval_seconds": 0.5
+      },
+      "CLI_seconds": 632.673662413843
+    },
+    {
+      "arm": "baseline",
+      "case": "CON04",
+      "report_sha256": "6c77209ac2175711daa13366f2bdfd9f68ac97c44b12687513f393f565637561",
+      "status": "completed",
+      "exit_code": 0,
+      "budget": {
+        "limit_bytes": 20000000000,
+        "measurements": {
+          "process_tree": 19795017728,
+          "allocated_bytes": 14679940096,
+          "reserved_bytes": 17607688192
+        },
+        "status": "observed_below_budget",
+        "monitor_issues": [],
+        "scope": "sampled process-tree maximum plus allocator ledger; not a mathematically continuous bound"
+      },
+      "sampler": {
+        "backend": "nvidia-smi",
+        "samples": 2782,
+        "failed_samples": 0,
+        "errors": [],
+        "max_observed_interval_seconds": 3.330059750005603,
+        "sample_interval_seconds": 0.5
+      },
+      "CLI_seconds": 1865.6735309707
+    },
+    {
+      "arm": "baseline",
+      "case": "CON05",
+      "report_sha256": "bab56909d4aec005b6723295b265293e16f062473545ade8b9544bfb38d95efd",
+      "status": "completed",
+      "exit_code": 0,
+      "budget": {
+        "limit_bytes": 20000000000,
+        "measurements": {
+          "process_tree": 19795017728,
+          "allocated_bytes": 14680774144,
+          "reserved_bytes": 17607688192
+        },
+        "status": "not_fully_measured",
+        "monitor_issues": [
+          "failed_samples",
+          "errors"
+        ],
+        "scope": "sampled process-tree maximum plus allocator ledger; not a mathematically continuous bound"
+      },
+      "sampler": {
+        "backend": "nvidia-smi",
+        "samples": 2339,
+        "failed_samples": 2,
+        "errors": [
+          "TimeoutExpired: Command '['nvidia-smi', '--query-compute-apps=gpu_uuid,pid,used_gpu_memory', '--format=csv,noheader,nounits']' timed out after 3 seconds",
+          "TimeoutExpired: Command '['nvidia-smi', '--query-compute-apps=gpu_uuid,pid,used_gpu_memory', '--format=csv,noheader,nounits']' timed out after 3 seconds"
+        ],
+        "max_observed_interval_seconds": 4.527028156910092,
+        "sample_interval_seconds": 0.5
+      },
+      "CLI_seconds": 1614.0825246269815
+    },
+    {
+      "arm": "baseline",
+      "case": "CON06",
+      "report_sha256": "e44d0525f83dca312e373ec4c1f9f6a982017cb227c010d14044bc0964e05792",
+      "status": "completed",
+      "exit_code": 0,
+      "budget": {
+        "limit_bytes": 20000000000,
+        "measurements": {
+          "process_tree": 19795017728,
+          "allocated_bytes": 14682063360,
+          "reserved_bytes": 17607688192
+        },
+        "status": "observed_below_budget",
+        "monitor_issues": [],
+        "scope": "sampled process-tree maximum plus allocator ledger; not a mathematically continuous bound"
+      },
+      "sampler": {
+        "backend": "nvidia-smi",
+        "samples": 1367,
+        "failed_samples": 0,
+        "errors": [],
+        "max_observed_interval_seconds": 3.314328752923757,
+        "sample_interval_seconds": 0.5
+      },
+      "CLI_seconds": 939.9281116370112
+    },
+    {
+      "arm": "baseline",
+      "case": "CON07",
+      "report_sha256": "da74f07869a361f0a5ef4ef4cd9d6ea1a524923fef163d95850ec07be2ac3632",
+      "status": "completed",
+      "exit_code": 0,
+      "budget": {
+        "limit_bytes": 20000000000,
+        "measurements": {
+          "process_tree": 19795017728,
+          "allocated_bytes": 14680356864,
+          "reserved_bytes": 17607688192
+        },
+        "status": "observed_below_budget",
+        "monitor_issues": [],
+        "scope": "sampled process-tree maximum plus allocator ledger; not a mathematically continuous bound"
+      },
+      "sampler": {
+        "backend": "nvidia-smi",
+        "samples": 1483,
+        "failed_samples": 0,
+        "errors": [],
+        "max_observed_interval_seconds": 2.392851703800261,
+        "sample_interval_seconds": 0.5
+      },
+      "CLI_seconds": 975.4246213678271
+    },
+    {
+      "arm": "baseline",
+      "case": "CON08",
+      "report_sha256": "d412bc1991b091e0da0eb395cbad1a99c6ffc1f1bdc34e9e49fec865ad43e59a",
+      "status": "completed",
+      "exit_code": 0,
+      "budget": {
+        "limit_bytes": 20000000000,
+        "measurements": {
+          "process_tree": 19795017728,
+          "allocated_bytes": 14680476672,
+          "reserved_bytes": 17607688192
+        },
+        "status": "observed_below_budget",
+        "monitor_issues": [],
+        "scope": "sampled process-tree maximum plus allocator ledger; not a mathematically continuous bound"
+      },
+      "sampler": {
+        "backend": "nvidia-smi",
+        "samples": 1595,
+        "failed_samples": 0,
+        "errors": [],
+        "max_observed_interval_seconds": 3.459542904049158,
+        "sample_interval_seconds": 0.5
+      },
+      "CLI_seconds": 1074.9145133779384
+    },
+    {
+      "arm": "baseline",
+      "case": "CON09",
+      "report_sha256": "d33541cec2a78cf56345ef9ec118abc7460000aaa00f9e3d6dab6e7b608d48d6",
+      "status": "completed",
+      "exit_code": 0,
+      "budget": {
+        "limit_bytes": 20000000000,
+        "measurements": {
+          "process_tree": 19815989248,
+          "allocated_bytes": 14681201664,
+          "reserved_bytes": 17628659712
+        },
+        "status": "observed_below_budget",
+        "monitor_issues": [],
+        "scope": "sampled process-tree maximum plus allocator ledger; not a mathematically continuous bound"
+      },
+      "sampler": {
+        "backend": "nvidia-smi",
+        "samples": 1201,
+        "failed_samples": 0,
+        "errors": [],
+        "max_observed_interval_seconds": 1.7020690613426268,
+        "sample_interval_seconds": 0.5
+      },
+      "CLI_seconds": 808.5783350379206
+    },
+    {
+      "arm": "candidate",
+      "case": "CON01",
+      "report_sha256": "59b35f926879c61d1a56385e85ecc0b00ecb685a36d6a3034797f98702130fb9",
+      "status": "completed",
+      "exit_code": 0,
+      "budget": {
+        "limit_bytes": 20000000000,
+        "measurements": {
+          "process_tree": 19795017728,
+          "allocated_bytes": 14681594880,
+          "reserved_bytes": 17607688192
+        },
+        "status": "observed_below_budget",
+        "monitor_issues": [],
+        "scope": "sampled process-tree maximum plus allocator ledger; not a mathematically continuous bound"
+      },
+      "sampler": {
+        "backend": "nvidia-smi",
+        "samples": 2956,
+        "failed_samples": 0,
+        "errors": [],
+        "max_observed_interval_seconds": 1.0435970067046583,
+        "sample_interval_seconds": 0.5
+      },
+      "CLI_seconds": 1972.7306006732397
+    },
+    {
+      "arm": "candidate",
+      "case": "CON03",
+      "report_sha256": "ebab0f0366de15b7010daa3e8a9a7dc2caea5b090a49bb1578f8326f89858823",
+      "status": "completed",
+      "exit_code": 0,
+      "budget": {
+        "limit_bytes": 20000000000,
+        "measurements": {
+          "process_tree": 19795017728,
+          "allocated_bytes": 14679795712,
+          "reserved_bytes": 17607688192
+        },
+        "status": "observed_below_budget",
+        "monitor_issues": [],
+        "scope": "sampled process-tree maximum plus allocator ledger; not a mathematically continuous bound"
+      },
+      "sampler": {
+        "backend": "nvidia-smi",
+        "samples": 1330,
+        "failed_samples": 0,
+        "errors": [],
+        "max_observed_interval_seconds": 0.9597118902020156,
+        "sample_interval_seconds": 0.5
+      },
+      "CLI_seconds": 886.1388252009638
+    },
+    {
+      "arm": "candidate",
+      "case": "CON04",
+      "report_sha256": "57e559da0fbda8c68bb7b4ee43fa8846af1dbabde95fca3b60ff0fcd0efc4fae",
+      "status": "completed",
+      "exit_code": 0,
+      "budget": {
+        "limit_bytes": 20000000000,
+        "measurements": {
+          "process_tree": 19795017728,
+          "allocated_bytes": 14679948800,
+          "reserved_bytes": 17607688192
+        },
+        "status": "not_fully_measured",
+        "monitor_issues": [
+          "failed_samples",
+          "errors",
+          "sampling_gap"
+        ],
+        "scope": "sampled process-tree maximum plus allocator ledger; not a mathematically continuous bound"
+      },
+      "sampler": {
+        "backend": "nvidia-smi",
+        "samples": 886,
+        "failed_samples": 8,
+        "errors": [
+          "TimeoutExpired: Command '['nvidia-smi', '--query-compute-apps=gpu_uuid,pid,used_gpu_memory', '--format=csv,noheader,nounits']' timed out after 3 seconds",
+          "TimeoutExpired: Command '['nvidia-smi', '--query-compute-apps=gpu_uuid,pid,used_gpu_memory', '--format=csv,noheader,nounits']' timed out after 3 seconds",
+          "TimeoutExpired: Command '['nvidia-smi', '--query-compute-apps=gpu_uuid,pid,used_gpu_memory', '--format=csv,noheader,nounits']' timed out after 3 seconds",
+          "TimeoutExpired: Command '['nvidia-smi', '--query-compute-apps=gpu_uuid,pid,used_gpu_memory', '--format=csv,noheader,nounits']' timed out after 3 seconds",
+          "TimeoutExpired: Command '['nvidia-smi', '--query-compute-apps=gpu_uuid,pid,used_gpu_memory', '--format=csv,noheader,nounits']' timed out after 3 seconds",
+          "TimeoutExpired: Command '['nvidia-smi', '--query-compute-apps=gpu_uuid,pid,used_gpu_memory', '--format=csv,noheader,nounits']' timed out after 3 seconds",
+          "TimeoutExpired: Command '['nvidia-smi', '--query-compute-apps=gpu_uuid,pid,used_gpu_memory', '--format=csv,noheader,nounits']' timed out after 3 seconds",
+          "TimeoutExpired: Command '['nvidia-smi', '--query-compute-apps=gpu_uuid,pid,used_gpu_memory', '--format=csv,noheader,nounits']' timed out after 3 seconds"
+        ],
+        "max_observed_interval_seconds": 13.79326698416844,
+        "sample_interval_seconds": 0.5
+      },
+      "CLI_seconds": 686.2473402330652
+    }
+  ]
+}
