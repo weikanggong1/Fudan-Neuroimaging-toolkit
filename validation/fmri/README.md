@@ -1,17 +1,18 @@
 # fMRI 验证索引
 
-当前完整测量冻结到 `6f67cc06ee8c5108ef3640cbfc289f3e5a742f65`。在同一例真实 UKB 原始 BOLD、SBRef、匹配存档 T1 和已有同源表面重建上，连续运行 volume 和 surface 公开 API；生成 preproc、clean 及 91k CIFTI。完整实际墙钟 **915.876 s**，扣除单独记录的中间结果捕获后估计 **883.340 s**。volume 为 **649.045 / 616.561 s**，surface 为 **266.814 / 266.777 s**，前者是实际观测、后者是捕获扣除估计。
+当前完整测量冻结到 `81f1bb3cccf520b736507baad69b73b7fef97fb5`。在同一例真实 UKB 原始 BOLD、SBRef、匹配存档 T1 和已有同源表面重建上，连续运行 volume 和 surface 公开 API；生成 preproc、clean 及 91k CIFTI。完整实际墙钟 **817.564 s**，扣除单独记录的中间结果捕获后估计 **781.414 s**。volume 为 **571.548 / 535.449 s**，surface 为 **246.004 / 245.964 s**，前者是实际观测、后者是捕获扣除估计。
 
 本轮对照分为同步骤原 FSL/FreeSurfer 指令和独立完整 fMRIPrep 原流程。各自的原始输入、输出身份、全部 490 帧精度、端到端与分步骤时间，以及脑图集中在[当前完整 benchmark](e2e_latest/README.md)。共享机器上的一次测量不能推广为固定加速比。已有 recon-all 的首次结构重建不在 FNIT 计时内；原流程实际执行的额外结构处理按原流程记录。
 
 | 当前证据 | 用途 |
 |---|---|
-| [发布清单](e2e_latest/publication.public.json) | 绑定本次发布的报告、图示、脚本和计算代码；列出合并后测试及两项无关eddy更新。 |
-| [完整 FNIT 执行](e2e_latest/fnit_main.public.json) | 两个公开入口连续运行的实际墙钟、捕获开销、细分阶段、全部输出检查及源码/输入/输出 SHA。 |
-| [MSM 扩展构建](e2e_latest/fnit_main_build.public.json) | 实际加载的本包 FastPD 扩展、构建源码与 flags；构建不计入调用耗时。 |
-| [进程完成状态](e2e_latest/fnit_main_process.public.json) | 本次成功运行的退出码。 |
-| [共享 GPU 观察](e2e_latest/fnit_main_gpu_load.public.jsonl) | 包括导入、哈希与事后 QC 的进程期采样；不代表各阶段独占 GPU。 |
-| [最新同步骤精度](e2e_latest/native_matched_main.public.json) | 当前main对同原始输入的原FSL/FS：22幅阶段影像、运动/仿射/形变与最终preproc/clean。 |
+| [发布清单](e2e_latest/publication.public.json) | 绑定本次发布的报告、图示、脚本和计算代码；列出合并后测试、121项运行时源码身份与39项完整输出核验。 |
+| [完整 FNIT 执行](e2e_latest/fnit_public_warp.public.json) | 两个公开入口连续运行的实际墙钟、捕获开销、细分阶段、全部输出检查及源码/输入/输出 SHA。 |
+| [MSM 扩展构建](e2e_latest/fnit_public_warp_build.public.json) | 实际加载的本包 FastPD 扩展、构建源码与 flags；构建不计入调用耗时。 |
+| [进程完成状态](e2e_latest/fnit_public_warp_process.public.json) | 本次成功运行的退出码。 |
+| [共享 GPU 观察](e2e_latest/fnit_public_warp_gpu_load.public.jsonl) | 包括导入、哈希与事后 QC 的进程期采样；不代表各阶段独占 GPU。 |
+| [最新39项一致性](e2e_latest/fnit_public_warp_equivalence.public.json) | 新81与6f完整链输出逐值、科学header和CIFTI/GIFTI轴核验，绑定已有原软件精度与脑图。 |
+| [最新同步骤精度](e2e_latest/native_matched_main.public.json) | 实际6f对同原始输入的原FSL/FS：22幅阶段影像、运动/仿射/形变与最终preproc/clean；81输出通过39项一致性门禁。 |
 | [原完整clean执行](e2e_latest/native_clean.public.json) | 实际2666.886 s，另存严格退出证明与独立MELODIC控制。 |
 | [独立完整fMRIPrep](e2e_latest/native_fmriprep_full_strict__run.public.json) | 6087.099 s、成功整链、额外FS/ANTs和全部最终产物。 |
 | [完整volume精度](e2e_latest/full_volume_main.public.json) / [surface精度](e2e_latest/surface_full_main.public.json) | 同raw、全部490帧；MNI无损方向对齐，真实最终source SHA门禁。 |
@@ -43,7 +44,8 @@
 
 | 冻结版本 / 日期 | 报告 |
 |---|---|
-| `6f67cc0` / 2026-10-02 | [当前连续 volume＋surface 与原软件对照](e2e_latest/README.md)；对更新前ac692bb的39项科学输出逐bit一致。 |
+| `81f1bb3` / 2026-10-02 | [最新连续 volume＋surface](e2e_latest/fnit_public_warp.public.json)，公开采样路径实测817.564 s；[39项核验](e2e_latest/fnit_public_warp_equivalence.public.json)绑定此前6f原软件对照。 |
+| `6f67cc0` / 2026-10-02 | [此前连续 volume＋surface 与原软件对照](e2e_latest/README.md)；对更新前ac692bb的39项科学输出逐bit一致。 |
 | `ac692bb` / 2026-10-02 | [更新前连续报告](e2e_latest/fnit_combined.public.json)，实际832.586 s / 扣除捕获估计793.314 s；保留原冻结源码身份。 |
 | `cfb7beee` / 2026-10-01 | [此前 volume 707.287 s](mcflirt_optimization.md)，包含 preproc＋clean；原同步骤 MNI clean 时间 r 均值 0.939162。 |
 | `7102c187` / 2026-10-02 | [此前独立 surface](surface_e2e/README.md)和[并行更新](surface_gpu_parallel/README.md)；不能把旧 volume 与旧 surface 时间相加当连续运行。 |

@@ -1,6 +1,6 @@
 # fMRI volume 与 surface：当前完整 benchmark
 
-2026-10-02，冻结 FNIT 运行时源码 `6f67cc06ee8c5108ef3640cbfc289f3e5a742f65`，在一例真实 UKB 原始 BOLD、SBRef、匹配存档 T1 和同源 FreeSurfer 7 重建上测量。BOLD 为 `88×88×64×490`、uint16、TR 0.735 s；T1 为 `162×215×180`，来自已有存档重建，本轮未验证其为扫描仪原始 T1。
+2026-10-02，冻结 FNIT 运行时源码 `81f1bb3cccf520b736507baad69b73b7fef97fb5`，在一例真实 UKB 原始 BOLD、SBRef、匹配存档 T1 和同源 FreeSurfer 7 重建上测量。BOLD 为 `88×88×64×490`、uint16、TR 0.735 s；T1 为 `162×215×180`，来自已有存档重建，本轮未验证其为扫描仪原始 T1。
 
 发布文件、实测代码和合并后测试的身份见[发布清单](publication.public.json)。在本次发布的仓库版本运行 `python validation/fmri/e2e_latest/verify_publication.py`，可核对摘要、脑图、脚本和计算代码的 SHA-256。清单不包含私有影像。
 
@@ -31,52 +31,55 @@ FNIT 同时计算 clean 和 preproc；surface 默认使用 preproc。原同步�
 
 | 全部 490 帧，含最终产物保存 | 实际墙钟，秒 | 扣除捕获后的估计，秒 |
 |---|---:|---:|
-| **raw→volume→91k CIFTI** | **915.876** | **883.340** |
-| volume：T1w/MNI preproc＋原生/MNI clean | 649.045 | **616.561** |
-| surface：重新估计双侧 MSM＋投影＋保存 | 266.814 | **266.777** |
+| **raw→volume→91k CIFTI** | **817.564** | **781.414** |
+| volume：T1w/MNI preproc＋原生/MNI clean | 571.548 | **535.449** |
+| surface：重新估计双侧 MSM＋投影＋保存 | 246.004 | **245.964** |
 
-捕获共 32.536 s。估计值只扣除当次测得的中间结果捕获，不是另一次无捕获测量。导入、CUDA 初始化、输入/源码哈希及事后检查在外层计时之外。两个 API 在同一进程连续运行；并非将历史单独调用时间相加。
+捕获共 36.150 s。估计值只扣除当次测得的中间结果捕获，不是另一次无捕获测量。导入、CUDA 初始化、输入/源码哈希及事后检查在外层计时之外。两个 API 在同一进程连续运行；并非将历史单独调用时间相加。
 
 | volume 细分 | 扣除对应捕获后的观测，秒 |
 |---|---:|
-| 完整解剖准备 | 47.428 |
-| 其中 FAST / T1 FLIRT / FNIRT 计算 | 10.141 / 4.112 / 30.810 |
-| 完整 FEAT | 122.610 |
-| 其中完整 MCFLIRT / motion 最终采样 | 104.058 / 20.185 |
-| 强度缩放 / 100 秒高通计算 | 1.150 / 1.721 |
-| 完整 BBR | 3.171 |
-| 完整 PICA＋AROMA＋混杂回归 | 130.437 |
-| 其中 PICA / AROMA 分型 / AROMA 去噪 / 联合回归 | 75.668 / 2.199 / 24.977 / 23.456 |
-| clean MNI 采样阶段 | 45.711 |
-| T1w＋MNI preproc 阶段，含准备与读写 | 247.099 |
-| 其中 T1w / MNI preproc 采样 | 33.305 / 94.766 |
+| 完整解剖准备 | 37.711 |
+| 其中 FAST / T1 FLIRT / FNIRT 计算 | 9.336 / 3.072 / 22.915 |
+| 完整 FEAT | 70.940 |
+| 其中完整 MCFLIRT / motion 最终采样 | 52.707 / 17.755 |
+| 强度缩放 / 100 秒高通计算 | 1.189 / 1.721 |
+| 完整 BBR | 2.747 |
+| 完整 PICA＋AROMA＋混杂回归 | 89.010 |
+| 其中 PICA / AROMA 分型 / AROMA 去噪 / 联合回归 | 30.873 / 2.247 / 26.160 / 25.362 |
+| clean MNI 采样阶段 | 46.630 |
+| T1w＋MNI preproc 阶段，含准备与读写 | 266.809 |
+| 其中 T1w / MNI preproc 采样 | 34.275 / 107.898 |
 
 | surface 细分 | 扣除对应捕获后的观测，秒 |
 |---|---:|
-| 原生表面准备 | 4.961 |
-| MSM 输入准备＋独立配准 | 112.108 |
-| 其中双侧 MSM 估计的外层墙钟 | 110.212 |
-| 并行双侧投影的外层墙钟 | 119.214 |
-| CIFTI 组装 | 24.135 |
+| 原生表面准备 | 5.004 |
+| MSM 输入准备＋独立配准 | 93.634 |
+| 其中双侧 MSM 估计的外层墙钟 | 91.699 |
+| 并行双侧投影的外层墙钟 | 117.178 |
+| CIFTI 组装 | 24.622 |
 
 “其中”行已包含在父阶段内；左右半球重叠执行，不能相加。preproc 采样函数以外的准备/读写占本阶段其余时间，未进一步剖析，不能把完整阶段仅写为两项采样之和。完整 API 与内部 `total` 的末尾文件发布边界也不同。
 
 输出检查：四份 BOLD 为有限 float32、490 帧、TR 0.735 s；T1w preproc `59×75×64×490`，MNI preproc/clean `91×109×91×490`，原生 clean `88×88×64×490`。MNI clean 掩膜外全零。CIFTI `490×91282`，21 个结构、正确 SeriesAxis；左右 GIFTI 各490帧、32492顶点。ICA 95 成分、43 次迭代、47 个噪声成分。
 
-H100、CPU 8 线程、TF32，未使用半精度，CUDA 额度20 GB，完整进程峰值 allocated/reserved **6.503/10.775 GB**。源码运行前后120项身份相同，实际 MSM 扩展与独立构建记录 SHA 一致。共享 GPU/CPU/I/O 的单次测量只描述本次观测。GPU1在整个进程期65次采样的利用率中位数86%，显存占用中位数22,737 MiB、最高37,273 MiB，包含其他任务；FNIT自身reserved峰值10.775 GB。不能由本次墙钟给出受控或普遍加速比。
+H100、CPU 8 线程、TF32，未使用半精度，CUDA 额度20 GB，完整进程峰值 allocated/reserved **6.503/10.775 GB**。源码运行前后121项身份相同，实际 MSM 扩展与独立构建记录 SHA 一致。共享 GPU/CPU/I/O 的单次测量只描述本次观测。GPU1在整个进程期60次采样的利用率中位数0%，显存占用中位数10,031 MiB、最高16,413 MiB，包含运行上下文与可能的其他任务；FNIT自身reserved峰值10.775 GB。不能由本次墙钟给出受控或普遍加速比。
 
-## 最近两次连续测量
+[本次完整执行](fnit_public_warp.public.json)与[完成状态](fnit_public_warp_process.public.json)绑定81f实际源文件；MSM复用经源码、flags与二进制SHA验证的本包构建，未重新编译，也未复用解剖或配准结果。
+
+## 最近三次连续测量
 
 | 冻结源码 | raw→volume→CIFTI实际 / 捕获扣除估计，秒 | volume实际 / 估计，秒 | surface实际 / 估计，秒 |
 |---|---:|---:|---:|
-| `6f67cc0`，当前 main | 915.876 / 883.340 | 649.045 / 616.561 | 266.814 / 266.777 |
+| `81f1bb3`，本次 public warp 路径 | 817.564 / 781.414 | 571.548 / 535.449 | 246.004 / 245.964 |
+| `6f67cc0`，此前连续基线 | 915.876 / 883.340 | 649.045 / 616.561 | 266.814 / 266.777 |
 | `ac692bb`，本轮更新前 | 832.586 / 793.314 | 574.944 / 535.726 | 257.629 / 257.587 |
 
-两次均从原始输入计算、退出0，输入、资源和配置相同，源码在各自运行期间不变。[完整39项比较](fnit_revision_comparison.public.json)确认两版输出逐 bit一致，包括四份BOLD、490帧GIFTI/CIFTI、双侧配准球面、FAST、运动和形变。共享服务器墙钟不同不能据此归因于算法变慢。此配置开启WM/CSF/Friston24，与[另一轮默认clean的FNIRT无损验收](../../registration_lossless_20261002/README.md)分开记录。
+三次均从原始输入计算、退出0，输入、资源和配置相同，源码在各自运行期间不变。ac→6f的[39项比较](fnit_revision_comparison.public.json)和6f→81的[最新39项比较](fnit_public_warp_equivalence.public.json)分别核对四份BOLD、490帧GIFTI/CIFTI、双侧配准球面、FAST、运动和形变；原报告保留各自实际源码与脚本SHA。共享服务器墙钟不同不能据此归因于算法变慢。此配置开启WM/CSF/Friston24，与[另一轮默认clean的FNIRT无损验收](../../registration_lossless_20261002/README.md)分开记录。
 
 ## 原 FSL / FreeSurfer 同步骤参考
 
-原软件只在隔离的验证驱动中调用，未成为 FNIT 的运行依赖。clean 使用原 SynthStrip、`fast`、`mcflirt`、FEAT 高通、`flirt`/BBR、`fnirt`、`melodic` 和作者 ICA-AROMA；随后以独立 NumPy SVD 联合回归 WM/CSF/Friston-24 和趋势项。完整 clean 原指令与变量见[同步骤协议](../matched_native.md#数据协议与原命令)。T1 的初始线性配准是 12-DOF `corratio`，不是 `normmi`。
+本节原 SynthStrip/FSL/作者 AROMA 参考指令只在隔离验证驱动中执行。当前 surface 另使用 Workbench 后端，见复测说明。clean 使用原 SynthStrip、`fast`、`mcflirt`、FEAT 高通、`flirt`/BBR、`fnirt`、`melodic` 和作者 ICA-AROMA；随后以独立 NumPy SVD 联合回归 WM/CSF/Friston-24 和趋势项。完整 clean 原指令与变量见[同步骤协议](../matched_native.md#数据协议与原命令)。T1 的初始线性配准是 12-DOF `corratio`，不是 `normmi`。
 
 新增 preproc 原指令从原始 BOLD 出发，把运动和 BBR 组合为每帧一份 FSL premat，MNI 再叠加本轮原 FNIRT；不会先写出 motion-corrected BOLD 再插值一次。当前安装的原 `applywarp` 支持 `4T×4` ASCII 矩阵序列。真实第0、100、489帧的控制分别与单帧原指令比较，2,707,887个 float32值逐 bit相同。
 
@@ -101,24 +104,26 @@ surface 原参考使用未变的同源 FreeSurfer 几何，从原生球面、sul
 
 ## 同步骤原指令：最新精度与时间
 
+下面的原软件精度统计与脑图实际由6f输出计算，保留其冻结来源。最新81输出经完整39项逐值、科学header及CIFTI/GIFTI轴检查与6f一致，因此这些统计适用于最新链；没有将旧报告改标为新测量。
+
 [原完整clean](native_clean.public.json)从相同原始数据连续执行，不复用前一次计算，退出0、全部490帧产物完整；实际 **2,666.886 s**。它包含各阶段解释器启动、内部完整性检查和读写，只输出clean。[原preproc](native_preproc_stage.public.json)另实际运行单次采样 **786.867 s**，其运动/BBR/FNIRT来自本轮原流程新估计的结果；[原surface](native_matched_surface__post_validation_recovery.public.json)从这些preproc和固定共享重建开始，科学worker **1,572.593 s**。三项有各自起止点，不能相加为实际测得的raw→CIFTI。
 
 | 步骤 | FNIT当前main，秒 | 原指令，秒 | 计时范围 |
 |---|---:|---:|---|
-| EPI / T1 SynthStrip | 1.386 / 1.171 | 9.880 / 9.981 | FNIT函数；原各自GPU进程，含启动和读写 |
-| FAST | 10.141 | 152.083 | FNIT计算；原CPU命令含读写 |
-| T1 12-DOF FLIRT | 4.112 | 17.235 | 各自计算或原命令 |
-| T1 FNIRT | 30.810 | 209.750 | 各自计算或原命令 |
-| 完整MCFLIRT | 104.058 | 335.310 | FNIT扣捕获；原CPU命令含读写 |
-| 强度缩放 / 高通 | 1.150 / 1.721 | 23.616 / 159.603 | 原缩放前另有mask、p50与时间均值命令 |
-| BBR初值 / 完整BBR | 2.295 / 3.171 | 6.702 / 45.481 | FNIT完整BBR包含初值，不能相加 |
-| PICA | 75.668 | 651.790 | 原MELODIC含文件和HTML产物 |
-| AROMA map→MNI / 特征分类 | 4.129 / 2.199 | 27.005 / 235.519 | 原作者特征包含多次FSL查询与运算 |
-| AROMA nonaggr / 联合混杂回归 | 24.977 / 23.456 | 48.104 / 36.466 | 原regfilt / 独立NumPy SVD |
-| clean MNI阶段 | 45.711 | 552.564 | FNIT采样与mask；原applywarp进程含读写 |
-| preproc T1w / MNI采样 | 33.305 / 94.766 | 198.255 / 577.397 | 原始490帧，一次空间插值 |
-| 完整volume / 原完整clean | 649.045（实际） | 2,666.886（实际） | FNIT另包含preproc；输出范围不同 |
-| 完整surface | 266.814（实际） | 1,572.593（科学worker） | 固定同源重建，双方独立MSM；原后验发布另2.505 s |
+| EPI / T1 SynthStrip | 1.165 / 1.071 | 9.880 / 9.981 | FNIT函数；原各自GPU进程，含启动和读写 |
+| FAST | 9.336 | 152.083 | FNIT计算；原CPU命令含读写 |
+| T1 12-DOF FLIRT | 3.072 | 17.235 | 各自计算或原命令 |
+| T1 FNIRT | 22.915 | 209.750 | 各自计算或原命令 |
+| 完整MCFLIRT | 52.707 | 335.310 | FNIT扣捕获；原CPU命令含读写 |
+| 强度缩放 / 高通 | 1.189 / 1.721 | 23.616 / 159.603 | 原缩放前另有mask、p50与时间均值命令 |
+| BBR初值 / 完整BBR | 1.987 / 2.747 | 6.702 / 45.481 | FNIT完整BBR包含初值，不能相加 |
+| PICA | 30.873 | 651.790 | 原MELODIC含文件和HTML产物 |
+| AROMA map→MNI / 特征分类 | 4.359 / 2.247 | 27.005 / 235.519 | 原作者特征包含多次FSL查询与运算 |
+| AROMA nonaggr / 联合混杂回归 | 26.160 / 25.362 | 48.104 / 36.466 | 原regfilt / 独立NumPy SVD |
+| clean MNI阶段 | 46.630 | 552.564 | FNIT采样与mask；原applywarp进程含读写 |
+| preproc T1w / MNI采样 | 34.275 / 107.898 | 198.255 / 577.397 | 原始490帧，一次空间插值 |
+| 完整volume / 原完整clean | 571.548（实际） | 2,666.886（实际） | FNIT另包含preproc；输出范围不同 |
+| 完整surface | 246.004（实际） | 1,572.593（科学worker） | 固定同源重建，双方独立MSM；原后验发布另2.505 s |
 
 原clean完整阶段墙钟为：解剖173.610、FEAT640.279、配准289.481、去噪1010.936、最终MNI552.564 s。表内函数/命令被包含在这些阶段中；原surface半球重叠执行。FNIT还生成preproc，原clean包含阶段检查；不据此给出输出范围相同的总加速比。
 
@@ -172,7 +177,7 @@ MNI两图每行分别是模板、FNIT temporal SD、原软件temporal SD、时�
 | GenerateCifti | 18.745 | 原91k组装接口 |
 | **实际完整raw→volume→CIFTI** | **6,087.099** | **整条原指令含保存** |
 
-[完整节点表](native_fmriprep_full_strict__nodes_final.public.json)记录541个结果文件；MapNode父节点在合计中去重。上述叶时间、并行区间、调度间隙与整个graph各有边界，不可相加替代6087.099 s。FNIT本次完整调用915.876 s；双方还包含不同输出和共享资源负载，分别列墙钟。
+[完整节点表](native_fmriprep_full_strict__nodes_final.public.json)记录541个结果文件；MapNode父节点在合计中去重。上述叶时间、并行区间、调度间隙与整个graph各有边界，不可相加替代6087.099 s。FNIT本次完整调用817.564 s；双方还包含不同输出和共享资源负载，分别列墙钟。
 
 共享初始重建14项SHA相同且最终原件未变；原私有副本实际更新双侧white与thickness。白面最大位移左 **4.108213 mm**、右 **3.571384 mm**，厚度最大差 **1.796915 / 1.720999 mm**，[完整几何记录](native_fmriprep_full_strict__geometry_final.public.json)另列。这些实际原处理包含在6087.099 s中，不能把最终几何称为双方共同固定输入。
 
@@ -261,7 +266,7 @@ fmriprep /input /output participant --participant-label 0001 \
 `wb_command` 是当前 surface 的实际 Workbench 后端：ribbon 投影、dilation、mask、面积加权重采样和 ROI 等步骤调用原 Workbench。体积处理和 MSM 配准使用本包实现；原 surface 参考独立执行其 FreeSurfer/sMRIPrep、newMSM、Workbench 与 CIFTI 步骤。不能把当前 surface 的全部运算表述为纯 PyTorch。
 
 ```bash
-# 记录当前运行源码；本轮最新报告冻结的是 6f67cc0，不将之后文档提交误写为已测代码。
+# 记录当前运行源码；本轮最新报告冻结的是 81f1bb3，不将之后文档提交误写为已测代码。
 SOURCE_REVISION="$(git rev-parse HEAD)"
 
 # 两个公开单被试 API 连续运行；固定 FNIRT、STC off、AROMA nonaggr、WM/CSF/Friston24。
@@ -275,9 +280,10 @@ PYTHONPATH=src CUDA_VISIBLE_DEVICES=0 python validation/fmri/benchmark_combined_
 
 逐体素/顶点时间 Pearson r 使用全部490帧和 float64，常数序列去均值 RMS≤1e-6 时不报告 r；RMSE保留实际强度。MNI统计在固定模板域或报告明确指定的共同域上计算并记录体素数、覆盖数和掩膜哈希。比较不追加配准、空间平滑、强度尺度/偏移拟合或截帧。所有最终影像必须绑定各自成功完整执行记录的 SHA；真实参数、坐标约定及参考网格分别核验。
 
-- [最新 FNIT 完整报告](fnit_main.public.json)：实际运行、源码、资源和输出身份、细分时间及质量检查。
-- [最新构建身份](fnit_main_build.public.json)、[退出状态](fnit_main_process.public.json)、[共享 GPU 采样](fnit_main_gpu_load.public.jsonl)。
-- [两版完整输出比较](fnit_revision_comparison.public.json)：39项全部输出和中间结果的解码位模式、科学header、球面及全部490帧时间轴一致。
+- [最新 FNIT 完整报告](fnit_public_warp.public.json)：实际运行、源码、资源和输出身份、细分时间及质量检查。
+- [最新构建身份](fnit_public_warp_build.public.json)、[退出状态](fnit_public_warp_process.public.json)、[共享 GPU 采样](fnit_public_warp_gpu_load.public.jsonl)。
+- [最新81对6f完整输出比较](fnit_public_warp_equivalence.public.json)：39项全部输出和中间结果的解码位模式、科学header、球面及全部490帧时间轴一致。
+- [此前6f对ac完整比较](fnit_revision_comparison.public.json)与[6f运行记录](fnit_main.public.json)：保留各自冻结身份与计时。
 - [更新前连续报告](fnit_combined.public.json)、[其构建](fnit_build.public.json)及[退出状态](fnit_process.public.json)：保留原冻结身份，不将旧观测更名为最新测试。
 - [初始化失败记录](fnit_initialization.public.json)：两次错误都发生在公开 API 前，未生成有效处理 benchmark。之后成功运行退出0；未据此宣称冷启动稳定。
 

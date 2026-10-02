@@ -43,6 +43,16 @@ def source_hashes(root):
             for p in sorted(set(paths)) if p.is_file()}
 
 
+def final_volume_resampler_name(module):
+    """跟踪pipeline实际调用的最终采样入口，兼容迁移前后的冻结版本。"""
+    for name in ("_resample_final_volume", "resample_world"):
+        if hasattr(module, name):
+            if not callable(getattr(module, name)):
+                raise TypeError("The final volume resampler is not callable")
+            return name
+    raise AttributeError("The volume module has no final resampling entry point")
+
+
 def public_configuration(configuration):
     """Keep numerical settings while removing private template/weight paths."""
     settings = {key: value for key, value in configuration.items()
@@ -232,7 +242,8 @@ def main():
         pipeline.TorchMCFLIRT.run = capture_mcflirt
     if args.capture_resampling_inputs:
         from fnit.fmri import end_to_end
-        resample_original = end_to_end.resample_world
+        resample_name = final_volume_resampler_name(end_to_end)
+        resample_original = getattr(end_to_end, resample_name)
 
         def capture_resample(*positional, **keywords):
             if keywords.get("output_mask") is not None:
@@ -247,7 +258,7 @@ def main():
                 stage_capture_seconds["mni_resampling"] += elapsed
             return resample_original(*positional, **keywords)
 
-        end_to_end.resample_world = capture_resample
+        setattr(end_to_end, resample_name, capture_resample)
     started = time.perf_counter()
     if args.stage == "volume":
         if args.mni_template is None:

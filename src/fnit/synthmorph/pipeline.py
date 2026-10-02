@@ -22,6 +22,7 @@ from .._transforms import (
     voxel_displacement_to_ras,
 )
 from ..weights import resolve_weights
+from .._world_resampling import WorldTransformChain, resample_world_image
 from .spatial import (
     _prepare_transform, _sample_prepared, compose, surfa_nearest, transform,
 )
@@ -446,8 +447,11 @@ def apply_transform(
     *,
     device="cpu",
     frame_chunk_size=None,
+    boundary="grid-constant",
+    output_mask=None,
+    spatial_chunk_size=262144,
 ):
-    """Apply an LTA affine or target-grid RAS displacement to 3D/4D data.
+    """Apply an affine, RAS displacement or world transform chain to 3D/4D data.
 
     ``device='cpu'`` preserves the original default sampler. CUDA is opt-in;
     floating-point interpolation can differ from CPU by rounding. A positive
@@ -460,7 +464,61 @@ def apply_transform(
     retains its zero-copy output view (by default when there are <=32 frames).
     Coordinates use the original CPU float32 arithmetic and are transferred
     once for CUDA sampling. Image decoding and NIfTI I/O remain on the CPU.
+
+    A ``WorldTransformChain`` uses the shared volume sampler, including cubic
+    ``method='spline'``, its ``boundary``, output mask and spatial chunk size.
+    It composes the fixed-grid RAS pull, world affine and per-frame motion in
+    one interpolation. Its frame chunk is the sampler batch size (None: 8).
+    This branch requires zero fill and cannot perform header-only updates.
+    Default float32 returns the shared image unchanged, including its header.
     """
+    if isinstance(transformation, WorldTransformChain):
+        if header_only:
+            raise ValueError("header_only is unsupported for WorldTransformChain")
+        if fill is None or fill != 0:
+            raise ValueError("WorldTransformChain requires fill=0")
+        if method not in ("linear", "nearest", "spline"):
+            raise ValueError(
+                "WorldTransformChain method must be linear, nearest or spline"
+            )
+        if frame_chunk_size is not None and (
+            isinstance(frame_chunk_size, (bool, np.bool_))
+            or not isinstance(frame_chunk_size, (int, np.integer))
+            or frame_chunk_size < 1
+        ):
+            raise ValueError("frame_chunk_size must be a positive integer or None")
+        output_dtype = np.dtype(dtype)
+        result = resample_world_image(
+            image,
+            transformation.reference,
+            transformation.reference_to_source_world,
+            pre_affine_pull_ras=transformation.pre_affine_pull_ras,
+            output_mask=output_mask,
+            interpolation=method,
+            boundary=boundary,
+            motion_pull_world=transformation.motion_pull_world,
+            coordinate_precision=transformation.coordinate_precision,
+            spatial_chunk_size=spatial_chunk_size,
+            batch_size=8 if frame_chunk_size is None else int(frame_chunk_size),
+            device=device,
+        )
+        if output_dtype == np.dtype(np.float32):
+            # Preserve the mature volume sampler's complete image contract.
+            return result
+        header = result.header.copy()
+        header.set_data_dtype(output_dtype)
+        return nib.Nifti1Image(
+            np.asarray(result.dataobj).astype(output_dtype, copy=False),
+            result.affine,
+            header,
+        )
+    if (
+        boundary != "grid-constant" or output_mask is not None
+        or spatial_chunk_size != 262144
+    ):
+        raise ValueError(
+            "boundary, output_mask and spatial_chunk_size require WorldTransformChain"
+        )
     image = _load(image, single_frame=False, check_finite=False)
     # Materialise an ArrayProxy only once (especially important for .nii.gz).
     data = np.asanyarray(image.dataobj)

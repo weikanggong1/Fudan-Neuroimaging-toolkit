@@ -39,3 +39,23 @@ def test_solver_gate_ignores_only_execution_and_nested_elapsed_seconds(tool):
 def test_missing_solver_trace_cannot_pass(tool):
     with pytest.raises(ValueError, match="missing its solver trace"):
         tool.solver_trace({"elapsed_seconds": 1.0})
+
+
+def test_bids_text_transform_is_science_and_missing_or_changed_fails(tool, tmp_path):
+    import json
+    import numpy as np
+
+    first, second = tmp_path / "baseline", tmp_path / "candidate"
+    for root in (first, second):
+        root.mkdir()
+        (root / "fnirt_qc.json").write_text(json.dumps({"levels": [{"cost": 0.1}]}))
+    name = "sub-example_from-boldref_to-T1w_mode-image_xfm.txt"
+    matrix = np.eye(4)
+    for root in (first, second):
+        np.savetxt(root / name, matrix)
+    assert tool.compare_trees(first, second)["all_equal"]
+    matrix[0, 3] = 0.001
+    np.savetxt(second / name, matrix)
+    assert not tool.compare_trees(first, second)["all_equal"]
+    (second / name).unlink()
+    assert not tool.compare_trees(first, second)["all_equal"]

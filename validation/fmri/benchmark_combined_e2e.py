@@ -150,6 +150,14 @@ class Observer:
             return result
         return observed
 
+    def observe_final_volume_resampling(self, module):
+        def resample_name(*args, **kwargs):
+            if kwargs.get("motion_pull_world") is not None:
+                return "preproc_mni_resampling" if kwargs.get("pre_affine_pull_ras") is not None else "preproc_t1w_resampling"
+            return "clean_mni_resampling" if kwargs.get("output_mask") is not None else "clean_mni_mask_resampling"
+        entry_point = _helpers.final_volume_resampler_name(module)
+        self.patch(module, entry_point, self.timed(getattr(module, entry_point), resample_name))
+
     def install(self):
         # Keep computational input paths and objects unchanged.
         def captured_strip(result, args, kwargs):
@@ -263,11 +271,7 @@ class Observer:
         self.patch(volume_module, "run_aroma_pipeline", self.timed(
             volume_module.run_aroma_pipeline, "pica_aroma_confounds_complete", after=captured_aroma))
 
-        def resample_name(*args, **kwargs):
-            if kwargs.get("motion_pull_world") is not None:
-                return "preproc_mni_resampling" if kwargs.get("pre_affine_pull_ras") is not None else "preproc_t1w_resampling"
-            return "clean_mni_resampling" if kwargs.get("output_mask") is not None else "clean_mni_mask_resampling"
-        self.patch(volume_module, "resample_world", self.timed(volume_module.resample_world, resample_name))
+        self.observe_final_volume_resampling(volume_module)
         # AROMA imports the normalization module at its own call boundary.
         self.patch(normalization_module, "resample_world", self.timed(
             normalization_module.resample_world, "aroma_map_mni_resampling"))
