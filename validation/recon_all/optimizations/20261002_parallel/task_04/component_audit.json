@@ -77,5 +77,21 @@
     "mrisp_paint": "TIFF frame #6 with -a 5 full interpolation and averaging; atlas sample helper is only primitive",
     "mris_curvature_stats": "curv.stats plus multiple smoothwm curvature files; existing curvature map APIs do not emit complete stats/write-curvature contract"
   },
-  "deployment": "existing manifest matches do not prove a clean isolated deployment; coordinator verifies"
+  "deployment": "existing manifest matches do not prove a clean isolated deployment; coordinator verifies",
+  "ga_source_review": {
+    "file": "utils/mrisurf_defect.cpp",
+    "definition_line": 7414,
+    "operations": [
+      "retessellateDefect",
+      "detectDefectFaces",
+      "computePatchEulerNumber",
+      "orientDefectFaces",
+      "defectMatch",
+      "computeDefectFaceNormals",
+      "mrisComputeDefectLogLikelihood",
+      "updateVertexStatistics",
+      "mrisRestoreVertexState"
+    ],
+    "scope": "fixed source live read; complete GA retained, no current GA speed claim"
+  }
 }
