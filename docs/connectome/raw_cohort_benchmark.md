@@ -212,6 +212,8 @@ python tools/benchmark_connectome_raw_cohort.py status \
 
 驱动进程意外退出后，不用原 namespace 重跑，不把旧产物自动接续为 fresh benchmark。查询报告会明确显示保存状态可能滞后；需要重新计时则创建新 namespace。受试者内部状态可能是 `cpu_queued`、`recon_running`、`gpu_queued`、`gpu_running_or_remote_lock_queue`、`completed`、`failed`。
 
+本轮已定位的 MGZ 维度 `numpy.int32` JSON 序列化故障有独立的[工具验证修复流程](raw_cohort_recovery.md)：仅在官方 recon-all 已真实退出 0、原始输入和本轮产物哈希不变时重新读取 anatomy，保留原失败，随后完整运行尚未开始的 raw DWI。修复结果单列中断和恢复计时，不改变普通 cohort 的 fresh 规则，也不称无中断 cold benchmark。
+
 ## 4. 官方命令和计时边界
 
 CPU reconstruction 实际执行：

@@ -222,7 +222,9 @@ def anatomy_geometry(payload):
             segmentation = name != "mri/brain.mgz"
             if segmentation and (np.any(data < 0) or not np.array_equal(data, np.rint(data))):
                 raise RuntimeError(f"noninteger/negative official segmentation: {path}")
-            record = {"shape": list(image.shape), "dtype": str(data.dtype), "scanner_ras_affine": affine.tolist(),
+            # MGH/MGZ header dimensions may be numpy.int32; keep the
+            # measured dimensions but serialize standard JSON integers.
+            record = {"shape": [int(value) for value in image.shape], "dtype": str(data.dtype), "scanner_ras_affine": affine.tolist(),
                       "vox2ras_tkr": image.header.get_vox2ras_tkr().tolist(), "foreground_voxels": int(np.count_nonzero(data)),
                       "full_voxel_array_read": True}
             if segmentation:
@@ -374,6 +376,31 @@ def host_identity():
             "cpu_affinity": sorted(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else None}
 
 
+def load_recon_for_gpu(config, case, version, job):
+    """Accept normal completion, or a separately bound private repair report.
+
+    The ordinary fresh-cohort CLI does not declare recovery reports. Only the
+    isolated recovery controller may supply an explicit per-case declaration;
+    its helper verifies the original failure and this run's unchanged anatomy.
+    """
+    job = Path(job)
+    path = job / "recon_report.json"
+    original = json.loads(path.read_text())
+    declared = config.get("revalidated_recon_reports", {})
+    key = f"{version}/{case['case_id']}"
+    if key in declared:
+        if config.get("recovery_mode") != "known_anatomy_int32_serialization":
+            raise RuntimeError("revalidation requires the explicit private recovery mode")
+        if __package__:
+            from . import benchmark_connectome_raw_recovery as recovery
+        else:
+            import benchmark_connectome_raw_recovery as recovery
+        return recovery.load_revalidated_recon(config, case, version, job, original)
+    if original.get("status") != "completed":
+        raise RuntimeError("fresh official recon-all report has not completed")
+    return original
+
+
 def worker(payload):
     config, action = payload["config"], payload["action"]
     if sha256(Path(__file__)) != config["worker_script_sha256"]:
@@ -447,9 +474,10 @@ def worker(payload):
             if report["raw_t1_sha256_after"].lower() != expected_t1.lower():
                 raise RuntimeError("raw T1 changed during official reconstruction")
         elif action == "gpu":
-            recon = json.loads((job / "recon_report.json").read_text())
-            if recon.get("status") != "completed":
-                raise RuntimeError("fresh official recon-all report has not completed")
+            recon = load_recon_for_gpu(config, case, version, job)
+            if recon.get("recovery"):
+                report["recovery"] = recon["recovery"]
+                report["execution_scope"] = "same-run raw reconstruction with separately recorded tool-validation recovery; not a pristine cold benchmark"
             output = job / "connectome"
             if output.exists() or (job / "raw_bids_wall.json").exists():
                 raise FileExistsError(f"refuse reused raw-DWI output/report: {job}")
@@ -515,6 +543,11 @@ def worker(payload):
                 report["input_verification_after"] = verify_inputs(case)
                 if sha256(config["wall_script"]) != config["wall_script_sha256"]:
                     raise RuntimeError("raw-DWI wall script changed during execution")
+                if recon.get("recovery"):
+                    # The original failed record and its separate repair must
+                    # remain unchanged throughout the actual GPU calculation.
+                    if load_recon_for_gpu(config, case, version, job).get("recovery") != recon["recovery"]:
+                        raise RuntimeError("separate revalidation report changed during the actual GPU execution")
                 report["wall_report"] = str(job / "raw_bids_wall.json")
                 report["raw_dwi_cli_total_runtime_seconds"] = wall["total_runtime_seconds"]
                 report["gpu_memory"] = {"process": wall.get("gpu_process_memory"), "allocator": wall.get("cuda_allocator")}
