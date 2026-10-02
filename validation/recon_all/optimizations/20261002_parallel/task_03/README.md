@@ -126,11 +126,11 @@ FNIT_GCA_QUERY_CAPABILITIES=1 "$CONDA_PREFIX/bin/mri_em_register"
 
 ## 自产连续链复现
 
-`benchmark_chain.py` 是验收脚本，生产调度仍由任务 1 维护。输入为 `--root` 内声明的冻结自产 nu、brainmask、SynthSeg 和 Talairach affine；`--case` 选择两例之一，`--output` 必须是新的独占目录，`--commit` 记录实际代码身份。输出包括重新计算的 mri/、stats/、scripts/，以及包含阶段秒数、源/资产/输入/程序哈希、实际设备、精度、同期父子显存和逐体素/逐标签比较的 report.json。失败立即记录，不读取参考结果参与计算；所有参考比较在 filled 生成后执行。这里的整体墙钟是受影响链，不是原始 T1 整例。连续链从自己的 pretess 输出额外计算两个成熟 CPU 后编辑，和 GPU WM 逐体素比较；该诊断结果不进入生产计算。诊断耗时单列 `CPU_WM_point_validation_only`，包含在验收脚本总墙钟内。
+`benchmark_chain.py` 是验收脚本，生产调度仍由任务 1 维护。输入为 `--root` 内声明的冻结自产 nu、brainmask、SynthSeg 和 Talairach affine；`--case` 选择两例之一，`--output` 必须是新的独占目录，`--commit` 记录实际代码身份。诊断脚本 `--gca-backend` 默认 `cpu_cached`，选择当前 v3 完整候选；`original` 选择现有原生对照。`--gca-cached-binary` 和 `--gca-cached-sha256` 可指定已验证程序，否则从本任务 `native_cached_v3/` 构建清单读取并校验；生产默认始终是现有原生程序，脚本默认不改变生产配置。输出包括重新计算的 mri/、stats/、scripts/，以及包含阶段秒数、源/资产/输入/程序哈希、实际设备、精度、同期父子显存和逐体素/逐标签比较的 report.json。失败立即记录，不读取参考结果参与计算；所有参考比较在 filled 生成后执行。这里的整体墙钟是受影响链，不是原始 T1 整例。连续链从自己的 pretess 输出额外计算两个成熟 CPU 后编辑，和 GPU WM 逐体素比较；该诊断结果不进入生产计算。诊断耗时单列 `CPU_WM_point_validation_only`，包含在验收脚本总墙钟内。
 
 ```mermaid
 flowchart TD
-    P[冻结自产 nu / brainmask / SynthSeg / affine] --> G[完整 Conda GCA 旧默认]
+    P[冻结自产 nu / brainmask / SynthSeg / affine] --> G[完整 Conda GCA 候选 v3 / 显式原始对照]
     G --> N[ca normalize 与 CC]
     N --> B[脑归一化与 GPU EntoWM]
     B --> D[Numba 去噪]

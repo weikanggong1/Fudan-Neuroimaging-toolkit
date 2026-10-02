@@ -16,6 +16,7 @@ from fnit.recon_all.ants_denoise_python import denoise_volume
 from fnit.recon_all.fill_cutting_plane_python import fill_mgz
 from fnit.recon_all.pretess_python import pretess_mgh
 from fnit.recon_all.sclimbic import mri_entowm_seg,ENTOWM_MODEL,ENTOWM_CTAB
+from fnit.recon_all.mri_em_register_cached_conda import run_cached_em_register
 from fnit.recon_all.wm_edits_gpu import fix_ento_wm_gpu
 from fnit.recon_all.wm_edits_python import fix_ento_wm as fix_ento_wm_cpu
 
@@ -31,14 +32,14 @@ def compare_volume(actual,reference,labels=False):
   values=np.union1d(np.unique(a),np.unique(b));result['per_label_dice']={str(int(v)):float(2*np.count_nonzero((a==v)&(b==v))/(np.count_nonzero(a==v)+np.count_nonzero(b==v))) for v in values}
  return result
 
-p=argparse.ArgumentParser(description=__doc__);p.add_argument('--root',type=Path,required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--case',choices=('whole_sub01_candidate_retry1','whole_sub02_candidate_retry2'),required=True);p.add_argument('--commit',required=True);args=p.parse_args()
+p=argparse.ArgumentParser(description=__doc__);p.add_argument('--root',type=Path,required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--case',choices=('whole_sub01_candidate_retry1','whole_sub02_candidate_retry2'),required=True);p.add_argument('--commit',required=True);p.add_argument('--gca-backend',choices=('original','cpu_cached'),default='cpu_cached',help='This diagnostic script defaults to candidate v3; production default stays original');p.add_argument('--gca-cached-binary',type=Path);p.add_argument('--gca-cached-sha256');args=p.parse_args()
 args.output.mkdir(parents=True,exist_ok=False)
 mri=args.output/'mri';mri.mkdir();(mri/'transforms').mkdir()
 for name in ('scripts','stats'):(args.output/name).mkdir()
 reference=args.root/'serial_20261001'/args.case/'mri';assets=args.root/'assets';weights=args.root/'weights';binaries=args.root/'serial_20261001/native_bundle/bin'
 snapshot=Path(__file__).resolve().parents[5]/'source_commit.txt'
 actual_commit=snapshot.read_text().strip() if snapshot.exists() else args.commit
-report={'commit':actual_commit,'dispatch_commit':args.commit,'case':args.case,'host':platform.node(),'pid':os.getpid(),'scope':'FNIT_frozen_prefix_continuous_GCA_to_filled_not_raw_T1_whole','overall_equivalence':'not_assessed','tolerance_declared':0,'gpu_uuid':os.environ['CUDA_VISIBLE_DEVICES'],'threads':{k:os.environ.get(k) for k in ('OMP_NUM_THREADS','MKL_NUM_THREADS','OPENBLAS_NUM_THREADS','NUMBA_NUM_THREADS')},'cpu_affinity':sorted(os.sched_getaffinity(0)),'torch_version':torch.__version__,'input_sha256':{},'resource_sha256':{},'binary_sha256':{},'stages':[],'gpu_samples':[],'comparison':{},'execution_complete':False}
+report={'GCA_backend':args.gca_backend,'commit':actual_commit,'dispatch_commit':args.commit,'case':args.case,'host':platform.node(),'pid':os.getpid(),'scope':'FNIT_frozen_prefix_continuous_GCA_to_filled_not_raw_T1_whole','overall_equivalence':'not_assessed','tolerance_declared':0,'gpu_uuid':os.environ['CUDA_VISIBLE_DEVICES'],'threads':{k:os.environ.get(k) for k in ('OMP_NUM_THREADS','MKL_NUM_THREADS','OPENBLAS_NUM_THREADS','NUMBA_NUM_THREADS')},'cpu_affinity':sorted(os.sched_getaffinity(0)),'torch_version':torch.__version__,'input_sha256':{},'resource_sha256':{},'binary_sha256':{},'stages':[],'gpu_samples':[],'comparison':{},'execution_complete':False}
 def json_scalar(value):
  if isinstance(value,np.generic):return value.item()
  raise TypeError('unsupported report value: '+type(value).__name__)
@@ -84,7 +85,14 @@ def stage(name,function,*values,**parameters):
  report['stages'].append({'name':name,'seconds_including_io':time.perf_counter()-tick,'torch_allocated_bytes':torch.cuda.memory_allocated(),'torch_reserved_bytes':torch.cuda.memory_reserved()});save();return result
 try:
  gca=assets/'average/RB_all_2020-01-02.gca';lta=mri/'transforms/talairach.lta'
- stage('mri_em_register',_run_native_em_register,binaries/'mri_em_register',mri,gca,assets)
+ if args.gca_backend=='original':
+  stage('mri_em_register',_run_native_em_register,binaries/'mri_em_register',mri,gca,assets)
+ else:
+  candidate=args.gca_cached_binary or Path(__file__).resolve().parents[5]/'native_cached_v3/mri_em_register_fnit_cached'
+  build=json.loads((candidate.parent/'build.json').read_text())
+  digest=args.gca_cached_sha256 or build['binary_sha256']
+  report['GCA_build']=build;report['binary_sha256']['GCA_actual_cached']=sha(candidate)
+  stage('mri_em_register',run_cached_em_register,candidate,mri,gca,assets,binary_sha256=digest)
  stage('mri_ca_normalize',run_ca_normalize,mri/'nu.mgz',mri/'brainmask.mgz',gca,lta,mri/'norm.mgz',mri/'ctrl_pts.mgz')
  stage('mri_cc',_segment_callosum,mri)
  stage('brain_second_normalize',normalize_t1_aseg,mri/'norm.mgz',mri/'aseg.presurf.mgz',mri/'brainmask.mgz',mri/'brain.mgz',device='cuda:0')
