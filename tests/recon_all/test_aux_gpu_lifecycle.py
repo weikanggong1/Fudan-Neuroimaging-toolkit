@@ -6,7 +6,9 @@ import torch
 from fnit.recon_all import aux_seg, sclimbic
 from fnit.synthmorph.models import SynthMorphNetwork
 
-def test_memory_inference_matches_mgz_roundtrip_and_reuses_model(tmp_path, monkeypatch):
+@pytest.mark.parametrize("cudnn_tf32", [False, True])
+def test_memory_inference_matches_mgz_roundtrip_and_reuses_model(tmp_path, monkeypatch, cudnn_tf32):
+    monkeypatch.setattr(torch.backends.cudnn, "allow_tf32", cudnn_tf32)
     loads = []
     class Fixed(torch.nn.Module):
         def forward(self, image):
@@ -27,6 +29,7 @@ def test_memory_inference_matches_mgz_roundtrip_and_reuses_model(tmp_path, monke
     second = aux_seg._infer_crop(data, native, np.zeros(3), weight, rows, 8, "cpu",
                                 model_cache=cache, precision_report=reports)
     assert len(loads) == 1 and len(reports) == 2
+    assert next(iter(cache))[2] is cudnn_tf32
     path, out, ctab = tmp_path/"input.mgz", tmp_path/"out.mgz", tmp_path/"table"
     nib.save(native, path)
     ctab.write_text("0 Unknown 0 0 0 0\n6101 Left-Dura-MCA 0 0 0 0\n")
@@ -34,6 +37,7 @@ def test_memory_inference_matches_mgz_roundtrip_and_reuses_model(tmp_path, monke
     np.testing.assert_array_equal(first, np.asarray(nib.load(out).dataobj))
     np.testing.assert_array_equal(second, first)
     assert reports[0]["input_dtype"] == "torch.float32"
+    assert reports[0]["cudnn_tf32"] is cudnn_tf32
     assert not reports[0]["autocast"]["enabled"]
 
 def test_forward_only_keeps_both_velocity_forwards_and_same_forward(monkeypatch):

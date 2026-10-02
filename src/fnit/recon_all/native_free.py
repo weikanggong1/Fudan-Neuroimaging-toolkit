@@ -296,14 +296,16 @@ def _run_white_mri_chain(subject: Path, weights: Path, assets: Path,
     为线程数，warp_binaries 按转换/求逆/重采样排列。stage 是记录耗时和
     失败的回调，device 为 CPU 或 CUDA。输出写入 subject，返回辅助网络实际
     前向记录字典；原生程序或计算失败抛异常。全部网络使用 device，
+    辅助网络卷积在局部作用域采用经同输入验证的FP32，matmul TF32不变；
     finalsurfs 后处理使用 CPU；空间、命令与实测见 MNI_NONLINEAR_CHAIN.md。
     """
     from .finalsurfs_python import run_finalsurfs
     from .mni_aux_chain import run_mni_aux_chain
     from .mni_nonlinear_chain import run_mni_nonlinear_chain
 
-    auxiliary = stage("mni_aux", run_mni_aux_chain, subject, weights, assets,
-          device=device, threads=threads)
+    with torch.backends.cudnn.flags(allow_tf32=False):
+        auxiliary = stage("mni_aux", run_mni_aux_chain, subject, weights, assets,
+              device=device, threads=threads)
     stage("mni_nonlinear", run_mni_nonlinear_chain, subject, weights, assets,
           warp_convert=warp_binaries[0], ca_register=warp_binaries[1],
           mri_convert=warp_binaries[2], device=device, threads=threads)
@@ -664,7 +666,9 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                                       value["enabled"] for value in caller_autocast.values()),
                                   "fp32_exceptions": ["SynthStrip", "SynthSeg",
                                                       "Talairach affine",
-                                                      "MNI nonlinear CUDA"]},
+                                                      "MNI nonlinear CUDA",
+                                                      "EntoWM/MCA-dura/vsinus cuDNN"],
+                                  "auxiliary_convolution_policy": "scoped cuDNN FP32; same-input GPU/CPU label regression; matmul TF32 preserved"},
                     "gpu_memory_mode": allocator["effective"], "cuda_allocator": allocator,
                     "timing": {"profile_stages": profile_stages,
                                "total_scope": "API entry through validation, loading, transfers and output writes",
@@ -804,10 +808,11 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
           mri / "norm.mgz", mri / "aseg.presurf.mgz",
           mri / "brainmask.mgz", mri / "brain.mgz", device=device)
     auxiliary_forwards = []
-    stage("entowm", mri_entowm_seg, mri / "nu.mgz", mri / "entowm.mgz",
-          weights, device=device, stats_path=stats / "entowm.stats",
-          talairach_lta=mri / "transforms/talairach.xfm.lta",
-          precision_report=auxiliary_forwards)
+    with torch.backends.cudnn.flags(allow_tf32=False):
+        stage("entowm", mri_entowm_seg, mri / "nu.mgz", mri / "entowm.mgz",
+              weights, device=device, stats_path=stats / "entowm.stats",
+              talairach_lta=mri / "transforms/talairach.xfm.lta",
+              precision_report=auxiliary_forwards)
     report["precision"]["EntoWM_actual_forwards"] = auxiliary_forwards
     stage("ants_denoise", denoise_volume, mri / "brain.mgz",
           mri / "antsdn.brain.mgz")

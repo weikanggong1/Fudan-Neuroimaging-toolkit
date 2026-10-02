@@ -125,7 +125,7 @@ def _infer_crop(crop: np.ndarray, native: nib.spatialimages.SpatialImage,
     """复用同次调用的权重/设备模型，在内存MGH上执行原裁剪推理。
 
     crop为float32三维强度，start为原网格起点（体素），native提供affine。
-    rows、fov和device与sclimbic相同；局部model_cache以权重SHA和设备为键，
+    rows、fov和device与sclimbic相同；局部model_cache以权重SHA、设备及实际cuDNN TF32策略为键，
     仅跨MCA双侧复用，不持久驻留。返回crop原网格int32标签。
     不创建临时MGZ或ctab；权重、几何及推理错误向上传递。
     """
@@ -133,7 +133,7 @@ def _infer_crop(crop: np.ndarray, native: nib.spatialimages.SpatialImage,
     affine[:3, 3] += affine[:3, :3] @ start
     source = nib.MGHImage(np.ascontiguousarray(crop), affine)
     digest = hashlib.sha256(model.read_bytes()).hexdigest()
-    key = (digest, str(torch.device(device)), True)
+    key = (digest, str(torch.device(device)), bool(torch.backends.cudnn.allow_tf32))
     loaded = None if model_cache is None else model_cache.get(key)
     if loaded is None:
         loaded = LimbicUNet.from_h5(model).to(device).eval()

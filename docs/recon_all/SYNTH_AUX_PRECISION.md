@@ -6,6 +6,8 @@
 
 函数作用域仍启用cuDNN，返回或异常时恢复原cuDNN状态。TF32开关属于进程全局状态，有不同精度策略的前向不能在同一进程并发执行。
 
+recon-all主调度对EntoWM及MNI辅助链采用局部`torch.backends.cudnn.flags(allow_tf32=False)`。matmul TF32保持原默认，作用域结束或失败时恢复cuDNN策略，不全局关闭TF32。MCA双侧模型缓存键包含实际cuDNN TF32设置，避免报告与缓存身份不一致。
+
 ## Python接口与数据结构
 
 | 参数 | 输入及默认值 |
@@ -27,17 +29,17 @@
 ```python
 import nibabel as nib
 import torch
-from fnit.recon_all.sclimbic import segment_sclimbic_image
+from fnit.recon_all.sclimbic import segment_sclimbic_image, _ctab_rows
 
 source_image = nib.load("subject/mri/nu.mgz")  # 自产1 mm影像，原生空间
 model_weight_path = "weights/entowm.fsm31.t1.nstd00-30.nstd21-108.h5"  # 已校验权重
-ordered_label_rows = [(0, "Unknown"), (3006, "wm-entorhinal")]  # 实际使用完整颜色表，按模型通道排序
+ordered_label_rows = _ctab_rows("weights/entowm.ctab")  # 权重匹配的完整颜色表，按模型通道排序
 actual_forward_records = []  # 保存本次前向精度，不能由历史声明推断
 with torch.backends.cudnn.flags(allow_tf32=True):  # 默认GPU策略；诊断可显式设False
     label_image = segment_sclimbic_image(
         source=source_image,  # nibabel原网格影像
         model_path=model_weight_path,  # HDF5模型路径
-        rows=ordered_label_rows,  # 必须替换为权重匹配的完整标签表
+        rows=ordered_label_rows,  # 与模型通道一一对应的完整标签表
         fov=160,  # 网络RAS立方边长，体素
         device="cuda:0",  # 显式指定逻辑GPU
         model=None,  # 此次加载模型；同一运行可复用已加载模型
@@ -54,6 +56,18 @@ with torch.backends.cudnn.flags(allow_tf32=True):  # 默认GPU策略；诊断可
 固定自产真实T1检查点的精度对照脚本为`validation/recon_all/optimizations/20261001_serial/benchmark_synth_aux.py`。`--cudnn-tf32`和`--matmul-tf32`仅取0/1，默认1；计时包括模型加载、传输与输出写出，检查点复制不计入阶段时间。每次使用新目录，记录影像、程序、权重、资产哈希及实际前向。
 
 首次61926c7对照的cuDNN关闭设置被覆盖，不能当作FP32测试结论；原始记录保留在[失效对照](../../validation/recon_all/optimizations/20261001_serial/whole/diagnostics/aux_fp32/summary.json)。修复后真实回归结果追加到[本轮报告](../../validation/recon_all/optimizations/20261001_serial/WHOLE_RESULTS.md)，未完成项明确标记。CPU语义单元测试覆盖调用方cuDNN开关及TF32开关四种组合、实际前向记录和状态恢复，不代替真实GPU benchmark。
+
+### 冻结真实T1的三种精度策略
+
+同gpucw1/H100、4线程、显式cuda:0、分配缓存开启；c757cc8源码。默认TF32与修复前GPU逐体素相同；以下不同体素数相对此前同输入CPU结果，顺序为EntoWM/MCA-dura/vsinus。实际前向均float32、autocast关闭。
+
+| 设置 | sub-01不同体素 | sub-02不同体素 | sub-01阶段秒 | sub-02阶段秒 |
+| --- | --- | --- | ---: | ---: |
+| cuDNN TF32 / matmul TF32 | 1/0/4 | 0/0/4 | 5.705 | 6.285 |
+| cuDNN FP32 / matmul FP32 | 0/0/0 | 0/0/0 | 6.211 | 6.301 |
+| cuDNN FP32 / matmul TF32 | 0/0/0 | 0/0/0 | 5.242 | 5.783 |
+
+计时包含模型加载、传输和输出写出，GPU已同步。各策略各测一次，执行先后和共享主机负载不同，不将最后一行较短的观察值宣传为FP32比TF32更快。此前这些少量辅助标签变化传播到毫米级white/pial变化，所以生产采用经验证的最小卷积精度例外；后续整例验证另报。
 
 ## 原实现与引用
 
