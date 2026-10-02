@@ -138,6 +138,29 @@ python tools/reference/bind_connectome_raw_reference_origins.py \
 该来源表的 `execution_completed` 仅表示两组真实参考产物已齐，`scientific_parity` 仍是 `not_assessed`。是否进入官方重复范围由矩阵 envelope 独立判断。解析器测试只验证来源协议，不能替代真实十例 benchmark。
 
 
+### 逐病例新来源交接
+
+如果最后一例需要新的官方预处理、建模或 anatomy namespace，使用 `bind_connectome_raw_reference_case_map.py` 建立**新的**逐病例来源表。旧两组配置及已完成产物保持原路径；新病例必须直接消费自己的真实新 consumer。该工具只读取与校验文件，不执行官方软件或 GPU，不生成矩阵。
+
+输入为冻结 JSON：`raw_manifest={path,sha256}`、`verified_reference_manifest={path,sha256}`，`binding_source_files={absolute_path:sha256}` 固定 mapper 与原 origin helper，`expected_runtime_sources={basename:sha256}` 固定 controller、科学 worker 和两 helper，`expected_parameters` 为已运行 raw worker 的完整参数。`seeds=[0,1,2,3,4]`、`n_seeds=100000`、`expected_eddy_solver="cpu"` 不变。
+
+`case_bindings={case_id:launch_alias}` 必须唯一覆盖 canonical 十例。每个 `launch_bindings[launch_alias]` 包含实际 `launch_configuration={path,sha256}`、实际 `controller_status_path`、说明复用或新交接的 `mode`。未来尚未配置的来源只能写 `{"state":"pending_configuration"}`，不能提前填写产物路径或 SHA。旧九例和新病例允许 producer 根目录不同，科学 worker/helper、二进制、原始病例、五种子参数必须保持相同。
+
+```bash
+# 配置冻结后，每次状态快照都写新的目录，不覆盖历史记录。
+explicit_case_configuration=/path/to/new_frozen/explicit_case_configuration.json
+explicit_case_configuration_sha256=完整64位SHA256
+explicit_case_view=/path/to/new_readonly_case_view
+python tools/reference/bind_connectome_raw_reference_case_map.py \
+    --config "$explicit_case_configuration" \
+    --config-sha256 "$explicit_case_configuration_sha256" \
+    --output-root "$explicit_case_view"
+```
+
+输出 `case_origin_binding.json` 与仅已完成病例的受控软链接。逐例保存实际原始文件、producer 合同、fresh FS、官方 reader、TCK/标量、160 矩阵和节点的 SHA；有末尾缺席节点时同时验证原 CSV、canonical CSV 和补零说明，不改变矩阵。正式发表用各病例自己的 `nodes.tsv`，节点数可随病例变化。
+
+发布前再次校验冻结源码、配置、完成 manifest 和 controller 中所选 terminal 记录；其他病例正常推进不会导致误报。原 controller 的失败信息完整保留，真实完成病例可以明确复用。如果旧 controller 已开始执行分配给新来源的病例，会拒绝发布以防重复来源。新来源未配置或未完成时不创建其结果链接。`execution_completed` 只说明所选十份参考结果齐备，科学匹配状态仍为 `not_assessed`。
+
 ### 已完成参考的只读审计
 
 `audit_connectome_raw_repeats.py` 接收已完成 `--manifest`、canonical `--raw-manifest/--raw-manifest-sha256`、唯一 `--case-id`、实际冻结 `--worker` 和新 `--output`。它不执行官方命令或 GPU，重验原始/producer/源码/二进制/输入 reader/TCK/标量/矩阵 SHA，保存各轮实际时间及官方自身十对完整范围。未提供 FNIT 结果时，cross 和 FNIT 重复状态保持 `not_assessed`。首两例实际完成结果见 [CON01/CON03 独立 raw 五重复审计](../../validation/connectome/tenraw_20261002/task_04_raw_reference_first_cases/README.md)。
@@ -171,6 +194,8 @@ python tools/reference/bind_connectome_raw_reference_origins.py \
 此前只读依赖预检：nodecw10 的七个固定二进制版本调用均 exit0，101 个原始唯一文件 SHA/header 已核对；当时 producer 合同未齐，`required_dependency_ready=false`。随后首四例真实合同就绪，两 CPU 组已启动，首两例参考完成；来源和精确时间以阶段报告为准。gpucw1 的旧系统 C++ 加载器失败独立保留，未改原程序或运行库。详见 [实际预检记录](../../validation/connectome/tenraw_20261002/task_04_raw_reference_preflight/README.md)。这不是追踪耗时或科学一致性结果。
 
 ## 6. 版本与 benchmark 记录
+
+- 2026-10-03：增加逐病例显式来源 hand-off，保持旧 namespace 并允许最后一例使用真实新 producer；14 项 CPU 文件协议回归通过。这些测试不运行科学计算，不是十例精度或耗时结果。
 
 - 2026-10-03：两互斥 CPU 组使用同一冻结配置，首 CON01/CON03 各五轮 198 命令全部 exit0；增加只读实物审计，保留官方自身范围与 `not_assessed` cross 状态。原 5TT 非空间 channel `spacing=NaN` 的 JSON 修正仅影响 metadata，原影像/reader 文件不变，19 CPU 契约测试通过。
 
