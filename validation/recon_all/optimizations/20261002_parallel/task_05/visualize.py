@@ -32,7 +32,7 @@ def main():
         index=arrays[0].shape[axis]//2
         for row,data in enumerate(arrays):
             image=axes[row,axis].imshow(np.take(data,index,axis=axis).T,origin='lower',cmap='gray' if row<2 else 'magma',vmin=0,vmax=255 if row<2 else (1 if row==2 else 1e-4))
-            axes[row,axis].set_title(f'{labels[row]}\n{['Sagittal','Coronal','Axial'][axis]}, RAS voxel {index}');axes[row,axis].axis('off')
+            axes[row,axis].set_title(f'{labels[row]}\n{["Sagittal","Coronal","Axial"][axis]}, RAS voxel {index}');axes[row,axis].axis('off')
             if row==3:fig.colorbar(image,ax=axes[row,axis],shrink=.7)
     fig.suptitle('Real MNI outputs: full-grid comparison, no masking')
     a.output.parent.mkdir(parents=True,exist_ok=True);fig.savefig(a.output,dpi=180);plt.close(fig)
