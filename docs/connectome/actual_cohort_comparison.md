@@ -164,6 +164,116 @@ summary_helper="$benchmark_root/formal_actual_summary_helper_v4/tools/reference"
 
 `ready_for_ten_case_render` 只在 10 例真正比较完整后为 true，用于后续十例图表生成；它不是 MRtrix 科学验收。其余状态为 `partial_actual_comparison_tables` 或明确 failed。CSV 为固定表格结构，JSON 为原指标与时间的完整结构。该工具不执行官方程序，原软件数据和命令见下一节。
 
+### 3.2 十例齐备后的真实脑图与最终导出
+
+`tools/reference/export_connectome_actual_cohort.py` 等待上面的实际 summary，然后重新核对十例完整科学报告、源码与输出 SHA。只有 **10 对下游、10 例独立 FS、130 项解剖、320 个矩阵、20 份实际执行源码记录** 都齐全，才导出最终表和图。覆盖完整与逐值相等是分别记录的结果；工具也不会自行作 MRtrix repeat-envelope 验收。
+
+```python
+from pathlib import Path
+from tools.reference.export_connectome_actual_cohort import export
+
+comparison_directory = Path("/shared/fnit-benchmark/root_actual_cohort_comparison_v2")
+final_directory = Path("/shared/fnit-benchmark/my_new_final_export")
+final_directory.mkdir(exist_ok=False)  # Python 调用也要使用新目录
+result = export(
+    comparison_directory,
+    final_directory,
+    representatives=["sub-CON01", "sub-CON09"],
+    atlas="fs-aparc",
+    candidate_source_label="641f16b2",
+)
+print(result["completed_pairs"])  # 只有实际十例齐全时返回 10
+```
+
+```bash
+plot_python=/shared/cpu-plot-python/bin/python
+export_helper="$benchmark_root/formal_actual_comparison_helper_v7/tools/reference"
+"$plot_python" "$export_helper/export_connectome_actual_cohort.py" \
+  --comparison-root "$benchmark_root/root_actual_cohort_comparison_v2" \
+  --summary-root "$benchmark_root/root_actual_cohort_summary_v2" \
+  --report-dir "$benchmark_root/root_actual_cohort_final_export_v1" \
+  --representative-cases sub-CON01 sub-CON09 \
+  --figure-atlas fs-aparc \
+  --candidate-source-label 641f16b2 \
+  --watch --poll-seconds 60 --timeout-hours 72
+```
+
+| 参数 | 含义 |
+|---|---|
+| `--comparison-root` | 必需，实际十例科学比较目录。最终导出重新验证全部输出字节，不能用旧 partial 结论填齐。 |
+| `--summary-root` | 必需，实际 summary 控制器目录；完整 summary 必须绑定同一个当前比较状态 SHA。 |
+| `--report-dir` | 必需，全新绝对目录；拒绝与原数据、结果、源码、原 driver、summary 或比较目录重叠。 |
+| `--representative-cases` | 默认 `sub-CON01 sub-CON09`，选择本轮真实病例作为脑图和矩阵示例；不能选择未完成病例或旧数据。 |
+| `--figure-atlas` | 默认 `fs-aparc`；从本轮实际八套 atlas 选择一种展示，矩阵与节点保持该病例自己的 K。最终表仍覆盖全部八套。 |
+| `--candidate-source-label` | 可选的人工版本标签，不替代实际 source fingerprint。 |
+| `--watch` | 等待实际完整结果；未齐时只写 waiting，绝不先画十例最终图。 |
+| `--poll-seconds` / `--timeout-hours` | 默认 60 / 72，分别允许 1–60 / `(0,168]`；停止观察不会停止任何原计算。 |
+
+输出包括原四张最终 CSV、完整 `summary.json`、`actual_execution_order.csv`、`final_report.json`、每个代表病例的真实 FA/atlas 脑图与四类完整矩阵图，以及实际执行顺序/CLI 时间/队列等待/显存图。`status.json` 未齐为 `waiting_actual_ten_case_outputs`，成功为 `completed_actual_ten_case_export`；失败历史不覆盖。
+
+脑图只对保存的 DWI grid 做方向轴置换/翻转，不插值、不重新配准，也不减少输入体素。FA NaN/Inf 保留并用洋红色标示；元数据记录其数量、实际空间和来源 SHA。原 FA、atlas、矩阵和输出文件保持原样。矩阵图使用同一病例、同一 atlas 的完整有序节点，逐矩阵共用颜色范围；绝对差值图只用于展示，数值结论来自完整比较表。
+
+实际顺序由同一个 GPU host 上保存的 CLI start UTC 排序，保留真实先后；不把规划的 AB 顺序写成跑过。原 FS 命令、raw-DWI CLI、GPU command、worker、head/staged wall、等待和 gap 均单列。显存再次直接读取每份原 GPU 报告的 allocated、reserved、process-tree 峰值，并记录 NVML 计划采样间隔、实际最大间隔和样本数；图中的采样峰值不是连续上界。绘图为 CPU 文件读取，另计 export 时间；不计入 MRI pipeline 时间。
+
+### 3.3 显式绑定独立的新 GPU 运行
+
+`--gpu-origin-bindings` 只用于新的只读比较 namespace。它逐例声明实际输出来源，保留原状态和报告；不修改旧目录，不恢复旧预处理，也不降低显存门槛。绑定工具为 `tools/reference/connectome_actual_gpu_origins.py`。
+
+```json
+{
+  "schema_version": 1,
+  "scope": "explicit_actual_GPU_monitor_recovery",
+  "bindings": [
+    {
+      "arm": "candidate",
+      "case_id": "sub-CON04",
+      "reason": "monitor_incomplete",
+      "original": {
+        "GPU_report": {"path": "/shared/old-run/candidate/sub-CON04/gpu_report.json", "sha256": "ACTUAL_SHA256"},
+        "wall_report": {"path": "/shared/old-run/candidate/sub-CON04/raw_bids_wall.json", "sha256": "ACTUAL_SHA256"},
+        "driver_snapshot": {"path": "/shared/preserved/old-driver.original-bytes.json", "sha256": "ACTUAL_SHA256"},
+        "configuration": {"path": "/shared/old-run/staged_gpu_config.json", "sha256": "ACTUAL_SHA256"}
+      },
+      "replacement": {
+        "root": "/shared/new-raw-run",
+        "driver_status": "/shared/new-driver/status.json",
+        "configuration": {"path": "/shared/new-raw-run/ACTUAL_CONFIG.json", "sha256": "ACTUAL_SHA256"},
+        "runtime_preflight": {"path": "/shared/nvml-runtime/runtime_preflight.json", "sha256": "ACTUAL_SHA256"}
+      }
+    }
+  ]
+}
+```
+
+上例是路径/结构示例；所有 SHA 必须来自实际不可变文件，不能使用示例字符串运行。`arm` 为 `baseline` 或 `candidate`；每个 `(arm,case_id)` 只能出现一次。`original` 四项绑定原报告、原 driver 的完整原字节快照和原配置。`replacement` 明确新输出目录、新 driver、冻结新配置与真实 CPU 环境预检。新 GPU/CLI 报告必须实际 completed、输出完整，才能形成科学比较。
+
+三类 `reason` 明确分开：
+
+- `monitor_incomplete`：原实际计算 exit 0，但 `nvidia-smi` 的已知 3 秒 timeout 使监测不完整。原观察三峰值均须低于 20 GB，不能把已观测超限包装成监测修复。原科学输出及时间保留为独立历史；新 raw-DWI 重新完整执行 TOPUP、EDDY、tracking 和八套矩阵。
+- `original_not_dispatched`：原 driver 已实际结束并暂停派发，该病例仍为未派发状态，原 GPU/wall 报告和 connectome 输出确实不存在。原 `GPU_report`、`wall_report` 为 null；不虚构旧计算、旧时间或失败。原 fresh recon-all 结果可作为同轮结构输入，新 raw-DWI 完整执行。
+- `original_queue_stopped_before_compute`：原 worker 已真实等待 GPU lock，但在开始 raw-DWI 计算前被调度器的 `STOP_DISPATCH` 拦下。必须保留原实际 failed GPU 报告、原 worker/queue 时间；精确已知 stop 错误、未启动 CLI、无 wall/connectome 输出均需核对。原 `wall_report` 为 null，不能把原 failed GPU 报告删除或改成“不存在”。
+
+新运行必须使用同一冻结 FNIT source、原输入 SHA、同轮真实 FS、atlas、seed、科学 CLI、线程、allocator 和共享 lock。允许明确的独立监控 venv；其原/新 Python 实际二进制、torch 与 NumPy C 扩展、nibabel 的文件路径/版本/SHA 必须一致，预检不初始化 CUDA。新的实际监测必须为直接 `pynvml`、无监测错误且 allocated/reserved/process-tree 三项均 `<20e9`。原 wall helper bytes 保持相同。新环境和等待间隔另列；不会用新的监测计时宣称与旧监测环境存在稳定整链加速。
+
+```bash
+recovery_helper="$benchmark_root/formal_actual_comparison_helper_v7/tools/reference"
+# 以下为新运行实际就绪后的调用示例；当前尚未据此启动新比较。
+"$benchmark_python" "$recovery_helper/benchmark_connectome_cohort_compare.py" \
+  --manifest "$benchmark_root/formal_baseline_raw_v2/input_manifest.json" \
+  --prep-bindings "$benchmark_root/formal_harness_staged_gpu_v2/candidate_prep_bindings.json" \
+  --baseline-anatomy-root "$benchmark_root/formal_baseline_raw_v2" \
+  --baseline-root "$benchmark_root/formal_baseline_common_v3_raw_rerun_v1" \
+  --candidate-root "$benchmark_root/formal_candidate_raw_staged_v1" \
+  --baseline-driver "$benchmark_root/formal_baseline_common_v3_raw_rerun_v1_driver/status.json" \
+  --candidate-driver "$benchmark_root/formal_candidate_raw_staged_v1_driver/status.json" \
+  --gpu-origin-bindings "$benchmark_root/recovery/actual_GPU_origin_bindings.json" \
+  --prior-comparison-dir "$benchmark_root/root_actual_cohort_comparison_v2" \
+  --report-dir "$benchmark_root/root_actual_cohort_comparison_v3" \
+  --poll-seconds 60 --timeout-hours 72
+```
+
+`--prior-comparison-dir` 在该模式只绑定原已完成且重新核对的独立 FS 科学报告。只有原 v1 未定义值读取失败，或本次显式绑定病例的原显存资格失败，才允许继续独立观察；原失败、helper SHA 和旧输出仍保留。下游科学比较重新从显式的新实际路径读取，不把旧失败输出充作新合格结果。summary、final export 和图像均沿相同显式病例映射读取。
+
 ## 4. 比较内容与对应官方数据
 
 原报告中的官方重建命令为：
@@ -230,7 +340,13 @@ JSON 记录实际 QC 和参数的逐项差异。wall 模式没有诊断 stage ho
 
 后续真实汇总已读到第二例 CON03：其 32 个矩阵、nodes/atlas labels、完整影像/变换/bvec 同样严格一致，实际 raw-DWI CLI 为 baseline 632.673662 s、candidate 886.138825 s。两例共 64 个矩阵严格一致；独立官方解剖当前为 8/10 例严格一致，完整下游为 2/10，余 8 例 pending，仍无整链加速结论。
 
-CPU 汇总观察器实际运行于 headcw `fnit-connectome-actual-summary-v2`，生成 10/320/130/20 行四张表；`ready_for_ten_case_render=false`。原 summary v1 的报告身份字段读取失败已保留，新 v2 只修正 path/SHA 与额外科学状态字段的验证，未修改任何原科学报告。最新实际表格、两例科学指标/源码/时间和原失败 SHA 见 [`actual_cohort_summary_v2_protocol.json`](../../validation/connectome/tenraw_20261002/actual_cohort_summary_v2_protocol.json)。这不是最终十例 summary；新增真实结果由只读观察器更新，未完成行不预填。
+该时点 CPU 汇总观察器运行于 headcw `fnit-connectome-actual-summary-v2`，生成 10/320/130/20 行四张表；`ready_for_ten_case_render=false`。原 summary v1 的报告身份字段读取失败已保留，新 v2 只修正 path/SHA 与额外科学状态字段的验证，未修改任何原科学报告。该时点实际表格、两例科学指标/源码/时间和原失败 SHA 见 [`actual_cohort_summary_v2_protocol.json`](../../validation/connectome/tenraw_20261002/actual_cohort_summary_v2_protocol.json)。这不是最终十例 summary；未完成行不预填。
+
+截至 2026-10-02 21:42:04 UTC，独立 FS 已真实比较 9/10 例，成对合格下游仍为 2/10。CON04 candidate 虽实际计算 exit 0、CLI 686.247340 s，但原监测 8 次 `nvidia-smi` timeout、最大实际间隔 13.793267 s；baseline CON05 原 CLI 1614.082525 s、2 次 timeout、最大间隔 4.527028 s。两份原 GPU 报告均为 `not_fully_measured`，不算满足显存资格。原 comparison v2 和 summary v2 已明确保存失败，最终脑图未生成。原失败/部分观察的公开快照见 [`actual_gpu_monitor_failure_protocol.json`](../../validation/connectome/tenraw_20261002/actual_gpu_monitor_failure_protocol.json)。
+
+新的隔离 NVML 环境真实预检已核对 Python/科学模块的路径、版本及字节完全相同，原 wall helper SHA `a34f8ee9…` 不变。12 次预检采样、无错误、最大实际间隔 0.626365 s；该 CPU 预检不是 GPU science run，也不能作为 pipeline 显存通过证明。新实际运行须在独立目录完整执行并通过上述正常门槛，才纳入十例最终比较。
+
+CON04 原预算不合格的实际科学输出另做完整 CPU 读取：32 矩阵、全部共享影像（包括完整 4D corrected DWI）和变换/bvec 数值仍严格一致，独立读取 wall 46.863494 s；该结果不替代原显存失败，也不计为合格第三对。科学读取报告 SHA `6b985abe820912d6590f2c629708260c06d5c56ad3d02c8ecec82da47642a127`，原 CLI 686.247340 s 与原监测失败均保留。
 
 ## 6. 更新与验证记录
 
@@ -241,6 +357,7 @@ CPU 汇总观察器实际运行于 headcw `fnit-connectome-actual-summary-v2`，
 - 本参考工具 v5 / 只读观察 v2：影像允许精确相同的未定义模式和 payload；新增/丢失/不同 payload 失败，矩阵仍必须 finite。60 项 headcw CPU 测试全部通过，0.592 s；新 namespace 显式绑定原 7 例解剖报告，首例 32 个矩阵真实严格一致。
 - 汇总观察 v1 / helper v3：首次真实读取因 FS identity 的额外科学状态字段使过严字典比较退出，原失败保存；科学比较 v2 的首对结果未改变。
 - 汇总工具 / helper v4：身份核验按原 path+SHA，另核对实际科学状态字段。比较/汇总共 75 项 headcw CPU 测试全部通过，0.549 s；包含 missing→null、错误报告拒绝、164/166 病例维度、源码标签与 fingerprint 区分等守卫。测试 fixture 不是 MRI benchmark。
+- 只读 helper v7：增加明确的三类原 GPU 来源、新监控环境字节守卫、最终十例完成/终止状态守卫、实际执行顺序/显存表和 CPU 真图输入读取。116 项 headcw CPU 测试全部通过，3.069 s、无跳过；实际 NVML preflight 与 CON01/03 两 arm 的保存 FA/atlas/矩阵读取通过，36/1 个 NaN 保留。原两个失败观察器、源码和输出均未修改；没有启动新比较或最终渲染。来源与测试快照见 [`actual_cohort_reader_v7_protocol.json`](../../validation/connectome/tenraw_20261002/actual_cohort_reader_v7_protocol.json)。
 
 ## 7. 原实现与参考
 

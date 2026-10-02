@@ -126,6 +126,30 @@ class SummaryProtocolTests(unittest.TestCase):
         with self.assertRaises(ValueError):summary.checked_number(float('nan'))
         with self.assertRaises(ValueError):summary.checked_number(float('inf'))
 
+    def test_final_tables_wait_for_comparison_controller_end_without_changing_science(self):
+        ledgers={arm:{'GPU_report_sha256':'1'*64,'wall_report_sha256':'2'*64,'source_fingerprint':self.sources[arm]['source_fingerprint'],
+            'actual_eddy_gp_seeds':[12345],'memory_budget':{},'outputs':{f'atlases/{atlas}/connectome_{kind}.csv':{'sha256':'3'*64}
+                for atlas in self.atlases for kind in summary.compare.MATRICES}} for arm in ('baseline','candidate')}
+        for case in self.manifest['cases']:
+            values={'status':'completed','count_exact_all_atlases':True,'matrix_numeric_exact_all_atlases':True,'images':{},'numeric_files':{},
+                'atlases':{atlas:{'node_count':2,'node_rows':[{},{}],'nodes_semantics_equal':True,
+                    'matrices':{kind:{'baseline':{'shape':[2,2],'finite':True},'candidate':{'shape':[2,2],'finite':True},
+                    'exact_scientific_array_equal':True} for kind in summary.compare.MATRICES}} for atlas in self.atlases},
+                **{arm:{'actual_source':self.sources[arm],'driver_timing':{}} for arm in ('baseline','candidate')}}
+            path=self.write(self.comp/(case['case_id']+'.json'),values)
+            fs={'case_id':case['case_id'],'status':'completed','all_requested_scientific_data_equal':True,
+                'files':{name:{'strict_scientific_equal':True,'file_bytes_equal':False} for _,names in summary.compare.anatomy.SCIENTIFIC_GROUPS for name in names},
+                **{arm:{'original_execution_timing':{'recon_command_seconds':1.}} for arm in ('baseline','candidate')}}
+            fs_path=self.write(self.comp/(case['case_id']+'.FS.json'),fs)
+            self.state['cases'][case['case_id']]={'status':'completed_comparison','connectome':summary.bounded_json(path)[1],
+                'anatomy':summary.bounded_json(fs_path)[1]}
+        self.state['status']='completed_actual_ten_case_comparison';self.write(self.comp/'status.json',self.state)
+        with patch.object(summary,'actual_pair_ledger',return_value=ledgers):
+            first=self.collect();self.assertEqual(first['completed_pairs'],10);self.assertFalse(first['ready_for_ten_case_render'])
+            self.state['end_utc']='2026-10-02T20:00:00+00:00';self.write(self.comp/'status.json',self.state)
+            finished=self.collect();self.assertTrue(finished['ready_for_ten_case_render'])
+        self.assertEqual(first['matrix_rows'],finished['matrix_rows'])
+
     def test_wrong_completed_gpu_case_refused(self):
         case=self.manifest['cases'][0];result={};configuration=dict(self.config)
         for arm in ('baseline','candidate'):

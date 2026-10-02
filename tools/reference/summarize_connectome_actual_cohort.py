@@ -51,11 +51,23 @@ def checked_number(value):
     return value
 
 
-def actual_pair_ledger(result, case, configuration, source_cache):
+def configuration_GPU_origins(configuration, cases):
+    path = configuration.get("gpu_origin_bindings")
+    if not path: return {}
+    options = argparse.Namespace(**{key: Path(configuration[key]) for key in
+        ("baseline_root", "candidate_root", "baseline_anatomy_root", "baseline_driver", "candidate_driver")})
+    bindings, _ = compare.gpu_origins.load_bindings(path, cases, options)
+    return bindings
+
+
+def actual_pair_ledger(result, case, configuration, source_cache, GPU_bindings=None):
     """Tie table metrics to the actual completed GPU/wall and output bytes."""
     ledgers = {}
     for arm in ("baseline", "candidate"):
-        root = Path(configuration[f"{arm}_root"])
+        options = argparse.Namespace(**{key: Path(configuration[key]) for key in ("baseline_root", "candidate_root", "baseline_driver", "candidate_driver")})
+        root, driver, binding = compare.gpu_origins.selected_origin(options, arm, case["case_id"], GPU_bindings)
+        compare.check(result[arm].get("actual_GPU_root", configuration[f"{arm}_root"]) == str(root) and
+                      result[arm].get("actual_GPU_driver", configuration[f"{arm}_driver"]) == str(driver), "table actual GPU root/driver differs from explicit origin")
         job = root / arm / case["case_id"]
         GPU, gpu_identity = bounded_json(job / "gpu_report.json")
         wall, wall_identity = bounded_json(job / "raw_bids_wall.json")
@@ -69,6 +81,11 @@ def actual_pair_ledger(result, case, configuration, source_cache):
                       "actual CLI outputs are incomplete")
         compare.check(GPU["source_before"]["source_fingerprint"] == GPU["source_after"]["source_fingerprint"] == source["source_fingerprint"],
                       "actual frozen source changed")
+        if binding:
+            actual_binding = compare.gpu_origins.verify_replacement(binding, GPU, wall, case, wall["selected_inputs"]["freesurfer_subject_dir"])
+            compare.check(result[arm].get("GPU_origin_binding") == actual_binding, "actual eligible replacement differs from scientific comparison")
+        else:
+            compare.check(result[arm].get("GPU_origin_binding") is None, "implicit replacement GPU origin rejected")
         if source["source_fingerprint"] not in source_cache:
             source_cache[source["source_fingerprint"]] = compare.verify_source(source)
         output = job / "connectome"
@@ -78,6 +95,7 @@ def actual_pair_ledger(result, case, configuration, source_cache):
                           identity.get("exists") is True and compare.anatomy.sha(path) == identity["sha256"],
                           "actual output bytes changed since scientific comparison")
         ledgers[arm] = {"GPU_report_sha256": gpu_identity["sha256"], "wall_report_sha256": wall_identity["sha256"],
+                        "actual_GPU_root": str(root), "actual_GPU_driver": str(driver), "GPU_origin_binding": result[arm].get("GPU_origin_binding"),
                         "source_fingerprint": source["source_fingerprint"], "actual_source_file_count": source["file_count"],
                         "actual_git_metadata": source.get("git_commit"), "outputs": wall["outputs"]["files"],
                         "actual_eddy_gp_seeds": wall.get("actual_eddy_gp_seeds"), "memory_budget": result[arm]["memory_budget"]}
@@ -131,6 +149,9 @@ def build_summary(comparison_root, *, candidate_source_label=None, verified_pair
     manifest, manifest_identity = bounded_json(configuration["manifest"])
     cases = compare.manifest_cases(manifest)
     compare.check(manifest_identity == state["manifest"], "actual canonical raw manifest changed")
+    GPU_bindings = configuration_GPU_origins(configuration, cases)
+    if state.get("GPU_origin_tool_sha256"):
+        compare.check(state["GPU_origin_tool_sha256"] == compare.anatomy.sha(compare.gpu_origins.__file__), "frozen GPU origin reader changed")
     baseline_config, _ = bounded_json(Path(configuration["baseline_root"]) / "cohort_config.json")
     atlases = baseline_config["atlases"]
     compare.check(len(atlases) == 8 and len(set(atlases)) == 8, "this formal table requires eight distinct declared atlases")
@@ -154,7 +175,9 @@ def build_summary(comparison_root, *, candidate_source_label=None, verified_pair
                "waiting_reason": record.get("waiting_reason"), "error": record.get("error"),
                "raw_input_ledger_sha256": hashlib.sha256(json.dumps(case["input_files"], sort_keys=True).encode()).hexdigest()}
         for arm in ("baseline", "candidate"):
-            row[arm + "_observation"] = observation(configuration[arm + "_root"], configuration[arm + "_driver"], arm, case_id)
+            options = argparse.Namespace(**{key: Path(configuration[key]) for key in ("baseline_root", "candidate_root", "baseline_driver", "candidate_driver")})
+            root, driver, binding = compare.gpu_origins.selected_origin(options, arm, case_id, GPU_bindings)
+            row[arm + "_observation"] = observation(root, driver, arm, case_id)
             for field in TIME_FIELDS: row[arm + "_" + field] = row[arm + "_observation"]["completed_time_observations"].get(field)
             row[arm + "_official_recon_command_seconds"] = None
             row[arm + "_full_timing_scope"] = None
@@ -181,7 +204,7 @@ def build_summary(comparison_root, *, candidate_source_label=None, verified_pair
             compare.check(result.get("status") == "completed" and list(result["atlases"]) == atlases, "actual eight-atlas report is incomplete")
             identity_key = record["connectome"]["sha256"]
             if identity_key not in verified_pairs:
-                verified_pairs[identity_key] = actual_pair_ledger(result, case, configuration, source_cache)
+                verified_pairs[identity_key] = actual_pair_ledger(result, case, configuration, source_cache, GPU_bindings)
             ledger = verified_pairs[identity_key]
             row.update(count_exact_all_atlases=result["count_exact_all_atlases"],
                        matrix_numeric_exact_all_atlases=result["matrix_numeric_exact_all_atlases"],
@@ -204,6 +227,9 @@ def build_summary(comparison_root, *, candidate_source_label=None, verified_pair
                 "actual_git_metadata": actual_source.get("git_commit") if actual_source else None,
                 "GPU_report_sha256": ledger[arm]["GPU_report_sha256"] if result else None,
                 "wall_report_sha256": ledger[arm]["wall_report_sha256"] if result else None,
+                "actual_GPU_root": ledger[arm].get("actual_GPU_root") if result else None,
+                "actual_GPU_driver": ledger[arm].get("actual_GPU_driver") if result else None,
+                "GPU_origin_binding": ledger[arm].get("GPU_origin_binding") if result else None,
                 "actual_eddy_gp_seeds": ledger[arm]["actual_eddy_gp_seeds"] if result else None,
                 "memory_budget": ledger[arm]["memory_budget"] if result else None})
         for atlas in atlases:
@@ -229,12 +255,14 @@ def build_summary(comparison_root, *, candidate_source_label=None, verified_pair
                 matrix_rows.append(entry)
         case_rows.append(row)
     complete = sum(row["paired_status"] == "completed_comparison" for row in case_rows)
+    finalized = complete == 10 and all(row["anatomy_status"] == "completed" for row in case_rows) and \
+                state.get("status") == "completed_actual_ten_case_comparison" and bool(state.get("end_utc"))
     return {"schema_version": 1, "observed_utc": compare.anatomy.utc(), "comparison_status_sha256": status_identity["sha256"],
-            "status": "complete_actual_ten_case_tables" if complete == 10 else "failed_actual_comparison_tables" if state.get("failed_cases") else "partial_actual_comparison_tables",
+            "status": "complete_actual_ten_case_tables" if finalized else "failed_actual_comparison_tables" if state.get("failed_cases") else "partial_actual_comparison_tables",
             "requested_cases": 10, "completed_pairs": complete, "requested_atlases_per_case": 8, "requested_matrices_per_case": 32,
             "atlas_names": atlases, "node_policy": "same-case same-atlas ordered nodes.tsv; case-specific K without trimming, padding or cross-subject K equality",
             "case_rows": case_rows, "matrix_rows": matrix_rows, "anatomy_rows": anatomy_rows, "source_rows": source_rows,
-            "ready_for_ten_case_render": complete == 10, "MRtrix_repeat_acceptance": "not_decided_by_this_table_tool",
+            "ready_for_ten_case_render": finalized, "MRtrix_repeat_acceptance": "not_decided_by_this_table_tool",
             "scope": "actual immutable scientific comparison reports and verified current output bytes; no missing value imputation, source/report mutation, GPU or MRI computation; stage walls/queue/gaps retained separately",
             "GPU_used": False}
 
@@ -276,6 +304,11 @@ def main(argv=None):
     compare.check(binding_identity == state["preparation_bindings"], "original official preparation binding changed")
     protected += [origin[key] for origin in origins for key in ("root", "driver_dir")]
     protected += [Path(state["configuration"][key]).parent for key in ("manifest", "prep_bindings", "baseline_driver", "candidate_driver")]
+    GPU_bindings = configuration_GPU_origins(state["configuration"], compare.manifest_cases(manifest))
+    for binding in GPU_bindings.values():
+        declaration = binding["declaration"]
+        protected += [declaration["replacement"]["root"], Path(declaration["replacement"]["driver_status"]).parent,
+                      Path(declaration["replacement"]["runtime_preflight"]["path"]).parent, Path(declaration["original"]["driver_snapshot"]["path"]).parent]
     if state.get("prior_comparison_binding"): protected.append(Path(state["prior_comparison_binding"]["original_status"]["path"]).parent)
     for arm, filename in (("baseline", "cohort_config.json"), ("candidate", "staged_gpu_config.json")):
         config_path = Path(state["configuration"][arm + "_root"]) / filename

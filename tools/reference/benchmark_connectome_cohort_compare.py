@@ -20,8 +20,10 @@ import time
 
 try:
     from . import compare_freesurfer_recon_outputs as anatomy
+    from . import connectome_actual_gpu_origins as gpu_origins
 except ImportError:
     import compare_freesurfer_recon_outputs as anatomy
+    import connectome_actual_gpu_origins as gpu_origins
 
 MATRICES = ("count", "sift2_fbc", "mean_length", "mean_fa")
 _SHARED_IMAGES = ("five_tissue_dwi_world.nii.gz", "gmwmi_dwi_world.nii.gz", "fa_dwi.nii.gz", "brain_mask_dwi.nii.gz",
@@ -188,7 +190,7 @@ def validate_input_ledger(entries, case, description):
               actual.get("actual_sha256") == wanted["sha256"], description + " input SHA provenance changed")
 
 
-def validate_gpu_run(root, driver_path, version, case, subject_dir, atlases, touched):
+def validate_gpu_run(root, driver_path, version, case, subject_dir, atlases, touched, *, GPU_origin_binding=None):
     record, state, observation = ready_case(driver_path, version, case["case_id"])
     config = state["config"]
     check(isinstance(record.get("timing"), dict) and bool(record["timing"]), "completed actual GPU driver has no validated original wall/queue/gap timing")
@@ -238,7 +240,9 @@ def validate_gpu_run(root, driver_path, version, case, subject_dir, atlases, tou
               for name in ("process_tree", "allocated_bytes", "reserved_bytes")), "GPU memory qualification is missing or outside the strict budget")
     for relative in files:
         touched[str(output / relative)] = anatomy.sha(output / relative)
+    recovered_origin = gpu_origins.verify_replacement(GPU_origin_binding, gpu, wall, case, subject_dir) if GPU_origin_binding else None
     return output, {"gpu_report": gpu_identity, "wall_report": wall_identity, "driver_observation": observation,
+                    "actual_GPU_root": str(root), "actual_GPU_driver": str(driver_path), "GPU_origin_binding": recovered_origin,
                     "actual_source": verified_source, "memory_budget": budget, "driver_timing": record.get("timing"),
                     "worker_wall_seconds": gpu.get("worker_wall_seconds"), "gpu_lock_queue_seconds": gpu.get("gpu_lock_queue_seconds"),
                     "gpu_command_wall_seconds": gpu.get("gpu_command_wall_seconds"), "raw_dwi_cli_total_runtime_seconds": wall.get("total_runtime_seconds"),
@@ -396,11 +400,14 @@ def verify_cached_anatomy(result):
                 check(path.is_symlink() and os.readlink(path) == link["link_target"] and str(path.resolve()) == link["resolved"],
                       "official FS internal link changed after comparison")
 
-def compare_gpu_case(case, baseline_root, candidate_root, baseline_driver, candidate_driver, fs_result, atlases):
+def compare_gpu_case(case, baseline_root, candidate_root, baseline_driver, candidate_driver, fs_result, atlases, *, GPU_bindings=None):
     verify_cached_anatomy(fs_result)
     touched = {}
-    a, baseline = validate_gpu_run(baseline_root, baseline_driver, "baseline", case, fs_result["baseline"]["subject_directory"], atlases, touched)
-    b, candidate = validate_gpu_run(candidate_root, candidate_driver, "candidate", case, fs_result["candidate"]["subject_directory"], atlases, touched)
+    scope = argparse.Namespace(baseline_root=baseline_root, candidate_root=candidate_root, baseline_driver=baseline_driver, candidate_driver=candidate_driver)
+    a_root, a_driver, a_binding = gpu_origins.selected_origin(scope, "baseline", case["case_id"], GPU_bindings)
+    b_root, b_driver, b_binding = gpu_origins.selected_origin(scope, "candidate", case["case_id"], GPU_bindings)
+    a, baseline = validate_gpu_run(a_root, a_driver, "baseline", case, fs_result["baseline"]["subject_directory"], atlases, touched, GPU_origin_binding=a_binding)
+    b, candidate = validate_gpu_run(b_root, b_driver, "candidate", case, fs_result["candidate"]["subject_directory"], atlases, touched, GPU_origin_binding=b_binding)
     check(baseline["precision_at_exit"] == candidate["precision_at_exit"], "actual precision settings differ")
     check(baseline["wall_report"] and candidate["wall_report"], "actual wall evidence absent")
     for entry in case["input_files"]:
@@ -482,10 +489,11 @@ def compare_once(options, state, cases, origins, mapping):
             else:
                 anatomy_result, identity = safe_json(record["anatomy"]["path"])
                 check(identity == {"path": record["anatomy"]["path"], "sha256": record["anatomy"]["sha256"]}, "completed anatomy comparison changed")
-            ready_case(options.baseline_driver, "baseline", case["case_id"])
-            ready_case(options.candidate_driver, "candidate", case["case_id"])
+            for arm in ("baseline", "candidate"):
+                _, actual_driver, _ = gpu_origins.selected_origin(options, arm, case["case_id"], getattr(options, "_gpu_origins", None))
+                ready_case(actual_driver, arm, case["case_id"])
             gpu_result = compare_gpu_case(case, options.baseline_root, options.candidate_root, options.baseline_driver,
-                                          options.candidate_driver, anatomy_result, origins[0]["config"]["atlases"])
+                                          options.candidate_driver, anatomy_result, origins[0]["config"]["atlases"], GPU_bindings=getattr(options, "_gpu_origins", None))
             output_path = namespace / f"{case['case_id']}.connectome.json"
             check(not output_path.exists(), "existing GPU comparison report is never overwritten")
             anatomy.atomic_json(output_path, gpu_result)
@@ -540,9 +548,18 @@ def bind_prior_anatomy(prior_dir, options, state, watched):
           prior.get("case_origin_index") == state["case_origin_index"], "prior comparison inputs/bindings changed")
     for key in ("manifest", "prep_bindings", "baseline_anatomy_root", "baseline_root", "candidate_root", "baseline_driver", "candidate_driver"):
         check(prior["configuration"].get(key) == str(getattr(options, key)), "prior actual comparison scope changed")
-    errors = [record.get("error") for record in prior["cases"].values() if record.get("status") == "failed_comparison"]
-    check(errors and all(error == {"type": "ValueError", "message": "nonfinite scientific array"} for error in errors),
-          "prior failure is not the explicitly supported matching-undefined-image reader failure")
+    failed_records = [(case_id, record.get("error")) for case_id, record in prior["cases"].items() if record.get("status") == "failed_comparison"]
+    errors = [error for _, error in failed_records]
+    def supported_prior_failure(case_id, error):
+        if error == {"type": "ValueError", "message": "nonfinite scientific array"}: return True
+        bindings = getattr(options, "_gpu_origins", {})
+        matched = [arm for arm in ("baseline", "candidate") if (arm, case_id) in bindings]
+        if not matched or not isinstance(error, dict) or error.get("type") != "ValueError": return False
+        message = error.get("message", "")
+        return message == "GPU memory qualification is missing or outside the strict budget" or any(
+            message.startswith(f"actual {arm}/{case_id} failed: failed_gpu_eligibility;") for arm in matched)
+    check(errors and all(supported_prior_failure(case_id, error) for case_id, error in failed_records),
+          "prior failure is not the explicitly bound undefined-image reader or original memory qualification failure")
     watched[str(prior_path)] = identity["sha256"]
     reused = []
     for case_id, record in prior["cases"].items():
@@ -574,7 +591,8 @@ def main(argv=None):
     parser.add_argument("--baseline-driver", type=Path, required=True, help="actual baseline driver status.json")
     parser.add_argument("--candidate-driver", type=Path, required=True, help="actual candidate driver status.json, may be absent until formal run starts")
     parser.add_argument("--report-dir", type=Path, required=True)
-    parser.add_argument("--prior-comparison-dir", type=Path, help="explicit immutable v1 nonfinite-reader failure; reuse only its verified completed official anatomy reports in a NEW comparison namespace")
+    parser.add_argument("--prior-comparison-dir", type=Path, help="explicit immutable undefined-image reader or bound GPU qualification failure; reuse only verified completed official anatomy reports in a NEW comparison namespace")
+    parser.add_argument("--gpu-origin-bindings", type=Path, help="explicit per-arm/case immutable memory-monitor failures and separate eligible fresh raw-DWI origins; no implicit output replacement")
     parser.add_argument("--poll-seconds", type=int, default=60)
     parser.add_argument("--timeout-hours", type=float, default=72)
     parser.add_argument("--once", action="store_true", help="one real observation; waiting remains waiting, never ten-case completion")
@@ -585,6 +603,8 @@ def main(argv=None):
         check(path.is_absolute(), "explicit absolute paths are required")
     if options.prior_comparison_dir is not None:
         check(options.prior_comparison_dir.is_absolute(), "prior comparison must be an explicit absolute path")
+    if options.gpu_origin_bindings is not None:
+        check(options.gpu_origin_bindings.is_absolute(), "GPU origin bindings require an explicit absolute path")
     manifest, manifest_identity = safe_json(options.manifest)
     cases = manifest_cases(manifest)
     origins, mapping, binding_identity = load_origins(options.prep_bindings, cases)
@@ -595,16 +615,30 @@ def main(argv=None):
     check(baseline_config["atlases"] == origins[0]["config"]["atlases"] and baseline_config["cpu_threads"] == 8,
           "baseline scientific/official settings differ from candidate preparation")
     verify_source(baseline_config["frozen_sources"]["baseline"])
+    options._gpu_origins, GPU_binding_identity = ({}, None) if options.gpu_origin_bindings is None else gpu_origins.load_bindings(options.gpu_origin_bindings, cases, options)
     protected = [options.baseline_anatomy_root, options.baseline_root, options.candidate_root]
     protected += [Path(origin["root"]) for origin in origins] + [Path(origin["driver_dir"]) for origin in origins]
     protected += [options.baseline_driver.parent, options.candidate_driver.parent, options.prep_bindings.parent]
     protected += [Path(identity["directory"]) for identity in baseline_config["frozen_sources"].values()]
     if options.prior_comparison_dir is not None:
         protected.append(options.prior_comparison_dir)
+    for binding in options._gpu_origins.values():
+        declaration = binding["declaration"]
+        protected += [Path(declaration["replacement"]["root"]), Path(declaration["replacement"]["driver_status"]).parent,
+                      Path(declaration["replacement"]["runtime_preflight"]["path"]).parent,
+                      Path(declaration["original"]["driver_snapshot"]["path"]).parent]
     check_report_namespace(options.report_dir, protected)
     options.report_dir.parent.mkdir(parents=True, exist_ok=True)
     options.report_dir.mkdir(exist_ok=False)
     watched = preserve_configs(options.report_dir, options.baseline_root, origins, options.prep_bindings, options.manifest)
+    if GPU_binding_identity:
+        watched[GPU_binding_identity["path"]] = GPU_binding_identity["sha256"]
+        with (options.report_dir / "GPU_origins.original_bytes.json").open("xb") as stream:
+            stream.write(Path(GPU_binding_identity["path"]).read_bytes())
+        for binding in options._gpu_origins.values():
+            declaration = binding["declaration"]
+            for identity in (*declaration["original"].values(), declaration["replacement"]["configuration"], declaration["replacement"]["runtime_preflight"]):
+                if identity is not None: watched[identity["path"]] = identity["sha256"]
     original_config = options.baseline_anatomy_root / "cohort_config.json"
     watched[str(original_config)] = anatomy.sha(original_config)
     with (options.report_dir / "original_baseline_anatomy_config.bytes.json").open("xb") as stream:
@@ -612,8 +646,9 @@ def main(argv=None):
     state = {"schema_version": 1, "status": "waiting_actual_outputs", "start_utc": anatomy.utc(),
              "controller_host": socket.gethostname(), "manifest": manifest_identity, "preparation_bindings": binding_identity,
              "case_origin_index": mapping, "requested_cases": 10, "candidate_source_status": "unknown until actual completed candidate GPU report/config is read",
-             "configuration": {key: str(value) if isinstance(value, Path) else value for key, value in vars(options).items()},
+             "configuration": {key: str(value) if isinstance(value, Path) else value for key, value in vars(options).items() if not key.startswith("_")},
              "tool_sha256": anatomy.sha(__file__), "anatomy_tool_sha256": anatomy.sha(anatomy.__file__),
+             "GPU_origin_tool_sha256": anatomy.sha(gpu_origins.__file__), "GPU_origin_bindings": GPU_binding_identity,
              "cases": {case["case_id"]: {"case_id": case["case_id"], "status": "waiting_actual_outputs"} for case in cases},
              "scope": "read-only actual CPU scientific comparisons; no original-source/status/output mutations; unknown is not ready; staged wall and queue/gap observations are retained without stage-sum full-wall claims",
              "GPU_used": False, "original_namespaces_modified": False}
