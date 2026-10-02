@@ -82,3 +82,64 @@ def test_native_splat_preserves_last_half_voxel_rejection():
         assert float(counts.sum())==expected
         sums=splat_inverse_coordinate_sums(positions,(3,3,3))
         assert all(not item.any() for item in sums)  # node coordinates are zero
+
+
+
+def _small_warp(tmp_path, source):
+    import nibabel as nib
+    from fnit.recon_all.mni_warp_io import write_forward_warp
+    path=tmp_path/'field.nii.gz'
+    write_forward_warp(np.zeros((*source.shape,3),np.float32),source,source,path)
+    return path
+
+
+def test_check_rejects_same_shape_wrong_scanner_affine(tmp_path):
+    import nibabel as nib
+    from fnit.recon_all.mni_warp_sampling import resample_mni_check
+    source=nib.Nifti1Image(np.ones((4,4,4),np.uint8),np.eye(4))
+    warp=_small_warp(tmp_path,source)
+    shifted=np.eye(4);shifted[0,3]=4
+    path=tmp_path/'wrong.nii.gz';nib.save(nib.Nifti1Image(np.ones(source.shape,np.uint8),shifted),path)
+    with pytest.raises(ValueError,match='scanner-RAS'):
+        resample_mni_check(path,warp,tmp_path/'output.nii.gz',device='cpu')
+
+
+def test_check_accepts_big_endian_mgz_multibyte_voxels(tmp_path):
+    import nibabel as nib
+    from fnit.recon_all.mni_warp_sampling import resample_mni_check
+    values=np.arange(64,dtype=np.int16).reshape(4,4,4)
+    source=nib.MGHImage(values,np.eye(4));original=tmp_path/'orig.mgz';nib.save(source,original)
+    loaded=nib.load(original)
+    assert np.asarray(loaded.dataobj).dtype.byteorder=='>'
+    warp=_small_warp(tmp_path,loaded);output=tmp_path/'output.nii.gz'
+    resample_mni_check(original,warp,output,device='cpu')
+    result=np.asarray(nib.load(output).dataobj)
+    expected=values.copy();expected[:,:,0]=0  # native GCAM source-domain check
+    np.testing.assert_array_equal(result,expected)
+    assert result.dtype.kind=='i' and result.dtype.itemsize==2
+
+
+@pytest.mark.parametrize('encoding,spacing',[(0,1),(1,1),(2,1),(3,2)])
+def test_warp_reader_rejects_wrong_vector_encoding(tmp_path,encoding,spacing):
+    import nibabel as nib,struct
+    from fnit.recon_all.ca_register_inverse import read_warp_geometries
+    source=nib.Nifti1Image(np.zeros((4,4,4),np.uint8),np.eye(4))
+    image=nib.load(_small_warp(tmp_path,source))
+    payload=bytearray(image.header.extensions[0].get_content());cursor=4
+    while cursor+12<=len(payload):
+        tag,length=struct.unpack_from('>iq',payload,cursor)
+        if tag==13:
+            struct.pack_into('>ii',payload,cursor+12,encoding,spacing);break
+        cursor+=12+length
+    image.header.extensions.clear();image.header.extensions.append(nib.nifti1.Nifti1Extension(14,bytes(payload)))
+    with pytest.raises(ValueError,match='DISP_RAS'):
+        read_warp_geometries(image)
+
+
+def test_warp_reader_rejects_multiple_vector_frames(tmp_path):
+    import nibabel as nib
+    from fnit.recon_all.ca_register_inverse import read_warp_geometries
+    source=nib.Nifti1Image(np.zeros((4,4,4),np.uint8),np.eye(4));single=nib.load(_small_warp(tmp_path,source))
+    multiple=nib.Nifti1Image(np.zeros((4,4,4,2,3),np.float32),single.affine,single.header)
+    with pytest.raises(ValueError,match='complete shape'):
+        read_warp_geometries(multiple)

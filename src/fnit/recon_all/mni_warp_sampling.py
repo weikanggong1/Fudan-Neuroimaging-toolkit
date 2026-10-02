@@ -139,8 +139,12 @@ def resample_mni_check(original,forward,output,*,device='cuda:0',chunk_slices=16
     image=nib.load(str(original));warp=nib.load(str(forward))
     source_aff,atlas_aff,source_shape=read_warp_geometries(warp)
     if tuple(image.shape)!=source_shape:raise ValueError('forward source grid differs from original')
-    array=np.asarray(image.dataobj)
-    volume=torch.as_tensor(np.ascontiguousarray(array),device=dev)
+    if not np.allclose(image.affine,source_aff,atol=1e-4,rtol=0):
+        raise ValueError('original scanner-RAS affine differs from forward source geometry')
+    array=np.asarray(image.dataobj)  # nibabel applies any proxy scale/intercept
+    array=np.ascontiguousarray(array.astype(array.dtype.newbyteorder('='),copy=False))
+    tensor_values=array.astype(np.int32) if array.dtype==np.dtype('uint16') else array
+    volume=torch.as_tensor(tensor_values,device=dev)
     disp=np.asarray(warp.dataobj,np.float32)[:,:,:,0,:]
     out=np.empty(warp.shape[:3],array.dtype);inverse=_inverse_4x4_native(source_aff)
     for lo in range(0,out.shape[0],chunk_slices):
