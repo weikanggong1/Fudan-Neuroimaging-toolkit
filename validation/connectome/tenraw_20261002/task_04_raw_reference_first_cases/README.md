@@ -26,6 +26,12 @@
 
 八套节点数在这两例为 84 / 84 / 164 / 376 / 414 / 216 / 554 / 1054，以实际 `nodes.tsv` 定义行列。其他病例可有不同缺席 ROI，不硬编码维度。
 
+### 真实脑图与已有矩阵
+
+![独立官方原始链 CON01/CON03 的 mean b0、FA、fs-aparc 和既有 seed0 count 矩阵](official_raw_brain_and_matrix.png)
+
+展示数据从这两例官方原文件提取：canonical 轴置换/翻转后取原扫描平面的中间切片，不插值。矩阵来自实际 seed0 CSV，行列使用 `nodes.tsv` 的 1–84 索引；正 count 用对数颜色，零边留白。mean b0 的颜色范围使用 2–98 百分位，FA 用 0–1 颜色范围，仅影响显示。原数组逐位重放相同，记录在 [展示数据来源](display_source.json)、[逐位重放](extraction_replay_bits.json)、[实际图像 SHA](brain_figure_artifact_identity.json)。这张图展示官方参考产物，不评判 FNIT 匹配。
+
 ## 3. 复现只读审计
 
 ```bash
@@ -45,11 +51,37 @@ CUDA_VISIBLE_DEVICES='' python tools/reference/audit_connectome_raw_repeats.py \
 
 `--manifest` 是真实完成参考报告；`--raw-manifest` 与 SHA 绑定原始病例；`--case-id` 必须一致；`--worker` 是当时执行的冻结源码及相邻 helper；`--output` 必须为新文件。工具源 SHA 写入审计结果。标量 QC 如有非有限值会保留计数，只描述有限子集分布，不改变原标量或矩阵。
 
+绘图工具支持分开提取和渲染：
+
+```bash
+# 在 benchmark 环境用 nibabel/NumPy 提取；不重新生成任何 pipeline 图像或矩阵。
+python tools/reference/plot_connectome_raw_reference_examples.py \
+    --manifests /actual/group_A/sub-CON01/reference_manifest.json \
+                /actual/group_B/sub-CON03/reference_manifest.json \
+    --display-directory /new/exact_display_arrays --extract-only
+
+# 仅在已有 matplotlib 环境渲染同一份冻结数组。
+python tools/reference/plot_connectome_raw_reference_examples.py \
+    --display-source /new/exact_display_arrays/display_source.json \
+    --output /new/official_raw_brain_and_matrix.png
+```
+
+`--manifests` 为一个或多个真实完成报告；`--display-directory` 必须为新目录；`--extract-only` 仅输出切片/已有矩阵 NPZ 和来源 JSON；`--display-source` 直接读该来源 JSON，校验 NPZ SHA；`--output` 指定 PNG。提取与绘图可以分别使用环境，绘图不重算科学指标。
+
 ## 4. 本轮 metadata 修正记录
 
 此前 dependency preflight 在 5TT 第四个非空间 channel 的 `spacing=NaN` 处无法严格写 JSON。commit `8afae8e1` 仅将该 undefined metadata 记为 `null` 并记录原 NaN 类型；前三个物理空间轴仍要求有限正间距，原 NIfTI 和 `mrinfo` 文件字节/SHA不变。与 `588e8e33` 比较，`parameters()` / `main()` 的科学命令 AST 未变；19 个 CPU 契约测试通过（8.37 s），测试不作为科学 benchmark。旧失败 preflight 和无 tmux 的零派发尝试均在来源快照中保留。
 
 两组实际 worker SHA `0c6191ec2fc950352548d2244a8ee1c03ab22cdd42a2f347bd36ffcb83dd487e`，控制器 SHA `f73e3840235f42b18bd902b6811dcd6834020d2bec1fa3aafe1fa6b51eafcf89`。新只读审计器独立冻结，不修改任何 producer 或运行中的 worker。只读 collector 另有 2 个标准库来源协议测试，包含实际 manifest 的 `size_bytes` 字段和原始/worker/audit/病例摘要错配拒绝，0.008 s；这些是协议回归。
+
+### 后续实物状态
+
+2026-10-02 22:31 UTC 已增 CON04/CON05，各五轮 198 条命令全部 exit0；只读审计分别 4.413 / 4.671 s。此时总覆盖 4/10，其余六例等待真实上游。原首两例快照保留，后续报告使用实际新源路径：
+
+- [CON04 原样审计](sub-CON04_official_repeat_audit.json)、[CON05 原样审计](sub-CON05_official_repeat_audit.json)
+- [四例实际审计状态快照](four_case_audit_status_snapshot.json)、[实物来源 SHA](four_case_actual_source_snapshot.json)
+
+collector 对首两例复用原实际审计路径和 SHA，对新增病例只执行 CPU 只读审计；不重算官方追踪或矩阵。跨软件评测仍等待总控交付最新正式 FNIT 输出来源。
 
 ## 5. 参考入口
 
