@@ -4,6 +4,8 @@
 [验证协议](BENCHMARK_PROTOCOL.md)。真实数据结果完成后单列发布；脚本语法检查、
 任务已启动和服务器已连接不能写成整例通过。
 
+五会话的共享登录、SCP 和计时排队方法见[服务器连接说明](SERVER_CONNECTION.md)。
+
 ## 原始 T1 整例
 
 `execute_whole_case.py` 从原始单 T1 启动已冻结源码。输入 JSON 的字段如下。
