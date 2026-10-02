@@ -260,3 +260,44 @@ python validation/recon_all/python_gpu_port/run_monitored.py \
 22 次样本、无查询失败、最大采样间隔 2.266 s；缓存关闭时 Torch 统计明确
 为 unavailable。这是冻结同输入阶段数据，不是当前缓冲优化或整例提速结果。
 当前版本的修复后阶段与整例仍须绑定最终源码和报告分别补充。
+
+## 前向实际后端记录
+
+`record_network_forward(module, inputs, records, **metadata)` 接收已经构造的
+PyTorch 模块、实际前向输入 Tensor、可追加的记录列表，以及 JSON 兼容的可选元数据。
+前三个参数没有默认值，metadata 默认空；函数返回 None，只追加一条字典。
+图像坐标与单位由输入张量决定，本函数不采样图像。记录设备、输入/模型 dtype、
+matmul/cuDNN TF32、autocast，以及 cuDNN 的 enabled、benchmark、deterministic。
+缺少模块/张量属性、列表不能追加时抛出原异常；不加载模型、不改策略、不同步 CUDA。
+
+```python
+import torch
+from fnit.recon_all.profiling import record_network_forward
+
+network = torch.nn.Conv3d(
+    in_channels=1,  # 已构造模型的输入通道数；此小模型仅演示记录接口
+    out_channels=1,  # 模型输出通道数
+    kernel_size=1,  # 卷积核边长
+).to(device="cuda:0", dtype=torch.float32).eval()
+input_tensor = torch.zeros(
+    size=(1, 1, 16, 16, 16),  # batch、channel、三个体素轴；例子不代表真实benchmark
+    dtype=torch.float32,  # 不使用FP16或BF16
+    device="cuda:0",  # 实际目标设备
+)
+forward_records = []  # 调用者保存，内部没有全局缓存
+record_network_forward(
+    module=network,  # 真实流程应传已经加载权重的网络
+    inputs=input_tensor,  # 传真正将要前向的张量
+    records=forward_records,  # 追加JSON兼容字典
+    model="example_conv3d",  # 可选元数据：辨认模型
+)
+print(forward_records[0])
+```
+
+该记录函数属于重建内部步骤，没有独立CLI或官方等价命令。
+新增后端字段在 `db479a0` 只改变日志；97项相关测试通过，未重跑该日志补丁的整例。
+两例真实整例实际运行 `ff372d7`，受 main 公用采样器更新影响的注册阶段在
+`ece5e23` 用两例相同输入回归，矩阵及warp逐位相同；
+[源码与报告绑定](../../validation/recon_all/optimizations/20261001_serial/whole/integrated_main/source_after_main_merge.json)
+和[完整耗时、显存及精度](../../validation/recon_all/optimizations/20261001_serial/FINAL_RESULTS.md)
+分别保留测试范围。示例张量不充当真实数据验证。

@@ -1,0 +1,69 @@
+{
+  "code_commit": "ff372d73f106e850b999fbc95ae0b324cd315cbf",
+  "source_archive_sha256": "071e48c97a1f8d88bd920e4753ed676033e47bed5a3fa0bc22e06c24338fd126",
+  "scope": "existing homepage Conda; wheel build and target install; not clean environment/whole runtime isolation",
+  "host": "headcw",
+  "python": "3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]",
+  "compiler_paths": {
+    "CC": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/x86_64-conda-linux-gnu-cc",
+    "CXX": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/x86_64-conda-linux-gnu-c++"
+  },
+  "steps": {
+    "wheel": {
+      "seconds": 15.006602588109672,
+      "exit_code": 0,
+      "command": [
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+        "-m",
+        "pip",
+        "wheel",
+        "--no-deps",
+        "--no-build-isolation",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate_integrated_ff372d7",
+        "-w",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/installation_ff372d7/wheels"
+      ],
+      "log_sha256": "59ccf6f1e774a69ebe81c47db4dc25b95118062c65fcb03af0e2ae760ea387b8"
+    },
+    "install": {
+      "seconds": 4.9969616355374455,
+      "exit_code": 0,
+      "command": [
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+        "-m",
+        "pip",
+        "install",
+        "--no-deps",
+        "--target",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/installation_ff372d7/installed",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/installation_ff372d7/wheels/fudan_neuroimaging_toolkit-0.16.0-cp311-cp311-linux_x86_64.whl"
+      ],
+      "log_sha256": "5d7bdb453ffd1f95b610f463afe3d6f5e467e9592f9cda1f6e6c210fe1d47cfb"
+    },
+    "recon_cli": {
+      "seconds": 1.5499431882053614,
+      "exit_code": 0,
+      "command": [
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+        "-m",
+        "fnit.recon_all.native_free",
+        "--help"
+      ],
+      "log_sha256": "38b7c96aa0903ca7c3a38076ef8bf4b061884553b1c641d7b48e8e98b964f72f"
+    },
+    "api_import": {
+      "seconds": 2.721122957766056,
+      "exit_code": 0,
+      "command": [
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+        "-c",
+        "import fnit,fnit.recon_all.native_free,fnit.recon_all.normalization._normalization_cuda,fnit.synthstrip,fnit.synthseg_parc; print(fnit.__file__)"
+      ],
+      "log_sha256": "b5721c7b900435a1986fdc8a358faca3397fbc8e41476dec11057f01705f2736"
+    }
+  },
+  "wheel_sha256": "f9074a44ec7214687c8a3aa9c5f05ceb4910ecff9d8797128e56e1267bb46fe3",
+  "status": "passed",
+  "isolation_status": "not_verified",
+  "script_sha256": "0e3f4d4682478853c10a3ee815a2b46bad3b72b75e31a829f4767083c83f8a24"
+}

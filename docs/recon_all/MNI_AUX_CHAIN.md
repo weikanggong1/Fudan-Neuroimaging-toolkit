@@ -90,3 +90,33 @@ mri_vsinus_seg --s sub01 --rca-synthseg --threads 4 \
 - [FreeSurfer 固定源码提交](https://github.com/freesurfer/freesurfer/tree/d932c45b7941662ea380a05efef580568b98d41a)。
 
 串行候选：recon-all GPU profile的MNI affine、MCA/dura、vsinus随主设备执行；MCA双侧复用模型，裁剪推理改为内存nibabel影像。新增precision_report及结构见[串行说明](SERIAL_OPTIMIZATION.md)。两例同GPU三张标签图零差异，CPU→GPU局部差异单列。
+
+## 自产 LTA 的读取兼容性
+
+本轮修复共享 `fnit._transforms._lta_value` 对字段名与等号之间空格数量的限制；
+自产 `xras   =` 等行原来会被拒绝。现在接受空格及制表符，并严格匹配完整字段名，
+不会把 `xras_extra` 当作 `xras`。同一段缺少字段仍抛 ValueError。
+
+公开接口 `load_lta(path)` 输入可读的 LTA 路径，无默认路径，返回 AffineTransform。
+`matrix` 为 float64 4×4，`source`/`target` 是带 shape/affine 的 ImageGeometry，
+`space` 为 world 或 voxel。type-1 为世界RAS坐标，平移mm、线性项无量纲；
+type-0 为源体素到目标体素，坐标单位体素。矩阵不因读取而转换空间。
+文件/字段缺失、无效几何或不支持的LTA类型会抛异常。
+
+```python
+from fnit._transforms import load_lta
+
+transform = load_lta(
+    path="/data/subjects/sub01/mri/transforms/synthmorph.1.0mm.1.0mm/reg.targ_to_invol.lta",  # FNIT自产type-0变换
+)
+voxel_matrix = transform.matrix  # 4×4 float64；MNI152体素→个体conform体素
+source_grid = transform.source  # MNI152模板的shape及世界RAS仿射
+target_grid = transform.target  # 个体conform网格的shape及世界RAS仿射
+```
+
+该格式读取没有独立CLI或独立原软件计算命令；LTA来自上文注册和变换组合，
+官方格式说明见[FreeSurfer LTA](https://surfer.nmr.mgh.harvard.edu/fswiki/FsTutorial/LtaFormat)。
+两例自产的Talairach世界LTA、MNI世界LTA和MNI→个体体素LTA共六个文件，读取矩阵差异0，
+全部读取与哈希共0.007435秒；这是格式回归，不是影像重建耗时。
+[真实报告](../../validation/recon_all/optimizations/20261001_serial/whole/integrated_main/postmerge/final_lta_reader_reproduced.json)
+绑定 `d4cba29`，100项相关测试通过，未把该兼容补丁标为另一次整例。

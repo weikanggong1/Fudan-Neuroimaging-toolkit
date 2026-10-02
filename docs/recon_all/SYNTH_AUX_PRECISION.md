@@ -6,7 +6,7 @@
 
 函数作用域仍启用cuDNN，返回或异常时恢复原cuDNN状态。TF32开关属于进程全局状态，有不同精度策略的前向不能在同一进程并发执行。
 
-recon-all主调度对EntoWM及MNI辅助链采用局部`torch.backends.cudnn.flags(allow_tf32=False)`。matmul TF32保持原默认，作用域结束或失败时恢复cuDNN策略，不全局关闭TF32。MCA双侧模型缓存键包含实际cuDNN TF32设置，避免报告与缓存身份不一致。
+recon-all主调度对EntoWM及完整MNI辅助链采用局部`torch.backends.cudnn.flags(allow_tf32=False)`，该MNI作用域包含MNI152 affine及MCA-dura/vsinus。MNI152初始仿射额外在自身作用域关闭matmul TF32（29f07d7），返回或异常恢复；EntoWM、MCA-dura/vsinus仍保留matmul TF32。cuDNN作用域结束或失败时也恢复，不全局关闭TF32。MCA双侧模型缓存键包含实际cuDNN TF32设置，避免报告与缓存身份不一致。
 
 ## Python接口与数据结构
 
@@ -55,7 +55,7 @@ with torch.backends.cudnn.flags(allow_tf32=True):  # 默认GPU策略；诊断可
 
 固定自产真实T1检查点的精度对照脚本为`validation/recon_all/optimizations/20261001_serial/benchmark_synth_aux.py`。`--cudnn-tf32`和`--matmul-tf32`仅取0/1，默认1；计时包括模型加载、传输与输出写出，检查点复制不计入阶段时间。每次使用新目录，记录影像、程序、权重、资产哈希及实际前向。
 
-首次61926c7对照的cuDNN关闭设置被覆盖，不能当作FP32测试结论；原始记录保留在[失效对照](../../validation/recon_all/optimizations/20261001_serial/whole/diagnostics/aux_fp32/summary.json)。修复后真实回归结果追加到[本轮报告](../../validation/recon_all/optimizations/20261001_serial/WHOLE_RESULTS.md)，未完成项明确标记。CPU语义单元测试覆盖调用方cuDNN开关及TF32开关四种组合、实际前向记录和状态恢复，不代替真实GPU benchmark。
+首次61926c7对照的cuDNN关闭设置被覆盖，不能当作FP32测试结论；原始记录保留在[失效对照](../../validation/recon_all/optimizations/20261001_serial/whole/diagnostics/aux_fp32/summary.json)。修复后真实回归结果见[现版整合报告](../../validation/recon_all/optimizations/20261001_serial/FINAL_RESULTS.md)及[同输入前向记录](../../validation/recon_all/optimizations/20261001_serial/whole/integrated_main/reports/aux_policy_ff372d7_summary.json)，未完成项明确标记。CPU语义单元测试覆盖调用方cuDNN开关及TF32开关四种组合、实际前向记录和状态恢复，不代替真实GPU benchmark。
 
 ### 冻结真实T1的三种精度策略
 
@@ -71,4 +71,6 @@ with torch.backends.cudnn.flags(allow_tf32=True):  # 默认GPU策略；诊断可
 
 ## 原实现与引用
 
-复用项目既有PyTorch网络与HDF5权重转换，不引入系统FreeSurfer运行依赖。上游实现为[FreeSurfer mri_sclimbic_seg](https://github.com/freesurfer/freesurfer/tree/dev/mri_sclimbic_seg)。模型和资产的来源、许可证及固定版本以[资源清单](../../validation/recon_all/optimizations/20261001_serial/runtime_fingerprints_61926c7.json)为准。
+复用项目既有PyTorch网络与HDF5权重转换，不引入系统FreeSurfer运行依赖。上游实现为[FreeSurfer mri_sclimbic_seg](https://github.com/freesurfer/freesurfer/tree/dev/mri_sclimbic_seg)。模型和资产的来源、许可证及固定版本以[当前资源清单](../../validation/recon_all/optimizations/20261001_serial/whole/integrated_main/reports/runtime_fingerprints_ff372d7.json)为准。
+
+当前生产 mni_aux 外层 cuDNN flags 的 enabled 实际为 False；MNI仿射仍在指定CUDA上以float32计算。辅助分割函数内部 enabled=True 并继承TF32=False，外层退出恢复设置。完整后端不同的控制不能直接充当同算法回归；本轮合并验证显式匹配这些值。相关原始失败控制与修正控制分别归档，不把差异统称随机性。

@@ -1,7 +1,7 @@
 {
   "schema": "fnit_serial_optimization_v1",
   "baseline_commit": "0c8ab327c1a4d10eaf6c8066a16d050e09e30c90",
-  "branch": "recon-all-serial-20261001",
+  "branch": "recon-all-main-verified-20261002",
   "execution": "single agent, serial stages",
   "stages": [
     {
@@ -10,7 +10,7 @@
       "status": "stage_regression_complete",
       "tested_commit": "8302bdc0fe627d678fb0014b6b64cea6844962fd",
       "report": "stage1_summary.json",
-      "whole_case_pending": true
+      "whole_case_pending": false
     },
     {
       "id": 2,
@@ -18,7 +18,7 @@
       "status": "stage_regression_complete",
       "tested_commit": "198c3091c5cb5a6995a2fcc7abdfbad00f57017d",
       "reports": "stage2/",
-      "whole_case_pending": true
+      "whole_case_pending": false
     },
     {
       "id": 3,
@@ -26,7 +26,7 @@
       "status": "stage_regression_complete",
       "tested_commit": "74ae022edd932e9f3c57c6e253678f13853f8842",
       "report": "stage3_summary.json",
-      "whole_case_pending": true
+      "whole_case_pending": false
     },
     {
       "id": 4,
@@ -36,7 +36,7 @@
       "reports": "stage4/",
       "default_reconstruction_threads": 1,
       "performance_result": "no significant whole-stage speedup; fitting dominates",
-      "whole_case_pending": true
+      "whole_case_pending": false
     },
     {
       "id": 5,
@@ -48,22 +48,97 @@
       "reports": "stage5/",
       "paired_unprofiled_timing": "complete: 1453.060 -> 1232.634 seconds, one paired observation",
       "same_input_native_reference": "complete: Python indexed geometry equals official; Conda P99 .225255/max 1.482209 mm",
-      "report": "stage5/summary.json"
+      "report": "stage5/summary.json",
+      "whole_case_pending": false
     }
   ],
-  "whole_case_validation": "sub01 complete; sub02 fresh GPU baseline complete, candidate retry1 Talairach CUDA OOM, same-code raw-T1 retry2 running",
+  "whole_case_validation": "both raw-T1 empty-dir executions and all independent comparisons complete",
   "metric_equivalence": "not_assessed",
   "whole_cases": {
     "sub01": {
       "execution": "complete",
-      "command_seconds": 3557.968623652123,
-      "comparison": "pending"
+      "comparison": "complete",
+      "baseline_command_seconds": 4242.883542585187,
+      "command_seconds": 3453.936414853204,
+      "time_reduction_percent": 18.59459774970108,
+      "peak_sampled_process_bytes": 10921967616,
+      "output_present": 138,
+      "strict_vs_baseline": 135,
+      "strict_vs_official": 6,
+      "label_dice_vs_baseline_minimum": 1.0,
+      "aparc_68_mae_vs_baseline": {
+        "SurfArea": 0.0,
+        "GrayVol": 0.0,
+        "ThickAvg": 0.0,
+        "MeanCurv": 0.0
+      }
     },
     "sub02": {
-      "execution": "baseline complete, candidate retry2 running",
+      "execution": "complete",
+      "comparison": "complete",
       "baseline_command_seconds": 4043.588950867299,
-      "comparison": "pending"
+      "command_seconds": 3712.5675714602694,
+      "time_reduction_percent": 8.1863261431662,
+      "peak_sampled_process_bytes": 10894704640,
+      "output_present": 138,
+      "strict_vs_baseline": 135,
+      "strict_vs_official": 2,
+      "label_dice_vs_baseline_minimum": 1.0,
+      "aparc_68_mae_vs_baseline": {
+        "SurfArea": 0.0,
+        "GrayVol": 0.0,
+        "ThickAvg": 0.0,
+        "MeanCurv": 0.0
+      }
     }
   },
-  "execution_stability": "two Talairach child CUDA allocation failures across API/CLI; six monitored raw-T1 input-chain replays succeeded in both bootstrap modes, root cause unlocated"
+  "execution_stability": "both final executions succeeded; historical Talairach allocation failure root cause remains unlocated",
+  "whole_case_report": "final_whole_summary.json",
+  "optimization_non_regression": "measured: seven label volumes exact, ordered white/pial geometry exact, 68 ROI thickness/area/volume/curvature exact; MNI fields still differ and are separately diagnosed",
+  "latest_production_commit": "d4cba2907856ed545f10e36f9c2b9e914e84585b",
+  "precision_fix": {
+    "cause": "sclimbic forced cuDNN TF32 and invalidated FP32 control",
+    "standalone_commit": "c757cc8016cc63fdb7f21adb156e3ef87753748d",
+    "production_commit": "3faa9385d6644e4f25e5fe0f858158d243028118",
+    "default_gpu_regression": "both cases exact vs prior GPU",
+    "conv_fp32_gpu_regression": "both cases exact vs CPU",
+    "matmul_tf32_preserved": true,
+    "report": "whole/precision_policy/three_settings_c757_summary.json",
+    "current_candidate_stage_report": "whole/precision_policy/candidate_3faa_summary.json",
+    "whole_case_validation": "3faa938 both complete; final ff372d7 both complete; separate reports"
+  },
+  "whole_cases_tested_commit": "ff372d73f106e850b999fbc95ae0b324cd315cbf",
+  "historical_61926c7": {
+    "whole_cases": {
+      "sub01": {
+        "execution": "complete",
+        "baseline_command_seconds": 4242.883542585187,
+        "command_seconds": 3557.968623652123,
+        "comparison": "complete",
+        "strict_vs_baseline": 23,
+        "strict_vs_official": 4,
+        "output_present": 138
+      },
+      "sub02": {
+        "execution": "complete",
+        "baseline_command_seconds": 4043.588950867299,
+        "command_seconds": 3910.8009453010745,
+        "comparison": "complete",
+        "strict_vs_baseline": 84,
+        "strict_vs_official": 2,
+        "output_present": 138
+      }
+    },
+    "execution_stability": "two Talairach child CUDA allocation failures across API/CLI; six monitored raw-T1 input-chain replays succeeded in both bootstrap modes, root cause unlocated",
+    "whole_case_report": "whole_summary.json",
+    "optimization_non_regression": "not_established; measured local surface changes and sub01 RH crossing count increase"
+  },
+  "postmerge_validation": {
+    "actual_computation_commit": "ece5e2308c6095e12f788cd4cc801196be39c3ad",
+    "status": "both real affected-stage regressions exact; 100 final related tests and six real LTA reader regressions passed",
+    "metadata_only_commit": "db479a0857fd911b174e98d22c99e14edf8f5294",
+    "source_proof": "whole/integrated_main/source_after_main_merge.json",
+    "not_a_new_whole_execution": true,
+    "lta_reader_compatibility_commit": "d4cba2907856ed545f10e36f9c2b9e914e84585b"
+  }
 }

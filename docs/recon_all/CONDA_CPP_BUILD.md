@@ -48,7 +48,7 @@ fnit-recon-all /data/sub01_T1w.nii.gz /data/subjects/sub01 \
 
 五阶段串行优化新增N4能力查询、内部拟合/重建计时和可选重建线程，接口见[N4说明](N4_ITK_CONDA.md)。主页安装脚本已经调用同一build_n4_itk_conda.sh；显式CMake配置后关闭Ninja自动重生成，避免共享文件系统时间戳造成反复配置。实际新产物已在现有主页Conda环境独立编译，两例量化前后与旧程序零差异，1/4重建线程没有整段收益，默认保留1。生产原生程序束只连接源码构建产物；[清单](../../validation/recon_all/optimizations/20261001_serial/native_bundle_manifest.json)与[实际构建](../../validation/recon_all/optimizations/20261001_serial/stage4/build.json)绑定哈希。
 
-本轮复用了已有环境与13项原生程序，没有重新创建干净环境或重编全部程序。新整例正在运行，干净隔离验收仍未验证；哈希、启动和ldd检查不代替这一项。
+本轮复用了已有环境与13项原生程序，没有重新创建干净环境或重编全部程序。整合版本ff372d7另在同一主页Conda环境构建wheel、编译FNIT FastPD扩展、安装至独立目标目录并验证API导入与CLI帮助；[安装报告](../../validation/recon_all/optimizations/20261001_serial/whole/integrated_main/reports/installation/report.json)保留编译器、日志与产物SHA。最新原始T1整例见[本轮结果](../../validation/recon_all/optimizations/20261001_serial/FINAL_RESULTS.md)。干净隔离验收仍未验证，哈希、启动和ldd检查不代替这一项。
 
 ## 参考文献与原实现
 

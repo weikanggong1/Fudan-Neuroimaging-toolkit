@@ -3,7 +3,9 @@
 --reports 是20261001_serial目录，需有whole/sub01、whole/sub02中的
 baseline_run/candidate_run、baseline_monitor/candidate_monitor、baseline_launch/candidate_launch、
 candidate_completion.json以及paired/、quality/、quality_baseline/、quality_official/。
-另读取runtime_fingerprints_61926c7.json、stage_implementations.json。所有耗时单位秒、
+--case-root默认whole，为reports下两例目录；--candidate-commit默认61926c7完整提交，
+--resource-report默认runtime_fingerprints_61926c7.json。它们必须与实际报告版本一致。
+另读取stage_implementations.json。所有耗时单位秒、
 NVML占用单位字节；--output必须是新的JSON。源文件及脚本绑定SHA-256。
 相同输入路径、主机、GPU UUID、设备、线程和成功状态不符时失败，保留失败诊断。
 输出含全部阶段/内部步骤、严格138诊断、脑区指标、标签Dice和扩展质量；
@@ -54,8 +56,16 @@ def hemisphere_reports(run):
     } for hemi, surface in run["surfaces"].items()}
 
 
-def summarize(root, case, implementations):
-    directory = root/"whole"/case
+def summarize(root, case, implementations, *,
+              candidate_commit="61926c7dceae2f9097fa296e306cf1efa0a09191",
+              case_root=Path("whole")):
+    """只读汇总单例；root为报告根、case为sub01/sub02、implementations为阶段分类。
+
+    candidate_commit及case_root显式绑定实际测试提交和目录；默认保留61926c7入口。
+    返回JSON兼容字典，秒/字节、表面指标原单位；缺失、版本/设备/线程不符抛异常。
+    不运行影像算法，不修改输入，也不判定尚无确认门槛的整体等效。
+    """
+    directory = root/case_root/case
     files = {name: directory/(name+".json") for name in
              ("baseline_run", "candidate_run", "baseline_monitor", "candidate_monitor",
               "baseline_launch", "candidate_launch", "candidate_completion")}
@@ -78,7 +88,7 @@ def summarize(root, case, implementations):
         "same_invocation": baseline_launch["invocation"] == launch["invocation"],
         "same_thread_environment": baseline_launch["thread_environment"] == launch["thread_environment"],
         "baseline_version_bound": baseline_launch["code_commit"] == baseline_version,
-        "candidate_version_bound": launch["code_commit"] == completion["code_commit"] == "61926c7dceae2f9097fa296e306cf1efa0a09191",
+        "candidate_version_bound": launch["code_commit"] == completion["code_commit"] == candidate_commit,
         "full_precision": not after["precision"]["fp16_or_bf16_enabled"],
     }
     if not all(checks.values()):
@@ -139,26 +149,33 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--reports",type=Path,required=True)
     parser.add_argument("--output",type=Path,required=True)
+    parser.add_argument("--candidate-commit",default="61926c7dceae2f9097fa296e306cf1efa0a09191")
+    parser.add_argument("--case-root",type=Path,default=Path("whole"))
+    parser.add_argument("--resource-report",type=Path,default=Path("runtime_fingerprints_61926c7.json"))
     args=parser.parse_args()
     if args.output.exists():
         raise FileExistsError(args.output)
     root=args.reports.resolve()
     implementations=read(root/"stage_implementations.json")
-    provenance=read(root/"runtime_fingerprints_61926c7.json")
+    provenance=read(root/args.resource_report)
+    if provenance["code_commit"] != args.candidate_commit:
+        raise ValueError("resource fingerprint and candidate version differ")
     if provenance["mismatches"]:
         raise ValueError(provenance["mismatches"])
     for case in ("sub01","sub02"):
-        if (root/"whole"/case/"timing.csv").exists():
-            raise FileExistsError(root/"whole"/case/"timing.csv")
+        if (root/args.case_root/case/"timing.csv").exists():
+            raise FileExistsError(root/args.case_root/case/"timing.csv")
     report={"schema":"fnit_serial_whole_v1",
             "resources":provenance,
             "script_sha256":hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
-            "cases":{case:summarize(root,case,implementations) for case in ("sub01","sub02")},
+            "cases":{case:summarize(root,case,implementations,
+                     candidate_commit=args.candidate_commit,case_root=args.case_root)
+                     for case in ("sub01","sub02")},
             "isolation_validation":"not_verified; host has separately installed official software",
             "continuous_gpu_peak":"not_verified; NVML sampling only",
             "overall_metric_equivalence":"not_assessed"}
     for case,value in report["cases"].items():
-        stages_csv=root/"whole"/case/"timing.csv"
+        stages_csv=root/args.case_root/case/"timing.csv"
         with stages_csv.open("x",newline="") as stream:
             fields=["name","baseline_seconds","candidate_seconds","saved_seconds",
                     "time_reduction_percent","speedup","implementation","source_paths",
