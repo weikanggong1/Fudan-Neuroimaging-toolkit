@@ -132,6 +132,6 @@ mris_place_surface --pial --lh --i "$SUBJECT_DIR/surf/lh.white" \
 
 使用现有 environment.yml：PyTorch2.5.1、Numba>=0.59、nibabel>=5，及其已声明 Triton3.1.0。没有新增下载、权重、模板、编译器安装或私有资源再分发。Triton按需导入，CPU路径不需要它；Conda原生环境的可选依赖接入由协调者统一维护。本实现根据已有 FNIT/FreeSurfer公式改写，遵循仓库 licenses/FreeSurfer.txt 与 THIRD_PARTY_NOTICES.md。
 
-- FreeSurfer固定源：d932c45b7941662ea380a05efef580568b98d41a；[mris_place_surface](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/mris_place_surface/mris_place_surface.cpp)、[强度梯度](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/utils/mrisurf_compute_dxyz.cpp)、[有序时间步](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/utils/mrisurf_timeStep.cpp)。
+- FreeSurfer固定源：d932c45b7941662ea380a05efef580568b98d41a；[mris_place_surface](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/mris_make_surfaces/mris_place_surface.cpp)、[强度梯度](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/utils/mrisurf_compute_dxyz.cpp)、[有序时间步](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/utils/mrisurf_timeStep.cpp)。
 - Fischl B, Dale AM. Measuring the thickness of the human cerebral cortex from magnetic resonance images. PNAS97:11050–11055 (2000). [doi:10.1073/pnas.200033797](https://doi.org/10.1073/pnas.200033797)。
 - [Triton JIT官方说明](https://triton-lang.org/main/python-api/generated/triton.jit.html)。

@@ -10,6 +10,15 @@ def sha(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 files=[a.subject/'surf'/f'{a.hemi}.white',a.subject/'surf'/f'autodet.gw.stats.{a.hemi}.dat',*[a.subject/'label'/f'{a.hemi}.{x}.label' for x in ('cortex','cortex+hipamyg')],*[a.subject/'mri'/f'{x}.mgz' for x in ('brain.finalsurfs','wm','aseg.presurf')]]
 report=dict(commit=a.commit,host=platform.node(),scope='frozen same-input complete four-pass pial; not self-generated continuous chain or whole case',input_sha256={str(x):sha(x) for x in files},source_sha256={str(x):sha(x) for x in Path(inspect.getfile(pial)).parent.glob('place*.py')},frozen_collision_sha256=sha(a.frozen_collision),benchmark_sha256=sha(__file__),program_sha256=sha(os.sys.executable),tolerance='exact coordinates, accepted trajectory and cleanup',overall_equivalence='not_assessed',runs={},trace=[])
 def save(): (a.output/'report.json').write_text(json.dumps(report,indent=2)+'\n')
+torch.backends.cuda.matmul.allow_tf32=True;torch.backends.cudnn.allow_tf32=True
+bootstrap=time.perf_counter()
+try:
+ bootstrap_tensor=torch.empty(1,device=a.device);torch.cuda.synchronize(a.device);del bootstrap_tensor
+ report['cuda_bootstrap_seconds']=time.perf_counter()-bootstrap
+ report['gpu_uuid']=str(torch.cuda.get_device_properties(a.device).uuid)
+except Exception as error:
+ report['cuda_bootstrap_failure']=repr(error);save();raise
+report['actual_tf32']=dict(matmul=torch.backends.cuda.matmul.allow_tf32,cudnn=torch.backends.cudnn.allow_tf32)
 spec=importlib.util.spec_from_file_location('fnit.recon_all.frozen_collision',a.frozen_collision);old=importlib.util.module_from_spec(spec);spec.loader.exec_module(old)
 new_async=pial.asynchronous_first_step;baseline_coordinates={}
 for name,backend in [('baseline','cpu'),('candidate','triton')]:
