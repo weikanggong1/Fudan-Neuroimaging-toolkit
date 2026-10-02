@@ -8,7 +8,7 @@ import time
 import nibabel as nib
 import numpy as np
 import torch
-from fnit._transforms import load_lta
+from fnit._transforms import load_lta, same_geometry
 from .ca_register_inverse import _inverse_4x4_native, read_warp_geometries
 from .mni_warp_io import native_geometry, write_forward_warp
 
@@ -73,10 +73,15 @@ def convert_mni_warp(ras_warp,cropped_source,original,full_target,crop_to_origin
     返回计算/加载/保存秒数；CUDA失败明确报错。显式cpu用于诊断。
     """
     started=time.perf_counter();dev=_device(device)
-    if chunk_slices<1:raise ValueError('chunk_slices must be positive')
+    if not isinstance(chunk_slices,int) or chunk_slices<1:raise ValueError('chunk_slices must be a positive integer')
     warp=nib.load(str(ras_warp));source=nib.load(str(cropped_source))
     orig=nib.load(str(original));target=nib.load(str(full_target))
     first,second=load_lta(crop_to_original_lta),load_lta(crop_to_full_lta)
+    if not (same_geometry(first.source,source,tolerance=1e-4) and
+            same_geometry(first.target,orig,tolerance=1e-4) and
+            same_geometry(second.source,warp,tolerance=1e-4) and
+            same_geometry(second.target,target,tolerance=1e-4)):
+        raise ValueError('LTA source/target geometries differ from supplied MNI inputs')
     # load_lta retains supplied voxel matrices. Native inversions round in FP32.
     def vox(transform):
         if transform.space=='voxel':return np.asarray(transform.matrix,np.float32)
@@ -84,7 +89,10 @@ def convert_mni_warp(ras_warp,cropped_source,original,full_target,crop_to_origin
                        _matmul(transform.matrix,transform.source.affine))
     source_to_orig=_inverse_4x4_native(_inverse_4x4_native(vox(first)))
     full_to_crop=_inverse_4x4_native(vox(second))
-    displacement=torch.as_tensor(np.ascontiguousarray(np.asarray(warp.dataobj,np.float32).transpose(3,0,1,2)),device=dev)
+    array=np.asarray(warp.dataobj,np.float32)
+    if array.shape != (*warp.shape[:3],3) or not np.isfinite(array).all():
+        raise ValueError('expected finite (X,Y,Z,3) RAS displacement')
+    displacement=torch.as_tensor(np.ascontiguousarray(array.transpose(3,0,1,2)),device=dev)
     coordinates=torch.empty_like(displacement)
     crop_aff=native_geometry(warp);src_inv=_inverse_4x4_native(native_geometry(source))
     for lo in range(0,warp.shape[0],chunk_slices):
@@ -107,16 +115,27 @@ def convert_mni_warp(ras_warp,cropped_source,original,full_target,crop_to_origin
             'device':str(dev),'chunk_slices':chunk_slices}
 
 
+def _native_nearest_plan(coordinates, shape):
+    """MRIindexNotInVolume uses rint; nint(double) rounds half away from zero."""
+    q=coordinates.double()
+    nearest=torch.where(q<0,torch.ceil(q-0.5),torch.floor(q+0.5)).long()
+    border=q.round()  # C rint, including even ties exactly at the border
+    valid=torch.ones_like(q[0],dtype=torch.bool)
+    for axis,size in enumerate(shape):
+        valid &= (border[axis]>=0)&(border[axis]<size)
+    return [nearest[axis].clamp(0,size-1) for axis,size in enumerate(shape)],valid
+
+
 @torch.inference_mode()
 def resample_mni_check(original,forward,output,*,device='cuda:0',chunk_slices=16):
-    """最近邻检查图：full目标→source绝对体素；nint= floor(q+0.5)，越界填0。
+    """最近邻检查图：full目标→source绝对体素；native nint双精度半整数远离零，边界先rint检查再clamp，越界填0。
 
     original为3D原图、forward为FS (X,Y,Z,1,3) world-mm pull、output为NIfTI。
     保留输入dtype和目标q/sform。device默认CUDA，chunk_slices默认16且>=1。
     无CUDA/扩展/有限坐标或错误源网格时失败，不使用PyTorch ties-to-even。
     """
     started=time.perf_counter();dev=_device(device)
-    if chunk_slices<1:raise ValueError('chunk_slices must be positive')
+    if not isinstance(chunk_slices,int) or chunk_slices<1:raise ValueError('chunk_slices must be a positive integer')
     image=nib.load(str(original));warp=nib.load(str(forward))
     source_aff,atlas_aff,source_shape=read_warp_geometries(warp)
     if tuple(image.shape)!=source_shape:raise ValueError('forward source grid differs from original')
@@ -129,10 +148,10 @@ def resample_mni_check(original,forward,output,*,device='cuda:0',chunk_slices=16
         delta=torch.as_tensor(np.ascontiguousarray(disp[lo:hi].transpose(3,0,1,2)),device=dev)
         q=_affine(inverse,(_affine(atlas_aff,grid).double()+delta.double()).float())
         if not bool(torch.isfinite(q).all()):raise ValueError('nonfinite forward coordinates')
-        indices=torch.floor(q+0.5).long()
-        valid=torch.ones_like(q[0],dtype=torch.bool)
-        for a,n in enumerate(source_shape):valid &= (indices[a]>=0)&(indices[a]<n)
-        idx=[indices[a].clamp(0,n-1) for a,n in enumerate(source_shape)]
+        idx,valid=_native_nearest_plan(q,source_shape)
+        # GCAMmorphToAtlas's pre-sampling domain check (3D original volume).
+        valid &= (q[0]>-1)&(q[0]<source_shape[0])&(q[1]>-1)&(q[1]<source_shape[1])
+        valid &= ((q[2]==0) if source_shape[2]==1 else ((q[2]>0)&(q[2]<source_shape[2])))
         out[lo:hi]=torch.where(valid,volume[idx[0],idx[1],idx[2]],0).cpu().numpy()
     tick=time.perf_counter()
     header=nib.Nifti1Header();header.set_data_dtype(array.dtype);header.set_xyzt_units('mm','sec')

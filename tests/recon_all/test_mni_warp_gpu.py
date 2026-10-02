@@ -62,3 +62,13 @@ def test_absolute_sampler_handles_last_cell_and_outside_without_border_fill():
     assert valid[:,0,0].tolist()==[True,False,False]
     torch.testing.assert_close(result[:,0,0,0],field[:,1,1,1])
     assert not result[:,1:].any()
+
+
+def test_native_nearest_promotes_half_addition_and_matches_border_rint():
+    from fnit.recon_all.mni_warp_sampling import _native_nearest_plan
+    q=torch.tensor([[127.49999237060547,-.5,2.5],[0,0,0],[0,0,0]],dtype=torch.float32)
+    idx,valid=_native_nearest_plan(q,(256,2,2))
+    assert idx[0].tolist()==[127,0,3]
+    assert valid.tolist()==[True,True,True]
+    idx,valid=_native_nearest_plan(q,(3,2,2))
+    assert idx[0][2].item()==2 and valid[2].item()
