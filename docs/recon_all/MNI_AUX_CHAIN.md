@@ -2,6 +2,10 @@
 
 `fnit.recon_all.mni_aux_chain` 生成 `brain.finalsurfs.mgz` 所需的被试 MNI152 变换及两张辅助标签图。它调用已有的 PyTorch SynthMorph、MCA/dura 和静脉窦模型，不调用 FreeSurfer 可执行程序。
 
+标准recon-all GPU profile已显式传递目标设备，所有上述网络运行FNIT GPU实现。`3faa938`在整个MNI辅助调用作用域使用经两例冻结输入验证的cuDNN FP32，包含MNI152 affine及MCA/dura、vsinus；matmul TF32保留，作用域结束恢复原策略。独立函数仍继承调用方精度并保留显式CPU兼容入口，实际前向记录见返回值`runtime`。[精度覆盖修复与对照](SYNTH_AUX_PRECISION.md)和[五阶段串行验证](SERIAL_OPTIMIZATION.md)分别说明阶段与整例范围。
+
+后续诊断发现MNI152初始仿射的GPU matmul TF32会量化几何矩阵，继而放大逆变形差异。CUDA仿射调用现在局部关闭matmul TF32，返回或失败均恢复原设置；其他辅助网络的matmul和其他阶段默认保持TF32。它继续使用GPU、float32输入与权重，未改用CPU或半精度。固定同输入三策略中，完整FP32相对CPU的矩阵最大元素差约5.95×10⁻⁵/1.06×10⁻⁴，优于仅卷积FP32的0.01797/0.06913；矩阵线性系数无量纲，平移项mm，不能将所有元素差统称mm。下游MNI完整回归另报，不能由矩阵误差直接宣布warp通过。
+
 ## 函数输入与输出
 
 | Python 函数 | 输入 | 输出及返回值 |
@@ -15,25 +19,19 @@
 Python 调用：
 
 ```python
-from fnit.recon_all.mni_aux_chain import register_mni152_affine, run_mni_aux_chain
+import torch
+from fnit.recon_all.mni_aux_chain import run_mni_aux_chain
 
-lta_path = register_mni152_affine(
-    subject_dir="/path/to/subjects/sub01",  # 被试目录；其 mri/orig.mgz 为配准输入
-    weights_dir="/path/to/weights",  # 含 SynthMorph affine 权重
-    assets_dir="/path/to/assets",  # 含 cropped/full MNI152 模板
-    device="cuda:0",  # PyTorch 推理设备
-    threads=4,  # CPU 计算线程数
-)
-# lta_path 是 mri/transforms/.../reg.targ_to_invol.lta 的路径。
-
-paths = run_mni_aux_chain(
-    subject_dir="/path/to/subjects/sub01",  # 还需 mri/nu.mgz、synthseg.rca.mgz
-    weights_dir="/path/to/weights",  # 另含 MCA/dura 与静脉窦模型
-    assets_dir="/path/to/assets",  # 另含三个分割先验
-    device="cuda:0",  # 模型推理设备
-    threads=4,  # CPU 线程数
-)
+with torch.backends.cudnn.flags(allow_tf32=False):  # 与recon-all相同的局部卷积策略，不改matmul TF32
+    paths = run_mni_aux_chain(
+        subject_dir="/path/to/subjects/sub01",  # 自产orig、nu、synthseg.rca；无需预先重复注册
+        weights_dir="/path/to/weights",  # affine、MCA/dura与静脉窦权重
+        assets_dir="/path/to/assets",  # cropped/full MNI152模板和三个先验
+        device="cuda:0",  # 所有网络显式使用同一GPU
+        threads=4,  # CPU线程预算
+    )
 # paths["lta"]、paths["mca_dura"]、paths["vsinus"] 分别是三个输出路径。
+# paths["runtime"]记录affine、MCA左/右及vsinus实际前向设置。
 ```
 
 单独写出已有配准矩阵时，可直接调用 LTA 写入函数：
@@ -52,7 +50,7 @@ write_mni_voxel_lta(
 # 返回 None；矩阵与几何写入 output_file。
 ```
 
-该写入函数用 NiBabel/NumPy 读取固定模板和 MGH 几何；可选 MNI152 affine 注册也已用 `affine_transform` 移除 Surfa 运行时依赖。通用 SynthMorph 的 `joint`、`deform`、`rigid`、`__call__` 与 `apply_transform` 仍使用 Surfa。辅助分割模块可在禁用 Surfa 导入时加载，但本次没有重跑两张标签图。
+该写入函数用NiBabel/NumPy读取固定模板与MGH几何。早前去Surfa的导入检查只证明模块可导入，不能代替整例；本轮实际辅助链GPU运行、模型缓存和内存裁剪的验证另列。允许的非命令Surfa功能继续用于通用SynthMorph，当前任务没有开展全面移除Surfa。
 
 命令行：
 
@@ -64,7 +62,7 @@ python -m fnit.recon_all.mni_aux_chain /path/to/subjects/sub01 \
 
 CLI 第一个位置参数是含 `mri/orig.mgz`、`nu.mgz`、`synthseg.rca.mgz` 的被试目录；`--weights` 指模型目录，`--assets` 指 MNI152 模板和先验目录，`--device` 选 PyTorch 设备，`--threads` 指 CPU 线程数。输出文件和返回值见上表。
 
-外置资产目录对 MNI152 模板和先验逐文件校验哈希。两张 MNI152 图像按需下载；当前下载器从约 515 MB 的上游归档提取。权重和模板不随 Python 包分发。
+外置资产目录对MNI152模板和先验逐文件校验哈希。下载遵循安装器的固定清单与许可证声明；未明确获准再分发的资源从上游获取。本轮复用已授权缓存，没有重复下载。权重和模板不随Python包分发。
 
 ## 对应的 FreeSurfer 8.2 命令
 
@@ -82,7 +80,9 @@ mri_vsinus_seg --s sub01 --rca-synthseg --threads 4 \
   --synthmorphdir transforms/synthmorph.1.0mm.1.0mm
 ```
 
-[MNI152 affine 注册去 Surfa 的同输入验收](../../validation/recon_all/python_gpu_port/mni152_affine_no_surfa_20260927/README.md)给出两份 LTA 逐字节相同及稳态时间。[LTA 写入替换的真实 T1 验证](../../validation/recon_all/python_gpu_port/mni_lta_nibabel_20260927/README.md)给出相同矩阵下与原 Surfa 写入的逐字节比较、完整函数的同输入比较和五次写入耗时。[真实 T1 对照](../../validation/recon_all/python_gpu_port/mni_aux_connected_20260927/README.md)逐项比较候选 LTA、两张标签图及后续 `brain.finalsurfs.mgz` 与保存的官方重建。保存试验的 `stats/vsinus.stats` 五个静脉窦区域数值行匹配，但其 eTIV 来自当时的 Talairach LTA；Talairach 精度修改后尚未重测这份统计文件。标准单 T1 流程在 CPU 上调用本模块。它还需要新的整例验收。
+早期版本证据包括[MNI152 affine同输入验收](../../validation/recon_all/python_gpu_port/mni152_affine_no_surfa_20260927/README.md)、[LTA写入真实T1验证](../../validation/recon_all/python_gpu_port/mni_lta_nibabel_20260927/README.md)及[2026-09-27辅助链对照](../../validation/recon_all/python_gpu_port/mni_aux_connected_20260927/README.md)。它们各自绑定当时的Talairach和代码版本，不作为当前统计量结论。
+
+当前两例冻结自产输入的GPU对照见[三精度策略原始报告](../../validation/recon_all/optimizations/20261001_serial/whole/precision_policy/three_settings_c757_summary.json)：cuDNN FP32/matmul TF32下标签与CPU全部一致，阶段分别5.242/5.783秒；包含加载、传输和写出，仅各一次观察。`61926c7`原始T1整例与局部差异见[完整诊断](../../validation/recon_all/optimizations/20261001_serial/WHOLE_RESULTS.md)；精度修复后的`3faa938`整例另行验证。不能由冻结阶段标签一致推断整例等效。
 
 ## 参考文献与原实现
 
