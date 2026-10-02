@@ -304,12 +304,15 @@ def check_outputs(output, atlases, reverse_pe):
                 raise RuntimeError(f"matrix/node dimension mismatch: {directory}/{name}")
             for i, row in enumerate(rows):
                 for j, value in enumerate(row):
-                    if not math.isfinite(value) or value != rows[j][i] or (i == j and value != 0):
-                        raise RuntimeError(f"nonfinite/asymmetric/nonzero-diagonal matrix: {directory}/{name}")
+                    # FNIT and the reference tck2connectome commands retain
+                    # self-connections. A nonzero diagonal is a valid output.
+                    if not math.isfinite(value) or value != rows[j][i]:
+                        raise RuntimeError(f"nonfinite/asymmetric matrix: {directory}/{name}")
                     if name == "count" and (value < 0 or value != int(value)):
                         raise RuntimeError(f"invalid integer counts: {directory}")
         dimensions[atlas] = count
     return {"status": "complete_files_and_matrix_structure", "atlas_node_counts": dimensions,
+            "self_connection_policy": "retained; no zero-diagonal requirement",
             "files": {str(path): {"size_bytes": path.stat().st_size, "sha256": sha256(path)} for path in files},
             "scientific_parity": "not_assessed"}
 

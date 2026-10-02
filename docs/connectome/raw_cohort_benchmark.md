@@ -142,7 +142,7 @@ driver_report_directory/
   *-recon.stderr.log / *-gpu.stderr.log  # SSH/worker stderr，不含 MRI 数值替代
 ```
 
-CPU 的 Conda 子进程通过 nibabel 真正读取 MGZ 全数组、surface 几何和所选 annotation，记录 scanner RAS affine、surface RAS 对应的 vox2ras_tkr、尺寸、标签和顶点/面数；核对 white/pial 有序 face 和顶点对应。另检查 anatomy 七文件和 `recon-all.done` 可读、每个 atlas 的矩阵/node 维度、有限值、对称性、零对角线以及整数 count。文件齐全和矩阵结构正确不等于科学结果通过。报告保留 `scientific_parity=not_assessed`，精度比较由独立验证步骤完成。
+CPU 的 Conda 子进程通过 nibabel 真正读取 MGZ 全数组、surface 几何和所选 annotation，记录 scanner RAS affine、surface RAS 对应的 vox2ras_tkr、尺寸、标签和顶点/面数；核对 white/pial 有序 face 和顶点对应。另检查 anatomy 七文件和 `recon-all.done` 可读、每个 atlas 的矩阵/node 维度、有限值、对称性以及非负整数 count。FNIT 与本评测的官方命令都保留自连接，因此允许非零对角线。文件齐全和矩阵结构正确不等于科学结果通过。报告保留 `scientific_parity=not_assessed`，精度比较由独立验证步骤完成。
 
 ## 3. 命令行和全部参数
 

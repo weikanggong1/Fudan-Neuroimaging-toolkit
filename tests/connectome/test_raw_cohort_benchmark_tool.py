@@ -294,6 +294,24 @@ class ReportTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 cohort.check_outputs(directory, ["fs-aparc"], False)
 
+    def test_self_connections_are_retained_and_asymmetry_is_rejected(self):
+        # CSV protocol fixture, not a neuroimaging or accuracy benchmark.
+        with tempfile.TemporaryDirectory() as directory:
+            for path in cohort.expected_outputs(directory, ["fs-aparc"], False):
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("fixture\n")
+            atlas = Path(directory) / "atlases/fs-aparc"
+            (atlas / "nodes.tsv").write_text("index\tname\n1\tleft\n2\tright\n")
+            (atlas / "region_labels.csv").write_text("1\n2\n")
+            for name in cohort.MATRICES:
+                (atlas / f"connectome_{name}.csv").write_text("2,1\n1,3\n")
+            result = cohort.check_outputs(directory, ["fs-aparc"], False)
+            self.assertEqual(result["atlas_node_counts"], {"fs-aparc": 2})
+            self.assertIn("retained", result["self_connection_policy"])
+            (atlas / "connectome_count.csv").write_text("2,1\n0,3\n")
+            with self.assertRaisesRegex(RuntimeError, "asymmetric"):
+                cohort.check_outputs(directory, ["fs-aparc"], False)
+
     def test_case_completion_is_saved_before_other_recon_finishes(self):
         # Only scheduling/report protocol is mocked, never neuroimaging computations.
         data = manifest(2)
