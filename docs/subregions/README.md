@@ -1,6 +1,6 @@
 # 四类脑亚区分割：`segment_4_subregions`
 
-[返回首页](../../README.md) · [真实数据验证](../../validation/subregions/README.md) · [完整 benchmark](../../validation/subregions/reproducibility_20261002/README.md)
+[返回首页](../../README.md) · [真实数据验证](../../validation/subregions/README.md) · [十例完整 benchmark](../../validation/subregions/ten_public_t1_20261002/README.md) · [当前 main 配对](../../validation/subregions/ten_public_t1_20261002/latest_main_regression/official_comparison.md)
 
 输入一张三维 T1，一次完成脑干、双侧丘脑、双侧海马和杏仁核分割。返回与输入 T1 **形状和 affine 相同**的 `int32` 标签图，以及标签表、硬体积、软体积和各结构的高分辨率结果；设置 `output_dir` 后自动保存。默认全部结构共有 **110 项亚区统计**，其中某些小亚区在原始 T1 网格上可能没有硬标签体素。
 
@@ -166,125 +166,142 @@ fnit segment-4-subregions --i /absolute/path/sub-01_T1w.nii.gz \
 以下是 **FreeSurfer 的参考命令**。官方流程先完成 `recon-all`，再读取该 subject 的 `norm.mgz`、`aseg.mgz` 和海马所需的 `wmparc.mgz`：
 
 ```bash
+# -i：同一公开 T1；-s：subject 名；-sd：独立 subjects 目录
+# -all：完整官方预处理；-openmp：每例 CPU 线程数
+recon-all -i /absolute/path/sub-01_ses-test_T1w.nii.gz \
+  -s fs_sub01 -sd /absolute/path/subjects -all -openmp 4
+
 segment_subregions brainstem --cross fs_sub01 --sd /absolute/path/subjects --threads 4
 segment_subregions thalamus --cross fs_sub01 --sd /absolute/path/subjects --threads 4
 segment_subregions hippo-amygdala --cross fs_sub01 --sd /absolute/path/subjects --threads 4
 ```
 
-相同阶段的精度对照需向 FNIT 传入同一组 `norm/aseg/wmparc`；从原始 T1 自动预处理的整例验证另行报告。原实现见 [FreeSurfer 源码](https://github.com/freesurfer/samseg/tree/2ce2b6be69f2954ea704e593a5be79c284a3a8c3/samseg/subregions)和 [官方使用说明](https://surfer.nmr.mgh.harvard.edu/fswiki/SubregionSegmentation)。
+官方参考在 CPU 上独立运行；本轮每例均从同一公开 T1 新建 subject，没有复用旧预处理。相同阶段对照向 FNIT 传入本例 fresh `norm/aseg/wmparc`；raw 则从公开 T1 自动预处理。[实际官方协议](../../validation/subregions/ten_public_t1_20261002/official_protocol.md)记录版本、环境、准备阶段与输出身份。原实现见 [FreeSurfer 源码](https://github.com/freesurfer/samseg/tree/2ce2b6be69f2954ea704e593a5be79c284a3a8c3/samseg/subregions)和 [官方使用说明](https://surfer.nmr.mgh.harvard.edu/fswiki/SubregionSegmentation)。
 
 
 ## 最新精度、运行时间与脑图
 
-2026-10-02，使用同一例公开去面部 T1（OpenNeuro ds000114，CC0）核查重复性，并重新运行官方细分割。输入、运行源码、图谱和模型均核对大小与 SHA-256；数据许可见[来源](../../examples/data/SOURCES.json)。FNIT 使用共享 H100、4 线程、FP32/TF32，自身进程显存限制为 19,073 MiB。
+2026-10-02，使用 OpenNeuro ds000114 **snapshot 1.0.2、ses-test 的 sub-01–sub-10 十例公开 T1**。选择在测试前固定，同时单列排除开发用 sub-01 的新九例。公开快照已做去脸，本次未追加处理；这批公开 T1 与此前单例开发派生 T1 分别记录。[数据与许可记录](../../validation/subregions/ten_public_t1_20261002/data_selection.md)保留选择、文件大小和 SHA-256。
 
-**同阶段输入**使用相同的官方 `norm/aseg/wmparc`。**原始 T1**由 FNIT 内部完成 SynthSeg+、TorchFAST、白质归一化、工作网格准备和四类分割。官方使用已安装的 FreeSurfer 8.2.0-1 / SAMSEG `0.5a0+17.g2ce2b6b`，固定 4 线程，三个独立进程重复运行脑干、丘脑和双侧海马/杏仁核。
+**raw** 从公开 T1 自动完成共享预处理和全部四项分割，原网格为公开 T1 网格。**stage** 从同一病例本轮全新官方 `norm/aseg/wmparc` 开始，原网格为其 norm 网格；用于比较亚区拟合，官方预处理耗时不计入 FNIT stage。两个输入分组报告。
 
-本轮三次官方结果逐体素一致，却与旧存档参考不同。旧文件缺少闭环的生成时输入与源码哈希；新旧 shape/affine 完全相同，也不能把差异解释为网格相位。[旧参考来源核查](../../validation/subregions/reproducibility_20261002/old_vs_fresh_reference_audit.md)保留证据。下面全部使用本轮已核验的官方结果，历史记录分别标明参考来源。
+当前 main `f436de5` 已对十例分别完成一次独立 `structures="all", optimization="fast"` raw 运行。与原计量版本 `ac692bb` 比较，50 张原网格/高分辨率标签图的体素、shape、affine、dtype 完全相同，1,100 条硬/软体积字典及 160 条上下文记录相同；raw Dice 与脑图因此继承原计量结果。[main 实际审计](../../validation/subregions/ten_public_t1_20261002/latest_main_regression/audit/summary.json)保留逐例证据。stage 结果及耗时来自 `ac692bb` 的实际运行，两版 24 个 GEMS 代码与查找表文件逐字节相同。
 
-### 官方与 FNIT 重复性
+### 六区域原网格精度
 
-官方使用固定 `norm/aseg/wmparc`，重复运行三次细分割。FNIT 优化前实现 `4178a48` 与最终实现，各对同阶段和原始 T1 运行三个独立进程，每次均为 `structures="all"`；不混用完整流程和单独结构调用。最终 FNIT 的原网格及固定官方高分辨率网格共 440 项逐标签统计：421 项非空标签的最低重复 Dice 为 1，19 项空标签记为 NA。最终全部硬标签零体素差异，软体积三次逐值相同、最大 CV 为 0。
+每例先按官方细标签体素数加权得到家族 Dice，再对病例等权汇总。下表为**均值 ± 样本 SD [最小值, 最大值]；有效/计划数，NA 数**，SD 使用 ddof=1，描述病例间差异，不是重复运行波动。
 
-| 家族 | 官方重复最低 Dice | 最终 FNIT 同阶段重复 Dice | 最终 FNIT 原始 T1 重复 Dice | 最多不同体素 |
-|---|---:|---:|---:|---:|
-| 脑干 | 1.000000 | 1.000000 | 1.000000 | 0 |
-| 丘脑细核 | 1.000000 | 1.000000 | 1.000000 | 0 |
-| 左/右海马 | 1.000000 | 1.000000 | 1.000000 | 0 |
-| 左/右杏仁核 | 1.000000 | 1.000000 | 1.000000 | 0 |
+#### 全部十例
 
-表中原网格结果与高分辨率结果一致。优化前脑干同阶段最多相差 14 / 102 个原网格 / 高分辨率体素，原始输入最多 10 / 104 个；最终全部为零。**自身硬标签波动达到本轮官方观察范围。** 按照允许部分体素差异的验收要求，稳定但跨软件 Dice 较低的区域可以保留；这种固定差异不称为官方随机波动。19 项空标签中，原始 T1 的高分辨率左 VM 为官方 1 个体素、FNIT 0 个，跨实现 Dice 为 0；其软体积为官方 14.4602、FNIT 14.2063 mm³，不将空标签记成 Dice 1。三次重复代表这例数据、固定版本和参数下的观察范围。
+| 家族 | raw：公开 T1 原网格 | stage：fresh norm 网格 |
+|---|---|---|
+| 脑干 | 0.9612 ± 0.0050 [0.9519, 0.9664]；10/10，NA 0 | 0.9911 ± 0.0088 [0.9667, 0.9966]；10/10，NA 0 |
+| 双侧丘脑细核 | 0.8881 ± 0.0189 [0.8543, 0.9135]；10/10，NA 0 | 0.9400 ± 0.0312 [0.8602, 0.9700]；10/10，NA 0 |
+| 左海马 | 0.8262 ± 0.0242 [0.7895, 0.8821]；10/10，NA 0 | 0.8720 ± 0.0429 [0.7903, 0.9294]；10/10，NA 0 |
+| 右海马 | 0.7957 ± 0.0506 [0.6799, 0.8656]；10/10，NA 0 | 0.8563 ± 0.0428 [0.7838, 0.9039]；10/10，NA 0 |
+| 左杏仁核 | 0.8894 ± 0.0336 [0.8268, 0.9208]；10/10，NA 0 | 0.9272 ± 0.0266 [0.8809, 0.9631]；10/10，NA 0 |
+| 右杏仁核 | 0.8679 ± 0.0303 [0.8139, 0.9280]；10/10，NA 0 | 0.9066 ± 0.0294 [0.8514, 0.9446]；10/10，NA 0 |
 
-官方 GEMS 按固定线程数分配 tetrahedra 并按固定顺序归约；更改线程数可能改变浮点计算路径，不能把参数变化当作同条件随机范围。本次官方 Python 拟合没有随机初始化或 seed 选项；默认 `mri_robust_register` 不启用随机子采样。见[固定版本源码审计](../../validation/subregions/reproducibility_20261002/official_source_review.md)及[最终逐标签统计](../../validation/subregions/reproducibility_20261002/final_all_analysis/final_roi_metrics.tsv)。
+#### 新九例（排除开发用 sub-01）
 
-### 最终完整流程精度
+| 家族 | raw：公开 T1 原网格 | stage：fresh norm 网格 |
+|---|---|---|
+| 脑干 | 0.9609 ± 0.0052 [0.9519, 0.9664]；9/9，NA 0 | 0.9911 ± 0.0094 [0.9667, 0.9966]；9/9，NA 0 |
+| 双侧丘脑细核 | 0.8863 ± 0.0192 [0.8543, 0.9135]；9/9，NA 0 | 0.9366 ± 0.0312 [0.8602, 0.9637]；9/9，NA 0 |
+| 左海马 | 0.8271 ± 0.0255 [0.7895, 0.8821]；9/9，NA 0 | 0.8690 ± 0.0443 [0.7903, 0.9294]；9/9，NA 0 |
+| 右海马 | 0.8085 ± 0.0320 [0.7568, 0.8656]；9/9，NA 0 | 0.8597 ± 0.0439 [0.7838, 0.9039]；9/9，NA 0 |
+| 左杏仁核 | 0.8866 ± 0.0343 [0.8268, 0.9208]；9/9，NA 0 | 0.9240 ± 0.0260 [0.8809, 0.9631]；9/9，NA 0 |
+| 右杏仁核 | 0.8683 ± 0.0322 [0.8139, 0.9280]；9/9，NA 0 | 0.9029 ± 0.0286 [0.8514, 0.9446]；9/9，NA 0 |
 
-以下为官方体积加权的细标签 Dice，三次完整运行的结果相同；高分辨率统计使用固定官方轴向、间距和整数网格相位。原始 T1 对照包含 FNIT 与官方预处理的差异。
+全部 **110 个分区**各自的均值、样本 SD、有效数与 NA 见[逐分区 Dice 表](../../validation/subregions/ten_public_t1_20261002/analysis/per_region_dice.md)；[880 行 ROI 汇总](../../validation/subregions/ten_public_t1_20261002/analysis/cohort_roi_summary.tsv)包含十例/新九例 × raw/stage × 原网格/高分辨率，另有[4,400 行逐例 ROI](../../validation/subregions/ten_public_t1_20261002/analysis/cohort_roi.tsv)及[逐例家族结果](../../validation/subregions/ten_public_t1_20261002/analysis/cohort_family.tsv)。单方缺失保留 0 Dice；双方硬标签均空和失败为 NA。raw-native 的 Left-Pc（8117）与 Right-Pt（8219）在十例均为双方空，有效 0/10、NA 10；新九例为有效 0/9、NA 9，这两个分区保留在完整表中。
 
-| 家族 | 同阶段原网格 | 同阶段高分辨率 | 原始 T1 原网格 | 原始 T1 高分辨率 |
-|---|---:|---:|---:|---:|
-| 脑干 | 0.991459 | 0.991916 | 0.945630 | 0.944731 |
-| 丘脑细核 | 0.970813 | 0.972354 | 0.913447 | 0.917687 |
-| 左海马 | 0.894809 | 0.910508 | 0.821955 | 0.833139 |
-| 右海马 | 0.828099 | 0.848762 | 0.731954 | 0.760335 |
-| 左杏仁核 | 0.953639 | 0.955204 | 0.908820 | 0.913728 |
-| 右杏仁核 | 0.929114 | 0.933789 | 0.868434 | 0.891597 |
+高分辨率统计在固定官方轴向、间距和整数网格相位的共同评价网格上进行。独立 [v2 HR 体素计数守恒审计](../../validation/subregions/ten_public_t1_20261002/official_hr_grid_conservation_v2.json)完成十例 40 张官方 HR 图、1,100 条标签记录：raw_hr 与 stage_hr 计数均保持原值，独立最近邻复查无分歧，原分析元数据未改。首轮报告写入遇到 NumPy 标量 JSON 兼容问题；v2 仅修复报告序列化，计数、网格和指标规则保留。
 
-### 本轮精度修复
+### 当前完整流程 benchmark
 
-丘脑 fast 原先在三个平滑层只取固定四分之一体素计算 mesh 数据项。现改为全部有效体素，保留原有细网格、EM、停止条件与拟合预算。最终完整四结构运行的同阶段原网格加权 Dice 为 **0.953076→0.970813**，固定官方高分辨率网格为 **0.955107→0.972354**；左 L-Sg 原网格为 **0.400→0.588235**、高分辨率为 **0.539474→0.666667**；左 VAmc 原网格为 **0.600→0.888889**。原网格包含四结构重叠处的合并选择，不能将单独丘脑调用的指标作为完整流程指标。
+FNIT 使用共享 **NVIDIA H100 PCIe，4 线程，FP32/默认 TF32**，自身进程显存限制 19,073 MiB；当前 raw 采样自身峰值为 **14,748–18,428 MiB**。官方使用 FreeSurfer 8.2.0-1，CPU 每例 4 线程，从同一公开 T1 全新执行 `recon-all -all` 及三个细分割命令。时间均来自本例本轮实际进程，不拼接旧 recon-all 记录。
 
-脑干的 CUDA 梯度原先通过原子加法累加，同条件重复存在少量体素波动。现对合成阶段的点和顶点梯度使用固定顺序归约，累计及优化器状态使用 FP64，并在需要时局部关闭 TF32。保持 Adam 40 步预算及全局 GPU 配置。
+下表为均值 ± 样本 SD [最小值, 最大值]；有效/计划数，NA 数。除官方整例一行使用分钟外，其余使用秒。
 
-海马/杏仁核拟合参数保持 fast 默认。低 Dice 候选中，右 AAA 的原始细标签仍存在，但最大连通域筛选因约 0.47 mm 的一格间隙将其删除。现用半径一格的闭运算稳定**连通域选择掩膜**，再与原始细标签前景相交；不补入桥接体素，不改标签 ID。右侧更长拟合配合这个修复可恢复 AAA，但相同 balanced 配置使左侧海马 Dice 明显回退，因此未改变全局默认拟合预算。见[拓扑诊断](../../validation/subregions/reproducibility_20261002/hippo_topology_review.md)。
+| 实际计时 | 全部十例 | 新九例 |
+|---|---|---|
+| 当前 main raw：API compute（秒） | 253.66 ± 6.31 [245.68, 261.89]；10/10，NA 0 | 254.46 ± 6.13 [245.68, 261.89]；9/9，NA 0 |
+| 当前 main raw：API total（秒） | 254.26 ± 6.34 [246.25, 262.55]；10/10，NA 0 | 255.06 ± 6.17 [246.25, 262.55]；9/9，NA 0 |
+| 当前 main raw：进程 wall（秒） | 259.37 ± 6.45 [251.26, 267.76]；10/10，NA 0 | 260.21 ± 6.22 [251.26, 267.76]；9/9，NA 0 |
+| 当前 main raw：保存（秒） | 0.55 ± 0.05 [0.48, 0.64]；10/10，NA 0 | 0.55 ± 0.05 [0.48, 0.64]；9/9，NA 0 |
+| ac692bb stage：API compute（秒） | 289.63 ± 11.14 [272.47, 311.13]；10/10，NA 0 | 290.06 ± 11.73 [272.47, 311.13]；9/9，NA 0 |
+| ac692bb stage：API total（秒） | 290.26 ± 11.15 [273.11, 311.85]；10/10，NA 0 | 290.70 ± 11.73 [273.11, 311.85]；9/9，NA 0 |
+| ac692bb stage：进程 wall（秒） | 296.52 ± 11.00 [278.21, 317.26]；10/10，NA 0 | 296.44 ± 11.66 [278.21, 317.26]；9/9，NA 0 |
+| 官方 fresh：recon-all＋三个细分割完整 wall（分钟） | 125.45 ± 12.28 [102.13, 138.90]；10/10，NA 0 | 126.79 ± 12.22 [102.13, 138.90]；9/9，NA 0 |
 
-保留小幅回退：最终全流程同阶段右 AAA 原网格 Dice 保持 0.956522，高分辨率由 0.870890 降至 0.868800；原始 T1 分别保持 0.947368、由 0.847627 降至 0.839934。右 Medial 同阶段为 0.400，原始 T1 高分辨率为 0.186667，属于稳定的跨实现差异。旧“官方 AAA 硬标签接近空”的解释已撤回：本轮官方三次均为原网格 24 / 高分辨率 626 个体素。
+API compute 含共享预处理、拟合和合并；API total 与保存单独记录。进程 wall 从实际启动至独立 wait 完成，含导入、CUDA 初始化、保存和观察器开销；输入及 GPU 预算等待另记，不计入该 wall。[同病例官方/main 配对](../../validation/subregions/ten_public_t1_20261002/latest_main_regression/official_comparison.md)先逐例计算官方 wall/FNIT wall，再汇总比值，保留 raw 的完整流程与 stage 的三项官方细分割范围。共享资源上分时测得的版本速度变化不归因于单项代码优化。
 
-### 完整流程 benchmark
+同病例实际进程 wall 比值如下：先在每例内计算官方/FNIT，再对病例等权汇总，未按精度筛选病例。列出均值 ± 样本 SD、中位数、范围和有效/计划数、NA 数。
 
-| 流程 | 计算（含共享预处理、全部拟合与合并） | API（含保存） | 进程 wall |
-|---|---:|---:|---:|
-| FNIT 同阶段，三次完整运行 | 352.86–361.63 s（5.88–6.03 min） | 353.44–362.21 s | 399.02–410.61 s |
-| FNIT 原始 T1，三次完整运行 | 259.99–348.20 s（4.33–5.80 min） | 260.65–348.87 s | 289.13–375.95 s |
-| 官方同阶段，脑干＋丘脑＋双侧海马/杏仁核子流程合计 | 未单独记录 | 未单独记录 | 1474.19–1496.97 s（24.57–24.95 min） |
+| 同病例 wall 比值 | 全部十例 | 新九例 |
+|---|---|---|
+| 官方 fresh 完整流程 / 当前 main raw | 29.010 ± 2.643；中位 29.702；[24.106, 32.966]；10/10，NA 0 | 29.231 ± 2.704；中位 30.331；[24.106, 32.966]；9/9，NA 0 |
+| 官方三项细分割 / ac692bb stage | 5.212 ± 0.457；中位 5.282；[4.476, 5.786]；10/10，NA 0 | 5.293 ± 0.399；中位 5.306；[4.757, 5.786]；9/9，NA 0 |
 
-FNIT 使用共享 H100：两种输入分别固定同一张物理 GPU，4 线程，进程显存限制 19,073 MiB，采样自身显存峰值 9,726–16,468 MiB。官方三个重复各 4 线程、同时运行于共享 CPU。进程 wall 包括 Python 导入、CUDA 初始化、保存及评分；源码检查和 GPU 预算等待另记。计算/API 保留验证 context 回调开销，不减去局部子计时推算生产耗时。共享资源上的时间不作为独占硬件加速比。
+#### 实际分步骤时间
 
-历史完整 `recon-all -all -openmp 4` 耗时 4,727 s，保留输入与当前 T1 的体素逐值相同；加上本轮官方细分割得到分段时间合计 103.35–103.73 min。该合计不是本轮单次原始 T1 全流程重跑时间，见[来源核对](../../validation/subregions/reproducibility_20261002/reconall_historical_lineage_audit.json)。
+当前 main raw 的共享预处理及四项 recipe 总计如下，单位为秒；字段分别为 `shared_preprocessing/seconds`、`brainstem/timing_seconds/total` 和其余三项的 `seconds`。
 
-#### 分步骤对照
+| 当前 main raw 步骤 | 全部十例 | 新九例 |
+|---|---|---|
+| 共享预处理 | 13.11 ± 0.85 [11.95, 14.74]；10/10，NA 0 | 13.01 ± 0.85 [11.95, 14.74]；9/9，NA 0 |
+| 脑干 recipe | 17.78 ± 0.71 [16.88, 19.24]；10/10，NA 0 | 17.75 ± 0.74 [16.88, 19.24]；9/9，NA 0 |
+| 双侧丘脑 recipe | 74.88 ± 4.76 [67.86, 81.64]；10/10，NA 0 | 75.67 ± 4.32 [68.44, 81.64]；9/9，NA 0 |
+| 左海马/杏仁核 recipe | 64.92 ± 4.18 [57.60, 71.20]；10/10，NA 0 | 65.52 ± 3.95 [57.60, 71.20]；9/9，NA 0 |
+| 右海马/杏仁核 recipe | 64.93 ± 4.03 [55.73, 69.27]；10/10，NA 0 | 64.45 ± 3.96 [55.73, 67.60]；9/9，NA 0 |
 
-分步时间来自实际 API 报告与官方日志；官方合成/强度时间包含该阶段准备，FNIT 分别记录准备和拟合。未独立计时的步骤保持缺测，不将总时间任意分配。完整字段见[分步骤计时表](../../validation/subregions/reproducibility_20261002/final_all_analysis/final_steps.tsv)。各结构结束时的原网格/高分辨率精度见上表；中间优化阶段没有共同保存的标签，阶段 Dice 记为未测。
+ac692bb stage 的实际四项 recipe 总计如下，单位为秒；来自同病例本轮 fresh norm 输入。
 
-| 结构 | 官方合成准备＋拟合 | FNIT 同阶段合成 | FNIT 原始 T1 合成 | 官方强度准备＋拟合 | FNIT 同阶段强度 | FNIT 原始 T1 强度 |
-|---|---:|---:|---:|---:|---:|---:|
-| 脑干 | 17 | 13.36–14.90 | 5.15–5.64 | 201–210 | 9.41–11.04 | 8.46–11.06 |
-| 丘脑 | 85–89 | 30.98–45.26 | 24.97–27.45 | 298–311 | 62.43–67.37 | 41.90–56.95 |
-| 左海马/杏仁核 | 75–77 | 52.57–57.56 | 35.06–74.88 | 251–257 | 43.78–47.83 | 34.90–49.19 |
-| 右海马/杏仁核 | 69–72 | 49.56–50.92 | 29.75–35.94 | 219–229 | 39.97–45.95 | 31.78–37.82 |
+| ac692bb stage 步骤 | 全部十例 | 新九例 |
+|---|---|---|
+| 脑干 recipe | 27.39 ± 1.11 [26.34, 29.95]；10/10，NA 0 | 27.51 ± 1.12 [26.34, 29.95]；9/9，NA 0 |
+| 双侧丘脑 recipe | 94.67 ± 4.18 [89.18, 103.65]；10/10，NA 0 | 95.27 ± 3.97 [89.18, 103.65]；9/9，NA 0 |
+| 左海马/杏仁核 recipe | 78.21 ± 4.84 [68.71, 84.31]；10/10，NA 0 | 77.53 ± 4.60 [68.71, 82.57]；9/9，NA 0 |
+| 右海马/杏仁核 recipe | 74.16 ± 8.57 [62.11, 83.05]；10/10，NA 0 | 74.64 ± 8.94 [62.11, 83.05]；9/9，NA 0 |
 
-单位为秒，FNIT 强度列为工作图准备与多层拟合之和。每项 recipe 总时间另含图谱读取、初始对齐和后处理：同阶段脑干 27.12–30.32、丘脑 102.15–111.51、左/右海马及杏仁核 107.36–108.50 / 95.26–101.59；原始 T1 分别为 16.46–19.97、70.17–85.62、74.99–134.07 / 66.85–78.11。recipe 总时间不能再与阶段列相加。官方初始化/对齐显式计时见[协议](../../validation/subregions/reproducibility_20261002/final_validation_protocol.md)，后处理无独立计时。
+| 官方实际 command wall（秒） | 全部十例 | 新九例 |
+|---|---|---|
+| recon-all -all | 5981.72 ± 664.15 [4701.85, 6904.68]；10/10，NA 0 | 6038.28 ± 678.41 [4701.85, 6904.68]；9/9，NA 0 |
+| 脑干 | 326.40 ± 39.56 [240.55, 371.25]；10/10，NA 0 | 335.93 ± 27.15 [291.65, 371.25]；9/9，NA 0 |
+| 双侧丘脑 | 455.39 ± 45.26 [400.94, 543.19]；10/10，NA 0 | 461.27 ± 43.77 [400.94, 543.19]；9/9，NA 0 |
+| 双侧海马/杏仁核（一个命令） | 763.30 ± 74.78 [677.19, 898.26]；10/10，NA 0 | 771.72 ± 74.11 [677.19, 898.26]；9/9，NA 0 |
+
+main raw 的全部实际 timer 路径与值见[机器可读对照](../../validation/subregions/ten_public_t1_20261002/latest_main_regression/official_comparison.json)。stage 与官方的对齐、合成准备/拟合、强度准备/拟合及 solver 子步骤来自本轮[分步骤明细](../../validation/subregions/ten_public_t1_20261002/analysis/steps/cohort_steps.tsv)和[汇总](../../validation/subregions/ten_public_t1_20261002/analysis/steps/cohort_steps_summary.tsv)；recon-all 的实际 FSTIME 来源见[日志计时表](../../validation/subregions/ten_public_t1_20261002/analysis/steps/cohort_reconall_fstime.tsv)。未独立记录的步骤耗时为 NA，内部阶段没有双方可比的已保存标签，步骤 Dice 为 NA。recipe 总计包含子步骤，不能重复相加；官方双侧海马/杏仁核 command wall 只计一次。
 
 ### 官方对照脑图
 
-每幅图显示六层 RAS 轴位，保持真实毫米比例；标签使用最近邻，红色标出所示细标签 ID 差异。原始 T1 脑图在固定裁切及六个显示切片内，以正、有限 T1 的 2/98 百分位设定灰度窗，所有比较行共窗。显示重采样不改变原网格和固定官方高分辨率网格上的统计。
+本轮 raw-native 脑图按预先定义的全 110 分区加权 Dice 排名，展示开发用 sub-01、中位例 sub-06 和最低例 sub-07。每幅图使用六个 axial slice，官方、FNIT 和标签差异三行共切面、共裁剪与灰度窗；标签显示使用最近邻。显示重采样不改变原评分网格。完整图与切片坐标、文件 SHA 见[实际脑图清单](../../validation/subregions/ten_public_t1_20261002/brain_figures/plot_manifest.json)和[中文结果页](../../validation/subregions/ten_public_t1_20261002/benchmark_results.md#真实-t1-脑图)。
 
-**同阶段：丘脑低 Dice 细核。**
+![十例 raw-native 六区域 Dice 热图](../../validation/subregions/ten_public_t1_20261002/brain_figures/cohort_raw_native_family_dice.png)
 
-![同阶段丘脑低 Dice 细核，三次新官方的第1次、更新前与最终完整流程](../../validation/subregions/reproducibility_20261002/final_brain_figures/stage/thalamus_low_nuclei.png)
+**按全 110 分区加权 Dice 选择的中位病例 sub-06：海马。**
 
-**同阶段：右海马 CA3、DG、parasubiculum。**
+![中位病例 sub-06 海马，六层轴位官方、FNIT 与标签差异](../../validation/subregions/ten_public_t1_20261002/brain_figures/sub-06_hippocampus_raw_native.png)
 
-![同阶段右海马低 Dice 区域](../../validation/subregions/reproducibility_20261002/final_brain_figures/stage/hippocampus_low_regions.png)
+**最低病例 sub-07：丘脑和海马。**
 
-**同阶段：右 AAA 与 Medial，使用全新官方参考。**
+![最低病例 sub-07 丘脑，六层轴位官方、FNIT 与标签差异](../../validation/subregions/ten_public_t1_20261002/brain_figures/sub-07_thalamus_raw_native.png)
 
-![同阶段右 AAA 与 Medial](../../validation/subregions/reproducibility_20261002/final_brain_figures/stage/amygdala_AAA_Medial.png)
+![最低病例 sub-07 海马，六层轴位官方、FNIT 与标签差异](../../validation/subregions/ten_public_t1_20261002/brain_figures/sub-07_hippocampus_raw_native.png)
 
-**同阶段：脑干 SCP、Medulla、Midbrain。**
-
-![同阶段脑干低 Dice 区域](../../validation/subregions/reproducibility_20261002/final_brain_figures/stage/brainstem_low_regions.png)
-
-**原始 T1：丘脑、右海马及右 AAA/Medial。**
-
-![原始 T1 丘脑低 Dice 细核](../../validation/subregions/reproducibility_20261002/final_brain_figures/raw/thalamus_low_nuclei.png)
-
-![原始 T1 右海马低 Dice 区域](../../validation/subregions/reproducibility_20261002/final_brain_figures/raw/hippocampus_low_regions.png)
-
-![原始 T1 右 AAA 与 Medial](../../validation/subregions/reproducibility_20261002/final_brain_figures/raw/amygdala_AAA_Medial.png)
-
-![原始 T1 脑干低 Dice 区域](../../validation/subregions/reproducibility_20261002/final_brain_figures/raw/brainstem_low_regions.png)
 
 ## 最近版本 benchmark 记录
 
-| 版本 | 官方参考 | 主要变化 |
+| 版本与范围 | 官方参考 | 主要记录 |
 |---|---|---|
-| [v16 C6](../../validation/subregions/speed_v16/README.md) | 历史存档，生成来源未闭环核验 | 历史速度基线 |
+| [当前 main 十例 raw 回归](../../validation/subregions/ten_public_t1_20261002/latest_main_regression/official_comparison.md) | 同病例本轮 fresh recon-all＋细分割 | f436de5 独立 raw 实测；与 ac692bb 的标签/几何逐值相同，另列新九例 |
+| [十例公开 T1 benchmark](../../validation/subregions/ten_public_t1_20261002/README.md) | 每例完整官方流程，输入/源码/资产哈希已核验 | 固定十例与新九例；110 分区、两类输入、两种评价网格；ac692bb stage 为实际条件测试 |
+| [单例开发重复性与精度修复](../../validation/subregions/reproducibility_20261002/README.md) | 开发病例三次全新官方细分割 | 同参数 all 流程重复性、丘脑完整积分、脑干固定梯度归约、稳定连通域选择；原单例指标、步骤与脑图保留在记录中 |
+| [4178a48](../../validation/subregions/segment_4_subregions/raw_precision_analysis/README.md) | 历史存档；后续重新核对参考来源 | 双侧海马稳定拟合、TorchFAST、白质代理、标准类别图导出 |
 | [入口整合与丘脑回溯修复](../../validation/subregions/segment_4_subregions/stability_fix/README.md) | 历史存档 | 统一公开入口，恢复稳定拟合 |
-| [4178a48](../../validation/subregions/segment_4_subregions/raw_precision_analysis/README.md) | 旧指标保留在历史记录；本轮重新计算 | 双侧海马稳定拟合、TorchFAST、白质代理、标准类别图导出 |
-| [本轮重复性与完整积分](../../validation/subregions/reproducibility_20261002/README.md) | 三次全新官方，输入/源码/图谱哈希已核验 | 同参数全流程重复验证、丘脑完整积分、脑干固定梯度归约、稳定连通域选择 |
+| [v16 C6](../../validation/subregions/speed_v16/README.md) | 历史存档，生成来源未闭环核验 | 历史速度基线 |
 
-历史 Dice 与本轮新参考的 Dice 不直接相减；共同参考下的前后比较使用本轮配对结果。该 benchmark 来自一例开发病例。
+旧单例结果与十例跨病例统计分开。历史完整 recon-all 与后续细分割的分段时间不当作本轮整例重跑；旧官方存档来源核查及单例前后比较继续保留在原记录中。本轮全部使用同病例 fresh 官方结果，病例间 SD 不用于估计算法随机范围。
 
 ## Reference
 
