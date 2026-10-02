@@ -1,0 +1,501 @@
+"""隔离官方 FS-only/SynthMorph 解剖参照；不导入 FNIT，不伪造 tracking PT。
+
+prepare: 本轮 fresh recon-all → 官方 5TT/GMWMI 与八套 T1 atlas。
+complete: 已验证 prepare + 官方自产 DWI contract → FLIRT 与 DWI atlas。
+仅 CPU；官方 GPU SynthMorph 必须另行实现受授权的设备/锁/显存监测。
+"""
+from __future__ import annotations
+
+import argparse
+import csv
+import hashlib
+import json
+import os
+from pathlib import Path
+import platform
+import shutil
+import subprocess
+import sys
+import time
+
+import nibabel as nib
+import numpy as np
+
+PROFILES = {
+    "aparc+tian-s1": ("aparc", 1),
+    "aparc.a2009s+tian-s1": ("aparc.a2009s", 1),
+    "glasser+tian-s1": ("Glasser", 1),
+    "glasser+tian-s4": ("Glasser", 4),
+    "schaefer200+tian-s1": ("Schaefer200", 1),
+    "schaefer500+tian-s4": ("Schaefer500", 4),
+    "schaefer1000+tian-s4": ("Schaefer1000", 4),
+}
+WEIGHTS = {
+    "synthmorph.affine.2.h5": (51455312, "1ac5304b683036e5177f5b4ad38fa09fcbbe7883e742d6fa5bdaedd0e619ced6"),
+    "synthmorph.deform.3.h5": (3508630424, "95b367cd30788cc647e4704b650642fc1d70d7e419c20c04f1ba1b2902bc6536"),
+}
+FIELDS = ("index", "original_label", "hemisphere", "name")
+
+
+def sha256(path):
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as stream:
+        for block in iter(lambda: stream.read(8 << 20), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def file_record(path):
+    path = Path(path).resolve()
+    return {"path": str(path), "size_bytes": path.stat().st_size, "sha256": sha256(path)}
+
+
+def verify_file(record):
+    path = Path(record["path"]).resolve()
+    if not path.is_file() or not path.stat().st_size:
+        raise FileNotFoundError(path)
+    if record.get("size_bytes") is not None and path.stat().st_size != record["size_bytes"]:
+        raise ValueError(f"size changed: {path}")
+    if sha256(path) != record["sha256"]:
+        raise ValueError(f"SHA changed: {path}")
+    return path
+
+
+def read_bound_json(record):
+    return json.loads(verify_file(record).read_text())
+
+
+def image_record(path, *, labels=False):
+    image = nib.load(str(path))
+    data = np.asanyarray(image.dataobj)
+    result = {**file_record(path), "shape": list(map(int, image.shape)),
+              "dtype": str(data.dtype), "affine": image.affine.tolist(),
+              "spacing": list(map(float, image.header.get_zooms()[:3])),
+              "nonfinite_count": int((~np.isfinite(data)).sum()),
+              "foreground_voxels": int(np.count_nonzero(data))}
+    if not np.isfinite(image.affine).all():
+        raise ValueError(f"nonfinite affine: {path}")
+    if labels:
+        if not np.isfinite(data).all() or (data < 0).any() or not np.equal(data, np.round(data)).all():
+            raise ValueError(f"invalid labels: {path}")
+        result["labels"] = np.unique(data).astype(int).tolist()
+    return result
+
+
+def verify_anatomy(config):
+    report = read_bound_json(config["anatomy_report"])
+    if report.get("status") != "completed" or report.get("case_id") != config["case_id"]:
+        raise ValueError("fresh anatomy report is incomplete or belongs to another case")
+    original = read_bound_json(report["original_report"]) if report.get("original_report") else report
+    raw = verify_file(config["raw_t1w"])
+    if original.get("exit_code") != 0:
+        raise ValueError("official recon-all did not exit successfully")
+    command = original.get("command", [])
+    if "-i" not in command or Path(command[command.index("-i") + 1]).resolve() != raw:
+        raise ValueError("official recon-all does not bind the original T1")
+    rows = original.get("raw_input_provenance", [])
+    if not any(row.get("kind") == "raw_t1w" and Path(row["path"]).resolve() == raw
+               and row["sha256"] == config["raw_t1w"]["sha256"] for row in rows):
+        raise ValueError("original T1 SHA absent from fresh reconstruction provenance")
+    subject = Path(config["subject_dir"]).resolve()
+    expected_subject = (Path(command[command.index("-sd") + 1]) / command[command.index("-s") + 1]).resolve()
+    if subject != expected_subject:
+        raise ValueError("subject directory differs from actual recon-all command")
+    files = report.get("anatomy", {})
+    required = ["mri/brain.mgz", "mri/aparc+aseg.mgz", "mri/ribbon.mgz", "scripts/recon-all.done"]
+    required += [f"surf/{hemi}.{name}" for hemi in ("lh", "rh") for name in ("white", "pial", "sphere.reg")]
+    required += [f"label/{hemi}.{name}.annot" for hemi in ("lh", "rh") for name in ("aparc", "aparc.a2009s")]
+    for name in required:
+        record = files.get(name)
+        if record is None or verify_file(record) != subject / name:
+            raise ValueError(f"unbound anatomy input: {name}")
+    return {"report": config["anatomy_report"], "original_report": report.get("original_report"),
+            "raw_t1w": config["raw_t1w"], "subject_dir": str(subject), "files": files,
+            "official_recon_command_seconds": original.get("recon_command_seconds"),
+            "recon_all_rerun": False}
+
+
+def verify_dwi_contract(record, case_id):
+    contract = read_bound_json(record)
+    if (contract.get("schema_version") != 1 or contract.get("case_id") != case_id
+            or contract.get("scope") != "official_self_produced_raw_dwi_chain"
+            or contract.get("state") != "completed"):
+        raise ValueError("independent official raw-DWI contract required")
+    report = read_bound_json(contract["upstream_report"])
+    if not (report.get("execution_completed") is True or report.get("state") == "completed"
+            or report.get("status") == "completed"):
+        raise ValueError("official upstream report is incomplete")
+    if not report.get("commands") and not report.get("completed_commands"):
+        raise ValueError("upstream report has no actual official commands")
+    paths = {name: verify_file(contract["files"][name]) for name in
+             ("corrected_dwi", "mean_b0", "mean_b0_brain", "brain_mask")}
+    grid = nib.load(str(paths["corrected_dwi"]))
+    if len(grid.shape) != 4:
+        raise ValueError("official corrected DWI must be 4D")
+    for name in ("mean_b0", "mean_b0_brain", "brain_mask"):
+        image = nib.load(str(paths[name]))
+        if image.shape != grid.shape[:3] or not np.allclose(image.affine, grid.affine, atol=1e-5, rtol=0):
+            raise ValueError(f"{name}: official output is not on the corrected DWI grid")
+    return contract, paths
+
+
+def write_nodes(path, rows):
+    if [int(row["index"]) for row in rows] != list(range(1, len(rows) + 1)):
+        raise ValueError("node indices must be contiguous")
+    with Path(path).open("w", newline="") as stream:
+        writer = csv.DictWriter(stream, fieldnames=FIELDS, delimiter="\t")
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def read_nodes(path):
+    with Path(path).open() as stream:
+        rows = list(csv.DictReader(stream, delimiter="\t"))
+    return [{**row, "index": int(row["index"]), "original_label": int(row["original_label"])} for row in rows]
+
+
+def verify_canonical_lut(nodes, freesurfer_lut, mrtrix_lut):
+    fs_names = {}
+    for line in Path(freesurfer_lut).read_text().splitlines():
+        parts = line.split()
+        if parts and parts[0].isdigit() and len(parts) >= 2:
+            fs_names[int(parts[0])] = parts[1]
+    names = {}
+    for line in Path(mrtrix_lut).read_text().splitlines():
+        parts = line.split()
+        if parts and parts[0].isdigit() and len(parts) >= 3:
+            names.setdefault(int(parts[0]), set()).add(parts[2])
+    if len(nodes) != 84 or [row["index"] for row in nodes] != list(range(1, 85)):
+        raise ValueError("canonical fs-aparc nodes must have 84 consecutive rows")
+    for row in nodes:
+        official_name = fs_names.get(row["original_label"])
+        if official_name not in names.get(row["index"], set()):
+            raise ValueError(f"node {row['index']} differs from official fs_default/FreeSurfer LUT")
+
+
+def combine_native(cortical_path, tian_path, output_path, cortical_rows, tian_names):
+    cortical, tian = nib.load(str(cortical_path)), nib.load(str(tian_path))
+    if cortical.shape != tian.shape or not np.allclose(cortical.affine, tian.affine, atol=1e-5, rtol=0):
+        raise ValueError("native cortical/Tian grids differ")
+    a, b = np.asanyarray(cortical.dataobj), np.asanyarray(tian.dataobj)
+    k = len(cortical_rows)
+    for values, maximum in ((a, k), (b, len(tian_names))):
+        if not np.isfinite(values).all() or (values < 0).any() or (values > maximum).any() or not np.equal(values, np.round(values)).all():
+            raise ValueError("native atlas labels are outside the node table")
+    # This is the declared UKB cortical-precedence formula, not a registration port.
+    combined = np.where(a > 0, a, np.where(b > 0, b + k, 0)).astype(np.int32)
+    nib.save(nib.Nifti1Image(combined, cortical.affine), str(output_path))
+    rows = [dict(row) for row in cortical_rows]
+    rows += [{"index": k + i, "original_label": i,
+              "hemisphere": "R" if name.endswith("-rh") else "L" if name.endswith("-lh") else "",
+              "name": name} for i, name in enumerate(tian_names, 1)]
+    return rows
+
+
+def synthmorph_commands(config, directory):
+    fs = Path(config["freesurfer_home"])
+    program = str(fs / "bin/mri_synthmorph")
+    atlas = Path(config["upstream_root"]) / "data/templates/atlases"
+    warp = directory / "mni_to_t1.mgz"
+    register = [program, "register", "-m", "joint", "-j", str(config["threads"]),
+                "-w", str(fs / "models/synthmorph.affine.2.h5"),
+                "-w", str(fs / "models/synthmorph.deform.3.h5"),
+                "-t", str(warp), config["mni_template"], str(Path(config["subject_dir"]) / "mri/brain.mgz")]
+    return [("synthmorph_register", register), *[(f"tian_s{scale}_apply", [program, "apply",
+        "-m", "nearest", "-t", "int16", str(warp),
+        str(atlas / f"Tian_Subcortex_S{scale}_3T.nii.gz"),
+        str(directory / f"tian_s{scale}_t1.nii.gz")]) for scale in (1, 4)]]
+
+
+class Runner:
+    def __init__(self, config, output, mode):
+        self.config, self.output = config, output
+        fs = Path(config["freesurfer_home"])
+        self.environment = {**os.environ, "FREESURFER_HOME": str(fs),
+            "FS_LICENSE": config["fs_license"], "FSLDIR": str(Path(config["fsl_bin"]).parent),
+            "FSLOUTPUTTYPE": "NIFTI_GZ", "CUDA_VISIBLE_DEVICES": "",
+            "SUBJECTS_DIR": str(output / "subjects"), "PYTHONNOUSERSITE": "1"}
+        self.environment["PATH"] = os.pathsep.join([str(Path(config["python"]).parent),
+            config["mrtrix_bin"], config["fsl_bin"], str(fs / "bin"), self.environment.get("PATH", "")])
+        for name in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS", "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS"):
+            self.environment[name] = str(config["threads"])
+        self.report = {"schema_version": 1, "case_id": config["case_id"],
+            "profile": "fnit-native-official-reference", "mode": mode, "state": "running",
+            "execution_completed": False, "connectome_completed": False,
+            "script_sha256": sha256(__file__), "source_commit": config["tool_commit"],
+            "config": config, "commands": [], "outputs": {}, "cpu_host": platform.node(),
+            "cpu_affinity": sorted(os.sched_getaffinity(0)), "threads": config["threads"],
+            "precision": "installed official implementations and default joint extent256/steps7; no -g",
+            "gpu": {"used": False, "allocated": None, "reserved": None},
+            "timing_scope": "tool entry, verification, official commands, native combination/readback/output hashing; Python import/startup excluded; no recon-all rerun"}
+
+    def save(self):
+        temporary = self.output / "reference_anatomy.json.tmp"
+        temporary.write_text(json.dumps(self.report, indent=2, allow_nan=False) + "\n")
+        temporary.replace(self.output / "reference_anatomy.json")
+
+    def run(self, stage, argv):
+        index = len(self.report["commands"])
+        log = self.output / "logs" / f"{index:03d}_{stage}.log"
+        timer = self.output / "logs" / f"{index:03d}_{stage}.time"
+        executable = Path(argv[0]).resolve()
+        record = {"stage": stage, "argv": list(map(str, argv)), "program": file_record(executable), "log": str(log)}
+        started = time.perf_counter()
+        with log.open("w") as stream:
+            result = subprocess.run(["/usr/bin/time", "-f", "wall_seconds=%e peak_rss_kib=%M", "-o", str(timer),
+                                     *map(str, argv)], env=self.environment, stdout=stream, stderr=subprocess.STDOUT)
+        record.update(seconds_inclusive=time.perf_counter() - started, returncode=result.returncode,
+                      time_file=str(timer), time_text=timer.read_text() if timer.exists() else None)
+        self.report["commands"].append(record)
+        self.save()
+        if result.returncode:
+            raise RuntimeError(f"official stage {stage} failed: {log}")
+
+    def output_image(self, name, path, labels=False):
+        self.report["outputs"][name] = image_record(path, labels=labels)
+        self.save()
+
+
+def preflight(config):
+    if config.get("schema_version") != 1 or config.get("profile") != "fnit-native" or config.get("threads") != 8:
+        raise ValueError("schema1, fnit-native, 8 CPU threads required")
+    if not config.get("tool_commit"):
+        raise ValueError("explicit frozen tool commit required")
+    if not Path(config["fs_license"]).is_file():
+        raise FileNotFoundError("FreeSurfer license path missing")
+    # Never open or hash FS_LICENSE, including when caller puts it in the asset list.
+    license_path = Path(config["fs_license"]).resolve()
+    assets = {}
+    for record in config["assets"]:
+        if Path(record["path"]).resolve() == license_path:
+            raise ValueError("license contents must not be hashed or published")
+        if not record.get("license") or not record.get("source") or not record.get("license_url"):
+            raise ValueError("asset license/source declaration required")
+        assets[str(verify_file(record))] = record
+    fs, upstream = Path(config["freesurfer_home"]), Path(config["upstream_root"])
+    required = [Path(config["mni_template"]), Path(config["canonical_nodes84"])]
+    required += [fs / "models" / name for name in WEIGHTS]
+    required += [Path(config["fsaverage_dir"]) / "surf" / f"{h}.sphere.reg" for h in ("lh", "rh")]
+    for scale in (1, 4):
+        required += [upstream / "data/templates/atlases" / f"Tian_Subcortex_S{scale}_3T{suffix}" for suffix in (".nii.gz", "_label.txt")]
+    for count in (200, 500, 1000):
+        required += [upstream / "data/templates/atlases" / f"{h}.Schaefer2018_{count}Parcels_7Networks_order.annot" for h in ("lh", "rh")]
+    required += [upstream / "data/templates/atlases" / "Q1-Q6_RelatedParcellation210.CorticalAreas_dil_Final_Final_Areas_Group_Colors.32k_fs_LR.dlabel.nii"]
+    for side in ("L", "R"):
+        required += [upstream / "data/templates/surfaces" / f"{side}.sphere.32k_fs_LR.surf.gii",
+                     upstream / "data/templates/surfaces" / f"fs_{side}-to-fs_LR_fsaverage.{side}_LR.spherical_std.164k_fs_{side}.surf.gii"]
+    for path in required:
+        if str(path.resolve()) not in assets:
+            raise ValueError(f"required asset lacks hash/license binding: {path}")
+    for name, (size, expected) in WEIGHTS.items():
+        asset = assets[str((fs / "models" / name).resolve())]
+        if asset["sha256"] != expected or asset["size_bytes"] != size:
+            raise ValueError("official weights differ from fixed FNIT resource identity")
+    scripts = {}
+    for name in ("convert_native_annot.py", "convert_schaefer_annot.py", "convert_labels_gii_to_annot.py", "map_surface_label_to_volume.py"):
+        record = config["upstream_scripts"][name]
+        path = verify_file(record)
+        if path != (upstream / "scripts/python" / name).resolve():
+            raise ValueError("upstream script directory mismatch")
+        scripts[name] = record
+    anatomy = verify_anatomy(config)
+    for program in [Path(config["python"]), Path(config["workbench_command"]),
+                    *[Path(config["mrtrix_bin"]) / name for name in ("5ttgen", "5tt2gmwmi", "labelconvert", "mrtransform", "transformconvert")],
+                    Path(config["fsl_bin"]) / "flirt", fs / "bin/mri_synthmorph", fs / "bin/mri_surf2surf", fs / "bin/mri_convert"]:
+        if not program.is_file() or not os.access(program, os.X_OK):
+            raise FileNotFoundError(program)
+    verify_canonical_lut(read_nodes(config["canonical_nodes84"]), fs / "FreeSurferColorLUT.txt",
+                         Path(config["mrtrix_bin"]).parent / "share/mrtrix3/labelconvert/fs_default.txt")
+    return {"anatomy": anatomy, "assets": assets, "upstream_scripts": scripts,
+            "freesurfer_build_stamp": file_record(fs / "build-stamp.txt"),
+            "freesurfer_version": (fs / "build-stamp.txt").read_text().strip(),
+            "official_synthmorph_source": file_record(fs / "python/scripts/mri_synthmorph"),
+            "official_fspython_wrapper": file_record(fs / "bin/fspython"),
+            "official_synthmorph_modules": {str(p.relative_to(fs)): file_record(p)
+                 for p in sorted((fs / "python/packages/synthmorph").glob("*.py"))}}
+
+
+def cortex_nodes(converted_left, converted_right, subject, name):
+    left = nib.freesurfer.read_annot(str(converted_left))
+    right = nib.freesurfer.read_annot(str(converted_right))
+    if left[2] != right[2]:
+        raise ValueError("converted cortical annotation tables differ")
+    left_ids = set(np.unique(left[0]).tolist())
+    names = [x.decode("utf-8") for x in left[2][1:]]
+    rows = [{"index": i, "original_label": i, "hemisphere": "L" if i in left_ids else "R", "name": value}
+            for i, value in enumerate(names, 1)]
+    if name in ("aparc", "aparc.a2009s"):
+        # Original native tables preserve each hemisphere's original annotation index.
+        originals = [nib.freesurfer.read_annot(str(subject / f"label/{h}.{name}.annot"))[2] for h in ("lh", "rh")]
+        for row in rows:
+            h = 0 if row["hemisphere"] == "L" else 1
+            prefix = "left_" if h == 0 else "right_"
+            row["original_label"] = [x.decode() for x in originals[h]].index(row["name"][len(prefix):])
+    return rows
+
+
+def prepare(runner):
+    c, out = runner.config, runner.output
+    fs, mr, upstream = Path(c["freesurfer_home"]), Path(c["mrtrix_bin"]), Path(c["upstream_root"])
+    subject = Path(c["subject_dir"])
+    private = out / "original_wrapper"
+    (private / "data/temporary/subjects/public_0/atlases").mkdir(parents=True)
+    (private / "reference_subjects/public_0").mkdir(parents=True)
+    (private / "reference_subjects/public_0/FreeSurfer").symlink_to(subject, target_is_directory=True)
+    (private / "scripts").symlink_to(upstream / "scripts", target_is_directory=True)
+    (private / "data/templates").symlink_to(upstream / "data/templates", target_is_directory=True)
+    subjects = out / "subjects"
+    subjects.mkdir()
+    (subjects / "fsaverage").symlink_to(c["fsaverage_dir"], target_is_directory=True)
+    (subjects / subject.name).symlink_to(subject, target_is_directory=True)
+    native = private / "data/temporary/subjects/public_0/atlases"
+    sm = out / "synthmorph"
+    sm.mkdir()
+    for name, argv in synthmorph_commands(c, sm):
+        runner.run(name, argv)
+    for scale in (1, 4):
+        runner.output_image(f"tian_s{scale}_t1", sm / f"tian_s{scale}_t1.nii.gz", labels=True)
+    runner.output_image("mni_to_t1", sm / "mni_to_t1.mgz")
+    runner.run("5ttgen", [mr / "5ttgen", "freesurfer", subject / "mri/aparc+aseg.mgz", out / "five_tissue_t1.nii.gz", "-nocrop", "-sgm_amyg_hipp", "-nthreads", "8"])
+    runner.run("5tt2gmwmi", [mr / "5tt2gmwmi", out / "five_tissue_t1.nii.gz", out / "gmwmi_t1.nii.gz", "-nthreads", "8"])
+    for name in ("five_tissue_t1", "gmwmi_t1"):
+        runner.output_image(name, out / f"{name}.nii.gz")
+    fs_default = mr.parent / "share/mrtrix3/labelconvert/fs_default.txt"
+    runner.report["official_luts"] = {"fs_default": file_record(fs_default), "freesurfer": file_record(fs / "FreeSurferColorLUT.txt")}
+    atlas_root = out / "atlases"
+    atlas_root.mkdir()
+    target = atlas_root / "fs-aparc"
+    target.mkdir()
+    runner.run("fs_aparc_labelconvert", [mr / "labelconvert", subject / "mri/aparc+aseg.mgz", fs / "FreeSurferColorLUT.txt", fs_default, target / "atlas_t1.nii.gz", "-nthreads", "8"])
+    rows84 = read_nodes(c["canonical_nodes84"])
+    if len(rows84) != 84:
+        raise ValueError("canonical fs-aparc nodes must have 84 rows")
+    write_nodes(target / "nodes.tsv", rows84)
+    runner.output_image("atlas:fs-aparc", target / "atlas_t1.nii.gz", labels=True)
+    cortical = {}
+    for name in ("aparc", "aparc.a2009s", "Schaefer200", "Schaefer500", "Schaefer1000", "Glasser"):
+        left, right = (native / f"{h}.native.{name}.annot" for h in ("lh", "rh"))
+        script = private / "scripts/python"
+        if name in ("aparc", "aparc.a2009s"):
+            runner.run(f"{name}_convert", [c["python"], script / "convert_native_annot.py", subject / f"label/lh.{name}.annot", subject / f"label/rh.{name}.annot", left, right])
+        else:
+            scratch = out / name
+            scratch.mkdir()
+            for h, side, cortex in (("lh", "L", "CORTEX_LEFT"), ("rh", "R", "CORTEX_RIGHT")):
+                if name == "Glasser":
+                    t = upstream / "data/templates"
+                    label32, label164 = scratch / f"{h}.32k.label.gii", scratch / f"{h}.164k.label.gii"
+                    runner.run(f"Glasser_{h}_separate", [c["workbench_command"], "-cifti-separate", t / "atlases/Q1-Q6_RelatedParcellation210.CorticalAreas_dil_Final_Final_Areas_Group_Colors.32k_fs_LR.dlabel.nii", "COLUMN", "-label", cortex, label32])
+                    runner.run(f"Glasser_{h}_resample", [c["workbench_command"], "-label-resample", label32, t / f"surfaces/{side}.sphere.32k_fs_LR.surf.gii", t / f"surfaces/fs_{side}-to-fs_LR_fsaverage.{side}_LR.spherical_std.164k_fs_{side}.surf.gii", "BARYCENTRIC", label164])
+                    runner.run(f"Glasser_{h}_convert", [c["python"], script / "convert_labels_gii_to_annot.py", label164, scratch / f"{h}.fsaverage.annot"])
+            if name.startswith("Schaefer"):
+                count = int(name[8:])
+                t = upstream / "data/templates/atlases"
+                runner.run(f"{name}_convert", [c["python"], script / "convert_schaefer_annot.py", t / f"lh.Schaefer2018_{count}Parcels_7Networks_order.annot", t / f"rh.Schaefer2018_{count}Parcels_7Networks_order.annot", scratch / "lh.fsaverage.annot", scratch / "rh.fsaverage.annot"])
+            for h, destination in (("lh", left), ("rh", right)):
+                runner.run(f"{name}_{h}_surf2surf", [fs / "bin/mri_surf2surf", "--srcsubject", "fsaverage", "--trgsubject", subject.name, "--hemi", h, "--sval-annot", scratch / f"{h}.fsaverage.annot", "--tval", destination])
+        runner.run(f"{name}_volume", [c["python"], script / "map_surface_label_to_volume.py", private, private / "reference_subjects", "public", "0", name])
+        volume = native / f"native.{name}.nii.gz"
+        cortical[name] = (volume, cortex_nodes(left, right, subject, name))
+        runner.output_image(f"cortical:{name}", volume, labels=True)
+    for profile, (name, scale) in PROFILES.items():
+        target = atlas_root / profile
+        target.mkdir()
+        names = (upstream / f"data/templates/atlases/Tian_Subcortex_S{scale}_3T_label.txt").read_text().splitlines()
+        volume, cortex_rows = cortical[name]
+        rows = combine_native(volume, sm / f"tian_s{scale}_t1.nii.gz", target / "atlas_t1.nii.gz", cortex_rows, names)
+        write_nodes(target / "nodes.tsv", rows)
+        runner.output_image(f"atlas:{profile}", target / "atlas_t1.nii.gz", labels=True)
+    for profile in ("fs-aparc", *PROFILES):
+        runner.report["outputs"][f"nodes:{profile}"] = file_record(atlas_root / profile / "nodes.tsv")
+    runner.report["state"] = "official_structural_reference_completed"
+    runner.report["execution_completed"] = True
+    runner.report["full_raw_connectome"] = False
+
+
+def complete(runner, prepared_record, dwi_record):
+    c, out = runner.config, runner.output
+    prepared = read_bound_json(prepared_record)
+    if not prepared.get("execution_completed") or prepared.get("state") != "official_structural_reference_completed" or prepared.get("case_id") != c["case_id"]:
+        raise ValueError("verified same-case official prepare report required")
+    if prepared["preflight"]["anatomy"] != runner.report["preflight"]["anatomy"]:
+        raise ValueError("prepared structural anatomy identity differs")
+    for record in prepared["outputs"].values():
+        verify_file(record)
+    contract, paths = verify_dwi_contract(dwi_record, c["case_id"])
+    runner.report["prepared_origin"] = prepared_record
+    runner.report["official_dwi_origin"] = {"contract": dwi_record, "binding": contract}
+    mr, fs = Path(c["mrtrix_bin"]), Path(c["freesurfer_home"])
+    subject = Path(c["subject_dir"])
+    runner.run("brain_to_nifti", [fs / "bin/mri_convert", subject / "mri/brain.mgz", out / "brain.nii.gz"])
+    runner.run("flirt", [Path(c["fsl_bin"]) / "flirt", "-in", paths["mean_b0_brain"], "-ref", out / "brain.nii.gz", "-cost", "normmi", "-dof", "6", "-omat", out / "dwi_to_t1_fsl.txt"])
+    runner.run("transformconvert", [mr / "transformconvert", out / "dwi_to_t1_fsl.txt", paths["mean_b0_brain"], out / "brain.nii.gz", "flirt_import", out / "dwi_to_t1_mrtrix.txt", "-nthreads", "8"])
+    for name in ("five_tissue", "gmwmi"):
+        source = prepared["outputs"][f"{name}_t1"]["path"]
+        runner.run(f"{name}_world", [mr / "mrtransform", source, out / f"{name}_dwi_world.nii.gz", "-linear", out / "dwi_to_t1_mrtrix.txt", "-inverse", "-nthreads", "8"])
+        runner.output_image(name, out / f"{name}_dwi_world.nii.gz")
+    (out / "atlases").mkdir()
+    for profile in ("fs-aparc", *PROFILES):
+        target = out / "atlases" / profile
+        target.mkdir()
+        source = prepared["outputs"][f"atlas:{profile}"]["path"]
+        runner.run(f"atlas_{profile}_nn", [mr / "mrtransform", source, target / "atlas_dwi.nii.gz", "-linear", out / "dwi_to_t1_mrtrix.txt", "-inverse", "-template", paths["mean_b0"], "-interp", "nearest", "-datatype", "uint32", "-nthreads", "8"])
+        shutil.copyfile(prepared["outputs"][f"nodes:{profile}"]["path"], target / "nodes.tsv")
+        rows = read_nodes(target / "nodes.tsv")
+        record = image_record(target / "atlas_dwi.nii.gz", labels=True)
+        if record["shape"] != list(nib.load(str(paths["mean_b0"])).shape) or max(record["labels"]) > len(rows):
+            raise ValueError("official atlas output shape/labels inconsistent")
+        runner.report["outputs"][f"atlas:{profile}"] = record
+        runner.report["outputs"][f"nodes:{profile}"] = file_record(target / "nodes.tsv")
+    for name in ("dwi_to_t1_fsl", "dwi_to_t1_mrtrix"):
+        runner.report["outputs"][name] = file_record(out / f"{name}.txt")
+    runner.report["state"] = "official_anatomy_and_dwi_atlas_completed"
+    runner.report["execution_completed"] = True
+    runner.report["full_raw_connectome"] = False
+
+
+def main(argv=None):
+    started = time.perf_counter()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("mode", choices=("prepare", "complete"))
+    parser.add_argument("--config", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True, help="fresh directory; failures remain intact")
+    parser.add_argument("--prepared-report", type=Path)
+    parser.add_argument("--official-dwi-contract", type=Path)
+    parser.add_argument("--dry-run", action="store_true")
+    args = parser.parse_args(argv)
+    if args.output.exists() or (args.mode == "complete" and (not args.prepared_report or not args.official_dwi_contract)):
+        parser.error("fresh output required; complete also requires both source contracts")
+    config = json.loads(args.config.read_text())
+    identity = preflight(config)
+    if args.dry_run:
+        print(json.dumps({"dry_run": True, "preflight": identity,
+                          "synthmorph_commands": synthmorph_commands(config, args.output / "synthmorph")}, default=str, indent=2))
+        return 0
+    args.output.mkdir(parents=True, exist_ok=False)
+    (args.output / "logs").mkdir()
+    runner = Runner(config, args.output, args.mode)
+    runner.report["preflight"] = identity
+    runner.report["config_sha256"] = sha256(args.config)
+    runner.save()
+    try:
+        if args.mode == "prepare":
+            prepare(runner)
+        else:
+            complete(runner, file_record(args.prepared_report), file_record(args.official_dwi_contract))
+        # Detect any input/source/asset change rather than blessing an old hash.
+        if preflight(config) != identity:
+            raise ValueError("input/asset/source identity changed during official reference")
+    except Exception as error:
+        runner.report.update(state="failed", execution_completed=False,
+                             error={"type": type(error).__name__, "message": str(error)})
+        raise
+    finally:
+        runner.report["total_wall_seconds"] = time.perf_counter() - started
+        runner.save()
+    print(json.dumps({"state": runner.report["state"], "report": str(args.output / "reference_anatomy.json")}))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -18,6 +18,7 @@ set -eu
   mri_synthmorph register -m joint -j 8 \
     -t "$output_dir/mni_to_t1.mgz" \
     "$mni_t1" "$native_t1"
+# apply 的 -t 是输出 dtype；变换 TRANS 是 IMAGE/OUTPUT 前的位置参数。
 /usr/bin/time -f '%e %M' -o "$output_dir/s1_apply.time" \
   mri_synthmorph apply -m nearest -t int16 \
     "$output_dir/mni_to_t1.mgz" "$tian_s1" "$output_dir/tian_s1_t1.nii.gz"
