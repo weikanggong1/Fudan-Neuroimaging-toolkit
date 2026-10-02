@@ -19,7 +19,7 @@ flowchart TD
     M --> C[同 raw 与同节点语义：官方10个重复组合对 FNIT 已有矩阵]
 ```
 
-本轮显式选择官方 modeling 与 `official_anatomy_raw10_v1` 的实际 `completed` 合同；上游路径以本轮交接为准，不能自动回退。CON01/03 原始选帧匹配；后八例按正式 FNIT 已冻结的原始 B0 frame index 作为共同输入参数，从原始文件由 `fslroi/fslmerge` 重建。这一输入适配及逐位抽帧检查保留在 producer 报告；官方仍自产 TOPUP field、mask、EDDY、FOD、FA 与 atlas，不称两条链独立选择 B0。早先失败或尚未完成的目录保留原状，不回退消费。若上游明确启用真实 `eddy_cpu` fallback，必须显式绑定其新完成合同；报告保留 CPU solver、host 与实际时间，GPU solver 的时间和 UUID 分开记录。
+本轮显式选择已完成的官方 modeling 与官方 anatomy consumer 合同；上游路径以本轮交接为准，不能自动回退。CON01/03 原始选帧匹配；后八例按正式 FNIT 已冻结的原始 B0 frame index 作为共同输入参数，从原始文件由 `fslroi/fslmerge` 重建。这一输入适配及逐位抽帧检查保留在 producer 报告；官方仍自产 TOPUP field、mask、EDDY、FOD、FA 与 atlas，不称两条链独立选择 B0。早先失败或尚未完成的目录保留原状，不回退消费。若上游明确启用真实 `eddy_cpu` fallback，必须显式绑定其新完成合同；报告保留 CPU solver、host 与实际时间，GPU solver 的时间和 UUID 分开记录。
 
 ## 2. Python、输入格式与输出
 
@@ -65,8 +65,8 @@ comparison_report = compare(
 # 所有路径来自本轮实际产物。old reference只用于二进制/helper身份校验。
 raw_manifest=/path/to/frozen/input_manifest.json
 raw_manifest_sha256=完整64位SHA256
-anatomy_contract=/path/to/official_anatomy_raw10_v1/sub-CON03/consumer_contract.json
-dwi_contract=/path/to/official_modeling_raw10_v2/sub-CON03/consumer_contract.json
+anatomy_contract=/path/to/current_completed_official_anatomy/sub-CON03/consumer_contract.json
+dwi_contract=/path/to/current_completed_official_modeling/sub-CON03/consumer_contract.json
 verified_reference_manifest=/path/to/audited_fixed_reference/reference_manifest.json
 verified_reference_manifest_sha256=完整64位SHA256
 mrtrix_binary_directory=/path/to/pinned/MRtrix3/bin
@@ -107,6 +107,36 @@ python tools/benchmark_connectome_raw_cohort_envelope.py \
 这里要求 FNIT `gpu_report.json` 同病例且实际 exit0，原始输入在 before/after 逐项校验，读到的矩阵、atlas 和 nodes 文件摘要属于该真实输出报告。尝试数和种子标签核对实际 CLI command。
 
 `preflight_connectome_raw_reference.py --config <冻结JSON> --config-sha256 <完整SHA> --output <新报告>` 只读核对真实工具/二进制、`-version`、原始文件与实际完成合同。配置列出源码 SHA、已审计 reference manifest 和 SHA、MRtrix 目录、raw manifest 和 SHA、明确 modeling/anatomy 根目录。加载器错误保留实际 returncode 与输出并使 `program_dependencies_ready=false`；合同未齐则 `required_dependency_ready=false`，不会因此启动计算或切换二进制。
+
+### 两组 CPU 流水与真实输出来源
+
+十例预定分为两个互斥组：A 为 CON01/04/06/08/10，B 为 CON03/05/07/09/11。每组运行原控制器，使用相同冻结 worker、helper、二进制、原始清单和 producer 根目录；`--case-ids` 写清本组的 `sub-CONxx`，`--output-root` 使用独立新目录。各组扫描全部病例，跳过未完成合同，因此某一病例尚未准备好不会挡住同组的其他 ready 病例。每例五个种子仍按 0–4 顺序运行；tracking `-nthreads 0`、下游 8 线程。只有对应组首个真实完成 consumer 到达后才启动该组，不等待另一组准备好。
+
+`bind_connectome_raw_reference_origins.py` 为两组产物建立来源表和受控软链接，便于现有逐病例矩阵工具读取。它只处理文件元数据，不运行官方命令、GPU 或矩阵重计算：
+
+```bash
+# 先冻结实际两组启动配置、源码 SHA 和当前完成 producer 的明确路径。
+origin_configuration=/path/to/frozen/case_origin_configuration.json
+origin_configuration_sha256=完整64位SHA256
+controlled_official_view=/path/to/new_controlled_official_view
+
+python tools/reference/bind_connectome_raw_reference_origins.py \
+    --config "$origin_configuration" \
+    --config-sha256 "$origin_configuration_sha256" \
+    --output-root "$controlled_official_view" --watch --poll-seconds 15
+```
+
+配置 JSON 的字段如下：
+
+- `raw_manifest` 与 `verified_reference_manifest`：各包含实际 `path` 和 `sha256`，分别绑定 canonical raw 清单和已审计官方身份。
+- `source_files`：冻结源码的绝对路径到 SHA 的映射，包含原控制器、raw worker、官方命令 helper 和 `connectome_repeat_common.py`；不能运行中替换。
+- `n_seeds=100000`、`seeds=[0,1,2,3,4]`、`expected_eddy_solver="cpu"`：本轮预先固定的尝试数、重复标签与上游 CPU solver 来源。
+- `groups.A` 与 `groups.B`：分别包含 `case_ids`、实际 `output_root` 和 `launch_configuration={path,sha256}`。两组必须互斥并覆盖 canonical 清单全部病例。每组启动配置除 `case_ids/output_root` 外完全一致，包含实际 `official_dwi_root/official_anatomy_root`、原始及 reference SHA、种子参数。
+
+输出 `case_origin_binding.json` 保留每组实际 controller PID、状态文件 SHA、启动配置与源码 SHA。病例只有在实际 worker returncode=0、全部官方命令完成、`reference_manifest.execution_completed=true`，且 raw/合同/源码身份一致时，才建立 `controlled_official_view/sub-CONxx → group实际目录/sub-CONxx`。表中同时保存目标路径、reference manifest SHA、真实 DWI/anatomy consumer SHA、EDDY CPU 来源和选帧记录。尚未启动或尚未完成的病例记录等待状态，不创建结果软链接；已有错误目录或指向其他产物的链接会报错。
+
+该来源表的 `execution_completed` 仅表示两组真实参考产物已齐，`scientific_parity` 仍是 `not_assessed`。是否进入官方重复范围由矩阵 envelope 独立判断。解析器测试只验证来源协议，不能替代真实十例 benchmark。
+
 
 ## 4. 官方步骤与命令
 
