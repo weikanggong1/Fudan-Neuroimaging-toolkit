@@ -91,3 +91,21 @@ def test_failed_presynchronization_records_current_stage_and_preserves_error(mon
     assert "sync-failure" in profiler.last_row["error"]
     assert profiler.last_row["function_seconds"] == 0
     assert profiler.last_row["torch_memory_stats_status"] == "failed"
+
+@pytest.mark.parametrize("enabled,benchmark,deterministic", [
+    (False, False, False), (True, False, True), (True, True, True),
+])
+def test_forward_records_actual_cudnn_backend_without_changing_policy(enabled, benchmark, deterministic):
+    from fnit.recon_all.profiling import record_network_forward
+    network = torch.nn.Linear(2, 1)
+    image = torch.ones(1, 2)
+    with torch.backends.cudnn.flags(enabled=enabled, benchmark=benchmark,
+                                    deterministic=deterministic, allow_tf32=False):
+        records = []
+        record_network_forward(module=network, inputs=image, records=records, model="test")
+        row = records[0]
+        assert (row["cudnn_enabled"], row["cudnn_benchmark"], row["cudnn_deterministic"]) == (
+            enabled, benchmark, deterministic)
+        assert not row["cudnn_tf32"]
+        assert (torch.backends.cudnn.enabled, torch.backends.cudnn.benchmark,
+                torch.backends.cudnn.deterministic) == (enabled, benchmark, deterministic)

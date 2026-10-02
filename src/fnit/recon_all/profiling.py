@@ -23,11 +23,13 @@ def autocast_state(device_type: str) -> dict:
 
 
 def record_network_forward(module, inputs: torch.Tensor, records: list, **metadata) -> None:
-    """在调用前记录实际设备、dtype、TF32及autocast，不同步CUDA或修改精度。
+    """在调用前记录实际设备、dtype、TF32、cuDNN后端及autocast，不同步CUDA或修改精度。
 
     module为已构造网络，inputs为真实前向张量，records为调用者列表；
     metadata可附模型名/是否计算逆变换。只追加JSON兼容字典，返回None。
-    输出含模型设备集合；列表由调用者保存，不形成全局缓存。
+    输出含模型设备集合，以及cudnn_enabled/benchmark/deterministic布尔值；
+    列表由调用者保存，不形成全局缓存。读取后端状态，不改变算法、缓存或同步。
+    缺少张量属性、模块参数不可遍历或列表不可追加时抛异常；无独立官方命令。
     """
     records.append({
         **metadata, "device": str(inputs.device), "input_dtype": str(inputs.dtype),
@@ -35,6 +37,9 @@ def record_network_forward(module, inputs: torch.Tensor, records: list, **metada
         "model_dtypes": sorted({str(p.dtype) for p in module.parameters()}),
         "matmul_tf32": bool(torch.backends.cuda.matmul.allow_tf32),
         "cudnn_tf32": bool(torch.backends.cudnn.allow_tf32),
+        "cudnn_enabled": bool(torch.backends.cudnn.enabled),
+        "cudnn_benchmark": bool(torch.backends.cudnn.benchmark),
+        "cudnn_deterministic": bool(torch.backends.cudnn.deterministic),
         "autocast": autocast_state(inputs.device.type),
     })
 
