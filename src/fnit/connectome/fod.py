@@ -322,7 +322,10 @@ def _mrtrix_icls_batch(
         if not bool(step.any()):
             break
         was_active = active[rows, index]
-        active[rows[step], index[step]] = True
+        # Reuse ordered integer indices: boolean indexing otherwise repeats
+        # nonzero (and CUDA host synchronisation) for the same selection.
+        step_rows = torch.nonzero(step, as_tuple=True)[0]
+        active[step_rows, index[step_rows]] = True
         changed = step & ~was_active
         pending = step.clone()
         for _ in range(constraints.shape[0] + 1):
@@ -347,19 +350,21 @@ def _mrtrix_icls_batch(
             negative = (multipliers < 0) & valid & pending[:, None]
             needs_removal = negative.any(dim=1)
             completed = pending & ~needs_removal
-            if bool(completed.any()):
-                solution[completed] = (
-                    y[completed]
-                    + (selected_rows[completed].transpose(1, 2)
-                       @ multipliers[completed, :, None]).squeeze(-1)
+            completed_rows = torch.nonzero(completed, as_tuple=True)[0]
+            if completed_rows.numel():
+                solution[completed_rows] = (
+                    y[completed_rows]
+                    + (selected_rows[completed_rows].transpose(1, 2)
+                       @ multipliers[completed_rows, :, None]).squeeze(-1)
                 )
-                updated = torch.zeros_like(prior_multipliers[completed])
+                updated = torch.zeros_like(prior_multipliers[completed_rows])
                 updated.scatter_add_(
-                    1, selected[completed],
-                    multipliers[completed] * valid[completed],
+                    1, selected[completed_rows],
+                    multipliers[completed_rows] * valid[completed_rows],
                 )
-                prior_multipliers[completed] = updated
-            if bool(needs_removal.any()):
+                prior_multipliers[completed_rows] = updated
+            removal_rows = torch.nonzero(needs_removal, as_tuple=True)[0]
+            if removal_rows.numel():
                 prior = prior_multipliers.gather(1, selected)
                 ratio = torch.where(
                     negative,
@@ -368,7 +373,7 @@ def _mrtrix_icls_batch(
                 )
                 remove = ratio.argmin(dim=1)
                 constraint_to_remove = selected.gather(1, remove[:, None]).squeeze(1)
-                active[rows[needs_removal], constraint_to_remove[needs_removal]] = False
+                active[removal_rows, constraint_to_remove[removal_rows]] = False
                 changed |= needs_removal
             pending = needs_removal
         else:
