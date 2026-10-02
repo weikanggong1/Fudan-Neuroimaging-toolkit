@@ -58,7 +58,7 @@ reconstruction_report = run_recon_all_python(
 
 每组独立报告位于 scripts/OPERATION.hemisphere-group.json，完整worker stdout/stderr位于 scripts/OPERATION.H.worker.log；原生其他日志加阶段及半球前缀，保留固定文件名的来源。私有影像正常成功/失败均删除，不进入报告交付；清理自身失败则组状态failed并记录残留私有路径。最终报告采用临时元数据+replace；写出失败仍在内存主报告中标failed，保留原始worker异常与收尾错误，不产生成功的临时JSON。
 
-失败行为：worker异常、未知共享写入、输入删除或不完整报告均失败，取消同组进程树，不发布该组计算结果。逐文件发布遇到I/O错误则主报告明确failed并保留已发布路径，没有跨文件事务回滚。输入/资源/线程/allocator错误继续沿用原接口异常。默认串行接口兼容；完整整例只由协调者统一验证。
+失败行为：worker异常、未知共享写入、输入删除或不完整报告均失败，取消同组进程树，不发布该组计算结果。逐文件发布遇到I/O错误则主报告明确failed并保留已发布路径，没有跨文件事务回滚。输入/资源/线程/allocator错误继续沿用原接口异常。默认串行接口兼容；并行调度要求Linux的/proc与POSIX进程组，Windows通过WSL或Linux服务器运行；完整整例只由协调者统一验证。
 
 batch接口 `run_recon_all_python_batch(..., hemisphere_workers=2, threads=4)` 向每个设备独立被试进程传递相同参数。每设备同一时刻一个被试；threads是每被试总预算，多GPU的全机预算由调用者另行安排。
 

@@ -10,6 +10,8 @@ from fnit.recon_all.compare_subject import _topology
 from fnit.recon_all.expected_outputs import paths as expected_paths
 from fnit.recon_all.native_free import _validate_meshes
 from fnit.recon_all.surface_roi_gpu import roi_area_thickness, roi_gray_volume
+from fnit.recon_all.place_surface_collision import triangles_intersect
+from scipy.spatial import cKDTree
 
 
 def sphere_quality(vertices,faces):
@@ -21,6 +23,38 @@ def sphere_quality(vertices,faces):
             'radius_max_mm':float(np.linalg.norm(vertices,axis=1).max())}
 
 
+def cross_surface_faces(white,pial,faces,cortex):
+    """全量cortex面双网格查询；原生tol的接触也计数，无抽样/近邻数量截断。"""
+    mask=np.zeros(len(white),bool);mask[cortex]=True
+    ids=np.flatnonzero(mask[faces].all(axis=1))
+    w,p=white[faces[ids]],pial[faces[ids]]
+    wc,pc=w.mean(axis=1),p.mean(axis=1)
+    wr=np.linalg.norm(w-wc[:,None],axis=2).max(axis=1)
+    pr=np.linalg.norm(p-pc[:,None],axis=2).max(axis=1)
+    pl,ph=p.min(axis=1),p.max(axis=1)
+    tree=cKDTree(pc)
+    pairs=[];coincident=0;tested=0
+    for start in range(0,len(w),4096):
+        lists=tree.query_ball_point(wc[start:start+4096],wr[start:start+4096]+pr.max()+1e-5)
+        for offset,near in enumerate(lists):
+            i=start+offset
+            candidates=np.asarray(near,dtype=np.int64)
+            if not len(candidates):continue
+            near=np.sum((pc[candidates]-wc[i])**2,axis=1)<=(pr[candidates]+wr[i]+1e-5)**2
+            candidates=candidates[near]
+            low,high=w[i].min(axis=0),w[i].max(axis=0)
+            candidates=candidates[np.all(pl[candidates]<=high+1e-5,axis=1)&np.all(low<=ph[candidates]+1e-5,axis=1)]
+            for j in candidates:
+                if i==j and np.array_equal(w[i],p[j]):coincident+=1;continue
+                tested+=1
+                if triangles_intersect(w[i].astype(np.float32),p[j].astype(np.float32)):
+                    pairs.append((int(ids[i]),int(ids[j])))
+    return {'cortex_face_count':len(ids),'candidate_pairs_tested':tested,
+            'intersecting_pairs_count':len(pairs),'intersecting_face_pairs':pairs,
+            'coincident_corresponding_faces':coincident,
+            'scope':'all faces with all three vertices in cortex; native 1e-6 plane tolerance, touch-inclusive; no pair sampling'}
+
+
 def white_pial_quality(white,pial,faces):
     # 对应面法向符号仅是局部逆向诊断，不等于完整两网格交叉检测。
     tri=white[faces]
@@ -29,7 +63,7 @@ def white_pial_quality(white,pial,faces):
     signed=np.einsum('ij,ij->i',normal,displacement)
     return {'reversed_prism_faces':int(np.count_nonzero(signed<0)),
             'same_vertex_distance_max_mm':float(np.linalg.norm(pial-white,axis=1).max()),
-            'white_pial_crossings':'not_assessed_full_triangle_pairs',
+            'white_pial_crossings':'see full cortex triangle-pair check',
             'diagnostic_scope':'oriented corresponding-face displacement, not full crossings'}
 
 
@@ -53,7 +87,9 @@ def main():
             white,faces=fs.read_geometry(subject/f'surf/{hemi}.white')
             pial,pfaces=fs.read_geometry(subject/f'surf/{hemi}.pial')
             quality={'white':_topology(white,faces),'pial':_topology(pial,pfaces)}
-            if np.array_equal(faces,pfaces):quality['white_pial']=white_pial_quality(white,pial,faces)
+            if np.array_equal(faces,pfaces):
+                quality['white_pial']=white_pial_quality(white,pial,faces)
+                quality['cortex_white_pial_crossings']=cross_surface_faces(white,pial,faces,fs.read_label(subject/f'label/{hemi}.cortex.label'))
             for sphere in ('sphere','sphere.reg'):
                 xyz,sfaces=fs.read_geometry(subject/f'surf/{hemi}.{sphere}')
                 quality[sphere]=sphere_quality(xyz,sfaces)
