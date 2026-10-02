@@ -258,7 +258,9 @@ tck2connectome tracks.tck atlas.mif fbc.csv -symmetric -assignment_radial_search
 |---|---|---|
 | CON01/CON03，同输入 CSD | 12 组实际中间张量、30 项数组比较逐位一致；观测耗时分别下降约 6.92%/3.45%，CON03 第二轮负载不稳定 | [建模优化与时间边界](../../validation/connectome/tenraw_20261002/task_02/README.md) |
 | CON01/CON03，同输入 100k tracking | 全部轨迹点、offsets、端点、长度和接受种子逐位一致；CON03 ABBA 197.785→160.700 s，观测下降 18.75%。CON01 最后一轮基线受到共享负载影响，不能用其均值差宣称稳定提速 | [追踪调用、完整参数与脑图](TRACKING_OPERATORS.md) |
-| CON03，独立官方五种子，固定相同 FOD/5TT/atlas | 接受数量进入官方范围；单个 FNIT 种子的 240 项矩阵比较有 7 项未进入官方自身重复范围，25 项轨迹群体比较有 15 项未进入 | [官方重复性审计与真实脑图](../../validation/connectome/tenraw_20261002/task_04_repeat_reference/README.md) |
+| CON03，双方各五种子，固定相同 FOD/5TT/atlas | 25 个跨软件组合中，矩阵 1091/1200 项、轨迹群体 72/125 项通过；FNIT 自身重复分别为 412/480、47/50。整体未匹配官方重复范围 | [完整五种子结果、失败项与真实脑图](../../validation/connectome/tenraw_20261002/task_04_repeat_fivefnit_reference/README.md) |
+| CON01，原始 AP/PA 整例两版本 | 校正 4D DWI、旋转梯度、配准、5TT/GMWMI、八 atlas 和 32 矩阵逐值一致；wall 641.205→1972.731 s，共享 GPU 条件下没有观测到整链加速。其余九例仍在执行 | [真实输出比较与时间范围](actual_cohort_comparison.md) |
+| CON01/CON03，固定 TCK 的 SIFT2 候选 | 两例严格逐值门槛均未通过，未采用优化器缓存。保留全部配对、原软件耗时及逐值误差 | [SIFT2/精确 FA 组件说明](SIFT2_SAMEINPUT_OPTIMIZATION.md) |
 | CON03，独立官方结构像步骤 | 官方 SynthMorph、FreeSurfer/MRtrix 与原 UKB atlas 脚本已真实执行，生成 27 项结构像输出。报告保留成功阶段恢复的时间与来源，尚不等于完整官方 raw-DWI 链验证 | [结构像实际报告与脑图](raw_official_anatomy_reference.md) |
 
 下表是既有 ds004666/UKB 结果，保留对应版本与输入范围。
@@ -277,7 +279,11 @@ tck2connectome tracks.tck atlas.mif fbc.csv -symmetric -assignment_radial_search
 
 历史 ds004666 组件优化保持原数值与 RNG 操作；其 Torch 已分配/预留峰值 2.544/2.938 GB 仅对应固定已有配准的组件范围，不能作为新的原始 BIDS 整链峰值。完整精确 FA 只从 109.81 降至 106.82 ms，收益很小；追踪的 SH、组织采样与圆弧概率仍是后续主要优化对象。
 
-![配对 T1、校正前后 b0 与 atlas](figures/ds004666_t1_raw_vs_topup_eddy_atlas.png)
+本轮新下载 CON03 的五次追踪平均分布如下。这里显示保存点的访问次数与差异，不等同于 MRtrix `tckmap`；完整来源、分箱和矩阵脑图见五种子报告。
+
+![本轮 CON03 五次实际追踪分布](../../validation/connectome/tenraw_20261002/task_04_repeat_fivefnit_reference/point_visit_brain.png)
+
+既有 ds004666 的[配对 T1、校正前后 b0 与 atlas 示例](figures/ds004666_t1_raw_vs_topup_eddy_atlas.png)仅对应原报告的输入和版本。
 
 ### BEDPOSTX + ProbtrackX2 能否作为完整对照？
 
