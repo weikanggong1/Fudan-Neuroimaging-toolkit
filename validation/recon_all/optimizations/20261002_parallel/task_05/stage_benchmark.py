@@ -50,9 +50,28 @@ def main():
             for source in inputs:
                 dest=folder/source.relative_to(subject);dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(source,dest)
             item['input_copy_seconds']=time.perf_counter()-tick;tick=time.perf_counter()
-            result=run_mni_nonlinear_chain(folder,cfg['weights'],cfg['assets'],
-              warp_convert=Path(cfg['native_bin'])/'mri_warp_convert',ca_register=Path(cfg['native_bin'])/'mri_ca_register',
-              mri_convert=Path(cfg['native_bin'])/'mri_convert',device='cuda:0',threads=4,postprocess_backend='gpu' if a.mode=='stage' else 'conda')
+            # 验证用只读 hook：直接观察两次内部反对称 DeformNetwork 前向。
+            # 不改生产模型、不改变精度、不同步；调用结束后始终移除。
+            from fnit.synthmorph.models import DeformNetwork
+            from fnit.recon_all.profiling import record_network_forward
+            trace=[]
+            def observe(module,inputs):
+                if isinstance(module,DeformNetwork):
+                    record_network_forward(module,inputs[0],trace,scope='internal_DeformNetwork')
+            hook=torch.nn.modules.module.register_module_forward_pre_hook(observe)
+            try:
+                result=run_mni_nonlinear_chain(folder,cfg['weights'],cfg['assets'],
+                  warp_convert=Path(cfg['native_bin'])/'mri_warp_convert',ca_register=Path(cfg['native_bin'])/'mri_ca_register',
+                  mri_convert=Path(cfg['native_bin'])/'mri_convert',device='cuda:0',threads=4,postprocess_backend='gpu' if a.mode=='stage' else 'conda')
+            finally:
+                hook.remove()
+            item['observed_internal_forwards']=trace
+            item['internal_forward_contract_passed']=(len(trace)==2 and all(
+              row['input_dtype']=='torch.float32' and row['model_dtypes']==['torch.float32']
+              and not row['matmul_tf32'] and not row['cudnn_tf32'] and not row['autocast']['enabled']
+              for row in trace))
+            if not item['internal_forward_contract_passed']:
+                raise RuntimeError('Actual internal antisymmetric forwards violated two-call FP32 contract')
             item['stage_wall_seconds']=time.perf_counter()-tick;item['result']=result
             targets={name:Path(result[name]) for name in ('forward','inverse','check')}
             item['timings']=result['timings_seconds']
