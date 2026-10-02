@@ -1,6 +1,6 @@
 # 任务 5：MNI warp GPU 后处理验证
 
-截至本记录，完整同 forward GPU 求逆与三方对照已完成且数值一致；最新转换回归和自产连续链未完成，首次 CUDA 分配失败正排错。默认后端仍为 `conda`；不得把本页阶段结果解释为整例成功或整体等效。
+截至本记录，完整同 forward GPU 求逆与三方对照已完成且数值一致；最新转换回归和自产连续链未完成，分阶段 CUDA 初始化探针已通过，v12 完整回归已排队。默认后端仍为 `conda`；不得把本页阶段结果解释为整例成功或整体等效。
 
 ## 实现与输入
 
@@ -54,7 +54,7 @@ CUDA 完整中心/边缘控制点单元回归与成熟 CPU 参考逐元素一致
 
 [GPU 监测](inverse_v6_monitor.json)记录全命令 156.032 s（包括四次求逆、哈希及排错，不能当作一次函数耗时），采样峰值 1,006,632,960 字节，399 样本，失败 0，最大间隔 3.743 s；[参考监测](reference_v6_monitor.json)全命令 419.303 s、峰值 933,232,640 字节、1,142 样本、失败 0、最大间隔 2.337 s。对应[GPU 采样](inverse_v6_gpu_samples.csv)与[参考采样](reference_v6_gpu_samples.csv)保留外部总占用；均非连续峰值上界。
 
-[v6 前置单元](unit_v6.log) 7 项通过。v7 几何修正与 v11 完整阶段的两个尝试分别在首次 CUDA 分配失败，见 [v7 日志](unit_v7_bootstrap_failure.log) / [v11 日志](unit_v11_bootstrap_failure.log)：pytest/model 未开始，没有该次速度或数值结果。正在以显式、单次初始化探针排错，不做模型自动重试。
+[v6 前置单元](unit_v6.log) 7 项通过。v7 几何修正与 v11 完整阶段的两个尝试分别在首次 CUDA 分配失败，见 [v7 日志](unit_v7_bootstrap_failure.log) / [v11 日志](unit_v11_bootstrap_failure.log)：pytest/model 未开始，没有该次速度或数值结果。随后[allocator 关闭](bootstrap_uncached_staged.json)和[allocator 开启](bootstrap_cached_staged.json)的分阶段诊断均通过 init / set-device / properties / memory-info / 4 字节分配 / synchronize；[两次状态](bootstrap_pair_status.json)记录返回码均为 0。此前失败原因尚未确认。v12 在相同已初始化进程内执行完整回归，不做模型自动重试。
 
 ## 待执行与门槛
 
@@ -67,7 +67,9 @@ CUDA 完整中心/边缘控制点单元回归与成熟 CPU 参考逐元素一致
 
 ## 复现
 
-[benchmark.py](benchmark.py)接受 JSON：`cases`（各含 `id`,`subject`）、`assets`,`native_bin`,`official_bin`,`output`,`code_commit`，mode 为 operators / inverse / reference / all。[stage_benchmark.py](stage_benchmark.py)另需 `weights`，mode 为 stage / stage-conda / baseline，output 必须是新目录。`stage` 与 `stage-conda` 都只复制 orig/crop/aff，重新运行完整两次网络前向和各自完整后处理，可做完整阶段对照；`baseline` 是冻结 deform/LTA 的隔离原生后处理计时，范围不同。完整阶段还记录自产 deform 与冻结 deform 数值差、资源 SHA、实际 Torch/interop 线程和 CPU affinity。文件系统与 JIT 缓存没有清空，不宣称无缓存冷启动。
+[benchmark.py](benchmark.py)接受 JSON：`cases`（各含 `id`,`subject`）、`assets`,`native_bin`,`official_bin`,`output`,`code_commit`，mode 为 operators / inverse / reference / all。[context_validation.py](context_validation.py)将单次分阶段 CUDA 初始化、14 项测试、两例算子、完整阶段 AB/BA 置于同一进程；初始化失败立即停止，完整模型逐次重建，sub01 GPU→Conda、sub02 Conda→GPU。整个命令外层持锁和监测。
+
+[stage_benchmark.py](stage_benchmark.py)另需 `weights`，mode 为 stage / stage-conda / baseline，output 必须是新目录。`stage` 与 `stage-conda` 都只复制 orig/crop/aff，重新运行完整两次网络前向和各自完整后处理，可做完整阶段对照；`baseline` 是冻结 deform/LTA 的隔离原生后处理计时，范围不同。完整阶段还记录自产 deform 与冻结 deform 数值差、资源 SHA、实际 Torch/interop 线程和 CPU affinity。文件系统与 JIT 缓存没有清空，不宣称无缓存冷启动。
 
 所有性能命令须在同一共用本地文件锁内顺序执行，进程启动前绑定物理 GPU UUID，OMP/BLAS/Numba/Torch 总线程预算 4。用项目已有 [run_monitored.py](../../../python_gpu_port/run_monitored.py) 包装记录过程树显存。环境为 Torch 2.5.1 / CUDA 11.8 / Triton 3.1.0；冷启动诊断先建立同设备单元素 CUDA 上下文，不隐藏失败、自动重试或改变精度。[bootstrap.json](bootstrap.json)保留实际诊断结果；[早期 CPU JIT 后首次 CUDA 分配失败原始日志](unit_cold_failure.log)保留 2 failed / 3 passed，失败发生在首次 GPU 张量建立处；原因未确认，未计入速度测量。原 GPFS 锁返回 ENOLCK 的尝试未执行被测命令；后续统一使用共用本地文件锁。
 
