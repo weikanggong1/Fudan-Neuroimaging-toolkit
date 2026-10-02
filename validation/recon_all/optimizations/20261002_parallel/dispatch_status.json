@@ -41,9 +41,9 @@
     "new_login_or_password": "not_required",
     "shared_host_local_flock": "verified; previous GPFS ENOLCK retained as failed attempt"
   },
-  "implementation_validation": "tasks 1,2,3,5 merged; task 4 all 12 frozen pairs and 4 own chains complete, final review pending",
-  "whole_validation": "baseline sub01 initialized-CUDA API running from raw T1 and new output; baseline sub02 CLI scheduled; integrated candidate not started",
-  "main_push": "not_started; whole paired runs and installation pending",
+  "implementation_validation": "all five task branches merged; final native link-map side-effect fix passed local regression",
+  "whole_validation": "baseline sub01 initialized-CUDA API running; latest snapshot 22 stages complete; sub02 CLI scheduled; candidate configs prepared but installation and raw runs pending",
+  "main_push": "not_started; installation and two paired raw whole runs pending",
   "resource_fingerprints": {
     "status": "passed",
     "measured_utc": "2026-10-02T07:42:42.921207+00:00",
@@ -56,7 +56,7 @@
     "isolation": "not_verified"
   },
   "integration_preserves_main": "f436de588647a0de80735e4a98d53df5d88e502d",
-  "updated_utc": "2026-10-02T13:06:39.277528+00:00",
+  "updated_utc": "2026-10-02T13:43:18.359754+00:00",
   "integration_source_commit_before_mni_wiring": "24390dc",
   "baseline_queue": {
     "supervisor_pid": 128920,
@@ -75,5 +75,17 @@
     "passed": true,
     "report": "coordinator/cpu_1dd6df8/cpu_integration_1dd6df8.json"
   },
-  "scientific_metric_equivalence": "not_assessed; no formally confirmed whole-case gates"
+  "scientific_metric_equivalence": "not_assessed; no formally confirmed whole-case gates",
+  "runtime_candidate_commit": "8d750e25d4d067a43edb788a96b2086a1c031ba0",
+  "integration_commit_after_build_fix": "ad450b6",
+  "candidate_deployment": {
+    "status": "passed",
+    "source_archive_sha256": "45cb2a8260883f58c5640af82b0903ed9d6f3339936730385dc198434d7e88c9",
+    "archive_bytes": 4247792,
+    "file_sha256_checks": 1487,
+    "raw_T1_weights_or_private_license_transferred": false
+  },
+  "installation_validation": "1dd6 partial native and wheel queued; final 8d750 wheel/target queued independently; no fresh Conda or physical isolation claim",
+  "strict_reproduction": "stage-dependent; task01 strict failed, retained; integrated whole not_assessed",
+  "new_degradation": "integrated whole not_assessed; same-input geometry/MNI/GCA exact, task01 curvature tails retained"
 }
