@@ -1,5 +1,7 @@
 # FastVBM 全流程 benchmark
 
+2026-10-02 的最新 FNIRT 完整 FastVBM、volume、dMRI 验收与完整 4D 重采样统一见[本轮报告](../registration_lossless_20261002/README.md)。以下记录按各自日期和源码保留。
+
 [功能、参数与调用](../../docs/fast_vbm/README.md) · [匿名标量报告](e2e.public.json) · [复现脚本](validate_real.py)
 
 2026-09-30 在 gpucw1 上用 `f958121` 的运行源码重跑一例真实临床 T1w，分别测试 FNIRT 和 SynthMorph 分支。两次均从原始 T1 开始，不传入 FSL GM 或仿射矩阵：SynthStrip → TorchFAST → TorchFLIRT → 非线性配准 → TorchApplyWarp → 非线性 Jacobian → 调制 GM → 保存全部结果。候选流程不调用 FSL 或 FreeSurfer。该提交的源码哈希见 JSON；后续文档和验证脚本更新不改变本次测量的算法。

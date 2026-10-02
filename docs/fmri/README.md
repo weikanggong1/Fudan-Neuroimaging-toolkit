@@ -318,7 +318,15 @@ fmriprep "$original_bids_root" "$reference_derivatives_root" participant \
 
 ## 最新真实数据精度、耗时与脑图
 
-### 最新完整 volume 实测（`cfb7beee`，FNIRT、STC 关闭）
+### 2026-10-02：FNIRT 完整 volume 无损验收
+
+本轮从相同 BIDS T1、SBRef 和全部 490 帧 BOLD 开始，冻结 `7473452`，以全新 derivatives 目录关闭解剖缓存复用，实际运行 T1 FNIRT。比较优化前后的最终 preproc/clean、T1、pull field、科学 header、全部时间帧和 FNIRT 求解轨迹；完整参数、逐阶段耗时、显存和位模式比较见[本轮统一报告](../../validation/registration_lossless_20261002/README.md)。
+
+本轮使用公开 API 的默认 clean 选项，WM/CSF 与额外运动回归关闭；下面的历史测量开启了这些回归，不能把两次总时间之差归给本轮改动。
+
+三条完整流程的FNIRT数值链验收均通过。volume基线→本轮FNIRT候选 API含保存为539.48→522.01 s，12幅影像、保存矩阵和完整科学FNIRT QC相同。当前main集成版（同时包含上游MCFLIRT精确缓存/CUDA graph）API为462.43 s；其与522.01 s候选的完整科学输出也逐位相同，峰值 allocated 6.503 GB。该整链观测包含其他步骤与共享资源波动，FNIRT单独的固定输入结果见统一报告。
+
+### 2026-10-01 完整 volume 历史实测（`cfb7beee`，FNIRT、STC 关闭）
 
 2026-10-01，在同一例真实 UKB `88×88×64×490` BOLD、SBRef 和匹配存档 T1 上，冻结源码 `cfb7beee202f7e89072faf1a8e69b78d143e451f` 完成公开 API，同时保存 **preproc 与 clean**。T1→MNI 使用 optimized FNIRT，BBR 使用 batched；MCFLIRT 保持 8/4/4 mm、NCC/Brent 和 `(1,1,1)`，复用成熟 FLIRT 的 float32 算子融合 cost 输入准备。clean 为 100 秒高通、nonaggr AROMA、WM/CSF 与 24 项运动回归；STC、SDC/GDC、全脑信号及额外带通关闭。
 
@@ -348,7 +356,7 @@ fmriprep "$original_bids_root" "$reference_derivatives_root" participant \
 
 另与冻结 FNIT `1eb9c417` 比较，**运动校正的全部 242,851,840 个解码值逐值相同**。独立完整运行的 EPI 脑掩膜相差 1 个边界体素，pre-ICA 仅该体素的 490 个值不同；完整 MNI clean 时间 r 均值为 **0.992649**、RMSE **21.194244**，后续 AROMA/clean 并非逐值一致。固定掩膜控制与独立整链分别报告，见[冻结 FNIT 回归](../../validation/fmri/mcflirt_optimization_comparison.public.json)。
 
-独立 MCFLIRT 已在 `8a3f227` 加入精确矩阵缓存及 CUDA graph。2026-10-02 的同卡交替测试中，完整 490 帧调用从 **86.37 / 109.46 s** 降至 **52.47 / 63.48 s**，两版均为 45,972 次 cost；未舍入矩阵、参数和全部校正值逐 bit 一致。完整未截断样条值及相同 TR、脑掩膜下的高通结果也与冻结版本一致。该更新由 volume pipeline 直接复用；本节 **707.287 s** 是 `cfb7beee` 的完整流程实测，尚未重测本轮整链。最新运动精度、步骤耗时和共享 GPU 负载见[MCFLIRT 功能页](../mcflirt/README.md)及[配对报告](../../validation/mcflirt/paired_exact_latest.public.json)。
+独立 MCFLIRT 已在 `8a3f227` 加入精确矩阵缓存及 CUDA graph。2026-10-02 的同卡交替测试中，完整 490 帧调用从 **86.37 / 109.46 s** 降至 **52.47 / 63.48 s**，两版均为 45,972 次 cost；未舍入矩阵、参数和全部校正值逐 bit 一致。完整未截断样条值及相同 TR、脑掩膜下的高通结果也与冻结版本一致。该更新由 volume pipeline 直接复用；本节 **707.287 s** 是 `cfb7beee` 的完整流程实测，本轮最新main完整490帧重测为462.43 s并通过科学输出逐位比较，使用默认clean配置，见[最新整链报告](../../validation/registration_lossless_20261002/README.md)。最新运动精度、步骤耗时和共享 GPU 负载见[MCFLIRT 功能页](../mcflirt/README.md)及[配对报告](../../validation/mcflirt/paired_exact_latest.public.json)。
 
 下图展示最新 FNIT 与原同步骤 clean 参照的 MNI 时间标准差及完整 490 帧时间 r；切面、共同统计域、色阶和 PNG SHA-256 见[新图来源](../../validation/fmri/mcflirt_optimization_figure.public.json)。未追加空间平滑。
 
@@ -360,7 +368,7 @@ fmriprep "$original_bids_root" "$reference_derivatives_root" participant \
 
 固定同一变换的单次插值、原生 BOLD 分辨率网格与输出时间 metadata 分别由[数值控制](../../tests/test_fmri_single_pass.py)、[采样参考](../../tests/test_fmri_sampling_reference.py)和[时间合同](../../tests/test_fmri_timing.py)检验。真实全部 490 帧固定官方变换时，T1w 实际节点通过数值门禁，MNI 实际节点仍有 12 帧不匹配，详见[实际节点对照](../../validation/fmri/fmriprep/actual_node_interpolation_full490.public.json)；默认关闭 STC，显式开启 STC 的真实 CPU 最大误差 0.021484375 仍未满足原 0.01 门槛，见[STC 实测](../../validation/fmri/fmriprep/stc_real_full490.public.json)。这些范围分别报告，不替代当前 FNIRT clean 表。
 
-独立 BBR、FNIRT 与解剖缓存的输入、精度及首次/热调用时间见 [BBR](bbr.md#真实-ukb-数据对照)、[T1→MNI](normalization.md#当前真实数据-benchmark)和[当前配准报告](../../validation/fmri/registration_gpu.current.public.json)。共享 H100 的单次观察和上述完整 API 有不同的输入/输出与计时边界。
+独立 BBR、FNIRT 与解剖缓存的输入、精度及首次/热调用时间见 [BBR](bbr.md#真实-ukb-数据对照)、[T1→MNI](normalization.md#最新真实数据-benchmark)和[当前配准报告](../../validation/fmri/registration_gpu.current.public.json)。共享 H100 的单次观察和上述完整 API 有不同的输入/输出与计时边界。
 
 官方 DeepPrep 25.1.0 的完整 T1w＋BOLD volume 为 **2091.36 s**，包含结构重建与 QC；其 T1 为 208×256×256、未提供 SBRef，只输出 preproc/confounds。本次 FNIT 从匹配存档 T1 和 SBRef 开始，同时输出 preproc/clean；完整条件见 [DeepPrep 参照](../../validation/fmri/deepprep/README.md)，尚无双方最终 BOLD 的配对精度测试。
 

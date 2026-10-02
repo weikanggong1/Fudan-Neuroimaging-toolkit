@@ -1,0 +1,397 @@
+{
+  "schema_version": 2,
+  "pipeline": "fast-vbm",
+  "real_data": true,
+  "full_default_schedule": true,
+  "fnirt_actually_executed": true,
+  "anatomical_cache_reused": false,
+  "source_sha256": {
+    "src/fnit/amico_noddi/__init__.py": "a3d133bdb2dcb70b9fe20b638f5e347ac97999e0e79868270335af16f9bdc2a7",
+    "src/fnit/amico_noddi/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+    "src/fnit/amico_noddi/assets/__init__.py": "f2db86e31d3612dc342d234ff7491a79bd7a975f08684e69ff661f6098752aba",
+    "src/fnit/amico_noddi/classic.py": "ee5292dc4a14b43736a9f105c8946a43f35f482faa8bb8259992e9de2d8193ea",
+    "src/fnit/amico_noddi/cli.py": "17ff1df0abba58579912c2c961d9726a96cbc52bd61026cbe2e1d0956ff7645a",
+    "src/fnit/amico_noddi/core.py": "5e79e796e95f9c53429b8cb408d87d9e2455ed101cb7ac7ec00ad9c3f354ae26",
+    "src/fnit/amico_noddi/kernels.py": "46f1044aa5f1c2dbffd12dd33707c0e192ef1de01dc23157ae03a0977b3d0b59",
+    "src/fnit/amico_noddi/solver.py": "0f04c492b61f91a60aede8d281a8c87d5aac0a7453eb15898a788d8a90e1497d",
+    "src/fnit/applywarp/__init__.py": "fe480862dfbe483b5d71e18ac3c5e9926cc71ffa3c6c2685a56748d0fe7cee08",
+    "src/fnit/applywarp/__main__.py": "c2ee4ddb093c9af060cafaf68219907f8a6b7b301ed3f8bea75db7555adec987",
+    "src/fnit/applywarp/cli.py": "024de40d9121d2352071cf37f2c47558d97f0630faa1bfc47abcfb4e6e38270e",
+    "src/fnit/applywarp/core.py": "57031bdc2120d10116593c987b9598e3ee695545daa34736395b4b5a4187c560",
+    "src/fnit/dmri_pipeline/__init__.py": "ebb576959a603e9c9ce7dc6ae052397a5a54b603d7b714deed4b40a6960a82cd",
+    "src/fnit/dmri_pipeline/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+    "src/fnit/dmri_pipeline/bids.py": "460c430159c3c3efd80a98a931977381959a996c8e7fab43b6f805a15d60afdd",
+    "src/fnit/dmri_pipeline/cli.py": "7337034523b5612e4e33d4ead6339fa2f069a0bd59e7c4129438c3f56798212a",
+    "src/fnit/dmri_pipeline/pipeline.py": "5cb5e82c8fce246f3cf771022c55cc13fcb8bdd7c1049635a9ede6174746ddff",
+    "src/fnit/dmri_pipeline/tbss.py": "d814d4ab5fdb8e4fcecf4ae3629a9d12957c2143bb957e8893ed73264766086d",
+    "src/fnit/dtifit/__init__.py": "a38d642b2b5209e1bb10f155d42be85d9798a39db878e8a6f7cfce2d63e22d79",
+    "src/fnit/dtifit/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+    "src/fnit/dtifit/cli.py": "82f8600caaa4aebba89014c1f4327c320a84791f3d687f0db404ee7143d7cae7",
+    "src/fnit/dtifit/core.py": "23e0fb554be1e0b309af154f34f5b6f7139db6e06ca8f10b1bd08be09789dc39",
+    "src/fnit/eddy/__init__.py": "e1239c07080954468a0d3060a0385275df55addfa243ac039f4bbcd65cea1908",
+    "src/fnit/eddy/__main__.py": "6d8b7d7846a845059d7a3107143f11131f63c5511d669b44085b15ec5e3d2279",
+    "src/fnit/eddy/cli.py": "833f4b2838792ba0c45be53b6b34db7b297e42e001f5d86ec3fdfc21b44c0117",
+    "src/fnit/eddy/fsl2111_strict/__init__.py": "82de3ea49caa7ac9460c0172621eef9c76b52074f54f5e9c71fa362178a06b46",
+    "src/fnit/eddy/fsl2111_strict/config.py": "2440c28354d70fd40317584c2a1ff9d43dcc25d0ec83c173033a2f1f7653600d",
+    "src/fnit/eddy/fsl2111_strict/geometry.py": "4933be355012c36aa281c5cbb309444f3d0e66a3dd493eaa737c1671384981ae",
+    "src/fnit/eddy/fsl2111_strict/gp.py": "1b0cd8303eded816bf986703962f4644f8fb7435ddf25c72f22658c3e9fc8f2a",
+    "src/fnit/eddy/fsl2111_strict/outlier.py": "5b125641eaa882e02fe682a769a66b6ce171139e301f8d301b50834b51fb8d7d",
+    "src/fnit/eddy/fsl2111_strict/pipeline.py": "148335d9b4d314bcb216bbf95501e7574e3a8f30e50df60a965fbe9eca6bf0d4",
+    "src/fnit/eddy/fsl2111_strict/registration.py": "064e0b4e92c6bee67149eb03f413be57f6ae0ebcf25c307629bee0077cff19b7",
+    "src/fnit/eddy/fsl2111_strict/shell_alignment.py": "477028cecfebf0ba4ff1938f2b2228c0bca690450a5742a89b560ab7cbef1030",
+    "src/fnit/eddy/fsl2111_strict/spline.py": "b55f7abc9aba63483a0777989cecd5a610db542f41950bf41007507d9f7fbfc8",
+    "src/fnit/eddy/fsl2111_strict/warp.py": "d9e03b07016bad2bda750ffec3141352e9b17f327b5eb0ba2a66fd80ee14e8ee",
+    "src/fnit/eddy/topup_field.py": "54d076b5187d70596db7778264326dbd797d9972c28f954aa32e43f6db2c6b74",
+    "src/fnit/eddy/ukb.py": "a3e7fef62e572fbd3b0e9de6fad96845a18a57d341088549c1718c0d1dce1e11",
+    "src/fnit/fast/__init__.py": "c0f675872a1523425465d764bf3810358d62fc0ad900ff273089b0a5fe516771",
+    "src/fnit/fast/_fsl_scan.py": "03add4e07ec955995a833fd8adb8761d8278f3fec43abe3499f30fe4da58a643",
+    "src/fnit/fast/algorithm.py": "b8eb36e776fe9631e94660a6784b469ddcfdf53753c9a4a75856970c067cedd1",
+    "src/fnit/fast/pipeline.py": "6fbbdc1f564cc5b700f6e462cc5bb09885ff20c46231d6bf9b8a72be0d0f28f4",
+    "src/fnit/fast_vbm/__init__.py": "e203eab378f3ff8de91bec3a624e1da9d597d72623c65ceff4a549f61b5fa9b8",
+    "src/fnit/fast_vbm/pipeline.py": "2d0b6a2778f78e53cce5623de9574c9f594a10b854281c2337a0a2fbbba3b10e",
+    "src/fnit/fast_vbm/registration.py": "2a931f509543429d687792571c162283f67f49643d492b52096d2e1fcddb111b",
+    "src/fnit/fast_vbm/synthmorph_backend.py": "547de082dc4bb65d630f254d2d4d34c5da81233fb6c91019a337f9f40424b211",
+    "src/fnit/flirt/__init__.py": "58b1ae43c50bd2942398f272c013f5bc743ce6a78abdaab7c93eeae1949447af",
+    "src/fnit/flirt/__main__.py": "03eb6210ee12d659108106a6126a870a9d5bc89ba95c116cd519e2764b0e092f",
+    "src/fnit/flirt/_batched_cuda.py": "c6ac99f6b0499c2b081969448dc9492906232daac247477edff0cb00ac43cd74",
+    "src/fnit/flirt/affine_batch.py": "8aa427ea1b185deea2ff2295e01c972bb371cb5a4b23504ce13ef79ca1d6155f",
+    "src/fnit/flirt/batched.py": "10115b3fd51497162c2ebc1a7ae52999a4c3079810e18906ae9c0c363a457719",
+    "src/fnit/flirt/cli.py": "f57d65c320aee278820de2fb31cc764e7bee911e3228d3a904108d2a75e8142e",
+    "src/fnit/flirt/coordinates.py": "8ff07946f752b71a746b84cf14aa35de69ed35f7bfb852b18bfd56140cec4b8e",
+    "src/fnit/flirt/core.py": "e6ce6185fafb89666be631069f66e96ce9c6a561ab3d7c7fab4c661d317885c1",
+    "src/fnit/flirt/search.py": "9b50908c1bead992c55255d2ed3c6cf266135e042c276b9ba8176fef03edae4c",
+    "src/fnit/flirt/standalone.py": "a5ffc8e847bfc5219ef8e068a34eb81bab4b6fceb7ea39a497eb573108a8115e",
+    "src/fnit/flirt/types.py": "55a3abf2d7ce7889c297df95289890a589d1721b9fe3b157aa90e87819ed8e21",
+    "src/fnit/fmri/__init__.py": "e3f2bb1fe0037087f9b97a246ed92b13d34737e43f9ae5cccd4be824ca1e69aa",
+    "src/fnit/fmri/_anatomical.py": "00cdbfbc70b2058f3f1627106f3feb97fc83a6bc65a5288a691d4d342b33dac4",
+    "src/fnit/fmri/_bbr_cuda.py": "c79fdd0c20e68628585a46b946d3ef1f532373aaf8c0371eb5ed0ae25a8a5090",
+    "src/fnit/fmri/aroma.py": "d7a8d9a8436d2b1d1b4fe4899dd89bbf134ccefa25a66d601db8cc1a9481b28d",
+    "src/fnit/fmri/aroma_pipeline.py": "a3dac1d8489ae2f28725712e64aeec58f5dba8af67d2e031d22c68e8aecff953",
+    "src/fnit/fmri/assets_setup.py": "ddb854b53abc405c106b13306a9c97c16021c11cf02b649e850e294bba74ac8c",
+    "src/fnit/fmri/bbr.py": "0ca14f3343d6b5bf09ea93f6ec94de9f2c0cce19fdf8ea005a87ff8e03f48fc2",
+    "src/fnit/fmri/bids.py": "7fce819c071fbf1ac7c67f32356129d9eda233484f701b5dc6fb113330ab166c",
+    "src/fnit/fmri/cli.py": "4b5c652fbd525486a6a4d9470dd3a2029fb8a4a65f377221259beb4414a15c1e",
+    "src/fnit/fmri/confounds.py": "90ca47f85fc51ec89829d7a42df5f9465868e82f48b3330a4b43e2488ab13c0a",
+    "src/fnit/fmri/derivatives.py": "b7c9e3ed0d8af3fa34a88a640192e0714e6a4895bb43c980a2a4c0db687ff15d",
+    "src/fnit/fmri/end_to_end.py": "62e7745b066496fa0091a6697445b76ebbafebf454d591ccf4f03dadf0ee10bc",
+    "src/fnit/fmri/mask.py": "c73657b11aebf63242bacfae952e2f18207033dfdd70218e43b3692448a5d2d5",
+    "src/fnit/fmri/motion.py": "82636e426616f84de8d06cfe2f7645c2a82b14f45c5f1d613c7524d079158204",
+    "src/fnit/fmri/normalization.py": "8bd3526743dd110e0291ddf64022d10b92d7d241948bdb96ad122370a7cf8527",
+    "src/fnit/fmri/pipeline.py": "028333ba91d9929cb0aca34a0c29562ea302bb37d44c0cbf61fbb23c4ae059f4",
+    "src/fnit/fmri/sampling_reference.py": "250642c2feffcbd1fb49cc2e5a66cd15bd6c6a7b62cd088ccd021886699a9453",
+    "src/fnit/fmri/slice_timing.py": "74cefa748c1c3239cc64ca73c2691652a511ac6ab004ddfc2404d822b2465e55",
+    "src/fnit/fmri/spatial.py": "bd7e3ae1d28202f79925323ea05c7303e07e8b0caa3646e732f64703a00ab134",
+    "src/fnit/fmri/surface.py": "b5b3c9712dcbaa6e63b93ce690374b25a28ad2f70a7ff22d4fbb36e231df70e2",
+    "src/fnit/fmri/surface_fmriprep.py": "f4b5eca407b12b050441f4a05e34e4bc78afec68bff633135b0743990ec612ae",
+    "src/fnit/fmri/surface_pipeline.py": "7719866bf61bf2edcb247f20b30ac85dce5affa95775996b0a4c77061d28d571",
+    "src/fnit/fmri/surface_prepare.py": "57bedff1794977436f23ac11ab34f9aa9173dd25c9e0a2733327b7ce33ff7e99",
+    "src/fnit/fmri/timing.py": "e5b3478d036886decfc942e8a08a97832acfa546a90089be2213d18de96b726a",
+    "src/fnit/fnirt/__init__.py": "3480673ed6cbbfc38e573ac64bab6d14fabffc46585a29c74a3d916c2739294d",
+    "src/fnit/fnirt/__main__.py": "3d2438ae92f4746e9ffaa1f837b1fe803f6281091d1f31f8c95643716f257d9a",
+    "src/fnit/fnirt/_smoothing_triton.py": "4b6293eb4210b18a91de647003804cf1aa1f50780449a073e350f9177982227b",
+    "src/fnit/fnirt/_topology_triton.py": "3f61e452228a9c3dff85caff58ed1103e7b89783c86838bf1e70e322ae3f65f1",
+    "src/fnit/fnirt/cli.py": "9c143739510dd245f76bd98a80610fdbf6ca65519cd59b41f4a9e233b172e53c",
+    "src/fnit/fnirt/io.py": "ee79183709258f2e71dcd110f3c922b1cc7d20a979161ae1c86c2c627becf366",
+    "src/fnit/fnirt/optimizer.py": "903d5031058c96aa9e5fdc29736619fe636b62422cd2646b527df49011d173fd",
+    "src/fnit/fnirt/registration.py": "9e5747292bb5bf79d1dd77bf2a6b76a94d99d33b5a6453ff79dc1b843bcda991",
+    "src/fnit/fnirt/spline.py": "79ec750523d69342bf4926adf5e715d91a59749026fc5253ee96d765c0208cad",
+    "src/fnit/fnirt/standalone.py": "83a51a301e1d9145051a12e3b4f10b452c319d1e7a7962308443a048b723ade6",
+    "src/fnit/fnirt/topology.py": "150f65a73baf796f98e6304d0c209288816ee75485be5d93032db46edeb52900",
+    "src/fnit/synthmorph/__init__.py": "3dc489987728d070bda07d82b255ca98b96800542dbdd8e48bb110efd7440d94",
+    "src/fnit/synthmorph/affine_no_surfa.py": "95eeb54d81e2f4c05882546f745cdd435c3519f1179e5eb440879ea2052b83b0",
+    "src/fnit/synthmorph/fsl_warp.py": "61177712062c536ec31e7e6985d1f7801c8992a1775312a74d058d8dd7124dd4",
+    "src/fnit/synthmorph/models.py": "a1cab2e98f6972ae053a7df2b30416c0ca069c1a30df562e6005d42d85d34a1b",
+    "src/fnit/synthmorph/pipeline.py": "81f971dd73f0bed3cd652e97f0627bf54e0b00a8dcf0cb8785c4ee0c696aa538",
+    "src/fnit/synthmorph/spatial.py": "dab615dcc8a5f332ef2efede1d5e45d04f21c440243650e960d763e35595d861",
+    "src/fnit/topup/__init__.py": "e15e503ddf68a59a8e36274ddfd6dc1609c38437885071049b8c9c37d813876d",
+    "src/fnit/topup/__main__.py": "c2ee4ddb093c9af060cafaf68219907f8a6b7b301ed3f8bea75db7555adec987",
+    "src/fnit/topup/cli.py": "fc5220c7c9de36577f5e116262bb5789733397beff00796059fe07313fba3388",
+    "src/fnit/topup/core.py": "4746d50f28b8137abf9bf6d8a211c12489bddc6a931bd06e695db1965f14b976",
+    "src/fnit/topup/io.py": "c87edab5c5369204d1a7ccfd2cb079dfd1a64e68279d8899f51755609038176a",
+    "src/fnit/topup/ukb.py": "63eb5cc0d9e2f4a4547585af4f041f543dd256a653101ca54ceab235addd0d08"
+  },
+  "timing_seconds": {
+    "api_including_save_excluding_validation_capture": 212.6702435691841,
+    "validation_capture": 0.8592902016825974,
+    "pipeline_stages": {
+      "brain_extraction": 3.9114318508654833,
+      "fast": 1.9840234969742596,
+      "registration_jacobian_modulation": 200.4001297610812,
+      "total": 206.68311704555526
+    },
+    "public_function_phases": {
+      "flirt": {
+        "calls": 1,
+        "seconds": 5.822356270160526
+      },
+      "fnirt": {
+        "calls": 1,
+        "seconds": 193.60629108501598
+      },
+      "applywarp": {
+        "calls": 1,
+        "seconds": 0.18858237890526652
+      }
+    },
+    "pipeline_stages_including_validation_capture": {
+      "brain_extraction": 3.9114318508654833,
+      "fast": 1.9840234969742596,
+      "registration_jacobian_modulation": 201.2594199627638,
+      "total": 207.54240724723786
+    },
+    "capture_seconds_by_containing_stage": {
+      "registration_jacobian_modulation": 0.8592902016825974,
+      "total": 0.8592902016825974
+    },
+    "pipeline_stages_exclude_validation_capture": true,
+    "stage_times_are_nested_and_not_additive": true,
+    "scope": "instrumented API including save, constructor and lazy imports; CUDA initialization and output checks excluded; phase-boundary synchronization retained"
+  },
+  "operation_counts": {
+    "expand_coefficients": 1402,
+    "_trilinear_sample": 58,
+    "trilinear_with_gradients": 58,
+    "adjoint_field": 1242,
+    "design_diagonal": 75
+  },
+  "outputs": {
+    "captured_fnirt_1_coefficient.nii.gz": {
+      "shape": [
+        21,
+        24,
+        21,
+        3
+      ],
+      "dtype": "float32",
+      "all_finite": true,
+      "sha256": "f06239c0fab6b1aab3678da60b98adc4566b5a914fe99395c6e1959db2d2f1ad"
+    },
+    "captured_fnirt_1_jacobian_full.nii.gz": {
+      "shape": [
+        91,
+        109,
+        91
+      ],
+      "dtype": "float32",
+      "all_finite": true,
+      "sha256": "cb929fc2a0cc1f008a8ce59dd9a2143d86bf5904b2f0728b00e5da9926fb2a5b"
+    },
+    "captured_fnirt_1_jacobian_nonlinear.nii.gz": {
+      "shape": [
+        91,
+        109,
+        91
+      ],
+      "dtype": "float32",
+      "all_finite": true,
+      "sha256": "fd50a92978b1e05aa01e471bcf23ee3741beb5f31ba45840fb095e992d86f03a"
+    },
+    "captured_fnirt_1_moved.nii.gz": {
+      "shape": [
+        91,
+        109,
+        91
+      ],
+      "dtype": "float32",
+      "all_finite": true,
+      "sha256": "e454daf6c8c6feb8f293ac28b94666a8124d25aaec4b6e3b147715c161ac68ab"
+    },
+    "captured_fnirt_1_pull_ras.nii.gz": {
+      "shape": [
+        91,
+        109,
+        91,
+        3
+      ],
+      "dtype": "float32",
+      "all_finite": true,
+      "sha256": "55a0d0c13dc2c4120f7a6f41de75487a1ba2bf5bc63d242537c1a3d915cdd597"
+    },
+    "scientific_output_0006": {
+      "shape": [
+        91,
+        109,
+        91
+      ],
+      "dtype": "float32",
+      "all_finite": true,
+      "sha256": "84972831bd7eb89c3e253f46dcb236ddf4f56b95ccac94c17a581e26d7340520"
+    },
+    "scientific_output_0007": {
+      "shape": [
+        91,
+        109,
+        91
+      ],
+      "dtype": "float32",
+      "all_finite": true,
+      "sha256": "14cfd2cf248b82c7cf3b6e3611ebd43972fc1486068909bbd25221117bfebbb3"
+    },
+    "scientific_output_0008": {
+      "shape": [
+        91,
+        109,
+        91
+      ],
+      "dtype": "float32",
+      "all_finite": true,
+      "sha256": "883e4cb351c5c35c8358af474d410f60ed3f05fbc8db1497fb788330a4a531cd"
+    },
+    "scientific_output_0009": {
+      "shape": [
+        208,
+        320,
+        320
+      ],
+      "dtype": "int16",
+      "all_finite": true,
+      "sha256": "7c7db171d8b5a8b7a930f08e219c696a2503cc72e8a0ca91e50d06fb2b7e9a57"
+    },
+    "scientific_output_0010": {
+      "shape": [
+        208,
+        320,
+        320
+      ],
+      "dtype": "float32",
+      "all_finite": true,
+      "sha256": "df0d8de4a6563eaaa552027f2650530c3c1be2de1616f4ad38787a049186b320"
+    },
+    "scientific_output_0011": {
+      "shape": [
+        208,
+        320,
+        320
+      ],
+      "dtype": "int32",
+      "all_finite": true,
+      "sha256": "f84bf1a1fc9be0e53d1d3f441f1e939183e67a0791f6d70f103dfad231cae538"
+    },
+    "scientific_output_0012": {
+      "shape": [
+        208,
+        320,
+        320
+      ],
+      "dtype": "float32",
+      "all_finite": true,
+      "sha256": "04a097f468ba2ba4c37835da696f56cb57d789eccd6171ce0cfea9a2b529054c"
+    },
+    "scientific_output_0013": {
+      "shape": [
+        208,
+        320,
+        320
+      ],
+      "dtype": "float32",
+      "all_finite": true,
+      "sha256": "4a2d1d1f34499876a737138c8d26f0aeaca79bb1bb9e63b68d40815a41556bb9"
+    },
+    "scientific_output_0014": {
+      "shape": [
+        208,
+        320,
+        320
+      ],
+      "dtype": "float32",
+      "all_finite": true,
+      "sha256": "92c0d2b5ce95384c74090ae65c245cdcb07e5aea808e9168c2036e8023926089"
+    },
+    "scientific_output_0015": {
+      "shape": [
+        208,
+        320,
+        320
+      ],
+      "dtype": "int32",
+      "all_finite": true,
+      "sha256": "09fcb49e318aec34e80ed6e391054236bebd15921a6cab1c4d79ebc2cef555b9"
+    },
+    "scientific_output_0016": {
+      "shape": [
+        208,
+        320,
+        320
+      ],
+      "dtype": "float32",
+      "all_finite": true,
+      "sha256": "c6537658b6222b8859ed2c009666de23d93f57446b95b250c0b70c4ae37a6fab"
+    },
+    "scientific_output_0017": {
+      "shape": [
+        208,
+        320,
+        320
+      ],
+      "dtype": "int32",
+      "all_finite": true,
+      "sha256": "3318ead539fcdd3d6d01f76da826214c8723311e244c77959f5f7282baee0782"
+    },
+    "scientific_output_0018": {
+      "shape": [
+        208,
+        320,
+        320
+      ],
+      "dtype": "uint8",
+      "all_finite": true,
+      "sha256": "f5046a5d9b26178bad2e3b94141ccd36d208dc282e87e41cd00514754adb39f9"
+    }
+  },
+  "memory": {
+    "peak_cuda_allocated_bytes": 6503141376,
+    "peak_cuda_reserved_bytes": 10823401472
+  },
+  "conditions": {
+    "threads": 8,
+    "tf32": true,
+    "float16": false,
+    "eddy_gp_seed": null,
+    "original_software_called": false,
+    "shared_gpu": true
+  },
+  "input_summaries": {
+    "image": {
+      "sha256": "916cc95237a89e7824ab742c8921268c3517617556ea341ff2e750fe5af36a1d",
+      "size_bytes": 15950054,
+      "shape": [
+        208,
+        320,
+        320
+      ],
+      "dtype": "int16"
+    },
+    "template": {
+      "sha256": "ab933db7455d7c4b88624d54f41a3065be4ba4289d00b9230daec0cdb1597a77",
+      "size_bytes": 707776,
+      "shape": [
+        91,
+        109,
+        91
+      ],
+      "dtype": "float32"
+    },
+    "reference_mask": {
+      "sha256": "342d41e1c445d87a812ca288786a116306e96a5595a198e46ba7e7515d4f221c",
+      "size_bytes": 11132,
+      "shape": [
+        91,
+        109,
+        91
+      ],
+      "dtype": "uint8"
+    },
+    "synthstrip_weights": {
+      "sha256": "37417f802196186441aae3e7f385d94f8a98c64a88acaeaa2723af995c653e33",
+      "size_bytes": 30851709
+    }
+  },
+  "input_provenance_collection": "post-run readback from the supplied private case; no input hashes were captured before the original API run, so historical input immutability is not asserted",
+  "metadata_amendment": {
+    "original_report_sha256": "a576faf36c9c8428585b33b9461b5b285381b87f4693dc612661f80073118c12",
+    "amendment_tool_sha256": "efdfb7777801d1a1da6ee348e5d5c8108c5ed318b0e3c81b4b7212a698944dc1",
+    "pipeline_rerun": false,
+    "measured_source_sha256_preserved": true,
+    "api_elapsed_memory_operation_counts_preserved": true
+  }
+}

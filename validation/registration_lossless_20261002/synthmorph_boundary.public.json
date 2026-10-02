@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-02",
+  "feature": "SynthMorph linear sampler boundary diagnosis on the first frame of a real 4D BOLD image",
+  "scope": {
+    "comparison": "frozen previous FNIT CPU output versus official FreeSurfer CPU output",
+    "available_frames": 490,
+    "measured_frames": 1,
+    "frame_index_zero_based": 0,
+    "cuda_compared": false,
+    "all_frame_error_contribution_estimated": false,
+    "identifiers_included": false,
+    "clinical_paths_included": false
+  },
+  "data": {
+    "input_kind": "real 4D BOLD",
+    "source_shape": [
+      88,
+      88,
+      64,
+      490
+    ],
+    "target_spatial_shape": [
+      91,
+      109,
+      91
+    ],
+    "source_dtype": "uint16",
+    "compared_output_dtype": "float32",
+    "brain_mask": "MNI152 T1 2 mm standard brain mask",
+    "brain_mask_voxels": 228483,
+    "metrics_units": "input intensity units"
+  },
+  "coordinate_diagnosis": {
+    "coordinates": "float32 target voxel grid plus FNIT ras_displacement_to_voxel of the same RAS displacement field",
+    "fnit_legacy_linear_valid_domain": "all axes: 0 <= coordinate <= size - 1",
+    "surfa_linear_valid_domain": "all axes: 0 <= coordinate < size",
+    "surfa_linear_upper_band_sampling": "floor coordinate gives the last valid index; high index equals low index, extending the last center",
+    "last_center_band_mask": "surfa valid domain and at least one axis coordinate > size - 1",
+    "outside_surfa_domain_mask": "any axis coordinate < 0 or coordinate >= size",
+    "brain_mask_last_center_band_intersection_voxels": 0
+  },
+  "reference_source": {
+    "software": "FreeSurfer 8.2.0; bundled Surfa 0.6.3",
+    "cli_script_sha256": "4fa7fb879243cbf55addef6cf253e4206fda90a9c82728f72a6050eaa80bf5c6",
+    "surfa_tag": "v0.6.3",
+    "fortran_linear": {
+      "function": "interp_3d_fortran_linear",
+      "line_range": [
+        294,
+        314
+      ],
+      "url": "https://github.com/freesurfer/surfa/blob/v0.6.3/surfa/image/interp.pyx#L294-L314"
+    },
+    "contiguous_linear": {
+      "function": "interp_3d_contiguous_linear",
+      "line_range": [
+        521,
+        541
+      ],
+      "url": "https://github.com/freesurfer/surfa/blob/v0.6.3/surfa/image/interp.pyx#L521-L541"
+    }
+  },
+  "statistics": {
+    "whole_grid": {
+      "voxels": 902629,
+      "mae": 1.9702365180540518,
+      "rmse": 43.66808813987024,
+      "max_abs": 3299.1396484375,
+      "errors_gt_1": 14467,
+      "baseline_nonzero": 821362,
+      "official_nonzero": 835829,
+      "share_total_sse": 1.0000000000000004,
+      "share_total_abs_error": 1.0
+    },
+    "closed_center_domain": {
+      "voxels": 821362,
+      "mae": 0.002713039809939229,
+      "rmse": 0.006993458874265874,
+      "max_abs": 0.189453125,
+      "errors_gt_1": 0,
+      "baseline_nonzero": 821362,
+      "official_nonzero": 821362,
+      "share_total_sse": 2.3338934120997267e-08,
+      "share_total_abs_error": 0.0012530347808173796
+    },
+    "surfa_last_center_band": {
+      "voxels": 14467,
+      "mae": 122.77350039747283,
+      "rmse": 344.9288922859489,
+      "max_abs": 3299.1396484375,
+      "errors_gt_1": 14467,
+      "baseline_nonzero": 0,
+      "official_nonzero": 14467,
+      "share_total_sse": 0.9999999766610658,
+      "share_total_abs_error": 0.9987469652191826
+    },
+    "outside_surfa_domain": {
+      "voxels": 66800,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "max_abs": 0.0,
+      "errors_gt_1": 0,
+      "baseline_nonzero": 0,
+      "official_nonzero": 0,
+      "share_total_sse": 0.0,
+      "share_total_abs_error": 0.0
+    },
+    "template_brain": {
+      "voxels": 228483,
+      "mae": 0.005470360885366809,
+      "rmse": 0.009839559352711576,
+      "max_abs": 0.15234375,
+      "errors_gt_1": 0,
+      "baseline_nonzero": 228483,
+      "official_nonzero": 228483,
+      "share_total_sse": 1.2851906370713083e-08,
+      "share_total_abs_error": 0.0007028169446286373
+    },
+    "band_in_template_brain": {
+      "voxels": 0,
+      "mae": 0.0,
+      "rmse": 0.0,
+      "max_abs": 0.0,
+      "errors_gt_1": 0,
+      "baseline_nonzero": 0,
+      "official_nonzero": 0,
+      "share_total_sse": 0.0,
+      "share_total_abs_error": 0.0
+    }
+  },
+  "error_domain": {
+    "all_errors_gt_1": 14467,
+    "errors_gt_1_outside_last_center_band": 0,
+    "last_band_axis_voxels": [
+      0,
+      565,
+      13960
+    ],
+    "axis_counts_can_overlap": true
+  },
+  "conclusion": {
+    "first_frame_large_error_domain_confirmed": "All absolute errors greater than 1 occur in the last-center band; frozen FNIT is zero and official output is nonzero at every band voxel.",
+    "first_frame_sse_share_in_band": 0.9999999766610658,
+    "first_frame_absolute_error_share_in_band": 0.9987469652191826,
+    "scope_limit": "These error contributions are measured only for frame 0; no identical contribution is claimed for all 490 frames.",
+    "production_boundary_behavior_changed": false,
+    "reason_retained": "This optimization preserves the previous FNIT numerical outputs; the pre-existing linear boundary rule is recorded separately."
+  }
+}

@@ -1,5 +1,7 @@
 # dMRI 参数图流程验证
 
+2026-10-02 的最新 FNIRT 完整 FastVBM、volume、dMRI 验收与完整 4D 重采样统一见[本轮报告](../registration_lossless_20261002/README.md)。以下记录按各自日期和源码保留。
+
 [功能和调用方式](../../docs/dmri_pipeline/README.md) · [既有 UKB TBSS 对照报告](tbss_e2e.real.current.json) · [经典 NODDI 接入报告](pipeline_classic_real.public.json) · [九图比较脚本](compare_current_eddy_pipeline.py) · [官方 TBSS 参考脚本](run_official_tbss.sh)
 
 ## 最新：2026-10-02 同 raw 完整 TBSS＋AMICO
