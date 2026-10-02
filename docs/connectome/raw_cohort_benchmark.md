@@ -2,7 +2,7 @@
 
 ## 1. 功能和流程
 
-`tools/benchmark_connectome_raw_cohort.py` 从**本轮新下载的公开原始 BIDS 数据**启动评测。在 CPU 主机运行官方 FreeSurfer `recon-all`，随后在 GPU 主机运行真实 `UKBConnectome_pipeline` 原始 DWI 入口。两台主机需能读取同一共享存储目录。此工具只编排执行、核对产物和记录计时，不实现 MRI 数值计算。
+`tools/benchmark_connectome_raw_cohort.py` 从**本轮新下载的公开原始 BIDS 数据**启动评测。在 CPU 主机运行官方 FreeSurfer `recon-all`，随后在 GPU 主机运行真实 `UKBConnectome_pipeline` 原始 DWI 入口。两台主机需能读取同一共享存储目录。驱动和 CPU/GPU worker 均使用 Python 3.10 或更新版本；系统 Python 3.6 不能运行本工具。此工具只编排执行、核对产物和记录计时，不实现 MRI 数值计算。
 
 正式比较的 baseline、candidate 各使用独立空目录；每例、每版本都从原始 T1w 重新运行官方 recon-all，从原始 DWI 重新运行 TOPUP/EDDY 和完整下游。DWI CLI 接收到的 `--freesurfer-subject-dir` 是**该例该版本本轮刚生成的结果**，因此 DWI 子阶段显示 `recon_all=supplied`；整例编排仍包含真实官方 reconstruction。不能把 CLI 自身的计时写成包含外部 CPU reconstruction。
 
@@ -55,7 +55,7 @@ manifest 是 UTF-8 JSON，包含以下字段。文件路径是 CPU/GPU 主机共
 ]
 ```
 
-这些是路径格式示例，运行时填写已经核对许可和 SHA-256 的真实资产。`--tian-fnirt-coeff` 与 `--mni-template` 二选一。配置只接受上述资源选项，不能插入 corrected DWI、既有 FA、`--overwrite` 或其他绕过计算的参数。
+这些是路径格式示例，运行时填写已经核对许可和 SHA-256 的真实资产。Workbench 路径用 `--gpu-path-prefix /shared/workbench/bin` 传给编排工具，不作为 FNIT CLI atlas 资源选项。`--tian-fnirt-coeff` 与 `--mni-template` 二选一。配置只接受上述资源选项，不能插入 corrected DWI、既有 FA、`--overwrite` 或其他绕过计算的参数。
 
 ### Python 示例
 
@@ -71,8 +71,8 @@ candidate_source_directory = Path("/shared/fnit-sources/candidate")
 # 每次正式重跑必须使用全新的 namespace 和 driver report 目录。
 fresh_run_directory = Path("/shared/ten-new-raw/formal-run-001")
 driver_report_directory = Path("/shared/ten-new-raw/driver-reports-001")
-# CPU 可使用系统 Python；GPU 必须使用已安装 FNIT 依赖的 Conda Python。
-cpu_python_executable = "/usr/bin/python3"
+# CPU 可使用 3.10 或更新的系统 Python；GPU 必须使用已安装 FNIT 依赖的 Conda Python。
+cpu_python_executable = "/shared/fnit-conda/bin/python"
 gpu_python_executable = "/shared/fnit-conda/bin/python"
 # 两个 benchmark 脚本上传到 CPU/GPU 都能读取的共享位置。
 cohort_worker_script = "/shared/fnit-harness/benchmark_connectome_raw_cohort.py"
@@ -200,6 +200,7 @@ python tools/benchmark_connectome_raw_cohort.py status \
 | `--gpu-lock` | 默认 `/tmp/fnit-recon-five-20261002-gongwk.gpu.lock`；与已有评测共享远端 GPU 锁 |
 | `--gpu-uuid` | 可选实际物理 GPU UUID；建议填写本轮核对值，供进程树显存监测 |
 | `--cuda-visible-devices` | 可选 GPU 可见设备映射；记录实际传入值 |
+| `--gpu-path-prefix` | 可重复指定绝对目录，在 GPU worker 的 PATH 前加入；Glasser 所需 `wb_command` 目录须明确传入。记录实际 PATH 和 executable SHA-256 |
 | `--device` | 默认 `cuda:0`；本工具正式评测只接受 CUDA |
 | `--n-seeds` | 默认 100000；正式运行不少于该数，较小计数只允许 `--pilot`；不减少体素或连接计算 |
 | `--seed` | 默认 0；tracking seed |
@@ -275,3 +276,7 @@ python3 -m unittest discover -s tests/connectome \
 - [UKB-connectomics connectome 矩阵](https://github.com/sina-mansour/UKB-connectomics/blob/main/scripts/bash/map_structural_connectivity.sh)
 - Dale AM, Fischl B, Sereno MI. Cortical surface-based analysis. I. Segmentation and surface reconstruction. *NeuroImage* 1999;9:179–194.
 - Tournier JD et al. MRtrix3: A fast, flexible and open software framework for medical image processing and visualisation. *NeuroImage* 2019;202:116137.
+
+### 2026-10-02 运行环境核对
+
+CPU worker 在加载官方 `SetUpFreeSurfer.sh` 前显式设置 `FREESURFER_HOME`，覆盖 SSH 可能继承的其他安装。冻结源码指纹包含包内 `.tsv`、`.npz` 等科学资源；归档部署无 Git 信息时保留 `git_commit=null`，另外提供本地导出 commit 与共同兼容补丁摘要。显存采样查询失败、设备未解析或采样间隙超过 5 秒或 4 倍采样间隔（取较大值）时，报告为 `not_fully_measured`，不会据此宣称显存通过。

@@ -33,7 +33,7 @@ ATLAS_NAMES = ("fs-aparc", "fs-aparc-a2009s", "aparc+tian-s1", "aparc.a2009s+tia
                "glasser+tian-s1", "glasser+tian-s4", "schaefer200+tian-s1",
                "schaefer500+tian-s4", "schaefer1000+tian-s4")
 RESOURCE_OPTIONS = ("--atlas-templates-dir", "--fsaverage-dir", "--mni-template",
-                    "--synthmorph-weights", "--tian-fnirt-coeff", "--workbench-command")
+                    "--synthmorph-weights", "--tian-fnirt-coeff")
 LABEL = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
 SHA = re.compile(r"^[0-9a-fA-F]{64}$")
 
@@ -475,8 +475,16 @@ def worker(payload):
                     environment[key] = str(config["gpu_cpu_threads"])
                 if config.get("cuda_visible_devices") is not None:
                     environment["CUDA_VISIBLE_DEVICES"] = config["cuda_visible_devices"]
+                if config.get("gpu_path_prefix"):
+                    environment["PATH"] = os.pathsep.join([*config["gpu_path_prefix"], environment.get("PATH", "")])
                 report.update(command=command, wall_script_sha256=sha256(config["wall_script"]),
-                              environment={key: environment[key] for key in ("PYTHONPATH", "OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS", "NUMEXPR_NUM_THREADS")})
+                              environment={key: environment[key] for key in ("PATH", "PYTHONPATH", "OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS", "NUMEXPR_NUM_THREADS")})
+                if any(atlas.startswith("glasser") for atlas in config["atlases"]):
+                    import shutil
+                    workbench = shutil.which("wb_command", path=environment.get("PATH"))
+                    if workbench is None:
+                        raise FileNotFoundError("Glasser requires the declared Workbench executable on GPU PATH")
+                    report["workbench_program"] = {"path": workbench, "sha256": sha256(workbench)}
                 if "CUDA_VISIBLE_DEVICES" in environment:
                     report["environment"]["CUDA_VISIBLE_DEVICES"] = environment["CUDA_VISIBLE_DEVICES"]
                 atomic_json(report_path, report)
@@ -750,6 +758,7 @@ def parse_options(argv=None):
     run.add_argument("--gpu-lock", default=GPU_LOCK)
     run.add_argument("--gpu-uuid")
     run.add_argument("--cuda-visible-devices")
+    run.add_argument("--gpu-path-prefix", action="append", default=[], help="absolute executable directory prepended on GPU worker PATH; repeat if needed")
     run.add_argument("--device", default="cuda:0")
     run.add_argument("--n-seeds", type=int, default=100000)
     run.add_argument("--seed", type=int, default=0)
@@ -819,6 +828,8 @@ def main(argv=None):
         raise ValueError("official recon-all must be inside the declared FreeSurfer installation")
     config["worker_script_sha256"] = sha256(Path(__file__))
     config["manifest_sha256"] = sha256(args.manifest)
+    for path in config["gpu_path_prefix"]:
+        absolute_path(path, "GPU executable directory")
     return run_cohort(config, manifest, cases, args.report_dir)
 
 
