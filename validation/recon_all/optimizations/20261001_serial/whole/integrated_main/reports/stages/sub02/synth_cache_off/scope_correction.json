@@ -1,0 +1,22 @@
+{
+  "scope": "standalone test; not the production SynthStrip cuDNN policy",
+  "run_sha256": "fc542333ca978f06b427bb59c19cdb4a56bd4c4eaed6b08861c00658aaeffb91",
+  "observed_torch_version": "2.5.1",
+  "executed_context": "torch.backends.cudnn.flags(allow_tf32=False)",
+  "resolved_flags": {
+    "enabled": false,
+    "benchmark": false,
+    "deterministic": false,
+    "allow_tf32": false
+  },
+  "production_policy": {
+    "enabled": true,
+    "benchmark": false,
+    "deterministic": true,
+    "allow_tf32": false
+  },
+  "valid_for_production_memory_or_strip_precision_claims": false,
+  "SynthSeg_label_comparison": "still measured; combined-run memory includes disabled-cuDNN Strip allocation",
+  "replacement": "whole/integrated_main/backend_controls/sub02",
+  "reason": "PyTorch flags context defaults disabled cuDNN, verified from runtime signature and source; raw outputs retained"
+}

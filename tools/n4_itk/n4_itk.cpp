@@ -1,4 +1,5 @@
 #include <fstream>
+#include <chrono>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -14,11 +15,20 @@
 #include "itkShrinkImageFilter.h"
 
 int main(int argc, char **argv) {
-  if (argc != 9) {
-    std::cerr << "usage: fnit_n4_itk INPUT_F32 OUTPUT_F32 NX NY NZ SX SY SZ\n";
+  if (argc == 2 && std::string(argv[1]) == "--capabilities") {
+    std::cout << "{\"reconstruction_threads\":true,\"profile\":true,\"fitting_threads\":1}\n";
+    return 0;
+  }
+  if (argc < 9 || argc > 11) {
+    std::cerr << "usage: fnit_n4_itk INPUT_F32 OUTPUT_F32 NX NY NZ SX SY SZ [RECONSTRUCTION_THREADS [PROFILE_JSON]]\n";
     return 2;
   }
   try {
+    using Clock = std::chrono::steady_clock;
+    const auto start = Clock::now();
+    const auto seconds = [](auto a, auto b) { return std::chrono::duration<double>(b-a).count(); };
+    const int reconstruction_threads = argc >= 10 ? std::stoi(argv[9]) : 1;
+    if (reconstruction_threads < 1) throw std::runtime_error("reconstruction threads must be positive");
     using Image = itk::Image<float, 3>;
     Image::SizeType size;
     Image::SpacingType spacing;
@@ -66,7 +76,12 @@ int main(int argc, char **argv) {
     corrector->SetMaskLabel(1);
     corrector->SetInput(small->GetOutput());
     corrector->SetMaskImage(small_mask->GetOutput());
+    const auto fit_start = Clock::now();
     corrector->Update();
+    const auto fit_end = Clock::now();
+
+    // Only spatially independent reconstruction is threaded. N4 fitting stays 1.
+    itk::MultiThreaderBase::SetGlobalDefaultNumberOfThreads(reconstruction_threads);
 
     using BSpline = itk::BSplineControlPointImageFilter<
         N4::BiasFieldControlPointLatticeType, N4::ScalarImageType>;
@@ -78,6 +93,7 @@ int main(int argc, char **argv) {
     bspline->SetDirection(input->GetDirection());
     bspline->SetSpacing(input->GetSpacing());
     bspline->Update();
+    const auto spline_end = Clock::now();
 
     auto log_field = Image::New();
     log_field->CopyInformation(input);
@@ -102,11 +118,24 @@ int main(int argc, char **argv) {
     crop->SetExtractionRegion(region);
     crop->SetDirectionCollapseToSubmatrix();
     crop->Update();
+    const auto reconstruction_end = Clock::now();
 
     std::ofstream out(argv[2], std::ios::binary);
     out.write(reinterpret_cast<const char *>(crop->GetOutput()->GetBufferPointer()),
               count * sizeof(float));
     if (!out) throw std::runtime_error("could not write corrected image");
+    out.close();
+    if (argc == 11) {
+      std::ofstream profile(argv[10]);
+      profile.precision(17);
+      profile << "{\"fitting_threads\":1,\"reconstruction_threads\":" << reconstruction_threads
+              << ",\"fitting_seconds\":" << seconds(fit_start, fit_end)
+              << ",\"bspline_seconds\":" << seconds(fit_end, spline_end)
+              << ",\"exp_divide_copy_seconds\":" << seconds(spline_end, reconstruction_end)
+              << ",\"read_prepare_seconds\":" << seconds(start, fit_start)
+              << ",\"write_seconds\":" << seconds(reconstruction_end, Clock::now()) << "}\n";
+      if (!profile) throw std::runtime_error("could not write N4 profile");
+    }
   } catch (const std::exception &error) {
     std::cerr << error.what() << '\n';
     return 1;

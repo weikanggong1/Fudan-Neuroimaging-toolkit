@@ -1,0 +1,580 @@
+{
+  "scope": "frozen-real-surface-stage-including-io;not-end-to-end",
+  "acceptance": "Entire generated .stats text must be unchanged versus frozen baseline; numerical deltas are diagnostics, not a relaxed gate.",
+  "baseline_commit": "e036f57b62b99d2af4cd8853ab2f1e6d2a9f8c68",
+  "candidate_commit": "3d9856c9dc659a50b685dbc8c0b9b6c695461fe7+stage1tar0444db72",
+  "subject": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_e036f57_uuid",
+  "hostname": "gpucw1",
+  "device": "cuda:0",
+  "threads": 4,
+  "torch_version": "2.5.1",
+  "python_version": "3.11.16",
+  "tf32_matmul": true,
+  "tf32_cudnn": true,
+  "cuda_allocation_cache_disabled": true,
+  "memory_scope": "PyTorch target-device allocator only; parent/child simultaneous NVML occupancy must be measured by the enclosing monitor. Disabled allocator statistics are null, not zero GPU occupancy.",
+  "half_precision": false,
+  "script_sha256": "e2438c0ef5050174a682a134e0c5d8055496c76e0bd0bd5fb1affd34b0404008",
+  "inputs_sha256": {
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_e036f57_uuid/stats/brainvol.stats": "beca8d4d8ab58d57c983d8b82fe04c6d4a208a507d87e909b3b5109ee9693015",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_e036f57_uuid/mri/transforms/talairach.xfm": "2e213d196c7c66bea01c1bc76808b791886a66f5ef06f0b9e266bf0e52fdf1f5",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_e036f57_uuid/surf/lh.white": "bb8f2d21f1da13120769bb1665694421198e74ce03f6c7ece46f8866e06d093a",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_e036f57_uuid/surf/lh.white.preaparc": "932b8567c06ad9323999b3fcfbd7d548603d59db457b2a786a02c63b31dc7465",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_e036f57_uuid/surf/lh.pial": "1568e59729914d021574daf12f743deb7599f2ec83049912481467e9ebd90c27",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_e036f57_uuid/surf/lh.area": "0c940906b26658d8cb907648d82361a03c5361202e1344e2c281b7ede02bb8a4",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_e036f57_uuid/surf/lh.area.pial": "25730fced52ac1ad5547bf37740b3911ef9dbb06d4e49d69b0bf1fe11beb95ac",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_e036f57_uuid/surf/lh.thickness": "a21cd84a9dbddd8da4067122c73aa9ced53c8f54854e60d0fa2a4cc64958e5e7",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_e036f57_uuid/label/lh.cortex.label": "7558e0afc2318c015c235ae9412643346235db77d90533d25d576e9bc5f09487",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_e036f57_uuid/label/lh.aparc.annot": "25a44f85cd00ffd2863aa5d8bfc1240b47d870992ce041cf2dbb0683ed259227",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_e036f57_uuid/label/lh.aparc.a2009s.annot": "4271f5fc353f3059628fdb706b71d2180f5b02fb02a14d87e30dd2d641d40a6f",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_e036f57_uuid/label/lh.aparc.DKTatlas.annot": "9417d0e6d3596c0a170c0932fa748bce1de3ebf2e3f2a9892f5ff81a48c80c87",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_e036f57_uuid/label/lh.BA_exvivo.annot": "a6b365998e1af4385baa80b9e7cf91be232c391f9b4928a324aa294031d84dc4",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_e036f57_uuid/label/lh.BA_exvivo.thresh.annot": "f41c41c25a744b4bb59dc58b5fe8fd8302482c42d672a08bf43f32ebb6761968",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_e036f57_uuid/surf/rh.white": "38619e9c4f61bc92c261b290167c67cf522e21ad3c0d2d033e7b936b0b7bded4",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_e036f57_uuid/surf/rh.white.preaparc": "693a2a862a4c5d5affe9817e334077fef6042d8be2ea3fd3f62ebd0bea827910",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_e036f57_uuid/surf/rh.pial": "e30dc17783a838f2f57ea69aa79ed036c1dcf80fd1fb10790a9776a15e2b4138",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_e036f57_uuid/surf/rh.area": "3f7c1996a5a698273c9ad27769a48ed54c278695cfcc412ad1915ccad083cb75",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_e036f57_uuid/surf/rh.area.pial": "fc047fe4e3ec5938e347bd8c9fee23d5df64f7f435cba305918cb6a46d080dc6",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_e036f57_uuid/surf/rh.thickness": "f7da153a34c95733644f761cba9fea13a92d0a28352b5d57d43cc5a4c73fd064",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_e036f57_uuid/label/rh.cortex.label": "9fe471178b1de5fdf40dcd163d382292b214c70dd96f1b8f8af898d1ab619404",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_e036f57_uuid/label/rh.aparc.annot": "7d3035959d4f8ed2f67078b3f497bbd9fd3b3336c7161e0a156dc0e91e374818",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_e036f57_uuid/label/rh.aparc.a2009s.annot": "baa141de0343f8d3d0978bb378634127e38e6f3a92f08c6d1d2c6315853474ca",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_e036f57_uuid/label/rh.aparc.DKTatlas.annot": "8af18b5cd4e8d04b1ced50c971a0d06a19afaa71f1b17d09c52957f090f2e566",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_e036f57_uuid/label/rh.BA_exvivo.annot": "aeacacf8521e49e7a92d065c7ce751c3d116c8b98b4bc5b251471754c5e48936",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_e036f57_uuid/label/rh.BA_exvivo.thresh.annot": "b79cb6e080ab3e1cdf962c3af4c259bedc19a7997e9751eaffa6ba15cd8bbd95"
+  },
+  "candidate_source_sha256": {
+    "anatomical_stats_file.py": "3aef07cbf0788276341125774717f1e0555a1197b2faeba5c9b75610a468df53",
+    "anatomical_stats_rows.py": "0832f2f33006435c330305a9dee224c33441df8a1b7fb420561413a7668fe5f9",
+    "anatomical_stats_global.py": "1f33e2e32bbaa3c2676d68a092497a22e3a824be382cc05abe54557300087235",
+    "surface_roi_gpu.py": "3c285f800aa5f81b08426a6f104c7b06bdf03137a2f9a51c45ef2e0b018011c8",
+    "surface_roi_curvature_gpu.py": "7cb53358fe2004a88cc2a1d89f603564e5824e2c86bfec7b9588efecf74fb126",
+    "surface_stats_cache.py": "fd92ec7a92bd0d00bbac72c8d3a16461f8c3df5c8688fd3998c350eab70ce9d8"
+  },
+  "baseline_source_sha256": {
+    "anatomical_stats_file.py": "e81fa78d1ae1a095fba0330cd876f5417812de455fefc02d88f67e57c4df2fe7",
+    "anatomical_stats_rows.py": "a38ba5416400b049dd2260554eeafb04690e9df5e94439196f256366874f15f1",
+    "anatomical_stats_global.py": "44b33fccf60d4e20416ca5234ece193a8456efe6872a39d75329a251fb78704e",
+    "surface_roi_gpu.py": "22fe8023612950b7cfcfdfe63837bde01677f574eddbff54570eb46526f402ac",
+    "surface_roi_curvature_gpu.py": "6533eae9fa44d66aa18621bbdc05ffe63c7e9beb6e81d24f21b3ca473c080f73"
+  },
+  "runs": [
+    {
+      "repeat": 0,
+      "order": [
+        "baseline",
+        "candidate"
+      ],
+      "baseline": {
+        "wall_seconds_including_io": 95.86411563167349,
+        "cache_counters": {
+          "lh": {},
+          "rh": {}
+        },
+        "torch_peak_allocated_bytes": null,
+        "torch_peak_reserved_bytes": null
+      },
+      "candidate": {
+        "wall_seconds_including_io": 16.934162736404687,
+        "cache_counters": {
+          "lh": {
+            "morph_reads": 3,
+            "annotation_reads": 5,
+            "cortex_reads": 1,
+            "global_total_computations": 3,
+            "etiv_computations": 1,
+            "geometry_reads": 2,
+            "vertex_area_computations": 2,
+            "face_area_computations": 2,
+            "no_th3_volume_computations": 1,
+            "roi_summary_transfers": 6,
+            "principal_curvature_computations": 2
+          },
+          "rh": {
+            "morph_reads": 3,
+            "annotation_reads": 5,
+            "cortex_reads": 1,
+            "global_total_computations": 3,
+            "etiv_computations": 1,
+            "geometry_reads": 2,
+            "vertex_area_computations": 2,
+            "face_area_computations": 2,
+            "no_th3_volume_computations": 1,
+            "roi_summary_transfers": 6,
+            "principal_curvature_computations": 2
+          }
+        },
+        "torch_peak_allocated_bytes": null,
+        "torch_peak_reserved_bytes": null
+      },
+      "comparisons": [
+        {
+          "file": "lh.aparc.stats",
+          "text_equal": true,
+          "roi_names_equal": true,
+          "roi_count": 34,
+          "max_abs_column_delta": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "file": "lh.aparc.a2009s.stats",
+          "text_equal": true,
+          "roi_names_equal": true,
+          "roi_count": 74,
+          "max_abs_column_delta": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "file": "lh.aparc.DKTatlas.stats",
+          "text_equal": true,
+          "roi_names_equal": true,
+          "roi_count": 31,
+          "max_abs_column_delta": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "file": "lh.aparc.pial.stats",
+          "text_equal": true,
+          "roi_names_equal": true,
+          "roi_count": 34,
+          "max_abs_column_delta": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "file": "lh.BA_exvivo.stats",
+          "text_equal": true,
+          "roi_names_equal": true,
+          "roi_count": 14,
+          "max_abs_column_delta": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "file": "lh.BA_exvivo.thresh.stats",
+          "text_equal": true,
+          "roi_names_equal": true,
+          "roi_count": 14,
+          "max_abs_column_delta": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "file": "rh.aparc.stats",
+          "text_equal": true,
+          "roi_names_equal": true,
+          "roi_count": 34,
+          "max_abs_column_delta": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "file": "rh.aparc.a2009s.stats",
+          "text_equal": true,
+          "roi_names_equal": true,
+          "roi_count": 74,
+          "max_abs_column_delta": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "file": "rh.aparc.DKTatlas.stats",
+          "text_equal": true,
+          "roi_names_equal": true,
+          "roi_count": 31,
+          "max_abs_column_delta": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "file": "rh.aparc.pial.stats",
+          "text_equal": true,
+          "roi_names_equal": true,
+          "roi_count": 34,
+          "max_abs_column_delta": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "file": "rh.BA_exvivo.stats",
+          "text_equal": true,
+          "roi_names_equal": true,
+          "roi_count": 14,
+          "max_abs_column_delta": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "file": "rh.BA_exvivo.thresh.stats",
+          "text_equal": true,
+          "roi_names_equal": true,
+          "roi_count": 14,
+          "max_abs_column_delta": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      ],
+      "regression_passed": true
+    },
+    {
+      "repeat": 1,
+      "order": [
+        "candidate",
+        "baseline"
+      ],
+      "candidate": {
+        "wall_seconds_including_io": 12.444487642962486,
+        "cache_counters": {
+          "lh": {
+            "morph_reads": 3,
+            "annotation_reads": 5,
+            "cortex_reads": 1,
+            "global_total_computations": 3,
+            "etiv_computations": 1,
+            "geometry_reads": 2,
+            "vertex_area_computations": 2,
+            "face_area_computations": 2,
+            "no_th3_volume_computations": 1,
+            "roi_summary_transfers": 6,
+            "principal_curvature_computations": 2
+          },
+          "rh": {
+            "morph_reads": 3,
+            "annotation_reads": 5,
+            "cortex_reads": 1,
+            "global_total_computations": 3,
+            "etiv_computations": 1,
+            "geometry_reads": 2,
+            "vertex_area_computations": 2,
+            "face_area_computations": 2,
+            "no_th3_volume_computations": 1,
+            "roi_summary_transfers": 6,
+            "principal_curvature_computations": 2
+          }
+        },
+        "torch_peak_allocated_bytes": null,
+        "torch_peak_reserved_bytes": null
+      },
+      "baseline": {
+        "wall_seconds_including_io": 73.8927720952779,
+        "cache_counters": {
+          "lh": {},
+          "rh": {}
+        },
+        "torch_peak_allocated_bytes": null,
+        "torch_peak_reserved_bytes": null
+      },
+      "comparisons": [
+        {
+          "file": "lh.aparc.stats",
+          "text_equal": true,
+          "roi_names_equal": true,
+          "roi_count": 34,
+          "max_abs_column_delta": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "file": "lh.aparc.a2009s.stats",
+          "text_equal": true,
+          "roi_names_equal": true,
+          "roi_count": 74,
+          "max_abs_column_delta": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "file": "lh.aparc.DKTatlas.stats",
+          "text_equal": true,
+          "roi_names_equal": true,
+          "roi_count": 31,
+          "max_abs_column_delta": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "file": "lh.aparc.pial.stats",
+          "text_equal": true,
+          "roi_names_equal": true,
+          "roi_count": 34,
+          "max_abs_column_delta": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "file": "lh.BA_exvivo.stats",
+          "text_equal": true,
+          "roi_names_equal": true,
+          "roi_count": 14,
+          "max_abs_column_delta": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "file": "lh.BA_exvivo.thresh.stats",
+          "text_equal": true,
+          "roi_names_equal": true,
+          "roi_count": 14,
+          "max_abs_column_delta": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "file": "rh.aparc.stats",
+          "text_equal": true,
+          "roi_names_equal": true,
+          "roi_count": 34,
+          "max_abs_column_delta": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "file": "rh.aparc.a2009s.stats",
+          "text_equal": true,
+          "roi_names_equal": true,
+          "roi_count": 74,
+          "max_abs_column_delta": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "file": "rh.aparc.DKTatlas.stats",
+          "text_equal": true,
+          "roi_names_equal": true,
+          "roi_count": 31,
+          "max_abs_column_delta": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "file": "rh.aparc.pial.stats",
+          "text_equal": true,
+          "roi_names_equal": true,
+          "roi_count": 34,
+          "max_abs_column_delta": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "file": "rh.BA_exvivo.stats",
+          "text_equal": true,
+          "roi_names_equal": true,
+          "roi_count": 14,
+          "max_abs_column_delta": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "file": "rh.BA_exvivo.thresh.stats",
+          "text_equal": true,
+          "roi_names_equal": true,
+          "roi_count": 14,
+          "max_abs_column_delta": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      ],
+      "regression_passed": true
+    }
+  ],
+  "regression_passed": true,
+  "speedup_by_repeat": [
+    5.6609893930915725,
+    5.937791431458828
+  ]
+}

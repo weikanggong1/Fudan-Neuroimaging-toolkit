@@ -27,6 +27,8 @@ def main():
     parser.add_argument("--eddy-gp-seed", type=int, default=12345)
     parser.add_argument("--threads", type=int, default=8)
     parser.add_argument("--memory-limit-bytes", type=int, default=20_000_000_000)
+    parser.add_argument("--synthstrip-weights", type=Path,
+                        help="explicit verified SynthStrip weights for the b0 brain mask")
     args = parser.parse_args()
     torch.set_num_threads(args.threads)
     device = torch.device(args.device)
@@ -36,28 +38,38 @@ def main():
         args.memory_limit_bytes / torch.cuda.get_device_properties(device).total_memory, device)
     import fnit
     import fnit.dmri_pipeline.pipeline as pipeline_module
+    import fnit.topup.ukb as topup_preparation_module
 
     events = []
+    stage_stack = []
 
     def instrument(label, original):
         @functools.wraps(original)
         def measured(*positional, **keywords):
             torch.cuda.synchronize(device)
             start = time.perf_counter()
+            parent = stage_stack[-1] if stage_stack else None
+            stage_stack.append(label)
             print(json.dumps({"event": "stage_start", "stage": label}), flush=True)
             try:
                 return original(*positional, **keywords)
             finally:
                 torch.cuda.synchronize(device)
                 row = {"event": "stage_end", "stage": label,
+                       "parent_stage": parent,
                        "seconds": time.perf_counter() - start,
                        "peak_allocated_bytes": torch.cuda.max_memory_allocated(device),
                        "peak_reserved_bytes": torch.cuda.max_memory_reserved(device)}
                 events.append(row)
+                stage_stack.pop()
                 print(json.dumps(row), flush=True)
         return measured
 
     pipeline_module.run_ukb_topup = instrument("topup_and_b0_selection", pipeline_module.run_ukb_topup)
+    topup_preparation_module.prepare_ukb_topup = instrument(
+        "b0_selection_and_pair_save", topup_preparation_module.prepare_ukb_topup)
+    topup_preparation_module.TorchTOPUP.run = instrument(
+        "topup_estimation_and_save", topup_preparation_module.TorchTOPUP.run)
     pipeline_module.prepare_ukb_eddy = instrument("eddy_preparation", pipeline_module.prepare_ukb_eddy)
     for label, cls in (("eddy", pipeline_module.TorchEDDY),
                        ("dtifit", pipeline_module.TorchDTIFIT),
@@ -67,6 +79,7 @@ def main():
     runner = pipeline_module.DMRIPipeline(
         device=device, registration_backend="tbss", noddi_fit_method="amico",
         bvec_source="rotated", eddy_gp_seed=args.eddy_gp_seed,
+        synthstrip_weights=args.synthstrip_weights,
     )
     torch.cuda.reset_peak_memory_stats(device)
     started = time.perf_counter()
@@ -86,6 +99,7 @@ def main():
         "peak_reserved_bytes": max(row["peak_reserved_bytes"] for row in events),
         "memory_scope": "maximum recorded public-stage CUDA allocator peak; components reset counters",
         "stage_events": events, "qc": result.qc,
+        "timing_tree_note": "child stages are contained in parent stages; do not sum both",
         "source_python_sha256": {str(path.relative_to(root)):
                                  hashlib.sha256(path.read_bytes()).hexdigest()
                                  for path in sorted(root.rglob("*.py"))},

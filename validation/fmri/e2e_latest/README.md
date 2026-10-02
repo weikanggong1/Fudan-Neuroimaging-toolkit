@@ -2,6 +2,8 @@
 
 2026-10-02，冻结 FNIT 运行时源码 `6f67cc06ee8c5108ef3640cbfc289f3e5a742f65`，在一例真实 UKB 原始 BOLD、SBRef、匹配存档 T1 和同源 FreeSurfer 7 重建上测量。BOLD 为 `88×88×64×490`、uint16、TR 0.735 s；T1 为 `162×215×180`，来自已有存档重建，本轮未验证其为扫描仪原始 T1。
 
+发布文件、实测代码和合并后测试的身份见[发布清单](publication.public.json)。在本次发布的仓库版本运行 `python validation/fmri/e2e_latest/verify_publication.py`，可核对摘要、脑图、脚本和计算代码的 SHA-256。清单不包含私有影像。
+
 ## 流程与比较范围
 
 ```mermaid
@@ -12,7 +14,9 @@ flowchart TD
     PP --> SURF[FNIT surface：双侧 MSM → ribbon 投影 → 91k CIFTI]
     FS[已有同源 FreeSurfer 重建] --> SURF
     RAW --> NATIVE[原 SynthStrip / FSL / 作者 AROMA 同步骤 clean]
-    NATIVE --> NP[原 FSL motion + BBR + FNIRT，原始 BOLD 单次 applywarp]
+    NATIVE --> NOUT[原生空间与 MNI clean BOLD]
+    RAW --> NP[原 FSL motion + BBR + FNIRT，原始 BOLD 单次 applywarp]
+    NATIVE -. 本轮原配准 .-> NP
     NP --> NS[原 FreeSurfer / newMSM / Workbench，同步骤 surface]
     FS --> NS
     RAW --> FMP[固定 fMRIPrep 25.2.4 + 原 newMSM 完整独立流程]

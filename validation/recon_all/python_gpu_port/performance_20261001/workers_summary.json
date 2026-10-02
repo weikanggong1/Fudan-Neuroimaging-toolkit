@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "scope": "independent worker-budget evidence for merge; original stage1 and whole-run fields not modified",
+  "new_worker_measurement": {
+    "status": "measured; independent subsequent frozen sub-01 LH GPU regression passed",
+    "scope": "sub-01 LH frozen FNIT white/pial; one candidate function call",
+    "code_version": "1b8c36d25a68e253a1e59b6d02114890afa467de+thickness-ab019eb",
+    "source_sha256": {
+      "candidate": "ab019eb7d413c7b08f01ad6b2e499c406ab513cb531d723142c2db2d6c12e961",
+      "script": "2af5cf2cdd1026e9feab6cb4f683208e1547ed8262c5a3cf2b672d59f598685c"
+    },
+    "frozen_source_sha256": "c5d586b58f8b57af1ecc5b61fcf0e33c980ee5eaca681fe7cc6c25be57083f48",
+    "input_sha256": {
+      "white": "bb8f2d21f1da13120769bb1665694421198e74ce03f6c7ece46f8866e06d093a",
+      "pial": "1568e59729914d021574daf12f743deb7599f2ec83049912481467e9ebd90c27"
+    },
+    "frozen_map_sha256": "a21cd84a9dbddd8da4067122c73aa9ced53c8f54854e60d0fa2a4cc64958e5e7",
+    "output_sha256": "a21cd84a9dbddd8da4067122c73aa9ced53c8f54854e60d0fa2a4cc64958e5e7",
+    "conda_map": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/diagnostics/lh.cpp.thickness",
+      "sha256": "b4c2c2031030c4592d82ea86c76d829cc67a6fae699297fe842f927c99d39736"
+    },
+    "conda_program": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/mris_place_surface",
+      "sha256": "44ad3994f8b86809b447919094273d3aa591b49be935ac4e09139e66bdddfe65",
+      "execution": "not run; existing same-input map"
+    },
+    "frozen_pair_report": {
+      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/final_1b8c36d/thickness/report.json",
+      "sha256": "77e9743535bff4c2c1e08dc394037d4827a71077dc394f5bfdbb7ed4db8cb4a5",
+      "code_commit": "1b8c36d25a68e253a1e59b6d02114890afa467de",
+      "candidate_source_sha256": "c5d586b58f8b57af1ecc5b61fcf0e33c980ee5eaca681fe7cc6c25be57083f48"
+    },
+    "post_run_remote_hash_verification": {
+      "method": "headcw sha256sum of shared candidate, benchmark/monitor source, white/pial, frozen/Conda/new maps and Conda binary; no image transfer",
+      "all_match_recorded_versions": true,
+      "monitor_source_sha256": "d0760007a9733f63c5aa57de42ec49adf95ccae06d64addc737349e7d57cedb2"
+    },
+    "host": "gpucw1",
+    "device": "cuda:0",
+    "gpu_uuid_requested": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+    "gpu_uuid_from_torch": "e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+    "gpu_name": "NVIDIA H100 PCIe",
+    "torch_version": "2.5.1",
+    "cuda_runtime": "11.8",
+    "threads": 4,
+    "thread_environment": {
+      "OMP_NUM_THREADS": "4",
+      "MKL_NUM_THREADS": "4",
+      "OPENBLAS_NUM_THREADS": "4",
+      "NUMEXPR_NUM_THREADS": "4"
+    },
+    "precision": {
+      "dtype": "float32",
+      "matmul_tf32": true,
+      "cudnn_tf32": true,
+      "float16_or_bfloat16": false
+    },
+    "cuda_allocator_cache_enabled": false,
+    "vertices": 105539,
+    "faces": 211074,
+    "started_utc": "2026-10-01T03:11:17.093573+00:00",
+    "ended_utc": "2026-10-01T03:11:30.799820+00:00",
+    "seconds_including_io": 13.706190661992878,
+    "timing_scope": "synchronized target GPU; function input I/O, transfers, computation, output I/O; excludes imports/CUDA init/diagnostic hashing",
+    "command_wall_seconds": 17.960685943719,
+    "function_report": {
+      "vertices": 105539,
+      "device": "cuda:0",
+      "setup_seconds": 0.713789464905858,
+      "compute_seconds": 12.985073887277395,
+      "total_seconds": 13.705352482851595,
+      "candidate_pairs": 2398404,
+      "peak_candidate_pairs": 42170,
+      "kdtree_workers": 4,
+      "candidate_search": "complete-radius",
+      "radius_guard_mm": 0.0001,
+      "maximum_hops": 20,
+      "maximum_direction_thickness_mm": 5.0
+    },
+    "thresholds": {
+      "optimization": {
+        "absolute_mm": 1e-06,
+        "relative": 0
+      },
+      "existing_reference": {
+        "absolute_mm": 0.005,
+        "relative": 0.001
+      }
+    },
+    "optimization_comparison": {
+      "pass": true,
+      "different_values": 0,
+      "outliers": 0,
+      "max_abs_mm": 0.0,
+      "p99_abs_mm": 0.0,
+      "mae_mm": 0.0
+    },
+    "strict_frozen_reproduction": true,
+    "conda_comparison": {
+      "pass": true,
+      "different_values": 10622,
+      "outliers": 0,
+      "max_abs_mm": 4.76837158203125e-07,
+      "p99_abs_mm": 2.384185791015625e-07,
+      "mae_mm": 1.9714222563929547e-08
+    },
+    "monitor": {
+      "pid": 102059,
+      "sampling_interval_requested_seconds": 2.0,
+      "query_timeout_seconds": 5.0,
+      "samples": 9,
+      "failed_app_queries": 0,
+      "failed_gpu_queries": 0,
+      "maximum_sampling_gap_seconds": 2.255604000762105,
+      "peak_sampled_process_bytes": 562036736,
+      "continuous_peak_verified": false,
+      "gpu_peak_allocated_bytes": null,
+      "gpu_peak_reserved_bytes": null,
+      "whole_gpu_total_mib_min": 33843,
+      "whole_gpu_total_mib_max": 46463,
+      "whole_gpu_utilization_percent_min": 100,
+      "whole_gpu_utilization_percent_max": 100,
+      "scope": "own parent and children within each compute-apps query; whole-GPU query separately timestamped; whole-GPU totals not assigned to this process"
+    },
+    "report": "thickness_workers_ab019/result/report.json",
+    "monitor_report": "thickness_workers_ab019/monitor/monitor.json",
+    "artifact_sha256": {
+      "thickness_workers_ab019/result/report.json": "c3f5d8119ebddfac6fd6d008f43e0633709c82778c41d3e915c149062fafaa0b",
+      "thickness_workers_ab019/monitor/monitor.json": "ff3b95b2a2ded5a8141a925dbaa269a8c39e4adda86ccb2c6fbc3e376cf99b2d",
+      "thickness_workers_ab019/monitor/gpu_samples.csv": "69335aafa80e9af1b2fb2c61065b109be3001a3df9d9e10d22b61de3fb9b5762",
+      "thickness_workers_ab019/monitor/command.log": "d4b38f15bafbb3b1377cac207682eb24c5fb5431bd9f30d1bfe6c0aa4fc8f769",
+      "run_thickness_workers_ab019.sh": "6ff57bf369528ffa8d37c6f049c4b99028d066f28d0545d0755cc21681a8c679"
+    },
+    "stage1_measurements": "unchanged; fb3b6651 snapshot eight rounds remain their original timings/hashes",
+    "worker_performance_inference": "one subsequent observation on busy shared GPU; no paired worker speedup claim",
+    "new_official_validation": "not_run",
+    "whole_pipeline_speedup": "not measured by this standalone regression",
+    "overall_equivalence": "not_assessed",
+    "pass": true
+  }
+}

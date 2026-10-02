@@ -253,7 +253,7 @@ class SynthMorphNetwork(nn.Module):
         self.eval().to(device)
 
     @torch.inference_mode()
-    def forward(self, moving, fixed, return_intermediates=False):
+    def forward(self, moving, fixed, return_intermediates=False, *, compute_inverse=True):
         if moving.shape != fixed.shape or moving.ndim != 5 or moving.shape[:2] != (1, 1):
             raise ValueError("Expected matching single-channel tensors of shape (1,1,I,J,K)")
         if any(size % 32 for size in moving.shape[2:]):
@@ -275,15 +275,19 @@ class SynthMorphNetwork(nn.Module):
             affine1 = affine2 = scale2
             mov1, mov2 = half1, half2
         velocity = (self.deform(mov1, mov2) - self.deform(mov2, mov1)) * 0.5
-        deform1, deform2 = integrate(velocity, self.int_steps), integrate(-velocity, self.int_steps)
+        deform1 = integrate(velocity, self.int_steps)
+        deform2 = integrate(-velocity, self.int_steps) if compute_inverse else None
         total1 = [affine1, deform1]
-        total2 = [affine2, deform2]
+        total2 = [affine2, deform2] if compute_inverse else None
         if self.model == "joint":
             total1.extend((scale_half, affine1))
-            total2.extend((scale_half, affine2))
-        total1, total2 = compose(total1), compose(total2)
+            if compute_inverse:
+                total2.extend((scale_half, affine2))
+        total1 = compose(total1)
+        total2 = compose(total2) if compute_inverse else None
         down = affine_to_dense(scale_half, full_shape)
-        forward, backward = compose((total1, down)), compose((total2, down))
+        forward = compose((total1, down))
+        backward = compose((total2, down)) if compute_inverse else None
         if return_intermediates:
             return forward, backward, {"velocity": velocity, "deform_forward": deform1,
                                        "deform_backward": deform2, "affine_forward": affine1,

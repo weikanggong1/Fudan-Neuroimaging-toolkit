@@ -9,7 +9,6 @@ import nibabel.freesurfer.io as fsio
 import numpy as np
 import torch
 
-from .surface_area_gpu import vertex_area
 
 
 @torch.inference_mode()
@@ -49,62 +48,41 @@ def vertex_volume_map(white: str | Path, pial: str | Path,
 
 @torch.inference_mode()
 def roi_area_thickness(surface: str | Path, annotation: str | Path,
-                       thickness: str | Path, *, device: str = "cuda:0") -> dict:
-    """Return NumVert, SurfArea, ThickAvg and ThickStd for annotated regions."""
-    xyz, faces = fsio.read_geometry(str(surface))
-    labels, _, names = fsio.read_annot(str(annotation))
-    values = torch.as_tensor(np.asarray(fsio.read_morph_data(str(thickness)),
-                                        dtype=np.float64), device=device)
-    area = torch.as_tensor(vertex_area(xyz, faces, device=device),
-                           dtype=torch.float64, device=device)
-    region = torch.as_tensor(np.asarray(labels, dtype=np.int64), device=device)
-    if len(values) != len(labels) or len(area) != len(labels):
-        raise ValueError("Surface, annotation and thickness vertex counts differ")
-    output = {}
-    for index, raw_name in enumerate(names):
-        name = raw_name.decode()
-        if name in {"corpuscallosum", "unknown", "Unknown", "Medial_wall"}:
-            continue
-        selected = region == index
-        if not bool(selected.any()):
-            continue
-        thick = values[selected]
-        output[name] = (len(thick), float(area[selected].sum()),
-                        float(thick.mean()), float(thick.std(unbiased=False)))
-    return output
+                       thickness: str | Path, *, device: str = "cuda:0",
+                       cache=None) -> dict:
+    """按 .annot 返回 {脑区: (顶点数, 面积 mm², 平均厚度 mm, 厚度总体 std mm)}。
+
+    surface 是 surface RAS/mm 三角网格；thickness 是同序 (N,) morph；
+    device 默认 cuda:0，cache 可复用同设备 SurfaceStatsCache。
+    缺失文件、顶点数或设备不一致会抛异常。CUDA 摘要一次回传，
+    保持各区顶点原有顺序、float64 归约及原 vertex_area 的 float32 计算。
+    对应 mris_anatomical_stats -no-th3 的四列，不包含全局表头。
+    """
+    from .surface_stats_cache import SurfaceStatsCache
+
+    if cache is None:
+        with SurfaceStatsCache(device=device) as temporary:
+            return temporary.roi_base(surface, annotation, thickness)[0]
+    cache.check_device(device)
+    return cache.roi_base(surface, annotation, thickness)[0]
 
 
 @torch.inference_mode()
 def roi_gray_volume(white: str | Path, pial: str | Path,
                     thickness: str | Path, annotation: str | Path,
-                    *, device: str = "cuda:0") -> dict[str, float]:
-    """Match `mris_anatomical_stats -no-th3` gray volume by annotation."""
-    wxyz, faces = fsio.read_geometry(str(white))
-    pxyz, pfaces = fsio.read_geometry(str(pial))
-    if len(wxyz) != len(pxyz) or not np.array_equal(faces, pfaces):
-        raise ValueError("White and pial surfaces must have identical topology")
-    w = torch.as_tensor(np.asarray(wxyz, dtype=np.float32), device=device)
-    p = torch.as_tensor(np.asarray(pxyz, dtype=np.float32), device=device)
-    tri = torch.as_tensor(np.asarray(faces, dtype=np.int64), device=device)
-    thick = torch.as_tensor(np.asarray(fsio.read_morph_data(str(thickness)),
-                                       dtype=np.float32), device=device)
-    if len(thick) != len(w):
-        raise ValueError("Surface and thickness vertex counts differ")
-    areas = []
-    for vertices in (w, p):
-        v0, v1, v2 = (vertices[tri[:, i]] for i in range(3))
-        areas.append(torch.linalg.vector_norm(torch.cross(v1 - v0, v2 - v0, dim=1),
-                                               dim=1).mul_(0.5))
-    mean_thick = thick[tri].to(torch.float64).mean(1)
-    share = mean_thick * (areas[0].to(torch.float64) + areas[1].to(torch.float64)) / 6.0
-    volume = torch.zeros(len(w), device=device, dtype=torch.float64)
-    for corner in range(3):
-        volume.index_add_(0, tri[:, corner], share)
-    labels, _, names = fsio.read_annot(str(annotation))
-    region = torch.as_tensor(np.asarray(labels, dtype=np.int64), device=device)
-    if len(volume) != len(region):
-        raise ValueError("Surface and annotation vertex counts differ")
-    return {name.decode(): float(volume[region == index].sum())
-            for index, name in enumerate(names)
-            if name.decode() not in {"corpuscallosum", "unknown", "Unknown", "Medial_wall"}
-            and bool((region == index).any())}
+                    *, device: str = "cuda:0", cache=None) -> dict[str, float]:
+    """按注释返回 mris_anatomical_stats -no-th3 脑区体积，单位 mm³。
+
+    white/pial 为 surface RAS/mm 网格且有序面必须完全相同；thickness
+    是同序 mm 顶点图，annotation 是 .annot。device 默认 cuda:0；
+    cache 可复用同设备 SurfaceStatsCache。基础量按平均三角面厚度及
+    white/pial 面积计算，未使用 TH3 四面体顶点图。输入/设备不一致
+    或文件缺失会抛异常；空/排除脑区不出现在返回字典中。
+    """
+    from .surface_stats_cache import SurfaceStatsCache
+
+    if cache is None:
+        with SurfaceStatsCache(device=device) as temporary:
+            return temporary.roi_volumes(white, pial, thickness, annotation)
+    cache.check_device(device)
+    return cache.roi_volumes(white, pial, thickness, annotation)

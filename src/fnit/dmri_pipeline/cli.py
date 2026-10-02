@@ -22,7 +22,7 @@ def _arguments(parser):
     parser.add_argument("--t1", help="subject T1w; required by MMORF")
     parser.add_argument("--t1-template", help="MNI152 T1 1 mm brain; required by MMORF")
     parser.add_argument("--tensor-template", help="FSL_HCP1065_tensor_1mm; required by MMORF")
-    parser.add_argument("--synthstrip-weights", help="official synthstrip.1.pt; required by MMORF")
+    parser.add_argument("--synthstrip-weights", help="verified official synthstrip.1.pt file/directory for b0 mask and MMORF T1; default FNIT local weight resolver")
     parser.add_argument("--dti-shell", type=float, default=1000)
     parser.add_argument("--dti-tolerance", type=float, default=100)
     parser.add_argument("--bvec-source", choices=("rotated", "raw"), default="rotated")

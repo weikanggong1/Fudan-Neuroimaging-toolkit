@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-02",
+  "scope": "supported local Conda Python CPU interface/math regression tests; inference stub for integration tests; no accuracy or performance benchmark",
+  "command": "PYTHONPATH=src PYTHONDONTWRITEBYTECODE=1 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python -m pytest -q tests/eddy/test_ukb_synthstrip_mask.py tests/eddy/test_ukb_reference_reuse.py tests/dmri_pipeline/test_dmri_pipeline.py tests/synthstrip",
+  "result": {
+    "passed": 53,
+    "failed": 0,
+    "pytest_reported_seconds": 8.12
+  },
+  "versions": {
+    "python": "3.11.16",
+    "torch": "2.5.1",
+    "nibabel": "5.4.2",
+    "numpy": "1.26.4",
+    "scipy": "1.17.1",
+    "pytest": "9.1.1"
+  },
+  "source_sha256": {
+    "src/fnit/eddy/ukb.py": "af505b03615975e7d734c1faef891e70a342434977e0fd76f3219f37a50b6af2",
+    "src/fnit/eddy/cli.py": "b37f3d85828bc20c2cf7d407a2ead12edd85cb58db1e0ef81648e1a0c20a57ef",
+    "src/fnit/dmri_pipeline/pipeline.py": "c95465d06f7af97849762c87cbbb19c6a9bc459f76c8ea98fd796e31ac702cb4",
+    "src/fnit/dmri_pipeline/cli.py": "8753897d5cb6223c0e78704ab7b4d2267533fc5724a1bccea076c71b9c62a40f",
+    "tests/eddy/test_ukb_synthstrip_mask.py": "f725263c9e206e0331da1f0bbb71bded5c0b4d62a311396d361aa295a0b5da95",
+    "tests/eddy/test_ukb_reference_reuse.py": "723bb28a367d6b13449cc15799433c7fd90029b0110fbef599eec5947b44a8f8",
+    "tests/dmri_pipeline/test_dmri_pipeline.py": "06b0916a8f525f6e7b0630802f1f34aab7836248ac9de44f6cf3d30bfad040c4"
+  },
+  "known_environment_boundary": "Python3.9 collection failed in existing MCFLIRT type annotations; official project Conda uses Python3.11; no workaround/source change was used for the passing tests"
+}

@@ -68,7 +68,7 @@ def test_mcadura_left_right_flip_and_label_swap(tmp_path, monkeypatch):
     external_models.mkdir()
     monkeypatch.setenv("FS_TORCH_MODEL_DIR", str(external_models))
 
-    def fake_infer(crop, native, start, model, rows, fov, device):
+    def fake_infer(crop, native, start, model, rows, fov, device, **kwargs):
         calls.append((crop.copy(), start.copy(), model, fov))
         seg = np.zeros(crop.shape, np.int32)
         seg[(10 if len(calls) == 1 else 59), 12, 18] = 6101
@@ -100,7 +100,7 @@ def test_vsinus_subject_cli_masks_cortex_and_writes_stats(tmp_path, monkeypatch)
     cortex[11, 12, 18] = 3
     nib.save(nib.MGHImage(cortex, np.eye(4)), mri / "synthseg.rca.mgz")
 
-    def fake_infer(crop, native, start, model, rows, fov, device):
+    def fake_infer(crop, native, start, model, rows, fov, device, **kwargs):
         seg = np.zeros(crop.shape, np.int32)
         for label, point in ((6111, (11, 12, 18)), (6112, (12, 13, 19)),
                              (6112, (13, 13, 19))):

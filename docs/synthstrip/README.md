@@ -35,7 +35,7 @@ result.distance.save(path=out / "subject_sdt.nii.gz")  # 输出路径：有符�
 
 ### 模型构造
 
-`SynthStrip(weights=None, device="cpu", no_csf=False, threads=None)`：
+`SynthStrip(weights=None, device="cpu", no_csf=False, threads=None, *, configure_precision=True)`：
 
 | 参数 | 含义 |
 |---|---|
@@ -43,23 +43,31 @@ result.distance.save(path=out / "subject_sdt.nii.gz")  # 输出路径：有符�
 | `device` | `"cpu"` 或 `"cuda:N"`；CUDA 编号遵循 `CUDA_VISIBLE_DEVICES` |
 | `no_csf` | 为 `True` 时使用排除 CSF 的官方权重 |
 | `threads` | 当前进程的 Torch 线程数；`None` 保留当前值 |
+| `configure_precision` | 默认 `True` 延续TF32配置；`False` 保留调用方TF32设置，不改变模型和float32输入。recon-all在构造后施加其cuDNN FP32例外。 |
 
 模型进入 eval 模式并使用 float32 张量；CUDA 构造默认允许 TF32 matmul 和 cuDNN 内核，不使用 float16 或 bfloat16。卷积使用 `cudnn.benchmark=False` 和 `cudnn.deterministic=True`，固定算法选择；这两项设置以及 TF32 是当前进程的 PyTorch 后端策略。重复使用实例可避免重复加载权重。
 
+[`DMRIPipeline`](../dmri_pipeline/README.md#b0-脑掩膜与权重) 使用此原生 API 对 TOPUP 校正 b0 均值或 AP-only 原 b0 均值提取 EDDY mask，固定标准模型、`border=1 mm`，复用实例处理 MMORF T1。输入均值保留原灰度和几何，标准权重在 pipeline 首次加载时校验大小/SHA-256；算法、网络和本模块预处理没有因此修改。该接入的真实新整链比较由 dMRI 验证页单独记录，下方既有 EPI/T1 基准保留原计时范围。
+
 ### 单次调用与结果
 
-`extract(image, border=1, fill=None) -> StripResult`：
+`extract(image, border=1, fill=None, *, precision_report=None) -> StripResult`：
 
 | 参数或字段 | 含义 |
 |---|---|
 | `image` 输入 | 文件路径或 `nibabel.spatialimages.SpatialImage`；支持 3D 和逐帧处理的 4D |
 | `border` | SDT 阈值，单位 mm，默认 1 |
 | `fill` | 掩膜外的强度；省略时为 `min(image.min(), 0)` |
+| `precision_report` | 默认 `None`；提供列表时，每帧真实前向前追加模型/输入设备与dtype、TF32及autocast状态，不增加CUDA同步。 |
 | `result.image` | 掩膜外已填充的影像，保留原网格和几何 |
 | `result.mask` | 二值脑掩膜 |
 | `result.distance` | 有符号距离场，单位 mm |
 
 三个返回字段均为 `FNITNifti1Image`（`nibabel.Nifti1Image` 子类），可用 `.save(path)` 保存；也可直接传给 `nibabel.save`。调用不会修改输入对象。直接使用 Python 保存时，由调用者准备输出父目录。
+
+2026-10-02的[recon-all串行接入](../recon_all/SERIAL_OPTIMIZATION.md)使用此精度接口，
+记录实际前向并在Talairach子进程启动前释放Strip模型。默认独立调用保持兼容，
+没有开启半精度。输入链当前整例仍在验证，旧功能benchmark不改标为本轮结果。
 
 ## 命令行
 
@@ -268,6 +276,7 @@ python validation/fmri/compare_synthstrip_geometry.py \
 
 | 版本与范围 | 更新及真实数据核对 | 耗时边界 |
 |---|---|---|
+| 2026-10-02 dMRI 固定 b0 输入 | 同一真实官方 TOPUP b0 均值，标准权重同哈希；FNIT H100 GPU/官方 CPU mask 为 271,077/271,080 voxel，差 5 voxel、Dice=0.9999907776，shape/affine 一致，SDT MAE=0.00056229 mm。[匿名报告](../../validation/dmri_pipeline/synthstrip_fixed_input_20261002.public.json)；不是新 dMRI pipeline 整链。 | FNIT 加载＋推理 1.5973 s；完整 FNIT/官方进程另测 6.825/122.275 s，官方包含冷 NFS 读取和 8 线程 CPU 推理，不与 FNIT 子函数时间直接计算速度比。 |
 | `cfb7beee` 合并版本验收 | SynthStrip 源码与 `44364a8` 一致；相对原 FreeSurfer，完整 EPI/T1 mask Dice 为 0.999994968/0.999998569，差异为 1/4 体素；当前 T1 脑图及 mask 与冻结图示输入逐值相同。见[最新版报告](../../validation/synthstrip/latest_native_comparison.public.json)。 | FNIT 复用模型子函数为 1.1654/1.4442 秒；原独立进程为 8.5569/9.3769 秒，分别保留模型构造与进程启动/读写边界。 |
 | `44364a8` 固定卷积算法选择 | 默认关闭 `cudnn.benchmark`，保留 deterministic、TF32 和原 API。旧策略真实 T1 两个新进程的 19 个边界差异及关闭 benchmark 后的逐值一致控制，保存在[跨进程报告](../../validation/synthstrip/cudnn_repeatability.public.json)的 `original_diagnostic`；报告顶层记录当前源码的新驱动验收及实际输入、模型状态、网络预测哈希。 | 新驱动的调用计时包含记录张量哈希的开销，新进程计时另含启动、模型加载和写盘；各次秒数读取该报告。此项测量限于 SynthStrip，不作为完整 fMRI 流程耗时或等价性结论。 |
 | `1db5917` 几何修复，`1eb9c417` 完整流程冻结验收 | 修正官方视野中心、NIfTI `pixdim` 和回采样边界。真实 SBRef/T1 的归一化网络输入与官方实现逐值相同；独立 mask Dice 为 0.999995/0.999991。对应来源以[历史几何报告](../../validation/fmri/synthstrip_geometry_control.public.json)和[冻结脑图报告](../../validation/fmri/synthstrip_figure.public.json)为准。 | SBRef/T1 控制为 7.61/4.83 秒，含模型构造、预测、双实现回采样与比较；不含 Python 启动、输入 conform/归一化和写盘。 |

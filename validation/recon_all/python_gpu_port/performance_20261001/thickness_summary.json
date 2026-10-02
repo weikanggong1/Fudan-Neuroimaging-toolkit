@@ -1,0 +1,578 @@
+{
+  "scope": "frozen same-input surface thickness; 2 subjects x 2 hemispheres x 2 repeats",
+  "script_sha256": "b65c0a606eb3e88b8f78e66aa5068c118eeb08d4fb3e04f885eb9d8c139ec52d",
+  "measured_candidate_sha256": "fb3b665150a2c78c0a8a3a5813f29648e71b74efc7474f4b6c318489862e0136",
+  "final_default_source_sha256": "c5d586b58f8b57af1ecc5b61fcf0e33c980ee5eaca681fe7cc6c25be57083f48",
+  "final_default_measurement_status": "not represented by these stage1 measurements",
+  "optimization_threshold": {
+    "absolute_mm": 1e-06,
+    "relative": 0
+  },
+  "optimization_regression_pass": true,
+  "strict_old_new_equal": true,
+  "new_official_validation": "not_run",
+  "whole_pipeline_speedup": "not_measured_here",
+  "overall_equivalence": "not_assessed",
+  "cases": [
+    {
+      "subject": "sub-01",
+      "hemi": "lh",
+      "vertices": 105539,
+      "faces": 211074,
+      "report": "diagnostics/thickness_lh/report.json",
+      "report_sha256": "9f6f32ab2146e67de71dfc84d205c0bad9b299fad504d905797a86b898cd0982",
+      "input_sha256": {
+        "white": "bb8f2d21f1da13120769bb1665694421198e74ce03f6c7ece46f8866e06d093a",
+        "pial": "1568e59729914d021574daf12f743deb7599f2ec83049912481467e9ebd90c27"
+      },
+      "measured_code_commit": "3d9856c9dc659a50b685dbc8c0b9b6c695461fe7+stage1tar0444db72",
+      "source_sha256": {
+        "baseline": "e00dcb26dff747d6f3bc9e51a81ecdfe6254e7984da22cb8308d882505fab90f",
+        "candidate": "fb3b665150a2c78c0a8a3a5813f29648e71b74efc7474f4b6c318489862e0136",
+        "script": "f97549164c4c567d88d1f5ac004aa664b89d055bf62b55bf1346a7fba4101e7c"
+      },
+      "host": "gpucw1",
+      "device": "cuda:0",
+      "threads": 4,
+      "precision": {
+        "dtype": "float32",
+        "matmul_tf32": true,
+        "cudnn_tf32": true,
+        "float16_or_bfloat16": false
+      },
+      "cache_enabled": false,
+      "runs": [
+        {
+          "repeat": 0,
+          "order": [
+            "dense",
+            "indexed"
+          ],
+          "seconds_including_io": {
+            "dense": 38.42018861975521,
+            "indexed": 8.857799835968763
+          },
+          "comparison": {
+            "pass": true,
+            "different_values": 0,
+            "outliers": 0,
+            "max_abs_mm": 0.0,
+            "p99_abs_mm": 0.0,
+            "mae_mm": 0.0
+          }
+        },
+        {
+          "repeat": 1,
+          "order": [
+            "indexed",
+            "dense"
+          ],
+          "seconds_including_io": {
+            "indexed": 9.574010432232171,
+            "dense": 34.447159533854574
+          },
+          "comparison": {
+            "pass": true,
+            "different_values": 0,
+            "outliers": 0,
+            "max_abs_mm": 0.0,
+            "p99_abs_mm": 0.0,
+            "mae_mm": 0.0
+          }
+        }
+      ],
+      "mean_seconds": {
+        "dense": 36.43367407680489,
+        "indexed": 9.215905134100467
+      },
+      "observed_stage_reduction_percent": 74.70498002844113,
+      "monitor": {
+        "scope": "whole paired process, includes dense and indexed",
+        "report": "diagnostics/thickness_lh_monitor/monitor.json",
+        "report_sha256": "51343e9f168bfe31485591f09b67f198196a02cc009458a7aac5c2f02c02d8a0",
+        "gpu_uuid": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+        "peak_sampled_process_bytes": 1308622848,
+        "samples": 45,
+        "maximum_sampling_gap_seconds": 2.2511812928132713,
+        "failed_app_queries": 0,
+        "continuous_peak_verified": false,
+        "command_wall_seconds": 95.88870277861133
+      },
+      "conda_source_build_comparison": {
+        "report": "diagnostics/thickness_lh_vs_conda.json",
+        "report_sha256": "f1ab7435bec9301ab7ad5c9bf6a39f1709cf20d8644cf88f07e884c780179162",
+        "pass": true,
+        "threshold": {
+          "absolute_mm": 0.005,
+          "relative": 0.001
+        },
+        "rows": [
+          {
+            "repeat": 0,
+            "implementation": "dense",
+            "candidate_sha256": "a21cd84a9dbddd8da4067122c73aa9ced53c8f54854e60d0fa2a4cc64958e5e7",
+            "different_values": 10622,
+            "max_abs_mm": 4.76837158203125e-07,
+            "p99_abs_mm": 2.384185791015625e-07,
+            "mae_mm": 1.9714222563929547e-08,
+            "outliers": 0,
+            "pass": true
+          },
+          {
+            "repeat": 0,
+            "implementation": "indexed",
+            "candidate_sha256": "a21cd84a9dbddd8da4067122c73aa9ced53c8f54854e60d0fa2a4cc64958e5e7",
+            "different_values": 10622,
+            "max_abs_mm": 4.76837158203125e-07,
+            "p99_abs_mm": 2.384185791015625e-07,
+            "mae_mm": 1.9714222563929547e-08,
+            "outliers": 0,
+            "pass": true
+          },
+          {
+            "repeat": 1,
+            "implementation": "indexed",
+            "candidate_sha256": "a21cd84a9dbddd8da4067122c73aa9ced53c8f54854e60d0fa2a4cc64958e5e7",
+            "different_values": 10622,
+            "max_abs_mm": 4.76837158203125e-07,
+            "p99_abs_mm": 2.384185791015625e-07,
+            "mae_mm": 1.9714222563929547e-08,
+            "outliers": 0,
+            "pass": true
+          },
+          {
+            "repeat": 1,
+            "implementation": "dense",
+            "candidate_sha256": "a21cd84a9dbddd8da4067122c73aa9ced53c8f54854e60d0fa2a4cc64958e5e7",
+            "different_values": 10622,
+            "max_abs_mm": 4.76837158203125e-07,
+            "p99_abs_mm": 2.384185791015625e-07,
+            "mae_mm": 1.9714222563929547e-08,
+            "outliers": 0,
+            "pass": true
+          }
+        ]
+      }
+    },
+    {
+      "subject": "sub-01",
+      "hemi": "rh",
+      "vertices": 104864,
+      "faces": 209724,
+      "report": "diagnostics/thickness_rh/report.json",
+      "report_sha256": "310d734973bb09016e6b98c82d9384f57e6e28875d7de1e87974a4120fd09f86",
+      "input_sha256": {
+        "white": "38619e9c4f61bc92c261b290167c67cf522e21ad3c0d2d033e7b936b0b7bded4",
+        "pial": "e30dc17783a838f2f57ea69aa79ed036c1dcf80fd1fb10790a9776a15e2b4138"
+      },
+      "measured_code_commit": "3d9856c9dc659a50b685dbc8c0b9b6c695461fe7+stage1tar0444db72",
+      "source_sha256": {
+        "baseline": "e00dcb26dff747d6f3bc9e51a81ecdfe6254e7984da22cb8308d882505fab90f",
+        "candidate": "fb3b665150a2c78c0a8a3a5813f29648e71b74efc7474f4b6c318489862e0136",
+        "script": "f97549164c4c567d88d1f5ac004aa664b89d055bf62b55bf1346a7fba4101e7c"
+      },
+      "host": "gpucw1",
+      "device": "cuda:0",
+      "threads": 4,
+      "precision": {
+        "dtype": "float32",
+        "matmul_tf32": true,
+        "cudnn_tf32": true,
+        "float16_or_bfloat16": false
+      },
+      "cache_enabled": false,
+      "runs": [
+        {
+          "repeat": 0,
+          "order": [
+            "dense",
+            "indexed"
+          ],
+          "seconds_including_io": {
+            "dense": 33.05236362712458,
+            "indexed": 6.6886313310824335
+          },
+          "comparison": {
+            "pass": true,
+            "different_values": 0,
+            "outliers": 0,
+            "max_abs_mm": 0.0,
+            "p99_abs_mm": 0.0,
+            "mae_mm": 0.0
+          }
+        },
+        {
+          "repeat": 1,
+          "order": [
+            "indexed",
+            "dense"
+          ],
+          "seconds_including_io": {
+            "indexed": 6.456194980069995,
+            "dense": 27.522016486153007
+          },
+          "comparison": {
+            "pass": true,
+            "different_values": 0,
+            "outliers": 0,
+            "max_abs_mm": 0.0,
+            "p99_abs_mm": 0.0,
+            "mae_mm": 0.0
+          }
+        }
+      ],
+      "mean_seconds": {
+        "dense": 30.287190056638792,
+        "indexed": 6.572413155576214
+      },
+      "observed_stage_reduction_percent": 78.29969322579802,
+      "monitor": {
+        "scope": "whole paired process, includes dense and indexed",
+        "report": "diagnostics/thickness_rh_monitor/monitor.json",
+        "report_sha256": "30f380779acc43ad4bf6810191dfab496fa1a663a9eeed9214e55f504ad85cf6",
+        "gpu_uuid": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+        "peak_sampled_process_bytes": 1304428544,
+        "samples": 37,
+        "maximum_sampling_gap_seconds": 2.283490943722427,
+        "failed_app_queries": 0,
+        "continuous_peak_verified": false,
+        "command_wall_seconds": 77.69655766617507
+      },
+      "conda_source_build_comparison": {
+        "report": "diagnostics/thickness_rh_vs_conda.json",
+        "report_sha256": "4813076d04bb9248eef63d572b1bfe08bbfccfd5da09dc5191ba53fd9c0f34a2",
+        "pass": true,
+        "threshold": {
+          "absolute_mm": 0.005,
+          "relative": 0.001
+        },
+        "rows": [
+          {
+            "repeat": 0,
+            "implementation": "dense",
+            "candidate_sha256": "f7da153a34c95733644f761cba9fea13a92d0a28352b5d57d43cc5a4c73fd064",
+            "different_values": 10469,
+            "max_abs_mm": 9.5367431640625e-07,
+            "p99_abs_mm": 2.384185791015625e-07,
+            "mae_mm": 1.8550001760063136e-08,
+            "outliers": 0,
+            "pass": true
+          },
+          {
+            "repeat": 0,
+            "implementation": "indexed",
+            "candidate_sha256": "f7da153a34c95733644f761cba9fea13a92d0a28352b5d57d43cc5a4c73fd064",
+            "different_values": 10469,
+            "max_abs_mm": 9.5367431640625e-07,
+            "p99_abs_mm": 2.384185791015625e-07,
+            "mae_mm": 1.8550001760063136e-08,
+            "outliers": 0,
+            "pass": true
+          },
+          {
+            "repeat": 1,
+            "implementation": "indexed",
+            "candidate_sha256": "f7da153a34c95733644f761cba9fea13a92d0a28352b5d57d43cc5a4c73fd064",
+            "different_values": 10469,
+            "max_abs_mm": 9.5367431640625e-07,
+            "p99_abs_mm": 2.384185791015625e-07,
+            "mae_mm": 1.8550001760063136e-08,
+            "outliers": 0,
+            "pass": true
+          },
+          {
+            "repeat": 1,
+            "implementation": "dense",
+            "candidate_sha256": "f7da153a34c95733644f761cba9fea13a92d0a28352b5d57d43cc5a4c73fd064",
+            "different_values": 10469,
+            "max_abs_mm": 9.5367431640625e-07,
+            "p99_abs_mm": 2.384185791015625e-07,
+            "mae_mm": 1.8550001760063136e-08,
+            "outliers": 0,
+            "pass": true
+          }
+        ]
+      }
+    },
+    {
+      "subject": "sub-02",
+      "hemi": "lh",
+      "vertices": 119363,
+      "faces": 238722,
+      "report": "diagnostics/sub02_thickness_lh/report.json",
+      "report_sha256": "1d925d3d743202cade95b0dcffe322f3c2b699a471ee9a98168bcb8bb2025c10",
+      "input_sha256": {
+        "white": "4e5561e6bcdc60c1e8ebc4933cf5dea0ac43fd6a9369a4101d11be1310087d42",
+        "pial": "0ad12402251201448f125d14553b8a22c3aff16622bae8ff536661f67a9a8f6d"
+      },
+      "measured_code_commit": "3d9856c9dc659a50b685dbc8c0b9b6c695461fe7+stage1tar0444db72",
+      "source_sha256": {
+        "baseline": "e00dcb26dff747d6f3bc9e51a81ecdfe6254e7984da22cb8308d882505fab90f",
+        "candidate": "fb3b665150a2c78c0a8a3a5813f29648e71b74efc7474f4b6c318489862e0136",
+        "script": "f97549164c4c567d88d1f5ac004aa664b89d055bf62b55bf1346a7fba4101e7c"
+      },
+      "host": "gpucw1",
+      "device": "cuda:0",
+      "threads": 4,
+      "precision": {
+        "dtype": "float32",
+        "matmul_tf32": true,
+        "cudnn_tf32": true,
+        "float16_or_bfloat16": false
+      },
+      "cache_enabled": false,
+      "runs": [
+        {
+          "repeat": 0,
+          "order": [
+            "dense",
+            "indexed"
+          ],
+          "seconds_including_io": {
+            "dense": 48.56636605877429,
+            "indexed": 13.398455568123609
+          },
+          "comparison": {
+            "pass": true,
+            "different_values": 0,
+            "outliers": 0,
+            "max_abs_mm": 0.0,
+            "p99_abs_mm": 0.0,
+            "mae_mm": 0.0
+          }
+        },
+        {
+          "repeat": 1,
+          "order": [
+            "indexed",
+            "dense"
+          ],
+          "seconds_including_io": {
+            "indexed": 13.448115705978125,
+            "dense": 42.241280167363584
+          },
+          "comparison": {
+            "pass": true,
+            "different_values": 0,
+            "outliers": 0,
+            "max_abs_mm": 0.0,
+            "p99_abs_mm": 0.0,
+            "mae_mm": 0.0
+          }
+        }
+      ],
+      "mean_seconds": {
+        "dense": 45.40382311306894,
+        "indexed": 13.423285637050867
+      },
+      "observed_stage_reduction_percent": 70.43578113758633,
+      "monitor": {
+        "scope": "whole paired process, includes dense and indexed",
+        "report": "diagnostics/sub02_thickness_lh_monitor/monitor.json",
+        "report_sha256": "a0b0581d63bea6dd3f80b3ae2e55ba95bfee8d06a3aa0fbe26452b29ba7f8e16",
+        "gpu_uuid": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+        "peak_sampled_process_bytes": 1365245952,
+        "samples": 58,
+        "maximum_sampling_gap_seconds": 2.2714149430394173,
+        "failed_app_queries": 0,
+        "continuous_peak_verified": false,
+        "command_wall_seconds": 121.55831771017984
+      },
+      "conda_source_build_comparison": {
+        "report": "diagnostics/sub02_thickness_lh_vs_conda.json",
+        "report_sha256": "2d5d31d67fb07ade7e31bfa16e2e7c56b9baa2e306039f8b8917a381a191f784",
+        "pass": true,
+        "threshold": {
+          "absolute_mm": 0.005,
+          "relative": 0.001
+        },
+        "rows": [
+          {
+            "repeat": 0,
+            "implementation": "dense",
+            "candidate_sha256": "6ea7a801a27ea00199769b523a29a2efef473bc954bc2ac432b271d7577f1576",
+            "different_values": 11768,
+            "max_abs_mm": 4.76837158203125e-07,
+            "p99_abs_mm": 2.384185791015625e-07,
+            "mae_mm": 2.0079359338663108e-08,
+            "outliers": 0,
+            "pass": true
+          },
+          {
+            "repeat": 0,
+            "implementation": "indexed",
+            "candidate_sha256": "6ea7a801a27ea00199769b523a29a2efef473bc954bc2ac432b271d7577f1576",
+            "different_values": 11768,
+            "max_abs_mm": 4.76837158203125e-07,
+            "p99_abs_mm": 2.384185791015625e-07,
+            "mae_mm": 2.0079359338663108e-08,
+            "outliers": 0,
+            "pass": true
+          },
+          {
+            "repeat": 1,
+            "implementation": "indexed",
+            "candidate_sha256": "6ea7a801a27ea00199769b523a29a2efef473bc954bc2ac432b271d7577f1576",
+            "different_values": 11768,
+            "max_abs_mm": 4.76837158203125e-07,
+            "p99_abs_mm": 2.384185791015625e-07,
+            "mae_mm": 2.0079359338663108e-08,
+            "outliers": 0,
+            "pass": true
+          },
+          {
+            "repeat": 1,
+            "implementation": "dense",
+            "candidate_sha256": "6ea7a801a27ea00199769b523a29a2efef473bc954bc2ac432b271d7577f1576",
+            "different_values": 11768,
+            "max_abs_mm": 4.76837158203125e-07,
+            "p99_abs_mm": 2.384185791015625e-07,
+            "mae_mm": 2.0079359338663108e-08,
+            "outliers": 0,
+            "pass": true
+          }
+        ]
+      }
+    },
+    {
+      "subject": "sub-02",
+      "hemi": "rh",
+      "vertices": 118303,
+      "faces": 236602,
+      "report": "diagnostics/sub02_thickness_rh/report.json",
+      "report_sha256": "2cc702efe5a1d7f6cd6d193907625dfd5f1b39cdf70f14b83fc73c2f78232513",
+      "input_sha256": {
+        "white": "508c3b989130c989878519307b9a3831118904cc637e10a9cf6348e3832d5967",
+        "pial": "3aabfcc50118ac68fab014f0be1f30e8e59e570364f971f465914fe44f527de0"
+      },
+      "measured_code_commit": "3d9856c9dc659a50b685dbc8c0b9b6c695461fe7+stage1tar0444db72",
+      "source_sha256": {
+        "baseline": "e00dcb26dff747d6f3bc9e51a81ecdfe6254e7984da22cb8308d882505fab90f",
+        "candidate": "fb3b665150a2c78c0a8a3a5813f29648e71b74efc7474f4b6c318489862e0136",
+        "script": "f97549164c4c567d88d1f5ac004aa664b89d055bf62b55bf1346a7fba4101e7c"
+      },
+      "host": "gpucw1",
+      "device": "cuda:0",
+      "threads": 4,
+      "precision": {
+        "dtype": "float32",
+        "matmul_tf32": true,
+        "cudnn_tf32": true,
+        "float16_or_bfloat16": false
+      },
+      "cache_enabled": false,
+      "runs": [
+        {
+          "repeat": 0,
+          "order": [
+            "dense",
+            "indexed"
+          ],
+          "seconds_including_io": {
+            "dense": 39.775226241443306,
+            "indexed": 9.087426690850407
+          },
+          "comparison": {
+            "pass": true,
+            "different_values": 0,
+            "outliers": 0,
+            "max_abs_mm": 0.0,
+            "p99_abs_mm": 0.0,
+            "mae_mm": 0.0
+          }
+        },
+        {
+          "repeat": 1,
+          "order": [
+            "indexed",
+            "dense"
+          ],
+          "seconds_including_io": {
+            "indexed": 9.254498308058828,
+            "dense": 41.15066647622734
+          },
+          "comparison": {
+            "pass": true,
+            "different_values": 0,
+            "outliers": 0,
+            "max_abs_mm": 0.0,
+            "p99_abs_mm": 0.0,
+            "mae_mm": 0.0
+          }
+        }
+      ],
+      "mean_seconds": {
+        "dense": 40.462946358835325,
+        "indexed": 9.170962499454618
+      },
+      "observed_stage_reduction_percent": 77.33491175327602,
+      "monitor": {
+        "scope": "whole paired process, includes dense and indexed",
+        "report": "diagnostics/sub02_thickness_rh_monitor/monitor.json",
+        "report_sha256": "5582bd9140cb42a6dcca6c3669d80bcaa0038c92e8ca3c0fca31cc7a5144d872",
+        "gpu_uuid": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+        "peak_sampled_process_bytes": 1361051648,
+        "samples": 49,
+        "maximum_sampling_gap_seconds": 2.3003472862765193,
+        "failed_app_queries": 0,
+        "continuous_peak_verified": false,
+        "command_wall_seconds": 103.75571152893826
+      },
+      "conda_source_build_comparison": {
+        "report": "diagnostics/sub02_thickness_rh_vs_conda.json",
+        "report_sha256": "a0ded0389c939d62371eb759206132086d465fbb5fd478b79f1db7cf801494d0",
+        "pass": true,
+        "threshold": {
+          "absolute_mm": 0.005,
+          "relative": 0.001
+        },
+        "rows": [
+          {
+            "repeat": 0,
+            "implementation": "dense",
+            "candidate_sha256": "6f9126f1183c7b2a6b57902bcb24e6b606fea9f8402a2a7308481981c6b4358b",
+            "different_values": 11506,
+            "max_abs_mm": 9.5367431640625e-07,
+            "p99_abs_mm": 2.384185791015625e-07,
+            "mae_mm": 1.986250484755437e-08,
+            "outliers": 0,
+            "pass": true
+          },
+          {
+            "repeat": 0,
+            "implementation": "indexed",
+            "candidate_sha256": "6f9126f1183c7b2a6b57902bcb24e6b606fea9f8402a2a7308481981c6b4358b",
+            "different_values": 11506,
+            "max_abs_mm": 9.5367431640625e-07,
+            "p99_abs_mm": 2.384185791015625e-07,
+            "mae_mm": 1.986250484755437e-08,
+            "outliers": 0,
+            "pass": true
+          },
+          {
+            "repeat": 1,
+            "implementation": "indexed",
+            "candidate_sha256": "6f9126f1183c7b2a6b57902bcb24e6b606fea9f8402a2a7308481981c6b4358b",
+            "different_values": 11506,
+            "max_abs_mm": 9.5367431640625e-07,
+            "p99_abs_mm": 2.384185791015625e-07,
+            "mae_mm": 1.986250484755437e-08,
+            "outliers": 0,
+            "pass": true
+          },
+          {
+            "repeat": 1,
+            "implementation": "dense",
+            "candidate_sha256": "6f9126f1183c7b2a6b57902bcb24e6b606fea9f8402a2a7308481981c6b4358b",
+            "different_values": 11506,
+            "max_abs_mm": 9.5367431640625e-07,
+            "p99_abs_mm": 2.384185791015625e-07,
+            "mae_mm": 1.986250484755437e-08,
+            "outliers": 0,
+            "pass": true
+          }
+        ]
+      }
+    }
+  ]
+}

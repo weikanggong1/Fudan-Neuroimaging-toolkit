@@ -162,11 +162,16 @@ def write_lta(transform, path) -> None:
 
 
 def _lta_value(lines, start, key):
-    prefix = f"{key} ="
+    """读取LTA当前几何段的具名字段；允许等号周围空格/制表符。
+    lines为文本行列表、start为段起点、key为字段名，均无默认值。
+    返回等号右侧字符串，不转换空间或单位；缺失字段抛ValueError。
+    属于LTA格式读写内部步骤，没有独立CLI。
+    """
     for index in range(start, len(lines)):
         stripped = lines[index].strip()
-        if stripped.startswith(prefix):
-            return stripped.split("=", 1)[1].strip()
+        name, separator, value = stripped.partition("=")
+        if separator and name.strip() == key:
+            return value.strip()
         if index > start and stripped.endswith("volume info"):
             break
     raise ValueError(f"LTA is missing {key}")

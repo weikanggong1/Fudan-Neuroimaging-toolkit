@@ -1,0 +1,311 @@
+{
+  "scope": "read-only audit of existing reports; no official command or model rerun; not current whole-run reproducibility proof",
+  "records": [
+    {
+      "stage": "LH final white",
+      "evidence": "final_white_conda_20260927/official_binary_repeat_lh.json",
+      "evidence_sha256": "36d268a3293c1e8d985c6a4433733ef6e5b05a19aef1789d718dab4350175d31",
+      "official_version_from_command_path": "FreeSurfer/8.2.0-1/bin/mris_place_surface",
+      "frozen_input_sha256": {
+        "mri/brain.finalsurfs.mgz": "c239ba0c807bd381662d388e198715da44103f0c724b3877a7c9623d4ccff9e7",
+        "mri/wm.mgz": "d6069783c3720b6ec6b7679ee4543a3ba32891b50b9c109a5a6e6f50e1050b46",
+        "mri/aseg.presurf.mgz": "be7f851405b92d82ec23041621c2da06bceaa700f4ea39c6aae42008c1dc525c",
+        "surf/lh.white.preaparc": "4cfb887d8aa15b4955ede1bedbcd71a13ae4188788554d5093a32ee107a68fa3",
+        "surf/autodet.gw.stats.lh.dat": "10b313e9f29a9d6572f0aef4546d307f6514eaae44896fc19b4212891719c7d9",
+        "label/lh.cortex.label": "524245d2c800a7ff3fc8ba1d1fe04c02d09354bcc29e99cf3f64182c2f312506",
+        "label/lh.aparc.annot": "9b4b6dce47037a623ca4bbab6564cd3bd31369c22c2e7c55d305a85c46517536"
+      },
+      "input_files": 7,
+      "input_bytes_equal": true,
+      "threads_from_log": 4,
+      "ordered_faces_equal": true,
+      "coordinate_components_equal": 319866,
+      "coordinate_components_total": 319866,
+      "maximum_coordinate_displacement_mm": 0.0,
+      "output_file_sha256": {
+        "repeat": "67c1d7d35cf4b989778267fdb9304e348596d6fc854ee07a663c7bf2222c59b8",
+        "archive": "fb93463ce649d232431175f65fe0c20fc11ed62e44ad64006d1b07c72aa3bfca"
+      },
+      "volume_geometry_equal": true,
+      "mrisps_different_voxels": 0,
+      "direct_repeat_binary_sha256": null,
+      "related_manifest_program": {
+        "path": "native_cpp_conda_20260927/place_geometry_pair/input_manifest.json",
+        "sha256": "db0e7619bb7383dcd685ce24831388031992fe35eb677d7b061680e921793884",
+        "official_program": {
+          "sha256": "67139c3590f961f879a4214cd01f173b42986c7b178d1851dfa3f08e8acf12aa",
+          "bytes": 4076992
+        },
+        "binding": "related stage manifest; repeat JSON does not independently record this program hash"
+      },
+      "limits": [
+        "LH frozen official upstream only, not FNIT self-produced input or whole subject",
+        "coordinates reproduce but complete surface file hashes differ",
+        "repeat JSON lacks host CPU and direct program hash/seed"
+      ]
+    },
+    {
+      "stage": "LH standard sphere",
+      "evidence": "native_cpp_conda_20260927/sphere_official_repeat_same_input.json",
+      "evidence_sha256": "2bc800c0100a567c12cc35054a3b92ba6fdc7336e2d1642309a8210fd9923b02",
+      "official_version_from_protocol": "FreeSurfer 8.2 mris_sphere",
+      "protocol": "The official 8.2 mris_sphere command was rerun with the same subject path, byte-identical frozen inputs, OMP_NUM_THREADS=4, -threads 4, and -seed 1234. The original output was saved outside the subject, subject inputs restored from the frozen snapshot, and first output restored afterward.",
+      "input_manifest_matches_first_run": true,
+      "related_pair": {
+        "path": "native_cpp_conda_20260927/sphere_registration_same_input.json",
+        "sha256": "b663c996feb322e238181164b2b6a28bad49ea8385c82bdace7cd21e8cd0c330",
+        "same_first_output_sha256": "f52648c164dbebb157939afb5f4dc4f2a7c117e6e6bdb951a3afa94daee98415",
+        "input_manifest_sha256": "6b209e92dd1565543082418d5c08450ae6cd3c9cf773879f1b2ce52c9b01df2f",
+        "direct_input_sha256": {
+          "lh.inflated": {
+            "conda": "3f0830c3ac3c1da27c9c71c3165aa825358e7a11fe22263b8056391395bb50e7",
+            "official": "3f0830c3ac3c1da27c9c71c3165aa825358e7a11fe22263b8056391395bb50e7"
+          },
+          "lh.sulc": {
+            "conda": "0a114093b620fd6cd82d2aa4f48a0aa63c720bdcd4960751e74856b574f6735b",
+            "official": "0a114093b620fd6cd82d2aa4f48a0aa63c720bdcd4960751e74856b574f6735b"
+          }
+        },
+        "official_binary_sha256": "c34ca308a7fa03acdb3f689bf6125cf3d0198c37c3a62992a29f68e631c73612",
+        "binding": "joined by exact first output file hash; hash is from paired-stage manifest, not separately rehashed in repeat JSON"
+      },
+      "ordered_coordinates_equal": true,
+      "ordered_faces_equal": true,
+      "different_coordinate_elements": 0,
+      "vertex_distance_mm": {
+        "max": 0.0,
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "p99": 0.0
+      },
+      "output_file_sha256": {
+        "first": "f52648c164dbebb157939afb5f4dc4f2a7c117e6e6bdb951a3afa94daee98415",
+        "second": "9ae2987b43b24bff5ef78794ff51410b4f56d1639a8720cdca23986e495d19e1"
+      },
+      "limits": [
+        "frozen LH sphere stage; not both hemispheres/two-subject whole pipeline",
+        "complete file hash differs while coordinates/faces/volume metadata agree",
+        "repeat report lacks recorded host CPU and direct rerun binary hash"
+      ]
+    },
+    {
+      "stage": "RH pial.T1",
+      "evidence": "native_cpp_conda_20260927/place_geometry_pair/python_pial/rh.official_repeat_vs_archive.json",
+      "evidence_sha256": "18f16328b1667e6ba496f8aaf9b4352826ed4bf18162b3269c285196733e68c2",
+      "reference": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/surf/rh.pial.T1",
+      "repeat": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/place_surface_cpp_pair_20260927/python_pial/rh.official_repeat.pial.T1",
+      "ordered_faces_equal": true,
+      "vertices": {
+        "reference": 105541,
+        "candidate": 105541
+      },
+      "coordinate_components_equal": 316623,
+      "coordinate_components_total": 316623,
+      "displacement_mm": {
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "p99": 0.0,
+        "maximum": 0.0,
+        "over_0p01_mm": 0,
+        "over_0p1_mm": 0
+      },
+      "output_file_sha256": {
+        "reference": "2ff3b4588e02739c972cffc8062da7df71fac75773fe092b3da5575e44b649c9",
+        "candidate": "fd7aceb0f19813965620a6a986669de96b67ead643c9f6ec4b7520ae7503257c"
+      },
+      "direct_repeat_program_sha256": null,
+      "direct_repeat_input_manifest_sha256": null,
+      "related_place_program": {
+        "sha256": "67139c3590f961f879a4214cd01f173b42986c7b178d1851dfa3f08e8acf12aa",
+        "bytes": 4076992
+      },
+      "limits": [
+        "record establishes exact saved geometry reproduction, not a fully version/hardware/input controlled rerun",
+        "this JSON lacks explicit input manifest, program hash, thread/seed and hardware records",
+        "complete file hashes differ; cannot substitute this for current whole-run repeatability"
+      ]
+    }
+  ],
+  "synthseg_148_label_contrast": {
+    "evidence": [
+      {
+        "path": "performance_20261001/diagnostics/old_effective_tf32/actual-forward.json",
+        "sha256": "88b8e8868ccf5352d12b9cedf9fa765a695e33ae4e775cdb521df4942c1ccd4e"
+      },
+      {
+        "path": "performance_20261001/diagnostics/corrected_uncached_api/actual-forward.json",
+        "sha256": "0928f040f6682aa060fe058aa123203dce3da1ed7dbb2278aba509427faa1838"
+      },
+      {
+        "path": "performance_20261001/final_1b8c36d/buffer_uncached_api/actual-forward.json",
+        "sha256": "70b0a1e1f727ed580aff38ac359e888c7ea0f08afd25f1ec49637a2df815790b"
+      }
+    ],
+    "input_sha256": "646cfe39c550fd1626c4a9bfbc3d065a9afdd9cddbd849585465a822b425bc09",
+    "weights_sha256": {
+      "synthseg_2.0.h5": "f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e",
+      "synthseg_segmentation_labels_2.0.npy": "5ef25ec33fe917ac99f30b8f2185b2d77121136ee411b9c4970c0b59be615ed8",
+      "synthseg_segmentation_names_2.0.npy": "234eb6d514e10d6ebd748a8b30a1d12d9426fd874c607e37852406fae8f290fc",
+      "synthseg_topological_classes_2.0.npy": "650b4b96834485c1e6d7421de4af74da80d861e6b2a39ef1164389bde3a5e14a"
+    },
+    "stage1_source_sha256": {
+      "fnit._dmri": "0862c7cefbd2b2811e9a56e3b617a209968d70c4e5a5b76c557630b1cd2f0117",
+      "fnit.synthseg_parc.segment": "efccf5a4e967b9fe63263dcd1fbe165a9e0628a6d880ed8a4ab643e74930a324",
+      "fnit.synthseg_parc.synthseg": "5b6fc866076b1311e9960267daecf25084f59dbbea84644a83289853cf4c2601"
+    },
+    "input_weights_source_equal_old_corrected": true,
+    "old_actual_forward": {
+      "requested_cudnn_tf32": true,
+      "forwards": [
+        {
+          "pass": "original",
+          "device": "cuda:0",
+          "matmul_tf32": true,
+          "cudnn_tf32": true,
+          "input_dtype": "torch.float32",
+          "model_dtypes": [
+            "torch.float32"
+          ],
+          "autocast": {
+            "cpu": {
+              "enabled": false,
+              "dtype": "torch.bfloat16"
+            },
+            "cuda": {
+              "enabled": false,
+              "dtype": "torch.float16"
+            }
+          },
+          "output_dtype": "torch.float32"
+        },
+        {
+          "pass": "flipped",
+          "device": "cuda:0",
+          "matmul_tf32": true,
+          "cudnn_tf32": true,
+          "input_dtype": "torch.float32",
+          "model_dtypes": [
+            "torch.float32"
+          ],
+          "autocast": {
+            "cpu": {
+              "enabled": false,
+              "dtype": "torch.bfloat16"
+            },
+            "cuda": {
+              "enabled": false,
+              "dtype": "torch.float16"
+            }
+          },
+          "output_dtype": "torch.float32"
+        }
+      ]
+    },
+    "corrected_actual_forward": {
+      "requested_cudnn_tf32": false,
+      "forwards": [
+        {
+          "pass": "original",
+          "device": "cuda:0",
+          "matmul_tf32": true,
+          "cudnn_tf32": false,
+          "input_dtype": "torch.float32",
+          "model_dtypes": [
+            "torch.float32"
+          ],
+          "autocast": {
+            "cpu": {
+              "enabled": false,
+              "dtype": "torch.bfloat16"
+            },
+            "cuda": {
+              "enabled": false,
+              "dtype": "torch.float16"
+            }
+          },
+          "output_dtype": "torch.float32"
+        },
+        {
+          "pass": "flipped",
+          "device": "cuda:0",
+          "matmul_tf32": true,
+          "cudnn_tf32": false,
+          "input_dtype": "torch.float32",
+          "model_dtypes": [
+            "torch.float32"
+          ],
+          "autocast": {
+            "cpu": {
+              "enabled": false,
+              "dtype": "torch.bfloat16"
+            },
+            "cuda": {
+              "enabled": false,
+              "dtype": "torch.float16"
+            }
+          },
+          "output_dtype": "torch.float32"
+        }
+      ]
+    },
+    "settings": {
+      "host": {
+        "old": "gpucw1",
+        "corrected": "gpucw1"
+      },
+      "device_uuid": {
+        "old": "e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+        "corrected": "e25cac06-0ce8-a833-abf9-09ab18c9c9ba"
+      },
+      "threads": {
+        "old": 4,
+        "corrected": 4
+      },
+      "torch_version": {
+        "old": "2.5.1",
+        "corrected": "2.5.1"
+      },
+      "cudnn_benchmark": {
+        "old": true,
+        "corrected": true
+      },
+      "cudnn_deterministic": {
+        "old": true,
+        "corrected": true
+      },
+      "allocator": {
+        "old": {
+          "requested": "disabled",
+          "cuda_initialized_at_entry": false,
+          "environment_at_entry": "1",
+          "environment_after_selection": "1",
+          "effective": "disabled",
+          "torch_stats_known_valid": false,
+          "torch_stats_known_unavailable": true
+        },
+        "corrected": {
+          "requested": "disabled",
+          "cuda_initialized_at_entry": false,
+          "environment_at_entry": "1",
+          "environment_after_selection": "1",
+          "effective": "disabled",
+          "torch_stats_known_valid": false,
+          "torch_stats_known_unavailable": true
+        }
+      },
+      "initialized_api": {
+        "old": false,
+        "corrected": true
+      }
+    },
+    "different_voxels": 148,
+    "minimum_label_dice": 0.9996683250414594,
+    "TIV_difference_mm3": 35.125,
+    "same_fp32_buffer_regression_different_voxels": 0,
+    "interpretation": "same-input explicit cuDNN TF32=True vs False precision contrast; not evidence of spontaneous same-setting randomness",
+    "limits": "CLI/API initialization differs in this contrast; no new matched same-setting official whole repeat executed here"
+  },
+  "conclusion": "Existing fixed stage records show exact coordinate reproducibility in their stated scope. Missing current whole repeat/hardware binding remains unverified. FNIT-vs-official deviations and 148 precision-contrast labels cannot all be attributed to randomness."
+}

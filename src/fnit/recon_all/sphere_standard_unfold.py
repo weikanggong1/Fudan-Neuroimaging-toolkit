@@ -176,21 +176,30 @@ def first_epoch_gradient(vertices: np.ndarray, faces: np.ndarray,
                          offsets: np.ndarray, neighbors: np.ndarray,
                          original_distances: np.ndarray,
                          distance_weight: float = 0.1,
-                         ) -> tuple[np.ndarray, np.ndarray, np.ndarray, dict]:
-    """Return fixed-epoch distance and negative-face-area forces."""
+                         *, normal_topology=None, original_metric=None) -> tuple[np.ndarray, np.ndarray, np.ndarray, dict]:
+    """按原顺序计算球面梯度，坐标为surface RAS/mm。
+
+    normal_topology=None可复用本次同面的FaceNormalTopology；original_metric=None
+    可传同一smoothwm的(float32(F,)绝对面积,float32总面积mm²)，两者只读。
+    默认None沿原即时计算；其余输入/权重和返回梯度/报告保持原定义。
+    缓存不能跨拓扑或metric版本使用，法向和现版面积每次重算。
+    """
     xyz = np.asarray(vertices, np.float32)
     faces = np.asarray(faces, np.int32)
     area, face_normals = _face_geometry(xyz, faces)
-    original_face_area, _ = _face_geometry(
-        np.asarray(smoothwm_vertices, np.float32), faces)
-    original_face_area = np.abs(original_face_area)
-    original_total = np.float32(np.sum(original_face_area, dtype=np.float64))
+    if original_metric is None:
+        original_face_area, _ = _face_geometry(
+            np.asarray(smoothwm_vertices, np.float32), faces)
+        original_face_area = np.abs(original_face_area)
+        original_total = np.float32(np.sum(original_face_area, dtype=np.float64))
+    else:
+        original_face_area, original_total = original_metric
     # MRIScomputeMetricProperties overrides total_area for MRIS_SPHERE.
     positive_face_area = np.float32(np.sum(area[area >= 0], dtype=np.float64))
     current_total = np.float32(math.pi * 100.0 * 100.0 * 4.0)
     distance_scale = np.float32(np.sqrt(np.float32(original_total / current_total)))
     area_scale = np.float32(original_total / current_total)
-    vertex_normals = initial_vertex_normals(xyz, faces)
+    vertex_normals = initial_vertex_normals(xyz, faces, topology=normal_topology)
     distance = _distance_force(xyz, vertex_normals, offsets, neighbors,
                                original_distances, distance_scale, np.float32(distance_weight))
     negative_area = _area_force(xyz, faces, face_normals, area,

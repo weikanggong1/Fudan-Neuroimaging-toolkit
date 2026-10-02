@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import csv
 import os
 from pathlib import Path
@@ -75,11 +75,13 @@ def _segmentation_image(data: np.ndarray, reference, affine: np.ndarray):
 
 @dataclass
 class SynthSegResult:
+    """分割、软体积（mm³）和实际前向精度；分割网格见 SynthSeg.__call__。"""
     segmentation: FNITNifti1Image
     volumes_mm3: dict[int, float]
     total_intracranial_mm3: float
     label_names: dict[int, str]
     near_tie_voxels: int
+    precision: dict = field(default_factory=dict)
 
     def write_volumes_csv(self, source: str | Path, path: str | Path) -> None:
         """Write the FreeSurfer non-parcellated SynthSeg 2.0 volume columns."""
@@ -98,8 +100,19 @@ class SynthSeg:
     """Run the non-robust, non-parcellated 33-class T1 model without FreeSurfer."""
 
     def __init__(self, weights: str | Path | None = None, device: str = "cpu",
-                 threads: int | None = None):
-        self.device = configure_device(device)
+                 threads: int | None = None, *, cudnn_tf32: bool | None = True):
+        """构造独立 SynthSeg，不调用原软件命令或改变全局 TF32。
+
+        weights 为模型/权重目录，None 使用已声明的默认权重；device 默认 CPU。
+        threads 默认 None 保留 PyTorch 线程，负数使用 CPU 核数。cudnn_tf32
+        默认 True 保留原 CUDA 卷积默认，False 关闭该模型前向中的 cuDNN TF32，
+        None 继承调用方设置；不控制 matmul 或主动启用的 autocast。返回模型
+        对象，缺少资源、标签不齐、设备/参数无效或权重加载失败时抛异常。
+        原软件对应 mri_synthseg --i T1 --o aseg；完整示例见精度策略文档。
+        """
+        if cudnn_tf32 is not None and not isinstance(cudnn_tf32, bool):
+            raise ValueError("cudnn_tf32 must be True, False or None")
+        self.device = configure_device(device, configure_precision=False)
         if threads is not None:
             torch.set_num_threads(os.cpu_count() if threads < 0 else threads)
         model = resolve_weights("synthseg_2.0.h5", explicit=weights)
@@ -116,11 +129,20 @@ class SynthSeg:
                             for label, index in zip(self.label_ids, unique_indices[1:])}
         self.topology = torch.as_tensor(topology[unique_indices], device=self.device)
         self.segmenter = SynthSegSegmenter(model, labels_path, device=self.device)
+        self.segmenter.cudnn_tf32 = cudnn_tf32
 
     @torch.inference_mode()
     def __call__(self, image: str | Path | nib.spatialimages.SpatialImage, *,
                  keep_geometry: bool = False,
                  color_lut: str | Path | None = None) -> SynthSegResult:
+        """从 T1 路径或 nibabel 影像生成分割、体积和实际前向精度。
+
+        image 为单幅 3-D T1，keep_geometry 默认 False 返回约 1-mm RAS 对齐
+        网格，True 最近邻恢复输入网格；color_lut 默认 None，可指定存在的
+        颜色表路径。返回 SynthSegResult：int32 NIfTI 分割、按标签 mm³ 软体积、
+        总颅内容积、名称、近并列体素数及 precision（每次前向 TF32、dtype、
+        autocast）。计算失败或颜色表不存在时抛异常；不更改调用方 TF32 状态。
+        """
         prepared = preprocess_t1(image, device=self.device)
         # The large CPU 3D convolution can crash in oneDNN; native torch convolutions complete.
         with torch.backends.mkldnn.flags(
@@ -153,4 +175,5 @@ class SynthSeg:
                                         prepared.voxel_volume_mm3)
         volumes = {label: float(value) for label, value in zip(self.label_ids, values[1:])}
         return SynthSegResult(segmentation, volumes, float(values[0]),
-                              self.label_names, near_tie_voxels)
+                              self.label_names, near_tie_voxels,
+                              getattr(self.segmenter, "precision", {}))

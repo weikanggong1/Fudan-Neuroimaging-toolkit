@@ -29,7 +29,8 @@ def test_cleanup_keeps_six_connected_neighbors_only():
 
 
 @pytest.mark.parametrize("initial_enabled", [False, True])
-def test_segmentation_restores_native_grid_and_label_ids(tmp_path, monkeypatch, initial_enabled):
+@pytest.mark.parametrize("initial_tf32", [False, True])
+def test_segmentation_restores_native_grid_and_label_ids(tmp_path, monkeypatch, initial_enabled, initial_tf32):
     seen = []
 
     class FixedModel(torch.nn.Module):
@@ -49,12 +50,14 @@ def test_segmentation_restores_native_grid_and_label_ids(tmp_path, monkeypatch, 
     ctab.write_text("0 Unknown 0 0 0 0\n3006 wm-entorhinal 50 245 28 0\n")
     nib.save(nib.MGHImage(np.arange(16 ** 3, dtype=np.float32).reshape((16,) * 3), affine), source)
     monkeypatch.setattr(torch.backends.cudnn, "enabled", initial_enabled)
-    monkeypatch.setattr(torch.backends.cudnn, "allow_tf32", True)
+    monkeypatch.setattr(torch.backends.cudnn, "allow_tf32", initial_tf32)
+    precision = []
     result = mri_sclimbic_seg(source, output, model_path=tmp_path / "unused.h5",
-                             ctab_path=ctab, fov=8)
-    assert seen == [(True, True)]
+                             ctab_path=ctab, fov=8, precision_report=precision)
+    assert seen == [(True, initial_tf32)]
+    assert precision[0]["cudnn_tf32"] is initial_tf32
     assert torch.backends.cudnn.enabled is initial_enabled
-    assert torch.backends.cudnn.allow_tf32 is True
+    assert torch.backends.cudnn.allow_tf32 is initial_tf32
     saved = nib.load(result)
     labels = np.asarray(saved.dataobj)
     assert np.array_equal(saved.affine, affine)

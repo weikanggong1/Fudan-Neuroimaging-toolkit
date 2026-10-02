@@ -1,0 +1,70 @@
+gongwk-local
+
+--inras: /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/postmerge_ece5e23_sub01/mri/transforms/synthmorph.1.0mm.1.0mm/tmp/deform.mgz input RAS warp.
+--insrcgeom: /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/postmerge_ece5e23_sub01/mri/transforms/synthmorph.1.0mm.1.0mm/invol.crop.nii.gz atlas/source image (used for geometry).
+--outfswarp: /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/postmerge_ece5e23_sub01/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz output Freesurfer 3D morph.
+Setting vg_isEqual_Threshold to 0.000100
+INFO: using NIfTI-1 sform (sform_code=1)
+Applying LTAs to the GCAM
+GCAMwrite(/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/postmerge_ece5e23_sub01/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz)
+[INFO] Warpfield::convert(): converting GCAM ...
+[INFO] Warpfield::convert(): gcam       [193 x 229 x 193]
+[INFO] Warpfield::convert(): gcam image [256 x 256 x 256]
+[INFO] Warpfield::convert(): gcam atlas [193 x 229 x 193]
+[INFO] Warpfield::convert(): total out of range voxel count: 0
+[INFO] niiWrite(): MGZ_INTENT_WARPMAP => NIFTI_INTENT_DISPVECT, intent_code = 1006, dimensions = {5, 193, 229, 193, 1, 3, 1, 1}
+[INFO] niiWrite(): convert displacement from 0 to 3
+/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mri_warp_convert successful.
+INFO: using NIfTI-1 sform (sform_code=1)
+Loading gcam
+[INFO] niiRead(): intent_code = 1006, dimensions = {5, 193, 229, 193, 1, 3, 1, 1}
+[DEBUG] Warpfield::read() gcam->status = GCAM_LABELED
+setting orig areas to linear transform determinant scaled 1.00
+Computing inverse of GCAM
+Filling inverse of GCAM
+Allocating inv_gcam...(256, 256, 256)
+Saving inverse to /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/postmerge_ece5e23_sub01/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.inv.nii.gz
+GCAMwrite(/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/postmerge_ece5e23_sub01/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.inv.nii.gz)
+[INFO] Warpfield::convert(): converting GCAM ...
+[INFO] Warpfield::convert(): gcam       [256 x 256 x 256]
+[INFO] Warpfield::convert(): gcam image [193 x 229 x 193]
+[INFO] Warpfield::convert(): gcam atlas [256 x 256 x 256]
+[INFO] Warpfield::convert(): total out of range voxel count: 0
+[INFO] niiWrite(): MGZ_INTENT_WARPMAP => NIFTI_INTENT_DISPVECT, intent_code = 1006, dimensions = {5, 256, 256, 256, 1, 3, 1, 1}
+[INFO] niiWrite(): convert displacement from 0 to 3
+/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mri_convert -rt nearest /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/postmerge_ece5e23_sub01/mri/orig.mgz -at /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/postmerge_ece5e23_sub01/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/postmerge_ece5e23_sub01/mri/transforms/synthmorph.1.0mm.1.0mm/test.nii.gz 
+INFO: using NIfTI-1 sform (sform_code=1)
+reading from /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/postmerge_ece5e23_sub01/mri/orig.mgz...
+TR=9.67, TE=0.00, TI=0.00, flip angle=0.00
+i_ras = (-1, -3.0268e-09, 9.31323e-10)
+j_ras = (-9.31323e-10, 7.45058e-09, -1)
+k_ras = (-1.39698e-09, 1, 7.45058e-09)
+INFO: Reading transformation from file /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/postmerge_ece5e23_sub01/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz...
+INFO: Applying transformation from file /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/postmerge_ece5e23_sub01/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz...
+Applying morph_3d ...
+[INFO] niiRead(): intent_code = 1006, dimensions = {5, 193, 229, 193, 1, 3, 1, 1}
+[DEBUG] Warpfield::read() gcam->status = GCAM_LABELED
+setting orig areas to linear transform determinant scaled 1.00
+morphing to atlas with resample type 0
+writing to /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/postmerge_ece5e23_sub01/mri/transforms/synthmorph.1.0mm.1.0mm/test.nii.gz...
+Traceback (most recent call last):
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/benchmark_postmerge_synthmorph.py", line 82, in <module>
+    if __name__=="__main__":main()
+                            ^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/benchmark_postmerge_synthmorph.py", line 71, in main
+    comps[n]=compare(a.source/(t+n),a.output/(t+n),n.endswith(".lta"))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/benchmark_postmerge_synthmorph.py", line 26, in compare
+    x=np.asarray(load_lta(a).convert(space="world").matrix)
+                 ^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate_postmerge_ece5e23/src/fnit/_transforms.py", line 222, in load_lta
+    source=_lta_geometry(lines, "src"),
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate_postmerge_ece5e23/src/fnit/_transforms.py", line 186, in _lta_geometry
+    [
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate_postmerge_ece5e23/src/fnit/_transforms.py", line 187, in <listcomp>
+    np.fromstring(_lta_value(lines, start, key), sep=" ")
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate_postmerge_ece5e23/src/fnit/_transforms.py", line 172, in _lta_value
+    raise ValueError(f"LTA is missing {key}")
+ValueError: LTA is missing xras

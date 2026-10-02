@@ -1,0 +1,155 @@
+{
+  "schema_version": 1,
+  "benchmark_sha256": "ac9a51957be2a5f9ac9a6882d823fbe8f55ca2f6f7ba22e119e7b4f1e991f155",
+  "scope": "complete saved 3D/4D images; no re-estimation or frame reduction",
+  "official_provenance": {
+    "fsl_version": "6.0.7.4",
+    "freesurfer_version": "8.2.0-1",
+    "surfa_version": "0.6.3",
+    "fsl_applywarp_sha256": "40721907ce0c2f0d05636e88cbe4ac7729bd09e0ff58c4407614653c8e853fdd",
+    "mri_synthmorph_sha256": "5ede2911ba967081a9b09aebf6cc4b9efbbb1632463438651254add8d4442ee7",
+    "outputs_exit_status": 0,
+    "format_preparation_in_apply_timing": false,
+    "fnit_selection": "frozen saved outputs; candidate warmup bitwise equality already checked; final rerun repeats gates"
+  },
+  "cases": [
+    {
+      "case": "case_001",
+      "label": "FSL ApplyWarp: 105-frame DWI",
+      "shape": [
+        91,
+        109,
+        91,
+        105
+      ],
+      "input_sha256": {
+        "candidate": "60f35aecbb785427f84e2dae6f181993aa4109e635fd53d9677fe06ca0e485a0",
+        "official": "d5f5bf5e8eca7838a0573cf107aef1fb0d2e02ec7bbe57a01e4db1bd67af783a",
+        "reference_mask": "b71a9f2015bd10262c37e51b4d17a655d0eb0a0dec4ba48322fb5af55c86b97c"
+      },
+      "brain_mask_voxels": 228483,
+      "brain": {
+        "compared_values": 23990715,
+        "frames": 105,
+        "pearson_r": 0.9999999999970532,
+        "mae": 0.0015142250446052272,
+        "rmse": 0.004125155637290781,
+        "maximum_absolute_error": 0.4462890625,
+        "changed_values_including_signed_zero": 21448979,
+        "changed_numerical_values_if_different_dtype": null
+      },
+      "whole_grid": {
+        "compared_values": 94776045,
+        "frames": 105,
+        "pearson_r": 0.9999999999980929,
+        "mae": 0.0004967995282288965,
+        "rmse": 0.002179932623388952,
+        "maximum_absolute_error": 0.4462890625,
+        "changed_values_including_signed_zero": 49433814,
+        "changed_numerical_values_if_different_dtype": null
+      },
+      "official_dtype": "float32",
+      "candidate_dtype": "float32",
+      "affine_exact": true,
+      "header_fields_equal": {
+        "dim": true,
+        "pixdim": false,
+        "datatype": true,
+        "xyzt_units": true,
+        "intent_code": true,
+        "intent_p1": true,
+        "intent_p2": true,
+        "intent_p3": true,
+        "qform_code": true,
+        "sform_code": true
+      },
+      "extensions_equal": true,
+      "temporal_metadata": {
+        "official": {
+          "tr": 3.5999999046325684,
+          "units": [
+            "mm",
+            "sec"
+          ]
+        },
+        "candidate": {
+          "tr": 3.5999999046325684,
+          "units": [
+            "mm",
+            "sec"
+          ]
+        }
+      },
+      "official_command_seconds": 500.62
+    },
+    {
+      "case": "case_002",
+      "label": "SynthMorph CPU: 490-frame BOLD",
+      "shape": [
+        91,
+        109,
+        91,
+        490
+      ],
+      "input_sha256": {
+        "candidate": "7be92867da2d8e14ca7c6215b9e585b4a07d4f9a558e58cd95c7f2913f76b6fa",
+        "official": "46e03fdf7dfa729d8fd3630ecfeac73caf542b25a924edc407b59e697f3ffe4f",
+        "reference_mask": "b71a9f2015bd10262c37e51b4d17a655d0eb0a0dec4ba48322fb5af55c86b97c"
+      },
+      "brain_mask_voxels": 228483,
+      "brain": {
+        "compared_values": 111956670,
+        "frames": 490,
+        "pearson_r": 0.9999999999952227,
+        "mae": 0.005271226196771301,
+        "rmse": 0.00944579374031466,
+        "maximum_absolute_error": 0.19140625,
+        "changed_values_including_signed_zero": 102846073,
+        "changed_numerical_values_if_different_dtype": null
+      },
+      "whole_grid": {
+        "compared_values": 442288210,
+        "frames": 490,
+        "pearson_r": 0.9999310864336728,
+        "mae": 1.9023107522783733,
+        "rmse": 41.78293338314591,
+        "maximum_absolute_error": 4088.632080078125,
+        "changed_values_including_signed_zero": 391063807,
+        "changed_numerical_values_if_different_dtype": null
+      },
+      "official_dtype": "float32",
+      "candidate_dtype": "float32",
+      "affine_exact": true,
+      "header_fields_equal": {
+        "dim": true,
+        "pixdim": true,
+        "datatype": true,
+        "xyzt_units": true,
+        "intent_code": true,
+        "intent_p1": true,
+        "intent_p2": true,
+        "intent_p3": true,
+        "qform_code": true,
+        "sform_code": true
+      },
+      "extensions_equal": false,
+      "temporal_metadata": {
+        "official": {
+          "tr": 0.7350000143051147,
+          "units": [
+            "mm",
+            "sec"
+          ]
+        },
+        "candidate": {
+          "tr": 0.7350000143051147,
+          "units": [
+            "mm",
+            "sec"
+          ]
+        }
+      },
+      "official_command_seconds": 116.16
+    }
+  ]
+}

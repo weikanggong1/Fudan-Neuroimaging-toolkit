@@ -82,7 +82,68 @@ result = eddy.run(
 
 `eddy(...)` 返回内存中的 `EDDYResult`，`eddy.run(...)` 还会调用 `result.save(out)` 写盘。`result.corrected` 是 NIfTI 影像；其余数值结果是 NumPy 数组。`EDDYConfig` 可用于检查固定参数并传入 `TorchEDDY(device="cuda:0", config=EDDYConfig(...))`；本页对照使用默认参数。
 
-若数据已有 UKB 风格的 `AP.nii.gz`、`AP.bval`、`AP.bvec` 和 TOPUP 目录，可调用 `run_ukb_eddy(raw_dir=..., topup_dir=..., output_dir=..., device="cuda:0", overwrite=False)`。它为这一个被试生成 `eddy_index.txt` 和脑掩膜，返回 `(result, inputs)`；`inputs` 是实际传给 EDDY 的输入路径及参考帧。对应单被试命令为 `fnit eddy --raw-dir subject/raw --topup-dir subject/topup --output-dir subject/eddy --device cuda:0`。目录准备规则见[源码说明](../../src/fnit/eddy/README.md)。
+### UKB 输入准备与 SynthStrip 脑掩膜
+
+`prepare_ukb_eddy` 为一个 UKB 风格的 AP DWI 准备 EDDY 输入。它平均 TOPUP `fieldmap_iout.nii.gz` 中的校正 b0，将原强度 float32 三维均值输入项目 [`SynthStrip`](../synthstrip/README.md)，保存原 DWI 网格的脑掩膜；固定 `border=1 mm`、`no_csf=False`，不再使用强度阈值和形态学侵蚀。没有 iout 时只平均原 AP 的 `b<100` volume，修复旧版将完整 DWI 一起平均的输入准备错误。校正 b0 与 AP 的 shape/affine 不匹配会报错。
+
+| 准备参数 | 含义 |
+|---|---|
+| `raw_dir` | 含 `AP.nii.gz`、`AP.bval`、`AP.bvec` 的单被试目录 |
+| `topup_dir` | 含 `acqparams.txt`、`fieldmap_out_fieldcoef.nii.gz` 和可选校正 b0 `fieldmap_iout.nii.gz` 的目录 |
+| `output_dir` | 保存 mask、index 和掩膜 QC 的目录 |
+| `device` | 默认可用 CUDA，否则 CPU；CUDA float32、TF32，不使用 float16 |
+| `synthstrip_weights` | 标准 `synthstrip.1.pt` 文件或目录；None 按 FNIT 本地权重解析规则查找 |
+| `ref_scan_no` | `prepare_ukb_eddy` 可接收 TOPUP 的零起始 `ap_index`；None 重新选择 AP b0 |
+| `overwrite` | 默认 False；已有 mask、index 或 QC 时拒绝覆盖 |
+
+标准 checkpoint 必须匹配 30,851,709 bytes 和 SHA-256 `37417f802196186441aae3e7f385d94f8a98c64a88acaeaa2723af995c653e33`。联网准备可运行 `fnit-setup-weights --model synthstrip`，优先固定 [assets-v1 Release](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/releases/tag/assets-v1)，校验和许可见[权重说明](../WEIGHTS.md)。推理只读本地权重，不下载。调用这一 helper 的 DMRIPipeline 和未校正 BIDS connectome 路径均需预先准备权重；直接 `TorchEDDY.run(mask=...)` 仍使用调用者给定的掩膜。
+
+```python
+from pathlib import Path
+from fnit import TorchEDDY
+from fnit.eddy.ukb import prepare_ukb_eddy
+
+raw_directory = Path("subject/raw")  # 输入：AP DWI 和梯度
+topup_directory = Path("subject/topup")  # 输入：已完成的 TOPUP 结果
+eddy_directory = Path("subject/eddy")  # 输出：mask、index、QC 和校正 DWI
+compute_device = "cuda:0"  # 改为 "cpu" 使用同一推理与几何流程
+synthstrip_weight_file = Path("/weights/synthstrip.1.pt")  # 标准 PT 文件
+eddy_inputs = prepare_ukb_eddy(
+    raw_dir=raw_directory,  # 单被试 AP 目录
+    topup_dir=topup_directory,  # TOPUP 场与校正 b0 目录
+    output_dir=eddy_directory,  # 准备文件输出目录
+    device=compute_device,  # 掩膜推理设备
+    synthstrip_weights=synthstrip_weight_file,  # 标准权重；None 使用本地解析
+    ref_scan_no=None,  # 已有 TOPUP ap_index 时传该整数，避免重复 b0 选择
+    overwrite=False,  # 写盘策略
+)
+result = TorchEDDY(device=compute_device).run(
+    **eddy_inputs, out=eddy_directory / "data", gp_seed=12345, overwrite=False
+)  # 固定 GP 种子；输入 dict 只含 EDDY 参数，不混入 QC
+```
+
+`run_ukb_eddy(raw_dir, topup_dir, output_dir, *, device=None, overwrite=False, synthstrip_weights=None, ref_scan_no=None, gp_seed=None)` 将准备和 EDDY 运行合为一次调用，返回 `(result, inputs)`；`inputs` 为实际 EDDY 路径及参考帧。`ref_scan_no` 传给输入准备，显式整数须指向 AP 中 `b<100` 的零起始帧；`None` 保留自动 b0 选择。`gp_seed` 传给 EDDY GP 选点，省略时保留按时间初始化。单被试命令为：
+
+```bash
+fnit eddy --raw-dir subject/raw --topup-dir subject/topup \
+  --output-dir subject/eddy --synthstrip-weights /weights/synthstrip.1.pt \
+  --ref-scan-no 0 --gp-seed 12345 --device cuda:0
+```
+
+`fnit eddy` 和独立入口 `fnit-eddy` 的 UKB 模式都将 `--ref-scan-no`、`--gp-seed` 传给 `run_ukb_eddy`。省略 `--ref-scan-no` 时，UKB 模式自动选择 AP b0；direct 模式仍默认参考帧 0。2026-10-02 修复了 UKB CLI 曾解析这两个参数却未转发的问题，并给 wrapper 增加兼容的可选参数；DMRIPipeline 原有的参考帧和种子传递路径保持原值。这是入口传参修复，已有真实 pipeline 精度和计时不需要据此改写。回归测试覆盖两个 CLI 入口、默认与显式值，以及 wrapper 到输入准备和 EDDY 的传递。
+
+原软件参考应对其自己的 TOPUP 结果独立提取脑掩膜，然后把 mask 传给上述 FSL EDDY 命令：
+
+```bash
+corrected_b0_pair="reference/topup/fieldmap_iout.nii.gz"  # 官方 TOPUP 校正 b0
+mean_b0_image="reference/topup/mean_b0.nii.gz"  # 三维 b0 均值
+brain_mask_image="reference/eddy/nodif_brain_mask.nii.gz"  # 官方 EDDY 使用的 mask
+synthstrip_weight_file="/weights/synthstrip.1.pt"  # 与 FNIT 同哈希的标准权重
+fslmaths "$corrected_b0_pair" -Tmean "$mean_b0_image"
+mri_synthstrip -i "$mean_b0_image" -m "$brain_mask_image" --model "$synthstrip_weight_file" -b 1 -t 8
+```
+
+准备输出 `nodif_brain_mask.nii.gz` 为 3D float32 二值 mask，`eddy_index.txt` 为 N 个全 1 的 acqp 行索引，`nodif_brain_mask_report.json` 为匿名 QC。QC 包含均值来源/哈希、volume 数、已校验权重哈希、几何、脑体素数、模型复用和权重加载/完整 SynthStrip/保存子计时。总时间包含 b0 读盘及均值、权重校验/加载、推理和 mask 保存，不含 QC JSON 写盘。CUDA peak 在 mask 阶段重置，包含当前进程存活张量、模型和已有 allocator reserve，排除其他进程与 CUDA context。DMRIPipeline 实例会复用模型，包括 MMORF T1；独立 helper 每次加载。新掩膜的独立整链验收范围见[流程说明](../dmri_pipeline/README.md)；下方既有 EDDY 固定输入结果保留原 mask/版本。
 
 ## 输出文件
 
@@ -102,7 +163,39 @@ result = eddy.run(
 
 默认 NIfTI 输出扩展名随 `FSLOUTPUTTYPE` 变化；本页基准使用 `.nii.gz`。以上是本命令共享的核心输出；FSL 的命令快照等辅助文件不属于 FNIT 输出合同。
 
-## 已有真实数据对照（2026-09-29）
+## 真实数据对照与版本记录
+
+### 2026-10-02：当前 main 的 SynthStrip＋匹配 TOPUP 上游复测
+
+当前 main 从同一 raw AP/PA 完整重新选择 b0、估计 TOPUP 场并生成脑掩膜；参考复用本轮已独立完成的同 raw、同官方环境和相同协议结果。参考侧用其自己的官方 TOPUP b0 均值调用官方 CPU SynthStrip，再运行 FSL GPU EDDY；FNIT 使用项目 PyTorch 实现。EDDY 配置、固定 GP 种子及原始梯度按相同规则设置，下游分别使用各自旋转后的 b-vector。当前 4D 比较已重新生成，误差反映双方完整上游输入的差异，不能归为仅 EDDY 求解器的固定输入误差。
+
+本例为 `104×104×72×105`，包含 5 个 b0、50 个 b≈1000、50 个 b≈2000 volume，固定 `gp_seed=12345`。Python 3.11.16、Torch 2.5.1、FSL 6.0.7.4；双方均为 8 CPU 线程，原软件固定 CPU 0–7，FNIT 固定 CPU 8–15。本任务 H100 GPU 1 阶段串行，最新 main 在参考完成后执行，没有本任务时间重叠；仅早期合并前运行与参考 CPU 配准重叠。EDDY 子步骤计时包含读取实际输入、计算、D2H 和保存。
+
+| 本轮指标 | 独立官方 SynthStrip 上游参考 |
+|---|---:|
+| FNIT／参考脑体素数；共同脑体素数 | 271,075／271,080；271,073 |
+| 脑 mask Dice | 0.9999834 |
+| 完整 105 volume，固定官方脑区 Pearson r | 0.999764184 |
+| 同 ROI MAE／RMSE，原信号单位 | 23.2314／43.0074 |
+| 同 ROI 最大绝对差，原信号单位 | 2655.9336 |
+| 100 个非 b0 旋转梯度平均／最大夹角 | 0.05585°／0.12146° |
+| 离群图 FNIT／参考条目数；不同条目数 | 20／21；1 |
+| EDDY 读取、计算与保存，当前 main FNIT／参考 | 331.41／645.88 s |
+| FNIT EDDY 阶段 allocator 已分配／保留峰值 | 4.92910／11.32672 GB |
+
+4D 指标使用固定官方 271,080 体素 mask 中全部 28,463,400 个 voxel-volume 数值；逐卷中心矩合并避免整幅 float64 副本。共同 mask、全 FOV 非零并集及 p95 抽样策略另见[上游匿名报告](../../validation/dmri_pipeline/upstream.synthstrip_topup_20261002.public.json)。两侧的 selected b0 pair、acqp 和 index 数值相同，完整输出仍有非零误差，不称为逐体素等价。
+
+整个 TBSS＋AMICO 流程新生成 27 图，当前 main FNIT／参考处理时间为 404.74／2055.53 s，完整进程 408.54／2073.54 s；整链 allocator 峰值 14.65145／19.98166 GB，预算为 20,000,000,000 bytes。显存统计取各公共阶段峰值，不含 context 或其他进程。这些是一例共享系统的观察值。433 个实际 Python 源文件全部匹配集成提交 `b3ccafe0a48f4c1c396ae6285d0bdbe07a7664c9`；TOPUP core／sampler 哈希仍以 `d6b9838c`／`ee19a764` 开头。集成版与合并前清理版的 27 图解码数组及 header binary block 全同，当前参考比较已重新计算。完整分步骤、标准九图误差和脑图见[本轮整链报告](../../validation/dmri_pipeline/end_to_end_synthstrip_topup_20261002.md)。
+
+合并前清理前／清理版处理时间分别为 516.31／499.55 s，EDDY 阶段分别为 420.05／418.43 s，完整进程为 521.75／503.37 s；不同源码记录不合并为当前版本重复计时。共享负载、缓存及运行时刻变化，不能把时间差全部归于新 main 共享组件优化。
+
+另保留最终 FNIT 对历史独立 FSL BET 链的比较，标准九图固定模板 ROI r=0.846458–0.959704；主要官方 SynthStrip 协议为 r=0.988013–0.998676，见[历史 BET 逐图报告](../../validation/dmri_pipeline/comparison.historical_bet_20261002.public.json)。两种脑提取和上游配准输入不同，不能把新旧相关性变化单独归为 EDDY 或某项修复。下面固定 EDDY 输入与固定 FNIT 基线的记录继续保留原 mask 和计时范围。
+
+### 2026-10-02：SynthStrip 固定输入
+
+本轮 b0 mask 的独立固定输入核验使用同一真实官方 TOPUP b0 均值，FNIT H100 GPU 对官方 8 线程 CPU：mask Dice=0.9999907776，差 5 voxel，shape/affine 相同，SDT MAE=0.00056229 mm。FNIT 模型加载＋推理 1.5973 s，完整 FNIT/官方进程另测为 6.825/122.275 s；官方包含 NFS 冷读取，计时边界不同，不计算加载＋推理相对完整进程的速度比。见[匿名固定输入结果](../../validation/dmri_pipeline/synthstrip_fixed_input_20261002.public.json)与[53 项受支持 CPU 回归记录](../../validation/dmri_pipeline/synthstrip_cpu_tests_20261002.public.json)。这次隔离成熟 SynthStrip；上节独立整链使用双方各自的 TOPUP 均值，下面旧对照使用其原 mask 和输入。
+
+### 2026-09-29：固定 EDDY 输入
 
 同一真实 UKB 格式 AP/PA 病例包含 105 个 volume（5 个 b0、50 个 b≈1000、50 个 b≈2000），使用同一 AP、脑掩膜、TOPUP 系数、acqp、index、bval、bvec、参考帧及 GP 种子。基准软件为 gpucw1 的 FSL 6.0.7.4 `eddy_cuda10.2`，FNIT 在同节点 H100 GPU 上运行。指标在同一脑掩膜内计算；过程和机器可读结果见[验证记录](../../validation/eddy/README.md)。
 
@@ -122,6 +215,8 @@ result = eddy.run(
 
 | 日期 | 更新 | 验证范围 |
 |---|---|---|
+| 2026-10-02，当前 main＋SynthStrip＋匹配 TOPUP | UKB helper 使用校正 b0 均值的 PyTorch SynthStrip mask，标准权重校验、实例复用及匿名 QC；集成提交 `b3ccafe` 的 433 个实际 Python 源文件一致，fresh 上游与整链完成 | 105 volume 固定官方脑区 EDDY r=0.999764184、mask Dice=0.9999834；EDDY 331.41／645.88 s，完整处理 404.74／2055.53 s。主要官方 SynthStrip 参考与历史 BET 参考分别报告，见上节和[整链报告](../../validation/dmri_pipeline/end_to_end_synthstrip_topup_20261002.md) |
+| 2026-10-02，合并前快照 | 清理前／清理版独立完成 raw-to-27 图，EDDY 420.05／418.43 s、总处理 516.31／499.55 s | 相对当前 main 27 图解码值及 header binary block 全同；时间按不同源码单列，不合并也不归为单项优化收益 |
 | 2026-10-02 | GP 有效掩膜一次复制 CPU；单次调用内复用固定 grid、EC basis、PE 轴、susceptibility 系数及 mirror padding；单次 GN 内复用预测 periodic padding | CPU 与 CUDA 回归比较变形返回值、6/16 参数 GN 结果及接受判据、glibc 坐标序列；固定 GP 种子的真实病例完整八轮输出与基线逐值相同，见下表及[验证报告](../../validation/dmri_pipeline/lossless_20261002.md) |
 | 2026-09-29 | cubic B-spline 权重改为无布尔索引的分段计算 | 一例真实病例的完整八轮图像 SHA-256、参数、梯度、RMS、离群 sidecars 保持相同；上节保留当次 FSL 误差和计时 |
 
@@ -182,3 +277,4 @@ print({"wall_seconds": wall_seconds, "peak_cuda_memory_bytes": result.qc["peak_c
 
 - 参考文献：Andersson & Sotiropoulos, *An integrated approach to correction for off-resonance effects and subject movement in diffusion MR imaging*, NeuroImage (2016), [doi:10.1016/j.neuroimage.2015.10.019](https://doi.org/10.1016/j.neuroimage.2015.10.019)。
 - 原实现代码库：[FSL `eddy`](https://git.fmrib.ox.ac.uk/fsl/eddy)。
+- 脑提取参考：Hoopes et al., *SynthStrip: Skull-Stripping for Any Brain Image*, NeuroImage (2022), [doi:10.1016/j.neuroimage.2022.119474](https://doi.org/10.1016/j.neuroimage.2022.119474)；[FreeSurfer `mri_synthstrip`](https://github.com/freesurfer/freesurfer/tree/dev/mri_synthstrip)。

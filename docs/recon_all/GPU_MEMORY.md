@@ -1,12 +1,42 @@
 # recon-all 显存记录与验收口径
 
-整例显存以**同一进程的实际 GPU 占用**和 PyTorch `max_memory_allocated`、`max_memory_reserved` 同时记录，统一保存字节数，并展示十进制 GB 和二进制 GiB。`nvidia-smi` 周期采样只能给出观察最大值，不能保证捕获连续峰值。
+整例显存记录指定物理 GPU 上**同一时刻父子进程合计的实际占用**，另报可用的 PyTorch `max_memory_allocated`、`max_memory_reserved`。统一保存字节数，并展示十进制 GB 和二进制 GiB；预算为 20,000,000,000 字节。`nvidia-smi` 周期采样只能给出观察最大值，不能保证捕获连续峰值，也不能将不同时刻的父、子峰值相加。
 
-标准 CUDA runner 默认关闭 PyTorch 的 CUDA 分配缓存，以压低进程显存占用。此模式下 PyTorch 的 allocated/reserved 峰值接口返回 0，运行报告用 `gpu_memory_mode=no_cuda_allocator_cache` 标识，并不将 0 当作显存峰值；Talairach 子进程单独保留缓存与其统计。完整进程显存需要外部采样。现版 GPU `sub-01` 整例的外部进程采样最大值为 18,452 MiB（约 19.35 GB），每 2 秒采样一次；这一观察值低于 20 GB，但仍须核查连续峰值及父子进程合计占用。[完整运行记录](../../validation/recon_all/python_gpu_port/current_full_runs_20260930.json)。默认允许 TF32；SynthStrip、SynthSeg 和 Talairach affine 的 FP32 例外按阶段记录。未启用 FP16/BF16。
+标准 CUDA runner 在尚未初始化 CUDA 时默认关闭 PyTorch 分配缓存；已初始化的 Python API 保留实际 allocator，不依据后来修改的环境变量猜测其状态。`cuda_allocator_cache=enabled/disabled` 必须在初始化前选择。缓存关闭时统计接口不可用，新报告标记 `unavailable` 并省略父进程的峰值，不能把 0 写成零显存。Talairach 子进程单独保留缓存与其统计；完整进程显存需要外部采样。参数与返回结构见[剖析说明](PROFILING.md)。
+
+## 2026-10-01 同输入实测
+
+本次单阶段使用固定 H100 UUID，记录真实前向为 float32、cuDNN TF32 关闭、矩阵乘法 TF32 开启且 autocast 关闭。缓冲区复用与精度修正分开比较：
+
+| 设置 | 包含模型与数据写出的秒数 | 同次查询父子合计采样最大值 |
+|---|---:|---:|
+| 未复用缓冲区，缓存关闭，已初始化 API | 70.26 | 12,897,484,800 B |
+| 未复用缓冲区，缓存开启，CLI | 59.37 | 20,352,860,160 B |
+| 复用后验缓冲区，缓存关闭，已初始化 API | 80.79 | 14,508,097,536 B |
+| 复用后验缓冲区，缓存开启，CLI | 64.60 | 18,138,267,648 B |
+| 复用后验缓冲区，缓存开启，已初始化 API | 42.09 | 18,138,267,648 B |
+
+后三组与第一组的落盘分割和体积 CSV 完全相同。不同启动方式、运行时刻和负载没有通过交替重复配对控制，因此不把单次墙钟变化归于缓存或缓冲复用。缓存开启的采样占用有所降低，但尚不足以改变整例默认策略。缓存关闭的 Torch 统计不可用，不能把上述 NVML 占用当作 Torch allocated。
+
+缓存开启 CLI/API 的源码、输入、权重、GPU UUID、四线程与实际两次前向设置一致：float32、cuDNN TF32=False、matmul TF32=True、autocast 关闭。API 在 CUDA 尚未初始化时选择 enabled，移除继承的 no-cache 环境设置，然后初始化并保留一个 CUDA 标量再调用模型；其 `cuda_initialized_at_entry=False` 描述策略选择时刻，`initialized_api=True` 描述模型前状态。CLI 未预留该标量。两种缓存开启调用的 PyTorch reserved 均为 17,574,133,760 B，allocated 为 CLI 15,621,712,896 B、API 15,621,713,408 B；缓存 API 包含启动和报告的外层墙钟为 50.164 s。
+
+[缓存 API 原始前向](../../validation/recon_all/python_gpu_port/performance_20261001/final_1b8c36d/buffer_cached_api/actual-forward.json)与[监测](../../validation/recon_all/python_gpu_port/performance_20261001/final_1b8c36d/buffer_cached_api_monitor/monitor.json)记录 24 次采样，请求间隔 2.0 s、最大实际间隔 2.292 s、查询超时 5.0 s、查询失败 0。峰值 18,138,267,648 B 即 18.138 GB / 16.893 GiB，仍不是连续峰值保证；[独立汇总](../../validation/recon_all/python_gpu_port/performance_20261001/buffer_cached_api_summary.json)绑定原始 JSON、探针、输入与模型 SHA-256，并核对保存结果与同 FP32 参考完全相同。
+
+已完成缓存开启的单阶段 CLI/API 试验，以及两例候选、受控基线和官方比较。[GPU 同策略受控整例](../../validation/recon_all/python_gpu_port/performance_20261001/gpu_control_pair_summary.json)均使用 no-cache 和已初始化 CUDA 的 API：旧版父子同时采样峰值为 12,897,484,800 B（12.897 GB / 12.012 GiB），冻结 1b 为 16,118,710,272 B（16.119 GB / 15.012 GiB）。候选采样峰更高，不能宣布整例显存下降。分别有 2415/2316 个样本，查询失败均 0，请求间隔 2 s，最大实际间隔 3.372/3.118 s；连续峰值仍未验证，allocated/reserved 为 null。
+
+完整缓存开启的整例与 GPU CLI 整例尚未测量，默认低显存措施保留。下一次策略对照须继续固定输入、完整时钟边界和父子同时采样；当前单阶段 cache 结果不足以改变默认策略。详情见[当前验证目录](../../validation/recon_all/python_gpu_port/performance_20261001/README.md)。
+
+## 历史配对与开发记录
+
+以下 `e036f57` 数据属于此前完成的配对，不代表这次修复。其旧报告对 SynthSeg FP32 的声明被模型构造覆盖，实际前向精度须以本次诊断为依据。
+
+历史 `e036f57` 的 sub-01 已初始化 CUDA API 整例，将 CUDA 可见设备和 NVML 采样同时固定到物理 GPU 1 的 `GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba`。父子进程同时刻合计最大采样值为 19,411,238,912 字节（19.41 GB、18.08 GiB），共 2611 行；实际间隔中位数 2 s、最大 656 s，五个间隔超过 30 s。最大的空窗为 2026-09-30 12:27:04–12:38:00 UTC。由于这些空窗，整例持续低于 20,000,000,000 字节未验证；不能以采样最大值作预算通过结论。直接基线 `279e09f` 的采样为 2824 行、最大间隔 20 s，最大观察值相同，两轮 CSV 均保留。[完整运行与空窗记录](../../validation/recon_all/python_gpu_port/current_full_runs_20260930.json)。默认允许 TF32；SynthStrip、SynthSeg、Talairach affine 和 MNI 非线性的 FP32 例外按阶段记录。未启用 FP16/BF16。
 
 2026-09-29 的单例开发运行在 SynthSeg 阶段记录到 allocated **21,089,711,616 字节**、reserved **24,761,073,664 字节**，已超过 20 GB；该运行仍在执行表面阶段，不能当作完成的整例。用同一真实 T1 和 GPU 作配对测试：第一份 float32 后验在第二次推理时暂存 CPU，分割图逐体素一致、体积 CSV 逐字节一致，allocated 降至 **18,843,125,248 字节**；再关闭分配缓存，`nvidia-smi` 周期采样的进程最大占用为 **18,450 MiB（约 19.35 GB）**。这只是 SynthSeg 单阶段，不证明整例低于 20 GB。[SynthSeg 配对记录](../../validation/recon_all/python_gpu_port/synthseg_memory_20260929.json)。Talairach affine 已改在子进程执行，冻结 `synthstrip.mgz` 的 XFM、LTA 与先前直接调用逐字节相同；其 allocated/reserved 峰值为 4,715,548,672/4,884,267,008 字节。连续整例的输出已核对；父子进程的合计 GPU 连续峰值仍须测量。[Talairach 同输入记录](../../validation/recon_all/python_gpu_port/talairach_child_20260929.json)。
 
-既有独立 SynthSeg 真实输入实验曾观察到 19,152 MiB（约 18.70 GiB、20.08 GB），历史 v2 整例曾观察到 20,824 MiB。这些数字来自旧版本和周期采样，不能作为当前流程满足 20 GB 的证据；原始 JSON 仍留在历史验证目录供核查。
+上述历史 CLI 基线与已初始化 CUDA 的 Python API 分别使用固定启动器，从原始 T1 和空目录开始，源码、退出码与 CSV 均保留。默认关闭缓存的父进程不能提供有效 allocated/reserved；报告中可用的 Talairach 子进程峰值也不能当作整个调用的 PyTorch 峰值。非默认逻辑 `cuda:1` 的探针只核查统计指向指定设备；完整缓存开启的 Python API 尚未验证。[计时、采样与复现方法](BENCHMARK_METHODS.md)。
+
+上述历史成功整例前有三个 GPU 启动失败：两次发生于首次四字节张量，第三次发生于 Talairach 子进程初始化。六次设备映射探针均指向上述 GPU；数字编号与 UUID 未发现映射差异。缓存、线程与模块加载探针的成败不一致，失败原因未确认。全部失败单独保留在[启动诊断](../../validation/recon_all/python_gpu_port/performance_20260930/startup_e036f57/README.md)，没有将失败尝试的短耗时或零采样计为成功性能或零显存。
 
 ## 参考文献与原实现
 

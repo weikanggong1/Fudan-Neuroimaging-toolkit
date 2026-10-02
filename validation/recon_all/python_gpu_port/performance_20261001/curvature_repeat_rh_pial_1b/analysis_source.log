@@ -1,0 +1,152 @@
+"""仅 CPU 读取已生成曲率图与 JSON，报告同网格重复性；不重算影像或 GPU。"""
+import ast
+import csv
+import hashlib
+import itertools
+import json
+import os
+from pathlib import Path
+import platform
+import sys
+import time
+
+import nibabel.freesurfer as fs
+import numpy as np
+
+tick = time.perf_counter()
+root = Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929')
+volume = root / 'volume_parity_20260930'
+fix = volume / 'fixes_20261001'
+new = volume / 'full_sub01_1b8c36d_retry1'
+old = volume / 'full_sub01_e036f57_threads4_fp32_control'
+code = fix / 'code_1b8c36d'
+legacy = volume / 'performance_e036f57_code'
+rounds = {'round1_retry1': fix / 'curvature_repeat_rh_pial_1b_round1_retry1',
+          'round2': fix / 'curvature_repeat_rh_pial_1b_round2'}
+
+def sha(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+def signature(path):
+    text = Path(path).read_text()
+    node = next(n for n in ast.parse(text).body if isinstance(n, ast.FunctionDef) and n.name == '_normals')
+    block = '\n'.join(text.splitlines()[node.lineno - 1:node.end_lineno]) + '\n'
+    return {'start_line': node.lineno, 'end_line': node.end_lineno,
+            'excerpt_sha256': hashlib.sha256(block.encode()).hexdigest(),
+            'canonicalization': 'UTF-8 original function lines joined with LF; one trailing LF'}
+
+paths = {'whole_controlled_e036': old / 'surf/rh.curv.pial',
+         'whole_candidate_1b': new / 'surf/rh.curv.pial'}
+raw_reports = {}
+for label, folder in rounds.items():
+    for method in ('reference', 'conda', 'pytorch'):
+        paths[f'{label}_{method}'] = folder / 'result' / f'rh.{method}'
+    for filename in ('monitor.json', 'result/report.json'):
+        path = folder / filename
+        raw_reports[f'{label}/{filename}'] = {'path': str(path), 'sha256': sha(path),
+                                              'report': json.loads(path.read_text())}
+
+maps = {name: fs.read_morph_data(str(path)).astype(np.float64) for name, path in paths.items()}
+shapes = {name: list(value.shape) for name, value in maps.items()}
+if len({tuple(shape) for shape in shapes.values()}) != 1:
+    raise ValueError(f'曲率图形状不一致，不能同索引比较：{shapes}')
+
+def comparison(left, right):
+    reference, candidate = maps[left], maps[right]
+    delta = np.abs(reference - candidate)
+    invalid = ~np.isfinite(delta)
+    failed = invalid | (delta > 0.005 + 0.001 * np.abs(reference))
+    return {'reference': left, 'candidate': right, 'vertices': len(delta),
+            'different_values': int(np.count_nonzero(delta)),
+            'nonfinite_values': int(np.count_nonzero(invalid)),
+            'max_abs': float(delta.max()), 'p99_abs': float(np.quantile(delta, .99)),
+            'mae': float(delta.mean()), 'outliers': int(np.count_nonzero(failed)),
+            'pass_existing_operator_tolerance': not bool(failed.any()),
+            'file_sha256_equal': sha(paths[left]) == sha(paths[right])}
+
+comparisons = [comparison(left, right) for left, right in itertools.combinations(paths, 2)]
+repeated = {method: comparison(f'round1_retry1_{method}', f'round2_{method}')
+            for method in ('reference', 'conda', 'pytorch')}
+whole = comparison('whole_controlled_e036', 'whole_candidate_1b')
+
+geometry = {}
+for surface in ('white', 'pial'):
+    left, right = old / 'surf' / f'rh.{surface}', new / 'surf' / f'rh.{surface}'
+    a, af = fs.read_geometry(str(left))
+    b, bf = fs.read_geometry(str(right))
+    ordered = a.shape == b.shape and af.shape == bf.shape and np.array_equal(af, bf)
+    same = ordered and np.array_equal(a, b)
+    if not same:
+        raise ValueError(f'整例 RH {surface} 不再是相同有序几何，禁止同索引比较')
+    geometry[surface] = {'controlled_file': str(left), 'candidate_file': str(right),
+                         'controlled_sha256': sha(left), 'candidate_sha256': sha(right),
+                         'coordinate_values': int(a.size), 'face_indices': int(af.size),
+                         'different_coordinate_values': int(np.count_nonzero(a != b)),
+                         'different_face_indices': int(np.count_nonzero(af != bf)),
+                         'ordered_geometry_identical': same}
+
+sources = {}
+for module in ('surface_curvature_gpu.py', 'surface_area_gpu.py', 'surface_thickness_gpu.py'):
+    sources[module] = {'e036_actual_source': str(legacy / 'src/fnit/recon_all' / module),
+                       'e036_actual_sha256': sha(legacy / 'src/fnit/recon_all' / module),
+                       '1b_actual_source': str(code / 'src/fnit/recon_all' / module),
+                       '1b_actual_sha256': sha(code / 'src/fnit/recon_all' / module)}
+sources['_normals_function'] = {'e036': signature(legacy / 'src/fnit/recon_all/surface_thickness_gpu.py'),
+                               '1b': signature(code / 'src/fnit/recon_all/surface_thickness_gpu.py')}
+
+load = {}
+for label, folder in rounds.items():
+    with (folder / 'gpu_samples.csv').open() as stream:
+        rows = list(csv.DictReader(stream))
+    summary = {'samples': len(rows), 'columns': list(rows[0]) if rows else []}
+    for key in summary['columns']:
+        if 'memory' in key or 'utilization' in key or key == 'total_process_bytes':
+            values = []
+            for row in rows:
+                try:
+                    values.append(float(row[key]))
+                except (TypeError, ValueError):
+                    pass
+            if values:
+                summary[key] = {'min': min(values), 'max': max(values), 'available_samples': len(values)}
+    load[label] = summary
+
+original_failure = fix / 'curvature_repeat_rh_pial_1b_round1'
+failure = {'directory': str(original_failure), 'monitor_sha256': sha(original_failure / 'monitor.json'),
+           'command_log_sha256': sha(original_failure / 'command.log'),
+           'reference_log_sha256': sha(original_failure / 'result/reference.log'),
+           'monitor': json.loads((original_failure / 'monitor.json').read_text()),
+           'cause': 'official binary exited 255 before candidate execution; FS_LICENSE was absent',
+           'retry': 'Existing authorized FS_LICENSE path from existing run scripts passed without reading/copying license contents'}
+
+report = {'status': 'complete', 'benchmark_only': True, 'created_utc': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+          'scope': 'sub-01 RH pial frozen ordered mesh; two independent benchmark processes, then CPU comparison of saved maps',
+          'candidate_calculation_commit': '1b8c36d25a68e253a1e59b6d02114890afa467de',
+          'controlled_calculation_commit': 'e036f57b62b99d2af4cd8853ab2f1e6d2a9f8c68',
+          'hostname': platform.node(), 'machine': platform.machine(), 'python_version': sys.version,
+          'numpy_version': np.__version__, 'analysis_source_sha256': sys.argv[1],
+          'threshold': {'absolute': .005, 'relative': .001,
+                        'formula': 'abs(candidate-reference) <= .005 + .001*abs(reference)',
+                        'origin': 'unchanged existing curvature operator tolerance; no new overall equivalence threshold'},
+          'units': 'mm^-1', 'surface_space': 'individual surface RAS, mm; original ordered vertex indices',
+          'map_files': {name: {'path': str(path), 'sha256': sha(path), 'shape': shapes[name],
+                                'dtype_after_read': 'float32', 'finite_values': int(np.isfinite(maps[name]).sum())}
+                        for name, path in paths.items()},
+          'geometry': geometry, 'actual_sources': sources, 'raw_reports': raw_reports,
+          'repeated_runs': repeated, 'whole_pair': whole, 'all_pairwise_comparisons': comparisons,
+          'sampled_load': load, 'original_failed_attempt': failure,
+          'limitations': ['Only this frozen RH pial and two successful repeats were tested; this is not a new whole recon-all run.',
+                          'Observed repeat variability does not by itself prove CUDA index_add_, GEMM, SVD or another operator caused the full whole-map differences.',
+                          'Potential numerical paths include identical _normals CUDA index_add_ accumulation and identical local fit/GEMM/SVD; no TF32 or algorithm changes were made.',
+                          'Does not attribute the other 19 nonzero whole maps to this experiment.',
+                          'GPU shared load and short duration limit timing interpretation; monitoring is sampled, not a continuous peak guarantee.',
+                          'Official/Conda repeat equality here does not establish official whole-pipeline repeatability.',
+                          'No original maps, input images, surfaces, weights or license files are transferred to the local repository.',
+                          'Overall metric equivalence remains not_assessed.'],
+          'analysis_cpu_wall_seconds_including_reads_hashes': time.perf_counter() - tick}
+target = fix / 'curvature_repeat_rh_pial_1b_summary.json'
+if target.exists():
+    raise FileExistsError(target)
+target.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
+print(json.dumps({'summary': str(target), 'sha256': sha(target),
+                  'repeated_runs': repeated, 'whole_pair': whole}, ensure_ascii=False, indent=2))

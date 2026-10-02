@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-02",
+  "scope": "local unit/integration contracts; synthetic fixtures are not benchmarks",
+  "passed": 96,
+  "elapsed_seconds": 39.87,
+  "python": "3.11.16",
+  "torch": "2.5.1",
+  "device": "WSL NVIDIA GeForce RTX 3060 for 20 sampler CUDA tests; CPU contracts for remaining tests",
+  "command": "PYTHONPATH=src PYTHONDONTWRITEBYTECODE=1 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python -m pytest -q tests/topup tests/eddy/test_ukb_synthstrip_mask.py tests/eddy/test_ukb_reference_reuse.py tests/dmri_pipeline/test_dmri_pipeline.py tests/synthstrip",
+  "source_sha256": {
+    "src/fnit/topup/core.py": "d6b9838ca62ffeaa32b608a860520fc3feb5e66582064303a6de47f199e2b8e8",
+    "src/fnit/topup/_sampling_cuda.py": "ee19a764849bda80137312ed3ab8f1bf0aaef5e13f852f49f435e511b40d2427",
+    "src/fnit/eddy/ukb.py": "af505b03615975e7d734c1faef891e70a342434977e0fd76f3219f37a50b6af2",
+    "src/fnit/dmri_pipeline/pipeline.py": "c95465d06f7af97849762c87cbbb19c6a9bc459f76c8ea98fd796e31ac702cb4"
+  },
+  "latest_main_integrated_run": {
+    "source_commit": "b3ccafe0a48f4c1c396ae6285d0bdbe07a7664c9",
+    "test_paths": [
+      "tests/topup",
+      "tests/eddy/test_cli.py",
+      "tests/eddy/test_ukb_synthstrip_mask.py",
+      "tests/eddy/test_ukb_reference_reuse.py",
+      "tests/dmri_pipeline/test_dmri_pipeline.py",
+      "tests/synthstrip"
+    ],
+    "result": "104 passed",
+    "elapsed_seconds": 13.61,
+    "environment": "supported Conda FNIT Python 3.11/Torch 2.5.1; PYTHONPATH=src; OPENBLAS_NUM_THREADS=1; OMP_NUM_THREADS=1",
+    "scope": "meaningful numerical, CUDA sampler and public API contracts; not a simulated-data performance benchmark",
+    "source_sha256": {
+      "src/fnit/eddy/ukb.py": "1138693b6edab00ad02a83b9b7c66a3db66a9863641e619576ee2f18fafe3d85",
+      "src/fnit/eddy/cli.py": "e8ab099b16b55a93eed871e5c0a52fbf32c0f29f0b4556e2a5f6845160d10a1d",
+      "src/fnit/topup/core.py": "d6b9838ca62ffeaa32b608a860520fc3feb5e66582064303a6de47f199e2b8e8",
+      "src/fnit/topup/_sampling_cuda.py": "ee19a764849bda80137312ed3ab8f1bf0aaef5e13f852f49f435e511b40d2427"
+    },
+    "working_tree_note": "production source matches b3ccafe; added tests/eddy/test_cli.py was uncommitted at this test run and is recorded by hash",
+    "test_file_sha256": {
+      "tests/eddy/test_cli.py": "d131482bfdae1da23411b2e9d660bb1e293d9aa30fe88e45133744779f50e175"
+    }
+  }
+}

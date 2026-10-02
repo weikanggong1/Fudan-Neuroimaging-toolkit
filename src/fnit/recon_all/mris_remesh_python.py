@@ -13,6 +13,7 @@ from pathlib import Path
 
 import nibabel.freesurfer as fs
 import numpy as np
+from numba import njit
 
 def edge_key(a, b):
     return (a, b) if a < b else (b, a)
@@ -98,10 +99,17 @@ def split_edge(points, faces, edge_index, edge_vertices, edge_faces, face_edges,
 
 
 def split_pass(points, faces, edge_index, edge_vertices, edge_faces, face_edges, threshold):
+    """按长度降序、边编号降序拆边；threshold 为 surface RAS 的 mm。
+
+    输入是原位更新的 points、faces 和四份可变拓扑索引，返回新增顶点数。
+    初始堆只改用线性 heapify，后续重新入堆和拆边规则保持不变。
+    需要有限坐标及一致的拓扑；非法索引或拓扑断言失败会抛异常。
+    """
     queue = []
     for ei, (a, b) in enumerate(edge_vertices):
         length = edge_length(points, a, b)
-        heapq.heappush(queue, (-length, -ei))
+        queue.append((-length, -ei))
+    heapq.heapify(queue)
     inserted = 0
     while queue and -queue[0][0] > threshold:
         old_neg_length, neg_ei = heapq.heappop(queue)
@@ -306,6 +314,12 @@ class Mesh:
         self.rebuild()
 
     def collapse_pass(self, threshold):
+        """按长度升序、边编号升序缩边，返回接受次数并紧凑重建拓扑。
+
+        threshold 单位为 mm；使用本轮初始面法线及原有几何/连接性检查。
+        只将初始队列逐项 heappush 改为 heapify，动态重新入堆不变。
+        非流形拓扑或无效索引会触发原有断言/异常。
+        """
         normals = self.face_normals()
         queue = []
         for ei, pair in enumerate(self.edge_vertices):
@@ -314,7 +328,8 @@ class Mesh:
             a, b = pair
             if len(self.edge_faces[ei]) < 2 or self.onboundary[a] or self.onboundary[b]:
                 continue
-            heapq.heappush(queue, (edge_length(self.points, a, b), ei))
+            queue.append((edge_length(self.points, a, b), ei))
+        heapq.heapify(queue)
         accepted = 0
         while queue and queue[0][0] < threshold:
             old, ei = heapq.heappop(queue)
@@ -330,61 +345,119 @@ class Mesh:
         return accepted
 
 
-def smooth(mesh, repeats=2):
+@njit(cache=True, fastmath=False)
+def _smooth_ordered(points: np.ndarray, faces: np.ndarray,
+                    offsets: np.ndarray, neighbours: np.ndarray,
+                    boundary: np.ndarray, repeats: int) -> None:
+    """编译后的顺序平滑内核；points float64(N,3) 原位更新，单位 mm。
+
+    faces int32(F,3)、offsets int64(N+1)、neighbours int32(E) 描述升序 CSR
+    邻接，boundary bool(N) 标记边界。每轮重算面积和法线；保持面序累加、
+    顶点升序原位更新及双精度表达式，不并行、不使用 fastmath。repeats 是轮数。
+    无返回值；零顶点法线或零邻接总面积与旧 Python 路径一样触发除零异常。
+    这是 mris_remesh 内部平滑步骤，没有独立官方 CLI。
+    """
     for _ in range(repeats):
-        areas = [0.0] * len(mesh.points)
-        for a, b, c in mesh.faces:
-            p0, p1, p2 = mesh.points[a], mesh.points[b], mesh.points[c]
-            area = 0.5 * norm(cross(subtract(p1, p0), subtract(p2, p0))) / 3.0
+        areas = np.zeros(len(points), np.float64)
+        vertex_normals = np.zeros((len(points), 3), np.float64)
+        # 面面积和单位法线原先各自重算同一个 cross/length。合并计算但仍按
+        # 原面序/角点序累加；顶点法线归一化前不会使用中间累加结果。
+        for face in range(len(faces)):
+            a, b, c = faces[face]
+            ax = points[b, 0] - points[a, 0]
+            ay = points[b, 1] - points[a, 1]
+            az = points[b, 2] - points[a, 2]
+            bx = points[c, 0] - points[a, 0]
+            by = points[c, 1] - points[a, 1]
+            bz = points[c, 2] - points[a, 2]
+            nx = ay * bz - az * by
+            ny = az * bx - ax * bz
+            nz = ax * by - ay * bx
+            length = math.sqrt(nx * nx + ny * ny + nz * nz)
+            area = 0.5 * length / 3.0
             areas[a] += area
             areas[b] += area
             areas[c] += area
-        face_normals = mesh.face_normals()
-        vertex_normals = [[0.0, 0.0, 0.0] for _ in mesh.points]
-        for face, normal in zip(mesh.faces, face_normals):
-            for vertex in face:
-                row = vertex_normals[vertex]
-                row[0] += normal[0]
-                row[1] += normal[1]
-                row[2] += normal[2]
+            if length < 1e-11:
+                nx, ny, nz = 0.0, 0.0, 0.0
+            else:
+                inverse = 1.0 / length
+                nx, ny, nz = inverse * nx, inverse * ny, inverse * nz
+            for local in range(3):
+                vertex = faces[face, local]
+                vertex_normals[vertex, 0] += nx
+                vertex_normals[vertex, 1] += ny
+                vertex_normals[vertex, 2] += nz
         for normal in vertex_normals:
-            length = norm(normal)
+            length = math.sqrt(normal[0] * normal[0] + normal[1] * normal[1]
+                               + normal[2] * normal[2])
             inverse = 1.0 / length
             normal[0] *= inverse
             normal[1] *= inverse
             normal[2] *= inverse
-        for vertex in range(len(mesh.points)):
-            if mesh.onboundary[vertex]:
+        for vertex in range(len(points)):
+            if boundary[vertex]:
                 continue
-            neighbours = sorted(mesh.vertex_edges[vertex])
-            if not neighbours:
+            start, end = offsets[vertex], offsets[vertex + 1]
+            if start == end:
                 continue
-            g = [0.0, 0.0, 0.0]
+            gx, gy, gz = 0.0, 0.0, 0.0
             total = 0.0
-            for other in neighbours:
+            for p in range(start, end):
+                other = neighbours[p]
                 weight = areas[other]
                 total += weight
-                point = mesh.points[other]
-                g[0] += weight * point[0]
-                g[1] += weight * point[1]
-                g[2] += weight * point[2]
+                gx += weight * points[other, 0]
+                gy += weight * points[other, 1]
+                gz += weight * points[other, 2]
             inverse = 1.0 / total
-            g = [inverse * value for value in g]
-            point = mesh.points[vertex]
-            delta = [g[i] - point[i] for i in range(3)]
+            dx = inverse * gx - points[vertex, 0]
+            dy = inverse * gy - points[vertex, 1]
+            dz = inverse * gz - points[vertex, 2]
             normal = vertex_normals[vertex]
-            movement = []
             for i in range(3):
-                terms = [(1.0 if i == j else 0.0) - normal[i] * normal[j]
-                         for j in range(3)]
-                movement.append((terms[0] * delta[0] + terms[1] * delta[1]) + terms[2] * delta[2])
-            mesh.points[vertex] = tuple(point[i] + 0.99 * movement[i] for i in range(3))
+                t0 = (1.0 if i == 0 else 0.0) - normal[i] * normal[0]
+                t1 = (1.0 if i == 1 else 0.0) - normal[i] * normal[1]
+                t2 = (1.0 if i == 2 else 0.0) - normal[i] * normal[2]
+                movement = (t0 * dx + t1 * dy) + t2 * dz
+                points[vertex, i] += 0.99 * movement
+
+
+def smooth(mesh, repeats=2):
+    """对 Mesh 执行顺序切向平滑，原位更新 points，默认两轮。
+
+    points 为 surface RAS 的 mm 坐标；faces 和 vertex_edges 采用原有顶点编号。
+    本次调用内拓扑固定，因此只构建一次升序 CSR 邻接；每轮的几何量仍重算。
+    输出仍为 Mesh.points 的 float64 坐标三元组列表；无返回值。repeats<=0
+    不修改输入。退化法线或零邻接总面积抛 ZeroDivisionError；Numba 首调用
+    编译包含在阶段耗时内。对应 mris_remesh 的内部平滑，无独立官方命令。
+    """
+    if repeats <= 0:
+        return
+    points = np.asarray(mesh.points, np.float64)
+    faces = np.asarray(mesh.faces, np.int32)
+    rows = [sorted(row) for row in mesh.vertex_edges]
+    offsets = np.zeros(len(rows) + 1, np.int64)
+    offsets[1:] = np.cumsum([len(row) for row in rows], dtype=np.int64)
+    neighbours = np.fromiter((other for row in rows for other in row),
+                             dtype=np.int32, count=int(offsets[-1]))
+    _smooth_ordered(points, faces, offsets, neighbours,
+                    np.asarray(mesh.onboundary, np.bool_), repeats)
+    mesh.points = [tuple(row) for row in points]
 
 
 
 def remesh_geometry(vertices: np.ndarray, faces: np.ndarray, iterations: int = 3
                     ) -> tuple[np.ndarray, np.ndarray]:
-    """Remesh ordered vertices/faces using the source's default target length."""
+    """按固定上游拆边、缩边及顺序平滑规则重新划分三角网格。
+
+    vertices 是 (N,3) 有限 surface RAS/mm 坐标，faces 是 (F,3) 有序三角面
+    顶点索引；内部坐标为 float64，iterations 默认 3 且不得为负。目标边长
+    固定为初始平均边长的 0.8，不改变拆边/缩边阈值或顺序。
+    返回 float32(Nnew,3) 坐标与 int32(Fnew,3) 面，保留算法生成的编号顺序；
+    不读写文件、不单独修复相交。非法迭代数抛 ValueError，索引/非流形拓扑
+    和退化法线抛原有异常。对应 mris_remesh --remesh --iters 3。
+    """
     if iterations < 0:
         raise ValueError("iterations must be nonnegative")
     mesh = Mesh([tuple(row) for row in np.asarray(vertices, dtype=np.float64)],
@@ -428,7 +501,13 @@ def _copy_footer(input_path: str | Path, output_path: str | Path) -> None:
 
 def remesh_surface(input_path: str | Path, output_path: str | Path,
                    iterations: int = 3) -> None:
-    """Write a FreeSurfer triangle surface with the input metadata tags."""
+    """读取三角表面，重划分后写出坐标、面和输入的原始几何尾部。
+
+    input_path/output_path 为文件路径；surface RAS 坐标单位 mm，iterations
+    默认 3。使用 nibabel 读写 float32 坐标/int32 面，随后保留 volume-info
+    等尾部；返回 None。输入格式、算法或文件读写失败会抛异常，失败文件不
+    应视为有效输出。对应 mris_remesh --remesh --iters 3 INPUT OUTPUT。
+    """
     vertices, faces = fs.read_geometry(input_path)
     result_vertices, result_faces = remesh_geometry(vertices, faces, iterations)
     fs.write_geometry(output_path, result_vertices, result_faces)

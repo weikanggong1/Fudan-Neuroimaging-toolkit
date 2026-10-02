@@ -1,40 +1,389 @@
 {
   "date": "2026-09-30",
   "profile": "single-t1-standard",
-  "candidate_source": "9ae7939; sub-02 additionally contains the CPU SynthSeg backend fix later pushed as b66ff97",
-  "comparison_scope": "two independent real T1 images, each processed continuously from the raw image; official FreeSurfer 8.2 references were generated separately",
+  "candidate_code_commit": "e036f57b62b99d2af4cd8853ab2f1e6d2a9f8c68",
+  "candidate_tag": "e036f57",
+  "baseline_tag": "279e09f",
+  "baseline_code_commit": "279e09f0d2a166237871b3d683a6be75bd5e99b4",
+  "initial_baseline_code_commit": "b8cd17bb441307d88dda78ba8f56e77695b595a8",
+  "source_archive_sha256": "3f3819aacac33ac63cd795628ef84260901a7e0ed247c3907c024ad272235d3b",
+  "function_timing_scope": "after entry validation; includes stage loading, transfer and I/O",
+  "whole_command_timing_scope": "includes imports, validation, CUDA initialization; GPU monitoring adds up to one query/sleep interval",
+  "overall_metric_equivalence": "not_assessed; no confirmed whole-case gates",
+  "shared_hardware": true,
   "subjects": {
     "sub-01": {
-      "device": "H100 GPU",
+      "host": "gpucw1",
+      "device": "cuda:0",
+      "call_mode": "initialized CUDA Python API",
+      "precision": {
+        "matmul_tf32_default": true,
+        "cudnn_tf32_default": true,
+        "fp16_or_bf16_enabled": false,
+        "fp32_exceptions": [
+          "SynthStrip",
+          "SynthSeg",
+          "Talairach affine",
+          "MNI nonlinear CUDA"
+        ]
+      },
+      "gpu_memory_mode": "no_cuda_allocator_cache",
       "input_t1_sha256": "f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a",
       "run_status": "complete",
-      "exit_code": 0,
       "stages": 66,
-      "total_seconds": 6398.565596858971,
-      "reference_recon_all_hours_from_log": 1.886,
-      "reference_seconds_approx": 6790,
-      "output_validation": {"expected": 138, "present": 138, "missing": 0, "status": "passed"},
-      "mesh_validation": {"status": "passed", "lh_vertices": 105539, "rh_vertices": 104540, "both_euler": 2, "both_unclosed_edges": 0, "white_pial_intersecting_faces": 0},
-      "strict_reference_comparison": {"checked": 138, "passed": 5, "all_pass": false, "group_passed": {"mri": 5, "surf": 0, "label": 0, "stats": 0}, "passed_files": ["mri/entowm.mgz", "mri/mca-dura.mgz", "mri/orig.mgz", "mri/orig/001.mgz", "mri/rawavg.mgz"]},
-      "peak_sampled_process_gpu_mib": 18452,
-      "gpu_sample_count": 3019,
-      "precision": "TF32 default with documented FP32 exceptions; no FP16 or BF16"
+      "total_seconds": 7422.344742062036,
+      "external": {
+        "exit_code": 0,
+        "peak_sampled_process_bytes": 19411238912,
+        "sample_count": 2611,
+        "command_wall_nanoseconds": 7437404620216
+      },
+      "baseline_total_seconds": 6303.788363100961,
+      "observed_runtime_change_percent": 17.744193087263405,
+      "initial_baseline_total_seconds": 5884.9644819246605,
+      "observed_runtime_change_vs_initial_percent": 26.123866420253727,
+      "output_validation": {
+        "profile": "single-t1-138",
+        "expected": 138,
+        "present": 138,
+        "missing": [],
+        "status": "passed"
+      },
+      "mesh_validation": {
+        "lh": {
+          "vertices": 105539,
+          "faces": 211074,
+          "euler": 2,
+          "unclosed_edges": 0,
+          "ordered_faces_preserved": true,
+          "finite_coordinates": true,
+          "intersecting_faces": {
+            "white": 0,
+            "pial": 0
+          },
+          "status": "passed"
+        },
+        "rh": {
+          "vertices": 104864,
+          "faces": 209724,
+          "euler": 2,
+          "unclosed_edges": 0,
+          "ordered_faces_preserved": true,
+          "finite_coordinates": true,
+          "intersecting_faces": {
+            "white": 0,
+            "pial": 0
+          },
+          "status": "passed"
+        },
+        "status": "passed"
+      },
+      "comparison": {
+        "baseline": {
+          "strict_all_pass": true,
+          "strict_passed": 138,
+          "strict_checked": 138,
+          "reports": [
+            "strict_vs_baseline.json",
+            "region_vs_baseline.json",
+            "dice_vs_baseline.json",
+            "surface_vs_baseline.json"
+          ]
+        },
+        "official": {
+          "strict_all_pass": false,
+          "strict_passed": 5,
+          "strict_checked": 138,
+          "reports": [
+            "strict_vs_official.json",
+            "region_vs_official.json",
+            "dice_vs_official.json",
+            "surface_vs_official.json"
+          ]
+        }
+      },
+      "additional_strict_failures_vs_baseline": [],
+      "slowest_stages": [
+        {
+          "name": "mni_nonlinear",
+          "seconds": 1018.055935958866
+        },
+        {
+          "name": "surface_lh",
+          "seconds": 832.9387966343202
+        },
+        {
+          "name": "surface_rh",
+          "seconds": 735.0661100689322
+        },
+        {
+          "name": "mri_edit_wm_with_aseg",
+          "seconds": 666.1683802786283
+        },
+        {
+          "name": "mri_em_register",
+          "seconds": 654.4312366419472
+        },
+        {
+          "name": "register_lh",
+          "seconds": 500.9656734839082
+        },
+        {
+          "name": "register_rh",
+          "seconds": 463.1813026671298
+        },
+        {
+          "name": "finish_surface_lh",
+          "seconds": 410.2351397010498
+        },
+        {
+          "name": "finish_surface_rh",
+          "seconds": 385.2656201426871
+        },
+        {
+          "name": "brain_second_normalize",
+          "seconds": 342.52860124688596
+        }
+      ],
+      "thread_policy": {
+        "torch_and_supported_native_threads": 4,
+        "global_numba_blas_openmp_cap": false
+      },
+      "hardware_report": "hardware_gpucw1_e036f57.json",
+      "parent_pytorch_peak_bytes": {
+        "allocated": null,
+        "reserved": null,
+        "reason": "CUDA allocator cache explicitly disabled"
+      },
+      "talairach_child_pytorch_peak_bytes": {
+        "allocated": 4715548672,
+        "reserved": 4884267008
+      },
+      "api_invocation": {
+        "invocation": "initialized CUDA Python API",
+        "cuda_initialized_before_api": true,
+        "device": "cuda:0",
+        "threads": 4,
+        "thread_budget_set_before_cuda": true,
+        "device_uuid": "e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+        "CUDA_VISIBLE_DEVICES": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+        "PYTORCH_NO_CUDA_MEMORY_CACHING": "1",
+        "seconds_including_context_and_run": 7432.380218623206,
+        "retained_tensor_bytes": 4,
+        "script_sha256": "fa9a8a8c980fe00c012bf93be6a4c535d802d5a4e22002bc980adad16c5210da"
+      },
+      "gpu_sampling": {
+        "physical_gpu": 1,
+        "logical_device": "cuda:0",
+        "gpu_uuid": "e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+        "sample_count": 2611,
+        "peak_simultaneous_parent_children_bytes": 19411238912,
+        "peak_gb": 19.411238912,
+        "peak_gib": 18.078125,
+        "median_interval_seconds": 2.0,
+        "maximum_interval_seconds": 656.0,
+        "intervals_over_30_seconds": 5,
+        "largest_sample_gaps": [
+          {
+            "start_utc": "2026-09-30T12:27:04Z",
+            "end_utc": "2026-09-30T12:38:00Z",
+            "seconds": 656.0
+          },
+          {
+            "start_utc": "2026-09-30T12:38:02Z",
+            "end_utc": "2026-09-30T12:42:47Z",
+            "seconds": 285.0
+          },
+          {
+            "start_utc": "2026-09-30T12:55:04Z",
+            "end_utc": "2026-09-30T12:58:45Z",
+            "seconds": 221.0
+          },
+          {
+            "start_utc": "2026-09-30T12:47:55Z",
+            "end_utc": "2026-09-30T12:51:27Z",
+            "seconds": 212.0
+          },
+          {
+            "start_utc": "2026-09-30T12:51:27Z",
+            "end_utc": "2026-09-30T12:54:58Z",
+            "seconds": 211.0
+          }
+        ],
+        "memory_budget_bytes": 20000000000,
+        "budget_compliance": "unverified; periodic observations cannot bound continuous peak",
+        "continuous_peak_verified": false
+      }
     },
     "sub-02": {
-      "device": "CPU on nodecw10",
+      "host": "nodecw10",
+      "device": "cpu",
+      "call_mode": "CLI",
+      "precision": {
+        "matmul_tf32_default": true,
+        "cudnn_tf32_default": true,
+        "fp16_or_bf16_enabled": false,
+        "fp32_exceptions": [
+          "SynthStrip",
+          "SynthSeg",
+          "Talairach affine",
+          "MNI nonlinear CUDA"
+        ]
+      },
+      "gpu_memory_mode": "torch_cuda_allocator",
       "input_t1_sha256": "326d1e0a948b76344150c28bbcf0299b58040092c2f037f09c754103d32f747d",
       "run_status": "complete",
-      "exit_code": 0,
       "stages": 66,
-      "total_seconds": 5622.315797276795,
-      "reference_recon_all_hours_from_log": 1.151,
-      "reference_seconds_approx": 4144,
-      "output_validation": {"expected": 138, "present": 138, "missing": 0, "status": "passed"},
-      "mesh_validation": {"status": "passed", "lh_vertices": 119475, "rh_vertices": 118560, "both_euler": 2, "both_unclosed_edges": 0, "white_pial_intersecting_faces": 0},
-      "strict_reference_comparison": {"checked": 138, "passed": 2, "all_pass": false, "group_passed": {"mri": 2, "surf": 0, "label": 0, "stats": 0}, "passed_files": ["mri/orig/001.mgz", "mri/rawavg.mgz"]},
-      "reference_host": "nodecw10",
-      "reference_exit_code": 0
+      "total_seconds": 5756.041157260537,
+      "external": {
+        "exit_code": 0,
+        "command_wall_nanoseconds": 5764930864616
+      },
+      "baseline_total_seconds": 6099.804113574326,
+      "observed_runtime_change_percent": -5.635639274854565,
+      "initial_baseline_total_seconds": 6080.80481274426,
+      "observed_runtime_change_vs_initial_percent": -5.3408005269808605,
+      "output_validation": {
+        "profile": "single-t1-138",
+        "expected": 138,
+        "present": 138,
+        "missing": [],
+        "status": "passed"
+      },
+      "mesh_validation": {
+        "lh": {
+          "vertices": 119363,
+          "faces": 238722,
+          "euler": 2,
+          "unclosed_edges": 0,
+          "ordered_faces_preserved": true,
+          "finite_coordinates": true,
+          "intersecting_faces": {
+            "white": 0,
+            "pial": 0
+          },
+          "status": "passed"
+        },
+        "rh": {
+          "vertices": 118303,
+          "faces": 236602,
+          "euler": 2,
+          "unclosed_edges": 0,
+          "ordered_faces_preserved": true,
+          "finite_coordinates": true,
+          "intersecting_faces": {
+            "white": 0,
+            "pial": 0
+          },
+          "status": "passed"
+        },
+        "status": "passed"
+      },
+      "comparison": {
+        "baseline": {
+          "strict_all_pass": true,
+          "strict_passed": 138,
+          "strict_checked": 138,
+          "reports": [
+            "strict_vs_baseline.json",
+            "region_vs_baseline.json",
+            "dice_vs_baseline.json",
+            "surface_vs_baseline.json"
+          ]
+        },
+        "official": {
+          "strict_all_pass": false,
+          "strict_passed": 2,
+          "strict_checked": 138,
+          "reports": [
+            "strict_vs_official.json",
+            "region_vs_official.json",
+            "dice_vs_official.json",
+            "surface_vs_official.json"
+          ]
+        }
+      },
+      "additional_strict_failures_vs_baseline": [],
+      "slowest_stages": [
+        {
+          "name": "surface_lh",
+          "seconds": 828.8126977160573
+        },
+        {
+          "name": "surface_rh",
+          "seconds": 796.2809866815805
+        },
+        {
+          "name": "finish_surface_rh",
+          "seconds": 640.0487653687596
+        },
+        {
+          "name": "finish_surface_lh",
+          "seconds": 632.5339298248291
+        },
+        {
+          "name": "mri_em_register",
+          "seconds": 484.02524000406265
+        },
+        {
+          "name": "register_lh",
+          "seconds": 465.38945983350277
+        },
+        {
+          "name": "register_rh",
+          "seconds": 402.1155455708504
+        },
+        {
+          "name": "SynthSeg",
+          "seconds": 359.17589369416237
+        },
+        {
+          "name": "mni_nonlinear",
+          "seconds": 317.73004369437695
+        },
+        {
+          "name": "n4",
+          "seconds": 109.78091864287853
+        }
+      ],
+      "thread_policy": {
+        "torch_and_supported_native_threads": 4,
+        "global_numba_blas_openmp_cap": false
+      },
+      "hardware_report": "hardware_nodecw10_e036f57.json"
     }
   },
-  "limits": "Complete stage execution and mesh/output checks pass. Strict numeric acceptance fails on both subjects. The GPU maximum is from periodic process sampling, not a continuous peak guarantee. The two subject runtimes use different hosts and devices and do not establish a speed ratio. Physical isolation from preinstalled FreeSurfer remains unverified."
+  "consumed_reports_sha256": {
+    "source_e036f57_manifest.json": "518a88bb580ea39c4f68d0d648caa834dbe988ae31b9cb5939c9db98f8d01094",
+    "source_279e09f_manifest.json": "fada25c5ce2015a406f1504d76b03de814f2f1c27793af60aed6b23d94a6f5d4",
+    "runtime_fingerprints_e036f57.json": "971eb2d2176c32540dd058f9b94d3ffdc8ae70428e38cf72075a6aa8b4ef1eea",
+    "sub01/full_e036f57_run.json": "5de820d30872e1e7f15e62ff1f5d96c30036e229b1c0121b1edc65eff6ccc3cf",
+    "sub01/full_279_run.json": "f31874806e31bb93b3150533afa92609a5273eed8a922e459491f61c66f1bf1e",
+    "sub01/full_b8cd_run.json": "d18b4378fb01c49f5102a2b7c284526d181b6f8be086a3126abafecdc48ebfdf",
+    "sub01/full_e036f57_pair/summary.json": "12855a9ba3dbfe9ddae96ada5ec9cb32bb6d5ae4e1d38f2599f576be2108032a",
+    "full_sub01_e036f57_gpu_summary.txt": "01266891a0cc08e2b7f0f68127ad690687a51d46a62e1fbe8a7cbf90723e9799",
+    "sub01/full_e036f57_pair/region_vs_official.json": "bd7993e5827cff52360f323e078aec4f73048bfb8c1604aaa43faa3deda35837",
+    "sub01/full_e036f57_pair/region_vs_baseline.json": "b69af2961bb6189a80a5ad255b513d97cddc7df64b23a2591397d25457820532",
+    "sub01/full_e036f57_pair/dice_vs_official.json": "97a7422a54dba3448bba14427da01f5385f2c822c186a51a2e5cc038aa8cf00e",
+    "sub01/full_e036f57_pair/dice_vs_baseline.json": "557a372a9f489987290456162407d823b26e72b7ef226807947c7a4ab6615473",
+    "sub01/full_e036f57_pair/surface_vs_baseline.json": "02ed09834da718414bae87cfab7435dce23e7859dd580ce310cc5275bebf0724",
+    "sub01/full_e036f57_pair/surface_vs_official.json": "3cbe6b91776e4c2ff4a573ba04137cf83ea73255600fce3ad16b121aaae0acb1",
+    "sub01/full_e036f57_pair/strict_vs_baseline.json": "cad97a7774fbfc25a67a4767af8ca72185a75a0acc19a3dde1ecb585857ed7cc",
+    "hardware_gpucw1_e036f57.json": "b051fe3de606c2cde835c01e6400ac6375819f463fa984fdf650450102e4e35e",
+    "full_sub01_e036f57_gpu_samples.csv": "b7f44c105208cb2e2c568f4a5f3608541f1c6bfc136ff86f3dd083c6bd0a74fc",
+    "sub01/run_api_e036f57.json": "4f4817a61f6b65adf016fcc234b42d4423e2b77adefceb379aadc81ec0baeb8e",
+    "sub02/full_e036f57_run.json": "2218ca910deefb44cf0b21b1a8ab72e3a2bea9d53ae3741f719631c8f1cdaefb",
+    "sub02/full_279_run.json": "9ae6123829971060d37ca9144cee8596fb24e638c3760af2fc1bd45d50c104ca",
+    "sub02/full_b8cd_run.json": "393f6bec52d201bdef17658046ebe9fe71d7a8aa172a911827f198c1b30baec2",
+    "sub02/full_e036f57_pair/summary.json": "68d6d19c1cc5ed18707324d77f2b3650f945cdc9b0ee235d5f448ba65e4e71d3",
+    "full_sub02_e036f57_summary.txt": "7df37f0d24f74d712f0dc8094603fc7f56311b19d8cf2d58d756c2b8a08f9a4f",
+    "sub02/full_e036f57_pair/region_vs_official.json": "ce45f772f0c5a354174cc32d9f8f63554b2c7f49fdca5f7df7b6816fedfaa4de",
+    "sub02/full_e036f57_pair/region_vs_baseline.json": "9ad6a9abbf5dddcfb664fb02b2670a5e878941ce6ac77589e718b679b63bd8fa",
+    "sub02/full_e036f57_pair/dice_vs_official.json": "5a6fb164ef5d86288ec1db7c385e4c60dcd979982d50454a9519e7581332c27f",
+    "sub02/full_e036f57_pair/dice_vs_baseline.json": "858cdb4ebcc84b42653fd1378cde50b686d1d42ce9381965c4dc3d580d692299",
+    "sub02/full_e036f57_pair/surface_vs_baseline.json": "854a03b78a9f153ed254ab8f90cf8401a4751f49b569092e4005c30f0771173a",
+    "sub02/full_e036f57_pair/surface_vs_official.json": "ee697857bbdd2f0a43d67c937b9b77a6ce5deae237c5ff73e449ed805548f419",
+    "sub02/full_e036f57_pair/strict_vs_baseline.json": "e3f1f158f62d9d1949fe14d0b285c1893712b8c72e2d409cf7b2ac8d6bab6663",
+    "hardware_nodecw10_e036f57.json": "fd42d2465cc3b25dfef5a290ff083b8546cdc34b9add25a5220cc534f123e3a4"
+  }
 }

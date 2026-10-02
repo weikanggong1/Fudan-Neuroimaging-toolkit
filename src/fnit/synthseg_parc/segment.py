@@ -93,8 +93,22 @@ def _blur(posterior):
 class SynthSegSegmenter:
     """Return the hard 33-class map supplied to the official ``--parc`` head."""
 
-    def __init__(self, weights: str | Path, labels: str | Path, device="cpu"):
-        self.device = configure_device(device)
+    def __init__(self, weights: str | Path, labels: str | Path, device="cpu", *,
+                 cudnn_tf32: bool | None = True):
+        """加载 33 类 FP32 模型，不更改调用方全局精度。
+
+        weights 为官方 HDF5 权重，labels 为 55 项官方标签数组；device 默认
+        CPU。cudnn_tf32 默认 True，保留 CUDA 推理的原默认；False 在实际
+        CUDA 前向中关闭 cuDNN TF32，None 保留调用方 cuDNN 设置。CUDA
+        matmul 在前向内仍使用既有 TF32 默认。参数不是半精度/autocast 开关。
+        标签不符、权重读取/形状错误或设备不可用时抛出异常。构造无影像输出；
+        posterior 的精度实测记录位于 precision，无独立原软件 CLI。
+        """
+        if cudnn_tf32 is not None and not isinstance(cudnn_tf32, bool):
+            raise ValueError("cudnn_tf32 must be True, False or None")
+        self.device = configure_device(device, configure_precision=False)
+        self.cudnn_tf32 = cudnn_tf32
+        self.precision = {}
         raw_labels = np.load(labels)
         if len(raw_labels) != 55 or len(np.unique(raw_labels)) != 33:
             raise ValueError("Expected SynthSeg 2.0's 55-entry label array with 33 unique IDs")
@@ -109,31 +123,94 @@ class SynthSegSegmenter:
         )
         self.model = SegmentUNet().load_h5(weights).to(self.device).eval()
 
+    def _forward(self, image: torch.Tensor, pass_name: str) -> torch.Tensor:
+        """执行一个前向并记录实际精度；输入/输出为 B×C×D×H×W 张量。
+
+        pass_name 是 original 或 flipped；记录 TF32、输入/模型/输出 dtype
+        和 CPU/CUDA autocast 开关及目标 dtype，不开启 autocast。调用方主动
+        开启的 autocast 沿用并如实记录。模型失败时保留进入前向的记录后抛出。
+        """
+        def autocast_state(device_type):
+            """查询 CPU/CUDA autocast 开关与目标 dtype，兼容 PyTorch 2.1。"""
+            try:
+                enabled = torch.is_autocast_enabled(device_type)
+            except TypeError:  # torch 2.1 的查询接口没有设备参数。
+                enabled = (torch.is_autocast_enabled() if device_type == "cuda"
+                           else torch.is_autocast_cpu_enabled())
+            if hasattr(torch, "get_autocast_dtype"):
+                dtype = torch.get_autocast_dtype(device_type)
+            else:
+                dtype = (torch.get_autocast_gpu_dtype() if device_type == "cuda"
+                         else torch.get_autocast_cpu_dtype())
+            return {"enabled": bool(enabled), "dtype": str(dtype)}
+
+        row = {"pass": pass_name, "device": str(image.device),
+               "matmul_tf32": bool(torch.backends.cuda.matmul.allow_tf32),
+               "cudnn_tf32": bool(torch.backends.cudnn.allow_tf32),
+               "input_dtype": str(image.dtype),
+               "model_dtypes": sorted({str(value.dtype) for value in self.model.parameters()}),
+               "autocast": {name: autocast_state(name) for name in ("cpu", "cuda")}}
+        self.precision["forwards"].append(row)
+        output = self.model(image)
+        row["output_dtype"] = str(output.dtype)
+        return output
+
     @torch.inference_mode()
     def posterior(self, image: torch.Tensor, *, flip: bool = True,
                   smooth: bool = True) -> torch.Tensor:
-        """Return probabilities, optionally smoothing and averaging left/right."""
+        """推理并返回 (33,D,H,W) 概率，同时保存实际前向精度记录。
+
+        image 为预处理后的 3-D 强度张量，转到模型设备和 float32；flip/smooth
+        默认 True，分别控制左右翻转集成和 0.5 体素高斯平滑。关闭 smooth 时
+        必须同时关闭 flip，否则抛 ValueError。输出留在模型设备，概率无量纲，
+        网格沿用输入。CUDA 的 TF32 策略仅在该作用域生效，正常或异常退出均
+        恢复调用方 matmul/cuDNN 设置。不会开启或关闭调用方 autocast；precision
+        记录两次前向的真实开关和 dtype，不能仅据 cudnn_tf32=False 宣称无半精度。
+        翻转集成复用内部 flipped 后验缓冲，先相加再乘 0.5；输出是该缓冲的
+        第零批次视图，不与输入 image 共享存储。precision 记录是否完成复用及
+        集成 dtype。模型、平滑或集成失败时传播原异常，并恢复 CUDA 精度设置。
+        """
         if image.ndim != 3:
             raise ValueError("image must be a preprocessed 3-D tensor")
-        x = image.to(device=self.device, dtype=torch.float32)[None, None]
-        original = self.model(x)
-        if not smooth:
-            if flip:
-                raise ValueError("unsmoothed probabilities require flip=False")
-            return original[0]
-        original = _blur(original)
-        if not flip:
-            return original[0]
-        if x.is_cuda:
-            # The first 33-channel posterior is only needed after the second
-            # pass; keep its exact float32 values off the GPU meanwhile.
-            original = original.cpu()
-            torch.cuda.empty_cache()
-        flipped = _blur(self.model(torch.flip(x, (2,))))
-        flipped = torch.flip(flipped, (2,))[:, self.flip_indices]
-        if x.is_cuda:
-            original = original.to(x.device)
-        return (0.5 * (original + flipped))[0]
+        if not smooth and flip:
+            raise ValueError("unsmoothed probabilities require flip=False")
+        policy = getattr(self, "cudnn_tf32", True)
+        self.precision = {"requested_cudnn_tf32": policy, "forwards": [],
+                          "posterior_buffer_reused": False}
+        previous_matmul = torch.backends.cuda.matmul.allow_tf32
+        previous_cudnn = torch.backends.cudnn.allow_tf32
+        cuda = self.device.type == "cuda"
+        try:
+            if cuda:
+                torch.backends.cuda.matmul.allow_tf32 = True
+                if policy is not None:
+                    torch.backends.cudnn.allow_tf32 = policy
+            x = image.to(device=self.device, dtype=torch.float32)[None, None]
+            original = self._forward(x, "original")
+            if not smooth:
+                return original[0]
+            original = _blur(original)
+            if not flip:
+                return original[0]
+            if x.is_cuda:
+                # The first 33-channel posterior is only needed after the second
+                # pass; keep its exact float32 values off the GPU meanwhile.
+                original = original.cpu()
+                torch.cuda.empty_cache()
+            flipped = _blur(self._forward(torch.flip(x, (2,)), "flipped"))
+            flipped = torch.flip(flipped, (2,))[:, self.flip_indices]
+            if x.is_cuda:
+                original = original.to(x.device)
+            # Both posteriors are private buffers. Retain the original FP32
+            # addition-then-scaling order without allocating two more volumes.
+            flipped.add_(original).mul_(0.5)
+            self.precision["posterior_buffer_reused"] = True
+            self.precision["posterior_ensemble_dtype"] = str(flipped.dtype)
+            return flipped[0]
+        finally:
+            if cuda:
+                torch.backends.cuda.matmul.allow_tf32 = previous_matmul
+                torch.backends.cudnn.allow_tf32 = previous_cudnn
 
     @torch.inference_mode()
     def __call__(self, image: torch.Tensor) -> torch.Tensor:

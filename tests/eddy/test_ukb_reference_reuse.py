@@ -3,6 +3,7 @@
 import nibabel as nib
 import numpy as np
 import pytest
+from types import SimpleNamespace
 
 import fnit.eddy.ukb as ukb
 
@@ -24,6 +25,11 @@ def case(tmp_path):
 
 def test_reused_selection_matches_original_files_and_skips_dwi_reload(tmp_path, monkeypatch):
     raw, topup = case(tmp_path)
+    def fake_strip(image, **kwargs):
+        return SimpleNamespace(mask=nib.Nifti1Image(
+            (np.asarray(image.dataobj) > 0).astype(np.uint8), image.affine
+        ))
+    monkeypatch.setattr(ukb, "_get_synthstrip", lambda *args: (fake_strip, {}, False))
     monkeypatch.setattr(ukb, "_best_b0", lambda *args: (1, np.ones(2)))
     original = ukb.prepare_ukb_eddy(raw, topup, tmp_path / "original", device="cpu")
     assert original["ref_scan_no"] == 2

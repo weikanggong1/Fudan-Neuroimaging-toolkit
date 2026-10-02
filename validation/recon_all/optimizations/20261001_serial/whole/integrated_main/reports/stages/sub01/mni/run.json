@@ -1,0 +1,172 @@
+{
+  "code_commit": "ff372d73f106e850b999fbc95ae0b324cd315cbf",
+  "scope": "frozen_self_generated_input_continuous_MNI_chain",
+  "host": "gpucw1",
+  "threads": 4,
+  "device": "cuda:0",
+  "gpu_uuid": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+  "input_sha256": {
+    "orig.mgz": "dfadd181d38e67e4c029fb6c6eaee0cb6667309c35cbbfd9c6ece02b3d4f360a",
+    "transforms/synthmorph.1.0mm.1.0mm/aff.lta": "853b04c593fb1245bed523155d128131a26d07a44949651af5238aa955af3415",
+    "transforms/synthmorph.1.0mm.1.0mm/invol.crop.nii.gz": "4a38fed518e638466ac7092793a759401bc856f4ef62b8b215c69b6199a427c0"
+  },
+  "seconds": 134.50225899601355,
+  "result": {
+    "forward": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/mni_affine_ff372d7_sub01_retry1/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz",
+    "inverse": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/mni_affine_ff372d7_sub01_retry1/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.inv.nii.gz",
+    "check": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/mni_affine_ff372d7_sub01_retry1/mri/transforms/synthmorph.1.0mm.1.0mm/test.nii.gz",
+    "model": "pytorch-synthmorph-deform",
+    "device": "cuda:0",
+    "precision": {
+      "cuda_fp32_exception": true,
+      "fp16_or_bf16": false,
+      "actual_forwards": [
+        {
+          "model": "deform",
+          "compute_inverse": false,
+          "device": "cuda:0",
+          "input_dtype": "torch.float32",
+          "model_devices": [
+            "cuda:0"
+          ],
+          "model_dtypes": [
+            "torch.float32"
+          ],
+          "matmul_tf32": false,
+          "cudnn_tf32": false,
+          "autocast": {
+            "enabled": false,
+            "dtype": "torch.float16"
+          }
+        }
+      ]
+    },
+    "timings_seconds": {
+      "deform_model_and_save": 15.239296521060169,
+      "warp_convert": 18.088509644847363,
+      "warp_inverse": 90.2531681698747,
+      "resample_check": 10.261766579933465
+    }
+  },
+  "allocated_bytes": 9267046912,
+  "reserved_bytes": 12165578752,
+  "benchmark_sha256": "b35977568996a8262970349e9b644110e5a332e07d5dbc5924b554d79322f9fd",
+  "source_sha256": "30f977e83c56907887797e4180b9f94d774ff76af84f62f8835aa3653b933c3e",
+  "program_sha256": {
+    "mri_warp_convert": "527255204f1cb6b71d47ac3f9032af388eae873bd46b7d69d8293b433e001059",
+    "mri_ca_register": "a0f3902b38963cd4b322b94342dde513903cb6455779f2282174c618b4ff0987",
+    "mri_convert": "cca67a9b3ae61632377406724e09cb6c16409d40b8972c6836b9d36a5ced2ebe"
+  },
+  "weight_sha256": "95b367cd30788cc647e4704b650642fc1d70d7e419c20c04f1ba1b2902bc6536",
+  "comparisons": {
+    "baseline_cpu_affine": {
+      "transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz": {
+        "before_sha256": "8f69814c61586af57cf105e9fa8bc3c69097f54412256cda8a91d16dcc65e1fa",
+        "after_sha256": "58773dd8e4badc41f6389ea7746adc10e4a2ce7d7d29cce681b26aef53d28d46",
+        "geometry_equal": true,
+        "dtype_equal": true,
+        "shape": [
+          193,
+          229,
+          193,
+          1,
+          3
+        ],
+        "different_elements": 8637092,
+        "max_abs_error": 0.0002899169921875,
+        "p99_abs_error": 6.103515625e-05,
+        "mean_abs_error": 7.417009333521739e-06,
+        "units": "mm"
+      },
+      "transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.inv.nii.gz": {
+        "before_sha256": "aee1b092c46356f8180ac3227094ad164894161de9f63ba46473ea07b0cd9e34",
+        "after_sha256": "6fb3862df09a0c54f557bfa372ddebe89e7454a01849ed5062079530256b34d1",
+        "geometry_equal": true,
+        "dtype_equal": true,
+        "shape": [
+          256,
+          256,
+          256,
+          1,
+          3
+        ],
+        "different_elements": 28810520,
+        "max_abs_error": 0.411407470703125,
+        "p99_abs_error": 0.000152587890625,
+        "mean_abs_error": 5.533150989952181e-05,
+        "units": "mm"
+      },
+      "transforms/synthmorph.1.0mm.1.0mm/test.nii.gz": {
+        "before_sha256": "d5e02af803d15f5a713a3c90959218a7601269d6873b7b64f8263b057f45fbad",
+        "after_sha256": "7147e1d707ca135e0485cf68c184416fd4ab666b7a52dfee6f0b8f1e18c7d476",
+        "geometry_equal": true,
+        "dtype_equal": true,
+        "shape": [
+          193,
+          229,
+          193
+        ],
+        "different_elements": 120,
+        "max_abs_error": 97.0,
+        "p99_abs_error": 0.0,
+        "mean_abs_error": 0.00014290703387482867,
+        "units": "intensity"
+      }
+    },
+    "prior_gpu_matmul_tf32": {
+      "transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz": {
+        "before_sha256": "01d0c9a472795633896723e8cfdef8d9411a6a6915ebaa100b8fd7b719291545",
+        "after_sha256": "58773dd8e4badc41f6389ea7746adc10e4a2ce7d7d29cce681b26aef53d28d46",
+        "geometry_equal": true,
+        "dtype_equal": true,
+        "shape": [
+          193,
+          229,
+          193,
+          1,
+          3
+        ],
+        "different_elements": 13954277,
+        "max_abs_error": 0.185272216796875,
+        "p99_abs_error": 0.0344085693359375,
+        "mean_abs_error": 0.006079799334613343,
+        "units": "mm"
+      },
+      "transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.inv.nii.gz": {
+        "before_sha256": "797c005063d322060359765465f37fb8133bac140f915915406497e5be3c1e42",
+        "after_sha256": "6fb3862df09a0c54f557bfa372ddebe89e7454a01849ed5062079530256b34d1",
+        "geometry_equal": true,
+        "dtype_equal": true,
+        "shape": [
+          256,
+          256,
+          256,
+          1,
+          3
+        ],
+        "different_elements": 41070704,
+        "max_abs_error": 24.699386596679688,
+        "p99_abs_error": 1.1227951049804688,
+        "mean_abs_error": 0.06956301961952842,
+        "units": "mm"
+      },
+      "transforms/synthmorph.1.0mm.1.0mm/test.nii.gz": {
+        "before_sha256": "8cb90947ce79a0a4afcc5c2903c7c7c23aa4a5cbf9a488faef160bff5a15d4e7",
+        "after_sha256": "7147e1d707ca135e0485cf68c184416fd4ab666b7a52dfee6f0b8f1e18c7d476",
+        "geometry_equal": true,
+        "dtype_equal": true,
+        "shape": [
+          193,
+          229,
+          193
+        ],
+        "different_elements": 89579,
+        "max_abs_error": 211.0,
+        "p99_abs_error": 1.0,
+        "mean_abs_error": 0.1041296381333645,
+        "units": "intensity"
+      }
+    }
+  },
+  "overall_metric_equivalence": "not_assessed"
+}

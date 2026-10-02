@@ -1,0 +1,1804 @@
+{
+  "scope": "frozen same-input stages; controls_3d and gentle_controls are replaced; shared stages use candidate sources",
+  "candidate_code_commit": "764607c+archiveSHA:7a79fed40ab97a0675ba9fef2112eb58e7b393090ce4e4388604e7cccbf1a8f0",
+  "baseline_controls_commit": "1b8c36d25a68e253a1e59b6d02114890afa467de",
+  "host": "gpucw1",
+  "platform": "Linux-3.10.0-1160.119.1.el7.x86_64-x86_64-with-glibc2.17",
+  "logical_cpu_count": 128,
+  "device": "cpu",
+  "threads": 4,
+  "actual_checkout": {
+    "root": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/code_cpu_candidate_764",
+    "head": null,
+    "status": "source archive without Git metadata"
+  },
+  "timing_context": "sequential stage-pair worker on shared gpucw1; one performance pair plus separate diagnostic pair; no whole speedup",
+  "seed": 1234,
+  "tf32_matmul": true,
+  "tf32_cudnn": true,
+  "half_precision": false,
+  "versions": {
+    "torch": "2.5.1",
+    "numpy": "1.26.4",
+    "scipy": "1.17.1",
+    "numba": "0.67.0",
+    "nibabel": "5.4.2"
+  },
+  "thread_environment": {
+    "OMP_NUM_THREADS": "4",
+    "MKL_NUM_THREADS": "4",
+    "OPENBLAS_NUM_THREADS": "4",
+    "NUMBA_NUM_THREADS": "4",
+    "PYTORCH_NO_CUDA_MEMORY_CACHING": null,
+    "CUDA_VISIBLE_DEVICES": ""
+  },
+  "input_sha256": {
+    "aseg": "0d168f965b83d30703f0cb4de51aeb9bb4d46b31cab6863bd294fdc427cb4683",
+    "brainmask": "d8a982e2a462c1ef223d246b9148eb78af2d91f14143568ee9e3c7c6a239c911",
+    "norm": "3ff286de0bcb2e73aa875e3dd00fc1624ec6e8874a6a51224a060ff62cb77dd3",
+    "nu": "d8a354dc599292451b112de95b1fbfe0699e6182805efc96e8fabdfc71c68496",
+    "xfm": "2e213d196c7c66bea01c1bc76808b791886a66f5ef06f0b9e266bf0e52fdf1f5"
+  },
+  "input_paths": {
+    "aseg": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/mri/aseg.presurf.mgz",
+    "brainmask": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/mri/brainmask.mgz",
+    "norm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/mri/norm.mgz",
+    "nu": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/mri/nu.mgz",
+    "xfm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/mri/transforms/talairach.xfm"
+  },
+  "baseline_controls_sha256": "147e6ecf4375ab5a077535c1f3797809e4ff8ff3be6a297d50bfd7fe71ec4703",
+  "baseline_gentle_sha256": "78f4195e40f516383f1b534f964d6a53ad16f59687357a1b37754294aefce7e9",
+  "candidate_source_sha256": {
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/code_cpu_candidate_764/src/fnit/recon_all/normalization/__init__.py": "a3dbc39eb024387c4a73b687fe59784893b59222c678d82a74576be6fc120ff1",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/code_cpu_candidate_764/src/fnit/recon_all/normalization/__main__.py": "9fb9f6e8f2a2f0afa774694ef5495fe43230541b0ff47e8cf3796c3949286d71",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/code_cpu_candidate_764/src/fnit/recon_all/normalization/aseg_pipeline.py": "8060c5b7311433c51f3161269ee7092d2656d8d0ab80e329de081d8cbdece494",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/code_cpu_candidate_764/src/fnit/recon_all/normalization/normalize_1d_source.py": "0e2c0130899d49938e077dd0c8b8d662912099a9b942df8c941dca9b9e96e57d",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/code_cpu_candidate_764/src/fnit/recon_all/normalization/normalize_3d_controls.py": "636f4260537de2103401dc678476dc55bd0f76645366d3073b21759b777d7189",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/code_cpu_candidate_764/src/fnit/recon_all/normalization/normalize_aseg_ridge.py": "01eb47a651805bb27c4cd44b72c5db69d094a913161fdb674e89e7bc0af9ff35",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/code_cpu_candidate_764/src/fnit/recon_all/normalization/normalize_aseg_source.py": "18afb533a17aaae08b8b1cbdb0f4b688e14529290e791f89f53d8b8035362c51",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/code_cpu_candidate_764/src/fnit/recon_all/normalization/normalize_gaussian_source.py": "82990481329a3fe9907d659e74e816dbaeb3f8fd6851f9b4ffd46472458ba749",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/code_cpu_candidate_764/src/fnit/recon_all/normalization/normalize_gentle_source.py": "1791a86e5a63e3a8dc4ebd4a612d58668cd2e2d9f9f7932434a68fa1fc692fab",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/code_cpu_candidate_764/src/fnit/recon_all/normalization/normalize_tissue_peaks.py": "c5e0a55d1b8583dbdf4b6b1938b859444655202606a5c374dfe365d1bc898042",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/code_cpu_candidate_764/src/fnit/recon_all/normalization/normalize_voronoi_source.py": "c1f278fd6a57c878cd05a23562a62c7015c896b788817df8857967cb77ac0dc5",
+    "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/code_cpu_candidate_764/src/fnit/recon_all/normalization/pipeline.py": "ad9a206a35e6ac2334f1c8006ef3f6245985a14d6169e7c8e308171162e29ec5"
+  },
+  "mgh_io_source_sha256": "351a7edde1e06c400e9379a2c94d8055396307237b2198cdf8527468d3ac510d",
+  "benchmark_script_sha256": "e93855a3cad7fe9ba6b3b7a6f3a44584580d0d5e5b58c0be8afee8154781a7a9",
+  "jit_policy": "no explicit warmup; two paired rounds expose first compilation/cache loading and later in-process reuse",
+  "process_gpu_memory": "not sampled here; pair external parent/child process sampling with this report",
+  "stages": {
+    "first": {
+      "performance_runs": [
+        {
+          "baseline": {
+            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/first/performance_1/baseline/T1.mgz",
+            "seconds_including_input_and_output_io": 84.64525575190783,
+            "function_report": {
+              "device": "cpu",
+              "three_d_iterations": 2,
+              "steps": {
+                "one_d_seconds": 0.15503826411440969,
+                "controls_seconds": 1.831521444953978,
+                "voronoi_seconds": 11.923093541990966,
+                "smoothing_seconds": 4.715232588816434,
+                "gentle_apply_seconds": 0.11307311709970236,
+                "three_d_1_controls_seconds": 13.473107059951872,
+                "three_d_1_voronoi_seconds": 11.188827181234956,
+                "three_d_1_smoothing_seconds": 3.264964752830565,
+                "three_d_1_apply_seconds": 0.07012582989409566,
+                "three_d_2_controls_seconds": 22.160496011842042,
+                "three_d_2_voronoi_seconds": 11.203890326898545,
+                "three_d_2_smoothing_seconds": 3.4934237613342702,
+                "three_d_2_apply_seconds": 0.05841377889737487,
+                "apply_write_seconds": 0.7275250507518649
+              },
+              "total_seconds": 84.59345445409417,
+              "peaks": {
+                "origin": [
+                  134,
+                  112,
+                  140
+                ],
+                "window": 10,
+                "window_step": 5,
+                "npeaks": 12,
+                "raw_peak_positions": [
+                  47.0,
+                  52.0,
+                  57.0,
+                  62.0,
+                  67.0,
+                  72.0,
+                  77.0,
+                  82.0,
+                  87.0,
+                  92.0,
+                  97.0,
+                  102.0,
+                  107.0,
+                  112.0,
+                  117.0,
+                  122.0,
+                  127.0,
+                  132.0,
+                  137.0,
+                  142.0,
+                  147.0,
+                  152.0,
+                  157.0
+                ],
+                "raw_peak_intensities": [
+                  219.0,
+                  219.0,
+                  161.0,
+                  161.0,
+                  154.0,
+                  147.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  105.0,
+                  89.0,
+                  90.0,
+                  96.0,
+                  96.0
+                ],
+                "knots": [
+                  77.0,
+                  82.0,
+                  87.0,
+                  92.0,
+                  97.0,
+                  102.0,
+                  107.0,
+                  112.0,
+                  117.0,
+                  122.0,
+                  127.0,
+                  132.0
+                ],
+                "peak_intensities": [
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0
+                ],
+                "scale_min": 0.9821428656578064,
+                "scale_max": 0.9821428656578064
+              },
+              "controls": {
+                "first_7x7x7": 4337,
+                "after_5x5x5": 10836,
+                "after_outlier_removal": 10775
+              },
+              "propagation": {
+                "levels": 140,
+                "controls": 10775,
+                "wall_seconds": 11.877061505801976
+              },
+              "smoothing": {
+                "sigma": 8.0,
+                "kernel_length": 65,
+                "strict": true,
+                "wall_seconds": 4.715145810041577
+              },
+              "three_d_passes": [
+                {
+                  "controls": {
+                    "initial_7": 14878,
+                    "initial_5": 27488,
+                    "tissue_peaks": {
+                      "selected_wm_peak": 110.49281311035156,
+                      "wm_index": 109,
+                      "gm_index": 80,
+                      "wm_peak": 108.84168243408203,
+                      "gm_peak": 79.88380432128906,
+                      "bin_size": 0.9985475540161133
+                    },
+                    "adaptive_7": 14878,
+                    "adaptive_5": 18451,
+                    "three_added": 18906,
+                    "six_added": 26449,
+                    "before_outlier_removal": 63806,
+                    "after_outlier_removal": 63806
+                  },
+                  "propagation": {
+                    "levels": 135,
+                    "controls": 63806,
+                    "wall_seconds": 11.178517791908234
+                  },
+                  "smoothing": {
+                    "sigma": 8.0,
+                    "kernel_length": 65,
+                    "strict": true,
+                    "wall_seconds": 3.264887270051986
+                  }
+                },
+                {
+                  "controls": {
+                    "initial_7": 14086,
+                    "initial_5": 25361,
+                    "tissue_peaks": {
+                      "selected_wm_peak": 110.22328186035156,
+                      "wm_index": 110,
+                      "gm_index": 45,
+                      "wm_peak": 110.0077896118164,
+                      "gm_peak": 45.0031852722168,
+                      "bin_size": 1.0000708103179932
+                    },
+                    "adaptive_7": 14086,
+                    "adaptive_5": 35813,
+                    "three_added": 39473,
+                    "six_added": 35773,
+                    "before_outlier_removal": 111059,
+                    "after_outlier_removal": 111059
+                  },
+                  "propagation": {
+                    "levels": 129,
+                    "controls": 111059,
+                    "wall_seconds": 11.182460003066808
+                  },
+                  "smoothing": {
+                    "sigma": 8.0,
+                    "kernel_length": 65,
+                    "strict": true,
+                    "wall_seconds": 3.493305158801377
+                  }
+                }
+              ]
+            },
+            "diagnostic_run": false,
+            "candidate_helper_signatures_before": [],
+            "candidate_helper_signatures_after": [],
+            "gpu_peak_allocated_bytes": null,
+            "gpu_peak_reserved_bytes": null
+          },
+          "candidate": {
+            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/first/performance_1/candidate/T1.mgz",
+            "seconds_including_input_and_output_io": 80.94487906713039,
+            "function_report": {
+              "device": "cpu",
+              "three_d_iterations": 2,
+              "steps": {
+                "one_d_seconds": 0.15595497889444232,
+                "controls_seconds": 2.1097759073600173,
+                "voronoi_seconds": 10.815858372952789,
+                "smoothing_seconds": 3.537619291804731,
+                "gentle_apply_seconds": 0.12256785808131099,
+                "three_d_1_controls_seconds": 12.877686300780624,
+                "three_d_1_voronoi_seconds": 10.901501510757953,
+                "three_d_1_smoothing_seconds": 2.9851340418681502,
+                "three_d_1_apply_seconds": 0.08502851612865925,
+                "three_d_2_controls_seconds": 22.103652021847665,
+                "three_d_2_voronoi_seconds": 11.416436548810452,
+                "three_d_2_smoothing_seconds": 2.7545314468443394,
+                "three_d_2_apply_seconds": 0.06447248486801982,
+                "apply_write_seconds": 0.7405439172871411
+              },
+              "total_seconds": 80.88900126516819,
+              "peaks": {
+                "origin": [
+                  134,
+                  112,
+                  140
+                ],
+                "window": 10,
+                "window_step": 5,
+                "npeaks": 12,
+                "raw_peak_positions": [
+                  47.0,
+                  52.0,
+                  57.0,
+                  62.0,
+                  67.0,
+                  72.0,
+                  77.0,
+                  82.0,
+                  87.0,
+                  92.0,
+                  97.0,
+                  102.0,
+                  107.0,
+                  112.0,
+                  117.0,
+                  122.0,
+                  127.0,
+                  132.0,
+                  137.0,
+                  142.0,
+                  147.0,
+                  152.0,
+                  157.0
+                ],
+                "raw_peak_intensities": [
+                  219.0,
+                  219.0,
+                  161.0,
+                  161.0,
+                  154.0,
+                  147.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  105.0,
+                  89.0,
+                  90.0,
+                  96.0,
+                  96.0
+                ],
+                "knots": [
+                  77.0,
+                  82.0,
+                  87.0,
+                  92.0,
+                  97.0,
+                  102.0,
+                  107.0,
+                  112.0,
+                  117.0,
+                  122.0,
+                  127.0,
+                  132.0
+                ],
+                "peak_intensities": [
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0,
+                  112.0
+                ],
+                "scale_min": 0.9821428656578064,
+                "scale_max": 0.9821428656578064
+              },
+              "controls": {
+                "first_7x7x7": 4337,
+                "after_5x5x5": 10836,
+                "after_outlier_removal": 10775
+              },
+              "propagation": {
+                "levels": 140,
+                "controls": 10775,
+                "wall_seconds": 10.754042657092214
+              },
+              "smoothing": {
+                "sigma": 8.0,
+                "kernel_length": 65,
+                "strict": true,
+                "wall_seconds": 3.5375737729482353
+              },
+              "three_d_passes": [
+                {
+                  "controls": {
+                    "initial_7": 14878,
+                    "initial_5": 27488,
+                    "tissue_peaks": {
+                      "selected_wm_peak": 110.49281311035156,
+                      "wm_index": 109,
+                      "gm_index": 80,
+                      "wm_peak": 108.84168243408203,
+                      "gm_peak": 79.88380432128906,
+                      "bin_size": 0.9985475540161133
+                    },
+                    "adaptive_7": 14878,
+                    "adaptive_5": 18451,
+                    "three_added": 18906,
+                    "six_added": 26449,
+                    "before_outlier_removal": 63806,
+                    "after_outlier_removal": 63806
+                  },
+                  "propagation": {
+                    "levels": 135,
+                    "controls": 63806,
+                    "wall_seconds": 10.890380066353828
+                  },
+                  "smoothing": {
+                    "sigma": 8.0,
+                    "kernel_length": 65,
+                    "strict": true,
+                    "wall_seconds": 2.9850875698029995
+                  }
+                },
+                {
+                  "controls": {
+                    "initial_7": 14086,
+                    "initial_5": 25361,
+                    "tissue_peaks": {
+                      "selected_wm_peak": 110.22328186035156,
+                      "wm_index": 110,
+                      "gm_index": 45,
+                      "wm_peak": 110.0077896118164,
+                      "gm_peak": 45.0031852722168,
+                      "bin_size": 1.0000708103179932
+                    },
+                    "adaptive_7": 14086,
+                    "adaptive_5": 35813,
+                    "three_added": 39473,
+                    "six_added": 35773,
+                    "before_outlier_removal": 111059,
+                    "after_outlier_removal": 111059
+                  },
+                  "propagation": {
+                    "levels": 129,
+                    "controls": 111059,
+                    "wall_seconds": 11.38771112030372
+                  },
+                  "smoothing": {
+                    "sigma": 8.0,
+                    "kernel_length": 65,
+                    "strict": true,
+                    "wall_seconds": 2.754363961983472
+                  }
+                }
+              ]
+            },
+            "diagnostic_run": false,
+            "candidate_helper_signatures_before": [],
+            "candidate_helper_signatures_after": [
+              "(Array(bool, 3, 'C', False, aligned=True),)"
+            ],
+            "gpu_peak_allocated_bytes": null,
+            "gpu_peak_reserved_bytes": null
+          },
+          "comparison": {
+            "left": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/first/performance_1/baseline/T1.mgz",
+            "right": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/first/performance_1/candidate/T1.mgz",
+            "sha256": [
+              "60ab81a37c263279389cbd3653f87e9ee4d06ef274698606b0330215879a821d",
+              "60ab81a37c263279389cbd3653f87e9ee4d06ef274698606b0330215879a821d"
+            ],
+            "shape": [
+              [
+                256,
+                256,
+                256
+              ],
+              [
+                256,
+                256,
+                256
+              ]
+            ],
+            "dtype": [
+              "uint8",
+              "uint8"
+            ],
+            "affine_equal": true,
+            "header_equal": true,
+            "different_values": 0,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "numerically_identical": true
+          },
+          "order": [
+            "baseline",
+            "candidate"
+          ]
+        }
+      ],
+      "diagnostic_runs": {
+        "baseline": {
+          "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/first/diagnostic/baseline/T1.mgz",
+          "seconds_including_input_and_output_io": 80.02792882500216,
+          "function_report": {
+            "device": "cpu",
+            "three_d_iterations": 2,
+            "steps": {
+              "one_d_seconds": 0.19356206618249416,
+              "controls_seconds": 1.817538547795266,
+              "voronoi_seconds": 10.7766291401349,
+              "smoothing_seconds": 2.750807622913271,
+              "gentle_apply_seconds": 0.09639025526121259,
+              "three_d_1_controls_seconds": 12.89233378879726,
+              "three_d_1_voronoi_seconds": 10.951253914274275,
+              "three_d_1_smoothing_seconds": 3.0073050251230597,
+              "three_d_1_apply_seconds": 0.05896693980321288,
+              "three_d_2_controls_seconds": 22.049162689130753,
+              "three_d_2_voronoi_seconds": 11.751735508907586,
+              "three_d_2_smoothing_seconds": 2.6931911786086857,
+              "three_d_2_apply_seconds": 0.0585784618742764,
+              "apply_write_seconds": 0.696876313071698
+            },
+            "total_seconds": 79.98765174672008,
+            "peaks": {
+              "origin": [
+                134,
+                112,
+                140
+              ],
+              "window": 10,
+              "window_step": 5,
+              "npeaks": 12,
+              "raw_peak_positions": [
+                47.0,
+                52.0,
+                57.0,
+                62.0,
+                67.0,
+                72.0,
+                77.0,
+                82.0,
+                87.0,
+                92.0,
+                97.0,
+                102.0,
+                107.0,
+                112.0,
+                117.0,
+                122.0,
+                127.0,
+                132.0,
+                137.0,
+                142.0,
+                147.0,
+                152.0,
+                157.0
+              ],
+              "raw_peak_intensities": [
+                219.0,
+                219.0,
+                161.0,
+                161.0,
+                154.0,
+                147.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                105.0,
+                89.0,
+                90.0,
+                96.0,
+                96.0
+              ],
+              "knots": [
+                77.0,
+                82.0,
+                87.0,
+                92.0,
+                97.0,
+                102.0,
+                107.0,
+                112.0,
+                117.0,
+                122.0,
+                127.0,
+                132.0
+              ],
+              "peak_intensities": [
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0
+              ],
+              "scale_min": 0.9821428656578064,
+              "scale_max": 0.9821428656578064
+            },
+            "controls": {
+              "first_7x7x7": 4337,
+              "after_5x5x5": 10836,
+              "after_outlier_removal": 10775
+            },
+            "propagation": {
+              "levels": 140,
+              "controls": 10775,
+              "wall_seconds": 10.72793282661587
+            },
+            "smoothing": {
+              "sigma": 8.0,
+              "kernel_length": 65,
+              "strict": true,
+              "wall_seconds": 2.750764393247664
+            },
+            "three_d_passes": [
+              {
+                "controls": {
+                  "initial_7": 14878,
+                  "initial_5": 27488,
+                  "tissue_peaks": {
+                    "selected_wm_peak": 110.49281311035156,
+                    "wm_index": 109,
+                    "gm_index": 80,
+                    "wm_peak": 108.84168243408203,
+                    "gm_peak": 79.88380432128906,
+                    "bin_size": 0.9985475540161133
+                  },
+                  "adaptive_7": 14878,
+                  "adaptive_5": 18451,
+                  "three_added": 18906,
+                  "six_added": 26449,
+                  "before_outlier_removal": 63806,
+                  "after_outlier_removal": 63806
+                },
+                "propagation": {
+                  "levels": 135,
+                  "controls": 63806,
+                  "wall_seconds": 10.936491655185819
+                },
+                "smoothing": {
+                  "sigma": 8.0,
+                  "kernel_length": 65,
+                  "strict": true,
+                  "wall_seconds": 3.0072744600474834
+                }
+              },
+              {
+                "controls": {
+                  "initial_7": 14086,
+                  "initial_5": 25361,
+                  "tissue_peaks": {
+                    "selected_wm_peak": 110.22328186035156,
+                    "wm_index": 110,
+                    "gm_index": 45,
+                    "wm_peak": 110.0077896118164,
+                    "gm_peak": 45.0031852722168,
+                    "bin_size": 1.0000708103179932
+                  },
+                  "adaptive_7": 14086,
+                  "adaptive_5": 35813,
+                  "three_added": 39473,
+                  "six_added": 35773,
+                  "before_outlier_removal": 111059,
+                  "after_outlier_removal": 111059
+                },
+                "propagation": {
+                  "levels": 129,
+                  "controls": 111059,
+                  "wall_seconds": 11.727727880701423
+                },
+                "smoothing": {
+                  "sigma": 8.0,
+                  "kernel_length": 65,
+                  "strict": true,
+                  "wall_seconds": 2.685354826040566
+                }
+              }
+            ]
+          },
+          "diagnostic_run": true,
+          "candidate_helper_signatures_before": [
+            "(Array(bool, 3, 'C', False, aligned=True),)"
+          ],
+          "candidate_helper_signatures_after": [
+            "(Array(bool, 3, 'C', False, aligned=True),)"
+          ],
+          "gpu_peak_allocated_bytes": null,
+          "gpu_peak_reserved_bytes": null,
+          "diagnostic_maps": {
+            "gentle_control": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/first/diagnostic/baseline/gentle_control.mgh",
+            "three_d_1_source": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/first/diagnostic/baseline/three_d_1_source.mgh",
+            "three_d_1_control": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/first/diagnostic/baseline/three_d_1_control.mgh",
+            "three_d_2_source": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/first/diagnostic/baseline/three_d_2_source.mgh",
+            "three_d_2_control": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/first/diagnostic/baseline/three_d_2_control.mgh"
+          },
+          "diagnostic_wall_including_map_write_seconds": 81.38695329008624
+        },
+        "candidate": {
+          "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/first/diagnostic/candidate/T1.mgz",
+          "seconds_including_input_and_output_io": 78.44341750815511,
+          "function_report": {
+            "device": "cpu",
+            "three_d_iterations": 2,
+            "steps": {
+              "one_d_seconds": 0.14876750204712152,
+              "controls_seconds": 1.7276258347555995,
+              "voronoi_seconds": 10.710390035994351,
+              "smoothing_seconds": 2.919554229825735,
+              "gentle_apply_seconds": 0.10490823397412896,
+              "three_d_1_controls_seconds": 12.832795253023505,
+              "three_d_1_voronoi_seconds": 10.613235791679472,
+              "three_d_1_smoothing_seconds": 2.676722601056099,
+              "three_d_1_apply_seconds": 0.062861452344805,
+              "three_d_2_controls_seconds": 21.478155438788235,
+              "three_d_2_voronoi_seconds": 11.290120525285602,
+              "three_d_2_smoothing_seconds": 2.8047710158862174,
+              "three_d_2_apply_seconds": 0.058377628680318594,
+              "apply_write_seconds": 0.7586351507343352
+            },
+            "total_seconds": 78.38702541403472,
+            "peaks": {
+              "origin": [
+                134,
+                112,
+                140
+              ],
+              "window": 10,
+              "window_step": 5,
+              "npeaks": 12,
+              "raw_peak_positions": [
+                47.0,
+                52.0,
+                57.0,
+                62.0,
+                67.0,
+                72.0,
+                77.0,
+                82.0,
+                87.0,
+                92.0,
+                97.0,
+                102.0,
+                107.0,
+                112.0,
+                117.0,
+                122.0,
+                127.0,
+                132.0,
+                137.0,
+                142.0,
+                147.0,
+                152.0,
+                157.0
+              ],
+              "raw_peak_intensities": [
+                219.0,
+                219.0,
+                161.0,
+                161.0,
+                154.0,
+                147.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                105.0,
+                89.0,
+                90.0,
+                96.0,
+                96.0
+              ],
+              "knots": [
+                77.0,
+                82.0,
+                87.0,
+                92.0,
+                97.0,
+                102.0,
+                107.0,
+                112.0,
+                117.0,
+                122.0,
+                127.0,
+                132.0
+              ],
+              "peak_intensities": [
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0,
+                112.0
+              ],
+              "scale_min": 0.9821428656578064,
+              "scale_max": 0.9821428656578064
+            },
+            "controls": {
+              "first_7x7x7": 4337,
+              "after_5x5x5": 10836,
+              "after_outlier_removal": 10775
+            },
+            "propagation": {
+              "levels": 140,
+              "controls": 10775,
+              "wall_seconds": 10.661986102815717
+            },
+            "smoothing": {
+              "sigma": 8.0,
+              "kernel_length": 65,
+              "strict": true,
+              "wall_seconds": 2.919525252189487
+            },
+            "three_d_passes": [
+              {
+                "controls": {
+                  "initial_7": 14878,
+                  "initial_5": 27488,
+                  "tissue_peaks": {
+                    "selected_wm_peak": 110.49281311035156,
+                    "wm_index": 109,
+                    "gm_index": 80,
+                    "wm_peak": 108.84168243408203,
+                    "gm_peak": 79.88380432128906,
+                    "bin_size": 0.9985475540161133
+                  },
+                  "adaptive_7": 14878,
+                  "adaptive_5": 18451,
+                  "three_added": 18906,
+                  "six_added": 26449,
+                  "before_outlier_removal": 63806,
+                  "after_outlier_removal": 63806
+                },
+                "propagation": {
+                  "levels": 135,
+                  "controls": 63806,
+                  "wall_seconds": 10.599727097898722
+                },
+                "smoothing": {
+                  "sigma": 8.0,
+                  "kernel_length": 65,
+                  "strict": true,
+                  "wall_seconds": 2.676689441781491
+                }
+              },
+              {
+                "controls": {
+                  "initial_7": 14086,
+                  "initial_5": 25361,
+                  "tissue_peaks": {
+                    "selected_wm_peak": 110.22328186035156,
+                    "wm_index": 110,
+                    "gm_index": 45,
+                    "wm_peak": 110.0077896118164,
+                    "gm_peak": 45.0031852722168,
+                    "bin_size": 1.0000708103179932
+                  },
+                  "adaptive_7": 14086,
+                  "adaptive_5": 35813,
+                  "three_added": 39473,
+                  "six_added": 35773,
+                  "before_outlier_removal": 111059,
+                  "after_outlier_removal": 111059
+                },
+                "propagation": {
+                  "levels": 129,
+                  "controls": 111059,
+                  "wall_seconds": 11.264973300043494
+                },
+                "smoothing": {
+                  "sigma": 8.0,
+                  "kernel_length": 65,
+                  "strict": true,
+                  "wall_seconds": 2.799045717343688
+                }
+              }
+            ]
+          },
+          "diagnostic_run": true,
+          "candidate_helper_signatures_before": [
+            "(Array(bool, 3, 'C', False, aligned=True),)"
+          ],
+          "candidate_helper_signatures_after": [
+            "(Array(bool, 3, 'C', False, aligned=True),)"
+          ],
+          "gpu_peak_allocated_bytes": null,
+          "gpu_peak_reserved_bytes": null,
+          "diagnostic_maps": {
+            "gentle_control": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/first/diagnostic/candidate/gentle_control.mgh",
+            "three_d_1_source": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/first/diagnostic/candidate/three_d_1_source.mgh",
+            "three_d_1_control": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/first/diagnostic/candidate/three_d_1_control.mgh",
+            "three_d_2_source": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/first/diagnostic/candidate/three_d_2_source.mgh",
+            "three_d_2_control": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/first/diagnostic/candidate/three_d_2_control.mgh"
+          },
+          "diagnostic_wall_including_map_write_seconds": 79.80207509128377
+        }
+      },
+      "diagnostic_comparison": {
+        "gentle_control": {
+          "left": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/first/diagnostic/baseline/gentle_control.mgh",
+          "right": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/first/diagnostic/candidate/gentle_control.mgh",
+          "sha256": [
+            "88be2a993938429131af048f3e2914f69c70bd0abb3b05af53400361ce3b75bf",
+            "88be2a993938429131af048f3e2914f69c70bd0abb3b05af53400361ce3b75bf"
+          ],
+          "shape": [
+            [
+              256,
+              256,
+              256
+            ],
+            [
+              256,
+              256,
+              256
+            ]
+          ],
+          "dtype": [
+            "uint8",
+            "uint8"
+          ],
+          "affine_equal": true,
+          "header_equal": true,
+          "different_values": 0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "numerically_identical": true
+        },
+        "three_d_1_source": {
+          "left": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/first/diagnostic/baseline/three_d_1_source.mgh",
+          "right": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/first/diagnostic/candidate/three_d_1_source.mgh",
+          "sha256": [
+            "a39fc37f4d835874256dd8d5d1ad9debcbc7c7e78e308ca05b17087e415da49b",
+            "a39fc37f4d835874256dd8d5d1ad9debcbc7c7e78e308ca05b17087e415da49b"
+          ],
+          "shape": [
+            [
+              256,
+              256,
+              256
+            ],
+            [
+              256,
+              256,
+              256
+            ]
+          ],
+          "dtype": [
+            ">f4",
+            ">f4"
+          ],
+          "affine_equal": true,
+          "header_equal": true,
+          "different_values": 0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "numerically_identical": true
+        },
+        "three_d_1_control": {
+          "left": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/first/diagnostic/baseline/three_d_1_control.mgh",
+          "right": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/first/diagnostic/candidate/three_d_1_control.mgh",
+          "sha256": [
+            "7a0ea56d57107be84ee412e8c3828aacf3076e653e5b3ea646bbb919b325d6d5",
+            "7a0ea56d57107be84ee412e8c3828aacf3076e653e5b3ea646bbb919b325d6d5"
+          ],
+          "shape": [
+            [
+              256,
+              256,
+              256
+            ],
+            [
+              256,
+              256,
+              256
+            ]
+          ],
+          "dtype": [
+            "uint8",
+            "uint8"
+          ],
+          "affine_equal": true,
+          "header_equal": true,
+          "different_values": 0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "numerically_identical": true
+        },
+        "three_d_2_source": {
+          "left": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/first/diagnostic/baseline/three_d_2_source.mgh",
+          "right": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/first/diagnostic/candidate/three_d_2_source.mgh",
+          "sha256": [
+            "9f0e519f2beeb127e2255873046fcad9c549ac47db88c18fe6a0782f2564f772",
+            "9f0e519f2beeb127e2255873046fcad9c549ac47db88c18fe6a0782f2564f772"
+          ],
+          "shape": [
+            [
+              256,
+              256,
+              256
+            ],
+            [
+              256,
+              256,
+              256
+            ]
+          ],
+          "dtype": [
+            ">f4",
+            ">f4"
+          ],
+          "affine_equal": true,
+          "header_equal": true,
+          "different_values": 0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "numerically_identical": true
+        },
+        "three_d_2_control": {
+          "left": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/first/diagnostic/baseline/three_d_2_control.mgh",
+          "right": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/first/diagnostic/candidate/three_d_2_control.mgh",
+          "sha256": [
+            "e5b6275fb99377f6a633f4c9e3e34c77d5dedc655cacdc67d816cd97c0590753",
+            "e5b6275fb99377f6a633f4c9e3e34c77d5dedc655cacdc67d816cd97c0590753"
+          ],
+          "shape": [
+            [
+              256,
+              256,
+              256
+            ],
+            [
+              256,
+              256,
+              256
+            ]
+          ],
+          "dtype": [
+            "uint8",
+            "uint8"
+          ],
+          "affine_equal": true,
+          "header_equal": true,
+          "different_values": 0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "numerically_identical": true
+        },
+        "final": {
+          "left": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/first/diagnostic/baseline/T1.mgz",
+          "right": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/first/diagnostic/candidate/T1.mgz",
+          "sha256": [
+            "60ab81a37c263279389cbd3653f87e9ee4d06ef274698606b0330215879a821d",
+            "60ab81a37c263279389cbd3653f87e9ee4d06ef274698606b0330215879a821d"
+          ],
+          "shape": [
+            [
+              256,
+              256,
+              256
+            ],
+            [
+              256,
+              256,
+              256
+            ]
+          ],
+          "dtype": [
+            "uint8",
+            "uint8"
+          ],
+          "affine_equal": true,
+          "header_equal": true,
+          "different_values": 0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "numerically_identical": true
+        }
+      }
+    },
+    "second": {
+      "performance_runs": [
+        {
+          "baseline": {
+            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/performance_1/baseline/brain.mgz",
+            "seconds_including_input_and_output_io": 94.22840658202767,
+            "function_report": {
+              "device": "cpu",
+              "three_d_iterations": 2,
+              "ridge_seconds": 14.644456156063825,
+              "initial_bias_seconds": 15.924812593962997,
+              "ridge": {
+                "marching": [
+                  [
+                    130964,
+                    16295657
+                  ],
+                  [
+                    127477,
+                    223118
+                  ]
+                ],
+                "ridge_voxels": 45325
+              },
+              "removed_controls": 8505,
+              "wm_peak": 104,
+              "completion": {
+                "steps": {
+                  "gentle_controls_seconds": 1.7987369378097355,
+                  "gentle_bias_seconds": 13.592918595299125,
+                  "three_d_1_controls_seconds": 11.040639542043209,
+                  "three_d_1_bias_seconds": 13.822281084954739,
+                  "three_d_1_controls": {
+                    "initial_7": 15935,
+                    "initial_5": 29212,
+                    "tissue_peaks": {
+                      "selected_wm_peak": 109.58328247070312,
+                      "wm_index": 109,
+                      "gm_index": 54,
+                      "wm_peak": 109.10375213623047,
+                      "gm_peak": 54.0514030456543,
+                      "bin_size": 1.000951886177063
+                    },
+                    "adaptive_7": 15935,
+                    "adaptive_5": 35558,
+                    "three_added": 44539,
+                    "six_added": 46723,
+                    "before_outlier_removal": 126820,
+                    "after_outlier_removal": 126820
+                  },
+                  "three_d_2_controls_seconds": 8.326173388864845,
+                  "three_d_2_bias_seconds": 13.378562617581338,
+                  "three_d_2_controls": {
+                    "initial_7": 16651,
+                    "initial_5": 32107,
+                    "tissue_peaks": {
+                      "selected_wm_peak": 109.54443359375,
+                      "wm_index": 110,
+                      "gm_index": 88,
+                      "wm_peak": 109.96427917480469,
+                      "gm_peak": 87.97142028808594,
+                      "bin_size": 0.9996752738952637
+                    },
+                    "adaptive_7": 16651,
+                    "adaptive_5": 21592,
+                    "three_added": 30871,
+                    "six_added": 34094,
+                    "before_outlier_removal": 86557,
+                    "after_outlier_removal": 86557
+                  }
+                },
+                "gentle_controls": {
+                  "first_7x7x7": 7458,
+                  "after_5x5x5": 18358,
+                  "after_outlier_removal": 18274
+                }
+              },
+              "total_seconds": 94.01748274685815
+            },
+            "diagnostic_run": false,
+            "candidate_helper_signatures_before": [
+              "(Array(bool, 3, 'C', False, aligned=True),)"
+            ],
+            "candidate_helper_signatures_after": [
+              "(Array(bool, 3, 'C', False, aligned=True),)"
+            ],
+            "gpu_peak_allocated_bytes": null,
+            "gpu_peak_reserved_bytes": null
+          },
+          "candidate": {
+            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/performance_1/candidate/brain.mgz",
+            "seconds_including_input_and_output_io": 90.35793294198811,
+            "function_report": {
+              "device": "cpu",
+              "three_d_iterations": 2,
+              "ridge_seconds": 12.034124405123293,
+              "initial_bias_seconds": 14.977923375088722,
+              "ridge": {
+                "marching": [
+                  [
+                    130964,
+                    16295657
+                  ],
+                  [
+                    127477,
+                    223118
+                  ]
+                ],
+                "ridge_voxels": 45325
+              },
+              "removed_controls": 8505,
+              "wm_peak": 104,
+              "completion": {
+                "steps": {
+                  "gentle_controls_seconds": 1.6507610781118274,
+                  "gentle_bias_seconds": 13.361771073192358,
+                  "three_d_1_controls_seconds": 10.58136459486559,
+                  "three_d_1_bias_seconds": 13.95967887993902,
+                  "three_d_1_controls": {
+                    "initial_7": 15935,
+                    "initial_5": 29212,
+                    "tissue_peaks": {
+                      "selected_wm_peak": 109.58328247070312,
+                      "wm_index": 109,
+                      "gm_index": 54,
+                      "wm_peak": 109.10375213623047,
+                      "gm_peak": 54.0514030456543,
+                      "bin_size": 1.000951886177063
+                    },
+                    "adaptive_7": 15935,
+                    "adaptive_5": 35558,
+                    "three_added": 44539,
+                    "six_added": 46723,
+                    "before_outlier_removal": 126820,
+                    "after_outlier_removal": 126820
+                  },
+                  "three_d_2_controls_seconds": 8.02919071400538,
+                  "three_d_2_bias_seconds": 14.122385344933718,
+                  "three_d_2_controls": {
+                    "initial_7": 16651,
+                    "initial_5": 32107,
+                    "tissue_peaks": {
+                      "selected_wm_peak": 109.54443359375,
+                      "wm_index": 110,
+                      "gm_index": 88,
+                      "wm_peak": 109.96427917480469,
+                      "gm_peak": 87.97142028808594,
+                      "bin_size": 0.9996752738952637
+                    },
+                    "adaptive_7": 16651,
+                    "adaptive_5": 21592,
+                    "three_added": 30871,
+                    "six_added": 34094,
+                    "before_outlier_removal": 86557,
+                    "after_outlier_removal": 86557
+                  }
+                },
+                "gentle_controls": {
+                  "first_7x7x7": 7458,
+                  "after_5x5x5": 18358,
+                  "after_outlier_removal": 18274
+                }
+              },
+              "total_seconds": 90.15205766633153
+            },
+            "diagnostic_run": false,
+            "candidate_helper_signatures_before": [
+              "(Array(bool, 3, 'C', False, aligned=True),)"
+            ],
+            "candidate_helper_signatures_after": [
+              "(Array(bool, 3, 'C', False, aligned=True),)"
+            ],
+            "gpu_peak_allocated_bytes": null,
+            "gpu_peak_reserved_bytes": null
+          },
+          "comparison": {
+            "left": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/performance_1/baseline/brain.mgz",
+            "right": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/performance_1/candidate/brain.mgz",
+            "sha256": [
+              "14a95e6358d0652a9351e6abd5bebc7e91381cb6d005b9b109b93e199a084629",
+              "14a95e6358d0652a9351e6abd5bebc7e91381cb6d005b9b109b93e199a084629"
+            ],
+            "shape": [
+              [
+                256,
+                256,
+                256
+              ],
+              [
+                256,
+                256,
+                256
+              ]
+            ],
+            "dtype": [
+              "uint8",
+              "uint8"
+            ],
+            "affine_equal": true,
+            "header_equal": true,
+            "different_values": 0,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "numerically_identical": true
+          },
+          "order": [
+            "baseline",
+            "candidate"
+          ]
+        }
+      ],
+      "diagnostic_runs": {
+        "baseline": {
+          "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/baseline/brain.mgz",
+          "seconds_including_input_and_output_io": 90.91292988695204,
+          "function_report": {
+            "device": "cpu",
+            "three_d_iterations": 2,
+            "ridge_seconds": 11.942594709806144,
+            "initial_bias_seconds": 15.013890566769987,
+            "ridge": {
+              "marching": [
+                [
+                  130964,
+                  16295657
+                ],
+                [
+                  127477,
+                  223118
+                ]
+              ],
+              "ridge_voxels": 45325
+            },
+            "removed_controls": 8505,
+            "wm_peak": 104,
+            "completion": {
+              "steps": {
+                "gentle_controls_seconds": 1.727504150941968,
+                "gentle_bias_seconds": 13.761496811173856,
+                "three_d_1_controls_seconds": 10.779606822878122,
+                "three_d_1_bias_seconds": 13.734630570746958,
+                "three_d_1_controls": {
+                  "initial_7": 15935,
+                  "initial_5": 29212,
+                  "tissue_peaks": {
+                    "selected_wm_peak": 109.58328247070312,
+                    "wm_index": 109,
+                    "gm_index": 54,
+                    "wm_peak": 109.10375213623047,
+                    "gm_peak": 54.0514030456543,
+                    "bin_size": 1.000951886177063
+                  },
+                  "adaptive_7": 15935,
+                  "adaptive_5": 35558,
+                  "three_added": 44539,
+                  "six_added": 46723,
+                  "before_outlier_removal": 126820,
+                  "after_outlier_removal": 126820
+                },
+                "three_d_2_controls_seconds": 8.236009289044887,
+                "three_d_2_bias_seconds": 14.000304177869111,
+                "three_d_2_controls": {
+                  "initial_7": 16651,
+                  "initial_5": 32107,
+                  "tissue_peaks": {
+                    "selected_wm_peak": 109.54443359375,
+                    "wm_index": 110,
+                    "gm_index": 88,
+                    "wm_peak": 109.96427917480469,
+                    "gm_peak": 87.97142028808594,
+                    "bin_size": 0.9996752738952637
+                  },
+                  "adaptive_7": 16651,
+                  "adaptive_5": 21592,
+                  "three_added": 30871,
+                  "six_added": 34094,
+                  "before_outlier_removal": 86557,
+                  "after_outlier_removal": 86557
+                }
+              },
+              "gentle_controls": {
+                "first_7x7x7": 7458,
+                "after_5x5x5": 18358,
+                "after_outlier_removal": 18274
+              }
+            },
+            "total_seconds": 90.72667967621237
+          },
+          "diagnostic_run": true,
+          "candidate_helper_signatures_before": [
+            "(Array(bool, 3, 'C', False, aligned=True),)"
+          ],
+          "candidate_helper_signatures_after": [
+            "(Array(bool, 3, 'C', False, aligned=True),)"
+          ],
+          "gpu_peak_allocated_bytes": null,
+          "gpu_peak_reserved_bytes": null,
+          "diagnostic_maps": {
+            "aseg_ridge": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/baseline/aseg_ridge.mgh",
+            "aseg_control": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/baseline/aseg_control.mgh",
+            "aseg_removed_control": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/baseline/aseg_removed_control.mgh",
+            "gentle_control": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/baseline/gentle_control.mgh",
+            "three_d_1_source": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/baseline/three_d_1_source.mgh",
+            "three_d_1_control": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/baseline/three_d_1_control.mgh",
+            "three_d_2_source": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/baseline/three_d_2_source.mgh",
+            "three_d_2_control": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/baseline/three_d_2_control.mgh"
+          },
+          "diagnostic_wall_including_map_write_seconds": 92.69105891278014
+        },
+        "candidate": {
+          "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/candidate/brain.mgz",
+          "seconds_including_input_and_output_io": 90.06736949505284,
+          "function_report": {
+            "device": "cpu",
+            "three_d_iterations": 2,
+            "ridge_seconds": 12.092738707084209,
+            "initial_bias_seconds": 14.789427769836038,
+            "ridge": {
+              "marching": [
+                [
+                  130964,
+                  16295657
+                ],
+                [
+                  127477,
+                  223118
+                ]
+              ],
+              "ridge_voxels": 45325
+            },
+            "removed_controls": 8505,
+            "wm_peak": 104,
+            "completion": {
+              "steps": {
+                "gentle_controls_seconds": 1.645339417271316,
+                "gentle_bias_seconds": 13.786205537151545,
+                "three_d_1_controls_seconds": 9.969918147660792,
+                "three_d_1_bias_seconds": 14.063085144851357,
+                "three_d_1_controls": {
+                  "initial_7": 15935,
+                  "initial_5": 29212,
+                  "tissue_peaks": {
+                    "selected_wm_peak": 109.58328247070312,
+                    "wm_index": 109,
+                    "gm_index": 54,
+                    "wm_peak": 109.10375213623047,
+                    "gm_peak": 54.0514030456543,
+                    "bin_size": 1.000951886177063
+                  },
+                  "adaptive_7": 15935,
+                  "adaptive_5": 35558,
+                  "three_added": 44539,
+                  "six_added": 46723,
+                  "before_outlier_removal": 126820,
+                  "after_outlier_removal": 126820
+                },
+                "three_d_2_controls_seconds": 8.03149869479239,
+                "three_d_2_bias_seconds": 14.023598304018378,
+                "three_d_2_controls": {
+                  "initial_7": 16651,
+                  "initial_5": 32107,
+                  "tissue_peaks": {
+                    "selected_wm_peak": 109.54443359375,
+                    "wm_index": 110,
+                    "gm_index": 88,
+                    "wm_peak": 109.96427917480469,
+                    "gm_peak": 87.97142028808594,
+                    "bin_size": 0.9996752738952637
+                  },
+                  "adaptive_7": 16651,
+                  "adaptive_5": 21592,
+                  "three_added": 30871,
+                  "six_added": 34094,
+                  "before_outlier_removal": 86557,
+                  "after_outlier_removal": 86557
+                }
+              },
+              "gentle_controls": {
+                "first_7x7x7": 7458,
+                "after_5x5x5": 18358,
+                "after_outlier_removal": 18274
+              }
+            },
+            "total_seconds": 89.87782803876325
+          },
+          "diagnostic_run": true,
+          "candidate_helper_signatures_before": [
+            "(Array(bool, 3, 'C', False, aligned=True),)"
+          ],
+          "candidate_helper_signatures_after": [
+            "(Array(bool, 3, 'C', False, aligned=True),)"
+          ],
+          "gpu_peak_allocated_bytes": null,
+          "gpu_peak_reserved_bytes": null,
+          "diagnostic_maps": {
+            "aseg_ridge": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/candidate/aseg_ridge.mgh",
+            "aseg_control": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/candidate/aseg_control.mgh",
+            "aseg_removed_control": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/candidate/aseg_removed_control.mgh",
+            "gentle_control": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/candidate/gentle_control.mgh",
+            "three_d_1_source": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/candidate/three_d_1_source.mgh",
+            "three_d_1_control": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/candidate/three_d_1_control.mgh",
+            "three_d_2_source": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/candidate/three_d_2_source.mgh",
+            "three_d_2_control": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/candidate/three_d_2_control.mgh"
+          },
+          "diagnostic_wall_including_map_write_seconds": 91.88620365783572
+        }
+      },
+      "diagnostic_comparison": {
+        "aseg_ridge": {
+          "left": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/baseline/aseg_ridge.mgh",
+          "right": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/candidate/aseg_ridge.mgh",
+          "sha256": [
+            "bb75f28e0b09b07100850a3d5423f29b4c06652d2716cfa46370b727713c3b17",
+            "bb75f28e0b09b07100850a3d5423f29b4c06652d2716cfa46370b727713c3b17"
+          ],
+          "shape": [
+            [
+              256,
+              256,
+              256
+            ],
+            [
+              256,
+              256,
+              256
+            ]
+          ],
+          "dtype": [
+            "uint8",
+            "uint8"
+          ],
+          "affine_equal": true,
+          "header_equal": true,
+          "different_values": 0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "numerically_identical": true
+        },
+        "aseg_control": {
+          "left": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/baseline/aseg_control.mgh",
+          "right": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/candidate/aseg_control.mgh",
+          "sha256": [
+            "66e571a2df4648a24f4f1e3b759e27e2296f66059f616c72ccde3e8b8f668b6c",
+            "66e571a2df4648a24f4f1e3b759e27e2296f66059f616c72ccde3e8b8f668b6c"
+          ],
+          "shape": [
+            [
+              256,
+              256,
+              256
+            ],
+            [
+              256,
+              256,
+              256
+            ]
+          ],
+          "dtype": [
+            "uint8",
+            "uint8"
+          ],
+          "affine_equal": true,
+          "header_equal": true,
+          "different_values": 0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "numerically_identical": true
+        },
+        "aseg_removed_control": {
+          "left": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/baseline/aseg_removed_control.mgh",
+          "right": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/candidate/aseg_removed_control.mgh",
+          "sha256": [
+            "67af77dddab2c73b3e4ee53a77da2bdf7e6855ffca964b3695c8beea77090813",
+            "67af77dddab2c73b3e4ee53a77da2bdf7e6855ffca964b3695c8beea77090813"
+          ],
+          "shape": [
+            [
+              256,
+              256,
+              256
+            ],
+            [
+              256,
+              256,
+              256
+            ]
+          ],
+          "dtype": [
+            "uint8",
+            "uint8"
+          ],
+          "affine_equal": true,
+          "header_equal": true,
+          "different_values": 0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "numerically_identical": true
+        },
+        "gentle_control": {
+          "left": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/baseline/gentle_control.mgh",
+          "right": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/candidate/gentle_control.mgh",
+          "sha256": [
+            "65a11b75dea68a623d562dcb76882e01eb88e98924f27763b639f98306141c68",
+            "65a11b75dea68a623d562dcb76882e01eb88e98924f27763b639f98306141c68"
+          ],
+          "shape": [
+            [
+              256,
+              256,
+              256
+            ],
+            [
+              256,
+              256,
+              256
+            ]
+          ],
+          "dtype": [
+            "uint8",
+            "uint8"
+          ],
+          "affine_equal": true,
+          "header_equal": true,
+          "different_values": 0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "numerically_identical": true
+        },
+        "three_d_1_source": {
+          "left": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/baseline/three_d_1_source.mgh",
+          "right": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/candidate/three_d_1_source.mgh",
+          "sha256": [
+            "a3dae0659b77d84aec6ae7edfa93e93d21323ed316be57c70bd50b7f24afedda",
+            "a3dae0659b77d84aec6ae7edfa93e93d21323ed316be57c70bd50b7f24afedda"
+          ],
+          "shape": [
+            [
+              256,
+              256,
+              256
+            ],
+            [
+              256,
+              256,
+              256
+            ]
+          ],
+          "dtype": [
+            ">f4",
+            ">f4"
+          ],
+          "affine_equal": true,
+          "header_equal": true,
+          "different_values": 0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "numerically_identical": true
+        },
+        "three_d_1_control": {
+          "left": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/baseline/three_d_1_control.mgh",
+          "right": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/candidate/three_d_1_control.mgh",
+          "sha256": [
+            "9b634be73cfa357e19505170b07064d70f7892acc2880cd80d48ee4f11393006",
+            "9b634be73cfa357e19505170b07064d70f7892acc2880cd80d48ee4f11393006"
+          ],
+          "shape": [
+            [
+              256,
+              256,
+              256
+            ],
+            [
+              256,
+              256,
+              256
+            ]
+          ],
+          "dtype": [
+            "uint8",
+            "uint8"
+          ],
+          "affine_equal": true,
+          "header_equal": true,
+          "different_values": 0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "numerically_identical": true
+        },
+        "three_d_2_source": {
+          "left": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/baseline/three_d_2_source.mgh",
+          "right": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/candidate/three_d_2_source.mgh",
+          "sha256": [
+            "2dea073545ddcdddeb960c1c5b17bb352b991681e125bb1bae3bfdc1bb128ee8",
+            "2dea073545ddcdddeb960c1c5b17bb352b991681e125bb1bae3bfdc1bb128ee8"
+          ],
+          "shape": [
+            [
+              256,
+              256,
+              256
+            ],
+            [
+              256,
+              256,
+              256
+            ]
+          ],
+          "dtype": [
+            ">f4",
+            ">f4"
+          ],
+          "affine_equal": true,
+          "header_equal": true,
+          "different_values": 0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "numerically_identical": true
+        },
+        "three_d_2_control": {
+          "left": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/baseline/three_d_2_control.mgh",
+          "right": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/candidate/three_d_2_control.mgh",
+          "sha256": [
+            "5ce5d33c5b3d646a232069e4c4ffc3f08c87cced718013d041105a547d30e611",
+            "5ce5d33c5b3d646a232069e4c4ffc3f08c87cced718013d041105a547d30e611"
+          ],
+          "shape": [
+            [
+              256,
+              256,
+              256
+            ],
+            [
+              256,
+              256,
+              256
+            ]
+          ],
+          "dtype": [
+            "uint8",
+            "uint8"
+          ],
+          "affine_equal": true,
+          "header_equal": true,
+          "different_values": 0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "numerically_identical": true
+        },
+        "final": {
+          "left": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/baseline/brain.mgz",
+          "right": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/normalize_pair_sub01/second/diagnostic/candidate/brain.mgz",
+          "sha256": [
+            "14a95e6358d0652a9351e6abd5bebc7e91381cb6d005b9b109b93e199a084629",
+            "14a95e6358d0652a9351e6abd5bebc7e91381cb6d005b9b109b93e199a084629"
+          ],
+          "shape": [
+            [
+              256,
+              256,
+              256
+            ],
+            [
+              256,
+              256,
+              256
+            ]
+          ],
+          "dtype": [
+            "uint8",
+            "uint8"
+          ],
+          "affine_equal": true,
+          "header_equal": true,
+          "different_values": 0,
+          "maximum_absolute_error": 0.0,
+          "p99_absolute_error": 0.0,
+          "numerically_identical": true
+        }
+      }
+    }
+  },
+  "cpu_model": "Intel(R) Xeon(R) Gold 6430",
+  "optimization_introduced_no_numeric_or_geometry_change": true,
+  "whole_pipeline_speedup": null
+}

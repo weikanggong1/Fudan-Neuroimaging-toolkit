@@ -96,19 +96,29 @@ def nonlinear_epoch_gradient(vertices: np.ndarray, faces: np.ndarray,
                              old_average_neighbors: np.float32,
                              distance_weight: float = 1e-6,
                              nonlinear_weight: float = 1.0,
-                             k: float = 10.0) -> tuple[np.ndarray, dict]:
-    """Accumulate native distance and logistic area forces in source order."""
+                             k: float = 10.0, *,
+                             normal_topology=None, original_metric=None) -> tuple[np.ndarray, dict]:
+    """按原顺序计算球面梯度，坐标为surface RAS/mm。
+
+    normal_topology=None可复用本次同面的FaceNormalTopology；original_metric=None
+    可传同一smoothwm的(float32(F,)绝对面积,float32总面积mm²)，两者只读。
+    默认None沿原即时计算；其余输入/权重和返回梯度/报告保持原定义。
+    缓存不能跨拓扑或metric版本使用，法向和现版面积每次重算。
+    """
     xyz = np.asarray(vertices, np.float32)
     faces = np.asarray(faces, np.int32)
     area, face_normals = _face_geometry(xyz, faces)
-    original_face_area, _ = _face_geometry(
-        np.asarray(smoothwm_vertices, np.float32), faces)
-    original_face_area = np.abs(original_face_area)
-    original_total = np.float32(np.sum(original_face_area, dtype=np.float64))
+    if original_metric is None:
+        original_face_area, _ = _face_geometry(
+            np.asarray(smoothwm_vertices, np.float32), faces)
+        original_face_area = np.abs(original_face_area)
+        original_total = np.float32(np.sum(original_face_area, dtype=np.float64))
+    else:
+        original_face_area, original_total = original_metric
     current_total = np.float32(4 * math.pi * 100 * 100)
     area_scale = np.float32(original_total / current_total)
     distance_scale = np.float32(np.sqrt(np.float32(original_total / current_total)))
-    normals = initial_vertex_normals(xyz, faces)
+    normals = initial_vertex_normals(xyz, faces, topology=normal_topology)
     distance = _distance_force(xyz, normals, offsets, neighbors,
                                original_distances, distance_scale,
                                np.float32(distance_weight),

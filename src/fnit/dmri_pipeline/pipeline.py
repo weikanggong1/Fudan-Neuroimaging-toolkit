@@ -18,11 +18,10 @@ from .._sampling_plan import SamplingGeometry
 from ..amico_noddi import TorchAMICONODDI
 from ..dtifit import TorchDTIFIT, select_shell
 from ..eddy import TorchEDDY
-from ..eddy.ukb import _brain_mask, prepare_ukb_eddy
+from ..eddy.ukb import _get_synthstrip, _prepare_brain_mask, prepare_ukb_eddy
 from ..flirt import TorchFLIRT
 from ..fnirt import resolve_fnirt_config
 from ..mmorf import prepare_mmorf_warp, run_mmorf
-from ..synthstrip import SynthStrip
 from ..topup import run_ukb_topup
 from ..topup.ukb import _metadata
 from .bids import locate_bids_dwi, stage_bids_dwi
@@ -59,31 +58,41 @@ def _same_grid(paths):
         raise ValueError("all standard templates must use the same MNI grid")
 
 
-def _prepare_ap_only(raw_dir, output_dir, *, overwrite):
+def _prepare_ap_only(raw_dir, output_dir, *, overwrite, device=None,
+                     synthstrip_weights=None, _synthstrip_cache=None):
     raw_dir = Path(raw_dir)
     output_dir = Path(output_dir)
     image_path = _require(raw_dir / "AP.nii.gz")
     bval_path = _require(raw_dir / "AP.bval")
     bvec_path = _require(raw_dir / "AP.bvec")
     _require(raw_dir / "AP.json")
+    started = time.perf_counter()
     image = nib.load(str(image_path))
-    values = np.asarray(image.dataobj, dtype=np.float32)
     bvals = load_bvals(bval_path)
-    if values.ndim != 4 or values.shape[3] != bvals.size:
+    if len(image.shape) != 4 or image.shape[3] != bvals.size:
         raise ValueError("AP image and bvals have inconsistent volume counts")
-    b0 = values[..., bvals < 100]
-    if b0.shape[3] == 0:
+    b0_indices = np.flatnonzero(bvals < 100)
+    if b0_indices.size == 0:
         raise ValueError("AP acquisition contains no b<100 volume")
     output_dir.mkdir(parents=True, exist_ok=True)
     mask_path = output_dir / "nodif_brain_mask.nii.gz"
     acqp_path = output_dir / "acqparams.txt"
     index_path = output_dir / "eddy_index.txt"
-    existing = [path for path in (mask_path, acqp_path, index_path) if path.exists()]
+    existing = [path for path in (mask_path, acqp_path, index_path,
+                                 output_dir / "nodif_brain_mask_report.json")
+                if path.exists()]
     if existing and not overwrite:
         raise FileExistsError(f"output exists: {existing[0]}; pass overwrite=True")
-    mask = _brain_mask(image_like(b0.mean(3), image))
-    nib.save(image_like(mask.astype(np.float32), image), str(mask_path))
-    pe, readout = _metadata(raw_dir, "AP", values.shape[:3])
+    mean = np.zeros(image.shape[:3], dtype=np.float32)
+    for index in b0_indices:
+        mean += np.asarray(image.dataobj[..., index], dtype=np.float32)
+    mean /= b0_indices.size
+    _prepare_brain_mask(
+        image_like(mean, image), output_dir, device=device,
+        synthstrip_weights=synthstrip_weights, _synthstrip_cache=_synthstrip_cache,
+        source="raw_ap_b_lt_100_mean", input_volumes=b0_indices.size, started=started,
+    )
+    pe, readout = _metadata(raw_dir, "AP", image.shape[:3])
     np.savetxt(acqp_path, np.asarray([(*pe, readout)]), fmt=("%g", "%g", "%g", "%.7g"))
     np.savetxt(index_path, np.ones((1, bvals.size), dtype=int), fmt="%d")
     return {
@@ -135,6 +144,7 @@ class DMRIPipeline:
             if registration_backend == "tbss" else None
         )
         self.synthstrip_weights = synthstrip_weights
+        self._synthstrip_cache = {}
         self.dti_shell = float(dti_shell)
         self.dti_tolerance = float(dti_tolerance)
         self.bvec_source = bvec_source
@@ -168,8 +178,6 @@ class DMRIPipeline:
             t1_template = _require(t1_template)
             tensor_template = _require(tensor_template)
             _same_grid((fa_template, t1_template, tensor_template))
-            if self.synthstrip_weights is None:
-                raise ValueError("synthstrip_weights is required for the MMORF branch")
         report_path = output_dir / "dmri_pipeline_report.json"
         if report_path.exists() and not overwrite:
             raise FileExistsError(f"output exists: {report_path}; pass overwrite=True")
@@ -203,12 +211,21 @@ class DMRIPipeline:
                 device=self.device,
                 overwrite=overwrite,
                 ref_scan_no=topup_prepared["ap_index"],
+                synthstrip_weights=self.synthstrip_weights,
+                _synthstrip_cache=self._synthstrip_cache,
             )
         else:
             eddy_inputs = _prepare_ap_only(
-                raw_dir, output_dir / "eddy", overwrite=overwrite
+                raw_dir, output_dir / "eddy", overwrite=overwrite,
+                device=self.device, synthstrip_weights=self.synthstrip_weights,
+                _synthstrip_cache=self._synthstrip_cache,
             )
         timings["topup_and_eddy_preparation"] = time.perf_counter() - started
+        brain_mask_qc = json.loads(
+            (output_dir / "eddy" / "nodif_brain_mask_report.json").read_text(
+                encoding="utf-8"
+            )
+        )
 
         started = time.perf_counter()
         eddy_root = output_dir / "eddy" / "data"
@@ -283,9 +300,10 @@ class DMRIPipeline:
             registration_qc = registered.qc
         else:
             registration_dir.mkdir(parents=True, exist_ok=True)
-            stripped = SynthStrip(
-                weights=self.synthstrip_weights, device=self.device
-            )(os.fspath(t1))
+            strip_model, strip_weights, strip_reused = _get_synthstrip(
+                self.synthstrip_weights, self.device, self._synthstrip_cache
+            )
+            stripped = strip_model(os.fspath(t1))
             t1_brain_path = registration_dir / "t1_brain.nii.gz"
             t1_mask_path = registration_dir / "t1_brain_mask.nii.gz"
             stripped.image.save(t1_brain_path)
@@ -324,6 +342,9 @@ class DMRIPipeline:
                 nib.save(warped, str(standard_dir / f"{name}.nii.gz"))
                 standard_maps[name] = warped
             registration_qc = {
+                "synthstrip": {"algorithm": "fnit.synthstrip.SynthStrip",
+                               "weights": strip_weights, "model_reused": strip_reused,
+                               "input": "subject_t1", "border_mm": 1, "no_csf": False},
                 "t1_flirt": scalar_affine.qc,
                 "fa_flirt": tensor_affine.qc,
                 "mmorf": mmorf.qc,
@@ -345,6 +366,7 @@ class DMRIPipeline:
             "eddy_gp_seed": self.eddy_gp_seed,
             "timings_seconds": timings,
             "elapsed_seconds": time.perf_counter() - total_started,
+            "brain_mask": brain_mask_qc,
             "eddy": eddy.qc,
             "dtifit": dti.qc,
             "noddi": noddi.qc,

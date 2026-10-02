@@ -1,0 +1,37 @@
+{
+  "code_commit": "ff372d73f106e850b999fbc95ae0b324cd315cbf",
+  "source_tree": "319ff4ccd7632c637721b55522640714ce0d37f2",
+  "status": "ready_for_raw_T1_whole_benchmark",
+  "decision_scope": "root-reviewed execution readiness; not formal numerical/metric equivalence acceptance",
+  "same_input_results": "SynthSeg and auxiliary labels exact vs prior; shapes/dtypes/actual GPU flags checked",
+  "known_changes": [
+    "main SynthStrip boundary image 51/31 voxels; assess downstream in raw whole runs",
+    "GPU MNI affine FP32 reduces field difference; strict transform diagnostic still fails",
+    "inverse full-field vector maxima 0.57475/55.83623 mm outside baseline brainmask; brain maxima 0.000563/0.002872 mm, no brain voxel over diagnostic 0.1 mm",
+    "cache-enabled Synth diagnostic exceeds20GB; low-memory cache-disabled monitored stages below20GB; retain policy"
+  ],
+  "pending": [
+    "two final raw-T1 whole runs",
+    "complete final metrics and mesh quality",
+    "clean environment runtime isolation"
+  ],
+  "overall_metric_equivalence": "not_assessed; no confirmed thresholds",
+  "input_report_sha256": {
+    "synth_main_ff372d7_sub01/run.json": "701fe716d120beeee783428801b1157c1a906e4577bd8ee74dc5954073d0df8c",
+    "synth_main_ff372d7_sub01_cache_off/run.json": "908534f67f0729610d002a299600f72b033fa82ce0c4760cfbd48a6e8918afc8",
+    "aux_policy_ff372d7_sub01.json": "a7f38b7ba0a4a41525c5c09ac6f689d2df99de3aaa2e9386825ed549796bf1e8",
+    "mni_affine_ff372d7_sub01_retry1.json": "72691f32e1b90efe6588311854d39e8b2233595b24d22937539efa58ac0c52ba",
+    "synth_main_ff372d7_sub01_cache_off_monitor/monitor.json": "272a1cfc3102cda40493414a101fb2129c5f3caa56232ece64f16adaf1ecca84",
+    "mni_affine_ff372d7_sub01_retry1_monitor/monitor.json": "ae77a4d7637dbadd750be64425ecb46ab7efd3b293903cd1d28ddd42c41bea54",
+    "synth_main_ff372d7_sub02/run.json": "124c4cc4c65fca4eca4ef07ddfadd082bda9679cbdd97ffbedb95eeeac5ab1c8",
+    "synth_main_ff372d7_sub02_cache_off/run.json": "fc542333ca978f06b427bb59c19cdb4a56bd4c4eaed6b08861c00658aaeffb91",
+    "aux_policy_ff372d7_sub02.json": "c62d2e710a4e5732f4d11af00ffe4e9ab46bf1a1449e4871b9dd818d79ffe6bf",
+    "mni_affine_ff372d7_sub02_retry1.json": "c0cd6fcd84941abfdeb8e76ed3a77899d986d4f6f27c0a5b03bb321ff8f3141a",
+    "synth_main_ff372d7_sub02_cache_off_monitor/monitor.json": "c2e407a5b94efd4d90084b7db639f5a988e04b9ce50ba41edb7b6e5d03bc2b20",
+    "mni_affine_ff372d7_sub02_retry1_monitor/monitor.json": "dcfc584894b51a468c21dca272a2087bc8977777bd704ab90442177bdc9da0df",
+    "aux_policy_ff372d7_summary.json": "e520d518fab379f72e96b1be1b842b7d6ab790968ef3ec8a6da36501e8e83570",
+    "mni_affine_inverse_residual_diagnosis.json": "4356f2b536fe9b7fc5b03a86cd7a8506effa89139954b686b7b94358df858d96",
+    "runtime_fingerprints_ff372d7.json": "8a87936042119b99e125273900ee87bb7d5e588d7e18534fcd77abfd24b958e6",
+    "installation_ff372d7/report.json": "7f1ff2f9e4023e9afbe4d4d7cc9bbc3328952a29c630c2dcb0908ce566356351"
+  }
+}

@@ -6,6 +6,7 @@
 
 | 当前证据 | 用途 |
 |---|---|
+| [发布清单](e2e_latest/publication.public.json) | 绑定本次发布的报告、图示、脚本和计算代码；列出合并后测试及两项无关eddy更新。 |
 | [完整 FNIT 执行](e2e_latest/fnit_main.public.json) | 两个公开入口连续运行的实际墙钟、捕获开销、细分阶段、全部输出检查及源码/输入/输出 SHA。 |
 | [MSM 扩展构建](e2e_latest/fnit_main_build.public.json) | 实际加载的本包 FastPD 扩展、构建源码与 flags；构建不计入调用耗时。 |
 | [进程完成状态](e2e_latest/fnit_main_process.public.json) | 本次成功运行的退出码。 |

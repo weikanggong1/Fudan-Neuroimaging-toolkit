@@ -63,3 +63,65 @@ mris_place_surface --adgws-in ../surf/autodet.gw.stats.lh.dat \
 
 - Fischl B. FreeSurfer. *NeuroImage*. 2012;62(2):774–781. [doi:10.1016/j.neuroimage.2012.01.021](https://doi.org/10.1016/j.neuroimage.2012.01.021)。
 - [FreeSurfer 固定源码提交](https://github.com/freesurfer/freesurfer/tree/d932c45b7941662ea380a05efef580568b98d41a)。
+
+
+## 当前串行优化：复用静态索引
+
+实测候选8178bf2。完整四轮函数复用已有FaceNormalTopology，固定面CSR只准备
+一次；每个当前坐标版本仍重算法向。原表面法向沿用自己的累加定义，累加前
+不归一化各面，不能用current法向替代。原始white坐标和rip标签的桶索引固定，
+每次对当前坐标重新生成键；Numba查询替代每轮两个Python逐顶点字典循环。
+保留float32加1000再向零取整、桶内原顶点顺序、所有候选及原排斥梯度。
+异步接受、拒绝试步状态、步长、目标值、四轮切换及最后相交清理均保留。
+生产默认仍为Conda完整pial；该替换必须先通过同输入回归，不能把组件加速
+直接计入生产整例提速。
+
+新增内部OriginalVertexBuckets(original, ripped)输入(N,3)float32原始surface
+RAS/mm坐标和(N,)bool标签mask，复制并冻结整数键和mask。query(current)输入
+同N的有限坐标，返回offsets(N+1)与candidate_ids(M) int32；M为全部候选数，
+没有固定上限。原表面或rip改变须新建；shape或有限性不合法抛ValueError。
+vertex_buckets(current, original, ripped)保留原入口，单次使用相同完整算法。
+original_vertex_normals(vertices, triangles, *, topology=None)接收同序有限坐标
+和整数三角面，返回(N,3)float32单位法向；无面顶点为零，不兼容拓扑抛异常。
+_query_vertex_buckets输入当前/排序整数键、原顶点ids及固定rip，返回同CSR。
+这些都是上游mris_place_surface内部步骤，没有独立官方CLI或GPU/精度选项。
+
+~~~python
+import nibabel.freesurfer.io as surface_io
+import numpy as np
+from fnit.recon_all.place_surface_normals import FaceNormalTopology
+from fnit.recon_all.place_surface_repulsion import OriginalVertexBuckets, original_vertex_normals
+vertices, faces = surface_io.read_geometry("/data/self/surf/lh.white")  # 有序三角面，surface RAS/mm
+ripped = np.zeros(len(vertices), dtype=bool)  # 示例保留全部顶点；生产来自真实rip标签
+normal_topology = FaceNormalTopology(triangles=faces, nvertices=len(vertices))  # 仅缓存整数拓扑
+original_normals = original_vertex_normals(vertices=vertices, triangles=faces, topology=normal_topology)  # 原表面法向定义
+candidate_index = OriginalVertexBuckets(original=vertices, ripped=ripped)  # 本次white与固定rip
+candidate_offsets, candidate_ids = candidate_index.query(current=vertices)  # 下一轮传其真实当前坐标
+~~~
+
+真实完整回归已执行sub01左侧41步，报告绑定源码/输入SHA，固定4线程、200步上限。
+未更改默认white：现有Python white只覆盖前缀，无法代替完整四轮优化。
+已有GPU厚度/面积/曲率继续由主runner调用，不重新实现；整例实测另行报告。
+
+
+## 61926c7：同一顶点批量碰撞
+
+当前真实剖析：完整41步含cProfile为1687.49秒，其中异步放置累计1419.07秒，
+最终相交清理140.51秒；桶构造17.57秒。累计时间含子函数，不能再相加。
+这是CPU剖析，不作为无剖析性能值。
+
+新增_vertex_collision_batch把同一顶点关联面一次送入KD查询，再复用原
+_candidate_collision进行编译循环。current不修改，所有面仍按原序；整个
+顶点检查完成后才接受坐标，保持异步顶点顺序。KD显式return_sorted=False，
+半径仍依次加原maximum_radius与1mm，完整候选无上限。存在拒绝试步MHT时
+继续执行原逐面路径，保留其状态、候选重试和清理。没有同时更新顶点或GPU
+近似。内部输入为当前float32(N,3)坐标、int32(F,3)面、有序关联face_ids、
+vertex、float32(3,)终点、当前固定KD树及最大面半径mm；返回bool。
+_incident_face_geometry返回关联面坐标、double中心/半径和float32边界；
+_incident_faces_collide输入这些量及完整候选CSR并返回首次碰撞bool。
+没有独立官方CLI、精度/线程新参数；限制是只用于无拒绝试步状态的顶点。
+
+32项专项测试通过；四半球真实原法向和white/pial坐标下的候选CSR完全相同。
+桶查询约0.016–0.027秒，旧代码0.222–0.369秒，准备成本另列；这是组件计时。
+候选完整无剖析冷JIT耗时1232.634秒，41步、四轮结束26/32/36/41及清理2→6→0均与优化前相同；有序面、全部坐标和文件SHA完全一致。无剖析、分别使用空JIT缓存的同主机4线程配对为1453.060→1232.634秒，单次观察减少15.17%（1.179倍），文件SHA相同。共享负载下只有一次新/旧顺序配对，未验证稳定吞吐；同输入三方结果已完成：Python的全部坐标及有序面与官方8.2.0完全相同，当前Conda与官方P99为0.225255mm、最大1.482209mm，与冻结Conda几何相同。原始报告见[三方JSON](../../validation/recon_all/optimizations/20261001_serial/stage5/native_reference.json)。Conda176.787秒、官方133.863秒；三者计时均含阶段读写与加载，Python另含冷JIT。当前Python明显较慢，不默认替换。生产仍保留完整Conda white/pial，整例提速单独测量。
+第一版只缓存整数索引的完整候选剖析已中止，保留日志，不计入性能结果。

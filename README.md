@@ -40,7 +40,7 @@ CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹�
 | [TorchFAST](docs/fast/README.md) | FSL `fast` | 三组织分割、部分体积分数与偏置场。 |
 | [FastVBM](docs/fast_vbm/README.md) | FSL `fslvbm` | 从 T1w 生成标准空间灰质、Jacobian 与调制灰质图；[全流程 benchmark](validation/fast_vbm/README.md)。 |
 | [segment_4_subregions](docs/subregions/README.md) | FreeSurfer `segment_subregions brainstem/thalamus/hippo-amygdala` | 一张 T1 完成脑干、双侧丘脑、海马和杏仁核分割，保存原网格标签、110 项硬/软体积及高分辨率结果；CPU/GPU 均支持。[全流程 benchmark 与官方重复性](validation/subregions/reproducibility_20261002/README.md)：原始 T1 计算 4.33–5.80 分钟；两类输入各三次完整运行，全部细标签重复零差异；同阶段丘脑细核官方加权 Dice 0.9531→0.9708。 |
-| [run_recon_all_python](docs/recon_all/README.md) | FreeSurfer `recon-all` | 从 T1w 生成脑分割、皮层表面、顶点指标与脑区统计。 |
+| [run_recon_all_python](docs/recon_all/README.md) | FreeSurfer `recon-all` | 从 T1w 生成脑分割、皮层表面、顶点指标与脑区统计；[两例当前性能与精度](validation/recon_all/optimizations/20261001_serial/FINAL_RESULTS.md)。 |
 
 ### fMRI
 
@@ -65,7 +65,7 @@ CUDA 路径默认启用 NVIDIA TF32 矩阵乘法和 cuDNN 内核；BWAS 为匹�
 | [TorchMMORF](docs/mmorf/README.md) | FSL `MMORF` | 多标量与扩散张量联合配准，自动估计线性初始化。 |
 | [TorchBEDPOSTX](docs/bedpostx/README.md) | FSL `bedpostx` | 纤维方向、体积分数与后验不确定性。 |
 | [TorchProbtrackX](docs/probtrackx/README.md) | FSL `probtrackx2` | 概率纤维追踪、路径密度和连接矩阵。 |
-| [DMRIPipeline](docs/dmri_pipeline/README.md) | UK Biobank dMRI pipeline（FSL `topup`、`eddy`、`dtifit`、TBSS） | 原始 AP/PA 或 BIDS DWI → 九张 native/标准参数图；无 T1w 用 TBSS，有 T1w 可选 MMORF。[最新同 raw 整链](validation/dmri_pipeline/end_to_end_20261002.md)：TBSS＋AMICO 两轮 FNIT 7.58–8.45 分钟、独立 FSL＋AMICO 33.24–36.12 分钟；标准九图固定 ROI r=0.419–0.810，尚未数值等价。 |
+| [DMRIPipeline](docs/dmri_pipeline/README.md) | UK Biobank dMRI pipeline（FSL `topup`、`eddy`、`dtifit`、TBSS） | 原始 AP/PA 或 BIDS DWI → 九张 native/标准参数图；无 T1w 用 TBSS，有 T1w 可选 MMORF。PyTorch SynthStrip 脑 mask＋新版 TOPUP。[最新同 raw 整链](validation/dmri_pipeline/end_to_end_synthstrip_topup_20261002.md)：FNIT 6.75 分钟、独立官方 SynthStrip＋FSL/AMICO 34.26 分钟；标准九图固定 ROI r=0.9880–0.9987。对旧 BET 协议 r=0.8465–0.9597；尚非逐值相等。 |
 | [UKBConnectome_pipeline](docs/connectome/README.md) | BIDS DWI/T1 结构连接组网 | 从原始 BIDS 自动执行 TOPUP、EDDY、必要时的官方 recon-all，并从一次追踪输出单套或多套 atlas 矩阵；[真实数据对照](validation/connectome/ds004666/README.md)。 |
 
 ### 后续分析（Post analysis）
@@ -190,7 +190,7 @@ subregion_result = segment_4_subregions(
 
 默认运行全部四项结构，设置输出目录后自动保存原 T1 网格的 `subregions_native.nii.gz`、`labels.tsv`、`volumes.tsv`、`report.json` 和四项 `highres/` 标签。`save_posteriors=False` 默认不写较大的后验图；需要时显式设为 `True`。完整参数、命令行和官方对照见[统一脑亚区说明](docs/subregions/README.md)。
 
-API 的显式 `weights=`、CLI 的 `--weights`、`FNIT_WEIGHTS` 环境变量、已保存目录和默认缓存按此顺序解析。TorchFAST、TorchFLIRT、TorchMCFLIRT、TorchFNIRT、TorchApplyWarp、TorchConvertWarp、TorchInvWarp、TorchTOPUP、TorchEDDY、TorchDTIFIT、TorchAMICONODDI、TorchMMORF、TorchBEDPOSTX、TorchProbtrackX 与 dMRI pipeline 的 TBSS 分支没有预训练权重；从原始 T1w 启动的流程可能仍需 SynthStrip。文件清单、官方 URL、SHA-256、许可和离线部署见[权重说明](docs/WEIGHTS.md)。
+API 的显式 `weights=`、CLI 的 `--weights`、`FNIT_WEIGHTS` 环境变量、已保存目录和默认缓存按此顺序解析。TorchFAST、TorchFLIRT、TorchMCFLIRT、TorchFNIRT、TorchApplyWarp、TorchConvertWarp、TorchInvWarp、TorchTOPUP、TorchEDDY、TorchDTIFIT、TorchAMICONODDI、TorchMMORF、TorchBEDPOSTX 与 TorchProbtrackX 本身没有预训练权重。DMRIPipeline 从原始 DWI 启动时使用 PyTorch SynthStrip 提取 b0 脑掩膜，需要 `synthstrip.1.pt`；有 T1w 的流程也可复用该模型。文件清单、官方 URL、SHA-256、许可和离线部署见[权重说明](docs/WEIGHTS.md)。
 
 ## 验证、样例与许可
 

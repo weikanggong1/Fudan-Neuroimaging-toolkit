@@ -12,7 +12,7 @@ import numpy as np
 import tifffile
 import torch
 
-from .mris_register_average_numba import average_gradients_exact_cpu
+from .mris_register_average_numba import RegistrationGradientAverager
 from .mris_register_atlas import sample_atlas_on_canonical_sphere
 from .mris_register_blur import blur_atlas_frame
 from .mris_register_kernels import center_sphere, normalize_mean_curvature, project_sphere
@@ -32,12 +32,17 @@ from .sphere_standard_python import write_standard_sphere_surface
 @torch.no_grad()
 def run_register_sulc(sphere: str | Path, smoothwm: str | Path,
                       sulc: str | Path, atlas_file: str | Path,
-                      output: str | Path, *, max_updates: int = 1024) -> dict:
+                      output: str | Path, *, max_updates: int = 1024,
+                      averaging_device: str = "cpu") -> dict:
     """Create the sulc-pass sphere from the ordered conventional sphere.
 
     This CPU PyTorch/Numba stage produces the seed for ``run_register_smoothwm``.
     It uses the FreeSurfer 8.2 default rigid search and source-derived scale
     schedule; no native registration executable or snapshot is read.
+    averaging_device 默认 cpu，可指定 cuda:N，仅搬运静态邻接及各次梯度，
+    完整 rounds 与 float32 顺序不变。max_updates 默认 1024 是未收敛时
+    的报错上限，不能减少正常轮次来加速。输出路径与逐轮轨迹、时间、
+    刚体搜索信息返回为 dict；表面坐标为 surface RAS/mm。
     """
     started = time.perf_counter()
     sphere, smoothwm, sulc = Path(sphere), Path(smoothwm), Path(sulc)
@@ -63,6 +68,7 @@ def run_register_sulc(sphere: str | Path, smoothwm: str | Path,
     normalized_sulc = normalize_mean_curvature(sulc_values)
     cache = prepare_registration_force_cache(vertices, original, triangles)
     neighbors, degrees = cache.neighbors, cache.degrees
+    average = RegistrationGradientAverager(neighbors, degrees, device=averaging_device)
     original_distances, original_areas = cache.original_distances, cache.original_areas
     original_area = cache.orig_area
     total_area = registration_total_area()
@@ -99,7 +105,7 @@ def run_register_sulc(sphere: str | Path, smoothwm: str | Path,
         e1, e2 = tangent_basis(normals)
         force = correlation_gradient_add(force, projected, curvature, e1, e2,
                                          mean_grid, variance_grid, avg_vertex_dist)
-        averaged = average_gradients_exact_cpu(force, neighbors, degrees, averages)
+        averaged = average(force, averages)
 
         def objective(trial: torch.Tensor) -> float:
             return first_registration_sse(
@@ -126,6 +132,7 @@ def run_register_sulc(sphere: str | Path, smoothwm: str | Path,
             "atlas": str(atlas_file), "output": str(output),
             "rigid_angles": angles, "rigid_score": rigid_score,
             "rigid_evaluations": evaluations, "rigid_seconds": rigid_seconds,
+            "averaging_device": str(average.device),
             "setup_seconds": setup_seconds, "updates": updates,
             "last_iteration": updates[-1]["iteration"],
             "total_seconds_including_io": time.perf_counter() - started}
@@ -136,9 +143,11 @@ def main(argv: list[str] | None = None) -> None:
     for name in ("sphere", "smoothwm", "sulc", "atlas", "output"):
         parser.add_argument(name, type=Path)
     parser.add_argument("--report", type=Path)
+    parser.add_argument("--averaging-device", default="cpu")
     args = parser.parse_args(argv)
     report = run_register_sulc(
-        args.sphere, args.smoothwm, args.sulc, args.atlas, args.output)
+        args.sphere, args.smoothwm, args.sulc, args.atlas, args.output,
+        averaging_device=args.averaging_device)
     content = json.dumps(report, indent=2) + "\n"
     if args.report:
         args.report.write_text(content)

@@ -1,0 +1,82 @@
+{
+  "host": "gpucw1",
+  "time_utc": "2026-09-30T11:37:26Z",
+  "physical_gpu": 1,
+  "precision": "float32",
+  "cuda_launch_blocking": true,
+  "source_commit": "e036f57b62b99d2af4cd8853ab2f1e6d2a9f8c68",
+  "records": [
+    {
+      "index": 0,
+      "cache_enabled": false,
+      "module_loading": null,
+      "operation": "empty",
+      "command": "import json,torch; from fnit.recon_all.native_free import run_recon_all_python; torch.set_num_threads(4); torch.cuda.init(); print(\"free_before\",torch.cuda.mem_get_info(0),flush=True); x=torch.empty(1,dtype=torch.float32,device=\"cuda:0\"); torch.cuda.synchronize(\"cuda:0\"); print(\"succeeded\",torch.cuda.mem_get_info(0),flush=True)",
+      "seconds": 4.9674084088765085,
+      "exit_code": 0,
+      "stdout": "free_before (29913776128, 84942979072)\nsucceeded (29911678976, 84942979072)\n",
+      "stderr": "",
+      "gpu_before": "52026, 28981, 100\n"
+    },
+    {
+      "index": 1,
+      "cache_enabled": false,
+      "module_loading": null,
+      "operation": "ones",
+      "command": "import json,torch; from fnit.recon_all.native_free import run_recon_all_python; torch.set_num_threads(4); torch.cuda.init(); print(\"free_before\",torch.cuda.mem_get_info(0),flush=True); x=torch.ones(1,dtype=torch.float32,device=\"cuda:0\"); torch.cuda.synchronize(\"cuda:0\"); print(\"succeeded\",torch.cuda.mem_get_info(0),flush=True)",
+      "seconds": 2.130000300705433,
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/site-packages/torch/cuda/memory.py\", line 712, in mem_get_info\n    return torch.cuda.cudart().cudaMemGetInfo(device)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: CUDA error: out of memory\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n\n",
+      "gpu_before": "52026, 28981, 100\n"
+    },
+    {
+      "index": 2,
+      "cache_enabled": true,
+      "module_loading": null,
+      "operation": "ones",
+      "command": "import json,torch; from fnit.recon_all.native_free import run_recon_all_python; torch.set_num_threads(4); torch.cuda.init(); print(\"free_before\",torch.cuda.mem_get_info(0),flush=True); x=torch.ones(1,dtype=torch.float32,device=\"cuda:0\"); torch.cuda.synchronize(\"cuda:0\"); print(\"succeeded\",torch.cuda.mem_get_info(0),flush=True)",
+      "seconds": 4.562929351814091,
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/site-packages/torch/cuda/memory.py\", line 712, in mem_get_info\n    return torch.cuda.cudart().cudaMemGetInfo(device)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: CUDA error: out of memory\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n\n",
+      "gpu_before": "52026, 28981, 100\n"
+    },
+    {
+      "index": 3,
+      "cache_enabled": false,
+      "module_loading": "EAGER",
+      "operation": "ones",
+      "command": "import json,torch; from fnit.recon_all.native_free import run_recon_all_python; torch.set_num_threads(4); torch.cuda.init(); print(\"free_before\",torch.cuda.mem_get_info(0),flush=True); x=torch.ones(1,dtype=torch.float32,device=\"cuda:0\"); torch.cuda.synchronize(\"cuda:0\"); print(\"succeeded\",torch.cuda.mem_get_info(0),flush=True)",
+      "seconds": 1.9802594776265323,
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/site-packages/torch/cuda/memory.py\", line 712, in mem_get_info\n    return torch.cuda.cudart().cudaMemGetInfo(device)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: CUDA error: out of memory\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n\n",
+      "gpu_before": "52026, 28981, 100\n"
+    },
+    {
+      "index": 4,
+      "cache_enabled": false,
+      "module_loading": "LAZY",
+      "operation": "ones",
+      "command": "import json,torch; from fnit.recon_all.native_free import run_recon_all_python; torch.set_num_threads(4); torch.cuda.init(); print(\"free_before\",torch.cuda.mem_get_info(0),flush=True); x=torch.ones(1,dtype=torch.float32,device=\"cuda:0\"); torch.cuda.synchronize(\"cuda:0\"); print(\"succeeded\",torch.cuda.mem_get_info(0),flush=True)",
+      "seconds": 1.9863310549408197,
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/site-packages/torch/cuda/memory.py\", line 712, in mem_get_info\n    return torch.cuda.cudart().cudaMemGetInfo(device)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: CUDA error: out of memory\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n\n",
+      "gpu_before": "52026, 28981, 100\n"
+    },
+    {
+      "index": 5,
+      "cache_enabled": true,
+      "module_loading": "EAGER",
+      "operation": "copy",
+      "command": "import json,torch; from fnit.recon_all.native_free import run_recon_all_python; torch.set_num_threads(4); torch.cuda.init(); print(\"free_before\",torch.cuda.mem_get_info(0),flush=True); x=torch.ones(1,dtype=torch.float32).to(\"cuda:0\"); torch.cuda.synchronize(\"cuda:0\"); print(\"succeeded\",torch.cuda.mem_get_info(0),flush=True)",
+      "seconds": 2.0091485581360757,
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/site-packages/torch/cuda/memory.py\", line 712, in mem_get_info\n    return torch.cuda.cudart().cudaMemGetInfo(device)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: CUDA error: out of memory\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n\n",
+      "gpu_before": "52026, 28981, 100\n"
+    }
+  ]
+}

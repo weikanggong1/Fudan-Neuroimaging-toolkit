@@ -1,0 +1,154 @@
+{
+  "code_commit": "ff372d73f106e850b999fbc95ae0b324cd315cbf",
+  "scope": "same_input_integration_stage; not_whole",
+  "host": "gpucw1",
+  "threads": 4,
+  "gpu_uuid": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
+  "input_sha256": "365b7668d55d91659b74948279a7913952033059b690993747903ce61ead4f70",
+  "benchmark_sha256": "b374d04db982e02d00ebbbc0517962b9a90a008f9be7b0fac5b5bfa36f857386",
+  "precision": {
+    "SynthStrip": [
+      {
+        "model": "SynthStrip",
+        "device": "cuda:0",
+        "input_dtype": "torch.float32",
+        "model_devices": [
+          "cuda:0"
+        ],
+        "model_dtypes": [
+          "torch.float32"
+        ],
+        "matmul_tf32": true,
+        "cudnn_tf32": false,
+        "autocast": {
+          "enabled": false,
+          "dtype": "torch.float16"
+        }
+      }
+    ],
+    "SynthSeg": {
+      "requested_cudnn_tf32": false,
+      "forwards": [
+        {
+          "pass": "original",
+          "device": "cuda:0",
+          "matmul_tf32": true,
+          "cudnn_tf32": false,
+          "input_dtype": "torch.float32",
+          "model_dtypes": [
+            "torch.float32"
+          ],
+          "autocast": {
+            "cpu": {
+              "enabled": false,
+              "dtype": "torch.bfloat16"
+            },
+            "cuda": {
+              "enabled": false,
+              "dtype": "torch.float16"
+            }
+          },
+          "output_dtype": "torch.float32"
+        },
+        {
+          "pass": "flipped",
+          "device": "cuda:0",
+          "matmul_tf32": true,
+          "cudnn_tf32": false,
+          "input_dtype": "torch.float32",
+          "model_dtypes": [
+            "torch.float32"
+          ],
+          "autocast": {
+            "cpu": {
+              "enabled": false,
+              "dtype": "torch.bfloat16"
+            },
+            "cuda": {
+              "enabled": false,
+              "dtype": "torch.float16"
+            }
+          },
+          "output_dtype": "torch.float32"
+        }
+      ],
+      "posterior_buffer_reused": true,
+      "posterior_ensemble_dtype": "torch.float32"
+    }
+  },
+  "SynthStrip_backend_policy": {
+    "enabled": true,
+    "benchmark": false,
+    "deterministic": true,
+    "allow_tf32": false
+  },
+  "SynthStrip_actual_backend": {
+    "enabled": true,
+    "benchmark": false,
+    "deterministic": true,
+    "allow_tf32": false
+  },
+  "seconds": {
+    "SynthStrip_including_extra_mask_distance_io": 4.358394599054009,
+    "SynthSeg": 7.77013509022072
+  },
+  "allocator_cache_disabled_env": false,
+  "torch_memory_stats_status": "available",
+  "allocated_bytes": 13073034240,
+  "reserved_bytes": 16190013440,
+  "comparisons": {
+    "SynthStrip": {
+      "different_voxels": 0,
+      "maximum": 0.0,
+      "p99": 0.0,
+      "geometry_equal": true,
+      "dtype_equal": true,
+      "before_sha256": "39e65fe4a46f93304e60bc5f1b8474c5cf23222afb544822c297d6152d40a62a",
+      "after_sha256": "39e65fe4a46f93304e60bc5f1b8474c5cf23222afb544822c297d6152d40a62a"
+    },
+    "SynthSeg": {
+      "different_voxels": 0,
+      "maximum": 0.0,
+      "p99": 0.0,
+      "geometry_equal": true,
+      "dtype_equal": true,
+      "before_sha256": "60300971c5f0b1b267e1ce183fa140867f3631f392a7eb753a3abad6933a43f7",
+      "after_sha256": "60300971c5f0b1b267e1ce183fa140867f3631f392a7eb753a3abad6933a43f7",
+      "dice": {
+        "2": 1.0,
+        "3": 1.0,
+        "4": 1.0,
+        "5": 1.0,
+        "7": 1.0,
+        "8": 1.0,
+        "10": 1.0,
+        "11": 1.0,
+        "12": 1.0,
+        "13": 1.0,
+        "14": 1.0,
+        "15": 1.0,
+        "16": 1.0,
+        "17": 1.0,
+        "18": 1.0,
+        "24": 1.0,
+        "26": 1.0,
+        "28": 1.0,
+        "41": 1.0,
+        "42": 1.0,
+        "43": 1.0,
+        "44": 1.0,
+        "46": 1.0,
+        "47": 1.0,
+        "49": 1.0,
+        "50": 1.0,
+        "51": 1.0,
+        "52": 1.0,
+        "53": 1.0,
+        "54": 1.0,
+        "58": 1.0,
+        "60": 1.0
+      }
+    }
+  },
+  "overall_metric_equivalence": "not_assessed"
+}
