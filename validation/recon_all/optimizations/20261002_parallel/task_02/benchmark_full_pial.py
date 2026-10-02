@@ -34,7 +34,7 @@ for name,backend in [('baseline','cpu'),('candidate','triton')]:
    item.update(different_components=int(np.count_nonzero(xyz!=ref)),max_mm=float(delta.max()),p99_mm=float(np.quantile(delta,.99)),same_state=state==refstate,same_pass=pass_index==refpass)
   report['trace'].append(item);save()
  t=time.perf_counter()
- result=pial.place_pial_t1(subject=a.subject,hemisphere=a.hemi,output=a.output/f'{name}.pial.T1',max_steps=200,sampling_backend=backend,device=a.device if backend!='cpu' else None,trace_callback=trace,candidate_backend='tree' if name=='baseline' else 'snapshot')
+ result=pial.place_pial_t1(subject=a.subject,hemisphere=a.hemi,output=a.output/f'{name}.pial.T1',max_steps=200,sampling_backend=backend,device=a.device if backend!='cpu' else None,trace_callback=trace,candidate_backend='tree')
  report['runs'][name]=dict(seconds=time.perf_counter()-t,stage=result,surface_sha256=sha(a.output/f'{name}.pial.T1'));save()
 reference,rf=fs.read_geometry(str(a.output/'baseline.pial.T1'));candidate,cf=fs.read_geometry(str(a.output/'candidate.pial.T1'));np.testing.assert_array_equal(rf,cf)
 delta=np.linalg.norm(candidate-reference,axis=1);report['comparison']=dict(ordered_faces_exact=True,different_components=int(np.count_nonzero(reference!=candidate)),max_mm=float(delta.max()),p99_mm=float(np.quantile(delta,.99)),same_pass_ends=report['runs']['baseline']['stage']['pass_ends']==report['runs']['candidate']['stage']['pass_ends'],same_cleanup=report['runs']['baseline']['stage']['cleanup']==report['runs']['candidate']['stage']['cleanup']);save()
