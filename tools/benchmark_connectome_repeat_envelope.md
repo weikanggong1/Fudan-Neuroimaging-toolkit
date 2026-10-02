@@ -122,9 +122,11 @@ tck2connectome -symmetric -assignment_radial_search 4 -tck_weights_in weights.tx
 
 四矩阵的统计量为：count 是已分配轨迹数，FBC 是 `Σw`，平均长度是 `Σ(w × length) / Σw`，平均 FA 是 `Σ(w × precise_streamline_mean_fa) / Σw`。MRtrix `-tck_weights_in ... -scale_file ... -stat_edge mean` 的分母累加权重，符合 FNIT 的 SIFT2 加权均值；不按轨迹数归一。未分配轨迹丢弃，自连接保留。
 
-精确输入来自 `tracking_inputs.pt`，不用将诊断 NIfTI-1 的舍入仿射说成精确内部几何。参考工具导出 NIfTI-2，检查数组的原始位（包括 NaN payload）和 Float64 仿射。ACT 5TT 保留原 header spacing；SIFT2 5TT 和 GMWMI 保留调用时原始仿射。FA 用检查点数组和实际 FOD 几何，atlas 用 CLI 标签数组和同一 DWI 几何。原 CLI atlas 摘要标识源文件；导出文件摘要/仿射差异单独记录。
+精确输入来自 `tracking_inputs.pt`，不用将诊断 NIfTI-1 的舍入仿射说成精确内部几何。参考工具导出 NIfTI-2，检查数组的原始位（包括 NaN payload）和 sform 可表示的前 **3×4 Float64 位**。NIfTI sform 的末行为格式隐含的 `[0,0,0,1]`，不能存完整源矩阵末行；实际矩阵求逆与乘法可能使源末行出现机器舍入残差。工具仅接受固定 dtype 机器界限 `γ4 = 4 × eps / (1 − 4 × eps)` 内的末行残差（Float64 约 `8.88e-16`），超出则拒绝 projective/non-affine 输入。原完整 4×4、原末行、文件可表示 4×4、隐含末行和机器界限全部保留，不声称完整 4×4 在文件中逐 bit 一致。这是格式序列化契约，不是科学比较容差，也不修改 FNIT 实际 Tensor。
 
-官方程序直接读取这些 NIfTI-2，避免额外 MIF 中转。追踪前对 5 份公共影像及每套 atlas 执行实际 `mrinfo -json_all`，检查读入文件、shape、轴变换、dtype 和强度缩放，记录完整 transform/spacing 及与原仿射、FNIT 算子几何的角点差异。官方 NIfTI reader 将 sform 列方向归一，并按原有 pixdim/sform 规则选 spacing；这些读入语义单独记录，不改 FNIT 实际追踪输入，也不新增观察结果之后选择的精度容差。JSON 中的几何数值经过文本序列化，不能声称与内部浮点数逐 bit 一致。
+ACT 5TT 保留原 header spacing；SIFT2 5TT 和 GMWMI 的可表示 sform 保留调用时原始前三行。FA 用检查点数组和实际 FOD 几何，atlas 用 CLI 标签数组和同一 DWI 几何。原 CLI atlas 摘要标识源文件；导出文件摘要/仿射差异单独记录。
+
+官方程序直接读取这些 NIfTI-2，避免额外 MIF 中转。追踪前对 5 份公共影像及每套 atlas 执行实际 `mrinfo -json_all`，检查读入文件、shape、轴变换、dtype 和强度缩放，分别记录完整源矩阵、文件矩阵、FNIT 算子矩阵和官方 transform/spacing、角点差异。官方 NIfTI reader 将 sform 列方向归一，并按原有 pixdim/sform 规则选 spacing；这些读入语义单独记录，不改 FNIT 实际追踪输入，也不新增观察结果之后选择的精度容差。JSON 中的几何数值经过文本序列化，不能声称与内部浮点数逐 bit 一致。
 
 ## 5. 验证和实测状态
 
@@ -136,10 +138,13 @@ tck2connectome -symmetric -assignment_radial_search 4 -tck_weights_in weights.tx
 
 最新 CPU 工具回归与原矩阵比较测试 **22 passed、1 skipped，2.61 秒**；跳过原因仍为可选 matplotlib 绘图。同一官方版本的小输入命令契约回归确认 `-stat_edge mean` 的加权均值分母为 `Σw`，自连接保留；这是参数/命令语义测试，不作为真实数据 benchmark。
 
+修正末行序列化契约后，对真实 `root_diagnostic_CON03_v2` 的 13 份输入（FOD、ACT 5TT、SIFT2 5TT、GMWMI、FA、8 套 atlas）在 CPU 完整重验：**13/13 体素位一致、13/13 前 3×4 sform 位一致**。源 5TT 仿射末行最大残差 `5.551115123125783e-16`，小于固定 Float64 γ4 界限 `8.88178419700126e-16`；原 FA 的 1 个 NaN 保留。原 PT 和失败 v1 manifest 摘要不变，未执行任何官方命令或 GPU。核验记录位于本轮 `root_repeat_input_export_CON03_v2/export_verification.json`，这只证明实际输入序列化契约，不是随机追踪通过结果。新增舍入边界、projective 拒绝和 sform 一位变化拒绝的 CPU 回归后，**25 passed、1 skipped，2.70 秒**。
+
 ## 6. 更新记录
 
 - 2026-10-02：三次固定输入改为至少三次、默认计划五次；支持任意 FNIT 重复和当前 CLI 多 atlas CSV；去掉旧数据/20 节点硬编码；修正单侧验收，新增空值和对角报告；独立官方参考共用每次追踪的后处理，保留精确检查点几何和完整来源。
 - 2026-10-03：核对实际 tracking 默认值和加权均值公式；补上同轮 core 输出就绪检查；直接 NIfTI-2 参考输入、追踪前官方 header readback、保留原 NaN；CON03 计划路径更新为 v2。没有据此宣称随机追踪或十例流程已经通过。
+- 2026-10-03：真实参考 v1 在 NIfTI-2 导出时误把齐次末行机器残差判为数据变化，尚未执行任何参考命令。改为严格校验可表示的 3×4 sform 和体素位，按固定 dtype γ4 界限检查原末行，完整记录源/文件/FNIT 算子几何。原失败目录保留，不改原 Tensor、ACT spacing 或科学门槛。
 - 旧报告继续绑定旧代码/数据，历史 `inside_count` 仍表示双侧观察范围；新版 `comparison_accepted` 才用于本轮验收。没有重新运行旧结果或改写旧结论。
 
 ## 7. 参考和源码

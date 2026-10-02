@@ -127,9 +127,30 @@ def command_plan(mrtrix_bin: Path, output: Path, profiles: dict, seeds: list[int
     return records
 
 
+def _nifti_affine_contract(affine: np.ndarray) -> dict:
+    """NIfTI sform 存 3x4；只接受 dtype 舍入级别的齐次末行残差。"""
+    if affine.shape != (4, 4) or affine.dtype.kind != "f" or affine.dtype.itemsize not in (4, 8) or not np.isfinite(affine).all():
+        raise ValueError("NIfTI export requires a finite float32/float64 4x4 affine")
+    canonical = np.array([0., 0., 0., 1.], dtype=affine.dtype)
+    epsilon = float(np.finfo(affine.dtype).eps)
+    # A four-term matrix product has the standard gamma_4 machine bound.
+    # This fixed unit-scale bottom-row serialization contract is independent
+    # of image size, observed errors and scientific parity acceptance.
+    bound = 4 * epsilon / (1 - 4 * epsilon)
+    difference = float(np.abs(affine[3] - canonical).max())
+    if difference > bound:
+        raise ValueError("NIfTI cannot represent a projective/non-affine bottom row beyond dtype machine roundoff")
+    return {"source_dtype": str(affine.dtype), "source_bottom_row": affine[3].tolist(),
+            "implicit_file_bottom_row": canonical.tolist(),
+            "bottom_row_max_abs_difference": difference,
+            "machine_epsilon": epsilon, "machine_bound_gamma4": bound,
+            "policy": "first 3x4 stored exactly in Float64 sform; bottom row implicit [0,0,0,1]; only dtype gamma_4 roundoff accepted"}
+
+
 def _save_image(path: Path, values, affine, spacing=None) -> dict:
     values = values.detach().cpu().numpy() if isinstance(values, torch.Tensor) else np.asarray(values)
     affine = affine.detach().cpu().numpy() if isinstance(affine, torch.Tensor) else np.asarray(affine)
+    affine_contract = _nifti_affine_contract(affine)
     path.parent.mkdir(parents=True, exist_ok=True)
     image = nib.Nifti2Image(values, affine, dtype=values.dtype)
     if spacing is not None:
@@ -142,9 +163,13 @@ def _save_image(path: Path, values, affine, spacing=None) -> dict:
     original_bits = np.ascontiguousarray(values, dtype=native_dtype).view(np.uint8)
     decoded_bits = np.ascontiguousarray(np.asarray(check.dataobj), dtype=native_dtype).view(np.uint8)
     decoded_dtype = np.dtype(check.get_data_dtype())
+    source_sform_bits = np.ascontiguousarray(affine[:3], dtype=np.float64).view(np.uint8)
+    decoded_sform_bits = np.ascontiguousarray(check.affine[:3], dtype=np.float64).view(np.uint8)
     if (decoded_dtype.kind != values.dtype.kind or decoded_dtype.itemsize != values.dtype.itemsize
-            or not np.array_equal(check.affine, affine) or not np.array_equal(decoded_bits, original_bits)):
-        raise ValueError(f"{path}: NIfTI-2 export changed voxel values or affine")
+            or not np.array_equal(decoded_sform_bits, source_sform_bits)
+            or not np.array_equal(check.affine[3], [0., 0., 0., 1.])
+            or not np.array_equal(decoded_bits, original_bits)):
+        raise ValueError(f"{path}: NIfTI-2 export changed voxel bits or representable 3x4 sform")
     nonfinite = ~np.isfinite(values)
     nonfinite_count = int(nonfinite.sum())
     # The limit bounds metadata size only; the full array is exported intact.
@@ -154,6 +179,8 @@ def _save_image(path: Path, values, affine, spacing=None) -> dict:
         nonfinite_coordinates = np.array(np.unravel_index(flat_indices, values.shape)).T.tolist()
     return {"path": str(path), "sha256": sha256(path), "dtype": str(values.dtype),
             "shape": list(values.shape), "affine": affine.tolist(),
+            "file_affine": check.affine.tolist(), "affine_serialization": affine_contract,
+            "sform_3x4_bits_verified_equal": True,
             "header_spacing": list(check.header.get_zooms()[:3]),
             "voxel_bits_verified_equal": True,
             "nonfinite_count": nonfinite_count,
@@ -230,14 +257,15 @@ def input_readback(record: dict, exported: dict) -> dict:
         if sign < 0:
             mapping[original_axis, 3] = shape[original_axis] - 1
     source_affine = np.asarray(exported["affine"], dtype=np.float64)
+    file_affine = np.asarray(exported.get("file_affine", exported["affine"]), dtype=np.float64)
     source_spacing = np.asarray(exported["header_spacing"], dtype=np.float64)
-    lengths = np.linalg.norm(source_affine[:3, :3], axis=0)
+    lengths = np.linalg.norm(file_affine[:3, :3], axis=0)
     # This 1e-5 is the pre-existing official NIfTI reader rule, not a parity
     # acceptance tolerance. A larger pixdim/sform discrepancy makes MRtrix
     # use sform column norms; otherwise it uses the exported pixdim values.
     rescaled = bool((np.abs(source_spacing / lengths - 1) > 1e-5).any())
     selected_spacing = lengths if rescaled else source_spacing
-    reader_affine = source_affine.copy()
+    reader_affine = file_affine.copy()
     reader_affine[:3, :3] *= selected_spacing / lengths
     expected = reader_affine @ mapping
     decoded = transform.copy()
@@ -247,17 +275,24 @@ def input_readback(record: dict, exported: dict) -> dict:
                                   nib.affines.apply_affine(expected, corners), axis=1)
     source_displacement = np.linalg.norm(nib.affines.apply_affine(decoded, corners) -
                                          nib.affines.apply_affine(source_affine @ mapping, corners), axis=1)
+    file_displacement = np.linalg.norm(nib.affines.apply_affine(decoded, corners) -
+                                       nib.affines.apply_affine(file_affine @ mapping, corners), axis=1)
     fnit_affine = np.asarray(exported.get("fnit_effective_affine", exported["affine"]), dtype=np.float64)
     fnit_displacement = np.linalg.norm(nib.affines.apply_affine(decoded, corners) -
                                       nib.affines.apply_affine(fnit_affine @ mapping, corners), axis=1)
     return {"status": "header_source_shape_dtype_scaling_verified_geometry_recorded", "mrinfo_json": actual,
             "mrinfo_json_sha256": sha256(Path(record["json"])),
             "axis_mapping_to_source": mapping.tolist(),
+            "source_voxel_to_world_affine": source_affine.tolist(),
+            "file_voxel_to_world_affine": file_affine.tolist(),
+            "fnit_effective_voxel_to_world_affine": fnit_affine.tolist(),
+            "affine_serialization": exported.get("affine_serialization"),
             "decoded_voxel_to_world_affine": decoded.tolist(),
             "official_nifti_sform_pixdim_rule_rescaled": rescaled,
             "expected_reader_affine": expected.tolist(),
             "maximum_corner_difference_from_reader_rule_mm": float(displacement.max()),
             "maximum_corner_difference_from_source_affine_mm": float(source_displacement.max()),
+            "maximum_corner_difference_from_file_affine_mm": float(file_displacement.max()),
             "maximum_corner_difference_from_fnit_operator_affine_mm": float(fnit_displacement.max()),
             "geometry_assessment": "descriptive actual reader result; JSON numbers are serialized, not a bit-exact affine claim or a new scientific gate",
             "voxel_validation_scope": "source NIfTI-2 bits verified on export; mrinfo checks header/shape/scaling, not full decoded image values"}
@@ -408,7 +443,7 @@ def main(argv=None) -> None:
                 "seeds": args.seeds, "downstream_threads": args.downstream_threads,
                 "commands": plan, "completed_commands": [], "execution_completed": False,
                 "input_readbacks": {},
-                "input_format_policy": "original voxel bits and Float64 geometry exported as NIfTI-2; official programs read these directly; actual reader geometry recorded before tracking",
+                "input_format_policy": "original voxel bits and representable 3x4 Float64 sform exported as NIfTI-2; original complete source 4x4 and implicit file bottom row separately recorded; official programs read these directly; reader geometry recorded before tracking",
                 "matrix_definitions": {"count": "number of assigned tracks",
                                        "sift2_fbc": "sum(w)",
                                        "mean_length": "sum(w * length) / sum(w)",

@@ -234,6 +234,8 @@ def test_official_plan_reuses_sift2_preserves_definition_and_thread_modes(tmp_pa
 def test_reference_nifti2_export_preserves_geometry_and_values(tmp_path):
     module = reference_tool()
     values = payload()
+    values["five_tissue_affine"][3] = torch.tensor(
+        [5.287e-19, 4.686e-18, -4.632e-19, 0.9999999999999994], dtype=torch.float64)
     checkpoint, native = tmp_path / "checkpoints", tmp_path / "native"
     checkpoint.mkdir()
     nib.save(nib.Nifti1Image(np.ones((4, 4, 4), np.float32), values["fod_affine"].numpy()), checkpoint / "fa.nii.gz")
@@ -248,6 +250,11 @@ def test_reference_nifti2_export_preserves_geometry_and_values(tmp_path):
     assert np.array_equal(image.affine, values["fod_affine"].numpy())
     assert np.array_equal(np.asarray(image.dataobj), values["wm_sh"].numpy())
     assert exported["five_tissue_act"]["header_spacing"] == [1., 1., 1.]
+    act = exported["five_tissue_act"]
+    assert act["sform_3x4_bits_verified_equal"]
+    assert act["affine"][3] == values["five_tissue_affine"][3].tolist()
+    assert act["file_affine"][3] == [0., 0., 0., 1.]
+    assert np.array_equal(nib.load(act["path"]).affine[:3], values["five_tissue_affine"].numpy()[:3])
     assert exported["five_tissue_sift2"]["header_spacing"][0] == values["five_tissue_affine"][0, 0].item()
     assert exported["atlases"]["fs-aparc"]["original_affine_max_abs_difference"] > 0
 
@@ -315,10 +322,49 @@ def test_nifti2_preserves_original_nan_payload_without_finite_filter(tmp_path):
     assert np.array_equal(decoded.view(np.uint32), values.view(np.uint32))
 
 
+@pytest.mark.parametrize("affine_dtype", [np.float32, np.float64])
+def test_sform_implicit_bottom_accepts_only_dtype_machine_roundoff(tmp_path, affine_dtype):
+    module = reference_tool()
+    affine = np.eye(4, dtype=affine_dtype)
+    epsilon = np.finfo(affine_dtype).eps
+    affine[3] = [epsilon / 4, -epsilon / 8, epsilon / 16, 1 - 2 * epsilon]
+    result = module._save_image(tmp_path / "roundoff.nii.gz", np.ones((2, 3, 4), np.float32), affine)
+    contract = result["affine_serialization"]
+    assert contract["machine_epsilon"] == epsilon
+    assert contract["machine_bound_gamma4"] == 4 * epsilon / (1 - 4 * epsilon)
+    assert contract["source_bottom_row"] == affine[3].tolist()
+    assert result["file_affine"][3] == [0., 0., 0., 1.]
+    assert result["affine"] == affine.tolist()
+    bound = contract["machine_bound_gamma4"]
+    affine[3] = [np.nextafter(affine_dtype(bound), affine_dtype(np.inf)), 0, 0, 1]
+    with pytest.raises(ValueError, match="projective/non-affine"):
+        module._save_image(tmp_path / "beyond_machine_bound.nii.gz", np.ones((2, 3, 4), np.float32), affine)
+    assert not (tmp_path / "beyond_machine_bound.nii.gz").exists()
+
+
+def test_projective_bottom_rejected_and_first_3x4_is_bit_checked(tmp_path, monkeypatch):
+    module = reference_tool()
+    affine = np.eye(4)
+    affine[3, 0] = 1e-8
+    with pytest.raises(ValueError, match="projective/non-affine"):
+        module._save_image(tmp_path / "projective.nii.gz", np.ones((2, 3, 4), np.float32), affine)
+    affine = np.eye(4)
+    original_save = nib.save
+    def corrupt_sform(image, path):
+        wrong = image.affine.copy()
+        wrong[0, 0] = np.nextafter(wrong[0, 0], np.inf)
+        image.set_sform(wrong)
+        original_save(image, path)
+    monkeypatch.setattr(module.nib, "save", corrupt_sform)
+    with pytest.raises(ValueError, match="representable 3x4 sform"):
+        module._save_image(tmp_path / "one_bit_change.nii.gz", np.ones((2, 3, 4), np.float32), affine)
+
+
 def test_actual_mrinfo_contract_records_geometry_without_posthoc_tolerance(tmp_path):
     module = reference_tool()
     path = tmp_path / "image.nii.gz"
     affine = np.diag([-2.5, 2.5, 2.5, 1.])
+    affine[3, 0] = np.finfo(np.float64).eps / 4
     exported = module._save_image(path, np.ones((4, 5, 6), np.float32), affine)
     decoded_affine = np.diag([2.5, 2.5, 2.5, 1.])
     decoded_affine[0, 3] = -7.5
@@ -332,6 +378,9 @@ def test_actual_mrinfo_contract_records_geometry_without_posthoc_tolerance(tmp_p
     result = module.input_readback(record, exported)
     assert result["maximum_corner_difference_from_source_affine_mm"] == 0
     assert result["axis_mapping_to_source"][0] == [-1, 0, 0, 3]
+    assert result["source_voxel_to_world_affine"][3] == affine[3].tolist()
+    assert result["file_voxel_to_world_affine"][3] == [0., 0., 0., 1.]
+    assert result["maximum_corner_difference_from_file_affine_mm"] == 0
     assert "tolerance" not in result and "scientific_parity" not in result
     actual["intensity_scale"] = 2
     Path(record["json"]).write_text(json.dumps(actual))
