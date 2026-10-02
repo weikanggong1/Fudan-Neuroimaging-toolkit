@@ -1,0 +1,48 @@
+# 表面放置原生热点：未消费面哈希构建
+
+固定 FreeSurfer d932c45 的 `MRISpositionSurface` 在非零 l_repulse 时每轮构建 mht_f_current，只作为 mrisComputeRepulsiveTerm 的 mht_faces 参数传入；该参数在固定定义中未读。此候选删除这一副本构建，动态碰撞 MHT、顶点 repulse MHT、完整四轮、拒绝恢复、固定顶点与相交清理均沿用成熟 Conda 源码控制流。没有新精度策略或额外 GPU/CPU 并行。
+
+## 构建调用与参数
+
+```bash
+python tools/place_surface_hotspots/build_native.py \
+  --build "$EXISTING_CONDA_FS_BUILD" \
+  --source "$FIXED_CONDA_FS_SOURCE" \
+  --output "$NEW_PRIVATE_BUILD_OUTPUT" \
+  --ninja "$CONDA_PREFIX/bin/ninja"
+```
+
+- `--build`：已完成的 Conda Ninja 完整 FS 构建目录，须有 utils/libutils.a 及 mris_place_surface 链接命令。
+- `--source`：与其匹配的固定源码根，两个相关源文件须严格匹配 builder 内声明 SHA-256。不是任意兼容源码或系统二进制目录。
+- `--output`：新的独立目录；必须不存在，不覆盖源目录/共享安装/其他任务产物。
+- `--ninja`：该 Conda 环境中的 Ninja 可执行文件。编译器、参数、库来自已有构建命令，不更换编译器/数值选项。
+
+没有参数默认值。源码偏移、未读参数条件变化、缺编译对象、原构建不匹配、输出已存在、编译/链接失败均立即报错。
+
+输出 `control/` 与 `candidate/` 各含 mris_place_surface_fnit_hotspot、私有patched源、source.patch、对象与libutils.a及build.json。control 保留未改代码；candidate 删除构建。build.json 绑定两份输入源码、原archive、编译器/命令、builder、最终程序hash。patched完整上游源和二进制只留授权构建目录，不提交进FNIT仓库。
+
+## Python调用与产物
+
+现有白面与pial入口的binary参数均可选择candidate路径，其余参数/默认/失败行为保留：
+
+```python
+from fnit.recon_all.final_white_conda import run_final_white
+
+final_white_result = run_final_white(
+    subject_dir="/data/subject_fnit",              # 已自产MRI、white.preaparc、标签、aparc及阈值
+    hemi="lh",                                    # lh/rh
+    binary="/private/build/candidate/mris_place_surface_fnit_hotspot",  # 仅在实际验收后选择
+    assets_dir="/data/fnit_fixed_assets",           # 校验过大小和SHA-256的固定资源
+    threads=4,                                    # CPU总线程预算，不新增并发
+)
+```
+
+输入/输出空间与原stage保持：surface RAS/mm、有序三角面/顶点、原MGZ网格。white.preaparc写表面、autodet阈值及mrisps.wpa；final white写white与mrisps.white；当前生产pial写pial.T1和日志，没有显式outvol参数。后续曲率阶段保持原调用顺序。完整契约见专项INTEGRATION.md。
+
+## 官方命令、验证与版本
+
+对应完整官方 mris_place_surface --white/--pial（参数见既有三个wrapper与专项文档）；本热点无独立官方CLI。真实同输入测试脚本为 validation/recon_all/optimizations/20261002_parallel/task_02/benchmark_native.py。比较当前Conda、独立未改重建control、候选及可选官方参考，完整阶段包含加载、计算、保存和wrapper检查；隔离复制另计。严格检查同索引表面、stats、诊断MGZ数组/affine/dtype和辅助曲率文件。官方偏差单列；本实验不得自动改变默认生产或整体等效结论。
+
+2026-10-02候选：固定哈希的未消费面哈希构建删除；实测状态见专项报告。没有以旧native_cuda_pilot或20261001时间作为本轮收益，也未补齐完整Python white。
+
+来源：[mrisurf_mri.cpp](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/utils/mrisurf_mri.cpp)、[mrisurf_compute_dxyz.cpp](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/utils/mrisurf_compute_dxyz.cpp)。保留仓库 licenses/FreeSurfer.txt 与 THIRD_PARTY_NOTICES.md 的适用条款。没有复制或发布无关上游代码、许可证或真实影像。

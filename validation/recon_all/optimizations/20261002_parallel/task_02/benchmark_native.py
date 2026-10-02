@@ -25,7 +25,7 @@ if a.official:
  binaries.append(('official',a.official,a.official_home))
 def save(): (a.output/'report.json').write_text(json.dumps(report,indent=2)+'\n')
 for stage in a.stages:
- outputs={};stats={};volumes={}
+ outputs={};stats={};volumes={};inventories={}
  for name,binary,assets in binaries:
   total_start=time.perf_counter();subject=a.output/stage/name
   for path in sources:
@@ -39,15 +39,20 @@ for stage in a.stages:
   surface=Path(result['output']);xyz,faces=fs.read_geometry(str(surface));outputs[name]=(xyz,faces)
   after={str(x.relative_to(subject)):sha(x) for x in subject.rglob('*') if x.is_file()}
   stats[name]=after[f'surf/autodet.gw.stats.{hemi}.dat']
+  inventories[name]=after
   if result.get('outvol'):
    image=nib.load(result['outvol']);volumes[name]=(np.asarray(image.dataobj).copy(),image.affine.copy(),str(image.get_data_dtype()))
   row=dict(stage=stage,backend=name,binary_sha256=sha(binary),surface_sha256=sha(surface),stage_wrapper_seconds=seconds,isolation_copy_seconds=copy_seconds,total_including_isolation_validation_seconds=time.perf_counter()-total_start,result=result,output_files={x:y for x,y in after.items() if before.get(x)!=y},stats_sha256=stats[name],external_loadavg=os.getloadavg())
   if name!='current':
    ref,rf=outputs['current'];same=xyz.shape==ref.shape and np.array_equal(faces,rf);delta=np.linalg.norm(xyz-ref,axis=1) if same else None
    row['comparison_to_current']=dict(ordered_correspondence=same,different_components=int(np.count_nonzero(xyz!=ref)) if same else None,max_mm=float(delta.max()) if same else None,p99_mm=float(np.quantile(delta,.99)) if same else None,mean_mm=float(delta.mean()) if same else None,stats_exact=stats[name]==stats['current'])
+   scalar_names=[x for x in inventories['current'] if x.startswith('surf/') and
+                 (x.endswith(('.curv','.area','.H','.K','.thickness','.sulc')))]
+   row['comparison_to_current']['auxiliary_scalar_files_exact']={x:inventories[name].get(x)==inventories['current'][x] for x in scalar_names}
    if name in volumes:
     ref,ra,rd=volumes['current'];candidate,ca,cd=volumes[name];row['comparison_to_current'].update(outvol_array_exact=np.array_equal(ref,candidate),outvol_affine_exact=np.array_equal(ra,ca),outvol_dtype_exact=rd==cd)
   report['rows'].append(row);save();print(f'{stage} {name}: {seconds:.3f}s',flush=True)
   if name in ('control','candidate'):
    compare=row['comparison_to_current'];assert compare['ordered_correspondence'] and compare['different_components']==0 and compare['stats_exact']
+   assert all(compare['auxiliary_scalar_files_exact'].values())
    if name in volumes:assert compare['outvol_array_exact'] and compare['outvol_affine_exact'] and compare['outvol_dtype_exact']

@@ -59,6 +59,7 @@ def main():
  build,source,output=a.build.resolve(),a.source.resolve(),a.output.resolve()
  for name,expected in EXPECTED.items():
   if sha(source/'utils'/name)!=expected:raise ValueError('fixed source hash mismatch: '+name)
+ if 'ninja' not in a.ninja.name or not a.ninja.is_file():raise ValueError('explicit completed Conda Ninja build required')
  commands=subprocess.check_output([str(a.ninja),'-t','commands','mris_place_surface'],cwd=build,text=True).splitlines()
  output.mkdir(parents=True,exist_ok=False)
  for patched,name in [(False,'control'),(True,'candidate')]:print(build_one(build,source,output/name,commands,patched),flush=True)
