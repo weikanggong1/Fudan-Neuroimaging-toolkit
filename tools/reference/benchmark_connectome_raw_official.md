@@ -106,6 +106,8 @@ python tools/benchmark_connectome_raw_cohort_envelope.py \
 
 这里要求 FNIT `gpu_report.json` 同病例且实际 exit0，原始输入在 before/after 逐项校验，读到的矩阵、atlas 和 nodes 文件摘要属于该真实输出报告。尝试数和种子标签核对实际 CLI command。
 
+`preflight_connectome_raw_reference.py --config <冻结JSON> --config-sha256 <完整SHA> --output <新报告>` 只读核对真实工具/二进制、`-version`、原始文件与实际完成合同。配置列出源码 SHA、已审计 reference manifest 和 SHA、MRtrix 目录、raw manifest 和 SHA、明确 modeling/anatomy 根目录。加载器错误保留实际 returncode 与输出并使 `program_dependencies_ready=false`；合同未齐则 `required_dependency_ready=false`，不会因此启动计算或切换二进制。
+
 ## 4. 官方步骤与命令
 
 | 阶段 | 本工具消费或执行的官方步骤 |
@@ -130,9 +132,11 @@ python tools/benchmark_connectome_raw_cohort_envelope.py \
 
 目前已完成的独立固定输入 CON03：官方 198 命令全部 exit0，一份 FNIT 对官方五份在八 atlas 主矩阵中 233/240 比较通过，7 个未通过。这个结果是算子定位，不是新十例完整官方链结果。已有 [真实点访问与人口分布图](../../validation/connectome/tenraw_20261002/task_04_repeat_reference/tractogram_population.png) 及 [矩阵图](../../validation/connectome/tenraw_20261002/task_04_repeat_reference/matrix_envelope.png)。
 
+实际只读依赖预检：nodecw10 的七个固定二进制版本调用均 exit0，101 个原始唯一文件 SHA/header 已核对；完整 producer 合同尚未齐，`required_dependency_ready=false`。gpucw1 的旧系统 C++ 加载器失败独立保留，未改原程序或运行库。详见 [实际预检记录](../../validation/connectome/tenraw_20261002/task_04_raw_reference_preflight/README.md)。这不是追踪耗时或科学一致性结果。
+
 ## 6. 版本与 benchmark 记录
 
-- 2026-10-03：增加独立官方原始链执行器、显式合同 CPU 控制器和同 raw/节点语义矩阵 envelope；35 个 CPU 工具契约回归通过、1 个可选绘图库跳过，4.11 s。这些小数组检验工具协议，不是科学 benchmark。
+- 2026-10-03：增加独立官方原始链执行器、显式合同 CPU 控制器和同 raw/节点语义矩阵 envelope；最新 32 个 CPU 工具契约回归通过、1 个可选绘图库跳过，3.94 s。这些小数组检验工具协议，不是科学 benchmark。
 - 2026-10-03：真实 fresh FS anatomy CON03 的官方 native atlas 已在另一阶段完成；官方 rawprep retry、modeling v2 与完整 DWI atlas 合同尚在推进。本工具不会提前写 completed。
 - 既有固定输入和 FNIT 五种子 GPU 后处理分别保留 [独立说明](benchmark_connectome_fnit_repeats.md) 与实际结果命名空间。
 

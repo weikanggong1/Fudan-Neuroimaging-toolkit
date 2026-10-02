@@ -104,3 +104,18 @@ def test_fnit_raw_producer_actual_sha_and_duplicate_records_are_not_accepted():
         whole.file_map(rows, verified=True)
     with pytest.raises(ValueError, match='duplicate'):
         whole.file_map(rows * 2)
+
+
+def test_readonly_program_loader_failure_is_recorded_not_ready(tmp_path):
+    # Protocol fixture only: preserve an actual failure return code; not a scientific tolerance.
+    path = Path(__file__).parents[2] / 'tools/reference/preflight_connectome_raw_reference.py'
+    spec = importlib.util.spec_from_file_location('official_raw_readonly_fixture', path)
+    preflight = importlib.util.module_from_spec(spec); spec.loader.exec_module(preflight)
+    executable = tmp_path / 'version_fixture'
+    executable.write_text('#!/bin/sh\necho fixture-loader-unavailable >&2\nexit 9\n')
+    executable.chmod(0o700)
+    result = preflight.inspect_program(raw_tool(), executable,
+        {'path': str(executable), 'sha256': sha256(executable)}, {'CUDA_VISIBLE_DEVICES': ''})
+    assert result['returncode'] == 9
+    assert result['actual_version_output'] == 'fixture-loader-unavailable'
+    assert result['readonly_invocation_ready'] is False

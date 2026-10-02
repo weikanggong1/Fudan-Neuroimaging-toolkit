@@ -11,6 +11,18 @@ import sys
 import time
 
 
+def inspect_program(worker, program, expected, environment):
+    """Record a real read-only invocation, including a loader failure; never mark it ready."""
+    worker.require(program.resolve() == Path(expected['path']).resolve() and
+            os.access(program, os.X_OK) and worker.sha256(program) == expected['sha256'],
+            'actual executable dependency differs from audited program')
+    before = time.perf_counter()
+    result = subprocess.run([str(program), '-version'], env=environment, capture_output=True, text=True)
+    return {**expected, 'actual_version_output': (result.stdout + result.stderr).strip(),
+            'returncode': result.returncode, 'readonly_invocation_seconds': time.perf_counter() - before,
+            'readonly_invocation_ready': result.returncode == 0}
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--config', type=Path, required=True)
@@ -46,17 +58,12 @@ def main(argv=None):
     for name in helper.PROGRAMS:
         program = Path(config['mrtrix_bin']) / name
         expected = reference['programs'][name]
-        worker.require(program.resolve() == Path(expected['path']).resolve() and
-                os.access(program, os.X_OK) and worker.sha256(program) == expected['sha256'],
-                'actual executable dependency differs from audited program')
-        before = time.perf_counter()
-        result = subprocess.run([str(program), '-version'], env=environment, capture_output=True, text=True)
-        worker.require(result.returncode == 0, 'actual executable version/read-only invocation failed')
-        version = (result.stdout + result.stderr).strip()
-        if name == 'tckgen':
-            worker.require(version == reference['mrtrix_version'], 'actual pinned version differs')
-        programs[name] = {**expected, 'actual_version_output': version, 'returncode': result.returncode,
-                          'readonly_invocation_seconds': time.perf_counter() - before}
+        record = inspect_program(worker, program, expected, environment)
+        record['pinned_version_matches'] = (record['actual_version_output'] == reference['mrtrix_version']) if name == 'tckgen' else None
+        if name == 'tckgen' and not record['pinned_version_matches']:
+            record['readonly_invocation_ready'] = False
+        programs[name] = record
+    programs_ready = all(row['readonly_invocation_ready'] for row in programs.values())
     manifest_path = Path(config['raw_manifest'])
     worker.require(worker.sha256(manifest_path) == config['raw_manifest_sha256'], 'canonical raw manifest changed')
     manifest = json.loads(manifest_path.read_text())
@@ -81,7 +88,7 @@ def main(argv=None):
         completed = all(p.is_file() and json.loads(p.read_text()).get('state') == 'completed' for p in (anatomy_path, dwi_path))
         row = {'raw_file_identities': identities, 'anatomy_contract_path': str(anatomy_path),
                'official_dwi_contract_path': str(dwi_path), 'actual_completed_contracts_present': completed,
-               'required_dependency_ready': completed, 'state': 'waiting_actual_completed_contracts'}
+               'required_dependency_ready': completed and programs_ready, 'state': 'waiting_actual_completed_contracts'}
         if completed:
             row['actual_consumer_preflight'] = worker.preflight(anatomy_path, dwi_path, case['case_id'])
             row['state'] = 'actual_completed_consumer_source_checked'
@@ -91,13 +98,14 @@ def main(argv=None):
         'scientific_parity': 'not_assessed', 'scope': 'actual source/program/config/raw dependency audit; no tracking/GPU/derivative generation',
         'config_path': str(args.config.resolve()), 'config_sha256': args.config_sha256,
         'script_sha256': worker.sha256(Path(__file__)), 'source_files_sha256_verified': config['source_files'],
-        'program_dependencies': programs, 'program_dependencies_ready': True,
+        'program_dependencies': programs, 'program_dependencies_ready': programs_ready,
         'raw_inputs_ready': True, 'raw_unique_file_count': len(checked),
         'raw_manifest_sha256': config['raw_manifest_sha256'], 'dataset': manifest['dataset'], 'snapshot': manifest['snapshot'],
         'license': manifest['license'], 'cases': cases,
         'required_dependency_ready': all(row['required_dependency_ready'] for row in cases.values()),
         'not_ready_reason': None if all(row['required_dependency_ready'] for row in cases.values()) else
-                'actual final official DWI/anatomy producer contracts not yet all completed; no fallback or synthetic contracts',
+                ('actual final official DWI/anatomy producer contracts not yet all completed; no fallback or synthetic contracts' if programs_ready else
+                 'actual pinned program read-only invocation failed or version differs; see returncode/version output; producer readiness recorded per case'),
         'environment': {'host': platform.node(), 'python': platform.python_version(),
                         'torch': torch.__version__, 'numpy': np.__version__, 'nibabel': nib.__version__,
                         'cuda_initialized': torch.cuda.is_initialized(), 'cuda_visible_devices': ''},
