@@ -31,7 +31,7 @@ placement_result = place_pial_t1(
     output="/results/lh.pial.T1",      # 独立结果路径；None 默认写回被试 surf 目录
     max_steps=200,                     # 总接受步数上限，必须为正；未完成四轮时报错
     sampling_backend="triton",        # cpu（默认）、torch 或 triton
-    candidate_backend="snapshot",     # tree（默认）或试步内快照CSR+Numba有序更新
+    candidate_backend="tree",         # 默认有序路径；snapshot作为独立诊断候选保留
     device="cuda:0",                  # GPU 后端必须显式给出逻辑设备编号
     trace_callback=None,              # 可选诊断回调；默认不保存每步网格
 )
@@ -82,7 +82,7 @@ intensity_displacement = sampling_context.gradient(
 
 `candidate_backend="snapshot"` 在每次首轮试步按完整候选构建 CSR，并在 Numba 中依原顶点序逐个更新。动态面几何仍来自当时已接受的坐标；每面保留原查询半径过滤和相交谓词。候选球以本试步最大位移的两倍加0.01mm作为保护界，中心变化不超过界、半径变化不超过两倍界，因此原球扩展三倍界覆盖全部动态查询。投影终点超过界时抛 ValueError，不裁剪候选。拒绝试步有 retained-MHT 状态及 slow 诊断仍走原 tree 路径；不跨试步或动态坐标版本复用候选。此选择与 sampling_backend 独立，默认 tree。
 
-子空间 `_assign_vertices(face_svi, incident, offsets, ripped)` 是内部函数：输入分别是每面 int32 子空间、原序关联面 CSR 编号、长度 N+1 的 int64 偏移及 N 个 bool。输出 N 个 int32 编号；无关联面/已 ripped 为 -1，不同关联面空间为 64，同空间保留原编号。它不读写坐标，不做接受更新，无动态索引缓存；对外 `subvolume_assignment` 和 `asynchronous_first_step` 接口保持不变。
+子空间 `_assign_vertices(face_svi, incident, offsets, ripped)` 是内部函数：输入分别是每面 int32 子空间、原序关联面 CSR 编号、长度 N+1 的 int64 偏移及 N 个 bool。输出 N 个 int32 编号；无关联面/已 ripped 为 -1，不同关联面空间为 64，同空间保留原编号。它不读写坐标，不做接受更新，无动态索引缓存；对外 `subvolume_assignment` 接口保持不变；`asynchronous_first_step` 的既有调用兼容，仅新增可选的 candidate_backend。
 
 ## 3. 命令行与复现
 
