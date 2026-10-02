@@ -145,7 +145,7 @@ python tools/reference/benchmark_connectome_official_anatomy_cohort.py \
   --output /shared/raw10/official_anatomy_raw10_v1
 ```
 
-默认十例CON01、CON03、CON04–CON11；`--case-ids`可显式选例。`--prepared-case-report CASE=REPORT`可重复，用于已经完成且SHA不变的同例官方pilot，原报告与时间独立保留，不重算；没有完成report时不能使用此参数。`--validation-script`绑定项目现有实际MGZ/surface/annotation读回工具，只有baseline本轮recon exit0且特定int32报告序列化失败时，才在新目录生成只读revalidation sidecar，保留原failed报告。其他失败不升级为成功，不使用candidate FS。
+默认十例CON01、CON03、CON04–CON11；`--case-ids`可显式选例。`--prepared-case-report CASE=REPORT`可重复，用于已经完成且SHA不变的同例官方结构准备，原报告与时间独立保留，不重算；没有完成report时不能使用此参数。`--validation-script`绑定项目现有实际MGZ/surface/annotation读回工具，只有baseline本轮recon exit0且特定int32报告序列化失败时，才在新目录生成只读revalidation sidecar，保留原failed报告。其他失败不升级为成功，不使用candidate FS。
 
 示例中的`current_verified_official_modeling`须替换为实际当前上游输出根路径，不能指向已经失败或退役的DWI链。切换producer时在新cohort目录显式绑定各例完成的prepare报告，保留旧namespace；只更换输入来源，不重算已验证的结构准备。
 
@@ -172,6 +172,25 @@ mrtransform ATLAS_T1.nii.gz ATLAS_DWI.nii.gz -linear DWI_T1_MRTRIX.txt -inverse 
 FS `mri_surf2surf`、Workbench `-label-resample BARYCENTRIC` 和原UKB投影脚本按每个例的私有工作目录执行。原UKB转换脚本的颜色表随机生成；保留实际annot哈希，不能声称随机颜色字节逐值一致，体积节点语义另核对。
 
 ## 5. 真实数据精度与运行时间
+
+**2026-10-03，十例官方结构准备已完成**：CON01、CON03、CON04–CON11均使用本轮baseline原始T1的fresh官方FreeSurfer，每例生成5TT、GMWMI和八套T1 atlas，共27个输出记录。不可变十例绑定SHA为`f1e722565953f032e822de42c2cfb499bbeb24d8edf377b85a0899135c9e904b`；[十例实际来源与耗时摘要](../../validation/connectome/raw10_official_anatomy_20261003/structure_prepare.public.json)再次核对各prepare报告的实际大小/SHA、完成状态、命令exit0和输出数量。影像字节与几何验证保留在各例原报告及该绑定中。本摘要只重新核对报告身份，没有重复计算MRI。
+
+| 真实例 | prepare模式 | 新命令数（全部exit0） | 本次prepare entry wall秒 | 本次命令合计秒 | 复用的此前成功命令秒 |
+| --- | --- | ---: | ---: | ---: | ---: |
+| CON01 | prepare | 34 | 426.095 | 386.771 | 无 |
+| CON03 | recover-prepare | 31 | 161.363 | 119.949 | 403.782 |
+| CON04 | prepare | 34 | 424.715 | 384.126 | 无 |
+| CON05 | prepare | 34 | 393.881 | 354.633 | 无 |
+| CON06 | prepare | 34 | 390.616 | 350.825 | 无 |
+| CON07 | prepare | 34 | 367.595 | 326.419 | 无 |
+| CON08 | recover-atlas | 28 | 142.298 | 100.843 | 224.273 |
+| CON09 | recover-atlas | 28 | 146.390 | 105.430 | 272.558 |
+| CON10 | prepare | 34 | 429.375 | 390.161 | 无 |
+| CON11 | prepare | 34 | 444.170 | 403.759 | 无 |
+
+这些是官方**结构准备阶段**的实际时间，不包含recon-all、DWI预处理、追踪或矩阵构造，也不与重建时间相加称连续冷调用。CON03/08/09明确复用此前成功阶段，原失败和新恢复目录均保留。CON11的实际recon-all exit0，但原报告在int32序列化时失败；只读重验证真实14个FS文件后完成prepare，没有再次运行recon-all。各例实际工具来源保留其原提交：常规prepare为`b9e48ef4`，CON03恢复为`608a68d8`，CON08/09恢复为`636b73c5`。
+
+此时官方原始DWI链的新输入冻结仍待上游完成核验，因此十例尚未产生官方FLIRT/DWI atlas、独立追踪和最终矩阵对照。结构准备全部完成不等于十例raw end-to-end完成；下面保留CON03及两例背景恢复的具体过程。
 
 2026-10-03：已实际核对FS8.2 `register/apply --help`及两h5完整大小/SHA；CPU仅用8线程，GPU未使用。官方原生Python3.8.13，TensorFlow2.13.1、surfa0.6.3、voxelmorph0.2、neurite0.2、numpy1.24.3；版本由官方fspython实际读回，无新增安装。
 
