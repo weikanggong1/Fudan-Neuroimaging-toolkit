@@ -1,0 +1,65 @@
+compile
+
+
+cli_help
+usage: publish_cohort_summary.py [-h] --root ROOT
+                                 [--analysis-dir ANALYSIS_DIR]
+                                 [--steps-dir STEPS_DIR]
+                                 [--figures-dir FIGURES_DIR] [--output OUTPUT]
+                                 [--copy-evidence]
+
+Publish verified final cohort text/figures without loading MRI or running
+fits. Full audited text evidence may live outside the repository. --output can
+point at the curated repository directory; --copy-evidence copies only an
+explicit allowlist of JSON/TSV/PNG. No full analysis, API report, image,
+weight or source snapshot is copied. Nonterminal analyses fail before any
+output is created.
+
+options:
+  -h, --help            show this help message and exit
+  --root ROOT           Server task root or relocated complete text-evidence
+                        mirror
+  --analysis-dir ANALYSIS_DIR
+  --steps-dir STEPS_DIR
+  --figures-dir FIGURES_DIR
+  --output OUTPUT, --output-dir OUTPUT
+                        Curated publication directory; default --root
+  --copy-evidence       Copy only checked curated JSON/TSV/PNG, never MRI/full
+                        analysis/source snapshots
+
+
+eight_publication_contracts
+test_archived_startup_records_separate_from_current_dependency_blocks (__main__.PublicationContract) ... ok
+test_document_formatter_keeps_na_and_portable_roi_links (__main__.PublicationContract) ... ok
+test_duplicate_subject_measurements_rejected (__main__.PublicationContract) ... ok
+test_invalid_numeric_values_rejected (__main__.PublicationContract) ... ok
+test_nonterminal_analysis_refused_without_image_reads (__main__.PublicationContract) ... ok
+test_relocated_text_hash_and_changed_evidence_rejected (__main__.PublicationContract) ... ok
+test_same_subject_speed_ratios_not_unpaired_extrema (__main__.PublicationContract) ... ok
+test_sample_sd_and_missing_zero_scores (__main__.PublicationContract) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.018s
+
+OK
+
+
+actual_local_waiting_status_gate
+Traceback (most recent call last):
+  File "/mnt/c/users/admin/documents/codex/2026-09-29/new-chat/work/fnit-dmri-perf/validation/subregions/ten_public_t1_20261002/publish_cohort_summary.py", line 685, in <module>
+    main()
+  File "/mnt/c/users/admin/documents/codex/2026-09-29/new-chat/work/fnit-dmri-perf/validation/subregions/ten_public_t1_20261002/publish_cohort_summary.py", line 621, in main
+    evidence = load_evidence(root, analysis_dir, steps_dir, figures_dir)
+  File "/mnt/c/users/admin/documents/codex/2026-09-29/new-chat/work/fnit-dmri-perf/validation/subregions/ten_public_t1_20261002/publish_cohort_summary.py", line 207, in load_evidence
+    raise ValueError("Final cohort analysis is not ready; refusing publication")
+ValueError: Final cohort analysis is not ready; refusing publication
+
+
+actual_archived_startup_and_current_dependency_metadata
+分析另保留 1 份环境/启动准备归档：共 10 条病例记录，其中 10 条失败记录，涉及 10 名预声明受试者；失败记录中 10 条已启动子进程。这些数量从归档的 case_outcomes 逐条计算，不是最终拟合失败人数。启动错误、环境修复及重新运行过程见 [官方准备记录](official_protocol.md#启动失败及重试)。归档的 state、exit_code、failure、日志路径和 SHA 随发布证据保留。
+
+| 准备归档（SHA 前12位） | 病例记录 | 失败记录 | 已启动的失败记录 | 依赖阻塞记录 | 失败受试者 |
+| --- | --- | --- | --- | --- | --- |
+| official_queue.json (ef4d609a4c32) | 10 | 10 | 10 | 0 | sub-01、sub-02、sub-03、sub-04、sub-05、sub-06、sub-07、sub-08、sub-09、sub-10 |
+
+当前合并队列另列尝试类别：进程/输出验证失败 0 次，上游依赖阻塞 10 次，设置/预检查失败 0 次。这一组数量不含独立归档的准备阶段记录；因上游官方预处理未就绪而 blocked 的 FNIT stage 属于依赖阻塞，不另累计为 FNIT 算法失败。修复后的最终结果使用本轮固定源码和预声明输入；完成状态、精度和耗时以实际最终进程及保存结果为准。
