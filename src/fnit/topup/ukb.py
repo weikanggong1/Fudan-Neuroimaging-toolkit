@@ -136,6 +136,14 @@ def prepare_ukb_topup(raw_dir, output_dir, *, device=None, overwrite=False,
     if not np.allclose(ap_image.header.get_zooms()[:3],
                        pa_image.header.get_zooms()[:3], atol=5e-4, rtol=0):
         raise ValueError("AP and PA images must have the same voxel spacing")
+    if pair_geometry == "fslmerge-first":
+        for image in (ap_image, pa_image):
+            axes = image.affine[:3, :3]
+            normalized = axes / np.linalg.norm(axes, axis=0)
+            if not np.allclose(normalized.T @ normalized, np.eye(3), atol=5e-4, rtol=0):
+                raise ValueError("fslmerge-first requires rigid geometry without shear")
+        if np.linalg.det(ap_image.affine[:3, :3]) * np.linalg.det(pa_image.affine[:3, :3]) <= 0:
+            raise ValueError("fslmerge-first requires matching geometry handedness")
     if pair_geometry == "strict" and not np.allclose(ap_image.affine, pa_image.affine, atol=5e-4, rtol=0):
         raise ValueError("AP and PA images must use the same voxel-to-world geometry")
     if device is None:

@@ -171,3 +171,18 @@ def test_fslmerge_first_keeps_raw_voxels_and_ap_geometry(tmp_path, monkeypatch):
     record=json.loads((tmp_path/'merge/pair_geometry.json').read_text())
     assert record['resampled'] is False and record['policy']=='fslmerge-first'
     assert record['PA']['affine'][0][3] == pytest.approx(1.2)
+
+
+def test_fslmerge_first_rejects_shear_and_invalid_policy(tmp_path):
+    raw=tmp_path/'raw';raw.mkdir()
+    array=np.ones((8,8,8,1),np.float32)
+    for stem,direction in [('AP','j-'),('PA','j')]:
+        affine=np.diag([2.,2.,2.,1.])
+        if stem=='PA':affine[0,1]=.4;affine[1,1]=np.sqrt(4-.16)
+        nib.save(nib.Nifti1Image(array,affine),raw/(stem+'.nii.gz'))
+        (raw/(stem+'.bval')).write_text('0')
+        (raw/(stem+'.json')).write_text(json.dumps({'PhaseEncodingDirection':direction,'TotalReadoutTime':.05}))
+    with pytest.raises(ValueError,match='without shear'):
+        prepare_ukb_topup(raw,tmp_path/'out',pair_geometry='fslmerge-first')
+    with pytest.raises(ValueError,match='pair_geometry'):
+        prepare_ukb_topup(raw,tmp_path/'out',pair_geometry='guess')
