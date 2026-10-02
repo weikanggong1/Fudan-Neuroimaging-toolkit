@@ -1,0 +1,254 @@
+{
+  "code_commit": "d327ee960f78fbad57dc754bfe0796cdd1e47d9e",
+  "mode": "operators",
+  "script_sha256": "a31e2e29cb9868cd1d7577f6f89ee7c59e99bda303a5d3cb7c21ee8cc4615e5e",
+  "early_cuda_prime_diagnostic": true,
+  "operator_tolerance_predeclared": {
+    "strict": "zero different numerical elements; geometry exact",
+    "forward_diagnostic_mm": 0.0001,
+    "inverse": "zero different numerical elements on identical forward",
+    "check": "zero different voxels on identical forward",
+    "overall_equivalence": "not_assessed"
+  },
+  "threads": 4,
+  "torch": "2.5.1",
+  "dtype": "FP32 fields; FP64 native matrix accumulation and stop tests",
+  "tf32_matmul": false,
+  "tf32_cudnn": true,
+  "pid": 86308,
+  "cpu_load_before": [
+    34.97,
+    39.16,
+    39.72
+  ],
+  "cases": {
+    "sub01": {
+      "input_sha256": {
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz": "54d06a2131ebe11f78a335c1d18b9bae7d78f8bfe7024717d783b48873649a24",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.inv.nii.gz": "a9f8cbce4d6511f134c047bb54e6e9f10719407c96abbf6fadfcd6d71837b9cf",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/mri/orig.mgz": "15dacae9cec18aec4f0f7dfe3a5ccd5a8dfe83e16111fdc700621e3abc54c2a2",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/mri/transforms/synthmorph.1.0mm.1.0mm/invol.crop.nii.gz": "4a38fed518e638466ac7092793a759401bc856f4ef62b8b215c69b6199a427c0",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/mri/transforms/synthmorph.1.0mm.1.0mm/tmp/deform.mgz": "751a6556be9a4fc3e8dbfb40bce2bcbd11a644069c53d59b1d119b792a156787",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/mri/transforms/synthmorph.1.0mm.1.0mm/tmp/reg.crop-to-invol.lta": "43a15c2b23fe28f7a25fc000d5b31415e80274638110f39c544584c37652d1e4",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/mri/transforms/synthmorph.1.0mm.1.0mm/tmp/reg.crop-to-full.lta": "0aa7a34ed0c52da4b4d6271c6842372af90dba68e955105540945715a98c844c"
+      },
+      "comparisons": {
+        "forward_gpu_vs_frozen": {
+          "different_elements": 0,
+          "elements": 25590063,
+          "maximum": 0.0,
+          "p99": 0.0,
+          "mean": 0.0,
+          "shape": [
+            193,
+            229,
+            193,
+            1,
+            3
+          ],
+          "dtype_left": "float32",
+          "dtype_right": "float32",
+          "affine_maximum": 0.0,
+          "intent_left": [
+            "displacement vector",
+            [],
+            ""
+          ],
+          "intent_right": [
+            "displacement vector",
+            [],
+            ""
+          ],
+          "units_left": [
+            "mm",
+            "sec"
+          ],
+          "units_right": [
+            "mm",
+            "sec"
+          ],
+          "sha256_left": "8869a9dd5fd1faee8340d7f99741a3250317e65ba77dfb0ceb7057174d13e2af",
+          "sha256_right": "54d06a2131ebe11f78a335c1d18b9bae7d78f8bfe7024717d783b48873649a24"
+        },
+        "check_gpu_vs_frozen": {
+          "different_elements": 0,
+          "elements": 8530021,
+          "maximum": 0.0,
+          "p99": 0.0,
+          "mean": 0.0,
+          "shape": [
+            193,
+            229,
+            193
+          ],
+          "dtype_left": "uint8",
+          "dtype_right": "uint8",
+          "affine_maximum": 0.0,
+          "intent_left": [
+            "none",
+            [],
+            ""
+          ],
+          "intent_right": [
+            "none",
+            [],
+            ""
+          ],
+          "units_left": [
+            "mm",
+            "sec"
+          ],
+          "units_right": [
+            "mm",
+            "sec"
+          ],
+          "sha256_left": "e97d2f1eb80ff4fc8a23feb823690451585ccc6a80b38d77923b67d9f1df332b",
+          "sha256_right": "7d953c4180c494babd899db28400fcc569573b69eea6cc01fcae079ab852c475"
+        }
+      },
+      "timings": {
+        "conversion_gpu": {
+          "load_convert_seconds": 1.5803557662293315,
+          "composition_download_seconds": 0.26464230194687843,
+          "save_seconds": 2.7499837740324438,
+          "total_seconds": 4.59498924203217,
+          "device": "cuda:0",
+          "chunk_slices": 16
+        },
+        "check_gpu": {
+          "save_seconds": 0.18025595834478736,
+          "total_seconds": 1.3093166118487716,
+          "device": "cuda:0",
+          "chunk_slices": 16
+        }
+      },
+      "cpu_load_after": [
+        35.29,
+        39.09,
+        39.69
+      ],
+      "torch_memory_status": "available",
+      "torch_peak_allocated": 231906816,
+      "torch_peak_reserved": 264241152
+    },
+    "sub02": {
+      "input_sha256": {
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz": "83a5558f5d218ff8615196a7e120ec46badb3c973e816d9968775154584810f5",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.inv.nii.gz": "da0fbc6d0c9f99bdcb693cd459f518d680395e3ce090d51d5f345b497f055e85",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/mri/orig.mgz": "5c7cac921ddd29876e400cf241fa259d1ac239f9d8189e5ffb37a7d463265a9f",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/mri/transforms/synthmorph.1.0mm.1.0mm/invol.crop.nii.gz": "be676f9794dead459246e27f1e5834c1b078ebc6c4cfdde9b0db92b79b3fec21",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/mri/transforms/synthmorph.1.0mm.1.0mm/tmp/deform.mgz": "41233afd190c45a261cfab471d570d66c03aafa2dd26c77afdfbfe661e18a61c",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/mri/transforms/synthmorph.1.0mm.1.0mm/tmp/reg.crop-to-invol.lta": "bb10c722a1626dd555f4b4e81d651e76e806b7124c07d0f2803210ec1cc319b6",
+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/mri/transforms/synthmorph.1.0mm.1.0mm/tmp/reg.crop-to-full.lta": "0aa7a34ed0c52da4b4d6271c6842372af90dba68e955105540945715a98c844c"
+      },
+      "comparisons": {
+        "forward_gpu_vs_frozen": {
+          "different_elements": 0,
+          "elements": 25590063,
+          "maximum": 0.0,
+          "p99": 0.0,
+          "mean": 0.0,
+          "shape": [
+            193,
+            229,
+            193,
+            1,
+            3
+          ],
+          "dtype_left": "float32",
+          "dtype_right": "float32",
+          "affine_maximum": 0.0,
+          "intent_left": [
+            "displacement vector",
+            [],
+            ""
+          ],
+          "intent_right": [
+            "displacement vector",
+            [],
+            ""
+          ],
+          "units_left": [
+            "mm",
+            "sec"
+          ],
+          "units_right": [
+            "mm",
+            "sec"
+          ],
+          "sha256_left": "b2ee02bf9cb491cf420ff8e4b9d1b536b807f538a7c173afe1b75fdebff4be19",
+          "sha256_right": "83a5558f5d218ff8615196a7e120ec46badb3c973e816d9968775154584810f5"
+        },
+        "check_gpu_vs_frozen": {
+          "different_elements": 0,
+          "elements": 8530021,
+          "maximum": 0.0,
+          "p99": 0.0,
+          "mean": 0.0,
+          "shape": [
+            193,
+            229,
+            193
+          ],
+          "dtype_left": "uint8",
+          "dtype_right": "uint8",
+          "affine_maximum": 0.0,
+          "intent_left": [
+            "none",
+            [],
+            ""
+          ],
+          "intent_right": [
+            "none",
+            [],
+            ""
+          ],
+          "units_left": [
+            "mm",
+            "sec"
+          ],
+          "units_right": [
+            "mm",
+            "sec"
+          ],
+          "sha256_left": "17ca423cbec2dae63ebf80fb72c5b926ecd0797a6d031b061135ad95567bdaec",
+          "sha256_right": "a7a7bc488dc702e5a8c0e2caf3915216d43759b7619d470c2c483795ade354e5"
+        }
+      },
+      "timings": {
+        "conversion_gpu": {
+          "load_convert_seconds": 1.3933248231187463,
+          "composition_download_seconds": 0.10679078288376331,
+          "save_seconds": 2.5477385208941996,
+          "total_seconds": 4.0478571890853345,
+          "device": "cuda:0",
+          "chunk_slices": 16
+        },
+        "check_gpu": {
+          "save_seconds": 0.17575282789766788,
+          "total_seconds": 1.359689577948302,
+          "device": "cuda:0",
+          "chunk_slices": 16
+        }
+      },
+      "cpu_load_after": [
+        35.09,
+        38.92,
+        39.63
+      ],
+      "torch_memory_status": "available",
+      "torch_peak_allocated": 231906816,
+      "torch_peak_reserved": 283115520
+    }
+  },
+  "source_sha256": {
+    "mni_warp_inverse.py": "bba7ece7d49a07c909b3123ac1339f362b96b8a71b4d7358096b4be9cceb758c",
+    "ca_register_inverse.py": "532e4601932964285ed98b55b8866528ebc80bbcb05a41da7cf62bd06100c389",
+    "mni_warp_kernels.py": "4fef5d84da94e1e5b81b1e1bb11aa7e5d14024117de05d07df4632cd853d69e8",
+    "mni_warp_io.py": "37e1f57fad13191a9150ff6730721601bb7d50808a8e532f4182d985c7eab3f0",
+    "mni_warp_postprocess.py": "dd5f3e298810ca6b361ee0472cbf0478930552e73bd3ad571c6d142212947ffd",
+    "ca_register_inverse_fill.py": "4154457be88a77e1aac4e06d94babcb9716006a3dc704a7bcfe2c6a859dcd395",
+    "mni_warp_sampling.py": "84dd8fae47346dbb69ba74ce753c3286ea534828dededf30756d43738787da3d",
+    "ca_register_inverse_output.py": "29d4280a8698631908b38a128ce2945bfcb7002789ed3f569142b9a1518551c2"
+  }
+}
