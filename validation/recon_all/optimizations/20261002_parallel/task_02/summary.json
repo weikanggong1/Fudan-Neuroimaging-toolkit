@@ -1,5 +1,5 @@
 {
-  "status": "operators_collision_layout_and_one_complete_pial_passed_native_pending",
+  "status": "task02_scoped_work_complete_integration_pending",
   "actual_operator_commit": "4674cc26bb3f9be6763c224c6addd09a7338964a",
   "operator_rows": [
     {
@@ -99,8 +99,8 @@
     "candidate": "passed",
     "capability_query": "passed",
     "measured_builder_commit": "c8c1db9",
-    "stage_regression": "pending",
-    "official_reference": "existing 8.2.0-1; isolated new run pending",
+    "stage_regression": "all three complete stages passed ordered geometry, stats and diagnostic volume checks against current Conda",
+    "official_reference": "new same-input official8.2.0-1 run completed; drift recorded separately, overall equivalence not assessed",
     "live_ldd": "both pass: no missing dependency, /public/software/apps/Freesurfer or /tmp/fs_itk_build runtime link"
   },
   "latest_layout_fix_commit": "fd1cd18",
@@ -156,5 +156,61 @@
     "numpy": "1.26.4",
     "scipy": "1.17.1",
     "matplotlib": "3.10.9"
+  },
+  "native_three_stage": {
+    "rows": [
+      {
+        "stage": "white_preaparc",
+        "current_seconds": 215.67550085764378,
+        "control_seconds": 212.80823246389627,
+        "candidate_seconds": 187.16901435516775,
+        "official_seconds": 143.846078556031,
+        "candidate_reduction_vs_current_percent": 13.21730395391162,
+        "candidate_reduction_vs_control_percent": 12.048038655214299,
+        "candidate_coordinate_error_mm": 0,
+        "official_max_mm": 1.1483424244840017,
+        "official_p99_mm": 0.014154080074806745,
+        "official_mean_mm": 0.0009524410268897885
+      },
+      {
+        "stage": "final_white",
+        "current_seconds": 193.70817919820547,
+        "control_seconds": 200.87756388168782,
+        "candidate_seconds": 171.72136445716023,
+        "official_seconds": 135.4916865308769,
+        "candidate_reduction_vs_current_percent": 11.350483408626722,
+        "candidate_reduction_vs_control_percent": 14.514413088810606,
+        "candidate_coordinate_error_mm": 0,
+        "official_max_mm": 0.22027396283977116,
+        "official_p99_mm": 0.005111739579540432,
+        "official_mean_mm": 0.00026652402601128603
+      },
+      {
+        "stage": "pial",
+        "current_seconds": 181.39552491903305,
+        "control_seconds": 231.25592363392934,
+        "candidate_seconds": 188.86331004509702,
+        "official_seconds": 129.46348762325943,
+        "candidate_reduction_vs_current_percent": -4.116851906571162,
+        "candidate_reduction_vs_control_percent": 18.3314714376521,
+        "candidate_coordinate_error_mm": 0,
+        "official_max_mm": 2.2845825006746843,
+        "official_p99_mm": 0.134769166554468,
+        "official_mean_mm": 0.007958402833085392
+      }
+    ],
+    "scope": "single frozen real lh; one ordered complete stage trial each; not a continuous chain or whole case",
+    "all_control_candidate_outputs_exact": true,
+    "official_reference_separate": true,
+    "monitor": {
+      "exit_code": 0,
+      "tree_peak_gpu_bytes": 0,
+      "samples": 4206,
+      "max_interval_seconds": 2.8013203241862357
+    },
+    "monitor_failures": 0,
+    "overall_equivalence": "not_assessed",
+    "actual_benchmark_commit": "c8c1db9",
+    "selection": "white stages show single-case benefit; pial4.117% slower than current and control/current differ, keep current pial and unchanged production defaults pending coordinator integration"
   }
 }

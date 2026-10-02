@@ -14,10 +14,12 @@
 
 Python pial 候选只写 `surf/H.pial.T1`，保留面、volume geometry和footer；不写 mrisps、曲率文件或生产日志。现有 `_run_native_pial` 也没有 `--outvol`/`--curv` 参数，检查输出pial网格并写 scripts/H.pial.log。white.preaparc Conda入口写 H.white.preaparc、autodet阈值和 mri/mrisps.wpa.mgz；final white写 H.white和mri/mrisps.white.mgz。`_write_principal_curvature_maps` 等后续阶段另写white.preaparc.H/K等曲率图，任务2没有移动这些调用。候选不能靠有pial网格就冒充完整生产产物；实际原生回归会清点新增/改写文件与hash。Python回调提供诊断不是mrisps输出替代。
 
-## 原生候选（待实测）
+## 原生候选（本轮三个完整步骤已实测）
 
-`tools/place_surface_hotspots/build_native.py` 按六份入口、计算和哈希支持源码的固定 SHA编译独立control和candidate，复用已授权Conda完整构建的其余对象，不覆盖共享源码/安装。只删除MRISpositionSurface中unused mht_f_current构建；动态MHT和顶点MHT仍每轮重建。若完整三步骤精确且实测有收益，协调者可通过三个已有wrapper的binary参数选择候选；公开安装入口由协调者加入该构建。当前仍选已发布Conda程序，不能仅凭静态未读参数就切默认。没有复制系统预装FS二进制。
+`tools/place_surface_hotspots/build_native.py` 按六份入口、计算和哈希支持源码的固定 SHA编译独立control和candidate，复用已授权Conda完整构建的其余对象，不覆盖共享源码/安装。只删除MRISpositionSurface中unused mht_f_current构建；动态MHT和顶点MHT仍每轮重建。若完整三步骤精确且实测有收益，协调者可通过三个已有wrapper的binary参数选择候选；公开安装入口由协调者加入该构建。本轮两个白面步骤有单输入收益，pial相对当前略慢且control时间有变化；生产仍选已发布Conda程序，协调者按整例验收结果决定各入口选择。没有复制系统预装FS二进制。
 
 独立native_build_v3已成功构建control/candidate；候选 --fnit-placement-capabilities 返回schema_version=1、固定上游提交与skip-unconsumed-repulse-face-table，且uses_cuda=false。构建hash见native_build/control.json与candidate.json。有限install_hotspot.patch已通过git apply --check，新增独立程序名、能力校验、ldd与启动检查，不覆盖原程序；尚未应用到共享安装。
 
 快照首试步回归已完成两例四半球，坐标、动量、次序及retained-MHT重试全部exact；完整首试步比tree略慢，因此不作为默认性能优化。对应collision_snapshot_v1/report.json绑定0d92ef5，未把它标成完整四轮或更新源码验收。完整pial对比包含每步坐标副本、hash、状态和JSON落盘的验证开销；其计时须称为含轨迹验证的完整回归，不能直接用作无诊断生产调用的收益。
+
+三个原生步骤12个完整运行已结束并严格收集（native_three_stage_v1/）。control/candidate有序表面与stats/outvol均exact；官方误差单列，pial最大2.284583mm、P99.134769mm。因此整体官方等效保持not_assessed；没有用较小mean值代替最大值，也未调整阈值。全部时间为单固定左半球独立步骤，不是连续自产链。
