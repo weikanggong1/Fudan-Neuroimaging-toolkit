@@ -85,7 +85,25 @@ def overlaps(left, right):
     return left.is_relative_to(right) or right.is_relative_to(left)
 
 
-def original_prep_config(config):
+def for_case(config, case=None):
+    """Select an explicit original prep binding without altering that config."""
+    origins = config.get("preparation_origins")
+    if origins is None:
+        return config
+    if case is None and "active_preparation_origin_index" in config:
+        return config
+    index = 0 if case is None else config["case_origin_index"].get(case["case_id"])
+    if isinstance(index, bool) or not isinstance(index, int) or not 0 <= index < len(origins):
+        raise ValueError("case has no valid declared preparation origin")
+    origin = origins[index]
+    if case is not None and case["case_id"] not in origin["case_ids"]:
+        raise ValueError("case-to-preparation origin mapping changed")
+    return {**config, "preparation_config":origin["preparation_config"],
+            "preparation_driver_status_path":origin["preparation_driver_status_path"], "active_preparation_origin_index":index}
+
+
+def original_prep_config(config, case=None):
+    config = for_case(config, case)
     b = config["preparation_config"]
     original, snapshot = Path(b["original_path"]), Path(b["snapshot_path"])
     raw = original.read_bytes()
@@ -100,6 +118,7 @@ def original_prep_config(config):
 
 def verify_preparation(config, case=None):
     """Use the ORIGINAL config with the ORIGINAL helper in a clean process."""
+    config = for_case(config, case)
     prep = original_prep_config(config)
     env = os.environ.copy()
     env.pop("PYTHONPATH", None)
@@ -179,6 +198,16 @@ def verify_source(config):
         path = Path(binding["path"])
         if path.is_symlink() or cohort.sha256(path) != binding["sha256"]:
             raise ValueError(f"original binding byte identity changed: {field}")
+    if config.get("origins_declaration"):
+        binding = config["origins_declaration"]
+        declaration_path = Path(binding["path"])
+        if declaration_path.is_symlink() or cohort.sha256(declaration_path) != binding["sha256"]:
+            raise ValueError("declared preparation origin mapping bytes changed")
+        declarations = json.loads(declaration_path.read_bytes())["bindings"]
+        report_dir = Path(config["stop_dispatch_path"]).parent
+        origins,mapping,_,_,_ = read_preparation_origins(declarations,report_dir)
+        if origins != config["preparation_origins"] or mapping != config["case_origin_index"]:
+            raise ValueError("in-memory case-to-origin mapping differs from the actual declared bytes")
     for path_key, sha_key in (("worker_script","worker_script_sha256"), ("staged_worker_script","staged_worker_sha256"),
                               ("resource_helper_script","resource_helper_sha256"), ("wall_script","wall_script_sha256")):
         if cohort.sha256(config[path_key]) != config[sha_key]:
@@ -196,7 +225,10 @@ def validate_gpu_configuration(prep, supplied):
     if set(supplied.get("sources", {})) != {VERSION} or set(supplied.get("frozen_sources", {})) != {VERSION}:
         raise ValueError("GPU configuration requires the actual candidate source and freeze")
     forbidden = {"recovery_mode", "rerun_origin", "revalidated_recon_reports", "preprocessed_root", "resume",
-                 "skip_topup", "skip_eddy", "run_root", "preparation_config", "staged_mode"}
+                 "skip_topup", "skip_eddy", "run_root", "preparation_config", "staged_mode",
+                 "preparation_origins", "case_origin_index", "origins_declaration", "active_preparation_origin_index",
+                 "preparation_driver_status_path", "gpu_configuration", "input_manifest", "resources_manifest",
+                 "stop_dispatch_path", "worker_script", "worker_script_sha256", "staged_worker_script", "staged_worker_sha256"}
     if forbidden.intersection(supplied):
         raise ValueError("candidate cannot supply recovery, reused output or binding metadata")
     future = {**prep["future_gpu_parameters"], "atlases":prep["atlases"]}
@@ -223,6 +255,7 @@ def assert_new_job(config, case, version, job):
 
 
 def preparation_driver_case(config, case):
+    config = for_case(config, case)
     path = Path(config["preparation_driver_status_path"])
     if path.is_symlink():
         raise ValueError("preparation driver cannot be a symlink")
@@ -247,8 +280,9 @@ def bind_anatomy(config, case, version, job):
     checked = verify_preparation(config, case)
     if record.get("preparation_report") != checked["preparation_report"]:
         raise ValueError("driver preparation ledger differs from the actual CPU report")
+    selected = for_case(config, case)
     result = {"status":"completed", "mode":MODE, "case_id":case["case_id"], "subject":case["subject"], "version":VERSION,
-              "prep_config_sha256":config["preparation_config"]["sha256"], "original_preparation":checked,
+              "prep_config_sha256":selected["preparation_config"]["sha256"], "original_preparation":checked,
               "preparation_driver_record":record, "driver_status_observation":observation, "bound_utc":cohort.utc(),
               "candidate_source_fingerprint":config["frozen_sources"][VERSION]["source_fingerprint"],
               "raw_dwi_preprocessing_resumed":False, "raw_dwi_outputs_copied":False,
@@ -263,8 +297,9 @@ def load_anatomy(config, case, version, job):
     verify_source(config)
     path = Path(job) / "staged_anatomy_binding.json"
     binding = json.loads(path.read_bytes())
+    selected = for_case(config, case)
     expected = {"status":"completed", "mode":MODE, "case_id":case["case_id"], "subject":case["subject"], "version":VERSION,
-                "prep_config_sha256":config["preparation_config"]["sha256"],
+                "prep_config_sha256":selected["preparation_config"]["sha256"],
                 "candidate_source_fingerprint":config["frozen_sources"][VERSION]["source_fingerprint"],
                 "raw_dwi_preprocessing_resumed":False, "raw_dwi_outputs_copied":False}
     if any(binding.get(k) != v for k, v in expected.items()):
@@ -278,7 +313,7 @@ def load_anatomy(config, case, version, job):
         raise ValueError("original preparation driver case changed after binding")
     recon = copy.deepcopy(checked["preparation_report"]["reconstruction_result"])
     recon["staged_anatomy"] = {"mode":MODE, "binding_path":str(path), "binding_sha256":cohort.sha256(path),
-                              "prep_config_sha256":config["preparation_config"]["sha256"],
+                              "prep_config_sha256":selected["preparation_config"]["sha256"],
                               "prepared_anatomy_subject_dir":checked["anatomy_subject_dir"],
                               "candidate_source_fingerprint":config["frozen_sources"][VERSION]["source_fingerprint"],
                               "recon_all_reused_from_other_round":False, "raw_dwi_preprocessing_resumed":False}
@@ -292,7 +327,7 @@ def anatomy_subject(config, case, job):
         raise RuntimeError("STOP_DISPATCH prevents starting the queued raw-DWI computation")
     verify_source(config)
     rerun.verify_resources(config)
-    prep = original_prep_config(config)
+    prep = original_prep_config(config, case)
     return cohort.recon_command(prep, case, Path(prep["run_root"]) / VERSION / case["case_id"])[2]
 
 
@@ -313,7 +348,9 @@ def worker(payload):
     verify_source(config)
     if action == "preflight":
         return {"resources":rerun.build_resources(config, source_version=VERSION),
-                "original_preparation":verify_preparation(config), "identity":cohort.host_identity()}
+                "original_preparation":[verify_preparation(for_case(config, {"case_id":origin["case_ids"][0]}))
+                    for origin in config["preparation_origins"]] if config.get("preparation_origins") else verify_preparation(config),
+                "identity":cohort.host_identity()}
     rerun.verify_resources(config)
     if action == "bind":
         case = payload["case"]
@@ -408,7 +445,80 @@ def atomic_cases_csv(path, records):
         temporary.unlink(missing_ok=True)
 
 
+def read_preparation_origins(declarations, report_dir):
+    """One full raw manifest; every formal case assigned exactly one real origin."""
+    if not isinstance(declarations, list) or not declarations:
+        raise ValueError("preparation bindings must be a nonempty list")
+    origins, mapping, raw_records = [], {}, []
+    manifest_hash = None
+    reference = None
+    seen_paths = set()
+    for index, declared in enumerate(declarations):
+        if not isinstance(declared, dict) or set(declared) != {"prep_config","prep_driver_report_dir","case_ids"}:
+            raise ValueError("preparation origin requires exactly config, driver and case_ids")
+        path, driver = Path(declared["prep_config"]), Path(declared["prep_driver_report_dir"])
+        cohort.absolute_path(str(path), "preparation config")
+        cohort.absolute_path(str(driver), "preparation driver")
+        if path.is_symlink() or str(path.resolve()) in seen_paths:
+            raise ValueError("duplicate/symlink original preparation config")
+        seen_paths.add(str(path.resolve()))
+        raw = path.read_bytes()
+        prep = json.loads(raw)
+        if path != Path(prep["run_root"]) / "anatomy_prep_config.json":
+            raise ValueError("origin config escaped its actual original namespace")
+        if (prep.get("scope") != "staged_anatomy_preparation_only" or prep.get("candidate_source") != "unknown"
+                or prep.get("gpu_started") is not False or prep.get("cpu_threads") != 8
+                or "sources" in prep or "frozen_sources" in prep):
+            raise ValueError("origin was not fresh source-independent eight-thread official preparation")
+        manifest_path = Path(prep["run_root"]) / "input_manifest.json"
+        actual_hash = cohort.sha256(manifest_path)
+        manifest = json.loads(manifest_path.read_bytes())
+        cases = cohort.validate_manifest(manifest)
+        if len(cases) != 10 or (manifest_hash is not None and manifest_hash != actual_hash):
+            raise ValueError("preparation origins do not share the exact full ten-case canonical raw manifest")
+        identity = {"official":prep["official_origin"]["identity"], "atlases":prep["atlases"], "future":prep["future_gpu_parameters"]}
+        if reference is not None and identity != reference:
+            raise ValueError("preparation origins differ in official identity or shared parameters")
+        reference, manifest_hash = identity, actual_hash
+        selected = declared["case_ids"]
+        available = {case["case_id"] for case in cases}
+        if (not isinstance(selected,list) or not selected or any(not isinstance(value,str) for value in selected)
+                or len(set(selected)) != len(selected) or set(selected)-available):
+            raise ValueError("origin case selection is empty, duplicated or outside the manifest")
+        if prep.get("selected_cases") and not set(selected).issubset(prep["selected_cases"]):
+            raise ValueError("origin case selection includes a subject that its official prep never planned")
+        for case_id in selected:
+            if case_id in mapping:
+                raise ValueError("a raw case was assigned multiple preparation origins")
+            mapping[case_id] = index
+        snapshot = Path(report_dir) / f"original_prep_config.{index}.bytes.json"
+        origin = {"preparation_config":{"original_path":str(path),"snapshot_path":str(snapshot),"sha256":hashlib.sha256(raw).hexdigest()},
+                  "preparation_driver_status_path":str(driver/"status.json"), "case_ids":list(selected)}
+        origins.append(origin)
+        raw_records.append({"path":str(snapshot), "bytes":raw})
+    if set(mapping) != {case["case_id"] for case in cases}:
+        raise ValueError("formal origin mapping must cover all ten raw subjects exactly once")
+    return origins,mapping,manifest,cases,raw_records
+
+
 def derive_config(options):
+    if getattr(options,"prep_bindings",None):
+        declarations = json.loads(options.prep_bindings.read_bytes())["bindings"]
+        origins,mapping,manifest,cases,raw_records = read_preparation_origins(declarations,options.report_dir)
+        single = copy.copy(options)
+        single.prep_bindings = None
+        single.prep_config = Path(origins[0]["preparation_config"]["original_path"])
+        single.prep_driver_report_dir = Path(origins[0]["preparation_driver_status_path"]).parent
+        config,_,_,_ = derive_config(single)
+        for origin in origins:
+            prior = json.loads(Path(origin["preparation_config"]["original_path"]).read_bytes())
+            for path in (options.run_root,options.report_dir):
+                if overlaps(path,prior["run_root"]) or overlaps(path,Path(origin["preparation_driver_status_path"]).parent):
+                    raise ValueError("new GPU/report namespace overlaps an original preparation origin")
+        config.update(preparation_origins=origins,case_origin_index=mapping,
+                      preparation_config=origins[0]["preparation_config"],
+                      origins_declaration={"path":str(options.prep_bindings),"sha256":cohort.sha256(options.prep_bindings)})
+        return config,manifest,cases,raw_records
     raw = options.prep_config.read_bytes()
     if options.prep_config.is_symlink():
         raise ValueError("original preparation config cannot be a symlink")
@@ -447,10 +557,18 @@ def run(options):
     start,start_utc = time.perf_counter(),cohort.utc()
     config,manifest,cases,raw = derive_config(options)
     report_dir = cohort.require_fresh(options.report_dir)
-    Path(config["preparation_config"]["snapshot_path"]).write_bytes(raw)
+    if isinstance(raw,bytes):
+        Path(config["preparation_config"]["snapshot_path"]).write_bytes(raw)
+    else:
+        for record in raw:
+            Path(record["path"]).write_bytes(record["bytes"])
     (report_dir/"original_gpu_config.bytes.json").write_bytes(options.gpu_config.read_bytes())
     original_driver = Path(config["preparation_driver_status_path"])
     (report_dir/"prep_driver_observation_at_bind.bytes.json").write_bytes(original_driver.read_bytes())
+    if config.get("preparation_origins"):
+        (report_dir/"original_prep_bindings.bytes.json").write_bytes(Path(config["origins_declaration"]["path"]).read_bytes())
+        for index,origin in enumerate(config["preparation_origins"]):
+            (report_dir/f"prep_driver_observation_at_bind.{index}.bytes.json").write_bytes(Path(origin["preparation_driver_status_path"]).read_bytes())
     state = {"schema_version":1,"status":"preflighting","staged_mode":MODE,"start_utc":start_utc,"config":config,"requested_cases":len(cases),
              "cases":{},"comparison_ready":False,"scientific_parity":"not_assessed","speedup":"not_assessed","continuous_cold_pipeline":False}
     for case in cases:
@@ -479,9 +597,11 @@ def run(options):
                     state["dispatch_paused"] = True
                     break
                 progressed = False
-                prep_state = json.loads(original_driver.read_bytes())
+                prep_states = [json.loads(Path(origin["preparation_driver_status_path"]).read_bytes())
+                    for origin in config["preparation_origins"]] if config.get("preparation_origins") else [json.loads(original_driver.read_bytes())]
                 for case in list(pending):
                     key = VERSION+"/"+case["case_id"]
+                    prep_state = prep_states[config["case_origin_index"][case["case_id"]]] if config.get("preparation_origins") else prep_states[0]
                     if prep_state.get("cases",{}).get(key,{}).get("status") not in ("completed","failed","failed_preparation_validation"):
                         continue
                     pending.remove(case)
@@ -509,7 +629,7 @@ def run(options):
                     save()
                     break  # One GPU stage; observe the current preparation state next.
                 if not progressed:
-                    if prep_state.get("status","").startswith(("failed","completed_anatomy")):
+                    if all(prep_state.get("status","").startswith(("failed","completed_anatomy")) for prep_state in prep_states):
                         for case in pending:
                             state["cases"][VERSION+"/"+case["case_id"]]["status"] = "incomplete_original_preparation"
                         pending.clear()
@@ -531,12 +651,19 @@ def main(argv=None):
         print(json.dumps(worker(json.load(sys.stdin)),allow_nan=False),flush=True)
         return 0
     parser = argparse.ArgumentParser(description=__doc__)
-    for name in ("prep-config","prep-driver-report-dir","gpu-config","run-root","report-dir"):
+    for name in ("gpu-config","run-root","report-dir"):
         parser.add_argument("--"+name,type=Path,required=True)
+    parser.add_argument("--prep-config",type=Path)
+    parser.add_argument("--prep-driver-report-dir",type=Path)
+    parser.add_argument("--prep-bindings",type=Path,help="explicit full-ten-case mapping to original prep configurations and driver reports")
     parser.add_argument("--preflight-only",action="store_true",help="actual source/resource/original-prep checks in a fresh report namespace; no GPU compute")
     parser.add_argument("--poll-seconds",type=float,default=30.)
     parser.add_argument("--timeout-hours",type=float,default=72.)
     options = parser.parse_args(argv)
+    if bool(options.prep_bindings) == bool(options.prep_config or options.prep_driver_report_dir):
+        parser.error("use either --prep-bindings or both single-origin preparation parameters")
+    if not options.prep_bindings and not (options.prep_config and options.prep_driver_report_dir):
+        parser.error("single origin requires both --prep-config and --prep-driver-report-dir")
     for value in vars(options).values():
         if isinstance(value,Path):
             cohort.absolute_path(str(value),"staged benchmark path")

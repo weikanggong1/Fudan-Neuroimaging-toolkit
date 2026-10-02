@@ -2,7 +2,7 @@
 
 ## 1. 功能与流程
 
-`tools/benchmark_connectome_anatomy_prep.py` 为本轮新下载的十例公开 BIDS 数据，分别从原始 T1w 完整执行官方 FreeSurfer `recon-all`。它复用现有 cohort 的官方重建命令、环境与 nibabel 产物检查。默认 CPU 同时运行两例，每例八线程。
+`tools/benchmark_connectome_anatomy_prep.py` 为本轮新下载的十例公开 BIDS 数据，分别从原始 T1w 完整执行官方 FreeSurfer `recon-all`。它复用现有 cohort 的官方重建命令、环境与 nibabel 产物检查。默认 CPU 同时运行两例，每例八线程；显式选择尚未启动的 case 子集时可使用最多八个并发 CPU 任务。
 
 这一步允许候选 FNIT 计算代码仍在开发。准备配置中没有 `sources`、`frozen_sources` 或候选源码路径；`candidate_source=unknown`。GPU 参数和 atlas 资源路径只保留为未来声明，不启动 DWI、GPU 任务或 GPU 锁。十例完成后的状态为 `completed_anatomy_preparation`，范围为 `staged_anatomy_preparation_only`，不是完整 connectome 的端到端结果。
 
@@ -11,10 +11,10 @@ flowchart TD
     A[本轮新下载的十例原始 BIDS<br/>T1w 与 DWI 输入清单] --> B[核对十个不同受试者<br/>绑定原始 manifest 和官方 FS 身份]
     B --> C[核对 CPU Python 官方程序<br/>setup 和 benchmark 脚本 SHA-256]
     C --> D[head 创建全新准备目录<br/>候选源码仍为 unknown]
-    D --> E[CPU 最多两例并行<br/>每例 recon-all -i rawT1 -all -openmp 8]
+    D --> E[默认两例；显式子集可最多八例并行<br/>每例 recon-all -i rawT1 -all -openmp 8]
     E --> F[nibabel 读取 MRI 表面与注释<br/>原始输入执行前后全量 SHA 校验]
     F --> G[逐例 JSON CSV 原子记录<br/>官方命令时间 head 墙钟 CPU 队列]
-    G --> H[十例实际完成并通过报告绑定<br/>completed_anatomy_preparation]
+    G --> H[本次计划实际完成并通过报告绑定<br/>完整十例或显式子集，计数分别记录]
     H --> I[以后显式冻结实际候选源码<br/>另建受控 GPU 绑定并执行全部原始 DWI 阶段]
 ```
 
@@ -52,7 +52,9 @@ exit_code = main([
 | `--run-root` | 不存在的新共享目录；存放十例新官方重建、准备配置和原始 manifest 副本 |
 | `--report-dir` | 不存在的新 driver 目录，不能与新 run 或旧 reconstruction 目录相互嵌套 |
 | `--worker-script` | 新版共享 cohort 脚本的绝对路径；字节须与本准备脚本实际导入的 cohort 实现一致 |
-| `--cpu-jobs` | 同时进行的官方重建数量，1 或 2，默认 2 |
+| `--cpu-jobs` | 同时进行的官方重建数量，默认 2；不声明子集时最多 2，声明 `--selected-cases` 后最多 8。每例仍固定 8 线程。 |
+| `--selected-cases` | 可选非空、无重复的 canonical `case_id` 列表。原始 manifest 仍保留完整十例；只在本次新命名空间运行所列 subject。 |
+| `--avoid-preparations PREP_CONFIG DRIVER_DIR` | 可重复；绑定之前准备配置及其 driver 的原字节 STOP 标记。子集必须在该旧准备目录完全没有开始，且原十例输入 SHA、官方身份和未来参数相同；不能与旧目录嵌套。 |
 | `--cpu-threads` | 每例线程数，固定 8 |
 | `--poll-seconds` | head 检查完成任务与停止标记的间隔，1–60 秒，默认 5 秒 |
 
@@ -75,7 +77,7 @@ fresh_preparation_report_directory/
   candidate-<case_id>-recon.stderr.log 本例远程准备的 SSH stderr
 ```
 
-`recon_command_seconds` 是 CPU 主机上实际官方命令的 monotonic 时间。`head_case_wall_seconds` 从 head 调用 CPU SSH 前开始，到返回并核对真实报告、全部输入和解剖文件后结束。`cpu_driver_queue_seconds` 单列准备队列等待。`head_preparation_wall_seconds` 是整个准备工具实际墙钟，包含配置、版本预检、两例并行、SSH、读写和校验；不能把它写成完整 DWI pipeline 时间。不同主机的 UTC 只保留各自原始记录，不相减代替 monotonic 计时。
+`recon_command_seconds` 是 CPU 主机上实际官方命令的 monotonic 时间。`head_case_wall_seconds` 从 head 调用 CPU SSH 前开始，到返回并核对真实报告、全部输入和解剖文件后结束。`cpu_driver_queue_seconds` 单列准备队列等待。`head_preparation_wall_seconds` 是整个准备工具实际墙钟，包含配置、版本预检、实际并发任务、SSH、读写和校验；不能把它写成完整 DWI pipeline 时间。不同主机的 UTC 只保留各自原始记录，不相减代替 monotonic 计时。
 
 每例 head 的 `start_utc` 在 CPU SSH 开始前原子写入 driver，运行中即可查看。计时错误保存在独立 `timing_error`，不覆盖已返回的真实准备结果或官方异常；十例实际成功但计时不完整时为 `completed_anatomy_preparation_with_timing_errors`，退出码为 1，不能视为计时验收完成。
 
@@ -94,6 +96,23 @@ python /shared/harness/benchmark_connectome_anatomy_prep.py \
 
 head 与 CPU worker 要使用 Python 3.10 或更新版本；实际 MRI 读取使用原配置指定、安装了 nibabel 的 Python。准备脚本不导入 FNIT 或创建 Conda 环境。停止后续派发可在报告目录创建 `STOP_DISPATCH`；中断后的再次运行应换全新目录。
 
+已有两例正在旧候选准备目录重建时，可以先停止旧 driver 的后续派发，再在全新目录只运行尚未开始的八例：
+
+```bash
+python /shared/harness_v2/benchmark_connectome_anatomy_prep.py \
+  --origin-driver-report-dir /shared/tenraw/original_driver \
+  --run-root /shared/tenraw/candidate_anatomy_v2 \
+  --report-dir /shared/tenraw/candidate_anatomy_v2_driver \
+  --worker-script /shared/harness_v2/benchmark_connectome_raw_cohort.py \
+  --selected-cases sub-CON04 sub-CON05 sub-CON06 sub-CON07 sub-CON08 sub-CON09 sub-CON10 sub-CON11 \
+  --avoid-preparations /shared/tenraw/candidate_anatomy_v1/anatomy_prep_config.json /shared/tenraw/candidate_anatomy_v1_driver \
+  --cpu-jobs 8 --cpu-threads 8
+```
+
+旧首两例自然结束，原目录、配置和失败/退出记录不改写。新 `selected_cases` 和原 `input_manifest.json` 分别记录八例计划与完整十例 canonical 输入；八例完成只表示该子集准备完成。以后[逐 case 来源绑定](raw_anatomy_staged_gpu.md)合并两批真实解剖结果，完整 GPU 评测仍要求十例全部成功。
+
+CPU 并发数不同会改变整个 cohort 的排队与吞吐；不能将两例并发基线与八例并发候选的总 batch wall 差全部归为 FNIT GPU 组件加速。每例实际官方 command 时间、GPU 下游和等待分别报告。
+
 ## 4. 对应官方调用
 
 工具设置原安装的 `FREESURFER_HOME`，source 官方 `SetUpFreeSurfer.sh`，在新 subject 目录执行：
@@ -111,13 +130,14 @@ recon-all \
 
 新增协议测试检查配置不含候选源码、十例清单、线程预算、原始/新目录隔离、命令参数、完整输入前后 SHA、真实产物报告绑定、停止派发和 monotonic 计时。测试的字节 fixture 不是 MRI，官方程序执行被 mock；这些测试不提供重建精度、真实运行时间或脑图结论。
 
-真实十例重建结果由部署运行后的 `status.json`、各例官方报告和实际 MGZ/表面产物确定。只有十例新官方命令均成功、真实 nibabel 数据读取通过、输入和输出字节绑定完整，才标记准备完成。候选 GPU pipeline 以后还需显式冻结实际源码并重新执行全部原始 DWI 阶段；本工具不建立该后续绑定。
+真实重建结果由部署运行后的 `status.json`、各例官方报告和实际 MGZ/表面产物确定。本次计划的全部新官方命令均成功、真实 nibabel 数据读取通过、输入和输出字节绑定完整，才标记该准备计划完成。候选 GPU pipeline 以后还需显式冻结实际源码并重新执行全部原始 DWI 阶段；本工具不建立该后续绑定。
 
 2026-10-03：相关 stdlib 协议测试 147 项通过，本工具含 23 项。新十例官方准备已在 nodecw10 开始，CON01、CON03 各使用全新目录和原始 T1w 执行 `recon-all -i ... -all -openmp 8`；实际官方版本为 `freesurfer-linux-centos7_x86_64-8.2.0-20260314-d932c45`。启动核查为两例运行、八例排队，候选 source 未知、GPU 未启动。该记录不是重建完成或完整 pipeline 精度/耗时结果，见[匿名化启动记录](../../validation/connectome/tenraw_20261002/anatomy_prep_protocol.json)。
 
 ## 6. 更新记录
 
 - 2026-10-03：新增独立官方解剖准备；候选源码未知时可先运行十例新 recon-all。使用最多两个活动 Future，保留已启动任务，禁止复用既有结果。
+- 同日 v2：新增显式子集和最多八个 CPU 任务；检查旧准备 STOP/配置/输入 SHA 及完全未开始目录，保留两批各自的计时和官方结果。
 - 协议测试和真实 benchmark 分开记录；部署后的真实墙钟、产物验证与脑图应引用本轮实际文件，不能以本工具的测试用时替代。
 
 ## 7. 原实现与参考

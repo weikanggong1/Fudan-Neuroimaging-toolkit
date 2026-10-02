@@ -43,6 +43,7 @@ return_code = main([
 |---|---|
 | `prep-config` | 原准备输出目录中的 `anatomy_prep_config.json`。在新 driver 目录原字节保存，核对 SHA；不增加源码字段、不改原文件。 |
 | `prep-driver-report-dir` | 原准备控制器的 `status.json`。只读；每例必须实际 `completed`、无 validation/timing error，并有真实准备结果和 head 起止计时。 |
+| `prep-bindings` | 多批准备时替代前两个参数的 JSON；显式将每个 case 分配给一个原 config/driver，恰好覆盖完整十例。各批 canonical manifest 原字节 SHA、官方身份和未来参数相同。 |
 | 准备目录中的 `input_manifest.json` | 正式十个不同 subjects；原始 T1/DWI 等输入路径、下载来源、许可与 SHA。原工具复核全部实际输入字节。 |
 | 每例 `anatomy_prep_report.json` / `recon_report.json` | 必须来自本轮新的候选官方解剖目录，官方版本、命令、线程数和输入相同；所有解剖文件重新读取和核对。仅存在 `recon-all.done` 不能通过。 |
 | `gpu-config` | JSON：候选实际源码路径及完整冻结清单、共同评测参数、GPU 和资源配置。配置文件自身 SHA 也冻结。见下表。 |
@@ -101,6 +102,27 @@ benchmark_harness="$benchmark_root/formal_harness_staged_gpu_v1"
 
 在新 driver 目录创建 `STOP_DISPATCH` 可停止下一例的 GPU 派发。它不修改原准备控制器、不终止当前科学计算。
 
+### 两批独立准备的逐例来源
+
+例如首两例由 v1 准备，余八例由 v2 准备：
+
+```json
+{
+  "bindings": [
+    {"prep_config": "/shared/candidate_anatomy_v1/anatomy_prep_config.json",
+     "prep_driver_report_dir": "/shared/candidate_anatomy_v1_driver",
+     "case_ids": ["sub-CON01", "sub-CON03"]},
+    {"prep_config": "/shared/candidate_anatomy_v2/anatomy_prep_config.json",
+     "prep_driver_report_dir": "/shared/candidate_anatomy_v2_driver",
+     "case_ids": ["sub-CON04", "sub-CON05", "sub-CON06", "sub-CON07", "sub-CON08", "sub-CON09", "sub-CON10", "sub-CON11"]}
+  ]
+}
+```
+
+命令只需把单来源的 `--prep-config` 和 `--prep-driver-report-dir` 替换为 `--prep-bindings /shared/candidate_prep_bindings.json`。每份原配置逐字节保存，原 helper 分别导入，CLI 实际使用各 case 自己来源中的 FreeSurfer 目录。重复/缺例、不同原始输入、伪装官方身份、超出原明确准备子集和映射文件变更全部拒绝。GPU 输出依旧使用一个全新的 namespace。
+
+各例的准备计时来自各自原 head 控制器，等待间隔保留原始 UTC 观察值；两批准备不被伪装成一次连续冷十例评测。
+
 ## 4. 官方步骤与实际调用
 
 独立准备工具从原始 T1 执行本轮官方命令，原报告记录真实 executable、version、环境和每个路径：
@@ -134,5 +156,6 @@ JSON/CSV 分别保存官方 `recon_command_seconds`、原准备 worker/head 的 
 ## 6. 更新记录与来源
 
 - 2026-10-03：新增候选解剖准备与真实冻结源码绑定；原准备配置/工具字节不变；复用现有 cohort GPU worker、资源检查和 wall 评测器。默认普通 fresh cohort 路径保持原样。
+- 同日：支持显式十例 case 到多个原准备来源映射；保留各配置原字节与独立计时，用于首两例和余八例的安全并行 CPU 调度。
 - 准备阶段：[raw_anatomy_prep.md](raw_anatomy_prep.md)。共同基线受控重跑：[raw_cohort_controlled_rerun.md](raw_cohort_controlled_rerun.md)。
 - 官方 FreeSurfer：[recon-all 文档](https://surfer.nmr.mgh.harvard.edu/fswiki/recon-all)、[官方代码库](https://github.com/freesurfer/freesurfer)。生产 pipeline 与各算法参考文献见项目 connectome 主说明，本工具只负责评测编排。

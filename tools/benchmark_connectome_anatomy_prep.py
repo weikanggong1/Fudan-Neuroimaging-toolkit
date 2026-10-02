@@ -63,8 +63,13 @@ def validate_config(config):
         raise ValueError("official anatomy preparation cannot declare a GPU execution")
     if config.get("cpu_threads") != 8 or isinstance(config.get("cpu_threads"), bool):
         raise ValueError("official reconstruction must use exactly eight CPU threads")
-    if config.get("cpu_jobs") not in (1, 2) or isinstance(config.get("cpu_jobs"), bool):
-        raise ValueError("preparation supports one or two concurrent official reconstructions")
+    maximum_jobs = 8 if config.get("selected_cases") else 2
+    if config.get("cpu_jobs") not in range(1, maximum_jobs + 1) or isinstance(config.get("cpu_jobs"), bool):
+        raise ValueError("preparation supports up to eight jobs only with an explicit case selection; ordinary preparation allows two")
+    if "selected_cases" in config and (not isinstance(config["selected_cases"], list) or not config["selected_cases"]
+            or any(not isinstance(value, str) for value in config["selected_cases"])
+            or len(set(config["selected_cases"])) != len(config["selected_cases"])):
+        raise ValueError("explicit preparation selection must be a nonempty unique case list")
     for name in ("run_root", "worker_script", "anatomy_prep_script", "cpu_python", "anatomy_validation_python",
                  "freesurfer_home", "recon_all"):
         cohort.absolute_path(config.get(name), name)
@@ -136,6 +141,45 @@ def verify_runtime_files(config):
     report = config["official_origin"]["report"]
     if cohort.sha256(report["path"]) != report["sha256"]:
         raise ValueError("recorded original official identity report changed")
+    verify_prior_preparations(config)
+
+
+def select_cases(cases, selected):
+    if selected is None:
+        return cases
+    if not selected or len(set(selected)) != len(selected):
+        raise ValueError("explicit preparation selection must be nonempty and unique")
+    available = {case["case_id"]: case for case in cases}
+    if any(value not in available for value in selected):
+        raise ValueError("selected preparation case is absent from the full canonical manifest")
+    return [available[value] for value in selected]
+
+
+def verify_prior_preparations(config):
+    """Prevent a new subset from duplicating any already started earlier job."""
+    selected = config.get("selected_cases", [])
+    for binding in config.get("prior_preparations", []):
+        path = Path(binding["path"])
+        if path.is_symlink() or cohort.sha256(path) != binding["sha256"]:
+            raise ValueError("prior preparation config bytes changed")
+        prior = json.loads(path.read_bytes())
+        if (prior.get("scope") != SCOPE or prior.get("candidate_source") != "unknown"
+                or prior.get("gpu_started") is not False or prior.get("cpu_threads") != 8):
+            raise ValueError("prior preparation does not describe this round's official staged anatomy")
+        if (prior.get("official_origin", {}).get("identity") != config["official_origin"]["identity"]
+                or prior.get("atlases") != config["atlases"]
+                or prior.get("future_gpu_parameters") != config["future_gpu_parameters"]):
+            raise ValueError("prior preparation differs in official identity or shared future parameters")
+        manifest = Path(prior["run_root"]) / "input_manifest.json"
+        if cohort.sha256(manifest) != config["origin_binding"]["input_manifest_sha256"]:
+            raise ValueError("prior preparation full raw manifest differs from this round")
+        stop = Path(binding["stop_dispatch_path"])
+        if not stop.is_file() or stop.is_symlink() or cohort.sha256(stop) != binding["stop_dispatch_sha256"]:
+            raise ValueError("prior preparation must have an unchanged explicit STOP_DISPATCH")
+        for case_id in selected:
+            job = Path(prior["run_root"]) / VERSION / case_id
+            if job.exists() or job.is_symlink():
+                raise FileExistsError("new preparation selection overlaps an already started official subject")
 
 
 def derive_config(options):
@@ -147,9 +191,13 @@ def derive_config(options):
         raise ValueError("preparation must derive from the formal eight-thread original cohort")
     manifest_path = Path(original["run_root"]) / "input_manifest.json"
     manifest = json.loads(manifest_path.read_text())
-    cases = cohort.validate_manifest(manifest)
-    if len(cases) != 10:
+    full_cases = cohort.validate_manifest(manifest)
+    if len(full_cases) != 10:
         raise ValueError("this formal preparation requires exactly ten distinct raw subjects")
+    selected = getattr(options, "selected_cases", None)
+    if getattr(options, "avoid_preparations", None) and selected is None:
+        raise ValueError("avoiding earlier preparations requires an explicit new case subset")
+    cases = select_cases(full_cases, selected)
     claim = origin.get("fresh_namespace", {})
     if claim.get("status") != "claimed_fresh_namespace" or claim.get("path") != original["run_root"]:
         raise ValueError("original raw round did not record a fresh namespace claim")
@@ -167,7 +215,20 @@ def derive_config(options):
                   origin_binding={"driver_status_path": str(origin_path),
                                   "driver_status_sha256_at_launch": cohort.hashlib.sha256(origin_bytes).hexdigest(),
                                   "input_manifest_path": str(manifest_path), "input_manifest_sha256": cohort.sha256(manifest_path)},
-                  official_origin=official_origin_identity(original, cases))
+                  official_origin=official_origin_identity(original, full_cases))
+    if selected is not None:
+        config["selected_cases"] = list(selected)
+        config["full_manifest_case_count"] = len(full_cases)
+    config["prior_preparations"] = []
+    for declaration in getattr(options, "avoid_preparations", []) or []:
+        path, driver = map(Path, declaration)
+        prior = json.loads(path.read_bytes())
+        for destination in (options.run_root, options.report_dir):
+            if overlaps(destination, prior["run_root"]) or overlaps(destination, driver):
+                raise ValueError("new preparation/report namespace overlaps an earlier preparation or driver")
+        stop = driver / "STOP_DISPATCH"
+        config["prior_preparations"].append({"path": str(path), "sha256": cohort.sha256(path),
+            "stop_dispatch_path": str(stop), "stop_dispatch_sha256": cohort.sha256(stop)})
     validate_config(config)
     config["frozen_runtime_files"] = freeze_runtime_files(config)
     verify_runtime_files(config)
@@ -190,6 +251,8 @@ def worker(payload):
     if action != "recon" or payload.get("version") != VERSION:
         raise ValueError("anatomy preparation worker only accepts official candidate reconstruction")
     case = payload["case"]
+    if config.get("selected_cases") and case["case_id"] not in config["selected_cases"]:
+        raise ValueError("official worker refuses a case outside its explicit preparation selection")
     manifest = json.loads(Path(config["origin_binding"]["input_manifest_path"]).read_text())
     if [item for item in manifest["cases"] if item["case_id"] == case["case_id"]] != [case]:
         raise ValueError("prepared raw subject differs from the bound original manifest")
@@ -249,6 +312,8 @@ def validate_reconstruction(config, case, report):
 
 
 def validate_preparation_result(config, case, result):
+    if config.get("selected_cases") and case["case_id"] not in config["selected_cases"]:
+        raise ValueError("case is outside this preparation's declared selection")
     job = Path(config["run_root"]) / VERSION / case["case_id"]
     actual_path = job / "anatomy_prep_report.json"
     if not actual_path.is_file() or actual_path.is_symlink() or json.loads(actual_path.read_text()) != result:
@@ -409,7 +474,7 @@ def run(options):
         completed = sum(record["status"] == "completed" for record in state["cases"].values())
         timing_complete = all(record.get("timing") and not record.get("timing_error") for record in state["cases"].values())
         status = "failed_or_incomplete_anatomy_preparation"
-        if completed == 10:
+        if completed == len(cases):
             status = "completed_anatomy_preparation" if timing_complete else "completed_anatomy_preparation_with_timing_errors"
         state.update(completed_cases=completed, timing_complete=timing_complete, status=status)
     except Exception as error:
@@ -429,7 +494,10 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("origin-driver-report-dir", "run-root", "report-dir", "worker-script"):
         parser.add_argument("--" + name, type=Path, required=True)
-    parser.add_argument("--cpu-jobs", type=int, choices=(1, 2), default=2)
+    parser.add_argument("--cpu-jobs", type=int, choices=range(1, 9), default=2)
+    parser.add_argument("--selected-cases", nargs="+", help="explicit subset of the full ten-case canonical manifest; allows up to eight concurrent CPU jobs")
+    parser.add_argument("--avoid-preparations", nargs=2, action="append", metavar=("PREP_CONFIG", "DRIVER_DIR"),
+                        help="prior original preparation config plus its driver STOP_DISPATCH; selected subjects must never have started there")
     parser.add_argument("--cpu-threads", type=int, choices=(8,), default=8)
     parser.add_argument("--poll-seconds", type=float, default=5.)
     options = parser.parse_args(argv)
