@@ -31,10 +31,8 @@ def _fast_atan2(y: torch.Tensor, x: torch.Tensor) -> torch.Tensor:
     return value.float()
 
 
-def _sample_mean_variance(mean: torch.Tensor, variance: torch.Tensor,
-                          x: torch.Tensor, y: torch.Tensor, z: torch.Tensor,
-                          alpha: float, radius: float) -> tuple[torch.Tensor, torch.Tensor]:
-    v_dim, u_dim = mean.shape
+def _sampling_geometry(shape, x, y, z, radius):
+    v_dim, u_dim = shape
     rad = torch.tensor(radius, dtype=torch.float32, device=x.device)
     d = (rad * rad - z * z).clamp_min(0)
     phi = torch.atan2(torch.sqrt(d), z)
@@ -48,8 +46,19 @@ def _sample_mean_variance(mean: torch.Tensor, variance: torch.Tensor,
     u0 = torch.where(u0 >= u_dim, u_dim - (u0 - u_dim + 1), u0)
     u1 = torch.where(u1 >= u_dim, u_dim - (u1 - u_dim + 1), u1)
 
+    return du, u0, u1, u0_voff, u1_voff, _fast_atan2(y, x)
+
+
+def _sample_mean_variance(mean: torch.Tensor, variance: torch.Tensor,
+                          x: torch.Tensor, y: torch.Tensor, z: torch.Tensor,
+                          alpha: float, radius: float, *, geometry=None) -> tuple[torch.Tensor, torch.Tensor]:
+    v_dim, u_dim = mean.shape
+    if geometry is None:
+        geometry = _sampling_geometry(mean.shape, x, y, z, radius)
+    du, u0, u1, u0_voff, u1_voff, theta_base = geometry
+
     alpha32 = torch.tensor(alpha, dtype=torch.float32, device=x.device)
-    theta = _fast_atan2(y, x) - alpha32
+    theta = theta_base - alpha32
     theta = torch.where(theta < 0, (theta.double() + 2 * math.pi).float(), theta)
     theta = torch.where(theta >= 2 * math.pi,
                         (theta.double() - 2 * math.pi).float(), theta)
@@ -66,11 +75,7 @@ def _sample_mean_variance(mean: torch.Tensor, variance: torch.Tensor,
     return sample(mean), sample(variance)
 
 
-def rigid_sse(vertices: torch.Tensor, curvature: torch.Tensor,
-              target_mean: torch.Tensor, target_variance: torch.Tensor,
-              angles_radians: tuple[float, float, float],
-              radius: float = 100.0) -> float:
-    """Compute the 16-partition native absolute standardized SSE at one angle."""
+def _project_rigid_positions(vertices, radius):
     xyz = vertices.float()
     x, y, z = xyz.unbind(dim=1)
     radius32 = torch.tensor(radius, dtype=torch.float32, device=xyz.device)
@@ -78,28 +83,53 @@ def rigid_sse(vertices: torch.Tensor, curvature: torch.Tensor,
     scale = radius32 / length
     x, y, z = x * scale, y * scale, z * scale
 
+    return x, y, z
+
+
+def _rigid_sse_projected(projected, curvature: torch.Tensor,
+              target_mean: torch.Tensor, target_variance: torch.Tensor,
+              angles_radians: tuple[float, float, float],
+              radius: float = 100.0, *, geometry=None) -> float:
+    """Compute the 16-partition native absolute standardized SSE at one angle."""
+    x, y, z = projected
     alpha, beta, gamma = angles_radians
-    sg = torch.tensor(math.sin(float(torch.tensor(gamma, dtype=torch.float32))),
-                      dtype=torch.float32, device=xyz.device)
-    cg = torch.tensor(math.cos(float(torch.tensor(gamma, dtype=torch.float32))),
-                      dtype=torch.float32, device=xyz.device)
-    sb = torch.tensor(math.sin(float(torch.tensor(beta, dtype=torch.float32))),
-                      dtype=torch.float32, device=xyz.device)
-    cb = torch.tensor(math.cos(float(torch.tensor(beta, dtype=torch.float32))),
-                      dtype=torch.float32, device=xyz.device)
-    gamma_y = y * cg - z * sg
-    gamma_z = y * sg + z * cg
-    rotated_x = x * cb - gamma_z * sb
-    rotated_z = x * sb + gamma_z * cb
+    if geometry is None:
+        geometry = _rotation_geometry(projected, target_mean.shape, beta, gamma, radius)
     target, variance = _sample_mean_variance(
-        target_mean, target_variance, rotated_x, gamma_y, rotated_z, alpha, radius)
+        target_mean, target_variance, x, y, z, alpha, radius, geometry=geometry)
     std = torch.sqrt(variance.double())
     std = torch.where(std.abs() < torch.finfo(torch.float32).eps, 4.0, std)
     delta = (curvature.double() - target.double()) / std
     abs_delta = delta.abs()
-    partition_size = (len(vertices) + 15) // 16
+    partition_size = (len(x) + 15) // 16
     return sum(float(abs_delta[p * partition_size:(p + 1) * partition_size].sum())
                for p in range(16))
+
+
+
+def rigid_sse(vertices: torch.Tensor, curvature: torch.Tensor,
+              target_mean: torch.Tensor, target_variance: torch.Tensor,
+              angles_radians: tuple[float, float, float], radius: float = 100.0) -> float:
+    """按原16分区求刚体目标；保留float32采样及float64累计。"""
+    return _rigid_sse_projected(_project_rigid_positions(vertices, radius),
+        curvature, target_mean, target_variance, angles_radians, radius)
+
+
+def _rotation_geometry(projected, shape, beta, gamma, radius):
+    x, y, z = projected
+    sg = torch.tensor(math.sin(float(torch.tensor(gamma, dtype=torch.float32))),
+                      dtype=torch.float32, device=x.device)
+    cg = torch.tensor(math.cos(float(torch.tensor(gamma, dtype=torch.float32))),
+                      dtype=torch.float32, device=x.device)
+    sb = torch.tensor(math.sin(float(torch.tensor(beta, dtype=torch.float32))),
+                      dtype=torch.float32, device=x.device)
+    cb = torch.tensor(math.cos(float(torch.tensor(beta, dtype=torch.float32))),
+                      dtype=torch.float32, device=x.device)
+    gamma_y = y * cg - z * sg
+    gamma_z = y * sg + z * cg
+    rotated_x = x * cb - gamma_z * sb
+    rotated_z = x * sb + gamma_z * cb
+    return _sampling_geometry(shape, rotated_x, gamma_y, rotated_z, radius)
 
 
 def rigid_search(vertices: torch.Tensor, curvature: torch.Tensor,
@@ -124,6 +154,7 @@ def rigid_search(vertices: torch.Tensor, curvature: torch.Tensor,
     best_sse = -1.0
     done: set[tuple[int, int, int]] = set()
     changed = True
+    projected = _project_rigid_positions(vertices, 100.0)
     with torch.no_grad():
         while True:
             if not changed:
@@ -140,6 +171,7 @@ def rigid_search(vertices: torch.Tensor, curvature: torch.Tensor,
                     bi = old_indices[1] + stride * (bj - nangles // 2)
                     if not 0 <= bi < grid_size:
                         continue
+                    geometry = None
                     for aj in range(nangles + 1):
                         ai = old_indices[0] + stride * (aj - nangles // 2)
                         if not 0 <= ai < grid_size:
@@ -148,9 +180,11 @@ def rigid_search(vertices: torch.Tensor, curvature: torch.Tensor,
                         if candidate in done:
                             continue
                         done.add(candidate)
-                        sse = rigid_sse(vertices, curvature, target_mean,
+                        if geometry is None:
+                            geometry = _rotation_geometry(projected, target_mean.shape, angle(bi), angle(gi), 100.0)
+                        sse = _rigid_sse_projected(projected, curvature, target_mean,
                                         target_variance,
-                                        (angle(ai), angle(bi), angle(gi)))
+                                        (angle(ai), angle(bi), angle(gi)), geometry=geometry)
                         radius = (stride * nangles) / 3.0
                         nearby = all(abs(old - new) <= radius
                                      for old, new in zip(best_indices, candidate))
