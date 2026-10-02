@@ -259,9 +259,10 @@ tck2connectome tracks.tck atlas.mif fbc.csv -symmetric -assignment_radial_search
 | CON01/CON03，同输入 CSD | 12 组实际中间张量、30 项数组比较逐位一致；观测耗时分别下降约 6.92%/3.45%，CON03 第二轮负载不稳定 | [建模优化与时间边界](../../validation/connectome/tenraw_20261002/task_02/README.md) |
 | CON01/CON03，同输入 100k tracking | 全部轨迹点、offsets、端点、长度和接受种子逐位一致；CON03 ABBA 197.785→160.700 s，观测下降 18.75%。CON01 最后一轮基线受到共享负载影响，不能用其均值差宣称稳定提速 | [追踪调用、完整参数与脑图](TRACKING_OPERATORS.md) |
 | CON03，双方各五种子，固定相同 FOD/5TT/atlas | 25 个跨软件组合中，矩阵 1091/1200 项、轨迹群体 72/125 项通过；FNIT 自身重复分别为 412/480、47/50。整体未匹配官方重复范围 | [完整五种子结果、失败项与真实脑图](../../validation/connectome/tenraw_20261002/task_04_repeat_fivefnit_reference/README.md) |
-| CON01，原始 AP/PA 整例两版本 | 校正 4D DWI、旋转梯度、配准、5TT/GMWMI、八 atlas 和 32 矩阵逐值一致；wall 641.205→1972.731 s，共享 GPU 条件下没有观测到整链加速。其余九例仍在执行 | [真实输出比较与时间范围](actual_cohort_comparison.md) |
+| CON01/CON03，原始 AP/PA 整例两版本 | 两例完整校正 DWI、梯度、变换、标签和共 64 矩阵逐值一致；wall 分别 641.205→1972.731、632.674→886.139 s，共享 GPU 条件下没有观测到整链加速。其余八例仍在执行 | [真实输出比较与时间范围](actual_cohort_comparison.md) |
+| CON01/CON03，独立官方 raw 预处理 | 自产 TOPUP→SynthStrip→CPU8 EDDY 已完成；脑内 DWI RMSE 1.0830/0.8836，梯度 RMS 0.0886°/0.0566°。CPU EDDY 2550.451/2550.927 s，未判等价或据不同计时边界算提速 | [完整原始链输入、参数、脑图和时间](../../validation/connectome/tenraw_20261002/task_01/official_rawprep_v1/README.md) |
 | CON01/CON03，固定 TCK 的 SIFT2 候选 | 两例严格逐值门槛均未通过，未采用优化器缓存。保留全部配对、原软件耗时及逐值误差 | [SIFT2/精确 FA 组件说明](SIFT2_SAMEINPUT_OPTIMIZATION.md) |
-| CON03，独立官方结构像步骤 | 官方 SynthMorph、FreeSurfer/MRtrix 与原 UKB atlas 脚本已真实执行，生成 27 项结构像输出。报告保留成功阶段恢复的时间与来源，尚不等于完整官方 raw-DWI 链验证 | [结构像实际报告与脑图](raw_official_anatomy_reference.md) |
+| 十例，独立官方结构像准备 | 官方 SynthMorph、FreeSurfer/MRtrix 与原 UKB atlas 脚本已生成每例 27 项准备输出，全部真实核验；恢复来源与时间分列。DWI 配准和最终 connectome 仍由后续独立链完成 | [结构像实际报告与脑图](raw_official_anatomy_reference.md) |
 
 下表是既有 ds004666/UKB 结果，保留对应版本与输入范围。
 

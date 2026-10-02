@@ -91,6 +91,8 @@ GPU 参考只将二进制换成同安装的 `eddy_cuda10.2`，输入、mask、TO
 
 ## 5. 最新真实精度、时间与脑图
 
+当前十例独立官方预处理参考见[raw TOPUP→SynthStrip→CPU EDDY](official_rawprep_v1/README.md)。首两例自产校正 DWI 和完整梯度已实际完成、比较与 SHA 校验通过；官方 CPU8 EDDY 分别为 2550.451/2550.927 s。本段后续旧组件结果使用固定 FNIT 场和 mask，输入范围不同，不能代替该独立 raw 链。GPU 全链尝试的 43.203 GB 预算终止与当前 CPU 时间分开记录。
+
 两个新 raw pilot 的组件准备均完成，以下从共享锁获取后开始，包含CUDA设置、staging、TOPUP、脑掩膜准备与EDDY保存；脚本导入在锁前，不包括recon-all和连接组下游。
 
 | Pilot | TOPUP (s) | EDDY准备 (s) | EDDY运行与保存 (s) | 实测锁内组件墙钟 (s) | GPU进程峰值 (GB) | 锁等待 (s，单列) |
