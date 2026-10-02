@@ -71,12 +71,68 @@ def initial_topology(faces):
     """
     matrix = np.asarray(faces, np.int64).reshape(-1, 3)
     pairs, offsets, adjacent, face_edges = _topology_arrays(matrix)
+    return _python_topology(pairs, offsets, adjacent, face_edges)
+
+
+def _python_topology(pairs, offsets, adjacent, face_edges):
     edge_vertices = pairs.tolist()
     edge_index = dict(zip(map(tuple, edge_vertices), range(len(edge_vertices))))
     entries = adjacent.tolist()
     bounds = offsets.tolist()
     edge_faces = [entries[bounds[i]:bounds[i + 1]] for i in range(len(pairs))]
     return edge_index, edge_vertices, edge_faces, face_edges.tolist()
+
+
+@njit(cache=True, fastmath=False)
+def _vertex_topology_arrays(faces, pairs, edge_offsets, nvertices):
+    face_counts = np.zeros(nvertices, np.int64)
+    edge_counts = np.zeros(nvertices, np.int64)
+    boundary = np.zeros(nvertices, np.bool_)
+    for ti in range(len(faces)):
+        for local in range(3):
+            vertex = faces[ti, local]
+            if local > 0 and vertex == faces[ti, 0]:
+                continue
+            if local > 1 and vertex == faces[ti, 1]:
+                continue
+            face_counts[vertex] += 1
+    for ei in range(len(pairs)):
+        a, b = pairs[ei]
+        edge_counts[a] += 1
+        edge_counts[b] += 1
+        if edge_offsets[ei + 1] - edge_offsets[ei] != 2:
+            boundary[a], boundary[b] = True, True
+    face_offsets = np.empty(nvertices + 1, np.int64)
+    adjacent_offsets = np.empty(nvertices + 1, np.int64)
+    face_offsets[0], adjacent_offsets[0] = 0, 0
+    for vertex in range(nvertices):
+        face_offsets[vertex + 1] = face_offsets[vertex] + face_counts[vertex]
+        adjacent_offsets[vertex + 1] = adjacent_offsets[vertex] + edge_counts[vertex]
+    face_ids = np.empty(face_offsets[-1], np.int64)
+    corners = np.empty_like(face_ids)
+    neighbors = np.empty(adjacent_offsets[-1], np.int64)
+    edge_ids = np.empty_like(neighbors)
+    cursor = face_offsets[:-1].copy()
+    for ti in range(len(faces)):
+        for local in range(3):
+            vertex = faces[ti, local]
+            if local > 0 and vertex == faces[ti, 0]:
+                continue
+            if local > 1 and vertex == faces[ti, 1]:
+                continue
+            pos = cursor[vertex]
+            face_ids[pos], corners[pos] = ti, local
+            cursor[vertex] += 1
+    cursor = adjacent_offsets[:-1].copy()
+    for ei in range(len(pairs)):
+        a, b = pairs[ei]
+        pos = cursor[a]
+        neighbors[pos], edge_ids[pos] = b, ei
+        cursor[a] += 1
+        pos = cursor[b]
+        neighbors[pos], edge_ids[pos] = a, ei
+        cursor[b] += 1
+    return face_offsets, face_ids, corners, adjacent_offsets, neighbors, edge_ids, boundary
 
 
 @njit(cache=True, fastmath=False)
@@ -195,22 +251,19 @@ class Mesh:
         self.rebuild()
 
     def rebuild(self):
-        self.edge_index, self.edge_vertices, self.edge_faces, self.face_edges = initial_topology(self.faces)
-        self.vertex_faces = [[] for _ in self.points]
-        self.vertex_local = [[] for _ in self.points]
-        for ti, face in enumerate(self.faces):
-            for local, vertex in enumerate(face):
-                if ti not in self.vertex_faces[vertex]:
-                    self.vertex_faces[vertex].append(ti)
-                    self.vertex_local[vertex].append(local)
-        self.vertex_edges = [dict() for _ in self.points]
-        for ei, (a, b) in enumerate(self.edge_vertices):
-            self.vertex_edges[a][b] = ei
-            self.vertex_edges[b][a] = ei
-        self.onboundary = [False] * len(self.points)
-        for ei, (a, b) in enumerate(self.edge_vertices):
-            if len(self.edge_faces[ei]) != 2:
-                self.onboundary[a] = self.onboundary[b] = True
+        matrix = np.asarray(self.faces, np.int64).reshape(-1, 3)
+        pairs, edge_offsets, adjacent, face_edges = _topology_arrays(matrix)
+        self.edge_index, self.edge_vertices, self.edge_faces, self.face_edges = _python_topology(
+            pairs, edge_offsets, adjacent, face_edges)
+        offsets, ids, corners, adjacency_offsets, neighbors, edge_ids, boundary = _vertex_topology_arrays(
+            matrix, pairs, edge_offsets, len(self.points))
+        bounds, face_ids, locals_ = offsets.tolist(), ids.tolist(), corners.tolist()
+        self.vertex_faces = [face_ids[bounds[v]:bounds[v+1]] for v in range(len(self.points))]
+        self.vertex_local = [locals_[bounds[v]:bounds[v+1]] for v in range(len(self.points))]
+        bounds, neighbors_, edges_ = adjacency_offsets.tolist(), neighbors.tolist(), edge_ids.tolist()
+        self.vertex_edges = [dict(zip(neighbors_[bounds[v]:bounds[v+1]], edges_[bounds[v]:bounds[v+1]]))
+                             for v in range(len(self.points))]
+        self.onboundary = boundary.tolist()
 
     def face_normals(self):
         return _remesh_face_normals(np.asarray(self.points, np.float64),
