@@ -138,6 +138,12 @@ python tools/reference/bind_connectome_raw_reference_origins.py \
 该来源表的 `execution_completed` 仅表示两组真实参考产物已齐，`scientific_parity` 仍是 `not_assessed`。是否进入官方重复范围由矩阵 envelope 独立判断。解析器测试只验证来源协议，不能替代真实十例 benchmark。
 
 
+### 已完成参考的只读审计
+
+`audit_connectome_raw_repeats.py` 接收已完成 `--manifest`、canonical `--raw-manifest/--raw-manifest-sha256`、唯一 `--case-id`、实际冻结 `--worker` 和新 `--output`。它不执行官方命令或 GPU，重验原始/producer/源码/二进制/输入 reader/TCK/标量/矩阵 SHA，保存各轮实际时间及官方自身十对完整范围。未提供 FNIT 结果时，cross 和 FNIT 重复状态保持 `not_assessed`。首两例实际完成结果见 [CON01/CON03 独立 raw 五重复审计](../../validation/connectome/tenraw_20261002/task_04_raw_reference_first_cases/README.md)。
+
+`run_connectome_raw_readonly_audit_cohort.py --config <冻结JSON> --config-sha256 <完整SHA> --poll-seconds 30` 持续读取上述 origin 表，只审计已完成病例。配置字段是 `raw_manifest={path,sha256}`、`case_origin_configuration={path,sha256}`、`official_view`、`source_files={absolute_path:sha256}`、`audit_worker`（只读审计器）、`producer_worker`（当时官方 worker）、`python`、全新 `output_root`；可用 `completed_audits={case_id:{path,sha256}}` 显式绑定此前已完成审计。它不会复制已有报告；来源表保存实际原路径。新报告逐例执行一次只读审计，不启动官方命令、追踪、矩阵计算或 GPU。输出 `cohort_status.json` 记录实际来源、摘要和等待/失败状态，`scientific_parity` 始终为 `not_assessed`。
+
 ## 4. 官方步骤与命令
 
 | 阶段 | 本工具消费或执行的官方步骤 |
@@ -156,15 +162,17 @@ python tools/reference/bind_connectome_raw_reference_origins.py \
 
 ## 5. 精度、时间与真实图
 
-新十例官方完整链的产物齐备后才进行真实矩阵评测。工具验收的是同原始病例和严格节点语义；两条独立处理链的中间图像及 atlas 内容分别记录。已有固定输入报告继续要求跨软件 atlas 来源 SHA 相同。
+新十例逐病例官方完整链产物齐备后进行真实矩阵评测。首 CON01/CON03 已完成各五轮参考，详见上述实物审计。工具验收的是同原始病例和严格节点语义；两条独立处理链的中间图像及 atlas 内容分别记录。已有固定输入报告继续要求跨软件 atlas 来源 SHA 相同。
 
 预先定义门槛：错误不超过官方自身最大观测错误，相似性不低于官方自身最小观测相似性。完整五次重复范围保留，不要求 FNIT 超过 MRtrix 自身重复；范围是有限样本观测，不是总体置信区间。共同 count 边上的 length/FA、全部严格上三角 count/FBC、support Dice 与 count Pearson 的数值定义复用原工具。
 
-目前已完成的独立固定输入 CON03：官方 198 命令全部 exit0，一份 FNIT 对官方五份在八 atlas 主矩阵中 233/240 比较通过，7 个未通过。这个结果是算子定位，不是新十例完整官方链结果。已有 [真实点访问与人口分布图](../../validation/connectome/tenraw_20261002/task_04_repeat_reference/tractogram_population.png) 及 [矩阵图](../../validation/connectome/tenraw_20261002/task_04_repeat_reference/matrix_envelope.png)。
+此前固定输入 CON03 的单次 FNIT seed0 对官方五份在八 atlas 主矩阵中 233/240 比较通过，7 个未通过；后续五份 FNIT 的全部交叉/自身重复结果见 [五种子实物报告](../../validation/connectome/tenraw_20261002/task_04_repeat_fivefnit_reference/README.md)。这些结果用于算子定位，与独立 raw 全链报告分开。已有 [真实点访问与人口分布图](../../validation/connectome/tenraw_20261002/task_04_repeat_reference/tractogram_population.png) 及 [矩阵图](../../validation/connectome/tenraw_20261002/task_04_repeat_reference/matrix_envelope.png)。
 
-实际只读依赖预检：nodecw10 的七个固定二进制版本调用均 exit0，101 个原始唯一文件 SHA/header 已核对；完整 producer 合同尚未齐，`required_dependency_ready=false`。gpucw1 的旧系统 C++ 加载器失败独立保留，未改原程序或运行库。详见 [实际预检记录](../../validation/connectome/tenraw_20261002/task_04_raw_reference_preflight/README.md)。这不是追踪耗时或科学一致性结果。
+此前只读依赖预检：nodecw10 的七个固定二进制版本调用均 exit0，101 个原始唯一文件 SHA/header 已核对；当时 producer 合同未齐，`required_dependency_ready=false`。随后首四例真实合同就绪，两 CPU 组已启动，首两例参考完成；来源和精确时间以阶段报告为准。gpucw1 的旧系统 C++ 加载器失败独立保留，未改原程序或运行库。详见 [实际预检记录](../../validation/connectome/tenraw_20261002/task_04_raw_reference_preflight/README.md)。这不是追踪耗时或科学一致性结果。
 
 ## 6. 版本与 benchmark 记录
+
+- 2026-10-03：两互斥 CPU 组使用同一冻结配置，首 CON01/CON03 各五轮 198 命令全部 exit0；增加只读实物审计，保留官方自身范围与 `not_assessed` cross 状态。原 5TT 非空间 channel `spacing=NaN` 的 JSON 修正仅影响 metadata，原影像/reader 文件不变，19 CPU 契约测试通过。
 
 - 2026-10-03：增加独立官方原始链执行器、显式合同 CPU 控制器和同 raw/节点语义矩阵 envelope；最新 32 个 CPU 工具契约回归通过、1 个可选绘图库跳过，3.94 s。这些小数组检验工具协议，不是科学 benchmark。
 - 2026-10-03：真实 fresh FS anatomy CON03 的官方 native atlas 已在另一阶段完成；官方 rawprep retry、modeling v2 与完整 DWI atlas 合同尚在推进。本工具不会提前写 completed。
