@@ -41,6 +41,27 @@ def test_gpu_backend_rejects_cpu_before_allocating():
     with unittest.TestCase().assertRaisesRegex(ValueError, "CUDA"):
         GCASearchScorer(samples,np.zeros((2,2,2),np.uint8),device="cpu")
 
+def test_gpu_coordinates_ignore_default_dtype():
+    import torch
+    if not torch.cuda.is_available():
+        raise RuntimeError('CUDA required for default-dtype regression')
+    from fnit.recon_all.mri_em_register_search_jit import log_sample_probability_jit
+    samples=StableSamples(np.array([[1,1,0]],np.int32),np.array([2],np.int32),
+                          np.array([100],np.float32),np.ones(1,np.float32),np.ones(1,np.float32))
+    source=np.zeros((3,3,3),np.uint8);source[1,2,0]=100
+    matrix=np.eye(4,dtype=np.float32);matrix[0,:]=[4,2**-25,0,0]
+    expected=log_sample_probability_jit(samples,source,matrix)
+    previous=torch.get_default_dtype()
+    try:
+        results=[]
+        for dtype in (torch.float32,torch.float64):
+            torch.set_default_dtype(dtype)
+            scorer=GCASearchScorer(samples,source,device='cuda:0')
+            results.append(float(scorer.score_many(matrix[None])[0]))
+        assert results==[expected,expected]
+    finally:torch.set_default_dtype(previous)
+
+
 def test_cached_logs_match_numba_reference_not_python_libm():
     from fnit.recon_all.mri_em_register_search_jit import _sample_log_values
     variances=np.array([1.003,17.293,73.182],np.float32)

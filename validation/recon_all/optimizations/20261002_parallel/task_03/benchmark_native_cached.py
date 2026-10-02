@@ -6,7 +6,9 @@ p=argparse.ArgumentParser(description=__doc__);p.add_argument('--root',type=Path
 def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 def lta(path):
  lines=Path(path).read_text().splitlines();i=lines.index('1 4 4');return np.array([[float(v) for v in line.split()] for line in lines[i+1:i+5]])
-report={'commit':a.commit,'host':platform.node(),'tolerance_declared':{'paired_lta_matrix_atol':0},'scope':'frozen_same_input_full_native_GCA_not_continuous_chain','overall_equivalence':'not_assessed','timing_includes_io_and_spawn':True,'cpu_threads':4,'same_build_control':a.same_build,'pid':os.getpid(),'rows':[],'external_load':[]}
+snapshot=Path(__file__).resolve().parents[5]/'source_commit.txt'
+actual_commit=snapshot.read_text().strip() if snapshot.exists() else a.commit
+report={'commit':actual_commit,'dispatch_commit':a.commit,'host':platform.node(),'tolerance_declared':{'paired_lta_matrix_atol':0},'scope':'frozen_same_input_full_native_GCA_not_continuous_chain','overall_equivalence':'not_assessed','timing_includes_io_and_spawn':True,'cpu_threads':4,'same_build_control':a.same_build,'pid':os.getpid(),'rows':[],'external_load':[]}
 stop=threading.Event()
 def monitor():
  while not stop.is_set():

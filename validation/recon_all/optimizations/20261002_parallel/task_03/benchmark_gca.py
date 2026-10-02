@@ -17,7 +17,9 @@ def main():
     p.add_argument('--commit',required=True); p.add_argument('--translation',action='store_true')
     a=p.parse_args(); a.output.mkdir(parents=True,exist_ok=True)
     torch.set_num_threads(4)
-    report={'commit':a.commit,'host':platform.node(),'tolerance_declared':{'score_atol':0,'translation_matrix_atol':0},
+    snapshot=Path(__file__).resolve().parents[5]/'source_commit.txt'
+    actual_commit=snapshot.read_text().strip() if snapshot.exists() else a.commit
+    report={'commit':actual_commit,'dispatch_commit':a.commit,'host':platform.node(),'pid':os.getpid(),'tolerance_declared':{'score_atol':0,'translation_matrix_atol':0},
             'scope':'frozen_same_input_component_not_complete_EM_or_continuous_chain', 'torch':torch.__version__,
             'threads':{k:os.environ.get(k) for k in ('OMP_NUM_THREADS','MKL_NUM_THREADS','OPENBLAS_NUM_THREADS','NUMBA_NUM_THREADS')},
             'gpu_uuid':os.environ['CUDA_VISIBLE_DEVICES'],'external_load':[], 'cases':[]}
@@ -78,8 +80,23 @@ def main():
                 row['translation']={'cpu_matrix':before.tolist(),'gpu_matrix':after.tolist(),'exact_matrix':bool(np.array_equal(before,after)),
                    'cpu_scores':[h[0] for h in history],'gpu_scores':[float(h[0]) for h in ghistory]}
                 del scorer
+            old_dtype=torch.get_default_dtype()
+            try:
+                torch.set_default_dtype(torch.float64)
+                scorer=GCASearchScorer(stable,source,device='cuda:0')
+                default64=scorer.score_many(matrices)
+            finally:
+                torch.set_default_dtype(old_dtype)
+            expected=np.array([log_sample_probability_jit(stable,source,m) for m in matrices],np.float32)
+            row['default_float64_different_scores']=int(np.count_nonzero(default64!=expected))
+            assert np.array_equal(default64,expected),'default dtype altered real-input score'
+            del scorer
             report['cases'].append(row)
             (a.output/'report.json').write_text(json.dumps(report,indent=2)+'\n')
+        import runpy
+        test_module=runpy.run_path(str(Path(__file__).resolve().parents[5]/'test_gca_score_batch.py'))
+        test_module['test_gpu_coordinates_ignore_default_dtype']()
+        report['boundary_default_dtype_test']='passed'
     finally:
         stop.set();watcher.join()
         source_root=Path(__file__).resolve().parents[5]/'src'

@@ -52,6 +52,8 @@ class GCASearchScorer:
         if not count or samples.coordinates.shape != (count, 3):
             raise ValueError('samples must contain nonempty (N,3) coordinates')
         arrays = (samples.means, samples.variances, samples.priors)
+        if any(a.dtype != np.float32 for a in arrays):
+            raise ValueError('fixed-T1 density arrays must have float32 dtype')
         if any(a.shape != (count,) or not np.isfinite(a).all() for a in arrays):
             raise ValueError('sample density arrays must be finite length N')
         if np.any(samples.variances <= 0) or np.any(samples.priors <= 0):
@@ -95,7 +97,7 @@ class GCASearchScorer:
                 coordinates = self.coordinates[start:stop]
                 axes = []
                 for axis in range(3):
-                    position = torch.zeros((len(block), stop-start), device=self.device)
+                    position = torch.zeros((len(block), stop-start), device=self.device, dtype=torch.float32)
                     for inner in range(3):
                         position = position + transform[:, axis, inner, None] * coordinates[None, :, inner]
                     position = position + transform[:, axis, 3, None]

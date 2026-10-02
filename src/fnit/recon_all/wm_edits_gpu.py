@@ -46,6 +46,12 @@ def amygdala_cortex_junction_gpu(aseg: torch.Tensor) -> torch.Tensor:
     return result
 
 
+def _native_voxel_array(image):
+    """Preserve values/dtype while converting MGH byte order for torch upload."""
+    source=np.asarray(image.dataobj)
+    return np.ascontiguousarray(source,dtype=source.dtype.newbyteorder('='))
+
+
 @torch.no_grad()
 def fix_ento_wm_gpu(input_file: str | Path, label_file: str | Path,
                     output_file: str | Path, *, level: int,
@@ -67,9 +73,7 @@ def fix_ento_wm_gpu(input_file: str | Path, label_file: str | Path,
         not np.allclose(image.affine,labels.affine,rtol=0,atol=1e-4)):
         raise ValueError('Input and label volumes must share a 3D grid')
     # MGH multi-byte storage is big-endian; torch requires native byte order.
-    source=np.asarray(image.dataobj)
-    source=source.astype(source.dtype.newbyteorder('='),copy=False)
-    voxels=torch.tensor(source,device=device)
+    voxels=torch.tensor(_native_voxel_array(image),device=device)
     segmentation=torch.tensor(np.asarray(labels.dataobj).astype(np.int32),device=device)
     if acj: segmentation=amygdala_cortex_junction_gpu(segmentation)
     left=torch.zeros(image.shape,dtype=torch.bool,device=device)

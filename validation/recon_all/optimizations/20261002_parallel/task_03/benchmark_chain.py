@@ -35,7 +35,9 @@ args.output.mkdir(parents=True,exist_ok=False)
 mri=args.output/'mri';mri.mkdir();(mri/'transforms').mkdir()
 for name in ('scripts','stats'):(args.output/name).mkdir()
 reference=args.root/'serial_20261001'/args.case/'mri';assets=args.root/'assets';weights=args.root/'weights';binaries=args.root/'serial_20261001/native_bundle/bin'
-report={'commit':args.commit,'case':args.case,'host':platform.node(),'pid':os.getpid(),'scope':'FNIT_frozen_prefix_continuous_GCA_to_filled_not_raw_T1_whole','overall_equivalence':'not_assessed','tolerance_declared':0,'gpu_uuid':os.environ['CUDA_VISIBLE_DEVICES'],'threads':{k:os.environ.get(k) for k in ('OMP_NUM_THREADS','MKL_NUM_THREADS','OPENBLAS_NUM_THREADS','NUMBA_NUM_THREADS')},'cpu_affinity':sorted(os.sched_getaffinity(0)),'torch_version':torch.__version__,'input_sha256':{},'resource_sha256':{},'binary_sha256':{},'stages':[],'gpu_samples':[],'comparison':{},'execution_complete':False}
+snapshot=Path(__file__).resolve().parents[5]/'source_commit.txt'
+actual_commit=snapshot.read_text().strip() if snapshot.exists() else args.commit
+report={'commit':actual_commit,'dispatch_commit':args.commit,'case':args.case,'host':platform.node(),'pid':os.getpid(),'scope':'FNIT_frozen_prefix_continuous_GCA_to_filled_not_raw_T1_whole','overall_equivalence':'not_assessed','tolerance_declared':0,'gpu_uuid':os.environ['CUDA_VISIBLE_DEVICES'],'threads':{k:os.environ.get(k) for k in ('OMP_NUM_THREADS','MKL_NUM_THREADS','OPENBLAS_NUM_THREADS','NUMBA_NUM_THREADS')},'cpu_affinity':sorted(os.sched_getaffinity(0)),'torch_version':torch.__version__,'input_sha256':{},'resource_sha256':{},'binary_sha256':{},'stages':[],'gpu_samples':[],'comparison':{},'execution_complete':False}
 def save(): (args.output/'report.json').write_text(json.dumps(report,indent=2)+'\n')
 # Frozen side inputs are all previously self-produced; no intermediate result is copied.
 for name in ('nu.mgz','brainmask.mgz','synthseg.rca.mgz','transforms/talairach.xfm.lta'):
