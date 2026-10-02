@@ -39,8 +39,8 @@ class PlacementSampling:
         if not np.isfinite(matrix).all():
             raise ValueError("affine must be finite")
         self.chunk_size = chunk_size
-        self.volume = torch.tensor(data, dtype=torch.uint8, device=self.device)
-        self.affine = torch.tensor(matrix, dtype=torch.float32, device=self.device)
+        self.volume = torch.tensor(data, dtype=torch.uint8, device=self.device).contiguous()
+        self.affine = torch.tensor(matrix, dtype=torch.float32, device=self.device).contiguous()
         self.shape = data.shape
 
     def _voxel(self, points):
@@ -83,7 +83,7 @@ class PlacementSampling:
             raise ValueError("vertices must be finite (N,3)")
         if self.implementation == "triton" and len(xyz):
             from .place_surface_sampling_triton import sample_kernel
-            points = torch.tensor(xyz, device=self.device)
+            points = torch.tensor(xyz, device=self.device).contiguous()
             result = torch.empty(len(xyz), dtype=torch.float64, device=self.device)
             with torch.cuda.device(self.device):
                 sample_kernel[((len(xyz)+127)//128,)](self.volume, self.affine, points, result,
@@ -127,7 +127,7 @@ class PlacementSampling:
             raise ValueError("active vertex sigma must be positive")
         if self.implementation == "triton" and len(xyz):
             from .place_surface_sampling_triton import gradient_kernel
-            tensors = [torch.tensor(x, device=self.device) for x in
+            tensors = [torch.tensor(x, device=self.device).contiguous() for x in
                        (xyz, normal, values, np.asarray(vertex_sigma, dtype=np.float32), skip)]
             result = torch.empty(xyz.shape, dtype=torch.float32, device=self.device)
             with torch.cuda.device(self.device):

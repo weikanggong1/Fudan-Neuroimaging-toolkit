@@ -17,9 +17,10 @@ class PlacementSamplingArgumentsTest(unittest.TestCase):
 @unittest.skipUnless(torch.cuda.is_available(), 'CUDA explicitly required')
 class PlacementSamplingCudaTest(unittest.TestCase):
     def test_boundary_input_ownership_and_backend_precision(self):
-        volume=np.arange(24,dtype=np.uint8).reshape(2,3,4)
-        affine=np.eye(4,dtype=np.float32)
+        volume=np.asfortranarray(np.arange(24,dtype=np.uint8).reshape(2,3,4))
+        affine=np.asfortranarray(np.eye(4,dtype=np.float32))
         points=np.array([[-.5,0,0],[-.50001,0,0],[1.49999,1,1],[1.5,1,1],[.125,1.375,2.5],[0,0,0]],np.float32)
+        points=np.asfortranarray(points)
         reference=np.array([_sample(volume,*_voxel(affine,*map(float,p))) for p in points])
         flags=(torch.backends.cuda.matmul.allow_tf32,torch.backends.cudnn.allow_tf32)
         for backend in ('torch','triton'):
