@@ -27,6 +27,8 @@ flowchart TD
 
 `recover-atlas` 只接受这一已记录的特定失败：同源 `prepare` 的九条官方前缀命令真实 exit0，随后 aparc converter 失败日志明确含 `KeyError: 0`。核对输入、argv、程序及既有输出 SHA后，在新目录复用 SynthMorph、5TT、GMWMI 和 fs-aparc 的结果，再生成背景兼容输入并续其余 atlas。原成功命令、原失败命令和新续跑/适配读写分别计时；首次观测的原失败日志及 nodes SHA也明确标注，不倒填旧报告。
 
+`recover-complete`针对另一种已保留的隔离参照失败：官方brain转换、FLIRT、transformconvert、5TT/GMWMI world变换及首fs-aparc NN均exit0，但MRtrix沿用T1的数据strides，使输出文件轴顺序与DWI模板不同。先证明两者只差signed整数轴置换/翻转及整数offset，并逐体素验证官方`mrconvert -strides OFFICIAL_MEAN_B0`的排序输出和逆排序全部bits一致；实际shape、affine仍须满足原DWI网格检查。恢复入口核对六条原argv、程序/source/report/影像SHA和同例官方DWI合同，复用这些成功结果，在新目录续剩余七套atlas。原MRtrix布局文件、单独格式化命令、首次观测的transform SHA和各段时间保留；不改NN数值、配准或目标网格检查。
+
 ## 2. Python、输入格式和输出
 
 ```python
@@ -132,6 +134,19 @@ python tools/reference/benchmark_connectome_anatomy_official.py recover-atlas \
 
 此模式不复用任何失败 atlas 输出；完整报告保留 `reused_official_prefix_origin` 与 `annotation_background_compatibility`，其中有原输入和适配输出SHA、受影响顶点数、实际读回核验以及适配wall时间。
 
+官方轴顺序失败的明确恢复：
+
+```bash
+python tools/reference/benchmark_connectome_anatomy_official.py recover-complete \
+  --config /verified/raw10/sub-CON01/config.json \
+  --prepared-report /verified/structure/sub-CON01/reference_anatomy.json \
+  --official-dwi-contract /verified/official_modeling/sub-CON01/consumer_contract.json \
+  --complete-prefix-proof /verified/official_integer_lattice/layout_proof.json \
+  --output /new/raw10/sub-CON01/complete
+```
+
+`--complete-prefix-proof`只在`recover-complete`使用；合同未完成、输入不同、原六命令非成功、原文件SHA改变、实际lattice/voxel值不一致均拒绝恢复。普通`complete`直接在官方NN命令中使用实际mean b0为`-strides`模板。
+
 十例调度使用独立工具，最多两例、每例CPU8，不占GPU：
 
 ```bash
@@ -151,6 +166,8 @@ python tools/reference/benchmark_connectome_official_anatomy_cohort.py \
 
 示例中的`current_verified_official_modeling`须替换为实际当前上游输出根路径，不能指向已经失败或退役的DWI链。切换producer时在新cohort目录显式绑定各例完成的prepare报告，保留旧namespace；只更换输入来源，不重算已验证的结构准备。
 
+若同例另有已验证的complete前缀，在cohort入口显式增加`--recover-complete-case-proof sub-CON01=/verified/layout_proof.json`（可重复）。它只允许用于同时显式绑定完成prepare的例；原DWI合同实际到达后再执行恢复，不能预先发布consumer。
+
 调度在新输出目录写`cohort_reference.json`及`sub-CONxx/{config.json,prepare/,complete/,consumer_contract.json}`。FS仍运行时等待，官方DWI合同未完成时等待，准备与完成各占一个CPU槽，等待不阻塞其余例的prepare。`consumer_contract`的scope为`official_self_produced_fresh_fs_anatomy_and_raw_dwi_atlases`，含真实T1/FS、prepare/complete/DWI上游报告SHA、5TT/GMWMI world影像、4×4变换、八套atlas影像及nodes/K；明确`tractography_completed=false`、`connectome_completed=false`。后续追踪只能消费该合同和官方建模合同。整个driver wall包含等待，不能替代各例实际官方命令耗时。
 
 ## 4. 官方命令及实际CLI
@@ -168,8 +185,11 @@ mri_synthmorph apply -m nearest -t int16 TRANS.mgz TIAN.nii.gz TIAN_T1.nii.gz
 flirt -in OFFICIAL_B0_BRAIN.nii.gz -ref FS_BRAIN.nii.gz -cost normmi -dof 6 -omat DWI_T1_FSL.txt
 transformconvert DWI_T1_FSL.txt OFFICIAL_B0_BRAIN.nii.gz FS_BRAIN.nii.gz flirt_import DWI_T1_MRTRIX.txt
 mrtransform ATLAS_T1.nii.gz ATLAS_DWI.nii.gz -linear DWI_T1_MRTRIX.txt -inverse \
-  -template OFFICIAL_MEAN_B0.nii.gz -interp nearest -datatype uint32 -nthreads 8
+  -template OFFICIAL_MEAN_B0.nii.gz -strides OFFICIAL_MEAN_B0.nii.gz \
+  -interp nearest -datatype uint32 -nthreads 8
 ```
+
+MRtrix的`-template`决定输出物理网格，`-strides`决定输出文件数据轴顺序；其官方help明确前者不会替换输入图像的strides。因此两者均引用实际官方mean b0，使NIfTI数组shape/affine直接对应模板。5TT/GMWMI world变换仍不传`-template`，继续保留native采样网格。
 
 FS `mri_surf2surf`、Workbench `-label-resample BARYCENTRIC` 和原UKB投影脚本按每个例的私有工作目录执行。原UKB转换脚本的颜色表随机生成；保留实际annot哈希，不能声称随机颜色字节逐值一致，体积节点语义另核对。
 
@@ -236,10 +256,15 @@ v4已完成5ttgen 10.701秒、GMWMI 1.559秒、fs-aparc84 labelconvert 1.181秒�
 
 首例实际官方CPU原始DWI/建模合同到达后，`official_anatomy_raw10_CPU_budget_v2`的CON01 complete遇到报告写出错误：完整上游合同未消费的`principal_direction.grid.spacing[3]`为NaN。原mri_convert日志及0.35秒time文件已保留；随后complete子进程exit1，尚未运行FLIRT。只在确认该调度无MRI child、argv/start_ticks/源SHA一致后退休其闲等进程，原目录及报告不改。新版本选择性记录实际消费的四个文件并保留完整合同原SHA，不改变任何MRI、配准或重采样。24项focused测试在实际CPU服务器通过（1.60秒），包含同结构的NaN附加metadata、缺失文件和错误SHA；实际CON01原合同SHA`36b56d7d8e218464e4440c99a75a3fe12a7d71f984912f743fa343e42d57a07b`的只读核验及严格JSON写出也通过，原合同SHA不变。这是报告交接修复的验证，完整FLIRT/八atlas结果另按实际运行报告记录。
 
+随后v3中CON01/03的前六条官方命令真实exit0（FLIRT分别13.166/9.833秒），首atlas存储轴检查失败。实际[整数lattice与全部voxel proof](../../validation/connectome/raw10_official_layout_20261003/layout_proof.public.json)给出同一映射`[[1,0,0,0],[0,0,-1,59],[0,1,0,0],[0,0,0,1]]`：全网格world误差最大界为`1.97e-6/3.40e-6 mm`，原LAS模板96×96×60与MRtrix LIA文件96×60×96物理等价。官方`mrconvert -strides`仅格式化，分别0.198/0.049秒，所有uint32 voxel值及逆排序全部bits一致、正ROI IDs不变，最终模板affine差0/`2.98e-8`。原六命令分别17.375/14.039秒，单独报告；布局proof不是最终矩阵匹配证据。v3失败/原输出保留，新的显式恢复复用已完成的配准与world/首atlas阶段，后续NN直接绑定模板strides，不放宽原网格检查。
+
+布局及恢复入口的28项focused测试在实际CPU服务器通过（0.80秒），覆盖真实模板strides argv、全部整数voxel逆排序、真实位移/ROI改变拒绝、错误例号和损坏原报告拒绝。对CON01/03原报告、六命令、source/program/artifact/合同SHA的实际恢复只读核验也通过；此核验没有重新执行FLIRT或NN。
+
 ## 6. 更新记录
 
 - 2026-10-03：新增prepare/complete独立官方解剖参照和可审核契约；禁止覆盖原输出，锁定fresh T1/FS，逐例隔离public_0路径，保留官方world-geometry变换与NN atlas定义。
 - 2026-10-03：十例官方结构准备实际完成，发布逐例来源、节点表与分阶段耗时；修复首例DWI交接报告复制未消费NaN向量metadata的问题，保留原合同SHA及原缺失/损坏/网格检查。
+- 2026-10-03：两例真实MRtrix轴顺序差完成整数lattice和全部voxel逆映射验证；官方NN显式使用模板strides，增加绑定成功六命令前缀的分阶段complete恢复。配准、插值和目标网格检查不变。
 - 2026-10-03：真实CON03预检发现官方`lh.pial`为标准`lh.pial.T1`链接；统一比较resolve路径并仍校验目标字节SHA，保留原预检失败，无MRI重算。
 - 2026-10-03：真实官方warp头为`0x301`，改用安装内官方Surfa只读读回，并增加明确来源/耗时的分阶段恢复入口；生产配准与重采样代码不变。
 - 2026-10-03：新增CPU十例解剖/atlas调度，使用baseline fresh FS与各自官方raw-DWI完成合同；绑定既有运行时并预检官方二进制，禁止把组件对照、旧pilot或FNIT产物称为十例全官方原始链。

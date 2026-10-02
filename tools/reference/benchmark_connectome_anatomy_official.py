@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import itertools
 import hashlib
 import json
 import os
@@ -201,6 +202,122 @@ def dwi_consumption_origin(record, contract):
         "recording_scope": "actual consumed image identities and verified source execution proof only; "
             "the unchanged complete upstream contract, including unused metadata, is bound by its original bytes SHA"
     }
+
+
+def image_layout_proof(original_path, template_path, matched_path):
+    """Prove a pure signed voxel permutation, including every voxel value."""
+    original, template, matched = [nib.load(str(p)) for p in
+                                   (original_path, template_path, matched_path)]
+    if any(len(im.shape) != 3 for im in (original, template, matched)):
+        raise ValueError("three-dimensional integer atlas layout proof required")
+    mapping = np.linalg.inv(original.affine) @ template.affine
+    integer = np.rint(mapping)
+    axes = integer[:3, :3]
+    if (not np.allclose(mapping, integer, atol=1e-5, rtol=0)
+            or not np.array_equal(integer[3], [0, 0, 0, 1])
+            or not np.all(np.sum(np.abs(axes), axis=0) == 1)
+            or not np.all(np.sum(np.abs(axes), axis=1) == 1)
+            or sorted(original.shape) != sorted(template.shape)):
+        raise ValueError("atlas and template do not share a signed integer voxel lattice")
+    corners = np.asarray(list(itertools.product(*[(0, size - 1) for size in template.shape])))
+    mapped = nib.affines.apply_affine(integer, corners)
+    world_delta = nib.affines.apply_affine(original.affine, mapped) - nib.affines.apply_affine(template.affine, corners)
+    bound = float(np.max(np.abs(world_delta)))
+    if np.any(mapped < 0) or np.any(mapped > np.asarray(original.shape) - 1) or bound >= 1e-5:
+        raise ValueError("atlas and template full-grid world points differ")
+    orientation = nib.orientations.ornt_transform(nib.orientations.io_orientation(original.affine),
+                                                 nib.orientations.io_orientation(template.affine))
+    expected = original.as_reoriented(orientation)
+    raw, actual = np.asanyarray(original.dataobj), np.asanyarray(matched.dataobj)
+    inverse = nib.orientations.ornt_transform(nib.orientations.io_orientation(template.affine),
+                                             nib.orientations.io_orientation(original.affine))
+    if (matched.shape != template.shape or not np.allclose(matched.affine, template.affine, atol=1e-5, rtol=0)
+            or raw.dtype.kind not in "iu" or actual.dtype != raw.dtype or not np.array_equal(actual, np.asanyarray(expected.dataobj))
+            or not np.array_equal(nib.orientations.apply_orientation(actual, inverse), raw)):
+        raise ValueError("official output strides did not preserve every voxel bit")
+    return {"signed_integer_mapping": integer.astype(int).tolist(),
+            "all_grid_world_max_abs_displacement_mm": bound, "dtype": str(raw.dtype),
+            "voxel_bits_exact_after_permutation": True, "all_voxel_bits_exact_after_inverse": True,
+            "interpolation_performed": False}
+
+
+def complete_prefix_commands(config, prepared, paths, output):
+    fs, mr, subject = Path(config["freesurfer_home"]), Path(config["mrtrix_bin"]), Path(config["subject_dir"])
+    output = Path(output)
+    commands = [
+        ("brain_to_nifti", [fs / "bin/mri_convert", subject / "mri/brain.mgz", output / "brain.nii.gz"]),
+        ("flirt", [Path(config["fsl_bin"]) / "flirt", "-in", paths["mean_b0_brain"], "-ref", output / "brain.nii.gz",
+                   "-cost", "normmi", "-dof", "6", "-omat", output / "dwi_to_t1_fsl.txt"]),
+        ("transformconvert", [mr / "transformconvert", output / "dwi_to_t1_fsl.txt", paths["mean_b0_brain"],
+                              output / "brain.nii.gz", "flirt_import", output / "dwi_to_t1_mrtrix.txt", "-nthreads", "8"])]
+    for name in ("five_tissue", "gmwmi"):
+        commands.append((f"{name}_world", [mr / "mrtransform", prepared["outputs"][f"{name}_t1"]["path"],
+            output / f"{name}_dwi_world.nii.gz", "-linear", output / "dwi_to_t1_mrtrix.txt", "-inverse", "-nthreads", "8"]))
+    return commands
+
+
+def atlas_nn_command(config, prepared, paths, output, profile, *, template_strides=True):
+    output = Path(output)
+    command = [Path(config["mrtrix_bin"]) / "mrtransform", prepared["outputs"][f"atlas:{profile}"]["path"],
+        output / "atlases" / profile / "atlas_dwi.nii.gz", "-linear", output / "dwi_to_t1_mrtrix.txt", "-inverse",
+        "-template", paths["mean_b0"], "-interp", "nearest", "-datatype", "uint32", "-nthreads", "8"]
+    if template_strides:
+        command += ["-strides", paths["mean_b0"]]
+    return command
+
+
+def verified_complete_recovery(proof_record, config, preflight, prepared_record, dwi_record, paths):
+    proof = read_bound_json(proof_record)
+    if (proof.get("state") != "completed" or proof.get("scope") !=
+            "official_atlas_signed_integer_layout_proof_and_completed_prefix_binding"):
+        raise ValueError("completed official layout proof required")
+    verify_file(proof["source"])
+    row = proof["cases"][config["case_id"]]
+    original = read_bound_json(row["failed_report"])
+    prepared = read_bound_json(prepared_record)
+    old_output = Path(row["failed_report"]["path"]).parent
+    if (original.get("case_id") != config["case_id"] or original.get("mode") != "complete"
+            or original.get("state") != "failed" or original.get("execution_completed")
+            or original.get("error") != {"type": "ValueError", "message": "official atlas output grid/labels inconsistent"}
+            or original["preflight"] != preflight or original["prepared_origin"] != prepared_record
+            or original["official_dwi_origin"]["contract"] != dwi_record
+            or row["prepared_report"] != prepared_record or row["official_dwi_contract"] != dwi_record):
+        raise ValueError("same-input failed official complete prefix required")
+    verify_file(row["original_source"])
+    if row["original_source"]["sha256"] != original["script_sha256"]:
+        raise ValueError("original complete source identity differs")
+    expected = complete_prefix_commands(config, prepared, paths, old_output)
+    expected.append(("atlas_fs-aparc_nn", atlas_nn_command(config, prepared, paths, old_output, "fs-aparc", template_strides=False)))
+    if len(original["commands"]) != 6 or row["original_commands"] != original["commands"]:
+        raise ValueError("six recorded successful official commands required")
+    for command, (stage, argv) in zip(original["commands"], expected):
+        if command["returncode"] != 0 or command["stage"] != stage or command["argv"] != list(map(str, argv)):
+            raise ValueError("original official complete argv/exit differs")
+        if verify_file(command["program"]) != Path(argv[0]).resolve():
+            raise ValueError("original official complete program differs")
+    relative = {"brain": "brain.nii.gz", "dwi_to_t1_fsl": "dwi_to_t1_fsl.txt", "dwi_to_t1_mrtrix": "dwi_to_t1_mrtrix.txt",
+                "five_tissue_world": "five_tissue_dwi_world.nii.gz", "gmwmi_world": "gmwmi_dwi_world.nii.gz",
+                "fs-aparc_original_layout": "atlases/fs-aparc/atlas_dwi.nii.gz"}
+    for name, filename in relative.items():
+        if verify_file(row["files"][name]) != (old_output / filename).resolve():
+            raise ValueError("original completed artifact path differs")
+    for name in ("five_tissue", "gmwmi"):
+        verify_file(original["outputs"][name])
+    if row["original_successful_command_seconds"] != sum(c["seconds_inclusive"] for c in original["commands"]):
+        raise ValueError("original successful command timing differs")
+    matched = verify_file(row["files"]["fs-aparc_matched_layout"])
+    if verify_file(row["template"]) != paths["mean_b0"]:
+        raise ValueError("layout proof uses another official template")
+    formatting = row["formatting_command"]
+    argv = [Path(config["mrtrix_bin"]) / "mrconvert", old_output / relative["fs-aparc_original_layout"], matched,
+            "-strides", paths["mean_b0"], "-datatype", "uint32", "-nthreads", "8"]
+    if formatting["returncode"] != 0 or formatting["argv"] != list(map(str, argv)) or verify_file(formatting["program"]) != Path(argv[0]).resolve():
+        raise ValueError("actual official formatting command differs")
+    verify_file(formatting["log"])
+    verify_file(formatting["time"])
+    layout = image_layout_proof(row["files"]["fs-aparc_original_layout"]["path"], paths["mean_b0"], matched)
+    return {"proof": proof_record, "origin": row, "actual_lattice_readback": layout,
+            "timing_scope": "six original successful commands and separately timed official output-format command; no prefix rerun"}
 
 
 def write_nodes(path, rows):
@@ -715,7 +832,7 @@ def prepare(runner, recovered_synthmorph=None, recovered_prefix=None):
             verify_file(record)
 
 
-def complete(runner, prepared_record, dwi_record):
+def complete(runner, prepared_record, dwi_record, recovery_proof=None):
     c, out = runner.config, runner.output
     prepared = read_bound_json(prepared_record)
     if not prepared.get("execution_completed") or prepared.get("state") != "official_structural_reference_completed" or prepared.get("case_id") != c["case_id"]:
@@ -727,21 +844,31 @@ def complete(runner, prepared_record, dwi_record):
     contract, paths = verify_dwi_contract(dwi_record, c["case_id"])
     runner.report["prepared_origin"] = prepared_record
     runner.report["official_dwi_origin"] = dwi_consumption_origin(dwi_record, contract)
-    mr, fs = Path(c["mrtrix_bin"]), Path(c["freesurfer_home"])
-    subject = Path(c["subject_dir"])
-    runner.run("brain_to_nifti", [fs / "bin/mri_convert", subject / "mri/brain.mgz", out / "brain.nii.gz"])
-    runner.run("flirt", [Path(c["fsl_bin"]) / "flirt", "-in", paths["mean_b0_brain"], "-ref", out / "brain.nii.gz", "-cost", "normmi", "-dof", "6", "-omat", out / "dwi_to_t1_fsl.txt"])
-    runner.run("transformconvert", [mr / "transformconvert", out / "dwi_to_t1_fsl.txt", paths["mean_b0_brain"], out / "brain.nii.gz", "flirt_import", out / "dwi_to_t1_mrtrix.txt", "-nthreads", "8"])
-    for name in ("five_tissue", "gmwmi"):
-        source = prepared["outputs"][f"{name}_t1"]["path"]
-        runner.run(f"{name}_world", [mr / "mrtransform", source, out / f"{name}_dwi_world.nii.gz", "-linear", out / "dwi_to_t1_mrtrix.txt", "-inverse", "-nthreads", "8"])
-        runner.output_image(name, out / f"{name}_dwi_world.nii.gz")
+    recovered = (verified_complete_recovery(recovery_proof, c, runner.report["preflight"], prepared_record,
+                                            dwi_record, paths) if recovery_proof else None)
+    if recovered:
+        runner.report["reused_official_complete_origin"] = recovered
+        files = recovered["origin"]["files"]
+        for name, filename in (("brain", "brain.nii.gz"), ("dwi_to_t1_fsl", "dwi_to_t1_fsl.txt"),
+                               ("dwi_to_t1_mrtrix", "dwi_to_t1_mrtrix.txt"),
+                               ("five_tissue_world", "five_tissue_dwi_world.nii.gz"), ("gmwmi_world", "gmwmi_dwi_world.nii.gz")):
+            shutil.copyfile(verify_file(files[name]), out / filename)
+        for name in ("five_tissue", "gmwmi"):
+            runner.output_image(name, out / f"{name}_dwi_world.nii.gz")
+    else:
+        for stage, argv in complete_prefix_commands(c, prepared, paths, out):
+            runner.run(stage, argv)
+            if stage in ("five_tissue_world", "gmwmi_world"):
+                name = stage.removesuffix("_world")
+                runner.output_image(name, out / f"{name}_dwi_world.nii.gz")
     (out / "atlases").mkdir()
     for profile in ("fs-aparc", *PROFILES):
         target = out / "atlases" / profile
         target.mkdir()
-        source = prepared["outputs"][f"atlas:{profile}"]["path"]
-        runner.run(f"atlas_{profile}_nn", [mr / "mrtransform", source, target / "atlas_dwi.nii.gz", "-linear", out / "dwi_to_t1_mrtrix.txt", "-inverse", "-template", paths["mean_b0"], "-interp", "nearest", "-datatype", "uint32", "-nthreads", "8"])
+        if recovered and profile == "fs-aparc":
+            shutil.copyfile(verify_file(recovered["origin"]["files"]["fs-aparc_matched_layout"]), target / "atlas_dwi.nii.gz")
+        else:
+            runner.run(f"atlas_{profile}_nn", atlas_nn_command(c, prepared, paths, out, profile))
         shutil.copyfile(prepared["outputs"][f"nodes:{profile}"]["path"], target / "nodes.tsv")
         rows = read_nodes(target / "nodes.tsv")
         record = image_record(target / "atlas_dwi.nii.gz", labels=True)
@@ -757,6 +884,11 @@ def complete(runner, prepared_record, dwi_record):
     for record in prepared["outputs"].values():
         verify_file(record)
     verify_dwi_contract(dwi_record, c["case_id"])
+    if recovered:
+        verify_file(recovery_proof)
+        verify_file(recovered["origin"]["failed_report"])
+        for record in recovered["origin"]["files"].values():
+            verify_file(record)
     runner.report["state"] = "official_anatomy_and_dwi_atlas_completed"
     runner.report["execution_completed"] = True
     runner.report["full_raw_connectome"] = False
@@ -765,18 +897,22 @@ def complete(runner, prepared_record, dwi_record):
 def main(argv=None):
     started = time.perf_counter()
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=("prepare", "recover-prepare", "recover-atlas", "complete"))
+    parser.add_argument("mode", choices=("prepare", "recover-prepare", "recover-atlas", "complete", "recover-complete"))
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True, help="fresh directory; failures remain intact")
     parser.add_argument("--prepared-report", type=Path)
     parser.add_argument("--official-dwi-contract", type=Path)
+    parser.add_argument("--complete-prefix-proof", type=Path,
+                        help="recover-complete only: bound successful six-command prefix and exact official output-strides proof")
     parser.add_argument("--successful-synthmorph-report", type=Path,
                         help="recover-prepare only: preserved failed prepare after three successful official SynthMorph commands")
     parser.add_argument("--failed-atlas-report", type=Path,
                         help="recover-atlas only: preserved original native annotation unknown index 0 failure")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args(argv)
-    if (args.output.exists() or (args.mode == "complete" and (not args.prepared_report or not args.official_dwi_contract))
+    if (args.output.exists() or (args.mode in ("complete", "recover-complete") and (not args.prepared_report or not args.official_dwi_contract))
+            or (args.mode == "recover-complete" and not args.complete_prefix_proof)
+            or (args.mode != "recover-complete" and args.complete_prefix_proof)
             or (args.mode == "recover-prepare" and not args.successful_synthmorph_report)
             or (args.mode != "recover-prepare" and args.successful_synthmorph_report)
             or (args.mode == "recover-atlas" and not args.failed_atlas_report)
@@ -802,7 +938,8 @@ def main(argv=None):
         if args.mode in ("prepare", "recover-prepare", "recover-atlas"):
             prepare(runner, recovery, atlas_recovery)
         else:
-            complete(runner, file_record(args.prepared_report), file_record(args.official_dwi_contract))
+            complete(runner, file_record(args.prepared_report), file_record(args.official_dwi_contract),
+                     file_record(args.complete_prefix_proof) if args.complete_prefix_proof else None)
         # Detect any input/source/asset change rather than blessing an old hash.
         if preflight(config) != identity:
             raise ValueError("input/asset/source identity changed during official reference")

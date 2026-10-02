@@ -154,6 +154,7 @@ def main(argv=None):
     parser.add_argument("--tool-commit", required=True)
     parser.add_argument("--case-ids", nargs="+", default=CASES)
     parser.add_argument("--prepared-case-report", action="append", default=[], metavar="CASE=REPORT")
+    parser.add_argument("--recover-complete-case-proof", action="append", default=[], metavar="CASE=PROOF")
     parser.add_argument("--workers", type=int, choices=(1, 2), default=2)
     parser.add_argument("--poll-seconds", type=float, default=30)
     parser.add_argument("--wait-timeout-seconds", type=float, default=21600)
@@ -170,6 +171,16 @@ def main(argv=None):
         if case not in args.case_ids or case in seeded:
             parser.error("one prepared origin per selected case required")
         seeded[case] = verify_prepared(Path(path), case)
+    completion_recoveries = {}
+    for item in args.recover_complete_case_proof:
+        case, path = item.split("=", 1)
+        if case not in seeded or case in completion_recoveries:
+            parser.error("one completion recovery proof per explicitly prepared selected case required")
+        record = anatomy.file_record(path)
+        proof = anatomy.read_bound_json(record)
+        if proof.get("state") != "completed" or case not in proof.get("cases", {}):
+            parser.error("completed same-case layout proof required")
+        completion_recoveries[case] = record
     args.output.mkdir(parents=True, exist_ok=False)
     state = {"schema_version": 1, "state": "running", "execution_completed": False,
              "scope": "independent official fresh FS and raw-DWI anatomy/atlas cohort",
@@ -189,6 +200,8 @@ def main(argv=None):
             anatomy.verify_anatomy(config)
             state["cases"][case].update(state="waiting_official_dwi", config=config,
                 prepared_report=record, prepared_origin="bound separately timed pilot; no preparation rerun")
+            if case in completion_recoveries:
+                state["cases"][case]["complete_recovery_proof"] = completion_recoveries[case]
     running = {}
     started = time.perf_counter()
     environment = {**os.environ, "CUDA_VISIBLE_DEVICES": "", "PYTHONUNBUFFERED": "1"}
@@ -246,11 +259,16 @@ def main(argv=None):
                     anatomy.verify_file(row["config_record"])
                 anatomy.verify_file(validation_identity)
                 anatomy.verify_file(state["anatomy_script"])
-                command = [row["config"]["python"], str(SOURCE), mode, "--config", str(config_path),
+                command_mode = "recover-complete" if mode == "complete" and row.get("complete_recovery_proof") else mode
+                command = [row["config"]["python"], str(SOURCE), command_mode, "--config", str(config_path),
                            "--output", str(directory / mode)]
                 if mode == "complete":
                     command += ["--prepared-report", row["prepared_report"]["path"],
                                 "--official-dwi-contract", row["official_dwi_contract"]["path"]]
+                    row["complete_mode"] = command_mode
+                    if command_mode == "recover-complete":
+                        anatomy.verify_file(row["complete_recovery_proof"])
+                        command += ["--complete-prefix-proof", row["complete_recovery_proof"]["path"]]
                 log = directory / f"{mode}.log"
                 stream = log.open("x")
                 process = subprocess.Popen(command, env=environment, stdout=stream, stderr=subprocess.STDOUT,

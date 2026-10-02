@@ -16,6 +16,70 @@ SPEC.loader.exec_module(MODULE)
 
 
 class OfficialAnatomyContracts(unittest.TestCase):
+    def test_official_atlas_strides_uses_real_template_not_fixed_axis_order(self):
+        config = {"mrtrix_bin": "/official/mr/bin"}
+        prepared = {"outputs": {"atlas:fs-aparc": {"path": "/prepared/atlas.nii.gz"}}}
+        paths = {"mean_b0": Path("/official/actual_meanb0.nii.gz")}
+        argv = MODULE.atlas_nn_command(config, prepared, paths, Path("/new/complete"), "fs-aparc")
+        self.assertEqual(argv[argv.index("-template") + 1], paths["mean_b0"])
+        self.assertEqual(argv[argv.index("-strides") + 1], paths["mean_b0"])
+        self.assertEqual(argv[argv.index("-interp") + 1], "nearest")
+        old = MODULE.atlas_nn_command(config, prepared, paths, Path("/new/complete"), "fs-aparc", template_strides=False)
+        self.assertEqual(argv[:-2], old)
+
+    def integer_layout_fixture(self, root):
+        values = np.arange(24, dtype=np.uint32).reshape(2, 3, 4)
+        template = nib.Nifti1Image(values, np.eye(4))
+        original = template.as_reoriented(np.array([[0, 1], [2, 1], [1, -1]]))
+        for name, image in (("template", template), ("matched", template), ("original", original)):
+            nib.save(image, root / f"{name}.nii.gz")
+        return [root / f"{name}.nii.gz" for name in ("original", "template", "matched")]
+
+    def test_signed_integer_layout_and_inverse_preserve_all_voxel_bits(self):
+        with tempfile.TemporaryDirectory() as directory:
+            files = self.integer_layout_fixture(Path(directory))
+            proof = MODULE.image_layout_proof(*files)
+            self.assertTrue(proof["voxel_bits_exact_after_permutation"])
+            self.assertTrue(proof["all_voxel_bits_exact_after_inverse"])
+            self.assertEqual(proof["all_grid_world_max_abs_displacement_mm"], 0)
+            self.assertFalse(proof["interpolation_performed"])
+
+    def test_layout_guard_rejects_real_displacement_or_changed_roi(self):
+        with tempfile.TemporaryDirectory() as directory:
+            files = self.integer_layout_fixture(Path(directory))
+            target = nib.load(files[1])
+            shifted = target.affine.copy()
+            shifted[0, 3] = 0.5
+            nib.save(nib.Nifti1Image(np.asanyarray(target.dataobj), shifted), files[1])
+            with self.assertRaisesRegex(ValueError, "signed integer"):
+                MODULE.image_layout_proof(*files)
+            files = self.integer_layout_fixture(Path(directory))
+            changed = np.asanyarray(nib.load(files[2]).dataobj).copy()
+            changed[0, 0, 0] = 100
+            nib.save(nib.Nifti1Image(changed, np.eye(4)), files[2])
+            with self.assertRaisesRegex(ValueError, "every voxel bit"):
+                MODULE.image_layout_proof(*files)
+
+    def test_complete_recovery_refuses_other_case_or_changed_report(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "proof_source.py"
+            source.write_text("bound private provenance producer")
+            old = root / "failed.json"
+            old.write_text(json.dumps({"case_id": "sub-CON03", "mode": "complete", "state": "failed"}))
+            prepared = root / "prepared.json"
+            prepared.write_text("{}")
+            proof = root / "proof.json"
+            proof.write_text(json.dumps({"state": "completed",
+                "scope": "official_atlas_signed_integer_layout_proof_and_completed_prefix_binding",
+                "source": MODULE.file_record(source), "cases": {"sub-CON01": {"failed_report": MODULE.file_record(old)}}}))
+            args = (MODULE.file_record(proof), {"case_id": "sub-CON01"}, {}, MODULE.file_record(prepared), {}, {})
+            with self.assertRaisesRegex(ValueError, "same-input failed official"):
+                MODULE.verified_complete_recovery(*args)
+            old.write_text("changed original report")
+            with self.assertRaisesRegex(ValueError, "changed"):
+                MODULE.verified_complete_recovery(*args)
+
     def official_dwi_fixture(self, root):
         files = {}
         for name in ("corrected_dwi", "mean_b0", "mean_b0_brain", "brain_mask"):
