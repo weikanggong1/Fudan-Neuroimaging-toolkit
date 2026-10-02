@@ -56,7 +56,7 @@ main(["complete", "--config", official_reference_config,
 | `freesurfer_home`、`fs_license` | 官方FS8.2安装目录、已有许可证路径。只检查许可证路径存在，不读取或记录其正文/哈希。 |
 | `mrtrix_bin`、`fsl_bin`、`workbench_command` | 官方MRtrix/FSL目录及Workbench可执行文件；只用于隔离参照。 |
 | `runtime_library_dirs`、`runtime_libraries` | 隔离参照的已有Conda运行时目录及其`libstdc++.so.6`文件记录，绑定大小/SHA后加入LD_LIBRARY_PATH；先实际`mrconvert -version`，避免系统旧GLIBCXX使官方二进制无法启动。无需安装新软件。 |
-| `python` | 运行原UKB Python脚本的既有Conda Python；项目已有nibabel/numpy/scipy/pandas依赖，无新增安装。 |
+| `python` | 运行本工具与原UKB Python脚本的既有Python环境，需nibabel/numpy/scipy/pandas（项目Conda环境已声明）；prepare先实际import并记录版本，无新增安装。 |
 | `upstream_root` | 已核对的原UKB脚本和`data/templates`资源目录；不写入此目录。 |
 | `upstream_scripts` | 四个原Python脚本名对应的 `{path,sha256,size_bytes}`：convert_native_annot、convert_schaefer_annot、convert_labels_gii_to_annot、map_surface_label_to_volume。固定实际源码字节，不发布复制的原软件源码。 |
 | `fsaverage_dir` | 与FNIT本轮相同的fsaverage目录；绑定双半球sphere.reg身份。 |
@@ -158,6 +158,8 @@ FS `mri_surf2surf`、Workbench `-label-resample BARYCENTRIC` 和原UKB投影脚�
 CON03新鲜FS输入的官方CPU命令已真实完成：joint register 385.7606秒，Tian S1 NN apply 12.0240秒，Tian S4 NN apply 5.9971秒。之后普通nibabel影像读回器拒绝warp头，原v2目录保留为failed；独立官方Surfa只读验证该实际warp成功：float32、`[256,256,256,3]`、format3、非有限值0、MNI source与FS target几何吻合。这些是已完成的官方组件证据，**不是十例端到端benchmark**。
 
 分阶段v3续跑的官方Surfa metadata命令完成12.9788秒；5ttgen随后因系统旧libstdc++缺少GLIBCXX_3.4.20/21/22启动失败，未产生5TT。原failed目录保留；既有Conda lib下实际`mrconvert -version`成功，识别3.0.3-103-g026e850d，后续新namespace显式绑定此运行时。参照程序字节与解剖输入不变。
+
+v4已完成5ttgen 10.701秒、GMWMI 1.559秒、fs-aparc84 labelconvert 1.181秒，随后原UKB脚本因指定环境缺pandas启动失败。保持原源码；使用服务器已存在的项目Python环境（pandas2.2.3/nibabel5.4.0/scipy1.11.4/numpy1.26.4）续新的独立namespace，不向正在运行的FNIT Conda环境安装或替换依赖。新增prepare Python import预检，避免运行配准后才发现此问题。
 
 本轮CON03 prepare实际CPU试跑及complete结果将以新报告补充。没有完成报告时，5TT、配准、8atlas精度/时间、脑图均记待评估；不填入旧ds004666结果。现有CON03 fixed-FNIT-input官方追踪参照仍属于另外的验证层级。
 

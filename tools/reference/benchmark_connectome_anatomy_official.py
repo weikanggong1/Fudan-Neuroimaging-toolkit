@@ -438,6 +438,11 @@ def prepare(runner, recovered_synthmorph=None):
     c, out = runner.config, runner.output
     fs, mr, upstream = Path(c["freesurfer_home"]), Path(c["mrtrix_bin"]), Path(c["upstream_root"])
     subject = Path(c["subject_dir"])
+    runner.run("reference_python_runtime", [c["python"], "-c",
+        "import sys,json,nibabel,numpy,scipy,pandas; "
+        "print(json.dumps({'python':sys.version,'executable':sys.executable,"
+        "'nibabel':nibabel.__version__,'numpy':numpy.__version__,"
+        "'scipy':scipy.__version__,'pandas':pandas.__version__}))"])
     # Fail on a missing host runtime before doing a several-minute registration.
     runner.run("mrtrix_runtime_version", [mr / "mrconvert", "-version"])
     private = out / "original_wrapper"
