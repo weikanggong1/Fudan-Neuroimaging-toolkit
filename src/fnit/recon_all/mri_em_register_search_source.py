@@ -33,7 +33,7 @@ def _centered_source(matrix, origin):
 
 
 def search_linear_iteration_source(samples, source, base_transform, origin,
-                                   search_scale, minimum_scale, maximum_scale):
+                                   search_scale, minimum_scale, maximum_scale, *, scorer=None):
     base = np.asarray(base_transform, np.float32).copy()
     origin = np.asarray(origin, np.float32)
     minimum_scale, maximum_scale = np.float32(minimum_scale), np.float32(maximum_scale)
@@ -41,7 +41,8 @@ def search_linear_iteration_source(samples, source, base_transform, origin,
     maximum_angle = np.float32(np.pi / 6 * search_scale)
     minimum_translation = np.float32(-15 * search_scale)
     maximum_translation = np.float32(15 * search_scale)
-    maximum = log_sample_probability_jit(samples, source, base)
+    score_one = log_sample_probability_jit if scorer is None else scorer
+    maximum = score_one(samples, source, base)
     reductions = []
     for _ in range(2):
         scales = _grid_values(minimum_scale, maximum_scale,
@@ -51,30 +52,31 @@ def search_linear_iteration_source(samples, source, base_transform, origin,
         translations = _grid_values(minimum_translation, maximum_translation,
                                     float(np.float32((maximum_translation - minimum_translation) / np.float32(2))))
         best = (1., 1., 1., 0., 0., 0., 0., 0., 0.)
-        for sx in scales:
-            for sy in scales:
-                for sz in scales:
-                    scale_matrix = np.eye(4, dtype=np.float32)
-                    scale_matrix[0, 0], scale_matrix[1, 1], scale_matrix[2, 2] = sx, sy, sz
-                    centered_scale = _centered_source(scale_matrix, origin)
-                    for ax in angles:
-                        x_rotation = _rotation(0, ax)
-                        for ay in angles:
-                            yx_rotation = _multiply_float32(_rotation(1, ay), x_rotation)
-                            for az in angles:
-                                rotation = _centered_source(
-                                    _multiply_float32(_rotation(2, az), yx_rotation), origin)
-                                fixed = _multiply_float32(
-                                    _multiply_float32(centered_scale, rotation), base)
-                                for tx in translations:
-                                    for ty in translations:
-                                        for tz in translations:
-                                            trial = fixed.copy()
-                                            trial[:3, 3] += np.asarray((tx, ty, tz), np.float32)
-                                            score = log_sample_probability_jit(samples, source, trial)
-                                            if score > maximum:
-                                                maximum = score
-                                                best = (sx, sy, sz, ax, ay, az, tx, ty, tz)
+        def candidates():
+            for sx in scales:
+                for sy in scales:
+                    for sz in scales:
+                        scale_matrix = np.eye(4, dtype=np.float32)
+                        scale_matrix[0, 0], scale_matrix[1, 1], scale_matrix[2, 2] = sx, sy, sz
+                        centered_scale = _centered_source(scale_matrix, origin)
+                        for ax in angles:
+                            x_rotation = _rotation(0, ax)
+                            for ay in angles:
+                                yx_rotation = _multiply_float32(_rotation(1, ay), x_rotation)
+                                for az in angles:
+                                    rotation = _centered_source(
+                                        _multiply_float32(_rotation(2, az), yx_rotation), origin)
+                                    fixed = _multiply_float32(
+                                        _multiply_float32(centered_scale, rotation), base)
+                                    for tx in translations:
+                                        for ty in translations:
+                                            for tz in translations:
+                                                trial = fixed.copy()
+                                                trial[:3, 3] += np.asarray((tx, ty, tz), np.float32)
+                                                yield (sx, sy, sz, ax, ay, az, tx, ty, tz), trial
+        for parameters, score in score_candidates(samples, source, candidates(), scorer):
+            if score > maximum:
+                maximum, best = score, parameters
         sx, sy, sz, ax, ay, az, tx, ty, tz = best
         scale_matrix = np.eye(4, dtype=np.float32)
         scale_matrix[0, 0], scale_matrix[1, 1], scale_matrix[2, 2] = sx, sy, sz
@@ -103,7 +105,7 @@ def search_linear_iteration_source(samples, source, base_transform, origin,
 
 
 def find_optimal_linear_transform_source(samples, source, base_transform,
-                                         origin, initial_score):
+                                         origin, initial_score, *, scorer=None):
     matrix = np.asarray(base_transform, np.float32).copy()
     current_score = initial_score
     search_scale = 1.
@@ -115,7 +117,7 @@ def find_optimal_linear_transform_source(samples, source, base_transform,
     while True:
         old_score = current_score
         matrix, current_score, reductions = search_linear_iteration_source(
-            samples, source, matrix, origin, search_scale, minimum_scale, maximum_scale)
+            samples, source, matrix, origin, search_scale, minimum_scale, maximum_scale, scorer=scorer)
         history.append((search_scale, current_score, matrix.copy(), reductions))
         if current_score < old_score + abs(.001 * old_score):
             search_scale *= .25
@@ -132,3 +134,21 @@ def find_optimal_linear_transform_source(samples, source, base_transform,
         if scale_reductions >= 3 and done:
             break
     return matrix, history
+
+
+def score_candidates(samples, source, candidates, scorer=None):
+    """Yield scores in source order; batch only immutable candidate evaluations."""
+    if scorer is None:
+        for parameters, matrix in candidates:
+            yield parameters, log_sample_probability_jit(samples, source, matrix)
+        return
+    batch = []
+    for candidate in candidates:
+        batch.append(candidate)
+        if len(batch) >= scorer.candidate_chunk:
+            scores = scorer.score_many(np.stack([item[1] for item in batch]))
+            yield from zip((item[0] for item in batch), scores)
+            batch.clear()
+    if batch:
+        scores = scorer.score_many(np.stack([item[1] for item in batch]))
+        yield from zip((item[0] for item in batch), scores)
