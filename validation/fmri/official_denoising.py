@@ -28,6 +28,8 @@ import time
 import nibabel as nib
 import numpy as np
 
+from native_exec import run_traced
+
 
 def sha256(path):
     value = hashlib.sha256()
@@ -94,6 +96,7 @@ class OfficialCommands:
         self.directory = args.fsl_bin or args.fsl_dir / "bin"
         self.output = args.output_dir
         self.allow_255 = args.allow_complete_exit255
+        self.trace_original_exits = args.trace_original_exits
         self.records = []
         os.environ["FSLDIR"] = str(args.fsl_dir)
         os.environ["FSLOUTPUTTYPE"] = "NIFTI_GZ"
@@ -105,12 +108,22 @@ class OfficialCommands:
         log = self.output / (phase + ".log")
         started = time.perf_counter()
         with log.open("wb") as stream:
-            result = subprocess.run(command, stdout=stream, stderr=subprocess.STDOUT, check=False)
+            if self.trace_original_exits:
+                result, exit_evidence = run_traced(
+                    command, trace_path=self.output / (phase + ".exec.private.log"),
+                    stdout=stream, stderr=subprocess.STDOUT)
+            else:
+                result = subprocess.run(command, stdout=stream, stderr=subprocess.STDOUT, check=False)
+                exit_evidence = None
         wall = time.perf_counter() - started
         record = {"phase": phase, "argv": command, "exit_status": result.returncode,
                   "command_wall_seconds": wall, "output_validation_passed": False}
+        if exit_evidence is not None:
+            record["exit_evidence"] = exit_evidence
         self.records.append(record)
         write_json(self.output / "commands.private.json", self.records)
+        if exit_evidence is not None and not exit_evidence["original_process_accepted"]:
+            raise RuntimeError(f"{name} has no successful native process evidence")
         if result.returncode != 0 and not (result.returncode == 255 and self.allow_255):
             raise RuntimeError(f"{name} exited {result.returncode}; inspect {log}")
         validator()
@@ -158,18 +171,29 @@ def checked_aroma_commands(commands):
         nonlocal count
         count += 1
         started = time.perf_counter()
-        result = subprocess.run(command, shell=True, stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE, check=False)
+        if commands.trace_original_exits:
+            result, exit_evidence = run_traced(
+                command, trace_path=commands.output / f"aroma_scalar_{count:04d}.exec.private.log",
+                shell=True, capture_output=True)
+            if not exit_evidence["original_process_accepted"]:
+                raise RuntimeError("Original AROMA scalar query has no successful native process evidence")
+        else:
+            result = subprocess.run(command, shell=True, stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE, check=False)
+            exit_evidence = None
         wall = time.perf_counter() - started
         text = result.stdout.decode("utf-8", errors="replace").strip()
         if result.returncode != 0 and not (result.returncode == 255 and commands.allow_255):
             raise RuntimeError("Original AROMA scalar query failed")
         if not re.fullmatch(r"[0-9.eE+\-\s]+", text) or not np.isfinite(np.fromstring(text, sep=" ")).all():
             raise ValueError("Original AROMA scalar query did not return finite numbers")
-        commands.records.append({"phase": f"aroma_scalar_query_{count:04d}", "shell_pipeline": command,
-                                 "exit_status": result.returncode, "command_wall_seconds": wall,
-                                 "output_validation_passed": True,
-                                 "abnormal_exit_accepted_after_complete_output_checks": result.returncode != 0})
+        row = {"phase": f"aroma_scalar_query_{count:04d}", "shell_pipeline": command,
+               "exit_status": result.returncode, "command_wall_seconds": wall,
+               "output_validation_passed": True,
+               "abnormal_exit_accepted_after_complete_output_checks": result.returncode != 0}
+        if exit_evidence is not None:
+            row["exit_evidence"] = exit_evidence
+        commands.records.append(row)
         write_json(commands.output / "commands.private.json", commands.records)
         return text
 
@@ -306,6 +330,8 @@ def main():
     parser.add_argument("--highpass-cutoff-seconds", type=float, default=100, help="记录上游已做的高通周期，本脚本不再次滤波")
     parser.add_argument("--chunk-voxels", type=int, default=4096)
     parser.add_argument("--allow-complete-exit255", action="store_true", help="仅在新输出全部通过 CRC/网格/有限值检查后接受255；原退出码仍记录")
+    parser.add_argument("--trace-original-exits", action="store_true",
+                        help="保留原FSL launcher与真实子进程退出证据；255还须有子进程0")
     args = parser.parse_args()
     for key, value in vars(args).items():
         if isinstance(value, Path):

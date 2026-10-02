@@ -21,10 +21,12 @@ import numpy as np
 
 
 IMAGE_STAGES = {
+    "epi_synthstrip_brain", "t1_synthstrip_brain", "fast_bias", "fast_restored",
     "epi_synthstrip_mask", "t1_synthstrip_mask", "fast_csf", "fast_gm", "fast_wm",
     "mni_brain_mask", "native_wm_mask", "native_csf_mask",
     "motion_corrected", "feat_filtered", "aroma_native", "clean_native", "clean_mni",
-    "t1_registered", "epi_registered",
+    "preproc_t1w", "preproc_mni",
+    "t1_registered", "t1_affine_registered", "epi_registered",
 }
 INPUT_NAMES = {"bold", "sbref", "t1w", "mni_template", "mni_mask",
                "synthstrip_weights", "synthmorph_weights"}
@@ -126,7 +128,8 @@ def image_pair(specification, directory):
     arrays = [values(image) for image in images]
     kind = specification["kind"]
     result = {"shape": list(images[0].shape), "same_grid": True, "all_values_finite": True,
-              "sha256": {key: sha256(path) for key, path in zip(("candidate", "reference"), paths)}}
+              "sha256": {key: sha256(path) for key, path in zip(("candidate", "reference"), paths)},
+              "saved_dtype": {key: str(image.get_data_dtype()) for key, image in zip(("candidate", "reference"), images)}}
     if kind == "mask":
         if arrays[0].ndim != 3 or not all(np.isin(a, [0, 1]).all() for a in arrays):
             raise ValueError("Brain masks must be binary 3D images")
@@ -161,9 +164,59 @@ def image_pair(specification, directory):
             raise ValueError("BOLD time units must be seconds")
         result["tr_seconds"] = tr[0]
     result["metrics"] = correlations(arrays[0][region], arrays[1][region], temporal=kind == "bold")
+    if kind == "bold":
+        coverage = [np.any(array != 0, axis=3) & region for array in arrays]
+        result["nonzero_series_coverage"] = {
+            "evaluation_voxels": int(region.sum()),
+            "candidate_nonzero_series_voxels": int(coverage[0].sum()),
+            "reference_nonzero_series_voxels": int(coverage[1].sum()),
+            "common_nonzero_series_voxels": int((coverage[0] & coverage[1]).sum()),
+            "candidate_only_voxels": int((coverage[0] & ~coverage[1]).sum()),
+            "reference_only_voxels": int((coverage[1] & ~coverage[0]).sum()),
+            "metrics_exclude_zero_series": False,
+            "definition": "A nonzero series has at least one saved value unequal to zero. Coverage counts do not change the stated comparison mask or RMSE; temporal r excludes only constant series using the documented RMS threshold.",
+        }
+        common = coverage[0] & coverage[1]
+        result['common_nonzero_series_metrics'] = (
+            result['metrics'].copy() if np.array_equal(common, region) else
+            correlations(arrays[0][common], arrays[1][common], temporal=True) if common.any() else None)
     result["ranges"] = {key: {"min": float(array.min()), "max": float(array.max())}
                         for key, array in zip(("candidate", "reference"), arrays)}
     return result
+
+
+def motion_reference_headers(specification, directory):
+    """比较实际NCC参考，保留原pixdim，不以相同affine代替。"""
+    paths = [local_path(specification[key], directory)
+             for key in ("candidate", "reference")]
+    images = [nib.load(path) for path in paths]
+    if images[0].shape != images[1].shape or images[0].ndim != 3:
+        raise ValueError("Motion reference images must have the same 3D shape")
+    arrays = [values(image) for image in images]
+    pixdim = [np.asarray(image.header["pixdim"][1:4], dtype=np.float32)
+              for image in images]
+    return {
+        "shape": list(images[0].shape),
+        "decoded_float32_values_bitwise_equal": bool(np.array_equal(
+            arrays[0].view(np.uint32), arrays[1].view(np.uint32))),
+        "decoded_max_absolute_difference": float(np.abs(
+            arrays[0].astype(np.float64) - arrays[1].astype(np.float64)).max()),
+        "affine_exact_equal": bool(np.array_equal(images[0].affine, images[1].affine)),
+        "affine_max_absolute_difference": float(np.abs(images[0].affine - images[1].affine).max()),
+        "stored_pixdim_float32_bits_equal": bool(np.array_equal(
+            pixdim[0].view(np.uint32), pixdim[1].view(np.uint32))),
+        "stored_pixdim_candidate_minus_reference_mm": (pixdim[0].astype(np.float64)
+                                                       - pixdim[1].astype(np.float64)).tolist(),
+        "headers": {key: {
+            "storage_dtype": str(image.get_data_dtype()),
+            "stored_pixdim_mm": sizes.astype(np.float64).tolist(),
+            "stored_pixdim_float32_uint32_bits": sizes.view(np.uint32).tolist(),
+            "qform_code": int(image.header["qform_code"]),
+            "sform_code": int(image.header["sform_code"]),
+            "sha256": sha256(path),
+        } for key, image, sizes, path in zip(("candidate", "reference"), images, pixdim, paths)},
+        "scope": "Actual independently produced NCC references. FSL scaled-mm uses stored pixdim, so identical decoded values and affine do not imply identical optimization inputs. Neither reference is replaced for this end-to-end comparison.",
+    }
 
 
 def matrix(path):
@@ -211,15 +264,19 @@ def affine_pair(specification, directory):
     paths = [local_path(specification[key], directory)
              for key in ("candidate_matrix", "reference_matrix")]
     raw = [matrix(path) for path in paths]
-    pull = [np.linalg.inv(world_forward(value, moving, reference, specification.get("convention", "fsl")))
-            for value in raw]
+    geometries = [(nib.load(local_path(specification.get(key + "_moving", specification["moving"]), directory)),
+                   nib.load(local_path(specification.get(key + "_fixed", specification["reference"]), directory)))
+                  for key in ("candidate", "reference")]
+    pull = [np.linalg.inv(world_forward(value, source, target, specification.get("convention", "fsl")))
+            for value, (source, target) in zip(raw, geometries)]
     mapped = [value[:3, :3] @ points + value[:3, 3:4] for value in pull]
     return {"inverse_world_displacement": distances(*mapped),
             "matrix_max_absolute_difference": float(np.abs(raw[0] - raw[1]).max()),
             "convention": specification.get("convention", "fsl"),
             "sha256": {key: sha256(path) for key, path in zip(("candidate", "reference"), paths)},
             "geometry_sha256": {key: sha256(local_path(specification[key], directory))
-                                for key in ("moving", "reference", "mask") if key in specification}}
+                                for key in ("moving", "reference", "mask", "candidate_moving", "reference_moving",
+                                            "candidate_fixed", "reference_fixed") if key in specification}}
 
 
 def matrix_files(value, directory):
@@ -244,11 +301,14 @@ def motion_pair(specification, directory):
     if not region.any():
         raise ValueError("Motion evaluation mask is empty")
     points = world_points(reference, region)
+    geometries = [(nib.load(local_path(specification.get(key + "_moving", specification["moving"]), directory)),
+                   nib.load(local_path(specification.get(key + "_reference", specification["reference"]), directory)))
+                  for key in ("candidate", "reference")]
     per_frame = []
     for first, second in zip(*sequences):
         mapped = []
-        for path in (first, second):
-            transform = np.linalg.inv(world_forward(matrix(path), moving, reference, "fsl"))
+        for path, (source, target) in zip((first, second), geometries):
+            transform = np.linalg.inv(world_forward(matrix(path), source, target, "fsl"))
             mapped.append(transform[:3, :3] @ points + transform[:3, 3:4])
         per_frame.append(distances(*mapped)["rms_mm"])
     return {"frames": len(per_frame), "evaluation_points": int(region.sum()),
@@ -256,6 +316,9 @@ def motion_pair(specification, directory):
             "median_frame_rms_mm": float(np.median(per_frame)),
             "p95_frame_rms_mm": float(np.percentile(per_frame, 95)),
             "max_frame_rms_mm": float(np.max(per_frame)),
+            "geometry_sha256": {key: sha256(local_path(specification[key], directory))
+                                for key in ("moving", "reference", "mask", "candidate_moving", "reference_moving",
+                                            "candidate_reference", "reference_reference") if key in specification},
             "matrix_sequence_sha256": {
                 key: hashlib.sha256("\n".join(sha256(path) for path in paths).encode()).hexdigest()
                 for key, paths in zip(("candidate", "reference"), sequences)}}
@@ -406,6 +469,9 @@ def compare_manifest(manifest, directory, private_output=None, device="cuda:0"):
         report["oracle_programs"] = oracle_provenance(manifest["oracle_programs"], directory)
     if "motion" in manifest:
         report["motion"] = motion_pair(manifest["motion"], directory)
+    if "motion_reference_headers" in manifest:
+        report["motion_reference_headers"] = motion_reference_headers(
+            manifest["motion_reference_headers"], directory)
     if "pull" in manifest:
         report["pull"] = pull_pair(manifest["pull"], directory)
     if "controls" in manifest:

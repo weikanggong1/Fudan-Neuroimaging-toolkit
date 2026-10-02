@@ -12,6 +12,7 @@ B-spline coefficient files are supported.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from .._world_resampling import WorldTransformChain, resample_world_image
 import os
 import operator
 from pathlib import Path
@@ -720,6 +721,44 @@ class TorchApplyWarp:
             ),
         )
 
+    def apply_world(
+        self, input, transformation, *, interpolation="spline",
+        boundary="grid-constant", output_mask=None, batch_size=8,
+        spatial_chunk_size=262144,
+    ):
+        """Apply an explicit RAS world chain and return its NIfTI image.
+
+        This world-coordinate entry supports cubic image sampling and
+        per-frame motion. It preserves the mature world sampler's coordinate
+        rounding, boundary rules and target/source metadata. The usual FSL
+        ``__call__`` entry retains its scaled-mm and nearest/trilinear rules.
+        ``batch_size`` defaults to 8 and does not change the constructor's
+        separate FSL frame policy. No static FSL ``valid_mask`` is inferred
+        from this per-frame chain; an optional ``output_mask`` is explicit.
+        """
+        if not isinstance(transformation, WorldTransformChain):
+            raise TypeError("transformation must be a WorldTransformChain")
+        return resample_world_image(
+            input, transformation.reference,
+            transformation.reference_to_source_world,
+            pre_affine_pull_ras=transformation.pre_affine_pull_ras,
+            motion_pull_world=transformation.motion_pull_world,
+            coordinate_precision=transformation.coordinate_precision,
+            output_mask=output_mask, interpolation=interpolation,
+            boundary=boundary, batch_size=batch_size,
+            spatial_chunk_size=spatial_chunk_size, device=self.device,
+        )
+
+    def run_world(self, input, transformation, output, **kwargs):
+        """Apply a world chain, save the full image and return its Path."""
+        import nibabel as nib
+
+        image = self.apply_world(input, transformation, **kwargs)
+        output_path = Path(output).expanduser().resolve()
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        nib.save(image, str(output_path))
+        return output_path
+
     def run(self, input, reference, output, **kwargs):
         """Apply the transform and save ``output``."""
         return self(input, reference, **kwargs).save(output)
@@ -741,5 +780,6 @@ __all__ = [
     "FSL_FNIRT_DISPLACEMENT_FIELD",
     "FSL_QUADRATIC_SPLINE_COEFFICIENTS",
     "TorchApplyWarp",
+    "WorldTransformChain",
     "applywarp",
 ]

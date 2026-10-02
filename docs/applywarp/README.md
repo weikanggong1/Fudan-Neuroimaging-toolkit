@@ -1,8 +1,8 @@
-# TorchApplyWarp：FSL 变形场重采样
+# TorchApplyWarp：FSL 变形场与显式 world 变换重采样
 
 ## 1. 功能简介
 
-`TorchApplyWarp` 读取 FSL dense warp 或 FNIRT cubic coefficient，将 3D 图像或完整 4D 序列重采样到参考网格。计算由 PyTorch 在 CPU/CUDA 上完成，NIfTI 读写使用 nibabel，运行时不调用 FSL。
+`TorchApplyWarp` 读取 FSL dense warp 或 FNIRT cubic coefficient，将 3D 图像或完整 4D 序列重采样到参考网格。新增 `apply_world()` / `run_world()` 接受显式 RAS world 变换链，支持 fMRI 的样条插值与逐帧运动组合。计算由 PyTorch 在 CPU/CUDA 上完成，NIfTI 读写使用 nibabel，运行时不调用 FSL。
 
 同一 warp 可应用于全部时间帧，也可先创建采样计划，再传播同网格上的 FA、MD、组织概率图或标签图。计划复用变换坐标、插值网格、有效掩膜和最近邻索引；4D 采样按 channel 分块，复用 GPU 输入 buffer，并将结果直接回传到最终 CPU 数组。分块改变数据流，不减少体素或时间帧。
 
@@ -147,7 +147,52 @@ output(x) = input(u)
 
 仅支持一个 premat 和一个 postmat，同一变换应用全部帧。输入影像的 sinc/spline 插值、supersampling、padding、`--mask`、`--usesqform` 和逐帧矩阵未实现。
 
-SynthMorph 的 RAS pull displacement 先经 `fnit.synthmorph.convert_warp_to_fsl(warp, moving=..., fixed=...)` 转为 intent-2006，才能交给本模块。两个坐标约定的数组和 header 不直接互换；详见 [SynthMorph](../synthmorph/README.md)。
+以上限制和坐标规则属于 FSL `__call__()` / `run()` 入口。SynthMorph 的 RAS pull displacement 使用该入口时，先经 `fnit.synthmorph.convert_warp_to_fsl(warp, moving=..., fixed=...)` 转为 intent-2006。显式 world 入口直接接受下面的 `WorldTransformChain`；两个入口的场数组和矩阵约定不能混用。
+
+### 2.6 fMRI 的显式 world 变换链
+
+```python
+import numpy as np
+from fnit.applywarp import TorchApplyWarp, WorldTransformChain
+
+world_transform_chain = WorldTransformChain(
+    reference="MNI152_T1_2mm.nii.gz",  # 3D 输出网格；空间 header 来自此文件
+    reference_to_source_world=np.load("mni_affine_to_bold_world.npy"),  # 4×4 RAS mm pull affine
+    pre_affine_pull_ras="mni_pull_ras.nii.gz",  # (Xref,Yref,Zref,3)，RAS mm 位移
+    motion_pull_world=np.load("motion_pull_world.npy"),  # (T,4,4)，参考 BOLD → 每帧原始 BOLD
+    coordinate_precision="fmriprep",  # 保留 volume preproc 已有的坐标舍入顺序
+)
+world_warper = TorchApplyWarp(device="cuda:0")
+world_warper.run_world(
+    input="original_bold.nii.gz",  # 完整 4D 原始 BOLD，不滤波时间轴
+    transformation=world_transform_chain,
+    output="preproc_bold_in_mni.nii.gz",
+    interpolation="spline",  # nearest / linear / spline
+    boundary="grid-constant",  # preproc 使用网格外零延拓
+    output_mask="bold_mask_mni.nii.gz",  # 可省略；阈值 >0.5
+    batch_size=8,  # 同时处理的帧数；保持既有 FFT 分组
+    spatial_chunk_size=262144,  # 样条查询分块，不改变输出网格
+)
+```
+
+| 参数 | 结构、含义及默认值 |
+|---|---|
+| `input` | 3D 或 4D NIfTI 路径/图像；含单帧的 4D 仍输出 4D。 |
+| `transformation.reference` | 3D NIfTI 路径/图像，定义输出 shape、affine 和空间 header。 |
+| `reference_to_source_world` | 4×4 RAS mm pull affine，从参考世界坐标到源参考帧世界坐标。 |
+| `pre_affine_pull_ras` | 可选 target-grid `(Xref,Yref,Zref,3)` 位移。先加位移，再应用 affine；保留输入场的 float64。 |
+| `motion_pull_world` | 可选 `(T,4,4)` RAS mm 矩阵，每帧在 affine 后应用；省略表示所有帧用同一变换。 |
+| `coordinate_precision` | 默认 `float64`；`fmriprep` 保留已实现的场查询/坐标舍入顺序。 |
+| `interpolation` | 默认 `spline`；可选 `linear`、`nearest`。nearest 保留 world sampler 的半整数偶数取整。 |
+| `boundary` | 默认 `grid-constant`：12 体素零预填充及 float64 样条系数；`periodic`：空间周期系数使用 float32，再按原输入支持域裁剪。 |
+| `output_mask` | 可选 3D 输出空间 NIfTI，值 >0.5 为有效；乘法保留可能的负零。 |
+| `batch_size` | 默认 8，正整数帧上限。CUDA 按坐标、FFT 系数和查询工作区保守检查十进制 20 GB 预算，超限报错；显式减小此值后重试。 |
+| `spatial_chunk_size` | 默认 262144，正整数空间查询上限；可减小以降低工作区显存。 |
+| `output` | `run_world()` 的输出路径，自动创建父目录。 |
+
+`apply_world()` 返回 `nib.Nifti1Image`，`run_world()` 保存该图像并返回 `Path`。输出总是 float32，空间 qform/sform 及 code、extensions 来自 reference，4D TR 和时间单位来自 input。时间轴不插值。逐帧运动变换分别应用于完整帧，不能提前折叠成一张静态场。
+
+fMRI volume 的 FNIRT 分支调用此入口；SynthMorph 分支调用共享同一数值核的 `apply_transform(WorldTransformChain)`。[volume 流程和终节点说明](../fmri/normalization.md)。已运动校正和清理的 `clean_mni` 使用 `periodic` 并省略 `motion_pull_world`，避免再次应用运动变换。
 
 ## 3. 命令行调用
 
@@ -165,6 +210,8 @@ fnit applywarp \
 ```
 
 `fnit-applywarp` 使用相同参数。省略 `--frame-chunk-size` 使用自动政策。
+
+volume 流程自动构造 `WorldTransformChain`。在 `fnit-fmri volume` 中选择 `--registration-backend fnirt`，其最终采样调用 `TorchApplyWarp.run_world()`；选择 `--registration-backend synthmorph` 则调用 `apply_transform()`。[完整 BIDS 命令和所有参数](../fmri/README.md#命令行调用)。
 
 | CLI 参数 | Python 对应或作用 |
 |---|---|
@@ -195,6 +242,12 @@ applywarp \
 FSL 没有 FNIT 的 `--device`/`--frame-chunk-size` 参数。输入、warp、premat/postmat、插值和输出类型需相同，才构成固定变换比较。官方用法见 [FNIRT User Guide：applywarp](https://fsl.fmrib.ox.ac.uk/fsl/docs/registration/fnirt/user_guide.html#applywarp)。
 
 ## 5. 最新验证、精度和运行时间
+
+### 显式 world 入口：完整 fMRI volume
+
+2026-10-02 将 FNIRT 分支的最终脑掩膜、clean MNI、preproc T1w 和 preproc MNI 接入 `run_world()` / `apply_world()`。从相同 BIDS 输入开始重新运行，原 FNIT `6f67cc0` 与候选的 12 幅保存影像逐位相同，包含全部 490 帧、正负零、完整 header 与 extensions；文本及 FNIRT 求解 QC 一致。实际调用栈确认四个节点均走公共入口。allocated / reserved 峰值为 6.50 / 10.78 GB。完整 API 含保存为 511.09→542.12 s，这是共享服务器的单轮观测，本轮没有整链提速证据。[完整报告及脑图](../../validation/fmri/public_resamplers_20261002/README.md)。
+
+下面的 105 帧数字属于 FSL scaled-mm 的普通入口，保留原测量范围。
 
 2026-10-02 已完成最终自动策略的完整 105 帧 DWI、3D FA，以及 FastVBM、volume、dMRI 三条 FNIRT pipeline 验证。原 FNIT 与新代码在同一设备上的输出逐位一致；全部记录见 [registration lossless 验收](../../validation/registration_lossless_20261002/README.md)。
 
@@ -254,7 +307,8 @@ FNIT 包含读取、展开、重采样和 CPU 回传，排除保存；FSL 包含
 
 | 日期 | 更新 | 验证记录 |
 |---|---|---|
-| 2026-10-02，本轮 | 4D channel 分块、GPU 输入 buffer 复用、直接回传最终数组、nearest 索引缓存、原地乘法 mask；新增构造函数/函数入口/CLI 分帧参数。按第一阶段完整 DWI 的吞吐结果，自动政策改为 8 GiB 工作预算、取消固定 64 帧上限。 | [最终默认与三条 pipeline 验收](../../validation/registration_lossless_20261002/README.md)通过；保留[第一阶段配置实测](../../validation/registration_lossless_20261002/component_tuning.public.json)。 |
+| 2026-10-02，公共 world 入口 | 新增 `WorldTransformChain` 与 `apply_world()` / `run_world()`；共享成熟的 world 数值核，保留样条边界、逐帧运动与 metadata。 | [完整 490 帧与实际调用验证](../../validation/fmri/public_resamplers_20261002/README.md)。 |
+| 2026-10-02，上一轮 | 4D channel 分块、GPU 输入 buffer 复用、直接回传最终数组、nearest 索引缓存、原地乘法 mask；新增构造函数/函数入口/CLI 分帧参数。按第一阶段完整 DWI 的吞吐结果，自动政策改为 8 GiB 工作预算、取消固定 64 帧上限。 | [最终默认与三条 pipeline 验收](../../validation/registration_lossless_20261002/README.md)通过；保留[第一阶段配置实测](../../validation/registration_lossless_20261002/component_tuning.public.json)。 |
 | 2026-10-02，前轮 | `ApplyWarpPlan` 复用 float64 几何和 float32 grid；跨图严格核验源网格及参考 header/extensions。 | 同一真实病例九图传播：原逐图调用→计划，热调用中位数 0.365734295→0.180841511 s；全部 voxel/header/affine/mask 及 TBSS 后处理一致。[九图报告](../../validation/dmri_pipeline/map_propagation_20261002.md)。 |
 | 2026-09-27 | 固定官方 coefficient 的 3D FA 采样。 | 上节官方精度和时间。[聚合 JSON](../../validation/applywarp/report.real.current.json)。 |
 

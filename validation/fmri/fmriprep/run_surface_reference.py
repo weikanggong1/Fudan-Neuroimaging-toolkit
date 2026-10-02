@@ -17,12 +17,15 @@ SIF 校验、解释器启动及包导入在此边界外，container_wall_seconds
 """
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor
+import errno
 import hashlib
 import json
 import os
 from pathlib import Path
 import shutil
 import subprocess
+import tempfile
 import time
 
 
@@ -49,6 +52,33 @@ def sha256(path):
 
 def write_json(path, value):
     Path(path).write_text(json.dumps(value, indent=2, allow_nan=False) + "\n")
+
+
+def publish_reference_output(staging, output):
+    """Keep publication atomic when node-local work and derivatives differ."""
+    start = time.perf_counter()
+    try:
+        os.replace(staging, output)
+        method = "atomic rename on one filesystem"
+    except OSError as error:
+        if error.errno != errno.EXDEV:
+            raise
+        temporary = Path(tempfile.mkdtemp(prefix=".surface_reference_publish_", dir=output.parent))
+        try:
+            shutil.copytree(staging, temporary, dirs_exist_ok=True)
+            for source in staging.rglob("*"):
+                if source.is_file() and sha256(source) != sha256(temporary / source.relative_to(staging)):
+                    raise ValueError("reference publication copy changed file bytes")
+            if output.exists() or output.is_symlink():
+                raise FileExistsError("reference output appeared during publication")
+            os.replace(temporary, output)
+        finally:
+            if temporary.exists():
+                shutil.rmtree(temporary)
+        method = "verified cross-filesystem copy followed by atomic destination rename"
+    return {"host_publication_seconds": time.perf_counter() - start,
+            "host_publication_method": method,
+            "host_publication_in_worker_wall": False}
 
 
 def read_inputs(path):
@@ -78,6 +108,14 @@ def read_inputs(path):
             raise FileNotFoundError(f"recon_all lacks {hemi}.midthickness or graymid")
     if not (Path(value["newmsm_env"]) / "bin/newmsm").is_file():
         raise FileNotFoundError("newmsm_env lacks bin/newmsm")
+    spheres = value.get("registered_spheres")
+    if spheres is not None:
+        if not isinstance(spheres, list) or len(spheres) != 2 or not all(
+                isinstance(item, str) and Path(item).is_absolute() and Path(item).is_file()
+                for item in spheres):
+            raise ValueError("registered_spheres must contain two existing absolute L/R paths")
+        if not isinstance(value.get("registration_reuse"), dict) or not value["registration_reuse"]:
+            raise ValueError("reused registration requires its independent execution/hash provenance")
     return value
 
 
@@ -198,21 +236,29 @@ def worker(args):
     msm_environment = {**os.environ, "LD_LIBRARY_PATH": str(msm_env / "lib") + ":" + os.environ.get("LD_LIBRARY_PATH", ""),
                        "OMP_NUM_THREADS": str(args.msm_threads), "MKL_NUM_THREADS": str(args.msm_threads),
                        "OPENBLAS_NUM_THREADS": str(args.msm_threads)}
-    for hemi in ("L", "R"):
+    def estimate_sphere(hemi):
         start = time.perf_counter()
         hemisphere = work / hemi
         fields = registration_inputs[hemi]
         prefix = hemisphere / "msm."
-        command([str(msm_binary), "--inmesh=" + fields["rotated_sphere"],
-                 "--refmesh=" + fields["reference_sphere"], "--indata=" + fields["native_sulc"],
-                 "--refdata=" + fields["reference_sulc"], "--conf=" + str(config_file), "--out=" + str(prefix)],
-                environment=msm_environment)
         sphere = Path(str(prefix) + "sphere.reg.surf.gii")
+        if inputs.get("registered_spheres") is None:
+            command([str(msm_binary), "--inmesh=" + fields["rotated_sphere"],
+                     "--refmesh=" + fields["reference_sphere"], "--indata=" + fields["native_sulc"],
+                     "--refdata=" + fields["reference_sulc"], "--conf=" + str(config_file), "--out=" + str(prefix)],
+                    environment=msm_environment)
+        else:
+            shutil.copyfile(inputs["registered_spheres"]["LR".index(hemi)], sphere)
         if not sphere.is_file():
             raise RuntimeError("official newMSM did not create the registered sphere")
+        return sphere, time.perf_counter() - start
+
+    def prepare_area(hemi, sphere, elapsed):
+        hemisphere = work / hemi
         prepared["sphere_reg_fsLR"].append(str(sphere))
         registered.append(sphere)
-        stage_seconds[f"{hemi}_official_msmsulc"] = time.perf_counter() - start
+        stage_seconds[f"{hemi}_official_msmsulc" if inputs.get("registered_spheres") is None
+                      else f"{hemi}_reused_official_sphere_copy"] = elapsed
         start = time.perf_counter()
         area = hemisphere / "midthickness.32k_fsLR.surf.gii"
         wb_command("-surface-resample", prepared["midthickness"]["LR".index(hemi)], sphere,
@@ -220,10 +266,25 @@ def worker(args):
         prepared["midthickness_fsLR"].append(str(area))
         stage_seconds[f"{hemi}_area_surface"] = time.perf_counter() - start
 
+    if args.parallel_msm:
+        msm_started = time.perf_counter()
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            futures = {hemi: executor.submit(estimate_sphere, hemi) for hemi in ("L", "R")}
+            estimated = {hemi: futures[hemi].result() for hemi in ("L", "R")}
+        stage_seconds["official_msmsulc_both_hemispheres_wall"] = time.perf_counter() - msm_started
+        for hemi in ("L", "R"):
+            prepare_area(hemi, *estimated[hemi])
+    else:
+        # Preserve the historical serial command order, including each area's
+        # preparation immediately after that hemisphere's registration.
+        for hemi in ("L", "R"):
+            prepare_area(hemi, *estimate_sphere(hemi))
+
     fixed_inputs = {
         "bold_file": inputs["t1w_bold"], "bold_std": inputs["mni_bold"], "volume_roi": None,
         **prepared, "repetition_time": inputs["repetition_time"], "expected_frames": inputs["expected_frames"],
-        "signal": "preproc", "geometry_space": "T1w world RAS", "sphere_kind": "estimated_msmsulc",
+        "signal": "preproc", "geometry_space": "T1w world RAS",
+        "sphere_kind": "estimated_msmsulc" if inputs.get("registered_spheres") is None else "provided_registration",
     }
     fixed_path = work / "projection_inputs.private.json"
     write_json(fixed_path, fixed_inputs)
@@ -255,11 +316,22 @@ def worker(args):
                               "mni_preproc": record["projection_inputs_sha256"]["bold_std"]},
         "msm_config": {"source_sha256": sha256(config_source), "effective_sha256": sha256(config_file),
                        "numthreads": args.msm_threads, "configuration_text": config_file.read_text()},
+        "registration_estimated_here": inputs.get("registered_spheres") is None,
+        "registration_reuse": inputs.get("registration_reuse"),
     })
     write_json(work / "commands.private.json", {"commands": commands})
     record.update({
-        "scope": SCOPE, "registration_estimated_here": True,
+        "scope": SCOPE if inputs.get("registered_spheres") is None else
+                 "Independent original geometry/ROI and area-surface preparation, full-frame projection, "
+                 "CIFTI/QC/publication from completed volume inputs, reusing explicitly supplied official "
+                 "registered spheres. No MSM estimation or prerequisite volume processing is timed here.",
+        "registration_estimated_here": inputs.get("registered_spheres") is None,
+        "registration_reuse": inputs.get("registration_reuse"),
         "reference_msm_threads": args.msm_threads, "strict_singlethread_accuracy_reference": args.msm_threads == 1,
+        "parallel_msm_hemispheres": args.parallel_msm,
+        "msm_parallelism_boundary": "Independent L/R official processes, separate output prefixes, "
+                                    "each with the stated fixed thread count. L/R runtimes overlap "
+                                    "when parallel; use both-hemisphere wall time.",
         "reference_newmsm_sha256": sha256(msm_binary), "hcp_config_source_sha256": sha256(config_source),
         "reference_freesurfer_conversion_version": Info.version(),
         "effective_msm_config_sha256": sha256(config_file), "surface_only_script_sha256": sha256(__file__),
@@ -308,6 +380,13 @@ def launch(args):
         else:
             bindings.append((source, target))
         mapped[field] = target
+    if inputs.get("registered_spheres") is not None:
+        mapped["registered_spheres"] = []
+        for hemisphere, value in zip(("L", "R"), inputs["registered_spheres"]):
+            source = Path(value).resolve()
+            target = f"/reference-inputs/registered_sphere_{hemisphere}"
+            bindings.append((source.parent, target))
+            mapped["registered_spheres"].append(target + "/" + source.name)
     write_json(work / "inputs.private.json", mapped)
     command = [engine, "exec", "--cleanenv", "--home", f"{home}:/home/reference",
                "-B", f"{work}:/reference-work", "-B", f"{Path(__file__).resolve().parent}:/reference-script:ro"]
@@ -324,7 +403,8 @@ def launch(args):
     command += ["-B", f"{license_file}:/reference-license.txt:ro", "-B", f"{cache}:/reference-templateflow", str(args.container_image.resolve()),
                 "python", "/reference-script/run_surface_reference.py", "--worker",
                 "--inputs-json", "/reference-work/inputs.private.json", "--output-root", "/reference-work/final_output",
-                "--work-root", "/reference-work/worker", "--threads", str(args.threads), "--msm-threads", str(args.msm_threads)]
+                "--work-root", "/reference-work/worker", "--threads", str(args.threads), "--msm-threads", str(args.msm_threads),
+                *(["--parallel-msm"] if args.parallel_msm else [])]
     environment = os.environ.copy()
     for prefix in ("SINGULARITYENV_", "APPTAINERENV_"):
         for name in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS"):
@@ -348,7 +428,8 @@ def launch(args):
     output.parent.mkdir(parents=True, exist_ok=True)
     if output.exists() or output.is_symlink():
         raise FileExistsError("output appeared during execution")
-    os.replace(staging, output)
+    record.update(publish_reference_output(staging, output))
+    write_json(output / "run.public.json", record)
     # Translate only our container paths for offline host comparisons. Source
     # paths stay in this private manifest, never in the public report.
     def host_paths(value):
@@ -389,10 +470,14 @@ def main():
     parser.add_argument("--singularity", default="singularity")
     parser.add_argument("--threads", type=int, default=8)
     parser.add_argument("--msm-threads", type=int, choices=(1, 8), default=1)
+    parser.add_argument("--parallel-msm", action="store_true",
+                        help="显式同时运行独立L/R原MSM进程；每侧固定1线程，总CPU预算仍为threads")
     parser.add_argument("--worker", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args()
     if args.threads < 1:
         parser.error("threads must be positive")
+    if args.parallel_msm and (args.msm_threads != 1 or args.threads < 2):
+        parser.error("parallel-msm requires strict msm-threads=1 and total threads >=2")
     if args.worker:
         worker(args)
     else:

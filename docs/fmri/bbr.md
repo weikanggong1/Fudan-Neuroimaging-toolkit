@@ -1,8 +1,10 @@
 # EPI→T1 边界配准（BBR）
 
+## 功能简介
+
 `register_bbr` 将一张 3D EPI 参考影像配准到同被试的 3D T1。函数在 T1 白质边界的内外各 2 mm 处采样 EPI 强度，优化 6 自由度刚体变换。边界目标采用 FSL FLIRT 的有符号 `tanh` 代价；无场图时不估计或校正 EPI 畸变。[FSL BBR 说明](https://fsl.fmrib.ox.ac.uk/fsl/docs/registration/flirt/bbr.html)解释了白质边界与 EPI 灰白质强度对比的要求；[epi_reg 说明](https://fsl.fmrib.ox.ac.uk/fsl/docs/registration/epi_reg.html)列出 T1、去颅骨 T1、白质分割等输入。
 
-## 输入、返回值与坐标
+## Python 调用、输入输出与参数
 
 | 参数 | 作用 |
 |---|---|
@@ -40,7 +42,13 @@ print(result.final_cost)                          # 配准后的 BBR 代价值�
 
 该函数只做刚体 BBR，不包括 SynthStrip、FAST、B0 场图校正、GDC 或 T1→MNI 的非线性配准。上游若已有 T1 白质分割和初始矩阵，显式传入即可复用，不需再次估计。
 
-## 官方同输入命令
+## 命令行调用
+
+`register_bbr` 的独立入口是上面的 Python 函数，没有独立 BBR CLI。完整 BIDS 调用使用 [`fnit-fmri volume`](README.md#命令行调用)，通过 `--bbr-execution batched/reference` 选择同算法执行方式。
+
+<a id="官方同输入命令"></a>
+
+## 原软件调用
 
 以下命令与上例使用同一张 EPI、去颅骨 T1 和白质边界；`fast` 与 `fslmaths` 两步只用于生成官方对照的分割。`bbr.sch` 来自所安装 FSL。该命令**不传场图，也不执行 GDC**。
 
@@ -62,9 +70,11 @@ flirt -in example_func.nii.gz -ref T1_brain.nii.gz \
 - 粗搜索包括 qform/sform 与已给初始矩阵两个起点、每个起点 729 个候选；之后按源 `Brent→Powell→Brent` 局部优化，再执行 729 个微网格候选和细级优化。保留网格枚举顺序、浮点参数解析和稳定的最小值选择。
 - 输出复用 FNIT FLIRT 的三线性采样、边缘背景及 header 规则，避免另一套逐 slab 输出代码。
 
-未降低 iteration、搜索范围或分辨率。Brent/Powell 存在前后依赖，局部优化仍需主机控制；候选批量化不改变这一依赖。原代码的 SciPy Powell、边界中心旋转、单轮粗网格及 border replication 已被替换。官方 MISCMATHS 原源码的独立编译 oracle 用于单元测试，不是 FNIT 运行依赖。当前与官方是否数值一致以以下真实数据配对为准。
+未降低 iteration、搜索范围或分辨率。Brent/Powell 存在前后依赖，局部优化仍需主机控制；候选批量化不改变这一依赖。官方 MISCMATHS 原源码的独立编译 oracle 用于单元测试，不是 FNIT 运行依赖。当前与官方是否数值一致以以下真实数据配对为准。
 
-## 真实 UKB 数据对照
+<a id="真实-ukb-数据对照"></a>
+
+## 最新真实数据精度、耗时与脑图
 
 2026-10-01 在共享 H100 PCIe 上，用一例真实 UKB 静息态 EPI 参考影像及同被试去颅骨 T1 比较。FSL 6.0.7.22 BBR 已重新运行，实际二进制子进程退出 0，矩阵、影像及 header 与固定参照逐位一致；安装包装器返回的 255 单独保留。两侧不做 GDC 或 B0 畸变校正。
 
@@ -114,7 +124,17 @@ profile 独立运行，插桩时间不进入上面的速度表。
 
 回归测试覆盖官方 MISCMATHS Brent/Powell trial trace、边界/平滑/插值，以及真实 NIfTI 常见的 Fortran 布局。融合 kernel 前将驻留影像转换为连续布局；此前按 C 顺序误读 Fortran 数据的错误候选已排除。配对冷/热/profile 产物逐位一致；与 FSL 仍有上表所列误差。这是一例不含畸变校正的对照，不能验证 fieldmap BBR 或外推其他采集。匿名汇总与源码哈希见 [当前配准报告](../../validation/fmri/registration_gpu.current.public.json)。
 
-## 原实现与参考文献
+BBR 本页没有单独发布新脑图；完整 490 帧空间输出图见[volume 精度与脑图](README.md#latest-real-benchmark)，其统计范围为完整流程，不能单独归因于 BBR。
+
+## 最近版本与 benchmark 记录
+
+| 版本/记录 | 变化与报告 |
+|---|---|
+| 2026-10-02 文档整理 | 保留当前参数、原命令、官方剩余误差与 CPU/reference；清理已替代路径的迁移说明，算法不变。 |
+| 2026-10-01 批量融合路径 | 补齐原 schedule，独立候选分批和融合采样；与修正后张量路径的矩阵/影像/header 逐位相同，对 FSL 仍有上表误差，见[配准报告](../../validation/fmri/registration_gpu.current.public.json)。 |
+| `7952b33` | 修改前真实配对基线，保留同一报告中的源码哈希、计数更正和完整链指标。 |
+
+## 参考文献与原实现
 
 - FSL FLIRT 源码：[`flirt`](https://git.fmrib.ox.ac.uk/fsl/flirt)，重点为 `costfns.cc`、`flirt.cc` 与 `flirtsch/bbr.sch`；核验版本见 [vendor 清单](../../src/fnit/_vendor_fsl/README.md)。
 - 优化器：[FSL MISCMATHS](https://git.fmrib.ox.ac.uk/fsl/miscmaths) 的 `optimise.cc`；边界平滑/梯度：[FSL NEWIMAGE](https://git.fmrib.ox.ac.uk/fsl/newimage)。
