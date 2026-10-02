@@ -21,7 +21,8 @@ from ..weights import resolve_weights
 from .aroma_pipeline import run_aroma_pipeline
 from .bids import locate_bids_inputs
 from .derivatives import ensure_derivative_dataset, fmri_derivative_paths, sidecar, write_json, publish_derivatives
-from .normalization import resample_world
+from ..applywarp import TorchApplyWarp, WorldTransformChain
+from ..synthmorph import apply_transform
 from ._anatomical import prepare_anatomical
 from ..flirt.coordinates import flirt_to_world_affine
 from .pipeline import run_feat_core
@@ -44,6 +45,40 @@ class FMRIVolumeResult:
     preproc_mni: Path | None = None
     motion_pull: Path | None = None
     mni_pull: Path | None = None
+
+
+def _resample_final_volume(
+    source, reference, reference_to_source_world, output, *, backend,
+    pre_affine_pull_ras=None, output_mask=None, interpolation="linear",
+    boundary="grid-constant", motion_pull_world=None,
+    coordinate_precision="float64", spatial_chunk_size=262144,
+    batch_size=8, device=None,
+):
+    """Route each final volume output through its public warp interface."""
+    chain = WorldTransformChain(
+        reference=reference,
+        reference_to_source_world=reference_to_source_world,
+        pre_affine_pull_ras=pre_affine_pull_ras,
+        motion_pull_world=motion_pull_world,
+        coordinate_precision=coordinate_precision,
+    )
+    if backend == "fnirt":
+        return TorchApplyWarp(device=device).run_world(
+            source, chain, output, interpolation=interpolation,
+            boundary=boundary, output_mask=output_mask,
+            batch_size=batch_size, spatial_chunk_size=spatial_chunk_size,
+        )
+    if backend != "synthmorph":
+        raise ValueError("backend must be synthmorph or fnirt")
+    image = apply_transform(
+        source, chain, method=interpolation, fill=0, dtype="float32",
+        device=device, frame_chunk_size=batch_size, boundary=boundary,
+        output_mask=output_mask, spatial_chunk_size=spatial_chunk_size,
+    )
+    output_path = Path(output).expanduser().resolve()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    nib.save(image, str(output_path))
+    return output_path
 
 
 def _sha256(path):
@@ -385,22 +420,23 @@ def fMRIVolume_pipeline(
     started = time.perf_counter()
     to_epi_world = np.linalg.inv(bbr.moving_to_fixed_world)
     clean_native = aroma.confounds_cleaned_bold or aroma.denoised_bold
-    mask_mni_raw = resample_world(
+    mask_mni_raw = _resample_final_volume(
         feat.mask, mni_template, to_epi_world,
         mask_dir / "brain_MNI152_2mm.nii.gz",
         pre_affine_pull_ras=t1_to_mni.pull_ras,
-        interpolation="nearest", device=selected,
+        interpolation="nearest", device=selected, backend=registration_backend,
     )
     mask_mni = _save_mask(
         (np.asarray(nib.load(str(mask_mni_raw)).dataobj) > 0.5)
         & (np.asarray(nib.load(str(template_mask)).dataobj) > 0),
         mni_template, mask_mni_raw,
     )
-    resample_world(
+    _resample_final_volume(
         clean_native, mni_template, to_epi_world, clean_mni,
         pre_affine_pull_ras=t1_to_mni.pull_ras,
         output_mask=mask_mni, interpolation="spline",
         boundary="periodic", batch_size=batch_size, device=selected,
+        backend=registration_backend,
     )
     timing["mni_resampling"] = time.perf_counter() - started
     configuration = {
@@ -462,18 +498,18 @@ def fMRIVolume_pipeline(
     t1_reference = native_bold_sampling_reference(
         t1_brain, epi_ref, t1_mask, output / "T1w_native_bold_reference.nii.gz",
     )
-    preproc_t1w = resample_world(
+    preproc_t1w = _resample_final_volume(
         minimal_bold, t1_reference, to_epi_world, output / "preproc_T1w.nii.gz",
         motion_pull_world=motion_pull, interpolation="spline",
         boundary="grid-constant", coordinate_precision="fmriprep",
-        batch_size=batch_size, device=selected,
+        batch_size=batch_size, device=selected, backend=registration_backend,
     )
-    preproc_mni = resample_world(
+    preproc_mni = _resample_final_volume(
         minimal_bold, mni_template, to_epi_world, output / "preproc_MNI.nii.gz",
         pre_affine_pull_ras=t1_to_mni.pull_ras, motion_pull_world=motion_pull,
         interpolation="spline", boundary="grid-constant",
         coordinate_precision="fmriprep",
-        batch_size=batch_size, device=selected,
+        batch_size=batch_size, device=selected, backend=registration_backend,
     )
     _set_bold_tr(preproc_t1w, inputs.tr)
     _set_bold_tr(preproc_mni, inputs.tr)

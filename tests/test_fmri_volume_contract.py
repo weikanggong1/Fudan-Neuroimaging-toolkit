@@ -139,7 +139,7 @@ def volume_dependencies(tmp_path, monkeypatch):
     monkeypatch.setattr(end_to_end, "prepare_anatomical", anatomical)
     monkeypatch.setattr(end_to_end, "run_feat_core", feat)
     monkeypatch.setattr("fnit.fmri.bbr.register_bbr", bbr)
-    monkeypatch.setattr(end_to_end, "resample_world", resample)
+    monkeypatch.setattr(end_to_end, "_resample_final_volume", resample)
     monkeypatch.setattr(end_to_end, "run_aroma_pipeline", aroma)
     monkeypatch.setattr(end_to_end, "TorchFLIRT", TissueSampler)
     # This fixture tests orchestration, independently of the fixed-template gate.

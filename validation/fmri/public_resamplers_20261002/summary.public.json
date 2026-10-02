@@ -1,0 +1,228 @@
+{
+  "schema_version": 1,
+  "baseline_commit": "6f67cc06ee8c5108ef3640cbfc289f3e5a742f65",
+  "scope": "same FNIT backend before/after public final-resampler routing; full 490-frame raw-BIDS API; no new original-software equivalence claim",
+  "expected_frames": 490,
+  "conditions": {
+    "gpu": "NVIDIA H100 PCIe",
+    "visible_gpus": 1,
+    "shared_server": true,
+    "threads": 8,
+    "tf32": true,
+    "half_precision": false,
+    "anatomical_cache_reused": false
+  },
+  "backends": {
+    "fnirt": {
+      "scientific_comparison_passed": true,
+      "nifti_images_compared": 12,
+      "full_header_bytes_equal": true,
+      "extensions_equal": true,
+      "changed_values_including_signed_zero": 0,
+      "maximum_absolute_error": 0.0,
+      "api_seconds": {
+        "baseline": 511.0851654736325,
+        "candidate": 542.122061742004
+      },
+      "memory": {
+        "baseline": {
+          "peak_cuda_allocated_bytes": 6503141376,
+          "peak_cuda_reserved_bytes": 10775166976,
+          "component_peak_counter_resets": 1,
+          "allocator_limit_bytes": 20000000000
+        },
+        "candidate": {
+          "peak_cuda_allocated_bytes": 6503141376,
+          "peak_cuda_reserved_bytes": 10775166976,
+          "component_peak_counter_resets": 1,
+          "allocator_limit_bytes": 20000000000
+        }
+      },
+      "final_pipeline_stages_seconds": {
+        "baseline": {
+          "epi_synthstrip": 0.9069253988564014,
+          "t1_synthstrip": 1.3733608280308545,
+          "template_preparation": 0.054058728739619255,
+          "fast": 9.298657482024282,
+          "t1_to_mni_affine": 3.0949175572022796,
+          "t1_to_mni_nonlinear": 24.33940183185041,
+          "warp_conversion": 0.48315059021115303,
+          "anatomical_cache_lookup": 0.0,
+          "feat_core": 85.01426103711128,
+          "bbr_initial_flirt": 2.1426063207909465,
+          "bbr_refinement": 0.7734964657574892,
+          "bbr_final_resampling": 0.046171060763299465,
+          "aroma_masks": 0.0023859930224716663,
+          "pica_aroma_confounds": 75.67636010283604,
+          "mni_resampling": 45.47657875390723,
+          "single_pass_preproc": 249.92633677879348,
+          "total": 499.7304891711101
+        },
+        "candidate": {
+          "epi_synthstrip": 1.336662351153791,
+          "t1_synthstrip": 1.5515718809328973,
+          "template_preparation": 0.057287936098873615,
+          "fast": 10.080819644965231,
+          "t1_to_mni_affine": 4.3534139967523515,
+          "t1_to_mni_nonlinear": 27.33657633094117,
+          "warp_conversion": 0.46386414393782616,
+          "anatomical_cache_lookup": 0.0,
+          "feat_core": 88.85391822922975,
+          "bbr_initial_flirt": 2.202892492990941,
+          "bbr_refinement": 0.7386125880293548,
+          "bbr_final_resampling": 0.04590966738760471,
+          "aroma_masks": 0.0020911558531224728,
+          "pica_aroma_confounds": 80.720582771115,
+          "mni_resampling": 54.05577693413943,
+          "single_pass_preproc": 263.02821961417794,
+          "total": 535.9171605687588
+        }
+      },
+      "route_counts": {
+        "fnit.applywarp.TorchApplyWarp.apply_world": {
+          "mask_mni": 1,
+          "clean_mni": 1,
+          "preproc_t1w": 1,
+          "preproc_mni": 1
+        },
+        "fnit.applywarp.TorchApplyWarp.run_world": {
+          "mask_mni": 1,
+          "clean_mni": 1,
+          "preproc_t1w": 1,
+          "preproc_mni": 1
+        }
+      },
+      "batch_size": 8,
+      "spatial_chunk_size": 262144
+    },
+    "synthmorph": {
+      "scientific_comparison_passed": true,
+      "nifti_images_compared": 7,
+      "full_header_bytes_equal": true,
+      "extensions_equal": true,
+      "changed_values_including_signed_zero": 0,
+      "maximum_absolute_error": 0.0,
+      "api_seconds": {
+        "baseline": 499.54594467999414,
+        "candidate": 461.5383397345431
+      },
+      "memory": {
+        "baseline": {
+          "peak_cuda_allocated_bytes": 13305323008,
+          "peak_cuda_reserved_bytes": 15057551360,
+          "component_peak_counter_resets": 1,
+          "allocator_limit_bytes": 20000000000
+        },
+        "candidate": {
+          "peak_cuda_allocated_bytes": 13305323008,
+          "peak_cuda_reserved_bytes": 15057551360,
+          "component_peak_counter_resets": 1,
+          "allocator_limit_bytes": 20000000000
+        }
+      },
+      "final_pipeline_stages_seconds": {
+        "baseline": {
+          "epi_synthstrip": 1.2711899760179222,
+          "t1_synthstrip": 1.4414910869672894,
+          "template_preparation": 0.05331077706068754,
+          "fast": 9.736762896180153,
+          "t1_to_mni_affine": 3.0921340021304786,
+          "t1_to_mni_nonlinear": 6.416175121907145,
+          "warp_conversion": 0.45547629008069634,
+          "anatomical_cache_lookup": 0.0,
+          "feat_core": 88.65706976689398,
+          "bbr_initial_flirt": 2.2922201710753143,
+          "bbr_refinement": 0.7620464530773461,
+          "bbr_final_resampling": 0.0477314367890358,
+          "aroma_masks": 0.002182280644774437,
+          "pica_aroma_confounds": 76.37967205839232,
+          "mni_resampling": 47.737078061793,
+          "single_pass_preproc": 250.0417930209078,
+          "total": 489.5560992732644
+        },
+        "candidate": {
+          "epi_synthstrip": 0.9177198852412403,
+          "t1_synthstrip": 1.3949499349109828,
+          "template_preparation": 0.05440904526039958,
+          "fast": 9.527589723933488,
+          "t1_to_mni_affine": 2.7644375171512365,
+          "t1_to_mni_nonlinear": 6.783979561179876,
+          "warp_conversion": 0.45640808064490557,
+          "anatomical_cache_lookup": 0.0,
+          "feat_core": 64.91428275080398,
+          "bbr_initial_flirt": 1.794636976905167,
+          "bbr_refinement": 0.6991869197227061,
+          "bbr_final_resampling": 0.04505041288211942,
+          "aroma_masks": 0.002112973015755415,
+          "pica_aroma_confounds": 62.671594991814345,
+          "mni_resampling": 45.99872077116743,
+          "single_pass_preproc": 251.3062894656323,
+          "total": 450.5459677367471
+        }
+      },
+      "route_counts": {
+        "fnit.synthmorph.apply_transform": {
+          "mask_mni": 1,
+          "clean_mni": 1,
+          "preproc_t1w": 1,
+          "preproc_mni": 1
+        }
+      },
+      "batch_size": 8,
+      "spatial_chunk_size": 262144
+    }
+  },
+  "posthoc_all_passed": true,
+  "execution_tool_sha256": "a5a3ab90a1870c12647736c5d0cf69bc29734b9dcba655a9bad13cdd157f44a1",
+  "audit_gate_tool_sha256": "a54f62e89017526f4c5d055bfe3f146fec23e3d7c97e255208d06f07cb8f3dbe",
+  "audit_helper_sha256": "24478360a4140a62ebd71b0ff50cb93931028d83c5d8558a8581c3a381ab7dc3",
+  "timing_note": "Original executed timings are retained. Execution tool a5a3ab90 also subtracts two peak-counter query durations outside its API timer; these tiny durations were not saved separately and are not reconstructed. All four paired runs used that same timing implementation. Numerical outputs, whole-run memory peaks and route records are unaffected.",
+  "timing_conclusion": "single paired runs on a shared server; no evidence of stable end-to-end speed improvement from routing",
+  "tests": {
+    "command": "CUDA_VISIBLE_DEVICES=0 OMP_NUM_THREADS=8 PYTHONPATH=candidate/src python -m pytest -q tests/applywarp tests/synthmorph tests/test_fmri* tests/test_spline_small_axes.py tests/fnirt",
+    "passed": 617,
+    "skipped": 12,
+    "seconds": 38.29
+  },
+  "artifact_sha256": {
+    "fnirt.comparison.public.json": "fc20ae6019332a477a8ff7ecd232236518a713015cfee36334cd29025878d333",
+    "fnirt.report.public.json": "510f83b913514d642d19730bf8fdd7ba45f242c8cf3bade738710c9f7509151b",
+    "posthoc_gate.public.json": "a5f0038ef84b8a5a5bf04e0b8d0a2fdd662f4059dedba34440de0d7559d0d9d6",
+    "synthmorph.comparison.public.json": "f97f84a37d3bb6bdbf778b69b533dd5ea1b0e6762a18bd3d4574a2afd99a27b0",
+    "synthmorph.report.public.json": "749da11b0f61dc5e3145f53d1de7547dad7be78549e7dece2a928a1377184db7",
+    "figures/volume_fnirt.png": "c945e0dbf4da6d1805070ad330c7deb1d1d403c34f207dfe3fbd9d9ceb41272c",
+    "figures/volume_fnirt.public.json": "4cfa4d8c3df5269af9bdf9ad68c34c3c945600664ad29ee610d435dbf8ee3e59",
+    "figures/volume_synthmorph.png": "426767d0dce7363d96593c00f94fb5d005e05446de7c7e368bbc216bb33fb593",
+    "figures/volume_synthmorph.public.json": "d5a4d0f15645cede0cb839bb76e1c6cebcf0b6acd6e1cd703af537d6b67789e2"
+  },
+  "publication_integration": {
+    "upstream_main_commit": "5d84c7ddec099f1b94772d273c0f76a79934c9bb",
+    "tested_fmri_warp_and_model_sources_match": true,
+    "verified_source_files": [
+      "src/fnit/_world_resampling.py",
+      "src/fnit/applywarp/core.py",
+      "src/fnit/applywarp/__init__.py",
+      "src/fnit/synthmorph/pipeline.py",
+      "src/fnit/synthmorph/__init__.py",
+      "src/fnit/fmri/end_to_end.py",
+      "src/fnit/fmri/normalization.py",
+      "src/fnit/_nib.py",
+      "src/fnit/weights.py",
+      "src/fnit/eddy/fsl2111_strict/spline.py"
+    ],
+    "upstream_source_changes_outside_fmri": [
+      "src/fnit/dmri_pipeline/cli.py",
+      "src/fnit/dmri_pipeline/pipeline.py",
+      "src/fnit/eddy/cli.py",
+      "src/fnit/eddy/ukb.py",
+      "src/fnit/topup/core.py"
+    ],
+    "note": "Upstream dMRI/TOPUP/EDDY-UKB changes were integrated after the frozen complete-run measurements; fMRI, registration models and shared spline source bytes are identical.",
+    "gpu_regression": {
+      "passed": 617,
+      "skipped": 12,
+      "seconds": 41.78,
+      "scope": "same full relevant test command, final integrated source after upstream main rebase"
+    }
+  }
+}
