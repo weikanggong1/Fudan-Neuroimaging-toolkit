@@ -17,6 +17,7 @@ from fnit.recon_all.fill_cutting_plane_python import fill_mgz
 from fnit.recon_all.pretess_python import pretess_mgh
 from fnit.recon_all.sclimbic import mri_entowm_seg,ENTOWM_MODEL,ENTOWM_CTAB
 from fnit.recon_all.wm_edits_gpu import fix_ento_wm_gpu
+from fnit.recon_all.wm_edits_python import fix_ento_wm as fix_ento_wm_cpu
 
 def sha(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 def geometry(image):return {'shape':list(image.shape),'affine':image.affine.tolist(),'dtype':str(image.get_data_dtype())}
@@ -90,8 +91,17 @@ try:
  stage('mri_segment',_run_native_wm_segment,binaries/'mri_segment',mri,assets)
  stage('mri_edit_wm_with_aseg',_run_native_wm_edit,binaries/'mri_edit_wm_with_aseg',mri,assets)
  stage('wm_pretess',pretess_mgh,mri/'wm.asegedit.mgz','wm',mri/'norm.mgz',mri/'wm.mgz')
+ # Independently recompute only the two affected edits on this chain's own
+ # pretess output; diagnostics are never read back by production calculations.
+ diagnostic=args.output/'current_cpu_wm_point_control.mgz'
+ def cpu_point_control():
+  fix_ento_wm_cpu(mri/'wm.mgz',mri/'entowm.mgz',diagnostic,level=3,left_value=255,right_value=255)
+  fix_ento_wm_cpu(diagnostic,mri/'aseg.presurf.mgz',diagnostic,level=3,left_value=255,right_value=255,acj=True)
+ stage('CPU_WM_point_validation_only',cpu_point_control)
  stage('wm_fix_ento',fix_ento_wm_gpu,mri/'wm.mgz',mri/'entowm.mgz',mri/'wm.mgz',level=3,left_value=255,right_value=255,device='cuda:0')
  stage('wm_fix_acj',fix_ento_wm_gpu,mri/'wm.mgz',mri/'aseg.presurf.mgz',mri/'wm.mgz',level=3,left_value=255,right_value=255,device='cuda:0',acj=True)
+ report['comparison']['GPU_WM_vs_current_CPU_point_control']=compare_volume(mri/'wm.mgz',diagnostic)
+ assert report['comparison']['GPU_WM_vs_current_CPU_point_control']['different_elements']==0,'current GPU WM point edits differ from current mature CPU on self-produced input'
  stage('mri_fill',fill_mgz,mri/'wm.mgz',mri/'aseg.presurf.mgz',lta,assets/'SubCorticalMassLUT.txt',mri/'filled.mgz',args.output/'scripts/ponscc.cut.log')
  shutil.copyfile(mri/'filled.mgz',mri/'filled.auto.mgz')
  for name in ('norm','ctrl_pts','aseg.presurf','brain','entowm','antsdn.brain','wm.seg','wm.asegedit','wm','filled'):
