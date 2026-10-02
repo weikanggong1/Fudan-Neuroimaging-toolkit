@@ -79,7 +79,7 @@ fnit-recon-all /data/sub-01_T1w.nii.gz /results/sub-01 \
 
 专项CPU测试与真实配对结果在本目录保存。真实测试脚本 benchmark_hemi.py 接收 --checkpoint（冻结自产被试）、--output（新目录）、--assets、--binaries、--device、--operation、--order=AB/BA、--commit。输入、源码、程序SHA-256写入JSON；analyze_metrics.py通过--pair-ab/--pair-ba/--output复现14张图容差控制、串行重复及真实脑图；analyze_chain.py接收配对根目录，追加连通/闭合/自相交/球面翻折、全量cortex white/pial相交对和逐区no-th3体积诊断；严格零差异及正式数值容差在测量前记录。父CUDA先初始化，验证Python API已初始化时仍能exec worker。
 
-冻结同输入阶段仅说明调度回归，不是原始T1整例验收。复制检查点中未重算的文件不得作为新版本成果。总体指标等效保持not_assessed；138项严格诊断与局部网格/脑区统计由相应专项和最终整例报告分别陈述。本目录已提供真实pial曲率差异脑图；两例空目录整例与最终端到端速度由协调者统一交付。
+冻结同输入阶段仅说明调度回归，不是原始T1整例验收。chain配对在复制冻结MRI前缀并清空surf/label/stats后开始计时；阶段内双份私有复制、exec启动、发布、清理均计入，配对开始前准备被试目录的复制不计入。它只测受影响表面链，完整原始T1端到端结果由协调者另行计时。复制检查点中未重算的文件不得作为新版本成果。总体指标等效保持not_assessed；138项严格诊断与局部网格/脑区统计由相应专项和最终整例报告分别陈述。本目录已提供真实pial曲率差异脑图；两例空目录整例与最终端到端速度由协调者统一交付。
 
 真实三套annotation同输入AB：串行4线程196.92秒，双侧各2线程116.39秒，1.692倍。六个annot文件逐字节一致、逐标签Dice=1；复制4.53秒、发布0.044秒、清理1.63秒，父子同期观测峰值5,924,454,400字节（5.924 GB / 5.518 GiB）；目标采样0.5秒，实际最大间隔4.35秒，1次采样失败均保留，不能作为连续显存上界。资源核验覆盖11个权重、102个资产、14个程序及2例原始T1，大小/哈希全部与冻结清单匹配；检查点保持不变。此为同输入annotation阶段结果，不能用作整例速度。
 
@@ -88,6 +88,8 @@ fnit-recon-all /data/sub-01_T1w.nii.gz /results/sub-01 \
 ![真实pial曲率差异，单位mm⁻¹](metrics_difference.png)
 
 数值控制见 metrics_numeric_control.json，AB/BA完整源文件哈希、同期父子显存及外部负载见 metrics_AB.json / metrics_BA.json，组计时见 metrics_timing.csv。
+
+连续表面链配对已完成：2530.09→1420.96秒，1.781倍；最终几何与278条脑区指标一致，但8项无非零门槛的中间曲率图严格失败。完整检查、97/138阶段范围和共享负载限制见 [RESULTS.md](RESULTS.md)。
 
 ## 6. 版本和benchmark记录
 
