@@ -100,7 +100,7 @@ mri_convert -rt nearest orig.mgz -at forward.nii.gz test.nii.gz
 
 ## 当前版本、真实 benchmark 与验证
 
-最新专项证据见 [任务 5 报告](../../validation/recon_all/optimizations/20261002_parallel/task_05/README.md)。必须先通过同输入回归再接入生产；这份接口不把旧 188–196 秒总阶段估计改标为新结果。两个完整原始 T1 整例与 138 项严格诊断由协调者执行。
+2026-10-02 两例自产完整阶段的 GPU / Conda 配对墙钟分别为 37.366 / 123.094 秒和 37.821 / 122.813 秒，本次观察加速 3.294× / 3.247×；两例新模型的 deform、前向场、完整逆向场和检查图直接数值零差异，几何及类型一致。14 项单元回归通过。进程树采样峰值 13.103 GB，Torch 全命令累计 allocated / reserved 峰值 9.269 / 12.273 GB，缓存未清空。最新专项证据见 [任务 5 报告](../../validation/recon_all/optimizations/20261002_parallel/task_05/README.md)。算子和完整阶段同输入回归已通过；阶段结果不替代整例验收。两个完整原始 T1 整例与 138 项严格诊断由协调者执行。
 
 版本记录：2026-10-02 增加独立 GPU 后处理候选；之前版本继续使用固定源码 Conda 转换/求逆/检查图，其真实阶段记录见 [现有 MNI 链说明](MNI_NONLINEAR_CHAIN.md)。候选严格复现、新增退化、整体指标等效分别报告，整体无正式阈值时为 `not_assessed`。
 
