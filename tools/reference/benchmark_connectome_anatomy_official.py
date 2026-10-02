@@ -1,6 +1,7 @@
 """隔离官方 FS-only/SynthMorph 解剖参照；不导入 FNIT，不伪造 tracking PT。
 
 prepare: 本轮 fresh recon-all → 官方 5TT/GMWMI 与八套 T1 atlas。
+recover-prepare: 只读验证旧失败报告中已成功的官方 SynthMorph 三命令，续未运行步骤。
 complete: 已验证 prepare + 官方自产 DWI contract → FLIRT 与 DWI atlas。
 仅 CPU；官方 GPU SynthMorph 必须另行实现受授权的设备/锁/显存监测。
 """
@@ -35,6 +36,30 @@ WEIGHTS = {
     "synthmorph.deform.3.h5": (3508630424, "95b367cd30788cc647e4704b650642fc1d70d7e419c20c04f1ba1b2902bc6536"),
 }
 FIELDS = ("index", "original_label", "hemisphere", "name")
+
+# Official SynthMorph writes an MGH warp intent (version 0x301).  nibabel's
+# regular MGH image reader correctly refuses it; read with the installed
+# official Surfa runtime instead of reinterpreting or modifying the header.
+WARP_READBACK = """
+import importlib.metadata as metadata
+import json
+from pathlib import Path
+import platform
+import sys
+import numpy as np
+import surfa as sf
+warp = sf.load_warp(sys.argv[1])
+def geometry(value):
+    return {'shape': list(map(int, value.shape)),
+            'affine': value.vox2world.matrix.tolist()}
+result = {'shape': list(map(int, warp.shape)), 'dtype': str(warp.data.dtype),
+          'format': int(warp.format), 'nonfinite_count': int((~np.isfinite(warp.data)).sum()),
+          'source': geometry(warp.source), 'target': geometry(warp.target),
+          'python': platform.python_version(), 'python_executable': sys.executable,
+          'packages': {name: metadata.version(name) for name in
+                       ('tensorflow', 'surfa', 'voxelmorph', 'neurite', 'numpy')}}
+Path(sys.argv[2]).write_text(json.dumps(result, indent=2, allow_nan=False) + '\\n')
+"""
 
 
 def sha256(path):
@@ -207,6 +232,40 @@ def synthmorph_commands(config, directory):
         str(directory / f"tian_s{scale}_t1.nii.gz")]) for scale in (1, 4)]]
 
 
+def verified_synthmorph_recovery(report_record, config, identity):
+    """Bind successful official commands without rewriting their failed report."""
+    prior = read_bound_json(report_record)
+    if (prior.get("case_id") != config["case_id"] or prior.get("mode") != "prepare"
+            or prior.get("state") != "failed" or prior.get("execution_completed") is not False
+            or prior.get("preflight") != identity):
+        raise ValueError("same-input failed official prepare required for staged recovery")
+    if prior.get("error", {}).get("type") != "HeaderDataError":
+        raise ValueError("recovery only accepts the documented warp image-readback failure")
+    source = Path(report_record["path"]).resolve().parent / "synthmorph"
+    expected = synthmorph_commands(config, source)
+    commands = prior.get("commands", [])
+    if len(commands) != 3:
+        raise ValueError("exactly three successful official SynthMorph commands required")
+    for actual, (stage, argv) in zip(commands, expected):
+        if actual.get("stage") != stage or actual.get("returncode") != 0 or actual.get("argv") != list(map(str, argv)):
+            raise ValueError("prior official SynthMorph command does not match the actual contract")
+        verify_file(actual["program"])
+    files = {}
+    for scale in (1, 4):
+        bound = prior["outputs"][f"tian_s{scale}_t1"]
+        if verify_file(bound) != (source / f"tian_s{scale}_t1.nii.gz").resolve():
+            raise ValueError("prior Tian output directory mismatch")
+        files[f"tian_s{scale}_t1.nii.gz"] = bound
+    # The former image reader failed before recording the warp. Its SHA is first
+    # observed in this recovery, not retroactively attributed to the old run.
+    files["mni_to_t1.mgz"] = file_record(source / "mni_to_t1.mgz")
+    return {"report": report_record, "original_source_commit": prior["source_commit"],
+            "original_script_sha256": prior["script_sha256"], "original_commands": commands,
+            "original_failed_state": prior["state"], "files": files,
+            "warp_sha_observation_scope": "first bound at recovery entry; prior three official commands exited zero",
+            "original_command_seconds": sum(row["seconds_inclusive"] for row in commands)}
+
+
 class Runner:
     def __init__(self, config, output, mode):
         self.config, self.output = config, output
@@ -253,6 +312,23 @@ class Runner:
 
     def output_image(self, name, path, labels=False):
         self.report["outputs"][name] = image_record(path, labels=labels)
+        self.save()
+
+    def output_warp(self, name, path):
+        metadata_path = self.output / "synthmorph" / "warp_metadata.json"
+        self.run("official_warp_readback", [Path(self.config["freesurfer_home"]) / "bin/fspython",
+                 "-c", WARP_READBACK, path, metadata_path])
+        metadata = json.loads(metadata_path.read_text())
+        fixed = nib.load(str(Path(self.config["subject_dir"]) / "mri/brain.mgz"))
+        moving = nib.load(self.config["mni_template"])
+        if metadata["nonfinite_count"] or metadata["shape"] != [*fixed.shape[:3], 3]:
+            raise ValueError("official warp is nonfinite or has the wrong target grid")
+        for actual, expected in ((metadata["source"], moving), (metadata["target"], fixed)):
+            if actual["shape"] != list(expected.shape[:3]) or not np.allclose(actual["affine"], expected.affine, atol=1e-5, rtol=0):
+                raise ValueError("official warp embedded geometry differs from the actual source/target")
+        self.report["outputs"][name] = {**file_record(path), **metadata,
+                                        "metadata_sidecar": file_record(metadata_path),
+                                        "reader": "installed official Surfa sf.load_warp; warp intent 0x301"}
         self.save()
 
 
@@ -334,7 +410,7 @@ def cortex_nodes(converted_left, converted_right, subject, name):
     return rows
 
 
-def prepare(runner):
+def prepare(runner, recovered_synthmorph=None):
     c, out = runner.config, runner.output
     fs, mr, upstream = Path(c["freesurfer_home"]), Path(c["mrtrix_bin"]), Path(c["upstream_root"])
     subject = Path(c["subject_dir"])
@@ -351,11 +427,22 @@ def prepare(runner):
     native = private / "data/temporary/subjects/public_0/atlases"
     sm = out / "synthmorph"
     sm.mkdir()
-    for name, argv in synthmorph_commands(c, sm):
-        runner.run(name, argv)
+    if recovered_synthmorph is None:
+        for name, argv in synthmorph_commands(c, sm):
+            runner.run(name, argv)
+    else:
+        runner.report["reused_synthmorph_origin"] = recovered_synthmorph
+        runner.report["timing_scope"] += "; staged recovery reuses separately timed successful official SynthMorph; not continuous cold"
+        for name, record in recovered_synthmorph["files"].items():
+            source = verify_file(record)
+            shutil.copyfile(source, sm / name)
+            verify_file(record)
+            if sha256(sm / name) != record["sha256"]:
+                raise ValueError("recovered official output changed while copying")
+        runner.save()
     for scale in (1, 4):
         runner.output_image(f"tian_s{scale}_t1", sm / f"tian_s{scale}_t1.nii.gz", labels=True)
-    runner.output_image("mni_to_t1", sm / "mni_to_t1.mgz")
+    runner.output_warp("mni_to_t1", sm / "mni_to_t1.mgz")
     runner.run("5ttgen", [mr / "5ttgen", "freesurfer", subject / "mri/aparc+aseg.mgz", out / "five_tissue_t1.nii.gz", "-nocrop", "-sgm_amyg_hipp", "-nthreads", "8"])
     runner.run("5tt2gmwmi", [mr / "5tt2gmwmi", out / "five_tissue_t1.nii.gz", out / "gmwmi_t1.nii.gz", "-nthreads", "8"])
     for name in ("five_tissue_t1", "gmwmi_t1"):
@@ -457,17 +544,23 @@ def complete(runner, prepared_record, dwi_record):
 def main(argv=None):
     started = time.perf_counter()
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=("prepare", "complete"))
+    parser.add_argument("mode", choices=("prepare", "recover-prepare", "complete"))
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True, help="fresh directory; failures remain intact")
     parser.add_argument("--prepared-report", type=Path)
     parser.add_argument("--official-dwi-contract", type=Path)
+    parser.add_argument("--successful-synthmorph-report", type=Path,
+                        help="recover-prepare only: preserved failed prepare after three successful official SynthMorph commands")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args(argv)
-    if args.output.exists() or (args.mode == "complete" and (not args.prepared_report or not args.official_dwi_contract)):
-        parser.error("fresh output required; complete also requires both source contracts")
+    if (args.output.exists() or (args.mode == "complete" and (not args.prepared_report or not args.official_dwi_contract))
+            or (args.mode == "recover-prepare" and not args.successful_synthmorph_report)
+            or (args.mode != "recover-prepare" and args.successful_synthmorph_report)):
+        parser.error("fresh output required; complete needs both contracts; recovery needs its explicit preserved report")
     config = json.loads(args.config.read_text())
     identity = preflight(config)
+    recovery = (verified_synthmorph_recovery(file_record(args.successful_synthmorph_report), config, identity)
+                if args.mode == "recover-prepare" else None)
     if args.dry_run:
         print(json.dumps({"dry_run": True, "preflight": identity,
                           "synthmorph_commands": synthmorph_commands(config, args.output / "synthmorph")}, default=str, indent=2))
@@ -479,8 +572,8 @@ def main(argv=None):
     runner.report["config_sha256"] = sha256(args.config)
     runner.save()
     try:
-        if args.mode == "prepare":
-            prepare(runner)
+        if args.mode in ("prepare", "recover-prepare"):
+            prepare(runner, recovery)
         else:
             complete(runner, file_record(args.prepared_report), file_record(args.official_dwi_contract))
         # Detect any input/source/asset change rather than blessing an old hash.

@@ -21,6 +21,8 @@ flowchart TD
 
 默认参照为 `fnit-native`：无 FIRST，Tian 使用 SynthMorph。原 UKB 的 FIRST/FNIRT 路线须另报 compatibility 结果。两个模式各使用新目录；`prepare` 的 CPU 工作可与尚未完成的官方 DWI 链并行，`complete` 只复用已完成且哈希不变的准备结果。两阶段及等待分别计时，不称 uninterrupted cold chain。
 
+`recover-prepare` 只用于已经保留的特定读回失败：旧 `prepare` 的官方 register、Tian S1 apply、Tian S4 apply 均真实 exit0，随后普通影像读回器拒绝官方 warp 专用 MGZ。它先校验同例、同输入/资源/源码身份、三条真实 argv 与程序 SHA、原 Tian 输出 SHA，复制到新目录并用官方 Surfa 读回 warp，然后继续此前未执行的5TT与atlas步骤。旧失败报告不改写；复用命令耗时与新续跑耗时分别报告，不能称重新执行或连续冷调用。
+
 ## 2. Python、输入格式和输出
 
 ```python
@@ -87,6 +89,8 @@ complete_output/
   atlases/<name>/nodes.tsv
 ```
 
+`synthmorph/warp_metadata.json` 是官方Surfa读回的warp格式、source/target shape与affine、有限性及官方Python/packages版本。官方SynthMorph warp MGZ使用`0x301`意图头，并非普通MGH影像；工具不修改header或调用FNIT转换它。
+
 八套名称固定：`fs-aparc`、`aparc+tian-s1`、`aparc.a2009s+tian-s1`、`glasser+tian-s1`、`glasser+tian-s4`、`schaefer200+tian-s1`、`schaefer500+tian-s4`、`schaefer1000+tian-s4`。缺少节点在体积中允许缺席，节点表仍定义矩阵维度。
 
 ## 3. 命令行
@@ -104,6 +108,8 @@ python tools/reference/benchmark_connectome_anatomy_official.py complete \
 ```
 
 `--dry-run` 验证真实输入/资源身份并列出SynthMorph argv，**不生成MRI结果**。`--config/--output`必填；`complete`另要求两个输入报告。已有输出目录直接拒绝；失败日志/产物保留。CPU报告中的GPU allocated/reserved为null，不是0。
+
+特定失败恢复使用 `recover-prepare --successful-synthmorph-report /preserved/failed/reference_anatomy.json`，同时给出`--config`与不存在的`--output`。仅接受同源报告中已成功的三条官方命令；恢复时首次记录warp SHA，明确不会倒填到原失败报告。
 
 ## 4. 官方命令及实际CLI
 
@@ -127,7 +133,9 @@ FS `mri_surf2surf`、Workbench `-label-resample BARYCENTRIC` 和原UKB投影脚�
 
 ## 5. 真实数据精度与运行时间
 
-2026-10-03：已实际核对FS8.2 `register/apply --help`及两h5完整大小/SHA；CPU仅用8线程，GPU未使用。focused contract/argv/节点优先级回归10项通过。这些检查**不是十例端到端benchmark**。
+2026-10-03：已实际核对FS8.2 `register/apply --help`及两h5完整大小/SHA；CPU仅用8线程，GPU未使用。官方原生Python3.8.13，TensorFlow2.13.1、surfa0.6.3、voxelmorph0.2、neurite0.2、numpy1.24.3；版本由官方fspython实际读回，无新增安装。
+
+CON03新鲜FS输入的官方CPU命令已真实完成：joint register 385.7606秒，Tian S1 NN apply 12.0240秒，Tian S4 NN apply 5.9971秒。之后普通nibabel影像读回器拒绝warp头，原v2目录保留为failed；独立官方Surfa只读验证该实际warp成功：float32、`[256,256,256,3]`、format3、非有限值0、MNI source与FS target几何吻合。这些是已完成的官方组件证据，**不是十例端到端benchmark**。
 
 本轮CON03 prepare实际CPU试跑及complete结果将以新报告补充。没有完成报告时，5TT、配准、8atlas精度/时间、脑图均记待评估；不填入旧ds004666结果。现有CON03 fixed-FNIT-input官方追踪参照仍属于另外的验证层级。
 
@@ -135,6 +143,7 @@ FS `mri_surf2surf`、Workbench `-label-resample BARYCENTRIC` 和原UKB投影脚�
 
 - 2026-10-03：新增prepare/complete独立官方解剖参照和可审核契约；禁止覆盖原输出，锁定fresh T1/FS，逐例隔离public_0路径，保留官方world-geometry变换与NN atlas定义。
 - 2026-10-03：真实CON03预检发现官方`lh.pial`为标准`lh.pial.T1`链接；统一比较resolve路径并仍校验目标字节SHA，保留原预检失败，无MRI重算。
+- 2026-10-03：真实官方warp头为`0x301`，改用安装内官方Surfa只读读回，并增加明确来源/耗时的分阶段恢复入口；生产配准与重采样代码不变。
 - 2026-10-03：核对SynthMorph真正CLI；现有shell wrapper命令原本正确，仅补说明与回归，未修改生产重采样。
 
 ## 7. 原实现与参考
