@@ -63,8 +63,8 @@ SH 和内部采样上下文没有独立生产 CLI。原始 BIDS 的入口见 [pi
 ```bash
 # 按实际冻结基线导出 fod.py 和 tracking.py；source目录内只需这两个文件。
 # manifest是本轮10例新下载数据的许可、配对、SHA记录，checkpoint保留全部输入张量和header间距。
-flock /tmp/fnit-recon-five-20261002-gongwk.gpu.lock \
-  env CUDA_VISIBLE_DEVICES=GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba \
+flock /tmp/fnit-connectome-tenraw-gongwk.gpu0.lock \
+  env CUDA_VISIBLE_DEVICES=GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e \
   python validation/connectome/tenraw_20261002/task_03/run_tracking_checkpoint.py run \
   --source /data/task_03/baseline \
   --source-commit f436de588647a0de80735e4a98d53df5d88e502d \
@@ -79,6 +79,21 @@ python validation/connectome/tenraw_20261002/task_03/run_tracking_checkpoint.py 
 ```
 
 `run` 参数：`source` 是两份模块的目录；`source-commit` 为实际版本；`checkpoint`、`manifest` 分别为检查点和本轮原始数据清单；`output` 是独立输出目录；`n-seeds`、`seed`、`batch-size` 未给出时完整复用真实检查点。给出 `seed`/`batch-size` 必须与快照相同；只允许明确的1000000规模检查覆盖原 seed数量。`profile` 可选，开启额外 CPU dispatch 诊断；`cuda-profile` 可选，导出CUDA trace和独立kernel/copy-memset事件时长。正式耗时关闭两项诊断。`compare` 需要 baseline、candidate 输出目录和报告文件名。
+
+随机重复另用 `run_tracking_seed_repeat.py`，它只在明确给出 `--seed-repeat --seed 0..4` 时覆盖随机种子，保持原 PT 张量、种子数量、batch及所有追踪参数。该工具独立于冻结的 ABBA worker。示例：
+
+```bash
+flock /tmp/fnit-connectome-tenraw-gongwk.gpu0.lock \
+  env CUDA_VISIBLE_DEVICES=GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e \
+  python validation/connectome/tenraw_20261002/task_03/run_tracking_seed_repeat.py run \
+  --source /data/task_03/candidate \
+  --source-commit c4811b4b192014cd59e1031385e359cd992ef9e5 \
+  --checkpoint /data/newpilot/tracking_input.pt \
+  --manifest /data/task_01/manifest.json \
+  --output /data/task_03/repeats/seed1 --seed-repeat --seed 1
+```
+
+不同随机种子的输出用于后续 SIFT2/矩阵波动分析，不用逐位相同作为判定标准。`check_actual_seed_repeats.py --directory /data/task_03/repeats --output /data/task_03/repeats/audit.json` 在全部五次实际运行完成后检查源码和输入 SHA、参数、数组结构、有限值、路径端点及显存预算；它不代替原软件矩阵对照。
 
 检查点由root诊断钩子直接从真实调用导出 `tracking_inputs.pt`，包含 `wm_sh`、`fod_affine`、`five_tissue`、`five_tissue_affine`、`gmwmi`、`five_tissue_spacing_mm`、`fa`、完整 `tracking_kwargs` 和 `explicit_arguments`。所有张量保存为 CPU；两份仿射保留 float64，spacing保留原header的float tuple。工具复用这些参数，不经NIfTI重写几何。
 
@@ -113,7 +128,7 @@ SH算子诊断覆盖CPU/CUDA、lmax=0,2,4,6,8,10,12、随机方向、极轴和�
 | 8192 | 1.562 | 1.002 | 35.8% |
 | 131072 | 1.589 | 1.003 | 36.9% |
 
-原始AB/BA、源码/fixture SHA和Torch版本见 [算子JSON](../../validation/connectome/tenraw_20261002/task_03/sh_operator_diagnostic.json)。本轮真实 CON03 tracking 数据如下；官方多seed/矩阵reference、两pilot1M及10例raw整例另由总控验收。旧脑图保留在对应版本报告中，不改标为本轮结果。
+原始AB/BA、源码/fixture SHA和Torch版本见 [算子JSON](../../validation/connectome/tenraw_20261002/task_03/sh_operator_diagnostic.json)。本轮真实 CON03 tracking 数据如下；官方多seed/矩阵reference、两pilot1M A/B容量检查及10例raw整例另由总控验收。旧脑图保留在对应版本报告中，不改标为本轮结果。
 
 CON03：本轮新下载 ds001226，CC0，snapshot `fb4d0fda44f2ab7a732fb4ab6cd62add09dc1cd7`。直接复用 root 实际调用原子导出的PT，SHA-256 `35fc586482c2366ae4cbf0b4360356fbc0e255e221b8def92d9555960275f07b`，不从NIfTI重建仿射。FOD `[96,96,60,45]`、5TT `[256,256,256,5]`、仿射float64；seed=0，100000次播种，batch=8192，lmax=8，arc_proposals=16，max_length_mm=250，cutoff=0.1，power=0.5，compile_arc=False，其余参数完整见报告。GPU0 UUID `GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e`，Torch2.5.1，TF32，8 CPU threads，allocator `expandable_segments:True`。
 
@@ -130,7 +145,26 @@ CON03 100k路径逻辑点数据4,788,264 bytes，去重后的底层storage实际
 
 CON01同样复用实际调用的原始PT，四轮接受14300条、486355点，四组严格比较全部为零误差。tracking wall分别A1=191.737、B1=159.040、B2=174.704、A2=648.205秒。首对观测减少17.05%；同一基线A2耗时为A1的3.38倍，采样最多6个计算进程，不能把算术均值产生的60.27%当作稳定实现提速。[CON01完整JSON](../../validation/connectome/tenraw_20261002/task_03/actual_tracking_100k_CON01.json)保留全部原值、源代码/输入/数组SHA及共享负载摘要。
 
-CON03的1M仅完成基线A1：2250.341秒，116285条、4021637点；路径逻辑48,259,644 bytes，实际去重storage2,419,304,628 bytes，95615条路径引用比自身更大的storage。allocated/reserved峰值3,091,213,312/3,120,562,176 bytes，采样NVML峰值5,018,484,736 bytes，最大采样间隔4.246秒。三种记录均低于20,000,000,000 bytes。这项结果证明已执行的1M基线驻留预算；候选1M、其余配对轮次、第二pilot规模和整例峰值继续测量。[实际1M A1 JSON](../../validation/connectome/tenraw_20261002/task_03/actual_tracking_1M_A1_CON03.json)。
+CON03 候选实现的实际随机重复均采用100000个seeds、原PT、batch8192及上述参数，只改变seed。seed0复用已严格核对的实际B1；seed1–4由独立重复工具运行。五次实际输出如下：
+
+| seed | 接受轨迹 | 轨迹点 | tracking同步wall/秒 |
+| --- | ---: | ---: | ---: |
+| 0 | 11606 | 399022 | 165.209 |
+| 1 | 11613 | 400900 | 520.133 |
+| 2 | 11747 | 404673 | 522.297 |
+| 3 | 11710 | 403573 | 561.484 |
+| 4 | 11764 | 410401 | 614.131 |
+
+五次源码和PT/manifest SHA一致；除seed外追踪参数相同，TF32开启、compile_arc=False。数组shape/dtype、有限值、offsets和路径首尾端点一致性审计全部通过。allocated峰值889,601,536–891,229,184 bytes，reserved均903,872,512 bytes，进程采样NVML峰值均2,801,795,072 bytes，均符合20,000,000,000 bytes预算。共享负载下耗时变化较大，表中数值是随机重复运行记录，不用于推导加速比。此处仅确认真实跟踪输出可供后续SIFT2/矩阵分析，原软件5×5矩阵精度评估由总控另行完成。[完整五次报告、数组哈希与审计](../../validation/connectome/tenraw_20261002/task_03/actual_tracking_five_seed_audit.json)及[producer控制器](../../validation/connectome/tenraw_20261002/task_03/actual_tracking_five_seed_controller.json)。
+
+CON03实际1M A/B已完成，两轮均接受116285条、4021637点；五类数组的shape、dtype、全部值逐位一致，neq/max/P99/RMSE=0。原PT、seed0、batch8192、全部追踪参数及TF32保持相同，compile_arc=False。原始A1直接复用，未重跑。
+
+| 1M轮次 | tracking同步wall/秒 | allocated峰值/bytes | reserved峰值/bytes | 进程采样NVML峰值/bytes |
+| --- | ---: | ---: | ---: | ---: |
+| CON03 A1基线 | 2250.341 | 3091213312 | 3120562176 | 5018484736 |
+| CON03 B1候选 | 5220.029 | 3091222528 | 3122659328 | 5020581888 |
+
+两轮路径逻辑数据均48,259,644 bytes，实际去重storage均2,419,304,628 bytes；95615条路径引用比自身更大的storage。三种显存记录均低于20,000,000,000 bytes。NVML最大采样间隔A1/B1为4.246/8.709秒，表中NVML数值是观测采样峰值。A/B在不同共享负载时段执行，保留全部耗时，未推导稳定1M加速结论。本轮1M用于容量与逐位输出检查，只执行A/B，旧B2/A2计划保留为未执行。CON01 A1/B1仍在进行，整例峰值由正式raw10另测。[CON03实际1M A/B完整报告与数组SHA](../../validation/connectome/tenraw_20261002/task_03/actual_tracking_1M_AB_CON03.json)。
 
 ![本轮真实CON03轨迹比较](../../validation/connectome/tenraw_20261002/task_03/tracking_real_abba_CON03.png)
 
@@ -144,6 +178,7 @@ CON03的1M仅完成基线A1：2250.341秒，116285条、4021637点；路径逻�
 
 | 版本/日期 | 更新与证据 |
 | --- | --- |
+| 随机重复证据/2026-10-03 | CON03实际seed0–4完成，输入、源码、参数与输出结构审计通过，三类显存峰值均符合预算。只增加独立重复/审计工具与报告，生产算法仍为c4811b4；CON03 1M A/B严格与预算通过；CON01 1M及原软件矩阵评估由当前任务/总控继续验收。 |
 | 本轮候选/2026-10-02 | SH同阶分组写回；FOD调用内上下文；5TT轴索引/权重复用。只减少重复准备，保留求和、ACT、RNG和路径视图。CON03真实100k同PT ABBA逐位一致，共享负载下观测耗时下降18.75%；1M/多seed/整例仍待完成。 |
 | f436de5/2026-10-02 | 本轮冻结基线；既有路径收集合同由`test_tracking_collection.py`保护。 |
 | 2026-09-29 | [旧100k三种子官方对照](../../validation/connectome/ds004666/tracking_100k_three_seed_20260929.md)，绑定原报告版本。 |
