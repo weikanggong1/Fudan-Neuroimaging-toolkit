@@ -65,7 +65,7 @@ export FS_LICENSE=/private/license.txt
 fnit-recon-all /data/sub01_T1w.nii.gz /data/subjects/sub01 \
   --weights-dir /data/fnit-weights \
   --assets-dir /data/fnit-assets \
-  --device cuda:0 --threads 4
+  --device cuda:0 --threads 4 --hemisphere-workers 2 --native-optimizations auto
 ```
 
 `FS_LICENSE` 指向用户自己的许可证文件。默认从激活的 Conda 环境 `bin/` 寻找原生程序；`--native-bin-dir` 可指定已核验的开发者构建目录。没有 GPU 时可使用 `--device cpu`。`subject_dir` 须不存在或为空。
@@ -79,7 +79,9 @@ report = run_recon_all_python(
     weights_dir="/data/fnit-weights",  # 已校验的模型权重目录
     assets_dir="/data/fnit-assets",  # 已校验的模板和图谱目录
     device="cuda:0",  # PyTorch 阶段的设备；无 GPU 时为 "cpu"
-    threads=4,  # Torch intraop 与当前调用线程的 Numba 掩码；不代表进程总线程数
+    threads=4,  # 当前被试计算预算；双半球并行时各2线程，报告线程设置与恢复
+    hemisphere_workers=2,  # 显式启用左右侧独立进程；默认1，共享缺陷体积仍顺序累计
+    native_optimizations="auto",  # 按已验证能力选择完整GCA缓存及white快速程序；pial保留原程序
     native_bin_dir=None,  # None 表示使用当前 Conda 环境的 bin/
     profile_stages=False,  # 生产默认不增加阶段 CUDA 同步；True 记录同步等待
     cuda_allocator_cache="auto",  # 首次 CUDA 默认关闭缓存；已初始化 API 保留实际策略
@@ -88,6 +90,8 @@ report = run_recon_all_python(
 ```
 
 `run_recon_all_python(...) -> dict` 的输入参数均在上例中列出。入口把原始 T1 重采样到 1 mm、256³ 的 conform 网格；`mri/orig.mgz`、分割图与最终体积图均在该网格上。`surf/lh.*`、`surf/rh.*` 使用该被试的 surface RAS，网格文件保存有序顶点和三角面；`surf/H.thickness` 等顶点图及 `label/H.*.annot` 与对应半球的顶点顺序对齐。原始 NIfTI 仿射和 conform 网格不能互换使用。
+
+`hemisphere_workers` 只允许1或2，默认1；设2时在表面生成、球面配准、注释和最终放置中使用私有被试目录，阶段成功后按既定规则发布。最终GPU指标保持串行；缺陷体积按左、右顺序累计。`native_optimizations` 默认为`auto`，只选择能力、固定源码及线程预算已验证的完整原生优化；`original` 用于同程序控制。详细参数、程序选择及当前验证范围见[性能接入](PERFORMANCE_INTEGRATION.md)。
 
 主要输出位于被试目录下：
 
@@ -102,7 +106,7 @@ report = run_recon_all_python(
 
 固定单 T1 profile 的全部 138 个相对路径由[清单](../../src/fnit/recon_all/expected_outputs.py)定义。`report["outputs"]` 是实际存在的 `{相对路径: 绝对路径}` 映射；`report["output_validation"]` 给出 138 项存在性检查；`report["mesh_validation"]` 逐侧检查闭合球面拓扑、顶点顺序、有限坐标及 white/pial 自相交；`report["numeric_validation"]` 单独记录参考结果的数值验收，默认是 `not_run`。`report["stages"]` 为按执行顺序排列的阶段名、秒数和可得的 PyTorch GPU 峰值字节数。默认关闭 CUDA 分配缓存时，父进程的 PyTorch 峰值接口不可用，以 `gpu_memory_mode` 说明，整例显存仍需进程级外部采样。`status="complete"` 只表示全部阶段执行、输出存在性和网格质量检查通过，不表示已与官方结果达到数值门槛。运行失败会抛出异常，部分失败信息写在 JSON 中；入口前置校验失败时可能尚未创建 JSON。
 
-批量 Python API `run_recon_all_python_batch(jobs=..., weights_dir=..., assets_dir=..., devices=("cuda:0",), threads=4, native_bin_dir=None, profile_stages=False, cuda_allocator_cache="auto")` 中，`jobs` 是按顺序排列的 `{"t1": 路径, "subject_dir": 空目录}` 列表；`devices` 是互不重复的设备列表。`threads` 是每个子进程的预算，多设备并行时总预算随进程数量增加。每个设备一次运行一例，新子进程重新应用 recon-all 精度策略，不继承父进程已经初始化的 CUDA flags 或 allocator；`auto` 按子进程初始化前环境选择。其余参数与单被试一致。返回值为同序的报告列表；任一被试失败时抛出 `RuntimeError`。
+批量 Python API `run_recon_all_python_batch(jobs=..., weights_dir=..., assets_dir=..., devices=("cuda:0",), threads=4, native_bin_dir=None, profile_stages=False, cuda_allocator_cache="auto", hemisphere_workers=1, native_optimizations="auto")` 中，`jobs` 是按顺序排列的 `{"t1": 路径, "subject_dir": 空目录}` 列表；`devices` 是互不重复的设备列表。`threads` 是每个子进程的预算，多设备并行时总预算随进程数量增加。每个设备一次运行一例，新子进程重新应用 recon-all 精度策略，不继承父进程已经初始化的 CUDA flags 或 allocator；`auto` 按子进程初始化前环境选择。其余参数与单被试一致。返回值为同序的报告列表；任一被试失败时抛出 `RuntimeError`。
 
 ## 最近版本与 benchmark
 
@@ -115,7 +119,7 @@ report = run_recon_all_python(
 | `1b8c36d`，指标与缓存接入 | [精度与时间记录](../../validation/recon_all/python_gpu_port/performance_20261001/README.md)：厚度、统计缓存、实际前向精度与剖析接口。 |
 | `e036f57`，法向优化 | [绑定该版的两例结果](../../validation/recon_all/python_gpu_port/current_full_runs_20260930.json)及[最终指标](../../validation/recon_all/python_gpu_port/final_metric_consistency_20260930.json)。历史 CPU/GPU 时间不与当前整例混算。 |
 
-当前结果、脑图和最差脑区统一放在本轮结果页。历史记录仅用于复现和原因定位；已替代的“当前仍在运行”等说法不再作为现版结论。
+对应版本的结果、脑图和最差脑区统一放在各轮结果页。历史记录仅用于复现和原因定位；已替代的“当前仍在运行”等说法不再作为现版结论。
 
 ## 验证与边界
 
