@@ -6,6 +6,7 @@
 #include <cstring>
 #include <limits>
 #include <vector>
+#include <map>
 #include "romp_support.h"
 
 namespace fnit_gca_search {
@@ -13,12 +14,38 @@ struct Capabilities {
   Capabilities() {
     const char *query = std::getenv("FNIT_GCA_QUERY_CAPABILITIES");
     if (query && !std::strcmp(query, "1")) {
-      std::puts("{\"fnit_gca_cached_search\":true,\"full_native_em\":true,\"version\":1,\"single_input_uint8\":true,\"activation\":\"FNIT_GCA_SCORER=cpu_cached\"}");
+      std::puts("{\"fnit_gca_cached_search\":true,\"full_native_em\":true,\"version\":2,\"single_input_uint8\":true,\"reduction\":\"upstream_ROMP_partials\",\"activation\":\"FNIT_GCA_SCORER=cpu_cached\"}");
       std::exit(0);
     }
   }
 };
 static Capabilities capabilities;
+
+struct Statistics {
+  bool enabled;
+  int fast_allowed = -1, reproducible_allowed = -1;
+  unsigned long long density_refreshes = 0;
+  std::map<int, unsigned long long> original, cached;
+  Statistics() {
+    const char *value = std::getenv("FNIT_GCA_DIAGNOSTICS");
+    enabled = value && !std::strcmp(value, "1");
+  }
+  ~Statistics() {
+    if (!enabled) return;
+    for (const auto &entry : original)
+      std::fprintf(stderr, "FNIT_GCA_CALLS backend=original samples=%d calls=%llu total_density_refreshes=%llu fast=%d reproducible=%d\n", entry.first, entry.second, density_refreshes, fast_allowed, reproducible_allowed);
+    for (const auto &entry : cached)
+      std::fprintf(stderr, "FNIT_GCA_CALLS backend=cpu_cached samples=%d calls=%llu total_density_refreshes=%llu fast=%d reproducible=%d\n", entry.first, entry.second, density_refreshes, fast_allowed, reproducible_allowed);
+  }
+};
+static Statistics &statistics() { static Statistics value; return value; }
+static void record_call(bool cached, int count) {
+  Statistics &value = statistics();
+  if (!value.enabled) return;
+  value.fast_allowed = ROMP_if_parallel1(ROMP_level_fast);
+  value.reproducible_allowed = ROMP_if_parallel1(ROMP_level_assume_reproducible);
+  ++(cached ? value.cached : value.original)[count];
+}
 
 struct DensityCache {
   float variance = std::numeric_limits<float>::quiet_NaN();
@@ -31,12 +58,14 @@ static double score(GCA *gca, GCA_SAMPLE *samples, MRI *image,
                     TRANSFORM *transform, int count, double clamp) {
   // Each entry is checked against its actual variance/prior, including pointer
   // reuse across sample sets. No subject-specific state or image cache exists.
+  record_call(true, count);
   static std::vector<DensityCache> cache;
   cache.resize(count);
   for (int i = 0; i < count; ++i) {
     const float variance = samples[i].covars[0];
     const float prior = gcas_getPrior(samples[i]);
     if (cache[i].variance != variance || cache[i].prior != prior) {
+      if (statistics().enabled) ++statistics().density_refreshes;
       cache[i].variance = variance;
       cache[i].prior = prior;
       cache[i].log_std = -std::log(std::sqrt(static_cast<double>(variance)));
@@ -54,10 +83,19 @@ static double score(GCA *gca, GCA_SAMPLE *samples, MRI *image,
     *MATRIX_RELT(destination[t], 4, 1) = 1.0;
   }
   double total = 0.0;
-  ROMP_PF_begin
-  #pragma omp parallel for if_ROMP(fast) reduction(+ : total)
-  for (int i = 0; i < count; ++i) {
-    ROMP_PFLB_begin
+  // Match upstream gca.cpp's enabled reproducible branch, including its
+  // partial ranges, serial per-partial order, final reduction and ROMP level.
+  #define ROMP_VARIABLE i
+  #define ROMP_LO 0
+  #define ROMP_HI count
+  #define ROMP_SUMREDUCTION0 total
+  #define ROMP_FOR_LEVEL ROMP_level_assume_reproducible
+  #ifdef ROMP_SUPPORT_ENABLED
+    const int romp_for_line = __LINE__;
+  #endif
+  #include "romp_for_begin.h"
+  ROMP_for_begin
+  #define total ROMP_PARTIALSUM(0)
     const int thread = omp_get_thread_num();
     V3_X(source[thread]) = samples[i].xp;
     V3_Y(source[thread]) = samples[i].yp;
@@ -79,9 +117,8 @@ static double score(GCA *gca, GCA_SAMPLE *samples, MRI *image,
     }
     samples[i].log_p = log_probability;
     total += log_probability;
-    ROMP_PFLB_end
-  }
-  ROMP_PF_end
+  #undef total
+  #include "romp_for_end.h"
   for (int t = 0; t < threads; ++t) {
     VectorFree(&source[t]); VectorFree(&destination[t]);
   }

@@ -106,7 +106,7 @@ lta_file = run_cached_em_register(
 )
 ```
 
-调用前设置总预算 `OMP_NUM_THREADS=4`，其它 BLAS/Numba/ITK 线程按协调配置固定。许可证只从授权进程环境继承。能力查询变量只用于探测，实际执行环境清除 `FNIT_GCA_QUERY_CAPABILITIES`；本次原生输出写到独占临时 LTA，核验有限 4×4 矩阵后原子发布，失败保留已有输出，不以旧文件判断成功。接口输出 4×4 voxel LTA（附 source/destination 网格几何），参数无隐含默认；程序哈希不符、输入缺失、线程声明不符、子进程失败均抛异常。`FNIT_GCA_SCORER=cpu_cached` 由 callable 显式设置；多输入、非 uint8 或非普通概率模式仍走原生既有分支。缓存逐次检查实际方差和先验，样本指针复用不会使缓存失效判断出错，强度和样本坐标每次读取。该程序的静态原生上下文只支持同进程内串行评分，不支持同进程并发 scorer；每次 callable 启动独立 EM 进程，不对同一被试并发发布。内部线程规约保留原生策略。
+调用前设置总预算 `OMP_NUM_THREADS=4`，其它 BLAS/Numba/ITK 线程按协调配置固定。许可证只从授权进程环境继承。能力查询变量只用于探测，实际执行环境清除 `FNIT_GCA_QUERY_CAPABILITIES`；本次原生输出写到独占临时 LTA，核验有限 4×4 矩阵后原子发布，失败保留已有输出，不以旧文件判断成功。接口输出 4×4 voxel LTA（附 source/destination 网格几何），参数无隐含默认；程序哈希不符、输入缺失、线程声明不符、子进程失败均抛异常。`FNIT_GCA_SCORER=cpu_cached` 由 callable 显式设置；多输入、非 uint8 或非普通概率模式仍走原生既有分支。缓存逐次检查实际方差和先验，样本指针复用不会使缓存失效判断出错，强度和样本坐标每次读取。该程序的静态原生上下文只支持同进程内串行评分，不支持同进程并发 scorer；每次 callable 启动独立 EM 进程，不对同一被试并发发布。当前 v3 使用上游已启用的 ROMP 可复现分块规约和线程许可级别；旧 v1/v2 普通 `fast` 规约有调度／规约偏离，相关失败结果保留且不允许默认启用。
 
 构建调用属于内部安装 API，不添加生产 CLI。协调者需将 `.hpp` 加入发行包数据，并将固定源码构建补丁接入主页 Conda 安装；本轮只提供专属构建器，不修改共享安装入口。无新增计算依赖，Ninja/编译器沿用声明的 Conda 构建环境。
 
@@ -149,3 +149,5 @@ PYTHONPATH=src python validation/recon_all/optimizations/20261002_parallel/task_
 ```
 
 连续链只使用项目成熟组件与固定源码 Conda 程序，对应原始 recon-all 的 `mri_em_register → mri_ca_normalize → mri_cc → mri_normalize → mri_entowm_seg → mri_segment → mri_edit_wm_with_aseg → mri_pretess → mri_fill` 部分。各程序参数保持当前生产调用图；本轮新增部分只有两个 WM GPU 后编辑入口。完整数据格式及逐步骤源码以现有子功能文档为准。
+
+原生诊断可选环境 `FNIT_GCA_DIAGNOSTICS=1`，默认关闭；打印有限补丁入口的评分次数、样本数、密度刷新和 ROMP 许可级别，不改变评分值。最新原生能力版本为 2，`reduction=upstream_ROMP_partials`。统计对象和密度缓存仍只支持同进程串行调用。

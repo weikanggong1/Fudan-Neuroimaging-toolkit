@@ -25,8 +25,10 @@ def patch_source_text(text):
       if (backend && !strcmp(backend, "cpu_cached") &&
           gca->ninputs == 1 && mri->type == MRI_UCHAR && mri->nframes == 1)
         result = fnit_gca_search::score(gca, gcas, mri, transform, nsamples, clamp);
-      else
+      else {
+        fnit_gca_search::record_call(false, nsamples);
         result = GCAcomputeLogSampleProbability(gca, gcas, mri, transform, nsamples, clamp);
+      }
     }''')
     return patched
 
