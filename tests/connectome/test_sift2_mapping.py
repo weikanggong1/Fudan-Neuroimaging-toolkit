@@ -3,7 +3,22 @@
 import pytest
 import torch
 
-from fnit.connectome.sift2_mapping import map_streamlines_to_fixels
+from fnit.connectome.sift2_mapping import _upsample_tracks, map_streamlines_to_fixels
+
+
+@pytest.mark.parametrize("device", ["cpu", pytest.param("cuda:0", marks=pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA absent"))])
+def test_no_upsampling_preserves_point_bits_and_track_order(device: str):
+    """Ratio one preserves uneven, noncontiguous paths without interpolation."""
+    first = torch.tensor([
+        [-0., .125, -3.25], [17.5, 21., 22.], [8.25, -4., 6.5],
+        [23., 24., 25.], [1.5, 9., -2.],
+    ], device=device)[::2]
+    second = torch.tensor([[.25, 1.25, -0.], [2.5, 3.5, 4.5]], device=device)
+    points, track, starts = _upsample_tracks([first, second], 1)
+    assert torch.equal(points.view(torch.int32), torch.cat((first, second)).view(torch.int32))
+    assert track.tolist() == [0, 0, 0, 1, 1]
+    assert starts.tolist() == [0, 3]
+    assert torch.equal(points[starts], torch.stack((first[0], second[0])))
 
 
 def _one_fixel_lookup(device: str, shape: tuple[int, int, int]):

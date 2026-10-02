@@ -647,6 +647,65 @@ def _act_seed_direction(
     return valid, one_way, oriented
 
 
+def _collect_tracks(
+    forward: torch.Tensor,
+    backward: torch.Tensor,
+    forward_counts: torch.Tensor,
+    backward_counts: torch.Tensor,
+    one_way: torch.Tensor,
+    keep: torch.Tensor,
+    total_lengths: torch.Tensor,
+    seeds: torch.Tensor,
+    *,
+    fa_image: torch.Tensor | None = None,
+    fod_inverse: torch.Tensor | None = None,
+) -> Tractogram:
+    """Collect accepted paths without a CUDA scalar transfer for each path.
+
+    Padded forward/backward buffers and counts come directly from ``_grow``;
+    ``keep`` preserves the accepted seed order. Only integer slice metadata
+    is copied to CPU, once per batch. A one-way path remains a forward-buffer
+    view; a two-way path uses the same backward flip and concatenation as
+    before. FA sampling and its per-path reduction retain their original
+    order. Endpoint, length and seed coordinates are gathered in batches.
+    """
+    if keep.numel() == 0:
+        return Tractogram(
+            paths=(), endpoints=forward.new_empty((0, 2, 3)),
+            lengths_mm=forward.new_empty(0),
+            mean_fa=forward.new_empty(0) if fa_image is not None else None,
+            seeds_attempted=seeds.shape[0],
+            accepted_seeds=seeds.new_empty((0, 3)),
+        )
+    kept_forward_counts = forward_counts[keep]
+    kept_backward_counts = backward_counts[keep]
+    kept_one_way = one_way[keep]
+    metadata = torch.stack(
+        (keep, kept_forward_counts, kept_backward_counts, kept_one_way.long()),
+        dim=-1,
+    ).cpu().tolist()
+    paths = []
+    fa_means = []
+    for index, forward_count, backward_count, is_one_way in metadata:
+        path = (forward[index, :forward_count] if is_one_way else
+                torch.cat((backward[index, :backward_count].flip(0),
+                           forward[index, 1:forward_count]), dim=0))
+        paths.append(path)
+        if fa_image is not None:
+            fa_means.append(_sample(fa_image, path, fod_inverse).mean())
+    starts = torch.where(
+        kept_one_way[:, None], forward[keep, 0],
+        backward[keep, kept_backward_counts - 1],
+    )
+    ends = forward[keep, kept_forward_counts - 1]
+    return Tractogram(
+        paths=tuple(paths), endpoints=torch.stack((starts, ends), dim=1),
+        lengths_mm=total_lengths[keep],
+        mean_fa=torch.stack(fa_means) if fa_image is not None else None,
+        seeds_attempted=seeds.shape[0], accepted_seeds=seeds[keep],
+    )
+
+
 @torch.inference_mode()
 def probabilistic_tractography(
     wm_sh: torch.Tensor,
@@ -780,22 +839,23 @@ def probabilistic_tractography(
         keep = torch.nonzero(valid_seed & gf & (one_way | gb) & (wf | wb) &
                              (total >= min_length_mm) &
                              (total <= max_length_mm), as_tuple=False).flatten()
-        for index in keep.tolist():
-            path = (forward[index, :nf[index]] if bool(one_way[index]) else
-                    torch.cat((backward[index, :nb[index]].flip(0),
-                               forward[index, 1:nf[index]]), dim=0))
-            collected.append(path)
-            endpoints.append(torch.stack((path[0], path[-1])))
-            lengths.append(total[index])
-            accepted_seeds.append(batch_seeds[index])
+        batch_tracks = _collect_tracks(
+            forward, backward, nf, nb, one_way, keep, total, batch_seeds,
+            fa_image=fa_image, fod_inverse=fod_inverse,
+        )
+        if batch_tracks.paths:
+            collected.extend(batch_tracks.paths)
+            endpoints.append(batch_tracks.endpoints)
+            lengths.append(batch_tracks.lengths_mm)
+            accepted_seeds.append(batch_tracks.accepted_seeds)
             if fa_image is not None:
-                fa_means.append(_sample(fa_image, path, fod_inverse).mean())
+                fa_means.append(batch_tracks.mean_fa)
     empty_endpoints = wm_sh.new_empty((0, 2, 3))
     return Tractogram(
         paths=tuple(collected),
-        endpoints=torch.stack(endpoints) if endpoints else empty_endpoints,
-        lengths_mm=torch.stack(lengths) if lengths else wm_sh.new_empty(0),
-        mean_fa=torch.stack(fa_means) if fa_means else (wm_sh.new_empty(0) if fa is not None else None),
+        endpoints=torch.cat(endpoints) if endpoints else empty_endpoints,
+        lengths_mm=torch.cat(lengths) if lengths else wm_sh.new_empty(0),
+        mean_fa=torch.cat(fa_means) if fa_means else (wm_sh.new_empty(0) if fa is not None else None),
         seeds_attempted=n_seeds,
-        accepted_seeds=torch.stack(accepted_seeds) if accepted_seeds else wm_sh.new_empty((0, 3)),
+        accepted_seeds=torch.cat(accepted_seeds) if accepted_seeds else wm_sh.new_empty((0, 3)),
     )

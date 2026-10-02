@@ -430,6 +430,10 @@ class UKBConnectome_pipeline:
         tracks.mean_fa = sample_streamline_mean_precise(tracks.paths, fa, dwi_affine)
         atlas_results = {}
         tian_transform = None
+        # These images depend on this subject and template choice, not on the
+        # final cortical+Tian pairing. Keep reuse local to this invocation.
+        cortical_cache = {}
+        tian_cache = {}
         for atlas_name in atlas_names:
             nodes = None
             if freesurfer_subject_dir is not None:
@@ -445,44 +449,54 @@ class UKBConnectome_pipeline:
                     templates = Path(atlas_templates_dir)
                     if atlas_name in NATIVE_TIAN_ATLASES:
                         tian_scale = 1
-                        cortical, cortical_nodes = native_annotation_to_t1(
-                            subject_dir=subject.subject_dir,
-                            annotation=NATIVE_TIAN_ATLASES[atlas_name],
-                            device=str(self.device),
-                        )
+                        cortical_key = ("native", NATIVE_TIAN_ATLASES[atlas_name])
                     elif atlas_name in SCHAEFER_TIAN_ATLASES:
                         parcels, tian_scale = SCHAEFER_TIAN_ATLASES[atlas_name]
-                        cortical, cortical_nodes = schaefer_to_t1(
-                            subject_dir=subject.subject_dir,
-                            fsaverage_dir=fsaverage_dir,
-                            left_annot=templates / f"lh.Schaefer2018_{parcels}Parcels_7Networks_order.annot",
-                            right_annot=templates / f"rh.Schaefer2018_{parcels}Parcels_7Networks_order.annot",
-                            device=str(self.device),
-                        )
+                        cortical_key = ("schaefer", parcels)
                     else:
                         tian_scale = GLASSER_TIAN_ATLASES[atlas_name]
-                        cortical, cortical_nodes = glasser_to_t1(
-                            subject_dir=subject.subject_dir,
-                            fsaverage_dir=fsaverage_dir,
-                            atlas_templates_dir=templates,
-                            device=str(self.device),
-                        )
+                        cortical_key = ("glasser",)
+                    if cortical_key not in cortical_cache:
+                        if cortical_key[0] == "native":
+                            cortical_cache[cortical_key] = native_annotation_to_t1(
+                                subject_dir=subject.subject_dir,
+                                annotation=NATIVE_TIAN_ATLASES[atlas_name],
+                                device=str(self.device),
+                            )
+                        elif cortical_key[0] == "schaefer":
+                            cortical_cache[cortical_key] = schaefer_to_t1(
+                                subject_dir=subject.subject_dir,
+                                fsaverage_dir=fsaverage_dir,
+                                left_annot=templates / f"lh.Schaefer2018_{parcels}Parcels_7Networks_order.annot",
+                                right_annot=templates / f"rh.Schaefer2018_{parcels}Parcels_7Networks_order.annot",
+                                device=str(self.device),
+                            )
+                        else:
+                            cortical_cache[cortical_key] = glasser_to_t1(
+                                subject_dir=subject.subject_dir,
+                                fsaverage_dir=fsaverage_dir,
+                                atlas_templates_dir=templates,
+                                device=str(self.device),
+                            )
+                    cortical, cortical_nodes = cortical_cache[cortical_key]
                     tian_name = f"Tian_Subcortex_S{tian_scale}_3T"
-                    if tian_fnirt_coeff is None:
-                        tian, tian_transform = synthmorph_tian_to_t1(
-                            t1_brain=subject.brain,
-                            mni_template=mni_template,
-                            tian_mni=templates / f"{tian_name}.nii.gz",
-                            device=str(self.device), weights=synthmorph_weights,
-                            transform=tian_transform,
-                        )
-                    else:
-                        tian = fnirt_tian_to_t1(
-                            t1_brain=subject.brain,
-                            tian_mni=templates / f"{tian_name}.nii.gz",
-                            forward_coefficients=tian_fnirt_coeff,
-                            device=str(self.device),
-                        )
+                    if tian_scale not in tian_cache:
+                        if tian_fnirt_coeff is None:
+                            tian_cache[tian_scale], tian_transform = synthmorph_tian_to_t1(
+                                t1_brain=subject.brain,
+                                mni_template=mni_template,
+                                tian_mni=templates / f"{tian_name}.nii.gz",
+                                device=str(self.device), weights=synthmorph_weights,
+                                transform=tian_transform,
+                            )
+                        else:
+                            tian_cache[tian_scale] = fnirt_tian_to_t1(
+                                t1_brain=subject.brain,
+                                tian_mni=templates / f"{tian_name}.nii.gz",
+                                forward_coefficients=tian_fnirt_coeff,
+                                device=str(self.device),
+                            )
+                    tian = tian_cache[tian_scale]
                     combined, nodes = combine_cortical_tian(
                         cortical_t1=cortical, cortical_nodes=cortical_nodes,
                         tian_t1=tian,
