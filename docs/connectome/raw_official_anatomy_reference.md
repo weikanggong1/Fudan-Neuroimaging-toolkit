@@ -137,7 +137,7 @@ python tools/reference/benchmark_connectome_official_anatomy_cohort.py \
   --config-template /shared/raw10/reference_CON03.json \
   --baseline-root /shared/raw10/formal_baseline_raw_v2/baseline \
   --raw-root /shared/raw10/raw \
-  --official-dwi-root /shared/raw10/task_02/official_modeling_raw10_v2 \
+  --official-dwi-root /shared/raw10/current_verified_official_modeling \
   --validation-script /frozen/tools/benchmark_connectome_raw_cohort.py \
   --tool-commit ACTUAL_FROZEN_REFERENCE_COMMIT \
   --prepared-case-report sub-CON03=/verified/pilot/reference_anatomy.json \
@@ -146,6 +146,8 @@ python tools/reference/benchmark_connectome_official_anatomy_cohort.py \
 ```
 
 默认十例CON01、CON03、CON04–CON11；`--case-ids`可显式选例。`--prepared-case-report CASE=REPORT`可重复，用于已经完成且SHA不变的同例官方pilot，原报告与时间独立保留，不重算；没有完成report时不能使用此参数。`--validation-script`绑定项目现有实际MGZ/surface/annotation读回工具，只有baseline本轮recon exit0且特定int32报告序列化失败时，才在新目录生成只读revalidation sidecar，保留原failed报告。其他失败不升级为成功，不使用candidate FS。
+
+示例中的`current_verified_official_modeling`须替换为实际当前上游输出根路径，不能指向已经失败或退役的DWI链。切换producer时在新cohort目录显式绑定各例完成的prepare报告，保留旧namespace；只更换输入来源，不重算已验证的结构准备。
 
 调度在新输出目录写`cohort_reference.json`及`sub-CONxx/{config.json,prepare/,complete/,consumer_contract.json}`。FS仍运行时等待，官方DWI合同未完成时等待，准备与完成各占一个CPU槽，等待不阻塞其余例的prepare。`consumer_contract`的scope为`official_self_produced_fresh_fs_anatomy_and_raw_dwi_atlases`，含真实T1/FS、prepare/complete/DWI上游报告SHA、5TT/GMWMI world影像、4×4变换、八套atlas影像及nodes/K；明确`tractography_completed=false`、`connectome_completed=false`。后续追踪只能消费该合同和官方建模合同。整个driver wall包含等待，不能替代各例实际官方命令耗时。
 
@@ -181,7 +183,7 @@ v4已完成5ttgen 10.701秒、GMWMI 1.559秒、fs-aparc84 labelconvert 1.181秒�
 
 **CON03 v5结构准备已完成**：31条新官方命令全部exit0，27个输出完成SHA和几何读回。新续跑entry wall为161.363秒，命令合计119.949秒；此前成功的SynthMorph register/apply三命令为403.782秒，单独报告，不能相加声称连续冷调用。尚未衔接官方DWI/追踪，故不是完整connectome或十例精度结论。
 
-背景兼容修复的真实输入验证：CON08/09 双半球 aparc、a2009s 共八个 annotation 均完成实际读回；只有左 aparc 的1/2个unknown顶点需要适配，其余六个文件直接使用原字节。适配文件颜色表/名称/正ROI索引与原文件逐值一致，原背景顶点集合不变，完整结构像与资源前后SHA一致；此前九条成功官方命令分别合计224.273/272.558秒。22项focused契约/背景读回测试在实际服务器CPU环境通过（0.78秒）。这些核验不代表两例atlas续跑或官方DWI/矩阵已经完成。
+背景兼容修复的真实输入验证：CON08/09 双半球 aparc、a2009s 共八个 annotation 均完成实际读回；只有左 aparc 的1/2个unknown顶点需要适配，其余六个文件直接使用原字节。适配文件颜色表/名称/正ROI索引与原文件逐值一致，原背景顶点集合不变，完整结构像与资源前后SHA一致；此前九条成功官方命令分别合计224.273/272.558秒。22项focused契约/背景读回测试在实际服务器CPU环境通过（0.78秒）。这一步验证只检查输入兼容，下表另报真实atlas续跑。
 
 **CON08/09 背景兼容 atlas 续跑已完成**，新冻结工具提交`636b73c5`，两例各28条新命令全部exit0、27个输出读回成功。实际冻结部署再次运行22项测试通过（0.93秒）。旧两个failed目录、原始FS、原UKB脚本保持原SHA；临时协调只暂停已验证无child的本工具driver，完成后以相同argv/start_ticks身份恢复，见[实际来源与结果摘要](../../validation/connectome/raw10_official_annotation_background_20261003/official_reference_background.public.json)。
 
@@ -209,7 +211,7 @@ v4已完成5ttgen 10.701秒、GMWMI 1.559秒、fs-aparc84 labelconvert 1.181秒�
 
 ![CON03官方freshFS生成5TT、GMWMI与八套native atlas](../../validation/connectome/raw10_official_anatomy_CON03_20261003/official_con03_anatomy.png)
 
-本轮CON03 prepare实际CPU试跑及complete结果将以新报告补充。没有完成报告时，5TT、配准、8atlas精度/时间、脑图均记待评估；不填入旧ds004666结果。现有CON03 fixed-FNIT-input官方追踪参照仍属于另外的验证层级。
+以上已完成结构准备与图示；FNIT相对独立官方DWI、FLIRT和最终矩阵的精度/时间对照仍待实际完整上游结果，不填入旧ds004666数据。现有CON03 fixed-FNIT-input官方追踪参照属于另外的验证层级。
 
 ## 6. 更新记录
 
