@@ -22,7 +22,8 @@ def main():
     p.add_argument('--mode',choices=['stage','stage-conda','baseline'],required=True)
     a=p.parse_args();cfg=json.loads(a.config.read_text())
     out=Path(cfg['output']);out.mkdir(parents=True,exist_ok=False)
-    torch.set_num_threads(4);torch.set_num_interop_threads(4)
+    torch.set_num_threads(4)
+    if torch.get_num_interop_threads()!=4:torch.set_num_interop_threads(4)
     # 建立CUDA上下文后才允许CPU Numba编译；不更改模型精度或自动重试。
     prime=torch.empty(1,device='cuda:0');torch.cuda.synchronize();del prime
     src=Path(__file__).resolve().parents[5]/'src/fnit/recon_all'
