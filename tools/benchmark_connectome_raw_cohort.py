@@ -152,7 +152,10 @@ def source_manifest(source):
     if not (source / "src/fnit/cli.py").is_file():
         raise FileNotFoundError(f"FNIT source missing: {source}")
     def git(*arguments):
-        result = subprocess.run(["git", "-C", str(source), *arguments], capture_output=True, text=True)
+        try:
+            result = subprocess.run(["git", *arguments], cwd=source, capture_output=True, text=True)
+        except FileNotFoundError:
+            return None
         return result.stdout.strip() if result.returncode == 0 else None
     files = sorted(path for path in (source / "src/fnit").rglob("*")
                    if path.is_file() and path.suffix not in {".pyc", ".pyo"}

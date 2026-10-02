@@ -548,8 +548,11 @@ def source_provenance(torch):
                 loaded[name] = {"path": str(Path(path).resolve()), "sha256": sha256(path)}
     package = Path(fnit.__file__).resolve().parent
     def git(*arguments):
-        result = subprocess.run(["git", "-C", str(package), *arguments],
-                                capture_output=True, check=False)
+        try:
+            result = subprocess.run(["git", *arguments], cwd=package,
+                                    capture_output=True, check=False)
+        except FileNotFoundError:
+            return None
         return result.stdout if result.returncode == 0 else None
     git_root = git("rev-parse", "--show-toplevel")
     tracked = git("ls-files", "--error-unmatch", "--", "__init__.py") is not None
