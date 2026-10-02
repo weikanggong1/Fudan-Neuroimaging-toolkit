@@ -230,9 +230,24 @@ class ProcessTreeDeviceSampler:
                 devices = {index.strip(): uuid.strip() for index, uuid in
                            (line.split(',') for line in gpu_list.strip().splitlines())}
                 logical = int(self.device.split(':')[1]) if ':' in self.device else 0
-                visible = os.environ.get('CUDA_VISIBLE_DEVICES')
-                selector = visible.split(',')[logical].strip() if visible is not None else str(logical)
-                self.uuid = selector if selector.startswith(('GPU-', 'MIG-')) else devices[selector]
+                # 已初始化的父API优先核对实际CUDA枚举；不建立新context。
+                if torch.cuda.is_initialized():
+                    actual = str(getattr(torch.cuda.get_device_properties(torch.device(self.device)), 'uuid', ''))
+                    canonical = actual if actual.startswith('GPU-') else 'GPU-' + actual
+                    if canonical in devices.values():
+                        self.uuid = canonical
+                if self.uuid is None:
+                    visible = os.environ.get('CUDA_VISIBLE_DEVICES')
+                    selector = visible.split(',')[logical].strip() if visible is not None else str(logical)
+                    if selector.startswith('GPU-'):
+                        matches = [uuid for uuid in devices.values() if uuid.lower().startswith(selector.lower())]
+                        if len(matches) != 1:
+                            raise ValueError('GPU UUID selector must match one complete UUID: ' + selector)
+                        self.uuid = matches[0]
+                    elif selector.startswith('MIG-'):
+                        raise ValueError('MIG process memory UUID mapping is not supported; memory unavailable')
+                    else:
+                        self.uuid = devices[selector]
             tree = self._tree(self.parent_pid)
             raw = subprocess.check_output(['nvidia-smi', '--query-compute-apps=pid,gpu_uuid,used_gpu_memory',
                 '--format=csv,noheader,nounits'], text=True, timeout=3)

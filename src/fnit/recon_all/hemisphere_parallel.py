@@ -42,34 +42,70 @@ def _owned(relative, hemi):
                      relative == f'mri/filled-pretess{255 if hemi == "lh" else 127}.mgz')
 
 
-def _normalize_paths(value, private, public):
+def _normalize_paths(value, private, public, published_paths=None):
     if isinstance(value, str):
+        if published_paths and value in published_paths:
+            return published_paths[value]
         return value.replace(str(private), str(public))
     if isinstance(value, list):
-        return [_normalize_paths(v, private, public) for v in value]
+        return [_normalize_paths(v, private, public, published_paths) for v in value]
     if isinstance(value, dict):
-        return {k: _normalize_paths(v, private, public) for k, v in value.items()}
+        return {k: _normalize_paths(v, private, public, published_paths) for k, v in value.items()}
     return value
 
 
+def resolve_worker_device(device):
+    """将CUDA当前设备固定成带索引名称；worker不能继承父current_device。"""
+    import torch
+    selected = torch.device(device)
+    if selected.type == 'cuda' and selected.index is None:
+        selected = torch.device('cuda', torch.cuda.current_device() if torch.cuda.is_initialized() else 0)
+    return str(selected)
+
+
+def inherited_allocator_policy(environ):
+    """按新进程环境选实际策略，不推断已初始化父API的实际缓存状态。"""
+    return 'disabled' if 'PYTORCH_NO_CUDA_MEMORY_CACHING' in environ else 'enabled'
+
+
+def _live_group(group):
+    # leader已退出仍可能有原生孙进程；zombie不作为仍运行计算。
+    try:
+        os.killpg(group, 0)
+    except ProcessLookupError:
+        return False
+    for path in Path('/proc').glob('[0-9]*/stat'):
+        try:
+            if path.stat().st_uid != os.getuid():
+                continue
+            fields = path.read_text().rsplit(') ', 1)[1].split()
+            if int(fields[2]) == group and int(fields[3]) == group and fields[0] not in ('Z', 'X'):
+                return True
+        except (OSError, ValueError, IndexError):
+            pass
+    return False
+
+
 def _cancel(processes):
-    """终止整棵 worker 原生子树，再回收；不影响外部进程。"""
-    for process in processes:
-        if process.poll() is None:
+    """只终止本调度new-session创建的组，包括已退出leader的原生孙进程。"""
+    groups = [process.pid for process in processes]
+    for group in groups:
+        if _live_group(group):
             try:
-                os.killpg(process.pid, signal.SIGTERM)
+                os.killpg(group, signal.SIGTERM)
             except ProcessLookupError:
                 pass
     deadline = time.monotonic() + 3
-    for process in processes:
-        try:
-            process.wait(timeout=max(.01, deadline - time.monotonic()))
-        except subprocess.TimeoutExpired:
+    while time.monotonic() < deadline and any(_live_group(group) for group in groups):
+        time.sleep(.05)
+    for group in groups:
+        if _live_group(group):
             try:
-                os.killpg(process.pid, signal.SIGKILL)
+                os.killpg(group, signal.SIGKILL)
             except ProcessLookupError:
                 pass
-            process.wait()
+    for process in processes:
+        process.wait()
 
 
 def run_hemisphere_group(subject, operation, *, device, threads, workers=2,
@@ -88,12 +124,18 @@ def run_hemisphere_group(subject, operation, *, device, threads, workers=2,
     from .thread_budget import native_thread_environment
     import torch
     validate_hemisphere_workers(workers, threads)
+    caller_device = str(device)
+    device = resolve_worker_device(device)
     subject = Path(subject).resolve()
     group_tick = time.monotonic()
     root = Path(tempfile.mkdtemp(prefix=f'hemi-{operation}-', dir=subject / 'scripts'))
     report = {'operation': operation, 'workers_requested': workers,
               'total_thread_budget': threads, 'worker_threads': threads // workers,
-              'status': 'running', 'workers': {}, 'values': {}, 'published': []}
+              'status': 'running', 'workers': {}, 'values': {}, 'published': [],
+              'caller_device': caller_device, 'worker_device': device,
+              'worker_allocator_selection': {'basis': 'environment at fresh exec',
+                  'selected_policy': inherited_allocator_policy(os.environ),
+                  'parent_preinitialized_actual_state': 'not_inferred_from_environment'}}
     precision = {'matmul_tf32': bool(torch.backends.cuda.matmul.allow_tf32),
                  'cudnn_tf32': bool(torch.backends.cudnn.allow_tf32)}
     processes, streams, private_roots, snapshots, pending = [], [], {}, {}, []
@@ -126,7 +168,8 @@ def run_hemisphere_group(subject, operation, *, device, threads, workers=2,
                 request = {'callable': callable_path, 'operation': operation,
                            'kwargs': child_kwargs, 'device': device,
                            'threads': threads // workers, 'precision': precision,
-                           'profile_stages': profile_stages}
+                           'profile_stages': profile_stages,
+                           'allocator_policy': inherited_allocator_policy(os.environ)}
                 request_path.write_text(json.dumps(request))
                 env, environment_report = native_thread_environment(threads=threads // workers)
                 # API 调用者可从 sys.path 导入候选源码；worker 必须导入同一包。
@@ -153,7 +196,7 @@ def run_hemisphere_group(subject, operation, *, device, threads, workers=2,
                     report['workers'][hemi] = child_report
                 if process.returncode or not report_path.is_file() or child_report['status'] != 'complete':
                     raise RuntimeError(f'{hemi} worker failed or produced no complete report')
-                report['values'][hemi] = _normalize_paths(child_report['value'], private_roots[hemi], subject)
+                report['values'][hemi] = child_report['value']
         report.update(parallel_intervals(report['workers']))
         # 先审计两侧全部改动，再发布任何文件。
         for hemi in HEMISPHERES:
@@ -182,6 +225,12 @@ def run_hemisphere_group(subject, operation, *, device, threads, workers=2,
             temporary.replace(target)
             report['published'].append(str(target.relative_to(subject)))
         report['publish_seconds'] = time.monotonic() - publish_tick
+        published_paths = {str(source): str(target) for source, target in pending}
+        for hemi in HEMISPHERES:
+            normalized = _normalize_paths(report['values'][hemi], private_roots[hemi], subject, published_paths)
+            report['values'][hemi] = normalized
+            report['workers'][hemi]['private_subject'] = str(private_roots[hemi])
+            report['workers'][hemi]['value'] = normalized
         report['status'] = 'complete'
     except BaseException as error:
         _cancel(processes)

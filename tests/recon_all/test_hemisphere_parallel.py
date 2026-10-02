@@ -3,6 +3,9 @@ import contextlib
 import io
 import json
 import os
+import subprocess
+import sys
+import time
 from pathlib import Path
 import tempfile
 import unittest
@@ -10,8 +13,9 @@ from unittest.mock import patch
 
 from fnit.recon_all.hemisphere_parallel import (
     HemisphereGroupError, run_hemisphere_group, validate_hemisphere_workers,
+    _cancel, _live_group, inherited_allocator_policy, resolve_worker_device,
 )
-from fnit.recon_all.profiling import parallel_intervals
+from fnit.recon_all.profiling import parallel_intervals, ProcessTreeDeviceSampler
 from fnit.recon_all.native_free import main, _finish_cortical_surface
 
 TARGET = '''
@@ -30,7 +34,8 @@ def execute(subject, hemi, device, threads, operation):
     (subject / 'mri/mrisps.white.mgz').write_bytes(hemi.encode())
     (subject / 'scripts/fixed.log').write_text(hemi)
     return dict(pid=os.getpid(), threads=threads, torch_threads=torch.get_num_threads(),
-                numba_threads=numba.get_num_threads(), env=os.environ['OMP_NUM_THREADS'])
+                numba_threads=numba.get_num_threads(), env=os.environ['OMP_NUM_THREADS'],
+                log=str(subject/'scripts/fixed.log'))
 '''
 
 
@@ -66,6 +71,9 @@ class HemisphereParallelTests(unittest.TestCase):
             self.assertEqual(value['torch_threads'], 2)
             self.assertEqual(value['numba_threads'], 2)
             self.assertEqual(value['env'], '2')
+            self.assertEqual(value['log'],str(self.subject/f'scripts/test.{hemi}.fixed.log'))
+            self.assertTrue(Path(value['log']).is_file())
+            self.assertEqual(report['workers'][hemi]['value']['log'],value['log'])
             self.assertEqual((self.subject / f'surf/{hemi}.white').read_bytes(), hemi.encode())
         self.assertGreater(report['overlap_seconds'], 0.)
         self.assertFalse(list((self.subject / 'scripts').glob('hemi-*')))
@@ -134,6 +142,65 @@ class HemisphereParallelTests(unittest.TestCase):
         self.assertEqual(report['worker_sum_seconds'], 10.)
         self.assertEqual(report['worker_span_seconds'], 7.)
         self.assertEqual(report['overlap_seconds'], 3.)
+
+    def test_cuda_current_device_is_fixed_without_unneeded_initialization(self):
+        with patch('torch.cuda.is_initialized',return_value=True), \
+             patch('torch.cuda.current_device',return_value=1) as current:
+            self.assertEqual(resolve_worker_device('cuda'),'cuda:1')
+            current.assert_called_once()
+        with patch('torch.cuda.is_initialized',return_value=False), \
+             patch('torch.cuda.current_device') as current:
+            self.assertEqual(resolve_worker_device('cuda'),'cuda:0')
+            self.assertEqual(resolve_worker_device('cuda:1'),'cuda:1')
+            current.assert_not_called()
+
+    def test_allocator_inherits_presence_semantics(self):
+        self.assertEqual(inherited_allocator_policy({}),'enabled')
+        for value in ('1','0',''):
+            self.assertEqual(inherited_allocator_policy({'PYTORCH_NO_CUDA_MEMORY_CACHING':value}),'disabled')
+        with patch.dict(os.environ,clear=False):
+            os.environ.pop('PYTORCH_NO_CUDA_MEMORY_CACHING',None)
+            report=self.run_group()
+        self.assertEqual(report['worker_allocator_selection']['selected_policy'],'enabled')
+        self.assertEqual(report['workers']['lh']['cuda_allocator']['requested'],'enabled')
+
+    def test_short_gpu_uuid_is_canonicalized_and_unknown_is_unavailable(self):
+        complete='GPU-abc12300-0000-0000-0000-000000000001'
+        gpu_list='0, '+complete+'\n1, GPU-def12300-0000-0000-0000-000000000002\n'
+        with patch.dict(os.environ,{'CUDA_VISIBLE_DEVICES':'GPU-abc'}), \
+             patch('torch.cuda.is_initialized',return_value=False), \
+             patch('subprocess.check_output',side_effect=[gpu_list,'155, '+complete+', 10\n']), \
+             patch.object(ProcessTreeDeviceSampler,'_tree',return_value={155}):
+            sampler=ProcessTreeDeviceSampler(device='cuda:0',parent_pid=155)
+            sampler.sample_if_due(force=True)
+        self.assertEqual(sampler.report()['target_gpu_uuid'],complete)
+        self.assertEqual(sampler.report()['peak_tree_total_bytes'],10*1024*1024)
+        with patch.dict(os.environ,{'CUDA_VISIBLE_DEVICES':'GPU-'}), \
+             patch('torch.cuda.is_initialized',return_value=False), \
+             patch('subprocess.check_output',return_value=gpu_list):
+            sampler=ProcessTreeDeviceSampler(device='cuda:0',parent_pid=155)
+            sampler.sample_if_due(force=True)
+        self.assertEqual(sampler.report()['status'],'unavailable')
+        self.assertIsNone(sampler.report()['peak_tree_total_bytes'])
+        self.assertEqual(len(sampler.report()['failed_samples']),1)
+
+    def test_cancel_ended_leader_reaps_live_own_grandchild_only(self):
+        marker=self.root/'grandchild.pid'
+        child_code="import os,signal,time;from pathlib import Path;signal.signal(signal.SIGTERM,signal.SIG_IGN);Path("+repr(str(marker))+").write_text(str(os.getpid()));time.sleep(60)"
+        leader_code="import subprocess,sys,time;subprocess.Popen([sys.executable,'-c',"+repr(child_code)+"]);time.sleep(.3)"
+        survivor=subprocess.Popen([sys.executable,'-c','import time;time.sleep(60)'],start_new_session=True)
+        leader=subprocess.Popen([sys.executable,'-c',leader_code],start_new_session=True)
+        try:
+            leader.wait(timeout=10)
+            self.assertTrue(marker.exists())
+            self.assertTrue(_live_group(leader.pid))
+            _cancel([leader])
+            deadline=time.monotonic()+3
+            while _live_group(leader.pid) and time.monotonic()<deadline:time.sleep(.05)
+            self.assertFalse(_live_group(leader.pid))
+            self.assertIsNone(survivor.poll())
+        finally:
+            _cancel([leader,survivor])
 
     def test_parallel_final_placement_defers_gpu_maps(self):
         with patch('fnit.recon_all.final_white_conda.run_final_white', return_value={'output':'white'}), \

@@ -22,7 +22,8 @@ def main():
         torch.backends.cuda.matmul.allow_tf32 = request['precision']['matmul_tf32']
         torch.backends.cudnn.allow_tf32 = request['precision']['cudnn_tf32']
         torch.set_num_interop_threads(1)
-        allocator = configure_cuda_allocator(request['device'], 'auto')
+        allocator = configure_cuda_allocator(request['device'], request.get('allocator_policy', 'auto'))
+        report['cuda_allocator'] = allocator
         bootstrap_tick = time.monotonic()
         if torch.device(request['device']).type == 'cuda':
             # 先显式FP32分配再同步；与既有SynthMorph首CUDA分配规则一致。

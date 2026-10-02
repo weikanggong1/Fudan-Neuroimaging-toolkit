@@ -769,7 +769,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         "finish_device": "cpu", "upstream": "repaired topology"}
     registration_device = torch.device(device)
     if registration_device.type == "cuda" and registration_device.index is None:
-        registration_device = torch.device("cuda", torch.cuda.current_device())
+        registration_device = torch.device("cuda", torch.cuda.current_device() if torch.cuda.is_initialized() else 0)
     report["sphere_registration"] = {
         "implementation": "Python/Numba + ordered CUDA averaging" if registration_device.type == "cuda" else "Python/Numba",
         "averaging_device": str(registration_device), "overlap_device": "cpu",
@@ -926,7 +926,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         for operation in ('surface', 'register', 'annotation', 'finish_surface'):
             try:
                 group = stage(f'{operation}_hemisphere_group', run_hemisphere_group,
-                              subject, operation, device=device, threads=threads,
+                              subject, operation, device=str(registration_device), threads=threads,
                               workers=hemisphere_workers, profile_stages=profile_stages, kwargs=common)
             except HemisphereGroupError as error:
                 report['hemisphere_scheduling']['groups'].append(error.report)
